@@ -36,14 +36,6 @@
 #include "elf/arm.h"
 #endif
 
-/* ??? This is currently unused.  */
-#ifdef __STDC__
-#define internalError() \
-  as_fatal (_("ARM Internal Error, line %d, %s"), __LINE__, __FILE__)
-#else
-#define internalError() as_fatal (_("ARM Internal Error"))
-#endif
-
 /* Types of processor to assemble for.  */
 #define ARM_1		0x00000001
 #define ARM_2		0x00000002
@@ -135,15 +127,15 @@ typedef struct arm_fix
 
 struct arm_it
 {
-  CONST char *error;
+  CONST char *  error;
   unsigned long instruction;
-  int suffix;
-  int size;
+  int           suffix;
+  int           size;
   struct
     {
       bfd_reloc_code_real_type type;
-      expressionS exp;
-      int pc_rel;
+      expressionS              exp;
+      int                      pc_rel;
     } reloc;
 };
 
@@ -151,7 +143,7 @@ struct arm_it inst;
 
 struct asm_shift
 {
-  CONST char *template;
+  CONST char *  template;
   unsigned long value;
 };
 
@@ -176,7 +168,7 @@ static CONST struct asm_shift shift[] =
 
 #define NUM_FLOAT_VALS 8
 
-CONST char *fp_const[] = 
+CONST char * fp_const[] = 
 {
   "0.0", "1.0", "2.0", "3.0", "4.0", "5.0", "0.5", "10.0", 0
 };
@@ -206,7 +198,7 @@ LITTLENUM_TYPE fp_values[NUM_FLOAT_VALS][MAX_LITTLENUMS];
 
 struct asm_cond
 {
-  CONST char *template;
+  CONST char *  template;
   unsigned long value;
 };
 
@@ -238,7 +230,7 @@ static CONST struct asm_cond conds[] =
    the set_bits: */
 struct asm_flg
 {
-  CONST char *template;		/* Basic flag string */
+  CONST char *  template;	/* Basic flag string */
   unsigned long set_bits;	/* Bits to set */
 };
 
@@ -364,7 +356,7 @@ static CONST struct asm_flg cplong_flag[] =
 
 struct asm_psr
 {
-  CONST char *template;
+  CONST char *  template;
   unsigned long number;
 };
 
@@ -491,13 +483,13 @@ static void output_inst		PARAMS ((char *));
 
 struct asm_opcode 
 {
-  CONST char *template;		/* Basic string to match */
-  unsigned long value;		/* Basic instruction code */
-  CONST char *comp_suffix;	/* Compulsory suffix that must follow conds */
-  CONST struct asm_flg *flags;	/* Bits to toggle if flag 'n' set */
-  unsigned long variants;	/* Which CPU variants this exists for */
+  CONST char *           template;	/* Basic string to match */
+  unsigned long          value;		/* Basic instruction code */
+  CONST char *           comp_suffix;	/* Compulsory suffix that must follow conds */
+  CONST struct asm_flg * flags;	        /* Bits to toggle if flag 'n' set */
+  unsigned long          variants;	/* Which CPU variants this exists for */
   /* Function to call to parse args */
-  void (*parms) PARAMS ((char *, unsigned long));
+  void (*                parms) PARAMS ((char *, unsigned long));
 };
 
 static CONST struct asm_opcode insns[] = 
@@ -719,7 +711,7 @@ static void do_t_adr		PARAMS ((char *operands));
 
 #define T_OPCODE_BRANCH 0xe7fe
 
-static int thumb_reg		PARAMS ((char **str, int hi_lo));
+static int thumb_reg		PARAMS ((char ** str, int hi_lo));
 
 #define THUMB_SIZE	2	/* Size of thumb instruction */
 #define THUMB_REG_LO	0x1
@@ -748,11 +740,10 @@ static int thumb_reg		PARAMS ((char **str, int hi_lo));
 
 struct thumb_opcode 
 {
-  CONST char *template;		/* Basic string to match */
+  CONST char *  template;	/* Basic string to match */
   unsigned long value;		/* Basic instruction code */
-  int size;
-  /* Function to call to parse args */
-  void (*parms) PARAMS ((char *));
+  int           size;
+  void (*       parms) PARAMS ((char *));  /* Function to call to parse args */
 };
 
 static CONST struct thumb_opcode tinsns[] =
@@ -818,8 +809,8 @@ static CONST struct thumb_opcode tinsns[] =
 
 struct reg_entry
 {
-  CONST char *name;
-  int number;
+  CONST char * name;
+  int          number;
 };
 
 #define int_register(reg) ((reg) >= 0 && (reg) <= 15)
@@ -860,12 +851,12 @@ static CONST struct reg_entry reg_table[] =
 #define bad_args _("Bad arguments to instruction");
 #define bad_pc _("r15 not allowed here");
 
-static struct hash_control *arm_ops_hsh = NULL;
-static struct hash_control *arm_tops_hsh = NULL;
-static struct hash_control *arm_cond_hsh = NULL;
-static struct hash_control *arm_shift_hsh = NULL;
-static struct hash_control *arm_reg_hsh = NULL;
-static struct hash_control *arm_psr_hsh = NULL;
+static struct hash_control * arm_ops_hsh = NULL;
+static struct hash_control * arm_tops_hsh = NULL;
+static struct hash_control * arm_cond_hsh = NULL;
+static struct hash_control * arm_shift_hsh = NULL;
+static struct hash_control * arm_reg_hsh = NULL;
+static struct hash_control * arm_psr_hsh = NULL;
 
 /* This table describes all the machine specific pseudo-ops the assembler
    has to support.  The fields are:
@@ -889,21 +880,21 @@ static int my_get_expression PARAMS ((expressionS *, char **));
 
 CONST pseudo_typeS md_pseudo_table[] =
 {
-  {"req", s_req, 0},	/* Never called becasue '.req' does not start line */
-  {"bss", s_bss, 0},
-  {"align", s_align, 0},
-  {"arm", s_arm, 0},
-  {"thumb", s_thumb, 0},
-  {"code", s_code, 0},
+  {"req",         s_req, 0},	/* Never called becasue '.req' does not start line */
+  {"bss",         s_bss, 0},
+  {"align",       s_align, 0},
+  {"arm",         s_arm, 0},
+  {"thumb",       s_thumb, 0},
+  {"code",        s_code, 0},
   {"force_thumb", s_force_thumb, 0},
-  {"thumb_func", s_thumb_func, 0},
-  {"even", s_even, 0},
-  {"ltorg", s_ltorg, 0},
-  {"pool", s_ltorg, 0},
-  {"word", cons, 4},
-  {"extend", float_cons, 'x'},
-  {"ldouble", float_cons, 'x'},
-  {"packed", float_cons, 'p'},
+  {"thumb_func",  s_thumb_func, 0},
+  {"even",        s_even, 0},
+  {"ltorg",       s_ltorg, 0},
+  {"pool",        s_ltorg, 0},
+  {"word",        cons, 4},
+  {"extend",      float_cons, 'x'},
+  {"ldouble",     float_cons, 'x'},
+  {"packed",      float_cons, 'p'},
   {0, 0, 0}
 };
 
@@ -927,14 +918,14 @@ static int label_is_thumb_function_name = false;
 typedef struct literalS
 {
   struct expressionS  exp;
-  struct arm_it      *inst;
+  struct arm_it *     inst;
 } literalT;
 
-literalT literals[MAX_LITERAL_POOL_SIZE];
-int next_literal_pool_place = 0; /* Next free entry in the pool */
-int lit_pool_num = 1; /* Next literal pool number */
-symbolS *current_poolP = NULL;
-symbolS *symbol_make_empty PARAMS ((void)); 
+literalT  literals[MAX_LITERAL_POOL_SIZE];
+int       next_literal_pool_place = 0; /* Next free entry in the pool */
+int       lit_pool_num = 1; /* Next literal pool number */
+symbolS * current_poolP = NULL;
+symbolS * symbol_make_empty PARAMS ((void)); 
 
 static int
 add_to_lit_pool ()
@@ -942,7 +933,7 @@ add_to_lit_pool ()
   int lit_count = 0;
 
   if (current_poolP == NULL)
-    current_poolP = symbol_make_empty();
+    current_poolP = symbol_make_empty ();
 
   /* Check if this literal value is already in the pool: */
   while (lit_count < next_literal_pool_place)
@@ -968,24 +959,24 @@ add_to_lit_pool ()
     }
 
   inst.reloc.exp.X_op = O_symbol;
-  inst.reloc.exp.X_add_number = (lit_count)*4-8;
+  inst.reloc.exp.X_add_number = (lit_count) * 4 - 8;
   inst.reloc.exp.X_add_symbol = current_poolP;
 
   return SUCCESS;
 }
  
 /* Can't use symbol_new here, so have to create a symbol and then at
-   a later date assign it a value. Thats what these functions do */
+   a later date assign it a value. Thats what these functions do.  */
 static void
 symbol_locate (symbolP, name, segment, valu, frag)
-     symbolS *symbolP; 
-     CONST char *name;		/* It is copied, the caller can modify */
-     segT segment;		/* Segment identifier (SEG_<something>) */
-     valueT valu;		/* Symbol value */
-     fragS *frag;		/* Associated fragment */
+     symbolS *    symbolP; 
+     CONST char * name;		/* It is copied, the caller can modify */
+     segT         segment;	/* Segment identifier (SEG_<something>) */
+     valueT       valu;		/* Symbol value */
+     fragS *      frag;		/* Associated fragment */
 {
   unsigned int name_length;
-  char *preserved_copy_of_name;
+  char * preserved_copy_of_name;
 
   name_length = strlen (name) + 1;      /* +1 for \0 */
   obstack_grow (&notes, name, name_length);
@@ -1008,16 +999,14 @@ symbol_locate (symbolP, name, segment, valu, frag)
 
   symbolP->sy_frag = frag;
 
-  /*
-   * Link to end of symbol chain.
-   */
+  /* Link to end of symbol chain.  */
   {
     extern int symbol_table_frozen;
     if (symbol_table_frozen)
       abort ();
   }
 
-  symbol_append (symbolP, symbol_lastP, &symbol_rootP, &symbol_lastP);
+  symbol_append (symbolP, symbol_lastP, & symbol_rootP, & symbol_lastP);
 
   obj_symbol_new_hook (symbolP);
 
@@ -1026,14 +1015,14 @@ symbol_locate (symbolP, name, segment, valu, frag)
 #endif
  
 #ifdef DEBUG_SYMS
-  verify_symbol_chain(symbol_rootP, symbol_lastP);
+  verify_symbol_chain (symbol_rootP, symbol_lastP);
 #endif /* DEBUG_SYMS */
 }
 
 symbolS *
 symbol_make_empty () 
 {
-  symbolS *symbolP; 
+  symbolS * symbolP; 
 
   symbolP = (symbolS *) obstack_alloc (&notes, sizeof (symbolS));
 
@@ -1099,7 +1088,9 @@ s_even (ignore)
 {
   if (!need_pass_2)		/* Never make frag if expect extra pass. */
     frag_align (1, 0, 0);
+  
   record_alignment (now_seg, 1);
+  
   demand_empty_rest_of_line ();
 }
 
@@ -1135,6 +1126,7 @@ s_ltorg (internal)
   symbol_table_insert (current_poolP);
 
   ARM_SET_THUMB (current_poolP, thumb_mode);
+  
 #if defined OBJ_COFF || defined OBJ_ELF
   ARM_SET_INTERWORK (current_poolP, support_interwork);
 #endif
@@ -1146,20 +1138,6 @@ s_ltorg (internal)
   next_literal_pool_place = 0;
   current_poolP = NULL;
 }
-
-#if 0 /* not used */
-static void
-arm_align (power, fill)
-     int power;
-     int fill;
-{
-  /* Only make a frag if we HAVE to ... */
-  if (power && !need_pass_2)
-    frag_align (power, fill, 0);
-
-  record_alignment (now_seg, power);
-}
-#endif
 
 static void
 s_align (unused)	/* Same as s_align_ptwo but align 0 => align 2 */
@@ -1226,7 +1204,7 @@ s_thumb_func (ignore)
 
   label_is_thumb_function_name = true;
   
-  demand_empty_rest_of_line();
+  demand_empty_rest_of_line ();
 }
 
 static void
@@ -1291,7 +1269,7 @@ s_code (unused)
     {
     case 16:
     case 32:
-      opcode_select(temp);
+      opcode_select (temp);
       break;
 
     default:
@@ -1301,7 +1279,7 @@ s_code (unused)
 
 static void
 end_of_line (str)
-     char *str;
+     char * str;
 {
   while (*str == ' ')
     str++;
@@ -1312,7 +1290,7 @@ end_of_line (str)
 
 static int
 skip_past_comma (str)
-     char **str;
+     char ** str;
 {
   char *p = *str, c;
   int comma = 0;
@@ -1336,12 +1314,12 @@ skip_past_comma (str)
 
 static int
 reg_required_here (str, shift)
-     char **str;
-     int shift;
+     char ** str;
+     int     shift;
 {
   static char buff [128]; /* XXX */
-  int reg;
-  char *start = *str;
+  int    reg;
+  char * start = *str;
 
   if ((reg = arm_reg_parse (str)) != FAIL && int_register (reg))
     {
@@ -1429,7 +1407,7 @@ co_proc_number (str)
 
 static int
 cp_opc_expr (str, where, length)
-     char **str;
+     char ** str;
      int where;
      int length;
 {
@@ -1460,11 +1438,11 @@ cp_opc_expr (str, where, length)
 
 static int
 cp_reg_required_here (str, where)
-     char **str;
-     int where;
+     char ** str;
+     int     where;
 {
-  int reg;
-  char *start = *str;
+  int    reg;
+  char * start = *str;
 
   if ((reg = arm_reg_parse (str)) != FAIL && cp_register (reg))
     {
@@ -1484,11 +1462,11 @@ cp_reg_required_here (str, where)
 
 static int
 fp_reg_required_here (str, where)
-     char **str;
-     int where;
+     char ** str;
+     int     where;
 {
   int reg;
-  char *start = *str;
+  char * start = *str;
 
   if ((reg = arm_reg_parse (str)) != FAIL && fp_register (reg))
     {
@@ -1508,7 +1486,7 @@ fp_reg_required_here (str, where)
 
 static int
 cp_address_offset (str)
-     char **str;
+     char ** str;
 {
   int offset;
 
@@ -1554,7 +1532,7 @@ cp_address_offset (str)
 
 static int
 cp_address_required_here (str)
-     char **str;
+     char ** str;
 {
   char *p = *str;
   int pre_inc = 0;
@@ -1839,7 +1817,7 @@ do_mull (str, flags)
 
 static void
 do_mul (str, flags)
-     char *str;
+     char *        str;
      unsigned long flags;
 {
   int rd, rm;
@@ -1896,7 +1874,7 @@ do_mul (str, flags)
 
 static void
 do_mla (str, flags)
-     char *str;
+     char *        str;
      unsigned long flags;
 {
   int rd, rm;
@@ -1957,12 +1935,13 @@ do_mla (str, flags)
    not in the table.  */
 static int
 my_get_float_expression (str)
-     char **str;
+     char ** str;
 {
   LITTLENUM_TYPE words[MAX_LITTLENUMS];
-  char *save_in;
-  expressionS exp;
-  int i, j;
+  char *         save_in;
+  expressionS    exp;
+  int            i;
+  int            j;
 
   memset (words, 0, MAX_LITTLENUMS * sizeof (LITTLENUM_TYPE));
   /* Look for a raw floating point number */
@@ -2023,7 +2002,7 @@ my_get_float_expression (str)
 /* Return true if anything in the expression is a bignum */
 static int
 walk_no_bignums (sp)
-     symbolS *sp;
+     symbolS * sp;
 {
   if (sp->sy_value.X_op == O_big)
     return 1;
@@ -2040,11 +2019,11 @@ walk_no_bignums (sp)
 
 static int
 my_get_expression (ep, str)
-     expressionS *ep;
-     char **str;
+     expressionS * ep;
+     char ** str;
 {
-  char *save_in;
-  segT seg;
+  char * save_in;
+  segT   seg;
   
   save_in = input_line_pointer;
   input_line_pointer = *str;
@@ -2089,12 +2068,12 @@ my_get_expression (ep, str)
 
 static int
 decode_shift (str, unrestrict)
-     char **str;
-     int unrestrict;
+     char ** str;
+     int     unrestrict;
 {
-  struct asm_shift *shft;
-  char *p;
-  char c;
+  struct asm_shift * shft;
+  char * p;
+  char   c;
     
   while (**str == ' ')
     (*str)++;
@@ -2198,8 +2177,8 @@ decode_shift (str, unrestrict)
 */
 static int
 negate_data_op (instruction, value)
-     unsigned long *instruction;
-     unsigned long value;
+     unsigned long * instruction;
+     unsigned long   value;
 {
   int op, new_inst;
   unsigned long negated, inverted;
@@ -2277,7 +2256,7 @@ negate_data_op (instruction, value)
 
 static int
 data_op2 (str)
-     char **str;
+     char ** str;
 {
   int value;
   expressionS expr;
@@ -2366,7 +2345,7 @@ data_op2 (str)
 
 static int
 fp_op2 (str)
-     char **str;
+     char ** str;
 {
   while (**str == ' ')
     (*str)++;
@@ -2423,7 +2402,7 @@ fp_op2 (str)
 
 static void
 do_arit (str, flags)
-     char *str;
+     char *        str;
      unsigned long flags;
 {
   while (*str == ' ')
@@ -2447,7 +2426,7 @@ do_arit (str, flags)
 
 static void
 do_adr (str, flags)
-     char *str;
+     char *        str;
      unsigned long flags;
 {
   /* This is a pseudo-op of the form "adr rd, label" to be converted
@@ -2476,7 +2455,7 @@ do_adr (str, flags)
 
 static void
 do_cmp (str, flags)
-     char *str;
+     char *        str;
      unsigned long flags;
 {
   while (*str == ' ')
@@ -2507,7 +2486,7 @@ do_cmp (str, flags)
 
 static void
 do_mov (str, flags)
-     char *str;
+     char *        str;
      unsigned long flags;
 {
   while (*str == ' ')
@@ -2535,8 +2514,8 @@ do_mov (str, flags)
 
 static int
 ldst_extend (str, hwse)
-     char **str;
-     int hwse;
+     char ** str;
+     int     hwse;
 {
   int add = INDEX_UP;
 
@@ -2607,7 +2586,7 @@ ldst_extend (str, hwse)
 
 static void
 do_ldst (str, flags)
-     char *str;
+     char *        str;
      unsigned long flags;
 {
   int halfword = 0;
@@ -2811,11 +2790,11 @@ do_ldst (str, flags)
 
 static long
 reg_list (strp)
-     char **strp;
+     char ** strp;
 {
-  char *str = *strp;
-  long range = 0;
-  int another_range;
+  char * str = *strp;
+  long   range = 0;
+  int    another_range;
 
   /* We come back here if we get ranges concatenated by '+' or '|' */
   do
@@ -2939,7 +2918,7 @@ reg_list (strp)
 
 static void
 do_ldmstm (str, flags)
-     char *str;
+     char *        str;
      unsigned long flags;
 {
   int base_reg;
@@ -2986,7 +2965,7 @@ do_ldmstm (str, flags)
 
 static void
 do_swi (str, flags)
-     char *str;
+     char *        str;
      unsigned long flags;
 {
   /* Allow optional leading '#'.  */
@@ -3007,7 +2986,7 @@ do_swi (str, flags)
 
 static void
 do_swap (str, flags)
-     char *str;
+     char *        str;
      unsigned long flags;
 {
   int reg;
@@ -3073,7 +3052,7 @@ do_swap (str, flags)
 
 static void
 do_branch (str, flags)
-     char *str;
+     char *        str;
      unsigned long flags;
 {
   if (my_get_expression (&inst.reloc.exp, &str))
@@ -3086,7 +3065,7 @@ do_branch (str, flags)
 
 static void
 do_bx (str, flags)
-     char *str;
+     char *        str;
      unsigned long flags;
 {
   int reg;
@@ -3106,7 +3085,7 @@ do_bx (str, flags)
 
 static void
 do_cdp (str, flags)
-     char *str;
+     char *        str;
      unsigned long flags;
 {
   /* Co-processor data operation.
@@ -3169,7 +3148,7 @@ do_cdp (str, flags)
 
 static void
 do_lstc (str, flags)
-     char *str;
+     char *        str;
      unsigned long flags;
 {
   /* Co-processor register load/store.
@@ -3208,7 +3187,7 @@ do_lstc (str, flags)
 
 static void
 do_co_reg (str, flags)
-     char *str;
+     char *        str;
      unsigned long flags;
 {
   /* Co-processor register transfer.
@@ -3272,7 +3251,7 @@ do_co_reg (str, flags)
 
 static void
 do_fp_ctrl (str, flags)
-     char *str;
+     char *        str;
      unsigned long flags;
 {
   /* FP control registers.
@@ -3294,7 +3273,7 @@ do_fp_ctrl (str, flags)
 
 static void
 do_fp_ldst (str, flags)
-     char *str;
+     char *        str;
      unsigned long flags;
 {
   while (*str == ' ')
@@ -3337,7 +3316,7 @@ do_fp_ldst (str, flags)
 
 static void
 do_fp_ldmstm (str, flags)
-     char *str;
+     char *        str;
      unsigned long flags;
 {
   int num_regs;
@@ -3479,7 +3458,7 @@ do_fp_ldmstm (str, flags)
 
 static void
 do_fp_dyadic (str, flags)
-     char *str;
+     char *        str;
      unsigned long flags;
 {
   while (*str == ' ')
@@ -3529,7 +3508,7 @@ do_fp_dyadic (str, flags)
 
 static void
 do_fp_monadic (str, flags)
-     char *str;
+     char *        str;
      unsigned long flags;
 {
   while (*str == ' ')
@@ -3571,7 +3550,7 @@ do_fp_monadic (str, flags)
 
 static void
 do_fp_cmp (str, flags)
-     char *str;
+     char *        str;
      unsigned long flags;
 {
   while (*str == ' ')
@@ -3599,7 +3578,7 @@ do_fp_cmp (str, flags)
 
 static void
 do_fp_from_reg (str, flags)
-     char *str;
+     char *        str;
      unsigned long flags;
 {
   while (*str == ' ')
@@ -3641,7 +3620,7 @@ do_fp_from_reg (str, flags)
 
 static void
 do_fp_to_reg (str, flags)
-     char *str;
+     char *        str;
      unsigned long flags;
 {
   while (*str == ' ')
@@ -3672,8 +3651,8 @@ do_fp_to_reg (str, flags)
    has been parsed.  */
 static int
 thumb_reg (strp, hi_lo)
-     char **strp;
-     int hi_lo;
+     char ** strp;
+     int     hi_lo;
 {
   int reg;
 
@@ -3709,8 +3688,8 @@ thumb_reg (strp, hi_lo)
    was SUB.  */
 static void
 thumb_add_sub (str, subtract)
-     char *str;
-     int subtract;
+     char * str;
+     int    subtract;
 {
   int Rd, Rs, Rn = FAIL;
 
@@ -3877,8 +3856,8 @@ thumb_add_sub (str, subtract)
 
 static void
 thumb_shift (str, shift)
-     char *str;
-     int shift;
+     char * str;
+     int    shift;
 {
   int Rd, Rs, Rn = FAIL;
 
@@ -3987,8 +3966,8 @@ thumb_shift (str, shift)
 
 static void
 thumb_mov_compare (str, move)
-     char *str;
-     int move;
+     char * str;
+     int    move;
 {
   int Rd, Rs = FAIL;
 
@@ -4076,9 +4055,9 @@ thumb_mov_compare (str, move)
 
 static void
 thumb_load_store (str, load_store, size)
-     char *str;
-     int load_store;
-     int size;
+     char * str;
+     int    load_store;
+     int    size;
 {
   int Rd, Rb, Ro = FAIL;
 
@@ -4277,7 +4256,7 @@ thumb_load_store (str, load_store, size)
 
 static void
 do_t_nop (str)
-     char *str;
+     char * str;
 {
   /* Do nothing */
   end_of_line (str);
@@ -4289,7 +4268,7 @@ do_t_nop (str)
    BIC and MVN.  */
 static void
 do_t_arit (str)
-     char *str;
+     char * str;
 {
   int Rd, Rs, Rn;
 
@@ -4342,21 +4321,21 @@ do_t_arit (str)
 
 static void
 do_t_add (str)
-     char *str;
+     char * str;
 {
   thumb_add_sub (str, 0);
 }
 
 static void
 do_t_asr (str)
-     char *str;
+     char * str;
 {
   thumb_shift (str, THUMB_ASR);
 }
 
 static void
 do_t_branch9 (str)
-     char *str;
+     char * str;
 {
   if (my_get_expression (&inst.reloc.exp, &str))
     return;
@@ -4367,7 +4346,7 @@ do_t_branch9 (str)
 
 static void
 do_t_branch12 (str)
-     char *str;
+     char * str;
 {
   if (my_get_expression (&inst.reloc.exp, &str))
     return;
@@ -4417,7 +4396,7 @@ find_real_start (symbolP)
 
 static void
 do_t_branch23 (str)
-     char *str;
+     char * str;
 {
   if (my_get_expression (&inst.reloc.exp, &str))
     return;
@@ -4438,7 +4417,7 @@ do_t_branch23 (str)
 
 static void
 do_t_bx (str)
-     char *str;
+     char * str;
 {
   int reg;
 
@@ -4460,14 +4439,14 @@ do_t_bx (str)
 
 static void
 do_t_compare (str)
-     char *str;
+     char * str;
 {
   thumb_mov_compare (str, THUMB_COMPARE);
 }
 
 static void
 do_t_ldmstm (str)
-     char *str;
+     char * str;
 {
   int Rb;
   long range;
@@ -4511,28 +4490,28 @@ do_t_ldmstm (str)
 
 static void
 do_t_ldr (str)
-     char *str;
+     char * str;
 {
   thumb_load_store (str, THUMB_LOAD, THUMB_WORD);
 }
 
 static void
 do_t_ldrb (str)
-     char *str;
+     char * str;
 {
   thumb_load_store (str, THUMB_LOAD, THUMB_BYTE);
 }
 
 static void
 do_t_ldrh (str)
-     char *str;
+     char * str;
 {
   thumb_load_store (str, THUMB_LOAD, THUMB_HALFWORD);
 }
 
 static void
 do_t_lds (str)
-     char *str;
+     char * str;
 {
   int Rd, Rb, Ro;
 
@@ -4558,28 +4537,28 @@ do_t_lds (str)
 
 static void
 do_t_lsl (str)
-     char *str;
+     char * str;
 {
   thumb_shift (str, THUMB_LSL);
 }
 
 static void
 do_t_lsr (str)
-     char *str;
+     char * str;
 {
   thumb_shift (str, THUMB_LSR);
 }
 
 static void
 do_t_mov (str)
-     char *str;
+     char * str;
 {
   thumb_mov_compare (str, THUMB_MOVE);
 }
 
 static void
 do_t_push_pop (str)
-     char *str;
+     char * str;
 {
   long range;
 
@@ -4624,35 +4603,35 @@ do_t_push_pop (str)
 
 static void
 do_t_str (str)
-     char *str;
+     char * str;
 {
   thumb_load_store (str, THUMB_STORE, THUMB_WORD);
 }
 
 static void
 do_t_strb (str)
-     char *str;
+     char * str;
 {
   thumb_load_store (str, THUMB_STORE, THUMB_BYTE);
 }
 
 static void
 do_t_strh (str)
-     char *str;
+     char * str;
 {
   thumb_load_store (str, THUMB_STORE, THUMB_HALFWORD);
 }
 
 static void
 do_t_sub (str)
-     char *str;
+     char * str;
 {
   thumb_add_sub (str, 1);
 }
 
 static void
 do_t_swi (str)
-     char *str;
+     char * str;
 {
   while (*str == ' ')
     str++;
@@ -4667,7 +4646,7 @@ do_t_swi (str)
 
 static void
 do_t_adr (str)
-     char *str;
+     char * str;
 {
   /* This is a pseudo-op of the form "adr rd, label" to be converted
      into a relative address of the form "add rd, pc, #label-.-4" */
@@ -4694,10 +4673,10 @@ static void
 insert_reg (entry)
      int entry;
 {
-  int len = strlen (reg_table[entry].name) + 2;
-  char *buf = (char *) xmalloc (len);
-  char *buf2 = (char *) xmalloc (len);
-  int i = 0;
+  int    len = strlen (reg_table[entry].name) + 2;
+  char * buf = (char *) xmalloc (len);
+  char * buf2 = (char *) xmalloc (len);
+  int    i = 0;
 
 #ifdef REGISTER_PREFIX
   buf[i++] = REGISTER_PREFIX;
@@ -4831,9 +4810,9 @@ md_begin ()
    */
 void
 md_number_to_chars (buf, val, n)
-     char *buf;
+     char * buf;
      valueT val;
-     int n;
+     int    n;
 {
   if (target_big_endian)
     number_to_chars_bigendian (buf, val, n);
@@ -4885,9 +4864,9 @@ md_chars_to_number (buf, n)
 
 char *
 md_atof (type, litP, sizeP)
-     char type;
-     char *litP;
-     int *sizeP;
+     char   type;
+     char * litP;
+     int *  sizeP;
 {
   int prec;
   LITTLENUM_TYPE words[MAX_LITTLENUMS];
@@ -4953,17 +4932,17 @@ md_atof (type, litP, sizeP)
   return 0;
 }
 
-/* We have already put the pipeline compensation in the instruction */
-
+/* The knowledge of the PC's pipeline offset is built into the relocs
+   for the ELF port and into the insns themselves for the COFF port.  */
 long
 md_pcrel_from (fixP)
-     fixS *fixP;
+     fixS * fixP;
 {
   if (   fixP->fx_addsy
       && S_GET_SEGMENT (fixP->fx_addsy) == undefined_section
       && fixP->fx_subsy == NULL)
-    return 0;	/* HACK */
-
+    return 0;
+  
   if (fixP->fx_pcrel && (fixP->fx_r_type == BFD_RELOC_ARM_THUMB_ADD))
     {
       /* PC relative addressing on the Thumb is slightly odd
@@ -4971,19 +4950,19 @@ md_pcrel_from (fixP)
 	 for the calculation */
       return (fixP->fx_where + fixP->fx_frag->fr_address) & ~3;
     }
-
+  
   return fixP->fx_where + fixP->fx_frag->fr_address;
 }
 
 /* Round up a section size to the appropriate boundary. */
 valueT
 md_section_align (segment, size)
-     segT segment;
+     segT   segment;
      valueT size;
 {
 #ifdef OBJ_ELF
   /* Don't align the dwarf2 debug sections */
-  if (!strncmp(segment->name,".debug",5))
+  if (!strncmp (segment->name, ".debug", 5))
     return size;
 #endif
   /* Round all sects to multiple of 4 */
@@ -4995,7 +4974,7 @@ md_section_align (segment, size)
 /* ARGSUSED */
 symbolS *
 md_undefined_symbol (name)
-     char *name;
+     char * name;
 {
   return 0;
 }
@@ -5005,12 +4984,12 @@ md_undefined_symbol (name)
 
 static int
 arm_reg_parse (ccp)
-     register char **ccp;
+     register char ** ccp;
 {
-  char *start = *ccp;
-  char c;
-  char *p;
-  struct reg_entry *reg;
+  char * start = * ccp;
+  char   c;
+  char * p;
+  struct reg_entry * reg;
 
 #ifdef REGISTER_PREFIX
   if (*start != REGISTER_PREFIX)
@@ -5045,11 +5024,12 @@ arm_reg_parse (ccp)
 
 static int
 arm_psr_parse (ccp)
-     register char **ccp;
+     register char ** ccp;
 {
-  char *start = *ccp;
-  char c, *p;
-  CONST struct asm_psr *psr;
+  char * start = * ccp;
+  char   c;
+  char * p;
+  CONST struct asm_psr * psr;
 
   p = start;
   c = *p++;
@@ -5071,17 +5051,17 @@ arm_psr_parse (ccp)
 
 int
 md_apply_fix3 (fixP, val, seg)
-     fixS *fixP;
-     valueT *val;
-     segT seg;
+     fixS *      fixP;
+     valueT *    val;
+     segT        seg;
 {
-  offsetT value = *val;
-  offsetT newval;
-  unsigned int newimm;
-  unsigned long temp;
-  int sign;
-  char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
-  arm_fix_data *arm_data = (arm_fix_data *) fixP->tc_fix_data;
+  offsetT        value = * val;
+  offsetT        newval;
+  unsigned int   newimm;
+  unsigned long  temp;
+  int            sign;
+  char *         buf = fixP->fx_where + fixP->fx_frag->fr_literal;
+  arm_fix_data * arm_data = (arm_fix_data *) fixP->tc_fix_data;
 
   assert (fixP->fx_r_type < BFD_RELOC_UNUSED);
 
@@ -5238,21 +5218,16 @@ md_apply_fix3 (fixP, val, seg)
       break;
 
     case BFD_RELOC_ARM_PCREL_BRANCH:
-#ifdef OBJ_ELF
-      if (target_oabi)
-        value = (value >> 2) & 0x00ffffff;
-      else
-        value = fixP->fx_offset;
-#else
-      value = (value >> 2) & 0x00ffffff;
-#endif
       newval = md_chars_to_number (buf, INSN_SIZE);
-#ifdef OBJ_ELF 
-      if (!target_oabi)
-        newval = (newval & 0xff000000);
+#ifdef OBJ_ELF
+      newval &= 0xff000000;
+      if (! target_oabi)
+        value = fixP->fx_offset;
+      else
+#else
+	value = (value >> 2) & 0x00ffffff;
 #endif
-      newval = (newval & 0xff000000);
-      value = (value + (newval & 0x00ffffff)) & 0x00ffffff;
+      value  = (value + (newval & 0x00ffffff)) & 0x00ffffff;
       newval = value | (newval & 0xff000000);
       md_number_to_chars (buf, newval, INSN_SIZE);
       break;
@@ -5337,17 +5312,14 @@ md_apply_fix3 (fixP, val, seg)
 
     case BFD_RELOC_RVA:
     case BFD_RELOC_32:
-#ifndef OBJ_ELF
       if (fixP->fx_done || fixP->fx_pcrel)
 	md_number_to_chars (buf, value, 4);
-#else
-      if (!target_oabi)
+#ifdef OBJ_ELF
+      else if (!target_oabi)
         {
           value = fixP->fx_offset;
           md_number_to_chars (buf, value, 4);
         }
-      else if (fixP->fx_done || fixP->fx_pcrel)
-        md_number_to_chars (buf, value, 4);
 #endif
       break;
 
@@ -5529,10 +5501,10 @@ md_apply_fix3 (fixP, val, seg)
    format.  */
 arelent *
 tc_gen_reloc (section, fixp)
-     asection *section;
-     fixS *fixp;
+     asection * section;
+     fixS * fixp;
 {
-  arelent *reloc;
+  arelent * reloc;
   bfd_reloc_code_real_type code;
 
   reloc = (arelent *) xmalloc (sizeof (arelent));
@@ -5643,18 +5615,18 @@ tc_gen_reloc (section, fixp)
 
 int
 md_estimate_size_before_relax (fragP, segtype)
-     fragS *fragP;
-     segT segtype;
+     fragS * fragP;
+     segT    segtype;
 {
   as_fatal (_("md_estimate_size_before_relax\n"));
-  return (1);
+  return 1;
 }
 
 static void
 output_inst (str)
-     char *str;
+     char * str;
 {
-  char *to = NULL;
+  char * to = NULL;
     
   if (inst.error)
     {
@@ -5674,7 +5646,7 @@ output_inst (str)
 
   if (inst.reloc.type != BFD_RELOC_NONE)
     fix_new_arm (frag_now, to - frag_now->fr_literal,
-		 inst.size, &inst.reloc.exp, inst.reloc.pc_rel,
+		 inst.size, & inst.reloc.exp, inst.reloc.pc_rel,
 		 inst.reloc.type);
 
   return;
@@ -5682,17 +5654,19 @@ output_inst (str)
 
 void
 md_assemble (str)
-     char *str;
+     char * str;
 {
-  char c;
-  char *p, *q, *start;
+  char   c;
+  char * p;
+  char * q;
+  char * start;
 
-  /* Align the instruction */
-  /* this may not be the right thing to do but ... */
+  /* Align the instruction.
+     This may not be the right thing to do but ... */
   /* arm_align (2, 0); */
   listing_prev_line (); /* Defined in listing.h */
 
-  /* Align the previous label if needed */
+  /* Align the previous label if needed.  */
   if (last_label_seen != NULL)
     {
       last_label_seen->sy_frag = frag_now;
@@ -5706,8 +5680,8 @@ md_assemble (str)
   if (*str == ' ')
     str++;			/* Skip leading white space */
     
-  /* scan up to the end of the op-code, which must end in white space or
-     end of string */
+  /* Scan up to the end of the op-code, which must end in white space or
+     end of string.  */
   for (start = p = str; *p != '\0'; p++)
     if (*p == ' ')
       break;
@@ -5958,9 +5932,10 @@ _("Warning: Use of the 'nv' conditional is deprecated\n"));
  *	      -mapcs-float	      Pass floats in float regs
  *	      -mapcs-reentrant        Position independent code
  *            -mthumb-interwork       Code supports Arm/Thumb interworking
+ *            -moabi                  Old ELF ABI
  */
 
-CONST char *md_shortopts = "m:";
+CONST char * md_shortopts = "m:";
 struct option md_longopts[] =
 {
 #ifdef ARM_BI_ENDIAN
@@ -5979,10 +5954,10 @@ size_t md_longopts_size = sizeof (md_longopts);
 
 int
 md_parse_option (c, arg)
-     int c;
-     char *arg;
+     int    c;
+     char * arg;
 {
-  char *str = arg;
+  char * str = arg;
 
   switch (c)
     {
@@ -6014,11 +5989,13 @@ md_parse_option (c, arg)
 	    cpu_variant &= ~FPU_ALL;
 	  break;
 
+#ifdef OBJ_ELF
         case 'o':
           if (!strcmp (str, "oabi"))
             target_oabi = true;
           break;
-
+#endif
+	  
         case 't':
           /* Limit assembler to generating only Thumb instructions: */
           if (! strcmp (str, "thumb"))
@@ -6259,7 +6236,7 @@ md_parse_option (c, arg)
 
 void
 md_show_usage (fp)
-     FILE *fp;
+     FILE * fp;
 {
   fprintf (fp,
 _("\
@@ -6282,6 +6259,11 @@ _("\
   fprintf (fp,
 _("\
   -mapcs-reentrant          the code is position independent/reentrant\n"));
+  #endif
+#ifdef OBJ_ELF
+  fprintf (fp,
+_("\
+  -moabi                    support the old ELF ABI\n"));
 #endif
 #ifdef ARM_BI_ENDIAN
   fprintf (fp,
@@ -6300,15 +6282,15 @@ _("\
 
 static void
 fix_new_arm (frag, where, size, exp, pc_rel, reloc)
-     fragS *frag;
-     int where;
-     short int size;
-     expressionS *exp;
-     int pc_rel;
-     int reloc;
+     fragS *       frag;
+     int           where;
+     short int     size;
+     expressionS * exp;
+     int           pc_rel;
+     int           reloc;
 {
-  fixS *new_fix;
-  arm_fix_data *arm_data;
+  fixS *         new_fix;
+  arm_fix_data * arm_data;
 
   switch (exp->X_op)
     {
@@ -6355,10 +6337,12 @@ arm_start_line_hook ()
 
 void
 arm_frob_label (sym)
-     symbolS *sym;
+     symbolS * sym;
 {
   last_label_seen = sym;
+  
   ARM_SET_THUMB (sym, thumb_mode);
+  
 #if defined OBJ_COFF || defined OBJ_ELF
   ARM_SET_INTERWORK (sym, support_interwork);
 #endif
@@ -6379,10 +6363,6 @@ arm_frob_label (sym)
 /* Adjust the symbol table.  This marks Thumb symbols as distinct from
    ARM ones.  */
 
-#ifdef OBJ_ELF
-#define S_GET_STORAGE_CLASS(S)   (elf_symbol ((S)->bsym)->internal_elf_sym.st_info)
-#define S_SET_STORAGE_CLASS(S,V) (elf_symbol ((S)->bsym)->internal_elf_sym.st_info = (V))
-#endif
 void
 arm_adjust_symtab ()
 {
@@ -6403,7 +6383,8 @@ arm_adjust_symtab ()
 	      else if (S_GET_STORAGE_CLASS (sym) == C_EXT)
 		S_SET_STORAGE_CLASS (sym, C_THUMBEXTFUNC);
 	      else
-		as_bad (_("%s: unexpected function type: %d"), S_GET_NAME (sym), S_GET_STORAGE_CLASS (sym));
+		as_bad (_("%s: unexpected function type: %d"),
+			S_GET_NAME (sym), S_GET_STORAGE_CLASS (sym));
 	    }
           else switch (S_GET_STORAGE_CLASS (sym))
             {
@@ -6425,14 +6406,10 @@ arm_adjust_symtab ()
 	coffsymbol(sym->bsym)->native->u.syment.n_flags = 0xFF;
     }
 #endif
-}
 #ifdef OBJ_ELF
-void
-armelf_adjust_symtab ()
-{
-  symbolS * sym;
-  elf_symbol_type *elf_sym;
-  char bind;
+  symbolS *         sym;
+  elf_symbol_type * elf_sym;
+  char              bind;
 
   for (sym = symbol_rootP; sym != NULL; sym = symbol_next (sym))
     {
@@ -6440,28 +6417,15 @@ armelf_adjust_symtab ()
         {
 	  if (THUMB_IS_FUNC (sym))
 	    {
-            elf_sym = elf_symbol(sym->bsym);
-            bind = ELF_ST_BIND(elf_sym);
-            elf_sym->internal_elf_sym.st_info = ELF_ST_INFO(bind, STT_ARM_TFUNC);
+	      elf_sym = elf_symbol (sym->bsym);
+	      bind = ELF_ST_BIND (elf_sym);
+	      elf_sym->internal_elf_sym.st_info = ELF_ST_INFO (bind, STT_ARM_TFUNC);
             }
-
          }
      }
+#endif
 }
 
-#endif
-
-#ifdef OBJ_ELF
-void
-armelf_frob_symbol (symp, puntp)
-    symbolS *symp;
-    int *puntp;
-
-{
-   elf_frob_symbol (symp, puntp);
-
-} 
-#endif
 int
 arm_data_in_code ()
 {
@@ -6472,12 +6436,13 @@ arm_data_in_code ()
       *input_line_pointer = 0;
       return 1;
     }
+  
   return 0;
 }
 
 char *
 arm_canonicalize_symbol_name (name)
-     char *name;
+     char * name;
 {
   int len;
 
@@ -6489,62 +6454,6 @@ arm_canonicalize_symbol_name (name)
 
   return name;
 }
-#ifdef OBJ_ELF
-/* Relocations against Thumb function names must be left unadjusted,
-   so that the linker can use this information to correctly set the
-   bottom bit of their addresses.  The MIPS version of this function
-   also prevents relocations that are mips-16 specific, but I do not
-   know why it does this.
-
-   FIXME:
-   There is one other problem that ought to be addressed here, but
-   which currently is not:  Taking the address of a label (rather
-   than a function) and then later jumping to that address.  Such
-   address also ought to have their bottom bit set (assuming that
-   they reside in Thumb code), but at the moment they will not.  */
-   
-boolean
-arm_fix_adjustable (fixP)
-   fixS *fixP;
-{
-
-  if (fixP->fx_addsy == NULL)
-    return 1;
-  
-  /* Prevent all adjustments to global symbols. */
-  if (S_IS_EXTERN (fixP->fx_addsy))
-    return 0;
-  if (S_IS_WEAK (fixP->fx_addsy))
-    return 0;
-
-  if (THUMB_IS_FUNC (fixP->fx_addsy)
-      && fixP->fx_subsy == NULL)
-    return 0;
-  
-  /* We need the symbol name for the VTABLE entries */
-  if (fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
-      || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
-    return 0;
-
-  return 1;
-}
-#endif /* OBJ_ELF */
-
-#ifdef OBJ_ELF
-int
-elf32_arm_force_relocation (fixp)
-      struct fix *fixp;
-{
-  if (fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
-      || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
-    return 1;
-
-  if (fixp->fx_r_type == BFD_RELOC_ARM_PCREL_BRANCH)
-    return 1;
-
-  return 0;
-}
-#endif
 
 boolean
 arm_validate_fix (fixP)
@@ -6566,6 +6475,47 @@ arm_validate_fix (fixP)
   return false;
 }
 
+#ifdef OBJ_ELF
+/* Relocations against Thumb function names must be left unadjusted,
+   so that the linker can use this information to correctly set the
+   bottom bit of their addresses.  The MIPS version of this function
+   also prevents relocations that are mips-16 specific, but I do not
+   know why it does this.
+
+   FIXME:
+   There is one other problem that ought to be addressed here, but
+   which currently is not:  Taking the address of a label (rather
+   than a function) and then later jumping to that address.  Such
+   addresses also ought to have their bottom bit set (assuming that
+   they reside in Thumb code), but at the moment they will not.  */
+   
+boolean
+arm_fix_adjustable (fixP)
+   fixS * fixP;
+{
+
+  if (fixP->fx_addsy == NULL)
+    return 1;
+  
+  /* Prevent all adjustments to global symbols. */
+  if (S_IS_EXTERN (fixP->fx_addsy))
+    return 0;
+  
+  if (S_IS_WEAK (fixP->fx_addsy))
+    return 0;
+
+  if (THUMB_IS_FUNC (fixP->fx_addsy)
+      && fixP->fx_subsy == NULL)
+    return 0;
+  
+  /* We need the symbol name for the VTABLE entries */
+  if (   fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+      || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+    return 0;
+
+  return 1;
+}
+
 const char *
 elf32_arm_target_format ()
 {
@@ -6580,3 +6530,26 @@ elf32_arm_target_format ()
     else
       return "elf32-littlearm";
 }
+
+void
+armelf_frob_symbol (symp, puntp)
+     symbolS * symp;
+     int * puntp;
+{
+  elf_frob_symbol (symp, puntp);
+} 
+
+int
+arm_force_relocation (fixp)
+     struct fix * fixp;
+{
+  if (   fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+      || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY
+      || fixp->fx_r_type == BFD_RELOC_ARM_PCREL_BRANCH)    
+    return 1;
+  
+  return 0;
+}
+
+#endif /* OBJ_ELF */
+
