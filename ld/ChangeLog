@@ -1,3 +1,8 @@
+Mon Nov 25 09:55:07 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* emulparms/mn10300.sh: Remove bogus '_' prefix for
+	entry symbol and ctor/dtor stuff.
+
 Fri Nov 15 13:00:18 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* Makefile.in (emn10300.c): Add dependencies.
