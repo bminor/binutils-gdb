@@ -1,5 +1,8 @@
 2002-05-23  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-alpha.c (assemble_tokens): Protect use of
+	ALPHA_RELOC_TABLE with #ifdef RELOC_OP_P.
+
 	* write.c (size_seg): Check adjustment to last frag.
 	(SUB_SEGMENT_ALIGN): If HANDLE_ALIGN defined, pad out last frag to
 	section alignment.

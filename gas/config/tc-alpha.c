@@ -2648,13 +2648,16 @@ assemble_tokens (opname, tok, ntok, local_macros_on)
   int cpumatch = 1;
   bfd_reloc_code_real_type reloc = BFD_RELOC_UNUSED;
 
+#ifdef RELOC_OP_P
   /* If a user-specified relocation is present, this is not a macro.  */
   if (ntok && USER_RELOC_P (tok[ntok - 1].X_op))
     {
       reloc = ALPHA_RELOC_TABLE (tok[ntok - 1].X_op)->reloc;
       ntok--;
     }
-  else if (local_macros_on)
+  else
+#endif
+  if (local_macros_on)
     {
       macro = ((const struct alpha_macro *)
 	       hash_find (alpha_macro_hash, opname));
