@@ -1,5 +1,9 @@
 Fri Jan  3 12:09:24 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-m68k.h (tc_frob_label): Define to warn about a
+ 	misaligned text label.  Based on patch from Ronald F. Guilmette
+ 	<rfg@monkeys.com>.
+
 	* macro.c (macro_expand_body): In MRI mode, just copy a single &.
 
 	* config/tc-m68k.c (m68k_ip): Call frag_grow before adding a
