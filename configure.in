@@ -634,6 +634,9 @@ case "${target}" in
 # CYGNUS LOCAL clm/arm-elf
   arm-*-elf*)
     noconfigdirs="$noconfigdirs target-libgloss"
+    if [ x${is_cross_compiler} != xno ] ; then
+	   target_configdirs="${target_configdirs} target-bsp target-libstub target-cygmon"
+    fi
     ;;
 # END CYGNUS LOCAL 
   c4x-*-*)
@@ -658,6 +661,11 @@ case "${target}" in
     ;;
   # CYGNUS LOCAL d30v
   d30v-*-*)
+    ;;
+  fr30-*-elf*)
+    if [ x${is_cross_compiler} != xno ] ; then
+	   target_configdirs="${target_configdirs} target-bsp target-libstub target-cygmon"
+    fi
     ;;
   h8300*-*-* | \
   h8500-*-*)
@@ -744,6 +752,11 @@ case "${target}" in
     # but that's okay since emacs doesn't work anyway
     noconfigdirs="$noconfigdirs emacs emacs19 target-libgloss"
     ;;
+  m68k-*-*)
+    if [ x${is_cross_compiler} != xno ] ; then
+	   target_configdirs="${target_configdirs} target-bsp target-libstub target-cygmon"
+    fi
+    ;;
   mn10200-*-*)
     noconfigdirs="$noconfigdirs"
     if [ x${is_cross_compiler} != xno ] ; then
@@ -753,7 +766,7 @@ case "${target}" in
   mn10300-*-*)
     noconfigdirs="$noconfigdirs"
     if [ x${is_cross_compiler} != xno ] ; then
-	   target_configdirs="${target_configdirs} target-libstub target-cygmon"
+	   target_configdirs="${target_configdirs} target-bsp target-libstub target-cygmon"
     fi
     ;;
   powerpc-*-aix*)
@@ -783,6 +796,11 @@ case "${target}" in
 # start-sanitize-cygnus
     noconfigdirs="$noconfigdirs flexlm"
 # end-sanitize-cygnus
+    ;;
+  powerpc-*-eabi)
+    if [ x${is_cross_compiler} != xno ] ; then
+	   target_configdirs="${target_configdirs} target-bsp target-libstub target-cygmon"
+    fi
     ;;
   rs6000-*-lynxos*)
     # The CVS server code doesn't work on the RS/6000
@@ -818,7 +836,7 @@ case "${target}" in
     ;;
   mipstx39-*-*)
     noconfigdirs="$noconfigdirs gprof"   # same as generic mips
-    target_configdirs="${target_configdirs} target-libstub target-cygmon"
+    target_configdirs="${target_configdirs} target-bsp target-libstub target-cygmon"
    ;;
 # start-sanitize-sky
   mips64r5900-sky-elf*)
