@@ -49,11 +49,11 @@ Do-first:
 keep_these_too="${keep_these_too} .cvsignore CYGNUS autoconf
 	apache bash 
 	bfd binutils byacc cvs deja-gnu dejagnu diff dosrel dvips emacs emacs19
-	examples expect fileutils flex
+	examples expect fileutils findutils flex
 	gas gawk gcc gdb gdbm gdbtest glob gprof grep grez groff guile gzip
 	include inet install.sh ispell
-	ld libg++ libgcc libgloss libiberty libio librx libstdc++
-	m4 make mmalloc move-if-change newlib opcodes
+	ld less libg++ libgcc libgloss libiberty libio librx libstdc++
+	m4 make mmalloc move-if-change newlib ncurses opcodes
 	pagas patch perl prms
 	rcs readline sed send-pr shellutils sim tar textutils time
 	texinfo tgas utils uudecode wdiff xiberty
