@@ -1,3 +1,8 @@
+Mon Jan 20 13:52:13 1997  Mark Alexander  <marka@cygnus.com>
+
+	* config/mips/{embed,embed64,embedl,embedl64}.mt:
+	Link in simulator on MIPS embedded targets.
+
 Sat Jan 18 02:31:29 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* blockframe.c (frameless_look_for_prologue):  Mark frames
