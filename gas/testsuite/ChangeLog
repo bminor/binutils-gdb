@@ -1,3 +1,8 @@
+2001-01-02  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/arm.exp: Pass -marmv3 to msr-bad test, since the
+	instruction is legal in v5.  Also fix expected error message.
+
 2001-01-01  Philip Blundell  <philb@gnu.org>
 
 	* gas/arm/adrl.s, gas/arm/pic.s, gas/arm/msr-bad.s: New tests.
