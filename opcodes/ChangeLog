@@ -1,4 +1,8 @@
 start-sanitize-am33
+Tue Jun 30 09:59:37 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* m10300-opc.c: Reorder "movbu" and "movhu" instructions too.
+
 Mon Jun 29 14:54:32 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* m10300-opc.c: Reorder more instructions so that we do not
