@@ -87,6 +87,7 @@ extern mi_cmd_args_ftype mi_cmd_exec_step_instruction;
 extern mi_cmd_args_ftype mi_cmd_exec_until;
 extern mi_cmd_args_ftype mi_cmd_exec_interrupt;
 extern mi_cmd_argv_ftype mi_cmd_file_list_exec_source_file;
+extern mi_cmd_argv_ftype mi_cmd_file_list_exec_source_files;
 extern mi_cmd_argv_ftype mi_cmd_gdb_exit;
 extern mi_cmd_argv_ftype mi_cmd_interpreter_exec;
 extern mi_cmd_argv_ftype mi_cmd_stack_info_depth;

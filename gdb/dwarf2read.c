@@ -380,6 +380,7 @@ struct partial_die_info
        sometimes DW_TAG_MIPS_linkage_name or a string computed in some
        other fashion.  */
     char *name;
+    char *dirname;
 
     /* The scope to prepend to our children.  This is generally
        allocated on the comp_unit_obstack, so will disappear
@@ -1348,6 +1349,9 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 				  comp_unit_die.lowpc,
 				  objfile->global_psymbols.next,
 				  objfile->static_psymbols.next);
+
+	  if (comp_unit_die.dirname)
+        pst->dirname = xstrdup (comp_unit_die.dirname);
 
       pst->read_symtab_private = (char *)
 	obstack_alloc (&objfile->objfile_obstack, sizeof (struct dwarf2_pinfo));
@@ -4874,6 +4878,10 @@ read_partial_die (struct partial_die_info *part_die,
 	  /* Prefer DW_AT_MIPS_linkage_name over DW_AT_name.  */
 	  if (part_die->name == NULL)
 	    part_die->name = DW_STRING (&attr);
+	  break;
+	case DW_AT_comp_dir:
+	  if (part_die->dirname == NULL)
+	    part_die->dirname = DW_STRING (&attr);
 	  break;
 	case DW_AT_MIPS_linkage_name:
 	  part_die->name = DW_STRING (&attr);

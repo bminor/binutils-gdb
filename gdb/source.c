@@ -805,30 +805,46 @@ source_full_path_of (char *filename, char **full_pathname)
   return 1;
 }
 
+/* This function is capable of finding the absolute path to a
+   source file, and opening it, provided you give it an 
+   OBJFILE and FILENAME. Both the DIRNAME and FULLNAME are only
+   added suggestions on where to find the file. 
 
-/* Open a source file given a symtab S.  Returns a file descriptor or
-   negative number for error.  */
+   OBJFILE should be the objfile associated with a psymtab or symtab. 
+   FILENAME should be the filename to open.
+   DIRNAME is the compilation directory of a particular source file.
+           Only some debug formats provide this info.
+   FULLNAME can be the last known absolute path to the file in question.
 
+   On Success 
+     A valid file descriptor is returned. ( the return value is positive )
+     FULLNAME is set to the absolute path to the file just opened.
+
+   On Failure
+     A non valid file descriptor is returned. ( the return value is negitive ) 
+     FULLNAME is set to NULL.  */
 int
-open_source_file (struct symtab *s)
+find_and_open_source (struct objfile *objfile,
+                      const char *filename,
+                      const char *dirname, 
+					  char **fullname)
 {
   char *path = source_path;
   const char *p;
   int result;
-  char *fullname;
 
   /* Quick way out if we already know its full name */
-  if (s->fullname)
+  if (*fullname)
     {
-      result = open (s->fullname, OPEN_MODE);
+      result = open (*fullname, OPEN_MODE);
       if (result >= 0)
 	return result;
       /* Didn't work -- free old one, try again. */
-      xmfree (s->objfile->md, s->fullname);
-      s->fullname = NULL;
+      xmfree (objfile->md, *fullname);
+      *fullname = NULL;
     }
 
-  if (s->dirname != NULL)
+  if (dirname != NULL)
     {
       /* Replace a path entry of  $cdir  with the compilation directory name */
 #define	cdir_len	5
@@ -841,60 +857,106 @@ open_source_file (struct symtab *s)
 	  int len;
 
 	  path = (char *)
-	    alloca (strlen (source_path) + 1 + strlen (s->dirname) + 1);
+	    alloca (strlen (source_path) + 1 + strlen (dirname) + 1);
 	  len = p - source_path;
 	  strncpy (path, source_path, len);	/* Before $cdir */
-	  strcpy (path + len, s->dirname);	/* new stuff */
+	  strcpy (path + len, dirname);	/* new stuff */
 	  strcat (path + len, source_path + len + cdir_len);	/* After $cdir */
 	}
     }
 
-  result = openp (path, 0, s->filename, OPEN_MODE, 0, &s->fullname);
+  result = openp (path, 0, filename, OPEN_MODE, 0, fullname);
   if (result < 0)
     {
       /* Didn't work.  Try using just the basename. */
-      p = lbasename (s->filename);
-      if (p != s->filename)
-	result = openp (path, 0, p, OPEN_MODE, 0, &s->fullname);
+      p = lbasename (filename);
+      if (p != filename)
+	result = openp (path, 0, p, OPEN_MODE, 0, fullname);
     }
 
   if (result >= 0)
     {
-      fullname = s->fullname;
-      s->fullname = mstrsave (s->objfile->md, s->fullname);
-      xfree (fullname);
+      char *tmp_fullname;
+      tmp_fullname = *fullname;
+      *fullname = mstrsave (objfile->md, *fullname);
+      xfree (tmp_fullname);
     }
   return result;
 }
 
-/* Return the path to the source file associated with symtab.  Returns NULL
-   if no symtab.  */
+/* Open a source file given a symtab S.  Returns a file descriptor or
+   negative number for error.  
+   
+   This function is a convience function to find_and_open_source. */
 
-char *
-symtab_to_filename (struct symtab *s)
+int
+open_source_file (struct symtab *s)
 {
-  int fd;
+    if (!s)
+      return -1;
+
+  return find_and_open_source (s->objfile, s->filename, s->dirname, 
+		  		 &s->fullname);
+}
+
+/* Finds the fullname that a symtab represents.
+
+   If this functions finds the fullname, it will save it in ps->fullname
+   and it will also return the value.
+
+   If this function fails to find the file that this symtab represents,
+   NULL will be returned and ps->fullname will be set to NULL.  */
+char *
+symtab_to_fullname (struct symtab *s)
+{
+  int r;
 
   if (!s)
     return NULL;
 
-  /* If we've seen the file before, just return fullname. */
+  /* Don't check s->fullname here, the file could have been 
+     deleted/moved/..., look for it again */
+  r =
+    find_and_open_source (s->objfile, s->filename, s->dirname, &s->fullname);
 
-  if (s->fullname)
+  if (r)
+  {
+    close (r);
     return s->fullname;
+  }
 
-  /* Try opening the file to setup fullname */
+  return NULL;
+}
 
-  fd = open_source_file (s);
-  if (fd < 0)
-    return s->filename;		/* File not found.  Just use short name */
+/* Finds the fullname that a partial_symtab represents.
 
-  /* Found the file.  Cleanup and return the full name */
+   If this functions finds the fullname, it will save it in ps->fullname
+   and it will also return the value.
 
-  close (fd);
-  return s->fullname;
+   If this function fails to find the file that this partial_symtab represents,
+   NULL will be returned and ps->fullname will be set to NULL.  */
+char *
+psymtab_to_fullname (struct partial_symtab *ps)
+{
+  int r;
+
+  if (!ps)
+    return NULL;
+
+  /* Don't check ps->fullname here, the file could have been
+     deleted/moved/..., look for it again */
+  r =
+    find_and_open_source (ps->objfile, ps->filename, ps->dirname,
+			  &ps->fullname);
+
+  if (r) 
+  {
+    close (r);
+    return ps->fullname;
 }
 
+  return NULL;
+}
 
 /* Create and initialize the table S->line_charpos that records
    the positions of the lines in the source file, which is assumed

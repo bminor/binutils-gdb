@@ -891,6 +891,10 @@ struct partial_symtab
 
   char *fullname;
 
+  /* Directory in which it was compiled, or NULL if we don't know.  */
+
+  char *dirname;
+
   /* Information about the object file from which symbols should be read.  */
 
   struct objfile *objfile;

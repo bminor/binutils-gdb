@@ -16848,14 +16848,24 @@ There's no @value{GDBN} command which directly corresponds to this one.
 
 List the source files for the current executable.
 
+It will always output the filename, but only when GDB can find the absolute
+file name of a source file, will it output the fullname.
+
 @subsubheading @value{GDBN} Command
 
 There's no @value{GDBN} command which directly corresponds to this one.
 @code{gdbtk} has an analogous command @samp{gdb_listfiles}.
 
 @subsubheading Example
-N.A.
-
+@smallexample
+(@value{GDBP})
+-file-list-exec-source-files
+^done,files=[
+@{file=foo.c,fullname=/home/foo.c@},
+@{file=/home/bar.c,fullname=/home/bar.c@},
+@{file=gdb_could_not_find_fullpath.c@}]
+(@value{GDBP})
+@end smallexample
 
 @subheading The @code{-file-list-shared-libraries} Command
 @findex -file-list-shared-libraries

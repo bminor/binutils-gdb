@@ -626,8 +626,6 @@ extern void init_source_path (void);
 
 extern void init_last_source_visited (void);
 
-extern char *symtab_to_filename (struct symtab *);
-
 /* From exec.c */
 
 extern void exec_set_section_offsets (bfd_signed_vma text_off,

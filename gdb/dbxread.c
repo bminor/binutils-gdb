@@ -1457,6 +1457,7 @@ read_dbx_symtab (struct objfile *objfile)
 	    static int prev_so_symnum = -10;
 	    static int first_so_symnum;
 	    char *p;
+	    static char *dirname_nso;
 	    int prev_textlow_not_set;
 
 	    valu = nlist.n_value + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
@@ -1514,18 +1515,27 @@ read_dbx_symtab (struct objfile *objfile)
 
 	    p = strrchr (namestring, '/');
 	    if (p && *(p + 1) == '\000')
-	      continue;		/* Simply ignore directory name SOs */
+	      {
+		/* Save the directory name SOs locally, then save it into
+		   the psymtab when it's created below. */
+	        dirname_nso = namestring;
+	        continue;		
+	      }
 
 	    /* Some other compilers (C++ ones in particular) emit useless
 	       SOs for non-existant .c files.  We ignore all subsequent SOs that
 	       immediately follow the first.  */
 
 	    if (!pst)
+	      {
 	      pst = start_psymtab (objfile,
 				   namestring, valu,
 				   first_so_symnum * symbol_size,
 				   objfile->global_psymbols.next,
 				   objfile->static_psymbols.next);
+		pst->dirname = dirname_nso;
+		dirname_nso = NULL;
+	      }
 	    continue;
 	  }
 
