@@ -37,11 +37,16 @@
 
 #include "config.h"
 
-/* This is the code recommended in the autoconf documentation --
+/* This is the code recommended in the autoconf documentation, almost
    verbatim.  If it doesn't work for you, let me know, and notify
    djm@gnu.ai.mit.edu as well.  */
+/* Added #undef for DJ Delorie.  The right fix is to ensure that as.h
+   is included first, before even any system header files, in all files
+   that use it.  KR 1994.11.03 */
+
 /* AIX requires this to be the first thing in the file.  */
 #ifdef __GNUC__
+# undef alloca
 # define alloca __builtin_alloca
 #else
 # if HAVE_ALLOCA_H
@@ -114,11 +119,8 @@ extern char *strdup (/* const char * */);
 #include <bfd.h>
 #endif
 
-#ifdef WANT_FOPEN_BIN
-#include "fopen-bin.h"
-#else
-#include "fopen-same.h"
-#endif
+/* Define the standard progress macros.  */
+#include <progress.h>
 
 /* This doesn't get taken care of anywhere.  */
 #if !defined (__GNUC__) && !defined (inline)
@@ -126,17 +128,20 @@ extern char *strdup (/* const char * */);
 #endif
 
 /* Other stuff from config.h.  */
-#ifdef NEED_MALLOC_DECLARATION
+#ifdef NEED_DECLARATION_MALLOC
 extern PTR malloc ();
 extern PTR realloc ();
 #endif
-#ifdef NEED_FREE_DECLARATION
+#ifdef NEED_DECLARATION_FREE
 extern void free ();
+#endif
+#ifdef NEED_DECLARATION_ERRNO
+extern int errno;
 #endif
 
 /* This is needed for VMS.  */
-#if ! defined (HAVE_UNLINK) && defined (HAVE_DELETE)
-#define unlink delete
+#if ! defined (HAVE_UNLINK) && defined (HAVE_REMOVE)
+#define unlink remove
 #endif
 
 #ifdef BFD_ASSEMBLER
@@ -398,6 +403,13 @@ struct frag
   relax_stateT fr_type;
   relax_substateT fr_subtype;
 
+#if 0 /* not yet */
+  /* Track the alignment and offset of the current frag.  With this,
+     sometimes we can avoid creating new frags for .align directives.  */
+  unsigned short align_mask;
+  unsigned short align_offset;
+#endif
+
   /* These are needed only on the NS32K machines.  But since we don't
      include targ-cpu.h until after this structure has been defined,
      we can't really conditionalize it.  This code should be
@@ -421,7 +433,7 @@ typedef struct frag fragS;
    included in frchain_now.  The fr_fix field is bogus; instead, use:
    obstack_next_free(&frags)-frag_now->fr_literal.  */
 COMMON fragS *frag_now;
-#define frag_now_fix() ((char*)obstack_next_free (&frags) - frag_now->fr_literal)
+extern int frag_now_fix ();
 
 /* For foreign-segment symbol fixups. */
 COMMON fragS zero_address_frag;
@@ -488,8 +500,20 @@ struct lineno_struct
 typedef struct lineno_struct lineno;
 #endif
 
-#if defined (__STDC__) && !defined(NO_STDARG)
+/* Prefer varargs for non-ANSI compiler, since some will barf if the
+   ellipsis definition is used with a no-arguments declaration.  */
+#if defined (HAVE_VARARGS_H) && !defined (__STDC__)
+#undef HAVE_STDARG_H
+#endif
 
+#if defined (HAVE_STDARG_H)
+#define USE_STDARG
+#endif
+#if !defined (USE_STDARG) && defined (HAVE_VARARGS_H)
+#define USE_VARARGS
+#endif
+
+#ifdef USE_STDARG
 #if __GNUC__ >= 2
 /* for use with -Wformat */
 #define PRINTF_LIKE(FCN)	void FCN (const char *format, ...) \
@@ -498,11 +522,12 @@ typedef struct lineno_struct lineno;
 					  const char *format, ...) \
 					__attribute__ ((format (printf, 3, 4)))
 #else /* ANSI C with stdarg, but not GNU C */
-#define PRINTF_LIKE(FCN)	void FCN (const char *format, ...)
-#define PRINTF_WHERE_LIKE(FCN)	void FCN (char *file, unsigned int line, \
-					  const char *format, ...)
+#define PRINTF_LIKE(FCN)	void FCN PARAMS ((const char *format, ...))
+#define PRINTF_WHERE_LIKE(FCN)	void FCN PARAMS ((char *file, \
+						  unsigned int line, \
+					  	  const char *format, ...))
 #endif
-#else /* not ANSI C, or not stdarg */
+#else /* not using stdarg */
 #define PRINTF_LIKE(FCN)	void FCN ()
 #define PRINTF_WHERE_LIKE(FCN)	void FCN ()
 #endif

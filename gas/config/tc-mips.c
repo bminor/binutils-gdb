@@ -6861,7 +6861,7 @@ s_loc (x)
   assert (now_seg == text_section);
 
   lineno = get_number ();
-  addroff = obstack_next_free (&frags) - frag_now->fr_literal;
+  addroff = frag_now_fix ();
 
   symbolP = symbol_new ("", N_SLINE, addroff, frag_now);
   S_SET_TYPE (symbolP, N_SLINE);

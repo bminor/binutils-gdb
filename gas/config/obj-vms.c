@@ -355,8 +355,8 @@ vms_resolve_symbol_redef (sym)
    *	If the new symbol is .comm AND it has a size of zero,
    *	we ignore it (i.e. the old symbol overrides it)
    */
-  if ((SEGMENT_TO_SYMBOL_TYPE ((int) now_seg) == (N_UNDF | N_EXT)) &&
-      ((obstack_next_free (&frags) - frag_now->fr_literal) == 0))
+  if (SEGMENT_TO_SYMBOL_TYPE ((int) now_seg) == (N_UNDF | N_EXT)
+      && frag_now_fix () == 0)
     {
       as_warn ("compiler emitted zero-size common symbol `%s' already defined",
 	       S_GET_NAME (sym));
@@ -373,7 +373,7 @@ vms_resolve_symbol_redef (sym)
 	       S_GET_NAME (sym));
       sym->sy_frag  = frag_now;
       S_SET_OTHER(sym, const_flag);
-      S_SET_VALUE(sym, obstack_next_free(& frags) - frag_now->fr_literal);
+      S_SET_VALUE(sym, frag_now_fix ());
       /* Keep N_EXT bit.  */
       sym->sy_symbol.n_type |= SEGMENT_TO_SYMBOL_TYPE((int) now_seg);
       return 1;

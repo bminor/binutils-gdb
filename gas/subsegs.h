@@ -1,6 +1,6 @@
 /* subsegs.h -> subsegs.c
 
-   Copyright (C) 1987, 1992 Free Software Foundation, Inc.
+   Copyright (C) 1987, 1992, 1993, 1994 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -44,6 +44,11 @@ struct frchain			/* control building of a frag chain */
   struct frchain *frch_next;	/* next in chain of struct frchain-s */
   segT frch_seg;		/* SEG_TEXT or SEG_DATA. */
   subsegT frch_subseg;		/* subsegment number of this chain */
+#ifdef BFD_ASSEMBLER
+  fixS *fix_root;		/* Root of fixups for this subsegment.  */
+  fixS *fix_tail;		/* Last fixup for this subsegment.  */
+#endif
+  struct obstack frch_obstack;	/* for objects in this frag chain */
 };
 
 typedef struct frchain frchainS;
@@ -69,8 +74,12 @@ typedef struct
   int bss : 1;
 
   int user_stuff;
+
+  /* Fixups for this segment.  If BFD_ASSEMBLER, this is only valid
+     after the frchains are run together.  */
   fixS *fix_root;
   fixS *fix_tail;
+
 #if defined (MANY_SEGMENTS) && !defined (BFD_ASSEMBLER)
   struct internal_scnhdr scnhdr;
 #endif
@@ -104,8 +113,7 @@ typedef struct
 
 #ifdef BFD_ASSEMBLER
 
-#define seg_info(SEC)	\
-	((segment_info_type *) bfd_get_section_userdata (stdoutput, (SEC)))
+extern segment_info_type *seg_info PARAMS ((segT));
 extern symbolS *section_symbol PARAMS ((segT));
 
 #else /* ! BFD_ASSEMBLER */

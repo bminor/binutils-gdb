@@ -1912,8 +1912,7 @@ obj_coff_ln (appline)
     }				/* wrong context */
 
   l = get_absolute_expression ();
-  c_line_new (0, obstack_next_free (&frags) - frag_now->fr_literal, l,
-	      frag_now);
+  c_line_new (0, frag_now_fix (), l, frag_now);
 #ifndef NO_LISTING
   {
     extern int listing;

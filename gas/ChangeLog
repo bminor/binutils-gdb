@@ -1,5 +1,31 @@
 Tue Dec 20 14:56:31 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
+	* frags.c (frag_init): Call obstack_begin on `frags'.
+	* subsegs.c (subsegs_begin): Don't do it here.
+	* as.c (main): Call frag_init before subsegs_begin.
+
+	* frags.c (frag_append_1_char): New function.
+	* frags.h (frag_append_1_char): Declare it.
+	(FRAG_APPEND_1_CHAR): Call it.  Old definition is commented out
+	for now.
+
+	* as.h (struct frag): Added (but commented out) new fields for
+	tracking current alignment.
+	(frag_now_fix): Changed macro to function declaration.
+	* frags.c (frag_now_fix): Define function here.
+	(frag_new): Use it instead of accessing `frags' directly.
+	* frags.h (frags): Change comment to indicate it shouldn't be
+	accessed directly.
+	* subsegs.h (struct frchain): New field frch_obstack, intended to
+	eventually replace global `frags' obstack.
+	* subsegs.c (subseg_set_rest): Use frag_now_fix instead of
+	accessing `frags' directly.  Initialize fields of new frchainS
+	explicitly instead of with memset.
+	* config/obj-coff.c (obj_coff_ln) [!BFD_ASSEMBLER]: Use
+	frag_now_fix.
+	* config/tc-mips.c (s_loc), config/obj-vms.c
+	(vms_resolve_symbol_redef), symbols.c (colon): Likewise.
+
 	* config/tc-m68k.c (md_apply_fix_2): Use offsetT and addressT
 	instead of long and unsigned long.
 	(md_apply_fix): Cast value before passing it.

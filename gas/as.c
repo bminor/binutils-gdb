@@ -41,20 +41,6 @@
 #include "subsegs.h"
 #include "output-file.h"
 
-#include <signal.h>
-
-#ifndef SIGTY
-#ifdef __STDC__
-#define SIGTY void
-#else
-#define SIGTY int
-#endif /* __STDC__ */
-#endif /* SIGTY */
-
-#if 0
-/* Not currently used.  */
-static SIGTY got_sig PARAMS ((int sig));
-#endif
 static void perform_an_assembly_pass PARAMS ((int argc, char **argv));
 
 int listing;			/* true if a listing is wanted */
@@ -373,19 +359,10 @@ main (argc, argv)
   HOST_SPECIAL_INIT (argc, argv);
 #endif
 
-#if 0 /* do we need any of this?? */
-  {
-    static const int sig[] = {SIGHUP, SIGINT, SIGPIPE, SIGTERM, 0};
-    int a;
-
-    for (a = 0; sig[a] != 0; a++)
-      if (signal (sig[a], SIG_IGN) != SIG_IGN)
-	signal (sig[a], got_sig);
-  }
-#endif
-
   myname = argv[0];
   xmalloc_set_program_name (myname);
+
+  START_PROGRESS (myname, 0);
 
 #ifndef OBJ_DEFAULT_OUTPUT_FILE_NAME
 #define OBJ_DEFAULT_OUTPUT_FILE_NAME "a.out"
@@ -397,12 +374,16 @@ main (argc, argv)
   bfd_init ();
 #endif
 
+  PROGRESS (1);
   symbol_begin ();
+  frag_init ();
   subsegs_begin ();
   read_begin ();
   input_scrub_begin ();
-  frag_init ();
+  PROGRESS (1);
   parse_args (&argc, &argv);
+
+  PROGRESS (1);
 
 #ifdef BFD_ASSEMBLER
   output_file_create (out_file_name);
@@ -412,6 +393,8 @@ main (argc, argv)
 #ifdef tc_init_after_args
   tc_init_after_args ();
 #endif
+
+  PROGRESS (1);
 
   perform_an_assembly_pass (argc, argv);	/* Assemble it. */
 #ifdef TC_I960
@@ -451,6 +434,8 @@ main (argc, argv)
 #ifdef md_end
   md_end ();
 #endif
+
+  END_PROGRESS (myname);
 
   if (flag_print_statistics)
     {
@@ -563,6 +548,7 @@ perform_an_assembly_pass (argc, argv)
     {
       if (*argv)
 	{			/* Is it a file-name argument? */
+	  PROGRESS (1);
 	  saw_a_file++;
 	  /* argv->"" if stdin desired, else->filename */
 	  read_a_source_file (*argv);
@@ -572,22 +558,5 @@ perform_an_assembly_pass (argc, argv)
   if (!saw_a_file)
     read_a_source_file ("");
 }				/* perform_an_assembly_pass() */
-
-#if 0
-/* This is not currently used.  */
-static SIGTY
-got_sig (sig)
-     int sig;
-{
-  static here_before = 0;
-
-  as_bad ("Interrupted by signal %d", sig);
-  if (here_before++)
-    exit (EXIT_FAILURE);
-#if 0 /* If SIGTY is void, this produces warnings.  */
-  return ((SIGTY) 0);
-#endif
-}
-#endif
 
 /* end of as.c */

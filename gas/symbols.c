@@ -117,7 +117,7 @@ symbol_create (name, segment, valu, frag)
 #ifdef BFD_ASSEMBLER
   symbolP->bsym = bfd_make_empty_symbol (stdoutput);
   assert (symbolP->bsym != 0);
-  symbolP->bsym->udata = (PTR) symbolP;
+  symbolP->bsym->udata.p = (PTR) symbolP;
 #endif
   S_SET_NAME (symbolP, preserved_copy_of_name);
 
@@ -220,7 +220,7 @@ colon (sym_name)		/* just seen "x:" - rattle symbols & frags */
 #ifdef OBJ_VMS
 	      S_GET_OTHER(symbolP) = const_flag;
 #endif
-	      S_SET_VALUE (symbolP, (valueT) ((char*)obstack_next_free (&frags) - frag_now->fr_literal));
+	      S_SET_VALUE (symbolP, (valueT) frag_now_fix ());
 	      S_SET_SEGMENT (symbolP, now_seg);
 #ifdef N_UNDF
 	      know (N_UNDF == 0);
@@ -297,7 +297,7 @@ colon (sym_name)		/* just seen "x:" - rattle symbols & frags */
 	{
 	  /* Don't blow up if the definition is the same */
 	  if (!(frag_now == symbolP->sy_frag
-		&& S_GET_VALUE (symbolP) == (char*)obstack_next_free (&frags) - frag_now->fr_literal
+		&& S_GET_VALUE (symbolP) == frag_now_fix ()
 		&& S_GET_SEGMENT (symbolP) == now_seg))
 	    as_fatal ("Symbol %s already defined.", sym_name);
 	}			/* if this symbol is not yet defined */
@@ -305,9 +305,7 @@ colon (sym_name)		/* just seen "x:" - rattle symbols & frags */
     }
   else
     {
-      symbolP = symbol_new (sym_name,
-			    now_seg,
-	       (valueT) ((char*)obstack_next_free (&frags) - frag_now->fr_literal),
+      symbolP = symbol_new (sym_name, now_seg, (valueT) frag_now_fix (),
 			    frag_now);
 #ifdef OBJ_VMS
       S_SET_OTHER (symbolP, const_flag);
@@ -621,8 +619,12 @@ resolve_symbol_value (symp)
 	case O_symbol:
 	  resolve_symbol_value (symp->sy_value.X_add_symbol);
 
+#if 0 /* I thought this was needed for some of the i386-svr4 PIC
+	 support, but it appears I was wrong, and it breaks rs6000
+	 support.  */
 	  if (S_GET_SEGMENT (symp->sy_value.X_add_symbol) != undefined_section
 	      && S_GET_SEGMENT (symp->sy_value.X_add_symbol) != expr_section)
+#endif
 	    {
 	      if (symp->sy_value.X_add_number == 0)
 		copy_symbol_attributes (symp, symp->sy_value.X_add_symbol);
@@ -1364,6 +1366,14 @@ print_symbol_value_1 (file, sym)
     fprintf (file, " used-in-reloc");
   if (sym->sy_used)
     fprintf (file, " used");
+  if (S_IS_LOCAL (sym))
+    fprintf (file, " local");
+  if (S_IS_EXTERN (sym))
+    fprintf (file, " extern");
+  if (S_IS_DEBUG (sym))
+    fprintf (file, " debug");
+  if (S_IS_DEFINED (sym))
+    fprintf (file, " defined");
   fprintf (file, " %s", segment_name (S_GET_SEGMENT (sym)));
   if (sym->sy_resolved)
     {
