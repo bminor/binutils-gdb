@@ -1,3 +1,8 @@
+Thu Feb 15 12:44:45 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objcopy.c (smart_rename): Rather than doing chmod then chown, do
+	chmod without setuid, then chown, then chmod with setuid.
+
 Wed Feb 14 16:46:42 1996  Martin Anantharaman  <martin@mail.imech.uni-duisburg.de>
 
 	* arsup.c (map_over_list): Reindent.  Don't assume that the
