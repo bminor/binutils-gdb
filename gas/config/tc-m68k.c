@@ -24,6 +24,7 @@
 #include "as.h"
 #include "obstack.h"
 #include "subsegs.h"
+#include "dwarf2dbg.h"
 
 #include "opcode/m68k.h"
 #include "m68k-parse.h"
