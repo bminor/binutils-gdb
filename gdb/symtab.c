@@ -349,6 +349,83 @@ gdb_mangle_name (struct type *type, int method_id, int signature_id)
   strcat (mangled_name, physname);
   return (mangled_name);
 }
+
+
+/* Initialize a symbol's mangled name.  */
+
+/* Try to initialize the demangled name for a symbol, based on the
+   language of that symbol.  If the language is set to language_auto,
+   it will attempt to find any demangling algorithm that works and
+   then set the language appropriately.  If no demangling of any kind
+   is found, the language is set back to language_unknown, so we can
+   avoid doing this work again the next time we encounter the symbol.
+   Any required space to store the name is obtained from the specified
+   obstack. */
+
+void
+symbol_init_demangled_name (struct general_symbol_info *gsymbol,
+                            struct obstack *obstack)
+{
+  char *mangled = gsymbol->name;
+  char *demangled = NULL;
+
+  if (gsymbol->language == language_unknown)
+    gsymbol->language = language_auto;
+  if (gsymbol->language == language_cplus
+      || gsymbol->language == language_auto)
+    {
+      demangled =
+        cplus_demangle (gsymbol->name, DMGL_PARAMS | DMGL_ANSI);
+      if (demangled != NULL)
+        {
+          gsymbol->language = language_cplus;
+          gsymbol->language_specific.cplus_specific.demangled_name =
+            obsavestring (demangled, strlen (demangled), obstack);
+          xfree (demangled);
+        }
+      else
+        {
+          gsymbol->language_specific.cplus_specific.demangled_name = NULL;
+        }
+    }
+  if (gsymbol->language == language_java)
+    {
+      demangled =
+        cplus_demangle (gsymbol->name,
+                        DMGL_PARAMS | DMGL_ANSI | DMGL_JAVA);
+      if (demangled != NULL)
+        {
+          gsymbol->language = language_java;
+          gsymbol->language_specific.cplus_specific.demangled_name =
+            obsavestring (demangled, strlen (demangled), obstack);
+          xfree (demangled);
+        }
+      else
+        {
+          gsymbol->language_specific.cplus_specific.demangled_name = NULL;
+        }
+    }
+  if (demangled == NULL
+      && (gsymbol->language == language_chill
+          || gsymbol->language == language_auto))
+    {
+      demangled =
+        chill_demangle (gsymbol->name);
+      if (demangled != NULL)
+        {
+          gsymbol->language = language_chill;
+          gsymbol->language_specific.chill_specific.demangled_name =
+            obsavestring (demangled, strlen (demangled), obstack);
+          xfree (demangled);
+        }
+      else
+        {
+          gsymbol->language_specific.chill_specific.demangled_name = NULL;
+        }
+    }
+}
+
+
 
 
 
