@@ -1,5 +1,9 @@
 Thu Sep 17 03:49:59 1992  John Gilmore  (gnu@cygnus.com)
 
+	* copying.awk, copying.c (show_copying_command,
+	show_warranty_command):  Rename from copying_info, warranty_info,
+	to match command function conventions.
+
 	* utils.c (prompt_for_continue):  Reinitialize more-counts
 	before printing anything, and again afterward.  Fix comments.
 	(vfprintf_filtered):  Eliminate static buffer; use auto buffer,
