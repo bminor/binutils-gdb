@@ -73,7 +73,7 @@ BFD_LIBS = libbfd.o opncls.o bfd.o archive.o targets.o cache.o \
 	archures.o core.o section.o format.o syms.o reloc.o init.o \
 	ctor.o seclet.o coffgen.o reloc16.o
 
-BFD_MACHINES = cpu-h8300.o cpu-i960.o cpu-sparc.o cpu-m68k.o cpu-m88k.o \
+ALL_MACHINES = cpu-h8300.o cpu-i960.o cpu-sparc.o cpu-m68k.o cpu-m88k.o \
 	cpu-vax.o cpu-mips.o cpu-a29k.o cpu-i386.o cpu-rs6000.o cpu-hppa.o \
 	cpu-z8k.o cpu-we32k.o cpu-h8500.o cpu-alpha.o cpu-sh.o
 
@@ -168,10 +168,21 @@ install-info: force
 # HDEPFILES comes from the host config; TDEPFILES from the target config.
 OFILES = $(BFD_LIBS) $(BFD_BACKENDS) $(BFD_MACHINES) $(HDEPFILES) $(TDEPFILES)
 
-$(TARGETLIB): $(OFILES)
-	 rm -f $(TARGETLIB)
-	 $(AR) $(AR_FLAGS) $(TARGETLIB) $(OFILES)
-	 $(RANLIB) $(TARGETLIB)
+ofiles : Makefile
+	rm -f ofiles2 ofiles ofiles3
+	cp /dev/null ofiles2
+	for i in $(OFILES) ; do \
+	  echo $$i >> ofiles2 ; \
+	done
+	sort < ofiles2 | uniq > ofiles3
+	mv ofiles3 ofiles
+	rm -f ofiles2 ofiles3
+
+$(TARGETLIB): $(OFILES) ofiles
+	rm -f $(TARGETLIB)
+	@echo ofiles = `cat ofiles`
+	$(AR) $(AR_FLAGS) $(TARGETLIB) `cat ofiles`
+	$(RANLIB) $(TARGETLIB)
 
 # When compiling archures.c and targets.c, supply the default target
 # info from configure.

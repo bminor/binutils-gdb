@@ -54,6 +54,7 @@ case "${target}" in
   i[34]86-*-isc*)	bfd_target=i386-sco ;; # gets core dump reading right
   i[34]86-*-sco*)	bfd_target=i386-sco ;;
   i[34]86-*-bsd*)	bfd_target=i386-bsd ;;
+  i[34]86-*-coff)	bfd_target=i386-coff ;;
   i[34]86-*-aix*)	bfd_target=i386-coff ;;
   i[34]86-*-elf)	bfd_target=i386-elf ;;
   i[34]86-*-linux*)	bfd_target=i386-linux ;;
@@ -79,12 +80,13 @@ case "${target}" in
   mips-*-ecoff*)	bfd_target=bigmips ;;
   mips-sgi-*)		bfd_target=bigmips ;;
   mips-*-sysv*)		bfd_target=riscos ;;
+  mips-*-riscos*)	bfd_target=riscos ;;
   mips-*-bsd*)		bfd_target=noop ;;
   rs6000-*-*)		bfd_target=rs6000 ;;
   sparc-*-solaris2*)	bfd_target=sparc-elf ;;
   sparc-*-sysv4*)	bfd_target=sparc-elf ;;
   sparc64-*-aout*)	bfd_target=sparc-aout ; target64=true ;; # v9
-  sparc64-*-elf*)	bfd_target=sparc-aout ; target64=true ;; # v9
+  sparc64-*-elf*)	bfd_target=sparc64-elf  ; target64=true ;; # v9
   sparc*-*-*)		bfd_target=sparc-aout ;;
   tahoe-*-*)		bfd_target=tahoe ;;
   vax-*-vms)		bfd_target=vax-vms ;;
@@ -130,25 +132,18 @@ rm -f Makefile.tmp Makefile.2
 mv Makefile Makefile.tmp
 
 case ${with_minimal_bfd} in
-  yes)
-    echo MINIMIZE=1 > Makefile.2
-    ;;
-  no | "")
-    echo MINIMIZE=0 > Makefile.2
-    ;;
+  yes)		echo MINIMIZE=1 > Makefile.2 ;;
+  no | "")	echo MINIMIZE=0 > Makefile.2 ;;
   *)
     echo "*** bad value \"${with_minimal_bfd}\" for minimal-bfd flag; ignored" 1>&2
+    with_minimal_bfd=no
     echo MINIMIZE=0 > Makefile.2
     ;;
 esac
 
 case ${with_64_bit_bfd} in
-  yes)
-    want64=true
-    ;;
-  no | "")
-    want64=false
-    ;;
+  yes)		want64=true  ;;
+  no | "")	want64=false ;;
   *)
     echo "*** bad value \"${with_64_bit_bfd}\" for 64-bit-bfd flag; ignored" 1>&2
     ;;
@@ -157,13 +152,27 @@ esac
 case ${host64}-${target64}-${want64} in
   *true*)
     echo WORDSIZE=64 >> Makefile.2
-    echo 'BFD_BACKENDS = $(BFD32_BACKENDS) $(BFD64_BACKENDS)' >> Makefile.2
+    echo 'ALL_BACKENDS = $(BFD64_BACKENDS) $(BFD32_BACKENDS)' >> Makefile.2
     ;;
   false-false-false)
     echo WORDSIZE=32 >> Makefile.2
-    echo 'BFD_BACKENDS = $(BFD32_BACKENDS)' >> Makefile.2
+    echo 'ALL_BACKENDS = $(BFD32_BACKENDS)' >> Makefile.2
     ;;
 esac
+
+if [ ${with_minimal_bfd} = yes ] \
+   && grep -s TARGET_BACKENDS ${srcdir}/${target_makefile_frag} ; then
+    echo 'BFD_BACKENDS = $(TARGET_BACKENDS)' >> Makefile.2
+else
+    echo 'BFD_BACKENDS = $(ALL_BACKENDS)' >> Makefile.2
+fi
+
+if [ ${with_minimal_bfd} = yes ] \
+   && grep -s TARGET_CPUS ${srcdir}/${target_makefile_frag} ; then
+    echo 'BFD_MACHINES = $(TARGET_CPUS)' >> Makefile.2
+else
+    echo 'BFD_MACHINES = $(ALL_MACHINES)' >> Makefile.2
+fi
 
 cat Makefile.tmp >> Makefile.2
 rm -f Makefile.tmp
