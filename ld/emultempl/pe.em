@@ -153,7 +153,6 @@ static char *pe_out_def_filename = NULL;
 static char *pe_implib_filename = NULL;
 static int pe_enable_auto_image_base = 0;
 static char *pe_dll_search_prefix = NULL;
-static char *pe_data_import_dll = NULL;
 #endif
 
 extern const char *output_filename;
@@ -756,23 +755,12 @@ gld_${EMULATION_NAME}_after_parse ()
     ldlang_add_undef (entry_symbol);
 }
 
-/* Previously, pe-dll.c directly accessed pe_data_import_dll,
-   which was only defined if DLL_SUPPORT.  This cause a build
-   failure on certain targets. At least this function will
-   exist regardless of whether DLL_SUPPORT is defined or not.
-  
-   However, it's still a kludge.  pe-dll.c shouldn't directly
-   call any functions other than the gld_${EMULATION_NAME}_*.  */
-
-char *
-pe_get_data_import_dll_name ()
-{
-#ifdef DLL_SUPPORT
-  return pe_data_import_dll;
-#else
-  return "unknown";
-#endif
-}
+/* pe-dll.c directly accesses pe_data_import_dll,
+   so it must be defined outside of #ifdef DLL_SUPPORT.
+   Note - this variable is deliberately not initialised.
+   This allows it to be treated as a common varaible, and only
+   exist in one incarnation in a multiple target enabled linker.  */
+char * pe_data_import_dll;
 
 #ifdef DLL_SUPPORT
 static struct bfd_link_hash_entry *pe_undef_found_sym;

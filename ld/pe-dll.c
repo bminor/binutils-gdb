@@ -2069,8 +2069,10 @@ pe_create_import_fixup (rel)
     }
 
   {
-    bfd *b = make_import_fixup_entry (name, fixup_name,
-				      pe_get_data_import_dll_name (),
+    extern char * pe_data_import_dll;
+    char * dll_symname = pe_data_import_dll ? "unknown" : pe_data_import_dll;
+
+    bfd *b = make_import_fixup_entry (name, fixup_name, dll_symname,
 				      output_bfd);
     add_bfd_to_link (b, b->filename, &link_info);
   }
