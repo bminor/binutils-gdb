@@ -1320,6 +1320,7 @@ hand_function_call (value_ptr function, int nargs, value_ptr *args)
   CORE_ADDR real_pc;
   struct type *param_type = NULL;
   struct type *ftype = check_typedef (SYMBOL_TYPE (function));
+  int n_method_args = 0;
 
   dummy = alloca (SIZEOF_CALL_DUMMY_WORDS);
   sizeof_dummy1 = REGISTER_SIZE * SIZEOF_CALL_DUMMY_WORDS / sizeof (ULONGEST);
@@ -1424,11 +1425,31 @@ hand_function_call (value_ptr function, int nargs, value_ptr *args)
   sp = old_sp;			/* It really is used, for some ifdef's... */
 #endif
 
-  if (nargs < TYPE_NFIELDS (ftype))
+  if (TYPE_CODE (ftype) == TYPE_CODE_METHOD)
+    {
+      i = 0;
+      while (TYPE_CODE (TYPE_ARG_TYPES (ftype)[i]) != TYPE_CODE_VOID)
+	i++;
+      n_method_args = i;
+      if (nargs < i)
+	error ("too few arguments in method call");
+    }
+  else if (nargs < TYPE_NFIELDS (ftype))
     error ("too few arguments in function call");
 
   for (i = nargs - 1; i >= 0; i--)
     {
+      /* Assume that methods are always prototyped, unless they are off the
+	 end (which we should only be allowing if there is a ``...'').  
+         FIXME.  */
+      if (TYPE_CODE (ftype) == TYPE_CODE_METHOD)
+	{
+	  if (i < n_method_args)
+	    args[i] = value_arg_coerce (args[i], TYPE_ARG_TYPES (ftype)[i], 1);
+	  else
+	    args[i] = value_arg_coerce (args[i], NULL, 0);
+	}
+
       /* If we're off the end of the known arguments, do the standard
          promotions.  FIXME: if we had a prototype, this should only
          be allowed if ... were present.  */
@@ -2618,12 +2639,13 @@ value_find_oload_method_list (value_ptr *argp, char *method, int offset,
 
 int
 find_overload_match (struct type **arg_types, int nargs, char *name, int method,
-		     int lax, value_ptr obj, struct symbol *fsym,
+		     int lax, value_ptr *objp, struct symbol *fsym,
 		     value_ptr *valp, struct symbol **symp, int *staticp)
 {
   int nparms;
   struct type **parm_types;
   int champ_nparms = 0;
+  struct value *obj = (objp ? *objp : NULL);
 
   short oload_champ = -1;	/* Index of best overloaded function */
   short oload_ambiguous = 0;	/* Current ambiguity state for overload resolution */
@@ -2847,6 +2869,15 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
       xfree (func_name);
     }
 
+  if (objp)
+    {
+      if (TYPE_CODE (VALUE_TYPE (temp)) != TYPE_CODE_PTR
+	  && TYPE_CODE (VALUE_TYPE (*objp)) == TYPE_CODE_PTR)
+	{
+	  temp = value_addr (temp);
+	}
+      *objp = temp;
+    }
   return oload_incompatible ? 100 : (oload_non_standard ? 10 : 0);
 }
 

@@ -1,5 +1,10 @@
 2001-12-07  Daniel Jacobowitz  <drow@mvista.com>
 
+	* valops.c (hand_function_call): Check for method arguments in
+	TYPE_ARG_TYPES(), not in TYPE_FIELD ().
+
+2001-12-07  Daniel Jacobowitz  <drow@mvista.com>
+
 	* cp-valprint.c (cp_print_value): Preserve offset if
 	the virtual base is outside of this object.
 
