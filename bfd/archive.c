@@ -904,7 +904,8 @@ bfd_slurp_armap (abfd)
   if (bfd_seek (abfd, (file_ptr) - 16, SEEK_CUR) != 0)
     return false;
 
-  if (!strncmp (nextname, "__.SYMDEF       ", 16))
+  if (!strncmp (nextname, "__.SYMDEF       ", 16)
+      || !strncmp (nextname, "__.SYMDEF/      ", 16)) /* old Linux archives */
     return do_slurp_bsd_armap (abfd);
   else if (!strncmp (nextname, "/               ", 16))
     return do_slurp_coff_armap (abfd);
@@ -943,7 +944,8 @@ bfd_slurp_bsd_armap_f2 (abfd)
   if (bfd_seek (abfd, -16L, SEEK_CUR) != 0)
     return false;
 
-  if (!strncmp (nextname, "__.SYMDEF       ", 16))
+  if (!strncmp (nextname, "__.SYMDEF       ", 16)
+      || !strncmp (nextname, "__.SYMDEF/      ", 16)) /* old Linux archives */
     return do_slurp_bsd_armap (abfd);
 
   if (strncmp (nextname, "/               ", 16))
@@ -1528,8 +1530,7 @@ _bfd_write_archive_contents (arch)
       else
 	sprintf (&(hdr.ar_name[0]), "ARFILENAMES/");
       sprintf (&(hdr.ar_size[0]), "%-10d", (int) elength);
-      hdr.ar_fmag[0] = '`';
-      hdr.ar_fmag[1] = '\012';
+      strncpy (hdr.ar_fmag, ARFMAG, 2);
       for (i = 0; i < sizeof (struct ar_hdr); i++)
 	if (((char *) (&hdr))[i] == '\0')
 	  (((char *) (&hdr))[i]) = ' ';
@@ -1798,8 +1799,7 @@ bsd_write_armap (arch, elength, map, orl_count, stridx)
   sprintf (hdr.ar_uid, "%d", getuid ());
   sprintf (hdr.ar_gid, "%d", getgid ());
   sprintf (hdr.ar_size, "%-10d", (int) mapsize);
-  hdr.ar_fmag[0] = '`';
-  hdr.ar_fmag[1] = '\012';
+  strncpy (hdr.ar_fmag, ARFMAG, 2);
   for (i = 0; i < sizeof (struct ar_hdr); i++)
     if (((char *) (&hdr))[i] == '\0')
       (((char *) (&hdr))[i]) = ' ';
@@ -1955,8 +1955,7 @@ coff_write_armap (arch, elength, map, symbol_count, stridx)
   sprintf ((hdr.ar_uid), "%d", 0);
   sprintf ((hdr.ar_gid), "%d", 0);
   sprintf ((hdr.ar_mode), "%-7o", (unsigned) 0);
-  hdr.ar_fmag[0] = '`';
-  hdr.ar_fmag[1] = '\012';
+  strncpy (hdr.ar_fmag, ARFMAG, 2);
 
   for (i = 0; i < sizeof (struct ar_hdr); i++)
     if (((char *) (&hdr))[i] == '\0')
