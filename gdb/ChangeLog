@@ -6,7 +6,9 @@ Thu Nov 21 18:26:11 1991  Fred Fish  (fnf at cygnus.com)
 
 Thu Nov 21 10:23:52 1991  John Gilmore  (gnu at cygnus.com)
 
-	* defs.h:  Incorporate param.h.  All users changed.
+	* Makefile.in: Roll VERSION to 4.2.90.
+
+	* defs.h:  Incorporate param.h into defs.h.  All users changed.
 	* param-no-tm.h:  Change users to define TM_FILE_OVERRIDE instead.
 	* param.h, param-no-tm.h:  Removed.
 	* Update copyrights in all changed files.
