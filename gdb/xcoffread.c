@@ -2243,8 +2243,14 @@ scan_xcoff_symtab (struct objfile *objfile)
 	    else
 	      csect_aux = main_aux[0];
 
-	    /* If symbol name starts with ".$" or "$", ignore it.  */
-	    if (namestring[0] == '$'
+	    /* If symbol name starts with ".$" or "$", ignore it. 
+
+	       A symbol like "@FIX1" introduces a section for -bbigtoc jump
+	       tables, which contain anonymous linker-generated code. 
+	       Ignore those sections to avoid "pc 0x... in read in psymtab,
+	       but not in symtab" warnings from find_pc_sect_symtab.  */
+
+	    if (namestring[0] == '$' || namestring[0] == '@'
 		|| (namestring[0] == '.' && namestring[1] == '$'))
 	      break;
 

@@ -1,3 +1,8 @@
+2001-04-12  Nicholas Duffek  <nsd@redhat.com>
+
+	* xcoffread.c (scan_xcoff_symtab): Ignore symbols beginning with
+	"@".
+
 2001-04-12  Kevin Buettner  <kevinb@redhat.com>
 
 	* config/i386/fbsd.mh (NATDEPFILES): Add i386-nat.o.
