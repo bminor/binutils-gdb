@@ -833,12 +833,24 @@ undefined_symbol (info, name, abfd, section, address)
       error_name = buystring (name);
     }
 
-  if (error_count < MAX_ERRORS_IN_A_ROW)
-    einfo ("%X%C: undefined reference to `%T'\n",
-	   abfd, section, address, name);
-  else if (error_count == MAX_ERRORS_IN_A_ROW)
-    einfo ("%D: more undefined references to `%T' follow\n",
-	   abfd, section, address, name);
+  if (section != NULL)
+    {
+      if (error_count < MAX_ERRORS_IN_A_ROW)
+	einfo ("%X%C: undefined reference to `%T'\n",
+	       abfd, section, address, name);
+      else if (error_count == MAX_ERRORS_IN_A_ROW)
+	einfo ("%D: more undefined references to `%T' follow\n",
+	       abfd, section, address, name);
+    }
+  else
+    {
+      if (error_count < MAX_ERRORS_IN_A_ROW)
+	einfo ("%X%B: undefined reference to `%T'\n",
+	       abfd, name);
+      else if (error_count == MAX_ERRORS_IN_A_ROW)
+	einfo ("%B: more undefined references to `%T' follow\n",
+	       abfd, name);
+    }
 
   return true;
 }

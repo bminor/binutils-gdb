@@ -1,5 +1,7 @@
 Mon Feb  6 12:17:24 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ldmain.c (undefined_symbol): Handle section being NULL.
+
 	* ldctor.c (ldctor_build_sets): Handle bfd_link_hash_defweak.
 	* ldexp.c (fold_name): Likewise.
 	* ldlang.c (print_one_symbol): Likewise.
