@@ -1,5 +1,11 @@
 2002-10-01  Jakub Jelinek  <jakub@redhat.com>
 
+	* ld-i386/i386.exp: Add tlsindntpoff test.
+	* ld-i386/tlsindntpoff.s: New test.
+	* ld-i386/tlsindntpoff.dd: New test.
+
+2002-10-01  Jakub Jelinek  <jakub@redhat.com>
+
 	* ld-x86-64/tlspic1.s: Change TLSGD sequences.
 	* ld-x86-64/tlsbinpic.s: Likewise.
 	* ld-x86-64/tlspic.dd: Adjust.

@@ -55,6 +55,8 @@ set i386tests {
     {"TLS in debug sections" "-melf_i386"
      "--32" {tlsg.s}
      {{objdump -sj.debug_foobar tlsg.sd}} "tlsg"}
+    {"TLS @indntpoff with %eax" "-melf_i386" "--32" {tlsindntpoff.s}
+     {{objdump -drj.text tlsindntpoff.dd}} "tlsindntpoff"}
     {"Reloc section order" "-shared -melf_i386" "--32" {reloc.s}
      {{objdump -hw reloc.d}} "reloc.so"}
 }

@@ -2625,7 +2625,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 		  if (val == 0xa1)
 		    {
 		      /* movl foo, %eax.  */
-		      bfd_put_8 (output_bfd, 0xb8, contents + rel->r_offset - 2);
+		      bfd_put_8 (output_bfd, 0xb8, contents + rel->r_offset - 1);
 		    }
 		  else if (type == 0x8b)
 		    {

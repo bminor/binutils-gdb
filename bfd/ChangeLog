@@ -1,5 +1,10 @@
 2002-10-01  Jakub Jelinek  <jakub@redhat.com>
 
+	* elf32-i386.c (elf_i386_relocate_section): Fix
+	movl foo@indntpoff, %eax IE->LE transition.
+
+2002-10-01  Jakub Jelinek  <jakub@redhat.com>
+
 	* elf64-x86-64.c (elf64_x86_64_relocate_section): Change TLSGD
 	sequence and its transitions.
 
