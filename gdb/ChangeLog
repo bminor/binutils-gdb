@@ -1,3 +1,8 @@
+2005-03-05  Mark Kettenis  <kettenis@gnu.org>
+
+	* mips64obsd-tdep.c (mips64obsd_init_abi): Don't set
+	software_single_step.
+
 2005-03-04  Michael Snyder  <msnyder@redhat.com>
 
 	* mn10300-prologue.c: New file.  Prologue analysis.
@@ -821,6 +826,8 @@
 	* coff-pe-read.c, coffread.c, complaints.c, copying.c: I18n markup.
 
 2005-01-29  Mark Kettenis  <kettenis@gnu.org>
+
+	* acconfig.h: Remove #undef.
 
 	* configure.ac: Remove extra check for ranlib.
 	* configure: Regenerated.
