@@ -557,7 +557,7 @@ dependent COFF routines
 .       struct internal_syment *sym));
 . void (*_bfd_coff_reloc16_extra_cases) PARAMS ((
 .       bfd     *abfd,
-.       bfd_seclet_type *seclet,
+.       struct bfd_seclet *seclet,
 .       arelent *reloc,
 .       bfd_byte *data,
 .       unsigned int *src_ptr,

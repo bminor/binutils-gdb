@@ -104,9 +104,9 @@ extern boolean bfd_coff_reloc16_relax_section PARAMS ((bfd *,
 						       asection *,
 						       asymbol **));
 extern bfd_byte *bfd_coff_reloc16_get_relocated_section_contents
-  PARAMS ((bfd *, bfd_seclet_type *, bfd_byte *));
+  PARAMS ((bfd *, struct bfd_seclet *, bfd_byte *));
 extern bfd_vma bfd_coff_reloc16_get_value PARAMS ((arelent *,
-						   bfd_seclet_type *));
+						   struct bfd_seclet *));
 
 /* And more taken from the source .. */
 
