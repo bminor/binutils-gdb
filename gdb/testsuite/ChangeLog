@@ -1,3 +1,7 @@
+2004-02-19  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.base/nodebug.exp: Fix typo.
+
 2004-02-17  Ulrich Weigand <Ulrich.Weigand@de.ibm.com>
 
 	Committed by Jim Blandy  <jimb@redhat.com>.
