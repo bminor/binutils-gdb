@@ -1311,6 +1311,13 @@ get_destructor_fn_field (struct type *t, int *method_indexp, int *field_indexp)
       int j;
       struct fn_field *f = TYPE_FN_FIELDLIST1 (t, i);
 
+      if (TYPE_FN_FIELDLIST_NAME (t, i)[0] == '~')
+	{
+	  *method_indexp = i;
+	  *field_indexp = 0;
+	  return 1;
+	}
+
       for (j = 0; j < TYPE_FN_FIELDLIST_LENGTH (t, i); j++)
 	{
 	  if (is_destructor_name (TYPE_FN_FIELD_PHYSNAME (f, j)) != 0)

@@ -1,3 +1,8 @@
+2002-11-01  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdbtypes.c (get_destructor_fn_field): Return obvious destructors
+	based on method name.
+
 2002-10-30  Daniel Jacobowitz  <drow@mvista.com>
 
 	* c-typeprint.c (c_type_print_modifier_before): New function.
