@@ -177,10 +177,6 @@ extern CORE_ADDR read_fp (void);
 
 extern CORE_ADDR generic_target_read_fp (void);
 
-extern void write_fp (CORE_ADDR);
-
-extern void generic_target_write_fp (CORE_ADDR);
-
 extern CORE_ADDR unsigned_pointer_to_address (struct type *type, void *buf);
 
 extern void unsigned_address_to_pointer (struct type *type, void *buf,

@@ -585,16 +585,16 @@ regcache_collect (int regnum, void *buf)
 }
 
 
-/* read_pc, write_pc, read_sp, write_sp, read_fp, write_fp, etc.
-   Special handling for registers PC, SP, and FP.  */
+/* read_pc, write_pc, read_sp, write_sp, read_fp, etc.  Special
+   handling for registers PC, SP, and FP.  */
 
 /* NOTE: cagney/2001-02-18: The functions generic_target_read_pc(),
    read_pc_pid(), read_pc(), generic_target_write_pc(),
    write_pc_pid(), write_pc(), generic_target_read_sp(), read_sp(),
-   generic_target_write_sp(), write_sp(), generic_target_read_fp(),
-   read_fp(), generic_target_write_fp(), write_fp will eventually be
-   moved out of the reg-cache into either frame.[hc] or to the
-   multi-arch framework.  The are not part of the raw register cache.  */
+   generic_target_write_sp(), write_sp(), generic_target_read_fp() and
+   read_fp(), will eventually be moved out of the reg-cache into
+   either frame.[hc] or to the multi-arch framework.  The are not part
+   of the raw register cache.  */
 
 /* This routine is getting awfully cluttered with #if's.  It's probably
    time to turn this into READ_PC and define it in the tm.h file.
@@ -736,26 +736,6 @@ CORE_ADDR
 read_fp (void)
 {
   return TARGET_READ_FP ();
-}
-
-void
-generic_target_write_fp (CORE_ADDR val)
-{
-#ifdef FP_REGNUM
-  if (FP_REGNUM >= 0)
-    {
-      write_register (FP_REGNUM, val);
-      return;
-    }
-#endif
-  internal_error (__FILE__, __LINE__,
-		  "generic_target_write_fp");
-}
-
-void
-write_fp (CORE_ADDR val)
-{
-  TARGET_WRITE_FP (val);
 }
 
 /* ARGSUSED */

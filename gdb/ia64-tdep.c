@@ -667,10 +667,9 @@ rse_address_add(CORE_ADDR addr, int nslots)
    even really hard to compute the frame chain, but it can be
    computationally expensive.  So, instead of making life difficult
    (and slow), we pick a more convenient representation of the frame
-   chain, knowing that we'll have to make some small adjustments
-   in other places.  (E.g, note that read_fp() and write_fp() are
-   actually read_sp() and write_sp() below in ia64_gdbarch_init()
-   below.) 
+   chain, knowing that we'll have to make some small adjustments in
+   other places.  (E.g, note that read_fp() is actually read_sp() in
+   ia64_gdbarch_init() below.)
 
    Okay, so what is the frame chain exactly?  It'll be the SP value
    at the time that the function in question was entered.
@@ -2204,7 +2203,6 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      is all read_fp() is used for), simply use the stack pointer value
      instead.  */
   set_gdbarch_read_fp (gdbarch, generic_target_read_sp);
-  set_gdbarch_write_fp (gdbarch, generic_target_write_sp);
 
   /* Settings that should be unnecessary.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);

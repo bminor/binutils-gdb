@@ -966,12 +966,6 @@ d10v_write_sp (CORE_ADDR val)
   write_register (SP_REGNUM, d10v_convert_daddr_to_raw (val));
 }
 
-static void
-d10v_write_fp (CORE_ADDR val)
-{
-  write_register (FP_REGNUM, d10v_convert_daddr_to_raw (val));
-}
-
 static CORE_ADDR
 d10v_read_fp (void)
 {
@@ -1477,7 +1471,6 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_read_pc (gdbarch, d10v_read_pc);
   set_gdbarch_write_pc (gdbarch, d10v_write_pc);
   set_gdbarch_read_fp (gdbarch, d10v_read_fp);
-  set_gdbarch_write_fp (gdbarch, d10v_write_fp);
   set_gdbarch_read_sp (gdbarch, d10v_read_sp);
   set_gdbarch_write_sp (gdbarch, d10v_write_sp);
 

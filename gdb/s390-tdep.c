@@ -1212,13 +1212,6 @@ s390_read_fp ()
 }
 
 
-void
-s390_write_fp (CORE_ADDR val)
-{
-  write_register (s390_fp_regnum (), val);
-}
-
-
 static void
 s390_pop_frame_regular (struct frame_info *frame)
 {
@@ -1801,7 +1794,6 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_init_extra_frame_info (gdbarch, s390_init_extra_frame_info);
   set_gdbarch_init_frame_pc_first (gdbarch, s390_init_frame_pc_first);
   set_gdbarch_read_fp (gdbarch, s390_read_fp);
-  set_gdbarch_write_fp (gdbarch, s390_write_fp);
   /* This function that tells us whether the function invocation represented
      by FI does not have a frame on the stack associated with it.  If it
      does not, FRAMELESS is set to 1, else 0.  */

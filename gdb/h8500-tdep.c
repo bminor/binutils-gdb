@@ -604,12 +604,6 @@ h8500_read_fp (void)
 }
 
 void
-h8500_write_fp (CORE_ADDR v)
-{
-  write_register (PR6_REGNUM, v);
-}
-
-void
 _initialize_h8500_tdep (void)
 {
   tm_print_insn = print_insn_h8500;

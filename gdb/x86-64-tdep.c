@@ -960,7 +960,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_fp0_regnum (gdbarch, X86_64_NUM_GREGS);	/* First FPU floating-point register.  */
 
   set_gdbarch_read_fp (gdbarch, cfi_read_fp);
-  set_gdbarch_write_fp (gdbarch, cfi_write_fp);
 
 /* Discard from the stack the innermost frame, restoring all registers.  */
   set_gdbarch_pop_frame (gdbarch, x86_64_pop_frame);

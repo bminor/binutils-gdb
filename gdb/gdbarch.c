@@ -141,7 +141,6 @@ struct gdbarch
   gdbarch_read_pc_ftype *read_pc;
   gdbarch_write_pc_ftype *write_pc;
   gdbarch_read_fp_ftype *read_fp;
-  gdbarch_write_fp_ftype *write_fp;
   gdbarch_read_sp_ftype *read_sp;
   gdbarch_write_sp_ftype *write_sp;
   gdbarch_virtual_frame_pointer_ftype *virtual_frame_pointer;
@@ -284,7 +283,6 @@ struct gdbarch startup_gdbarch =
   8 * sizeof (void*),
   8 * sizeof (void*),
   1,
-  0,
   0,
   0,
   0,
@@ -453,7 +451,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->read_pc = generic_target_read_pc;
   current_gdbarch->write_pc = generic_target_write_pc;
   current_gdbarch->read_fp = generic_target_read_fp;
-  current_gdbarch->write_fp = generic_target_write_fp;
   current_gdbarch->read_sp = generic_target_read_sp;
   current_gdbarch->write_sp = generic_target_write_sp;
   current_gdbarch->virtual_frame_pointer = legacy_virtual_frame_pointer;
@@ -576,7 +573,6 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of read_pc, invalid_p == 0 */
   /* Skip verify of write_pc, invalid_p == 0 */
   /* Skip verify of read_fp, invalid_p == 0 */
-  /* Skip verify of write_fp, invalid_p == 0 */
   /* Skip verify of read_sp, invalid_p == 0 */
   /* Skip verify of write_sp, invalid_p == 0 */
   /* Skip verify of virtual_frame_pointer, invalid_p == 0 */
@@ -2089,20 +2085,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->virtual_frame_pointer
                         /*TARGET_VIRTUAL_FRAME_POINTER ()*/);
 #endif
-#ifdef TARGET_WRITE_FP
-#if GDB_MULTI_ARCH
-  /* Macro might contain `[{}]' when not multi-arch */
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "TARGET_WRITE_FP(val)",
-                      XSTRING (TARGET_WRITE_FP (val)));
-#endif
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: TARGET_WRITE_FP = 0x%08lx\n",
-                        (long) current_gdbarch->write_fp
-                        /*TARGET_WRITE_FP ()*/);
-#endif
 #ifdef TARGET_WRITE_PC
 #if GDB_MULTI_ARCH
   /* Macro might contain `[{}]' when not multi-arch */
@@ -2411,24 +2393,6 @@ set_gdbarch_read_fp (struct gdbarch *gdbarch,
                      gdbarch_read_fp_ftype read_fp)
 {
   gdbarch->read_fp = read_fp;
-}
-
-void
-gdbarch_write_fp (struct gdbarch *gdbarch, CORE_ADDR val)
-{
-  if (gdbarch->write_fp == 0)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_write_fp invalid");
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_write_fp called\n");
-  gdbarch->write_fp (val);
-}
-
-void
-set_gdbarch_write_fp (struct gdbarch *gdbarch,
-                      gdbarch_write_fp_ftype write_fp)
-{
-  gdbarch->write_fp = write_fp;
 }
 
 CORE_ADDR

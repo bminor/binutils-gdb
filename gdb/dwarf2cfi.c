@@ -1506,7 +1506,8 @@ cfi_read_fp ()
   return cfa;
 }
 
-/* Store the frame address.  */
+/* Store the frame address.  This function is not used.  */
+
 void
 cfi_write_fp (CORE_ADDR val)
 {

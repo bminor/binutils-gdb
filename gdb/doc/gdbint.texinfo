@@ -2918,8 +2918,8 @@ Deprecated in favor of @code{PRINT_FLOAT_INFO}.
 If the virtual frame pointer is kept in a register, then define this
 macro to be the number (greater than or equal to zero) of that register.
 
-This should only need to be defined if @code{TARGET_READ_FP} and
-@code{TARGET_WRITE_FP} are not defined.
+This should only need to be defined if @code{TARGET_READ_FP} is not
+defined.
 
 @item FRAMELESS_FUNCTION_INVOCATION(@var{fi})
 @findex FRAMELESS_FUNCTION_INVOCATION
@@ -3547,18 +3547,15 @@ Number of bits in a short integer; defaults to @code{2 * TARGET_CHAR_BIT}.
 @findex TARGET_WRITE_SP
 @itemx TARGET_READ_FP
 @findex TARGET_READ_FP
-@itemx TARGET_WRITE_FP
-@findex TARGET_WRITE_FP
 @findex read_pc
 @findex write_pc
 @findex read_sp
 @findex write_sp
 @findex read_fp
-@findex write_fp
 These change the behavior of @code{read_pc}, @code{write_pc},
-@code{read_sp}, @code{write_sp}, @code{read_fp} and @code{write_fp}.
-For most targets, these may be left undefined.  @value{GDBN} will call the read
-and write register functions with the relevant @code{_REGNUM} argument.
+@code{read_sp}, @code{write_sp} and @code{read_fp}.  For most targets,
+these may be left undefined.  @value{GDBN} will call the read and write
+register functions with the relevant @code{_REGNUM} argument.
 
 These macros are useful when a target keeps one of these registers in a
 hard to get at place; for example, part in a segment register and part

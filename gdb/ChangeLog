@@ -1,3 +1,29 @@
+2002-04-05  Andrew Cagney  <ac131313@redhat.com>
+
+	* h8500-tdep.c (h8500_write_fp): Delete function.
+	* dwarf2cfi.c (cfi_write_fp): Document as not used.
+	* mips-tdep.c (mips_gdbarch_init): Do not set write_fp.
+	* ia64-tdep.c (ia64_gdbarch_init): Do not set write_fp.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Do not set write_fp.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Do not set write_fp.
+	* s390-tdep.c (s390_gdbarch_init): Do not set write_fp.
+	(s390_write_fp):
+	* sh-tdep.c (sh_gdbarch_init): Do not set write_fp.
+	* x86-64-tdep.c (i386_gdbarch_init): Do not set write_fp.
+	* d10v-tdep.c (d10v_gdbarch_init): Do not set write_fp.
+	(d10v_write_fp): Delete function.
+	* inferior.h (write_fp, generic_target_write_fp): Delete
+	declarations.
+	* regcache.c (generic_target_write_fp): Delete function.
+	(write_fp): Delete function.
+	* gdbarch.sh (TARGET_WRITE_FP): Delete.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* config/v850/tm-v850.h (TARGET_WRITE_FP): Delete macro.
+	* config/sparc/tm-sp64.h (TARGET_WRITE_FP): Delete macro.
+	(sparc64_write_fp): Delete declaration.
+	* config/h8500/tm-h8500.h (TARGET_WRITE_FP): Delete macro.
+	(h8500_write_fp): Delete declaration.
+
 2002-04-04  Andrew Cagney  <ac131313@redhat.com>
 
 	* sparc-tdep.c (sparc64_write_fp): Delete.

@@ -358,23 +358,6 @@ extern void set_gdbarch_read_fp (struct gdbarch *gdbarch, gdbarch_read_fp_ftype 
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (TARGET_WRITE_FP)
-#define TARGET_WRITE_FP(val) (generic_target_write_fp (val))
-#endif
-
-typedef void (gdbarch_write_fp_ftype) (CORE_ADDR val);
-extern void gdbarch_write_fp (struct gdbarch *gdbarch, CORE_ADDR val);
-extern void set_gdbarch_write_fp (struct gdbarch *gdbarch, gdbarch_write_fp_ftype *write_fp);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (TARGET_WRITE_FP)
-#error "Non multi-arch definition of TARGET_WRITE_FP"
-#endif
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_WRITE_FP)
-#define TARGET_WRITE_FP(val) (gdbarch_write_fp (current_gdbarch, val))
-#endif
-#endif
-
-/* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (TARGET_READ_SP)
 #define TARGET_READ_SP() (generic_target_read_sp ())
 #endif

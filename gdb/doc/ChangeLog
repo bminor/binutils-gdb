@@ -1,3 +1,8 @@
+2002-04-05  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	references to TARGET_WRITE_FP and write_fp.
+
 2002-03-27  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.texinfo: Document new commands dump, append, and restore.
