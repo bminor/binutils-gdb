@@ -1,3 +1,17 @@
+Thu Aug  1 15:35:17 1991  Roland H. Pesch  (pesch at fowanton.cygnus.com)
+
+	* Makefile.in, doc/gdbrc.tex, doc/rc-* (new files):
+	Minor rearrangement of refcard permits two new make targets--
+	gdbrc.dvi	    DVI output for refcard, using CM fonts
+	gdbrc.ps	    PostScript refcard, using PS fonts
+
+Wed Jul 31 16:46:21 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* GDB-3.98 release.
+
+	* TODO, Projects, WHATS.NEW, README:  Update for gdb-3.98.
+	* Makefile.in (gdb-all.texinfo):  Avoid touching file if M4 dies.
+
 Wed Jul 31 16:35:58 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
 
 	* doc/gdb.texinfo: last changes for release.
@@ -20,13 +34,6 @@ Wed Jul 31 16:35:58 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
 
 	Improved installation directions in appendix, added manual formatting
 	instructions 
-
-
-Wed Jul 31 12:06:29 1991  John Gilmore  (gnu at cygint.cygnus.com)
-
-	* GDB-3.98 release.
-
-	* TODO, Projects, WHATS.NEW:  Update for gdb-3.98.
 
 Tue Jul 30 17:26:39 1991  John Gilmore  (gnu at cygint.cygnus.com)
 

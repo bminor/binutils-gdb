@@ -40,6 +40,9 @@ i960.m4
 m680x0.m4
 none.m4
 pretex.m4
+rc-cm.tex
+rc-ps.tex
+rc-pslong.tex
 sparc.m4
 threecol.tex
 vax.m4
@@ -51,7 +54,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 2.2  1991/07/29 22:38:53  pesch
+# Revision 2.3  1991/08/01 22:34:55  pesch
+# *** empty log message ***
+#
+# Revision 2.2  1991/07/29  22:38:53  pesch
 # Updated list of files to keep to reflect reintegration of most fragments
 # into gdb.texinfo.
 #

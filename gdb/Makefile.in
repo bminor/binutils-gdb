@@ -246,6 +246,9 @@ OTHERS = Makefile.in depend alldeps.mak \
 # gdb-xxx.tar.Z:
 TARDIRS = doc hp-include # tests
 
+# GDB "info" files, which should be included in their entirety
+INFOFILES = gdb.info*
+
 DEPFILES= ${TDEPFILES} ${XDEPFILES}
 
 SOURCES=$(SFILES) $(ALLDEPFILES)
@@ -459,10 +462,11 @@ gdb.tar.Z: force_update
 	$(MAKE) $(MFLAGS) gdb.info
 	$(MAKE) $(MFLAGS) gdb-$(VERSION).tar.Z
 
-gdb-$(VERSION).tar.Z: ${TARFILES} ${TARDIRS}
+gdb-$(VERSION).tar.Z: ${TARFILES} ${TARDIRS} gdb.info
 	rm -f gdb.tar gdb-$(VERSION).tar.Z; rm -rf $(DIST)
 	mkdir $(DIST)
 	cd $(DIST) ; for i in ${TARFILES} ; do ln -s ../$$i . ; done
+	cd $(DIST) ; ln -s ../${INFOFILES} .
 	cd $(DIST); for i in ${TARDIRS}; do \
 	  (mkdir $$i; cd $$i; \
 	  ln -s ../../$$i/* .; \
@@ -474,7 +478,7 @@ gdb-$(VERSION).tar.Z: ${TARFILES} ${TARDIRS}
 	cd $(DIST)/tconfig ; \
 	  for i in $(SFILES_SUBDIR) $(NONSRC_SUBDIR) $(ALLDEPFILES_SUBDIR); \
 	    do ln -s ../../$$i ../$$i ; done
-	chmod og=u `find $(DIST) -print`
+	chmod og=u `find . -print`
 	tar chf - $(DIST) | compress >gdb-$(VERSION).tar.Z
 	rm -rf $(DIST)
 
@@ -483,7 +487,8 @@ clean:
 	rm -f init.c init.o version.c
 	rm -f gdb core gdb.tar gdb.tar.Z make.log
 	rm -f gdb[0-9]
-	rm -f gdb.dvi rdl-apps.texinfo gdb-all*
+	rm -f gdb.dvi rdl-apps.texinfo gdb-all* 
+	rm -f gdbrc.ps gdbrc.dvi doc/rcfonts.tex doc/gdbrc.log
 
 distclean: clean expread.tab.c TAGS
 	rm -f tm.h xm.h config.status
@@ -496,12 +501,28 @@ realclean: clean
 	rm -f Makefile depend
 
 # Documentation!
+# GDB QUICK REFERENCE (TeX dvi file, CM fonts)
+gdbrc.dvi : doc/gdbrc.tex
+	( cd $(srcdir)/doc; \
+	rm -f rcfonts.tex; cp rc-cm.tex rcfonts.tex; \
+	TEXINPUTS=.:$$TEXINPUTS tex gdbrc.tex; rm -f gdbrc.log )
+	mv $(srcdir)/doc/gdbrc.dvi .
 
+# GDB QUICK REFERENCE (PostScript output, common PS fonts)
+gdbrc.ps : doc/gdbrc.tex
+	( cd $(srcdir)/doc; \
+	rm -f rcfonts.tex; cp rc-ps.tex rcfonts.tex; \
+	TEXINPUTS=.:$$TEXINPUTS tex gdbrc.tex; \
+	dvips -t landscape gdbrc -o; rm -f gdbrc.dvi gdbrc.log )
+	mv $(srcdir)/doc/gdbrc.ps .
+
+# Cover file for "Readline" appendices
 rdl-apps.texinfo: ${READLINE_DIR}/inc-readline.texinfo \
 			${READLINE_DIR}/inc-history.texinfo
 	echo "@include ${READLINE_DIR}/inc-readline.texinfo" >rdl-apps.texinfo
 	echo "@include ${READLINE_DIR}/inc-history.texinfo" >>rdl-apps.texinfo
 
+# GDB MANUAL: texinfo source, created by preprocessing w/m4
 # Be sure to not create a bad gdb-all.texinfo if ${M4} is missing or aborts...
 gdb-all.texinfo: ${SFILES_DOCDIR}
 	rm -f gdb-all.texinfo foobus.texinfo
@@ -509,6 +530,7 @@ gdb-all.texinfo: ${SFILES_DOCDIR}
 		${M4} pretex.m4 none.m4 all.m4 gdb.texinfo ) >foobus.texinfo
 	mv foobus.texinfo gdb-all.texinfo
 
+# GDB MANUAL: TeX dvi file
 gdb.dvi : gdb-all.texinfo rdl-apps.texinfo
 	TEXINPUTS=${TEXIDIR}:$$TEXINPUTS tex gdb-all.texinfo
 	texindex gdb-all.??
@@ -516,6 +538,7 @@ gdb.dvi : gdb-all.texinfo rdl-apps.texinfo
 	mv gdb-all.dvi gdb.dvi
 	rm -f gdb-all.?? gdb-all.???
 
+# GDB MANUAL: info file
 # We're using texinfo2, and older makeinfo's may not be able to
 # cope with all the markup.  In the meantime, we distribute the info
 # files as formatted by the elisp texinfo2 code.
