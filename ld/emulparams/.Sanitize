@@ -29,6 +29,7 @@ a29k.sh
 ebmon29k.sh
 elf32_sparc.sh
 elf64_sparc.sh
+elf_i386.sh
 gld960.sh
 go32.sh
 h8300.sh

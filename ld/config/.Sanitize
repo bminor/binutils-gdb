@@ -41,10 +41,12 @@ hppaosf.mt
 i386-aout.mt
 i386-bsd.mt
 i386-coff.mt
+i386-elf.mt
 i386-linux.mt
 i386sco.mh
 i386v.mh
 i386v.mt
+i386v4.mh
 i960.mt
 ieee-h8300.mt
 irix4.mh
