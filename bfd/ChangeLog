@@ -1768,7 +1768,7 @@ Thu Feb 10 20:07:50 GMT 2000  Toshiyasu Morita (toshi.morita@sega.com)
 
 	* coff-mcore.c (COFF_DEFAULT_SECTION_ALIGNMENT_POWER): Change from
 	3 to 2.  This allows 4 byte sized sections, which is necessary for
-	dlltool to build funcitoning DLLs.
+	dlltool to build functioning DLLs.
 
 2000-01-10  Philip Blundell  <pb@futuretv.com>
 

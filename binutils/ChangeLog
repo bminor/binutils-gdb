@@ -606,7 +606,7 @@ Fri Apr  7 15:56:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	rel type undetermined.
 	(get_machine_name): Add new machine codes.
 	(get_section_type_name): Add new section types.
-	(get_elf_section_flags): New funciton: Decode section flags.
+	(get_elf_section_flags): New function: Decode section flags.
 	(process_section_headers): Call get_elf_section_flags() in
 	order to decode flags in section header.
 	(get_dynamic_flags): New function: Decode dynamic section
