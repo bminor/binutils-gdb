@@ -47,6 +47,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "frame.h"
 #include "regex.h"
 #include "inferior.h"
+#include "environ.h"
 #include "language.h"
 #include "gdbcmd.h"
 
@@ -238,12 +239,13 @@ solib_map_sections (so)
   filename = tilde_expand (so -> so_name);
   old_chain = make_cleanup (free, filename);
   
-  scratch_chan = openp (getenv ("PATH"), 1, filename, O_RDONLY, 0,
-			&scratch_pathname);
+  scratch_chan = openp (get_in_environ (inferior_environ, "PATH"), 
+		        1, filename, O_RDONLY, 0, &scratch_pathname);
   if (scratch_chan < 0)
     {
-      scratch_chan = openp (getenv ("LD_LIBRARY_PATH"), 1, filename,
-			    O_RDONLY, 0, &scratch_pathname);
+      scratch_chan = openp (get_in_environ 
+			    (inferior_environ, "LD_LIBRARY_PATH"), 
+			    1, filename, O_RDONLY, 0, &scratch_pathname);
     }
   if (scratch_chan < 0)
     {

@@ -1,5 +1,9 @@
 Fri Sep  8 12:57:41 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
+	* inferior.h: Add extern declaration of inferior_environ.
+	* solib.c (solib_map_sections): To get inferior's env instead of
+	gdb's for LD_LIBRARY_PATH, same for PATH.
+	
 	* solib.c (solib_map_sections): Copy full path name into so_list
 	structure so that symbol_file_add can find it.
 
