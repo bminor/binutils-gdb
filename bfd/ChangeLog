@@ -1,3 +1,12 @@
+2002-07-23  Nick Clifton  <nickc@redhat.com>
+
+	* elf-bfd.h (struct elf_backend_data): Add new bitfield
+	'want_p_paddr_set_to_zero'.
+	* elfxx-target.h: Set default value for want_p_paddr_set_to_zero
+	to false;
+	* elfxx-ia64.c: Set want_p_paddr_set_zero for HPUX target.
+	* elf.c (copy_private_bfd_data): Test want_p_paddr_set_zero.
+
 2002-07-23  Gabor Keresztfalvi  <keresztg@mail.com>
 
 	* nlmcode.h (nlm_swap_auxiliary_headers_out): Swapped the order of
