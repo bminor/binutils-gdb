@@ -719,7 +719,7 @@ do_captured_thread_select (struct ui_out *uiout,
   print_stack_frame (selected_frame, frame_relative_level (selected_frame), 1);
 
   if (!ptid_equal (old_ptid, inferior_ptid))
-    context_changed_event (pid_to_thread_id (inferior_ptid));
+    selected_thread_changed_event (pid_to_thread_id (inferior_ptid));
 
   return GDB_RC_OK;
 }

@@ -1,3 +1,11 @@
+2002-08-29  Keith Seitz  <keiths@redhat.com>
+
+	* gdb-events.sh (context_changed): Rename to selected_thread_changed
+	to parallel selected_frame_level_changed.
+	* thread.c (do_captured_thread_select): Ditto.
+	* gdb-events.c: Regenerate.
+	* gdb-events.h: Regenerate.
+
 2002-08-28  Keith Seitz  <keiths@redhat.com>
 
 	* interps.c (interpreter_exec_cmd): Temporarily set
