@@ -1482,6 +1482,9 @@ exec.o: exec.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) $(inferior_h) \
 expprint.o: expprint.c $(defs_h) $(expression_h) $(gdbtypes_h) \
 	$(language_h) $(parser_defs_h) $(symtab_h) $(value_h)
 
+fbsd-proc.o: fbsd-proc.c $(defs_h) $(gdbcore_h) $(inferior_h) $(gdb_string_h) \
+	$(elf_bfd_h) $(gregset_h)
+
 findvar.o: findvar.c $(defs_h) $(gdbcore_h) $(inferior_h) $(target_h) \
 	$(gdb_string_h) $(regcache_h) $(builtin_regs_h)
 
@@ -1491,7 +1494,8 @@ frame.o: frame.c $(defs_h) $(frame_h) $(target_h) $(value_h) $(inferior_h) \
 frv-tdep.o: frv-tdep.c $(defs_h) $(inferior_h) $(symfile_h) $(gdbcore_h) \
 	$(arch_utils_h) $(regcache_h)
 
-regcache.o: regcache.c $(defs_h) $(inferior_h) $(target_h) $(regcache_h)
+regcache.o: regcache.c $(defs_h) $(inferior_h) $(target_h) $(gdbarch_h) \
+	$(gdbcmd_h) $(regcache_h) $(gdb_assert_h) $(gdb_string_h)
 
 fork-child.o: fork-child.c $(gdb_wait_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) $(target_h) $(terminal_h) $(gdbthread_h) $(gdb_string_h)
@@ -1598,11 +1602,11 @@ tracepoint.o: tracepoint.c $(defs_h) $(symtab_h) $(frame_h) $(tracepoint_h) \
 	$(language_h) $(gdb_string_h) $(readline_headers) $(remote_h) \
 	$(linespec_h) $(regcache_h) $(completer_h)
 
-gdbarch.o: gdbarch.c $(defs_h) $(bfd_h) $(gdbcmd_h) $(gdb_string_h) \
-	$(symtab_h) $(frame_h) $(inferior_h) $(breakpoint_h) $(gdb_wait_h) \
-	$(gdbcore_h) $(target_h) $(gdbthread_h) $(annotate_h) $(symfile_h) \
-	$(value_h) $(symcat_h) $(floatformat_h) $(gdb_assert_h) \
-	$(gdb_events_h)
+gdbarch.o: gdbarch.c $(defs_h) $(arch_utils_h) $(gdbcmd_h) $(inferior_h) \
+	$(gdb_string_h) $(symtab_h) $(frame_h) $(inferior_h) $(breakpoint_h) \
+	$(gdb_wait_h) $(gdbcore_h) $(gdbcmd_h) $(target_h) $(gdbthread_h) \
+	$(annotate_h) $(symfile_h) $(value_h) $(symcat_h) $(floatformat_h) \
+	$(gdb_assert_h) $(gdb_string_h) $(gdb_events_h)
 
 arch-utils.o: arch-utils.c $(defs_h) $(bfd_h) $(gdbcmd_h) \
 	$(arch_utils_h) $(gdb_assert_h) $(inferior_h) \
@@ -1914,8 +1918,8 @@ somread.o: somread.c $(bfd_h) $(buildsym_h) $(complaints_h) $(defs_h) \
 
 somsolib.o: somsolib.c $(defs_h) $(regcache_h)
 
-std-regs.o: std-regs.c $(defs_h) $(builtin_regs_h) $(frame_h) \
-	$(gdbtypes_h) $(value_h)
+std-regs.o: std-regs.c $(defs_h) $(builtin_regs_h) $(frame_h) $(gdbtypes_h) \
+	$(value_h) $(gdb_string_h)
 
 pa64solib.o: pa64solib.c $(defs_h) $(regcache_h)
 
@@ -2194,7 +2198,8 @@ tui-file.o: $(srcdir)/tui/tui-file.c $(defs_h) $(srcdir)/tui/tui-file.h \
 	$(srcdir)/tui/tuiIO.h
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-file.c
 
-ax-general.o: ax-general.c $(ax_h) $(defs_h) $(value_h)
+ax-general.o: ax-general.c $(defs_h) $(ax_h) $(value_h)
+
 ax-gdb.o: ax-gdb.c $(defs_h) $(symtab_h) $(symfile_h) $(gdbtypes_h) \
 	$(value_h) $(expression_h) $(command_h) $(ax_h) $(gdbcmd_h) ax-gdb.h
 
@@ -2240,8 +2245,9 @@ macrocmd.o: macrocmd.c $(defs_h) $(macrotab_h) $(macroexp_h) \
 target.o: target.c $(bfd_h) $(defs_h) $(gdbcmd_h) $(inferior_h) \
 	$(objfiles_h) $(symfile_h) $(target_h) $(gdb_string_h) $(regcache_h)
 
-thread.o: thread.c $(defs_h) $(gdbthread_h) $(gdbcmd_h) $(target_h) \
-	$(regcache_h) $(ui_out_h) $(gdb_h)
+thread.o: thread.c $(defs_h) $(symtab_h) $(frame_h) $(inferior_h) \
+	$(environ_h) $(value_h) $(target_h) $(gdbthread_h) $(command_h) \
+	$(gdbcmd_h) $(regcache_h) $(gdb_h) $(ui_out_h)
 
 completer.o: completer.c $(completer_h) $(gdbtypes_h) $(symtab_h) \
 	$(defs_h) $(gdbcmd_h) $(expression_h) $(readline_headers) \
@@ -2349,8 +2355,8 @@ gdb-events.o: gdb-events.c $(gdb_events_h) $(defs_h) $(gdbcmd_h)
 ui-out.o: ui-out.c $(defs_h) $(ui_out_h) $(expression_h) $(language_h)
 cli-out.o: cli-out.c $(defs_h) $(ui_out_h) $(cli_out_h)
 
-varobj.o: varobj.c $(defs_h) $(frame_h) $(value_h) \
-	$(language_h) $(valprint_h) $(varobj_h) $(wrapper_h)
+varobj.o: varobj.c $(defs_h) $(value_h) $(expression_h) $(frame_h) \
+	$(language_h) $(wrapper_h) $(gdbcmd_h) $(gdb_string_h) $(varobj_h)
 
 wrapper.o: wrapper.c $(defs_h) $(frame_h) $(value_h) $(wrapper_h)
 

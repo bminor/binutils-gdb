@@ -1238,6 +1238,7 @@ cat <<EOF
 #include "floatformat.h"
 
 #include "gdb_assert.h"
+#include "gdb_string.h"
 #include "gdb-events.h"
 
 /* Static function declarations */

@@ -21,6 +21,7 @@
 #include "defs.h"
 #include "gdbcore.h"
 #include "inferior.h"
+#include "gdb_string.h"
 
 #include <sys/procfs.h>
 #include <sys/types.h>

@@ -27,6 +27,7 @@
 #include "gdbcmd.h"
 #include "regcache.h"
 #include "gdb_assert.h"
+#include "gdb_string.h"
 
 /*
  * DATA STRUCTURE

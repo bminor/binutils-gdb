@@ -1,3 +1,21 @@
+Fri Aug  2 15:53:50 2002  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh: Include "gdb_string.h".
+	* gdbarch.c: Regenerate.
+
+	* regcache.c: Include "gdb_string.h".
+	* ax-general.c: Ditto.
+	* varobj.c: Ditto.
+	* std-regs.c: Ditto.
+	* fbsd-proc.c: Ditto.
+	* thread.c: Ditto.
+
+	* Makefile.in (regcache.o): Update dependencies.
+	(thread.o, gdbarch.o): Ditto.
+	(ax-general.o, gdbarch.o): Ditto.
+	(varobj.o, std-regs.o): Ditto.
+	(fbsd-proc.o): Specify dependencies.
+
 2002-08-02  Andrew Cagney  <cagney@redhat.com>
 
 	* regcache.c (regcache_cooked_read): Rename rawnum parameter to
