@@ -472,6 +472,9 @@ getpacket (buffer)
     }
   while (checksum != xmitcsum);
 
+  if (remote_debug)
+    ConsolePrintf ("Received packet \"%s\"\r\n", buffer);
+
   return 1;
 }
 
@@ -485,6 +488,9 @@ putpacket (buffer)
   unsigned char checksum;
   int count;
   int ch;
+
+  if (remote_debug)
+    ConsolePrintf ("Sending packet \"%s\"\r\n", buffer);
 
   /*  $<packet info>#<checksum>. */
   do
@@ -526,21 +532,18 @@ debug_error (format, parm)
      char *parm;
 {
   if (remote_debug)
-    fprintf (stderr, format, parm);
+    {
+      fprintf (stderr, format, parm);
+      fprintf (stderr, "\n");
+    }
 }
 
-/* Address of a routine to RTE to if we get a memory fault.  */
-static volatile void (*mem_fault_routine)() = NULL;
+/* This is set if we could get a memory access fault.  */
+static int mem_may_fault;
 
 /* Indicate to caller of mem2hex or hex2mem that there has been an
    error.  */
 static volatile int mem_err = 0;
-
-static void
-set_mem_err ()
-{
-  mem_err = 1;
-}
 
 /* These are separate functions so that they are so short and sweet
    that the compiler won't save any registers (if there is a fault
@@ -562,6 +565,18 @@ set_char (addr, val)
   *addr = val;
 }
 
+/* This bit of assembly language just returns from a function.  If a
+   memory error occurs within get_char or set_char, the debugger
+   handler points EIP at these instructions to get out.  */
+
+extern void just_return ();
+asm (".globl just_return");
+asm (".globl _just_return");
+asm ("just_return:");
+asm ("_just_return:");
+asm ("leave");
+asm ("ret");
+
 /* convert the memory pointed to by mem into hex, placing result in buf */
 /* return a pointer to the last char put in buf (null) */
 /* If MAY_FAULT is non-zero, then we should set mem_err in response to
@@ -577,8 +592,7 @@ mem2hex (mem, buf, count, may_fault)
   int i;
   unsigned char ch;
 
-  if (may_fault)
-    mem_fault_routine = set_mem_err;
+  mem_may_fault = may_fault;
   for (i = 0; i < count; i++)
     {
       ch = get_char (mem++);
@@ -588,8 +602,7 @@ mem2hex (mem, buf, count, may_fault)
       *buf++ = hexchars[ch % 16];
     }
   *buf = 0;
-  if (may_fault)
-    mem_fault_routine = NULL;
+  mem_may_fault = 0;
   return(buf);
 }
 
@@ -606,8 +619,7 @@ hex2mem (buf, mem, count, may_fault)
   int i;
   unsigned char ch;
 
-  if (may_fault)
-    mem_fault_routine = set_mem_err;
+  mem_may_fault = may_fault;
   for (i=0;i<count;i++)
     {
       ch = hex(*buf++) << 4;
@@ -616,8 +628,7 @@ hex2mem (buf, mem, count, may_fault)
       if (may_fault && mem_err)
 	return (mem);
     }
-  if (may_fault)
-    mem_fault_routine = NULL;
+  mem_may_fault = 0;
   return(mem);
 }
 
@@ -691,7 +702,6 @@ static LONG
 handle_exception (T_StackFrame *old_frame)
 {
   T_TSS_StackFrame *frame = (T_TSS_StackFrame *) old_frame;
-  int first = 0;
   int sigval;
   int addr, length;
   char * ptr;
@@ -723,6 +733,14 @@ handle_exception (T_StackFrame *old_frame)
       return RETURN_TO_PROGRAM;
     }
 
+  /* After we've reached the initial breakpoint, reset it.  */
+  if (frame->ExceptionEIP == (LONG) handle->LDInitializationProcedure + 1
+      && *(unsigned char *) handle->LDInitializationProcedure == 0xcc)
+    {
+      *(char *) handle->LDInitializationProcedure = first_insn;
+      frame->ExceptionEIP = (LONG) handle->LDInitializationProcedure;
+    }
+
   /* Pass some events on to the next debugger, in case it will handle
      them.  */
   if (frame->ExceptionNumber == ENTER_DEBUGGER_EVENT
@@ -735,14 +753,26 @@ handle_exception (T_StackFrame *old_frame)
       && frame->ExceptionNumber > 31)
     return RETURN_TO_PROGRAM;
 
-  /* Reset the initial breakpoint if necessary.  */
-  if (frame->ExceptionNumber == 3
-      && frame->ExceptionEIP == (LONG) handle->LDInitializationProcedure + 1
-      && *(unsigned char *) handle->LDInitializationProcedure == 0xcc)
+  /* If we get a GP fault, and mem_may_fault is set, and the
+     instruction pointer is near set_char or get_char, then we caused
+     the fault ourselves accessing an illegal memory location.  */
+  if (mem_may_fault
+      && (frame->ExceptionNumber == 11
+	  || frame->ExceptionNumber == 13
+	  || frame->ExceptionNumber == 14)
+      && ((frame->ExceptionEIP >= (long) &set_char
+	   && frame->ExceptionEIP < (long) &set_char + 50)
+	  || (frame->ExceptionEIP >= (long) &get_char
+	      && frame->ExceptionEIP < (long) &get_char + 50)))
     {
-      *(char *) handle->LDInitializationProcedure = first_insn;
-      frame->ExceptionEIP = (LONG) handle->LDInitializationProcedure;
-      first = 1;
+      mem_err = 1;
+      /* Point the instruction pointer at an assembly language stub
+	 which just returns from the function.  */
+      frame->ExceptionEIP = (long) &just_return;
+      /* Keep going.  This will act as though it returned from
+	 set_char or get_char.  The calling routine will check
+	 mem_err, and do the right thing.  */
+      return RETURN_TO_PROGRAM;
     }
 
   /* FIXME: How do we know that this exception has anything to do with
@@ -764,18 +794,13 @@ handle_exception (T_StackFrame *old_frame)
   else
     {
       sigval = computeSignal (frame->ExceptionNumber);
-      remcomOutBuffer[0] = 'S';
+      remcomOutBuffer[0] = 'N';
       remcomOutBuffer[1] =  hexchars[sigval >> 4];
       remcomOutBuffer[2] =  hexchars[sigval % 16];
-      remcomOutBuffer[3] = 0;
-      if (first)
-	{
-	  remcomOutBuffer[0] = 'N';
-	  sprintf (remcomOutBuffer + 3, "0x%x;0x%x;0x%x",
-		   handle->LDCodeImageOffset,
-		   handle->LDDataImageOffset,
-		   handle->LDDataImageOffset + handle->LDDataImageLength);
-	}
+      sprintf (remcomOutBuffer + 3, "0x%x;0x%x;0x%x",
+	       handle->LDCodeImageOffset,
+	       handle->LDDataImageOffset,
+	       handle->LDDataImageOffset + handle->LDDataImageLength);
     }
 
   if (! putpacket(remcomOutBuffer))
@@ -798,19 +823,13 @@ handle_exception (T_StackFrame *old_frame)
 	{
 	case '?':
 	  sigval = computeSignal (frame->ExceptionNumber);
-	  remcomOutBuffer[0] = 'S';
+	  remcomOutBuffer[0] = 'N';
 	  remcomOutBuffer[1] =  hexchars[sigval >> 4];
 	  remcomOutBuffer[2] =  hexchars[sigval % 16];
-	  remcomOutBuffer[3] = 0;
-	  if (first)
-	    {
-	      remcomOutBuffer[0] = 'N';
-	      sprintf (remcomOutBuffer + 3, "0x%x;0x%x;0x%x",
-		       handle->LDCodeImageOffset,
-		       handle->LDDataImageOffset,
-		       (handle->LDDataImageOffset
-			+ handle->LDDataImageLength));
-	    }
+	  sprintf (remcomOutBuffer + 3, "0x%x;0x%x;0x%x",
+		   handle->LDCodeImageOffset,
+		   handle->LDDataImageOffset,
+		   handle->LDDataImageOffset + handle->LDDataImageLength);
 	  break;
 	case 'd':
 	  remote_debug = !(remote_debug); /* toggle debug flag */
