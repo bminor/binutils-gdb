@@ -764,7 +764,7 @@ safe_strerror (int errnum)
    Then return to command level.  */
 
 NORETURN void
-perror_with_name (char *string)
+perror_with_name (const char *string)
 {
   char *err;
   char *combined;
@@ -788,7 +788,7 @@ perror_with_name (char *string)
    as the file name for which the error was encountered.  */
 
 void
-print_sys_errmsg (char *string, int errcode)
+print_sys_errmsg (const char *string, int errcode)
 {
   char *err;
   char *combined;
@@ -1201,7 +1201,7 @@ gdb_print_host_address (void *addr, struct ui_file *stream)
 
 /* VARARGS */
 int
-query (char *ctlstr,...)
+query (const char *ctlstr,...)
 {
   va_list args;
   register int answer;

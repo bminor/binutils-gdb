@@ -1,3 +1,12 @@
+2002-02-25  Andrew Cagney  <ac131313@redhat.com>
+
+	* utils.c (perror_with_name): Make string parameter constant.
+	(print_sys_errmsg): Ditto.
+	(query): Ditto.
+	* defs.h (perror_with_name): Update.
+	(print_sys_errmsg): Update.
+	(query): Update.
+
 2002-02-25  Daniel Jacobowitz  <drow@mvista.com>
 
 	From Eliot Dresselhaus <eliot@ayrnetworks.com>:

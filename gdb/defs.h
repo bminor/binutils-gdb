@@ -568,7 +568,7 @@ extern void null_cleanup (void *);
 
 extern int myread (int, char *, int);
 
-extern int query (char *, ...) ATTR_FORMAT (printf, 1, 2);
+extern int query (const char *, ...) ATTR_FORMAT (printf, 1, 2);
 
 extern void init_page_info (void);
 
@@ -698,9 +698,9 @@ extern CORE_ADDR string_to_core_addr (const char *my_string);
 extern void fprintf_symbol_filtered (struct ui_file *, char *,
 				     enum language, int);
 
-extern NORETURN void perror_with_name (char *) ATTR_NORETURN;
+extern NORETURN void perror_with_name (const char *) ATTR_NORETURN;
 
-extern void print_sys_errmsg (char *, int);
+extern void print_sys_errmsg (const char *, int);
 
 /* From regex.c or libc.  BSD 4.4 declares this with the argument type as
    "const char *" in unistd.h, so we can't declare the argument
