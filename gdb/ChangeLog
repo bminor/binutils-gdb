@@ -1,3 +1,12 @@
+2004-09-13  Andrew Cagney  <cagney@gnu.org>
+
+	* config/i386/nm-i386.h (TARGET_HAS_HARDWARE_WATCHPOINTS): Delete.
+	* config/s390/nm-linux.h (TARGET_HAS_HARDWARE_WATCHPOINTS): Delete.
+	* config/pa/nm-hppah.h (TARGET_HAS_HARDWARE_WATCHPOINTS): Delete.
+	* config/ia64/nm-linux.h (TARGET_HAS_HARDWARE_WATCHPOINTS): Delete.
+	* config/frv/tm-frv.h (TARGET_HAS_HARDWARE_WATCHPOINTS): Delete.
+	* mips-tdep.c (mips_dump_tdep): Do not print same.
+
 2004-09-12  Andrew Cagney  <cagney@gnu.org>
 
 	* valprint.c (print_longest): Use fputs_filtered.  Make "val"

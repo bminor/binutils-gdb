@@ -6604,9 +6604,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 		      "mips_dump_tdep: TARGET_CAN_USE_HARDWARE_WATCHPOINT # %s\n",
 		      XSTRING (TARGET_CAN_USE_HARDWARE_WATCHPOINT
 			       (TYPE, CNT, OTHERTYPE)));
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: TARGET_HAS_HARDWARE_WATCHPOINTS # %s\n",
-		      XSTRING (TARGET_HAS_HARDWARE_WATCHPOINTS));
 #ifdef TRACE_CLEAR
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: TRACE_CLEAR # %s\n",

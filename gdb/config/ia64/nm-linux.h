@@ -45,8 +45,6 @@ extern int ia64_cannot_store_register (int regno);
 
 /* Hardware watchpoints */
 
-#define TARGET_HAS_HARDWARE_WATCHPOINTS
-
 #define TARGET_CAN_USE_HARDWARE_WATCHPOINT(type, cnt, ot) 1
 
 /* The IA-64 architecture can step over a watch point (without triggering

@@ -20,8 +20,6 @@
 
 /* This target uses an architecture vector for most architecture methods.  */
 
-#define TARGET_HAS_HARDWARE_WATCHPOINTS
-
 #define TARGET_CAN_USE_HARDWARE_WATCHPOINT(type, cnt, ot) \
 	frv_check_watch_resources (type, cnt, ot)
 extern int frv_check_watch_resources (int type, int cnt, int ot);

@@ -98,8 +98,6 @@ extern int hppa_require_detach (int, int);
    10.20 will at least link.  However, the "can I use a fast watchpoint?"
    query will always return "No" for 10.20. */
 
-#define TARGET_HAS_HARDWARE_WATCHPOINTS
-
 /* The PA can watch any number of locations (generic routines already check
    that all intermediates are in watchable memory locations). */
 extern int hppa_can_use_hw_watchpoint (int type, int cnt, int ot);
