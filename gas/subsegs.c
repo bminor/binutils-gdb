@@ -616,27 +616,6 @@ subsegs_print_statistics (FILE *file)
 
       for (fragp = frchp->frch_root; fragp; fragp = fragp->fr_next)
 	{
-#if 0
-	  switch (fragp->fr_type)
-	    {
-	    case rs_fill:
-	      fprintf (file, "f"); break;
-	    case rs_align:
-	      fprintf (file, "a"); break;
-	    case rs_align_code:
-	      fprintf (file, "c"); break;
-	    case rs_org:
-	      fprintf (file, "o"); break;
-	    case rs_machine_dependent:
-	      fprintf (file, "m"); break;
-	    case rs_space:
-	      fprintf (file, "s"); break;
-	    case 0:
-	      fprintf (file, "0"); break;
-	    default:
-	      fprintf (file, "?"); break;
-	    }
-#endif
 	  count++;
 	}
       fprintf (file, "\n");

@@ -104,26 +104,9 @@ extern void *alloca ();
 #if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 6)
 #define __PRETTY_FUNCTION__  ((char*)0)
 #endif
-#if 0
-
-/* Handle lossage with assert.h.  */
-#ifndef BROKEN_ASSERT
-#include <assert.h>
-#else /* BROKEN_ASSERT */
-#ifndef NDEBUG
-#define assert(p) ((p) ? 0 : (as_assert (__FILE__, __LINE__, __PRETTY_FUNCTION__), 0))
-#else
-#define assert(p) ((p), 0)
-#endif
-#endif /* BROKEN_ASSERT */
-
-#else
-
 #define assert(P) ((P) ? 0 : (as_assert (__FILE__, __LINE__, __PRETTY_FUNCTION__), 0))
 #undef abort
 #define abort()		as_abort (__FILE__, __LINE__, __PRETTY_FUNCTION__)
-
-#endif
 
 /* Now GNU header files...  */
 #include "ansidecl.h"

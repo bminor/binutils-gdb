@@ -2370,16 +2370,6 @@ int indent_level;
    Available for modification inside a gdb session.  */
 int max_indent_level = 8;
 
-#if 0
-
-static void
-indent (void)
-{
-  printf ("%*s", indent_level * 4, "");
-}
-
-#endif
-
 void
 print_symbol_value_1 (FILE *file, symbolS *sym)
 {

@@ -119,22 +119,8 @@ COMMON fragS zero_address_frag;
 /* For local common (N_BSS segment) fixups.  */
 COMMON fragS bss_address_frag;
 
-#if 0
-/* A macro to speed up appending exactly 1 char to current frag.  */
-/* JF changed < 1 to <= 1 to avoid a race condition.  */
-#define FRAG_APPEND_1_CHAR(datum)			\
-{							\
-  if (obstack_room (&frags) <= 1)			\
-    {							\
-      frag_wane (frag_now);				\
-      frag_new (0);					\
-    }							\
-  obstack_1grow (&frags, datum);			\
-}
-#else
 extern void frag_append_1_char (int);
 #define FRAG_APPEND_1_CHAR(X) frag_append_1_char (X)
-#endif
 
 void frag_init (void);
 fragS *frag_alloc (struct obstack *);

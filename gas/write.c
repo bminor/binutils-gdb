@@ -942,12 +942,12 @@ write_relocs (bfd *abfd, asection *sec, PTR xxx ATTRIBUTE_UNUSED)
 	  continue;
 	}
 
-#if 0
-      /* This test is triggered inappropriately for the SH.  */
-      if (fixp->fx_where + fixp->fx_size
-	  > fixp->fx_frag->fr_fix + fixp->fx_frag->fr_offset)
-	abort ();
-#endif
+      /*
+	This test is triggered inappropriately for the SH:
+         if (fixp->fx_where + fixp->fx_size
+	     > fixp->fx_frag->fr_fix + fixp->fx_frag->fr_offset)
+	     abort ();
+      */
 
       s = bfd_install_relocation (stdoutput, reloc,
 				  fixp->fx_frag->fr_literal,
@@ -1929,13 +1929,6 @@ write_object_file (void)
 	  if (S_IS_DEFINED (symp) == 0
 	      && S_GET_VALUE (symp) != 0)
 	    S_SET_SEGMENT (symp, bfd_com_section_ptr);
-#if 0
-	  printf ("symbol `%s'\n\t@%x: value=%d flags=%x seg=%s\n",
-		  S_GET_NAME (symp), symp,
-		  S_GET_VALUE (symp),
-		  symbol_get_bfdsym (symp)->flags,
-		  segment_name (S_GET_SEGMENT (symp)));
-#endif
 
 #ifdef obj_frob_symbol
 	  obj_frob_symbol (symp, punt);
@@ -2083,14 +2076,10 @@ relax_frag (segT segment, fragS *fragP, long stretch)
 #ifdef TC_PCREL_ADJUST
   /* Currently only the ns32k family needs this.  */
   aim += TC_PCREL_ADJUST (fragP);
-/* #else */
-  /* This machine doesn't want to use pcrel_adjust.
-     In that case, pcrel_adjust should be zero.  */
-#if 0
-  assert (fragP->fr_targ.ns32k.pcrel_adjust == 0);
 #endif
-#endif
-#ifdef md_prepare_relax_scan /* formerly called M68K_AIM_KLUDGE  */
+
+#ifdef md_prepare_relax_scan
+  /* Formerly called M68K_AIM_KLUDGE.  */
   md_prepare_relax_scan (fragP, address, aim, this_state, this_type);
 #endif
 

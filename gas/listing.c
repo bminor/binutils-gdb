@@ -613,10 +613,6 @@ calc_hex (list_info_type *list)
 	      sprintf (data_buffer + data_buffer_size,
 		       "%02X",
 		       (frag_ptr->fr_literal[var_rep_idx]) & 0xff);
-#if 0
-	      data_buffer[data_buffer_size++] = '*';
-	      data_buffer[data_buffer_size++] = '*';
-#endif
 	      data_buffer_size += 2;
 
 	      var_rep_idx++;

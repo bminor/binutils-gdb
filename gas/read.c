@@ -20,14 +20,10 @@ along with GAS; see the file COPYING.  If not, write to the Free
 Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 02111-1307, USA.  */
 
-#if 0
-/* If your chars aren't 8 bits, you will change this a bit.
+/* If your chars aren't 8 bits, you will change this a bit (eg. to 0xFF).
    But then, GNU isn't spozed to run on your machine anyway.
    (RMS is so shortsighted sometimes.)  */
-#define MASK_CHAR (0xFF)
-#else
 #define MASK_CHAR ((int)(unsigned char) -1)
-#endif
 
 /* This is the largest known floating point format (for now). It will
    grow when we do 4361 style flonums.  */

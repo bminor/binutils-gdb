@@ -3185,14 +3185,10 @@ ecoff_directive_frame (int ignore ATTRIBUTE_UNUSED)
 
   cur_proc_ptr->pdr.pcreg = tc_get_register (0);
 
-#if 0
   /* Alpha-OSF1 adds "the offset of saved $a0 from $sp", according to
      Sandro.  I don't yet know where this value should be stored, if
-     anywhere.  */
-  demand_empty_rest_of_line ();
-#else
+     anywhere.  Don't call demand_empty_rest_of_line ().  */
   s_ignore (42);
-#endif
 }
 
 /* Parse .mask directives.  */

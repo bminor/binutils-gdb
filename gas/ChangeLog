@@ -1,3 +1,18 @@
+2005-01-21  Ben Elliston  <bje@au.ibm.com>
+
+	* as.h: Remove #if 0'd code.
+	* atof-generic.c (atof_generic): Likewise.
+	* ecoff.c (ecoff_directive_frame): Likewise.
+	* frags.h (FRAG_APPEND_1_CHAR): Likewise.
+	* itbl-ops.c (itbl_add_reg): Likewise.
+	* listing.c (calc_hex): Likewise.
+	* read.c (MASK_CHAR): Likewise.
+	* subsegs.c (subsegs_print_statistics): Likewise.
+	* symbols.c (indent): Likewise.
+	* write.c (write_relocs): Likewise.
+	(write_object_file): Likewise.
+	(relax_frag): Likewise.
+
 2005-01-20  Nick Clifton  <nickc@redhat.com>
 
 	* as.c (std_longopts): Add an entry for "--a" in order to prevent
