@@ -174,6 +174,8 @@ static int this_operand;	/* current operand we are working on */
 
 static int flag_do_long_jump;	/* FIXME what does this do? */
 
+static int flag_16bit_code;	/* 1 if we're writing 16-bit code, 0 if 32-bit */
+
 /* Interface to relax_segment.
    There are 2 relax states for 386 jump insns: one for conditional &
    one for unconditional jumps.  This is because the these two types
@@ -318,6 +320,12 @@ smallest_imm_type (num)
 	  : (Imm32));
 }				/* smallest_imm_type() */
 
+void set_16bit_code_flag(new_16bit_code_flag)
+	int new_16bit_code_flag;
+{
+  flag_16bit_code = new_16bit_code_flag;
+}
+
 const pseudo_typeS md_pseudo_table[] =
 {
 #ifndef I386COFF
@@ -334,6 +342,8 @@ const pseudo_typeS md_pseudo_table[] =
   {"value", cons, 2},
   {"noopt", s_ignore, 0},
   {"optim", s_ignore, 0},
+  {"code16", set_16bit_code_flag, 1},
+  {"code32", set_16bit_code_flag, 0},
   {0, 0, 0}
 };
 
@@ -645,24 +655,20 @@ reloc (size, pcrel, other)
   if (pcrel)
     switch (size)
       {
-#ifndef OBJ_ELF
       case 1: return BFD_RELOC_8_PCREL;
       case 2: return BFD_RELOC_16_PCREL;
-#endif
       case 4: return BFD_RELOC_32_PCREL;
       }
   else
     switch (size)
       {
-#ifndef OBJ_ELF
       case 1: return BFD_RELOC_8;
       case 2: return BFD_RELOC_16;
-#endif
       case 4: return BFD_RELOC_32;
       }
 
   as_bad ("Can not do %d byte %srelocation", size,
-	  pcrel ? "pc-relative" : "");
+	  pcrel ? "pc-relative " : "");
   return BFD_RELOC_NONE;
 }
 #else
@@ -683,9 +689,15 @@ reloc (size, pcrel, other)
 tc_i386_fix_adjustable(fixP)
      fixS * fixP;
 {
-	/* Prevent all adjustments to global symbols. */
-	if(!S_IS_LOCAL(fixP->fx_addsy)) return 0;
-	return 1;
+  /* Prevent all adjustments to global symbols. */
+  if (!S_IS_LOCAL (fixP->fx_addsy))
+    return 0;
+#ifdef BFD_ASSEMBLER
+  /* adjust_reloc_syms doesn't know about the GOT */
+  if (fixP->fx_r_type == BFD_RELOC_386_GOTOFF)
+    return 0;
+#endif
+  return 1;
 }
 
 /* This is the guts of the machine-dependent assembler.  LINE points to a
@@ -1032,6 +1044,21 @@ md_assemble (line)
     i.tm = *t;
     t = &i.tm;			/* alter new copy of template */
 
+    /* If the matched instruction specifies an explicit opcode suffix,
+       use it - and make sure none has already been specified.  */
+    if (t->opcode_modifier & (Data16|Data32))
+      {
+	if (i.suffix)
+	  {
+	    as_bad ("extraneous opcode suffix given");
+	    return;
+	  }
+	if (t->opcode_modifier & Data16)
+	  i.suffix = WORD_OPCODE_SUFFIX;
+	else
+	  i.suffix = DWORD_OPCODE_SUFFIX;
+      }
+
     /* If there's no opcode suffix we try to invent one based on register
        operands. */
     if (!i.suffix && i.reg_operands)
@@ -1115,7 +1142,7 @@ md_assemble (line)
 	  t->base_opcode |= W;
 	/* Now select between word & dword operations via the
 				   operand size prefix. */
-	if (i.suffix == WORD_OPCODE_SUFFIX)
+	if ((i.suffix == WORD_OPCODE_SUFFIX) ^ flag_16bit_code)
 	  {
 	    if (i.prefixes == MAX_PREFIXES)
 	      {
@@ -1130,6 +1157,16 @@ md_assemble (line)
     /* For insns with operands there are more diddles to do to the opcode. */
     if (i.operands)
       {
+        /* Default segment register this instruction will use
+	   for memory accesses.  0 means unknown.
+	   This is only for optimizing out unnecessary segment overrides.  */
+	const seg_entry *default_seg = 0;
+
+	/* True if this instruction uses a memory addressing mode,
+	   and therefore may need an address-size prefix.  */
+	int uses_mem_addrmode = 0;
+
+
 	/* If we found a reverse match we must alter the opcode direction bit
 	   found_reverse_match holds bit to set (different for int &
 	   float insns). */
@@ -1194,6 +1231,14 @@ md_assemble (line)
 	       to change the opcode. */
 	    if (i.regs[0]->reg_num == 5)
 	      t->base_opcode |= 0x08;
+	  }
+	else if ((t->base_opcode & ~DW) == MOV_AX_DISP32)
+	  {
+	    /* This is a special non-modrm instruction
+	       that addresses memory with a 32-bit displacement mode anyway,
+	       and thus requires an address-size prefix if in 16-bit mode.  */
+	    uses_mem_addrmode = 1;
+	    default_seg = &ds;
 	  }
 	else if (t->opcode_modifier & Modrm)
 	  {
@@ -1323,11 +1368,11 @@ md_assemble (line)
 			exp->X_op_symbol = (symbolS *) 0;
 		      }
 
-		    /* Select the correct segment for the memory operand. */
+		    /* Find the default segment for the memory operand.
+		       Used to optimize out explicit segment specifications.  */
 		    if (i.seg)
 		      {
 			unsigned int seg_index;
-			const seg_entry *default_seg;
 
 			if (i.rm.regmem == ESCAPE_TO_TWO_BYTE_ADDRESSING)
 			  {
@@ -1338,18 +1383,6 @@ md_assemble (line)
 			  {
 			    seg_index = (i.rm.mode << 3) | i.rm.regmem;
 			    default_seg = one_byte_segment_defaults[seg_index];
-			  }
-			/* If the specified segment is not the default, use an
-			   opcode prefix to select it */
-			if (i.seg != default_seg)
-			  {
-			    if (i.prefixes == MAX_PREFIXES)
-			      {
-				as_bad ("%d prefixes given and %s segment override gives too many prefixes",
-					MAX_PREFIXES, i.seg->seg_name);
-				return;
-			      }
-			    i.prefix[i.prefixes++] = i.seg->seg_prefix;
 			  }
 		      }
 		  }
@@ -1381,6 +1414,40 @@ md_assemble (line)
 		if (t->extension_opcode != None)
 		  i.rm.reg = t->extension_opcode;
 	      }
+
+	    if (i.rm.mode != 3)
+	      uses_mem_addrmode = 1;
+	  }
+
+	/* GAS currently doesn't support 16-bit memory addressing modes at all,
+	   so if we're writing 16-bit code and using a memory addressing mode,
+	   always spew out an address size prefix.  */
+	if (uses_mem_addrmode && flag_16bit_code)
+	  {
+	    if (i.prefixes == MAX_PREFIXES)
+	      {
+	        as_bad ("%d prefixes given and address size override gives too many prefixes",
+	        	MAX_PREFIXES);
+	        return;
+	      }
+	    i.prefix[i.prefixes++] = ADDR_PREFIX_OPCODE;
+	  }
+
+	/* If a segment was explicitly specified,
+	   and the specified segment is not the default,
+	   use an opcode prefix to select it.
+	   If we never figured out what the default segment is,
+	   then default_seg will be zero at this point,
+	   and the specified segment prefix will always be used.  */
+	if ((i.seg) && (i.seg != default_seg))
+	  {
+	    if (i.prefixes == MAX_PREFIXES)
+	      {
+	        as_bad ("%d prefixes given and %s segment override gives too many prefixes",
+	    	    MAX_PREFIXES, i.seg->seg_name);
+	        return;
+	      }
+	    i.prefix[i.prefixes++] = i.seg->seg_prefix;
 	  }
       }
   }
@@ -1410,39 +1477,47 @@ md_assemble (line)
 		p[0] = t->base_opcode;
 		p[1] = n;
 	      }
-#if 0				/* leave out 16 bit jumps - pace */
-	    else if (fits_in_signed_word (n))
-	      {
-		p = frag_more (4);
-		insn_size += 4;
-		p[0] = WORD_PREFIX_OPCODE;
-		p[1] = t->base_opcode;
-		md_number_to_chars (&p[2], (valueT) n, 2);
-	      }
-#endif
 	    else
-	      {			/* It's an absolute dword displacement. */
+	      {	/* It's an absolute word/dword displacement. */
+
+	        /* Use only 16-bit jumps for 16-bit code,
+		   because text segments are limited to 64K anyway;
+	           use only 32-bit jumps for 32-bit code,
+		   because they're faster.  */
+		int jmp_size = flag_16bit_code ? 2 : 4;
+	      	if (flag_16bit_code && !fits_in_signed_word (n))
+		  {
+		    as_bad ("16-bit jump out of range");
+		    return;
+		  }
+
 		if (t->base_opcode == JUMP_PC_RELATIVE)
 		  {		/* pace */
 		    /* unconditional jump */
-		    p = frag_more (5);
-		    insn_size += 5;
+		    p = frag_more (1 + jmp_size);
+		    insn_size += 1 + jmp_size;
 		    p[0] = (char) 0xe9;
-		    md_number_to_chars (&p[1], (valueT) n, 4);
+		    md_number_to_chars (&p[1], (valueT) n, jmp_size);
 		  }
 		else
 		  {
 		    /* conditional jump */
-		    p = frag_more (6);
-		    insn_size += 6;
+		    p = frag_more (2 + jmp_size);
+		    insn_size += 2 + jmp_size;
 		    p[0] = TWO_BYTE_OPCODE_ESCAPE;
 		    p[1] = t->base_opcode + 0x10;
-		    md_number_to_chars (&p[2], (valueT) n, 4);
+		    md_number_to_chars (&p[2], (valueT) n, jmp_size);
 		  }
 	      }
 	  }
 	else
 	  {
+	    if (flag_16bit_code)
+	      {
+	        FRAG_APPEND_1_CHAR (WORD_PREFIX_OPCODE);
+		insn_size += 1;
+	      }
+
 	    /* It's a symbol; end frag & setup for relax.
 	       Make sure there are more than 6 chars left in the current frag;
 	       if not we'll have to start a new one. */
@@ -1468,6 +1543,24 @@ md_assemble (line)
       {
 	int size = (t->opcode_modifier & JumpByte) ? 1 : 4;
 	unsigned long n = i.disps[0]->X_add_number;
+	unsigned char *q;
+
+	/* The jcx/jecx instruction might need a data size prefix.  */
+	for (q = i.prefix; q < i.prefix + i.prefixes; q++)
+	  {
+	    if (*q == WORD_PREFIX_OPCODE)
+	      {
+	        FRAG_APPEND_1_CHAR (WORD_PREFIX_OPCODE);
+	        insn_size += 1;
+		break;
+	      }
+	  }
+
+	if ((size == 4) && (flag_16bit_code))
+	  {
+	    FRAG_APPEND_1_CHAR (WORD_PREFIX_OPCODE);
+	    insn_size += 1;
+	  }
 
 	if (fits_in_unsigned_byte (t->base_opcode))
 	  {
@@ -1503,6 +1596,12 @@ md_assemble (line)
       }
     else if (t->opcode_modifier & JumpInterSegment)
       {
+	if (flag_16bit_code)
+	  {
+	    FRAG_APPEND_1_CHAR (WORD_PREFIX_OPCODE);
+	    insn_size += 1;
+	  }
+
 	p = frag_more (1 + 2 + 4);	/* 1 opcode; 2 segment; 4 offset */
 	insn_size += 1 + 2 + 4;
 	p[0] = t->base_opcode;
@@ -1688,7 +1787,7 @@ md_assemble (line)
 			p = frag_more (size);
 			insn_size += size;
 #ifdef BFD_ASSEMBLER
-			if (r_type = BFD_RELOC_32
+			if (r_type == BFD_RELOC_32
 			    && i.imms[n]->X_op == O_symbol
 			    && GOT_symbol
 			    && GOT_symbol == i.imms[n]->X_add_symbol)
@@ -2095,9 +2194,16 @@ i386_operand (operand_string)
 	  /* We do this to make sure that the section symbol is in
 	     the symbol table.  We will ultimately change the relocation
 	     to be relative to the beginning of the section */
-	  if(i.disp_reloc[this_operand] == BFD_RELOC_386_GOTOFF &&
-	     S_IS_LOCAL(exp->X_add_symbol))
-	    section_symbol(exp->X_add_symbol->bsym->section);
+	  if (i.disp_reloc[this_operand] == BFD_RELOC_386_GOTOFF)
+	    {
+	      if (S_IS_LOCAL(exp->X_add_symbol)
+		  && S_GET_SEGMENT (exp->X_add_symbol) != undefined_section)
+		section_symbol(exp->X_add_symbol->bsym->section);
+	      assert (exp->X_op == O_symbol);
+	      exp->X_op = O_subtract;
+	      exp->X_op_symbol = GOT_symbol;
+	      i.disp_reloc[this_operand] = BFD_RELOC_32;
+	    }
 #endif
 
 	  if (*input_line_pointer)
@@ -2426,7 +2532,7 @@ md_apply_fix_1 (fixP, value)
   /* Fix a few things - the dynamic linker expects certain values here,
      and we must not dissappoint it. */
 #ifdef OBJ_ELF
-  if(fixP->fx_addsy)
+  if (fixP->fx_addsy)
     switch(fixP->fx_r_type) {
     case BFD_RELOC_386_PLT32:
       /* Make the jump instruction point to the address of the operand.  At
@@ -2472,13 +2578,14 @@ md_apply_fix_1 (fixP, value)
  * the pcrel_adjust field was used to store the correction, but since the
  * expression is not pcrel, I felt it would be confusing to do it this way.
  */
-      value += fixP->fx_where + fixP->fx_frag->fr_address - fixP->fx_offset;
+      value -= 1;
       break;
     case BFD_RELOC_386_GOT32:
       value = 0; /* Fully resolved at runtime.  No addend. */
+      break;
     case BFD_RELOC_386_GOTOFF:
-      /* Here everything should be correct already.  Just wanted to mention
-       this explicitly so no one things I forgot it. */
+      break;
+
     default:
       break;
     }
@@ -2726,6 +2833,18 @@ s_bss (ignore)
 
 
 #ifdef BFD_ASSEMBLER
+
+void
+i386_validate_fix (fixp)
+     fixS *fixp;
+{
+  if (fixp->fx_subsy && fixp->fx_subsy == GOT_symbol)
+    {
+      fixp->fx_r_type = BFD_RELOC_386_GOTOFF;
+      fixp->fx_subsy = 0;
+    }
+}
+
 #define F(SZ,PCREL)		(((SZ) << 1) + (PCREL))
 #define MAP(SZ,PCREL,TYPE)	case F(SZ,PCREL): code = (TYPE); break
 

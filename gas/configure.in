@@ -102,8 +102,10 @@ case ${generic_target} in
 			obj_format=coff gas_target=i386coff ;;
   i386-*-vsta)		obj_format=aout ;;
   i386-*-go32)		obj_format=coff gas_target=i386coff ;;
+  i386-*-gnu*elf*)	obj_format=elf ;;
   i386-*-mach* | i386-*-gnu*)
 			obj_format=aout emulation=mach bfd_gas=yes ;;
+  i386-*-msdos*)	obj_format=aout ;;
 
   i960-*-bout)		obj_format=bout ;;
   i960-*-coff)		obj_format=coff emulation=ic960 gas_target=ic960coff ;;
@@ -185,6 +187,8 @@ case ${generic_target} in
 
   z8k-*-coff | z8k-*-sim)
 			obj_format=coff ;;
+
+  w65-*-*)		obj_format=coff ;;
 
   *-*-aout | *-*-scout)
 			obj_format=aout ;;
