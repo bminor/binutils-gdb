@@ -240,6 +240,9 @@ extern void add_symbol_to_list (struct symbol *symbol,
 extern struct symbol *find_symbol_in_list (struct pending *list,
 					   char *name, int length);
 
+extern void add_using_directive (const char *name, unsigned int outer_index,
+				 unsigned int inner_index);
+
 extern void finish_block (struct symbol *symbol,
 			  struct pending **listhead,
 			  struct pending_block *old_blocks,

@@ -31,15 +31,19 @@ extern char *method_name_from_physname (const char *physname);
 extern const char *cp_find_first_component (const char *name);
 
 /* This is a struct to store data from "using directives" and similar
-   language constructs.  It contains two strings, OUTER and INNER;
-   both should be fully-qualified namespace names, OUTER should be a
-   strict initial substring of INNER, and it says that names in the
-   namespace INNER should be imported into namespace OUTER.  For
-   example, if it is used to represent the directive "using namespace
-   std;" then INNER should be "std" and new should be "".  For a more
+   language constructs.  NAME is a pointer to a string; its initial
+   substrings of length OUTER_LENGTH and INNER_LENGTH should both be
+   fully-qualified namespace names.  (And OUTER_LENGTH should be
+   strictly less than INNER_LENGTH).  The meaning is that names in the
+   inner namespace should be imported into outer.
+
+   For example, if it is used to represent the directive "using
+   namespace std;" then NAME should start with "std", INNER_LENGTH
+   should be 0, and OUTER_LENGTH should be "3".  For a more
    complicated example, if there is an anonymous namespace with a
-   named namespace A, then INNER should be "A::(anonymous namespace)"
-   and new should be "A".  */
+   named namespace A, then NAME should start with "A::(anonymous
+   namespace)", INNER_LENGTH should be 1, and OUTER_LENGTH should be
+   strlen ("A::(anonymous namespace)").  */
 
 /* FIXME: carlton/2002-10-07: That anonymous namespace example isn't
    that great, since it really depends not only on what the
@@ -50,8 +54,9 @@ extern const char *cp_find_first_component (const char *name);
 
 struct using_direct
 {
-  const char *outer;
-  const char *inner;
+  const char *name;
+  unsigned short outer_length;
+  unsigned short inner_length;
 };
 
 /* This is a struct for a linked list of using_direct's.  */
@@ -62,8 +67,9 @@ struct using_direct_node
   struct using_direct_node *next;
 };
 
-extern struct using_direct_node *cp_add_using (const char *outer,
-					       const char *inner,
+extern struct using_direct_node *cp_add_using (const char *name,
+					       unsigned short outer_length,
+					       unsigned short inner_length,
 					       struct using_direct_node *next,
 					       struct obstack *obstack);
 

@@ -63,8 +63,15 @@ static struct pending *free_pendings;
    otherwise empty symtab from being tossed.  */
 
 static int have_line_numbers;
+
+/* List of using directives that are active in the current file.  */
+
+static struct using_direct_node *using_list;
+
 
 static int compare_line_numbers (const void *ln1p, const void *ln2p);
+
+static void scan_for_anonymous_namespaces (struct symbol *symbol);
 
 
 /* Initial sizes of data structures.  These are realloc'd larger if
@@ -108,7 +115,9 @@ add_free_pendings (struct pending *list)
     }
 }
       
-/* Add a symbol to one of the lists of symbols.  */
+/* Add a symbol to one of the lists of symbols.  While we're at it,
+   check to see if it references an anonymous namespace; if so, add an
+   appropriate using directive.  */
 
 void
 add_symbol_to_list (struct symbol *symbol, struct pending **listhead)
@@ -139,6 +148,48 @@ add_symbol_to_list (struct symbol *symbol, struct pending **listhead)
     }
 
   (*listhead)->symbol[(*listhead)->nsyms++] = symbol;
+
+  /* Check to see if we might need to look for a mention of anonymous
+     namespaces.  */
+  /* TODOTODO */
+/*   if (SYMBOL_LANGUAGE (symbol) == language_cplus */
+/*       && SYMBOL_CPLUS_DEMANGLED_NAME (symbol) != NULL) */
+/*     scan_for_anonymous_namespaces (symbol) */
+}
+
+/* Check to see if a symbol is contained within an anonymous
+   namespace; if so, add an appropriate using directive.  */
+
+/* Optimize away strlen ("(anonymous namespace)").  */
+
+#define ANONYMOUS_NAMESPACE_LEN 21
+
+static void
+scan_for_anonymous_namespaces (struct symbol *symbol)
+{
+  const char *name = SYMBOL_CPLUS_DEMANGLED_NAME (symbol);
+  const char *beginning, *end;
+
+  /* FIXME: carlton/2002-10-14: Should we do some sort of fast search
+     first to see if the substring "(anonymous namespace)" occurs in
+     name at all?  */
+
+  for (beginning = name, end = cp_find_first_component (name);
+       *end == ':';
+       /* The "+ 2" is for ':'.  */
+       beginning = end + 2, end = cp_find_first_component (beginning))
+    {
+      if ((end - beginning) == ANONYMOUS_NAMESPACE_LEN
+	  && strncmp (beginning, "(anonymous namespace)",
+		      ANONYMOUS_NAMESPACE_LEN) == 0)
+	/* We've found a component of the name that's an anonymous
+	   namespace.  So add symbols in it to the namespace given by
+	   the previous component if there is one, or to the global
+	   namespace if there isn't.  */
+	add_using_directive (name,
+			     beginning == name ? 0 : beginning - name - 2,
+			     end - name);
+    }
 }
 
 /* Find a symbol named NAME on a LIST.  NAME need not be
@@ -165,6 +216,32 @@ find_symbol_in_list (struct pending *list, char *name, int length)
     }
   return (NULL);
 }
+
+/* This adds a using directive to using_list.  NAME is the start of a
+   string that should contain the namespaces we want to add as initial
+   substrings, OUTER_INDEX is the end of the outer namespace, and
+   INNER_INDEX is the end of the inner namespace.  If the using
+   directive in question has already been added, don't add it
+   twice.  */
+
+void
+add_using_directive (const char *name, unsigned int outer_index,
+		     unsigned int inner_index)
+{
+  struct using_direct_node *current;
+
+  gdb_assert (outer_index < inner_index);
+
+  /* Has it already been added?  */
+
+  for (current = using_list; current; current = current->next)
+    if (strncmp (current->current->name, name, outer_index) == 0
+	&& strncmp (current->current->name, name, inner_index) == 0)
+      return;
+
+  /* TODOTODO */
+}
+
 
 /* At end of reading syms, or in case of quit, really free as many
    `struct pending's as we can easily find. */
@@ -366,11 +443,8 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 	       /* The '+ 2' is to skip the '::'.  */
 	       next = cp_find_first_component (next + 2))
 	    {
-	      const char *namespace_name
-		= obsavestring (name, next - name,
-				&objfile->symbol_obstack);
 	      BLOCK_USING (block)
-		= cp_add_using ("", namespace_name, BLOCK_USING (block),
+		= cp_add_using (name, 0, next - name, BLOCK_USING (block),
 				&objfile->symbol_obstack);
 	    }
 
@@ -803,6 +877,7 @@ start_symtab (char *name, char *dirname, CORE_ADDR start_addr)
   global_symbols = NULL;
   within_function = 0;
   have_line_numbers = 0;
+  using_list = NULL;
 
   /* Context stack is initially empty.  Allocate first one with room
      for 10 levels; reuse it forever afterward.  */
@@ -936,6 +1011,10 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
       finish_block (0, &global_symbols, 0, last_source_start_addr, end_addr,
 		    objfile);
       blockvector = make_blockvector (objfile);
+      /* TODOTODO */
+/*       BLOCK_USING (BLOCKVECTOR_BLOCK (blockvector, STATIC_BLOCK)) */
+/* 	= cp_copy_usings_obstack (using_list, &objfile->symbol_obstack); */
+/*       cp_deep_free_usings (using_list); */
     }
 
 #ifndef PROCESS_LINENUMBER_HOOK
@@ -1065,6 +1144,10 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
 
   return symtab;
 }
+
+/* Search the block for global symbols indicating the presence of
+   anonymous namespaces; add using declarations for them, if
+   found.  */
 
 /* Push a context block.  Args are an identifying nesting level
    (checkable when you pop it), and the starting PC address of this

@@ -171,12 +171,14 @@ method_name_from_physname (const char *physname)
 }
 
 /* This allocates a new using_direct structure initialized to contain
-   OUTER and INNER, and puts it at the beginning of the linked list
-   given by NEXT.  It returns the resulting struct using_direct_node.
-   All memory is allocated using OBSTACK.  */
+   NAME, OUTER_LENGTH, and INNER_LENGTH, and puts it at the beginning
+   of the linked list given by NEXT.  It returns the resulting struct
+   using_direct_node.  All memory is allocated using OBSTACK.  */
 
 struct using_direct_node *
-cp_add_using (const char *outer, const char *inner,
+cp_add_using (const char *name,
+	      unsigned short outer_length,
+	      unsigned short inner_length,
 	      struct using_direct_node *next,
 	      struct obstack *obstack)
 {
@@ -185,8 +187,11 @@ cp_add_using (const char *outer, const char *inner,
   struct using_direct_node *retval
     = obstack_alloc (obstack, sizeof (struct using_direct_node));
 
-  current->outer = outer;
-  current->inner = inner;
+  gdb_assert (outer_length < inner_length);
+
+  current->name = name;
+  current->outer_length = outer_length;
+  current->inner_length = inner_length;
   retval->current = current;
   retval->next = next;
 
@@ -195,6 +200,7 @@ cp_add_using (const char *outer, const char *inner,
 
 /* This copies the using_direct_nodes in TOCOPY, using xmalloc, and
    sticks them onto a list ending in TAIL.  */
+
 struct using_direct_node *
 cp_copy_usings (struct using_direct_node *tocopy,
 		struct using_direct_node *tail)

@@ -126,6 +126,7 @@ struct symbol *lookup_symbol_aux_using (const char *name,
 
 static
 struct symbol *lookup_symbol_aux_using_loop (const char *prefix,
+					     int prefix_len,
 					     const char *rest,
 					     struct using_direct_node *using,
 					     const char *mangled_name,
@@ -1066,19 +1067,15 @@ static struct symbol *lookup_symbol_aux_using (const char *name,
       block = BLOCK_SUPERBLOCK (block);
     }
 
-  sym = lookup_symbol_aux_using_loop ("", name, using, mangled_name,
+  sym = lookup_symbol_aux_using_loop ("", 0, name, using, mangled_name,
 				      namespace, symtab);
   cp_free_usings (using);
   
   return sym;
 }
 
-/* This tries to look up a symbol whose name is the concatenation of
-   PREFIX, "::", and REST, where "::" is ommitted if PREFIX is the
-   empty string, applying the various using directives given in USING.
-   When applying the using directives, however, it assumes that the
-   part of the name given by PREFIX is immutable, so it only adds
-   symbols to namespaces whose names contain PREFIX.
+/* This tries to look up REST in the namespace given by the initial
+   substring of PREFIX of length PREFIX_LEN.
 
    Basically, assume that we have using directives adding A to the
    global namespace, adding A::inner to namespace A, and adding B to
@@ -1090,11 +1087,7 @@ static struct symbol *lookup_symbol_aux_using (const char *name,
    A::foo, A::inner::foo, and B::foo.  (Though if the original caller
    to lookup_symbol had specified A::foo, we would want to look up
    stuff in A::A::foo, A::inner::A::foo, A::inner::foo, and
-   B::A::foo).
-
-   The reason why this treates the case of PREFIX = "" specially is to
-   avoid having to create temporary strings with "::" stuck on the end
-   of them.  */
+   B::A::foo).  */
 
 /* FIXME: carlton/2002-10-11: There are still some places where this
    will return false positives.  For example, if you have namespaces
@@ -1106,7 +1099,9 @@ static struct symbol *lookup_symbol_aux_using (const char *name,
    for other reasons, but it will take a little while.)  */
 
 static struct symbol *
-lookup_symbol_aux_using_loop (const char *prefix, const char *rest,
+lookup_symbol_aux_using_loop (const char *prefix,
+			      int prefix_len,
+			      const char *rest,
 			      struct using_direct_node *using,
 			      const char *mangled_name,
 			      namespace_enum namespace,
@@ -1114,22 +1109,28 @@ lookup_symbol_aux_using_loop (const char *prefix, const char *rest,
 {
   struct using_direct_node *current;
   struct symbol *sym;
-  int prefix_len = strlen (prefix);
 
   for (current = using; current; current = current->next)
     {
       /* First, see if the prefix matches the start of this using
 	 directive.  */
-      if (strncmp (prefix, current->current->outer, prefix_len) == 0)
+      if (prefix_len >= current->current->outer_length
+	  && strncmp (prefix, current->current->name, prefix_len) == 0)
 	{
 	  /* Great, it matches: now does the rest of the using
 	     directive match the rest of the name?  */
 	  
-	  const char *rest_of_outer = current->current->outer + prefix_len;
-	  /* Should we skip some colons?  */
+	  const char *rest_of_outer = current->current->name + prefix_len;
+	  int rest_of_outer_len
+	    = current->current->outer_length - prefix_len;
+	  /* Should we skip some colons?  (Should always be true
+	     unless PREFIX_LEN is zero (and hence we're in the global
+	     namespace.)  */
 	  if (*rest_of_outer == ':')
-	    rest_of_outer += 2;
-	  int rest_of_outer_len = strlen (rest_of_outer);
+	    {
+	      rest_of_outer += 2;
+	      rest_of_outer_len -= 2;
+	    }
 	  if (strncmp (rest_of_outer, rest, rest_of_outer_len) == 0)
 	    {
 	      /* Everything matches!  Yippee!  So apply the using
@@ -1138,12 +1139,14 @@ lookup_symbol_aux_using_loop (const char *prefix, const char *rest,
 	      if (*new_rest == ':')
 		new_rest += 2;
 
-	      sym = lookup_symbol_aux_using_loop (current->current->inner,
-						  new_rest,
-						  using,
-						  mangled_name,
-						  namespace,
-						  symtab);
+	      sym = lookup_symbol_aux_using_loop
+		(current->current->name,
+		 current->current->inner_length,
+		 new_rest,
+		 using,
+		 mangled_name,
+		 namespace,
+		 symtab);
 	      if (sym != NULL)
 		return sym;
 	    }
@@ -1153,6 +1156,7 @@ lookup_symbol_aux_using_loop (const char *prefix, const char *rest,
   /* We didn't find anything by applying any of the using directives
      that are still applicable; so let's see if we've got a match
      using the current name.  */
+  
   if (prefix_len == 0)
     {
       return lookup_symbol_aux_nonlocal (GLOBAL_BLOCK, rest, mangled_name,
@@ -1162,7 +1166,7 @@ lookup_symbol_aux_using_loop (const char *prefix, const char *rest,
     {
       char *concatenated_name
 	= xmalloc (prefix_len + 2 + strlen (rest) + 1);
-      strcpy (concatenated_name, prefix);
+      strncpy (concatenated_name, prefix, prefix_len);
       strcpy (concatenated_name + prefix_len, "::");
       strcpy (concatenated_name + prefix_len + 2, rest);
       sym = lookup_symbol_aux_nonlocal (GLOBAL_BLOCK, concatenated_name,

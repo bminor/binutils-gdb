@@ -1,3 +1,28 @@
+2002-10-14  David Carlton  <carlton@math.stanford.edu>
+
+	* buildsym.c (add_using_directive): Rewrite to match new version
+	of struct using_direct.
+	(finish_block): Ditto.
+
+	* symtab.c (lookup_symbol_aux_using_loop): Add 'prefix_len'
+	argument; rewrite to match new version of struct using_direct.
+
+	* cp-support.h: Update declaration for cp_add_using.
+
+	* cp-support.c (cp_add_using): Rewrite to match new version of
+	struct using_direct.
+
+	* cp-support.h (struct using_direct): Rewrite struct.
+
+	* buildsym.h: Declaration for add_using_directive.
+
+	* buildsym.c: New variable 'using_list'.
+	(start_symtab): Initialize using_list.
+	(end_symtab): Initialize BLOCK_USING of STATIC_BLOCK.
+	(scan_for_anonymous_namespaces): New function.
+	(add_symbol_to_list): In C++ case, look for anonymous namespaces.
+	(add_using_directive): New function.
+
 2002-10-11  David Carlton  <carlton@math.stanford.edu>
 
 	* jv-lang.c (get_java_class_symtab): Initialize BLOCK_USING (bl)
