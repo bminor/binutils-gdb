@@ -1,5 +1,10 @@
 Tue Dec 17 10:59:32 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c: Undo part of last Friday's alignment changes.
+ 	(md_begin): Always align the text section to a four byte
+	boundary.
+	(append_insn): Remove call to record_align.
+
 	* config/tc-mips.c (insn_label): Remove.
 	(struct insn_label_list): Define.
 	(insn_labels, free_insn_labels): New static variables.

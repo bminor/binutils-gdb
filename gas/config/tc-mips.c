@@ -923,8 +923,7 @@ md_begin ()
   mips_cprmask[3] = 0;
 
   /* set the default alignment for the text section (2**2) */
-  if (OUTPUT_FLAVOR != bfd_target_elf_flavour)
-    record_alignment (text_section, 2);
+  record_alignment (text_section, 2);
 
   if (USE_GLOBAL_POINTER_OPT)
     bfd_set_gp_size (stdoutput, g_switch_value);
@@ -1181,17 +1180,6 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
   char *f;
   fixS *fixp;
   int nops = 0;
-
-  /* Make sure the section will be aligned appropriately.  Note that
-     we do not insert an alignment directive; it remains the user's
-     responsibility to align instructions if necessary.  Here we only
-     ensure that the section will have the right default alignment, so
-     that the right thing will happen if no alignment directive is
-     used.  */
-  if (mips16)
-    record_alignment (now_seg, 1);
-  else
-    record_alignment (now_seg, 2);
 
   /* Mark instruction labels in mips16 mode.  This permits the linker
      to handle them specially, such as generating jalx instructions
