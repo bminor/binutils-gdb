@@ -2,7 +2,9 @@ Fri Nov  6 23:10:37 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* config.sub: remove 'sparc'-->'sparc-sun' default transformation,
 	add 'sparc' to list of recognized cpus.  This needed to make
-	'sparc-aout' expand to 'sparc-unknown-aout' instead of 'sparc-sun-aout'
+	'sparc-aout' expand to 'sparc-unknown-aout' instead of 'sparc-sun-aout'.
+	Delete some redundant ose68 variants.  Recognize -wrs as an os,
+	then changes that into $CPU-wrs-vxworks.
 
 	* configure.in: remove most references to gdbtest, regularize
 	target based program removal
