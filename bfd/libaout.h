@@ -22,29 +22,27 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    variants in a few routines, and otherwise share large masses of code.
    This means we only have to fix bugs in one place, most of the time.  */
 
-#ifdef __STDC__
-#define CAT3(a,b,c) a##b##c
-#else
-#define CAT3(a,b,c) a/**/b/**/c
-#endif
-
 /* Parameterize the a.out code based on whether it is being built
    for a 32-bit architecture or a 64-bit architecture.  */
 #if ARCH_SIZE==64
 #define GET_WORD bfd_h_get_64
 #define GET_SWORD (int64_type)GET_WORD
 #define PUT_WORD bfd_h_put_64
+#ifndef NAME
 #define NAME(x,y) CAT3(x,_64_,y)
+#endif
 #define JNAME(x) CAT(x,_64)
 #define BYTES_IN_WORD 8
-#else
+#else /* ARCH_SIZE == 32 */
 #define GET_WORD bfd_h_get_32
 #define GET_SWORD (int32_type)GET_WORD
 #define PUT_WORD bfd_h_put_32
+#ifndef NAME
 #define NAME(x,y) CAT3(x,_32_,y)
+#endif
 #define JNAME(x) CAT(x,_32)
 #define BYTES_IN_WORD 4
-#endif
+#endif /* ARCH_SIZE==32 */
 
 /* Declare these types at file level, since they are used in parameter
    lists, which have wierd scope.  */
@@ -288,6 +286,10 @@ NAME(aout,get_lineno) PARAMS ((bfd *ignore_abfd, asymbol *ignore_symbol));
 void
 NAME(aout,print_symbol) PARAMS ((bfd *ignore_abfd, PTR file,
 			    asymbol *symbol, bfd_print_symbol_type how));
+
+void
+NAME(aout,get_symbol_info) PARAMS ((bfd *ignore_abfd,
+                           asymbol *symbol, symbol_info *ret));
 
 boolean
 NAME(aout,close_and_cleanup) PARAMS ((bfd *abfd));
