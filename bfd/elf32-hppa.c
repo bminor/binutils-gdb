@@ -643,16 +643,18 @@ hppa_add_stub (stub_name, section, htab)
       stub_sec = htab->stub_group[link_sec->id].stub_sec;
       if (stub_sec == NULL)
 	{
+	  size_t namelen;
 	  bfd_size_type len;
 	  char *s_name;
 
-	  len = strlen (link_sec->name) + sizeof (STUB_SUFFIX);
+	  namelen = strlen (link_sec->name);
+	  len = namelen + sizeof (STUB_SUFFIX);
 	  s_name = bfd_alloc (htab->stub_bfd, len);
 	  if (s_name == NULL)
 	    return NULL;
 
-	  strcpy (s_name, link_sec->name);
-	  strcpy (s_name + len - sizeof (STUB_SUFFIX), STUB_SUFFIX);
+	  memcpy (s_name, link_sec->name, namelen);
+	  memcpy (s_name + namelen, STUB_SUFFIX, sizeof (STUB_SUFFIX));
 	  stub_sec = (*htab->add_stub_section) (s_name, link_sec);
 	  if (stub_sec == NULL)
 	    return NULL;

@@ -960,6 +960,7 @@ elf_add_default_symbol (abfd, info, h, name, sym, sec, value,
   boolean collect;
   boolean dynamic;
   char *p;
+  size_t len, shortlen;
 
   /* If this symbol has a version, and it is the default version, we
      create an indirect symbol from the default name to the fully
@@ -972,7 +973,7 @@ elf_add_default_symbol (abfd, info, h, name, sym, sec, value,
   if (override)
     {
       /* We are overridden by an old defition. We need to check if we
-	 need to crreate the indirect symbol from the default name.  */
+	 need to create the indirect symbol from the default name.  */
       hi = elf_link_hash_lookup (elf_hash_table (info), name, true,
 				 false, false);
       BFD_ASSERT (hi != NULL);
@@ -991,12 +992,12 @@ elf_add_default_symbol (abfd, info, h, name, sym, sec, value,
   collect = bed->collect;
   dynamic = (abfd->flags & DYNAMIC) != 0;
 
-  shortname = bfd_hash_allocate (&info->hash->table,
-				 (size_t) (p - name + 1));
+  shortlen = p - name;
+  shortname = bfd_hash_allocate (&info->hash->table, shortlen + 1);
   if (shortname == NULL)
     return false;
-  strncpy (shortname, name, (size_t) (p - name));
-  shortname [p - name] = '\0';
+  memcpy (shortname, name, shortlen);
+  shortname[shortlen] = '\0';
 
   /* We are going to create a new symbol.  Merge it with any existing
      symbol with this name.  For the purposes of the merge, act as
@@ -1101,11 +1102,12 @@ elf_add_default_symbol (abfd, info, h, name, sym, sec, value,
   /* We also need to define an indirection from the nondefault version
      of the symbol.  */
 
-  shortname = bfd_hash_allocate (&info->hash->table, strlen (name));
+  len = strlen (name);
+  shortname = bfd_hash_allocate (&info->hash->table, len);
   if (shortname == NULL)
     return false;
-  strncpy (shortname, name, (size_t) (p - name));
-  strcpy (shortname + (p - name), p + 1);
+  memcpy (shortname, name, shortlen);
+  memcpy (shortname + shortlen, p + 1, len - shortlen);
 
   /* Once again, merge with any existing symbol.  */
   type_change_ok = false;
@@ -1493,10 +1495,11 @@ elf_link_add_object_symbols (abfd, info)
 		  fnm = bfd_elf_string_from_elf_section (abfd, shlink, tagv);
 		  if (n == NULL || fnm == NULL)
 		    goto error_return;
-		  anm = bfd_alloc (abfd, (bfd_size_type) strlen (fnm) + 1);
+		  amt = strlen (fnm) + 1;
+		  anm = bfd_alloc (abfd, amt);
 		  if (anm == NULL)
 		    goto error_return;
-		  strcpy (anm, fnm);
+		  memcpy (anm, fnm, (size_t) amt);
 		  n->name = anm;
 		  n->by = abfd;
 		  n->next = NULL;
@@ -1524,10 +1527,11 @@ elf_link_add_object_symbols (abfd, info)
 		  fnm = bfd_elf_string_from_elf_section (abfd, shlink, tagv);
 		  if (n == NULL || fnm == NULL)
 		    goto error_return;
-		  anm = bfd_alloc (abfd, (bfd_size_type) strlen (fnm) + 1);
+		  amt = strlen (fnm) + 1;
+		  anm = bfd_alloc (abfd, amt);
 		  if (anm == NULL)
 		    goto error_return;
-		  strcpy (anm, fnm);
+		  memcpy (anm, fnm, (size_t) amt);
 		  n->name = anm;
 		  n->by = abfd;
 		  n->next = NULL;
@@ -1551,10 +1555,11 @@ elf_link_add_object_symbols (abfd, info)
 		  fnm = bfd_elf_string_from_elf_section (abfd, shlink, tagv);
 		  if (n == NULL || fnm == NULL)
 		    goto error_return;
-		  anm = bfd_alloc (abfd, (bfd_size_type) strlen (fnm) + 1);
+		  amt = strlen (fnm) + 1;
+		  anm = bfd_alloc (abfd, amt);
 		  if (anm == NULL)
 		    goto error_return;
-		  strcpy (anm, fnm);
+		  memcpy (anm, fnm, (size_t) amt);
 		  n->name = anm;
 		  n->by = abfd;
 		  n->next = NULL;
@@ -1798,8 +1803,7 @@ elf_link_add_object_symbols (abfd, info)
 		  || (vernum > 1 && ! bfd_is_abs_section (sec)))
 		{
 		  const char *verstr;
-		  unsigned int namelen;
-		  bfd_size_type newlen;
+		  size_t namelen, verlen, newlen;
 		  char *newname, *p;
 
 		  if (sym.st_shndx != SHN_UNDEF)
@@ -1856,14 +1860,16 @@ elf_link_add_object_symbols (abfd, info)
 		    }
 
 		  namelen = strlen (name);
-		  newlen = namelen + strlen (verstr) + 2;
-		  if ((iver.vs_vers & VERSYM_HIDDEN) == 0)
+		  verlen = strlen (verstr);
+		  newlen = namelen + verlen + 2;
+		  if ((iver.vs_vers & VERSYM_HIDDEN) == 0
+		      && sym.st_shndx != SHN_UNDEF)
 		    ++newlen;
 
-		  newname = (char *) bfd_alloc (abfd, newlen);
+		  newname = (char *) bfd_alloc (abfd, (bfd_size_type) newlen);
 		  if (newname == NULL)
 		    goto error_return;
-		  strcpy (newname, name);
+		  memcpy (newname, name, namelen);
 		  p = newname + namelen;
 		  *p++ = ELF_VER_CHR;
 		  /* If this is a defined non-hidden version symbol,
@@ -1872,7 +1878,7 @@ elf_link_add_object_symbols (abfd, info)
 		  if ((iver.vs_vers & VERSYM_HIDDEN) == 0
 		      && sym.st_shndx != SHN_UNDEF)
 		    *p++ = ELF_VER_CHR;
-		  strcpy (p, verstr);
+		  memcpy (p, verstr, verlen + 1);
 
 		  name = newname;
 		}
@@ -4339,7 +4345,7 @@ elf_link_assign_sym_version (h, data)
 	      alc = bfd_malloc ((bfd_size_type) len);
 	      if (alc == NULL)
 		return false;
-	      strncpy (alc, h->root.root.string, len - 1);
+	      memcpy (alc, h->root.root.string, len - 1);
 	      alc[len - 1] = '\0';
 	      if (alc[len - 2] == ELF_VER_CHR)
 		alc[len - 2] = '\0';

@@ -1974,12 +1974,12 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	    else
 	      {
 		char *w;
+		size_t len = strlen (string) + 1;
 
-		w = bfd_hash_allocate (&info->hash->table,
-				       strlen (string) + 1);
+		w = bfd_hash_allocate (&info->hash->table, len);
 		if (w == NULL)
 		  return false;
-		strcpy (w, string);
+		memcpy (w, string, len);
 		sub->u.i.warning = w;
 	      }
 

@@ -1313,14 +1313,16 @@ _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset, pfound,
 	  || strncmp (info->filename, directory_name, dirlen) != 0
 	  || strcmp (info->filename + dirlen, file_name) != 0)
 	{
+	  size_t len;
+
 	  if (info->filename != NULL)
 	    free (info->filename);
-	  info->filename = (char *) bfd_malloc ((bfd_size_type) dirlen
-						+ strlen (file_name) + 1);
+	  len = strlen (file_name) + 1;
+	  info->filename = (char *) bfd_malloc ((bfd_size_type) dirlen + len);
 	  if (info->filename == NULL)
 	    return false;
-	  strcpy (info->filename, directory_name);
-	  strcpy (info->filename + dirlen, file_name);
+	  memcpy (info->filename, directory_name, dirlen);
+	  memcpy (info->filename + dirlen, file_name, len);
 	}
 
       *pfilename = info->filename;

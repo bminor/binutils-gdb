@@ -798,7 +798,7 @@ bfd_get_unique_section_name (abfd, templat, count)
   sname = bfd_malloc ((bfd_size_type) len + 8);
   if (sname == NULL)
     return NULL;
-  strcpy (sname, templat);
+  memcpy (sname, templat, len);
   num = 1;
   if (count != NULL)
     num = *count;

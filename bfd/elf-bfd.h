@@ -713,7 +713,7 @@ struct elf_backend_data
     PARAMS ((bfd *, struct bfd_link_info *, PTR,
 	    boolean (*) (PTR, const char *, Elf_Internal_Sym *, asection *)));
 
-  /* Copy any information related to dynamic linking from a pre-existing 
+  /* Copy any information related to dynamic linking from a pre-existing
      symbol to a newly created symbol.  Also called to copy flags and
      other back-end info to a weakdef, in which case the symbol is not
      newly created and plt/got refcounts and dynamic indices should not
@@ -782,7 +782,7 @@ struct elf_backend_data
     PARAMS ((asection *, Elf_Internal_Phdr *));
 
   /* This function, if defined, returns true if copy_private_bfd_data
-     should be called.  It provides a way of overriding default 
+     should be called.  It provides a way of overriding default
      test conditions in _bfd_elf_copy_private_section_data.  */
   boolean (*copy_private_bfd_data_p)
     PARAMS ((bfd *, asection *, bfd *, asection *));
@@ -1592,20 +1592,20 @@ extern boolean _bfd_elf64_reloc_symbol_deleted_p
   PARAMS ((bfd_vma, PTR));
 
 /* Exported interface for writing elf corefile notes. */
-extern char *elfcore_write_note 
-  PARAMS ((bfd *, char *, int *, char *, int, void *, int));
-extern char *elfcore_write_prpsinfo 
-  PARAMS ((bfd *, char *, int *, char *, char *));
-extern char *elfcore_write_prstatus 
-  PARAMS ((bfd *, char *, int *, long, int, void *));
-extern char * elfcore_write_pstatus 
-  PARAMS ((bfd *, char *, int *, long, int, void *));
-extern char *elfcore_write_prfpreg 
-  PARAMS ((bfd *, char *, int *, void *, int));
-extern char *elfcore_write_prxfpreg 
-  PARAMS ((bfd *, char *, int *, void *, int));
-extern char *elfcore_write_lwpstatus 
-  PARAMS ((bfd*, char*, int*, long, int, void*));
+extern char *elfcore_write_note
+  PARAMS ((bfd *, char *, int *, const char *, int, const PTR, int));
+extern char *elfcore_write_prpsinfo
+  PARAMS ((bfd *, char *, int *, const char *, const char *));
+extern char *elfcore_write_prstatus
+  PARAMS ((bfd *, char *, int *, long, int, const PTR));
+extern char * elfcore_write_pstatus
+  PARAMS ((bfd *, char *, int *, long, int, const PTR));
+extern char *elfcore_write_prfpreg
+  PARAMS ((bfd *, char *, int *, const PTR, int));
+extern char *elfcore_write_prxfpreg
+  PARAMS ((bfd *, char *, int *, const PTR, int));
+extern char *elfcore_write_lwpstatus
+  PARAMS ((bfd *, char *, int *, long, int, const PTR));
 
 /* SH ELF specific routine.  */
 

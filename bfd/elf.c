@@ -2071,16 +2071,18 @@ _bfd_elf_make_section_from_phdr (abfd, hdr, index, typename)
   asection *newsect;
   char *name;
   char namebuf[64];
+  size_t len;
   int split;
 
   split = ((hdr->p_memsz > 0)
 	    && (hdr->p_filesz > 0)
 	    && (hdr->p_memsz > hdr->p_filesz));
   sprintf (namebuf, "%s%d%s", typename, index, split ? "a" : "");
-  name = bfd_alloc (abfd, (bfd_size_type) strlen (namebuf) + 1);
+  len = strlen (namebuf) + 1;
+  name = bfd_alloc (abfd, (bfd_size_type) len);
   if (!name)
     return false;
-  strcpy (name, namebuf);
+  memcpy (name, namebuf, len);
   newsect = bfd_make_section (abfd, name);
   if (newsect == NULL)
     return false;
@@ -2108,10 +2110,11 @@ _bfd_elf_make_section_from_phdr (abfd, hdr, index, typename)
   if (split)
     {
       sprintf (namebuf, "%s%db", typename, index);
-      name = bfd_alloc (abfd, (bfd_size_type) strlen (namebuf) + 1);
+      len = strlen (namebuf) + 1;
+      name = bfd_alloc (abfd, (bfd_size_type) len);
       if (!name)
 	return false;
-      strcpy (name, namebuf);
+      memcpy (name, namebuf, len);
       newsect = bfd_make_section (abfd, name);
       if (newsect == NULL)
 	return false;
@@ -2666,10 +2669,10 @@ assign_section_numbers (abfd)
 	      char *alc;
 
 	      len = strlen (sec->name);
-	      alc = (char *) bfd_malloc ((bfd_size_type) len - 2);
+	      alc = (char *) bfd_malloc ((bfd_size_type) (len - 2));
 	      if (alc == NULL)
 		return false;
-	      strncpy (alc, sec->name, len - 3);
+	      memcpy (alc, sec->name, len - 3);
 	      alc[len - 3] = '\0';
 	      s = bfd_get_section_by_name (abfd, alc);
 	      free (alc);
@@ -6189,15 +6192,17 @@ _bfd_elfcore_make_pseudosection (abfd, name, size, filepos)
 {
   char buf[100];
   char *threaded_name;
+  size_t len;
   asection *sect;
 
   /* Build the section name.  */
 
   sprintf (buf, "%s/%d", name, elfcore_make_pid (abfd));
-  threaded_name = bfd_alloc (abfd, (bfd_size_type) strlen (buf) + 1);
+  len = strlen (buf) + 1;
+  threaded_name = bfd_alloc (abfd, (bfd_size_type) len);
   if (threaded_name == NULL)
     return false;
-  strcpy (threaded_name, buf);
+  memcpy (threaded_name, buf, len);
 
   sect = bfd_make_section (abfd, threaded_name);
   if (sect == NULL)
@@ -6482,6 +6487,7 @@ elfcore_grok_lwpstatus (abfd, note)
   lwpstatus_t lwpstat;
   char buf[100];
   char *name;
+  size_t len;
   asection *sect;
 
   if (note->descsz != sizeof (lwpstat)
@@ -6499,10 +6505,11 @@ elfcore_grok_lwpstatus (abfd, note)
   /* Make a ".reg/999" section.  */
 
   sprintf (buf, ".reg/%d", elfcore_make_pid (abfd));
-  name = bfd_alloc (abfd, (bfd_size_type) strlen (buf) + 1);
+  len = strlen (buf) + 1;
+  name = bfd_alloc (abfd, (bfd_size_type) len);
   if (name == NULL)
     return false;
-  strcpy (name, buf);
+  memcpy (name, buf, len);
 
   sect = bfd_make_section (abfd, name);
   if (sect == NULL)
@@ -6528,10 +6535,11 @@ elfcore_grok_lwpstatus (abfd, note)
   /* Make a ".reg2/999" section */
 
   sprintf (buf, ".reg2/%d", elfcore_make_pid (abfd));
-  name = bfd_alloc (abfd, (bfd_size_type) strlen (buf) + 1);
+  len = strlen (buf) + 1;
+  name = bfd_alloc (abfd, (bfd_size_type) len);
   if (name == NULL)
     return false;
-  strcpy (name, buf);
+  memcpy (name, buf, len);
 
   sect = bfd_make_section (abfd, name);
   if (sect == NULL)
@@ -6563,6 +6571,7 @@ elfcore_grok_win32pstatus (abfd, note)
 {
   char buf[30];
   char *name;
+  size_t len;
   asection *sect;
   win32_pstatus_t pstatus;
 
@@ -6583,11 +6592,12 @@ elfcore_grok_win32pstatus (abfd, note)
       /* Make a ".reg/999" section.  */
       sprintf (buf, ".reg/%d", pstatus.data.thread_info.tid);
 
-      name = bfd_alloc (abfd, (bfd_size_type) strlen (buf) + 1);
+      len = strlen (buf) + 1;
+      name = bfd_alloc (abfd, (bfd_size_type) len);
       if (name == NULL)
 	return false;
 
-      strcpy (name, buf);
+      memcpy (name, buf, len);
 
       sect = bfd_make_section (abfd, name);
       if (sect == NULL)
@@ -6609,11 +6619,12 @@ elfcore_grok_win32pstatus (abfd, note)
       /* Make a ".module/xxxxxxxx" section.  */
       sprintf (buf, ".module/%08x", pstatus.data.module_info.base_address);
 
-      name = bfd_alloc (abfd, (bfd_size_type) strlen (buf) + 1);
+      len = strlen (buf) + 1;
+      name = bfd_alloc (abfd, (bfd_size_type) len);
       if (name == NULL)
 	return false;
 
-      strcpy (name, buf);
+      memcpy (name, buf, len);
 
       sect = bfd_make_section (abfd, name);
 
@@ -6815,15 +6826,29 @@ elfcore_write_note (abfd, buf, bufsiz, name, type, input, size)
      bfd  *abfd;
      char *buf;
      int  *bufsiz;
-     char *name;
+     const char *name;
      int  type;
-     void *input;
+     const PTR input;
      int  size;
 {
   Elf_External_Note *xnp;
-  int namesz = strlen (name);
-  int newspace = BFD_ALIGN (sizeof (Elf_External_Note) + size + namesz - 1, 4);
+  size_t namesz;
+  size_t pad;
+  size_t newspace;
   char *p, *dest;
+
+  namesz = 0;
+  pad = 0;
+  if (name != NULL)
+    {
+      struct elf_backend_data *bed;
+
+      namesz = strlen (name) + 1;
+      bed = get_elf_backend_data (abfd);
+      pad = -namesz & (bed->s->file_align - 1);
+    }
+
+  newspace = sizeof (Elf_External_Note) - 1 + namesz + pad + size;
 
   p = realloc (buf, *bufsiz + newspace);
   dest = p + *bufsiz;
@@ -6832,8 +6857,18 @@ elfcore_write_note (abfd, buf, bufsiz, name, type, input, size)
   H_PUT_32 (abfd, namesz, xnp->namesz);
   H_PUT_32 (abfd, size, xnp->descsz);
   H_PUT_32 (abfd, type, xnp->type);
-  strcpy (xnp->name, name);
-  memcpy (xnp->name + BFD_ALIGN (namesz, 4), input, size);
+  dest = xnp->name;
+  if (name != NULL)
+    {
+      memcpy (dest, name, namesz);
+      dest += namesz;
+      while (pad != 0)
+	{
+	  *dest++ = '\0';
+	  --pad;
+	}
+    }
+  memcpy (dest, input, size);
   return p;
 }
 
@@ -6843,8 +6878,8 @@ elfcore_write_prpsinfo (abfd, buf, bufsiz, fname, psargs)
      bfd  *abfd;
      char *buf;
      int  *bufsiz;
-     char *fname; 
-     char *psargs;
+     const char *fname; 
+     const char *psargs;
 {
   int note_type;
   char *note_name = "CORE";
@@ -6873,7 +6908,7 @@ elfcore_write_prstatus (abfd, buf, bufsiz, pid, cursig, gregs)
      int *bufsiz;
      long pid;
      int cursig;
-     void *gregs;
+     const PTR gregs;
 {
   prstatus_t prstat;
   char *note_name = "CORE";
@@ -6895,7 +6930,7 @@ elfcore_write_lwpstatus (abfd, buf, bufsiz, pid, cursig, gregs)
      int *bufsiz;
      long pid;
      int cursig;
-     void *gregs;
+     const PTR gregs;
 {
   lwpstatus_t lwpstat;
   char *note_name = "CORE";
@@ -6927,7 +6962,7 @@ elfcore_write_pstatus (abfd, buf, bufsiz, pid, cursig, gregs)
      int *bufsiz;
      long pid;
      int cursig;
-     void *gregs;
+     const PTR gregs;
 {
   pstatus_t pstat;
   char *note_name = "CORE";
@@ -6945,7 +6980,7 @@ elfcore_write_prfpreg (abfd, buf, bufsiz, fpregs, size)
      bfd  *abfd;
      char *buf;
      int  *bufsiz;
-     void *fpregs;
+     const PTR fpregs;
      int size;
 {
   char *note_name = "CORE";
@@ -6958,7 +6993,7 @@ elfcore_write_prxfpreg (abfd, buf, bufsiz, xfpregs, size)
      bfd  *abfd;
      char *buf;
      int  *bufsiz;
-     void *xfpregs;
+     const PTR xfpregs;
      int size;
 {
   char *note_name = "LINUX";

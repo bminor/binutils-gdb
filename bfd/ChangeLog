@@ -1,3 +1,38 @@
+2002-06-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc_add_stub): Replace strcpy/strncpy with memcpy.
+	* elf32-hppa.c (hppa_add_stub): Likewise.
+	* elflink.c (_bfd_elf_link_record_dynamic_symbol): Likewise.
+	* elflink.h (elf_add_default_symbol): Fix comment typo.
+	(elf_add_default_symbol): Replace strcpy and strncpy with memcpy.
+	(elf_link_add_object_symbols): Likewise.
+	(elf_link_assign_sym_version): Likewise.
+	* hash.c (bfd_hash_lookup): Likewise.
+	* linker.c (_bfd_generic_link_add_one_symbol): Likewise.
+	* section.c (bfd_get_unique_section_name): Likewise.
+	* syms.c (_bfd_stab_section_find_nearest_line): Likewise.
+	* elf.c (_bfd_elf_make_section_from_phdr): Likewise.
+	(assign_section_numbers): Likewise.
+	(_bfd_elfcore_make_pseudosection): Likewise.
+	(elfcore_grok_lwpstatus): Likewise.
+	(elfcore_grok_win32pstatus): Likewise.
+	(elfcore_write_note): Constify input params.  Use PTR instead of
+	void *.  Include terminating NUL in namesz.  Correct padding.
+	Support NULL "name" param.  Use memcpy instead of strcpy.
+	(elfcore_write_prpsinfo): Constify input params.
+	(elfcore_write_prstatus): Likewise.  Use PTR instead of void *.
+	(elfcore_write_lwpstatus): Likewise.
+	(elfcore_write_pstatus): Likewise.
+	(elfcore_write_prfpreg): Likewise.
+	(elfcore_write_prxfpreg): Likewise.
+	* elf-bfd.h (elfcore_write_note): Update declaration.
+	(elfcore_write_prpsinfo): Likewise.
+	(elfcore_write_prstatus): Likewise.
+	(elfcore_write_pstatus): Likewise.
+	(elfcore_write_prfpreg): Likewise.
+	(elfcore_write_prxfpreg): Likewise.
+	(elfcore_write_lwpstatus): Likewise.
+
 2002-06-25  Jason Eckhardt  <jle@rice.edu>
 
 	* ecoff.c (ecoff_set_symbol_info): Set BSF_FUNCTION for
