@@ -1,3 +1,8 @@
+
+Wed Apr  8 16:53:00 1998 Jillian Ye <jillian@cygnus.com>
+
+	* c_gen.pl: Added subroutin perform_test_read_only.
+
 Wed Apr  8 14:03:13 1998  Jillian Ye (jillian@cygnus.com>
 
         * sce_test40.dvpasm, sce_test41.dvpasm, sce_test42.dvpasm, sce_test43.dvpasm:

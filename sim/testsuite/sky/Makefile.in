@@ -171,7 +171,7 @@ sce2_%.vu.o: sce2_%.vuasm
 
 sce%.ok: sce%.exe
 	rm -f sce$*.ok 
-	ulimit -t 30 ; $(RUN_FOR_TARGET) $<  >& sce$*_our_gif.dat; \
+	ulimit -t 30 ; $(RUN_FOR_TARGET) $<  > sce$*_our_gif.dat; \
         if [ $$? -ne 0 ];  then \
 	   touch sce$*.ok; \
 	else \

@@ -17,6 +17,7 @@
 #         ! (reg wrt 32) 0xH  (addr)       0xH  (data) 
 #         ~ (reg wrt 64) 0xH  (addr)       0xHigh_Low (data)
 #         % (reg read 64) 0xH (addr)       0xHigh_Low (data) 
+#         r (read only)  0xH  (addr)       4/8
 #         # comment line
 #       Note: n can be 0 (for VU1), 1 (for VU2), or 2 (for GIF).
 #             H, High, or Low is hex data in the format of FFFFFFFF
@@ -94,6 +95,10 @@ while( $inputline = <INFILE> )
   elsif ( $inputline =~ /^\%/ )      # A line starts with "%" is a 64bit read/verification request
   {
       &perform_test64;
+  }
+  elsif ( $inputline =~ /^\r/ )      # A line starts with "r" is a read only test request
+  {
+      &perform_test_read_only;
   }
   else   # ignore this input
   {
@@ -259,6 +264,30 @@ sub perform_test64 {
   print OUTFILE ("  }\n}\n");
 
 }
+
+sub perform_test_read_only {
+  print OUTFILE ("\n");
+  print OUTFILE ("/******************************************************************/\n");
+  print OUTFILE ("/*Just trying to read data from the specified address:            */\n\n");
+  
+  @columns = split ( /[\s]+/, $inputline );
+ 
+  #column[1] is the address;
+  #column[2] is the byte-indicator, which can be 4 or 8;
+
+  if ( $column[2] =~ /^4/ )      # This is a 4-byte data address
+  {     $d_type = "long "; }
+  else {
+        $d_type = "long long ";  # assuming the input is "8"
+  }
+
+  print OUTFILE ("\n{\n");
+  print OUTFILE ("  volatile ".$d_type."int* test_add = \(".$d_type."int *\)".$columns[1].";\n");
+  print OUTFILE ("  long long int test64_data = \(long long\) \( *test_add \);\n");
+  print OUTFILE ("}\n");
+
+}
+
 
 
 
