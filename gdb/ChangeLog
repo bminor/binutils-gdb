@@ -1,5 +1,8 @@
 Wed Jun  9 12:56:58 1993  K. Richard Pixley  (rich@cygnus.com)
 
+	* config/a29k/a29k.mt (TDEPFILES): drop minimon support.  It
+	  doesn't compile on solaris and is now obsolete.
+
 	* config/sparc/sun4os4.mh (XM_CLIBS): remove -lresolv.  This
 	  breaks stock sunos installations.
 
