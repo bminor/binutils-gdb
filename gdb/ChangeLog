@@ -1,3 +1,11 @@
+2000-09-24  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	* rs6000-tdep.c (rs6000_pop_frame):  Use PC_IN_CALL_DUMMY to test
+	for call dummy instead of accessing stop_stack_dummy, which does
+	not work if we `return' from a stop in a call dummy.
+	(rs6000_gdbarch_init):  Use generic_save_dummy_frame_tos for
+	dummy_frame_tos function to make PC_IN_CALL_DUMMY work.
+
 2000-09-23  Kevin Buettner  <kevinb@redhat.com>
 
 	* mdebugread.c (mdebug_next_symbol_text): Protoize.

@@ -671,8 +671,6 @@ skip_prologue (CORE_ADDR pc, struct rs6000_framedata *fdata)
   frames, etc. 
 *************************************************************************/
 
-extern int stop_stack_dummy;
-
 
 /* Pop the innermost frame, go back to the caller. */
 
@@ -687,7 +685,7 @@ rs6000_pop_frame (void)
   pc = read_pc ();
   sp = FRAME_FP (frame);
 
-  if (stop_stack_dummy)
+  if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     {
       generic_pop_dummy_frame ();
       flush_cached_frames ();
@@ -2140,6 +2138,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
   set_gdbarch_fix_call_dummy (gdbarch, rs6000_fix_call_dummy);
   set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
+  set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
   set_gdbarch_push_return_address (gdbarch, ppc_push_return_address);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
   set_gdbarch_coerce_float_to_double (gdbarch, rs6000_coerce_float_to_double);
