@@ -69,7 +69,7 @@ nllookup( address )
 	printf("[nllookup] %d (%d) probes, fall off\n", probes, nname-1);
       }
 #	    endif
-      return &nl[middle];
+      return &nl[middle+1];
     }
     fprintf( stderr , "[nllookup] binary search fails???\n" );
 #ifdef DEBUG
