@@ -1,3 +1,11 @@
+Tue Dec 28 15:08:00 1993  Fred Fish  (fnf@deneb.cygnus.com)
+
+	* solib.c (DEBUG_BASE):  Remove macro and all references.
+	* solib.c (debug_base_symbols):  Add array of symbols to lookup.
+	* solib.c (IGNORE_FIRST_LINK_MAP_ENTRY):  Add macro.
+	* solib.c (look_for_base, locate_base):  Use debug_base_symbols.
+	* solib.c (find_solib):  Use IGNORE_FIRST_LINK_MAP_ENTRY.
+
 Tue Dec 28 12:06:57 1993  Kung Hsu  (kung@cirdan.cygnus.com)
 
 	* c-exp.y : fix grammar to parse ellipsis (...)
