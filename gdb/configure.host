@@ -91,12 +91,12 @@ ia64-*-linux*)		gdb_host=linux ;;
 m680[01]0-sun-sunos3*)	gdb_host=sun2os3 ;;
 m680[01]0-sun-sunos4*)	gdb_host=sun2os4 ;;
 
-m68*-apollo*-sysv*)	gdb_host=apollo68v ;;
-m68*-apollo*-bsd*)	gdb_host=apollo68b ;;
+# OBSOLETE m68*-apollo*-sysv*)	gdb_host=apollo68v ;;
+# OBSOLETE m68*-apollo*-bsd*)	gdb_host=apollo68b ;;
 m68*-att-*)		gdb_host=3b1 ;;
 m68*-bull*-sysv*)	gdb_host=dpx2 ;;
-m68*-hp-bsd*)		gdb_host=hp300bsd ;;
-m68*-hp-hpux*)		gdb_host=hp300hpux ;;
+# OBSOLETE m68*-hp-bsd*)		gdb_host=hp300bsd ;;
+# OBSOLETE m68*-hp-hpux*)		gdb_host=hp300hpux ;;
 m68*-*-linux*)		gdb_host=linux ;;
 m68*-*-lynxos*)		gdb_host=m68klynx ;;
 m68*-*-netbsd*)		gdb_host=nbsdaout ;;

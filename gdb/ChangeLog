@@ -1,3 +1,25 @@
+2002-08-20  Andrew Cagney  <cagney@redhat.com>
+
+	* NEWS: Mention that the Apollo line was made obsolete.
+	* configure.tgt: Make m68*-apollo*-bsd*, m68*-hp-bsd*, and
+	m68*-hp-hpux* obsolete.
+	* configure.host: Make m68*-apollo*-sysv*, m68*-apollo*-bsd*,
+	m68*-hp-bsd* and m68*-hp-hpux* obsolete.
+	* buildsym.c (make_blockvector): Make static.
+	* buildsym.h (make_blockvector): Make extern declaration obsolete.
+	* Makefile.in (HFILES_NO_SRCDIR): Remove dst.h
+	(ALLDEPFILES): Remove dstread.c.
+	(dstread.o): Obsolete make rule.
+	* dstread.c: Makefile obsolete.
+	* dst.h: Ditto.
+	* config/m68k/hp300hpux.mt: Ditto.
+	* config/m68k/hp300hpux.mh: Ditto.
+	* config/m68k/hp300bsd.mt: Ditto.
+	* config/m68k/hp300bsd.mh: Ditto.
+	* config/m68k/apollo68b.mt: Ditto.
+	* config/m68k/apollo68v.mh: Ditto.
+	* config/m68k/apollo68b.mh: Ditto.
+
 2002-08-20  Michael Snyder  <msnyder@redhat.com>
 
 	* mips-tdep.c (mips_in_return_stub): Make static.

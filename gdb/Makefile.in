@@ -692,7 +692,7 @@ xcoffsolib_h =	xcoffsolib.h
 # right, it is probably easiest just to list .h files here directly.
 
 HFILES_NO_SRCDIR = bcache.h buildsym.h call-cmds.h coff-solib.h defs.h \
-	dst.h environ.h $(gdbcmd_h) gdb.h gdbcore.h \
+	environ.h $(gdbcmd_h) gdb.h gdbcore.h \
 	gdb-stabs.h $(inferior_h) language.h minimon.h monitor.h \
 	objfiles.h parser-defs.h serial.h solib.h \
 	symfile.h stabsread.h target.h terminal.h typeprint.h xcoffsolib.h \
@@ -1253,7 +1253,7 @@ ALLDEPFILES = a68v-nat.c \
 	avr-tdep.c \
 	coff-solib.c \
 	core-sol2.c core-regset.c core-aout.c corelow.c \
-	dcache.c delta68-nat.c dpx2-nat.c dstread.c exec.c fork-child.c \
+	dcache.c delta68-nat.c dpx2-nat.c exec.c fork-child.c \
 	go32-nat.c h8300-tdep.c h8500-tdep.c \
 	hp300ux-nat.c hppa-tdep.c hppab-nat.c hppah-nat.c hpread.c \
 	i386-tdep.c i386b-nat.c i386v-nat.c i386-linux-nat.c \
@@ -1525,9 +1525,9 @@ dink32-rom.o: dink32-rom.c $(monitor_h) $(bfd_h) $(gdb_wait_h) $(defs_h) \
 
 dpx2-nat.o: dpx2-nat.c $(defs_h) $(gdbcore_h) $(gdb_string_h)
 
-dstread.o: dstread.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(breakpoint_h) \
-	$(bfd_h) $(symfile_h) $(objfiles_h) $(buildsym_h) $(gdb_obstack_h) \
-	$(gdb_string_h) $(dst_h)
+# OBSOLETE dstread.o: dstread.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(breakpoint_h) \
+# OBSOLETE 	$(bfd_h) $(symfile_h) $(objfiles_h) $(buildsym_h) $(gdb_obstack_h) \
+# OBSOLETE 	$(gdb_string_h) $(dst_h)
 
 dwarf2cfi.o: dwarf2cfi.c $(defs_h) $(symtab_h) $(symfile_h) $(objfiles_h) \
 	$(target_h) $(inferior_h) $(regcache_h) $(dwarf2cfi_h)

@@ -1,1598 +1,1598 @@
-/* Read apollo DST symbol tables and convert to internal format, for GDB.
-   Contributed by Troy Rollo, University of NSW (troy@cbme.unsw.edu.au).
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000
-   Free Software Foundation, Inc.
-
-   This file is part of GDB.
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or
-   (at your option) any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
-
-#include "defs.h"
-#include "symtab.h"
-#include "gdbtypes.h"
-#include "breakpoint.h"
-#include "bfd.h"
-#include "symfile.h"
-#include "objfiles.h"
-#include "buildsym.h"
-#include "gdb_obstack.h"
-
-#include "gdb_string.h"
-
-#include "dst.h"
-
-CORE_ADDR cur_src_start_addr, cur_src_end_addr;
-dst_sec blocks_info, lines_info, symbols_info;
-
-/* Vector of line number information.  */
-
-static struct linetable *line_vector;
-
-/* Index of next entry to go in line_vector_index.  */
-
-static int line_vector_index;
-
-/* Last line number recorded in the line vector.  */
-
-static int prev_line_number;
-
-/* Number of elements allocated for line_vector currently.  */
-
-static int line_vector_length;
-
-static int init_dst_sections (int);
-
-static void read_dst_symtab (struct objfile *);
-
-static void find_dst_sections (bfd *, sec_ptr, PTR);
-
-static void dst_symfile_init (struct objfile *);
-
-static void dst_new_init (struct objfile *);
-
-static void dst_symfile_read (struct objfile *, int);
-
-static void dst_symfile_finish (struct objfile *);
-
-static void dst_end_symtab (struct objfile *);
-
-static void complete_symtab (char *, CORE_ADDR, unsigned int);
-
-static void dst_start_symtab (void);
-
-static void dst_record_line (int, CORE_ADDR);
-
-/* Manage the vector of line numbers.  */
-/* FIXME: Use record_line instead.  */
-
-static void
-dst_record_line (int line, CORE_ADDR pc)
-{
-  struct linetable_entry *e;
-  /* Make sure line vector is big enough.  */
-
-  if (line_vector_index + 2 >= line_vector_length)
-    {
-      line_vector_length *= 2;
-      line_vector = (struct linetable *)
-	xrealloc ((char *) line_vector, sizeof (struct linetable)
-		  + (line_vector_length
-		     * sizeof (struct linetable_entry)));
-    }
-
-  e = line_vector->item + line_vector_index++;
-  e->line = line;
-  e->pc = pc;
-}
-
-/* Start a new symtab for a new source file.
-   It indicates the start of data for one original source file.  */
-/* FIXME: use start_symtab, like coffread.c now does.  */
-
-static void
-dst_start_symtab (void)
-{
-  /* Initialize the source file line number information for this file.  */
-
-  if (line_vector)		/* Unlikely, but maybe possible? */
-    xfree (line_vector);
-  line_vector_index = 0;
-  line_vector_length = 1000;
-  prev_line_number = -2;	/* Force first line number to be explicit */
-  line_vector = (struct linetable *)
-    xmalloc (sizeof (struct linetable)
-	     + line_vector_length * sizeof (struct linetable_entry));
-}
-
-/* Save the vital information from when starting to read a file,
-   for use when closing off the current file.
-   NAME is the file name the symbols came from, START_ADDR is the first
-   text address for the file, and SIZE is the number of bytes of text.  */
-
-static void
-complete_symtab (char *name, CORE_ADDR start_addr, unsigned int size)
-{
-  last_source_file = savestring (name, strlen (name));
-  cur_src_start_addr = start_addr;
-  cur_src_end_addr = start_addr + size;
-
-  if (current_objfile->ei.entry_point >= cur_src_start_addr &&
-      current_objfile->ei.entry_point < cur_src_end_addr)
-    {
-      current_objfile->ei.entry_file_lowpc = cur_src_start_addr;
-      current_objfile->ei.entry_file_highpc = cur_src_end_addr;
-    }
-}
-
-/* Finish the symbol definitions for one main source file,
-   close off all the lexical contexts for that file
-   (creating struct block's for them), then make the
-   struct symtab for that file and put it in the list of all such. */
-/* FIXME: Use end_symtab, like coffread.c now does.  */
-
-static void
-dst_end_symtab (struct objfile *objfile)
-{
-  register struct symtab *symtab;
-  register struct blockvector *blockvector;
-  register struct linetable *lv;
-
-  /* Create the blockvector that points to all the file's blocks.  */
-
-  blockvector = make_blockvector (objfile);
-
-  /* Now create the symtab object for this source file.  */
-  symtab = allocate_symtab (last_source_file, objfile);
-
-  /* Fill in its components.  */
-  symtab->blockvector = blockvector;
-  symtab->free_code = free_linetable;
-  symtab->free_ptr = 0;
-  symtab->filename = last_source_file;
-  symtab->dirname = NULL;
-  symtab->debugformat = obsavestring ("Apollo DST", 10,
-				      &objfile->symbol_obstack);
-  lv = line_vector;
-  lv->nitems = line_vector_index;
-  symtab->linetable = (struct linetable *)
-    xrealloc ((char *) lv, (sizeof (struct linetable)
-			    + lv->nitems * sizeof (struct linetable_entry)));
-
-  free_named_symtabs (symtab->filename);
-
-  /* Reinitialize for beginning of new file. */
-  line_vector = 0;
-  line_vector_length = -1;
-  last_source_file = NULL;
-}
-
-/* dst_symfile_init ()
-   is the dst-specific initialization routine for reading symbols.
-
-   We will only be called if this is a DST or DST-like file.
-   BFD handles figuring out the format of the file, and code in symtab.c
-   uses BFD's determination to vector to us.
-
-   The ultimate result is a new symtab (or, FIXME, eventually a psymtab).  */
-
-static void
-dst_symfile_init (struct objfile *objfile)
-{
-  asection *section;
-  bfd *abfd = objfile->obfd;
-
-  init_entry_point_info (objfile);
-
-}
-
-/* This function is called for every section; it finds the outer limits
-   of the line table (minimum and maximum file offset) so that the
-   mainline code can read the whole thing for efficiency.  */
-
-/* ARGSUSED */
-static void
-find_dst_sections (bfd *abfd, sec_ptr asect, PTR vpinfo)
-{
-  int size, count;
-  long base;
-  file_ptr offset, maxoff;
-  dst_sec *section;
-
-/* WARNING WILL ROBINSON!  ACCESSING BFD-PRIVATE DATA HERE!  FIXME!  */
-  size = asect->_raw_size;
-  offset = asect->filepos;
-  base = asect->vma;
-/* End of warning */
-
-  section = NULL;
-  if (!strcmp (asect->name, ".blocks"))
-    section = &blocks_info;
-  else if (!strcmp (asect->name, ".lines"))
-    section = &lines_info;
-  else if (!strcmp (asect->name, ".symbols"))
-    section = &symbols_info;
-  if (!section)
-    return;
-  section->size = size;
-  section->position = offset;
-  section->base = base;
-}
-
-
-/* The BFD for this file -- only good while we're actively reading
-   symbols into a psymtab or a symtab.  */
-
-static bfd *symfile_bfd;
-
-/* Read a symbol file, after initialization by dst_symfile_init.  */
-/* FIXME!  Addr and Mainline are not used yet -- this will not work for
-   shared libraries or add_file!  */
-
-/* ARGSUSED */
-static void
-dst_symfile_read (struct objfile *objfile, int mainline)
-{
-  bfd *abfd = objfile->obfd;
-  char *name = bfd_get_filename (abfd);
-  int desc;
-  register int val;
-  int num_symbols;
-  int symtab_offset;
-  int stringtab_offset;
-
-  symfile_bfd = abfd;		/* Kludge for swap routines */
-
-/* WARNING WILL ROBINSON!  ACCESSING BFD-PRIVATE DATA HERE!  FIXME!  */
-  desc = fileno ((FILE *) (abfd->iostream));	/* File descriptor */
-
-  /* Read the line number table, all at once.  */
-  bfd_map_over_sections (abfd, find_dst_sections, (PTR) NULL);
-
-  val = init_dst_sections (desc);
-  if (val < 0)
-    error ("\"%s\": error reading debugging symbol tables\n", name);
-
-  init_minimal_symbol_collection ();
-  make_cleanup_discard_minimal_symbols ();
-
-  /* Now that the executable file is positioned at symbol table,
-     process it and define symbols accordingly.  */
-
-  read_dst_symtab (objfile);
-
-  /* Sort symbols alphabetically within each block.  */
-
-  {
-    struct symtab *s;
-    for (s = objfile->symtabs; s != NULL; s = s->next)
-      {
-	sort_symtab_syms (s);
-      }
-  }
-
-  /* Install any minimal symbols that have been collected as the current
-     minimal symbols for this objfile. */
-
-  install_minimal_symbols (objfile);
-}
-
-static void
-dst_new_init (struct objfile *ignore)
-{
-  /* Nothin' to do */
-}
-
-/* Perform any local cleanups required when we are done with a particular
-   objfile.  I.E, we are in the process of discarding all symbol information
-   for an objfile, freeing up all memory held for it, and unlinking the
-   objfile struct from the global list of known objfiles. */
-
-static void
-dst_symfile_finish (struct objfile *objfile)
-{
-  /* Nothing to do */
-}
-
-
-/* Get the next line number from the DST. Returns 0 when we hit an
- * end directive or cannot continue for any other reason.
- *
- * Note that ordinary pc deltas are multiplied by two. Apparently
- * this is what was really intended.
- */
-static int
-get_dst_line (signed char **buffer, long *pc)
-{
-  static last_pc = 0;
-  static long last_line = 0;
-  static int last_file = 0;
-  dst_ln_entry_ptr_t entry;
-  int size;
-  dst_src_loc_t *src_loc;
-
-  if (*pc != -1)
-    {
-      last_pc = *pc;
-      *pc = -1;
-    }
-  entry = (dst_ln_entry_ptr_t) * buffer;
-
-  while (dst_ln_ln_delta (*entry) == dst_ln_escape_flag)
-    {
-      switch (entry->esc.esc_code)
-	{
-	case dst_ln_pad:
-	  size = 1;		/* pad byte */
-	  break;
-	case dst_ln_file:
-	  /* file escape.  Next 4 bytes are a dst_src_loc_t */
-	  size = 5;
-	  src_loc = (dst_src_loc_t *) (*buffer + 1);
-	  last_line = src_loc->line_number;
-	  last_file = src_loc->file_index;
-	  break;
-	case dst_ln_dln1_dpc1:
-	  /* 1 byte line delta, 1 byte pc delta */
-	  last_line += (*buffer)[1];
-	  last_pc += 2 * (unsigned char) (*buffer)[2];
-	  dst_record_line (last_line, last_pc);
-	  size = 3;
-	  break;
-	case dst_ln_dln2_dpc2:
-	  /* 2 bytes line delta, 2 bytes pc delta */
-	  last_line += *(short *) (*buffer + 1);
-	  last_pc += 2 * (*(short *) (*buffer + 3));
-	  size = 5;
-	  dst_record_line (last_line, last_pc);
-	  break;
-	case dst_ln_ln4_pc4:
-	  /* 4 bytes ABSOLUTE line number, 4 bytes ABSOLUTE pc */
-	  last_line = *(unsigned long *) (*buffer + 1);
-	  last_pc = *(unsigned long *) (*buffer + 5);
-	  size = 9;
-	  dst_record_line (last_line, last_pc);
-	  break;
-	case dst_ln_dln1_dpc0:
-	  /* 1 byte line delta, pc delta = 0 */
-	  size = 2;
-	  last_line += (*buffer)[1];
-	  break;
-	case dst_ln_ln_off_1:
-	  /* statement escape, stmt # = 1 (2nd stmt on line) */
-	  size = 1;
-	  break;
-	case dst_ln_ln_off:
-	  /* statement escape, stmt # = next byte */
-	  size = 2;
-	  break;
-	case dst_ln_entry:
-	  /* entry escape, next byte is entry number */
-	  size = 2;
-	  break;
-	case dst_ln_exit:
-	  /* exit escape */
-	  size = 1;
-	  break;
-	case dst_ln_stmt_end:
-	  /* gap escape, 4 bytes pc delta */
-	  size = 5;
-	  /* last_pc += 2 * (*(long *) (*buffer + 1)); */
-	  /* Apparently this isn't supposed to actually modify
-	   * the pc value. Totally weird.
-	   */
-	  break;
-	case dst_ln_escape_11:
-	case dst_ln_escape_12:
-	case dst_ln_escape_13:
-	  size = 1;
-	  break;
-	case dst_ln_nxt_byte:
-	  /* This shouldn't happen. If it does, we're SOL */
-	  return 0;
-	  break;
-	case dst_ln_end:
-	  /* end escape, final entry follows */
-	  return 0;
-	}
-      *buffer += (size < 0) ? -size : size;
-      entry = (dst_ln_entry_ptr_t) * buffer;
-    }
-  last_line += dst_ln_ln_delta (*entry);
-  last_pc += entry->delta.pc_delta * 2;
-  (*buffer)++;
-  dst_record_line (last_line, last_pc);
-  return 1;
-}
-
-static void
-enter_all_lines (char *buffer, long address)
-{
-  if (buffer)
-    while (get_dst_line (&buffer, &address));
-}
-
-static int
-get_dst_entry (char *buffer, dst_rec_ptr_t *ret_entry)
-{
-  int size;
-  dst_rec_ptr_t entry;
-  static int last_type;
-  int ar_size;
-  static unsigned lu3;
-
-  entry = (dst_rec_ptr_t) buffer;
-  switch (entry->rec_type)
-    {
-    case dst_typ_pad:
-      size = 0;
-      break;
-    case dst_typ_comp_unit:
-      size = sizeof (DST_comp_unit (entry));
-      break;
-    case dst_typ_section_tab:
-      size = sizeof (DST_section_tab (entry))
-	+ ((int) DST_section_tab (entry).number_of_sections
-	   - dst_dummy_array_size) * sizeof (long);
-      break;
-    case dst_typ_file_tab:
-      size = sizeof (DST_file_tab (entry))
-	+ ((int) DST_file_tab (entry).number_of_files
-	   - dst_dummy_array_size) * sizeof (dst_file_desc_t);
-      break;
-    case dst_typ_block:
-      size = sizeof (DST_block (entry))
-	+ ((int) DST_block (entry).n_of_code_ranges
-	   - dst_dummy_array_size) * sizeof (dst_code_range_t);
-      break;
-    case dst_typ_5:
-      size = -1;
-      break;
-    case dst_typ_var:
-      size = sizeof (DST_var (entry)) -
-	sizeof (dst_var_loc_long_t) * dst_dummy_array_size +
-	DST_var (entry).no_of_locs *
-	(DST_var (entry).short_locs ?
-	 sizeof (dst_var_loc_short_t) :
-	 sizeof (dst_var_loc_long_t));
-      break;
-    case dst_typ_pointer:
-      size = sizeof (DST_pointer (entry));
-      break;
-    case dst_typ_array:
-      size = sizeof (DST_array (entry));
-      break;
-    case dst_typ_subrange:
-      size = sizeof (DST_subrange (entry));
-      break;
-    case dst_typ_set:
-      size = sizeof (DST_set (entry));
-      break;
-    case dst_typ_implicit_enum:
-      size = sizeof (DST_implicit_enum (entry))
-	+ ((int) DST_implicit_enum (entry).nelems
-	   - dst_dummy_array_size) * sizeof (dst_rel_offset_t);
-      break;
-    case dst_typ_explicit_enum:
-      size = sizeof (DST_explicit_enum (entry))
-	+ ((int) DST_explicit_enum (entry).nelems
-	   - dst_dummy_array_size) * sizeof (dst_enum_elem_t);
-      break;
-    case dst_typ_short_rec:
-      size = sizeof (DST_short_rec (entry))
-	+ DST_short_rec (entry).nfields * sizeof (dst_short_field_t)
-	- dst_dummy_array_size * sizeof (dst_field_t);
-      break;
-    case dst_typ_short_union:
-      size = sizeof (DST_short_union (entry))
-	+ DST_short_union (entry).nfields * sizeof (dst_short_field_t)
-	- dst_dummy_array_size * sizeof (dst_field_t);
-      break;
-    case dst_typ_file:
-      size = sizeof (DST_file (entry));
-      break;
-    case dst_typ_offset:
-      size = sizeof (DST_offset (entry));
-      break;
-    case dst_typ_alias:
-      size = sizeof (DST_alias (entry));
-      break;
-    case dst_typ_signature:
-      size = sizeof (DST_signature (entry)) +
-	((int) DST_signature (entry).nargs -
-	 dst_dummy_array_size) * sizeof (dst_arg_t);
-      break;
-    case dst_typ_21:
-      size = -1;
-      break;
-    case dst_typ_old_label:
-      size = sizeof (DST_old_label (entry));
-      break;
-    case dst_typ_scope:
-      size = sizeof (DST_scope (entry));
-      break;
-    case dst_typ_end_scope:
-      size = 0;
-      break;
-    case dst_typ_25:
-    case dst_typ_26:
-      size = -1;
-      break;
-    case dst_typ_string_tab:
-    case dst_typ_global_name_tab:
-      size = sizeof (DST_string_tab (entry))
-	+ DST_string_tab (entry).length
-	- dst_dummy_array_size;
-      break;
-    case dst_typ_forward:
-      size = sizeof (DST_forward (entry));
-      get_dst_entry ((char *) entry + DST_forward (entry).rec_off, &entry);
-      break;
-    case dst_typ_aux_size:
-      size = sizeof (DST_aux_size (entry));
-      break;
-    case dst_typ_aux_align:
-      size = sizeof (DST_aux_align (entry));
-      break;
-    case dst_typ_aux_field_size:
-      size = sizeof (DST_aux_field_size (entry));
-      break;
-    case dst_typ_aux_field_off:
-      size = sizeof (DST_aux_field_off (entry));
-      break;
-    case dst_typ_aux_field_align:
-      size = sizeof (DST_aux_field_align (entry));
-      break;
-    case dst_typ_aux_qual:
-      size = sizeof (DST_aux_qual (entry));
-      break;
-    case dst_typ_aux_var_bound:
-      size = sizeof (DST_aux_var_bound (entry));
-      break;
-    case dst_typ_extension:
-      size = DST_extension (entry).rec_size;
-      break;
-    case dst_typ_string:
-      size = sizeof (DST_string (entry));
-      break;
-    case dst_typ_old_entry:
-      size = 48;		/* Obsolete entry type */
-      break;
-    case dst_typ_const:
-      size = sizeof (DST_const (entry))
-	+ DST_const (entry).value.length
-	- sizeof (DST_const (entry).value.val);
-      break;
-    case dst_typ_reference:
-      size = sizeof (DST_reference (entry));
-      break;
-    case dst_typ_old_record:
-    case dst_typ_old_union:
-    case dst_typ_record:
-    case dst_typ_union:
-      size = sizeof (DST_record (entry))
-	+ ((int) DST_record (entry).nfields
-	   - dst_dummy_array_size) * sizeof (dst_field_t);
-      break;
-    case dst_typ_aux_type_deriv:
-      size = sizeof (DST_aux_type_deriv (entry));
-      break;
-    case dst_typ_locpool:
-      size = sizeof (DST_locpool (entry))
-	+ ((int) DST_locpool (entry).length -
-	   dst_dummy_array_size);
-      break;
-    case dst_typ_variable:
-      size = sizeof (DST_variable (entry));
-      break;
-    case dst_typ_label:
-      size = sizeof (DST_label (entry));
-      break;
-    case dst_typ_entry:
-      size = sizeof (DST_entry (entry));
-      break;
-    case dst_typ_aux_lifetime:
-      size = sizeof (DST_aux_lifetime (entry));
-      break;
-    case dst_typ_aux_ptr_base:
-      size = sizeof (DST_aux_ptr_base (entry));
-      break;
-    case dst_typ_aux_src_range:
-      size = sizeof (DST_aux_src_range (entry));
-      break;
-    case dst_typ_aux_reg_val:
-      size = sizeof (DST_aux_reg_val (entry));
-      break;
-    case dst_typ_aux_unit_names:
-      size = sizeof (DST_aux_unit_names (entry))
-	+ ((int) DST_aux_unit_names (entry).number_of_names
-	   - dst_dummy_array_size) * sizeof (dst_rel_offset_t);
-      break;
-    case dst_typ_aux_sect_info:
-      size = sizeof (DST_aux_sect_info (entry))
-	+ ((int) DST_aux_sect_info (entry).number_of_refs
-	   - dst_dummy_array_size) * sizeof (dst_sect_ref_t);
-      break;
-    default:
-      size = -1;
-      break;
-    }
-  if (size == -1)
-    {
-      fprintf_unfiltered (gdb_stderr, "Warning: unexpected DST entry type (%d) found\nLast valid entry was of type: %d\n",
-			  (int) entry->rec_type,
-			  last_type);
-      fprintf_unfiltered (gdb_stderr, "Last unknown_3 value: %d\n", lu3);
-      size = 0;
-    }
-  else
-    last_type = entry->rec_type;
-  if (size & 1)			/* Align on a word boundary */
-    size++;
-  size += 2;
-  *ret_entry = entry;
-  return size;
-}
-
-static int
-next_dst_entry (char **buffer, dst_rec_ptr_t *entry, dst_sec *table)
-{
-  if (*buffer - table->buffer >= table->size)
-    {
-      *entry = NULL;
-      return 0;
-    }
-  *buffer += get_dst_entry (*buffer, entry);
-  return 1;
-}
-
-#define NEXT_BLK(a, b) next_dst_entry(a, b, &blocks_info)
-#define NEXT_SYM(a, b) next_dst_entry(a, b, &symbols_info)
-#define	DST_OFFSET(a, b) ((char *) (a) + (b))
-
-static dst_rec_ptr_t section_table = NULL;
-
-char *
-get_sec_ref (dst_sect_ref_t *ref)
-{
-  dst_sec *section = NULL;
-  long offset;
-
-  if (!section_table || !ref->sect_index)
-    return NULL;
-  offset = DST_section_tab (section_table).section_base[ref->sect_index - 1]
-    + ref->sect_offset;
-  if (offset >= blocks_info.base &&
-      offset < blocks_info.base + blocks_info.size)
-    section = &blocks_info;
-  else if (offset >= symbols_info.base &&
-	   offset < symbols_info.base + symbols_info.size)
-    section = &symbols_info;
-  else if (offset >= lines_info.base &&
-	   offset < lines_info.base + lines_info.size)
-    section = &lines_info;
-  if (!section)
-    return NULL;
-  return section->buffer + (offset - section->base);
-}
-
-CORE_ADDR
-dst_get_addr (int section, long offset)
-{
-  if (!section_table || !section)
-    return 0;
-  return DST_section_tab (section_table).section_base[section - 1] + offset;
-}
-
-CORE_ADDR
-dst_sym_addr (dst_sect_ref_t *ref)
-{
-  if (!section_table || !ref->sect_index)
-    return 0;
-  return DST_section_tab (section_table).section_base[ref->sect_index - 1]
-    + ref->sect_offset;
-}
-
-static struct symbol *
-create_new_symbol (struct objfile *objfile, char *name)
-{
-  struct symbol *sym = (struct symbol *)
-  obstack_alloc (&objfile->symbol_obstack, sizeof (struct symbol));
-  memset (sym, 0, sizeof (struct symbol));
-  SYMBOL_NAME (sym) = obsavestring (name, strlen (name),
-				    &objfile->symbol_obstack);
-  SYMBOL_VALUE (sym) = 0;
-  SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
-
-  SYMBOL_CLASS (sym) = LOC_BLOCK;
-  return sym;
-};
-
-static struct type *decode_dst_type (struct objfile *, dst_rec_ptr_t);
-
-static struct type *
-decode_type_desc (struct objfile *objfile, dst_type_t *type_desc,
-		  dst_rec_ptr_t base)
-{
-  struct type *type;
-  dst_rec_ptr_t entry;
-  if (type_desc->std_type.user_defined_type)
-    {
-      entry = (dst_rec_ptr_t) DST_OFFSET (base,
-					  dst_user_type_offset (*type_desc));
-      type = decode_dst_type (objfile, entry);
-    }
-  else
-    {
-      switch (type_desc->std_type.dtc)
-	{
-	case dst_int8_type:
-	  type = builtin_type_signed_char;
-	  break;
-	case dst_int16_type:
-	  type = builtin_type_short;
-	  break;
-	case dst_int32_type:
-	  type = builtin_type_long;
-	  break;
-	case dst_uint8_type:
-	  type = builtin_type_unsigned_char;
-	  break;
-	case dst_uint16_type:
-	  type = builtin_type_unsigned_short;
-	  break;
-	case dst_uint32_type:
-	  type = builtin_type_unsigned_long;
-	  break;
-	case dst_real32_type:
-	  type = builtin_type_float;
-	  break;
-	case dst_real64_type:
-	  type = builtin_type_double;
-	  break;
-	case dst_complex_type:
-	  type = builtin_type_complex;
-	  break;
-	case dst_dcomplex_type:
-	  type = builtin_type_double_complex;
-	  break;
-	case dst_bool8_type:
-	  type = builtin_type_char;
-	  break;
-	case dst_bool16_type:
-	  type = builtin_type_short;
-	  break;
-	case dst_bool32_type:
-	  type = builtin_type_long;
-	  break;
-	case dst_char_type:
-	  type = builtin_type_char;
-	  break;
-	  /* The next few are more complex. I will take care
-	   * of them properly at a later point.
-	   */
-	case dst_string_type:
-	  type = builtin_type_void;
-	  break;
-	case dst_ptr_type:
-	  type = builtin_type_void;
-	  break;
-	case dst_set_type:
-	  type = builtin_type_void;
-	  break;
-	case dst_proc_type:
-	  type = builtin_type_void;
-	  break;
-	case dst_func_type:
-	  type = builtin_type_void;
-	  break;
-	  /* Back tto some ordinary ones */
-	case dst_void_type:
-	  type = builtin_type_void;
-	  break;
-	case dst_uchar_type:
-	  type = builtin_type_unsigned_char;
-	  break;
-	default:
-	  type = builtin_type_void;
-	  break;
-	}
-    }
-  return type;
-}
-
-struct structure_list
-{
-  struct structure_list *next;
-  struct type *type;
-};
-
-static struct structure_list *struct_list = NULL;
-
-static struct type *
-find_dst_structure (char *name)
-{
-  struct structure_list *element;
-
-  for (element = struct_list; element; element = element->next)
-    if (!strcmp (name, TYPE_NAME (element->type)))
-      return element->type;
-  return NULL;
-}
-
-
-static struct type *
-decode_dst_structure (struct objfile *objfile, dst_rec_ptr_t entry, int code,
-		      int version)
-{
-  struct type *type, *child_type;
-  char *struct_name;
-  char *name, *field_name;
-  int i;
-  int fieldoffset, fieldsize;
-  dst_type_t type_desc;
-  struct structure_list *element;
-
-  struct_name = DST_OFFSET (entry, DST_record (entry).noffset);
-  name = concat ((code == TYPE_CODE_UNION) ? "union " : "struct ",
-		 struct_name, NULL);
-  type = find_dst_structure (name);
-  if (type)
-    {
-      xfree (name);
-      return type;
-    }
-  type = alloc_type (objfile);
-  TYPE_NAME (type) = obstack_copy0 (&objfile->symbol_obstack,
-				    name, strlen (name));
-  xfree (name);
-  TYPE_CODE (type) = code;
-  TYPE_LENGTH (type) = DST_record (entry).size;
-  TYPE_NFIELDS (type) = DST_record (entry).nfields;
-  TYPE_FIELDS (type) = (struct field *)
-    obstack_alloc (&objfile->symbol_obstack, sizeof (struct field) *
-		   DST_record (entry).nfields);
-  fieldoffset = fieldsize = 0;
-  INIT_CPLUS_SPECIFIC (type);
-  element = (struct structure_list *)
-    xmalloc (sizeof (struct structure_list));
-  element->type = type;
-  element->next = struct_list;
-  struct_list = element;
-  for (i = 0; i < DST_record (entry).nfields; i++)
-    {
-      switch (version)
-	{
-	case 2:
-	  field_name = DST_OFFSET (entry,
-				   DST_record (entry).f.ofields[i].noffset);
-	  fieldoffset = DST_record (entry).f.ofields[i].foffset * 8 +
-	    DST_record (entry).f.ofields[i].bit_offset;
-	  fieldsize = DST_record (entry).f.ofields[i].size;
-	  type_desc = DST_record (entry).f.ofields[i].type_desc;
-	  break;
-	case 1:
-	  field_name = DST_OFFSET (entry,
-				   DST_record (entry).f.fields[i].noffset);
-	  type_desc = DST_record (entry).f.fields[i].type_desc;
-	  switch (DST_record (entry).f.fields[i].f.field_loc.format_tag)
-	    {
-	    case dst_field_byte:
-	      fieldoffset = DST_record (entry).f.
-		fields[i].f.field_byte.offset * 8;
-	      fieldsize = -1;
-	      break;
-	    case dst_field_bit:
-	      fieldoffset = DST_record (entry).f.
-		fields[i].f.field_bit.byte_offset * 8 +
-		DST_record (entry).f.
-		fields[i].f.field_bit.bit_offset;
-	      fieldsize = DST_record (entry).f.
-		fields[i].f.field_bit.nbits;
-	      break;
-	    case dst_field_loc:
-	      fieldoffset += fieldsize;
-	      fieldsize = -1;
-	      break;
-	    }
-	  break;
-	case 0:
-	  field_name = DST_OFFSET (entry,
-				   DST_record (entry).f.sfields[i].noffset);
-	  fieldoffset = DST_record (entry).f.sfields[i].foffset;
-	  type_desc = DST_record (entry).f.sfields[i].type_desc;
-	  if (i < DST_record (entry).nfields - 1)
-	    fieldsize = DST_record (entry).f.sfields[i + 1].foffset;
-	  else
-	    fieldsize = DST_record (entry).size;
-	  fieldsize -= fieldoffset;
-	  fieldoffset *= 8;
-	  fieldsize *= 8;
-	}
-      TYPE_FIELDS (type)[i].name =
-	obstack_copy0 (&objfile->symbol_obstack,
-		       field_name, strlen (field_name));
-      TYPE_FIELDS (type)[i].type = decode_type_desc (objfile,
-						     &type_desc,
-						     entry);
-      if (fieldsize == -1)
-	fieldsize = TYPE_LENGTH (TYPE_FIELDS (type)[i].type) *
-	  8;
-      TYPE_FIELDS (type)[i].bitsize = fieldsize;
-      TYPE_FIELDS (type)[i].bitpos = fieldoffset;
-    }
-  return type;
-}
-
-static struct type *
-decode_dst_type (struct objfile *objfile, dst_rec_ptr_t entry)
-{
-  struct type *child_type, *type, *range_type, *index_type;
-
-  switch (entry->rec_type)
-    {
-    case dst_typ_var:
-      return decode_type_desc (objfile,
-			       &DST_var (entry).type_desc,
-			       entry);
-      break;
-    case dst_typ_variable:
-      return decode_type_desc (objfile,
-			       &DST_variable (entry).type_desc,
-			       entry);
-      break;
-    case dst_typ_short_rec:
-      return decode_dst_structure (objfile, entry, TYPE_CODE_STRUCT, 0);
-    case dst_typ_short_union:
-      return decode_dst_structure (objfile, entry, TYPE_CODE_UNION, 0);
-    case dst_typ_union:
-      return decode_dst_structure (objfile, entry, TYPE_CODE_UNION, 1);
-    case dst_typ_record:
-      return decode_dst_structure (objfile, entry, TYPE_CODE_STRUCT, 1);
-    case dst_typ_old_union:
-      return decode_dst_structure (objfile, entry, TYPE_CODE_UNION, 2);
-    case dst_typ_old_record:
-      return decode_dst_structure (objfile, entry, TYPE_CODE_STRUCT, 2);
-    case dst_typ_pointer:
-      return make_pointer_type (
-				 decode_type_desc (objfile,
-					     &DST_pointer (entry).type_desc,
-						   entry),
-				 NULL);
-    case dst_typ_array:
-      child_type = decode_type_desc (objfile,
-				     &DST_pointer (entry).type_desc,
-				     entry);
-      index_type = lookup_fundamental_type (objfile,
-					    FT_INTEGER);
-      range_type = create_range_type ((struct type *) NULL,
-				      index_type, DST_array (entry).lo_bound,
-				      DST_array (entry).hi_bound);
-      return create_array_type ((struct type *) NULL, child_type,
-				range_type);
-    case dst_typ_alias:
-      return decode_type_desc (objfile,
-			       &DST_alias (entry).type_desc,
-			       entry);
-    default:
-      return builtin_type_int;
-    }
-}
-
-struct symbol_list
-{
-  struct symbol_list *next;
-  struct symbol *symbol;
-};
-
-static struct symbol_list *dst_global_symbols = NULL;
-static int total_globals = 0;
-
-static void
-decode_dst_locstring (char *locstr, struct symbol *sym)
-{
-  dst_loc_entry_t *entry, *next_entry;
-  CORE_ADDR temp;
-  int count = 0;
-
-  while (1)
-    {
-      if (count++ == 100)
-	{
-	  fprintf_unfiltered (gdb_stderr, "Error reading locstring\n");
-	  break;
-	}
-      entry = (dst_loc_entry_t *) locstr;
-      next_entry = (dst_loc_entry_t *) (locstr + 1);
-      switch (entry->header.code)
-	{
-	case dst_lsc_end:	/* End of string */
-	  return;
-	case dst_lsc_indirect:	/* Indirect through previous. Arg == 6 */
-	  /* Or register ax x == arg */
-	  if (entry->header.arg < 6)
-	    {
-	      SYMBOL_CLASS (sym) = LOC_REGISTER;
-	      SYMBOL_VALUE (sym) = entry->header.arg + 8;
-	    }
-	  /* We predict indirects */
-	  locstr++;
-	  break;
-	case dst_lsc_dreg:
-	  SYMBOL_CLASS (sym) = LOC_REGISTER;
-	  SYMBOL_VALUE (sym) = entry->header.arg;
-	  locstr++;
-	  break;
-	case dst_lsc_section:	/* Section (arg+1) */
-	  SYMBOL_VALUE (sym) = dst_get_addr (entry->header.arg + 1, 0);
-	  locstr++;
-	  break;
-	case dst_lsc_sec_byte:	/* Section (next_byte+1) */
-	  SYMBOL_VALUE (sym) = dst_get_addr (locstr[1] + 1, 0);
-	  locstr += 2;
-	  break;
-	case dst_lsc_add:	/* Add (arg+1)*2 */
-	case dst_lsc_sub:	/* Subtract (arg+1)*2 */
-	  temp = (entry->header.arg + 1) * 2;
-	  locstr++;
-	  if (*locstr == dst_multiply_256)
-	    {
-	      temp <<= 8;
-	      locstr++;
-	    }
-	  switch (entry->header.code)
-	    {
-	    case dst_lsc_add:
-	      if (SYMBOL_CLASS (sym) == LOC_LOCAL)
-		SYMBOL_CLASS (sym) = LOC_ARG;
-	      SYMBOL_VALUE (sym) += temp;
-	      break;
-	    case dst_lsc_sub:
-	      SYMBOL_VALUE (sym) -= temp;
-	      break;
-	    }
-	  break;
-	case dst_lsc_add_byte:
-	case dst_lsc_sub_byte:
-	  switch (entry->header.arg & 0x03)
-	    {
-	    case 1:
-	      temp = (unsigned char) locstr[1];
-	      locstr += 2;
-	      break;
-	    case 2:
-	      temp = *(unsigned short *) (locstr + 1);
-	      locstr += 3;
-	      break;
-	    case 3:
-	      temp = *(unsigned long *) (locstr + 1);
-	      locstr += 5;
-	      break;
-	    }
-	  if (*locstr == dst_multiply_256)
-	    {
-	      temp <<= 8;
-	      locstr++;
-	    }
-	  switch (entry->header.code)
-	    {
-	    case dst_lsc_add_byte:
-	      if (SYMBOL_CLASS (sym) == LOC_LOCAL)
-		SYMBOL_CLASS (sym) = LOC_ARG;
-	      SYMBOL_VALUE (sym) += temp;
-	      break;
-	    case dst_lsc_sub_byte:
-	      SYMBOL_VALUE (sym) -= temp;
-	      break;
-	    }
-	  break;
-	case dst_lsc_sbreg:	/* Stack base register (frame pointer). Arg==0 */
-	  if (next_entry->header.code != dst_lsc_indirect)
-	    {
-	      SYMBOL_VALUE (sym) = 0;
-	      SYMBOL_CLASS (sym) = LOC_STATIC;
-	      return;
-	    }
-	  SYMBOL_VALUE (sym) = 0;
-	  SYMBOL_CLASS (sym) = LOC_LOCAL;
-	  locstr++;
-	  break;
-	default:
-	  SYMBOL_VALUE (sym) = 0;
-	  SYMBOL_CLASS (sym) = LOC_STATIC;
-	  return;
-	}
-    }
-}
-
-static struct symbol_list *
-process_dst_symbols (struct objfile *objfile, dst_rec_ptr_t entry, char *name,
-		     int *nsyms_ret)
-{
-  struct symbol_list *list = NULL, *element;
-  struct symbol *sym;
-  char *symname;
-  int nsyms = 0;
-  char *location;
-  long line;
-  dst_type_t symtype;
-  struct type *type;
-  dst_var_attr_t attr;
-  dst_var_loc_t loc_type;
-  unsigned loc_index;
-  long loc_value;
-
-  if (!entry)
-    {
-      *nsyms_ret = 0;
-      return NULL;
-    }
-  location = (char *) entry;
-  while (NEXT_SYM (&location, &entry) &&
-	 entry->rec_type != dst_typ_end_scope)
-    {
-      if (entry->rec_type == dst_typ_var)
-	{
-	  if (DST_var (entry).short_locs)
-	    {
-	      loc_type = DST_var (entry).locs.shorts[0].loc_type;
-	      loc_index = DST_var (entry).locs.shorts[0].loc_index;
-	      loc_value = DST_var (entry).locs.shorts[0].location;
-	    }
-	  else
-	    {
-	      loc_type = DST_var (entry).locs.longs[0].loc_type;
-	      loc_index = DST_var (entry).locs.longs[0].loc_index;
-	      loc_value = DST_var (entry).locs.longs[0].location;
-	    }
-	  if (loc_type == dst_var_loc_external)
-	    continue;
-	  symname = DST_OFFSET (entry, DST_var (entry).noffset);
-	  line = DST_var (entry).src_loc.line_number;
-	  symtype = DST_var (entry).type_desc;
-	  attr = DST_var (entry).attributes;
-	}
-      else if (entry->rec_type == dst_typ_variable)
-	{
-	  symname = DST_OFFSET (entry,
-				DST_variable (entry).noffset);
-	  line = DST_variable (entry).src_loc.line_number;
-	  symtype = DST_variable (entry).type_desc;
-	  attr = DST_variable (entry).attributes;
-	}
-      else
-	{
-	  continue;
-	}
-      if (symname && name && !strcmp (symname, name))
-	/* It's the function return value */
-	continue;
-      sym = create_new_symbol (objfile, symname);
-
-      if ((attr & (1 << dst_var_attr_global)) ||
-	  (attr & (1 << dst_var_attr_static)))
-	SYMBOL_CLASS (sym) = LOC_STATIC;
-      else
-	SYMBOL_CLASS (sym) = LOC_LOCAL;
-      SYMBOL_LINE (sym) = line;
-      SYMBOL_TYPE (sym) = decode_type_desc (objfile, &symtype,
-					    entry);
-      SYMBOL_VALUE (sym) = 0;
-      switch (entry->rec_type)
-	{
-	case dst_typ_var:
-	  switch (loc_type)
-	    {
-	    case dst_var_loc_abs:
-	      SYMBOL_VALUE_ADDRESS (sym) = loc_value;
-	      break;
-	    case dst_var_loc_sect_off:
-	    case dst_var_loc_ind_sect_off:	/* What is this? */
-	      SYMBOL_VALUE_ADDRESS (sym) = dst_get_addr (
-							  loc_index,
-							  loc_value);
-	      break;
-	    case dst_var_loc_ind_reg_rel:	/* What is this? */
-	    case dst_var_loc_reg_rel:
-	      /* If it isn't fp relative, specify the
-	       * register it's relative to.
-	       */
-	      if (loc_index)
-		{
-		  sym->aux_value.basereg = loc_index;
-		}
-	      SYMBOL_VALUE (sym) = loc_value;
-	      if (loc_value > 0 &&
-		  SYMBOL_CLASS (sym) == LOC_BASEREG)
-		SYMBOL_CLASS (sym) = LOC_BASEREG_ARG;
-	      break;
-	    case dst_var_loc_reg:
-	      SYMBOL_VALUE (sym) = loc_index;
-	      SYMBOL_CLASS (sym) = LOC_REGISTER;
-	      break;
-	    }
-	  break;
-	case dst_typ_variable:
-	  /* External variable..... don't try to interpret
-	   * its nonexistant locstring.
-	   */
-	  if (DST_variable (entry).loffset == -1)
-	    continue;
-	  decode_dst_locstring (DST_OFFSET (entry,
-					    DST_variable (entry).loffset),
-				sym);
-	}
-      element = (struct symbol_list *)
-	xmalloc (sizeof (struct symbol_list));
-
-      if (attr & (1 << dst_var_attr_global))
-	{
-	  element->next = dst_global_symbols;
-	  dst_global_symbols = element;
-	  total_globals++;
-	}
-      else
-	{
-	  element->next = list;
-	  list = element;
-	  nsyms++;
-	}
-      element->symbol = sym;
-    }
-  *nsyms_ret = nsyms;
-  return list;
-}
-
-
-static struct symbol *
-process_dst_function (struct objfile *objfile, dst_rec_ptr_t entry, char *name,
-		      CORE_ADDR address)
-{
-  struct symbol *sym;
-  struct type *type, *ftype;
-  dst_rec_ptr_t sym_entry, typ_entry;
-  char *location;
-  struct symbol_list *element;
-
-  type = builtin_type_int;
-  sym = create_new_symbol (objfile, name);
-  SYMBOL_CLASS (sym) = LOC_BLOCK;
-
-  if (entry)
-    {
-      location = (char *) entry;
-      do
-	{
-	  NEXT_SYM (&location, &sym_entry);
-	}
-      while (sym_entry && sym_entry->rec_type != dst_typ_signature);
-
-      if (sym_entry)
-	{
-	  SYMBOL_LINE (sym) =
-	    DST_signature (sym_entry).src_loc.line_number;
-	  if (DST_signature (sym_entry).result)
-	    {
-	      typ_entry = (dst_rec_ptr_t)
-		DST_OFFSET (sym_entry,
-			    DST_signature (sym_entry).result);
-	      type = decode_dst_type (objfile, typ_entry);
-	    }
-	}
-    }
-
-  if (!type->function_type)
-    {
-      ftype = alloc_type (objfile);
-      type->function_type = ftype;
-      TYPE_TARGET_TYPE (ftype) = type;
-      TYPE_CODE (ftype) = TYPE_CODE_FUNC;
-    }
-  SYMBOL_TYPE (sym) = type->function_type;
-
-  /* Now add ourselves to the global symbols list */
-  element = (struct symbol_list *)
-    xmalloc (sizeof (struct symbol_list));
-
-  element->next = dst_global_symbols;
-  dst_global_symbols = element;
-  total_globals++;
-  element->symbol = sym;
-
-  return sym;
-}
-
-static struct block *
-process_dst_block (struct objfile *objfile, dst_rec_ptr_t entry)
-{
-  struct block *block;
-  struct symbol *function = NULL;
-  CORE_ADDR address;
-  long size;
-  char *name;
-  dst_rec_ptr_t child_entry, symbol_entry;
-  struct block *child_block;
-  int total_symbols = 0;
-  char fake_name[20];
-  static long fake_seq = 0;
-  struct symbol_list *symlist, *nextsym;
-  int symnum;
-
-  if (DST_block (entry).noffset)
-    name = DST_OFFSET (entry, DST_block (entry).noffset);
-  else
-    name = NULL;
-  if (DST_block (entry).n_of_code_ranges)
-    {
-      address = dst_sym_addr (
-			       &DST_block (entry).code_ranges[0].code_start);
-      size = DST_block (entry).code_ranges[0].code_size;
-    }
-  else
-    {
-      address = -1;
-      size = 0;
-    }
-  symbol_entry = (dst_rec_ptr_t) get_sec_ref (&DST_block (entry).symbols_start);
-  switch (DST_block (entry).block_type)
-    {
-      /* These are all really functions. Even the "program" type.
-       * This is because the Apollo OS was written in Pascal, and
-       * in Pascal, the main procedure is described as the Program.
-       * Cute, huh?
-       */
-    case dst_block_procedure:
-    case dst_block_function:
-    case dst_block_subroutine:
-    case dst_block_program:
-      prim_record_minimal_symbol (name, address, mst_text, objfile);
-      function = process_dst_function (
-					objfile,
-					symbol_entry,
-					name,
-					address);
-      enter_all_lines (get_sec_ref (&DST_block (entry).code_ranges[0].lines_start), address);
-      break;
-    case dst_block_block_data:
-      break;
-
-    default:
-      /* GDB has to call it something, and the module name
-       * won't cut it
-       */
-      sprintf (fake_name, "block_%08lx", fake_seq++);
-      function = process_dst_function (
-					objfile, NULL, fake_name, address);
-      break;
-    }
-  symlist = process_dst_symbols (objfile, symbol_entry,
-				 name, &total_symbols);
-  block = (struct block *)
-    obstack_alloc (&objfile->symbol_obstack,
-		   sizeof (struct block) +
-		     (total_symbols - 1) * sizeof (struct symbol *));
-
-  symnum = 0;
-  while (symlist)
-    {
-      nextsym = symlist->next;
-
-      block->sym[symnum] = symlist->symbol;
-
-      xfree (symlist);
-      symlist = nextsym;
-      symnum++;
-    }
-  BLOCK_NSYMS (block) = total_symbols;
-  BLOCK_HASHTABLE (block) = 0;
-  BLOCK_START (block) = address;
-  BLOCK_END (block) = address + size;
-  BLOCK_SUPERBLOCK (block) = 0;
-  if (function)
-    {
-      SYMBOL_BLOCK_VALUE (function) = block;
-      BLOCK_FUNCTION (block) = function;
-    }
-  else
-    BLOCK_FUNCTION (block) = 0;
-
-  if (DST_block (entry).child_block_off)
-    {
-      child_entry = (dst_rec_ptr_t) DST_OFFSET (entry,
-					 DST_block (entry).child_block_off);
-      while (child_entry)
-	{
-	  child_block = process_dst_block (objfile, child_entry);
-	  if (child_block)
-	    {
-	      if (BLOCK_START (child_block) <
-		  BLOCK_START (block) ||
-		  BLOCK_START (block) == -1)
-		BLOCK_START (block) =
-		  BLOCK_START (child_block);
-	      if (BLOCK_END (child_block) >
-		  BLOCK_END (block) ||
-		  BLOCK_END (block) == -1)
-		BLOCK_END (block) =
-		  BLOCK_END (child_block);
-	      BLOCK_SUPERBLOCK (child_block) = block;
-	    }
-	  if (DST_block (child_entry).sibling_block_off)
-	    child_entry = (dst_rec_ptr_t) DST_OFFSET (
-						       child_entry,
-				 DST_block (child_entry).sibling_block_off);
-	  else
-	    child_entry = NULL;
-	}
-    }
-  record_pending_block (objfile, block, NULL);
-  return block;
-}
-
-
-static void
-read_dst_symtab (struct objfile *objfile)
-{
-  char *buffer;
-  dst_rec_ptr_t entry, file_table, root_block;
-  char *source_file;
-  struct block *block, *global_block;
-  int symnum;
-  struct symbol_list *nextsym;
-  int module_num = 0;
-  struct structure_list *element;
-
-  current_objfile = objfile;
-  buffer = blocks_info.buffer;
-  while (NEXT_BLK (&buffer, &entry))
-    {
-      if (entry->rec_type == dst_typ_comp_unit)
-	{
-	  file_table = (dst_rec_ptr_t) DST_OFFSET (entry,
-					  DST_comp_unit (entry).file_table);
-	  section_table = (dst_rec_ptr_t) DST_OFFSET (entry,
-				       DST_comp_unit (entry).section_table);
-	  root_block = (dst_rec_ptr_t) DST_OFFSET (entry,
-				   DST_comp_unit (entry).root_block_offset);
-	  source_file = DST_OFFSET (file_table,
-				DST_file_tab (file_table).files[0].noffset);
-	  /* Point buffer to the start of the next comp_unit */
-	  buffer = DST_OFFSET (entry,
-			       DST_comp_unit (entry).data_size);
-	  dst_start_symtab ();
-
-	  block = process_dst_block (objfile, root_block);
-
-	  global_block = (struct block *)
-	    obstack_alloc (&objfile->symbol_obstack,
-			   sizeof (struct block) +
-			     (total_globals - 1) *
-			   sizeof (struct symbol *));
-	  BLOCK_NSYMS (global_block) = total_globals;
-	  BLOCK_HASHTABLE (global_block) = 0;
-	  for (symnum = 0; symnum < total_globals; symnum++)
-	    {
-	      nextsym = dst_global_symbols->next;
-
-	      global_block->sym[symnum] =
-		dst_global_symbols->symbol;
-
-	      xfree (dst_global_symbols);
-	      dst_global_symbols = nextsym;
-	    }
-	  dst_global_symbols = NULL;
-	  total_globals = 0;
-	  BLOCK_FUNCTION (global_block) = 0;
-	  BLOCK_START (global_block) = BLOCK_START (block);
-	  BLOCK_END (global_block) = BLOCK_END (block);
-	  BLOCK_SUPERBLOCK (global_block) = 0;
-	  BLOCK_SUPERBLOCK (block) = global_block;
-	  record_pending_block (objfile, global_block, NULL);
-
-	  complete_symtab (source_file,
-			   BLOCK_START (block),
-			   BLOCK_END (block) - BLOCK_START (block));
-	  module_num++;
-	  dst_end_symtab (objfile);
-	}
-    }
-  if (module_num)
-    prim_record_minimal_symbol ("<end_of_program>",
-				BLOCK_END (block), mst_text, objfile);
-  /* One more faked symbol to make sure nothing can ever run off the
-   * end of the symbol table. This one represents the end of the
-   * text space. It used to be (CORE_ADDR) -1 (effectively the highest
-   * int possible), but some parts of gdb treated it as a signed
-   * number and failed comparisons. We could equally use 7fffffff,
-   * but no functions are ever mapped to an address higher than
-   * 40000000
-   */
-  prim_record_minimal_symbol ("<end_of_text>",
-			      (CORE_ADDR) 0x40000000,
-			      mst_text, objfile);
-  while (struct_list)
-    {
-      element = struct_list;
-      struct_list = element->next;
-      xfree (element);
-    }
-}
-
-
-/* Support for line number handling */
-static char *linetab = NULL;
-static long linetab_offset;
-static unsigned long linetab_size;
-
-/* Read in all the line numbers for fast lookups later.  Leave them in
-   external (unswapped) format in memory; we'll swap them as we enter
-   them into GDB's data structures.  */
-static int
-init_one_section (int chan, dst_sec *secinfo)
-{
-  if (secinfo->size == 0
-      || lseek (chan, secinfo->position, 0) == -1
-      || (secinfo->buffer = xmalloc (secinfo->size)) == NULL
-      || myread (chan, secinfo->buffer, secinfo->size) == -1)
-    return 0;
-  else
-    return 1;
-}
-
-static int
-init_dst_sections (int chan)
-{
-
-  if (!init_one_section (chan, &blocks_info) ||
-      !init_one_section (chan, &lines_info) ||
-      !init_one_section (chan, &symbols_info))
-    return -1;
-  else
-    return 0;
-}
-
-/* Fake up support for relocating symbol addresses.  FIXME.  */
-
-struct section_offsets dst_symfile_faker =
-{0};
-
-void
-dst_symfile_offsets (struct objfile *objfile, struct section_addr_info *addrs)
-{
-  objfile->num_sections = 1;
-  objfile->section_offsets = &dst_symfile_faker;
-}
-
-/* Register our ability to parse symbols for DST BFD files */
-
-static struct sym_fns dst_sym_fns =
-{
-  /* FIXME: Can this be integrated with coffread.c?  If not, should it be
-     a separate flavour like ecoff?  */
-  (enum bfd_flavour) -2,
-
-  dst_new_init,			/* sym_new_init: init anything gbl to entire symtab */
-  dst_symfile_init,		/* sym_init: read initial info, setup for sym_read() */
-  dst_symfile_read,		/* sym_read: read a symbol file into symtab */
-  dst_symfile_finish,		/* sym_finish: finished with file, cleanup */
-  dst_symfile_offsets,		/* sym_offsets:  xlate external to internal form */
-  NULL				/* next: pointer to next struct sym_fns */
-};
-
-void
-_initialize_dstread (void)
-{
-  add_symtab_fns (&dst_sym_fns);
-}
+// OBSOLETE /* Read apollo DST symbol tables and convert to internal format, for GDB.
+// OBSOLETE    Contributed by Troy Rollo, University of NSW (troy@cbme.unsw.edu.au).
+// OBSOLETE    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000
+// OBSOLETE    Free Software Foundation, Inc.
+// OBSOLETE 
+// OBSOLETE    This file is part of GDB.
+// OBSOLETE 
+// OBSOLETE    This program is free software; you can redistribute it and/or modify
+// OBSOLETE    it under the terms of the GNU General Public License as published by
+// OBSOLETE    the Free Software Foundation; either version 2 of the License, or
+// OBSOLETE    (at your option) any later version.
+// OBSOLETE 
+// OBSOLETE    This program is distributed in the hope that it will be useful,
+// OBSOLETE    but WITHOUT ANY WARRANTY; without even the implied warranty of
+// OBSOLETE    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// OBSOLETE    GNU General Public License for more details.
+// OBSOLETE 
+// OBSOLETE    You should have received a copy of the GNU General Public License
+// OBSOLETE    along with this program; if not, write to the Free Software
+// OBSOLETE    Foundation, Inc., 59 Temple Place - Suite 330,
+// OBSOLETE    Boston, MA 02111-1307, USA.  */
+// OBSOLETE 
+// OBSOLETE #include "defs.h"
+// OBSOLETE #include "symtab.h"
+// OBSOLETE #include "gdbtypes.h"
+// OBSOLETE #include "breakpoint.h"
+// OBSOLETE #include "bfd.h"
+// OBSOLETE #include "symfile.h"
+// OBSOLETE #include "objfiles.h"
+// OBSOLETE #include "buildsym.h"
+// OBSOLETE #include "gdb_obstack.h"
+// OBSOLETE 
+// OBSOLETE #include "gdb_string.h"
+// OBSOLETE 
+// OBSOLETE #include "dst.h"
+// OBSOLETE 
+// OBSOLETE CORE_ADDR cur_src_start_addr, cur_src_end_addr;
+// OBSOLETE dst_sec blocks_info, lines_info, symbols_info;
+// OBSOLETE 
+// OBSOLETE /* Vector of line number information.  */
+// OBSOLETE 
+// OBSOLETE static struct linetable *line_vector;
+// OBSOLETE 
+// OBSOLETE /* Index of next entry to go in line_vector_index.  */
+// OBSOLETE 
+// OBSOLETE static int line_vector_index;
+// OBSOLETE 
+// OBSOLETE /* Last line number recorded in the line vector.  */
+// OBSOLETE 
+// OBSOLETE static int prev_line_number;
+// OBSOLETE 
+// OBSOLETE /* Number of elements allocated for line_vector currently.  */
+// OBSOLETE 
+// OBSOLETE static int line_vector_length;
+// OBSOLETE 
+// OBSOLETE static int init_dst_sections (int);
+// OBSOLETE 
+// OBSOLETE static void read_dst_symtab (struct objfile *);
+// OBSOLETE 
+// OBSOLETE static void find_dst_sections (bfd *, sec_ptr, PTR);
+// OBSOLETE 
+// OBSOLETE static void dst_symfile_init (struct objfile *);
+// OBSOLETE 
+// OBSOLETE static void dst_new_init (struct objfile *);
+// OBSOLETE 
+// OBSOLETE static void dst_symfile_read (struct objfile *, int);
+// OBSOLETE 
+// OBSOLETE static void dst_symfile_finish (struct objfile *);
+// OBSOLETE 
+// OBSOLETE static void dst_end_symtab (struct objfile *);
+// OBSOLETE 
+// OBSOLETE static void complete_symtab (char *, CORE_ADDR, unsigned int);
+// OBSOLETE 
+// OBSOLETE static void dst_start_symtab (void);
+// OBSOLETE 
+// OBSOLETE static void dst_record_line (int, CORE_ADDR);
+// OBSOLETE 
+// OBSOLETE /* Manage the vector of line numbers.  */
+// OBSOLETE /* FIXME: Use record_line instead.  */
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE dst_record_line (int line, CORE_ADDR pc)
+// OBSOLETE {
+// OBSOLETE   struct linetable_entry *e;
+// OBSOLETE   /* Make sure line vector is big enough.  */
+// OBSOLETE 
+// OBSOLETE   if (line_vector_index + 2 >= line_vector_length)
+// OBSOLETE     {
+// OBSOLETE       line_vector_length *= 2;
+// OBSOLETE       line_vector = (struct linetable *)
+// OBSOLETE 	xrealloc ((char *) line_vector, sizeof (struct linetable)
+// OBSOLETE 		  + (line_vector_length
+// OBSOLETE 		     * sizeof (struct linetable_entry)));
+// OBSOLETE     }
+// OBSOLETE 
+// OBSOLETE   e = line_vector->item + line_vector_index++;
+// OBSOLETE   e->line = line;
+// OBSOLETE   e->pc = pc;
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE /* Start a new symtab for a new source file.
+// OBSOLETE    It indicates the start of data for one original source file.  */
+// OBSOLETE /* FIXME: use start_symtab, like coffread.c now does.  */
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE dst_start_symtab (void)
+// OBSOLETE {
+// OBSOLETE   /* Initialize the source file line number information for this file.  */
+// OBSOLETE 
+// OBSOLETE   if (line_vector)		/* Unlikely, but maybe possible? */
+// OBSOLETE     xfree (line_vector);
+// OBSOLETE   line_vector_index = 0;
+// OBSOLETE   line_vector_length = 1000;
+// OBSOLETE   prev_line_number = -2;	/* Force first line number to be explicit */
+// OBSOLETE   line_vector = (struct linetable *)
+// OBSOLETE     xmalloc (sizeof (struct linetable)
+// OBSOLETE 	     + line_vector_length * sizeof (struct linetable_entry));
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE /* Save the vital information from when starting to read a file,
+// OBSOLETE    for use when closing off the current file.
+// OBSOLETE    NAME is the file name the symbols came from, START_ADDR is the first
+// OBSOLETE    text address for the file, and SIZE is the number of bytes of text.  */
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE complete_symtab (char *name, CORE_ADDR start_addr, unsigned int size)
+// OBSOLETE {
+// OBSOLETE   last_source_file = savestring (name, strlen (name));
+// OBSOLETE   cur_src_start_addr = start_addr;
+// OBSOLETE   cur_src_end_addr = start_addr + size;
+// OBSOLETE 
+// OBSOLETE   if (current_objfile->ei.entry_point >= cur_src_start_addr &&
+// OBSOLETE       current_objfile->ei.entry_point < cur_src_end_addr)
+// OBSOLETE     {
+// OBSOLETE       current_objfile->ei.entry_file_lowpc = cur_src_start_addr;
+// OBSOLETE       current_objfile->ei.entry_file_highpc = cur_src_end_addr;
+// OBSOLETE     }
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE /* Finish the symbol definitions for one main source file,
+// OBSOLETE    close off all the lexical contexts for that file
+// OBSOLETE    (creating struct block's for them), then make the
+// OBSOLETE    struct symtab for that file and put it in the list of all such. */
+// OBSOLETE /* FIXME: Use end_symtab, like coffread.c now does.  */
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE dst_end_symtab (struct objfile *objfile)
+// OBSOLETE {
+// OBSOLETE   register struct symtab *symtab;
+// OBSOLETE   register struct blockvector *blockvector;
+// OBSOLETE   register struct linetable *lv;
+// OBSOLETE 
+// OBSOLETE   /* Create the blockvector that points to all the file's blocks.  */
+// OBSOLETE 
+// OBSOLETE   blockvector = make_blockvector (objfile);
+// OBSOLETE 
+// OBSOLETE   /* Now create the symtab object for this source file.  */
+// OBSOLETE   symtab = allocate_symtab (last_source_file, objfile);
+// OBSOLETE 
+// OBSOLETE   /* Fill in its components.  */
+// OBSOLETE   symtab->blockvector = blockvector;
+// OBSOLETE   symtab->free_code = free_linetable;
+// OBSOLETE   symtab->free_ptr = 0;
+// OBSOLETE   symtab->filename = last_source_file;
+// OBSOLETE   symtab->dirname = NULL;
+// OBSOLETE   symtab->debugformat = obsavestring ("Apollo DST", 10,
+// OBSOLETE 				      &objfile->symbol_obstack);
+// OBSOLETE   lv = line_vector;
+// OBSOLETE   lv->nitems = line_vector_index;
+// OBSOLETE   symtab->linetable = (struct linetable *)
+// OBSOLETE     xrealloc ((char *) lv, (sizeof (struct linetable)
+// OBSOLETE 			    + lv->nitems * sizeof (struct linetable_entry)));
+// OBSOLETE 
+// OBSOLETE   free_named_symtabs (symtab->filename);
+// OBSOLETE 
+// OBSOLETE   /* Reinitialize for beginning of new file. */
+// OBSOLETE   line_vector = 0;
+// OBSOLETE   line_vector_length = -1;
+// OBSOLETE   last_source_file = NULL;
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE /* dst_symfile_init ()
+// OBSOLETE    is the dst-specific initialization routine for reading symbols.
+// OBSOLETE 
+// OBSOLETE    We will only be called if this is a DST or DST-like file.
+// OBSOLETE    BFD handles figuring out the format of the file, and code in symtab.c
+// OBSOLETE    uses BFD's determination to vector to us.
+// OBSOLETE 
+// OBSOLETE    The ultimate result is a new symtab (or, FIXME, eventually a psymtab).  */
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE dst_symfile_init (struct objfile *objfile)
+// OBSOLETE {
+// OBSOLETE   asection *section;
+// OBSOLETE   bfd *abfd = objfile->obfd;
+// OBSOLETE 
+// OBSOLETE   init_entry_point_info (objfile);
+// OBSOLETE 
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE /* This function is called for every section; it finds the outer limits
+// OBSOLETE    of the line table (minimum and maximum file offset) so that the
+// OBSOLETE    mainline code can read the whole thing for efficiency.  */
+// OBSOLETE 
+// OBSOLETE /* ARGSUSED */
+// OBSOLETE static void
+// OBSOLETE find_dst_sections (bfd *abfd, sec_ptr asect, PTR vpinfo)
+// OBSOLETE {
+// OBSOLETE   int size, count;
+// OBSOLETE   long base;
+// OBSOLETE   file_ptr offset, maxoff;
+// OBSOLETE   dst_sec *section;
+// OBSOLETE 
+// OBSOLETE /* WARNING WILL ROBINSON!  ACCESSING BFD-PRIVATE DATA HERE!  FIXME!  */
+// OBSOLETE   size = asect->_raw_size;
+// OBSOLETE   offset = asect->filepos;
+// OBSOLETE   base = asect->vma;
+// OBSOLETE /* End of warning */
+// OBSOLETE 
+// OBSOLETE   section = NULL;
+// OBSOLETE   if (!strcmp (asect->name, ".blocks"))
+// OBSOLETE     section = &blocks_info;
+// OBSOLETE   else if (!strcmp (asect->name, ".lines"))
+// OBSOLETE     section = &lines_info;
+// OBSOLETE   else if (!strcmp (asect->name, ".symbols"))
+// OBSOLETE     section = &symbols_info;
+// OBSOLETE   if (!section)
+// OBSOLETE     return;
+// OBSOLETE   section->size = size;
+// OBSOLETE   section->position = offset;
+// OBSOLETE   section->base = base;
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE 
+// OBSOLETE /* The BFD for this file -- only good while we're actively reading
+// OBSOLETE    symbols into a psymtab or a symtab.  */
+// OBSOLETE 
+// OBSOLETE static bfd *symfile_bfd;
+// OBSOLETE 
+// OBSOLETE /* Read a symbol file, after initialization by dst_symfile_init.  */
+// OBSOLETE /* FIXME!  Addr and Mainline are not used yet -- this will not work for
+// OBSOLETE    shared libraries or add_file!  */
+// OBSOLETE 
+// OBSOLETE /* ARGSUSED */
+// OBSOLETE static void
+// OBSOLETE dst_symfile_read (struct objfile *objfile, int mainline)
+// OBSOLETE {
+// OBSOLETE   bfd *abfd = objfile->obfd;
+// OBSOLETE   char *name = bfd_get_filename (abfd);
+// OBSOLETE   int desc;
+// OBSOLETE   register int val;
+// OBSOLETE   int num_symbols;
+// OBSOLETE   int symtab_offset;
+// OBSOLETE   int stringtab_offset;
+// OBSOLETE 
+// OBSOLETE   symfile_bfd = abfd;		/* Kludge for swap routines */
+// OBSOLETE 
+// OBSOLETE /* WARNING WILL ROBINSON!  ACCESSING BFD-PRIVATE DATA HERE!  FIXME!  */
+// OBSOLETE   desc = fileno ((FILE *) (abfd->iostream));	/* File descriptor */
+// OBSOLETE 
+// OBSOLETE   /* Read the line number table, all at once.  */
+// OBSOLETE   bfd_map_over_sections (abfd, find_dst_sections, (PTR) NULL);
+// OBSOLETE 
+// OBSOLETE   val = init_dst_sections (desc);
+// OBSOLETE   if (val < 0)
+// OBSOLETE     error ("\"%s\": error reading debugging symbol tables\n", name);
+// OBSOLETE 
+// OBSOLETE   init_minimal_symbol_collection ();
+// OBSOLETE   make_cleanup_discard_minimal_symbols ();
+// OBSOLETE 
+// OBSOLETE   /* Now that the executable file is positioned at symbol table,
+// OBSOLETE      process it and define symbols accordingly.  */
+// OBSOLETE 
+// OBSOLETE   read_dst_symtab (objfile);
+// OBSOLETE 
+// OBSOLETE   /* Sort symbols alphabetically within each block.  */
+// OBSOLETE 
+// OBSOLETE   {
+// OBSOLETE     struct symtab *s;
+// OBSOLETE     for (s = objfile->symtabs; s != NULL; s = s->next)
+// OBSOLETE       {
+// OBSOLETE 	sort_symtab_syms (s);
+// OBSOLETE       }
+// OBSOLETE   }
+// OBSOLETE 
+// OBSOLETE   /* Install any minimal symbols that have been collected as the current
+// OBSOLETE      minimal symbols for this objfile. */
+// OBSOLETE 
+// OBSOLETE   install_minimal_symbols (objfile);
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE dst_new_init (struct objfile *ignore)
+// OBSOLETE {
+// OBSOLETE   /* Nothin' to do */
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE /* Perform any local cleanups required when we are done with a particular
+// OBSOLETE    objfile.  I.E, we are in the process of discarding all symbol information
+// OBSOLETE    for an objfile, freeing up all memory held for it, and unlinking the
+// OBSOLETE    objfile struct from the global list of known objfiles. */
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE dst_symfile_finish (struct objfile *objfile)
+// OBSOLETE {
+// OBSOLETE   /* Nothing to do */
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE 
+// OBSOLETE /* Get the next line number from the DST. Returns 0 when we hit an
+// OBSOLETE  * end directive or cannot continue for any other reason.
+// OBSOLETE  *
+// OBSOLETE  * Note that ordinary pc deltas are multiplied by two. Apparently
+// OBSOLETE  * this is what was really intended.
+// OBSOLETE  */
+// OBSOLETE static int
+// OBSOLETE get_dst_line (signed char **buffer, long *pc)
+// OBSOLETE {
+// OBSOLETE   static last_pc = 0;
+// OBSOLETE   static long last_line = 0;
+// OBSOLETE   static int last_file = 0;
+// OBSOLETE   dst_ln_entry_ptr_t entry;
+// OBSOLETE   int size;
+// OBSOLETE   dst_src_loc_t *src_loc;
+// OBSOLETE 
+// OBSOLETE   if (*pc != -1)
+// OBSOLETE     {
+// OBSOLETE       last_pc = *pc;
+// OBSOLETE       *pc = -1;
+// OBSOLETE     }
+// OBSOLETE   entry = (dst_ln_entry_ptr_t) * buffer;
+// OBSOLETE 
+// OBSOLETE   while (dst_ln_ln_delta (*entry) == dst_ln_escape_flag)
+// OBSOLETE     {
+// OBSOLETE       switch (entry->esc.esc_code)
+// OBSOLETE 	{
+// OBSOLETE 	case dst_ln_pad:
+// OBSOLETE 	  size = 1;		/* pad byte */
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_ln_file:
+// OBSOLETE 	  /* file escape.  Next 4 bytes are a dst_src_loc_t */
+// OBSOLETE 	  size = 5;
+// OBSOLETE 	  src_loc = (dst_src_loc_t *) (*buffer + 1);
+// OBSOLETE 	  last_line = src_loc->line_number;
+// OBSOLETE 	  last_file = src_loc->file_index;
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_ln_dln1_dpc1:
+// OBSOLETE 	  /* 1 byte line delta, 1 byte pc delta */
+// OBSOLETE 	  last_line += (*buffer)[1];
+// OBSOLETE 	  last_pc += 2 * (unsigned char) (*buffer)[2];
+// OBSOLETE 	  dst_record_line (last_line, last_pc);
+// OBSOLETE 	  size = 3;
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_ln_dln2_dpc2:
+// OBSOLETE 	  /* 2 bytes line delta, 2 bytes pc delta */
+// OBSOLETE 	  last_line += *(short *) (*buffer + 1);
+// OBSOLETE 	  last_pc += 2 * (*(short *) (*buffer + 3));
+// OBSOLETE 	  size = 5;
+// OBSOLETE 	  dst_record_line (last_line, last_pc);
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_ln_ln4_pc4:
+// OBSOLETE 	  /* 4 bytes ABSOLUTE line number, 4 bytes ABSOLUTE pc */
+// OBSOLETE 	  last_line = *(unsigned long *) (*buffer + 1);
+// OBSOLETE 	  last_pc = *(unsigned long *) (*buffer + 5);
+// OBSOLETE 	  size = 9;
+// OBSOLETE 	  dst_record_line (last_line, last_pc);
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_ln_dln1_dpc0:
+// OBSOLETE 	  /* 1 byte line delta, pc delta = 0 */
+// OBSOLETE 	  size = 2;
+// OBSOLETE 	  last_line += (*buffer)[1];
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_ln_ln_off_1:
+// OBSOLETE 	  /* statement escape, stmt # = 1 (2nd stmt on line) */
+// OBSOLETE 	  size = 1;
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_ln_ln_off:
+// OBSOLETE 	  /* statement escape, stmt # = next byte */
+// OBSOLETE 	  size = 2;
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_ln_entry:
+// OBSOLETE 	  /* entry escape, next byte is entry number */
+// OBSOLETE 	  size = 2;
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_ln_exit:
+// OBSOLETE 	  /* exit escape */
+// OBSOLETE 	  size = 1;
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_ln_stmt_end:
+// OBSOLETE 	  /* gap escape, 4 bytes pc delta */
+// OBSOLETE 	  size = 5;
+// OBSOLETE 	  /* last_pc += 2 * (*(long *) (*buffer + 1)); */
+// OBSOLETE 	  /* Apparently this isn't supposed to actually modify
+// OBSOLETE 	   * the pc value. Totally weird.
+// OBSOLETE 	   */
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_ln_escape_11:
+// OBSOLETE 	case dst_ln_escape_12:
+// OBSOLETE 	case dst_ln_escape_13:
+// OBSOLETE 	  size = 1;
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_ln_nxt_byte:
+// OBSOLETE 	  /* This shouldn't happen. If it does, we're SOL */
+// OBSOLETE 	  return 0;
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_ln_end:
+// OBSOLETE 	  /* end escape, final entry follows */
+// OBSOLETE 	  return 0;
+// OBSOLETE 	}
+// OBSOLETE       *buffer += (size < 0) ? -size : size;
+// OBSOLETE       entry = (dst_ln_entry_ptr_t) * buffer;
+// OBSOLETE     }
+// OBSOLETE   last_line += dst_ln_ln_delta (*entry);
+// OBSOLETE   last_pc += entry->delta.pc_delta * 2;
+// OBSOLETE   (*buffer)++;
+// OBSOLETE   dst_record_line (last_line, last_pc);
+// OBSOLETE   return 1;
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE enter_all_lines (char *buffer, long address)
+// OBSOLETE {
+// OBSOLETE   if (buffer)
+// OBSOLETE     while (get_dst_line (&buffer, &address));
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE static int
+// OBSOLETE get_dst_entry (char *buffer, dst_rec_ptr_t *ret_entry)
+// OBSOLETE {
+// OBSOLETE   int size;
+// OBSOLETE   dst_rec_ptr_t entry;
+// OBSOLETE   static int last_type;
+// OBSOLETE   int ar_size;
+// OBSOLETE   static unsigned lu3;
+// OBSOLETE 
+// OBSOLETE   entry = (dst_rec_ptr_t) buffer;
+// OBSOLETE   switch (entry->rec_type)
+// OBSOLETE     {
+// OBSOLETE     case dst_typ_pad:
+// OBSOLETE       size = 0;
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_comp_unit:
+// OBSOLETE       size = sizeof (DST_comp_unit (entry));
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_section_tab:
+// OBSOLETE       size = sizeof (DST_section_tab (entry))
+// OBSOLETE 	+ ((int) DST_section_tab (entry).number_of_sections
+// OBSOLETE 	   - dst_dummy_array_size) * sizeof (long);
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_file_tab:
+// OBSOLETE       size = sizeof (DST_file_tab (entry))
+// OBSOLETE 	+ ((int) DST_file_tab (entry).number_of_files
+// OBSOLETE 	   - dst_dummy_array_size) * sizeof (dst_file_desc_t);
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_block:
+// OBSOLETE       size = sizeof (DST_block (entry))
+// OBSOLETE 	+ ((int) DST_block (entry).n_of_code_ranges
+// OBSOLETE 	   - dst_dummy_array_size) * sizeof (dst_code_range_t);
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_5:
+// OBSOLETE       size = -1;
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_var:
+// OBSOLETE       size = sizeof (DST_var (entry)) -
+// OBSOLETE 	sizeof (dst_var_loc_long_t) * dst_dummy_array_size +
+// OBSOLETE 	DST_var (entry).no_of_locs *
+// OBSOLETE 	(DST_var (entry).short_locs ?
+// OBSOLETE 	 sizeof (dst_var_loc_short_t) :
+// OBSOLETE 	 sizeof (dst_var_loc_long_t));
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_pointer:
+// OBSOLETE       size = sizeof (DST_pointer (entry));
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_array:
+// OBSOLETE       size = sizeof (DST_array (entry));
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_subrange:
+// OBSOLETE       size = sizeof (DST_subrange (entry));
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_set:
+// OBSOLETE       size = sizeof (DST_set (entry));
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_implicit_enum:
+// OBSOLETE       size = sizeof (DST_implicit_enum (entry))
+// OBSOLETE 	+ ((int) DST_implicit_enum (entry).nelems
+// OBSOLETE 	   - dst_dummy_array_size) * sizeof (dst_rel_offset_t);
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_explicit_enum:
+// OBSOLETE       size = sizeof (DST_explicit_enum (entry))
+// OBSOLETE 	+ ((int) DST_explicit_enum (entry).nelems
+// OBSOLETE 	   - dst_dummy_array_size) * sizeof (dst_enum_elem_t);
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_short_rec:
+// OBSOLETE       size = sizeof (DST_short_rec (entry))
+// OBSOLETE 	+ DST_short_rec (entry).nfields * sizeof (dst_short_field_t)
+// OBSOLETE 	- dst_dummy_array_size * sizeof (dst_field_t);
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_short_union:
+// OBSOLETE       size = sizeof (DST_short_union (entry))
+// OBSOLETE 	+ DST_short_union (entry).nfields * sizeof (dst_short_field_t)
+// OBSOLETE 	- dst_dummy_array_size * sizeof (dst_field_t);
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_file:
+// OBSOLETE       size = sizeof (DST_file (entry));
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_offset:
+// OBSOLETE       size = sizeof (DST_offset (entry));
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_alias:
+// OBSOLETE       size = sizeof (DST_alias (entry));
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_signature:
+// OBSOLETE       size = sizeof (DST_signature (entry)) +
+// OBSOLETE 	((int) DST_signature (entry).nargs -
+// OBSOLETE 	 dst_dummy_array_size) * sizeof (dst_arg_t);
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_21:
+// OBSOLETE       size = -1;
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_old_label:
+// OBSOLETE       size = sizeof (DST_old_label (entry));
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_scope:
+// OBSOLETE       size = sizeof (DST_scope (entry));
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_end_scope:
+// OBSOLETE       size = 0;
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_25:
+// OBSOLETE     case dst_typ_26:
+// OBSOLETE       size = -1;
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_string_tab:
+// OBSOLETE     case dst_typ_global_name_tab:
+// OBSOLETE       size = sizeof (DST_string_tab (entry))
+// OBSOLETE 	+ DST_string_tab (entry).length
+// OBSOLETE 	- dst_dummy_array_size;
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_forward:
+// OBSOLETE       size = sizeof (DST_forward (entry));
+// OBSOLETE       get_dst_entry ((char *) entry + DST_forward (entry).rec_off, &entry);
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_aux_size:
+// OBSOLETE       size = sizeof (DST_aux_size (entry));
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_aux_align:
+// OBSOLETE       size = sizeof (DST_aux_align (entry));
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_aux_field_size:
+// OBSOLETE       size = sizeof (DST_aux_field_size (entry));
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_aux_field_off:
+// OBSOLETE       size = sizeof (DST_aux_field_off (entry));
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_aux_field_align:
+// OBSOLETE       size = sizeof (DST_aux_field_align (entry));
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_aux_qual:
+// OBSOLETE       size = sizeof (DST_aux_qual (entry));
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_aux_var_bound:
+// OBSOLETE       size = sizeof (DST_aux_var_bound (entry));
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_extension:
+// OBSOLETE       size = DST_extension (entry).rec_size;
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_string:
+// OBSOLETE       size = sizeof (DST_string (entry));
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_old_entry:
+// OBSOLETE       size = 48;		/* Obsolete entry type */
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_const:
+// OBSOLETE       size = sizeof (DST_const (entry))
+// OBSOLETE 	+ DST_const (entry).value.length
+// OBSOLETE 	- sizeof (DST_const (entry).value.val);
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_reference:
+// OBSOLETE       size = sizeof (DST_reference (entry));
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_old_record:
+// OBSOLETE     case dst_typ_old_union:
+// OBSOLETE     case dst_typ_record:
+// OBSOLETE     case dst_typ_union:
+// OBSOLETE       size = sizeof (DST_record (entry))
+// OBSOLETE 	+ ((int) DST_record (entry).nfields
+// OBSOLETE 	   - dst_dummy_array_size) * sizeof (dst_field_t);
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_aux_type_deriv:
+// OBSOLETE       size = sizeof (DST_aux_type_deriv (entry));
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_locpool:
+// OBSOLETE       size = sizeof (DST_locpool (entry))
+// OBSOLETE 	+ ((int) DST_locpool (entry).length -
+// OBSOLETE 	   dst_dummy_array_size);
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_variable:
+// OBSOLETE       size = sizeof (DST_variable (entry));
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_label:
+// OBSOLETE       size = sizeof (DST_label (entry));
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_entry:
+// OBSOLETE       size = sizeof (DST_entry (entry));
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_aux_lifetime:
+// OBSOLETE       size = sizeof (DST_aux_lifetime (entry));
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_aux_ptr_base:
+// OBSOLETE       size = sizeof (DST_aux_ptr_base (entry));
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_aux_src_range:
+// OBSOLETE       size = sizeof (DST_aux_src_range (entry));
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_aux_reg_val:
+// OBSOLETE       size = sizeof (DST_aux_reg_val (entry));
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_aux_unit_names:
+// OBSOLETE       size = sizeof (DST_aux_unit_names (entry))
+// OBSOLETE 	+ ((int) DST_aux_unit_names (entry).number_of_names
+// OBSOLETE 	   - dst_dummy_array_size) * sizeof (dst_rel_offset_t);
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_aux_sect_info:
+// OBSOLETE       size = sizeof (DST_aux_sect_info (entry))
+// OBSOLETE 	+ ((int) DST_aux_sect_info (entry).number_of_refs
+// OBSOLETE 	   - dst_dummy_array_size) * sizeof (dst_sect_ref_t);
+// OBSOLETE       break;
+// OBSOLETE     default:
+// OBSOLETE       size = -1;
+// OBSOLETE       break;
+// OBSOLETE     }
+// OBSOLETE   if (size == -1)
+// OBSOLETE     {
+// OBSOLETE       fprintf_unfiltered (gdb_stderr, "Warning: unexpected DST entry type (%d) found\nLast valid entry was of type: %d\n",
+// OBSOLETE 			  (int) entry->rec_type,
+// OBSOLETE 			  last_type);
+// OBSOLETE       fprintf_unfiltered (gdb_stderr, "Last unknown_3 value: %d\n", lu3);
+// OBSOLETE       size = 0;
+// OBSOLETE     }
+// OBSOLETE   else
+// OBSOLETE     last_type = entry->rec_type;
+// OBSOLETE   if (size & 1)			/* Align on a word boundary */
+// OBSOLETE     size++;
+// OBSOLETE   size += 2;
+// OBSOLETE   *ret_entry = entry;
+// OBSOLETE   return size;
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE static int
+// OBSOLETE next_dst_entry (char **buffer, dst_rec_ptr_t *entry, dst_sec *table)
+// OBSOLETE {
+// OBSOLETE   if (*buffer - table->buffer >= table->size)
+// OBSOLETE     {
+// OBSOLETE       *entry = NULL;
+// OBSOLETE       return 0;
+// OBSOLETE     }
+// OBSOLETE   *buffer += get_dst_entry (*buffer, entry);
+// OBSOLETE   return 1;
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE #define NEXT_BLK(a, b) next_dst_entry(a, b, &blocks_info)
+// OBSOLETE #define NEXT_SYM(a, b) next_dst_entry(a, b, &symbols_info)
+// OBSOLETE #define	DST_OFFSET(a, b) ((char *) (a) + (b))
+// OBSOLETE 
+// OBSOLETE static dst_rec_ptr_t section_table = NULL;
+// OBSOLETE 
+// OBSOLETE char *
+// OBSOLETE get_sec_ref (dst_sect_ref_t *ref)
+// OBSOLETE {
+// OBSOLETE   dst_sec *section = NULL;
+// OBSOLETE   long offset;
+// OBSOLETE 
+// OBSOLETE   if (!section_table || !ref->sect_index)
+// OBSOLETE     return NULL;
+// OBSOLETE   offset = DST_section_tab (section_table).section_base[ref->sect_index - 1]
+// OBSOLETE     + ref->sect_offset;
+// OBSOLETE   if (offset >= blocks_info.base &&
+// OBSOLETE       offset < blocks_info.base + blocks_info.size)
+// OBSOLETE     section = &blocks_info;
+// OBSOLETE   else if (offset >= symbols_info.base &&
+// OBSOLETE 	   offset < symbols_info.base + symbols_info.size)
+// OBSOLETE     section = &symbols_info;
+// OBSOLETE   else if (offset >= lines_info.base &&
+// OBSOLETE 	   offset < lines_info.base + lines_info.size)
+// OBSOLETE     section = &lines_info;
+// OBSOLETE   if (!section)
+// OBSOLETE     return NULL;
+// OBSOLETE   return section->buffer + (offset - section->base);
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE CORE_ADDR
+// OBSOLETE dst_get_addr (int section, long offset)
+// OBSOLETE {
+// OBSOLETE   if (!section_table || !section)
+// OBSOLETE     return 0;
+// OBSOLETE   return DST_section_tab (section_table).section_base[section - 1] + offset;
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE CORE_ADDR
+// OBSOLETE dst_sym_addr (dst_sect_ref_t *ref)
+// OBSOLETE {
+// OBSOLETE   if (!section_table || !ref->sect_index)
+// OBSOLETE     return 0;
+// OBSOLETE   return DST_section_tab (section_table).section_base[ref->sect_index - 1]
+// OBSOLETE     + ref->sect_offset;
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE static struct symbol *
+// OBSOLETE create_new_symbol (struct objfile *objfile, char *name)
+// OBSOLETE {
+// OBSOLETE   struct symbol *sym = (struct symbol *)
+// OBSOLETE   obstack_alloc (&objfile->symbol_obstack, sizeof (struct symbol));
+// OBSOLETE   memset (sym, 0, sizeof (struct symbol));
+// OBSOLETE   SYMBOL_NAME (sym) = obsavestring (name, strlen (name),
+// OBSOLETE 				    &objfile->symbol_obstack);
+// OBSOLETE   SYMBOL_VALUE (sym) = 0;
+// OBSOLETE   SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+// OBSOLETE 
+// OBSOLETE   SYMBOL_CLASS (sym) = LOC_BLOCK;
+// OBSOLETE   return sym;
+// OBSOLETE };
+// OBSOLETE 
+// OBSOLETE static struct type *decode_dst_type (struct objfile *, dst_rec_ptr_t);
+// OBSOLETE 
+// OBSOLETE static struct type *
+// OBSOLETE decode_type_desc (struct objfile *objfile, dst_type_t *type_desc,
+// OBSOLETE 		  dst_rec_ptr_t base)
+// OBSOLETE {
+// OBSOLETE   struct type *type;
+// OBSOLETE   dst_rec_ptr_t entry;
+// OBSOLETE   if (type_desc->std_type.user_defined_type)
+// OBSOLETE     {
+// OBSOLETE       entry = (dst_rec_ptr_t) DST_OFFSET (base,
+// OBSOLETE 					  dst_user_type_offset (*type_desc));
+// OBSOLETE       type = decode_dst_type (objfile, entry);
+// OBSOLETE     }
+// OBSOLETE   else
+// OBSOLETE     {
+// OBSOLETE       switch (type_desc->std_type.dtc)
+// OBSOLETE 	{
+// OBSOLETE 	case dst_int8_type:
+// OBSOLETE 	  type = builtin_type_signed_char;
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_int16_type:
+// OBSOLETE 	  type = builtin_type_short;
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_int32_type:
+// OBSOLETE 	  type = builtin_type_long;
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_uint8_type:
+// OBSOLETE 	  type = builtin_type_unsigned_char;
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_uint16_type:
+// OBSOLETE 	  type = builtin_type_unsigned_short;
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_uint32_type:
+// OBSOLETE 	  type = builtin_type_unsigned_long;
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_real32_type:
+// OBSOLETE 	  type = builtin_type_float;
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_real64_type:
+// OBSOLETE 	  type = builtin_type_double;
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_complex_type:
+// OBSOLETE 	  type = builtin_type_complex;
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_dcomplex_type:
+// OBSOLETE 	  type = builtin_type_double_complex;
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_bool8_type:
+// OBSOLETE 	  type = builtin_type_char;
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_bool16_type:
+// OBSOLETE 	  type = builtin_type_short;
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_bool32_type:
+// OBSOLETE 	  type = builtin_type_long;
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_char_type:
+// OBSOLETE 	  type = builtin_type_char;
+// OBSOLETE 	  break;
+// OBSOLETE 	  /* The next few are more complex. I will take care
+// OBSOLETE 	   * of them properly at a later point.
+// OBSOLETE 	   */
+// OBSOLETE 	case dst_string_type:
+// OBSOLETE 	  type = builtin_type_void;
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_ptr_type:
+// OBSOLETE 	  type = builtin_type_void;
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_set_type:
+// OBSOLETE 	  type = builtin_type_void;
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_proc_type:
+// OBSOLETE 	  type = builtin_type_void;
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_func_type:
+// OBSOLETE 	  type = builtin_type_void;
+// OBSOLETE 	  break;
+// OBSOLETE 	  /* Back tto some ordinary ones */
+// OBSOLETE 	case dst_void_type:
+// OBSOLETE 	  type = builtin_type_void;
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_uchar_type:
+// OBSOLETE 	  type = builtin_type_unsigned_char;
+// OBSOLETE 	  break;
+// OBSOLETE 	default:
+// OBSOLETE 	  type = builtin_type_void;
+// OBSOLETE 	  break;
+// OBSOLETE 	}
+// OBSOLETE     }
+// OBSOLETE   return type;
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE struct structure_list
+// OBSOLETE {
+// OBSOLETE   struct structure_list *next;
+// OBSOLETE   struct type *type;
+// OBSOLETE };
+// OBSOLETE 
+// OBSOLETE static struct structure_list *struct_list = NULL;
+// OBSOLETE 
+// OBSOLETE static struct type *
+// OBSOLETE find_dst_structure (char *name)
+// OBSOLETE {
+// OBSOLETE   struct structure_list *element;
+// OBSOLETE 
+// OBSOLETE   for (element = struct_list; element; element = element->next)
+// OBSOLETE     if (!strcmp (name, TYPE_NAME (element->type)))
+// OBSOLETE       return element->type;
+// OBSOLETE   return NULL;
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE 
+// OBSOLETE static struct type *
+// OBSOLETE decode_dst_structure (struct objfile *objfile, dst_rec_ptr_t entry, int code,
+// OBSOLETE 		      int version)
+// OBSOLETE {
+// OBSOLETE   struct type *type, *child_type;
+// OBSOLETE   char *struct_name;
+// OBSOLETE   char *name, *field_name;
+// OBSOLETE   int i;
+// OBSOLETE   int fieldoffset, fieldsize;
+// OBSOLETE   dst_type_t type_desc;
+// OBSOLETE   struct structure_list *element;
+// OBSOLETE 
+// OBSOLETE   struct_name = DST_OFFSET (entry, DST_record (entry).noffset);
+// OBSOLETE   name = concat ((code == TYPE_CODE_UNION) ? "union " : "struct ",
+// OBSOLETE 		 struct_name, NULL);
+// OBSOLETE   type = find_dst_structure (name);
+// OBSOLETE   if (type)
+// OBSOLETE     {
+// OBSOLETE       xfree (name);
+// OBSOLETE       return type;
+// OBSOLETE     }
+// OBSOLETE   type = alloc_type (objfile);
+// OBSOLETE   TYPE_NAME (type) = obstack_copy0 (&objfile->symbol_obstack,
+// OBSOLETE 				    name, strlen (name));
+// OBSOLETE   xfree (name);
+// OBSOLETE   TYPE_CODE (type) = code;
+// OBSOLETE   TYPE_LENGTH (type) = DST_record (entry).size;
+// OBSOLETE   TYPE_NFIELDS (type) = DST_record (entry).nfields;
+// OBSOLETE   TYPE_FIELDS (type) = (struct field *)
+// OBSOLETE     obstack_alloc (&objfile->symbol_obstack, sizeof (struct field) *
+// OBSOLETE 		   DST_record (entry).nfields);
+// OBSOLETE   fieldoffset = fieldsize = 0;
+// OBSOLETE   INIT_CPLUS_SPECIFIC (type);
+// OBSOLETE   element = (struct structure_list *)
+// OBSOLETE     xmalloc (sizeof (struct structure_list));
+// OBSOLETE   element->type = type;
+// OBSOLETE   element->next = struct_list;
+// OBSOLETE   struct_list = element;
+// OBSOLETE   for (i = 0; i < DST_record (entry).nfields; i++)
+// OBSOLETE     {
+// OBSOLETE       switch (version)
+// OBSOLETE 	{
+// OBSOLETE 	case 2:
+// OBSOLETE 	  field_name = DST_OFFSET (entry,
+// OBSOLETE 				   DST_record (entry).f.ofields[i].noffset);
+// OBSOLETE 	  fieldoffset = DST_record (entry).f.ofields[i].foffset * 8 +
+// OBSOLETE 	    DST_record (entry).f.ofields[i].bit_offset;
+// OBSOLETE 	  fieldsize = DST_record (entry).f.ofields[i].size;
+// OBSOLETE 	  type_desc = DST_record (entry).f.ofields[i].type_desc;
+// OBSOLETE 	  break;
+// OBSOLETE 	case 1:
+// OBSOLETE 	  field_name = DST_OFFSET (entry,
+// OBSOLETE 				   DST_record (entry).f.fields[i].noffset);
+// OBSOLETE 	  type_desc = DST_record (entry).f.fields[i].type_desc;
+// OBSOLETE 	  switch (DST_record (entry).f.fields[i].f.field_loc.format_tag)
+// OBSOLETE 	    {
+// OBSOLETE 	    case dst_field_byte:
+// OBSOLETE 	      fieldoffset = DST_record (entry).f.
+// OBSOLETE 		fields[i].f.field_byte.offset * 8;
+// OBSOLETE 	      fieldsize = -1;
+// OBSOLETE 	      break;
+// OBSOLETE 	    case dst_field_bit:
+// OBSOLETE 	      fieldoffset = DST_record (entry).f.
+// OBSOLETE 		fields[i].f.field_bit.byte_offset * 8 +
+// OBSOLETE 		DST_record (entry).f.
+// OBSOLETE 		fields[i].f.field_bit.bit_offset;
+// OBSOLETE 	      fieldsize = DST_record (entry).f.
+// OBSOLETE 		fields[i].f.field_bit.nbits;
+// OBSOLETE 	      break;
+// OBSOLETE 	    case dst_field_loc:
+// OBSOLETE 	      fieldoffset += fieldsize;
+// OBSOLETE 	      fieldsize = -1;
+// OBSOLETE 	      break;
+// OBSOLETE 	    }
+// OBSOLETE 	  break;
+// OBSOLETE 	case 0:
+// OBSOLETE 	  field_name = DST_OFFSET (entry,
+// OBSOLETE 				   DST_record (entry).f.sfields[i].noffset);
+// OBSOLETE 	  fieldoffset = DST_record (entry).f.sfields[i].foffset;
+// OBSOLETE 	  type_desc = DST_record (entry).f.sfields[i].type_desc;
+// OBSOLETE 	  if (i < DST_record (entry).nfields - 1)
+// OBSOLETE 	    fieldsize = DST_record (entry).f.sfields[i + 1].foffset;
+// OBSOLETE 	  else
+// OBSOLETE 	    fieldsize = DST_record (entry).size;
+// OBSOLETE 	  fieldsize -= fieldoffset;
+// OBSOLETE 	  fieldoffset *= 8;
+// OBSOLETE 	  fieldsize *= 8;
+// OBSOLETE 	}
+// OBSOLETE       TYPE_FIELDS (type)[i].name =
+// OBSOLETE 	obstack_copy0 (&objfile->symbol_obstack,
+// OBSOLETE 		       field_name, strlen (field_name));
+// OBSOLETE       TYPE_FIELDS (type)[i].type = decode_type_desc (objfile,
+// OBSOLETE 						     &type_desc,
+// OBSOLETE 						     entry);
+// OBSOLETE       if (fieldsize == -1)
+// OBSOLETE 	fieldsize = TYPE_LENGTH (TYPE_FIELDS (type)[i].type) *
+// OBSOLETE 	  8;
+// OBSOLETE       TYPE_FIELDS (type)[i].bitsize = fieldsize;
+// OBSOLETE       TYPE_FIELDS (type)[i].bitpos = fieldoffset;
+// OBSOLETE     }
+// OBSOLETE   return type;
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE static struct type *
+// OBSOLETE decode_dst_type (struct objfile *objfile, dst_rec_ptr_t entry)
+// OBSOLETE {
+// OBSOLETE   struct type *child_type, *type, *range_type, *index_type;
+// OBSOLETE 
+// OBSOLETE   switch (entry->rec_type)
+// OBSOLETE     {
+// OBSOLETE     case dst_typ_var:
+// OBSOLETE       return decode_type_desc (objfile,
+// OBSOLETE 			       &DST_var (entry).type_desc,
+// OBSOLETE 			       entry);
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_variable:
+// OBSOLETE       return decode_type_desc (objfile,
+// OBSOLETE 			       &DST_variable (entry).type_desc,
+// OBSOLETE 			       entry);
+// OBSOLETE       break;
+// OBSOLETE     case dst_typ_short_rec:
+// OBSOLETE       return decode_dst_structure (objfile, entry, TYPE_CODE_STRUCT, 0);
+// OBSOLETE     case dst_typ_short_union:
+// OBSOLETE       return decode_dst_structure (objfile, entry, TYPE_CODE_UNION, 0);
+// OBSOLETE     case dst_typ_union:
+// OBSOLETE       return decode_dst_structure (objfile, entry, TYPE_CODE_UNION, 1);
+// OBSOLETE     case dst_typ_record:
+// OBSOLETE       return decode_dst_structure (objfile, entry, TYPE_CODE_STRUCT, 1);
+// OBSOLETE     case dst_typ_old_union:
+// OBSOLETE       return decode_dst_structure (objfile, entry, TYPE_CODE_UNION, 2);
+// OBSOLETE     case dst_typ_old_record:
+// OBSOLETE       return decode_dst_structure (objfile, entry, TYPE_CODE_STRUCT, 2);
+// OBSOLETE     case dst_typ_pointer:
+// OBSOLETE       return make_pointer_type (
+// OBSOLETE 				 decode_type_desc (objfile,
+// OBSOLETE 					     &DST_pointer (entry).type_desc,
+// OBSOLETE 						   entry),
+// OBSOLETE 				 NULL);
+// OBSOLETE     case dst_typ_array:
+// OBSOLETE       child_type = decode_type_desc (objfile,
+// OBSOLETE 				     &DST_pointer (entry).type_desc,
+// OBSOLETE 				     entry);
+// OBSOLETE       index_type = lookup_fundamental_type (objfile,
+// OBSOLETE 					    FT_INTEGER);
+// OBSOLETE       range_type = create_range_type ((struct type *) NULL,
+// OBSOLETE 				      index_type, DST_array (entry).lo_bound,
+// OBSOLETE 				      DST_array (entry).hi_bound);
+// OBSOLETE       return create_array_type ((struct type *) NULL, child_type,
+// OBSOLETE 				range_type);
+// OBSOLETE     case dst_typ_alias:
+// OBSOLETE       return decode_type_desc (objfile,
+// OBSOLETE 			       &DST_alias (entry).type_desc,
+// OBSOLETE 			       entry);
+// OBSOLETE     default:
+// OBSOLETE       return builtin_type_int;
+// OBSOLETE     }
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE struct symbol_list
+// OBSOLETE {
+// OBSOLETE   struct symbol_list *next;
+// OBSOLETE   struct symbol *symbol;
+// OBSOLETE };
+// OBSOLETE 
+// OBSOLETE static struct symbol_list *dst_global_symbols = NULL;
+// OBSOLETE static int total_globals = 0;
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE decode_dst_locstring (char *locstr, struct symbol *sym)
+// OBSOLETE {
+// OBSOLETE   dst_loc_entry_t *entry, *next_entry;
+// OBSOLETE   CORE_ADDR temp;
+// OBSOLETE   int count = 0;
+// OBSOLETE 
+// OBSOLETE   while (1)
+// OBSOLETE     {
+// OBSOLETE       if (count++ == 100)
+// OBSOLETE 	{
+// OBSOLETE 	  fprintf_unfiltered (gdb_stderr, "Error reading locstring\n");
+// OBSOLETE 	  break;
+// OBSOLETE 	}
+// OBSOLETE       entry = (dst_loc_entry_t *) locstr;
+// OBSOLETE       next_entry = (dst_loc_entry_t *) (locstr + 1);
+// OBSOLETE       switch (entry->header.code)
+// OBSOLETE 	{
+// OBSOLETE 	case dst_lsc_end:	/* End of string */
+// OBSOLETE 	  return;
+// OBSOLETE 	case dst_lsc_indirect:	/* Indirect through previous. Arg == 6 */
+// OBSOLETE 	  /* Or register ax x == arg */
+// OBSOLETE 	  if (entry->header.arg < 6)
+// OBSOLETE 	    {
+// OBSOLETE 	      SYMBOL_CLASS (sym) = LOC_REGISTER;
+// OBSOLETE 	      SYMBOL_VALUE (sym) = entry->header.arg + 8;
+// OBSOLETE 	    }
+// OBSOLETE 	  /* We predict indirects */
+// OBSOLETE 	  locstr++;
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_lsc_dreg:
+// OBSOLETE 	  SYMBOL_CLASS (sym) = LOC_REGISTER;
+// OBSOLETE 	  SYMBOL_VALUE (sym) = entry->header.arg;
+// OBSOLETE 	  locstr++;
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_lsc_section:	/* Section (arg+1) */
+// OBSOLETE 	  SYMBOL_VALUE (sym) = dst_get_addr (entry->header.arg + 1, 0);
+// OBSOLETE 	  locstr++;
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_lsc_sec_byte:	/* Section (next_byte+1) */
+// OBSOLETE 	  SYMBOL_VALUE (sym) = dst_get_addr (locstr[1] + 1, 0);
+// OBSOLETE 	  locstr += 2;
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_lsc_add:	/* Add (arg+1)*2 */
+// OBSOLETE 	case dst_lsc_sub:	/* Subtract (arg+1)*2 */
+// OBSOLETE 	  temp = (entry->header.arg + 1) * 2;
+// OBSOLETE 	  locstr++;
+// OBSOLETE 	  if (*locstr == dst_multiply_256)
+// OBSOLETE 	    {
+// OBSOLETE 	      temp <<= 8;
+// OBSOLETE 	      locstr++;
+// OBSOLETE 	    }
+// OBSOLETE 	  switch (entry->header.code)
+// OBSOLETE 	    {
+// OBSOLETE 	    case dst_lsc_add:
+// OBSOLETE 	      if (SYMBOL_CLASS (sym) == LOC_LOCAL)
+// OBSOLETE 		SYMBOL_CLASS (sym) = LOC_ARG;
+// OBSOLETE 	      SYMBOL_VALUE (sym) += temp;
+// OBSOLETE 	      break;
+// OBSOLETE 	    case dst_lsc_sub:
+// OBSOLETE 	      SYMBOL_VALUE (sym) -= temp;
+// OBSOLETE 	      break;
+// OBSOLETE 	    }
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_lsc_add_byte:
+// OBSOLETE 	case dst_lsc_sub_byte:
+// OBSOLETE 	  switch (entry->header.arg & 0x03)
+// OBSOLETE 	    {
+// OBSOLETE 	    case 1:
+// OBSOLETE 	      temp = (unsigned char) locstr[1];
+// OBSOLETE 	      locstr += 2;
+// OBSOLETE 	      break;
+// OBSOLETE 	    case 2:
+// OBSOLETE 	      temp = *(unsigned short *) (locstr + 1);
+// OBSOLETE 	      locstr += 3;
+// OBSOLETE 	      break;
+// OBSOLETE 	    case 3:
+// OBSOLETE 	      temp = *(unsigned long *) (locstr + 1);
+// OBSOLETE 	      locstr += 5;
+// OBSOLETE 	      break;
+// OBSOLETE 	    }
+// OBSOLETE 	  if (*locstr == dst_multiply_256)
+// OBSOLETE 	    {
+// OBSOLETE 	      temp <<= 8;
+// OBSOLETE 	      locstr++;
+// OBSOLETE 	    }
+// OBSOLETE 	  switch (entry->header.code)
+// OBSOLETE 	    {
+// OBSOLETE 	    case dst_lsc_add_byte:
+// OBSOLETE 	      if (SYMBOL_CLASS (sym) == LOC_LOCAL)
+// OBSOLETE 		SYMBOL_CLASS (sym) = LOC_ARG;
+// OBSOLETE 	      SYMBOL_VALUE (sym) += temp;
+// OBSOLETE 	      break;
+// OBSOLETE 	    case dst_lsc_sub_byte:
+// OBSOLETE 	      SYMBOL_VALUE (sym) -= temp;
+// OBSOLETE 	      break;
+// OBSOLETE 	    }
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_lsc_sbreg:	/* Stack base register (frame pointer). Arg==0 */
+// OBSOLETE 	  if (next_entry->header.code != dst_lsc_indirect)
+// OBSOLETE 	    {
+// OBSOLETE 	      SYMBOL_VALUE (sym) = 0;
+// OBSOLETE 	      SYMBOL_CLASS (sym) = LOC_STATIC;
+// OBSOLETE 	      return;
+// OBSOLETE 	    }
+// OBSOLETE 	  SYMBOL_VALUE (sym) = 0;
+// OBSOLETE 	  SYMBOL_CLASS (sym) = LOC_LOCAL;
+// OBSOLETE 	  locstr++;
+// OBSOLETE 	  break;
+// OBSOLETE 	default:
+// OBSOLETE 	  SYMBOL_VALUE (sym) = 0;
+// OBSOLETE 	  SYMBOL_CLASS (sym) = LOC_STATIC;
+// OBSOLETE 	  return;
+// OBSOLETE 	}
+// OBSOLETE     }
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE static struct symbol_list *
+// OBSOLETE process_dst_symbols (struct objfile *objfile, dst_rec_ptr_t entry, char *name,
+// OBSOLETE 		     int *nsyms_ret)
+// OBSOLETE {
+// OBSOLETE   struct symbol_list *list = NULL, *element;
+// OBSOLETE   struct symbol *sym;
+// OBSOLETE   char *symname;
+// OBSOLETE   int nsyms = 0;
+// OBSOLETE   char *location;
+// OBSOLETE   long line;
+// OBSOLETE   dst_type_t symtype;
+// OBSOLETE   struct type *type;
+// OBSOLETE   dst_var_attr_t attr;
+// OBSOLETE   dst_var_loc_t loc_type;
+// OBSOLETE   unsigned loc_index;
+// OBSOLETE   long loc_value;
+// OBSOLETE 
+// OBSOLETE   if (!entry)
+// OBSOLETE     {
+// OBSOLETE       *nsyms_ret = 0;
+// OBSOLETE       return NULL;
+// OBSOLETE     }
+// OBSOLETE   location = (char *) entry;
+// OBSOLETE   while (NEXT_SYM (&location, &entry) &&
+// OBSOLETE 	 entry->rec_type != dst_typ_end_scope)
+// OBSOLETE     {
+// OBSOLETE       if (entry->rec_type == dst_typ_var)
+// OBSOLETE 	{
+// OBSOLETE 	  if (DST_var (entry).short_locs)
+// OBSOLETE 	    {
+// OBSOLETE 	      loc_type = DST_var (entry).locs.shorts[0].loc_type;
+// OBSOLETE 	      loc_index = DST_var (entry).locs.shorts[0].loc_index;
+// OBSOLETE 	      loc_value = DST_var (entry).locs.shorts[0].location;
+// OBSOLETE 	    }
+// OBSOLETE 	  else
+// OBSOLETE 	    {
+// OBSOLETE 	      loc_type = DST_var (entry).locs.longs[0].loc_type;
+// OBSOLETE 	      loc_index = DST_var (entry).locs.longs[0].loc_index;
+// OBSOLETE 	      loc_value = DST_var (entry).locs.longs[0].location;
+// OBSOLETE 	    }
+// OBSOLETE 	  if (loc_type == dst_var_loc_external)
+// OBSOLETE 	    continue;
+// OBSOLETE 	  symname = DST_OFFSET (entry, DST_var (entry).noffset);
+// OBSOLETE 	  line = DST_var (entry).src_loc.line_number;
+// OBSOLETE 	  symtype = DST_var (entry).type_desc;
+// OBSOLETE 	  attr = DST_var (entry).attributes;
+// OBSOLETE 	}
+// OBSOLETE       else if (entry->rec_type == dst_typ_variable)
+// OBSOLETE 	{
+// OBSOLETE 	  symname = DST_OFFSET (entry,
+// OBSOLETE 				DST_variable (entry).noffset);
+// OBSOLETE 	  line = DST_variable (entry).src_loc.line_number;
+// OBSOLETE 	  symtype = DST_variable (entry).type_desc;
+// OBSOLETE 	  attr = DST_variable (entry).attributes;
+// OBSOLETE 	}
+// OBSOLETE       else
+// OBSOLETE 	{
+// OBSOLETE 	  continue;
+// OBSOLETE 	}
+// OBSOLETE       if (symname && name && !strcmp (symname, name))
+// OBSOLETE 	/* It's the function return value */
+// OBSOLETE 	continue;
+// OBSOLETE       sym = create_new_symbol (objfile, symname);
+// OBSOLETE 
+// OBSOLETE       if ((attr & (1 << dst_var_attr_global)) ||
+// OBSOLETE 	  (attr & (1 << dst_var_attr_static)))
+// OBSOLETE 	SYMBOL_CLASS (sym) = LOC_STATIC;
+// OBSOLETE       else
+// OBSOLETE 	SYMBOL_CLASS (sym) = LOC_LOCAL;
+// OBSOLETE       SYMBOL_LINE (sym) = line;
+// OBSOLETE       SYMBOL_TYPE (sym) = decode_type_desc (objfile, &symtype,
+// OBSOLETE 					    entry);
+// OBSOLETE       SYMBOL_VALUE (sym) = 0;
+// OBSOLETE       switch (entry->rec_type)
+// OBSOLETE 	{
+// OBSOLETE 	case dst_typ_var:
+// OBSOLETE 	  switch (loc_type)
+// OBSOLETE 	    {
+// OBSOLETE 	    case dst_var_loc_abs:
+// OBSOLETE 	      SYMBOL_VALUE_ADDRESS (sym) = loc_value;
+// OBSOLETE 	      break;
+// OBSOLETE 	    case dst_var_loc_sect_off:
+// OBSOLETE 	    case dst_var_loc_ind_sect_off:	/* What is this? */
+// OBSOLETE 	      SYMBOL_VALUE_ADDRESS (sym) = dst_get_addr (
+// OBSOLETE 							  loc_index,
+// OBSOLETE 							  loc_value);
+// OBSOLETE 	      break;
+// OBSOLETE 	    case dst_var_loc_ind_reg_rel:	/* What is this? */
+// OBSOLETE 	    case dst_var_loc_reg_rel:
+// OBSOLETE 	      /* If it isn't fp relative, specify the
+// OBSOLETE 	       * register it's relative to.
+// OBSOLETE 	       */
+// OBSOLETE 	      if (loc_index)
+// OBSOLETE 		{
+// OBSOLETE 		  sym->aux_value.basereg = loc_index;
+// OBSOLETE 		}
+// OBSOLETE 	      SYMBOL_VALUE (sym) = loc_value;
+// OBSOLETE 	      if (loc_value > 0 &&
+// OBSOLETE 		  SYMBOL_CLASS (sym) == LOC_BASEREG)
+// OBSOLETE 		SYMBOL_CLASS (sym) = LOC_BASEREG_ARG;
+// OBSOLETE 	      break;
+// OBSOLETE 	    case dst_var_loc_reg:
+// OBSOLETE 	      SYMBOL_VALUE (sym) = loc_index;
+// OBSOLETE 	      SYMBOL_CLASS (sym) = LOC_REGISTER;
+// OBSOLETE 	      break;
+// OBSOLETE 	    }
+// OBSOLETE 	  break;
+// OBSOLETE 	case dst_typ_variable:
+// OBSOLETE 	  /* External variable..... don't try to interpret
+// OBSOLETE 	   * its nonexistant locstring.
+// OBSOLETE 	   */
+// OBSOLETE 	  if (DST_variable (entry).loffset == -1)
+// OBSOLETE 	    continue;
+// OBSOLETE 	  decode_dst_locstring (DST_OFFSET (entry,
+// OBSOLETE 					    DST_variable (entry).loffset),
+// OBSOLETE 				sym);
+// OBSOLETE 	}
+// OBSOLETE       element = (struct symbol_list *)
+// OBSOLETE 	xmalloc (sizeof (struct symbol_list));
+// OBSOLETE 
+// OBSOLETE       if (attr & (1 << dst_var_attr_global))
+// OBSOLETE 	{
+// OBSOLETE 	  element->next = dst_global_symbols;
+// OBSOLETE 	  dst_global_symbols = element;
+// OBSOLETE 	  total_globals++;
+// OBSOLETE 	}
+// OBSOLETE       else
+// OBSOLETE 	{
+// OBSOLETE 	  element->next = list;
+// OBSOLETE 	  list = element;
+// OBSOLETE 	  nsyms++;
+// OBSOLETE 	}
+// OBSOLETE       element->symbol = sym;
+// OBSOLETE     }
+// OBSOLETE   *nsyms_ret = nsyms;
+// OBSOLETE   return list;
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE 
+// OBSOLETE static struct symbol *
+// OBSOLETE process_dst_function (struct objfile *objfile, dst_rec_ptr_t entry, char *name,
+// OBSOLETE 		      CORE_ADDR address)
+// OBSOLETE {
+// OBSOLETE   struct symbol *sym;
+// OBSOLETE   struct type *type, *ftype;
+// OBSOLETE   dst_rec_ptr_t sym_entry, typ_entry;
+// OBSOLETE   char *location;
+// OBSOLETE   struct symbol_list *element;
+// OBSOLETE 
+// OBSOLETE   type = builtin_type_int;
+// OBSOLETE   sym = create_new_symbol (objfile, name);
+// OBSOLETE   SYMBOL_CLASS (sym) = LOC_BLOCK;
+// OBSOLETE 
+// OBSOLETE   if (entry)
+// OBSOLETE     {
+// OBSOLETE       location = (char *) entry;
+// OBSOLETE       do
+// OBSOLETE 	{
+// OBSOLETE 	  NEXT_SYM (&location, &sym_entry);
+// OBSOLETE 	}
+// OBSOLETE       while (sym_entry && sym_entry->rec_type != dst_typ_signature);
+// OBSOLETE 
+// OBSOLETE       if (sym_entry)
+// OBSOLETE 	{
+// OBSOLETE 	  SYMBOL_LINE (sym) =
+// OBSOLETE 	    DST_signature (sym_entry).src_loc.line_number;
+// OBSOLETE 	  if (DST_signature (sym_entry).result)
+// OBSOLETE 	    {
+// OBSOLETE 	      typ_entry = (dst_rec_ptr_t)
+// OBSOLETE 		DST_OFFSET (sym_entry,
+// OBSOLETE 			    DST_signature (sym_entry).result);
+// OBSOLETE 	      type = decode_dst_type (objfile, typ_entry);
+// OBSOLETE 	    }
+// OBSOLETE 	}
+// OBSOLETE     }
+// OBSOLETE 
+// OBSOLETE   if (!type->function_type)
+// OBSOLETE     {
+// OBSOLETE       ftype = alloc_type (objfile);
+// OBSOLETE       type->function_type = ftype;
+// OBSOLETE       TYPE_TARGET_TYPE (ftype) = type;
+// OBSOLETE       TYPE_CODE (ftype) = TYPE_CODE_FUNC;
+// OBSOLETE     }
+// OBSOLETE   SYMBOL_TYPE (sym) = type->function_type;
+// OBSOLETE 
+// OBSOLETE   /* Now add ourselves to the global symbols list */
+// OBSOLETE   element = (struct symbol_list *)
+// OBSOLETE     xmalloc (sizeof (struct symbol_list));
+// OBSOLETE 
+// OBSOLETE   element->next = dst_global_symbols;
+// OBSOLETE   dst_global_symbols = element;
+// OBSOLETE   total_globals++;
+// OBSOLETE   element->symbol = sym;
+// OBSOLETE 
+// OBSOLETE   return sym;
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE static struct block *
+// OBSOLETE process_dst_block (struct objfile *objfile, dst_rec_ptr_t entry)
+// OBSOLETE {
+// OBSOLETE   struct block *block;
+// OBSOLETE   struct symbol *function = NULL;
+// OBSOLETE   CORE_ADDR address;
+// OBSOLETE   long size;
+// OBSOLETE   char *name;
+// OBSOLETE   dst_rec_ptr_t child_entry, symbol_entry;
+// OBSOLETE   struct block *child_block;
+// OBSOLETE   int total_symbols = 0;
+// OBSOLETE   char fake_name[20];
+// OBSOLETE   static long fake_seq = 0;
+// OBSOLETE   struct symbol_list *symlist, *nextsym;
+// OBSOLETE   int symnum;
+// OBSOLETE 
+// OBSOLETE   if (DST_block (entry).noffset)
+// OBSOLETE     name = DST_OFFSET (entry, DST_block (entry).noffset);
+// OBSOLETE   else
+// OBSOLETE     name = NULL;
+// OBSOLETE   if (DST_block (entry).n_of_code_ranges)
+// OBSOLETE     {
+// OBSOLETE       address = dst_sym_addr (
+// OBSOLETE 			       &DST_block (entry).code_ranges[0].code_start);
+// OBSOLETE       size = DST_block (entry).code_ranges[0].code_size;
+// OBSOLETE     }
+// OBSOLETE   else
+// OBSOLETE     {
+// OBSOLETE       address = -1;
+// OBSOLETE       size = 0;
+// OBSOLETE     }
+// OBSOLETE   symbol_entry = (dst_rec_ptr_t) get_sec_ref (&DST_block (entry).symbols_start);
+// OBSOLETE   switch (DST_block (entry).block_type)
+// OBSOLETE     {
+// OBSOLETE       /* These are all really functions. Even the "program" type.
+// OBSOLETE        * This is because the Apollo OS was written in Pascal, and
+// OBSOLETE        * in Pascal, the main procedure is described as the Program.
+// OBSOLETE        * Cute, huh?
+// OBSOLETE        */
+// OBSOLETE     case dst_block_procedure:
+// OBSOLETE     case dst_block_function:
+// OBSOLETE     case dst_block_subroutine:
+// OBSOLETE     case dst_block_program:
+// OBSOLETE       prim_record_minimal_symbol (name, address, mst_text, objfile);
+// OBSOLETE       function = process_dst_function (
+// OBSOLETE 					objfile,
+// OBSOLETE 					symbol_entry,
+// OBSOLETE 					name,
+// OBSOLETE 					address);
+// OBSOLETE       enter_all_lines (get_sec_ref (&DST_block (entry).code_ranges[0].lines_start), address);
+// OBSOLETE       break;
+// OBSOLETE     case dst_block_block_data:
+// OBSOLETE       break;
+// OBSOLETE 
+// OBSOLETE     default:
+// OBSOLETE       /* GDB has to call it something, and the module name
+// OBSOLETE        * won't cut it
+// OBSOLETE        */
+// OBSOLETE       sprintf (fake_name, "block_%08lx", fake_seq++);
+// OBSOLETE       function = process_dst_function (
+// OBSOLETE 					objfile, NULL, fake_name, address);
+// OBSOLETE       break;
+// OBSOLETE     }
+// OBSOLETE   symlist = process_dst_symbols (objfile, symbol_entry,
+// OBSOLETE 				 name, &total_symbols);
+// OBSOLETE   block = (struct block *)
+// OBSOLETE     obstack_alloc (&objfile->symbol_obstack,
+// OBSOLETE 		   sizeof (struct block) +
+// OBSOLETE 		     (total_symbols - 1) * sizeof (struct symbol *));
+// OBSOLETE 
+// OBSOLETE   symnum = 0;
+// OBSOLETE   while (symlist)
+// OBSOLETE     {
+// OBSOLETE       nextsym = symlist->next;
+// OBSOLETE 
+// OBSOLETE       block->sym[symnum] = symlist->symbol;
+// OBSOLETE 
+// OBSOLETE       xfree (symlist);
+// OBSOLETE       symlist = nextsym;
+// OBSOLETE       symnum++;
+// OBSOLETE     }
+// OBSOLETE   BLOCK_NSYMS (block) = total_symbols;
+// OBSOLETE   BLOCK_HASHTABLE (block) = 0;
+// OBSOLETE   BLOCK_START (block) = address;
+// OBSOLETE   BLOCK_END (block) = address + size;
+// OBSOLETE   BLOCK_SUPERBLOCK (block) = 0;
+// OBSOLETE   if (function)
+// OBSOLETE     {
+// OBSOLETE       SYMBOL_BLOCK_VALUE (function) = block;
+// OBSOLETE       BLOCK_FUNCTION (block) = function;
+// OBSOLETE     }
+// OBSOLETE   else
+// OBSOLETE     BLOCK_FUNCTION (block) = 0;
+// OBSOLETE 
+// OBSOLETE   if (DST_block (entry).child_block_off)
+// OBSOLETE     {
+// OBSOLETE       child_entry = (dst_rec_ptr_t) DST_OFFSET (entry,
+// OBSOLETE 					 DST_block (entry).child_block_off);
+// OBSOLETE       while (child_entry)
+// OBSOLETE 	{
+// OBSOLETE 	  child_block = process_dst_block (objfile, child_entry);
+// OBSOLETE 	  if (child_block)
+// OBSOLETE 	    {
+// OBSOLETE 	      if (BLOCK_START (child_block) <
+// OBSOLETE 		  BLOCK_START (block) ||
+// OBSOLETE 		  BLOCK_START (block) == -1)
+// OBSOLETE 		BLOCK_START (block) =
+// OBSOLETE 		  BLOCK_START (child_block);
+// OBSOLETE 	      if (BLOCK_END (child_block) >
+// OBSOLETE 		  BLOCK_END (block) ||
+// OBSOLETE 		  BLOCK_END (block) == -1)
+// OBSOLETE 		BLOCK_END (block) =
+// OBSOLETE 		  BLOCK_END (child_block);
+// OBSOLETE 	      BLOCK_SUPERBLOCK (child_block) = block;
+// OBSOLETE 	    }
+// OBSOLETE 	  if (DST_block (child_entry).sibling_block_off)
+// OBSOLETE 	    child_entry = (dst_rec_ptr_t) DST_OFFSET (
+// OBSOLETE 						       child_entry,
+// OBSOLETE 				 DST_block (child_entry).sibling_block_off);
+// OBSOLETE 	  else
+// OBSOLETE 	    child_entry = NULL;
+// OBSOLETE 	}
+// OBSOLETE     }
+// OBSOLETE   record_pending_block (objfile, block, NULL);
+// OBSOLETE   return block;
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE read_dst_symtab (struct objfile *objfile)
+// OBSOLETE {
+// OBSOLETE   char *buffer;
+// OBSOLETE   dst_rec_ptr_t entry, file_table, root_block;
+// OBSOLETE   char *source_file;
+// OBSOLETE   struct block *block, *global_block;
+// OBSOLETE   int symnum;
+// OBSOLETE   struct symbol_list *nextsym;
+// OBSOLETE   int module_num = 0;
+// OBSOLETE   struct structure_list *element;
+// OBSOLETE 
+// OBSOLETE   current_objfile = objfile;
+// OBSOLETE   buffer = blocks_info.buffer;
+// OBSOLETE   while (NEXT_BLK (&buffer, &entry))
+// OBSOLETE     {
+// OBSOLETE       if (entry->rec_type == dst_typ_comp_unit)
+// OBSOLETE 	{
+// OBSOLETE 	  file_table = (dst_rec_ptr_t) DST_OFFSET (entry,
+// OBSOLETE 					  DST_comp_unit (entry).file_table);
+// OBSOLETE 	  section_table = (dst_rec_ptr_t) DST_OFFSET (entry,
+// OBSOLETE 				       DST_comp_unit (entry).section_table);
+// OBSOLETE 	  root_block = (dst_rec_ptr_t) DST_OFFSET (entry,
+// OBSOLETE 				   DST_comp_unit (entry).root_block_offset);
+// OBSOLETE 	  source_file = DST_OFFSET (file_table,
+// OBSOLETE 				DST_file_tab (file_table).files[0].noffset);
+// OBSOLETE 	  /* Point buffer to the start of the next comp_unit */
+// OBSOLETE 	  buffer = DST_OFFSET (entry,
+// OBSOLETE 			       DST_comp_unit (entry).data_size);
+// OBSOLETE 	  dst_start_symtab ();
+// OBSOLETE 
+// OBSOLETE 	  block = process_dst_block (objfile, root_block);
+// OBSOLETE 
+// OBSOLETE 	  global_block = (struct block *)
+// OBSOLETE 	    obstack_alloc (&objfile->symbol_obstack,
+// OBSOLETE 			   sizeof (struct block) +
+// OBSOLETE 			     (total_globals - 1) *
+// OBSOLETE 			   sizeof (struct symbol *));
+// OBSOLETE 	  BLOCK_NSYMS (global_block) = total_globals;
+// OBSOLETE 	  BLOCK_HASHTABLE (global_block) = 0;
+// OBSOLETE 	  for (symnum = 0; symnum < total_globals; symnum++)
+// OBSOLETE 	    {
+// OBSOLETE 	      nextsym = dst_global_symbols->next;
+// OBSOLETE 
+// OBSOLETE 	      global_block->sym[symnum] =
+// OBSOLETE 		dst_global_symbols->symbol;
+// OBSOLETE 
+// OBSOLETE 	      xfree (dst_global_symbols);
+// OBSOLETE 	      dst_global_symbols = nextsym;
+// OBSOLETE 	    }
+// OBSOLETE 	  dst_global_symbols = NULL;
+// OBSOLETE 	  total_globals = 0;
+// OBSOLETE 	  BLOCK_FUNCTION (global_block) = 0;
+// OBSOLETE 	  BLOCK_START (global_block) = BLOCK_START (block);
+// OBSOLETE 	  BLOCK_END (global_block) = BLOCK_END (block);
+// OBSOLETE 	  BLOCK_SUPERBLOCK (global_block) = 0;
+// OBSOLETE 	  BLOCK_SUPERBLOCK (block) = global_block;
+// OBSOLETE 	  record_pending_block (objfile, global_block, NULL);
+// OBSOLETE 
+// OBSOLETE 	  complete_symtab (source_file,
+// OBSOLETE 			   BLOCK_START (block),
+// OBSOLETE 			   BLOCK_END (block) - BLOCK_START (block));
+// OBSOLETE 	  module_num++;
+// OBSOLETE 	  dst_end_symtab (objfile);
+// OBSOLETE 	}
+// OBSOLETE     }
+// OBSOLETE   if (module_num)
+// OBSOLETE     prim_record_minimal_symbol ("<end_of_program>",
+// OBSOLETE 				BLOCK_END (block), mst_text, objfile);
+// OBSOLETE   /* One more faked symbol to make sure nothing can ever run off the
+// OBSOLETE    * end of the symbol table. This one represents the end of the
+// OBSOLETE    * text space. It used to be (CORE_ADDR) -1 (effectively the highest
+// OBSOLETE    * int possible), but some parts of gdb treated it as a signed
+// OBSOLETE    * number and failed comparisons. We could equally use 7fffffff,
+// OBSOLETE    * but no functions are ever mapped to an address higher than
+// OBSOLETE    * 40000000
+// OBSOLETE    */
+// OBSOLETE   prim_record_minimal_symbol ("<end_of_text>",
+// OBSOLETE 			      (CORE_ADDR) 0x40000000,
+// OBSOLETE 			      mst_text, objfile);
+// OBSOLETE   while (struct_list)
+// OBSOLETE     {
+// OBSOLETE       element = struct_list;
+// OBSOLETE       struct_list = element->next;
+// OBSOLETE       xfree (element);
+// OBSOLETE     }
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE 
+// OBSOLETE /* Support for line number handling */
+// OBSOLETE static char *linetab = NULL;
+// OBSOLETE static long linetab_offset;
+// OBSOLETE static unsigned long linetab_size;
+// OBSOLETE 
+// OBSOLETE /* Read in all the line numbers for fast lookups later.  Leave them in
+// OBSOLETE    external (unswapped) format in memory; we'll swap them as we enter
+// OBSOLETE    them into GDB's data structures.  */
+// OBSOLETE static int
+// OBSOLETE init_one_section (int chan, dst_sec *secinfo)
+// OBSOLETE {
+// OBSOLETE   if (secinfo->size == 0
+// OBSOLETE       || lseek (chan, secinfo->position, 0) == -1
+// OBSOLETE       || (secinfo->buffer = xmalloc (secinfo->size)) == NULL
+// OBSOLETE       || myread (chan, secinfo->buffer, secinfo->size) == -1)
+// OBSOLETE     return 0;
+// OBSOLETE   else
+// OBSOLETE     return 1;
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE static int
+// OBSOLETE init_dst_sections (int chan)
+// OBSOLETE {
+// OBSOLETE 
+// OBSOLETE   if (!init_one_section (chan, &blocks_info) ||
+// OBSOLETE       !init_one_section (chan, &lines_info) ||
+// OBSOLETE       !init_one_section (chan, &symbols_info))
+// OBSOLETE     return -1;
+// OBSOLETE   else
+// OBSOLETE     return 0;
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE /* Fake up support for relocating symbol addresses.  FIXME.  */
+// OBSOLETE 
+// OBSOLETE struct section_offsets dst_symfile_faker =
+// OBSOLETE {0};
+// OBSOLETE 
+// OBSOLETE void
+// OBSOLETE dst_symfile_offsets (struct objfile *objfile, struct section_addr_info *addrs)
+// OBSOLETE {
+// OBSOLETE   objfile->num_sections = 1;
+// OBSOLETE   objfile->section_offsets = &dst_symfile_faker;
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE /* Register our ability to parse symbols for DST BFD files */
+// OBSOLETE 
+// OBSOLETE static struct sym_fns dst_sym_fns =
+// OBSOLETE {
+// OBSOLETE   /* FIXME: Can this be integrated with coffread.c?  If not, should it be
+// OBSOLETE      a separate flavour like ecoff?  */
+// OBSOLETE   (enum bfd_flavour) -2,
+// OBSOLETE 
+// OBSOLETE   dst_new_init,			/* sym_new_init: init anything gbl to entire symtab */
+// OBSOLETE   dst_symfile_init,		/* sym_init: read initial info, setup for sym_read() */
+// OBSOLETE   dst_symfile_read,		/* sym_read: read a symbol file into symtab */
+// OBSOLETE   dst_symfile_finish,		/* sym_finish: finished with file, cleanup */
+// OBSOLETE   dst_symfile_offsets,		/* sym_offsets:  xlate external to internal form */
+// OBSOLETE   NULL				/* next: pointer to next struct sym_fns */
+// OBSOLETE };
+// OBSOLETE 
+// OBSOLETE void
+// OBSOLETE _initialize_dstread (void)
+// OBSOLETE {
+// OBSOLETE   add_symtab_fns (&dst_sym_fns);
+// OBSOLETE }

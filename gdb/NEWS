@@ -64,6 +64,9 @@ Argonaut Risc Chip (ARC)			arc-*-*
 i386 running Mach 3.0				i[3456]86-*-mach3*
 i386 running Mach				i[3456]86-*-mach*
 i386 running OSF/1				i[3456]86-*osf1mk*
+HP/Apollo 68k Family				m68*-apollo*-sysv*,
+						m68*-apollo*-bsd*,
+						m68*-hp-bsd*, m68*-hp-hpux*
 
 * OBSOLETE languages
 

@@ -141,10 +141,10 @@ m68hc11*-*-*|m6811*-*-*)	gdb_target=m68hc11 ;;
 m68000-*-sunos3*)	gdb_target=sun2os3 ;;
 m68000-*-sunos4*)	gdb_target=sun2os4 ;;
 
-m68*-apollo*-bsd*)	gdb_target=apollo68b ;;
+# OBSOLETE m68*-apollo*-bsd*)	gdb_target=apollo68b ;;
 m68*-bull-sysv*)	gdb_target=dpx2 ;;
-m68*-hp-bsd*)		gdb_target=hp300bsd ;;
-m68*-hp-hpux*)		gdb_target=hp300hpux ;;
+# OBSOLETE m68*-hp-bsd*)		gdb_target=hp300bsd ;;
+# OBSOLETE m68*-hp-hpux*)		gdb_target=hp300hpux ;;
 m68*-att-*)		gdb_target=3b1 ;;
 m68*-cisco*-*)		gdb_target=cisco ;;
 m68*-ericsson-*)	gdb_target=es1800 ;;
