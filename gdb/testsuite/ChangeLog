@@ -1,4 +1,11 @@
+Mon Mar  6 10:44:06 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gdb.disasm/hppa.exp: Delete redundant ".*" at the beginning of
+	each expect pattern.  Cuts runtime from 12 to about 4 seconds.
+
 Thu Mar  2 05:31:34 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.base/langs.exp: Don't insist that foo__Fi be demangled.
 
 	* gdb.disasm/hppa.exp (all_fpu_comparison_tests): Only
 	disassemble 8, not 16, instructions for part 4.
