@@ -121,11 +121,11 @@ subroutines.
 @code{ar} will create an index to the symbols defined in relocatable
 object modules in the archive when you specify the modifier @samp{s}.
 Once created, this index is updated in the archive whenever @code{ar}
-makes a change to its contents.  An archive with such an index speeds up
-linking to the library, and allows routines in the library to call each
-other without regard to their placement in the archive.
-@c FIXME This auto-update may happen-always only for WRS version; Gumby
-@c says, for instance, that it doesn't happen with 'q' updates elsewhere.
+makes a change to its contents (save for the @samp{q} update operation).
+An archive with such an index speeds up linking to the library, and
+allows routines in the library to call each other without regard to
+their placement in the archive.
+
 
 You may use @samp{nm -s} or @samp{nm +print-armap} to list this index
 table.  If an archive lacks the table, another form of @code{ar} called
@@ -177,15 +177,16 @@ If you specify no @var{files}, all the files in the archive are printed.
 
 @item q
 @emph{Quick append}; add @var{files} to the end of @var{archive},
-without checking for replacement.
+without checking for replacement.  
 
 The modifiers @samp{a}, @samp{b}, and @samp{i} do @emph{not} affect this
 operation; new members are always placed at the end of the archive.
 
 The modifier @samp{v} makes @code{ar} list each file as it is appended.
 
-@c FIXME: per Gumby, versions other than WRS of this will *not* auto-update
-@c SYMDEF index on 'q' updates.
+Since the point of this operation is speed, the archive's symbol table
+index is not updated, even if it already existed; you can use @samp{ar s} or
+@code{ranlib} explicitly to update the symbol table index.
 
 @item r
 Insert @var{files} into @var{archive} (with @emph{replacement}). This
