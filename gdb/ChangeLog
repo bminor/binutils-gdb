@@ -1,3 +1,10 @@
+Wed Sep 11 19:38:44 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* Makefile.in (documentation targets):  Pass $(M4).
+	Bugfix from eggert@twinsun.com (Paul Eggert).
+
+	* stack.c (down_silently_command):  Check for stack existence.
+
 Tue Sep 10 23:08:29 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	* Makefile.in (VERSION):  Update to 4.0.3.

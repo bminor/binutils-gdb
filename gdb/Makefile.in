@@ -480,7 +480,7 @@ clean:
 	rm -f init.c init.o version.c
 	rm -f gdb core gdb.tar gdb.tar.Z make.log
 	rm -f gdb[0-9]
-	cd $(srcdir)/doc; make clean
+	cd $(srcdir)/doc; $(MAKE) clean
 
 distclean: clean expread.tab.c TAGS
 	rm -f tm.h xm.h config.status
@@ -536,26 +536,26 @@ force:
 # Documentation!
 # GDB QUICK REFERENCE (TeX dvi file, CM fonts)
 refcard.dvi : $(srcdir)/doc/refcard.tex
-	( cd $(srcdir)/doc; make refcard.dvi )
+	( cd $(srcdir)/doc; $(MAKE) refcard.dvi )
 	mv $(srcdir)/doc/refcard.dvi .
 
 # GDB QUICK REFERENCE (PostScript output, common PS fonts)
 refcard.ps : $(srcdir)/doc/refcard.tex
-	( cd $(srcdir)/doc; make refcard.ps )
+	( cd $(srcdir)/doc; $(MAKE) refcard.ps )
 	mv $(srcdir)/doc/refcard.ps .
 
 # GDB MANUAL: TeX dvi file
 gdb.dvi : $(srcdir)/doc/gdb-all.texi $(srcdir)/doc/rdl-apps.texi
-	( cd $(srcdir)/doc; make gdb.dvi )
+	( cd $(srcdir)/doc; $(MAKE) M4=$(M4) gdb.dvi )
 	mv $(srcdir)/doc/gdb.dvi .
 
 # GDB MANUAL: info file
 gdb.info: $(srcdir)/doc/gdb-all.texi
-	( cd $(srcdir)/doc; make gdb.info )
+	( cd $(srcdir)/doc; $(MAKE) M4=$(M4) gdb.info )
 	mv $(srcdir)/doc/gdb.info* .
 
 $(srcdir)/doc/gdb-all.texi:
-	(cd $(srcdir)/doc; $(MAKE) gdb-all.texi)
+	(cd $(srcdir)/doc; $(MAKE) M4=$(M4) gdb-all.texi)
 $(srcdir)/doc/rdl-apps.texi:
 	(cd $(srcdir)/doc; $(MAKE) rdl-apps.texi)
 
