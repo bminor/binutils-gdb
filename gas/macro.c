@@ -132,6 +132,15 @@ macro_init (int alternate, int mri, int strip_at,
   macro_expr = expr;
 }
 
+/* Switch in and out of alternate mode on the fly.  */
+
+void
+macro_set_alternate(alternate)
+     int alternate;
+{
+  macro_alternate = alternate;
+}
+
 /* Switch in and out of MRI mode on the fly.  */
 
 void

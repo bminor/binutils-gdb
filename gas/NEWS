@@ -12,6 +12,9 @@
 * Support for ColdFire EMAC instructions added and Motorola syntax for MAC/EMAC
   instrucitons.
 
+* New command line option --alternate and pseudo-ops .altmacro and .noaltmacro
+  added to enter (and leave) alternate macro syntax mode.
+
 Changes in 2.15:
 
 * The MIPS -membedded-pic option (Embedded-PIC code generation) is

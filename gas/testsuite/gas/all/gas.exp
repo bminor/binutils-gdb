@@ -114,6 +114,8 @@ case $target_triplet in {
     }
 }
 
+run_dump_test altmacro
+
 # This test is for any COFF target.
 # We omit m88k COFF because it uses weird pseudo-op names.
 # We omit the ARM toolchains because they define locals to

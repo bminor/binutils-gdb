@@ -216,6 +216,7 @@ static int dwarf_file_string;
 
 static void do_align (int, char *, int, int);
 static void s_align (int, int);
+static void s_altmacro (int);
 static int hex_float (int, char *);
 static segT get_known_segmented_expression (expressionS * expP);
 static void pobegin (void);
@@ -251,6 +252,7 @@ static struct hash_control *po_hash;
 static const pseudo_typeS potable[] = {
   {"abort", s_abort, 0},
   {"align", s_align_ptwo, 0},
+  {"altmacro", s_altmacro, 1},
   {"ascii", stringer, 0},
   {"asciz", stringer, 1},
   {"balign", s_align_bytes, 0},
@@ -351,6 +353,7 @@ static const pseudo_typeS potable[] = {
   {"mri", s_mri, 0},
   {".mri", s_mri, 0},	/* Special case so .mri works in MRI mode.  */
   {"name", s_ignore, 0},
+  {"noaltmacro", s_altmacro, 0},
   {"noformat", s_ignore, 0},
   {"nolist", listing_list, 0},	/* Turn listing off.  */
   {"nopage", listing_nopage, 0},
@@ -1318,6 +1321,15 @@ void
 s_align_ptwo (int arg)
 {
   s_align (arg, 0);
+}
+
+/* Switch in and out of alternate macro mode.  */
+
+void
+s_altmacro (int on)
+{
+  demand_empty_rest_of_line ();
+  macro_set_alternate (on);
 }
 
 symbolS *

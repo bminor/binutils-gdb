@@ -73,6 +73,7 @@ extern int macro_nest;
 extern int buffer_and_nest (const char *, const char *, sb *, int (*) (sb *));
 extern void macro_init
   (int, int, int, int (*) (const char *, int, sb *, int *));
+extern void macro_set_alternate (int);
 extern void macro_mri_mode (int);
 extern const char *define_macro
   (int, sb *, sb *, int (*) (sb *), const char **);

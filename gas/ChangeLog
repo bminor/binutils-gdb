@@ -1,3 +1,15 @@
+2004-08-13 Jan Beulich <jbeulich@novell.com>
+	   Nick Clifton <nickc@redhat.com>
+
+	* as.c: Add and handle new --alternate command line option.
+	* macro.c (macro_set_alternate): New.
+	* macro.h (macro_set_alternate): Declare.
+	* read.c: Add and handle new .altmacro and .noaltmacro directives.
+	* doc/as.texinfo: Document new command line option and pseudo-ops
+	as well as insert documentation originating from gasp about
+	alternate macro syntax.
+	* NEWS: Mention new command line option and pseudo-ops.
+
 2004-08-10  Mark Mitchell  <mark@codesourcery.com>
 
 	* expr.c (operand): Handle the "~", "-", and "!" operators applied

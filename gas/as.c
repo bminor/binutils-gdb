@@ -123,6 +123,8 @@ static struct itbl_file_list *itbl_files;
 
 static long start_time;
 
+static int flag_macro_alternate;
+
 
 #ifdef USE_EMULATIONS
 #define EMULATION_ENVIRON "AS_EMULATION"
@@ -244,6 +246,8 @@ Options:\n\
                       	  s      include symbols\n\
                       	  =FILE  list to FILE (must be last sub-option)\n"));
 
+  fprintf (stream, _("\
+  --alternate             initially turn on alternate macro syntax\n"));
   fprintf (stream, _("\
   -D                      produce assembler debugging messages\n"));
   fprintf (stream, _("\
@@ -414,6 +418,7 @@ parse_args (int * pargc, char *** pargv)
       OPTION_TARGET_HELP,
       OPTION_EXECSTACK,
       OPTION_NOEXECSTACK,
+      OPTION_ALTERNATE,
       OPTION_WARN_FATAL
     };
   
@@ -457,6 +462,7 @@ parse_args (int * pargc, char *** pargv)
     {"execstack", no_argument, NULL, OPTION_EXECSTACK},
     {"noexecstack", no_argument, NULL, OPTION_NOEXECSTACK},
 #endif
+    {"alternate", no_argument, NULL, OPTION_ALTERNATE},
     {"fatal-warnings", no_argument, NULL, OPTION_WARN_FATAL}
     /* When you add options here, check that they do not collide with
        OPTION_MD_BASE.  See as.h.  */
@@ -731,6 +737,19 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 	  flag_always_generate_output = 1;
 	  break;
 
+ 	case OPTION_ALTERNATE:
+ 	  optarg = old_argv [optind - 1];
+ 	  while (* optarg == '-')
+ 	    optarg ++;
+
+ 	  if (strcmp (optarg, "alternate") == 0)
+ 	    {
+ 	      flag_macro_alternate = 1;
+ 	      break;
+ 	    }
+ 	  optarg ++;
+ 	  /* Fall through.  */
+
 	case 'a':
 	  if (optarg)
 	    {
@@ -981,7 +1000,6 @@ perform_an_assembly_pass (int argc, char ** argv)
 int
 main (int argc, char ** argv)
 {
-  int macro_alternate;
   int macro_strip_at;
   int keep_it;
 
@@ -1036,7 +1054,6 @@ main (int argc, char ** argv)
   if (flag_print_statistics)
     xatexit (dump_statistics);
 
-  macro_alternate = 0;
   macro_strip_at = 0;
 #ifdef TC_I960
   macro_strip_at = flag_mri;
@@ -1044,11 +1061,11 @@ main (int argc, char ** argv)
 #ifdef TC_A29K
   /* For compatibility with the AMD 29K family macro assembler
      specification.  */
-  macro_alternate = 1;
+  flag_macro_alternate = 1;
   macro_strip_at = 1;
 #endif
 
-  macro_init (macro_alternate, flag_mri, macro_strip_at, macro_expr);
+  macro_init (flag_macro_alternate, flag_mri, macro_strip_at, macro_expr);
 
   PROGRESS (1);
 

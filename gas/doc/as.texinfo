@@ -226,9 +226,9 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @c to be limited to one line for the header.
 @smallexample
 @c man begin SYNOPSIS
-@value{AS} [@b{-a}[@b{cdhlns}][=@var{file}]] [@b{-D}] [@b{--defsym} @var{sym}=@var{val}]
- [@b{-f}] [@b{--gstabs}] [@b{--gstabs+}] [@b{--gdwarf2}] [@b{--help}]
- [@b{-I} @var{dir}] [@b{-J}] [@b{-K}] [@b{-L}]
+@value{AS} [@b{-a}[@b{cdhlns}][=@var{file}]] [@b{--alternate}] [@b{-D}]
+ [@b{--defsym} @var{sym}=@var{val}] [@b{-f}] [@b{--gstabs}] [@b{--gstabs+}]
+ [@b{--gdwarf2}] [@b{--help}] [@b{-I} @var{dir}] [@b{-J}] [@b{-K}] [@b{-L}]
  [@b{--listing-lhs-width}=@var{NUM}] [@b{--listing-lhs-width2}=@var{NUM}]
  [@b{--listing-rhs-width}=@var{NUM}] [@b{--listing-cont-lines}=@var{NUM}]
  [@b{--keep-locals}] [@b{-o} @var{objfile}] [@b{-R}] [@b{--statistics}] [@b{-v}]
@@ -462,6 +462,9 @@ set the name of the listing file
 You may combine these options; for example, use @samp{-aln} for assembly
 listing without forms processing.  The @samp{=file} option, if used, must be
 the last one.  By itself, @samp{-a} defaults to @samp{-ahls}.
+
+@item --alternate
+Begin in alternate macro mode, see @ref{Altmacro,,@code{.altmacro}}.
 
 @item -D
 Ignored.  This option is accepted for script compatibility with calls to
@@ -1457,6 +1460,7 @@ assembler.)
 
 @menu
 * a::             -a[cdhlns] enable listings
+* alternate::     --alternate enable alternate macro syntax
 * D::             -D for compatibility
 * f::             -f to work faster
 * I::             -I for .include search path
@@ -1528,6 +1532,12 @@ is being used) then the listing will not contain any comments or preprocessor
 directives.  This is because the listing code buffers input source lines from
 stdin only after they have been preprocessed by the assembler.  This reduces
 memory usage and makes the code more efficient.
+
+@node alternate
+@section @option{--alternate}
+
+@kindex --alternate
+Begin in alternate macro mode, see @ref{Altmacro,,@code{.altmacro}}.
 
 @node D
 @section @option{-D}
@@ -3677,6 +3687,7 @@ Some machine configurations provide additional directives.
 @end ifset
 
 * Align::                       @code{.align @var{abs-expr} , @var{abs-expr}}
+* Altmacro::                    @code{.altmacro}
 * Ascii::                       @code{.ascii "@var{string}"}@dots{}
 * Asciz::                       @code{.asciz "@var{string}"}@dots{}
 * Balign::                      @code{.balign @var{abs-expr} , @var{abs-expr}}
@@ -3753,6 +3764,7 @@ Some machine configurations provide additional directives.
 
 * Macro::			@code{.macro @var{name} @var{args}}@dots{}
 * MRI::				@code{.mri @var{val}}
+* Noaltmacro::                  @code{.noaltmacro}
 * Nolist::                      @code{.nolist}
 * Octa::                        @code{.octa @var{bignums}}
 * Org::                         @code{.org @var{new-lc} , @var{fill}}
@@ -4847,19 +4859,51 @@ Exit early from the current macro definition.
 executed in this pseudo-variable; you can copy that number to your
 output with @samp{\@@}, but @emph{only within a macro definition}.
 
-@ignore
 @item LOCAL @var{name} [ , @dots{} ]
 @emph{Warning: @code{LOCAL} is only available if you select ``alternate
-macro syntax'' with @samp{-a} or @samp{--alternate}.}  @xref{Alternate,,
-Alternate macro syntax}.
+macro syntax'' with @samp{--alternate} or @code{.altmacro}.}
+@xref{Altmacro,,@code{.altmacro}}.
+@end ftable
 
-Generate a string replacement for each of the @var{name} arguments, and
+@node Altmacro
+@section @code{.altmacro}
+Enable alternate macro mode, enabling:
+
+@ftable @code
+@item LOCAL @var{name} [ , @dots{} ]
+One additional directive, @code{LOCAL}, is available.  It is used to
+generate a string replacement for each of the @var{name} arguments, and
 replace any instances of @var{name} in each macro expansion.  The
 replacement string is unique in the assembly, and different for each
 separate macro expansion.  @code{LOCAL} allows you to write macros that
 define symbols, without fear of conflict between separate macro expansions.
-@end ignore
+
+@item String delimiters
+You can write strings delimited in these other ways besides
+@code{"@var{string}"}:
+
+@table @code
+@item '@var{string}'
+You can delimit strings with single-quote charaters.
+
+@item <@var{string}>
+You can delimit strings with matching angle brackets.
+@end table
+
+@item single-character string escape
+To include any single character literally in a string (even if the
+character would otherwise have some special meaning), you can prefix the
+character with @samp{!} (an exclamation mark).  For example, you can
+write @samp{<4.3 !> 5.4!!>} to get the literal text @samp{4.3 > 5.4!}.
+
+@item Expression results as strings
+You can write @samp{%@var{expr}} to evaluate the expression @var{expr}
+and use the result as a string.  
 @end ftable
+
+@node Noaltmacro
+@section @code{.noaltmacro}
+Disable alternate macro mode.  @ref{Altmacro}
 
 @node Nolist
 @section @code{.nolist}
