@@ -56,6 +56,7 @@ responsibility among the other maintainers.
   ARM		   Richard Earnshaw <rearnsha@arm.com>
   AVR		   Denis Chertykov <denisc@overta.ru>
   AVR		   Marek Michalkiewicz <marekm@amelek.gda.pl>
+  CONFIGURE	   Ben Elliston <bje@redhat.com>
   CRIS		   Hans-Peter Nilsson <hp@axis.com>
   DWARF2	   Jason Merrill <jason@redhat.com>
   FR30		   Dave Brolley <brolley@redhat.com>
@@ -82,6 +83,7 @@ responsibility among the other maintainers.
   SH		   Hans-Peter Nilsson <hp@bitrange.com>
   SH		   Alexandre Oliva <aoliva@redhat.com>
   SPARC		   Jakub Jelinek <jakub@redhat.com>
+  TESTSUITES	   Ben Elliston <bje@redhat.com>
   TIC54X           Timothy Wall <twall@alum.mit.edu>
   VAX		   Jason R Thorpe <thorpej@wasabisystems.com>
   x86_64	   Jan Hubicka <jh@suse.cz>
@@ -137,3 +139,21 @@ great).  If you are uncertain as to whether a patch is appropriate for
 the branch, ask the branch maintainer.  This is:
 
    Daniel Jacobowitz  <dan@debian.org>
+
+    -------- Testsuites ---------------
+
+In general patches to any of the binutils testsuites should be
+considered generic and sent to the binutils mailing list for
+approval.  Patches to target specific tests are the responsibility the
+relevent port maintainer(s), and can be approved/checked in by them.
+Other testsuite patches need the approval of a blanket-write-priveleges
+person.
+
+    -------- Configure patches ----------
+
+Patches to the top level configure files (config.sub & config.guess)
+are not the domain of the binutils project and they cannot be approved
+by the binutils group.  Instead they should be submitted to the config
+maintainer at:
+
+	config-patches@gnu.org
