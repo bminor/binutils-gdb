@@ -106,6 +106,7 @@ language support	David Taylor		taylor@cygnus.com
   Java support		Anthony Green 		green@cygnus.com
   Objective-C/C++	Klee Dienes		kdienes@apple.com
 			Jim Ingham		jimgham@apple.com
+  Pascal support	Pierre Muller		muller@sourceware.cygnus.com
 expression eval		David Taylor		taylor@cygnus.com
 defs.h			David Taylor		taylor@cygnus.com
 utils.c			David Taylor		taylor@cygnus.com
@@ -171,6 +172,7 @@ Nick Clifton					nickc@cygnus.com
 Jonathan Larmour				jlarmour@redhat.co.uk
 Glen McCready					gkm@cygnus.com
 Gary Thomas					gthomas@redhat.com
+Pierre Muller					muller@sourceware.cygnus.com
 
 
 * Indicates folks we need to get Kerberos/SSH accounts ready so they
