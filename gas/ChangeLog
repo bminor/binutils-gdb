@@ -1,3 +1,8 @@
+Tue Apr 29 19:54:36 1997  Richard Henderson  <rth@tamu.edu>
+
+	* config/obj-elf.c (elf_pseudo_table): Add "subsection".
+ 	(obj_elf_subsection): New static function.
+
 Tue Apr 29 19:52:47 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/obj-coff.c (coff_header_append): Don't reset string_size
