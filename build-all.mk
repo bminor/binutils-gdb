@@ -110,6 +110,15 @@ FLAGS_TO_PASS := \
 	"host=$(canonhost)" \
 	"RELEASE_TAG=$(TAG)"
 
+all-emacs:
+	@echo build started at `date`
+	[ -d $(INSTALLDIR) ] || mkdir $(INSTALLDIR)
+	rm -f /usr/cygnus/$(TAG)
+	ln -s $(INSTALLDIR) /usr/cygnus/$(TAG) 
+	$(MAKE) -f test-build.mk $(FLAGS_TO_PASS) do1 > $(canonhost)-native-log 2>&1 
+	$(MAKE) -f test-build.mk $(FLAGS_TO_PASS) do-latest > $(canonhost)-latest-log 2>&1 
+	@echo done at `date`
+
 all-cygnus:
 	@echo build started at `date`
 	[ -d $(INSTALLDIR) ] || mkdir $(INSTALLDIR)
