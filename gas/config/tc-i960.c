@@ -1,3 +1,4 @@
+/* to sanitize : grep -v XL */
 /* tc-i960.c - All the i80960-specific stuff
    Copyright (C) 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
 
@@ -15,67 +16,50 @@
 
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* See comment on md_parse_option for 80960-specific invocation options. */
 
-/******************************************************************************
- * i80690 NOTE!!!:
- *	Header, symbol, and relocation info will be used on the host machine
- *	only -- only executable code is actually downloaded to the i80960.
- *	Therefore, leave all such information in host byte order.
- *
- *	(That's a slight lie -- we DO download some header information, but
- *	the downloader converts the file format and corrects the byte-ordering
- *	of the relevant fields while doing so.)
- *
- * ==> THIS IS NO LONGER TRUE USING BFD.  WE CAN GENERATE ANY BYTE ORDER
- *     FOR THE HEADER, AND READ ANY BYTE ORDER.  PREFERENCE WOULD BE TO
- *     USE LITTLE-ENDIAN BYTE ORDER THROUGHOUT, REGARDLESS OF HOST.  <==
- *
- ***************************************************************************** */
-
 /* There are 4 different lengths of (potentially) symbol-based displacements
- * in the 80960 instruction set, each of which could require address fix-ups
- * and (in the case of external symbols) emission of relocation directives:
- *
- * 32-bit (MEMB)
- *	This is a standard length for the base assembler and requires no
- *	special action.
- *
- * 13-bit (COBR)
- *	This is a non-standard length, but the base assembler has a hook for
- *	bit field address fixups:  the fixS structure can point to a descriptor
- *	of the field, in which case our md_number_to_field() routine gets called
- *	to process it.
- *
- *	I made the hook a little cleaner by having fix_new() (in the base
- *	assembler) return a pointer to the fixS in question.  And I made it a
- *	little simpler by storing the field size (in this case 13) instead of
- *	of a pointer to another structure:  80960 displacements are ALWAYS
- *	stored in the low-order bits of a 4-byte word.
- *
- *	Since the target of a COBR cannot be external, no relocation directives
- *	for this size displacement have to be generated.  But the base assembler
- *	had to be modified to issue error messages if the symbol did turn out
- *	to be external.
- *
- * 24-bit (CTRL)
- *	Fixups are handled as for the 13-bit case (except that 24 is stored
- *	in the fixS).
- *
- *	The relocation directive generated is the same as that for the 32-bit
- *	displacement, except that it's PC-relative (the 32-bit displacement
- *	never is).   The i80960 version of the linker needs a mod to
- *	distinguish and handle the 24-bit case.
- *
- * 12-bit (MEMA)
- *	MEMA formats are always promoted to MEMB (32-bit) if the displacement
- *	is based on a symbol, because it could be relocated at link time.
- *	The only time we use the 12-bit format is if an absolute value of
- *	less than 4096 is specified, in which case we need neither a fixup nor
- *	a relocation directive.
- */
+   in the 80960 instruction set, each of which could require address fix-ups
+   and (in the case of external symbols) emission of relocation directives:
+
+   32-bit (MEMB)
+        This is a standard length for the base assembler and requires no
+        special action.
+
+   13-bit (COBR)
+        This is a non-standard length, but the base assembler has a
+        hook for bit field address fixups: the fixS structure can
+        point to a descriptor of the field, in which case our
+        md_number_to_field() routine gets called to process it.
+
+        I made the hook a little cleaner by having fix_new() (in the base
+        assembler) return a pointer to the fixS in question.  And I made it a
+        little simpler by storing the field size (in this case 13) instead of
+        of a pointer to another structure:  80960 displacements are ALWAYS
+        stored in the low-order bits of a 4-byte word.
+
+        Since the target of a COBR cannot be external, no relocation
+        directives for this size displacement have to be generated.
+        But the base assembler had to be modified to issue error
+        messages if the symbol did turn out to be external.
+
+   24-bit (CTRL)
+        Fixups are handled as for the 13-bit case (except that 24 is stored
+        in the fixS).
+
+        The relocation directive generated is the same as that for the 32-bit
+        displacement, except that it's PC-relative (the 32-bit displacement
+        never is).   The i80960 version of the linker needs a mod to
+        distinguish and handle the 24-bit case.
+
+   12-bit (MEMA)
+        MEMA formats are always promoted to MEMB (32-bit) if the displacement
+        is based on a symbol, because it could be relocated at link time.
+        The only time we use the 12-bit format is if an absolute value of
+        less than 4096 is specified, in which case we need neither a fixup nor
+        a relocation directive.  */
 
 #include <stdio.h>
 #include <ctype.h>
@@ -86,11 +70,41 @@
 
 #include "opcode/i960.h"
 
-extern char *strchr ();
+#if defined (OBJ_AOUT) || defined (OBJ_BOUT)
+
+#define TC_S_IS_SYSPROC(s)	((1<=S_GET_OTHER(s)) && (S_GET_OTHER(s)<=32))
+#define TC_S_IS_BALNAME(s)	(S_GET_OTHER(s) == N_BALNAME)
+#define TC_S_IS_CALLNAME(s)	(S_GET_OTHER(s) == N_CALLNAME)
+#define TC_S_IS_BADPROC(s)	((S_GET_OTHER(s) != 0) && !TC_S_IS_CALLNAME(s) && !TC_S_IS_BALNAME(s) && !TC_S_IS_SYSPROC(s))
+
+#define TC_S_SET_SYSPROC(s, p)	(S_SET_OTHER((s), (p)+1))
+#define TC_S_GET_SYSPROC(s)	(S_GET_OTHER(s)-1)
+
+#define TC_S_FORCE_TO_BALNAME(s)	(S_SET_OTHER((s), N_BALNAME))
+#define TC_S_FORCE_TO_CALLNAME(s)	(S_SET_OTHER((s), N_CALLNAME))
+#define TC_S_FORCE_TO_SYSPROC(s)	{;}
+
+#else /* ! OBJ_A/BOUT */
+#ifdef OBJ_COFF
+
+#define TC_S_IS_SYSPROC(s)	(S_GET_STORAGE_CLASS(s) == C_SCALL)
+#define TC_S_IS_BALNAME(s)	(SF_GET_BALNAME(s))
+#define TC_S_IS_CALLNAME(s)	(SF_GET_CALLNAME(s))
+#define TC_S_IS_BADPROC(s)	(TC_S_IS_SYSPROC(s) && TC_S_GET_SYSPROC(s) < 0 && 31 < TC_S_GET_SYSPROC(s))
+
+#define TC_S_SET_SYSPROC(s, p)	((s)->sy_symbol.ost_auxent[1].x_sc.x_stindx = (p))
+#define TC_S_GET_SYSPROC(s)	((s)->sy_symbol.ost_auxent[1].x_sc.x_stindx)
+
+#define TC_S_FORCE_TO_BALNAME(s)	(SF_SET_BALNAME(s))
+#define TC_S_FORCE_TO_CALLNAME(s)	(SF_SET_CALLNAME(s))
+#define TC_S_FORCE_TO_SYSPROC(s)	(S_SET_STORAGE_CLASS((s), C_SCALL))
+
+#else /* ! OBJ_COFF */
+you lose;
+#endif /* ! OBJ_COFF */
+#endif /* ! OBJ_A/BOUT */
 
 extern char *input_line_pointer;
-extern struct hash_control *po_hash;
-extern char *next_object_file_charP;
 
 #if !defined (BFD_ASSEMBLER) && !defined (BFD)
 #ifdef OBJ_COFF
@@ -100,9 +114,7 @@ const int md_reloc_size = sizeof (struct relocation_info);
 #endif /* OBJ_COFF */
 #endif
 
-/***************************
- *  Local i80960 routines  *
- ************************** */
+/* Local i80960 routines.  */
 
 static void brcnt_emit ();	/* Emit branch-prediction instrumentation code */
 static char *brlab_next ();	/* Return next branch local label */
@@ -131,24 +143,23 @@ static int shift_ok ();		/* Will a 'shlo' substiture for a 'ldconst'? */
 static void syntax ();		/* Give syntax error */
 static int targ_has_sfr ();	/* Target chip supports spec-func register? */
 static int targ_has_iclass ();	/* Target chip supports instruction set? */
-/* static void	unlink_sym(); *//* Remove a symbol from the symbol list */
 
 /* See md_parse_option() for meanings of these options */
 static char norelax;		/* True if -norelax switch seen */
-static char instrument_branches;/* True if -b switch seen */
+static char instrument_branches;	/* True if -b switch seen */
 
 /* Characters that always start a comment.
- * If the pre-processor is disabled, these aren't very useful.
+   If the pre-processor is disabled, these aren't very useful.
  */
 const char comment_chars[] = "#";
 
 /* Characters that only start a comment at the beginning of
- * a line.  If the line seems to have the form '# 123 filename'
- * .line and .file directives will appear in the pre-processed output.
- *
- * Note that input_file.c hand checks for '#' at the beginning of the
- * first line of the input file.  This is because the compiler outputs
- * #NO_APP at the beginning of its output.
+   a line.  If the line seems to have the form '# 123 filename'
+   .line and .file directives will appear in the pre-processed output.
+
+   Note that input_file.c hand checks for '#' at the beginning of the
+   first line of the input file.  This is because the compiler outputs
+   #NO_APP at the beginning of its output.
  */
 
 /* Also note that comments started like this one will always work. */
@@ -161,38 +172,38 @@ const char line_separator_chars[1];
 const char EXP_CHARS[] = "eE";
 
 /* Chars that mean this number is a floating point constant,
- * as in 0f12.456 or 0d1.2345e12
+   as in 0f12.456 or 0d1.2345e12
  */
 const char FLT_CHARS[] = "fFdDtT";
 
 
 /* Table used by base assembler to relax addresses based on varying length
- * instructions.  The fields are:
- *   1) most positive reach of this state,
- *   2) most negative reach of this state,
- *   3) how many bytes this mode will add to the size of the current frag
- *   4) which index into the table to try if we can't fit into this one.
- *
- * For i80960, the only application is the (de-)optimization of cobr
- * instructions into separate compare and branch instructions when a 13-bit
- * displacement won't hack it.
+   instructions.  The fields are:
+     1) most positive reach of this state,
+     2) most negative reach of this state,
+     3) how many bytes this mode will add to the size of the current frag
+     4) which index into the table to try if we can't fit into this one.
+
+   For i80960, the only application is the (de-)optimization of cobr
+   instructions into separate compare and branch instructions when a 13-bit
+   displacement won't hack it.
  */
-const relax_typeS
-  md_relax_table[] =
+const relax_typeS md_relax_table[] =
 {
   {0, 0, 0, 0},			/* State 0 => no more relaxation possible */
   {4088, -4096, 0, 2},		/* State 1: conditional branch (cobr) */
   {0x800000 - 8, -0x800000, 4, 0},	/* State 2: compare (reg) & branch (ctrl) */
 };
 
+static void s_endian PARAMS ((int));
 
 /* These are the machine dependent pseudo-ops.
- *
- * This table describes all the machine specific pseudo-ops the assembler
- * has to support.  The fields are:
- *	pseudo-op name without dot
- *	function to call to execute this pseudo-op
- *	integer arg to pass to the function
+
+   This table describes all the machine specific pseudo-ops the assembler
+   has to support.  The fields are:
+        pseudo-op name without dot
+        function to call to execute this pseudo-op
+        integer arg to pass to the function
  */
 #define S_LEAFPROC	1
 #define S_SYSPROC	2
@@ -200,6 +211,7 @@ const relax_typeS
 const pseudo_typeS md_pseudo_table[] =
 {
   {"bss", s_lcomm, 1},
+  {"endian", s_endian, 0},
   {"extended", float_cons, 't'},
   {"leafproc", parse_po, S_LEAFPROC},
   {"sysproc", parse_po, S_SYSPROC},
@@ -276,13 +288,13 @@ struct regop
   };
 
 
-/* Number and assembler mnemonic for all registers that can appear in operands */
-static struct
+/* Number and assembler mnemonic for all registers that can appear in
+   operands.  */
+static const struct
   {
     char *reg_name;
     int reg_num;
   }
-
 regnames[] =
 {
   { "pfp", 0 },
@@ -355,9 +367,8 @@ regnames[] =
   { "sf30", 62 },
   { "sf31", 63 },
 
-  /* Numbers for floating point registers are for assembler internal use
-	 * only: they are scaled back to [0-3] for binary output.
-	 */
+  /* Numbers for floating point registers are for assembler internal
+     use only: they are scaled back to [0-3] for binary output.  */
 #define FP0	64
 
   { "fp0", 64 },
@@ -372,15 +383,13 @@ regnames[] =
 #define	IS_SF_REG(n)	((SF0 <= (n)) && ((n) < FP0))
 #define	IS_FP_REG(n)	((n) >= FP0)
 
-/* Number and assembler mnemonic for all registers that can appear as 'abase'
- * (indirect addressing) registers.
- */
-static struct
+/* Number and assembler mnemonic for all registers that can appear as
+   'abase' (indirect addressing) registers.  */
+static const struct
   {
     char *areg_name;
     int areg_num;
   }
-
 aregs[] =
 {
   { "(pfp)", 0 },
@@ -437,76 +446,72 @@ static struct hash_control *areg_hash;	/* Abase register hash table */
 #define ARCH_KB		2
 #define ARCH_MC		3
 #define ARCH_CA		4
+#define ARCH_XL		5
 int architecture = ARCH_ANY;	/* Architecture requested on invocation line */
 int iclasses_seen;		/* OR of instruction classes (I_* constants)
-				 *	for which we've actually assembled
-				 *	instructions.
+				 *    for which we've actually assembled
+				 *      instructions.
 				 */
 
 
 /* BRANCH-PREDICTION INSTRUMENTATION
- *
- *	The following supports generation of branch-prediction instrumentation
- *	(turned on by -b switch).  The instrumentation collects counts
- *	of branches taken/not-taken for later input to a utility that will
- *	set the branch prediction bits of the instructions in accordance with
- *	the behavior observed.  (Note that the KX series does not have
- *	brach-prediction.)
- *
- *	The instrumentation consists of:
- *
- *	(1) before and after each conditional branch, a call to an external
- *	    routine that increments and steps over an inline counter.  The
- *	    counter itself, initialized to 0, immediately follows the call
- *	    instruction.  For each branch, the counter following the branch
- *	    is the number of times the branch was not taken, and the difference
- *	    between the counters is the number of times it was taken.  An
- *	    example of an instrumented conditional branch:
- *
- *				call	BR_CNT_FUNC
- *				.word	0
- *		LBRANCH23:	be	label
- *				call	BR_CNT_FUNC
- *				.word	0
- *
- *	(2) a table of pointers to the instrumented branches, so that an
- *	    external postprocessing routine can locate all of the counters.
- *	    the table begins with a 2-word header: a pointer to the next in
- *	    a linked list of such tables (initialized to 0);  and a count
- *	    of the number of entries in the table (exclusive of the header.
- *
- *	    Note that input source code is expected to already contain calls
- *	    an external routine that will link the branch local table into a
- *	    list of such tables.
+
+        The following supports generation of branch-prediction instrumentation
+        (turned on by -b switch).  The instrumentation collects counts
+        of branches taken/not-taken for later input to a utility that will
+        set the branch prediction bits of the instructions in accordance with
+        the behavior observed.  (Note that the KX series does not have
+        brach-prediction.)
+
+        The instrumentation consists of:
+
+        (1) before and after each conditional branch, a call to an external
+            routine that increments and steps over an inline counter.  The
+            counter itself, initialized to 0, immediately follows the call
+            instruction.  For each branch, the counter following the branch
+            is the number of times the branch was not taken, and the difference
+            between the counters is the number of times it was taken.  An
+            example of an instrumented conditional branch:
+
+                                call    BR_CNT_FUNC
+                                .word   0
+                LBRANCH23:      be      label
+                                call    BR_CNT_FUNC
+                                .word   0
+
+        (2) a table of pointers to the instrumented branches, so that an
+            external postprocessing routine can locate all of the counters.
+            the table begins with a 2-word header: a pointer to the next in
+            a linked list of such tables (initialized to 0);  and a count
+            of the number of entries in the table (exclusive of the header.
+
+            Note that input source code is expected to already contain calls
+            an external routine that will link the branch local table into a
+            list of such tables.
  */
 
-static int br_cnt;		/* Number of branches instrumented so far.
-				 * Also used to generate unique local labels
-				 * for each instrumented branch
-				 */
+/* Number of branches instrumented so far.  Also used to generate
+   unique local labels for each instrumented branch.  */
+static int br_cnt;
 
 #define BR_LABEL_BASE	"LBRANCH"
-/* Basename of local labels on instrumented
- * branches, to avoid conflict with compiler-
- * generated local labels.
- */
+/* Basename of local labels on instrumented branches, to avoid
+   conflict with compiler- generated local labels.  */
 
 #define BR_CNT_FUNC	"__inc_branch"
-/* Name of the external routine that will
- * increment (and step over) an inline counter.
- */
+/* Name of the external routine that will increment (and step over) an
+   inline counter.  */
 
 #define BR_TAB_NAME	"__BRANCH_TABLE__"
-/* Name of the table of pointers to branches.
- * A local (i.e., non-external) symbol.
- */
+/* Name of the table of pointers to branches.  A local (i.e.,
+   non-external) symbol.  */
 
 /*****************************************************************************
- * md_begin:  One-time initialization.
- *
- *	Set up hash tables.
- *
- **************************************************************************** */
+   md_begin:  One-time initialization.
+
+  	Set up hash tables.
+
+  *************************************************************************** */
 void
 md_begin ()
 {
@@ -527,48 +532,43 @@ md_begin ()
 
   for (i = 0; regnames[i].reg_name && !retval; i++)
     retval = hash_insert (reg_hash, regnames[i].reg_name,
-			  &regnames[i].reg_num);
+			  (char *) &regnames[i].reg_num);
 
   for (i = 0; aregs[i].areg_name && !retval; i++)
     retval = hash_insert (areg_hash, aregs[i].areg_name,
-			  &aregs[i].areg_num);
+			  (char *) &aregs[i].areg_num);
 
   if (retval)
     as_fatal ("Hashing returned \"%s\".", retval);
 }
 
 /*****************************************************************************
- * md_assemble:  Assemble an instruction
- *
- * Assumptions about the passed-in text:
- *	- all comments, labels removed
- *	- text is an instruction
- *	- all white space compressed to single blanks
- *	- all character constants have been replaced with decimal
- *
- **************************************************************************** */
+   md_assemble:  Assemble an instruction
+
+   Assumptions about the passed-in text:
+  	- all comments, labels removed
+  	- text is an instruction
+  	- all white space compressed to single blanks
+  	- all character constants have been replaced with decimal
+
+  *************************************************************************** */
 void
 md_assemble (textP)
      char *textP;		/* Source text of instruction */
 {
-  /* Parsed instruction text, containing NO whitespace:
-   *	arg[0]->opcode mnemonic
-   *	arg[1-3]->operands, with char constants
-   *			replaced by decimal numbers
-   */
+  /* Parsed instruction text, containing NO whitespace: arg[0]->opcode
+     mnemonic arg[1-3]->operands, with char constants replaced by
+     decimal numbers.  */
   char *args[4];
 
   int n_ops;			/* Number of instruction operands */
   /* Pointer to instruction description */
   struct i960_opcode *oP;
-  /* TRUE iff opcode mnemonic included branch-prediction
-   *	suffix (".f" or ".t")
-   */
+  /* TRUE iff opcode mnemonic included branch-prediction suffix (".f"
+     or ".t").  */
   int branch_predict;
-  /* Setting of branch-prediction bit(s) to be OR'd
-   *	into instruction opcode of CTRL/COBR format
-   *	instructions.
-   */
+  /* Setting of branch-prediction bit(s) to be OR'd into instruction
+     opcode of CTRL/COBR format instructions.  */
   long bp_bits;
 
   int n;			/* Offset of last character in opcode mnemonic */
@@ -603,18 +603,16 @@ md_assemble (textP)
   if (args[0][n - 1] == '.' && (args[0][n] == 't' || args[0][n] == 'f'))
     {
       /* We could check here to see if the target architecture
-       * supports branch prediction, but why bother?  The bit
-       * will just be ignored by processors that don't use it.
-       */
+	 supports branch prediction, but why bother?  The bit will
+	 just be ignored by processors that don't use it.  */
       branch_predict = 1;
       bp_bits = (args[0][n] == 't') ? BP_TAKEN : BP_NOT_TAKEN;
       args[0][n - 1] = '\0';	/* Strip suffix from opcode mnemonic */
     }
 
   /* Look up opcode mnemonic in table and check number of operands.
-   * Check that opcode is legal for the target architecture.
-   * If all looks good, assemble instruction.
-   */
+     Check that opcode is legal for the target architecture.  If all
+     looks good, assemble instruction.  */
   oP = (struct i960_opcode *) hash_find (op_hash, args[0]);
   if (!oP || !targ_has_iclass (oP->iclass))
     {
@@ -689,9 +687,9 @@ md_assemble (textP)
 }				/* md_assemble() */
 
 /*****************************************************************************
- * md_number_to_chars:  convert a number to target byte order
- *
- **************************************************************************** */
+   md_number_to_chars:  convert a number to target byte order
+
+  *************************************************************************** */
 void
 md_number_to_chars (buf, value, n)
      char *buf;
@@ -702,9 +700,9 @@ md_number_to_chars (buf, value, n)
 }
 
 /*****************************************************************************
- * md_chars_to_number:  convert from target byte order to host byte order.
- *
- **************************************************************************** */
+   md_chars_to_number:  convert from target byte order to host byte order.
+
+  *************************************************************************** */
 int
 md_chars_to_number (val, n)
      unsigned char *val;	/* Value in target byte order */
@@ -725,17 +723,17 @@ md_chars_to_number (val, n)
 #define LNUM_SIZE	sizeof(LITTLENUM_TYPE)
 
 /*****************************************************************************
- * md_atof:	convert ascii to floating point
- *
- * Turn a string at input_line_pointer into a floating point constant of type
- * 'type', and store the appropriate bytes at *litP.  The number of LITTLENUMS
- * emitted is returned at 'sizeP'.  An error message is returned, or a pointer
- * to an empty message if OK.
- *
- * Note we call the i386 floating point routine, rather than complicating
- * things with more files or symbolic links.
- *
- **************************************************************************** */
+   md_atof:	convert ascii to floating point
+
+   Turn a string at input_line_pointer into a floating point constant of type
+   'type', and store the appropriate bytes at *litP.  The number of LITTLENUMS
+   emitted is returned at 'sizeP'.  An error message is returned, or a pointer
+   to an empty message if OK.
+
+   Note we call the i386 floating point routine, rather than complicating
+   things with more files or symbolic links.
+
+  *************************************************************************** */
 char *
 md_atof (type, litP, sizeP)
      int type;
@@ -795,9 +793,9 @@ md_atof (type, litP, sizeP)
 
 
 /*****************************************************************************
- * md_number_to_imm
- *
- **************************************************************************** */
+   md_number_to_imm
+
+  *************************************************************************** */
 void
 md_number_to_imm (buf, val, n)
      char *buf;
@@ -809,9 +807,9 @@ md_number_to_imm (buf, val, n)
 
 
 /*****************************************************************************
- * md_number_to_disp
- *
- **************************************************************************** */
+   md_number_to_disp
+
+  *************************************************************************** */
 void
 md_number_to_disp (buf, val, n)
      char *buf;
@@ -822,12 +820,12 @@ md_number_to_disp (buf, val, n)
 }
 
 /*****************************************************************************
- * md_number_to_field:
- *
- *	Stick a value (an address fixup) into a bit field of
- *	previously-generated instruction.
- *
- **************************************************************************** */
+   md_number_to_field:
+
+  	Stick a value (an address fixup) into a bit field of
+  	previously-generated instruction.
+
+  *************************************************************************** */
 void
 md_number_to_field (instrP, val, bfixP)
      char *instrP;		/* Pointer to instruction to be fixed */
@@ -838,13 +836,11 @@ md_number_to_field (instrP, val, bfixP)
   long instr;			/* 32-bit instruction to be fixed-up */
   long sign;			/* 0 or -1, according to sign bit of 'val' */
 
-  /* Convert instruction back to host byte order
-	 */
+  /* Convert instruction back to host byte order.  */
   instr = md_chars_to_number (instrP, 4);
 
-  /* Surprise! -- we stored the number of bits
-	 * to be modified rather than a pointer to a structure.
-	 */
+  /* Surprise! -- we stored the number of bits to be modified rather
+     than a pointer to a structure.  */
   numbits = (int) bfixP;
   if (numbits == 1)
     {
@@ -854,9 +850,8 @@ md_number_to_field (instrP, val, bfixP)
 
   know ((numbits == 13) || (numbits == 24));
 
-  /* Propagate sign bit of 'val' for the given number of bits.
-	 * Result should be all 0 or all 1
-	 */
+  /* Propagate sign bit of 'val' for the given number of bits.  Result
+     should be all 0 or all 1.  */
   sign = val >> ((int) numbits - 1);
   if (((val < 0) && (sign != -1))
       || ((val > 0) && (sign != 0)))
@@ -867,92 +862,96 @@ md_number_to_field (instrP, val, bfixP)
   else
     {
       /* Put bit field into instruction and write back in target
-		 * byte order.
-		 */
+         * byte order.
+       */
       val &= ~(-1 << (int) numbits);	/* Clear unused sign bits */
       instr |= val;
       md_number_to_chars (instrP, instr, 4);
     }
 }				/* md_number_to_field() */
-
 
+
 /*****************************************************************************
- * md_parse_option
- *	Invocation line includes a switch not recognized by the base assembler.
- *	See if it's a processor-specific option.  For the 960, these are:
- *
- *	-norelax:
- *		Conditional branch instructions that require displacements
- *		greater than 13 bits (or that have external targets) should
- *		generate errors.  The default is to replace each such
- *		instruction with the corresponding compare (or chkbit) and
- *		branch instructions.  Note that the Intel "j" cobr directives
- *		are ALWAYS "de-optimized" in this way when necessary,
- *		regardless of the setting of this option.
- *
- *	-b:
- *		Add code to collect information about branches taken, for
- *		later optimization of branch prediction bits by a separate
- *		tool.  COBR and CNTL format instructions have branch
- *		prediction bits (in the CX architecture);  if "BR" represents
- *		an instruction in one of these classes, the following rep-
- *		resents the code generated by the assembler:
- *
- *			call	<increment routine>
- *			.word	0	# pre-counter
- *		Label:  BR
- *			call	<increment routine>
- *			.word	0	# post-counter
- *
- *		A table of all such "Labels" is also generated.
- *
- *
- *	-AKA, -AKB, -AKC, -ASA, -ASB, -AMC, -ACA:
- *		Select the 80960 architecture.  Instructions or features not
- *		supported by the selected architecture cause fatal errors.
- *		The default is to generate code for any instruction or feature
- *		that is supported by SOME version of the 960 (even if this
- *		means mixing architectures!).
- *
- *****************************************************************************/
+   md_parse_option
+  	Invocation line includes a switch not recognized by the base assembler.
+  	See if it's a processor-specific option.  For the 960, these are:
+
+  	-norelax:
+  		Conditional branch instructions that require displacements
+  		greater than 13 bits (or that have external targets) should
+  		generate errors.  The default is to replace each such
+  		instruction with the corresponding compare (or chkbit) and
+  		branch instructions.  Note that the Intel "j" cobr directives
+  		are ALWAYS "de-optimized" in this way when necessary,
+  		regardless of the setting of this option.
+
+  	-b:
+  		Add code to collect information about branches taken, for
+  		later optimization of branch prediction bits by a separate
+  		tool.  COBR and CNTL format instructions have branch
+  		prediction bits (in the CX architecture);  if "BR" represents
+  		an instruction in one of these classes, the following rep-
+  		resents the code generated by the assembler:
+
+  			call	<increment routine>
+  			.word	0	# pre-counter
+  		Label:  BR
+  			call	<increment routine>
+  			.word	0	# post-counter
+
+  		A table of all such "Labels" is also generated.
+
+
+  	-AKA, -AKB, -AKC, -ASA, -ASB, -AMC, -ACA:
+  		Select the 80960 architecture.  Instructions or features not
+  		supported by the selected architecture cause fatal errors.
+  		The default is to generate code for any instruction or feature
+  		that is supported by SOME version of the 960 (even if this
+  		means mixing architectures!).
+
+  ****************************************************************************/
 
 CONST char *md_shortopts = "A:b";
-struct option md_longopts[] = {
+struct option md_longopts[] =
+{
 #define OPTION_LINKRELAX (OPTION_MD_BASE)
   {"linkrelax", no_argument, NULL, OPTION_LINKRELAX},
+  {"link-relax", no_argument, NULL, OPTION_LINKRELAX},
 #define OPTION_NORELAX (OPTION_MD_BASE + 1)
   {"norelax", no_argument, NULL, OPTION_NORELAX},
+  {"no-relax", no_argument, NULL, OPTION_NORELAX},
   {NULL, no_argument, NULL, 0}
 };
-size_t md_longopts_size = sizeof(md_longopts);
+size_t md_longopts_size = sizeof (md_longopts);
+
+struct tabentry
+  {
+    char *flag;
+    int arch;
+  };
+static const struct tabentry arch_tab[] =
+{
+  {"KA", ARCH_KA},
+  {"KB", ARCH_KB},
+  {"SA", ARCH_KA},		/* Synonym for KA */
+  {"SB", ARCH_KB},		/* Synonym for KB */
+  {"KC", ARCH_MC},		/* Synonym for MC */
+  {"MC", ARCH_MC},
+  {"CA", ARCH_CA},
+  {"XL", ARCH_XL},
+  {NULL, 0}
+};
 
 int
 md_parse_option (c, arg)
      int c;
      char *arg;
 {
-  struct tabentry
-    {
-      char *flag;
-      int arch;
-    };
-  static struct tabentry arch_tab[] =
-  {
-    { "KA", ARCH_KA },
-    { "KB", ARCH_KB },
-    { "SA", ARCH_KA },		/* Synonym for KA */
-    { "SB", ARCH_KB },		/* Synonym for KB */
-    { "KC", ARCH_MC },		/* Synonym for MC */
-    { "MC", ARCH_MC },
-    { "CA", ARCH_CA },
-    { NULL, 0 }
-  };
-
   switch (c)
     {
     case OPTION_LINKRELAX:
       linkrelax = 1;
-      flagseen['L'] = 1;
+      flag_keep_locals = 1;
       break;
 
     case OPTION_NORELAX:
@@ -965,16 +964,12 @@ md_parse_option (c, arg)
 
     case 'A':
       {
-	struct tabentry *tp;
+	const struct tabentry *tp;
 	char *p = arg;
 
 	for (tp = arch_tab; tp->flag != NULL; tp++)
-	  {
-	    if (!strcmp (p, tp->flag))
-	      {
-		break;
-	      }
-	  }
+	  if (!strcmp (p, tp->flag))
+	    break;
 
 	if (tp->flag == NULL)
 	  {
@@ -982,9 +977,7 @@ md_parse_option (c, arg)
 	    return 0;
 	  }
 	else
-	  {
-	    architecture = tp->arch;
-	  }
+	  architecture = tp->arch;
       }
       break;
 
@@ -999,33 +992,38 @@ void
 md_show_usage (stream)
      FILE *stream;
 {
-  fprintf(stream, "\
-I960 options:\n\
--ACA | -ACA_A | -ACB | -ACC | -AKA | -AKB | -AKC | -AMC\n\
+  int i;
+  fprintf (stream, "I960 options:\n");
+  for (i = 0; arch_tab[i].flag; i++)
+    fprintf (stream, "%s-A%s", i ? " | " : "", arch_tab[i].flag);
+  fprintf (stream, "\n\
 			specify variant of 960 architecture\n\
 -b			add code to collect statistics about branches taken\n\
--linkrelax		make relocatable instructions undefined (?)\n\
--norelax		don't alter compare-and-branch instructions for\n\
+-link-relax		preserve individual alignment directives so linker\n\
+			can do relaxing (b.out format only)\n\
+-no-relax		don't alter compare-and-branch instructions for\n\
 			long displacements\n");
 }
 
 
+#ifndef BFD_ASSEMBLER
 /*****************************************************************************
- * md_convert_frag:
- *	Called by base assembler after address relaxation is finished:  modify
- *	variable fragments according to how much relaxation was done.
- *
- *	If the fragment substate is still 1, a 13-bit displacement was enough
- *	to reach the symbol in question.  Set up an address fixup, but otherwise
- *	leave the cobr instruction alone.
- *
- *	If the fragment substate is 2, a 13-bit displacement was not enough.
- *	Replace the cobr with a two instructions (a compare and a branch).
- *
- **************************************************************************** */
+   md_convert_frag:
+  	Called by base assembler after address relaxation is finished:  modify
+  	variable fragments according to how much relaxation was done.
+
+  	If the fragment substate is still 1, a 13-bit displacement was enough
+  	to reach the symbol in question.  Set up an address fixup, but otherwise
+  	leave the cobr instruction alone.
+
+  	If the fragment substate is 2, a 13-bit displacement was not enough.
+  	Replace the cobr with a two instructions (a compare and a branch).
+
+  *************************************************************************** */
 void
-md_convert_frag (headers, fragP)
+md_convert_frag (headers, seg, fragP)
      object_headers *headers;
+     segT seg;
      fragS *fragP;
 {
   fixS *fixP;			/* Structure describing needed address fix */
@@ -1055,25 +1053,24 @@ md_convert_frag (headers, fragP)
 }
 
 /*****************************************************************************
- * md_estimate_size_before_relax:  How much does it look like *fragP will grow?
- *
- *	Called by base assembler just before address relaxation.
- *	Return the amount by which the fragment will grow.
- *
- *	Any symbol that is now undefined will not become defined; cobr's
- *	based on undefined symbols will have to be replaced with a compare
- *	instruction and a branch instruction, and the code fragment will grow
- *	by 4 bytes.
- *
- **************************************************************************** */
+   md_estimate_size_before_relax:  How much does it look like *fragP will grow?
+
+  	Called by base assembler just before address relaxation.
+  	Return the amount by which the fragment will grow.
+
+  	Any symbol that is now undefined will not become defined; cobr's
+  	based on undefined symbols will have to be replaced with a compare
+  	instruction and a branch instruction, and the code fragment will grow
+  	by 4 bytes.
+
+  *************************************************************************** */
 int
 md_estimate_size_before_relax (fragP, segment_type)
      register fragS *fragP;
      register segT segment_type;
 {
   /* If symbol is undefined in this segment, go to "relaxed" state
-	 * (compare and branch instructions instead of cobr) right now.
-	 */
+     (compare and branch instructions instead of cobr) right now.  */
   if (S_GET_SEGMENT (fragP->fr_symbol) != segment_type)
     {
       relax_cobr (fragP);
@@ -1084,18 +1081,18 @@ md_estimate_size_before_relax (fragP, segment_type)
 
 
 /*****************************************************************************
- * md_ri_to_chars:
- *	This routine exists in order to overcome machine byte-order problems
- *	when dealing with bit-field entries in the relocation_info struct.
- *
- *	But relocation info will be used on the host machine only (only
- *	executable code is actually downloaded to the i80960).  Therefore,
- *	we leave it in host byte order.
- *
- *	The above comment is no longer true.  This routine now really
- *	does do the reordering (Ian Taylor 28 Aug 92).
- *
- **************************************************************************** */
+   md_ri_to_chars:
+  	This routine exists in order to overcome machine byte-order problems
+  	when dealing with bit-field entries in the relocation_info struct.
+
+  	But relocation info will be used on the host machine only (only
+  	executable code is actually downloaded to the i80960).  Therefore,
+  	we leave it in host byte order.
+
+  	The above comment is no longer true.  This routine now really
+  	does do the reordering (Ian Taylor 28 Aug 92).
+
+  *************************************************************************** */
 void
 md_ri_to_chars (where, ri)
      char *where;
@@ -1141,21 +1138,16 @@ md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
 }
 
 #endif
+#endif /* BFD_ASSEMBLER */
 
-/*************************************************************
- *                                                           *
- *  FOLLOWING ARE THE LOCAL ROUTINES, IN ALPHABETICAL ORDER  *
- *                                                           *
- ************************************************************ */
-
-
+/* FOLLOWING ARE THE LOCAL ROUTINES, IN ALPHABETICAL ORDER  */
 
 /*****************************************************************************
- * brcnt_emit:	Emit code to increment inline branch counter.
- *
- *	See the comments above the declaration of 'br_cnt' for details on
- *	branch-prediction instrumentation.
- **************************************************************************** */
+   brcnt_emit:	Emit code to increment inline branch counter.
+
+  	See the comments above the declaration of 'br_cnt' for details on
+  	branch-prediction instrumentation.
+  *************************************************************************** */
 static void
 brcnt_emit ()
 {
@@ -1164,11 +1156,11 @@ brcnt_emit ()
 }
 
 /*****************************************************************************
- * brlab_next:	generate the next branch local label
- *
- *	See the comments above the declaration of 'br_cnt' for details on
- *	branch-prediction instrumentation.
- **************************************************************************** */
+   brlab_next:	generate the next branch local label
+
+  	See the comments above the declaration of 'br_cnt' for details on
+  	branch-prediction instrumentation.
+  *************************************************************************** */
 static char *
 brlab_next ()
 {
@@ -1179,42 +1171,43 @@ brlab_next ()
 }
 
 /*****************************************************************************
- * brtab_emit:	generate the fetch-prediction branch table.
- *
- *	See the comments above the declaration of 'br_cnt' for details on
- *	branch-prediction instrumentation.
- *
- *	The code emitted here would be functionally equivalent to the following
- *	example assembler source.
- *
- *			.data
- *			.align	2
- *	   BR_TAB_NAME:
- *			.word	0		# link to next table
- *			.word	3		# length of table
- *			.word	LBRANCH0	# 1st entry in table proper
- *			.word	LBRANCH1
- *			.word	LBRANCH2
- ***************************************************************************** */
+   brtab_emit:	generate the fetch-prediction branch table.
+
+  	See the comments above the declaration of 'br_cnt' for details on
+  	branch-prediction instrumentation.
+
+  	The code emitted here would be functionally equivalent to the following
+  	example assembler source.
+
+  			.data
+  			.align	2
+  	   BR_TAB_NAME:
+  			.word	0		# link to next table
+  			.word	3		# length of table
+  			.word	LBRANCH0	# 1st entry in table proper
+  			.word	LBRANCH1
+  			.word	LBRANCH2
+  **************************************************************************** */
 void
 brtab_emit ()
 {
   int i;
   char buf[20];
   char *p;			/* Where the binary was output to */
-  fixS *fixP;			/*->description of deferred address fixup */
+  /* Pointer to description of deferred address fixup.  */
+  fixS *fixP;
 
   if (!instrument_branches)
     {
       return;
     }
 
-  subseg_set (SEG_DATA, 0);	/* 	.data */
-  frag_align (2, 0);		/* 	.align 2 */
+  subseg_set (data_section, 0);	/*      .data */
+  frag_align (2, 0);		/*      .align 2 */
   record_alignment (now_seg, 2);
   colon (BR_TAB_NAME);		/* BR_TAB_NAME: */
-  emit (0);			/* 	.word 0	#link to next table */
-  emit (br_cnt);		/*	.word n #length of table */
+  emit (0);			/*      .word 0 #link to next table */
+  emit (br_cnt);		/*      .word n #length of table */
 
   for (i = 0; i < br_cnt; i++)
     {
@@ -1232,25 +1225,25 @@ brtab_emit ()
 }
 
 /*****************************************************************************
- * cobr_fmt:	generate a COBR-format instruction
- *
- **************************************************************************** */
+   cobr_fmt:	generate a COBR-format instruction
+
+  *************************************************************************** */
 static
 void
 cobr_fmt (arg, opcode, oP)
-     char *arg[];		/* arg[0]->opcode mnemonic, arg[1-3]->operands (ascii) */
-     long opcode;		/* Opcode, with branch-prediction bits already set
-		 *	if necessary.
-		 */
+     /* arg[0]->opcode mnemonic, arg[1-3]->operands (ascii) */
+     char *arg[];
+     /* Opcode, with branch-prediction bits already set if necessary.  */
+     long opcode;
+     /* Pointer to description of instruction.  */
      struct i960_opcode *oP;
-     /*->description of instruction */
 {
   long instr;			/* 32-bit instruction */
   struct regop regop;		/* Description of register operand */
   int n;			/* Number of operands */
   int var_frag;			/* 1 if varying length code fragment should
-				 *	be emitted;  0 if an address fix
-				 *	should be emitted.
+				 *    be emitted;  0 if an address fix
+				 *      should be emitted.
 				 */
 
   instr = opcode;
@@ -1259,17 +1252,15 @@ cobr_fmt (arg, opcode, oP)
   if (n >= 1)
     {
       /* First operand (if any) of a COBR is always a register
-		 * operand.  Parse it.
-		 */
+	 operand.  Parse it.  */
       parse_regop (&regop, arg[1], oP->operand[0]);
       instr |= (regop.n << 19) | (regop.mode << 13);
     }
   if (n >= 2)
     {
       /* Second operand (if any) of a COBR is always a register
-		 * operand.  Parse it.
-		 */
-      parse_regop (&regop, arg[2], oP->operand[1]);
+	 operand.  Parse it.  */
+    parse_regop (&regop, arg[2], oP->operand[1]);
       instr |= (regop.n << 14) | regop.special;
     }
 
@@ -1287,12 +1278,11 @@ cobr_fmt (arg, opcode, oP)
 	  colon (brlab_next ());
 	}
 
-      /* A third operand to a COBR is always a displacement.
-		 * Parse it; if it's relaxable (a cobr "j" directive, or any
-		 * cobr other than bbs/bbc when the "-norelax" option is not in
-		 * use) set up a variable code fragment;  otherwise set up an
-		 * address fix.
-		 */
+      /* A third operand to a COBR is always a displacement.  Parse
+         it; if it's relaxable (a cobr "j" directive, or any cobr
+         other than bbs/bbc when the "-norelax" option is not in use)
+         set up a variable code fragment; otherwise set up an address
+         fix.  */
       var_frag = !norelax || (oP->format == COJ);	/* TRUE or FALSE */
       get_cdisp (arg[3], "COBR", instr, 13, var_frag, 0);
 
@@ -1305,9 +1295,9 @@ cobr_fmt (arg, opcode, oP)
 
 
 /*****************************************************************************
- * ctrl_fmt:	generate a CTRL-format instruction
- *
- **************************************************************************** */
+   ctrl_fmt:	generate a CTRL-format instruction
+
+  *************************************************************************** */
 static
 void
 ctrl_fmt (targP, opcode, num_ops)
@@ -1316,8 +1306,8 @@ ctrl_fmt (targP, opcode, num_ops)
      int num_ops;		/* Number of operands */
 {
   int instrument;		/* TRUE iff we should add instrumentation to track
-			 * how often the branch is taken
-			 */
+				   * how often the branch is taken
+				 */
 
 
   if (num_ops == 0)
@@ -1337,8 +1327,8 @@ ctrl_fmt (targP, opcode, num_ops)
 	}
 
       /* The operand MUST be an ip-relative displacment. Parse it
-		 * and set up address fix for the instruction we just output.
-		 */
+         * and set up address fix for the instruction we just output.
+       */
       get_cdisp (targP, "CTRL", opcode, 24, 0, 0);
 
       if (instrument)
@@ -1351,12 +1341,12 @@ ctrl_fmt (targP, opcode, num_ops)
 
 
 /*****************************************************************************
- * emit:	output instruction binary
- *
- *	Output instruction binary, in target byte order, 4 bytes at a time.
- *	Return pointer to where it was placed.
- *
- **************************************************************************** */
+   emit:	output instruction binary
+
+  	Output instruction binary, in target byte order, 4 bytes at a time.
+  	Return pointer to where it was placed.
+
+  *************************************************************************** */
 static
 char *
 emit (instr)
@@ -1371,34 +1361,32 @@ emit (instr)
 
 
 /*****************************************************************************
- * get_args:	break individual arguments out of comma-separated list
- *
- * Input assumptions:
- *	- all comments and labels have been removed
- *	- all strings of whitespace have been collapsed to a single blank.
- *	- all character constants ('x') have been replaced with decimal
- *
- * Output:
- *	args[0] is untouched. args[1] points to first operand, etc. All args:
- *	- are NULL-terminated
- *	- contain no whitespace
- *
- * Return value:
- *	Number of operands (0,1,2, or 3) or -1 on error.
- *
- **************************************************************************** */
+   get_args:	break individual arguments out of comma-separated list
+
+   Input assumptions:
+  	- all comments and labels have been removed
+  	- all strings of whitespace have been collapsed to a single blank.
+  	- all character constants ('x') have been replaced with decimal
+
+   Output:
+  	args[0] is untouched. args[1] points to first operand, etc. All args:
+  	- are NULL-terminated
+  	- contain no whitespace
+
+   Return value:
+  	Number of operands (0,1,2, or 3) or -1 on error.
+
+  *************************************************************************** */
 static int
 get_args (p, args)
-     register char *p;		/* Pointer to comma-separated operands; MUCKED BY US */
-     char *args[];		/* Output arg: pointers to operands placed in args[1-3].
-		 * MUST ACCOMMODATE 4 ENTRIES (args[0-3]).
-		 */
+     /* Pointer to comma-separated operands; MUCKED BY US */
+     register char *p;
+     /* Output arg: pointers to operands placed in args[1-3].  MUST
+        ACCOMMODATE 4 ENTRIES (args[0-3]).  */
+     char *args[];
 {
   register int n;		/* Number of operands */
   register char *to;
-  /*	char buf[4]; */
-  /*	int len; */
-
 
   /* Skip lead white space */
   while (*p == ' ')
@@ -1415,13 +1403,14 @@ get_args (p, args)
   args[1] = p;
 
   /* Squeze blanks out by moving non-blanks toward start of string.
-	 * Isolate operands, whenever comma is found.
-	 */
+     * Isolate operands, whenever comma is found.
+   */
   to = p;
   while (*p != '\0')
     {
 
-      if (*p == ' ')
+      if (*p == ' '
+	  && (! isalnum (p[1]) || ! isalnum (p[-1])))
 	{
 	  p++;
 
@@ -1451,19 +1440,19 @@ get_args (p, args)
 
 
 /*****************************************************************************
- * get_cdisp:	handle displacement for a COBR or CTRL instruction.
- *
- *	Parse displacement for a COBR or CTRL instruction.
- *
- *	If successful, output the instruction opcode and set up for it,
- *	depending on the arg 'var_frag', either:
- *	    o an address fixup to be done when all symbol values are known, or
- *	    o a varying length code fragment, with address fixup info.  This
- *		will be done for cobr instructions that may have to be relaxed
- *		in to compare/branch instructions (8 bytes) if the final
- *		address displacement is greater than 13 bits.
- *
- *****************************************************************************/
+   get_cdisp:	handle displacement for a COBR or CTRL instruction.
+
+  	Parse displacement for a COBR or CTRL instruction.
+
+  	If successful, output the instruction opcode and set up for it,
+  	depending on the arg 'var_frag', either:
+  	    o an address fixup to be done when all symbol values are known, or
+  	    o a varying length code fragment, with address fixup info.  This
+  		will be done for cobr instructions that may have to be relaxed
+  		in to compare/branch instructions (8 bytes) if the final
+  		address displacement is greater than 13 bits.
+
+  ****************************************************************************/
 static
 void
 get_cdisp (dispP, ifmtP, instr, numbits, var_frag, callj)
@@ -1476,7 +1465,7 @@ get_cdisp (dispP, ifmtP, instr, numbits, var_frag, callj)
      /* # bits of displacement (13 for COBR, 24 for CTRL) */
      int numbits;
      /* 1 if varying length code fragment should be emitted;
-      *	0 if an address fix should be emitted.
+      *       0 if an address fix should be emitted.
       */
      int var_frag;
      /* 1 if callj relocation should be done; else 0 */
@@ -1495,15 +1484,15 @@ get_cdisp (dispP, ifmtP, instr, numbits, var_frag, callj)
       as_bad ("expression syntax error");
 
     case O_symbol:
-      if (S_GET_SEGMENT (e.X_add_symbol) == text_section
+      if (S_GET_SEGMENT (e.X_add_symbol) == now_seg
 	  || S_GET_SEGMENT (e.X_add_symbol) == undefined_section)
-	{	
+	{
 	  if (var_frag)
 	    {
-	      outP = frag_more (8); /* Allocate worst-case storage */
+	      outP = frag_more (8);	/* Allocate worst-case storage */
 	      md_number_to_chars (outP, instr, 4);
 	      frag_variant (rs_machine_dependent, 4, 4, 1,
-			    adds (e), offs (e), outP, 0, 0);
+			    adds (e), offs (e), outP);
 	    }
 	  else
 	    {
@@ -1541,25 +1530,27 @@ get_cdisp (dispP, ifmtP, instr, numbits, var_frag, callj)
 
 
 /*****************************************************************************
- * get_ispec:	parse a memory operand for an index specification
- *
- *	Here, an "index specification" is taken to be anything surrounded
- *	by square brackets and NOT followed by anything else.
- *
- *	If it's found, detach it from the input string, remove the surrounding
- *	square brackets, and return a pointer to it.  Otherwise, return NULL.
- *
- **************************************************************************** */
+   get_ispec:	parse a memory operand for an index specification
+
+  	Here, an "index specification" is taken to be anything surrounded
+  	by square brackets and NOT followed by anything else.
+
+  	If it's found, detach it from the input string, remove the surrounding
+  	square brackets, and return a pointer to it.  Otherwise, return NULL.
+
+  *************************************************************************** */
 static
 char *
 get_ispec (textP)
-     char *textP;		/*->memory operand from source instruction, no white space */
+     /* Pointer to memory operand from source instruction, no white space.  */
+     char *textP;
 {
-  char *start;			/*->start of index specification */
-  char *end;			/*->end of index specification */
+  /* Points to start of index specification.  */
+  char *start;
+  /* Points to end of index specification.  */
+  char *end;
 
-  /* Find opening square bracket, if any
-	 */
+  /* Find opening square bracket, if any.  */
   start = strchr (textP, '[');
 
   if (start != NULL)
@@ -1578,8 +1569,8 @@ get_ispec (textP)
       else
 	{
 	  /* Eliminate ']' and make sure it was the last thing
-			 * in the string.
-			 */
+	     * in the string.
+	   */
 	  *end = '\0';
 	  if (*(end + 1) != '\0')
 	    {
@@ -1591,12 +1582,12 @@ get_ispec (textP)
 }
 
 /*****************************************************************************
- * get_regnum:
- *
- *	Look up a (suspected) register name in the register table and return the
- *	associated register number (or -1 if not found).
- *
- **************************************************************************** */
+   get_regnum:
+
+  	Look up a (suspected) register name in the register table and return the
+  	associated register number (or -1 if not found).
+
+  *************************************************************************** */
 static
 int
 get_regnum (regname)
@@ -1610,29 +1601,30 @@ get_regnum (regname)
 
 
 /*****************************************************************************
- * i_scan:	perform lexical scan of ascii assembler instruction.
- *
- * Input assumptions:
- *	- input string is an i80960 instruction (not a pseudo-op)
- *	- all comments and labels have been removed
- *	- all strings of whitespace have been collapsed to a single blank.
- *
- * Output:
- *	args[0] points to opcode, other entries point to operands. All strings:
- *	- are NULL-terminated
- *	- contain no whitespace
- *	- have character constants ('x') replaced with a decimal number
- *
- * Return value:
- *	Number of operands (0,1,2, or 3) or -1 on error.
- *
- **************************************************************************** */
+   i_scan:	perform lexical scan of ascii assembler instruction.
+
+   Input assumptions:
+  	- input string is an i80960 instruction (not a pseudo-op)
+  	- all comments and labels have been removed
+  	- all strings of whitespace have been collapsed to a single blank.
+
+   Output:
+  	args[0] points to opcode, other entries point to operands. All strings:
+  	- are NULL-terminated
+  	- contain no whitespace
+  	- have character constants ('x') replaced with a decimal number
+
+   Return value:
+  	Number of operands (0,1,2, or 3) or -1 on error.
+
+  *************************************************************************** */
 static int
 i_scan (iP, args)
-     register char *iP;		/* Pointer to ascii instruction;  MUCKED BY US. */
-     char *args[];		/* Output arg: pointers to opcode and operands placed
-		 *	here.  MUST ACCOMMODATE 4 ENTRIES.
-		 */
+     /* Pointer to ascii instruction;  MUCKED BY US. */
+     register char *iP;
+     /* Output arg: pointers to opcode and operands placed here.  MUST
+	ACCOMMODATE 4 ENTRIES.  */
+     char *args[];
 {
 
   /* Isolate opcode */
@@ -1661,9 +1653,9 @@ i_scan (iP, args)
 
 
 /*****************************************************************************
- * mem_fmt:	generate a MEMA- or MEMB-format instruction
- *
- **************************************************************************** */
+   mem_fmt:	generate a MEMA- or MEMB-format instruction
+
+  *************************************************************************** */
 static void
 mem_fmt (args, oP, callx)
      char *args[];		/* args[0]->opcode mnemonic, args[1-3]->operands */
@@ -1676,7 +1668,8 @@ mem_fmt (args, oP, callx)
   memS instr;			/* Description of binary to be output */
   char *outP;			/* Where the binary was output to */
   expressionS expr;		/* Parsed expression */
-  fixS *fixP;			/*->description of deferred address fixup */
+  /* ->description of deferred address fixup */
+  fixS *fixP;
 
 #ifdef OBJ_COFF
   /* COFF support isn't in place yet for callx relaxing.  */
@@ -1768,8 +1761,8 @@ mem_fmt (args, oP, callx)
 			  NO_RELOC);
       fixP->fx_im_disp = 2;	/* 32-bit displacement fix */
       /* Steve's linker relaxing hack.  Mark this 32-bit relocation as
-	 being in the instruction stream, specifically as part of a callx
-	 instruction.  */
+         being in the instruction stream, specifically as part of a callx
+         instruction.  */
       fixP->fx_bsr = callx;
       break;
     }
@@ -1777,15 +1770,15 @@ mem_fmt (args, oP, callx)
 
 
 /*****************************************************************************
- * mema_to_memb:	convert a MEMA-format opcode to a MEMB-format opcode.
- *
- * There are 2 possible MEMA formats:
- *	- displacement only
- *	- displacement + abase
- *
- * They are distinguished by the setting of the MEMA_ABASE bit.
- *
- **************************************************************************** */
+   mema_to_memb:	convert a MEMA-format opcode to a MEMB-format opcode.
+
+   There are 2 possible MEMA formats:
+  	- displacement only
+  	- displacement + abase
+
+   They are distinguished by the setting of the MEMA_ABASE bit.
+
+  *************************************************************************** */
 static void
 mema_to_memb (opcodeP)
      char *opcodeP;		/* Where to find the opcode, in target byte order */
@@ -1810,18 +1803,18 @@ mema_to_memb (opcodeP)
 
 
 /*****************************************************************************
- * parse_expr:		parse an expression
- *
- *	Use base assembler's expression parser to parse an expression.
- *	It, unfortunately, runs off a global which we have to save/restore
- *	in order to make it work for us.
- *
- *	An empty expression string is treated as an absolute 0.
- *
- *	Sets O_illegal regardless of expression evaluation if entire input
- *	string is not consumed in the evaluation -- tolerate no dangling junk!
- *
- **************************************************************************** */
+   parse_expr:		parse an expression
+
+  	Use base assembler's expression parser to parse an expression.
+  	It, unfortunately, runs off a global which we have to save/restore
+  	in order to make it work for us.
+
+  	An empty expression string is treated as an absolute 0.
+
+  	Sets O_illegal regardless of expression evaluation if entire input
+  	string is not consumed in the evaluation -- tolerate no dangling junk!
+
+  *************************************************************************** */
 static void
 parse_expr (textP, expP)
      char *textP;		/* Text of expression to be parsed */
@@ -1864,20 +1857,20 @@ parse_expr (textP, expP)
 
 
 /*****************************************************************************
- * parse_ldcont:
- *	Parse and replace a 'ldconst' pseudo-instruction with an appropriate
- *	i80960 instruction.
- *
- *	Assumes the input consists of:
- *		arg[0]	opcode mnemonic ('ldconst')
- *		arg[1]  first operand (constant)
- *		arg[2]	name of register to be loaded
- *
- *	Replaces opcode and/or operands as appropriate.
- *
- *	Returns the new number of arguments, or -1 on failure.
- *
- **************************************************************************** */
+   parse_ldcont:
+  	Parse and replace a 'ldconst' pseudo-instruction with an appropriate
+  	i80960 instruction.
+
+  	Assumes the input consists of:
+  		arg[0]	opcode mnemonic ('ldconst')
+  		arg[1]  first operand (constant)
+  		arg[2]	name of register to be loaded
+
+  	Replaces opcode and/or operands as appropriate.
+
+  	Returns the new number of arguments, or -1 on failure.
+
+  *************************************************************************** */
 static
 int
 parse_ldconst (arg)
@@ -1902,16 +1895,16 @@ parse_ldconst (arg)
 
     case O_constant:
       /* Try the following mappings:
-       *	ldconst 0,<reg>  ->mov  0,<reg>
-       * 	ldconst 31,<reg> ->mov  31,<reg>
-       * 	ldconst 32,<reg> ->addo 1,31,<reg>
-       * 	ldconst 62,<reg> ->addo 31,31,<reg>
-       *	ldconst 64,<reg> ->shlo 8,3,<reg>
-       * 	ldconst -1,<reg> ->subo 1,0,<reg>
-       * 	ldconst -31,<reg>->subo 31,0,<reg>
+       *      ldconst 0,<reg>  ->mov  0,<reg>
+       *        ldconst 31,<reg> ->mov  31,<reg>
+       *        ldconst 32,<reg> ->addo 1,31,<reg>
+       *        ldconst 62,<reg> ->addo 31,31,<reg>
+       *        ldconst 64,<reg> ->shlo 8,3,<reg>
+       *        ldconst -1,<reg> ->subo 1,0,<reg>
+       *        ldconst -31,<reg>->subo 31,0,<reg>
        *
        * anthing else becomes:
-       * 	lda xxx,<reg>
+       *        lda xxx,<reg>
        */
       n = offs (e);
       if ((0 <= n) && (n <= 31))
@@ -1962,36 +1955,36 @@ parse_ldconst (arg)
 }
 
 /*****************************************************************************
- * parse_memop:	parse a memory operand
- *
- *	This routine is based on the observation that the 4 mode bits of the
- *	MEMB format, taken individually, have fairly consistent meaning:
- *
- *		 M3 (bit 13): 1 if displacement is present (D_BIT)
- *		 M2 (bit 12): 1 for MEMB instructions (MEMB_BIT)
- *		 M1 (bit 11): 1 if index is present (I_BIT)
- *		 M0 (bit 10): 1 if abase is present (A_BIT)
- *
- *	So we parse the memory operand and set bits in the mode as we find
- *	things.  Then at the end, if we go to MEMB format, we need only set
- *	the MEMB bit (M2) and our mode is built for us.
- *
- *	Unfortunately, I said "fairly consistent".  The exceptions:
- *
- *		 DBIA
- *		 0100	Would seem illegal, but means "abase-only".
- *
- *		 0101	Would seem to mean "abase-only" -- it means IP-relative.
- *			Must be converted to 0100.
- *
- *		 0110	Would seem to mean "index-only", but is reserved.
- *			We turn on the D bit and provide a 0 displacement.
- *
- *	The other thing to observe is that we parse from the right, peeling
- *	things * off as we go:  first any index spec, then any abase, then
- *	the displacement.
- *
- **************************************************************************** */
+   parse_memop:	parse a memory operand
+
+  	This routine is based on the observation that the 4 mode bits of the
+  	MEMB format, taken individually, have fairly consistent meaning:
+
+  		 M3 (bit 13): 1 if displacement is present (D_BIT)
+  		 M2 (bit 12): 1 for MEMB instructions (MEMB_BIT)
+  		 M1 (bit 11): 1 if index is present (I_BIT)
+  		 M0 (bit 10): 1 if abase is present (A_BIT)
+
+  	So we parse the memory operand and set bits in the mode as we find
+  	things.  Then at the end, if we go to MEMB format, we need only set
+  	the MEMB bit (M2) and our mode is built for us.
+
+  	Unfortunately, I said "fairly consistent".  The exceptions:
+
+  		 DBIA
+  		 0100	Would seem illegal, but means "abase-only".
+
+  		 0101	Would seem to mean "abase-only" -- it means IP-relative.
+  			Must be converted to 0100.
+
+  		 0110	Would seem to mean "index-only", but is reserved.
+  			We turn on the D bit and provide a 0 displacement.
+
+  	The other thing to observe is that we parse from the right, peeling
+  	things * off as we go:  first any index spec, then any abase, then
+  	the displacement.
+
+  *************************************************************************** */
 static
 void
 parse_memop (memP, argP, optype)
@@ -2003,18 +1996,18 @@ parse_memop (memP, argP, optype)
   char *p;			/* Temp char pointer */
   char iprel_flag;		/* True if this is an IP-relative operand */
   int regnum;			/* Register number */
-  int scale;			/* Scale factor: 1,2,4,8, or 16.  Later converted
-			 *	to internal format (0,1,2,3,4 respectively).
-			 */
+  /* Scale factor: 1,2,4,8, or 16.  Later converted to internal format
+     (0,1,2,3,4 respectively).  */
+  int scale;
   int mode;			/* MEMB mode bits */
   int *intP;			/* Pointer to register number */
 
   /* The following table contains the default scale factors for each
-   * type of memory instruction.  It is accessed using (optype-MEM1)
-   * as an index -- thus it assumes the 'optype' constants are assigned
-   * consecutive values, in the order they appear in this table
-   */
-  static int def_scale[] =
+     type of memory instruction.  It is accessed using (optype-MEM1)
+     as an index -- thus it assumes the 'optype' constants are
+     assigned consecutive values, in the order they appear in this
+     table.  */
+  static const int def_scale[] =
   {
     1,				/* MEM1 */
     2,				/* MEM2 */
@@ -2034,18 +2027,21 @@ parse_memop (memP, argP, optype)
       p = strchr (indexP, '*');
       if (p == NULL)
 	{
-	  /* No explicit scale -- use default for this
-			 *instruction type.
-			 */
-	  scale = def_scale[optype - MEM1];
+	  /* No explicit scale -- use default for this instruction
+	     type and assembler mode.  */
+	  if (flag_mri)
+	    scale = 1;
+	  else
+	    /* GNU960 compatibility */
+	    scale = def_scale[optype - MEM1];
 	}
       else
 	{
 	  *p++ = '\0';		/* Eliminate '*' */
 
 	  /* Now indexP->a '\0'-terminated register name,
-			 * and p->a scale factor.
-			 */
+	     * and p->a scale factor.
+	   */
 
 	  if (!strcmp (p, "16"))
 	    {
@@ -2098,9 +2094,8 @@ parse_memop (memP, argP, optype)
   /* Any abase (Register Indirect) specification present? */
   if ((p = strrchr (argP, '(')) != NULL)
     {
-      /* "(" is there -- does it start a legal abase spec?
-		 * (If not it could be part of a displacement expression.)
-		 */
+      /* "(" is there -- does it start a legal abase spec?  If not, it
+         could be part of a displacement expression.  */
       intP = (int *) hash_find (areg_hash, p);
       if (intP != NULL)
 	{
@@ -2147,26 +2142,23 @@ parse_memop (memP, argP, optype)
     {
     case D_BIT | A_BIT:
       /* Go with MEMA instruction format for now (grow to MEMB later
-		 *	if 12 bits is not enough for the displacement).
-		 * MEMA format has a single mode bit: set it to indicate
-		 *	that abase is present.
-		 */
+         if 12 bits is not enough for the displacement).  MEMA format
+         has a single mode bit: set it to indicate that abase is
+         present.  */
       memP->opcode |= MEMA_ABASE;
       memP->disp = 12;
       break;
 
     case D_BIT:
       /* Go with MEMA instruction format for now (grow to MEMB later
-		 *	if 12 bits is not enough for the displacement).
-		 */
+         if 12 bits is not enough for the displacement).  */
       memP->disp = 12;
       break;
 
     case A_BIT:
       /* For some reason, the bit string for this mode is not
-		 * consistent:  it should be 0 (exclusive of the MEMB bit),
-		 * so we set it "by hand" here.
-		 */
+         consistent: it should be 0 (exclusive of the MEMB bit), so we
+         set it "by hand" here.  */
       memP->opcode |= MEMB_BIT;
       break;
 
@@ -2176,11 +2168,9 @@ parse_memop (memP, argP, optype)
       break;
 
     case I_BIT:
-      /* Treat missing displacement as displacement of 0 */
+      /* Treat missing displacement as displacement of 0.  */
       mode |= D_BIT;
-      /***********************
-		 * Fall into next case *
-		 ********************** */
+      /* Fall into next case.  */
     case D_BIT | A_BIT | I_BIT:
     case D_BIT | I_BIT:
       /* set MEMB bit in mode, and OR in mode bits */
@@ -2195,21 +2185,20 @@ parse_memop (memP, argP, optype)
 }
 
 /*****************************************************************************
- * parse_po:	parse machine-dependent pseudo-op
- *
- *	This is a top-level routine for machine-dependent pseudo-ops.  It slurps
- *	up the rest of the input line, breaks out the individual arguments,
- *	and dispatches them to the correct handler.
- **************************************************************************** */
+   parse_po:	parse machine-dependent pseudo-op
+
+  	This is a top-level routine for machine-dependent pseudo-ops.  It slurps
+  	up the rest of the input line, breaks out the individual arguments,
+  	and dispatches them to the correct handler.
+  *************************************************************************** */
 static
 void
 parse_po (po_num)
      int po_num;		/* Pseudo-op number:  currently S_LEAFPROC or S_SYSPROC */
 {
-  char *args[4];		/* Pointers operands, with no embedded whitespace.
-			 *	arg[0] unused.
-			 *	arg[1-3]->operands
-			 */
+  /* Pointers operands, with no embedded whitespace.
+     arg[0] unused, arg[1-3]->operands */
+  char *args[4];
   int n_ops;			/* Number of operands */
   char *p;			/* Pointer to beginning of unparsed argument string */
   char eol;			/* Character that indicated end of line */
@@ -2246,18 +2235,18 @@ parse_po (po_num)
       break;
     }
 
-  /* Restore eol, so line numbers get updated correctly.  Base assembler
-	 * assumes we leave input pointer pointing at char following the eol.
-	 */
+  /* Restore eol, so line numbers get updated correctly.  Base
+     assembler assumes we leave input pointer pointing at char
+     following the eol.  */
   *input_line_pointer++ = eol;
 }
 
 /*****************************************************************************
- * parse_regop: parse a register operand.
- *
- *	In case of illegal operand, issue a message and return some valid
- *	information so instruction processing can continue.
- **************************************************************************** */
+   parse_regop: parse a register operand.
+
+  	In case of illegal operand, issue a message and return some valid
+  	information so instruction processing can continue.
+  *************************************************************************** */
 static
 void
 parse_regop (regopP, optext, opdesc)
@@ -2307,9 +2296,7 @@ parse_regop (regopP, optext, opdesc)
     }
   else if (LIT_OK (opdesc))
     {
-      /*
-		 * How about a literal?
-		 */
+      /* How about a literal?  */
       regopP->mode = 1;
       regopP->special = 0;
       if (FP_OK (opdesc))
@@ -2356,9 +2343,9 @@ parse_regop (regopP, optext, opdesc)
 }				/* parse_regop() */
 
 /*****************************************************************************
- * reg_fmt:	generate a REG-format instruction
- *
- **************************************************************************** */
+   reg_fmt:	generate a REG-format instruction
+
+  *************************************************************************** */
 static void
 reg_fmt (args, oP)
      char *args[];		/* args[0]->opcode mnemonic, args[1-3]->operands */
@@ -2379,8 +2366,8 @@ reg_fmt (args, oP)
       if ((n_ops == 1) && !(instr & M3))
 	{
 	  /* 1-operand instruction in which the dst field should
-			 * be used (instead of src1).
-			 */
+	     * be used (instead of src1).
+	   */
 	  regop.n <<= 19;
 	  if (regop.special)
 	    {
@@ -2405,8 +2392,8 @@ reg_fmt (args, oP)
       if ((n_ops == 2) && !(instr & M3))
 	{
 	  /* 2-operand instruction in which the dst field should
-			 * be used instead of src2).
-			 */
+	     * be used instead of src2).
+	   */
 	  regop.n <<= 19;
 	  if (regop.special)
 	    {
@@ -2437,41 +2424,40 @@ reg_fmt (args, oP)
 
 
 /*****************************************************************************
- * relax_cobr:
- *	Replace cobr instruction in a code fragment with equivalent branch and
- *	compare instructions, so it can reach beyond a 13-bit displacement.
- *	Set up an address fix/relocation for the new branch instruction.
- *
- **************************************************************************** */
+   relax_cobr:
+  	Replace cobr instruction in a code fragment with equivalent branch and
+  	compare instructions, so it can reach beyond a 13-bit displacement.
+  	Set up an address fix/relocation for the new branch instruction.
 
-/* This "conditional jump" table maps cobr instructions into equivalent
- * compare and branch opcodes.
- */
-static
+  *************************************************************************** */
+
+/* This "conditional jump" table maps cobr instructions into
+   equivalent compare and branch opcodes.  */
+static const
 struct
-  {
-    long compare;
-    long branch;
-  }
+{
+  long compare;
+  long branch;
+}
 
 coj[] =
 {				/* COBR OPCODE: */
-  { CHKBIT, BNO },		/*	0x30 - bbc */
-  { CMPO, BG },			/*	0x31 - cmpobg */
-  { CMPO, BE },			/*	0x32 - cmpobe */
-  { CMPO, BGE },		/*	0x33 - cmpobge */
-  { CMPO, BL },			/*	0x34 - cmpobl */
-  { CMPO, BNE },		/*	0x35 - cmpobne */
-  { CMPO, BLE },		/*	0x36 - cmpoble */
-  { CHKBIT, BO },		/*	0x37 - bbs */
-  { CMPI, BNO },		/*	0x38 - cmpibno */
-  { CMPI, BG },			/*	0x39 - cmpibg */
-  { CMPI, BE },			/*	0x3a - cmpibe */
-  { CMPI, BGE },		/*	0x3b - cmpibge */
-  { CMPI, BL },			/*	0x3c - cmpibl */
-  { CMPI, BNE },		/*	0x3d - cmpibne */
-  { CMPI, BLE },		/*	0x3e - cmpible */
-  { CMPI, BO },			/*	0x3f - cmpibo */
+  { CHKBIT, BNO },		/*      0x30 - bbc */
+  { CMPO, BG },			/*      0x31 - cmpobg */
+  { CMPO, BE },			/*      0x32 - cmpobe */
+  { CMPO, BGE },		/*      0x33 - cmpobge */
+  { CMPO, BL },			/*      0x34 - cmpobl */
+  { CMPO, BNE },		/*      0x35 - cmpobne */
+  { CMPO, BLE },		/*      0x36 - cmpoble */
+  { CHKBIT, BO },		/*      0x37 - bbs */
+  { CMPI, BNO },		/*      0x38 - cmpibno */
+  { CMPI, BG },			/*      0x39 - cmpibg */
+  { CMPI, BE },			/*      0x3a - cmpibe */
+  { CMPI, BGE },		/*      0x3b - cmpibge */
+  { CMPI, BL },			/*      0x3c - cmpibl */
+  { CMPI, BNE },		/*      0x3d - cmpibne */
+  { CMPI, BLE },		/*      0x3e - cmpible */
+  { CMPI, BO },			/*      0x3f - cmpibo */
 };
 
 static
@@ -2486,7 +2472,8 @@ relax_cobr (fragP)
   /* Bit fields from cobr instruction */
   long bp_bits;			/* Branch prediction bits from cobr instruction */
   long instr;			/* A single i960 instruction */
-  char *iP;			/*->instruction to be replaced */
+  /* ->instruction to be replaced */
+  char *iP;
   fixS *fixP;			/* Relocation that can be done at assembly time */
 
   /* PICK UP & PARSE COBR INSTRUCTION */
@@ -2524,48 +2511,49 @@ relax_cobr (fragP)
 
 
 /*****************************************************************************
- * reloc_callj:	Relocate a 'callj' instruction
- *
- *	This is a "non-(GNU)-standard" machine-dependent hook.  The base
- *	assembler calls it when it decides it can relocate an address at
- *	assembly time instead of emitting a relocation directive.
- *
- *	Check to see if the relocation involves a 'callj' instruction to a:
- *	    sysproc:	Replace the default 'call' instruction with a 'calls'
- *	    leafproc:	Replace the default 'call' instruction with a 'bal'.
- *	    other proc:	Do nothing.
- *
- *	See b.out.h for details on the 'n_other' field in a symbol structure.
- *
- * IMPORTANT!:
- *	Assumes the caller has already figured out, in the case of a leafproc,
- *	to use the 'bal' entry point, and has substituted that symbol into the
- *	passed fixup structure.
- *
- **************************************************************************** */
+   reloc_callj:	Relocate a 'callj' instruction
+
+  	This is a "non-(GNU)-standard" machine-dependent hook.  The base
+  	assembler calls it when it decides it can relocate an address at
+  	assembly time instead of emitting a relocation directive.
+
+  	Check to see if the relocation involves a 'callj' instruction to a:
+  	    sysproc:	Replace the default 'call' instruction with a 'calls'
+  	    leafproc:	Replace the default 'call' instruction with a 'bal'.
+  	    other proc:	Do nothing.
+
+  	See b.out.h for details on the 'n_other' field in a symbol structure.
+
+   IMPORTANT!:
+  	Assumes the caller has already figured out, in the case of a leafproc,
+  	to use the 'bal' entry point, and has substituted that symbol into the
+  	passed fixup structure.
+
+  *************************************************************************** */
 void
 reloc_callj (fixP)
-     fixS *fixP;		/* Relocation that can be done at assembly time */
+     /* Relocation that can be done at assembly time */
+     fixS *fixP;
 {
-  char *where;			/*->the binary for the instruction being relocated */
+  /* Points to the binary for the instruction being relocated.  */
+  char *where;
 
   if (!fixP->fx_tcbit)
     {
+      /* This wasn't a callj instruction in the first place */
       return;
-    }				/* This wasn't a callj instruction in the first place */
+    }
 
   where = fixP->fx_frag->fr_literal + fixP->fx_where;
 
   if (TC_S_IS_SYSPROC (fixP->fx_addsy))
     {
-      /* Symbol is a .sysproc: replace 'call' with 'calls'.
-		 * System procedure number is (other-1).
-		 */
+      /* Symbol is a .sysproc: replace 'call' with 'calls'.  System
+         procedure number is (other-1).  */
       md_number_to_chars (where, CALLS | TC_S_GET_SYSPROC (fixP->fx_addsy), 4);
 
-      /* Nothing else needs to be done for this instruction.
-		 * Make sure 'md_number_to_field()' will perform a no-op.
-		 */
+      /* Nothing else needs to be done for this instruction.  Make
+         sure 'md_number_to_field()' will perform a no-op.  */
       fixP->fx_bit_fixP = (bit_fixS *) 1;
 
     }
@@ -2573,14 +2561,12 @@ reloc_callj (fixP)
     {
       /* Should not happen: see block comment above */
       as_fatal ("Trying to 'bal' to %s", S_GET_NAME (fixP->fx_addsy));
-
     }
   else if (TC_S_IS_BALNAME (fixP->fx_addsy))
     {
-      /* Replace 'call' with 'bal';  both instructions have
-		 * the same format, so calling code should complete
-		 * relocation as if nothing happened here.
-		 */
+      /* Replace 'call' with 'bal'; both instructions have the same
+         format, so calling code should complete relocation as if
+         nothing happened here.  */
       md_number_to_chars (where, BAL, 4);
     }
   else if (TC_S_IS_BADPROC (fixP->fx_addsy))
@@ -2593,20 +2579,20 @@ reloc_callj (fixP)
 
 
 /*****************************************************************************
- * s_leafproc:	process .leafproc pseudo-op
- *
- *	.leafproc takes two arguments, the second one is optional:
- *		arg[1]: name of 'call' entry point to leaf procedure
- *		arg[2]: name of 'bal' entry point to leaf procedure
- *
- *	If the two arguments are identical, or if the second one is missing,
- *	the first argument is taken to be the 'bal' entry point.
- *
- *	If there are 2 distinct arguments, we must make sure that the 'bal'
- *	entry point immediately follows the 'call' entry point in the linked
- *	list of symbols.
- *
- **************************************************************************** */
+   s_leafproc:	process .leafproc pseudo-op
+
+  	.leafproc takes two arguments, the second one is optional:
+  		arg[1]: name of 'call' entry point to leaf procedure
+  		arg[2]: name of 'bal' entry point to leaf procedure
+
+  	If the two arguments are identical, or if the second one is missing,
+  	the first argument is taken to be the 'bal' entry point.
+
+  	If there are 2 distinct arguments, we must make sure that the 'bal'
+  	entry point immediately follows the 'call' entry point in the linked
+  	list of symbols.
+
+  *************************************************************************** */
 static void
 s_leafproc (n_ops, args)
      int n_ops;			/* Number of operands */
@@ -2630,9 +2616,9 @@ s_leafproc (n_ops, args)
     }				/* is leafproc */
 
   /* If that was the only argument, use it as the 'bal' entry point.
-	 * Otherwise, mark it as the 'call' entry point and find or create
-	 * another symbol for the 'bal' entry point.
-	 */
+     * Otherwise, mark it as the 'call' entry point and find or create
+     * another symbol for the 'bal' entry point.
+   */
   if ((n_ops == 1) || !strcmp (args[1], args[2]))
     {
       TC_S_FORCE_TO_BALNAME (callP);
@@ -2655,17 +2641,16 @@ s_leafproc (n_ops, args)
 
 
 /*
- * s_sysproc:	process .sysproc pseudo-op
- *
- *	.sysproc takes two arguments:
- *		arg[1]: name of entry point to system procedure
- *		arg[2]: 'entry_num' (index) of system procedure in the range
- *			[0,31] inclusive.
- *
- *	For [ab].out, we store the 'entrynum' in the 'n_other' field of
- *	the symbol.  Since that entry is normally 0, we bias 'entrynum'
- *	by adding 1 to it.  It must be unbiased before it is used.
- */
+   s_sysproc: process .sysproc pseudo-op
+
+        .sysproc takes two arguments:
+                arg[1]: name of entry point to system procedure
+                arg[2]: 'entry_num' (index) of system procedure in the range
+                        [0,31] inclusive.
+
+        For [ab].out, we store the 'entrynum' in the 'n_other' field of
+        the symbol.  Since that entry is normally 0, we bias 'entrynum'
+        by adding 1 to it.  It must be unbiased before it is used.  */
 static void
 s_sysproc (n_ops, args)
      int n_ops;			/* Number of operands */
@@ -2704,15 +2689,15 @@ s_sysproc (n_ops, args)
 
 
 /*****************************************************************************
- * shift_ok:
- *	Determine if a "shlo" instruction can be used to implement a "ldconst".
- *	This means that some number X < 32 can be shifted left to produce the
- *	constant of interest.
- *
- *	Return the shift count, or 0 if we can't do it.
- *	Caller calculates X by shifting original constant right 'shift' places.
- *
- **************************************************************************** */
+   shift_ok:
+  	Determine if a "shlo" instruction can be used to implement a "ldconst".
+  	This means that some number X < 32 can be shifted left to produce the
+  	constant of interest.
+
+  	Return the shift count, or 0 if we can't do it.
+  	Caller calculates X by shifting original constant right 'shift' places.
+
+  *************************************************************************** */
 static
 int
 shift_ok (n)
@@ -2740,10 +2725,8 @@ shift_ok (n)
 }
 
 
-/*****************************************************************************
- * syntax:	issue syntax error
- *
- **************************************************************************** */
+/* syntax: issue syntax error */
+
 static void
 syntax ()
 {
@@ -2751,12 +2734,11 @@ syntax ()
 }				/* syntax() */
 
 
-/*****************************************************************************
- * targ_has_sfr:
- *	Return TRUE iff the target architecture supports the specified
- *	special-function register (sfr).
- *
- *****************************************************************************/
+/* targ_has_sfr:
+
+   Return TRUE iff the target architecture supports the specified
+   special-function register (sfr).  */
+
 static
 int
 targ_has_sfr (n)
@@ -2767,6 +2749,7 @@ targ_has_sfr (n)
     case ARCH_KA:
     case ARCH_KB:
     case ARCH_MC:
+    case ARCH_XL:
       return 0;
     case ARCH_CA:
     default:
@@ -2775,18 +2758,18 @@ targ_has_sfr (n)
 }
 
 
-/*****************************************************************************
- * targ_has_iclass:
- *	Return TRUE iff the target architecture supports the indicated
- *	class of instructions.
- *
- *****************************************************************************/
+/* targ_has_iclass:
+
+   Return TRUE iff the target architecture supports the indicated
+   class of instructions.  */
 static
 int
 targ_has_iclass (ic)
-     int ic;			/* Instruction class;  one of:
-	 *	I_BASE, I_CX, I_DEC, I_KX, I_FP, I_MIL, I_CASIM
-	 */
+     /* Instruction class;  one of:
+        I_BASE, I_CX, I_DEC, I_KX, I_FP, I_MIL, I_CASIM
+        or I_XL
+      */
+     int ic;
 {
   iclasses_seen |= ic;
   switch (architecture)
@@ -2798,10 +2781,12 @@ targ_has_iclass (ic)
     case ARCH_MC:
       return ic & (I_BASE | I_KX | I_FP | I_DEC | I_MIL);
     case ARCH_CA:
-      return ic & (I_BASE | I_CX | I_CASIM);
+      return ic & (I_BASE | I_CX | I_CX2 | I_CASIM);
+    case ARCH_XL:
+      return ic & (I_BASE | I_CX2 | I_XL);
     default:
       if ((iclasses_seen & (I_KX | I_FP | I_DEC | I_MIL))
-	  && (iclasses_seen & I_CX))
+	  && (iclasses_seen & (I_CX | I_CX2)))
 	{
 	  as_warn ("architecture of opcode conflicts with that of earlier instruction(s)");
 	  iclasses_seen &= ~ic;
@@ -2810,16 +2795,27 @@ targ_has_iclass (ic)
     }
 }
 
+/* Handle the MRI .endian pseudo-op.  */
 
-/* Parse an operand that is machine-specific.
-   We just return without modifying the expression if we have nothing
-   to do. */
-
-/* ARGSUSED */
-void
-md_operand (expressionP)
-     expressionS *expressionP;
+static void
+s_endian (ignore)
+     int ignore;
 {
+  char *name;
+  char c;
+
+  name = input_line_pointer;
+  c = get_symbol_end ();
+  if (strcasecmp (name, "little") == 0)
+    ;
+  else if (strcasecmp (name, "big") == 0)
+    as_bad ("big endian mode is not supported");
+  else
+    as_warn ("ignoring unrecognized .endian type `%s'", name);
+
+  *input_line_pointer = c;
+
+  demand_empty_rest_of_line ();
 }
 
 /* We have no need to default values of symbols. */
@@ -2868,7 +2864,7 @@ md_apply_fix (fixP, val)
 			    : val),
 			   fixP->fx_size);
 	break;
-      case 2:		/* fix requested for .long .word etc */
+      case 2:			/* fix requested for .long .word etc */
 	md_number_to_chars (place, val, fixP->fx_size);
 	break;
       default:
@@ -2991,6 +2987,12 @@ tc_headers_hook (headers)
     {
       headers->filehdr.f_flags |= F_I960CA;
     }
+  else if (iclasses_seen & I_XL)
+    headers->filehdr.f_flags |= F_I960XL;
+  else if (iclasses_seen & I_CX2)
+    {
+      headers->filehdr.f_flags |= F_I960CA;
+    }
   else if (iclasses_seen & I_MIL)
     {
       headers->filehdr.f_flags |= F_I960MC;
@@ -3004,7 +3006,7 @@ tc_headers_hook (headers)
       headers->filehdr.f_flags |= F_I960KA;
     }				/* set arch flag */
 
-  if (flagseen['R'])
+  if (flag_readonly_data_in_text)
     {
       headers->filehdr.f_magic = I960RWMAGIC;
       headers->aouthdr.magic = OMAGIC;
@@ -3018,24 +3020,21 @@ tc_headers_hook (headers)
 
 #endif /* OBJ_COFF */
 
-/*
- * Things going on here:
- *
- * For bout, We need to assure a couple of simplifying
- * assumptions about leafprocs for the linker: the leafproc
- * entry symbols will be defined in the same assembly in
- * which they're declared with the '.leafproc' directive;
- * and if a leafproc has both 'call' and 'bal' entry points
- * they are both global or both local.
- *
- * For coff, the call symbol has a second aux entry that
- * contains the bal entry point.  The bal symbol becomes a
- * label.
- *
- * For coff representation, the call symbol has a second aux entry that
- * contains the bal entry point.  The bal symbol becomes a label.
- *
- */
+/* Things going on here:
+
+   For bout, We need to assure a couple of simplifying
+   assumptions about leafprocs for the linker: the leafproc
+   entry symbols will be defined in the same assembly in
+   which they're declared with the '.leafproc' directive;
+   and if a leafproc has both 'call' and 'bal' entry points
+   they are both global or both local.
+
+   For coff, the call symbol has a second aux entry that
+   contains the bal entry point.  The bal symbol becomes a
+   label.
+
+   For coff representation, the call symbol has a second aux entry that
+   contains the bal entry point.  The bal symbol becomes a label.  */
 
 void
 tc_crawl_symbol_chain (headers)
@@ -3080,12 +3079,10 @@ tc_crawl_symbol_chain (headers)
     }				/* walk the symbol chain */
 }
 
-/*
- * For aout or bout, the bal immediately follows the call.
- *
- * For coff, we cheat and store a pointer to the bal symbol
- * in the second aux entry of the call.
- */
+/* For aout or bout, the bal immediately follows the call.
+
+   For coff, we cheat and store a pointer to the bal symbol in the
+   second aux entry of the call.  */
 
 #undef OBJ_ABOUT
 #ifdef OBJ_AOUT
@@ -3112,8 +3109,8 @@ tc_set_bal_of_call (callP, balP)
 #ifdef OBJ_ABOUT
 
   /* If the 'bal' entry doesn't immediately follow the 'call'
-	 * symbol, unlink it from the symbol list and re-insert it.
-	 */
+     * symbol, unlink it from the symbol list and re-insert it.
+   */
   if (symbol_next (callP) != balP)
     {
       symbol_remove (balP, &symbol_rootP, &symbol_lastP);
@@ -3157,8 +3154,10 @@ tc_coff_symbol_emit_hook (symbolP)
 #ifdef OBJ_COFF
       symbolS *balP = tc_get_bal_of_call (symbolP);
 
+#if 0
       /* second aux entry contains the bal entry point */
-      /*		S_SET_NUMBER_AUXILIARY(symbolP, 2); */
+      S_SET_NUMBER_AUXILIARY (symbolP, 2);
+#endif
       symbolP->sy_symbol.ost_auxent[1].x_bal.x_balntry = S_GET_VALUE (balP);
       S_SET_STORAGE_CLASS (symbolP, (!SF_GET_LOCAL (symbolP) ? C_LEAFEXT : C_LEAFSTAT));
       S_SET_DATA_TYPE (symbolP, S_GET_DATA_TYPE (symbolP) | (DT_FCN << N_BTSHFT));
@@ -3207,7 +3206,7 @@ i960_validate_fix (fixP, this_segment_type, add_symbolPP)
   if (fixP->fx_tcbit && TC_S_IS_CALLNAME (add_symbolP))
     {
       /* Relocation should be done via the associated 'bal'
-	 entry point symbol. */
+         entry point symbol. */
 
       if (!TC_S_IS_BALNAME (tc_get_bal_of_call (add_symbolP)))
 	{
@@ -3218,24 +3217,24 @@ i960_validate_fix (fixP, this_segment_type, add_symbolPP)
       fixP->fx_addsy = add_symbolP = tc_get_bal_of_call (add_symbolP);
     }
 #if 0
-    /* Still have to work out other conditions for these tests.  */
-    {
-      if (fixP->fx_tcbit)
-	{
-	  as_bad ("callj to difference of two symbols");
-	  return 1;
-	}
-      reloc_callj (fixP);
-      if ((int) fixP->fx_bit_fixP == 13)
-	{
-	  /* This is a COBR instruction.  They have only a 13-bit
-	     displacement and are only to be used for local branches:
-	     flag as error, don't generate relocation.  */
-	  as_bad ("can't use COBR format with external label");
-	  fixP->fx_addsy = NULL;	/* No relocations please. */
-	  return 1;
-	}
-    }
+  /* Still have to work out other conditions for these tests.  */
+  {
+    if (fixP->fx_tcbit)
+      {
+	as_bad ("callj to difference of two symbols");
+	return 1;
+      }
+    reloc_callj (fixP);
+    if ((int) fixP->fx_bit_fixP == 13)
+      {
+	/* This is a COBR instruction.  They have only a 13-bit
+	   displacement and are only to be used for local branches:
+	   flag as error, don't generate relocation.  */
+	as_bad ("can't use COBR format with external label");
+	fixP->fx_addsy = NULL;	/* No relocations please. */
+	return 1;
+      }
+  }
 #endif
 #undef add_symbolP
   return 0;

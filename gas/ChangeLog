@@ -1,3 +1,11 @@
+Tue Jan 30 12:35:24 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* config/tc-i960.c (parse_memop): In MRI mode, don't use implicit
+	scaling of index.
+
+	* expr.c (operand): Accept 0x hex constants in MRI mode if not on
+	m68k.
+
 Mon Jan 29 12:21:30 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/obj-elf.c (obj_elf_type): Set BSF_OBJECT flag for a type
