@@ -1,12 +1,3 @@
 # Configuration fragment for opcodes.
 
-duplicate -y -d {topsrcdir}bfd:hosts:mpw.h sysdep.h
-
-Echo "#ifndef __va_list__" >varargs.h
-Echo "#define __va_list__" >>varargs.h
-Echo "typedef char *va_list;" >>varargs.h
-Echo "#endif" >>varargs.h
-Echo "#define va_dcl int va_alist;" >>varargs.h
-Echo "#define va_start(list) list = (char *) &va_alist" >>varargs.h
-Echo "#define va_end(list)" >>varargs.h
-Echo "#define va_arg(list,mode) ((mode *)(list += sizeof(mode)))[-1]" >>varargs.h
+forward-include "{srcroot}"bfd:hosts:mpw.h sysdep.h

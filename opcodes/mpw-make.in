@@ -70,7 +70,7 @@ RANLIB = ranlib
 
 INCDIR = "{topsrcdir}"include
 BFDDIR = "{topsrcdir}"bfd
-CSEARCH =  -i {INCDIR},{INCDIR}:,{BFDDIR}:,::bfd:
+CSEARCH =  -i {INCDIR},{INCDIR}:,{BFDDIR}:,::bfd:,"{INCDIR}":mpw:
 DEP = mkdep
 
 ALL_CFLAGS =  -mc68020 -mc68881 -model far {CSEARCH}
