@@ -1,3 +1,8 @@
+2004-02-09  Anil Paranjpe  <anilp1@KPITCummins.com>
+
+	* coff-h8300.c: Added comments about relaxation for ldc.w and stc.w.
+	* elf32-h8300.c: Likewise.
+
 2004-02-09  Christian Vogel <vogelchr@vogel.cx>
 	    Nick Clifton  <nickc@redhat.com>
 

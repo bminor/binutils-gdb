@@ -1198,7 +1198,7 @@ elf32_h8_relax_section (bfd *abfd, asection *sec,
 
 	       "band", "bclr", "biand", "bild", "bior", "bist",
 	       "bixor", "bld", "bnot", "bor", "bset", "bst", "btst",
-	       "bxor", and "mov.[bwl]"
+	       "bxor", "ldc.w", "stc.w" and "mov.[bwl]"
 
 	     We may relax this into an 16-bit absolute address if it's
 	     in the right range.  */

@@ -780,8 +780,8 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
 	 instructions:
 
 	   "band", "bclr", "biand", "bild", "bior", "bist", "bixor",
-	   "bld", "bnot", "bor", "bset", "bst", "btst", "bxor", and
-	   "mov.[bwl]"
+	   "bld", "bnot", "bor", "bset", "bst", "btst", "bxor", "ldc.w",
+	   "stc.w" and "mov.[bwl]"
 
 	 We may relax this into an 16-bit absolute address if it's in
 	 the right range.  */

@@ -1,3 +1,12 @@
+2004-02-09  Anil Paranjpe  <anilp1@KPITCummins.com>
+	
+	* ld-h8300/relax-5.s: New file: Source for relax-5 test.
+	* ld-h8300/relax-5.d: New file: Expected output and commands for
+	assembling and linking the relax-5 test.
+	* ld-h8300/relax-5-coff.d: New file: Variant for the COFF based
+	toolchain.
+	* ld-h8300/h8300-exp:  Run the relax-5 test.
+
 2004-01-23  Daniel Jacobowitz  <drow@mvista.com>
 
 	* ld-arm/arm-app-abs32.s, ld-arm/arm-app-abs32.r,
