@@ -1,3 +1,8 @@
+Tue May 17 15:04:14 1994  Bill Cox  (bill@rtl.cygnus.com)
+
+	* config/mips-gdb.exp, config/udi-gdb.exp, config/vx-gdb.exp,
+          lib/gdb.exp: Replace error proc calls with perror.
+
 Mon May 16 19:00:50 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* gdb.t00/teststrategy.exp: Reorder so that AIX gdb can print the

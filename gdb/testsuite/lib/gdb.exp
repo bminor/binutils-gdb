@@ -33,6 +33,12 @@ if ![info exists GDBFLAGS] then {
     set GDBFLAGS ""
 }
 
+# set the prompt if it doesn't exist
+global prompt
+if ![info exists prompt] then {
+    set prompt "\[(\]gdb\[)\]"
+}
+
 #
 # gdb_version -- extract and print the version number of gcc
 #
@@ -94,13 +100,13 @@ proc delete_breakpoints {} {
 	}
 	-re "y\r\n$prompt $" {}
 	-re ".*$prompt $" { perror "Delete all breakpoints" ; return }
-	timeout { error "Delete all breakpoints (timeout)" ; return }
+	timeout { perror "Delete all breakpoints (timeout)" ; return }
     }
     send "info breakpoints\n"
     expect {
 	-re "No breakpoints or watchpoints..*$prompt $" {}
 	-re ".*$prompt $" { perror "breakpoints not deleted" ; return }
-	timeout { error "info breakpoints (timeout)" ; return }
+	timeout { perror "info breakpoints (timeout)" ; return }
     }
 }
 
@@ -295,32 +301,12 @@ proc default_gdb_exit {} {
     # This used to be 1 for unix-gdb.exp
     set timeout 5
 
-    catch "send \"quit\n\"" result
-    # If the process has gone away (e.g. gdb dumped core), deal with it.
-    if [string match "write\[(\]+spawn_id=\[0-9)\]+:" $result] then {
-	catch "close"
-	# FIXME:  Shouldn't we call "wait" too?
-	return -1
-    }
-    # FIXME: What is this catch statement doing here?  Won't it prevent us
-    # from getting errors that we'd rather see?
-	expect {
-	    eof { 
-		verbose "Got EOF from $GDB" 2
-	    }
-	    timeout { 
-		verbose "Got TIMEOUT from $GDB" 2
-	    }
-	    -re "The program is running.  Quit anyway.*y or n. $" {
-		send "y\n"
-		verbose "Killing program being debugged" 2
-	    }
-    }
+    # We used to try to send "quit" to GDB, and wait for it to die.
+    # Dealing with all the cases and errors got pretty hairy.  Just close it, 
+    # that is simpler.
+    close
 
-    # Before this was here sometimes "uit" would get sent to the next GDB
-    # (assuming this is immediately followed by gdb_start), which would
-    # cause a loss of syncronization (i.e. all the stuff that swallows a
-    # prompt would swallow the wrong one).
+    # Omitting this probably would cause strange timing-dependent failures.
     wait
 }
 
@@ -381,7 +367,7 @@ oaded."
             # This is an attempt to detect a core dump, but seems not to
             # work.  Perhaps we need to match .* followed by eof, in which
             # expect does not seem to have a way to do that.
-            error "couldn't load $arg into $GDB (end of file)."
+            perror "couldn't load $arg into $GDB (end of file)."
             return -1
         }
     }

@@ -65,14 +65,14 @@ proc gdb_target_udi { } {
 	    warning "$expect_out(buffer)"
 	}
 	-re "TIP-ipc ERROR,.*failed:" {
-	    error "$expect_out(buffer)"
+	    perror "$expect_out(buffer)"
 	}
 	-re "A program is being debugged already.  Kill it\? \(y or n\)" {
 	    send "y\n"
 	    exp_continue
 	}
 	timeout { 
-	    error "Couldn't set target for UDI."
+	    perror "Couldn't set target for UDI."
 	    cleanup
 	    exit $exit_status
 	}
@@ -119,11 +119,11 @@ proc gdb_start { } {
 	    verbose "$GDB initialized for cross mode\n"
 	}
 	-re "$prompt $" {
-	    error "GDB never initialized."
+	    perror "GDB never initialized."
 	    return -1
 	}
 	timeout {
-	    error "(timeout) GDB never initialized."    
+	    perror "(timeout) GDB never initialized."    
 	    return -1
 	}
     }

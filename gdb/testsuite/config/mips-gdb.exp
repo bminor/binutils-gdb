@@ -72,8 +72,8 @@ proc gdb_load { arg } {
 	    exp_continue
 	}
 	-re "Reading symbols from.*done..*$prompt $" { }
-	-re "$prompt $" { error "GDB couldn't read file" }
-	timeout { error "(timeout) read symbol file" ; return }
+	-re "$prompt $" { perror "GDB couldn't read file" }
+	timeout { perror "(timeout) read symbol file" ; return }
     }
     send "load $arg\n"
     if $verbose>1 then {
@@ -90,12 +90,12 @@ proc gdb_load { arg } {
 	}
 	-re "$prompt $"     {
 	    if $verbose>1 then {
-		error "GDB couldn't load."
+	 perror "GDB couldn't load."
 	    }
 	}
 	timeout {
 	    if $verbose>1 then {
-		error "Timed out trying to load $arg."
+	 perror "Timed out trying to load $arg."
 	    }
 	}
     }
@@ -138,7 +138,7 @@ proc gdb_start { } {
 		expect {
 		    -i $shell_id -re "<IDT>$" { }
 		    timeout {
-			error "(timeout) board did not come up."; return -1
+		 perror "(timeout) board did not come up."; return -1
 		    }
 		}
 	    }
@@ -146,7 +146,7 @@ proc gdb_start { } {
 	send -i $shell_id "go 0xbfc00000\n"
 	expect {
 	    -i $shell_id -re "<IDT>$" { }
-	    timeout     { error "(timeout) board did not come up."; return -1 }
+	    timeout     { perror "(timeout) board did not come up."; return -1 }
 	}
 	verbose "about to exit kermit"
 	exit_remote_shell $shell_id
@@ -165,8 +165,8 @@ proc gdb_start { } {
 		send_user "$GDB initialized for cross mode\n\n"
 	    }
 	}
-	-re "$prompt $"     { error "GDB never initialized."; return -1 }
-	timeout             { error "(timeout) GDB never initialized.";
+	-re "$prompt $"     { perror "GDB never initialized."; return -1 }
+	timeout             { perror "(timeout) GDB never initialized.";
 			      return -1 }
     }
 
@@ -194,7 +194,7 @@ proc gdb_start { } {
 	    }
 	}
 	timeout { 
-	    error "Couldn't set MIPS target."
+	    perror "Couldn't set MIPS target."
 	    set timeout 10
 	    return -1
 	}
@@ -203,13 +203,13 @@ proc gdb_start { } {
 }
 
 expect_after {
-    "<return>"		   { send "\n"; error "Window too small." }
-    -re "\(y or n\) " 	   { send "n\n"; error "Got interactive prompt." }
-    buffer_full		   { error "internal buffer is full." }
-    eof			   { error "eof -- pty is hosed." }
-    timeout			   { error "timeout." }
-    "virtual memory exhausted" { error "virtual memory exhausted." }
-    "Undefined command"	   { error "send string probably wrong." }
+    "<return>"		   { send "\n"; perror "Window too small." }
+    -re "\(y or n\) " 	   { send "n\n"; perror "Got interactive prompt." }
+    buffer_full		   { perror "internal buffer is full." }
+    eof			   { perror "eof -- pty is hosed." }
+    timeout			   { perror "timeout." }
+    "virtual memory exhausted" { perror "virtual memory exhausted." }
+    "Undefined command"	   { perror "send string probably wrong." }
 }
 
 proc gdb_exit { } {
