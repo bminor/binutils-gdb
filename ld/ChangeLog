@@ -1,3 +1,22 @@
+Thu Aug 18 15:37:45 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	Make the ELF linker handle orphaned sections reasonably.  Also,
+	define __start_SECNAME and __stop_SECNAME around sections whose
+	names can be represented in C, for the benefit of symbol sets in
+	glibc.
+	* ldemul.h (ldemul_place_orphan): Declare.
+	(ld_emulation_xfer_type): Add place_orphan field.
+	* ldemul.c (ldemul_place_orphan): New function.
+	* ldlang.h (wild_doit): Declare.
+	* ldlang.c (wild_doit): Make nonstatic.
+	(lang_place_orphans): Call ldemul_place_orphan.
+	* emultempl/elf32.em: Include <ctype.h> and "ldgram.h".
+	(hold_section, hold_use, hold_text, hold_data, hold_bss): New
+	static variables.
+	(gld${EMULATION_NAME}_place_orphan): New static function.
+	(gld${EMULATION_NAME}_place_section): New static function.
+	(ld_${EMULATION_NAME}_emulation): Initialize place_orphan field.
+
 Tue Aug 16 00:17:20 1994  Eric Youngdale  (ericy@cais.cais.com)
 
 	* scripttempl/aout.sc: Add .linux-dynamic after .data.
