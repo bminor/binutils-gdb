@@ -1,3 +1,18 @@
+2003-03-21  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* s390-dis.c (init_disasm): Rename S390_OPCODE_ESAME to
+	S390_OPCODE_ZARCH.
+	(print_insn_s390): Use new modes field of s390_opcodes.
+	* s390-mkopc.c (ARCHBITS_ESAONLY, ARCHBITS_ESA, ARCHBITS_ESAME): Remove.
+	(s390_opcode_mode_val, s390_opcode_cpu_val): New enums.
+	(struct op_struct): Remove archbits. Add mode_bits and min_cpu.
+	(insertOpcode): Replace archbits by min_cpu and mode_bits.
+	(dumpTable): Write mode_bits and min_cpu instead of archbits.
+	(main): Adapt to new format in s390-opcode.txt.
+	* s390-opc.c (s390_opformats): Replace archbits by min_cpu and
+	mode_bits.
+	* s390-opc.txt: Replace archbits by min_cpu and mode_bits.
+
 2003-03-17  Nick Clifton  <nickc@redhat.com>
 
 	* ppc-opc.c: Fix formatting.  Update copyright date.
