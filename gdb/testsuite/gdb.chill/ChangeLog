@@ -3,6 +3,15 @@ Tue Aug 12 21:48:08 1997  Bob Manson  <manson@charmed.cygnus.com>
 	* tests2.exp: Fix quoting.
 	* tests1.exp: Ditto.
 	* pr-9946.exp: Ditto.
+	* enum.exp: Ditto.
+	* builtins.exp: Ditto.
+	* powerset.exp: Ditto.
+	* misc.exp: Ditto.
+	* gch981.exp: Ditto.
+	* gch922.exp: Ditto.
+	* gch1280.exp: Ditto.
+	* gch1272.exp: Ditto.
+	* gch1041.exp: Ditto.
 
 Sat Nov 23 14:00:59 1996  Fred Fish  <fnf@cygnus.com>
 
