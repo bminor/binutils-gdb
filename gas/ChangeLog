@@ -1,3 +1,10 @@
+Fri Apr  5 15:13:10 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* config/atof-ieee.c: Fix handling of denormalized extended
+	precision numbers and overflow/underflow detection.
+	(MAX_PRECISION, X_PRECISION, P_PRECISION): Changed from 6 to 5, to
+	not include the 16 bit gap in the m68k extended precision format.
+
 Fri Apr  5 14:29:23 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Add i386-*-freebsdelf* target; from John Polstra
