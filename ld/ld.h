@@ -223,4 +223,15 @@ extern void add_cref PARAMS ((const char *, bfd *, asection *, bfd_vma));
 extern void output_cref PARAMS ((FILE *));
 extern void check_nocrossrefs PARAMS ((void));
 
+extern void ld_abort PARAMS ((const char *, int, const char *))
+     ATTRIBUTE_NORETURN;
+
+/* If gcc, we can give a function name, too.  */
+#if !defined (__GNUC__) || __GNUC_MINOR__ <= 5
+#define __PRETTY_FUNCTION__  ((char*) NULL)
+#endif
+
+#undef abort
+#define abort() ld_abort (__FILE__, __LINE__, __PRETTY_FUNCTION__)
+
 #endif

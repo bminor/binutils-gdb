@@ -536,3 +536,22 @@ print_nl ()
 {
   fprintf (config.map_file, "\n");
 }
+
+/* A more or less friendly abort message.  In ld.h abort is defined to
+   call this function.  */
+
+void
+ld_abort (file, line, fn)
+     const char *file;
+     int line;
+     const char *fn;
+{
+  if (fn != NULL)
+    einfo (_("%P: internal error: aborting at %s line %d in %s\n"),
+	   file, line, fn);
+  else
+    einfo (_("%P: internal error: aborting at %s line %d\n"),
+	   file, line);
+  einfo (_("%P%F: please report this bug\n"));
+  xexit (1);
+}

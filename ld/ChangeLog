@@ -1,5 +1,9 @@
 1999-09-12  Ian Lance Taylor  <ian@zembu.com>
 
+	* pe.em: Don't include "../bfd/libbfd.h".
+	(gld_${EMULATION_NAME}_after_open): Use xmalloc rather than
+	bfd_alloc.
+
 	* pe-dll.h: New file.
 	* pe-dll.c: Include "pe-dll.h".  Mark unused arguments as needed
 	to avoid warnings.
@@ -22,6 +26,10 @@
 	(HFILES): Add pe-dll.h.
 
 1999-09-12  Donn Terry  <donn@interix.com>
+
+	* ld.h (ld_abort): Declare.
+	(abort): Define.
+	* ldmisc.c (ld_abort): Define.
 
 	* scripttempl/pe.sc: Use ${ENTRY} rather than _mainCRTStartup.
 	Move .bss section after .rdata.  Move .reloc section after .rsrc.
