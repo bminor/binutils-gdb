@@ -1,3 +1,9 @@
+start-sanitize-v850
+Tue Oct 15 16:17:28 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* elf32-v850.c:  Define elf_symbol_leading_char to be '_'.
+
+end-sanitize-v850
 Tue Oct 15 12:40:41 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* VERSION: Bump for new relocation.

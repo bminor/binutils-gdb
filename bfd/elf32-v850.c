@@ -328,12 +328,14 @@ bfd_elf32_v850_reloc (abfd, reloc, symbol, data, isection, obfd, err)
 	}
       else if (reloc->howto->type == R_V850_HI16_S)
 	{
+	  relocation += bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
 	  relocation = (relocation >> 16) + ((relocation & 0x8000) != 0);
 	  bfd_put_16 (abfd, relocation, (bfd_byte *)data + reloc->address);
 	  return bfd_reloc_ok;
 	}
       else if (reloc->howto->type == R_V850_HI16)
 	{
+	  relocation += bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
 	  relocation = (relocation >> 16);
 	  bfd_put_16 (abfd, relocation, (bfd_byte *)data + reloc->address);
 	  return bfd_reloc_ok;
@@ -343,6 +345,21 @@ bfd_elf32_v850_reloc (abfd, reloc, symbol, data, isection, obfd, err)
   return bfd_reloc_continue;
 }
 
+static boolean bfd_elf32_v850_is_local_label PARAMS ((bfd *, asymbol *));
+
+/*ARGSUSED*/
+static boolean
+bfd_elf32_v850_is_local_label (abfd, symbol)
+     bfd *abfd;
+     asymbol *symbol;
+{
+  return ((symbol->name[0] == '.' && (symbol->name[1] == 'L' || symbol->name[1] == '.'))
+	  || (symbol->name[0] == '_' && symbol->name[1] == '.' && symbol->name[2] == 'L'
+	      && symbol->name[3] == '_'));
+}
+
+#define bfd_elf32_bfd_is_local_label	bfd_elf32_v850_is_local_label
+
 #define TARGET_LITTLE_SYM		bfd_elf32_v850_vec
 #define TARGET_LITTLE_NAME		"elf32-v850"
 #define ELF_ARCH		bfd_arch_v850
@@ -351,5 +368,7 @@ bfd_elf32_v850_reloc (abfd, reloc, symbol, data, isection, obfd, err)
 
 #define elf_info_to_howto	0
 #define elf_info_to_howto_rel	v850_info_to_howto_rel
+
+#define elf_symbol_leading_char '_'
 
 #include "elf32-target.h"
