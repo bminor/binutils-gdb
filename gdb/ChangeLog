@@ -1,3 +1,36 @@
+Thu Apr 11 13:47:52 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* dcache.c:  Add prototypes.  Make many functions static.
+	* (dcache_peek dcache_fetch dcache_poke):  Make dcache_fetch and
+	dcache_poke call dcache_xfer_memory directly in order to fix
+	problems with turning off dcache.  dcache_peek is now unnecessary,
+	so it goes away.
+
+	* defs.h:  Define new macros HOST_{FLOAT DOUBLE	LONG_DOUBLE}_FORMAT 
+	and TARGET_{FLOAT DOUBLE LONG_DOUBLE}_FORMAT to specify a pointer
+	to a struct floatformat.  This allows for better handling of
+	targets whose floating point formats differ from the host by more
+	than just byte order.
+	* (floatformat_to_long_double floatformat_from_long_double):
+	Prototypes for new functions in utils.c.
+	* (floatformat_to_doublest floatformat_from_doublest):  Prototypes
+	for pointers to floating point conversion functions.  The actual
+	function uses either double or long double if the host supports it.
+	* findvar.c (floatformat_to_doublest floatformat_from_doublest):
+	Initialize to point at correct function depending on HAVE_LONG_DOUBLE.
+	* (extract_floating store_floating):  Rewrite.  Now, if host fp
+	format is the same as the target, we just do a copy.  Otherwise,
+	we call floatformat_{to from}_doublest.
+	* remote-nindy.c (nindy_xfer_inferior_memory):  Change param
+	`write' to `should_write'.
+	* utils.c (floatformat_to_long_double
+	floatformat_from_long_double):  New routines that implement long
+	double versions of functions in libiberty/floatformat.c.
+	* config/i960/tm-i960.h (TARGET_LONG_DOUBLE_FORMAT):  Define this for
+	i960 extended real (80 bit) numbers.
+	* nindy-share/nindy.c (ninMemGet ninMemPut):  Return number of bytes
+	actually read or written.
+
 Wed Apr 10 02:56:06 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
 
 	* ch-valprint.c (chill_val_print): Remove call to calculate_array_length.

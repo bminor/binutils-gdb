@@ -525,11 +525,11 @@ nindy_store_word (addr, word)
    FIXME, rewrite this to not use the word-oriented routines.  */
 
 int
-nindy_xfer_inferior_memory(memaddr, myaddr, len, write, target)
+nindy_xfer_inferior_memory(memaddr, myaddr, len, should_write, target)
      CORE_ADDR memaddr;
      char *myaddr;
      int len;
-     int write;
+     int should_write;
      struct target_ops *target;			/* ignored */
 {
   register int i;
@@ -541,7 +541,7 @@ nindy_xfer_inferior_memory(memaddr, myaddr, len, write, target)
   /* Allocate buffer of that many longwords.  */
   register int *buffer = (int *) alloca (count * sizeof (int));
 
-  if (write)
+  if (should_write)
     {
       /* Fill start and end extra bytes of buffer with existing memory data.  */
 

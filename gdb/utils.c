@@ -18,7 +18,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
-#if !defined(__GO32__) && !defined(__WIN32__)
+#if !defined(__GO32__) && !defined(__WIN32__) && !defined(MPW)
 #include <sys/ioctl.h>
 #include <sys/param.h>
 #include <pwd.h>
@@ -603,9 +603,9 @@ request_quit (signo)
   signal (signo, request_quit);
 
 /* start-sanitize-gm */
-#ifdef GENERAL_MAGIC_HACKS
+#ifdef GENERAL_MAGIC
   target_kill ();
-#endif /* GENERAL_MAGIC_HACKS */
+#endif /* GENERAL_MAGIC */
 /* end-sanitize-gm */
 
 #ifdef REQUEST_QUIT
@@ -1950,4 +1950,313 @@ initialize_utils ()
 #ifdef  SIGWINCH_HANDLER_BODY
         SIGWINCH_HANDLER_BODY
 #endif
+
+#ifdef HAVE_LONG_DOUBLE
+/* Support for converting target fp numbers into host long double format.  */
 
+/* XXX - This code should really be in libiberty/floatformat.c, however
+   configuration issues with libiberty made this very difficult to do in the
+   available time.  */
+
+#include "floatformat.h"
+#include <math.h>		/* ldexp */
+
+/* The odds that CHAR_BIT will be anything but 8 are low enough that I'm not
+   going to bother with trying to muck around with whether it is defined in
+   a system header, what we do if not, etc.  */
+#define FLOATFORMAT_CHAR_BIT 8
+
+static unsigned long get_field PARAMS ((unsigned char *,
+					enum floatformat_byteorders,
+					unsigned int,
+					unsigned int,
+					unsigned int));
+
+/* Extract a field which starts at START and is LEN bytes long.  DATA and
+   TOTAL_LEN are the thing we are extracting it from, in byteorder ORDER.  */
+static unsigned long
+get_field (data, order, total_len, start, len)
+     unsigned char *data;
+     enum floatformat_byteorders order;
+     unsigned int total_len;
+     unsigned int start;
+     unsigned int len;
+{
+  unsigned long result;
+  unsigned int cur_byte;
+  int cur_bitshift;
+
+  /* Start at the least significant part of the field.  */
+  cur_byte = (start + len) / FLOATFORMAT_CHAR_BIT;
+  if (order == floatformat_little)
+    cur_byte = (total_len / FLOATFORMAT_CHAR_BIT) - cur_byte - 1;
+  cur_bitshift =
+    ((start + len) % FLOATFORMAT_CHAR_BIT) - FLOATFORMAT_CHAR_BIT;
+  result = *(data + cur_byte) >> (-cur_bitshift);
+  cur_bitshift += FLOATFORMAT_CHAR_BIT;
+  if (order == floatformat_little)
+    ++cur_byte;
+  else
+    --cur_byte;
+
+  /* Move towards the most significant part of the field.  */
+  while (cur_bitshift < len)
+    {
+      if (len - cur_bitshift < FLOATFORMAT_CHAR_BIT)
+	/* This is the last byte; zero out the bits which are not part of
+	   this field.  */
+	result |=
+	  (*(data + cur_byte) & ((1 << (len - cur_bitshift)) - 1))
+	    << cur_bitshift;
+      else
+	result |= *(data + cur_byte) << cur_bitshift;
+      cur_bitshift += FLOATFORMAT_CHAR_BIT;
+      if (order == floatformat_little)
+	++cur_byte;
+      else
+	--cur_byte;
+    }
+  return result;
+}
+  
+/* Convert from FMT to a long double.
+   FROM is the address of the extended float.
+   Store the long double in *TO.  */
+
+void
+floatformat_to_long_double (fmt, from, to)
+     const struct floatformat *fmt;
+     char *from;
+     long double *to;
+{
+  unsigned char *ufrom = (unsigned char *)from;
+  long double dto;
+  long exponent;
+  unsigned long mant;
+  unsigned int mant_bits, mant_off;
+  int mant_bits_left;
+
+  exponent = get_field (ufrom, fmt->byteorder, fmt->totalsize,
+			fmt->exp_start, fmt->exp_len);
+  /* Note that if exponent indicates a NaN, we can't really do anything useful
+     (not knowing if the host has NaN's, or how to build one).  So it will
+     end up as an infinity or something close; that is OK.  */
+
+  mant_bits_left = fmt->man_len;
+  mant_off = fmt->man_start;
+  dto = 0.0;
+  exponent -= fmt->exp_bias;
+
+  /* Build the result algebraically.  Might go infinite, underflow, etc;
+     who cares. */
+
+/* If this format uses a hidden bit, explicitly add it in now.  Otherwise,
+   increment the exponent by one to account for the integer bit.  */
+
+  if (fmt->intbit == floatformat_intbit_no)
+    dto = ldexp (1.0, exponent);
+  else
+    exponent++;
+
+  while (mant_bits_left > 0)
+    {
+      mant_bits = min (mant_bits_left, 32);
+
+      mant = get_field (ufrom, fmt->byteorder, fmt->totalsize,
+			 mant_off, mant_bits);
+
+      dto += ldexp ((double)mant, exponent - mant_bits);
+      exponent -= mant_bits;
+      mant_off += mant_bits;
+      mant_bits_left -= mant_bits;
+    }
+
+  /* Negate it if negative.  */
+  if (get_field (ufrom, fmt->byteorder, fmt->totalsize, fmt->sign_start, 1))
+    dto = -dto;
+  memcpy (to, &dto, sizeof (dto));
+}
+
+static void put_field PARAMS ((unsigned char *, enum floatformat_byteorders,
+			       unsigned int,
+			       unsigned int,
+			       unsigned int,
+			       unsigned long));
+
+/* Set a field which starts at START and is LEN bytes long.  DATA and
+   TOTAL_LEN are the thing we are extracting it from, in byteorder ORDER.  */
+static void
+put_field (data, order, total_len, start, len, stuff_to_put)
+     unsigned char *data;
+     enum floatformat_byteorders order;
+     unsigned int total_len;
+     unsigned int start;
+     unsigned int len;
+     unsigned long stuff_to_put;
+{
+  unsigned int cur_byte;
+  int cur_bitshift;
+
+  /* Start at the least significant part of the field.  */
+  cur_byte = (start + len) / FLOATFORMAT_CHAR_BIT;
+  if (order == floatformat_little)
+    cur_byte = (total_len / FLOATFORMAT_CHAR_BIT) - cur_byte - 1;
+  cur_bitshift =
+    ((start + len) % FLOATFORMAT_CHAR_BIT) - FLOATFORMAT_CHAR_BIT;
+  *(data + cur_byte) &=
+    ~(((1 << ((start + len) % FLOATFORMAT_CHAR_BIT)) - 1) << (-cur_bitshift));
+  *(data + cur_byte) |=
+    (stuff_to_put & ((1 << FLOATFORMAT_CHAR_BIT) - 1)) << (-cur_bitshift);
+  cur_bitshift += FLOATFORMAT_CHAR_BIT;
+  if (order == floatformat_little)
+    ++cur_byte;
+  else
+    --cur_byte;
+
+  /* Move towards the most significant part of the field.  */
+  while (cur_bitshift < len)
+    {
+      if (len - cur_bitshift < FLOATFORMAT_CHAR_BIT)
+	{
+	  /* This is the last byte.  */
+	  *(data + cur_byte) &=
+	    ~((1 << (len - cur_bitshift)) - 1);
+	  *(data + cur_byte) |= (stuff_to_put >> cur_bitshift);
+	}
+      else
+	*(data + cur_byte) = ((stuff_to_put >> cur_bitshift)
+			      & ((1 << FLOATFORMAT_CHAR_BIT) - 1));
+      cur_bitshift += FLOATFORMAT_CHAR_BIT;
+      if (order == floatformat_little)
+	++cur_byte;
+      else
+	--cur_byte;
+    }
+}
+
+/* Return the fractional part of VALUE, and put the exponent of VALUE in *EPTR.
+   The range of the returned value is >= 0.5 and < 1.0.  This is equivalent to
+   frexp, but operates on the long double data type.  */
+
+static long double ldfrexp PARAMS ((long double value, int *eptr));
+
+static long double
+ldfrexp (value, eptr)
+     long double value;
+     int *eptr;
+{
+  long double tmp;
+  int exp;
+
+  /* Unfortunately, there are no portable functions for extracting the exponent
+     of a long double, so we have to do it iteratively by multiplying or dividing
+     by two until the fraction is between 0.5 and 1.0.  */
+
+  if (value < 0.0l)
+    value = -value;
+
+  tmp = 1.0l;
+  exp = 0;
+
+  if (value >= tmp)		/* Value >= 1.0 */
+    while (value >= tmp)
+      {
+	tmp *= 2.0l;
+	exp++;
+      }
+  else if (value != 0.0l)	/* Value < 1.0  and > 0.0 */
+    {
+      while (value < tmp)
+	{
+	  tmp /= 2.0l;
+	  exp--;
+	}
+      tmp *= 2.0l;
+      exp++;
+    }
+
+  *eptr = exp;
+  return value/tmp;
+}
+
+/* The converse: convert the long double *FROM to an extended float
+   and store where TO points.  Neither FROM nor TO have any alignment
+   restrictions.  */
+
+void
+floatformat_from_long_double (fmt, from, to)
+     CONST struct floatformat *fmt;
+     long double *from;
+     char *to;
+{
+  long double dfrom;
+  int exponent;
+  long double mant;
+  unsigned int mant_bits, mant_off;
+  int mant_bits_left;
+  unsigned char *uto = (unsigned char *)to;
+
+  memcpy (&dfrom, from, sizeof (dfrom));
+  memset (uto, 0, fmt->totalsize / FLOATFORMAT_CHAR_BIT);
+  if (dfrom == 0)
+    return;			/* Result is zero */
+  if (dfrom != dfrom)
+    {
+      /* From is NaN */
+      put_field (uto, fmt->byteorder, fmt->totalsize, fmt->exp_start,
+		 fmt->exp_len, fmt->exp_nan);
+      /* Be sure it's not infinity, but NaN value is irrel */
+      put_field (uto, fmt->byteorder, fmt->totalsize, fmt->man_start,
+		 32, 1);
+      return;
+    }
+
+  /* If negative, set the sign bit.  */
+  if (dfrom < 0)
+    {
+      put_field (uto, fmt->byteorder, fmt->totalsize, fmt->sign_start, 1, 1);
+      dfrom = -dfrom;
+    }
+
+  /* How to tell an infinity from an ordinary number?  FIXME-someday */
+
+  mant = ldfrexp (dfrom, &exponent);
+  put_field (uto, fmt->byteorder, fmt->totalsize, fmt->exp_start, fmt->exp_len,
+	     exponent + fmt->exp_bias - 1);
+
+  mant_bits_left = fmt->man_len;
+  mant_off = fmt->man_start;
+  while (mant_bits_left > 0)
+    {
+      unsigned long mant_long;
+      mant_bits = mant_bits_left < 32 ? mant_bits_left : 32;
+
+      mant *= 4294967296.0;
+      mant_long = (unsigned long)mant;
+      mant -= mant_long;
+
+      /* If the integer bit is implicit, then we need to discard it.
+	 If we are discarding a zero, we should be (but are not) creating
+	 a denormalized	number which means adjusting the exponent
+	 (I think).  */
+      if (mant_bits_left == fmt->man_len
+	  && fmt->intbit == floatformat_intbit_no)
+	{
+	  mant_long &= 0x7fffffff;
+	  mant_bits -= 1;
+	}
+      else if (mant_bits < 32)
+	{
+	  /* The bits we want are in the most significant MANT_BITS bits of
+	     mant_long.  Move them to the least significant.  */
+	  mant_long >>= 32 - mant_bits;
+	}
+
+      put_field (uto, fmt->byteorder, fmt->totalsize,
+		 mant_off, mant_bits, mant_long);
+      mant_off += mant_bits;
+      mant_bits_left -= mant_bits;
+    }
+}
+
+#endif /* HAVE_LONG_DOUBLE */

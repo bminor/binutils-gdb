@@ -163,6 +163,8 @@ extern CORE_ADDR saved_pc_after_call ();
 
 #include "floatformat.h"
 
+#define TARGET_LONG_DOUBLE_FORMAT &floatformat_i960_ext
+
 /* Convert data from raw format for register REGNUM in buffer FROM
    to virtual format with type TYPE in buffer TO.  */
 

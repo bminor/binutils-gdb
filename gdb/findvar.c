@@ -26,6 +26,29 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "inferior.h"
 #include "target.h"
 #include "gdb_string.h"
+#include "floatformat.h"
+
+/* This is used to indicate that we don't know the format of the floating point
+   number.  Typically, this is useful for native ports, where the actual format
+   is irrelevant, since no conversions will be taking place.  */
+
+const struct floatformat floatformat_unknown;
+
+#ifdef HAVE_LONG_DOUBLE
+void (*floatformat_to_doublest)
+     PARAMS ((const struct floatformat *,
+	      char *, DOUBLEST *)) = floatformat_to_long_double;
+void (*floatformat_from_doublest)
+     PARAMS ((const struct floatformat *,
+	      DOUBLEST *, char *)) = floatformat_from_long_double;
+#else
+void (*floatformat_to_doublest)
+     PARAMS ((const struct floatformat *,
+	      char *, DOUBLEST *)) = floatformat_to_double;
+void (*floatformat_from_doublest)
+     PARAMS ((const struct floatformat *,
+	      DOUBLEST *, char *)) = floatformat_from_double;
+#endif
 
 /* Registers we shouldn't try to store.  */
 #if !defined (CANNOT_STORE_REGISTER)
@@ -285,31 +308,50 @@ extract_floating (addr, len)
      PTR addr;
      int len;
 {
+  DOUBLEST dretval;
+
   if (len == sizeof (float))
     {
-      float retval;
-      memcpy (&retval, addr, sizeof (retval));
-      SWAP_FLOATING (&retval, sizeof (retval));
-      return retval;
+      if (HOST_FLOAT_FORMAT == TARGET_FLOAT_FORMAT)
+	{
+	  float retval;
+
+	  memcpy (&retval, addr, sizeof (retval));
+	  return retval;
+	}
+      else
+	floatformat_to_doublest (TARGET_FLOAT_FORMAT, addr, &dretval);
     }
   else if (len == sizeof (double))
     {
-      double retval;
-      memcpy (&retval, addr, sizeof (retval));
-      SWAP_FLOATING (&retval, sizeof (retval));
-      return retval;
+      if (HOST_DOUBLE_FORMAT == TARGET_DOUBLE_FORMAT)
+	{
+	  double retval;
+
+	  memcpy (&retval, addr, sizeof (retval));
+	  return retval;
+	}
+      else
+	floatformat_to_doublest (TARGET_DOUBLE_FORMAT, addr, &dretval);
     }
   else if (len == sizeof (DOUBLEST))
     {
-      DOUBLEST retval;
-      memcpy (&retval, addr, sizeof (retval));
-      SWAP_FLOATING (&retval, sizeof (retval));
-      return retval;
+      if (HOST_LONG_DOUBLE_FORMAT == TARGET_LONG_DOUBLE_FORMAT)
+	{
+	  DOUBLEST retval;
+
+	  memcpy (&retval, addr, sizeof (retval));
+	  return retval;
+	}
+      else
+	floatformat_to_doublest (TARGET_LONG_DOUBLE_FORMAT, addr, &dretval);
     }
   else
     {
       error ("Can't deal with a floating point number of %d bytes.", len);
     }
+
+  return dretval;
 }
 
 void
@@ -320,21 +362,32 @@ store_floating (addr, len, val)
 {
   if (len == sizeof (float))
     {
-      float floatval = val;
-      SWAP_FLOATING (&floatval, sizeof (floatval));
-      memcpy (addr, &floatval, sizeof (floatval));
+      if (HOST_FLOAT_FORMAT == TARGET_FLOAT_FORMAT)
+	{
+	  float floatval = val;
+
+	  memcpy (addr, &floatval, sizeof (floatval));
+	}
+      else
+	floatformat_from_doublest (TARGET_FLOAT_FORMAT, &val, addr);
     }
   else if (len == sizeof (double))
     {
-      double doubleval = val;
+      if (HOST_DOUBLE_FORMAT == TARGET_DOUBLE_FORMAT)
+	{
+	  double doubleval = val;
 
-      SWAP_FLOATING (&doubleval, sizeof (doubleval));
-      memcpy (addr, &doubleval, sizeof (doubleval));
+	  memcpy (addr, &doubleval, sizeof (doubleval));
+	}
+      else
+	floatformat_from_doublest (TARGET_DOUBLE_FORMAT, &val, addr);
     }
   else if (len == sizeof (DOUBLEST))
     {
-      SWAP_FLOATING (&val, sizeof (val));
-      memcpy (addr, &val, sizeof (val));
+      if (HOST_LONG_DOUBLE_FORMAT == TARGET_LONG_DOUBLE_FORMAT)
+	memcpy (addr, &val, sizeof (val));
+      else
+	floatformat_from_doublest (TARGET_LONG_DOUBLE_FORMAT, &val, addr);
     }
   else
     {

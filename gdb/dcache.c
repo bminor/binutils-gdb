@@ -148,6 +148,23 @@ struct dcache_struct
   int cache_has_stuff;
 } ;
 
+static int
+dcache_poke_byte PARAMS ((DCACHE *dcache, CORE_ADDR addr, char *ptr));
+
+static int
+dcache_peek_byte PARAMS ((DCACHE *dcache, CORE_ADDR addr, char *ptr));
+
+static struct dcache_block *
+dcache_hit PARAMS ((DCACHE *dcache, unsigned int addr));
+
+static int dcache_write_line PARAMS ((DCACHE *dcache,struct dcache_block *db));
+
+static struct dcache_block *dcache_alloc PARAMS ((DCACHE *dcache));
+
+static int dcache_writeback PARAMS ((DCACHE *dcache));
+
+static void dcache_info PARAMS ((char *exp, int tty));
+
 int remote_dcache = 0;
 
 DCACHE *last_cache; /* Used by info dcache */
@@ -186,8 +203,8 @@ dcache_flush (dcache)
 
 /* If addr is present in the dcache, return the address of the block
    containing it. */
-static
-struct dcache_block *
+
+static struct dcache_block *
 dcache_hit (dcache, addr)
      DCACHE *dcache;
      unsigned int addr;
@@ -261,8 +278,8 @@ dcache_write_line (dcache, db)
    prevents errors from creeping in if a memory retrieval is
    interrupted (which used to put garbage blocks in the valid
    list...).  */
-static
-struct dcache_block *
+
+static struct dcache_block *
 dcache_alloc (dcache)
      DCACHE *dcache;
 {
@@ -302,7 +319,7 @@ dcache_alloc (dcache)
 
    Returns 0 on error. */
 
-int
+static int
 dcache_peek_byte (dcache, addr, ptr)
      DCACHE *dcache;
      CORE_ADDR addr;
@@ -342,28 +359,6 @@ dcache_peek_byte (dcache, addr, ptr)
   return ok;
 }
 
-/* Using the data cache DCACHE return the contents of the word at
-   address ADDR in the remote machine.  
-
-   Returns 0 on error. */
-
-int
-dcache_peek (dcache, addr, data)
-     DCACHE *dcache;
-     CORE_ADDR addr;
-     int *data;
-{
-  char *dp = (char *) data;
-  int i;
-  for (i = 0; i < (int) sizeof (int); i++)
-    {
-      if (!dcache_peek_byte (dcache, addr + i, dp + i))
-	return 0;
-    }
-  return 1;
-}
-
-
 /* Writeback any dirty lines to the remote. */
 static int
 dcache_writeback (dcache)
@@ -391,7 +386,10 @@ dcache_fetch (dcache, addr)
      CORE_ADDR addr;
 {
   int res;
-  dcache_peek (dcache, addr, &res);
+
+  if (dcache_xfer_memory (dcache, addr, (char *)&res, sizeof res, 0) != sizeof res)
+    memory_error (EIO, addr);
+
   return res;
 }
 
@@ -400,7 +398,7 @@ dcache_fetch (dcache, addr)
    Return zero on write error.
  */
 
-int
+static int
 dcache_poke_byte (dcache, addr, ptr)
      DCACHE *dcache;
      CORE_ADDR addr;
@@ -431,15 +429,10 @@ dcache_poke (dcache, addr, data)
      CORE_ADDR addr;
      int data;
 {
-  char *dp = (char *) (&data);
-  int i;
-  for (i = 0; i < (int) sizeof (int); i++)
-    {
-      if (!dcache_poke_byte (dcache, addr + i, dp + i))
-	return 0;
-    }
-  dcache_writeback (dcache);
-  return 1;
+  if (dcache_xfer_memory (dcache, addr, (char *)&data, sizeof data, 1) != sizeof data)
+    return 0;
+
+  return dcache_writeback (dcache);
 }
 
 
