@@ -1,5 +1,16 @@
 Thu Oct  7 12:56:57 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	New Mach stuff:
+	* config/i386/i386mach.c: Explain this is for the old (probably
+	non-functional and/or obsolete) Mach stuff.
+	* m3-nat.c, config/nm-m3.h,
+	i386m3-nat.c, mipsm3-nat.c, ns32km3-nat.c,
+	config/i386/{i386m3.mh,i386m3.mt,tm-i386m3.h,xm-i386m3.h},
+	config/i386/{i386mk.mh,i386mk.mt,tm-i386mk.h,xm-i386mk.h},
+	config/mips/{mipsm3.mh,mipsm3.mt,tm-mipsm3.h,xm-mipsm3.h},
+	config/ns32k/{ns32km3.mh,ns32km3.mt,tm-ns32km3.h,xm-ns32km3.h}:
+	New files.
+
 	* blockframe.c (find_pc_partial_function): If we call
 	PSYMTAB_TO_SYMTAB, call target_terminal_ours_for_output first.
 	This is needed now that wait_for_inferior passes in endaddr.

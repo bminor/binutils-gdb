@@ -33,6 +33,7 @@ i960
 m68k
 m88k
 mips
+nm-m3.h
 nm-sysv4.h
 nm-trash.h
 none

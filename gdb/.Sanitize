@@ -129,6 +129,7 @@ i386aix-nat.c
 i386b-nat.c
 i386ly-tdep.c
 i386lynx-nat.c
+i386m3-nat.c
 i386mach-nat.c
 i386v-nat.c
 i386v4-nat.c
@@ -151,6 +152,7 @@ m2-lang.c
 m2-lang.h
 m2-typeprint.c
 m2-valprint.c
+m3-nat.c
 m68k-pinsn.c
 m68k-stub.c
 m68k-tdep.c
@@ -165,6 +167,7 @@ minsyms.c
 mips-nat.c
 mips-pinsn.c
 mips-tdep.c
+mipsm3-nat.c
 mipsread.c
 monitor.h
 munch
@@ -174,6 +177,7 @@ nindy-tdep.c
 nlmread.c
 ns32k-opcode.h
 ns32k-pinsn.c
+ns32km3-nat.c
 objfiles.c
 objfiles.h
 osfsolib.c

@@ -1,0 +1,8 @@
+# Host: ns32k running Mach3
+
+XDEPFILES= os-mach3.o ns32kmach3-xdep.o
+XM_FILE= xm-ns32kmach3.h
+
+# Don't use the mmalloc library in Mach 3.
+MMALLOC_LIB = 
+MMALLOC_DISABLE = -DNO_MMALLOC
