@@ -1,3 +1,24 @@
+start-sanitize-d30v
+Tue Feb 18 18:42:51 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* config/tc-d30v.c, config/tc-d30v.h: New files.
+
+ 	* configure: Rebuilt.
+	
+	* configure.in: Add case for d30v.
+
+end-sanitize-d30v	
+Sun Feb 16 17:47:29 1997  Fred Fish  <fnf@toadfish.ninemoons.com>
+
+	* config/tc-alpha.h (md_operand): Define with a null expansion,
+	like all the other targets.
+	* doc/internals.texi (CPU backend): Add missing word in 
+	md_flush_pending_output description.  Fix typo in md_convert_frag
+	description.
+start-sanitize-tic80
+	* config/tc-tic80: Minor comment additions/changes.
+end-sanitize-tic80
+	
 Fri Feb 14 18:09:59 1997  Philippe De Muyter  <phdm@info.ucl.ac.be>
 
 	* config/tc-m68k.c (LOCAL_LABEL): Macro redefined if TE_DELTA.
