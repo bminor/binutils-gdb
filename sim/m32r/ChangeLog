@@ -1,3 +1,7 @@
+1998-12-09  Doug Evans  <devans@casey.cygnus.com>
+
+	* sim-if.c: Include string.h or strings.h if present.
+
 1998-12-04  Doug Evans  <devans@casey.cygnus.com>
 
 	* configure.in: Call SIM_AC_OPTION_INLINE.
