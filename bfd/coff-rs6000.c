@@ -237,7 +237,7 @@ _bfd_xcoff_mkobject (abfd)
   xcoff_data (abfd)->debug_indices = NULL;
 
   /* text section alignment is different than the default */
-  /* xcoff_data (abfd)->text_align_power = 5; */
+  bfd_xcoff_text_align_power (abfd) = 2;
 
   return true;
 }
@@ -278,8 +278,8 @@ _bfd_xcoff_copy_private_bfd_data (ibfd, obfd)
       else
 	ox->snentry = sec->output_section->target_index;
     }
-  ox->text_align_power = ix->text_align_power;
-  ox->data_align_power = ix->data_align_power;
+  bfd_xcoff_text_align_power (obfd) = bfd_xcoff_text_align_power (ibfd);
+  bfd_xcoff_data_align_power (obfd) = bfd_xcoff_data_align_power (ibfd);
   ox->modtype = ix->modtype;
   ox->cputype = ix->cputype;
   ox->maxdata = ix->maxdata;
@@ -1730,7 +1730,6 @@ do_shared_object_padding (out_bfd, in_bfd, offset, ar_header_size)
       int text_align_power;
 
       text_align_power = bfd_xcoff_text_align_power (in_bfd);
-      BFD_ASSERT (2 < text_align_power);
 
       pad = 1 << text_align_power;
       pad -= (*offset + ar_header_size) & (pad - 1);

@@ -1,3 +1,14 @@
+2002-06-11  Tom Rix  <trix@redhat.com>
+
+	* coffcode.h (coff_compute_section_file_positions): Add data
+	section to AIX loader alignment check.
+
+	* coff-rs6000.c (_bfd_xcoff_mkobject): Set default text section 
+	alignment to 4 bytes.
+	(_bfd_xcoff_copy_private_bfd_data): Use text and data alignment
+	power accessor macro.
+	(do_shared_object_padding): Remove invalid assertion.
+
 2002-06-10  Richard Sandiford  <rsandifo@redhat.com>
 
 	* section.c (_bfd_strip_section_from_output): Set SEC_EXCLUDE

@@ -1782,8 +1782,8 @@ coff_mkobject_hook (abfd, filehdr, aouthdr)
       xcoff->toc = internal_a->o_toc;
       xcoff->sntoc = internal_a->o_sntoc;
       xcoff->snentry = internal_a->o_snentry;
-      xcoff->text_align_power = internal_a->o_algntext;
-      xcoff->data_align_power = internal_a->o_algndata;
+      bfd_xcoff_text_align_power (abfd) = internal_a->o_algntext;
+      bfd_xcoff_data_align_power (abfd) = internal_a->o_algndata;
       xcoff->modtype = internal_a->o_modtype;
       xcoff->cputype = internal_a->o_cputype;
       xcoff->maxdata = internal_a->o_maxdata;
@@ -3084,8 +3084,10 @@ coff_compute_section_file_positions (abfd)
 	     AIX executable is stripped with gnu strip because the default vma
 	     of native is 0x10000150 but default for gnu is 0x10000140.  Gnu
 	     stripped gnu excutable passes this check because the filepos is 
-	     0x0140. */
-	  if (!strcmp (current->name, _TEXT)) 
+	     0x0140.  This problem also show up with 64 bit shared objects. The
+	     data section must also be aligned.  */
+	  if (!strcmp (current->name, _TEXT) 
+	      || !strcmp (current->name, _DATA)) 
 	    {
 	      bfd_vma pad;
 	      bfd_vma align;
