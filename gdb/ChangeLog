@@ -1,5 +1,24 @@
 2002-11-26  Andrew Cagney  <ac131313@redhat.com>
 
+	* config/h8500/tm-h8500.h (CALL_DUMMY_LOCATION): Define as ON_STACK.
+	(USE_GENERIC_DUMMY_FRAMES): Define as zero.
+	(PC_IN_CALL_DUMMY): Define as pc_in_call_dummy_on_stack.
+	* config/mn10200/tm-mn10200.h (PC_IN_CALL_DUMMY): Define as
+	pc_in_call_dummy_at_entry_point.
+	* config/pa/tm-hppa.h (CALL_DUMMY_LOCATION): Define as ON_STACK.
+	(USE_GENERIC_DUMMY_FRAMES): Define as zero.
+	(PC_IN_CALL_DUMMY): Define as pc_in_call_dummy_on_stack.
+	* config/pa/tm-hppa64.h (CALL_DUMMY_LOCATION): Delete undefine.
+	* config/sparc/tm-sparc.h (PC_IN_CALL_DUMMY): Define as
+	pc_in_call_dummy_on_stack.
+	* config/sparc/tm-sp64.h (PC_IN_CALL_DUMMY): Redefine as
+	pc_in_call_dummy_at_entry_point and pc_in_call_dummy_on_stack.
+	* config/z8k/tm-z8k.h (CALL_DUMMY_LOCATION): Define as ON_STACK.
+	(USE_GENERIC_DUMMY_FRAMES): Define as zero.
+	(PC_IN_CALL_DUMMY): Defile as pc_in_call_dummy_on_stack.
+	
+2002-11-26  Andrew Cagney  <ac131313@redhat.com>
+
 	* inferior.h (deprecated_pc_in_call_dummy_before_text_end): Rename
 	pc_in_call_dummy_before_text_end
 	(deprecated_pc_in_call_dummy_after_text_end): Rename
