@@ -1,3 +1,9 @@
+2002-08-17  Mark Kettenis  <kettenis@gnu.org>
+
+	* top.c (gdb_rl_operate_and_get_next): Make sure
+	operate-and-get-next functions correctly even when the history
+	list is completely filled.
+
 2002-08-18  Andrew Cagney  <ac131313@redhat.com>
 
 	* MAINTAINERS (Target Instruction Set Architectures): Rename
