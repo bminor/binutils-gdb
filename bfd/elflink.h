@@ -392,6 +392,28 @@ elf_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
   return FALSE;
 }
 
+/* Sort symbol by value and section.  */
+static int
+sort_symbol (const void *arg1, const void *arg2)
+{
+  const struct elf_link_hash_entry *h1
+    = *(const struct elf_link_hash_entry **) arg1;
+  const struct elf_link_hash_entry *h2
+    = *(const struct elf_link_hash_entry **) arg2;
+  bfd_signed_vma vdiff = h1->root.u.def.value - h2->root.u.def.value;
+
+  if (vdiff)
+    return vdiff > 0 ? 1 : -1;
+  else
+    {
+      long sdiff = h1->root.u.def.section - h2->root.u.def.section;
+      if (sdiff)
+	return sdiff > 0 ? 1 : -1;
+      else
+	return 0;
+    }
+}
+
 /* Add symbols from an ELF object file to the linker hash table.  */
 
 static bfd_boolean
@@ -1493,63 +1515,132 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
      assembler code, handling it correctly would be very time
      consuming, and other ELF linkers don't handle general aliasing
      either.  */
-  while (weaks != NULL)
+  if (weaks != NULL)
     {
-      struct elf_link_hash_entry *hlook;
-      asection *slook;
-      bfd_vma vlook;
       struct elf_link_hash_entry **hpp;
       struct elf_link_hash_entry **hppend;
+      struct elf_link_hash_entry **sorted_sym_hash;
+      struct elf_link_hash_entry *h;
+      size_t sym_count;
 
-      hlook = weaks;
-      weaks = hlook->weakdef;
-      hlook->weakdef = NULL;
-
-      BFD_ASSERT (hlook->root.type == bfd_link_hash_defined
-		  || hlook->root.type == bfd_link_hash_defweak
-		  || hlook->root.type == bfd_link_hash_common
-		  || hlook->root.type == bfd_link_hash_indirect);
-      slook = hlook->root.u.def.section;
-      vlook = hlook->root.u.def.value;
-
+      /* Since we have to search the whole symbol list for each weak
+	 defined symbol, search time for N weak defined symbols will be
+	 O(N^2). Binary search will cut it down to O(NlogN).  */
+      amt = extsymcount * sizeof (struct elf_link_hash_entry *);
+      sorted_sym_hash = bfd_malloc (amt);
+      if (sorted_sym_hash == NULL)
+	goto error_return;
+      sym_hash = sorted_sym_hash;
       hpp = elf_sym_hashes (abfd);
       hppend = hpp + extsymcount;
+      sym_count = 0;
       for (; hpp < hppend; hpp++)
 	{
-	  struct elf_link_hash_entry *h;
-
 	  h = *hpp;
-	  if (h != NULL && h != hlook
+	  if (h != NULL
 	      && h->root.type == bfd_link_hash_defined
-	      && h->root.u.def.section == slook
-	      && h->root.u.def.value == vlook)
+	      && h->type != STT_FUNC)
 	    {
-	      hlook->weakdef = h;
-
-	      /* If the weak definition is in the list of dynamic
-		 symbols, make sure the real definition is put there
-		 as well.  */
-	      if (hlook->dynindx != -1
-		  && h->dynindx == -1)
-		{
-		  if (! _bfd_elf_link_record_dynamic_symbol (info, h))
-		    goto error_return;
-		}
-
-	      /* If the real definition is in the list of dynamic
-		 symbols, make sure the weak definition is put there
-		 as well.  If we don't do this, then the dynamic
-		 loader might not merge the entries for the real
-		 definition and the weak definition.  */
-	      if (h->dynindx != -1
-		  && hlook->dynindx == -1)
-		{
-		  if (! _bfd_elf_link_record_dynamic_symbol (info, hlook))
-		    goto error_return;
-		}
-	      break;
+	      *sym_hash = h;
+	      sym_hash++;
+	      sym_count++;
 	    }
 	}
+
+      qsort (sorted_sym_hash, sym_count,
+	     sizeof (struct elf_link_hash_entry *),
+	     sort_symbol);
+
+      while (weaks != NULL)
+	{
+	  struct elf_link_hash_entry *hlook;
+	  asection *slook;
+	  bfd_vma vlook;
+	  long ilook;
+	  size_t i, j, idx;
+
+	  hlook = weaks;
+	  weaks = hlook->weakdef;
+	  hlook->weakdef = NULL;
+
+	  BFD_ASSERT (hlook->root.type == bfd_link_hash_defined
+		      || hlook->root.type == bfd_link_hash_defweak
+		      || hlook->root.type == bfd_link_hash_common
+		      || hlook->root.type == bfd_link_hash_indirect);
+	  slook = hlook->root.u.def.section;
+	  vlook = hlook->root.u.def.value;
+
+	  ilook = -1;
+	  i = 0;
+	  j = sym_count;
+	  while (i < j)
+	    {
+	      bfd_signed_vma vdiff;
+	      idx = (i + j) / 2;
+	      h = sorted_sym_hash [idx];
+	      vdiff = vlook - h->root.u.def.value;
+	      if (vdiff < 0)
+		j = idx;
+	      else if (vdiff > 0)
+		i = idx + 1;
+	      else
+		{
+		  long sdiff = slook - h->root.u.def.section;
+		  if (sdiff < 0)
+		    j = idx;
+		  else if (sdiff > 0)
+		    i = idx + 1;
+		  else
+		    {
+		      ilook = idx;
+		      break;
+		    }
+		}
+	    }
+
+	  /* We didn't find a value/section match.  */
+	  if (ilook == -1)
+	    continue;
+
+	  for (i = ilook; i < sym_count; i++)
+	    {
+	      h = sorted_sym_hash [i];
+
+	      /* Stop if value or section doesn't match.  */
+	      if (h->root.u.def.value != vlook
+		  || h->root.u.def.section != slook)
+		break;
+	      else if (h != hlook)
+		{
+		  hlook->weakdef = h;
+
+		  /* If the weak definition is in the list of dynamic
+		     symbols, make sure the real definition is put
+		     there as well.  */
+		  if (hlook->dynindx != -1 && h->dynindx == -1)
+		    {
+		      if (! _bfd_elf_link_record_dynamic_symbol (info,
+								 h))
+			goto error_return;
+		    }
+
+		  /* If the real definition is in the list of dynamic
+		     symbols, make sure the weak definition is put
+		     there as well.  If we don't do this, then the
+		     dynamic loader might not merge the entries for the
+		     real definition and the weak definition.  */
+		  if (h->dynindx != -1 && hlook->dynindx == -1)
+		    {
+		      if (! _bfd_elf_link_record_dynamic_symbol (info,
+								 hlook))
+			goto error_return;
+		    }
+		  break;
+		}
+	    }
+	}
+
+      free (sorted_sym_hash);
     }
 
   /* If this object is the same format as the output object, and it is
