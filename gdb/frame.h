@@ -671,7 +671,7 @@ extern struct frame_extra_info *get_frame_extra_info (struct frame_info *fi);
    SP_REGNUM where the value of the register in the previous frame is
    stored).  */
 extern CORE_ADDR *frame_saved_regs_zalloc (struct frame_info *);
-extern CORE_ADDR *get_frame_saved_regs (struct frame_info *);
+extern CORE_ADDR *deprecated_get_frame_saved_regs (struct frame_info *);
 
 /* FIXME: cagney/2002-12-06: Has the PC in the current frame changed?
    "infrun.c", Thanks to DECR_PC_AFTER_BREAK, can change the PC after

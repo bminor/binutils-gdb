@@ -370,7 +370,7 @@ ns32k_frame_init_saved_regs (struct frame_info *frame)
   int localcount;
   CORE_ADDR enter_addr, next_addr;
 
-  if (get_frame_saved_regs (frame))
+  if (deprecated_get_frame_saved_regs (frame))
     return;
 
   frame_saved_regs_zalloc (frame);
@@ -385,18 +385,18 @@ ns32k_frame_init_saved_regs (struct frame_info *frame)
       for (regnum = 0; regnum < 8; regnum++)
 	{
           if (regmask & (1 << regnum))
-	    get_frame_saved_regs (frame)[regnum] = next_addr -= 4;
+	    deprecated_get_frame_saved_regs (frame)[regnum] = next_addr -= 4;
 	}
 
-      get_frame_saved_regs (frame)[SP_REGNUM] = get_frame_base (frame) + 4;
-      get_frame_saved_regs (frame)[PC_REGNUM] = get_frame_base (frame) + 4;
-      get_frame_saved_regs (frame)[DEPRECATED_FP_REGNUM] = read_memory_integer (get_frame_base (frame), 4);
+      deprecated_get_frame_saved_regs (frame)[SP_REGNUM] = get_frame_base (frame) + 4;
+      deprecated_get_frame_saved_regs (frame)[PC_REGNUM] = get_frame_base (frame) + 4;
+      deprecated_get_frame_saved_regs (frame)[DEPRECATED_FP_REGNUM] = read_memory_integer (get_frame_base (frame), 4);
     }
   else if (enter_addr == 1)
     {
       CORE_ADDR sp = read_register (SP_REGNUM);
-      get_frame_saved_regs (frame)[PC_REGNUM] = sp;
-      get_frame_saved_regs (frame)[SP_REGNUM] = sp + 4;
+      deprecated_get_frame_saved_regs (frame)[PC_REGNUM] = sp;
+      deprecated_get_frame_saved_regs (frame)[SP_REGNUM] = sp + 4;
     }
 }
 
@@ -427,9 +427,9 @@ ns32k_pop_frame (void)
   DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
 
   for (regnum = 0; regnum < 8; regnum++)
-    if (get_frame_saved_regs (frame)[regnum])
+    if (deprecated_get_frame_saved_regs (frame)[regnum])
       write_register (regnum,
-		      read_memory_integer (get_frame_saved_regs (frame)[regnum], 4));
+		      read_memory_integer (deprecated_get_frame_saved_regs (frame)[regnum], 4));
 
   write_register (DEPRECATED_FP_REGNUM, read_memory_integer (fp, 4));
   write_register (PC_REGNUM, read_memory_integer (fp + 4, 4));

@@ -1090,7 +1090,7 @@ hppa_frame_saved_pc (struct frame_info *frame)
 	{
 	  CORE_ADDR *saved_regs;
 	  hppa_frame_init_saved_regs (get_next_frame (frame));
-	  saved_regs = get_frame_saved_regs (get_next_frame (frame));
+	  saved_regs = deprecated_get_frame_saved_regs (get_next_frame (frame));
 	  if (read_memory_integer (saved_regs[FLAGS_REGNUM],
 				   TARGET_PTR_BIT / 8) & 0x2)
 	    {
@@ -1130,7 +1130,7 @@ hppa_frame_saved_pc (struct frame_info *frame)
 	{
 	  CORE_ADDR *saved_regs;
 	  hppa_frame_init_saved_regs (get_next_frame (frame));
-	  saved_regs = get_frame_saved_regs (get_next_frame (frame));
+	  saved_regs = deprecated_get_frame_saved_regs (get_next_frame (frame));
 	  if (read_memory_integer (saved_regs[FLAGS_REGNUM],
 				   TARGET_PTR_BIT / 8) & 0x2)
 	    {
@@ -1404,7 +1404,7 @@ hppa_frame_chain (struct frame_info *frame)
 	     in optimized code, GCC often doesn't actually save r3.
 	     We'll discover this if we look at the prologue.  */
 	  hppa_frame_init_saved_regs (tmp_frame);
-	  saved_regs = get_frame_saved_regs (tmp_frame);
+	  saved_regs = deprecated_get_frame_saved_regs (tmp_frame);
 	  saved_regs_frame = tmp_frame;
 
 	  /* If we have an address for r3, that's good.  */
@@ -1455,7 +1455,7 @@ hppa_frame_chain (struct frame_info *frame)
 	  if (tmp_frame != saved_regs_frame)
 	    {
 	      hppa_frame_init_saved_regs (tmp_frame);
-	      saved_regs = get_frame_saved_regs (tmp_frame);
+	      saved_regs = deprecated_get_frame_saved_regs (tmp_frame);
 	    }
 
 	  /* Abominable hack.  */
@@ -1493,7 +1493,7 @@ hppa_frame_chain (struct frame_info *frame)
       if (tmp_frame != saved_regs_frame)
 	{
 	  hppa_frame_init_saved_regs (tmp_frame);
-	  saved_regs = get_frame_saved_regs (tmp_frame);
+	  saved_regs = deprecated_get_frame_saved_regs (tmp_frame);
 	}
 
       /* Abominable hack.  See above.  */
@@ -1698,7 +1698,7 @@ hppa_pop_frame (void)
 
   fp = get_frame_base (frame);
   hppa_frame_init_saved_regs (frame);
-  fsr = get_frame_saved_regs (frame);
+  fsr = deprecated_get_frame_saved_regs (frame);
 
 #ifndef NO_PC_SPACE_QUEUE_RESTORE
   if (fsr[IPSW_REGNUM])	/* Restoring a call dummy frame */
@@ -4248,9 +4248,9 @@ hppa_frame_find_saved_regs (struct frame_info *frame_info,
 void
 hppa_frame_init_saved_regs (struct frame_info *frame)
 {
-  if (get_frame_saved_regs (frame) == NULL)
+  if (deprecated_get_frame_saved_regs (frame) == NULL)
     frame_saved_regs_zalloc (frame);
-  hppa_frame_find_saved_regs (frame, get_frame_saved_regs (frame));
+  hppa_frame_find_saved_regs (frame, deprecated_get_frame_saved_regs (frame));
 }
 
 /* Exception handling support for the HP-UX ANSI C++ compiler.

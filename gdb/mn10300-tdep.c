@@ -169,7 +169,7 @@ analyze_dummy_frame (CORE_ADDR pc, CORE_ADDR frame)
   deprecated_update_frame_base_hack (dummy, frame);
   get_frame_extra_info (dummy)->status = 0;
   get_frame_extra_info (dummy)->stack_size = 0;
-  memset (get_frame_saved_regs (dummy), '\000', SIZEOF_FRAME_SAVED_REGS);
+  memset (deprecated_get_frame_saved_regs (dummy), '\000', SIZEOF_FRAME_SAVED_REGS);
   mn10300_analyze_prologue (dummy, pc);
   return dummy;
 }
@@ -237,59 +237,59 @@ set_movm_offsets (struct frame_info *fi, int movm_args)
       /* The `other' bit leaves a blank area of four bytes at the
          beginning of its block of saved registers, making it 32 bytes
          long in total.  */
-      get_frame_saved_regs (fi)[LAR_REGNUM]    = get_frame_base (fi) + offset + 4;
-      get_frame_saved_regs (fi)[LIR_REGNUM]    = get_frame_base (fi) + offset + 8;
-      get_frame_saved_regs (fi)[MDR_REGNUM]    = get_frame_base (fi) + offset + 12;
-      get_frame_saved_regs (fi)[A0_REGNUM + 1] = get_frame_base (fi) + offset + 16;
-      get_frame_saved_regs (fi)[A0_REGNUM]     = get_frame_base (fi) + offset + 20;
-      get_frame_saved_regs (fi)[D0_REGNUM + 1] = get_frame_base (fi) + offset + 24;
-      get_frame_saved_regs (fi)[D0_REGNUM]     = get_frame_base (fi) + offset + 28;
+      deprecated_get_frame_saved_regs (fi)[LAR_REGNUM]    = get_frame_base (fi) + offset + 4;
+      deprecated_get_frame_saved_regs (fi)[LIR_REGNUM]    = get_frame_base (fi) + offset + 8;
+      deprecated_get_frame_saved_regs (fi)[MDR_REGNUM]    = get_frame_base (fi) + offset + 12;
+      deprecated_get_frame_saved_regs (fi)[A0_REGNUM + 1] = get_frame_base (fi) + offset + 16;
+      deprecated_get_frame_saved_regs (fi)[A0_REGNUM]     = get_frame_base (fi) + offset + 20;
+      deprecated_get_frame_saved_regs (fi)[D0_REGNUM + 1] = get_frame_base (fi) + offset + 24;
+      deprecated_get_frame_saved_regs (fi)[D0_REGNUM]     = get_frame_base (fi) + offset + 28;
       offset += 32;
     }
   if (movm_args & movm_a3_bit)
     {
-      get_frame_saved_regs (fi)[A3_REGNUM] = get_frame_base (fi) + offset;
+      deprecated_get_frame_saved_regs (fi)[A3_REGNUM] = get_frame_base (fi) + offset;
       offset += 4;
     }
   if (movm_args & movm_a2_bit)
     {
-      get_frame_saved_regs (fi)[A2_REGNUM] = get_frame_base (fi) + offset;
+      deprecated_get_frame_saved_regs (fi)[A2_REGNUM] = get_frame_base (fi) + offset;
       offset += 4;
     }
   if (movm_args & movm_d3_bit)
     {
-      get_frame_saved_regs (fi)[D3_REGNUM] = get_frame_base (fi) + offset;
+      deprecated_get_frame_saved_regs (fi)[D3_REGNUM] = get_frame_base (fi) + offset;
       offset += 4;
     }
   if (movm_args & movm_d2_bit)
     {
-      get_frame_saved_regs (fi)[D2_REGNUM] = get_frame_base (fi) + offset;
+      deprecated_get_frame_saved_regs (fi)[D2_REGNUM] = get_frame_base (fi) + offset;
       offset += 4;
     }
   if (AM33_MODE)
     {
       if (movm_args & movm_exother_bit)
         {
-          get_frame_saved_regs (fi)[MCVF_REGNUM]   = get_frame_base (fi) + offset;
-          get_frame_saved_regs (fi)[MCRL_REGNUM]   = get_frame_base (fi) + offset + 4;
-          get_frame_saved_regs (fi)[MCRH_REGNUM]   = get_frame_base (fi) + offset + 8;
-          get_frame_saved_regs (fi)[MDRQ_REGNUM]   = get_frame_base (fi) + offset + 12;
-          get_frame_saved_regs (fi)[E0_REGNUM + 1] = get_frame_base (fi) + offset + 16;
-          get_frame_saved_regs (fi)[E0_REGNUM + 0] = get_frame_base (fi) + offset + 20;
+          deprecated_get_frame_saved_regs (fi)[MCVF_REGNUM]   = get_frame_base (fi) + offset;
+          deprecated_get_frame_saved_regs (fi)[MCRL_REGNUM]   = get_frame_base (fi) + offset + 4;
+          deprecated_get_frame_saved_regs (fi)[MCRH_REGNUM]   = get_frame_base (fi) + offset + 8;
+          deprecated_get_frame_saved_regs (fi)[MDRQ_REGNUM]   = get_frame_base (fi) + offset + 12;
+          deprecated_get_frame_saved_regs (fi)[E0_REGNUM + 1] = get_frame_base (fi) + offset + 16;
+          deprecated_get_frame_saved_regs (fi)[E0_REGNUM + 0] = get_frame_base (fi) + offset + 20;
           offset += 24;
         }
       if (movm_args & movm_exreg1_bit)
         {
-          get_frame_saved_regs (fi)[E0_REGNUM + 7] = get_frame_base (fi) + offset;
-          get_frame_saved_regs (fi)[E0_REGNUM + 6] = get_frame_base (fi) + offset + 4;
-          get_frame_saved_regs (fi)[E0_REGNUM + 5] = get_frame_base (fi) + offset + 8;
-          get_frame_saved_regs (fi)[E0_REGNUM + 4] = get_frame_base (fi) + offset + 12;
+          deprecated_get_frame_saved_regs (fi)[E0_REGNUM + 7] = get_frame_base (fi) + offset;
+          deprecated_get_frame_saved_regs (fi)[E0_REGNUM + 6] = get_frame_base (fi) + offset + 4;
+          deprecated_get_frame_saved_regs (fi)[E0_REGNUM + 5] = get_frame_base (fi) + offset + 8;
+          deprecated_get_frame_saved_regs (fi)[E0_REGNUM + 4] = get_frame_base (fi) + offset + 12;
           offset += 16;
         }
       if (movm_args & movm_exreg0_bit)
         {
-          get_frame_saved_regs (fi)[E0_REGNUM + 3] = get_frame_base (fi) + offset;
-          get_frame_saved_regs (fi)[E0_REGNUM + 2] = get_frame_base (fi) + offset + 4;
+          deprecated_get_frame_saved_regs (fi)[E0_REGNUM + 3] = get_frame_base (fi) + offset;
+          deprecated_get_frame_saved_regs (fi)[E0_REGNUM + 2] = get_frame_base (fi) + offset + 4;
           offset += 8;
         }
     }
@@ -648,14 +648,14 @@ saved_regs_size (struct frame_info *fi)
 
   /* Reserve four bytes for every register saved.  */
   for (i = 0; i < NUM_REGS; i++)
-    if (get_frame_saved_regs (fi)[i])
+    if (deprecated_get_frame_saved_regs (fi)[i])
       adjust += 4;
 
   /* If we saved LIR, then it's most likely we used a `movm'
      instruction with the `other' bit set, in which case the SP is
      decremented by an extra four bytes, "to simplify calculation
      of the transfer area", according to the processor manual.  */
-  if (get_frame_saved_regs (fi)[LIR_REGNUM])
+  if (deprecated_get_frame_saved_regs (fi)[LIR_REGNUM])
     adjust += 4;
 
   return adjust;
@@ -705,8 +705,8 @@ mn10300_frame_chain (struct frame_info *fi)
     {
       /* Our caller has a frame pointer.  So find the frame in $a3 or
          in the stack.  */
-      if (get_frame_saved_regs (fi)[A3_REGNUM])
-	return (read_memory_integer (get_frame_saved_regs (fi)[A3_REGNUM],
+      if (deprecated_get_frame_saved_regs (fi)[A3_REGNUM])
+	return (read_memory_integer (deprecated_get_frame_saved_regs (fi)[A3_REGNUM],
 				     DEPRECATED_REGISTER_SIZE));
       else
 	return read_register (A3_REGNUM);
@@ -744,11 +744,11 @@ mn10300_pop_frame_regular (struct frame_info *frame)
 
   /* Restore any saved registers.  */
   for (regnum = 0; regnum < NUM_REGS; regnum++)
-    if (get_frame_saved_regs (frame)[regnum] != 0)
+    if (deprecated_get_frame_saved_regs (frame)[regnum] != 0)
       {
         ULONGEST value;
 
-        value = read_memory_unsigned_integer (get_frame_saved_regs (frame)[regnum],
+        value = read_memory_unsigned_integer (deprecated_get_frame_saved_regs (frame)[regnum],
                                               REGISTER_RAW_SIZE (regnum));
         write_register (regnum, value);
       }

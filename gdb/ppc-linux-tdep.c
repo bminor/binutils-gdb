@@ -402,7 +402,7 @@ ppc_linux_frame_init_saved_regs (struct frame_info *fi)
     {
       CORE_ADDR regs_addr;
       int i;
-      if (get_frame_saved_regs (fi))
+      if (deprecated_get_frame_saved_regs (fi))
 	return;
 
       frame_saved_regs_zalloc (fi);
@@ -410,24 +410,24 @@ ppc_linux_frame_init_saved_regs (struct frame_info *fi)
       regs_addr =
 	read_memory_integer (get_frame_base (fi)
 			     + PPC_LINUX_REGS_PTR_OFFSET, 4);
-      get_frame_saved_regs (fi)[PC_REGNUM] = regs_addr + 4 * PPC_LINUX_PT_NIP;
-      get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_ps_regnum] =
+      deprecated_get_frame_saved_regs (fi)[PC_REGNUM] = regs_addr + 4 * PPC_LINUX_PT_NIP;
+      deprecated_get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_ps_regnum] =
         regs_addr + 4 * PPC_LINUX_PT_MSR;
-      get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_cr_regnum] =
+      deprecated_get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_cr_regnum] =
         regs_addr + 4 * PPC_LINUX_PT_CCR;
-      get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_lr_regnum] =
+      deprecated_get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_lr_regnum] =
         regs_addr + 4 * PPC_LINUX_PT_LNK;
-      get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_ctr_regnum] =
+      deprecated_get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_ctr_regnum] =
         regs_addr + 4 * PPC_LINUX_PT_CTR;
-      get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_xer_regnum] =
+      deprecated_get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_xer_regnum] =
         regs_addr + 4 * PPC_LINUX_PT_XER;
-      get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_mq_regnum] =
+      deprecated_get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_mq_regnum] =
 	regs_addr + 4 * PPC_LINUX_PT_MQ;
       for (i = 0; i < 32; i++)
-	get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_gp0_regnum + i] =
+	deprecated_get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_gp0_regnum + i] =
 	  regs_addr + 4 * PPC_LINUX_PT_R0 + 4 * i;
       for (i = 0; i < 32; i++)
-	get_frame_saved_regs (fi)[FP0_REGNUM + i] = regs_addr + 4 * PPC_LINUX_PT_FPR0 + 8 * i;
+	deprecated_get_frame_saved_regs (fi)[FP0_REGNUM + i] = regs_addr + 4 * PPC_LINUX_PT_FPR0 + 8 * i;
     }
   else
     rs6000_frame_init_saved_regs (fi);

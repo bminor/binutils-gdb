@@ -1,5 +1,15 @@
 2003-09-25  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.h (deprecated_frame_saved_regs): Rename
+	get_frame_saved_regs.
+	* cris-tdep.c, frame.c, h8300-tdep.c, hppa-tdep.c: Update.
+	* mcore-tdep.c, mips-tdep.c, mn10300-tdep.c: Update.
+	* ns32k-tdep.c, ppc-linux-tdep.c, rs6000-tdep.c: Update.
+	* s390-tdep.c, sh64-tdep.c, stack.c: Update.
+	* v850-tdep.c, vax-tdep.c, xstormy16-tdep.c: Update.
+
+2003-09-25  Andrew Cagney  <cagney@redhat.com>
+
 	* NEWS: Mention the new backtrace mechanism, DWARF 2 CFI, hosted
 	file I/O, multi-arch, TLS and NPTL, DWARF 2 Location Expressions,
 	and Java.

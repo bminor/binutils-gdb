@@ -844,7 +844,7 @@ frame_saved_regs_zalloc (struct frame_info *fi)
 }
 
 CORE_ADDR *
-get_frame_saved_regs (struct frame_info *fi)
+deprecated_get_frame_saved_regs (struct frame_info *fi)
 {
   return fi->saved_regs;
 }
@@ -986,16 +986,16 @@ legacy_saved_regs_prev_register (struct frame_info *next_frame,
   struct frame_info *frame = next_frame->prev;
   gdb_assert (frame != NULL);
 
-  if (get_frame_saved_regs (frame) == NULL)
+  if (deprecated_get_frame_saved_regs (frame) == NULL)
     {
       /* If nothing's initialized the saved regs, do it now.  */
       gdb_assert (DEPRECATED_FRAME_INIT_SAVED_REGS_P ());
       DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
-      gdb_assert (get_frame_saved_regs (frame) != NULL);
+      gdb_assert (deprecated_get_frame_saved_regs (frame) != NULL);
     }
 
-  if (get_frame_saved_regs (frame) != NULL
-      && get_frame_saved_regs (frame)[regnum] != 0)
+  if (deprecated_get_frame_saved_regs (frame) != NULL
+      && deprecated_get_frame_saved_regs (frame)[regnum] != 0)
     {
       if (regnum == SP_REGNUM)
 	{
@@ -1008,7 +1008,7 @@ legacy_saved_regs_prev_register (struct frame_info *next_frame,
 	    /* NOTE: cagney/2003-05-09: In-lined store_address with
                it's body - store_unsigned_integer.  */
 	    store_unsigned_integer (bufferp, REGISTER_RAW_SIZE (regnum),
-				    get_frame_saved_regs (frame)[regnum]);
+				    deprecated_get_frame_saved_regs (frame)[regnum]);
 	}
       else
 	{
@@ -1016,7 +1016,7 @@ legacy_saved_regs_prev_register (struct frame_info *next_frame,
              a local copy of its value.  */
 	  *optimizedp = 0;
 	  *lvalp = lval_memory;
-	  *addrp = get_frame_saved_regs (frame)[regnum];
+	  *addrp = deprecated_get_frame_saved_regs (frame)[regnum];
 	  *realnump = -1;
 	  if (bufferp != NULL)
 	    {
@@ -1035,13 +1035,13 @@ legacy_saved_regs_prev_register (struct frame_info *next_frame,
 		{
 		  regs[regnum]
 		    = frame_obstack_zalloc (REGISTER_RAW_SIZE (regnum));
-		  read_memory (get_frame_saved_regs (frame)[regnum], regs[regnum],
+		  read_memory (deprecated_get_frame_saved_regs (frame)[regnum], regs[regnum],
 			       REGISTER_RAW_SIZE (regnum));
 		}
 	      memcpy (bufferp, regs[regnum], REGISTER_RAW_SIZE (regnum));
 #else
 	      /* Read the value in from memory.  */
-	      read_memory (get_frame_saved_regs (frame)[regnum], bufferp,
+	      read_memory (deprecated_get_frame_saved_regs (frame)[regnum], bufferp,
 			   REGISTER_RAW_SIZE (regnum));
 #endif
 	    }
@@ -1139,8 +1139,8 @@ deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
 	    }
 
 	  DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
-	  if (get_frame_saved_regs (frame) != NULL
-	      && get_frame_saved_regs (frame)[regnum] != 0)
+	  if (deprecated_get_frame_saved_regs (frame) != NULL
+	      && deprecated_get_frame_saved_regs (frame)[regnum] != 0)
 	    {
 	      if (lval)		/* found it saved on the stack */
 		*lval = lval_memory;
@@ -1151,14 +1151,14 @@ deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
                        with it's body - store_unsigned_integer.  */
 		    store_unsigned_integer (raw_buffer,
 					    REGISTER_RAW_SIZE (regnum),
-					    get_frame_saved_regs (frame)[regnum]);
+					    deprecated_get_frame_saved_regs (frame)[regnum]);
 		}
 	      else
 		{
 		  if (addrp)	/* any other register */
-		    *addrp = get_frame_saved_regs (frame)[regnum];
+		    *addrp = deprecated_get_frame_saved_regs (frame)[regnum];
 		  if (raw_buffer)
-		    read_memory (get_frame_saved_regs (frame)[regnum], raw_buffer,
+		    read_memory (deprecated_get_frame_saved_regs (frame)[regnum], raw_buffer,
 				 REGISTER_RAW_SIZE (regnum));
 		}
 	      return;

@@ -1570,7 +1570,7 @@ mips_find_saved_regs (struct frame_info *fci)
   t_inst inst;
   CORE_ADDR *saved_regs;
 
-  if (get_frame_saved_regs (fci) != NULL)
+  if (deprecated_get_frame_saved_regs (fci) != NULL)
     return;
   saved_regs = frame_saved_regs_zalloc (fci);
 
@@ -2733,7 +2733,7 @@ mips_init_extra_frame_info (int fromleaf, struct frame_info *fci)
 			      get_frame_base (fci));
 	      set_reg_offset (temp_saved_regs, PC_REGNUM,
 			      temp_saved_regs[RA_REGNUM]);
-	      memcpy (get_frame_saved_regs (fci), temp_saved_regs,
+	      memcpy (deprecated_get_frame_saved_regs (fci), temp_saved_regs,
 		      SIZEOF_FRAME_SAVED_REGS);
 	    }
 	}
@@ -3957,18 +3957,18 @@ mips_pop_frame (void)
   mips_find_saved_regs (frame);
   for (regnum = 0; regnum < NUM_REGS; regnum++)
     if (regnum != SP_REGNUM && regnum != PC_REGNUM
-	&& get_frame_saved_regs (frame)[regnum])
+	&& deprecated_get_frame_saved_regs (frame)[regnum])
       {
 	/* Floating point registers must not be sign extended, 
 	   in case MIPS_SAVED_REGSIZE = 4 but sizeof (FP0_REGNUM) == 8.  */
 
 	if (FP0_REGNUM <= regnum && regnum < FP0_REGNUM + 32)
 	  write_register (regnum,
-			  read_memory_unsigned_integer (get_frame_saved_regs (frame)[regnum],
+			  read_memory_unsigned_integer (deprecated_get_frame_saved_regs (frame)[regnum],
 							MIPS_SAVED_REGSIZE));
 	else
 	  write_register (regnum,
-			  read_memory_integer (get_frame_saved_regs (frame)[regnum],
+			  read_memory_integer (deprecated_get_frame_saved_regs (frame)[regnum],
 					       MIPS_SAVED_REGSIZE));
       }
 
