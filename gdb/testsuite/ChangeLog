@@ -1,3 +1,9 @@
+Wed Jan 11 00:14:40 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gdb.base/commands.exp: Test if/while commands as part of a
+	breakpoint command list; verify they appear in breakpoint
+	information.
+
 Wed Jan 11 00:47:58 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>
 
 	* gdb.base/sigall.c (gen_FPE): Generate SIGFPE with kill() rather
