@@ -1,3 +1,7 @@
+2003-04-08  Alexandre Oliva  <aoliva@redhat.com>
+
+	* mips-dis.c (mips_gpr_names_newabi): Reverted previous patch.
+
 2003-04-07  Alexandre Oliva  <aoliva@redhat.com>
 
 	* mips-dis.c (mips_gpr_names_newabi): $12-$15 are named $t4-$t7.
