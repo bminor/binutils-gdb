@@ -1,3 +1,11 @@
+2002-11-26  Elena Zannoni  <ezannoni@redhat.com>
+
+        Fix PR gdb/723 and PR gdb/245.
+	* Makefile.in (install-info): Run the install-info command as part
+	of the post install steps only.
+	(uninstall-info): New target.
+	(uninstall): New target.
+
 2002-11-22  Elena Zannoni  <ezannoni@redhat.com>
 
 	* Makefile.in (install): Make install do some real work.
