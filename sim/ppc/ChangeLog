@@ -1,4 +1,15 @@
-Sun Nov 12 07:58:09 1995  Michael Meissner  <meissner@wogglebug.tiac.net>
+Sun Nov 12 07:58:09 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* igen.c (model_table_insert_{macro,function}): New functions.
+	(insn_table_load_insns): Call them.
+	(gen_model_h): Move section emiting model-macros to be first.
+	(model_{c,h}_function): New functions cloned from semantic
+	functions to print out the prototype and function for
+	model-functions.
+	(gen_model_{c,h}): Print out model-functions.
+
+	* ppc-instructions (model_{start,halt,print_info}): Add dummy
+	model-functions.
 
 	* options.c (print_options): Print out WITH_{,DEFAULT_}MODEL, not
 	WITH_PPC_{,DEFAULT_}_MODEL.

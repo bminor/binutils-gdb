@@ -651,6 +651,9 @@ static model *last_model;
 static insn *model_macros;
 static insn *last_model_macro;
 
+static insn *model_functions;
+static insn *last_model_function;
+
 static void
 insn_table_insert_function(insn_table *table,
 			   table_entry *file_entry)
@@ -791,6 +794,32 @@ model_table_insert(insn_table *table,
 
   memcpy(name, new_model->name, name_len);
   strcpy(name + name_len, "_SENTINEL");
+}
+
+static void
+model_table_insert_macro(insn_table *table,
+			 table_entry *file_entry)
+{
+  insn *macro = ZALLOC(insn);
+  macro->file_entry = file_entry;
+  if (last_model_macro)
+    last_model_macro->next = macro;
+  else
+    model_macros = macro;
+  last_model_macro = macro;
+}
+
+static void
+model_table_insert_function(insn_table *table,
+			    table_entry *file_entry)
+{
+  insn *func = ZALLOC(insn);
+  func->file_entry = file_entry;
+  if (last_model_function)
+    last_model_function->next = func;
+  else
+    model_functions = func;
+  last_model_function = func;
 }
 
 
@@ -1110,13 +1139,10 @@ insn_table_load_insns(char *file_name)
       model_table_insert(table, file_entry);
     }
     else if (it_is("model-macro", file_entry->fields[insn_flags])) {
-      insn *macro = ZALLOC(insn);
-      macro->file_entry = file_entry;
-      if (last_model_macro)
-	last_model_macro->next = macro;
-      else
-	model_macros = macro;
-      last_model_macro = macro;
+      model_table_insert_macro(table, file_entry);
+    }
+    else if (it_is("model-function", file_entry->fields[insn_flags])) {
+      model_table_insert_function(table, file_entry);
     }
     else {
       insn_fields *fields;
@@ -2940,9 +2966,30 @@ gen_itable_c(insn_table *table, lf *file)
 
 /****************************************************************/
 
+static void
+model_h_function(insn_table *entry,
+		 lf *file,
+		 table_entry *function)
+{
+  if (function->fields[function_type] == NULL
+      || function->fields[function_type][0] == '\0') {
+    semantics_h_print_function(file,
+			       function->fields[function_name],
+			       NULL);
+  }
+  else {
+    lf_printf(file, "\n");
+    lf_printf(file, "INLINE_MODEL %s %s\n(%s);\n",
+	      function->fields[function_type],
+	      function->fields[function_name],
+	      function->fields[function_param]);
+  }
+}
+
 static void 
 gen_model_h(insn_table *table, lf *file)
 {
+  insn *insn_ptr;
   model *model_ptr;
   model_func_unit *func_unit_ptr;
   insn *macro;
@@ -2953,6 +3000,13 @@ gen_model_h(insn_table *table, lf *file)
   lf_printf(file, "#ifndef _MODEL_H_\n");
   lf_printf(file, "#define _MODEL_H_\n");
   lf_printf(file, "\n");
+
+  if (model_macros) {
+    for(macro = model_macros; macro; macro = macro->next)
+      lf_printf(file, "%s\n", macro->file_entry->fields[insn_comment]);
+    lf_printf(file, "\n");
+  }
+
   lf_printf(file, "#ifndef INLINE_MODEL\n");
   lf_printf(file, "#define INLINE_MODEL\n");
   lf_printf(file, "#endif\n");
@@ -3027,12 +3081,6 @@ gen_model_h(insn_table *table, lf *file)
     lf_printf(file, "\n");
   }
 
-  if (model_macros) {
-    for(macro = model_macros; macro; macro = macro->next)
-      lf_printf(file, "%s\n", macro->file_entry->fields[insn_comment]);
-    lf_printf(file, "\n");
-  }
-
   lf_printf(file, "extern model_enum current_model;\n");
   lf_printf(file, "extern const char *model_name[ (int)nr_models ];\n");
   lf_printf(file, "extern const char *const *const model_func_unit_name[ (int)nr_models ];\n");
@@ -3040,6 +3088,12 @@ gen_model_h(insn_table *table, lf *file)
   lf_printf(file, "\n");
   lf_printf(file, "INLINE_MODEL void model_set\n");
   lf_printf(file, "(const char *name);\n");
+
+  for(insn_ptr = model_functions; insn_ptr; insn_ptr = insn_ptr->next) {
+    model_h_function(table, file, insn_ptr->file_entry);
+    lf_printf(file, "\n");
+  }
+
   lf_printf(file, "\n");
   lf_printf(file, "#endif /* _MODEL_H_ */\n");
 }
@@ -3079,9 +3133,39 @@ model_c_insn(insn_table *entry,
   lf_printf(file, "  { %s_SENTINEL },\n", current_name);
 }
 
+static void
+model_c_function(insn_table *table,
+		 lf *file,
+		 table_entry *function)
+{
+  if (function->fields[function_type] == NULL
+      || function->fields[function_type][0] == '\0') {
+    lf_print_c_semantic_function_header(file,
+					function->fields[function_name],
+					NULL);
+  }
+  else {
+    lf_printf(file, "\n");
+    lf_printf(file, "INLINE_MODEL %s\n%s(%s)\n",
+	      function->fields[function_type],
+	      function->fields[function_name],
+	      function->fields[function_param]);
+  }
+  table_entry_lf_c_line_nr(file, function);
+  lf_printf(file, "{\n");
+  if (function->annex) {
+    lf_indent(file, +2);
+    lf_print_c_code(file, function->annex);
+    lf_indent(file, -2);
+  }
+  lf_printf(file, "}\n");
+  lf_print_lf_c_line_nr(file);
+}
+
 static void 
 gen_model_c(insn_table *table, lf *file)
 {
+  insn *insn_ptr;
   model *model_ptr;
   model_func_unit *func_unit_ptr;
   int i;
@@ -3142,6 +3226,7 @@ gen_model_c(insn_table *table, lf *file)
   }
   lf_printf(file, "};\n");
   lf_printf(file, "\n");
+  lf_printf(file, "\f\n");
 
   lf_printf(file, "/* Insn functional unit info */\n");
   for(model_ptr = models; model_ptr; model_ptr = model_ptr->next) {
@@ -3156,6 +3241,7 @@ gen_model_c(insn_table *table, lf *file)
 
     lf_printf(file, "};\n");
     lf_printf(file, "\n");
+    lf_printf(file, "\f\n");
   }
 
   lf_printf(file, "const model_time *const model_time_mapping[ (int)nr_models ] = {\n");
@@ -3165,6 +3251,11 @@ gen_model_c(insn_table *table, lf *file)
   }
   lf_printf(file, "};\n");
   lf_printf(file, "\n");
+
+  for(insn_ptr = model_functions; insn_ptr; insn_ptr = insn_ptr->next) {
+    model_c_function(table, file, insn_ptr->file_entry);
+    lf_printf(file, "\n");
+  }
 
   lf_printf(file, "INLINE_MODEL void\n");
   lf_printf(file, "model_set(const char *name)\n");

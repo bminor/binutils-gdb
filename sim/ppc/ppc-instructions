@@ -75,6 +75,9 @@
 ::model:603e:PPC603e:IU=1 integer,FPU=1 floating point,LSU=1 memory,SRU=1 system register,BPU=1 branch
 ::model:603:PPC603:IU=1 integer,FPU=1 floating point,LSU=1 memory,SRU=1 system register,BPU=1 branch
 
+void::model-function::model_init:void
+void::model-function::model_halt:void
+void::model-function::model_print_info:void
 
 # The following (illegal) instruction is `known' by gen and is
 # called when ever an illegal instruction is encountered
