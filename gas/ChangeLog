@@ -1,3 +1,9 @@
+Mon Feb 24 02:23:00 1997  Dawn Perchik  <dawn@cygnus.com>
+
+	* Makefile.in: Remove dependancies on itbl-cpu.h.
+	* as.c: Define stubs for itbl_parse and itbl_init if HAVE_ITBL_CPU 
+	is not defined.
+
 Mon Feb 24 02:03:00 1997  Dawn Perchik  <dawn@cygnus.com>
 
 	* itbl-ops.h: Include as.h.
