@@ -67,8 +67,7 @@ static char *i386_register_names[] =
   "mxcsr"
 };
 
-static const int i386_num_register_names =
-  (sizeof (i386_register_names) / sizeof (*i386_register_names));
+static const int i386_num_register_names = ARRAY_SIZE (i386_register_names);
 
 /* MMX registers.  */
 
@@ -78,8 +77,7 @@ static char *i386_mmx_names[] =
   "mm4", "mm5", "mm6", "mm7"
 };
 
-static const int i386_num_mmx_regs =
-  (sizeof (i386_mmx_names) / sizeof (i386_mmx_names[0]));
+static const int i386_num_mmx_regs = ARRAY_SIZE (i386_mmx_names);
 
 #define MM0_REGNUM NUM_REGS
 

@@ -1,3 +1,8 @@
+2003-09-27  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_num_register_names, i386_num_mmx_regs):
+	Initialize using ARRAY_SIZE.
+
 2003-09-27  Andrew Cagney  <cagney@redhat.com>
 
 	* arch-utils.c (deprecated_init_frame_pc_default): Rename
