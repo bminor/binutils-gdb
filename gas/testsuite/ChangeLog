@@ -1,8 +1,7 @@
-2002-12-20  DJ Delorie  <dj@redhat.com>
+2002-12-20  Chris Demetriou  <cgd@broadcom.com>
 
-	* gas/xstormy16/allinsn.sh: Add tests for 12-bit reloc.
-	* gas/xstormy16/allinsn.s: Likewise.
-	* gas/xstormy16/allinsn.d: Likewise.
+        * lib/gas-defs.exp (run_dump_test): Add a new optional argument,
+        "extra_options".
 
 2002-12-18  Chris Demetriou  <cgd@broadcom.com>
 

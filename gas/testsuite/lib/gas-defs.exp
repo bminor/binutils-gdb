@@ -183,7 +183,7 @@ proc gas_init { args } {
 }
 
 
-# run_dump_test FILE
+# run_dump_test FILE (optional:) EXTRA_OPTIONS
 #
 # Assemble a .s file, then run some utility on it and check the output.
 #
@@ -206,6 +206,12 @@ proc gas_init { args } {
 # Whitespace is ignored everywhere, except within VALUE.  The option
 # list ends with the first line that doesn't match the above syntax
 # (hmm, not great for error detection).
+#
+# The optional EXTRA_OPTIONS argument to `run_dump_test' is a list of
+# two-element lists.  The first element of each is an option name, and
+# the second additional arguments to be added on to the end of the
+# option list as given in FILE.d.  (If omitted, no additional options
+# are added.)
 #
 # The interesting options are:
 #
@@ -247,7 +253,7 @@ proc gas_init { args } {
 # regexps in FILE.d.  `regexp_diff' is defined later in this file; see
 # further comments there.
 
-proc run_dump_test { name } {
+proc run_dump_test { name {extra_options {}} } {
     global subdir srcdir
     global OBJDUMP NM AS OBJCOPY READELF
     global OBJDUMPFLAGS NMFLAGS ASFLAGS OBJCOPYFLAGS READELFFLAGS
@@ -291,6 +297,22 @@ proc run_dump_test { name } {
 	    return
 	}
 	set opts($opt_name) $opt_val
+    }
+
+    foreach i $extra_options {
+	set opt_name [lindex $i 0]
+	set opt_val [lindex $i 1]
+	if ![info exists opts($opt_name)] {
+	    perror "unknown option $opt_name given in extra_opts"
+	    unresolved $subdir/$name
+	    return
+	}
+	# add extra option to end of existing option, adding space
+	# if necessary.
+	if [string length $opts($opt_name)] {
+	    append opts($opt_name) " "
+	}
+	append opts($opt_name) $opt_val
     }
 
     if {$opts(PROG) != ""} {
