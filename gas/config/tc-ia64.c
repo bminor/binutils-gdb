@@ -719,6 +719,7 @@ static enum operand_match_result operand_match PARAMS ((const struct ia64_opcode
 							expressionS *e));
 static int parse_operand PARAMS ((expressionS *e));
 static struct ia64_opcode * parse_operands PARAMS ((struct ia64_opcode *));
+static int errata_nop_necessary_p PARAMS ((struct slot *, enum ia64_unit));
 static void build_insn PARAMS ((struct slot *, bfd_vma *));
 static void emit_one_bundle PARAMS ((void));
 static void fix_insn PARAMS ((fixS *, const struct ia64_operand *, valueT));
@@ -867,8 +868,8 @@ static int generate_unwind_image PARAMS ((const char *));
    stack, so this must be a macro... */
 #define make_unw_section_name(special, text_name, result)		   \
   {									   \
-    char *_prefix = special_section_name[special];			   \
-    char *_suffix = text_name;						   \
+    const char *_prefix = special_section_name[special];		   \
+    const char *_suffix = text_name;					   \
     size_t _prefix_len, _suffix_len;					   \
     char *_result;							   \
     if (strncmp (text_name, ".gnu.linkonce.t.",				   \
