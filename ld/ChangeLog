@@ -1,3 +1,8 @@
+Mon Nov  2 14:47:15 1998  Catherine Moore  <clm@cygnus.com>
+
+        * ldmain.c (main):  Don't report error for dynamic links and
+        --gc-sections.
+
 1998-10-26 16:05  Ulrich Drepper  <drepper@cygnus.com>
 
 	* lexsup.c (ld_options): Change text of -O to Optimize output file".
