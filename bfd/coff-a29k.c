@@ -126,9 +126,10 @@ a29k_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
     signed_value = SIGN_EXTEND_HWORD(signed_value);
     signed_value <<= 2;
     signed_value +=  sym_value + reloc_entry->addend;
-    if ((signed_value&~0x3ffff) == 0) 
+    if (((signed_value + reloc_entry->address) & ~0x3ffff) == 0)
     {				/* Absolute jmp/call */
       insn |= (1<<24);		/* Make it absolute */
+      signed_value += reloc_entry->address;
       /* FIXME: Should we change r_type to R_IABS */
     } 
     else 
