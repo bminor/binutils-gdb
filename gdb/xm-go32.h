@@ -22,3 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define SYS_SIGLIST_MISSING 1
 #define HOST_BYTE_ORDER LITTLE_ENDIAN
 #include "fopen-bin.h"
+
+/* Define this lseek(n) != nth byte of file */
+#define LSEEK_NOT_LINEAR
+

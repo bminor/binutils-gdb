@@ -1,3 +1,12 @@
+Fri Aug  7 11:18:23 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* xm-go32.h: Define LSEEK_NOT_LINEAR
+	* serial.c (find_source_lines): if LSEEK_NOT_LINEAR is defined
+	then work out the lseek positions of newlines by running through
+	the file and `tell'ing.  This makes source file listing work on
+	OS's where the relationship between physical position in file and
+	canonical position is indeterminate, eg VMS and DOS.
+
 Thu Aug  6 10:56:01 1992  Fred Fish  (fnf@cygnus.com)
 
 	* stabsread.c:  Ensure that all members of all allocated structures
