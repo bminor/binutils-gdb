@@ -1,7 +1,10 @@
 Wed Jun 17 13:08:33 1992  Stu Grossman  (grossman at cygnus.com)
 
-	* xcoffexec.c:  Remove ' from comment.
+	* breakpoint.c (enable_command, disable_command):  Without args,
+	should only affect normal breakpoints and watchpoints.
 
+	* m68k-pinsn.c (print_insn_arg):  Make register be const.
+	* xcoffexec.c:  Remove ' from comment.
 	* xm-sun3os4.h:  Define MALLOC_INCOMPATIBLE to avoid conflicts
 	with decls of malloc in c-exp.tab.c (as produced by yacc).
 	There's got to be a better way to do this...

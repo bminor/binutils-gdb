@@ -33,6 +33,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "target.h"
 #include "language.h"
 #include <string.h>
+#include "demangle.h"
 
 /* local function prototypes */
 
@@ -109,7 +110,7 @@ static void
 breakpoints_info PARAMS ((char *, int));
 
 static void
-breakpoint_1 PARAMS ((int, enum bptype, int));
+breakpoint_1 PARAMS ((int, int));
 
 static bpstat
 bpstat_alloc PARAMS ((struct breakpoint *, bpstat));
@@ -271,7 +272,7 @@ condition_command (arg, from_tty)
 	    b->cond = 0;
 	    b->cond_string = NULL;
 	    if (from_tty)
-	      printf ("Breakpoint %d now unconditional.\n", bnum);
+	      printf_filtered ("Breakpoint %d now unconditional.\n", bnum);
 	  }
 	else
 	  {
@@ -317,7 +318,7 @@ commands_command (arg, from_tty)
       {
 	if (from_tty && input_from_terminal_p ())
 	  {
-	    printf ("Type commands for when breakpoint %d is hit, one per line.\n\
+	    printf_filtered ("Type commands for when breakpoint %d is hit, one per line.\n\
 End with a line saying just \"end\".\n", bnum);
 	    fflush (stdout);
 	  }
@@ -1030,9 +1031,9 @@ breakpoint_1 (bnum, allflag)
 
 	printf_filtered ("%-3d %-14s %-4s %-3c ",
 			 b->number,
-			 bptypes[b->type],
-			 bpdisps[b->disposition],
-			 bpenables[b->enable]);
+			 bptypes[(int)b->type],
+			 bpdisps[(int)b->disposition],
+			 bpenables[(int)b->enable]);
 	switch (b->type)
 	  {
 	  case bp_watchpoint:
@@ -1053,7 +1054,8 @@ breakpoint_1 (bnum, allflag)
 		if (sym)
 		  {
 		    fputs_filtered ("in ", stdout);
-		    fputs_demangled (SYMBOL_NAME (sym), stdout, 1);
+		    fputs_demangled (SYMBOL_NAME (sym), stdout, 
+				     DMGL_ANSI | DMGL_PARAMS);
 		    fputs_filtered (" at ", stdout);
 		  }
 		fputs_filtered (b->symtab->filename, stdout);
@@ -2278,11 +2280,13 @@ set_ignore_count (bptnum, count, from_tty)
 	if (!from_tty)
 	  return;
 	else if (count == 0)
-	  printf ("Will stop next time breakpoint %d is reached.", bptnum);
+	  printf_filtered ("Will stop next time breakpoint %d is reached.",
+			   bptnum);
 	else if (count == 1)
-	  printf ("Will ignore next crossing of breakpoint %d.", bptnum);
+	  printf_filtered ("Will ignore next crossing of breakpoint %d.",
+			   bptnum);
 	else
-	  printf ("Will ignore next %d crossings of breakpoint %d.",
+	  printf_filtered ("Will ignore next %d crossings of breakpoint %d.",
 		  count, bptnum);
 	return;
       }
@@ -2321,7 +2325,7 @@ ignore_command (args, from_tty)
   set_ignore_count (num,
 		    longest_to_int (value_as_long (parse_and_eval (p))),
 		    from_tty);
-  printf ("\n");
+  printf_filtered ("\n");
 }
 
 /* Call FUNCTION on each of the breakpoints
@@ -2395,7 +2399,14 @@ enable_command (args, from_tty)
   struct breakpoint *bpt;
   if (args == 0)
     ALL_BREAKPOINTS (bpt)
-      enable_breakpoint (bpt);
+      switch (bpt->type)
+	{
+	case bp_breakpoint:
+	case bp_watchpoint:
+	  enable_breakpoint (bpt);
+	default:
+	  continue;
+	}
   else
     map_breakpoint_numbers (args, enable_breakpoint);
 }
@@ -2407,7 +2418,7 @@ disable_breakpoint (bpt)
   bpt->enable = disabled;
 
   if (xgdb_verbose && bpt->type == bp_breakpoint)
-    printf ("breakpoint #%d disabled\n", bpt->number);
+    printf_filtered ("breakpoint #%d disabled\n", bpt->number);
 
   check_duplicates (bpt->address);
 }
@@ -2421,7 +2432,14 @@ disable_command (args, from_tty)
   register struct breakpoint *bpt;
   if (args == 0)
     ALL_BREAKPOINTS (bpt)
-      disable_breakpoint (bpt);
+      switch (bpt->type)
+	{
+	case bp_breakpoint:
+	case bp_watchpoint:
+	  disable_breakpoint (bpt);
+	default:
+	  continue;
+	}
   else
     map_breakpoint_numbers (args, disable_breakpoint);
 }
@@ -2627,8 +2645,8 @@ Do \"help breakpoints\" for info on other commands dealing with breakpoints.");
   add_info ("breakpoints", breakpoints_info,
 	    "Status of user-settable breakpoints, or breakpoint number NUMBER.\n\
 The \"Type\" column indicates one of:\n\
-\tbreakpoint     - for normal breakpoints\n\
-\twatchpoint     - for watchpoints\n\
+\tbreakpoint     - normal breakpoint\n\
+\twatchpoint     - watchpoint\n\
 The \"Disp\" column contains one of \"keep\", \"del\", or \"dis\" to indicate\n\
 the disposition of the breakpoint after it gets hit.  \"dis\" means that the\n\
 breakpoint will be disabled.  The \"Address\" and \"What\" columns indicate the\n\
@@ -2641,12 +2659,12 @@ breakpoint set.");
   add_info ("all-breakpoints", all_breakpoints_info,
 	    "Status of all breakpoints, or breakpoint number NUMBER.\n\
 The \"Type\" column indicates one of:\n\
-\tbreakpoint     - for normal breakpoints\n\
-\twatchpoint     - for watchpoints\n\
-\tlongjmp        - for internal breakpoints to handle stepping through longjmp()\n\
-\tlongjmp resume - for internal breakpoints at the target of longjmp()\n\
-\tuntil          - for internal breakpoints used by the \"until\" command\n\
-\tfinish         - for internal breakpoints used by the \"finish\" command\n\
+\tbreakpoint     - normal breakpoint\n\
+\twatchpoint     - watchpoint\n\
+\tlongjmp        - internal breakpoint used to step through longjmp()\n\
+\tlongjmp resume - internal breakpoint at the target of longjmp()\n\
+\tuntil          - internal breakpoint used by the \"until\" command\n\
+\tfinish         - internal breakpoint used by the \"finish\" command\n\
 The \"Disp\" column contains one of \"keep\", \"del\", or \"dis\" to indicate\n\
 the disposition of the breakpoint after it gets hit.  \"dis\" means that the\n\
 breakpoint will be disabled.  The \"Address\" and \"What\" columns indicate the\n\
