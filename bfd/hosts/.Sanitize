@@ -26,6 +26,7 @@ Do-first:
 Things-to-keep:
 
 h-amix.h
+h-apollo68v.h
 h-decstation.h
 h-dgux.h
 h-delta88.h
