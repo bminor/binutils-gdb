@@ -52,6 +52,9 @@
 # define DWARF2_ADDR_SIZE(bfd) (bfd_arch_bits_per_address (bfd) / 8);
 #endif
 
+#ifndef TC_DWARF2_EMIT_OFFSET
+# define TC_DWARF2_EMIT_OFFSET  generic_dwarf2_emit_offset
+#endif
 
 #ifdef BFD_ASSEMBLER
 
@@ -160,6 +163,7 @@ static char const fake_label_name[] = ".L0\001";
 /* The size of an address on the target.  */
 static unsigned int sizeof_address;
 
+static void generic_dwarf2_emit_offset PARAMS((symbolS *, unsigned int));
 static struct line_subseg *get_line_subseg PARAMS ((segT, subsegT));
 static unsigned int get_filenum PARAMS ((const char *, unsigned int));
 static struct frag *first_frag_for_seg PARAMS ((segT));
@@ -186,6 +190,21 @@ static void out_debug_aranges PARAMS ((segT, segT));
 static void out_debug_abbrev PARAMS ((segT));
 static void out_debug_info PARAMS ((segT, segT, segT));
 
+/* Create an offset to .dwarf2_*.  */
+
+static void
+generic_dwarf2_emit_offset (symbol, size)
+     symbolS *symbol;
+     unsigned int size;
+{
+  expressionS expr;
+
+  expr.X_op = O_symbol;
+  expr.X_add_symbol = symbol;
+  expr.X_add_number = 0;
+  emit_expr (&expr, size);
+}
+
 /* Find or create an entry for SEG+SUBSEG in ALL_SEGS.  */
 
 static struct line_subseg *
@@ -1209,10 +1228,8 @@ out_debug_aranges (aranges_seg, info_seg)
   out_two (2);
 
   /* Offset to .debug_info.  */
-  expr.X_op = O_symbol;
-  expr.X_add_symbol = section_symbol (info_seg);
-  expr.X_add_number = 0;
-  emit_expr (&expr, 4);
+  /* ??? sizeof_offset */
+  TC_DWARF2_EMIT_OFFSET (section_symbol (info_seg), 4);
 
   /* Size of an address (offset portion).  */
   out_byte (addr_size);
@@ -1339,10 +1356,7 @@ out_debug_info (info_seg, abbrev_seg, line_seg)
   out_two (2);
 
   /* .debug_abbrev offset */
-  expr.X_op = O_symbol;
-  expr.X_add_symbol = section_symbol (abbrev_seg);
-  expr.X_add_number = 0;
-  emit_expr (&expr, sizeof_offset);
+  TC_DWARF2_EMIT_OFFSET (section_symbol (abbrev_seg), sizeof_offset);
 
   /* Target address size.  */
   out_byte (sizeof_address);
@@ -1351,10 +1365,8 @@ out_debug_info (info_seg, abbrev_seg, line_seg)
   out_uleb128 (1);
 
   /* DW_AT_stmt_list */
-  expr.X_op = O_symbol;
-  expr.X_add_symbol = section_symbol (line_seg);
-  expr.X_add_number = 0;
-  emit_expr (&expr, 4);
+  /* ??? sizeof_offset */
+  TC_DWARF2_EMIT_OFFSET (section_symbol (line_seg), 4);
 
   /* These two attributes may only be emitted if all of the code is
      contiguous.  Multiple sections are not that.  */

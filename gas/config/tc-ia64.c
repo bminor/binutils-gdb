@@ -10033,6 +10033,20 @@ ia64_pcrel_from_section (fix, sec)
   return off;
 }
 
+
+/* Used to emit section-relative relocs for the dwarf2 debug data.  */
+void
+ia64_dwarf2_emit_offset (symbolS *symbol, unsigned int size)
+{
+  expressionS expr;
+
+  expr.X_op = O_pseudo_fixup;
+  expr.X_op_symbol = pseudo_func[FUNC_SEC_RELATIVE].u.sym;
+  expr.X_add_number = 0;
+  expr.X_add_symbol = symbol;
+  emit_expr (&expr, size);
+}
+
 /* This is called whenever some data item (not an instruction) needs a
    fixup.  We pick the right reloc code depending on the byteorder
    currently in effect.  */
@@ -10074,16 +10088,6 @@ ia64_cons_fix_new (f, where, nbytes, exp)
 	  exp->X_op = O_symbol;
 	  break;
 	}
-      else if (exp->X_op == O_pseudo_fixup
-	       && exp->X_op_symbol
-	       && S_GET_VALUE (exp->X_op_symbol) == FUNC_DTP_RELATIVE)
-	{
-	  if (target_big_endian)
-	    code = BFD_RELOC_IA64_DTPREL64MSB;
-	  else
-	    code = BFD_RELOC_IA64_DTPREL64LSB;
-	  break;
-	}
       else
 	{
 	  if (target_big_endian)
@@ -10102,7 +10106,6 @@ ia64_cons_fix_new (f, where, nbytes, exp)
 	    code = BFD_RELOC_IA64_IPLTMSB;
 	  else
 	    code = BFD_RELOC_IA64_IPLTLSB;
-
 	  exp->X_op = O_symbol;
 	  break;
 	}
@@ -10113,11 +10116,12 @@ ia64_cons_fix_new (f, where, nbytes, exp)
       ignore_rest_of_line ();
       return;
     }
+
   if (exp->X_op == O_pseudo_fixup)
     {
-      /* ??? */
       exp->X_op = O_symbol;
       code = ia64_gen_real_reloc_type (exp->X_op_symbol, code);
+      /* ??? If code unchanged, unsupported.  */
     }
 
   fix = fix_new_exp (f, where, nbytes, exp, 0, code);
@@ -10293,6 +10297,10 @@ ia64_gen_real_reloc_type (sym, r_type)
     case FUNC_DTP_RELATIVE:
       switch (r_type)
 	{
+	case BFD_RELOC_IA64_DIR64MSB:
+	  new = BFD_RELOC_IA64_DTPREL64MSB; break;
+	case BFD_RELOC_IA64_DIR64LSB:
+	  new = BFD_RELOC_IA64_DTPREL64LSB; break;
 	case BFD_RELOC_IA64_IMM14:
 	  new = BFD_RELOC_IA64_DTPREL14; break;
 	case BFD_RELOC_IA64_IMM22:
@@ -10320,6 +10328,7 @@ ia64_gen_real_reloc_type (sym, r_type)
     default:
       abort ();
     }
+
   /* Hmmmm.  Should this ever occur?  */
   if (new)
     return new;
