@@ -1,3 +1,18 @@
+2004-01-07  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (find_section): New function.  Locates a named
+	section.
+	(get_debug_line_pointer_sizes): New function:  Initialises the
+	debug_line_pointer_sizes array.
+        (display_debug_lines): Call get_debug_line_pointer_sizes.
+        (display_debug_loc): Likewise.
+        (load_debug_loc): Use find_section.
+        (load_debug_str): Likewise.
+        (display_debug_info): Likewise.
+        (prescan_debug_info): Delete.
+        (debug_displays): Remove prescan field.
+        (process_section_contents): Do not perform prescans.
+
 2004-01-03  Alan Modra  <amodra@bigpond.net.au>
 
 	* objcopy.c (filter_bytes): Delete.  Move code to..

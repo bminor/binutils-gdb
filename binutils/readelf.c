@@ -6271,16 +6271,137 @@ process_extended_line_op (unsigned char *data, int is_stmt, int pointer_size)
   return len;
 }
 
+/* Finds section NAME inside FILE and returns a
+   pointer to it, or NULL upon failure.  */
+
+static Elf_Internal_Shdr *
+find_section (const char * name)
+{
+  Elf_Internal_Shdr *sec;
+  unsigned int i;
+  
+  for (i = elf_header.e_shnum, sec = section_headers + i - 1;
+       i; --i, --sec)
+    if (strcmp (SECTION_NAME (sec), name) == 0)
+      break;
+
+  if (i && sec && sec->sh_size != 0)
+    return sec;
+
+  return NULL;
+}
+
 /* Size of pointers in the .debug_line section.  This information is not
    really present in that section.  It's obtained before dumping the debug
    sections by doing some pre-scan of the .debug_info section.  */
 static unsigned int * debug_line_pointer_sizes = NULL;
 static unsigned int   num_debug_line_pointer_sizes = 0;
 
+/* Locate and scan the .debug_info section in the file and record the pointer
+   sizes for the compilation units in it.  Usually an executable will have
+   just one pointer size, but this is not guaranteed, and so we try not to
+   make any assumptions.  Returns zero upon failure, or the number of
+   compilation units upon success.  */
+
+static unsigned int
+get_debug_line_pointer_sizes (FILE * file)
+{
+  Elf_Internal_Shdr * section;
+  unsigned char *     start;
+  unsigned char *     end;
+  unsigned char *     begin;
+  unsigned long       length;
+  unsigned int        num_units;
+  unsigned int        unit;
+
+  section = find_section (".debug_info");
+  if (section == NULL)
+    return 0;
+
+  length = section->sh_size;
+  start = get_data (NULL, file, section->sh_offset, section->sh_size,
+		    _("extracting pointer sizes from .debug_info section"));
+  if (start == NULL)
+    return 0;
+
+  end = start + section->sh_size;
+  /* First scan the section to get the number of comp units.  */
+  for (begin = start, num_units = 0; begin < end; num_units++)
+    {
+      /* Read the first 4 bytes.  For a 32-bit DWARF section, this will
+	 be the length.  For a 64-bit DWARF section, it'll be the escape
+	 code 0xffffffff followed by an 8 byte length.  */
+      length = byte_get (begin, 4);
+
+      if (length == 0xffffffff)
+	{
+	  length = byte_get (begin + 4, 8);
+	  begin += length + 12;
+	}
+      else
+	begin += length + 4;
+    }
+
+  if (num_units == 0)
+    {
+      error (_("No comp units in .debug_info section ?"));
+      free (start);
+      return 0;
+    }
+
+  /* Then allocate an array to hold the pointer sizes.  */
+  debug_line_pointer_sizes = malloc (num_units * sizeof * debug_line_pointer_sizes);
+  if (debug_line_pointer_sizes == NULL)
+    {
+      error (_("Not enough memory for a pointer size array of %u entries"),
+	     num_units);
+      free (start);
+      return 0;
+    }
+
+  /* Populate the array.  */
+  for (begin = start, unit = 0; begin < end; unit++)
+    {
+      length = byte_get (begin, 4);
+      if (length == 0xffffffff)
+	{
+	  /* For 64-bit DWARF, the 1-byte address_size field is 22 bytes
+	     from the start of the section.  This is computed as follows:
+
+	     unit_length:         12 bytes
+	     version:              2 bytes
+	     debug_abbrev_offset:  8 bytes
+	     -----------------------------
+	     Total:               22 bytes  */
+
+	  debug_line_pointer_sizes [unit] = byte_get (begin + 22, 1);
+	  length = byte_get (begin + 4, 8);
+	  begin += length + 12;
+	}
+      else
+	{
+	  /* For 32-bit DWARF, the 1-byte address_size field is 10 bytes from
+	     the start of the section:
+	     
+	     unit_length:          4 bytes
+	     version:              2 bytes
+	     debug_abbrev_offset:  4 bytes
+	     -----------------------------
+	     Total:               10 bytes  */
+
+	  debug_line_pointer_sizes [unit] = byte_get (begin + 10, 1);
+	  begin += length + 4;
+	}
+    }
+
+  free (start);
+  num_debug_line_pointer_sizes = num_units;
+  return num_units;
+}
+
 static int
 display_debug_lines (Elf_Internal_Shdr *section,
-		     unsigned char * start,
-		     FILE *file ATTRIBUTE_UNUSED)
+		     unsigned char *start, FILE *file)
 {
   unsigned char *hdrptr;
   DWARF2_Internal_LineInfo info;
@@ -6295,6 +6416,9 @@ display_debug_lines (Elf_Internal_Shdr *section,
 
   printf (_("\nDump of debug contents of section %s:\n\n"),
 	  SECTION_NAME (section));
+
+  if (num_debug_line_pointer_sizes == 0)
+    get_debug_line_pointer_sizes (file);
 
   while (data < end)
     {
@@ -7506,20 +7630,14 @@ static void
 load_debug_loc (FILE *file)
 {
   Elf_Internal_Shdr *sec;
-  unsigned int i;
 
   /* If it is already loaded, do nothing.  */
   if (debug_loc_contents != NULL)
     return;
 
   /* Locate the .debug_loc section.  */
-  for (i = 0, sec = section_headers;
-       i < elf_header.e_shnum;
-       i++, sec++)
-    if (strcmp (SECTION_NAME (sec), ".debug_loc") == 0)
-      break;
-
-  if (i == elf_header.e_shnum || sec->sh_size == 0)
+  sec = find_section (".debug_loc");
+  if (sec == NULL)
     return;
 
   debug_loc_size = sec->sh_size;
@@ -7542,8 +7660,7 @@ free_debug_loc (void)
 
 static int
 display_debug_loc (Elf_Internal_Shdr *section,
-		   unsigned char *start,
-		   FILE *file ATTRIBUTE_UNUSED)
+		   unsigned char *start, FILE *file)
 {
   unsigned char *section_end;
   unsigned long bytes;
@@ -7560,6 +7677,9 @@ display_debug_loc (Elf_Internal_Shdr *section,
       printf (_("\nThe .debug_loc section is empty.\n"));
       return 0;
     }
+
+  if (num_debug_line_pointer_sizes == 0)
+    get_debug_line_pointer_sizes (file);
 
   printf (_("Contents of the .debug_loc section:\n\n"));
   printf (_("\n    Offset   Begin    End      Expression\n"));
@@ -7625,20 +7745,14 @@ static void
 load_debug_str (FILE *file)
 {
   Elf_Internal_Shdr *sec;
-  unsigned int i;
 
   /* If it is already loaded, do nothing.  */
   if (debug_str_contents != NULL)
     return;
 
   /* Locate the .debug_str section.  */
-  for (i = 0, sec = section_headers;
-       i < elf_header.e_shnum;
-       i++, sec++)
-    if (strcmp (SECTION_NAME (sec), ".debug_str") == 0)
-      break;
-
-  if (i == elf_header.e_shnum || sec->sh_size == 0)
+  sec = find_section (".debug_str");
+  if (sec == NULL)
     return;
 
   debug_str_size = sec->sh_size;
@@ -8100,7 +8214,6 @@ display_debug_info (Elf_Internal_Shdr *section,
       unsigned char *hdrptr;
       unsigned char *cu_abbrev_offset_ptr;
       unsigned char *tags;
-      unsigned int i;
       int level;
       unsigned long cu_offset;
       int offset_size;
@@ -8224,13 +8337,8 @@ display_debug_info (Elf_Internal_Shdr *section,
 	unsigned char *begin;
 
 	/* Locate the .debug_abbrev section and process it.  */
-	for (i = 0, sec = section_headers;
-	     i < elf_header.e_shnum;
-	     i++, sec++)
-	  if (strcmp (SECTION_NAME (sec), ".debug_abbrev") == 0)
-	    break;
-
-	if (i == elf_header.e_shnum || sec->sh_size == 0)
+	sec = find_section (".debug_abbrev");
+	if (sec == NULL)
 	  {
 	    warn (_("Unable to locate .debug_abbrev section!\n"));
 	    return 0;
@@ -9194,121 +9302,31 @@ display_debug_not_supported (Elf_Internal_Shdr *section,
   return 1;
 }
 
-/* Pre-scan the .debug_info section to record the pointer sizes for the
-   compilation units.  Usually an executable will have just one pointer
-   size, but this is not guaranteed, and so we try not to make any
-   assumptions.  Returns zero upon failure, or the number of compilation
-   units upon success.  */
-
-static unsigned int
-prescan_debug_info (Elf_Internal_Shdr *section, unsigned char *start,
-		    FILE *file ATTRIBUTE_UNUSED)
-{
-  unsigned char *begin;
-  unsigned char *end = start + section->sh_size;
-  unsigned long  length;
-  unsigned int   num_units;
-  unsigned int   unit;
-    
-  /* First scan the section to compute the number of comp units.  */
-  for (begin = start, num_units = 0; begin < end; num_units++)
-    {
-      /* Read the first 4 bytes.  For a 32-bit DWARF section, this will
-	 be the length.  For a 64-bit DWARF section, it'll be the escape
-	 code 0xffffffff followed by an 8 byte length.  */
-      length = byte_get (begin, 4);
-
-      if (length == 0xffffffff)
-	{
-	  length = byte_get (begin + 4, 8);
-	  begin += length + 12;
-	}
-      else
-	begin += length + 4;
-    }
-
-  if (num_units == 0)
-    {
-      error (_("No comp units in .debug_info section ?"));
-      return 0;
-    }
-
-  /* Then allocate an array to hold the pointer sizes.  */
-  debug_line_pointer_sizes = malloc (num_units * sizeof * debug_line_pointer_sizes);
-  if (debug_line_pointer_sizes == NULL)
-    {
-      error (_("Not enough memory for a pointer size array of %u entries"),
-	     num_units);
-      return 0;
-    }
-
-  /* Populate the array.  */
-  for (begin = start, unit = 0; begin < end; unit++)
-    {
-      length = byte_get (begin, 4);
-      if (length == 0xffffffff)
-	{
-	  /* For 64-bit DWARF, the 1-byte address_size field is 22 bytes
-	     from the start of the section.  This is computed as follows:
-
-	     unit_length:         12 bytes
-	     version:              2 bytes
-	     debug_abbrev_offset:  8 bytes
-	     -----------------------------
-	     Total:               22 bytes  */
-
-	  debug_line_pointer_sizes [unit] = byte_get (begin + 22, 1);
-	  length = byte_get (begin + 4, 8);
-	  begin += length + 12;
-	}
-      else
-	{
-	  /* For 32-bit DWARF, the 1-byte address_size field is 10 bytes from
-	     the start of the section:
-	     
-	     unit_length:          4 bytes
-	     version:              2 bytes
-	     debug_abbrev_offset:  4 bytes
-	     -----------------------------
-	     Total:               10 bytes  */
-
-	  debug_line_pointer_sizes [unit] = byte_get (begin + 10, 1);
-	  begin += length + 4;
-	}
-    }
-
-  num_debug_line_pointer_sizes = num_units;
-  return num_units;
-}
-
-/* A structure containing the name of a debug section and a pointer
-   to a function that can decode it.  The third field is a prescan
-   function to be run over the section before displaying any of the
-   sections.  */
+/* A structure containing the name of a debug section
+   and a pointer to a function that can decode it.  */
 struct
 {
   const char *const name;
   int (*display) (Elf_Internal_Shdr *, unsigned char *, FILE *);
-  int (*prescan) (Elf_Internal_Shdr *, unsigned char *, FILE *);
 }
 debug_displays[] =
 {
-  { ".debug_abbrev",		display_debug_abbrev, NULL },
-  { ".debug_aranges",		display_debug_aranges, NULL },
-  { ".debug_frame",		display_debug_frames, NULL },
-  { ".debug_info",		display_debug_info, prescan_debug_info },
-  { ".debug_line",		display_debug_lines, NULL },
-  { ".debug_pubnames",		display_debug_pubnames, NULL },
-  { ".eh_frame",		display_debug_frames, NULL },
-  { ".debug_macinfo",		display_debug_macinfo, NULL },
-  { ".debug_str",		display_debug_str, NULL },
-  { ".debug_loc",		display_debug_loc, NULL },
-  { ".debug_pubtypes",		display_debug_not_supported, NULL },
-  { ".debug_ranges",		display_debug_not_supported, NULL },
-  { ".debug_static_func",	display_debug_not_supported, NULL },
-  { ".debug_static_vars",	display_debug_not_supported, NULL },
-  { ".debug_types",		display_debug_not_supported, NULL },
-  { ".debug_weaknames",		display_debug_not_supported, NULL }
+  { ".debug_abbrev",		display_debug_abbrev },
+  { ".debug_aranges",		display_debug_aranges },
+  { ".debug_frame",		display_debug_frames },
+  { ".debug_info",		display_debug_info },
+  { ".debug_line",		display_debug_lines },
+  { ".debug_pubnames",		display_debug_pubnames },
+  { ".eh_frame",		display_debug_frames },
+  { ".debug_macinfo",		display_debug_macinfo },
+  { ".debug_str",		display_debug_str },
+  { ".debug_loc",		display_debug_loc },
+  { ".debug_pubtypes",		display_debug_not_supported },
+  { ".debug_ranges",		display_debug_not_supported },
+  { ".debug_static_func",	display_debug_not_supported },
+  { ".debug_static_vars",	display_debug_not_supported },
+  { ".debug_types",		display_debug_not_supported },
+  { ".debug_weaknames",		display_debug_not_supported }
 };
 
 static int
@@ -9362,42 +9380,6 @@ process_section_contents (FILE *file)
 
   if (! do_dump)
     return 1;
-
-  /* Pre-scan the debug sections to find some debug information not
-     present in some of them.  For the .debug_line, we must find out the
-     size of address (specified in .debug_info and .debug_aranges).  */
-  for (i = 0, section = section_headers;
-       i < elf_header.e_shnum && i < num_dump_sects;
-       i++, section++)
-    {
-      char *name = SECTION_NAME (section);
-      int j;
-
-      if (section->sh_size == 0)
-	continue;
-
-      /* See if there is some pre-scan operation for this section.  */
-      for (j = NUM_ELEM (debug_displays); j--;)
-	if (strcmp (debug_displays[j].name, name) == 0)
-	  {
-	    if (debug_displays[j].prescan != NULL)
-	      {
-		bfd_size_type length;
-		unsigned char *start;
-
-		length = section->sh_size;
-		start = get_data (NULL, file, section->sh_offset, length,
-				  _("debug section data"));
-		if (!start)
-		  return 0;
-
-		debug_displays[j].prescan (section, start, file);
-		free (start);
-	      }
-
-	    break;
-	  }
-    }
 
   for (i = 0, section = section_headers;
        i < elf_header.e_shnum && i < num_dump_sects;

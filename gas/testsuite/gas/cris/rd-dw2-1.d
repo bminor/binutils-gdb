@@ -14,6 +14,7 @@ Dump of debug contents of section \.debug_line:
   Line Base:                   -5
   Line Range:                  14
   Opcode Base:                 10
+  \(Pointer size:               4\)
 
  Opcodes:
   Opcode 1 has 0 args
