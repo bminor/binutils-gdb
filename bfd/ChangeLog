@@ -1,5 +1,7 @@
 Thu Aug 12 10:32:47 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
+	* Makefile.in (BFD32_BACKENDS): Remove srec.o, add reloc16.o.
+
 	* configure.in: Add reloc16.o when we add
 	coff-h8300.o, coff-h8500.o, coff-sh.o, coff-z8k.o.
 	Makefile.in (BFD_LIBS): Remove reloc16.o.
