@@ -1307,54 +1307,82 @@ sim_fetch_register (sd, rn, memory, length)
      int length;
 {
   int size;
-  if (rn < 0)
-    size = 0;
-  else if (rn >= SIM_D10V_R0_REGNUM
-	   && rn < SIM_D10V_R0_REGNUM + SIM_D10V_NR_R_REGS)
+  switch ((enum gdb_d10v_regs) rn)
     {
+    case SIM_D10V_R0_REGNUM:
+    case SIM_D10V_R1_REGNUM:
+    case SIM_D10V_R2_REGNUM:
+    case SIM_D10V_R3_REGNUM:
+    case SIM_D10V_R4_REGNUM:
+    case SIM_D10V_R5_REGNUM:
+    case SIM_D10V_R6_REGNUM:
+    case SIM_D10V_R7_REGNUM:
+    case SIM_D10V_R8_REGNUM:
+    case SIM_D10V_R9_REGNUM:
+    case SIM_D10V_R10_REGNUM:
+    case SIM_D10V_R11_REGNUM:
+    case SIM_D10V_R12_REGNUM:
+    case SIM_D10V_R13_REGNUM:
+    case SIM_D10V_R14_REGNUM:
+    case SIM_D10V_R15_REGNUM:
       WRITE_16 (memory, GPR (rn - SIM_D10V_R0_REGNUM));
       size = 2;
-    }
-  else if (rn >= SIM_D10V_CR0_REGNUM
-	   && rn < SIM_D10V_CR0_REGNUM + SIM_D10V_NR_CR_REGS)
-    {
+      break;
+    case SIM_D10V_CR0_REGNUM:
+    case SIM_D10V_CR1_REGNUM:
+    case SIM_D10V_CR2_REGNUM:
+    case SIM_D10V_CR3_REGNUM:
+    case SIM_D10V_CR4_REGNUM:
+    case SIM_D10V_CR5_REGNUM:
+    case SIM_D10V_CR6_REGNUM:
+    case SIM_D10V_CR7_REGNUM:
+    case SIM_D10V_CR8_REGNUM:
+    case SIM_D10V_CR9_REGNUM:
+    case SIM_D10V_CR10_REGNUM:
+    case SIM_D10V_CR11_REGNUM:
+    case SIM_D10V_CR12_REGNUM:
+    case SIM_D10V_CR13_REGNUM:
+    case SIM_D10V_CR14_REGNUM:
+    case SIM_D10V_CR15_REGNUM:
       WRITE_16 (memory, CREG (rn - SIM_D10V_CR0_REGNUM));
       size = 2;
-    }
-  else if (rn >= SIM_D10V_A0_REGNUM
-	   && rn < SIM_D10V_A0_REGNUM + SIM_D10V_NR_A_REGS)
-    {
+      break;
+    case SIM_D10V_A0_REGNUM:
+    case SIM_D10V_A1_REGNUM:
       WRITE_64 (memory, ACC (rn - SIM_D10V_A0_REGNUM));
       size = 8;
-    }
-  else if (rn == SIM_D10V_SPI_REGNUM)
-    {
+      break;
+    case SIM_D10V_SPI_REGNUM:
       /* PSW_SM indicates that the current SP is the USER
          stack-pointer. */
       WRITE_16 (memory, spi_register ());
       size = 2;
-    }
-  else if (rn == SIM_D10V_SPU_REGNUM)
-    {
+      break;
+    case SIM_D10V_SPU_REGNUM:
       /* PSW_SM indicates that the current SP is the USER
          stack-pointer. */
       WRITE_16 (memory, spu_register ());
       size = 2;
-    }
-  else if (rn >= SIM_D10V_IMAP0_REGNUM
-	   && rn < SIM_D10V_IMAP0_REGNUM + SIM_D10V_NR_IMAP_REGS)
-    {
+      break;
+    case SIM_D10V_IMAP0_REGNUM:
+    case SIM_D10V_IMAP1_REGNUM:
       WRITE_16 (memory, imap_register (rn - SIM_D10V_IMAP0_REGNUM));
       size = 2;
-    }
-  else if (rn >= SIM_D10V_DMAP0_REGNUM
-	   && rn < SIM_D10V_DMAP0_REGNUM + SIM_D10V_NR_DMAP_REGS)
-    {
+      break;
+    case SIM_D10V_DMAP0_REGNUM:
+    case SIM_D10V_DMAP1_REGNUM:
+    case SIM_D10V_DMAP2_REGNUM:
+    case SIM_D10V_DMAP3_REGNUM:
       WRITE_16 (memory, dmap_register (rn - SIM_D10V_DMAP0_REGNUM));
       size = 2;
+      break;
+    case SIM_D10V_TS2_DMAP_REGNUM:
+      size = 0;
+      break;
+    default:
+      size = 0;
+      break;
     }
-  else
-    size = 0;
   return size;
 }
  
@@ -1366,52 +1394,80 @@ sim_store_register (sd, rn, memory, length)
      int length;
 {
   int size;
-  if (rn < 0)
-    size = 0;
-  else if (rn >= SIM_D10V_R0_REGNUM
-	   && rn < SIM_D10V_R0_REGNUM + SIM_D10V_NR_R_REGS)
+  switch ((enum sim_d10v_reg) rn)
     {
+    case SIM_D10V_R0_REGNUM:
+    case SIM_D10V_R1_REGNUM:
+    case SIM_D10V_R2_REGNUM:
+    case SIM_D10V_R3_REGNUM:
+    case SIM_D10V_R4_REGNUM:
+    case SIM_D10V_R5_REGNUM:
+    case SIM_D10V_R6_REGNUM:
+    case SIM_D10V_R7_REGNUM:
+    case SIM_D10V_R8_REGNUM:
+    case SIM_D10V_R9_REGNUM:
+    case SIM_D10V_R10_REGNUM:
+    case SIM_D10V_R11_REGNUM:
+    case SIM_D10V_R12_REGNUM:
+    case SIM_D10V_R13_REGNUM:
+    case SIM_D10V_R14_REGNUM:
+    case SIM_D10V_R15_REGNUM:
       SET_GPR (rn - SIM_D10V_R0_REGNUM, READ_16 (memory));
       size = 2;
-    }
-  else if (rn >= SIM_D10V_CR0_REGNUM
-	   && rn < SIM_D10V_CR0_REGNUM + SIM_D10V_NR_CR_REGS)
-    {
+      break;
+    case SIM_D10V_CR0_REGNUM:
+    case SIM_D10V_CR1_REGNUM:
+    case SIM_D10V_CR2_REGNUM:
+    case SIM_D10V_CR3_REGNUM:
+    case SIM_D10V_CR4_REGNUM:
+    case SIM_D10V_CR5_REGNUM:
+    case SIM_D10V_CR6_REGNUM:
+    case SIM_D10V_CR7_REGNUM:
+    case SIM_D10V_CR8_REGNUM:
+    case SIM_D10V_CR9_REGNUM:
+    case SIM_D10V_CR10_REGNUM:
+    case SIM_D10V_CR11_REGNUM:
+    case SIM_D10V_CR12_REGNUM:
+    case SIM_D10V_CR13_REGNUM:
+    case SIM_D10V_CR14_REGNUM:
+    case SIM_D10V_CR15_REGNUM:
       SET_CREG (rn - SIM_D10V_CR0_REGNUM, READ_16 (memory));
       size = 2;
-    }
-  else if (rn >= SIM_D10V_A0_REGNUM
-	   && rn < SIM_D10V_A0_REGNUM + SIM_D10V_NR_A_REGS)
-    {
+      break;
+    case SIM_D10V_A0_REGNUM:
+    case SIM_D10V_A1_REGNUM:
       SET_ACC (rn - SIM_D10V_A0_REGNUM, READ_64 (memory) & MASK40);
       size = 8;
-    }
-  else if (rn == SIM_D10V_SPI_REGNUM)
-    {
+      break;
+    case SIM_D10V_SPI_REGNUM:
       /* PSW_SM indicates that the current SP is the USER
          stack-pointer. */
       set_spi_register (READ_16 (memory));
       size = 2;
-    }
-  else if (rn == SIM_D10V_SPU_REGNUM)
-    {
+      break;
+    case SIM_D10V_SPU_REGNUM:
       set_spu_register (READ_16 (memory));
       size = 2;
-    }
-  else if (rn >= SIM_D10V_IMAP0_REGNUM
-	   && rn < SIM_D10V_IMAP0_REGNUM + SIM_D10V_NR_IMAP_REGS)
-    {
+      break;
+    case SIM_D10V_IMAP0_REGNUM:
+    case SIM_D10V_IMAP1_REGNUM:
       set_imap_register (rn - SIM_D10V_IMAP0_REGNUM, READ_16(memory));
       size = 2;
-    }
-  else if (rn >= SIM_D10V_DMAP0_REGNUM
-	   && rn < SIM_D10V_DMAP0_REGNUM + SIM_D10V_NR_DMAP_REGS)
-    {
+      break;
+    case SIM_D10V_DMAP0_REGNUM:
+    case SIM_D10V_DMAP1_REGNUM:
+    case SIM_D10V_DMAP2_REGNUM:
+    case SIM_D10V_DMAP3_REGNUM:
       set_dmap_register (rn - SIM_D10V_DMAP0_REGNUM, READ_16(memory));
       size = 2;
+      break;
+    case SIM_D10V_TS2_DMAP_REGNUM:
+      size = 0;
+      break;
+    default:
+      size = 0;
+      break;
     }
-  else
-    size = 0;
   SLOT_FLUSH ();
   return size;
 }
