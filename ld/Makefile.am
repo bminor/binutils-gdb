@@ -221,6 +221,7 @@ ALL_EMULATIONS = \
 	esun4.o \
 	etic30aout.o \
 	etic30coff.o \
+	etic54xcoff.o \
 	etic80coff.o \
 	evanilla.o \
 	evax.o \
@@ -705,6 +706,9 @@ etic30aout.c: $(srcdir)/emulparams/tic30aout.sh \
 etic30coff.c: $(srcdir)/emulparams/tic30coff.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/tic30coff.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} tic30coff "$(tdir_tic30coff)"
+etic54xcoff.c: $(srcdir)/emulparams/tic54xcoff.sh \
+  $(srcdir)/emultempl/ticoff.em $(srcdir)/scripttempl/tic54xcoff.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} tic54xcoff "$(tdir_tic54xcoff)"
 etic80coff.c: $(srcdir)/emulparams/tic80coff.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/tic80coff.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} tic80coff "$(tdir_tic80coff)"

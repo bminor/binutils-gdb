@@ -105,6 +105,9 @@ This file documents the @sc{gnu} linker ld version @value{VERSION}.
 @ifset I960
 * i960::                        ld and the Intel 960 family
 @end ifset
+@ifset TICOFF
+* TI COFF::                     ld and the TI COFF
+@end ifset
 @end ifclear
 @ifclear SingleFormat
 * BFD::                         BFD
@@ -3855,6 +3858,9 @@ functionality are not listed.
 * H8/300::                      @code{ld} and the H8/300
 * i960::                        @code{ld} and the Intel 960 family
 * ARM::				@code{ld} and the ARM family
+@ifset TICOFF
+* TI COFF::                     @code{ld} and TI COFF
+@end ifset
 @end menu
 @end ifset
 
@@ -3994,6 +4000,18 @@ The @samp{--thumb-entry} switch is a duplicate of the generic
 But it also sets the bottom bit of the address, so that it can be
 branched to using a BX instruction, and the program will start
 executing in Thumb mode straight away.
+
+@ifset TICOFF
+@node TI COFF
+@section @code{ld}'s support for various TI COFF versions
+@cindex TI COFF versions
+@kindex --format=@var{version}
+The @samp{--format} switch allows selection of one of the various
+TI COFF versions.  The latest of this writing is 2; versions 0 and 1 are
+also supported.  The TI COFF versions also vary in header byte-order
+format; @code{ld} will read any version or byte order, but the output
+header format depends on the default specified by the specific target.
+@end ifset
 
 @ifclear GENERIC
 @lowersections

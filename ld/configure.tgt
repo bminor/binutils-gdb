@@ -284,6 +284,7 @@ powerpc-*-beos*)	targ_emul=aixppc ;;
 rs6000-*-aix*)		targ_emul=aixrs6 ;;
 tic30-*-*aout*)		targ_emul=tic30aout ;;
 tic30-*-*coff*)		targ_emul=tic30coff ;;
+tic54x-*-* | c54x*-*-*)	targ_emul=tic54xcoff ;;
 tic80-*-*)		targ_emul=tic80coff ;;
 v850-*-*)		targ_emul=v850 ;;
 v850e-*-*)		targ_emul=v850 ;;

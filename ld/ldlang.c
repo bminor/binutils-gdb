@@ -1196,6 +1196,13 @@ wild_doit (ptr, section, output, file)
       /* If supplied an aligment, then force it.  */
       if (output->section_alignment != -1)
 	output->bfd_section->alignment_power = output->section_alignment;
+
+      if (section->flags & SEC_BLOCK)
+        {
+          section->output_section->flags |= SEC_BLOCK;
+          /* FIXME: This value should really be obtained from the bfd... */
+          output->block_value = 128;
+        }
     }
 }
 

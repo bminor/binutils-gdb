@@ -619,7 +619,9 @@ memory_spec: 		NAME
 		attributes_opt ':'
 		origin_spec opt_comma length_spec
 
-	; origin_spec:
+	;
+
+origin_spec:
 	ORIGIN '=' mustbe_exp
 		{ region->current =
 		 region->origin =
