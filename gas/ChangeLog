@@ -1,5 +1,9 @@
 Sun Dec  5 17:05:29 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* config/obj-som.c (obj_read_begin_hook): Delete unused function.
+	* config/obj-som.h (obj_read_begin_hook): Provide dummy definition.
+	(TARGET_SYMBOL_FIELDS): Delete.  SOM isn't making use of them.
+
 	* config/tc-hppa.c (tc_gen_reloc, SOM version): Handle relocation
 	expansion due to rounding mode selectors.  Handle R_[RDSN]_MODE
 	relocations for selecting the current rounding mode.

@@ -32,13 +32,6 @@ const pseudo_typeS obj_pseudo_table[] =
   {NULL}
 };
 
-/* SOM does not use this.  */
-
-void
-obj_read_begin_hook ()
-{
-}
-
 /* Handle a .version directive.  FIXME.  We just parse the .version
    directive and throw away the results!.  */
 
@@ -46,7 +39,7 @@ void
 obj_som_version (unused)
      int unused;
 {
-  SKIP_WHITESPACE ()
+  SKIP_WHITESPACE ();
   if (*input_line_pointer == '\"')
     {
       ++input_line_pointer;
@@ -71,27 +64,91 @@ void
 obj_som_init_stab_section (seg)
      segT seg;
 {
-  segT saved_seg = now_seg, space;
+  segT saved_seg = now_seg;
+  segT space;
   subsegT saved_subseg = now_subseg;
+  char *p, *file;
+  unsigned int stroff;
 
   /* Make the space which will contain the debug subspaces.  */
   space = bfd_make_section_old_way (stdoutput, "$GDB_DEBUG$");
 
   /* Set SOM specific attributes for the space.  In particular we set
-     the space "defined", "private", "sort_key", and "spnum" values.  */
-  obj_set_section_attributes (space, 1, 1, 255, 2);
+     the space "defined", "private", "sort_key", and "spnum" values. 
+
+     Due to a bug in pxdb (called by hpux linker), the sort keys
+     of the various stabs spaces/subspaces need to be "small".  We
+     reserve range 72/73 which appear to work well.  */
+  obj_set_section_attributes (space, 1, 1, 72, 2);
+  bfd_set_section_alignment (stdoutput, space, 2);
 
   /* Set the containing space for both stab sections to be $GDB_DEBUG$
      (just created above).  Also set some attributes which BFD does
      not understand.  In particular, access bits, sort keys, and load
      quadrant.  */
-  obj_set_subsection_attributes (seg, space, 0x1f, 255, 0);
+  obj_set_subsection_attributes (seg, space, 0x1f, 73, 0);
+  bfd_set_section_alignment (stdoutput, seg, 2);
 
-  /* Likewise for the $GDB_STRINGS$ subspace.  Note the section
-     hasn't been created at the time of this call, so we create
-     it now.  */
-  seg = subseg_new ("$GDB_STRINGS$", 0);
-  obj_set_subsection_attributes (seg, space, 0x1f, 254, 0);
+  /* Make some space for the first stab entry which is special.
+     It contains information about the length of this file's
+     stab string and the like.  Using it avoids the need to 
+     relocate the stab strings.
+
+     The $GDB_STRINGS$ space will be created as a side effect of
+     the call to get_stab_string_offset.  */
+  p = frag_more (12);
+  as_where (&file, (unsigned int *) NULL);
+  stroff = get_stab_string_offset (file, "$GDB_STRINGS$");
+  know (stroff == 1);
+  md_number_to_chars (p, stroff, 4);
+  seg_info (seg)->stabu.p = p;
+
+  /* Set the containing space for both stab sections to be $GDB_DEBUG$
+     (just created above).  Also set some attributes which BFD does
+     not understand.  In particular, access bits, sort keys, and load
+     quadrant.  */
+  seg = bfd_get_section_by_name (stdoutput, "$GDB_STRINGS$");
+  obj_set_subsection_attributes (seg, space, 0x1f, 72, 0);
+  bfd_set_section_alignment (stdoutput, seg, 2);
 
   subseg_set (saved_seg, saved_subseg);
+}
+
+/* Fill in the counts in the first entry in a .stabs section.  */
+
+static void
+adjust_stab_sections (abfd, sec, xxx)
+     bfd *abfd;
+     asection *sec;
+     PTR xxx;
+{
+  asection *strsec;
+  char *p;
+  int strsz, nsyms;
+
+  if (strcmp ("$GDB_SYMBOLS$", sec->name))
+    return;
+
+  strsec = bfd_get_section_by_name (abfd, "$GDB_STRINGS$");
+  if (strsec)
+    strsz = bfd_section_size (abfd, strsec);
+  else
+    strsz = 0;
+  nsyms = bfd_section_size (abfd, sec) / 12 - 1;
+
+  p = seg_info (sec)->stabu.p;
+  assert (p != 0);
+
+  bfd_h_put_16 (abfd, (bfd_vma) nsyms, (bfd_byte *) p + 6);
+  bfd_h_put_32 (abfd, (bfd_vma) strsz, (bfd_byte *) p + 8);
+}
+
+/* Called late in the asssembly phase to adjust the special
+   stab entry.  This is where any other late object-file dependent
+   processing which should happen.  */
+
+void
+som_frob_file ()
+{
+  bfd_map_over_sections (stdoutput, adjust_stab_sections, (PTR) 0);
 }

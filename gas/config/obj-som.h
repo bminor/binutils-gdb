@@ -34,9 +34,6 @@
 #define TRUE !FALSE
 #endif
 
-#define TARGET_SYMBOL_FIELDS	int local:1; unsigned long sy_name_offset;
-
-
 /* should be conditional on address size!  */
 #define som_symbol(asymbol) ((som_symbol_type *)(&(asymbol)->the_bfd))
 
@@ -54,6 +51,7 @@ extern void obj_som_version PARAMS ((int));
 extern void obj_som_init_stab_section PARAMS ((segT));
 
 #define obj_symbol_new_hook(s) {;}
+#define obj_read_begin_hook() {;}
 
 /* SOM has several attributes for spaces/subspaces which can not
    be easily expressed in BFD.  We use these macros to trigger calls
@@ -63,6 +61,10 @@ extern void obj_som_init_stab_section PARAMS ((segT));
 
 /* Likewise for symbol types.  */
 #define obj_set_symbol_type bfd_som_set_symbol_type
+
+/* This is the trigger for calling a BFD routine to attach unwind
+   information to a function symbol.  */
+#define obj_attach_unwind_info bfd_som_attach_unwind_info
 
 /* Stabs go in a separate sections.  GDB expects to find them in sections
    with the names $GDB_SYMBOLS$ and $GDB_STRINGS$ rather than .stab and
