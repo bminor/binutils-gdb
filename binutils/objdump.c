@@ -1315,6 +1315,7 @@ disassemble_data (abfd)
   INIT_DISASSEMBLE_INFO(disasm_info, stdout, fprintf);
   disasm_info.application_data = (PTR) &aux;
   aux.abfd = abfd;
+  aux.require_sec = false;
   disasm_info.print_address_func = objdump_print_address;
 
   if (machine != (char *) NULL)
