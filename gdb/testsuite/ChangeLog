@@ -1,3 +1,57 @@
+2003-02-03  Andrew Cagney  <ac131313@redhat.com>
+
+	* lib/mi-support: Hack, accept any prompt for moment.
+
+2002-09-11  Keith Seitz  <keiths@redhat.com>
+
+	* lib/mi-support.exp (mi_step_next_helper): Remove.
+	(mi_next): Use mi_next_to.
+	(mi_step): Use mi_step_to.
+
+2002-09-05  Keith Seitz  <keiths@redhat.com>
+
+	* lib/mi-support.exp (mi_runto): New proc. Does the same as gdb's
+	runto proc.
+	(mi_run_to_main): Use mi_runto.
+
+2002-09-04  Keith Seitz  <keiths@redhat.com>
+
+	* lib/mi-support.exp (mi_run_to_main): Allow anything to precede
+	regexp for stopping at main. Could have multiple event notifications.
+	Don't assume that main was declared with no parameters.
+	(mi_step_next_helper): New procedure to do step/next.
+	(mi_next): Use mi_step_next_helper.
+	(mi_step): Ditto.
+
+2002-09-04  Keith Seitz  <keiths@redhat.com>
+
+	* lib/gdb.exp (gdb_compile_pthreads): Fix "build_bin" typo.
+	Use integer comparison instead of string comparison for testing
+	whether binary was built.
+
+2002-08-29  Keith Seitz  <keiths@redhat.com>
+
+	* lib/mi-support.exp (mi_gdb_test): Add global declaration for
+	expect_out so that callers can get at it.
+
+2002-07-22  Keith Seitz  <keiths@redhat.com>
+
+	* lib/mi-support.exp (mi_delete_breakpoints): Allow for breakpoint
+	delete events in output of -break-delete.
+	(mi_run_to_main): Don't assume that breakpoint at main is first
+	breakpoint installed.
+
+2002-06-24  Keith Seitz  <keiths@redhat.com>
+
+	* lib/mi-support.exp (mi_gdb_test): Move expected pattern higher
+	in the list of expect statements.
+
+2002-06-19  Keith Seitz  <keiths@redhat.com>
+
+	* lib/mi-support.exp (mi_run_to_main): Use MIFLAGS to figure
+	out what version of MI is running. Use this to determine the proper
+	output of setting a breakpoint.
+
 2003-02-02  Andrew Cagney  <ac131313@redhat.com>
 
 	2002-11-10 Jason Molenda (jason-cl@molenda.com):

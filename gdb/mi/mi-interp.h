@@ -1,6 +1,6 @@
-/* Output generating routines for GDB CLI.
-   Copyright 1999, 2000 Free Software Foundation, Inc.
-   Contributed by Cygnus Solutions.
+/* MI Interpreter for GDB the GNU debugger.
+
+   Copyright 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -19,10 +19,12 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef CLI_OUT_H
-#define CLI_OUT_H
+#ifndef MI_INTERP_H
+#define MI_INTERP_H
 
-extern struct ui_out *cli_out_new (struct ui_file *stream);
-extern struct ui_file *cli_out_set_stream (struct ui_out *uiout,
-					   struct ui_file *stream);
+/* The mi interpreters. */
+struct gdb_interpreter;
+extern struct gdb_interpreter *mi_interp;
+extern struct gdb_interpreter *mi1_interp;
+
 #endif

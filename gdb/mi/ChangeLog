@@ -1,3 +1,216 @@
+2002-11-05  Elena Zannoni  <ezannoni@redhat.com>
+
+        * mi-cmd-stack.c (mi_cmd_stack_select_frame): Remove stray statement.
+        Remove include of gdb-events.h.
+
+2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
+
+	* mi.h: Clean up interface, removing unnecessarily exported
+	functions and data structures.
+	* mi-events.c (mi_event_handlers): Move here...
+	* mi-interps.c: .. from here.
+	Include gdb_string.h.
+	
+2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
+
+	* mi-interp.c (mi_interpreter_resume): Ditto.
+	(mi_cmd_interpreter_exec): Use gdb_interpreter_lookup.
+	(_initialize_mi_interp): Use gdb_interpreter_new,
+	gdb_interpreter_add.
+	* mi-cmd-break.c (mi_cmd_break_insert): Use
+	gdb_interpreter_current_is_named_p.
+	(mi_cmd_break_watch): Ditto.
+	* mi-events.c (mi_interp_stack_changed_hook): Ditto.
+	(event_notify): Ditto.
+	
+
+	* mi-main.c (captured_mi_execute_command): Use
+	gdb_interpreter_current_is_named_p.
+	(mi_load_progress): Ditto.
+
+2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
+
+	* mi-interp.c (_initialize_mi_interp): Use mi_interpreter_prompt_p
+	instead of mi_interpreter_prompt.
+	(mi_interpreter_prompt_p): Rename from mi_interpreter_prompt and
+	rewrite.
+
+2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
+
+	* mi-interp.c mi_interpreter_delete): Remove.
+	(_initialize_mi_interp): Remove mi_interpreter_delete.
+
+2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
+
+	* mi-interp.c (mi_interpreter_do_one_event): Remove.
+
+2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
+
+	* mi-cmd-break.c (mi_cmd_break_insert): Initialize old_hooks.
+	(mi_cmd_break_insert, mi_cmd_break_watch, mi_cmd_break_insert):
+	Increment MI version number.
+
+2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
+
+	* mi-interp.c: Increment mi version numbers: 0->1, 1->2,
+	and 2->3. Remove MI0 references.
+	* mi-events.c: Ditto.
+	* mi-main.c: Ditto. Remove erroneously merged code.
+	* mi.h: Ditto.
+	
+2002-08-28  Keith Seitz  <keiths@redhat.com>
+
+	* mi-interp.c (_initialize_mi_interp): Add exec_proc.
+	(mi_interpreter_exec): New function. MI's exec_proc.
+
+2002-08-28  Keith Seitz  <keiths@redhat.com>
+
+	* gdbmi.texinfo: Document the interpreter-exec command.
+
+2002-08-21  Keith Seitz  <keiths@redhat.com>
+
+	* mi-events.c (mi_target_changed): Renamed from mi_register_update.
+	* mi.h (mi_target_changed): Ditto.
+	* mi-interp.c (mi_event_handlers): Ditto.
+
+2002-08-19  Keith Seitz  <keiths@redhat.com>
+
+	* mi-cmd-stack.c (mi_cmd_stack_select_frame): Revert 2002-07-25
+	change. stack.c now handles it properly.
+
+2002-08-13  Keith Seitz  <keiths@redhat.com>
+
+	* mi-interp.c (mi_cmd_interpreter_set): Remove. We're not going
+	to allow this.
+	* mi-cmds.c: Remove "interpreter-set" command.
+	* mi-cmds.h (mi_cmd_interpreter_set): Remove.
+
+2002-08-09  Keith Seitz  <keiths@redhat.com>
+
+	* gdbmi.texinfo: Document selected-frame-changed, register-update,
+	and context-changed events.
+
+2002-08-09  Keith Seitz  <keiths@redhat.com>
+
+	* gdbmi.texinfo (-data-list-register-names): Document "-numbers"
+	option.
+	* mi-main.c (mi_cmd_data_list_register_names): Add "-numbers"
+	option.
+
+2002-08-09  Keith Seitz  <keiths@redhat.com>
+
+        * mi-interp.c (mi_event_handlers): Add context_changed event
+        handler.
+	(mi_command_loop): Remove big block of code repeated in 
+	mi_interpreter_resume. I don't think this is needed.
+        (mi_insert_notify_hooks): Remove context_hook.
+        (mi_remove_notify_hooks): Likewise.
+        * mi-events.c (mi_context_changed): New function.
+        * mi.h (mi_context_changed): Add declaration.
+
+2002-07-25  Keith Seitz  <keiths@redhat.com>
+
+	* mi-interp.c (mi_event_handlers): Add selected_frame_level_changed
+	handler.
+	(mi_insert_notify_hooks): Remove breakpoint hooks and frame
+	changed hook.
+	(mi_remove_notify_hooks): Likewise.
+	* mi-events.c (mi_selected_frame_level_changed): New function.
+	(mi_interp_frame_changed_hook): Remove.
+	(mi_interp_create_breakpoint_hook): Remove.
+	(mi_interp_modify_breakpoint_hook): Remove.
+	(mi_interp_delete_breakpoint_hook): Remove.
+	* mi.h (mi_selected_frame_level_changed): Add declaration.
+        (mi_interp_create_breakpoint_hook): Remove declaration.
+        (mi_interp_modify_breakpoint_hook): Remove declaration.
+        (mi_interp_delete_breakpoint_hook): Remove declaration.
+	* mi-cmd-stack.c (mi_cmd_stack_select_frame): If the stack level changes,
+	issue a selected_frame_level_changed event.
+
+2002-07-22  Keith Seitz  <keiths@redhat.com>
+
+	* mi-events.c (mi_register_update): New function.
+	* mi-interp.c (mi_event_handlers): Add mi_register_update
+	event handler.
+	* mi.h (mi_register_update): Add declaration.
+	
+2002-06-24  Keith Seitz  <keiths@redhat.com>
+
+	* mi-cmds.h (mi_execute_command): Add "extern".
+	(mi_error_last_message): New function.
+	* mi-main.c (mi_error_last_message): New function.
+	* mi-interp.c (mi_event_handlers): New static global.
+	(mi_interpreter_init): Don't install mi event handlers here.
+	(mi_interpreter_resume): Install mi event handlers here.
+	(mi_interpreter_exec): Don't actually switch interpreters.
+	Update error messages.
+	exec_proc will return <0 if an error occurs.
+
+2002-06-19  Keith Seitz  <keiths@redhat.com>
+
+	* mi-cmd-break.c (breakpoint_notify): Only query the breakpoint
+	for user breakpoints.
+	(mi_cmd_break_insert): Only reset event handlers for MI0 and MI1
+	interpreters.
+	(mi_cmd_break_watch): Reset uiout output to clear watchpoint
+	query. This is only used for MI0 and MI1.
+
+	* mi-console.h (mi_console_file_new): Add "quote" parameter.
+	* mi_console.c (struct mi_console_file): Add "quote".
+	(mi_console_file_new): Add "quote" parameter.
+	(mi_console_raw_packet): Use the quote character specified in
+	mi_console_file_new, instead of assuming it is '"'.
+
+	* mi-interp.c (mi_event_channel): New channel for event notifications.
+	(mi_interpreter_init): Make static.
+	Set event handlers.
+	(mi_interpreter_resume): Make static.
+	Deal with MI version bump.
+	(mi_interpreter_suspend): Make static.
+	(mi_interpreter_delete): Ditto.
+	(mi_do_one_event): Ditto.
+	(mi_cmd_exec_continuation): Ditto.
+	(mi_interp_query_hook): Ditto.
+	(mi_interp_read_one_line_hook): Ditto.
+	(_initialize_mi_interp): Create explicit mi1 interp.
+
+	* mi-events.c (notify_event): New helper function.
+	(mi_create_breakpoint, mi_modify_breakpoint, mi_delete_breakpoint,
+	mi_create_tracepoint, mi_modify_tracepoint, mi_delete_tracepoint,
+	mi_architecture_changed): New functions.
+
+	* mi.h: Add declarations for mi_create_breakpoint, mi_modify_breakpoint,
+	mi_delete_breakpoint, mi_create_tracepoint, mi_modify_tracepoint,
+	mi_delete_tracepoint, mi_architecture_changed, mi_stdout, mi_stderr,
+	mi_stdtarg, mi_stdlog, and mi_eventchannel.
+
+	* mi-main.c (captured_mi_execute_command): Deal with mi version
+	bump.
+	(mi_load_progress): Ditto.
+
+	* gdbmi.texinfo: Expand notify-async-output to include GDB events.
+	Update all examples to show breakpoint events and
+	remove redundant breakpoint info on "-break-insert" and "-break-watch".
+	The event now supplies everything that is needed.
+
+2002-05-28  Keith Seitz  <keiths@redhat.com>
+
+	* mi-interp.c:  New file. Almost entirely from Apple's
+	sources. Collected and moved here.
+	* mi-events.c: Ditto.
+	* mi.h: New file.
+	* mi-main.c (captured_execute_command): Use catch_exception
+	instead of catch_errors.
+	(mi_execute_command_wrapper): Remove. Using catch_errors now.
+	(mi_input): Make global.
+	(mi_load_progress): Ditto.
+	Use interpreter functions instead of interpreter_p.
+	(mi_command_loop): Moved to mi-interp.c
+	(mi0_command_loop): Ditto.
+	(mi1_command_loop): Ditto.
+	(mi_init_ui): Remove.
+	(_initialize_mi_main): Remove. No longer needed.
+
 2003-02-02  Andrew Cagney  <ac131313@redhat.com>
 
 	From 2002-11-10 Jason Molenda (jason-cl@molenda.com):
@@ -137,7 +350,6 @@
 	and tuples. Do the cleanups when returning errors.
 
 2002-07-29  Andrew Cagney  <ac131313@redhat.com>
-
 
 	* mi-cmd-var.c: Include "gdb_string.h".
 	* mi-cmd-disas.c: Ditto.

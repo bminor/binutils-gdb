@@ -88,6 +88,7 @@ struct mi_cmd mi_cmds[] =
   {"gdb-show", "show %s", 0},
   {"gdb-source", 0, 0},
   {"gdb-version", "show version", 0},
+  {"interpreter-exec", 0, 0, mi_cmd_interpreter_exec},
   {"kod-info", 0, 0},
   {"kod-list", 0, 0},
   {"kod-list-object-types", 0, 0},

@@ -1,6 +1,5 @@
-/* Output generating routines for GDB CLI.
-   Copyright 1999, 2000 Free Software Foundation, Inc.
-   Contributed by Cygnus Solutions.
+/* MI Internal Functions
+   Copyright 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -19,10 +18,21 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef CLI_OUT_H
-#define CLI_OUT_H
+#ifndef MI_H
+#define MI_H
+/* The mi interpreters. */
 
-extern struct ui_out *cli_out_new (struct ui_file *stream);
-extern struct ui_file *cli_out_set_stream (struct ui_out *uiout,
-					   struct ui_file *stream);
-#endif
+extern struct gdb_interpreter *mi_interp;
+extern struct gdb_interpreter *mi1_interp;
+extern struct gdb_events mi_event_handlers;
+extern struct ui_file *mi_event_channel;
+
+extern void mi_setup_architecture_data (void);
+extern void mi_register_gdbarch_swap (void);
+
+extern void mi_load_progress (const char *section_name,
+			      unsigned long sent_so_far,
+			      unsigned long total_section,
+			      unsigned long total_sent,
+			      unsigned long grand_total);
+#endif /* MI_H */

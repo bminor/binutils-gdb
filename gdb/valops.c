@@ -727,6 +727,8 @@ value_assign (struct value *toval, struct value *fromval)
 	      error ("Attempt to assign to an unmodifiable value.");
 	  }
 
+	if (regno > VALUE_FRAME_REGNUM (toval) + reg_offset)
+	  regno = -1;
 	if (register_changed_hook)
 	  register_changed_hook (-1);
 	target_changed_event ();

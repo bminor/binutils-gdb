@@ -1,3 +1,337 @@
+2002-11-05  Elena Zannoni  <ezannoni@redhat.com>
+
+        * defs.h (selected_frame_level_changed_hook): Removed.
+
+2002-11-05  Elena Zannoni  <ezannoni@redhat.com>
+        
+        * event-top.c: Reorg some code, to minimize diffs with mainline.
+
+2002-11-05  Elena Zannoni  <ezannoni@redhat.com>
+
+        * Makefile.in (event-loop.o): Remove dependency on interps.h.
+        * event-loop.c: Remove include of interps.h.
+
+2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
+
+	* interps.h (clear_interpreter_hooks): Add 'extern' keyword.
+
+2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
+
+	* cli/cli-interp.c (_initialize_cli_interp): Call
+	gdb_interpreter_new and gdb_interpreter_add.
+	* top.c (gdb_init): Call gdb_interpreter_lookup.
+	(gdb_init): Call gdb_interpreter_set.
+	* interps.c (gdb_interpreter_new): Renamed from
+	gdb_new_interpreter.
+	(gdb_interpreter_add): Renamed from gdb_add_interpreter.
+	(gdb_interpreter_set): Renamed from gdb_set_interpreter.
+	(gdb_interpreter_lookup): Renamed from gdb_lookup_interpreter.
+	(gdb_interpreter_current): Renamed from gdb_current_interpreter.
+	Update all callers.
+	* interps.h: Ditto.
+	
+
+2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
+
+	* interps.h (gdb_interpreter_is_quiet_p): Rename from
+	gdb_interpreter_is_quiet.
+	* cli/cli-interp.c (cli_interpreter_display_prompt_p): Call
+	gdb_interpreter_is_quiet_p.
+	* interps.c (gdb_interpreter_is_quiet_p): Rename from
+	gdb_interpreter_is_quiet.
+	(gdb_set_interpreter): Call gdb_interpreter_is_quiet_p.
+
+2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
+
+	* event-top.c (display_gdb_prompt): Use
+	gdb_interpreter_display_prompt_p.
+	* cli/cli-interp.c (cli_interpreter_display_prompt_p): Rename from
+	cli_interpreter_display_prompt and rewrite.
+	(_initialize_cli_interp): New proc name is
+	cli_interpreter_display_prompt_p.
+	* interps.c (gdb_new_interpreter): Initialize prompt_proc_p
+	instead of prompt_proc.
+	(gdb_interpreter_display_prompt_p): Rewrite as a predicate.
+	(gdb_interpreter_is_quiet_p): Rename from gdb_interpreter_is_quiet.
+	(gdb_set_interpreter): Call gdb_interpreter_is_quiet_p.
+
+	* interps.h (interp_prompt_ftype): Update typedef.
+	(struct gdb_interpreter_procs): Rename prompt_proc to
+	prompt_proc_p.
+	(gdb_interpreter_display_prompt_p): Export this instead of old
+	function.
+
+2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
+
+	* interps.c (list_interpreter_cmd, do_set_interpreter): Remove
+	useless prototypes.
+	Update a few comments, remove gratuitous blank lines.
+
+2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
+
+	* cli/cli-interp.c (cli_interpreter_delete): Delete.
+	(_initialize_cli_interp): Remove delete_proc.
+
+	* interps.h (struct gdb_interpreter_procs): Remove delete_proc.
+	(interp_delete_ftype): Delete.
+	(gdb_delete_interpreter): Remove.
+
+	* interps.c (gdb_delete_interpreter): Remove.
+	(gdb_new_interpreter): Don't initialize delete_proc.
+
+2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
+
+	* interps.c (set_interpreter_cmd): Remove.
+
+2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
+
+	* interps.c (interpreter_completer): Initialize alloced.
+	(struct gdb_interpreter): Reformat.
+	(set_interpreter_cmd): Remove.
+
+2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
+
+	* interps.h (struct gdb_interpreter_procs): Remove do_one_event_proc.
+	(interp_do_one_event_ftype): Delete.
+	* interps.c (gdb_new_interpreter): Remove setup of do_one_event
+	procedure.
+	(interpreter_do_one_event): Delete.
+	* event-loop.c (start_event_loop): Remove no-op call to
+	interpreter_do_one_event.
+	* cli/cli-interps.c: (cli_interpreter_do_one_event): Delete.
+	
+2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
+
+        * Makefile.in (mi-main.o, mi-cmd-break.o, event-loop.o): Update
+        dependencies on interps.h.
+
+2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
+
+	* interps.h (GDB_INTERPRETER_MI2): Define.
+	(GDB_INTERPRETER_MI0): Remove.
+
+2002-10-01  Keith Seitz  <keiths@redhat.com>
+
+	* interps.c (interpreter_exec_cmd): Remove mention of "mi" in
+	error message.
+	(list_interpreter_cmd): Removed.
+
+	* cli/cli-interp.c (do_captured_execute_command): New function.
+	(safe_execute_command): New function.
+	* Makefile.in (cli-interp.c): Depend on top_h.
+	* wrapper.c (do_captured_execute_command): Moved to cli/cli-interp.c.
+	(gdb_execute_command): Removed.
+	* wrapper.h (gdb_execute_command): Removed.
+
+2002-09-04  Keith Seitz  <keiths@redhat.com>
+
+	* thread.c (do_captured_list_thread_ids): Call prune_threads
+	and target_find_new_threads.
+
+2002-08-29  Keith Seitz  <keiths@redhat.com>
+
+	* gdb-events.sh (context_changed): Rename to selected_thread_changed
+	to parallel selected_frame_level_changed.
+	* thread.c (do_captured_thread_select): Ditto.
+	* gdb-events.c: Regenerate.
+	* gdb-events.h: Regenerate.
+
+2002-08-28  Keith Seitz  <keiths@redhat.com>
+
+	* interps.c (interpreter_exec_cmd): Temporarily set
+	current interpreter to quiet, too, so that we don't get
+	too many prompts when switching interpreters.
+
+2002-08-28  Keith Seitz  <keiths@redhat.com>
+
+	* thread.c (do_captured_thread_select): Add context-changed
+	notification.
+	* infrun.c (handle_inferior_event): Remove context-changed
+	notification. The stop result already has this information.
+
+	* thread.c (do_captured_list_thread_ids): Use ui_out_list_begin/end
+	instead of ui_out_tuple_begin/end.
+
+2002-08-22  Keith Seitz  <keiths@redhat.com>
+
+	* breakpoint.c (internal_breakpoint_number): Revert 2002-06-18 change.
+	(create_internal_breakpoint): Likewise.
+	(watch_command_1): Use create_internal_breakpoint to create
+	the watchpoint scope breakpoint.
+
+2002-08-21  Keith Seitz  <keiths@redhat.com>
+
+	* gdb-events.sh: Replace register_update with target-changed event.
+	* gdb-events.c: Regenerated.
+	* gdb-events.c: Regenerated.
+	* valops.c (value_assign): Use target_changed_event instead
+	of register_update_event and memory_changed.
+
+2002-08-19  Keith Seitz  <keiths@redhat.com>
+
+	* stack.c (select_frame_command): Send selected-frame-level-changed
+	event notification, but only if the level actually changed.
+	(up_silently_base): Add selected-frame-level-changed event
+	notification.
+	(down_silently_base): Likewise.
+	(frame_command): Revert 2002-07-25 changes.
+	(up_command): Likewise.
+	(down_command): Likewise.
+
+2002-08-13  Keith Seitz  <keiths@redhat.com>
+
+	* interps.c (_initialize_interpreter): Remove ability to set
+	the interpreter. This could really undermine MI clients.
+	* top.c (catcher): Don't worry about interpreter changes.
+
+2002-08-12  Keith Seitz  <keiths@redhat.com>
+
+	* interps.c (_initialize_interpreter): Add completer function
+	to "set interpreter" command.
+
+2002-08-12  Keith Seitz  <keiths@redhat.com>
+
+	* interps.c: Run through gdb_indent.sh
+	* interps.h: Ditto.
+
+2002-08-08  Keith Seitz  <keiths@redhat.com>
+
+	* infrun.c (handle_inferior_event): Add context_changed_event.
+	* gdb-events.sh (context_hook): Removed comment.
+	(context_changed): Add new event.
+	* gdb-events.c: Regenerate.
+	* gdb-events.h: Regenerate.
+
+2002-07-25  Keith Seitz  <keiths@redhat.com>
+
+	* stack.c (frame_command): If the frame level changed, issue
+	a selected_frame_level_changed event.
+	(up_command): Add selected_frame_level_changed event;
+	(down_command): Likewise.
+
+	* gdb-events.sh: Add selected_frame_level_changed event.
+	* gdb-events.c: Regenerate.
+	* gdb-events.h: Regenerate.
+	
+	* stack.c (print_frame_info_base): Always set current_source_symtab
+	and current_source_line.
+
+	* cli/cli-interp.c (cli_interpreter_exec): Pass from_tty=1 to
+	gdb_execute_command.
+
+2002-07-22  Keith Seitz  <keiths@redhat.com>
+
+	* gdb-events.sh (register_changed_hook): Remove comment.
+	(register_update): New event.
+	* gdb-events.c: Regenerated.
+	* gdb-events.h: Regenerated.
+
+2002-07-22  Keith Seitz  <keiths@redhat.com>
+
+	* valops.c (value_assign): Add register_update event notification
+	for lval_register and lval_reg_frame_relative.
+
+2002-06-24  Keith Seitz  <keiths@redhat.com>
+
+	* Makefile.in (interps.o): Add gdb-events.h as a dependency.
+
+	* gdb-events.sh (clear_gdb_event_hooks): New function.
+	* gdb-events.c: Regenerate.
+	* gdb-events.h: Regenerate.
+
+	* cli-out.h (cli_out_set_stream): New function.
+	* cli-out.c (cli_out_set_stream): New function.
+
+	* interps.c: Include gdb-events.h.
+	(clear_interpreter_hooks): Also clear out event handlers.
+	(gdb_set_interpreter): Clear out any hooks/event handlers that
+	may have been installed by old interpreter.
+
+	* cli/cli-interp.c (cli_interpreter_exec): Set the stream for the
+	cli's uiout to gdb_stdout, which has probably changed from it's
+	initialization. Restore the original stream when we're done executing
+	in the interpreter.
+
+2002-06-18  Keith Seitz  <keiths@redhat.com>
+
+	* breakpoint.c (internal_breakpoint_number): Make static global.
+	(condition_command): Add modify breakpoint event notification.
+	(commands_command): Likewise.
+	(create_internal_breakpoint): internal_breakpoint_number is now global.
+	Add create breakpoint event notification.
+	(create_fork_vfork_event_catchpoint): Likewise.
+	(create_exec_event_catchpoint): Likewise.
+	(mention): Remove FIXME and create breakpoint event.
+	(create_breakpoints): Add create breakpoint event notification.
+	(watch_command_1): Likewise.
+	(create_exception_catchpoint): Likewise.
+	(set_breakpoint_sal): Likewise.
+	(set_ignore_count): Add modify breakopint event notification.
+	
+	* interps.h: Add GDB_INTERPRETER_MI1. GDB_INTERPRETER_MI will
+	now be mi version 2.
+
+	* cli/cli-interp.c (cli_uiout): Make static.
+	(cli_interp): Make static.
+	(cli_interpreter_exec): Use cli_uiout instead of uiout.
+
+2002-05-28  Keith Seitz  <keiths@redhat.com>
+
+	* cli/cli-interp.c: New file. Almost entirely from Apple's
+	sources. Collected and moved here.
+	* Makefile.in: Add new files.
+	Update dependencies on interps.h.
+	* defs.h (selected_frame_level_changed_hook): Add declaration.
+	* wrapper.c (captured_execute_command): New function.
+	(do_captured_execute_command): New function.
+	* wrapper.h (captured_execute_command): Declare.
+	* top.c (catcher): If the caught command changes the uiout on us,
+	try to do something sane, like using the current interpreter's
+	uiout.
+
+        From Jim Ingham <jingham@apple.com>:
+	* event-loop.c (start_event_loop): Poll the interpreter's event loop
+	as well as gdb...
+	* event-top.c (gdb_setup_readline, gdb_disable_readline): New functions,
+	used by console & mi to grab & relinquish control of the readline input.
+	* event-top.h (gdb_setup_readline, gdb_disable_readline): Declare.
+	* main.c (captured_main): Copy the interpreter name, since we will
+	eventually use it as a set variable.
+	* top.c (gdb_init): Use the interpreter mechanism to startup the stdin
+	handling.
+	* interps.c: New file. (Originally called interpreter.c by Apple)
+	* interps.h: New file. (Originally called interpreter.h by Apple)
+	* mi/mi-cmds.c, mi/mi-cmds.h: Add mi commands -interpreter-set and
+	-interpreter-exec.
+	* mi/mi-main.c: Add the interpreter functions.
+	(mi_execute_command): Don't print the prompt if the command return
+	is MI_CMD_QUIET.
+
+2003-02-02  Elena Zannoni  <ezannoni@redhat.com>
+
+	Fix PR gdb/742 gdb/743 gdb/877
+	* disasm.c (dump_insns): Use make_cleanup_ui_out_tuple_begin_end.
+	(do_mixed_source_and_assembly): Use
+	make_cleanup_ui_out_tuple_begin_end and
+	make_cleanup_ui_out_tuple_begin_end.
+	(do_mixed_source_and_assembly): Ditto.
+	* thread.c (do_captured_list_thread_ids): Ditto.
+	* ui-out.h (ui_out_table_begin, ui_out_list_begin,
+	ui_out_tuple_begin, ui_out_table_end, ui_out_list_end,
+	ui_out_tuple_end): Delete prototypes.
+	* ui-out.c (ui_out_list_begin, ui_out_tuple_begin,
+	ui_out_list_end, ui_out_tuple_end): Delete.
+
+	From Kevin Buettner  <kevinb@redhat.com>:
+	* ui-out.h (make_cleanup_ui_out_table_begin_end): New function.
+        * ui-out.c (make_cleanup_ui_out_table_begin_end)
+        (do_cleanup_table_end):  New functions.
+        * breakpoint.c (print_it_typical, print_one_breakpoint, mention):
+        Use cleanups to invoke_ui_out_tuple_end().
+        (breakpoint_1): Use cleanup to invoke ui_out_table_end().
+	* cli/cli-setshow.c (cmd_show_list): Use
+	make_cleanup_ui_out_tuple_begin_end.
+	
 2003-02-02  Andrew Cagney  <ac131313@redhat.com>
 
 	* frame.c (frame_unwind_register): New function.
@@ -610,6 +944,7 @@
 
 2003-01-14  Elena Zannoni  <ezannoni@redhat.com>
 
+	Fix PR gdb/898
 	* breakpoint.c (until_break_command): Add new argument.  Use it to
 	decide whether to stop only at the current frame or not.
 	* breakpoint.h (until_break_command): Update prototype.

@@ -20,7 +20,7 @@
 #include "value.h"
 #include "wrapper.h"
 
-/* Use this struct to pass arguments to wrapper routines. We assume
+/* use this struct to pass arguments to wrapper routines. We assume
    (arbitrarily) that no gdb function takes more than ten arguments. */
 struct gdb_wrapper_arguments
   {
@@ -330,4 +330,3 @@ do_captured_value_struct_elt (struct ui_out *uiout, void *data)
 			     cargs->static_memfuncp, cargs->err);
   return GDB_RC_OK;
 }
-

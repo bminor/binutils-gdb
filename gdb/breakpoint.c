@@ -2002,7 +2002,7 @@ top:
 static enum print_stop_action
 print_it_typical (bpstat bs)
 {
-  struct cleanup *old_chain;
+  struct cleanup *old_chain, *ui_out_chain;
   struct ui_stream *stb;
   stb = ui_out_stream_new (uiout);
   old_chain = make_cleanup_ui_out_stream_delete (stb);
@@ -2163,14 +2163,14 @@ print_it_typical (bpstat bs)
 	  if (ui_out_is_mi_like_p (uiout))
 	    ui_out_field_string (uiout, "reason", "watchpoint-trigger");
 	  mention (bs->breakpoint_at);
-	  ui_out_tuple_begin (uiout, "value");
+	  ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "value");
 	  ui_out_text (uiout, "\nOld value = ");
 	  value_print (bs->old_val, stb->stream, 0, Val_pretty_default);
 	  ui_out_field_stream (uiout, "old", stb);
 	  ui_out_text (uiout, "\nNew value = ");
 	  value_print (bs->breakpoint_at->val, stb->stream, 0, Val_pretty_default);
 	  ui_out_field_stream (uiout, "new", stb);
-	  ui_out_tuple_end (uiout);
+	  do_cleanups (ui_out_chain);
 	  ui_out_text (uiout, "\n");
 	  value_free (bs->old_val);
 	  bs->old_val = NULL;
@@ -2183,11 +2183,11 @@ print_it_typical (bpstat bs)
       if (ui_out_is_mi_like_p (uiout))
 	ui_out_field_string (uiout, "reason", "read-watchpoint-trigger");
       mention (bs->breakpoint_at);
-      ui_out_tuple_begin (uiout, "value");
+      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "value");
       ui_out_text (uiout, "\nValue = ");
       value_print (bs->breakpoint_at->val, stb->stream, 0, Val_pretty_default);
       ui_out_field_stream (uiout, "value", stb);
-      ui_out_tuple_end (uiout);
+      do_cleanups (ui_out_chain);
       ui_out_text (uiout, "\n");
       return PRINT_UNKNOWN;
       break;
@@ -2199,7 +2199,7 @@ print_it_typical (bpstat bs)
 	  if (ui_out_is_mi_like_p (uiout))
 	    ui_out_field_string (uiout, "reason", "access-watchpoint-trigger");
 	  mention (bs->breakpoint_at);
-	  ui_out_tuple_begin (uiout, "value");
+	  ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "value");
 	  ui_out_text (uiout, "\nOld value = ");
 	  value_print (bs->old_val, stb->stream, 0, Val_pretty_default);
 	  ui_out_field_stream (uiout, "old", stb);
@@ -2212,12 +2212,12 @@ print_it_typical (bpstat bs)
 	  mention (bs->breakpoint_at);
 	  if (ui_out_is_mi_like_p (uiout))
 	    ui_out_field_string (uiout, "reason", "access-watchpoint-trigger");
-	  ui_out_tuple_begin (uiout, "value");
+	  ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "value");
 	  ui_out_text (uiout, "\nValue = ");
 	}
       value_print (bs->breakpoint_at->val, stb->stream, 0,Val_pretty_default);
       ui_out_field_stream (uiout, "new", stb);
-      ui_out_tuple_end (uiout);
+      do_cleanups (ui_out_chain);
       ui_out_text (uiout, "\n");
       return PRINT_UNKNOWN;
       break;
@@ -3229,9 +3229,10 @@ print_one_breakpoint (struct breakpoint *b,
   char wrap_indent[80];
   struct ui_stream *stb = ui_out_stream_new (uiout);
   struct cleanup *old_chain = make_cleanup_ui_out_stream_delete (stb);
+  struct cleanup *bkpt_chain;
 
   annotate_record ();
-  ui_out_tuple_begin (uiout, "bkpt");
+  bkpt_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "bkpt");
 
   /* 1 */
   annotate_field (0);
@@ -3469,12 +3470,14 @@ print_one_breakpoint (struct breakpoint *b,
   
   if ((l = b->commands))
     {
+      struct cleanup *script_chain;
+
       annotate_field (9);
-      ui_out_tuple_begin (uiout, "script");
+      script_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "script");
       print_command_lines (uiout, l, 4);
-      ui_out_tuple_end (uiout);
+      do_cleanups (script_chain);
     }
-  ui_out_tuple_end (uiout);
+  do_cleanups (bkpt_chain);
   do_cleanups (old_chain);
 }
 
@@ -3542,6 +3545,7 @@ breakpoint_1 (int bnum, int allflag)
   register struct breakpoint *b;
   CORE_ADDR last_addr = (CORE_ADDR) -1;
   int nr_printable_breakpoints;
+  struct cleanup *bkpttbl_chain;
   
   /* Compute the number of rows in the table. */
   nr_printable_breakpoints = 0;
@@ -3554,9 +3558,13 @@ breakpoint_1 (int bnum, int allflag)
       }
 
   if (addressprint)
-    ui_out_table_begin (uiout, 6, nr_printable_breakpoints, "BreakpointTable");
+    bkpttbl_chain 
+      = make_cleanup_ui_out_table_begin_end (uiout, 6, nr_printable_breakpoints,
+                                             "BreakpointTable");
   else
-    ui_out_table_begin (uiout, 5, nr_printable_breakpoints, "BreakpointTable");
+    bkpttbl_chain 
+      = make_cleanup_ui_out_table_begin_end (uiout, 5, nr_printable_breakpoints,
+                                             "BreakpointTable");
 
   if (nr_printable_breakpoints > 0)
     annotate_breakpoints_headers ();
@@ -3598,7 +3606,7 @@ breakpoint_1 (int bnum, int allflag)
 	  print_one_breakpoint (b, &last_addr);
       }
   
-  ui_out_table_end (uiout);
+  do_cleanups (bkpttbl_chain);
 
   if (nr_printable_breakpoints == 0)
     {
@@ -3891,6 +3899,7 @@ create_internal_breakpoint (CORE_ADDR address, enum bptype type)
   b = set_raw_breakpoint (sal, type);
   b->number = internal_breakpoint_number--;
   b->disposition = disp_donttouch;
+  breakpoint_create_event (b->number);
 
   return b;
 }
@@ -4174,6 +4183,7 @@ solib_load_unload_1 (char *hookname, int tempflag, char *dll_pathname,
     }
 
   mention (b);
+  breakpoint_create_event (b->number);
   do_cleanups (old_chain);
 }
 
@@ -4219,6 +4229,7 @@ create_fork_vfork_event_catchpoint (int tempflag, char *cond_string,
   b->forked_inferior_pid = 0;
 
   mention (b);
+  breakpoint_create_event (b->number);
 }
 
 void
@@ -4257,6 +4268,7 @@ create_exec_event_catchpoint (int tempflag, char *cond_string)
   b->disposition = tempflag ? disp_del : disp_donttouch;
 
   mention (b);
+  breakpoint_create_event (b->number);
 }
 
 static int
@@ -4380,6 +4392,7 @@ set_momentary_breakpoint (struct symtab_and_line sal, struct frame_id frame_id,
   if (in_thread_list (inferior_ptid))
     b->thread = pid_to_thread_id (inferior_ptid);
 
+  breakpoint_create_event (b->number);
   return b;
 }
 
@@ -4390,20 +4403,11 @@ static void
 mention (struct breakpoint *b)
 {
   int say_where = 0;
-  struct cleanup *old_chain;
+  struct cleanup *old_chain, *ui_out_chain;
   struct ui_stream *stb;
 
   stb = ui_out_stream_new (uiout);
   old_chain = make_cleanup_ui_out_stream_delete (stb);
-
-  /* FIXME: This is misplaced; mention() is called by things (like hitting a
-     watchpoint) other than breakpoint creation.  It should be possible to
-     clean this up and at the same time replace the random calls to
-     breakpoint_changed with this hook, as has already been done for
-     delete_breakpoint_hook and so on.  */
-  if (create_breakpoint_hook)
-    create_breakpoint_hook (b);
-  breakpoint_create_event (b->number);
 
   switch (b->type)
     {
@@ -4412,39 +4416,39 @@ mention (struct breakpoint *b)
       break;
     case bp_watchpoint:
       ui_out_text (uiout, "Watchpoint ");
-      ui_out_tuple_begin (uiout, "wpt");
+      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "wpt");
       ui_out_field_int (uiout, "number", b->number);
       ui_out_text (uiout, ": ");
       print_expression (b->exp, stb->stream);
       ui_out_field_stream (uiout, "exp", stb);
-      ui_out_tuple_end (uiout);
+      do_cleanups (ui_out_chain);
       break;
     case bp_hardware_watchpoint:
       ui_out_text (uiout, "Hardware watchpoint ");
-      ui_out_tuple_begin (uiout, "wpt");
+      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "wpt");
       ui_out_field_int (uiout, "number", b->number);
       ui_out_text (uiout, ": ");
       print_expression (b->exp, stb->stream);
       ui_out_field_stream (uiout, "exp", stb);
-      ui_out_tuple_end (uiout);
+      do_cleanups (ui_out_chain);
       break;
     case bp_read_watchpoint:
       ui_out_text (uiout, "Hardware read watchpoint ");
-      ui_out_tuple_begin (uiout, "hw-rwpt");
+      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "hw-rwpt");
       ui_out_field_int (uiout, "number", b->number);
       ui_out_text (uiout, ": ");
       print_expression (b->exp, stb->stream);
       ui_out_field_stream (uiout, "exp", stb);
-      ui_out_tuple_end (uiout);
+      do_cleanups (ui_out_chain);
       break;
     case bp_access_watchpoint:
       ui_out_text (uiout, "Hardware access (read/write) watchpoint ");
-      ui_out_tuple_begin (uiout, "hw-awpt");
+      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "hw-awpt");
       ui_out_field_int (uiout, "number", b->number);
       ui_out_text (uiout, ": ");
       print_expression (b->exp, stb->stream);
       ui_out_field_stream (uiout, "exp", stb);
-      ui_out_tuple_end (uiout);
+      do_cleanups (ui_out_chain);
       break;
     case bp_breakpoint:
       if (ui_out_is_mi_like_p (uiout))
@@ -4575,6 +4579,7 @@ create_breakpoints (struct symtabs_and_lines sals, char **addr_string,
 	b->enable_state = bp_enabled;
 	b->disposition = disposition;
 	mention (b);
+	breakpoint_create_event (b->number);
       }
   }    
 }
@@ -5429,9 +5434,12 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
 	  /* The scope breakpoint is related to the watchpoint.  We
 	     will need to act on them together.  */
 	  b->related_breakpoint = scope_breakpoint;
+
+	  breakpoint_create_event (scope_breakpoint->number);
 	}
     }
   value_free_to_mark (mark);
+  breakpoint_create_event (b->number);
   mention (b);
 }
 
@@ -6175,6 +6183,7 @@ create_exception_catchpoint (int tempflag, char *cond_string,
   b->enable_state = bp_enabled;
   b->disposition = tempflag ? disp_del : disp_donttouch;
   mention (b);
+  breakpoint_create_event (b->number);
 }
 
 /* Deal with "catch catch" and "catch throw" commands */
@@ -6340,6 +6349,7 @@ handle_gnu_4_16_catch_command (char *arg, int tempflag, int from_tty)
       b->disposition = tempflag ? disp_del : disp_donttouch;
 
       mention (b);
+      breakpoint_create_event (b->number);
     }
 
   if (sals.nelts > 1)
@@ -6482,6 +6492,7 @@ set_breakpoint_sal (struct symtab_and_line sal)
   b->number = breakpoint_count;
   b->cond = 0;
   b->thread = -1;
+  breakpoint_create_event (b->number);
   return b;
 }
 

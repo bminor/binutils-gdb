@@ -1195,7 +1195,6 @@ extern void (*error_begin_hook) (void);
 
 extern int (*ui_load_progress_hook) (const char *section, unsigned long num);
 
-
 /* Inhibit window interface if non-zero. */
 
 extern int use_windows;

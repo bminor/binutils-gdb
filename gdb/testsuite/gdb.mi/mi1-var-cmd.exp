@@ -276,18 +276,6 @@ mi_gdb_test "-var-assign linteger 3333" \
 	"\\^done,value=\"3333\"" \
 	"assign to linteger"
 
-mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\{name=\"linteger\",in_scope=\"true\",type_changed=\"false\"\}" \
-	"update all vars: linteger changed after assign"
-
-mi_gdb_test "-var-assign linteger 3333" \
-	"\\^done,value=\"3333\"" \
-	"assign to linteger again, same value"
-
-mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\{\}" \
-	"update all vars: linteger not changed after same assign"
-
 mi_gdb_test "-var-evaluate-expression linteger" \
 	"\\^done,value=\"3333\"" \
 	"eval linteger"
@@ -295,14 +283,6 @@ mi_gdb_test "-var-evaluate-expression linteger" \
 mi_gdb_test "-var-assign lpinteger \"&linteger + 3\"" \
 	"\\^done,value=\"$hex\"" \
 	"assign to lpinteger"
-
-mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\{name=\"lpinteger\",in_scope=\"true\",type_changed=\"false\"\}" \
-	"update all vars: lpinteger changed after assign"
-
-mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\{\}" \
-	"update all vars: no changes for second update"
 
 mi_gdb_test "-var-evaluate-expression lpinteger" \
 	"\\^done,value=\"$hex\"" \
@@ -526,35 +506,6 @@ mi_gdb_test "-var-delete i" \
 mi_gdb_test "-var-delete l" \
 	"\\^done,ndeleted=\"1\"" \
 	"delete var l"
-
-# Test whether we can follow the name of a variable through multiple
-# stack frames.
-mi_gdb_test "-break-insert do_special_tests" \
-  {\^done,bkpt=.*} \
-  "set breakpoint at do_special_tests"
-
-mi_continue_to {.*} do_special_tests {.*} {.*var-cmd.c} {.*} {stop in do_special_tests}
-
-mi_gdb_test "-var-create selected_a @ a" \
-  {\^done,name="selected_a",numchild="0",type="int"} \
-  "create selected_a"
-
-mi_gdb_test "-break-insert incr_a" \
-  {\^done,bkpt=.*} \
-  "set breakpoint at incr_a"
-
-mi_continue_to {.*} incr_a {.*} {.*var-cmd.c} {.*} {stop in incr_a}
-
-mi_gdb_test "-var-update selected_a" \
-  {\^done,changelist=\{name="selected_a",in_scope="true",new_type="char",new_num_children="0"\}} \
-  "update selected_a in incr_a"
-
-mi_next "step a line in incr_a"
-mi_next "return from incr_a to do_special_tests"
-
-mi_gdb_test "-var-update selected_a" \
-  {\^done,changelist=\{name="selected_a",in_scope="true",new_type="int",new_num_children="0"\}} \
-  "update selected_a in do_special_tests"
 
 mi_gdb_exit
 return 0
