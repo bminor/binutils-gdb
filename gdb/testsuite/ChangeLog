@@ -1,3 +1,12 @@
+2002-12-17  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/try_catch.cc: Add marker comments.
+	* gdb.c++/try_catch.exp: Get line numbers from marker comments.
+	* gdb.c++/m-data.cc: Delete namespace __gnu_test.
+	* gdb.c++/m-static.cc: Ditto.
+	* gdb.c++/m-static1.cc: Ditto.
+	* gdb.c++/try_catch.cc: Ditto.
+
 2002-12-16  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* lib/mi-support.exp (mi_reinitialize_dir): Check mi level

@@ -54,31 +54,29 @@ if ![runto_main] then {
     continue
 }
 
-# One.
+gdb_breakpoint [gdb_get_line_number "marker 1-throw"]
+gdb_continue_to_breakpoint "marker 1-throw"
 
-gdb_test "break 61" "Breakpoint \[0-9\]*.*line 61\\."
-gdb_test "continue" "Continuing\\.\r\n\r\nBreakpoint.*at.*try_catch\\.cc:61\r\n.*" "continue to 61"
+gdb_breakpoint [gdb_get_line_number "marker 1-catch"]
+gdb_continue_to_breakpoint "marker 1-catch"
 
-gdb_test "break 66" "Breakpoint \[0-9\]*.*line 66\\."
-gdb_test "continue" "Continuing\\.\r\n\r\nBreakpoint.*at.*try_catch\\.cc:66\r\n.*" "continue to 66"
+gdb_breakpoint [gdb_get_line_number "marker 2-start"]
+gdb_continue_to_breakpoint "marker 2-start"
 
-gdb_test "break 80" "Breakpoint \[0-9\]*.*line 80\\."
-gdb_test "continue" "Continuing\\.\r\n\r\nBreakpoint.*at.*try_catch\\.cc:80\r\n.*" "continue to 80"
+gdb_breakpoint [gdb_get_line_number "marker 2-next"]
+gdb_continue_to_breakpoint "marker 2-next"
 
-gdb_test "break 83" "Breakpoint \[0-9\]*.*line 83\\."
-gdb_test "continue" "Continuing\\.\r\n\r\nBreakpoint.*at.*try_catch\\.cc:83\r\n.*" "continue to 83"
+gdb_breakpoint [gdb_get_line_number "marker 2-throw"]
+gdb_continue_to_breakpoint "marker 2-throw"
 
-gdb_test "break 87" "Breakpoint \[0-9\]*.*line 87\\."
-gdb_test "continue" "Continuing\\.\r\n\r\nBreakpoint.*at.*try_catch\\.cc:87\r\n.*" "continue to 87"
+gdb_breakpoint [gdb_get_line_number "marker 2-catch"]
+gdb_continue_to_breakpoint "marker 2-catch"
 
-gdb_test "break 92" "Breakpoint \[0-9\]*.*line 92\\."
-gdb_test "continue" "Continuing\\.\r\n\r\nBreakpoint.*at.*try_catch\\.cc:92\r\n.*" "continue to 92"
+gdb_breakpoint [gdb_get_line_number "marker 3-throw"]
+gdb_continue_to_breakpoint "marker 3-throw"
 
-gdb_test "break 118" "Breakpoint \[0-9\]*.*line 118\\."
-gdb_test "continue" "Continuing\\.\r\n\r\nBreakpoint.*at.*try_catch\\.cc:118\r\n.*" "continue to 118"
-
-gdb_test "break 122" "Breakpoint \[0-9\]*.*line 122\\."
-gdb_test "continue" "Continuing\\.\r\n\r\nBreakpoint.*at.*try_catch\\.cc:122\r\n.*" "continue to 122"
+gdb_breakpoint [gdb_get_line_number "marker 3-catch"]
+gdb_continue_to_breakpoint "marker 3-catch"
 
 gdb_exit
 return 0
