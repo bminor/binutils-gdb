@@ -1,6 +1,11 @@
 Wed Dec  7 16:49:14 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
+	* gas/mips/mul.d,jal.d: Fix 0-strings to work with 64-bit hosted
+	disassembly.
+
 	* gas/ieee-fp: Renamed from ieee.fp.
+
+	* lib/gas-defs.exp: Make sure timeout is at least 2 minutes.
 
 Wed Nov 30 10:48:00 1994  Jeff Law  (law@snake.cs.utah.edu)
 

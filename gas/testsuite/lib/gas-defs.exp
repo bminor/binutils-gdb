@@ -109,7 +109,7 @@ proc gas_test { file as_opts var_opts testname } {
 	    if [expr $i&$num] then {
 		set extra_opts "$extra_opts $opt($bit)"
 		if $ignore_stdout($bit) then {
-		    set maybe_ignore_stdout "1>/dev/null"
+		    set maybe_ignore_stdout ">/dev/null"
 		}
 	    }
 	}
@@ -131,14 +131,14 @@ proc gas_test { file as_opts var_opts testname } {
 proc gas_test_ignore_stdout { file as_opts testname } {
     global comp_output
 
-    gas_run $file $as_opts "2>&1 1>/dev/null"
+    gas_run $file $as_opts ">/dev/null"
     want_no_output $testname
 }
 
 proc gas_test_error { file as_opts testname } {
     global comp_output
 
-    gas_run $file $as_opts "2>&1 1>/dev/null"
+    gas_run $file $as_opts ">/dev/null"
     if ![string match "" $comp_output] then {
 	send_log "$comp_output\n"
 	verbose "$comp_output" 3
@@ -198,6 +198,7 @@ proc run_dump_test { name } {
     set opts(nm) {}
     set opts(name) {}
     set opts(PROG) {}
+    set opts(source) {}
 
     foreach i $opt_array {
 	set opt_name [lindex $i 0]
@@ -236,7 +237,13 @@ proc run_dump_test { name } {
     eval set program \$[string toupper $program]
     if { $opts(name) == "" } { set testname "$subdir/$name" } else { set testname $opts(name) }
 
-    catch "exec $srcdir/lib/run $AS $ASFLAGS $opts(as) ${file}.s" comp_output
+    if { $opts(source) == "" } {
+	set sourcefile ${file}.s
+    } else {
+	set sourcefile $srcdir/$subdir/$opts(source)
+    }
+
+    catch "exec $srcdir/lib/run $AS $ASFLAGS $opts(as) $sourcefile" comp_output
 
     if ![string match "" $comp_output] then {
 	send_log "$comp_output\n"
@@ -245,8 +252,9 @@ proc run_dump_test { name } {
 	return
     }
 
-    if [catch "exec $program -r > dump.out" comp_output] {
-	fail_phase $testname {running objdump} {-r}
+    if { $progopts1 == "" } { set $progopts1 "-r" }
+    if [catch "exec $program $progopts $progopts1 > dump.out" comp_output] {
+	fail_phase $testname {running objdump} "$progopts $progopts1"
 	return
     }
 
@@ -268,7 +276,7 @@ proc slurp_options { file } {
     set nws {[^ 	]*}
     # whitespace is ignored anywhere except within the options list;
     # option names are alphabetic only
-    set pat "^#${ws}(\[a-zA-Z\]*)$ws:${ws}($nws)$ws\$"
+    set pat "^#${ws}(\[a-zA-Z\]*)$ws:${ws}(.*)$ws\$"
     while { [gets $f line] != -1 } {
 	set line [string trim $line]
 	# Whitespace here is space-tab.
@@ -311,6 +319,10 @@ proc objdump_finish { } {
     catch "close"
     catch "wait"
 }
+
+# Default timeout is 10 seconds, loses on a slow machine.  But some
+# configurations of dejagnu may override it.
+if {$timeout<120} then { set timeout 120 }
 
 expect_after {
     timeout			{ perror "timeout" }
@@ -366,12 +378,14 @@ proc regexp_diff { file_1 file_2 } {
 	if { $end } { break }
 	verbose "regexp \"^$line_b$\"\nline   \"$line_a\"" 3
 	if ![regexp "^$line_b$" "$line_a"] {
-		verbose "no match" 3
+		send_log "regexp_diff match failure\n"
+		send_log "regexp \"^$line_b$\"\nline   \"$line_a\"\n"
 		set differences 1
 	}
     }
 
     if { $differences == 0 && [eof $file_a] != [eof $file_b] } {
+	send_log "different lengths\n"
 	verbose "different lengths" 3
 	set differences 1
     }
