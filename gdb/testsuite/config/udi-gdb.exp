@@ -56,7 +56,7 @@ proc gdb_target_udi { } {
     set timeout 60
     expect {
 	-re "target udi $targetname\[\r\n\]+" {
-	    continue -expect
+	    exp_continue
 	}
 	-re "TIP UDI 1.2 Conformant.*$prompt $"	{
 	    verbose "Set target to $targetname"
@@ -69,7 +69,7 @@ proc gdb_target_udi { } {
 	}
 	-re "A program is being debugged already.  Kill it\? \(y or n\)" {
 	    send "y\n"
-	    continue -expect
+	    exp_continue
 	}
 	timeout { 
 	    error "Couldn't set target for UDI."
