@@ -1,3 +1,8 @@
+Mon Aug  1 13:19:09 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* nlmheader.y: Per current NetWare docs, accept a revision number
+	of 0 and treat a revision number greater than 26 as 0.
+
 Mon Jul 25 12:58:36 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* objdump.c (objdump_print_address): Correct handling of end of
