@@ -44,11 +44,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* When passing a structure to a function, GCC passes the address
    in a register, not the structure itself. */
 
+/* FIXME: I believe this is wrong.  I believe passing the address
+   depends only on the size of the argument being > 8, not on its type
+   (which is a much more sane way than the REG_STRUCT_HAS_ADDR way,
+   IMHO).  Also, as far as I know it is not dependent on it being
+   passed in a register.  This should be verified before changing
+   anything (in fact, printing structure arguments of
+   2,4,6,8,12,16,and 20 bytes should all be in the test suite).  */
+
 #define REG_STRUCT_HAS_ADDR(gcc_p) (1)
-
-/* Groan */
-
-#define	ARGS_GROW_DOWN
 
 /* Offset from address of function to start of its code.
    Zero on most machines.  */
@@ -77,11 +81,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    the new frame is not set up until the new function executes
    some instructions.  */
 
-#define SAVED_PC_AFTER_CALL(frame) (read_register (RP_REGNUM) & ~3)
-
-/* Address of end of stack space. Who knows.  */
-
-#define STACK_END_ADDR 0x80000000
+#undef	SAVED_PC_AFTER_CALL
+#define SAVED_PC_AFTER_CALL(frame) saved_pc_after_call (frame)
 
 /* Stack grows upward */
 
@@ -139,10 +140,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
   "sr3", "sr5", "sr6", "sr7", "cr0", "cr8", "cr9", "ccr", "cr12", "cr13", \
   "cr24", "cr25", "cr26", "mpsfu_high", "mpsfu_low", "mpsfu_ovflo", "pad", \
   "fpsr", "fpe1", "fpe2", "fpe3", "fpe4", "fpe5", "fpe6", "fpe7", \
-  "fp4", "fp5", "fp6", "fp7", "fp8", \
-  "fp9", "fp10", "fp11", "fp12", "fp13", "fp14", "fp15", \
-  "fp16", "fp17", "fp18", "fp19", "fp20", "fp21", "fp22", "fp23", \
-  "fp24", "fp25", "fp26", "fp27", "fp28", "fp29", "fp30", "fp31"}
+  "fr4", "fr5", "fr6", "fr7", "fr8", \
+  "fr9", "fr10", "fr11", "fr12", "fr13", "fr14", "fr15", \
+  "fr16", "fr17", "fr18", "fr19", "fr20", "fr21", "fr22", "fr23", \
+  "fr24", "fr25", "fr26", "fr27", "fr28", "fr29", "fr30", "fr31"}
 
 /* Register numbers of various important registers.
    Note that some of these values are "real" register numbers,
@@ -313,7 +314,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    by FI does not have a frame on the stack associated with it.  If it
    does not, FRAMELESS is set to 1, else 0.  */
 #define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS) \
-  (FRAMELESS) = frameless_look_for_prologue(FI)
+  (FRAMELESS) = frameless_function_invocation(FI)
 
 #define FRAME_SAVED_PC(FRAME) frame_saved_pc (FRAME)
 
@@ -563,3 +564,5 @@ struct obj_unwind_info {
 };
 
 #define OBJ_UNWIND_INFO(obj) ((struct obj_unwind_info *)obj->obj_private)
+
+#define TARGET_READ_PC() target_read_pc ()

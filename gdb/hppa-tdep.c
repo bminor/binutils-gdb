@@ -840,6 +840,18 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
   return dyncall_addr;
 }
 
+/* Get the PC from %r31 if currently in a syscall.  Also mask out privilege
+   bits.  */
+CORE_ADDR
+target_read_pc ()
+{
+  int flags = read_register (FLAGS_REGNUM);
+
+  if (flags & 2)
+    return read_register (31) & ~0x3;
+  return read_register (PC_REGNUM) & ~0x3;
+}
+
 /* return the alignment of a type in bytes. Structures have the maximum
    alignment required by their fields. */
 

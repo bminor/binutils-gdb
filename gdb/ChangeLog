@@ -1,5 +1,10 @@
 Fri Jul 30 08:58:01 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	From J. Law:
+	* infcmd.c (read_pc): Remove PA specific code.
+	* tm-hppa.h (TARGET_READ_PC): Define.
+	* hppa-tdep.c (target_read_pc): New function.
+
 	* symtab.c (gdb_mangle_name): Deal with it if type lacks a name.
 
 Fri Jul 30 07:36:53 1993  Fred Fish  (fnf@deneb.cygnus.com)
