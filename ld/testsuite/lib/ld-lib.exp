@@ -390,6 +390,32 @@ proc is_elf_format {} {
 }
 
 #
+# is_elf64
+#	true if the object format is known to be 64bit ELF
+proc is_elf64 { binary_file } {
+    global READELF
+    global READELFFLAGS
+
+    set readelf_size ""
+    catch "exec $READELF $READELFFLAGS -h $binary_file > readelf.out" got
+
+    if ![string match "" $got] then {
+	return 0
+    }
+
+    if { ![regexp "\n\[ \]*Class:\[ \]*ELF(\[0-9\]+)\n" \
+	   [file_contents readelf.out] nil readelf_size] } {
+	return 0
+    }
+
+    if { $readelf_size == "64" } {
+	return 1
+    }
+
+    return 0
+}
+
+#
 # simple_diff
 #	compares two files line-by-line
 #	returns differences if exist

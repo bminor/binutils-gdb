@@ -1,3 +1,9 @@
+2003-09-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* lib/ld-lib.exp (proc is_elf64): New.
+
+	* ld-scripts/phdrs.exp: Use is_elf_format and is_elf64.
+
 2003-09-23  Alan Modra  <alan@modra.org>
 
 	* ld-discard/exit.s: Correct .text.exit attributes.
