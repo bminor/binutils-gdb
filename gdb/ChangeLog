@@ -1,3 +1,9 @@
+2002-01-12  Andrew Cagney  <ac131313@redhat.com>
+
+	From Peter Schauer:
+	* language.c (longest_local_hex_string_custom): Use phex_nz to
+	convert NUM to a hex string.
+
 2002-01-12  Elena Zannoni  <ezannoni@redhat.com>
 
 	* sh-tdep.c (sh_gdbarch_init): Move setting of long_bit earlier in

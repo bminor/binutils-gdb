@@ -662,21 +662,10 @@ longest_local_hex_string_custom (LONGEST num, char *width)
   sprintf (res2, format, num);
   return res2;
 #else /* !defined (PRINTF_HAS_LONG_LONG) */
-  /* Use strcat_address_numeric to print the number into a string, then
+  /* Use phex_nz to print the number into a string, then
      build the result string from local_hex_format_prefix, padding and 
      the hex representation as indicated by "width".  */
-
-  temp_nbr_buf[0] = 0;
-  /* With use_local == 0, we don't get the leading "0x" prefix. */
-  /* MERGEBUG ?? As a quick fix I am replacing this call to
-     strcat_address_numeric with sprintf
-     strcat_address_numeric(num, 0, temp_nbr_buf, RESULT_BUF_LEN);
-   */
-
-  {
-    long long ll = num;
-    sprintf (temp_nbr_buf, "%llx", ll);
-  }
+  strcpy (temp_nbr_buf, phex_nz (num, sizeof (num)));
   /* parse width */
   parse_ptr = width;
   pad_on_left = 1;
