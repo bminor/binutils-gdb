@@ -89,6 +89,10 @@ extern const struct floatformat *default_double_format (struct gdbarch *gdbarch)
    being passed */
 extern int frame_num_args_unknown (struct frame_info *fi);
 
+/* Return the start address of ABFD.  This is exactly like
+   bfd_get_start_address, except that it's a gdbarch function.  */
+extern CORE_ADDR generic_bfd_entry_point (struct gdbarch *gdbarch, bfd *abfd);
+
 
 /* The following DEPRECATED interfaces are for pre- multi-arch legacy
    targets. */
