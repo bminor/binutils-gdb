@@ -55,6 +55,7 @@ EXTRACT_FN (dotdest);
 PRINT_FN (dotdest);
 
 PARSE_FN (dotdest1);
+PARSE_FN (dest1);
 
 PARSE_FN (bc);
 EXTRACT_FN (bc);
@@ -88,6 +89,8 @@ PRINT_FN (vi01);
 INSERT_FN (luimm12);
 EXTRACT_FN (luimm12);
 
+INSERT_FN (luimm12up6);
+
 INSERT_FN (luimm15);
 EXTRACT_FN (luimm15);
 
@@ -110,7 +113,7 @@ const struct txvu_operand txvu_operands[] =
      in both upper and lower instructions.  These don't have a U or L prefix.
      Operands specific to the upper or lower instruction are so prefixed.  */
 
-  /* Destination indicator attached to mnemonic, with leading '.'.
+  /* Destination indicator attached to mnemonic, with leading '.' or '/'.
      After parsing this, the value is stored in global `dest' so that the
      register parser can verify the same choice of xyzw is used.  */
 #define DOTDEST (UNUSED + 1)
@@ -198,8 +201,12 @@ const struct txvu_operand txvu_operands[] =
 #define LUIMM12 (LUIMM24 + 1)
   { 12, 0, 0, 0, insert_luimm12, extract_luimm12, 0 },
 
+  /* upper 6 bits of 12 bit unsigned immediate */
+#define LUIMM12UP6 (LUIMM12 + 1)
+  { 12, 0, 0, 0, insert_luimm12up6, extract_luimm12, 0 },
+
   /* 11 bit pc-relative signed immediate.  */
-#define LPCREL11 (LUIMM12 + 1)
+#define LPCREL11 (LUIMM12UP6 + 1)
   { 11, 0, TXVU_OPERAND_SIGNED + TXVU_OPERAND_RELATIVE_BRANCH, 0, 0, 0, 0 },
 
   /* Destination indicator, single letter only, with leading '.'.  */
@@ -208,6 +215,10 @@ const struct txvu_operand txvu_operands[] =
       /* Note that we borrow the insert/extract/print functions from the
 	 vector case.  */
       parse_dotdest1, insert_dotdest, extract_dotdest, print_dotdest },
+
+  /* Destination indicator, single letter only, no leading '.'.  */
+#define LDEST1 (LDOTDEST1 + 1)
+  { 0, 0, 0, parse_dest1, 0, 0, print_dotdest },
 
 /* end of list place holder */
   { 0 }
@@ -429,59 +440,57 @@ struct txvu_opcode txvu_lower_opcodes[] = {
   { "fceq", { SP, LVI01, C, LUIMM24 }, MLOP7 + MLB24, VLOP7 (0x10) },
   { "fcget", { SP, LITREG }, MLOP7 + MDEST + MS + MLIMM11, VLOP7 (0x1c) },
   { "fcor", { SP, LVI01, C, LUIMM24 }, MLOP7 + MLB24, VLOP7 (0x13) },
-  { "fcset", { SP, LVI01, C, LUIMM24 }, MLOP7 + MLB24, VLOP7 (0x11) },
+  { "fcset", { SP, LUIMM24 }, MLOP7 + MLB24, VLOP7 (0x11) },
   { "fmand", { SP, LITREG, C, LISREG }, MLOP7 + MDEST + MLIMM11, VLOP7 (0x1a) },
   { "fmeq", { SP, LITREG, C, LISREG }, MLOP7 + MDEST + MLIMM11, VLOP7 (0x18) },
   { "fmor", { SP, LITREG, C, LISREG }, MLOP7 + MDEST + MLIMM11, VLOP7 (0x1b) },
   { "fsand", { SP, LITREG, C, LUIMM12 }, MLOP7 + MLUIMM12UNUSED + MS, VLOP7 (0x16) },
   { "fseq", { SP, LITREG, C, LUIMM12 }, MLOP7 + MLUIMM12UNUSED + MS, VLOP7 (0x14) },
   { "fsor", { SP, LITREG, C, LUIMM12 }, MLOP7 + MLUIMM12UNUSED + MS, VLOP7 (0x17) },
-  { "fsset", { SP, LITREG, C, LUIMM12 }, MLOP7 + MLUIMM12UNUSED + MS, VLOP7 (0x15) },
+  { "fsset", { SP, LUIMM12UP6 }, MLOP7 + MLUIMM12UNUSED + V (~0, 6, 0) + MS + MT, VLOP7 (0x15) },
   { "iadd", { SP, LIDREG, C, LISREG, C, LITREG }, MLOP7 + MDEST + MLOP6, VLOP7 (0x40) + VLOP6 (0x30) },
   { "iaddi", { SP, LITREG, C, LISREG, C, LIMM5 }, MLOP7 + MDEST + MLOP6, VLOP7 (0x40) + VLOP6 (0x32) },
   { "iaddiu", { SP, LITREG, C, LISREG, C, LUIMM15 }, MLOP7, VLOP7 (0x08) },
   { "iand", { SP, LIDREG, C, LISREG, C, LITREG }, MLOP7 + MDEST + MLOP6, VLOP7 (0x40) + VLOP6 (0x34) },
   { "ibeq", { SP, LITREG, C, LISREG, C, LPCREL11 }, MLOP7 + MDEST, VLOP7 (0x28) },
   { "ibgez", { SP, LISREG, C, LPCREL11 }, MLOP7 + MDEST + MT, VLOP7 (0x2f) },
+  { "ibgtz", { SP, LISREG, C, LPCREL11 }, MLOP7 + MDEST + MT, VLOP7 (0x2d) },
   { "iblez", { SP, LISREG, C, LPCREL11 }, MLOP7 + MDEST + MT, VLOP7 (0x2e) },
   { "ibltz", { SP, LISREG, C, LPCREL11 }, MLOP7 + MDEST + MT, VLOP7 (0x2c) },
   { "ibne", { SP, LITREG, C, LISREG, C, LPCREL11 }, MLOP7 + MDEST, VLOP7 (0x29) },
-  /* FIXME: Need to not require commas around parens.  */
-  { "ilw", { LDOTDEST1, SP, LITREG, C, LIMM11, '(', LISREG, ')' }, MLOP7, VLOP7 (0x04) },
-  { "ilwr", { LDOTDEST1, SP, LITREG, C, '(', LISREG, ')' }, MLOP7, VLOP7 (0x40) + VLIMM11 (0x3fe) },
+  { "ilw", { LDOTDEST1, SP, LITREG, C, LIMM11, '(', LISREG, ')', LDEST1 }, MLOP7, VLOP7 (0x04) },
+  { "ilwr", { LDOTDEST1, SP, LITREG, C, '(', LISREG, ')', LDEST1 }, MLOP7, VLOP7 (0x40) + VLIMM11 (0x3fe) },
   { "ior", { SP, LIDREG, C, LISREG, C, LITREG }, MLOP7 + MDEST + MLOP6, VLOP7 (0x40) + VLOP6 (0x34) },
   { "isub", { SP, LIDREG, C, LISREG, C, LITREG }, MLOP7 + MDEST + MLOP6, VLOP7 (0x40) + VLOP6 (0x31) },
   { "isubiu", { SP, LITREG, C, LISREG, C, LUIMM15 }, MLOP7, VLOP7 (0x09) },
-  { "isw", { LDOTDEST1, SP, LITREG, C, LIMM11, '(', LISREG, ')' }, MLOP7, VLOP7 (0x05) },
-  { "iswr", { LDOTDEST1, SP, LITREG, C, '(', LISREG, ')' }, MLOP7, VLOP7 (0x40) + VLIMM11 (0x3ff) },
+  { "isw", { LDOTDEST1, SP, LITREG, C, LIMM11, '(', LISREG, ')', LDEST1 }, MLOP7, VLOP7 (0x05) },
+  { "iswr", { LDOTDEST1, SP, LITREG, C, '(', LISREG, ')', LDEST1 }, MLOP7, VLOP7 (0x40) + VLIMM11 (0x3ff) },
   { "jalr", { SP, LITREG, C, LISREG }, MLOP7 + MDEST + MLIMM11, VLOP7 (0x25) },
   { "jr", { SP, LISREG }, MLOP7 + MDEST + MT + MLIMM11, VLOP7 (0x24) },
   { "lq", { DOTDEST, SP, VFTREG, C, LIMM11, '(', LISREG, ')' }, MLOP7, VLOP7 (0x00) },
-  /* FIXME: No commas around -/+.  */
-  { "lqd", { DOTDEST, SP, VFTREG, C, LIMM11, '(', '-', '-', LISREG, ')' }, MLOP7, VLOP7 (0x40) + VLIMM11 (0x37e) },
-  { "lqi", { DOTDEST, SP, VFTREG, C, LIMM11, '(', LISREG, '+', '+', ')' }, MLOP7, VLOP7 (0x40) + VLIMM11 (0x37c) },
+  { "lqd", { DOTDEST, SP, VFTREG, C, '(', '-', '-', LISREG, ')' }, MLOP7 + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x37e) },
+  { "lqi", { DOTDEST, SP, VFTREG, C, '(', LISREG, '+', '+', ')' }, MLOP7 + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x37c) },
   /* Only a single VF reg is allowed here.  We can use VFTREG because LDOTDEST1
      handles verifying only a single choice of xyzw is present.  */
   { "mfir", { LDOTDEST1, SP, VFTREG, C, LISREG }, MLOP7 + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x3fc) },
   { "mfp", { DOTDEST, SP, VFTREG, C, P }, MLOP7 + MS + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x67c) },
   { "move", { DOTDEST, SP, VFTREG, C, VFSREG }, MLOP7 + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x33c) },
   { "mr32", { DOTDEST, SP, VFTREG, C, VFSREG }, MLOP7 + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x33d) },
-  { "mtir", { LDOTDEST1, SP, LITREG, C, LFSREG }, MLOP7 + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x3fd) },
+  { "mtir", { LDOTDEST1, SP, LITREG, C, VFSREG }, MLOP7 + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x3fd) },
   { "rget", { DOTDEST, SP, VFTREG, C, R }, MLOP7 + MS + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x43d) },
   { "rinit", { SP, R, C, LFSFFSREG }, MLOP7 + VLFTF (~0) + MT + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x43e) },
   { "rnext", { DOTDEST, SP, VFTREG, C, R }, MLOP7 + MS + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x43c) },
   { "rsqrt", { SP, Q, C, LFSFFSREG, C, LFTFFTREG }, MLOP7 + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x3be) },
-  { "rxor", { R, C, LFSFFSREG }, MLOP7 + VLFTF (~0) + MT + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x43f) },
+  { "rxor", { SP, R, C, LFSFFSREG }, MLOP7 + VLFTF (~0) + MT + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x43f) },
   { "sq", { DOTDEST, SP, VFTREG, C, LIMM11, '(', LISREG, ')' }, MLOP7, VLOP7 (0x01) },
-  /* FIXME: No commas around -/+.  */
-  { "sqd", { DOTDEST, SP, VFTREG, C, LIMM11, '(', '-', '-', LISREG, ')' }, MLOP7, VLOP7 (0x40) + VLIMM11 (0x37f) },
-  { "sqi", { DOTDEST, SP, VFTREG, C, LIMM11, '(', LISREG, '+', '+', ')' }, MLOP7, VLOP7 (0x40) + VLIMM11 (0x37d) },
+  { "sqd", { DOTDEST, SP, VFTREG, C, '(', '-', '-', LISREG, ')' }, MLOP7 + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x37f) },
+  { "sqi", { DOTDEST, SP, VFTREG, C, '(', LISREG, '+', '+', ')' }, MLOP7 + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x37d) },
   { "sqrt", { SP, Q, C, LFTFFTREG }, MLOP7 + VLFSF (~0) + MS + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x3bd) },
   { "waitp", { 0 }, 0xffffffff, VLOP7 (0x40) + VLIMM11 (0x7bf) },
   { "waitq", { 0 }, 0xffffffff, VLOP7 (0x40) + VLIMM11 (0x3bf) },
-  { "xgkick", { LISREG }, MLOP7 + MDEST + MT + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x6fc) },
-  { "xitop", { LITREG }, MLOP7 + MDEST + MS + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x6bd) },
-  { "xtop", { LITREG }, MLOP7 + MDEST + MS + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x6bc) }
+  { "xgkick", { SP, LISREG }, MLOP7 + MDEST + MT + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x6fc) },
+  { "xitop", { SP, LITREG }, MLOP7 + MDEST + MS + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x6bd) },
+  { "xtop", { SP, LITREG }, MLOP7 + MDEST + MS + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x6bc) }
 };
 const int txvu_lower_opcodes_count = sizeof (txvu_lower_opcodes) / sizeof (txvu_lower_opcodes[0]);
 
@@ -590,12 +599,12 @@ txvu_lower_opcode_lookup_dis (insn)
 /* Value of DEST in use.
    Each of the registers must specify the same value as the opcode.
    ??? Perhaps remove the duplication?  */
-static int dest;
+static int mnemonic_dest;
 
 /* Value of BC to use.
    The register specified for the ftreg must match the broadcast register
    specified in the opcode.  */
-static int bc;
+static int mnemonic_bc;
 
 /* Init fns.
    These are called before doing each of the respective activities.  */
@@ -605,8 +614,8 @@ static int bc;
 void
 txvu_opcode_init_parse ()
 {
-  dest = -1;
-  bc = -1;
+  mnemonic_dest = -1;
+  mnemonic_bc = -1;
 }
 
 /* Called by the disassembler before printing an instruction.  */
@@ -614,8 +623,8 @@ txvu_opcode_init_parse ()
 void
 txvu_opcode_init_print ()
 {
-  dest = -1;
-  bc = -1;
+  mnemonic_dest = -1;
+  mnemonic_bc = -1;
 }
 
 /* Multiple destination choice support.
@@ -694,14 +703,14 @@ parse_dotdest1 (pstr, errmsg)
   ++*pstr;
   switch (**pstr)
     {
-    case 'x' : case 'X' : dest |= TXVU_DEST_X; break;
-    case 'y' : case 'Y' : dest |= TXVU_DEST_Y; break;
-    case 'z' : case 'Z' : dest |= TXVU_DEST_Z; break;
-    case 'w' : case 'W' : dest |= TXVU_DEST_W; break;
+    case 'x' : case 'X' : dest = TXVU_DEST_X; break;
+    case 'y' : case 'Y' : dest = TXVU_DEST_Y; break;
+    case 'z' : case 'Z' : dest = TXVU_DEST_Z; break;
+    case 'w' : case 'W' : dest = TXVU_DEST_W; break;
     default : *errmsg = "invalid `dest'"; return 0;
     }
   ++*pstr;
-  c == tolower (**pstr);
+  c = tolower (**pstr);
   if (c == 'x' || c == 'y' || c == 'z' || c == 'w')
     {
       *errmsg = "only one of x,y,z,w can be specified";
@@ -710,6 +719,38 @@ parse_dotdest1 (pstr, errmsg)
   if (isalnum (**pstr))
     {
       *errmsg = "invalid `dest'";
+      return 0;
+    }
+
+  *errmsg = NULL;
+  return dest;
+}
+
+/* Parse a `dest' spec with no leading '.', where only a single letter is
+   allowed, but the encoding handles all four.  The parsed value must match
+   that recorded in `dest'.  */
+
+static long
+parse_dest1 (pstr, errmsg)
+     char **pstr;
+     const char **errmsg;
+{
+  char c;
+  long dest;
+
+  dest = _parse_dest (pstr);
+  if (dest != TXVU_DEST_X
+      && dest != TXVU_DEST_Y
+      && dest != TXVU_DEST_Z
+      && dest != TXVU_DEST_W)
+    {
+      *errmsg = "expecting one of x,y,z,w";
+      return 0;
+    }
+
+  if (dest != mnemonic_dest)
+    {
+      *errmsg = "`dest' suffix does not match instruction `dest'";
       return 0;
     }
 
@@ -726,9 +767,7 @@ insert_dotdest (insn, operand, mods, value, errmsg)
      const char **errmsg;
 {
   /* Record the DEST value in use so the register parser can use it.  */
-  dest = value;
-  if (errmsg)
-    *errmsg = NULL;
+  mnemonic_dest = value;
   return insn |= value << operand->shift;
 }
 
@@ -740,8 +779,8 @@ extract_dotdest (insn, operand, mods, pinvalid)
      int *pinvalid;
 {
   /* Record the DEST value in use so the register printer can use it.  */
-  dest = (insn >> operand->shift) & ((1 << operand->bits) - 1);
-  return dest;
+  mnemonic_dest = (insn >> operand->shift) & ((1 << operand->bits) - 1);
+  return mnemonic_dest;
 }
 
 /* Utility to print a multiple dest spec.  */
@@ -791,7 +830,7 @@ _parse_sdest (pstr, errmsg)
     default : *errmsg = "only one of x,y,z,w can be specified"; return 0;
     }
   ++*pstr;
-  c == tolower (**pstr);
+  c = tolower (**pstr);
   if (c == 'x' || c == 'y' || c == 'z' || c == 'w')
     {
       *errmsg = "only one of x,y,z,w can be specified";
@@ -838,7 +877,7 @@ parse_bc (pstr, errmsg)
   if (*errmsg)
     return 0;
   /* Save value for later verification in register parsing.  */
-  bc = value;
+  mnemonic_bc = value;
   return value;
 }
 
@@ -852,8 +891,8 @@ extract_bc (insn, operand, mods, pinvalid)
      int mods;
      int *pinvalid;
 {
-  bc = insn & 3;
-  return bc;
+  mnemonic_bc = insn & 3;
+  return mnemonic_bc;
 }
 
 static long
@@ -889,7 +928,7 @@ parse_vfreg (pstr, errmsg)
       *errmsg = "invalid `dest'";
       return 0;
     }
-  if (reg_dest != dest)
+  if (reg_dest != mnemonic_dest)
     {
       *errmsg = "register `dest' does not match instruction `dest'";
       return 0;
@@ -906,7 +945,7 @@ print_vfreg (info, insn, value)
      long value;
 {
   (*info->fprintf_func) (info->stream, "vf%02ld", value);
-  _print_dest (info, insn, dest);
+  _print_dest (info, insn, mnemonic_dest);
 }
 
 /* FT register in broadcast case.  */
@@ -941,7 +980,7 @@ parse_bcftreg (pstr, errmsg)
   reg_bc = _parse_sdest (&str, errmsg);
   if (*errmsg)
     return 0;
-  if (reg_bc != bc)
+  if (reg_bc != mnemonic_bc)
     {
       *errmsg = "register `bc' does not match instruction `bc'";
       return 0;
@@ -958,7 +997,7 @@ print_bcftreg (info, insn, value)
      long value;
 {
   (*info->fprintf_func) (info->stream, "vf%02ld", value);
-  print_sdest (info, insn, bc);
+  print_sdest (info, insn, mnemonic_bc);
 }
 
 /* ACC handling.  */
@@ -983,7 +1022,7 @@ parse_accdest (pstr, errmsg)
       *errmsg = "invalid `dest'";
       return 0;
     }
-  if (acc_dest != dest)
+  if (acc_dest != mnemonic_dest)
     {
       *errmsg = "acc `dest' does not match instruction `dest'";
       return 0;
@@ -1001,7 +1040,7 @@ print_accdest (info, insn, value)
      long value;
 {
   (*info->fprintf_func) (info->stream, "acc");
-  _print_dest (info, insn, dest);
+  _print_dest (info, insn, mnemonic_dest);
 }
 
 /* XYZ operand handling.
@@ -1016,7 +1055,7 @@ insert_xyz (insn, operand, mods, value, errmsg)
      long value;
      const char **errmsg;
 {
-  if (dest != (TXVU_DEST_X | TXVU_DEST_Y | TXVU_DEST_Z))
+  if (mnemonic_dest != (TXVU_DEST_X | TXVU_DEST_Y | TXVU_DEST_Z))
     {
       *errmsg = "expecting `xyz' for `dest' value";
       return insn;
@@ -1109,7 +1148,6 @@ parse_freg (pstr, errmsg)
   char *str = *pstr;
   char *start;
   long reg;
-  int reg_bc;
 
   if (tolower (str[0]) != 'v'
       || tolower (str[1]) != 'f')
@@ -1152,7 +1190,6 @@ parse_ireg (pstr, errmsg)
   char *str = *pstr;
   char *start;
   long reg;
-  int reg_bc;
 
   if (tolower (str[0]) != 'v'
       || tolower (str[1]) != 'i')
@@ -1195,7 +1232,6 @@ parse_vi01 (pstr, errmsg)
   char *str = *pstr;
   char *start;
   long reg;
-  int reg_bc;
 
   if (tolower (str[0]) != 'v'
       || tolower (str[1]) != 'i')
@@ -1249,6 +1285,19 @@ extract_luimm12 (insn, operand, mods, pinvalid)
      int *pinvalid;
 {
   return (((insn & MLUIMM12TOP) != 0) << 11) | VLIMM11 (insn);
+}
+
+/* Lower instruction 12 bit unsigned immediate, upper 6 bits.  */
+
+static TXVU_INSN
+insert_luimm12up6 (insn, operand, mods, value, errmsg)
+     TXVU_INSN insn;
+     const struct txvu_operand *operand;
+     int mods;
+     long value;
+     const char **errmsg;
+{
+  return insn | VLUIMM12TOP ((value & (1 << 11)) != 0) | (value & 0x7c0);
 }
 
 /* Lower instruction 15 bit unsigned immediate.  */

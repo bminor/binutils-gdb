@@ -10,6 +10,11 @@ Fri Jan 23 01:49:24 1998  Doug Evans  <devans@seba.cygnus.com>
 	(print_bcftreg): Likewise.
 	(print_accdest): Pass `dest' to _print_dest.
 	(insert_xyz): Renamed from parse_xyz.
+	(parse_dest1,insert_luimm12up6): New functions.
+	(txvu_operands): New operands LUIMM12UP6, LDEST1.
+	(txvu_lower_opcodes): Clean up pass over table.
+	(parse_dotdest1): Fix dest calculation.
+	(_parse_sdest): Fix typo.
 
 end-sanitize-sky
 Thu Jan 22 16:20:17 1998  Fred Fish  <fnf@cygnus.com>
