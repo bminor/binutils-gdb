@@ -1,3 +1,11 @@
+2002-09-10  Keith Seitz  <keiths@redhat.com>
+
+	* lib/mi-support.exp: (mi_run_to_main): Allow anything to precede
+	regexp for stopping at main. Could have multiple event notifications.
+	Don't assume that main was declared with no parameters.
+	(mi_next): Use mi_step_to.
+	(mi_step): Use mi_next_to.
+
 2002-09-09  Corinna Vinschen  <vinschen@redhat.com>
 
 	* gdb.base/default.exp: Fix expected string in `info float' test.
