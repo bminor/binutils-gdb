@@ -311,6 +311,9 @@ sh_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 #define GET_SOURCE_REG(x)  	(((x) >> 4) & 0xf)
 #define GET_TARGET_REG(x)  	(((x) >> 8) & 0xf)
 
+/* JSR @Rm         0100mmmm00001011 */
+#define IS_JSR(x)		(((x) & 0xf0ff) == 0x400b)
+
 /* STS.L PR,@-r15  0100111100100010
    r15-4-->r15, PR-->(r15) */
 #define IS_STS(x)  		((x) == 0x4f22)
@@ -508,6 +511,20 @@ sh_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 	      else
 		break;
 	    }
+	  break;
+	}
+      else if (IS_JSR (inst))
+	{
+	  /* We have found a jsr that has been scheduled into the prologue.
+	     If we continue the scan and return a pc someplace after this,
+	     then setting a breakpoint on this function will cause it to
+	     appear to be called after the function it is calling via the
+	     jsr, which will be very confusing.  Most likely the next
+	     instruction is going to be IS_MOV_SP_FP in the delay slot.  If
+	     so, note that before returning the current pc. */
+	  inst = read_memory_integer (pc + 2, 2);
+	  if (IS_MOV_SP_FP (inst))
+	    cache->uses_fp = 1;
 	  break;
 	}
 #if 0				/* This used to just stop when it found an instruction that

@@ -1,3 +1,9 @@
+2004-02-19  Fred Fish  <fnf@redhat.com>
+
+	Fix for PR breakpoint/1558.
+	* sh-tdep.c (IS_JSR): New macro.
+	(sh_analyze_prologue): Use IS_JSR to terminate prologue scan.
+
 2004-02-19  Jim Blandy  <jimb@redhat.com>
 
 	* findvar.c (value_from_register): Doc fix.
