@@ -425,6 +425,7 @@ BFD32_BACKENDS = \
 	sunos.lo \
 	vaxnetbsd.lo \
 	vax1knetbsd.lo \
+	vaxbsd.lo \
 	versados.lo \
 	vms.lo \
 	vms-gsd.lo \
@@ -580,6 +581,7 @@ BFD32_BACKENDS_CFILES = \
 	sunos.c \
 	vaxnetbsd.c \
 	vax1knetbsd.c \
+	vaxbsd.c \
 	versados.c \
 	vms.c \
 	vms-gsd.c \
@@ -1643,9 +1645,9 @@ elf32-fr30.lo: elf32-fr30.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/elf/fr30.h $(INCDIR)/elf/reloc-macros.h \
   elf32-target.h
-elf32-frv.lo: elf32-frv.c elf-bfd.h $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/elf/frv.h $(INCDIR)/elf/reloc-macros.h \
+elf32-frv.lo: elf32-frv.c $(INCDIR)/filenames.h elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(INCDIR)/elf/frv.h $(INCDIR)/elf/reloc-macros.h \
   elf32-target.h
 elf32-gen.lo: elf32-gen.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
@@ -1964,6 +1966,9 @@ vaxnetbsd.lo: vaxnetbsd.c netbsd.h $(INCDIR)/filenames.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
 vax1knetbsd.lo: vax1knetbsd.c netbsd.h $(INCDIR)/filenames.h \
   libaout.h $(INCDIR)/bfdlink.h aout-target.h $(INCDIR)/aout/aout64.h \
+  $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
+vaxbsd.lo: vaxbsd.c $(INCDIR)/filenames.h libaout.h \
+  $(INCDIR)/bfdlink.h aout-target.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
 versados.lo: versados.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h
 vms.lo: vms.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \

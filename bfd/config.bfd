@@ -1097,12 +1097,6 @@ case "${targ}" in
   v850ea-*-*)
     targ_defvec=bfd_elf32_v850_vec
     ;;
-#if HAVE_host_aout_vec
-  vax-*-bsd* | vax-*-ultrix*)
-    targ_defvec=host_aout_vec
-    targ_underscore=yes
-    ;;
-#endif
 
   vax-*-netbsdelf*)
     targ_defvec=bfd_elf32_vax_vec
@@ -1112,6 +1106,11 @@ case "${targ}" in
   vax-*-netbsdaout* | vax-*-netbsd*)
     targ_defvec=vaxnetbsd_vec
     targ_selvecs="bfd_elf32_vax_vec vax1knetbsd_vec"
+    targ_underscore=yes
+    ;;
+
+  vax-*-bsd* | vax-*-ultrix*)
+    targ_defvec=vaxbsd_vec
     targ_underscore=yes
     ;;
 

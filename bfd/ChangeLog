@@ -1,3 +1,16 @@
+2002-07-01  John David Anglin  <dave@hiauly1.hia.nrc.ca>
+
+	* vaxbsd.c: New BFD backend for VAX BSD and Ultrix.
+	* Makefile.am (BFD32_BACKENDS, BFD32_BACKENDS_CFILES): Add new backend.
+	Run "make dep-am".
+	* config.bfd (vax-*-bsd* | vax-*-ultrix*): Use vaxbsd_vec instead of
+	host_aout_vec.
+	* configure.in (vaxbsd_vec): Add.
+	* targets.c (vaxbsd_vec): Add.
+	* Makefile.in: Rebuild.
+	* configure: Rebuild.
+	* po/SRC-POTFILES.in: Rebuild.
+
 2002-07-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.h (elf_gc_mark): Pass in the section whose relocs we are
