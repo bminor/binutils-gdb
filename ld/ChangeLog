@@ -1,3 +1,8 @@
+1999-08-23  Nick Clifton  <nickc@cygnus.com>
+
+	* emultempl/elf32.em: Add ability for individual targets to have
+	their own command line switches by defining PARSE_AND_LIST_ARGS.
+
 1999-08-19  Andreas Schwab  <schwab@suse.de>
 
 	* configure.host: Use ${CC} instead of gcc for finding compiler

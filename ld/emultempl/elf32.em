@@ -1119,6 +1119,22 @@ EOF
 
 fi
 
+if test -n "$PARSE_AND_LIST_ARGS" ; then
+cat >>e${EMULATION_NAME}.c <<EOF
+static int  gld_${EMULATION_NAME}_parse_args PARAMS ((int, char **));
+static void gld_${EMULATION_NAME}_list_options PARAMS ((FILE * file));
+
+ $PARSE_AND_LIST_ARGS
+EOF
+else
+
+cat >>e${EMULATION_NAME}.c <<EOF
+#define gld_${EMULATION_NAME}_parse_args   NULL
+#define gld_${EMULATION_NAME}_list_options NULL
+EOF
+
+fi
+
 cat >>e${EMULATION_NAME}.c <<EOF
 
 struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation = 
@@ -1135,14 +1151,14 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   gld${EMULATION_NAME}_get_script,
   "${EMULATION_NAME}",
   "${OUTPUT_FORMAT}",
-  NULL,
-  NULL,
+  NULL, 	/* finish */
+  NULL, 	/* create output section statements */
   gld${EMULATION_NAME}_open_dynamic_archive,
   gld${EMULATION_NAME}_place_orphan,
   NULL,		/* set_symbols */
-  NULL,		/* parse_args */
+  gld_${EMULATION_NAME}_parse_args,
   NULL,		/* unrecognized_file */
-  NULL,		/* list_options */
+  gld_${EMULATION_NAME}_list_options,
   NULL		/* recognized_file */
 };
 EOF
