@@ -1,3 +1,9 @@
+1999-06-10  Richard Henderson  <rth@cygnus.com>
+
+	* gas/macros/irp.s: Use `foo' and `bar' instead of `r' and `s'.
+	* gas/macros/rept.s, gas/macros/test2.s, gas/macros/test3.s: Likewise.
+	* gas/macros/{irp,rept,test2,test3}.d: Update.
+
 1999-06-05  Richard Henderson  <rth@cygnus.com>
 
 	* gas/elf/elf.exp: New directory.
