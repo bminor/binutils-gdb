@@ -1,3 +1,24 @@
+2000-03-13  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* go32-nat.c (struct env387): Remove declaration.
+	(print_387_status, i386_go32_float_info): Remove redundant
+	functions.
+	(regno_mapping, sig_map, excepn_map): Add braces around inner
+	initializers.
+	(many functions): Use ATTRIBUTE_UNUSED to shut up the compiler;
+	fix code which mixed signed with unsigned.
+	(go32_resume): Use TARGET_SIGNAL_LAST instead of -1.
+	(go32_wait): Initialize INT3_addr.
+	(go32_fetch_registers): Extend all FP registers that are shorter
+	than 4 bytes to 32 bits.  Support 32 standard FP registers defined
+	on config/i386/tm-i386.h.
+	(store_register): Support 32 FP registers.
+	(go32_create_inferior): Don't crash if handed a NULL pointer
+	instead of exec file name.
+	(ignore): Remove unused function.
+	(go32_insert_hw_breakpoint): Remove unused variables.
+	(init_go32_ops): Set value of processing_gcc_compilation to 2.
+
 Mon Mar 13 18:54:42 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	From 2000-03-10 Daniel Berlin <dan@cgsoftware.com> Fix C++

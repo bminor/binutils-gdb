@@ -22,13 +22,12 @@
 #include <fcntl.h>
 
 #include "defs.h"
-#include "frame.h"		/* required by inferior.h */
 #include "inferior.h"
-#include "target.h"
 #include "gdb_wait.h"
 #include "gdbcore.h"
 #include "command.h"
 #include "floatformat.h"
+#include "buildsym.h"
 
 #include <stdio.h>		/* required for __DJGPP_MINOR__ */
 #include <stdlib.h>
@@ -137,23 +136,6 @@ int redir_debug_init (cmdline_t *ptr) { return 0; }
 
 extern void _initialize_go32_nat (void);
 
-struct env387
-  {
-    unsigned short control;
-    unsigned short r0;
-    unsigned short status;
-    unsigned short r1;
-    unsigned short tag;
-    unsigned short r2;
-    unsigned long eip;
-    unsigned short code_seg;
-    unsigned short opcode;
-    unsigned long operand;
-    unsigned short operand_seg;
-    unsigned short r3;
-    unsigned char regs[8][10];
-  };
-
 typedef enum { wp_insert, wp_remove, wp_count } wp_op;
 
 /* This holds the current reference counts for each debug register.  */
@@ -164,7 +146,6 @@ extern char **environ;
 #define SOME_PID 42
 
 static int prog_has_started = 0;
-static void print_387_status (unsigned short status, struct env387 *ep);
 static void go32_open (char *name, int from_tty);
 static void go32_close (int quitting);
 static void go32_attach (char *args, int from_tty);
@@ -184,8 +165,6 @@ static void go32_create_inferior (char *exec_file, char *args, char **env);
 static void cleanup_dregs (void);
 static void go32_mourn_inferior (void);
 static int go32_can_run (void);
-static void ignore (void);
-static void ignore2 (char *a, int b);
 static int go32_insert_aligned_watchpoint (CORE_ADDR waddr, CORE_ADDR addr,
 					   int len, int rw);
 static int go32_remove_aligned_watchpoint (CORE_ADDR waddr, CORE_ADDR addr,
@@ -198,92 +177,6 @@ static void go32_terminal_init (void);
 static void go32_terminal_inferior (void);
 static void go32_terminal_ours (void);
 
-static void
-print_387_status (unsigned short status, struct env387 *ep)
-{
-  int i;
-  int bothstatus;
-  int top;
-  int fpreg;
-
-  bothstatus = ((status != 0) && (ep->status != 0));
-  if (status != 0)
-    {
-      if (bothstatus)
-	printf_unfiltered ("u: ");
-      print_387_status_word (status);
-    }
-
-  if (ep->status != 0)
-    {
-      if (bothstatus)
-	printf_unfiltered ("e: ");
-      print_387_status_word (ep->status);
-    }
-
-  print_387_control_word (ep->control & 0xffff);
-  /* Other platforms say "last exception", but that's not true: the
-     FPU stores the last non-control instruction there.  */
-  printf_unfiltered ("last FP instruction: ");
-  /* The ORing with D800h restores the upper 5 bits of the opcode that
-     are not stored by the FPU (since these bits are the same for all
-     floating-point instructions).  */
-  printf_unfiltered ("opcode %s; ",
-		     local_hex_string (ep->opcode ? (ep->opcode|0xd800) : 0));
-  printf_unfiltered ("pc %s:", local_hex_string (ep->code_seg));
-  printf_unfiltered ("%s; ", local_hex_string (ep->eip));
-  printf_unfiltered ("operand %s", local_hex_string (ep->operand_seg));
-  printf_unfiltered (":%s\n", local_hex_string (ep->operand));
-
-  top = (ep->status >> 11) & 7;
-
-  printf_unfiltered ("regno tag     msb              lsb  value\n");
-  for (fpreg = 7; fpreg >= 0; fpreg--)
-    {
-      /* FNSAVE saves the FP registers in their logical TOP-relative
-	 order, beginning with ST(0).  Since we need to print them in
-	 their physical order, we have to remap them.  */
-      int  regno = fpreg - top;
-      long double val;
-
-      if (regno < 0)
-	regno += 8;
-
-      printf_unfiltered ("%s %d: ", fpreg == top ? "=>" : "  ", fpreg);
-
-      switch ((ep->tag >> (fpreg * 2)) & 3)
-	{
-	case 0:
-	  printf_unfiltered ("valid   ");
-	  break;
-	case 1:
-	  printf_unfiltered ("zero    ");
-	  break;
-	case 2:
-	  /* All other versions of print_387_status use TRAP here, but I
-	     think this is misleading, since Intel manuals say SPECIAL.  */
-	  printf_unfiltered ("special ");
-	  break;
-	case 3:
-	  printf_unfiltered ("empty   ");
-	  break;
-	}
-      for (i = 9; i >= 0; i--)
-	printf_unfiltered ("%02x", ep->regs[regno][i]);
-
-      REGISTER_CONVERT_TO_VIRTUAL (FP0_REGNUM+regno, builtin_type_long_double,
-				   &ep->regs[regno], &val);
-
-      printf_unfiltered ("  %.19LG\n", val);
-    }
-}
-
-void
-i386_go32_float_info (void)
-{
-  print_387_status (0, (struct env387 *) &npx);
-}
-
 #define r_ofs(x) (offsetof(TSS,x))
 
 static struct
@@ -293,110 +186,111 @@ static struct
 }
 regno_mapping[] =
 {
-  r_ofs (tss_eax), 4,	/* normal registers, from a_tss */
-    r_ofs (tss_ecx), 4,
-    r_ofs (tss_edx), 4,
-    r_ofs (tss_ebx), 4,
-    r_ofs (tss_esp), 4,
-    r_ofs (tss_ebp), 4,
-    r_ofs (tss_esi), 4,
-    r_ofs (tss_edi), 4,
-    r_ofs (tss_eip), 4,
-    r_ofs (tss_eflags), 4,
-    r_ofs (tss_cs), 2,
-    r_ofs (tss_ss), 2,
-    r_ofs (tss_ds), 2,
-    r_ofs (tss_es), 2,
-    r_ofs (tss_fs), 2,
-    r_ofs (tss_gs), 2,
-    0, 10,		/* 8 FP registers, from npx.reg[] */
-    1, 10,
-    2, 10,
-    3, 10,
-    4, 10,
-    5, 10,
-    6, 10,
-    7, 10,
+  {r_ofs (tss_eax), 4},	/* normal registers, from a_tss */
+  {r_ofs (tss_ecx), 4},
+  {r_ofs (tss_edx), 4},
+  {r_ofs (tss_ebx), 4},
+  {r_ofs (tss_esp), 4},
+  {r_ofs (tss_ebp), 4},
+  {r_ofs (tss_esi), 4},
+  {r_ofs (tss_edi), 4},
+  {r_ofs (tss_eip), 4},
+  {r_ofs (tss_eflags), 4},
+  {r_ofs (tss_cs), 2},
+  {r_ofs (tss_ss), 2},
+  {r_ofs (tss_ds), 2},
+  {r_ofs (tss_es), 2},
+  {r_ofs (tss_fs), 2},
+  {r_ofs (tss_gs), 2},
+  {0, 10},		/* 8 FP registers, from npx.reg[] */
+  {1, 10},
+  {2, 10},
+  {3, 10},
+  {4, 10},
+  {5, 10},
+  {6, 10},
+  {7, 10},
 	/* The order of the next 7 registers must be consistent
-	   with their numbering in config/i386/tm-go32.h, which see.  */
-  0, 2,			/* control word, from npx */
-  4, 2,			/* status word, from npx */
-  8, 2,			/* tag word, from npx */
-  16, 2,		/* last FP exception CS from npx */
-  24, 2,		/* last FP exception operand selector from npx */
-  12, 4,		/* last FP exception EIP from npx */
-  20, 4			/* last FP exception operand offset from npx */
+	   with their numbering in config/i386/tm-i386.h, which see.  */
+  {0, 2},		/* control word, from npx */
+  {4, 2},		/* status word, from npx */
+  {8, 2},		/* tag word, from npx */
+  {16, 2},		/* last FP exception CS from npx */
+  {12, 4},		/* last FP exception EIP from npx */
+  {24, 2},		/* last FP exception operand selector from npx */
+  {20, 4},		/* last FP exception operand offset from npx */
+  {18, 2}		/* last FP opcode from npx */
 };
 
 static struct
   {
     int go32_sig;
-    int gdb_sig;
+    enum target_signal gdb_sig;
   }
 sig_map[] =
 {
-  0, TARGET_SIGNAL_FPE,
-    1, TARGET_SIGNAL_TRAP,
+  {0, TARGET_SIGNAL_FPE},
+  {1, TARGET_SIGNAL_TRAP},
   /* Exception 2 is triggered by the NMI.  DJGPP handles it as SIGILL,
      but I think SIGBUS is better, since the NMI is usually activated
      as a result of a memory parity check failure.  */
-    2, TARGET_SIGNAL_BUS,
-    3, TARGET_SIGNAL_TRAP,
-    4, TARGET_SIGNAL_FPE,
-    5, TARGET_SIGNAL_SEGV,
-    6, TARGET_SIGNAL_ILL,
-    7, TARGET_SIGNAL_EMT,	/* no-coprocessor exception */
-    8, TARGET_SIGNAL_SEGV,
-    9, TARGET_SIGNAL_SEGV,
-    10, TARGET_SIGNAL_BUS,
-    11, TARGET_SIGNAL_SEGV,
-    12, TARGET_SIGNAL_SEGV,
-    13, TARGET_SIGNAL_SEGV,
-    14, TARGET_SIGNAL_SEGV,
-    16, TARGET_SIGNAL_FPE,
-    17, TARGET_SIGNAL_BUS,
-    31, TARGET_SIGNAL_ILL,
-    0x1b, TARGET_SIGNAL_INT,
-    0x75, TARGET_SIGNAL_FPE,
-    0x78, TARGET_SIGNAL_ALRM,
-    0x79, TARGET_SIGNAL_INT,
-    0x7a, TARGET_SIGNAL_QUIT,
-    -1, -1
+  {2, TARGET_SIGNAL_BUS},
+  {3, TARGET_SIGNAL_TRAP},
+  {4, TARGET_SIGNAL_FPE},
+  {5, TARGET_SIGNAL_SEGV},
+  {6, TARGET_SIGNAL_ILL},
+  {7, TARGET_SIGNAL_EMT},	/* no-coprocessor exception */
+  {8, TARGET_SIGNAL_SEGV},
+  {9, TARGET_SIGNAL_SEGV},
+  {10, TARGET_SIGNAL_BUS},
+  {11, TARGET_SIGNAL_SEGV},
+  {12, TARGET_SIGNAL_SEGV},
+  {13, TARGET_SIGNAL_SEGV},
+  {14, TARGET_SIGNAL_SEGV},
+  {16, TARGET_SIGNAL_FPE},
+  {17, TARGET_SIGNAL_BUS},
+  {31, TARGET_SIGNAL_ILL},
+  {0x1b, TARGET_SIGNAL_INT},
+  {0x75, TARGET_SIGNAL_FPE},
+  {0x78, TARGET_SIGNAL_ALRM},
+  {0x79, TARGET_SIGNAL_INT},
+  {0x7a, TARGET_SIGNAL_QUIT},
+  {-1, TARGET_SIGNAL_LAST}
 };
 
 static struct {
   enum target_signal gdb_sig;
   int djgpp_excepno;
 } excepn_map[] = {
-  TARGET_SIGNAL_0, -1,
-  TARGET_SIGNAL_ILL, 6,		/* Invalid Opcode */
-  TARGET_SIGNAL_EMT, 7,		/* triggers SIGNOFP */
-  TARGET_SIGNAL_SEGV, 13,	/* GPF */
-  TARGET_SIGNAL_BUS, 17,	/* Alignment Check */
+  {TARGET_SIGNAL_0, -1},
+  {TARGET_SIGNAL_ILL, 6},	/* Invalid Opcode */
+  {TARGET_SIGNAL_EMT, 7},	/* triggers SIGNOFP */
+  {TARGET_SIGNAL_SEGV, 13},	/* GPF */
+  {TARGET_SIGNAL_BUS, 17},	/* Alignment Check */
   /* The rest are fake exceptions, see dpmiexcp.c in djlsr*.zip for
      details.  */
-  TARGET_SIGNAL_TERM, 0x1b,	/* triggers Ctrl-Break type of SIGINT */
-  TARGET_SIGNAL_FPE, 0x75,
-  TARGET_SIGNAL_INT, 0x79,
-  TARGET_SIGNAL_QUIT, 0x7a,
-  TARGET_SIGNAL_ALRM, 0x78,	/* triggers SIGTIMR */
-  TARGET_SIGNAL_PROF, 0x78,
-  -1, -1
+  {TARGET_SIGNAL_TERM, 0x1b},	/* triggers Ctrl-Break type of SIGINT */
+  {TARGET_SIGNAL_FPE, 0x75},
+  {TARGET_SIGNAL_INT, 0x79},
+  {TARGET_SIGNAL_QUIT, 0x7a},
+  {TARGET_SIGNAL_ALRM, 0x78},	/* triggers SIGTIMR */
+  {TARGET_SIGNAL_PROF, 0x78},
+  {TARGET_SIGNAL_LAST, -1}
 };
 
 static void
-go32_open (char *name, int from_tty)
+go32_open (char *name ATTRIBUTE_UNUSED, int from_tty ATTRIBUTE_UNUSED)
 {
   printf_unfiltered ("Done.  Use the \"run\" command to run the program.\n");
 }
 
 static void
-go32_close (int quitting)
+go32_close (int quitting ATTRIBUTE_UNUSED)
 {
 }
 
 static void
-go32_attach (char *args, int from_tty)
+go32_attach (char *args ATTRIBUTE_UNUSED, int from_tty ATTRIBUTE_UNUSED)
 {
   error ("\
 You cannot attach to a running program on this platform.\n\
@@ -404,7 +298,7 @@ Use the `run' command to run DJGPP programs.");
 }
 
 static void
-go32_detach (char *args, int from_tty)
+go32_detach (char *args ATTRIBUTE_UNUSED, int from_tty ATTRIBUTE_UNUSED)
 {
 }
 
@@ -412,7 +306,7 @@ static int resume_is_step;
 static int resume_signal = -1;
 
 static void
-go32_resume (int pid, int step, enum target_signal siggnal)
+go32_resume (int pid ATTRIBUTE_UNUSED, int step, enum target_signal siggnal)
 {
   int i;
 
@@ -420,7 +314,8 @@ go32_resume (int pid, int step, enum target_signal siggnal)
 
   if (siggnal != TARGET_SIGNAL_0 && siggnal != TARGET_SIGNAL_TRAP)
   {
-    for (i = 0, resume_signal = -1; excepn_map[i].gdb_sig != -1; i++)
+    for (i = 0, resume_signal = -1;
+	 excepn_map[i].gdb_sig != TARGET_SIGNAL_LAST; i++)
       if (excepn_map[i].gdb_sig == siggnal)
       {
 	resume_signal = excepn_map[i].djgpp_excepno;
@@ -435,11 +330,11 @@ go32_resume (int pid, int step, enum target_signal siggnal)
 static char child_cwd[FILENAME_MAX];
 
 static int
-go32_wait (int pid, struct target_waitstatus *status)
+go32_wait (int pid ATTRIBUTE_UNUSED, struct target_waitstatus *status)
 {
   int i;
   unsigned char saved_opcode;
-  unsigned long INT3_addr;
+  unsigned long INT3_addr = 0;
   int stepping_over_INT = 0;
 
   a_tss.tss_eflags &= 0xfeff;	/* reset the single-step flag (TF) */
@@ -566,9 +461,31 @@ go32_fetch_registers (int regno)
       else if (regno < 24)
 	supply_register (regno,
 			 (char *) &npx.reg[regno_mapping[regno].tss_ofs]);
-      else if (regno < 31)
-	supply_register (regno,
-			 (char *) &npx + regno_mapping[regno].tss_ofs);
+      else if (regno < 32)
+	{
+	  unsigned regval;
+
+	  switch (regno_mapping[regno].size)
+	    {
+	      case 2:
+		regval = *(unsigned short *)
+		  ((char *) &npx + regno_mapping[regno].tss_ofs);
+		regval &= 0xffff;
+		if (regno == FOP_REGNUM && regval)
+		  /* Feature: restore the 5 bits of the opcode
+		     stripped by FSAVE/FNSAVE.  */
+		  regval |= 0xd800;
+		break;
+	      case 4:
+		regval = *(unsigned *)
+		  ((char *) &npx + regno_mapping[regno].tss_ofs);
+		break;
+	      default:
+		internal_error ("\
+Invalid native size for register no. %d in go32_fetch_register.", regno);
+	    }
+	  supply_register (regno, (char *) &regval);
+	}
       else
 	internal_error ("Invalid register no. %d in go32_fetch_register.",
 			regno);
@@ -585,17 +502,19 @@ store_register (int regno)
     rp = (char *) &a_tss + regno_mapping[regno].tss_ofs;
   else if (regno < 24)
     rp = (char *) &npx.reg[regno_mapping[regno].tss_ofs];
-  else if (regno < 31)
+  else if (regno < 32)
     rp = (char *) &npx + regno_mapping[regno].tss_ofs;
   else
     internal_error ("Invalid register no. %d in store_register.", regno);
   memcpy (rp, v, regno_mapping[regno].size);
+  if (regno == FOP_REGNUM)
+    *(short *)rp &= 0x07ff; /* strip high 5 bits, in case they added them */
 }
 
 static void
 go32_store_registers (int regno)
 {
-  int r;
+  unsigned r;
 
   if (regno >= 0)
     store_register (regno);
@@ -613,7 +532,7 @@ go32_prepare_to_store (void)
 
 static int
 go32_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
-		  struct target_ops *target)
+		  struct target_ops *target ATTRIBUTE_UNUSED)
 {
   if (write)
     {
@@ -642,7 +561,7 @@ go32_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 static cmdline_t child_cmd;	/* parsed child's command line kept here */
 
 static void
-go32_files_info (struct target_ops *target)
+go32_files_info (struct target_ops *target ATTRIBUTE_UNUSED)
 {
   printf_unfiltered ("You are running a DJGPP V2 program.\n");
 }
@@ -671,6 +590,11 @@ go32_create_inferior (char *exec_file, char *args, char **env)
   jmp_buf start_state;
   char *cmdline;
   char **env_save = environ;
+
+  /* If no exec file handed to us, get it from the exec-file command -- with
+     a good, common error message if none is specified.  */
+  if (exec_file == 0)
+    exec_file = get_exec_file (1);
 
   if (prog_has_started)
     {
@@ -741,11 +665,6 @@ static int
 go32_can_run (void)
 {
   return 1;
-}
-
-static void
-ignore (void)
-{
 }
 
 /* Hardware watchpoint support.  */
@@ -849,7 +768,8 @@ cleanup_dregs (void)
 /* Insert a watchpoint.  */
 
 int
-go32_insert_watchpoint (int pid, CORE_ADDR addr, int len, int rw)
+go32_insert_watchpoint (int pid ATTRIBUTE_UNUSED, CORE_ADDR addr,
+			int len, int rw)
 {
   int ret = go32_insert_aligned_watchpoint (addr, addr, len, rw);
 
@@ -891,7 +811,7 @@ go32_insert_aligned_watchpoint (CORE_ADDR waddr, CORE_ADDR addr,
   for (i = 0; i < 4; i++)
   {
     if (!IS_REG_FREE (i) && D_REGS[i] == addr
-	&& DR_DEF (i) == (len_bits | read_write_bits))
+	&& DR_DEF (i) == (unsigned)(len_bits | read_write_bits))
     {
       dr_ref_count[i]++;
       return 0;
@@ -980,7 +900,8 @@ go32_handle_nonaligned_watchpoint (wp_op what, CORE_ADDR waddr, CORE_ADDR addr,
 /* Remove a watchpoint.  */
 
 int
-go32_remove_watchpoint (int pid, CORE_ADDR addr, int len, int rw)
+go32_remove_watchpoint (int pid ATTRIBUTE_UNUSED, CORE_ADDR addr,
+			int len, int rw)
 {
   int ret = go32_remove_aligned_watchpoint (addr, addr, len, rw);
 
@@ -1034,7 +955,7 @@ go32_remove_aligned_watchpoint (CORE_ADDR waddr, CORE_ADDR addr,
   for (i = 0; i <= 3; i++)
     {
       if (!IS_REG_FREE (i) && D_REGS[i] == addr
-	  && DR_DEF (i) == (len_bits | read_write_bits))
+	  && DR_DEF (i) == (unsigned)(len_bits | read_write_bits))
 	{
 	  dr_ref_count[i]--;
 	  if (dr_ref_count[i] == 0)
@@ -1064,7 +985,7 @@ go32_region_ok_for_watchpoint (CORE_ADDR addr, int len)
    whose access triggered the watchpoint.  */
 
 CORE_ADDR
-go32_stopped_by_watchpoint (int pid, int data_watchpoint)
+go32_stopped_by_watchpoint (int pid ATTRIBUTE_UNUSED, int data_watchpoint)
 {
   int i, ret = 0;
   int status;
@@ -1086,7 +1007,7 @@ go32_stopped_by_watchpoint (int pid, int data_watchpoint)
 /* Remove a breakpoint.  */
 
 int
-go32_remove_hw_breakpoint (CORE_ADDR addr, CORE_ADDR shadow)
+go32_remove_hw_breakpoint (CORE_ADDR addr, void *shadow ATTRIBUTE_UNUSED)
 {
   int i;
   for (i = 0; i <= 3; i++)
@@ -1103,12 +1024,9 @@ go32_remove_hw_breakpoint (CORE_ADDR addr, CORE_ADDR shadow)
 }
 
 int
-go32_insert_hw_breakpoint (CORE_ADDR addr, CORE_ADDR shadow)
+go32_insert_hw_breakpoint (CORE_ADDR addr, void *shadow ATTRIBUTE_UNUSED)
 {
   int i;
-  int read_write_bits, len_bits;
-  int free_debug_register;
-  int register_number;
 
   /* Look for an occupied debug register with the same address and the
      same RW and LEN definitions.  If we find one, we can use it for
@@ -1192,7 +1110,7 @@ go32_terminal_init (void)
 }
 
 static void
-go32_terminal_info (char *args, int from_tty)
+go32_terminal_info (char *args ATTRIBUTE_UNUSED, int from_tty ATTRIBUTE_UNUSED)
 {
   printf_unfiltered ("Inferior's terminal is in %s mode.\n",
 		     !inf_mode_valid
@@ -1313,6 +1231,9 @@ init_go32_ops (void)
   /* Initialize child's command line storage.  */
   if (redir_debug_init (&child_cmd) == -1)
     internal_error ("Cannot allocate redirection storage: not enough memory.\n");
+
+  /* We are always processing GCC-compiled programs.  */
+  processing_gcc_compilation = 2;
 }
 
 void
