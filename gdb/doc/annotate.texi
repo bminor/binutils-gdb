@@ -402,8 +402,8 @@ it is annotated with
 
 Then, if source is to actually be displayed for this frame (for example,
 this is not true for output from the @code{backtrace} command), then a
-@code{source} annotation (@pxref{Source}) is displayed.  Unlike most
-annotations, this is output instead of the normal text which would be
+@code{source} annotation (@pxref{Source Annotations}) is displayed.  Unlike
+most annotations, this is output instead of the normal text which would be
 output, not in addition.
 @end itemize
 
