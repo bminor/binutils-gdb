@@ -41,7 +41,7 @@ i[345]86-*-lynxos*)	gdb_host=i386lynx ;;
 i[345]86-*-go32)	gdb_host=go32
 			gdb_serial_driver=ser-go32.c
 			;;
-i[345]86-*-linux)	gdb_host=linux ;;
+i[345]86-*-linux*)	gdb_host=linux ;;
 i[345]86-*-mach)	gdb_host=i386mach ;;
 i[345]86-*-sco3.2v4*)	gdb_host=i386sco4 ;;
 i[345]86-*-sco*)	gdb_host=i386sco ;;
@@ -168,7 +168,7 @@ i[345]86-*-sunos*)	gdb_target=sun386 ;;
 i[345]86-*-sysv4*)	gdb_target=i386v4 ;;
 i[345]86-*-sco*)	gdb_target=i386v ;;
 i[345]86-*-sysv*)	gdb_target=i386v ;;
-i[345]86-*-linux)	gdb_target=linux ;;
+i[345]86-*-linux*)	gdb_target=linux ;;
 
 i960-*-bout)		gdb_target=vxworks960 ;;
 i960-*-coff)		gdb_target=nindy960 ;;

@@ -119,14 +119,14 @@ endif
 ifeq ($(canonhost),i586-unknown-linux)
 canonhost := i486-linux
 endif
-ifeq ($(canonhost),i386-unknown-linuxelf)
-canonhost := i386-linuxelf
+ifeq ($(canonhost),i386-unknown-linuxaout)
+canonhost := i386-linuxaout
 endif
-ifeq ($(canonhost),i486-unknown-linuxelf)
-canonhost := i486-linuxelf
+ifeq ($(canonhost),i486-unknown-linuxaout)
+canonhost := i486-linuxaout
 endif
-ifeq ($(canonhost),i586-unknown-linuxelf)
-canonhost := i486-linuxelf
+ifeq ($(canonhost),i586-unknown-linuxaout)
+canonhost := i486-linuxaout
 endif
 
 #
@@ -297,7 +297,7 @@ all: all-cygnus
 SHELL=/bin/bash
 endif
 
-ifeq ($(patsubst %-linux,linux,$(patsubst %-linuxelf,linux,$(canonhost))),linux)
+ifeq ($(patsubst %-linux,linux,$(patsubst %-linuxaout,linux,$(canonhost))),linux)
 TARGETS = $(NATIVE)
 all: all-cygnus
 endif
@@ -318,7 +318,7 @@ ifeq ($(patsubst %-lynx,lynx,$(canonhost)),lynx)
 FLAGS_TO_PASS := $(FLAGS_TO_PASS) "GNU_MAKE=$(MAKE)" "CONFIG_SHELL=/bin/bash"
 endif
 
-ifeq ($(patsubst %-linux,linux,$(patsubst %-linuxelf,linux,$(canonhost))),linux)
+ifeq ($(patsubst %-linux,linux,$(patsubst %-linuxaout,linux,$(canonhost))),linux)
 FLAGS_TO_PASS := $(FLAGS_TO_PASS) "GNU_MAKE=$(MAKE)"
 endif
 
