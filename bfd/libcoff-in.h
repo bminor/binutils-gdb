@@ -40,6 +40,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define obj_coff_keep_strings(bfd) (coff_data (bfd)->keep_strings)
 #define obj_coff_sym_hashes(bfd) (coff_data (bfd)->sym_hashes)
 
+#define obj_coff_local_toc_table(bfd) (coff_data(bfd)->local_toc_sym_map)
+
 /* `Tdata' information kept for COFF files.  */
 
 typedef struct coff_tdata
@@ -83,6 +85,9 @@ typedef struct coff_tdata
   /* Used by the COFF backend linker.  */
   struct coff_link_hash_entry **sym_hashes;
 
+  /* used by the pe linker for PowerPC */
+  int *local_toc_sym_map;
+
   struct bfd_link_info *link_info;
 } coff_data_type;
 
@@ -94,6 +99,7 @@ typedef struct pe_tdata
   int dll;
   int has_reloc_section;
   boolean (*in_reloc_p) PARAMS((bfd *, reloc_howto_type *));
+  flagword real_flags;
 } pe_data_type;
 
 #define pe_data(bfd)		((bfd)->tdata.pe_obj_data)
@@ -217,6 +223,11 @@ struct coff_link_hash_entry
 
   /* Pointer to array of auxiliary entries, if any.  */
   union internal_auxent *aux;
+
+  /* If this symbol requires an entry in the table of contents, the
+     processor specific backend uses this field to hold the offset
+     into the .toc section.  */
+  bfd_vma toc_offset;
 };
 
 /* COFF linker hash table.  */

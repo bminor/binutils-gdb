@@ -204,6 +204,7 @@ _bfd_coff_link_hash_newfunc (entry, table, string)
       ret->numaux = 0;
       ret->auxbfd = NULL;
       ret->aux = NULL;
+      ret->toc_offset = 1; /* invalid toc address, sets the high bit */
     }
 
   return (struct bfd_hash_entry *) ret;
@@ -313,6 +314,7 @@ coff_link_add_object_symbols (abfd, info)
     return false;
   if (! coff_link_add_symbols (abfd, info))
     return false;
+
   if (! info->keep_memory)
     {
       if (! _bfd_coff_free_symbols (abfd))
@@ -529,6 +531,7 @@ coff_link_add_symbols (abfd, info)
 		  (*sym_hash)->type = sym.n_type;
 		  (*sym_hash)->numaux = sym.n_numaux;
 		  (*sym_hash)->auxbfd = abfd;
+		  (*sym_hash)->toc_offset = 1;
 		  if (sym.n_numaux != 0)
 		    {
 		      union internal_auxent *alloc;
@@ -2344,7 +2347,6 @@ _bfd_coff_generic_relocate_section (output_bfd, info, input_bfd,
 {
   struct internal_reloc *rel;
   struct internal_reloc *relend;
-
 
   rel = relocs;
   relend = rel + input_section->reloc_count;

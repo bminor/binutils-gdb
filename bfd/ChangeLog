@@ -1,3 +1,36 @@
+Tue Nov  7 11:53:48 1995  Kim Knuttila  <krk@cygnus.com>
+
+	* coff-ppc.c (ppc_record_toc_entry): new function.
+	(in_reloc_p): changed return value.
+	(coff_ppc_relocate_section): much rework.
+	(ppc_allocate_toc_section): new function.
+	(ppc_process_before_allocation): new function.
+	(ppc_coff_swap_sym_in_hook): new function.
+
+	* cofflink.c (_bfd_coff_link_hash_newfunc): initialize toc_offset.
+	(coff_link_add_symbols): initialize toc_offset.
+
+	* peicode.h (coff_swap_sym_in): Added coff_swap_sym_in_hook
+	(coff_swap_aouthdr_out): Added more sections to the data
+	dictionary for the pe file header. Also changed linker version
+	number on the ppc side.
+	(dir_names): small improvements to the dictionary printing.
+	(pe_mkobject_hook): save the file level flags.
+
+	* libcoff-in.h (coff_link_hash_entry): added toc_offset field
+	(pe_tdata): added real_flags field
+	(coff_tdata): added local_toc_sym_map and access macro
+
+	* libcoff.h (coff_link_hash_entry): added toc_offset field
+	(pe_tdata): added real_flags field
+	(coff_tdata): added local_toc_sym_map and access macro
+
+	* coffcode.h (coff_set_alignment_hook): added hook for PE.
+	(coff_mkobject): init for local_toc_sym_map
+	(coff_write_object_contents): set the internal_a.magic to
+        IMAGE_NT_OPTIONAL_HDR_MAGIC which appears to be what other
+	ppc compilers use.
+
 Tue Nov  7 13:48:58 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Call AC_CHECK_PROG to find and cache AR.

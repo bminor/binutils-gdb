@@ -928,6 +928,40 @@ coff_set_alignment_hook (abfd, section, scnhdr)
   section->alignment_power = i;
 }
 
+#elif defined(COFF_WITH_PE) 
+
+/* a couple of macros to help setting the alignment power field */
+#define ALIGN_SET(field,x,y) \
+  if (((field) & IMAGE_SCN_ALIGN_64BYTES) == x )\
+  {\
+     section->alignment_power = y;\
+  }
+
+#define ELIFALIGN_SET(field,x,y) \
+  else if (( (field) & IMAGE_SCN_ALIGN_64BYTES) == x ) \
+  {\
+     section->alignment_power = y;\
+  }
+
+static void
+coff_set_alignment_hook (abfd, section, scnhdr)
+     bfd * abfd;
+     asection * section;
+     PTR scnhdr;
+{
+  struct internal_scnhdr *hdr = (struct internal_scnhdr *) scnhdr;
+
+  ALIGN_SET     (hdr->s_flags, IMAGE_SCN_ALIGN_64BYTES, 6)
+  ELIFALIGN_SET (hdr->s_flags, IMAGE_SCN_ALIGN_32BYTES, 5)
+  ELIFALIGN_SET (hdr->s_flags, IMAGE_SCN_ALIGN_16BYTES, 4)
+  ELIFALIGN_SET (hdr->s_flags, IMAGE_SCN_ALIGN_8BYTES,  3)
+  ELIFALIGN_SET (hdr->s_flags, IMAGE_SCN_ALIGN_4BYTES,  2)
+  ELIFALIGN_SET (hdr->s_flags, IMAGE_SCN_ALIGN_2BYTES,  1)
+  ELIFALIGN_SET (hdr->s_flags, IMAGE_SCN_ALIGN_1BYTES,  0)
+}
+#undef ALIGN_SET
+#undef ELIFALIGN_SET
+
 #else /* ! I960 */
 
 #define coff_set_alignment_hook \
@@ -953,6 +987,8 @@ coff_mkobject (abfd)
   coff->conversion_table = (unsigned int *) NULL;
   coff->raw_syments = (struct coff_ptr_struct *) NULL;
   coff->relocbase = 0;
+  coff->local_toc_sym_map = 0;
+
 /*  make_abs_section(abfd);*/
 
   return true;
@@ -2176,6 +2212,7 @@ coff_write_object_contents (abfd)
   if (abfd->flags & EXEC_P)
     internal_f.f_flags |= F_EXEC;
 
+  /* FIXME: this is wrong for PPC_PE! */
   if (!abfd->xvec->byteorder_big_p)
     internal_f.f_flags |= F_AR32WR;
   else
@@ -2254,7 +2291,7 @@ coff_write_object_contents (abfd)
 #endif 
 #if defined(PPC)
 #define __A_MAGIC_SET__
-    internal_a.magic = PPCMAGIC;
+    internal_a.magic = IMAGE_NT_OPTIONAL_HDR_MAGIC;
 #endif
 #if defined(I386)
 #define __A_MAGIC_SET__

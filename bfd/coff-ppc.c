@@ -47,6 +47,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "libcoff.h"
 
+/* The nt loader points the toc register to &toc + 32768, in order to */
+/* use the complete range of a 16-bit displacement (I guess). We have */
+/* to adjust for this when we fix up loads displaced off the toc reg. */
+#define TOC_LOAD_ADJUSTMENT (-32768)
+#define TOC_SECTION_NAME ".private.toc"
+
 /* The main body of code is in coffcode.h.  */
 
 #define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (3)
@@ -205,6 +211,7 @@ static bfd_reloc_status_type ppc_imglue_reloc PARAMS ((bfd *abfd,
 
 
 
+static boolean in_reloc_p PARAMS((bfd *abfd, reloc_howto_type *howto));
 
 
 /* FIXME: It'll take a while to get through all of these. I only need a few to
@@ -262,22 +269,22 @@ static reloc_howto_type ppc_coff_howto_table[] =
 	 0x00,	 	         /* src_mask */                             
 	 0x00,        		 /* dst_mask */                             
 	 false),                 /* pcrel_offset */
-
+  
   /* IMAGE_REL_PPC_ADDR64 0x0001  64-bit address */
   /* Unused: */
   HOWTO(IMAGE_REL_PPC_ADDR64,    /* type */                                 
-	 0,	                 /* rightshift */                           
-	 3,	                 /* size (0 = byte, 1 = short, 2 = long) */ 
-	 64,	                 /* bitsize */                   
-	 false,	                 /* pc_relative */                          
-	 0,	                 /* bitpos */                               
-	 complain_overflow_bitfield, 	 /* complain_on_overflow */
-	 0,		         /* special_function */                     
-	 "ADDR64",               /* name */
-	 true,	                 /* partial_inplace */                      
-	 MINUS_ONE,	 	 /* src_mask */
-	 MINUS_ONE,        	 /* dst_mask */
-	 false),                 /* pcrel_offset */
+	0,	                 /* rightshift */                           
+	3,	                 /* size (0 = byte, 1 = short, 2 = long) */ 
+	64,	                 /* bitsize */                   
+	false,	                 /* pc_relative */                          
+	0,	                 /* bitpos */                               
+	complain_overflow_bitfield, 	 /* complain_on_overflow */
+	0,		         /* special_function */                     
+	"ADDR64",               /* name */
+	true,	                 /* partial_inplace */                      
+	MINUS_ONE,	 	 /* src_mask */
+	MINUS_ONE,        	 /* dst_mask */
+	false),                 /* pcrel_offset */
 
   /* IMAGE_REL_PPC_ADDR32 0x0002  32-bit address */
   /* Used: */
@@ -294,10 +301,10 @@ static reloc_howto_type ppc_coff_howto_table[] =
 	 0xffffffff,            /* src_mask */                             
 	 0xffffffff,            /* dst_mask */                             
 	 false),                /* pcrel_offset */
-
+  
   /* IMAGE_REL_PPC_ADDR24 0x0003  26-bit address, shifted left 2 (branch absolute) */
   /* the LI field is in bit 6 through bit 29 is 24 bits, + 2 for the shift */
-  /* Of course, That's the IBM approved bit numbering, which is not what 
+  /* Of course, That's the IBM approved bit numbering, which is not what */
   /* anyone else uses.... The li field is in bit 2 thru 25 */ 
   /* Used: */
   HOWTO (IMAGE_REL_PPC_ADDR24,  /* type */
@@ -313,7 +320,7 @@ static reloc_howto_type ppc_coff_howto_table[] =
 	 0x07fffffc,	        /* src_mask */                             
 	 0x07fffffc,        	/* dst_mask */                             
 	 false),                /* pcrel_offset */
-
+  
   /* IMAGE_REL_PPC_ADDR16 0x0004  16-bit address */
   /* Used: */
   HOWTO (IMAGE_REL_PPC_ADDR16,  /* type */             
@@ -329,7 +336,7 @@ static reloc_howto_type ppc_coff_howto_table[] =
 	 0xffff,	        /* src_mask */                             
 	 0xffff,        	/* dst_mask */                             
 	 false),                /* pcrel_offset */
-
+  
   /* IMAGE_REL_PPC_ADDR14 0x0005 */
   /*  16-bit address, shifted left 2 (load doubleword) */
   /* FIXME: the mask is likely wrong, and the bit position may be as well */
@@ -347,7 +354,7 @@ static reloc_howto_type ppc_coff_howto_table[] =
 	 0xffff,	        /* src_mask */                             
 	 0xffff,        	/* dst_mask */                             
 	 false),                /* pcrel_offset */
-
+  
   /* IMAGE_REL_PPC_REL24 0x0006 */
   /*   26-bit PC-relative offset, shifted left 2 (branch relative) */
   /* Used: */
@@ -364,7 +371,7 @@ static reloc_howto_type ppc_coff_howto_table[] =
 	 0x3fffffc,	        /* src_mask */                             
 	 0x3fffffc,        	/* dst_mask */                             
 	 false),                /* pcrel_offset */
-
+  
   /* IMAGE_REL_PPC_REL14 0x0007 */
   /*   16-bit PC-relative offset, shifted left 2 (br cond relative) */
   /* FIXME: the mask is likely wrong, and the bit position may be as well */
@@ -383,7 +390,7 @@ static reloc_howto_type ppc_coff_howto_table[] =
 	 0xffff,	        /* src_mask */                             
 	 0xffff,        	/* dst_mask */                             
 	 true),                 /* pcrel_offset */
-
+  
   /* IMAGE_REL_PPC_TOCREL16 0x0008 */
   /*   16-bit offset from TOC base */
   /* Used: */
@@ -400,7 +407,7 @@ static reloc_howto_type ppc_coff_howto_table[] =
 	 0xffff,	        /* src_mask */                             
 	 0xffff,        	/* dst_mask */                             
 	 false),                /* pcrel_offset */
-
+  
   /* IMAGE_REL_PPC_TOCREL14 0x0009 */
   /*   16-bit offset from TOC base, shifted left 2 (load doubleword) */
   /* Unused: */
@@ -416,8 +423,8 @@ static reloc_howto_type ppc_coff_howto_table[] =
 	 false,	                /* partial_inplace */                      
 	 0xffff,	        /* src_mask */                             
 	 0xffff,        	/* dst_mask */                             
-	 true),                 /* pcrel_offset */
-
+	 false),                /* pcrel_offset */
+  
   /* IMAGE_REL_PPC_ADDR32NB 0x000A */
   /*   32-bit addr w/ image base */
   /* Unused: */
@@ -428,13 +435,13 @@ static reloc_howto_type ppc_coff_howto_table[] =
 	 false,	                /* pc_relative */                          
 	 0,	                /* bitpos */                               
 	 complain_overflow_signed, /* complain_on_overflow */
-	 ppc_addr32nb_reloc,    /* special_function */                     
+	 0,                     /* special_function */                     
 	 "ADDR32NB",            /* name */
 	 true,	                /* partial_inplace */                      
 	 0xffffffff,	        /* src_mask */                             
 	 0xffffffff,        	/* dst_mask */                             
-	 true),                 /* pcrel_offset */
-
+	 false),                 /* pcrel_offset */
+  
   /* IMAGE_REL_PPC_SECREL 0x000B */
   /*   va of containing section (as in an image sectionhdr) */
   /* Unused: */
@@ -484,7 +491,7 @@ static reloc_howto_type ppc_coff_howto_table[] =
 	 true,	                /* partial_inplace */                      
 	 0xffffffff,	        /* src_mask */                             
 	 0xffffffff,        	/* dst_mask */                             
-	 true),                 /* pcrel_offset */
+	 false),                /* pcrel_offset */
 
   /* IMAGE_REL_PPC_IMGLUE 0x000E */
   /*   symbol is glue code; virtual address is TOC restore instruction */
@@ -570,317 +577,10 @@ static reloc_howto_type ppc_coff_howto_table[] =
 };
 
 
-/* Provided the symbol, returns the value reffed */
-static long get_symbol_value PARAMS ((asymbol *));
-
-static long
-get_symbol_value (symbol)       
-     asymbol *symbol;
-{                                             
-  long relocation = 0;
-
-  if (bfd_is_com_section (symbol->section))
-  {
-    relocation = 0;                           
-  }
-  else 
-  {                                      
-    relocation = symbol->value +
-     symbol->section->output_section->vma +
-      symbol->section->output_offset;
-  }                                           
-
-  return(relocation);
-}
-
-/* this function is in charge of performing all the ppc PE relocations */
-/* Don't yet know if we want to do this this particular way ... (krk)  */
-/* (it is not yet enabled) */
-
-static bfd_reloc_status_type
-pe_ppc_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
-	    error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol_in;
-     PTR data;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message;
-{
-  /* the consth relocation comes in two parts, we have to remember
-     the state between calls, in these variables */
-  static boolean part1_consth_active = false;
-  static unsigned long part1_consth_value;
-
-  unsigned long insn;
-  unsigned long sym_value;
-  unsigned long unsigned_value;
-  unsigned short r_type;
-  long signed_value;
-
-  unsigned long addr = reloc_entry->address ; /*+ input_section->vma*/
-  bfd_byte  *hit_data =addr + (bfd_byte *)(data);
-	
-  r_type = reloc_entry->howto->type;
-
-  if (output_bfd) {
-    /* Partial linking - do nothing */
-    reloc_entry->address += input_section->output_offset;
-    return bfd_reloc_ok;
-
-  }
-
-  if (symbol_in != NULL
-      && bfd_is_und_section (symbol_in->section))
-  {
-    /* Keep the state machine happy in case we're called again */
-    if (r_type == IMAGE_REL_PPC_REFHI) 
-    {
-      part1_consth_active = true;
-      part1_consth_value  = 0;
-    }
-    return(bfd_reloc_undefined);
-  }
-
-  if ((part1_consth_active) && (r_type != IMAGE_REL_PPC_PAIR)) 
-  {
-    part1_consth_active = false;
-    *error_message = (char *) "Missing PAIR";
-    return(bfd_reloc_dangerous);
-  }
-
-
-  sym_value = get_symbol_value(symbol_in);
-
-#if 0
-
-  switch (r_type) 
-  {
-   case R_IREL: 	
-    insn = bfd_get_32(abfd, hit_data); 
-    /* Take the value in the field and sign extend it */
-    signed_value = EXTRACT_HWORD(insn);
-    signed_value = SIGN_EXTEND_HWORD(signed_value);
-    signed_value <<= 2;
-    signed_value +=  sym_value + reloc_entry->addend;
-    if (((signed_value + reloc_entry->address) & ~0x3ffff) == 0)
-    {				/* Absolute jmp/call */
-      insn |= (1<<24);		/* Make it absolute */
-      signed_value += reloc_entry->address;
-      /* FIXME: Should we change r_type to R_IABS */
-    } 
-    else 
-    {
-      /* Relative jmp/call, so subtract from the value the
-	 address of the place we're coming from */
-      signed_value -= (input_section->output_section->vma
-		       + input_section->output_offset);
-      if (signed_value>0x1ffff || signed_value<-0x20000) 
-       return(bfd_reloc_overflow);
-    }
-    signed_value >>= 2;
-    insn = INSERT_HWORD(insn, signed_value);
-    bfd_put_32(abfd, insn ,hit_data); 
-    break;
-   case R_ILOHALF: 
-    insn = bfd_get_32(abfd, hit_data); 
-    unsigned_value = EXTRACT_HWORD(insn);
-    unsigned_value +=  sym_value + reloc_entry->addend;
-    insn = INSERT_HWORD(insn, unsigned_value);
-    bfd_put_32(abfd, insn, hit_data); 
-    break;
-   case R_IHIHALF:
-    insn = bfd_get_32(abfd, hit_data); 
-    /* consth, part 1 
-       Just get the symbol value that is referenced */
-    part1_consth_active = true;
-    part1_consth_value = sym_value + reloc_entry->addend;
-    /* Don't modify insn until R_IHCONST */
-    break;
-   case R_IHCONST:	
-    insn = bfd_get_32(abfd, hit_data); 
-    /* consth, part 2 
-       Now relocate the reference */
-    if (part1_consth_active == false) {
-      *error_message = (char *) "Missing IHIHALF";
-      return(bfd_reloc_dangerous);
-    }
-    /* sym_ptr_ptr = r_symndx, in coff_slurp_reloc_table() */
-    unsigned_value = 0;		/*EXTRACT_HWORD(insn) << 16;*/
-    unsigned_value += reloc_entry->addend; /* r_symndx */
-    unsigned_value += part1_consth_value;
-    unsigned_value = unsigned_value >> 16;
-    insn = INSERT_HWORD(insn, unsigned_value);
-    part1_consth_active = false;
-    bfd_put_32(abfd, insn, hit_data); 
-    break;
-   case R_BYTE:
-    insn = bfd_get_8(abfd, hit_data); 
-    unsigned_value = insn + sym_value + reloc_entry->addend;	
-    if (unsigned_value & 0xffffff00) {
-      fprintf(stderr,"Relocation problem : ");
-      fprintf(stderr,"byte value too large in module %s\n",
-	      abfd->filename); 
-      return(bfd_reloc_overflow);
-    }
-    bfd_put_8(abfd, unsigned_value, hit_data); 
-    break;
-   case R_HWORD:
-    insn = bfd_get_16(abfd, hit_data); 
-    unsigned_value = insn + sym_value + reloc_entry->addend;	
-    if (unsigned_value & 0xffff0000) {
-      fprintf(stderr,"Relocation problem : ");
-      fprintf(stderr,"hword value too large in module %s\n",
-	      abfd->filename); 
-      return(bfd_reloc_overflow);
-    }
-
-    bfd_put_16(abfd, insn, hit_data); 
-    break;
-   case R_WORD:
-    insn = bfd_get_32(abfd, hit_data); 
-    insn += sym_value + reloc_entry->addend;  
-    bfd_put_32(abfd, insn, hit_data);
-    break;
-   default:
-    *error_message = "Unrecognized reloc";
-    return (bfd_reloc_dangerous);
-  }
-
-#endif
-
-  return(bfd_reloc_ok);	
-}
-
-/* The reloc processing routine for the optimized COFF linker.  */
-
-static boolean
-coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
-			    contents, relocs, syms, sections)
-     bfd *output_bfd;
-     struct bfd_link_info *info;
-     bfd *input_bfd;
-     asection *input_section;
-     bfd_byte *contents;
-     struct internal_reloc *relocs;
-     struct internal_syment *syms;
-     asection **sections;
-{
-  struct internal_reloc *rel;
-  struct internal_reloc *relend;
-  boolean hihalf;
-  bfd_vma hihalf_val;
-
-  unsigned short r_type  = EXTRACT_TYPE (rel->r_type);
-  unsigned short r_flags = EXTRACT_FLAGS(rel->r_type);
-  unsigned short junk    = EXTRACT_JUNK (rel->r_type);
-
-
-  /* If we are performing a relocateable link, we don't need to do a
-     thing.  The caller will take care of adjusting the reloc
-     addresses and symbol indices.  */
-
-  if (info->relocateable)
-    return true;
-
-  hihalf = false;
-  hihalf_val = 0;
-
-  rel = relocs;
-  relend = rel + input_section->reloc_count;
-  for (; rel < relend; rel++)
-    {
-      long symndx;
-      bfd_byte *loc;
-      struct coff_link_hash_entry *h;
-      struct internal_syment *sym;
-      asection *sec;
-      bfd_vma val;
-      boolean overflow;
-      unsigned long insn;
-      long signed_value;
-      unsigned long unsigned_value;
-      bfd_reloc_status_type rstat;
-
-      symndx = rel->r_symndx;
-      loc = contents + rel->r_vaddr - input_section->vma;
-
-      if (symndx == -1)
-	h = NULL;
-      else
-	h = obj_coff_sym_hashes (input_bfd)[symndx];
-
-      sym = NULL;
-      sec = NULL;
-      val = 0;
-
-      overflow = false;
-
-      switch (r_type)
-	{
-	default:
-	  fprintf( stderr, "unsupported reloc %s\n",
-		  ppc_coff_howto_table[r_type].name);
-	  bfd_set_error (bfd_error_bad_value);
-	  return false;
-	case IMAGE_REL_PPC_TOCREL16:
-	case IMAGE_REL_PPC_IFGLUE:
-	case IMAGE_REL_PPC_SECTION:
-	case IMAGE_REL_PPC_SECREL:
-	case IMAGE_REL_PPC_IMGLUE:
-	case IMAGE_REL_PPC_ABSOLUTE:
-	  break;
-
-	case IMAGE_REL_PPC_ADDR16:
-	case IMAGE_REL_PPC_REL24:
-	case IMAGE_REL_PPC_ADDR24:
-	case IMAGE_REL_PPC_ADDR32:
-	case IMAGE_REL_PPC_ADDR32NB:
-	  rstat = _bfd_relocate_contents (ppc_coff_howto_table + r_type,
-					  input_bfd, val, loc);
-	  if (rstat == bfd_reloc_overflow)
-	    overflow = true;
-	  else if (rstat != bfd_reloc_ok)
-	    abort ();
-	  break;
-	}
-
-      if (overflow)
-	{
-	  const char *name;
-	  char buf[SYMNMLEN + 1];
-
-	  if (symndx == -1)
-	    name = "*ABS*";
-	  else if (h != NULL)
-	    name = h->root.root.string;
-	  else if (sym == NULL)
-	    name = "*unknown*";
-	  else if (sym->_n._n_n._n_zeroes == 0
-		   && sym->_n._n_n._n_offset != 0)
-	    name = obj_coff_strings (input_bfd) + sym->_n._n_n._n_offset;
-	  else
-	    {
-	      strncpy (buf, sym->_n._n_name, SYMNMLEN);
-	      buf[SYMNMLEN] = '\0';
-	      name = buf;
-	    }
-
-	  if (! ((*info->callbacks->reloc_overflow)
-		 (info, name, ppc_coff_howto_table[r_type].name, (bfd_vma) 0,
-		  input_bfd, input_section,
-		  rel->r_vaddr - input_section->vma)))
-	    return false;
-	}
-    }     
-
-  return true;
-}
-
 
 
 /* Some really cheezy macros that can be turned on to test stderr :-) */
+
 
 #ifdef DEBUG_RELOC
 #define UN_IMPL(x)                                           \
@@ -900,6 +600,15 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 	   r->address, r->addend);                   \
 }
 
+/* Given a reloc name, n, and a pointer to an internal_reloc, 
+   dump out interesting information on the contents 
+
+#define n_name		_n._n_name
+#define n_zeroes	_n._n_n._n_zeroes
+#define n_offset	_n._n_n._n_offset
+
+*/
+
 #define DUMP_RELOC2(n,r)                     \
 {                                            \
    fprintf(stderr,"%s sym %d, r_vaddr %d\n", \
@@ -910,6 +619,873 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 #define UN_IMPL(x)
 #define DUMP_RELOC(n,r)
 #define DUMP_RELOC2(n,r)
+#endif
+
+
+
+/* toc construction and management routines */
+extern bfd* bfd_of_toc_owner;
+extern long int global_toc_size;
+
+extern long int import_table_size;
+extern long int first_thunk_address;
+extern long int thunk_size;
+
+enum toc_type
+{
+  default_toc,
+  toc_32,
+  toc_64
+};
+
+/* record a toc offset against a symbol */
+static int
+ppc_record_toc_entry(abfd, info, sec, sym, toc_kind)
+     bfd *abfd;
+     struct bfd_link_info *info;
+     asection *sec;
+     int sym;
+     enum toc_type toc_kind;
+{
+  bfd_byte *t;
+  bfd_byte *old_contents;
+  asection *s;
+  int element_size;
+  int data;
+  int offset;
+  struct coff_link_hash_entry *h;
+  struct coff_symbol_struct *target;
+  int ret_val;
+  const char *name;
+
+  int *local_syms;
+
+  h = 0;
+
+  h = obj_coff_sym_hashes (abfd)[sym];
+
+  if (h == 0) 
+    { 
+      local_syms = obj_coff_local_toc_table(abfd);
+      if (local_syms == 0)
+	{
+	  int i;
+	  /* allocate a table */
+	  local_syms = 
+	    (int *) bfd_zalloc (abfd, 
+				obj_raw_syment_count(abfd) * sizeof(int));
+	  if (local_syms == 0)
+	    {
+	      bfd_set_error (bfd_error_no_memory);
+	      return false;
+	    }
+	  obj_coff_local_toc_table(abfd) = local_syms;
+	  for (i = 0; i < obj_raw_syment_count(abfd); ++i)
+	    local_syms[i] = 1;
+	}
+
+      if (local_syms[sym] == 1) 
+	{
+	  local_syms[sym] = global_toc_size;
+	  ret_val = global_toc_size;
+	  global_toc_size += 4;
+#ifdef TOC_DEBUG
+	  fprintf(stderr,
+		  "Setting toc_offset for local sym %d to %d\n",
+		  sym, ret_val);
+#endif
+	}
+      else
+	{
+	  ret_val = local_syms[sym];
+#ifdef TOC_DEBUG
+	  fprintf(stderr,
+		  "toc_offset already set for local sym %d to %d\n",
+		  sym, ret_val);
+#endif
+	}
+    }
+  else
+    {
+      name = h->root.root.string;
+
+      /* check to see if there's a toc slot allocated. If not, do it
+	 here. It will be used in relocate_section */
+      if (h->toc_offset == 1)
+	{
+	  h->toc_offset = global_toc_size;
+	  ret_val = global_toc_size;
+	  global_toc_size += 4;
+#ifdef TOC_DEBUG
+	  fprintf(stderr,
+		  "Setting toc_offset for sym %d (%s) [h=%p] to %d\n",
+		  sym, name, h, ret_val);
+#endif
+	}
+      else
+	{
+	  ret_val = h->toc_offset;
+#ifdef TOC_DEBUG
+	  fprintf(stderr,
+		  "toc_offset already set for sym %d (%s) [h=%p] to %d\n",
+		  sym, name, h, ret_val);
+#endif
+	}
+    }
+
+  return ret_val;
+}
+
+
+/* Provided the symbol, returns the value reffed */
+static long get_symbol_value PARAMS ((asymbol *));
+
+static long
+get_symbol_value (symbol)       
+     asymbol *symbol;
+{                                             
+  long relocation = 0;
+
+  if (bfd_is_com_section (symbol->section))
+    {
+      relocation = 0;                           
+    }
+  else 
+    {                                      
+      relocation = symbol->value +
+	symbol->section->output_section->vma +
+	  symbol->section->output_offset;
+    }                                           
+
+  return(relocation);
+}
+
+/* Return true if this relocation should
+   appear in the output .reloc section. */
+
+static boolean in_reloc_p(abfd, howto)
+     bfd * abfd;
+     reloc_howto_type *howto;
+{
+  return 
+    (! howto->pc_relative) 
+      && (howto->type != IMAGE_REL_PPC_TOCREL16)
+      && (howto->type != IMAGE_REL_PPC_IMGLUE);
+}     
+
+/* this function is in charge of performing all the ppc PE relocations */
+/* Don't yet know if we want to do this this particular way ... (krk)  */
+/* FIXME: (it is not yet enabled) */
+
+static bfd_reloc_status_type
+pe_ppc_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
+	      error_message)
+     bfd *abfd;
+     arelent *reloc_entry;
+     asymbol *symbol_in;
+     PTR data;
+     asection *input_section;
+     bfd *output_bfd;
+     char **error_message;
+{
+  /* the consth relocation comes in two parts, we have to remember
+     the state between calls, in these variables */
+  static boolean part1_consth_active = false;
+  static unsigned long part1_consth_value;
+
+  unsigned long insn;
+  unsigned long sym_value;
+  unsigned long unsigned_value;
+  unsigned short r_type;
+  long signed_value;
+  
+  unsigned long addr = reloc_entry->address ; /*+ input_section->vma*/
+  bfd_byte  *hit_data =addr + (bfd_byte *)(data);
+	
+  fprintf(stderr, "pe_ppc_reloc (%s)\n", TARGET_LITTLE_NAME);
+
+  r_type = reloc_entry->howto->type;
+
+  if (output_bfd) 
+    {
+      /* Partial linking - do nothing */
+      reloc_entry->address += input_section->output_offset;
+      return bfd_reloc_ok; 
+    }
+
+  if (symbol_in != NULL
+      && bfd_is_und_section (symbol_in->section))
+    {
+      /* Keep the state machine happy in case we're called again */
+      if (r_type == IMAGE_REL_PPC_REFHI) 
+	{
+	  part1_consth_active = true;
+	  part1_consth_value  = 0;
+	}
+      return(bfd_reloc_undefined);
+    }
+  
+  if ((part1_consth_active) && (r_type != IMAGE_REL_PPC_PAIR)) 
+    {
+      part1_consth_active = false;
+      *error_message = (char *) "Missing PAIR";
+      return(bfd_reloc_dangerous);
+    }
+
+
+  sym_value = get_symbol_value(symbol_in);
+  
+  return(bfd_reloc_ok);	
+}
+
+/* The reloc processing routine for the optimized COFF linker.  */
+
+static boolean
+coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
+			   contents, relocs, syms, sections)
+     bfd *output_bfd;
+     struct bfd_link_info *info;
+     bfd *input_bfd;
+     asection *input_section;
+     bfd_byte *contents;
+     struct internal_reloc *relocs;
+     struct internal_syment *syms;
+     asection **sections;
+{
+  struct internal_reloc *rel;
+  struct internal_reloc *relend;
+  boolean hihalf;
+  bfd_vma hihalf_val;
+  asection *toc_section = 0;
+  bfd_vma relocation;
+  reloc_howto_type *howto = 0;
+  
+#ifdef DEBUG_RELOC
+  fprintf(stderr, 
+	  "pe_ppc_relocate_section (%s) for %s \n", 
+	  TARGET_LITTLE_NAME,
+	  input_section->name);
+  
+#endif  
+
+  /* If we are performing a relocateable link, we don't need to do a
+     thing.  The caller will take care of adjusting the reloc
+     addresses and symbol indices.  */
+  if (info->relocateable)
+    return true;
+  
+  hihalf = false;
+  hihalf_val = 0;
+
+  rel = relocs;
+  relend = rel + input_section->reloc_count;
+  for (; rel < relend; rel++)
+    {
+      long symndx;
+      struct coff_link_hash_entry *h;
+      struct internal_syment *sym;
+      bfd_vma val;
+
+      asection *sec;
+      bfd_reloc_status_type rstat;
+      bfd_byte *loc;
+
+      unsigned short r_type  = EXTRACT_TYPE (rel->r_type);
+      unsigned short r_flags = EXTRACT_FLAGS(rel->r_type);
+      unsigned short junk    = EXTRACT_JUNK (rel->r_type);
+  
+#ifdef DEBUG_RELOC
+  /* now examine flags */
+  if (r_flags != 0) 
+    {
+      fprintf (stderr, "Reloc with flags found!");
+      if ( r_flags & IMAGE_REL_PPC_NEG ) 
+	fprintf (stderr, " NEG");
+      if ( r_flags & IMAGE_REL_PPC_BRTAKEN )
+	fprintf (stderr, " BRTAKEN");
+      if ( r_flags & IMAGE_REL_PPC_BRNTAKEN )
+	fprintf (stderr, " BRNTAKEN");
+      if ( r_flags & IMAGE_REL_PPC_TOCDEFN )
+	fprintf (stderr, " TOCDEFN");
+      fprintf(stderr, "\n");
+    }
+#endif
+
+      symndx = rel->r_symndx;
+      loc = contents + rel->r_vaddr - input_section->vma;
+
+      /* FIXME: check bounds on r_type */
+      howto = ppc_coff_howto_table + r_type;
+
+      if (symndx == -1)
+	{
+	  h = NULL;
+	  sym = NULL;
+	}
+      else
+	{
+	  h = obj_coff_sym_hashes (input_bfd)[symndx];
+	  sym = syms + symndx;
+	}
+
+      sec = NULL;
+      val = 0;
+
+      /* FIXME: PAIR unsupported in the following code */
+      if (h == NULL)
+	{
+	  if (symndx == -1)
+	    sec = bfd_abs_section_ptr;
+	  else
+	    {
+	      sec = sections[symndx];
+	      val = (sec->output_section->vma
+		     + sec->output_offset
+		     + sym->n_value
+		     - sec->vma);
+	    }
+	}
+      else
+	{
+	  if (h->root.type == bfd_link_hash_defined
+	      || h->root.type == bfd_link_hash_defweak)
+	    {
+	      sec = h->root.u.def.section;
+	      val = (h->root.u.def.value
+		     + sec->output_section->vma
+		     + sec->output_offset);
+	    }
+	  else
+	    {
+	      if (! ((*info->callbacks->undefined_symbol)
+		     (info, h->root.root.string, input_bfd, input_section,
+		      rel->r_vaddr - input_section->vma)))
+		return false;
+	    }
+	}
+
+      rstat = bfd_reloc_ok;
+      
+      /* Each case must do its own relocation, setting rstat appropriately */
+      switch (r_type)
+	{
+	default:
+	  fprintf( stderr, 
+		  "ERROR: during reloc processing -- unsupported reloc %s\n", 
+		  howto->name);
+	  bfd_set_error (bfd_error_bad_value);
+	  abort();
+	  return false;
+	case IMAGE_REL_PPC_TOCREL16:
+	  {
+	    bfd_vma our_toc_offset;
+	    int fixit;
+
+	    DUMP_RELOC2(howto->name, rel);
+
+	    if (toc_section == 0) 
+	      {
+		toc_section = bfd_get_section_by_name (bfd_of_toc_owner, 
+						       TOC_SECTION_NAME);
+#ifdef TOC_DEBUG
+
+		fprintf(stderr,
+			"BFD of toc owner %p, section addr of %s %p\n",
+			 bfd_of_toc_owner, TOC_SECTION_NAME, toc_section);
+#endif
+
+		if ( toc_section == NULL ) 
+		  {
+		    fprintf(stderr, "No Toc section!\n");
+		    abort();
+		  }
+	      }
+
+	    /* 
+	     *  Amazing bit tricks present. As we may have seen earlier, we
+	     *  use the 1 bit to tell us whether or not a toc offset has been
+	     *  allocated. Now that they've all been allocated, we will use
+	     *  the 1 bit to tell us if we've written this particular toc
+	     *  entry out.
+	     */
+	    fixit = false;
+	    if (h == 0)
+	      { /* it is a file local symbol */
+		int *local_toc_table;
+		const char *name;
+
+		sym = syms + symndx;
+		name = sym->_n._n_name;
+
+		local_toc_table = obj_coff_local_toc_table(input_bfd);
+		our_toc_offset = local_toc_table[symndx];
+
+		if ((our_toc_offset & 1) != 0)
+		  {
+		    /* if it has been written out, it is marked with the 
+		       1 bit. Fix up our offset, but do not write it out
+		       again.
+		     */
+		    our_toc_offset &= ~1;
+#ifdef TOC_DEBUG
+
+		    fprintf(stderr,
+			    "Not writing out toc_offset of %d for %s\n", our_toc_offset, name);
+#endif
+		  }
+		else
+		  {
+		    /* write out the toc entry */
+#ifdef TOC_DEBUG
+		    fprintf(stderr,
+			    "Writing out toc_offset toc_section (%p,%p)+%d val %d for %s\n", 
+			    toc_section,
+			    toc_section->contents,
+			    our_toc_offset, 
+			    val,
+			    name);
+#endif
+
+		    bfd_put_32(output_bfd,
+			       val,
+			       toc_section->contents + our_toc_offset);
+
+		    local_toc_table[symndx] |= 1;
+		    fixit = true;
+		  }
+	      }
+	    else
+	      {
+		const char *name = h->root.root.string;
+		our_toc_offset = h->toc_offset;
+		if ((our_toc_offset & 1) != 0)
+		  {
+		    /* if it has been written out, it is marked with the 
+		       1 bit. Fix up our offset, but do not write it out
+		       again.
+		     */
+		    our_toc_offset &= ~1;
+#ifdef TOC_DEBUG
+		    fprintf(stderr,
+			    "Not writing out toc_offset of %d for %s\n", our_toc_offset, name);
+#endif
+		  }
+		else
+		  {
+#ifdef TOC_DEBUG
+		    /* write out the toc entry */
+		    fprintf(stderr,
+			    "Writing out toc_offset toc_section (%p,%p)+%d val %d for %s\n", 
+			    toc_section,
+			    toc_section->contents,
+			    our_toc_offset, 
+			    val,
+			    name);
+#endif
+
+		    /* write out the toc entry */
+		    bfd_put_32(output_bfd,
+			       val,
+			       toc_section->contents + our_toc_offset);
+
+		    h->toc_offset |= 1;
+		    /* The tricky part is that this is the address that */
+		    /* needs a .reloc entry for it */
+		    fixit = true;
+		  }
+	      }
+
+	    if (fixit && info->base_file) 
+	      {
+		/* So if this is non pcrelative, and is referenced
+		   to a section or a common symbol, then it needs a reloc */
+
+		/* relocation to a symbol in a section which
+		   isn't absolute - we output the address here 
+		   to a file */
+
+		bfd_vma addr =  toc_section->output_section->vma
+		  + toc_section->output_offset + our_toc_offset;
+		    
+		fprintf(stderr,
+			"  Toc Section reloc candidate\n");
+		    
+		if (coff_data(output_bfd)->pe)
+		  addr -= pe_data(output_bfd)->pe_opthdr.ImageBase;
+		fwrite (&addr, 1,4, (FILE *) info->base_file);
+	      }
+
+
+	    /* FIXME: this test is conservative */
+	    if (our_toc_offset > toc_section->_raw_size)
+	      {
+		fprintf(stderr,
+			"reloc offset is bigger than the toc size!\n");
+		abort();
+	      }
+
+	    /* Now we know the relocation for this toc reference */
+	    relocation =  our_toc_offset + TOC_LOAD_ADJUSTMENT;
+	    rstat = _bfd_relocate_contents (howto,
+					    input_bfd, 
+					    relocation, 
+					    loc);
+	  }
+	  break;
+	case IMAGE_REL_PPC_IFGLUE:
+	  /* To solve this, we need to know whether or not the symbol */
+	  /* appearing on the call instruction is a function included */
+	  /* in the link or not. If it is, then we leave the nop instruction */
+	  /* alone, and the reloc is done. */
+
+	  /* Actually, for dll support on NT, this is likely not necessary at
+	     all. For any library function, a glue code stub must be supplied
+	     to the linker, and the glue will take care of the toc reload */
+	  DUMP_RELOC2(howto->name, rel);
+#if 0
+	  if (h == 0) 
+	    {
+	      /* this better be a static function */
+		  fprintf(stderr,
+			  "It's a static function.... \n");
+	    }
+	  else
+	    {
+	      /* this is an externally visible function */
+	      /* is it present? */
+	      if (h->root.type == bfd_link_hash_defined
+		  || h->root.type == bfd_link_hash_defweak)
+		{
+		  fprintf(stderr,
+			  "The function is present. \n");
+		  ;
+		}
+	      else
+		{
+		  fprintf(stderr,
+			  "The function is not present. \n");
+		}
+	    }
+#endif
+	  break;
+	case IMAGE_REL_PPC_SECREL:
+	  /* Unimplemented: codeview debugging information */
+	  /* For fast access to the header of the section 
+	     containing the item. */
+	  break;
+	case IMAGE_REL_PPC_SECTION:
+	  /* Unimplemented: codeview debugging information */
+	  /* Is used to indicate that the value should be relative
+	     to the beginning of the section that contains the
+	     symbol */
+	  break;
+	case IMAGE_REL_PPC_ABSOLUTE:
+	case IMAGE_REL_PPC_IMGLUE:
+	  {
+	    const char *my_name;
+	    if (h == 0)
+		my_name = (syms+symndx)->_n._n_name;
+	    else
+		my_name = h->root.root.string;
+
+	    fprintf(stderr, 
+		    "Warning: unsupported reloc %s <file %s, section %s>\n", 
+		    howto->name,
+		    bfd_get_filename(input_bfd),
+		    input_section->name);
+
+	    fprintf(stderr,"sym %d (%s), r_vaddr %d (%x)\n", 
+		    rel->r_symndx, my_name, rel->r_vaddr, rel->r_vaddr);  
+	  }
+	  break;
+
+	case IMAGE_REL_PPC_ADDR32NB:
+	  {
+	    struct coff_link_hash_entry *myh = 0;
+	    const char *name = 0;
+	    DUMP_RELOC2(howto->name, rel);
+	    if (h == 0)
+	      { /* it is a file local symbol */
+		sym = syms + symndx;
+		name = sym->_n._n_name;
+	      }
+	    else
+	      {
+		char *target = 0;
+
+		name = h->root.root.string;
+		if (strcmp(".idata$2", name) == 0)
+		  target = "__idata2_magic__";
+		else if (strcmp(".idata$4", name) == 0)
+		  target = "__idata4_magic__";
+		else if (strcmp(".idata$5", name) == 0)
+		  target = "__idata5_magic__";
+		else
+		  abort();
+
+		myh = 0;
+
+		myh = coff_link_hash_lookup (coff_hash_table (info),
+					     target,
+					     false, false, true);
+		if (myh == 0) 
+		  {
+		    fprintf(stderr, "Missing idata magic cookies, this cannot work anyway...\n");
+		    abort();
+		  }
+
+		val = myh->root.u.def.value + sec->output_section->vma + sec->output_offset;
+		if (first_thunk_address == 0)
+		  {
+		    int idata5offset;
+		    myh = coff_link_hash_lookup (coff_hash_table (info),
+						 "__idata5_magic__",
+						 false, false, true);
+		    first_thunk_address = myh->root.u.def.value + sec->output_section->vma + 
+		      sec->output_offset - pe_data(output_bfd)->pe_opthdr.ImageBase;
+
+		    idata5offset = myh->root.u.def.value;
+		    myh = coff_link_hash_lookup (coff_hash_table (info),
+						 "__idata6_magic__",
+						 false, false, true);
+
+		    thunk_size = myh->root.u.def.value - idata5offset;
+		    myh = coff_link_hash_lookup (coff_hash_table (info),
+						 "__idata4_magic__",
+						 false, false, true);
+		    import_table_size = myh->root.u.def.value;
+		  }
+	      }
+
+	    rstat = _bfd_relocate_contents (howto,
+					    input_bfd, 
+					    val - pe_data(output_bfd)->pe_opthdr.ImageBase,
+					    loc);
+	  }
+	  break;
+
+	case IMAGE_REL_PPC_ADDR16:
+	case IMAGE_REL_PPC_REL24:
+	case IMAGE_REL_PPC_ADDR24:
+	case IMAGE_REL_PPC_ADDR32:
+	  DUMP_RELOC2(howto->name, rel);
+	  rstat = _bfd_relocate_contents (howto,
+					  input_bfd, 
+					  val, 
+					  loc);
+	  break;
+	}
+
+      if ( info->base_file )
+	{
+	  /* So if this is non pcrelative, and is referenced
+	     to a section or a common symbol, then it needs a reloc */
+	  if (sym && pe_data(output_bfd)->in_reloc_p(output_bfd, howto))
+	    {
+	      /* relocation to a symbol in a section which
+		 isn't absolute - we output the address here 
+		 to a file */
+	      bfd_vma addr = rel->r_vaddr 
+		- input_section->vma 
+		+ input_section->output_offset 
+		  + input_section->output_section->vma;
+
+	      if (coff_data(output_bfd)->pe)
+		{
+		  addr -= pe_data(output_bfd)->pe_opthdr.ImageBase;
+		  fprintf(stderr,
+			  " adjusted down to %d", addr);
+		}
+	      fprintf(stderr, "\n");
+
+	      fwrite (&addr, 1,4, (FILE *) info->base_file);
+	    }
+	}
+
+      switch (rstat)
+	{
+	default:
+	  abort ();
+	case bfd_reloc_ok:
+	  break;
+	case bfd_reloc_overflow:
+	  {
+	    const char *name;
+	    char buf[SYMNMLEN + 1];
+
+	    if (symndx == -1)
+	      name = "*ABS*";
+	    else if (h != NULL)
+	      name = h->root.root.string;
+	    else if (sym == NULL)
+	      name = "*unknown*";
+	    else if (sym->_n._n_n._n_zeroes == 0
+		     && sym->_n._n_n._n_offset != 0)
+	      name = obj_coff_strings (input_bfd) + sym->_n._n_n._n_offset;
+	    else
+	      {
+		strncpy (buf, sym->_n._n_name, SYMNMLEN);
+		buf[SYMNMLEN] = '\0';
+		name = buf;
+	      }
+#if 0
+	    else
+	      {
+		name = _bfd_coff_internal_syment_name (input_bfd, sym, buf);
+		if (name == NULL)
+		  return false;
+	      }
+#endif
+
+	    if (! ((*info->callbacks->reloc_overflow)
+		   (info, name, howto->name, 
+		    (bfd_vma) 0, input_bfd,
+		    input_section, rel->r_vaddr - input_section->vma)))
+	      return false;
+	  }
+	}
+
+    }     
+
+  return true;
+}
+
+#ifdef COFF_IMAGE_WITH_PE
+
+long int global_toc_size = 0;
+
+bfd* bfd_of_toc_owner = 0;
+
+long int import_table_size;
+long int first_thunk_address;
+long int thunk_size;
+
+
+boolean
+ppc_allocate_toc_section (info) 
+     struct bfd_link_info *info;
+{
+  asection *s;
+  bfd_byte *foo;
+  static char test_char = '1';
+
+#ifdef DEBUG_TOC
+  fprintf(stderr,
+	  "ppc_allocate_toc_section: allocating %s section of size %d\n",
+	  TOC_SECTION_NAME, global_toc_size);
+#endif
+
+  if ( global_toc_size == 0 ) /* FIXME: does this get me in trouble? */
+    return true;
+
+  if (bfd_of_toc_owner == 0)
+    {
+      fprintf(stderr,
+	      "There is no bfd that owns the toc section!\n");
+      abort();
+    }
+
+  s = bfd_get_section_by_name ( bfd_of_toc_owner , TOC_SECTION_NAME);
+  if (s == NULL) 
+    {
+      fprintf(stderr, "No Toc section!\n");
+      abort();
+    }
+
+  foo = bfd_alloc(bfd_of_toc_owner, global_toc_size);
+  memset(foo, test_char, global_toc_size);
+
+  s->_raw_size = s->_cooked_size = global_toc_size;
+  s->contents = foo;
+
+  return true;
+}
+
+boolean
+ppc_process_before_allocation (abfd, info)
+     bfd *abfd;
+     struct bfd_link_info *info;
+{
+  asection *sec;
+  struct internal_reloc *i, *rel;
+
+#if 0
+  fprintf(stderr, 
+	  "ppc_process_before_allocation: BFD %s\n", 
+	  bfd_get_filename(abfd));
+#endif
+
+  /* here we have a bfd that is to be included on the link. We have a hook
+     to do reloc rummaging, before section sizes are nailed down. */
+
+  _bfd_coff_get_external_symbols(abfd);
+
+  /* rummage around all the relocs and map the toc */
+  sec = abfd->sections;
+
+  if (sec == 0)
+    {
+      return true;
+    }
+
+  for (; sec != 0; sec = sec->next)
+  {
+    int toc_offset;
+#ifdef DEBUG_RELOC
+    fprintf(stderr, 
+	    "  section %s reloc count %d\n", 
+	    sec->name, 
+	    sec->reloc_count);
+#endif
+
+    if (sec->reloc_count == 0) 
+      continue;
+
+    /* load the relocs */
+    /* FIXME: there may be a storage leak here */
+    i=_bfd_coff_read_internal_relocs(abfd,sec,1,0,0,0);
+    
+    if (i == 0)
+      abort();
+
+    for (rel=i;rel<i+sec->reloc_count;++rel) 
+      {
+	unsigned short r_type  = EXTRACT_TYPE (rel->r_type);
+	unsigned short r_flags = EXTRACT_FLAGS(rel->r_type);
+	unsigned short junk    = EXTRACT_JUNK (rel->r_type);
+
+#ifdef DEBUG_RELOC
+  /* now examine flags */
+  if (r_flags != 0) 
+    {
+      fprintf (stderr, "Reloc with flags found!");
+      if ( r_flags & IMAGE_REL_PPC_NEG ) 
+	fprintf (stderr, " NEG");
+      if ( r_flags & IMAGE_REL_PPC_BRTAKEN )
+	fprintf (stderr, " BRTAKEN");
+      if ( r_flags & IMAGE_REL_PPC_BRNTAKEN )
+	fprintf (stderr, " BRNTAKEN");
+      if ( r_flags & IMAGE_REL_PPC_TOCDEFN )
+	fprintf (stderr, " TOCDEFN");
+      fprintf(stderr, "\n");
+    }
+#endif
+	
+	DUMP_RELOC2(ppc_coff_howto_table[r_type].name, rel);
+
+	switch(r_type) 
+	  {
+	  case IMAGE_REL_PPC_TOCREL16:
+	    toc_offset = ppc_record_toc_entry(abfd, info, sec, 
+					      rel->r_symndx, default_toc);
+	    break;
+	  default:
+	    break;
+	  }
+      }
+  }
+}
+
 #endif
 
 
@@ -1213,9 +1789,9 @@ ppc_coff_rtype2howto (relent, internal)
 	      r_type);
       break;
     }
-
+  
   relent->howto = ppc_coff_howto_table + r_type;
-
+  
 }
 
 static reloc_howto_type *
@@ -1244,6 +1820,9 @@ coff_ppc_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
   unsigned short r_flags = EXTRACT_FLAGS(rel->r_type);
   unsigned short junk    = EXTRACT_JUNK (rel->r_type);
 
+fprintf(stderr,
+	"coff_ppc_rtype_to_howto\n");
+
   /* the masking process only slices off the bottom byte for r_type. */
   if ( r_type > MAX_RELOC_INDEX ) 
     {
@@ -1252,7 +1831,7 @@ coff_ppc_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
 	      r_type, 0, MAX_RELOC_INDEX);
       abort();
     }
-
+  
   /* check for absolute crap */
   if ( junk != 0 )
     {
@@ -1261,7 +1840,7 @@ coff_ppc_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
 	      rel->r_type, junk);
       abort();
     }
-
+  
 #ifdef DEBUG_RELOC
   /* now examine flags */
   if (r_flags != 0) 
@@ -1278,7 +1857,7 @@ coff_ppc_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
       fprintf(stderr, "\n");
     }
 #endif
-
+  
   switch(r_type) 
     {
     case IMAGE_REL_PPC_ADDR32NB:
@@ -1307,7 +1886,7 @@ coff_ppc_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
 	      r_type);
       break;
     }
-
+  
   howto = ppc_coff_howto_table + r_type;
   return howto;
 }
@@ -1315,22 +1894,22 @@ coff_ppc_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
 
 /* a cheesy little macro to make the code a little more readable */
 #define HOW2MAP(bfd_rtype,ppc_rtype)  \
-          case bfd_rtype: return &ppc_coff_howto_table[ppc_rtype]
+ case bfd_rtype: return &ppc_coff_howto_table[ppc_rtype]
 
 static reloc_howto_type *ppc_coff_reloc_type_lookup
-  PARAMS ((bfd *, bfd_reloc_code_real_type));
+PARAMS ((bfd *, bfd_reloc_code_real_type));
 
 static reloc_howto_type *
 ppc_coff_reloc_type_lookup (abfd, code)
      bfd *abfd;
      bfd_reloc_code_real_type code;
 {
-
+  
 #ifdef DEBUG_RELOC
   fprintf(stderr, "ppc_coff_reloc_type_lookup for %s\n",
-                   bfd_get_reloc_code_name(code));
+	  bfd_get_reloc_code_name(code));
 #endif
-
+  
   switch (code)
     {
       HOW2MAP(BFD_RELOC_16_GOT_PCREL, IMAGE_REL_PPC_IFGLUE);
@@ -1339,9 +1918,13 @@ ppc_coff_reloc_type_lookup (abfd, code)
       HOW2MAP(BFD_RELOC_PPC_BA26,     IMAGE_REL_PPC_ADDR24);
       HOW2MAP(BFD_RELOC_PPC_TOC16,    IMAGE_REL_PPC_TOCREL16);
       HOW2MAP(BFD_RELOC_32,           IMAGE_REL_PPC_ADDR32);
-      default: return NULL;
+      HOW2MAP(BFD_RELOC_RVA,          IMAGE_REL_PPC_ADDR32NB);
+    default: 
+      fprintf(stderr,
+	      "\treturning NULL\n");
+      return NULL;
     }
-
+  
   return NULL;
 }
 
@@ -1352,17 +1935,86 @@ ppc_coff_reloc_type_lookup (abfd, code)
 
 #define RTYPE2HOWTO(cache_ptr, dst)  ppc_coff_rtype2howto (cache_ptr, dst)
 
-/* We use the special COFF backend linker.  */
-/* #define coff_relocate_section        _bfd_coff_generic_relocate_section */
+#ifndef COFF_IMAGE_WITH_PE
+static void
+ppc_coff_swap_sym_in_hook ();
+#endif
+
+/* We use the special COFF backend linker, with our own special touch.  */
+
 #define coff_bfd_reloc_type_lookup   ppc_coff_reloc_type_lookup
 #define coff_rtype_to_howto          coff_ppc_rtype_to_howto
 #define coff_relocate_section        coff_ppc_relocate_section
+
+#ifndef COFF_IMAGE_WITH_PE
+#define coff_swap_sym_in_hook        ppc_coff_swap_sym_in_hook
+#endif
 
 #define SELECT_RELOC(internal, howto) {internal.r_type=howto->type;}
 
 #define COFF_PAGE_SIZE                       0x1000
 
+#define POWERPC_LE_PE
+
 #include "coffcode.h"
+
+
+
+#ifndef COFF_IMAGE_WITH_PE
+static void
+ppc_coff_swap_sym_in_hook (abfd, ext1, in1)
+     bfd            *abfd;
+     PTR ext1;
+     PTR in1;
+{
+  SYMENT *ext = (SYMENT *)ext1;
+  struct internal_syment      *in = (struct internal_syment *)in1;
+
+#if 0
+  if (bfd_of_toc_owner != 0) /* we already have a toc, so go home */
+    return;
+#endif
+
+  if (strcmp(in->_n._n_name, ".toc") == 0)
+    {
+      flagword flags;
+      register asection *s;
+      char *foo;
+
+      s = bfd_get_section_by_name ( abfd , TOC_SECTION_NAME);
+      if (s != NULL) 
+	{
+	  return;
+	}
+
+      flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY ;
+
+#ifdef TOC_DEBUG
+      fprintf(stderr,
+	      "ppc_coff_swap_sym_in_hook: about to create the %s section\n",
+	      TOC_SECTION_NAME);
+#endif
+
+      s = bfd_make_section (abfd, TOC_SECTION_NAME);
+
+      if (s == NULL
+	  || !bfd_set_section_flags (abfd, s, flags)
+	  || !bfd_set_section_alignment (abfd, s, 2))
+	{
+	  fprintf(stderr,
+		  "toc section allocation failed!\n");
+	  abort();
+	}
+
+      /* save the bfd for later allocation */
+      bfd_of_toc_owner = abfd;
+    }
+
+  return;
+}
+#endif
+
+
 
 /* The transfer vectors that lead the outside world to all of the above. */
 
@@ -1378,26 +2030,27 @@ TARGET_LITTLE_SYM =
   (HAS_RELOC | EXEC_P |		/* FIXME: object flags */
    HAS_LINENO | HAS_DEBUG |
    HAS_SYMS | HAS_LOCALS | WP_TEXT),
-
+  
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
   0,				/* leading char */
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen??? FIXMEmgo */
 
   bfd_getl64, bfd_getl_signed_64, bfd_putl64,
-     bfd_getl32, bfd_getl_signed_32, bfd_putl32,
-     bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* data */
-  bfd_getl64, bfd_getl_signed_64, bfd_putl64,
-     bfd_getl32, bfd_getl_signed_32, bfd_putl32,
-     bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* hdrs */
+  bfd_getl32, bfd_getl_signed_32, bfd_putl32,
+  bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* data */
 
+  bfd_getl64, bfd_getl_signed_64, bfd_putl64,
+  bfd_getl32, bfd_getl_signed_32, bfd_putl32,
+  bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* hdrs */
+  
   {_bfd_dummy_target, coff_object_p, 	/* bfd_check_format */
      bfd_generic_archive_p, /* _bfd_dummy_target */ coff_object_p },
   {bfd_false, coff_mkobject, _bfd_generic_mkarchive, /* bfd_set_format */
      bfd_false},
   {bfd_false, coff_write_object_contents,	/* bfd_write_contents */
      _bfd_write_archive_contents, bfd_false},
-
+  
   BFD_JUMP_TABLE_GENERIC (coff),
   BFD_JUMP_TABLE_COPY (coff),
   BFD_JUMP_TABLE_CORE (_bfd_nocore),
@@ -1407,7 +2060,7 @@ TARGET_LITTLE_SYM =
   BFD_JUMP_TABLE_WRITE (coff),
   BFD_JUMP_TABLE_LINK (coff),
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
-
+  
   COFF_SWAP_TABLE,
 };
 #endif
@@ -1431,11 +2084,12 @@ TARGET_BIG_SYM =
   15,				/* ar_max_namelen??? FIXMEmgo */
 
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,
-     bfd_getb32, bfd_getb_signed_32, bfd_putb32,
-     bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* data */
+  bfd_getb32, bfd_getb_signed_32, bfd_putb32,
+  bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* data */
+
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,
-     bfd_getb32, bfd_getb_signed_32, bfd_putb32,
-     bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* hdrs */
+  bfd_getb32, bfd_getb_signed_32, bfd_putb32,
+  bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* hdrs */
 
   {_bfd_dummy_target, coff_object_p, 	/* bfd_check_format */
      bfd_generic_archive_p, /* _bfd_dummy_target */ coff_object_p },
