@@ -1,3 +1,10 @@
+2002-07-30  Jim Blandy  <jimb@redhat.com>
+
+	Patch from David Carlton <carlton@math.stanford.edu>:
+	* gdbinit.in: Move the `dir' commands that add GDB's own source
+	directory to the search path to the end, so that the `gdb' source
+	directory will be searched first.
+
 2002-07-29  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdb_obstack.h: New file.
