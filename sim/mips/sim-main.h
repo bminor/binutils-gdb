@@ -516,31 +516,8 @@ struct _sim_cpu {
   address_word dspc;  /* delay-slot PC */
 #define DSPC ((CPU)->dspc)
 
-#if !WITH_IGEN
-  /* Issue a delay slot instruction immediatly by re-calling
-     idecode_issue */
-#define DELAY_SLOT(TARGET) \
-  do { \
-    address_word target = (TARGET); \
-    instruction_word delay_insn; \
-    sim_events_slip (SD, 1); \
-    CIA = CIA + 4; /* NOTE not mips16 */ \
-    STATE |= simDELAYSLOT; \
-    delay_insn = IMEM32 (CIA); /* NOTE not mips16 */ \
-    idecode_issue (CPU_, delay_insn, (CIA)); \
-    STATE &= ~simDELAYSLOT; \
-    NIA = target; \
-  } while (0)
-#define NULLIFY_NEXT_INSTRUCTION() \
-  do { \
-    sim_events_slip (SD, 1); \
-    dotrace (SD, CPU, tracefh, 2, NIA, 4, "load instruction"); \
-    NIA = CIA + 8; \
-  } while (0)
-#else
 #define DELAY_SLOT(TARGET) NIA = delayslot32 (SD_, (TARGET))
 #define NULLIFY_NEXT_INSTRUCTION() NIA = nullify_next_insn32 (SD_)
-#endif
 
 
   /* State of the simulator */
@@ -807,12 +784,28 @@ struct sim_state {
 
 /* start-sanitize-sky */
 #ifdef TARGET_SKY
+
 #ifdef SKY_FUNIT
   /* Record of option for floating point implementation type. */
   int fp_type_opt;
 #define STATE_FP_TYPE_OPT(sd) ((sd)->fp_type_opt)
 #define STATE_FP_TYPE_OPT_ACCURATE 0x80000000
 #endif
+
+  /* Index of next unused name slot for multi-phase load list. */ 
+  int next_mload_count;
+#define STATE_MLOAD_COUNT(sd) ((sd)->next_mload_count)
+
+#define MAX_MLOAD_COUNT 2 /* limit for next_load_count and load_index */
+
+  /* Program names for multi-phase load. */
+  char *next_mload_name[MAX_MLOAD_COUNT];
+#define STATE_MLOAD_NAME(sd) ((sd)->next_mload_name)
+
+  /* Index of next program for multi-phase load. */ 
+  int mload_index;
+#define STATE_MLOAD_INDEX(sd) ((sd)->mload_index)
+
 #endif
 /* end-sanitize-sky */
 
@@ -1046,6 +1039,8 @@ void decode_coproc PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, unsigne
 #define DecodeCoproc(instruction) \
 decode_coproc (SD, CPU, cia, (instruction))
 
+void sim_monitor (SIM_DESC sd, sim_cpu *cpu, address_word cia, unsigned int arg);
+  
 
 
 /* Memory accesses */
@@ -1081,12 +1076,10 @@ decode_coproc (SD, CPU, cia, (instruction))
 #define AccessLength_DOUBLEWORD (7)
 #define AccessLength_QUADWORD   (15)
 
-#if (WITH_IGEN)
 #define LOADDRMASK (WITH_TARGET_WORD_BITSIZE == 64 \
 		    ? AccessLength_DOUBLEWORD /*7*/ \
 		    : AccessLength_WORD /*3*/)
 #define PSIZE (WITH_TARGET_ADDRESS_BITSIZE)
-#endif
 
 
 INLINE_SIM_MAIN (int) address_translation PARAMS ((SIM_DESC sd, sim_cpu *, address_word cia, address_word vAddr, int IorD, int LorS, address_word *pAddr, int *CCA, int raw));
@@ -1148,8 +1141,6 @@ void sky_sim_engine_restart PARAMS ((SIM_DESC sd, sim_cpu *last, sim_cia cia));
 SIM_RC sky_sim_module_install PARAMS ((SIM_DESC sd));
 
 #define MODULE_LIST	sky_sim_module_install,
-  
-void sim_monitor (SIM_DESC sd, sim_cpu *cpu, address_word cia, unsigned int arg);
   
 #ifndef TM_TXVU_H /* In case GDB hasn't been configured yet */
 enum txvu_cpu_context
