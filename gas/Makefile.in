@@ -5,7 +5,7 @@
 
 #GNU GAS is free software; you can redistribute it and/or modify
 #it under the terms of the GNU General Public License as published by
-#the Free Software Foundation; either version 1, or (at your option)
+#the Free Software Foundation; either version 2, or (at your option)
 #any later version.
 
 #GNU GAS is distributed in the hope that it will be useful,
@@ -26,56 +26,41 @@
 # Variables that exist for you to override.
 # See below for how to change them for certain systems.
 
-ALLOCA =
-CFLAGS = -g $(XCFLAGS) -I$(srcdir)/../include
-INTERNAL_CFLAGS = $(CROSS)
-OLDCC = cc
-BISON = bison
-BISONFLAGS = -v
-AR = ar
-OLDAR_FLAGS = qc
-AR_FLAGS = rc
+srcdir = .
+
+prefix = /usr/local
+
+bindir = $(prefix)/bin
+datadir = $(prefix)/lib
+libdir = $(prefix)/lib
+mandir = $(datadir)/man
+man1dir = $(mandir)/man1
+man2dir = $(mandir)/man2
+man3dir = $(mandir)/man3
+man4dir = $(mandir)/man4
+man5dir = $(mandir)/man5
+man6dir = $(mandir)/man6
+man7dir = $(mandir)/man7
+man8dir = $(mandir)/man8
+man9dir = $(mandir)/man9
+infodir = $(prefix)/info
+includedir = $(prefix)/include
+docdir = $(datadir)/doc
+
 SHELL = /bin/sh
-# on sysV, define this as cp.
+
 INSTALL = install -c
-# These permit overriding just for certain files.
 INSTALL_PROGRAM = $(INSTALL)
-INSTALL_FILE = $(INSTALL)
+INSTALL_DATA = $(INSTALL)
 
-# Define this as & to perform parallel make on a Sequent.
-# Note that this has some bugs, and it seems currently necessary 
-# to compile all the gen* files first by hand to avoid erroneous results.
-P =
-
-# How to invoke ranlib.
+AR = ar
+AR_FLAGS = qv
+BISON = bison
+MAKEINFO = makeinfo
 RANLIB = ranlib
-# Test to use to see whether ranlib exists on the system.
-RANLIB_TEST = [ -f /usr/bin/ranlib -o -f /bin/ranlib ]
-
-# CFLAGS for use with OLDCC, for compiling gnulib.
-# NOTE: -O does not work on some Unix systems!
-CCLIBFLAGS = -O
 
 # Version of ar to use when compiling gnulib. 
 OLDAR = ar
-
-version=`$(unsubdir)/../gcc$(subdir)/gcc -dumpversion`
-
-# Directory where sources are, from where we are.
-srcdir = .
-# Common prefix for installation directories.
-# NOTE: This directory must exist when you start installation.
-ddestdir = /usr/local
-# Directory in which to put the executable for the command `gcc'
-bindir = $(ddestdir)/bin
-# Directory in which to put the directories used by the compiler.
-libdir = $(ddestdir)/lib
-# Directory in which the compiler finds executables, libraries, etc.
-libsubdir = $(libdir)/gcc/$(target_alias)/$(version)
-# Number to put in man-page filename.
-manext = 1
-# Directory in which to put man pages.
-mandir = $(destdir)/H-independent/man/man$(manext)
 
 # Additional system libraries to link with.
 CLIB=
@@ -225,7 +210,7 @@ OBJS = \
 # The real definition is under `all.internal'.
 
 all: $(ALL)
-all-info:
+info:
 install-info:
 
 fake-as: force
@@ -259,8 +244,8 @@ HOST_LIBS = $(HOST_PREFIX)$(OBSTACK) $(USE_HOST_ALLOCA) $(HOST_PREFIX)$(MALLOC) 
 # Both . and srcdir are used, in that order,
 # so that tm.h and config.h will be found in the compilation
 # subdirectory rather than in the source directory.
-INCLUDES = -I. -I$(srcdir) -I$(srcdir)/config
-SUBDIR_INCLUDES = -I.. -I../$(srcdir) -I../$(srcdir)/config
+INCLUDES = -I. -I$(srcdir) -I$(srcdir)/config -I$(srcdir)/../include
+SUBDIR_INCLUDES = -I.. -I$(srcdir) -I$(srcdir)/config
 
 # Always use -I$(srcdir)/config when compiling.
 .c.o:
@@ -451,9 +436,7 @@ realclean: cleanconfig
 
 # Copy the files into directories where they will be run.
 install: $(ALL)
-	$(INSTALL_PROGRAM) $(ALL) $(libsubdir)/as
-#	cp $(ALL) $(bindir)/as.new
-#	mv -f $(bindir)/as.new $(bindir)/as
+	$(INSTALL_PROGRAM) $(ALL) $(bindir)/as
 
 # Create the installation directory.
 install-dir:

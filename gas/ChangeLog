@@ -1,3 +1,24 @@
+Fri Dec  6 23:16:43 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
+
+	* Makefile.in: install using INSTALL_DATA and INSTALL_PROGRAM.
+	  correct include directory locations. added standards.text
+	  support.
+
+	* configure.in: mark this directory as target dependent.
+
+Thu Dec  5 22:46:23 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
+
+	* Makefile.in: idestdir and ddestdir go away.  Added
+	  copyrights and shift gpl to v2.  Added ChangeLog if it
+	  didn't exist. docdir and mandir now keyed off datadir by
+	  default.
+
+Wed Dec  4 10:28:48 1991  Steve Chamberlain  (sac at cygnus.com)
+
+	* config/obj-coff-bfd.c (crawl_symbol_chain): only move a
+	symbol to the end of a file if it really is external.
+
+
 Sat Nov 30 23:03:59 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
 
 	* as.h: reloc.h->aout/reloc.h.
@@ -457,7 +478,7 @@ Mon Aug 13 15:53:46 EDT 1990	Jay Fenlason
 	* read.c  Handle .align specially on the sparc, or any other machine
 	where OTHER_ALIGN is defined.  Added option and comments about it
 	to Makefile.
-
+v
 Fri Aug 10 12:24:33 EDT 1990	Jay Fenlason
 
 	* m68k.c (get_num)  Handle SEG_PASS1 expressions.

@@ -7,6 +7,8 @@ srctrigger=as.c
 srcname="gas"
 targetdependent=true
 need_bfd=
+target_dependent=true
+
 # per-host:
 
 gas_host=generic
@@ -46,6 +48,7 @@ cpu_type=${target_cpu}
 # assign object format
 case ${target_os} in
 bout*) obj_format=bout ;;
+nindy*) obj_format=bout ;;
 bsd* | sunos*) obj_format=aout ;;
 
 ebmon-old)
