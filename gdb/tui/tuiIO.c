@@ -44,6 +44,7 @@
 #include "terminal.h"
 #include "target.h"
 #include "event-loop.h"
+#include "event-top.h"
 #include "command.h"
 #include "top.h"
 #include "readline/readline.h"
@@ -151,7 +152,7 @@ tui_puts (const char *string)
 /* Readline callback.
    Redisplay the command line with its prompt after readline has
    changed the edited text.  */
-static void
+void
 tui_redisplay_readline (void)
 {
   int prev_col;
@@ -164,7 +165,10 @@ tui_redisplay_readline (void)
   char *prompt;
   int start_line;
   
-  prompt = get_prompt ();
+  if (tui_current_key_mode == tui_single_key_mode)
+    prompt = "";
+  else
+    prompt = get_prompt ();
   
   c_pos = -1;
   c_line = -1;

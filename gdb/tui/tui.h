@@ -102,6 +102,23 @@ extern void tui_enable (void);
 /* Leave the tui mode.  */
 extern void tui_disable (void);
 
+enum tui_key_mode
+{
+  /* Plain command mode to enter gdb commands.  */
+  tui_command_mode,
+
+  /* SingleKey mode with some keys bound to gdb commands.  */
+  tui_single_key_mode,
+
+  /* Read/edit one command and return to SingleKey after it's processed.  */
+  tui_one_command_mode
+};
+
+extern enum tui_key_mode tui_current_key_mode;
+
+/* Change the TUI key mode by installing the appropriate readline keymap.  */
+extern void tui_set_key_mode (enum tui_key_mode mode);
+
 extern void tui_initialize_io (void);
 
 extern void tui_initialize_readline (void);

@@ -72,7 +72,33 @@
 int tui_active = 0;
 static int tui_finish_init = 1;
 
-/* Switch the output mode between TUI/standard gdb.  */
+enum tui_key_mode tui_current_key_mode = tui_command_mode;
+
+struct tui_char_command
+{
+  unsigned char key;
+  const char* cmd;
+};
+
+/* Key mapping to gdb commands when the TUI is using the single key mode.  */
+static const struct tui_char_command tui_commands[] = {
+  { 'c', "continue" },
+  { 'd', "down" },
+  { 'f', "finish" },
+  { 'n', "next" },
+  { 'r', "run" },
+  { 's', "step" },
+  { 'u', "up" },
+  { 'v', "info locals" },
+  { 'w', "where" },
+  { 0, 0 },
+};
+
+static Keymap tui_keymap;
+static Keymap tui_readline_standard_keymap;
+
+/* TUI readline command.
+   Switch the output mode between TUI/standard gdb.  */
 static int
 tui_rl_switch_mode (void)
 {
@@ -193,19 +219,128 @@ tui_rl_delete_other_windows (void)
   return 0;
 }
 
+/* TUI readline command.
+   Execute the gdb command bound to the specified key.  */
+static int
+tui_rl_command_key (int count, int key)
+{
+  int i;
+
+  reinitialize_more_filter ();
+  for (i = 0; tui_commands[i].cmd; i++)
+    {
+      if (tui_commands[i].key == key)
+        {
+          /* Must save the command because it can be modified
+             by execute_command.  */
+          char* cmd = alloca (strlen (tui_commands[i].cmd) + 1);
+          strcpy (cmd, tui_commands[i].cmd);
+          execute_command (cmd, TRUE);
+          return 0;
+        }
+    }
+  return 0;
+}
+
+/* TUI readline command.
+   Temporarily leave the TUI SingleKey mode to allow editing
+   a gdb command with the normal readline.  Once the command
+   is executed, the TUI SingleKey mode is installed back.  */
+static int
+tui_rl_command_mode (int count, int key)
+{
+  tui_set_key_mode (tui_one_command_mode);
+  return rl_insert (count, key);
+}
+
+/* TUI readline command.
+   Switch between TUI SingleKey mode and gdb readline editing.  */
+static int
+tui_rl_next_keymap (void)
+{
+  tui_set_key_mode (tui_current_key_mode == tui_command_mode
+                    ? tui_single_key_mode : tui_command_mode);
+  return 0;
+}
+
+/* Readline hook to redisplay ourself the gdb prompt.
+   In the SingleKey mode, the prompt is not printed so that
+   the command window is cleaner.  It will be displayed if
+   we temporarily leave the SingleKey mode.  */
+static int
+tui_rl_startup_hook ()
+{
+  rl_already_prompted = (tui_current_key_mode != tui_command_mode);
+  if (rl_already_prompted)
+    {
+      tui_set_key_mode (tui_single_key_mode);
+      tui_redisplay_readline ();
+    }
+  return 0;
+}
+
+/* Change the TUI key mode by installing the appropriate readline keymap.  */
+void
+tui_set_key_mode (enum tui_key_mode mode)
+{
+  tui_current_key_mode = mode;
+  rl_set_keymap (mode == tui_single_key_mode
+                 ? tui_keymap : tui_readline_standard_keymap);
+  tuiShowLocatorContent ();
+}
+
 /* Initialize readline and configure the keymap for the switching
    key shortcut.  */
 void
 tui_initialize_readline ()
 {
+  int i;
+  Keymap tui_ctlx_keymap;
+
   rl_initialize ();
 
   rl_add_defun ("tui-switch-mode", tui_rl_switch_mode, -1);
+  rl_add_defun ("gdb-command", tui_rl_command_key, -1);
+  rl_add_defun ("next-keymap", tui_rl_next_keymap, -1);
+
+  tui_keymap = rl_make_bare_keymap ();
+  tui_ctlx_keymap = rl_make_bare_keymap ();
+  tui_readline_standard_keymap = rl_get_keymap ();
+
+  for (i = 0; tui_commands[i].cmd; i++)
+    rl_bind_key_in_map (tui_commands[i].key, tui_rl_command_key, tui_keymap);
+
+  rl_generic_bind (ISKMAP, "\\C-x", (char*) tui_ctlx_keymap, tui_keymap);
+
+  /* Bind all other keys to tui_rl_command_mode so that we switch
+     temporarily from SingleKey mode and can enter a gdb command.  */
+  for (i = ' ' + 1; i < 0x7f; i++)
+    {
+      int j;
+
+      for (j = 0; tui_commands[j].cmd; j++)
+        if (tui_commands[j].key == i)
+          break;
+
+      if (tui_commands[j].cmd)
+        continue;
+
+      rl_bind_key_in_map (i, tui_rl_command_mode, tui_keymap);
+    }
+
   rl_bind_key_in_map ('a', tui_rl_switch_mode, emacs_ctlx_keymap);
+  rl_bind_key_in_map ('a', tui_rl_switch_mode, tui_ctlx_keymap);
   rl_bind_key_in_map ('A', tui_rl_switch_mode, emacs_ctlx_keymap);
+  rl_bind_key_in_map ('A', tui_rl_switch_mode, tui_ctlx_keymap);
   rl_bind_key_in_map (CTRL ('A'), tui_rl_switch_mode, emacs_ctlx_keymap);
+  rl_bind_key_in_map (CTRL ('A'), tui_rl_switch_mode, tui_ctlx_keymap);
   rl_bind_key_in_map ('1', tui_rl_delete_other_windows, emacs_ctlx_keymap);
+  rl_bind_key_in_map ('1', tui_rl_delete_other_windows, tui_ctlx_keymap);
   rl_bind_key_in_map ('2', tui_rl_change_windows, emacs_ctlx_keymap);
+  rl_bind_key_in_map ('2', tui_rl_change_windows, tui_ctlx_keymap);
+  rl_bind_key_in_map ('q', tui_rl_next_keymap, tui_keymap);
+  rl_bind_key_in_map ('s', tui_rl_next_keymap, emacs_ctlx_keymap);
+  rl_bind_key_in_map ('s', tui_rl_next_keymap, tui_ctlx_keymap);
 }
 
 /* Enter in the tui mode (curses).
@@ -255,6 +390,7 @@ tui_enable (void)
 
   /* Install the TUI specific hooks.  */
   tui_install_hooks ();
+  rl_startup_hook = tui_rl_startup_hook;
 
   tui_update_variables ();
   
@@ -284,6 +420,8 @@ tui_disable (void)
 
   /* Remove TUI hooks.  */
   tui_remove_hooks ();
+  rl_startup_hook = 0;
+  rl_already_prompted = 0;
 
   /* Leave curses and restore previous gdb terminal setting.  */
   endwin ();
