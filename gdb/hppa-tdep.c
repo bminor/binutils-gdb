@@ -1389,7 +1389,9 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
 	 somsolib.c.  Once the GOT value is in %r19 we can call the procedure
 	 in the normal fashion.  */
 
+#ifndef GDB_TARGET_IS_PA_ELF
 	 write_register (19, som_solib_get_got_by_pc (fun));
+#endif
     }
 
   /* If we are calling an import stub (eg calling into a dynamic library)

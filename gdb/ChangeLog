@@ -1,3 +1,11 @@
+Wed Dec  7 13:21:47 1994  Rob Savoye  <rob@darkstar.cygnus.com>
+
+	* hppa-tdep.c: Use GDB_TARGET_IS_PA_ELF so SOM target support will
+	stop being linked in.
+
+	* config/pa/tm-hppap.h: New file. Set GDB_TARGET_IS_PA_ELF,
+	otherwise it looks like BSD-ELF.
+
 Mon Dec  5 21:43:52 1994  Stu Grossman  (grossman@cygnus.com)
 
 	* inftarg.c: include <sys/types.h> to get def of pid_t.
