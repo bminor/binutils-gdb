@@ -1,3 +1,8 @@
+2004-01-23  Daniel Jacobowitz  <drow@mvista.com>
+
+	* elf32-arm.h (elf32_arm_check_relocs): Revert part of 2004-01-13
+	change.
+
 2004-01-21  Tom Rix  <tcrix@worldnet.att.net>
 
 	* reloc.c: New 5 bit reloc, BFD_RELOC_M68HC12_5B, for m68hc12 movb/movw.
