@@ -27,28 +27,22 @@ static long
 hash(insn)
      long insn;
 {
-  if ((insn & 0x30) == 0
-      || (insn & 0x38) == 0x10)
+  if ((insn & 0x0600) == 0
+      || (insn & 0x0700) == 0x0200)
     return (insn & 0x07e0) >> 5;
-  if ((insn & 0x3c) == 0x18
-      || (insn & 0x3c) == 0x1c
-      || (insn & 0x3c) == 0x20
-      || (insn & 0x3c) == 0x24
-      || (insn & 0x3c) == 0x28
-      || (insn & 0x3c) == 0x23)
+  if ((insn & 0x0700) == 0x0300
+      || (insn & 0x0700) == 0x0400
+      || (insn & 0x0700) == 0x0500)
+    return (insn & 0x0780) >> 7;
+  if ((insn & 0x0700) == 0x0600)
+    return (insn & 0x07e0) >> 5;
+  if ((insn & 0x0780) == 0x0700)
+    return (insn & 0x07e0) >> 5;
+  if ((insn & 0x07c0) == 0x0780)
     return (insn & 0x07c0) >> 6;
-  if ((insn & 0x38) == 0x30)
+  if ((insn & 0x07E0) == 0x07C0)
     return (insn & 0x07e0) >> 5;
-  /* What about sub-op field? XXX */
-  if ((insn & 0x38) == 0x38)
-    return (insn & 0x07e0) >> 5;
-  if ((insn & 0x3e) == 0x3c)
-    return (insn & 0x07c0) >> 6;
-  if ((insn & 0x3f) == 0x3e)
-    return (insn & 0xc7e0) >> 5;
-  /* Not really correct.  XXX */
-  return insn & 0xffffffff;
-  
+  return (insn & 0x07e0) >> 5;
 }
 
 static struct hash_entry *
@@ -208,7 +202,14 @@ static void
 do_format_8 (insn)
      uint32 insn;
 {
+  struct hash_entry *h;
   printf("format 8 0x%x\n", insn);
+
+  h = lookup_hash (insn);
+  OP[0] = insn & 0x1f;
+  OP[1] = (insn >> 11) & 0x7;
+  OP[2] = (insn >> 16) & 0xffff;
+  (h->ops->func) ();
 }
 
 static void

@@ -1306,24 +1306,78 @@ OP_20 ()
 void
 OP_7C0 ()
 {
+  unsigned int op0, op1, op2;
+  int result, temp;
+
+  op0 = State.regs[OP[0]];
+  op1 = OP[1] & 0x7;
+  temp = OP[2];
+  temp = (temp << 16) >> 16;
+  op2 = temp;
+  temp = get_byte (State.mem + op0 + op2);
+  State.sregs[5] &= ~PSW_Z;
+  if ((temp & (1 << op1)) == 0)
+    State.sregs[5] |= PSW_Z;
+  temp |= ~(1 << op1);
+  put_byte (State.mem + op0 + op2, temp);
 }
 
 /* not1 */
 void
 OP_47C0 ()
 {
+  unsigned int op0, op1, op2;
+  int result, temp;
+
+  op0 = State.regs[OP[0]];
+  op1 = OP[1] & 0x7;
+  temp = OP[2];
+  temp = (temp << 16) >> 16;
+  op2 = temp;
+  temp = get_byte (State.mem + op0 + op2);
+  State.sregs[5] &= ~PSW_Z;
+  if ((temp & (1 << op1)) == 0)
+    State.sregs[5] |= PSW_Z;
+  temp ^= ~(1 << op1);
+  put_byte (State.mem + op0 + op2, temp);
 }
 
 /* clr1 */
 void
 OP_87C0 ()
 {
+  unsigned int op0, op1, op2;
+  int result, temp;
+
+  op0 = State.regs[OP[0]];
+  op1 = OP[1] & 0x7;
+  temp = OP[2];
+  temp = (temp << 16) >> 16;
+  op2 = temp;
+  temp = get_byte (State.mem + op0 + op2);
+  State.sregs[5] &= ~PSW_Z;
+  if ((temp & (1 << op1)) == 0)
+    State.sregs[5] |= PSW_Z;
+  temp &= ~(1 << op1);
+  put_byte (State.mem + op0 + op2, temp);
 }
 
 /* tst1 */
 void
 OP_C7C0 ()
 {
+  unsigned int op0, op1, op2;
+  int result, temp;
+
+  op0 = State.regs[OP[0]];
+  op1 = OP[1] & 0x7;
+  temp = OP[2];
+  temp = (temp << 16) >> 16;
+  op2 = temp;
+  temp = get_byte (State.mem + op0 + op2);
+  State.sregs[5] &= ~PSW_Z;
+  if ((temp & (1 << op1)) == 0)
+    State.sregs[5] |= PSW_Z;
 }
 
 /* di */

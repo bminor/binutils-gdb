@@ -1,3 +1,10 @@
+Fri Aug 30 10:33:49 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* interp.c (hash): Fix.
+	* interp.c (do_format_8): Get operands correctly and
+	call the target function.
+	* simops.c: Rough cut at "clr1", "not1", "set1", and "tst1".
+
 Thu Aug 29 13:53:29 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* interp.c (do_format_4): Get operands correctly and
