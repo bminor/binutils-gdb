@@ -348,23 +348,23 @@ struct dis386 dis386[] = {
   { "outsb",	indirDX, Xb },
   { "outsS",	indirDX, Xv },
   /* 70 */
-  { "jo",		Jb },
+  { "jo",	Jb },
   { "jno",	Jb },
-  { "jb",		Jb },
+  { "jb",	Jb },
   { "jae",	Jb },
-  { "je",		Jb },
+  { "je",	Jb },
   { "jne",	Jb },
   { "jbe",	Jb },
-  { "ja",		Jb },
+  { "ja",	Jb },
   /* 78 */
-  { "js",		Jb },
+  { "js",	Jb },
   { "jns",	Jb },
-  { "jp",		Jb },
+  { "jp",	Jb },
   { "jnp",	Jb },
-  { "jl",		Jb },
+  { "jl",	Jb },
   { "jnl",	Jb },
   { "jle",	Jb },
-  { "jg",		Jb },
+  { "jg",	Jb },
   /* 80 */
   { GRP1b },
   { GRP1S },
@@ -685,6 +685,44 @@ struct dis386 dis386_twobyte[] = {
   { "(bad)" },  { "(bad)" },  { "(bad)" },  { "(bad)" },  
 };
 
+static const unsigned char onebyte_has_modrm[256] = {
+  1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,
+  1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,
+  1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,
+  1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,1,1,0,0,0,0,0,1,0,1,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+  1,1,0,0,1,1,1,1,0,0,0,0,0,0,0,0,
+  1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,
+  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1
+};
+
+static const unsigned char twobyte_has_modrm[256] = {
+  1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+  1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+  0,0,0,1,1,1,1,1,0,0,0,1,1,1,1,1,
+  1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,
+  1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+};
+
 static char obuf[100];
 static char *obufp;
 static char scratchbuf[100];
@@ -993,7 +1031,8 @@ print_insn_i386 (pc, info)
   int enter_instruction;
   char *first, *second, *third;
   int needcomma;
-  
+  unsigned char need_modrm;
+
   struct dis_private priv;
   bfd_byte *inbuf = priv.the_buffer;
 
@@ -1058,20 +1097,22 @@ print_insn_i386 (pc, info)
     {
       FETCH_DATA (info, codep + 2);
       dp = &dis386_twobyte[*++codep];
+      need_modrm = twobyte_has_modrm[*codep];
     }
   else
-    dp = &dis386[*codep];
+    {
+      dp = &dis386[*codep];
+      need_modrm = onebyte_has_modrm[*codep];
+    }
   codep++;
 
-  /* Fetch the mod/reg/rm byte.  FIXME: We should be only fetching
-     this if we need it.  As it is, this code loses if there is a
-     one-byte instruction (without a mod/reg/rm byte) at the end of
-     the address space.  */
-
-  FETCH_DATA (info, codep + 1);
-  mod = (*codep >> 6) & 3;
-  reg = (*codep >> 3) & 7;
-  rm = *codep & 7;
+  if (need_modrm)
+    {
+      FETCH_DATA (info, codep + 1);
+      mod = (*codep >> 6) & 3;
+      reg = (*codep >> 3) & 7;
+      rm = *codep & 7;
+    }
 
   if (dp->name == NULL && dp->bytemode1 == FLOATCODE)
     {

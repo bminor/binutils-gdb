@@ -1,3 +1,14 @@
+Wed Feb 14 19:01:27 1996  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* i386-dis.c (onebyte_has_modrm): New static array.
+	(twobyte_has_modrm): New static array.
+	(print_insn_i386): Only fetch the mod/reg/rm byte if it is needed.
+
+Tue Feb 13 15:15:01 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in ($(SHLINK)): Check ts against $(SHLIB), not
+	$(SHLINK).
+
 Mon Feb 12 16:26:06 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* ppc-opc.c (PPC): Undef, so default defination on Windows NT
