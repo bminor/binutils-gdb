@@ -722,10 +722,9 @@ struct symtab
 
     int nlines;
 
-    /* The Nth element of this array is the position of the
-       (N-1)th line of the source file.  "position" means something
-       we can lseek() to; it is not guaranteed to be useful any other
-       way.  */
+    /* line_charpos[N] is the position of the (N-1)th line of the
+       source file.  "position" means something we can lseek() to; it
+       is not guaranteed to be useful any other way.  */
 
     int *line_charpos;
 
@@ -988,7 +987,12 @@ install_minimal_symbols PARAMS ((struct objfile *));
 struct symtab_and_line
 {
   struct symtab *symtab;
+
+  /* Line number.  Line numbers start at 1 and proceed through symtab->nlines.
+     0 is never a valid line number; it is used to indicate that line number
+     information is not available.  */
   int line;
+
   CORE_ADDR pc;
   CORE_ADDR end;
 };
