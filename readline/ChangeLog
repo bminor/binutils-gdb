@@ -12,6 +12,7 @@ Thu Feb 24 04:13:53 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 	no multiple inclusion protection.
 	* readline.c (_rl_set_screen_size):  Reestablish test for
 	TIOCGWINSZ_BROKEN.
+	* rldefs.h:  Define S_ISREG if necessary.
 
 Fri Feb 18 08:56:35 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
