@@ -1,4 +1,4 @@
 	.data
 	.hidden foo
 	.global foo
-	.long foo
+	.dc.a foo

@@ -1,5 +1,10 @@
 2005-02-21  Alan Modra  <amodra@bigpond.net.au>
 
+	* ld-elf/exclude1.s: Use ".dc.a".
+	* ld-elfvsb/hidden2.s: Likewise.
+
+2005-02-21  Alan Modra  <amodra@bigpond.net.au>
+
 	* ld-elf/warn1.d: Specify -Ttext.
 	* ld-scripts/align.exp (align2a, align2b: Don't run on aout targets.
 	* ld-scripts/align2.t: Discard all but .text and .data.

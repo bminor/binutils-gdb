@@ -243,6 +243,24 @@ read_begin (void)
     lex_type['?'] = 3;
 }
 
+#ifndef TC_ADDRESS_BYTES
+#ifdef BFD_ASSEMBLER
+#define TC_ADDRESS_BYTES address_bytes
+
+static inline int
+address_bytes (void)
+{
+  /* Choose smallest of 1, 2, 4, 8 bytes that is large enough to
+     contain an address.  */
+  int n = (stdoutput->arch_info->bits_per_address - 1) / 8;
+  n |= n >> 1;
+  n |= n >> 2;
+  n += 1;
+  return n;
+}
+#endif
+#endif
+
 /* Set up pseudo-op tables.  */
 
 static struct hash_control *po_hash;
@@ -263,6 +281,9 @@ static const pseudo_typeS potable[] = {
   {"common.s", s_mri_common, 1},
   {"data", s_data, 0},
   {"dc", cons, 2},
+#ifdef TC_ADDRESS_BYTES
+  {"dc.a", cons, 0},
+#endif
   {"dc.b", cons, 1},
   {"dc.d", float_cons, 'd'},
   {"dc.l", cons, 4},
@@ -3334,6 +3355,11 @@ cons_worker (register int nbytes,	/* 1=.byte, 2=.word, 4=.long.  */
 	mri_comment_end (stop, stopc);
       return;
     }
+
+#ifdef TC_ADDRESS_BYTES
+  if (nbytes == 0)
+    nbytes = TC_ADDRESS_BYTES ();
+#endif
 
 #ifdef md_cons_align
   md_cons_align (nbytes);

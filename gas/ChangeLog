@@ -1,5 +1,13 @@
 2005-02-21  Alan Modra  <amodra@bigpond.net.au>
 
+	* read.c (address_bytes): New function.
+	(TC_ADDRESS_BYTES): Default for BSD_ASSEMBLER to address_bytes.
+	(potable): Add "dc.a".
+	(cons_worker): Handle "dc.a".
+	* doc/internals.texi (TC_ADDRESS_BYTES): Document.
+
+2005-02-21  Alan Modra  <amodra@bigpond.net.au>
+
 	* input-file.c (input_file_open): Rearrange to avoid warning.
 
 2005-02-19  Alan Modra  <amodra@bigpond.net.au>

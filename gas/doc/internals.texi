@@ -1114,6 +1114,11 @@ pseudo-op.
 @cindex TC_CONS_FIX_NEW
 You may define this macro to generate a fixup for a data allocation pseudo-op.
 
+@item TC_ADDRESS_BYTES
+@cindex TC_ADDRESS_BYTES
+Define this macro to specify the number of bytes used to store an address.
+Used to implement @code{dc.a}.  The target must have a reloc for this size.
+
 @item TC_INIT_FIX_DATA (@var{fixp})
 @cindex TC_INIT_FIX_DATA
 A C statement to initialize the target specific fields of fixup @var{fixp}.
