@@ -112,11 +112,13 @@ Tue Oct 22 22:01:25 1996  Jeffrey A Law  (law@cygnus.com)
 	differently for movea & sst/sld insns.
 
 end-sanitize-v850
+start-sanitize-d10v
 Tue Oct 22 17:09:32 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/tc-d10v.c (parallel_ok): Don't allow illegal combinations
 	of instructions.
 
+end-sanitize-d10v
 Tue Oct 22 11:28:39 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* obj.h (struct format_ops): Add frob_file_after_relocs field.
