@@ -81,6 +81,7 @@ exec.c
 expprint.c
 expression.h
 findvar.c
+fork-child.c
 frame.h
 gcc.patch
 gdb-stabs.h
