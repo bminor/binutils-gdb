@@ -1,5 +1,5 @@
 /* Native support for the SGI Iris running IRIX version 4, for GDB.
-   Copyright 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1988, 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
    Contributed by Alessandro Forin(af@cs.cmu.edu) at CMU
    and by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin.
    Implemented for Irix 4.x by Garrett A. Wollman.
@@ -147,4 +147,20 @@ get_longjmp_target(pc)
   SWAP_TARGET_AND_HOST(pc, sizeof(CORE_ADDR));
 
   return 1;
+}
+
+void
+fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
+     char *core_reg_sect;
+     unsigned core_reg_size;
+     int which;			/* Unused */
+     unsigned int reg_addr;	/* Unused */
+{
+  if (core_reg_size != REGISTER_BYTES)
+    {
+      warning ("wrong size gregset struct in core file");
+      return;
+    }
+
+  memcpy ((char *)registers, core_reg_sect, core_reg_size);
 }

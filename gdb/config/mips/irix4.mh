@@ -2,7 +2,7 @@
 XDEPFILES= 
 XM_FILE= xm-irix4.h
 NAT_FILE= nm-irix4.h
-NATDEPFILES= fork-child.o procfs.o irix4-nat.o
+NATDEPFILES= fork-child.o procfs.o irix4-nat.o corelow.o
 ALLOCA=alloca.o
 ALLOCA1=alloca.o
 MUNCH_DEFINE=-B

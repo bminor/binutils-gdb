@@ -2260,66 +2260,6 @@ procfs_fetch_registers (regno)
 
 /*
 
-GLOBAL FUNCTION
-
-	fetch_core_registers -- fetch current registers from core file data
-
-SYNOPSIS
-
-	void fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
-				   int which, unsigned in reg_addr)
-
-DESCRIPTION
-
-	Read the values of either the general register set (WHICH equals 0)
-	or the floating point register set (WHICH equals 2) from the core
-	file data (pointed to by CORE_REG_SECT), and update gdb's idea of
-	their current values.  The CORE_REG_SIZE parameter is ignored.
-
-NOTES
-
-	Use the indicated sizes to validate the gregset and fpregset
-	structures.
-*/
-
-void
-fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
-     char *core_reg_sect;
-     unsigned core_reg_size;
-     int which;
-     unsigned int reg_addr;	/* Unused in this version */
-{
-
-  if (which == 0)
-    {
-      if (core_reg_size != sizeof (pi.gregset))
-	{
-	  warning ("wrong size gregset struct in core file");
-	}
-      else
-	{
-	  memcpy ((char *) &pi.gregset, core_reg_sect, sizeof (pi.gregset));
-	  supply_gregset (&pi.gregset);
-	}
-    }
-  else if (which == 2)
-    {
-      if (core_reg_size != sizeof (pi.fpregset))
-	{
-	  warning ("wrong size fpregset struct in core file");
-	}
-      else
-	{
-	  memcpy ((char *) &pi.fpregset, core_reg_sect, sizeof (pi.fpregset));
-#if defined (FP0_REGNUM)
-	  supply_fpregset (&pi.fpregset);
-#endif
-	}
-    }
-}
-
-/*
-
 LOCAL FUNCTION
 
 	proc_init_failed - called whenever /proc access initialization fails

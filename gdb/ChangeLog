@@ -1,3 +1,15 @@
+Mon Apr 19 22:52:33 1993  Stu Grossman  (grossman@cygnus.com)
+
+	* irix4-nat.c (fetch_core_registers):  Special version of this for
+	Irix 4.x, which stores regs a bit differently from other /proc
+	based systems.
+	* procfs.c, core-svr4.c:  Move fetch_core_registers from procfs.c
+	to new file core-svr4.c.
+	* config/i386/i386sol2.mh, config/i386/i386v4.mh, config/m68k/amix.mh,
+	config/i386/ncr3000.mh, config/sparc/sun4sol2.mh:  Add core-svr4.o
+	to NATDEPFILES.
+	* config/mips/irix4.mh:  Add corelow.o to NATDEPFILES.
+
 Mon Apr 19 11:13:34 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* i387-tdep.c: Remove unused #includes.
