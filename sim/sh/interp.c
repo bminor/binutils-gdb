@@ -275,6 +275,7 @@ fail ()
   abort ();
 }
 
+/* start-sanitize-sh4 */
 int
 special_address (addr, bits_written, data)
      void *addr;
@@ -290,6 +291,7 @@ special_address (addr, bits_written, data)
   return 0;
 }
 
+/* end-sanitize-sh4 */
 /* This function exists solely for the purpose of setting a breakpoint to
    catch simulated bus errors when running the simulator under GDB.  */
 
@@ -302,6 +304,9 @@ bp_holder ()
    being implemented by ../common/sim_resume.c and the below should
    make a call to sim_engine_halt */
 
+/* restore-sanitize-sh4#define BUSERROR(addr, mask) \
+   restore-sanitize-sh4  if (addr & ~mask) { saved_state.asregs.exception = SIGBUS;  bp_holder (); }
+   start-sanitize-sh4 */
 #define BUSERROR(addr, mask, bits_written, data) \
   if (addr & ~mask) \
     { \
@@ -310,6 +315,7 @@ bp_holder ()
       saved_state.asregs.exception = SIGBUS; \
       bp_holder (); \
     }
+/* end-sanitize-sh4 */
 
 /* Define this to enable register lifetime checking.
    The compiler generates "add #0,rn" insns to mark registers as invalid,
@@ -459,7 +465,10 @@ wlat_little (memory, x, value, maskl)
 {
   int v = value;
   unsigned char *p = memory + ((x) & maskl);
+/* restore-sanitize-sh4  BUSERROR(x, maskl);
+   start-sanitize-sh4 */
   BUSERROR(x, maskl, 32, v);
+/* end-sanitize-sh4 */
   p[3] = v >> 24;
   p[2] = v >> 16;
   p[1] = v >> 8;
@@ -472,7 +481,10 @@ wwat_little (memory, x, value, maskw)
 {
   int v = value;
   unsigned char *p = memory + ((x) & maskw);
+/* restore-sanitize-sh4  BUSERROR(x, maskw);
+   start-sanitize-sh4 */
   BUSERROR(x, maskw, 16, v);
+/* end-sanitize-sh4 */
 
   p[1] = v >> 8;
   p[0] = v;
@@ -485,7 +497,10 @@ wbat_any (memory, x, value, maskb)
   unsigned char *p = memory + (x & maskb);
   if (x > 0x5000000)
     IOMEM (x, 1, value);
+/* restore-sanitize-sh4  BUSERROR(x, maskb);
+   start-sanitize-sh4 */
   BUSERROR(x, maskb, 8, value);
+/* end-sanitize-sh4 */
 
   p[0] = value;
 }
@@ -496,7 +511,10 @@ wlat_big (memory, x, value, maskl)
 {
   int v = value;
   unsigned char *p = memory + ((x) & maskl);
+/* restore-sanitize-sh4  BUSERROR(x, maskl);
+   start-sanitize-sh4 */
   BUSERROR(x, maskl, 32, v);
+/* end-sanitize-sh4 */
 
   p[0] = v >> 24;
   p[1] = v >> 16;
@@ -510,7 +528,10 @@ wwat_big (memory, x, value, maskw)
 {
   int v = value;
   unsigned char *p = memory + ((x) & maskw);
+/* restore-sanitize-sh4  BUSERROR(x, maskw);
+   start-sanitize-sh4 */
   BUSERROR(x, maskw, 16, v);
+/* end-sanitize-sh4 */
 
   p[0] = v >> 8;
   p[1] = v;
@@ -521,7 +542,10 @@ wbat_big (memory, x, value, maskb)
      unsigned char *memory;
 {
   unsigned char *p = memory + (x & maskb);
+/* restore-sanitize-sh4  BUSERROR(x, maskb);
+   start-sanitize-sh4 */
   BUSERROR(x, maskb, 8, value);
+/* end-sanitize-sh4 */
 
   if (x > 0x5000000)
     IOMEM (x, 1, value);
@@ -535,7 +559,10 @@ rlat_little (memory, x, maskl)
      unsigned char *memory;
 {
   unsigned char *p = memory + ((x) & maskl);
+/* restore-sanitize-sh4  BUSERROR(x, maskl);
+   start-sanitize-sh4 */
   BUSERROR(x, maskl, -32, -1);
+/* end-sanitize-sh4 */
 
   return (p[3] << 24) | (p[2] << 16) | (p[1] << 8) | p[0];
 }
@@ -545,7 +572,10 @@ rwat_little (memory, x, maskw)
      unsigned char *memory;
 {
   unsigned char *p = memory + ((x) & maskw);
+/* restore-sanitize-sh4  BUSERROR(x, maskw);
+   start-sanitize-sh4 */
   BUSERROR(x, maskw, -16, -1);
+/* end-sanitize-sh4 */
 
   return (p[1] << 8) | p[0];
 }
@@ -555,7 +585,10 @@ rbat_any (memory, x, maskb)
      unsigned char *memory;
 {
   unsigned char *p = memory + ((x) & maskb);
+/* restore-sanitize-sh4  BUSERROR(x, maskb);
+   start-sanitize-sh4 */
   BUSERROR(x, maskb, -8, -1);
+/* end-sanitize-sh4 */
 
   return p[0];
 }
@@ -565,6 +598,10 @@ rlat_big (memory, x, maskl)
      unsigned char *memory;
 {
   unsigned char *p = memory + ((x) & maskl);
+/* restore-sanitize-sh4  BUSERROR(x, maskl);
+   start-sanitize-sh4 */
+  BUSERROR(x, maskl, -32, -1);
+/* end-sanitize-sh4 */
 
   return (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];
 }
@@ -574,7 +611,10 @@ rwat_big (memory, x, maskw)
      unsigned char *memory;
 {
   unsigned char *p = memory + ((x) & maskw);
+/* restore-sanitize-sh4  BUSERROR(x, maskw);
+   start-sanitize-sh4 */
   BUSERROR(x, maskw, -16, -1);
+/* end-sanitize-sh4 */
 
   return (p[0] << 8) | p[1];
 }
@@ -1576,7 +1616,7 @@ sim_create_inferior (sd, prog_bfd, argv, env)
      char **argv;
      char **env;
 {
-  /* clear the registers (retaining the PC) */
+  /* clear the registers */
   memset (&saved_state, 0,
 	  (char*)&saved_state.asregs.end_of_registers - (char*)&saved_state);
   /* set the PC */
