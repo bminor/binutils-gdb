@@ -34,7 +34,9 @@ Things-to-keep:
 hmake-dgux
 hmake-sun3
 hmake-sun4
+hmake-dec3100
 tmake-sun4
+
 
 Do-last:
 
@@ -43,7 +45,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.1  1991/05/23 21:43:26  rich
+# Revision 1.2  1991/05/31 01:01:51  steve
+# *** empty log message ***
+#
+# Revision 1.1  1991/05/23  21:43:26  rich
 # Initial revision
 #
 #
