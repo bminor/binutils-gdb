@@ -1166,9 +1166,9 @@ pe_ILF_object_p (bfd * abfd)
     case IMAGE_FILE_MACHINE_THUMB:
 #ifdef THUMBPEMAGIC
       {
-	extern bfd_target armpei_little_vec;
+	extern bfd_target TARGET_LITTLE_SYM;
 	
-	if (abfd->xvec == & armpei_little_vec)
+	if (abfd->xvec == & TARGET_LITTLE_SYM)
 	  magic = THUMBPEMAGIC;
       }
 #endif      
