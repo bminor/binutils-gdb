@@ -27,7 +27,7 @@ if $tracelevel then {
 
 if { [skip_cplus_tests] } { continue }
 
-set testfile "misc"
+set testfile "classes"
 set srcfile ${testfile}.cc
 set binfile ${objdir}/${subdir}/${testfile}
 
