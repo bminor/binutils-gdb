@@ -2,7 +2,8 @@ Sat Apr  8 12:46:33 1995  Doug Evans  <dje@chestnut.cygnus.com>
 
 start-sanitize-arc
 	* gas/arc: Testsuite for ARC.
-	* gas/arc/{arc.exp,math.s,math.d,flag.s,flag.d,j.s,j.d}: New files.
+	* gas/arc/{arc.exp,math.[sd],flag.[sd],j.[sd]}: New files.
+	* gas/arc/{branch.[sd],alias.[sd],sshift.[sd]}: New files.
 end-sanitize-arc
 
 	* lib/gas-defs.exp (run_dump_test): Handle arguments with paths.
