@@ -28,10 +28,34 @@ Makefile.in
 configure
 configure.in
 exit47.s
+f-abs.s
+f-add.s
+f-adda.s
+f-cond.s
+f-cvt.s
+f-div.s
+f-madd.s
+f-madda.s
+f-max.s
+f-min.s
+f-msub.s
+f-msuba.s
+f-mul.s
+f-mula.s
+f-neg.s
+f-rsqrt.s
+f-sqrt.s
+f-sub.s
+f-suba.s
 hello.s
 loop.s
+t-dadd.s
+t-ddiv.s
+t-div.s
+t-div1.s
+t-divu.s
+t-divu1.s
 t-macros.i
-
 t-mtsa.s
 t-pabsh.s
 t-pabsw.s
@@ -88,8 +112,9 @@ t-psubuh.s
 t-psubuw.s
 t-psubw.s
 t-qfsrv.s
-
+t-sdl.s
 tick.s
+trap.s
 
 Things-to-lose:
 
