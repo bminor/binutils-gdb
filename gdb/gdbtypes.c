@@ -685,7 +685,7 @@ lookup_struct_elt_type (type, name, noerr)
 {
   int i;
 
-  if (TYPE_CODE (type) == TYPE_CODE_PTR ||
+  while (TYPE_CODE (type) == TYPE_CODE_PTR ||
       TYPE_CODE (type) == TYPE_CODE_REF)
       type = TYPE_TARGET_TYPE (type);
 

@@ -1,3 +1,8 @@
+Fri Nov 12 11:18:02 1993  Kung Hsu  (kung@cirdan.cygnus.com)
+
+	* gdbtypes.c (lookup_struct_elt_type): Handle type ref or pointer
+	to struct/union case.
+
 Fri Nov 12 10:39:31 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* coff-solib.c (coff_solib_add):  Cast result of alloca().
