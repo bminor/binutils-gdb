@@ -1,3 +1,8 @@
+Thu Feb  4 01:50:53 1993  John Gilmore  (gnu@cygnus.com)
+
+	* Makefile.in (make-gdb.tar.Z):  Change BISON to 'bison -y' for
+	GDB releases.
+
 Wed Feb  3 17:22:16 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* configure: Include srcdir in message about target of link not

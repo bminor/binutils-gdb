@@ -1491,7 +1491,7 @@ make-gdb.tar.Z: $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS) gdb texinfo/texinfo.tex
 	sed -e '/^all\.normal: /s/\all-texinfo //' \
 	    -e '/^	install-texinfo /d' \
 	    -e '\/^BISON =/,\/^$$/c\
-		BISON = bison' \
+		BISON = bison -y' \
 	<Makefile.in >proto-toplev/Makefile.in
 
 	mkdir proto-toplev/texinfo
