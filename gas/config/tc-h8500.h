@@ -20,7 +20,6 @@
 
 
 #define TC_H8500
-#define const
 /* This macro translates between an internal fix and an coff reloc type */
 #define TC_COFF_FIX2RTYPE(fixP) tc_coff_fix2rtype(fixP)
 
