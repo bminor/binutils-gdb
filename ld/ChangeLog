@@ -1,3 +1,8 @@
+2002-02-20  Andreas Schwab  <schwab@suse.de>
+
+	* emulparams/elf64_ia64.sh (OTHER_READONLY_SECTIONS): Don't fold
+	.IA64_unwind* in a relocatable link.
+
 2002-02-20  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* NEWS: Mark 2.12 branch.
