@@ -926,15 +926,8 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	    if (cs->c_name[0] != '@' /* Skip tdesc symbols */ )
 	      {
 		struct minimal_symbol *msym;
-
- 		/* FIXME: cagney/2001-02-01: The nasty (int) -> (long)
-                   -> (void*) cast is to ensure that that the value of
-                   cs->c_sclass can be correctly stored in a void
-                   pointer in MSYMBOL_INFO.  Better solutions
-                   welcome. */
-		gdb_assert (sizeof (void *) >= sizeof (cs->c_sclass));
 		msym = prim_record_minimal_symbol_and_info
-		  (cs->c_name, tmpaddr, ms_type, (void *) (long) cs->c_sclass,
+		  (cs->c_name, tmpaddr, ms_type, NULL,
 		   sec, NULL, objfile);
 		if (msym)
 		  COFF_MAKE_MSYMBOL_SPECIAL (cs->c_sclass, msym);

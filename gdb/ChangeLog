@@ -1,3 +1,8 @@
+2003-11-05 Elena Zannoni  <ezannoni@redhat.com>
+
+	* coffread.c (coff_symtab_read): Remove passing of info parameter
+	to prim_record_minimal_symbol_and_info.
+
 2003-11-05  Elena Zannoni  <ezannoni@redhat.com>
 
 	* coffread.c (process_coff_symbol): Delete CXUX_TARGET macro use.
