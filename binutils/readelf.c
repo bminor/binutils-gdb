@@ -162,240 +162,8 @@ typedef enum print_mode
 }
 print_mode;
 
-/* Forward declarations for dumb compilers.  */
-static void print_vma
-  PARAMS ((bfd_vma, print_mode));
-static void print_symbol
-  PARAMS ((int, const char *));
-static bfd_vma (*byte_get)
-  PARAMS ((unsigned char *, int));
-static bfd_vma byte_get_little_endian
-  PARAMS ((unsigned char *, int));
-static bfd_vma byte_get_big_endian
-  PARAMS ((unsigned char *, int));
-static bfd_vma byte_get_signed
-  PARAMS ((unsigned char *, int));
-static void (*byte_put)
-  PARAMS ((unsigned char *, bfd_vma, int));
-static void byte_put_little_endian
-  PARAMS ((unsigned char *, bfd_vma, int));
-static void byte_put_big_endian
-  PARAMS ((unsigned char *, bfd_vma, int));
-static const char *get_mips_dynamic_type
-  PARAMS ((unsigned long));
-static const char *get_sparc64_dynamic_type
-  PARAMS ((unsigned long));
-static const char *get_ppc64_dynamic_type
-  PARAMS ((unsigned long));
-static const char *get_parisc_dynamic_type
-  PARAMS ((unsigned long));
-static const char *get_ia64_dynamic_type
-  PARAMS ((unsigned long));
-static const char *get_dynamic_type
-  PARAMS ((unsigned long));
-static int slurp_rela_relocs
-  PARAMS ((FILE *, unsigned long, unsigned long, Elf_Internal_Rela **,
-	   unsigned long *));
-static int slurp_rel_relocs
-  PARAMS ((FILE *, unsigned long, unsigned long, Elf_Internal_Rela **,
-	   unsigned long *));
-static int dump_relocations
-  PARAMS ((FILE *, unsigned long, unsigned long, Elf_Internal_Sym *,
-	   unsigned long, char *, int));
-static char *get_file_type
-  PARAMS ((unsigned));
-static char *get_machine_name
-  PARAMS ((unsigned));
-static void decode_ARM_machine_flags
-  PARAMS ((unsigned, char[]));
-static char *get_machine_flags
-  PARAMS ((unsigned, unsigned));
-static const char *get_mips_segment_type
-  PARAMS ((unsigned long));
-static const char *get_parisc_segment_type
-  PARAMS ((unsigned long));
-static const char *get_ia64_segment_type
-  PARAMS ((unsigned long));
-static const char *get_segment_type
-  PARAMS ((unsigned long));
-static const char *get_mips_section_type_name
-  PARAMS ((unsigned int));
-static const char *get_parisc_section_type_name
-  PARAMS ((unsigned int));
-static const char *get_ia64_section_type_name
-  PARAMS ((unsigned int));
-static const char *get_section_type_name
-  PARAMS ((unsigned int));
-static const char *get_symbol_binding
-  PARAMS ((unsigned int));
-static const char *get_symbol_type
-  PARAMS ((unsigned int));
-static const char *get_symbol_visibility
-  PARAMS ((unsigned int));
-static const char *get_symbol_index_type
-  PARAMS ((unsigned int));
-static const char *get_dynamic_flags
-  PARAMS ((bfd_vma));
-static void usage
-  PARAMS ((void));
-static void parse_args
-  PARAMS ((int, char **));
-static int process_file_header
-  PARAMS ((void));
-static int process_program_headers
-  PARAMS ((FILE *));
-static int process_section_headers
-  PARAMS ((FILE *));
-static int process_unwind
-  PARAMS ((FILE *));
-static void dynamic_segment_mips_val
-  PARAMS ((Elf_Internal_Dyn *));
-static void dynamic_segment_parisc_val
-  PARAMS ((Elf_Internal_Dyn *));
-static void dynamic_segment_ia64_val
-  PARAMS ((Elf_Internal_Dyn *));
-static int process_dynamic_segment
-  PARAMS ((FILE *));
-static int process_symbol_table
-  PARAMS ((FILE *));
-static int process_syminfo
-  PARAMS ((FILE *));
-static int process_section_contents
-  PARAMS ((FILE *));
-static void process_mips_fpe_exception
-  PARAMS ((int));
-static int process_mips_specific
-  PARAMS ((FILE *));
-static int process_file
-  PARAMS ((char *));
-static int process_relocs
-  PARAMS ((FILE *));
-static int process_version_sections
-  PARAMS ((FILE *));
-static char *get_ver_flags
-  PARAMS ((unsigned int));
-static int get_32bit_section_headers
-  PARAMS ((FILE *, unsigned int));
-static int get_64bit_section_headers
-  PARAMS ((FILE *, unsigned int));
-static int get_32bit_program_headers
-  PARAMS ((FILE *, Elf_Internal_Phdr *));
-static int get_64bit_program_headers
-  PARAMS ((FILE *, Elf_Internal_Phdr *));
-static int get_program_headers
-  PARAMS ((FILE *));
-static int get_file_header
-  PARAMS ((FILE *));
-static Elf_Internal_Sym *get_32bit_elf_symbols
-  PARAMS ((FILE *, Elf_Internal_Shdr *));
-static Elf_Internal_Sym *get_64bit_elf_symbols
-  PARAMS ((FILE *, Elf_Internal_Shdr *));
-static const char *get_elf_section_flags
-  PARAMS ((bfd_vma));
-static int *get_dynamic_data
-  PARAMS ((FILE *, unsigned int));
-static int get_32bit_dynamic_segment
-  PARAMS ((FILE *));
-static int get_64bit_dynamic_segment
-  PARAMS ((FILE *));
-static long offset_from_vma
-  PARAMS ((FILE *, bfd_vma vma, bfd_size_type size));
-#ifdef SUPPORT_DISASSEMBLY
-static int disassemble_section
-  PARAMS ((Elf_Internal_Shdr *, FILE *));
-#endif
-static int dump_section
-  PARAMS ((Elf_Internal_Shdr *, FILE *));
-static int display_debug_section
-  PARAMS ((Elf_Internal_Shdr *, FILE *));
-static int display_debug_info
-  PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
-static int display_debug_not_supported
-  PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
-static int prescan_debug_info
-  PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
-static int display_debug_lines
-  PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
-static int display_debug_pubnames
-  PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
-static int display_debug_abbrev
-  PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
-static int display_debug_aranges
-  PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
-static int display_debug_frames
-  PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
-static int display_debug_macinfo
-  PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
-static int display_debug_str
-  PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
-static int display_debug_loc
-  PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
-static unsigned char *process_abbrev_section
-  PARAMS ((unsigned char *, unsigned char *));
-static void load_debug_str
-  PARAMS ((FILE *));
-static void free_debug_str
-  PARAMS ((void));
-static const char *fetch_indirect_string
-  PARAMS ((unsigned long));
-static void load_debug_loc
-  PARAMS ((FILE *));
-static void free_debug_loc
-  PARAMS ((void));
-static unsigned long read_leb128
-  PARAMS ((unsigned char *, int *, int));
-static int process_extended_line_op
-  PARAMS ((unsigned char *, int, int));
-static void reset_state_machine
-  PARAMS ((int));
-static char *get_TAG_name
-  PARAMS ((unsigned long));
-static char *get_AT_name
-  PARAMS ((unsigned long));
-static char *get_FORM_name
-  PARAMS ((unsigned long));
-static void free_abbrevs
-  PARAMS ((void));
-static void add_abbrev
-  PARAMS ((unsigned long, unsigned long, int));
-static void add_abbrev_attr
-  PARAMS ((unsigned long, unsigned long));
-static unsigned char *read_and_display_attr
-  PARAMS ((unsigned long, unsigned long, unsigned char *, unsigned long,
-	   unsigned long, unsigned long, int));
-static unsigned char *read_and_display_attr_value
-  PARAMS ((unsigned long, unsigned long, unsigned char *, unsigned long,
-	   unsigned long, unsigned long, int));
-static unsigned char *display_block
-  PARAMS ((unsigned char *, unsigned long));
-static void decode_location_expression
-  PARAMS ((unsigned char *, unsigned int, unsigned long));
-static void request_dump
-  PARAMS ((unsigned int, int));
-static const char *get_elf_class
-  PARAMS ((unsigned int));
-static const char *get_data_encoding
-  PARAMS ((unsigned int));
-static const char *get_osabi_name
-  PARAMS ((unsigned int));
-static int guess_is_rela
-  PARAMS ((unsigned long));
-static const char *get_note_type
-  PARAMS ((unsigned int));
-static const char *get_netbsd_elfcore_note_type
-  PARAMS ((unsigned int));
-static int process_note
-  PARAMS ((Elf_Internal_Note *));
-static int process_corefile_note_segment
-  PARAMS ((FILE *, bfd_vma, bfd_vma));
-static int process_corefile_note_segments
-  PARAMS ((FILE *));
-static int process_corefile_contents
-  PARAMS ((FILE *));
-static int process_arch_specific
-  PARAMS ((FILE *));
-static int process_gnu_liblist
-  PARAMS ((FILE *));
+static bfd_vma (*byte_get) (unsigned char *, int);
+static void (*byte_put) (unsigned char *, bfd_vma, int);
 
 typedef int Elf32_Word;
 
@@ -447,38 +215,31 @@ typedef int Elf32_Word;
 
 
 static void
-error VPARAMS ((const char *message, ...))
+error (const char *message, ...)
 {
-  VA_OPEN (args, message);
-  VA_FIXEDARG (args, const char *, message);
+  va_list args;
 
+  va_start (args, message);
   fprintf (stderr, _("%s: Error: "), program_name);
   vfprintf (stderr, message, args);
-  VA_CLOSE (args);
+  va_end (args);
 }
 
 static void
-warn VPARAMS ((const char *message, ...))
+warn (const char *message, ...)
 {
-  VA_OPEN (args, message);
-  VA_FIXEDARG (args, const char *, message);
+  va_list args;
 
+  va_start (args, message);
   fprintf (stderr, _("%s: Warning: "), program_name);
   vfprintf (stderr, message, args);
-  VA_CLOSE (args);
+  va_end (args);
 }
 
-static PTR get_data PARAMS ((PTR, FILE *, long, size_t, const char *));
-
-static PTR
-get_data (var, file, offset, size, reason)
-     PTR var;
-     FILE *file;
-     long offset;
-     size_t size;
-     const char *reason;
+static void *
+get_data (void *var, FILE *file, long offset, size_t size, const char *reason)
 {
-  PTR mvar;
+  void *mvar;
 
   if (size == 0)
     return NULL;
@@ -492,7 +253,7 @@ get_data (var, file, offset, size, reason)
   mvar = var;
   if (mvar == NULL)
     {
-      mvar = (PTR) malloc (size);
+      mvar = malloc (size);
 
       if (mvar == NULL)
 	{
@@ -514,9 +275,7 @@ get_data (var, file, offset, size, reason)
 }
 
 static bfd_vma
-byte_get_little_endian (field, size)
-     unsigned char *field;
-     int size;
+byte_get_little_endian (unsigned char *field, int size)
 {
   switch (size)
     {
@@ -563,9 +322,7 @@ byte_get_little_endian (field, size)
 }
 
 static bfd_vma
-byte_get_signed (field, size)
-     unsigned char *field;
-     int size;
+byte_get_signed (unsigned char *field, int size)
 {
   bfd_vma x = byte_get (field, size);
 
@@ -586,10 +343,7 @@ byte_get_signed (field, size)
 }
 
 static void
-byte_put_little_endian (field, value, size)
-     unsigned char * field;
-     bfd_vma	     value;
-     int             size;
+byte_put_little_endian (unsigned char *field, bfd_vma value, int size)
 {
   switch (size)
     {
@@ -618,9 +372,7 @@ byte_put_little_endian (field, value, size)
 
 /* Print a VMA value.  */
 static void
-print_vma (vma, mode)
-     bfd_vma vma;
-     print_mode mode;
+print_vma (bfd_vma vma, print_mode mode)
 {
 #ifdef BFD64
   if (is_32bit_elf)
@@ -738,9 +490,7 @@ print_vma (vma, mode)
    truncating or padding as necessary.  */
 
 static void
-print_symbol (width, symbol)
-     int width;
-     const char *symbol;
+print_symbol (int width, const char *symbol)
 {
   if (do_wide)
     printf ("%s", symbol);
@@ -751,9 +501,7 @@ print_symbol (width, symbol)
 }
 
 static bfd_vma
-byte_get_big_endian (field, size)
-     unsigned char *field;
-     int size;
+byte_get_big_endian (unsigned char *field, int size)
 {
   switch (size)
     {
@@ -801,10 +549,7 @@ byte_get_big_endian (field, size)
 }
 
 static void
-byte_put_big_endian (field, value, size)
-     unsigned char * field;
-     bfd_vma	     value;
-     int             size;
+byte_put_big_endian (unsigned char *field, bfd_vma value, int size)
 {
   switch (size)
     {
@@ -838,8 +583,7 @@ byte_put_big_endian (field, value, size)
 /* Guess the relocation size commonly used by the specific machines.  */
 
 static int
-guess_is_rela (e_machine)
-     unsigned long e_machine;
+guess_is_rela (unsigned long e_machine)
 {
   switch (e_machine)
     {
@@ -927,12 +671,11 @@ guess_is_rela (e_machine)
 }
 
 static int
-slurp_rela_relocs (file, rel_offset, rel_size, relasp, nrelasp)
-     FILE *file;
-     unsigned long rel_offset;
-     unsigned long rel_size;
-     Elf_Internal_Rela **relasp;
-     unsigned long *nrelasp;
+slurp_rela_relocs (FILE *file,
+		   unsigned long rel_offset,
+		   unsigned long rel_size,
+		   Elf_Internal_Rela **relasp,
+		   unsigned long *nrelasp)
 {
   Elf_Internal_Rela *relas;
   unsigned long nrelas;
@@ -942,15 +685,13 @@ slurp_rela_relocs (file, rel_offset, rel_size, relasp, nrelasp)
     {
       Elf32_External_Rela *erelas;
 
-      erelas = (Elf32_External_Rela *) get_data (NULL, file, rel_offset,
-						 rel_size, _("relocs"));
+      erelas = get_data (NULL, file, rel_offset, rel_size, _("relocs"));
       if (!erelas)
 	return 0;
 
       nrelas = rel_size / sizeof (Elf32_External_Rela);
 
-      relas = (Elf_Internal_Rela *)
-	malloc (nrelas * sizeof (Elf_Internal_Rela));
+      relas = malloc (nrelas * sizeof (Elf_Internal_Rela));
 
       if (relas == NULL)
 	{
@@ -971,15 +712,13 @@ slurp_rela_relocs (file, rel_offset, rel_size, relasp, nrelasp)
     {
       Elf64_External_Rela *erelas;
 
-      erelas = (Elf64_External_Rela *) get_data (NULL, file, rel_offset,
-						 rel_size, _("relocs"));
+      erelas = get_data (NULL, file, rel_offset, rel_size, _("relocs"));
       if (!erelas)
 	return 0;
 
       nrelas = rel_size / sizeof (Elf64_External_Rela);
 
-      relas = (Elf_Internal_Rela *)
-	malloc (nrelas * sizeof (Elf_Internal_Rela));
+      relas = malloc (nrelas * sizeof (Elf_Internal_Rela));
 
       if (relas == NULL)
 	{
@@ -1002,12 +741,11 @@ slurp_rela_relocs (file, rel_offset, rel_size, relasp, nrelasp)
 }
 
 static int
-slurp_rel_relocs (file, rel_offset, rel_size, relsp, nrelsp)
-     FILE *file;
-     unsigned long rel_offset;
-     unsigned long rel_size;
-     Elf_Internal_Rela **relsp;
-     unsigned long *nrelsp;
+slurp_rel_relocs (FILE *file,
+		  unsigned long rel_offset,
+		  unsigned long rel_size,
+		  Elf_Internal_Rela **relsp,
+		  unsigned long *nrelsp)
 {
   Elf_Internal_Rela *rels;
   unsigned long nrels;
@@ -1017,14 +755,13 @@ slurp_rel_relocs (file, rel_offset, rel_size, relsp, nrelsp)
     {
       Elf32_External_Rel *erels;
 
-      erels = (Elf32_External_Rel *) get_data (NULL, file, rel_offset,
-					       rel_size, _("relocs"));
+      erels = get_data (NULL, file, rel_offset, rel_size, _("relocs"));
       if (!erels)
 	return 0;
 
       nrels = rel_size / sizeof (Elf32_External_Rel);
 
-      rels = (Elf_Internal_Rela *) malloc (nrels * sizeof (Elf_Internal_Rela));
+      rels = malloc (nrels * sizeof (Elf_Internal_Rela));
 
       if (rels == NULL)
 	{
@@ -1045,14 +782,13 @@ slurp_rel_relocs (file, rel_offset, rel_size, relsp, nrelsp)
     {
       Elf64_External_Rel *erels;
 
-      erels = (Elf64_External_Rel *) get_data (NULL, file, rel_offset,
-					       rel_size, _("relocs"));
+      erels = get_data (NULL, file, rel_offset, rel_size, _("relocs"));
       if (!erels)
 	return 0;
 
       nrels = rel_size / sizeof (Elf64_External_Rel);
 
-      rels = (Elf_Internal_Rela *) malloc (nrels * sizeof (Elf_Internal_Rela));
+      rels = malloc (nrels * sizeof (Elf_Internal_Rela));
 
       if (rels == NULL)
 	{
@@ -1074,17 +810,17 @@ slurp_rel_relocs (file, rel_offset, rel_size, relsp, nrelsp)
   return 1;
 }
 
-/* Display the contents of the relocation data found at the specified offset.  */
+/* Display the contents of the relocation data found at the specified
+   offset.  */
 
 static int
-dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
-     FILE *file;
-     unsigned long rel_offset;
-     unsigned long rel_size;
-     Elf_Internal_Sym *symtab;
-     unsigned long nsyms;
-     char *strtab;
-     int is_rela;
+dump_relocations (FILE *file,
+		  unsigned long rel_offset,
+		  unsigned long rel_size,
+		  Elf_Internal_Sym *symtab,
+		  unsigned long nsyms,
+		  char *strtab,
+		  int is_rela)
 {
   unsigned int i;
   Elf_Internal_Rela *rels;
@@ -1148,8 +884,8 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
       bfd_vma info;
       bfd_vma symtab_index;
       bfd_vma type;
-      bfd_vma type2 = (bfd_vma) NULL;
-      bfd_vma type3 = (bfd_vma) NULL;
+      bfd_vma type2 = 0;
+      bfd_vma type3 = 0;
 
       offset = rels[i].r_offset;
       info   = rels[i].r_info;
@@ -1517,8 +1253,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 }
 
 static const char *
-get_mips_dynamic_type (type)
-     unsigned long type;
+get_mips_dynamic_type (unsigned long type)
 {
   switch (type)
     {
@@ -1571,8 +1306,7 @@ get_mips_dynamic_type (type)
 }
 
 static const char *
-get_sparc64_dynamic_type (type)
-     unsigned long type;
+get_sparc64_dynamic_type (unsigned long type)
 {
   switch (type)
     {
@@ -1583,8 +1317,7 @@ get_sparc64_dynamic_type (type)
 }
 
 static const char *
-get_ppc64_dynamic_type (type)
-     unsigned long type;
+get_ppc64_dynamic_type (unsigned long type)
 {
   switch (type)
     {
@@ -1597,8 +1330,7 @@ get_ppc64_dynamic_type (type)
 }
 
 static const char *
-get_parisc_dynamic_type (type)
-     unsigned long type;
+get_parisc_dynamic_type (unsigned long type)
 {
   switch (type)
     {
@@ -1621,8 +1353,7 @@ get_parisc_dynamic_type (type)
 }
 
 static const char *
-get_ia64_dynamic_type (type)
-     unsigned long type;
+get_ia64_dynamic_type (unsigned long type)
 {
   switch (type)
     {
@@ -1633,8 +1364,7 @@ get_ia64_dynamic_type (type)
 }
 
 static const char *
-get_dynamic_type (type)
-     unsigned long type;
+get_dynamic_type (unsigned long type)
 {
   static char buff[32];
 
@@ -1769,8 +1499,7 @@ get_dynamic_type (type)
 }
 
 static char *
-get_file_type (e_type)
-     unsigned e_type;
+get_file_type (unsigned e_type)
 {
   static char buff[32];
 
@@ -1794,8 +1523,7 @@ get_file_type (e_type)
 }
 
 static char *
-get_machine_name (e_machine)
-     unsigned e_machine;
+get_machine_name (unsigned e_machine)
 {
   static char buff[64]; /* XXX */
 
@@ -1901,9 +1629,7 @@ get_machine_name (e_machine)
 }
 
 static void
-decode_ARM_machine_flags (e_flags, buf)
-     unsigned e_flags;
-     char buf[];
+decode_ARM_machine_flags (unsigned e_flags, char buf[])
 {
   unsigned eabi;
   int unknown = 0;
@@ -2047,9 +1773,7 @@ decode_ARM_machine_flags (e_flags, buf)
 }
 
 static char *
-get_machine_flags (e_flags, e_machine)
-     unsigned e_flags;
-     unsigned e_machine;
+get_machine_flags (unsigned e_flags, unsigned e_machine)
 {
   static char buf[1024];
 
@@ -2279,8 +2003,37 @@ get_machine_flags (e_flags, e_machine)
 }
 
 static const char *
-get_mips_segment_type (type)
-     unsigned long type;
+get_osabi_name (unsigned int osabi)
+{
+  static char buff[32];
+
+  switch (osabi)
+    {
+    case ELFOSABI_NONE:		return "UNIX - System V";
+    case ELFOSABI_HPUX:		return "UNIX - HP-UX";
+    case ELFOSABI_NETBSD:	return "UNIX - NetBSD";
+    case ELFOSABI_LINUX:	return "UNIX - Linux";
+    case ELFOSABI_HURD:		return "GNU/Hurd";
+    case ELFOSABI_SOLARIS:	return "UNIX - Solaris";
+    case ELFOSABI_AIX:		return "UNIX - AIX";
+    case ELFOSABI_IRIX:		return "UNIX - IRIX";
+    case ELFOSABI_FREEBSD:	return "UNIX - FreeBSD";
+    case ELFOSABI_TRU64:	return "UNIX - TRU64";
+    case ELFOSABI_MODESTO:	return "Novell - Modesto";
+    case ELFOSABI_OPENBSD:	return "UNIX - OpenBSD";
+    case ELFOSABI_OPENVMS:	return "VMS - OpenVMS";
+    case ELFOSABI_NSK:		return "HP - Non-Stop Kernel";
+    case ELFOSABI_AROS:		return "Amiga Research OS";
+    case ELFOSABI_STANDALONE:	return _("Standalone App");
+    case ELFOSABI_ARM:		return "ARM";
+    default:
+      sprintf (buff, _("<unknown: %x>"), osabi);
+      return buff;
+    }
+}
+
+static const char *
+get_mips_segment_type (unsigned long type)
 {
   switch (type)
     {
@@ -2298,8 +2051,7 @@ get_mips_segment_type (type)
 }
 
 static const char *
-get_parisc_segment_type (type)
-     unsigned long type;
+get_parisc_segment_type (unsigned long type)
 {
   switch (type)
     {
@@ -2325,8 +2077,7 @@ get_parisc_segment_type (type)
 }
 
 static const char *
-get_ia64_segment_type (type)
-     unsigned long type;
+get_ia64_segment_type (unsigned long type)
 {
   switch (type)
     {
@@ -2344,8 +2095,7 @@ get_ia64_segment_type (type)
 }
 
 static const char *
-get_segment_type (p_type)
-     unsigned long p_type;
+get_segment_type (unsigned long p_type)
 {
   static char buff[32];
 
@@ -2421,8 +2171,7 @@ get_segment_type (p_type)
 }
 
 static const char *
-get_mips_section_type_name (sh_type)
-     unsigned int sh_type;
+get_mips_section_type_name (unsigned int sh_type)
 {
   switch (sh_type)
     {
@@ -2472,8 +2221,7 @@ get_mips_section_type_name (sh_type)
 }
 
 static const char *
-get_parisc_section_type_name (sh_type)
-     unsigned int sh_type;
+get_parisc_section_type_name (unsigned int sh_type)
 {
   switch (sh_type)
     {
@@ -2487,8 +2235,7 @@ get_parisc_section_type_name (sh_type)
 }
 
 static const char *
-get_ia64_section_type_name (sh_type)
-     unsigned int sh_type;
+get_ia64_section_type_name (unsigned int sh_type)
 {
   /* If the top 8 bits are 0x78 the next 8 are the os/abi ID. */
   if ((sh_type & 0xFF000000) == SHT_IA_64_LOPSREG)
@@ -2506,8 +2253,7 @@ get_ia64_section_type_name (sh_type)
 }
 
 static const char *
-get_section_type_name (sh_type)
-     unsigned int sh_type;
+get_section_type_name (unsigned int sh_type)
 {
   static char buff[32];
 
@@ -2611,7 +2357,7 @@ struct option options[] =
 };
 
 static void
-usage ()
+usage (void)
 {
   fprintf (stdout, _("Usage: readelf <option(s)> elf-file(s)\n"));
   fprintf (stdout, _(" Display information about the contents of ELF format files\n"));
@@ -2652,15 +2398,13 @@ usage ()
 }
 
 static void
-request_dump (section, type)
-     unsigned int section;
-     int type;
+request_dump (unsigned int section, int type)
 {
   if (section >= num_dump_sects)
     {
       char *new_dump_sects;
 
-      new_dump_sects = (char *) calloc (section + 1, 1);
+      new_dump_sects = calloc (section + 1, 1);
 
       if (new_dump_sects == NULL)
 	error (_("Out of memory allocating dump request table."));
@@ -2683,9 +2427,7 @@ request_dump (section, type)
 }
 
 static void
-parse_args (argc, argv)
-     int argc;
-     char **argv;
+parse_args (int argc, char **argv)
 {
   int c;
 
@@ -2956,8 +2698,7 @@ parse_args (argc, argv)
 }
 
 static const char *
-get_elf_class (elf_class)
-     unsigned int elf_class;
+get_elf_class (unsigned int elf_class)
 {
   static char buff[32];
 
@@ -2973,8 +2714,7 @@ get_elf_class (elf_class)
 }
 
 static const char *
-get_data_encoding (encoding)
-     unsigned int encoding;
+get_data_encoding (unsigned int encoding)
 {
   static char buff[32];
 
@@ -2989,41 +2729,10 @@ get_data_encoding (encoding)
     }
 }
 
-static const char *
-get_osabi_name (osabi)
-     unsigned int osabi;
-{
-  static char buff[32];
-
-  switch (osabi)
-    {
-    case ELFOSABI_NONE:		return "UNIX - System V";
-    case ELFOSABI_HPUX:		return "UNIX - HP-UX";
-    case ELFOSABI_NETBSD:	return "UNIX - NetBSD";
-    case ELFOSABI_LINUX:	return "UNIX - Linux";
-    case ELFOSABI_HURD:		return "GNU/Hurd";
-    case ELFOSABI_SOLARIS:	return "UNIX - Solaris";
-    case ELFOSABI_AIX:		return "UNIX - AIX";
-    case ELFOSABI_IRIX:		return "UNIX - IRIX";
-    case ELFOSABI_FREEBSD:	return "UNIX - FreeBSD";
-    case ELFOSABI_TRU64:	return "UNIX - TRU64";
-    case ELFOSABI_MODESTO:	return "Novell - Modesto";
-    case ELFOSABI_OPENBSD:	return "UNIX - OpenBSD";
-    case ELFOSABI_OPENVMS:	return "VMS - OpenVMS";
-    case ELFOSABI_NSK:		return "HP - Non-Stop Kernel";
-    case ELFOSABI_AROS:		return "Amiga Research OS";
-    case ELFOSABI_STANDALONE:	return _("Standalone App");
-    case ELFOSABI_ARM:		return "ARM";
-    default:
-      sprintf (buff, _("<unknown: %x>"), osabi);
-      return buff;
-    }
-}
-
 /* Decode the data held in 'elf_header'.  */
 
 static int
-process_file_header ()
+process_file_header (void)
 {
   if (   elf_header.e_ident[EI_MAG0] != ELFMAG0
       || elf_header.e_ident[EI_MAG1] != ELFMAG1
@@ -3112,19 +2821,16 @@ process_file_header ()
 
 
 static int
-get_32bit_program_headers (file, program_headers)
-     FILE *file;
-     Elf_Internal_Phdr *program_headers;
+get_32bit_program_headers (FILE *file, Elf_Internal_Phdr *program_headers)
 {
   Elf32_External_Phdr *phdrs;
   Elf32_External_Phdr *external;
   Elf_Internal_Phdr *internal;
   unsigned int i;
 
-  phdrs = ((Elf32_External_Phdr *)
-	   get_data (NULL, file, elf_header.e_phoff,
-		     elf_header.e_phentsize * elf_header.e_phnum,
-		     _("program headers")));
+  phdrs = get_data (NULL, file, elf_header.e_phoff,
+		    elf_header.e_phentsize * elf_header.e_phnum,
+		    _("program headers"));
   if (!phdrs)
     return 0;
 
@@ -3148,19 +2854,16 @@ get_32bit_program_headers (file, program_headers)
 }
 
 static int
-get_64bit_program_headers (file, program_headers)
-     FILE *file;
-     Elf_Internal_Phdr *program_headers;
+get_64bit_program_headers (FILE *file, Elf_Internal_Phdr *program_headers)
 {
   Elf64_External_Phdr *phdrs;
   Elf64_External_Phdr *external;
   Elf_Internal_Phdr *internal;
   unsigned int i;
 
-  phdrs = ((Elf64_External_Phdr *)
-	   get_data (NULL, file, elf_header.e_phoff,
-		     elf_header.e_phentsize * elf_header.e_phnum,
-		     _("program headers")));
+  phdrs = get_data (NULL, file, elf_header.e_phoff,
+		    elf_header.e_phentsize * elf_header.e_phnum,
+		    _("program headers"));
   if (!phdrs)
     return 0;
 
@@ -3186,8 +2889,7 @@ get_64bit_program_headers (file, program_headers)
 /* Returns 1 if the program headers were read into `program_headers'.  */
 
 static int
-get_program_headers (file)
-     FILE *file;
+get_program_headers (FILE *file)
 {
   Elf_Internal_Phdr *phdrs;
 
@@ -3195,8 +2897,7 @@ get_program_headers (file)
   if (program_headers != NULL)
     return 1;
 
-  phdrs = (Elf_Internal_Phdr *) malloc
-    (elf_header.e_phnum * sizeof (Elf_Internal_Phdr));
+  phdrs = malloc (elf_header.e_phnum * sizeof (Elf_Internal_Phdr));
 
   if (phdrs == NULL)
     {
@@ -3219,8 +2920,7 @@ get_program_headers (file)
 /* Returns 1 if the program headers were loaded.  */
 
 static int
-process_program_headers (file)
-     FILE *file;
+process_program_headers (FILE *file)
 {
   Elf_Internal_Phdr *segment;
   unsigned int i;
@@ -3425,10 +3125,7 @@ process_program_headers (file)
 /* Find the file offset corresponding to VMA by using the program headers.  */
 
 static long
-offset_from_vma (file, vma, size)
-     FILE *file;
-     bfd_vma vma;
-     bfd_size_type size;
+offset_from_vma (FILE *file, bfd_vma vma, bfd_size_type size)
 {
   Elf_Internal_Phdr *seg;
 
@@ -3457,23 +3154,18 @@ offset_from_vma (file, vma, size)
 
 
 static int
-get_32bit_section_headers (file, num)
-     FILE *file;
-     unsigned int num;
+get_32bit_section_headers (FILE *file, unsigned int num)
 {
   Elf32_External_Shdr *shdrs;
   Elf_Internal_Shdr *internal;
   unsigned int i;
 
-  shdrs = ((Elf32_External_Shdr *)
-	   get_data (NULL, file, elf_header.e_shoff,
-		     elf_header.e_shentsize * num,
-		     _("section headers")));
+  shdrs = get_data (NULL, file, elf_header.e_shoff,
+		    elf_header.e_shentsize * num, _("section headers"));
   if (!shdrs)
     return 0;
 
-  section_headers = ((Elf_Internal_Shdr *)
-		     malloc (num * sizeof (Elf_Internal_Shdr)));
+  section_headers = malloc (num * sizeof (Elf_Internal_Shdr));
 
   if (section_headers == NULL)
     {
@@ -3503,23 +3195,18 @@ get_32bit_section_headers (file, num)
 }
 
 static int
-get_64bit_section_headers (file, num)
-     FILE *file;
-     unsigned int num;
+get_64bit_section_headers (FILE *file, unsigned int num)
 {
   Elf64_External_Shdr *shdrs;
   Elf_Internal_Shdr *internal;
   unsigned int i;
 
-  shdrs = ((Elf64_External_Shdr *)
-	   get_data (NULL, file, elf_header.e_shoff,
-		     elf_header.e_shentsize * num,
-		     _("section headers")));
+  shdrs = get_data (NULL, file, elf_header.e_shoff,
+		    elf_header.e_shentsize * num, _("section headers"));
   if (!shdrs)
     return 0;
 
-  section_headers = ((Elf_Internal_Shdr *)
-		     malloc (num * sizeof (Elf_Internal_Shdr)));
+  section_headers = malloc (num * sizeof (Elf_Internal_Shdr));
 
   if (section_headers == NULL)
     {
@@ -3549,9 +3236,7 @@ get_64bit_section_headers (file, num)
 }
 
 static Elf_Internal_Sym *
-get_32bit_elf_symbols (file, section)
-     FILE *file;
-     Elf_Internal_Shdr *section;
+get_32bit_elf_symbols (FILE *file, Elf_Internal_Shdr *section)
 {
   unsigned long number;
   Elf32_External_Sym *esyms;
@@ -3560,9 +3245,8 @@ get_32bit_elf_symbols (file, section)
   Elf_Internal_Sym *psym;
   unsigned int j;
 
-  esyms = ((Elf32_External_Sym *)
-	   get_data (NULL, file, section->sh_offset,
-		     section->sh_size, _("symbols")));
+  esyms = get_data (NULL, file, section->sh_offset, section->sh_size,
+		    _("symbols"));
   if (!esyms)
     return NULL;
 
@@ -3571,9 +3255,8 @@ get_32bit_elf_symbols (file, section)
       && (symtab_shndx_hdr->sh_link
 	  == (unsigned long) SECTION_HEADER_NUM (section - section_headers)))
     {
-      shndx = ((Elf_External_Sym_Shndx *)
-	       get_data (NULL, file, symtab_shndx_hdr->sh_offset,
-			 symtab_shndx_hdr->sh_size, _("symtab shndx")));
+      shndx = get_data (NULL, file, symtab_shndx_hdr->sh_offset,
+			symtab_shndx_hdr->sh_size, _("symtab shndx"));
       if (!shndx)
 	{
 	  free (esyms);
@@ -3582,7 +3265,7 @@ get_32bit_elf_symbols (file, section)
     }
 
   number = section->sh_size / section->sh_entsize;
-  isyms = (Elf_Internal_Sym *) malloc (number * sizeof (Elf_Internal_Sym));
+  isyms = malloc (number * sizeof (Elf_Internal_Sym));
 
   if (isyms == NULL)
     {
@@ -3616,9 +3299,7 @@ get_32bit_elf_symbols (file, section)
 }
 
 static Elf_Internal_Sym *
-get_64bit_elf_symbols (file, section)
-     FILE *file;
-     Elf_Internal_Shdr *section;
+get_64bit_elf_symbols (FILE *file, Elf_Internal_Shdr *section)
 {
   unsigned long number;
   Elf64_External_Sym *esyms;
@@ -3627,9 +3308,8 @@ get_64bit_elf_symbols (file, section)
   Elf_Internal_Sym *psym;
   unsigned int j;
 
-  esyms = ((Elf64_External_Sym *)
-	   get_data (NULL, file, section->sh_offset,
-		     section->sh_size, _("symbols")));
+  esyms = get_data (NULL, file, section->sh_offset, section->sh_size,
+		    _("symbols"));
   if (!esyms)
     return NULL;
 
@@ -3638,9 +3318,8 @@ get_64bit_elf_symbols (file, section)
       && (symtab_shndx_hdr->sh_link
 	  == (unsigned long) SECTION_HEADER_NUM (section - section_headers)))
     {
-      shndx = ((Elf_External_Sym_Shndx *)
-	       get_data (NULL, file, symtab_shndx_hdr->sh_offset,
-			 symtab_shndx_hdr->sh_size, _("symtab shndx")));
+      shndx = get_data (NULL, file, symtab_shndx_hdr->sh_offset,
+			symtab_shndx_hdr->sh_size, _("symtab shndx"));
       if (!shndx)
 	{
 	  free (esyms);
@@ -3649,7 +3328,7 @@ get_64bit_elf_symbols (file, section)
     }
 
   number = section->sh_size / section->sh_entsize;
-  isyms = (Elf_Internal_Sym *) malloc (number * sizeof (Elf_Internal_Sym));
+  isyms = malloc (number * sizeof (Elf_Internal_Sym));
 
   if (isyms == NULL)
     {
@@ -3683,8 +3362,7 @@ get_64bit_elf_symbols (file, section)
 }
 
 static const char *
-get_elf_section_flags (sh_flags)
-     bfd_vma sh_flags;
+get_elf_section_flags (bfd_vma sh_flags)
 {
   static char buff[32];
 
@@ -3731,8 +3409,7 @@ get_elf_section_flags (sh_flags)
 }
 
 static int
-process_section_headers (file)
-     FILE *file;
+process_section_headers (FILE *file)
 {
   Elf_Internal_Shdr *section;
   unsigned int i;
@@ -3764,8 +3441,8 @@ process_section_headers (file)
 
   if (section->sh_size != 0)
     {
-      string_table = (char *) get_data (NULL, file, section->sh_offset,
-					section->sh_size, _("string table"));
+      string_table = get_data (NULL, file, section->sh_offset,
+			       section->sh_size, _("string table"));
 
       if (string_table == NULL)
 	return 0;
@@ -3806,9 +3483,8 @@ process_section_headers (file)
 	      continue;
 	    }
 
-	  dynamic_strings = (char *) get_data (NULL, file, section->sh_offset,
-					       section->sh_size,
-					       _("dynamic strings"));
+	  dynamic_strings = get_data (NULL, file, section->sh_offset,
+				      section->sh_size, _("dynamic strings"));
 	}
       else if (section->sh_type == SHT_SYMTAB_SHNDX)
 	{
@@ -3983,8 +3659,7 @@ struct
 
 /* Process the reloc section.  */
 static int
-process_relocs (file)
-     FILE *file;
+process_relocs (FILE *file)
 {
   unsigned long rel_size;
   unsigned long rel_offset;
@@ -4093,9 +3768,8 @@ process_relocs (file)
 
 		  strsec = SECTION_HEADER (symsec->sh_link);
 
-		  strtab = (char *) get_data (NULL, file, strsec->sh_offset,
-					      strsec->sh_size,
-					      _("string table"));
+		  strtab = get_data (NULL, file, strsec->sh_offset,
+				     strsec->sh_size, _("string table"));
 		}
 	      is_rela = section->sh_type == SHT_RELA;
 
@@ -4150,21 +3824,13 @@ struct unw_aux_info
     unsigned long strtab_size;	/* Size of string table.  */
   };
 
-static void find_symbol_for_address
-  PARAMS ((struct unw_aux_info *, struct absaddr, const char **, bfd_vma *));
-static void dump_ia64_unwind
-  PARAMS ((struct unw_aux_info *));
-static int slurp_ia64_unwind_table
-  PARAMS ((FILE *, struct unw_aux_info *, Elf_Internal_Shdr *));
-
 static void
-find_symbol_for_address (aux, addr, symname, offset)
-     struct unw_aux_info *aux;
-     struct absaddr addr;
-     const char **symname;
-     bfd_vma *offset;
+find_symbol_for_address (struct unw_aux_info *aux,
+			 struct absaddr addr,
+			 const char **symname,
+			 bfd_vma *offset)
 {
-  bfd_vma dist = (bfd_vma) 0x100000;
+  bfd_vma dist = 0x100000;
   Elf_Internal_Sym *sym, *best = NULL;
   unsigned long i;
 
@@ -4194,8 +3860,7 @@ find_symbol_for_address (aux, addr, symname, offset)
 }
 
 static void
-dump_ia64_unwind (aux)
-     struct unw_aux_info *aux;
+dump_ia64_unwind (struct unw_aux_info *aux)
 {
   bfd_vma addr_size;
   struct unw_table_entry *tp;
@@ -4253,10 +3918,9 @@ dump_ia64_unwind (aux)
 }
 
 static int
-slurp_ia64_unwind_table (file, aux, sec)
-     FILE *file;
-     struct unw_aux_info *aux;
-     Elf_Internal_Shdr *sec;
+slurp_ia64_unwind_table (FILE *file,
+			 struct unw_aux_info *aux,
+			 Elf_Internal_Shdr *sec)
 {
   unsigned long size, addr_size, nrelas, i;
   Elf_Internal_Phdr *seg;
@@ -4295,8 +3959,7 @@ slurp_ia64_unwind_table (file, aux, sec)
 
   /* Second, build the unwind table from the contents of the unwind section:  */
   size = sec->sh_size;
-  table = (char *) get_data (NULL, file, sec->sh_offset,
-			     size, _("unwind table"));
+  table = get_data (NULL, file, sec->sh_offset, size, _("unwind table"));
   if (!table)
     return 0;
 
@@ -4400,8 +4063,7 @@ slurp_ia64_unwind_table (file, aux, sec)
 }
 
 static int
-process_unwind (file)
-     FILE *file;
+process_unwind (FILE *file)
 {
   Elf_Internal_Shdr *sec, *unwsec = NULL, *strsec;
   unsigned long i, addr_size, unwcount = 0, unwstart = 0;
@@ -4429,8 +4091,8 @@ process_unwind (file)
 
 	  strsec = SECTION_HEADER (sec->sh_link);
 	  aux.strtab_size = strsec->sh_size;
-	  aux.strtab = (char *) get_data (NULL, file, strsec->sh_offset,
-					  aux.strtab_size, _("string table"));
+	  aux.strtab = get_data (NULL, file, strsec->sh_offset,
+				 aux.strtab_size, _("string table"));
 	}
       else if (sec->sh_type == SHT_IA_64_UNWIND)
 	unwcount++;
@@ -4499,8 +4161,8 @@ process_unwind (file)
 	{
 	  aux.info_size = sec->sh_size;
 	  aux.info_addr = sec->sh_addr;
-	  aux.info = (char *) get_data (NULL, file, sec->sh_offset,
-					aux.info_size, _("unwind info"));
+	  aux.info = get_data (NULL, file, sec->sh_offset, aux.info_size,
+			       _("unwind info"));
 
 	  printf (_("\nUnwind section "));
 
@@ -4536,8 +4198,7 @@ process_unwind (file)
 }
 
 static void
-dynamic_segment_mips_val (entry)
-     Elf_Internal_Dyn *entry;
+dynamic_segment_mips_val (Elf_Internal_Dyn *entry)
 {
   switch (entry->d_tag)
     {
@@ -4611,8 +4272,7 @@ dynamic_segment_mips_val (entry)
 
 
 static void
-dynamic_segment_parisc_val (entry)
-     Elf_Internal_Dyn *entry;
+dynamic_segment_parisc_val (Elf_Internal_Dyn *entry)
 {
   switch (entry->d_tag)
     {
@@ -4668,8 +4328,7 @@ dynamic_segment_parisc_val (entry)
 }
 
 static void
-dynamic_segment_ia64_val (entry)
-     Elf_Internal_Dyn *entry;
+dynamic_segment_ia64_val (Elf_Internal_Dyn *entry)
 {
   switch (entry->d_tag)
     {
@@ -4688,15 +4347,14 @@ dynamic_segment_ia64_val (entry)
 }
 
 static int
-get_32bit_dynamic_segment (file)
-     FILE *file;
+get_32bit_dynamic_segment (FILE *file)
 {
   Elf32_External_Dyn *edyn;
   Elf_Internal_Dyn *entry;
   bfd_size_type i;
 
-  edyn = (Elf32_External_Dyn *) get_data (NULL, file, dynamic_addr,
-					  dynamic_size, _("dynamic segment"));
+  edyn = get_data (NULL, file, dynamic_addr, dynamic_size,
+		   _("dynamic segment"));
   if (!edyn)
     return 0;
 
@@ -4707,8 +4365,7 @@ get_32bit_dynamic_segment (file)
   while (*(Elf32_Word *) edyn[dynamic_size++].d_tag != DT_NULL)
     ;
 
-  dynamic_segment = (Elf_Internal_Dyn *)
-    malloc (dynamic_size * sizeof (Elf_Internal_Dyn));
+  dynamic_segment = malloc (dynamic_size * sizeof (Elf_Internal_Dyn));
 
   if (dynamic_segment == NULL)
     {
@@ -4731,15 +4388,14 @@ get_32bit_dynamic_segment (file)
 }
 
 static int
-get_64bit_dynamic_segment (file)
-     FILE *file;
+get_64bit_dynamic_segment (FILE *file)
 {
   Elf64_External_Dyn *edyn;
   Elf_Internal_Dyn *entry;
   bfd_size_type i;
 
-  edyn = (Elf64_External_Dyn *) get_data (NULL, file, dynamic_addr,
-					  dynamic_size, _("dynamic segment"));
+  edyn = get_data (NULL, file, dynamic_addr, dynamic_size,
+		   _("dynamic segment"));
   if (!edyn)
     return 0;
 
@@ -4750,8 +4406,7 @@ get_64bit_dynamic_segment (file)
   while (*(bfd_vma *) edyn[dynamic_size++].d_tag != DT_NULL)
     ;
 
-  dynamic_segment = (Elf_Internal_Dyn *)
-    malloc (dynamic_size * sizeof (Elf_Internal_Dyn));
+  dynamic_segment = malloc (dynamic_size * sizeof (Elf_Internal_Dyn));
 
   if (dynamic_segment == NULL)
     {
@@ -4774,8 +4429,7 @@ get_64bit_dynamic_segment (file)
 }
 
 static const char *
-get_dynamic_flags (flags)
-     bfd_vma flags;
+get_dynamic_flags (bfd_vma flags)
 {
   static char buff[128];
   char *p = buff;
@@ -4808,8 +4462,7 @@ get_dynamic_flags (flags)
 
 /* Parse and display the contents of the dynamic segment.  */
 static int
-process_dynamic_segment (file)
-     FILE *file;
+process_dynamic_segment (FILE *file)
 {
   Elf_Internal_Dyn *entry;
   bfd_size_type i;
@@ -4902,8 +4555,8 @@ process_dynamic_segment (file)
 	      continue;
 	    }
 
-	  dynamic_strings = (char *) get_data (NULL, file, offset, str_tab_len,
-					       _("dynamic string table"));
+	  dynamic_strings = get_data (NULL, file, offset, str_tab_len,
+				      _("dynamic string table"));
 	  break;
 	}
     }
@@ -4936,13 +4589,12 @@ process_dynamic_segment (file)
 	  Elf_Internal_Syminfo *syminfo;
 
 	  /* There is a syminfo section.  Read the data.  */
-	  extsyminfo = ((Elf_External_Syminfo *)
-			get_data (NULL, file, dynamic_syminfo_offset,
-				  syminsz, _("symbol information")));
+	  extsyminfo = get_data (NULL, file, dynamic_syminfo_offset, syminsz,
+				 _("symbol information"));
 	  if (!extsyminfo)
 	    return 0;
 
-	  dynamic_syminfo = (Elf_Internal_Syminfo *) malloc (syminsz);
+	  dynamic_syminfo = malloc (syminsz);
 	  if (dynamic_syminfo == NULL)
 	    {
 	      error (_("Out of memory\n"));
@@ -5355,8 +5007,7 @@ process_dynamic_segment (file)
 }
 
 static char *
-get_ver_flags (flags)
-     unsigned int flags;
+get_ver_flags (unsigned int flags)
 {
   static char buff[32];
 
@@ -5384,8 +5035,7 @@ get_ver_flags (flags)
 
 /* Display the contents of the version sections.  */
 static int
-process_version_sections (file)
-     FILE *file;
+process_version_sections (FILE *file)
 {
   Elf_Internal_Shdr *section;
   unsigned i;
@@ -5418,10 +5068,8 @@ process_version_sections (file)
 		    (unsigned long) section->sh_offset, section->sh_link,
 		    SECTION_NAME (SECTION_HEADER (section->sh_link)));
 
-	    edefs = ((Elf_External_Verdef *)
-		     get_data (NULL, file, section->sh_offset,
-			       section->sh_size,
-			       _("version definition section")));
+	    edefs = get_data (NULL, file, section->sh_offset, section->sh_size,
+			      _("version definition section"));
 	    if (!edefs)
 	      break;
 
@@ -5509,9 +5157,8 @@ process_version_sections (file)
 		    (unsigned long) section->sh_offset, section->sh_link,
 		    SECTION_NAME (SECTION_HEADER (section->sh_link)));
 
-	    eneed = ((Elf_External_Verneed *)
-		     get_data (NULL, file, section->sh_offset,
-			       section->sh_size, _("version need section")));
+	    eneed = get_data (NULL, file, section->sh_offset, section->sh_size,
+			      _("version need section"));
 	    if (!eneed)
 	      break;
 
@@ -5588,6 +5235,7 @@ process_version_sections (file)
 	    char *strtab;
 	    Elf_Internal_Sym *symbols;
 	    Elf_Internal_Shdr *string_sec;
+	    long off;
 
 	    link_section = SECTION_HEADER (section->sh_link);
 	    total = section->sh_size / section->sh_entsize;
@@ -5598,9 +5246,8 @@ process_version_sections (file)
 
 	    string_sec = SECTION_HEADER (link_section->sh_link);
 
-	    strtab = (char *) get_data (NULL, file, string_sec->sh_offset,
-					string_sec->sh_size,
-					_("version string table"));
+	    strtab = get_data (NULL, file, string_sec->sh_offset,
+			       string_sec->sh_size, _("version string table"));
 	    if (!strtab)
 	      break;
 
@@ -5613,20 +5260,18 @@ process_version_sections (file)
 		    (unsigned long) section->sh_offset, section->sh_link,
 		    SECTION_NAME (link_section));
 
-	    edata =
-	      ((unsigned char *)
-	       get_data (NULL, file,
-			 offset_from_vma
-			 (file, version_info[DT_VERSIONTAGIDX (DT_VERSYM)],
-			  total * sizeof (short)),
-			 total * sizeof (short), _("version symbol data")));
+	    off = offset_from_vma (file,
+				   version_info[DT_VERSIONTAGIDX (DT_VERSYM)],
+				   total * sizeof (short));
+	    edata = get_data (NULL, file, off, total * sizeof (short),
+			      _("version symbol data"));
 	    if (!edata)
 	      {
 		free (strtab);
 		break;
 	      }
 
-	    data = (unsigned short *) malloc (total * sizeof (short));
+	    data = malloc (total * sizeof (short));
 
 	    for (cnt = total; cnt --;)
 	      data[cnt] = byte_get (edata + cnt * sizeof (short),
@@ -5794,8 +5439,7 @@ process_version_sections (file)
 }
 
 static const char *
-get_symbol_binding (binding)
-     unsigned int binding;
+get_symbol_binding (unsigned int binding)
 {
   static char buff[32];
 
@@ -5816,8 +5460,7 @@ get_symbol_binding (binding)
 }
 
 static const char *
-get_symbol_type (type)
-     unsigned int type;
+get_symbol_type (unsigned int type)
 {
   static char buff[32];
 
@@ -5863,8 +5506,7 @@ get_symbol_type (type)
 }
 
 static const char *
-get_symbol_visibility (visibility)
-     unsigned int visibility;
+get_symbol_visibility (unsigned int visibility)
 {
   switch (visibility)
     {
@@ -5877,8 +5519,7 @@ get_symbol_visibility (visibility)
 }
 
 static const char *
-get_symbol_index_type (type)
-     unsigned int type;
+get_symbol_index_type (unsigned int type)
 {
   static char buff[32];
 
@@ -5903,14 +5544,12 @@ get_symbol_index_type (type)
 }
 
 static int *
-get_dynamic_data (file, number)
-     FILE *file;
-     unsigned int number;
+get_dynamic_data (FILE *file, unsigned int number)
 {
   unsigned char *e_data;
   int *i_data;
 
-  e_data = (unsigned char *) malloc (number * 4);
+  e_data = malloc (number * 4);
 
   if (e_data == NULL)
     {
@@ -5924,7 +5563,7 @@ get_dynamic_data (file, number)
       return NULL;
     }
 
-  i_data = (int *) malloc (number * sizeof (*i_data));
+  i_data = malloc (number * sizeof (*i_data));
 
   if (i_data == NULL)
     {
@@ -5943,8 +5582,7 @@ get_dynamic_data (file, number)
 
 /* Dump the symbol table.  */
 static int
-process_symbol_table (file)
-     FILE *file;
+process_symbol_table (FILE *file)
 {
   Elf_Internal_Shdr *section;
   unsigned char nb[4];
@@ -6065,9 +5703,8 @@ process_symbol_table (file)
 
 	      string_sec = SECTION_HEADER (section->sh_link);
 
-	      strtab = (char *) get_data (NULL, file, string_sec->sh_offset,
-					  string_sec->sh_size,
-					  _("string table"));
+	      strtab = get_data (NULL, file, string_sec->sh_offset,
+				 string_sec->sh_size, _("string table"));
 	    }
 
 	  for (si = 0, psym = symtab;
@@ -6243,7 +5880,7 @@ process_symbol_table (file)
 	      nbuckets);
       printf (_(" Length  Number     %% of total  Coverage\n"));
 
-      lengths = (int *) calloc (nbuckets, sizeof (int));
+      lengths = calloc (nbuckets, sizeof (int));
       if (lengths == NULL)
 	{
 	  error (_("Out of memory"));
@@ -6262,7 +5899,7 @@ process_symbol_table (file)
 	    }
 	}
 
-      counts = (int *) calloc (maxlength + 1, sizeof (int));
+      counts = calloc (maxlength + 1, sizeof (int));
       if (counts == NULL)
 	{
 	  error (_("Out of memory"));
@@ -6299,8 +5936,7 @@ process_symbol_table (file)
 }
 
 static int
-process_syminfo (file)
-     FILE *file ATTRIBUTE_UNUSED;
+process_syminfo (FILE *file ATTRIBUTE_UNUSED)
 {
   unsigned int i;
 
@@ -6366,9 +6002,7 @@ process_syminfo (file)
 
 #ifdef SUPPORT_DISASSEMBLY
 static void
-disassemble_section (section, file)
-     Elf_Internal_Shdr *section;
-     FILE *file;
+disassemble_section (Elf_Internal_Shdr *section, FILE *file)
 {
   printf (_("\nAssembly dump of section %s\n"),
 	  SECTION_NAME (section));
@@ -6380,9 +6014,7 @@ disassemble_section (section, file)
 #endif
 
 static int
-dump_section (section, file)
-     Elf_Internal_Shdr *section;
-     FILE *file;
+dump_section (Elf_Internal_Shdr *section, FILE *file)
 {
   bfd_size_type bytes;
   bfd_vma addr;
@@ -6402,8 +6034,7 @@ dump_section (section, file)
 
   addr = section->sh_addr;
 
-  start = (unsigned char *) get_data (NULL, file, section->sh_offset, bytes,
-				      _("section data"));
+  start = get_data (NULL, file, section->sh_offset, bytes, _("section data"));
   if (!start)
     return 0;
 
@@ -6472,10 +6103,7 @@ dump_section (section, file)
 
 
 static unsigned long int
-read_leb128 (data, length_return, sign)
-     unsigned char *data;
-     int *length_return;
-     int sign;
+read_leb128 (unsigned char *data, int *length_return, int sign)
 {
   unsigned long int result = 0;
   unsigned int num_read = 0;
@@ -6520,8 +6148,7 @@ typedef struct State_Machine_Registers
 static SMR state_machine_regs;
 
 static void
-reset_state_machine (is_stmt)
-     int is_stmt;
+reset_state_machine (int is_stmt)
 {
   state_machine_regs.address = 0;
   state_machine_regs.file = 1;
@@ -6536,10 +6163,7 @@ reset_state_machine (is_stmt)
 /* Handled an extend line op.  Returns true if this is the end
    of sequence.  */
 static int
-process_extended_line_op (data, is_stmt, pointer_size)
-     unsigned char *data;
-     int is_stmt;
-     int pointer_size;
+process_extended_line_op (unsigned char *data, int is_stmt, int pointer_size)
 {
   unsigned char op_code;
   int bytes_read;
@@ -6603,10 +6227,9 @@ process_extended_line_op (data, is_stmt, pointer_size)
 static int debug_line_pointer_size = 4;
 
 static int
-display_debug_lines (section, start, file)
-     Elf_Internal_Shdr *section;
-     unsigned char * start;
-     FILE *file ATTRIBUTE_UNUSED;
+display_debug_lines (Elf_Internal_Shdr *section,
+		     unsigned char * start,
+		     FILE *file ATTRIBUTE_UNUSED)
 {
   unsigned char *hdrptr;
   DWARF2_Internal_LineInfo info;
@@ -6878,10 +6501,9 @@ display_debug_lines (section, start, file)
 }
 
 static int
-display_debug_pubnames (section, start, file)
-     Elf_Internal_Shdr *section;
-     unsigned char *start;
-     FILE *file ATTRIBUTE_UNUSED;
+display_debug_pubnames (Elf_Internal_Shdr *section,
+			unsigned char *start,
+			FILE *file ATTRIBUTE_UNUSED)
 {
   DWARF2_Internal_PubNames pubnames;
   unsigned char *end;
@@ -6965,8 +6587,7 @@ display_debug_pubnames (section, start, file)
 }
 
 static char *
-get_TAG_name (tag)
-     unsigned long tag;
+get_TAG_name (unsigned long tag)
 {
   switch (tag)
     {
@@ -7046,8 +6667,7 @@ get_TAG_name (tag)
 }
 
 static char *
-get_AT_name (attribute)
-     unsigned long attribute;
+get_AT_name (unsigned long attribute)
 {
   switch (attribute)
     {
@@ -7160,8 +6780,7 @@ get_AT_name (attribute)
 }
 
 static char *
-get_FORM_name (form)
-     unsigned long form;
+get_FORM_name (unsigned long form)
 {
   switch (form)
     {
@@ -7222,7 +6841,7 @@ static abbrev_entry *first_abbrev = NULL;
 static abbrev_entry *last_abbrev = NULL;
 
 static void
-free_abbrevs ()
+free_abbrevs (void)
 {
   abbrev_entry *abbrev;
 
@@ -7247,14 +6866,11 @@ free_abbrevs ()
 }
 
 static void
-add_abbrev (number, tag, children)
-     unsigned long number;
-     unsigned long tag;
-     int children;
+add_abbrev (unsigned long number, unsigned long tag, int children)
 {
   abbrev_entry *entry;
 
-  entry = (abbrev_entry *) malloc (sizeof (*entry));
+  entry = malloc (sizeof (*entry));
 
   if (entry == NULL)
     /* ugg */
@@ -7276,13 +6892,11 @@ add_abbrev (number, tag, children)
 }
 
 static void
-add_abbrev_attr (attribute, form)
-     unsigned long attribute;
-     unsigned long form;
+add_abbrev_attr (unsigned long attribute, unsigned long form)
 {
   abbrev_attr *attr;
 
-  attr = (abbrev_attr *) malloc (sizeof (*attr));
+  attr = malloc (sizeof (*attr));
 
   if (attr == NULL)
     /* ugg */
@@ -7306,9 +6920,7 @@ add_abbrev_attr (attribute, form)
    an abbreviation set was found.  */
 
 static unsigned char *
-process_abbrev_section (start, end)
-     unsigned char *start;
-     unsigned char *end;
+process_abbrev_section (unsigned char *start, unsigned char *end)
 {
   if (first_abbrev != NULL)
     return NULL;
@@ -7358,10 +6970,9 @@ process_abbrev_section (start, end)
 
 
 static int
-display_debug_macinfo (section, start, file)
-     Elf_Internal_Shdr *section;
-     unsigned char *start;
-     FILE *file ATTRIBUTE_UNUSED;
+display_debug_macinfo (Elf_Internal_Shdr *section,
+		       unsigned char *start,
+		       FILE *file ATTRIBUTE_UNUSED)
 {
   unsigned char *end = start + section->sh_size;
   unsigned char *curr = start;
@@ -7432,10 +7043,9 @@ display_debug_macinfo (section, start, file)
 
 
 static int
-display_debug_abbrev (section, start, file)
-     Elf_Internal_Shdr *section;
-     unsigned char *start;
-     FILE *file ATTRIBUTE_UNUSED;
+display_debug_abbrev (Elf_Internal_Shdr *section,
+		      unsigned char *start,
+		      FILE *file ATTRIBUTE_UNUSED)
 {
   abbrev_entry *entry;
   unsigned char *end = start + section->sh_size;
@@ -7479,9 +7089,7 @@ display_debug_abbrev (section, start, file)
 
 
 static unsigned char *
-display_block (data, length)
-     unsigned char *data;
-     unsigned long length;
+display_block (unsigned char *data, unsigned long length)
 {
   printf (_(" %lu byte block: "), length);
 
@@ -7492,10 +7100,9 @@ display_block (data, length)
 }
 
 static void
-decode_location_expression (data, pointer_size, length)
-     unsigned char * data;
-     unsigned int pointer_size;
-     unsigned long length;
+decode_location_expression (unsigned char * data,
+			    unsigned int pointer_size,
+			    unsigned long length)
 {
   unsigned op;
   int bytes_read;
@@ -7828,8 +7435,7 @@ static const char *debug_loc_contents;
 static bfd_vma debug_loc_size;
 
 static void
-load_debug_loc (file)
-     FILE *file;
+load_debug_loc (FILE *file)
 {
   Elf_Internal_Shdr *sec;
   unsigned int i;
@@ -7850,13 +7456,12 @@ load_debug_loc (file)
 
   debug_loc_size = sec->sh_size;
 
-  debug_loc_contents = ((char *)
-			get_data (NULL, file, sec->sh_offset, sec->sh_size,
-				  _("debug_loc section data")));
+  debug_loc_contents = get_data (NULL, file, sec->sh_offset, sec->sh_size,
+				 _("debug_loc section data"));
 }
 
 static void
-free_debug_loc ()
+free_debug_loc (void)
 {
   if (debug_loc_contents == NULL)
     return;
@@ -7868,10 +7473,9 @@ free_debug_loc ()
 
 
 static int
-display_debug_loc (section, start, file)
-     Elf_Internal_Shdr *section;
-     unsigned char *start;
-     FILE *file ATTRIBUTE_UNUSED;
+display_debug_loc (Elf_Internal_Shdr *section,
+		   unsigned char *start,
+		   FILE *file ATTRIBUTE_UNUSED)
 {
   unsigned char *section_end;
   unsigned long bytes;
@@ -7941,8 +7545,7 @@ static const char *debug_str_contents;
 static bfd_vma debug_str_size;
 
 static void
-load_debug_str (file)
-     FILE *file;
+load_debug_str (FILE *file)
 {
   Elf_Internal_Shdr *sec;
   unsigned int i;
@@ -7963,13 +7566,12 @@ load_debug_str (file)
 
   debug_str_size = sec->sh_size;
 
-  debug_str_contents = ((char *)
-			get_data (NULL, file, sec->sh_offset, sec->sh_size,
-				  _("debug_str section data")));
+  debug_str_contents = get_data (NULL, file, sec->sh_offset, sec->sh_size,
+				 _("debug_str section data"));
 }
 
 static void
-free_debug_str ()
+free_debug_str (void)
 {
   if (debug_str_contents == NULL)
     return;
@@ -7980,8 +7582,7 @@ free_debug_str ()
 }
 
 static const char *
-fetch_indirect_string (offset)
-     unsigned long offset;
+fetch_indirect_string (unsigned long offset)
 {
   if (debug_str_contents == NULL)
     return _("<no .debug_str section>");
@@ -7993,10 +7594,9 @@ fetch_indirect_string (offset)
 }
 
 static int
-display_debug_str (section, start, file)
-     Elf_Internal_Shdr *section;
-     unsigned char *start;
-     FILE *file ATTRIBUTE_UNUSED;
+display_debug_str (Elf_Internal_Shdr *section,
+		   unsigned char *start,
+		   FILE *file ATTRIBUTE_UNUSED)
 {
   unsigned long bytes;
   bfd_vma addr;
@@ -8053,15 +7653,13 @@ display_debug_str (section, start, file)
 }
 
 static unsigned char *
-read_and_display_attr_value (attribute, form, data, cu_offset, pointer_size,
-                             offset_size, dwarf_version)
-     unsigned long attribute;
-     unsigned long form;
-     unsigned char *data;
-     unsigned long cu_offset;
-     unsigned long pointer_size;
-     unsigned long offset_size;
-     int dwarf_version;
+read_and_display_attr_value (unsigned long attribute,
+			     unsigned long form,
+			     unsigned char *data,
+			     unsigned long cu_offset,
+			     unsigned long pointer_size,
+			     unsigned long offset_size,
+			     int dwarf_version)
 {
   unsigned long uvalue = 0;
   unsigned char *block_start = NULL;
@@ -8390,15 +7988,13 @@ read_and_display_attr_value (attribute, form, data, cu_offset, pointer_size,
 }
 
 static unsigned char *
-read_and_display_attr (attribute, form, data, cu_offset, pointer_size,
-                       offset_size, dwarf_version)
-     unsigned long attribute;
-     unsigned long form;
-     unsigned char *data;
-     unsigned long cu_offset;
-     unsigned long pointer_size;
-     unsigned long offset_size;
-     int dwarf_version;
+read_and_display_attr (unsigned long attribute,
+		       unsigned long form,
+		       unsigned char *data,
+		       unsigned long cu_offset,
+		       unsigned long pointer_size,
+		       unsigned long offset_size,
+		       int dwarf_version)
 {
   printf ("     %-18s:", get_AT_name (attribute));
   data = read_and_display_attr_value (attribute, form, data, cu_offset,
@@ -8408,10 +8004,9 @@ read_and_display_attr (attribute, form, data, cu_offset, pointer_size,
 }
 
 static int
-display_debug_info (section, start, file)
-     Elf_Internal_Shdr *section;
-     unsigned char *start;
-     FILE *file;
+display_debug_info (Elf_Internal_Shdr *section,
+		    unsigned char *start,
+		    FILE *file)
 {
   unsigned char *end = start + section->sh_size;
   unsigned char *section_begin = start;
@@ -8564,9 +8159,8 @@ display_debug_info (section, start, file)
 	    return 0;
 	  }
 
-	begin = ((unsigned char *)
-		 get_data (NULL, file, sec->sh_offset, sec->sh_size,
-			   _("debug_abbrev section data")));
+	begin = get_data (NULL, file, sec->sh_offset, sec->sh_size,
+			  _("debug_abbrev section data"));
 	if (!begin)
 	  return 0;
 
@@ -8636,10 +8230,9 @@ display_debug_info (section, start, file)
 }
 
 static int
-display_debug_aranges (section, start, file)
-     Elf_Internal_Shdr *section;
-     unsigned char *start;
-     FILE *file ATTRIBUTE_UNUSED;
+display_debug_aranges (Elf_Internal_Shdr *section,
+		       unsigned char *start,
+		       FILE *file ATTRIBUTE_UNUSED)
 {
   unsigned char *end = start + section->sh_size;
 
@@ -8757,15 +8350,8 @@ Frame_Chunk;
    in the frame info.  */
 #define DW_CFA_unreferenced (-1)
 
-static void frame_need_space PARAMS ((Frame_Chunk *, int));
-static void frame_display_row PARAMS ((Frame_Chunk *, int *, int *));
-static int size_of_encoded_value PARAMS ((int));
-static bfd_vma get_encoded_value PARAMS ((unsigned char *, int));
-
 static void
-frame_need_space (fc, reg)
-     Frame_Chunk *fc;
-     int reg;
+frame_need_space (Frame_Chunk *fc, int reg)
 {
   int prev = fc->ncols;
 
@@ -8773,10 +8359,8 @@ frame_need_space (fc, reg)
     return;
 
   fc->ncols = reg + 1;
-  fc->col_type = (short int *) xrealloc (fc->col_type,
-					 fc->ncols * sizeof (short int));
-  fc->col_offset = (int *) xrealloc (fc->col_offset,
-				     fc->ncols * sizeof (int));
+  fc->col_type = xrealloc (fc->col_type, fc->ncols * sizeof (short int));
+  fc->col_offset = xrealloc (fc->col_offset, fc->ncols * sizeof (int));
 
   while (prev < fc->ncols)
     {
@@ -8787,10 +8371,7 @@ frame_need_space (fc, reg)
 }
 
 static void
-frame_display_row (fc, need_col_headers, max_regs)
-     Frame_Chunk *fc;
-     int *need_col_headers;
-     int *max_regs;
+frame_display_row (Frame_Chunk *fc, int *need_col_headers, int *max_regs)
 {
   int r;
   char tmp[100];
@@ -8855,8 +8436,7 @@ frame_display_row (fc, need_col_headers, max_regs)
 }
 
 static int
-size_of_encoded_value (encoding)
-     int encoding;
+size_of_encoded_value (int encoding)
 {
   switch (encoding & 0x7)
     {
@@ -8869,9 +8449,7 @@ size_of_encoded_value (encoding)
 }
 
 static bfd_vma
-get_encoded_value (data, encoding)
-     unsigned char *data;
-     int encoding;
+get_encoded_value (unsigned char *data, int encoding)
 {
   int size = size_of_encoded_value (encoding);
   if (encoding & DW_EH_PE_signed)
@@ -8885,10 +8463,9 @@ get_encoded_value (data, encoding)
 #define SLEB()	read_leb128 (start, & length_return, 1); start += length_return
 
 static int
-display_debug_frames (section, start, file)
-     Elf_Internal_Shdr *section;
-     unsigned char *start;
-     FILE *file ATTRIBUTE_UNUSED;
+display_debug_frames (Elf_Internal_Shdr *section,
+		      unsigned char *start,
+		      FILE *file ATTRIBUTE_UNUSED)
 {
   unsigned char *end = start + section->sh_size;
   unsigned char *section_start = start;
@@ -8947,15 +8524,15 @@ display_debug_frames (section, start, file)
 	{
 	  int version;
 
-	  fc = (Frame_Chunk *) xmalloc (sizeof (Frame_Chunk));
+	  fc = xmalloc (sizeof (Frame_Chunk));
 	  memset (fc, 0, sizeof (Frame_Chunk));
 
 	  fc->next = chunks;
 	  chunks = fc;
 	  fc->chunk_start = saved_start;
 	  fc->ncols = 0;
-	  fc->col_type = (short int *) xmalloc (sizeof (short int));
-	  fc->col_offset = (int *) xmalloc (sizeof (int));
+	  fc->col_type = xmalloc (sizeof (short int));
+	  fc->col_offset = xmalloc (sizeof (int));
 	  frame_need_space (fc, max_regs-1);
 
 	  version = *start++;
@@ -9058,8 +8635,8 @@ display_debug_frames (section, start, file)
 		    cie_id, saved_start);
 	      start = block_end;
 	      fc->ncols = 0;
-	      fc->col_type = (short int *) xmalloc (sizeof (short int));
-	      fc->col_offset = (int *) xmalloc (sizeof (int));
+	      fc->col_type = xmalloc (sizeof (short int));
+	      fc->col_offset = xmalloc (sizeof (int));
 	      frame_need_space (fc, max_regs - 1);
 	      cie = fc;
 	      fc->augmentation = "";
@@ -9068,8 +8645,8 @@ display_debug_frames (section, start, file)
 	  else
 	    {
 	      fc->ncols = cie->ncols;
-	      fc->col_type = (short int *) xmalloc (fc->ncols * sizeof (short int));
-	      fc->col_offset = (int *) xmalloc (fc->ncols * sizeof (int));
+	      fc->col_type = xmalloc (fc->ncols * sizeof (short int));
+	      fc->col_offset = xmalloc (fc->ncols * sizeof (int));
 	      memcpy (fc->col_type, cie->col_type, fc->ncols * sizeof (short int));
 	      memcpy (fc->col_offset, cie->col_offset, fc->ncols * sizeof (int));
 	      fc->augmentation = cie->augmentation;
@@ -9374,10 +8951,10 @@ display_debug_frames (section, start, file)
 	    case DW_CFA_remember_state:
 	      if (! do_debug_frames_interp)
 		printf ("  DW_CFA_remember_state\n");
-	      rs = (Frame_Chunk *) xmalloc (sizeof (Frame_Chunk));
+	      rs = xmalloc (sizeof (Frame_Chunk));
 	      rs->ncols = fc->ncols;
-	      rs->col_type = (short int *) xmalloc (rs->ncols * sizeof (short int));
-	      rs->col_offset = (int *) xmalloc (rs->ncols * sizeof (int));
+	      rs->col_type = xmalloc (rs->ncols * sizeof (short int));
+	      rs->col_offset = xmalloc (rs->ncols * sizeof (int));
 	      memcpy (rs->col_type, fc->col_type, rs->ncols);
 	      memcpy (rs->col_offset, fc->col_offset, rs->ncols * sizeof (int));
 	      rs->next = remembered_state;
@@ -9530,10 +9107,9 @@ display_debug_frames (section, start, file)
 #undef SLEB
 
 static int
-display_debug_not_supported (section, start, file)
-     Elf_Internal_Shdr *section;
-     unsigned char *start ATTRIBUTE_UNUSED;
-     FILE *file ATTRIBUTE_UNUSED;
+display_debug_not_supported (Elf_Internal_Shdr *section,
+			     unsigned char *start ATTRIBUTE_UNUSED,
+			     FILE *file ATTRIBUTE_UNUSED)
 {
   printf (_("Displaying the debug contents of section %s is not yet supported.\n"),
 	    SECTION_NAME (section));
@@ -9545,10 +9121,9 @@ display_debug_not_supported (section, start, file)
    When dumping the .debug_line, we use that size information, assuming
    that all compilation units have the same address size.  */
 static int
-prescan_debug_info (section, start, file)
-     Elf_Internal_Shdr *section ATTRIBUTE_UNUSED;
-     unsigned char *start;
-     FILE *file ATTRIBUTE_UNUSED;
+prescan_debug_info (Elf_Internal_Shdr *section ATTRIBUTE_UNUSED,
+		    unsigned char *start,
+		    FILE *file ATTRIBUTE_UNUSED)
 {
   unsigned long length;
 
@@ -9595,8 +9170,8 @@ prescan_debug_info (section, start, file)
 struct
 {
   const char *const name;
-  int (*display) PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
-  int (*prescan) PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
+  int (*display) (Elf_Internal_Shdr *, unsigned char *, FILE *);
+  int (*prescan) (Elf_Internal_Shdr *, unsigned char *, FILE *);
 }
 debug_displays[] =
 {
@@ -9619,9 +9194,7 @@ debug_displays[] =
 };
 
 static int
-display_debug_section (section, file)
-     Elf_Internal_Shdr *section;
-     FILE *file;
+display_debug_section (Elf_Internal_Shdr *section, FILE *file)
 {
   char *name = SECTION_NAME (section);
   bfd_size_type length;
@@ -9635,8 +9208,8 @@ display_debug_section (section, file)
       return 0;
     }
 
-  start = (unsigned char *) get_data (NULL, file, section->sh_offset, length,
-				      _("debug section data"));
+  start = get_data (NULL, file, section->sh_offset, length,
+		    _("debug section data"));
   if (!start)
     return 0;
 
@@ -9664,8 +9237,7 @@ display_debug_section (section, file)
 }
 
 static int
-process_section_contents (file)
-     FILE *file;
+process_section_contents (FILE *file)
 {
   Elf_Internal_Shdr *section;
   unsigned int i;
@@ -9696,9 +9268,8 @@ process_section_contents (file)
 		unsigned char *start;
 
 		length = section->sh_size;
-		start = ((unsigned char *)
-			 get_data (NULL, file, section->sh_offset, length,
-				   _("debug section data")));
+		start = get_data (NULL, file, section->sh_offset, length,
+				  _("debug section data"));
 		if (!start)
 		  return 0;
 
@@ -9732,8 +9303,7 @@ process_section_contents (file)
 }
 
 static void
-process_mips_fpe_exception (mask)
-     int mask;
+process_mips_fpe_exception (int mask)
 {
   if (mask)
     {
@@ -9754,8 +9324,7 @@ process_mips_fpe_exception (mask)
 }
 
 static int
-process_mips_specific (file)
-     FILE *file;
+process_mips_specific (FILE *file)
 {
   Elf_Internal_Dyn *entry;
   size_t liblist_offset = 0;
@@ -9800,10 +9369,9 @@ process_mips_specific (file)
       Elf32_External_Lib *elib;
       size_t cnt;
 
-      elib = ((Elf32_External_Lib *)
-	      get_data (NULL, file, liblist_offset,
-			liblistno * sizeof (Elf32_External_Lib),
-			_("liblist")));
+      elib = get_data (NULL, file, liblist_offset,
+		       liblistno * sizeof (Elf32_External_Lib),
+		       _("liblist"));
       if (elib)
 	{
 	  printf ("\nSection '.liblist' contains %lu entries:\n",
@@ -9887,12 +9455,11 @@ process_mips_specific (file)
       while (sect->sh_type != SHT_MIPS_OPTIONS)
 	++sect;
 
-      eopt = (Elf_External_Options *) get_data (NULL, file, options_offset,
-						sect->sh_size, _("options"));
+      eopt = get_data (NULL, file, options_offset, sect->sh_size,
+		       _("options"));
       if (eopt)
 	{
-	  iopt = ((Elf_Internal_Options *)
-		  malloc ((sect->sh_size / sizeof (eopt)) * sizeof (*iopt)));
+	  iopt = malloc ((sect->sh_size / sizeof (eopt)) * sizeof (*iopt));
 	  if (iopt == NULL)
 	    {
 	      error (_("Out of memory"));
@@ -10084,7 +9651,7 @@ process_mips_specific (file)
 	  return 0;
 	}
 
-      iconf = (Elf32_Conflict *) malloc (conflictsno * sizeof (*iconf));
+      iconf = malloc (conflictsno * sizeof (*iconf));
       if (iconf == NULL)
 	{
 	  error (_("Out of memory"));
@@ -10095,10 +9662,8 @@ process_mips_specific (file)
 	{
 	  Elf32_External_Conflict *econf32;
 
-	  econf32 = ((Elf32_External_Conflict *)
-		     get_data (NULL, file, conflicts_offset,
-			       conflictsno * sizeof (*econf32),
-			       _("conflict")));
+	  econf32 = get_data (NULL, file, conflicts_offset,
+			      conflictsno * sizeof (*econf32), _("conflict"));
 	  if (!econf32)
 	    return 0;
 
@@ -10111,10 +9676,8 @@ process_mips_specific (file)
 	{
 	  Elf64_External_Conflict *econf64;
 
-	  econf64 = ((Elf64_External_Conflict *)
-		     get_data (NULL, file, conflicts_offset,
-			       conflictsno * sizeof (*econf64),
-			       _("conflict")));
+	  econf64 = get_data (NULL, file, conflicts_offset,
+			      conflictsno * sizeof (*econf64), _("conflict"));
 	  if (!econf64)
 	    return 0;
 
@@ -10146,8 +9709,7 @@ process_mips_specific (file)
 }
 
 static int
-process_gnu_liblist (file)
-     FILE *file;
+process_gnu_liblist (FILE *file)
 {
   Elf_Internal_Shdr *section, *string_sec;
   Elf32_External_Lib *elib;
@@ -10165,17 +9727,15 @@ process_gnu_liblist (file)
       switch (section->sh_type)
 	{
 	case SHT_GNU_LIBLIST:
-	  elib = ((Elf32_External_Lib *)
-		 get_data (NULL, file, section->sh_offset, section->sh_size,
-			   _("liblist")));
+	  elib = get_data (NULL, file, section->sh_offset, section->sh_size,
+			   _("liblist"));
 
 	  if (elib == NULL)
 	    break;
 	  string_sec = SECTION_HEADER (section->sh_link);
 
-	  strtab = (char *) get_data (NULL, file, string_sec->sh_offset,
-				      string_sec->sh_size,
-				      _("liblist string table"));
+	  strtab = get_data (NULL, file, string_sec->sh_offset,
+			     string_sec->sh_size, _("liblist string table"));
 
 	  if (strtab == NULL
 	      || section->sh_entsize != sizeof (Elf32_External_Lib))
@@ -10226,8 +9786,7 @@ process_gnu_liblist (file)
 }
 
 static const char *
-get_note_type (e_type)
-     unsigned e_type;
+get_note_type (unsigned e_type)
 {
   static char buff[64];
 
@@ -10251,8 +9810,7 @@ get_note_type (e_type)
 }
 
 static const char *
-get_netbsd_elfcore_note_type (e_type)
-     unsigned e_type;
+get_netbsd_elfcore_note_type (unsigned e_type)
 {
   static char buff[64];
 
@@ -10318,8 +9876,7 @@ get_netbsd_elfcore_note_type (e_type)
 
    If the value of namesz is zero, there is no name present.  */
 static int
-process_note (pnote)
-     Elf_Internal_Note *pnote;
+process_note (Elf_Internal_Note *pnote)
 {
   const char *nt;
 
@@ -10349,10 +9906,7 @@ process_note (pnote)
 
 
 static int
-process_corefile_note_segment (file, offset, length)
-     FILE *file;
-     bfd_vma offset;
-     bfd_vma length;
+process_corefile_note_segment (FILE *file, bfd_vma offset, bfd_vma length)
 {
   Elf_External_Note *pnotes;
   Elf_External_Note *external;
@@ -10361,8 +9915,7 @@ process_corefile_note_segment (file, offset, length)
   if (length <= 0)
     return 0;
 
-  pnotes = (Elf_External_Note *) get_data (NULL, file, offset, length,
-					   _("notes"));
+  pnotes = get_data (NULL, file, offset, length, _("notes"));
   if (!pnotes)
     return 0;
 
@@ -10435,8 +9988,7 @@ process_corefile_note_segment (file, offset, length)
 }
 
 static int
-process_corefile_note_segments (file)
-     FILE *file;
+process_corefile_note_segments (FILE *file)
 {
   Elf_Internal_Phdr *segment;
   unsigned int i;
@@ -10459,8 +10011,7 @@ process_corefile_note_segments (file)
 }
 
 static int
-process_corefile_contents (file)
-     FILE *file;
+process_corefile_contents (FILE *file)
 {
   /* If we have not been asked to display the notes then do nothing.  */
   if (! do_notes)
@@ -10481,8 +10032,7 @@ process_corefile_contents (file)
 }
 
 static int
-process_arch_specific (file)
-     FILE *file;
+process_arch_specific (FILE *file)
 {
   if (! do_arch)
     return 1;
@@ -10500,8 +10050,7 @@ process_arch_specific (file)
 }
 
 static int
-get_file_header (file)
-     FILE *file;
+get_file_header (FILE *file)
 {
   /* Read in the identity array.  */
   if (fread (elf_header.e_ident, EI_NIDENT, 1, file) != 1)
@@ -10594,8 +10143,7 @@ get_file_header (file)
 }
 
 static int
-process_file (file_name)
-     char *file_name;
+process_file (char *file_name)
 {
   FILE *file;
   struct stat statbuf;
@@ -10731,12 +10279,8 @@ db_task_printsym (unsigned int addr)
 }
 #endif
 
-int main PARAMS ((int, char **));
-
 int
-main (argc, argv)
-     int argc;
-     char **argv;
+main (int argc, char **argv)
 {
   int err;
   char *cmdline_dump_sects = NULL;

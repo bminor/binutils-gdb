@@ -1,3 +1,10 @@
+2003-08-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* objcopy.c: Remove unnecessary prototypes and casts.
+	* objdump.c: Remove unnecessary casts.
+	* readelf.c: Convert to C90.  Remove unnecessary prototypes and casts.
+	(get_osabi_name): Move so we don't need a forward declaration.
+
 2003-08-04  Bradley Harrington  <bharring@us.ibm.com>
 	    Alan Modra  <amodra@bigpond.net.au>
 

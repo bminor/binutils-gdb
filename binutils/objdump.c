@@ -90,10 +90,10 @@ struct objdump_disasm_info
 };
 
 /* Architecture to disassemble for, or default if NULL.  */
-static char *machine = (char *) NULL;
+static char *machine = NULL;
 
 /* Target specific options to the disassembler.  */
-static char *disassembler_options = (char *) NULL;
+static char *disassembler_options = NULL;
 
 /* Endianness to disassemble for, or default if BFD_ENDIAN_UNKNOWN.  */
 static enum bfd_endian endian = BFD_ENDIAN_UNKNOWN;
@@ -354,7 +354,7 @@ dump_headers (bfd *abfd)
 static asymbol **
 slurp_symtab (bfd *abfd)
 {
-  asymbol **sy = (asymbol **) NULL;
+  asymbol **sy = NULL;
   long storage;
 
   if (!(bfd_get_file_flags (abfd) & HAS_SYMS))
@@ -367,7 +367,7 @@ slurp_symtab (bfd *abfd)
   if (storage < 0)
     bfd_fatal (bfd_get_filename (abfd));
   if (storage)
-    sy = (asymbol **) xmalloc (storage);
+    sy = xmalloc (storage);
 
   symcount = bfd_canonicalize_symtab (abfd, sy);
   if (symcount < 0)
@@ -380,7 +380,7 @@ slurp_symtab (bfd *abfd)
 static asymbol **
 slurp_dynamic_symtab (bfd *abfd)
 {
-  asymbol **sy = (asymbol **) NULL;
+  asymbol **sy = NULL;
   long storage;
 
   storage = bfd_get_dynamic_symtab_upper_bound (abfd);
@@ -396,7 +396,7 @@ slurp_dynamic_symtab (bfd *abfd)
       bfd_fatal (bfd_get_filename (abfd));
     }
   if (storage)
-    sy = (asymbol **) xmalloc (storage);
+    sy = xmalloc (storage);
 
   dynsymcount = bfd_canonicalize_dynamic_symtab (abfd, sy);
   if (dynsymcount < 0)
@@ -801,7 +801,7 @@ objdump_print_addr (bfd_vma vma, struct disassemble_info *info,
 
   aux = (struct objdump_disasm_info *) info->application_data;
   sym = find_symbol_for_address (aux->abfd, aux->sec, vma, aux->require_sec,
-				 (long *) NULL);
+				 NULL);
   objdump_print_addr_with_sym (aux->abfd, aux->sec, sym, vma, info,
 			       skip_zeroes);
 }
@@ -829,7 +829,7 @@ objdump_symbol_at_address (bfd_vma vma, struct disassemble_info * info)
 
   aux = (struct objdump_disasm_info *) info->application_data;
   sym = find_symbol_for_address (aux->abfd, aux->sec, vma, aux->require_sec,
-				 (long *) NULL);
+				 NULL);
 
   return (sym != NULL && (bfd_asymbol_value (sym) == vma));
 }
@@ -1520,7 +1520,7 @@ disassemble_data (bfd *abfd)
 
   /* We make a copy of syms to sort.  We don't want to sort syms
      because that will screw up the relocs.  */
-  sorted_syms = (asymbol **) xmalloc (symcount * sizeof (asymbol *));
+  sorted_syms = xmalloc (symcount * sizeof (asymbol *));
   memcpy (sorted_syms, syms, symcount * sizeof (asymbol *));
 
   sorted_symcount = remove_useless_symbols (sorted_syms, symcount);
@@ -1536,7 +1536,7 @@ disassemble_data (bfd *abfd)
   disasm_info.print_address_func = objdump_print_address;
   disasm_info.symbol_at_address_func = objdump_symbol_at_address;
 
-  if (machine != (char *) NULL)
+  if (machine != NULL)
     {
       const bfd_arch_info_type *info = bfd_scan_arch (machine);
 
@@ -1550,7 +1550,7 @@ disassemble_data (bfd *abfd)
     {
       struct bfd_target *xvec;
 
-      xvec = (struct bfd_target *) xmalloc (sizeof (struct bfd_target));
+      xvec = xmalloc (sizeof (struct bfd_target));
       memcpy (xvec, abfd->xvec, sizeof (struct bfd_target));
       xvec->byteorder = endian;
       abfd->xvec = xvec;
@@ -1591,7 +1591,7 @@ disassemble_data (bfd *abfd)
 
       if (relsize > 0)
 	{
-	  dynrelbuf = (arelent **) xmalloc (relsize);
+	  dynrelbuf = xmalloc (relsize);
 	  relcount = bfd_canonicalize_dynamic_reloc (abfd, dynrelbuf, dynsyms);
 	  if (relcount < 0)
 	    bfd_fatal (bfd_get_filename (abfd));
@@ -1602,7 +1602,7 @@ disassemble_data (bfd *abfd)
     }
 
   for (section = abfd->sections;
-       section != (asection *) NULL;
+       section != NULL;
        section = section->next)
     {
       bfd_byte *data = NULL;
@@ -1649,7 +1649,7 @@ disassemble_data (bfd *abfd)
 
 	  if (relsize > 0)
 	    {
-	      relbuf = (arelent **) xmalloc (relsize);
+	      relbuf = xmalloc (relsize);
 	      relcount = bfd_canonicalize_reloc (abfd, section, relbuf, syms);
 	      if (relcount < 0)
 		bfd_fatal (bfd_get_filename (abfd));
@@ -1665,7 +1665,7 @@ disassemble_data (bfd *abfd)
 
       printf (_("Disassembly of section %s:\n"), section->name);
 
-      data = (bfd_byte *) xmalloc ((size_t) datasize);
+      data = xmalloc (datasize);
 
       bfd_get_section_contents (abfd, section, data, 0, datasize);
 
@@ -1866,10 +1866,10 @@ read_section_stabs (bfd *abfd, const char *stabsect_name,
   stab_size    = bfd_section_size (abfd, stabsect);
   stabstr_size = bfd_section_size (abfd, stabstrsect);
 
-  stabs  = (bfd_byte *) xmalloc (stab_size);
-  strtab = (char *) xmalloc (stabstr_size);
+  stabs  = xmalloc (stab_size);
+  strtab = xmalloc (stabstr_size);
 
-  if (! bfd_get_section_contents (abfd, stabsect, (void *) stabs, 0, stab_size))
+  if (! bfd_get_section_contents (abfd, stabsect, stabs, 0, stab_size))
     {
       non_fatal (_("Reading %s section of %s failed: %s"),
 		 stabsect_name, bfd_get_filename (abfd),
@@ -2173,7 +2173,7 @@ display_bfd (bfd *abfd)
 static void
 display_file (char *filename, char *target)
 {
-  bfd *file, *arfile = (bfd *) NULL;
+  bfd *file, *arfile = NULL;
 
   file = bfd_openr (filename, target);
   if (file == NULL)
@@ -2248,12 +2248,11 @@ dump_data (bfd *abfd)
 
 	      if (bfd_section_size (abfd, section) == 0)
 		continue;
-	      data = (bfd_byte *) xmalloc ((size_t) bfd_section_size
-					   (abfd, section));
+	      data = xmalloc (bfd_section_size (abfd, section));
 	      datasize = bfd_section_size (abfd, section);
 
 
-	      bfd_get_section_contents (abfd, section, (void *) data, 0,
+	      bfd_get_section_contents (abfd, section, data, 0,
 					bfd_section_size (abfd, section));
 
 	      if (start_address == (bfd_vma) -1
@@ -2411,7 +2410,7 @@ dump_relocs (bfd *abfd)
   long relcount;
   asection *a;
 
-  for (a = abfd->sections; a != (asection *) NULL; a = a->next)
+  for (a = abfd->sections; a != NULL; a = a->next)
     {
       long relsize;
 
@@ -2448,7 +2447,7 @@ dump_relocs (bfd *abfd)
 	}
       else
 	{
-	  relpp = (arelent **) xmalloc (relsize);
+	  relpp = xmalloc (relsize);
 	  relcount = bfd_canonicalize_reloc (abfd, a, relpp, syms);
 
 	  if (relcount < 0)
@@ -2483,7 +2482,7 @@ dump_dynamic_relocs (bfd *abfd)
     printf (" (none)\n\n");
   else
     {
-      relpp = (arelent **) xmalloc (relsize);
+      relpp = xmalloc (relsize);
       relcount = bfd_canonicalize_dynamic_reloc (abfd, relpp, dynsyms);
 
       if (relcount < 0)
@@ -2493,7 +2492,7 @@ dump_dynamic_relocs (bfd *abfd)
       else
 	{
 	  printf ("\n");
-	  dump_reloc_set (abfd, (asection *) NULL, relpp, relcount);
+	  dump_reloc_set (abfd, NULL, relpp, relcount);
 	  printf ("\n\n");
 	}
       free (relpp);
@@ -2524,7 +2523,7 @@ dump_reloc_set (bfd *abfd, asection *sec, arelent **relpp, long relcount)
   last_functionname = NULL;
   last_line = 0;
 
-  for (p = relpp; relcount && *p != (arelent *) NULL; p++, relcount--)
+  for (p = relpp; relcount && *p != NULL; p++, relcount--)
     {
       arelent *q = *p;
       const char *filename, *functionname;
@@ -2589,12 +2588,11 @@ dump_reloc_set (bfd *abfd, asection *sec, arelent **relpp, long relcount)
 	    printf (" %-16s  ", q->howto->name);
 	  else
 	    printf (" %-16d  ", q->howto->type);
-	  objdump_print_symname (abfd, (struct disassemble_info *) NULL,
-				 *q->sym_ptr_ptr);
+	  objdump_print_symname (abfd, NULL, *q->sym_ptr_ptr);
 	}
       else
 	{
-	  if (section_name == (const char *) NULL)
+	  if (section_name == NULL)
 	    section_name = "*unknown*";
 	  bfd_printf_vma (abfd, q->address);
 	  printf (" %-16s  [%s]",
