@@ -1,3 +1,10 @@
+Fri Sep 22 16:34:46 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/tc-ppc.c (ppc_elf_suffix): Rewrite to use a table of
+	strings and relocations they represent.  Add @br{,n}taken for
+	branch taken/not taken support.
+	(md_apply_fix3): Add BFD_RELOC_PPC_B16_BR{,N}TAKEN support.
+
 Thu Sep 21 21:10:17 1995  Michael Meissner  <meissner@cygnus.com>
 
 	* config/tc-ppc.c (md_parse_option): -mrelocatable-lib now only

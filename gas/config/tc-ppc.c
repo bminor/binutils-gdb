@@ -554,41 +554,46 @@ static bfd_reloc_code_real_type
 ppc_elf_suffix (str_p)
      char **str_p;
 {
-  char *str = *str_p;
+  struct map_bfd {
+    char *string;
+    int length;
+    bfd_reloc_code_real_type reloc;
+  };
 
-  if (*str != '@')
+  char *str = *str_p;
+  int ch;
+  struct map_bfd *ptr;
+
+  static struct map_bfd mapping[] = {
+    { "GOT",		3,	BFD_RELOC_PPC_TOC16 },
+    { "got",		3,	BFD_RELOC_PPC_TOC16 },
+    { "L",		1,	BFD_RELOC_LO16 },
+    { "l",		1,	BFD_RELOC_LO16 },
+    { "HA",		2,	BFD_RELOC_HI16_S },
+    { "ha",		2,	BFD_RELOC_HI16_S },
+    { "H",		1,	BFD_RELOC_HI16 },
+    { "h",		1,	BFD_RELOC_HI16 },
+    { "SDAREL",		6,	BFD_RELOC_GPREL16 },
+    { "sdarel",		6,	BFD_RELOC_GPREL16 },
+    { "FIXUP",		5,	BFD_RELOC_CTOR },	/* synonym for BFD_RELOC_32 that doesn't get */
+    { "fixup",		5,	BFD_RELOC_CTOR },	/* warnings with -mrelocatable */
+    { "BRTAKEN",	7,	BFD_RELOC_PPC_B16_BRTAKEN },
+    { "brtaken",	7,	BFD_RELOC_PPC_B16_BRTAKEN },
+    { "BRNTAKEN",	8,	BFD_RELOC_PPC_B16_BRNTAKEN },
+    { "brntaken",	8,	BFD_RELOC_PPC_B16_BRNTAKEN },
+    { (char *)0,	0,	BFD_RELOC_UNUSED }
+  };
+
+  if (*str++ != '@')
     return BFD_RELOC_UNUSED;
 
-  if (strncmp (str, "@GOT", 4) == 0 || strncmp (str, "@got", 4) == 0)
-    {
-      *str_p += 4;
-      return BFD_RELOC_PPC_TOC16;
-    }
-  else if (strncmp (str, "@L", 2) == 0 || strncmp (str, "@l", 2) == 0)
-    {
-      *str_p += 2;
-      return BFD_RELOC_LO16;
-    }
-  else if (strncmp (str, "@HA", 3) == 0 || strncmp (str, "@ha", 3) == 0)
-    {
-      *str_p += 3;
-      return BFD_RELOC_HI16_S;
-    }
-  else if (strncmp (str, "@H", 2) == 0 || strncmp (str, "@h", 2) == 0)
-    {
-      *str_p += 2;
-      return BFD_RELOC_HI16;
-    }
-  else if (strncmp (str, "@sdarel", 7) == 0 || strncmp (str, "@sdarel", 7) == 0)
-    {
-      *str_p += 7;
-      return BFD_RELOC_GPREL16;
-    }
-  else if (strncmp (str, "@FIXUP", 6) == 0 || strncmp (str, "@fixup", 6) == 0)
-    {
-      *str_p += 6;
-      return BFD_RELOC_CTOR;	/* synonym for BFD_RELOC_32 that doesn't get */
-    }				/* warnings with -mrelocatable */
+  ch = *str;
+  for (ptr = &mapping[0]; ptr->length > 0; ptr++)
+    if (ch == ptr->string[0] && strncmp (str, ptr->string, ptr->length) == 0)
+      {
+	*str_p = str + ptr->length;
+	return ptr->reloc;
+      }
 
   return BFD_RELOC_UNUSED;
 }
@@ -2790,6 +2795,9 @@ md_apply_fix3 (fixp, valuep, seg)
 	  if (fixp->fx_pcrel)
 	    abort ();
 
+	case BFD_RELOC_PPC_B16_BRTAKEN:
+	case BFD_RELOC_PPC_B16_BRNTAKEN:
+	  value <<= 2;
 	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
 			      value, 2);
 	  break;
