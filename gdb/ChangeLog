@@ -1,5 +1,7 @@
 Fri Feb 18 08:26:29 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* Version 4.12.2.
+
 	* Makefile.in (install): Do the sed for program_transform_name
 	ourselves instead of worrying about INSTALL_XFORM.  This enables
 	users to override INSTALL_PROGRAM in the standard way.
