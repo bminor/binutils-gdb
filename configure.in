@@ -490,7 +490,10 @@ case "${target}" in
     noconfigdirs="$noconfigdirs target-libgloss libio libstdc++ libg++ gdb"
     ;;
 # end-sanitize-m32r
-  mn10x00-*-*)
+  mn10200-*-*)
+    noconfigdirs="$noconfigdirs ld gcc gdb target-libiberty target-libgloss target-newlib target-libio target-librx target-libstdc++ target-libg++"
+    ;;
+  mn10300-*-*)
     noconfigdirs="$noconfigdirs ld gcc gdb target-libiberty target-libgloss target-newlib target-libio target-librx target-libstdc++ target-libg++"
     ;;
   powerpc-*-aix*)

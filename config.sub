@@ -186,7 +186,10 @@ case $basic_machine in
 		basic_machine=$basic_machine-unknown
 		;;
 # end-sanitize-m32r
-	mn10x00)
+	mn10200)
+		basic_machine=$basic_machine-unknown
+		;;
+	mn10300)
 		basic_machine=$basic_machine-unknown
 		;;
 	# Object if more than one company name word.

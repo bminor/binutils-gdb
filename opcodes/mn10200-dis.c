@@ -1,4 +1,4 @@
-/* Disassemble MN10x00 instructions.
+/* Disassemble MN10200 instructions.
    Copyright (C) 1996 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
@@ -19,7 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <stdio.h>
 
 #include "ansidecl.h"
-#include "opcode/mn10x00.h" 
+#include "opcode/mn10200.h" 
 #include "dis-asm.h"
 
 static void disassemble PARAMS ((bfd_vma memaddr,
@@ -27,7 +27,7 @@ static void disassemble PARAMS ((bfd_vma memaddr,
 				 unsigned long insn));
 
 int 
-print_insn_mn10x00 (memaddr, info)
+print_insn_mn10200 (memaddr, info)
      bfd_vma memaddr;
      struct disassemble_info *info;
 {

@@ -1,4 +1,4 @@
-/* mn10x00.h -- Header file for Matsushita 10200 and 10300 opcode table
+/* mn10300.h -- Header file for Matsushita 10300 opcode table
    Copyright 1996 Free Software Foundation, Inc.
    Written by Jeff Law, Cygnus Support
 
@@ -18,12 +18,12 @@ You should have received a copy of the GNU General Public License
 along with this file; see the file COPYING.  If not, write to the Free
 Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#ifndef MN10x00_H
-#define MN10x00_H
+#ifndef MN10300_H
+#define MN10300_H
 
-/* The opcode table is an array of struct mn10x00_opcode.  */
+/* The opcode table is an array of struct mn10300_opcode.  */
 
-struct mn10x00_opcode
+struct mn10300_opcode
 {
   /* The opcode name.  */
   const char *name;
@@ -47,13 +47,13 @@ struct mn10x00_opcode
 /* The table itself is sorted by major opcode number, and is otherwise
    in the order in which the disassembler should consider
    instructions.  */
-extern const struct mn10x00_opcode mn10x00_opcodes[];
-extern const int mn10x00_num_opcodes;
+extern const struct mn10300_opcode mn10300_opcodes[];
+extern const int mn10300_num_opcodes;
 
 
 /* The operands table is an array of struct powerpc_operand.  */
 
-struct mn10x00_operand
+struct mn10300_operand
 {
   /* The number of bits in the operand.  */
   int bits;
@@ -66,10 +66,10 @@ struct mn10x00_operand
 };
 
 /* Elements in the table are retrieved by indexing with values from
-   the operands field of the mn10x00_opcodes table.  */
+   the operands field of the mn10300_opcodes table.  */
 
-extern const struct mn10x00_operand mn10x00_operands[];
+extern const struct mn10300_operand mn10300_operands[];
 
-/* Values defined for the flags field of a struct mn10x00_operand.  */
+/* Values defined for the flags field of a struct mn10300_operand.  */
 
-#endif /* MN10x00_H */
+#endif /* MN10300_H */

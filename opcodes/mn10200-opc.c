@@ -1,4 +1,4 @@
-/* Assemble Matsushita MN10x00 instructions.
+/* Assemble Matsushita MN10200 instructions.
    Copyright (C) 1996 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
@@ -16,10 +16,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "ansidecl.h"
-#include "opcode/mn10x00.h"
+#include "opcode/mn10200.h"
 
 
-const struct mn10x00_operand mn10x00_operands[] = {
+const struct mn10200_operand mn10200_operands[] = {
 #define UNUSED	0
   { 0, 0, 0 }, 
 } ; 
@@ -42,10 +42,10 @@ const struct mn10x00_operand mn10x00_operands[] = {
    specific instructions before more general instructions.  It is also
    sorted by major opcode.  */
 
-const struct mn10x00_opcode mn10x00_opcodes[] = {
+const struct mn10200_opcode mn10200_opcodes[] = {
 { 0, 0, 0, {0}, } } ;
 
-const int mn10x00_num_opcodes =
-  sizeof (mn10x00_opcodes) / sizeof (mn10x00_opcodes[0]);
+const int mn10200_num_opcodes =
+  sizeof (mn10200_opcodes) / sizeof (mn10200_opcodes[0]);
 
 

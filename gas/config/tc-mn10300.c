@@ -1,4 +1,4 @@
-/* tc-mn10x00.c -- Assembler code for the Matsushita 10x00
+/* tc-mn10300.c -- Assembler code for the Matsushita 10300
 
    Copyright (C) 1996 Free Software Foundation.
 
@@ -23,7 +23,7 @@
 #include <ctype.h>
 #include "as.h"
 #include "subsegs.h"     
-#include "opcode/mn10x00.h"
+#include "opcode/mn10300.h"
 
 /* Structure to hold information about predefined registers.  */
 struct reg_name
@@ -54,25 +54,25 @@ const char FLT_CHARS[] = "dD";
 
 
 /* local functions */
-static unsigned long mn10x00
-  PARAMS ((unsigned long insn, const struct mn10x00_operand *operand,
+static unsigned long mn10300
+  PARAMS ((unsigned long insn, const struct mn10300_operand *operand,
 	   offsetT val, char *file, unsigned int line));
 static int reg_name_search PARAMS ((const struct reg_name *, int, const char *));
 static boolean register_name PARAMS ((expressionS *expressionP));
 static boolean system_register_name PARAMS ((expressionS *expressionP));
 static boolean cc_name PARAMS ((expressionS *expressionP));
-static bfd_reloc_code_real_type mn10x00_reloc_prefix PARAMS ((void));
+static bfd_reloc_code_real_type mn10300_reloc_prefix PARAMS ((void));
 
 
 /* fixups */
 #define MAX_INSN_FIXUPS (5)
-struct mn10x00_fixup
+struct mn10300_fixup
 {
   expressionS exp;
   int opindex;
   bfd_reloc_code_real_type reloc;
 };
-struct mn10x00_fixup fixups[MAX_INSN_FIXUPS];
+struct mn10300_fixup fixups[MAX_INSN_FIXUPS];
 static int fc;
 
 const char *md_shortopts = "";
@@ -88,7 +88,7 @@ const pseudo_typeS md_pseudo_table[] =
 };
 
 /* Opcode hash table.  */
-static struct hash_control *mn10x00_hash;
+static struct hash_control *mn10300_hash;
 
 /* This table is sorted. Suitable for searching by a binary search. */
 static const struct reg_name pre_defined_registers[] =
@@ -345,7 +345,7 @@ void
 md_show_usage (stream)
   FILE *stream;
 {
-  fprintf(stream, "MN10x00 options:\n\
+  fprintf(stream, "MN10300 options:\n\
 none yet\n");
 } 
 
@@ -429,29 +429,29 @@ void
 md_begin ()
 {
   char *prev_name = "";
-  register const struct mn10x00_opcode *op;
+  register const struct mn10300_opcode *op;
 
-  mn10x00_hash = hash_new();
+  mn10300_hash = hash_new();
 
-  /* Insert unique names into hash table.  The MN10x00 instruction set
+  /* Insert unique names into hash table.  The MN10300 instruction set
      has many identical opcode names that have different opcodes based
      on the operands.  This hash table then provides a quick index to
      the first opcode with a particular name in the opcode table.  */
 
-  op     = mn10x00_opcodes;
+  op     = mn10300_opcodes;
   while (op->name)
     {
       if (strcmp (prev_name, op->name)) 
 	{
 	  prev_name = (char *) op->name;
-	  hash_insert (mn10x00_hash, op->name, (char *) op);
+	  hash_insert (mn10300_hash, op->name, (char *) op);
 	}
       op++;
     }
 }
 
 static bfd_reloc_code_real_type
-mn10x00_reloc_prefix()
+mn10300_reloc_prefix()
 {
   if (strncmp(input_line_pointer, "hi0(", 4) == 0)
     {
@@ -479,8 +479,8 @@ md_assemble (str)
      char *str;
 {
   char *s;
-  struct mn10x00_opcode *opcode;
-  struct mn10x00_opcode *next_opcode;
+  struct mn10300_opcode *opcode;
+  struct mn10300_opcode *next_opcode;
   const unsigned char *opindex_ptr;
   int next_opindex;
   unsigned long insn, size;
@@ -496,7 +496,7 @@ md_assemble (str)
     *s++ = '\0';
 
   /* find the first opcode with the proper name */
-  opcode = (struct mn10x00_opcode *)hash_find (mn10x00_hash, str);
+  opcode = (struct mn10300_opcode *)hash_find (mn10300_hash, str);
   if (opcode == NULL)
     {
       as_bad ("Unrecognized opcode: `%s'", str);
@@ -519,17 +519,17 @@ md_assemble (str)
       insn = opcode->opcode;
       for (opindex_ptr = opcode->operands; *opindex_ptr != 0; opindex_ptr++)
 	{
-	  const struct mn10x00_operand *operand;
+	  const struct mn10300_operand *operand;
 	  char *hold;
 	  expressionS ex;
 
 	  if (next_opindex == 0)
 	    {
-	      operand = &mn10x00_operands[*opindex_ptr];
+	      operand = &mn10300_operands[*opindex_ptr];
 	    }
 	  else
 	    {
-	      operand = &mn10x00_operands[next_opindex];
+	      operand = &mn10300_operands[next_opindex];
 	      next_opindex = 0;
 	    }
 
@@ -544,7 +544,7 @@ md_assemble (str)
 
 
 	  /* lo(), hi(), hi0(), etc... */
-	  if ((reloc = mn10x00_reloc_prefix()) != BFD_RELOC_UNUSED)
+	  if ((reloc = mn10300_reloc_prefix()) != BFD_RELOC_UNUSED)
 	    {
 	      expression(&ex);
 
@@ -575,7 +575,7 @@ md_assemble (str)
 		      break;
 		    }
 
-		  insn = mn10x00_insert_operand (insn, operand, ex.X_add_number,
+		  insn = mn10300_insert_operand (insn, operand, ex.X_add_number,
 					      (char *) NULL, 0);
 		}
 	      else
@@ -601,12 +601,12 @@ md_assemble (str)
 	      goto error;
 	    case O_register:
 		
-	      insn = mn10x00_insert_operand (insn, operand, ex.X_add_number,
+	      insn = mn10300_insert_operand (insn, operand, ex.X_add_number,
 					  (char *) NULL, 0);
 	      break;
 
 	    case O_constant:
-	      insn = mn10x00_insert_operand (insn, operand, ex.X_add_number,
+	      insn = mn10300_insert_operand (insn, operand, ex.X_add_number,
 					  (char *) NULL, 0);
 	      break;
 
@@ -673,9 +673,9 @@ md_assemble (str)
      md_apply_fix.  */
   for (i = 0; i < fc; i++)
     {
-      const struct mn10x00_operand *operand;
+      const struct mn10300_operand *operand;
 
-      operand = &mn10x00_operands[fixups[i].opindex];
+      operand = &mn10300_operands[fixups[i].opindex];
       if (fixups[i].reloc != BFD_RELOC_UNUSED)
 	{
 	  reloc_howto_type *reloc_howto = bfd_reloc_type_lookup (stdoutput, fixups[i].reloc);
@@ -701,7 +701,7 @@ md_assemble (str)
 	{
 	  fix_new_exp (frag_now, f - frag_now->fr_literal, 4,
 		       &fixups[i].exp,
-		       1 /* FIXME: MN10x00_OPERAND_RELATIVE ??? */,
+		       1 /* FIXME: MN10300_OPERAND_RELATIVE ??? */,
 		       ((bfd_reloc_code_real_type)
 			(fixups[i].opindex + (int) BFD_RELOC_UNUSED)));
 	}
@@ -790,12 +790,12 @@ md_apply_fix3 (fixp, valuep, seg)
   if ((int) fixp->fx_r_type >= (int) BFD_RELOC_UNUSED)
     {
       int opindex;
-      const struct mn10x00_operand *operand;
+      const struct mn10300_operand *operand;
       char *where;
       unsigned long insn;
 
       opindex = (int) fixp->fx_r_type - (int) BFD_RELOC_UNUSED;
-      operand = &mn10x00_operands[opindex];
+      operand = &mn10300_operands[opindex];
 
       /* Fetch the instruction, insert the fully resolved operand
          value, and stuff the instruction back again.
@@ -805,7 +805,7 @@ md_apply_fix3 (fixp, valuep, seg)
       where = fixp->fx_frag->fr_literal + fixp->fx_where;
 
       insn = bfd_getl32((unsigned char *) where);
-      insn = mn10x00_insert_operand (insn, operand, (offsetT) value,
+      insn = mn10300_insert_operand (insn, operand, (offsetT) value,
 				  fixp->fx_file, fixp->fx_line);
       bfd_putl32((bfd_vma) insn, (unsigned char *) where);
 
@@ -845,9 +845,9 @@ md_apply_fix3 (fixp, valuep, seg)
 /* Insert an operand value into an instruction.  */
 
 static unsigned long
-mn10x00_insert_operand (insn, operand, val, file, line)
+mn10300_insert_operand (insn, operand, val, file, line)
      unsigned long insn;
-     const struct mn10x00_operand *operand;
+     const struct mn10300_operand *operand;
      offsetT val;
      char *file;
      unsigned int line;

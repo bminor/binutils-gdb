@@ -1,3 +1,8 @@
+Thu Oct  3 10:33:14 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* dis-asm.h (print_insn_mn10x00): Delete declaration.
+	(print_insn_mn10200, print_insn_mn10300): Declare.
+
 Wed Oct  2 21:24:43 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* dis-asm.h (print_insn_mn10x00): Declare.

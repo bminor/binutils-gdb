@@ -1,3 +1,9 @@
+Thu Oct  3 09:28:25 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* configure.in: Break mn10x00 support into separate
+	mn10200 and mn10300 configurations.
+	* config.sub: Likewise.
+
 Wed Oct  2 22:27:52 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* configure.in: Add lots of stuff to noconfigdirs for

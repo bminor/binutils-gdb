@@ -74,6 +74,10 @@ m88k-dis.c
 makefile.vms
 mips-dis.c
 mips-opc.c
+mn10200-dis.c
+mn10200-opc.c
+mn10300-dis.c
+mn10300-opc.c
 mpw-config.in
 mpw-make.sed
 ns32k-dis.c

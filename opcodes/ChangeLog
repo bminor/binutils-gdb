@@ -1,3 +1,13 @@
+Thu Oct  3 10:06:07 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10200-opc.c, mn10300-opc.c: New files.
+	* mn10200-dis.c, mn10300-dis.c: New files.
+	* mn10x00-opc.c, mn10x00-dis.c: Deleted.
+	* disassemble.c: Break mn10x00 support into 10200 and 10300
+	support.
+	* configure.in: Likewise.
+	* configure: Rebuilt.
+
 Thu Oct  3 15:59:12 1996  Jason Molenda  (crash@godzilla.cygnus.co.jp)
 
 	* Makefile.in (MOSTLYCLEAN): Move config.log to distclean.

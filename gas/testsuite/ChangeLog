@@ -1,6 +1,7 @@
-Thu Oct  3 00:14:04 1996  Jeffrey A Law  (law@cygnus.com)
+Thu Oct  3 09:57:03 1996  Jeffrey A Law  (law@cygnus.com)
 
-	* gas/mn10x00: New directory for Matsushita 10x00 tests.
+	* gas/mn10200, gas/mn10300: New directorys for Matsushita
+	mn10200 and mn10300 tests.
 
 Tue Oct  1 15:38:28 1996  Ian Lance Taylor  <ian@cygnus.com>
 

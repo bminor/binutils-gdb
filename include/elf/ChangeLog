@@ -1,3 +1,7 @@
+Thu Oct  3 10:01:40 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* common.h: Break mn10x00 support into mn10200 and mn10300.
+
 Wed Oct  2 21:26:43 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* common.h (EM_CYGNUS_MN10x00): Define.

@@ -1229,7 +1229,8 @@ enum bfd_architecture
   /* start-sanitize-m32r */
   bfd_arch_m32r,       /* Mitsubishi M32R */
   /* end-sanitize-m32r */
-  bfd_arch_mn10x00,    /* Matsushita MN10x00 */
+  bfd_arch_mn10200,    /* Matsushita MN10200 */
+  bfd_arch_mn10300,    /* Matsushita MN10300 */
   bfd_arch_last
   };
 

@@ -1,3 +1,8 @@
+Thu Oct  3 10:33:46 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10x00.h: Delete.
+	* mn10200.h, mn10300.h: New files.
+
 Wed Oct  2 21:31:26 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10x00.h: New file.

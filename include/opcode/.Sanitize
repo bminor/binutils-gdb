@@ -61,7 +61,8 @@ i960.h
 m68k.h
 m88k.h
 mips.h
-mn10x00.h
+mn10200.h
+mn10300.h
 np1.h
 ns32k.h
 pn.h

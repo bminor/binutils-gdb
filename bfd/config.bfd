@@ -393,8 +393,12 @@ case "${targ}" in
     targ_selvecs="bfd_elf32_littlemips_vec bfd_elf64_bigmips_vec bfd_elf64_littlemips_vec"
     ;;
 
-  mn10x00-*-*)
-    targ_defvec=bfd_elf32_mn10x00_vec
+  mn10200-*-*)
+    targ_defvec=bfd_elf32_mn10200_vec
+    ;;
+
+  mn10300-*-*)
+    targ_defvec=bfd_elf32_mn10300_vec
     ;;
 
   ns32k-pc532-mach* | ns32k-pc532-ux*)

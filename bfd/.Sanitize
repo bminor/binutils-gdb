@@ -137,7 +137,8 @@ cpu-i960.c
 cpu-m68k.c
 cpu-m88k.c
 cpu-mips.c
-cpu-mn10x00.c
+cpu-mn10200.c
+cpu-mn10300.c
 cpu-ns32k.c
 cpu-powerpc.c
 cpu-rs6000.c
@@ -163,7 +164,8 @@ elf32-i860.c
 elf32-m68k.c
 elf32-m88k.c
 elf32-mips.c
-elf32-mn10x00.c
+elf32-mn10200.c
+elf32-mn10300.c
 elf32-ppc.c
 elf32-sh.c
 elf32-sparc.c

@@ -456,7 +456,8 @@ do
 # end-sanitize-m32r
     bfd_elf32_m68k_vec)		tb="$tb elf32-m68k.o elf32.o $elf" ;;
     bfd_elf32_m88k_vec)		tb="$tb elf32-m88k.o elf32.o $elf" ;;
-    bfd_elf32_mn10x00_vec)	tb="$tb elf32-mn10x00.o elf32.o $elf" ;;
+    bfd_elf32_mn10200_vec)	tb="$tb elf32-mn10200.o elf32.o $elf" ;;
+    bfd_elf32_mn10300_vec)	tb="$tb elf32-mn10300.o elf32.o $elf" ;;
     bfd_elf32_powerpc_vec)	tb="$tb elf32-ppc.o elf32.o $elf" ;;
     bfd_elf32_powerpcle_vec)	tb="$tb elf32-ppc.o elf32.o $elf" ;;
     bfd_elf32_sh_vec)		tb="$tb elf32-sh.o elf32.o $elf coff-sh.o" ;;
