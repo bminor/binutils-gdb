@@ -1,3 +1,8 @@
+2005-02-11  Zack Weinberg  <zack@codesourcery.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_stat_needed):
+	If st.st_ino is zero, do not treat the library as a duplicate.
+
 2005-02-10  Jakub Jelinek  <jakub@redhat.com>
 
 	* emultempl/hppaelf.em (hppaelf_create_output_section_statements):
@@ -8,7 +13,7 @@
 2005-02-08  Mark Mitchell  <mark@codesourcery.com>
 
 	* scripttempl/armbpabi.sc (VERSION): Make special section symbols
-	local. 
+	local.
 	(Image$$ER_RO$$Base): Define whenever RELOCATING.
 	(Image$$ER_RO$$Limit): Likewise.
 	(SHT$$INIT_ARRAY$$Base): Likewise.
@@ -69,7 +74,7 @@
 	(PARSE_AND_LIST_PROLOGUE): Add option token OPTION_FIX_V4BX.
 	(PARSE_AND_LIST_LONGOPTS): Add option --fix-v4bx.
 	(PARSE_AND_LIST_OPTIONS): Add option --fix-v4bx.
-	(PARSE_AND_LIST_ARGS_CASES): Add option OPTION_FIX_V4BX. 
+	(PARSE_AND_LIST_ARGS_CASES): Add option OPTION_FIX_V4BX.
 	* NEWS: Mention --fix-v4bx.
 	* ld.texinfo: Document --fix-v4bx.
 
@@ -80,8 +85,8 @@
 	* ld/scripttempl/armbpabi.sc: Move .plt to end of text segment.
 	Define IMAGE$$ER_RO$${Base,Limit} and SHT$$INIT_ARRAY$${Base,Limit}.
 	Put .init_array, .fini_array, etc. into the read-only data
-	segment. 
-	
+	segment.
+
 2005-01-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_try_needed): Formatting.

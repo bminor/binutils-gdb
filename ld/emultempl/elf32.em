@@ -231,8 +231,16 @@ gld${EMULATION_NAME}_stat_needed (lang_input_statement_type *s)
       return;
     }
 
+  /* Some operating systems, e.g. Windows, do not provide a meaningful
+     st_ino; they always set it to zero.  (Windows does provide a
+     meaningful st_dev.)  Do not indicate a duplicate library in that
+     case.  While there is no guarantee that a system that provides
+     meaningful inode numbers will never set st_ino to zero, this is
+     merely an optimization, so we do not need to worry about false
+     negatives.  */
   if (st.st_dev == global_stat.st_dev
-      && st.st_ino == global_stat.st_ino)
+      && st.st_ino == global_stat.st_ino
+      && st.st_ino != 0)
     {
       global_found = TRUE;
       return;
