@@ -1268,7 +1268,7 @@ reinit_frame_cache (void)
 }
 
 /* Create the previous frame using the deprecated methods
-   INIT_EXTRA_INFO, INIT_FRAME_PC and INIT_FRAME_PC_FIRST.  */
+   INIT_EXTRA_INFO, and INIT_FRAME_PC.  */
 
 static struct frame_info *
 legacy_get_prev_frame (struct frame_info *this_frame)
@@ -1304,8 +1304,7 @@ legacy_get_prev_frame (struct frame_info *this_frame)
   /* NOTE: cagney/2002-11-18: Should have been correctly setting the
      frame's type here, before anything else, and not last, at the
      bottom of this function.  The various
-     DEPRECATED_INIT_EXTRA_FRAME_INFO, DEPRECATED_INIT_FRAME_PC,
-     DEPRECATED_INIT_FRAME_PC_FIRST and
+     DEPRECATED_INIT_EXTRA_FRAME_INFO, DEPRECATED_INIT_FRAME_PC, and
      DEPRECATED_FRAME_INIT_SAVED_REGS methods are full of work-arounds
      that handle the frame not being correctly set from the start.
      Unfortunately those same work-arounds rely on the type defaulting
@@ -1563,10 +1562,6 @@ legacy_get_prev_frame (struct frame_info *this_frame)
      machines appear to require DEPRECATED_INIT_EXTRA_FRAME_INFO
      before they can do DEPRECATED_INIT_FRAME_PC.  Phoo.
 
-     We shouldn't need DEPRECATED_INIT_FRAME_PC_FIRST to add more
-     complication to an already overcomplicated part of GDB.
-     gnu@cygnus.com, 15Sep92.
-
      Assuming that some machines need DEPRECATED_INIT_FRAME_PC after
      DEPRECATED_INIT_EXTRA_FRAME_INFO, one possible scheme:
 
@@ -1621,11 +1616,6 @@ legacy_get_prev_frame (struct frame_info *this_frame)
      with it!  Note that FRAME_SAVED_PC() is being superseed by
      frame_pc_unwind() and that function does have somewhere to cache
      that PC value.  */
-
-  if (DEPRECATED_INIT_FRAME_PC_FIRST_P ())
-    deprecated_update_frame_pc_hack (prev,
-				     DEPRECATED_INIT_FRAME_PC_FIRST (fromleaf,
-								     prev));
 
   if (DEPRECATED_INIT_EXTRA_FRAME_INFO_P ())
     DEPRECATED_INIT_EXTRA_FRAME_INFO (fromleaf, prev);
@@ -2322,7 +2312,6 @@ int
 legacy_frame_p (struct gdbarch *current_gdbarch)
 {
   if (DEPRECATED_INIT_FRAME_PC_P ()
-      || DEPRECATED_INIT_FRAME_PC_FIRST_P ()
       || DEPRECATED_INIT_EXTRA_FRAME_INFO_P ()
       || DEPRECATED_FRAME_CHAIN_P ())
     /* No question, it's a legacy frame.  */

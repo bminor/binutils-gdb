@@ -1,5 +1,10 @@
 2004-04-02  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (DEPRECATED_INIT_FRAME_PC_FIRST): Delete.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* frame.c (legacy_get_prev_frame): Delete references to
+	DEPRECATED_INIT_FRAME_PC_FIRST.
+
 	* infrun.c (pc_in_sigtramp): Delete function.
 	(check_sigtramp2): Inline call to pc_in_sigtramp, use
 	get_frame_type.

@@ -1114,31 +1114,6 @@ extern void set_gdbarch_deprecated_pc_in_call_dummy (struct gdbarch *gdbarch, gd
 #define DEPRECATED_PC_IN_CALL_DUMMY(pc, sp, frame_address) (gdbarch_deprecated_pc_in_call_dummy (current_gdbarch, pc, sp, frame_address))
 #endif
 
-#if defined (DEPRECATED_INIT_FRAME_PC_FIRST)
-/* Legacy for systems yet to multi-arch DEPRECATED_INIT_FRAME_PC_FIRST */
-#if !defined (DEPRECATED_INIT_FRAME_PC_FIRST_P)
-#define DEPRECATED_INIT_FRAME_PC_FIRST_P() (1)
-#endif
-#endif
-
-extern int gdbarch_deprecated_init_frame_pc_first_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_INIT_FRAME_PC_FIRST_P)
-#error "Non multi-arch definition of DEPRECATED_INIT_FRAME_PC_FIRST"
-#endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_INIT_FRAME_PC_FIRST_P)
-#define DEPRECATED_INIT_FRAME_PC_FIRST_P() (gdbarch_deprecated_init_frame_pc_first_p (current_gdbarch))
-#endif
-
-typedef CORE_ADDR (gdbarch_deprecated_init_frame_pc_first_ftype) (int fromleaf, struct frame_info *prev);
-extern CORE_ADDR gdbarch_deprecated_init_frame_pc_first (struct gdbarch *gdbarch, int fromleaf, struct frame_info *prev);
-extern void set_gdbarch_deprecated_init_frame_pc_first (struct gdbarch *gdbarch, gdbarch_deprecated_init_frame_pc_first_ftype *deprecated_init_frame_pc_first);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_INIT_FRAME_PC_FIRST)
-#error "Non multi-arch definition of DEPRECATED_INIT_FRAME_PC_FIRST"
-#endif
-#if !defined (DEPRECATED_INIT_FRAME_PC_FIRST)
-#define DEPRECATED_INIT_FRAME_PC_FIRST(fromleaf, prev) (gdbarch_deprecated_init_frame_pc_first (current_gdbarch, fromleaf, prev))
-#endif
-
 #if defined (DEPRECATED_INIT_FRAME_PC)
 /* Legacy for systems yet to multi-arch DEPRECATED_INIT_FRAME_PC */
 #if !defined (DEPRECATED_INIT_FRAME_PC_P)
