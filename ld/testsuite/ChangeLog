@@ -1,3 +1,8 @@
+2002-08-16  Stephen Clarke <stephen.clarke@superh.com>
+
+	* ld-sh/sh64/sh64.exp: Add dlsection.
+	* ld-sh/sh64/dlsection-1.s, ld-sh/sh64/dlsection.sd: New.
+
 2002-08-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-discard/discard.exp: xfail targets using generic linker.

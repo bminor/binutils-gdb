@@ -73,6 +73,12 @@ set sh64tests {
     {"SH64 inter-file datalabel references, 32-bit ABI" "-mshelf32"
      "--abi=32" {shdl-1.s shdl-2.s}
      {{objdump -sr shdl64.sd} {objdump -x shdl32.xd}}}
+    {"SH64 inter-file datalabel references and gc-sections, 32-bit ABI" "-mshelf32 --gc-sections"
+     "--abi=32" {dlsection-1.s }
+     {{objdump -sr dlsection.sd}}}
+    {"SH64 inter-file datalabel references and gc-sections, 64-bit ABI" "-mshelf64 --gc-sections"
+     "--abi=64" {dlsection-1.s }
+     {{objdump -sr dlsection.sd}}}
     {"SH64 simple partial linking, 32-bit ABI" "-mshelf32 -r"
      "--abi=32" {rel-1.s rel-2.s}
      {{objdump -sx rel32.xd}}}
