@@ -459,15 +459,15 @@ static struct
 pseudo_func[] =
   {
     /* reloc pseudo functions (these must come first!):  */
-    { "fptr",	PSEUDO_FUNC_RELOC },
-    { "gprel",	PSEUDO_FUNC_RELOC },
-    { "ltoff",	PSEUDO_FUNC_RELOC },
-    { "pcrel",	PSEUDO_FUNC_RELOC },
-    { "pltoff",	PSEUDO_FUNC_RELOC },
-    { "secrel",	PSEUDO_FUNC_RELOC },
-    { "segrel",	PSEUDO_FUNC_RELOC },
-    { "ltv",	PSEUDO_FUNC_RELOC },
-    { 0, },		/* placeholder for FUNC_LT_FPTR_RELATIVE */
+    { "fptr",	PSEUDO_FUNC_RELOC, { 0 } },
+    { "gprel",	PSEUDO_FUNC_RELOC, { 0 } },
+    { "ltoff",	PSEUDO_FUNC_RELOC, { 0 } },
+    { "pcrel",	PSEUDO_FUNC_RELOC, { 0 } },
+    { "pltoff",	PSEUDO_FUNC_RELOC, { 0 } },
+    { "secrel",	PSEUDO_FUNC_RELOC, { 0 } },
+    { "segrel",	PSEUDO_FUNC_RELOC, { 0 } },
+    { "ltv",	PSEUDO_FUNC_RELOC, { 0 } },
+    { "", 0, { 0 } },	/* placeholder for FUNC_LT_FPTR_RELATIVE */
 
     /* mbtype4 constants:  */
     { "alt",	PSEUDO_FUNC_CONST, { 0xa } },
@@ -539,7 +539,7 @@ static struct rsrc {
   int data_srlz;                    /* current data serialization state */
   int qp_regno;                     /* qualifying predicate for this usage */
   char *file;                       /* what file marked this dependency */
-  int line;                         /* what line marked this dependency */
+  unsigned int line;                /* what line marked this dependency */
   struct mem_offset mem_offset;     /* optional memory offset hint */
   enum { CMP_NONE, CMP_OR, CMP_AND } cmp_type; /* OR or AND compare? */
   int path;                         /* corresponding code entry index */
@@ -576,7 +576,7 @@ static struct gr {
   unsigned known:1;
   int path;
   valueT value;
-} gr_values[128] = {{ 1, 0 }};
+} gr_values[128] = {{ 1, 0, 0 }};
 
 /* These are the routines required to output the various types of
    unwind records.  */
@@ -597,7 +597,7 @@ typedef struct unw_rec_list {
   struct unw_rec_list *next;
 } unw_rec_list;
 
-#define SLOT_NUM_NOT_SET        -1
+#define SLOT_NUM_NOT_SET        (unsigned)-1
 
 static struct
 {
@@ -867,7 +867,7 @@ set_section (name)
 flagword
 ia64_elf_section_flags (flags, attr, type)
      flagword flags;
-     int attr, type;
+     int attr, type ATTRIBUTE_UNUSED;
 {
   if (attr & SHF_IA_64_SHORT)
     flags |= SEC_SMALL_DATA;
@@ -973,7 +973,7 @@ void
 output_vbyte_mem (count, ptr, comment)
      int count;
      char *ptr;
-     char *comment;
+     char *comment ATTRIBUTE_UNUSED;
 {
   int x;
   if (vbyte_mem_ptr == NULL)
@@ -990,8 +990,8 @@ static int vbyte_count = 0;
 void
 count_output (count, ptr, comment)
      int count;
-     char *ptr;
-     char *comment;
+     char *ptr ATTRIBUTE_UNUSED;
+     char *comment ATTRIBUTE_UNUSED;
 {
   vbyte_count += count;
 }
@@ -2703,18 +2703,18 @@ convert_expr_to_ab_reg (e, ab, regp)
     return 0;
 
   reg = e->X_add_number;
-  if (reg >= REG_GR + 4 && reg <= REG_GR + 7)
+  if (reg >= (REG_GR + 4) && reg <= (REG_GR + 7))
     {
       *ab = 0;
       *regp = reg - REG_GR;
     }
-  else if ((reg >= REG_FR + 2 && reg <= REG_FR + 5)
-	   || (reg >= REG_FR + 16 && reg <= REG_FR + 31))
+  else if ((reg >= (REG_FR + 2) && reg <= (REG_FR + 5))
+	   || (reg >= (REG_FR + 16) && reg <= (REG_FR + 31)))
     {
       *ab = 1;
       *regp = reg - REG_FR;
     }
-  else if (reg >= REG_BR + 1 && reg <= REG_BR + 5)
+  else if (reg >= (REG_BR + 1) && reg <= (REG_BR + 5))
     {
       *ab = 2;
       *regp = reg - REG_BR;
@@ -2756,17 +2756,17 @@ convert_expr_to_xy_reg (e, xy, regp)
 
   reg = e->X_add_number;
 
-  if (reg >= REG_GR && reg <= REG_GR + 127)
+  if (/* reg >= REG_GR && */ reg <= (REG_GR + 127))
     {
       *xy = 0;
       *regp = reg - REG_GR;
     }
-  else if (reg >= REG_FR && reg <= REG_FR + 127)
+  else if (reg >= REG_FR && reg <= (REG_FR + 127))
     {
       *xy = 1;
       *regp = reg - REG_FR;
     }
-  else if (reg >= REG_BR && reg <= REG_BR + 7)
+  else if (reg >= REG_BR && reg <= (REG_BR + 7))
     {
       *xy = 2;
       *regp = reg - REG_BR;
@@ -2778,7 +2778,7 @@ convert_expr_to_xy_reg (e, xy, regp)
 
 static void
 dot_radix (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   int radix;
 
@@ -2818,7 +2818,7 @@ add_unwind_entry (ptr)
 
 static void
 dot_fframe (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   expressionS e;
 
@@ -2832,7 +2832,7 @@ dot_fframe (dummy)
 
 static void
 dot_vframe (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   expressionS e;
   unsigned reg;
@@ -2851,7 +2851,7 @@ dot_vframe (dummy)
 
 static void
 dot_vframesp (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   expressionS e;
 
@@ -2867,7 +2867,7 @@ dot_vframesp (dummy)
 
 static void
 dot_vframepsp (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   expressionS e;
 
@@ -2883,7 +2883,7 @@ dot_vframepsp (dummy)
 
 static void
 dot_save (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   expressionS e1, e2;
   int sep;
@@ -2960,7 +2960,7 @@ dot_save (dummy)
 
 static void
 dot_restore (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   expressionS e1, e2;
   unsigned long ecount = 0;
@@ -2988,7 +2988,7 @@ dot_restore (dummy)
 
 static void
 dot_restorereg (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   unsigned int ab, reg;
   expressionS e;
@@ -3005,7 +3005,7 @@ dot_restorereg (dummy)
 
 static void
 dot_restorereg_p (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   unsigned int qp, ab, reg;
   expressionS e1, e2;
@@ -3092,7 +3092,7 @@ generate_unwind_image ()
 
 static void
 dot_handlerdata (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   generate_unwind_image ();
   demand_empty_rest_of_line ();
@@ -3100,14 +3100,14 @@ dot_handlerdata (dummy)
 
 static void
 dot_unwentry (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   demand_empty_rest_of_line ();
 }
 
 static void
 dot_altrp (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   expressionS e;
   unsigned reg;
@@ -3216,7 +3216,7 @@ dot_savemem (psprel)
 
 static void
 dot_saveg (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   expressionS e1, e2;
   int sep;
@@ -3244,7 +3244,7 @@ dot_saveg (dummy)
 
 static void
 dot_savef (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   expressionS e1;
   int sep;
@@ -3258,7 +3258,7 @@ dot_savef (dummy)
 
 static void
 dot_saveb (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   expressionS e1, e2;
   unsigned int reg;
@@ -3293,7 +3293,7 @@ dot_saveb (dummy)
 
 static void
 dot_savegf (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   expressionS e1, e2;
   int sep;
@@ -3313,7 +3313,7 @@ dot_savegf (dummy)
 
 static void
 dot_spill (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   expressionS e;
   unsigned char sep;
@@ -3330,7 +3330,7 @@ dot_spill (dummy)
 
 static void
 dot_spillreg (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   int sep, ab, xy, reg, treg;
   expressionS e1, e2;
@@ -3397,7 +3397,7 @@ dot_spillmem (psprel)
 
 static void
 dot_spillreg_p (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   int sep, ab, xy, reg, treg;
   expressionS e1, e2, e3;
@@ -3496,7 +3496,7 @@ dot_spillmem_p (psprel)
 
 static void
 dot_label_state (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   expressionS e;
 
@@ -3511,7 +3511,7 @@ dot_label_state (dummy)
 
 static void
 dot_copy_state (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   expressionS e;
 
@@ -3526,7 +3526,7 @@ dot_copy_state (dummy)
 
 static void
 dot_unwabi (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   expressionS e1, e2;
   unsigned char sep;
@@ -3558,7 +3558,7 @@ dot_unwabi (dummy)
 
 static void
 dot_personality (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   char *name, *p, c;
   SKIP_WHITESPACE ();
@@ -3573,7 +3573,7 @@ dot_personality (dummy)
 
 static void
 dot_proc (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   char *name, *p, c;
   symbolS *sym;
@@ -3608,7 +3608,7 @@ dot_proc (dummy)
 
 static void
 dot_body (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   unwind.prologue = 0;
   unwind.prologue_mask = 0;
@@ -3619,10 +3619,10 @@ dot_body (dummy)
 
 static void
 dot_prologue (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   unsigned char sep;
-  int mask = 0, grsave;
+  int mask = 0, grsave = 0;
 
   if (!is_it_end_of_statement ())
     {
@@ -3660,7 +3660,7 @@ dot_prologue (dummy)
 
 static void
 dot_endp (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   expressionS e;
   unsigned char *ptr;
@@ -3732,7 +3732,7 @@ dot_template (template)
 
 static void
 dot_regstk (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   int ins, locs, outs, rots;
 
@@ -3883,7 +3883,7 @@ dot_byteorder (byteorder)
 
 static void
 dot_psr (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   char *option;
   int ch;
@@ -3916,14 +3916,14 @@ dot_psr (dummy)
 
 static void
 dot_alias (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   as_bad (".alias not implemented yet");
 }
 
 static void
 dot_ln (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   new_logical_line (0, get_absolute_expression ());
   demand_empty_rest_of_line ();
@@ -4067,7 +4067,7 @@ dot_xfloat_cons_ua (kind)
 
 static void
 dot_reg_val (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   expressionS reg;
 
@@ -4320,7 +4320,7 @@ dot_pred_rel (type)
 
 static void
 dot_entry (dummy)
-     int dummy;
+     int dummy ATTRIBUTE_UNUSED;
 {
   const char *err;
   char *name;
@@ -4359,7 +4359,7 @@ dot_entry (dummy)
 
 static void
 dot_mem_offset (dummy)
-  int dummy;
+  int dummy ATTRIBUTE_UNUSED;
 {
   md.mem_offset.hint = 1;
   md.mem_offset.offset = get_absolute_expression ();
@@ -4389,40 +4389,40 @@ const pseudo_typeS md_pseudo_table[] =
     { "proc", dot_proc, 0 },
     { "body", dot_body, 0 },
     { "prologue", dot_prologue, 0 },
-    { "endp", dot_endp },
-    { "file", dwarf2_directive_file },
-    { "loc", dwarf2_directive_loc },
+    { "endp", dot_endp, 0 },
+    { "file", dwarf2_directive_file, 0 },
+    { "loc", dwarf2_directive_loc, 0 },
 
-    { "fframe", dot_fframe },
-    { "vframe", dot_vframe },
-    { "vframesp", dot_vframesp },
-    { "vframepsp", dot_vframepsp },
-    { "save", dot_save },
-    { "restore", dot_restore },
-    { "restorereg", dot_restorereg },
-    { "restorereg.p", dot_restorereg_p },
-    { "handlerdata", dot_handlerdata },
-    { "unwentry", dot_unwentry },
-    { "altrp", dot_altrp },
+    { "fframe", dot_fframe, 0 },
+    { "vframe", dot_vframe, 0 },
+    { "vframesp", dot_vframesp, 0 },
+    { "vframepsp", dot_vframepsp, 0 },
+    { "save", dot_save, 0 },
+    { "restore", dot_restore, 0 },
+    { "restorereg", dot_restorereg, 0 },
+    { "restorereg.p", dot_restorereg_p, 0 },
+    { "handlerdata", dot_handlerdata, 0 },
+    { "unwentry", dot_unwentry, 0 },
+    { "altrp", dot_altrp, 0 },
     { "savesp", dot_savemem, 0 },
     { "savepsp", dot_savemem, 1 },
-    { "save.g", dot_saveg },
-    { "save.f", dot_savef },
-    { "save.b", dot_saveb },
-    { "save.gf", dot_savegf },
-    { "spill", dot_spill },
-    { "spillreg", dot_spillreg },
+    { "save.g", dot_saveg, 0 },
+    { "save.f", dot_savef, 0 },
+    { "save.b", dot_saveb, 0 },
+    { "save.gf", dot_savegf, 0 },
+    { "spill", dot_spill, 0 },
+    { "spillreg", dot_spillreg, 0 },
     { "spillsp", dot_spillmem, 0 },
     { "spillpsp", dot_spillmem, 1 },
-    { "spillreg.p", dot_spillreg_p },
+    { "spillreg.p", dot_spillreg_p, 0 },
     { "spillsp.p", dot_spillmem_p, 0 },
     { "spillpsp.p", dot_spillmem_p, 1 },
-    { "label_state", dot_label_state },
-    { "copy_state", dot_copy_state },
-    { "unwabi", dot_unwabi },
-    { "personality", dot_personality },
+    { "label_state", dot_label_state, 0 },
+    { "copy_state", dot_copy_state, 0 },
+    { "unwabi", dot_unwabi, 0 },
+    { "personality", dot_personality, 0 },
 #if 0
-    { "estate", dot_estate },
+    { "estate", dot_estate, 0 },
 #endif
     { "mii", dot_template, 0x0 },
     { "mli", dot_template, 0x2 }, /* old format, for compatibility */
@@ -4470,13 +4470,13 @@ const pseudo_typeS md_pseudo_table[] =
 
     /* annotations/DV checking support */
     { "entry", dot_entry, 0 },
-    { "mem.offset", dot_mem_offset },
+    { "mem.offset", dot_mem_offset, 0 },
     { "pred.rel", dot_pred_rel, 0 },
     { "pred.rel.clear", dot_pred_rel, 'c' },
     { "pred.rel.imply", dot_pred_rel, 'i' },
     { "pred.rel.mutex", dot_pred_rel, 'm' },
     { "pred.safe_across_calls", dot_pred_rel, 's' },
-    { "reg.val", dot_reg_val },
+    { "reg.val", dot_reg_val, 0 },
     { "auto", dot_dv_mode, 'a' },
     { "explicit", dot_dv_mode, 'e' },
     { "default", dot_dv_mode, 'd' },
@@ -4821,9 +4821,9 @@ operand_match (idesc, index, e)
 
       if (e->X_op == O_constant
 	  && ((e->X_add_number >= 0
-	       && e->X_add_number < ((bfd_vma) 1 << 44))
+	       && (bfd_vma) e->X_add_number < ((bfd_vma) 1 << 44))
 	      || (e->X_add_number < 0
-		  && -e->X_add_number <= ((bfd_vma) 1 << 44))))
+		  && (bfd_vma) -e->X_add_number <= ((bfd_vma) 1 << 44))))
 	{
 	  /* sign-extend */
 	  if (e->X_add_number >= 0
@@ -4839,9 +4839,9 @@ operand_match (idesc, index, e)
       /* bit 0 is a don't care (pr0 is hardwired to 1) */
       if (e->X_op == O_constant
 	  && ((e->X_add_number >= 0
-	       && e->X_add_number < ((bfd_vma) 1 << 17))
+	       && (bfd_vma) e->X_add_number < ((bfd_vma) 1 << 17))
 	      || (e->X_add_number < 0
-		  && -e->X_add_number <= ((bfd_vma) 1 << 17))))
+		  && (bfd_vma) -e->X_add_number <= ((bfd_vma) 1 << 17))))
 	{
 	  /* sign-extend */
 	  if (e->X_add_number >= 0
@@ -4950,8 +4950,8 @@ operand_match (idesc, index, e)
       else
 	val = e->X_add_number;
 
-      if ((val >= 0 && val < ((bfd_vma) 1 << (bits - 1)))
-	  || (val < 0 && -val <= ((bfd_vma) 1 << (bits - 1))))
+      if ((val >= 0 && (bfd_vma) val < ((bfd_vma) 1 << (bits - 1)))
+	  || (val < 0 && (bfd_vma) -val <= ((bfd_vma) 1 << (bits - 1))))
 	return 1;
       break;
 
@@ -5410,7 +5410,7 @@ emit_one_bundle ()
   struct ia64_opcode *idesc;
   int end_of_insn_group = 0, user_template = -1;
   int n, i, j, first, curr;
-  unw_rec_list *ptr, *prev;
+  unw_rec_list *ptr;
   bfd_vma t0 = 0, t1 = 0;
   struct label_fix *lfix;
   struct insn_fix *ifix;
@@ -5477,7 +5477,8 @@ emit_one_bundle ()
 	}
       if (idesc->flags & IA64_OPCODE_LAST)
 	{
-	  int required_slot, required_template;
+	  int required_slot;
+	  unsigned int required_template;
 
 	  /* If we need a stop bit after an M slot, our only choice is
 	     template 5 (M;;MI).  If we need a stop bit after a B
@@ -6158,8 +6159,8 @@ md_begin ()
 
 void
 ia64_init (argc, argv)
-     int argc;
-     char **argv;
+     int argc ATTRIBUTE_UNUSED;
+     char **argv ATTRIBUTE_UNUSED;
 {
   md.flags = EF_IA_64_ABI64;
   if (TARGET_BYTES_BIG_ENDIAN)
@@ -6957,7 +6958,7 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 		    for (i = 0; i < NELEMS (gr_values); i++)
 		      {
 			/* Uses all registers *except* the one in R3.  */
-			if (i != (gr_values[regno].value & 0xFF))
+			if ((unsigned)i != (gr_values[regno].value & 0xFF))
 			  {
 			    specs[count] = tmpl;
 			    specs[count++].index = i;
@@ -8302,8 +8303,11 @@ note_register_values (idesc)
 	  gr_values[regno].value = CURR_SLOT.opnd[1].X_add_number;
 	  gr_values[regno].path = md.path;
 	  if (md.debug_dv)
-	    fprintf (stderr, "  Know gr%d = 0x%llx\n",
-		     regno, gr_values[regno].value);
+	    {
+	      fprintf (stderr, "  Know gr%d = ", regno);
+	      fprintf_vma (stderr, gr_values[regno].value);
+	      fputs ("\n", stderr);
+	    }
 	}
     }
   else
@@ -8495,8 +8499,8 @@ insn_group_break (insert_stop, qp_regno, save_current)
 
 static void
 mark_resource (idesc, dep, spec, depind, path)
-     struct ia64_opcode *idesc;
-     const struct ia64_dependency *dep;
+     struct ia64_opcode *idesc ATTRIBUTE_UNUSED;
+     const struct ia64_dependency *dep ATTRIBUTE_UNUSED;
      struct rsrc *spec;
      int depind;
      int path;
@@ -8533,9 +8537,12 @@ print_dependency (action, depind)
       if (regdeps[depind].specific && regdeps[depind].index != 0)
 	fprintf (stderr, " (%d)", regdeps[depind].index);
       if (regdeps[depind].mem_offset.hint)
-	fprintf (stderr, " 0x%llx+0x%llx",
-		 regdeps[depind].mem_offset.base,
-		 regdeps[depind].mem_offset.offset);
+	{
+	  fputs (" ", stderr);
+	  fprintf_vma (stderr, regdeps[depind].mem_offset.base);
+	  fputs ("+", stderr);
+	  fprintf_vma (stderr, regdeps[depind].mem_offset.offset);
+	}
       fprintf (stderr, "\n");
     }
 }
@@ -9122,7 +9129,7 @@ md_assemble (str)
 
 symbolS *
 md_undefined_symbol (name)
-     char *name;
+     char *name ATTRIBUTE_UNUSED;
 {
   return 0;
 }
@@ -9589,7 +9596,7 @@ int
 md_apply_fix3 (fix, valuep, seg)
      fixS *fix;
      valueT *valuep;
-     segT seg;
+     segT seg ATTRIBUTE_UNUSED;
 {
   char *fixpos;
   valueT value = *valuep;
@@ -9667,7 +9674,7 @@ md_apply_fix3 (fix, valuep, seg)
 
 arelent *
 tc_gen_reloc (sec, fixp)
-     asection *sec;
+     asection *sec ATTRIBUTE_UNUSED;
      fixS *fixp;
 {
   arelent *reloc;
@@ -9765,7 +9772,7 @@ int
 ia64_md_do_align (n, fill, len, max)
      int n;
      const char *fill;
-     int len;
+     int len ATTRIBUTE_UNUSED;
      int max;
 {
   /* Fill any pending bundle with nops.  */

@@ -1,3 +1,30 @@
+2000-11-22  Jim Wilson  <wilson@redhat.com>
+
+	* config/tc-ia64.c (pseudo_func): Add missing initializers.
+	(struct rsrc): Make line unsigned.
+	(gr_values): Add missing initializer.
+	(SLOT_NUM_NOT_SET): Add unsigned cast.
+	(ia64_elf_section_flags, output_vbyte_mem, count_output, dot_radix,
+	dot_fframe, dot_vframe, dot_vframesp, dot_vframepsp, dot_save,
+	dot_restore, dot_restorereg, dot_restorereg_p, dot_handlerdata,
+	dot_unwentry, dot_altrp, dot_saveg, dot_savef, dot_saveb, dot_savegf,
+	dot_spill, dot_spillreg, dot_spillreg_p, dot_label_state,
+	dot_copy_state, dot_unwabi, dot_personality, dot_proc, dot_body,
+	dot_prologue, dot_endp, dot_regstk, dot_psr, dot_alias, dot_ln,
+	dot_reg_val, dot_entry, dot_mem_offset, ia64_init, mark_resource,
+	md_undefined_symbol, md_apply_fix3, tc_gen_reloc, ia64_md_do_align):
+	Add ATTRIBUTE_UNUSED to unused parameters.
+	(convert_expr_to_ab_reg): Add parens.
+	(convert_expr_to_xy_reg): Add parens.  Comment out >= REG_GR test.
+	(dot_prologue): Initialize grsave when declared.
+	(md_pseudo_table): Add missing initializers.
+	(operand_match): Add casts to bfd_vma.
+	(emit_one_bundle): Delete unused local prev.  Make required_template
+	unsigned.
+	(specify_resource): Cast i to unsigned.
+	(note_register_values): Use fprintf_vma.
+	(print_dependency): Likewise.
+
 2000-11-21  Jim Wilson  <wilson@redhat.com>
 
 	* config/tc-ia64.c (generate_unwind_image): Call record_alignment
