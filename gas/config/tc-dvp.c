@@ -320,6 +320,10 @@ assemble_pke (str)
 	      cur_varlen_insn = f;
 	      if (opcode->flags & PKE_OPCODE_MPG)
 		cur_asm_state = ASM_MPG;
+	      else if (opcode->flags & PKE_OPCODE_DIRECT)
+		cur_asm_state = ASM_DIRECT;
+	      else if (opcode->flags & PKE_OPCODE_UNPACK)
+		cur_asm_state = ASM_UNPACK;
 	    }
 	  else
 	    {
@@ -328,6 +332,10 @@ assemble_pke (str)
 		 used to indicate we're expecting to see a .endmpg.  */
 	      if (opcode->flags & PKE_OPCODE_MPG)
 		cur_asm_state = ASM_VU;
+	      else if (opcode->flags & PKE_OPCODE_DIRECT)
+		cur_asm_state = ASM_GPUIF;
+	      else if (opcode->flags & PKE_OPCODE_UNPACK)
+		cur_asm_state = ASM_INIT;
 	      /* FIXME: We assume there is exactly the right amount of
 		 data.  */
 	    }
@@ -1202,17 +1210,26 @@ install_pke_length (buf, len)
     {
       /* mpg */
       len /= 4;
+      /* ??? Worry about data /= 4 cuts off?  */
       if (len > 256)
-	as_bad ("mpg data length must be between 1 and 256");
-      buf[2] = len;
+	as_bad ("`mpg' data length must be between 1 and 256");
+      buf[2] = len == 256 ? 0 : len;
     }
   else if ((cmd & 0x70) == 0x50)
     {
       /* direct/directhl */
+      /* ??? Worry about data /= 16 cuts off?  */
+      len /= 16;
+      if (len > 65536)
+	as_bad ("`direct' data length must be between 1 and 65536");
+      len = len == 65536 ? 0 : len;
+      buf[0] = len;
+      buf[1] = len >> 8;
     }
   else if ((cmd & 0x60) == 0x60)
     {
       /* unpack */
+      /* FIXME */
     }
   else
     as_fatal ("bad call to install_pke_length");
