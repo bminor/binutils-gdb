@@ -1,7 +1,7 @@
 2003-09-03  Michael Snyder  <msnyder@redhat.com>
 
-	* sim/frv/fr500/mclracc.cgs: Change mach to 'all', 
-	to be consistant with other tests in the directory.
+	* sim/frv/fr500/mclracc.cgs: Change mach to 'all', to be
+	consistent with other tests in the directory.
 
 2003-09-03  Michael Snyder  <msnyder@redhat.com>
 
