@@ -1467,6 +1467,38 @@ get_prev_frame (struct frame_info *this_frame)
       return prev_frame;
     }
 
+  /* Check that this frame's ID was valid.  If it wasn't, don't try to
+     unwind to the prev frame.  Be careful to not apply this test to
+     the sentinel frame.  */
+  if (this_frame->level >= 0 && !frame_id_p (get_frame_id (this_frame)))
+    {
+      if (frame_debug)
+ 	fprintf_filtered (gdb_stdlog,
+ 			  "Outermost frame - this ID is NULL\n");
+      return NULL;
+    }
+
+  /* Check that this frame's ID isn't inner to (younger, below, next)
+     the next frame.  This happens when frame unwind goes backwards.
+     Since the sentinel frame isn't valid, don't apply this if this
+     frame is entier the inner-most or sentinel frame.  */
+  if (this_frame->level > 0
+      && frame_id_inner (get_frame_id (this_frame),
+			 get_frame_id (this_frame->next)))
+    error ("This frame inner-to next frame (corrupt stack?)");
+
+  /* Check that this and the next frame are different.  If they are
+     not, there is most likely a stack cycle.  As with the inner-than
+     test, avoid the inner-most and sentinel frames.  */
+  /* FIXME: cagney/2003-03-17: Can't yet enable this this check. The
+     frame_id_eq() method doesn't yet use function addresses when
+     comparing frame IDs.  */
+  if (0
+      && this_frame->level > 0
+      && frame_id_eq (get_frame_id (this_frame),
+		      get_frame_id (this_frame->next)))
+    error ("This frame identical to next frame (corrupt stack?)");
+
   /* Allocate the new frame but do not wire it in to the frame chain.
      Some (bad) code in INIT_FRAME_EXTRA_INFO tries to look along
      frame->next to pull some fancy tricks (of course such code is, by
@@ -1533,38 +1565,17 @@ get_prev_frame (struct frame_info *this_frame)
 			       &prev_frame->prologue_cache,
 			       &prev_frame->id);
 
-  /* Check that the unwound ID is valid.  */
-  if (!frame_id_p (prev_frame->id))
-    {
-      if (frame_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "Outermost frame - unwound frame ID invalid\n");
-      return NULL;
-    }
+  /* The unwound frame ID is validate at the start of this function,
+     as part of the logic to decide if that frame should be further
+     unwound, and not here while the prev frame is being created.
+     Doing this makes it possible for the user to examine a frame that
+     has an invalid frame ID.
 
-  /* Check that the new frame isn't inner to (younger, below, next)
-     the old frame.  If that happens the frame unwind is going
-     backwards.  */
-  /* FIXME: cagney/2003-02-25: Ignore the sentinel frame since that
-     doesn't have a valid frame ID.  Should instead set the sentinel
-     frame's frame ID to a true `sentinel'.  Leave it until after the
-     switch to storing the frame ID, instead of the frame base, in the
-     frame object.  */
-  if (this_frame->level >= 0
-      && frame_id_inner (prev_frame->id, get_frame_id (this_frame)))
-    error ("Unwound frame inner-to selected frame (corrupt stack?)");
-
-  /* FIXME: cagney/2003-03-14: Should check that this and next frame's
-     IDs are different (i.e., !frame_id_eq()).  Can't yet do that as
-     the EQ function doesn't yet compare PC values.  */
-
-  /* FIXME: cagney/2003-03-14: Should delay the evaluation of the
-     frame ID until when it is needed.  That way the inner most frame
-     can be created without needing to do prologue analysis.  */
-
-  /* Note that, due to frameless functions, the stronger test of the
-     new frame being outer to the old frame can't be used - frameless
-     functions differ by only their PC value.  */
+     The very old VAX frame_args_address_correct() method noted: [...]
+     For the sake of argument, suppose that the stack is somewhat
+     trashed (which is one reason that "info frame" exists).  So,
+     return 0 (indicating we don't know the address of the arglist) if
+     we don't know what frame this frame calls.  */
 
   /* FIXME: cagney/2002-12-18: Instead of this hack, should only store
      the frame ID in PREV_FRAME.  Unfortunatly, some architectures

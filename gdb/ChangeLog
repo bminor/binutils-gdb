@@ -1,5 +1,11 @@
 2003-03-25  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.c (get_prev_frame): Delay validating a frame's ID -
+	non-NULL, didn't go backwards - until an attempt to unwind it to
+	the previous frame.
+
+2003-03-25  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbarch.sh (DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED): Replace
 	EXTRA_STACK_ALIGNMENT_NEEDED.  Default to 0 not 1.
 	* gdbarch.h, gdbarch.c: Re-generate.
