@@ -35,7 +35,7 @@ extern const struct pd_reg pre_defined_registers[];
 int reg_name_cnt();
 
 /* the number of control registers */
-#define MAX_CONTROL_REG	16
+#define MAX_CONTROL_REG	64
 
 /* define the format specifiers */
 #define FM00	0
@@ -81,36 +81,43 @@ struct d30v_opcode
   unsigned char format[4];
 
 #define SHORT_M		1
-#define SHORT_A		5
-#define SHORT_B1	7
-#define SHORT_B2	8
-#define SHORT_B3	9
-#define SHORT_B3b	11
-#define SHORT_D1	13
-#define SHORT_D2	15
-#define SHORT_U		17	/* unary SHORT_A.  ABS for example */
-#define SHORT_F		19	/* SHORT_A with flag registers */
-#define SHORT_AF	21	/* SHORT_A with only the first register a flag register */
-#define SHORT_T		23	/* for trap instruction */
-#define SHORT_A5	24	/* SHORT_A with a 5-bit immediate instead of 6 */
-#define SHORT_CMP	25	/* special form for CMPcc and CMPUcc */
-#define SHORT_A1	27	/* special form of SHORT_A for MACa opcodes where a=1 */
-#define SHORT_AA	29	/* SHORT_A with the first register an accumulator */
-#define SHORT_RA	31	/* SHORT_A with the second register an accumulator */
-#define SHORT_MODINC	33	
-#define SHORT_MODDEC	34
-#define SHORT_C1	35
-#define SHORT_C2	36
-#define SHORT_UF	37
-#define SHORT_NONE	38	/* no operands */
-#define LONG		39
-#define LONG_U		40	/* unary LONG */
-#define LONG_AF		41	/* LONG with the first register a flag register */
-#define LONG_CMP	42	/* special form for CMPcc and CMPUcc */
-#define LONG_M		43	/* Memory long for ldb, stb */
-#define LONG_2		44	/* LONG with 2 operands; bratnz */
-#define LONG_2b		45	/* LONG_2 with modifier of 3 */
-#define LONG_D		46	/* for DBRAI*/
+#define SHORT_M2	5	/* for ld2w and st2w */
+#define SHORT_A		9
+#define SHORT_B1	11
+#define SHORT_B2	12
+#define SHORT_B3	13
+#define SHORT_B3b	15
+#define SHORT_D1	17
+#define SHORT_D2	19
+#define SHORT_D2B	21
+#define SHORT_U		23	/* unary SHORT_A.  ABS for example */
+#define SHORT_F		25	/* SHORT_A with flag registers */
+#define SHORT_AF	27	/* SHORT_A with only the first register a flag register */
+#define SHORT_T		29	/* for trap instruction */
+#define SHORT_A5	30	/* SHORT_A with a 5-bit immediate instead of 6 */
+#define SHORT_CMP	32	/* special form for CMPcc */
+#define SHORT_CMPU	34	/* special form for CMPUcc */
+#define SHORT_A1	36	/* special form of SHORT_A for MACa opcodes where a=1 */
+#define SHORT_AA	38	/* SHORT_A with the first register an accumulator */
+#define SHORT_RA	40	/* SHORT_A with the second register an accumulator */
+#define SHORT_MODINC	42	
+#define SHORT_MODDEC	43
+#define SHORT_C1	44
+#define SHORT_C2	45
+#define SHORT_UF	46
+#define SHORT_A2	47
+#define SHORT_A5S	49
+#define SHORT_NONE	51	/* no operands */
+#define LONG		52
+#define LONG_U		53	/* unary LONG */
+#define LONG_AF		54	/* LONG with the first register a flag register */
+#define LONG_CMP	55	/* special form for CMPcc and CMPUcc */
+#define LONG_M		56	/* Memory long for ldb, stb */
+#define LONG_M2		57	/* Memory long for ld2w, st2w */
+#define LONG_2		58	/* LONG with 2 operands; bratnz */
+#define LONG_2b		59	/* LONG_2 with modifier of 3 */
+#define LONG_D		60	/* for DBRAI*/
+#define LONG_Db		61	/* for repeati*/
 
   /* the execution unit(s) used */
   int unit;
@@ -120,25 +127,41 @@ struct d30v_opcode
 
   /* this field is used to decide if two instructions */
   /* can be executed in parallel */
-  int flags_used;
-  int flags_set;
-#define FLAG_0	(1<<0)
-#define FLAG_1	(1<<1)
-#define FLAG_2	(1<<2)
-#define FLAG_3	(1<<3)
-#define FLAG_4	(1<<4)	/* S (saturation) */
-#define FLAG_5	(1<<5)	/* V (overflow) */
-#define FLAG_6	(1<<6)	/* VA (accumulated overflow) */
-#define FLAG_7	(1<<7)	/* C (carry/borrow) */
-#define FLAG_SM	(1<<8)	/* SM (stack mode) */
-#define FLAG_RP	(1<<9)	/* RP (repeat emable) */
-#define FLAG_JMP	(1<<10)	/* instruction is a branch */
-#define FLAG_JSR	(1<<11)	/* subroutine call.  must be aligned */
-#define FLAG_MEM	(1<<12)	/* reads/writes memory */
-#define FLAG_X		(1<<12)	/* flag used/set depends on register contents */
+  long flags_used;
+  long flags_set;
+#define FLAG_0		(1L<<0)
+#define FLAG_1		(1L<<1)
+#define FLAG_2		(1L<<2)
+#define FLAG_3		(1L<<3)
+#define FLAG_4		(1L<<4)		/* S (saturation) */
+#define FLAG_5		(1L<<5)		/* V (overflow) */
+#define FLAG_6		(1L<<6)		/* VA (accumulated overflow) */
+#define FLAG_7		(1L<<7)		/* C (carry/borrow) */
+#define FLAG_SM		(1L<<8)		/* SM (stack mode) */
+#define FLAG_RP		(1L<<9)		/* RP (repeat enable) */
+#define FLAG_CONTROL	(1L<<10)	/* control registers */
+#define FLAG_A0		(1L<<11)	/* A0 */
+#define FLAG_A1		(1L<<12)	/* A1 */
+#define FLAG_JMP	(1L<<13)	/* instruction is a branch */
+#define FLAG_JSR	(1L<<14)	/* subroutine call.  must be aligned */
+#define FLAG_MEM	(1L<<15)	/* reads/writes memory */
+#define FLAG_2WORD	(1L<<16)	/* 2 word/4 byte operation */
+#define FLAG_MUL16	(1L<<17)	/* 16 bit multiply */
+#define FLAG_MUL32	(1L<<18)	/* 32 bit multiply */
+#define FLAG_ADDSUBppp	(1L<<19)	/* ADDppp or SUBppp */
 #define FLAG_CVVA	(FLAG_5|FLAG_6|FLAG_7)
-#define FLAG_C	FLAG_7
-#define FLAG_ALL 0xffffffff
+#define FLAG_C		FLAG_7
+#define FLAG_ALL	(FLAG_0 | \
+			 FLAG_1 | \
+			 FLAG_2 | \
+			 FLAG_3 | \
+			 FLAG_4 | \
+			 FLAG_5 | \
+			 FLAG_6 | \
+			 FLAG_7 | \
+			 FLAG_SM | \
+			 FLAG_RP | \
+			 FLAG_CONTROL)
 
   int reloc_flag;
 #define RELOC_PCREL	1
@@ -161,7 +184,7 @@ struct d30v_operand
   int position;
 
   /* syntax flags.  */
-  int flags;
+  long flags;
 };
 extern const struct d30v_operand d30v_operand_table[];
 
@@ -216,6 +239,9 @@ extern const struct d30v_operand d30v_operand_table[];
 
 /* fake operand for mvtsys and mvfsys */
 #define OPERAND_SPECIAL	(0x8000)
+
+/* let the optimizer know that two registers are affected */
+#define OPERAND_2REG	(0x10000)
 
 /* The format table is an array of struct d30v_format.  */
 struct d30v_format
