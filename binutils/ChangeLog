@@ -1,3 +1,9 @@
+Mon Feb 22 07:54:03 1993  Mike Werner  (mtw@poseidon.cygnus.com)
+
+	* binutils/testsuite: made modifications to testcases, etc., to allow
+        them to work properly  given the reorganization of deja-gnu and the
+	relocation of the testcases from deja-gnu to a "tool" subdirectory.
+
 Mon Feb 22 10:27:24 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* objdump.c (dump_data): Free up section contents each time
