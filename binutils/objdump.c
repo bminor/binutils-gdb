@@ -58,6 +58,7 @@ char *only;			/* -j secname */
 struct objdump_disasm_info {
   bfd *abfd;
   asection *sec;
+  boolean require_sec;
 };
 
 /* Architecture to disassemble for, or default if NULL.  */
@@ -421,7 +422,8 @@ objdump_print_address (vma, info)
     long i;
 
     aux = (struct objdump_disasm_info *) info->application_data;
-    if ((aux->abfd->flags & HAS_RELOC)
+    if ((aux->require_sec
+	 || (aux->abfd->flags & HAS_RELOC) != 0)
 	&& vma >= bfd_get_section_vma (aux->abfd, aux->sec)
 	&& vma < (bfd_get_section_vma (aux->abfd, aux->sec)
 		  + bfd_get_section_size_before_reloc (aux->sec))
@@ -665,7 +667,9 @@ disassemble_data (abfd)
 			}
 		    }
 		}
+	      aux.require_sec = true;
 	      objdump_print_address (section->vma + i, &disasm_info);
+	      aux.require_sec = false;
 	      putchar (' ');
 
 	      if (disassemble_fn)
