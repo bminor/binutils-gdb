@@ -10754,11 +10754,23 @@ md_apply_fix3 (fixP, valP, seg)
 	  value -= symval;
 
 	  howto = bfd_reloc_type_lookup (stdoutput, fixP->fx_r_type);
-	  if (value != 0 && howto->partial_inplace && ! fixP->fx_pcrel)
+	  if (value != 0 && howto->partial_inplace
+	      && (! fixP->fx_pcrel || howto->pcrel_offset))
 	    {
 	      /* In this case, the bfd_install_relocation routine will
 		 incorrectly add the symbol value back in.  We just want
-		 the addend to appear in the object file.  */
+		 the addend to appear in the object file.
+		 
+		 howto->pcrel_offset is added for R_MIPS_PC16, which is
+		 generated for code like
+		 
+		 	globl g1 .text
+			.text
+			.space 20
+		 g1:
+		 x:
+		 	bal g1
+	       */
 	      value -= symval;
 
 	      /* Make sure the addend is still non-zero.  If it became zero
