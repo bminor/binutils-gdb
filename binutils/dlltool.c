@@ -713,6 +713,7 @@ static int alphafunc (const void *, const void *);
 static void mangle_defs (void);
 static void usage (FILE *, int);
 static void inform (const char *, ...);
+static void set_dll_name_from_def (const char *);
 
 static char *
 prefix_encode (char *start, unsigned code)
@@ -877,7 +878,6 @@ process_def_file (const char *name)
 
 /* Communications with the parser.  */
 
-static const char *d_name;	/* Arg to NAME or LIBRARY.  */
 static int d_nfuncs;		/* Number of functions exported.  */
 static int d_named_nfuncs;	/* Number of named functions exported.  */
 static int d_low_ord;		/* Lowest ordinal index.  */
@@ -925,6 +925,16 @@ def_exports (const char *name, const char *internal_name, int ordinal,
     p->forward = 0; /* no forward */
 }
 
+static void
+set_dll_name_from_def (const char * name)
+{
+  const char* image_basename = lbasename (name);
+  if (image_basename != name)
+    non_fatal (_("%s: Path components stripped from image name, '%s'."),
+	      def_file, name);
+  dll_name = xstrdup (image_basename);
+}
+
 void
 def_name (const char *name, int base)
 {
@@ -934,11 +944,10 @@ def_name (const char *name, int base)
   if (d_is_dll)
     non_fatal (_("Can't have LIBRARY and NAME"));
 
-  d_name = name;
   /* If --dllname not provided, use the one in the DEF file.
      FIXME: Is this appropriate for executables?  */
   if (! dll_name)
-    dll_name = xstrdup (name);
+    set_dll_name_from_def (name);
   d_is_exe = 1;
 }
 
@@ -951,10 +960,9 @@ def_library (const char *name, int base)
   if (d_is_exe)
     non_fatal (_("Can't have LIBRARY and NAME"));
 
-  d_name = name;
   /* If --dllname not provided, use the one in the DEF file.  */
   if (! dll_name)
-    dll_name = xstrdup (name);
+    set_dll_name_from_def (name);
   d_is_dll = 1;
 }
 
@@ -3289,7 +3297,10 @@ main (int ac, char **av)
 	  output_def = fopen (optarg, FOPEN_WT);
 	  break;
 	case 'D':
-	  dll_name = optarg;
+	  dll_name = (char*) lbasename (optarg);
+	  if (dll_name != optarg)
+	    non_fatal (_("Path components stripped from dllname, '%s'."),
+	      		 optarg);
 	  break;
 	case 'l':
 	  imp_name = optarg;
@@ -3371,9 +3382,13 @@ main (int ac, char **av)
 
   if (!dll_name && exp_name)
     {
-      int len = strlen (exp_name) + 5;
+      /* If we are inferring dll_name from exp_name,
+         strip off any path components, without emitting
+         a warning.  */  
+      const char* exp_basename = lbasename (exp_name); 
+      const int len = strlen (exp_basename) + 5;
       dll_name = xmalloc (len);
-      strcpy (dll_name, exp_name);
+      strcpy (dll_name, exp_basename);
       strcat (dll_name, ".dll");
     }
 

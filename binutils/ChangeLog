@@ -1,3 +1,12 @@
+2005-01-16  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* dlltool.c (set_dll_name_from_def): New function.  Strip name
+	to basename, with warning.
+	(def_name): Use it. 
+	(def_library): Likwise.
+	(main): Strip arg of --dllname to basename, with warning.
+	Only use basename of exp_name when inferring dll_name.
+
 2005-01-11  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/637
