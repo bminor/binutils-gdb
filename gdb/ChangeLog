@@ -1,5 +1,7 @@
 Wed Oct  5 11:41:24 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
+	* nlm/configure.in: ${gdb_host_cpu} defaults to ${host_cpu}.
+
 	* nlm/Makefile.in: Get rid of NWINCLUDES.
 	* config/{alpha,powerpc}/gdbserve.mt: Remove NWINCLUDES.
 	  User should now configure with --with-headers.

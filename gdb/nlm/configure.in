@@ -15,7 +15,7 @@ i[345]86)		gdb_host_cpu=i386 ;;
 m68*)			gdb_host_cpu=m68k ;;
 np1)			gdb_host_cpu=gould ;;
 pyramid)		gdb_host_cpu=pyr ;;
-*)			gdb_host_cpu=$target_cpu ;;
+*)			gdb_host_cpu=$host_cpu ;;
 
 esac
 
