@@ -1,3 +1,14 @@
+2002-07-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-i386.c (elf_i386_relocate_section): Don't complain about
+	unresolved debugging relocs in dynamic applications.
+	* elf32-s390.c (elf_s390_relocate_section): Likewise.
+	* elf32-sparc.c (elf32_sparc_relocate_section): Likewise.
+	* elf64-ppc.c (ppc64_elf_relocate_section): Likewise.
+	* elf64-s390.c (elf_s390_relocate_section): Likewise.
+	* elf64-sparc.c (sparc64_elf_relocate_section): Likewise.
+	* elf64-x86-64.c (elf64_x86_64_relocate_section): Likewise.
+
 2002-07-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ONES): Define.

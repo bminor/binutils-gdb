@@ -5907,13 +5907,11 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  break;
 	}
 
-      /* FIXME: Why do we allow debugging sections to escape this error?
-	 More importantly, why do we not emit dynamic relocs above in
-	 debugging sections (which are ! SEC_ALLOC)?  If we had
-	 emitted the dynamic reloc, we could remove the fudge here.  */
+      /* Dynamic relocs are not propagated for SEC_DEBUGGING sections
+	 because such sections are not SEC_ALLOC and thus ld.so will
+	 not process them.  */
       if (unresolved_reloc
-	  && !(info->shared
-	       && (input_section->flags & SEC_DEBUGGING) != 0
+	  && !((input_section->flags & SEC_DEBUGGING) != 0
 	       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0))
 	{
 	  (*_bfd_error_handler)
