@@ -2,6 +2,8 @@ Sun Nov 19 05:20:53 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* irix5-nat.c, osfsolib.c (solib_address):  Return the name of the
 	containing solib.
+	* stack.c (print_frame_info):  Use minimal symbol only if
+	fi->pc is in a known section.
 
 Sat Nov 18 11:19:35 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
 
