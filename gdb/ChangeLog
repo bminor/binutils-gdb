@@ -1,5 +1,14 @@
 2005-01-12  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386fbsd-tdep.c: Update copyright year.  Include "gdbcore.h",
+	"regcache.h", "gdb_assert.h" and "bsd-uthread.h".
+	(i386fbsd_jmp_buf_reg_offset): New variable.
+	(i386fbsd_supply_uthread, i386fbsd_collect_uthread): New
+	functions.
+	(i386fbsdaout_init_abi): Set supply_uthread and collect_uthread.
+	* Makefile.in (i386fbsd-tdep.o): Update dependency.
+	* config/i386/fbsd.mt (TDEPFILES): Add bsd-uthread.o.
+
 	* bsd-uthread.h: New file.
 	* bsd-uthread.c: New file.
 	* Makefile.in (bsd_uthread_h): New variable.

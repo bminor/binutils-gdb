@@ -1,6 +1,6 @@
 /* Target-dependent code for FreeBSD/i386.
 
-   Copyright 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,10 +21,15 @@
 
 #include "defs.h"
 #include "arch-utils.h"
+#include "gdbcore.h"
 #include "osabi.h"
+#include "regcache.h"
+
+#include "gdb_assert.h"
 
 #include "i386-tdep.h"
 #include "i387-tdep.h"
+#include "bsd-uthread.h"
 #include "solib-svr4.h"
 
 /* FreeBSD 3.0-RELEASE or later.  */
@@ -65,6 +70,60 @@ static int i386fbsd_sc_reg_offset[] =
   8 + 16 * 4			/* %gs */
 };
 
+/* From /usr/src/lib/libc/i386/_setjmp.S.  */
+static int i386fbsd_jmp_buf_reg_offset[] =
+{
+  -1,				/* %eax */
+  -1,				/* %ecx */
+  -1,				/* %edx */
+  1 * 4,			/* %ebx */
+  2 * 4,			/* %esp */
+  3 * 4,			/* %ebp */
+  4 * 4,			/* %esi */
+  5 * 4,			/* %edi */
+  0 * 4				/* %eip */
+};
+
+static void
+i386fbsd_supply_uthread (struct regcache *regcache,
+			 int regnum, CORE_ADDR addr)
+{
+  char buf[4];
+  int i;
+
+  gdb_assert (regnum >= -1);
+
+  for (i = 0; i < ARRAY_SIZE (i386fbsd_jmp_buf_reg_offset); i++)
+    {
+      if (i386fbsd_jmp_buf_reg_offset[i] != -1
+	  && (regnum == -1 || regnum == i))
+	{
+	  read_memory (addr + i386fbsd_jmp_buf_reg_offset[i], buf, 4);
+	  regcache_raw_supply (regcache, i, buf);
+	}
+    }
+}
+
+static void
+i386fbsd_collect_uthread (const struct regcache *regcache,
+			  int regnum, CORE_ADDR addr)
+{
+  char buf[4];
+  int i;
+
+  gdb_assert (regnum >= -1);
+
+  for (i = 0; i < ARRAY_SIZE (i386fbsd_jmp_buf_reg_offset); i++)
+    {
+      if (i386fbsd_jmp_buf_reg_offset[i] != -1
+	  && (regnum == -1 || regnum == i))
+	{
+	  regcache_raw_collect (regcache, i, buf);
+	  write_memory (addr + i386fbsd_jmp_buf_reg_offset[i], buf, 4);
+	}
+    }
+}
+
 static void
 i386fbsdaout_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -90,6 +149,10 @@ i386fbsdaout_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* FreeBSD has a more complete `struct sigcontext'.  */
   tdep->sc_reg_offset = i386fbsd_sc_reg_offset;
   tdep->sc_num_regs = ARRAY_SIZE (i386fbsd_sc_reg_offset);
+
+  /* FreeBSD provides a user-level threads implementation.  */
+  bsd_uthread_set_supply_uthread (gdbarch, i386fbsd_supply_uthread);
+  bsd_uthread_set_collect_uthread (gdbarch, i386fbsd_collect_uthread);
 }
 
 static void
