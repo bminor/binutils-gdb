@@ -255,21 +255,21 @@ m32r_cgen_parse_operand (cd, opindex, strp, fields)
       break;
     case M32R_OPERAND_DISP16 :
       {
-        bfd_vma value;
+        bfd_vma value = 0;
         errmsg = cgen_parse_address (cd, strp, M32R_OPERAND_DISP16, 0, NULL,  & value);
         fields->f_disp16 = value;
       }
       break;
     case M32R_OPERAND_DISP24 :
       {
-        bfd_vma value;
+        bfd_vma value = 0;
         errmsg = cgen_parse_address (cd, strp, M32R_OPERAND_DISP24, 0, NULL,  & value);
         fields->f_disp24 = value;
       }
       break;
     case M32R_OPERAND_DISP8 :
       {
-        bfd_vma value;
+        bfd_vma value = 0;
         errmsg = cgen_parse_address (cd, strp, M32R_OPERAND_DISP8, 0, NULL,  & value);
         fields->f_disp8 = value;
       }
@@ -312,7 +312,7 @@ m32r_cgen_parse_operand (cd, opindex, strp, fields)
       break;
     case M32R_OPERAND_UIMM24 :
       {
-        bfd_vma value;
+        bfd_vma value = 0;
         errmsg = cgen_parse_address (cd, strp, M32R_OPERAND_UIMM24, 0, NULL,  & value);
         fields->f_uimm24 = value;
       }

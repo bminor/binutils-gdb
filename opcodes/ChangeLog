@@ -1,3 +1,11 @@
+2005-04-04  Nick Clifton  <nickc@redhat.com>
+
+	* fr30-asm.c: Regenerate.
+	* frv-asm.c: Regenerate.
+	* iq2000-asm.c: Regenerate.
+	* m32r-asm.c: Regenerate.
+	* openrisc-asm.c: Regenerate.
+
 2005-04-01  Jan Beulich  <jbeulich@novell.com>
 
 	* i386-dis.c (PNI_Fixup): Neither mwait nor monitor have any

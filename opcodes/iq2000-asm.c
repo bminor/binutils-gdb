@@ -358,7 +358,7 @@ iq2000_cgen_parse_operand (cd, opindex, strp, fields)
       break;
     case IQ2000_OPERAND_BASEOFF :
       {
-        bfd_vma value;
+        bfd_vma value = 0;
         errmsg = cgen_parse_address (cd, strp, IQ2000_OPERAND_BASEOFF, 0, NULL,  & value);
         fields->f_imm = value;
       }
@@ -401,7 +401,7 @@ iq2000_cgen_parse_operand (cd, opindex, strp, fields)
       break;
     case IQ2000_OPERAND_JMPTARG :
       {
-        bfd_vma value;
+        bfd_vma value = 0;
         errmsg = cgen_parse_address (cd, strp, IQ2000_OPERAND_JMPTARG, 0, NULL,  & value);
         fields->f_jtarg = value;
       }
@@ -409,7 +409,6 @@ iq2000_cgen_parse_operand (cd, opindex, strp, fields)
     case IQ2000_OPERAND_JMPTARGQ10 :
       {
         bfd_vma value = 0;
-
         errmsg = parse_jtargq10 (cd, strp, IQ2000_OPERAND_JMPTARGQ10, 0, NULL,  & value);
         fields->f_jtargq10 = value;
       }
@@ -434,7 +433,7 @@ iq2000_cgen_parse_operand (cd, opindex, strp, fields)
       break;
     case IQ2000_OPERAND_OFFSET :
       {
-        bfd_vma value;
+        bfd_vma value = 0;
         errmsg = cgen_parse_address (cd, strp, IQ2000_OPERAND_OFFSET, 0, NULL,  & value);
         fields->f_offset = value;
       }

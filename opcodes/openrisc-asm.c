@@ -201,14 +201,14 @@ openrisc_cgen_parse_operand (cd, opindex, strp, fields)
     {
     case OPENRISC_OPERAND_ABS_26 :
       {
-        bfd_vma value;
+        bfd_vma value = 0;
         errmsg = cgen_parse_address (cd, strp, OPENRISC_OPERAND_ABS_26, 0, NULL,  & value);
         fields->f_abs26 = value;
       }
       break;
     case OPENRISC_OPERAND_DISP_26 :
       {
-        bfd_vma value;
+        bfd_vma value = 0;
         errmsg = cgen_parse_address (cd, strp, OPENRISC_OPERAND_DISP_26, 0, NULL,  & value);
         fields->f_disp26 = value;
       }

@@ -1229,14 +1229,14 @@ frv_cgen_parse_operand (cd, opindex, strp, fields)
       break;
     case FRV_OPERAND_LABEL16 :
       {
-        bfd_vma value;
+        bfd_vma value = 0;
         errmsg = cgen_parse_address (cd, strp, FRV_OPERAND_LABEL16, 0, NULL,  & value);
         fields->f_label16 = value;
       }
       break;
     case FRV_OPERAND_LABEL24 :
       {
-        bfd_vma value;
+        bfd_vma value = 0;
         errmsg = parse_call_label (cd, strp, FRV_OPERAND_LABEL24, 0, NULL,  & value);
         fields->f_label24 = value;
       }
