@@ -1,5 +1,10 @@
 2002-01-06  Andrew Cagney  <ac131313@redhat.com>
 
+	* hp-psymtab-read.c: Include "gdb_string.h" instead of <string.h>.
+	* gnu-nat.c: Ditto.
+
+2002-01-06  Andrew Cagney  <ac131313@redhat.com>
+
 	* MAINTAINERS: Note that alpha-dec-osf4.0a, arc-elf, arm-coff,
 	arm-elf, arm-pe, d30v-elf, fr30-elf, h8300hms, h8500hms,
 	i960-coff, m32r-elf, m68k-elf, m88k, mcore-elf, mn10200-elf,

@@ -68,7 +68,7 @@ static struct partial_symtab *hpread_end_psymtab
 #define PXDB_BSD  "/usr/bin/pxdb"
 
 #include <stdlib.h>
-#include <string.h>
+#include "gdb_string.h"
 
 /* check for the existence of a file, given its full pathname */
 int
