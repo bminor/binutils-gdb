@@ -144,15 +144,6 @@ remove_output ()
     }
 }
 
-/* Prevent remove_output from doing anything.
-   Called after a successful link.  */
-
-static void
-preserve_output ()
-{
-  output_filename = NULL;
-}
-
 int
 main (argc, argv)
      int argc;
@@ -323,7 +314,9 @@ main (argc, argv)
 	       (long) (lim - (char *) &environ));
     }
 
-  atexit (preserve_output);
+  /* Prevent remove_output from doing anything, after a successful link.  */
+  output_filename = NULL;
+
   xexit (0);
   return 0;
 }

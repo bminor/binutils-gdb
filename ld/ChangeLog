@@ -1,3 +1,10 @@
+Sat Feb  5 03:54:34 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* emultempl/lnk960.em (append), emultempl/hppaosf.em
+	(hppaosf_finish): Call xmalloc, not ldmalloc.
+	* ldmain.c (preserve_output): Function removed.
+	(main): Do it here instead.
+
 Fri Feb  4 23:02:19 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* ldlang.h (LANG_FOR_EACH_{INPUT,OUTPUT}_SECTION): Delete (unused)

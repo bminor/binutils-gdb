@@ -106,6 +106,11 @@ hppaosf_finish()
       extern lang_statement_list_type file_chain;
       lang_input_statement_type *statement;
 
+<<<<<<< hppaosf.em
+		stub_file->asymbols = xmalloc((stub_file->symbol_count + new_sym_cnt) * sizeof(asymbol *));
+||||||| 1.7
+		stub_file->asymbols = ldmalloc((stub_file->symbol_count + new_sym_cnt) * sizeof(asymbol *));
+=======
       for (statement = (lang_input_statement_type *)file_chain.head;
 	   statement != (lang_input_statement_type *)NULL;
 	   statement = (lang_input_statement_type *)statement->next)
@@ -119,6 +124,7 @@ hppaosf_finish()
 	      int new_sym_cnt = 0;
 	      int i,j;
 	      asymbol *syms;
+>>>>>>> 1.8
 
 	      syms = hppa_look_for_stubs_in_section (stub_file->the_bfd,
 						     abfd,
