@@ -1,5 +1,10 @@
 Fri Apr 15 10:51:51 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* ecoff.c (first_proc_ptr): New static variable.
+	(add_procedure): Set first_proc_ptr if it hasn't been set.
+	(ecoff_build_lineno): If the first procedure does not start at
+	address zero, insert a dummy line to compensate.
+
 	* Makefile.in (bootstrap, bootstrap2, bootstrap3): Make gasp.new
 	as well as as.new.
 
