@@ -1,5 +1,8 @@
 Tue Jan 11 14:37:12 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* aoutx.h (NAME(aout,final_link)): Set a_entry before computing
+	file offsets.
+
 	* elfcode.h (swap_out_syms): A common symbol is STT_OBJECT, not
 	STT_NOTYPE.
 
