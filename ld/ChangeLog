@@ -1,3 +1,8 @@
+Thu Jun  9 00:17:20 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ldlang.c (map_input_to_output_sections): For lang_address, call
+	init_os if it hasn't already been called.
+
 Thu Jun  2 17:24:08 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	Add support for SunOS shared libraries.

@@ -1060,15 +1060,12 @@ map_input_to_output_sections (s, target, output_section_statement)
 	  /* Mark the specified section with the supplied address */
 	  {
 	    lang_output_section_statement_type *os =
-	    lang_output_section_statement_lookup
-	    (s->address_statement.section_name);
+	      lang_output_section_statement_lookup
+		(s->address_statement.section_name);
 
+	    if (os->bfd_section == NULL)
+	      init_os (os);
 	    os->addr_tree = s->address_statement.address;
-	    if (os->bfd_section == (asection *) NULL)
-	      {
-		einfo ("%P%F: cannot set the address of undefined section %s\n",
-		       s->address_statement.section_name);
-	      }
 	  }
 	  break;
 	}
