@@ -73,8 +73,7 @@ maintainer works with the native maintainer when resolving API issues.
 	frv		--target=frv-elf ,-Werror
 			Maintenance only
 
-	h8300		--target=h8300hms broken
-			Maintenance only
+	h8300		Deleted
 
 	i386		--target=i386-elf ,-Werror
 			Mark Kettenis           kettenis@gnu.org
@@ -94,17 +93,14 @@ maintainer works with the native maintainer when resolving API issues.
 	m88k		--target=m88k-openbsd ,-Werror
 			Mark Kettenis		kettenis@gnu.org
 
-	mcore		--target=mcore-elf broken
-			Maintenance only
+	mcore		Deleted
 
 	mips		--target=mips-elf ,-Werror
 			Andrew Cagney		cagney@redhat.com
 
-	mn10300		--target=mn10300-elf broken
-			Maintenance only
+	mn10300		Deleted
 
-	ns32k		--target=ns32k-netbsd broken
-			Maintenance only
+	ns32k		Deleted
 
 	pa		--target=hppa-elf ,-Werror
 			Maintenance only
@@ -122,8 +118,7 @@ maintainer works with the native maintainer when resolving API issues.
 	sparc		--target=sparc-elf ,-Werror
 			Maintenance only
 
-	v850		--target=v850-elf broken
-			Maintenance only
+	v850		Deleted
 
 	vax		--target=vax-netbsd ,-Werror
 			Maintenance only

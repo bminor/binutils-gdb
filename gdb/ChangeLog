@@ -1,3 +1,22 @@
+2004-11-13  Andrew Cagney  <cagney@gnu.org>
+
+	* NEWS: List h8300*-*-*, mcore-*-*, mn10300-*-*, ns32k-*-*, and
+	v850-*-* under removed.
+	* configure.host: Delete ns32k-*-netbsd*.
+	* configure.tgt: Delete h8300-*-*, mcore*-*-*, mn10300-*-*,
+	ns32k-*-netbsd*, and v850*-*-*.
+	* MAINTAINERS: Mark h8300, mcore, mn10300, ns32k, v850 as
+	"Deleted"
+	* config/h8300/tm-h8300.h, config/h8300/h8300.mt: Delete.
+	* h8300-tdep.c, config/mcore/mcore.mt, mcore-rom.c: Delete.
+	* mcore-tdep.c, config/mn10300/mn10300.mt: Delete.
+	* mn10300-tdep.c, config/ns32k/nbsdaout.mh: Delete.
+	* config/ns32k/nbsdaout.mt, config/ns32k/nm-nbsd.h: Delete.
+	* config/ns32k/nm-nbsdaout.h, config/ns32k/tm-ns32k.h: Delete.
+	* ns32knbsd-nat.c, ns32knbsd-tdep.c, ns32k-tdep.c: Delete.
+	* ns32k-tdep.h, config/v850/v850.mt, v850ice.c: Delete.
+	* v850-tdep.c: Delete.
+	
 2004-11-13  Joel Brobecker  <brobecker@gnat.com>
 
 	* irix5-nat.c (fetch_core_registers): Replace use of
