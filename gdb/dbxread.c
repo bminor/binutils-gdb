@@ -546,7 +546,7 @@ dbx_symfile_read (objfile, section_offsets, mainline)
   symbol_size = DBX_SYMBOL_SIZE (objfile);
   symbol_table_offset = DBX_SYMTAB_OFFSET (objfile);
 
-  pending_blocks = 0;
+  free_pending_blocks ();
   back_to = make_cleanup (really_free_pendings, 0);
 
   init_minimal_symbol_collection ();

@@ -51,9 +51,6 @@ static int prev_line_number;
 
 static int line_vector_length;
 
-static struct blockvector *
-make_blockvector PARAMS ((struct objfile *));
-
 static int
 init_dst_sections PARAMS ((int));
 
@@ -86,42 +83,6 @@ dst_start_symtab PARAMS ((void));
 
 static void
 dst_record_line PARAMS ((int, CORE_ADDR));
-
-static struct blockvector *
-make_blockvector (objfile)
-     struct objfile *objfile;
-{
-  register struct pending_block *next, *next1;
-  register struct blockvector *blockvector;
-  register int i;
-
-  /* Count the length of the list of blocks.  */
-
-  for (next = pending_blocks, i = 0; next; next = next->next, i++);
-
-  blockvector = (struct blockvector *)
-		  obstack_alloc (&objfile->symbol_obstack, sizeof (struct blockvector) + (i - 1) * sizeof (struct block *));
-
-  /* Copy the blocks into the blockvector.
-     This is done in reverse order, which happens to put
-     the blocks into the proper order (ascending starting address).
-   */
-
-  BLOCKVECTOR_NBLOCKS (blockvector) = i;
-  for (next = pending_blocks; next; next = next->next)
-    BLOCKVECTOR_BLOCK (blockvector, --i) = next->block;
-
-  /* Now free the links of the list, and empty the list.  */
-
-  for (next = pending_blocks; next; next = next1)
-    {
-      next1 = next->next;
-      free ((PTR)next);
-    }
-  pending_blocks = 0;
-
-  return blockvector;
-}
 
 /* Manage the vector of line numbers.  */
 /* FIXME: Use record_line instead.  */
@@ -1426,7 +1387,6 @@ process_dst_block(objfile, entry)
 	dst_rec_ptr_t child_entry, symbol_entry;
 	struct block *child_block;
 	int	total_symbols = 0;
-	struct pending_block *pblock;
 	char	fake_name[20];
 	static	long	fake_seq = 0;
 	struct symbol_list *symlist, *nextsym;
@@ -1509,11 +1469,6 @@ process_dst_block(objfile, entry)
 	else
 		BLOCK_FUNCTION (block) = 0;
 
-	pblock = (struct pending_block *)
-			xmalloc (sizeof (struct pending_block));
-	pblock->block = block;
-	pblock->next = pending_blocks;
-	pending_blocks = pblock;
 	if (DST_block(entry).child_block_off)
 	{
 		child_entry = (dst_rec_ptr_t) DST_OFFSET(entry,
@@ -1543,6 +1498,7 @@ process_dst_block(objfile, entry)
 				child_entry = NULL;
 		}
 	}
+	record_pending_block (objfile, block, NULL);
 	return block;
 }
 
@@ -1555,7 +1511,6 @@ read_dst_symtab (objfile)
 	dst_rec_ptr_t entry, file_table, root_block;
 	char	*source_file;
 	struct	block *block, *global_block;
-	struct	pending_block *pblock;
 	int	symnum;
 	struct symbol_list *nextsym;
 	int	module_num = 0;
@@ -1580,11 +1535,6 @@ read_dst_symtab (objfile)
 					DST_comp_unit(entry).data_size);
 			dst_start_symtab();
 
-			pblock = (struct pending_block *)
-				xmalloc (sizeof (struct pending_block));
-			pblock->next = NULL;
-			pending_blocks = pblock;
-	
 			block = process_dst_block(objfile, root_block);
 
 			global_block = (struct block *)
@@ -1610,7 +1560,7 @@ read_dst_symtab (objfile)
 			BLOCK_END(global_block) = BLOCK_END(block);
 			BLOCK_SUPERBLOCK(global_block) = 0;
 			BLOCK_SUPERBLOCK(block) = global_block;
-			pblock->block = global_block;
+			record_pending_block (objfile, global_block, NULL);
 
 			complete_symtab(source_file,
 					BLOCK_START(block), 

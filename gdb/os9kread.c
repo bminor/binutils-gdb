@@ -332,7 +332,7 @@ os9k_symfile_read (objfile, section_offsets, mainline)
     objfile->static_psymbols.size == 0)
     init_psymbol_list (objfile, DBX_SYMCOUNT (objfile));
 
-  pending_blocks = 0;
+  free_pending_blocks ();
   back_to = make_cleanup (really_free_pendings, 0);
 
   make_cleanup (discard_minimal_symbols, 0);

@@ -1,3 +1,31 @@
+Tue Oct  8 11:47:13 1996  Fred Fish  <fnf@cygnus.com>
+
+	* dbxread.c (dbx_symfile_read): Call free_pending_blocks rather
+	than poking global variable (which is now static).
+	* hpread.c (hpread_build_psymtabs): Ditto.
+	* os9kread.c (os9k_symfile_read): Ditto.
+	* xcoffread.c (xcoff_initial_scan): Ditto.
+
+	* buildsym.h (free_pending_blocks): Declare here.
+	(pending_blocks): Remove declaration of global symbol.
+	(free_pendings): Remove declaration of global symbol.
+	(make_blockvector): Declare here.
+	(record_pending_block): Declare here.
+	
+	* dstread.c (make_blockvector): Remove static copy that was old
+	clone of version in buildsym.c.
+	(process_dst_block): Call record_pending_block rather than doing
+	it by hand.
+	(read_dst_symtab): Ditto.
+
+	* buildsym.c (make_blockvector): Make global rather than static,
+	(record_pending_block): New function, code moved from finish_block.
+	(finish_block): Use record_pending_block.
+	(free_pending_blocks): New function.
+	(really_free_pendings): Call free_pending_blocks.
+	(pending_blocks): Make static instead of global.
+	(free_pendings): Make static instead of global.
+	
 Tue Oct  8 09:03:22 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* config/i386/windows.mh config/i386/xm-windows.h::  New config

@@ -2718,7 +2718,7 @@ xcoff_initial_scan (objfile, section_offsets, mainline)
        include N_SLINE.  */
     init_psymbol_list (objfile, num_symbols);
 
-  pending_blocks = 0;
+  free_pending_blocks ();
   back_to = make_cleanup (really_free_pendings, 0);
 
   init_minimal_symbol_collection ();

@@ -340,7 +340,7 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
   int dependencies_used, dependencies_allocated;
 
   /* Just in case the stabs reader left turds lying around.  */
-  pending_blocks = 0;
+  free_pending_blocks ();
   make_cleanup (really_free_pendings, 0);
 
   pst = (struct partial_symtab *) 0;

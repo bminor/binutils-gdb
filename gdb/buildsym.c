@@ -44,11 +44,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    questionable--see comment where we call them).  */
 #include "stabsread.h"
 
+/* Pointer to the head of a linked list of symbol blocks which have
+   already been finalized (lexical contexts already closed) and which are
+   just waiting to be built into a blockvector when finalizing the
+   associated symtab. */
+
+static struct pending_block *pending_blocks = NULL;
+
+/* List of free `struct pending' structures for reuse.  */
+
+static struct pending *free_pendings;
+
+
 static int
 compare_line_numbers PARAMS ((const void *, const void *));
-
-static struct blockvector *
-make_blockvector PARAMS ((struct objfile *));
 
 
 /* Initial sizes of data structures.  These are realloc'd larger if needed,
@@ -146,9 +155,6 @@ really_free_pendings (foo)
      int foo;
 {
   struct pending *next, *next1;
-#if 0
-  struct pending_block *bnext, *bnext1;
-#endif
 
   for (next = free_pendings; next; next = next1)
     {
@@ -157,14 +163,7 @@ really_free_pendings (foo)
     }
   free_pendings = NULL;
 
-#if 0 /* Now we make the links in the symbol_obstack, so don't free them.  */
-  for (bnext = pending_blocks; bnext; bnext = bnext1)
-    {
-      bnext1 = bnext->next;
-      free ((PTR)bnext);
-    }
-#endif
-  pending_blocks = NULL;
+  free_pending_blocks ();
 
   for (next = file_symbols; next != NULL; next = next1)
     {
@@ -179,6 +178,23 @@ really_free_pendings (foo)
       free ((PTR)next);
     }
   global_symbols = NULL;
+}
+
+/* This function is called to discard any pending blocks. */
+
+void
+free_pending_blocks ()
+{
+#if 0 /* Now we make the links in the symbol_obstack, so don't free them.  */
+  struct pending_block *bnext, *bnext1;
+
+  for (bnext = pending_blocks; bnext; bnext = bnext1)
+    {
+      bnext1 = bnext->next;
+      free ((PTR)bnext);
+    }
+#endif
+  pending_blocks = NULL;
 }
 
 /* Take one of the lists of symbols and make a block from it.
@@ -381,29 +397,44 @@ finish_block (symbol, listhead, old_blocks, start, end, objfile)
       opblock = pblock;
     }
 
-  /* Record this block on the list of all blocks in the file.
-     Put it after opblock, or at the beginning if opblock is 0.
-     This puts the block in the list after all its subblocks.  */
+  record_pending_block (objfile, block, opblock);
+}
 
-  /* Allocate in the symbol_obstack to save time.
-     It wastes a little space.  */
+/* Record BLOCK on the list of all blocks in the file.  Put it after
+   OPBLOCK, or at the beginning if opblock is NULL.  This puts the block
+   in the list after all its subblocks.
+
+   Allocate the pending block struct in the symbol_obstack to save
+   time.  This wastes a little space.  FIXME: Is it worth it?  */
+
+void
+record_pending_block (objfile, block, opblock)
+     struct objfile* objfile;
+     struct block *block;
+     struct pending_block *opblock;
+{
+  register struct pending_block *pblock;
+
   pblock = (struct pending_block *)
-    obstack_alloc (&objfile -> symbol_obstack,
-		   sizeof (struct pending_block));
-  pblock->block = block;
+    obstack_alloc (&objfile -> symbol_obstack, sizeof (struct pending_block));
+  pblock -> block = block;
   if (opblock)
     {
-      pblock->next = opblock->next;
-      opblock->next = pblock;
+      pblock -> next = opblock -> next;
+      opblock -> next = pblock;
     }
   else
     {
-      pblock->next = pending_blocks;
+      pblock -> next = pending_blocks;
       pending_blocks = pblock;
     }
 }
 
-static struct blockvector *
+/* Note that this is only used in this file and in dstread.c, which should be
+   fixed to not need direct access to this function.  When that is done, it can
+   be made static again. */
+
+struct blockvector *
 make_blockvector (objfile)
      struct objfile *objfile;
 {
