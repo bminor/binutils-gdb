@@ -1,3 +1,8 @@
+1999-07-08  Jakub Jelinek  <jj@ultra.linux.cz>
+
+	* sparc-dis.c (print_insn_sparc): Differentiate between
+	addition and oring when guessing symbol for comment.
+
 1999-07-05  Nick Clifton  <nickc@cygnus.com>
 
 	* arm-dis.c (print_insn_arm): Display hex equivalent of rotated
