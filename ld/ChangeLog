@@ -1,3 +1,8 @@
+2000-02-23  Richard Henderson  <rth@cygnus.com>
+
+	* scripttempl/elfd10v.sc: Remove dynamic linking hooks.
+	Add and use memory regions.
+
 2000-02-23  Linas Vepstas (linas@linas.org)
 
 	* emulparams/elf32i370.sh, scripttempl/elfi370.sc: New.
