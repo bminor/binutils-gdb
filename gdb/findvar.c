@@ -1476,7 +1476,7 @@ addresses have not been bound by the dynamic loader. Try again when executable i
 }
 
 /* Return a value of type TYPE, stored in register REGNUM, in frame
-   FRAME. 
+   FRAME.
 
    NOTE: returns NULL if register value is not available.
    Caller will check return value or die!  */
@@ -1500,7 +1500,8 @@ value_from_register (type, regnum, frame)
   CHECK_TYPEDEF (type);
   len = TYPE_LENGTH (type);
 
-  /* Pointers on D10V are really only 16 bits, but we lie to gdb elsewhere... */
+  /* Pointers on D10V are really only 16 bits, 
+     but we lie to gdb elsewhere... */
   if (GDB_TARGET_IS_D10V && TYPE_CODE (type) == TYPE_CODE_PTR)
     len = 2;
 
@@ -1703,25 +1704,20 @@ value_from_register (type, regnum, frame)
     }
 
   if (GDB_TARGET_IS_D10V
-      && TYPE_CODE (type) == TYPE_CODE_PTR
-      && TYPE_TARGET_TYPE (type)
-      && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC))
+      && TYPE_CODE (type) == TYPE_CODE_PTR)
     {
-      /* pointer to function */
       unsigned long num;
       unsigned short snum;
-      snum = (unsigned short) extract_unsigned_integer (VALUE_CONTENTS_RAW (v), 2);
-      num = D10V_MAKE_IADDR (snum);
-      store_address (VALUE_CONTENTS_RAW (v), 4, num);
-    }
-  else if (GDB_TARGET_IS_D10V
-	   && TYPE_CODE (type) == TYPE_CODE_PTR)
-    {
-      /* pointer to data */
-      unsigned long num;
-      unsigned short snum;
-      snum = (unsigned short) extract_unsigned_integer (VALUE_CONTENTS_RAW (v), 2);
-      num = D10V_MAKE_DADDR (snum);
+
+      snum = (unsigned short)
+	extract_unsigned_integer (VALUE_CONTENTS_RAW (v), 2);
+
+      if (TYPE_TARGET_TYPE (type)	  /* pointer to function */
+	  && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC))
+	num = D10V_MAKE_IADDR (snum);
+      else 				  /* pointer to data */
+	num = D10V_MAKE_DADDR (snum);
+
       store_address (VALUE_CONTENTS_RAW (v), 4, num);
     }
 

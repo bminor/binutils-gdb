@@ -1,3 +1,7 @@
+2000-05-24  Michael Snyder  <msnyder@seadog.cygnus.com>
+
+	* findvar.c (value_from_register): Factor code, simplify logic.
+
 2000-05-23  J.T. Conklin  <jtc@redback.com>
 
 	* config/i386/nbsd.mt (TDEPFILES): Move solib.o from here...
