@@ -24,10 +24,6 @@
 #define TM_LINUX_H
 
 #define I386_GNULINUX_TARGET
-#ifdef HAVE_PTRACE_GETFPXREGS
-#define FILL_FPXREGSET
-#define HAVE_SSE_REGS
-#endif
 
 #include "i386/tm-i386.h"
 #include "config/tm-linux.h"

@@ -77,6 +77,11 @@ extern int cannot_store_register (int regno);
 #define CANNOT_FETCH_REGISTER(regno) cannot_fetch_register (regno)
 #define CANNOT_STORE_REGISTER(regno) cannot_store_register (regno)
 
+#ifdef HAVE_PTRACE_GETFPXREGS
+/* Include register set support for the SSE registers.  */
+#define FILL_FPXREGSET
+#endif
+
 /* Override child_resume in `infptrace.c'.  */
 #define CHILD_RESUME
 
