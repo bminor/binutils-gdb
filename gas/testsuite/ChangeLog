@@ -1,3 +1,10 @@
+Wed Jul  3 14:20:04 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/all/gas.exp: Remove setup_xfail for h8300*-*-* for two tests
+	which now pass.
+	* gas/h8300/h8300.exp: Fix regexp of mov32bug test to work on a 64
+	bit host.
+
 Sat Jun 29 18:21:51 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/all/gas.exp: Add setup_xfail for vax*-*-vms* for 930509a
