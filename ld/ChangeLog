@@ -1,3 +1,9 @@
+Sun Jan 30 14:33:40 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* ldlex.l: Removed duplicate rules.
+	(yywrap): Provide default definition, needed with some versions of
+	flex.
+
 Fri Jan 28 09:12:56 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* ldmisc.c (vfinfo): For `%I', if the file is in an archive, print
