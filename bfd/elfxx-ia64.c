@@ -2248,7 +2248,7 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
   const Elf_Internal_Rela *relend;
   Elf_Internal_Shdr *symtab_hdr;
   const Elf_Internal_Rela *rel;
-  asection *got, *fptr, *srel;
+  asection *got, *fptr, *srel, *pltoff;
 
   if (info->relocatable)
     return TRUE;
@@ -2256,7 +2256,7 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   ia64_info = elfNN_ia64_hash_table (info);
 
-  got = fptr = srel = NULL;
+  got = fptr = srel = pltoff = NULL;
 
   relend = relocs + sec->reloc_count;
   for (rel = relocs; rel < relend; ++rel)
@@ -2507,7 +2507,18 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
       if (need_entry & NEED_FULL_PLT)
 	dyn_i->want_plt2 = 1;
       if (need_entry & NEED_PLTOFF)
-	dyn_i->want_pltoff = 1;
+	{
+	  /* This is needed here, in case @pltoff is used in a non-shared
+	     link.  */
+	  if (!pltoff)
+	    {
+	      pltoff = get_pltoff (abfd, info, ia64_info);
+	      if (!pltoff)
+		return FALSE;
+	    }
+	  
+	  dyn_i->want_pltoff = 1;
+	}
       if ((need_entry & NEED_DYNREL) && (sec->flags & SEC_ALLOC))
 	{
 	  if (!srel)
