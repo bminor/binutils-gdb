@@ -214,6 +214,8 @@ vfinfo(fp, fmt, arg)
 	   or section name as a last resort.  The arguments are a BFD,
 	   a section, and an offset.  */
 	{
+	  static char *last_file = NULL;
+	  static char *last_function = NULL;
 	  bfd *abfd;
 	  asection *section;
 	  bfd_vma offset;
@@ -222,6 +224,7 @@ vfinfo(fp, fmt, arg)
 	  const char *filename;
 	  const char *functionname;
 	  unsigned int linenumber;
+	  boolean discard_last;
 
 	  abfd = va_arg (arg, bfd *);
 	  section = va_arg (arg, asection *);
@@ -250,6 +253,7 @@ vfinfo(fp, fmt, arg)
 		}
 	    }
 
+	  discard_last = true;
 	  if (bfd_find_nearest_line (abfd, section, asymbols, offset,
 				     &filename, &functionname, &linenumber))
 	    {
@@ -258,18 +262,44 @@ vfinfo(fp, fmt, arg)
 
 	      if (functionname != NULL && fmt[-1] == 'C')
 		{
-		  fprintf (fp, "%s: In function `%s':\n", filename,
-			   demangle (functionname, 1));
+		  if (last_file == NULL
+		      || last_function == NULL
+		      || strcmp (last_file, filename) != 0
+		      || strcmp (last_function, functionname) != 0)
+		    {
+		      fprintf (fp, "%s: In function `%s':\n", filename,
+			       demangle (functionname, 1));
+		      if (last_file != NULL)
+			free (last_file);
+		      last_file = buystring (filename);
+		      if (last_function != NULL)
+			free (last_function);
+		      last_function = buystring (functionname);
+		    }
+		  discard_last = false;
 		  fprintf (fp, "%s:%u", filename, linenumber);
 		}
 	      else if (linenumber != 0) 
 		fprintf (fp, "%s:%u", filename, linenumber);
 	      else
 		finfo (fp, "%s(%s+0x%v)", filename, section->name, offset);
-
 	    }
 	  else
 	    finfo (fp, "%s(%s+0x%v)", abfd->filename, section->name, offset);
+
+	  if (discard_last)
+	    {
+	      if (last_file != NULL)
+		{
+		  free (last_file);
+		  last_file = NULL;
+		}
+	      if (last_function != NULL)
+		{
+		  free (last_function);
+		  last_function = NULL;
+		}
+	    }
 	}
 	break;
 		
