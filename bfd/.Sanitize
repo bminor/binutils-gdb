@@ -42,6 +42,7 @@ bfd-in.h
 bfd.c
 bout.c
 cache.c
+ctor.c
 coff-a29k.c
 coff-i386.c
 coff-i960.c
@@ -115,7 +116,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.27  1991/10/25 10:17:41  gnu
+# Revision 1.28  1991/11/04 00:37:06  steve
+# Added ctor.c (I remembered this time)
+#
+# Revision 1.27  1991/10/25  10:17:41  gnu
 # * Rename COFF-related files in `coff-ARCH.c' form.
 # coff-a29k.c, coff-i386.c, coff-i960.c, coff-m68k.c, coff-m88k.c,
 # coff-mips.c, coff-rs6000.c to be exact.
