@@ -1,3 +1,7 @@
+2002-12-03  Andrew Cagney  <cagney@redhat.com>
+
+	* PROBLEMS: Mention PR gdb/725.
+
 2002-12-02  Andrew Cagney  <ac131313@redhat.com>
 
 	* MAINTAINERS (Java): Global maintainers are responible for Java.
