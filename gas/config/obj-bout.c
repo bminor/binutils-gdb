@@ -94,16 +94,6 @@ const pseudo_typeS obj_pseudo_table[] = {
 /* Relocation. */
 
 /*
- * In: length of relocation (or of address) in chars: 1, 2 or 4.
- * Out: GNU LD relocation length code: 0, 1, or 2.
- */
-
-static unsigned char
-nbytes_r_length [] = {
-  42, 0, 1, 42, 2
-  };
-
-/*
  *		emit_relocations()
  *
  * Crawl along a fixS chain. Emit the segment's relocations.
@@ -113,40 +103,13 @@ char **where;
 fixS *fixP;	/* Fixup chain for this segment. */
 relax_addressT segment_address_in_file;
 {
-	struct relocation_info	ri;
-	register symbolS *		symbolP;
-	
-	/* If a machine dependent emitter is needed, call it instead. */
-	if (md_emit_relocations) {
-		(*md_emit_relocations) (fixP, segment_address_in_file);
-		return;
-	}
-	
-	
-	/* JF this is for paranoia */
-	bzero((char *)&ri,sizeof(ri));
-	for (;  fixP;  fixP = fixP->fx_next) {
-		if ((symbolP = fixP->fx_addsy) != 0) {
-			ri . r_bsr		= fixP->fx_bsr;
-			ri . r_disp		= fixP->fx_im_disp;
-			ri . r_callj		= fixP->fx_callj;
-			ri . r_length		= nbytes_r_length [fixP->fx_size];
-			ri . r_pcrel		= fixP->fx_pcrel;
-			ri . r_address	= fixP->fx_frag->fr_address + fixP->fx_where - segment_address_in_file;
-			
-			if (S_GET_TYPE(symbolP) == N_UNDF) {
-				ri . r_extern	= 1;
-				ri . r_symbolnum	= symbolP->sy_number;
-			} else {
-				ri . r_extern	= 0;
-				ri . r_symbolnum	= S_GET_TYPE(symbolP);
-			}
-			
-			/* Output the relocation information in machine-dependent form. */
-			md_ri_to_chars(*where, &ri);
-			*where += md_reloc_size;
-		}
-	}
+	for (; fixP; fixP = fixP->fx_next) {
+		if (fixP->fx_addsy != NULL) {
+			tc_bout_fix_to_chars(*where, fixP, segment_address_in_file);
+			where += sizeof(struct relocation_info);
+		} /* if there's a symbol */
+	} /* for each fixup */
+
 } /* emit_relocations() */
 
 /* Aout file generation & utilities */
@@ -168,7 +131,7 @@ object_headers *headers;
 	headers->header.a_balign = section_alignment[SEG_BSS];
 
 	headers->header.a_tload = 0;
-	headers->header.a_dload = md_section_align(SEG_DATA, headers->header.a_text);
+	headers->header.a_dload = md_section_align(SEG_DATA, H_GET_TEXT_SIZE(headers));
 
 	append(where, (char *) &headers->header, sizeof(headers->header));
 } /* a_header_append() */

@@ -903,29 +903,6 @@ symbolS *to_symbol;
     abort();
 }
 
-/* Translate internal representation of relocation info to target format.
-
-   On sparc/29k: first 4 bytes are normal unsigned long address, next three
-   bytes are index, most sig. byte first.  Byte 7 is broken up with
-   bit 7 as external, bits 6 & 5 unused, and the lower
-   five bits as relocation type.  Next 4 bytes are long addend. */
-/* Thanx and a tip of the hat to Michael Bloom, mb@ttidca.tti.com */
-void
-md_ri_to_chars(the_bytes, ri)
-     char *the_bytes;
-     struct reloc_info_generic *ri;
-{
-  /* this is easy */
-  md_number_to_chars(the_bytes, ri->r_address, 4);
-  /* now the fun stuff */
-  the_bytes[4] = (ri->r_index >> 16) & 0x0ff;
-  the_bytes[5] = (ri->r_index >> 8) & 0x0ff;
-  the_bytes[6] = ri->r_index & 0x0ff;
-  the_bytes[7] = ((ri->r_extern << 7)  & 0x80) | (0 & 0x60) | (ri->r_type & 0x1F);
-  /* Also easy */
-  md_number_to_chars(&the_bytes[8], ri->r_addend, 4);
-}
-
 /* should never be called for 29k */
 void md_convert_frag(headers, fragP)
 object_headers *headers;
@@ -1012,48 +989,45 @@ print_insn(insn)
 }
 #endif
 
-/*
- * Sparc/A29K relocations are completely different, so it needs
- * this machine dependent routine to emit them.
- */
+/* Translate internal representation of relocation info to target format.
+
+   On sparc/29k: first 4 bytes are normal unsigned long address, next three
+   bytes are index, most sig. byte first.  Byte 7 is broken up with
+   bit 7 as external, bits 6 & 5 unused, and the lower
+   five bits as relocation type.  Next 4 bytes are long addend. */
+/* Thanx and a tip of the hat to Michael Bloom, mb@ttidca.tti.com */
+
 #ifdef OBJ_AOUT
-static void emit_machine_reloc(fixP, segment_address_in_file)
-register fixS *fixP;
+
+void tc_aout_fix_to_chars(where, fixP, segment_address_in_file)
+char *where;
+fixS *fixP;
 relax_addressT segment_address_in_file;
 {
-    struct reloc_info_generic ri;
-    register symbolS *symbolP;
-    extern char *next_object_file_charP;
-/* !!!!    long add_number; */
+	long r_index;
+	
+	know(fixP->fx_r_type < NO_RELOC);
+	know(fixP->fx_addsy != NULL);
+	
+	r_index = (S_IS_DEFINED(fixP->fx_addsy)
+		   ? S_GET_TYPE(fixP->fx_addsy)
+		   : fixP->fx_addsy->sy_number);
+	
+	/* this is easy */
+	md_number_to_chars(where,
+			   fixP->fx_frag->fr_address + fixP->fx_where - segment_address_in_file,
+			   4);
+	
+	/* now the fun stuff */
+	where[4] = (r_index >> 16) & 0x0ff;
+	where[5] = (r_index >> 8) & 0x0ff;
+	where[6] = r_index & 0x0ff;
+	where[7] = (((!S_IS_DEFINED(fixP->fx_addsy)) << 7)  & 0x80) | (0 & 0x60) | (fixP->fx_r_type & 0x1F);
+	/* Also easy */
+	md_number_to_chars(&where[8], fixP->fx_addnumber, 4);
 
-    bzero((char *) &ri, sizeof(ri));
-    for (; fixP; fixP = fixP->fx_next) {
-
-	if (fixP->fx_r_type >= NO_RELOC) {
-	    fprintf(stderr, "fixP->fx_r_type = %d\n", fixP->fx_r_type);
-	    abort();
-	}
-
-	if ((symbolP = fixP->fx_addsy) != NULL) {
-	    ri.r_address = fixP->fx_frag->fr_address +
-	        fixP->fx_where - segment_address_in_file;
-	    ri.r_addend = fixP->fx_addnumber;
-	    if (!S_IS_DEFINED(symbolP)) {
-		ri.r_extern = 1;
-		ri.r_index = symbolP->sy_number;
-	    } else {
-		ri.r_extern = 0;
-		ri.r_index = S_GET_TYPE(symbolP);
-	    }
-	    ri.r_type = fixP->fx_r_type;
-
-	    md_ri_to_chars (next_object_file_charP, &ri);
-	    next_object_file_charP += md_reloc_size;
-	}
-    }
-} /* emit_machine_reloc() */
-
-void (*md_emit_relocations)() = emit_machine_reloc;
+	return;
+} /* tc_aout_fix_to_chars() */
 
 #endif /* OBJ_AOUT */
 

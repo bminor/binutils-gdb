@@ -42,7 +42,7 @@ static void sparc_ip();
 
 static enum sparc_architecture current_architecture = v6;
 static int architecture_requested = 0;
-static int warn_on_bump = 1;
+static int warn_on_bump = 0;
 
 const relax_typeS md_relax_table[] = {
 	0 };
@@ -428,7 +428,7 @@ char *str;
 	struct sparc_opcode *insn;
 	char *argsStart;
 	unsigned long opcode;
-	unsigned int mask;
+	unsigned int mask = 0;
 	int match = 0;
 	int comma = 0;
 	
@@ -787,44 +787,134 @@ char *str;
  /* start-sanitize-v9 */
 #ifndef NO_V9
 			case 'j':
+			case 'u':
+			case 'U':
 #endif /* NO_V9 */
  /* end-sanitize-v9 */
 			case 'e': /* next operand is a floating point register */
+			case 'v':
+			case 'V':
+
 			case 'f':
+			case 'B':
+			case 'R':
+
 			case 'g':
-				if (*s++ == '%' && *s++ == 'f' && isdigit(*s)) {
-					mask = *s++;
-					if (isdigit(*s)) {
-						mask = 10 * (mask - '0') + (*s++ - '0');
-						if (mask >= 32) {
-							break;
-						}
-					} else {
-						mask -= '0';
-					}
-					switch (*args) {
-						
-					case 'e':
-						opcode |= RS1(mask);
-						continue;
-						
-					case 'f':
-						opcode |= RS2(mask);
-						continue;
-						
-					case 'g':
-						opcode |= RD(mask);
-						continue;
+			case 'H':
+			case 'J': {
+				char format;
+
+				if (*s++ == '%'
+
  /* start-sanitize-v9 */
 #ifndef NO_V9
-					case 'j':
-						opcode |= (mask & 0x1f) << 9;
-						continue;
+				    && ((format = *s) == 'f'
+				    || *s == 'd'
+				    || *s == 'q')
+#else
+ /* end-sanitize-v9 */
+				    && ((format = *s) == 'f')
+
+ /* start-sanitize-v9 */
 #endif /* NO_V9 */
  /* end-sanitize-v9 */
-					}
-				}
+				    && isdigit(*++s)) {
+
+
+
+					for (mask = 0; isdigit(*s); ++s) {
+						mask = 10 * mask + (*s - '0');
+					} /* read the number */
+
+					if ((*args == 'u'
+					     || *args == 'v'
+					     || *args == 'B'
+					     || *args == 'H')
+					    && (mask & 1)) {
+						break;
+					} /* register must be even numbered */
+
+					if ((*args == 'U'
+					     || *args == 'V'
+					     || *args == 'R'
+					     || *args == 'J')
+					    && (mask & 3)) {
+						break;
+					} /* register must be multiple of 4 */
+
+					if (format == 'f') {
+						if (mask >= 32) {
+							error_message = ": There are only 32 f registers; [0-31]";
+							goto error;
+						} /* on error */
+ /* start-sanitize-v9 */
+#ifndef NO_V9
+					} else {
+						if (format == 'd') {
+							if (mask >= 64) {
+								error_message = ": There are only 32 d registers [0, 2, ... 62].";
+								goto error;
+							} else if (mask & 1) {
+								error_message = ": Only even numbered d registers exist.";
+								goto error;
+							} /* on error */
+							
+						} else if (format == 'q') {
+							if (mask >= 64) {
+								error_message =
+								    ": There are only 16 q registers [0, 4, ... 60].";
+								goto error;
+							} else if (mask & 3) {
+								error_message =
+								    ": Only q registers evenly divisible by four exist.";
+								goto error;
+							} /* on error */
+						} else {
+							know(0);
+						} /* depending on format */
+						
+						if (mask >= 32) {
+							mask -= 31;
+						} /* wrap high bit */
+					} /* if not an 'f' register. */
+#endif /* NO_V9 */
+ /* end-sanitize-v9 */
+				} /* on error */
+
+				switch (*args) {
+ /* start-sanitize-v9 */
+#ifndef NO_V9
+				case 'j':
+				case 'u':
+				case 'U':
+					opcode |= (mask & 0x1f) << 9;
+					continue;
+#endif /* NO_V9 */
+ /* end-sanitize-v9 */
+
+				case 'v':
+				case 'V':
+				case 'e':
+					opcode |= RS1(mask);
+					continue;
+					
+
+				case 'f':
+				case 'B':
+				case 'R':
+					opcode |= RS2(mask);
+					continue;
+					
+				case 'g':
+				case 'H':
+				case 'J':
+					opcode |= RD(mask);
+					continue;
+				} /* pack it in. */
+
+				know(0);
 				break;
+			} /* float arg */
 				
 			case 'F':
 				if (strncmp(s, "%fsr", 4) == 0) {
@@ -1208,28 +1298,20 @@ long val;
  /* start-sanitize-v9 */
 #ifndef NO_V9
 	case RELOC_11:
-#if 0
-		/* ??? Bogus overflow test.  This is a signed value, so
-		   the upper bits can be set if the sign bit is set.  */
-		if (val & ~0x7ff) {
+		if (((val > 0) && (val & ~0x7ff))
+		    || ((val < 0) && (~val & ~0x7ff))) {
 			as_bad("relocation overflow.");
 		} /* on overflow */
-#endif
 
 		buf[2] = (val >> 8) & 0x7;
 		buf[3] = val & 0xff;
 		break;
 
 	case RELOC_WDISP2_14:
-#if 0
-		/* ??? Bogus overflow test.  This is a signed value, so
-		   the upper bits can be set if the sign bit is set.  */
-		/* ??? This tests the wrong 16 bits also, should test
-		   ~0x3fffc0.  */
-		if (val & ~0xffff) {
+		if (((val > 0) && (val & ~0x3fffc))
+		    || ((val < 0) && (~val & ~0x3fffc))) {
 			as_bad("relocation overflow.");
 		} /* on overflow */
-#endif
 
 		val = (val >>= 2) + 1;
 		buf[1] |= ((val >> 14) & 0x3) << 3;
@@ -1238,15 +1320,10 @@ long val;
 		break;
 
 	case RELOC_WDISP19:
-#if 0
-		/* ??? Bogus overflow test.  This is a signed value, so
-		   the upper bits can be set if the sign bit is set.  */
-		/* ??? This tests the wrong 19 bits also, should test
-		   ~0x1ffffc0.  */
-		if (val & ~0x7ffff) {
+		if (((val > 0) && (val & ~0x1ffffc))
+		    || ((val < 0) && (~val & ~0x1ffffc))) {
 			as_bad("relocation overflow.");
 		} /* on overflow */
-#endif
 
 		val = (val >>= 2) + 1;
 		buf[1] |= (val >> 16) & 0x7;
@@ -1255,7 +1332,7 @@ long val;
 		break;
 
 	case RELOC_HHI22:
-		val >> 32;
+		val >>= 32;
  /* intentional fallthrough */
 #endif /* NO_V9 */
  /* end-sanitize-v9 */
@@ -1345,23 +1422,56 @@ symbolS *to_symbol;
    bit 7 as external, bits 6 & 5 unused, and the lower
    five bits as relocation type.  Next 4 bytes are long addend. */
 /* Thanx and a tip of the hat to Michael Bloom, mb@ttidca.tti.com */
-void md_ri_to_chars(the_bytes, ri)
-char *the_bytes;
-struct reloc_info_generic *ri;
+void tc_aout_fix_to_chars(where, fixP, segment_address_in_file)
+char *where;
+fixS *fixP;
+relax_addressT segment_address_in_file;
 {
+	long r_index;
+	long r_extern;
+	long r_addend;
+	long r_address;
+
+	know(fixP->fx_addsy);
+
+	if ((S_GET_TYPE(fixP->fx_addsy)) == N_UNDF) {
+		r_extern = 1;
+		r_index = fixP->fx_addsy->sy_number;
+	} else {
+		r_extern = 0;
+		r_index = S_GET_TYPE(fixP->fx_addsy);
+	}
+			
 	/* this is easy */
-	md_number_to_chars(the_bytes, ri->r_address, 4);
+	md_number_to_chars(where,
+			   r_address = fixP->fx_frag->fr_address + fixP->fx_where - segment_address_in_file,
+			   4);
+
 	/* now the fun stuff */
-	the_bytes[4] = (ri->r_index >> 16) & 0x0ff;
-	the_bytes[5] = (ri->r_index >> 8) & 0x0ff;
-	the_bytes[6] = ri->r_index & 0x0ff;
-	the_bytes[7] = ((ri->r_extern << 7)  & 0x80) | (0 & 0x60) | (ri->r_type & 0x1F);
+	where[4] = (r_index >> 16) & 0x0ff;
+	where[5] = (r_index >> 8) & 0x0ff;
+	where[6] = r_index & 0x0ff;
+	where[7] = ((r_extern << 7)  & 0x80) | (0 & 0x60) | (fixP->fx_r_type & 0x1F);
+
 	/* Also easy */
-	md_number_to_chars(&the_bytes[8], ri->r_addend, 4);
-} /* md_ri_to_chars() */
+	if (fixP->fx_addsy->sy_frag) {
+		r_addend = fixP->fx_addsy->sy_frag->fr_address;
+	}
+	
+	if (fixP->fx_pcrel) {
+		r_addend -= r_address;
+	} else {
+		r_addend = fixP->fx_addnumber;
+	}
+	
+	md_number_to_chars(&where[8], r_addend, 4);
+
+	return;
+} /* tc_aout_fix_to_chars() */
 
 /* should never be called for sparc */
-void md_convert_frag(fragP)
+void md_convert_frag(headers, fragP)
+object_headers *headers;
 register fragS *fragP;
 {
 	fprintf(stderr, "sparc_convert_frag\n");
@@ -1450,8 +1560,10 @@ struct sparc_it *insn;
 
 /* Set the hook... */
 
-void emit_sparc_reloc();
-void (*md_emit_relocations)() = emit_sparc_reloc;
+/* void emit_sparc_reloc();
+void (*md_emit_relocations)() = emit_sparc_reloc; */
+
+#ifdef comment
 
 /*
  * Sparc/AM29K relocations are completely different, so it needs
@@ -1503,6 +1615,7 @@ relax_addressT segment_address_in_file;
 	return;
 } /* emit_sparc_reloc() */
 #endif /* aout or bout */
+#endif /* comment */
 
 /*
  * md_parse_option

@@ -247,6 +247,7 @@ struct relocation_info {
 				 H_GET_DATA_RELOCATION_SIZE(h) + \
 				 (h)->string_table_size)
 
+#define H_GET_HEADER_SIZE(h)		(sizeof(struct exec))
 #define H_GET_TEXT_SIZE(h)		((h)->header.a_text)
 #define H_GET_DATA_SIZE(h)		((h)->header.a_data)
 #define H_GET_BSS_SIZE(h)		((h)->header.a_bss)
@@ -256,6 +257,8 @@ struct relocation_info {
 #define H_GET_MAGIC_NUMBER(h)		((h)->header.a_info)
 #define H_GET_ENTRY_POINT(h)		((h)->header.a_entry)
 #define H_GET_STRING_SIZE(h)		((h)->string_table_size)
+#define H_GET_LINENO_SIZE(h)		(0)
+
 #ifdef EXEC_MACHINE_TYPE
 #define H_GET_MACHINE_TYPE(h)		((h)->header.a_machtype)
 #endif /* EXEC_MACHINE_TYPE */
@@ -263,9 +266,9 @@ struct relocation_info {
 #define H_GET_VERSION(h)		((h)->header.a_version)
 #endif /* EXEC_VERSION */
 
-#define H_SET_TEXT_SIZE(h,v)		((h)->header.a_text = md_section_align(SEG_TEXT, (v)))
-#define H_SET_DATA_SIZE(h,v)		((h)->header.a_data = md_section_align(SEG_DATA, (v)))
-#define H_SET_BSS_SIZE(h,v)		((h)->header.a_bss = md_section_align(SEG_BSS, (v)))
+#define H_SET_TEXT_SIZE(h,v)		((h)->header.a_text = (v))
+#define H_SET_DATA_SIZE(h,v)		((h)->header.a_data = (v))
+#define H_SET_BSS_SIZE(h,v)		((h)->header.a_bss = (v))
 
 #define H_SET_RELOCATION_SIZE(h,t,d)	(H_SET_TEXT_RELOCATION_SIZE((h),(t)),\
 					 H_SET_DATA_RELOCATION_SIZE((h),(d)))
@@ -301,6 +304,13 @@ typedef struct {
 /* unused hooks. */
 #define OBJ_EMIT_LINENO(a, b, c)	;
 #define obj_pre_write_hook(a)		;
+
+#ifdef __STDC__
+struct fix;
+void tc_aout_fix_to_chars(char *where, struct fix *fixP, relax_addressT segment_address);
+#else
+void tc_aout_fix_to_chars();
+#endif /* __STDC__ */
 
 /*
  * Local Variables:

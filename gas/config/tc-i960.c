@@ -5,7 +5,7 @@ This file is part of GAS.
 
 GAS is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
+the Free Software Foundation; either version 2, or (at your option)
 any later version.
 
 GAS is distributed in the hope that it will be useful,
@@ -86,7 +86,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 extern char *input_line_pointer;
 extern struct hash_control *po_hash;
-extern unsigned char nbytes_r_length[];
 extern char *next_object_file_charP;
 
 #ifdef OBJ_COFF
@@ -94,20 +93,6 @@ int md_reloc_size = sizeof(struct reloc);
 #else /* OBJ_COFF */
 int md_reloc_size = sizeof(struct relocation_info);
 #endif /* OBJ_COFF */
-
-#if defined(OBJ_AOUT) | defined(OBJ_BOUT)
-#ifdef __STDC__
-
-static void emit_machine_reloc(fixS *fixP, relax_addressT segment_address_in_file);
-
-#else /* __STDC__ */
-
-static void emit_machine_reloc();
-
-#endif /* __STDC__ */
-
-void (*md_emit_relocations)() = emit_machine_reloc;
-#endif /* OBJ_AOUT or OBJ_BOUT */
 
 	/***************************
 	 *  Local i80960 routines  *
@@ -621,6 +606,8 @@ md_number_to_chars(buf, value, n)
 	if (value != 0 && value != -1){
 		as_bad("Displacement too long for instruction field length.");
 	}
+
+	return;
 } /* md_number_to_chars() */
 
 /*****************************************************************************
@@ -892,7 +879,8 @@ md_parse_option(argP, cntP, vecP)
  *
  **************************************************************************** */
 void
-md_convert_frag(fragP)
+md_convert_frag(headers, fragP)
+object_headers *headers;
     fragS * fragP;
 {
 	fixS *fixP;	/* Structure describing needed address fix */
@@ -959,26 +947,12 @@ md_estimate_size_before_relax(fragP, segment_type)
  *	we leave it in host byte order.
  *
  **************************************************************************** */
-void md_ri_to_chars(the_bytes, ri)
-char *the_bytes;
-struct reloc_info_generic *ri;
+void md_ri_to_chars(where, ri)
+char *where;
+struct relocation_info *ri;
 {
-	struct relocation_info br;
-
-	(void) bzero(&br, sizeof(br));
-
-	br.r_address = ri->r_address;
-	br.r_index = ri->r_index;
-	br.r_pcrel = ri->r_pcrel;
-	br.r_length = ri->r_length;
-	br.r_extern = ri->r_extern;
-	br.r_bsr = ri->r_bsr;
-	br.r_disp = ri->r_disp;
-	br.r_callj = ri->r_callj;
-
-	*((struct relocation_info *) the_bytes) = br;
+	*((struct relocation_info *) where) = *ri; /* structure assignment */
 } /* md_ri_to_chars() */
-
 
 #ifndef WORKING_DOT_WORD
 
@@ -1393,14 +1367,14 @@ get_ispec(textP)
 
 	/* Find opening square bracket, if any
 	 */
-	start = index(textP, '[');
+	start = strchr(textP, '[');
 
 	if (start != NULL){
 
 		/* Eliminate '[', detach from rest of operand */
 		*start++ = '\0';
 
-		end = index(start, ']');
+		end = strchr(start, ']');
 
 		if (end == NULL){
 			as_bad("unmatched '['");
@@ -2569,54 +2543,41 @@ md_apply_fix(fixP, val)
 } /* md_apply_fix() */
 
 #if defined(OBJ_AOUT) | defined(OBJ_BOUT)
-/*
- *		emit_relocations()
- *
- * Crawl along a fixS chain. Emit the segment's relocations.
- */
-static void
-emit_machine_reloc (fixP, segment_address_in_file)
-     register fixS *	fixP;	/* Fixup chain for this segment. */
-     relax_addressT	segment_address_in_file;
+void tc_bout_fix_to_chars(where, fixP, segment_address_in_file)
+char *where;
+fixS *fixP;
+relax_addressT segment_address_in_file;
 {
-  struct reloc_info_generic	ri;
-  register symbolS *		symbolP;
-
+	static unsigned char nbytes_r_length [] = { 42, 0, 1, 42, 2 };
+	struct relocation_info ri;
+	symbolS *symbolP;
+	
 	/* JF this is for paranoia */
-  bzero((char *)&ri,sizeof(ri));
-  for (;  fixP;  fixP = fixP->fx_next)
-    {
-      if ((symbolP = fixP->fx_addsy) != 0)
-	{
-	  /* These two 'cuz of NS32K */
-	  ri . r_bsr		= fixP->fx_bsr;
-	  ri . r_disp		= fixP->fx_im_disp;
-
-	  ri . r_callj		= fixP->fx_callj;
-
-	  ri . r_length		= nbytes_r_length [fixP->fx_size];
-	  ri . r_pcrel		= fixP->fx_pcrel;
-	  ri . r_address	= fixP->fx_frag->fr_address
-	    +   fixP->fx_where
-	      - segment_address_in_file;
-	  if (!S_IS_DEFINED(symbolP))
-	    {
-	      ri . r_extern	= 1;
-	      ri . r_symbolnum	= symbolP->sy_number;
-	    }
-	  else
-	    {
-	      ri . r_extern	= 0;
-	      ri . r_symbolnum	= S_GET_TYPE(symbolP);
-	    }
-
-	  /* Output the relocation information in machine-dependent form. */
-	  md_ri_to_chars(next_object_file_charP, &ri);
-	  next_object_file_charP += sizeof(struct relocation_info);
+	bzero((char *)&ri, sizeof(ri));
+	
+	know((symbolP = fixP->fx_addsy) != 0);
+	
+	/* These two 'cuz of NS32K */
+	ri.r_callj = fixP->fx_callj;
+	
+	ri.r_length = nbytes_r_length[fixP->fx_size];
+	ri.r_pcrel = fixP->fx_pcrel;
+	ri.r_address = fixP->fx_frag->fr_address + fixP->fx_where - segment_address_in_file;
+	
+	if (!S_IS_DEFINED(symbolP)) {
+		ri.r_extern = 1;
+		ri.r_index = symbolP->sy_number;
+	} else {
+		ri.r_extern = 0;
+		ri.r_index = S_GET_TYPE(symbolP);
 	}
-    }
+	
+	/* Output the relocation information in machine-dependent form. */
+	md_ri_to_chars(where, &ri);
+	
+	return;
+} /* tc_bout_fix_to_chars() */
 
-} /* emit_machine_reloc() */
 #endif /* OBJ_AOUT or OBJ_BOUT */
 
 /* Align an address by rounding it up to the specified boundary.

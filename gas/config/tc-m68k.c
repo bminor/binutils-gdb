@@ -1009,7 +1009,7 @@ static struct hash_control*   op_hash = NULL;	/* handle of the OPCODE hash table
  * No argument string should generate such an error string:
  * it means a bug in our code, not in the user's text.
  *
- * You MUST have called m86_ip_begin() once and m86_ip_end() never before using
+ * You MUST have called m68_ip_begin() once and m86_ip_end() never before using
  * this function.
  */
 
@@ -1068,9 +1068,13 @@ char	*instring;
 	}
 
   /* found a legitimate opcode, start matching operands */
-	for(opP= &the_ins.operands[0];*p;opP++) {
-		p = crack_operand (p, opP);
-		if(opP->error) {
+	while (*p == ' ') ++p;
+
+	for(opP = &the_ins.operands[0]; *p; opP++) {
+
+		p = crack_operand(p, opP);
+
+		if (opP->error) {
 			the_ins.error=opP->error;
 			return;
 		}
@@ -3089,6 +3093,7 @@ bit 7 as pcrel, bits 6 & 5 as length, bit 4 as pcrel, and the lower
 nibble as nuthin. (on Sun 3 at least) */
 /* Translate the internal relocation information into target-specific
    format. */
+#ifdef comment
 void
 md_ri_to_chars(the_bytes, ri)
      char *the_bytes;
@@ -3103,6 +3108,46 @@ md_ri_to_chars(the_bytes, ri)
   the_bytes[7] = (((ri->r_pcrel << 7)  & 0x80) | ((ri->r_length << 5) & 0x60) | 
     ((ri->r_extern << 4)  & 0x10)); 
 }
+#endif /* comment */
+
+void tc_aout_fix_to_chars(where, fixP, segment_address_in_file)
+char *where;
+fixS *fixP;
+relax_addressT segment_address_in_file;
+{
+	/*
+	 * In: length of relocation (or of address) in chars: 1, 2 or 4.
+	 * Out: GNU LD relocation length code: 0, 1, or 2.
+	 */
+	
+	static unsigned char nbytes_r_length [] = { 42, 0, 1, 42, 2 };
+	
+	long r_extern;
+	long r_symbolnum;
+	
+	/* this is easy */
+	md_number_to_chars(where,
+			   fixP->fx_frag->fr_address + fixP->fx_where - segment_address_in_file,
+			   4);
+	
+	/* now the fun stuff */
+	if (S_GET_TYPE(fixP->fx_addsy) == N_UNDF) {
+		r_extern	= 1;
+		r_symbolnum	= fixP->fx_addsy->sy_number;
+	} else {
+		r_extern	= 0;
+		r_symbolnum	= S_GET_TYPE(fixP->fx_addsy);
+	}
+	
+	where[4] = (r_symbolnum >> 16) & 0x0ff;
+	where[5] = (r_symbolnum >> 8) & 0x0ff;
+	where[6] = r_symbolnum & 0x0ff;
+	where[7] = (((fixP->fx_pcrel << 7)  & 0x80) | ((nbytes_r_length[fixP->fx_size] << 5) & 0x60) | 
+		    ((r_extern << 4)  & 0x10)); 
+	
+	return;
+} /* tc_aout_fix_to_chars() */
+
 #endif /* OBJ_AOUT or OBJ_BOUT */
 
 #ifndef WORKING_DOT_WORD
