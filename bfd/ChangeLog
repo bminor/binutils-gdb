@@ -1,5 +1,9 @@
 Mon Apr  8 12:09:36 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.in: Permit --enable-shared to specify a list of
+	directories.
+	* configure: Rebuild.
+
 	* configure.host: Set HLDFLAGS and SHLIB_CFLAGS for *-dec-osf*
 	host when configuring with --enable-shard.
 

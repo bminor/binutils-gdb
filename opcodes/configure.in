@@ -31,7 +31,8 @@ AC_ARG_ENABLE(shared,
 [case "${enableval}" in
   yes) shared=true ;;
   no)  shared=false ;;
-  *)   AC_MSG_ERROR([bad value ${enableval} for opcodes shared option]) ;;
+  *opcodes*) shared=true ;;
+  *) shared=false ;;
 esac])dnl
 AC_ARG_ENABLE(commonbfdlib,
 [  --enable-commonbfdlib   build shared BFD/opcodes/libiberty library],
