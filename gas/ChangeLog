@@ -1,3 +1,9 @@
+Wed Feb 23 16:51:43 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* write.c (write_contents): Give the user a reasonable error
+	message rather than "assertion failed" if bfd_set_section_contents
+	fails.
+
 Tue Feb 22 10:07:32 1994  Ken Raeburn  (raeburn@rtl.cygnus.com)
 
 	* config/ho-mach3.h: New file.
