@@ -1215,7 +1215,6 @@ hms_before_main_loop ()
   char ttyname[100];
   char *p, *p2;
   extern FILE *instream;
-  extern jmp_buf to_top_level;
 
   push_target (&hms_ops);
 }

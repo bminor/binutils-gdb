@@ -855,7 +855,9 @@ mips_initialize ()
   mips_receive_wait = 3;
 
   tries = 0;
-  while (catch_errors (mips_receive_packet, buff, (char *) NULL) == 0)
+  while (catch_errors (mips_receive_packet, buff, (char *) NULL,
+		       RETURN_MASK_ALL)
+	 == 0)
     {
       char cc;
 

@@ -467,7 +467,8 @@ add_vmap(ldi)
 
 #ifndef SOLIB_SYMBOLS_MANUAL
 	if (catch_errors (objfile_symbol_add, (char *)obj,
-			  "Error while reading shared library symbols:\n"))
+			  "Error while reading shared library symbols:\n",
+			  RETURN_MASK_ALL))
 	  {
 	    /* Note this is only done if symbol reading was successful.  */
 	    vmap_symtab (vp);

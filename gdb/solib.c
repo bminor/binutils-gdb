@@ -766,7 +766,8 @@ solib_add (arg_string, from_tty, target)
 	    }
 	  else if (catch_errors
 		   (symbol_add_stub, (char *) so,
-		    "Error while reading shared library symbols:\n"))
+		    "Error while reading shared library symbols:\n",
+		    RETURN_MASK_ALL))
 	    {
 	      special_symbol_handling (so);
 	      so -> symbols_loaded = 1;

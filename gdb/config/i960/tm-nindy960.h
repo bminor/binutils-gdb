@@ -57,9 +57,9 @@ extern char *nindy_ttyname;	/* Name of serial port to talk to nindy */
    and download the executable file if one was specified.  */
 
 #define	ADDITIONAL_OPTION_HANDLER	\
-	if (!setjmp (to_top_level) && nindy_ttyname) {		\
+	if (!SET_TOP_LEVEL () && nindy_ttyname) {		\
 	  nindy_open (nindy_ttyname, !batch);			\
-	  if ( !setjmp(to_top_level) && execarg ) {		\
+	  if (!SET_TOP_LEVEL () && execarg) {			\
 		target_load (execarg, !batch);			\
 	  }							\
 	}

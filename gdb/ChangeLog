@@ -1,3 +1,15 @@
+Sun Jun 13 09:17:48 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* defs.h, main.c (catch_errors): Add return_mask arg.
+	stack.c (print_frame_info): Pass RETURN_MASK_ERROR.
+	other callers: Pass RETURN_MASK_ALL.
+	(return_to_top_level), callers: Add return_reason arg.
+	* utils.c (quit):
+	Use return_to_top_level (RETURN_QUIT) instead of error ().
+	* main.c (main), tm-nindy960.h (ADDITIONAL_OPTION_HANDLER):
+	Use SET_TOP_LEVEL not setjmp (to_top_level).
+	* remote-nindy.c: Use catch_errors not setjmp (to_top_level).
+
 Sat Jun 12 14:40:54 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* solib.c (solib_create_inferior_hook) [SVR4_SHARED_LIBS]:

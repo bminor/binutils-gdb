@@ -1031,8 +1031,9 @@ vx_open (args, from_tty)
     {
       if (*bootFile) {
 	printf_filtered ("\t%s: ", bootFile);
-	if (catch_errors (symbol_stub, bootFile,
-		"Error while reading symbols from boot file:\n"))
+	if (catch_errors
+	    (symbol_stub, bootFile,
+	     "Error while reading symbols from boot file:\n", RETURN_MASK_ALL))
 	  puts_filtered ("ok\n");
       } else if (from_tty)
 	printf ("VxWorks kernel symbols not loaded.\n");
@@ -1068,7 +1069,8 @@ vx_open (args, from_tty)
       /* Botches, FIXME:
 	 (1)  Searches the PATH, not the source path.
 	 (2)  data and bss are assumed to be at the usual offsets from text.  */
-      catch_errors (add_symbol_stub, (char *)pLoadFile, (char *)0);
+      catch_errors (add_symbol_stub, (char *)pLoadFile, (char *)0,
+		    RETURN_MASK_ALL);
 #endif
     }
   printf_filtered ("Done.\n");

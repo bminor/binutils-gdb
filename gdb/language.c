@@ -1022,7 +1022,7 @@ type_error (va_alist)
    fprintf (stderr, "\n");
    va_end (args);
    if (type_check==type_check_on)
-      return_to_top_level();
+      return_to_top_level (RETURN_ERROR);
 }
 
 void
@@ -1043,7 +1043,7 @@ range_error (va_alist)
    fprintf (stderr, "\n");
    va_end (args);
    if (range_check==range_check_on)
-      return_to_top_level();
+      return_to_top_level (RETURN_ERROR);
 }
 
 

@@ -125,7 +125,6 @@ extern char *mktemp();
 extern void generic_mourn_inferior ();
 
 extern struct target_ops nindy_ops;
-extern jmp_buf to_top_level;
 extern FILE *instream;
 extern struct ext_format ext_format_i960;	/* i960-tdep.c */
 
@@ -840,6 +839,23 @@ nindy_mourn_inferior ()
   generic_mourn_inferior ();	/* Do all the proper things now */
 }
 
+/* Pass the args the way catch_errors wants them.  */
+static int
+nindy_open_stub (arg)
+     char *arg;
+{
+  nindy_open (arg, 1);
+  return 1;
+}
+
+static int
+load_stub (arg)
+     char *arg;
+{
+  target_load (arg, 1);
+  return 1;
+}
+
 /* This routine is run as a hook, just before the main command loop is
    entered.  If gdb is configured for the i960, but has not had its
    nindy target specified yet, this will loop prompting the user to do so.
@@ -854,7 +870,6 @@ nindy_before_main_loop ()
   char ttyname[100];
   char *p, *p2;
 
-  setjmp(to_top_level);
   while (current_target != &nindy_ops) { /* remote tty not specified yet */
 	if ( instream == stdin ){
 		printf("\nAttach /dev/ttyNN -- specify NN, or \"quit\" to quit:  ");
@@ -877,13 +892,16 @@ nindy_before_main_loop ()
 		exit(1);
 	}
 
-	nindy_open( p, 1 );
-
-	/* Now that we have a tty open for talking to the remote machine,
-	   download the executable file if one was specified.  */
-	if ( !setjmp(to_top_level) && exec_bfd ) {
-	      target_load (bfd_get_filename (exec_bfd), 1);
-	}
+	if (catch_errors (nindy_open_stub, p, "", RETURN_MASK_ALL))
+	  {
+	    /* Now that we have a tty open for talking to the remote machine,
+	       download the executable file if one was specified.  */
+	    if (exec_bfd)
+	      {
+		catch_errors (load_stub, bfd_get_filename (exec_bfd), "",
+			      RETURN_MASK_ALL);
+	      }
+	  }
   }
 }
 

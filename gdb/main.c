@@ -337,33 +337,63 @@ static void stop_sig PARAMS ((int));
 #define sigsetmask(n)
 #endif
 
-/* This is how `error' returns to command level.  */
+/* Where to go for return_to_top_level (RETURN_ERROR).  */
+static jmp_buf error_return;
+/* Where to go for return_to_top_level (RETURN_QUIT).  */
+static jmp_buf quit_return;
 
-jmp_buf to_top_level;
+/* Temporary variable for SET_TOP_LEVEL.  */
+static int top_level_val;
+
+/* Do a setjmp on error_return and quit_return.  catch_errors is
+   generally a cleaner way to do this, but main() would look pretty
+   ugly if it had to use catch_errors each time.  */
+
+#define SET_TOP_LEVEL() \
+  (((top_level_val = setjmp (error_return)) \
+    ? (PTR) 0 : (PTR) memcpy (quit_return, error_return, sizeof (jmp_buf))) \
+   , top_level_val)
+
+/* Return for reason REASON.  This generally gets back to the command
+   loop, but can be caught via catch_errors.  */
 
 NORETURN void
-return_to_top_level ()
+return_to_top_level (reason)
+     enum return_reason reason;
 {
   quit_flag = 0;
   immediate_quit = 0;
   bpstat_clear_actions(stop_bpstat);	/* Clear queued breakpoint commands */
   disable_current_display ();
   do_cleanups (ALL_CLEANUPS);
-  (NORETURN void) longjmp (to_top_level, 1);
+  (NORETURN void) longjmp
+    (reason == RETURN_ERROR ? error_return : quit_return, 1);
 }
 
-/* Call FUNC with arg ARGS, catching any errors.
-   If there is no error, return the value returned by FUNC.
-   If there is an error, print ERRSTRING, print the specific error message,
-		         then return zero.  */
+/* Call FUNC with arg ARGS, catching any errors.  If there is no
+   error, return the value returned by FUNC.  If there is an error,
+   print ERRSTRING, print the specific error message, then return
+   zero.
+
+   MASK specifies what to catch; it is normally set to
+   RETURN_MASK_ALL, if for no other reason than that the code which
+   calls catch_errors might not be set up to deal with a quit which
+   isn't caught.  But if the code can deal with it, it generally
+   should be RETURN_MASK_ERROR, unless for some reason it is more
+   useful to abort only the portion of the operation inside the
+   catch_errors.  Note that quit should return to the command line
+   fairly quickly, even if some further processing is being done.  */
 
 int
-catch_errors (func, args, errstring)
+catch_errors (func, args, errstring, mask)
      int (*func) PARAMS ((char *));
-     char *args;
+     PTR args;
      char *errstring;
+     return_mask mask;
 {
-  jmp_buf saved;
+  jmp_buf saved_error;
+  jmp_buf saved_quit;
+  jmp_buf tmp_jmp;
   int val;
   struct cleanup *saved_cleanup_chain;
   char *saved_error_pre_print;
@@ -371,18 +401,30 @@ catch_errors (func, args, errstring)
   saved_cleanup_chain = save_cleanups ();
   saved_error_pre_print = error_pre_print;
 
-  memcpy ((char *)saved, (char *)to_top_level, sizeof (jmp_buf));
+  if (mask & RETURN_MASK_ERROR)
+    memcpy ((char *)saved_error, (char *)error_return, sizeof (jmp_buf));
+  if (mask & RETURN_MASK_QUIT)
+    memcpy (saved_quit, quit_return, sizeof (jmp_buf));
   error_pre_print = errstring;
 
-  if (setjmp (to_top_level) == 0)
-    val = (*func) (args);
+  if (setjmp (tmp_jmp) == 0)
+    {
+      if (mask & RETURN_MASK_ERROR)
+	memcpy (error_return, tmp_jmp, sizeof (jmp_buf));
+      if (mask & RETURN_MASK_QUIT)
+	memcpy (quit_return, tmp_jmp, sizeof (jmp_buf));
+      val = (*func) (args);
+    }
   else
     val = 0;
 
   restore_cleanups (saved_cleanup_chain);
 
   error_pre_print = saved_error_pre_print;
-  memcpy ((char *)to_top_level, (char *)saved, sizeof (jmp_buf));
+  if (mask & RETURN_MASK_ERROR)
+    memcpy (error_return, saved_error, sizeof (jmp_buf));
+  if (mask & RETURN_MASK_QUIT)
+    memcpy (quit_return, saved_quit, sizeof (jmp_buf));
   return val;
 }
 
@@ -393,7 +435,7 @@ disconnect (signo)
 int signo;
 {
   catch_errors (quit_cover, NULL,
-		"Could not kill the program being debugged");
+		"Could not kill the program being debugged", RETURN_MASK_ALL);
   signal (SIGHUP, SIG_DFL);
   kill (getpid (), SIGHUP);
 }
@@ -479,7 +521,7 @@ main (argc, argv)
 #endif
 
   /* If error() is called from initialization code, just exit */
-  if (setjmp (to_top_level)) {
+  if (SET_TOP_LEVEL ()) {
     exit(1);
   }
 
@@ -728,7 +770,7 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
       strcat (homeinit, gdbinit);
       if (!inhibit_gdbinit && access (homeinit, R_OK) == 0)
 	{
-	  if (!setjmp (to_top_level))
+	  if (!SET_TOP_LEVEL ())
 	    source_command (homeinit, 0);
 	}
       do_cleanups (ALL_CLEANUPS);
@@ -749,7 +791,7 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
   /* Now perform all the actions indicated by the arguments.  */
   if (cdarg != NULL)
     {
-      if (!setjmp (to_top_level))
+      if (!SET_TOP_LEVEL ())
 	{
 	  cd_command (cdarg, 0);
 	  init_source_path ();
@@ -758,7 +800,7 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
   do_cleanups (ALL_CLEANUPS);
 
   for (i = 0; i < ndir; i++)
-    if (!setjmp (to_top_level))
+    if (!SET_TOP_LEVEL ())
       directory_command (dirarg[i], 0);
   free ((PTR)dirarg);
   do_cleanups (ALL_CLEANUPS);
@@ -769,7 +811,7 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
     {
       /* The exec file and the symbol-file are the same.  If we can't open
 	 it, better only print one error message.  */
-      if (!setjmp (to_top_level))
+      if (!SET_TOP_LEVEL ())
 	{
 	  exec_file_command (execarg, !batch);
 	  symbol_file_command (symarg, 0);
@@ -778,10 +820,10 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
   else
     {
       if (execarg != NULL)
-	if (!setjmp (to_top_level))
+	if (!SET_TOP_LEVEL ())
 	  exec_file_command (execarg, !batch);
       if (symarg != NULL)
-	if (!setjmp (to_top_level))
+	if (!SET_TOP_LEVEL ())
 	  symbol_file_command (symarg, 0);
     }
   do_cleanups (ALL_CLEANUPS);
@@ -795,14 +837,14 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
   warning_pre_print = "\nwarning: ";
 
   if (corearg != NULL)
-    if (!setjmp (to_top_level))
+    if (!SET_TOP_LEVEL ())
       core_file_command (corearg, !batch);
-    else if (isdigit (corearg[0]) && !setjmp (to_top_level))
+    else if (isdigit (corearg[0]) && !SET_TOP_LEVEL ())
       attach_command (corearg, !batch);
   do_cleanups (ALL_CLEANUPS);
 
   if (ttyarg != NULL)
-    if (!setjmp (to_top_level))
+    if (!SET_TOP_LEVEL ())
       tty_command (ttyarg, !batch);
   do_cleanups (ALL_CLEANUPS);
 
@@ -821,14 +863,14 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
       || memcmp ((char *) &homebuf, (char *) &cwdbuf, sizeof (struct stat)))
     if (!inhibit_gdbinit && access (gdbinit, R_OK) == 0)
       {
-	if (!setjmp (to_top_level))
+	if (!SET_TOP_LEVEL ())
 	  source_command (gdbinit, 0);
       }
   do_cleanups (ALL_CLEANUPS);
 
   for (i = 0; i < ncmd; i++)
     {
-      if (!setjmp (to_top_level))
+      if (!SET_TOP_LEVEL ())
 	{
 	  if (cmdarg[i][0] == '-' && cmdarg[i][1] == '\0')
 	    read_command_file (stdin);
@@ -859,7 +901,7 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
 
   while (1)
     {
-      if (!setjmp (to_top_level))
+      if (!SET_TOP_LEVEL ())
 	{
 	  do_cleanups (ALL_CLEANUPS);		/* Do complete cleanup */
 	  command_loop ();
