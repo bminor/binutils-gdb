@@ -2066,8 +2066,23 @@ coff_print_symbol (abfd, filep, symbol, how)
 				 auxp->u.auxent.x_scn.x_comdat);
 		      break;
 		    }
+		    /* else fall through */
+		case C_EXT:
+		  if (ISFCN (combined->u.syment.n_type))
+		    {
+		      fprintf (file,
+			       _("AUX tagndx %ld ttlsiz 0x%lx lnnos %ld next %ld"),
+			       tagndx,
+			       auxp->u.auxent.x_sym.x_misc.x_fsize,
+			       auxp->u.auxent.x_sym.x_fcnary.x_fcn.x_lnnoptr,
+			       (auxp->fix_end
+				? ((long)
+				   (auxp->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.p
+				    - root))
+				: auxp->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.l));
+		      break;
+		    }
 		  /* else fall through */
-
 		default:
 		  fprintf (file, "AUX lnno %d size 0x%x tagndx %ld",
 			   auxp->u.auxent.x_sym.x_misc.x_lnsz.x_lnno,

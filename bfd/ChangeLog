@@ -1,5 +1,8 @@
 1999-09-11  Donn Terry  <donn@interix.com>
 
+	* coffgen.c (coff_print_symbol): Fix printing of aux record for
+	function symbols.
+
 	* syms.c (BSF_DEBUGGING_RELOC): Define.
 	* coffgen.c (fixup_symbol_value): Relocate a symbol which has
 	BSF_DEBUGGING_RELOC set.
