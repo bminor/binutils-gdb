@@ -1,5 +1,12 @@
 2004-08-17  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* configure.in: Add gdb.fortran.
+	* configure: Regenerate.
+	* gdb.fortran/Makefile.in: New file.
+	* lib/gdb.exp (skip_fortran_tests): New procedure.
+
+2004-08-17  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.mi/mi-var-block.exp: Use gdb_get_line_number.  Remove
 	reference to bug-gnu@prep.ai.mit.edu.
 	* gdb.mi/mi-var-child.exp: Likewise.

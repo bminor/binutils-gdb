@@ -1121,6 +1121,12 @@ proc skip_cplus_tests {} {
     return 0
 }
 
+# Return a 1 if I don't even want to try to test FORTRAN.
+
+proc skip_fortran_tests {} {
+    return 0
+}
+
 # Skip all the tests in the file if you are not on an hppa running
 # hpux target.
 
