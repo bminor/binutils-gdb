@@ -1,3 +1,11 @@
+2002-11-19  Adam Fedor  <fedor@gnu.org>
+
+	* Makefile.in (SFILES): Add objc-exp.y objc-lang.c.
+	(objc_lang_h): Define.
+	(YYFILES): Add objc-exp.tab.c.
+	(local-maintainer-clean): Remove objc-exp.tab.c.
+	(objc-exp.tab.c, objc-exp.tab.o, objc-lang.o): New target.
+	
 2002-11-19  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* p-exp.y (typecast rule): Add automatic dereference of

@@ -551,6 +551,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	macrotab.c macroexp.c macrocmd.c macroscope.c main.c maint.c \
 	mdebugread.c memattr.c mem-break.c minsyms.c mipsread.c \
 	nlmread.c \
+	objc-exp.y objc-lang.c \
 	objfiles.c osabi.c \
 	p-exp.y p-lang.c p-typeprint.c p-valprint.c parse.c printcmd.c \
 	regcache.c reggroups.c remote.c \
@@ -692,6 +693,7 @@ mipsnbsd_tdep_h = mipsnbsd-tdep.h
 monitor_h = monitor.h
 nbsd_tdep_h = nbsd-tdep.h
 ns32k_tdep_h = ns32k-tdep.h $(osabi_h)
+objc_lang_h = objc-lang.h
 objfiles_h = objfiles.h $(gdb_obstack_h) $(symfile_h)
 ocd_h = ocd.h
 osabi_h = osabi.h
@@ -870,6 +872,7 @@ SUBDIRS = @SUBDIRS@
 
 # For now, shortcut the "configure GDB for fewer languages" stuff.
 YYFILES = c-exp.tab.c \
+	objc-exp.tab.c \
 	ada-exp.tab.c \
 	jv-exp.tab.c \
 	f-exp.tab.c m2-exp.tab.c p-exp.tab.c
@@ -1135,6 +1138,7 @@ local-maintainer-clean:
 	@echo "it deletes files that may require special tools to rebuild."
 	rm -f c-exp.tab.c \
 		ada-lex.c ada-exp.tab.c \
+	        objc-exp.tab.c \
 		jv-exp.tab \
 		f-exp.tab.c m2-exp.tab.c p-exp.tab.c
 	rm -f TAGS $(INFOFILES)
@@ -1228,6 +1232,22 @@ c-exp.tab.c: c-exp.y
 	  < c-exp.tmp > c-exp.new
 	-rm c-exp.tmp
 	mv c-exp.new ./c-exp.tab.c
+
+# See comments above ...
+.PRECIOUS: objc-exp.tab.c
+objc-exp.tab.o: objc-exp.tab.c
+objc-exp.tab.c: objc-exp.y
+	$(SHELL) $(YLWRAP) "$(YACC)" $(srcdir)/objc-exp.y y.tab.c objc-exp.tmp -- $(YFLAGS) 
+	-sed -e '/extern.*malloc/d' \
+	     -e '/extern.*realloc/d' \
+	     -e '/extern.*free/d' \
+	     -e '/include.*malloc.h/d' \
+	     -e 's/malloc/xmalloc/g' \
+	     -e 's/realloc/xrealloc/g' \
+	     -e '/^#line.*y.tab.c/d' \
+	  < objc-exp.tmp > objc-exp.new
+	-rm objc-exp.tmp
+	mv objc-exp.new ./objc-exp.tab.c
 
 # See comments above ...
 .PRECIOUS: jv-exp.tab.c
@@ -1444,6 +1464,10 @@ c-exp.tab.o: c-exp.tab.c $(defs_h) $(gdb_string_h) $(expression_h) \
 	$(value_h) $(parser_defs_h) $(language_h) $(c_lang_h) $(bfd_h) \
 	$(charset_h) \
 	$(symfile_h) $(objfiles_h)
+
+objc-exp.tab.o: objc-exp.tab.c $(objc_lang_h) $(defs_h) $(expression_h) \
+	$(gdbtypes_h) $(language_h) $(parser_defs_h) $(symtab_h) $(value_h) \
+	$(bfd_h) $(objfiles_h) $(symfile_h)
 
 jv-exp.tab.o: jv-exp.tab.c jv-lang.h $(defs_h) $(expression_h) \
 	$(gdbtypes_h) $(language_h) $(parser_defs_h) $(symtab_h) $(value_h) \
@@ -1953,6 +1977,11 @@ ns32k-tdep.o: ns32k-tdep.c $(defs_h) $(frame_h) $(gdbtypes_h) $(gdbcore_h) \
 ns32knbsd-nat.o: ns32knbsd-nat.c $(defs_h) $(inferior_h) $(target_h) \
 	$(gdbcore_h) $(regcache_h)
 ns32knbsd-tdep.o: ns32knbsd-tdep.c $(defs_h) $(ns32k_tdep_h) $(gdb_string_h)
+objc-lang.o: objc-lang.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
+	$(parser_defs_h) $(language_h) $(c_lang_h) $(objc_lang_h) \
+	$(complaints_h) $(value_h) $(symfile_h) $(objfiles_h) \
+	$(gdb_string_h) $(target_h) $(gdbcore_h) $(gdbcmd_h) $(frame_h) \
+	$(gdb_regex_h) $(regcache_h)
 objfiles.o: objfiles.c $(defs_h) $(bfd_h) $(symtab_h) $(symfile_h) \
 	$(objfiles_h) $(gdb_stabs_h) $(target_h) $(bcache_h) $(gdb_stat_h) \
 	$(gdb_obstack_h) $(gdb_string_h) $(breakpoint_h) $(mmalloc_h)
