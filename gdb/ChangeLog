@@ -1,5 +1,7 @@
 2005-01-23  Mark Kettenis  <kettenis@gnu.org>
 
+	* NEWS: Mention new BSD user-level threads support.
+
 	* i386obsd-tdep.c: Update copyright year.  Include
 	"bsd-uthread.h".
 	(i386obsd_uthread_reg_offset): New variable.

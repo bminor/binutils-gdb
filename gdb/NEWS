@@ -3,6 +3,19 @@
 
 *** Changes since GDB 6.3
 
+* New BSD user-level threads support
+
+It is now possible to debug programs using the user-level threads
+library on OpenBSD and FreeBSD.  Currently supported (target)
+configurations are:
+
+FreeBSD/amd64			x86_64-*-freebsd*
+FreeBSD/i386			i386-*-freebsd*
+OpenBSD/i386			i386-*-openbsd*
+
+Note that the new kernel threads libraries introduced in FreeBSD 5.x
+are not yet supported.
+
 * New support for Matsushita MN10300 w/sim added
 (Work in progress).  mn10300-elf.
 
