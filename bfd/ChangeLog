@@ -1,5 +1,26 @@
 2004-04-21  Andrew Cagney  <cagney@redhat.com>
 
+	* opncls.c (_bfd_new_bfd_contained_in): Copy "iovec".
+	(struct opncls, opncls_btell, opncls_bseek, opncls_bread)
+	(opncls_bwrite, opncls_bclose, opncls_bflush)
+	(opncls_bstat, opncls_iovec, bfd_openr_iovec): Implement a
+	bfd iovec that uses function callbacks.
+	(bfd_close): Use the iovec's bclose.
+	* cache.c (cache_btell, cache_bseek, cache_bread, cache_bwrite)
+	(cache_bclose, cache_bflush, cache_bstat)
+	(cache_iovec): New functions and global variable, implement a
+	cache "iovec", where applicable set bfd_error.
+	(bfd_cache_init, bfd_cache_close): Set/test the bfd's iovec.
+	* bfdio.c (struct bfd_iovec): Define.
+	(real_read): Delete function.
+	(bfd_bread, bfd_bread, bfd_bwrite, bfd_tell, bfd_flush, bfd_stat)
+	(bfd_seek, bfd_get_mtime, bfd_get_size): Use the bfd's "iovec",
+	assume that bread and bwrite set bfd_error.
+	* bfd.c (struct bfd): Add "iovec", update comments.
+	* bfd-in2.h, libbfd.h: Re-generate.
+
+2004-04-21  Andrew Cagney  <cagney@redhat.com>
+
 	* libaout.h (enum machine_type): Add M_POWERPC_NETBSD.
 
 2004-04-21  Eric Botcazou  <ebotcazou@act-europe.fr>

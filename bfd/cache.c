@@ -44,6 +44,109 @@ SECTION
 
 static bfd_boolean bfd_cache_delete (bfd *);
 
+
+static file_ptr
+cache_btell (struct bfd *abfd)
+{
+  return real_ftell (bfd_cache_lookup (abfd));
+}
+
+static int
+cache_bseek (struct bfd *abfd, file_ptr offset, int whence)
+{
+  return real_fseek (bfd_cache_lookup (abfd), offset, whence);
+}
+
+/* Note that archive entries don't have streams; they share their parent's.
+   This allows someone to play with the iostream behind BFD's back.
+
+   Also, note that the origin pointer points to the beginning of a file's
+   contents (0 for non-archive elements).  For archive entries this is the
+   first octet in the file, NOT the beginning of the archive header.  */
+
+static file_ptr
+cache_bread (struct bfd *abfd, void *buf, file_ptr nbytes)
+{
+  file_ptr nread;
+  /* FIXME - this looks like an optimization, but it's really to cover
+     up for a feature of some OSs (not solaris - sigh) that
+     ld/pe-dll.c takes advantage of (apparently) when it creates BFDs
+     internally and tries to link against them.  BFD seems to be smart
+     enough to realize there are no symbol records in the "file" that
+     doesn't exist but attempts to read them anyway.  On Solaris,
+     attempting to read zero bytes from a NULL file results in a core
+     dump, but on other platforms it just returns zero bytes read.
+     This makes it to something reasonable. - DJ */
+  if (nbytes == 0)
+    return 0;
+
+#if defined (__VAX) && defined (VMS)
+  /* Apparently fread on Vax VMS does not keep the record length
+     information.  */
+  nread = read (fileno (bfd_cache_lookup (abfd)), buf, nbytes);
+  /* Set bfd_error if we did not read as much data as we expected.  If
+     the read failed due to an error set the bfd_error_system_call,
+     else set bfd_error_file_truncated.  */
+  if (nread == (file_ptr)-1)
+    {
+      bfd_set_error (bfd_error_system_call);
+      return -1;
+    }
+#else
+  nread = fread (buf, 1, nbytes, bfd_cache_lookup (abfd));
+  /* Set bfd_error if we did not read as much data as we expected.  If
+     the read failed due to an error set the bfd_error_system_call,
+     else set bfd_error_file_truncated.  */
+  if (nread < nbytes && ferror (bfd_cache_lookup (abfd)))
+    {
+      bfd_set_error (bfd_error_system_call);
+      return -1;
+    }
+#endif
+  return nread;
+}
+
+static file_ptr
+cache_bwrite (struct bfd *abfd, const void *where, file_ptr nbytes)
+{
+  file_ptr nwrite = fwrite (where, 1, nbytes, bfd_cache_lookup (abfd));
+  if (nwrite < nbytes && ferror (bfd_cache_lookup (abfd)))
+    {
+      bfd_set_error (bfd_error_system_call);
+      return -1;
+    }
+  return nwrite;
+}
+
+static int
+cache_bclose (struct bfd *abfd)
+{
+  return bfd_cache_close (abfd);
+}
+
+static int
+cache_bflush (struct bfd *abfd)
+{
+  int sts = fflush (bfd_cache_lookup (abfd));
+  if (sts < 0)
+    bfd_set_error (bfd_error_system_call);
+  return sts;
+}
+
+static int
+cache_bstat (struct bfd *abfd, struct stat *sb)
+{
+  int sts = fstat (fileno (bfd_cache_lookup (abfd)), sb);
+  if (sts < 0)
+    bfd_set_error (bfd_error_system_call);
+  return sts;
+}
+
+static const struct bfd_iovec cache_iovec = {
+  &cache_bread, &cache_bwrite, &cache_btell, &cache_bseek,
+  &cache_bclose, &cache_bflush, &cache_bstat
+};
+
 /*
 INTERNAL_FUNCTION
 	BFD_CACHE_MAX_OPEN macro
@@ -205,6 +308,7 @@ bfd_cache_init (bfd *abfd)
       if (! close_one ())
 	return FALSE;
     }
+  abfd->iovec = &cache_iovec;
   insert (abfd);
   ++open_files;
   return TRUE;
@@ -229,8 +333,7 @@ RETURNS
 bfd_boolean
 bfd_cache_close (bfd *abfd)
 {
-  if (abfd->iostream == NULL
-      || (abfd->flags & BFD_IN_MEMORY) != 0)
+  if (abfd->iovec != &cache_iovec)
     return TRUE;
 
   return bfd_cache_delete (abfd);

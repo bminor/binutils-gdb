@@ -839,6 +839,18 @@ bfd *bfd_fdopenr (const char *filename, const char *target, int fd);
 
 bfd *bfd_openstreamr (const char *, const char *, void *);
 
+bfd *bfd_openr_iovec (const char *filename, const char *target,
+    void *(*open) (struct bfd *nbfd,
+    void *open_closure),
+    void *open_closure,
+    file_ptr (*pread) (struct bfd *nbfd,
+    void *stream,
+    void *buf,
+    file_ptr nbytes,
+    file_ptr offset),
+    int (*close) (struct bfd *nbfd,
+    void *stream));
+
 bfd *bfd_openw (const char *filename, const char *target);
 
 bfd_boolean bfd_close (bfd *abfd);
@@ -3708,14 +3720,10 @@ struct bfd
   /* A pointer to the target jump table.  */
   const struct bfd_target *xvec;
 
-  /* To avoid dragging too many header files into every file that
-     includes `<<bfd.h>>', IOSTREAM has been declared as a "char *",
-     and MTIME as a "long".  Their correct types, to which they
-     are cast when used, are "FILE *" and "time_t".    The iostream
-     is the result of an fopen on the filename.  However, if the
-     BFD_IN_MEMORY flag is set, then iostream is actually a pointer
-     to a bfd_in_memory struct.  */
+  /* The IOSTREAM, and corresponding IO vector that provide access
+     to the file backing the BFD.  */
   void *iostream;
+  const struct bfd_iovec *iovec;
 
   /* Is the file descriptor being cached?  That is, can it be closed as
      needed, and re-opened when accessed later?  */
