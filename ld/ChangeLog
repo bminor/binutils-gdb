@@ -1,3 +1,11 @@
+Tue May  6 13:21:19 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	From Sean McNeil <sean@mcneil.com>:
+	* emultempl/pe.em (sort_by_file_name): Sort by archive name
+	first.
+	(sort_sections): Sort all sections, not just sections in the same
+	archive.
+
 Mon May  5 18:19:55 1997  Philip Blundell  <pjb27@cam.ac.uk>
 
 	* configure.tgt, configure.host: cope with '*-*-linux-gnuaout'
