@@ -858,20 +858,26 @@ I believe Fortran is the only language with this feature.
 
 @findex N_BCOMM
 @findex N_ECOMM
+@findex C_BCOMM
+@findex C_ECOMM
 A @code{N_BCOMM} stab begins a common block and an @code{N_ECOMM} stab
 ends it.  The only field that is significant in these two stabs is the
 string, which names a normal (non-debugging) symbol that gives the
-address of the common block.
+address of the common block.  According to IBM documentation, only the
+@code{N_BCOMM} has the name of the common block (even though their
+compiler actually puts it both places).
 
 @findex N_ECOML
-Each stab between the @code{N_BCOMM} and the @code{N_ECOMM} specifies a
-member of that common block; its value is the offset within the
-common block of that variable.  The @code{N_ECOML} stab type is
-documented for this purpose, but Sun's Fortran compiler uses
-@code{N_GSYM} instead.  The test case I looked at had a common block
-local to a function and it used the @samp{V} symbol descriptor; I assume
-one would use @samp{S} if not local to a function (that is, if a common
-block @emph{can} be anything other than local to a function).
+@findex C_ECOML
+The stabs for the members of the common block are between the
+@code{N_BCOMM} and the @code{N_ECOMM}; the value of each stab is the
+offset within the common block of that variable.  IBM uses the
+@code{C_ECOML} stab type, and there is a corresponding @code{N_ECOML}
+stab type, but Sun's Fortran compiler uses @code{N_GSYM} instead.  The
+variables within a common block use the @samp{V} symbol descriptor (I
+believe this is true of all Fortran variables).  Other stabs (at least
+type declarations using @code{C_DECL}) can also be between the
+@code{N_BCOMM} and the @code{N_ECOMM}.
 
 @node Statics
 @section Static Variables

@@ -1,5 +1,7 @@
 Tue Oct 12 09:11:45 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* stabs.texinfo (Common Blocks): Minor cleanups.
+
 	* stabs.texinfo: Update ld stabs in elf relocation to reflect the fact
 	that Sun has backed away from the linker kludge and thus the relevant
 	issue is changes to the SunPRO tools, not the Solaris linker.
