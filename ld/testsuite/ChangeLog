@@ -1,3 +1,10 @@
+2002-06-06  David Heine <dlheine@tensilica.com>
+
+	* ld-scripts/phdrs2.exp: New file: Run second phdrs test.
+	* ld-scripts/phdrs2.s: New file: Dummy assembler source.
+	* ld-scripts/phdrs2.t: New file: Linker script with an empty
+	section at the start of a loadable segment.
+
 2005-06-02  H.J. Lu <hjl@gnu.org>
 
 	* ld-srec/sr3.cc (__dso_handle): Added for gcc 3.1 with

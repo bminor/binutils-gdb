@@ -3455,6 +3455,37 @@ assign_file_positions_for_segments (abfd)
       if (! map_sections_to_segments (abfd))
 	return false;
     }
+  else
+    {
+      /* The placement algorithm assumes that non allocated sections are
+	 not in PT_LOAD segments.  We ensure this here by removing such
+	 sections from the segment map.  */
+      for (m = elf_tdata (abfd)->segment_map;
+	   m != NULL;
+	   m = m->next)
+	{
+	  unsigned int new_count;
+	  unsigned int i;
+
+	  if (m->p_type != PT_LOAD)
+	    continue;
+
+	  new_count = 0;
+	  for (i = 0; i < m->count; i ++)
+	    {
+	      if ((m->sections[i]->flags & SEC_ALLOC) != 0)
+		{
+		  if (i != new_count) 
+		    m->sections[new_count] = m->sections[i];
+
+		  new_count ++;
+		}
+	    }
+
+	  if (new_count != m->count)
+	    m->count = new_count;
+	}
+    }
 
   if (bed->elf_backend_modify_segment_map)
     {
@@ -4610,10 +4641,11 @@ copy_private_bfd_data (ibfd, obfd)
 	{
 	  /* Special segments, such as the PT_PHDR segment, may contain
 	     no sections, but ordinary, loadable segments should contain
-	     something.  */
+	     something.  They are allowed by the ELF spec however, so only
+	     a warning is produced.  */
 	  if (segment->p_type == PT_LOAD)
 	    (*_bfd_error_handler)
-	      (_("%s: warning: Empty loadable segment detected\n"),
+	      (_("%s: warning: Empty loadable segment detected, is this intentional ?\n"),
 	       bfd_archive_filename (ibfd));
 
 	  map->count = 0;

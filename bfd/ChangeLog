@@ -1,3 +1,9 @@
+2002-06-06  David Heine <dlheine@tensilica.com>
+
+	* elf.c (assign_file_positions_for_segments): Remove unallocated
+	sections from the section to segment mapping for PT_LOAD segments.
+	Update comment about empty loadable segments.
+
 2002-06-06  Richard Sandiford  <rsandifo@redhat.com>
 
 	* stabs.c (_bfd_link_section_stabs): Check that the symbol offset
@@ -44,7 +50,7 @@
 	* elf64-sh64.c (sh_elf64_get_relocated_section_contents): Likewise.
 	* elfxx-ia64.c (elfNN_ia64_relax_section): Likewise.
 
-Wed Jun  5 20:43:27 2002  J"orn Rennecke <joern.rennecke@superh.com>
+2002-06-05  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* config.bfd (sh64l*-*-elf*, shl*-*-elf*): New configurations.
 
