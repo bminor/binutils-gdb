@@ -1,5 +1,5 @@
 /* TXVU ELF support for BFD.
-   Copyright (C) 1997 Free Software Foundation, Inc.
+   Copyright (C) 1997, 1998 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -23,7 +23,12 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
 enum reloc_type
 {
   R_TXVU_NONE = 0,
-  /* insert reloc codes here, see other files for examples */
+  R_TXVU_8,
+  R_TXVU_16,
+  R_TXVU_32,
+  R_TXVU_UA16,
+  R_TXVU_UA32,
+  R_TXVU_11_PCREL,
   R_TXVU_max
 };
 
