@@ -704,6 +704,10 @@ sol_thread_store_registers (regno)
 
   if (regno != -1)
     {				/* Not writing all the regs */
+      /* save new register value */
+      char old_value[REGISTER_SIZE];
+      memcpy(old_value, & registers[REGISTER_BYTE(regno)], REGISTER_SIZE);
+
       val = p_td_thr_getgregs (&thandle, regset);
       if (val != TD_OK)
 	error ("sol_thread_store_registers: td_thr_getgregs %s",
@@ -712,6 +716,9 @@ sol_thread_store_registers (regno)
       if (val != TD_OK)
 	error ("sol_thread_store_registers: td_thr_getfpregs %s",
 	       td_err_string (val));
+
+      /* restore register value */
+      memcpy(& registers[REGISTER_BYTE(regno)], old_value, REGISTER_SIZE);
 
 #if 0
 /* thread_db doesn't seem to handle this right */
