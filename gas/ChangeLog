@@ -1,5 +1,10 @@
 2002-10-30  Daniel Jacobowitz  <drow@mvista.com>
 
+	* configure.in: Update ARM CPU patterns.
+	* configure: Regenerated.
+
+2002-10-30  Daniel Jacobowitz  <drow@mvista.com>
+
 	* po/gas.pot: Regenerated.
 
 2002-10-29  Daniel Jacobowitz  <drow@mvista.com>
