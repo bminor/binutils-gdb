@@ -123,7 +123,7 @@ exec_file_command (filename, from_tty)
       validate_files ();
     }
   else if (from_tty)
-    printf_filtered ("No exec file now.\n");
+    printf_filtered ("No executable file now.\n");
 
   /* Tell display code (if any) about the changed file name.  */
   if (exec_file_display_hook)

@@ -1,6 +1,8 @@
 Thu Oct  1 20:52:39 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
-	* remote-rdp.c (remote_rdp_create_inferior), remote-os9k.c
+	* exec.c (exec_file_command), convex-tdep.c (exec_file_command),
+ 	arm-xdep.c (exec_file_command), remote-rdp.c
+ 	(remote_rdp_create_inferior), remote-os9k.c
  	(rombug_create_inferior), remote-mm.c (mm_create_inferior),
  	remote-eb.c (eb_create_inferior), remote-es.c
  	(es1800_create_inferior), remote-rdi.c (arm_rdi_create_inferior),
