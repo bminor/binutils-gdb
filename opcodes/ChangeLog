@@ -2,6 +2,7 @@
 
 	* ppc-opc.c (EVUIMM_4): Change bit size to 32.
 	(EVUIMM_2): Same.
+	(EVUIMM_8): Same.
 
 2002-11-07  Klee Dienes  <kdienes@apple.com>
 

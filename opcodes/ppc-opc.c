@@ -552,7 +552,7 @@ const struct powerpc_operand powerpc_operands[] =
 
   /* The other UIMM field in a double EVX form instruction. */
 #define EVUIMM_8 EVUIMM_4 + 1
-  { 8, 11, insert_ev8, extract_ev8, PPC_OPERAND_PARENS },
+  { 32, 11, insert_ev8, extract_ev8, PPC_OPERAND_PARENS },
 
   /* The WS field.  */
 #define WS EVUIMM_8 + 1
