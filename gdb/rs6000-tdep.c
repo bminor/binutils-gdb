@@ -1172,7 +1172,8 @@ free_loadinfo ()
 /* this is called from xcoffread.c */
 
 void
-xcoff_add_toc_to_loadinfo (unsigned long tocoff)
+xcoff_add_toc_to_loadinfo (tocoff)
+     unsigned long tocoff;
 {
   while (loadinfotocindex >= loadinfolen) {
     loadinfolen += LOADINFOLEN;
