@@ -3726,7 +3726,10 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
 		return FALSE;
 	      if (h == htab->tls_get_addr)
 		sec->has_tls_reloc = 1;
-	      else if (strcmp (h->root.root.string, ".__tls_get_addr") == 0)
+	      else if ((strncmp (h->root.root.string, ".__tls_get_addr", 15)
+			== 0)
+		       && (h->root.root.string[15] == 0
+			   || h->root.root.string[15] == '@'))
 		{
 		  htab->tls_get_addr = h;
 		  sec->has_tls_reloc = 1;
@@ -5171,6 +5174,18 @@ ppc64_elf_tls_setup (obfd, info)
 
   htab = ppc_hash_table (info);
   htab->tls_sec = tls;
+
+  if (htab->tls_get_addr != NULL)
+    {
+      struct elf_link_hash_entry *h = htab->tls_get_addr;
+
+      while (h->root.type == bfd_link_hash_indirect
+	     || h->root.type == bfd_link_hash_warning)
+	h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+      htab->tls_get_addr = h;
+    }
+
   return tls != NULL;
 }
 

@@ -1,3 +1,9 @@
+2003-02-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc64_elf_check_relocs): Match versioned
+	.__tls_get_addr too.
+	(ppc64_elf_tls_setup): Ensure cached tls_get_addr is not indirect.
+
 2003-02-10  Kaz kojima  <kkojima@rr.iij4u.or.jp>
 
 	* elf32-sh.c (elf_sh_dyn_relocs): Add tls_tpoff32 field.
