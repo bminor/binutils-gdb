@@ -1063,7 +1063,15 @@ styp_to_sec_flags (abfd, hdr, name, section, flags_ptr)
 	  unhandled = "IMAGE_SCN_MEM_NOT_CACHED";
 	  break;
 	case IMAGE_SCN_MEM_NOT_PAGED:
+#if 0
 	  unhandled = "IMAGE_SCN_MEM_NOT_PAGED";
+#else
+	  /* Generate a warning message rather using the 'unhandled'
+	     variable as this will allow some .sys files generate by
+	     other toolchains to be processed.  See bugzilla issue 196.  */
+	  _bfd_error_handler (_("%s: Warning: Ignoring section flag IMAGE_SCN_MEM_NOT_PAGED in section %s"),
+	     bfd_archive_filename (abfd), name);
+#endif
 	  break;
 	case IMAGE_SCN_MEM_EXECUTE:
 	  sec_flags |= SEC_CODE;
