@@ -1,6 +1,6 @@
 %{
 
-/* Copyright (C) 1991, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
+/* Copyright (C) 1991, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
 
@@ -89,6 +89,9 @@ static void lex_warn_invalid PARAMS ((char *where, char *what));
 	BOTH		either EXPRESSION or SCRIPT
 	DEFSYMEXP	in an argument to -defsym
         MRI             in an MRI script
+	VERS_START	starting a Sun style mapfile
+	VERS_SCRIPT	a Sun style mapfile
+	VERS_NODE	a node within a Sun style mapfile
 */
 #define RTOKEN(x)  {  yylval.token = x; return x; }
 
@@ -104,19 +107,24 @@ int yywrap () { return 1; }
 CMDFILENAMECHAR   [_a-zA-Z0-9\/\.\\_\+\$\:\[\]\\\,\=\&\!\<\>\-\~]
 CMDFILENAMECHAR1  [_a-zA-Z0-9\/\.\\_\+\$\:\[\]\\\,\=\&\!\<\>\~]
 FILENAMECHAR1	[_a-zA-Z\/\.\\\$\_\~]
-SYMBOLCHARN     [_a-zA-Z\/\.\\0-9]
+SYMBOLCHARN     [_a-zA-Z\/\.\\\$\_\~0-9]
 FILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\=\$\:\[\]\\\,\~]
 WILDCHAR	[_a-zA-Z0-9\/\.\-\_\+\=\$\:\[\]\\\,\~\?\*]
 WHITE		[ \t\n\r]+ 
 
 NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 
+V_TAG [.$_a-zA-Z][._a-zA-Z0-9]*
+V_IDENTIFIER [*?$_a-zA-Z][*?_a-zA-Z0-9]*
 
 %s SCRIPT
 %s EXPRESSION
 %s BOTH
 %s DEFSYMEXP
 %s MRI
+%s VERS_START
+%s VERS_SCRIPT
+%s VERS_NODE
 %%
 
   if (parser_input != input_selected)
@@ -128,6 +136,7 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 	{
 	case input_script: return INPUT_SCRIPT; break;
 	case input_mri_script: return INPUT_MRI_SCRIPT; break;
+	case input_version_script: return INPUT_VERSION_SCRIPT; break;
 	case input_defsym: return INPUT_DEFSYM; break;
 	default: abort ();
 	}
@@ -223,12 +232,15 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 <BOTH,SCRIPT,EXPRESSION,MRI>";"		{ RTOKEN(';');}
 <BOTH,SCRIPT>"MEMORY"		{ RTOKEN(MEMORY);}
 <BOTH,SCRIPT>"ORIGIN"		{ RTOKEN(ORIGIN);}
+<BOTH,SCRIPT>"VERSION"		{ RTOKEN(VERSION);}
 <EXPRESSION,BOTH,SCRIPT>"BLOCK"		{ RTOKEN(BLOCK);}
 <EXPRESSION,BOTH,SCRIPT>"BIND"		{ RTOKEN(BIND);}
 <BOTH,SCRIPT>"LENGTH"		{ RTOKEN(LENGTH);}
 <EXPRESSION,BOTH,SCRIPT>"ALIGN"			{ RTOKEN(ALIGN_K);}
 <EXPRESSION,BOTH,SCRIPT>"ADDR"			{ RTOKEN(ADDR);}
 <EXPRESSION,BOTH,SCRIPT>"LOADADDR"		{ RTOKEN(LOADADDR);}
+<EXPRESSION,BOTH>"MAX"			{ RTOKEN(MAX); }
+<EXPRESSION,BOTH>"MIN"			{ RTOKEN(MIN); }
 <BOTH,SCRIPT>"ENTRY"			{ RTOKEN(ENTRY);}
 <EXPRESSION,BOTH,SCRIPT>"NEXT"			{ RTOKEN(NEXT);}
 <EXPRESSION,BOTH,SCRIPT>"sizeof_headers"	{ RTOKEN(SIZEOF_HEADERS);}
@@ -253,11 +265,13 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 <BOTH,SCRIPT>"SYSLIB"		{ RTOKEN(SYSLIB);}
 <BOTH,SCRIPT>"FLOAT"			{ RTOKEN(FLOAT);}
 <BOTH,SCRIPT>"QUAD"			{ RTOKEN( QUAD);}
+<BOTH,SCRIPT>"SQUAD"			{ RTOKEN( SQUAD);}
 <BOTH,SCRIPT>"LONG"			{ RTOKEN( LONG);}
 <BOTH,SCRIPT>"SHORT"			{ RTOKEN( SHORT);}
 <BOTH,SCRIPT>"BYTE"			{ RTOKEN( BYTE);}
 <BOTH,SCRIPT>"NOFLOAT"		{ RTOKEN(NOFLOAT);}
-<BOTH,SCRIPT>"NOCROSSREFS"		{ RTOKEN(NOCROSSREFS);}
+<EXPRESSION,BOTH,SCRIPT>"NOCROSSREFS"	{ RTOKEN(NOCROSSREFS);}
+<BOTH,SCRIPT>"OVERLAY"			{ RTOKEN(OVERLAY); }
 <EXPRESSION,BOTH,SCRIPT>"NOLOAD"	{ RTOKEN(NOLOAD);}
 <EXPRESSION,BOTH,SCRIPT>"DSECT"		{ RTOKEN(DSECT);}
 <EXPRESSION,BOTH,SCRIPT>"COPY"		{ RTOKEN(COPY);}
@@ -341,6 +355,29 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 <BOTH,SCRIPT,EXPRESSION>"\r"		{ lineno++;}
 <MRI,BOTH,SCRIPT,EXPRESSION>[ \t]
 
+<VERS_NODE,VERS_SCRIPT>[:,;]	{ return *yytext; }
+
+<VERS_NODE>global		{ RTOKEN(GLOBAL); }
+
+<VERS_NODE>local		{ RTOKEN(LOCAL); }
+
+<VERS_NODE>{V_IDENTIFIER}	{ yylval.name = buystring (yytext);
+				  return VERS_IDENTIFIER; }
+
+<VERS_SCRIPT>{V_TAG}		{ yylval.name = buystring (yytext);
+				  return VERS_TAG; }
+
+<VERS_START>"{"			{ BEGIN(VERS_SCRIPT); return *yytext; }
+
+<VERS_SCRIPT>"{"		{ BEGIN(VERS_NODE); return *yytext; }
+<VERS_SCRIPT,VERS_NODE>"}"	{ BEGIN(VERS_SCRIPT); return *yytext; }
+
+<VERS_START,VERS_NODE,VERS_SCRIPT>[\n\r]	{ lineno++; }
+
+<VERS_START,VERS_NODE,VERS_SCRIPT>#.*		{ /* Eat up comments */ }
+
+<VERS_START,VERS_NODE,VERS_SCRIPT>[ \t]+   	{ /* Eat up whitespace */ }
+
 <<EOF>> {
   include_stack_ptr--;
     
@@ -360,7 +397,7 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
   return END;
 }
 
-<SCRIPT,MRI>.		lex_warn_invalid(" in script", yytext);
+<SCRIPT,MRI,VERS_START,VERS_SCRIPT,VERS_NODE>.	lex_warn_invalid(" in script", yytext);
 <EXPRESSION,DEFSYMEXP,BOTH>.	lex_warn_invalid(" in expression", yytext);
     
 %%
@@ -469,6 +506,20 @@ ldlex_mri_script ()
 }
 
 void
+ldlex_version_script ()
+{
+  *(state_stack_p)++ = yy_start;
+  BEGIN (VERS_START);
+}
+
+void
+ldlex_version_file ()
+{
+  *(state_stack_p)++ = yy_start;
+  BEGIN (VERS_SCRIPT);
+}
+
+void
 ldlex_defsym ()
 {
   *(state_stack_p)++ = yy_start;
@@ -512,7 +563,7 @@ yy_input (buf, result, max_size)
 	{
 	  *result = read (fileno (yyin), (char *) buf, max_size);
 	  if (*result < 0) 
-	    einfo ("%F%P: read in flex scanner failed");
+	    einfo ("%F%P: read in flex scanner failed\n");
 	}
     }
 }

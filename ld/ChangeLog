@@ -1,5 +1,20 @@
 Mon Jun 16 12:49:36 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
 
+	* ldlang.c (lang_place_undefineds): Add \n in einfo call.
+	(lang_size_sections): Likewise.
+	* ldlex.l: Likewise.
+	* emultempl/aix.em (gld${EMULATION_NAME}_read_file): Likewise.
+	* emultempl/mipsecoff.em (gld${EMULATION_NAME}_after_open):
+	Likewise.
+	(check_sections): Likewise.
+	(gld${EMULATION_NAME}_after_allocation): Likewise.
+	* emultempl/pe.em (gld_$${EMULATION_NAME}_before_allocation):
+	Likewise.
+	* mpw-eppcmac.c (gldppcmacos_read_file): Likewise.
+	* mpw-idtmips.c (gldmipsidt_after_open): Likewise.
+	(check_sections): Likewise.
+	(gldmipsidt_after_allocation): Likewise.
+
 	* ldemul.c (ldemul_choose_mode): Remove unused einfo argument.
 
 Fri Jun  6 23:47:42 1997  Ian Lance Taylor  <ian@cygnus.com>
