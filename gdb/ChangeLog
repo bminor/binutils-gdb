@@ -1,3 +1,11 @@
+2003-07-30  Kevin Buettner  <kevinb@redhat.com>
+
+	* mn10300-tdep.c (analyze_dummy_frame): Pass ``pc'' so that
+	the prologue analyzer won't need to attempt to extract the pc
+	value from the woefully incomplete dummy frame.
+	(mn10300_analyze_prologue): Avoid calls to get_frame_pc() when
+	possible.  Disable code which modifies the frame.
+
 2003-07-28  Andrew Cagney  <cagney@redhat.com>
 
 	* annotate.c (annotate_breakpoints_headers): Restrict annotation
