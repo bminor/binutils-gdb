@@ -1,3 +1,8 @@
+Fri Jun 21 17:40:16 1996  Joel Sherrill  <joel@merlin.gcs.redstone.army.mil>
+
+	* configure.in: Add support for *-*-rtems* configurations.
+	* configure: Rebuild.
+
 Fri Jun 21 16:01:18 1996  Richard Henderson  <rth@tamu.edu>
 
 	* configure.in: Add alpha-*-linuxecoff* target.  Use elf for
