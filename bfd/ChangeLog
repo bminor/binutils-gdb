@@ -1,5 +1,11 @@
 Wed Aug 11 06:40:51 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* Base use of sco-core on host, not target.
+	* configure.host (i[34]86-*-sco*): Use i386sco rather than i386v.
+	* config/i386-sco.mt (TDEFINES): Removed.
+	* config/i386sco.mh: New file to use sco-core.
+	* hosts/i386sco.h: New file; just includes hosts/i386v.h.
+
 	* ecoffswap.h (ecoff_swap_{hdr,ext}_{in,out}): Use signed
 	conversions for some fields.
 
