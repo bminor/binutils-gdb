@@ -1,3 +1,29 @@
+Fri Feb  4 23:38:03 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ppc-opc.c (powerpc_operands): New operand type MBE to handle a
+	single number giving a bitmask for the MB and ME fields of an M
+	form instruction.  Change NB to accept 32, and turn it into 0;
+	also turn 0 into 32 when disassembling.  Seperated SH from NB.
+	(insert_mbe, extract_mbe): New functions.
+	(insert_nb, extract_nb): New functions.
+	(SC_MASK): Mask out SA and LK bits.
+	(powerpc_opcodes): Change "cal" to use RT, D, RA rather than RT,
+	RA, SI.  Change "liu" and "cau" to use UI rather than SI.  Mark
+	"bctr" and "bctrl" as accepted by POWER.  Change "rlwimi",
+	"rlimi", "rlwimi.", "rlimi.", "rlwinm", "rlinm", "rlwinm.",
+	"rlinm.", "rlmi", "rlmi.", "rlwnm", "rlnm", "rlwnm.", "rlnm." to
+	use MBE rather than MB.  Add "mfmq" and "mtmq" POWER instructions.
+	(powerpc_macros): Define table of macro definitions.
+	(powerpc_num_macros): Define.
+
+	* ppc-dis.c (print_insn_powerpc): Don't skip optional operands
+	if PPC_OPERAND_NEXT is set.
+
+Sat Jan 22 23:10:07 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* i960-dis.c (print_insn_i960): Make buffer bfd_byte instead of
+	char.  Retrieve contents using bfd_getl32 instead of shifting.
+
 Fri Jan 21 19:01:39 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ppc-opc.c: New file.  Opcode table for PowerPC, including
