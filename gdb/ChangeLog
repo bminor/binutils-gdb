@@ -1,5 +1,26 @@
 2003-03-27  Andrew Cagney  <cagney@redhat.com>
 
+	* NEWS: Mention removal of support for hppa*-*-bsd* and
+	hppa*-*-osf* natives, and hppa*-*-pro* target.
+	* config/pa/xm-hppah.h: Do not include "pa/xm-pa.h".
+	* config/pa/xm-pa.h: Obsolete file.
+	* config/pa/xm-hppab.h: Obsolete file.
+	* config/pa/nm-hppab.h: Obsolete file.
+	* config/pa/tm-hppab.h: Obsolete file.
+	* config/pa/tm-hppao.h: Obsolete file.
+	* config/pa/nm-hppao.h: Obsolete file.
+	* config/pa/tm-pro.h: Obsolete file.
+	* config/pa/hppaosf.mt: Obsolete file.
+	* config/pa/hppaosf.mh: Obsolete file.
+	* config/pa/hppapro.mt: Obsolete file.
+	* config/pa/hppabsd.mt: Obsolete file.
+	* config/pa/hppabsd.mh: Obsolete file.
+	* configure.host: Disable hppa*-*-bsd* and hppa*-*-osf*.
+	* configure.tgt: Disable hppa*-*-bsd*, hppa*-*-pro* and
+	hppa*-*-osf*.
+
+2003-03-27  Andrew Cagney  <cagney@redhat.com>
+
 	* d10v-tdep.c (d10v_gdbarch_init): Set push_dummy_call instead of
 	push_arguments.  Don't set push_return_address or write_sp.
 	(d10v_push_dummy_call): Replace d10v_push_arguments.
