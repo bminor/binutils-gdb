@@ -3,6 +3,10 @@
 
 *** Changes since GDB 6.0:
 
+* New native configurations
+
+NetBSD/amd64					x86_64-*-netbsd*
+
 * New debugging protocols
 
 M32R with SDI protocol				m32r-*-elf*

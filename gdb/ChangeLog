@@ -1,3 +1,18 @@
+2003-10-18  Mark Kettenis  <kettenis@gnu.org>
+
+	Add NetBSD/amd64 native configuration:
+	* x86-64-tdep.h (amd64nbsd_r_reg_offset): Add extern declarations.
+	* amd64nbsd-tdep.c: New file.
+	* amd64nbsd-nat.c: New file.
+	* amd64bsd-nat.c: New file.
+	* config/i386/nbsd64.mh: New file.
+	* config/i386/nbsd64.mt: New file.
+	* configure.host: Add x86_64-*-netbsd*.
+	* configure.tgt: Add x86_64-*-netbsd*.
+	* Makefile.in (amd64bsd-nat.o, amd64nbsd-nat.o, amd64nbsd-tdep.o):
+	New targets.
+	* NEWS (New native configurations): Mention NetBSD/amd64.
+
 2003-10-17  Michael Chastain  <mec@shout.net>
 
 	* config/djgpp/fnchange.lst: Remove dead lines for:
