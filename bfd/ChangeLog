@@ -1,3 +1,11 @@
+2004-02-24  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf32-frv.c (FRV_SYM_LOCAL): Weak undefined doesn't imply local.
+	(_frv_emit_got_relocs_plt_entries): Decay relocation to protected
+	function's descriptor to symbol+offset, and map local undefweak
+	symbol to NULL function descriptor.
+	(elf32_frv_relocate_section): Likewise.
+
 2004-02-23  Mark Kettenis  <kettenis@gnu.org>
 
 	* libaout.h (enum machine_type): Add M_SPARC64_NETBSD and
