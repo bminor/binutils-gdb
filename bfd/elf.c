@@ -3075,11 +3075,9 @@ prep_headers (abfd)
    case bfd_arch_arc:
       i_ehdrp->e_machine = EM_CYGNUS_ARC;
       break;
-/* start-sanitize-armelf */
    case bfd_arch_arm:
       i_ehdrp->e_machine = EM_ARM;
       break;
-/* end-sanitize-armelf */
     case bfd_arch_m32r:
       i_ehdrp->e_machine = EM_CYGNUS_M32R;
       break;
@@ -4737,4 +4735,22 @@ _bfd_elf_close_and_cleanup (abfd)
     }
 
   return _bfd_generic_close_and_cleanup (abfd);
+}
+
+/* For Rel targets, we encode meaningful data for BFD_RELOC_VTABLE_ENTRY
+   in the relocation's offset.  Thus we cannot allow any sort of sanity
+   range-checking to interfere.  There is nothing else to do in processing
+   this reloc.  */
+
+bfd_reloc_status_type
+_bfd_elf_rel_vtable_reloc_fn (abfd, re, symbol, data, is, obfd, errmsg)
+     bfd *abfd;
+     arelent *re;
+     struct symbol_cache_entry *symbol;
+     PTR data;
+     asection *is;
+     bfd *obfd;
+     char **errmsg;
+{
+  return bfd_reloc_ok;
 }

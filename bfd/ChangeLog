@@ -1,4 +1,15 @@
-start-sanitize-armelf
+Fri Aug 28 19:38:53 1998  Richard Henderson  <rth@cygnus.com>
+
+	* elf-bfd.h (_bfd_elf_rel_vtable_reloc_fn): Declare.
+	* elf.c (_bfd_elf_rel_vtable_reloc_fn): New.
+
+	* elf32-i386.c (elf_howto_table): Add vtable relocs.
+	(elf_i386_reloc_type_lookup): Recognize them.
+	(elf_i386_check_relocs): Pass them off to generic code.
+	(elf_i386_relocate_section): Ignore them.
+	(elf_i386_gc_mark_hook, elf_i386_gc_sweep_hook): New.
+	(elf_backend_can_gc_sections): True.
+
 Thu Aug 20 15:03:45 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-arm.c (elf32_thumb_to_arm_stub): Check sym_sec is not NULL
@@ -6,7 +17,7 @@ Thu Aug 20 15:03:45 1998  Nick Clifton  <nickc@cygnus.com>
 	(elf32_arm_to_thumb_stub): Ditto.
 	(elf32_arm_relocate_section): Compute name before calling
 	elf32_arm_final_link_relocate().
-end-sanitize-armelf
+
 Wed Aug 19 15:43:26 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* elfcode.h (elf_object_p): Reject files of header type ET_CORE
@@ -37,12 +48,11 @@ Wed Aug 19 15:43:26 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 	R_PPC_EMB_SDA21, R_PPC_EMB_RELSDA.  In all these cases also ignore
 	output_offset for correct evaluation of addend.
 
-start-sanitize-armelf
 Tue Aug 18 11:48:12 1998  Catherine Moore  <clm@cygnus.com>
 
         * elf32-arm.c: Add prefix bfd_ to elf32_arm_get_bfd_for_interworking,
-       elf32_arm_allocate_interworking_sections and
-       elf32_arm_process_before_allocation.
+        elf32_arm_allocate_interworking_sections and
+        elf32_arm_process_before_allocation.
 
 Tue Aug 18 11:46:00 1998  Nick Clifton  <nickc@cygnus.com>
 
@@ -52,7 +62,6 @@ Tue Aug 18 11:46:00 1998  Nick Clifton  <nickc@cygnus.com>
  
         * bfd-in2.h: Regenerate.
 
-end-sanitize-armelf
 Sat Aug 15 20:55:08 1998  Richard Henderson  <rth@cygnus.com>
 
 	* elf64-alpha.c (elf64_alpha_relax_section): Handle indirect symbols.
@@ -62,7 +71,6 @@ Fri Aug 14 09:12:28 1998  Stan Cox  <scox@cygnus.com>
 	* aoutx.h (aout_link_input_section_ext): Use the relocation already
 	calculated for RELOC_SPARC_REV32 case.
 
-start-sanitize-armelf
 Thu Aug 13 14:02:02 1998  Catherine Moore  <clm@cygnus.com>
 
        * bfd-in.h:  Add prototypes for elf32_arm_get_bfd_for_interworking,
@@ -88,7 +96,6 @@ Thu Aug 13 14:02:02 1998  Catherine Moore  <clm@cygnus.com>
        (elf32_arm_relocate_section):  Pass symbol section to
        elf32_arm_final_link_relocate.
 
-end-sanitize-armelf
 Wed Aug 12 19:00:39 1998  Geoff Keating  <geoffk@ozemail.com.au>
 
 	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Generate PLT
@@ -99,14 +106,11 @@ Wed Aug 12 14:48:33 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* libaout.h: Remove nested comment to avoid warning.
 
-start-sanitize-armelf
 Wed Aug 12 08:10:11 1998 Catherine Moore  <clm@cygnus.com>
 
        * elf32-arm.c (elf32_arm_final_link_relocate):  Rework
        R_ARM_PC24 relocation.
 
-end-sanitize-armelf
-start-sanitize-armelf
 Tue Aug 11 14:42:26 1998  Catherine Moore  <clm@cygnus.com>
 
        * elf32-arm.c (elf32_arm_final_link_relocate):  Remove unused
@@ -115,7 +119,6 @@ Tue Aug 11 14:42:26 1998  Catherine Moore  <clm@cygnus.com>
        (elf32_arm_relocate_section):  Don't pass local sym and pass
        sym_flags to elf32_arm_final_link_relocate. 
 
-end-sanitize-armelf
 Mon Aug 10 20:38:39 1998  Richard Henderson  <rth@cygnus.com>
 
 	* elf64-alpha.c (elf64_alpha_calc_dynrel_sizes): Correct last change
@@ -139,13 +142,11 @@ Mon Aug 10 17:31:21 1998  Ian Lance Taylor  <ian@cygnus.com>
 	* ieee.c (ieee_write_processor): Correct the processor ID written
 	out for bfd_arch_m68k, accommodating change of March 25.
 
-start-sanitize-armelf
 Sun Aug  9 20:55:44 1998  Catherine Moore  <clm@cygnus.com>
 
         * elf32-arm.c (elf32_arm_final_link_relocate):  Rework
         R_ARM_THM_RPC22 relocations.
 
-end-sanitize-armelf
 Sat Aug  8 15:15:30 1998  Richard Henderson  <rth@cygnus.com>
 
 	* elf64-alpha.c (alpha_elf_dynamic_symbol_p): Undef weak symbols
@@ -153,7 +154,6 @@ Sat Aug  8 15:15:30 1998  Richard Henderson  <rth@cygnus.com>
 	(elf64_alpha_calc_dynrel_sizes): Allow enough room for RELATIVE
 	.got relocs in -Bsymbolic shared objects.
 
-start-sanitize-armelf
 Wed Aug  5 15:48:08 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-arm.c: Add private flags to ELF header.
@@ -162,7 +162,6 @@ Wed Aug  5 15:48:08 1998  Nick Clifton  <nickc@cygnus.com>
 	(elf32_arm_copy_private_flags): New Function.
 	(elf32_arm_merge_private_bfd_data): New Function.
 
-end-sanitize-armelf
 Mon Aug  3 17:10:15 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf32-sparc.c (elf32_sparc_check_relocs): Permit WPLT30 against
@@ -181,7 +180,6 @@ Sun Aug  2 03:19:23 1998  Richard Henderson  <rth@cygnus.com>
 	* elf32-mips.c (_bfd_mips_elf_section_from_shdr): Don't pass
 	".liblist" string through gettext.
 
-start-sanitize-armelf
 Fri Jul 31 16:38:14 1998  Catherine Moore  <clm@cygnus.com>
 
         * Makefile.am: Add support for elf32-arm.lo.
@@ -195,7 +193,6 @@ Fri Jul 31 16:38:14 1998  Catherine Moore  <clm@cygnus.com>
         bfd_target bfd_elf32_littlearm_vec.
         * elf32-arm.c:  New file.
 
-end-sanitize-armelf
 Tue Jun 28 19:05:28 1998  Stan Cox  <scox@cygnus.com>
 
 	* libaout.h (M_SPARCLITE_LE): New machine.
