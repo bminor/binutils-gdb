@@ -26,6 +26,7 @@
 #include "gdb_wait.h"
 #include "gdbcore.h"
 #include "command.h"
+#include "gdbcmd.h"
 #include "floatformat.h"
 #include "buildsym.h"
 #include "i387-nat.h"
@@ -1612,23 +1613,39 @@ go32_sidt (char *arg, int from_tty)
     }
 }
 
+static struct cmd_list_element *info_dos_cmdlist = NULL;
+
+static void
+go32_info_dos_command (char *args, int from_tty)
+{
+  help_list (info_dos_cmdlist, "info dos ", class_info, gdb_stdout);
+}
+
 void
 _initialize_go32_nat (void)
 {
   init_go32_ops ();
   add_target (&go32_ops);
 
-  add_info ("dos-sysinfo", go32_sysinfo,
-	    "Display information about the target system, including CPU, OS, DPMI, etc.");
-  add_info ("dos-ldt", go32_sldt,
-	    "Display entries in the LDT (Local Descriptor Table).\n"
-	    "Entry number (an expression) as an argument means display only that entry.");
-  add_info ("dos-gdt", go32_sgdt,
-	    "Display entries in the GDT (Global Descriptor Table).\n"
-	    "Entry number (an expression) as an argument means display only that entry.");
-  add_info ("dos-idt", go32_sidt,
-	    "Display entries in the IDT (Interrupt Descriptor Table).\n"
-	    "Entry number (an expression) as an argument means display only that entry.");
+  add_prefix_cmd ("dos", class_info, go32_info_dos_command,
+		  "Print information specific to DJGPP (a.k.a. MS-DOS) debugging.",
+		  &info_dos_cmdlist, "info dos ", 0, &infolist);
+
+  add_cmd ("sysinfo", class_info, go32_sysinfo,
+	    "Display information about the target system, including CPU, OS, DPMI, etc.",
+	   &info_dos_cmdlist);
+  add_cmd ("ldt", class_info, go32_sldt,
+	   "Display entries in the LDT (Local Descriptor Table).\n"
+	   "Entry number (an expression) as an argument means display only that entry.",
+	   &info_dos_cmdlist);
+  add_cmd ("gdt", class_info, go32_sgdt,
+	   "Display entries in the GDT (Global Descriptor Table).\n"
+	   "Entry number (an expression) as an argument means display only that entry.",
+	   &info_dos_cmdlist);
+  add_cmd ("idt", class_info, go32_sidt,
+	   "Display entries in the IDT (Interrupt Descriptor Table).\n"
+	   "Entry number (an expression) as an argument means display only that entry.",
+	   &info_dos_cmdlist);
 }
 
 pid_t
