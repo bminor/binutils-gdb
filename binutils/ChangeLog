@@ -1,3 +1,7 @@
+2003-09-16  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* arlex.c, deflex.c, rclex.c, syslex.c: Rebuild with flex 2.5.4.
+
 2003-05-15  Daniel Jacobowitz  <drow@mvista.com>
 
 	Merge from mainline:

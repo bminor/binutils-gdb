@@ -1,3 +1,7 @@
+2003-09-16  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* ldlex.c: Rebuild with flex 2.5.4.
+
 2003-07-29  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* scripttempl/elfm68hc12.sc: Add gcc_except_table.
