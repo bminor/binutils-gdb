@@ -1717,6 +1717,7 @@ enum bfd_architecture
 #define bfd_mach_frvsimple     2
 #define bfd_mach_fr300         300
 #define bfd_mach_fr400         400
+#define bfd_mach_fr450         450
 #define bfd_mach_frvtomcat     499     /* fr500 prototype */
 #define bfd_mach_fr500         500
 #define bfd_mach_fr550         550

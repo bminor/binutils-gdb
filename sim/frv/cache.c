@@ -38,6 +38,7 @@ frv_cache_init (SIM_CPU *cpu, FRV_CACHE *cache)
   switch (STATE_ARCHITECTURE (sd)->mach)
     {
     case bfd_mach_fr400:
+    case bfd_mach_fr450:
       if (cache->configured_sets == 0)
 	cache->configured_sets = 512;
       if (cache->configured_ways == 0)
@@ -205,6 +206,7 @@ non_cache_access (FRV_CACHE *cache, USI address)
   switch (STATE_ARCHITECTURE (sd)->mach)
     {
     case bfd_mach_fr400:
+    case bfd_mach_fr450:
       if (address >= 0xff000000
 	  || address >= 0xfe000000 && address <= 0xfeffffff)
 	return 1; /* non-cache access */

@@ -239,6 +239,7 @@ frv_queue_illegal_instruction_interrupt (
   switch (STATE_ARCHITECTURE (sd)->mach)
     {
     case bfd_mach_fr400:
+    case bfd_mach_fr450:
     case bfd_mach_fr550:
       break;
     default:
@@ -299,6 +300,7 @@ frv_queue_non_implemented_instruction_interrupt (
   switch (STATE_ARCHITECTURE (sd)->mach)
     {
     case bfd_mach_fr400:
+    case bfd_mach_fr450:
     case bfd_mach_fr550:
       break;
     default:

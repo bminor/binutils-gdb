@@ -1,5 +1,23 @@
 2004-03-01  Richard Sandiford  <rsandifo@redhat.com>
 
+	* sim/frv/allinsn.exp (all_machs): Add fr405 and fr450.
+	* sim/fr400/allinsn.exp (all_machs): Likewise.
+	* sim/fr400/addss.cgs (mach): Change to "fr405 fr450".
+	* sim/fr400/scutss.cgs (mach): Likewise.
+	* sim/fr400/slass.cgs (mach): Likewise.
+	* sim/fr400/smass.cgs (mach): Likewise.
+	* sim/fr400/smsss.cgs (mach): Likewise.
+	* sim/fr400/smu.cgs (mach): Likewise.
+	* sim/fr400/subss.cgs (mach): Likewise.
+	* sim/interrupts/fp_exception.cgs: Replace fmadds with .word.
+	* sim/interrupts/fp_exception-fr550.cgs: Likewise.
+	* sim/frv/mqlclrhs.cgs: New test.
+	* sim/frv/mqlmths.cgs: New test.
+	* sim/frv/mqsllhi.cgs: New test.
+	* sim/frv/mqsrahi.cgs: New test.
+
+2004-03-01  Richard Sandiford  <rsandifo@redhat.com>
+
 	* sim/frv/fr400/scutss.cgs: Fix tests to account for rounding.
 	Add some new ones.
 

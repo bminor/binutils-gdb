@@ -4032,6 +4032,8 @@ elf32_frv_machine (abfd)
     default:		    break;
     case EF_FRV_CPU_FR550:  return bfd_mach_fr550;
     case EF_FRV_CPU_FR500:  return bfd_mach_fr500;
+    case EF_FRV_CPU_FR450:  return bfd_mach_fr450;
+    case EF_FRV_CPU_FR405:  return bfd_mach_fr400;
     case EF_FRV_CPU_FR400:  return bfd_mach_fr400;
     case EF_FRV_CPU_FR300:  return bfd_mach_fr300;
     case EF_FRV_CPU_SIMPLE: return bfd_mach_frvsimple;
@@ -4080,6 +4082,33 @@ frv_elf_copy_private_bfd_data (ibfd, obfd)
   elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
   elf_flags_init (obfd) = TRUE;
   return TRUE;
+}
+
+/* Return true if the architecture described by elf header flag
+   EXTENSION is an extension of the architecture described by BASE.  */
+
+static bfd_boolean
+frv_elf_arch_extension_p (flagword base, flagword extension)
+{
+  if (base == extension)
+    return TRUE;
+
+  /* CPU_GENERIC code can be merged with code for a specific
+     architecture, in which case the result is marked as being
+     for the specific architecture.  Everything is therefore
+     an extension of CPU_GENERIC.  */
+  if (base == EF_FRV_CPU_GENERIC)
+    return TRUE;
+
+  if (extension == EF_FRV_CPU_FR450)
+    if (base == EF_FRV_CPU_FR400 || base == EF_FRV_CPU_FR405)
+      return TRUE;
+
+  if (extension == EF_FRV_CPU_FR405)
+    if (base == EF_FRV_CPU_FR400)
+      return TRUE;
+
+  return FALSE;
 }
 
 /* Merge backend specific data from an object file to the output
@@ -4266,13 +4295,10 @@ frv_elf_merge_private_bfd_data (ibfd, obfd)
 	 the generic cpu).  */
       new_partial = (new_flags & EF_FRV_CPU_MASK);
       old_partial = (old_flags & EF_FRV_CPU_MASK);
-      if (new_partial == old_partial)
+      if (frv_elf_arch_extension_p (new_partial, old_partial))
 	;
 
-      else if (new_partial == EF_FRV_CPU_GENERIC)
-	;
-
-      else if (old_partial == EF_FRV_CPU_GENERIC)
+      else if (frv_elf_arch_extension_p (old_partial, new_partial))
 	old_flags = (old_flags & ~EF_FRV_CPU_MASK) | new_partial;
 
       else
@@ -4284,6 +4310,8 @@ frv_elf_merge_private_bfd_data (ibfd, obfd)
 	    case EF_FRV_CPU_SIMPLE:  strcat (new_opt, " -mcpu=simple"); break;
 	    case EF_FRV_CPU_FR550:   strcat (new_opt, " -mcpu=fr550");  break;
 	    case EF_FRV_CPU_FR500:   strcat (new_opt, " -mcpu=fr500");  break;
+	    case EF_FRV_CPU_FR450:   strcat (new_opt, " -mcpu=fr450");  break;
+	    case EF_FRV_CPU_FR405:   strcat (new_opt, " -mcpu=fr405");  break;
 	    case EF_FRV_CPU_FR400:   strcat (new_opt, " -mcpu=fr400");  break;
 	    case EF_FRV_CPU_FR300:   strcat (new_opt, " -mcpu=fr300");  break;
 	    case EF_FRV_CPU_TOMCAT:  strcat (new_opt, " -mcpu=tomcat"); break;
@@ -4296,6 +4324,8 @@ frv_elf_merge_private_bfd_data (ibfd, obfd)
 	    case EF_FRV_CPU_SIMPLE:  strcat (old_opt, " -mcpu=simple"); break;
 	    case EF_FRV_CPU_FR550:   strcat (old_opt, " -mcpu=fr550");  break;
 	    case EF_FRV_CPU_FR500:   strcat (old_opt, " -mcpu=fr500");  break;
+	    case EF_FRV_CPU_FR450:   strcat (old_opt, " -mcpu=fr450");  break;
+	    case EF_FRV_CPU_FR405:   strcat (old_opt, " -mcpu=fr405");  break;
 	    case EF_FRV_CPU_FR400:   strcat (old_opt, " -mcpu=fr400");  break;
 	    case EF_FRV_CPU_FR300:   strcat (old_opt, " -mcpu=fr300");  break;
 	    case EF_FRV_CPU_TOMCAT:  strcat (old_opt, " -mcpu=tomcat"); break;
@@ -4363,6 +4393,8 @@ frv_elf_print_private_bfd_data (abfd, ptr)
     case EF_FRV_CPU_SIMPLE: fprintf (file, " -mcpu=simple");	break;
     case EF_FRV_CPU_FR550:  fprintf (file, " -mcpu=fr550");	break;
     case EF_FRV_CPU_FR500:  fprintf (file, " -mcpu=fr500");	break;
+    case EF_FRV_CPU_FR450:  fprintf (file, " -mcpu=fr450");	break;
+    case EF_FRV_CPU_FR405:  fprintf (file, " -mcpu=fr405");	break;
     case EF_FRV_CPU_FR400:  fprintf (file, " -mcpu=fr400");	break;
     case EF_FRV_CPU_FR300:  fprintf (file, " -mcpu=fr300");	break;
     case EF_FRV_CPU_TOMCAT: fprintf (file, " -mcpu=tomcat");	break;

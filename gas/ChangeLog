@@ -1,3 +1,12 @@
+2004-03-01  Richard Sandiford  <rsandifo@redhat.com>
+
+	* config/tc-frv.c (fr400_audio): New variable.
+	(md_parse_option, md_show_usage): Add -mcpu=fr405 and -mcpu=fr450.
+	(md_parse_option): Set fr400_audio for -mcpu=fr400 and -mcpu=fr405.
+	(target_implements_insn_p): New function.
+	(md_assemble): Report an error if the processor doesn't implement
+	the instruction.
+
 2004-02-27  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
 
 	* config/tc-m32r.c (md_longopts): Added -no-bitinst option.

@@ -37,7 +37,8 @@ static void
 reset_gr_flags (SIM_CPU *cpu, INT gr)
 {
   SIM_DESC sd = CPU_STATE (cpu);
-  if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr400)
+  if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr400
+      || STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr450)
     fr400_reset_gr_flags (cpu, gr);
   /* Other machines have no gr flags right now.  */
 }
@@ -46,7 +47,8 @@ static void
 reset_fr_flags (SIM_CPU *cpu, INT fr)
 {
   SIM_DESC sd = CPU_STATE (cpu);
-  if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr400)
+  if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr400
+      || STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr450)
     fr400_reset_fr_flags (cpu, fr);
   else if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr500)
     fr500_reset_fr_flags (cpu, fr);
@@ -56,7 +58,8 @@ static void
 reset_acc_flags (SIM_CPU *cpu, INT acc)
 {
   SIM_DESC sd = CPU_STATE (cpu);
-  if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr400)
+  if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr400
+      || STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr450)
     fr400_reset_acc_flags (cpu, acc);
   /* Other machines have no acc flags right now.  */
 }
@@ -926,6 +929,7 @@ frvbf_model_insn_before (SIM_CPU *cpu, int first_p)
   switch (STATE_ARCHITECTURE (sd)->mach)
     {
     case bfd_mach_fr400:
+    case bfd_mach_fr450:
       fr400_model_insn_before (cpu, first_p);
       break;
     case bfd_mach_fr500:
@@ -992,6 +996,7 @@ frvbf_model_insn_after (SIM_CPU *cpu, int last_p, int cycles)
   switch (STATE_ARCHITECTURE (sd)->mach)
     {
     case bfd_mach_fr400:
+    case bfd_mach_fr450:
       fr400_model_insn_after (cpu, last_p, cycles);
       break;
     case bfd_mach_fr500:

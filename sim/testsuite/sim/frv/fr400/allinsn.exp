@@ -4,7 +4,7 @@ if [istarget frv*-*] {
     # load support procs (none yet)
     # load_lib cgen.exp
     # all machines
-    set all_machs "fr400 fr550"
+    set all_machs "fr400 fr405 fr450 fr550"
     set cpu_option -mcpu
 
     # The .cgs suffix is for "cgen .s".

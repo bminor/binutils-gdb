@@ -1,5 +1,15 @@
 2004-03-01  Richard Sandiford  <rsandifo@redhat.com>
 
+	* frv-asm.c: Regenerate.
+	* frv-desc.c: Regenerate.
+	* frv-desc.h: Regenerate.
+	* frv-dis.c: Regenerate.
+	* frv-ibld.c: Regenerate.
+	* frv-opc.c: Regenerate.
+	* frv-opc.h: Regenerate.
+
+2004-03-01  Richard Sandiford  <rsandifo@redhat.com>
+
 	* frv-desc.c, frv-opc.c: Regenerate.
 
 2004-03-01  Richard Sandiford  <rsandifo@redhat.com>

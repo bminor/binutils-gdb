@@ -1,5 +1,37 @@
 2004-03-01  Richard Sandiford  <rsandifo@redhat.com>
 
+	* frv.cpu (define-arch frv): Add fr450 mach.
+	(define-mach fr450): New.
+	(define-model fr450): New.  Add profile units to every fr450 insn.
+	(define-attr UNIT): Add MDCUTSSI.
+	(define-attr FR450-MAJOR): New enum.  Add to every fr450 insn.
+	(define-attr AUDIO): New boolean.
+	(f-LRAE, f-LRAD, f-LRAS, f-TLBPRopx, f-TLBPRL)
+	(f-LRA-null, f-TLBPR-null): New fields.
+	(scr0, scr1, scr2, scr3, imavr1, damvr1, cxnr, ttbr)
+	(tplr, tppr, tpxr, timerh, timerl, timerd, btbr): New SPRs.
+	(LRAE, LRAD, LRAS, TLBPRopx, TLBPRL): New operands.
+	(LRA-null, TLBPR-null): New macros.
+	(iacc-multiply-r-r, slass, scutss, int-arith-ss-r-r): Add AUDIO attr.
+	(load-real-address): New macro.
+	(lrai, lrad, tlbpr): New instructions.
+	(media-cut-acc, media-cut-acc-ss): Add fr450-major argument.
+	(mcut, mcuti, mcutss, mcutssi): Adjust accordingly.
+	(mdcutssi): Change UNIT attribute to MDCUTSSI.
+	(media-low-clear-semantics, media-scope-limit-semantics)
+	(media-quad-limit, media-quad-shift): New macros.
+	(mqlclrhs, mqlmths, mqsllhi, mqsrahi): New instructions.
+	* frv.opc (frv_is_branch_major, frv_is_float_major, frv_is_media_major)
+	(frv_is_branch_insn, frv_is_float_insn, frv_is_media_insn)
+	(frv_vliw_reset, frv_vliw_add_insn): Handle bfd_mach_fr450.
+	(fr450_unit_mapping): New array.
+	(fr400_unit_mapping, fr500_unit_mapping, fr550_unit_mapping): Add entry
+	for new MDCUTSSI unit.
+	(fr450_check_insn_major_constraints): New function.
+	(check_insn_major_constraints): Use it.
+
+2004-03-01  Richard Sandiford  <rsandifo@redhat.com>
+
 	* frv.cpu (nsdiv, nudiv, nsdivi, nudivi): Remove fr400 profiling unit.
 	(scutss): Change unit to I0.
 	(calll, callil, ccalll): Add missing FR550-MAJOR and profile unit.

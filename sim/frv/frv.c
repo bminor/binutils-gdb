@@ -173,7 +173,15 @@ check_register_alignment (SIM_CPU *current_cpu, UINT reg, int align_mask)
       SIM_DESC sd = CPU_STATE (current_cpu);
       switch (STATE_ARCHITECTURE (sd)->mach)
 	{
+	  /* Note: there is a discrepancy between V2.2 of the FR400 
+	     instruction manual and the various FR4xx LSI specs.
+	     The former claims that unaligned registers cause a
+	     register_exception while the latter say it's an
+	     illegal_instruction.  The LSI specs appear to be
+	     correct; in fact, the FR4xx series is not documented
+	     as having a register_exception.  */
 	case bfd_mach_fr400:
+	case bfd_mach_fr450:
 	case bfd_mach_fr550:
 	  frv_queue_program_interrupt (current_cpu, FRV_ILLEGAL_INSTRUCTION);
 	  break;
@@ -201,7 +209,9 @@ check_fr_register_alignment (SIM_CPU *current_cpu, UINT reg, int align_mask)
       SIM_DESC sd = CPU_STATE (current_cpu);
       switch (STATE_ARCHITECTURE (sd)->mach)
 	{
+	  /* See comment in check_register_alignment().  */
 	case bfd_mach_fr400:
+	case bfd_mach_fr450:
 	case bfd_mach_fr550:
 	  frv_queue_program_interrupt (current_cpu, FRV_ILLEGAL_INSTRUCTION);
 	  break;
@@ -233,7 +243,9 @@ check_memory_alignment (SIM_CPU *current_cpu, SI address, int align_mask)
       SIM_DESC sd = CPU_STATE (current_cpu);
       switch (STATE_ARCHITECTURE (sd)->mach)
 	{
+	  /* See comment in check_register_alignment().  */
 	case bfd_mach_fr400:
+	case bfd_mach_fr450:
 	  frv_queue_data_access_error_interrupt (current_cpu, address);
 	  break;
 	case bfd_mach_frvtomcat:
@@ -990,10 +1002,11 @@ void
 frvbf_clear_accumulators (SIM_CPU *current_cpu, SI acc_ix, int A)
 {
   SIM_DESC sd = CPU_STATE (current_cpu);
-  int acc_num = 
-    (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr500) ? 8 :
-    (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr550) ? 8 :
-    (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr400) ? 4 :
+  int acc_mask =
+    (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr500) ? 7 :
+    (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr550) ? 7 :
+    (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr450) ? 11 :
+    (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr400) ? 3 :
     63;
   FRV_PROFILE_STATE *ps = CPU_PROFILE_STATE (current_cpu);
 
@@ -1003,15 +1016,16 @@ frvbf_clear_accumulators (SIM_CPU *current_cpu, SI acc_ix, int A)
     {
       /* This instruction is a nop if the referenced accumulator is not
 	 implemented. */
-      if (acc_ix < acc_num)
+      if ((acc_ix & acc_mask) == acc_ix)
 	sim_queue_fn_di_write (current_cpu, frvbf_h_acc40S_set, acc_ix, 0);
     }
   else
     {
       /* Clear all implemented accumulators.  */
       int i;
-      for (i = 0; i < acc_num; ++i)
-	sim_queue_fn_di_write (current_cpu, frvbf_h_acc40S_set, i, 0);
+      for (i = 0; i <= acc_mask; ++i)
+	if ((i & acc_mask) == i)
+	  sim_queue_fn_di_write (current_cpu, frvbf_h_acc40S_set, i, 0);
     }
 }
 
@@ -1208,12 +1222,14 @@ do_media_average (SIM_CPU *current_cpu, HI arg1, HI arg2)
   HI result = sum >> 1;
   int rounding_value;
 
-  /* On fr400 and fr550, check the rounding mode.  On other machines rounding is always
-     toward negative infinity and the result is already correctly rounded.  */
+  /* On fr4xx and fr550, check the rounding mode.  On other machines
+     rounding is always toward negative infinity and the result is
+     already correctly rounded.  */
   switch (STATE_ARCHITECTURE (sd)->mach)
     {
       /* Need to check rounding mode. */
     case bfd_mach_fr400:
+    case bfd_mach_fr450:
     case bfd_mach_fr550:
       /* Check whether rounding will be required.  Rounding will be required
 	 if the sum is an odd number.  */

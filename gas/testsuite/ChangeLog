@@ -1,5 +1,16 @@
 2004-03-01  Richard Sandiford  <rsandifo@redhat.com>
 
+	* gas/frv/fr405-insn.[sdl]: New test.
+	* gas/frv/fr450-spr.[sd]: New test.
+	* gas/frv/fr450-insn.[sdl]: New test.
+	* gas/frv/fr450-media-issue.[sl]: New test.
+	* gas/frv/allinsn.exp: Run new tests.  Ensure fr405 instructions
+	aren't accepted for -mcpu=fr400 or -mcpu=fr500.  Ensure fr450
+	instructions aren't accepted for -mcpu=fr400, -mcpu=fr405 or
+	-mcpu=fr500.
+
+2004-03-01  Richard Sandiford  <rsandifo@redhat.com>
+
 	* gas/frv/allinsn.s (rstb, rsth, rst, rstd, rstq): Replace with nops.
 	(rstbf, rsthf, rstf, rstdf, rstqf): Likewise.
 	* gas/frv/allinsn.d: Update accordingly.

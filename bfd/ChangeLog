@@ -1,3 +1,14 @@
+2004-03-01  Richard Sandiford  <rsandifo@redhat.com>
+
+	* archures.c (bfd_mach_fr450): New.
+	* bfd-in2.h: Regenerate.
+	* cpu-frv.c (arch_info_450): New bfd_arch_info_type.
+	(arch_info_500): Link to it.
+	* elf32-frv.c (elf32_frv_machine, frv_elf_merge_private_bfd_data)
+	(frv_elf_print_private_bfd_data): Handle fr405 and fr450 header flags.
+	(frv_elf_arch_extension_p): New function.
+	(frv_elf_merge_private_bfd_data): Use it.
+
 2004-02-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf-bfd.h (_bfd_elf_link_add_archive_symbols): New prototype.

@@ -568,6 +568,9 @@ static const struct insn_sem frvbf_insn_sem[] =
   { FRV_INSN_DCUL, FRVBF_INSN_DCUL, FRVBF_SFMT_ICUL },
   { FRV_INSN_BAR, FRVBF_INSN_BAR, FRVBF_SFMT_REI },
   { FRV_INSN_MEMBAR, FRVBF_INSN_MEMBAR, FRVBF_SFMT_REI },
+  { FRV_INSN_LRAI, FRVBF_INSN_LRAI, FRVBF_SFMT_REI },
+  { FRV_INSN_LRAD, FRVBF_INSN_LRAD, FRVBF_SFMT_REI },
+  { FRV_INSN_TLBPR, FRVBF_INSN_TLBPR, FRVBF_SFMT_REI },
   { FRV_INSN_COP1, FRVBF_INSN_COP1, FRVBF_SFMT_REI },
   { FRV_INSN_COP2, FRVBF_INSN_COP2, FRVBF_SFMT_REI },
   { FRV_INSN_CLRGR, FRVBF_INSN_CLRGR, FRVBF_SFMT_CLRGR },
@@ -715,6 +718,10 @@ static const struct insn_sem frvbf_insn_sem[] =
   { FRV_INSN_CMQADDHUS, FRVBF_INSN_CMQADDHUS, FRVBF_SFMT_CMQADDHSS },
   { FRV_INSN_CMQSUBHSS, FRVBF_INSN_CMQSUBHSS, FRVBF_SFMT_CMQADDHSS },
   { FRV_INSN_CMQSUBHUS, FRVBF_INSN_CMQSUBHUS, FRVBF_SFMT_CMQADDHSS },
+  { FRV_INSN_MQLCLRHS, FRVBF_INSN_MQLCLRHS, FRVBF_SFMT_MQSATHS },
+  { FRV_INSN_MQLMTHS, FRVBF_INSN_MQLMTHS, FRVBF_SFMT_MQSATHS },
+  { FRV_INSN_MQSLLHI, FRVBF_INSN_MQSLLHI, FRVBF_SFMT_MQSLLHI },
+  { FRV_INSN_MQSRAHI, FRVBF_INSN_MQSRAHI, FRVBF_SFMT_MQSLLHI },
   { FRV_INSN_MADDACCS, FRVBF_INSN_MADDACCS, FRVBF_SFMT_MADDACCS },
   { FRV_INSN_MSUBACCS, FRVBF_INSN_MSUBACCS, FRVBF_SFMT_MADDACCS },
   { FRV_INSN_MDADDACCS, FRVBF_INSN_MDADDACCS, FRVBF_SFMT_MDADDACCS },
@@ -1004,6 +1011,9 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           case 26 : itype = FRVBF_INSN_STFU; goto extract_sfmt_stbfu;
           case 27 : itype = FRVBF_INSN_STDFU; goto extract_sfmt_stdfu;
           case 28 : itype = FRVBF_INSN_STQFU; goto extract_sfmt_ldqfu;
+          case 32 : itype = FRVBF_INSN_LRAI; goto extract_sfmt_rei;
+          case 33 : itype = FRVBF_INSN_LRAD; goto extract_sfmt_rei;
+          case 36 : itype = FRVBF_INSN_TLBPR; goto extract_sfmt_rei;
           case 37 : itype = FRVBF_INSN_STC; goto extract_sfmt_stc;
           case 38 : itype = FRVBF_INSN_STDC; goto extract_sfmt_stdc;
           case 39 : itype = FRVBF_INSN_STQC; goto extract_sfmt_ldqc;
@@ -1838,7 +1848,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 120 :
         {
-          unsigned int val = (((insn >> 7) & (1 << 4)) | ((insn >> 6) & (15 << 0)));
+          unsigned int val = (((insn >> 6) & (63 << 0)));
           switch (val)
           {
           case 0 : itype = FRVBF_INSN_MQXMACHS; goto extract_sfmt_mqmachs;
@@ -1856,12 +1866,16 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           case 13 : itype = FRVBF_INSN_MCPLI; goto extract_sfmt_mcpli;
           case 14 : itype = FRVBF_INSN_MDCUTSSI; goto extract_sfmt_mdcutssi;
           case 15 : itype = FRVBF_INSN_MQSATHS; goto extract_sfmt_mqsaths;
-          case 16 : itype = FRVBF_INSN_MHSETLOS; goto extract_sfmt_mhsetlos;
-          case 17 : itype = FRVBF_INSN_MHSETLOH; goto extract_sfmt_mhsetloh;
-          case 18 : itype = FRVBF_INSN_MHSETHIS; goto extract_sfmt_mhsethis;
-          case 19 : itype = FRVBF_INSN_MHSETHIH; goto extract_sfmt_mhsethih;
-          case 20 : itype = FRVBF_INSN_MHDSETS; goto extract_sfmt_mhdsets;
-          case 21 : itype = FRVBF_INSN_MHDSETH; goto extract_sfmt_mhdseth;
+          case 16 : itype = FRVBF_INSN_MQLCLRHS; goto extract_sfmt_mqsaths;
+          case 17 : itype = FRVBF_INSN_MQSLLHI; goto extract_sfmt_mqsllhi;
+          case 19 : itype = FRVBF_INSN_MQSRAHI; goto extract_sfmt_mqsllhi;
+          case 20 : itype = FRVBF_INSN_MQLMTHS; goto extract_sfmt_mqsaths;
+          case 32 : itype = FRVBF_INSN_MHSETLOS; goto extract_sfmt_mhsetlos;
+          case 33 : itype = FRVBF_INSN_MHSETLOH; goto extract_sfmt_mhsetloh;
+          case 34 : itype = FRVBF_INSN_MHSETHIS; goto extract_sfmt_mhsethis;
+          case 35 : itype = FRVBF_INSN_MHSETHIH; goto extract_sfmt_mhsethih;
+          case 36 : itype = FRVBF_INSN_MHDSETS; goto extract_sfmt_mhdsets;
+          case 37 : itype = FRVBF_INSN_MHDSETH; goto extract_sfmt_mhdseth;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -9448,6 +9462,47 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
       FLD (in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintieven_1) = ((FLD (f_FRi)) + (1));
       FLD (in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintjeven_0) = ((FLD (f_FRj)) + (0));
       FLD (in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintjeven_1) = ((FLD (f_FRj)) + (1));
+      FLD (out_FRintkeven) = f_FRk;
+      FLD (out_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintkeven_0) = ((FLD (f_FRk)) + (0));
+      FLD (out_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintkeven_1) = ((FLD (f_FRk)) + (1));
+      FLD (out_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintkeven_0) = ((FLD (f_FRk)) + (0));
+      FLD (out_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintkeven_1) = ((FLD (f_FRk)) + (1));
+    }
+#endif
+#undef FLD
+    return idesc;
+  }
+
+ extract_sfmt_mqsllhi:
+  {
+    const IDESC *idesc = &frvbf_insn_data[itype];
+    CGEN_INSN_INT insn = entire_insn;
+#define FLD(f) abuf->fields.sfmt_mqsllhi.f
+    UINT f_FRk;
+    UINT f_FRi;
+    UINT f_u6;
+
+    f_FRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
+    f_FRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
+    f_u6 = EXTRACT_LSB0_UINT (insn, 32, 5, 6);
+
+  /* Record the fields for the semantic handler.  */
+  FLD (f_FRi) = f_FRi;
+  FLD (f_FRk) = f_FRk;
+  FLD (f_u6) = f_u6;
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_mqsllhi", "f_FRi 0x%x", 'x', f_FRi, "f_FRk 0x%x", 'x', f_FRk, "f_u6 0x%x", 'x', f_u6, (char *) 0));
+
+#if WITH_PROFILE_MODEL_P
+  /* Record the fields for profiling.  */
+  if (PROFILE_MODEL_P (current_cpu))
+    {
+      FLD (in_FRintieven) = f_FRi;
+      FLD (in_FRintkeven) = f_FRk;
+      FLD (in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintieven_0) = ((FLD (f_FRi)) + (0));
+      FLD (in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintieven_1) = ((FLD (f_FRi)) + (1));
+      FLD (in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintieven_0) = ((FLD (f_FRi)) + (0));
+      FLD (in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintieven_1) = ((FLD (f_FRi)) + (1));
+      FLD (out_FRintieven) = f_FRi;
       FLD (out_FRintkeven) = f_FRk;
       FLD (out_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintkeven_0) = ((FLD (f_FRk)) + (0));
       FLD (out_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintkeven_1) = ((FLD (f_FRk)) + (1));

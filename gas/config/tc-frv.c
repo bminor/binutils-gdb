@@ -163,6 +163,7 @@ static FRV_VLIW vliw;
 #endif
 
 static unsigned long frv_mach = bfd_mach_frv;
+static bfd_boolean fr400_audio;
 
 /* Flags to set in the elf header */
 static flagword frv_flags = DEFAULT_FLAGS;
@@ -354,10 +355,24 @@ md_parse_option (c, arg)
 	    frv_mach = bfd_mach_fr550;
 	  }
 
+	else if (strcmp (p, "fr450") == 0)
+	  {
+	    cpu_flags = EF_FRV_CPU_FR450;
+	    frv_mach = bfd_mach_fr450;
+	  }
+
+	else if (strcmp (p, "fr405") == 0)
+	  {
+	    cpu_flags = EF_FRV_CPU_FR405;
+	    frv_mach = bfd_mach_fr400;
+	    fr400_audio = TRUE;
+	  }
+
 	else if (strcmp (p, "fr400") == 0)
 	  {
 	    cpu_flags = EF_FRV_CPU_FR400;
 	    frv_mach = bfd_mach_fr400;
+	    fr400_audio = FALSE;
 	  }
 
 	else if (strcmp (p, "fr300") == 0)
@@ -446,7 +461,7 @@ md_show_usage (stream)
   fprintf (stream, _("-mpic        Note small position independent code\n"));
   fprintf (stream, _("-mPIC        Note large position independent code\n"));
   fprintf (stream, _("-mlibrary-pic Compile library for large position indepedent code\n"));
-  fprintf (stream, _("-mcpu={fr500|fr550|fr400|fr300|frv|simple|tomcat}\n"));
+  fprintf (stream, _("-mcpu={fr500|fr550|fr400|fr405|fr450|fr300|frv|simple|tomcat}\n"));
   fprintf (stream, _("             Record the cpu type\n"));
   fprintf (stream, _("-mtomcat-stats Print out stats for tomcat workarounds\n"));
   fprintf (stream, _("-mtomcat-debug Debug tomcat workarounds\n"));
@@ -1042,6 +1057,36 @@ fr550_check_acc_range (FRV_VLIW *vliw, frv_insn *insn)
   return 0; /* all is ok */
 }
 
+/* Return true if the target implements instruction INSN.  */
+
+static bfd_boolean
+target_implements_insn_p (const CGEN_INSN *insn)
+{
+  switch (frv_mach)
+    {
+    default:
+      /* bfd_mach_frv or generic.  */
+      return TRUE;
+
+    case bfd_mach_fr300:
+    case bfd_mach_frvsimple:
+      return CGEN_INSN_MACH_HAS_P (insn, MACH_SIMPLE);
+
+    case bfd_mach_fr400:
+      return ((fr400_audio || !CGEN_INSN_ATTR_VALUE (insn, CGEN_INSN_AUDIO))
+	      && CGEN_INSN_MACH_HAS_P (insn, MACH_FR400));
+
+    case bfd_mach_fr450:
+      return CGEN_INSN_MACH_HAS_P (insn, MACH_FR450);
+
+    case bfd_mach_fr500:
+      return CGEN_INSN_MACH_HAS_P (insn, MACH_FR500);
+
+    case bfd_mach_fr550:
+      return CGEN_INSN_MACH_HAS_P (insn, MACH_FR550);
+    }
+}
+
 void
 md_assemble (str)
      char * str;
@@ -1125,6 +1170,11 @@ md_assemble (str)
      instructions, don't do vliw checking.  */
   else if (frv_mach != bfd_mach_frv)
     {
+      if (!target_implements_insn_p (insn.insn))
+	{
+	  as_bad (_("Instruction not supported by this architecture"));
+	  return;
+	}
       packing_constraint = frv_vliw_add_insn (& vliw, insn.insn);
       if (frv_mach == bfd_mach_fr550 && ! packing_constraint)
 	packing_constraint = fr550_check_acc_range (& vliw, & insn);

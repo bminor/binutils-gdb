@@ -1,3 +1,8 @@
+2004-03-01  Richard Sandiford  <rsandifo@redhat.com>
+
+	* ld-frv/fr450-link[abc].s, fr450-link.d: New test.
+	* ld-frv/frv.exp: New harness.
+
 2004-02-24  Alexandre Oliva  <aoliva@redhat.com>
 
 	* ld-frv/fdpic-pie-2.d: Adjust for decay of FUNCDESC relocs that

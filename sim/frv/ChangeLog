@@ -1,5 +1,40 @@
 2004-03-01  Richard Sandiford  <rsandifo@redhat.com>
 
+	* Makefile.in (SIM_OBJS): Add profile-fr450.o.
+	(profile-fr450.o): New dependency.
+	(stamp-cpu): Add fr450 to the list of machs.
+	* sim-frv.h (SPR_IS_ACC): New macro.
+	(H_SPR_ACC4, H_SPR_ACC63, H_SPR_ACCG4, H_SPR_ACCG63): Delete.
+	* cache.c (frv_cache_init, non_cache_access): Handle bfd_mach_fr450.
+	* frv.c (check_register_alignment, check_fr_register_alignment)
+	(check_memory_alignment, do_media_average): Likewise.
+	(frvbf_clear_accumulators): Likewise.  Use a mask of valid registers
+	rather than a consecutive range.
+	* interrupts.c (frv_queue_illegal_instruction_interrupt)
+	(frv_queue_non_implemented_instruction_interrupt): Handle
+	bfd_mach_fr450.
+	* memory.c (check_data_read_address, check_readwrite_address)
+	(check_insn_read_address, check_write_address): Likewise.
+	* mloop.in (@cpu@_simulate_insn_prefetch): Likewise.
+	* profile.c (reset_gr_flags, reset_fr_flags, reset_acc_flags)
+	(frvbf_model_insn_before, frvbf_model_insn_after): Likewise.
+	* profile-fr450.c: New file.
+	* registers.c (fr450_spr): New array.
+	(frv_register_control_init): Check its size.  Use it for fr450.
+	(frv_check_register_access): Handle bfd_mach_fr450.
+	(frv_check_spr_read_access): Likewise. Generalize accumulator check.
+	* traps.c (frv_core_signal, frvbf_media_cr_not_aligned): Likewise.
+	(frvbf_media_acc_not_aligned): Likewise.
+	(frvbf_media_register_not_aligned): Likewise.
+	* arch.c: Regenerate.
+	* arch.h: Regenerate.
+	* cpu.h: Regenerate.
+	* cpuall.h: Regenerate.
+	* decode.h: Regenerate.
+	* model.c: Regenerate.
+
+2004-03-01  Richard Sandiford  <rsandifo@redhat.com>
+
 	* cache.c (frv_cache_init): Change fr400 cache statistics to match
 	the fr405.
 	(non_cache_access): Add missing breaks.

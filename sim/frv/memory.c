@@ -73,6 +73,7 @@ check_data_read_address (SIM_CPU *current_cpu, SI address, int align_mask)
   switch (STATE_ARCHITECTURE (sd)->mach)
     {
     case bfd_mach_fr400:
+    case bfd_mach_fr450:
       address = fr400_check_data_read_address (current_cpu, address,
 					       align_mask);
       break;
@@ -149,6 +150,7 @@ check_readwrite_address (SIM_CPU *current_cpu, SI address, int align_mask)
   switch (STATE_ARCHITECTURE (sd)->mach)
     {
     case bfd_mach_fr400:
+    case bfd_mach_fr450:
       address = fr400_check_readwrite_address (current_cpu, address,
 						    align_mask);
       break;
@@ -240,6 +242,7 @@ check_insn_read_address (SIM_CPU *current_cpu, PCADDR address, int align_mask)
   switch (STATE_ARCHITECTURE (sd)->mach)
     {
     case bfd_mach_fr400:
+    case bfd_mach_fr450:
       address = fr400_check_insn_read_address (current_cpu, address,
 					       align_mask);
       break;
@@ -723,6 +726,7 @@ check_write_address (SIM_CPU *current_cpu, SI address, int align_mask)
   switch (STATE_ARCHITECTURE (sd)->mach)
     {
     case bfd_mach_fr400:
+    case bfd_mach_fr450:
       address = fr400_check_write_address (current_cpu, address, align_mask);
       break;
     case bfd_mach_frvtomcat:
