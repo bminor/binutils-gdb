@@ -1,3 +1,11 @@
+2003-07-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/ppc/test2elf64.s: Rename to..
+	* gas/ppc/power4.s: ..this.  Add mtcr and mfcr testcases.
+	* gas/ppc/test2elf64.d: Rename to..
+	* gas/ppc/power4.d: ..this.  Update.
+	* gas/ppc/ppc.exp: Update.
+
 2003-07-02  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* gas/mips/set-arch.d: Fix GPR names and show raw insns.

@@ -1,6 +1,6 @@
-#objdump: -Drx -Mpower4
+#objdump: -drx -Mpower4
 #as: -mpower4
-#name: PowerPC Test 2, 64 bit elf, power4 instructions
+#name: Power4 instructions
 
 .*: +file format elf64-powerpc
 .*
@@ -10,7 +10,7 @@ start address 0x0+
 
 Sections:
 Idx Name +Size +VMA +LMA +File off +Algn
- +0 \.text +0+68 +0+ +0+ +.*
+ +0 \.text +0+b8 +0+ +0+ +.*
  +CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
  +1 \.data +0+10 +0+ +0+ +.*
  +CONTENTS, ALLOC, LOAD, DATA
@@ -79,23 +79,23 @@ Disassembly of section \.text:
  +5c:	f8 c7 80 02 	stq	r6,-32768\(r7\)
  +60:	f8 c7 7f f2 	stq	r6,32752\(r7\)
  +64:	00 00 02 00 	attn
-Disassembly of section \.data:
-
-0+ <dsym0>:
- +0:	00 00 00 00 	\.long 0x0
- +4:	de ad be ef 	stfdu	f21,-16657\(r13\)
-
-0+8 <dsym1>:
- +8:	00 00 00 00 	\.long 0x0
- +c:	ca fe ba be 	lfd	f23,-17730\(r30\)
-
-Disassembly of section \.toc:
-
-0+ <\.toc>:
-	\.\.\.
-			0: R_PPC64_ADDR64	dsym0
-			8: R_PPC64_ADDR64	dsym1
-			10: R_PPC64_ADDR64	usym0
-			18: R_PPC64_ADDR64	usym1
-			20: R_PPC64_ADDR64	esym0
-			28: R_PPC64_ADDR64	esym1
+ +68:	7c 6f f1 20 	mtcr	r3
+ +6c:	7c 6f f1 20 	mtcr	r3
+ +70:	7c 68 11 20 	mtcrf	129,r3
+ +74:	7c 70 11 20 	mtcrf	1,r3
+ +78:	7c 70 21 20 	mtcrf	2,r3
+ +7c:	7c 70 41 20 	mtcrf	4,r3
+ +80:	7c 70 81 20 	mtcrf	8,r3
+ +84:	7c 71 01 20 	mtcrf	16,r3
+ +88:	7c 72 01 20 	mtcrf	32,r3
+ +8c:	7c 74 01 20 	mtcrf	64,r3
+ +90:	7c 78 01 20 	mtcrf	128,r3
+ +94:	7c 60 00 26 	mfcr	r3
+ +98:	7c 70 10 26 	mfcr	r3,1
+ +9c:	7c 70 20 26 	mfcr	r3,2
+ +a0:	7c 70 40 26 	mfcr	r3,4
+ +a4:	7c 70 80 26 	mfcr	r3,8
+ +a8:	7c 71 00 26 	mfcr	r3,16
+ +ac:	7c 72 00 26 	mfcr	r3,32
+ +b0:	7c 74 00 26 	mfcr	r3,64
+ +b4:	7c 78 00 26 	mfcr	r3,128
