@@ -7376,6 +7376,12 @@ display_debug_aranges (section, start, file)
       arange.ar_pointer_size = BYTE_GET (external->ar_pointer_size);
       arange.ar_segment_size = BYTE_GET (external->ar_segment_size);
 
+      if (arange.ar_length == 0xffffffff)
+	{
+	  warn (_("DWARF64 aranges not currently supported.\n"));
+	  break;
+	}
+
       if (arange.ar_version != 2)
 	{
 	  warn (_("Only DWARF 2 aranges are currently supported.\n"));
@@ -9069,6 +9075,8 @@ db_task_printsym (unsigned int addr)
   print_address (addr, stderr);
 }
 #endif
+
+int main PARAMS ((int, char **));
 
 int
 main (argc, argv)
