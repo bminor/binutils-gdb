@@ -3367,7 +3367,15 @@ elf_create_pointer_linker_section (abfd, info, lsect, h, rel)
       lsect->hole_offset += ARCH_SIZE / 8;
       lsect->sym_offset  += ARCH_SIZE / 8;
       if (lsect->sym_hash)	/* Bump up symbol value if needed */
-	lsect->sym_hash->root.u.def.value += ARCH_SIZE / 8;
+	{
+	  lsect->sym_hash->root.u.def.value += ARCH_SIZE / 8;
+#ifdef DEBUG
+	  fprintf (stderr, "Bump up %s by %ld, current value = %ld\n",
+		   lsect->sym_hash->root.root.string,
+		   (long)ARCH_SIZE / 8,
+		   (long)lsect->sym_hash->root.u.def.value);
+#endif
+	}
     }
   else
     linker_section_ptr->offset = lsect->section->_raw_size;
