@@ -1797,6 +1797,12 @@ assign_file_positions_for_segments (abfd)
       unsigned int i;
       asection **secpp;
 
+      /* If elf_segment_map is not from map_sections_to_segments, the
+         sections may not be correctly ordered.  */
+      if (m->count > 0)
+	qsort (m->sections, (size_t) m->count, sizeof (asection *),
+	       elf_sort_sections);
+
       p->p_type = m->p_type;
 
       if (m->p_flags_valid)
@@ -2018,6 +2024,17 @@ get_program_header_size (abfd)
   /* We can't return a different result each time we're called.  */
   if (elf_tdata (abfd)->program_header_size != 0)
     return elf_tdata (abfd)->program_header_size;
+
+  if (elf_tdata (abfd)->segment_map != NULL)
+    {
+      struct elf_segment_map *m;
+
+      segs = 0;
+      for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
+	++segs;
+      elf_tdata (abfd)->program_header_size = segs * bed->s->sizeof_phdr;
+      return elf_tdata (abfd)->program_header_size;
+    }
 
   /* Assume we will need exactly two PT_LOAD segments: one for text
      and one for data.  */
@@ -2539,9 +2556,6 @@ copy_private_bfd_data (ibfd, obfd)
 	    }
 	}
       BFD_ASSERT (isec == csecs);
-      if (csecs > 0)
-	qsort (m->sections, (size_t) csecs, sizeof (asection *),
-	       elf_sort_sections);
       m->count = csecs;
 
       *pm = m;
