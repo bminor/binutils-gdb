@@ -1,3 +1,7 @@
+Wed Nov 11 14:02:25 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* sim-hload.c (sim_load): Pass `prog_name' to sim_load_file, not NULL.
+
 Wed Nov  4 23:51:19 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* genmloop.sh (eng.hin): Rename HAVE_PARALLEL_EXEC to
