@@ -194,73 +194,66 @@ sparclet_load (desc, file, hashmark)
 
 static char *sparclet_inits[] = {"\n\r\r\n", NULL};
 
-static struct monitor_ops sparclet_cmds =
+static struct monitor_ops sparclet_cmds ;
+static void init_sparclet_cmds(void)
 {
-  MO_CLR_BREAK_USES_ADDR |
-  MO_HEX_PREFIX          |
-  MO_NO_ECHO_ON_OPEN     |
-  MO_NO_ECHO_ON_SETMEM   |
-  MO_RUN_FIRST_TIME      |
-  MO_GETMEM_READ_SINGLE,	/* flags */
-  sparclet_inits,		/* Init strings */
-  "cont\r",			/* continue command */
-  "step\r",			/* single step */
-  "\r",				/* break interrupts the program */
-  "+bp %x\r",			/* set a breakpoint */
-				/* can't use "br" because only 2 hw bps are supported */
-  "-bp %x\r",			/* clear a breakpoint */
-  "-bp\r",			/* clear all breakpoints */
-  "fill %x -n %x -v %x -b\r",	/* fill (start length val) */
-				/* can't use "fi" because it takes words, not bytes */
-  {
-    /* ex [addr] [-n count] [-b|-s|-l]          default: ex cur -n 1 -b */
-    "ex %x -b\r%x\rq\r",	/* setmem.cmdb (addr, value) */
-    "ex %x -s\r%x\rq\r",	/* setmem.cmdw (addr, value) */
-    "ex %x -l\r%x\rq\r",        /* setmem.cmdl (addr, value) */
-    NULL,			/* setmem.cmdll (addr, value) */
-    NULL, /*": " */		/* setmem.resp_delim */
-    NULL, /*"? " */		/* setmem.term */
-    NULL, /*"q\r" */		/* setmem.term_cmd */
-  },
-  {
-    /* since the parsing of multiple bytes is difficult due to
-       interspersed addresses, we'll only read 1 value at a time, 
-       even tho these can handle a count */
-    /* we can use -n to set count to read, but may have to parse? */
-    "ex %x -n 1 -b\r",		/* getmem.cmdb (addr, #bytes) */
-    "ex %x -n 1 -s\r",		/* getmem.cmdw (addr, #swords) */
-    "ex %x -n 1 -l\r",		/* getmem.cmdl (addr, #words) */
-    NULL,			/* getmem.cmdll (addr, #dwords) */
-    ": ",			/* getmem.resp_delim */
-    NULL,			/* getmem.term */
-    NULL,			/* getmem.term_cmd */
-  },
-  {
-    "reg %s 0x%x\r",		/* setreg.cmd (name, value) */
-    NULL,			/* setreg.resp_delim */
-    NULL,			/* setreg.term */
-    NULL			/* setreg.term_cmd */
-  },
-  {
-    "reg %s\r",			/* getreg.cmd (name) */
-    " ",			/* getreg.resp_delim */
-    NULL,			/* getreg.term */
-    NULL,			/* getreg.term_cmd */
-  },
-  "reg\r",			/* dump_registers */
-  "\\(\\w+\\)=\\([0-9a-fA-F]+\\)",	/* register_pattern */
-  sparclet_supply_register,	/* supply_register */
-  sparclet_load,		/* load_routine */
-  NULL,				/* download command (srecs on console) */
-  NULL,				/* load response */
-  "monitor>",			/* monitor command prompt */
+  sparclet_cmds.flags =   MO_CLR_BREAK_USES_ADDR |
+    MO_HEX_PREFIX          |
+    MO_NO_ECHO_ON_OPEN     |
+    MO_NO_ECHO_ON_SETMEM   |
+    MO_RUN_FIRST_TIME      |
+    MO_GETMEM_READ_SINGLE ;	/* flags */
+  sparclet_cmds.init =   sparclet_inits;		/* Init strings */
+  sparclet_cmds.cont =   "cont\r";			/* continue command */
+  sparclet_cmds.step =   "step\r";			/* single step */
+  sparclet_cmds.stop =   "\r";				/* break interrupts the program */
+  sparclet_cmds.set_break =   "+bp %x\r";		/* set a breakpoint */
+  sparclet_cmds.clr_break =  "-bp %x\r" ;		/* can't use "br" because only 2 hw bps are supported */
+  sparclet_cmds.clr_all_break =   "-bp %x\r";		/* clear a breakpoint */
+  "-bp\r" ;			/* clear all breakpoints */
+  sparclet_cmds.fill =   "fill %x -n %x -v %x -b\r";	/* fill (start length val) */
+  /* can't use "fi" because it takes words, not bytes */
+  /* ex [addr] [-n count] [-b|-s|-l]          default: ex cur -n 1 -b */
+  sparclet_cmds.setmem.cmdb =     "ex %x -b\r%x\rq\r";	/* setmem.cmdb (addr, value) */
+  sparclet_cmds.setmem.cmdw =     "ex %x -s\r%x\rq\r";	/* setmem.cmdw (addr, value) */
+  sparclet_cmds.setmem.cmdl =     "ex %x -l\r%x\rq\r";  /* setmem.cmdl (addr, value) */
+  sparclet_cmds.setmem.cmdll =     NULL;		/* setmem.cmdll (addr, value) */
+  sparclet_cmds.setmem.resp_delim =     NULL; /*": " */	/* setmem.resp_delim */
+  sparclet_cmds.setmem.term =     NULL; /*"? " */	/* setmem.term */
+  sparclet_cmds.setmem.term_cmd =     NULL; /*"q\r" */	/* setmem.term_cmd */
+  /* since the parsing of multiple bytes is difficult due to
+     interspersed addresses, we'll only read 1 value at a time,
+     even tho these can handle a count */
+  /* we can use -n to set count to read, but may have to parse? */
+  sparclet_cmds.getmem.cmdb =     "ex %x -n 1 -b\r";	/* getmem.cmdb (addr, #bytes) */
+  sparclet_cmds.getmem.cmdw =     "ex %x -n 1 -s\r";	/* getmem.cmdw (addr, #swords) */
+  sparclet_cmds.getmem.cmdl =     "ex %x -n 1 -l\r";	/* getmem.cmdl (addr, #words) */
+  sparclet_cmds.getmem.cmdll =     NULL;		/* getmem.cmdll (addr, #dwords) */
+  sparclet_cmds.getmem.resp_delim =     ": ";		/* getmem.resp_delim */
+  sparclet_cmds.getmem.term =     NULL;			/* getmem.term */
+  sparclet_cmds.getmem.term_cmd =     NULL;		/* getmem.term_cmd */
+  sparclet_cmds.setreg.cmd =     "reg %s 0x%x\r";	/* setreg.cmd (name, value) */
+  sparclet_cmds.setreg.resp_delim =     NULL;		/* setreg.resp_delim */
+  sparclet_cmds.setreg.term =     NULL;			/* setreg.term */
+  sparclet_cmds.setreg.term_cmd =  NULL ;		/* setreg.term_cmd */
+  sparclet_cmds.getreg.cmd =     "reg %s\r";		/* getreg.cmd (name) */
+  sparclet_cmds.getreg.resp_delim =     " ";		/* getreg.resp_delim */
+  sparclet_cmds.getreg.term =     NULL;			/* getreg.term */
+  sparclet_cmds.getreg.term_cmd =     NULL;		/* getreg.term_cmd */
+  sparclet_cmds.dump_registers =   "reg\r";		/* dump_registers */
+  sparclet_cmds.register_pattern =   "\\(\\w+\\)=\\([0-9a-fA-F]+\\)";	/* register_pattern */
+  sparclet_cmds.supply_register =   sparclet_supply_register;	/* supply_register */
+  sparclet_cmds.load_routine =   sparclet_load;		/* load_routine */
+  sparclet_cmds.load =   NULL;				/* download command (srecs on console) */
+  sparclet_cmds.loadresp =   NULL;			/* load response */
+  sparclet_cmds.prompt =   "monitor>";			/* monitor command prompt */
   /* yikes!  gdb core dumps without this delimitor!! */
-  "\r",				/* end-of-command delimitor */
-  NULL,				/* optional command terminator */
-  &sparclet_ops,		/* target operations */
-  SERIAL_1_STOPBITS,		/* number of stop bits */
-  sparclet_regnames,		/* registers names */
-  MONITOR_OPS_MAGIC		/* magic */
+  sparclet_cmds.line_term =   "\r";			/* end-of-command delimitor */
+  sparclet_cmds.cmd_end =   NULL;			/* optional command terminator */
+  sparclet_cmds.target =   &sparclet_ops;		/* target operations */
+  sparclet_cmds.stopbits =   SERIAL_1_STOPBITS;		/* number of stop bits */
+  sparclet_cmds.regnames =   sparclet_regnames;		/* registers names */
+  sparclet_cmds.magic =   MONITOR_OPS_MAGIC ;	/* magic */
 };
 
 static void
@@ -275,6 +268,7 @@ void
 _initialize_sparclet ()
 {
   int i;
+  init_sparclet_cmds() ;
 
   for (i = 0; i < NUM_REGS; i++)
     if (sparclet_regnames[i][0] == 'c' ||

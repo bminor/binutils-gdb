@@ -1,3 +1,19 @@
+Mon Apr 27 13:46:40 1998  John Metzler  <jmetzler@cygnus.com>
+
+	* rom68k-rom.c (_initialize_rom68k init_rom68k_cmds):
+	* abug-rom.c (_initialize_abug_rom init_abug-cmds):
+	* cpu32bug-rom.c (_initialize_cpu32bug_rom init_cpu32bug_cmds):
+	* mon960-rom.c (initialize_mon960 init_mon960_cmds):
+	* op50-rom.c (initialize_op50n  init_op50n_cmds) :
+	* ppcbug-rom.c (_initialize_ppcbug_rom init_ppc_cmds) :
+	* sh3-rom.c (_initialize_sh3_rom init_sh3_cmds) :
+	* sparclet-rom.c (_initialize_sparcletinit_sparclet_cmds ) :
+	* remote-est.c ( _initialize_est  init_est_cmds) :
+	* remote-hms.c (  _initialize_remote_hms  init_hms_cmds) :
+	  Convert all static initializations of monitor ops structures to
+ 	executable initializations in oreer tat additions to the data structure
+	definition can me made without repeating this editing exercise.
+
 Mon Apr 27 10:43:04 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 
         * gdb_string.h (strdup): Don't specify arguments in prototype.

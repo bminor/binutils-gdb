@@ -183,63 +183,54 @@ static struct target_ops sh3_ops, sh3e_ops;
 
 static char *sh3_inits[] = {"\003", NULL}; /* Exits sub-command mode & download cmds */
 
-static struct monitor_ops sh3_cmds =
+static struct monitor_ops sh3_cmds ;
+static void init_sh3_cmds(void)
 {
-  MO_CLR_BREAK_USES_ADDR
-    | MO_GETMEM_READ_SINGLE,	/* flags */
-  sh3_inits,			/* monitor init string */
-  "g\r",			/* continue command */
-  "s\r",			/* single step */
-  "\003",			/* Interrupt program */
-  "b %x\r",			/* set a breakpoint */
-  "b -%x\r",			/* clear a breakpoint */
-  "b -\r",			/* clear all breakpoints */
-  "f %x @%x %x\r",		/* fill (start len val) */
-  {
-    "m %x %x\r",		/* setmem.cmdb (addr, value) */
-    "m %x %x;w\r",		/* setmem.cmdw (addr, value) */
-    "m %x %x;l\r",		/* setmem.cmdl (addr, value) */
-    NULL,			/* setmem.cmdll (addr, value) */
-    NULL,			/* setreg.resp_delim */
-    NULL,			/* setreg.term */
-    NULL,			/* setreg.term_cmd */
-  },
-  {
-    "m %x\r",			/* getmem.cmdb (addr, len) */
-    "m %x;w\r",			/* getmem.cmdw (addr, len) */
-    "m %x;l\r",			/* getmem.cmdl (addr, len) */
-    NULL,			/* getmem.cmdll (addr, len) */
-    "^ [0-9A-F]+ ",		/* getmem.resp_delim */
-    "? ",			/* getmem.term */
-    ".\r",			/* getmem.term_cmd */
-  },
-  {
-    ".%s %x\r",			/* setreg.cmd (name, value) */
-    NULL,			/* setreg.resp_delim */
-    NULL,			/* setreg.term */
-    NULL			/* setreg.term_cmd */
-  },
-  {
-    ".%s\r",			/* getreg.cmd (name) */
-    "=",			/* getreg.resp_delim */
-    "? ",			/* getreg.term */
-    ".\r"			/* getreg.term_cmd */
-  },
-  "r\r",			/* dump_registers */
-				/* register_pattern */
-  "\\(\\w+\\)=\\([0-9a-fA-F]+\\( +[0-9a-fA-F]+\\b\\)*\\)",
-  sh3_supply_register,		/* supply_register */
-  sh3_load,			/* load_routine */
-  NULL,				/* download command */
-  NULL,				/* Load response */
-  "\n:",			/* monitor command prompt */
-  "\r",				/* end-of-line terminator */
-  ".\r",			/* optional command terminator */
-  &sh3_ops,			/* target operations */
-  SERIAL_1_STOPBITS,		/* number of stop bits */
-  sh3_regnames,			/* registers names */
-  MONITOR_OPS_MAGIC		/* magic */
-};
+  sh3_cmds.flags =   MO_CLR_BREAK_USES_ADDR | MO_GETMEM_READ_SINGLE ;	/* flags */
+  sh3_cmds.init =   sh3_inits;		/* monitor init string */
+  sh3_cmds.cont =   "g\r";		/* continue command */
+  sh3_cmds.step =   "s\r";		/* single step */
+  sh3_cmds.stop =   "\003";		/* Interrupt program */
+  sh3_cmds.set_break =   "b %x\r";	/* set a breakpoint */
+  sh3_cmds.clr_break =   "b -%x\r";	/* clear a breakpoint */
+  sh3_cmds.clr_all_break =   "b -\r";	/* clear all breakpoints */
+  sh3_cmds.fill =   "f %x @%x %x\r";		/* fill (start len val) */
+  sh3_cmds.setmem.cmdb =     "m %x %x\r";	/* setmem.cmdb (addr, value) */
+  sh3_cmds.setmem.cmdw =     "m %x %x;w\r";	/* setmem.cmdw (addr, value) */
+  sh3_cmds.setmem.cmdl =     "m %x %x;l\r";	/* setmem.cmdl (addr, value) */
+  sh3_cmds.setmem.cmdll =     NULL;		/* setmem.cmdll (addr, value) */
+  sh3_cmds.setmem.resp_delim =     NULL;	/* setreg.resp_delim */
+  sh3_cmds.setmem.term =     NULL;		/* setreg.term */
+  sh3_cmds.setmem.term_cmd =     NULL;		/* setreg.term_cmd */
+  sh3_cmds.getmem.cmdb =     "m %x\r";		/* getmem.cmdb (addr, len) */
+  sh3_cmds.getmem.cmdw =     "m %x;w\r";	/* getmem.cmdw (addr, len) */
+  sh3_cmds.getmem.cmdl =     "m %x;l\r";	/* getmem.cmdl (addr, len) */
+  sh3_cmds.getmem.cmdll =     NULL;		/* getmem.cmdll (addr, len) */
+  sh3_cmds.getmem.resp_delim =     "^ [0-9A-F]+ "; /* getmem.resp_delim */
+  sh3_cmds.getmem.term =     "? ";		/* getmem.term */
+  sh3_cmds.getmem.term_cmd =     ".\r";		/* getmem.term_cmd */
+  sh3_cmds.setreg.cmd =     ".%s %x\r";		/* setreg.cmd (name, value) */
+  sh3_cmds.setreg.resp_delim =     NULL;	/* setreg.resp_delim */
+  sh3_cmds.setreg.term =     NULL;		/* setreg.term */
+  sh3_cmds.setreg.term_cmd =     NULL;		/* setreg.term_cmd */
+  sh3_cmds.getreg.cmd =     ".%s\r";		/* getreg.cmd (name) */
+  sh3_cmds.getreg.resp_delim =     "=";		/* getreg.resp_delim */
+  sh3_cmds.getreg.term =     "? ";		/* getreg.term */
+  sh3_cmds.getreg.term_cmd =     ".\r"	;	/* getreg.term_cmd */
+  sh3_cmds.dump_registers =   "r\r";		/* dump_registers */
+  sh3_cmds.register_pattern = 	"\\(\\w+\\)=\\([0-9a-fA-F]+\\( +[0-9a-fA-F]+\\b\\)*\\)";
+  sh3_cmds.supply_register =  sh3_supply_register ;	/* supply_register */
+  sh3_cmds.load_routine =   sh3_load;		/* load_routine */
+  sh3_cmds.load =   NULL;			/* download command */
+  sh3_cmds.loadresp =   NULL;			/* Load response */
+  sh3_cmds.prompt =   "\n:";			/* monitor command prompt */
+  sh3_cmds.line_term =   "\r";			/* end-of-line terminator */
+  sh3_cmds.cmd_end =   ".\r";			/* optional command terminator */
+  sh3_cmds.target =   &sh3_ops;			/* target operations */
+  sh3_cmds.stopbits =   SERIAL_1_STOPBITS;	/* number of stop bits */
+  sh3_cmds.regnames =   sh3_regnames;		/* registers names */
+  sh3_cmds.magic =   MONITOR_OPS_MAGIC	;	/* magic */
+} /* init_sh3_cmds */
 
 /* This monitor structure is identical except for a couple slots, so
    we will fill it in from the base structure when needed.  */
@@ -350,6 +341,7 @@ sh3_close (quitting)
 void
 _initialize_sh3_rom ()
 {
+  init_sh3_cmds() ;
   init_monitor_ops (&sh3_ops);
 
   sh3_ops.to_shortname = "sh3";

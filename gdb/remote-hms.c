@@ -26,7 +26,6 @@
 #include "serial.h"
 
 static void hms_open PARAMS ((char *args, int from_tty));
-
 static void
 hms_supply_register (regname, regnamelen, val, vallen)
      char *regname;
@@ -83,61 +82,54 @@ static char *hms_inits[] =
 {"\003",			/* Resets the prompt, and clears repeated cmds */
  NULL};
 
-static struct monitor_ops hms_cmds =
+static struct monitor_ops hms_cmds ;
+static void init_hms_cmds(void)
 {
-  MO_CLR_BREAK_USES_ADDR | MO_FILL_USES_ADDR | MO_GETMEM_NEEDS_RANGE,
-  hms_inits,			/* Init strings */
-  "g\r",			/* continue command */
-  "s\r",			/* single step */
-  "\003",			/* ^C interrupts the program */
-  "b %x\r",			/* set a breakpoint */
-  "b - %x\r",			/* clear a breakpoint */
-  "b -\r",			/* clear all breakpoints */
-  "f %x %x %x\r",		/* fill (start end val) */
-  {
-    "m.b %x=%x\r",		/* setmem.cmdb (addr, value) */
-    "m.w %x=%x\r",		/* setmem.cmdw (addr, value) */
-    NULL,			/* setmem.cmdl (addr, value) */
-    NULL,			/* setmem.cmdll (addr, value) */
-    NULL,			/* setreg.resp_delim */
-    NULL,			/* setreg.term */
-    NULL,			/* setreg.term_cmd */
-  },
-  {
-    "m.b %x %x\r",		/* getmem.cmdb (addr, addr) */
-    "m.w %x %x\r",		/* getmem.cmdw (addr, addr) */
-    NULL,			/* getmem.cmdl (addr, addr) */
-    NULL,			/* getmem.cmdll (addr, addr) */
-    ": ",			/* getmem.resp_delim */
-    ">",			/* getmem.term */
-    "\003",			/* getmem.term_cmd */
-  },
-  {
-    "r %s=%x\r",		/* setreg.cmd (name, value) */
-    NULL,			/* setreg.resp_delim */
-    NULL,			/* setreg.term */
-    NULL			/* setreg.term_cmd */
-  },
-  {
-    "r %s\r",			/* getreg.cmd (name) */
-    " (",			/* getreg.resp_delim */
-    ":",			/* getreg.term */
-    "\003",			/* getreg.term_cmd */
-  },
-  "r\r",			/* dump_registers */
-  "\\(\\w+\\)=\\([0-9a-fA-F]+\\)",	/* register_pattern */
-  hms_supply_register,		/* supply_register */
-  NULL,				/* load_routine (defaults to SRECs) */
-  "tl\r",			/* download command */
-  NULL,				/* load response */
-  ">",				/* monitor command prompt */
-  "\r",				/* end-of-command delimitor */
-  NULL,				/* optional command terminator */
-  &hms_ops,			/* target operations */
-  SERIAL_1_STOPBITS,		/* number of stop bits */
-  hms_regnames,			/* registers names */
-  MONITOR_OPS_MAGIC		/* magic */
-};
+  hms_cmds.flags =   MO_CLR_BREAK_USES_ADDR | MO_FILL_USES_ADDR | MO_GETMEM_NEEDS_RANGE;
+  hms_cmds.init =   hms_inits;		/* Init strings */
+  hms_cmds.cont =   "g\r";		/* continue command */
+  hms_cmds.step =   "s\r";		/* single step */
+  hms_cmds.stop =   "\003";		/* ^C interrupts the program */
+  hms_cmds.set_break =   "b %x\r";	/* set a breakpoint */
+  hms_cmds.clr_break =   "b - %x\r";	/* clear a breakpoint */
+  hms_cmds.clr_all_break =   "b -\r";	/* clear all breakpoints */
+  hms_cmds.fill =   "f %x %x %x\r";	/* fill (start end val) */
+  hms_cmds.setmem.cmdb =     "m.b %x=%x\r";	/* setmem.cmdb (addr, value) */
+  hms_cmds.setmem.cmdw =     "m.w %x=%x\r";	/* setmem.cmdw (addr, value) */
+  hms_cmds.setmem.cmdl =     NULL;	/* setmem.cmdl (addr, value) */
+  hms_cmds.setmem.cmdll =     NULL;	/* setmem.cmdll (addr, value) */
+  hms_cmds.setmem.resp_delim =     NULL;/* setreg.resp_delim */
+  hms_cmds.setmem.term =     NULL;	/* setreg.term */
+  hms_cmds.setmem.term_cmd =     NULL;	/* setreg.term_cmd */
+  hms_cmds.getmem.cmdb =     "m.b %x %x\r";	/* getmem.cmdb (addr, addr) */
+  hms_cmds.getmem.cmdw =     "m.w %x %x\r";	/* getmem.cmdw (addr, addr) */
+  hms_cmds.getmem.cmdl =     NULL;	/* getmem.cmdl (addr, addr) */
+  hms_cmds.getmem.cmdll =     NULL;	/* getmem.cmdll (addr, addr) */
+  hms_cmds.getmem.resp_delim =     ": ";/* getmem.resp_delim */
+  hms_cmds.getmem.term =     ">";	/* getmem.term */
+  hms_cmds.getmem.term_cmd =     "\003";/* getmem.term_cmd */
+  hms_cmds.setreg.cmd =     "r %s=%x\r";/* setreg.cmd (name, value) */
+  hms_cmds.setreg.resp_delim =     NULL;/* setreg.resp_delim */
+  hms_cmds.setreg.term =     NULL;	/* setreg.term */
+  hms_cmds.setreg.term_cmd =     NULL;	/* setreg.term_cmd */
+  hms_cmds.getreg.cmd =     "r %s\r";	/* getreg.cmd (name) */
+  hms_cmds.getreg.resp_delim =     " (";/* getreg.resp_delim */
+  hms_cmds.getreg.term =     ":";	/* getreg.term */
+  hms_cmds.getreg.term_cmd =     "\003";/* getreg.term_cmd */
+  hms_cmds.dump_registers =   "r\r";	/* dump_registers */
+  hms_cmds.register_pattern =   "\\(\\w+\\)=\\([0-9a-fA-F]+\\)";	/* register_pattern */
+  hms_cmds.supply_register =   hms_supply_register;	/* supply_register */
+  hms_cmds.load_routine =   NULL;	/* load_routine (defaults to SRECs) */
+  hms_cmds.load =   "tl\r";		/* download command */
+  hms_cmds.loadresp =   NULL;		/* load response */
+  hms_cmds.prompt =   ">";		/* monitor command prompt */
+  hms_cmds.line_term =   "\r";		/* end-of-command delimitor */
+  hms_cmds.cmd_end =   NULL;		/* optional command terminator */
+  hms_cmds.target =   &hms_ops;		/* target operations */
+  hms_cmds.stopbits =   SERIAL_1_STOPBITS;/* number of stop bits */
+  hms_cmds.regnames =   hms_regnames;	/* registers names */
+  hms_cmds.magic =   MONITOR_OPS_MAGIC;	/* magic */
+} /* init_hms-cmds */
 
 static void
 hms_open (args, from_tty)
@@ -152,6 +144,7 @@ int write_dos_tick_delay;
 void
 _initialize_remote_hms ()
 {
+  init_hms_cmds() ;
   init_monitor_ops (&hms_ops);
 
   hms_ops.to_shortname = "hms";

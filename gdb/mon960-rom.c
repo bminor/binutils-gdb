@@ -148,75 +148,66 @@ static char *mon960_inits[] = {"\n\r\r\r\r\r\r\r\r\r\r\r\r\r\r\n\r\n\r\n", NULL}
 static char *mon960_inits[] = { "\r", NULL};
 #endif
 
-static struct monitor_ops mon960_cmds =
+static struct monitor_ops mon960_cmds ;
+static void init_mon960_cmds(void)
 {
-  MO_CLR_BREAK_USES_ADDR
-    | MO_NO_ECHO_ON_OPEN
-    | MO_SEND_BREAK_ON_STOP
-    | MO_GETMEM_READ_SINGLE,    /* flags */
-  mon960_inits,			/* Init strings */
-  "go\n\r",			/* continue command */
-  "st\n\r",			/* single step */
-  NULL,				/* break interrupts the program */
-  NULL,				/* set a breakpoint */
-				/* can't use "br" because only 2 hw bps are supported */
-  NULL,				/* clear a breakpoint - "de" is for hw bps */
+  mon960_cmds.flags =   MO_CLR_BREAK_USES_ADDR
+    | MO_NO_ECHO_ON_OPEN   | MO_SEND_BREAK_ON_STOP   | MO_GETMEM_READ_SINGLE ;    /* flags */
+  mon960_cmds.init =   mon960_inits;	/* Init strings */
+  mon960_cmds.cont =   "go\n\r";	/* continue command */
+  mon960_cmds.step =   "st\n\r";		/* single step */
+  mon960_cmds.stop =   NULL;			/* break interrupts the program */
+  mon960_cmds.set_break =   NULL;		/* set a breakpoint */
+  mon960_cmds.clr_break = 			/* can't use "br" because only 2 hw bps are supported */
+    mon960_cmds.clr_all_break =   NULL;		/* clear a breakpoint - "de" is for hw bps */
   NULL,				/* clear all breakpoints */
-  NULL,				/* fill (start end val) */
-				/* can't use "fi" because it takes words, not bytes */
-  {
-    /* can't use "mb", "md" or "mo" because they require interaction */
-    NULL,			/* setmem.cmdb (addr, value) */
-    NULL,			/* setmem.cmdw (addr, value) */
-    "md %x %x\n\r",		/* setmem.cmdl (addr, value) */
-    NULL,			/* setmem.cmdll (addr, value) */
-    NULL,			/* setmem.resp_delim */
-    NULL,			/* setmem.term */
-    NULL,			/* setmem.term_cmd */
-  },
-  {
-    /* since the parsing of multiple bytes is difficult due to
-       interspersed addresses, we'll only read 1 value at a time, 
-       even tho these can handle a count */
-    "db %x\n\r",		/* getmem.cmdb (addr, #bytes) */
-    "ds %x\n\r",		/* getmem.cmdw (addr, #swords) */
-    "di %x\n\r",		/* getmem.cmdl (addr, #words) */
-    "dd %x\n\r",		/* getmem.cmdll (addr, #dwords) */
-    " : ",			/* getmem.resp_delim */
-    NULL,			/* getmem.term */
-    NULL,			/* getmem.term_cmd */
-  },
-  {
-    "md %s %x\n\r",		/* setreg.cmd (name, value) */
-    NULL,			/* setreg.resp_delim */
-    NULL,			/* setreg.term */
-    NULL			/* setreg.term_cmd */
-  },
-  {
-    "di %s\n\r",		/* getreg.cmd (name) */
-    " : ",			/* getreg.resp_delim */
-    NULL,			/* getreg.term */
-    NULL,			/* getreg.term_cmd */
-  },
-  "re\n\r",			/* dump_registers */
-  "\\(\\w+\\)=\\([0-9a-fA-F]+\\)",	/* register_pattern */
-  NULL,				/* supply_register */
+    mon960_cmds.fill =   NULL;			/* fill (start end val) */
+  /* can't use "fi" because it takes words, not bytes */
+  /* can't use "mb", "md" or "mo" because they require interaction */
+  mon960_cmds.setmem.cmdb =     NULL;		/* setmem.cmdb (addr, value) */
+  mon960_cmds.setmem.cmdw =     NULL;		/* setmem.cmdw (addr, value) */
+  mon960_cmds.setmem.cmdl =     "md %x %x\n\r";	/* setmem.cmdl (addr, value) */
+  mon960_cmds.setmem.cmdll =     NULL;		/* setmem.cmdll (addr, value) */
+  mon960_cmds.setmem.resp_delim =     NULL;	/* setmem.resp_delim */
+  mon960_cmds.setmem.term =     NULL;		/* setmem.term */
+  mon960_cmds.setmem.term_cmd =     NULL;			/* setmem.term_cmd */
+  /* since the parsing of multiple bytes is difficult due to
+     interspersed addresses, we'll only read 1 value at a time,
+     even tho these can handle a count */
+  mon960_cmds.getmem.cmdb =     "db %x\n\r";	/* getmem.cmdb (addr, #bytes) */
+  mon960_cmds.getmem.cmdw =     "ds %x\n\r";	/* getmem.cmdw (addr, #swords) */
+  mon960_cmds.getmem.cmdl =     "di %x\n\r";	/* getmem.cmdl (addr, #words) */
+  mon960_cmds.getmem.cmdll =     "dd %x\n\r";	/* getmem.cmdll (addr, #dwords) */
+  mon960_cmds.getmem.resp_delim =     " : ";	/* getmem.resp_delim */
+  mon960_cmds.getmem.term =     NULL;		/* getmem.term */
+  mon960_cmds.getmem.term_cmd =     NULL;	/* getmem.term_cmd */
+  mon960_cmds.setreg.cmd =     "md %s %x\n\r";	/* setreg.cmd (name, value) */
+  mon960_cmds.setreg.resp_delim =     NULL;	/* setreg.resp_delim */
+  mon960_cmds.setreg.term =     NULL;		/* setreg.term */
+  mon960_cmds.setreg.term_cmd =     NULL,	/* setreg.term_cmd */
+    mon960_cmds.getreg.cmd =     "di %s\n\r";	/* getreg.cmd (name) */
+  mon960_cmds.getreg.resp_delim =     " : ";	/* getreg.resp_delim */
+  mon960_cmds.getreg.term =     NULL;		/* getreg.term */
+  mon960_cmds.getreg.term_cmd =     NULL;	/* getreg.term_cmd */
+  mon960_cmds.dump_registers =   "re\n\r";	/* dump_registers */
+  mon960_cmds.register_pattern =   "\\(\\w+\\)=\\([0-9a-fA-F]+\\)";	/* register_pattern */
+  mon960_cmds.supply_register =   NULL;		/* supply_register */
 #ifdef USE_GENERIC_LOAD
-  NULL,				/* load_routine (defaults to SRECs) */
-  NULL,				/* download command */
-  NULL,				/* load response */
+  mon960_cmds.load_routine =   NULL;		/* load_routine (defaults to SRECs) */
+  mon960_cmds.load = NULL;			/* download command */
+  mon960_cmds.loadresp  = NULL;			/* load response */
 #else
-  mon960_load,			/* load_routine (defaults to SRECs) */
-  "do\n\r",			/* download command */
-  "Downloading\n\r",		/* load response */
+  mon960_cmds.load_routine =   mon960_load ;	/* load_routine (defaults to SRECs) */
+  mon960_cmds.load =  "do\n\r";		/* download command */
+  mon960_cmds.loadresp =  "Downloading\n\r" ;/* load response */
 #endif
-  "=>",				/* monitor command prompt */
-  "\n\r",			/* end-of-command delimitor */
-  NULL,				/* optional command terminator */
-  &mon960_ops,			/* target operations */
-  SERIAL_1_STOPBITS,		/* number of stop bits */
-  mon960_regnames,		/* registers names */
-  MONITOR_OPS_MAGIC		/* magic */
+  mon960_cmds.prompt =   "=>";		/* monitor command prompt */
+  mon960_cmds.line_term =  "\n\r";		/* end-of-command delimitor */  
+  mon960_cmds.cmd_end = NULL;		/* optional command terminator */
+  mon960_cmds.target =   &mon960_ops;		/* target operations */
+  mon960_cmds.stopbits =     SERIAL_1_STOPBITS;	/* number of stop bits */
+  mon960_cmds.regnames =  mon960_regnames;	/* registers names */
+  mon960_cmds.magic = MONITOR_OPS_MAGIC;	/* magic */
 };
 
 static void
