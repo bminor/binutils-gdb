@@ -1,3 +1,13 @@
+Wed Mar 19 11:37:57 1997  Philippe De Muyter  <phdm@info.ucl.ac.be>
+
+	* config/obj-coff.c (glue_symbols): Unused variable symbolP
+	removed.
+	(crawl_symbols): Do not modify symbol_rootP and symbol_lastP here;
+	that is done by symbol_remove and symbol_insert.
+
+	* config/obj-coff.h (S_IS_LOCAL): Return 0 for a debugging
+	symbol.
+
 Wed Mar 19 11:06:29 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (load_register): In 32 bit mode, when not
