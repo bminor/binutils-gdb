@@ -1,3 +1,11 @@
+Mon Jun 17 15:50:53 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* doc/as.texinfo: Reorder chapter of machine dependent options so
+ 	that it is sorted by chip name.  
+
+	* doc/as.texinfo: Use consistant spelling of Vax.
+	* doc/c-vax.texi: Likewise.
+
 Mon Jun 17 11:26:56 1996  Jeffrey A. Law  <law@rtl.cygnus.com>
 
 	* config/tc-hppa.c (md_pseudo_table): Add ".begin_try" and ".end_try"
