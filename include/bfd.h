@@ -222,7 +222,7 @@ typedef enum bfd_print_symbol
   bfd_print_symbol_name,
   bfd_print_symbol_more,
   bfd_print_symbol_all,
-  bfd_print_symbol_nm, /* Pretty format suitable for nm program. */
+  bfd_print_symbol_nm /* Pretty format suitable for nm program. */
 } bfd_print_symbol_type;
     
 
