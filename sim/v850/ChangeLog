@@ -1,3 +1,8 @@
+Thu Aug 29 13:53:29 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* simops.c: Add logicals, mov, movhi, movea, add, addi, sub
+	and subr.  No condition codes yet.
+
 Wed Aug 28 13:53:22 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* ChangeLog, Makefile.in, configure, configure.in, v850_sim.h, 

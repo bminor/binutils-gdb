@@ -3,11 +3,6 @@
 #include "simops.h"
 
 void
-OP_1A0 ()
-{
-}
-
-void
 OP_280 ()
 {
 }
@@ -29,11 +24,6 @@ OP_C7C0 ()
 
 void
 OP_760 ()
-{
-}
-
-void
-OP_6A0 ()
 {
 }
 
@@ -148,11 +138,6 @@ OP_660 ()
 }
 
 void
-OP_100 ()
-{
-}
-
-void
 OP_E0 ()
 {
 }
@@ -167,14 +152,57 @@ OP_16007E0 ()
 {
 }
 
-void
-OP_600 ()
-{
-}
+/* add reg, reg
 
+   XXX condition codes.  */
 void
 OP_1C0 ()
 {
+  State.regs[OP[1]] += State.regs[OP[0]];
+}
+
+/* add sign_extend(imm5), reg
+
+   XXX condition codes.  */
+void
+OP_240 ()
+{
+  int value = OP[0];
+ 
+  value = (value << 27) >> 27;
+
+  State.regs[OP[1]] += value;
+}
+
+/* addi sign_extend(imm16), reg, reg
+
+   XXX condition codes.  */
+void
+OP_600 ()
+{
+  int value = OP[0];
+ 
+  value = (value << 16) >> 16;
+
+  State.regs[OP[2]] = State.regs[OP[1]] + value;
+}
+
+/* sub reg1, reg2
+
+   XXX condition codes  */
+void
+OP_1A0 ()
+{
+  State.regs[OP[1]] -= State.regs[OP[0]];
+}
+
+/* subr reg1, reg2
+
+   XXX condition codes */
+void
+OP_180 ()
+{
+  State.regs[OP[1]] = State.regs[OP[0]] - State.regs[OP[1]];
 }
 
 void
@@ -193,11 +221,6 @@ OP_12007E0 ()
 }
 
 void
-OP_240 ()
-{
-}
-
-void
 OP_4007E0 ()
 {
 }
@@ -209,11 +232,6 @@ OP_10720 ()
 
 void
 OP_780 ()
-{
-}
-
-void
-OP_6C0 ()
 {
 }
 
@@ -238,23 +256,48 @@ OP_87C0 ()
 }
 
 void
-OP_180 ()
-{
-}
-
-void
 OP_300 ()
 {
 }
 
+/* mov reg, reg */
 void
 OP_0 ()
 {
+  State.regs[OP[1]] = State.regs[OP[0]];
 }
 
+/* mov sign_extend(imm5), reg */
 void
-OP_680 ()
+OP_200 ()
 {
+  int value = OP[0];
+ 
+  value = (value << 27) >> 27;
+  State.regs[OP[1]] = value;
+}
+
+/* movea sign_extend(imm16), reg, reg  */
+
+void
+OP_620 ()
+{
+  int value = OP[0];
+ 
+  value = (value << 16) >> 16;
+
+  State.regs[OP[2]] = State.regs[OP[1]] + value;
+}
+
+/* movhi imm16, reg, reg */
+void
+OP_640 ()
+{
+  int value = OP[0];
+ 
+  value = (value & 0xffff) << 16; 
+
+  State.regs[OP[2]] = State.regs[OP[1]] + value;
 }
 
 void
@@ -263,17 +306,7 @@ OP_7C0 ()
 }
 
 void
-OP_120 ()
-{
-}
-
-void
 OP_1687E0 ()
-{
-}
-
-void
-OP_620 ()
 {
 }
 
@@ -289,11 +322,6 @@ OP_A0 ()
 
 void
 OP_260 ()
-{
-}
-
-void
-OP_200 ()
 {
 }
 
@@ -317,9 +345,13 @@ OP_14007E0 ()
 {
 }
 
+/* not reg1, reg2
+
+   XXX condition codes */
 void
 OP_20 ()
 {
+  State.regs[OP[1]] = ~State.regs[OP[0]];
 }
 
 void
@@ -357,14 +389,70 @@ OP_7E0 ()
 {
 }
 
+/* or reg, reg
+
+   XXX condition codes.  */
+void
+OP_100 ()
+{
+  State.regs[OP[1]] |= State.regs[OP[0]];
+}
+
+/* ori zero_extend(imm16), reg, reg
+
+   XXX condition codes */
+void
+OP_680 ()
+{
+  int value = OP[0];
+ 
+  value &= 0xffff;
+
+  State.regs[OP[2]] = State.regs[OP[1]] | value;
+}
+
+/* and reg, reg
+
+   XXX condition codes.  */
 void
 OP_140 ()
 {
+  State.regs[OP[1]] &= State.regs[OP[0]];
 }
 
+/* andi zero_extend(imm16), reg, reg
+
+   XXX condition codes.  */
 void
-OP_640 ()
+OP_6C0 ()
 {
+  int value = OP[0];
+ 
+  value &= 0xffff;
+
+  State.regs[OP[2]] = State.regs[OP[1]] & value;
+}
+
+/* xor reg, reg
+
+   XXX condition codes.  */
+void
+OP_120 ()
+{
+  State.regs[OP[1]] ^= State.regs[OP[0]];
+}
+
+/* xori zero_extend(imm16), reg, reg
+
+   XXX condition codes.  */
+void
+OP_6A0 ()
+{
+  int value = OP[0];
+ 
+  value &= 0xffff;
+
+  State.regs[OP[2]] = State.regs[OP[1]] ^ value;
 }
 
 void
@@ -372,3 +460,17 @@ OP_C0 ()
 {
 }
 
+void
+OP_480 ()
+{
+}
+
+void
+OP_380 ()
+{
+}
+
+void
+OP_501 ()
+{
+}
