@@ -1,3 +1,11 @@
+2005-03-16  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* configure.tgt: Set emulation for arm-*-eabi*.
+	* config/tc-arm.c (meabi_flags): Check EABI_DEFAULT.
+	* config/te-armeabi.h: New file.
+	* config/te-armlinuxeabi.h (EABI_DEFAULT): Define.
+	* config/te-symbian.h: Include "te-armeabi.h".
+
 2005-03-16  Nick Clifton  <nickc@redhat.com>
 	    Ben Elliston  <bje@au.ibm.com>
 

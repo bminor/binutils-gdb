@@ -159,7 +159,11 @@ static int march_fpu_opt = -1;
 static int mfpu_opt = -1;
 static int mfloat_abi_opt = -1;
 #ifdef OBJ_ELF
+# ifdef EABI_DEFAULT
+static int meabi_flags = EABI_DEFAULT;
+# else
 static int meabi_flags = EF_ARM_EABI_UNKNOWN;
+# endif
 #endif
 
 /* This array holds the chars that always start a comment.  If the
