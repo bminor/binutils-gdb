@@ -78,6 +78,7 @@ sim-trace.c
 sim-trace.h
 sim-types.h
 sim-utils.c
+sim-utils.h
 sim-xcat.h
 tconfig.in
 
