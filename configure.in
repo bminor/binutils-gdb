@@ -15,7 +15,10 @@ case "${host_os}" in
 m88kbcs)	host_makefile_frag=config/mh-delta88;;
 sysv4*)		host_makefile_frag=config/mh-sysv4 ;;
 sysv* | irix*)	host_makefile_frag=config/mh-sysv ;;
-ultrix)		host_makefile_frag=config/mh-decstation ;;
+ultrix*)
+	case "${host_cpu}" in
+	mips)	host_makefile_frag=config/mh-decstation ;;
+	esac
 esac
 
 case "${host_vendor}" in
