@@ -1,3 +1,8 @@
+Tue Dec 15 02:01:00 1992  John Gilmore  (gnu@cygnus.com)
+
+	* doc/gdbint.texinfo:  SWAP_HOST_AND_TARGET => SWAP_TARGET_AND_HOST.
+	Noticed by Andy Jackson, <arj@cam-orl.co.uk>.
+
 Mon Dec 14 23:28:15 1992  John Gilmore  (gnu@cygnus.com)
 
 	* tm-nindy960.h, remote-nindy.c:  Lint.
