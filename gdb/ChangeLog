@@ -1,5 +1,7 @@
 2000-04-02  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-linux-nat.c: Add copyright notice.
+
 	* config/i386/xm-linux.h (HOST_LONG_DOUBLE_FORMAT): Define as
 	&floatformat_i387_ext.
 	* config/i386/xm-i386gnu.h (HOST_LONG_DOUBLE_FORMAT): Likewise.

@@ -1,4 +1,5 @@
 /* Native-dependent code for Linux running on i386's, for GDB.
+   Copyright (C) 1999, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
