@@ -1,5 +1,8 @@
 Tue Apr  7 08:45:46 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* mipsread.c (read_mips_symtab, read_the_mips_symtab,
+	mipscoff_symfile_read):  Convert to BFD to do file I/O.
+
 	* symfile.c:  #include <ctype.h> to get proper def if isspace().
 
 	* i386-tdep.c (get_longjmp_target):  #ifdef GET_LONGJMP_TARGET.
