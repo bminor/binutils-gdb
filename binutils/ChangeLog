@@ -1,3 +1,8 @@
+2003-07-01  Jakub Jelinek  <jakub@redhat.com>
+
+	* readelf.c (dynamic_segment_ia64_val): Print address and newline
+	for sections by default.  Comment fix.
+
 2003-06-28  Danny Smith  <dannysmith@users.sourceforge.net>
 
 	* rcparse.y (res_text_field): New res_id variable.

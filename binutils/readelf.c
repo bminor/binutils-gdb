@@ -4671,12 +4671,17 @@ dynamic_segment_ia64_val (entry)
   switch (entry->d_tag)
     {
     case DT_IA_64_PLT_RESERVE: 
-      /* First 3 bytes reserved.  */
+      /* First 3 slots reserved.  */
       print_vma (entry->d_un.d_ptr, PREFIX_HEX);
       printf (" -- ");
       print_vma (entry->d_un.d_ptr + (3 * 8), PREFIX_HEX);
-      printf ("\n");
+      break;
+
+    default:
+      print_vma (entry->d_un.d_ptr, PREFIX_HEX);
+      break;
     }
+  putchar ('\n');
 }
 
 static int
