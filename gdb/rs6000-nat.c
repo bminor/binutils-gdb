@@ -24,6 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "xcoffsolib.h"
 #include "symfile.h"
 #include "objfiles.h"
+#include "libbfd.h"  /* For bfd_cache_lookup (FIXME) */
 #include "bfd.h"
 
 #include <sys/ptrace.h>

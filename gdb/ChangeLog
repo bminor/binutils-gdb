@@ -1,5 +1,8 @@
 Mon Aug 22 11:45:01 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
+	* rs6000-nat.c: Include libbfd.h again, needed until reference
+	to bfd_cache_lookup is cleaned out.
+
 	* config/i386/linux.mh (XM_CLIBS): Add -lm.
 
 Mon Aug 22 10:42:15 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
