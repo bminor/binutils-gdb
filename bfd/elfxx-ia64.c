@@ -3835,47 +3835,48 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_IA64_SEGREL32LSB:
 	case R_IA64_SEGREL64MSB:
 	case R_IA64_SEGREL64LSB:
-	  {
-	    struct elf_segment_map *m;
-	    Elf_Internal_Phdr *p;
+	  if (r_symndx == 0)
+	    {
+	      /* If the input section was discarded from the output, then
+		 do nothing.  */
+	      r = bfd_reloc_ok;
+	    }
+	  else
+	    {
+	      struct elf_segment_map *m;
+	      Elf_Internal_Phdr *p;
 
-	    /* Find the segment that contains the output_section.  */
-	    for (m = elf_tdata (output_bfd)->segment_map,
-		   p = elf_tdata (output_bfd)->phdr;
-		 m != NULL;
-		 m = m->next, p++)
-	      {
-		int i;
-		for (i = m->count - 1; i >= 0; i--)
-		  if (m->sections[i] == sym_sec->output_section)
+	      /* Find the segment that contains the output_section.  */
+	      for (m = elf_tdata (output_bfd)->segment_map,
+		     p = elf_tdata (output_bfd)->phdr;
+		   m != NULL;
+		   m = m->next, p++)
+		{
+		  int i;
+		  for (i = m->count - 1; i >= 0; i--)
+		    if (m->sections[i] == sym_sec->output_section)
+		      break;
+		  if (i >= 0)
 		    break;
-		if (i >= 0)
-		  break;
-	      }
+		}
 
-	    if (m == NULL)
-	      {
-		/* If the input section was discarded from the output, then
-		   do nothing.  */
-
-		if (bfd_is_abs_section (sym_sec->output_section))
-		  r = bfd_reloc_ok;
-		else
+	      if (m == NULL)
+		{
 		  r = bfd_reloc_notsupported;
-	      }
-	    else
-	      {
-		/* The VMA of the segment is the vaddr of the associated
-		   program header.  */
-		if (value > p->p_vaddr)
-		  value -= p->p_vaddr;
-		else
-		  value = 0;
-		r = elfNN_ia64_install_value (output_bfd, hit_addr, value,
-					      r_type);
-	      }
-	    break;
-	  }
+		}
+	      else
+		{
+		  /* The VMA of the segment is the vaddr of the associated
+		     program header.  */
+		  if (value > p->p_vaddr)
+		    value -= p->p_vaddr;
+		  else
+		    value = 0;
+		  r = elfNN_ia64_install_value (output_bfd, hit_addr, value,
+						r_type);
+		}
+	      break;
+	    }
 
 	case R_IA64_SECREL32MSB:
 	case R_IA64_SECREL32LSB:
