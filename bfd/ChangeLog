@@ -1,4 +1,17 @@
-Wed Apr 17 19:23:43 2002  J"orn Rennecke <joern.rennecke@superh.com>
+2002-04-18  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* coff-arm.c (coff_thumb_pcrel_12, coff_thumb_pcrel_9,
+	insert_thumb_branch, record_thumb_to_arm_glue): Suppress
+	definition of these functions for ARM_WINCE builds as they are
+	not used.
+        (SWAP_IN_RELOC_OFFSET, SWAP_OUT_RELOC_OFFSET): Do not define
+	for ARM_WINCE builds.
+
+2002-04-18  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* coff-arm.c (bfd_arm_process_before_allocation): 
+
+2002-04-17  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* cpu-sh.c (scan_mach): Delete.
 	(arch_info_struct): Replace scan_mach with bfd_default_scan.
@@ -406,7 +419,7 @@ Wed Apr 17 19:23:43 2002  J"orn Rennecke <joern.rennecke@superh.com>
 	* elflink.h (NAME(bfd_elf,record_link_assignment)): Don't set
 	STT_NOTYPE symbols to STT_OBJECT.
 
-Mon Mar 18 17:38:03 CET 2002  Jan Hubicka  <jh@suse.cz>
+2002-03-18  Jan Hubicka  <jh@suse.cz>
 
 	* cpu-i386.c (bfd_x86_64_arch): Rename to "i386:x86-64"
 
