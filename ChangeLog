@@ -2,6 +2,8 @@ Thu Sep  9 16:48:52 1993  Jason Merrill  (jason@deneb.cygnus.com)
 
 	* install.sh: Support -d option (in the manner of SunOS 4 install,
 	as it is more deterministic than that of GNU install)
+	(chmodcmd): Set file to mode 755 by default (should also do default
+	chgrp and chown, but I don't feel like dealing with that now)
 
 Tue Sep  7 11:59:39 1993  Doug Evans  (dje@canuck.cygnus.com)
 
