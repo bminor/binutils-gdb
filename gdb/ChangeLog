@@ -1,3 +1,7 @@
+Fri Nov  4 16:26:59 1994  Kung Hsu  (kung@mexican.cygnus.com)
+
+	* sparcl-stub.c: get rid of defs.h.
+
 Fri Nov  4 13:11:54 1994  Jim Kingdon  <kingdon@deneb.cygnus.com>
 
 	* gdbserver/Makefile.in (MMALLOC_CFLAGS): Add -I${MMALLOC_DIR}.
