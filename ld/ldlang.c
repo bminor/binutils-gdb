@@ -178,6 +178,7 @@ lang_statement_list_type lang_output_section_statement;
 lang_statement_list_type *stat_ptr = &statement_list;
 lang_statement_list_type file_chain = { NULL, NULL };
 const char *entry_symbol = NULL;
+const char *entry_section = ".text";
 boolean entry_from_cmdline;
 boolean lang_has_input_file = false;
 boolean had_output_filename = false;
@@ -3465,7 +3466,7 @@ lang_finish ()
 
 	  /* Can't find the entry symbol, and it's not a number.  Use
 	     the first address in the text section.  */
-	  ts = bfd_get_section_by_name (output_bfd, ".text");
+	  ts = bfd_get_section_by_name (output_bfd, entry_section);
 	  if (ts != (asection *) NULL)
 	    {
 	      if (warn)

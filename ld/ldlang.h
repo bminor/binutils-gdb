@@ -356,6 +356,7 @@ extern lang_statement_list_type *stat_ptr;
 extern boolean delete_output_file_on_failure;
 
 extern const char *entry_symbol;
+extern const char *entry_section;
 extern boolean entry_from_cmdline;
 extern lang_statement_list_type file_chain;
 
