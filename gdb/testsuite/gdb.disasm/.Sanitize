@@ -30,6 +30,8 @@ hppa.exp
 hppa.s
 mn10200.exp
 mn10200.s
+mn10300.exp
+mn10300.s
 sh3.exp
 sh3.s
 
