@@ -1,5 +1,9 @@
 Thu Feb 11 00:59:07 1993  John Gilmore  (gnu@cygnus.com)
 
+	* mips-tdep.c (isa_NAN):  Fix byte order dependency.
+	Reported by Nobuyuki Hikichi <hikichi@sra.co.jp>,
+	fixed by sato@sm.sony.co.jp.
+
 	* xcoffread.c (parmsym):  Don't use an initializer to set up
 	this struct symbol.  Set it up in initialize_xcoffread.
 	(read_xcoff_symtab, xcoff_symfile_read):  Surround code that only
