@@ -163,7 +163,7 @@ MAKEINFOFLAGS = --no-split
 all: all-cross
 endif
 
-ifeq ($(canonhost),i386-univel-sysv4)
+ifeq ($(canonhost),i386-univel-sysv4.2)
 TARGETS	= $(NATIVE) 
 CC = cc
 all: all-cygnus
