@@ -461,7 +461,7 @@ gld${EMULATION_NAME}_add_sysroot (path)
   if (path[i])
     colons++;
 
-  len = len + colons * strlen (ld_sysroot);
+  len = len + (colons + 1) * strlen (ld_sysroot);
   ret = xmalloc (len + 1);
   strcpy (ret, ld_sysroot);
   p = ret + strlen (ret);
