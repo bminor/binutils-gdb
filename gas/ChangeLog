@@ -1,3 +1,8 @@
+2004-02-13  Hannes Reinecke  <hare@suse.de>
+            Jakub Jelinek  <jakub@redhat.com>
+
+	* dwarf2dbg.c (get_filenum): Do not read beyond allocated memory.
+
 2004-02-10  Steve Ellcey  <sje@cup.hp.com>
 
 	* config/tc-ia64.h (ia64_frob_symbol): New declaration.
