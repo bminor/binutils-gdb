@@ -9,7 +9,7 @@ srcname="DejaGnu"
 # Directories to use in all configurations.
 configdirs="gdb.t00 gdb.t01 gdb.t02 gdb.t03 gdb.t04 gdb.t05 gdb.t06 \
 	gdb.t07 gdb.t08 gdb.t09 gdb.t10 gdb.t11 gdb.t12 gdb.t13 gdb.t15 \
-	gdb.t16 gdb.t17 gdb.t24 gdb.t30 gdb.t31"
+	gdb.t16 gdb.t17 gdb.t24 gdb.t30"
 
 # Directories to use for a configuration which uses stabs.  C++ tests
 # are also here because I don't believe they work well for any other
