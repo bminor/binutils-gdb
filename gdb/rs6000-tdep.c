@@ -38,6 +38,8 @@
 #include "libbfd.h"		/* for bfd_default_set_arch_mach */
 #include "coff/internal.h"	/* for libcoff.h */
 #include "libcoff.h"		/* for xcoff_data */
+#include "coff/xcoff.h"
+#include "libxcoff.h"
 
 #include "elf-bfd.h"
 
@@ -2506,7 +2508,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      that, else choose a likely default. */
   if (from_xcoff_exec)
     {
-      if (xcoff_data (info.abfd)->xcoff64)
+      if (bfd_xcoff_is_xcoff64 (info.abfd))
 	wordsize = 8;
       else
 	wordsize = 4;
