@@ -72,7 +72,7 @@ op tab[] =
     "R[n] = ult;",
   },
 
-  { "0", "", "and #<imm>,R0", "11001001i8*1....",
+  { "0", "0", "and #<imm>,R0", "11001001i8*1....",
     "R0 &= i;",
   },
   { "n", "nm", "and <REG_M>,<REG_N>", "0010nnnnmmmm1001",
@@ -201,8 +201,8 @@ op tab[] =
     "SET_SR_T (0);",
   },
 
-  { "", "nm", "div1 <REG_M>,<REG_N>", "0011nnnnmmmm0100",
-    "div1 (R, m, n/*, T*/);",
+  { "n", "nm", "div1 <REG_M>,<REG_N>", "0011nnnnmmmm0100",
+    "div1 (&R0, m, n/*, T*/);",
   },
 
   { "", "nm", "dmuls.l <REG_M>,<REG_N>", "0011nnnnmmmm1101",
@@ -491,7 +491,7 @@ op tab[] =
   },
 
   /* sh4 */
-  { "", "", "fsrra", "1111nnnn01111101",
+  { "", "", "fsrra <FREG_N>", "1111nnnn01111101",
     "if (FPSCR_PR)",
     "  RAISE_EXCEPTION (SIGILL);",
     "else",
@@ -841,7 +841,7 @@ op tab[] =
     "WLAT (R[n], R[0]);",
   },
 
-  { "n", "0", "movco.l R0, @<REG_N>", "0000nnnn01110011", 
+  { "", "n0", "movco.l R0, @<REG_N>", "0000nnnn01110011", 
     "/* LDST -> T */",
     "SET_SR_T (LDST);",
     "/* if (T) R0 -> (Rn) */",
@@ -1102,7 +1102,7 @@ op tab[] =
   },
 
   { "", "", "sleep", "0000000000011011",
-    "nip += trap (0xc3, R0, PC, memory, maskl, maskw, endianw);",
+    "nip += trap (0xc3, &R0, PC, memory, maskl, maskw, endianw);",
   },
 
   { "n", "", "stc <CREG_M>,<REG_N>", "0000nnnnmmmm0010",
@@ -1193,7 +1193,7 @@ op tab[] =
   { "0", "", "trapa #<imm>", "11000011i8*1....", 
     "long imm = 0xff & i;",
     "if (i < 20 || i == 33 || i == 34 || i == 0xc3)",
-    "  nip += trap (i, R, PC, memory, maskl, maskw, endianw);",
+    "  nip += trap (i, &R0, PC, memory, maskl, maskw, endianw);",
 #if 0
     "else {",
     /* SH-[12] */
