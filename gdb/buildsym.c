@@ -668,7 +668,18 @@ end_symtab (end_addr, sort_pending, sort_linevec, objfile)
 	    {
 	      symtab->linetable = NULL;
 	    }
-	  symtab->dirname = subfile->dirname;
+	  if (subfile->dirname)
+	    {
+	      /* Reallocate the dirname on the symbol obstack */
+	      symtab->dirname = (char *)
+		obstack_alloc (&objfile -> symbol_obstack,
+			       strlen (subfile -> dirname) + 1);
+	      strcpy (symtab->dirname, subfile->dirname);
+	    }
+	  else
+	    {
+	      symtab->dirname = NULL;
+	    }
 	  symtab->free_code = free_linetable;
 	  symtab->free_ptr = NULL;
 
