@@ -1,5 +1,10 @@
 2003-08-07  Andrew Cagney  <cagney@redhat.com>
 
+	Patch from Nick Roberts.
+	* gdb.texinfo (Using GDB under GNU Emacs): Fix/update key
+	bindings.  Remove description of send-gdb-command.
+2003-08-07  Andrew Cagney  <cagney@redhat.com>
+
 	* gdb.texinfo (Mode Options): Mention that "mi2" was included in
 	GDB 6.0.
 
