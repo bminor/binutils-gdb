@@ -1,3 +1,73 @@
+Tue Feb 25 00:32:49 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-mips.c (mips_elf_relocate_section): Check for misaligned
+	jal and for jal overflow.
+
+Mon Feb 24 17:53:14 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	From Eric Youngdale <eric@andante.jic.com>:
+	* elflink.h (elf_link_add_archive_symbols): If a default symbol is
+	not found, try looking it up again without the version name.
+	(elf_link_add_object_symbols): Always link against the dynamic
+	symbol table of a dynamic object.  When linking against a dynamic
+	object, include version strings in symbol names, and set up
+	version information.  Add indirect symbols for default versions.
+	(elf_link_create_dynamic_sections): Add special version sections.
+	(struct elf_assign_sym_version_info): Define.
+	(struct elf_find_verdep_info): Define.
+	(NAME(bfd_elf,size_dynamic_sections)): Add verdefs parameter.  Set
+	up version sections.
+	(elf_adjust_dynamic_symbol): Ignore indirect symbols.
+	(elf_link_find_version_dependencies): New static function.
+	(elf_link_assign_sym_version): New static function.
+	(elf_link_renumber_dynsyms): New static function.
+	(struct elf_final_link_info): Add symver_sec field.
+	(elf_bfd_final_link): Initialize finfo.symver_sec.  Don't count
+	local symbols of a dynamic object.  Handle DT_VER* constants.
+	(elf_link_output_extsym): Simplify BFD_ASSERT checking for a
+	dynamic object.  Skip indirect symbols from ELF objects.  Remove
+	the version name before choosing a hash bucket.  Write out the
+	version information if appropriate.
+	(elf_link_input_bfd): Check for DYNAMIC, not ET_DYN.
+	* bfd-in.h (bfd_elf32_size_dynamic_sections): Update declaration.
+	(bfd_elf64_size_dynamic_sections): Likewise.
+	* bfd-in2.h: Rebuild.
+	* elf-bfd.h (struct elf_link_hash_entry): Add verinfo field.
+	Change elf_link_hash_flags to unsigned short.
+	(ELF_LINK_HIDDEN): Define.
+	(struct elf_obj_tdata): Add fields dynversym_hdr, dynverref_hdr,
+	dynverdef_hdr, dynversym_section, dynverdef_section,
+	dynverref_section, cverdefs, cverrefs, verdef, verref.
+	(elf_dynversym, elf_dynverdef, elf_dynverref): Define.
+	(_bfd_elf_swap_verdef_in, _bfd_elf_swap_verdef_out): Declare.
+	(_bfd_elf_swap_verdaux_in, _bfd_elf_swap_verdaux_out): Declare.
+	(_bfd_elf_swap_verneed_in, _bfd_elf_swap_verneed_out): Declare.
+	(_bfd_elf_swap_vernaux_in, _bfd_elf_swap_vernaux_out): Declare.
+	(_bfd_elf_swap_versym_in, _bfd_elf_swap_versym_out): Declare.
+	(_bfd_elf_slurp_version_tables): Declare.
+	* elf.c (_bfd_elf_swap_verdef_in): New function.
+	(_bfd_elf_swap_verdef_out): Likewise.
+	(_bfd_elf_swap_verdaux_in, _bfd_elf_swap_verdaux_out): Likewise.
+	(_bfd_elf_swap_verneed_in, _bfd_elf_swap_verneed_out): Likewise.
+	(_bfd_elf_swap_vernaux_in, _bfd_elf_swap_vernaux_out): Likewise.
+	(_bfd_elf_swap_versym_in, _bfd_elf_swap_versym_out): Likewise.
+	(_bfd_elf_print_private_bfd_data): Add DT_VER* constants.  Print
+	version information if there is any.
+	(_bfd_elf_link_hash_newfunc): Initialize verinfo field.
+	(bfd_section_from_shdr): Handle SHT_GNU_ver* section types.
+	(elf_fake_sections): Handle .gnu.version* section names.
+	(assign_section_numbers): Handle SHT_GNU_ver* section types.
+	(_bfd_elf_slurp_version_tables): New function.
+	* elflink.c (_bfd_elf_link_record_dynamic_symbol): Don't include
+	version name in string entered in dynamic hash table.
+	* elfcode.h: Include fnmatch.h.
+	* elf32-i386.c (elf_i386_relocate_section): Handle a dynamic
+	symbol which was forced to become local.
+	* elf32-m68k.c (elf_m68k_relocate_section): Likewise.
+	* elf32-ppc.c (ppc_elf_relocate_section): Likewise.
+	* elf32-sparc.c (elf32_sparc_relocate_section): Likewise.
+	* elf64-alpha.c (alpha_elf_dynamic_symbol_p): Likewise.
+
 Fri Feb 21 16:15:18 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* elf32-mn10200.c (mn10200_elf_final_link_relocate): Simplify
