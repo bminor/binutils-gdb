@@ -80,8 +80,7 @@ fill_gregset (gdb_gregset_t *gregsetp, int regno)
 
 #define COPY_REG(_idx_,_regi_) \
   if ((regno == -1) || regno == _regi_) \
-    memcpy (regp + _idx_, &registers[REGISTER_BYTE (_regi_)], \
-	    REGISTER_RAW_SIZE (_regi_))
+    regcache_collect (_regi_, regp + _idx_)
 
   for (regi = 0; regi < 32; regi++)
     {
@@ -113,16 +112,10 @@ void
 fill_fpregset (gdb_fpregset_t *fpregsetp, int regno)
 {
   int regi;
-  char *to;
-  char *from;
   
   for (regi = 0; regi < 32; regi++)
     {
       if ((regno == -1) || (regno == FP0_REGNUM + regi))
-        {
-	  from = (char *) &registers[REGISTER_BYTE (FP0_REGNUM + regi)];
-	  to = (char *) (*fpregsetp + regi);
-	  memcpy (to, from, REGISTER_RAW_SIZE (FP0_REGNUM + regi));
-        }
+	regcache_collect (FP0_REGNUM + regi, (char *) (*fpregsetp + regi));
     }
 }
