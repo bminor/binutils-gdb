@@ -149,6 +149,10 @@ struct elf_backend_data
   boolean (*elf_backend_section_from_bfd_section)
     PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *, int *retval));
 
+  /* A function to do any beginning processing needed for the ELF file
+     before building the ELF headers and computing file positions.  */
+  void (*elf_backend_begin_write_processing) PARAMS ((bfd *));
+
   /* A function to do any final processing needed for the ELF file
      before writing it out.  */
   void (*elf_backend_final_write_processing) PARAMS ((bfd *));

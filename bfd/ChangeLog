@@ -1,3 +1,30 @@
+Thu Apr  7 11:10:51 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* elfcode.h (elf_set_section_contents): Support calling the backend
+	function elf_backend_begin_write_processing when just beginning to
+	write an object file.
+
+	* libelf.h (elf_backend_begin_write_processing): Declare.
+
+	* elf{32,64}-target.h (elf_backend_begin_write_processing): Provide
+	a default definition.
+	(elf{32,64}_bed): Add elf_backend_begin_write_processing.
+	
+	* elf32-hppa.h (elf_hppa_tc_symbol): Delete extern declaration.
+	(elf_hppa_tc_make_sections): Likewise.
+
+	* elf32-hppa.c (symext_chain_built): Delete.
+	(symext_chain_size): Renamed from symextn_contents_real_size.
+	(elf32_hppa_backend_{begin,final}_write_processing): New functions.
+	(add_entry_to_symext_chain): New function.
+	(hppa_elf_set_section_contents): Ignore writes to the symbol extension
+	section until it's been rebuilt internally.
+	(hppa_elf_get_section_contents): Symbol extension section is no
+	longer special.
+	(elf_backend_{begin,final}_write_processing): Define.
+	(elf_hppa_tc_make_sections): Simplify now that much code has
+	migrated into elf32_hppa_backend_{being,final}_write_processing.
+
 Wed Apr  6 17:24:14 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	Add new target vectors to read the dynamic symbols and dynamic

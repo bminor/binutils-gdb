@@ -2374,6 +2374,10 @@ NAME(bfd_elf,write_object_contents) (abfd)
 
   if (abfd->output_has_begun == false)
     {
+      /* Do any elf backend specific processing first.  */
+      if (bed->elf_backend_begin_write_processing)
+	(*bed->elf_backend_begin_write_processing) (abfd);
+
       if (prep_headers (abfd) == false)
 	return false;
       if (elf_compute_section_file_positions (abfd) == false)
@@ -3233,6 +3237,12 @@ elf_set_section_contents (abfd, section, location, offset, count)
 
   if (abfd->output_has_begun == false)	/* set by bfd.c handler? */
     {
+      struct elf_backend_data *bed = get_elf_backend_data (abfd);
+
+      /* Do any elf backend specific processing first.  */
+      if (bed->elf_backend_begin_write_processing)
+	(*bed->elf_backend_begin_write_processing) (abfd);
+
       /* do setup calculations (FIXME) */
       if (prep_headers (abfd) == false)
 	return false;
