@@ -385,7 +385,7 @@ lwp_to_thread (lwp)
   if (val == TD_NOTHR)
     return -1;		/* thread must have terminated */
   else if (val != TD_OK)
-    error ("lwp_to_thread: td_thr_get_info: %s.", td_err_string (val));
+    error ("lwp_to_thread: td_ta_map_lwp2thr: %s.", td_err_string (val));
 
   val = p_td_thr_validate (&th);
   if (val == TD_NOTHR)
@@ -1291,7 +1291,7 @@ ps_lgetLDT (const struct ps_prochandle *ph, lwpid_t lwpid,
   /* Search LDT for the LWP via register GS.  */
   for (i = 0; i < nldt; i++)
     {
-      if (ldt_bufp[i].sel == gregset[GS])
+      if (ldt_bufp[i].sel == (gregset[GS] & 0xffff))
 	{
 	  *pldt = ldt_bufp[i];
 	  return PS_OK;

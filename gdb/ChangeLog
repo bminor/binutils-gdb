@@ -1,3 +1,15 @@
+Fri Aug 14 04:18:23 1998  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	* sol-thread.c (lwp_to_thread):  Fix error message for failing
+	td_ta_map_lwp2thr call.
+	(ps_lgetLDT):  Mask off upper bits in GS register when comparing
+	with selector.
+
+Wed Aug 12 16:30:01 1998  Frank Ch. Eigler  <fche@cygnus.com>
+ 
+	* remote-sim.c (simulator_command): Reset register cache after
+	simulator command.
+
 Wed Aug 12 09:00:26 1998  Stu Grossman  <grossman@babylon-5.cygnus.com>
 
 	* expprint.c (dump_prefix/postfix_expression):  Don't try to print type
