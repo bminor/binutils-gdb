@@ -1,3 +1,8 @@
+Wed Jan 19 23:15:24 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-mips.c (md_pseudo_table): Add all data allocation
+	pseudo-ops: .hword, .int, .long, .octa, .quad, .short, .single.
+
 Tue Jan 18 15:51:59 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* config/obj-coffbfd.c (obj_coff_endef): For C_EFCN, C_BLOCK and
