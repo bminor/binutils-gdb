@@ -3540,6 +3540,11 @@ COPRO="armcopro.o maverick.o iwmmxt.o"
 
 
 
+cgen_breaks=""
+if grep CGEN_MAINT $srcdir/Makefile.in >/dev/null; then
+cgen_breaks="break cgen_rtx_error";
+fi
+
 trap '' 1 2 15
 cat > confcache <<\EOF
 # This file is a shell script that caches the results of configure
@@ -3749,6 +3754,7 @@ s%@sim_trace@%$sim_trace%g
 s%@sim_profile@%$sim_profile%g
 s%@EXEEXT@%$EXEEXT%g
 s%@COPRO@%$COPRO%g
+s%@cgen_breaks@%$cgen_breaks%g
 
 CEOF
 EOF

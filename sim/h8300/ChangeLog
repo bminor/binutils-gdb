@@ -1,3 +1,7 @@
+2004-12-08  Hans-Peter Nilsson  <hp@axis.com>
+
+	* configure: Regenerate for ../common/aclocal.m4 update.
+
 2004-06-28  Alexandre Oliva  <aoliva@redhat.com>
 
 	2003-07-23  Richard Sandiford  <rsandifo@redhat.com>

@@ -4808,6 +4808,11 @@ done
 
 
 
+cgen_breaks=""
+if grep CGEN_MAINT $srcdir/Makefile.in >/dev/null; then
+cgen_breaks="break cgen_rtx_error";
+fi
+
 trap '' 1 2 15
 cat > confcache <<\EOF
 # This file is a shell script that caches the results of configure
@@ -5027,6 +5032,7 @@ s%@sim_multi_obj@%$sim_multi_obj%g
 s%@mips_extra_objs@%$mips_extra_objs%g
 s%@mips_igen_engine@%$mips_igen_engine%g
 s%@mips_extra_libs@%$mips_extra_libs%g
+s%@cgen_breaks@%$cgen_breaks%g
 
 CEOF
 EOF
