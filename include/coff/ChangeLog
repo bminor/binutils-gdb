@@ -1,3 +1,7 @@
+Mon Nov  6 17:28:01 1995  Harry Dolan  <dolan@ssd.intel.com>
+
+	* i860.h: New file, based on i386.h.
+
 Wed Nov  1 15:25:18 1995  Manfred Hollstein KS/EF4A 60/1F/110 #40283  <manfred@lts.sel.alcatel.de>
 
 	* m68k.h (PAGEMAGICEXECSWAPPED): Define.

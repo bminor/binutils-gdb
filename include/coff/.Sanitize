@@ -33,6 +33,7 @@ ecoff.h
 h8300.h
 h8500.h
 i386.h
+i860.h
 i960.h
 internal.h
 m68k.h
