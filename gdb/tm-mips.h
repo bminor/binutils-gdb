@@ -327,6 +327,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
   (prev)->pc = ((fromleaf) ? SAVED_PC_AFTER_CALL ((prev)->next) : \
 	      (prev)->next ? FRAME_SAVED_PC ((prev)->next) : read_pc ());
 
+/* Special symbol found in blocks associated with routines.  We can hang
+   mips_extra_func_info_t's off of this.  */
+
+#define MIPS_EFI_SYMBOL_NAME "__GDB_EFI_INFO__"
+
 /* Specific information about a procedure.
    This overlays the MIPS's PDR records, 
    mipsread.c (ab)uses this to save memory */

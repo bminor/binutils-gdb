@@ -79,7 +79,7 @@ struct linked_proc_info
 {
   struct mips_extra_func_info info;
   struct linked_proc_info *next;
-} * linked_proc_desc_table = NULL;
+} *linked_proc_desc_table = NULL;
 
 
 #define READ_FRAME_REG(fi, regno) read_next_frame_reg((fi)->next, regno)
@@ -231,7 +231,7 @@ find_proc_desc(pc, next_frame)
   mips_extra_func_info_t proc_desc;
   struct block *b = block_for_pc(pc);
   struct symbol *sym =
-      b ? lookup_symbol(".gdbinfo.", b, LABEL_NAMESPACE, 0, NULL) : NULL;
+      b ? lookup_symbol(MIPS_EFI_SYMBOL_NAME, b, LABEL_NAMESPACE, 0, NULL) : NULL;
 
   if (sym)
     {
@@ -330,7 +330,7 @@ init_extra_frame_info(fci)
           fci->frame = read_register (SP_REGNUM);
         else
 	  fci->frame = READ_FRAME_REG(fci, PROC_FRAME_REG(proc_desc))
-	                                 + PROC_FRAME_OFFSET(proc_desc);
+		       + PROC_FRAME_OFFSET(proc_desc);
       }
 
       if (proc_desc == &temp_proc_desc)
@@ -525,35 +525,57 @@ mips_push_dummy_frame()
 
 void
 mips_pop_frame()
-{ register int regnum;
+{
+  register int regnum;
   FRAME frame = get_current_frame ();
   CORE_ADDR new_sp = frame->frame;
+
   mips_extra_func_info_t proc_desc = frame->proc_desc;
+
+  write_register (PC_REGNUM, FRAME_SAVED_PC(frame));
+  if (proc_desc)
+    {
+      for (regnum = 32; --regnum >= 0; )
+	if (PROC_REG_MASK(proc_desc) & (1 << regnum))
+	  write_register (regnum,
+			  read_memory_integer (frame->saved_regs->regs[regnum],
+					       4));
+      for (regnum = 32; --regnum >= 0; )
+	if (PROC_FREG_MASK(proc_desc) & (1 << regnum))
+	  write_register (regnum + FP0_REGNUM,
+			  read_memory_integer (frame->saved_regs->regs[regnum + FP0_REGNUM], 4));
+    }
+  write_register (SP_REGNUM, new_sp);
+  flush_cached_frames ();
+  /* We let mips_init_extra_frame_info figure out the frame pointer */
+  set_current_frame (create_new_frame (0, read_pc ()));
+
   if (PROC_DESC_IS_DUMMY(proc_desc))
     {
-      struct linked_proc_info **ptr = &linked_proc_desc_table;;
-      for (; &ptr[0]->info != proc_desc; ptr = &ptr[0]->next )
-	  if (ptr[0] == NULL) abort();
-      *ptr = ptr[0]->next;
-      free (ptr[0]);
+      struct linked_proc_info *pi_ptr, *prev_ptr;
+
+      for (pi_ptr = linked_proc_desc_table, prev_ptr = NULL;
+	   pi_ptr != NULL;
+	   prev_ptr = pi_ptr, pi_ptr = pi_ptr->next)
+	{
+	  if (&pi_ptr->info == proc_desc)
+	    break;
+	}
+
+      if (pi_ptr == NULL)
+	error ("Can't locate dummy extra frame info\n");
+
+      if (prev_ptr != NULL)
+	prev_ptr->next = pi_ptr->next;
+      else
+	linked_proc_desc_table = pi_ptr->next;
+
+      free (pi_ptr);
+
       write_register (HI_REGNUM, read_memory_integer(new_sp - 8, 4));
       write_register (LO_REGNUM, read_memory_integer(new_sp - 12, 4));
       write_register (FCRCS_REGNUM, read_memory_integer(new_sp - 16, 4));
     }
-  write_register (PC_REGNUM, FRAME_SAVED_PC(frame));
-  if (frame->proc_desc) {
-    for (regnum = 32; --regnum >= 0; )
-      if (PROC_REG_MASK(proc_desc) & (1 << regnum))
-	write_register (regnum,
-		  read_memory_integer (frame->saved_regs->regs[regnum], 4));
-    for (regnum = 32; --regnum >= 0; )
-      if (PROC_FREG_MASK(proc_desc) & (1 << regnum))
-	write_register (regnum + FP0_REGNUM,
-		  read_memory_integer (frame->saved_regs->regs[regnum + FP0_REGNUM], 4));
-  }
-  write_register (SP_REGNUM, new_sp);
-  flush_cached_frames ();
-  set_current_frame (create_new_frame (new_sp, read_pc ()));
 }
 
 static void
@@ -709,7 +731,7 @@ mips_skip_prologue(pc)
     b = block_for_pc(pc);
     if (!b) return pc;
 
-    f = lookup_symbol(".gdbinfo.", b, LABEL_NAMESPACE, 0, NULL);
+    f = lookup_symbol(MIPS_EFI_SYMBOL_NAME, b, LABEL_NAMESPACE, 0, NULL);
     if (!f) return pc;
     /* Ideally, I would like to use the adjusted info
        from mips_frame_info(), but for all practical

@@ -1,3 +1,16 @@
+Thu Oct 15 01:27:32 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* mips-tdep.c, mipsread.c, tm-mips.h:  Get rid of ".gdbinfo."
+	symbol.  #define MIPS_EFI_SYMBOL_NAME instead.  Use different
+	value so that demangler won't be invoked.  This greatly speeds up
+	stepping.
+	* mips-tdep.c (mips_pop_frame):  Rewrite handling of
+	linked_proc_info so that it properly deallocates the appropriate
+	item after it is done with it instead of before.
+	* Don't pass bogus frame pointer to create_new_frame().  Just
+	leave it as zero so that lower level code will figure out the
+	correct value.
+
 Wed Oct 14 18:56:28 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	Sony News native support.
