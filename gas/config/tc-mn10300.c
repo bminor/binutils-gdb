@@ -95,6 +95,9 @@ static boolean address_register_name PARAMS ((expressionS *expressionP));
 static boolean other_register_name PARAMS ((expressionS *expressionP));
 static void set_arch_mach PARAMS ((int));
 
+/*  Set linkrelax here to avoid fixups in most sections.  */
+int linkrelax = 1;
+
 static int current_machine;
 
 /* Fixups.  */
@@ -917,11 +920,6 @@ md_begin ()
 	}
       op++;
     }
-
-  /* This is both a simplification (we don't have to write md_apply_fix)
-     and support for future optimizations (branch shortening and similar
-     stuff in the linker).  */
-  linkrelax = 1;
 
   /* Set the default machine type.  */
   if (!bfd_set_arch_mach (stdoutput, bfd_arch_mn10300, MN103))
@@ -1903,15 +1901,12 @@ long
 md_pcrel_from (fixp)
      fixS *fixp;
 {
-  return fixp->fx_frag->fr_address;
-#if 0
   if (fixp->fx_addsy != (symbolS *) NULL && !S_IS_DEFINED (fixp->fx_addsy))
     {
       /* The symbol is undefined.  Let the linker figure it out.  */
       return 0;
     }
   return fixp->fx_frag->fr_address + fixp->fx_where;
-#endif
 }
 
 int

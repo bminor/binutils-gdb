@@ -1,3 +1,8 @@
+2000-09-05  Eric Christopher  <echristo@cygnus.com>
+
+	* config/tc-mn10300.c: Cleanup.
+	(md_pcrel_from): Enable.
+
 2000-09-05  Alan Modra  <alan@linuxcare.com.au>
 
 	* expr.c (operand): Fix a comment typo.
@@ -75,7 +80,7 @@
 	* config.in: Regenerate.
 	* po/gas.pot: Regenerate.
 	* Makefile.in: Regenerate.
-	
+
 2000-09-01  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-sh.h [OBJ_ELF] (TC_FIX_ADJUSTABLE): Define.
@@ -415,8 +420,22 @@ Wed Aug  9 16:28:21 EDT 2000	Diego Novillo <dnovillo@cygnus.com>
 	* config/atof-ieee.c: Fix formatting.
 	* config/atof-tahoe.c: Likewise.
 
-2000-08-06  Nick Clifton  <nickc@cygnus.com>
+2000-07-29  Marek Michalkiewicz  <marekm@linux.org.pl>
 
+<<<<<<< ChangeLog
+	* config/tc-avr.c: Use PARAMS macro in function declarations.
+	Don't declare md_pcrel_from_section (already in tc-avr.h).
+	(avr_operands): Use AVR_UNDEF_P and AVR_SKIP_P macros.
+	(avr_operand): Don't set (unsigned) op_mask to -1.
+=======
+2000-08-06  Nick Clifton  <nickc@cygnus.com>
+>>>>>>> 1.551
+
+<<<<<<< ChangeLog
+2000-08-04  Nick Clifton  <nickc@cygnus.com>
+
+=======
+>>>>>>> 1.551
 	* config/tc-sparc.c (md_begin): Fix typo in recent formatting
 	work.
 
