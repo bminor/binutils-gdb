@@ -393,11 +393,13 @@ elf_swap_reloca_out (abfd, src, dst)
 }
 
 INLINE void
-elf_swap_dyn_in (abfd, src, dst)
+elf_swap_dyn_in (abfd, p, dst)
      bfd *abfd;
-     const Elf_External_Dyn *src;
+     const PTR p;
      Elf_Internal_Dyn *dst;
 {
+  const Elf_External_Dyn *src = (const Elf_External_Dyn *) p;
+
   dst->d_tag = get_word (abfd, src->d_tag);
   dst->d_un.d_val = get_word (abfd, src->d_un.d_val);
 }
@@ -477,11 +479,11 @@ elf_object_p (abfd)
   switch (x_ehdr.e_ident[EI_DATA])
     {
     case ELFDATA2MSB:		/* Big-endian */
-      if (!abfd->xvec->header_byteorder_big_p)
+      if (! bfd_header_big_endian (abfd))
 	goto got_wrong_format_error;
       break;
     case ELFDATA2LSB:		/* Little-endian */
-      if (abfd->xvec->header_byteorder_big_p)
+      if (! bfd_header_little_endian (abfd))
 	goto got_wrong_format_error;
       break;
     case ELFDATANONE:		/* No data encoding specified */
@@ -1269,4 +1271,5 @@ const struct elf_size_info NAME(_bfd_elf,size_info) = {
   elf_swap_symbol_out,
   elf_slurp_reloc_table,
   elf_slurp_symbol_table,
+  elf_swap_dyn_in
 };

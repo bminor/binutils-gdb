@@ -335,50 +335,152 @@ _bfd_elf_print_private_bfd_data (abfd, farg)
 {
   FILE *f = (FILE *) farg;
   Elf_Internal_Phdr *p;
-  unsigned int i, c;
+  asection *s;
+  bfd_byte *dynbuf = NULL;
 
   p = elf_tdata (abfd)->phdr;
-  if (p == NULL)
-    return true;
-
-  c = elf_elfheader (abfd)->e_phnum;
-  for (i = 0; i < c; i++, p++)
+  if (p != NULL)
     {
-      const char *s;
-      char buf[20];
+      unsigned int i, c;
 
-      switch (p->p_type)
+      fprintf (f, "\nProgram Header:\n");
+      c = elf_elfheader (abfd)->e_phnum;
+      for (i = 0; i < c; i++, p++)
 	{
-	case PT_NULL: s = "NULL"; break;
-	case PT_LOAD: s = "LOAD"; break;
-	case PT_DYNAMIC: s = "DYNAMIC"; break;
-	case PT_INTERP: s = "INTERP"; break;
-	case PT_NOTE: s = "NOTE"; break;
-	case PT_SHLIB: s = "SHLIB"; break;
-	case PT_PHDR: s = "PHDR"; break;
-	default: sprintf (buf, "0x%lx", p->p_type); s = buf; break;
+	  const char *s;
+	  char buf[20];
+
+	  switch (p->p_type)
+	    {
+	    case PT_NULL: s = "NULL"; break;
+	    case PT_LOAD: s = "LOAD"; break;
+	    case PT_DYNAMIC: s = "DYNAMIC"; break;
+	    case PT_INTERP: s = "INTERP"; break;
+	    case PT_NOTE: s = "NOTE"; break;
+	    case PT_SHLIB: s = "SHLIB"; break;
+	    case PT_PHDR: s = "PHDR"; break;
+	    default: sprintf (buf, "0x%lx", p->p_type); s = buf; break;
+	    }
+	  fprintf (f, "%8s off    0x", s);
+	  fprintf_vma (f, p->p_offset);
+	  fprintf (f, " vaddr 0x");
+	  fprintf_vma (f, p->p_vaddr);
+	  fprintf (f, " paddr 0x");
+	  fprintf_vma (f, p->p_paddr);
+	  fprintf (f, " align 2**%u\n", bfd_log2 (p->p_align));
+	  fprintf (f, "         filesz 0x");
+	  fprintf_vma (f, p->p_filesz);
+	  fprintf (f, " memsz 0x");
+	  fprintf_vma (f, p->p_memsz);
+	  fprintf (f, " flags %c%c%c",
+		   (p->p_flags & PF_R) != 0 ? 'r' : '-',
+		   (p->p_flags & PF_W) != 0 ? 'w' : '-',
+		   (p->p_flags & PF_X) != 0 ? 'x' : '-');
+	  if ((p->p_flags &~ (PF_R | PF_W | PF_X)) != 0)
+	    fprintf (f, " %lx", p->p_flags &~ (PF_R | PF_W | PF_X));
+	  fprintf (f, "\n");
 	}
-      fprintf (f, "%8s off    0x", s);
-      fprintf_vma (f, p->p_offset);
-      fprintf (f, " vaddr 0x");
-      fprintf_vma (f, p->p_vaddr);
-      fprintf (f, " paddr 0x");
-      fprintf_vma (f, p->p_paddr);
-      fprintf (f, " align 2**%u\n", bfd_log2 (p->p_align));
-      fprintf (f, "         filesz 0x");
-      fprintf_vma (f, p->p_filesz);
-      fprintf (f, " memsz 0x");
-      fprintf_vma (f, p->p_memsz);
-      fprintf (f, " flags %c%c%c",
-	       (p->p_flags & PF_R) != 0 ? 'r' : '-',
-	       (p->p_flags & PF_W) != 0 ? 'w' : '-',
-	       (p->p_flags & PF_X) != 0 ? 'x' : '-');
-      if ((p->p_flags &~ (PF_R | PF_W | PF_X)) != 0)
-	fprintf (f, " %lx", p->p_flags &~ (PF_R | PF_W | PF_X));
-      fprintf (f, "\n");
+    }
+
+  s = bfd_get_section_by_name (abfd, ".dynamic");
+  if (s != NULL)
+    {
+      int elfsec;
+      unsigned long link;
+      bfd_byte *extdyn, *extdynend;
+      size_t extdynsize;
+      void (*swap_dyn_in) PARAMS ((bfd *, const PTR, Elf_Internal_Dyn *));
+
+      fprintf (f, "\nDynamic Section:\n");
+
+      dynbuf = (bfd_byte *) bfd_malloc (s->_raw_size);
+      if (dynbuf == NULL)
+	goto error_return;
+      if (! bfd_get_section_contents (abfd, s, (PTR) dynbuf, (file_ptr) 0,
+				      s->_raw_size))
+	goto error_return;
+
+      elfsec = _bfd_elf_section_from_bfd_section (abfd, s);
+      if (elfsec == -1)
+	goto error_return;
+      link = elf_elfsections (abfd)[elfsec]->sh_link;
+
+      extdynsize = get_elf_backend_data (abfd)->s->sizeof_dyn;
+      swap_dyn_in = get_elf_backend_data (abfd)->s->swap_dyn_in;
+
+      extdyn = dynbuf;
+      extdynend = extdyn + s->_raw_size;
+      for (; extdyn < extdynend; extdyn += extdynsize)
+	{
+	  Elf_Internal_Dyn dyn;
+	  const char *name;
+	  char ab[20];
+	  boolean stringp;
+
+	  (*swap_dyn_in) (abfd, (PTR) extdyn, &dyn);
+
+	  if (dyn.d_tag == DT_NULL)
+	    break;
+
+	  stringp = false;
+	  switch (dyn.d_tag)
+	    {
+	    default:
+	      sprintf (ab, "0x%x", dyn.d_tag);
+	      name = ab;
+	      break;
+
+	    case DT_NEEDED: name = "NEEDED"; stringp = true; break;
+	    case DT_PLTRELSZ: name = "PLTRELSZ"; break;
+	    case DT_PLTGOT: name = "PLTGOT"; break;
+	    case DT_HASH: name = "HASH"; break;
+	    case DT_STRTAB: name = "STRTAB"; break;
+	    case DT_SYMTAB: name = "SYMTAB"; break;
+	    case DT_RELA: name = "RELA"; break;
+	    case DT_RELASZ: name = "RELASZ"; break;
+	    case DT_RELAENT: name = "RELAENT"; break;
+	    case DT_STRSZ: name = "STRSZ"; break;
+	    case DT_SYMENT: name = "SYMENT"; break;
+	    case DT_INIT: name = "INIT"; break;
+	    case DT_FINI: name = "FINI"; break;
+	    case DT_SONAME: name = "SONAME"; stringp = true; break;
+	    case DT_RPATH: name = "RPATH"; stringp = true; break;
+	    case DT_SYMBOLIC: name = "SYMBOLIC"; break;
+	    case DT_REL: name = "REL"; break;
+	    case DT_RELSZ: name = "RELSZ"; break;
+	    case DT_RELENT: name = "RELENT"; break;
+	    case DT_PLTREL: name = "PLTREL"; break;
+	    case DT_DEBUG: name = "DEBUG"; break;
+	    case DT_TEXTREL: name = "TEXTREL"; break;
+	    case DT_JMPREL: name = "JMPREL"; break;
+	    }
+
+	  fprintf (f, "  %-11s ", name);
+	  if (! stringp)
+	    fprintf (f, "0x%x", dyn.d_un.d_val);
+	  else
+	    {
+	      const char *string;
+
+	      string = bfd_elf_string_from_elf_section (abfd, link,
+							dyn.d_un.d_val);
+	      if (string == NULL)
+		goto error_return;
+	      fprintf (f, "%s", string);
+	    }
+	  fprintf (f, "\n");
+	}
+
+      free (dynbuf);
+      dynbuf = NULL;
     }
 
   return true;
+
+ error_return:
+  if (dynbuf != NULL)
+    free (dynbuf);
+  return false;
 }
 
 /* Display ELF-specific fields of a symbol.  */

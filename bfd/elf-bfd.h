@@ -182,6 +182,7 @@ struct elf_size_info {
   void (*swap_symbol_out) PARAMS ((bfd *, Elf_Internal_Sym *, PTR));
   boolean (*slurp_reloc_table) PARAMS ((bfd *, asection *, asymbol **));
   long (*slurp_symbol_table) PARAMS ((bfd *, asymbol **, boolean));
+  void (*swap_dyn_in) PARAMS ((bfd *, const PTR, Elf_Internal_Dyn *));
 };
 
 #define elf_symbol_from(ABFD,S) \
@@ -687,7 +688,7 @@ extern void bfd_elf32_swap_phdr_in
 extern void bfd_elf32_swap_phdr_out
   PARAMS ((bfd *, Elf_Internal_Phdr *, Elf32_External_Phdr *));
 extern void bfd_elf32_swap_dyn_in
-  PARAMS ((bfd *, const Elf32_External_Dyn *, Elf_Internal_Dyn *));
+  PARAMS ((bfd *, const PTR, Elf_Internal_Dyn *));
 extern void bfd_elf32_swap_dyn_out
   PARAMS ((bfd *, const Elf_Internal_Dyn *, Elf32_External_Dyn *));
 extern boolean bfd_elf32_add_dynamic_entry
@@ -723,7 +724,7 @@ extern void bfd_elf64_swap_phdr_in
 extern void bfd_elf64_swap_phdr_out
   PARAMS ((bfd *, Elf_Internal_Phdr *, Elf64_External_Phdr *));
 extern void bfd_elf64_swap_dyn_in
-  PARAMS ((bfd *, const Elf64_External_Dyn *, Elf_Internal_Dyn *));
+  PARAMS ((bfd *, const PTR, Elf_Internal_Dyn *));
 extern void bfd_elf64_swap_dyn_out
   PARAMS ((bfd *, const Elf_Internal_Dyn *, Elf64_External_Dyn *));
 extern boolean bfd_elf64_add_dynamic_entry
