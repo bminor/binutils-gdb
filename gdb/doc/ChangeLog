@@ -1,3 +1,8 @@
+Sun Jan 16 12:43:32 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in: Remove refcard.dvi and GDBvn.texi in realclean,
+	not clean.
+
 Wed Jan 12 21:29:54 1994  John Gilmore  (gnu@cygnus.com)
 
 	* gdb.texinfo (Print Settings): Document `set print

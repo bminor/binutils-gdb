@@ -132,8 +132,8 @@ clean-info:
 	rm -f gdb.info* gdbint.info* stabs.info*
 
 clean-dvi:
-	rm -f gdb.dvi refcard.dvi gdbint.dvi stabs.dvi sedref.dvi
-	
+	rm -f gdb.dvi gdbint.dvi stabs.dvi sedref.dvi
+
 mostlyclean: clean-info clean-dvi
 	rm -f gdb.?? gdb.??? gdb.mm gdb.ms gdb.me
 	rm -f links2roff
@@ -146,7 +146,10 @@ clean: mostlyclean
 distclean: clean
 	rm -f Makefile config.status
 
+# GDBvn.texi and refcard.dvi are distributed, so they should not be
+# removed by "clean" or "distclean".
 realclean: distclean clean-dvi clean-info
+	rm -f GDBvn.texi refcard.dvi
 
 # GDB QUICK REFERENCE (dvi output)
 refcard.dvi : refcard.tex $(REFEDITS)
