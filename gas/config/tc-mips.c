@@ -12153,18 +12153,9 @@ md_estimate_size_before_relax (fragp, segtype)
   boolean linkonce = false;
 
   if (RELAX_MIPS16_P (fragp->fr_subtype))
-    {
-      if (mips16_extended_frag (fragp, segtype, 0))
-	{
-	  fragp->fr_subtype = RELAX_MIPS16_MARK_EXTENDED (fragp->fr_subtype);
-	  return 4;
-	}
-      else
-	{
-	  fragp->fr_subtype = RELAX_MIPS16_CLEAR_EXTENDED (fragp->fr_subtype);
-	  return 2;
-	}
-    }
+    /* We don't want to modify the EXTENDED bit here; it might get us
+       into infinite loops.  We change it only in mips_relax_frag().  */
+    return (RELAX_MIPS16_EXTENDED (fragp->fr_subtype) ? 4 : 2);
 
   if (mips_pic == NO_PIC)
     {
