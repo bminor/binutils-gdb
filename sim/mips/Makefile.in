@@ -8,6 +8,19 @@ srcroot=$(srcdir)/../../
 
 SIM_NO_OBJ =
 
+# start-sanitize-sky
+SIM_SKY_OBJS = \
+	sky-device.o \
+	sky-dma.o \
+	sky-engine.o \
+	sky-gpuif.o \
+	sky-hardware.o \
+	sky-libvpe.o \
+	sky-pke.o \
+	sky-vu0.o \
+	sky-vu1.o
+# end-sanitize-sky
+
 SIM_IGEN_OBJ = \
 	support.o \
 	itable.o \
@@ -31,9 +44,12 @@ SIM_M16_OBJ = \
 	itable.o \
 	m16run.o \
 
+MIPS_EXTRA_OBJS = @mips_extra_objs@
+
 SIM_OBJS = \
 	$(SIM_@sim_gen@_OBJ) \
 	$(SIM_NEW_COMMON_OBJS) \
+	$(MIPS_EXTRA_OBJS) \
 	interp.o \
 	sim-hload.o \
 	sim-engine.o \

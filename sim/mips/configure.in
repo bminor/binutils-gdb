@@ -199,6 +199,14 @@ fi],[sim_gen="${sim_use_gen}"])dnl
 AC_SUBST(sim_gen)
 
 
+case "${target}" in
+# start-sanitize-sky
+  mips64r59*-sky-*)  mips_extra_objs='$(SIM_SKY_OBJS)' ;;
+# end-sanitize-sky
+  *)                 mips_extra_objs="" ;;
+esac
+AC_SUBST(mips_extra_objs)
+
 
 AC_CHECK_HEADERS(string.h strings.h stdlib.h stdlib.h)
 AC_CHECK_LIB(m, fabs)
