@@ -1,3 +1,9 @@
+2003-02-25  Alexandre Oliva  <aoliva@redhat.com>
+
+	* Makefile.am (ldmain.o): Define TOOLBINDIR.
+	* Makefile.in: Rebuilt.
+	* ldmain.c (ld_sysroot): Try to set from TOOLBINDIR too.
+
 2003-02-21  Bob Wilson  <bob.wilson@acm.org>
 
 	* ldlang.c (lang_size_sections_1): Add CHECK_REGIONS argument and only

@@ -397,6 +397,7 @@ po/POTFILES.in: @MAINT@ Makefile
 ldmain.o: ldmain.c config.status
 	$(COMPILE) -c -DDEFAULT_EMULATION='"$(EMUL)"' \
 	  -DSCRIPTDIR='"$(scriptdir)"' -DBINDIR='"$(bindir)"' \
+	  -DTOOLBINDIR='"$(tooldir)/bin"' \
 	  -DTARGET='"@target@"' @TARGET_SYSTEM_ROOT_DEFINE@ \
 	  $(srcdir)/ldmain.c
 

@@ -42,7 +42,7 @@
 #include "ldemul.h"
 #include "ldctor.h"
 
-/* Somewhere above, sys/stat.h got included . . . .  */
+/* Somewhere above, sys/stat.h got included.  */
 #if !defined(S_ISDIR) && defined(S_IFDIR)
 #define	S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
 #endif
@@ -60,9 +60,6 @@ extern PTR sbrk ();
 #endif
 
 int main PARAMS ((int, char **));
-
-static char *get_emulation PARAMS ((int, char **));
-static void set_scripts_dir PARAMS ((void));
 
 /* EXPORTS */
 
@@ -101,46 +98,49 @@ args_type command_line;
 
 ld_config_type config;
 
-static void remove_output PARAMS ((void));
-static bfd_boolean check_for_scripts_dir PARAMS ((char *dir));
-static bfd_boolean add_archive_element PARAMS ((struct bfd_link_info *, bfd *,
-					    const char *));
-static bfd_boolean multiple_definition PARAMS ((struct bfd_link_info *,
-					    const char *,
-					    bfd *, asection *, bfd_vma,
-					    bfd *, asection *, bfd_vma));
-static bfd_boolean multiple_common PARAMS ((struct bfd_link_info *,
-					const char *, bfd *,
-					enum bfd_link_hash_type, bfd_vma,
-					bfd *, enum bfd_link_hash_type,
-					bfd_vma));
-static bfd_boolean add_to_set PARAMS ((struct bfd_link_info *,
-				   struct bfd_link_hash_entry *,
-				   bfd_reloc_code_real_type,
-				   bfd *, asection *, bfd_vma));
-static bfd_boolean constructor_callback PARAMS ((struct bfd_link_info *,
-					     bfd_boolean constructor,
-					     const char *name,
-					     bfd *, asection *, bfd_vma));
-static bfd_boolean warning_callback PARAMS ((struct bfd_link_info *,
-					 const char *, const char *, bfd *,
-					 asection *, bfd_vma));
-static void warning_find_reloc PARAMS ((bfd *, asection *, PTR));
-static bfd_boolean undefined_symbol PARAMS ((struct bfd_link_info *,
-					 const char *, bfd *,
-					 asection *, bfd_vma, bfd_boolean));
-static bfd_boolean reloc_overflow PARAMS ((struct bfd_link_info *, const char *,
-				       const char *, bfd_vma,
-				       bfd *, asection *, bfd_vma));
-static bfd_boolean reloc_dangerous PARAMS ((struct bfd_link_info *, const char *,
-					bfd *, asection *, bfd_vma));
-static bfd_boolean unattached_reloc PARAMS ((struct bfd_link_info *,
-					 const char *, bfd *, asection *,
-					 bfd_vma));
-static bfd_boolean notice PARAMS ((struct bfd_link_info *, const char *,
-			       bfd *, asection *, bfd_vma));
+static char *get_emulation
+  PARAMS ((int, char **));
+static void set_scripts_dir
+  PARAMS ((void));
+static void remove_output
+  PARAMS ((void));
+static bfd_boolean check_for_scripts_dir
+  PARAMS ((char *));
+static bfd_boolean add_archive_element
+  PARAMS ((struct bfd_link_info *, bfd *, const char *));
+static bfd_boolean multiple_definition
+  PARAMS ((struct bfd_link_info *, const char *, bfd *, asection *, bfd_vma,
+	   bfd *, asection *, bfd_vma));
+static bfd_boolean multiple_common
+  PARAMS ((struct bfd_link_info *, const char *, bfd *,
+	   enum bfd_link_hash_type, bfd_vma, bfd *, enum bfd_link_hash_type,
+	   bfd_vma));
+static bfd_boolean add_to_set
+  PARAMS ((struct bfd_link_info *, struct bfd_link_hash_entry *,
+	   bfd_reloc_code_real_type, bfd *, asection *, bfd_vma));
+static bfd_boolean constructor_callback
+  PARAMS ((struct bfd_link_info *, bfd_boolean, const char *, bfd *,
+	   asection *, bfd_vma));
+static bfd_boolean warning_callback
+  PARAMS ((struct bfd_link_info *, const char *, const char *, bfd *,
+	   asection *, bfd_vma));
+static void warning_find_reloc
+  PARAMS ((bfd *, asection *, PTR));
+static bfd_boolean undefined_symbol
+  PARAMS ((struct bfd_link_info *, const char *, bfd *, asection *, bfd_vma,
+	   bfd_boolean));
+static bfd_boolean reloc_overflow
+  PARAMS ((struct bfd_link_info *, const char *, const char *, bfd_vma,
+	   bfd *, asection *, bfd_vma));
+static bfd_boolean reloc_dangerous
+  PARAMS ((struct bfd_link_info *, const char *, bfd *, asection *, bfd_vma));
+static bfd_boolean unattached_reloc
+  PARAMS ((struct bfd_link_info *, const char *, bfd *, asection *, bfd_vma));
+static bfd_boolean notice
+  PARAMS ((struct bfd_link_info *, const char *, bfd *, asection *, bfd_vma));
 
-static struct bfd_link_callbacks link_callbacks = {
+static struct bfd_link_callbacks link_callbacks =
+{
   add_archive_element,
   multiple_definition,
   multiple_common,
@@ -199,21 +199,40 @@ main (argc, argv)
 #ifdef TARGET_SYSTEM_ROOT_RELOCATABLE
   ld_sysroot = make_relative_prefix (program_name, BINDIR,
 				     TARGET_SYSTEM_ROOT);
+
   if (ld_sysroot)
     {
       struct stat s;
       int res = stat (ld_sysroot, &s) == 0 && S_ISDIR (s.st_mode);
+
       if (!res)
 	{
 	  free (ld_sysroot);
-	  ld_sysroot = TARGET_SYSTEM_ROOT;
+	  ld_sysroot = NULL;
 	}
     }
-  else
-    ld_sysroot = TARGET_SYSTEM_ROOT;
-#else
-  ld_sysroot = TARGET_SYSTEM_ROOT;
+
+  if (! ld_sysroot)
+    {
+      ld_sysroot = make_relative_prefix (program_name, TOOLBINDIR,
+					 TARGET_SYSTEM_ROOT);
+
+      if (ld_sysroot)
+	{
+	  struct stat s;
+	  int res = stat (ld_sysroot, &s) == 0 && S_ISDIR (s.st_mode);
+
+	  if (!res)
+	    {
+	      free (ld_sysroot);
+	      ld_sysroot = NULL;
+	    }
+	}
+    }
+
+  if (! ld_sysroot)
 #endif
+    ld_sysroot = TARGET_SYSTEM_ROOT;
 
   /* Set the default BFD target based on the configured target.  Doing
      this permits the linker to be configured for a particular target,
@@ -411,9 +430,7 @@ main (argc, argv)
     }
 
   if (trace_files)
-    {
-      info_msg (_("%P: mode %s\n"), emulation);
-    }
+    info_msg (_("%P: mode %s\n"), emulation);
 
   ldemul_after_parse ();
 
@@ -439,7 +456,6 @@ main (argc, argv)
 
   /* Print error messages for any missing symbols, for any warning
      symbols, and possibly multiple definitions.  */
-
   if (link_info.relocateable)
     output_bfd->flags &= ~EXEC_P;
   else
@@ -457,17 +473,13 @@ main (argc, argv)
   /* Even if we're producing relocateable output, some non-fatal errors should
      be reported in the exit status.  (What non-fatal errors, if any, do we
      want to ignore for relocateable output?)  */
-
   if (!config.make_executable && !force_make_executable)
     {
       if (trace_files)
-	{
-	  einfo (_("%P: link errors found, deleting executable `%s'\n"),
-		 output_filename);
-	}
+	einfo (_("%P: link errors found, deleting executable `%s'\n"),
+	       output_filename);
 
       /* The file will be removed by remove_output.  */
-
       xexit (1);
     }
   else
@@ -481,6 +493,7 @@ main (argc, argv)
       if (! link_info.relocateable && command_line.force_exe_suffix)
 	{
 	  int len = strlen (output_filename);
+
 	  if (len < 4
 	      || (strcasecmp (output_filename + len - 4, ".exe") != 0
 		  && strcasecmp (output_filename + len - 4, ".dll") != 0))
@@ -491,6 +504,7 @@ main (argc, argv)
 	      char *buf = xmalloc (bsize);
 	      int l;
 	      char *dst_name = xmalloc (len + 5);
+
 	      strcpy (dst_name, output_filename);
 	      strcat (dst_name, ".exe");
 	      src = fopen (output_filename, FOPEN_RB);
@@ -503,16 +517,14 @@ main (argc, argv)
 	      while ((l = fread (buf, 1, bsize, src)) > 0)
 		{
 		  int done = fwrite (buf, 1, l, dst);
+
 		  if (done != l)
-		    {
-		      einfo (_("%P: Error writing file `%s'\n"), dst_name);
-		    }
+		    einfo (_("%P: Error writing file `%s'\n"), dst_name);
 		}
+
 	      fclose (src);
 	      if (fclose (dst) == EOF)
-		{
-		  einfo (_("%P: Error closing file `%s'\n"), dst_name);
-		}
+		einfo (_("%P: Error closing file `%s'\n"), dst_name);
 	      free (dst_name);
 	      free (buf);
 	    }
@@ -571,9 +583,7 @@ get_emulation (argc, argv)
 		  i++;
 		}
 	      else
-		{
-		  einfo (_("%P%F: missing argument to -m\n"));
-		}
+		einfo (_("%P%F: missing argument to -m\n"));
 	    }
 	  else if (strcmp (argv[i], "-mips1") == 0
 		   || strcmp (argv[i], "-mips2") == 0
@@ -643,7 +653,7 @@ check_for_scripts_dir (dir)
    SCRIPTDIR (passed from Makefile)
    the dir where this program is (for using it from the build tree)
    the dir where this program is/../lib
-	     (for installing the tool suite elsewhere)  */
+	     (for installing the tool suite elsewhere).  */
 
 static void
 set_scripts_dir ()
@@ -669,17 +679,16 @@ set_scripts_dir ()
   {
     /* We could have \foo\bar, or /foo\bar.  */
     char *bslash = strrchr (program_name, '\\');
+
     if (end == NULL || (bslash != NULL && bslash > end))
       end = bslash;
   }
 #endif
 
   if (end == NULL)
-    {
-      /* Don't look for ldscripts in the current directory.  There is
-         too much potential for confusion.  */
-      return;
-    }
+    /* Don't look for ldscripts in the current directory.  There is
+       too much potential for confusion.  */
+    return;
 
   dirlen = end - program_name;
   /* Make a copy of program_name in dir.
@@ -735,6 +744,7 @@ add_wrap (name)
 				   61))
 	einfo (_("%P%F: bfd_hash_table_init failed: %E\n"));
     }
+
   if (bfd_hash_lookup (link_info.wrap_hash, name, TRUE, TRUE) == NULL)
     einfo (_("%P%F: bfd_hash_lookup failed: %E\n"));
 }
@@ -1120,7 +1130,8 @@ constructor_callback (info, constructor, name, abfd, section, value)
 /* A structure used by warning_callback to pass information through
    bfd_map_over_sections.  */
 
-struct warning_callback_info {
+struct warning_callback_info
+{
   bfd_boolean found;
   const char *warning;
   const char *symbol;
@@ -1158,7 +1169,6 @@ warning_callback (info, warning, symbol, abfd, section, address)
 
       /* Look through the relocs to see if we can find a plausible
 	 address.  */
-
       entry = (lang_input_statement_type *) abfd->usrdata;
       if (entry != NULL && entry->asymbols != NULL)
 	asymbols = entry->asymbols;
@@ -1269,7 +1279,6 @@ undefined_symbol (info, name, abfd, section, address, fatal)
       static struct bfd_hash_table *hash;
 
       /* Only warn once about a particular undefined symbol.  */
-
       if (hash == NULL)
 	{
 	  hash = ((struct bfd_hash_table *)
