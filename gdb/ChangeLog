@@ -1,5 +1,14 @@
 2002-10-03  Jeff Johnston  <jjohnstn@redhat.com>
 
+	* ui-out.h (ui_out_field_fmt_int): New prototype.
+	* ui-out.c (ui_out_field_fmt_int): New function allowing specification
+	of field width and alignment.
+	* stack.c (print_frame_info_base): When printing frame level, use
+	ui_out_field_fmt_int with a width of 2 and left alignment.  Fix for
+	PR gdb/192
+
+2002-10-03  Jeff Johnston  <jjohnstn@redhat.com>
+
 	* MAINTAINERS: Add self to Write After Approval list.
 
 2002-10-02  Elena Zannoni  <ezannoni@redhat.com>
