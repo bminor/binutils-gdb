@@ -66,6 +66,8 @@ struct regcache_descr
      both raw registers and memory by the architecture methods
      gdbarch_register_read and gdbarch_register_write.  */
   int nr_cooked_registers;
+  long sizeof_cooked_registers;
+  long sizeof_cooked_register_valid_p;
 
   /* Offset and size (in 8 bit bytes), of reach register in the
      register cache.  All registers (including those in the range
@@ -93,20 +95,28 @@ init_legacy_regcache_descr (struct gdbarch *gdbarch,
   gdb_assert (gdbarch != NULL);
 
   /* FIXME: cagney/2002-05-11: Shouldn't be including pseudo-registers
-     in the register buffer.  Unfortunatly some architectures do.  */
+     in the register cache.  Unfortunatly some architectures still
+     rely on this and the pseudo_register_write() method.  */
   descr->nr_raw_registers = descr->nr_cooked_registers;
-  descr->sizeof_raw_register_valid_p = descr->nr_cooked_registers;
+  descr->sizeof_raw_register_valid_p = descr->sizeof_cooked_register_valid_p;
 
-  /* FIXME: cagney/2002-05-11: Instead of using REGISTER_BYTE() this
-     code should compute the offets et.al. at runtime.  This currently
-     isn't possible because some targets overlap register locations -
-     see the mess in read_register_bytes() and write_register_bytes()
-     registers.  */
+  /* Compute the offset of each register.  Legacy architectures define
+     REGISTER_BYTE() so use that.  */
+  /* FIXME: cagney/2002-11-07: Instead of using REGISTER_BYTE() this
+     code should, as is done in init_regcache_descr(), compute the
+     offets at runtime.  This currently isn't possible as some ISAs
+     define overlapping register regions - see the mess in
+     read_register_bytes() and write_register_bytes() registers.  */
   descr->sizeof_register = XCALLOC (descr->nr_cooked_registers, long);
   descr->register_offset = XCALLOC (descr->nr_cooked_registers, long);
   descr->max_register_size = 0;
   for (i = 0; i < descr->nr_cooked_registers; i++)
     {
+      /* FIXME: cagney/2001-12-04: This code shouldn't need to use
+         REGISTER_BYTE().  Unfortunatly, legacy code likes to lay the
+         buffer out so that certain registers just happen to overlap.
+         Ulgh!  New targets use gdbarch's register read/write and
+         entirely avoid this uglyness.  */
       descr->register_offset[i] = REGISTER_BYTE (i);
       descr->sizeof_register[i] = REGISTER_RAW_SIZE (i);
       if (descr->max_register_size < REGISTER_RAW_SIZE (i))
@@ -115,8 +125,13 @@ init_legacy_regcache_descr (struct gdbarch *gdbarch,
 	descr->max_register_size = REGISTER_VIRTUAL_SIZE (i);
     }
 
-  /* Come up with the real size of the registers buffer.  */
-  descr->sizeof_raw_registers = REGISTER_BYTES; /* OK use.  */
+  /* Compute the real size of the register buffer.  Start out by
+     trusting REGISTER_BYTES, but then adjust it upwards should that
+     be found to not be sufficient.  */
+  /* FIXME: cagney/2002-11-05: Instead of using REGISTER_BYTES, this
+     code should, as is done in init_regcache_descr(), compute the
+     total number of register bytes using the accumulated offsets.  */
+  descr->sizeof_cooked_registers = REGISTER_BYTES; /* OK use.  */
   for (i = 0; i < descr->nr_cooked_registers; i++)
     {
       long regend;
@@ -125,15 +140,14 @@ init_legacy_regcache_descr (struct gdbarch *gdbarch,
          legacy code is free to put registers in random places in the
          buffer separated by holes.  Once REGISTER_BYTE() is killed
          this can be greatly simplified.  */
-      /* FIXME: cagney/2001-12-04: This code shouldn't need to use
-         REGISTER_BYTE().  Unfortunatly, legacy code likes to lay the
-         buffer out so that certain registers just happen to overlap.
-         Ulgh!  New targets use gdbarch's register read/write and
-         entirely avoid this uglyness.  */
       regend = descr->register_offset[i] + descr->sizeof_register[i];
-      if (descr->sizeof_raw_registers < regend)
-	descr->sizeof_raw_registers = regend;
+      if (descr->sizeof_cooked_registers < regend)
+	descr->sizeof_cooked_registers = regend;
     }
+  /* FIXME: cagney/2002-05-11: Shouldn't be including pseudo-registers
+     in the register cache.  Unfortunatly some architectures still
+     rely on this and the pseudo_register_write() method.  */
+  descr->sizeof_raw_registers = descr->sizeof_cooked_registers;
 }
 
 static void *
@@ -151,6 +165,7 @@ init_regcache_descr (struct gdbarch *gdbarch)
      directly onto the raw register cache while the pseudo's are
      either mapped onto raw-registers or memory.  */
   descr->nr_cooked_registers = NUM_REGS + NUM_PSEUDO_REGS;
+  descr->sizeof_cooked_register_valid_p = NUM_REGS + NUM_PSEUDO_REGS;
 
   /* Fill in a table of register types.  */
   descr->register_type = XCALLOC (descr->nr_cooked_registers,
@@ -178,12 +193,9 @@ init_regcache_descr (struct gdbarch *gdbarch)
      array.  This pretects GDB from erant code that accesses elements
      of the global register_valid_p[] array in the range [NUM_REGS
      .. NUM_REGS + NUM_PSEUDO_REGS).  */
-  descr->sizeof_raw_register_valid_p = NUM_REGS + NUM_PSEUDO_REGS;
+  descr->sizeof_raw_register_valid_p = descr->sizeof_cooked_register_valid_p;
 
-  /* Lay out the register cache.  The pseud-registers are included in
-     the layout even though their value isn't stored in the register
-     cache.  Some code, via read_register_bytes() access a register
-     using an offset/length rather than a register number.
+  /* Lay out the register cache.
 
      NOTE: cagney/2002-05-22: Only register_type() is used when
      constructing the register cache.  It is assumed that the
@@ -204,14 +216,15 @@ init_regcache_descr (struct gdbarch *gdbarch)
 	  descr->max_register_size = descr->sizeof_register[i];
       }
     /* Set the real size of the register cache buffer.  */
-    /* FIXME: cagney/2002-05-22: Should only need to allocate space
-       for the raw registers.  Unfortunatly some code still accesses
-       the register array directly using the global registers[].
-       Until that code has been purged, play safe and over allocating
-       the register buffer.  Ulgh!  */
-    descr->sizeof_raw_registers = offset;
-    /* = descr->register_offset[descr->nr_raw_registers]; */
+    descr->sizeof_cooked_registers = offset;
   }
+
+  /* FIXME: cagney/2002-05-22: Should only need to allocate space for
+     the raw registers.  Unfortunatly some code still accesses the
+     register array directly using the global registers[].  Until that
+     code has been purged, play safe and over allocating the register
+     buffer.  Ulgh!  */
+  descr->sizeof_raw_registers = descr->sizeof_cooked_registers;
 
 #if 0
   /* Sanity check.  Confirm that the assumptions about gdbarch are

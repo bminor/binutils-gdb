@@ -1,5 +1,14 @@
 2002-11-13  Andrew Cagney  <cagney@redhat.com>
 
+	* regcache.c (struct regcache_descr): Add fields
+	sizeof_cooked_registers and sizeof_cooked_register_valid_p.
+	(init_legacy_regcache_descr): Compute the size of a cooked
+	register cache and then assign that to sizeof_raw_registers.  Set
+	sizeof_raw_register_valid_p to sizeof_cooked_register_valid_p
+	(init_legacy_regcache_descr): Ditto.
+
+2002-11-13  Andrew Cagney  <cagney@redhat.com>
+
 	* regcache.c (register_buffer): Move to near start of file, update
 	description.
 	(regcache_raw_read): Use.
