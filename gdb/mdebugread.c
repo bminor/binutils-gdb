@@ -383,7 +383,7 @@ static void
 handle_psymbol_enumerators PARAMS ((struct objfile *, FDR *, int, CORE_ADDR));
 
 static char *
-mdebug_next_symbol_text PARAMS ((void));
+mdebug_next_symbol_text PARAMS ((struct objfile *));
 
 /* Address bounds for the signal trampoline in inferior, if any */
 
@@ -3085,7 +3085,8 @@ handle_psymbol_enumerators (objfile, fh, stype, svalue)
 }
 
 static char *
-mdebug_next_symbol_text ()
+mdebug_next_symbol_text (objfile)
+     struct objfile *objfile;	/* argument objfile is currently unused */
 {
   SYMR sh;
 

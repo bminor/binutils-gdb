@@ -493,7 +493,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 		      /* Check for and handle cretinous dbx symbol name
 			 continuation!  */
 		      if (*p == '\\' || (*p == '?' && p[1] == '\0'))
-			p = next_symbol_text ();
+			p = next_symbol_text (objfile);
 
 		      /* Point to the character after the name
 			 of the enum constant.  */

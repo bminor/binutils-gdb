@@ -1,3 +1,40 @@
+Wed Dec 20 10:54:41 1995  Fred Fish  <fnf@cygnus.com>
+
+	* defs.h: Delete extraneous whitespace at end of file.
+	* symfile.h: Move #include of demangle.h outside conditional.
+	* objfiles.h (struct objstats, OBJSTAT, OBJSTATS): New struct
+	and macros to hold per-objfile statistics for internal instrumentation.
+	(struct objfile): Add OBJSTATS member, which is optional.
+	* buildsym.h (next_symbol_text_func): Now takes objfile argument.
+	Also update copyright to 1995.
+	* dbxread.c (dbx_next_symbol_text): Now takes objfile argument.
+	(dbx_symfile_init, coffstab_build_psymtabs, elfstab_build_psymtabs,
+	stabsect_build_psymtabs): Accumulate string table size.
+	(dbx_next_symbol_text, read_dbx_symtab, read_ofile_symtab):
+	Accumulate number of stabs symbols read. 	
+	* dwarfread.c (new_symbol, symthesize_typedef):
+	Accumulate number of full symbols created.
+	* gdbtypes.c (alloc_type): Accumulate number of types.
+	* maint.c (maintenance_print_statistics): New function.
+	* mdebugread.c (mdebug_next_symbol_text): Now takes objfile argument.
+	* minsyms.c (prim_record_minimal_symbol_and_info): Accumulate
+	number of minimal symbols read.
+	* os9kread.c (read_os9k_psymtab): next_symbol_text takes objfile arg.
+	* partial-stab.h: next_symbol_text takes objfile arg.
+	* stabsread.c (error_type, STABS_CONTINUE): Now takes objfile arg and
+ 	uses it to call next_symbol_text.
+	* symfile.c (add_psymbol_to_list, add_psymbol_addr_to_list):
+	Accumulate number of partial symbols created.
+	* symfile.h (ADD_PSYMBOL_VT_TO_LIST): Accumulate number of partial
+	symbols created.
+	* symmisc.c (print_objfile_statistics): Print the per-objfile
+	internal instrumentation statistics gathered.
+	* xcoffread.c (xcoff_next_symbol_text): Now takes objfile argument.
+	
+Fri Dec 15 16:15:55 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* top.c (set_endian_from_file): Use new bfd_big_endian macro.
+
 Fri Dec 15 12:21:10 1995  Raymond Jou  <rjou@mexican.cygnus.com>
 
 	* mpw-make.sed: Add quotes to RIncludes reference. 

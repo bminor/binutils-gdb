@@ -832,7 +832,7 @@ read_os9k_psymtab (section_offsets, objfile, text_addr, text_size)
 		      /* Check for and handle cretinous dbx symbol name
 			 continuation! 
 		      if (*p == '\\')
-			p = next_symbol_text ();
+			p = next_symbol_text (objfile);
 		      */
 
 		      /* Point to the character after the name

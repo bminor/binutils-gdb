@@ -34,7 +34,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "demangle.h"
 #include "inferior.h" /* for write_pc */
 
-#include <obstack.h>
+#include "obstack.h"
 #include <assert.h>
 
 #include <sys/types.h>
@@ -1652,6 +1652,7 @@ add_psymbol_to_list (name, namelength, namespace, class, list, val, language,
   PSYMBOL_NAMESPACE (psym) = namespace;
   PSYMBOL_CLASS (psym) = class;
   SYMBOL_INIT_LANGUAGE_SPECIFIC (psym, language);
+  OBJSTAT (objfile, psyms++);
 }
 
 /* Add a symbol with a CORE_ADDR value to a psymtab. */
@@ -1687,6 +1688,7 @@ add_psymbol_addr_to_list (name, namelength, namespace, class, list, val,
   PSYMBOL_NAMESPACE (psym) = namespace;
   PSYMBOL_CLASS (psym) = class;
   SYMBOL_INIT_LANGUAGE_SPECIFIC (psym, language);
+  OBJSTAT (objfile, psyms++);
 }
 
 #endif /* !INLINE_ADD_PSYMBOL */

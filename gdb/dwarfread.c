@@ -2891,6 +2891,7 @@ new_symbol (dip, objfile)
     {
       sym = (struct symbol *) obstack_alloc (&objfile -> symbol_obstack,
 					     sizeof (struct symbol));
+      OBJSTAT (objfile, n_syms++);
       memset (sym, 0, sizeof (struct symbol));
       SYMBOL_NAME (sym) = create_name (dip -> at_name,
 				       &objfile->symbol_obstack);
@@ -3041,6 +3042,7 @@ synthesize_typedef (dip, objfile, type)
     {
       sym = (struct symbol *)
 	obstack_alloc (&objfile -> symbol_obstack, sizeof (struct symbol));
+      OBJSTAT (objfile, n_syms++);
       memset (sym, 0, sizeof (struct symbol));
       SYMBOL_NAME (sym) = create_name (dip -> at_name,
 				       &objfile->symbol_obstack);

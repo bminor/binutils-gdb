@@ -156,6 +156,33 @@ struct obj_section {
   struct objfile *objfile;
 };
 
+/* The "objstats" structure provides a place for gdb to record some
+   interesting information about its internal state at runtime, on a
+   per objfile basis, such as information about the number of symbols
+   read, size of string table (if any), etc. */
+
+#if MAINTENANCE_CMDS
+
+struct objstats {
+  int n_minsyms;	/* Number of minimal symbols read */
+  int n_psyms;		/* Number of partial symbols read */
+  int n_syms;		/* Number of full symbols read */
+  int n_stabs;		/* Number of ".stabs" read (if applicable) */
+  int n_types;		/* Number of types */
+  int sz_strtab;	/* Size of stringtable, (if applicable) */
+};
+
+#define OBJSTAT(objfile, expr) (objfile -> stats.expr)
+#define OBJSTATS struct objstats stats
+extern void print_objfile_statistics PARAMS ((void));
+
+#else
+
+#define OBJSTAT(objfile, expr)	/* Nothing */
+#define OBJSTATS		/* Nothing */
+
+#endif	/* MAINTENANCE_CMDS */
+
 /* Master structure for keeping track of each file from which
    gdb reads symbols.  There are several ways these get allocated: 1.
    The main symbol file, symfile_objfile, set by the symbol-file command,
@@ -321,6 +348,9 @@ struct objfile
 
   /* two auxiliary fields, used to hold the fp of separate symbol files */
   FILE *auxf1, *auxf2;
+
+  /* Place to stash various statistics about this objfile */
+  OBJSTATS;
 };
 
 /* Defines for the objfile flag word. */

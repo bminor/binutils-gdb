@@ -494,6 +494,7 @@ prim_record_minimal_symbol_and_info (name, address, ms_type, info, section,
   MSYMBOL_INFO (msymbol) = info; /* FIXME! */
   msym_bunch_index++;
   msym_count++;
+  OBJSTAT (objfile, n_minsyms++);
   return msymbol;
 }
 

@@ -80,7 +80,7 @@ dbx_alloc_type PARAMS ((int [2], struct objfile *));
 
 static long read_huge_number PARAMS ((char **, int, int *));
 
-static struct type *error_type PARAMS ((char **));
+static struct type *error_type PARAMS ((char **, struct objfile *));
 
 static void
 patch_block_stabs PARAMS ((struct pending *, struct pending_stabs *,
@@ -202,10 +202,10 @@ static int undef_types_length;
 static struct symbol *current_symbol = NULL;
 
 /* Check for and handle cretinous stabs symbol name continuation!  */
-#define STABS_CONTINUE(pp)				\
+#define STABS_CONTINUE(pp,objfile)				\
   do {							\
     if (**(pp) == '\\' || (**(pp) == '?' && (*(pp))[1] == '\0')) \
-      *(pp) = next_symbol_text ();	\
+      *(pp) = next_symbol_text (objfile);	\
   } while (0)
 
 /* FIXME: These probably should be our own types (like rs6000_builtin_type
@@ -658,7 +658,7 @@ define_symbol (valu, string, desc, type, objfile)
       if (*p != '=')
 	{
 	  SYMBOL_CLASS (sym) = LOC_CONST;
-	  SYMBOL_TYPE (sym) = error_type (&p);
+	  SYMBOL_TYPE (sym) = error_type (&p, objfile);
 	  SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
 	  add_symbol_to_list (sym, &file_symbols);
 	  return sym;
@@ -732,7 +732,7 @@ define_symbol (valu, string, desc, type, objfile)
 
 	    if (*p != ',')
 	      {
-		SYMBOL_TYPE (sym) = error_type (&p);
+		SYMBOL_TYPE (sym) = error_type (&p, objfile);
 		break;
 	      }
 	    ++p;
@@ -749,7 +749,7 @@ define_symbol (valu, string, desc, type, objfile)
 	default:
 	  {
 	    SYMBOL_CLASS (sym) = LOC_CONST;
-	    SYMBOL_TYPE (sym) = error_type (&p);
+	    SYMBOL_TYPE (sym) = error_type (&p, objfile);
 	  }
 	}
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
@@ -1211,7 +1211,7 @@ define_symbol (valu, string, desc, type, objfile)
       break;
 
     default:
-      SYMBOL_TYPE (sym) = error_type (&p);
+      SYMBOL_TYPE (sym) = error_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_CONST;
       SYMBOL_VALUE (sym) = 0;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
@@ -1252,7 +1252,7 @@ define_symbol (valu, string, desc, type, objfile)
    Thus code like this:
 
    if (*(*pp)++ != ';')
-     return error_type (pp);
+     return error_type (pp, objfile);
 
    is wrong because if *pp starts out pointing at '\0' (typically as the
    result of an earlier error), it will be incremented to point to the
@@ -1260,13 +1260,13 @@ define_symbol (valu, string, desc, type, objfile)
    if you run off the end of the string table.  Instead use
 
    if (**pp != ';')
-     return error_type (pp);
+     return error_type (pp, objfile);
    ++*pp;
 
    or
 
    if (**pp != ';')
-     foo = error_type (pp);
+     foo = error_type (pp, objfile);
    else
      ++*pp;
 
@@ -1275,8 +1275,9 @@ define_symbol (valu, string, desc, type, objfile)
    debugger will be able to read the new symbol tables.  */
 
 static struct type *
-error_type (pp)
+error_type (pp, objfile)
      char **pp;
+     struct objfile *objfile;
 {
   complain (&error_type_complaint);
   while (1)
@@ -1290,7 +1291,7 @@ error_type (pp)
       /* Check for and handle cretinous dbx symbol name continuation!  */
       if ((*pp)[-1] == '\\' || (*pp)[-1] == '?')
 	{
-	  *pp = next_symbol_text ();
+	  *pp = next_symbol_text (objfile);
 	}
       else
 	{
@@ -1333,7 +1334,7 @@ read_type (pp, objfile)
       || **pp == '-')
     {
       if (read_type_number (pp, typenums) != 0)
-	return error_type (pp);
+	return error_type (pp, objfile);
       
       /* Type is not being defined here.  Either it already exists,
 	 or this is a forward reference to it.  dbx_alloc_type handles
@@ -1362,7 +1363,7 @@ read_type (pp, objfile)
 		++p;
 	      *pp = p;
 	      if (*p == '\0')
-		return error_type (pp);
+		return error_type (pp, objfile);
 	      else
 		/* Skip the semicolon.  */
 		++*pp;
@@ -1441,7 +1442,7 @@ read_type (pp, objfile)
 	  q1 = strchr(*pp, '<');
 	  p = strchr(*pp, ':');
 	  if (p == NULL)
-	    return error_type (pp);
+	    return error_type (pp, objfile);
 	  while (q1 && p > q1 && p[1] == ':')
 	    {
 	       q2 = strchr(q1, '>');
@@ -1450,7 +1451,7 @@ read_type (pp, objfile)
 	       p += 2;
 	       p = strchr(p, ':');
 	       if (p == NULL)
-		 return error_type (pp);
+		 return error_type (pp, objfile);
 	    }
 	  to = type_name = 
 		(char *)obstack_alloc (&objfile->type_obstack, p - *pp + 1);
@@ -1524,7 +1525,7 @@ read_type (pp, objfile)
 
 	/* Peek ahead at the number to detect void.  */
 	if (read_type_number (pp, xtypenums) != 0)
-	  return error_type (pp);
+	  return error_type (pp, objfile);
 
 	if (typenums[0] == xtypenums[0] && typenums[1] == xtypenums[1])
 	  /* It's being defined as itself.  That means it is "void".  */
@@ -1609,7 +1610,7 @@ read_type (pp, objfile)
       /* Because 'c' means other things to AIX and 'k' is perfectly good,
 	 only accept 'c' in the os9k_stabs case.  */
       if (type_descriptor == 'c' && !os9k_stabs)
-	return error_type (pp);
+	return error_type (pp, objfile);
       type = read_type (pp, objfile);
       /* FIXME! For now, we ignore const and volatile qualifiers.  */
       break;
@@ -1619,7 +1620,7 @@ read_type (pp, objfile)
       /* Because 'i' means other things to AIX and 'B' is perfectly good,
 	 only accept 'i' in the os9k_stabs case.  */
       if (type_descriptor == 'i' && !os9k_stabs)
-	return error_type (pp);
+	return error_type (pp, objfile);
       type = read_type (pp, objfile);
       /* FIXME! For now, we ignore const and volatile qualifiers.  */
       break;
@@ -1632,7 +1633,7 @@ read_type (pp, objfile)
 
 	if (**pp != ',')
 	  /* Invalid member type data format.  */
-	  return error_type (pp);
+	  return error_type (pp, objfile);
 	++*pp;
 
 	memtype = read_type (pp, objfile);
@@ -1663,7 +1664,7 @@ read_type (pp, objfile)
 
 	  if (**pp != ',')
 	    /* Invalid member type data format.  */
-	    return error_type (pp);
+	    return error_type (pp, objfile);
 	  else
 	    ++(*pp);
 
@@ -1723,7 +1724,7 @@ read_type (pp, objfile)
 
     case 'a':				/* Array type */
       if (**pp != 'r')
-	return error_type (pp);
+	return error_type (pp, objfile);
       ++*pp;
       
       type = dbx_alloc_type (typenums, objfile);
@@ -1744,13 +1745,13 @@ read_type (pp, objfile)
     default:
       --*pp;			/* Go back to the symbol in error */
 				/* Particularly important if it was \0! */
-      return error_type (pp);
+      return error_type (pp, objfile);
     }
 
   if (type == 0)
     {
       warning ("GDB internal error, type is NULL in stabsread.c\n");
-      return error_type (pp);
+      return error_type (pp, objfile);
     }
 
   /* Size specified in a type attribute overrides any other size.  */
@@ -2012,7 +2013,7 @@ read_member_functions (fip, pp, type, objfile)
 	  /* Skip past '::'.  */
 	  *pp = p + 2;
 
-	  STABS_CONTINUE (pp);
+	  STABS_CONTINUE (pp, objfile);
 	  p = *pp;
 	  while (*p != '.')
 	    {
@@ -2041,7 +2042,7 @@ read_member_functions (fip, pp, type, objfile)
 	  if (look_ahead_type == NULL)
 	    {
 	      /* Normal case. */
-	      STABS_CONTINUE (pp);
+	      STABS_CONTINUE (pp, objfile);
 	      
 	      new_sublist -> fn_field.type = read_type (pp, objfile);
 	      if (**pp != ':')
@@ -2086,7 +2087,7 @@ read_member_functions (fip, pp, type, objfile)
 		break;
 	    }
 	  
-	  STABS_CONTINUE (pp);
+	  STABS_CONTINUE (pp, objfile);
 	  switch (**pp)
 	    {
 	      case 'A': /* Normal functions. */
@@ -2135,7 +2136,7 @@ read_member_functions (fip, pp, type, objfile)
 		if (nbits != 0)
 		  return 0;
 	      
-		STABS_CONTINUE (pp);
+		STABS_CONTINUE (pp, objfile);
 		if (**pp == ';' || **pp == '\0')
 		  {
 		    /* Must be g++ version 1.  */
@@ -2192,7 +2193,7 @@ read_member_functions (fip, pp, type, objfile)
 	  new_sublist -> next = sublist;
 	  sublist = new_sublist;
 	  length++;
-	  STABS_CONTINUE (pp);
+	  STABS_CONTINUE (pp, objfile);
 	}
       while (**pp != ';' && **pp != '\0');
       
@@ -2213,7 +2214,7 @@ read_member_functions (fip, pp, type, objfile)
       fip -> fnlist = new_fnlist;
       nfn_fields++;
       total_length += length;
-      STABS_CONTINUE (pp);
+      STABS_CONTINUE (pp, objfile);
     }
 
   if (nfn_fields)
@@ -2515,7 +2516,7 @@ read_struct_fields (fip, pp, type, objfile)
   while (**pp != ';')
     {
       if (os9k_stabs && **pp == ',') break;
-      STABS_CONTINUE (pp);
+      STABS_CONTINUE (pp, objfile);
       /* Get space to record the next field's data.  */
       new = (struct nextfield *) xmalloc (sizeof (struct nextfield));
       make_cleanup (free, new);
@@ -2647,7 +2648,7 @@ read_baseclasses (fip, pp, type, objfile)
       fip -> list = new;
       new -> field.bitsize = 0;	/* this should be an unpacked field! */
 
-      STABS_CONTINUE (pp);
+      STABS_CONTINUE (pp, objfile);
       switch (**pp)
 	{
 	  case '0':
@@ -2729,7 +2730,7 @@ read_tilde_fields (fip, pp, type, objfile)
 {
   register char *p;
 
-  STABS_CONTINUE (pp);
+  STABS_CONTINUE (pp, objfile);
 
   /* If we are positioned at a ';', then skip it. */
   if (**pp == ';')
@@ -2948,7 +2949,7 @@ read_struct_type (pp, type, objfile)
     int nbits;
     TYPE_LENGTH (type) = read_huge_number (pp, 0, &nbits);
     if (nbits != 0)
-      return error_type (pp);
+      return error_type (pp, objfile);
   }
 
   /* Now read the baseclasses, if any, read the regular C struct or C++
@@ -2964,7 +2965,7 @@ read_struct_type (pp, type, objfile)
       || !read_tilde_fields (&fi, pp, type, objfile))
     {
       do_cleanups (back_to);
-      return (error_type (pp));
+      return (error_type (pp, objfile));
     }
 
   do_cleanups (back_to);
@@ -3001,7 +3002,7 @@ read_array_type (pp, type, objfile)
       index_type = read_type (pp, objfile);
       if (**pp != ';')
 	/* Improper format of array type decl.  */
-	return error_type (pp);
+	return error_type (pp, objfile);
       ++*pp;
     }
 
@@ -3012,7 +3013,7 @@ read_array_type (pp, type, objfile)
     }
   lower = read_huge_number (pp, os9k_stabs ? ',' : ';', &nbits);
   if (nbits != 0)
-    return error_type (pp);
+    return error_type (pp, objfile);
 
   if (!(**pp >= '0' && **pp <= '9') && **pp != '-')
     {
@@ -3021,7 +3022,7 @@ read_array_type (pp, type, objfile)
     }
   upper = read_huge_number (pp, ';', &nbits);
   if (nbits != 0)
-    return error_type (pp);
+    return error_type (pp, objfile);
   
   element_type = read_type (pp, objfile);
 
@@ -3079,7 +3080,7 @@ read_enum_type (pp, type, objfile)
 	 with a digit).  */
       read_huge_number (pp, 0, &nbits);
       if (nbits != 0)
-	return error_type (pp);
+	return error_type (pp, objfile);
     }
 
   /* The aix4 compiler emits an extra field before the enum members;
@@ -3099,14 +3100,14 @@ read_enum_type (pp, type, objfile)
      A semicolon or comma instead of a NAME means the end.  */
   while (**pp && **pp != ';' && **pp != ',')
     {
-      STABS_CONTINUE (pp);
+      STABS_CONTINUE (pp, objfile);
       p = *pp;
       while (*p != ':') p++;
       name = obsavestring (*pp, p - *pp, &objfile -> symbol_obstack);
       *pp = p + 1;
       n = read_huge_number (pp, ',', &nbits);
       if (nbits != 0)
-	return error_type (pp);
+	return error_type (pp, objfile);
 
       sym = (struct symbol *)
 	obstack_alloc (&objfile -> symbol_obstack, sizeof (struct symbol));
@@ -3196,7 +3197,7 @@ read_sun_builtin_type (pp, typenums, objfile)
 	signed_type = 0;
 	break;
       default:
-	return error_type (pp);
+	return error_type (pp, objfile);
     }
   (*pp)++;
 
@@ -3214,17 +3215,17 @@ read_sun_builtin_type (pp, typenums, objfile)
      we will ignore it.  */
   read_huge_number (pp, ';', &nbits);
   if (nbits != 0)
-    return error_type (pp);
+    return error_type (pp, objfile);
 
   /* The second number is always 0, so ignore it too. */
   read_huge_number (pp, ';', &nbits);
   if (nbits != 0)
-    return error_type (pp);
+    return error_type (pp, objfile);
 
   /* The third number is the number of bits for this type. */
   type_bits = read_huge_number (pp, 0, &nbits);
   if (nbits != 0)
-    return error_type (pp);
+    return error_type (pp, objfile);
   /* The type *should* end with a semicolon.  If it are embedded
      in a larger type the semicolon may be the only way to know where
      the type ends.  If this type is at the end of the stabstring we
@@ -3259,12 +3260,12 @@ read_sun_floating_type (pp, typenums, objfile)
      FN_COMPLEX.  */
   details = read_huge_number (pp, ';', &nbits);
   if (nbits != 0)
-    return error_type (pp);
+    return error_type (pp, objfile);
 
   /* The second number is the number of bytes occupied by this type */
   nbytes = read_huge_number (pp, ';', &nbits);
   if (nbits != 0)
-    return error_type (pp);
+    return error_type (pp, objfile);
 
   if (details == NF_COMPLEX || details == NF_COMPLEX16
       || details == NF_COMPLEX32)
@@ -3409,7 +3410,7 @@ read_range_type (pp, typenums, objfile)
   /* First comes a type we are a subrange of.
      In C it is usually 0, 1 or the type being defined.  */
   if (read_type_number (pp, rangenums) != 0)
-    return error_type (pp);
+    return error_type (pp, objfile);
   self_subrange = (rangenums[0] == typenums[0] &&
 		   rangenums[1] == typenums[1]);
 
@@ -3429,7 +3430,7 @@ read_range_type (pp, typenums, objfile)
   n3 = read_huge_number (pp, ';', &n3bits);
 
   if (n2bits == -1 || n3bits == -1)
-    return error_type (pp);
+    return error_type (pp, objfile);
 
   if (index_type)
     goto handle_true_range;
@@ -3467,7 +3468,7 @@ read_range_type (pp, typenums, objfile)
 			    objfile);
 	}
       else
-	return error_type (pp);
+	return error_type (pp, objfile);
     }
 
   /* A type defined as a subrange of itself, with bounds both 0, is void.  */
@@ -3551,7 +3552,7 @@ read_range_type (pp, typenums, objfile)
      a self_subrange type; I'm going to assume that this is used
      as an idiom, and that all of them are special cases.  So . . .  */
   if (self_subrange)
-    return error_type (pp);
+    return error_type (pp, objfile);
 
   index_type = *dbx_lookup_type (rangenums);
   if (index_type == NULL)
@@ -3593,7 +3594,7 @@ read_args (pp, end, objfile)
 	/* Invalid argument list: no ','.  */
 	return (struct type **)-1;
       (*pp)++;
-      STABS_CONTINUE (pp);
+      STABS_CONTINUE (pp, objfile);
       types[n++] = read_type (pp, objfile);
     }
   (*pp)++;			/* get past `end' (the ':' character) */

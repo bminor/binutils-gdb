@@ -74,6 +74,7 @@ alloc_type (objfile)
     {
       type  = (struct type *) obstack_alloc (&objfile -> type_obstack,
 					     sizeof (struct type));
+      OBJSTAT (objfile, n_types++);
     }
   memset ((char *) type, 0, sizeof (struct type));
 
@@ -1165,6 +1166,7 @@ lookup_fundamental_type (objfile, typeid)
       objfile -> fundamental_types = (struct type **)
 	obstack_alloc (&objfile -> type_obstack, nbytes);
       memset ((char *) objfile -> fundamental_types, 0, nbytes);
+      OBJSTAT (objfile, n_types += FT_NUM_MEMBERS);
     }
 
   /* Look for this particular type in the fundamental type vector.  If one is

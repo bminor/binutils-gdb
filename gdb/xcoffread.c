@@ -848,13 +848,15 @@ static char *raw_symbol;
 /* This is the function which stabsread.c calls to get symbol
    continuations.  */
 static char *
-xcoff_next_symbol_text ()
+xcoff_next_symbol_text (objfile)
+     struct objfile *objfile;
 {
   struct internal_syment symbol;
   static struct complaint msg =
     {"Unexpected symbol continuation", 0, 0};
   char *retval;
-  struct objfile *objfile = this_symtab_psymtab->objfile;
+  /* FIXME: is this the same as the passed arg? */
+  objfile = this_symtab_psymtab->objfile;
 
   bfd_coff_swap_sym_in (objfile->obfd, raw_symbol, &symbol);
   if (symbol.n_zeroes)

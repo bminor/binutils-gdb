@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 
-#if MAINTENANCE_CMDS	/* Entire file goes away if not including maint cmds */
+#if MAINTENANCE_CMDS	/* Entire rest of file goes away if not including maint cmds */
 
 #include <signal.h>
 #include "command.h"
@@ -243,6 +243,15 @@ maintenance_info_sections (arg, from_tty)
     }
 }
 
+/* ARGSUSED */
+void
+maintenance_print_statistics (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  print_objfile_statistics ();
+}
+
 /* The "maintenance print" command is defined as a prefix, with allow_unknown
    0.  Therefore, its own definition is called only for "maintenance print"
    with no args.  */
@@ -337,6 +346,10 @@ If a SOURCE file is specified, dump only that file's partial symbols.",
 
   add_cmd ("objfiles", class_maintenance, maintenance_print_objfiles,
 	   "Print dump of current object file definitions.",
+	   &maintenanceprintlist);
+
+  add_cmd ("statistics", class_maintenance, maintenance_print_statistics,
+	   "Print statistics about internal gdb state.",
 	   &maintenanceprintlist);
 
   add_cmd ("check-symtabs", class_maintenance, maintenance_check_symtabs,
