@@ -1,3 +1,18 @@
+2001-08-02  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/mips/mips-gp32-fp32,
+	* gas/mips/mips-gp32-fp64,
+	* gas/mips/mips-gp64-fp32,
+	* gas/mips/mips-gp64-fp64,
+	* gas/mips/mips-abi32,
+	* gas/mips/mips-gp32-fp32-pic,
+	* gas/mips/mips-gp32-fp64-pic,
+	* gas/mips/mips-gp64-fp32-pic,
+	* gas/mips/mips-gp64-fp64-pic,
+	* gas/mips/mips-abi32-pic: New testcases.
+
+	* gas/mips/mips.exp: Run them.
+
 2001-08-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/elf/section2.l: Adjust warning message comparison.
