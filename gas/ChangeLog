@@ -1,3 +1,7 @@
+1999-06-04  Mark Klein <mklein@dis.com>
+
+	* config/tc-hppa.c: Update for symbol handling changes.
+
 1999-06-03  Ian Lance Taylor  <ian@zembu.com>
 
 	* cgen.c: Update for symbol handling changes.

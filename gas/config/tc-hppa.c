@@ -2813,7 +2813,8 @@ tc_gen_reloc (section, fixp)
     {
       code = *codes[i];
 
-      relocs[i]->sym_ptr_ptr = &fixp->fx_addsy->bsym;
+      relocs[i]->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+      *relocs[i]->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
       relocs[i]->howto = bfd_reloc_type_lookup (stdoutput, code);
       relocs[i]->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
@@ -2824,23 +2825,28 @@ tc_gen_reloc (section, fixp)
 	     of two symbols.  With that in mind we fill in all four
 	     relocs now and break out of the loop.  */
 	  assert (i == 1);
-	  relocs[0]->sym_ptr_ptr = (asymbol **) &bfd_abs_symbol;
+    relocs[0]->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+    *relocs[0]->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
 	  relocs[0]->howto = bfd_reloc_type_lookup (stdoutput, *codes[0]);
 	  relocs[0]->address = fixp->fx_frag->fr_address + fixp->fx_where;
 	  relocs[0]->addend = 0;
-	  relocs[1]->sym_ptr_ptr = &fixp->fx_addsy->bsym;
+    relocs[1]->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+    *relocs[1]->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
 	  relocs[1]->howto = bfd_reloc_type_lookup (stdoutput, *codes[1]);
 	  relocs[1]->address = fixp->fx_frag->fr_address + fixp->fx_where;
 	  relocs[1]->addend = 0;
-	  relocs[2]->sym_ptr_ptr = &fixp->fx_subsy->bsym;
+    relocs[2]->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+    *relocs[2]->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
 	  relocs[2]->howto = bfd_reloc_type_lookup (stdoutput, *codes[2]);
 	  relocs[2]->address = fixp->fx_frag->fr_address + fixp->fx_where;
 	  relocs[2]->addend = 0;
-	  relocs[3]->sym_ptr_ptr = (asymbol **) &bfd_abs_symbol;
+    relocs[3]->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+    *relocs[3]->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
 	  relocs[3]->howto = bfd_reloc_type_lookup (stdoutput, *codes[3]);
 	  relocs[3]->address = fixp->fx_frag->fr_address + fixp->fx_where;
 	  relocs[3]->addend = 0;
-	  relocs[4]->sym_ptr_ptr = (asymbol **) &bfd_abs_symbol;
+    relocs[4]->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+    *relocs[4]->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
 	  relocs[4]->howto = bfd_reloc_type_lookup (stdoutput, *codes[4]);
 	  relocs[4]->address = fixp->fx_frag->fr_address + fixp->fx_where;
 	  relocs[4]->addend = 0;
@@ -2878,7 +2884,8 @@ tc_gen_reloc (section, fixp)
 	case R_N0SEL:
 	case R_N1SEL:
 	  /* There is no symbol or addend associated with these fixups.  */
-	  relocs[i]->sym_ptr_ptr = &dummy_symbol->bsym;
+    relocs[i]->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+    *relocs[i]->sym_ptr_ptr = symbol_get_bfdsym (dummy_symbol);
 	  relocs[i]->addend = 0;
 	  break;
 
@@ -2886,7 +2893,8 @@ tc_gen_reloc (section, fixp)
 	case R_ENTRY:
 	case R_EXIT:
 	  /* There is no symbol associated with these fixups.  */
-	  relocs[i]->sym_ptr_ptr = &dummy_symbol->bsym;
+    relocs[i]->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+    *relocs[i]->sym_ptr_ptr = symbol_get_bfdsym (dummy_symbol);
 	  relocs[i]->addend = fixp->fx_offset;
 	  break;
 
@@ -6555,7 +6563,7 @@ hppa_fix_adjustable (fixp)
       && (hppa_fix->segment->flags & SEC_CODE))
     {
       /* Apparently sy_used_in_reloc never gets set for sub symbols.  */
-      fixp->fx_subsy->sy_used_in_reloc = 1;
+      symbol_mark_used_in_reloc (fixp->fx_subsy);
       return 0;
     }
 
