@@ -1,3 +1,10 @@
+Thu Nov 30 11:32:34 1995  Manfred Hollstein KS/EF4A 60/1F/110 #40283  <manfred@lts.sel.alcatel.de>
+
+	* configure.host (m68*-motorola-sysv): Define HOSTING_CRT0 and
+	HOSTING_LIBS for testing.
+	(m88*-motorola-sysv3): Define HOSTING_CRT0 and HOSTING_LIBS for
+	testing.
+
 Tue Nov 28 12:14:53 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* lexsup.c (parse_args): Set config.dynamic_link to false for -N
