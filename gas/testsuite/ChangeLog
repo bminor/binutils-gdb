@@ -1,3 +1,10 @@
+start-sanitize-sky
+Thu Apr 16 11:23:13 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* gas/testsuite/dvp/{vif-1.[sd],vif-3.s}: Update, '*' no longer
+	supported as unpack address.
+
+end-sanitize-sky
 start-sanitize-r5900
 Wed Apr 15 13:08:30 1998  Frank Ch. Eigler <fche.cygnus.com>
 
