@@ -85,6 +85,8 @@
 @V@/gdb/config/alpha/tm-alphalinux.h @V@/gdb/config/alpha/tm-alplinux.h
 @V@/gdb/config/alpha/xm-alphalinux.h @V@/gdb/config/alpha/xm-alplinux.h
 @V@/gdb/config/alpha/xm-alphaosf.h @V@/gdb/config/alpha/xm-alposf.h
+@V@/gdb/config/i386/nm-linux64.h @V@/gdb/config/i386/nm-lx64.h
+@V@/gdb/config/i386/tm-linux64.h @V@/gdb/config/i386/tm-lx64.h
 @V@/gdb/config/i386/nm-i386sco4.h @V@/gdb/config/i386/nm-sco4.h
 @V@/gdb/config/i386/nm-i386sco5.h @V@/gdb/config/i386/nm-sco5.h
 @V@/gdb/config/i386/nm-i386sol2.h @V@/gdb/config/i386/nm-sol2.h

@@ -1,5 +1,9 @@
 2004-02-28  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/djgpp/fnchange.lst: Rename "config/i386/nm-linux64.h" to
+	"config/i386/nm-lx64.h" and "config/i386/tm-linux64.h" to
+	"config/i386/tm-lx64.h".
+
 	* config/djgpp/fnchange.lst: Rename "amd64-linux-tdep.c" to
 	"amd64-ltdep.c" and "amd64-linux-nat.c" to "amd64-lnat.c".  Remove
 	rules for "x86-64-linux-tdep.c" and "x86-64-linux-nat.c".
