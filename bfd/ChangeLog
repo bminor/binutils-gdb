@@ -26,6 +26,11 @@
 	(elf32_h8_mach, elf32_h8_final_write_processing): New functions.
 	(elf32_h8_object_p): Similarly.
 
+2001-08-29  Tom Rix <trix@redhat.com>
+
+ 	* xcofflink.c (xcoff_link_add_symbols):  Fix XTY_LD symbol that 
+ 	does not follow a XTY_SD.
+
 2001-08-29  Alan Modra  <amodra@bigpond.net.au>
 
 	* targmatch.sed: Delete case statements.

@@ -1574,9 +1574,9 @@ xcoff_link_add_symbols (abfd, info)
 
 	case XTY_LD:
 	  /* This is a label definition.  The x_scnlen field is the
-             symbol index of the csect.  I believe that this must
-             always follow the appropriate XTY_SD symbol, so I will
-             insist on it.  */
+	     symbol index of the csect.  Usually the XTY_LD symbol will 
+	     follow its appropriate XTY_SD symbol.  The .set pseudo op can
+	     cause the XTY_LD to not follow the XTY_SD symbol. */
 	  {
 	    boolean bad;
 
@@ -1600,7 +1600,7 @@ xcoff_link_add_symbols (abfd, info)
 		bfd_set_error (bfd_error_bad_value);
 		goto error_return;
 	      }
-
+ 	    csect = section;
 	    value = sym.n_value - csect->vma;
 	  }
 	  break;
