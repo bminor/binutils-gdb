@@ -172,6 +172,16 @@ main (argc, argv)
 
   xatexit (remove_output);
 
+  /* Set the default BFD target based on the configured target.  Doing
+     this permits the linker to be configured for a particular target,
+     and linked against a shared BFD library which was configured for
+     a different target.  The macro TARGET is defined by Makefile.  */
+  if (! bfd_set_default_target (TARGET))
+    {
+      einfo ("%X%P: can't set BFD default target to `%s': %E\n", TARGET);
+      xexit (1);
+    }
+
   /* Initialize the data about options.  */
   trace_files = trace_file_tries = version_printed = false;
   whole_archive = false;
@@ -794,8 +804,10 @@ multiple_definition (info, name, obfd, osec, oval, nbfd, nsec, nval)
      FIXME: It would be cleaner to somehow ignore symbols defined in
      sections which are being discarded.  */
   if ((osec->output_section != NULL
+       && ! bfd_is_abs_section (osec)
        && bfd_is_abs_section (osec->output_section))
       || (nsec->output_section != NULL
+	  && ! bfd_is_abs_section (nsec)
 	  && bfd_is_abs_section (nsec->output_section)))
     return true;
 

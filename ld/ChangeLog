@@ -1,3 +1,17 @@
+Wed Mar 12 21:33:09 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldmain.c (multiple_definition): Only skip the warning if the
+	output section is absolute when the input section is not
+	absolute.
+
+	* ldlex.l: Accept whitespace in VERS_START state.  Warn about
+	invalid characters in VERS_* states.
+
+Tue Mar 11 13:51:31 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* emultempl/aix.em (gld${EMULATION_NAME}_read_file): Don't let a
+	trailing space lead us to think that there is a zero address.
+
 Sun Mar  9 23:06:35 1997  Eric Youngdale  <eric@andante.jic.com>
 
 	* ldgram.y (vers_node): Correct typo of '('  for '{'.
