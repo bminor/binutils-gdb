@@ -27,7 +27,7 @@ Things-to-keep:
 add.s
 basic.exp
 bcc.s
-bccs.s
+bccx.s
 bit.s
 cmp.s
 ext.s
