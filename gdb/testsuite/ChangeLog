@@ -1,3 +1,10 @@
+2003-06-09  Raoul Gough  <RaoulGough@yahoo.co.uk>
+
+	* gdb.base/shreloc.exp: New file, check symbol values obtained from
+	shared objects after relocation at load time (gdb PR/1132).
+	* gdb.base/shreloc.c, gdb.base/shreloc1.c, gdb.base/shreloc2.c:
+        as above, part of the shared object relocation test.
+
 2003-06-08  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.base/readline.exp: Add tests for operate-and-get-next with a
