@@ -1,3 +1,11 @@
+Fri Oct  3 15:46:05 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/ieee-fp/x930509a.exp: Remove setup_xfail; it should now
+	work.  Correct for big endian and for tabs in input file.
+
+	* gas/alpha/fp.exp: Check for alpha-*-osf*, not alpha-*-osf1*.
+	* gas/alpha/fp.s: Change comment characters from ! to #.
+
 Thu Sep 18 11:17:53 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* gas/sparc/splet.d: Update to new objdump output format.
@@ -69,7 +77,6 @@ Tue Aug  5 12:33:23 1997  Ian Lance Taylor  <ian@cygnus.com>
 	* config/default.exp: Set NM to nm-new, not nm.new, to match
 	recent change in binutils build directory.
 
-start-sanitize-v850
 Thu Jul 31 15:21:51 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/v850/range.s: New test.
@@ -81,7 +88,6 @@ Tue Jul 29 14:35:02 1997  Jeffrey A Law  (law@cygnus.com)
 	* gas/v850/fepsw.s: New test.
 	* gas/v850/basic.exp: Run them.
 
-end-sanitize-v850
 Tue Jul 15 13:03:17 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* gas/m32r/uppercase.[sd]: New testcase.
@@ -491,13 +497,11 @@ Tue Oct 29 17:05:43 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/mips/*.d: Update for disassembler changes.
 
-start-sanitize-v850
 Wed Oct 16 22:39:50 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/v850/reloc.s: New tests.
 	* gas/v850/basic.exp: Run them.
 
-end-sanitize-v850
 Mon Oct 14 13:52:55 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/mips: Add symbols to several testsuites, since the ELF
@@ -568,7 +572,6 @@ Wed Sep  4 11:47:29 1996  James G. Smith  <jsmith@cygnus.co.uk>
 	* gas/mips/mips.exp: Add check for dli macro instruction.
 	* gas/mips/dli.{s,d}: Added.
 
-start-sanitize-v850
 Sat Aug 31 01:25:03 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/v850/basic.exp (do_mem): Check bit patterns for short
@@ -588,12 +591,10 @@ Fri Aug 30 00:37:55 1996  Jeffrey A Law  (law@cygnus.com)
 	* gas/v850/hilo.s: New testfile.
 	* gas/v850/basic.exp: Run hilo tests.
 
-end-sanitize-v850
 Thu Aug 29 11:32:23 1996  James G. Smith  <jsmith@cygnus.co.uk>
 
 	* gas/arm/arm7t.d: Explicitly force little-endian assembly.
 
-start-sanitize-v850
 Fri Aug 23 11:02:55 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/v850/basic.exp (do_move): Test instruction bit patterns.
@@ -633,7 +634,6 @@ Fri Aug 23 11:02:55 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/v850: New directory with v850 tests.
 
-end-sanitize-v850
 Fri Aug 16 00:19:10 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/hppa/basic/purge.s: Use "%sr4" on pitlb, pitlbe
