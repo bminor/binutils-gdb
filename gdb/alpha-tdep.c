@@ -1902,6 +1902,44 @@ get_elfosabi (bfd *abfd)
   return ALPHA_ABI_UNKNOWN;
 }
 
+struct alpha_abi_handler
+{
+  struct alpha_abi_handler *next;
+  enum alpha_abi abi;
+  void (*init_abi)(struct gdbarch_info, struct gdbarch *);
+};
+
+struct alpha_abi_handler *alpha_abi_handler_list = NULL;
+
+void
+alpha_gdbarch_register_os_abi (enum alpha_abi abi,
+                               void (*init_abi)(struct gdbarch_info,
+						struct gdbarch *))
+{
+  struct alpha_abi_handler **handler_p;
+
+  for (handler_p = &alpha_abi_handler_list; *handler_p != NULL;
+       handler_p = &(*handler_p)->next)
+    {
+      if ((*handler_p)->abi == abi)
+	{
+	  internal_error
+	    (__FILE__, __LINE__,
+	     "alpha_gdbarch_register_os_abi: A handler for this ABI variant "
+	     "(%d) has already been registered", (int) abi);
+	  /* If user wants to continue, override previous definition.  */
+	  (*handler_p)->init_abi = init_abi;
+	  return;
+	}
+    }
+
+  (*handler_p)
+    = (struct alpha_abi_handler *) xmalloc (sizeof (struct alpha_abi_handler));
+  (*handler_p)->next = NULL;
+  (*handler_p)->abi = abi;
+  (*handler_p)->init_abi = init_abi;
+}
+
 /* Initialize the current architecture based on INFO.  If possible, re-use an
    architecture from ARCHES, which is a list of architectures already created
    during this debugging session.
@@ -1915,6 +1953,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   struct gdbarch_tdep *tdep;
   struct gdbarch *gdbarch;
   enum alpha_abi alpha_abi = ALPHA_ABI_UNKNOWN;
+  struct alpha_abi_handler *abi_handler;
 
   /* Try to determine the ABI of the object we are loading.  */
 
@@ -2064,6 +2103,40 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_decr_pc_after_break (gdbarch, 4);
   set_gdbarch_frame_args_skip (gdbarch, 0);
+
+  /* Hook in ABI-specific overrides, if they have been registered.  */
+  if (alpha_abi == ALPHA_ABI_UNKNOWN)
+    {
+      /* Don't complain about not knowing the ABI variant if we don't
+	 have an inferior.  */
+      if (info.abfd)
+	fprintf_filtered
+	  (gdb_stderr, "GDB doesn't recognize the ABI of the inferior.  "
+	   "Attempting to continue with the default Alpha settings");
+    }
+  else
+    {
+      for (abi_handler = alpha_abi_handler_list; abi_handler != NULL;
+	   abi_handler = abi_handler->next)
+	if (abi_handler->abi == alpha_abi)
+	  break;
+
+      if (abi_handler)
+	abi_handler->init_abi (info, gdbarch);
+      else
+	{
+	  /* We assume that if GDB_MULTI_ARCH is less than
+	     GDB_MULTI_ARCH_TM that an ABI variant can be supported by
+	     overriding definitions in this file.  */
+	  if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
+	    fprintf_filtered
+	      (gdb_stderr,
+	       "A handler for the ABI variant \"%s\" is not built into this "
+	       "configuration of GDB.  "
+	       "Attempting to continue with the default Alpha settings",
+	       alpha_abi_names[alpha_abi]);
+	}
+    }
 
   return gdbarch;
 }

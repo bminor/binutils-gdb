@@ -98,4 +98,8 @@ struct gdbarch_tdep
   CORE_ADDR vm_min_address;	/* used by heuristic_proc_start */
 };
 
+void alpha_gdbarch_register_os_abi (enum alpha_abi,
+                                    void (*init_abi)(struct gdbarch_info,
+						     struct gdbarch *));
+
 #endif /* ALPHA_TDEP_H */

@@ -1,5 +1,15 @@
 2002-04-21  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* alpha-tdep.c (alpha_abi_handler): New structure to describe
+	an Alpha ABI variant.
+	(alpha_abi_handler_list): Declare.
+	(alpha_gdbarch_register_os_abi): New function.
+	(alpha_gdbarch_init): Give registered ABI variant handlers a
+	chance to tweak the gdbarch once we have set up defaults.
+	* alpha-tdep.h: Prototype alpha_gdbarch_register_os_abi.
+
+2002-04-21  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* alpha-tdep.c (alpha_gdbarch_init): Set coerce_float_to_double
 	to standard_coerce_float_to_double.
 	* config/alpha/tm-alpha.h (COERCE_FLOAT_TO_DOUBLE): Remove.
