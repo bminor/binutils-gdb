@@ -206,6 +206,7 @@ adjust_stab_sections (abfd, sec, xxx)
   bfd_h_put_32 (abfd, (bfd_vma) strsz, (bfd_byte *) p + 8);
 }
 
+#if 0
 /* Adjust the VMA address for each $CODE$ subspace.  */
 static void
 adjust_code_sections (abfd, sec, xxx)
@@ -221,6 +222,7 @@ adjust_code_sections (abfd, sec, xxx)
   bfd_set_section_vma (stdoutput, sec, size_so_far);
   size_so_far += bfd_get_section_size_before_reloc (sec);
 }
+#endif
 
 /* Called late in the asssembly phase to adjust the special
    stab entry and to set the starting address for each code subspace.  */
@@ -229,5 +231,8 @@ void
 som_frob_file ()
 {
   bfd_map_over_sections (stdoutput, adjust_stab_sections, (PTR) 0);
+#if 0
+  See comment in tc-hppa.c:pa_proc about GDB lossage
   bfd_map_over_sections (stdoutput, adjust_code_sections, (PTR) 0);
+#endif
 }

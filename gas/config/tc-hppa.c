@@ -4866,6 +4866,11 @@ pa_proc (unused)
   callinfo_found = FALSE;
   within_procedure = TRUE;
 
+#if 0
+  Enabling this code creates severe problems with GDB.  It appears as if
+  inserting linker stubs between functions within a single .o makes GDB
+  blow chunks.
+
   /* Create a new CODE subspace for each procedure if we are not
      using space/subspace aliases.  */
   if (!USE_ALIASES && call_info_root != NULL)
@@ -4892,6 +4897,7 @@ pa_proc (unused)
       obj_set_subsection_attributes (seg, current_space->sd_seg, 0x2c, 24, 0);
 #endif
     }
+#endif
 
   /* Create another call_info structure.  */
   call_info = (struct call_info *) xmalloc (sizeof (struct call_info));
@@ -4931,6 +4937,7 @@ pa_proc (unused)
 	  {
 	    last_call_info->start_symbol = label_symbol->lss_label;
 	    label_symbol->lss_label->bsym->flags |= BSF_FUNCTION;
+#if 0
 	    if (! USE_ALIASES)
 	      {
 		/* The label was defined in a different segment.  Fix that
@@ -4941,6 +4948,7 @@ pa_proc (unused)
 			       - frag_now->fr_literal));
 		last_call_info->start_symbol->sy_frag = frag_now;
 	      }
+#endif
 	  }
 	else
 	  as_bad ("Missing function name for .PROC (corrupted label chain)");
