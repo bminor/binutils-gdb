@@ -27,10 +27,10 @@ Makefile.in
 configure
 configure.in
 hppa.exp
-hppa.mt
 hppa.s
+mn10200.exp
+mn10200.s
 sh3.exp
-sh3.mt
 sh3.s
 
 Things-to-lose:
