@@ -1,5 +1,7 @@
 Thu Nov  2 08:54:04 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
+	* Makefile.in: Uncomment built file dependencies.
+	
 	* configure.in: Rewrite --enable-sim switch handling to use the
 	autoconf builtins so it works correctly if the configure or
 	Makefile.in files are modified and make decides to rebuild

@@ -338,10 +338,10 @@ tmp-igen: igen ppc-instructions $(IGEN_OPCODE_RULES) ppc-cache-rules $(srcdir)/.
 
 # NOTE: Some versions of make don't handle files created as side-effects
 # uncomment the below if that is the case.
-#
-# $(TARGETLIB): tmp-igen tmp-dgen
-# itable.h itable.c icache.h idecode.h idecode.c semantics.h semantics.c: tmp-igen
-# spreg.h spreg.c: tmp-dgen
+
+$(TARGETLIB): tmp-igen tmp-dgen
+itable.h itable.c icache.h idecode.h idecode.c semantics.h semantics.c: tmp-igen
+spreg.h spreg.c: tmp-dgen
 
 dgen: dgen.o table.o lf.o misc.o filter_filename.o
 	$(CC_FOR_BUILD) $(CFLAGS) $(LDFLAGS) -o dgen dgen.o table.o lf.o misc.o filter_filename.o $(LIBIBERTY_LIB) $(LIBS)

@@ -7,7 +7,7 @@ AC_ARG_ENABLE(sim-cflags,
 [case "${enableval}" in
   yes)	sim_cflags="-O2 -fomit-frame-pointer";;
   no)	sim_cflags="";;
-  *)	sim_cflags=`echo "${enableval}" | sed -e "s/,/ /"`;;
+  *)	sim_cflags=`echo "${enableval}" | sed -e "s/,/ /g"`;;
 esac],[sim_cflags=""])dnl
 
 AC_ARG_ENABLE(sim-config,
