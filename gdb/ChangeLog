@@ -1,3 +1,7 @@
+2003-05-10  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/tm-linux.h (I386_GNULINUX_TARGET): Remove define.
+
 2003-05-08  Andrew Cagney  <cagney@redhat.com>
 
 	* regcache.h (max_register_size): Delete declaration.
