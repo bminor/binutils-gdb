@@ -1,3 +1,13 @@
+Thu Nov  9 16:10:56 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* Makefile.in (AR, CC, CFLAGS, CC_FOR_BUILD, RANLIB): Pick up
+	defaults from configure.
+
+	* configure.in: Pick up AR, CC, CFLAGS, CC_FOR_BUILD, RANLIB using
+	configure defaults.
+	(powerpc*-*-eabi*): Build simulator for all powerpc eabi targets
+	if we are using GCC to build with.
+
 Wed Nov  8 15:46:49 1995  James G. Smith  <jsmith@pasanda.cygnus.co.uk>
 
 	* configure.in (mips*-*-*): Added "mips" simulator target.

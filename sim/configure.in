@@ -5,6 +5,21 @@ AC_INIT(Makefile.in)
 AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/..)
 AC_CANONICAL_SYSTEM
 AC_ARG_PROGRAM
+AC_PROG_CC
+AC_SUBST(CFLAGS)
+AC_SUBST(HDEFINES)
+AR=${AR-ar}
+AC_SUBST(AR)
+AC_PROG_RANLIB
+
+# Put a plausible default for CC_FOR_BUILD in Makefile.
+AC_C_CROSS
+if test "x$cross_compiling" = "xno"; then
+  CC_FOR_BUILD='$(CC)'
+else
+  CC_FOR_BUILD=gcc
+fi
+AC_SUBST(CC_FOR_BUILD)
 
 # WHEN ADDING ENTRIES TO THIS MATRIX:
 #  Make sure that the left side always has two dashes.  Otherwise you
@@ -17,8 +32,7 @@ case "${target}" in
   h8500-*-*)		sim_target=h8500 ;;
   mips*-*-*)		sim_target=mips ;;
   sh*-*-*)		sim_target=sh ;; 
-  powerpc-*-eabisim*)	sim_target=ppc ;;
-  powerpcle-*-eabisim*)	sim_target=ppc ;;
+  powerpc*-*-eabi*)	if test x$GCC != x""; then sim_target=ppc; fi ;;
   w65-*-*)		sim_target=w65 ;;
   z8k*-*-*)		sim_target=z8k ;;
   *)			sim_target=none ;;
