@@ -1,8 +1,13 @@
+2002-12-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/arm/adrl.s: Test behaviour against globals too.
+	* gas/arm/adrl.d: Adjust.
+
 2002-12-02  Nick Clifton  <nickc@redhat.com>
 
 	* gasp: Remove entire directory tree.  (Gasp has been removed from
 	binutils).
-	* config/default.asp (GASP): Remove definition and initialization.	
+	* config/default.asp (GASP): Remove definition and initialization.
 
 2002-12-01  Stephane Carrez  <stcarrez@nerim.fr>
 

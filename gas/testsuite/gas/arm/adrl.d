@@ -17,4 +17,10 @@ Disassembly of section .text:
 0+201c <.*> e1a00000 	nop			\(mov r0,r0\)
 0+2020 <.*> 028f0000 	addeq	r0, pc, #0	; 0x0
 0+2024 <.*> e1a00000 	nop			\(mov r0,r0\)
+0+2028 <.*> e24f0030 	sub	r0, pc, #48	; 0x30
+0+202c <.*> e2400c20 	sub	r0, r0, #8192	; 0x2000
+0+2030 <.*> e28f0c21 	add	r0, pc, #8448	; 0x2100
+0+2034 <.*> e1a00000 	nop			\(mov r0,r0\)
+	...
+0+4030 <.*> e28fec01 	add	lr, pc, #256	; 0x100
 	...
