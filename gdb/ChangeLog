@@ -1,3 +1,9 @@
+Thu Jul 20 22:22:34 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* somread.c (som_symtab_read): Add unsatisfied common symbols to
+	the minimal symbol table.  All common symbols are "unsatisfied"
+	when -E is passed to the linker.
+
 Thu Jul 20 15:04:57 1995  Fred Fish  <fnf@cygnus.com>
 
 	* top.c (show_endian): Cast first arg of printf_unfiltered to

@@ -286,6 +286,23 @@ som_symtab_read (abfd, objfile, section_offsets)
 	    }
 	  break;
 
+	/* This can happen for common symbols when -E is passed to the
+	   final link.  No idea _why_ that would make the linker force
+	   common symbols to have an SS_UNSAT scope, but it does.  */
+	case SS_UNSAT:
+	  switch (bufp->symbol_type)
+	    {
+	      case ST_STORAGE:
+		symname = bufp->name.n_strx + stringtab;
+		bufp->symbol_value += data_offset;
+		ms_type = mst_data;
+		break;
+
+	      default:
+		continue;
+	    }
+	  break;
+
 	default:
 	  continue;
 	}
