@@ -148,7 +148,6 @@ check-DEJAGNU: site.exp
 	  TCL_LIBRARY=`cd $(top_srcdir)/../tcl/library && pwd`; \
 	  export TCL_LIBRARY; \
 	fi; \
-	LC_ALL=C; export LC_ALL; \
 	runtest=$(RUNTEST); \
 	if $(SHELL) -c "$$runtest --version" > /dev/null 2>&1; then \
 	  CC_FOR_TARGET="$(CC_FOR_TARGET)" CFLAGS_FOR_TARGET="$(CFLAGS)" \
