@@ -396,3 +396,13 @@
 @V@/tk/unix/tkUnixSend.c @V@/tk/unix/tkSend.c
 @V@/libgui/src/tkWinPrintCanvas.c @V@/libgui/src/tkWPrtCanvas.c
 @V@/libgui/src/tkWinPrintText.c @V@/libgui/src/tkWPrtText.c
+@V@/gdb/gdbtk/generic/ChangeLog-1997 @V@/gdb/gdbtk/generic/ChangeLog.97
+@V@/gdb/gdbtk/generic/ChangeLog-1998 @V@/gdb/gdbtk/generic/ChangeLog.98
+@V@/gdb/gdbtk/generic/ChangeLog-1999 @V@/gdb/gdbtk/generic/ChangeLog.99
+@V@/gdb/gdbtk/generic/ChangeLog-2000 @V@/gdb/gdbtk/generic/ChangeLog.000
+@V@/gdb/gdbtk/generic/ChangeLog-2001 @V@/gdb/gdbtk/generic/ChangeLog.001
+@V@/gdb/gdbtk/library/ChangeLog-1997 @V@/gdb/gdbtk/library/ChangeLog.97
+@V@/gdb/gdbtk/library/ChangeLog-1998 @V@/gdb/gdbtk/library/ChangeLog.98
+@V@/gdb/gdbtk/library/ChangeLog-1999 @V@/gdb/gdbtk/library/ChangeLog.99
+@V@/gdb/gdbtk/library/ChangeLog-2000 @V@/gdb/gdbtk/library/ChangeLog.000
+@V@/gdb/gdbtk/library/ChangeLog-2001 @V@/gdb/gdbtk/library/ChangeLog.001
