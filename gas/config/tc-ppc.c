@@ -82,6 +82,7 @@ static void ppc_section PARAMS ((int));
 static void ppc_stabx PARAMS ((int));
 static void ppc_rename PARAMS ((int));
 static void ppc_toc PARAMS ((int));
+static void ppc_xcoff_cons PARAMS ((int));
 #endif
 
 #ifdef OBJ_ELF
@@ -110,6 +111,7 @@ static void ppc_pe_tocd PARAMS ((int));
 /* Generic assembler global variables which must be defined by all
    targets.  */
 
+#ifdef OBJ_ELF
 /* This string holds the chars that always start a comment.  If the
    pre-processor is disabled, these aren't very useful.  The macro
    tc_comment_chars points to this.  We use this, rather than the
@@ -121,6 +123,9 @@ static const char ppc_eabi_comment_chars[] = "#";
 const char *ppc_comment_chars = ppc_solaris_comment_chars;
 #else
 const char *ppc_comment_chars = ppc_eabi_comment_chars;
+#endif
+#else
+const char comment_chars[] = "#";
 #endif
 
 /* Characters which start a comment at the beginning of a line.  */
@@ -171,6 +176,9 @@ const pseudo_typeS md_pseudo_table[] =
   { "stabx",	ppc_stabx,	0 },
   { "text",	ppc_section,	't' },
   { "toc",	ppc_toc,	0 },
+  { "long",	ppc_xcoff_cons,	2 },
+  { "word",	ppc_xcoff_cons,	1 },
+  { "short",	ppc_xcoff_cons,	1 },
 #endif
 
 #ifdef OBJ_ELF
@@ -1130,12 +1138,12 @@ ppc_elf_suffix (str_p, exp_p)
     MAP ("got@h",	BFD_RELOC_HI16_GOTOFF),
     MAP ("got@ha",	BFD_RELOC_HI16_S_GOTOFF),
     MAP ("fixup",	BFD_RELOC_CTOR),		/* warnings with -mrelocatable */
+    MAP ("plt",		BFD_RELOC_24_PLT_PCREL),
     MAP ("pltrel24",	BFD_RELOC_24_PLT_PCREL),
     MAP ("copy",	BFD_RELOC_PPC_COPY),
     MAP ("globdat",	BFD_RELOC_PPC_GLOB_DAT),
     MAP ("local24pc",	BFD_RELOC_PPC_LOCAL24PC),
     MAP ("local",	BFD_RELOC_PPC_LOCAL24PC),
-    MAP ("plt",		BFD_RELOC_32_PLTOFF),
     MAP ("pltrel",	BFD_RELOC_32_PLT_PCREL),
     MAP ("plt@l",	BFD_RELOC_LO16_PLTOFF),
     MAP ("plt@h",	BFD_RELOC_HI16_PLTOFF),
@@ -3061,6 +3069,18 @@ ppc_toc (ignore)
   demand_empty_rest_of_line ();
 }
 
+/* The AIX assembler automatically aligns the operands of a .long or
+   .short pseudo-op, and we want to be compatible.  */
+
+static void
+ppc_xcoff_cons (log_size)
+     int log_size;
+{
+  frag_align (log_size, 0);
+  record_alignment (now_seg, log_size);
+  cons (1 << log_size);
+}
+
 #endif /* OBJ_XCOFF */
 
 /* The .tc pseudo-op.  This is used when generating either XCOFF or
@@ -4733,6 +4753,7 @@ md_apply_fix3 (fixp, valuep, seg)
 			      value, 1);
 	  break;
 
+	case BFD_RELOC_24_PLT_PCREL:
 	case BFD_RELOC_PPC_LOCAL24PC:
 	  if (!fixp->fx_pcrel)
 	    abort ();

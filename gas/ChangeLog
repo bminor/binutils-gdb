@@ -5,6 +5,10 @@ Fri Jan 31 13:15:05 1997  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 Fri Jan 31 10:46:14 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-ppc.c (md_pseudo_table): If OBJ_XCOFF, add "long",
+ 	"word", and "short".
+	(ppc_xcoff_cons): New static function.
+
 	* write.c (relax_segment): Give an error if a .space symbol is
 	common or undefined.
 
