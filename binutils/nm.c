@@ -29,6 +29,7 @@
 #include "demangle.h"
 #include "libiberty.h"
 #include "elf-bfd.h"
+#include "elf/common.h"
 
 /* When sorting by size, we use this structure to hold the size and a
    pointer to the minisymbol.  */
@@ -54,6 +55,7 @@ struct extended_symbol_info
 {
   symbol_info *sinfo;
   bfd_vma ssize;
+  elf_symbol_type *elfinfo;
   /* FIXME: We should add more fields for Type, Line, Section.  */
 };
 #define SYM_NAME(sym)        (sym->sinfo->name)
@@ -62,7 +64,8 @@ struct extended_symbol_info
 #define SYM_STAB_NAME(sym)   (sym->sinfo->stab_name)
 #define SYM_STAB_DESC(sym)   (sym->sinfo->stab_desc)
 #define SYM_STAB_OTHER(sym)  (sym->sinfo->stab_other)
-#define SYM_SIZE(sym)        (sym->ssize)              
+#define SYM_SIZE(sym) \
+  (sym->elfinfo ? sym->elfinfo->internal_elf_sym.st_size: sym->ssize)
 
 static void usage                PARAMS ((FILE *, int));
 static void set_print_radix      PARAMS ((char *));
@@ -104,6 +107,7 @@ static void print_symbol_info_bsd PARAMS ((struct extended_symbol_info *, bfd *)
 static void print_symbol_info_sysv PARAMS ((struct extended_symbol_info *, bfd *));
 static void print_symbol_info_posix PARAMS ((struct extended_symbol_info *, bfd *));
 static void get_relocs PARAMS ((bfd *, asection *, PTR));
+static const char * get_symbol_type PARAMS ((unsigned int));
 
 /* Support for different output formats.  */
 struct output_fns
@@ -497,6 +501,32 @@ main (argc, argv)
   return retval;
 }
 
+static const char *
+get_symbol_type (type)
+     unsigned int type;
+{
+  static char buff [32];
+
+  switch (type)
+    {
+    case STT_NOTYPE:   return "NOTYPE";
+    case STT_OBJECT:   return "OBJECT";
+    case STT_FUNC:     return "FUNC";
+    case STT_SECTION:  return "SECTION";
+    case STT_FILE:     return "FILE";
+    case STT_COMMON:   return "COMMON";
+    case STT_TLS:      return "TLS";
+    default:
+      if (type >= STT_LOPROC && type <= STT_HIPROC)
+	sprintf (buff, _("<processor specific>: %d"), type);
+      else if (type >= STT_LOOS && type <= STT_HIOS)
+	sprintf (buff, _("<OS specific>: %d"), type);
+      else
+	sprintf (buff, _("<unknown>: %d"), type);
+      return buff;
+    }
+}
+
 static void
 display_archive (file)
      bfd *file;
@@ -525,6 +555,10 @@ display_archive (file)
 
       if (bfd_check_format_matches (arfile, bfd_object, &matching))
 	{
+	  char buf[30];
+
+	  bfd_sprintf_vma (arfile, buf, (bfd_vma) -1);
+	  print_width = strlen (buf);
 	  (*format->print_archive_member) (bfd_get_filename (file),
 					   bfd_get_filename (arfile));
 	  display_rel_file (arfile, file);
@@ -577,6 +611,10 @@ display_file (filename)
     }
   else if (bfd_check_format_matches (file, bfd_object, &matching))
     {
+      char buf[30];
+
+      bfd_sprintf_vma (file, buf, (bfd_vma) -1);
+      print_width = strlen (buf);
       (*format->print_object_filename) (filename);
       display_rel_file (file, NULL);
     }
@@ -896,7 +934,6 @@ display_rel_file (abfd, archive_bfd)
   PTR minisyms;
   unsigned int size;
   struct size_sym *symsizes;
-  char buf[30];
 
   if (! dynamic)
     {
@@ -916,9 +953,6 @@ display_rel_file (abfd, archive_bfd)
       non_fatal (_("%s: no symbols"), bfd_get_filename (abfd));
       return;
     }
-
-  bfd_sprintf_vma (abfd, buf, (bfd_vma) -1);
-  print_width = strlen (buf);
 
   /* Discard the symbols we don't want to print.
      It's OK to do this in place; we'll free the storage anyway
@@ -1079,18 +1113,12 @@ print_symbols (abfd, dynamic, minisyms, symcount, size, archive_bfd)
   for (; from < fromend; from += size)
     {
       asymbol *sym;
-      bfd_vma ssize;
 
       sym = bfd_minisymbol_to_symbol (abfd, dynamic, from, store);
       if (sym == NULL)
 	bfd_fatal (bfd_get_filename (abfd));
 
-      if (bfd_get_flavour (abfd) == bfd_target_elf_flavour) 
-	ssize = ((elf_symbol_type *) sym)->internal_elf_sym.st_size;
-      else
-	ssize = 0;
-
-      print_symbol (abfd, sym, ssize, archive_bfd);
+      print_symbol (abfd, sym, (bfd_vma) 0, archive_bfd);
     }
 }
 
@@ -1121,9 +1149,6 @@ print_size_symbols (abfd, dynamic, symsizes, symcount, archive_bfd)
       sym = bfd_minisymbol_to_symbol (abfd, dynamic, from->minisym, store);
       if (sym == NULL)
 	bfd_fatal (bfd_get_filename (abfd));
-
-      /* Set the symbol value so that we actually display the symbol size.  */
-      sym->value = from->size - bfd_section_vma (abfd, bfd_get_section (sym));
 
       /* For elf we have already computed the correct symbol size.  */
       if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
@@ -1161,6 +1186,10 @@ print_symbol (abfd, sym, ssize, archive_bfd)
       bfd_get_symbol_info (abfd, sym, &syminfo);
       info.sinfo = &syminfo;
       info.ssize = ssize;
+      if (bfd_get_flavour (abfd) == bfd_target_elf_flavour) 
+	info.elfinfo = (elf_symbol_type *) sym;
+      else
+	info.elfinfo = NULL;
       (*format->print_symbol_info) (&info, abfd);
     }
 
@@ -1303,8 +1332,12 @@ print_object_filename_sysv (filename)
     printf (_("\n\nUndefined symbols from %s:\n\n"), filename);
   else
     printf (_("\n\nSymbols from %s:\n\n"), filename);
-  printf (_("\
-Name                  Value   Class        Type         Size   Line  Section\n\n"));
+  if (print_width == 8)
+    printf (_("\
+Name                  Value   Class        Type         Size     Line  Section\n\n"));
+  else
+    printf (_("\
+Name                  Value           Class        Type         Size             Line  Section\n\n"));
 }
 
 static void
@@ -1357,8 +1390,12 @@ print_archive_member_sysv (archive, filename)
     printf (_("\n\nUndefined symbols from %s[%s]:\n\n"), archive, filename);
   else
     printf (_("\n\nSymbols from %s[%s]:\n\n"), archive, filename);
-  printf (_("\
-Name                  Value   Class        Type         Size   Line  Section\n\n"));
+  if (print_width == 8)
+    printf (_("\
+Name                  Value   Class        Type         Size     Line  Section\n\n"));
+  else
+    printf (_("\
+Name                  Value           Class        Type         Size             Line  Section\n\n"));
 }
 
 static void
@@ -1489,7 +1526,12 @@ print_symbol_info_sysv (info, abfd)
   print_symname ("%-20s|", SYM_NAME (info), abfd);
 
   if (bfd_is_undefined_symclass (SYM_TYPE (info)))
-    printf ("        ");
+    {
+      if (print_width == 8)
+	printf ("        ");
+      else
+	printf ("                ");
+    }
   else
     print_value (abfd, SYM_VALUE (info));
 
@@ -1505,14 +1547,26 @@ print_symbol_info_sysv (info, abfd)
   else
     {	
       /* Type, Size, Line, Section */
-      printf ("                  |");
+      if (info->elfinfo)
+	printf ("%18s|",
+		get_symbol_type (ELF_ST_TYPE (info->elfinfo->internal_elf_sym.st_info)));
+      else
+	printf ("                  |");
 
       if (SYM_SIZE (info))
 	print_value (abfd, SYM_SIZE (info));
       else
-	printf("        ");
+	{
+	  if (print_width == 8)
+	    printf ("        ");
+	  else
+	    printf ("                ");
+	}
 
-      printf("|     |");	
+      if (info->elfinfo)
+	printf("|     |%s", info->elfinfo->symbol.section->name);
+      else
+	printf("|     |");
     }
 }
 

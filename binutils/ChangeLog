@@ -1,3 +1,27 @@
+2002-06-18  H.J. Lu  (hjl@gnu.org)
+
+	* nm.c: Include "elf/common.h".
+	(extended_symbol_info): Add elfinfo, a pointer to
+	elf_symbol_type.
+	(SYM_SIZE): Use elfinfo if it is not NULL.
+	(get_symbol_type): New function.
+	(display_archive): Set print_width for each archive member.
+	(display_file): Likewise.
+	(display_rel_file): Don't set print_width here.
+	(print_object_filename_sysv): Handle print_width.
+	(print_archive_member_sysv): Likewise.
+	(print_symbols): Pass (bfd_vma) 0 to print_symbol.
+	(print_symbol): Set the elfinfo field in extended_symbol_info
+	for ELF.
+	(print_object_filename_sysv): Fix the output format.
+	(print_symbol_info_sysv): Print type and section for ELF.
+
+2002-06-18  Elias Athanasopoulos  <eathan@otenet.gr>
+
+	* nm.c (print_size_symbols): Remove assignment, which makes
+	the symbol's size equal to its value when --size-sort is 
+	used.
+
 2002-06-18  Dave Brolley  <brolley@redhat.com>
 
 	From Catherine Moore:
