@@ -4,55 +4,57 @@ you should consider sending mail to the same address, to find out
 whether anyone else is working on it.
 
 
-TODO: GDB 5.0
-=============
+Known problems in GDB 5.0
+=========================
 
-Here are _all_ the issues that have been raised vis-a-vis the 5.0
-release.  Also check the GDB, and other, mail archives
-(http://sourceware.cygnus.com/ml/gdb/).
+Below is a list of problems identified during the GDB 5.0 release
+cycle.  People hope to have these problems fixed in a follow-on
+release.
 
-If, however, you fix something, then feel free to tweek this file
-(deleting the problem).  Just send a note to gdb-patches so that I see
-the change.
-
-The names in paren are those that might know more about the problem.
-They don't necessarily indicate the people that will fix the problem.
+(The names in paren indicate people that posted the original problem.)
 
 --
 
-GDB 5.0: Must have
-------------------
+GDB doesn't build under IRIX6.4
 
-These are things that have been identifed as must-have for this
-release of GDB.
+Benjamin Gamsa wrote:
 
---
-
-GDB 5.0: Nice to have
----------------------
-
-These are things that might make it in 5.0 but don't sit in the
-critical path.  If they miss the 5.0 cut then they definitly should
-make the follow-on release.
+Has anyone successfully built the latest (from cvs) gdb on IRIX6.4 or
+later?  The first problem I hit is that proc-api.c includes
+sys/user.h, which no longer exists under IRIX6.4.  If I comment out
+that include, the next problem I hit is that PIOCGETPR and PIOCGETU
+are no longer defined in IRIX6.4 (presumably related to the
+disappearance of user.h).
 
 --
 
-Generic: lin-thread cannot handle thread exit (Mark Kettenis, Michael Snyder)
-http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00525.html
+gdb-cvs fails to build on freebsd-elf
+http://sourceware.cygnus.com/ml/gdb/2000-04/msg00004.html
+
+Either the FreeBSD group need to contribute their local GDB changes
+back to the master sources or someone needs to provides a new
+(clean-room) implementation.  Since the former involves a fairly
+complicated assignment the latter may be easier. [cagney]
+
+--
+
+Generic: lin-thread cannot handle thread exit (Mark Kettenis, Michael
+Snyder) http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00525.html
 
 The thread_db assisted debugging code doesn't handle exiting threads
 properly, at least in combination with glibc 2.1.3 (the framework is
 there, just not the actual code).  There are at least two problems
 that prevent this from working.
 
-As an additional reference point, the pre thread_db code didn't work
+As an additional reference point, the pre thread_db code did not work
 either.
 
 --
 
 Java (Anthony Green, David Taylor)
 
-Anthony Green has started contributing late breaking Java patches:
+Anthony Green has a number of Java patches that did not make it into
+the 5.0 release.
 
 Patch: java tests
 http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00512.html
@@ -63,32 +65,24 @@ http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00515.html
 Patch: handle N_MAIN stab
 http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00527.html
 
-It should be able to squeeze these in.
-
 --
 
 Pascal (Pierre Muller, David Taylor)
 
-The pascal support patches nave been added to the patch data base.  I
-[cagney] strongly suspect that they are better suited for 5.1.
-
-Indent -gnu ?
-http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00496.html
+Pierre Muller has contributed patches for adding Pascal Language
+support to GDB.
 
 2 pascal language patches inserted in database
 http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00521.html
 
---
-
-Programs run under GDB have SIGCHLD masked.
-
-[I think this can be worked around by using the action command -
-cagney]
+Indent -gnu ?
+http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00496.html
 
 --
 
 GNU/Linux/x86 and random thread signals (and Solaris/SPARC but not
-Solaris/x86)
+Solaris/x86).
+http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00336.html
 
 Christopher Blizzard writes:
 
@@ -110,61 +104,43 @@ http://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=9565
 
 --
 
-IRIX?
-
-Benjamin Gamsa wrote:
-
-Has anyone successfully built the latest (from cvs) gdb on IRIX6.4 or
-later?  The first problem I hit is that proc-api.c includes
-sys/user.h, which no longer exists under IRIX6.4.  If I comment out
-that include, the next problem I hit is that PIOCGETPR and PIOCGETU
-are no longer defined in IRIX6.4 (presumably related to the
-disappearance of user.h).
-
---
-
-Regressions (prologue) with devel GCC.
-
-The current head of the GCC branch doesn't co-operate well with GDB
-over debug information.
-
-Regressions problem (200 failures)
+Possible regressions with some devel GCCs.
 http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00475.html
 
+gcc-2.95.2 outputs a line note *before* the prologue (and one for the
+closing brace after the epilogue, instead of before it, as it used to
+be). By disabling the RTL-style prologue generating mechanism
+(undocumented GCC option -mno-schedule-prologue), you get back the
+traditional behaviour.
+http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00510.html
+
+This should now be fixed.
+
 --
 
-RFA: infrun.c, breakpoint.c: Kludge for Solaris x86 hardware watchpoint support
-http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00664.html
-
-Unfortunately I'd need the following kludge to work around a Solaris
-x86 kernel problem with hardware watchpoint support.  See the comment
-in the patches for a description of the problem.
-
---
-
-RFD: infrun.c: No bpstat_stop_status call after proceed over break ?
+RFD: infrun.c: No bpstat_stop_status call after proceed over break?
+(Peter Schauer)
 http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00665.html
 
-I am currently trying to fix a GDB bug with missing watchpoint triggers
-after proceeding over a breakpoint on x86 targets.
+GDB misses watchpoint triggers after proceeding over a breakpoint on
+x86 targets.
+
+I think
+http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00664.html
+fixed this.
 
 --
 
 x86 linux GDB and SIGALRM (???)
 http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00803.html
 
---
+I know there are problems with single stepping through signal
+handlers.  These problems were present in 4.18.  They were just masked
+because 4.18 failed to recognize signal handlers.  Fixing it is not
+easy, and will require changes to handle_inferior_event(), that I
+prefer not to make before the 5.0 release.
 
-Migrate qfThreadInfo packet -> qThreadInfo. (Andrew Cagney)
-
-Add support for packet enable/disable commands with these thread
-packets.  General cleanup.
-
-[PATCH] Document the ThreadInfo remote protocol queries
-http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00832.html
-
-[PATCH] "info threads" queries for remote.c
-http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00831.html
+Mark
 
 --
 
@@ -182,115 +158,20 @@ Discussion on MI can be found on the thread: [PATCH] GDB command-line
 switches and annotations docs
 http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00639.html
 
+MI documentation can be found in the file gdb/mi/gdbmi.texinfo
+
 --
 
 Revised UDP support (was: Re: [Fwd: [patch] UDP transport support])
 http://sourceware.cygnus.com/ml/gdb-patches/2000-04/msg00000.html
 
---
-
-problems loading shared libraries - with attached test case
-http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00820.html
-
-Hi, I'm having problems loading shared libraries.  This is with a
-build of gdb out of cvs that I pulled and built on March 27th and has
-been there for at least a week.  I haven't gone back further than
-that.  This is with the gcc that is shipping with Red Hat 6.2:
-
-Reading specs from
-/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/specs gcc version
-egcs-2.91.66 19990314/Linux (egcs-1.1.2 release)
-
-I'm using "set auto-solib-add 0" after main has been called.  If I use
-"shar" to load a shared library manually once I can't use it again to
-load another shared library later.  Please see the attached log for an
-example of how to reproduce the problem.
+(Broken) support for GDB's remote protocol across UDP is to be
+included in the follow-on release.
 
 --
 
-GDB 5.0: Won't have
--------------------
-
-The following are on hold until GDB 5.0 is branched.  In general they
-won't go in as they unsettle the GDB sources.
-
---
-
-ATTRIBUTE_UNUSED
-
-The need for this as almost been eliminated.  The next version of GCC
-(assuming cagney gets the revised patch approved) will be able to
-supress unused parameter warnings.
-
---
-
-Delete macro TARGET_BYTE_ORDER_SELECTABLE.
-
-Patches in the database.
-
---
-
-Updated readline
-
-Readline 4.? is out.  A merge wouldn't hurt.
-
---
-
-Purge PARAMS
-
-Something to do post 5.0 branch
-
---
-
-Elimination of make_cleanup_func. (Andrew Cagney)
-
-make_cleanup_func elimination
-http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00791.html
-http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00814.html
-
---
-
-ChangeLog.mi vs ChangeLog-mi (Andrew Cagney)
-Needs further debate.
-
-Re: [PATCH] Add change-log variables to more MI files
-http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00811.html
-
---
-
-Re: gdb-cvs fails on freebsd-elf
-http://sourceware.cygnus.com/ml/gdb/2000-04/msg00004.html
-
-FreeBSD haven't contributed their local GDB changes back to the master
-sources (they would at least need an FSF assignment by all
-individuales that contributed to the work).  Given the strong
-likelhood that this will never happen, I'd suggest that a better
-strategy would be for someone (with an FSF/GDD assignment) to do a new
-(clean-room) implementation.  That can then be accepted in time for
-GDB 5.1.
-
---
-
-Re: Various C++ things
-
-value_headof/value_from_vtable_info are worthless, and should be removed.
-The one place in printcmd.c that uses it should use the RTTI functions.
-
-RTTI for g++ should be using the typeinfo functions rather than the vtables.
-The typeinfo functions are always at offset 4 from the beginning of the vtable,
-and are always right. The vtables will have weird names like E::VB sometimes.
-The typeinfo function will always be "E type_info function", or somesuch.
-
-value_virtual_fn_field needs to be fixed so there are no failures for virtual
-functions for C++ using g++.
-
-Testsuite cases are the major priority right now for C++ support, since i have
-to make a lot of changes that could potentially break each other.
-
-
---
 GDB 5.0: Test results
----------------------
+=====================
 
 Please include:
 
@@ -384,21 +265,102 @@ http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00025.html
 		------------------------------------------------
 
 
-General Wish List
-=================
+Code cleanups
+=============
+
+The following code cleanups are planned for the follow-on release to
+GDB 5.0.
+
+--
+
+ATTRIBUTE_UNUSED
+
+The need for this as almost been eliminated.  The next version of GCC
+(assuming cagney gets the relevant patch committed) will be able to
+supress unused parameter warnings.
+
+--
+
+Delete macro TARGET_BYTE_ORDER_SELECTABLE.
+
+Patches in the database.
+
+--
+
+Updated readline
+
+Readline 4.? is out.  A merge wouldn't hurt.
+
+--
+
+Purge PARAMS
+
+Eliminate all uses of PARAMS in GDB's source code.
+
+--
+
+Elimination of make_cleanup_func. (Andrew Cagney)
+
+make_cleanup_func elimination
+http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00791.html
+http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00814.html
+
+--
+
+ChangeLog.mi vs ChangeLog-mi (Andrew Cagney)
+Needs further debate.
+
+Re: [PATCH] Add change-log variables to more MI files
+http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00811.html
+
+--
+
+Re: Various C++ things
+
+value_headof/value_from_vtable_info are worthless, and should be removed.
+The one place in printcmd.c that uses it should use the RTTI functions.
+
+RTTI for g++ should be using the typeinfo functions rather than the vtables.
+The typeinfo functions are always at offset 4 from the beginning of the vtable,
+and are always right. The vtables will have weird names like E::VB sometimes.
+The typeinfo function will always be "E type_info function", or somesuch.
+
+value_virtual_fn_field needs to be fixed so there are no failures for virtual
+functions for C++ using g++.
+
+Testsuite cases are the major priority right now for C++ support, since i have
+to make a lot of changes that could potentially break each other.
 
 --
 
 GDBARCH cleanup (Andrew Cagney)
 
 The non-generated parts of gdbarch.{sh,h,c} should be separated out
-into gdbarch-utils.[hc] (Name ok).
+into arch-utils.[hc].
 
 The ``info architecture'' command should be replaced with a fixed
 ``set architecture'' (implemented using the command.c enum code).
 
 Document that gdbarch_init_ftype could easily fail because it didn't
 identify an architecture.
+
+--
+
+Migrate qfThreadInfo packet -> qThreadInfo. (Andrew Cagney)
+
+Add support for packet enable/disable commands with these thread
+packets.  General cleanup.
+
+[PATCH] Document the ThreadInfo remote protocol queries
+http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00832.html
+
+[PATCH] "info threads" queries for remote.c
+http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00831.html
+
+--
+
+General Wish List
+=================
 
 --
 
