@@ -1,3 +1,8 @@
+2004-03-20  Paul Hilfinger  <hilfingr@nile.gnat.com>
+
+	* bcache.c (print_percentage): Use floating point to avoid
+	incorrect results when portion*100 overflows.
+
 2004-03-19  Kevin Buettner  <kevinb@redhat.com>
 
 	* ppc_tdep.h (ppc_linux_frame_saved_pc)
