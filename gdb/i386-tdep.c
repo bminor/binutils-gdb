@@ -832,7 +832,8 @@ i386_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 	  ULONGEST val;
 
 	  /* Clear the direction flag.  */
-	  frame_unwind_unsigned_register (next_frame, PS_REGNUM, &val);
+	  val = frame_unwind_register_unsigned (next_frame,
+						I386_EFLAGS_REGNUM);
 	  val &= ~(1 << 10);
 	  store_unsigned_integer (valuep, 4, val);
 	}
@@ -1035,11 +1036,14 @@ i386_get_longjmp_target (CORE_ADDR *pc)
   if (jb_pc_offset == -1)
     return 0;
 
-  sp = read_register (SP_REGNUM);
+  /* Don't use I386_ESP_REGNUM here, since this function is also used
+     for AMD64.  */
+  regcache_cooked_read (current_regcache, SP_REGNUM, buf);
+  sp = extract_typed_address (buf, builtin_type_void_data_ptr);
   if (target_read_memory (sp + len, buf, len))
     return 0;
 
-  jb_addr = extract_typed_address (buf, builtin_type_void_func_ptr);
+  jb_addr = extract_typed_address (buf, builtin_type_void_data_ptr);
   if (target_read_memory (jb_addr + jb_pc_offset, buf, len))
     return 0;
 
@@ -1148,8 +1152,8 @@ i386_extract_return_value (struct type *type, struct regcache *regcache,
     }
   else
     {
-      int low_size = REGISTER_RAW_SIZE (LOW_RETURN_REGNUM);
-      int high_size = REGISTER_RAW_SIZE (HIGH_RETURN_REGNUM);
+      int low_size = register_size (current_gdbarch, LOW_RETURN_REGNUM);
+      int high_size = register_size (current_gdbarch, HIGH_RETURN_REGNUM);
 
       if (len <= low_size)
 	{
@@ -1222,8 +1226,8 @@ i386_store_return_value (struct type *type, struct regcache *regcache,
     }
   else
     {
-      int low_size = REGISTER_RAW_SIZE (LOW_RETURN_REGNUM);
-      int high_size = REGISTER_RAW_SIZE (HIGH_RETURN_REGNUM);
+      int low_size = register_size (current_gdbarch, LOW_RETURN_REGNUM);
+      int high_size = register_size (current_gdbarch, HIGH_RETURN_REGNUM);
 
       if (len <= low_size)
 	regcache_raw_write_part (regcache, LOW_RETURN_REGNUM, 0, len, valbuf);
@@ -1337,7 +1341,7 @@ i386_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 
       /* Extract (always little endian).  */
       regcache_raw_read (regcache, fpnum, mmx_buf);
-      memcpy (buf, mmx_buf, REGISTER_RAW_SIZE (regnum));
+      memcpy (buf, mmx_buf, register_size (gdbarch, regnum));
     }
   else
     regcache_raw_read (regcache, regnum, buf);
@@ -1355,7 +1359,7 @@ i386_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
       /* Read ...  */
       regcache_raw_read (regcache, fpnum, mmx_buf);
       /* ... Modify ... (always little endian).  */
-      memcpy (mmx_buf, buf, REGISTER_RAW_SIZE (regnum));
+      memcpy (mmx_buf, buf, register_size (gdbarch, regnum));
       /* ... Write.  */
       regcache_raw_write (regcache, fpnum, mmx_buf);
     }
@@ -1459,7 +1463,7 @@ i386_register_to_value (struct frame_info *frame, int regnum,
       gdb_assert (regnum != -1);
       gdb_assert (register_size (current_gdbarch, regnum) == 4);
 
-      frame_read_register (frame, regnum, buf);
+      get_frame_register (frame, regnum, buf);
       regnum = i386_next_regnum (regnum);
       len -= 4;
       buf += 4;
@@ -1727,14 +1731,14 @@ i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 }
 
 
-/* Get the ith function argument for the current function.  */
+/* Get the ARGIth function argument for the current function.  */
+
 static CORE_ADDR
 i386_fetch_pointer_argument (struct frame_info *frame, int argi, 
 			     struct type *type)
 {
-  CORE_ADDR stack;
-  frame_read_register (frame, SP_REGNUM, &stack);
-  return read_memory_unsigned_integer (stack + (4 * (argi + 1)), 4);
+  CORE_ADDR sp = get_frame_register_unsigned  (frame, I386_ESP_REGNUM);
+  return read_memory_unsigned_integer (sp + (4 * (argi + 1)), 4);
 }
 
 

@@ -1,3 +1,21 @@
+2003-08-10  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_register_to_value): Use get_frame_register
+	instead of frame_read_register.
+	(i386_fetch_pointer_argument): Use get_frame_register_unsigned
+	instead of frame_read_register.  Use I386_ESP_REGNUM instead of
+	SP_REGNUM.
+	(i386_frame_prev_register): Use frame_unwind_register_unsigned
+	instead of frame_unwind_unsigned_register.  Use
+	I386_EFLAGS_REGISTER instead of PS_REGNUM.
+	(i386_get_longjmp_target): Use regcache_read_unsigned_register
+	instead of read_register.  Use builtin_type_void_data_ptr instead
+	of builtin_type_void_func_ptr when extracting the address of the
+	jmp_buf.
+	(i386_extract_return_value, i386_store_return_value,
+	i386_pseudo_register_read, i386_pseudo_register_write): Use
+	register_size instead REGISTER_RAW_SIZE.
+
 2003-08-10  Andrew Cagney  <cagney@redhat.com>
 
 	* infcall.c (call_function_by_hand): Use xstrprintf instead of
@@ -7,6 +25,8 @@
 
 	* i387-tdep.c (i387_register_to_value): Use get_frame_register
 	instead of frame_read_register.
+	(i387_print_float_info): Use get_frame_register and
+	get_frame_register_unsigned instead of frame_register_read.
 
 	* i386fbsd-nat.c: Include "i386-tdep.h".
 	(child_resume): Make `eflags' an ULONGEST.  Use
