@@ -630,8 +630,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	case N_NSYMS:		/* Ultrix 4.0: symbol count */
 	case N_DEFD:		/* GNU Modula-2 */
 
-	case N_OBJ:		/* two useless types from Solaris */
+	case N_OBJ:		/* useless types from Solaris */
 	case N_OPT:
+	case N_ENDM:
 	  /* These symbols aren't interesting; don't worry about them */
 
 	  continue;

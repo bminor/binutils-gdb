@@ -1629,7 +1629,7 @@ process_one_symbol (type, desc, valu, name, offset, objfile)
 #if 0
 /* It seems that the Sun ANSI C compiler (acc) replaces N_FUN with N_GSYM and
    N_STSYM with a type code of f or F.  Can't enable this until we get some
-   stuff straightened out with psymtabs. */
+   stuff straightened out with psymtabs.  FIXME. */
 
     case N_GSYM:
     case N_STSYM:
@@ -1916,13 +1916,14 @@ process_one_symbol (type, desc, valu, name, offset, objfile)
     /*   N_UNDF: 		   Solaris 2:  file separator mark */
     /*   N_UNDF: -- we will never encounter it, since we only process one
 		    file's symbols at once.  */
+    case N_ENDM:		/* Solaris 2:  End of module */
+    case N_MAIN:		/* Name of main routine.  */
       break;
       
     /* The following symbol types we don't know how to process.  Handle
        them in a "default" way, but complain to people who care.  */
     default:
     case N_EHDECL:		/* Exception handler name */
-    case N_MAIN:		/* Name of main routine (not used in C) */
     case N_PC:			/* Global symbol in Pascal */
     case N_M2C:			/* Modula-2 compilation unit */
     /*   N_MOD2:	overlaps with N_EHDECL */

@@ -274,7 +274,12 @@ elf_symtab_read (abfd, addr, objfile)
 		}
 	      else
 		{
-		  ms_type = mst_unknown;
+		  /* FIXME:  Solaris2 shared libraries include lots of
+		     odd "absolute" and "undefined" symbols, that play 
+		     hob with actions like finding what function the PC
+		     is in.  Ignore them if they aren't text or data.  */
+		  /* ms_type = mst_unknown; */
+		  continue;		/* Skip this symbol. */
 		}
 	      /* Pass symbol size field in via BFD.  FIXME!!!  */
 	      record_minimal_symbol_and_info ((char *) sym -> name,

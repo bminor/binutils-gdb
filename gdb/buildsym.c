@@ -1253,7 +1253,9 @@ define_symbol (valu, string, desc, type, objfile)
 
   else
     {
-      struct type *type_read;
+      /* The symbol class letter is followed by a type (typically the
+	 type of the symbol, or its return-type, or etc).  Read it.  */
+
       synonym = *p == 't';
 
       if (synonym)
@@ -1273,43 +1275,7 @@ define_symbol (valu, string, desc, type, objfile)
 	 we can examine it to decide between "int" and "long".  FIXME.  */
       long_kludge_name = SYMBOL_NAME (sym);
 
-      type_read = read_type (&p, objfile);
-
-      if ((deftype == 'F' || deftype == 'f') && *p == ';') {
-	/* Sun acc puts declared types of aguments here.  We don't care
-	   about their actual types (FIXME -- we should remember the whole
-	   function prototype), but the list
-	   may define some new types that we have to remember, so we must
-	   scan them now.  */
-        while (*p == ';') {
-          p++;
-          read_type (&p, objfile);
-	}
-      }
-
-      if ((deftype == 'F' || deftype == 'f')
-	  && TYPE_CODE (type_read) != TYPE_CODE_FUNC)
-      {
-#if 0
-/* This code doesn't work -- it needs to realloc and can't.  */
-/* Attempt to set up to record a function prototype... */
-	struct type *new = (struct type *)
-	  obstack_alloc (&objfile -> type_obstack,
-			 sizeof (struct type));
-
-	/* Generate a template for the type of this function.  The 
-	   types of the arguments will be added as we read the symbol 
-	   table. */
-	*new = *lookup_function_type (type_read);
-	SYMBOL_TYPE(sym) = new;
-	TYPE_OBJFILE (new) = objfile;
-	in_function_type = new;
-#else
-	SYMBOL_TYPE (sym) = lookup_function_type (type_read);
-#endif
-      }
-      else
-	SYMBOL_TYPE (sym) = type_read;
+      SYMBOL_TYPE (sym) = read_type (&p, objfile);
     }
 
   switch (deftype)
@@ -1323,16 +1289,55 @@ define_symbol (valu, string, desc, type, objfile)
       break;
 
     case 'f':
+      /* A static function definition.  */
       SYMBOL_CLASS (sym) = LOC_BLOCK;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
       add_symbol_to_list (sym, &file_symbols);
+      /* fall into process_function_types.  */
+
+    process_function_types:
+      /* Function result types are described as the result type in stabs.
+	 We need to convert this to the function-returning-type-X type
+	 in GDB.  E.g. "int" is converted to "function returning int".  */
+      if (TYPE_CODE (SYMBOL_TYPE (sym)) != TYPE_CODE_FUNC)
+	{
+#if 0
+	  /* This code doesn't work -- it needs to realloc and can't.  */
+	  /* Attempt to set up to record a function prototype... */
+	  struct type *new = (struct type *)
+	    obstack_alloc (&objfile -> type_obstack,
+			   sizeof (struct type));
+
+	  /* Generate a template for the type of this function.  The 
+	     types of the arguments will be added as we read the symbol 
+	     table. */
+	  *new = *lookup_function_type (SYMBOL_TYPE(sym));
+	  SYMBOL_TYPE(sym) = new;
+	  TYPE_OBJFILE (new) = objfile;
+	  in_function_type = new;
+#else
+	  SYMBOL_TYPE (sym) = lookup_function_type (SYMBOL_TYPE (sym));
+#endif
+	}
+      /* fall into process_prototype_types */
+
+    process_prototype_types:
+      /* Sun acc puts declared types of arguments here.  We don't care
+	 about their actual types (FIXME -- we should remember the whole
+	 function prototype), but the list may define some new types
+	 that we have to remember, so we must scan it now.  */
+      while (*p == ';') {
+	p++;
+	read_type (&p, objfile);
+      }
       break;
 
     case 'F':
+      /* A global function definition.  */
       SYMBOL_CLASS (sym) = LOC_BLOCK;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
       add_symbol_to_list (sym, &global_symbols);
-      break;
+      goto process_function_types;
 
     case 'G':
       /* For a class G (global) symbol, it appears that the
@@ -1435,14 +1440,13 @@ define_symbol (valu, string, desc, type, objfile)
 #endif /* no BELIEVE_PCC_PROMOTION_TYPE.  */
 
     case 'P':
+      /* acc seems to use P to delare the prototypes of functions that
+         are referenced by this file.  gdb is not prepared to deal
+         with this extra information.  FIXME, it ought to.  */
+      if (type == N_FUN)
+	goto process_prototype_types;
+
       /* Parameter which is in a register.  */
-
-      /* acc seems to use P to delare the types of functions that
-         are called by this file.  gdb is not prepared to deal
-         with this extra information.  */
-      if (processing_acc_compilation)
-	break;
-
       SYMBOL_CLASS (sym) = LOC_REGPARM;
       SYMBOL_VALUE (sym) = STAB_REG_TO_REGNUM (valu);
       if (SYMBOL_VALUE (sym) >= NUM_REGS)
@@ -1951,6 +1955,16 @@ read_type (pp, objfile)
     case 'f':				/* Function returning another type */
       type1 = read_type (pp, objfile);
       type = make_function_type (type1, dbx_lookup_type (typenums));
+      break;
+
+    case 'k':				/* Const qualifier on some type (Sun) */
+      type = read_type (pp, objfile);
+      /* FIXME! For now, we ignore const and volatile qualifiers.  */
+      break;
+
+    case 'B':				/* Volatile qual on some type (Sun) */
+      type = read_type (pp, objfile);
+      /* FIXME! For now, we ignore const and volatile qualifiers.  */
       break;
 
 /* FIXME -- we should be doing smash_to_XXX types here.  */
@@ -2969,7 +2983,18 @@ read_enum_type (pp, type, objfile)
   return type;
 }
 
-/* this is for the initial typedefs in every file (for int, long, etc) */
+/* Sun's ACC uses a somewhat saner method for specifying the builtin
+   typedefs in every file (for int, long, etc):
+
+	type = b <signed> <width>; <offset>; <nbits>
+	signed = u or s.  Possible c in addition to u or s (for char?).
+	offset = offset from high order bit to start bit of type.
+	width is # bytes in object of this type, nbits is # bits in type.
+
+   The width/offset stuff appears to be for small objects stored in
+   larger ones (e.g. `shorts' in `int' registers).  We ignore it for now,
+   FIXME.  */
+
 static struct type *
 read_sun_builtin_type (pp, typenums, objfile)
      char **pp;
