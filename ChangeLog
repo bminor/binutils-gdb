@@ -1,3 +1,7 @@
+Wed Jan 24 20:32:30 1996  Torbjorn Granlund  <tege@noisy.matematik.su.se>
+
+	* configure: Pass --nfp to recursive configures.
+
 Mon Jan 22 10:41:56 1996  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* Makefile.in (DLLTOOL): New.
