@@ -1522,7 +1522,7 @@ do_relocs_for (abfd, h, file_cursor)
 		      intr.r_vaddr =
 			base + fix_ptr->fx_frag->fr_address + fix_ptr->fx_where;
 
-#ifdef TC_M88K
+#if defined(TC_M88K) || TC_KEEP_FX_OFFSET
 		      intr.r_offset = fix_ptr->fx_offset;
 #else
 		      intr.r_offset = 0;
