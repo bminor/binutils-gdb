@@ -1,3 +1,8 @@
+Fri Feb 10 14:04:04 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-i386.c (tc_i386_fix_adjustable): Use S_IS_EXTERN
+	rather than !S_IS_LOCAL.
+
 start-sanitize-arc
 Thu Feb  9 17:44:29 1995  Doug Evans  <dje@canuck.cygnus.com>
 
