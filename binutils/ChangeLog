@@ -6,6 +6,11 @@ Wed Jan 28 17:45:46 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 Wed Jan 28 17:43:02 1998  J.J. van der Heijden <J.J.vanderHeijden@student.utwente.nl>
 
+	* objcopy.c (copy_archive): Only pass one argument to mkdir if
+	_WIN32 but not __CYGWIN32__.
+	(smart_rename): Add code for _WIN32 (not __CYGWIN32__), to cope
+	with different rename behaviour and lack of chown.
+
 	* configure.in: Check for mingw32 when deciding whether to build
 	dlltool.
 	* dlltool.c: Never include vfork.h.
