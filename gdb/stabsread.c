@@ -3512,7 +3512,7 @@ read_range_type (pp, typenums, objfile)
     return init_type (TYPE_CODE_INT, 1, 0, NULL, objfile);
 
   else if (current_symbol && SYMBOL_LANGUAGE (current_symbol) == language_chill
-      && SYMBOL_LINE (current_symbol) > 0)
+	   && !self_subrange)
     goto handle_true_range;
 
   /* We used to do this only for subrange of self or subrange of int.  */
@@ -3552,13 +3552,10 @@ read_range_type (pp, typenums, objfile)
      return a real pointer.  */
  handle_true_range:
 
-  /* At this point I don't have the faintest idea how to deal with
-     a self_subrange type; I'm going to assume that this is used
-     as an idiom, and that all of them are special cases.  So . . .  */
   if (self_subrange)
-    return error_type (pp, objfile);
-
-  index_type = *dbx_lookup_type (rangenums);
+    index_type = builtin_type_int;
+  else
+    index_type = *dbx_lookup_type (rangenums);
   if (index_type == NULL)
     {
       /* Does this actually ever happen?  Is that why we are worrying

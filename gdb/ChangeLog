@@ -1,3 +1,14 @@
+Tue Feb  6 21:37:03 1996  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* stabsread.c (read_range_type):  If !self-subrange and language
+	is Chill, assume a true range.  If a true_range is a sub_subrange,
+	use builtin_type_int for index_type.
+
+Tue Feb  6 18:38:51 1996  J.T. Conklin  <jtc@slave.cygnus.com>
+
+	* nindy-share/nindy.c (say): Use stdarg.h macros when compiling
+        with an ANSI compiler.
+
 Mon Feb  5 18:24:28 1996  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	From Michael_Snyder@NeXT.COM (Michael Snyder):
