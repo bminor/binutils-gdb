@@ -1883,6 +1883,7 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 		{
 	        case R_ARM_PC24:
 	        case R_ARM_ABS32:
+		case R_ARM_THM_PC22:
 	          if (info->shared
 	              && (
 		  (!info->symbolic && h->dynindx != -1)
@@ -1923,8 +1924,10 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 		  if (sec->output_section == NULL)
 		    {
 		      (*_bfd_error_handler)
-			(_("%s: warning: unresolvable relocation against symbol `%s' from %s section"),
-			 bfd_archive_filename (input_bfd), h->root.root.string,
+			(_("%s: warning: unresolvable relocation %d against symbol `%s' from %s section"),
+			 bfd_archive_filename (input_bfd),
+			 r_type,
+			 h->root.root.string,
 			 bfd_get_section_name (input_bfd, input_section));
 		      relocation_needed = 0;
 		    }
