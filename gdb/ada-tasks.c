@@ -270,7 +270,7 @@ get_self_id (void)
 }
 
 int
-get_current_task ()
+get_current_task (void)
 {
   int result;
 

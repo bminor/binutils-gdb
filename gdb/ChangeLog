@@ -1,3 +1,10 @@
+2002-09-08  Aidan Skinner <aidan@velvet.net>
+
+	* ada-lang.c (ada_array_bound, ada_type_match,
+	_initialize_ada_language): Fix K&R definitions.
+	* ada-tasks.c (get_current_task): Fix K&R definitions.
+	* ada-valprint.c (adjust_type_signedness): Fix K&R definitions.
+			
 2002-09-07  Christopher Faylor  <cgf@redhat.com>
 
 	* MAINTAINERS: Remove CE from list of maintainership responsibilities.
