@@ -293,161 +293,161 @@ struct gdbarch startup_gdbarch =
 {
   1, /* Always initialized.  */
   /* basic architecture information */
-  &bfd_default_arch_struct,
-  BFD_ENDIAN_BIG,
-  GDB_OSABI_UNKNOWN,
+  &bfd_default_arch_struct,  /* bfd_arch_info */
+  BFD_ENDIAN_BIG,  /* byte_order */
+  GDB_OSABI_UNKNOWN,  /* osabi */
   /* target specific vector and its dump routine */
   NULL, NULL,
   /*per-architecture data-pointers and swap regions */
   0, NULL, NULL,
   /* Multi-arch values */
-  8 * sizeof (short),
-  8 * sizeof (int),
-  8 * sizeof (long),
-  8 * sizeof (LONGEST),
-  8 * sizeof (float),
-  8 * sizeof (double),
-  8 * sizeof (long double),
-  8 * sizeof (void*),
-  8 * sizeof (void*),
-  8 * sizeof (void*),
-  1,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  -1,
-  -1,
-  -1,
-  -1,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  generic_register_byte,
-  generic_register_size,
-  0,
-  generic_register_size,
-  0,
-  0,
-  0,
-  0,
-  default_print_registers_info,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  generic_pc_in_call_dummy,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  generic_remote_translate_xfer_address,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  generic_in_function_epilogue_p,
-  construct_inferior_arguments,
-  0,
-  0,
-  0,
-  "malloc",
-  0,
-  0,
-  0,
-  0,
-  0,
-  default_register_reggroup_p,
-  0,
+  8 * sizeof (short),  /* short_bit */
+  8 * sizeof (int),  /* int_bit */
+  8 * sizeof (long),  /* long_bit */
+  8 * sizeof (LONGEST),  /* long_long_bit */
+  8 * sizeof (float),  /* float_bit */
+  8 * sizeof (double),  /* double_bit */
+  8 * sizeof (long double),  /* long_double_bit */
+  8 * sizeof (void*),  /* ptr_bit */
+  8 * sizeof (void*),  /* addr_bit */
+  8 * sizeof (void*),  /* bfd_vma_bit */
+  1,  /* char_signed */
+  0,  /* read_pc */
+  0,  /* write_pc */
+  0,  /* deprecated_target_read_fp */
+  0,  /* read_sp */
+  0,  /* deprecated_dummy_write_sp */
+  0,  /* virtual_frame_pointer */
+  0,  /* pseudo_register_read */
+  0,  /* pseudo_register_write */
+  0,  /* num_regs */
+  0,  /* num_pseudo_regs */
+  -1,  /* sp_regnum */
+  -1,  /* deprecated_fp_regnum */
+  -1,  /* pc_regnum */
+  -1,  /* ps_regnum */
+  0,  /* fp0_regnum */
+  0,  /* npc_regnum */
+  0,  /* stab_reg_to_regnum */
+  0,  /* ecoff_reg_to_regnum */
+  0,  /* dwarf_reg_to_regnum */
+  0,  /* sdb_reg_to_regnum */
+  0,  /* dwarf2_reg_to_regnum */
+  0,  /* register_name */
+  0,  /* deprecated_register_size */
+  0,  /* deprecated_register_bytes */
+  generic_register_byte,  /* register_byte */
+  generic_register_size,  /* register_raw_size */
+  0,  /* deprecated_max_register_raw_size */
+  generic_register_size,  /* register_virtual_size */
+  0,  /* deprecated_max_register_virtual_size */
+  0,  /* register_virtual_type */
+  0,  /* register_type */
+  0,  /* deprecated_do_registers_info */
+  default_print_registers_info,  /* print_registers_info */
+  0,  /* print_float_info */
+  0,  /* print_vector_info */
+  0,  /* register_sim_regno */
+  0,  /* register_bytes_ok */
+  0,  /* cannot_fetch_register */
+  0,  /* cannot_store_register */
+  0,  /* get_longjmp_target */
+  0,  /* deprecated_use_generic_dummy_frames */
+  0,  /* call_dummy_location */
+  0,  /* call_dummy_address */
+  0,  /* deprecated_call_dummy_start_offset */
+  0,  /* deprecated_call_dummy_breakpoint_offset */
+  0,  /* deprecated_call_dummy_length */
+  generic_pc_in_call_dummy,  /* deprecated_pc_in_call_dummy */
+  0,  /* deprecated_call_dummy_words */
+  0,  /* deprecated_sizeof_call_dummy_words */
+  0,  /* deprecated_call_dummy_stack_adjust */
+  0,  /* deprecated_fix_call_dummy */
+  0,  /* push_dummy_code */
+  0,  /* deprecated_init_frame_pc_first */
+  0,  /* deprecated_init_frame_pc */
+  0,  /* believe_pcc_promotion */
+  0,  /* believe_pcc_promotion_type */
+  0,  /* deprecated_get_saved_register */
+  0,  /* register_convertible */
+  0,  /* register_convert_to_virtual */
+  0,  /* register_convert_to_raw */
+  0,  /* convert_register_p */
+  0,  /* register_to_value */
+  0,  /* value_to_register */
+  0,  /* pointer_to_address */
+  0,  /* address_to_pointer */
+  0,  /* integer_to_address */
+  0,  /* return_value_on_stack */
+  0,  /* deprecated_push_arguments */
+  0,  /* push_dummy_call */
+  0,  /* deprecated_push_dummy_frame */
+  0,  /* deprecated_push_return_address */
+  0,  /* deprecated_pop_frame */
+  0,  /* deprecated_store_struct_return */
+  0,  /* extract_return_value */
+  0,  /* store_return_value */
+  0,  /* deprecated_extract_return_value */
+  0,  /* deprecated_store_return_value */
+  0,  /* extract_struct_value_address */
+  0,  /* deprecated_extract_struct_value_address */
+  0,  /* use_struct_convention */
+  0,  /* deprecated_frame_init_saved_regs */
+  0,  /* deprecated_init_extra_frame_info */
+  0,  /* skip_prologue */
+  0,  /* prologue_frameless_p */
+  0,  /* inner_than */
+  0,  /* breakpoint_from_pc */
+  0,  /* memory_insert_breakpoint */
+  0,  /* memory_remove_breakpoint */
+  0,  /* decr_pc_after_break */
+  0,  /* prepare_to_proceed */
+  0,  /* function_start_offset */
+  generic_remote_translate_xfer_address,  /* remote_translate_xfer_address */
+  0,  /* frame_args_skip */
+  0,  /* frameless_function_invocation */
+  0,  /* deprecated_frame_chain */
+  0,  /* deprecated_frame_chain_valid */
+  0,  /* deprecated_frame_saved_pc */
+  0,  /* unwind_pc */
+  0,  /* frame_args_address */
+  0,  /* frame_locals_address */
+  0,  /* deprecated_saved_pc_after_call */
+  0,  /* frame_num_args */
+  0,  /* stack_align */
+  0,  /* frame_align */
+  0,  /* deprecated_extra_stack_alignment_needed */
+  0,  /* reg_struct_has_addr */
+  0,  /* save_dummy_frame_tos */
+  0,  /* unwind_dummy_id */
+  0,  /* parm_boundary */
+  0,  /* float_format */
+  0,  /* double_format */
+  0,  /* long_double_format */
+  0,  /* convert_from_func_ptr_addr */
+  0,  /* addr_bits_remove */
+  0,  /* smash_text_address */
+  0,  /* software_single_step */
+  0,  /* print_insn */
+  0,  /* skip_trampoline_code */
+  0,  /* in_solib_call_trampoline */
+  0,  /* in_solib_return_trampoline */
+  0,  /* pc_in_sigtramp */
+  0,  /* sigtramp_start */
+  0,  /* sigtramp_end */
+  generic_in_function_epilogue_p,  /* in_function_epilogue_p */
+  construct_inferior_arguments,  /* construct_inferior_arguments */
+  0,  /* dwarf2_build_frame_info */
+  0,  /* elf_make_msymbol_special */
+  0,  /* coff_make_msymbol_special */
+  "malloc",  /* name_of_malloc */
+  0,  /* cannot_step_breakpoint */
+  0,  /* have_nonsteppable_watchpoint */
+  0,  /* address_class_type_flags */
+  0,  /* address_class_type_flags_to_name */
+  0,  /* address_class_name_to_type_flags */
+  default_register_reggroup_p,  /* register_reggroup_p */
+  0,  /* fetch_pointer_argument */
   /* startup_gdbarch() */
 };
 

@@ -1,5 +1,10 @@
 2003-06-07  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh: Comment each field of startup_gdbarch.
+	* gdbarch.h, gdbarch.c: Re-generate.
+
+2003-06-07  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbarch.sh (TARGET_READ_PC): Add predicate, remove default.
 	* gdbarch.h, gdbarch.c: Re-generate.
 	* regcache.c: Update comments on read_pc et.al.

@@ -1401,7 +1401,7 @@ function_list | while do_read
 do
     if class_is_info_p
     then
-	printf "  ${staticdefault},\n"
+	printf "  ${staticdefault},  /* ${function} */\n"
     fi
 done
 cat <<EOF
@@ -1415,7 +1415,7 @@ function_list | while do_read
 do
     if class_is_function_p || class_is_variable_p
     then
-	printf "  ${staticdefault},\n"
+	printf "  ${staticdefault},  /* ${function} */\n"
     fi
 done
 cat <<EOF
