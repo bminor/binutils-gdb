@@ -1,3 +1,9 @@
+2002-07-09  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* mips-dis.c (mips_isa_type): Add MIPS16 insn handling.
+	* mips-opc.c (I16): New define.
+	(mips_builtin_opcodes): Make jalx an I16 insn.
+
 2002-06-18  Dave Brolley  <brolley@redhat.com>
 
 	* po/POTFILES.in: Add frv-*.[ch].

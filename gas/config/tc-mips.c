@@ -2728,7 +2728,10 @@ macro_build (place, counter, ep, name, fmt, va_alist)
          MDMX or MIPS-3D instructions.  */
       if (strcmp (fmt, insn.insn_mo->args) == 0
 	  && insn.insn_mo->pinfo != INSN_MACRO
-	  && OPCODE_IS_MEMBER (insn.insn_mo, mips_opts.isa, mips_arch)
+  	  && OPCODE_IS_MEMBER (insn.insn_mo,
+  			       (mips_opts.isa
+	      		        | (mips_opts.mips16 ? INSN_MIPS16 : 0)),
+			       mips_arch)
 	  && (mips_arch != CPU_R4650 || (insn.insn_mo->pinfo & FP_D) == 0))
 	break;
 
@@ -7733,6 +7736,7 @@ mips_ip (str, ip)
 
       if (OPCODE_IS_MEMBER (insn,
 			    (mips_opts.isa
+			     | (mips_opts.mips16 ? INSN_MIPS16 : 0)
 	      		     | (mips_opts.ase_mdmx ? INSN_MDMX : 0)
 			     | (mips_opts.ase_mips3d ? INSN_MIPS3D : 0)),
 			    mips_arch))

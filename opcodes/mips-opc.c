@@ -87,6 +87,9 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
 #define I64     INSN_ISA64
 
 /* MIPS64 MIPS-3D ASE support.  */
+#define I16     INSN_MIPS16
+
+/* MIPS64 MIPS-3D ASE support.  */
 #define M3D     INSN_MIPS3D
 
 /* MIPS64 MDMX ASE support.  */
@@ -568,9 +571,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
    assembler, but will never match user input (because the line above
    will match first).  */
 {"jal",     "a",	0x0c000000, 0xfc000000,	UBD|WR_31,		I1	},
-  /* jalx really should only be avaliable if mips16 is available,
-     but for now make it I1. */
-{"jalx",    "a",	0x74000000, 0xfc000000, UBD|WR_31,		I1      },
+{"jalx",    "a",	0x74000000, 0xfc000000, UBD|WR_31,		I16     },
 {"la",      "t,o(b)",	0x24000000, 0xfc000000,	WR_t|RD_s,		I1	}, /* addiu */
 {"la",      "t,A(b)",	0,    (int) M_LA_AB,	INSN_MACRO,		I1	},
 {"lb",      "t,o(b)",	0x80000000, 0xfc000000,	LDD|RD_b|WR_t,		I1	},

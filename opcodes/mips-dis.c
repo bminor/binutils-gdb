@@ -412,7 +412,7 @@ mips_isa_type (mach, isa, cputype)
       break;
     case bfd_mach_mips16:
       *cputype = CPU_MIPS16;
-      *isa = ISA_MIPS3;
+      *isa = ISA_MIPS3 | INSN_MIPS16;
       break;
     case bfd_mach_mips5:
       *cputype = CPU_MIPS5;
@@ -429,12 +429,12 @@ mips_isa_type (mach, isa, cputype)
 	 _MIPS32 Architecture For Programmers Volume I: Introduction to the
 	 MIPS32 Architecture_ (MIPS Document Number MD00082, Revision 0.95),
 	 page 1.  */
-      *isa = ISA_MIPS32;
+      *isa = ISA_MIPS32 | INSN_MIPS16;
       break;
     case bfd_mach_mipsisa64:
       *cputype = CPU_MIPS64;
       /* For stock MIPS64, disassemble all applicable MIPS-specified ASEs.  */
-      *isa = ISA_MIPS64 | INSN_MDMX | INSN_MIPS3D;
+      *isa = ISA_MIPS64 | INSN_MIPS16 | INSN_MIPS3D | INSN_MDMX;
       break;
 
     default:
