@@ -1,3 +1,19 @@
+Thu Feb 27 09:20:41 1992  Steve Chamberlain  (sac at thepub.cygnus.com)
+
+	* cplus-dem.c: yet another copy of this - maybe it should go into
+	libiberty ?
+	* ldgram.y: now -V and -v have different actions
+	* ldver.c: if -V, prints list of emulations compiled in
+	* ldmisc.c: support for cplus demangling
+
+
+Thu Feb 20 17:43:46 1992  Per Bothner  (bothner at cygnus.com)
+
+	* Makefile.in:  Change mkscript rule into one for ./mkscript
+	(for the sake of makes that don't realize they're the same).
+	* PORTING:  Add more details.
+	* genscripts.sh:  Add more tailorability of DATA_ALIGNMENT.
+
 Mon Feb 17 12:04:36 1992  Per Bothner  (bothner at cygnus.com)
 
 	* Makefile.in, and new files hp300bsd.sh, config/mh-hp300bsd,

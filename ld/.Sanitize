@@ -38,6 +38,7 @@ config
 config.h
 configure.bat
 configure.in
+cplus-dem.c
 ebmon29k.sc-sh
 ebmon29k.sh
 generic.em
@@ -102,7 +103,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.30  1992/02/22 00:11:38  sac
+# Revision 1.31  1992/02/27 17:23:59  sac
+# Why didn't it start emacs
+#
+# Revision 1.30  1992/02/22  00:11:38  sac
 # DJ naming change
 #
 # Revision 1.29  1992/02/16  20:49:26  bothner
