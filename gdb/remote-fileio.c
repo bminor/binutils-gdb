@@ -417,6 +417,8 @@ remote_fileio_to_fio_ulong (LONGEST num, fio_ulong_t fnum)
 static void
 remote_fileio_to_fio_stat (struct stat *st, struct fio_stat *fst)
 {
+  LONGEST blksize;
+
   /* `st_dev' is set in the calling function */
   remote_fileio_to_fio_uint ((long) st->st_ino, fst->fst_ino);
   remote_fileio_to_fio_mode (st->st_mode, fst->fst_mode);
@@ -425,15 +427,20 @@ remote_fileio_to_fio_stat (struct stat *st, struct fio_stat *fst)
   remote_fileio_to_fio_uint ((long) st->st_gid, fst->fst_gid);
   remote_fileio_to_fio_uint ((long) st->st_rdev, fst->fst_rdev);
   remote_fileio_to_fio_ulong ((LONGEST) st->st_size, fst->fst_size);
-  remote_fileio_to_fio_ulong ((LONGEST) st->st_blksize, fst->fst_blksize);
+#ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
+  blksize = st->st_blksize;
+#else
+  blksize = 512;
+#endif
+  remote_fileio_to_fio_ulong (blksize, fst->fst_blksize);
 #if HAVE_STRUCT_STAT_ST_BLOCKS
   remote_fileio_to_fio_ulong ((LONGEST) st->st_blocks, fst->fst_blocks);
 #else
   /* FIXME: This is correct for DJGPP, but other systems that don't
      have st_blocks, if any, might prefer 512 instead of st_blksize.
      (eliz, 30-12-2003)  */
-  remote_fileio_to_fio_ulong (((LONGEST) st->st_size + st->st_blksize - 1)
-			      / (LONGEST) st->st_blksize,
+  remote_fileio_to_fio_ulong (((LONGEST) st->st_size + blksize - 1)
+			      / blksize,
 			      fst->fst_blocks);
 #endif
   remote_fileio_to_fio_time (st->st_atime, fst->fst_atime);
@@ -1150,11 +1157,21 @@ remote_fileio_func_fstat (char *buf)
       remote_fileio_to_fio_uint (1, fst.fst_dev);
       st.st_mode = S_IFCHR | (fd == FIO_FD_CONSOLE_IN ? S_IRUSR : S_IWUSR);
       st.st_nlink = 1;
+#ifdef HAVE_GETUID
       st.st_uid = getuid ();
+#else
+      st.st_uid = 0;
+#endif
+#ifdef HAVE_GETGID
       st.st_gid = getgid ();
+#else
+      st.st_gid = 0;
+#endif
       st.st_rdev = 0;
       st.st_size = 0;
+#ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
       st.st_blksize = 512;
+#endif
 #if HAVE_STRUCT_STAT_ST_BLOCKS
       st.st_blocks = 0;
 #endif

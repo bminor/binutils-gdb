@@ -1,3 +1,13 @@
+2005-03-21  Mark Mitchell  <mark@codesourcery.com>
+
+	* configure.ac (stat.st_blksize): Check for it.
+	(getuid): Likewise.
+	(getgid): Likewise.
+	* configure: Regenerated.
+	* config.in: Likewise.
+	* remote-fileio.c (remote_fileio_to_fio_stat): Check
+	HAVE_STRUCT_STAT_ST_BLKSIZE. 
+
 2005-03-21  Christopher Faylor  <cgf@timesys.com>
 
 	* win32-nat.c (do_initial_child_stuff): Don't clear the thread list

@@ -425,6 +425,7 @@ AC_CHECK_DECLS(getopt)
 # ----------------------- #
 
 AC_CHECK_MEMBERS([struct stat.st_blocks])
+AC_CHECK_MEMBERS([struct stat.st_blksize])
 
 # ------------------ #
 # Checks for types.  #
@@ -447,6 +448,7 @@ AC_FUNC_ALLOCA
 AC_FUNC_MMAP
 AC_FUNC_VFORK
 AC_CHECK_FUNCS(canonicalize_file_name realpath)
+AC_CHECK_FUNCS(getuid getgid)
 AC_CHECK_FUNCS(poll)
 AC_CHECK_FUNCS(pread64)
 AC_CHECK_FUNCS(sbrk)
