@@ -1,5 +1,34 @@
 2004-04-12  Mark Kettenis  <kettenis@gnu.org>
 
+	* vax-tdep.c: Include "frame-base.h", "frame-unwind.h" and
+	"trad-frame.h".
+	(vax_frame_init_saved_regs): Remove function.
+	(vax_sigtramp_saved_pc): Remove function.
+	(vax_frame_saved_pc): Remove function.
+	(vax_frame_args_address): Remove function.
+	(vax_frame_num_args): Rewrite.
+	(vax_frame_chain): Remove function.
+	(vax_push_dummy_frame): Replace DEPRECATED_FP_REGNUM with
+	VAX_FP_REGNUM.
+	(vax_pop_frame): Likewise.
+	(vax_saved_pc_after_call): Remove function.
+	(struct vax_frame_cache): New structure.
+	(vax_frame_cache): New function.
+	(vax_frame_this_id): New function.
+	(vax_frame_prev_register): New function.
+	(vax_frame_unwind): New variable.
+	(vax_frame_sniffer): New function.
+	(vax_frame_base_address): New function.
+	(vax_frame_args_address): New function.
+	(vax_frame_base): New variable.
+	(vax_unwind_pc): New function.
+	(vax_gdbarch_init): Don't set deprecated_init_frame_pc,
+	deprecated_fp_regnum, deprecated_saved_pc_after_call,
+	deprecated_frame_chain, deprecated_frame_saved_pc,
+	deprecated_frame_args_address and
+	deprecated_frame_init_saved_regs.
+	* Makefile.in (vax-tdep.o): Update dependencies.
+
 	* vaxbsd-nat.c: New file.
 
 	* vax-tdep.h: Update copyright year.  Adjust comments.

@@ -2492,8 +2492,9 @@ values.o: values.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 varobj.o: varobj.c $(defs_h) $(value_h) $(expression_h) $(frame_h) \
 	$(language_h) $(wrapper_h) $(gdbcmd_h) $(gdb_string_h) $(varobj_h)
 vax-tdep.o: vax-tdep.c $(defs_h) $(symtab_h) $(opcode_vax_h) $(gdbcore_h) \
-	$(inferior_h) $(regcache_h) $(frame_h) $(value_h) $(arch_utils_h) \
-	$(gdb_string_h) $(osabi_h) $(dis_asm_h) $(vax_tdep_h)
+	$(inferior_h) $(regcache_h) $(frame_h) $(frame_base_h) \
+	$(frame_unwind_h) $(value_h) $(arch_utils_h) $(gdb_string_h) \
+	$(osabi_h) $(dis_asm_h) $(vax_tdep_h)
 win32-nat.o: win32-nat.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
 	$(gdbcore_h) $(command_h) $(completer_h) $(regcache_h) $(top_h) \
 	$(buildsym_h) $(symfile_h) $(objfiles_h) $(gdb_string_h) \
