@@ -880,7 +880,7 @@ void
 OP_4E04 ()
 {
   trace_input ("exef0f", OP_VOID, OP_VOID, OP_VOID);
-  State.exe = (State.F0) ? 0 : 1;
+  State.exe = (State.F0 == 0);
   trace_output (OP_FLAG);
 }
 
@@ -889,7 +889,7 @@ void
 OP_4E24 ()
 {
   trace_input ("exef0t", OP_VOID, OP_VOID, OP_VOID);
-  State.exe = State.F0;
+  State.exe = (State.F0 != 0);
   trace_output (OP_FLAG);
 }
 
@@ -898,7 +898,7 @@ void
 OP_4E40 ()
 {
   trace_input ("exef1f", OP_VOID, OP_VOID, OP_VOID);
-  State.exe = (State.F1) ? 0 : 1;
+  State.exe = (State.F1 == 0);
   trace_output (OP_FLAG);
 }
 
@@ -907,7 +907,7 @@ void
 OP_4E42 ()
 {
   trace_input ("exef1t", OP_VOID, OP_VOID, OP_VOID);
-  State.exe = State.F1;
+  State.exe = (State.F1 != 0);
   trace_output (OP_FLAG);
 }
 
@@ -916,7 +916,7 @@ void
 OP_4E00 ()
 {
   trace_input ("exefaf", OP_VOID, OP_VOID, OP_VOID);
-  State.exe = (State.F0 | State.F1) ? 0 : 1;
+  State.exe = (State.F0 == 0) & (State.F1 == 0);
   trace_output (OP_FLAG);
 }
 
@@ -925,7 +925,7 @@ void
 OP_4E02 ()
 {
   trace_input ("exefat", OP_VOID, OP_VOID, OP_VOID);
-  State.exe = (State.F0) ? 0 : (State.F1); 
+  State.exe = (State.F0 == 0) & (State.F1 != 0);
   trace_output (OP_FLAG);
 }
 
@@ -934,7 +934,7 @@ void
 OP_4E20 ()
 {
   trace_input ("exetaf", OP_VOID, OP_VOID, OP_VOID);
-  State.exe = (State.F1) ? 0 : (State.F0);
+  State.exe = (State.F0 != 0) & (State.F1 == 0);
   trace_output (OP_FLAG);
 }
 
@@ -943,7 +943,7 @@ void
 OP_4E22 ()
 {
   trace_input ("exetat", OP_VOID, OP_VOID, OP_VOID);
-  State.exe = (State.F0) ? (State.F1) : 0;
+  State.exe = (State.F0 != 0) & (State.F1 != 0);
   trace_output (OP_FLAG);
 }
 
