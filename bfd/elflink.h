@@ -4013,8 +4013,10 @@ elf_link_size_reloc_section (abfd, rel_hdr, o)
   rel_hdr->sh_size = rel_hdr->sh_entsize * reloc_count;
 
   /* The contents field must last into write_object_contents, so we
-     allocate it with bfd_alloc rather than malloc.  */
-  rel_hdr->contents = (PTR) bfd_alloc (abfd, rel_hdr->sh_size);
+     allocate it with bfd_alloc rather than malloc.  Also since we
+     cannot be sure that the contents will actually be filled in,
+     we zero the allocated space.  */
+  rel_hdr->contents = (PTR) bfd_zalloc (abfd, rel_hdr->sh_size);
   if (rel_hdr->contents == NULL && rel_hdr->sh_size != 0)
     return false;
   
