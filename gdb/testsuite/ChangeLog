@@ -7,7 +7,7 @@ Mon Jan 31 06:43:45 1994  Fred Fish  (fnf@cygnus.com)
 	* gdb.t20/inherit.exp (test_ptype_vi):  Accept "_vb." as well as
 	well as "_vb$".
 	* gdb.t21/cplusfuncs.exp (test_lookup_operator_functions):
-	Remove setup_xfails for sparc-sun-solaris2.*, these tests no pass
+	Remove setup_xfails for sparc-sun-solaris2.*, these tests now pass
 	with latest gcc and gdb.
 	* gdb.t22/virtfunc.exp (test_ptype_of_classes):  Accept "_vb." as
 	well as "_vb$".
