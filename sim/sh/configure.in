@@ -31,3 +31,9 @@ fi
 # per-target:
 
 
+case "${target}" in
+  sh-*-*)		sim_target=sh ;;
+  shl-*-*)		sim_target=shl ;;
+esac
+
+target_makefile_frag=${sim_target}.mt

@@ -1,3 +1,31 @@
+Wed Nov 23 21:31:55 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* interp.c ([wr][bwl]at): New functions.
+	(trap): Cope with both byte modes.
+
+Thu Sep  8 17:35:07 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* gencode.c (tab): Simulate T bit after a negc insn right.
+	* interp.c (RSBAT): Sign extend the arg.
+	(ACE_FAST): New macro.
+	(sim_resume): Remove obsolete test of sim_timeout.
+	
+Fri Aug  5 14:12:31 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* interp.c (IOMEM): New function, simulates very basic I/O area of
+	the SH.
+	(WBAT, RBAT) : Call I/O functions.
+	* gencode.c (tab): Special case trapa #3.
+
+Mon Jun 27 18:04:54 1994  Steve Chamberlain  (sac@cirdan.cygnus.com)
+
+	* run.c (main): Specify the file type again.
+
+Thu May 26 19:04:37 1994  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* interp.c (trap): Fix irix incompatibility.
+	* run.c (main): open without specifying file type.
+
 Wed May 18 14:18:53 1994  Doug Evans  (dje@canuck.cygnus.com)
 
 	* interp.c (sim_*): Make result void where there isn't one.
