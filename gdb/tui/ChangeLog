@@ -1,5 +1,10 @@
 2002-09-13  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* tuiIO.c (tui_setup_io): rl_already_prompted must be cleared
+	when leaving TUI mode so that gdb prompt is displayed.
+
+2002-09-13  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* tuiStack.c (tui_make_status_line): Make sure the local buffer
 	is large enough to hold the complete line.
 

@@ -532,7 +532,7 @@ tui_setup_io (int mode)
       rl_outstream = tui_old_rl_outstream;
       rl_completion_display_matches_hook = 0;
       readline_echoing_p = tui_old_readline_echoing_p;
-      rl_already_prompted = 1;
+      rl_already_prompted = 0;
 
       /* Save tty for SIGCONT.  */
       savetty ();
