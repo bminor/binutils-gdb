@@ -1,3 +1,8 @@
+Wed Nov  2 15:05:39 1994  Kung Hsu  (kung@mexican.cygnus.com)
+
+	* c-exp.y (yylex): scan template names, and scan nested class
+	names.
+
 Wed Nov  2 11:01:55 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
 	* nlm/Makefile.in: install gdbserve.nlm.
