@@ -1,5 +1,5 @@
 /* Low level interface to ptrace, for the remote server for GDB.
-   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002
+   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -316,6 +316,7 @@ check_removed_breakpoint (struct process_info *event_child)
     (*the_low_target.set_pc) (stop_pc);
 
   /* We consumed the pending SIGTRAP.  */
+  event_child->pending_is_breakpoint = 0;
   event_child->status_pending_p = 0;
   event_child->status_pending = 0;
 
@@ -876,18 +877,18 @@ linux_resume_one_process (struct inferior_list_entry *entry,
 static struct thread_resume *resume_ptr;
 
 /* This function is called once per thread.  We look up the thread
-   in RESUME_PTR, which will tell us whether to resume, step, or leave
-   the thread stopped; and what signal, if any, it should be sent.
-   For threads which we aren't explicitly told otherwise, we preserve
-   the stepping flag; this is used for stepping over gdbserver-placed
-   breakpoints.  If the thread has a status pending, it may not actually
-   be resumed.  */
+   in RESUME_PTR, and mark the thread with a pointer to the appropriate
+   resume request.
+
+   This algorithm is O(threads * resume elements), but resume elements
+   is small (and will remain small at least until GDB supports thread
+   suspension).  */
 static void
-linux_continue_one_thread (struct inferior_list_entry *entry)
+linux_set_resume_request (struct inferior_list_entry *entry)
 {
   struct process_info *process;
   struct thread_info *thread;
-  int ndx, step;
+  int ndx;
 
   thread = (struct thread_info *) entry;
   process = get_thread_process (thread);
@@ -896,25 +897,127 @@ linux_continue_one_thread (struct inferior_list_entry *entry)
   while (resume_ptr[ndx].thread != -1 && resume_ptr[ndx].thread != entry->id)
     ndx++;
 
-  if (resume_ptr[ndx].leave_stopped)
+  process->resume = &resume_ptr[ndx];
+}
+
+/* This function is called once per thread.  We check the thread's resume
+   request, which will tell us whether to resume, step, or leave the thread
+   stopped; and what signal, if any, it should be sent.  For threads which
+   we aren't explicitly told otherwise, we preserve the stepping flag; this
+   is used for stepping over gdbserver-placed breakpoints.  */
+
+static void
+linux_continue_one_thread (struct inferior_list_entry *entry)
+{
+  struct process_info *process;
+  struct thread_info *thread;
+  int step;
+
+  thread = (struct thread_info *) entry;
+  process = get_thread_process (thread);
+
+  if (process->resume->leave_stopped)
     return;
 
-  if (resume_ptr[ndx].thread == -1)
-    step = process->stepping || resume_ptr[ndx].step;
+  if (process->resume->thread == -1)
+    step = process->stepping || process->resume->step;
   else
-    step = resume_ptr[ndx].step;
+    step = process->resume->step;
 
-  linux_resume_one_process (&process->head, step, resume_ptr[ndx].sig);
+  linux_resume_one_process (&process->head, step, process->resume->sig);
+
+  process->resume = NULL;
+}
+
+/* This function is called once per thread.  We check the thread's resume
+   request, which will tell us whether to resume, step, or leave the thread
+   stopped; and what signal, if any, it should be sent.  We queue any needed
+   signals, since we won't actually resume.  We already have a pending event
+   to report, so we don't need to preserve any step requests; they should
+   be re-issued if necessary.  */
+
+static void
+linux_queue_one_thread (struct inferior_list_entry *entry)
+{
+  struct process_info *process;
+  struct thread_info *thread;
+
+  thread = (struct thread_info *) entry;
+  process = get_thread_process (thread);
+
+  if (process->resume->leave_stopped)
+    return;
+
+  /* If we have a new signal, enqueue the signal.  */
+  if (process->resume->sig != 0)
+    {
+      struct pending_signals *p_sig;
+      p_sig = malloc (sizeof (*p_sig));
+      p_sig->prev = process->pending_signals;
+      p_sig->signal = process->resume->sig;
+      process->pending_signals = p_sig;
+    }
+
+  process->resume = NULL;
+}
+
+/* Set DUMMY if this process has an interesting status pending.  */
+static int
+resume_status_pending_p (struct inferior_list_entry *entry, void *flag_p)
+{
+  struct process_info *process = (struct process_info *) entry;
+
+  /* Processes which will not be resumed are not interesting, because
+     we might not wait for them next time through linux_wait.  */
+  if (process->resume->leave_stopped)
+    return 0;
+
+  /* If this thread has a removed breakpoint, we won't have any
+     events to report later, so check now.  check_removed_breakpoint
+     may clear status_pending_p.  We avoid calling check_removed_breakpoint
+     for any thread that we are not otherwise going to resume - this
+     lets us preserve stopped status when two threads hit a breakpoint.
+     GDB removes the breakpoint to single-step a particular thread
+     past it, then re-inserts it and resumes all threads.  We want
+     to report the second thread without resuming it in the interim.  */
+  if (process->status_pending_p)
+    check_removed_breakpoint (process);
+
+  if (process->status_pending_p)
+    * (int *) flag_p = 1;
+
+  return 0;
 }
 
 static void
 linux_resume (struct thread_resume *resume_info)
 {
-  /* Yes, this is quadratic.  If it ever becomes a problem then it's
-     fairly easy to fix.  Yes, the use of a global here is rather ugly.  */
+  int pending_flag;
 
+  /* Yes, the use of a global here is rather ugly.  */
   resume_ptr = resume_info;
-  for_each_inferior (&all_threads, linux_continue_one_thread);
+
+  for_each_inferior (&all_threads, linux_set_resume_request);
+
+  /* If there is a thread which would otherwise be resumed, which
+     has a pending status, then don't resume any threads - we can just
+     report the pending status.  Make sure to queue any signals
+     that would otherwise be sent.  */
+  pending_flag = 0;
+  find_inferior (&all_processes, resume_status_pending_p, &pending_flag);
+
+  if (debug_threads)
+    {
+      if (pending_flag)
+	fprintf (stderr, "Not resuming, pending status\n");
+      else
+	fprintf (stderr, "Resuming, no pending status\n");
+    }
+
+  if (pending_flag)
+    for_each_inferior (&all_threads, linux_queue_one_thread);
+  else
+    for_each_inferior (&all_threads, linux_continue_one_thread);
 }
 
 #ifdef HAVE_LINUX_USRREGS
