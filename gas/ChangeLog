@@ -1,3 +1,9 @@
+2002-02-15  Chris Demetriou  <cgd@broadcom.com>
+
+        * config/tc-mips.c (md_estimate_size_before_relax): Really
+	make sure we treat weak like extern only for ELF.  (Fixes
+	patch from 2001-07-25.)
+
 2002-02-15  Ben Elliston  <bje@redhat.com>
 
 	* doc/as.texinfo: Add duplicate directory entry so that "info gas"
