@@ -1,4 +1,10 @@
+Tue Jun 15 16:48:51 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in: new install.sh support; update install-info rules
+
 Wed Jun  9 12:31:34 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* configure.in: Build diff for crosses, but not for go32 host.
 
 	* configure.in: Build gprof only for native, and don't build it
 	for mips-*-*, rs6000-*-*, or i[34]86-*-sco*.

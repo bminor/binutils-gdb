@@ -45,9 +45,10 @@ docdir = $(datadir)/doc
 
 SHELL = /bin/sh
 
-INSTALL = cp
+INSTALL = $${srcroot}/install.sh -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL)
+INSTALL_XFORM = $(INSTALL) -t $(program_transform_name)
 
 AS = as
 AR = ar
@@ -101,7 +102,11 @@ SUBDIRS = "this is set via configure, don't edit this"
 OTHERS = 
 
 ALL = all.normal
-INSTALL_TARGET = install-dirs  $(INSTALL_MODULES) $(INSTALL_TARGET_MODULES) $(INSTALL_X11_MODULES)
+INSTALL_TARGET = install-dirs \
+	$(INSTALL_MODULES) \
+	$(INSTALL_TARGET_MODULES) \
+	$(INSTALL_X11_MODULES) \
+	install-gcc
 
 CC_FOR_TARGET = ` \
   if [ -f $${rootme}/gcc/Makefile ] ; then \
@@ -222,6 +227,7 @@ BASE_FLAGS_TO_PASS = \
 	"INSTALL=$(INSTALL)" \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
+	"INSTALL_XFORM=$(INSTALL_XFORM)" \
 	"LDFLAGS=$(LDFLAGS)" \
 	"LEX=$(LEX)" \
 	"LOADLIBES=$(LOADLIBES)" \
@@ -590,12 +596,11 @@ info: do-info
 installcheck: do-installcheck
 dvi: do-dvi
 
-install-info: install-info-dirs do-install-info dir.info
+install-info: do-install-info dir.info
+	srcroot=`cd $(srcdir); pwd`; export srcroot; \
 	if [ -f dir.info ] ; then \
 	  $(INSTALL_DATA) dir.info $(infodir)/dir.info ; \
 	else true ; fi
-
-do-install-info: install-info-dirs
 
 local-clean:
 	-rm -f *.a TEMP errs core *.o *~ \#* TAGS *.E
@@ -649,7 +654,7 @@ install-no-fixedincludes: \
 	$(INSTALL_MODULES) \
 	$(INSTALL_TARGET_MODULES) \
 	$(INSTALL_X11_MODULES) \
-	gcc-no-fixedincludes \
+	gcc-no-fixedincludes 
 
 # Install the gcc headers files, but not the fixed include files,
 # which Cygnus is not allowed to distribute.  This rule is very
@@ -725,7 +730,7 @@ $(INSTALL_MODULES): install-dirs
 	if [ -f ./$${dir}/Makefile ] ; then \
 	  rootme=`pwd`; export rootme; \
 	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
-	  (cd $${dir}; $(MAKE) install); \
+	  (cd $${dir}; $(MAKE) $(FLAGS_TO_PASS) install); \
 	else \
 	  true; \
 	fi
@@ -924,12 +929,6 @@ install-dirs:
 		fi ; \
 	done
 
-.PHONY: install-info-dirs 
-install-info-dirs:
-	if [ -d $(prefix) ] ; then true ; else mkdir $(prefix) ; fi
-	-parent=`echo $(infodir)|sed -e 's@/[^/]*$$@@'`; \
-	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
-	-if [ -d $(infodir) ] ; then true ; else mkdir $(infodir) ; fi
 
 dir.info: do-install-info
 	if [ -f $(srcdir)/texinfo/gen-info-dir ] ; then \
