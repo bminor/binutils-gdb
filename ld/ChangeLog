@@ -1,3 +1,16 @@
+Fri Jan 12 13:29:55 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* scripttempl/elfppc.sc: Add support for .sdata2/.sbss2, etc.  Add
+	in old support that 2.7.2 needs, but the current compiler does
+	not.
+
+	* Makefile.in (eelf32{,l}ppc.c): Fix up dependencies to use the
+	correct Linker script template.
+
+	* emulparams/elf32{,l}ppc.sh (TEXT_START_ADDR): Set to 0x40000,
+	not 0x400000.
+	(DATA_ADDR,NONPAGED_TEXT_START_ADDR): Delete.
+
 Tue Jan  9 15:53:02 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* scripttempl/alpha.sc: Put .rconst right after .rdata.
