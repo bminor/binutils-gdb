@@ -1,3 +1,9 @@
+2003-05-02  H.J. Lu <hjl@gnu.org>
+
+	* read.h (demand_copy_string): New.
+
+	* config/tc-alpha.c (demand_copy_string): Removed.
+
 2003-05-02  Michael Snyder  <msnyder@redhat.com>
 
 	* write.h (FAKE_LABEL_NAME): Allow override 

@@ -5066,8 +5066,6 @@ s_alpha_file (ignore)
   int length;
   static char case_hack[32];
 
-  extern char *demand_copy_string PARAMS ((int *lenP));
-
   sprintf (case_hack, "<CASE:%01d%01d>",
 	   alpha_flag_hash_long_names, alpha_flag_show_after_trunc);
 
