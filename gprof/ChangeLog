@@ -1,3 +1,9 @@
+Thu Apr  3 13:21:25 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gprof.c (VERSION): Define as "2.8.1".
+
+	* Branched binutils 2.8.
+
 Thu Mar 27 17:15:23 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gprof.c (main): Correct copyright message.
