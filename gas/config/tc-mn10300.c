@@ -125,6 +125,7 @@ const pseudo_typeS md_pseudo_table[] =
 };
 
 #define HAVE_AM33 (current_machine == AM33)
+#define HAVE_AM30 (current_machine == AM30)
 
 /* Opcode hash table.  */
 static struct hash_control *mn10300_hash;
@@ -944,7 +945,8 @@ md_assemble (str)
       /* If the instruction is not available on the current machine
 	 then it can not possibly match.  */
       if (opcode->machine
-	  && !(opcode->machine == AM33 && HAVE_AM33))
+	  && !(opcode->machine == AM33 && HAVE_AM33)
+	  && !(opcode->machine == AM30 && HAVE_AM30))
 	goto error;
 
       for (op_idx = 1, opindex_ptr = opcode->operands;
