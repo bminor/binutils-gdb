@@ -1,3 +1,7 @@
+2002-12-16  Andrew MacLeod  <amacleod@redhat.com>
+
+	* xstormy16-asm.c: Regenerate.
+
 2002-12-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* ns32k-dis.c (print_insn_ns32k): Constify "d", remove register
