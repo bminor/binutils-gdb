@@ -1,3 +1,7 @@
+2002-01-29  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Releasing GDB): Revise and update.
+
 2002-01-28  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Delete

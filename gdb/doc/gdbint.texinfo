@@ -4816,47 +4816,49 @@ or so included files.
 @chapter Releasing @value{GDBN}
 @cindex making a new release of gdb
 
-@section Before the branch
+@section Obsolete any code
 
-The most important objective at this stage is to find and fix simple
-changes that become a pain to track once the branch is created.  For
-instance, configuration problems that stop @value{GDBN} from even
-building.  If you can't get the problem fixed, document it in the
-@file{PROBLEMS} file.
+Before anything else, poke the other developers (and around the source
+code) to see there is anything that can be removed from @value{GDBN} (an
+old target, an unused file).
 
-@subheading Obsolete any code
+Obsolete code is identified by adding an @code{OBSOLETE} prefix to every
+line.  Doing this means that it is easy to identify obsolete code when
+grepping through the sources.
 
-Mark as @kbd{OBSOLETE} any uninteresting targets or code files.  This
-has a number of steps and is slow --- mainly to ensure that people have
-had a reasonable chance to respond.  Remember, everything on the
-internet takes a week.
+The process has a number of steps and is intentionally slow --- this is
+to mainly ensure that people have had a reasonable chance to respond.
+Remember, everything on the internet takes a week.
 
 @itemize @bullet
 @item
 announce the change on @email{gdb@@sources.redhat.com, GDB mailing list}
 @item
-wait a week
+wait a week or so
 @item
 announce the change on @email{gdb-announce@@sources.redhat.com, GDB
 Announcement mailing list}
 @item
 wait a week or so
 @item
-post / commit the change
+go through and edit all relevant files and lines (e.g., in
+@file{configure.tgt}) so that they are prefixed with the word
+@code{OBSOLETE}.
 @end itemize
 
-@subheading Refresh any imported files.
+@emph{Maintainer note: Removing old code, while regrettable, is a good
+thing.  Firstly it helps the developers by removing code that is either
+no longer relevant or simply wrong.  Secondly since it removes any
+history associated with the file (effectively clearing the slate) the
+developer has a much freer hand when it comes to fixing broken files.}
 
-A number of files are taken from external repositories.  They include:
+@section Before the branch
 
-@itemize @bullet
-@item
-@file{texinfo/texinfo.tex}
-@item
-@file{config.guess} et.@: al.@: 
-@end itemize
-
-and should be refreshed.
+The most important objective at this stage is to find and fix simple
+changes that become a pain to track once the branch is created.  For
+instance, configuration problems that stop @value{GDBN} from even
+building.  If you can't get the problem fixed, document it in the
+@file{gdb/PROBLEMS} file.
 
 @subheading Organize and announce the schedule.
 
@@ -4883,117 +4885,378 @@ start enjoying all the fun
 @end itemize
 
 As an aside, the branch tag name is probably regrettable vis:
-@file{gdb_N_M-YYYY-MM-DD-@{branch,branchpoint@}}.
+@example
+gdb_N_M-YYYY-MM-DD-@{branch,branchpoint@}
+@end example
 
+@subheading Refresh any imported files.
 
-@section Building a Release
+A number of files are taken from external repositories.  They include:
+
+@itemize @bullet
+@item
+@file{texinfo/texinfo.tex}
+@item
+@file{config.guess} et.@: al.@: 
+@end itemize
+
+and should be refreshed.
+
+@subheading Prompt for @file{gdb/NEWS}
+
+People always forget.  Send a post reminding them but also if you know
+something interesting happened add it your self.
+
+@subheading Review @file{gdb/README}
+
+Grab one of the nightly snapshots and then walk through the
+@file{gdb/README} looking for anything that can be improved.
+
+@subheading Check the ARI
+
+ARI is an @code{awk} script (Awk Regression Indicator?) that checks for a
+number of errors and coding conventions.  The checks include things like
+using @code{malloc} instead of @code{xmalloc} and file naming problems.
+There shouldn't be any regressions.
+
+@section Cut the branch
+
+@subheading The dirty work
+
+I think something like the below was used:
+
+@example
+$  d=`date -u +%Y-%m-%d`
+$  echo $d
+2002-01-24
+$  cvs -f -d /cvs/src rtag -D $d-gmt \
+gdb_5_1-$d-branchpoint insight+dejagnu
+$  cvs -f -d /cvs/src rtag -b -r gdb_V_V-$d-branchpoint \
+gdb_5_1-$d-branch insight+dejagnu
+$
+@end example
+
+@itemize @bullet
+@item
+the @kbd{-D YYYY-MM-DD-gmt} forces the branch to an exact date/time.
+@item
+the trunk is first taged so that the branch point can easily be found
+@item
+Insight (which includes GDB) and dejagnu are tagged at the same time
+@end itemize
+
+@subheading Post the branch info
+
+@subheading Update the web and news pages
+
+@subheading Tweak cron to track the new branch
+
+@section Stabilize the branch
+
+Something goes here.
+
+@section Create a Release
+
+This procedure can be followed when creating beta and final final
+releases.  With a beta many of the steps can be skipped.
 
 @subheading Establish a few defaults.
 
 @example
-$  b=gdb_5_1_0_1-2002-01-03-branch
-$  v=5.1.0.1
-$  cd /sourceware/snapshot-tmp/gdbadmin-tmp/$b
+$  b=gdb_5_1-2001-07-29-branch
+$  v=5.1.1
+$  t=/sourceware/snapshot-tmp/gdbadmin-tmp
+$  echo $t/$b/$v
+$  mkdir -p $t/$b/$v
+$  cd $t/$b/$v
+$  pwd
+/sourceware/snapshot-tmp/gdbadmin-tmp/gdb_5_1-2001-07-29-branch/5.1.1
 $  which autoconf
 /home/gdbadmin/bin/autoconf
+$
 @end example
 
-NB: Check the autoconf version carefully.  You want to be using
-@file{gdbadmin}'s version (which is really the version taken from the
-binutils snapshot).  SWARE may have a different version installed.
+NB: Check the autoconf version carefully.  You want to be using the
+version taken from the binutils snapshot directory.  It is most likely
+that your system's installed version (@file{/usr/bin}?) is probably
+correct.
 
 @subheading Check out the relevant modules:
 
 @example
-$  for m in gdb insight dejagnu; do
+$  for m in gdb insight dejagnu
+do
 ( mkdir -p $m && cd $m && cvs -q -f -d /cvs/src co -P -r $b $m )
 done
+$
 @end example
 
 NB: The reading of @file{.cvsrc} is disabled (@file{-f}) so that there
-isn't any confusion between what is written here and what CVS really
-does.
+isn't any confusion between what is written here and what your local CVS
+really does.
 
-@subheading Update the file @file{gdb/version.in} where applicable.
+@subheading Update relevant files.
 
-@example
-$ for m in gdb insight; do echo $v > $m/src/gdb/version.in ; done
-@end example
+@subsubheading @file{gdb/NEWS}
 
+Major releases get their comments added as part of the mainline.  Minor
+releases should probably mention any significant bugs that were fixed.
 
-@subheading Mutter something about creating a @file{ChangeLog} entry. (both trunk and branch).
-
-@example
-$  emacs gdb/src/gdb/version.in
-c-x 4 a
-Bump version to 5.1.0.1.
-c-x c-s c-x c-c
-@end example
-
-ditto for @file{insight/src/gdb/version.in}
-
-@subheading Mutter something about updating @file{README}
-
-For dejagnu, edit @file{dejagnu/src/dejagnu/configure.in} and set it to
-gdb-$v and then regenerate configure.  Mention this in the dejagnu
-@file{ChangeLog}.
+Don't forget to update the ChangeLog.
 
 @example
-$  emacs dejagnu/src/dejagnu/configure.in
+$  emacs gdb/src/gdb/NEWS
 ...
 c-x 4 a
-Bump version to 5.1.0.1.
-* configure: Re-generate.
+...
 c-x c-s c-x c-c
-$  ( cd dejagnu/src/dejagnu && autoconf )
+$  cp gdb/src/gdb/NEWS insight/src/gdb/NEWS 
+$  cp gdb/src/gdb/ChangeLog insight/src/gdb/ChangeLog 
 @end example
 
-@subheading Build the snapshot:
+@subsubheading @file{gdb/README}
+
+You'll need to update: the version, the update date, and who did it.
 
 @example
-$  for m in gdb insight dejagnu; do
+$  emacs gdb/src/gdb/README
+...
+c-x 4 a
+...
+c-x c-s c-x c-c
+$  cp gdb/src/gdb/README insight/src/gdb/README 
+$  cp gdb/src/gdb/ChangeLog insight/src/gdb/ChangeLog 
+@end example
+
+@emph{Maintainer note: Hopefully the README file was reviewed before the
+initial branch was cut so just a simple substitute is needed to get it
+updated.}
+
+@emph{Maintainer note: Other projects generate @file{README} and
+@file{INSTALL} from the core documentation.  This might be worth
+pursuing.}
+
+@subsubheading @file{gdb/version.in}
+
+@example
+$  echo $v > gdb/src/gdb/version.in
+$  emacs gdb/src/gdb/version.in
+...
+c-x 4 a
+...
+c-x c-s c-x c-c
+$  cp gdb/src/gdb/version.in insight/src/gdb/version.in 
+$  cp gdb/src/gdb/ChangeLog insight/src/gdb/ChangeLog 
+@end example
+
+@subsubheading @file{dejagnu/src/dejagnu/configure.in}
+
+Dejagnu is more complicated.  The version number is a parameter to
+@var{AM_INIT_AUTOMAKE}.  Tweak it to read something like
+@var{gdb-5.1.1}.
+
+Re-generate configure.
+
+Add a ChangeLog.
+
+@subheading Do the dirty work
+
+This is identical to the process used when creating the daily snapshot.
+
+@example
+$  for m in gdb insight dejagnu
+do
 ( cd $m/src && gmake -f Makefile.in $m.tar.bz2 )
 done
 @end example
 
-@subheading Do another @kbd{CVS update} to see what the damage is.
-
-@example
-$ ( cd gdb/src && cvs -q update )
-@end example
+@subheading Check the source files
 
 You're looking for files that have mysteriously disappeared as the
 @kbd{distclean} has the habit of deleting files it shouldn't.  Watch out
-for the @file{version.in} update cronjob.
-
-@subheading Copy all the @file{.bz2} files to the ftp directory:
+for the @file{version.in} update @kbd{cronjob}.
 
 @example
-cp */src/*.bz2 ~ftp/.....
+$  ( cd gdb/src && cvs -f -q -n update )
+M djunpack.bat
+? proto-toplev
+? gdb-5.1.1.tar.bz2
+M gdb/ChangeLog
+M gdb/NEWS
+M gdb/README
+M gdb/version.in
+? gdb/p-exp.tab.c
+? gdb/doc/gdb.info-11
+? gdb/doc/gdb.info-12
+? gdb/doc/gdb.info-13
+? gdb/doc/gdb.info-14
+? gdb/doc/gdb.info-15
+? gdb/doc/gdbint.info-4
+? gdb/doc/gdbint.info-5
+$
 @end example
 
-@subheading Something about @kbd{gzip}'ing them.
+@emph{Don't worry about the @file{gdb.info-??} or
+@file{gdb/p-exp.tab.c}.  They were generated (and yes @file{gdb.info-1}
+was also generated only something strange with CVS means that they
+didn't get supressed).  Fixing it would be nice though.}
 
-@subheading Something about web pages?
+@subheading Re-pack the release with @code{gzip}
 
-@subheading Something about documentation?
+@example
+$  cp */*/*.bz2 .
+$  bunzip2 -k -v *.bz2
+$  gzip -9 -v *.tar
+@end example
 
-@subheading Cleanup the release tree
+NB: A pipe such as @kbd{bunzip2 < xxx.bz2 | gzip -9 > xxx.gz} shouldn't
+be used since, in that mode, gzip doesn't know the file name information
+and consequently can't include it.  This is also why the release process
+runs @code{tar} and @code{bzip2} as separate passes.
 
-In particular you'll need to:
+@emph{Maintainer note: The release process could be changed to create
+@file{.tar} rather than @file{.tar.bz2} files.}
+
+@section Check the release
+
+Grab the @file{gdb.tar.bz2}, copy it to your local machine and then try
+a simple build using it.
+
+If this is a pre-release just copy the @file{.bz2} files to the snapshot
+directory and skip the remaining steps.
+
+If it is a final release, also make it available under a bogus name so
+that others can download and check it.
+
+@emph{Maintainer note: This adds an extra day to the release process but
+is very much worth it.  Other developers are given the oportunity to
+check that things like your @file{NEWS} entries are correct or that
+other changes actually work.}
+
+@section Release the tar ball
+
+This is where, unfortunatly, the notes just get vague.
+
+@subheading Install on sware
+
+@example
+$  cp *.bz2 *.gz ~ftp/pub/gdb/releases
+@end example
+
+@subheading Create and update the web pages.
+
+Try the following:
 
 @itemize @bullet
 @item
-Commit the changes to @file{ChangeLog} and @file{version.in}
+create the directory @file{htdocs/@var{version}} (e.g., @file{htdocs/5.1.1}
 @item
-Tag the repository.
+copy @file{index.html} and @file{ANNOUNCE} from the previous release
+into the @file{htdocs/@var{version}} directory and edit for content.
+Things like the MD5 sums, @kbd{ls -l} output, the version number and so
+on will need updating.  Add NEWS entries to the @file{ANNOUNCE}.  This
+ensures that the previous announcement is kept somewhere handy.
+@item
+copy the @file{NEWS} from the distro into the
+@file{htdocs/@var{version}} directory, trim down to just the most recent
+news items
+@item
+Add a short (identical) announcement to both @file{htdocs/index.html}
+and @file{htdocs/news/index.html}
+@item
+edit the script @file{htdocs/index.sh} to link in the new release
+number.  Run it across all @file{index.html} files vis @kbd{./index.sh
+index.html */index.html}.
+@item
+grep the @file{htdocs} tree for references to the previous release
+version (@file{htdocs/download/index.html})
 @end itemize
 
+@emph{Maintainer note: This step is too fragile --- it is too easy to
+mis one of the entries and forget to update it.}
 
-@section After the release
+@subheading Generate online docs
 
-Remove any @kbd{OBSOLETE} code.
+You need to find the magic command that is used to generate the online
+docs from the @file{.tar.bz2}.  The best way is to look in the output
+from one of the nightly cronjobs and then just edit accordingly.
+Something like:
 
+@example
+$  ~/ss/update-web-docs \
+ ~ftp/pub/gdb/releases/gdb-5.1.1.tar.bz2 \
+ $PWD/www \
+ /www/sourceware/htdocs/gdb/5.1.1/onlinedocs \
+ gdb
+@end example
+
+@subheading Something about @file{ANNOUNCEMENT}
+
+Send the @file{ANNOUNCEMENT} file you created above to:
+
+@itemize @bullet
+@item
+@email{gdb-announce@@sources.redhat.com, GDB Announcement mailing list}
+@item
+The gnu announce list (but delay it a day or so to let things get out).
+@end itemize
+
+@subheading Install it on GNU
+
+At the time of writing, the GNU machine was @kbd{gnudist.gnu.org} in
+@file{~ftp/gnu/gdb} (I think, I'm still waiting for it to copy into my
+home directory).
+
+@section Cleanup
+
+@subheading Commit outstanding changes
+
+In particular you'll need to commit the changes to:
+
+@itemize @bullet
+@item
+@file{gdb/ChangeLog}
+@item
+@file{gdb/version.in}
+@item
+@file{gdb/NEWS}
+@item
+@file{gdb/README}
+@end itemize
+
+@subheading Tag the release
+
+Something like:
+
+@example
+$  d=`date -u +%Y-%m-%d`
+$  echo $d
+2002-01-24
+$  ( cd insight/src/gdb && cvs -f -q update )
+$  ( cd insight/src && cvs -f -q tag gdb_5_1_1-$d-release )
+@end example
+
+Insight is used since that contains more of the release than GDB (yes
+dejagnu doesn't get tagged but I think we can live with that.).
+
+@subheading Restart @file{gdb/version.in}
+
+If @file{gdb/version.in} does not contain an ISO date such as
+@kbd{2002-01-24} then the daily @code{cronjob} won't update it.  Having
+committed all the release changes it can be set to
+@file{5.1.0_0000-00-00-cvs} which will restart things (yes the @kbd{_}
+is important - it affects the snapshot process).
+
+Don't forget the @file{ChangeLog}.
+
+@subheading Merge into trunk
+
+The files committed to the branch may also need changes merged into the
+trunk.
+
+@section Post release
+
+Remove any @code{OBSOLETE} code.
 
 @node Testsuite
 
