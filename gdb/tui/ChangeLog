@@ -1,3 +1,8 @@
+2003-08-04  Daniel Jacobowitz  <drow@mvista.com>
+
+	* tui-interp.c: Include "cli-out.h".
+	(tui_resume): Update tui_old_uiout's stream to gdb_stdout.
+
 2003-07-24  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* tui.c (tui_rl_other_window): New function to switch the TUI active
