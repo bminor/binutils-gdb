@@ -306,14 +306,6 @@ i386_linux_write_pc (CORE_ADDR pc, ptid_t ptid)
   write_register_pid (I386_LINUX_ORIG_EAX_REGNUM, -1, ptid);
 }
 
-/* Calling functions in shared libraries.  */
-
-CORE_ADDR
-i386_linux_skip_solib_resolver (CORE_ADDR pc)
-{
-  return glibc_skip_solib_resolver (pc);
-}
-
 /* Fetch (and possibly build) an appropriate link_map_offsets
    structure for native GNU/Linux x86 targets using the struct offsets
    defined in link.h (but without actual reference to that file).
@@ -453,6 +445,7 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
      to support backtracing through calls to signal handlers.  */
   set_gdbarch_pc_in_sigtramp (gdbarch, i386_linux_pc_in_sigtramp);
 
+  set_gdbarch_skip_solib_resolver (gdbarch, glibc_skip_solib_resolver);
   set_solib_svr4_fetch_link_map_offsets (gdbarch,
 				       i386_linux_svr4_fetch_link_map_offsets);
 }

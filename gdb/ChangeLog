@@ -1,3 +1,17 @@
+2003-11-15  Mark Kettenis  <kettenis@gnu.org>
+
+	* glibc-tdep.h (struct gdbarch): Declare opaque.
+	(glibc_skip_solib_resolver): Adjust prototype.
+	* glibc-tdep.c (glibc_skip_solib_resolver): Adjust.
+	* arm-linux-tdep.c (arm_linux_skip_solib_resolver): Remove.
+	(arm_linux_init_abi): Set skip_solib_resolver.
+	* i386-linux-tdep.c (i386_linux_skip_solib_resolver): Remove.
+	(i386_linux_init_abi): Set skip_solib_resolver.
+	* config/arm/tm-linux.h (SKIP_SOLIB_RESOLVER): Remove.
+	(arm_linux_skip_solib_resolver): Remove prototype.
+	* config/i386/tm-linux.h (SKIP_SOLIB_RESOLVER): Remove.
+	(i386_linux_skip_solib_resolver): Remove prototype.
+
 2003-11-14  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdbarch.sh (skip_solib_resolver): Change into a multi-arch
