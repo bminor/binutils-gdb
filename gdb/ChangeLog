@@ -1,3 +1,7 @@
+2002-11-06  Joel Brobecker  <brobecker@gnat.com>
+
+	* PROBLEMS: Document gdb/816 (unable to read core file on alpha-osf).
+
 2002-11-06  Theodore A. Roth  <troth@openavr.org>
 
 	* c-exp.y: Add missing semi-colons.

@@ -50,3 +50,18 @@ i386-*-freebsd4.4*
 
 gdb/455: GDB doesn't build on a FreeBSD 4.4-STABLE system.  The
 problem is still being investigated.
+
+alpha*-*-osf*
+-------------
+
+gdb/816: When building GDB with GCC 3.0.1, GDB is unable to load a core
+file properly. It generates several errors and warnings regarding
+unhandled core file section types, incorrect endianness, the failure to
+load the registers. Are also incorrectly reported: The program name, the
+cause of the program death, and the call stack at the moment of the
+death. This problem has been reported on alpha-osf4.0f and alpha-osf5.1a.
+To work-around the problem, add -D__digital__ to the CFLAGS when
+building GDB vis:
+
+    $ make CFLAGS='-O2 -D__digital__'
+
