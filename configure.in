@@ -9,11 +9,11 @@ srcname="gnu development package"
 
 # per-host:
 
-# XXX - FIXME there needs to be a case for hmake-dgux
+# XXX - FIXME there needs to be a case for mh_dgux
 
 case "${host_os}" in
-sysv* | irix*)	host_makefile_frag=config/hmake-sysv ;;
-svr4)		host_makefile_frag=config/hmake-svr4 ;;
+sysv* | irix*)	host_makefile_frag=config/mh-sysv ;;
+svr4)		host_makefile_frag=config/mh-svr4 ;;
 esac
 
 # per-target:
@@ -35,7 +35,7 @@ amd)
 esac
 
 
-target_makefile_frag=config/t-${bfd_target}
+target_makefile_frag=config/mt-${bfd_target}
 
 
 #
