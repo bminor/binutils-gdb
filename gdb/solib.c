@@ -1060,7 +1060,7 @@ first_link_map_member (void)
 
   SYNOPSIS
 
-  void open_symbol_file_object (int *from_tty)
+  int open_symbol_file_object (void *from_ttyp)
 
   DESCRIPTION
 
@@ -1075,11 +1075,12 @@ first_link_map_member (void)
   catch_errors() requires a pointer argument. */
 
 static int
-open_symbol_file_object (int *from_ttyp)
+open_symbol_file_object (void *from_ttyp)
 {
   CORE_ADDR lm;
   char *filename;
   int errcode;
+  int from_tty = *(int *)from_ttyp;
 
   if (symfile_objfile)
     if (!query ("Attempt to reload symbols from process? "))
@@ -1130,7 +1131,7 @@ open_symbol_file_object (int *from_ttyp)
 
   make_cleanup (free, filename);
   /* Have a pathname: read the symbol file.  */
-  symbol_file_command (filename, *from_ttyp);
+  symbol_file_command (filename, from_tty);
 
   return 1;
 }
