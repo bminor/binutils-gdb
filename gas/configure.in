@@ -121,9 +121,7 @@ changequote([,])dnl
       alpha-*-linuxecoff*)  fmt=ecoff ;;
       alpha-*-linux*)       fmt=elf em=linux ;;
 
-# start-sanitize-arc
       arc-*-elf*)           fmt=elf bfd_gas=yes ;;
-# end-sanitize-arc
 
       arm-*-riscix*)	    fmt=aout em=riscix ;;
       arm-*-aout)	    fmt=aout ;;
