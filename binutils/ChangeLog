@@ -4,6 +4,9 @@ Thu Jun 11 01:19:06 1992  John Gilmore  (gnu at cygnus.com)
 	.stab section from an ELF file.  Installed under #ifdef
 	ELF_STAB_DISPLAY so it can be easily disabled, since it requires
 	bfd-internals header files and such.
+	* objdump.1, binutils.texi:  Update for --stabs.  Also fix
+	objdump's doc to use -- rather than + for long options.
+	(FIXME:  Not yet fixed everywhere in binutils.texinfo.)
 
 Wed Jun 10 07:53:24 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 

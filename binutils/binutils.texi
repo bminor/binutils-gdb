@@ -637,9 +637,9 @@ Display only undefined symbols (those external to each object file).
 
 @smallexample
   objdump [ -a ]  [ -b @var{bfdname} ]  [ -d ]  [ -f ]
-          [ -h | +header ]  [ -i ]  [ -j @var{section} ]  [ -l ]
-          [ -m @var{machine} ]  [ -r | +reloc ]  [ -s ]
-          [ -t | +syms ]  [ -x ]
+          [ -h | --header ]  [ -i ]  [ -j @var{section} ]  [ -l ]
+          [ -m @var{machine} ]  [ -r | --reloc ]  [ -s ]
+          [ --stabs ]  [ -t | --syms ]  [ -x ]
           @var{objfiles}@dots{}
 @end smallexample
 
@@ -665,7 +665,7 @@ header information (in a format similar to @samp{ls -l}).  Besides the
 information you could list with @samp{ar tv}, @samp{objdump -a} shows
 the object file format of each archive member.
 
-@c suggest longname +target or +format or +bfd
+@c suggest longname --target or --format or --bfd
 @item -b @var{bfdname}
 @cindex object code format
 You can specify a particular object-code format for your object files as
@@ -692,7 +692,7 @@ File header.  Display summary information from the overall header of
 each file in @var{objfiles}.
 
 @item -h
-@itemx +header
+@itemx --header
 @cindex section headers
 Header.  Display summary information from the section headers of the
 object file.
@@ -703,18 +703,18 @@ object file.
 Display a list showing all architectures and object formats available
 for specification with @code{-b} or @code{-m}.
 
-@c suggest longname +section
+@c suggest longname --section
 @item -j @var{name}
 @cindex section information
 Display information only for section @var{name}
 
-@c suggest longname +label or +linespec
+@c suggest longname --label or --linespec
 @item -l
 @cindex source filenames for object files
 Label the display (using debugging information) with the source filename
 and line numbers corresponding to the object code shown.
 
-@c suggest longname +architecture
+@c suggest longname --architecture
 @item -m @var{machine}
 @cindex architecture
 Specify the object files @var{objfiles} are for architecture
@@ -722,7 +722,7 @@ Specify the object files @var{objfiles} are for architecture
 option. 
 
 @item -r
-@itemx +reloc
+@itemx --reloc
 @cindex relocation entries, in object file
 Relocation.  Print the relocation entries of the file.
 
@@ -731,8 +731,21 @@ Relocation.  Print the relocation entries of the file.
 @cindex object file sections
 Display the full contents of any sections requested.
 
+@item --stabs
+@cindex stab
+@cindex .stab
+@cindex debug symbols
+@cindex ELF object file format
+Display the full contents of any sections requested.
+Display the contents of the .stab section from an ELF file.
+This is only useful on systems (such as Solaris 2.0) in which
+@code{.stab} debugging symbol-table entries are carried in an ELF section.
+In most other file formats, debugging symbol-table entries are 
+interleaved with linkage symbols, and are visible in the @samp{--syms}
+output.
+
 @item -t
-@itemx +syms
+@itemx --syms
 @cindex symbol table entries, printing
 Symbol Table.  Print the symbol table entries of the file.
 This is similar to the information provided by the @samp{nm} program.
