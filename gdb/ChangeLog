@@ -1,5 +1,8 @@
 Tue Oct 15 16:30:07 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
+	* Makefile.in (init.c):  Don't use -s option with grep.  It means
+	something different under Digital Unix.
+
 	* buildsym.c (finish_block):  Treat LOC_BASEREG_ARG and
 	LOC_LOCAL_ARG as arguments so that GDB will know about function
 	args declared this way.  Mostly affects dwarf.
