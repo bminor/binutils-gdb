@@ -43,10 +43,8 @@ char *registers = my_registers;
 #include <sys/reg.h>
 #endif
 
-/* Default the type of the ptrace transfer to int.  */
-#ifndef PTRACE_XFER_TYPE
+#define PTRACE_ARG3_TYPE long
 #define PTRACE_XFER_TYPE int
-#endif
 
 extern int errno;
 
@@ -718,7 +716,7 @@ read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
   /* Read all the longwords */
   for (i = 0; i < count; i++, addr += sizeof (PTRACE_XFER_TYPE))
     {
-      buffer[i] = ptrace (PTRACE_PEEKTEXT, inferior_pid, addr, 0);
+      buffer[i] = ptrace (PTRACE_PEEKTEXT, inferior_pid, (PTRACE_ARG3_TYPE) addr, 0);
     }
 
   /* Copy appropriate bytes out of the buffer.  */
@@ -745,13 +743,16 @@ write_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
 
   /* Fill start and end extra bytes of buffer with existing memory data.  */
 
-  buffer[0] = ptrace (PTRACE_PEEKTEXT, inferior_pid, addr, 0);
+  buffer[0] = ptrace (PTRACE_PEEKTEXT, inferior_pid,
+		      (PTRACE_ARG3_TYPE) addr, 0);
 
   if (count > 1)
     {
       buffer[count - 1]
 	= ptrace (PTRACE_PEEKTEXT, inferior_pid,
-		  addr + (count - 1) * sizeof (PTRACE_XFER_TYPE), 0);
+		  (PTRACE_ARG3_TYPE) (addr + (count - 1)
+				      * sizeof (PTRACE_XFER_TYPE)),
+		  0);
     }
 
   /* Copy data to be written over corresponding part of buffer */
@@ -763,7 +764,7 @@ write_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
   for (i = 0; i < count; i++, addr += sizeof (PTRACE_XFER_TYPE))
     {
       errno = 0;
-      ptrace (PTRACE_POKETEXT, inferior_pid, addr, buffer[i]);
+      ptrace (PTRACE_POKETEXT, inferior_pid, (PTRACE_ARG3_TYPE) addr, buffer[i]);
       if (errno)
 	return errno;
     }

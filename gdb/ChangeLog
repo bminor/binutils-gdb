@@ -1,5 +1,11 @@
 2002-02-05  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdbserver/linux-low.c: Define PTRACE_ARG3_TYPE.
+	(read_inferior_memory): Use it.
+	(write_inferior_memory): Likewise.
+
+2002-02-05  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdbserver/linux-low.c (create_inferior): Call strerror instead of
 	grubbing through sys_errlist.
 
