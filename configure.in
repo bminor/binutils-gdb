@@ -870,6 +870,7 @@ targargs=`echo "${arguments}" | \
 	sed -e 's/--norecursion//' \
 	    -e 's/--cache[a-z-]*=[^ 	]*//' \
 	    -e 's/--ho[a-z-]*=[^ 	]*//' \
+	    -e 's/--bu[a-z-]*=[^ 	]*//' \
 	    -e 's/--ta[a-z-]*=[^ 	]*//'`
 
 # Passing a --with-cross-host argument lets the target libraries know
@@ -878,7 +879,7 @@ targargs=`echo "${arguments}" | \
 # sorts of decisions they want to make on this basis.  Please consider
 # this option to be deprecated.  FIXME.
 if [ x${is_cross_compiler} = xyes ]; then
-  targargs="--with-cross-host=${host_alias} --build=${build_alias} ${targargs}"
+  targargs="--with-cross-host=${host_alias} ${targargs}"
 fi
 
 # Default to --enable-multilib.
@@ -886,7 +887,7 @@ if [ x${enable_multilib} = x ]; then
   targargs="--enable-multilib ${targargs}"
 fi
 
-targargs="--host=${target_alias} ${targargs}"
+targargs="--host=${target_alias} --build=${build_alias} ${targargs}"
 sed -e "s:^TARGET_CONFIGDIRS[ 	]*=.*$:TARGET_CONFIGDIRS = ${target_configdirs}:" \
     -e "s%^CONFIG_ARGUMENTS[ 	]*=.*$%CONFIG_ARGUMENTS = ${targargs}%" \
     -e "s%^TARGET_SUBDIR[ 	]*=.*$%TARGET_SUBDIR = ${target_subdir}%" \

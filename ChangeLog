@@ -1,3 +1,8 @@
+Fri Jun 13 10:22:56 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* configure.in (targargs): Strip out any supplied --build argument
+ 	before adding our own. Always add --build.
+
 Thu Jun 12 21:12:28 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* configure.in (targargs): Pass --build if we're doing
