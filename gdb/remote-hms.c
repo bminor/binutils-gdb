@@ -139,7 +139,7 @@ static struct monitor_ops hms_cmds =
   MONITOR_OPS_MAGIC		/* magic */
 };
 
-void
+static void
 hms_open (args, from_tty)
      char *args;
      int from_tty;
@@ -147,8 +147,8 @@ hms_open (args, from_tty)
   monitor_open (args, &hms_cmds, from_tty);
 }
 
-
 int write_dos_tick_delay;
+
 void
 _initialize_remote_hms ()
 {
@@ -163,7 +163,6 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   write_dos_tick_delay = 1;
   add_target (&hms_ops);
 }
-
 
 
 #if 0

@@ -1,3 +1,18 @@
+Thu Jun 15 14:54:58 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* array-rom.c: Remove, no longer used.
+
+	* remote-hms.c (hms_open): Make static.
+
+	* mpw-config.in (MacSerial.h): Copy from version in {CIncludes},
+	not {MPW}Interfaces:CIncludes.
+	* ser-mac.c (mac_baud_rate_table): Fix value for 38400 baud.
+
+Wed Jun 14 14:27:07 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* ch-exp.y:  Remove lots of unsupported productions and names.
+	Add support for IF-expressions, ORIF, ANDIF, NUM, and ADDR.
+
 Tue Jun 13 21:40:11 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* parser-defs.h (enum precedence):  Added PREC_BUILTIN_FUNCTION.

@@ -248,7 +248,7 @@ static struct {
   int bits;
 } mac_baud_rate_table[] = {
   { 57600, baud57600 },
-  { 38400, 2 /* ??? */ },
+  { 38400, 1 },
   { 19200, baud19200 },
   { 9600, baud9600 },
   { 7200, baud7200 },
