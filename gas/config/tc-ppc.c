@@ -5223,7 +5223,14 @@ md_apply_fix3 (fixP, valP, seg)
       else if ((operand->flags & PPC_OPERAND_RELATIVE) != 0
 	  && operand->bits == 16
 	  && operand->shift == 0)
-	fixP->fx_r_type = BFD_RELOC_PPC_B16;
+	{
+	  fixP->fx_r_type = BFD_RELOC_PPC_B16;
+#ifdef OBJ_XCOFF
+	  fixP->fx_size = 2;
+	  if (target_big_endian)
+	    fixP->fx_where += 2;
+#endif
+	}
       else if ((operand->flags & PPC_OPERAND_ABSOLUTE) != 0
 	       && operand->bits == 26
 	       && operand->shift == 0)
@@ -5231,7 +5238,14 @@ md_apply_fix3 (fixP, valP, seg)
       else if ((operand->flags & PPC_OPERAND_ABSOLUTE) != 0
 	       && operand->bits == 16
 	       && operand->shift == 0)
-	fixP->fx_r_type = BFD_RELOC_PPC_BA16;
+	{
+	  fixP->fx_r_type = BFD_RELOC_PPC_BA16;
+#ifdef OBJ_XCOFF
+	  fixP->fx_size = 2;
+	  if (target_big_endian)
+	    fixP->fx_where += 2;
+#endif
+	}
 #if defined (OBJ_XCOFF) || defined (OBJ_ELF)
       else if ((operand->flags & PPC_OPERAND_PARENS) != 0
 	       && operand->bits == 16
