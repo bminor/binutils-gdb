@@ -1,3 +1,8 @@
+2002-04-01  Jessica Han  <jessica@cup.hp.com>
+
+	* config/tc-ia64.c (ia64_cons_fix_new): Handle 8 byte iplt reloc
+	in 32-bit mode.
+
 2002-03-28  Alan Modra  <amodra@bigpond.net.au>
 
 	* aclocal.m4: Regenerate.

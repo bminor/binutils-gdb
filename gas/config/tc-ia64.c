@@ -9986,11 +9986,26 @@ ia64_cons_fix_new (f, where, nbytes, exp)
       break;
 
     case 8:
-      if (target_big_endian)
-	code = BFD_RELOC_IA64_DIR64MSB;
-      else
-	code = BFD_RELOC_IA64_DIR64LSB;
-      break;
+      /* In 32-bit mode, data8 could mean function descriptors too. */
+      if (exp->X_op == O_pseudo_fixup
+          && exp->X_op_symbol
+          && S_GET_VALUE (exp->X_op_symbol) == FUNC_IPLT_RELOC
+          && !(md.flags & EF_IA_64_ABI64))
+        {
+          if (target_big_endian)
+            code = BFD_RELOC_IA64_IPLTMSB;
+          else
+            code = BFD_RELOC_IA64_IPLTLSB;
+          exp->X_op = O_symbol;
+          break;
+        }
+       else {
+         if (target_big_endian)
+	   code = BFD_RELOC_IA64_DIR64MSB;
+         else
+	   code = BFD_RELOC_IA64_DIR64LSB;
+         break;
+       }
 
     case 16:
       if (exp->X_op == O_pseudo_fixup
