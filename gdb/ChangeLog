@@ -1,3 +1,9 @@
+2000-03-28  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	breakpoint.c, breakpoint.h (remove_hw_watchpoints):  New function.
+	infrun.c (resume):  Remove hardware watchpoints before stepping
+	when CANNOT_STEP_HW_WATCHPOINTS is nonzero.
+
 2000-03-28  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* Makefile.in: anchor tui-file.h dependency to $srcdir.

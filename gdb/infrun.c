@@ -296,6 +296,13 @@ a command like `return' or `jump' to continue execution.\n");
 #define HAVE_CONTINUABLE_WATCHPOINT 1
 #endif
 
+#ifndef CANNOT_STEP_HW_WATCHPOINTS
+#define CANNOT_STEP_HW_WATCHPOINTS 0
+#else
+#undef  CANNOT_STEP_HW_WATCHPOINTS
+#define CANNOT_STEP_HW_WATCHPOINTS 1
+#endif
+
 /* Tables of how to react to signals; the user sets them.  */
 
 static unsigned char *signal_stop;
@@ -795,6 +802,18 @@ resume (int step, enum target_signal sig)
   if (step && breakpoints_inserted && breakpoint_here_p (read_pc ()))
     step = 0;
 #endif
+
+  /* Some targets (e.g. Solaris x86) have a kernel bug when stepping
+     over an instruction that causes a page fault without triggering
+     a hardware watchpoint. The kernel properly notices that it shouldn't
+     stop, because the hardware watchpoint is not triggered, but it forgets
+     the step request and continues the program normally.
+     Work around the problem by removing hardware watchpoints if a step is
+     requested, GDB will check for a hardware watchpoint trigger after the
+     step anyway.  */
+  if (CANNOT_STEP_HW_WATCHPOINTS && step && breakpoints_inserted)
+    remove_hw_watchpoints ();
+     
 
   /* Normally, by the time we reach `resume', the breakpoints are either
      removed or inserted, as appropriate.  The exception is if we're sitting

@@ -1096,6 +1096,27 @@ remove_breakpoints ()
 }
 
 int
+remove_hw_watchpoints ()
+{
+  register struct breakpoint *b;
+  int val;
+
+  ALL_BREAKPOINTS (b)
+  {
+    if (b->inserted
+	&& (b->type == bp_hardware_watchpoint
+	    || b->type == bp_read_watchpoint
+	    || b->type == bp_access_watchpoint))
+      {
+	val = remove_breakpoint (b, mark_uninserted);
+	if (val != 0)
+	  return val;
+      }
+  }
+  return 0;
+}
+
+int
 reattach_breakpoints (pid)
      int pid;
 {
