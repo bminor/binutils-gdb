@@ -1,3 +1,11 @@
+Wed Apr 29 23:58:52 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-trace.c (print_data): For floating-point numbers trace raw
+ 	hex value.
+	(trace_result_fp2): New function.
+	* sim-trace.h (trace_result_fp2): New declaration.
+	(TRACE_FP_RESULT2): New macro.
+
 Tue Apr 28 18:28:58 1998  Geoffrey Noer  <noer@cygnus.com>
 
         * common/aclocal.m4: call AM_EXEEXT in SIM_AC_COMMON, define
