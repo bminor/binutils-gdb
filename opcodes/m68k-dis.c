@@ -154,7 +154,7 @@ fetch_data (info, addr)
   if (status != 0)
     {
       (*info->memory_error_func) (status, start, info);
-      longjmp (priv->bailout);
+      longjmp (priv->bailout, 1);
     }
   else
     priv->max_fetched = addr;
