@@ -2690,6 +2690,14 @@ pa_ip (str)
 		break;
 	      continue;
 
+	    /* Handle ,l completer for new syntax branches.  */
+	    case 'l':
+	      if (*s == ',' && strcasecmp (s + 1, "l") == 0)
+		s += 2;
+	      else
+		break;
+	      continue;
+
 	    /* Handle a 11 bit immediate at 31.  */
 	    case 'i':
 	      the_insn.field_selector = pa_chk_field_selector (&s);
