@@ -103,7 +103,7 @@ if [ ! -f ${srcdir}/${files} ] ; then
 fi
 host_makefile_frag=
 if [ -f ${srcdir}/config/mh-${my_host} ] ; then
-	host_makefile_frag=config/mh-${my_host}
+	host_makefile_frag=${srcdir}/config/mh-${my_host}
 fi
 
 # per-target:
@@ -124,11 +124,12 @@ sun)
 		*) my_target=coff-a29k ;;
 		esac
 		;;
-	h8300)	my_target=h8300hds ;;
+	h8300)	my_target=coff-h8300 ;;
 	m68k)	
 		case ${target_vendor} in
-		sony)	my_target=news;;
-		hp)	my_target=hp300bsd;;
+		sony)	my_target=news ;;
+		hp)	my_target=hp300bsd ;;
+		wrs)	my_target=sun3 ;;
 		*)
 			echo "Unknown m68k target vendor:" ${target_vendor}
 			exit 1
@@ -139,4 +140,4 @@ sun)
 	;;
 esac
 
-target_makefile_frag=config/mt-${my_target}
+target_makefile_frag=${srcdir}/config/mt-${my_target}

@@ -311,8 +311,8 @@ fi
 #  We really shouldn't depend on there being a space after TM_FILE= ...
 targetfile=`awk '$1 == "TM_FILE=" { print $2 }' <${srcdir}/config/mt-${gdb_target}`
 
-host_makefile_frag=config/mh-${gdb_host}
-target_makefile_frag=config/mt-${gdb_target}
+host_makefile_frag=${srcdir}/config/mh-${gdb_host}
+target_makefile_frag=${srcdir}/config/mt-${gdb_target}
 
 # If hostfile (XM_FILE) and/or targetfile (TM_FILE) is not set in the
 # ?config/* file, we don't make the corresponding links.  But we have
