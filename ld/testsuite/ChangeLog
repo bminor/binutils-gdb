@@ -1,3 +1,10 @@
+2003-09-21  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* ld-mips-elf/relax-jalr-n32.d: Fix little endian test failure.
+	* ld-mips-elf/relax-jalr-n32-shared.d: Likewise.
+	* ld-mips-elf/relax-jalr-n64.d: Likewise.
+	* ld-mips-elf/relax-jalr-n64-shared.d: Likewise.
+
 2003-09-14  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* ld-mmix/bpo-1.d, ld-mmix/bpo-10.d, ld-mmix/bpo-11.d,
