@@ -9009,6 +9009,7 @@ mips16_extended_frag (fragp, sec, stretch)
   register const struct mips16_immed_operand *op;
   offsetT val;
   int mintiny, maxtiny;
+  segT symsec;
 
   type = RELAX_MIPS16_TYPE (fragp->fr_subtype);
   op = mips16_immed_operands;
@@ -9037,14 +9038,26 @@ mips16_extended_frag (fragp, sec, stretch)
       maxtiny = (1 << (op->nbits - 1)) - 1;
     }
 
-  /* FIXME: If this is an expression symbol, this will fix its value.
-     If the expression is actually a subtraction of two symbols in the
-     segment being relaxed, the value will get fixed inappropriately.  */
-  val = S_GET_VALUE (fragp->fr_symbol);
-
-  /* When we are called, symbol values are offsets within a frag.  The
-     address of the frag has not yet been added into the value.  */
-  val += fragp->fr_symbol->sy_frag->fr_address;
+  /* We can't call S_GET_VALUE here, because we don't want to lock in
+     a particular frag address.  */
+  if (fragp->fr_symbol->sy_value.X_op == O_constant)
+    {
+      val = (fragp->fr_symbol->sy_value.X_add_number
+	     + fragp->fr_symbol->sy_frag->fr_address);
+      symsec = S_GET_SEGMENT (fragp->fr_symbol);
+    }
+  else if (fragp->fr_symbol->sy_value.X_op == O_symbol
+	   && (fragp->fr_symbol->sy_value.X_add_symbol->sy_value.X_op
+	       == O_constant))
+    {
+      val = (fragp->fr_symbol->sy_value.X_add_symbol->sy_value.X_add_number
+	     + fragp->fr_symbol->sy_value.X_add_symbol->sy_frag->fr_address
+	     + fragp->fr_symbol->sy_value.X_add_number
+	     + fragp->fr_symbol->sy_frag->fr_address);
+      symsec = S_GET_SEGMENT (fragp->fr_symbol->sy_value.X_add_symbol);
+    }
+  else
+    return 1;
 
   if (op->pcrel)
     {
@@ -9063,7 +9076,7 @@ mips16_extended_frag (fragp, sec, stretch)
 	}
       else
 	{
-	  if (S_GET_SEGMENT (fragp->fr_symbol) != sec)
+	  if (symsec != sec)
 	    {
 	      fragp->fr_subtype =
 		RELAX_MIPS16_MARK_LONG_BRANCH (fragp->fr_subtype);
@@ -9470,8 +9483,8 @@ md_convert_frag (abfd, asec, fragp)
 	  ext = false;
 	}
 
+      resolve_symbol_value (fragp->fr_symbol);
       val = S_GET_VALUE (fragp->fr_symbol);
-      val += fragp->fr_symbol->sy_frag->fr_address;
       if (op->pcrel)
 	{
 	  addressT addr;

@@ -1,5 +1,10 @@
 Fri Dec  6 18:48:13 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c (mips16_extended_frag): Don't call
+	S_GET_VALUE.
+	(md_convert_frag): Call resolve_symbol_value before calling
+	S_GET_VALUE, and don't add in the frag address.
+
 	* config/tc-mips.c (mips16_immed): Add file and line parameters,
 	and use them when reporting errors.  Change all callers.
 
