@@ -352,7 +352,7 @@ static int disable_break (void);
 
 static void info_sharedlibrary_command (char *, int);
 
-static int symbol_add_stub (void *);
+static int symbol_add_stub (char *);
 
 static struct so_list *find_solib (struct so_list *);
 
@@ -364,7 +364,7 @@ static void xfer_link_map_member (struct so_list *, struct link_map *);
 
 static CORE_ADDR locate_base (void);
 
-static int solib_map_sections (void *);
+static int solib_map_sections (char *);
 
 /*
 
@@ -394,7 +394,8 @@ static int solib_map_sections (void *);
  */
 
 static int
-solib_map_sections (void *arg)
+solib_map_sections (arg)
+     char *arg;
 {
   struct so_list *so = (struct so_list *) arg;	/* catch_errors bogon */
   char *filename;
@@ -459,7 +460,6 @@ solib_map_sections (void *arg)
   /* Free the file names, close the file now.  */
   do_cleanups (old_chain);
 
-  /* must be non-zero */
   return (1);
 }
 
@@ -564,13 +564,12 @@ first_link_map_member ()
     return NULL;
 
   /* Get first list entry.  */
-  /* The MIPS Sign extends addresses. */
-  lladdr = host_pointer_to_address (listp);
+  lladdr = (CORE_ADDR) listp;
   read_memory (lladdr, (char *) &list_old, sizeof (struct obj_list));
 
   /* The first entry in the list is the object file we are debugging,
      so skip it.  */
-  next_lladdr = host_pointer_to_address (list_old.next);
+  next_lladdr = (CORE_ADDR) list_old.next;
 
 #ifdef HANDLE_NEW_OBJ_LIST
   if (list_old.data == NEW_OBJ_INFO_MAGIC)
@@ -630,7 +629,7 @@ next_link_map_member (so_list_ptr)
 	  status = target_read_memory (lm->l_lladdr,
 				       (char *) &list_old,
 				       sizeof (struct obj_list));
-	  next_lladdr = host_pointer_to_address (list_old.next);
+	  next_lladdr = (CORE_ADDR) list_old.next;
 	}
 #ifdef HANDLE_NEW_OBJ_LIST
       else if (lm->l_variant == OBJ_LIST_32)
@@ -683,7 +682,7 @@ xfer_link_map_member (so_list_ptr, lm)
 
   new_lm->l_variant = OBJ_LIST_OLD;
   new_lm->l_lladdr = lladdr;
-  new_lm->l_next = host_pointer_to_address (list_old.next);
+  new_lm->l_next = (CORE_ADDR) list_old.next;
 
 #ifdef HANDLE_NEW_OBJ_LIST
   if (list_old.data == NEW_OBJ_INFO_MAGIC)
@@ -819,7 +818,8 @@ find_solib (so_list_ptr)
 /* A small stub to get us past the arg-passing pinhole of catch_errors.  */
 
 static int
-symbol_add_stub (void *arg)
+symbol_add_stub (arg)
+     char *arg;
 {
   register struct so_list *so = (struct so_list *) arg;		/* catch_errs bogon */
   CORE_ADDR text_addr = 0;
@@ -848,7 +848,6 @@ symbol_add_stub (void *arg)
   section_addrs.other[0].addr = text_addr;
   so->objfile = symbol_file_add (so->so_name, so->from_tty,
 				 &section_addrs, 0, 0);
-  /* must be non-zero */
   return (1);
 }
 

@@ -50,8 +50,6 @@
 #include "language.h"
 #include "annotate.h"
 
-#include "inferior.h" /* for signed_pointer_to_address */
-
 #include <readline/readline.h>
 
 #undef XMALLOC
@@ -773,6 +771,26 @@ safe_strerror (errnum)
     }
   return (msg);
 }
+
+/* The strsignal() function can return NULL for signal values that are
+   out of range.  Provide a "safe" version that always returns a
+   printable string. */
+
+char *
+safe_strsignal (signo)
+     int signo;
+{
+  char *msg;
+  static char buf[32];
+
+  if ((msg = strsignal (signo)) == NULL)
+    {
+      sprintf (buf, "(undocumented signal %d)", signo);
+      msg = buf;
+    }
+  return (msg);
+}
+
 
 /* Print the system error message for errno, and also mention STRING
    as the file name for which the error was encountered.
@@ -2963,25 +2981,4 @@ phex_nz (ULONGEST l, int sizeof_l)
       break;
     }
   return str;
-}
-
-
-/* Convert to / from the hosts pointer to GDB's internal CORE_ADDR
-   using the target's conversion routines. */
-CORE_ADDR
-host_pointer_to_address (void *ptr)
-{
-  if (sizeof (ptr) != TYPE_LENGTH (builtin_type_ptr))
-    internal_error ("core_addr_to_void_ptr: bad cast");
-  return POINTER_TO_ADDRESS (builtin_type_ptr, &ptr);
-}
-
-void *
-address_to_host_pointer (CORE_ADDR addr)
-{
-  void *ptr;
-  if (sizeof (ptr) != TYPE_LENGTH (builtin_type_ptr))
-    internal_error ("core_addr_to_void_ptr: bad cast");
-  ADDRESS_TO_POINTER (builtin_type_ptr, &ptr, addr);
-  return ptr;
 }

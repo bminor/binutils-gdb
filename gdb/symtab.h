@@ -1059,11 +1059,10 @@ struct partial_symtab
    style, using thunks (where '$' is really CPLUS_MARKER). */
 
 #define VTBL_PREFIX_P(NAME) \
-  (((NAME)[0] == '_' \
+  ((NAME)[0] == '_' \
    && (((NAME)[1] == 'V' && (NAME)[2] == 'T') \
        || ((NAME)[1] == 'v' && (NAME)[2] == 't')) \
-   && is_cplus_marker ((NAME)[3])) || ((NAME)[0]=='_' && (NAME)[1]=='_' \
-   && (NAME)[2]=='v' && (NAME)[3]=='t' && (NAME)[4]=='_'))
+   && is_cplus_marker ((NAME)[3]))
 
 /* Macro that yields non-zero value iff NAME is the prefix for C++ destructor
    names.  Note that this macro is g++ specific (FIXME).  */
