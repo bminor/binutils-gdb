@@ -36,7 +36,7 @@ program_transform_name = @program_transform_name@
 exec_prefix = @exec_prefix@
 bindir = $(exec_prefix)/bin
 libdir = $(exec_prefix)/lib
-tooldir = $(libdir)/$(target_alias)
+tooldir = $(exec_prefix)/$(target_alias)
 
 datadir = $(prefix)/lib
 mandir = $(prefix)/man
@@ -76,43 +76,6 @@ CFLAGS = -g
 
 MAKEOVERRIDES=
 
-AS_FOR_TARGET = $${here}/as.new
-
-CC_FOR_TARGET = ` \
-  if [ -f $${here}/../gcc/Makefile ] ; then \
-    echo $${here}/../gcc/xgcc -B$${here}/../gcc/; \
-  else \
-    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
-      echo $(CC); \
-    else \
-      echo gcc | sed '$(program_transform_name)'; \
-    fi; \
-  fi`
-
-NM=nm
-NM_FOR_TARGET = ` \
-  if [ -f $${here}/../binutils/Makefile ] ; then \
-    echo $${here}/../binutils/nm ; \
-  else \
-    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
-      echo $(NM); \
-    else \
-      echo nm | sed '$(program_transform_name)' ; \
-    fi; \
-  fi`
-
-OBJDUMP=objdump
-OBJDUMP_FOR_TARGET = ` \
-  if [ -f $${here}/../binutils/Makefile ] ; then \
-    echo $${here}/../binutils/objdump ; \
-  else \
-    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
-      echo $(OBJDUMP); \
-    else \
-      echo objdump | sed '$(program_transform_name)' ; \
-    fi; \
-  fi`
-
 FLAGS_TO_PASS = \
 	"prefix=$(prefix)" \
 	"exec_prefix=$(exec_prefix)" \
@@ -133,10 +96,6 @@ FLAGS_TO_PASS = \
 
 RUNTEST=runtest
 CHECKFLAGS= \
-	"AS_FOR_TARGET=$(AS_FOR_TARGET)" \
-	"CC_FOR_TARGET=$(CC_FOR_TARGET)" \
-	"NM_FOR_TARGET=$(NM_FOR_TARGET)" \
-	"OBJDUMP_FOR_TARGET=$(OBJDUMP_FOR_TARGET)" \
 	"RUNTESTFLAGS=$(RUNTESTFLAGS)" \
 	"RUNTEST=$(RUNTEST)"
 
@@ -166,8 +125,7 @@ REAL_SOURCES = \
 	$(srcdir)/write.c \
 	$(srcdir)/listing.c \
 	$(srcdir)/ecoff.c \
-	$(srcdir)/stabs.c \
-	$(srcdir)/xmalloc.c
+	$(srcdir)/stabs.c
 
 # in an expedient order
 LINKED_SOURCES = \
@@ -233,12 +191,13 @@ OBJS = \
 	listing.o \
 	ecoff.o \
 	stabs.o \
-	xmalloc.o \
 	$(TE_OBJS)
 
 # These are objects we know we'll be pulling in from other directories.
 # For VMS, we have to build them explicitly.
 VMS_OTHER_OBJS = \
+	../libiberty/xmalloc.o \
+	../libiberty/xexit.o \
 	../libiberty/obstack.o \
 	../libiberty/strdup.o \
 	../libiberty/strncasecmp.o \
@@ -415,7 +374,6 @@ stabs.o : stabs.c as.h targ-env.h obj-format.h \
   targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
   subsegs.h $(srcdir)/../include/aout/stab_gnu.h
-xmalloc.o : xmalloc.c
 atof-targ.o : atof-targ.c as.h targ-env.h obj-format.h \
   targ-cpu.h struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h \

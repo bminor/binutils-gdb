@@ -1,3 +1,13 @@
+Fri Dec 16 14:40:16 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* Makefile.in (CHECKFLAGS): Don't pass AS_FOR_TARGET,
+	CC_FOR_TARGET, OBJDUMP_FOR_TARGET, NM_FOR_TARGET; they're not
+	used.
+	(AS_FOR_TARGET, CC_FOR_TARGET, OBJDUMP, OBJDUMP_FOR_TARGET, NM,
+	NM_FOR_TARGET): Don't define.
+	(VMS_OTHER_OBJS): Add xmalloc.o and xexit.o from libiberty.
+	(tooldir): Use exec_prefix, not libdir.
+
 Fri Dec 16 11:07:10 1994  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* config/obj-coff.h: Include libcoff.h, not ../bfd/libcoff.h.
