@@ -1,3 +1,16 @@
+Wed Jul 19 16:08:29 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* config/obj-coff.h (TE_PE): Delete.
+	* config/tc-arm.h (BYTE_ORDER): Delete.
+	(TARGET_FORMAT): Provide value for OBJ_COFF and TE_PE.
+	(ARM_BI_ENDIAN): Define if OBJ_COFF and TE_PE.
+	* config/tc-arm.c (byte_order): Delete.
+	(md_number_to_chars): Reference target_big_endian, not byte_order.
+	(md_chars_to_number): Likewise.
+	(md_longopts): Add -EB/-EL if ARM_BI_ENDIAN.
+	(md_parse_options): Recognize -EB/-EL.
+	(md_show_usage): List -EB/-EL.
+
 Wed Jul 19 11:49:25 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gasp.c (process_assigns): Use toupper before comparing against
