@@ -46,7 +46,7 @@ typedef struct  user_section_struct {
 
 /* Which symbols should be stripped (omitted from the output):
    none, all, or debugger symbols.  */
-enum { STRIP_NONE, STRIP_ALL, STRIP_DEBUGGER } strip_symbols;
+typedef  enum { STRIP_NONE, STRIP_ALL, STRIP_DEBUGGER } strip_symbols_type;
 
 
 
@@ -54,7 +54,7 @@ enum { STRIP_NONE, STRIP_ALL, STRIP_DEBUGGER } strip_symbols;
 /* Which local symbols should be omitted:
    none, all, or those starting with L.
    This is irrelevant if STRIP_NONE.  */
-enum { DISCARD_NONE, DISCARD_ALL, DISCARD_L } discard_locals;
+typedef  enum { DISCARD_NONE, DISCARD_ALL, DISCARD_L } discard_locals_type;
 
 
 
