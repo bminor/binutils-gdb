@@ -26,6 +26,13 @@
 
 /* We assume we're being built with and will be used for cygwin.  */
 
+#include <windows.h>
+#include <signal.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <imagehlp.h>
+#include <sys/cygwin.h>
 #include "defs.h"
 #include "tm.h"			/* required for SSE registers */
 #include "frame.h"		/* required by inferior.h */
@@ -37,13 +44,6 @@
 #include "regcache.h"
 #include "top.h"
 #include "i386-tdep.h"
-#include <signal.h>
-#include <sys/types.h>
-#include <fcntl.h>
-#include <stdlib.h>
-#include <windows.h>
-#include <imagehlp.h>
-#include <sys/cygwin.h>
 
 #include "buildsym.h"
 #include "symfile.h"
