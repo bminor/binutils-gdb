@@ -28,16 +28,7 @@
 #include "regcache.h"
 
 #include "alpha-tdep.h"
-
-#ifndef HAVE_GREGSET_T
-typedef struct reg gregset_t;
-#endif
-
-#ifndef HAVE_FPREGSET_T
-typedef struct fpreg fpregset_t; 
-#endif
-
-#include "gregset.h"
+#include "alphabsd-tdep.h"
 
 static void
 fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
@@ -81,7 +72,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
   supply_register (PC_REGNUM, regs + (FRAME_PC * 8));
 
   /* Floating point registers.  */
-  supply_fpregset (&core_reg->md_fpstate);
+  alphabsd_supply_fpreg ((char *) &core_reg->md_fpstate, -1);
 }
 
 static void
@@ -91,17 +82,17 @@ fetch_elfcore_registers (char *core_reg_sect, unsigned core_reg_size, int which,
   switch (which)
     {
     case 0:  /* Integer registers.  */
-      if (core_reg_size != sizeof (struct reg))
+      if (core_reg_size != SIZEOF_STRUCT_REG)
 	warning ("Wrong size register set in core file.");
       else
-	supply_gregset ((gregset_t *) core_reg_sect);
+	alphabsd_supply_reg (core_reg_sect, -1);
       break;
 
     case 2:  /* Floating point registers.  */
-      if (core_reg_size != sizeof (struct fpreg))
+      if (core_reg_size != SIZEOF_STRUCT_FPREG)
 	warning ("Wrong size FP register set in core file.");
       else
-	supply_fpregset ((fpregset_t *) core_reg_sect);
+	alphabsd_supply_fpreg (core_reg_sect, -1);
       break;
 
     default:

@@ -1,3 +1,27 @@
+2002-05-11  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* Makefile.in (ALLDEPFILES): Add alphabsd-tdep.c.
+	(alphabsd-nat.o): Depend on alphabsd-tdep.h.
+	(alphanbsd-nat.o): Likewise.
+	(alphabsd-tdep.o): New dependency list.
+	* alphabsd-nat.c (supply_gregset): Use alphabsd_supply_reg.
+	(fill_gregset): Use alphabsd_fill_reg.
+	(supply_fpregset): Use alphabsd_supply_fpreg.
+	(fill_fpregset): Use alphabsd_fill_fpreg.
+	(fetch_inferior_registers): Use struct reg and struct fpreg
+	rather than gregset_t and fpregset_t.  Use alphabsd_supply_reg
+	and alphabsd_supply_fpreg.
+	(store_inferior_registers): Use struct reg and struct fpreg
+	rather than gregset_t and fpregset_t.  Use alphabsd_fill_reg
+	and alphabsd_fill_fpreg.
+	* alphabsd-tdep.c: New file.
+	* alphabsd-tdep.h: New file.
+	* alphanbsd-nat.c (fetch_core_registers): Use alphabsd_supply_fpreg.
+	(fetch_elfcore_registers): Use alphabsd_supply_reg and
+	alphabsd_supply_fpreg.
+	* config/alpha/fbsd.mt (TDEPFILES): Add alphabsd-tdep.o.
+	* config/alpha/nbsd.mt (TDEPFILES): Likewise.
+
 2002-05-11  Eric Christopher  <echristo@redhat.com>
 
 	* mips-tdep.c (mips_double_register_type): Fix thinko.
