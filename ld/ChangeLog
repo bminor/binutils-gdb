@@ -1,5 +1,9 @@
 Thu Jun  6 11:50:31 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* emulparams/elf32bmip.sh (OTHER_GOT_SYMBOLS): Use ALIGN(16)
+	rather than . when computing _gp value.  From Per Fogelstrom.
+	* emulparams/elf32lmip.sh (OTHER_GOT_SYMBOLS): Likewise.
+
 	* ldmain.c (main): Don't close and unlink the file on error, since
 	remove_output will do it anyhow.
 	* ldlang.c (open_output): Set boolean variable to true, not 1.
