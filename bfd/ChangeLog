@@ -1,3 +1,43 @@
+2000-09-01  Niibe Yutaka  <gniibe@m17n.org>, Kaz Kojima  <kkojima@rr.iij4u.or.jp>, Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf32-sh.c (R_SH_GOT32, R_SH_PLT32, R_SH_COPY, R_SH_GLOB_DAT,
+	R_SH_JMP_SLOT, R_SH_RELATIVE, R_SH_GOTOFF, R_SH_GOTPC): New.
+	(sh_reloc_map): Add new relocs.
+	(sh_elf_check_relocs, sh_elf_link_hash_newfunc,
+	sh_elf_link_hash_table_create, sh_elf_adjust_dynamic_symbol,
+	sh_elf_size_dynamic_sections, sh_elf_finish_dynamic_symbol,
+	sh_elf_finishe_dynamic_sections, sh_elf_discard_copies): New
+	functions.
+	(ELF_DYNAMIC_INTERPRETER, PLT_ENTRY_SIZE): Define.
+	(elf_sh_plt0_entry_be, elf_sh_plt0_entry_le,
+	elf_sh_plt_entry_be, elf_sh_plt_entry_le,
+	elf_sh_pic_plt_entry_be, elf_sh_pic_plt_entry_le):
+	New array constants.
+	(elf_sh_plt0_entry, elf_sh_plt_entry, elf_sh_pic_plt_entry):
+	New variables.
+	(elf_sh_sizeof_plt, elf_sh_plt_plt0_offset,
+	elf_sh_plt0_linker_offset, elf_sh_plt0_gotid_offset,
+	elf_sh_plt_temp_offset, elf_sh_plt_symbol_offset,
+	elf_sh_plt_reloc_offset): Define.
+	(elf_sh_pcrel_relocs_copied, elf_sh_link_hash_entry,
+	elf_sh_link_hash_table): New structs.
+	(sh_elf_link_hash_traverse, sh_elf_hash_table): New macros.
+	(sh_elf_relocate_section, sh_elf_check_relocs): Handle new
+	relocation types.
+	(elf_backend_create_dynamic_sections,
+	bfd_elf32_bfd_link_hash_table_create,
+	elf_backend_adjust_dynamic_symbol,
+	elf_backend_size_dynamic_sections,
+	elf_backend_finish_dynamic_symbol,
+	elf_backend_finish_dynamic_sections, elf_backend_want_got_plt,
+	elf_backend_plt_readonly, elf_backend_want_plt_sym,
+	elf_backend_got_header_size, elf_backend_plt_header_size):
+	Define.
+	* reloc.c (BFD_RELOC_SH_COPY, BFD_RELOC_SH_GLOB_DAT,
+	BFD_RELOC_SH_JMP_SLOT, BFD_RELOC_SH_RELATIVE, BFD_RELOC_SH_GOTPC):
+	New relocs.
+	* bfd-in2.h, libbfd.h: Rebuilt.
+
 2000-09-01  Alan Modra  <alan@linuxcare.com.au>
 
 	* elf32-i386.c (elf_i386_finish_dynamic_symbol): Revert 2000-08-27

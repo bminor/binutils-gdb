@@ -2162,6 +2162,11 @@ field in the instruction. */
   BFD_RELOC_SH_LABEL,
   BFD_RELOC_SH_LOOP_START,
   BFD_RELOC_SH_LOOP_END,
+  BFD_RELOC_SH_COPY,
+  BFD_RELOC_SH_GLOB_DAT,
+  BFD_RELOC_SH_JMP_SLOT,
+  BFD_RELOC_SH_RELATIVE,
+  BFD_RELOC_SH_GOTPC,
 
 /* Thumb 23-, 12- and 9-bit pc-relative branches.  The lowest bit must
 be zero and is not stored in the instruction. */
