@@ -1,3 +1,10 @@
+Tue Jun 18 17:13:33 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-i386.c (md_assemble): When checking the size of a
+	register to set the size of an instruction, do a bitwise and with
+	Reg8 and Reg16 rather than requiring the type to be exactly Reg8
+	or Reg16.
+
 Tue Jun 18 13:19:51 1996  Jeffrey A. Law  <law@rtl.cygnus.com>
 
 	* config/tc-h8300.c (parse_reg): Tweak error messages.
