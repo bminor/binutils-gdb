@@ -1369,6 +1369,10 @@ v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
 		+ input_section->output_offset
 		+ offset);
 
+      /* If the sign extension will corrupt the value then we have overflowed.  */
+      if (((value & 0xff000000) != 0x0) && ((value & 0xff000000) != 0xff000000))
+	return bfd_reloc_overflow;
+      
       value = SEXT24 (value);  /* Only the bottom 24 bits of the PC are valid */
       break;
       

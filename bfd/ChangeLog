@@ -1,3 +1,8 @@
+1999-06-22  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-v850.c (v850_elf_final_link_relocate): Catch overflow
+	handling R_V850_22_PCREL relocation.
+
 1999-06-21  Ian Lance Taylor  <ian@zembu.com>
 
 	* coff-arm.c (arm_emit_base_file_entry): Explicitly declare return
