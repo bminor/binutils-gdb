@@ -8,10 +8,6 @@
 	IN_SOLIB_CALL_TRAMPOLINE and SKIP_TRAMPOLINE_CODE methods here,
 	giving the same effect as the #definitions above.
 
-	Support gdbserver on 64-bit PowerPC Linux.
-	* configure.tgt (powerpc64-*-linux*): Build gdbserver, please.
-	* regformats/reg-ppc64.dat: New file.
-
 2003-05-28  Jim Blandy  <jimb@redhat.com>
 
 	* ppc-linux-nat.c (store_altivec_registers): Don't cast fourth
