@@ -1,3 +1,8 @@
+2003-11-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* README: Update bug report address.  Move bug reporting info to
+	binutils/README.
+
 2003-11-07  Christian Groessler  <chris@groessler.org>
 
 	* doc/c-z8k.texi: Document command-line options.  Fix byte
