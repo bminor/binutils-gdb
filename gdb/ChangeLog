@@ -1,3 +1,8 @@
+Thu Oct 10 16:32:08 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* Makefile.in (init.c):  Fixup final sed script to work around
+	Linux bug with `p' operator.
+
 Wed Oct  9 18:02:48 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* remote-mips.c: Use the correct name everywhere (DDB) for NEC's
