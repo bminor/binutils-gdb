@@ -4,6 +4,7 @@ Mon Jan 26 16:29:49 1998  Doug Evans  <devans@seba.cygnus.com>
 	* tc-txvu.c: First pass at dma/pke/gpuif support.
 	(assemble_one_insn): Renamed from assemble_insn.
 	Initialize errmsg = NULL before calling parse fn.
+	Allow [] in suffix operand.
 	(fixups,fixup_count): Make static globals.
 
 end-sanitize-sky
