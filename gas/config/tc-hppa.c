@@ -499,17 +499,17 @@ static int need_89_opcode PARAMS ((struct pa_it *,
 				   struct pa_89_fp_reg_struct *));
 static int pa_parse_number PARAMS ((char **, struct pa_89_fp_reg_struct *));
 static label_symbol_struct *pa_get_label PARAMS ((void));
-static sd_chain_struct *create_new_space PARAMS ((char *, int, char,
-						  char, char, char,
+static sd_chain_struct *create_new_space PARAMS ((char *, int, int,
+						  int, int, int,
 						  asection *, int));
 static ssd_chain_struct *create_new_subspace PARAMS ((sd_chain_struct *,
-						      char *, char, char,
-						      char, char, char,
-						      char, int, int, int,
+						      char *, int, int,
+						      int, int, int,
+						      int, int, int, int,
 						      int, asection *));
 static ssd_chain_struct *update_subspace PARAMS ((sd_chain_struct *,
-						  char *, char, char, char,
-						  char, char, char, int,
+						  char *, int, int, int,
+						  int, int, int, int,
 						  int, int, int,
 						  asection *));
 static sd_chain_struct *is_defined_space PARAMS ((char *));
@@ -520,7 +520,7 @@ static ssd_chain_struct *pa_subsegment_to_subspace PARAMS ((asection *,
 static sd_chain_struct *pa_find_space_by_number PARAMS ((int));
 static unsigned int pa_subspace_start PARAMS ((sd_chain_struct *, int));
 static void pa_ip PARAMS ((char *));
-static void fix_new_hppa PARAMS ((fragS *, int, short int, symbolS *,
+static void fix_new_hppa PARAMS ((fragS *, int, int, symbolS *,
 				  long, expressionS *, int,
 				  bfd_reloc_code_real_type,
 				  enum hppa_reloc_field_selector_type,
@@ -1185,7 +1185,7 @@ fix_new_hppa (frag, where, size, add_symbol, offset, exp, pcrel,
 	      r_type, r_field, r_format, arg_reloc, unwind_desc)
      fragS *frag;
      int where;
-     short int size;
+     int size;
      symbolS *add_symbol;
      long offset;
      expressionS *exp;
@@ -2773,7 +2773,11 @@ tc_gen_reloc (section, fixp)
 	  reloc->addend = HPPA_R_ADDEND (hppa_fixp->fx_arg_reloc, 0);
 	  break;
 	default:
-	  reloc->addend = fixp->fx_addnumber;
+	  if (fixp->fx_addsy && fixp->fx_addsy->bsym->flags & BSF_FUNCTION)
+	    relocs[i]->addend = 0;
+	  else
+	    relocs[i]->addend = fixp->fx_addnumber;
+	  break;
 	  break;
 	}
       break;
@@ -2820,7 +2824,10 @@ tc_gen_reloc (section, fixp)
 	  break;
 
 	default:
-	  relocs[i]->addend = fixp->fx_addnumber;
+	  if (fixp->fx_addsy && fixp->fx_addsy->bsym->flags & BSF_FUNCTION)
+	    relocs[i]->addend = 0;
+	  else
+	    relocs[i]->addend = fixp->fx_addnumber;
 	  break;
 	}
     }
@@ -3002,7 +3009,8 @@ md_apply_fix (fixP, valp)
 	  && hppa_fixP->fx_r_field != R_HPPA_RPSEL
 	  && hppa_fixP->fx_r_field != R_HPPA_TSEL
 	  && hppa_fixP->fx_r_field != R_HPPA_LTSEL
-	  && hppa_fixP->fx_r_field != R_HPPA_RTSEL)
+	  && hppa_fixP->fx_r_field != R_HPPA_RTSEL
+	  && !(fixP->fx_addsy && fixP->fx_addsy->bsym->flags & BSF_FUNCTION))
 	new_val = hppa_field_adjust (val, 0, hppa_fixP->fx_r_field);
       else
 	new_val = 0;
@@ -5644,10 +5652,10 @@ create_new_space (name, spnum, loadable, defined, private,
 		  sort, seg, user_defined)
      char *name;
      int spnum;
-     char loadable;
-     char defined;
-     char private;
-     char sort;
+     int loadable;
+     int defined;
+     int private;
+     int sort;
      asection *seg;
      int user_defined;
 {
@@ -5728,8 +5736,8 @@ create_new_subspace (space, name, loadable, code_only, common,
 		     alignment, quadrant, seg)
      sd_chain_struct *space;
      char *name;
-     char loadable, code_only, common, dup_common, is_zero;
-     char sort;
+     int loadable, code_only, common, dup_common, is_zero;
+     int sort;
      int access;
      int space_index;
      int alignment;
@@ -5800,12 +5808,12 @@ update_subspace (space, name, loadable, code_only, common, dup_common, sort,
 		 zero, access, space_index, alignment, quadrant, section)
      sd_chain_struct *space;
      char *name;
-     char loadable;
-     char code_only;
-     char common;
-     char dup_common;
-     char zero;
-     char sort;
+     int loadable;
+     int code_only;
+     int common;
+     int dup_common;
+     int zero;
+     int sort;
      int access;
      int space_index;
      int alignment;
