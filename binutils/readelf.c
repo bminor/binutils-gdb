@@ -4180,9 +4180,9 @@ process_symbol_table (file)
 
       printf (_("\nSymbol table for image:\n"));
       if (is_32bit_elf)
-	printf (_("  Num Buc:    Value  Size   Type   Bind Vis      Ot Ndx Name\n"));
+	printf (_("  Num Buc:    Value  Size   Type   Bind Vis      Ndx Name\n"));
       else
-	printf (_("  Num Buc:    Value          Size   Type   Bind Vis      Ot Ndx Name\n"));
+	printf (_("  Num Buc:    Value          Size   Type   Bind Vis      Ndx Name\n"));
 
       for (hn = 0; hn < nbuckets; hn++)
 	{
@@ -4203,7 +4203,6 @@ process_symbol_table (file)
 	      printf ("  %6s", get_symbol_type (ELF_ST_TYPE (psym->st_info)));
 	      printf (" %6s",  get_symbol_binding (ELF_ST_BIND (psym->st_info)));
 	      printf (" %3s",  get_symbol_visibility (ELF_ST_VISIBILITY (psym->st_other)));
-	      printf (" %2d",  ELF_ST_OTHER (psym->st_other));
 	      printf (" %3.3s", get_symbol_index_type (psym->st_shndx));
 	      printf (" %s\n", dynamic_strings + psym->st_name);
 	    }
@@ -4231,9 +4230,9 @@ process_symbol_table (file)
 		  SECTION_NAME (section),
 		  (unsigned long) (section->sh_size / section->sh_entsize));
 	  if (is_32bit_elf)
-	    printf (_("   Num:    Value  Size Type    Bind   Vis      Ot Ndx Name\n"));
+	    printf (_("   Num:    Value  Size Type    Bind   Vis      Ndx Name\n"));
 	  else
-	    printf (_("   Num:    Value          Size Type    Bind   Vis      Ot  Ndx Name\n"));
+	    printf (_("   Num:    Value          Size Type    Bind   Vis      Ndx Name\n"));
 
 	  symtab = GET_ELF_SYMBOLS (file, section->sh_offset,
 				    section->sh_size / section->sh_entsize);
@@ -4263,7 +4262,6 @@ process_symbol_table (file)
 	      printf (" %-7s", get_symbol_type (ELF_ST_TYPE (psym->st_info)));
 	      printf (" %-6s", get_symbol_binding (ELF_ST_BIND (psym->st_info)));
 	      printf (" %-3s", get_symbol_visibility (ELF_ST_VISIBILITY (psym->st_other)));
-	      printf (" %2d", ELF_ST_OTHER (psym->st_other));
 	      printf (" %4s", get_symbol_index_type (psym->st_shndx));
 	      printf (" %s", strtab + psym->st_name);
 
