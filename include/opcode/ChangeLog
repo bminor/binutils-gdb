@@ -1,3 +1,7 @@
+Mon Mar  2 10:44:07 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* cgen.h (CGEN_BOOL_ATTR): New macro.
+
 start-sanitize-d30v
 Thu Feb 26 15:54:31 1998  Michael Meissner  <meissner@cygnus.com>
 
