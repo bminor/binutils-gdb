@@ -79,36 +79,10 @@ const struct objfile_data *hppa_objfile_priv_data = NULL;
 #define SR4EXPORT_LDIL_OFFSET (HPPA_INSTRUCTION_SIZE * 12)
 #define SR4EXPORT_LDO_OFFSET (HPPA_INSTRUCTION_SIZE * 13)
 
-/* To support detection of the pseudo-initial frame
-   that threads have. */
-#define THREAD_INITIAL_FRAME_SYMBOL  "__pthread_exit"
-#define THREAD_INITIAL_FRAME_SYM_LEN  sizeof(THREAD_INITIAL_FRAME_SYMBOL)
-
 /* Sizes (in bytes) of the native unwind entries.  */
 #define UNWIND_ENTRY_SIZE 16
 #define STUB_UNWIND_ENTRY_SIZE 8
 
-static void unwind_command (char *, int);
-
-static int hppa_alignof (struct type *);
-
-static int prologue_inst_adjust_sp (unsigned long);
-
-static int is_branch (unsigned long);
-
-static int inst_saves_gr (unsigned long);
-
-static int inst_saves_fr (unsigned long);
-
-static int compare_unwind_entries (const void *, const void *);
-
-static void read_unwind_info (struct objfile *);
-
-static void internalize_unwinds (struct objfile *,
-				 struct unwind_table_entry *,
-				 asection *, unsigned int,
-				 unsigned int, CORE_ADDR);
-static void record_text_segment_lowaddr (bfd *, asection *, void *);
 /* FIXME: brobecker 2002-11-07: We will likely be able to make the
    following functions static, once we hppa is partially multiarched.  */
 int hppa_pc_requires_run_before_use (CORE_ADDR pc);

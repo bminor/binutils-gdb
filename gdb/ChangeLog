@@ -1,3 +1,12 @@
+2004-05-17  Randolph Chung  <tausq@debian.org>
+
+	* hppa-tdep.c (THREAD_INITIAL_FRAME_SYMBOL): Delete unused symbol.
+	(THREAD_INITIAL_FRAME_SYM_LEN): Likewise.
+	(unwind_command, hppa_alignof, prologue_inst_adjust_sp)
+	(is_branch, inst_saves_gr, inst_saves_fr, compare_unwind_entries)
+	(read_unwind_info, internalize_unwinds, record_text_segment_lowaddr):
+	Remove static function declarations.
+
 2004-05-17  Mark Kettenis  <kettenis@gnu.org>
 
 	* m68k-tdep.h (m68k_regnum): Add M68K_D2_REGNUM, M68K_D7_REGNUM
