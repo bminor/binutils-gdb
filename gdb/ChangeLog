@@ -1,7 +1,7 @@
 2003-06-12  Jim Blandy  <jimb@redhat.com>
 
 	* ppc-linux-tdep.c (ppc64_linux_bfd_entry_point): New function.
-	(ppc_linux_init_abi): Register it as our bfd_entry_point address.
+	(ppc_linux_init_abi): Register it as our bfd_entry_point method.
 
 	* gdbarch.sh (gdbarch_bfd_entry_point): New gdbarch method.
 	* arch-utils.c (generic_bfd_entry_point): New function.
