@@ -1,6 +1,24 @@
 2000-12-09  Nick Clifton  <nickc@redhat.com>
 
+	* m32r-dis.c (print_insn): Prevent re-read of instruction from
+	wrong address.
+
 	* fr30-dis.c: Regenerate.
+
+2000-12-08  Peter Targett  <peter.targett@arccores.com>
+
+	* configure.in: Add arc-ext.lo for bfd_arc_arch selection.
+	* Makefile.am (C_FILES): Add arc-ext.c.
+	(ALL_MACHINES) Add arc-ext.lo.
+	(INCLUDES) Add opcode directory to list.
+	New dependency entry for arc-ext.lo.
+	* disassemble.c (disassembler): Correct call to
+	arc_get_disassembler.
+	* arc-opc.c: New update for ARC, including full base
+	instructions for ARC variants.
+	* arc-dis.h, arc-dis.c: New update for ARC, including
+	extensibility functionality.
+	* arc-ext.h, arc-ext.c: New files for handling extensibility.
 
 2000-12-03  Chris Demetriou   cgd@sibyte.com
 
