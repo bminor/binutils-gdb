@@ -1,3 +1,8 @@
+2002-06-17  Elena Zannoni  <ezannoni@redhat.com>
+
+	* psim.c (psim_options): Don't choke when gdb invokes us with
+	the --architecture option, just ignore it.
+
 2002-06-16  Andrew Cagney  <ac131313@redhat.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
