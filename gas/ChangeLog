@@ -1,3 +1,8 @@
+Mon Jun 12 22:25:39 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (pa_ip): Check for invalid register in single
+	precision fmpyadd and fmpysub instructions.
+
 Thu  8 Jun 19:33:02 1995  Pat Rankin  (rankin@eql.caltech.edu)
 
 	* config/obj-vms.c (myname): Delete all references.

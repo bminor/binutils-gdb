@@ -145,8 +145,8 @@ struct call_info
     /* Name of this function.  */
     symbolS *start_symbol;
 
-    /* Size of the function in bytes.  */
-    unsigned long function_size;
+    /* (temporary) symbol used to mark the end of this function.  */
+    symbolS *end_symbol;
 
     /* Next entry in the chain.  */
     struct call_info *ci_next;
@@ -540,6 +540,7 @@ static int log2 PARAMS ((int));
 static int pa_next_subseg PARAMS ((sd_chain_struct *));
 static unsigned int pa_stringer_aux PARAMS ((char *));
 static void pa_spaces_begin PARAMS ((void));
+static void hppa_elf_mark_end_of_function PARAMS ((void));
 
 /* File and gloally scoped variable declarations.  */
 
@@ -2363,6 +2364,12 @@ pa_ip (str)
 		CHECK_FIELD (result.number_part, 31, 0, 0);
 		if (the_insn.fpof1 == SGL)
 		  {
+		    if (result.number_part < 16)
+		      {
+			as_bad  ("Invalid register for single precision fmpyadd or fmpysub");
+			break;
+		      }
+
 		    result.number_part &= 0xF;
 		    result.number_part |= (result.l_r_select & 1) << 4;
 		  }
@@ -2378,6 +2385,11 @@ pa_ip (str)
 		CHECK_FIELD (result.number_part, 31, 0, 0);
 		if (the_insn.fpof1 == SGL)
 		  {
+		    if (result.number_part < 16)
+		      {
+			as_bad  ("Invalid register for single precision fmpyadd or fmpysub");
+			break;
+		      }
 		    result.number_part &= 0xF;
 		    result.number_part |= (result.l_r_select & 1) << 4;
 		  }
@@ -2393,6 +2405,11 @@ pa_ip (str)
 		CHECK_FIELD (result.number_part, 31, 0, 0);
 		if (the_insn.fpof1 == SGL)
 		  {
+		    if (result.number_part < 16)
+		      {
+			as_bad  ("Invalid register for single precision fmpyadd or fmpysub");
+			break;
+		      }
 		    result.number_part &= 0xF;
 		    result.number_part |= (result.l_r_select & 1) << 4;
 		  }
@@ -2408,6 +2425,11 @@ pa_ip (str)
 		CHECK_FIELD (result.number_part, 31, 0, 0);
 		if (the_insn.fpof1 == SGL)
 		  {
+		    if (result.number_part < 16)
+		      {
+			as_bad  ("Invalid register for single precision fmpyadd or fmpysub");
+			break;
+		      }
 		    result.number_part &= 0xF;
 		    result.number_part |= (result.l_r_select & 1) << 4;
 		  }
@@ -2423,6 +2445,11 @@ pa_ip (str)
 		CHECK_FIELD (result.number_part, 31, 0, 0);
 		if (the_insn.fpof1 == SGL)
 		  {
+		    if (result.number_part < 16)
+		      {
+			as_bad  ("Invalid register for single precision fmpyadd or fmpysub");
+			break;
+		      }
 		    result.number_part &= 0xF;
 		    result.number_part |= (result.l_r_select & 1) << 4;
 		  }
@@ -2889,7 +2916,7 @@ md_apply_fix (fixP, valp)
 	  && !arg_reloc_stub_needed (((obj_symbol_type *)
 				fixP->fx_addsy->bsym)->tc_data.hppa_arg_reloc,
 				    hppa_fixP->fx_arg_reloc)
-	  && (*valp > -262144 && *valp < 262143)
+	  && ((int)(*valp) > -262144 && (int)(*valp) < 262143)
 	  && S_GET_SEGMENT (fixP->fx_addsy) == hppa_fixP->segment
 	  && !(fixP->fx_subsy
 	       && S_GET_SEGMENT (fixP->fx_subsy) != hppa_fixP->segment))
@@ -4081,10 +4108,16 @@ pa_build_unwind_subspace (call_info)
 
   p = frag_more (4);
 
-  /* Relocation info. for end offset of the function.  */
+  /* Relocation info. for end offset of the function.
+
+     Because we allow reductions of 32bit relocations for ELF, this will be
+     reduced to section_sym + offset which avoids putting the temporary
+     symbol into the symbol table.  It (should) end up giving the same
+     value as call_info->start_symbol + function size once the linker is
+     finished with its work.  */
+
   fix_new_hppa (frag_now, p - frag_now->fr_literal, 4,
-		call_info->start_symbol,
-		call_info->function_size,
+		call_info->end_symbol, (offsetT) 0,
 		(expressionS *) NULL, 0, R_PARISC_DIR32, e_fsel, 32, 0, NULL);
 
   /* Dump it. */
@@ -4410,13 +4443,11 @@ process_exit ()
 
   where = frag_more (0);
 
-  last_call_info->function_size
-    = where - frag_now->fr_literal - S_GET_VALUE (last_call_info->start_symbol);
-
 #ifdef OBJ_ELF
   /* Mark the end of the function, stuff away the location of the frag
      for the end of the function, and finally call pa_build_unwind_subspace
      to add an entry in the unwind table.  */
+  hppa_elf_mark_end_of_function ();
   pa_build_unwind_subspace (last_call_info);
 #else
   /* SOM defers building of unwind descriptors until the link phase.
@@ -4912,8 +4943,12 @@ pa_procend (unused)
   if (within_entry_exit)
     as_bad ("Missing .EXIT for a .ENTRY");
 
-  last_call_info->function_size
-    = frag_more (0) - frag_now->fr_literal - S_GET_VALUE (last_call_info->start_symbol);
+#ifdef OBJ_ELF
+  /* ELF needs to mark the end of each function so that it can compute
+     the size of the function (apparently its needed in the symbol table).  */
+  hppa_elf_mark_end_of_function ();
+#endif
+
   within_procedure = FALSE;
   demand_empty_rest_of_line ();
   pa_undefine_label ();
@@ -6199,7 +6234,7 @@ hppa_force_relocation (fixp)
      fixS *fixp;
 {
   struct hppa_fix_struct *hppa_fixp;
-  unsigned int distance;
+  int distance;
 
   hppa_fixp = (struct hppa_fix_struct *) fixp->tc_fix_data;
 #ifdef OBJ_SOM
@@ -6234,8 +6269,66 @@ hppa_force_relocation (fixp)
 
 /* Now for some ELF specific code.  FIXME.  */
 #ifdef OBJ_ELF
+/* Mark the end of a function so that it's possible to compute
+   the size of the function in hppa_elf_final_processing.  */
+
+static void
+hppa_elf_mark_end_of_function ()
+{
+  /* ELF does not have EXIT relocations.  All we do is create a
+     temporary symbol marking the end of the function.  */
+  char *name = (char *)
+    xmalloc (strlen ("L$\001end_") +
+	     strlen (S_GET_NAME (last_call_info->start_symbol)) + 1);
+
+  if (name)
+    {
+      symbolS *symbolP;
+
+      strcpy (name, "L$\001end_");
+      strcat (name, S_GET_NAME (last_call_info->start_symbol));
+
+      /* If we have a .exit followed by a .procend, then the
+	 symbol will have already been defined.  */
+      symbolP = symbol_find (name);
+      if (symbolP)
+	{
+	  /* The symbol has already been defined!  This can
+	     happen if we have a .exit followed by a .procend.
+
+	     This is *not* an error.  All we want to do is free
+	     the memory we just allocated for the name and continue.  */
+	  xfree (name);
+	}
+      else
+	{
+	  /* symbol value should be the offset of the
+	     last instruction of the function */
+	  symbolP = symbol_new (name, now_seg,
+				(valueT) (obstack_next_free (&frags)
+					  - frag_now->fr_literal - 4),
+				frag_now);
+
+	  assert (symbolP);
+	  symbolP->bsym->flags = BSF_LOCAL;
+	  symbol_table_insert (symbolP);
+	}
+
+      if (symbolP)
+	last_call_info->end_symbol = symbolP;
+      else
+	as_bad ("Symbol '%s' could not be created.", name);
+
+    }
+  else
+    as_bad ("No memory for symbol name.");
+
+}
+
 /* For ELF, this function serves one purpose:  to setup the st_size
-   field of STT_FUNC symbols.  */
+   field of STT_FUNC symbols.  To do this, we need to scan the
+   call_info structure list, determining st_size in by taking the
+   difference in the address of the beginning/end marker symbols.  */
 
 void
 elf_hppa_final_processing ()
@@ -6248,7 +6341,9 @@ elf_hppa_final_processing ()
     {
       elf_symbol_type *esym
       = (elf_symbol_type *) call_info_pointer->start_symbol->bsym;
-      esym->internal_elf_sym.st_size = call_info_pointer->function_size;
+      esym->internal_elf_sym.st_size =
+	S_GET_VALUE (call_info_pointer->end_symbol)
+	- S_GET_VALUE (call_info_pointer->start_symbol) + 4;
     }
 }
 #endif
