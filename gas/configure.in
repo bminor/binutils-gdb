@@ -102,7 +102,8 @@ ebmon)
 
 generic) obj_format=generic ;;
 
-hms)
+
+xray | hms)
 	obj_format=coffbfd
 	need_bfd="./../bfd/libbfd.a"
 	;;
@@ -157,7 +158,7 @@ esac
 
 # and target makefile frag
 
-target_makefile_frag=config/mt-${target_cpu}
+target_makefile_frag=config/${target_cpu}.mt
 
 files="config/ho-${gas_host}.h config/tc-${cpu_type}.c \
 	config/tc-${cpu_type}.h config/te-${emulation}.h \
