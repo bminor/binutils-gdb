@@ -1,3 +1,48 @@
+2004-03-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* bfd-in.h (bfd_getb64, bfd_getl64): Replace bfd_byte* with void*.
+	(bfd_getb32, bfd_getl32, bfd_getb16, bfd_getl16): Likewise.
+	(bfd_getb_signed_64, bfd_getl_signed_64): Likewise.
+	(bfd_getb_signed_32, bfd_getl_signed_32): Likewise.
+	(bfd_getb_signed_16, bfd_getl_signed_16): Likewise.
+	(bfd_putb64, bfd_putl64, bfd_putb32, bfd_putl32): Likewise.
+	(bfd_putb16, bfd_putl16, bfd_get_bits, bfd_put_bits): Likewise.
+	* libbfd.c: Likewise in function definitions.
+	(bfd_put_8): Mask with 0xff rather than casting to char.
+	(bfd_putb16, bfd_putl16, bfd_putb32, bfd_putl32): Likewise.
+	(bfd_putb64, bfd_putl64, bfd_put_bits): Likewise.
+	(H_PUT_64, H_PUT_32, H_PUT_16, H_PUT_8): Remove casts, simplify.
+	(H_PUT_S64, H_PUT_S32, H_PUT_S16, H_PUT_S8): Likewise.
+	(H_GET_64, H_GET_32, H_GET_16, H_GET_8): Likewise.
+	(H_GET_S64, H_GET_S32, H_GET_S16, H_GET_S8): Likewise.
+	* libaout.h (H_PUT_64 H_PUT_32, H_PUT_16): Remove casts, simplify.
+	(H_PUT_S64, H_PUT_S32, H_PUT_S16): Likewise.
+	(H_GET_64, H_GET_32, H_GET_16): Likewise.
+	(H_GET_S64, H_GET_S32, H_GET_S16): Likewise.
+	* archive.c (do_slurp_coff_armap): Update swap prototype.
+	* coff-tic54x.c (tic54x_getl32): Replace bfd_byte* with void*.
+	(tic54x_getl_signed_32): Likewise.
+	(tic54x_putl32): Likewise.  Mask with 0xff rather than casting to char.
+	* mach-o.c (bfd_mach_o_read_header): Update get32 prototype.
+	* pdp11.c (bfd_getp32): Make static, replace bfd_byte* with void*.
+	(bfd_getp_signed_32, bfd_putp32): Likewise.
+	* targets.c (struct bfd_target): Use void* in place of bfd_byte* for
+	bfd_getx64, bfd_getx_signed_64, bfd_putx64, bfd_getx32,
+	bfd_getx_signed_32, bfd_putx32, bfd_getx16, bfd_getx_signed_16,
+	bfd_putx16, bfd_h_getx64, bfd_h_getx_signed_64, bfd_h_putx64,
+	bfd_h_getx32, bfd_h_getx_signed_32, bfd_h_putx32, bfd_h_getx16,
+	bfd_h_getx_signed_16, bfd_h_putx16.
+	* aix386-core.c (NO_GET, NO_GETS, NO_PUT): Update prototypes.
+	* hppabsd-core.c: Similarly.  Rename NO_SIGNED_GET to NO_GETS.
+	* hpux-core.c: Likewise.
+	* irix-core.c: Likewise.
+	* netbsd-core.c: Likewise.
+	* osf-core.c: Likewise.
+	* ptrace-core.c: Likewise.
+	* sco5-core.c: Likewise.
+	* trad-core.c: Likewise.
+	* bfd-in2.h: Regenerate.
+
 2004-03-15  Matt Thomas  <matt@3am-software.com>
 
 	* config.bfd: Add x86-64 vector to NetBSD/i386 if 64bit BFD is
