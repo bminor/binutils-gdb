@@ -254,6 +254,7 @@ struct gdbarch
   gdbarch_print_insn_ftype *print_insn;
   gdbarch_skip_trampoline_code_ftype *skip_trampoline_code;
   gdbarch_in_solib_call_trampoline_ftype *in_solib_call_trampoline;
+  gdbarch_in_function_epilogue_p_ftype *in_function_epilogue_p;
 };
 
 
@@ -339,6 +340,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   generic_get_saved_register,
+  0,
   0,
   0,
   0,
@@ -500,6 +502,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->print_insn = legacy_print_insn;
   current_gdbarch->skip_trampoline_code = generic_skip_trampoline_code;
   current_gdbarch->in_solib_call_trampoline = generic_in_solib_call_trampoline;
+  current_gdbarch->in_function_epilogue_p = generic_in_function_epilogue_p;
   /* gdbarch_alloc() */
 
   return current_gdbarch;
@@ -754,6 +757,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of print_insn, invalid_p == 0 */
   /* Skip verify of skip_trampoline_code, invalid_p == 0 */
   /* Skip verify of in_solib_call_trampoline, invalid_p == 0 */
+  /* Skip verify of in_function_epilogue_p, invalid_p == 0 */
   buf = ui_file_xstrdup (log, &dummy);
   make_cleanup (xfree, buf);
   if (strlen (buf) > 0)
@@ -778,6 +782,10 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: GDB_MULTI_ARCH = %d\n",
                       GDB_MULTI_ARCH);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: in_function_epilogue_p = 0x%08lx\n",
+                        (long) current_gdbarch->in_function_epilogue_p);
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
                         "gdbarch_dump: register_read = 0x%08lx\n",
@@ -4239,6 +4247,24 @@ set_gdbarch_in_solib_call_trampoline (struct gdbarch *gdbarch,
                                       gdbarch_in_solib_call_trampoline_ftype in_solib_call_trampoline)
 {
   gdbarch->in_solib_call_trampoline = in_solib_call_trampoline;
+}
+
+int
+gdbarch_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR addr)
+{
+  if (gdbarch->in_function_epilogue_p == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_in_function_epilogue_p invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_in_function_epilogue_p called\n");
+  return gdbarch->in_function_epilogue_p (gdbarch, addr);
+}
+
+void
+set_gdbarch_in_function_epilogue_p (struct gdbarch *gdbarch,
+                                    gdbarch_in_function_epilogue_p_ftype in_function_epilogue_p)
+{
+  gdbarch->in_function_epilogue_p = in_function_epilogue_p;
 }
 
 

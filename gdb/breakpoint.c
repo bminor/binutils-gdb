@@ -2308,6 +2308,14 @@ watchpoint_check (PTR p)
       reinit_frame_cache ();
       fr = find_frame_addr_in_frame_chain (b->watchpoint_frame);
       within_current_scope = (fr != NULL);
+      /* in_function_epilogue_p() returns a non-zero value if we're still
+	 in the function but the stack frame has already been invalidated.
+	 Since we can't rely on the values of local variables after the
+	 stack has been destroyed, we are treating the watchpoint in that
+	 state as `not changed' without further checking. */
+      if (within_current_scope && fr == get_current_frame ()
+          && gdbarch_in_function_epilogue_p (current_gdbarch, read_pc ()))
+	return WP_VALUE_NOT_CHANGED;
       if (within_current_scope)
 	/* If we end up stopping, the current frame will get selected
 	   in normal_stop.  So this call to select_frame won't affect

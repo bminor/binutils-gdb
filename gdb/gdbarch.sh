@@ -546,6 +546,16 @@ f:2:SKIP_TRAMPOLINE_CODE:CORE_ADDR:skip_trampoline_code:CORE_ADDR pc:pc:::generi
 # trampoline code in the ".plt" section.  IN_SOLIB_CALL_TRAMPOLINE evaluates
 # to nonzero if we are current stopped in one of these.
 f:2:IN_SOLIB_CALL_TRAMPOLINE:int:in_solib_call_trampoline:CORE_ADDR pc, char *name:pc, name:::generic_in_solib_call_trampoline::0
+# A target might have problems with watchpoints as soon as the stack
+# frame of the current function has been destroyed.  This mostly happens
+# as the first action in a funtion's epilogue.  in_function_epilogue_p()
+# is defined to return a non-zero value if either the given addr is one
+# instruction after the stack destroying instruction up to the trailing
+# return instruction or if we can figure out that the stack frame has
+# already been invalidated regardless of the value of addr.  Targets
+# which don't suffer from that problem could just let this functionality
+# untouched.
+m:::int:in_function_epilogue_p:CORE_ADDR addr:addr::0:generic_in_function_epilogue_p::0
 EOF
 }
 

@@ -111,6 +111,12 @@ generic_in_solib_call_trampoline (CORE_ADDR pc, char *name)
   return 0;
 }
 
+int
+generic_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  return 0;
+}
+
 char *
 legacy_register_name (int i)
 {

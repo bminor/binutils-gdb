@@ -2069,6 +2069,20 @@ extern void set_gdbarch_in_solib_call_trampoline (struct gdbarch *gdbarch, gdbar
 #endif
 #endif
 
+/* A target might have problems with watchpoints as soon as the stack
+   frame of the current function has been destroyed.  This mostly happens
+   as the first action in a funtion's epilogue.  in_function_epilogue_p()
+   is defined to return a non-zero value if either the given addr is one
+   instruction after the stack destroying instruction up to the trailing
+   return instruction or if we can figure out that the stack frame has
+   already been invalidated regardless of the value of addr.  Targets
+   which don't suffer from that problem could just let this functionality
+   untouched. */
+
+typedef int (gdbarch_in_function_epilogue_p_ftype) (struct gdbarch *gdbarch, CORE_ADDR addr);
+extern int gdbarch_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR addr);
+extern void set_gdbarch_in_function_epilogue_p (struct gdbarch *gdbarch, gdbarch_in_function_epilogue_p_ftype *in_function_epilogue_p);
+
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
 
