@@ -741,6 +741,7 @@ elf_link_add_object_symbols (abfd, info)
 	{
 	  Elf_Internal_Versym iver;
 	  int vernum;
+	  boolean indirect;
 	  boolean override;
 
 	  if (ever != NULL)
@@ -850,9 +851,14 @@ elf_link_add_object_symbols (abfd, info)
 	  if (h->root.type == bfd_link_hash_new)
 	    h->elf_link_hash_flags &=~ ELF_LINK_NON_ELF;
 
+	  indirect = false;
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	    {
+	      if (h->root.type == bfd_link_hash_indirect)
+		indirect = true;
+	      h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	    }
 
 	  /* FIXME: There are too many cases here, and it's too
              confusing.  This code needs to be reorganized somehow.  */
@@ -1008,7 +1014,8 @@ elf_link_add_object_symbols (abfd, info)
 	      && (h->root.u.def.section->flags & SEC_ALLOC) != 0
 	      && (h->root.u.def.section->flags & SEC_LOAD) == 0
 	      && h->size > 0
-	      && h->type != STT_FUNC)
+	      && h->type != STT_FUNC
+	      && ! indirect)
 	    {
 	      /* It would be best if we could set the hash table entry
                  to a common symbol, but we don't know what to use for

@@ -1,3 +1,9 @@
+Wed Jun 18 11:35:42 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elflink.h (elf_link_add_object_symbols): Don't let a common
+	symbol in a regular object override a common symbol in a shared
+	object if the latter was found via an indirect symbol.
+
 Tue Jun 17 11:55:02 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* cofflink.c (_bfd_coff_link_input_bfd): If stripping debugging
