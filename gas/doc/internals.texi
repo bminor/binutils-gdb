@@ -704,9 +704,10 @@ processing.  After this point, it is safe to operate on one chain per section.
 
 The assembler always has a current frag, named @code{frag_now}.  More space is
 allocated for the current frag using the @code{frag_more} function; this
-returns a pointer to the amount of requested space.  Relaxing is done using
-variant frags allocated by @code{frag_var} or @code{frag_variant}
-(@pxref{Relaxation}).
+returns a pointer to the amount of requested space.  The function
+@code{frag_room} says by how much the current frag can be extended.
+Relaxing is done using variant frags allocated by @code{frag_var}
+or @code{frag_variant} (@pxref{Relaxation}).
 
 @node GAS processing
 @section What GAS does when it runs
