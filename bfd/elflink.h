@@ -998,11 +998,15 @@ elf_link_add_object_symbols (abfd, info)
 	    {
 	      if (h->size != 0 && h->size != sym.st_size && ! size_change_ok)
 		(*_bfd_error_handler)
-		  ("Warning: size of symbol `%s' changed from %lu to %lu in %s",
-		   name, (unsigned long) h->size, (unsigned long) sym.st_size,
-		   bfd_get_filename (abfd));
+		  ("Warning: size of symbol `%s' was %lu, but in %s is %lu; using %lu",
+		   name, (unsigned long) h->size,
+		   bfd_get_filename (abfd), (unsigned long) sym.st_size,
+		   (h->size < sym.st_size
+		    ? (unsigned long) sym.st_size
+		    : (unsigned long) h->size));
 
-	      h->size = sym.st_size;
+	      if (h->size < sym.st_size)
+		h->size = sym.st_size;
 	    }
 	  if (ELF_ST_TYPE (sym.st_info) != STT_NOTYPE
 	      && (definition || h->type == STT_NOTYPE))
