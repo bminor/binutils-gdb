@@ -1032,7 +1032,7 @@ md_parse_option(argP,cntP,vecP)
     int *cntP;
     char ***vecP;
 {
-    return 1;
+    return(0);
 }
 
 
