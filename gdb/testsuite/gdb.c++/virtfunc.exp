@@ -915,12 +915,11 @@ proc test_virtual_calls {} {
     #
     # -- chastain 2002-02-20
 
-    if {$gcc_compiled} then { setup_xfail "*-*-*" }
-
     send_gdb "print pEe->D::vg()\n"
-    setup_xfail "*-*-*"
     gdb_expect {
 	-re ".* = 102$nl$gdb_prompt $" { pass "print pEe->D::vg()" }
+	-re "Attempt to take address of value not located in memory.\r\n$gdb_prompt $"
+	{ kfail "gdb/1064" "print pEe->D::vg()" }
 	-re ".*$gdb_prompt $" { fail "print pEe->D::vg()" }
 	timeout { fail "print pEe->D::vg() (timeout)" }
 	eof { fail "print pEe->D::vg() ($GDB dumped core) (FIXME)" ; gdb_virtfunc_restart; return }
