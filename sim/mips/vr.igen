@@ -13,36 +13,79 @@
 
 
 :function:::unsigned64:MulAcc:
+*vr4100:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
+// start-sanitize-cygnus
+*vr5400:
+// end-sanitize-cygnus
 {
   unsigned64 result = U8_4 (HI, LO);
   return result;
 }
 
 :function:::void:SET_MulAcc:unsigned64 value
+*vr4100:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
+// start-sanitize-cygnus
+*vr5400:
+// end-sanitize-cygnus
 {
+  /* 64 bit specific */
   *AL4_8 (&HI) = VH4_8 (value);
   *AL4_8 (&LO) = VL4_8 (value);
 }
 
 :function:::signed64:SignedMultiply:signed32 l, signed32 r
+*vr4100:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
+// start-sanitize-cygnus
+*vr5400:
+// end-sanitize-cygnus
 {
   signed64 result = (signed64) l * (signed64) r;
   return result;
 }
 
 :function:::unsigned64:UnsignedMultiply:unsigned32 l, unsigned32 r
+*vr4100:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
+// start-sanitize-cygnus
+*vr5400:
+// end-sanitize-cygnus
 {
   unsigned64 result = (unsigned64) l * (unsigned64) r;
   return result;
 }
 
 :function:::unsigned64:Low32Bits:unsigned64 value
+*vr4100:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
+// start-sanitize-cygnus
+*vr5400:
+// end-sanitize-cygnus
 {
   unsigned64 result = (signed64) (signed32) VL4_8 (value);
   return result;
 }
 
 :function:::unsigned64:High32Bits:unsigned64 value
+*vr4100:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
+// start-sanitize-cygnus
+*vr5400:
+// end-sanitize-cygnus
 {
   unsigned64 result = (signed64) (signed32) VH4_8 (value);
   return result;
@@ -138,9 +181,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-vrXXXX
 {
   SET_MulAcc (SD_, 0 + SignedMultiply (SD_, GPR[RS], GPR[RT]));
@@ -157,9 +200,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-vrXXXX
 {
   SET_MulAcc (SD_, 0 + UnsignedMultiply (SD_, GPR[RS], GPR[RT]));
@@ -176,9 +219,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-vrXXXX
 {
   SET_MulAcc (SD_, 0 + SignedMultiply (SD_, GPR[RS], GPR[RT]));
@@ -195,9 +238,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-vrXXXX
 {
   SET_MulAcc (SD_, 0 + UnsignedMultiply (SD_, GPR[RS], GPR[RT]));
@@ -206,63 +249,63 @@
 
 
 // end-sanitize-vrXXXX
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 // Multiply, Negate and Move LO.
 000000,5.RS,5.RT,5.RD,00011,011000::::MULS
 "muls r<RD>, r<RS>, r<RT>"
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 {
   SET_MulAcc (SD_, 0 - SignedMultiply   (SD_, GPR[RS], GPR[RT]));
   GPR[RD] = Low32Bits  (SD_, MulAcc (SD_));
 }
 
 
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 // Unsigned Multiply, Negate and Move LO.
 000000,5.RS,5.RT,5.RD,00011,011001::::MULSU
 "mulsu r<RD>, r<RS>, r<RT>"
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 {
   SET_MulAcc (SD_, 0 - UnsignedMultiply (SD_, GPR[RS], GPR[RT]));
   GPR[RD] = Low32Bits  (SD_, MulAcc (SD_));
 }
 
 
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 // Multiply, Negate and Move HI.
 000000,5.RS,5.RT,5.RD,01011,011000::::MULSHI
 "mulshi r<RD>, r<RS>, r<RT>"
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 {
   SET_MulAcc (SD_, 0 - SignedMultiply   (SD_, GPR[RS], GPR[RT]));
   GPR[RD] = High32Bits (SD_, MulAcc (SD_));
 }
 
 
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 // Unsigned Multiply, Negate and Move HI.
 000000,5.RS,5.RT,5.RD,01011,011001::::MULSHIU
 "mulshiu r<RD>, r<RS>, r<RT>"
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 {
   SET_MulAcc (SD_, 0 - UnsignedMultiply (SD_, GPR[RS], GPR[RT]));
   GPR[RD] = High32Bits (SD_, MulAcc (SD_));
@@ -272,16 +315,16 @@
 
 
 
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // Multiply, Accumulate and Move LO.
 000000,5.RS,5.RT,5.RD,00010,101000::::MACC
 "macc r<RD>, r<RS>, r<RT>"
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 {
   SET_MulAcc (SD_, MulAcc (SD_) + SignedMultiply (SD_, GPR[RS], GPR[RT]));
   GPR[RD] = Low32Bits  (SD_, MulAcc (SD_));
@@ -296,9 +339,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-vrXXXX
 {
   SET_MulAcc (SD_, MulAcc (SD_) + UnsignedMultiply (SD_, GPR[RS], GPR[RT]));
@@ -315,9 +358,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-vrXXXX
 {
   SET_MulAcc (SD_, MulAcc (SD_) + SignedMultiply (SD_, GPR[RS], GPR[RT]));
@@ -334,9 +377,9 @@
 // start-sanitize-vr4320
 *vr4320:
 // end-sanitize-vr4320
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
+// end-sanitize-cygnus
 // start-sanitize-vrXXXX
 {
   SET_MulAcc (SD_, MulAcc (SD_) + UnsignedMultiply (SD_, GPR[RS], GPR[RT]));
@@ -347,146 +390,146 @@
 
 
 // end-sanitize-vrXXXX
-// start-sanitize-vr5400
+// start-sanitize-cygnus
 // Multiply, Negate, Accumulate and Move LO.
 000000,5.RS,5.RT,5.RD,00111,011000::::MSAC
 "msac r<RD>, r<RS>, r<RT>"
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 {
   SET_MulAcc (SD_, MulAcc (SD_) - SignedMultiply (SD_, GPR[RS], GPR[RT]));
   GPR[RD] = Low32Bits  (SD_, MulAcc (SD_));
 }
 
 
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 // Unsigned Multiply, Negate, Accumulate and Move LO.
 000000,5.RS,5.RT,5.RD,00111,011001::::MSACU
 "msacu r<RD>, r<RS>, r<RT>"
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 {
   SET_MulAcc (SD_, MulAcc (SD_) - UnsignedMultiply (SD_, GPR[RS], GPR[RT]));
   GPR[RD] = Low32Bits  (SD_, MulAcc (SD_));
 }
 
 
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 // Multiply, Negate, Accumulate and Move HI.
 000000,5.RS,5.RT,5.RD,01111,011000::::MSACHI
 "msachi r<RD>, r<RS>, r<RT>"
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 {
   SET_MulAcc (SD_, MulAcc (SD_) - SignedMultiply (SD_, GPR[RS], GPR[RT]));
   GPR[RD] = High32Bits (SD_, MulAcc (SD_));
 }
 
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 // Unsigned Multiply, Negate, Accumulate and Move HI.
 000000,5.RS,5.RT,5.RD,01111,011001::::MSACHIU
 "msachiu r<RD>, r<RS>, r<RT>"
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 {
   SET_MulAcc (SD_, MulAcc (SD_) - UnsignedMultiply (SD_, GPR[RS], GPR[RT]));
   GPR[RD] = High32Bits (SD_, MulAcc (SD_));
 }
 
 
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 // Rotate Right.
 000000,00001,5.RT,5.RD,5.SHIFT,000010::::ROR
 "ror r<RD>, r<RT>, <SHIFT>"
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 {
   int s = SHIFT;
   GPR[RD] = ROTR32 (GPR[RT], s);
 }
 
 
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 // Rotate Right Variable.
 000000,5.RS,5.RT,5.RD,00001,000110::::RORV
 "rorv r<RD>, r<RT>, <RS>"
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 {
   int s = MASKED (GPR[RS], 4, 0);
   GPR[RD] = ROTR32 (GPR[RT], s);
 }
 
 
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 // Double Rotate Right.
 000000,00001,5.RT,5.RD,5.SHIFT,111010::::DROR
 "dror r<RD>, r<RT>, <SHIFT>"
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 {
   int s = SHIFT;
   GPR[RD] = ROTR64 (GPR[RT], s);
 }
 
 
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 // Double Rotate Right Plus 32.
 000000,00001,5.RT,5.RD,5.SHIFT,111110::::DROR32
 "dror32 r<RD>, r<RT>, <SHIFT>"
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 {
   int s = SHIFT + 32;
   GPR[RD] = ROTR64 (GPR[RT], s);
 }
 
 
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 // Double Rotate Right Variable.
 000000,5.RS,5.RT,5.RD,00001,010110::::DRORV
 "drorv r<RD>, r<RT>, <RS>"
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 *vr5400:
-// end-sanitize-vr5400
-// start-sanitize-vr5400
+// end-sanitize-cygnus
+// start-sanitize-cygnus
 {
   int s = MASKED (GPR[RS], 5, 0);
   GPR[RD] = ROTR64 (GPR[RT], s);
 }
 
 
-// end-sanitize-vr5400
+// end-sanitize-cygnus
