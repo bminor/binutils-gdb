@@ -1,3 +1,9 @@
+Fri Mar  5 17:39:45 1993  John Gilmore  (gnu@cacophony.cygnus.com)
+
+	* am29k-tdep.c (initialize_29k):  Fix call_scratch_address doc.
+	Remove reginv command.
+	(reginv_com):  Remove ancient kludge command.
+
 Fri Mar  5 17:16:26 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
 
 	* tm-irix3.h (ZERO_REGNUM): copy this macro from tm-mips.h so that

@@ -1,5 +1,5 @@
 /* Target-machine dependent code for the AMD 29000
-   Copyright 1990, 1991 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by Jim Kingdon.
 
 This file is part of GDB.
@@ -797,24 +797,10 @@ push_dummy_frame ()
   write_register (lrnum, read_register (NPC_REGNUM));
 }
 
-static void
-reginv_com (args, fromtty)
-     char       *args;
-     int        fromtty;
-{
-   registers_changed();
-   if (fromtty)
-	printf_filtered("Gdb's register cache invalidated.\n");
-}
-
-/* We use this mostly for debugging gdb */
 void
 _initialize_29k()
 {
   extern CORE_ADDR text_end;
-
-  add_com ("reginv ", class_obscure, reginv_com, 
-        "Invalidate gdb's internal register cache.");
 
   /* FIXME, there should be a way to make a CORE_ADDR variable settable. */
   add_show_from_set
@@ -829,7 +815,7 @@ or will produce the value -1.", &setlist),
   add_show_from_set
     (add_set_cmd ("call_scratch_address", class_support, var_uinteger,
 		  (char *)&text_end,
-"Set address in memory where small amounts of RAM can be used when\n\
-making function calls into the inferior.", &setlist),
+"Set address in memory where small amounts of RAM can be used\n\
+when making function calls into the inferior.", &setlist),
      &showlist);
 }
