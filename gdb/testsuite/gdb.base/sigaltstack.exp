@@ -79,8 +79,10 @@ gdb_expect_list "backtrace" ".*$gdb_prompt $" {
 }
 
 proc finish_test { pattern msg } {
+    global gdb_prompt
+
     gdb_test_multiple "finish" $msg {
-	-re "Cannot insert breakpoint 0" {
+	-re "Cannot insert breakpoint 0.*${gdb_prompt} $" {
 	    # Some platforms use a special read-only page for signal
 	    # trampolines.  We can't set a breakpoint there, and we
 	    # don't gracefully fall back to single-stepping.

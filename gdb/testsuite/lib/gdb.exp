@@ -700,7 +700,17 @@ proc gdb_test_multiple { command message user_code } {
     }
 
     set result 0
-    gdb_expect $tmt $code
+    set code [catch {gdb_expect $tmt $code} string]
+    if {$code == 1} {
+	global errorInfo errorCode;
+	return -code error -errorinfo $errorInfo -errorcode $errorCode $string
+    } elseif {$code == 2} {
+	return -code return $string
+    } elseif {$code == 3} {
+	return
+    } elseif {$code > 4} {
+	return -code $code $string
+    }
     return $result
 }
 

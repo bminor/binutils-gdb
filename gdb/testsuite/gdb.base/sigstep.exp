@@ -112,6 +112,14 @@ proc advancei { i } {
 
     set test "$i into signal trampoline"
     gdb_test_multiple "$i" "${test}" {
+        -re "Cannot insert breakpoint 0.*${gdb_prompt} $" {
+            # Some platforms use a special read-only page for signal
+            # trampolines.  We can't set a breakpoint there, and we
+            # don't gracefully fall back to single-stepping.
+            setup_kfail "i?86-*-linux*" gdb/1736
+            fail "$test (could not set breakpoint)"
+	    return
+        }
 	-re "done = 1;.*${gdb_prompt} $" {
 	    send_gdb "$i\n"
 	    exp_continue

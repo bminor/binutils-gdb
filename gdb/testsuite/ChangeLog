@@ -1,5 +1,13 @@
 2004-08-08  Daniel Jacobowitz  <dan@debian.org>
 
+	PR gdb/1736
+	* lib/gdb.exp (gdb_test_multiple): Handle return -code return.
+	* gdb.base/sigaltstack.exp (finish_test): Consume output until
+	the prompt.
+	* gdb.base/sigstep.exp: Add KFAIL for gdb/1736.
+
+2004-08-08  Daniel Jacobowitz  <dan@debian.org>
+
 	* gdb.cp/templates.exp: Handle (char)115 for template argument 's'.
 
 2004-08-08  Daniel Jacobowitz  <dan@debian.org>
