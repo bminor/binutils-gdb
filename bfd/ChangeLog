@@ -1,3 +1,7 @@
+Tue Feb 16 00:44:54 1993  John Gilmore  (gnu@cygnus.com)
+
+	* bfd-in.h, VERSION:  Roll to version 2.1.
+
 Mon Feb 15 20:43:51 1993  John Gilmore  (gnu@cygnus.com)
 
 	* oasys.c (oasys_write_object_contents):  Lint.

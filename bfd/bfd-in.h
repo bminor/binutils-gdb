@@ -45,7 +45,7 @@ here.  */
 #include "ansidecl.h"
 #include "obstack.h"
 
-#define BFD_VERSION "2.0"
+#define BFD_VERSION "2.1"
 
 /* forward declaration */
 typedef struct _bfd bfd;
@@ -144,7 +144,7 @@ typedef int symtype;		/* Who knows, yet? */
 #define bfd_get_output_section(x) ((x)->section->output_section)
 #define bfd_set_section(x,y) ((x)->section) = (y)
 #define bfd_asymbol_base(x) ((x)->section->vma)
-#define bfd_asymbol_value(x) (bfd_asymbol_base(x) + x->value)
+#define bfd_asymbol_value(x) (bfd_asymbol_base(x) + (x)->value)
 #define bfd_asymbol_name(x) ((x)->name)
 /*Perhaps future: #define bfd_asymbol_bfd(x) ((x)->section->owner)*/
 #define bfd_asymbol_bfd(x) ((x)->the_bfd)
@@ -192,6 +192,8 @@ typedef struct sec *sec_ptr;
 #define bfd_section_alignment(bfd, ptr) ((ptr)->alignment_power)
 #define bfd_get_section_flags(bfd, ptr) ((ptr)->flags + 0)
 #define bfd_get_section_userdata(bfd, ptr) ((ptr)->userdata)
+
+#define bfd_is_com_section(ptr) (((ptr)->flags & SEC_IS_COMMON) != 0)
 
 #define bfd_set_section_vma(bfd, ptr, val) (((ptr)->vma = (val)), ((ptr)->user_set_vma = true), true)
 #define bfd_set_section_alignment(bfd, ptr, val) (((ptr)->alignment_power = (val)),true)
