@@ -1,3 +1,8 @@
+2002-09-18  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/ending-run.exp: Add handling of "step to end of run" for
+	embedded targets which never actually exit.
+
 2002-09-18  Fernando Nasser  <fnasser@redhat.com>
 
 	* gdb.base/ending-run.exp: Properly mark "continue after exit" and

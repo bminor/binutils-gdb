@@ -253,6 +253,9 @@ if {! [target_info exists use_gdb_stub]
 		pass "step to end of run (status wrapper)"
 		set program_exited_normally 1
 	    }
+	    -re "Single.*EXIT code 0\r\n.*$gdb_prompt $" {
+		pass "step to end of run (status wrapper)"
+	    }
 	    -re ".*Single.*Program exited.*$gdb_prompt $" {
 		pass "step to end of run"
 		set program_exited_normally 1
