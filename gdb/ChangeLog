@@ -1,3 +1,20 @@
+Fri Apr  4 08:21:21 1997  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* remote.c:  Fix doc for `C' and `S' commands to indicate full
+	address.
+	* (remote_ops extended_remote_ops remote_desc remote_write_size):
+	Make static.
+	* (remote_fetch_registers remote_write_bytes remote_read_bytes):
+	Record size of response to fetch registers command, use this to
+	limit size of memory read and write commands.
+	* (push_remote_target):  New function to make it possible to have
+	another target switch to the remote target.
+	* target.h:  Add prototype for push_remote_target.
+	* sh-tdep.c (sh_frame_find_saved_regs):  Fix sign extension bugs
+	for hosts which default to unsigned chars (such as SGI's).
+	* (_initialize_sh_tdep):  Don't set remote_write_size.  It's now
+	handled automatically in remote.c.
+
 Thu Apr  3 15:10:30 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* blockframe.c: blockvector_for_pc_sect(), block_for_pc_sect(), 

@@ -262,7 +262,7 @@ sh_frame_find_saved_regs (fi, fsr)
 	}
       else if (IS_MOV_R3 (insn))
 	{
-	  r3_val = (char) (insn & 0xff);
+	  r3_val = ((insn & 0xff) ^ 0x80) - 0x80;
 	  pc += 2;
 	  insn = read_memory_integer (pc, 2);
 	}
@@ -281,7 +281,7 @@ sh_frame_find_saved_regs (fi, fsr)
       else if (IS_ADD_SP (insn))
 	{
 	  pc += 2;
-	  depth += -((char) (insn & 0xff));
+	  depth -= ((insn & 0xff) ^ 0x80) - 0x80;
 	  insn = read_memory_integer (pc, 2);
 	}
       else
@@ -706,9 +706,4 @@ Set this to be able to access processor-type-specific registers.\n\
   sh_set_processor_type_command (strsave (DEFAULT_SH_TYPE), 0);
 
   add_com ("regs", class_vars, sh_show_regs, "Print all registers");
-
-  /* Reduce the remote write size because some CMONs can't take
-    more than 400 bytes in a packet.  300 seems like a safe bet.  */
-  remote_write_size = 300;
 }
-

@@ -1,5 +1,5 @@
 /* Remote target communications for serial-line targets in custom GDB protocol
-   Copyright 1988, 1991, 1992, 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
+   Copyright 1988, 1991, 1992, 1993, 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -97,10 +97,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 					If AA..AA is omitted,
 					resume at same address.
 
-	continue with	Csig;AA		Continue with signal sig (hex signal
-	signal				number).
+	continue with	Csig;AA..AA	Continue with signal sig (hex signal
+	signal				number).  If ;AA..AA is omitted, resume
+					at same address.
 
-	step with	Ssig;AA		Like 'C' but step not continue.
+	step with	Ssig;AA..AA	Like 'C' but step not continue.
 	signal
 
 	last signal     ?               Reply the current reason for stopping.
@@ -278,8 +279,8 @@ static int remote_insert_breakpoint PARAMS ((CORE_ADDR, char *));
 
 static int remote_remove_breakpoint PARAMS ((CORE_ADDR, char *));
 
-extern struct target_ops remote_ops;	/* Forward decl */
-extern struct target_ops extended_remote_ops;	/* Forward decl */
+static struct target_ops remote_ops;	/* Forward decl */
+static struct target_ops extended_remote_ops;	/* Forward decl */
 
 /* This was 5 seconds, which is a long time to sit and wait.
    Unless this is going though some terminal server or multiplexer or
@@ -300,7 +301,7 @@ static int remote_break;
 /* Descriptor for I/O to remote machine.  Initialize it to NULL so that
    remote_open knows that we don't have a file open when the program
    starts.  */
-serial_t remote_desc = NULL;
+static serial_t remote_desc = NULL;
 
 /* Having this larger than 400 causes us to be incompatible with m68k-stub.c
    and i386-stub.c.  Normally, no one would notice because it only matters
@@ -329,9 +330,21 @@ serial_t remote_desc = NULL;
 
 static int remote_write_size = PBUFSIZ;
 
+/* This is the size (in chars) of the first response to the `g' command.  This
+   is used to limit the size of the memory read and write commands to prevent
+   stub buffers from overflowing.  */
+
+static int remote_register_buf_size = 0;
+
 /* Should we try the 'P' request?  If this is set to one when the stub
    doesn't support 'P', the only consequence is some unnecessary traffic.  */
 static int stub_supports_P = 1;
+
+/* These are pointers to hook functions that may be set in order to
+   modify resume/wait behavior for a particular architecture.  */
+
+void (*target_resume_hook) PARAMS ((void));
+void (*target_wait_loop_hook) PARAMS ((void));
 
 
 /* These are the threads which we last sent to the remote system.  -1 for all
@@ -663,6 +676,11 @@ remote_resume (pid, step, siggnal)
   last_sent_signal = siggnal;
   last_sent_step = step;
 
+  /* A hook for when we need to do something at the last moment before
+     resumption.  */
+  if (target_resume_hook)
+    (*target_resume_hook) ();
+
   if (siggnal != TARGET_SIGNAL_0)
     {
       buf[0] = step ? 'S' : 'C';
@@ -753,6 +771,11 @@ remote_wait (pid, status)
       ofunc = (void (*)()) signal (SIGINT, remote_interrupt);
       getpkt ((char *) buf, 1);
       signal (SIGINT, ofunc);
+
+      /* This is a hook for when we need to do something (perhaps the
+	 collection of trace data) every time the target stops.  */
+      if (target_wait_loop_hook)
+	(*target_wait_loop_hook) ();
 
       switch (buf[0])
 	{
@@ -915,6 +938,9 @@ remote_fetch_registers (regno)
   sprintf (buf, "g");
   remote_send (buf);
 
+  if (remote_register_buf_size == 0)
+    remote_register_buf_size = strlen (buf);
+
   /* Unimplemented registers read as all bits zero.  */
   memset (regs, 0, REGISTER_BYTES);
 
@@ -1068,6 +1094,21 @@ remote_store_word (addr, word)
 #endif	/* 0 (unused?) */
 
 
+
+/* Return the number of hex digits in num.  */
+
+static int
+hexnumlen (num)
+     ULONGEST num;
+{
+  int i;
+
+  for (i = 0; num != 0; i++)
+    num >>= 4;
+
+  return min (i, 1);
+}
+
 /* Write memory data directly to the remote machine.
    This does not inform the data cache; the data cache uses this.
    MEMADDR is the address in the remote memory space.
@@ -1082,24 +1123,32 @@ remote_write_bytes (memaddr, myaddr, len)
      char *myaddr;
      int len;
 {
-  char buf[PBUFSIZ];
-  int i;
-  char *p;
-  int done;
+  int max_buf_size;		/* Max size of packet output buffer */
+  int origlen;
+
   /* Chop the transfer down if necessary */
 
-  done = 0;
-  while (done < len)
-    {
-      int todo = len - done;
-      int cando = min(remote_write_size, PBUFSIZ) / 2 - 32; /* num bytes that will fit */
+  max_buf_size = min (remote_write_size, PBUFSIZ);
+  max_buf_size = min (max_buf_size, remote_register_buf_size);
 
-      if (todo > cando)
-	todo = cando;
+#define PACKET_OVERHEAD (1 + 1 + 1 + 2)	/* $x#xx  - Overhead for all types of packets */
+
+  /* packet overhead + <memaddr>,<len>:  */
+  max_buf_size -= PACKET_OVERHEAD + hexnumlen (memaddr + len - 1) + 1 + hexnumlen (len) + 1;
+
+  origlen = len;
+  while (len > 0)
+    {
+      char buf[PBUFSIZ];
+      char *p;
+      int todo;
+      int i;
+
+      todo = min (len, max_buf_size / 2); /* num bytes that will fit */
 
       /* FIXME-32x64: Need a version of print_address_numeric which puts the
 	 result in a buffer like sprintf.  */
-      sprintf (buf, "M%lx,%x:", (unsigned long) memaddr + done, todo);
+      sprintf (buf, "M%lx,%x:", (unsigned long) memaddr, todo);
 
       /* We send target system values byte by byte, in increasing byte addresses,
 	 each byte encoded as two hex characters.  */
@@ -1107,8 +1156,8 @@ remote_write_bytes (memaddr, myaddr, len)
       p = buf + strlen (buf);
       for (i = 0; i < todo; i++)
 	{
-	  *p++ = tohex ((myaddr[i + done] >> 4) & 0xf);
-	  *p++ = tohex (myaddr[i + done] & 0xf);
+	  *p++ = tohex ((myaddr[i] >> 4) & 0xf);
+	  *p++ = tohex (myaddr[i] & 0xf);
 	}
       *p = '\0';
 
@@ -1124,9 +1173,11 @@ remote_write_bytes (memaddr, myaddr, len)
 	  errno = EIO;
 	  return 0;
 	}
-      done += todo;
+      myaddr += todo;
+      memaddr += todo;
+      len -= todo;
     }
-  return len;
+  return origlen;
 }
 
 /* Read memory data directly from the remote machine.
@@ -1143,28 +1194,30 @@ remote_read_bytes (memaddr, myaddr, len)
      char *myaddr;
      int len;
 {
-  char buf[PBUFSIZ];
-  int i;
-  char *p;
-  int done;
-  /* Chop transfer down if neccessary */
+  int max_buf_size;		/* Max size of packet output buffer */
+  int origlen;
 
-#if 0
-  /* FIXME: This is wrong for larger packets */
-  if (len > PBUFSIZ / 2 - 1)
-    abort ();
-#endif
-  done = 0;
-  while (done < len)
+  /* Chop the transfer down if necessary */
+
+  max_buf_size = min (remote_write_size, PBUFSIZ);
+  max_buf_size = min (max_buf_size, remote_register_buf_size);
+
+  /* packet overhead */
+  max_buf_size -= PACKET_OVERHEAD;
+
+  origlen = len;
+  while (len > 0)
     {
-      int todo = len - done;
-      int cando = PBUFSIZ / 2 - 32; /* number of bytes that will fit. */
-      if (todo > cando)
-	todo = cando;
+      char buf[PBUFSIZ];
+      char *p;
+      int todo;
+      int i;
+
+      todo = min (len, max_buf_size / 2); /* num bytes that will fit */
 
       /* FIXME-32x64: Need a version of print_address_numeric which puts the
 	 result in a buffer like sprintf.  */
-      sprintf (buf, "m%lx,%x", (unsigned long) memaddr + done, todo);
+      sprintf (buf, "m%lx,%x", (unsigned long) memaddr, todo);
       putpkt (buf);
       getpkt (buf, 0);
 
@@ -1187,13 +1240,15 @@ remote_read_bytes (memaddr, myaddr, len)
 	  if (p[0] == 0 || p[1] == 0)
 	    /* Reply is short.  This means that we were able to read only part
 	       of what we wanted to.  */
-	    return i + done;
-	  myaddr[i + done] = fromhex (p[0]) * 16 + fromhex (p[1]);
+	    return i + (origlen - len);
+	  myaddr[i] = fromhex (p[0]) * 16 + fromhex (p[1]);
 	  p += 2;
 	}
-      done += todo;
+      myaddr += todo;
+      memaddr += todo;
+      len -= todo;
     }
-  return len;
+  return origlen;
 }
 
 /* Read or write LEN bytes from inferior memory at MEMADDR, transferring
@@ -1782,7 +1837,8 @@ remote_remove_breakpoint (addr, contents_cache)
 
 /* Define the target subroutine names */
 
-struct target_ops remote_ops = {
+static struct target_ops remote_ops =
+{
   "remote",			/* to_shortname */
   "Remote serial target in gdb-specific protocol",	/* to_longname */
   "Use a remote computer via a serial line, using a gdb-specific protocol.\n\
@@ -1826,7 +1882,8 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",  /* to_doc */
   OPS_MAGIC			/* to_magic */
 };
 
-struct target_ops extended_remote_ops = {
+static struct target_ops extended_remote_ops =
+{
   "extended-remote",			/* to_shortname */
   "Extended remote serial target in gdb-specific protocol",/* to_longname */
   "Use a remote computer via a serial line, using a gdb-specific protocol.\n\
@@ -1871,6 +1928,26 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",  /* to_doc */
   NULL,				/* sections_end */
   OPS_MAGIC			/* to_magic */
 };
+
+/* Some targets are only capable of doing downloads, and afterwards they switch
+   to the remote serial protocol.  This function provides a clean way to get
+   from the download target to the remote target.  It's basically just a
+   wrapper so that we don't have to expose any of the internal workings of
+   remote.c.
+
+   Prior to calling this routine, you should shutdown the current target code,
+   else you will get the "A program is being debugged already..." message.
+   Usually a call to pop_target() suffices.
+*/
+
+void
+push_remote_target (name, from_tty)
+     char *name;
+     int from_tty;
+{
+  printf_filtered ("Switching to remote protocol\n");
+  remote_open (name, from_tty);
+}
 
 void
 _initialize_remote ()
