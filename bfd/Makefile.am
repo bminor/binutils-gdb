@@ -491,7 +491,6 @@ BFD64_BACKENDS = \
 	efi-app-ia64.lo \
 	elf64-x86-64.lo \
 	elf64-alpha.lo \
-	elf64-alpha-fbsd.lo \
 	elf64-hppa.lo \
 	elf64-ia64.lo \
 	elf64-gen.lo \
@@ -519,7 +518,6 @@ BFD64_BACKENDS_CFILES = \
 	efi-app-ia64.c \
 	elf64-x86-64.c \
 	elf64-alpha.c \
-	elf64-alpha-fbsd.c \
 	elf64-hppa.c \
 	elf64-gen.c \
 	elfn32-mips.c \
@@ -1543,13 +1541,6 @@ elf64-alpha.lo: elf64-alpha.c $(INCDIR)/filenames.h \
   $(INCDIR)/coff/sym.h $(INCDIR)/coff/symconst.h $(INCDIR)/coff/ecoff.h \
   $(INCDIR)/coff/alpha.h $(INCDIR)/aout/ar.h libcoff.h \
   libecoff.h ecoffswap.h elf64-target.h
-elf64-alpha-fbsd.lo: elf64-alpha-fbsd.c $(INCDIR)/filenames.h \
-  elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
-  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h elf64-alpha.c \
-  $(INCDIR)/elf/alpha.h $(INCDIR)/elf/reloc-macros.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/sym.h $(INCDIR)/coff/symconst.h \
-  $(INCDIR)/coff/ecoff.h $(INCDIR)/coff/alpha.h $(INCDIR)/aout/ar.h \
-  libcoff.h libecoff.h ecoffswap.h elf64-target.h
 elf64-hppa.lo: elf64-hppa.c $(INCDIR)/alloca-conf.h \
   $(INCDIR)/filenames.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \

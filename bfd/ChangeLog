@@ -1,3 +1,12 @@
+2002-10-15  Richard Henderson  <rth@redhat.com>
+
+	* Makefile.am (BFD64_BACKENDS): Remove elf64-alpha-fbsd.
+	(BFD64_BACKENDS_CFILES): Likewise.
+	* configure.in (bfd_elf64_alpha_freebsd_vec): Use elf64-alpha.
+	* elf64-alpha-fbsd.c: Remove file, move code ...
+	* elf64-alpha.c: ... here.
+	* Makefile.in, configure: Rebuild.
+
 2002-10-14  Richard Henderson  <rth@redhat.com>
 
 	* elf64-alpha.c (elf64_alpha_relocate_section) [BRSGP]: Increment
