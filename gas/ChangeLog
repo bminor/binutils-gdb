@@ -1,21 +1,180 @@
+Wed Jun 30 11:12:02 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* read.c (cons): Conditionalize parsing of expression.  Move
+	putting value into object file into separate function.  Separate
+	out MRI and WANT_BITFIELDS cases into separate functions.
+	(emit_expr): New function to write data into object file.
+	Conditionalize on TC_CONS_FIX_NEW and TC_CONS_RELOC rather than on
+	processor types.
+	(parse_bitfield_cons): New function to parse bitfield expressions
+	as used by i960 assemblers.  Only compiled if
+	BITFIELD_CONS_EXPRESSIONS is defined.
+	(parse_mri_cons): New function to parse MRI style strings.  Only
+	compiled if MRI is defined.
+	(parse_repeat_cons): New function to parse repeat counts.  Only
+	compiled if REPEAT_CONS_EXPRESSIONS is defined.
+	* read.h (emit_expr): Added declaration of new function.
+	* config/tc-a29k.h (TC_CONS_RELOC): Define to be RELOC_32.
+	* config/tc-h8300.h (TC_CONS_RELOC): Define to be R_RELWORD.
+	* config/tc-hppa.c (parse_cons_expression_hppa): New function to
+	parse a HPPA expression, rather than special case in cons
+	function.
+	(cons_fix_new_hppa): New function to emit an HPPA fixup, rather
+	than special case in emit_expr function.
+	* config/tc-hppa.h (TC_PARSE_CONS_EXPRESSION, TC_CONS_FIX_NEW):
+	Define to use new functions from tc-hppa.c.
+	* config/tc-i960.h (BITFIELD_CONS_EXPRESSIONS): Define.
+	(WANT_BITFIELDS): Removed; now obsolete.
+	* config/tc-mips.h (REPEAT_CONS_EXPRESSIONS): Define.
+	* config/tc-ns32k.c (cons_fix_new_ns32k): New function to emit an
+	NS32K fixup, rather than special case in emit_expr function.
+	* config/tc-ns32k.h (TC_CONS_FIX_NEW): Define to be
+	cons_fix_new_ns32k.  Also use PARAMS rather than checking
+	__STDC__.
+	* config/tc-sparc.h (TC_CONS_RELOC): Define to RELOC_32.
+
+	* write.c (relax_and_size_seg, adjust_reloc_syms, write_contents):
+	Don't core dump if gas has no information about a section.
+
+Wed Jun 30 06:21:27 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* write.c (relax_and_size_seg): Always fully process a section.
+	Section size is last frag's (vm)address plus its size.  If no
+	relocations are present, force SEC_RELOC flag clear.
+	(dump_section_relocs): New debugging routine.
+	(adjust_reloc_syms): New routine, broken out from write_contents.
+	Don't adjust relocs that are already relative to section symbol.
+	Look for obj_fix_adjustable macro to know what else to skip,
+	instead of obj_write_symbol.  Look for section symbol stored in
+	section information.
+	(write_object_file): Map adjust_reloc_syms over all sections.
+	(write_contents): Clear SEC_RELOC flag if no relocations are
+	found.
+
+	* as.h (__PTR_TO_INT, __INT_TO_PTR): New versions for Saber, to
+	keep it quiet.
+
+	* write.c (remove_subsegs): Don't define for BFD_ASSEMBLER.
+
+Fri Jun 25 03:43:06 1993  Ken Raeburn  (raeburn@poseidon.cygnus.com)
+
+	* as.h (strstr): Disable declaration for now.
+	(fprint_value, sprint_value): Declare.
+
+	* subsegs.c (subseg_new_rest): Use memset to clear new frag.
+	(subseg_new) [BFD_ASSEMBLER]: Initialize all seginfo fields.
+
+	* expr.c (expr_part): Made sanity checks a.out-specific.
+	(expr): Disabled sanity checks.
+
+	* subsegs.h (segment_info_type) [BFD_ASSEMBLER]: Add field for
+	section symbol.
+	* subsegs.c (subseg_change): Initialize section symbol pointer
+	when setting up a new section.
+
+	* symbols.c (symbol_new) [BFD_ASSEMBLER]: Point BFD symbol's udata
+	field back at gas symbol structure.
+
+	* symbols.c (colon): Cast obstack_next_free value to char* before
+	doing arithmetic on it.
+	* subsegs.c (subseg_new_rest): Likewise.
+	* as.h (frag_now_fix): Likewise.
+
+	* config/obj-elf.c (elf_file_symbol): Use subseg_new instead of
+	calling bfd_make_section_old_way directly, and call subseg_set
+	instead of subseg_change.  Now returns void.
+	(obj_elf_write_symbol): Only check local symbols for now.
+	(elf_stab_symbol): Now static and void, and disabled until it
+	works completely.
+	(obj_elf_size): For expression values, fail silently for now.
+	(obj_symbol_new_hook): Do nothing.
+
+	* config/tc-sparc.c (tc_gen_reloc): Handle BFD_RELOC_SPARC_WDISP22
+	relocation.
+	(s_local) [OBJ_ELF]: New function.
+	(md_pseudo_table) [OBJ_ELF]: Call it for "local".
+	(s_common): Rearrange to handle Solaris .common pseudo, which may
+	sometimes use bss space instead of common.
+	* config/obj-elf.h (TARGET_SYMBOL_FIELDS): Add new `local' field.
+
 Thu Jun 24 16:33:53 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* configure.in: set host config to hpux for hppa*-hp-hpux
 
+Thu Jun 24 13:35:06 1993  Ken Raeburn  (raeburn@poseidon.cygnus.com)
+
+	* app.c (app_pop, app_push): Fix bug reported by Chris Arthur.
+
+Tue Jun 22 01:04:23 1993  Ken Raeburn  (raeburn@poseidon.cygnus.com)
+
+	* subsegs.c (subseg_new): Don't special-case a.out -R flag here.
+	* config/obj-aout.c (s_sect): Do it here.
+
+	* as.h (BAD_CASE): Don't make some lame compilers think we want
+	substitution inside strings.
+
+	* as.c (print_version_id): New function, split off from main.
+	(main): Call it.
+	* config/tc-sparc.c (md_parse_option) [OBJ_ELF]: Print version id
+	for -V.  Ignore -Q and -s options for now.
+
 Mon Jun 21 17:37:59 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* Makefile.in: make installation & builds work again for crosses
+
+Sun Jun 20 18:18:26 1993  Ken Raeburn  (raeburn@poseidon.cygnus.com)
+
+	* listing.c (list_symbol_table): Rewrite to print wide (>32 bits)
+	symbol values correctly.
+
+	* write.c (write_object_file): Deleted unused variables.
+	(fixup_segment): Use sprint_value.
+
+	* messages.c (sprint_value, fprint_value): New routines.
+
+	* config/obj-elf.c (elf_stab_symbol): Now returns void.
+	(obj_elf_stab_generic): Fix typo in logic.
+
+	* Makefile.in (INCLUDES): Look in ../bfd for bfd.h.
+
+	* as.h (addressT, offsetT): New types, using BFD types if
+	available.
+	(relax_addressT, struct frag): Use them.
+	* struc-symbol.h (valueT, struct broken_word): Likewise.
+
+	* as.h (subseg_new) [BFD_ASSEMBLER]: Name argument is const.
+	* subsegs.c (subseg_new) [BFD_ASSEMBLER]: Name argument is const.
 
 Thu Jun 17 16:53:56 1993  david d `zoo' zuhn (zoo@cygnus.com)
 	
 	* Makefile.in: canonicalize install.sh; for use within
 	this directory (and subdirs)
 
-Thu Jun 17 14:56:07 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+Sun Jun 20 02:34:04 1993  Ashley Saulsbury (ans@sics.se)
 
-	* config/obj-coffbfd.c (fill_section): Don't allow fills backwards.
-	* config/tc-sh (get_specific, md_convert_frag,
-	md_estimate_size_before_relax): Add support for rest of opcodes.
+	* m88k-opcode.h : fixed tiny tiny mistake - xcr was incorrectly
+	specified, should have both S1 and S2 fields identical
+	If only finding the problem was as fast as fixing the bug !!!!
+
+Tue Jun 15 16:01:57 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* write.c (write_contents): Do write out non-loadable sections.
+	Debug sections can fall in this category.
+
+	* read.c (s_app_file): Call elf_file_symbol for ELF files.
+	* config/obj-elf.c (elf_file_symbol): New function.
+
+	* config/obj-elf.c (elf_stab_symbol_string): Renamed from pa_...,
+	added argument to specify section base name.
+	(obj_elf_stab_generic): Renamed from ..._stab.  New argument
+	specifies section base name.
+	(obj_elf_stab): New function, calls obj_elf_stab_generic with
+	".stab" as section base name.
+	(obj_elf_xstab): New function, calls obj_elf_stab_generic.
+	(obj_elf_type): Handle "object".  Use bitwise-or to merge in
+	symbol flags rather than simply replacing, so global/local flags
+	are preserved.
+	(obj_elf_ident): Rewrite.
 
 Tue Jun 15 17:03:25 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
@@ -27,6 +186,32 @@ Wed Jun  9 11:26:07 1993  Ian Lance Taylor  (ian@cygnus.com)
 	for any a.out target, not just Linux and 386BSD.
 	* config/tc-i386.h (DOT_LABEL_PREFIX): Do not define for any a.out
 	target.
+
+Mon Jun  7 13:33:19 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/tc-m88k.c: Don't include flonum.h, md.h, m88k.h.  They
+	don't exist or duplicate other inclusions.
+
+	* config/tc-vax.h (NO_RELOC): Define.
+
+Sat Jun  5 19:32:52 1993  Torbjorn Granlund  (tege@nada.kth.se)
+
+	* gas/config/m88k-opcode.h (m88k_opcodes): Add 88110 instructions.
+	* gas/config/tc-m88k.c (get_reg): New arg reg_prefix.  Compare first
+	char to reg_prefix instead of to 'r'.
+	(calcop): Change calls to get_reg.
+	(calcop): Handle new case 'x' to set reg_prefix.
+	(calcop): Set reg_prefix to 'r' after each call to get_reg.
+	(cmpslot): Add 88110 conditions.
+
+	* gas/config/m88k-opcode.h: Swap cases for "rot" for consistency.
+
+	* gas/config/tc-m88k.c (get_bf): Always restore input_line_pointer
+	before returning.
+
+	* gas/config/m88k-opcode.h (m88k_opcodes): Make equal mnemonics
+	adjacent; mov.s and mov.d swapped.
+	(m88k_opcodes): Fix typo `r2' -> `2'.
 
 Fri Jun  4 15:59:31 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 

@@ -33,10 +33,12 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	on the h8, this is allways true, since no fixup is done
 */
 #define TC_COUNT_RELOC(x) (x->fx_addsy)
-/* end of tc-a29k.h */
+#define TC_CONS_RELOC RELOC_32
 
 #define COFF_FLAGS F_AR32W
 #define reloc_type int
 #define NEED_FX_R_TYPE
 
 #define ZERO_BASED_SEGMENTS
+
+/* end of tc-a29k.h */
