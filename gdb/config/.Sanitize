@@ -57,6 +57,7 @@ i386bsd.mh
 i386bsd.mt
 i386mach.mh
 i386sco.mh
+i386sco4.mh
 i386sol2.mh
 i386sol2.mt
 i386v.mh
