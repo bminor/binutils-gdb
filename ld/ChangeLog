@@ -1,3 +1,11 @@
+2005-03-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/ppc64elf.em (ppc_finish): Rename from
+	gld${EMULATION_NAME}_finish.  Call gld${EMULATION_NAME}_finish.
+	(LDEMUL_FINISH): Update.
+	* emultempl/hppaelf.em (hppaelf_finish, LDEMUL_FINISH): Likewise.
+	* emultempl/m68hc1xelf.em (m68hc11elf_finish, LDEMUL_FINISH): Likewise.
+
 2005-03-18  Julian Brown  <julian@codesourcery.com>
 
 	* scripttempl/armbpapi.sc (.rel.dyn): Add .rel.init_array,

@@ -314,7 +314,7 @@ build_section_lists (lang_statement_union_type *statement)
 /* Final emulation specific call.  */
 
 static void
-gld${EMULATION_NAME}_finish (void)
+ppc_finish (void)
 {
   /* e_entry on PowerPC64 points to the function descriptor for
      _start.  If _start is missing, default to the first function
@@ -389,6 +389,7 @@ gld${EMULATION_NAME}_finish (void)
     }
 
   ppc64_elf_restore_symbols (&link_info);
+  gld${EMULATION_NAME}_finish ();
 }
 
 
@@ -576,6 +577,6 @@ PARSE_AND_LIST_ARGS_CASES='
 #
 LDEMUL_BEFORE_ALLOCATION=ppc_before_allocation
 LDEMUL_AFTER_ALLOCATION=gld${EMULATION_NAME}_after_allocation
-LDEMUL_FINISH=gld${EMULATION_NAME}_finish
+LDEMUL_FINISH=ppc_finish
 LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=ppc_create_output_section_statements
 LDEMUL_NEW_VERS_PATTERN=gld${EMULATION_NAME}_new_vers_pattern

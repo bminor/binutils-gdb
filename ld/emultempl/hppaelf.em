@@ -256,7 +256,7 @@ build_section_lists (lang_statement_union_type *statement)
    to build linker stubs.  */
 
 static void
-gld${EMULATION_NAME}_finish (void)
+hppaelf_finish (void)
 {
   /* bfd_elf_discard_info just plays with debugging sections,
      ie. doesn't affect any code, so we can delay resizing the
@@ -312,9 +312,14 @@ gld${EMULATION_NAME}_finish (void)
       if (stub_file != NULL && stub_file->the_bfd->sections != NULL)
 	{
 	  if (! elf32_hppa_build_stubs (&link_info))
-	    einfo ("%X%P: can not build stubs: %E\n");
+	    {
+	      einfo ("%X%P: can not build stubs: %E\n");
+	      return;
+	    }
 	}
     }
+
+  gld${EMULATION_NAME}_finish ();
 }
 
 
@@ -387,5 +392,5 @@ PARSE_AND_LIST_ARGS_CASES='
 # Put these extra hppaelf routines in ld_${EMULATION_NAME}_emulation
 #
 LDEMUL_AFTER_PARSE=hppaelf_after_parse
-LDEMUL_FINISH=gld${EMULATION_NAME}_finish
+LDEMUL_FINISH=hppaelf_finish
 LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=hppaelf_create_output_section_statements

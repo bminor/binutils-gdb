@@ -5,7 +5,7 @@
 #readelf: -WSsrl
 #target: powerpc64*-*-*
 
-There are 20 section headers.*
+There are 16 section headers.*
 
 Section Headers:
  +\[Nr\] Name +Type +Address +Off +Size +ES Flg Lk Inf Al
@@ -20,15 +20,11 @@ Section Headers:
  +\[ 8\] \.tdata +PROGBITS .* 0+38 0+ WAT +0 +0 +8
  +\[ 9\] \.tbss +NOBITS .* 0+38 0+ WAT +0 +0 +8
  +\[10\] \.dynamic +DYNAMIC .* 0+150 10 +WA +4 +0 +8
- +\[11\] \.data +PROGBITS .* 0+ 0+ +WA +0 +0 +1
- +\[12\] \.branch_lt +.*
- +\[13\] \.got +PROGBITS .* 0+58 08 +WA +0 +0 +8
- +\[14\] \.sbss +.*
- +\[15\] \.plt +.*
- +\[16\] \.bss +.*
- +\[17\] \.shstrtab +.*
- +\[18\] \.symtab +.*
- +\[19\] \.strtab +.*
+ +\[11\] \.got +PROGBITS .* 0+58 08 +WA +0 +0 +8
+ +\[12\] \.plt +.*
+ +\[13\] \.shstrtab +.*
+ +\[14\] \.symtab +.*
+ +\[15\] \.strtab +.*
 #...
 
 Elf file type is EXEC \(Executable file\)
@@ -74,7 +70,7 @@ Symbol table '\.dynsym' contains 8 entries:
 .* [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS _edata
 .* [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS _end
 
-Symbol table '\.symtab' contains 44 entries:
+Symbol table '\.symtab' contains 40 entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
 .* 0+ +0 NOTYPE +LOCAL +DEFAULT +UND 
 .* [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +1 
@@ -89,13 +85,9 @@ Symbol table '\.symtab' contains 44 entries:
 .* 0+10010430 +0 SECTION LOCAL +DEFAULT +10 
 .* 0+10010580 +0 SECTION LOCAL +DEFAULT +11 
 .* [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +12 
-.* 0+10010580 +0 SECTION LOCAL +DEFAULT +13 
+.* [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +13 
 .* [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +14 
 .* [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +15 
-.* [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +16 
-.* 0+ +0 SECTION LOCAL +DEFAULT +17 
-.* 0+ +0 SECTION LOCAL +DEFAULT +18 
-.* 0+ +0 SECTION LOCAL +DEFAULT +19 
 .* 0+ +0 TLS +LOCAL +DEFAULT +8 gd4
 .* 0+8 +0 TLS +LOCAL +DEFAULT +8 ld4
 .* 0+10 +0 TLS +LOCAL +DEFAULT +8 ld5
@@ -103,7 +95,7 @@ Symbol table '\.symtab' contains 44 entries:
 .* 0+20 +0 TLS +LOCAL +DEFAULT +8 ie4
 .* 0+28 +0 TLS +LOCAL +DEFAULT +8 le4
 .* 0+30 +0 TLS +LOCAL +DEFAULT +8 le5
-.* 0+100105d0 +0 NOTYPE +LOCAL +DEFAULT +13 \.Lie0
+.* 0+100105d0 +0 NOTYPE +LOCAL +DEFAULT +11 \.Lie0
 .* 0+ +0 FUNC +LOCAL +DEFAULT +UND \.__tls_get_addr
 .* 0+10010430 +0 OBJECT +GLOBAL DEFAULT +ABS _DYNAMIC
 .* 0+ +0 TLS +GLOBAL DEFAULT +UND gd

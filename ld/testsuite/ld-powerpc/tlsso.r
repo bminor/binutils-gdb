@@ -4,7 +4,7 @@
 #readelf: -WSsrl
 #target: powerpc64*-*-*
 
-There are 19 section headers.*
+There are 15 section headers.*
 
 Section Headers:
  +\[Nr\] Name +Type +Address +Off +Size +ES Flg Lk Inf Al
@@ -18,15 +18,11 @@ Section Headers:
  +\[ 7\] \.tdata +PROGBITS +0+106c8 0+6c8 0+38 0+ WAT +0 +0 +8
  +\[ 8\] \.tbss +NOBITS +0+10700 0+700 0+38 0+ WAT +0 +0 +8
  +\[ 9\] \.dynamic +DYNAMIC +0+10700 0+700 0+150 10 +WA +3 +0 +8
- +\[10\] \.data +PROGBITS +0+10850 0+850 0+ 0+ +WA +0 +0 +1
- +\[11\] \.branch_lt +.*
- +\[12\] \.got +PROGBITS +0+10850 0+850 0+60 08 +WA +0 +0 +8
- +\[13\] \.sbss +.*
- +\[14\] \.plt +.*
- +\[15\] \.bss +.*
- +\[16\] \.shstrtab +.*
- +\[17\] \.symtab +.*
- +\[18\] \.strtab +.*
+ +\[10\] \.got +PROGBITS +0+10850 0+850 0+60 08 +WA +0 +0 +8
+ +\[11\] \.plt +.*
+ +\[12\] \.shstrtab +.*
+ +\[13\] \.symtab +.*
+ +\[14\] \.strtab +.*
 #...
 
 Elf file type is DYN \(Shared object file\)
@@ -76,9 +72,9 @@ Symbol table '\.dynsym' contains 22 entries:
  +[0-9]+: 0+5c8 +0 SECTION LOCAL +DEFAULT +6 
  +[0-9]+: 0+106c8 +0 SECTION LOCAL +DEFAULT +7 
  +[0-9]+: 0+10700 +0 SECTION LOCAL +DEFAULT +8 
- +[0-9]+: 0+10850 +0 SECTION LOCAL +DEFAULT +10 
- +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +11 
- +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +15 
+ +[0-9]+: 0+ +0 NOTYPE +LOCAL +DEFAULT +UND 
+ +[0-9]+: 0+ +0 NOTYPE +LOCAL +DEFAULT +UND 
+ +[0-9]+: 0+ +0 NOTYPE +LOCAL +DEFAULT +UND 
  +[0-9]+: 0+10700 +0 OBJECT +GLOBAL DEFAULT +ABS _DYNAMIC
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT +UND gd
  +[0-9]+: 0+60 +0 TLS +GLOBAL DEFAULT +8 le0
@@ -95,7 +91,7 @@ Symbol table '\.dynsym' contains 22 entries:
  +[0-9]+: 0+38 +0 TLS +GLOBAL DEFAULT +8 gd0
  +[0-9]+: 0+58 +0 TLS +GLOBAL DEFAULT +8 ie0
 
-Symbol table '\.symtab' contains 42 entries:
+Symbol table '\.symtab' contains 38 entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
  +[0-9]+: 0+ +0 NOTYPE +LOCAL +DEFAULT +UND 
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +1 
@@ -112,10 +108,6 @@ Symbol table '\.symtab' contains 42 entries:
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +12 
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +13 
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +14 
- +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +15 
- +[0-9]+: 0+ +0 SECTION LOCAL +DEFAULT +16 
- +[0-9]+: 0+ +0 SECTION LOCAL +DEFAULT +17 
- +[0-9]+: 0+ +0 SECTION LOCAL +DEFAULT +18 
  +[0-9]+: 0+ +0 TLS +LOCAL +DEFAULT +7 gd4
  +[0-9]+: 0+8 +0 TLS +LOCAL +DEFAULT +7 ld4
  +[0-9]+: 0+10 +0 TLS +LOCAL +DEFAULT +7 ld5
