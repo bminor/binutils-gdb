@@ -1,5 +1,8 @@
 Mon Oct 25 14:57:45 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdbserver/{low-lynx.c,low-sparc.c,low-sun3.c}, standalone.c,
+	m3-nat.c, i386m3-nat.c, mipsm3-nat.c, ns32km3-nat.c: bcopy -> memcpy.
+
 	gcc -Wall lint:
 	* breakpoint.c: Include thread.h.
 	* coffread.c: Include stabsread.h.

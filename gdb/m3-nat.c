@@ -1798,7 +1798,7 @@ mach3_read_inferior (addr, myaddr, length)
 	}
     }
 
-  bcopy ((char *)addr - low_address + copied_memory, myaddr, length);
+  memcpy (myaddr, (char *)addr - low_address + copied_memory, length);
 
   ret = vm_deallocate (mach_task_self (),
 		       copied_memory,
@@ -1858,7 +1858,7 @@ mach3_write_inferior (addr, myaddr, length)
 
   deallocate++;
 
-  bcopy (myaddr, (char *)addr - low_address + copied_memory, length);
+  memcpy ((char *)addr - low_address + copied_memory, myaddr, length);
 
   obstack_init (&region_obstack);
 

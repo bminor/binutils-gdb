@@ -58,15 +58,15 @@ static int reg_offset[] =
  * Caller knows that the regs handled in one transaction are of same size.
  */
 #define FETCH_REGS(state, regnum, count) \
-  bcopy ((char *)state+reg_offset[ regnum ], \
-	 &registers[REGISTER_BYTE (regnum)], \
-	 count*sizeof (REGISTER_TYPE))
+  memcpy (&registers[REGISTER_BYTE (regnum)], \
+	  (char *)state+reg_offset[ regnum ], \
+	  count*sizeof (REGISTER_TYPE))
 
 /* Store COUNT contiguous registers to thread STATE starting from REGNUM */
 #define STORE_REGS(state, regnum, count) \
-  bcopy (&registers[REGISTER_BYTE (regnum)], \
-	 (char *)state+reg_offset[ regnum ], \
-	 count*sizeof (REGISTER_TYPE))
+  memcpy ((char *)state+reg_offset[ regnum ], \
+	  &registers[REGISTER_BYTE (regnum)], \
+	  count*sizeof (REGISTER_TYPE))
 
 /* 4.4 bfd support function */
 /* jtv@hut.fi: UNIMPLEMENTED!!!!! */

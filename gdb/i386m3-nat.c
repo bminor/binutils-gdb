@@ -85,15 +85,15 @@ static int reg_offset[] =
  * Caller knows that the regs handled in one transaction are of same size.
  */
 #define FETCH_REGS(state, regnum, count) \
-  bcopy (REG_ADDRESS (state, regnum), \
-	 &registers[REGISTER_BYTE (regnum)], \
-	 count*sizeof (REGISTER_TYPE))
+  memcpy (&registers[REGISTER_BYTE (regnum)], \
+	  REG_ADDRESS (state, regnum), \
+	  count*sizeof (REGISTER_TYPE))
 
 /* Store COUNT contiguous registers to thread STATE starting from REGNUM */
 #define STORE_REGS(state, regnum, count) \
-  bcopy (&registers[REGISTER_BYTE (regnum)], \
-	 REG_ADDRESS (state, regnum), \
-	 count*sizeof (REGISTER_TYPE))
+  memcpy (REG_ADDRESS (state, regnum), \
+	  &registers[REGISTER_BYTE (regnum)], \
+	  count*sizeof (REGISTER_TYPE))
 
 /*
  * Fetch inferiors registers for gdb.
@@ -380,7 +380,7 @@ get_i387_state (fstate)
 
   fstate->status = fsp->exc_status;
 
-  bcopy ((char *)&fsp->hw_state, fstate->state, FP_STATE_BYTES);
+  memcpy (fstate->state, (char *)&fsp->hw_state, FP_STATE_BYTES);
 
   return TRUE;
 }

@@ -283,7 +283,7 @@ read_inferior_memory (memaddr, myaddr, len)
     }
 
   /* Copy appropriate bytes out of the buffer.  */
-  bcopy ((char *) buffer + (memaddr & (sizeof (int) - 1)), myaddr, len);
+  memcpy (myaddr, (char *) buffer + (memaddr & (sizeof (int) - 1)), len);
 }
 
 /* Copy LEN bytes of data from debugger memory at MYADDR
@@ -320,7 +320,7 @@ write_inferior_memory (memaddr, myaddr, len)
 
   /* Copy data to be written over corresponding part of buffer */
 
-  bcopy (myaddr, (char *) buffer + (memaddr & (sizeof (int) - 1)), len);
+  memcpy ((char *) buffer + (memaddr & (sizeof (int) - 1)), myaddr, len);
 
   /* Write the entire buffer.  */
 

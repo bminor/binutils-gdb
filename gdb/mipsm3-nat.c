@@ -120,15 +120,15 @@ static int reg_offset[] =
  * Caller knows that the regs handled in one transaction are of same size.
  */
 #define FETCH_REGS(state, regnum, count) \
-  bcopy ((char *)state+reg_offset[ regnum ], \
-	 &registers[REGISTER_BYTE (regnum)], \
-	 count*sizeof (REGISTER_TYPE))
+  memcpy (&registers[REGISTER_BYTE (regnum)], \
+	  (char *)state+reg_offset[ regnum ], \
+	  count*sizeof (REGISTER_TYPE))
 
 /* Store COUNT contiguous registers to thread STATE starting from REGNUM */
 #define STORE_REGS(state, regnum, count) \
-  bcopy (&registers[REGISTER_BYTE (regnum)], \
-	 (char *)state+reg_offset[ regnum ], \
-	 count*sizeof (REGISTER_TYPE))
+  memcpy ((char *)state+reg_offset[ regnum ], \
+	  &registers[REGISTER_BYTE (regnum)], \
+	  count*sizeof (REGISTER_TYPE))
 
 #define REGS_ALL    -1
 #define REGS_NORMAL  1
@@ -342,9 +342,9 @@ store_inferior_registers (regno)
        *     should go to threads frame pointer. If not true, this
        *     fails badly!!!!!
        */
-      bcopy (&registers[REGISTER_BYTE (FP_REGNUM)],
-	     &registers[REGISTER_BYTE (MACH_FP_REGNUM)],
-	     REGISTER_RAW_SIZE (FP_REGNUM));
+      memcpy (&registers[REGISTER_BYTE (MACH_FP_REGNUM)],
+	      &registers[REGISTER_BYTE (FP_REGNUM)],
+	      REGISTER_RAW_SIZE (FP_REGNUM));
 #endif
       
       /* Save gdb's regs 1..31 to thread saved regs 1..31

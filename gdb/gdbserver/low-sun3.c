@@ -186,18 +186,20 @@ store_inferior_registers (ignored)
   struct regs inferior_registers;
   struct fp_status inferior_fp_registers;
 
-  bcopy (registers, &inferior_registers, 16 * 4);
+  memcpy (&inferior_registers, registers, 16 * 4);
 #ifdef FP0_REGNUM
-  bcopy (&registers[REGISTER_BYTE (FP0_REGNUM)], &inferior_fp_registers,
-	 sizeof inferior_fp_registers.fps_regs);
+  memcpy (&inferior_fp_registers,
+	  &registers[REGISTER_BYTE (FP0_REGNUM)],
+	  sizeof inferior_fp_registers.fps_regs);
 #endif
   inferior_registers.r_ps = *(int *)&registers[REGISTER_BYTE (PS_REGNUM)];
   inferior_registers.r_pc = *(int *)&registers[REGISTER_BYTE (PC_REGNUM)];
 
 #ifdef FP0_REGNUM
-  bcopy (&registers[REGISTER_BYTE (FPC_REGNUM)],
-	 &inferior_fp_registers.fps_control,
-	 sizeof inferior_fp_registers - sizeof inferior_fp_registers.fps_regs);
+  memcpy (&inferior_fp_registers.fps_control,
+	  &registers[REGISTER_BYTE (FPC_REGNUM)],
+	  (sizeof inferior_fp_registers
+	   - sizeof inferior_fp_registers.fps_regs));
 #endif
 
   ptrace (PTRACE_SETREGS, inferior_pid,
@@ -238,7 +240,7 @@ read_inferior_memory (memaddr, myaddr, len)
     }
 
   /* Copy appropriate bytes out of the buffer.  */
-  bcopy ((char *) buffer + (memaddr & (sizeof (int) - 1)), myaddr, len);
+  memcpy (myaddr, (char *) buffer + (memaddr & (sizeof (int) - 1)), len);
 }
 
 /* Copy LEN bytes of data from debugger memory at MYADDR
@@ -275,7 +277,7 @@ write_inferior_memory (memaddr, myaddr, len)
 
   /* Copy data to be written over corresponding part of buffer */
 
-  bcopy (myaddr, (char *) buffer + (memaddr & (sizeof (int) - 1)), len);
+  memcpy ((char *) buffer + (memaddr & (sizeof (int) - 1)), myaddr, len);
 
   /* Write the entire buffer.  */
 

@@ -213,7 +213,7 @@ myread (desc, destptr, size, filename)
       return -1;
     }
 
-  bcopy (sourceptr, destptr, len);
+  memcpy (destptr, sourceptr, len);
   sourceleft -= len;
   return len;
 }
@@ -230,7 +230,7 @@ fread (bufp, numelts, eltsize, stream)
       return -1;
     }
 
-  bcopy (sourceptr, bufp, len);
+  memcpy (bufp, sourceptr, len);
   sourceleft -= len;
   return elts;
 }
@@ -370,7 +370,7 @@ read_memory (memaddr, myaddr, len)
      char *myaddr;
      int len;
 {
-  bcopy (memaddr, myaddr, len);
+  memcpy (myaddr, memaddr, len);
 }
 
 /* Always return 0 indicating success.  */
@@ -380,7 +380,7 @@ write_memory (memaddr, myaddr, len)
      char *myaddr;
      int len;
 {
-  bcopy (myaddr, memaddr, len);
+  memcpy (memaddr, myaddr, len);
   return 0;
 }
 
@@ -487,7 +487,7 @@ resume ()
   PUSH_FRAME_PTR;
   save_frame_pointer ();
 
-  bcopy (saved_regs, restore, sizeof restore);
+  memcpy (restore, saved_regs, sizeof restore);
   POP_REGISTERS;
   /* Control does not drop through here!  */
 }
@@ -533,7 +533,7 @@ restore_gdb ()
 save_registers (firstreg)
      int firstreg;
 {
-  bcopy (&firstreg, saved_regs, sizeof saved_regs);
+  memcpy (saved_regs, &firstreg, sizeof saved_regs);
   fault_code = (&firstreg)[NUM_REGS];
 }
 
