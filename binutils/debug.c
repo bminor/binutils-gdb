@@ -2237,6 +2237,9 @@ debug_get_parameter_types (handle, type, pvarargs)
     {
     default:
       return NULL;
+    case DEBUG_KIND_FUNCTION:
+      *pvarargs = type->u.kfunction->varargs;
+      return type->u.kfunction->arg_types;
     case DEBUG_KIND_METHOD:
       *pvarargs = type->u.kmethod->varargs;
       return type->u.kmethod->arg_types;

@@ -1,5 +1,11 @@
 Tue Jan 23 15:54:18 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ieee.c: Various changes to handle C++ reference types.
+
+	* debug.h (enum debug_var_kind): Add DEBUG_VAR_ILLEGAL.
+	(enum debug_parm_kind): Add DEBUG_PARM_ILLEGAL.
+	* debug.c (debug_get_parameter_types): Handle DEBUG_KIND_FUNCTION.
+
 	* ieee.c: Various changes to write out definitions of C++ classes.
 
 	* debug.c (debug_append_filename): Remove.

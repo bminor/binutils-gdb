@@ -86,6 +86,8 @@ enum debug_type_kind
 
 enum debug_var_kind
 {
+  /* Not used.  */
+  DEBUG_VAR_ILLEGAL,
   /* A global variable.  */
   DEBUG_GLOBAL,
   /* A static variable.  */
@@ -102,6 +104,8 @@ enum debug_var_kind
 
 enum debug_parm_kind
 {
+  /* Not used.  */
+  DEBUG_PARM_ILLEGAL,
   /* A stack based parameter.  */
   DEBUG_PARM_STACK,
   /* A register parameter.  */
