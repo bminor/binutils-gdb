@@ -1,3 +1,40 @@
+Fri Aug 19 14:55:45 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	Initial Fortran language support, adapted from work by Farooq Butt
+	(fmbutt@engage.sps.mot.com).
+	* Makefile.in: Add Fortran-related files and dependencies.
+	* defs.h (language_fortran): New language enum.
+	* language.h (_LANG_fortran): Define.
+	(MAX_FORTRAN_DIMS): Define.
+	* expression.h: Reformat to standard.
+	(MULTI_F77_SUBSCRIPT, OP_F77_UNDETERMINED_ARGLIST,
+	OP_F77_LITERAL_COMPLEX, OP_F77_SUBSTR): New expression opcodes.
+	* gdbtypes.h (TYPE_CODE_COMPLEX, TYPE_CODE_LITERAL_COMPLEX,
+	TYPE_CODE_LITERAL_STRING): New type codes.
+	(type): New fields upper_bound_type and lower_bound_type.
+	(TYPE_ARRAY_UPPER_BOUND_TYPE, TYPE_ARRAY_LOWER_BOUND_TYPE,
+	TYPE_ARRAY_UPPER_BOUND_VALUE, TYPE_ARRAY_LOWER_BOUND_VALUE): New
+	macros.
+	(builtin_type_f_character, etc): Declare.
+	* value.h (VALUE_LITERAL_DATA, VALUE_SUBSTRING_START): Define.
+	* f-exp.y: New file, Fortran expression grammar.
+	* f-lang.c: New file, Fortran language support functions.
+	* f-lang.h: New file, Fortran language support declarations.
+	* f-typeprint.c: New file, Fortran type printing.
+	* f-valprint.c: New file, Fortran value printing.
+	* eval.c (evaluate_subexp): Add code for new expression opcodes,
+	fix wording of error message.
+	* gdbtypes.c (f77_create_literal_complex_type,
+	f77_create_literal_string_type): New functions.
+	* language.c (set_language_command): Add Fortran info.
+	(calc_f77_array_dims): New function.
+	* parse.c (length_of_subexp, prefixify_subexp): Add cases for new
+	expression opcodes.
+	* symfile.c (deduce_language_from_filename): Recognize .f and .F
+	as Fortran source files.
+	* valops.c (f77_value_literal_string, f77_value_substring,
+	f77_value_literal_complex): New functions.
+
 Fri Aug 19 13:35:01 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* c-typeprint.c (c_print_type):  Assume demangled arguments

@@ -80,9 +80,7 @@ enum type_code
   TYPE_CODE_FUNC,		/* Function type */
   TYPE_CODE_INT,		/* Integer type */
 
-  /* Floating type.  This is *NOT* a complex type.  Complex types, when
-     we have them, will have their own type code (or TYPE_CODE_ERROR if
-     we can parse a complex type but not manipulate it).  There are parts
+  /* Floating type.  This is *NOT* a complex type.  Beware, there are parts
      of GDB which bogusly assume that TYPE_CODE_FLT can mean complex.  */
   TYPE_CODE_FLT,
 
@@ -119,7 +117,12 @@ enum type_code
 
   /* Boolean type.  0 is false, 1 is true, and other values are non-boolean
      (e.g. FORTRAN "logical" used as unsigned int).  */
-  TYPE_CODE_BOOL
+  TYPE_CODE_BOOL,
+
+  /* Fortran */
+  TYPE_CODE_COMPLEX,		/* Complex float */
+  TYPE_CODE_LITERAL_COMPLEX,	/* */
+  TYPE_CODE_LITERAL_STRING	/* */
 };
 
 /* For now allow source to use TYPE_CODE_CLASS for C++ classes, as an
@@ -181,6 +184,17 @@ struct type
      of storage for a value of this type */
 
   unsigned length;
+
+  /* FIXME, these should probably be restricted to a Fortran-specific
+     field in some fashion.  */
+#define BOUND_CANNOT_BE_DETERMINED   5
+#define BOUND_BY_REF_ON_STACK        4
+#define BOUND_BY_VALUE_ON_STACK      3
+#define BOUND_BY_REF_IN_REG          2
+#define BOUND_BY_VALUE_IN_REG        1
+#define BOUND_SIMPLE                 0
+  int upper_bound_type;
+  int lower_bound_type;
 
   /* Every type is now associated with a particular objfile, and the
      type is allocated on the type_obstack for that objfile.  One problem
@@ -486,6 +500,17 @@ allocate_cplus_struct_type PARAMS ((struct type *));
    by force_to_range_type. */
 #define TYPE_DUMMY_RANGE(type) ((type)->vptr_fieldno)
 
+/* Moto-specific stuff for FORTRAN arrays */
+
+#define TYPE_ARRAY_UPPER_BOUND_TYPE(thistype) (thistype)->upper_bound_type
+#define TYPE_ARRAY_LOWER_BOUND_TYPE(thistype) (thistype)->lower_bound_type
+
+#define TYPE_ARRAY_UPPER_BOUND_VALUE(arraytype) \
+   (TYPE_FIELD_BITPOS((TYPE_FIELD_TYPE((arraytype),0)),1))
+
+#define TYPE_ARRAY_LOWER_BOUND_VALUE(arraytype) \
+   (TYPE_FIELD_BITPOS((TYPE_FIELD_TYPE((arraytype),0)),0))
+
 /* C++ */
 
 #define TYPE_VPTR_BASETYPE(thistype) (thistype)->vptr_basetype
@@ -604,6 +629,23 @@ extern struct type *builtin_type_chill_char;
 extern struct type *builtin_type_chill_long;
 extern struct type *builtin_type_chill_ulong;
 extern struct type *builtin_type_chill_real;
+
+/* Fortran (F77) types */
+
+extern struct type *builtin_type_f_character;
+extern struct type *builtin_type_f_integer;
+extern struct type *builtin_type_f_logical;
+extern struct type *builtin_type_f_logical_s1;
+extern struct type *builtin_type_f_logical_s2;
+extern struct type *builtin_type_f_integer; 
+extern struct type *builtin_type_f_integer_s2;
+extern struct type *builtin_type_f_real;
+extern struct type *builtin_type_f_real_s8;
+extern struct type *builtin_type_f_real_s16;
+extern struct type *builtin_type_f_complex_s8;
+extern struct type *builtin_type_f_complex_s16;
+extern struct type *builtin_type_f_complex_s32;
+extern struct type *builtin_type_f_void;
 
 /* Maximum and minimum values of built-in types */
 

@@ -466,7 +466,18 @@ length_of_subexp (expr, endpos)
       oplen = 3;
       break;
 
+    case OP_F77_LITERAL_COMPLEX:
+      oplen = 1; 
+      args = 2;
+      break; 
+
+    case OP_F77_SUBSTR:
+      oplen = 1; 
+      args = 2;
+      break; 
+
     case OP_FUNCALL:
+    case OP_F77_UNDETERMINED_ARGLIST:
       oplen = 3;
       args = 1 + longest_to_int (expr->elts[endpos - 2].longconst);
       break;
@@ -524,7 +535,9 @@ length_of_subexp (expr, endpos)
 
       /* Modula-2 */
    case MULTI_SUBSCRIPT:
-      oplen=3;
+      /* Fortran */
+   case MULTI_F77_SUBSCRIPT:
+      oplen = 3;
       args = 1 + longest_to_int (expr->elts[endpos- 2].longconst);
       break;
 
@@ -595,7 +608,18 @@ prefixify_subexp (inexpr, outexpr, inend, outbeg)
       oplen = 3;
       break;
 
+    case OP_F77_LITERAL_COMPLEX:
+      oplen = 1; 
+      args = 2; 
+      break; 
+
+   case OP_F77_SUBSTR:
+      oplen = 1; 
+      args = 2; 
+      break; 
+
     case OP_FUNCALL:
+    case OP_F77_UNDETERMINED_ARGLIST:
       oplen = 3;
       args = 1 + longest_to_int (inexpr->elts[inend - 2].longconst);
       break;
@@ -657,7 +681,9 @@ prefixify_subexp (inexpr, outexpr, inend, outbeg)
 
       /* Modula-2 */
    case MULTI_SUBSCRIPT:
-      oplen=3;
+      /* Fortran */
+   case MULTI_F77_SUBSCRIPT:
+      oplen = 3;
       args = 1 + longest_to_int (inexpr->elts[inend - 2].longconst);
       break;
 

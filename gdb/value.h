@@ -139,6 +139,28 @@ extern int value_fetch_lazy PARAMS ((value_ptr val));
 #define VALUE_REGNO(val) (val)->regno
 #define VALUE_OPTIMIZED_OUT(val) ((val)->optimized_out)
 
+/* This is probably not the right thing to do for in-gdb arrays.  FIXME */
+/* Overload the contents field to store literal data for 
+   arrays.  */
+
+#define VALUE_LITERAL_DATA(val)  ((val)->aligner.contents[0])
+
+/* Overload the frame address field to contain a pointer to 
+   the base substring, for F77 string substring operators.
+   We use this ONLY when doing operations of the form 
+   
+   FOO= 'hello' 
+   FOO(2:4) = 'foo'
+
+   In the above case VALUE_SUBSTRING_START would point to 
+   FOO(2) in the original FOO string. 
+
+   Depending on whether the base object is allocated in the 
+   inferior or the superior process, VALUE_SUBSTRING_START 
+   contains a ptr. to memory in the relevant area.  */ 
+
+#define VALUE_SUBSTRING_START(val) VALUE_FRAME(val)
+
 /* Convert a REF to the object referenced. */
 
 #define COERCE_REF(arg)    \
@@ -433,6 +455,10 @@ print_floating PARAMS ((char *valaddr, struct type *type, GDB_FILE *stream));
 extern int value_print PARAMS ((value_ptr val, GDB_FILE *stream, int format,
 				enum val_prettyprint pretty));
 
+extern void
+value_print_array_elements PARAMS ((value_ptr val, GDB_FILE* stream,
+				    int format, enum val_prettyprint pretty));
+
 extern value_ptr
 value_release_to_mark PARAMS ((value_ptr mark));
 
@@ -474,5 +500,11 @@ extern int baseclass_offset PARAMS ((struct type *, int, value_ptr, int));
 /* From valops.c */
 
 extern value_ptr call_function_by_hand PARAMS ((value_ptr, int, value_ptr *));
+
+extern value_ptr f77_value_literal_complex PARAMS ((value_ptr, value_ptr, int));
+
+extern value_ptr f77_value_literal_string PARAMS ((int, int, value_ptr *));
+
+extern value_ptr f77_value_substring PARAMS ((value_ptr, int, int));
 
 #endif	/* !defined (VALUE_H) */

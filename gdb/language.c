@@ -166,6 +166,7 @@ set_language_command (ignore, from_tty)
     printf_unfiltered ("c                Use the C language\n");
     printf_unfiltered ("c++              Use the C++ language\n");
     printf_unfiltered ("chill            Use the Chill language\n");
+    printf_unfiltered ("fortran          Use the Fortran language\n");
     printf_unfiltered ("modula-2         Use the Modula-2 language\n");
     /* Restore the silly string. */
     set_language(current_language->la_language);
