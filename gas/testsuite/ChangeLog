@@ -1,3 +1,10 @@
+2000-09-29  Hans-Peter Nilsson  <hp@axis.com>
+
+	* gas/cris/regprefix-err-1.s, gas/cris/rd-regprefix-1.s,
+	gas/cris/rd-regprefix-1.d, gas/cris/rd-regprefix-1b.d,
+	gas/cris/us-err-1.s, gas/cris/us-err-2.s, gas/cris/us-err-3.s: New.
+	* gas/cris/cris.exp: Loop run_dump_test over files matching rd-*.d.
+
 2000-09-28  Alan Modra  <alan@linuxcare.com.au>
 
 	* gas/hppa/parse/parse.exp: Replace "hppa*w-*-*" with "hppa*64*-*-*"
