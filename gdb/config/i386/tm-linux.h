@@ -31,6 +31,13 @@
 #include "i386/tm-i386.h"
 #include "tm-linux.h"
 
+/* Linux/ELF uses stabs-in-ELF with the DWARF register numbering
+   scheme by default, so we must redefine STAB_REG_TO_REGNUM.  This
+   messes up the floating-point registers for a.out, but there is not
+   much we can do about that.  */
+#undef STAB_REG_TO_REGNUM
+#define STAB_REG_TO_REGNUM(reg) i386_dwarf_reg_to_regnum ((reg))
+
 /* Use target_specific function to define link map offsets.  */
 extern struct link_map_offsets *i386_linux_svr4_fetch_link_map_offsets (void);
 #define SVR4_FETCH_LINK_MAP_OFFSETS() i386_linux_svr4_fetch_link_map_offsets ()
