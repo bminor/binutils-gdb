@@ -1,3 +1,9 @@
+Wed Nov 17 18:23:09 1993  Kung Hsu  (kung@cirdan.cygnus.com)
+
+	* eval.c(evaluate_subexp): to use unified search so type conversion 
+	operator works in calling method.
+	* valarith.c(value_x_binop, value_x_unop): same as above.
+
 Wed Nov 17 18:47:34 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* mipsread.c: Change use of ECOFF information to correspond to
