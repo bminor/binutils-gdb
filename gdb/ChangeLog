@@ -1,5 +1,8 @@
 Sat Jan  9 19:59:33 1993  Stu Grossman  (grossman at cygnus.com)
 
+	* Makefile.in:  Add info for paread.o.
+	* config/hppahpux.mh:  Add paread.o to NATDEPFILES.
+
 	* blockframe.c (frameless_look_for_prologue):  Correct the
 	comment.
 	* gdbtypes.h, gdbtypes.c:  Use const in decl of
