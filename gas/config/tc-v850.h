@@ -27,9 +27,19 @@
 #endif
 
 /* The target BFD architecture.  */
-#define TARGET_ARCH bfd_arch_v850
+#define TARGET_ARCH 		bfd_arch_v850
 
-#define TARGET_FORMAT "elf32-v850"
+#define TARGET_FORMAT 		"elf32-v850"
+
+#define TARGET_MACHINE 		0
+/* start-sanitize-v850e */
+#undef  TARGET_MACHINE
+#define TARGET_MACHINE 		bfd_mach_v850e
+/* end-sanitize-v850e */
+/* start-sanitize-v850eq */
+#undef  TARGET_MACHINE
+#define TARGET_MACHINE 		bfd_mach_v850eq
+/* end-sanitize-v850eq */
 
 #define MD_APPLY_FIX3
 #define md_operand(x)

@@ -31,8 +31,11 @@
 static bfd_reloc_code_real_type hold_cons_reloc;
 
 /* Set to TRUE if we want to be pedantic about signed overflows.  */
-static boolean warn_signed_overflows = FALSE;
+static boolean warn_signed_overflows   = FALSE;
 static boolean warn_unsigned_overflows = FALSE;
+
+/* Indicates the target processor type.  */
+static int     machine                 = TARGET_MACHINE;
 
 
 /* Structure to hold information about predefined registers.  */
@@ -763,7 +766,15 @@ md_show_usage (stream)
   FILE *stream;
 {
   fprintf (stream, "V850 options:\n");
-  fprintf (stream, "\t-wsigned_overflow  Warn if signed immediate values overflow\n");
+  fprintf (stream, "\t-wsigned_overflow    Warn if signed immediate values overflow\n");
+  fprintf (stream, "\t-wunsigned_overflow  Warn if unsigned immediate values overflow\n");
+  fprintf (stream, "\t-mv850               The code is targeted at the v850\n");
+/* start-sanitize-v850e */
+  fprintf (stream, "\t-mv850e              The code is targeted at the v850e\n");
+/* end-sanitize-v850e */
+/* start-sanitize-v850eq */
+  fprintf (stream, "\t-mv850eq             The code is targeted at the v850eq\n");
+/* end-sanitize-v850eq */
 } 
 
 int
@@ -771,18 +782,44 @@ md_parse_option (c, arg)
      int    c;
      char * arg;
 {
-  if (c == 'w' && strcmp (arg, "signed_overflow") == 0)
+  switch (c)
     {
-      warn_signed_overflows = TRUE;
-      return 1;
-    }
+    case 'w':
+      if (strcmp (arg, "signed_overflow") == 0)
+	{
+	  warn_signed_overflows = TRUE;
+	  return 1;
+	}
+      else if (strcmp (arg, "unsigned_overflow") == 0)
+	{
+	  warn_unsigned_overflows = TRUE;
+	  return 1;
+	}
+      break;
 
-  if (c == 'w' && strcmp (arg, "unsigned_overflow") == 0)
-    {
-      warn_unsigned_overflows = TRUE;
-      return 1;
+    case 'm':
+      if (strcmp (arg, "v850") == 0)
+	{
+	  machine = 0;
+	  return 1;
+	}
+/* start-sanitize-v850e */
+      else if (strcmp (arg, "v850e") == 0)
+	{
+	  machine = bfd_mach_v850e;
+	  return 1;
+	}
+/* end-sanitize-v850e */
+/* start-sanitize-v850eq */
+      else if (strcmp (arg, "v850eq") == 0)
+	{
+	  machine = bfd_mach_v850eq;
+	  return 1;
+	}
+/* end-sanitize-v850eq */
+      break;
     }
-
+  
   return 0;
 }
 
@@ -907,14 +944,8 @@ md_begin ()
 	}
       op++;
     }
-  
-  bfd_set_arch_mach (stdoutput, TARGET_ARCH, 0);
-  /* start-sanitize-v850e */
-  bfd_set_arch_mach (stdoutput, TARGET_ARCH, bfd_mach_v850e);
-  /* end-sanitize-v850e */
-  /* start-sanitize-v850eq */
-  bfd_set_arch_mach (stdoutput, TARGET_ARCH, bfd_mach_v850eq);
-  /* end-sanitize-v850eq */
+
+  bfd_set_arch_mach (stdoutput, TARGET_ARCH, machine);
 
   applicable = bfd_applicable_section_flags (stdoutput);
 
