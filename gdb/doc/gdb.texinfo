@@ -2171,7 +2171,7 @@ above (or no argument) specifying where to break.  @xref{Conditions,
 @kindex tbreak
 Set a breakpoint enabled only for one stop.  @var{args} are the
 same as for the @code{break} command, and the breakpoint is set in the same
-way, but the breakpoint is automatically disabled after the first time your
+way, but the breakpoint is automatically deleted after the first time your
 program stops there.  @xref{Disabling, ,Disabling breakpoints}.
 
 @item rbreak @var{regex}
