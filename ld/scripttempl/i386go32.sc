@@ -21,7 +21,7 @@ SECTIONS
     *(.const*)
     *(.ro*)
     ${RELOCATING+*(.gnu.linkonce.r*)}
-    ${RELOCATING+etext  =  . ; _etext = .};
+    ${RELOCATING+etext  =  . ; _etext = . ;}
     ${RELOCATING+. = ALIGN(${SEGMENT_SIZE});}
   }
   .data ${RELOCATING+ ${DATA_ALIGNMENT}} : {
@@ -40,7 +40,7 @@ SECTIONS
     ${RELOCATING+LONG(0);}
 
     ${RELOCATING+*(.gnu.linkonce.d*)}
-    ${RELOCATING+edata  =  . ; _edata = .};
+    ${RELOCATING+edata  =  . ; _edata = . ;}
     ${RELOCATING+. = ALIGN(${SEGMENT_SIZE});}
   }
   ${CONSTRUCTING+${RELOCATING-$CTOR}}
@@ -49,7 +49,7 @@ SECTIONS
   { 					
     *(.bss)
     *(COMMON)
-    ${RELOCATING+ end = . ; _end = .};
+    ${RELOCATING+ end = . ; _end = . ;}
     ${RELOCATING+ . = ALIGN(${SEGMENT_SIZE});}
   }
 }

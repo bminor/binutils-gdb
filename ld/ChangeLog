@@ -1,3 +1,7 @@
+2000-02-27  Mark Elbrecht  <snowball3@bigfoot.com>
+
+	* scripttempl/i386go32.sc: Move misplaced semicolons.
+
 2000-02-25  Ian Lance Taylor  <ian@zembu.com>
 
 	* Makefile.am (ALL_EMULATIONS): Remove ehppaelf.o.
