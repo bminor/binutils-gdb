@@ -81,9 +81,9 @@ gdb-all.texi: ${SFILES_DOCDIR}
 
 # GDB MANUAL: TeX dvi file
 gdb.dvi : gdb-all.texi rdl-apps.texi
-	TEXINPUTS=${TEXIDIR}:$$TEXINPUTS tex gdb-all.texi
+	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex gdb-all.texi
 	texindex gdb-all.??
-	TEXINPUTS=${TEXIDIR}:$$TEXINPUTS tex gdb-all.texi
+	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex gdb-all.texi
 	mv gdb-all.dvi gdb.dvi
 	rm -f gdb-all.?? gdb-all.???
 
@@ -96,9 +96,9 @@ gdb.info: gdb-all.texi
 
 # GDB INTERNALS MANUAL: TeX dvi file
 gdbint.dvi : gdbint.texinfo
-	TEXINPUTS=${TEXIDIR}:$$TEXINPUTS tex gdbint.texinfo
+	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex gdbint.texinfo
 	texindex gdbint.??
-	TEXINPUTS=${TEXIDIR}:$$TEXINPUTS tex gdbint.texinfo
+	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex gdbint.texinfo
 	rm -f gdbint.?? gdbint.aux gdbint.cps gdbint.fns gdbint.kys \
 		gdbint.log gdbint.pgs gdbint.toc gdbint.tps gdbint.vrs
 
