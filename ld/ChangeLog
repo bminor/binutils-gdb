@@ -1,3 +1,30 @@
+Thu Jun  2 17:24:08 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	Add support for SunOS shared libraries.
+	* aout.sc: Don't define __DYNAMIC here.  Add new sections used by
+	shared library support code.
+	* emultempl/sunos.em: New file.
+	* emulparams/sun4.sh (TEMPLATE_NAME): Define as sunos.
+	* Makefile.in (esun4.c): Depend upon sunos.em, not generic.em.
+
+	* ldlang.c: Minor formatting cleanups.
+	(lang_for_each_input_file): New function.
+	* ldlang.h (lang_for_each_input_file): Declare.
+
+	* ldfile.h (search_dirs_type): Move from ldfile.c, and add cmdline
+	field.
+	(search_head): Declare.
+	(ldfile_add_library_path): Add new cmdline argument in prototype.
+	* ldfile.c (search_head): Make non-static.
+	(search_dirs_type): Move to ldfile.h.
+	(ldfile_add_library_path): Accept cmdline argument, and save it.
+	* lexsup.c (parse_args): Pass true for new cmdline argument of
+	ldfile_add_library_path.
+	(set_default_dirlist): Likewise.
+	* ldmain.c (check_for_scripts_dir): Pass false for new cmdline
+	argument of ldfile_add_library_path.
+	* ldgram.y (ifile_p1): Likewise.
+
 Wed Jun  1 14:24:08 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ldlang.h (lang_input_statement_type): Remove fields subfiles,

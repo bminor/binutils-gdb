@@ -252,7 +252,7 @@ GENSCRIPTS = $(SHELL) $(srcdir)/genscripts.sh ${srcdir} ${libdir} ${host_alias} 
 GEN_DEPENDS = $(srcdir)/genscripts.sh $(srcdir)/emultempl/stringify.sed
 
 esun4.c: $(srcdir)/emulparams/sun4.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/sunos.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} sun4
 esun3.c: $(srcdir)/emulparams/sun3.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
