@@ -1,3 +1,8 @@
+2002-03-22  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/default.exp: Add test for gcore.
+	* gdb.base/help.exp: Add test for gcore.
+
 2002-03-06  Fred Fish  <fnf@redhat.com>
 
 	* gdb.base/funcargs.c:  Remove extraneous ';' character.

@@ -259,6 +259,27 @@ gdb_test "finish" "The program is not running." "finish"
 # The message here comes from the regexp library, not gdb, and so can
 # vary on different systems.
 gdb_test "forward-search" "No previous regular expression.*|There is no previous regular expression.*" "forward-search"
+#test gcore
+send_gdb "gcore\n"
+gdb_expect {
+    -re "You can\'t do that without a process to debug.*$gdb_prompt $" {
+	pass "gcore"
+    }
+    -re "Undefined command: .*$gdb_prompt $" {
+	pass "gcore"
+    }
+    default { fail "gcore" }
+}
+send_gdb "generate-core-file\n"
+gdb_expect {
+    -re "You can\'t do that without a process to debug.*$gdb_prompt $" {
+	pass "generate-core-file"
+    }
+    -re "Undefined command: .*$gdb_prompt $" {
+	pass "generate-core-file"
+    }
+    default { fail "generate-core-file" }
+}
 #test help "h" abbreviation
 gdb_test "h" "List of classes of commands:(\[^\r\n\]*\[\r\n\])+aliases -- Aliases of other commands(\[^\r\n\]*\[\r\n\])+breakpoints -- Making program stop at certain points(\[^\r\n\]*\[\r\n\])+data -- Examining data(\[^\r\n\]*\[\r\n\])+files -- Specifying and examining files(\[^\r\n\]*\[\r\n\])+obscure -- Obscure features(\[^\r\n\]*\[\r\n\])+running -- Running the program(\[^\r\n\]*\[\r\n\])+stack -- Examining the stack(\[^\r\n\]*\[\r\n\])+status -- Status inquiries(\[^\r\n\]*\[\r\n\])+support -- Support facilities(\[^\r\n\]*\[\r\n\])+user-defined -- User-defined commands(\[^\r\n\]*\[\r\n\])+Type \"help\" followed by a class name for a list of commands in that class.(\[^\r\n\]*\[\r\n\])+Type \"help\" followed by command name for full documentation.(\[^\r\n\]*\[\r\n\])+Command name abbreviations are allowed if unambiguous." "help \"h\" abbreviation"
 #test help
