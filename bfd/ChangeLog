@@ -1,6 +1,8 @@
 Thu Jul 16 16:28:09 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
 
-	* Makefile.dos: removed rcsid.
+	* Makefile.in: merged changes from progressive, removed rcsid.
+
+	* archive.c, Makefile.dos: removed rcsid.
 
 Thu Jul 16 08:08:25 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
