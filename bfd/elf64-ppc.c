@@ -2872,9 +2872,6 @@ struct ppc_link_hash_table
      select suitable defaults for the stub group size.  */
   unsigned int has_14bit_branch;
 
-  /* Set if we detect a reference undefined weak symbol.  */
-  unsigned int have_undefweak;
-
   /* Incremented every time we size stubs.  */
   unsigned int stub_iteration;
 
@@ -4355,10 +4352,6 @@ func_desc_adjust (struct elf_link_hash_entry *h, void *inf)
   if (!fh->is_func)
     return TRUE;
 
-  if (fh->elf.root.type == bfd_link_hash_undefweak
-      && (fh->elf.elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR))
-    htab->have_undefweak = TRUE;
-
   for (ent = fh->elf.plt.plist; ent != NULL; ent = ent->next)
     if (ent->plt.refcount > 0)
       break;
@@ -4525,13 +4518,8 @@ ppc64_elf_func_desc_adjust (bfd *obfd ATTRIBUTE_UNUSED,
 
   if (htab->sfpr->size == 0)
     {
-      if (!htab->have_undefweak)
-	{
-	  _bfd_strip_section_from_output (info, htab->sfpr);
-	  return TRUE;
-	}
-
-      htab->sfpr->size = 4;
+      _bfd_strip_section_from_output (info, htab->sfpr);
+      return TRUE;
     }
 
   p = bfd_alloc (htab->elf.dynobj, htab->sfpr->size);
@@ -4559,11 +4547,8 @@ ppc64_elf_func_desc_adjust (bfd *obfd ATTRIBUTE_UNUSED,
       bfd_put_32 (htab->elf.dynobj, LFD_FR0_0R1 + fpr + stackoff, p);
       p += 4;
     }
-  if (lowest_restf <= MAX_SAVE_FPR
-      || htab->sfpr->size == 4)
-    {
-      bfd_put_32 (htab->elf.dynobj, BLR, p);
-    }
+  if (lowest_restf <= MAX_SAVE_FPR)
+    bfd_put_32 (htab->elf.dynobj, BLR, p);
 
   return TRUE;
 }
@@ -7988,28 +7973,16 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		}
 	    }
 
+	  /* NOP out calls to undefined weak functions.
+	     We can thus call a weak function without first
+	     checking whether the function is defined.  */
 	  if (h != NULL
 	      && h->root.type == bfd_link_hash_undefweak
 	      && relocation == 0
 	      && rel->r_addend == 0)
 	    {
-	      /* Tweak calls to undefined weak functions to point at a
-		 blr.  We can thus call a weak function without first
-		 checking whether the function is defined.  We have a
-		 blr at the end of .sfpr.  */
-	      BFD_ASSERT (htab->sfpr->size != 0);
-	      relocation = (htab->sfpr->size - 4
-			    + htab->sfpr->output_offset
-			    + htab->sfpr->output_section->vma);
-	      from = (rel->r_offset
-		      + input_section->output_offset
-		      + input_section->output_section->vma);
-
-	      /* But let's not be silly about it.  If the blr isn't in
-		 reach, just go to the next instruction.  */
-	      if (relocation - from + (1 << 25) >= (1 << 26)
-		  || htab->sfpr->size == 0)
-		relocation = from + 4;
+	      bfd_put_32 (output_bfd, NOP, contents + rel->r_offset);
+	      continue;
 	    }
 	  break;
 	}

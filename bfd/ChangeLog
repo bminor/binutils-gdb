@@ -1,5 +1,10 @@
 2004-08-09  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-ppc.c (struct ppc_link_hash_table): Remove have_undefweak.
+	(func_desc_adjust): Don't set have_undefweak.
+	(ppc64_elf_func_desc_adjust): Don't add an extr nop to sfpr.
+	(ppc64_elf_relocate_section): NOP out calls to undefweak functions.
+
 	* elf64-ppc.c (struct ppc_link_hash_entry): Make "oh" a
 	"struct ppc_link_hash_entry *".  Adjust all references.
 	(ppc64_elf_hide_symbol): Correct a comment.
