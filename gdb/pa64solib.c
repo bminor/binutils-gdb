@@ -923,7 +923,7 @@ threshold in megabytes.  Is ignored when using `sharedlibrary'.",
 
 /* Get some HPUX-specific data from a shared lib.  */
 CORE_ADDR
-so_lib_thread_start_addr (struct so_list *so)
+pa64_solib_thread_start_addr (struct so_list *so)
 {
   return so->pa64_solib_desc.tls_start_addr;
 }
