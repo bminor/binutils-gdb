@@ -1,3 +1,9 @@
+Fri Mar 20 02:26:43 1998  Richard Henderson  <rth@cygnus.com>
+
+	* elf32-sparc.c (elf32_sparc_adjust_dynamic_symbol): Revert
+	part of Feb 22 change controling when to override the existing
+	symbol with the .plt entry.
+
 Wed Mar 18 09:26:25 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config.bfd (targ_cpu): Add thumb-pe target.
