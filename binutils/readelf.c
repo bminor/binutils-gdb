@@ -161,7 +161,7 @@ print_mode;
 
 /* Forward declarations for dumb compilers.  */
 static void		  print_vma		      PARAMS ((bfd_vma, print_mode));
-static void		  print_symbol		      PARAMS ((int, char *));
+static void		  print_symbol		      PARAMS ((int, const char *));
 static bfd_vma (*         byte_get)                   PARAMS ((unsigned char *, int));
 static bfd_vma            byte_get_little_endian      PARAMS ((unsigned char *, int));
 static bfd_vma            byte_get_big_endian         PARAMS ((unsigned char *, int));
@@ -406,7 +406,7 @@ byte_get_little_endian (field, size)
     case 8:
       /* We want to extract data from an 8 byte wide field and
 	 place it into a 4 byte wide field.  Since this is a little
-	 endian source we can juts use the 4 byte extraction code.  */
+	 endian source we can just use the 4 byte extraction code.  */
       /* Fall through.  */
 #endif
     case 4:
@@ -535,10 +535,10 @@ print_vma (vma, mode)
 static void
 print_symbol (width, symbol)
      int width;
-     char * symbol;
+     const char * symbol;
 {
   if (do_wide)
-    printf (symbol);
+    printf ("%s", symbol);
   else if (width < 0)
     printf ("%-*.*s", width, width, symbol);
   else
@@ -1166,7 +1166,35 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	      printf (is_32bit_elf ? "   " : " ");
 
 	      if (psym->st_name == 0)
-		print_symbol (22, SECTION_NAME (section_headers + psym->st_shndx));
+		{
+		  const char *sec_name = "<null>";
+		  char name_buf[40];
+
+		  if (ELF_ST_TYPE (psym->st_info) == STT_SECTION)
+		    {
+		      bfd_vma sec_index = (bfd_vma) -1;
+
+		      if (psym->st_shndx < SHN_LORESERVE)
+			sec_index = psym->st_shndx;
+		      else if (psym->st_shndx > SHN_LORESERVE)
+			sec_index = psym->st_shndx - (SHN_HIRESERVE + 1
+						      - SHN_LORESERVE);
+
+		      if (sec_index != (bfd_vma) -1)
+			sec_name = SECTION_NAME (section_headers + sec_index);
+		      else if (psym->st_shndx == SHN_ABS)
+			sec_name = "ABS";
+		      else if (psym->st_shndx == SHN_COMMON)
+			sec_name = "COMMON";
+		      else
+			{
+			  sprintf (name_buf, "<section 0x%x>",
+				   (unsigned int) psym->st_shndx);
+			  sec_name = name_buf;
+			}
+		    }
+		  print_symbol (22, sec_name);
+		}
 	      else if (strtab == NULL)
 		printf (_("<string table index %3ld>"), psym->st_name);
 	      else
@@ -3414,6 +3442,7 @@ process_section_headers (file)
   dynamic_symbols = NULL;
   dynamic_strings = NULL;
   dynamic_syminfo = NULL;
+  symtab_shndx_hdr = NULL;
 
   for (i = 0, section = section_headers;
        i < elf_header.e_shnum;
@@ -7740,8 +7769,8 @@ read_and_display_attr_value (attribute, form, data, cu_offset, pointer_size)
       break;
 
     case DW_FORM_strp:
-      printf (_(" (indirect string, offset: 0x%lx): "), uvalue);
-      printf (fetch_indirect_string (uvalue));
+      printf (_(" (indirect string, offset: 0x%lx): %s"),
+	      uvalue, fetch_indirect_string (uvalue));
       break;
 
     case DW_FORM_indirect:
@@ -8380,7 +8409,11 @@ display_debug_frames (section, start, file)
       length = byte_get (start, 4); start += 4;
 
       if (length == 0)
-	return 1;
+	{
+	  printf ("\n%08lx ZERO terminator\n\n",
+		    (unsigned long)(saved_start - section_start));
+	  return 1;
+	}
 
       if (length == 0xffffffff)
 	{
@@ -8534,6 +8567,8 @@ display_debug_frames (section, start, file)
 	    encoded_ptr_size = size_of_encoded_value (fc->fde_encoding);
 
 	  fc->pc_begin = byte_get (start, encoded_ptr_size);
+	  if ((fc->fde_encoding & 0x70) == DW_EH_PE_pcrel)
+	    fc->pc_begin += section->sh_addr + (start - section_start);
 	  start += encoded_ptr_size;
 	  fc->pc_range = byte_get (start, encoded_ptr_size);
 	  start += encoded_ptr_size;
@@ -8713,6 +8748,8 @@ display_debug_frames (section, start, file)
 
 	    case DW_CFA_set_loc:
 	      vma = byte_get (start, encoded_ptr_size);
+	      if ((fc->fde_encoding & 0x70) == DW_EH_PE_pcrel)
+		vma += section->sh_addr + (start - section_start);
 	      start += encoded_ptr_size;
 	      if (do_debug_frames_interp)
 		frame_display_row (fc, &need_col_headers, &max_regs);

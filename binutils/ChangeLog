@@ -1,3 +1,15 @@
+2002-11-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* readelf.c (byte_get_little_endian): Comment typo fix.
+	(print_symbol): Constify "symbol" arg.  Don't pass "symbol" to printf
+	as the format string.
+	(dump_relocations): Correct section sym names.
+	(process_section_headers): Clear symtab_shndx_hdr.
+	(read_and_display_attr_value): Don't pass indirect string to printf
+	as the format string.
+	(display_debug_frames): Indicate when zero terminator found.  Decode
+	DW_EH_PE_pcrel addresses.
+
 2002-10-23  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
 	* configure.in: Define SKIP_ZEROES as 32 for tic4x target in
