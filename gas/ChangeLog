@@ -27,6 +27,11 @@
 	* config/tc-s390.c (md_gather_operands): Emit dwarf2 line-number
 	information for instructions.
 
+2002-05-02  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* config/tc-arm.c (thumb_add_sub): Do not convert a subtract of
+	zero into an add of zero - it is not the same.
+
 2002-04-27  Alan Modra  <amodra@bigpond.net.au>
 
 	Merge from mainline.
