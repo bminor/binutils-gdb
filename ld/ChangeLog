@@ -1,3 +1,17 @@
+Wed Feb 14 18:49:01 1996  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* configure.in: Redo emulation handling so that each emulation
+	searches the correct tool directory, based on the target alias.
+	For example, "configure --enable-targets=m68k-coff i386-linux"
+	will search /usr/local/i386-linux/lib for linux and
+	/usr/local/m68k-coff/lib for m68k-coff.
+	* configure: Rebuild.
+	* configure.tgt: Add special tdir settings for Linux.
+	* Makefile.in: Add @TDIRS@.  Pass "$(tdir_EMUL)" to ${GENSCRIPTS}
+	for each eEMUL.c target.
+	* genscripts.sh: Accept specific alias as 9th argument, and use it
+	in LIB_PATH.
+
 Wed Feb 14 16:38:36 1996  Martin Anantharaman  <martin@mail.imech.uni-duisburg.de>
 
 	* ldlang.c (lang_set_startof): Don't do anything for a
@@ -16,6 +30,8 @@ Wed Feb 14 16:38:36 1996  Martin Anantharaman  <martin@mail.imech.uni-duisburg.d
 	(em68kpsos.c): New target.
 
 Wed Feb 14 11:09:25 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.tgt (*-*-ieee*): New target; use vanilla.
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_before_parse): Strip
 	`:foo' from ${ARCH}.

@@ -1080,57 +1080,53 @@ fi
 
 # target-specific stuff:
 
-# Canonicalize the secondary target names.
-if test -n "$enable_targets"; then
-    for targ in `echo $enable_targets | sed 's/,/ /g'`
-    do
-	result=`$ac_config_sub $targ 2>/dev/null`
-	if test -n "$result"; then
-	    canon_targets="$canon_targets $result"
-	else
-	    # Allow targets that config.sub doesn't recognize, like "all".
-	    canon_targets="$canon_targets $targ"
-	fi
-    done
-fi
-
-all_targets=false
+all_targets=
 EMUL=
 all_emuls=
+TDIRS=
 
-for targ in $target $canon_targets
+for targ_alias in `echo $target_alias $enable_targets | sed 's/,/ /g'`
 do
-    if test "x$targ" = "xall"; then
-        all_targets=true
+  if test "$targ_alias" = "all"; then
+    all_targets=true
+  else
+    # Canonicalize the secondary target names.
+    result=`$ac_config_sub $targ_alias 2>/dev/null`
+    if test -n "$result"; then
+	targ=$result
     else
-	. ${srcdir}/configure.tgt
-
-	if test "x$targ" = "x$target"; then
-	    EMUL=${targ_emul}
-	fi
-
-	all_emuls="${all_emuls} ${targ_emul} ${targ_extra_emuls}"
+	targ=$targ_alias
     fi
+
+    . ${srcdir}/configure.tgt
+
+    if test "$targ" = "$target"; then
+      EMUL=$targ_emul
+    fi
+
+    for i in $targ_emul $targ_extra_emuls; do
+	case " $all_emuls " in
+	*" e${i}.o "*) ;;
+	*)
+	  all_emuls="$all_emuls e${i}.o"
+	  eval result=\$tdir_$i
+	  test -z "$result" && result=$targ_alias
+	  TDIRS="$TDIRS\\
+tdir_$i=$result"
+	  ;;
+	esac
+    done
+  fi
 done
 
 
 
-if test x${all_targets} = xfalse; then
-    # uniq the list.
-    f=""
-    for i in $all_emuls ; do
-	case " $f " in
-	*" e$i.o "*) ;;
-	*) f="$f e$i.o" ;;
-	esac
-    done
 
-    EMULATION_OFILES="$f"
-
-else	# all_targets is true
-    EMULATION_OFILES='$(ALL_EMULATIONS)'
-fi	# all_targets is true
-
+if test x${all_targets} = xtrue; then
+  EMULATION_OFILES='$(ALL_EMULATIONS)'
+else
+  EMULATION_OFILES=$all_emuls
+fi
 
 
 trap '' 1 2 15
@@ -1273,6 +1269,7 @@ s%@NATIVE_LIB_DIRS@%$NATIVE_LIB_DIRS%g
 s%@BFDLIB@%$BFDLIB%g
 s%@CPP@%$CPP%g
 s%@EMUL@%$EMUL%g
+s%@TDIRS@%$TDIRS%g
 s%@EMULATION_OFILES@%$EMULATION_OFILES%g
 
 CEOF
