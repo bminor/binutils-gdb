@@ -1717,14 +1717,7 @@ mips_mdebug_frame_base_sniffer (struct frame_info *next_frame)
 static struct mips_frame_cache *
 mips_insn16_frame_cache (struct frame_info *next_frame, void **this_cache)
 {
-  mips_extra_func_info_t proc_desc;
   struct mips_frame_cache *cache;
-  struct gdbarch *gdbarch = get_frame_arch (next_frame);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  /* r0 bit means kernel trap */
-  int kernel_trap;
-  /* What registers have been saved?  Bitmasks.  */
-  unsigned long gen_mask, float_mask;
 
   if ((*this_cache) != NULL)
     return (*this_cache);
@@ -1732,7 +1725,7 @@ mips_insn16_frame_cache (struct frame_info *next_frame, void **this_cache)
   (*this_cache) = cache;
   cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
 
-  /* Synthesize a proc descriptor.  */
+  /* Analyze the function prologue.  */
   {
     const CORE_ADDR pc = frame_pc_unwind (next_frame);
     CORE_ADDR start_addr;
@@ -1740,8 +1733,12 @@ mips_insn16_frame_cache (struct frame_info *next_frame, void **this_cache)
     find_pc_partial_function (pc, NULL, &start_addr, NULL);
     if (start_addr == 0)
       start_addr = heuristic_proc_start (pc);
+    /* We can't analyze the prologue if we couldn't find the begining
+       of the function.  */
+    if (start_addr == 0)
+      return cache;
 
-    proc_desc = heuristic_proc_desc (start_addr, pc, next_frame, *this_cache);
+    heuristic_proc_desc (start_addr, pc, next_frame, *this_cache);
   }
   
   /* SP_REGNUM, contains the value and not the address.  */
@@ -1822,14 +1819,7 @@ mips_insn16_frame_base_sniffer (struct frame_info *next_frame)
 static struct mips_frame_cache *
 mips_insn32_frame_cache (struct frame_info *next_frame, void **this_cache)
 {
-  mips_extra_func_info_t proc_desc;
   struct mips_frame_cache *cache;
-  struct gdbarch *gdbarch = get_frame_arch (next_frame);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  /* r0 bit means kernel trap */
-  int kernel_trap;
-  /* What registers have been saved?  Bitmasks.  */
-  unsigned long gen_mask, float_mask;
 
   if ((*this_cache) != NULL)
     return (*this_cache);
@@ -1838,7 +1828,7 @@ mips_insn32_frame_cache (struct frame_info *next_frame, void **this_cache)
   (*this_cache) = cache;
   cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
 
-  /* Synthesize a proc descriptor.  */
+  /* Analyze the function prologue.  */
   {
     const CORE_ADDR pc = frame_pc_unwind (next_frame);
     CORE_ADDR start_addr;
@@ -1846,16 +1836,14 @@ mips_insn32_frame_cache (struct frame_info *next_frame, void **this_cache)
     find_pc_partial_function (pc, NULL, &start_addr, NULL);
     if (start_addr == 0)
       start_addr = heuristic_proc_start (pc);
+    /* We can't analyze the prologue if we couldn't find the begining
+       of the function.  */
+    if (start_addr == 0)
+      return cache;
 
-    proc_desc = heuristic_proc_desc (start_addr, pc, next_frame, *this_cache);
+    heuristic_proc_desc (start_addr, pc, next_frame, *this_cache);
   }
   
-  if (proc_desc == NULL)
-    /* I'm not sure how/whether this can happen.  Normally when we
-       can't find a proc_desc, we "synthesize" one using
-       heuristic_proc_desc and set the saved_regs right away.  */
-    return cache;
-
   /* SP_REGNUM, contains the value and not the address.  */
   trad_frame_set_value (cache->saved_regs, NUM_REGS + MIPS_SP_REGNUM, cache->base);
 
