@@ -4709,7 +4709,8 @@ Immediate data @var{xx}.
 @cindex Z8000 directives
 @cindex directives, Z8000
 The Z8000 port of as includes these additional assembler directives,
-for compatibility with other Z8000 assemblers:
+for compatibility with other Z8000 assemblers.  As shown, these do not
+begin with @samp{.} (unlike the ordinary as directives).
 
 @table @code
 @item segm

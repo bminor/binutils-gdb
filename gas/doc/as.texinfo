@@ -5369,7 +5369,8 @@ _CHAPSEC__(1+_GENERIC__) Assembler Directives for the Z8000
 @cindex Z8000 directives
 @cindex directives, Z8000
 The Z8000 port of _AS__ includes these additional assembler directives,
-for compatibility with other Z8000 assemblers:
+for compatibility with other Z8000 assemblers.  As shown, these do not
+begin with @samp{.} (unlike the ordinary _AS__ directives).
 
 @table @code
 @item segm
