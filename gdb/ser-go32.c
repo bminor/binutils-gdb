@@ -1,12 +1,12 @@
 /* Remote serial interface for local (hardwired) serial ports for GO32.
-   Copyright 1992, 1993, 2000 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 2000, 2001 Free Software Foundation, Inc.
 
    Contributed by Nigel Stephens, Algorithmics Ltd. (nigel@algor.co.uk).
 
-   This version uses DPMI interrupts to handle buffered i/o 
+   This version uses DPMI interrupts to handle buffered i/o
    without the separate "asynctsr" program.
 
-   This file is part of GDB.  
+   This file is part of GDB.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 #include "defs.h"
 #include "gdbcmd.h"
 #include "serial.h"
+#include "gdb_string.h"
 
 
 /*
@@ -127,7 +128,7 @@
 #define	MSR_DDSR	0x02
 #define	MSR_DCTS	0x01
 
-#include <string.h>
+#include <time.h>
 #include <dos.h>
 #include <go32.h>
 #include <dpmi.h>
@@ -138,9 +139,6 @@ typedef unsigned long u_long;
 
 /* input buffer size */
 #define CBSIZE	4096
-
-/* return raw 18Hz clock count */
-extern long rawclock (void);
 
 #define RAWHZ	18
 
@@ -356,24 +354,23 @@ dos_comisr (int irq)
 }
 
 #define ISRNAME(x) dos_comisr##x
-#define ISR(x) static void ISRNAME(x)() {dos_comisr(x);}
+#define ISR(x) static void ISRNAME(x)(void) {dos_comisr(x);}
 
 ISR (0) ISR (1) ISR (2) ISR (3)
 ISR (4) ISR (5) ISR (6) ISR (7)
 
-     typedef void (*isr_t) ();
+typedef void (*isr_t) (void);
 
-     static isr_t isrs[NINTR] =
-     {
+static isr_t isrs[NINTR] =
+  {
        ISRNAME (0), ISRNAME (1), ISRNAME (2), ISRNAME (3),
        ISRNAME (4), ISRNAME (5), ISRNAME (6), ISRNAME (7)
-};
+  };
 
 
 
-     static struct intrupt *
-       dos_hookirq (irq)
-     unsigned int irq;
+static struct intrupt *
+dos_hookirq (unsigned int irq)
 {
   struct intrupt *intr;
   unsigned int vec;
@@ -412,7 +409,8 @@ ISR (4) ISR (5) ISR (6) ISR (7)
   intr->new_pmhandler.pm_offset = (u_long) isr;
   _go32_dpmi_allocate_iret_wrapper (&intr->new_pmhandler);
 
-  if (_go32_dpmi_set_protected_mode_interrupt_vector (vec, &intr->new_pmhandler))
+  if (_go32_dpmi_set_protected_mode_interrupt_vector (vec,
+						      &intr->new_pmhandler))
     {
       return 0;
     }
@@ -507,7 +505,8 @@ ok:
   outb (port, com_ier, 0);
 
   /* tentatively enable 16550 fifo, and see if it responds */
-  outb (port, com_fifo, FIFO_ENABLE | FIFO_RCV_RST | FIFO_XMT_RST | FIFO_TRIGGER);
+  outb (port, com_fifo,
+	FIFO_ENABLE | FIFO_RCV_RST | FIFO_XMT_RST | FIFO_TRIGGER);
   sleep (1);
   port->fifo = ((inb (port, com_iir) & IIR_FIFO_MASK) == IIR_FIFO_MASK);
 
@@ -601,13 +600,13 @@ dos_close (serial_t scb)
 
 
 static int
-dos_noop (serial_t scb ATTRIBUTE_UNUSED)
+dos_noop (serial_t scb)
 {
   return 0;
 }
 
 static void
-dos_raw (serial_t scb ATTRIBUTE_UNUSED)
+dos_raw (serial_t scb)
 {
   /* Always in raw mode */
 }
@@ -667,7 +666,7 @@ dos_set_tty_state (serial_t scb, serial_ttystate ttystate)
 
 static int
 dos_noflush_set_tty_state (serial_t scb, serial_ttystate new_ttystate,
-			   serial_ttystate old_ttystate ATTRIBUTE_UNUSED)
+			   serial_ttystate old_ttystate)
 {
   struct dos_ttystate *state;
 
@@ -689,9 +688,8 @@ dos_flush_input (serial_t scb)
 }
 
 static void
-dos_print_tty_state (serial_t scb ATTRIBUTE_UNUSED,
-		     serial_ttystate ttystate ATTRIBUTE_UNUSED,
-		     struct ui_file *stream ATTRIBUTE_UNUSED)
+dos_print_tty_state (serial_t scb, serial_ttystate ttystate,
+		     struct ui_file *stream)
 {
   /* Nothing to print */
   return;
@@ -705,7 +703,7 @@ dos_baudconv (int rate)
   if (rate <= 0)
     return -1;
 
-#define divrnd(n, q)	(((n) * 2 / (q) + 1) / 2)	/* divide and round off */
+#define divrnd(n, q)	(((n) * 2 / (q) + 1) / 2) /* divide and round off */
   x = divrnd (COMTICK, rate);
   if (x <= 0)
     return -1;
@@ -864,7 +862,7 @@ static struct serial_ops dos_ops =
 
 
 static void
-dos_info (char *arg ATTRIBUTE_UNUSED, int from_tty ATTRIBUTE_UNUSED)
+dos_info (char *arg, int from_tty)
 {
   struct dos_ttystate *port;
 #ifdef DOS_STATS

@@ -29,11 +29,12 @@
 #include "floatformat.h"
 #include "buildsym.h"
 #include "i387-nat.h"
+#include "value.h"
 #include "regcache.h"
+#include "gdb_string.h"
 
 #include <stdio.h>		/* required for __DJGPP_MINOR__ */
 #include <stdlib.h>
-#include <string.h>
 #include <errno.h>
 #include <unistd.h>
 #include <io.h>
@@ -120,30 +121,32 @@ typedef struct {
   int redirected;
 } cmdline_t;
 
-void redir_cmdline_delete (cmdline_t *ptr) {ptr->redirected = 0;}
-int  redir_cmdline_parse (const char *args, cmdline_t *ptr)
+void
+redir_cmdline_delete (cmdline_t *ptr) {ptr->redirected = 0;}
+
+int
+redir_cmdline_parse (const char *args, cmdline_t *ptr)
 {
   return -1;
 }
-int redir_to_child (cmdline_t *ptr)
+int
+redir_to_child (cmdline_t *ptr)
 {
   return 1;
 }
-int redir_to_debugger (cmdline_t *ptr)
+int
+redir_to_debugger (cmdline_t *ptr)
 {
   return 1;
 }
-int redir_debug_init (cmdline_t *ptr) { return 0; }
+int
+redir_debug_init (cmdline_t *ptr) { return 0; }
 #endif /* __DJGPP_MINOR < 3 */
-
-extern void _initialize_go32_nat (void);
 
 typedef enum { wp_insert, wp_remove, wp_count } wp_op;
 
 /* This holds the current reference counts for each debug register.  */
 static int dr_ref_count[4];
-
-extern char **environ;
 
 #define SOME_PID 42
 
@@ -276,18 +279,18 @@ static struct {
 };
 
 static void
-go32_open (char *name ATTRIBUTE_UNUSED, int from_tty ATTRIBUTE_UNUSED)
+go32_open (char *name, int from_tty)
 {
   printf_unfiltered ("Done.  Use the \"run\" command to run the program.\n");
 }
 
 static void
-go32_close (int quitting ATTRIBUTE_UNUSED)
+go32_close (int quitting)
 {
 }
 
 static void
-go32_attach (char *args ATTRIBUTE_UNUSED, int from_tty ATTRIBUTE_UNUSED)
+go32_attach (char *args, int from_tty)
 {
   error ("\
 You cannot attach to a running program on this platform.\n\
@@ -295,7 +298,7 @@ Use the `run' command to run DJGPP programs.");
 }
 
 static void
-go32_detach (char *args ATTRIBUTE_UNUSED, int from_tty ATTRIBUTE_UNUSED)
+go32_detach (char *args, int from_tty)
 {
 }
 
@@ -303,7 +306,7 @@ static int resume_is_step;
 static int resume_signal = -1;
 
 static void
-go32_resume (int pid ATTRIBUTE_UNUSED, int step, enum target_signal siggnal)
+go32_resume (int pid, int step, enum target_signal siggnal)
 {
   int i;
 
@@ -327,7 +330,7 @@ go32_resume (int pid ATTRIBUTE_UNUSED, int step, enum target_signal siggnal)
 static char child_cwd[FILENAME_MAX];
 
 static int
-go32_wait (int pid ATTRIBUTE_UNUSED, struct target_waitstatus *status)
+go32_wait (int pid, struct target_waitstatus *status)
 {
   int i;
   unsigned char saved_opcode;
@@ -392,7 +395,7 @@ go32_wait (int pid ATTRIBUTE_UNUSED, struct target_waitstatus *status)
   if (!*child_cwd)
     /* Initialize child's cwd with the current one.  */
     getcwd (child_cwd, sizeof (child_cwd));
-    
+
   chdir (child_cwd);
 
 #if __DJGPP_MINOR__ < 3
@@ -473,7 +476,7 @@ static void
 store_register (int regno)
 {
   void *rp;
-  void *v = (void *) &registers[REGISTER_BYTE (regno)];
+  void *v = (void *) register_buffer (regno);
 
   if (regno < FP0_REGNUM)
     memcpy ((char *) &a_tss + regno_mapping[regno].tss_ofs,
@@ -507,8 +510,7 @@ go32_prepare_to_store (void)
 
 static int
 go32_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
-		  struct mem_attrib *attrib ATTRIBUTE_UNUSED,
-		  struct target_ops *target ATTRIBUTE_UNUSED)
+		  struct mem_attrib *attrib, struct target_ops *target)
 {
   if (write)
     {
@@ -537,7 +539,7 @@ go32_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 static cmdline_t child_cmd;	/* parsed child's command line kept here */
 
 static void
-go32_files_info (struct target_ops *target ATTRIBUTE_UNUSED)
+go32_files_info (struct target_ops *target)
 {
   printf_unfiltered ("You are running a DJGPP V2 program.\n");
 }
@@ -563,6 +565,7 @@ go32_kill_inferior (void)
 static void
 go32_create_inferior (char *exec_file, char *args, char **env)
 {
+  extern char **environ;
   jmp_buf start_state;
   char *cmdline;
   char **env_save = environ;
@@ -661,6 +664,9 @@ go32_can_run (void)
 void
 go32_set_dr (int i, CORE_ADDR addr)
 {
+  if (i < 0 || i > 3)
+    internal_error (__FILE__, __LINE__, 
+		    "Invalid register %d in go32_set_dr.\n", i);
   D_REGS[i] = addr;
 }
 
@@ -733,7 +739,7 @@ go32_terminal_init (void)
 }
 
 static void
-go32_terminal_info (char *args ATTRIBUTE_UNUSED, int from_tty ATTRIBUTE_UNUSED)
+go32_terminal_info (char *args, int from_tty)
 {
   printf_unfiltered ("Inferior's terminal is in %s mode.\n",
 		     !inf_mode_valid

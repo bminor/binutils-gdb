@@ -1,3 +1,28 @@
+2001-03-23  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* config/djgpp/djconfig.sh: Add copyright notice.
+
+	* ser-go32.c (rawclock): Remove prototype; include time.h instead.
+	(ISR, dos_hookirq, isr_t): Convert K&R definition to ANSI C.
+	(top level) <string.h>: Include gdb_string.h instead.
+	(dos_noop, dos_raw, dos_noflush_set_tty_state) 
+	(dos_print_tty_state, dos_info): Remove ATTRIBUTE_UNUSED.
+
+	* go32-nat.c (go32_create_inferior): Move the declaration of
+	`environ' to here from the top level.
+	(top level) <_initialize_go32_nat>: Remove redundant prototype.
+	<gdb_string.h>: Include it instead of string.h.
+	(store_register): Call register_buffer instead of accessing
+	registers[] directly.
+	(redir_cmdline_delete, redir_cmdline_parse, redir_to_debugger) 
+	(redir_to_debugger, redir_debug_init) [__DJGPP_MINOR__ < 3]: Put
+	the function names at the start of the line.
+	(go32_set_dr): Throw internal_error if the argument is not a valid
+	debug register number.
+	(go32_open, go32_close, go32_attach, go32_detach, go32_resume) 
+	(go32_wait, go32_xfer_memory, go32_files_info) 
+	(go32_terminal_info): Remove ATTRIBUTE_UNUSED.
+
 2001-03-25  Jim Blandy  <jimb@redhat.com>
 
 	* mips-tdep.c (mips_gdbarch_init): Tweak indentation.
