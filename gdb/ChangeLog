@@ -1,5 +1,7 @@
 2002-02-07  Andrew Cagney  <ac131313@redhat.com>
 
+	* defs.h (warning_begin): Delete declaration.
+
 	* config/powerpc/tm-ppcle-eabi.h (TARGET_BYTE_ORDER_DEFAULT):
 	Delete macro.
 
@@ -429,7 +431,6 @@
 2002-01-30  Andrew Cagney  <ac131313@redhat.com>
 
 	* defs.h (vwarning): Declare.
-	(warning_begin): Delete declaration.
 	* utils.c (vwarning): New function.
 	(warning): Call vwarning.
 	(warning_begin): Delete function.

@@ -1166,8 +1166,6 @@ extern int catch_errors (catch_errors_ftype *, PTR, char *, return_mask);
 typedef void (catch_command_errors_ftype) (char *, int);
 extern int catch_command_errors (catch_command_errors_ftype *func, char *command, int from_tty, return_mask);
 
-extern void warning_begin (void);
-
 extern void warning (const char *, ...) ATTR_FORMAT (printf, 1, 2);
 
 extern void vwarning (const char *, va_list args);
