@@ -1,3 +1,8 @@
+2001-03-21  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c: Add back _initialize_i386_tdep prototype with
+	appropriate comment.
+
 2001-03-20  Kevin Buettner  <kevinb@redhat.com>
 
 	* config/alpha/alpha-linux.mh (NATDEPFILES): Use proc-service.o,

@@ -959,6 +959,9 @@ set_disassembly_flavor (void)
 }
 
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+void _initialize_i386_tdep (void);
+
 void
 _initialize_i386_tdep (void)
 {
