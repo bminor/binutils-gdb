@@ -2066,7 +2066,7 @@ pe_create_import_fixup (rel)
 
   {
     extern char * pe_data_import_dll;
-    char * dll_symname = pe_data_import_dll ? "unknown" : pe_data_import_dll;
+    char * dll_symname = pe_data_import_dll ? pe_data_import_dll : "unknown";
 
     bfd *b = make_import_fixup_entry (name, fixup_name, dll_symname,
 				      output_bfd);

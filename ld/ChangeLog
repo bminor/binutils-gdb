@@ -1,8 +1,8 @@
-2001-09-24  Nick Clifton  <nickc@cambridge.redhat.com>
-
-	* pe-dll.c: Remove spurious prototype.
-
 2001-09-24  Charles Wilson  <cwilson@ece.gatech.edu>
+
+	* pe-dll.c: Remove obsoleted declaration of
+	pe_get_data_import_dll_name.
+	(pe_create_import_fixup): Fix thinko.
 
 	* ld.texinfo(enable-auto-import): Clarify the explanation.
 
