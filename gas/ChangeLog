@@ -1,3 +1,9 @@
+Tue Oct 11 15:24:00 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* config/tc-mips.c (mips_ip): Don't use S_IS_LOCAL when checking
+	for an embedded PIC switch expression, since the definition of
+	S_IS_LOCAL was changed.
+
 Tue Oct 11 15:05:11 1994  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
 
 	* Makefile.in (comparison): When comparing as.new or gasp.new, try
