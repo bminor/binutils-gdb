@@ -29,13 +29,6 @@ else
         lose_these_too="${beos_files} ${lose_these_too}"
 fi
 
-armelf_files="elfarm.sc"
-if ( echo $* | grep keep\-armelf > /dev/null ) ; then
-	keep_these_too="${armelf_files} ${keep_these_too}"
-else
-	lose_these_too="${armelf_files} ${lose_these_too}"
-fi
-
 # All files listed between the "Things-to-keep:" line and the
 # "Do-last:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -54,6 +47,7 @@ armcoff.sc
 delta68.sc
 ebmon29k.sc
 elf.sc
+elfarm.sc
 elfd10v.sc
 elfd30v.sc
 elfppc.sc
