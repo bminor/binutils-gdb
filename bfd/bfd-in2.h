@@ -2232,6 +2232,17 @@ to compensate for the borrow when the low bits are added.  */
   BFD_RELOC_MIPS_RELGOT,
   BFD_RELOC_MIPS_JALR,
 
+/* Fujitsu Frv Relocations.  */
+  BFD_RELOC_FRV_LABEL16,
+  BFD_RELOC_FRV_LABEL24,
+  BFD_RELOC_FRV_LO16,
+  BFD_RELOC_FRV_HI16,
+  BFD_RELOC_FRV_GPREL12,
+  BFD_RELOC_FRV_GPRELU12,
+  BFD_RELOC_FRV_GPREL32,
+  BFD_RELOC_FRV_GPRELHI,
+  BFD_RELOC_FRV_GPRELLO,
+
 
 /* i386/elf relocations  */
   BFD_RELOC_386_GOT32,
@@ -2838,17 +2849,6 @@ value of SUBI insn.  */
 /* This is a 32 bit reloc for the AVR that stores 23 bit value
 into 22 bits.  */
   BFD_RELOC_AVR_CALL,
-
-/* Fujitsu Frv Relocations. */
-  BFD_RELOC_FRV_LABEL16,
-  BFD_RELOC_FRV_LABEL24,
-  BFD_RELOC_FRV_LO16,
-  BFD_RELOC_FRV_HI16,
-  BFD_RELOC_FRV_GPREL12,
-  BFD_RELOC_FRV_GPRELU12,
-  BFD_RELOC_FRV_GPREL32,
-  BFD_RELOC_FRV_GPRELHI,
-  BFD_RELOC_FRV_GPRELLO,
 
 /* Direct 12 bit.  */
   BFD_RELOC_390_12,

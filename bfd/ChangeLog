@@ -1,5 +1,11 @@
 2002-06-23  Alan Modra  <amodra@bigpond.net.au>
 
+	* Makefile.in: Regenerate.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* configure: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
 	* elflink.h: Comment typo fixes.
 
 2002-06-23  H.J. Lu  <hjl@gnu.org>

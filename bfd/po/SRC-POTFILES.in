@@ -277,6 +277,7 @@ syms.c
 targets.c
 tekhex.c
 trad-core.c
+vax1knetbsd.c
 vaxnetbsd.c
 versados.c
 version.h
