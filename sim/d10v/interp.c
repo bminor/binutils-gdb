@@ -99,8 +99,6 @@ lookup_hash (ins, size)
     {
       if (h->next == NULL)
 	{
-	  (*d10v_callback->printf_filtered)
-	    (d10v_callback, "ERROR: Illegal instruction %x at PC %x\n", ins, PC);
 	  State.exception = SIGILL;
 	  State.pc_changed = 1; /* Don't increment the PC. */
 	  return NULL;
@@ -977,6 +975,13 @@ sim_resume (sd, step, siggnal)
       SET_BPSW (PSW);
       SET_HW_PSW ((PSW & (PSW_F0_BIT | PSW_F1_BIT | PSW_C_BIT)));
       JMP (AE_VECTOR_START);
+      SLOT_FLUSH ();
+      break;
+    case SIGILL:
+      SET_BPC (PC);
+      SET_BPSW (PSW);
+      SET_HW_PSW ((PSW & (PSW_F0_BIT | PSW_F1_BIT | PSW_C_BIT)));
+      JMP (RIE_VECTOR_START);
       SLOT_FLUSH ();
       break;
     default:
