@@ -1,3 +1,7 @@
+1999-10-15  Ian Lance Taylor  <ian@zembu.com>
+
+	* ar.c (normalize): Fix full_pathname code.
+
 1999-10-08  Ben Elliston  <bje@cygnus.com>
 
         * binutils.texi: Some rewording and clarifications.

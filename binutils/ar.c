@@ -299,7 +299,7 @@ normalize (file, abfd)
   const char *filename;
 
   if (full_pathname)
-    return filename;
+    return file;
 
   filename = strrchr (file, '/');
   if (filename != (char *) NULL)
