@@ -1,7 +1,11 @@
+Thu Aug 12 16:58:59 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in (distclean): Remove *.plog *.sum *.psum site.*.
+
 Wed Aug 11 19:47:27 1993  John Gilmore  (gnu@rtl.cygnus.com)
 
 	* lib/gdb.exp (gdb_exit):  Move the best version of gdb_exit
-	to here.
+	to here.  Fix 'Quit anyway.*?' bug (? is a regexp metacharacter).
 	* config/{mips-gdb.exp, nind-gdb.exp, udi-gdb.exp, vx-gdb.exp}:
 	Remove various versions of gdb_exit.
 	* config/vx-gdb.exp:  Remove quit_vxgdb, change a caller to call
