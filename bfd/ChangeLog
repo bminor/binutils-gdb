@@ -1,6 +1,24 @@
 Thu Feb 12 17:31:11 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	NetBSD patches from Gordon W. Ross <gwr@mc.com>:
+	* netbsd.h (MACHTYPE_OK): Define.
+	(MY(write_object_contents)): Use DEFAULT_ARCH and DEFAULT_MID when
+	calling N_SET_MACHTYPE, rather than having a switch.
+	* libaout.h (enum machine_type): Add M_PMAX_NETBSD, M_VAX_NETBSD,
+	and M_ALPHA_NETBSD.
+	* i386netbsd.c (MACHTYPE_OK): Don't define.
+	(DEFAULT_MID): Define.
+	* m68k4knetbsd.c (SEGMENT_SIZE): Don't define.
+	(MACHTYPE_OK): Don't define.
+	(DEFAULT_MID): Define.
+	* m68knetbsd.c: (MACHTYPE_OK): Don't define.
+	(DEFAULT_MID): Define.
+	* ns32knetbsd.c (MACHTYPE_OK): Don't define.
+	(DEFAULT_MID): Define.
+	* sparcnetbsd.c (MACHTYPE_OK): Don't define.
+	(DEFAULT_MID): Define.
+
+	NetBSD patches from Gordon W. Ross <gwr@mc.com>:
 	* vaxnetbsd.c: New file.
 	* netbsd-core.c: Clean up.  Remove unused macros.  Use netbsd
 	rather than netbsd_core.
