@@ -255,5 +255,9 @@ disassembler (abfd)
 void
 disassembler_usage (FILE * stream)
 {
+#ifdef ARCH_arm
+  print_arm_disassembler_options (stream);
+#endif
+  
   return;
 }

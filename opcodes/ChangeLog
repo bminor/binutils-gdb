@@ -2,7 +2,21 @@
 
 	* disassemble.c (disassembler_usage): New function: Print out any
 	target specific disassembler options.
+	Call arm_disassembler_options() if the ARM architecture is being
+	supported.  
 
+	* arm-dis.c (NUM_ELEM): Define this macro if not already
+	defined.
+	(arm_regname): New struct type for ARM register names.
+	(arm_toggle_regnames): Delete.
+	(parse_disassembler_option): Use register name structure.
+	(print_insn): New function: Combines duplicate code found in
+	print_insn_big_arm and print_insn_little_arm.
+	(print_insn_big_arm): Call print_insn.
+	(print_insn_little_arm): Call print_insn.
+	(print_arm_disassembler_options): Display list of supported,
+	ARM specific disassembler options.
+	  
 2000-01-27  Thomas de Lellis  <tdel@windriver.com>
 
         * arm-dis.c (printf_insn_big_arm): Treat ELF symbols with the

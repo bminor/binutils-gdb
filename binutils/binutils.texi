@@ -1346,13 +1346,17 @@ some targets.
 
 If the target is an ARM architecture then this switch can be used to
 select which register name set is used during disassembler.  Specifying
-@samp{--disassembler-options=reg-name-std} (the default) will select the
-register names as used in ARM's instruction set documentation, but with
-register 13 called 'sp', register 14 called 'lr' and register 15 called
-'pc'.  Specifying @samp{--disassembler-options=reg-names-apcs} will
-select the name set used by the ARM Procedure Call Standard, whilst
-specifying @samp{--disassembler-options=reg-names-raw} will just use
-@samp{r} followed by the register number.
+@samp{-M reg-name-std} (the default) will select the register names as
+used in ARM's instruction set documentation, but with register 13 called
+'sp', register 14 called 'lr' and register 15 called 'pc'.  Specifying
+@samp{-M reg-names-apcs} will select the name set used by the ARM
+Procedure Call Standard, whilst specifying @samp{-M reg-names-raw} will
+just use @samp{r} followed by the register number.
+
+There are also two variants on the APCS register naming scheme enabled
+by @samp{-M reg-names-atpcs} and @samp{-M reg-names-atpcs-special} which
+use the ARM/Thumb Procedure Call Standard naming conventions.  (Eiuther
+with the normal register name sor the special register names).
 
 This option can also be used for ARM architectures to force the
 disassembler to interpret all instructions as THUMB instructions by
