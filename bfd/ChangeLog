@@ -1,3 +1,16 @@
+Mon Mar 14 11:41:23 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* som.c (som_object_setup): Set EXEC_P, D_PAGED, WP_TEXT, and
+	HAS_RELOC based on the object's magic number.
+	(make_unique_section): Delete function.  BFD and its users are
+	prepared to handle multiple sections with the same name.
+	(setup_sections): Allocate space on the BFD's obstack to hold
+	section names.  Use bfd_make_setion_anyway rather than the
+	obsolete make_unique_section.
+	(som_prep_headers): Choose the correct SOM magic number based
+	on the BFD's flags.
+	(som_bfd_fill_in_ar_symbols): Return false, not NULL on error.
+
 Sat Mar 12 09:46:09 1994  Ian Lance Taylor  (ian@cygnus.com)
 
 	* elf32-ppc.c: Renamed from elf32-powerpc.c.

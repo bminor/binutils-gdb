@@ -1550,12 +1550,26 @@ som_object_setup (abfd, file_hdrp, aux_hdrp)
 
   /* Set BFD flags based on what information is available in the SOM.  */
   abfd->flags = NO_FLAGS;
-  if (! file_hdrp->entry_offset)
-    abfd->flags |= HAS_RELOC;
-  else
-    abfd->flags |= EXEC_P;
   if (file_hdrp->symbol_total)
     abfd->flags |= HAS_LINENO | HAS_DEBUG | HAS_SYMS | HAS_LOCALS;
+
+  switch (file_hdrp->a_magic)
+    {
+    case DEMAND_MAGIC:
+      abfd->flags |= (D_PAGED | WP_TEXT | EXEC_P);
+      break;
+    case SHARE_MAGIC:
+      abfd->flags |= (WP_TEXT | EXEC_P);
+      break;
+    case EXEC_MAGIC:
+      abfd->flags |= (EXEC_P);
+      break;
+    case RELOC_MAGIC:
+      abfd->flags |= HAS_RELOC;
+      break;
+    default:
+      break;
+    }
 
   bfd_get_start_address (abfd) = aux_hdrp->exec_entry;
   bfd_default_set_arch_mach (abfd, bfd_arch_hppa, 0);
@@ -1572,39 +1586,6 @@ som_object_setup (abfd, file_hdrp, aux_hdrp)
   obj_som_reloc_filepos (abfd) = file_hdrp->fixup_request_location;
 
   return abfd->xvec;
-}
-
-/* Create a new BFD section for NAME.  If NAME already exists, then create a
-   new unique name, with NAME as the prefix.  This exists because SOM .o files
-   may have more than one $CODE$ subspace.  */
-
-static asection *
-make_unique_section (abfd, name, num)
-     bfd *abfd;
-     CONST char *name;
-     int num;
-{
-  asection *sect;
-  char *newname;
-  char altname[100];
-
-  sect = bfd_make_section (abfd, name);
-  while (!sect)
-    {
-      sprintf (altname, "%s-%d", name, num++);
-      sect = bfd_make_section (abfd, altname);
-    }
-
-  newname = bfd_alloc (abfd, strlen (sect->name) + 1);
-  if (!newname)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
-  strcpy (newname, sect->name);
-
-  sect->name = newname;
-  return sect;
 }
 
 /* Convert all of the space and subspace info into BFD sections.  Each space
@@ -1644,6 +1625,7 @@ setup_sections (abfd, file_hdr)
       struct subspace_dictionary_record subspace, save_subspace;
       int subspace_index;
       asection *space_asect;
+      char *newname;
 
       /* Read the space dictionary element */
       if (bfd_seek (abfd, file_hdr->space_location
@@ -1656,7 +1638,12 @@ setup_sections (abfd, file_hdr)
       space.name.n_name = space.name.n_strx + space_strings;
 
       /* Make a section out of it */
-      space_asect = make_unique_section (abfd, space.name.n_name, space_index);
+      newname = bfd_alloc (abfd, strlen (space.name.n_name) + 1);
+      if (!newname)
+	goto error_return;
+      strcpy (newname, space.name.n_name);
+			   
+      space_asect = bfd_make_section_anyway (abfd, newname);
       if (!space_asect)
 	goto error_return;
 
@@ -1698,10 +1685,13 @@ setup_sections (abfd, file_hdr)
 	  /* Setup the subspace name string */
 	  subspace.name.n_name = subspace.name.n_strx + space_strings;
 
-	  /* Make a section out of this subspace */
-	  subspace_asect = make_unique_section (abfd, subspace.name.n_name,
-				     space.subspace_index + subspace_index);
+	  newname = bfd_alloc (abfd, strlen (subspace.name.n_name) + 1);
+	  if (!newname)
+	    goto error_return;
+	  strcpy (newname, subspace.name.n_name);
 
+	  /* Make a section out of this subspace */
+	  subspace_asect = bfd_make_section_anyway (abfd, newname);
 	  if (!subspace_asect)
 	    goto error_return;
 
@@ -1922,9 +1912,15 @@ som_prep_headers (abfd)
      PA1.1 instructions/registers have been used.  */
   file_hdr->system_id = CPU_PA_RISC1_0;
 
-  /* FIXME.  Only correct for building relocatable objects.  */
   if (abfd->flags & EXEC_P)
-    abort ();
+    {
+      if (abfd->flags & D_PAGED)
+	file_hdr->a_magic = DEMAND_MAGIC;
+      else if (abfd->flags & WP_TEXT)
+	file_hdr->a_magic = SHARE_MAGIC;
+      else
+	file_hdr->a_magic = EXEC_MAGIC;
+    }
   else
     file_hdr->a_magic = RELOC_MAGIC;
 
@@ -4598,7 +4594,7 @@ som_slurp_armap (abfd)
   if (strncmp (ar_header.ar_fmag, ARFMAG, 2))
     {
       bfd_set_error (bfd_error_malformed_archive);
-      return NULL;
+      return false;
     }
 
   /* How big is the archive symbol table entry?  */
@@ -4607,7 +4603,7 @@ som_slurp_armap (abfd)
   if (errno != 0)
     {
       bfd_set_error (bfd_error_malformed_archive);
-      return NULL;
+      return false;
     }
 
   /* Save off the file offset of the first real user data.  */
@@ -4626,7 +4622,7 @@ som_slurp_armap (abfd)
   if (lst_header.a_magic != LIBMAGIC)
     {
       bfd_set_error (bfd_error_malformed_archive);
-      return NULL;
+      return false;
     }
 
   /* Count the number of symbols in the library symbol table.  */
