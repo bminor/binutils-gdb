@@ -1,3 +1,9 @@
+2001-02-28  Andreas Jaeger  <aj@suse.de>, Bo Thorsen  <bo@suse.de>
+
+	* config/tc-i386.c (tc_gen_reloc): Remove ugly hack which is not needed
+	anymore since we use bfd_elf_generic_reloc now.
+	(md_apply_fix3): Only apply hack for partial_inplace if not using RELA.
+
 2001-02-27  Alan Modra  <alan@linuxcare.com.au>
 
 	* configure.in (BFD_VERSION): New.
@@ -37,7 +43,7 @@
 	* Makefile.in: Regenerated.
 	* configure.in: Added configuration for ia64-*-aix*.
 	* configure: Regenerated.
-	
+
 2001-02-21  David Mosberger  <davidm@hpl.hp.com>
 
 	* config/tc-ia64.c (enum operand_match_result): New type.
@@ -47,7 +53,7 @@
 	(parse_operands): New locals result, error_pos, out_of_range_pos,
 	curr_out_of_range_pos.  Rewrite operand matching loop to give better
 	error messages.
-	
+
 2001-02-21  David Mosberger  <davidm@hpl.hp.com>
 
 	* config/tc-ia64.c (struct unwind): Add member "prologue_count".
