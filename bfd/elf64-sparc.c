@@ -2053,7 +2053,15 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  if (info->shared
 		      && ((!info->symbolic && h->dynindx != -1)
 			  || !(h->elf_link_hash_flags
-			       & ELF_LINK_HASH_DEF_REGULAR)))
+			       & ELF_LINK_HASH_DEF_REGULAR))
+		      && ((input_section->flags & SEC_ALLOC) != 0
+			  /* DWARF will emit R_SPARC_{32,64} relocations in
+			     its sections against symbols defined externally
+			     in shared libraries.  We can't do anything
+			     with them here.  */
+			  || ((input_section->flags & SEC_DEBUGGING) != 0
+			      && (h->elf_link_hash_flags
+				  & ELF_LINK_HASH_DEF_DYNAMIC) != 0)))
 		    skip_it = true;
 		  break;
 		}

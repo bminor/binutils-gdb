@@ -1,5 +1,12 @@
 2001-11-23  Jakub Jelinek  <jakub@redhat.com>
 
+	* elf32-sparc.c (elf32_sparc_relocate_section): Don't clear
+	relocations in non-alloced sections against global symbols
+	defined in shared library being built.
+	* elf64-sparc.c (sparc64_elf_relocate_section): Likewise.
+
+2001-11-23  Jakub Jelinek  <jakub@redhat.com>
+
 	* elf.c (_bfd_elf_rela_local_sym): New.
 	* elflink.h (elf_link_input_bfd): Don't consider empty
 	merged sections as removed in relocation tests.

@@ -1221,7 +1221,15 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 			  || ((r_type == R_SPARC_PC10
 			       || r_type == R_SPARC_PC22)
 			      && strcmp (h->root.root.string,
-					 "_GLOBAL_OFFSET_TABLE_") != 0))))
+					 "_GLOBAL_OFFSET_TABLE_") != 0))
+		      && ((input_section->flags & SEC_ALLOC) != 0
+			  /* DWARF will emit R_SPARC_32 relocations in its
+			     sections against symbols defined externally
+			     in shared libraries.  We can't do anything
+			     with them here.  */
+			  || ((input_section->flags & SEC_DEBUGGING) != 0
+			      && (h->elf_link_hash_flags
+				  & ELF_LINK_HASH_DEF_DYNAMIC) != 0))))
 		{
 		  /* In these cases, we don't need the relocation
                      value.  We check specially because in some
