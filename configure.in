@@ -92,7 +92,6 @@ case "${host}" in
   mips-sgi-irix4*)        host_makefile_frag=config/mh-irix4 ;;
   mips-sgi-irix3*)        host_makefile_frag=config/mh-sysv ;;
   mips-*-sysv*)		  host_makefile_frag=config/mh-riscos ;;
-  i[34]86-*-lynxos*)	  host_makefile_frag=config/mh-lynxos ;;
   i[34]86-ncr-sysv4*)     host_makefile_frag=config/mh-ncr3000 ;;
   i[34]86-*-sco*)         host_makefile_frag=config/mh-sco ;;
   i[34]86-*-isc*)	  host_makefile_frag=config/mh-sysv ;;
@@ -106,6 +105,7 @@ case "${host}" in
   m68k-sun-*)		  host_makefile_frag=config/mh-sun3 ;;
   *-sun-*)		  host_makefile_frag=config/mh-sun ;;
   *-hp-hpux)              host_makefile_frag=config/mh-hpux ;;
+  *-*-lynxos*)	  	  host_makefile_frag=config/mh-lynxos ;;
   *-*-sysv4*)             host_makefile_frag=config/mh-sysv4 ;;
   *-*-sysv*)              host_makefile_frag=config/mh-sysv ;;
 esac
