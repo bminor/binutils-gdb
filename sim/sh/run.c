@@ -46,6 +46,11 @@ main (ac, av)
 	{
 	  trace = 1;
 	}
+      else if (strcmp (av[i], "-m") == 0)
+	{
+	  sim_size(atoi(av[i+1]));
+	  i++;
+	}
       else
 	{
 	  name = av[i];
