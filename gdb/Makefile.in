@@ -541,7 +541,7 @@ SFILES = ax-general.c ax-gdb.c bcache.c blockframe.c breakpoint.c \
 	tui/tui-file.h tui/tui-file.c \
 	ui-file.h ui-file.c \
 	frame.c \
-	gnu-v2-abi.c hpacc-abi.c cp-abi.c
+	gnu-v2-abi.c gnu-v3-abi.c hpacc-abi.c cp-abi.c
 
 LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
 
@@ -695,7 +695,7 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
 	nlmread.o serial.o mdebugread.o os9kread.o top.o utils.o \
 	ui-file.o tui-file.o \
 	frame.o \
-	gnu-v2-abi.o hpacc-abi.o cp-abi.o
+	gnu-v2-abi.o gnu-v3-abi.o hpacc-abi.o cp-abi.o
 
 OBS = $(COMMON_OBS) $(ANNOTATE_OBS)
 
@@ -1495,6 +1495,8 @@ gnu-nat.o: process_reply_S.h exc_request_S.h notify_S.h msg_reply_S.h \
 gnu-v2-abi.o: gnu-v2-abi.c $(defs_h) $(gdb_string_h) $(symtab_h) \
 	$(gdbtypes_h) $(value_h) $(demangle_h) $(cp_abi_h) 
 
+gnu-v3-abi.o: gnu-v2-abi.c $(defs_h) $(value_h) $(cp_abi_h) $(demangle_h)
+ 
 h8300-tdep.o: h8300-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(regcache_h)
 
 h8500-tdep.o: h8500-tdep.c $(bfd_h) $(dis-asm_h) $(defs_h) \
@@ -1679,7 +1681,7 @@ os9kread.o: os9kread.c buildsym.h complaints.h $(bfd_h) $(defs_h) \
 mem-break.o: mem-break.c $(defs_h) 
 
 minsyms.o: minsyms.c $(bfd_h) $(defs_h) objfiles.h symfile.h \
-	$(symtab_h) $(gdb_string_h)
+	$(symtab_h) $(gdb_string_h) $(value_h) $(cp_abi_h)
 
 mips-nat.o: mips-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) $(regcache_h)
 

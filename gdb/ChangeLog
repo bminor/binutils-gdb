@@ -1,3 +1,18 @@
+2001-05-22  Jim Blandy  <jimb@redhat.com>
+
+	Add support for the GNU V3 C++ ABI.
+	(Includes changes by Dan Berlin.)
+
+        * gnu-v3-abi.c: New file.
+	* minsyms.c: #include "value.h" and "cp-abi.h".
+	(install_minimal_symbols): Check the minimal symbol table for
+	symbols that look mangled in the V3 style, and select the V3 ABI
+	if we find any.
+	* Makefile.in (SFILES): Add gnu-v3-abi.c.
+	(COMMON_OBS): Add gnu-v3-abi.o.
+	(gnu-v3-abi.o): Add new rule.
+	(minsyms.o): Depend on $(cp_abi_h) and $(value_h).
+
 2001-05-21  Jim Blandy  <jimb@redhat.com>
 
 	* values.c (value_primitive_field): If we're extracting a base
