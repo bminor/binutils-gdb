@@ -1,3 +1,7 @@
+Sat Jun 28 23:20:42 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* aclocal.m4, configure, Makefile.in: Rebuild with automake 1.2.
+
 Mon Jun 16 15:31:39 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am (INCLUDES): Add -DDEBUG.
