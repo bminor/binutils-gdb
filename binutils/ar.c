@@ -511,7 +511,6 @@ extract_file(abfd)
 		exit(1);
 	    }
 	}
-	/* no need to byte-swap; the two formats are presumably compatible(!) */
 	fwrite(cbuf, 1, nread, ostream);
 	ncopied += tocopy;
     }
@@ -845,6 +844,14 @@ replace_members(files_to_move)
 		if (newer_only) {
 		    struct stat     fsbuf,
 		                    asbuf;
+
+		    if (current->arelt_data == NULL) {
+		      /* This can only happen if you specify a file on the
+			 command line more than once. */
+		      fprintf (stderr, "Duplicate file specified: %s -- skipping.\n", *files_to_move);
+		      goto next_file;
+		    }
+
 		    if (stat(*files_to_move, &fsbuf) != 0) {
 			if (errno != ENOENT)
 			    bfd_fatal(*files_to_move);
