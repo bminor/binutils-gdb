@@ -4,10 +4,10 @@
 #define NO_STDARG
 #endif /* not __STDC__ */
 
-#ifndef __GNUC__
-#ifndef __STDC__
+#if !defined(__GNUC__) & !defined(__STDC__)
 #include <memory.h>
-#endif
+#else
+extern int memset();
 #endif
 
 #include <ctype.h>
