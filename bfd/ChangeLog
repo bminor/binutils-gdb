@@ -1,8 +1,15 @@
+2002-08-23  Stephen Clarke <stephen.clarke@superh.com>,
+	    Richard Shann <richard.shann@superh.com>
+
+	* elf32-sh.c (sh_elf_finish_dynamic_sections): Set LSB of DT_INIT
+	value if .init is an SHmedia function.  Similarly for DT_FINI.
+	* elf64-sh64.c (sh64_elf64_finish_dynamic_sections): Likewise.
+	
 2002-08-23  Stephen Clarke <stephen.clarke@superh.com>
 
-	* bfd/elf32-sh.c (sh_elf_size_dynamic_sections): Zero initialize
+	* elf32-sh.c (sh_elf_size_dynamic_sections): Zero initialize
 	dynamic section.
-	* bfd/elf64-sh64.c (sh64_elf64_size_dynamic_sections): Likewise.
+	* elf64-sh64.c (sh64_elf64_size_dynamic_sections): Likewise.
 
 2002-08-22  Kaz Kojima <kkojima@rr.iij4u.or.jp>
 

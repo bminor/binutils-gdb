@@ -5697,6 +5697,7 @@ sh_elf_finish_dynamic_sections (output_bfd, info)
 	  Elf_Internal_Dyn dyn;
 	  const char *name;
 	  asection *s;
+	  struct elf_link_hash_entry *h;
 
 	  bfd_elf32_swap_dyn_in (dynobj, dyncon, &dyn);
 
@@ -5704,6 +5705,27 @@ sh_elf_finish_dynamic_sections (output_bfd, info)
 	    {
 	    default:
 	      break;
+
+#ifdef INCLUDE_SHMEDIA
+	    case DT_INIT:
+	      name = info->init_function;
+	      goto get_sym;
+
+	    case DT_FINI:
+	      name = info->fini_function;
+	    get_sym:
+	      if (dyn.d_un.d_val != 0)
+		{
+		  h = elf_link_hash_lookup (elf_hash_table (info), name,
+					    false, false, true);
+		  if (h != NULL && (h->other & STO_SH5_ISA32))
+		    {
+		      dyn.d_un.d_val |= 1;
+		      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
+		    }
+		}
+	      break;
+#endif
 
 	    case DT_PLTGOT:
 	      name = ".got";
