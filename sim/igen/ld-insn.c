@@ -1,6 +1,6 @@
 /*  This file is part of the program psim.
 
-    Copyright (C) 1994-1997, Andrew Cagney <cagney@highland.com.au>
+    Copyright (C) 1994-1998, Andrew Cagney <cagney@highland.com.au>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -260,8 +260,9 @@ parse_insn_word (line_ref *line,
   /* check that the last field goes all the way to the last bit */
   if (word->last->last != options.insn_bit_size - 1)
     {
-      options.warning (line, "Instruction format is not %d bits wide\n",
-		       options.insn_bit_size);
+      if (options.warn.width)
+	options.warning (line, "Instruction format is not %d bits wide\n",
+			 options.insn_bit_size);
       word->last->last = options.insn_bit_size - 1;
     }
 
@@ -488,10 +489,16 @@ parse_model_data_record (insn_table *isa,
 		model_record->field[record_filter_flags_field]);
   new_data->entry = model_record;
   new_data->code = code_record;
-  /* append it */
-  while (*list != NULL)
-    list = &(*list)->next;
-  *list = new_data;
+  /* append it if not filtered out */
+  if (!is_filtered_out (options.flags_filter,
+			model_record->field[record_filter_flags_field])
+      && !is_filtered_out (options.model_filter,
+			   model_record->field[record_filter_models_field]))
+    {
+      while (*list != NULL)
+	list = &(*list)->next;
+      *list = new_data;
+    }
   return record;
 }
 
@@ -521,6 +528,28 @@ static const name_map option_map[] = {
 };
 
 static table_entry *
+parse_include_record (table *file,
+		      table_entry *record)
+{
+  /* parse the include record */
+  if (record->nr_fields < nr_include_fields)
+    error (record->line, "Incorrect nr fields for include record\n");
+  /* process it */
+  if (!is_filtered_out (options.flags_filter,
+			record->field[record_filter_flags_field])
+      && !is_filtered_out (options.model_filter,
+			   record->field[record_filter_models_field]))
+    {
+      table_push (file, record->line, options.include,
+		  record->field[include_filename_field]);
+    }  
+  /* nb: can't read next record until after the file has been pushed */
+  record = table_read (file);
+  return record;
+}
+
+
+static table_entry *
 parse_option_record (table *file,
 		     table_entry *record)
 {
@@ -532,7 +561,9 @@ parse_option_record (table *file,
   record = table_read (file);
   /* process it */
   if (!is_filtered_out (options.flags_filter,
-			option_record->field[record_filter_flags_field]))
+			option_record->field[record_filter_flags_field])
+      && !is_filtered_out (options.model_filter,
+			   option_record->field[record_filter_models_field]))
     {
       char *name = option_record->field[option_name_field];
       option_names option = name2i (name, option_map);
@@ -598,6 +629,7 @@ parse_option_record (table *file,
   return record;
 }
 
+
 static table_entry *
 parse_function_record (table *file,
 		       table_entry *record,
@@ -606,35 +638,66 @@ parse_function_record (table *file,
 		       int is_internal)
 {
   function_entry *new_function;
-  if (record->nr_fields < nr_function_fields)
-    error (record->line, "Missing fields from function record\n");
-  /* look for a body to the function */
   new_function = ZALLOC (function_entry);
-  /* parse the function header */
   new_function->line = record->line;
-  filter_parse (&new_function->flags,
-		record->field[record_filter_flags_field]);
-  if (record_is_old (record))
-    new_function->type = record->field[old_function_typedef_field];
-  else
-    new_function->type = record->field[function_typedef_field];
-  new_function->name = record->field[function_name_field];
-  if (record->nr_fields > function_param_field)
-    new_function->param = record->field[function_param_field];
   new_function->is_internal = is_internal;
-  /* parse the function body */
+  /* parse the function header */
+  if (record_is_old (record))
+    {
+      if (record->nr_fields < nr_old_function_fields)
+	error (record->line, "Missing fields from (old) function record\n");
+      new_function->type = record->field[old_function_typedef_field];
+      new_function->type = record->field[old_function_typedef_field];
+      if (record->nr_fields > old_function_param_field)
+	new_function->param = record->field[old_function_param_field];
+      new_function->name = record->field[old_function_name_field];
+    }
+  else
+    {
+      if (record->nr_fields < nr_function_fields)
+	error (record->line, "Missing fields from function record\n");
+      filter_parse (&new_function->flags,
+		    record->field[record_filter_flags_field]);
+      filter_parse (&new_function->models,
+		    record->field[record_filter_models_field]);
+      new_function->type = record->field[function_typedef_field];
+      new_function->param = record->field[function_param_field];
+      new_function->name = record->field[function_name_field];
+    }
   record = table_read (file);
+  /* parse any function-model records */
+  while (record != NULL
+	 && record_prefix_is (record, '*', nr_function_model_fields))
+    {
+      filter_parse (&new_function->models,
+		    record->field[function_model_name_field] + 1 /*skip `*'*/);
+      record = table_read (file);
+    }
+  /* parse the function body */
   if (record->type == table_code_entry)
     {
       new_function->code = record;
       record = table_read (file);
     }
   /* insert it */
-  while (*list != NULL)
-    list = &(*list)->next;
-  *list = new_function;
-  if (list_entry != NULL)
-    *list_entry = new_function;
+  if (!filter_is_subset (options.flags_filter, new_function->flags))
+    {
+      if (options.warn.discard)
+	notify (new_function->line, "Discarding function entry - filter flags\n");
+    }
+  else if (!filter_is_subset (options.model_filter, new_function->models))
+    {
+      if (options.warn.discard)
+	notify (new_function->line, "Discarding function entry - filter models\n");
+    }
+  else
+    {
+      while (*list != NULL)
+	list = &(*list)->next;
+      *list = new_function;
+      if (list_entry != NULL)
+	*list_entry = new_function;
+    }
   /* done */
   return record;
 }
@@ -649,16 +712,16 @@ parse_insn_model_record (table *file,
   insn_model_entry *new_insn_model = ZALLOC (insn_model_entry);
   /* parse it */
   new_insn_model->line = record->line;
-  if (record->nr_fields > insn_model_name_field)
-    new_insn_model->name = record->field[insn_model_name_field];
   if (record->nr_fields > insn_model_unit_data_field)
     new_insn_model->unit_data = record->field[insn_model_unit_data_field];
   new_insn_model->insn = insn;
-  /* strip "\*[ ]*" from name */
-  new_insn_model->name = skip_spaces (new_insn_model->name + 1);
-  if (strlen (new_insn_model->name) == 0)
+  /* parse the model names, verify that all were defined */
+  new_insn_model->names = NULL;
+  filter_parse (&new_insn_model->names,
+		record->field[insn_model_name_field] + 1 /*skip `*'*/);
+  if (new_insn_model->names == NULL)
     {
-      /* No processor name - a generic model entry, enter it into all
+      /* No processor names - a generic model entry, enter it into all
 	 the non-empty fields */
       int index;
       for (index = 0; index < model->nr_models; index++)
@@ -671,20 +734,33 @@ parse_insn_model_record (table *file,
     }
   else
     {
-      /* Find the corresponding master model record so it can be
-	 linked in correctly */
+      /* Find the corresponding master model record for each name so
+         that they can be linked in. */
       int index;
-      index = filter_is_member (model->processors, new_insn_model->name) - 1;
-      if (index < 0)
+      char *name = "";
+      while (1)
 	{
-	  error (record->line, "machine model `%s' undefined\n",
-		 new_insn_model->name);
+	  name = filter_next (new_insn_model->names, name);
+	  if (name == NULL) break;
+	  index = filter_is_member (model->processors, name) - 1;
+	  if (index < 0)
+	    {
+	      error (new_insn_model->line,
+		     "machine model `%s' undefined\n", name);
+	    }
+	  /* store it in the corresponding model array entry */
+	  if (insn->model[index] != NULL
+	      && insn->model[index]->names != NULL)
+	    {
+	      warning (new_insn_model->line,
+		       "machine model `%s' previously defined\n", name);
+	      error (insn->model[index]->line, "earlier definition\n");
+	    }
+	  insn->model[index] = new_insn_model;
+	  /* also add the name to the instructions processor set as an
+	     alternative lookup mechanism */
+	  filter_parse (&insn->processors, name);
 	}
-      /* store it in the corresponding model array entry */
-      insn->model[index] = new_insn_model;
-      /* also add the name to the instructions processor set as an
-	 alternative lookup mechanism */
-      filter_parse (&insn->processors, new_insn_model->name);
     }
 #if 0
   /* for some reason record the max length of any
@@ -748,12 +824,7 @@ load_insn_table (char *file_name,
 
 	case include_record:
 	  {
-	    if (record->nr_fields < nr_include_record_fields)
-	      error (record->line,
-		     "Incorrect nr of fields for include record\n");
-	    table_push (file, record->line, options.include,
-			record->field[include_record_filename_field]);
-	    record = table_read (file);
+	    record = parse_include_record (file, record);
 	    break;
 	  }
 
@@ -767,20 +838,23 @@ load_insn_table (char *file_name,
 	
 	case string_function_record:
 	  {
-	    /* convert a string function field into an internal function field */
-	    char *name;
-	    if (record->nr_fields < nr_function_fields)
-	      error (record->line, "Incorrect nr of fields for %%s record\n");
-	    name = NZALLOC (char,
-			    (strlen ("str_")
-			     + strlen (record->field[function_name_field])
-			     + 1));
-	    strcat (name, "str_");
-	    strcat (name, record->field[function_name_field]);
-	    record->field[record_type_field] = "function";
-	    record->field[function_typedef_field] = "const char *";
-	    record->field[function_name_field] = name;
-	    /* HACK - comes round back as a function/internal record */
+	    function_entry *function = NULL;
+	    record = parse_function_record (file, record,
+					    &isa->functions,
+					    &function,
+					    0/*is-internal*/);
+	    /* convert a string function record into an internal function */
+	    if (function != NULL)
+	      {
+		char *name = NZALLOC (char,
+				      (strlen ("str_")
+				       + strlen (function->name)
+				       + 1));
+		strcat (name, "str_");
+		strcat (name, function->name);
+		function->name = name;
+		function->type = "const char *";
+	      }
 	    break;
 	  }
 	
@@ -844,7 +918,9 @@ load_insn_table (char *file_name,
 	    new_cache->line = record->line;
 	    filter_parse (&new_cache->flags,
 			  record->field[record_filter_flags_field]);
-	    new_cache->type = record->field[cache_type_field];
+	    filter_parse (&new_cache->models,
+			  record->field[record_filter_models_field]);
+	    new_cache->type = record->field[cache_typedef_field];
 	    new_cache->name = record->field[cache_name_field];
 	    filter_parse (&new_cache->original_fields,
 			  record->field[cache_original_fields_field]);
@@ -852,7 +928,13 @@ load_insn_table (char *file_name,
 	    /* insert it but only if not filtered out */
 	    if (!filter_is_subset (options.flags_filter, new_cache->flags))
 	      {
-		notify (new_cache->line, "Discarding cache entry %s\n",
+		notify (new_cache->line, "Discarding cache entry %s - filter flags\n",
+			new_cache->name);
+	      }
+	    else if (is_filtered_out (options.model_filter,
+				      record->field[record_filter_models_field]))
+	      {
+		notify (new_cache->line, "Discarding cache entry %s - filter models\n",
 			new_cache->name);
 	      }
 	    else
@@ -887,7 +969,13 @@ load_insn_table (char *file_name,
 	    /* only insert it if not filtered out */
 	    if (!filter_is_subset (options.flags_filter, new_model->flags))
 	      {
-		notify (new_model->line, "Discarding processor model %s\n",
+		notify (new_model->line, "Discarding processor model %s - filter flags\n",
+			new_model->name);
+	      }
+	    else if (is_filtered_out (options.model_filter,
+				      record->field[record_filter_models_field]))
+	      {
+		notify (new_model->line, "Discarding processor model %s - filter models\n",
 			new_model->name);
 	      }
 	    else if (filter_is_member (model->processors, new_model->name))
@@ -1409,7 +1497,7 @@ dump_insn_model_entry (lf *file,
     {
       lf_indent (file, +1);
       dump_line_ref (file, "\n(line ", model->line, ")");
-      lf_printf (file, "\n(name \"%s\")", model->name);
+      dump_filter (file, "\n(names ", model->names, ")");
       lf_printf (file, "\n(full_name \"%s\")", model->full_name);
       lf_printf (file, "\n(unit_data \"%s\")", model->unit_data);
       lf_printf (file, "\n(insn (insn_entry *) 0x%lx)", (long) model->insn);

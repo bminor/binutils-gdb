@@ -1,6 +1,6 @@
 /*  This file is part of the program psim.
 
-    Copyright (C) 1994,1995,1996,1997 Andrew Cagney <cagney@highland.com.au>
+    Copyright (C) 1994-1998 Andrew Cagney <cagney@highland.com.au>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -123,6 +123,9 @@ enum {
 
 /* Functions and internal routins:
 
+   NB: <filter-models> and <function-models> are the equivalent.
+
+
    <function> ::=
        ":" "function"
        <function-spec>
@@ -138,6 +141,12 @@ enum {
        <function-spec>
        ;
 
+   <function-model> ::=
+       "*" [ <processor-list> ]
+       ":"
+       <nl>
+       ;
+
    <function-spec> ::=
        ":" <filter-flags>
        ":" <filter-models>
@@ -145,6 +154,7 @@ enum {
        ":" <name>
        [ ":" <parameter-list> ]
        <nl>
+       [ <function-model> ]
        <code-block>
        ;
 
@@ -155,6 +165,11 @@ enum {
   function_name_field,
   function_param_field,
   nr_function_fields,
+};
+
+enum {
+  function_model_name_field = 0,
+  nr_function_model_fields = 1,
 };
 
 enum {
@@ -262,7 +277,7 @@ struct _cache_entry {
        ":" <filter-flags>
        ":" <filter-models>
        ":" <processor>
-       ":" <long-processor>
+       ":" <BFD-processor>
        ":" <function-unit-data>
        <nl>
        ;
@@ -368,8 +383,8 @@ struct _model_table {
        ;
 
    <field> ::=
-       "*" +
-       | "/" +
+         { "*" }+
+       | { "/" }+
        | <field-name>
        | "0x" <hex-value>
        | "0b" <binary-value>
@@ -436,16 +451,21 @@ struct _insn_word_entry {
 
 /* Instruction model:
 
-   Provides scheduling data for the code modeling the instruction unit. 
+   Provides scheduling and other data for the code modeling the
+   instruction unit.
 
    <insn-model> ::=
-       "*" [ <processor> ]
-       ":" <function-unit-data>
+       "*" [ <processor-list> ]
+       ":" [ <function-unit-data> ]
        <nl>
        ;
 
-   If <processor> is NULL, the model is made the default for this
-   instruction.
+   <processor-list> ::=
+       <processor> { "," <processor>" }
+       ;
+
+   If the <processor-list> is empty, the model is made the default for
+   this instruction.
 
    */
 
@@ -459,7 +479,7 @@ typedef struct _insn_model_entry insn_model_entry;
 struct _insn_model_entry {
   line_ref *line;
   insn_entry *insn;
-  char *name;
+  filter *names;
   char *full_name;
   char *unit_data;
   insn_model_entry *next;
@@ -475,6 +495,31 @@ struct _insn_model_entry {
        "\"" <assembler-mnemonic> "\""
        [ ":" <conditional-expression> ]
        <nl>
+       ;
+
+   An assembler mnemonic string has the syntax:
+
+   <assembler-mnemonic>  ::=
+       ( [ "%" <format-spec> ] "<" <func> [ "#" <param-list> ] ">"
+       | "%%"
+       | <other-letter>
+       )+
+
+    Where, for instance, the text is translated into a printf format
+    and argument pair:
+
+       "<FUNC>"         : "%ld", (long) FUNC
+       "%<FUNC>..."     : "%...", FUNC
+       "%s<FUNC>"       : "%s", <%s>FUNC (SD_, FUNC)
+       "%s<FUNC#P1,P2>" : "%s", <%s>FUNC (SD_, P1,P2)
+       "%lx<FUNC>"      : "%lx", (unsigned long) FUNC
+       "%08lx<FUNC>"    : "%08lx", (unsigned long) FUNC
+
+    And "<%s>FUNC" denotes a function declared using the "%s" record
+    specifier.
+
+
+
        ;
 
    */
