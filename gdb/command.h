@@ -136,7 +136,7 @@ struct cmd_list_element
         
        bit 2: MALLOCED_REPLACEMENT, when functions are deprecated at
        compile time (this is the way it should, in general, be done)
-       the memory comtaining the replacement string is statically
+       the memory containing the replacement string is statically
        allocated.  In some cases it makes sense to deprecate commands
        at runtime (the testsuite is one example).  In this case the
        memory for replacement is malloc'ed.  When a command is
