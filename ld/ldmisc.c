@@ -399,6 +399,9 @@ vfinfo (fp, fmt, arg)
 	}
     }
 
+  if (config.fatal_warnings)
+    config.make_executable = false;
+
   if (fatal == true)
     xexit (1);
 }

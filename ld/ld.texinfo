@@ -982,6 +982,11 @@ assembler.  It causes the linker to create a table which may be used at
 runtime to relocate any data which was statically initialized to pointer
 values.  See the code in testsuite/ld-empic for details.
 
+
+@kindex --fatal-warnings
+@item --fatal-warnings
+Treat all warnings as errors.
+
 @kindex --force-exe-suffix
 @item  --force-exe-suffix
 Make sure that an output file has a .exe suffix.
@@ -1333,7 +1338,7 @@ about the version heirarchy for the library being created.  This option
 is only meaningful on ELF platforms which support shared libraries.
 @xref{VERSION}.
 
-@kindex --warn-comon
+@kindex --warn-common
 @cindex warnings, on combining symbols
 @cindex combining symbols, warnings on
 @item --warn-common

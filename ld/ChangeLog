@@ -1,3 +1,15 @@
+2001-04-13  J.T. Conklin  <jtc@redback.com>
+
+	* ld.texinfo: Document --fatal-warnings.
+	* ld.1: Regenerate.
+
+	* ldmisc.c (vfinfo): Set flag to inhibit making executable if
+ 	warnings have been turned into errors.
+	* lexsup.c (OPTION_WARN_FATAL): Define.
+	(ld_options): Entry for --fatal-warnings.
+	(parse_args): Handle OPTION_WARN_FATAL.
+	* ld.h (ld_config_type): Add fatal_warnings field.
+
 2001-04-13  Jakub Jelinek  <jakub@redhat.com>
 
 	* ldmain.c (main): Default to discard_sec_merge.

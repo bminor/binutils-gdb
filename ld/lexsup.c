@@ -109,7 +109,8 @@ int parsing_defsym = 0;
 #define OPTION_VERSION_EXPORTS_SECTION	(OPTION_VERSION_SCRIPT + 1)
 #define OPTION_WARN_COMMON		(OPTION_VERSION_EXPORTS_SECTION + 1)
 #define OPTION_WARN_CONSTRUCTORS	(OPTION_WARN_COMMON + 1)
-#define OPTION_WARN_MULTIPLE_GP		(OPTION_WARN_CONSTRUCTORS + 1)
+#define OPTION_WARN_FATAL		(OPTION_WARN_CONSTRUCTORS + 1)
+#define OPTION_WARN_MULTIPLE_GP		(OPTION_WARN_FATAL + 1)
 #define OPTION_WARN_ONCE		(OPTION_WARN_MULTIPLE_GP + 1)
 #define OPTION_WARN_SECTION_ALIGN	(OPTION_WARN_ONCE + 1)
 #define OPTION_SPLIT_BY_RELOC		(OPTION_WARN_SECTION_ALIGN + 1)
@@ -388,6 +389,9 @@ static const struct ld_option ld_options[] =
   { {"warn-section-align", no_argument, NULL, OPTION_WARN_SECTION_ALIGN},
       '\0', NULL, N_("Warn if start of section changes due to alignment"),
       TWO_DASHES },
+  { {"fatal-warnings", no_argument, NULL, OPTION_WARN_FATAL},
+     '\0', NULL, N_("Treat warnings as errors"),
+     TWO_DASHES },
   { {"whole-archive", no_argument, NULL, OPTION_WHOLE_ARCHIVE},
       '\0', NULL, N_("Include all objects from following archives"), TWO_DASHES },
   { {"wrap", required_argument, NULL, OPTION_WRAP},
@@ -1031,6 +1035,9 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 	  break;
 	case OPTION_WARN_CONSTRUCTORS:
 	  config.warn_constructors = true;
+	  break;
+	case OPTION_WARN_FATAL:
+	  config.fatal_warnings = true;
 	  break;
 	case OPTION_WARN_MULTIPLE_GP:
 	  config.warn_multiple_gp = true;

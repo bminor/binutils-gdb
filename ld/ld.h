@@ -192,6 +192,9 @@ typedef struct {
      changes due to the alignment of an input section.  */
   boolean warn_section_align;
 
+  /* If true, warning messages are fatal */
+  boolean fatal_warnings;
+
   boolean sort_common;
 
   boolean text_read_only;
