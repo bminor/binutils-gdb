@@ -65,8 +65,9 @@ struct field_info
 static struct type *
 dbx_alloc_type PARAMS ((int [2], struct objfile *));
 
-static void
-read_huge_number PARAMS ((char **, int, long *, int *));
+static long read_huge_number PARAMS ((char **, int, int *));
+
+static struct type *error_type PARAMS ((char **));
 
 static void
 patch_block_stabs PARAMS ((struct pending *, struct pending_stabs *,
@@ -74,6 +75,9 @@ patch_block_stabs PARAMS ((struct pending *, struct pending_stabs *,
 
 static void
 fix_common_block PARAMS ((struct symbol *, int));
+
+static int
+read_type_number PARAMS ((char **, int *));
 
 static struct type *
 read_range_type PARAMS ((char **, int [2], struct objfile *));
@@ -122,7 +126,7 @@ read_array_type PARAMS ((char **, struct type *, struct objfile *));
 static struct type **
 read_args PARAMS ((char **, int, struct objfile *));
 
-static void
+static int
 read_cpp_abbrev PARAMS ((struct field_info *, char **, struct type *,
 			 struct objfile *));
 
@@ -256,8 +260,13 @@ dbx_lookup_type (typenums)
     return 0;
 
   if (filenum < 0 || filenum >= n_this_object_header_files)
-    error ("Invalid symbol data: type number (%d,%d) out of range at symtab pos %d.",
-	   filenum, index, symnum);
+    {
+      static struct complaint msg = {"\
+Invalid symbol data: type number (%d,%d) out of range at symtab pos %d.",
+				0, 0};
+      complain (&msg, filenum, index, symnum);
+      goto error_return;
+    }
 
   if (filenum == 0)
     {
@@ -303,7 +312,16 @@ dbx_lookup_type (typenums)
 
       if (real_filenum >= n_header_files)
 	{
-	  abort ();
+	  struct type *temp_type;
+	  struct type **temp_type_p;
+
+	  warning ("GDB internal error: bad real_filenum");
+
+	error_return:
+	  temp_type = init_type (TYPE_CODE_ERROR, 0, 0, NULL, NULL);
+	  temp_type_p = (struct type **) xmalloc (sizeof (struct type *));
+	  *temp_type_p = temp_type;
+	  return temp_type_p;
 	}
 
       f = &header_files[real_filenum];
@@ -431,24 +449,31 @@ patch_block_stabs (symbols, stabs, objfile)
    or perhaps read a pair (FILENUM, TYPENUM) in parentheses.
    Just a single number N is equivalent to (0,N).
    Return the two numbers by storing them in the vector TYPENUMS.
-   TYPENUMS will then be used as an argument to dbx_lookup_type.  */
+   TYPENUMS will then be used as an argument to dbx_lookup_type.
 
-void
+   Returns 0 for success, -1 for error.  */
+
+static int
 read_type_number (pp, typenums)
      register char **pp;
      register int *typenums;
 {
+  int nbits;
   if (**pp == '(')
     {
       (*pp)++;
-      typenums[0] = read_number (pp, ',');
-      typenums[1] = read_number (pp, ')');
+      typenums[0] = read_huge_number (pp, ',', &nbits);
+      if (nbits != 0) return -1;
+      typenums[1] = read_huge_number (pp, ')', &nbits);
+      if (nbits != 0) return -1;
     }
   else
     {
       typenums[0] = 0;
-      typenums[1] = read_number (pp, 0);
+      typenums[1] = read_huge_number (pp, 0, &nbits);
+      if (nbits != 0) return -1;
     }
+  return 0;
 }
 
 
@@ -566,10 +591,18 @@ define_symbol (valu, string, desc, type, objfile)
   p++;
 
   /* Determine the type of name being defined.  */
+#if 0
+  /* Getting GDB to correctly skip the symbol on an undefined symbol
+     descriptor and not ever dump core is a very dodgy proposition if
+     we do things this way.  I say the acorn RISC machine can just
+     fix their compiler.  */
   /* The Acorn RISC machine's compiler can put out locals that don't
      start with "234=" or "(3,4)=", so assume anything other than the
      deftypes we know how to handle is a local.  */
   if (!strchr ("cfFGpPrStTvVXCR", *p))
+#else
+  if (isdigit (*p) || *p == '(' || *p == '-')
+#endif
     deftype = 'l';
   else
     deftype = *p++;
@@ -582,8 +615,15 @@ define_symbol (valu, string, desc, type, objfile)
 	(where type 6 is defined by "blobs:t6=eblob1:0,blob2:1,;").  */
   if (deftype == 'c')
     {
-      if (*p++ != '=')
-	error ("Invalid symbol data at symtab pos %d.", symnum);
+      if (*p != '=')
+	{
+	  SYMBOL_CLASS (sym) = LOC_CONST;
+	  SYMBOL_TYPE (sym) = error_type (&p);
+	  SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+	  add_symbol_to_list (sym, &file_symbols);
+	  return sym;
+	}
+      ++p;
       switch (*p++)
 	{
 	case 'r':
@@ -1053,7 +1093,12 @@ define_symbol (valu, string, desc, type, objfile)
       break;
 
     default:
-      error ("Invalid symbol data: unknown symbol-type code `%c' at symtab pos %d.", deftype, symnum);
+      SYMBOL_CLASS (sym) = LOC_CONST;
+      SYMBOL_VALUE (sym) = 0;
+      SYMBOL_TYPE (sym) = error_type (&p);
+      SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+      add_symbol_to_list (sym, &file_symbols);
+      break;
     }
 
   /* When passing structures to a function, some systems sometimes pass
@@ -1105,7 +1150,7 @@ define_symbol (valu, string, desc, type, objfile)
    can define new types and new syntaxes, and old versions of the
    debugger will be able to read the new symbol tables.  */
 
-struct type *
+static struct type *
 error_type (pp)
      char **pp;
 {
@@ -1157,7 +1202,8 @@ read_type (pp, objfile)
   if ((**pp >= '0' && **pp <= '9')
       || **pp == '(')
     {
-      read_type_number (pp, typenums);
+      if (read_type_number (pp, typenums) != 0)
+	return error_type (pp);
       
       /* Type is not being defined here.  Either it already exists,
 	 or this is a forward reference to it.  dbx_alloc_type handles
@@ -1330,13 +1376,19 @@ read_type (pp, objfile)
 	 putting out the debugging information to do that, however.  */
 
       (*pp)--;
-      read_type_number (pp, xtypenums);
-      type = *dbx_lookup_type (xtypenums);
+      if (read_type_number (pp, xtypenums) != 0)
+	return error_type (pp);
       if (typenums[0] == xtypenums[0] && typenums[1] == xtypenums[1])
 	/* It's being defined as itself.  That means it is "void".  */
 	type = init_type (TYPE_CODE_VOID, 0, 0, NULL, objfile);
+      else
+	type = *dbx_lookup_type (xtypenums);
       if (typenums[0] != -1)
 	*dbx_lookup_type (typenums) = type;
+      /* This can happen if we had '-' followed by a garbage character,
+	 for example.  */
+      if (type == NULL)
+	return error_type (pp);
       break;
 
     /* In the following types, we must be sure to overwrite any existing
@@ -1408,9 +1460,11 @@ read_type (pp, objfile)
 	  struct type *return_type;
 	  struct type **args;
 
-	  if (*(*pp)++ != ',')
-	    error ("invalid member type data format, at symtab pos %d.",
-		   symnum);
+	  if (**pp != ',')
+	    /* Invalid member type data format.  */
+	    return error_type (pp);
+	  else
+	    ++(*pp);
 
 	  return_type = read_type (pp, objfile);
 	  args = read_args (pp, ';', objfile);
@@ -1440,7 +1494,8 @@ read_type (pp, objfile)
     case 'e':				/* Enumeration type */
       type = dbx_alloc_type (typenums, objfile);
       type = read_enum_type (pp, type, objfile);
-      *dbx_lookup_type (typenums) = type;
+      if (typenums[0] != -1)
+	*dbx_lookup_type (typenums) = type;
       break;
 
     case 's':				/* Struct type */
@@ -1479,7 +1534,10 @@ read_type (pp, objfile)
     }
 
   if (type == 0)
-    abort ();
+    {
+      warning ("GDB internal error, type is NULL in stabsread.c\n");
+      return error_type (pp);
+    }
 
   return type;
 }
@@ -1649,7 +1707,9 @@ rs6000_builtin_type (typenum)
 
    For the case of overloaded operators, the format is op$::*.funcs, where
    $ is the CPLUS_MARKER (usually '$'), `*' holds the place for an operator
-   name (such as `+=') and `.' marks the end of the operator name.  */
+   name (such as `+=') and `.' marks the end of the operator name.
+
+   Returns 1 for success, 0 for failure.  */
 
 static int
 read_member_functions (fip, pp, type, objfile)
@@ -1829,6 +1889,8 @@ read_member_functions (fip, pp, type, objfile)
 	  switch (*(*pp)++)
 	    {
 	      case '*':
+	      {
+		int nbits;
 	        /* virtual member function, followed by index.
 		   The sign bit is set to distinguish pointers-to-methods
 		   from virtual function indicies.  Since the array is
@@ -1837,7 +1899,9 @@ read_member_functions (fip, pp, type, objfile)
 		   the sign bit out, and usable as a valid index into
 		   the array.  Remove the sign bit here.  */
 	        new_sublist -> fn_field.voffset =
-		  (0x7fffffff & read_number (pp, ';')) + 2;
+		  (0x7fffffff & read_huge_number (pp, ';', &nbits)) + 2;
+		if (nbits != 0)
+		  return 0;
 	      
 		STABS_CONTINUE (pp);
 		if (**pp == ';' || **pp == '\0')
@@ -1870,7 +1934,7 @@ read_member_functions (fip, pp, type, objfile)
 		      }
 		  }
 		break;
-	      
+	      }
 	      case '?':
 		/* static member function.  */
 		new_sublist -> fn_field.voffset = VOFFSET_STATIC;
@@ -1935,9 +1999,11 @@ read_member_functions (fip, pp, type, objfile)
 }
 
 /* Special GNU C++ name.
-   FIXME:  Still need to properly handle parse error conditions. */
 
-static void
+   Returns 1 for success, 0 for failure.  "failure" means that we can't
+   keep parsing and it's time for error_type().  */
+
+static int
 read_cpp_abbrev (fip, pp, type, objfile)
      struct field_info *fip;
      char **pp;
@@ -1998,10 +2064,20 @@ read_cpp_abbrev (fip, pp, type, objfile)
       if (p[-1] != ':')
 	{
 	  complain (&invalid_cpp_abbrev_complaint, *pp);
+	  return 0;
 	}
       fip->list->field.type = read_type (pp, objfile);
-      (*pp)++;			/* Skip the comma.  */
-      fip->list->field.bitpos = read_number (pp, ';');
+      if (**pp == ',')
+	(*pp)++;			/* Skip the comma.  */
+      else
+	return 0;
+
+      {
+	int nbits;
+	fip->list->field.bitpos = read_huge_number (pp, ';', &nbits);
+	if (nbits != 0)
+	  return 0;
+      }
       /* This field is unpacked.  */
       fip->list->field.bitsize = 0;
       fip->list->visibility = VISIBILITY_PRIVATE;
@@ -2015,6 +2091,7 @@ read_cpp_abbrev (fip, pp, type, objfile)
     {
       complain (&invalid_cpp_abbrev_complaint, *pp);
     }
+  return 1;
 }
 
 static void
@@ -2089,11 +2166,24 @@ read_one_struct_field (fip, pp, p, type, objfile)
       complain (&stabs_general_complaint, "bad structure-type format");
       return;
     }
-  
+
   (*pp)++;			/* Skip the comma.  */
-  fip -> list -> field.bitpos = read_number (pp, ',');
-  fip -> list -> field.bitsize = read_number (pp, ';');
-  
+
+  {
+    int nbits;
+    fip -> list -> field.bitpos = read_huge_number (pp, ',', &nbits);
+    if (nbits != 0)
+      {
+	complain (&stabs_general_complaint, "bad structure-type format");
+	return;
+      }
+    fip -> list -> field.bitsize = read_huge_number (pp, ';', &nbits);
+    if (nbits != 0)
+      {
+	complain (&stabs_general_complaint, "bad structure-type format");
+	return;
+      }
+  }
 #if 0
   /* FIXME-tiemann: Can't the compiler put out something which
      lets us distinguish these? (or maybe just not put out anything
@@ -2165,7 +2255,9 @@ read_one_struct_field (fip, pp, p, type, objfile)
 	'/1'	(VISIBILITY_PROTECTED)
 	'/2'	(VISIBILITY_PUBLIC)
 
-   or nothing, for C style fields with public visibility. */
+   or nothing, for C style fields with public visibility.
+
+   Returns 1 for success, 0 for failure.  */
        
 static int
 read_struct_fields (fip, pp, type, objfile)
@@ -2199,7 +2291,8 @@ read_struct_fields (fip, pp, type, objfile)
       p = *pp;
       if (*p == CPLUS_MARKER)
 	{
-	  read_cpp_abbrev (fip, pp, type, objfile);
+	  if (!read_cpp_abbrev (fip, pp, type, objfile))
+	    return 0;
 	  continue;
 	}
 
@@ -2208,10 +2301,12 @@ read_struct_fields (fip, pp, type, objfile)
 	 functions are delimited by a pair of ':'s.  When we hit the member
 	 functions (if any), terminate scan loop and return. */
 
-      while (*p != ':') 
+      while (*p != ':' && *p != '\0') 
 	{
 	  p++;
 	}
+      if (*p == '\0')
+	return 0;
 
       /* Check to see if we have hit the member functions yet.  */
       if (p[1] == ':')
@@ -2250,7 +2345,8 @@ read_struct_fields (fip, pp, type, objfile)
 	Visibility specifiers (2) _______________________________| |  |
 	Offset in bits from start of class ________________________|  |
 	Type number of base class ____________________________________|
- */
+
+  Return 1 for success, 0 for (error-type-inducing) failure.  */
 
 static int
 read_baseclasses (fip, pp, type, objfile)
@@ -2273,7 +2369,12 @@ read_baseclasses (fip, pp, type, objfile)
     }
 
   ALLOCATE_CPLUS_STRUCT_TYPE (type);
-  TYPE_N_BASECLASSES (type) = read_number (pp, ',');
+  {
+    int nbits;
+    TYPE_N_BASECLASSES (type) = read_huge_number (pp, ',', &nbits);
+    if (nbits != 0)
+      return 0;
+  }
 
 #if 0
   /* Some stupid compilers have trouble with the following, so break
@@ -2327,20 +2428,30 @@ read_baseclasses (fip, pp, type, objfile)
 	    return 0;
 	}
 
-      /* The remaining value is the bit offset of the portion of the object
-	 corresponding to this baseclass.  Always zero in the absence of
-	 multiple inheritance.  */
+      {
+	int nbits;
+	
+	/* The remaining value is the bit offset of the portion of the object
+	   corresponding to this baseclass.  Always zero in the absence of
+	   multiple inheritance.  */
 
-      new -> field.bitpos = read_number (pp, ',');
+	new -> field.bitpos = read_huge_number (pp, ',', &nbits);
+	if (nbits != 0)
+	  return 0;
+      }
 
-      /* The last piece of baseclass information is the type of the base
-	 class.  Read it, and remember it's type name as this field's name. */
+      /* The last piece of baseclass information is the type of the
+	 base class.  Read it, and remember it's type name as this
+	 field's name. */
 
       new -> field.type = read_type (pp, objfile);
       new -> field.name = type_name_no_tag (new -> field.type);
 
       /* skip trailing ';' and bump count of number of fields seen */
-      (*pp)++;
+      if (**pp == ';')
+	(*pp)++;
+      else
+	return 0;
     }
   return 1;
 }
@@ -2575,7 +2686,12 @@ read_struct_type (pp, type, objfile)
 
   /* First comes the total size in bytes.  */
 
-  TYPE_LENGTH (type) = read_number (pp, 0);
+  {
+    int nbits;
+    TYPE_LENGTH (type) = read_huge_number (pp, 0, &nbits);
+    if (nbits != 0)
+      return error_type (pp);
+  }
 
   /* Now read the baseclasses, if any, read the regular C struct or C++
      class member fields, attach the fields to the type, read the C++
@@ -2611,6 +2727,7 @@ read_array_type (pp, type, objfile)
   struct type *index_type, *element_type, *range_type;
   int lower, upper;
   int adjustable = 0;
+  int nbits;
 
   /* Format of an array type:
      "ar<index type>;lower;upper;<array_contents_type>".  Put code in
@@ -2630,14 +2747,18 @@ read_array_type (pp, type, objfile)
       (*pp)++;
       adjustable = 1;
     }
-  lower = read_number (pp, ';');
+  lower = read_huge_number (pp, ';', &nbits);
+  if (nbits != 0)
+    return error_type (pp);
 
   if (!(**pp >= '0' && **pp <= '9'))
     {
       (*pp)++;
       adjustable = 1;
     }
-  upper = read_number (pp, ';');
+  upper = read_huge_number (pp, ';', &nbits);
+  if (nbits != 0)
+    return error_type (pp);
   
   element_type = read_type (pp, objfile);
 
@@ -2699,12 +2820,15 @@ read_enum_type (pp, type, objfile)
      A semicolon or comma instead of a NAME means the end.  */
   while (**pp && **pp != ';' && **pp != ',')
     {
+      int nbits;
       STABS_CONTINUE (pp);
       p = *pp;
       while (*p != ':') p++;
       name = obsavestring (*pp, p - *pp, &objfile -> symbol_obstack);
       *pp = p + 1;
-      n = read_number (pp, ',');
+      n = read_huge_number (pp, ',', &nbits);
+      if (nbits != 0)
+	return error_type (pp);
 
       sym = (struct symbol *)
 	obstack_alloc (&objfile -> symbol_obstack, sizeof (struct symbol));
@@ -2789,6 +2913,7 @@ read_sun_builtin_type (pp, typenums, objfile)
      int typenums[2];
      struct objfile *objfile;
 {
+  int type_bits;
   int nbits;
   int signed_type;
 
@@ -2817,23 +2942,29 @@ read_sun_builtin_type (pp, typenums, objfile)
      by this type, except that unsigned short is 4 instead of 2.
      Since this information is redundant with the third number,
      we will ignore it.  */
-  read_number (pp, ';');
+  read_huge_number (pp, ';', &nbits);
+  if (nbits != 0)
+    return error_type (pp);
 
   /* The second number is always 0, so ignore it too. */
-  read_number (pp, ';');
+  read_huge_number (pp, ';', &nbits);
+  if (nbits != 0)
+    return error_type (pp);
 
   /* The third number is the number of bits for this type. */
-  nbits = read_number (pp, 0);
+  type_bits = read_huge_number (pp, 0, &nbits);
+  if (nbits != 0)
+    return error_type (pp);
 
 #if 0
   /* FIXME.  Here we should just be able to make a type of the right
      number of bits and signedness.  FIXME.  */
 
-  if (nbits == TARGET_LONG_LONG_BIT)
+  if (type_bits == TARGET_LONG_LONG_BIT)
     return (lookup_fundamental_type (objfile,
 		 signed_type? FT_LONG_LONG: FT_UNSIGNED_LONG_LONG));
   
-  if (nbits == TARGET_INT_BIT)
+  if (type_bits == TARGET_INT_BIT)
     {
       /* FIXME -- the only way to distinguish `int' from `long'
 	 is to look at its name!  */
@@ -2856,21 +2987,21 @@ read_sun_builtin_type (pp, typenums, objfile)
 	}
     }
     
-  if (nbits == TARGET_SHORT_BIT)
+  if (type_bits == TARGET_SHORT_BIT)
     return (lookup_fundamental_type (objfile,
 		 signed_type? FT_SHORT: FT_UNSIGNED_SHORT));
   
-  if (nbits == TARGET_CHAR_BIT)
+  if (type_bits == TARGET_CHAR_BIT)
     return (lookup_fundamental_type (objfile,
 		 signed_type? FT_CHAR: FT_UNSIGNED_CHAR));
   
-  if (nbits == 0)
+  if (type_bits == 0)
     return lookup_fundamental_type (objfile, FT_VOID);
   
   return error_type (pp);
 #else
-  return init_type (nbits == 0 ? TYPE_CODE_VOID : TYPE_CODE_INT,
-		    nbits / TARGET_CHAR_BIT,
+  return init_type (type_bits == 0 ? TYPE_CODE_VOID : TYPE_CODE_INT,
+		    type_bits / TARGET_CHAR_BIT,
 		    signed_type ? 0 : TYPE_FLAG_UNSIGNED, (char *)NULL,
 		    objfile);
 #endif
@@ -2882,17 +3013,22 @@ read_sun_floating_type (pp, typenums, objfile)
      int typenums[2];
      struct objfile *objfile;
 {
+  int nbits;
   int details;
   int nbytes;
 
   /* The first number has more details about the type, for example
      FN_COMPLEX.  */
-  details = read_number (pp, ';');
+  details = read_huge_number (pp, ';', &nbits);
+  if (nbits != 0)
+    return error_type (pp);
 
   /* The second number is the number of bytes occupied by this type */
-  nbytes = read_number (pp, ';');
+  nbytes = read_huge_number (pp, ';', &nbits);
+  if (nbits != 0)
+    return error_type (pp);
 
-  if (**pp != 0 || details == NF_COMPLEX || details == NF_COMPLEX16
+  if (details == NF_COMPLEX || details == NF_COMPLEX16
       || details == NF_COMPLEX32)
     /* This is a type we can't handle, but we do know the size.
        We also will be able to give it a name.  */
@@ -2908,16 +3044,15 @@ read_sun_floating_type (pp, typenums, objfile)
    and that character is skipped if it does match.
    If END is zero, *PP is left pointing to that character.
 
-   If the number fits in a long, set *VALUE and set *BITS to 0.
-   If not, set *BITS to be the number of bits in the number.
+   If the number fits in a long, set *BITS to 0 and return the value.
+   If not, set *BITS to be the number of bits in the number and return 0.
 
-   If encounter garbage, set *BITS to -1.  */
+   If encounter garbage, set *BITS to -1 and return 0.  */
 
-static void
-read_huge_number (pp, end, valu, bits)
+static long
+read_huge_number (pp, end, bits)
      char **pp;
      int end;
-     long *valu;
      int *bits;
 {
   char *p = *pp;
@@ -3007,11 +3142,12 @@ read_huge_number (pp, end, valu, bits)
     }
   else
     {
-      if (valu)
-	*valu = n * sign;
       if (bits)
 	*bits = 0;
+      return n * sign;
     }
+  /* It's *BITS which has the interesting information.  */
+  return 0;
 }
 
 static struct type *
@@ -3029,7 +3165,10 @@ read_range_type (pp, typenums, objfile)
 
   /* First comes a type we are a subrange of.
      In C it is usually 0, 1 or the type being defined.  */
-  read_type_number (pp, rangenums);
+  /* FIXME: according to stabs.texinfo and AIX doc, this can be a type-id
+     not just a type number.  */
+  if (read_type_number (pp, rangenums) != 0)
+    return error_type (pp);
   self_subrange = (rangenums[0] == typenums[0] &&
 		   rangenums[1] == typenums[1]);
 
@@ -3039,8 +3178,8 @@ read_range_type (pp, typenums, objfile)
 
   /* The remaining two operands are usually lower and upper bounds
      of the range.  But in some special cases they mean something else.  */
-  read_huge_number (pp, ';', &n2, &n2bits);
-  read_huge_number (pp, ';', &n3, &n3bits);
+  n2 = read_huge_number (pp, ';', &n2bits);
+  n3 = read_huge_number (pp, ';', &n3bits);
 
   if (n2bits == -1 || n3bits == -1)
     return error_type (pp);
@@ -3177,50 +3316,6 @@ read_range_type (pp, typenums, objfile)
   return (result_type);
 }
 
-/* Read a number from the string pointed to by *PP.
-   The value of *PP is advanced over the number.
-   If END is nonzero, the character that ends the
-   number must match END, or an error happens;
-   and that character is skipped if it does match.
-   If END is zero, *PP is left pointing to that character.  */
-
-long
-read_number (pp, end)
-     char **pp;
-     int end;
-{
-  register char *p = *pp;
-  register long n = 0;
-  register int c;
-  int sign = 1;
-
-  /* Handle an optional leading minus sign.  */
-
-  if (*p == '-')
-    {
-      sign = -1;
-      p++;
-    }
-
-  /* Read the digits, as far as they go.  */
-
-  while ((c = *p++) >= '0' && c <= '9')
-    {
-      n *= 10;
-      n += c - '0';
-    }
-  if (end)
-    {
-      if (c && c != end)
-	error ("Invalid symbol data: invalid character \\%03o at symbol pos %d.", c, symnum);
-    }
-  else
-    --p;
-
-  *pp = p;
-  return n * sign;
-}
-
 /* Read in an argument list.  This is a list of types, separated by commas
    and terminated with END.  Return the list of types read in, or (struct type
    **)-1 if there is an error.  */
@@ -3331,15 +3426,14 @@ cleanup_undefined_types ()
 		struct pending *ppt;
 		int i;
 		/* Name of the type, without "struct" or "union" */
-		char *typename = TYPE_NAME (*type);
+		char *typename = type_name_no_tag (*type);
 
-		if (!strncmp (typename, "struct ", 7))
-		  typename += 7;
-		if (!strncmp (typename, "union ", 6))
-		  typename += 6;
-		if (!strncmp (typename, "enum ", 5))
-		  typename += 5;
-
+		if (typename == NULL)
+		  {
+		    static struct complaint msg = {"need a type name", 0, 0};
+		    complain (&msg);
+		    break;
+		  }
 		for (ppt = file_symbols; ppt; ppt = ppt->next)
 		  {
 		    for (i = 0; i < ppt->nsyms; i++)
@@ -3383,9 +3477,13 @@ cleanup_undefined_types ()
 	  }
 	  break;
 
-	  default:
-	  badtype:
-	  error ("GDB internal error.  cleanup_undefined_types with bad type %d.", TYPE_CODE (*type));
+	default:
+	badtype:
+	  {
+	    static struct complaint msg = {"\
+GDB internal error.  cleanup_undefined_types with bad type %d.", 0, 0};
+	    complain (&msg, TYPE_CODE (*type));
+	  }
 	  break;
 	}
     }

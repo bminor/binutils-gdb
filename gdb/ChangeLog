@@ -1,3 +1,13 @@
+Tue May 25 13:06:28 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabsread.c: Remove all uses of error().  Make error_type and
+	read_type_number static.
+	(define_symbol): Don't try to deal with a missing symbol
+	descriptor which isn't followed by digit, '(', or '-'.
+	* stabsread.h: Don't declare read_type_number here.
+	* gdbtypes.h: Don't declare error_type here.
+	* xcoffread.c: Remove NO_TYPEDEFS code.
+
 Tue May 25 09:33:16 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* mips-tdep.c: Removed #include of many header files, and #define
@@ -7,7 +17,7 @@ Tue May 25 09:36:13 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* Many places: replace "the inferior" in messages with "the program"
 	or "the program being debugged".
-	* inflow.c (try_writing_regs): Revove; it's been #if 0'd forever
+	* inflow.c (try_writing_regs): Remove; it's been #if 0'd forever
 	and I'm getting sick of maintaining it.
 
 	* config/i386/linux.mh: Don't use \ newline; the awk scripts don't

@@ -635,9 +635,6 @@ extern struct type *
 builtin_type PARAMS ((char **));
 
 extern struct type *
-error_type PARAMS ((char **));
-
-extern struct type *
 lookup_typename PARAMS ((char *, struct block *, int));
 
 extern struct type *
