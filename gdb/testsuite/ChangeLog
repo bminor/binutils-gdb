@@ -1,3 +1,8 @@
+2002-02-20  Michael Chastain  <mec@shout.net>
+
+	* gdb.c++/virtfunc.exp (test_virtual_calls): Remove obsolete calls
+	to setup_xfail.  Document some of the remaining calls.
+
 2002-02-18  Michael Chastain  <mec@shout.net>
 
 	* gdb.c++/userdef.exp: Update copyright year.

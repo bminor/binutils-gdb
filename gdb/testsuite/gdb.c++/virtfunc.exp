@@ -743,12 +743,6 @@ proc test_virtual_calls {} {
 	return 0
     }
 
-    # FIXME: In fall 1998, GCC's virtual function type info was changed,
-    # which causes GDB to be unable to resolve these calls.  Until the
-    # problem is fixed, XFAIL these tests. -sts 1999-08-02
-
-    if {$gcc_compiled} then { setup_xfail "*-*-*" }
-
     send_gdb "print pAe->f()\n"
     gdb_expect {
 	-re ".* = 20$nl$gdb_prompt $" { pass "print pAe->f()" }
@@ -770,8 +764,6 @@ proc test_virtual_calls {} {
 	eof { fail "print pAe->f() ($GDB dumped core) (FIXME)" ; gdb_virtfunc_restart; return }
     }
 
-    if {$gcc_compiled} then { setup_xfail "*-*-*" }
-
     send_gdb "print pAa->f()\n"
     gdb_expect {
 	-re ".* = 1$nl$gdb_prompt $" { pass "print pAa->f()" }
@@ -783,8 +775,6 @@ proc test_virtual_calls {} {
 	timeout { fail "print pAa->f() (timeout)" }
 	eof { fail "print pAa->f() ($GDB dumped core) (FIXME)" ; gdb_virtfunc_restart; return }
     }
-
-    if {$gcc_compiled} then { setup_xfail "*-*-*" }
 
     send_gdb "print pDe->vg()\n"
     gdb_expect {
@@ -798,8 +788,6 @@ proc test_virtual_calls {} {
 	eof { fail "print pDe->vg() ($GDB dumped core) (FIXME)" ; gdb_virtfunc_restart; return }
     }
 
-    if {$gcc_compiled} then { setup_xfail "*-*-*" }
-
     send_gdb "print pADe->vg()\n"
     gdb_expect {
 	-re ".* = 202$nl$gdb_prompt $" { pass "print pADe->vg()" }
@@ -811,8 +799,6 @@ proc test_virtual_calls {} {
 	timeout { fail "print pADe->vg() (timeout)" }
 	eof { fail "print pADe->vg() ($GDB dumped core) (FIXME)" ; gdb_virtfunc_restart; return }
     }
-
-    if {$gcc_compiled} then { setup_xfail "*-*-*" }
 
     send_gdb "print pDd->vg()\n"
     gdb_expect {
@@ -826,8 +812,6 @@ proc test_virtual_calls {} {
 	eof { fail "print pDd->vg() ($GDB dumped core) (FIXME)" ; gdb_virtfunc_restart; return }
     }
 
-    if {$gcc_compiled} then { setup_xfail "*-*-*" }
-
     send_gdb "print pEe->vvb()\n"
     gdb_expect {
 	-re ".* = 411$nl$gdb_prompt $" { pass "print pEe->vvb()" }
@@ -840,8 +824,6 @@ proc test_virtual_calls {} {
 	eof { fail "print pEe->vvb() ($GDB dumped core) (FIXME)" ; gdb_virtfunc_restart; return }
     }
 
-    if {$gcc_compiled} then { setup_xfail "*-*-*" }
-
     send_gdb "print pVB->vvb()\n"
     gdb_expect {
 	-re ".* = 407$nl$gdb_prompt $" { pass "print pVB->vvb()" }
@@ -853,6 +835,10 @@ proc test_virtual_calls {} {
 	timeout { fail "print pVB->vvb() (timeout)" }
 	eof { fail "print pVB->vvb() ($GDB dumped core) (FIXME)" ; gdb_virtfunc_restart; return }
     }
+
+    # fails on target=native, host=i686-pc-linux-gnu%rh-7.2,
+    # gdb=HEAD%2002-02-16, gcc=2.95.3, goption=-gdwarf-2.
+    # -- chastain 2002-02-20
 
     if {$gcc_compiled} then { setup_xfail "*-*-*" }
 
@@ -868,8 +854,6 @@ proc test_virtual_calls {} {
 	eof { fail "print pBe->vvb() ($GDB dumped core) (FIXME)" ; gdb_virtfunc_restart; return }
     }
 
-    if {$gcc_compiled} then { setup_xfail "*-*-*" }
-
     send_gdb "print pDe->vvb()\n"
     gdb_expect {
 	-re ".* = 411$nl$gdb_prompt $" { pass "print pDe->vvb()" }
@@ -881,8 +865,6 @@ proc test_virtual_calls {} {
 	timeout { fail "print pDe->vvb() (timeout)" }
 	eof { fail "print pDe->vvb() ($GDB dumped core) (FIXME)" ; gdb_virtfunc_restart; return }
     }
-
-    if {$gcc_compiled} then { setup_xfail "*-*-*" }
 
     send_gdb "print pEe->vd()\n"
     gdb_expect {
@@ -896,8 +878,6 @@ proc test_virtual_calls {} {
 	eof { fail "print pEe->vd() ($GDB dumped core) (FIXME)" ; gdb_virtfunc_restart; return }
     }
 
-    if {$gcc_compiled} then { setup_xfail "*-*-*" }
-
     send_gdb "print pEe->fvb()\n"
     gdb_expect {
 	-re ".* = 311$nl$gdb_prompt $" { pass "print pEe->fvb()" }
@@ -909,6 +889,38 @@ proc test_virtual_calls {} {
 	timeout { fail "print pEe->fvb() (timeout)" }
 	eof { fail "print pEe->fvb() ($GDB dumped core) (FIXME)" ; gdb_virtfunc_restart; return }
     }
+
+    # fails on target=native, host=i686-pc-linux-gnu%rh-7.2,
+    # gdb=HEAD%2002-02-16, gcc=2.95.3, goption=-gdwarf-2.
+    #
+    # fails on target=native, host=i686-pc-linux-gnu%rh-7.2,
+    # gdb=HEAD%2002-02-16, gcc=2.95.3, goption=-gstabs+.
+    #
+    # fails on target=native, host=i686-pc-linux-gnu%rh-7.2,
+    # gdb=HEAD%2002-02-16, gcc=3.0.3, goption=-gdwarf-2.
+    #
+    # fails on target=native, host=i686-pc-linux-gnu%rh-7.2,
+    # gdb=HEAD%2002-02-16, gcc=3.0.3, goption=-gstabs+.
+    #
+    # fails on target=native, host=i686-pc-linux-gnu%rh-7.2,
+    # gdb=HEAD%2002-02-16, gcc=3.0.4-20020215, goption=-gdwarf-2.
+    #
+    # fails on target=native, host=i686-pc-linux-gnu%rh-7.2,
+    # gdb=HEAD%2002-02-16, gcc=3.0.4-20020215, goption=-gstabs+.
+    #
+    # fails on target=native, host=i686-pc-linux-gnu%rh-7.2,
+    # gdb=HEAD%2002-02-16, gcc=gcc-3_0-branch%2002-02-16, goption=-gdwarf-2.
+    #
+    # fails on target=native, host=i686-pc-linux-gnu%rh-7.2,
+    # gdb=HEAD%2002-02-16, gcc=gcc-3_0-branch%2002-02-16, goption=-gstabs+.
+    #
+    # fails on target=native, host=i686-pc-linux-gnu%rh-7.2,
+    # gdb=HEAD%2002-02-16, gcc=HEAD%2002-02-16, goption=-gdwarf-2.
+    #
+    # fails on target=native, host=i686-pc-linux-gnu%rh-7.2,
+    # gdb=HEAD%2002-02-16, gcc=HEAD%2002-02-16, goption=-gstabs+.
+    #
+    # -- chastain 2002-02-20
 
     if {$gcc_compiled} then { setup_xfail "*-*-*" }
 
