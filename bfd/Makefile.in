@@ -1748,10 +1748,9 @@ elf32-m68hc12.lo: elf32-m68hc12.c $(INCDIR)/filenames.h \
   $(INCDIR)/elf/reloc-macros.h $(INCDIR)/opcode/m68hc11.h \
   elf32-target.h elf32-m68hc1x.h
 elf32-m68hc1x.lo: elf32-m68hc1x.c $(INCDIR)/filenames.h \
-  elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
-  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/m68hc11.h \
-  $(INCDIR)/elf/reloc-macros.h $(INCDIR)/opcode/m68hc11.h \
-  elf32-target.h elf32-m68hc1x.h
+  $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/m68hc11.h \
+  $(INCDIR)/elf/reloc-macros.h elf32-target.h elf32-m68hc1x.h
 elf32-m88k.lo: elf32-m88k.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h elf32-target.h
