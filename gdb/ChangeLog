@@ -365,7 +365,7 @@ Thu Jan 13 23:34:17 EST 2000  Nicholas Duffek <nsd@cygnus.com>
 2000-01-07  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* uw-thread.c: New file to support UnixWare user-mode threads:
-	contributed by Nickolas Duffek  <nsd@cygnus.com>. 
+	contributed by Nickolas Duffek  <nsd@cygnus.com>.
 	* target.h (struct target_ops): New vector, to_extra_thread_info,
 	allows back-ends to give extra details in info thread display.
 	(target_extra_thread_info): define new macro.
