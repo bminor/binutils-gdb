@@ -1,3 +1,9 @@
+Mon Dec 31 16:46:26 2001  Jeffrey A Law  (law@redhat.com)
+
+	* hppa-dis.c (print_insn_hppa): Handle new 'c' mode completers,
+	'X', 'M', and 'A'.  No longer emit a space after 'x' or 's'.
+	Always emit a space after 'H'.
+
 2001-12-18  matthew green  <mrg@redhat.com>
 
 	* ppc-opc.c (PPCVEC): Include PPC_OPCODE_ANY.
