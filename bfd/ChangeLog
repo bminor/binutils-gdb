@@ -1,3 +1,77 @@
+2004-02-13  Andrew Cagney  <cagney@redhat.com>
+
+	* elf.c	(vma_page_aligned_bias): New function.
+	(assign_file_positions_except_relocs)
+	(assign_file_positions_for_segments): Replace broken modulo
+	arithmetic with call to vma_page_aligned_bias.
+
+2004-02-11  Andrew Cagney  <cagney@redhat.com>
+
+	* bfd-in.h: Update copyright.
+	(bfd_tell): Change return type to file_ptr.
+	* bfd-in2.h: Re-generate.
+	* cache.c: Update copyright.
+	(bfd_cache_lookup_worker): Use real_fseek, do not cast offset
+	parameter.
+	(close_one): Use real_ftell.
+	* bfdio.c: Update copyright.
+	(real_ftell, real_fseek): New functions.
+	(bfd_tell): Use real_fseek and real_ftell, change return type to
+	file_ptr.
+	(bfd_seek): Use real_ftell and real_fseek, change type of
+	file_position to a file_ptr.
+	* libbfd-in.h: Update copyright.
+	(real_ftell, real_fseek): Declare.
+	* libbfd.h: Re-generate.
+
+	* configure.in (AC_CHECK_FUNCS): Check for ftello, ftello64,
+	fseeko and fseeko64.  Determine bfd_file_ptr.
+	* configure: Re-generate.
+	* config.in: Re-generate.
+	
+2004-02-09  Anil Paranjpe  <anilp1@KPITCummins.com>
+
+	* coff-h8300.c: Added comments about relaxation for ldc.w and stc.w.
+	* elf32-h8300.c: Likewise.
+
+2004-02-09  Christian Vogel <vogelchr@vogel.cx>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* elf64-alpha.c (elf64_alpha_calc_got_offsets_for_symbol): Catch
+	GOT entries with no associated GOT subsection.
+
+2004-02-09  Richard Sandiford  <rsandifo@redhat.com>
+
+	* bfd-elf.h (elf_backend_name_local_section_symbols): New hook.
+	* elf.c (swap_out_syms): Use it to decide whether local section
+	symbols should be named.
+	* elfxx-target.h (elf_backend_name_local_section_symbols): New macro.
+	* elfxx-mips.h (_bfd_mips_elf_name_local_section_symbols): Declare.
+	(elf_backend_name_local_section_symbols): Define.
+	* elfxx-mips.c (_bfd_mips_elf_name_local_section_symbols): New.
+
+2004-01-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-ia64.c (elfNN_ia64_relax_brl): New function.
+	(elfNN_ia64_relax_section): Optimize brl to br during the relax
+	finalize pass.
+
+2004-01-30  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf32-frv.c (elf32_frv_always_size_sections): Initialize pointer
+	to bfd_link_hash_entry passed by reference to
+	_bfd_generic_link_add_one_symbol.
+
+2004-01-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-ia64.c (elfNN_ia64_relocate_section): Disallow imm
+	relocations against dynamic symbols.
+
+2004-01-23  Daniel Jacobowitz  <drow@mvista.com>
+
+	* elf32-arm.h (elf32_arm_check_relocs): Revert part of 2004-01-13
+	change.
+
 2004-01-21  Tom Rix  <tcrix@worldnet.att.net>
 
 	* reloc.c: New 5 bit reloc, BFD_RELOC_M68HC12_5B, for m68hc12 movb/movw.

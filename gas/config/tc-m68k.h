@@ -1,6 +1,6 @@
 /* This file is tc-m68k.h
    Copyright 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000, 2001, 2002, 2003
+   1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -169,8 +169,11 @@ while (0)
 #define tc_fix_adjustable(X) tc_m68k_fix_adjustable(X)
 extern int tc_m68k_fix_adjustable PARAMS ((struct fix *));
 
-/* Target *-*-elf implies an embedded target.  No shared libs.  */
-#define EXTERN_FORCE_RELOC (strcmp (TARGET_OS, "elf") != 0)
+/* Target *-*-elf implies an embedded target.  No shared libs.
+   *-*-uclinux also requires special casing to prevent GAS from
+   generating unsupported R_68K_PC16 relocs.  */
+#define EXTERN_FORCE_RELOC \
+  ((strcmp (TARGET_OS, "elf") != 0) && (strcmp (TARGET_OS, "uclinux") != 0))
 
 /* Values passed to md_apply_fix3 don't include symbol values.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0

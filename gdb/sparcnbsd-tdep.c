@@ -50,16 +50,18 @@ const struct sparc_gregset sparc32nbsd_gregset =
   -1				/* %l0 */
 };
 
-/* Unlike other NetBSD implementations, the SPARC port historically
-   used .reg and .reg2 (see bfd/netbsd-core.c), and as such, we can
-   share one routine for a.out and ELF core files.  */
-
 static void
 sparc32nbsd_supply_gregset (const struct regset *regset,
 			    struct regcache *regcache,
 			    int regnum, const void *gregs, size_t len)
 {
   sparc32_supply_gregset (regset->descr, regcache, regnum, gregs);
+
+  /* Traditional NetBSD core files don't use multiple register sets.
+     Instead, the general-purpose and floating-point registers are
+     lumped together in a single section.  */
+  if (len >= 212)
+    sparc32_supply_fpregset (regcache, regnum, (const char *) gregs + 80);
 }
 
 static void
@@ -90,25 +92,102 @@ sparc32nbsd_pc_in_sigtramp (CORE_ADDR pc, char *name)
   return nbsd_pc_in_sigtramp (pc, name);
 }
 
+struct trad_frame_saved_reg *
+sparc32nbsd_sigcontext_saved_regs (struct frame_info *next_frame)
+{
+  struct trad_frame_saved_reg *saved_regs;
+  CORE_ADDR addr, sigcontext_addr;
+  int regnum, delta;
+  ULONGEST psr;
+
+  saved_regs = trad_frame_alloc_saved_regs (next_frame);
+
+  /* We find the appropriate instance of `struct sigcontext' at a
+     fixed offset in the signal frame.  */
+  addr = frame_unwind_register_unsigned (next_frame, SPARC_FP_REGNUM);
+  sigcontext_addr = addr + 64 + 16;
+
+  /* The registers are saved in bits and pieces scattered all over the
+     place.  The code below records their location on the assumption
+     that the part of the signal trampoline that saves the state has
+     been executed.  */
+
+  saved_regs[SPARC_SP_REGNUM].addr = sigcontext_addr + 8;
+  saved_regs[SPARC32_PC_REGNUM].addr = sigcontext_addr + 12;
+  saved_regs[SPARC32_NPC_REGNUM].addr = sigcontext_addr + 16;
+  saved_regs[SPARC32_PSR_REGNUM].addr = sigcontext_addr + 20;
+  saved_regs[SPARC_G1_REGNUM].addr = sigcontext_addr + 24;
+  saved_regs[SPARC_O0_REGNUM].addr = sigcontext_addr + 28;
+
+  /* The remaining `global' registers and %y are saved in the `local'
+     registers.  */
+  delta = SPARC_L0_REGNUM - SPARC_G0_REGNUM;
+  for (regnum = SPARC_G2_REGNUM; regnum <= SPARC_G7_REGNUM; regnum++)
+    saved_regs[regnum].realreg = regnum + delta;
+  saved_regs[SPARC32_Y_REGNUM].realreg = SPARC_L1_REGNUM;
+
+  /* The remaining `out' registers can be found in the current frame's
+     `in' registers.  */
+  delta = SPARC_I0_REGNUM - SPARC_O0_REGNUM;
+  for (regnum = SPARC_O1_REGNUM; regnum <= SPARC_O5_REGNUM; regnum++)
+    saved_regs[regnum].realreg = regnum + delta;
+  saved_regs[SPARC_O7_REGNUM].realreg = SPARC_I7_REGNUM;
+
+  /* The `local' and `in' registers have been saved in the register
+     save area.  */
+  addr = saved_regs[SPARC_SP_REGNUM].addr;
+  addr = get_frame_memory_unsigned (next_frame, addr, 4);
+  for (regnum = SPARC_L0_REGNUM;
+       regnum <= SPARC_I7_REGNUM; regnum++, addr += 4)
+    saved_regs[regnum].addr = addr;
+
+  /* Handle StackGhost.  */
+  {
+    ULONGEST wcookie = sparc_fetch_wcookie ();
+
+    if (wcookie != 0)
+      {
+	ULONGEST i7;
+
+	addr = saved_regs[SPARC_I7_REGNUM].addr;
+	i7 = get_frame_memory_unsigned (next_frame, addr, 4);
+	trad_frame_set_value (saved_regs, SPARC_I7_REGNUM, i7 ^ wcookie);
+      }
+  }
+
+  /* The floating-point registers are only saved if the EF bit in %prs
+     has been set.  */
+
+#define PSR_EF	0x00001000
+
+  addr = saved_regs[SPARC32_PSR_REGNUM].addr;
+  psr = get_frame_memory_unsigned (next_frame, addr, 4);
+  if (psr & PSR_EF)
+    {
+      CORE_ADDR sp;
+
+      sp = frame_unwind_register_unsigned (next_frame, SPARC_SP_REGNUM);
+      saved_regs[SPARC32_FSR_REGNUM].addr = sp + 96;
+      for (regnum = SPARC_F0_REGNUM, addr = sp + 96 + 8;
+	   regnum <= SPARC_F31_REGNUM; regnum++, addr += 4)
+	saved_regs[regnum].addr = addr;
+    }
+
+  return saved_regs;
+}
+
 static struct sparc_frame_cache *
 sparc32nbsd_sigcontext_frame_cache (struct frame_info *next_frame,
 				    void **this_cache)
 {
   struct sparc_frame_cache *cache;
-  CORE_ADDR addr, sigcontext_addr;
-  LONGEST psr;
-  int regnum, delta;
+  CORE_ADDR addr;
 
   if (*this_cache)
     return *this_cache;
 
   cache = sparc_frame_cache (next_frame, this_cache);
   gdb_assert (cache == *this_cache);
-
-  /* The registers are saved in bits and pieces scattered all over the
-     place.  The code below records their location on the assumption
-     that the part of the signal trampoline that saves the state has
-     been executed.  */
 
   /* If we couldn't find the frame's function, we're probably dealing
      with an on-stack signal trampoline.  */
@@ -123,58 +202,7 @@ sparc32nbsd_sigcontext_frame_cache (struct frame_info *next_frame,
       cache->base = addr;
     }
 
-  cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
-
-  /* We find the appropriate instance of `struct sigcontext' at a
-     fixed offset in the signal frame.  */
-  sigcontext_addr = cache->base + 64 + 16;
-
-  cache->saved_regs[SPARC_SP_REGNUM].addr = sigcontext_addr + 8;
-  cache->saved_regs[SPARC32_PC_REGNUM].addr = sigcontext_addr + 12;
-  cache->saved_regs[SPARC32_NPC_REGNUM].addr = sigcontext_addr + 16;
-  cache->saved_regs[SPARC32_PSR_REGNUM].addr = sigcontext_addr + 20;
-  cache->saved_regs[SPARC_G1_REGNUM].addr = sigcontext_addr + 24;
-  cache->saved_regs[SPARC_O0_REGNUM].addr = sigcontext_addr + 28;
-
-  /* The remaining `global' registers and %y are saved in the `local'
-     registers.  */
-  delta = SPARC_L0_REGNUM - SPARC_G0_REGNUM;
-  for (regnum = SPARC_G2_REGNUM; regnum <= SPARC_G7_REGNUM; regnum++)
-    cache->saved_regs[regnum].realreg = regnum + delta;
-  cache->saved_regs[SPARC32_Y_REGNUM].realreg = SPARC_L1_REGNUM;
-
-  /* The remaining `out' registers can be found in the current frame's
-     `in' registers.  */
-  delta = SPARC_I0_REGNUM - SPARC_O0_REGNUM;
-  for (regnum = SPARC_O1_REGNUM; regnum <= SPARC_O5_REGNUM; regnum++)
-    cache->saved_regs[regnum].realreg = regnum + delta;
-  cache->saved_regs[SPARC_O7_REGNUM].realreg = SPARC_I7_REGNUM;
-
-  /* The `local' and `in' registers have been saved in the register
-     save area.  */
-  addr = cache->saved_regs[SPARC_SP_REGNUM].addr;
-  addr = get_frame_memory_unsigned (next_frame, addr, 4);
-  for (regnum = SPARC_L0_REGNUM;
-       regnum <= SPARC_I7_REGNUM; regnum++, addr += 4)
-    cache->saved_regs[regnum].addr = addr;
-
-  /* The floating-point registers are only saved if the EF bit in %prs
-     has been set.  */
-
-#define PSR_EF	0x00001000
-
-  addr = cache->saved_regs[SPARC32_PSR_REGNUM].addr;
-  psr = get_frame_memory_unsigned (next_frame, addr, 4);
-  if (psr & PSR_EF)
-    {
-      CORE_ADDR sp;
-
-      sp = frame_unwind_register_unsigned (next_frame, SPARC_SP_REGNUM);
-      cache->saved_regs[SPARC32_FSR_REGNUM].addr = sp + 96;
-      for (regnum = SPARC_F0_REGNUM, addr = sp + 96 + 8;
-	   regnum <= SPARC_F31_REGNUM; regnum++, addr += 4)
-	cache->saved_regs[regnum].addr = addr;
-    }
+  cache->saved_regs = sparc32nbsd_sigcontext_saved_regs (next_frame);
 
   return cache;
 }
@@ -249,9 +277,11 @@ sparc32nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->gregset = XMALLOC (struct regset);
   tdep->gregset->descr = &sparc32nbsd_gregset;
   tdep->gregset->supply_regset = sparc32nbsd_supply_gregset;
+  tdep->sizeof_gregset = 20 * 4;
 
   tdep->fpregset = XMALLOC (struct regset);
   tdep->fpregset->supply_regset = sparc32nbsd_supply_fpregset;
+  tdep->sizeof_fpregset = 33 * 4;
 
   set_gdbarch_pc_in_sigtramp (gdbarch, sparc32nbsd_pc_in_sigtramp);
   frame_unwind_append_sniffer (gdbarch, sparc32nbsd_sigtramp_frame_sniffer);
@@ -284,6 +314,28 @@ sparcnbsd_aout_osabi_sniffer (bfd *abfd)
   return GDB_OSABI_UNKNOWN;
 }
 
+/* OpenBSD uses the traditional NetBSD core file format, even for
+   ports that use ELF.  Therefore, if the default OS ABI is OpenBSD
+   ELF, we return that instead of NetBSD a.out.  This is mainly for
+   the benfit of OpenBSD/sparc64, which inherits the sniffer below
+   since we include this file for an OpenBSD/sparc64 target.  For
+   OpenBSD/sparc, the NetBSD a.out OS ABI is probably similar enough
+   to both the OpenBSD a.out and the OpenBSD ELF OS ABI.  */
+#if defined (GDB_OSABI_DEFAULT) && (GDB_OSABI_DEFAULT == GDB_OSABI_OPENBSD_ELF)
+#define GDB_OSABI_NETBSD_CORE GDB_OSABI_OPENBSD_ELF
+#else
+#define GDB_OSABI_NETBSD_CORE GDB_OSABI_NETBSD_AOUT
+#endif
+
+static enum gdb_osabi
+sparcnbsd_core_osabi_sniffer (bfd *abfd)
+{
+  if (strcmp (bfd_get_target (abfd), "netbsd-core") == 0)
+    return GDB_OSABI_NETBSD_CORE;
+
+  return GDB_OSABI_UNKNOWN;
+}
+
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 void _initialize_sparcnbsd_tdep (void);
@@ -293,6 +345,11 @@ _initialize_sparnbsd_tdep (void)
 {
   gdbarch_register_osabi_sniffer (bfd_arch_sparc, bfd_target_aout_flavour,
 				  sparcnbsd_aout_osabi_sniffer);
+
+  /* BFD doesn't set the architecture for NetBSD style a.out core
+     files.  */
+  gdbarch_register_osabi_sniffer (bfd_arch_unknown, bfd_target_unknown_flavour,
+                                  sparcnbsd_core_osabi_sniffer);
 
   gdbarch_register_osabi (bfd_arch_sparc, 0, GDB_OSABI_NETBSD_AOUT,
 			  sparc32nbsd_aout_init_abi);

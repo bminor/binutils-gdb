@@ -657,6 +657,15 @@ gdb_test "cd ${fullsrcdir}" \
          "Working directory [string_to_regexp ${fullsrcdir}].*" \
          "cd to \${srcdir}"
 
+send_gdb "complete file ./gdb.base/compl\n"
+sleep 1
+gdb_expect  {
+    -re "file ./gdb.base/completion\\.exp.*$gdb_prompt $"
+	{ pass "complete-command 'file ./gdb.base/compl'"}
+    -re ".*$gdb_prompt $"       { fail "complete-command 'file ./gdb.base/compl'" }
+    timeout         { fail "(timeout) complete-command 'file ./gdb.base/compl'" }
+}
+
 send_gdb "file ./gdb.base/complet\t"
 sleep 1
 gdb_expect  {
@@ -664,7 +673,6 @@ gdb_expect  {
             { send_gdb "\n"
               gdb_expect {
                       -re "\r\nA program is being debugged already\\.  Kill it\\? \\(y or n\\) $"
-\
                       { send_gdb "n\n"
                         gdb_expect {
                                 -re "\r\nProgram not killed\\.\r\n$gdb_prompt $"\

@@ -1,5 +1,5 @@
 /* Target-dependent code for Atmel AVR, for GDB.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -226,12 +226,6 @@ avr_make_iaddr (CORE_ADDR x)
   return ((x) | AVR_IMEM_START);
 }
 
-static int
-avr_iaddr_p (CORE_ADDR x)
-{
-  return (((x) & AVR_MEM_MASK) == AVR_IMEM_START);
-}
-
 /* FIXME: TRoth: Really need to use a larger mask for instructions. Some
    devices are already up to 128KBytes of flash space.
 
@@ -249,12 +243,6 @@ static CORE_ADDR
 avr_make_saddr (CORE_ADDR x)
 {
   return ((x) | AVR_SMEM_START);
-}
-
-static int
-avr_saddr_p (CORE_ADDR x)
-{
-  return (((x) & AVR_MEM_MASK) == AVR_SMEM_START);
 }
 
 static CORE_ADDR
@@ -1321,7 +1309,6 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_breakpoint_from_pc (gdbarch, avr_breakpoint_from_pc);
 
-  set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frameless_function_invocation (gdbarch,
                                              frameless_look_for_prologue);
 

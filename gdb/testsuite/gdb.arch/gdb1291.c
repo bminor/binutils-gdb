@@ -1,4 +1,4 @@
-/* Copyright 2003 Free Software Foundation, Inc.
+/* Copyright 2003, 2004 Free Software Foundation, Inc.
  
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ main()
 asm(".text\n"
     "    .align 5\n"
     "sub:\n"
+    "_sub:\n"
     "    mov.l  r14,@-r15\n"
     "    mov.w  .STACK2,r3\n"
     "    sub    r3,r15\n"

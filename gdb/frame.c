@@ -234,7 +234,6 @@ get_frame_id (struct frame_info *fi)
 	     directly.  Unfortunately, legacy code, called by
 	     legacy_get_prev_frame, explicitly set the frames type
 	     using the method deprecated_set_frame_type().  */
-	  gdb_assert (fi->unwind->type != UNKNOWN_FRAME);
 	  fi->type = fi->unwind->type;
 	}
       /* Find THIS frame's ID.  */
@@ -510,9 +509,10 @@ frame_register_unwind (struct frame_info *frame, int regnum,
 
   if (frame_debug)
     {
-      fprintf_unfiltered (gdb_stdlog,
-			  "{ frame_register_unwind (frame=%d,regnum=\"%s\",...) ",
-			  frame->level, frame_map_regnum_to_name (frame, regnum));
+      fprintf_unfiltered (gdb_stdlog, "\
+{ frame_register_unwind (frame=%d,regnum=%d(%s),...) ",
+			  frame->level, regnum,
+			  frame_map_regnum_to_name (frame, regnum));
     }
 
   /* Require all but BUFFERP to be valid.  A NULL BUFFERP indicates
@@ -538,7 +538,6 @@ frame_register_unwind (struct frame_info *frame, int regnum,
 	 directly.  Unfortunately, legacy code, called by
 	 legacy_get_prev_frame, explicitly set the frames type using
 	 the method deprecated_set_frame_type().  */
-      gdb_assert (frame->unwind->type != UNKNOWN_FRAME);
       frame->type = frame->unwind->type;
     }
 
@@ -1029,9 +1028,12 @@ legacy_saved_regs_this_id (struct frame_info *next_frame,
 			   void **this_prologue_cache,
 			   struct frame_id *id)
 {
-  /* legacy_get_prev_frame() always sets ->this_id.p, hence this is
-     never needed.  */
-  internal_error (__FILE__, __LINE__, "legacy_saved_regs_this_id() called");
+  /* A developer is trying to bring up a new architecture, help them
+     by providing a default unwinder that refuses to unwind anything
+     (the ID is always NULL).  In the case of legacy code,
+     legacy_get_prev_frame() will have previously set ->this_id.p, so
+     this code won't be called.  */
+  (*id) = null_frame_id;
 }
 	
 const struct frame_unwind legacy_saved_regs_unwinder = {
@@ -1284,7 +1286,7 @@ legacy_get_prev_frame (struct frame_info *this_frame)
   prev = FRAME_OBSTACK_ZALLOC (struct frame_info);
   prev->level = this_frame->level + 1;
 
-  /* Do not completly wire it in to the frame chain.  Some (bad) code
+  /* Do not completely wire it in to the frame chain.  Some (bad) code
      in INIT_FRAME_EXTRA_INFO tries to look along frame->prev to pull
      some fancy tricks (of course such code is, by definition,
      recursive).
@@ -1838,7 +1840,7 @@ get_prev_frame (struct frame_info *this_frame)
       && backtrace_beyond_entry_func
 #endif
       && this_frame->type != DUMMY_FRAME && this_frame->level >= 0
-      && inside_entry_func (get_frame_pc (this_frame)))
+      && inside_entry_func (this_frame))
     {
       if (frame_debug)
 	{
@@ -2133,7 +2135,6 @@ get_frame_type (struct frame_info *frame)
 	 directly.  Unfortunately, legacy code, called by
 	 legacy_get_prev_frame, explicitly set the frames type using
 	 the method deprecated_set_frame_type().  */
-      gdb_assert (frame->unwind->type != UNKNOWN_FRAME);
       frame->type = frame->unwind->type;
     }
   if (frame->type == UNKNOWN_FRAME)
@@ -2280,11 +2281,28 @@ frame_sp_unwind (struct frame_info *next_frame)
 int
 legacy_frame_p (struct gdbarch *current_gdbarch)
 {
-  return (DEPRECATED_INIT_FRAME_PC_P ()
-	  || DEPRECATED_INIT_FRAME_PC_FIRST_P ()
-	  || DEPRECATED_INIT_EXTRA_FRAME_INFO_P ()
-	  || DEPRECATED_FRAME_CHAIN_P ()
-	  || !gdbarch_unwind_dummy_id_p (current_gdbarch));
+  if (DEPRECATED_INIT_FRAME_PC_P ()
+      || DEPRECATED_INIT_FRAME_PC_FIRST_P ()
+      || DEPRECATED_INIT_EXTRA_FRAME_INFO_P ()
+      || DEPRECATED_FRAME_CHAIN_P ())
+    /* No question, it's a legacy frame.  */
+    return 1;
+  if (gdbarch_unwind_dummy_id_p (current_gdbarch))
+    /* No question, it's not a legacy frame (provided none of the
+       deprecated methods checked above are present that is).  */
+    return 0;
+  if (DEPRECATED_TARGET_READ_FP_P ()
+      || DEPRECATED_FP_REGNUM >= 0)
+    /* Assume it's legacy.  If you're trying to convert a legacy frame
+       target to the new mechanism, get rid of these.  legacy
+       get_prev_frame requires these when unwind_frame_id isn't
+       available.  */
+    return 1;
+  /* Default to assuming that it's brand new code, and hence not
+     legacy.  Force it down the non-legacy path so that the new code
+     uses the new frame mechanism from day one.  Dummy frame's won't
+     work very well but we can live with that.  */
+  return 0;
 }
 
 extern initialize_file_ftype _initialize_frame; /* -Wmissing-prototypes */

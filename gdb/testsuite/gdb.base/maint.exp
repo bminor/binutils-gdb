@@ -191,6 +191,11 @@ gdb_expect  {
 send_gdb "maint print statistics\n"
 gdb_expect  {
         -re "Statistics for.*break.*Number of \"minimal\" symbols read.*Number of \"partial\" symbols read.*Number of \"types\" defined.*Number of psym tables \\(not yet expanded\\).*Number of symbol tables.*Number of symbol tables with line tables.*Number of symbol tables with blockvectors.*Total memory used for psymbol obstack.*Total memory used for psymbol cache.*Total memory used for symbol obstack.*Total memory used for type obstack.*$gdb_prompt $"\
+                        { 
+			    # Old output for gdb 6.0 and earlier
+			    pass "maint print statistics" 
+			}
+        -re "Statistics for.*break.*Number of \"minimal\" symbols read.*Number of \"partial\" symbols read.*Number of \"types\" defined.*Number of psym tables \\(not yet expanded\\).*Number of symbol tables.*Number of symbol tables with line tables.*Number of symbol tables with blockvectors.*Total memory used for objfile obstack.*Total memory used for psymbol cache.*Total memory used for macro cache.*$gdb_prompt $"\
                         { pass "maint print statistics" }
         -re ".*$gdb_prompt $"       { fail "maint print statistics" }
         timeout         { fail "(timeout) maint print statistics" }

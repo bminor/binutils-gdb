@@ -1,5 +1,5 @@
 /* C language support routines for GDB, the GNU debugger.
-   Copyright 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2002
+   Copyright 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -556,6 +556,7 @@ const struct language_defn c_language_defn =
   NULL,				/* Language specific skip_trampoline */
   NULL,				/* value_of_this */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
+  basic_lookup_transparent_type,/* lookup_transparent_type */
   NULL,				/* Language specific symbol demangler */
   {"", "", "", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */
@@ -613,6 +614,7 @@ const struct language_defn cplus_language_defn =
   NULL,				/* Language specific skip_trampoline */
   value_of_this,		/* value_of_this */
   cp_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
+  cp_lookup_transparent_type,   /* lookup_transparent_type */
   cplus_demangle,		/* Language specific symbol demangler */
   {"", "", "", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */
@@ -647,6 +649,7 @@ const struct language_defn asm_language_defn =
   NULL,				/* Language specific skip_trampoline */
   NULL,				/* value_of_this */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
+  basic_lookup_transparent_type,/* lookup_transparent_type */
   NULL,				/* Language specific symbol demangler */
   {"", "", "", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */
@@ -686,6 +689,7 @@ const struct language_defn minimal_language_defn =
   NULL,				/* Language specific skip_trampoline */
   NULL,				/* value_of_this */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
+  basic_lookup_transparent_type,/* lookup_transparent_type */
   NULL,				/* Language specific symbol demangler */
   {"", "", "", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */

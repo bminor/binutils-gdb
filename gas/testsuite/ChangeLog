@@ -1,3 +1,53 @@
+2004-02-09  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* gas/sh/basic.exp: Don't do sh4a tests for sh5.
+
+2004-02-06  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* gas/macros/test2.s: Lowercase it.
+
+2004-02-02  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
+	* gas/mips/div.d: Update to accomodate changes in macro
+	expansions.
+	gas/mips/elf-rel-got-n32.d: Likewise.
+	gas/mips/elf-rel-got-n64.d: Likewise.
+	gas/mips/elf-rel-xgot-n32.d: Likewise.
+	gas/mips/elf-rel-xgot-n64.d: Likewise.
+	gas/mips/la-svr4pic.d: Likewise.
+	gas/mips/la-xgot.d: Likewise.
+	gas/mips/lca-svr4pic.d: Likewise.
+	gas/mips/lca-xgot.d: Likewise.
+
+2004-02-01  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* gas/sh/sh4a-fp.d: Fix opcode name fssra to fsrra.
+	* gas/sh/sh4a-fp.s: Likewise.
+	* gas/sh/err-sh4a-fp.s: Likewise.
+
+2004-01-24  Chris Demetriou  <cgd@broadcom.com>
+
+	* gas/mips/relax-swap1.s: Add extra space at end, so the
+	disassembly will consistently have "..." at its end.
+	* gas/mips/relax-swap2.s: Likewise.
+	* gas/mips/relax-swap1-mips2.d: Expect "..." at end of disassembly.
+
+2004-01-23  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gas/arm/arm.exp: Add "undefined" test.
+	* gas/arm/undefined.s, gas/arm/undefined.l: New files.
+
+2004-01-23  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/mips/macro-warn-[1234].[sdl]: New tests.
+	* gas/mips/macro-warn-[12]-n32.[dl]: New tests.
+	* gas/mips/mips.exp: Run them.
+
+2004-01-23  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/mips/elf-rel19.[sd]: New test.
+	* gas/mips/mips.exp: Run it.
+
 2004-01-11 Tom Rix   <tcrix@worldnet.att.net>
 
 	* gas/m68hc11/movb.s: Add m68hc12 movb and movw dump test.

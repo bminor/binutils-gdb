@@ -3,7 +3,7 @@ srcdir = @srcdir@
 
 EXECUTABLES = all-types annota1 bitfields break \
 	call-ar-st call-rt-st call-strs callfuncs callfwmall \
-	commands compiler condbreak constvars coremaker \
+	chng-syms commands compiler condbreak constvars coremaker \
 	dbx-test display ending-run execd-prog exprs \
 	foll-exec foll-fork foll-vfork funcargs int-type interrupt jump \
 	langs list long_long mips_pro miscexprs nodebug opaque overlays \

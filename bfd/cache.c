@@ -1,6 +1,8 @@
 /* BFD library -- caching of file descriptors.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1996, 2000, 2001, 2002, 2003
-   Free Software Foundation, Inc.
+
+   Copyright 1990, 1991, 1992, 1993, 1994, 1996, 2000, 2001, 2002,
+   2003, 2004 Free Software Foundation, Inc.
+
    Hacked by Steve Chamberlain of Cygnus Support (steve@cygnus.com).
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -155,7 +157,7 @@ close_one (void)
       return TRUE;
     }
 
-  kill->where = ftell ((FILE *) kill->iostream);
+  kill->where = real_ftell ((FILE *) kill->iostream);
 
   return bfd_cache_delete (kill);
 }
@@ -356,7 +358,7 @@ bfd_cache_lookup_worker (bfd *abfd)
 	return NULL;
       if (abfd->where != (unsigned long) abfd->where)
 	return NULL;
-      if (fseek ((FILE *) abfd->iostream, (long) abfd->where, SEEK_SET) != 0)
+      if (real_fseek ((FILE *) abfd->iostream, abfd->where, SEEK_SET) != 0)
 	return NULL;
     }
 

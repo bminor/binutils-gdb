@@ -1,6 +1,6 @@
 /* User Interface Events.
 
-   Copyright 1999, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1999, 2001, 2002, 2004 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions.
 
@@ -96,7 +96,7 @@ extern void selected_frame_level_changed_event (int level);
 extern void selected_thread_changed_event (int thread_num);
 
 
-/* When GDB_EVENTS are not being used, completly disable them. */
+/* When GDB_EVENTS are not being used, completely disable them. */
 
 #if !WITH_GDB_EVENTS
 #define breakpoint_create_event(b) 0

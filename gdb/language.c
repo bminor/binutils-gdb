@@ -1,7 +1,7 @@
 /* Multiple source language support for GDB.
 
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000,
-   2001, 2002, 2003 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    Contributed by the Department of Computer Science at the State University
    of New York at Buffalo.
@@ -1289,6 +1289,7 @@ const struct language_defn unknown_language_defn =
   unk_lang_trampoline,		/* Language specific skip_trampoline */
   value_of_this,		/* value_of_this */
   basic_lookup_symbol_nonlocal, /* lookup_symbol_nonlocal */
+  basic_lookup_transparent_type,/* lookup_transparent_type */
   unk_lang_demangle,		/* Language specific symbol demangler */
   {"", "", "", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */
@@ -1324,6 +1325,7 @@ const struct language_defn auto_language_defn =
   unk_lang_trampoline,		/* Language specific skip_trampoline */
   value_of_this,		/* value_of_this */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
+  basic_lookup_transparent_type,/* lookup_transparent_type */
   unk_lang_demangle,		/* Language specific symbol demangler */
   {"", "", "", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */
@@ -1358,6 +1360,7 @@ const struct language_defn local_language_defn =
   unk_lang_trampoline,		/* Language specific skip_trampoline */
   value_of_this,		/* value_of_this */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
+  basic_lookup_transparent_type,/* lookup_transparent_type */
   unk_lang_demangle,		/* Language specific symbol demangler */
   {"", "", "", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */

@@ -147,3 +147,5 @@ foo:
 
         .space  0x20000         # to make a 128kb loop body
 bar:
+# Force at least 8 (non-delay-slot) zero bytes, to make 'objdump' print ...
+        .space  8

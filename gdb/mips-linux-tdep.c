@@ -27,6 +27,7 @@
 #include "mips-tdep.h"
 #include "gdb_string.h"
 #include "gdb_assert.h"
+#include "frame.h"
 
 /* Copied from <asm/elf.h>.  */
 #define ELF_NGREG       45
@@ -676,6 +677,125 @@ init_register_addr_data (struct gdbarch *gdbarch)
   return 0;
 }
 
+/* Check the code at PC for a dynamic linker lazy resolution stub.  Because
+   they aren't in the .plt section, we pattern-match on the code generated
+   by GNU ld.  They look like this:
+
+   lw t9,0x8010(gp)
+   addu t7,ra
+   jalr t9,ra
+   addiu t8,zero,INDEX
+
+   (with the appropriate doubleword instructions for N64).  Also return the
+   dynamic symbol index used in the last instruction.  */
+
+static int
+mips_linux_in_dynsym_stub (CORE_ADDR pc, char *name)
+{
+  unsigned char buf[28], *p;
+  ULONGEST insn, insn1;
+  int n64 = (mips_abi (current_gdbarch) == MIPS_ABI_N64);
+
+  read_memory (pc - 12, buf, 28);
+
+  if (n64)
+    {
+      /* ld t9,0x8010(gp) */
+      insn1 = 0xdf998010;
+    }
+  else
+    {
+      /* lw t9,0x8010(gp) */
+      insn1 = 0x8f998010;
+    }
+
+  p = buf + 12;
+  while (p >= buf)
+    {
+      insn = extract_unsigned_integer (p, 4);
+      if (insn == insn1)
+	break;
+      p -= 4;
+    }
+  if (p < buf)
+    return 0;
+
+  insn = extract_unsigned_integer (p + 4, 4);
+  if (n64)
+    {
+      /* daddu t7,ra */
+      if (insn != 0x03e0782d)
+	return 0;
+    }
+  else
+    {
+      /* addu t7,ra */
+      if (insn != 0x03e07821)
+	return 0;
+    }
+  
+  insn = extract_unsigned_integer (p + 8, 4);
+  /* jalr t9,ra */
+  if (insn != 0x0320f809)
+    return 0;
+
+  insn = extract_unsigned_integer (p + 12, 4);
+  if (n64)
+    {
+      /* daddiu t8,zero,0 */
+      if ((insn & 0xffff0000) != 0x64180000)
+	return 0;
+    }
+  else
+    {
+      /* addiu t8,zero,0 */
+      if ((insn & 0xffff0000) != 0x24180000)
+	return 0;
+    }
+
+  return (insn & 0xffff);
+}
+
+/* Return non-zero iff PC belongs to the dynamic linker resolution code
+   or to a stub.  */
+
+int
+mips_linux_in_dynsym_resolve_code (CORE_ADDR pc)
+{
+  /* Check whether PC is in the dynamic linker.  This also checks whether
+     it is in the .plt section, which MIPS does not use.  */
+  if (in_solib_dynsym_resolve_code (pc))
+    return 1;
+
+  /* Pattern match for the stub.  It would be nice if there were a more
+     efficient way to avoid this check.  */
+  if (mips_linux_in_dynsym_stub (pc, NULL))
+    return 1;
+
+  return 0;
+}
+
+/* See the comments for SKIP_SOLIB_RESOLVER at the top of infrun.c,
+   and glibc_skip_solib_resolver in glibc-tdep.c.  The normal glibc
+   implementation of this triggers at "fixup" from the same objfile as
+   "_dl_runtime_resolve"; MIPS/Linux can trigger at "__dl_runtime_resolve"
+   directly.  An unresolved PLT entry will point to _dl_runtime_resolve,
+   which will first call __dl_runtime_resolve, and then pass control to
+   the resolved function.  */
+
+static CORE_ADDR
+mips_linux_skip_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  struct minimal_symbol *resolver;
+
+  resolver = lookup_minimal_symbol ("__dl_runtime_resolve", NULL, NULL);
+
+  if (resolver && SYMBOL_VALUE_ADDRESS (resolver) == pc)
+    return frame_pc_unwind (get_current_frame ()); 
+
+  return 0;
+}      
+
 static void
 mips_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -709,6 +829,12 @@ mips_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 	internal_error (__FILE__, __LINE__, "can't handle ABI");
 	break;
     }
+
+  set_gdbarch_skip_solib_resolver (gdbarch, mips_linux_skip_resolver);
+
+  /* This overrides the MIPS16 stub support from mips-tdep.  But no one uses
+     MIPS16 on Linux yet, so this isn't much of a loss.  */
+  set_gdbarch_in_solib_call_trampoline (gdbarch, mips_linux_in_dynsym_stub);
 }
 
 void

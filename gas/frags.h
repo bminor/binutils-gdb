@@ -141,6 +141,7 @@ void frag_align_pattern (int alignment, const char *fill_pattern,
 void frag_align_code (int alignment, int max);
 void frag_new (int old_frags_var_max_size);
 void frag_wane (fragS * fragP);
+int frag_room (void);
 
 char *frag_variant (relax_stateT type,
 		    int max_chars,

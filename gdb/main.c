@@ -1,7 +1,7 @@
 /* Top level stuff for GDB, the GNU debugger.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
    Foundation, Inc.
 
    This file is part of GDB.
@@ -72,10 +72,10 @@ char *gdb_sysroot = 0;
 struct ui_file *gdb_stdout;
 struct ui_file *gdb_stderr;
 struct ui_file *gdb_stdlog;
-struct ui_file *gdb_stdtarg;
 struct ui_file *gdb_stdin;
 /* target IO streams */
 struct ui_file *gdb_stdtargin;
+struct ui_file *gdb_stdtarg;
 struct ui_file *gdb_stdtargerr;
 
 /* Whether to enable writing into executable and core files */

@@ -485,9 +485,9 @@ set_greg\@:
 	bra	.Lsrbit\@
 	nop
 	.align 2
-.Lsrbitval:
+.Lsrbitval\@:
 	.long	\val
-.Lsrbit:
+.Lsrbit\@:
 	.endm
 
 	.macro	test_sr_bit_set val
@@ -559,7 +559,7 @@ set_greg\@:
 
 
 	.macro set_creg val reg
-	# 
+	# [gbr, vbr, ssr, spc, sgr, dbr... ]
 	push	r0
 	mov.l	.Lscrval\@, r0
 	ldc	r0, \reg

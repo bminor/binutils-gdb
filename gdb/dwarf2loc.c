@@ -154,7 +154,7 @@ dwarf_expr_frame_base (void *baton, unsigned char **start, size_t * length)
 
   framefunc = get_frame_function (debaton->frame);
 
-  if (SYMBOL_LOCATION_FUNCS (framefunc) == &dwarf2_loclist_funcs)
+  if (SYMBOL_OPS (framefunc) == &dwarf2_loclist_funcs)
     {
       struct dwarf2_loclist_baton *symbaton;
       symbaton = SYMBOL_LOCATION_BATON (framefunc);
@@ -465,7 +465,7 @@ locexpr_tracepoint_var_ref (struct symbol * symbol, struct agent_expr * ax,
 
 /* The set of location functions used with the DWARF-2 expression
    evaluator.  */
-struct location_funcs dwarf2_locexpr_funcs = {
+const struct symbol_ops dwarf2_locexpr_funcs = {
   locexpr_read_variable,
   locexpr_read_needs_frame,
   locexpr_describe_location,
@@ -537,7 +537,7 @@ loclist_tracepoint_var_ref (struct symbol * symbol, struct agent_expr * ax,
 
 /* The set of location functions used with the DWARF-2 expression
    evaluator and location lists.  */
-struct location_funcs dwarf2_loclist_funcs = {
+const struct symbol_ops dwarf2_loclist_funcs = {
   loclist_read_variable,
   loclist_read_needs_frame,
   loclist_describe_location,

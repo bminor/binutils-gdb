@@ -1,7 +1,7 @@
 /* Definitions for symbol file management in GDB.
 
    Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -98,18 +98,7 @@ struct objfile_data;
    use the block at main, or can't find it for some reason, everything
    still works as before.  And if we have no startup code debugging
    information but we do have usable information for main(), backtraces
-   from user code don't go wandering off into the startup code.
-
-   To use this method, define your DEPRECATED_FRAME_CHAIN_VALID macro
-   like:
-
-   #define DEPRECATED_FRAME_CHAIN_VALID(chain, thisframe)     \
-   (chain != 0                                   \
-   && !(inside_main_func ((thisframe)->pc))     \
-   && !(inside_entry_func ((thisframe)->pc)))
-
-   and add initializations of the four scope controlling variables inside
-   the object file / debugging information processing modules.  */
+   from user code don't go wandering off into the startup code.  */
 
 struct entry_info
   {
@@ -292,12 +281,10 @@ struct objfile
 
     long mtime;
 
-    /* Obstacks to hold objects that should be freed when we load a new symbol
+    /* Obstack to hold objects that should be freed when we load a new symbol
        table from this object file. */
 
-    struct obstack psymbol_obstack;	/* Partial symbols */
-    struct obstack symbol_obstack;	/* Full symbols */
-    struct obstack type_obstack;	/* Types */
+    struct obstack objfile_obstack; 
 
     /* A byte cache where we can stash arbitrary "chunks" of bytes that
        will not change. */
@@ -313,7 +300,7 @@ struct objfile
     struct htab *demangled_names_hash;
 
     /* Vectors of all partial symbols read in from file.  The actual data
-       is stored in the psymbol_obstack. */
+       is stored in the objfile_obstack. */
 
     struct psymbol_allocation_list global_psymbols;
     struct psymbol_allocation_list static_psymbols;
@@ -325,7 +312,7 @@ struct objfile
        when passed a pointer to somewhere in the middle of it.  There is also
        a count of the number of symbols, which does not include the terminating
        null symbol.  The array itself, as well as all the data that it points
-       to, should be allocated on the symbol_obstack for this file. */
+       to, should be allocated on the objfile_obstack for this file. */
 
     struct minimal_symbol *msymbols;
     int minimal_symbol_count;
@@ -403,7 +390,7 @@ struct objfile
     unsigned num_data;
 
     /* Set of relocation offsets to apply to each section.
-       Currently on the psymbol_obstack (which makes no sense, but I'm
+       Currently on the objfile_obstack (which makes no sense, but I'm
        not sure it's harming anything).
 
        These offsets indicate that all symbols (including partial and
@@ -431,20 +418,21 @@ struct objfile
        SECTIONS points to the first entry in the table, and
        SECTIONS_END points to the first location past the last entry
        in the table.  Currently the table is stored on the
-       psymbol_obstack (which makes no sense, but I'm not sure it's
+       objfile_obstack (which makes no sense, but I'm not sure it's
        harming anything).  */
 
     struct obj_section
      *sections, *sections_end;
 
-    /* two auxiliary fields, used to hold the fp of separate symbol files */
-    FILE *auxf1, *auxf2;
-
     /* Imported symbols */
+    /* FIXME: ezannoni 2004-02-10: This is just SOM (HP) specific (see
+       somread.c). It should not pollute generic objfiles.  */
     ImportEntry *import_list;
     int import_list_size;
 
     /* Exported symbols */
+    /* FIXME: ezannoni 2004-02-10: This is just SOM (HP) specific (see
+       somread.c). It should not pollute generic objfiles.  */
     ExportEntry *export_list;
     int export_list_size;
 
@@ -520,7 +508,7 @@ extern struct objfile *symfile_objfile;
 
 extern struct objfile *rt_common_objfile;
 
-/* When we need to allocate a new type, we need to know which type_obstack
+/* When we need to allocate a new type, we need to know which objfile_obstack
    to allocate the type on, since there is one for each objfile.  The places
    where types are allocated are deeply buried in function call hierarchies
    which know nothing about objfiles, so rather than trying to pass a

@@ -208,11 +208,10 @@ struct gdbarch
   gdbarch_deprecated_extract_return_value_ftype *deprecated_extract_return_value;
   gdbarch_deprecated_store_return_value_ftype *deprecated_store_return_value;
   gdbarch_use_struct_convention_ftype *use_struct_convention;
-  gdbarch_extract_struct_value_address_ftype *extract_struct_value_address;
+  gdbarch_deprecated_extract_struct_value_address_ftype *deprecated_extract_struct_value_address;
   gdbarch_deprecated_frame_init_saved_regs_ftype *deprecated_frame_init_saved_regs;
   gdbarch_deprecated_init_extra_frame_info_ftype *deprecated_init_extra_frame_info;
   gdbarch_skip_prologue_ftype *skip_prologue;
-  gdbarch_prologue_frameless_p_ftype *prologue_frameless_p;
   gdbarch_inner_than_ftype *inner_than;
   gdbarch_breakpoint_from_pc_ftype *breakpoint_from_pc;
   gdbarch_adjust_breakpoint_address_ftype *adjust_breakpoint_address;
@@ -379,11 +378,10 @@ struct gdbarch startup_gdbarch =
   0,  /* deprecated_extract_return_value */
   0,  /* deprecated_store_return_value */
   0,  /* use_struct_convention */
-  0,  /* extract_struct_value_address */
+  0,  /* deprecated_extract_struct_value_address */
   0,  /* deprecated_frame_init_saved_regs */
   0,  /* deprecated_init_extra_frame_info */
   0,  /* skip_prologue */
-  0,  /* prologue_frameless_p */
   0,  /* inner_than */
   0,  /* breakpoint_from_pc */
   0,  /* adjust_breakpoint_address */
@@ -519,11 +517,9 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->extract_return_value = legacy_extract_return_value;
   current_gdbarch->store_return_value = legacy_store_return_value;
   current_gdbarch->use_struct_convention = generic_use_struct_convention;
-  current_gdbarch->prologue_frameless_p = generic_prologue_frameless_p;
   current_gdbarch->memory_insert_breakpoint = default_memory_insert_breakpoint;
   current_gdbarch->memory_remove_breakpoint = default_memory_remove_breakpoint;
   current_gdbarch->remote_translate_xfer_address = generic_remote_translate_xfer_address;
-  current_gdbarch->frame_args_skip = -1;
   current_gdbarch->frameless_function_invocation = generic_frameless_function_invocation_not;
   current_gdbarch->deprecated_frame_args_address = get_frame_base;
   current_gdbarch->deprecated_frame_locals_address = get_frame_base;
@@ -686,13 +682,12 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of extract_return_value, invalid_p == 0 */
   /* Skip verify of store_return_value, invalid_p == 0 */
   /* Skip verify of use_struct_convention, invalid_p == 0 */
-  /* Skip verify of extract_struct_value_address, has predicate */
+  /* Skip verify of deprecated_extract_struct_value_address, has predicate */
   /* Skip verify of deprecated_frame_init_saved_regs, has predicate */
   /* Skip verify of deprecated_init_extra_frame_info, has predicate */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (current_gdbarch->skip_prologue == 0))
     fprintf_unfiltered (log, "\n\tskip_prologue");
-  /* Skip verify of prologue_frameless_p, invalid_p == 0 */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (current_gdbarch->inner_than == 0))
     fprintf_unfiltered (log, "\n\tinner_than");
@@ -705,9 +700,7 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of decr_pc_after_break, invalid_p == 0 */
   /* Skip verify of function_start_offset, invalid_p == 0 */
   /* Skip verify of remote_translate_xfer_address, invalid_p == 0 */
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (current_gdbarch->frame_args_skip == -1))
-    fprintf_unfiltered (log, "\n\tframe_args_skip");
+  /* Skip verify of frame_args_skip, invalid_p == 0 */
   /* Skip verify of frameless_function_invocation, invalid_p == 0 */
   /* Skip verify of deprecated_frame_chain, has predicate */
   /* Skip verify of deprecated_frame_chain_valid, has predicate */
@@ -1086,6 +1079,25 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
                       "gdbarch_dump: DEPRECATED_EXTRACT_RETURN_VALUE = <0x%08lx>\n",
                       (long) current_gdbarch->deprecated_extract_return_value
                       /*DEPRECATED_EXTRACT_RETURN_VALUE ()*/);
+#endif
+#ifdef DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P()",
+                      XSTRING (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P() = %d\n",
+                      DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P ());
+#endif
+#ifdef DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(regcache)",
+                      XSTRING (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS (regcache)));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS = <0x%08lx>\n",
+                      (long) current_gdbarch->deprecated_extract_struct_value_address
+                      /*DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS ()*/);
 #endif
 #ifdef DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED
   fprintf_unfiltered (file,
@@ -1753,25 +1765,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
                       (long) current_gdbarch->extract_return_value
                       /*EXTRACT_RETURN_VALUE ()*/);
 #endif
-#ifdef EXTRACT_STRUCT_VALUE_ADDRESS_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "EXTRACT_STRUCT_VALUE_ADDRESS_P()",
-                      XSTRING (EXTRACT_STRUCT_VALUE_ADDRESS_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: EXTRACT_STRUCT_VALUE_ADDRESS_P() = %d\n",
-                      EXTRACT_STRUCT_VALUE_ADDRESS_P ());
-#endif
-#ifdef EXTRACT_STRUCT_VALUE_ADDRESS
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "EXTRACT_STRUCT_VALUE_ADDRESS(regcache)",
-                      XSTRING (EXTRACT_STRUCT_VALUE_ADDRESS (regcache)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: EXTRACT_STRUCT_VALUE_ADDRESS = <0x%08lx>\n",
-                      (long) current_gdbarch->extract_struct_value_address
-                      /*EXTRACT_STRUCT_VALUE_ADDRESS ()*/);
-#endif
 #ifdef FETCH_POINTER_ARGUMENT_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -2023,16 +2016,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: print_vector_info = 0x%08lx\n",
                       (long) current_gdbarch->print_vector_info);
-#ifdef PROLOGUE_FRAMELESS_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "PROLOGUE_FRAMELESS_P(ip)",
-                      XSTRING (PROLOGUE_FRAMELESS_P (ip)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: PROLOGUE_FRAMELESS_P = <0x%08lx>\n",
-                      (long) current_gdbarch->prologue_frameless_p
-                      /*PROLOGUE_FRAMELESS_P ()*/);
-#endif
 #ifdef PS_REGNUM
   fprintf_unfiltered (file,
                       "gdbarch_dump: PS_REGNUM # %s\n",
@@ -4346,27 +4329,27 @@ set_gdbarch_use_struct_convention (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_extract_struct_value_address_p (struct gdbarch *gdbarch)
+gdbarch_deprecated_extract_struct_value_address_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  return gdbarch->extract_struct_value_address != NULL;
+  return gdbarch->deprecated_extract_struct_value_address != NULL;
 }
 
 CORE_ADDR
-gdbarch_extract_struct_value_address (struct gdbarch *gdbarch, struct regcache *regcache)
+gdbarch_deprecated_extract_struct_value_address (struct gdbarch *gdbarch, struct regcache *regcache)
 {
   gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->extract_struct_value_address != NULL);
+  gdb_assert (gdbarch->deprecated_extract_struct_value_address != NULL);
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_extract_struct_value_address called\n");
-  return gdbarch->extract_struct_value_address (regcache);
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_extract_struct_value_address called\n");
+  return gdbarch->deprecated_extract_struct_value_address (regcache);
 }
 
 void
-set_gdbarch_extract_struct_value_address (struct gdbarch *gdbarch,
-                                          gdbarch_extract_struct_value_address_ftype extract_struct_value_address)
+set_gdbarch_deprecated_extract_struct_value_address (struct gdbarch *gdbarch,
+                                                     gdbarch_deprecated_extract_struct_value_address_ftype deprecated_extract_struct_value_address)
 {
-  gdbarch->extract_struct_value_address = extract_struct_value_address;
+  gdbarch->deprecated_extract_struct_value_address = deprecated_extract_struct_value_address;
 }
 
 int
@@ -4432,23 +4415,6 @@ set_gdbarch_skip_prologue (struct gdbarch *gdbarch,
                            gdbarch_skip_prologue_ftype skip_prologue)
 {
   gdbarch->skip_prologue = skip_prologue;
-}
-
-int
-gdbarch_prologue_frameless_p (struct gdbarch *gdbarch, CORE_ADDR ip)
-{
-  gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->prologue_frameless_p != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_prologue_frameless_p called\n");
-  return gdbarch->prologue_frameless_p (ip);
-}
-
-void
-set_gdbarch_prologue_frameless_p (struct gdbarch *gdbarch,
-                                  gdbarch_prologue_frameless_p_ftype prologue_frameless_p)
-{
-  gdbarch->prologue_frameless_p = prologue_frameless_p;
 }
 
 int
@@ -4598,8 +4564,7 @@ CORE_ADDR
 gdbarch_frame_args_skip (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Check variable changed from pre-default.  */
-  gdb_assert (gdbarch->frame_args_skip != -1);
+  /* Skip verify of frame_args_skip, invalid_p == 0 */
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_frame_args_skip called\n");
   return gdbarch->frame_args_skip;

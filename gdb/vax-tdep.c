@@ -187,9 +187,6 @@ vax_frame_chain (struct frame_info *frame)
 {
   /* In the case of the VAX, the frame's nominal address is the FP value,
      and 12 bytes later comes the saved previous FP value as a 4-byte word.  */
-  if (deprecated_inside_entry_file (get_frame_pc (frame)))
-    return (0);
-
   return (read_memory_integer (get_frame_base (frame) + 12, 4));
 }
 

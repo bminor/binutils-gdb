@@ -324,10 +324,11 @@ struct cleanup
 
 struct symtab;
 struct breakpoint;
+struct frame_info;
 
 /* From blockframe.c */
 
-extern int inside_entry_func (CORE_ADDR);
+extern int inside_entry_func (struct frame_info *this_frame);
 
 extern int deprecated_inside_entry_file (CORE_ADDR addr);
 
@@ -444,21 +445,17 @@ extern struct ui_file *gdb_stdin;
 /* Serious error notifications */
 extern struct ui_file *gdb_stderr;
 /* Log/debug/trace messages that should bypass normal stdout/stderr
-   filtering.  For momement, always call this stream using
+   filtering.  For moment, always call this stream using
    *_unfiltered. In the very near future that restriction shall be
    removed - either call shall be unfiltered. (cagney 1999-06-13). */
 extern struct ui_file *gdb_stdlog;
 /* Target output that should bypass normal stdout/stderr filtering.
-   For momement, always call this stream using *_unfiltered. In the
+   For moment, always call this stream using *_unfiltered. In the
    very near future that restriction shall be removed - either call
    shall be unfiltered. (cagney 1999-07-02). */
 extern struct ui_file *gdb_stdtarg;
 extern struct ui_file *gdb_stdtargerr;
 extern struct ui_file *gdb_stdtargin;
-
-#if defined(TUI)
-#include "tui.h"
-#endif
 
 #include "ui-file.h"
 
@@ -655,8 +652,6 @@ enum lval_type
        lval_register or lval_memory).  */
     lval_reg_frame_relative
   };
-
-struct frame_info;
 
 /* Control types for commands */
 

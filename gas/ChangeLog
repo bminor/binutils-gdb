@@ -1,3 +1,158 @@
+2004-02-13  Hannes Reinecke  <hare@suse.de>
+            Jakub Jelinek  <jakub@redhat.com>
+
+	* dwarf2dbg.c (get_filenum): Do not read beyond allocated memory.
+
+2004-02-10  Steve Ellcey  <sje@cup.hp.com>
+
+	* config/tc-ia64.h (ia64_frob_symbol): New declaration.
+	(tc_frob_symbol): New macro definition.
+	* config/tc-ia64.c (ia64_frob_symbol): New routine.
+
+2004-02-09  Daniel Jacobowitz  <drow@mvista.com>
+
+	* config/tc-arm.c (md_begin): Mark .note.gnu.arm.ident as
+	read-only.
+
+2004-02-09  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* read.h (IGNORE_OPCODE_CASE): Do not define. Replace with ...
+	(TC_CASE_SENSITIVE): ... this.
+	* read.c: Replace IGNORE_OPCODE_CASE with TC_CASE_SENSITIVE.
+	* doc/internals.texi (TC_CASE_SENSITIVE): Document.
+
+2004-02-06  James E Wilson  <wilson@specifixinc.com>
+
+	* config/tc-ia64.c (dot_endp): Delete call to output_endp.
+	(generate_unwind_image): Re-add it here.
+
+2004-02-06  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* dwarf2dbg.c (DWARF2_ADDR_SIZE): Remove trailing ';'
+	* read.h (SKIP_WHITESPACE): Turn into an expression.
+	* read.c (read_a_source_file): A pseudo is removed by having a
+	NULL handler.
+
+2004-02-05  James E Wilson  <wilson@specifixinc.com>
+
+	* config/tc-ia64.c (output_endp): New.
+	(count_bits): Delete.
+	(ia64_flush_insns, process_one_record, optimize_unw_records): Handle
+	endp unwind records.
+	(fixup_unw_records): Handle endp unwind records.  Delete code for
+	shortening prologue regions not followed by a body record.
+	(dot_endp): Call add_unwind_entry to emit endp unwind record.
+	* config/tc-ia64.h (unw_record_type): Add endp.
+
+2004-02-03  James E Wilson  <wilson@specifixinc.com>
+
+	* config/tc-ia64.c (ia64_convert_frag): Call md_number_to_chars to
+	fill padding bytes with zeroes.
+	(emit_one_bundle): New locals last_ptr, end_ptr.  Rewrite code that
+	sets unwind_record slot_number and slot_frag fields.
+
+2004-02-02  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
+	* config/tc-mips.c (add_got_offset_hilo): New function.
+	(macro): Use load_register() and add_got_offset_hilo() to load
+	constants instead of hardcoding code sequences throughout.
+
+2004-01-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-ia64.c (emit_one_bundle): Add proper indentation.
+
+2004-01-26  Bernardo Innocenti  <bernie@develer.com>
+
+	* config/tc-m68k.h (EXTERN_FORCE_RELOC): Handle m68k-uclinux specially,
+	like m68k-elf.
+	* config/tc-m68k.c (RELAXABLE_SYMBOL): Use EXTERN_FORCE_RELOC instead
+	of hard-coded test for TARGET_OS=elf.
+
+2004-01-24  Chris Demetriou  <cgd@broadcom.com>
+
+	* config/tc-mips.c (hilo_interlocks): Change definition
+	so that MIPS32, MIPS64 and later ISAs are included, along with
+	the already-included machines.  Update comments.
+
+2004-01-23  Daniel Jacobowitz  <drow@mvista.com>
+
+	* config/tc-arm.c (tc_gen_reloc): Improve error message for
+	undefined local labels.
+
+2004-01-23  Richard Sandiford  <rsandifo@redhat.com>
+
+	* config/tc-mips.c (load_address, macro): Update comments about
+	NewABI GP relaxation.
+
+2004-01-23  Richard Sandiford  <rsandifo@redhat.com>
+
+	* config/tc-mips.c (macro_build): Remove place and counter arguments.
+	(mips_build_lui, macro_build_ldst_constoffset): Likewise.
+	(mips16_macro_build, macro_build_jalr): Remove counter argument.
+	(set_at, load_register, load_address, move_register): Likewise.
+	(load_got_offset, add_got_offset): Likewise.
+	Update all calls and tidy accordingly.
+
+2004-01-23  Richard Sandiford  <rsandifo@redhat.com>
+
+	* config/tc-mips.c (RELAX_ENCODE): Remove WARN argument.
+	(RELAX_FIRST, RELAX_SECOND): Turn into 8-bit quantities.
+	(RELAX_USE_SECOND): Bump to 0x10000.
+	(RELAX_SECOND_LONGER, RELAX_NOMACRO, RELAX_DELAY_SLOT): New flags.
+	(mips_macro_warning): New variable.
+	(md_assemble): Wrap macro expansion in macro_start() and macro_end().
+	(s_cpload, s_cpsetup, s_cprestore, s_cpreturn): Likewise.
+	(relax_close_frag): Set mips_macro_warning.first_frag.  Adjust use
+	of RELAX_ENCODE.
+	(append_insn): Update mips_macro_warning.sizes.
+	(macro_start, macro_warning, macro_end): New functions.
+	(macro_build): Don't emit warnings here.
+	(macro_build_lui, md_estimate_size_before_relax): ...or here.
+	(md_convert_frag): Check for cases where one macro alternative
+	needs a warning and the other doesn't.  Emit a warning if the
+	longer sequence was chosen.
+
+2004-01-23  Richard Sandiford  <rsandifo@redhat.com>
+
+	* config/tc-mips.h (tc_frag_data_type, TC_FRAG_TYPE): Remove.
+	* config/tc-mips.c (RELAX_ENCODE): Take three arguments: the size of
+	the first sequence, the size of the second sequence, and a flag
+	that says whether we should warn.
+	(RELAX_OLD, RELAX_NEW, RELAX_RELOC[123]): Delete.
+	(RELAX_FIRST, RELAX_SECOND): New.
+	(mips_relax): New variable.
+	(relax_close_frag, relax_start, relax_switch, relax_end): New fns.
+	(append_insn): Remove "place" argument.  Use mips_relax.sequence
+	rather than "place" to check whether we're expanding the second
+	alternative of a relaxable macro.  Remove redundant check for
+	branch relaxation.  If generating a normal insn, and there
+	is not enough room in the current frag, call relax_close_frag()
+	to close it.  Update mips_relax.sizes[].  Emit fixups for the
+	second version of a relaxable macro.  Record the first relaxable
+	fixup in mips_relax.  Remove tc_gen_reloc workaround.
+	(macro_build): Remove all uses of "place".  Use mips_relax.sequence
+	in the same way as in append_insn.
+	(mips16_macro_build): Remove "place" argument.
+	(macro_build_lui): As for macro_build.  Don't drop the add_symbol
+	when generating the second version of a relaxable macro.
+	(load_got_offset, add_got_offset): New functions.
+	(load_address, macro): Use new relaxation machinery.  Remove
+	tc_gen_reloc workarounds.
+	(md_estimate_size_before_relax): Set RELAX_USE_SECOND if the second
+	version of a relaxable macro is needed.  Return -RELAX_SECOND if the
+	first version is needed.
+	(tc_gen_reloc): Remove relaxation handling.
+	(md_convert_frag): Go through the fixups for a relaxable macro and
+	mark those that belong to the unneeded alternative as done.  If the
+	second alternative is needed, adjust the fixup addresses to account
+	for the deleted first alternative.
+
+2004-01-23  Richard Sandiford  <rsandifo@redhat.com>
+
+	* frags.h (frag_room): Declare.
+	* frags.c (frag_room): New function.
+	* doc/internals.texi: Document it.
+
 2004-01-22  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* config/tc-mips.c (append_insn): Don't do r3900 interlock

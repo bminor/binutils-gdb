@@ -21,6 +21,8 @@
 #if !defined (DWARF2LOC_H)
 #define DWARF2LOC_H
 
+struct symbol_ops;
+
 /* This header is private to the DWARF-2 reader.  It is shared between
    dwarf2read.c and dwarf2loc.c.  */
 
@@ -62,7 +64,7 @@ struct dwarf2_loclist_baton
   struct objfile *objfile;
 };
 
-extern struct location_funcs dwarf2_locexpr_funcs;
-extern struct location_funcs dwarf2_loclist_funcs;
+extern const struct symbol_ops dwarf2_locexpr_funcs;
+extern const struct symbol_ops dwarf2_loclist_funcs;
 
 #endif

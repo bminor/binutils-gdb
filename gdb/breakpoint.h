@@ -1,5 +1,6 @@
 /* Data structures associated with breakpoints in GDB.
-   Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000
+   Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
+   2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -385,6 +386,17 @@ struct breakpoint
 
     /* Methods associated with this breakpoint.  */
     struct breakpoint_ops *ops;
+
+    /* Was breakpoint issued from a tty?  Saved for the use of pending breakpoints.  */
+    int from_tty;
+
+    /* Flag value for pending breakpoint.
+       first bit  : 0 non-temporary, 1 temporary.
+       second bit : 0 normal breakpoint, 1 hardware breakpoint. */
+    int flag;
+
+    /* Is breakpoint pending on shlib loads?  */
+    int pending;
   };
 
 /* The following stuff is an abstract data type "bpstat" ("breakpoint
@@ -402,7 +414,7 @@ extern void bpstat_clear (bpstat *);
    is part of the bpstat is copied as well.  */
 extern bpstat bpstat_copy (bpstat);
 
-extern bpstat bpstat_stop_status (CORE_ADDR *pc, int not_a_sw_breakpoint);
+extern bpstat bpstat_stop_status (CORE_ADDR pc, ptid_t ptid);
 
 /* This bpstat_what stuff tells wait_for_inferior what to do with a
    breakpoint (a challenging task).  */
@@ -604,6 +616,8 @@ enum breakpoint_here
 extern enum breakpoint_here breakpoint_here_p (CORE_ADDR);
 
 extern int breakpoint_inserted_here_p (CORE_ADDR);
+
+extern int software_breakpoint_inserted_here_p (CORE_ADDR);
 
 /* FIXME: cagney/2002-11-10: The current [generic] dummy-frame code
    implements a functional superset of this function.  The only reason

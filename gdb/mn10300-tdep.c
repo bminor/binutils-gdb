@@ -1179,7 +1179,6 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_deprecated_store_struct_return (gdbarch, mn10300_store_struct_return);
   set_gdbarch_deprecated_pop_frame (gdbarch, mn10300_pop_frame);
   set_gdbarch_skip_prologue (gdbarch, mn10300_skip_prologue);
-  set_gdbarch_frame_args_skip (gdbarch, 0);
   /* That's right, we're using the stack pointer as our frame pointer.  */
   set_gdbarch_deprecated_target_read_fp (gdbarch, mn10300_read_fp);
 

@@ -1,7 +1,7 @@
 /* Generic remote debugging interface for simulators.
 
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002 Free Software Foundation, Inc.
+   2002, 2004 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
    Steve Chamberlain (sac@cygnus.com).
@@ -221,7 +221,7 @@ gdb_os_write_stderr (host_callback *p, const char *buf, int len)
     {
       b[0] = buf[i];
       b[1] = 0;
-      fputs_unfiltered (b, gdb_stdtarg);
+      fputs_unfiltered (b, gdb_stdtargerr);
     }
   return len;
 }
@@ -231,7 +231,7 @@ gdb_os_write_stderr (host_callback *p, const char *buf, int len)
 static void
 gdb_os_flush_stderr (host_callback *p)
 {
-  gdb_flush (gdb_stderr);
+  gdb_flush (gdb_stdtargerr);
 }
 
 /* GDB version of printf_filtered callback.  */

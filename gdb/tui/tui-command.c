@@ -29,13 +29,7 @@
 #include "tui/tui-win.h"
 #include "tui/tui-io.h"
 
-#ifdef HAVE_NCURSES_H       
-#include <ncurses.h>
-#else
-#ifdef HAVE_CURSES_H
-#include <curses.h>
-#endif
-#endif
+#include "gdb_curses.h"
 
 
 /*****************************************
@@ -52,20 +46,20 @@
 unsigned int
 tui_dispatch_ctrl_char (unsigned int ch)
 {
-  TuiWinInfoPtr winInfo = tuiWinWithFocus ();
-  WINDOW *w = cmdWin->generic.handle;
+  struct tui_win_info *win_info = tui_win_with_focus ();
+  WINDOW *w = TUI_CMD_WIN->generic.handle;
 
   /*
      ** If the command window has the logical focus, or no-one does
      ** assume it is the command window; in this case, pass the
      ** character on through and do nothing here.
    */
-  if (winInfo == (TuiWinInfoPtr) NULL || winInfo == cmdWin)
+  if (win_info == NULL || win_info == TUI_CMD_WIN)
     return ch;
   else
     {
-      unsigned int c = 0, chCopy = ch;
-      register int i;
+      unsigned int c = 0, ch_copy = ch;
+      int i;
       char *term;
 
       /* If this is an xterm, page next/prev keys aren't returned
@@ -77,57 +71,58 @@ tui_dispatch_ctrl_char (unsigned int ch)
 	term[i] = toupper (term[i]);
       if ((strcmp (term, "XTERM") == 0) && key_is_start_sequence (ch))
 	{
-	  unsigned int pageCh = 0, tmpChar;
+	  unsigned int page_ch = 0;
+	  unsigned int tmp_char;
 
-	  tmpChar = 0;
-	  while (!key_is_end_sequence (tmpChar))
+	  tmp_char = 0;
+	  while (!key_is_end_sequence (tmp_char))
 	    {
-	      tmpChar = (int) wgetch (w);
-	      if (tmpChar == ERR)
+	      tmp_char = (int) wgetch (w);
+	      if (tmp_char == ERR)
 		{
 		  return ch;
 		}
-	      if (!tmpChar)
+	      if (!tmp_char)
 		break;
-	      if (tmpChar == 53)
-		pageCh = KEY_PPAGE;
-	      else if (tmpChar == 54)
-		pageCh = KEY_NPAGE;
+	      if (tmp_char == 53)
+		page_ch = KEY_PPAGE;
+	      else if (tmp_char == 54)
+		page_ch = KEY_NPAGE;
 	      else
 		{
 		  return 0;
 		}
 	    }
-	  chCopy = pageCh;
+	  ch_copy = page_ch;
 	}
 
-      switch (chCopy)
+      switch (ch_copy)
 	{
 	case KEY_NPAGE:
-	  tuiScrollForward (winInfo, 0);
+	  tui_scroll_forward (win_info, 0);
 	  break;
 	case KEY_PPAGE:
-	  tuiScrollBackward (winInfo, 0);
+	  tui_scroll_backward (win_info, 0);
 	  break;
 	case KEY_DOWN:
 	case KEY_SF:
-	  tuiScrollForward (winInfo, 1);
+	  tui_scroll_forward (win_info, 1);
 	  break;
 	case KEY_UP:
 	case KEY_SR:
-	  tuiScrollBackward (winInfo, 1);
+	  tui_scroll_backward (win_info, 1);
 	  break;
 	case KEY_RIGHT:
-	  tuiScrollLeft (winInfo, 1);
+	  tui_scroll_left (win_info, 1);
 	  break;
 	case KEY_LEFT:
-	  tuiScrollRight (winInfo, 1);
+	  tui_scroll_right (win_info, 1);
 	  break;
 	case '\f':
-	  tuiRefreshAll ();
+	  tui_refresh_all_win ();
 	  break;
 	default:
-	  c = chCopy;
+	  c = ch_copy;
 	  break;
 	}
       return c;

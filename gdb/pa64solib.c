@@ -1,6 +1,6 @@
 /* Handle HP ELF shared libraries for GDB, the GNU Debugger.
 
-   Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation,
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation,
    Inc.
 
    This file is part of GDB.
@@ -281,7 +281,7 @@ pa64_solib_add_solib_objfile (struct so_list *so, char *name, int from_tty,
   if (so->objfile->obj_private == NULL)
     {
       obj_private = (obj_private_data_t *)
-	obstack_alloc (&so->objfile->psymbol_obstack,
+	obstack_alloc (&so->objfile->objfile_obstack,
 		       sizeof (obj_private_data_t));
       obj_private->unwind_info = NULL;
       obj_private->so_info = NULL;
@@ -1161,7 +1161,7 @@ add_to_solist (int from_tty, char *dll_path, int readsyms,
   new_so->pa64_solib_desc_addr = load_module_desc_addr;
   new_so->loaded = 1;
   new_so->name = obsavestring (dll_path, strlen(dll_path),
-			       &symfile_objfile->symbol_obstack);
+			       &symfile_objfile->objfile_obstack);
 
   /* If we are not going to load the library, tell the user if we
      haven't already and return.  */

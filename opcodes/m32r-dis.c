@@ -105,7 +105,8 @@ my_print_insn (cd, pc, info)
 
   /* Read the base part of the insn.  */
 
-  status = (*info->read_memory_func) (pc, buf, buflen, info);
+  status = (*info->read_memory_func) (pc - ((!big_p && (pc & 3) != 0) ? 2 : 0),
+                                      buf, buflen, info);
   if (status != 0)
     {
       (*info->memory_error_func) (status, pc, info);
@@ -118,13 +119,13 @@ my_print_insn (cd, pc, info)
     return print_insn (cd, pc, info, buf, buflen);
 
   /* Print the first insn.  */
-  buf += (big_p ? 0 : 2);
   if ((pc & 3) == 0)
     {
+      buf += (big_p ? 0 : 2);
       if (print_insn (cd, pc, info, buf, 2) == 0)
 	(*info->fprintf_func) (info->stream, UNKNOWN_INSN_MSG);
+      buf += (big_p ? 2 : -2);
     }
-  buf += (big_p ? 2 : -2);
 
   x = (big_p ? &buf[0] : &buf[1]);
   if (*x & 0x80)

@@ -1536,7 +1536,6 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
 
   /* Set register info.  */
   set_gdbarch_fp0_regnum (gdbarch, -1);
-  set_gdbarch_frame_args_skip (gdbarch, 0);
 
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
 
@@ -1552,8 +1551,7 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_return_value_on_stack (gdbarch, m68hc11_return_value_on_stack);
 
   set_gdbarch_store_return_value (gdbarch, m68hc11_store_return_value);
-  set_gdbarch_store_return_value (gdbarch, m68hc11_store_return_value);
-  set_gdbarch_extract_struct_value_address (gdbarch, m68hc11_extract_struct_value_address);
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, m68hc11_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, m68hc11_use_struct_convention);
   set_gdbarch_skip_prologue (gdbarch, m68hc11_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);

@@ -1,7 +1,7 @@
 /* Find a variable's value in memory, for GDB, the GNU debugger.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2003 Free Software
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2003, 2004 Free Software
    Foundation, Inc.
 
    This file is part of GDB.
@@ -263,7 +263,7 @@ value_of_register (int regnum, struct frame_info *frame)
   char raw_buffer[MAX_REGISTER_SIZE];
   enum lval_type lval;
 
-  /* User registers lie completly outside of the range of normal
+  /* User registers lie completely outside of the range of normal
      registers.  Catch them early so that the target never sees them.  */
   if (regnum >= NUM_REGS + NUM_PSEUDO_REGS)
     return value_of_user_reg (regnum, frame);
@@ -346,11 +346,12 @@ symbol_read_needs_frame (struct symbol *sym)
          we failed to consider one.  */
     case LOC_COMPUTED:
     case LOC_COMPUTED_ARG:
-      {
-	struct location_funcs *symfuncs = SYMBOL_LOCATION_FUNCS (sym);
-	return (symfuncs->read_needs_frame) (sym);
-      }
-      break;
+      /* FIXME: cagney/2004-01-26: It should be possible to
+	 unconditionally call the SYMBOL_OPS method when available.
+	 Unfortunately DWARF 2 stores the frame-base (instead of the
+	 function) location in a function's symbol.  Oops!  For the
+	 moment enable this when/where applicable.  */
+      return SYMBOL_OPS (sym)->read_needs_frame (sym);
 
     case LOC_REGISTER:
     case LOC_ARG:
@@ -564,15 +565,14 @@ addresses have not been bound by the dynamic loader. Try again when executable i
 
     case LOC_COMPUTED:
     case LOC_COMPUTED_ARG:
-      {
-	struct location_funcs *funcs = SYMBOL_LOCATION_FUNCS (var);
-
-	if (frame == 0 && (funcs->read_needs_frame) (var))
-	  return 0;
-	return (funcs->read_variable) (var, frame);
-
-      }
-      break;
+      /* FIXME: cagney/2004-01-26: It should be possible to
+	 unconditionally call the SYMBOL_OPS method when available.
+	 Unfortunately DWARF 2 stores the frame-base (instead of the
+	 function) location in a function's symbol.  Oops!  For the
+	 moment enable this when/where applicable.  */
+      if (frame == 0 && SYMBOL_OPS (var)->read_needs_frame (var))
+	return 0;
+      return SYMBOL_OPS (var)->read_variable (var, frame);
 
     case LOC_UNRESOLVED:
       {

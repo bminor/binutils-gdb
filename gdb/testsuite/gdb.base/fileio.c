@@ -75,7 +75,7 @@ test_open ()
 
   /* Test opening */
   errno = 0;
-  ret = open (FILENAME, O_CREAT | O_TRUNC | O_RDONLY, S_IWUSR | S_IRUSR);
+  ret = open (FILENAME, O_CREAT | O_TRUNC | O_RDWR, S_IWUSR | S_IRUSR);
   printf ("open 1: ret = %d, errno = %d %s\n", ret, errno,
 	  ret >= 0 ? "OK" : "");
   if (ret >= 0)

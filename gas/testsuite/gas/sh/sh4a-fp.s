@@ -3,9 +3,9 @@
 
 	fpchg
 
-	fssra fr1
-	fssra fr9
-	fssra fr6
+	fsrra fr1
+	fsrra fr9
+	fsrra fr6
 
 	fsca fpul, dr2
 	fsca fpul, dr12

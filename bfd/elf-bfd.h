@@ -576,6 +576,11 @@ struct elf_backend_data
   int (*elf_backend_get_symbol_type)
     (Elf_Internal_Sym *, int);
 
+  /* Return true if local section symbols should have a non-null st_name.
+     NULL implies false.  */
+  bfd_boolean (*elf_backend_name_local_section_symbols)
+    (bfd *);
+
   /* A function to do additional processing on the ELF section header
      just before writing it out.  This is used to set the flags and
      type fields for some sections, or to actually write out data for

@@ -46,8 +46,9 @@ set srcfile2 "${srcdir}/${subdir}/${testfile}2.cc"
 set objfile2 "${objdir}/${subdir}/${testfile}2.o"
 set binfile ${objdir}/${subdir}/${testfile}
 
-# gdb_get_line_number needs this to be called srcfile.
-set srcfile "${srcfile1}"
+# gdb_get_line_number needs this to be called srcfile.  Except that it
+# gets confused if the directories are included. :-(
+set srcfile "${testfile}1.cc"
 
 if  { [gdb_compile "${srcfile1}" "${objfile1}" object {debug c++}] != "" } {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
@@ -78,8 +79,8 @@ if ![runto_main] then {
 
 # First, run to after we've constructed the object:
 
-gdb_breakpoint [gdb_get_line_number "constructs-done"]
-gdb_continue_to_breakpoint "end of constructors"
+gdb_breakpoint [gdb_get_line_number "main-constructs-done"]
+gdb_continue_to_breakpoint "end of constructors in main"
 
 gdb_test_multiple "print *e1" "print *e1" {
     -re "warning: RTTI symbol not found for class 'n1::D1'.*$gdb_prompt $" {
@@ -130,6 +131,14 @@ gdb_test_multiple "print *e2" "print *e2" {
 	kfail "gdb/57" "print *e2"
     }
 }
+
+# Now we test the hack that's been implemented to get around some
+# instances of PR gdb/1511.
+
+gdb_breakpoint [gdb_get_line_number "func-constructs-done"]
+gdb_continue_to_breakpoint "end of constructors in func"
+
+gdb_test "print *obj" "\\$\[0-9\]* = {<n2::Base2> = .*}"
 
 gdb_exit
 return 0

@@ -25,29 +25,31 @@
 #ifndef TUI_DATA_H
 #define TUI_DATA_H
 
-#if defined (HAVE_NCURSES_H)
-#include <ncurses.h>
-#elif defined (HAVE_CURSES_H)
-#include <curses.h>
-#endif
+#include "tui/tui.h"	/* For enum tui_win_type.  */
+#include "gdb_curses.h"	/* For WINDOW.  */
+
+/* This is a point definition.  */
+struct tui_point
+{
+  int x, y;
+};
 
 /* Generic window information */
-     typedef struct _TuiGenWinInfo
-       {
-	 WINDOW *handle;	/* window handle */
-	 TuiWinType type;	/* type of window */
-	 int width;		/* window width */
-	 int height;		/* window height */
-	 TuiPoint origin;	/* origin of window */
-	 OpaquePtr content;	/* content of window */
-	 int contentSize;	/* Size of content (# of elements) */
-	 int contentInUse;	/* Can it be used, or is it already used? */
-	 int viewportHeight;	/* viewport height */
-	 int lastVisibleLine;	/* index of last visible line */
-	 int isVisible;		/* whether the window is visible or not */
-         char* title;          /* Window title to display.  */
-       }
-TuiGenWinInfo, *TuiGenWinInfoPtr;
+struct tui_gen_win_info
+{
+  WINDOW *handle;	/* window handle */
+  enum tui_win_type type;	/* type of window */
+  int width;		/* window width */
+  int height;		/* window height */
+  struct tui_point origin;	/* origin of window */
+  void **content;	/* content of window */
+  int content_size;	/* Size of content (# of elements) */
+  int content_in_use;	/* Can it be used, or is it already used? */
+  int viewport_height;	/* viewport height */
+  int last_visible_line;	/* index of last visible line */
+  int is_visible;		/* whether the window is visible or not */
+  char *title;          /* Window title to display.  */
+};
 
 /* Constant definitions */
 #define DEFAULT_TAB_LEN                8
@@ -95,120 +97,109 @@ TuiGenWinInfo, *TuiGenWinInfoPtr;
 #define TUI_GENERAL_SPECIAL_REGS_NAME        "$REGS"
 #define TUI_GENERAL_SPECIAL_REGS_NAME_LOWER  "$regs"
 
-/* Scroll direction enum */
-typedef enum tui_scroll_direction
-  {
-    FORWARD_SCROLL,
-    BACKWARD_SCROLL,
-    LEFT_SCROLL,
-    RIGHT_SCROLL
-  }
-TuiScrollDirection, *TuiScrollDirectionPtr;
+/* Scroll direction enum.  */
+enum tui_scroll_direction
+{
+  FORWARD_SCROLL,
+  BACKWARD_SCROLL,
+  LEFT_SCROLL,
+  RIGHT_SCROLL
+};
 
 
-/* General list struct */
-typedef struct _TuiList
-  {
-    OpaqueList list;
-    int count;
-  }
-TuiList, *TuiListPtr;
+/* General list struct.  */
+struct tui_list
+{
+  void **list;
+  int count;
+};
 
 
 /* The kinds of layouts available */
-typedef enum
-  {
-    SRC_COMMAND,
-    DISASSEM_COMMAND,
-    SRC_DISASSEM_COMMAND,
-    SRC_DATA_COMMAND,
-    DISASSEM_DATA_COMMAND,
-    UNDEFINED_LAYOUT
-  }
-TuiLayoutType, *TuiLayoutTypePtr;
+enum tui_layout_type
+{
+  SRC_COMMAND,
+  DISASSEM_COMMAND,
+  SRC_DISASSEM_COMMAND,
+  SRC_DATA_COMMAND,
+  DISASSEM_DATA_COMMAND,
+  UNDEFINED_LAYOUT
+};
 
 /* Basic data types that can be displayed in the data window. */
-typedef enum _TuiDataType
-  {
-    TUI_REGISTER,
-    TUI_SCALAR,
-    TUI_COMPLEX,
-    TUI_STRUCT
-  }
-TuiDataType, TuiDataTypePtr;
+enum tui_data_type
+{
+  TUI_REGISTER,
+  TUI_SCALAR,
+  TUI_COMPLEX,
+  TUI_STRUCT
+};
 
 /* Types of register displays */
-typedef enum tui_register_display_type
-  {
-    TUI_UNDEFINED_REGS,
-    TUI_GENERAL_REGS,
-    TUI_SFLOAT_REGS,
-    TUI_DFLOAT_REGS,
-    TUI_SPECIAL_REGS,
-    TUI_GENERAL_AND_SPECIAL_REGS
-  }
-TuiRegisterDisplayType, *TuiRegisterDisplayTypePtr;
+enum tui_register_display_type
+{
+  TUI_UNDEFINED_REGS,
+  TUI_GENERAL_REGS,
+  TUI_SFLOAT_REGS,
+  TUI_DFLOAT_REGS,
+  TUI_SPECIAL_REGS,
+  TUI_GENERAL_AND_SPECIAL_REGS
+};
 
 /* Structure describing source line or line address */
-typedef union _TuiLineOrAddress
-  {
-    int lineNo;
-    CORE_ADDR addr;
-  }
-TuiLineOrAddress, *TuiLineOrAddressPtr;
+union tui_line_or_address
+{
+  int line_no;
+  CORE_ADDR addr;
+};
 
 /* Current Layout definition */
-typedef struct _TuiLayoutDef
-  {
-    TuiWinType displayMode;
-    int split;
-    TuiRegisterDisplayType regsDisplayType;
-    TuiRegisterDisplayType floatRegsDisplayType;
-  }
-TuiLayoutDef, *TuiLayoutDefPtr;
+struct tui_layout_def
+{
+  enum tui_win_type display_mode;
+  int split;
+  enum tui_register_display_type regs_display_type;
+  enum tui_register_display_type float_regs_display_type;
+};
 
 /* Elements in the Source/Disassembly Window */
-typedef struct _TuiSourceElement
-  {
-    char *line;
-    TuiLineOrAddress lineOrAddr;
-    int isExecPoint;
-    int hasBreak;
-  }
-TuiSourceElement, *TuiSourceElementPtr;
+struct tui_source_element
+{
+  char *line;
+  union tui_line_or_address line_or_addr;
+  int is_exec_point;
+  int has_break;
+};
 
 
 /* Elements in the data display window content */
-typedef struct _TuiDataElement
-  {
-    const char *name;
-    int itemNo;			/* the register number, or data display number */
-    TuiDataType type;
-    Opaque value;
-    int highlight;
-  }
-TuiDataElement, *TuiDataElementPtr;
+struct tui_data_element
+{
+  const char *name;
+  int item_no;			/* the register number, or data display number */
+  enum tui_data_type type;
+  void *value;
+  int highlight;
+};
 
 
 /* Elements in the command window content */
-typedef struct _TuiCommandElement
-  {
-    char *line;
-  }
-TuiCommandElement, *TuiCommandElementPtr;
+struct tui_command_element
+{
+  char *line;
+};
 
 
 #define MAX_LOCATOR_ELEMENT_LEN        100
 
 /* Elements in the locator window content */
-typedef struct _TuiLocatorElement
-  {
-    char fileName[MAX_LOCATOR_ELEMENT_LEN];
-    char procName[MAX_LOCATOR_ELEMENT_LEN];
-    int lineNo;
-    CORE_ADDR addr;
-  }
-TuiLocatorElement, *TuiLocatorElementPtr;
+struct tui_locator_element
+{
+  char file_name[MAX_LOCATOR_ELEMENT_LEN];
+  char proc_name[MAX_LOCATOR_ELEMENT_LEN];
+  int line_no;
+  CORE_ADDR addr;
+};
 
 /* Flags to tell what kind of breakpoint is at current line.  */
 #define TUI_BP_ENABLED      0x01
@@ -223,164 +214,136 @@ TuiLocatorElement, *TuiLocatorElementPtr;
 #define TUI_EXEC_POS        2
 #define TUI_EXECINFO_SIZE   4
 
-typedef char TuiExecInfoContent[TUI_EXECINFO_SIZE];
+typedef char tui_exec_info_content[TUI_EXECINFO_SIZE];
 
 /* An content element in a window */
-typedef union
-  {
-    TuiSourceElement source;	/* the source elements */
-    TuiGenWinInfo dataWindow;	/* data display elements */
-    TuiDataElement data;	/* elements of dataWindow */
-    TuiCommandElement command;	/* command elements */
-    TuiLocatorElement locator;	/* locator elements */
-    TuiExecInfoContent simpleString;	/* simple char based elements */
-  }
-TuiWhichElement, *TuiWhichElementPtr;
+union tui_which_element
+{
+  struct tui_source_element source;	/* the source elements */
+  struct tui_gen_win_info data_window;	/* data display elements */
+  struct tui_data_element data;	/* elements of data_window */
+  struct tui_command_element command;	/* command elements */
+  struct tui_locator_element locator;	/* locator elements */
+  tui_exec_info_content simple_string;	/* simple char based elements */
+};
 
-typedef struct _TuiWinElement
-  {
-    int highlight;
-    TuiWhichElement whichElement;
-  }
-TuiWinElement, *TuiWinElementPtr;
+struct tui_win_element
+{
+  int highlight;
+  union tui_which_element which_element;
+};
 
 
 /* This describes the content of the window. */
-typedef TuiWinElementPtr *TuiWinContent;
+typedef struct tui_win_element **tui_win_content;
 
 
 /* This struct defines the specific information about a data display window */
-typedef struct _TuiDataInfo
-  {
-    TuiWinContent dataContent;	/* start of data display content */
-    int dataContentCount;
-    TuiWinContent regsContent;	/* start of regs display content */
-    int regsContentCount;
-    TuiRegisterDisplayType regsDisplayType;
-    int regsColumnCount;
-    int displayRegs;		/* Should regs be displayed at all? */
-  }
-TuiDataInfo, *TuiDataInfoPtr;
+struct tui_data_info
+{
+  tui_win_content data_content;	/* start of data display content */
+  int data_content_count;
+  tui_win_content regs_content;	/* start of regs display content */
+  int regs_content_count;
+  enum tui_register_display_type regs_display_type;
+  int regs_column_count;
+  int display_regs;		/* Should regs be displayed at all? */
+};
 
 
-typedef struct _TuiSourceInfo
-  {
-    int hasLocator;		/* Does locator belongs to this window? */
-    TuiGenWinInfoPtr executionInfo;	/* execution information window */
-    int horizontalOffset;	/* used for horizontal scroll */
-    TuiLineOrAddress startLineOrAddr;
-    char* filename;
-  }
-TuiSourceInfo, *TuiSourceInfoPtr;
+struct tui_source_info
+{
+  int has_locator;		/* Does locator belongs to this window? */
+  /* Execution information window.  */
+  struct tui_gen_win_info *execution_info;
+  int horizontal_offset;	/* used for horizontal scroll */
+  union tui_line_or_address start_line_or_addr;
+  char* filename;
+};
 
 
-typedef struct _TuiCommandInfo
-  {
-    int curLine;		/* The current line position */
-    int curch;			/* The current cursor position */
-    int start_line;
-  }
-TuiCommandInfo, *TuiCommandInfoPtr;
+struct tui_command_info
+{
+  int cur_line;		/* The current line position */
+  int curch;			/* The current cursor position */
+  int start_line;
+};
 
 
 /* This defines information about each logical window */
-typedef struct _TuiWinInfo
+struct tui_win_info
+{
+  struct tui_gen_win_info generic;	/* general window information */
+  union
   {
-    TuiGenWinInfo generic;	/* general window information */
-    union
-      {
-	TuiSourceInfo sourceInfo;
-	TuiDataInfo dataDisplayInfo;
-	TuiCommandInfo commandInfo;
-	Opaque opaque;
-      }
-    detail;
-    int canHighlight;		/* Can this window ever be highlighted? */
-    int isHighlighted;		/* Is this window highlighted? */
+    struct tui_source_info source_info;
+    struct tui_data_info data_display_info;
+    struct tui_command_info command_info;
+    void *opaque;
   }
-TuiWinInfo, *TuiWinInfoPtr;
+  detail;
+  int can_highlight;		/* Can this window ever be highlighted? */
+  int is_highlighted;		/* Is this window highlighted? */
+};
 
-/* MACROS (prefixed with m_) */
-
-/* Testing macros */
-#define        m_genWinPtrIsNull(winInfo) \
-                ((winInfo) == (TuiGenWinInfoPtr)NULL)
-#define        m_genWinPtrNotNull(winInfo) \
-                ((winInfo) != (TuiGenWinInfoPtr)NULL)
-#define        m_winPtrIsNull(winInfo) \
-                ((winInfo) == (TuiWinInfoPtr)NULL)
-#define        m_winPtrNotNull(winInfo) \
-                ((winInfo) != (TuiWinInfoPtr)NULL)
-
-#define        m_winIsSourceType(type) \
-                (type == SRC_WIN || type == DISASSEM_WIN)
-#define        m_winIsAuxillary(winType) \
-                (winType > MAX_MAJOR_WINDOWS)
-#define        m_hasLocator(winInfo) \
-                ( ((winInfo) != (TuiWinInfoPtr)NULL) ? \
-                    (winInfo->detail.sourceInfo.hasLocator) : \
-                    FALSE )
-
-#define     m_setWinHighlightOn(winInfo) \
-                if ((winInfo) != (TuiWinInfoPtr)NULL) \
-                              (winInfo)->isHighlighted = TRUE
-#define     m_setWinHighlightOff(winInfo) \
-                if ((winInfo) != (TuiWinInfoPtr)NULL) \
-                              (winInfo)->isHighlighted = FALSE
+extern int tui_win_is_source_type (enum tui_win_type win_type);
+extern int tui_win_is_auxillary (enum tui_win_type win_type);
+extern int tui_win_has_locator (struct tui_win_info *win_info);
+extern void tui_set_win_highlight (struct tui_win_info *win_info,
+				   int highlight);
 
 
 /* Global Data */
-extern TuiWinInfoPtr winList[MAX_MAJOR_WINDOWS];
+extern struct tui_win_info *(tui_win_list[MAX_MAJOR_WINDOWS]);
 
-/* Macros */
-#define srcWin            winList[SRC_WIN]
-#define disassemWin       winList[DISASSEM_WIN]
-#define dataWin           winList[DATA_WIN]
-#define cmdWin            winList[CMD_WIN]
+#define TUI_SRC_WIN            tui_win_list[SRC_WIN]
+#define TUI_DISASM_WIN       tui_win_list[DISASSEM_WIN]
+#define TUI_DATA_WIN           tui_win_list[DATA_WIN]
+#define TUI_CMD_WIN            tui_win_list[CMD_WIN]
 
 /* Data Manipulation Functions */
-extern void initializeStaticData (void);
-extern TuiGenWinInfoPtr allocGenericWinInfo (void);
-extern TuiWinInfoPtr allocWinInfo (TuiWinType);
-extern void initGenericPart (TuiGenWinInfoPtr);
-extern void initWinInfo (TuiWinInfoPtr);
-extern TuiWinContent allocContent (int, TuiWinType);
-extern int addContentElements (TuiGenWinInfoPtr, int);
-extern void initContentElement (TuiWinElementPtr, TuiWinType);
-extern void freeWindow (TuiWinInfoPtr);
-extern void freeWinContent (TuiGenWinInfoPtr);
-extern void freeDataContent (TuiWinContent, int);
-extern void freeAllSourceWinsContent (void);
-extern void tuiDelWindow (TuiWinInfoPtr);
-extern void tuiDelDataWindows (TuiWinContent, int);
-extern TuiWinInfoPtr partialWinByName (char *);
-extern char *winName (TuiGenWinInfoPtr);
-extern TuiLayoutType currentLayout (void);
-extern void setCurrentLayoutTo (TuiLayoutType);
-extern int termHeight (void);
-extern void setTermHeightTo (int);
-extern int termWidth (void);
-extern void setTermWidthTo (int);
-extern void setGenWinOrigin (TuiGenWinInfoPtr, int, int);
-extern TuiGenWinInfoPtr locatorWinInfoPtr (void);
-extern TuiGenWinInfoPtr sourceExecInfoWinPtr (void);
-extern TuiGenWinInfoPtr disassemExecInfoWinPtr (void);
-extern TuiListPtr sourceWindows (void);
-extern void clearSourceWindows (void);
-extern void clearSourceWindowsDetail (void);
-extern void clearWinDetail (TuiWinInfoPtr winInfo);
-extern void tuiAddToSourceWindows (TuiWinInfoPtr);
-extern int tuiDefaultTabLen (void);
-extern void tuiSetDefaultTabLen (int);
-extern TuiWinInfoPtr tuiWinWithFocus (void);
-extern void tuiSetWinWithFocus (TuiWinInfoPtr);
-extern TuiLayoutDefPtr tuiLayoutDef (void);
-extern int tuiWinResized (void);
-extern void tuiSetWinResizedTo (int);
+extern void tui_initialize_static_data (void);
+extern struct tui_gen_win_info *tui_alloc_generic_win_info (void);
+extern struct tui_win_info *tui_alloc_win_info (enum tui_win_type);
+extern void tui_init_generic_part (struct tui_gen_win_info *);
+extern void tui_init_win_info (struct tui_win_info *);
+extern tui_win_content tui_alloc_content (int, enum tui_win_type);
+extern int tui_add_content_elements (struct tui_gen_win_info *, int);
+extern void tui_init_content_element (struct tui_win_element *, enum tui_win_type);
+extern void tui_free_window (struct tui_win_info *);
+extern void tui_free_win_content (struct tui_gen_win_info *);
+extern void tui_free_data_content (tui_win_content, int);
+extern void tui_free_all_source_wins_content (void);
+extern void tui_del_window (struct tui_win_info *);
+extern void tui_del_data_windows (tui_win_content, int);
+extern struct tui_win_info *tui_partial_win_by_name (char *);
+extern char *tui_win_name (struct tui_gen_win_info *);
+extern enum tui_layout_type tui_current_layout (void);
+extern void tui_set_current_layout_to (enum tui_layout_type);
+extern int tui_term_height (void);
+extern void tui_set_term_height_to (int);
+extern int tui_term_width (void);
+extern void tui_set_term_width_to (int);
+extern void tui_set_gen_win_origin (struct tui_gen_win_info *, int, int);
+extern struct tui_gen_win_info *tui_locator_win_info_ptr (void);
+extern struct tui_gen_win_info *tui_source_exec_info_win_ptr (void);
+extern struct tui_gen_win_info *tui_disassem_exec_info_win_ptr (void);
+extern struct tui_list * tui_source_windows (void);
+extern void tui_clear_source_windows (void);
+extern void tui_clear_source_windows_detail (void);
+extern void tui_clear_win_detail (struct tui_win_info * win_info);
+extern void tui_add_to_source_windows (struct tui_win_info *);
+extern int tui_default_tab_len (void);
+extern void tui_set_default_tab_len (int);
+extern struct tui_win_info *tui_win_with_focus (void);
+extern void tui_set_win_with_focus (struct tui_win_info *);
+extern struct tui_layout_def * tui_layout_def (void);
+extern int tui_win_resized (void);
+extern void tui_set_win_resized_to (int);
 
-extern TuiWinInfoPtr tuiNextWin (TuiWinInfoPtr);
-extern TuiWinInfoPtr tuiPrevWin (TuiWinInfoPtr);
+extern struct tui_win_info *tui_next_win (struct tui_win_info *);
+extern struct tui_win_info *tui_prev_win (struct tui_win_info *);
 
-extern void addToSourceWindows (TuiWinInfoPtr winInfo);
+extern void tui_add_to_source_windows (struct tui_win_info * win_info);
 
 #endif /* TUI_DATA_H */

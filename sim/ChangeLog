@@ -1,3 +1,8 @@
+2004-01-26  Chris Demetriou  <cgd@broadcom.com>
+
+	* configure.in (mips*-*-*): Configure in testsuite.
+	* configure: Regenerate.
+
 2003-10-08  Dave Brolley  <brolley@redhat.com>
 
 	* configure.in: Move frv handling to alphabetically correct placement.

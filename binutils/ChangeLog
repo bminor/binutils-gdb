@@ -1,3 +1,7 @@
+2004-01-21  Roland McGrath  <roland@redhat.com>
+
+	* readelf.c (get_note_type): Match NT_AUXV.
+
 2004-01-20  Nick Clifton  <nickc@redhat.com>
 
 	* version.c (print_version): Update copyright year to 2004.

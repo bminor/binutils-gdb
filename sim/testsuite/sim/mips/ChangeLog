@@ -1,0 +1,5 @@
+2004-01-26  Chris Demetriou  <cgd@broadcom.com>
+
+	* basic.exp: New file.
+	* testutils.inc: New file.
+	* sanity.s: New file.

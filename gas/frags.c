@@ -262,6 +262,14 @@ frag_wane (register fragS *fragP)
   fragP->fr_var = 0;
 }
 
+/* Return the number of bytes by which the current frag can be grown.  */
+
+int
+frag_room (void)
+{
+  return obstack_room (&frchain_now->frch_obstack);
+}
+
 /* Make an alignment frag.  The size of this frag will be adjusted to
    force the next frag to have the appropriate alignment.  ALIGNMENT
    is the power of two to which to align.  FILL_CHARACTER is the

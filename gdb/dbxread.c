@@ -651,14 +651,13 @@ dbx_symfile_init (struct objfile *objfile)
   DBX_SYMCOUNT (objfile) = bfd_get_symcount (sym_bfd);
   DBX_SYMTAB_OFFSET (objfile) = SYMBOL_TABLE_OFFSET;
 
-  /* Read the string table and stash it away in the psymbol_obstack.  It is
-     only needed as long as we need to expand psymbols into full symbols,
-     so when we blow away the psymbol the string table goes away as well.
+  /* Read the string table and stash it away in the objfile_obstack.
+     When we blow away the objfile the string table goes away as well.
      Note that gdb used to use the results of attempting to malloc the
      string table, based on the size it read, as a form of sanity check
      for botched byte swapping, on the theory that a byte swapped string
      table size would be so totally bogus that the malloc would fail.  Now
-     that we put in on the psymbol_obstack, we can't do this since gdb gets
+     that we put in on the objfile_obstack, we can't do this since gdb gets
      a fatal error (out of virtual memory) if the size is bogus.  We can
      however at least check to see if the size is less than the size of
      the size field itself, or larger than the size of the entire file.
@@ -710,7 +709,7 @@ dbx_symfile_init (struct objfile *objfile)
 		   DBX_STRINGTAB_SIZE (objfile));
 
 	  DBX_STRINGTAB (objfile) =
-	    (char *) obstack_alloc (&objfile->psymbol_obstack,
+	    (char *) obstack_alloc (&objfile->objfile_obstack,
 				    DBX_STRINGTAB_SIZE (objfile));
 	  OBJSTAT (objfile, sz_strtab += DBX_STRINGTAB_SIZE (objfile));
 
@@ -2147,7 +2146,7 @@ start_psymtab (struct objfile *objfile, char *filename, CORE_ADDR textlow,
 			filename, textlow, global_syms, static_syms);
 
   result->read_symtab_private = (char *)
-    obstack_alloc (&objfile->psymbol_obstack, sizeof (struct symloc));
+    obstack_alloc (&objfile->objfile_obstack, sizeof (struct symloc));
   LDSYMOFF (result) = ldsymoff;
   result->read_symtab = dbx_psymtab_to_symtab;
   SYMBOL_SIZE (result) = symbol_size;
@@ -2269,7 +2268,7 @@ end_psymtab (struct partial_symtab *pst, char **include_list, int num_includes,
   if (number_dependencies)
     {
       pst->dependencies = (struct partial_symtab **)
-	obstack_alloc (&objfile->psymbol_obstack,
+	obstack_alloc (&objfile->objfile_obstack,
 		    number_dependencies * sizeof (struct partial_symtab *));
       memcpy (pst->dependencies, dependency_list,
 	      number_dependencies * sizeof (struct partial_symtab *));
@@ -2285,7 +2284,7 @@ end_psymtab (struct partial_symtab *pst, char **include_list, int num_includes,
       /* Copy the sesction_offsets array from the main psymtab. */
       subpst->section_offsets = pst->section_offsets;
       subpst->read_symtab_private =
-	(char *) obstack_alloc (&objfile->psymbol_obstack,
+	(char *) obstack_alloc (&objfile->objfile_obstack,
 				sizeof (struct symloc));
       LDSYMOFF (subpst) =
 	LDSYMLEN (subpst) =
@@ -2295,7 +2294,7 @@ end_psymtab (struct partial_symtab *pst, char **include_list, int num_includes,
       /* We could save slight bits of space by only making one of these,
          shared by the entire set of include files.  FIXME-someday.  */
       subpst->dependencies = (struct partial_symtab **)
-	obstack_alloc (&objfile->psymbol_obstack,
+	obstack_alloc (&objfile->objfile_obstack,
 		       sizeof (struct partial_symtab *));
       subpst->dependencies[0] = pst;
       subpst->number_of_dependencies = 1;
@@ -3344,7 +3343,7 @@ coffstab_build_psymtabs (struct objfile *objfile, int mainline,
   if (stabstrsize > bfd_get_size (sym_bfd))
     error ("ridiculous string table size: %d bytes", stabstrsize);
   DBX_STRINGTAB (objfile) = (char *)
-    obstack_alloc (&objfile->psymbol_obstack, stabstrsize + 1);
+    obstack_alloc (&objfile->objfile_obstack, stabstrsize + 1);
   OBJSTAT (objfile, sz_strtab += stabstrsize + 1);
 
   /* Now read in the string table in one big gulp.  */
@@ -3442,7 +3441,7 @@ elfstab_build_psymtabs (struct objfile *objfile, int mainline,
   if (stabstrsize > bfd_get_size (sym_bfd))
     error ("ridiculous string table size: %d bytes", stabstrsize);
   DBX_STRINGTAB (objfile) = (char *)
-    obstack_alloc (&objfile->psymbol_obstack, stabstrsize + 1);
+    obstack_alloc (&objfile->objfile_obstack, stabstrsize + 1);
   OBJSTAT (objfile, sz_strtab += stabstrsize + 1);
 
   /* Now read in the string table in one big gulp.  */
@@ -3536,7 +3535,7 @@ stabsect_build_psymtabs (struct objfile *objfile, int mainline, char *stab_name,
   if (DBX_STRINGTAB_SIZE (objfile) > bfd_get_size (sym_bfd))
     error ("ridiculous string table size: %d bytes", DBX_STRINGTAB_SIZE (objfile));
   DBX_STRINGTAB (objfile) = (char *)
-    obstack_alloc (&objfile->psymbol_obstack, DBX_STRINGTAB_SIZE (objfile) + 1);
+    obstack_alloc (&objfile->objfile_obstack, DBX_STRINGTAB_SIZE (objfile) + 1);
   OBJSTAT (objfile, sz_strtab += DBX_STRINGTAB_SIZE (objfile) + 1);
 
   /* Now read in the string table in one big gulp.  */

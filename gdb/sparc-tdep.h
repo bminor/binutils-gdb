@@ -22,11 +22,11 @@
 #ifndef SPARC_TDEP_H
 #define SPARC_TDEP_H 1
 
+struct frame_info;
 struct gdbarch;
 struct regcache;
 struct regset;
 struct trad_frame_saved_reg;
-struct frame_info;
 
 /* Register offsets for the general-purpose register set.  */
 
@@ -147,6 +147,9 @@ struct sparc_frame_cache
 /* Fetch the instruction at PC.  */
 extern unsigned long sparc_fetch_instruction (CORE_ADDR pc);
 
+/* Fetch StackGhost Per-Process XOR cookie.  */
+extern ULONGEST sparc_fetch_wcookie (void);
+
 extern CORE_ADDR sparc_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 					 struct sparc_frame_cache *cache);
 
@@ -194,5 +197,8 @@ extern void sparc32_sol2_init_abi (struct gdbarch_info info,
 
 /* Register offsets for NetBSD.  */
 extern const struct sparc_gregset sparc32nbsd_gregset;
+
+extern struct trad_frame_saved_reg *
+  sparc32nbsd_sigcontext_saved_regs (struct frame_info *next_frame);
 
 #endif /* sparc-tdep.h */

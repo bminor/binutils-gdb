@@ -1,4 +1,4 @@
-#   Copyright 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+#   Copyright 1997, 1998, 1999, 2000, 2004 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -291,7 +291,7 @@ send_gdb "set width 0\n" ; gdb_expect -re "$gdb_prompt $"
 
 # PR's 16495, 18213
 # test that we can re-set breakpoints in shared libraries
-gdb_test "break shr1" "Breakpoint 1.*" "set bp in shared library"
+gdb_breakpoint "shr1"
 
 # FIXME: should not send "run" explicitly.  Non-portable.
 

@@ -672,6 +672,36 @@ bfd_elfNN_ia64_after_parse (int itanium)
   oor_branch_size = itanium ? sizeof (oor_ip) : sizeof (oor_brl);
 }
 
+static void
+elfNN_ia64_relax_brl (bfd *abfd, bfd_byte *contents, bfd_vma off)
+{
+  int template;
+  bfd_byte *hit_addr;
+  bfd_vma t0, t1, i0, i1, i2;
+
+  hit_addr = (bfd_byte *) (contents + off);
+  hit_addr -= (long) hit_addr & 0x3;
+  t0 = bfd_get_64 (abfd, hit_addr);
+  t1 = bfd_get_64 (abfd, hit_addr + 8);
+
+  /* Keep the instruction in slot 0. */
+  i0 = (t0 >> 5) & 0x1ffffffffffLL;
+  /* Use nop.b for slot 1. */
+  i1 = 0x4000000000LL;
+  /* For slot 2, turn brl into br by masking out bit 40.  */
+  i2 = (t1 >> 23) & 0x0ffffffffffLL;
+
+  /* Turn a MLX bundle into a MBB bundle with the same stop-bit
+     variety.  */
+  template = 0x12;
+  if ((t0 & 0x1fLL) == 5)
+    template += 1;
+  t0 = (i1 << 46) | (i0 << 5) | template;
+  t1 = (i2 << 23) | (i1 >> 18);
+
+  bfd_put_64 (abfd, t0, hit_addr);
+  bfd_put_64 (abfd, t1, hit_addr + 8);
+}
 
 /* These functions do relaxation for IA-64 ELF.  */
 
@@ -765,13 +795,30 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 	case R_IA64_PCREL21BI:
 	case R_IA64_PCREL21M:
 	case R_IA64_PCREL21F:
+	  /* In the finalize pass, all br relaxations are done. We can
+	     skip it. */
 	  if (!link_info->need_relax_finalize)
 	    continue;
 	  is_branch = TRUE;
 	  break;
 
+	case R_IA64_PCREL60B:
+	  /* We can't optimize brl to br before the finalize pass since
+	     br relaxations will increase the code size. Defer it to
+	     the finalize pass.  */
+	  if (link_info->need_relax_finalize)
+	    {
+	      sec->need_finalize_relax = 1;
+	      continue;
+	    }
+	  is_branch = TRUE;
+	  break;
+
 	case R_IA64_LTOFF22X:
 	case R_IA64_LDXMOV:
+	  /* We can't relax ldx/mov before the finalize pass since
+	     br relaxations will increase the code size. Defer it to
+	     the finalize pass.  */
 	  if (link_info->need_relax_finalize)
 	    {
 	      sec->need_finalize_relax = 1;
@@ -885,6 +932,25 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 	  /* If the branch is in range, no need to do anything.  */
 	  if ((bfd_signed_vma) (symaddr - reladdr) >= -0x1000000
 	      && (bfd_signed_vma) (symaddr - reladdr) <= 0x0FFFFF0)
+	    {
+	      /* If the 60-bit branch is in 21-bit range, optimize it. */
+	      if (r_type == R_IA64_PCREL60B)
+		{
+		  elfNN_ia64_relax_brl (abfd, contents, roff);
+
+		  irel->r_info
+		    = ELF64_R_INFO (ELF64_R_SYM (irel->r_info),
+				    R_IA64_PCREL21B);
+
+		  /* If the original relocation offset points to slot
+		     1, change it to slot 2.  */
+		  if ((irel->r_offset & 3) == 1)
+		    irel->r_offset += 1;
+		}
+
+	      continue;
+	    }
+	  else if (r_type == R_IA64_PCREL60B)
 	    continue;
 
 	  /* If the branch and target are in the same section, you've
@@ -3951,6 +4017,24 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	      BFD_ASSERT (srel != NULL);
 
+	      switch (r_type)
+		{
+		case R_IA64_IMM14:
+		case R_IA64_IMM22:
+		case R_IA64_IMM64:
+		  /* ??? People shouldn't be doing non-pic code in
+		     shared libraries nor dynamic executables.  */
+		  (*_bfd_error_handler)
+		    (_("%s: non-pic code with imm relocation against dynamic symbol `%s'"),
+		     bfd_archive_filename (input_bfd),
+		     h->root.root.string);
+		  ret_val = FALSE;
+		  continue;
+
+		default:
+		  break;
+		}
+
 	      /* If we don't need dynamic symbol lookup, find a
 		 matching RELATIVE relocation.  */
 	      dyn_r_type = r_type;
@@ -3978,17 +4062,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 		      break;
 
 		    default:
-		      /* We can't represent this without a dynamic symbol.
-			 Adjust the relocation to be against an output
-			 section symbol, which are always present in the
-			 dynamic symbol table.  */
-		      /* ??? People shouldn't be doing non-pic code in
-			 shared libraries.  Hork.  */
-		      (*_bfd_error_handler)
-			(_("%s: linking non-pic code in a shared library"),
-			 bfd_archive_filename (input_bfd));
-		      ret_val = FALSE;
-		      continue;
+		      break;
 		    }
 		  dynindx = 0;
 		  addend = value;

@@ -274,7 +274,7 @@ i386_linux_sigcontext_addr (struct frame_info *next_frame)
 	 pointer to the user context is passed as the third argument
 	 to the signal handler.  */
       read_memory (sp + 8, buf, 4);
-      ucontext_addr = extract_unsigned_integer (buf, 4) + 20;
+      ucontext_addr = extract_unsigned_integer (buf, 4);
       return ucontext_addr + I386_LINUX_UCONTEXT_SIGCONTEXT_OFFSET;
     }
 

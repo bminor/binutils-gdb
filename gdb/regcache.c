@@ -1,7 +1,7 @@
 /* Cache and manage the values of registers for GDB, the GNU debugger.
 
    Copyright 1986, 1987, 1989, 1991, 1994, 1995, 1996, 1998, 2000,
-   2001, 2002 Free Software Foundation, Inc.
+   2001, 2002, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -459,7 +459,7 @@ regcache_cpy_no_passthrough (struct regcache *dst, struct regcache *src)
   gdb_assert (src->descr->gdbarch == dst->descr->gdbarch);
   /* NOTE: cagney/2002-05-17: Don't let the caller do a no-passthrough
      move of data into the current_regcache().  Doing this would be
-     silly - it would mean that valid_p would be completly invalid.  */
+     silly - it would mean that valid_p would be completely invalid.  */
   gdb_assert (dst != current_regcache);
   memcpy (dst->registers, src->registers, dst->descr->sizeof_raw_registers);
   memcpy (dst->register_valid_p, src->register_valid_p,

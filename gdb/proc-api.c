@@ -459,7 +459,7 @@ static off_t lseek_offset;
 int
 write_with_trace (int fd, void *varg, size_t len, char *file, int line)
 {
-  int  i;
+  int i = ARRAY_SIZE (rw_table) - 1;
   int ret;
   procfs_ctl_t *arg = (procfs_ctl_t *) varg;
 

@@ -1392,7 +1392,6 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_breakpoint_from_pc (gdbarch, frv_breakpoint_from_pc);
   set_gdbarch_adjust_breakpoint_address (gdbarch, frv_gdbarch_adjust_breakpoint_address);
 
-  set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frameless_function_invocation (gdbarch, frv_frameless_function_invocation);
 
   set_gdbarch_use_struct_convention (gdbarch, always_use_struct_convention);
@@ -1400,7 +1399,7 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_deprecated_store_struct_return (gdbarch, frv_store_struct_return);
   set_gdbarch_store_return_value (gdbarch, frv_store_return_value);
-  set_gdbarch_extract_struct_value_address (gdbarch, frv_extract_struct_value_address);
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, frv_extract_struct_value_address);
 
   /* Frame stuff.  */
   set_gdbarch_unwind_pc (gdbarch, frv_unwind_pc);

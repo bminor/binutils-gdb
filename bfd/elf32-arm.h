@@ -2945,10 +2945,11 @@ elf32_arm_check_relocs (abfd, info, sec, relocs)
 		   symbol local.  */
 		if (ELF32_R_TYPE (rel->r_info) == R_ARM_PC24
 		    || ELF32_R_TYPE (rel->r_info) == R_ARM_PLT32)
-		  {
-		    h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
-		    h->plt.refcount += 1;
-		  }
+		  h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
+
+		/* If we create a PLT entry, this relocation will reference
+		   it, even if it's an ABS32 relocation.  */
+		h->plt.refcount += 1;
 	      }
 
 	    /* If we are creating a shared library, and this is a reloc

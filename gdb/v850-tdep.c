@@ -1243,8 +1243,6 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
    */
   /* Stack grows up. */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-  /* This value is almost never non-zero... */
-  set_gdbarch_frame_args_skip (gdbarch, 0);
 
   /*
    * Call Dummies

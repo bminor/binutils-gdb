@@ -1,7 +1,7 @@
 /* Symbol table lookup for the GNU debugger, GDB.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -485,7 +485,7 @@ symbol_find_demangled_name (struct general_symbol_info *gsymbol,
 
 /* Set both the mangled and demangled (if any) names for GSYMBOL based
    on LINKAGE_NAME and LEN.  The hash table corresponding to OBJFILE
-   is used, and the memory comes from that objfile's symbol_obstack.
+   is used, and the memory comes from that objfile's objfile_obstack.
    LINKAGE_NAME is copied, so the pointer can be discarded after
    calling this function.  */
 
@@ -572,7 +572,7 @@ symbol_set_names (struct general_symbol_info *gsymbol,
       /* If there is a demangled name, place it right after the mangled name.
 	 Otherwise, just place a second zero byte after the end of the mangled
 	 name.  */
-      *slot = obstack_alloc (&objfile->symbol_obstack,
+      *slot = obstack_alloc (&objfile->objfile_obstack,
 			     lookup_len + demangled_len + 2);
       memcpy (*slot, lookup_name, lookup_len + 1);
       if (demangled_name != NULL)
@@ -1480,15 +1480,23 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 }
 
 /* Look up a type named NAME in the struct_domain.  The type returned
-   must not be opaque -- i.e., must have at least one field defined
-
-   This code was modelled on lookup_symbol -- the parts not relevant to looking
-   up types were just left out.  In particular it's assumed here that types
-   are available in struct_domain and only at file-static or global blocks. */
-
+   must not be opaque -- i.e., must have at least one field
+   defined.  */
 
 struct type *
 lookup_transparent_type (const char *name)
+{
+  return current_language->la_lookup_transparent_type (name);
+}
+
+/* The standard implementation of lookup_transparent_type.  This code
+   was modeled on lookup_symbol -- the parts not relevant to looking
+   up types were just left out.  In particular it's assumed here that
+   types are available in struct_domain and only at file-static or
+   global blocks.  */
+
+struct type *
+basic_lookup_transparent_type (const char *name)
 {
   struct symbol *sym;
   struct symtab *s = NULL;

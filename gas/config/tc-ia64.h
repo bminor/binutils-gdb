@@ -91,6 +91,9 @@ extern void ia64_end_of_source PARAMS((void));
 extern void ia64_start_line PARAMS((void));
 extern int ia64_unrecognized_line PARAMS((int ch));
 extern void ia64_frob_label PARAMS((struct symbol *sym));
+#ifdef TE_HPUX
+extern int ia64_frob_symbol PARAMS((struct symbol *sym));
+#endif
 extern void ia64_flush_pending_output PARAMS((void));
 extern int ia64_parse_name (char *name, expressionS *e);
 extern int ia64_optimize_expr PARAMS((expressionS *l, operatorT op,
@@ -118,6 +121,9 @@ extern void ia64_convert_frag (fragS *);
 #define md_start_line_hook()		ia64_start_line ()
 #define tc_unrecognized_line(ch)	ia64_unrecognized_line (ch)
 #define tc_frob_label(s)		ia64_frob_label (s)
+#ifdef TE_HPUX
+#define tc_frob_symbol(s,p)		p |= ia64_frob_symbol (s)
+#endif /* TE_HPUX */
 #define md_flush_pending_output()	ia64_flush_pending_output ()
 #define md_parse_name(s,e,c)		ia64_parse_name (s, e)
 #define tc_canonicalize_symbol_name(s)	ia64_canonicalize_symbol_name (s)
@@ -202,7 +208,7 @@ typedef enum
   bspstore_gr, bspstore_psprel, bspstore_sprel, rnat_when, rnat_gr,
   rnat_psprel, rnat_sprel, epilogue, label_state, copy_state,
   spill_psprel, spill_sprel, spill_reg, spill_psprel_p, spill_sprel_p,
-  spill_reg_p, unwabi
+  spill_reg_p, unwabi, endp
 } unw_record_type;
 
 /* These structures declare the fields that can be used in each of the

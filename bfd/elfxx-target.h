@@ -274,6 +274,9 @@
 #ifndef elf_backend_get_symbol_type
 #define elf_backend_get_symbol_type 0
 #endif
+#ifndef elf_backend_name_local_section_symbols
+#define elf_backend_name_local_section_symbols	0
+#endif
 #ifndef elf_backend_section_processing
 #define elf_backend_section_processing	0
 #endif
@@ -456,6 +459,7 @@ static const struct elf_backend_data elfNN_bed =
   elf_backend_symbol_processing,
   elf_backend_symbol_table_processing,
   elf_backend_get_symbol_type,
+  elf_backend_name_local_section_symbols,
   elf_backend_section_processing,
   elf_backend_section_from_shdr,
   elf_backend_section_flags,

@@ -485,7 +485,7 @@ default_symfile_offsets (struct objfile *objfile,
 
   objfile->num_sections = bfd_count_sections (objfile->obfd);
   objfile->section_offsets = (struct section_offsets *)
-    obstack_alloc (&objfile->psymbol_obstack, 
+    obstack_alloc (&objfile->objfile_obstack, 
 		   SIZEOF_N_SECTION_OFFSETS (objfile->num_sections));
   memset (objfile->section_offsets, 0, 
 	  SIZEOF_N_SECTION_OFFSETS (objfile->num_sections));
@@ -690,7 +690,7 @@ syms_from_objfile (struct objfile *objfile,
       objfile->num_sections = num_offsets;
       objfile->section_offsets
         = ((struct section_offsets *)
-           obstack_alloc (&objfile->psymbol_obstack, size));
+           obstack_alloc (&objfile->objfile_obstack, size));
       memcpy (objfile->section_offsets, offsets, size);
 
       init_objfile_sect_indices (objfile);
@@ -1879,7 +1879,7 @@ reread_symbols (void)
 		       bfd_errmsg (bfd_get_error ()));
 
 	      /* Save the offsets, we will nuke them with the rest of the
-	         psymbol_obstack.  */
+	         objfile_obstack.  */
 	      num_offsets = objfile->num_sections;
 	      offsets = ((struct section_offsets *) 
 			 alloca (SIZEOF_N_SECTION_OFFSETS (num_offsets)));
@@ -1911,13 +1911,12 @@ reread_symbols (void)
 		  htab_delete (objfile->demangled_names_hash);
 		  objfile->demangled_names_hash = NULL;
 		}
-	      obstack_free (&objfile->psymbol_obstack, 0);
-	      obstack_free (&objfile->symbol_obstack, 0);
-	      obstack_free (&objfile->type_obstack, 0);
+	      obstack_free (&objfile->objfile_obstack, 0);
 	      objfile->sections = NULL;
 	      objfile->symtabs = NULL;
 	      objfile->psymtabs = NULL;
 	      objfile->free_psymtabs = NULL;
+	      objfile->cp_namespace_symtab = NULL;
 	      objfile->msymbols = NULL;
 	      objfile->sym_private = NULL;
 	      objfile->minimal_symbol_count = 0;
@@ -1934,16 +1933,13 @@ reread_symbols (void)
 
 	      /* We never make this a mapped file.  */
 	      objfile->md = NULL;
-	      /* obstack_specify_allocation also initializes the obstack so
-	         it is empty.  */
 	      objfile->psymbol_cache = bcache_xmalloc ();
 	      objfile->macro_cache = bcache_xmalloc ();
-	      obstack_specify_allocation (&objfile->psymbol_obstack, 0, 0,
-					  xmalloc, xfree);
-	      obstack_specify_allocation (&objfile->symbol_obstack, 0, 0,
-					  xmalloc, xfree);
-	      obstack_specify_allocation (&objfile->type_obstack, 0, 0,
-					  xmalloc, xfree);
+	      /* obstack_init also initializes the obstack so it is
+	         empty.  We could use obstack_specify_allocation but
+	         gdb_obstack.h specifies the alloc/dealloc
+	         functions.  */
+	      obstack_init (&objfile->objfile_obstack);
 	      if (build_objfile_section_table (objfile))
 		{
 		  error ("Can't find the file sections in `%s': %s",
@@ -1954,7 +1950,7 @@ reread_symbols (void)
 	      /* We use the same section offsets as from last time.  I'm not
 	         sure whether that is always correct for shared libraries.  */
 	      objfile->section_offsets = (struct section_offsets *)
-		obstack_alloc (&objfile->psymbol_obstack, 
+		obstack_alloc (&objfile->objfile_obstack, 
 			       SIZEOF_N_SECTION_OFFSETS (num_offsets));
 	      memcpy (objfile->section_offsets, offsets, 
 		      SIZEOF_N_SECTION_OFFSETS (num_offsets));
@@ -2240,14 +2236,14 @@ allocate_symtab (char *filename, struct objfile *objfile)
   struct symtab *symtab;
 
   symtab = (struct symtab *)
-    obstack_alloc (&objfile->symbol_obstack, sizeof (struct symtab));
+    obstack_alloc (&objfile->objfile_obstack, sizeof (struct symtab));
   memset (symtab, 0, sizeof (*symtab));
   symtab->filename = obsavestring (filename, strlen (filename),
-				   &objfile->symbol_obstack);
+				   &objfile->objfile_obstack);
   symtab->fullname = NULL;
   symtab->language = deduce_language_from_filename (filename);
   symtab->debugformat = obsavestring ("unknown", 7,
-				      &objfile->symbol_obstack);
+				      &objfile->objfile_obstack);
 
   /* Hook it to the objfile it comes from */
 
@@ -2278,12 +2274,12 @@ allocate_psymtab (char *filename, struct objfile *objfile)
     }
   else
     psymtab = (struct partial_symtab *)
-      obstack_alloc (&objfile->psymbol_obstack,
+      obstack_alloc (&objfile->objfile_obstack,
 		     sizeof (struct partial_symtab));
 
   memset (psymtab, 0, sizeof (struct partial_symtab));
   psymtab->filename = obsavestring (filename, strlen (filename),
-				    &objfile->psymbol_obstack);
+				    &objfile->objfile_obstack);
   psymtab->symtab = NULL;
 
   /* Prepend it to the psymtab list for the objfile it belongs to.
@@ -2432,7 +2428,7 @@ cashier_psymtab (struct partial_symtab *pst)
          partial_symbol lists (global_psymbols/static_psymbols) that
          this psymtab points to.  These just take up space until all
          the psymtabs are reclaimed.  Ditto the dependencies list and
-         filename, which are all in the psymbol_obstack.  */
+         filename, which are all in the objfile_obstack.  */
 
       /* We need to cashier any psymtab that has this one as a dependency... */
     again:

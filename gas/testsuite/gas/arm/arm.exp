@@ -86,6 +86,8 @@ if {[istarget *arm*-*-*] || [istarget "xscale-*-*"]} then {
     }
 
     gas_test "offset.s" "" $stdoptlist "OFFSET_IMM regression"
+
+    run_errors_test "undefined" "" "Undefined local label error"
 }
 
 # Not all arm targets are bi-endian, so only run this test on ones

@@ -31,6 +31,7 @@
 #include "gdbtypes.h"
 #include "dictionary.h"
 #include "command.h"
+#include "frame.h"
 
 /* When set, the file that we're processing is known to have debugging
    info for C++ namespaces.  */
@@ -84,6 +85,10 @@ static struct symbol *lookup_symbol_file (const char *name,
 					  const domain_enum domain,
 					  struct symtab **symtab,
 					  int anonymous_namespace);
+
+static struct type *cp_lookup_transparent_type_loop (const char *name,
+						     const char *scope,
+						     int scope_len);
 
 static void initialize_namespace_symtab (struct objfile *objfile);
 
@@ -551,6 +556,74 @@ cp_lookup_nested_type (struct type *parent_type,
     }
 }
 
+/* The C++-version of lookup_transparent_type.  */
+
+/* FIXME: carlton/2004-01-16: The problem that this is trying to
+   address is that, unfortunately, sometimes NAME is wrong: it may not
+   include the name of namespaces enclosing the type in question.
+   lookup_transparent_type gets called when the the type in question
+   is a declaration, and we're trying to find its definition; but, for
+   declarations, our type name deduction mechanism doesn't work.
+   There's nothing we can do to fix this in general, I think, in the
+   absence of debug information about namespaces (I've filed PR
+   gdb/1511 about this); until such debug information becomes more
+   prevalent, one heuristic which sometimes looks is to search for the
+   definition in namespaces containing the current namespace.
+
+   We should delete this functions once the appropriate debug
+   information becomes more widespread.  (GCC 3.4 will be the first
+   released version of GCC with such information.)  */
+
+struct type *
+cp_lookup_transparent_type (const char *name)
+{
+  /* First, try the honest way of looking up the definition.  */
+  struct type *t = basic_lookup_transparent_type (name);
+  const char *scope;
+
+  if (t != NULL)
+    return t;
+
+  /* If that doesn't work and we're within a namespace, look there
+     instead.  */
+  scope = block_scope (get_selected_block (0));
+
+  if (scope[0] == '\0')
+    return NULL;
+
+  return cp_lookup_transparent_type_loop (name, scope, 0);
+}
+
+/* Lookup the the type definition associated to NAME in
+   namespaces/classes containing SCOPE whose name is strictly longer
+   than LENGTH.  LENGTH must be the index of the start of a
+   component of SCOPE.  */
+
+static struct type *
+cp_lookup_transparent_type_loop (const char *name, const char *scope,
+				 int length)
+{
+  int scope_length = cp_find_first_component (scope + length);
+  char *full_name;
+
+  /* If the current scope is followed by "::", look in the next
+     component.  */
+  if (scope[scope_length] == ':')
+    {
+      struct type *retval
+	= cp_lookup_transparent_type_loop (name, scope, scope_length + 2);
+      if (retval != NULL)
+	return retval;
+    }
+
+  full_name = alloca (scope_length + 2 + strlen (name) + 1);
+  strncpy (full_name, scope, scope_length);
+  strncpy (full_name + scope_length, "::", 2);
+  strcpy (full_name + scope_length + 2, name);
+
+  return basic_lookup_transparent_type (full_name);
+}
+
 /* Now come functions for dealing with symbols associated to
    namespaces.  (They're used to store the namespaces themselves, not
    objects that live in the namespaces.)  These symbols come in two
@@ -582,7 +655,7 @@ initialize_namespace_symtab (struct objfile *objfile)
   namespace_symtab->free_code = free_nothing;
   namespace_symtab->dirname = NULL;
 
-  bv = obstack_alloc (&objfile->symbol_obstack,
+  bv = obstack_alloc (&objfile->objfile_obstack,
 		      sizeof (struct blockvector)
 		      + FIRST_LOCAL_BLOCK * sizeof (struct block *));
   BLOCKVECTOR_NBLOCKS (bv) = FIRST_LOCAL_BLOCK + 1;
@@ -590,12 +663,12 @@ initialize_namespace_symtab (struct objfile *objfile)
   
   /* Allocate empty GLOBAL_BLOCK and STATIC_BLOCK. */
 
-  bl = allocate_block (&objfile->symbol_obstack);
-  BLOCK_DICT (bl) = dict_create_linear (&objfile->symbol_obstack,
+  bl = allocate_block (&objfile->objfile_obstack);
+  BLOCK_DICT (bl) = dict_create_linear (&objfile->objfile_obstack,
 					NULL);
   BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK) = bl;
-  bl = allocate_block (&objfile->symbol_obstack);
-  BLOCK_DICT (bl) = dict_create_linear (&objfile->symbol_obstack,
+  bl = allocate_block (&objfile->objfile_obstack);
+  BLOCK_DICT (bl) = dict_create_linear (&objfile->objfile_obstack,
 					NULL);
   BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK) = bl;
 
@@ -613,7 +686,7 @@ initialize_namespace_symtab (struct objfile *objfile)
      having a symtab/block for this purpose seems like the best
      solution for now.  */
 
-  bl = allocate_block (&objfile->symbol_obstack);
+  bl = allocate_block (&objfile->objfile_obstack);
   BLOCK_DICT (bl) = dict_create_hashed_expandable ();
   BLOCKVECTOR_BLOCK (bv, FIRST_LOCAL_BLOCK) = bl;
 
@@ -710,17 +783,23 @@ check_one_possible_namespace_symbol (const char *name, int len,
 				     struct objfile *objfile)
 {
   struct block *block = get_possible_namespace_block (objfile);
-  char *name_copy = obsavestring (name, len, &objfile->symbol_obstack);
-  struct symbol *sym = lookup_block_symbol (block, name_copy, NULL,
-					    VAR_DOMAIN);
+  char *name_copy = alloca (len + 1);
+  struct symbol *sym;
+
+  memcpy (name_copy, name, len);
+  name_copy[len] = '\0';
+  sym = lookup_block_symbol (block, name_copy, NULL, VAR_DOMAIN);
 
   if (sym == NULL)
     {
-      struct type *type = init_type (TYPE_CODE_NAMESPACE, 0, 0,
-				     name_copy, objfile);
+      struct type *type;
+      name_copy = obsavestring (name, len, &objfile->objfile_obstack);
+
+      type = init_type (TYPE_CODE_NAMESPACE, 0, 0, name_copy, objfile);
+
       TYPE_TAG_NAME (type) = TYPE_NAME (type);
 
-      sym = obstack_alloc (&objfile->symbol_obstack, sizeof (struct symbol));
+      sym = obstack_alloc (&objfile->objfile_obstack, sizeof (struct symbol));
       memset (sym, 0, sizeof (struct symbol));
       SYMBOL_LANGUAGE (sym) = language_cplus;
       SYMBOL_SET_NAMES (sym, name_copy, len, objfile);
@@ -733,11 +812,7 @@ check_one_possible_namespace_symbol (const char *name, int len,
       return 0;
     }
   else
-    {
-      obstack_free (&objfile->symbol_obstack, name_copy);
-
-      return 1;
-    }
+    return 1;
 }
 
 /* Look for a symbol named NAME in all the possible namespace blocks.

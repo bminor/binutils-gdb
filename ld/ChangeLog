@@ -1,3 +1,36 @@
+2004-02-09  Daniel Jacobowitz  <drow@mvista.com>
+
+	* emulparams/armelf.sh, emulparams/armelf_linux.sh: Move
+	.note.gnu.arm.ident to after allocated sections.  Mark its
+	address as 0.
+
+2004-02-09  Daniel Jacobowitz  <drow@mvista.com>
+
+	* emulparams/armelf_linux.sh (COMMONPAGESIZE): Set to 4KB.
+	* emulparams/elf32bmip.sh (COMMONPAGESIZE): Likewise.
+	* emulparams/elf32bmipn32.sh (COMMONPAGESIZE): Likewise.
+	* emulparams/elf32btsmipn32.sh (COMMONPAGESIZE): Likewise.
+	* emulparams/shlelf_linux.sh (COMMONPAGESIZE): Likewise.
+
+2004-02-05  Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/pe.em (_after_open): Fix typo in previous delta.
+
+2004-02-04  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* emultempl/pe.em (_after_open): Fix thinko in 2003-12-18 patch.
+
+2004-01-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* genscripts.sh: Fix typo.
+
+	* genscripts.sh: Apply $LIBPATH_SUFFIX to $tool_lib and $libdir too.
+
+2004-01-24  Jakub Jelinek  <jakub@redhat.com>
+
+	* emulparams/elf64_ia64.sh: Put .rela.opd into
+	OTHER_GOT_RELOC_SECTIONS instead of OTHER_PLT_RELOC_SECTIONS.
+
 2004-01-20  Danny Smith  <dannysmith@users.sourceforge.net>
 
 	* pe-dll.c (pe_create_import_fixup): Clear WP_TEXT flag.
@@ -14,13 +47,13 @@
 	* ldlang.c (lang_get_regions): Add extra parameter 'have_vma'
 	which if true will prevent the LMA region being used as a
 	replacement for a default VMA region.
-        (lang_leave_output_section_statement): Pass extra parameter.
-        (lang_leave_overlay): Likewise.
-        * ld.texinfo (Output Section LMA): Document that the LMA
+	(lang_leave_output_section_statement): Pass extra parameter.
+	(lang_leave_overlay): Likewise.
+	* ld.texinfo (Output Section LMA): Document that the LMA
 	region can be set to the VMA region if no VMA has been set.
 	* ldlang.h (struct lang_output_section_phdr_list): Create a
 	typedef for this type.  Minor formatting fixes.
-	
+
 2004-01-13  Nick Clifton  <nickc@redhat.com>
 
 	* ldlang.c (lang_size_sections_1): If dot is advanced, then

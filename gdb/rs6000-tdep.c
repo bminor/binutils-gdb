@@ -2046,17 +2046,6 @@ rs6000_extract_struct_value_address (struct regcache *regcache)
   return 0;
 }
 
-/* Return whether PC is in a dummy function call.
-
-   FIXME: This just checks for the end of the stack, which is broken
-   for things like stepping through gcc nested function stubs.  */
-
-static int
-rs6000_pc_in_call_dummy (CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR fp)
-{
-  return sp < pc && pc < fp;
-}
-
 /* Hook called when a new child process is started.  */
 
 void
@@ -2892,7 +2881,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   else
     set_gdbarch_push_dummy_call (gdbarch, rs6000_push_dummy_call);
 
-  set_gdbarch_extract_struct_value_address (gdbarch, rs6000_extract_struct_value_address);
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, rs6000_extract_struct_value_address);
   set_gdbarch_deprecated_pop_frame (gdbarch, rs6000_pop_frame);
 
   set_gdbarch_skip_prologue (gdbarch, rs6000_skip_prologue);

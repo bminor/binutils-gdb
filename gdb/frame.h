@@ -1,7 +1,7 @@
 /* Definitions for dealing with stack frames, for GDB, the GNU debugger.
 
    Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -344,7 +344,7 @@ extern CORE_ADDR get_frame_args_address (struct frame_info *);
 extern int frame_relative_level (struct frame_info *fi);
 
 /* Return the frame's type.  Some are real, some are signal
-   trampolines, and some are completly artificial (dummy).  */
+   trampolines, and some are completely artificial (dummy).  */
 
 enum frame_type
 {

@@ -1,6 +1,6 @@
 /* GDB routines for manipulating the minimal symbol tables.
    Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003
+   2002, 2003, 2004
    Free Software Foundation, Inc.
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
@@ -355,7 +355,7 @@ lookup_minimal_symbol_solib_trampoline (const char *name,
 
 /* Search through the minimal symbol table for each objfile and find
    the symbol whose address is the largest address that is still less
-   than or equal to PC, and matches SECTION (if non-null).  Returns a
+   than or equal to PC, and matches SECTION (if non-NULL).  Returns a
    pointer to the minimal symbol if such a symbol is found, or NULL if
    PC is not in a suitable range.  Note that we need to look through
    ALL the minimal symbol tables before deciding on the symbol that
@@ -374,20 +374,23 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc, asection *section)
   struct minimal_symbol *best_symbol = NULL;
   struct obj_section *pc_section;
 
-  /* pc has to be in a known section. This ensures that anything beyond
-     the end of the last segment doesn't appear to be part of the last
-     function in the last segment.  */
+  /* PC has to be in a known section.  This ensures that anything
+     beyond the end of the last segment doesn't appear to be part of
+     the last function in the last segment.  */
   pc_section = find_pc_section (pc);
   if (pc_section == NULL)
     return NULL;
 
-  /* If no section was specified, then just make sure that the PC is in
-     the same section as the minimal symbol we find.  */
-  if (section == NULL)
-    section = pc_section->the_bfd_section;
-
-  /* FIXME drow/2003-07-19: Should we also check that PC is in SECTION
-     if we were passed a non-NULL SECTION argument?  */
+  /* NOTE: cagney/2004-01-27: Removed code (added 2003-07-19) that was
+     trying to force the PC into a valid section as returned by
+     find_pc_section.  It broke IRIX 6.5 mdebug which relies on this
+     code returning an absolute symbol - the problem was that
+     find_pc_section wasn't returning an absolute section and hence
+     the code below would skip over absolute symbols.  Since the
+     original problem was with finding a frame's function, and that
+     uses [indirectly] lookup_minimal_symbol_by_pc, the original
+     problem has been fixed by having that function use
+     find_pc_section.  */
 
   for (objfile = object_files;
        objfile != NULL;
@@ -497,7 +500,13 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc, asection *section)
 struct minimal_symbol *
 lookup_minimal_symbol_by_pc (CORE_ADDR pc)
 {
-  return lookup_minimal_symbol_by_pc_section (pc, find_pc_mapped_section (pc));
+  /* NOTE: cagney/2004-01-27: This was using find_pc_mapped_section to
+     force the section but that (well unless you're doing overlay
+     debugging) always returns NULL making the call somewhat useless.  */
+  struct obj_section *section = find_pc_section (pc);
+  if (section == NULL)
+    return NULL;
+  return lookup_minimal_symbol_by_pc_section (pc, section->the_bfd_section);
 }
 
 
@@ -714,7 +723,7 @@ make_cleanup_discard_minimal_symbols (void)
 
    Note that we are not concerned here about recovering the space that
    is potentially freed up, because the strings themselves are allocated
-   on the symbol_obstack, and will get automatically freed when the symbol
+   on the objfile_obstack, and will get automatically freed when the symbol
    table is freed.  The caller can free up the unused minimal symbols at
    the end of the compacted region if their allocation strategy allows it.
 
@@ -832,10 +841,10 @@ install_minimal_symbols (struct objfile *objfile)
          we will give back the excess space.  */
 
       alloc_count = msym_count + objfile->minimal_symbol_count + 1;
-      obstack_blank (&objfile->symbol_obstack,
+      obstack_blank (&objfile->objfile_obstack,
 		     alloc_count * sizeof (struct minimal_symbol));
       msymbols = (struct minimal_symbol *)
-	obstack_base (&objfile->symbol_obstack);
+	obstack_base (&objfile->objfile_obstack);
 
       /* Copy in the existing minimal symbols, if there are any.  */
 
@@ -875,10 +884,10 @@ install_minimal_symbols (struct objfile *objfile)
 
       mcount = compact_minimal_symbols (msymbols, mcount, objfile);
 
-      obstack_blank (&objfile->symbol_obstack,
+      obstack_blank (&objfile->objfile_obstack,
 	       (mcount + 1 - alloc_count) * sizeof (struct minimal_symbol));
       msymbols = (struct minimal_symbol *)
-	obstack_finish (&objfile->symbol_obstack);
+	obstack_finish (&objfile->objfile_obstack);
 
       /* We also terminate the minimal symbol table with a "null symbol",
          which is *not* included in the size of the table.  This makes it
@@ -896,7 +905,7 @@ install_minimal_symbols (struct objfile *objfile)
       SYMBOL_INIT_LANGUAGE_SPECIFIC (&msymbols[mcount], language_unknown);
 
       /* Attach the minimal symbol table to the specified objfile.
-         The strings themselves are also located in the symbol_obstack
+         The strings themselves are also located in the objfile_obstack
          of this objfile.  */
 
       objfile->minimal_symbol_count = mcount;

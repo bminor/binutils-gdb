@@ -155,7 +155,7 @@ char is_end_of_line[256] = {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0	/* */
 };
 
-#ifdef  IGNORE_OPCODE_CASE
+#ifndef TC_CASE_SENSITIVE
 char original_case_string[128];
 #endif
 
@@ -720,7 +720,7 @@ read_a_source_file (char *name)
 		  /* Expect pseudo-op or machine instruction.  */
 		  pop = NULL;
 
-#ifdef IGNORE_OPCODE_CASE
+#ifndef TC_CASE_SENSITIVE
 		  {
 		    char *s2 = s;
 
@@ -754,6 +754,8 @@ read_a_source_file (char *name)
 
 		      if (pop == NULL)
 			pop = (pseudo_typeS *) hash_find (po_hash, s + 1);
+		      if (pop && !pop->poc_handler)
+			pop = NULL;
 
 		      /* In MRI mode, we may need to insert an
 			 automatic alignment directive.  What a hack

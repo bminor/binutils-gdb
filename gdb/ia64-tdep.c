@@ -102,7 +102,6 @@ static gdbarch_register_type_ftype ia64_register_type;
 static gdbarch_breakpoint_from_pc_ftype ia64_breakpoint_from_pc;
 static gdbarch_skip_prologue_ftype ia64_skip_prologue;
 static gdbarch_extract_return_value_ftype ia64_extract_return_value;
-static gdbarch_extract_struct_value_address_ftype ia64_extract_struct_value_address;
 static gdbarch_use_struct_convention_ftype ia64_use_struct_convention;
 static struct type *is_float_or_hfa_type (struct type *t);
 
@@ -333,32 +332,6 @@ const struct floatformat floatformat_ia64_ext =
   floatformat_intbit_yes, "floatformat_ia64_ext", floatformat_valid
 };
 
-
-/* Read the given register from a sigcontext structure in the
-   specified frame.  */
-
-static CORE_ADDR
-read_sigcontext_register (struct frame_info *frame, int regnum)
-{
-  CORE_ADDR regaddr;
-
-  if (frame == NULL)
-    internal_error (__FILE__, __LINE__,
-		    "read_sigcontext_register: NULL frame");
-  if (!(get_frame_type (frame) == SIGTRAMP_FRAME))
-    internal_error (__FILE__, __LINE__,
-		    "read_sigcontext_register: frame not a signal trampoline");
-  if (SIGCONTEXT_REGISTER_ADDRESS == 0)
-    internal_error (__FILE__, __LINE__,
-		    "read_sigcontext_register: SIGCONTEXT_REGISTER_ADDRESS is 0");
-
-  regaddr = SIGCONTEXT_REGISTER_ADDRESS (get_frame_base (frame), regnum);
-  if (regaddr)
-    return read_memory_integer (regaddr, register_size (current_gdbarch, regnum));
-  else
-    internal_error (__FILE__, __LINE__,
-		    "read_sigcontext_register: Register %d not in struct sigcontext", regnum);
-}
 
 /* Extract ``len'' bits from an instruction bundle starting at
    bit ``from''.  */
@@ -647,18 +620,6 @@ ia64_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
   *pcptr &= ~0x0f;
 #endif
   return breakpoint;
-}
-
-static CORE_ADDR
-ia64_read_fp (void)
-{
-  /* We won't necessarily have a frame pointer and even if we do, it
-     winds up being extraordinarly messy when attempting to find the
-     frame chain.  So for the purposes of creating frames (which is
-     all deprecated_read_fp() is used for), simply use the stack
-     pointer value instead.  */
-  gdb_assert (SP_REGNUM >= 0);
-  return read_register (SP_REGNUM);
 }
 
 static CORE_ADDR
@@ -1590,8 +1551,10 @@ ia64_frame_this_id (struct frame_info *next_frame, void **this_cache,
   (*this_id) = frame_id_build_special (cache->base, cache->pc, cache->bsp);
   if (gdbarch_debug >= 1)
     fprintf_unfiltered (gdb_stdlog,
-			"regular frame id: code %lx, stack %lx, special %lx, next_frame %p\n",
-			this_id->code_addr, this_id->stack_addr, cache->bsp, next_frame);
+			"regular frame id: code 0x%s, stack 0x%s, special 0x%s, next_frame %p\n",
+			paddr_nz (this_id->code_addr), 
+			paddr_nz (this_id->stack_addr), 
+			paddr_nz (cache->bsp), next_frame);
 }
 
 static void
@@ -1886,9 +1849,10 @@ ia64_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 
   if (gdbarch_debug >= 1)
     fprintf_unfiltered (gdb_stdlog,
-			"regular prev register <%d> <%s> is %lx\n", regnum, 
+			"regular prev register <%d> <%s> is 0x%s\n", regnum, 
 			(((unsigned) regnum <= IA64_NAT127_REGNUM)
-			 ? ia64_register_names[regnum] : "r??"), extract_unsigned_integer (valuep, 8));
+			 ? ia64_register_names[regnum] : "r??"), 
+			paddr_nz (extract_unsigned_integer (valuep, 8)));
 }
  
 static const struct frame_unwind ia64_frame_unwind =
@@ -1986,8 +1950,10 @@ ia64_sigtramp_frame_this_id (struct frame_info *next_frame,
   (*this_id) = frame_id_build_special (cache->base, frame_pc_unwind (next_frame), cache->bsp);
   if (gdbarch_debug >= 1)
     fprintf_unfiltered (gdb_stdlog,
-			"sigtramp frame id: code %lx, stack %lx, special %lx, next_frame %p\n",
-			this_id->code_addr, this_id->stack_addr, cache->bsp, next_frame);
+			"sigtramp frame id: code 0x%s, stack 0x%s, special 0x%s, next_frame %p\n",
+			paddr_nz (this_id->code_addr), 
+			paddr_nz (this_id->stack_addr), 
+			paddr_nz (cache->bsp), next_frame);
 }
 
 static void
@@ -2063,9 +2029,10 @@ ia64_sigtramp_frame_prev_register (struct frame_info *next_frame,
 
   if (gdbarch_debug >= 1)
     fprintf_unfiltered (gdb_stdlog,
-			"sigtramp prev register <%s> is %lx\n",
+			"sigtramp prev register <%s> is 0x%s\n",
 			(((unsigned) regnum <= IA64_NAT127_REGNUM)
-			 ? ia64_register_names[regnum] : "r??"), extract_unsigned_integer (valuep, 8));
+			 ? ia64_register_names[regnum] : "r??"), 
+			paddr_nz (extract_unsigned_integer (valuep, 8)));
 }
 
 static const struct frame_unwind ia64_sigtramp_frame_unwind =
@@ -2264,9 +2231,10 @@ ia64_access_reg (unw_addr_space_t as, unw_regnum_t uw_regnum, unw_word_t *val,
 	}
       if (gdbarch_debug >= 1)
 	fprintf_unfiltered (gdb_stdlog, 
-			    "  access_reg: to cache: %4s=%016lx\n",
+			    "  access_reg: to cache: %4s=0x%s\n",
 			    (((unsigned) regnum <= IA64_NAT127_REGNUM)
-			     ? ia64_register_names[regnum] : "r??"), *val);
+			     ? ia64_register_names[regnum] : "r??"), 
+			    paddr_nz (*val));
     }
   else
     {
@@ -2310,9 +2278,10 @@ ia64_access_reg (unw_addr_space_t as, unw_regnum_t uw_regnum, unw_word_t *val,
       
       if (gdbarch_debug >= 1)
 	fprintf_unfiltered (gdb_stdlog, 
-			    "  access_reg: from cache: %4s=%016lx\n",
+			    "  access_reg: from cache: %4s=0x%s\n",
 			    (((unsigned) regnum <= IA64_NAT127_REGNUM)
-			     ? ia64_register_names[regnum] : "r??"), *val);
+			     ? ia64_register_names[regnum] : "r??"), 
+			    paddr_nz (*val));
     }
   return 0;
 }
@@ -2396,9 +2365,11 @@ get_kernel_table (unw_word_t ip, unw_dyn_info_t *di)
   
   if (gdbarch_debug >= 1)
     fprintf_unfiltered (gdb_stdlog, "get_kernel_table: found table `%s': "
-			"segbase=%lx, length=%lu, gp=%lx\n",
-			(char *) di->u.ti.name_ptr, di->u.ti.segbase, 
-			di->u.ti.table_len, di->gp);
+			"segbase=0x%s, length=%s, gp=0x%s\n",
+			(char *) di->u.ti.name_ptr, 
+			paddr_nz (di->u.ti.segbase), 
+			paddr_u (di->u.ti.table_len), 
+			paddr_nz (di->gp));
   return 0;
 }
 
@@ -2480,12 +2451,15 @@ ia64_find_proc_info_x (unw_addr_space_t as, unw_word_t ip, unw_proc_info_t *pi,
 	return -UNW_ENOINFO;
 
       if (gdbarch_debug >= 1)
-	fprintf_unfiltered (gdb_stdlog, "ia64_find_proc_info_x: %lx -> "
-			    "(name=`%s',segbase=%lx,start=%lx,end=%lx,gp=%lx,"
-			    "length=%lu,data=%p)\n",
-			    ip, (char *)di.u.ti.name_ptr,
-			    di.u.ti.segbase, di.start_ip, di.end_ip,
-			    di.gp, di.u.ti.table_len, di.u.ti.table_data);
+	fprintf_unfiltered (gdb_stdlog, "ia64_find_proc_info_x: 0x%s -> "
+			    "(name=`%s',segbase=0x%s,start=0x%s,end=0x%s,gp=0x%s,"
+			    "length=%s,data=0x%s)\n",
+			    paddr_nz (ip), (char *)di.u.ti.name_ptr,
+			    paddr_nz (di.u.ti.segbase), 
+			    paddr_nz (di.start_ip), paddr_nz (di.end_ip),
+			    paddr_nz (di.gp), 
+			    paddr_u (di.u.ti.table_len), 
+			    paddr_nz ((CORE_ADDR)di.u.ti.table_data));
     }
   else
     {
@@ -2494,12 +2468,15 @@ ia64_find_proc_info_x (unw_addr_space_t as, unw_word_t ip, unw_proc_info_t *pi,
 	return ret;
 
       if (gdbarch_debug >= 1)
-	fprintf_unfiltered (gdb_stdlog, "ia64_find_proc_info_x: %lx -> "
-			    "(name=`%s',segbase=%lx,start=%lx,end=%lx,gp=%lx,"
-			    "length=%lu,data=%lx)\n",
-			    ip, (char *)di.u.rti.name_ptr,
-			    di.u.rti.segbase, di.start_ip, di.end_ip,
-			    di.gp, di.u.rti.table_len, di.u.rti.table_data);
+	fprintf_unfiltered (gdb_stdlog, "ia64_find_proc_info_x: 0x%s -> "
+			    "(name=`%s',segbase=0x%s,start=0x%s,end=0x%s,gp=0x%s,"
+			    "length=%s,data=0x%s)\n",
+			    paddr_nz (ip), (char *)di.u.rti.name_ptr,
+			    paddr_nz (di.u.rti.segbase), 
+			    paddr_nz (di.start_ip), paddr_nz (di.end_ip),
+			    paddr_nz (di.gp), 
+			    paddr_u (di.u.rti.table_len), 
+			    paddr_nz (di.u.rti.table_data));
     }
 
   ret = libunwind_search_unwind_table (&as, ip, &di, pi, need_unwind_info,
@@ -2552,9 +2529,9 @@ ia64_get_dyn_info_list (unw_addr_space_t as,
 	      if (gdbarch_debug >= 1)
 		fprintf_unfiltered (gdb_stdlog,
 				    "dynamic unwind table in objfile %s "
-				    "at %lx (gp=%lx)\n",
+				    "at 0x%s (gp=0x%s)\n",
 				    bfd_get_filename (objfile->obfd),
-				    addr, di.gp);
+				    paddr_nz (addr), paddr_nz (di.gp));
 	      *dilap = addr;
 	      return 0;
 	    }
@@ -2584,8 +2561,9 @@ ia64_libunwind_frame_this_id (struct frame_info *next_frame, void **this_cache,
 
   if (gdbarch_debug >= 1)
     fprintf_unfiltered (gdb_stdlog,
-			"libunwind frame id: code %lx, stack %lx, special %lx, next_frame %p\n",
-			id.code_addr, id.stack_addr, bsp, next_frame);
+			"libunwind frame id: code 0x%s, stack 0x%s, special 0x%s, next_frame %p\n",
+			paddr_nz (id.code_addr), paddr_nz (id.stack_addr), 
+			paddr_nz (bsp), next_frame);
 }
 
 static void
@@ -2664,9 +2642,10 @@ ia64_libunwind_frame_prev_register (struct frame_info *next_frame,
 
   if (gdbarch_debug >= 1)
     fprintf_unfiltered (gdb_stdlog,
-			"libunwind prev register <%s> is %lx\n",
+			"libunwind prev register <%s> is 0x%s\n",
 			(((unsigned) regnum <= IA64_NAT127_REGNUM)
-			 ? ia64_register_names[regnum] : "r??"), extract_unsigned_integer (valuep, 8));
+			 ? ia64_register_names[regnum] : "r??"), 
+			paddr_nz (extract_unsigned_integer (valuep, 8)));
 }
 
 static const struct frame_unwind ia64_libunwind_frame_unwind =
@@ -2709,9 +2688,9 @@ static struct libunwind_descr ia64_libunwind_descr =
 
 #endif /* HAVE_LIBUNWIND_IA64_H  */
 
-/* Should we use EXTRACT_STRUCT_VALUE_ADDRESS instead of
-   EXTRACT_RETURN_VALUE?  GCC_P is true if compiled with gcc
-   and TYPE is the type (which is known to be struct, union or array).  */
+/* Should we use DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS instead of
+   EXTRACT_RETURN_VALUE?  GCC_P is true if compiled with gcc and TYPE
+   is the type (which is known to be struct, union or array).  */
 int
 ia64_use_struct_convention (int gcc_p, struct type *type)
 {
@@ -3211,8 +3190,9 @@ ia64_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
 
   if (gdbarch_debug >= 1)
     fprintf_unfiltered (gdb_stdlog,
-			"dummy frame id: code %lx, stack %lx, special %lx\n",
-			frame_pc_unwind (next_frame), sp, bsp);
+			"dummy frame id: code 0x%s, stack 0x%s, special 0x%s\n",
+			paddr_nz (frame_pc_unwind (next_frame)), 
+			paddr_nz (sp), paddr_nz (bsp));
 
   return frame_id_build_special (sp, frame_pc_unwind (next_frame), bsp);
 }
@@ -3254,53 +3234,6 @@ ia64_remote_translate_xfer_address (struct gdbarch *gdbarch,
 {
   *targ_addr = memaddr;
   *targ_len  = nr_bytes;
-}
-
-static void
-process_note_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
-{
-  int *os_ident_ptr = obj;
-  const char *name;
-  unsigned int sectsize;
-
-  name = bfd_get_section_name (abfd, sect);
-  sectsize = bfd_section_size (abfd, sect);
-  if (strcmp (name, ".note.ABI-tag") == 0 && sectsize > 0)
-    {
-      unsigned int name_length, data_length, note_type;
-      char *note = alloca (sectsize);
-
-      bfd_get_section_contents (abfd, sect, note,
-                                (file_ptr) 0, (bfd_size_type) sectsize);
-
-      name_length = bfd_h_get_32 (abfd, note);
-      data_length = bfd_h_get_32 (abfd, note + 4);
-      note_type   = bfd_h_get_32 (abfd, note + 8);
-
-      if (name_length == 4 && data_length == 16 && note_type == 1
-          && strcmp (note + 12, "GNU") == 0)
-	{
-	  int os_number = bfd_h_get_32 (abfd, note + 16);
-
-	  /* The case numbers are from abi-tags in glibc.  */
-	  switch (os_number)
-	    {
-	    case 0 :
-	      *os_ident_ptr = ELFOSABI_LINUX;
-	      break;
-	    case 1 :
-	      *os_ident_ptr = ELFOSABI_HURD;
-	      break;
-	    case 2 :
-	      *os_ident_ptr = ELFOSABI_SOLARIS;
-	      break;
-	    default :
-	      internal_error (__FILE__, __LINE__,
-			      "process_note_abi_sections: unknown OS number %d", os_number);
-	      break;
-	    }
-	}
-    }
 }
 
 static int
@@ -3400,7 +3333,7 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_extract_return_value (gdbarch, ia64_extract_return_value);
 
   set_gdbarch_store_return_value (gdbarch, ia64_store_return_value);
-  set_gdbarch_extract_struct_value_address (gdbarch, ia64_extract_struct_value_address);
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, ia64_extract_struct_value_address);
 
   set_gdbarch_memory_insert_breakpoint (gdbarch, ia64_memory_insert_breakpoint);
   set_gdbarch_memory_remove_breakpoint (gdbarch, ia64_memory_remove_breakpoint);
@@ -3424,8 +3357,6 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Settings that should be unnecessary.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-
-  set_gdbarch_frame_args_skip (gdbarch, 0);
 
   set_gdbarch_remote_translate_xfer_address (
     gdbarch, ia64_remote_translate_xfer_address);

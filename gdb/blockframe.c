@@ -156,11 +156,18 @@ inside_main_func (CORE_ADDR pc)
 	  && symfile_objfile->ei.main_func_highpc > pc);
 }
 
-/* Test whether PC is inside the range of addresses that corresponds
-   to the process entry point function.  */
+/* Test whether THIS_FRAME is inside the process entry point function.  */
 
 int
-inside_entry_func (CORE_ADDR pc)
+inside_entry_func (struct frame_info *this_frame)
+{
+  return (get_frame_func (this_frame) == entry_point_address ());
+}
+
+/* Similar to inside_entry_func, but accomodating legacy frame code.  */
+
+static int
+legacy_inside_entry_func (CORE_ADDR pc)
 {
   if (symfile_objfile == 0)
     return 0;
@@ -192,9 +199,16 @@ frameless_look_for_prologue (struct frame_info *frame)
   if (func_start)
     {
       func_start += FUNCTION_START_OFFSET;
-      /* This is faster, since only care whether there *is* a
-         prologue, not how long it is.  */
-      return PROLOGUE_FRAMELESS_P (func_start);
+      /* NOTE: cagney/2004-02-09: Eliminated per-architecture
+         PROLOGUE_FRAMELESS_P call as architectures with custom
+         implementations had all been deleted.  Eventually even this
+         function can go - GDB no longer tries to differentiate
+         between framed, frameless and stackless functions.  They are
+         all now considered equally evil :-^.  */
+      /* If skipping the prologue ends up skips nothing, there must be
+         no prologue and hence no code creating a frame.  There for
+         the function is "frameless" :-/.  */
+      return func_start == SKIP_PROLOGUE (func_start);
     }
   else if (get_frame_pc (frame) == 0)
     /* A frame with a zero PC is usually created by dereferencing a
@@ -500,10 +514,24 @@ int
 find_pc_partial_function (CORE_ADDR pc, char **name, CORE_ADDR *address,
 			  CORE_ADDR *endaddr)
 {
-  asection *section;
+  struct bfd_section *bfd_section;
 
-  section = find_pc_overlay (pc);
-  return find_pc_sect_partial_function (pc, section, name, address, endaddr);
+  /* To ensure that the symbol returned belongs to the correct setion
+     (and that the last [random] symbol from the previous section
+     isn't returned) try to find the section containing PC.  First try
+     the overlay code (which by default returns NULL); and second try
+     the normal section code (which almost always succeeds).  */
+  bfd_section = find_pc_overlay (pc);
+  if (bfd_section == NULL)
+    {
+      struct obj_section *obj_section = find_pc_section (pc);
+      if (obj_section == NULL)
+	bfd_section = NULL;
+      else
+	bfd_section = obj_section->the_bfd_section;
+    }
+  return find_pc_sect_partial_function (pc, bfd_section, name, address,
+					endaddr);
 }
 
 /* Return the innermost stack frame executing inside of BLOCK,
@@ -604,7 +632,7 @@ legacy_frame_chain_valid (CORE_ADDR fp, struct frame_info *fi)
 
   /* If we're already inside the entry function for the main objfile, then it
      isn't valid.  */
-  if (inside_entry_func (get_frame_pc (fi)))
+  if (legacy_inside_entry_func (get_frame_pc (fi)))
     return 0;
 
   /* If we're inside the entry file, it isn't valid.  */

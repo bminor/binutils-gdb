@@ -1,7 +1,7 @@
 /* DWARF debugging format support for GDB.
 
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    Written by Fred Fish at Cygnus Support.  Portions based on dbxread.c,
    mipsread.c, coffread.c, and dwarfread.c from a Data General SVR4 gdb port.
@@ -968,7 +968,7 @@ struct_type (struct dieinfo *dip, char *thisdie, char *enddie,
       && *dip->at_name != '~'
       && *dip->at_name != '.')
     {
-      TYPE_TAG_NAME (type) = obconcat (&objfile->type_obstack,
+      TYPE_TAG_NAME (type) = obconcat (&objfile->objfile_obstack,
 				       "", "", dip->at_name);
     }
   /* Use whatever size is known.  Zero is a valid size.  We might however
@@ -1011,7 +1011,7 @@ struct_type (struct dieinfo *dip, char *thisdie, char *enddie,
 	  /* Save the data.  */
 	  list->field.name =
 	    obsavestring (mbr.at_name, strlen (mbr.at_name),
-			  &objfile->type_obstack);
+			  &objfile->objfile_obstack);
 	  FIELD_TYPE (list->field) = decode_die_type (&mbr);
 	  FIELD_BITPOS (list->field) = 8 * locval (&mbr);
 	  FIELD_STATIC_KIND (list->field) = 0;
@@ -1670,7 +1670,7 @@ enum_type (struct dieinfo *dip, struct objfile *objfile)
       && *dip->at_name != '~'
       && *dip->at_name != '.')
     {
-      TYPE_TAG_NAME (type) = obconcat (&objfile->type_obstack,
+      TYPE_TAG_NAME (type) = obconcat (&objfile->objfile_obstack,
 				       "", "", dip->at_name);
     }
   if (dip->at_byte_size != 0)
@@ -1704,15 +1704,15 @@ enum_type (struct dieinfo *dip, struct objfile *objfile)
 			    objfile);
 	  scan += TARGET_FT_LONG_SIZE (objfile);
 	  list->field.name = obsavestring (scan, strlen (scan),
-					   &objfile->type_obstack);
+					   &objfile->objfile_obstack);
 	  scan += strlen (scan) + 1;
 	  nfields++;
 	  /* Handcraft a new symbol for this enum member. */
-	  sym = (struct symbol *) obstack_alloc (&objfile->symbol_obstack,
+	  sym = (struct symbol *) obstack_alloc (&objfile->objfile_obstack,
 						 sizeof (struct symbol));
 	  memset (sym, 0, sizeof (struct symbol));
 	  DEPRECATED_SYMBOL_NAME (sym) = create_name (list->field.name,
-					   &objfile->symbol_obstack);
+					   &objfile->objfile_obstack);
 	  SYMBOL_INIT_LANGUAGE_SPECIFIC (sym, cu_language);
 	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 	  SYMBOL_CLASS (sym) = LOC_CONST;
@@ -1733,7 +1733,7 @@ enum_type (struct dieinfo *dip, struct objfile *objfile)
 	    TYPE_FLAGS (type) |= TYPE_FLAG_UNSIGNED;
 	  TYPE_NFIELDS (type) = nfields;
 	  TYPE_FIELDS (type) = (struct field *)
-	    obstack_alloc (&objfile->symbol_obstack, sizeof (struct field) * nfields);
+	    obstack_alloc (&objfile->objfile_obstack, sizeof (struct field) * nfields);
 	  /* Copy the saved-up fields into the field vector.  */
 	  for (n = 0; (n < nfields) && (list != NULL); list = list->next)
 	    {
@@ -2800,7 +2800,7 @@ scan_compilation_units (char *thisdie, char *enddie, file_ptr dbfoff,
 
 	  pst->texthigh = di.at_high_pc;
 	  pst->read_symtab_private = (char *)
-	    obstack_alloc (&objfile->psymbol_obstack,
+	    obstack_alloc (&objfile->objfile_obstack,
 			   sizeof (struct dwfinfo));
 	  DBFOFF (pst) = dbfoff;
 	  DBROFF (pst) = curoff;
@@ -2851,7 +2851,7 @@ new_symbol (struct dieinfo *dip, struct objfile *objfile)
 
   if (dip->at_name != NULL)
     {
-      sym = (struct symbol *) obstack_alloc (&objfile->symbol_obstack,
+      sym = (struct symbol *) obstack_alloc (&objfile->objfile_obstack,
 					     sizeof (struct symbol));
       OBJSTAT (objfile, n_syms++);
       memset (sym, 0, sizeof (struct symbol));
@@ -3011,11 +3011,11 @@ synthesize_typedef (struct dieinfo *dip, struct objfile *objfile,
   if (dip->at_name != NULL)
     {
       sym = (struct symbol *)
-	obstack_alloc (&objfile->symbol_obstack, sizeof (struct symbol));
+	obstack_alloc (&objfile->objfile_obstack, sizeof (struct symbol));
       OBJSTAT (objfile, n_syms++);
       memset (sym, 0, sizeof (struct symbol));
       DEPRECATED_SYMBOL_NAME (sym) = create_name (dip->at_name,
-				       &objfile->symbol_obstack);
+				       &objfile->objfile_obstack);
       SYMBOL_INIT_LANGUAGE_SPECIFIC (sym, cu_language);
       SYMBOL_TYPE (sym) = type;
       SYMBOL_CLASS (sym) = LOC_TYPEDEF;

@@ -11809,6 +11809,9 @@ md_begin ()
     bfd_set_section_flags (stdoutput, arm_arch,
 			   SEC_DATA | SEC_ALLOC | SEC_LOAD | SEC_LINK_ONCE \
 			   | SEC_HAS_CONTENTS);
+#else
+    bfd_set_section_flags (stdoutput, arm_arch,
+			   SEC_READONLY | SEC_HAS_CONTENTS);
 #endif
     arm_arch->output_section = arm_arch;
     subseg_set (arm_arch, 0);
@@ -12823,6 +12826,16 @@ tc_gen_reloc (section, fixp)
       return NULL;
 
     case BFD_RELOC_ARM_OFFSET_IMM:
+      if (fixp->fx_addsy != NULL
+	  && !S_IS_DEFINED (fixp->fx_addsy)
+	  && S_IS_LOCAL (fixp->fx_addsy))
+	{
+	  as_bad_where (fixp->fx_file, fixp->fx_line,
+			_("undefined local label `%s'"),
+			S_GET_NAME (fixp->fx_addsy));
+	  return NULL;
+	}
+
       as_bad_where (fixp->fx_file, fixp->fx_line,
 		    _("internal_relocation (type: OFFSET_IMM) not fixed up"));
       return NULL;

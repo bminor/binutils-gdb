@@ -1515,7 +1515,6 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_remote_translate_xfer_address (gdbarch, 
 					     remote_d10v_translate_xfer_address);
 
-  set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frameless_function_invocation (gdbarch, 
 					     frameless_look_for_prologue);
 

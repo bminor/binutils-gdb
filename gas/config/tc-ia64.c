@@ -822,6 +822,7 @@ static void output_X2_format PARAMS ((vbyte_func, int, int, int, int, int, unsig
 static void output_X3_format PARAMS ((vbyte_func, unw_record_type, int, int, int, unsigned long,
 				      unsigned long));
 static void output_X4_format PARAMS ((vbyte_func, int, int, int, int, int, int, unsigned long));
+static unw_rec_list *output_endp PARAMS ((void));
 static unw_rec_list *output_prologue PARAMS ((void));
 static unw_rec_list *output_prologue_gr PARAMS ((unsigned int, unsigned int));
 static unw_rec_list *output_body PARAMS ((void));
@@ -896,7 +897,6 @@ static void process_one_record PARAMS ((unw_rec_list *, vbyte_func));
 static void process_unw_records PARAMS ((unw_rec_list *, vbyte_func));
 static int calc_record_size PARAMS ((unw_rec_list *));
 static void set_imask PARAMS ((unw_rec_list *, unsigned long, unsigned long, unsigned int));
-static int count_bits PARAMS ((unsigned long));
 static unsigned long slot_index PARAMS ((unsigned long, fragS *,
 					 unsigned long, fragS *));
 static unw_rec_list *optimize_unw_records PARAMS ((unw_rec_list *));
@@ -1088,12 +1088,12 @@ ia64_flush_insns ()
   CURR_SLOT.tag_fixups = 0;
 
   /* In case there are unwind directives following the last instruction,
-     resolve those now.  We only handle body and prologue directives here.
-     Give an error for others.  */
+     resolve those now.  We only handle prologue, body, and endp directives
+     here.  Give an error for others.  */
   for (ptr = unwind.current_entry; ptr; ptr = ptr->next)
     {
       if (ptr->r.type == prologue || ptr->r.type == prologue_gr
-	  || ptr->r.type == body)
+	  || ptr->r.type == body || ptr->r.type == endp)
 	{
 	  ptr->slot_number = (unsigned long) frag_more (0);
 	  ptr->slot_frag = frag_now;
@@ -1709,6 +1709,16 @@ alloc_record (unw_record_type t)
   ptr->r.type = t;
   ptr->next_slot_number = 0;
   ptr->next_slot_frag = 0;
+  return ptr;
+}
+
+/* Dummy unwind record used for calculating the length of the last prologue or
+   body region.  */
+
+static unw_rec_list *
+output_endp ()
+{
+  unw_rec_list *ptr = alloc_record (endp);
   return ptr;
 }
 
@@ -2332,6 +2342,10 @@ process_one_record (ptr, f)
 
   switch (ptr->r.type)
     {
+      /* This is a dummy record that takes up no space in the output.  */
+    case endp:
+      break;
+
     case gr_mem:
     case fr_mem:
     case br_mem:
@@ -2574,19 +2588,6 @@ set_imask (region, regmask, t, type)
     }
 }
 
-static int
-count_bits (unsigned long mask)
-{
-  int n = 0;
-
-  while (mask)
-    {
-      mask &= mask - 1;
-      ++n;
-    }
-  return n;
-}
-
 /* Return the number of instruction slots from FIRST_ADDR to SLOT_ADDR.
    SLOT_FRAG is the frag containing SLOT_ADDR, and FIRST_FRAG is the frag
    containing FIRST_ADDR.  */
@@ -2680,8 +2681,8 @@ optimize_unw_records (list)
   /* If the only unwind record is ".prologue" or ".prologue" followed
      by ".body", then we can optimize the unwind directives away.  */
   if (list->r.type == prologue
-      && (list->next == NULL
-	  || (list->next->r.type == body && list->next->next == NULL)))
+      && (list->next->r.type == endp
+	  || (list->next->r.type == body && list->next->next->r.type == endp)))
     return NULL;
 
   return list;
@@ -2713,59 +2714,23 @@ fixup_unw_records (list)
 	case body:
 	  {
 	    unw_rec_list *last;
-	    int size, dir_len = 0;
-	    unsigned long last_addr;
-	    fragS *last_frag;
+	    int size;
+	    unsigned long last_addr = 0;
+	    fragS *last_frag = NULL;
 
 	    first_addr = ptr->slot_number;
 	    first_frag = ptr->slot_frag;
 	    /* Find either the next body/prologue start, or the end of
-	       the list, and determine the size of the region.  */
-	    last_addr = list->next_slot_number;
-	    last_frag = list->next_slot_frag;
+	       the function, and determine the size of the region.  */
 	    for (last = ptr->next; last != NULL; last = last->next)
 	      if (last->r.type == prologue || last->r.type == prologue_gr
-		  || last->r.type == body)
+		  || last->r.type == body || last->r.type == endp)
 		{
 		  last_addr = last->slot_number;
 		  last_frag = last->slot_frag;
 		  break;
 		}
-	      else if (!last->next)
-		{
-		  /* In the absence of an explicit .body directive,
-		     the prologue ends after the last instruction
-		     covered by an unwind directive.  */
-		  if (ptr->r.type != body)
-		    {
-		      last_addr = last->slot_number;
-		      last_frag = last->slot_frag;
-		      switch (last->r.type)
-			{
-			case frgr_mem:
-			  dir_len = (count_bits (last->r.record.p.frmask)
-				     + count_bits (last->r.record.p.grmask));
-			  break;
-			case fr_mem:
-			case gr_mem:
-			  dir_len += count_bits (last->r.record.p.rmask);
-			  break;
-			case br_mem:
-			case br_gr:
-			  dir_len += count_bits (last->r.record.p.brmask);
-			  break;
-			case gr_gr:
-			  dir_len += count_bits (last->r.record.p.grmask);
-			  break;
-			default:
-			  dir_len = 1;
-			  break;
-			}
-		    }
-		  break;
-		}
-	    size = (slot_index (last_addr, last_frag, first_addr, first_frag)
-		    + dir_len);
+	    size = slot_index (last_addr, last_frag, first_addr, first_frag);
 	    rlen = ptr->r.record.r.rlen = size;
 	    if (ptr->r.type == body)
 	      /* End of region.  */
@@ -2911,6 +2876,12 @@ ia64_convert_frag (fragS *frag)
   /* Skip the header.  */
   vbyte_mem_ptr = frag->fr_literal + 8;
   process_unw_records (list, output_vbyte_mem);
+
+  /* Fill the padding bytes with zeros.  */
+  if (pad != 0)
+    md_number_to_chars (frag->fr_literal + len + 8 - md.pointer_size + pad, 0,
+			md.pointer_size - pad);
+
   frag->fr_fix += size;
   frag->fr_type = rs_fill;
   frag->fr_var = 0;
@@ -3282,6 +3253,10 @@ generate_unwind_image (text_name)
 {
   int size, pad;
   unw_rec_list *list;
+
+  /* Mark the end of the unwind info, so that we can compute the size of the
+     last unwind region.  */
+  add_unwind_entry (output_endp ());
 
   /* Force out pending instructions, to make sure all unwind records have
      a valid slot_number field.  */
@@ -6032,7 +6007,7 @@ emit_one_bundle ()
   struct ia64_opcode *idesc;
   int end_of_insn_group = 0, user_template = -1;
   int n, i, j, first, curr;
-  unw_rec_list *ptr;
+  unw_rec_list *ptr, *last_ptr, *end_ptr;
   bfd_vma t0 = 0, t1 = 0;
   struct label_fix *lfix;
   struct insn_fix *ifix;
@@ -6076,18 +6051,39 @@ emit_one_bundle ()
   end_of_insn_group = 0;
   for (i = 0; i < 3 && md.num_slots_in_use > 0; ++i)
     {
-      /* Set the slot number for prologue/body records now as those
-	 refer to the current point, not the point after the
-	 instruction has been issued:  */
-      /* Don't try to delete prologue/body records here, as that will cause
-	 them to also be deleted from the master list of unwind records.  */
-      for (ptr = md.slot[curr].unwind_record; ptr; ptr = ptr->next)
-	if (ptr->r.type == prologue || ptr->r.type == prologue_gr
-	    || ptr->r.type == body)
-	  {
-	    ptr->slot_number = (unsigned long) f + i;
-	    ptr->slot_frag = frag_now;
-	  }
+      /* If we have unwind records, we may need to update some now.  */
+      ptr = md.slot[curr].unwind_record;
+      if (ptr)
+	{
+	  /* Find the last prologue/body record in the list for the current
+	     insn, and set the slot number for all records up to that point.
+	     This needs to be done now, because prologue/body records refer to
+	     the current point, not the point after the instruction has been
+	     issued.  This matters because there may have been nops emitted
+	     meanwhile.  Any non-prologue non-body record followed by a
+	     prologue/body record must also refer to the current point.  */
+	  last_ptr = NULL;
+	  end_ptr = md.slot[(curr + 1) % NUM_SLOTS].unwind_record;
+	  for (; ptr != end_ptr; ptr = ptr->next)
+	    if (ptr->r.type == prologue || ptr->r.type == prologue_gr
+		|| ptr->r.type == body)
+	      last_ptr = ptr;
+	  if (last_ptr)
+	    {
+	      /* Make last_ptr point one after the last prologue/body
+		 record.  */
+	      last_ptr = last_ptr->next;
+	      for (ptr = md.slot[curr].unwind_record; ptr != last_ptr;
+		   ptr = ptr->next)
+		{
+		  ptr->slot_number = (unsigned long) f + i;
+		  ptr->slot_frag = frag_now;
+		}
+	      /* Remove the initialized records, so that we won't accidentally
+		 update them again if we insert a nop and continue.  */
+	      md.slot[curr].unwind_record = last_ptr;
+	    }
+	}
 
       if (idesc->flags & IA64_OPCODE_SLOT2)
 	{
@@ -6292,15 +6288,20 @@ emit_one_bundle ()
 
       build_insn (md.slot + curr, insn + i);
 
-      /* Set slot counts for non prologue/body unwind records.  */
-      for (ptr = md.slot[curr].unwind_record; ptr; ptr = ptr->next)
-	if (ptr->r.type != prologue && ptr->r.type != prologue_gr
-	    && ptr->r.type != body)
-	  {
-	    ptr->slot_number = (unsigned long) f + i;
-	    ptr->slot_frag = frag_now;
-	  }
-      md.slot[curr].unwind_record = NULL;
+      ptr = md.slot[curr].unwind_record;
+      if (ptr)
+	{
+	  /* Set slot numbers for all remaining unwind records belonging to the
+	     current insn.  There can not be any prologue/body unwind records
+	     here.  */
+	  end_ptr = md.slot[(curr + 1) % NUM_SLOTS].unwind_record;
+	  for (; ptr != end_ptr; ptr = ptr->next)
+	    {
+	      ptr->slot_number = (unsigned long) f + i;
+	      ptr->slot_frag = frag_now;
+	    }
+	  md.slot[curr].unwind_record = NULL;
+	}
 
       if (required_unit == IA64_UNIT_L)
 	{
@@ -6375,8 +6376,8 @@ emit_one_bundle ()
 
   if (unwind.list)
     {
-  unwind.list->next_slot_number = (unsigned long) f + 16;
-  unwind.list->next_slot_frag = frag_now;
+      unwind.list->next_slot_number = (unsigned long) f + 16;
+      unwind.list->next_slot_frag = frag_now;
     }
 }
 
@@ -7117,6 +7118,23 @@ ia64_frob_label (sym)
       md.entry_labels[md.path++] = S_GET_NAME (sym);
     }
 }
+
+#ifdef TE_HPUX
+/* The HP-UX linker will give unresolved symbol errors for symbols
+   that are declared but unused.  This routine removes declared,
+   unused symbols from an object.  */
+int
+ia64_frob_symbol (sym)
+     struct symbol *sym;
+{
+  if ((S_GET_SEGMENT (sym) == &bfd_und_section && ! symbol_used_p (sym) &&
+       ELF_ST_VISIBILITY (S_GET_OTHER (sym)) == STV_DEFAULT)
+      || (S_GET_SEGMENT (sym) == &bfd_abs_section
+	  && ! S_IS_EXTERNAL (sym)))
+    return 1;
+  return 0;
+}
+#endif
 
 void
 ia64_flush_pending_output ()

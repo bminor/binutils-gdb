@@ -208,7 +208,7 @@ struct linux_corefile_thread_data
 };
 
 /* Function: linux_corefile_thread_callback
- * 
+ *
  * Called by gdbthread.c once per thread.
  * Records the thread's register state for the corefile note section.
  */
@@ -221,7 +221,7 @@ linux_corefile_thread_callback (struct lwp_info *ti, void *data)
 
   inferior_ptid = ti->ptid;
   registers_changed ();
-  target_fetch_registers (-1);	/* FIXME should not be necessary; 
+  target_fetch_registers (-1);	/* FIXME should not be necessary;
 				   fill_gregset should do it automatically. */
   args->note_data = linux_do_thread_registers (args->obfd,
 					       ti->ptid,
@@ -230,13 +230,13 @@ linux_corefile_thread_callback (struct lwp_info *ti, void *data)
   args->num_notes++;
   inferior_ptid = saved_ptid;
   registers_changed ();
-  target_fetch_registers (-1);	/* FIXME should not be necessary; 
+  target_fetch_registers (-1);	/* FIXME should not be necessary;
 				   fill_gregset should do it automatically. */
   return 0;
 }
 
 /* Function: linux_do_registers
- * 
+ *
  * Records the register state for the corefile note section.
  */
 
@@ -245,7 +245,7 @@ linux_do_registers (bfd *obfd, ptid_t ptid,
 		    char *note_data, int *note_size)
 {
   registers_changed ();
-  target_fetch_registers (-1);	/* FIXME should not be necessary; 
+  target_fetch_registers (-1);	/* FIXME should not be necessary;
 				   fill_gregset should do it automatically. */
   return linux_do_thread_registers (obfd,
 				    ptid_build (ptid_get_pid (inferior_ptid),
@@ -258,8 +258,8 @@ linux_do_registers (bfd *obfd, ptid_t ptid,
 /* Function: linux_make_note_section
  *
  * Fills the "to_make_corefile_note" target vector.
- * Builds the note section for a corefile, and returns it 
- * in a malloc buffer. 
+ * Builds the note section for a corefile, and returns it
+ * in a malloc buffer.
  */
 
 static char *
@@ -271,6 +271,8 @@ linux_make_note_section (bfd *obfd, int *note_size)
   char psargs[80] = { '\0' };
   char *note_data = NULL;
   ptid_t current_ptid = inferior_ptid;
+  char *auxv;
+  int auxv_len;
 
   if (get_exec_file (0))
     {
@@ -303,6 +305,14 @@ linux_make_note_section (bfd *obfd, int *note_size)
   else
     {
       note_data = thread_args.note_data;
+    }
+
+  auxv_len = target_auxv_read (&current_target, &auxv);
+  if (auxv_len > 0)
+    {
+      note_data = elfcore_write_note (obfd, note_data, note_size,
+				      "CORE", NT_AUXV, auxv, auxv_len);
+      xfree (auxv);
     }
 
   make_cleanup (xfree, note_data);
@@ -564,7 +574,7 @@ linux_info_proc_cmd (char *args, int from_tty)
 	    printf_filtered ("End of text: 0x%x\n", itmp);
 	  if (fscanf (procfile, "%u ", &itmp) > 0)
 	    printf_filtered ("Start of stack: 0x%x\n", itmp);
-#if 0				/* Don't know how architecture-dependent the rest is... 
+#if 0				/* Don't know how architecture-dependent the rest is...
 				   Anyway the signal bitmap info is available from "status".  */
 	  if (fscanf (procfile, "%u ", &itmp) > 0)	/* FIXME arch? */
 	    printf_filtered ("Kernel stack pointer: 0x%x\n", itmp);

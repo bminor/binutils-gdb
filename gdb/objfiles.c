@@ -1,7 +1,7 @@
 /* GDB routines for manipulating objfiles.
 
    Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
@@ -93,7 +93,7 @@ add_to_objfile_sections (struct bfd *abfd, struct bfd_section *asect,
   section.ovly_mapped = 0;
   section.addr = bfd_section_vma (abfd, asect);
   section.endaddr = section.addr + bfd_section_size (abfd, asect);
-  obstack_grow (&objfile->psymbol_obstack, (char *) &section, sizeof (section));
+  obstack_grow (&objfile->objfile_obstack, (char *) &section, sizeof (section));
   objfile->sections_end = (struct obj_section *) (((unsigned long) objfile->sections_end) + 1);
 }
 
@@ -119,13 +119,13 @@ build_objfile_section_table (struct objfile *objfile)
   /* objfile->sections can be already set when reading a mapped symbol
      file.  I believe that we do need to rebuild the section table in
      this case (we rebuild other things derived from the bfd), but we
-     can't free the old one (it's in the psymbol_obstack).  So we just
+     can't free the old one (it's in the objfile_obstack).  So we just
      waste some memory.  */
 
   objfile->sections_end = 0;
   bfd_map_over_sections (objfile->obfd, add_to_objfile_sections, (char *) objfile);
   objfile->sections = (struct obj_section *)
-    obstack_finish (&objfile->psymbol_obstack);
+    obstack_finish (&objfile->objfile_obstack);
   objfile->sections_end = objfile->sections + (unsigned long) objfile->sections_end;
   return (0);
 }
@@ -165,13 +165,9 @@ allocate_objfile (bfd *abfd, int flags)
       objfile->md = NULL;
       objfile->psymbol_cache = bcache_xmalloc ();
       objfile->macro_cache = bcache_xmalloc ();
-      obstack_specify_allocation (&objfile->psymbol_obstack, 0, 0, xmalloc,
-				  xfree);
-      obstack_specify_allocation (&objfile->symbol_obstack, 0, 0, xmalloc,
-				  xfree);
-      obstack_specify_allocation (&objfile->type_obstack, 0, 0, xmalloc,
-				  xfree);
-
+      /* We could use obstack_specify_allocation here instead, but
+	 gdb_obstack.h specifies the alloc/dealloc functions.  */
+      obstack_init (&objfile->objfile_obstack);
       terminate_minimal_symbol_table (objfile);
     }
 
@@ -238,14 +234,14 @@ allocate_objfile (bfd *abfd, int flags)
 
 /* Create the terminating entry of OBJFILE's minimal symbol table.
    If OBJFILE->msymbols is zero, allocate a single entry from
-   OBJFILE->symbol_obstack; otherwise, just initialize
+   OBJFILE->objfile_obstack; otherwise, just initialize
    OBJFILE->msymbols[OBJFILE->minimal_symbol_count].  */
 void
 terminate_minimal_symbol_table (struct objfile *objfile)
 {
   if (! objfile->msymbols)
     objfile->msymbols = ((struct minimal_symbol *)
-                         obstack_alloc (&objfile->symbol_obstack,
+                         obstack_alloc (&objfile->objfile_obstack,
                                         sizeof (objfile->msymbols[0])));
 
   {
@@ -341,8 +337,8 @@ unlink_objfile (struct objfile *objfile)
 
 
 /* Destroy an objfile and all the symtabs and psymtabs under it.  Note
-   that as much as possible is allocated on the symbol_obstack and
-   psymbol_obstack, so that the memory can be efficiently freed.
+   that as much as possible is allocated on the objfile_obstack 
+   so that the memory can be efficiently freed.
 
    Things which we do NOT free because they are not in malloc'd memory
    or not in memory specific to the objfile include:
@@ -431,9 +427,7 @@ free_objfile (struct objfile *objfile)
   bcache_xfree (objfile->macro_cache);
   if (objfile->demangled_names_hash)
     htab_delete (objfile->demangled_names_hash);
-  obstack_free (&objfile->psymbol_obstack, 0);
-  obstack_free (&objfile->symbol_obstack, 0);
-  obstack_free (&objfile->type_obstack, 0);
+  obstack_free (&objfile->objfile_obstack, 0);
   xmfree (objfile->md, objfile);
   objfile = NULL;
 }
