@@ -401,8 +401,12 @@ asconfig.texi: $(CONFIG).texi
 	  || ln $(srcdir)/$(CONFIG).texi ./asconfig.texi >/dev/null 2>&1 \
 	  || cp $(srcdir)/$(CONFIG).texi ./asconfig.texi
 
-as.info: $(srcdir)/as.texinfo asconfig.texi $(CPU_DOCS)
-as.dvi: $(srcdir)/as.texinfo asconfig.texi $(CPU_DOCS)
+gasver.texi: Makefile
+	rm -f $@
+	echo '@set VERSION $(VERSION)' > $@
+
+as.info: $(srcdir)/as.texinfo asconfig.texi gasver.texi $(CPU_DOCS)
+as.dvi: $(srcdir)/as.texinfo asconfig.texi gasver.texi $(CPU_DOCS)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

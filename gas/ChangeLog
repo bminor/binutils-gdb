@@ -1,3 +1,11 @@
+Tue Jul  7 17:57:38 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* doc/Makefile.am (gasver.texi): New target.
+	(as.info, as.dvi): Depends upon gasver.texi.
+	* doc/as.texinfo: Include gasver.texi.  Mention version number on
+	title page and in top node.
+	* doc/Makefile.in: Rebuild.
+
 Tue Jul  7 11:42:16 1998  Richard Henderson  <rth@cygnus.com>
 
 	* listing.c (listing_listing): For EDICT_LIST, skip all lines up to
