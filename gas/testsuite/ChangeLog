@@ -1,6 +1,9 @@
 start-sanitize-am33
 Thu Jul 23 09:22:09 1998  Jeffrey A Law  (law@cygnus.com)
 
+	* gas/mn10300/am33_8.s: Test DSP autoincrement memory loads/stores.
+	* gas/mn10300/basic.exp: Corresponding changes.
+
 	* gas/mn10300/am_*.s: Test autoincrement memory loads/stores.
 	* gas/mn10300/basic.exp: Corresponding changes.
 

@@ -1,4 +1,5 @@
 	.text
+	.am33
 	xor_add r4,r1,r2,r3
 	xor_add r4,r1,2,r3
 	xor_sub r4,r1,r2,r3
@@ -55,4 +56,15 @@
 	sat16_lsr r4,r1,2,r3
 	sat16_asl r4,r1,r2,r3
 	sat16_asl r4,r1,2,r3
+	mov_llt (r1+,4),r2
+	mov_lgt (r1+,4),r2
+	mov_lge (r1+,4),r2
+	mov_lle (r1+,4),r2
+	mov_lcs (r1+,4),r2
+	mov_lhi (r1+,4),r2
+	mov_lcc (r1+,4),r2
+	mov_lls (r1+,4),r2
+	mov_leq (r1+,4),r2
+	mov_lne (r1+,4),r2
+	mov_lra (r1+,4),r2
 
