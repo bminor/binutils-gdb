@@ -1,3 +1,8 @@
+2001-06-27  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* config/tc-arm.c (do_ldst): Use MVN to build simple inverted
+	constants.
+
 2001-06-27  Alan Modra  <amodra@bigpond.net.au>
 
 	* write.c (fixup_segment <Difference of 2 syms same seg>): Don't
