@@ -5113,7 +5113,9 @@ _bfd_elf_get_symtab_upper_bound (abfd)
   Elf_Internal_Shdr *hdr = &elf_tdata (abfd)->symtab_hdr;
 
   symcount = hdr->sh_size / get_elf_backend_data (abfd)->s->sizeof_sym;
-  symtab_size = (symcount - 1 + 1) * (sizeof (asymbol *));
+  symtab_size = (symcount + 1) * (sizeof (asymbol *));
+  if (symcount > 0)
+    symtab_size -= sizeof (asymbol *);
 
   return symtab_size;
 }
@@ -5133,7 +5135,9 @@ _bfd_elf_get_dynamic_symtab_upper_bound (abfd)
     }
 
   symcount = hdr->sh_size / get_elf_backend_data (abfd)->s->sizeof_sym;
-  symtab_size = (symcount - 1 + 1) * (sizeof (asymbol *));
+  symtab_size = (symcount + 1) * (sizeof (asymbol *));
+  if (symcount > 0)
+    symtab_size -= sizeof (asymbol *);
 
   return symtab_size;
 }

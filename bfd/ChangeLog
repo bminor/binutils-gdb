@@ -1,3 +1,9 @@
+2002-03-27  Gregory Steuck <greg@nest.cx>
+
+	* elf.c (_bfd_elf_get_symtab_upper_bound): Leave space for
+	terminating NULL if empty symbol table.
+	(_bfd_elf_get_dynamic_symtab_upper_bound): Likewise.
+
 2002-03-26  H.J. Lu  (hjl@gnu.org)
 
 	* elflink.h (elf_link_input_bfd): Revert the last change since
