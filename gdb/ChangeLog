@@ -1,3 +1,9 @@
+Tue Jan 17 09:48:38 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>
+
+	* parse.c (write_exp_msymbol): Use new variables
+	msym_*_symbol_type as type of msymbol expression.
+	(_initialize_parse): Initialize them.
+
 Mon Jan 16 18:11:03 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	General cleanup and simplication of disassembler interface.

@@ -355,7 +355,15 @@ write_exp_bitstring (str)
 }
 
 /* Add the appropriate elements for a minimal symbol to the end of
-   the expression.  */
+   the expression.  The rationale behind passing in text_symbol_type and
+   data_symbol_type was so that Modula-2 could pass in WORD for
+   data_symbol_type.  Perhaps it still is useful to have those types vary
+   based on the language, but they no longer have names like "int", so
+   the initial rationale is gone.  */
+
+static struct type *msym_text_symbol_type;
+static struct type *msym_data_symbol_type;
+static struct type *msym_unknown_symbol_type;
 
 void
 write_exp_msymbol (msymbol, text_symbol_type, data_symbol_type)
@@ -374,18 +382,18 @@ write_exp_msymbol (msymbol, text_symbol_type, data_symbol_type)
     case mst_text:
     case mst_file_text:
     case mst_solib_trampoline:
-      write_exp_elt_type (text_symbol_type);
+      write_exp_elt_type (msym_text_symbol_type);
       break;
 
     case mst_data:
     case mst_file_data:
     case mst_bss:
     case mst_file_bss:
-      write_exp_elt_type (data_symbol_type);
+      write_exp_elt_type (msym_data_symbol_type);
       break;
 
     default:
-      write_exp_elt_type (builtin_type_char);
+      write_exp_elt_type (msym_unknown_symbol_type);
       break;
     }
   write_exp_elt_opcode (UNOP_MEMVAL);
@@ -902,4 +910,14 @@ _initialize_parse ()
   type_stack_depth = 0;
   type_stack = (union type_stack_elt *)
     xmalloc (type_stack_size * sizeof (*type_stack));
+
+  msym_text_symbol_type =
+    init_type (TYPE_CODE_FUNC, 1, 0, "<text variable without -g>", NULL);
+  TYPE_TARGET_TYPE (msym_text_symbol_type) = builtin_type_int;
+  msym_data_symbol_type =
+    init_type (TYPE_CODE_INT, TARGET_INT_BIT / HOST_CHAR_BIT, 0,
+	       "<data variable without -g>", NULL);
+  msym_unknown_symbol_type =
+    init_type (TYPE_CODE_INT, 1, 0, "<unknown segment variable without -g>",
+	       NULL);
 }
