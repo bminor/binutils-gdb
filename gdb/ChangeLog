@@ -1,5 +1,10 @@
 2002-12-05  David Carlton  <carlton@math.stanford.edu>
 
+	* linespec.c (decode_compound): New function.
+	(decode_line_1): Move code into decode_compound.
+
+2002-12-05  David Carlton  <carlton@math.stanford.edu>
+
 	* symtab.c (lookup_symbol_aux_local): Add 'static_block'
 	argument.
 	(lookup_symbol_aux): Do the 'field_of_this' check before checking
