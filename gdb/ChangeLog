@@ -1,3 +1,8 @@
+Tue Oct  3 16:54:56 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* remote-nrom.c (nrom_ops): Add value for to_thread_alive,
+	add comment naming slots.
+
 Mon Oct  2 21:45:44 1995  Jeff Law  (law@hurl)
 
 	* top.c (build_command_line): Demand arguments for if/while
@@ -79,22 +84,24 @@ Thu Sep 28 14:32:11 1995  steve chamberlain  <sac@slash.cygnus.com>
 	own #if tree.
 	(hardwire_flush_input): Reset input buffer too.
 	* source.c (openp): If WIN32 then open file in binary mode.
-	* terminal.h: Configure IO mechanism using autoconf defines if available and
-	not overriden.
-	* utils.c (quit, pollquit, notice_quit): WIN32 check becomes WINGDB check.
-	* config/arm/arm.mt (TDEPFILES): Add remote-rdp.o
-	* config/arm/tm-arm.h (TARGET_BYTE_ORDER): becomes TARGET_BYTE_ORDER_SELECTABLE.
+	* terminal.h: Configure IO mechanism using autoconf defines if
+ 	available and not overriden.
+	* utils.c (quit, pollquit, notice_quit): WIN32 check becomes
+ 	WINGDB check.
+
+	* config/arm/arm.mt (TDEPFILES): Add remote-rdp.o.
+	* config/arm/tm-arm.h (TARGET_BYTE_ORDER): becomes
+	TARGET_BYTE_ORDER_SELECTABLE.
 	(ADDR_BITS_REMOVE): New.
 	(ORIGINAL_REGISTER_NAMES, ADDITIONAL_REGISTER_NAMES): New.
-	(INST_xx): New
+	(INST_xx): New.
 	(FRAME_FIND_SAVED_REGS): Pass the right argument.
 	(arm_get_next_pc): Declare.
 
-
 Wed Sep 27 10:14:36 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
-	* valops.c (search_struct_field):  Also allow "else" as a variant name,
-
+	* valops.c (search_struct_field):  Also allow "else" as a variant
+	name.
 	* eval.c (evaluate_struct_tuple):  New function.  Used to evaluate
 	structure tuples.  Now also handles Chill variant records.
 	(get_label):  New function, used by evaluate_struct_tuple.

@@ -271,7 +271,7 @@ nrom_mourn()
 struct target_ops nrom_ops = {
   "nrom",			/* to_shortname */
   "Remote XDI `NetROM' target",	/* to_longname */
-  "Remote debug using a NetROM over Ethernet",
+  "Remote debug using a NetROM over Ethernet",  /* to_doc */
   nrom_open,			/* to_open */
   nrom_close,			/* to_close */
   NULL,				/* to_attach */
@@ -285,25 +285,26 @@ struct target_ops nrom_ops = {
   NULL,				/* to_files_info */
   NULL,				/* to_insert_breakpoint */
   NULL,				/* to_remove_breakpoint */
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  nrom_kill,
-  nrom_load,
-  NULL,
+  NULL,				/* to_terminal_init */
+  NULL,				/* to_terminal_inferior */
+  NULL,				/* to_terminal_ours_for_output */
+  NULL,				/* to_terminal_ours */
+  NULL,				/* to_terminal_info */
+  nrom_kill,			/* to_kill */
+  nrom_load,			/* to_load */
+  NULL,				/* to_lookup_symbol */
   NULL,				/* to_create_inferior */
-  nrom_mourn,
+  nrom_mourn,			/* to_mourn_inferior */
   NULL,				/* to_can_run */
   0,				/* to_notice_signals */
-  0,
+  0,				/* to_thread_alive */
+  0,				/* to_stop */
   download_stratum,		/* to_stratum */
   NULL,				/* to_next */
-  1,
-  1,
-  1,
-  1,
+  1,				/* to_has_all_memory */
+  1,				/* to_has_memory */
+  1,				/* to_has_stack */
+  1,				/* to_has_registers */
   0,				/* to_has_execution */
   NULL,				/* sections */
   NULL,				/* sections_end */
