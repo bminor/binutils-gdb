@@ -1,3 +1,15 @@
+2003-10-15  Andrew Cagney  <cagney@redhat.com>
+
+	* target.c (target_stack): Change to a static target_ops.
+	(update_current_target): Walk the "struct target_ops" stack.
+	(pop_target, do_xfer_memory, target_info): Ditto.
+	(find_target_beneath): Ditto.
+	(push_target): Rewrite to use the "struct target_ops" stack.
+	(unpush_target): Ditto.
+	* target.h (struct target_stack_item): Delete definition.
+	(target_stack): Delete declaration.
+	(struct target_ops): Add field "beneath".
+
 2003-10-17  Shrinivas Atre  <shrinivasa@KPITCummins.com>
 
 	* gdb/config/h8300/tm-h8300.h (h8300_normal_mode): Add external

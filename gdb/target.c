@@ -180,7 +180,7 @@ static struct target_ops dummy_target;
 
 /* Top of target stack.  */
 
-struct target_stack_item *target_stack;
+static struct target_ops *target_stack;
 
 /* The target structure we are currently using to talk to a process
    or file or whatever "inferior" we have.  */
@@ -534,15 +534,13 @@ cleanup_target (struct target_ops *t)
 static void
 update_current_target (void)
 {
-  struct target_stack_item *item;
   struct target_ops *t;
 
   /* First, reset current_target */
   memset (&current_target, 0, sizeof current_target);
 
-  for (item = target_stack; item; item = item->next)
+  for (t = target_stack; t; t = t->beneath)
     {
-      t = item->target_ops;
 
 #define INHERIT(FIELD, TARGET) \
       if (!current_target.FIELD) \
@@ -645,7 +643,7 @@ update_current_target (void)
 int
 push_target (struct target_ops *t)
 {
-  struct target_stack_item *cur, *prev, *tmp;
+  struct target_ops **cur;
 
   /* Check magic number.  If wrong, it probably means someone changed
      the struct definition, but not all the places that initialize one.  */
@@ -657,42 +655,30 @@ push_target (struct target_ops *t)
       internal_error (__FILE__, __LINE__, "failed internal consistency check");
     }
 
-  /* Find the proper stratum to install this target in. */
-
-  for (prev = NULL, cur = target_stack; cur; prev = cur, cur = cur->next)
+  /* Find the proper stratum to install this target in.  */
+  for (cur = &target_stack; (*cur) != NULL; cur = &(*cur)->beneath)
     {
-      if ((int) (t->to_stratum) >= (int) (cur->target_ops->to_stratum))
+      if ((int) (t->to_stratum) >= (int) (*cur)->to_stratum)
 	break;
     }
 
-  /* If there's already targets at this stratum, remove them. */
-
-  if (cur)
-    while (t->to_stratum == cur->target_ops->to_stratum)
-      {
-	/* There's already something on this stratum.  Close it off.  */
-	if (cur->target_ops->to_close)
-	  (cur->target_ops->to_close) (0);
-	if (prev)
-	  prev->next = cur->next;	/* Unchain old target_ops */
-	else
-	  target_stack = cur->next;	/* Unchain first on list */
-	tmp = cur->next;
-	xfree (cur);
-	cur = tmp;
-      }
+  /* If there's already targets at this stratum, remove them.  */
+  /* FIXME: cagney/2003-10-15: I think this should be poping all
+     targets to CUR, and not just those at this stratum level.  */
+  while ((*cur) != NULL && t->to_stratum == (*cur)->to_stratum)
+    {
+      /* There's already something at this stratum level.  Close it,
+         and un-hook it from the stack.  */
+      struct target_ops *tmp = (*cur);
+      (*cur) = (*cur)->beneath;
+      tmp->beneath = NULL;
+      if (tmp->to_close)
+	(tmp->to_close) (0);
+    }
 
   /* We have removed all targets in our stratum, now add the new one.  */
-
-  tmp = (struct target_stack_item *)
-    xmalloc (sizeof (struct target_stack_item));
-  tmp->next = cur;
-  tmp->target_ops = t;
-
-  if (prev)
-    prev->next = tmp;
-  else
-    target_stack = tmp;
+  t->beneath = (*cur);
+  (*cur) = t;
 
   update_current_target ();
 
@@ -701,7 +687,8 @@ push_target (struct target_ops *t)
   if (targetdebug)
     setup_target_debug ();
 
-  return prev != 0;
+  /* Not on top?  */
+  return (t != target_stack);
 }
 
 /* Remove a target_ops vector from the stack, wherever it may be. 
@@ -710,7 +697,8 @@ push_target (struct target_ops *t)
 int
 unpush_target (struct target_ops *t)
 {
-  struct target_stack_item *cur, *prev;
+  struct target_ops **cur;
+  struct target_ops *tmp;
 
   if (t->to_close)
     t->to_close (0);		/* Let it clean up */
@@ -718,21 +706,19 @@ unpush_target (struct target_ops *t)
   /* Look for the specified target.  Note that we assume that a target
      can only occur once in the target stack. */
 
-  for (cur = target_stack, prev = NULL; cur; prev = cur, cur = cur->next)
-    if (cur->target_ops == t)
-      break;
+  for (cur = &target_stack; (*cur) != NULL; cur = &(*cur)->beneath)
+    {
+      if ((*cur) == t)
+	break;
+    }
 
-  if (!cur)
+  if ((*cur) == NULL)
     return 0;			/* Didn't find target_ops, quit now */
 
   /* Unchain the target */
-
-  if (!prev)
-    target_stack = cur->next;
-  else
-    prev->next = cur->next;
-
-  xfree (cur);			/* Release the target_stack_item */
+  tmp = (*cur);
+  (*cur) = (*cur)->beneath;
+  tmp->beneath = NULL;
 
   update_current_target ();
   cleanup_target (&current_target);
@@ -744,7 +730,7 @@ void
 pop_target (void)
 {
   (current_target.to_close) (0);	/* Let it clean up */
-  if (unpush_target (target_stack->target_ops) == 1)
+  if (unpush_target (target_stack) == 1)
     return;
 
   fprintf_unfiltered (gdb_stderr,
@@ -865,7 +851,6 @@ do_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
   int res;
   int done = 0;
   struct target_ops *t;
-  struct target_stack_item *item;
 
   /* Zero length requests are ok and require no work.  */
   if (len == 0)
@@ -902,9 +887,8 @@ do_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
   /* If res <= 0 then we call it again in the loop.  Ah well. */
   if (res <= 0)
     {
-      for (item = target_stack; item; item = item->next)
+      for (t = target_stack; t != NULL; t = t->beneath)
 	{
-	  t = item->target_ops;
 	  if (!t->to_has_memory)
 	    continue;
 
@@ -1076,7 +1060,6 @@ static void
 target_info (char *args, int from_tty)
 {
   struct target_ops *t;
-  struct target_stack_item *item;
   int has_all_mem = 0;
 
   if (symfile_objfile != NULL)
@@ -1087,10 +1070,8 @@ target_info (char *args, int from_tty)
     return;
 #endif
 
-  for (item = target_stack; item; item = item->next)
+  for (t = target_stack; t != NULL; t = t->beneath)
     {
-      t = item->target_ops;
-
       if (!t->to_has_memory)
 	continue;
 
@@ -1385,16 +1366,7 @@ find_core_target (void)
 struct target_ops *
 find_target_beneath (struct target_ops *t)
 {
-  struct target_stack_item *cur;
-
-  for (cur = target_stack; cur; cur = cur->next)
-    if (cur->target_ops == t)
-      break;
-
-  if (cur == NULL || cur->next == NULL)
-    return NULL;
-  else
-    return cur->next->target_ops;
+  return t->beneath;
 }
 
 

@@ -188,6 +188,7 @@ struct thread_info;		/* fwd decl for parameter list below: */
 
 struct target_ops
   {
+    struct target_ops *beneath;	/* To the target under this one.  */
     char *to_shortname;		/* Name this target type */
     char *to_longname;		/* Name for printing */
     char *to_doc;		/* Documentation.  Does not include trailing
@@ -325,18 +326,6 @@ struct target_ops
    never be NULL.  If there is no target, it points to the dummy_target.  */
 
 extern struct target_ops current_target;
-
-/* An item on the target stack.  */
-
-struct target_stack_item
-  {
-    struct target_stack_item *next;
-    struct target_ops *target_ops;
-  };
-
-/* The target stack.  */
-
-extern struct target_stack_item *target_stack;
 
 /* Define easy words for doing these operations on our current target.  */
 
