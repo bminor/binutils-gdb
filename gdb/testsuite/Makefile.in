@@ -98,7 +98,7 @@ CC_FOR_TARGET = ` \
 CXX = gcc
 CXX_FOR_TARGET = ` \
   if [ -f $${rootme}/../../gcc/xgcc ] ; then \
-    if [ -f $${rootme}/../../newlib/Makefile ]; then
+    if [ -f $${rootme}/../../newlib/Makefile ]; then \
       echo $${rootme}/../../gcc/xgcc -B$${rootme}/../../gcc/ -idirafter $${rootme}/../../newlib/targ-include -idirafter $${rootsrc}/../../newlib/libc/include -nostdinc; \
     else \
       echo $${rootme}/../../gcc/xgcc -B$${rootme}/../../gcc/; \
