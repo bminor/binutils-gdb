@@ -115,9 +115,14 @@ This section describes some fundamental GAS data types.
 @cindex symbols, internal
 @cindex symbolS structure
 
-The definition for @code{struct symbol}, also known as @code{symbolS}, is
-located in @file{struc-symbol.h}.  Symbol structures contain the following
-fields:
+The definition for the symbol structure, @code{symbolS}, is located in
+@file{struc-symbol.h}.
+
+In general, the fields of this structure may not be referred to directly.
+Instead, you must use one of the accessor functions defined in @file{symbol.h}.
+These accessor functions should work for any GAS version.
+
+Symbol structures contain the following fields:
 
 @table @code
 @item sy_value
@@ -188,16 +193,10 @@ that name is defined in @file{obj-format.h}, this field is not defined.
 This processor-specific data is of type @code{TC_SYMFIELD_TYPE}.  If no macro
 by that name is defined in @file{targ-cpu.h}, this field is not defined.
 
-@item TARGET_SYMBOL_FIELDS
-If this macro is defined, it defines additional fields in the symbol structure.
-This macro is obsolete, and should be replaced when possible by uses of
-@code{OBJ_SYMFIELD_TYPE} and @code{TC_SYMFIELD_TYPE}.
 @end table
 
-There are a number of access routines used to extract the fields of a
-@code{symbolS} structure.  When possible, these routines should be used rather
-than referring to the fields directly.  These routines will work for any GAS
-version.
+Here is a description of the accessor functions.  These should be used rather
+than referring to the fields of @code{symbolS} directly.
 
 @table @code
 @item S_SET_VALUE
@@ -302,7 +301,135 @@ which it makes sense (primarily ELF).
 @cindex S_SET_SIZE
 Set the size of a symbol.  This is only defined for object file formats for
 which it makes sense (primarily ELF).
+
+@item symbol_get_value_expression
+@cindex symbol_get_value_expression
+Get a pointer to an @code{expressionS} structure which represents the value of
+the symbol as an expression.
+
+@item symbol_set_value_expression
+@cindex symbol_set_value_expression
+Set the value of a symbol to an expression.
+
+@item symbol_set_frag
+@cindex symbol_set_frag
+Set the frag where a symbol is defined.
+
+@item symbol_get_frag
+@cindex symbol_get_frag
+Get the frag where a symbol is defined.
+
+@item symbol_mark_used
+@cindex symbol_mark_used
+Mark a symbol as having been used in an expression.
+
+@item symbol_clear_used
+@cindex symbol_clear_used
+Clear the mark indicating that a symbol was used in an expression.
+
+@item symbol_used_p
+@cindex symbol_used_p
+Return whether a symbol was used in an expression.
+
+@item symbol_mark_used_in_reloc
+@cindex symbol_mark_used_in_reloc
+Mark a symbol as having been used by a relocation.
+
+@item symbol_clear_used_in_reloc
+@cindex symbol_clear_used_in_reloc
+Clear the mark indicating that a symbol was used in a relocation.
+
+@item symbol_used_in_reloc_p
+@cindex symbol_used_in_reloc_p
+Return whether a symbol was used in a relocation.
+
+@item symbol_mark_mri_common
+@cindex symbol_mark_mri_common
+Mark a symbol as an MRI common symbol.
+
+@item symbol_clear_mri_common
+@cindex symbol_clear_mri_common
+Clear the mark indicating that a symbol is an MRI common symbol.
+
+@item symbol_mri_common_p
+@cindex symbol_mri_common_p
+Return whether a symbol is an MRI common symbol.
+
+@item symbol_mark_written
+@cindex symbol_mark_written
+Mark a symbol as having been written.
+
+@item symbol_clear_written
+@cindex symbol_clear_written
+Clear the mark indicating that a symbol was written.
+
+@item symbol_written_p
+@cindex symbol_written_p
+Return whether a symbol was written.
+
+@item symbol_mark_resolved
+@cindex symbol_mark_resolved
+Mark a symbol as having been resolved.
+
+@item symbol_resolved_p
+@cindex symbol_resolved_p
+Return whether a symbol has been resolved.
+
+@item symbol_section_p
+@cindex symbol_section_p
+Return whether a symbol is a section symbol.
+
+@item symbol_equated_p
+@cindex symbol_equated_p
+Return whether a symbol is equated to another symbol.
+
+@item symbol_constant_p
+@cindex symbol_constant_p
+Return whether a symbol has a constant value, including being an offset within
+some frag.
+
+@item symbol_get_bfdsym
+@cindex symbol_get_bfdsym
+Return the BFD symbol associated with a symbol.
+
+@item symbol_set_bfdsym
+@cindex symbol_set_bfdsym
+Set the BFD symbol associated with a symbol.
+
+@item symbol_get_obj
+@cindex symbol_get_obj
+Return a pointer to the @code{OBJ_SYMFIELD_TYPE} field of a symbol.
+
+@item symbol_set_obj
+@cindex symbol_set_obj
+Set the @code{OBJ_SYMFIELD_TYPE} field of a symbol.
+
+@item symbol_get_tc
+@cindex symbol_get_tc
+Return a pointer to the @code{TC_SYMFIELD_TYPE} field of a symbol.
+
+@item symbol_set_tc
+@cindex symbol_set_tc
+Set the @code{TC_SYMFIELD_TYPE} field of a symbol.
+
 @end table
+
+When @code{BFD_ASSEMBLER} is defined, GAS attempts to store local
+symbols--symbols which will not be written to the output file--using a
+different structure, @code{struct local_symbol}.  This structure can only
+represent symbols whose value is an offset within a frag.
+
+Code outside of the symbol handler will always deal with @code{symbolS}
+structures and use the accessor functions.  The accessor functions correctly
+deal with local symbols.  @code{struct local_symbol} is much smaller than
+@code{symbolS} (which also automatically creates a bfd @code{asymbol}
+structure), so this saves space when assembling large files.
+
+The first field of @code{symbolS} is @code{bsym}, the pointer to the BFD
+symbol.  The first field of @code{struct local_symbol} is a pointer which is
+always set to NULL.  This is how the symbol accessor functions can distinguish
+local symbols from ordinary symbols.  The symbol accessor functions
+automatically convert a local symbol into an ordinary symbol when necessary.
 
 @node Expressions
 @subsection Expressions

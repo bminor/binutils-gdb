@@ -1,3 +1,8 @@
+1999-06-03  Ian Lance Taylor  <ian@zembu.com>
+
+	* doc/internals.texi (Symbols): Describe changes in symbol
+	handling.
+
 1999-06-03  Richard Henderson  <rth@cygnus.com>
 
 	* dwarf2dbg.c (dwarf2_gen_line_info): Use section_symbol
