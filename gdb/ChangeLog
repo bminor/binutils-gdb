@@ -1,3 +1,8 @@
+2003-08-08  J. Brobecker  <brobecker@gnat.com>
+
+	* config/pa/tm-hppa64.h: Remove lots of macros that are no
+	longer necessary now that hppa64 is partially multiarch'ed.
+
 2003-08-08  Andrew Cagney  <cagney@redhat.com>
 
 	* interps.c (interp_set): Check for a NULL "old_interp".
