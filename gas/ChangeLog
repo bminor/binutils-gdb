@@ -1,3 +1,7 @@
+Mon Aug 14 11:49:12 2000  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-mn10300.h (DWARF2_LINE_MIN_INSN_LENGTH): Define.
+
 2000-08-14  Andreas Schwab  <schwab@suse.de>
 
 	* doc/c-arm.texi (ARM Directives): Fix warnings from makeinfo.

@@ -51,3 +51,5 @@ extern const struct relax_type md_relax_table[];
 
 #define md_end() mn10300_finalize ()
 void mn10300_finalize PARAMS ((void));
+
+#define DWARF2_LINE_MIN_INSN_LENGTH 1
