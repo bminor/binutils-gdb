@@ -523,6 +523,11 @@ static CONST struct section_to_type stt[] =
   {".sdata", 'g'},		/* Small initialized data.  */
   {".text", 't'},
   {"code", 't'},		/* MRI .text */
+  {".drectve", 'i'},            /* MSVC's .drective section */
+  {".idata", 'i'},              /* MSVC's .idata (import) section */
+  {".edata", 'e'},              /* MSVC's .edata (export) section */
+  {".pdata", 'p'},              /* MSVC's .pdata (stack unwind) section */
+  {".debug", 'N'},              /* MSVC's .debug (non-standard debug syms) */
   {0, 0}
 };
 
@@ -572,7 +577,12 @@ bfd_decode_symclass (symbol)
   if (bfd_is_com_section (symbol->section))
     return 'C';
   if (bfd_is_und_section (symbol->section))
-    return 'U';
+    {
+      if (symbol->flags & BSF_WEAK)
+	return 'w';
+      else
+	return 'U';
+    }
   if (bfd_is_ind_section (symbol->section))
     return 'I';
   if (symbol->flags & BSF_WEAK)
@@ -619,7 +629,7 @@ bfd_symbol_info (symbol, ret)
      symbol_info *ret;
 {
   ret->type = bfd_decode_symclass (symbol);
-  if (ret->type != 'U')
+  if (ret->type != 'U' && ret->type != 'w')
     ret->value = symbol->value + symbol->section->vma;
   else
     ret->value = 0;

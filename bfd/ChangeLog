@@ -1,5 +1,10 @@
 1999-09-06  Donn Terry  <donn@interix.com>
 
+	* syms.c (stt): Add some PE/PEI section names.
+	(bfd_decode_symclass): Return 'w', not 'U', for a weak undefined
+	symbol.
+	(bfd_symbol_info): Check for 'w'.
+
 	* section.c (struct bfd_comdat_info): Define.
 	(asection): Add comdat field.
 	(STD_SECTION): Initialize comdat field.
