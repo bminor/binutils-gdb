@@ -1643,7 +1643,7 @@ read_file_scope (dip, thisdie, enddie, objfile)
   utypes = (struct type **) xmalloc (numutypes * sizeof (struct type *));
   back_to = make_cleanup (free, utypes);
   memset (utypes, 0, numutypes * sizeof (struct type *));
-  start_symtab (dip -> at_name, NULL, dip -> at_low_pc);
+  start_symtab (dip -> at_name, dip -> at_comp_dir, dip -> at_low_pc);
   decode_line_numbers (lnbase);
   process_dies (thisdie + dip -> die_length, enddie, objfile);
   symtab = end_symtab (dip -> at_high_pc, 0, 0, objfile);
@@ -3274,7 +3274,17 @@ completedieinfo (dip, objfile)
 	  dip -> at_name = diep;
 	  break;
 	case AT_comp_dir:
-	  dip -> at_comp_dir = diep;
+	  /* For now, ignore any "hostname:" portion, since gdb doesn't
+	     know how to deal with it.  (FIXME). */
+	  dip -> at_comp_dir = strrchr (diep, ':');
+	  if (dip -> at_comp_dir != NULL)
+	    {
+	      dip -> at_comp_dir++;
+	    }
+	  else
+	    {
+	      dip -> at_comp_dir = diep;
+	    }
 	  break;
 	case AT_producer:
 	  dip -> at_producer = diep;
