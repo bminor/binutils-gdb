@@ -1,3 +1,10 @@
+Fri Oct  9 08:41:11 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* xm-hppah.h: if __STDC__ is not defined, define
+	HPPA_COMPILER_BUG.
+	symtab.c (decode_line_1): avoid a bug in the HP9000/700 native
+	compiler; see the comment in the file.
+
 Fri Oct  9 04:43:43 1992  John Gilmore (gnu@cygnus.com)
 
 	First cut at support for all BSD variants on 386.

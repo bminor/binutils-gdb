@@ -32,6 +32,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define USG
 #endif
 
+#ifndef __STDC__
+/* This define is discussed in decode_line_1 in symtab.c  */
+#define HPPA_COMPILER_BUG
+#endif
+
 #define HAVE_TERMIO
 
 #define KERNEL_U_ADDR 0
