@@ -1,3 +1,17 @@
+Mon Oct  7 16:53:23 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-mn10300.h (pre_defined_registers) Remove.
+	(system_registers, cc_names): Likewise.
+	(address_registers, data_registers, other_registers): New register
+	arrays.
+	(register_name, system_register_name, cc_name): Remove.
+	(mn10300_reloc_prefix): Likewise.
+	(data_register_name): New function.
+	(address_register_name, other_register_name): Likewise.
+	(md_assemble): Rough cut at parsing operands.  Remove lots of
+	unwanted code.
+	(md_apply_fix3): Disable for now.
+
 Mon Oct  7 11:38:34 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* config/tc-m68k.c (select_control_regs): New function, extracted

@@ -61,7 +61,6 @@ static int reg_name_search PARAMS ((const struct reg_name *, int, const char *))
 static boolean register_name PARAMS ((expressionS *expressionP));
 static boolean system_register_name PARAMS ((expressionS *expressionP));
 static boolean cc_name PARAMS ((expressionS *expressionP));
-static bfd_reloc_code_real_type mn10300_reloc_prefix PARAMS ((void));
 
 
 /* fixups */
@@ -91,85 +90,31 @@ const pseudo_typeS md_pseudo_table[] =
 static struct hash_control *mn10300_hash;
 
 /* This table is sorted. Suitable for searching by a binary search. */
-static const struct reg_name pre_defined_registers[] =
+static const struct reg_name data_registers[] =
 {
-  { "ep", 30 },			/* ep - element ptr */
-  { "gp", 4 },			/* gp - global ptr */
-  { "lp", 31 },			/* lp - link ptr */
-  { "r0", 0 },
-  { "r1", 1 },
-  { "r10", 10 },
-  { "r11", 11 },
-  { "r12", 12 },
-  { "r13", 13 },
-  { "r14", 14 },
-  { "r15", 15 },
-  { "r16", 16 },
-  { "r17", 17 },
-  { "r18", 18 },
-  { "r19", 19 },
-  { "r2", 2 },
-  { "r20", 20 },
-  { "r21", 21 },
-  { "r22", 22 },
-  { "r23", 23 },
-  { "r24", 24 },
-  { "r25", 25 },
-  { "r26", 26 },
-  { "r27", 27 },
-  { "r28", 28 },
-  { "r29", 29 },
-  { "r3", 3 },
-  { "r30", 30 },
-  { "r31", 31 },
-  { "r4", 4 },
-  { "r5", 5 },
-  { "r6", 6 },
-  { "r7", 7 },
-  { "r8", 8 },
-  { "r9", 9 },
-  { "sp", 3 },			/* sp - stack ptr */
-  { "tp", 5 },			/* tp - text ptr */
-  { "zero", 0 },
+  { "d0", 0 },
+  { "d1", 1 },
+  { "d2", 2 },
+  { "d3", 3 },
 };
-#define REG_NAME_CNT	(sizeof(pre_defined_registers) / sizeof(struct reg_name))
+#define DATA_REG_NAME_CNT	(sizeof(data_registers) / sizeof(struct reg_name))
 
-
-static const struct reg_name system_registers[] = 
+static const struct reg_name address_registers[] =
 {
-  { "eipc", 0 },
-  { "eipsw", 1 },
-  { "fepc", 2 },
-  { "fepsw", 3 },
-  { "ecr", 4 },
-  { "psw", 5 },
+  { "a0", 0 },
+  { "a1", 1 },
+  { "a2", 2 },
+  { "a3", 3 },
 };
-#define SYSREG_NAME_CNT	(sizeof(system_registers) / sizeof(struct reg_name))
+#define ADDRESS_REG_NAME_CNT	(sizeof(address_registers) / sizeof(struct reg_name))
 
-static const struct reg_name cc_names[] =
+static const struct reg_name other_registers[] =
 {
-  { "c", 0x1 },
-  { "ge", 0xe },
-  { "gt", 0xf },
-  { "h", 0xb },
-  { "l", 0x1 },
-  { "le", 0x7 },
-  { "lt", 0x6 },
-  { "n", 0x4 },
-  { "nc", 0x9 },
-  { "nh", 0x3 },
-  { "nl", 0x9 },
-  { "ns", 0xc },
-  { "nv", 0x8 },
-  { "nz", 0xa },
-  { "p",  0xc },
-  { "s", 0x4 },
-  { "sa", 0xd },
-  { "t", 0x5 },
-  { "v", 0x0 },
-  { "z", 0x2 },
+  { "mdr", 0 },
+  { "psw", 0 },
+  { "sp", 0 },
 };
-#define CC_NAME_CNT	(sizeof(cc_names) / sizeof(struct reg_name))
+#define OTHER_REG_NAME_CNT	(sizeof(other_registers) / sizeof(struct reg_name))
 
 /* reg_name_search does a binary search of the given register table
    to see if "name" is a valid regiter name.  Returns the register
@@ -214,7 +159,7 @@ reg_name_search (regs, regcount, name)
  *	its original state.
  */
 static boolean
-register_name (expressionP)
+data_register_name (expressionP)
      expressionS *expressionP;
 {
   int reg_number;
@@ -226,7 +171,7 @@ register_name (expressionP)
   start = name = input_line_pointer;
 
   c = get_symbol_end ();
-  reg_number = reg_name_search (pre_defined_registers, REG_NAME_CNT, name);
+  reg_number = reg_name_search (data_registers, DATA_REG_NAME_CNT, name);
 
   /* look to see if it's in the register table */
   if (reg_number >= 0) 
@@ -249,7 +194,7 @@ register_name (expressionP)
     }
 }
 
-/* Summary of system_register_name().
+/* Summary of register_name().
  *
  * in: Input_line_pointer points to 1st char of operand.
  *
@@ -260,7 +205,7 @@ register_name (expressionP)
  *	its original state.
  */
 static boolean
-system_register_name (expressionP)
+address_register_name (expressionP)
      expressionS *expressionP;
 {
   int reg_number;
@@ -272,7 +217,7 @@ system_register_name (expressionP)
   start = name = input_line_pointer;
 
   c = get_symbol_end ();
-  reg_number = reg_name_search (system_registers, SYSREG_NAME_CNT, name);
+  reg_number = reg_name_search (address_registers, ADDRESS_REG_NAME_CNT, name);
 
   /* look to see if it's in the register table */
   if (reg_number >= 0) 
@@ -295,7 +240,7 @@ system_register_name (expressionP)
     }
 }
 
-/* Summary of cc_name().
+/* Summary of register_name().
  *
  * in: Input_line_pointer points to 1st char of operand.
  *
@@ -306,7 +251,7 @@ system_register_name (expressionP)
  *	its original state.
  */
 static boolean
-cc_name (expressionP)
+other_register_name (expressionP)
      expressionS *expressionP;
 {
   int reg_number;
@@ -318,12 +263,12 @@ cc_name (expressionP)
   start = name = input_line_pointer;
 
   c = get_symbol_end ();
-  reg_number = reg_name_search (cc_names, CC_NAME_CNT, name);
+  reg_number = reg_name_search (other_registers, OTHER_REG_NAME_CNT, name);
 
   /* look to see if it's in the register table */
   if (reg_number >= 0) 
     {
-      expressionP->X_op = O_constant;
+      expressionP->X_op = O_register;
       expressionP->X_add_number = reg_number;
 
       /* make the rest nice */
@@ -450,30 +395,6 @@ md_begin ()
     }
 }
 
-static bfd_reloc_code_real_type
-mn10300_reloc_prefix()
-{
-  if (strncmp(input_line_pointer, "hi0(", 4) == 0)
-    {
-      input_line_pointer += 4;
-      return BFD_RELOC_HI16;
-    }
-  if (strncmp(input_line_pointer, "hi(", 3) == 0)
-    {
-      input_line_pointer += 3;
-      return BFD_RELOC_HI16_S;
-    }
-  if (strncmp (input_line_pointer, "lo(", 3) == 0)
-    {
-      input_line_pointer += 3;
-      return BFD_RELOC_LO16;
-    }
-
-  /* FIXME: implement sda, tda, zda here */
-
-  return BFD_RELOC_UNUSED;
-}
-
 void
 md_assemble (str) 
      char *str;
@@ -512,15 +433,19 @@ md_assemble (str)
   for(;;)
     {
       const char *errmsg = NULL;
+      int op_idx;
+      int parens = 0;
+      char *hold;
 
       fc = 0;
       match = 0;
       next_opindex = 0;
       insn = opcode->opcode;
-      for (opindex_ptr = opcode->operands; *opindex_ptr != 0; opindex_ptr++)
+      for (op_idx = 1, opindex_ptr = opcode->operands;
+	   *opindex_ptr != 0;
+	   opindex_ptr++, op_idx++)
 	{
 	  const struct mn10300_operand *operand;
-	  char *hold;
 	  expressionS ex;
 
 	  if (next_opindex == 0)
@@ -542,55 +467,101 @@ md_assemble (str)
 	  hold = input_line_pointer;
 	  input_line_pointer = str;
 
-
-	  /* lo(), hi(), hi0(), etc... */
-	  if ((reloc = mn10300_reloc_prefix()) != BFD_RELOC_UNUSED)
+#if 1
+	  if (*str == '(')
+            {
+	      str++;
+	      input_line_pointer++;
+	      parens++;
+	    }
+#endif
+	  /* See if we can match the operands.  */
+	  if (operand->flags & MN10300_OPERAND_DREG)
 	    {
-	      expression(&ex);
-
-	      if (*input_line_pointer++ != ')')
+	      if (!data_register_name (&ex))
 		{
-		  errmsg = "syntax error: expected `)'";
+		  input_line_pointer = hold;
+		  str = hold;
 		  goto error;
 		}
-	      
-	      if (ex.X_op == O_constant)
+	    }
+	  else if (operand->flags & MN10300_OPERAND_AREG)
+	    {
+	      if (!address_register_name (&ex))
 		{
-		  switch (reloc)
-		    {
-		    case BFD_RELOC_LO16:
-		      ex.X_add_number &= 0xffff;
-		      break;
-
-		    case BFD_RELOC_HI16:
-		      ex.X_add_number = ((ex.X_add_number >> 16) & 0xffff);
-		      break;
-
-		    case BFD_RELOC_HI16_S:
-		      ex.X_add_number = ((ex.X_add_number >> 16) & 0xffff)
-			+ ((ex.X_add_number >> 15) & 1);
-		      break;
-
-		    default:
-		      break;
-		    }
-
-		  insn = mn10300_insert_operand (insn, operand, ex.X_add_number,
-					      (char *) NULL, 0);
+		  input_line_pointer = hold;
+		  str = hold;
+		  goto error;
 		}
-	      else
+	    }
+	  else if (operand->flags & MN10300_OPERAND_SP)
+	    {
+	      char *start = input_line_pointer;
+	      char c = get_symbol_end ();
+
+	      if (strcmp (start, "sp") != 0)
 		{
-		  if (fc > MAX_INSN_FIXUPS)
-		    as_fatal ("too many fixups");
-
-		  fixups[fc].exp = ex;
-		  fixups[fc].opindex = *opindex_ptr;
-		  fixups[fc].reloc = reloc;
-		  fc++;
+		  *input_line_pointer = c;
+		  input_line_pointer = hold;
+		  str = hold;
+		  goto error;
 		}
+	      *input_line_pointer = c;
+	      goto keep_going;
+	    }
+	  else if (operand->flags & MN10300_OPERAND_PSW)
+	    {
+	      char *start = input_line_pointer;
+	      char c = get_symbol_end ();
+
+	      if (strcmp (start, "psw") != 0)
+		{
+		  *input_line_pointer = c;
+		  input_line_pointer = hold;
+		  str = hold;
+		  goto error;
+		}
+	      *input_line_pointer = c;
+	      goto keep_going;
+	    }
+	  else if (operand->flags & MN10300_OPERAND_MDR)
+	    {
+	      char *start = input_line_pointer;
+	      char c = get_symbol_end ();
+
+	      if (strcmp (start, "mdr") != 0)
+		{
+		  *input_line_pointer = c;
+		  input_line_pointer = hold;
+		  str = hold;
+		  goto error;
+		}
+	      *input_line_pointer = c;
+	      goto keep_going;
+	    }
+	  else if (data_register_name (&ex))
+	    {
+	      input_line_pointer = hold;
+	      str = hold;
+	      goto error;
+	    }
+	  else if (address_register_name (&ex))
+	    {
+	      input_line_pointer = hold;
+	      str = hold;
+	      goto error;
+	    }
+	  else if (other_register_name (&ex))
+	    {
+	      input_line_pointer = hold;
+	      str = hold;
+	      goto error;
 	    }
 	  else
 	    {
+	      expression (&ex);
+	    }
+
 	  switch (ex.X_op) 
 	    {
 	    case O_illegal:
@@ -600,17 +571,44 @@ md_assemble (str)
 	      errmsg = "missing operand";
 	      goto error;
 	    case O_register:
+	      if (operand->flags & (MN10300_OPERAND_DREG 
+				    | MN10300_OPERAND_AREG) == 0)
+		{
+		  input_line_pointer = hold;
+		  str = hold;
+		  goto error;
+		}
 		
 	      insn = mn10300_insert_operand (insn, operand, ex.X_add_number,
 					  (char *) NULL, 0);
 	      break;
 
 	    case O_constant:
+	      /* If this operand can be promoted, and it doesn't
+		 fit into the allocated bitfield for this insn,
+		 then promote it (ie this opcode does not match).  */
+	      if (operand->flags & MN10300_OPERAND_PROMOTE
+		  && ! check_operand (insn, operand, ex.X_add_number))
+		{
+		  input_line_pointer = hold;
+		  str = hold;
+		  goto error;
+		}
+
 	      insn = mn10300_insert_operand (insn, operand, ex.X_add_number,
 					  (char *) NULL, 0);
 	      break;
 
 	    default:
+	      /* If this operand can be promoted, then this opcode didn't
+		 match since we can't know if it needed promotion!  */
+	      if (operand->flags & MN10300_OPERAND_PROMOTE)
+		{
+		  input_line_pointer = hold;
+		  str = hold;
+		  goto error;
+		}
+
 	      /* We need to generate a fixup for this expression.  */
 	      if (fc >= MAX_INSN_FIXUPS)
 		as_fatal ("too many fixups");
@@ -621,15 +619,26 @@ md_assemble (str)
 	      break;
 	    }
 
-	    }
-
+keep_going:
 	  str = input_line_pointer;
 	  input_line_pointer = hold;
 
 	  while (*str == ' ' || *str == ',' || *str == '[' || *str == ']')
 	    ++str;
+
+	  if (*str == ')')
+	    {
+	      str++;
+	      parens--;
+	    }
 	}
-      match = 1;
+      if (parens == 0 && *str != ',')
+	match = 1;
+      else
+	{
+	  input_line_pointer = hold;
+	  str = hold;
+	}
 
     error:
       if (match == 0)
@@ -655,57 +664,38 @@ md_assemble (str)
 
   input_line_pointer = str;
 
-  /* Write out the instruction.
+  /* XXX */
+  if (opcode->format == 1)
+    size = 1;
 
-     Four byte insns have an opcode with the two high bits on.  */ 
-  if ((insn & 0x0600) == 0x0600)
-    size = 4;
-  else
+  if (opcode->format == 2 || opcode->format == 6)
     size = 2;
+
+  if (opcode->format == 3 || opcode->format == 7)
+    size = 3;
+
+  if (opcode->format == 4)
+    size = 5;
+
+  if (opcode->format == 5)
+    size = 7;
+
+  if (opcode->format == 8)
+    size = 4;
+
+  if (opcode->format == 9)
+    size = 6;
+
+  if (opcode->format == 10)
+    size = 8;
+
+ 
+  /* Write out the instruction.  */
+
   f = frag_more (size);
+  if (size > 4)
+    size = 4;
   md_number_to_chars (f, insn, size);
-
-  /* Create any fixups.  At this point we do not use a
-     bfd_reloc_code_real_type, but instead just use the
-     BFD_RELOC_UNUSED plus the operand index.  This lets us easily
-     handle fixups for any operand type, although that is admittedly
-     not a very exciting feature.  We pick a BFD reloc type in
-     md_apply_fix.  */
-  for (i = 0; i < fc; i++)
-    {
-      const struct mn10300_operand *operand;
-
-      operand = &mn10300_operands[fixups[i].opindex];
-      if (fixups[i].reloc != BFD_RELOC_UNUSED)
-	{
-	  reloc_howto_type *reloc_howto = bfd_reloc_type_lookup (stdoutput, fixups[i].reloc);
-	  int size;
-	  int offset;
-	  fixS *fixP;
-
-	  if (!reloc_howto)
-	    abort();
-	  
-	  size = bfd_get_reloc_size (reloc_howto);
-	  offset = 4 - size;
-
-	  if (size < 1 || size > 4)
-	    abort();
-
-	  fixP = fix_new_exp (frag_now, f - frag_now->fr_literal + offset, size,
-			      &fixups[i].exp, 
-			      reloc_howto->pc_relative,
-			      fixups[i].reloc);
-	}
-      else
-	{
-	  fix_new_exp (frag_now, f - frag_now->fr_literal, 4,
-		       &fixups[i].exp,
-		       1 /* FIXME: MN10300_OPERAND_RELATIVE ??? */,
-		       ((bfd_reloc_code_real_type)
-			(fixups[i].opindex + (int) BFD_RELOC_UNUSED)));
-	}
-    }
 }
 
 
@@ -761,6 +751,9 @@ md_apply_fix3 (fixp, valuep, seg)
 {
   valueT value;
   char *where;
+
+  fixp->fx_done = 1;
+  return 0;
 
   if (fixp->fx_addsy == (symbolS *) NULL)
     {
@@ -841,7 +834,6 @@ md_apply_fix3 (fixp, valuep, seg)
   return 1;
 }
 
-
 /* Insert an operand value into an instruction.  */
 
 static unsigned long
@@ -852,11 +844,17 @@ mn10300_insert_operand (insn, operand, val, file, line)
      char *file;
      unsigned int line;
 {
-  if (operand->bits != 16)
+  if (operand->bits != 32)
     {
       long min, max;
       offsetT test;
 
+      if ((operand->flags & MN10300_OPERAND_SIGNED) != 0)
+	{
+	  max = (1 << (operand->bits - 1)) - 1;
+	  min = - (1 << (operand->bits - 1));
+	}
+      else
         {
           max = (1 << operand->bits) - 1;
           min = 0;
@@ -881,4 +879,37 @@ mn10300_insert_operand (insn, operand, val, file, line)
 
   insn |= (((long) val & ((1 << operand->bits) - 1)) << operand->shift);
   return insn;
+}
+
+static unsigned long
+check_operand (insn, operand, val)
+     unsigned long insn;
+     const struct mn10300_operand *operand;
+     offsetT val;
+{
+  if (operand->bits != 32)
+    {
+      long min, max;
+      offsetT test;
+
+      if ((operand->flags & MN10300_OPERAND_SIGNED) != 0)
+	{
+	  max = (1 << (operand->bits - 1)) - 1;
+	  min = - (1 << (operand->bits - 1));
+	}
+      else
+        {
+          max = (1 << operand->bits) - 1;
+          min = 0;
+        }
+
+      test = val;
+
+
+      if (test < (offsetT) min || test > (offsetT) max)
+	return 0;
+      else
+	return 1;
+    }
+  return 1;
 }
