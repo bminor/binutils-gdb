@@ -1,3 +1,8 @@
+2002-05-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* nm.c (print_symbol): Check returned filename from
+	bfd_find_nearest_line is non-NULL.
+
 2002-04-25  Elena Zannoni <ezannoni@redhat.com>
     
         * readelf.c (get_AT_name): Handle DW_AT_GNU_vector.
