@@ -3,9 +3,6 @@
 
 *** Changes in GDB-4.9:
 
-(This is a prototype to remind us of things that should be announced
-in the next release...)
-
  * Testsuite
 
 This is the first GDB release which is accompanied by a matching testsuite.
@@ -15,10 +12,10 @@ via ftp from most sites that carry GNU software.
  * C++ demangling
 
 'Cfront' style demangling has had its name changed to 'ARM' style, to
-emphasize that it was written from the specifications in the Annotated
-Reference Manual, not to be compatible with AT&T cfront.  Despite disclaimers,
-it still generated too much confusion with users attempting to use gdb with
-AT&T cfront.
+emphasize that it was written from the specifications in the C++ Annotated
+Reference Manual, not necessarily to be compatible with AT&T cfront.  Despite
+disclaimers, it still generated too much confusion with users attempting to
+use gdb with AT&T cfront.
 
  * Simulators
 
@@ -34,59 +31,20 @@ SH simulator				sh-hitachi-hms    or sh
 Z8000 simulator		  		z8k-zilog-none 	  or z8ksim
 IDT MIPS board over serial line		mips-idt-ecoff
 
-
 Cross-debugging to GO32 targets is supported.  It requires a custom
 version of the i386-stub.c module which is integrated with the 
-GO32 memory extender.  Msg follows:
+GO32 memory extender.
 
+ * New remote protocols
 
-Date: Tue, 16 Feb 93 02:34:20 EST
-From: "Mark W. Eichin" <eichin@cygnus.com>
-Message-Id: <9302160734.AA09302@tweedledumb.cygnus.com>
-To: gnu@cygnus.com
-Cc: ian@cygnus.com, gnu@cygnus.com, gumby@cygnus.com, gdb@cygnus.com
-In-Reply-To: gnu@cygnus.com's message of Mon, 15 Feb 93 22:30:09 -0800 <9302160630.AA00786@cygnus.com>
-Subject: GO32 debugging in devo/gdb
+MIPS remote debugging protocol.
 
-   SUB: GO32 debugging in devo/gdb
-   SUM: <gnu>, gnu->eichin, ian, gnu, gumby, gdb
+ * New source languages supported
 
-   My impression is that devo/gdb supports remote debugging of GO32 programs.
-   Is this true?
+This version includes preliminary support for Chill, a Pascal like language
+used by telecommunications companies.  Chill support is also being integrated
+into the GNU compiler, but we don't know when it will be publically available.
 
-Yes. I think that even the 4.7 release had everything needed.
-
-   What does a user have to have in the GO32 environment in order to do this?
-   (My guess: our custom-modified GO32.  Did we send the changes back to
-   DJ and did they ever get integrated into the standard GO32?)
-
-I asked DJ if he wanted the changes; at the time, he was very busy
-having a daughter. He's back on the net now, I'll give him another
-try. My changes are to GO32 1.07 and the entire source (and an
-executable) are checked in to cvs; the current GO32 is 1.08, I haven't
-tried updating the changes. 
-
-   What does a user have to actually do in GO32 in order for this to work?
-   E.g. there seems to be no user-level documentation for this feature.
-
-GO32 includes "go32.exe" and "debug32.exe"; my version is
-"dser32.exe". With a serial link on com1 to the host, use the mode
-command on the target to set the baud rate, then "dser32 a.out" and
-start up gdb (configured -target go32), target remote /dev/ttya.
-Shoudl just work from there.
-
-   I'm wondering if we can announce this as part of what's supported in 
-   gdb-4.8.
-
-The hard part is the extender itself -- it needs to be built with a
-native 16-bit compiler (such as Turbo C with Turbo Assembler -- about
-$300 in software, which I do own -- and the assembly code uses enough
-high level features (like structs) that it isn't portable to other
-assemblers.) We have no way to build it with any free tools. I think
-we can ship (or at least make available) the executable for the DOS
-side, I don't think Turbo C has any runtime restrictions.
-
-							_Mark_
 
 *** Changes in GDB-4.8:
 

@@ -1,3 +1,7 @@
+Mon May 10 20:00:43 1993  Fred Fish  (fnf@cygnus.com)
+
+	* README, NEWS:  Update for gdb 4.9 release.
+
 Mon May 10 19:38:34 1993  John Gilmore  (gnu@cygnus.com)
 
 	* ch-exp.y (MAX, MIN):  Rename to MAX_TOKEN, MIN_TOKEN.
@@ -1318,7 +1322,7 @@ Fri Mar 12 16:23:54 1993  K. Richard Pixley  (rich@cygnus.com)
 
 	* symtab.c (find_pc_symtab): some object file formats, notably
 	  mips, have holes in the address ranges of symtabs.  Change
-	  this algorythm from first hit to tightest fit.
+	  this algorithm from first hit to tightest fit.
 
 	* mips-tdep.c (heuristic_proc_start): if we walk the pc into the
 	  fence post without finding the enclosing function, then print a
