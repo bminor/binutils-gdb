@@ -182,11 +182,11 @@ changequote([,])dnl
 
       alpha*-*-*vms*)	    fmt=evax ;;
       alpha*-*-netware*)    fmt=ecoff ;;
-      alpha*-*-openbsd*)    fmt=ecoff ;;
       alpha*-*-osf*)        fmt=ecoff ;;
       alpha*-*-linuxecoff*) fmt=ecoff ;;
       alpha*-*-linux-gnu*)  fmt=elf em=linux ;;
       alpha*-*-netbsd*)     fmt=elf em=nbsd ;;
+      alpha*-*-openbsd*)    fmt=elf em=obsd ;;
 
       arc-*-elf*)           fmt=elf bfd_gas=yes ;;
 
@@ -228,6 +228,7 @@ changequote([,])dnl
       hppa-*-*elf*)         fmt=elf em=hppa ;;
       hppa-*-lites*)        fmt=elf em=hppa ;;
       hppa-*-netbsd*)       fmt=elf em=nbsd ;;
+      hppa-*-openbsd*)      fmt=elf em=hppa ;;
       hppa-*-osf*)          fmt=som em=hppa ;;
       hppa-*-rtems*)        fmt=elf em=hppa ;;
       hppa-*-hpux11*)	    case ${cpu} in
@@ -463,7 +464,12 @@ changequote([,])dnl
                                 sparc64) fmt=elf ;;
                             esac
                             ;;
-      sparc-*-openbsd*)     fmt=aout em=nbsd ;;
+      sparc-*-openbsd*)     em=nbsd
+                            case ${cpu} in
+                               sparc) fmt=aout ;;
+                               sparc64) fmt=elf ;;
+                            esac
+                            ;;
 
       strongarm-*-coff)     fmt=coff ;;
       strongarm-*-elf)      fmt=elf ;;
