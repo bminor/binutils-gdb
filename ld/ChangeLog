@@ -1,3 +1,7 @@
+2002-02-15  Richard Henderson  <rth@redhat.com>
+
+	* emulparams/elf64alpha.sh (NOP): Adjust for little-endian definition.
+
 2002-02-15  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* NEWS: Mention support for MMIX.
