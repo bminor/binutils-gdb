@@ -1,3 +1,13 @@
+Mon Dec 28 10:32:05 1992  Ken Raeburn  (raeburn@cygnus.com)
+
+	* expr.c (operand): If not LOCAL_LABELS_FB, don't look for "0f"
+	and "0b".  If LOCAL_LABELS_DOLLAR, check for "0$".
+
+	* config/obj-coff.h: Don't use #elif.
+
+	* config/ho-sunos.h: Don't include sys/stdtypes.h; 4.0.3 doesn't
+	have it.  (Reported by Noah Friedman, friedman@gnu.ai.mit.edu.)
+
 Wed Dec 16 12:12:33 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* write.c, obj-ieee.c: don't define SUB_SEGMENT_ALIGN if it is
