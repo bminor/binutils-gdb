@@ -2065,12 +2065,16 @@ store_fpr(sd,cia,fpr,fmt,value)
 
   if (SizeFGR() == 64) {
     switch (fmt) {
+      case fmt_uninterpreted_32:
+	fmt = fmt_uninterpreted;
       case fmt_single :
       case fmt_word :
        FGR[fpr] = (((uword64)0xDEADC0DE << 32) | (value & 0xFFFFFFFF));
        FPR_STATE[fpr] = fmt;
        break;
 
+      case fmt_uninterpreted_64:
+	fmt = fmt_uninterpreted;
       case fmt_uninterpreted:
       case fmt_double :
       case fmt_long :
@@ -2085,12 +2089,16 @@ store_fpr(sd,cia,fpr,fmt,value)
     }
   } else {
     switch (fmt) {
+      case fmt_uninterpreted_32:
+	fmt = fmt_uninterpreted;
       case fmt_single :
       case fmt_word :
        FGR[fpr] = (value & 0xFFFFFFFF);
        FPR_STATE[fpr] = fmt;
        break;
 
+      case fmt_uninterpreted_64:
+	fmt = fmt_uninterpreted;
       case fmt_uninterpreted:
       case fmt_double :
       case fmt_long :
@@ -3019,6 +3027,12 @@ decode_coproc(sd,cia,instruction)
                 break;
 #else
 		/* 16 = Config             R4000   VR4100  VR4300 */
+              case 16:
+                if (code == 0x00)
+                  GPR[rt] = C0_CONFIG;
+                else
+                  C0_CONFIG = GPR[rt];
+                break;
 #endif
 #ifdef SUBTARGET_R3900
                 /* 17 = Debug */
@@ -3239,18 +3253,8 @@ sim_engine_run (sd, next_cpu_nr, siggnal)
 
        [NOTE: pipeline_count has been replaced the event queue] */
 
-#if defined(HASFPU)
-    /* Set previous flag, depending on current: */
-    if (STATE & simPCOC0)
-     STATE |= simPCOC1;
-    else
-     STATE &= ~simPCOC1;
-    /* and update the current value: */
-    if (GETFCC(0))
-     STATE |= simPCOC0;
-    else
-     STATE &= ~simPCOC0;
-#endif /* HASFPU */
+    /* shuffle the floating point status pipeline state */
+    ENGINE_ISSUE_PREFIX_HOOK();
 
 /* NOTE: For multi-context simulation environments the "instruction"
    variable should be local to this routine. */

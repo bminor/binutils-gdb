@@ -97,6 +97,8 @@ typedef enum {
     range, and are used in the register status vector. */
  fmt_unknown       = 0x10000000,
  fmt_uninterpreted = 0x20000000,
+ fmt_uninterpreted_32 = 0x40000000,
+ fmt_uninterpreted_64 = 0x80000000,
 } FP_formats;
 
 unsigned64 value_fpr PARAMS ((SIM_DESC sd, address_word cia, int fpr, FP_formats));
@@ -339,7 +341,19 @@ struct _sim_cpu {
 #define simSIGINT	(1 << 28)  /* 0 = do nothing; 1 = SIGINT has occured */
 #define simJALDELAYSLOT	(1 << 29) /* 1 = in jal delay slot */
 
-
+#define ENGINE_ISSUE_PREFIX_HOOK() \
+  { \
+    /* Set previous flag, depending on current: */ \
+    if (STATE & simPCOC0) \
+     STATE |= simPCOC1; \
+    else \
+     STATE &= ~simPCOC1; \
+    /* and update the current value: */ \
+    if (GETFCC(0)) \
+     STATE |= simPCOC0; \
+    else \
+     STATE &= ~simPCOC0; \
+  }
 
 
 /* This is nasty, since we have to rely on matching the register
@@ -384,6 +398,9 @@ struct _sim_cpu {
 #define DEPC	(REGISTERS[87])
 #define EPC	(REGISTERS[88])
 #define COCIDX  (LAST_EMBED_REGNUM + 2) /* special case : outside the normal range */
+
+  unsigned_word c0_config_reg;
+#define C0_CONFIG ((STATE_CPU (sd,0))->c0_config_reg)
 
 /* The following are pseudonyms for standard registers */
 #define ZERO    (REGISTERS[0])
