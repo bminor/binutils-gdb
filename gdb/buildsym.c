@@ -100,8 +100,7 @@ add_symbol_to_list (symbol, listhead)
 {
   register struct pending *link;
 
-  /* If this is a reference to/live alias for another symbol, don't add it.
-     We don't want to be able to look up the live references directly. */
+  /* If this is an alias for another symbol, don't add it.  */
   if (symbol->ginfo.name && symbol->ginfo.name[0] == '#')
     return;
       
