@@ -1,4 +1,10 @@
 Wed Nov  6 13:46:07 1996  Jeffrey A Law  (law@cygnus.com)
+	
+	* config/tc-mn10300.c (mn10300_insert_operand): MN10300_OPERAND_SPLIT
+	operands are assumed to be 32bits.  Use "bits" field to hold the
+	number of bits in the main instruction word for MN10300_OPERAND_SPLIT.
+	(mn10300_check_operand): MN10300_OPERAND_SPLIT operands are assumed
+	to be 32bits.
 
 	* config/tc-mn10300.c (mn10300_insert_operand): Shift low part
 	of a MN10300_OPERAND_SPLIT operand by operand->shift.
