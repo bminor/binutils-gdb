@@ -160,13 +160,13 @@ arm | merlin | none | np1 | pn | pyramid | tahoe)
 esac
 
 
-if [ ! -f ${srcdir}/config/mh-${gdb_host} ]; then
+if [ ! -f ${srcdir}/config/${gdb_host}.mh ]; then
 	echo '***' "Gdb does not support host ${host}" 1>&2
 	exit 1
 fi
 
 #  We really shouldn't depend on there being a space after XM_FILE= ...
-hostfile=`awk '$1 == "XM_FILE=" { print $2 }' <${srcdir}/config/mh-${gdb_host}`
+hostfile=`awk '$1 == "XM_FILE=" { print $2 }' <${srcdir}/config/${gdb_host}.mh`
 
 # per-target:
 
@@ -312,21 +312,21 @@ rs6000)
 
 esac
 
-if [ ! -f ${srcdir}/config/mt-${gdb_target} ]; then
+if [ ! -f ${srcdir}/config/${gdb_target}.mt ]; then
 	echo '***' "Gdb does not support target ${target}" 1>&2
 	exit 1
 fi
 
 if [ -z "${removing}" ] ; then
-	cat ${srcdir}/config/mh-${gdb_host} ${srcdir}/config/mt-${gdb_target} | awk '$1 == "#msg" {
+	cat ${srcdir}/config/${gdb_host}.mh ${srcdir}/config/${gdb_target}.mt | awk '$1 == "#msg" {
 		print substr($0,6)}'
 fi
 
 #  We really shouldn't depend on there being a space after TM_FILE= ...
-targetfile=`awk '$1 == "TM_FILE=" { print $2 }' <${srcdir}/config/mt-${gdb_target}`
+targetfile=`awk '$1 == "TM_FILE=" { print $2 }' <${srcdir}/config/${gdb_target}.mt`
 
-host_makefile_frag=config/mh-${gdb_host}
-target_makefile_frag=config/mt-${gdb_target}
+host_makefile_frag=config/${gdb_host}.mh
+target_makefile_frag=config/${gdb_target}.mt
 
 # If hostfile (XM_FILE) and/or targetfile (TM_FILE) is not set in the
 # ?config/* file, we don't make the corresponding links.  But we have
