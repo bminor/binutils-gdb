@@ -1,3 +1,8 @@
+Sun Oct 30 00:57:35 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (pa_proc): Delete disabled code to put each
+	proc in its own subspace, we're not going to use it.
+
 Tue Oct 25 14:44:33 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* config/tc-mips.c (macro): Ensure that mips2 case of M_LI_DD in
