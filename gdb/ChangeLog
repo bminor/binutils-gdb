@@ -1,3 +1,10 @@
+Fri Apr 19 09:36:50 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
+
+	* Makefile.dist (cplus-dem.o): Hack in an #include "param.h"
+	before we compile it.
+	defs.h: Protect against multiple inclusion.
+	param.h: Include defs.h.
+
 Thu Apr 18 19:49:10 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
 
 	* i386-pinsn.c (OP_E): Change %d to 0x%x for consistency.

@@ -17,6 +17,9 @@ You should have received a copy of the GNU General Public License
 along with GDB; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#if !defined (DEFS_H)
+#define DEFS_H
+
 /* An address in the program being debugged.  Host byte order.  */
 typedef unsigned int CORE_ADDR;
 
@@ -171,3 +174,5 @@ char *baud_rate;
 #if !defined (TARGET_CHAR_BIT)
 #define TARGET_CHAR_BIT 8
 #endif
+
+#endif /* no DEFS_H */
