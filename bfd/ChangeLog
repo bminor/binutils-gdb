@@ -1,3 +1,7 @@
+Tue Jan 14 08:46:33 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* libaout.h (machine_type): Reserve several values for sparclet.
+
 start-sanitize-tic80
 Mon Jan 13 22:39:08 1997  Michael Meissner  <meissner@tiktok.cygnus.com>
 
