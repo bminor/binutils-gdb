@@ -1,3 +1,8 @@
+Thu Apr 29 08:46:22 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* stabsread.c (define_symbol): If unrecognized constant type,
+	complain() not error().
+
 Thu Apr 29 00:03:59 1993  Fred Fish  (fnf@cygnus.com)
 
 	* infptrace.c:  Add missing close paren to test for

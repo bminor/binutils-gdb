@@ -597,6 +597,8 @@ define_symbol (valu, string, desc, type, objfile)
 	    dbl_valu = (char *)
 	      obstack_alloc (&objfile -> symbol_obstack, sizeof (double));
 	    memcpy (dbl_valu, &d, sizeof (double));
+	    /* Put it in target byte order, but it's still in host
+	       floating point format.  */
 	    SWAP_TARGET_AND_HOST (dbl_valu, sizeof (double));
 	    SYMBOL_VALUE_BYTES (sym) = dbl_valu;
 	    SYMBOL_CLASS (sym) = LOC_CONST_BYTES;
@@ -627,7 +629,16 @@ define_symbol (valu, string, desc, type, objfile)
 	  }
 	  break;
 	default:
-	  error ("Invalid symbol data at symtab pos %d.", symnum);
+	  {
+	    static struct complaint msg =
+	      {"Unrecognized constant type", 0, 0};
+	    complain (&msg);
+	    SYMBOL_CLASS (sym) = LOC_CONST;
+	    /* This gives a second complaint, which is probably OK.
+	       We do want the skip to the end of symbol behavior (to
+	       deal with continuation).  */
+	    SYMBOL_TYPE (sym) = error_type (&p);
+	  }
 	}
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
       add_symbol_to_list (sym, &file_symbols);
