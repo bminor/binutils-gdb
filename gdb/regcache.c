@@ -616,8 +616,8 @@ regcache_raw_read (struct regcache *regcache, int regnum, void *buf)
 	target_fetch_registers (regnum);
 #if 0
       /* FIXME: cagney/2004-08-07: At present a number of targets
-	 forget (or didn't know that they needed) set this leading to
-	 panics.  Also is the problem that target's need to indicate
+	 forget (or didn't know that they needed) to set this leading to
+	 panics.  Also is the problem that targets need to indicate
 	 that a register is in one of the possible states: valid,
 	 undefined, unknown.  The last of which isn't yet
 	 possible.  */

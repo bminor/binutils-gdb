@@ -1,3 +1,10 @@
+2004-10-11  David Anderson  <davea@sgi.com>
+
+	* regcache.c (regcache_raw_read): Comment was missing "to".
+	Extraneous ' removed.
+	* gdb_thread_db.h (struct td_thrinfo): ti_lid field
+	comment now describes use.
+
 2004-10-11  Orjan Friberg  <orjanf@axis.com>
 
 	* cris-tdep.c (cris_sigtramp_start, cris_rt_sigtramp_start)
@@ -240,6 +247,7 @@
 	* mips-tdep.c (mips32_next_pc): Check the register's contents,
 	not its number for BLEZ/BLEZL and BGTZ/BGTZL.
 
+>>>>>>> 1.6475
 2004-10-07  Kei Sakamoto  <sakamoto.kei@renesas.com>
 
 	* m32r-tdep.c (decode_prologue): Support functions written
