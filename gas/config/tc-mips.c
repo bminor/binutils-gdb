@@ -9641,12 +9641,18 @@ mips16_extended_frag (fragp, sec, stretch)
       /* The base address rules are complicated.  The base address of
          a branch is the following instruction.  The base address of a
          PC relative load or add is the instruction itself, but if it
-         is extended add 2, and if it is in a delay slot (in which
-         case it can not be extended) use the address of the
-         instruction whose delay slot it is in.  */
+         is in a delay slot (in which case it can not be extended) use
+         the address of the instruction whose delay slot it is in.  */
       if (type == 'p' || type == 'q')
 	{
 	  addr += 2;
+
+	  /* If we are currently assuming that this frag should be
+	     extended, then, the current address is two bytes
+	     higher. */
+	  if (RELAX_MIPS16_EXTENDED (fragp->fr_subtype))
+	    addr += 2;
+
 	  /* Ignore the low bit in the target, since it will be set
              for a text label.  */
 	  if ((val & 1) != 0)
@@ -9656,11 +9662,6 @@ mips16_extended_frag (fragp, sec, stretch)
 	addr -= 4;
       else if (RELAX_MIPS16_DSLOT (fragp->fr_subtype))
 	addr -= 2;
-
-      /* If we are currently assuming that this frag should be
-         extended, then the current address is two bytes higher.  */
-      if (RELAX_MIPS16_EXTENDED (fragp->fr_subtype))
-	addr += 2;
 
       val -= addr & ~ ((1 << op->shift) - 1);
 
@@ -10080,6 +10081,8 @@ md_convert_frag (abfd, asec, fragp)
 	  if (type == 'p' || type == 'q')
 	    {
 	      addr += 2;
+	      if (ext)
+		addr += 2;
 	      /* Ignore the low bit in the target, since it will be
                  set for a text label.  */
 	      if ((val & 1) != 0)
@@ -10090,8 +10093,6 @@ md_convert_frag (abfd, asec, fragp)
 	  else if (RELAX_MIPS16_DSLOT (fragp->fr_subtype))
 	    addr -= 2;
 
-	  if (ext)
-	    addr += 2;
 	  addr &= ~ (addressT) ((1 << op->shift) - 1);
 	  val -= addr;
 

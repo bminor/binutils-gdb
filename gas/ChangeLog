@@ -1,5 +1,9 @@
 Thu Feb 13 11:40:58 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c (mips16_extended_frag): Correct base address
+	for an extended PC relative instruction.
+	(md_convert_frag): Likewise.
+
 	* config/tc-mips.c (prev_nop_frag): New static variable.
 	(prev_nop_frag_holds): New static variable.
 	(prev_nop_frag_required): New static variable.
