@@ -1,3 +1,17 @@
+Wed Mar 31 12:31:56 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in: Complete overhaul to merge many almost identical
+	targets.
+
+Tue Mar 30 20:17:01 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* Makefile.in (setup-dirs-gdb): Renamed from setup-dirs.
+	(gdb.tar.Z): Adjusted.
+
+	* Makefile.in (setup-dirs, taz): New targets; should be general
+	enough to adapt for gdb sometime.  Build only .z file.
+	(gas.tar.z): New target.
+
 Tue Mar 30 10:03:09 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* build-all.mk: Use CC=cc -Xs on Solaris.
