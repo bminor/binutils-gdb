@@ -1,3 +1,10 @@
+2004-04-16  Joel Brobecker  <brobecker@gnat.com>
+
+	* observer.c (observer_test_first_notification_function): Update
+	function profile.
+	(observer_test_second_notification_function): Likewise.
+	(observer_test_third_notification_function): Likewise.
+
 2004-04-16  Mark Kettenis  <kettenis@gnu.org>
 
 	From Brian Ford <ford@vss.fsi.com>:
