@@ -240,6 +240,7 @@ main (argc, argv)
   link_info.no_undefined = false;
   link_info.allow_shlib_undefined = false;
   link_info.allow_multiple_definition = false;
+  link_info.allow_undefined_version = true;
   link_info.strip = strip_none;
   link_info.discard = discard_sec_merge;
   link_info.keep_memory = true;

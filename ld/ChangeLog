@@ -1,3 +1,17 @@
+2002-08-07  H.J. Lu <hjl@gnu.org>
+
+	* ld.texinfo: Document --no-undefined-version.
+
+	* ldlang.c (lang_new_vers_pattern): Set the `symver' and
+	`script.' fields to 0.
+
+	* ldmain.c (main): Initialize the allow_undefined_version to
+	true.
+
+	* lexsup.c (OPTION_NO_UNDEFINED_VERSION): New.
+	(ld_options): Add --no-undefined-version.
+	(parse_args): Support OPTION_NO_UNDEFINED_VERSION.
+
 2002-08-07  Nick Clifton  <nickc@redhat.com>
 
 	* emultempl/armelf.em (arm_elf_before_allocation): Only search for

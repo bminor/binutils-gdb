@@ -1,3 +1,11 @@
+2002-08-07  H.J. Lu <hjl@gnu.org>
+
+	* elflink.h (NAME(bfd_elf,size_dynamic_sections)): Check symbol
+	with undefined version if needed.
+	(elf_link_assign_sym_version): Match a default symbol with a
+	version without definition. No need to hide the default
+	definition separately.
+
 2002-08-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.h (elf_link_output_extsym): Don't output symbols from

@@ -5132,6 +5132,8 @@ lang_new_vers_pattern (orig, new, lang)
   ret = (struct bfd_elf_version_expr *) xmalloc (sizeof *ret);
   ret->next = orig;
   ret->pattern = new;
+  ret->symver = 0;
+  ret->script = 0;
 
   if (lang == NULL || strcasecmp (lang, "C") == 0)
     ret->match = lang_vers_match_lang_c;

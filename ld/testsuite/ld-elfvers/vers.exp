@@ -62,7 +62,7 @@ set tmpdir tmpdir
 set VOBJDUMP_FLAGS --private-headers
 set DOBJDUMP_FLAGS --dynamic-syms
 set SOBJDUMP_FLAGS --syms
-set shared --shared
+set shared "--shared --no-undefined-version"
 set script --version-script
 
 proc test_ar { test lib object expect } {
@@ -643,7 +643,7 @@ proc build_exec { test source execname flags solibname verexp versymexp symexp }
     global CC
     global CFLAGS
 
-    set shared --shared
+    set shared "--shared --no-undefined-version"
     set script --version-script
     if ![ld_compile "$CC -S $CFLAGS" $srcdir/$subdir/$source $tmpdir/$execname.s]     {
 	unresolved "$test"

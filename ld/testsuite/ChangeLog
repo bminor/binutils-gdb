@@ -1,3 +1,11 @@
+2002-08-07  H.J. Lu <hjl@gnu.org>
+
+	* ld-elfvers/vers.exp: Add --no-undefined-version.
+
+	* ld-elfvers/vers1.map: Remove the unused foo1 and foo2.
+	* ld-elfvers/vers8.map: Likewise.
+	* ld-elfvers/vers18.map: Likewise.
+
 2002-07-30  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* ld-discard/discard.exp, ld-scripts/phdrs.exp, ld-scripts/phdrs2.exp,

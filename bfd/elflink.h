@@ -2938,6 +2938,9 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
       struct elf_info_failed eif;
       struct elf_link_hash_entry *h;
       asection *dynstr;
+      struct bfd_elf_version_tree *t;
+      struct bfd_elf_version_expr *d;
+      boolean all_defined;
 
       *sinterpptr = bfd_get_section_by_name (dynobj, ".interp");
       BFD_ASSERT (*sinterpptr != NULL || info->shared);
@@ -3018,6 +3021,54 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	    return false;
 	}
 
+      /* Make all global versions with definiton.  */
+      for (t = verdefs; t != NULL; t = t->next)
+	for (d = t->globals; d != NULL; d = d->next)
+	  if (!d->symver && strchr (d->pattern, '*') == NULL)
+	    {
+	      const char *verstr, *name;
+	      size_t namelen, verlen, newlen;
+	      char *newname, *p;
+	      struct elf_link_hash_entry *newh;
+
+	      name = d->pattern;
+	      namelen = strlen (name);
+	      verstr = t->name;
+	      verlen = strlen (verstr);
+	      newlen = namelen + verlen + 3; 
+
+	      newname = (char *) bfd_malloc ((bfd_size_type) newlen);
+	      if (newname == NULL)
+		return false;
+	      memcpy (newname, name, namelen);
+
+	      /* Check the hidden versioned definition.  */
+	      p = newname + namelen;
+	      *p++ = ELF_VER_CHR;
+	      memcpy (p, verstr, verlen + 1);
+	      newh = elf_link_hash_lookup (elf_hash_table (info),
+					   newname, false, false,
+					   false);
+	      if (newh == NULL
+		  || (newh->root.type != bfd_link_hash_defined
+		      && newh->root.type != bfd_link_hash_defweak))
+		{
+		  /* Check the default versioned definition.  */
+		  *p++ = ELF_VER_CHR;
+		  memcpy (p, verstr, verlen + 1);
+		  newh = elf_link_hash_lookup (elf_hash_table (info),
+					       newname, false, false,
+					       false);
+		}
+	      free (newname);
+
+	      /* Mark this version if there is a definition.  */
+	      if (newh != NULL
+		  && (newh->root.type == bfd_link_hash_defined
+		      || newh->root.type == bfd_link_hash_defweak))
+		d->symver = 1;
+	    }
+
       /* Attach all the symbols to their version information.  */
       asvinfo.output_bfd = output_bfd;
       asvinfo.info = info;
@@ -3029,6 +3080,28 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 			      (PTR) &asvinfo);
       if (asvinfo.failed)
 	return false;
+
+      if (!info->allow_undefined_version)
+	{
+	  /* Check if all global versions have a definiton.  */
+	  all_defined = true;
+	  for (t = verdefs; t != NULL; t = t->next)
+	    for (d = t->globals; d != NULL; d = d->next)
+	      if (!d->symver && !d->script
+		  && strchr (d->pattern, '*') == NULL)
+		{
+		  (*_bfd_error_handler)
+		    (_("%s: undefined version: %s"),
+		     d->pattern, t->name);
+		  all_defined = false;
+		}
+
+	  if (!all_defined)
+	    {
+	      bfd_set_error (bfd_error_bad_value);
+	      return false;
+	    }
+	}
 
       /* Find all symbols which were defined in a dynamic object and make
 	 the backend pick a reasonable value for them.  */
@@ -4258,7 +4331,6 @@ elf_link_assign_sym_version (h, data)
 	    (_("%s: undefined versioned symbol name %s"),
 	     bfd_get_filename (sinfo->output_bfd), h->root.root.string);
 	  bfd_set_error (bfd_error_bad_value);
-	error_return:
 	  sinfo->failed = true;
 	  return false;
 	}
@@ -4283,18 +4355,34 @@ elf_link_assign_sym_version (h, data)
 	{
 	  if (t->globals != NULL)
 	    {
+	      boolean matched;
+
+	      matched = false;
 	      for (d = t->globals; d != NULL; d = d->next)
 		{
 		  if ((*d->match) (d, h->root.root.string))
 		    {
-		      h->verinfo.vertree = t;
-		      local_ver = NULL;
-		      break;
+		      if (d->symver)
+			matched = true;
+		      else
+			{
+			  /* There is a version without definition.  Make
+			     the symbol the default definition for this
+			     version.  */
+			  h->verinfo.vertree = t;
+			  local_ver = NULL;
+			  d->script = 1;
+			  break;
+			}
 		    }
 		}
 
 	      if (d != NULL)
 		break;
+	      else if (matched)
+		/* There is no undefined version for this symbol. Hide the
+		   default one.  */
+		(*bed->elf_backend_hide_symbol) (info, h, true);
 	    }
 
 	  if (t->locals != NULL)
@@ -4326,43 +4414,6 @@ elf_link_assign_sym_version (h, data)
 	    {
 	      (*bed->elf_backend_hide_symbol) (info, h, true);
 	    }
-	}
-
-      /* We need to check if a hidden versioned definition should
-	 hide the default one.  */
-      if (h->dynindx != -1 && h->verinfo.vertree != NULL)
-	{
-	  const char *verstr, *name;
-	  size_t namelen, verlen, newlen;
-	  char *newname;
-	  struct elf_link_hash_entry *newh;
-
-	  name = h->root.root.string;
-	  namelen = strlen (name);
-	  verstr = h->verinfo.vertree->name;
-	  verlen = strlen (verstr);
-	  newlen = namelen + verlen + 2;
-
-	  newname = (char *) bfd_malloc ((bfd_size_type) newlen);
-	  if (newname == NULL)
-	    goto error_return;
-	  memcpy (newname, name, namelen);
-
-	  /* Check the hidden versioned definition.  */
-	  p = newname + namelen;
-	  *p++ = ELF_VER_CHR;
-	  memcpy (p, verstr, verlen + 1);
-	  newh = elf_link_hash_lookup (elf_hash_table (info), newname,
-				       false, false, false);
-
-	  if (newh
-	      && (newh->root.type == bfd_link_hash_defined
-		  || newh->root.type == bfd_link_hash_defweak))
-	    /* We found a hidden versioned definition.  Hide the
-	       default one.  */
-	    (*bed->elf_backend_hide_symbol) (info, h, true);
-
-	  free (newname);
 	}
     }
 
