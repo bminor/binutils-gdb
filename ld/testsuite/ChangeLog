@@ -1,3 +1,8 @@
+2002-06-29  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* ld-mmix/sec-8m.d, ld-mmix/sec-8m.s, ld-mmix/sec-8a.s,
+	ld-mmix/sec-8b.s, ld-mmix/sec-8d.s: New test. 
+
 2002-06-18  Chris Demetriou  <cgd@broadcom.com>
 
 	* ld-mips-elf/empic2-ref.s: Add a missing .end, apparently
