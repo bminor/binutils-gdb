@@ -15,7 +15,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software 
+   along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
@@ -43,7 +43,7 @@ struct bfd_pef_loader_header
   long main_section;
   unsigned long main_offset;
   long init_section;
-  unsigned long init_offset; 
+  unsigned long init_offset;
   long term_section;
   unsigned long term_offset;
   unsigned long imported_library_count;
@@ -183,4 +183,4 @@ int  bfd_pef_parse_imported_library PARAMS ((bfd *, unsigned char *, size_t, bfd
 int  bfd_pef_parse_imported_symbol  PARAMS ((bfd *, unsigned char *, size_t, bfd_pef_imported_symbol *));
 int  bfd_pef_scan_section           PARAMS ((bfd *, bfd_pef_section *));
 int  bfd_pef_scan_start_address     PARAMS ((bfd *));
-int  bfd_pef_scan                   PARAMS ((bfd *, bfd_pef_header *));
+int  bfd_pef_scan                   PARAMS ((bfd *, bfd_pef_header *, bfd_pef_data_struct *));

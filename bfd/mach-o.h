@@ -15,7 +15,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software 
+   along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #ifndef _BFD_MACH_O_H_
@@ -127,13 +127,13 @@ bfd_mach_o_filetype;
 typedef enum bfd_mach_o_section_type
   {
     /* Regular section.  */
-    BFD_MACH_O_S_REGULAR = 0x0,	
+    BFD_MACH_O_S_REGULAR = 0x0,
 
     /* Zero fill on demand section.  */
     BFD_MACH_O_S_ZEROFILL = 0x1,
 
     /* Section with only literal C strings.  */
-    BFD_MACH_O_S_CSTRING_LITERALS = 0x2, 
+    BFD_MACH_O_S_CSTRING_LITERALS = 0x2,
 
     /* Section with only 4 byte literals.  */
     BFD_MACH_O_S_4BYTE_LITERALS = 0x3,
@@ -159,13 +159,13 @@ typedef enum bfd_mach_o_section_type
 
     /* Section with only non-lazy symbol pointers.  */
     BFD_MACH_O_S_NON_LAZY_SYMBOL_POINTERS = 0x6,
-  
+
     /* Section with only lazy symbol pointers.  */
     BFD_MACH_O_S_LAZY_SYMBOL_POINTERS = 0x7,
-  
+
     /* Section with only symbol stubs, byte size of stub in the reserved2 field.  */
     BFD_MACH_O_S_SYMBOL_STUBS = 0x8,
-  
+
     /* Section with only function pointers for initialization.  */
     BFD_MACH_O_S_MOD_INIT_FUNC_POINTERS = 0x9
   }
@@ -232,7 +232,7 @@ bfd_mach_o_symtab_command;
 
 /* This is the second set of the symbolic information which is used to support
    the data structures for the dynamicly link editor.
- 
+
    The original set of symbolic information in the symtab_command which contains
    the symbol and string tables must also be present when this load command is
    present.  When this load command is present the symbol table is organized
@@ -242,7 +242,7 @@ bfd_mach_o_symtab_command;
        undefined external symbols (sorted by name)
    In this load command there are offsets and counts to each of the three groups
    of symbols.
- 
+
    This load command contains a the offsets and sizes of the following new
    symbolic information tables:
        table of contents
@@ -258,7 +258,7 @@ bfd_mach_o_symtab_command;
        module table - the file contains only one module so everything in the
                       file is part of the module.
        reference symbol table - is the defined and undefined external symbols
- 
+
    For dynamicly linked shared library files this load command also contains
    offsets and sizes to the pool of relocation entries for all sections
    separated into two groups:
@@ -274,11 +274,11 @@ typedef struct bfd_mach_o_dysymtab_command
        local symbols (further grouped by the module they are from)
        defined external symbols (further grouped by the module they are from)
        undefined symbols
-   
+
      The local symbols are used only for debugging.  The dynamic binding
      process may have to use them to indicate to the debugger the local
      symbols for a module that is being bound.
-   
+
      The last two groups are used by the dynamic binding process to do the
      binding (indirectly through the module table and the reference symbol
      table when this is a dynamicly linked shared library file).  */
@@ -368,11 +368,11 @@ typedef struct bfd_mach_o_dysymtab_command
   unsigned long locreloff;    /* Offset to local relocation entries.  */
   unsigned long nlocrel;      /* Number of local relocation entries.  */
 }
-bfd_mach_o_dysymtab_command;      
+bfd_mach_o_dysymtab_command;
 
-/* An indirect symbol table entry is simply a 32bit index into the symbol table 
+/* An indirect symbol table entry is simply a 32bit index into the symbol table
    to the symbol that the pointer or stub is refering to.  Unless it is for a
-   non-lazy symbol pointer section for a defined symbol which strip(1) as 
+   non-lazy symbol pointer section for a defined symbol which strip(1) as
    removed.  In which case it has the value INDIRECT_SYMBOL_LOCAL.  If the
    symbol was also absolute INDIRECT_SYMBOL_ABS is or'ed with that.  */
 
@@ -390,7 +390,7 @@ bfd_mach_o_thread_flavour;
 typedef struct bfd_mach_o_thread_command
 {
   unsigned long nflavours;
-  bfd_mach_o_thread_flavour *flavours; 
+  bfd_mach_o_thread_flavour *flavours;
   asection *section;
 }
 bfd_mach_o_thread_command;
@@ -469,7 +469,7 @@ int                bfd_mach_o_scan_read_symtab_strtab   PARAMS ((bfd *, bfd_mach
 int                bfd_mach_o_scan_read_symtab_symbols  PARAMS ((bfd *, bfd_mach_o_symtab_command *));
 int                bfd_mach_o_scan_read_dysymtab_symbol PARAMS ((bfd *, bfd_mach_o_dysymtab_command *, bfd_mach_o_symtab_command *, asymbol *, unsigned long));
 int                bfd_mach_o_scan_start_address        PARAMS ((bfd *));
-int                bfd_mach_o_scan                      PARAMS ((bfd *, bfd_mach_o_header *));
+int                bfd_mach_o_scan                      PARAMS ((bfd *, bfd_mach_o_header *, bfd_mach_o_data_struct *));
 boolean            bfd_mach_o_mkobject                  PARAMS ((bfd *));
 const bfd_target * bfd_mach_o_object_p                  PARAMS ((bfd *));
 const bfd_target * bfd_mach_o_core_p                    PARAMS ((bfd *));

@@ -3739,6 +3739,27 @@ extern bfd_byte *bfd_get_relocated_section_contents
 boolean
 bfd_alt_mach_code PARAMS ((bfd *abfd, int alternative));
 
+struct bfd_preserve
+{
+  PTR marker;
+  PTR tdata;
+  flagword flags;
+  const struct bfd_arch_info *arch_info;
+  struct sec *sections;
+  struct sec **section_tail;
+  unsigned int section_count;
+  struct bfd_hash_table section_htab;
+};
+
+boolean
+bfd_preserve_save PARAMS ((bfd *, struct bfd_preserve *));
+
+void
+bfd_preserve_restore PARAMS ((bfd *, struct bfd_preserve *));
+
+void
+bfd_preserve_finish PARAMS ((bfd *, struct bfd_preserve *));
+
 /* Extracted from archive.c.  */
 symindex
 bfd_get_next_mapent PARAMS ((bfd *abfd, symindex previous, carsym **sym));

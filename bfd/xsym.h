@@ -15,7 +15,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software 
+   along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
@@ -103,7 +103,7 @@ typedef struct bfd_sym_file_reference bfd_sym_file_reference;
 /* NAME TABLE (NTE).  */
 
 /* RESOURCES TABLE (RTE)
-   
+
    All code and data is *defined* to reside in a resource.  Even A5
    relative data is defined to reside in a dummy resource of ResType
    'gbld'.  Code always resides in a resource.  Because a code/data
@@ -128,7 +128,7 @@ struct bfd_sym_resources_table_entry
 typedef struct bfd_sym_resources_table_entry bfd_sym_resources_table_entry;
 
 /* MODULES TABLE (MTE)
-   
+
    Modules table entries are ordered by their appearance in a resource.
    (Note that having a single module copied into two resources is not
    possible).  Modules map back to their resource via an index into the
@@ -159,19 +159,19 @@ struct bfd_sym_modules_table_entry
   unsigned long mte_ctte_index;        /* Types contained in this.  */
   unsigned long mte_csnte_idx_1;       /* CSNTE index of mte_snbr_first.  */
   unsigned long mte_csnte_idx_2;       /* CSNTE index of mte_snbr_last.  */
-}; 
+};
 typedef struct bfd_sym_modules_table_entry bfd_sym_modules_table_entry;
 
 /* FILE REFERENCES TABLE (FRTE)
-   
+
    The FILE REFERENCES TABLE maps from source file to module & offset.
    The table is ordered by increasing file offset.  Each new offset
    references a module.
- 
+
  				FRT	= FILE_SOURCE_START
  							FILE_SOURCE_INCREMENT*
  							END_OF_LIST.
- 
+
 	*** THIS MECHANISM IS VERY SLOW FOR FILE+STATEMENT_NUMBER TO
  	*** MODULE/CODE ADDRESS OPERATIONS.  ANOTHER MECHANISM IS
  	***	REQUIRED!!  */
@@ -193,7 +193,7 @@ union bfd_sym_file_references_table_entry
     unsigned long mod_date;
   }
   filename;
-  
+
   struct
   {
     /* < FILE_NAME_INDEX.  */
@@ -209,7 +209,7 @@ typedef union bfd_sym_file_references_table_entry bfd_sym_file_references_table_
    Contained Modules are lists of indices into the modules table.  The
    lists are terminated by an END_OF_LIST index.  All entries are of the
    same size, hence mapping an index into a CMTE list is simple.
- 
+
    CMT = MTE_INDEX* END_OF_LIST.  */
 
 union bfd_sym_contained_modules_table_entry
@@ -220,7 +220,7 @@ union bfd_sym_contained_modules_table_entry
     unsigned long type;
   }
   generic;
-  
+
   struct
   {
     unsigned long mte_index; /* Index into the Modules Table.  */
@@ -231,7 +231,7 @@ union bfd_sym_contained_modules_table_entry
 typedef union bfd_sym_contained_modules_table_entry bfd_sym_contained_modules_table_entry;
 
 /* CONTAINED VARIABLES TABLE (CVTE)
- 
+
    Contained Variables map into the module table, file table, name table, and type
    table.  Contained Variables are a contiguous list of source file change record,
    giving the name of and offset into the source file corresponding to all variables
@@ -240,25 +240,25 @@ typedef union bfd_sym_contained_modules_table_entry bfd_sym_contained_modules_ta
    table giving the type of the variable, an increment added to the source file
    offset giving the start of the implementation of the variable, and a storage
    class address, giving information on variable's runtime address.
- 
+
    CVT = SOURCE_FILE_CHANGE SYMBOL_INFO* END_OF_LIST.
    SYMBOL_INFO = SYMBOL_DEFINITION | SOURCE_FILE_CHANGE .
- 
+
    All entries are of the same size, making the fetching of data simple.  The
    variable entries in the list are in ALPHABETICAL ORDER to simplify the display of
    available variables for several of the debugger's windows.  */
 
 /* 'la_size' determines the variant used below:
- 
+
      == BFD_SYM_CVTE_SCA
      Traditional STORAGE_CLASS_ADDRESS;
- 
+
      <= BFD_SYM_CVTE_LA_MAX_SIZE
      That many logical address bytes ("in-situ");
- 
+
      == BFD_SYM_CVTE_BIG_LA
      Logical address bytes in constant pool, at offset 'big_la'.  */
- 
+
 #define	BFD_SYM_CVTE_SCA 0          /* Indicate SCA variant of CVTE.  */
 #define	BFD_SYM_CVTE_LA_MAX_SIZE 13 /* Max# of logical address bytes in a CVTE.  */
 #define	BFD_SYM_CVTE_BIG_LA 127     /* Indicates LA redirection to constant pool.  */
@@ -322,7 +322,7 @@ union bfd_sym_contained_variables_table_entry
 typedef union bfd_sym_contained_variables_table_entry bfd_sym_contained_variables_table_entry;
 
 /* CONTAINED STATEMENTS TABLE (CSNTE)
- 
+
    Contained Statements table.  This table is similar to the Contained
    Variables table except that instead of VARIABLE_DEFINITION entries, this
    module contains STATEMENT_NUMBER_DEFINITION entries.  A statement number
@@ -332,7 +332,7 @@ typedef union bfd_sym_contained_variables_table_entry bfd_sym_contained_variable
    All entries are of the same size, making the fetching of data simple.  The
    entries in the table are in order of increasing statement number within the
    source file.
- 
+
    The Contained Statements table is indexed from two places.  An MTE contains
    an index to the first statement number within the module.  An FRTE contains
    an index to the first statement in the table (Possibly.  This is slow.)  Or
@@ -367,7 +367,7 @@ union bfd_sym_contained_statements_table_entry
 typedef union bfd_sym_contained_statements_table_entry bfd_sym_contained_statements_table_entry;
 
 /* CONTAINED LABELS TABLE (CLTE)
- 
+
    Contained Labels table names those labels local to the module.  It is similar
    to the Contained Statements table.  */
 
@@ -402,7 +402,7 @@ union bfd_sym_contained_labels_table_entry
 typedef union bfd_sym_contained_labels_table_entry bfd_sym_contained_labels_table_entry;
 
 /* CONTAINED TYPES TABLE (CTTE)
- 
+
    Contained Types define the named types that are in the module.  It is used to
    map name indices into type indices.  The type entries in the table are in
    alphabetical order by type name.  */
@@ -427,7 +427,7 @@ union bfd_sym_contained_types_table_entry
   struct
   {
     /* < SOURCE_FILE_CHANGE.  */
-    unsigned long tte_index; 
+    unsigned long tte_index;
     unsigned long nte_index;
     unsigned long file_delta; /* From last file definition.  */
   }
@@ -451,7 +451,7 @@ struct bfd_sym_type_information_table_entry
 typedef struct bfd_sym_type_information_table_entry bfd_sym_type_information_table_entry;
 
 /* FILE REFERENCES INDEX TABLE (FITE)
- 
+
    The FRTE INDEX TABLE indexes into the FILE REFERENCE TABLE above.  The FRTE
    at that index is the FILE_SOURCE_START for a series of files.  The FRTEs are
    indexed from 1.  The list is terminated with an END_OF_LIST.  */
@@ -463,7 +463,7 @@ union bfd_sym_file_references_index_table_entry
     unsigned long type;
   }
   generic;
-  
+
   struct
   {
     unsigned long frte_index;  /* Index into the FRTE table.  */
@@ -474,15 +474,15 @@ union bfd_sym_file_references_index_table_entry
 typedef union bfd_sym_file_references_index_table_entry bfd_sym_file_references_index_table_entry;
 
 /* CONSTANT POOL (CONST)
- 
+
    The CONSTANT_POOL consists of entries that start on word boundaries.  The entries
    are referenced by byte index into the constant pool, not by record number.
- 
+
    Each entry takes the form:
- 
+
    <16-bit size>
    <that many bytes of stuff>
- 
+
    Entries do not cross page boundaries.  */
 
 typedef short bfd_sym_constant_pool_entry;
@@ -493,7 +493,7 @@ typedef short bfd_sym_constant_pool_entry;
    allocations. For the purposes of paging, the * file is considered
    to be an array of dshb_page_size blocks, with block 0 (and *
    possibly more) devoted to the DISK_SYMBOL_HEADER_BLOCK.
- 
+
    The dti_object_count field means that the allowed indices for that
    type of object are 0 .. dti_object_count. An index of 0, although
    allowed, is never done.  However, an 0th entry is created in the
@@ -510,7 +510,7 @@ struct bfd_sym_table_info
 };
 typedef struct bfd_sym_table_info bfd_sym_table_info;
 
-struct bfd_sym_header_block 
+struct bfd_sym_header_block
 {
   unsigned char dshb_id[32];      /* Version information.  */
   unsigned short dshb_page_size;  /* Size of the pages/blocks.  */
@@ -683,6 +683,8 @@ extern void                  bfd_sym_display_constant_pool
   PARAMS ((bfd *, FILE *));
 extern void                  bfd_sym_display_type_information_table
   PARAMS ((bfd *, FILE *));
+extern int                   bfd_sym_scan
+  PARAMS ((bfd *, bfd_sym_version, bfd_sym_data_struct *));
 extern const bfd_target *    bfd_sym_object_p
   PARAMS ((bfd *));
 extern asymbol *             bfd_sym_make_empty_symbol

@@ -997,11 +997,8 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&pc532machaout_vec,
 	&pc532netbsd_vec,
 	&pdp11_aout_vec,
-#if 0
-	/* bfd_pef_object_p and bfd_pef_xlib_object_p are broken.  */
 	&pef_vec,
 	&pef_xlib_vec,
-#endif
 #if 0
 	/* This has the same magic number as RS/6000.  */
 	&pmac_xcoff_vec,
@@ -1031,10 +1028,7 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&sparclynx_coff_vec,
 	&sparcnetbsd_vec,
 	&sunos_big_vec,
-#if 0
-	/* bfd_sym_object_p is broken.  */
 	&sym_vec,
-#endif
 	&tic30_aout_vec,
 	&tic30_coff_vec,
 	&tic54x_coff0_beh_vec,

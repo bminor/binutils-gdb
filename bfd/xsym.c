@@ -15,7 +15,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software 
+   along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "xsym.h"
@@ -116,7 +116,7 @@ bfd_sym_valid (abfd)
   if (abfd == NULL || abfd->xvec == NULL)
     return 0;
 
-  return (abfd->xvec == &sym_vec);
+  return abfd->xvec == &sym_vec;
 }
 
 unsigned char *
@@ -128,19 +128,19 @@ bfd_sym_read_name_table (abfd, dshb)
   long ret;
   size_t table_size = dshb->dshb_nte.dti_page_count * dshb->dshb_page_size;
   size_t table_offset = dshb->dshb_nte.dti_first_page * dshb->dshb_page_size;
-  
+
   rstr = (unsigned char *) bfd_alloc (abfd, table_size);
   if (rstr == NULL)
     return rstr;
 
   bfd_seek (abfd, table_offset, SEEK_SET);
   ret = bfd_bread (rstr, table_size, abfd);
-  if ((ret < 0) || ((unsigned long) ret != table_size))
+  if (ret < 0 || (unsigned long) ret != table_size)
     {
       bfd_release (abfd, rstr);
       return NULL;
     }
-  
+
   return rstr;
 }
 
@@ -163,11 +163,11 @@ bfd_sym_parse_disk_table_v32 (buf, len, table)
      bfd_sym_table_info *table;
 {
   BFD_ASSERT (len == 8);
-  
+
   table->dti_first_page = bfd_getb16 (buf);
   table->dti_page_count = bfd_getb16 (buf + 2);
   table->dti_object_count = bfd_getb32 (buf + 4);
-} 
+}
 
 void
 bfd_sym_parse_header_v32 (buf, len, header)
@@ -176,13 +176,13 @@ bfd_sym_parse_header_v32 (buf, len, header)
      bfd_sym_header_block *header;
 {
   BFD_ASSERT (len == 154);
-  
+
   memcpy (header->dshb_id, buf, 32);
   header->dshb_page_size = bfd_getb16 (buf + 32);
   header->dshb_hash_page = bfd_getb16 (buf + 34);
   header->dshb_root_mte = bfd_getb16 (buf + 36);
   header->dshb_mod_date = bfd_getb32 (buf + 38);
-  
+
   bfd_sym_parse_disk_table_v32 (buf + 42, 8, &header->dshb_frte);
   bfd_sym_parse_disk_table_v32 (buf + 50, 8, &header->dshb_rte);
   bfd_sym_parse_disk_table_v32 (buf + 58, 8, &header->dshb_mte);
@@ -196,7 +196,7 @@ bfd_sym_parse_header_v32 (buf, len, header)
   bfd_sym_parse_disk_table_v32 (buf + 122, 8, &header->dshb_tinfo);
   bfd_sym_parse_disk_table_v32 (buf + 130, 8, &header->dshb_fite);
   bfd_sym_parse_disk_table_v32 (buf + 138, 8, &header->dshb_const);
-  
+
   memcpy (&header->dshb_file_creator, buf + 146, 4);
   memcpy (&header->dshb_file_type, buf + 150, 4);
 }
@@ -208,13 +208,13 @@ bfd_sym_read_header_v32 (abfd, header)
 {
   unsigned char buf[154];
   long ret;
-  
+
   ret = bfd_bread (buf, 154, abfd);
   if (ret != 154)
     return -1;
-  
+
   bfd_sym_parse_header_v32 (buf, 154, header);
-  
+
   return 0;
 }
 
@@ -253,11 +253,11 @@ bfd_sym_read_version (abfd, version)
 {
   unsigned char version_string[32];
   long ret;
-  
+
   ret = bfd_bread (version_string, sizeof (version_string), abfd);
   if (ret != sizeof (version_string))
     return -1;
-  
+
   if (pstrcmp (version_string, BFD_SYM_VERSION_STR_3_1) == 0)
     *version = BFD_SYM_VERSION_3_1;
   else if (pstrcmp (version_string, BFD_SYM_VERSION_STR_3_2) == 0)
@@ -270,7 +270,7 @@ bfd_sym_read_version (abfd, version)
     *version = BFD_SYM_VERSION_3_5;
   else
     return -1;
-  
+
   return 0;
 }
 
@@ -302,10 +302,10 @@ bfd_sym_display_header (f, dshb)
 
   fprintf (f, "       File Creator:  %.4s  Type: %.4s\n\n",
 	   dshb->dshb_file_creator, dshb->dshb_file_type);
-  
+
   fprintf (f, "Table Name   First Page    Page Count   Object Count\n");
   fprintf (f, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-  
+
   bfd_sym_display_table_summary (f, &dshb->dshb_nte, "NTE");
   bfd_sym_display_table_summary (f, &dshb->dshb_rte, "RTE");
   bfd_sym_display_table_summary (f, &dshb->dshb_mte, "MTE");
@@ -319,7 +319,7 @@ bfd_sym_display_header (f, dshb)
   bfd_sym_display_table_summary (f, &dshb->dshb_tinfo, "TINFO");
   bfd_sym_display_table_summary (f, &dshb->dshb_fite, "FITE");
   bfd_sym_display_table_summary (f, &dshb->dshb_const, "CONST");
-  
+
   fprintf (f, "\n");
 }
 
@@ -371,7 +371,7 @@ bfd_sym_parse_file_references_table_entry_v32 (buf, len, entry)
      bfd_sym_file_references_table_entry *entry;
 {
   unsigned int type;
-  
+
   BFD_ASSERT (len == 10);
 
   memset (entry, 0, sizeof (bfd_sym_file_references_table_entry));
@@ -407,7 +407,7 @@ bfd_sym_parse_contained_modules_table_entry_v32 (buf, len, entry)
 
   memset (entry, 0, sizeof (bfd_sym_contained_modules_table_entry));
   type = bfd_getb16 (buf);
-  
+
   switch (type)
     {
     case BFD_SYM_END_OF_LIST_3_2:
@@ -428,7 +428,7 @@ bfd_sym_parse_contained_variables_table_entry_v32 (buf, len, entry)
      bfd_sym_contained_variables_table_entry *entry;
 {
   unsigned int type;
-  
+
   BFD_ASSERT (len == 26);
 
   memset (entry, 0, sizeof (bfd_sym_contained_variables_table_entry));
@@ -483,7 +483,7 @@ bfd_sym_parse_contained_statements_table_entry_v32 (buf, len, entry)
 
   memset (entry, 0, sizeof (bfd_sym_contained_statements_table_entry));
   type = bfd_getb16 (buf);
-  
+
   switch (type)
     {
     case BFD_SYM_END_OF_LIST_3_2:
@@ -515,7 +515,7 @@ bfd_sym_parse_contained_labels_table_entry_v32 (buf, len, entry)
 
   memset (entry, 0, sizeof (bfd_sym_contained_labels_table_entry));
   type = bfd_getb16 (buf);
-  
+
   switch (type)
     {
     case BFD_SYM_END_OF_LIST_3_2:
@@ -544,7 +544,7 @@ bfd_sym_parse_type_table_entry_v32 (buf, len, entry)
      bfd_sym_type_table_entry *entry;
 {
   BFD_ASSERT (len == 4);
-  
+
   *entry = bfd_getb32 (buf);
 }
 
@@ -554,12 +554,14 @@ bfd_sym_fetch_resources_table_entry (abfd, entry, index)
      bfd_sym_resources_table_entry *entry;
      unsigned long index;
 {
-  void (*parser) (unsigned char *, size_t, bfd_sym_resources_table_entry *) = NULL;  
+  void (*parser) PARAMS ((unsigned char *, size_t,
+			  bfd_sym_resources_table_entry *));
   unsigned long offset;
   unsigned long entry_size;
   unsigned char buf[18];
   bfd_sym_data_struct *sdata = NULL;
 
+  parser = NULL;
   BFD_ASSERT (bfd_sym_valid (abfd));
   sdata = abfd->tdata.sym_data;
 
@@ -588,14 +590,14 @@ bfd_sym_fetch_resources_table_entry (abfd, entry, index)
   offset = compute_offset (sdata->header.dshb_rte.dti_first_page,
 			   sdata->header.dshb_page_size,
 			   entry_size, index);
-  
+
   if (bfd_seek (abfd, offset, SEEK_SET) < 0)
     return -1;
   if (bfd_bread (buf, entry_size, abfd) != entry_size)
     return -1;
 
   (*parser) (buf, entry_size, entry);
-  
+
   return 0;
 }
 
@@ -605,12 +607,14 @@ bfd_sym_fetch_modules_table_entry (abfd, entry, index)
      bfd_sym_modules_table_entry *entry;
      unsigned long index;
 {
-  void (*parser) (unsigned char *, size_t, bfd_sym_modules_table_entry *) = NULL;  
+  void (*parser) PARAMS ((unsigned char *, size_t,
+			  bfd_sym_modules_table_entry *));
   unsigned long offset;
   unsigned long entry_size;
   unsigned char buf[46];
   bfd_sym_data_struct *sdata = NULL;
 
+  parser = NULL;
   BFD_ASSERT (bfd_sym_valid (abfd));
   sdata = abfd->tdata.sym_data;
 
@@ -639,14 +643,14 @@ bfd_sym_fetch_modules_table_entry (abfd, entry, index)
   offset = compute_offset (sdata->header.dshb_mte.dti_first_page,
 			   sdata->header.dshb_page_size,
 			   entry_size, index);
-  
+
   if (bfd_seek (abfd, offset, SEEK_SET) < 0)
     return -1;
   if (bfd_bread (buf, entry_size, abfd) != entry_size)
     return -1;
 
   (*parser) (buf, entry_size, entry);
-  
+
   return 0;
 }
 
@@ -656,12 +660,14 @@ bfd_sym_fetch_file_references_table_entry (abfd, entry, index)
      bfd_sym_file_references_table_entry *entry;
      unsigned long index;
 {
-  void (*parser) (unsigned char *, size_t, bfd_sym_file_references_table_entry *) = NULL;  
+  void (*parser) PARAMS ((unsigned char *, size_t,
+			  bfd_sym_file_references_table_entry *));
   unsigned long offset;
   unsigned long entry_size = 0;
   unsigned char buf[8];
   bfd_sym_data_struct *sdata = NULL;
 
+  parser = NULL;
   BFD_ASSERT (bfd_sym_valid (abfd));
   sdata = abfd->tdata.sym_data;
 
@@ -689,14 +695,14 @@ bfd_sym_fetch_file_references_table_entry (abfd, entry, index)
   offset = compute_offset (sdata->header.dshb_frte.dti_first_page,
 			   sdata->header.dshb_page_size,
 			   entry_size, index);
-  
+
   if (bfd_seek (abfd, offset, SEEK_SET) < 0)
     return -1;
   if (bfd_bread (buf, entry_size, abfd) != entry_size)
     return -1;
 
   (*parser) (buf, entry_size, entry);
-  
+
   return 0;
 }
 
@@ -706,12 +712,14 @@ bfd_sym_fetch_contained_modules_table_entry (abfd, entry, index)
      bfd_sym_contained_modules_table_entry *entry;
      unsigned long index;
 {
-  void (*parser) (unsigned char *, size_t, bfd_sym_contained_modules_table_entry *) = NULL;
+  void (*parser) PARAMS ((unsigned char *, size_t,
+			  bfd_sym_contained_modules_table_entry *));
   unsigned long offset;
   unsigned long entry_size = 0;
   unsigned char buf[6];
   bfd_sym_data_struct *sdata = NULL;
 
+  parser = NULL;
   BFD_ASSERT (bfd_sym_valid (abfd));
   sdata = abfd->tdata.sym_data;
 
@@ -739,14 +747,14 @@ bfd_sym_fetch_contained_modules_table_entry (abfd, entry, index)
   offset = compute_offset (sdata->header.dshb_cmte.dti_first_page,
 			   sdata->header.dshb_page_size,
 			   entry_size, index);
- 
+
   if (bfd_seek (abfd, offset, SEEK_SET) < 0)
     return -1;
   if (bfd_bread (buf, entry_size, abfd) != entry_size)
     return -1;
 
   (*parser) (buf, entry_size, entry);
-  
+
   return 0;
 }
 
@@ -756,12 +764,14 @@ bfd_sym_fetch_contained_variables_table_entry (abfd, entry, index)
      bfd_sym_contained_variables_table_entry *entry;
      unsigned long index;
 {
-  void (*parser) (unsigned char *, size_t, bfd_sym_contained_variables_table_entry *) = NULL;
+  void (*parser) PARAMS ((unsigned char *, size_t,
+			  bfd_sym_contained_variables_table_entry *));
   unsigned long offset;
   unsigned long entry_size = 0;
   unsigned char buf[26];
   bfd_sym_data_struct *sdata = NULL;
 
+  parser = NULL;
   BFD_ASSERT (bfd_sym_valid (abfd));
   sdata = abfd->tdata.sym_data;
 
@@ -789,14 +799,14 @@ bfd_sym_fetch_contained_variables_table_entry (abfd, entry, index)
   offset = compute_offset (sdata->header.dshb_cvte.dti_first_page,
 			   sdata->header.dshb_page_size,
 			   entry_size, index);
-  
+
   if (bfd_seek (abfd, offset, SEEK_SET) < 0)
     return -1;
   if (bfd_bread (buf, entry_size, abfd) != entry_size)
     return -1;
 
   (*parser) (buf, entry_size, entry);
-  
+
   return 0;
 }
 
@@ -806,12 +816,14 @@ bfd_sym_fetch_contained_statements_table_entry (abfd, entry, index)
      bfd_sym_contained_statements_table_entry *entry;
      unsigned long index;
 {
-  void (*parser) (unsigned char *, size_t, bfd_sym_contained_statements_table_entry *) = NULL;  
+  void (*parser) PARAMS ((unsigned char *, size_t,
+			  bfd_sym_contained_statements_table_entry *));
   unsigned long offset;
   unsigned long entry_size = 0;
   unsigned char buf[8];
   bfd_sym_data_struct *sdata = NULL;
 
+  parser = NULL;
   BFD_ASSERT (bfd_sym_valid (abfd));
   sdata = abfd->tdata.sym_data;
 
@@ -839,14 +851,14 @@ bfd_sym_fetch_contained_statements_table_entry (abfd, entry, index)
   offset = compute_offset (sdata->header.dshb_csnte.dti_first_page,
 			   sdata->header.dshb_page_size,
 			   entry_size, index);
-  
+
   if (bfd_seek (abfd, offset, SEEK_SET) < 0)
     return -1;
   if (bfd_bread (buf, entry_size, abfd) != entry_size)
     return -1;
 
   (*parser) (buf, entry_size, entry);
-  
+
   return 0;
 }
 
@@ -856,12 +868,14 @@ bfd_sym_fetch_contained_labels_table_entry (abfd, entry, index)
      bfd_sym_contained_labels_table_entry *entry;
      unsigned long index;
 {
-  void (*parser) (unsigned char *, size_t, bfd_sym_contained_labels_table_entry *) = NULL;  
+  void (*parser) PARAMS ((unsigned char *, size_t,
+			  bfd_sym_contained_labels_table_entry *));
   unsigned long offset;
   unsigned long entry_size = 0;
   unsigned char buf[12];
   bfd_sym_data_struct *sdata = NULL;
 
+  parser = NULL;
   BFD_ASSERT (bfd_sym_valid (abfd));
   sdata = abfd->tdata.sym_data;
 
@@ -889,14 +903,14 @@ bfd_sym_fetch_contained_labels_table_entry (abfd, entry, index)
   offset = compute_offset (sdata->header.dshb_clte.dti_first_page,
 			   sdata->header.dshb_page_size,
 			   entry_size, index);
-  
+
   if (bfd_seek (abfd, offset, SEEK_SET) < 0)
     return -1;
   if (bfd_bread (buf, entry_size, abfd) != entry_size)
     return -1;
 
   (*parser) (buf, entry_size, entry);
-  
+
   return 0;
 }
 
@@ -906,12 +920,14 @@ bfd_sym_fetch_contained_types_table_entry (abfd, entry, index)
      bfd_sym_contained_types_table_entry *entry;
      unsigned long index;
 {
-  void (*parser) (unsigned char *, size_t, bfd_sym_contained_types_table_entry *) = NULL;  
+  void (*parser) PARAMS ((unsigned char *, size_t,
+			  bfd_sym_contained_types_table_entry *));
   unsigned long offset;
   unsigned long entry_size = 0;
   unsigned char buf[0];
   bfd_sym_data_struct *sdata = NULL;
 
+  parser = NULL;
   BFD_ASSERT (bfd_sym_valid (abfd));
   sdata = abfd->tdata.sym_data;
 
@@ -939,14 +955,14 @@ bfd_sym_fetch_contained_types_table_entry (abfd, entry, index)
   offset = compute_offset (sdata->header.dshb_ctte.dti_first_page,
 			   sdata->header.dshb_page_size,
 			   entry_size, index);
-  
+
   if (bfd_seek (abfd, offset, SEEK_SET) < 0)
     return -1;
   if (bfd_bread (buf, entry_size, abfd) != entry_size)
     return -1;
 
   (*parser) (buf, entry_size, entry);
-  
+
   return 0;
 }
 
@@ -956,12 +972,14 @@ bfd_sym_fetch_file_references_index_table_entry (abfd, entry, index)
      bfd_sym_file_references_index_table_entry *entry;
      unsigned long index;
 {
-  void (*parser) (unsigned char *, size_t, bfd_sym_file_references_index_table_entry *) = NULL;  
+  void (*parser) PARAMS ((unsigned char *, size_t,
+			  bfd_sym_file_references_index_table_entry *));
   unsigned long offset;
   unsigned long entry_size = 0;
   unsigned char buf[0];
   bfd_sym_data_struct *sdata = NULL;
 
+  parser = NULL;
   BFD_ASSERT (bfd_sym_valid (abfd));
   sdata = abfd->tdata.sym_data;
 
@@ -989,14 +1007,14 @@ bfd_sym_fetch_file_references_index_table_entry (abfd, entry, index)
   offset = compute_offset (sdata->header.dshb_fite.dti_first_page,
 			   sdata->header.dshb_page_size,
 			   entry_size, index);
-  
+
   if (bfd_seek (abfd, offset, SEEK_SET) < 0)
     return -1;
   if (bfd_bread (buf, entry_size, abfd) != entry_size)
     return -1;
 
   (*parser) (buf, entry_size, entry);
-  
+
   return 0;
 }
 
@@ -1006,12 +1024,14 @@ bfd_sym_fetch_constant_pool_entry (abfd, entry, index)
      bfd_sym_constant_pool_entry *entry;
      unsigned long index;
 {
-  void (*parser) (unsigned char *, size_t, bfd_sym_constant_pool_entry *) = NULL;  
+  void (*parser) PARAMS ((unsigned char *, size_t,
+			  bfd_sym_constant_pool_entry *));
   unsigned long offset;
   unsigned long entry_size = 0;
   unsigned char buf[0];
   bfd_sym_data_struct *sdata = NULL;
 
+  parser = NULL;
   BFD_ASSERT (bfd_sym_valid (abfd));
   sdata = abfd->tdata.sym_data;
 
@@ -1039,14 +1059,14 @@ bfd_sym_fetch_constant_pool_entry (abfd, entry, index)
   offset = compute_offset (sdata->header.dshb_fite.dti_first_page,
 			   sdata->header.dshb_page_size,
 			   entry_size, index);
-  
+
   if (bfd_seek (abfd, offset, SEEK_SET) < 0)
     return -1;
   if (bfd_bread (buf, entry_size, abfd) != entry_size)
     return -1;
 
   (*parser) (buf, entry_size, entry);
-  
+
   return 0;
 }
 
@@ -1056,12 +1076,14 @@ bfd_sym_fetch_type_table_entry (abfd, entry, index)
      bfd_sym_type_table_entry *entry;
      unsigned long index;
 {
-  void (*parser) (unsigned char *, size_t, bfd_sym_type_table_entry *) = NULL;  
+  void (*parser) PARAMS ((unsigned char *, size_t,
+			  bfd_sym_type_table_entry *));
   unsigned long offset;
   unsigned long entry_size = 0;
   unsigned char buf[4];
   bfd_sym_data_struct *sdata = NULL;
 
+  parser = NULL;
   BFD_ASSERT (bfd_sym_valid (abfd));
   sdata = abfd->tdata.sym_data;
 
@@ -1086,14 +1108,14 @@ bfd_sym_fetch_type_table_entry (abfd, entry, index)
   offset = compute_offset (sdata->header.dshb_tte.dti_first_page,
 			   sdata->header.dshb_page_size,
 			   entry_size, index);
-  
+
   if (bfd_seek (abfd, offset, SEEK_SET) < 0)
     return -1;
   if (bfd_bread (buf, entry_size, abfd) != entry_size)
     return -1;
 
   (*parser) (buf, entry_size, entry);
-  
+
   return 0;
 }
 
@@ -1118,11 +1140,11 @@ bfd_sym_fetch_type_information_table_entry (abfd, entry, offset)
   if (bfd_bread (buf, 4, abfd) != 4)
     return -1;
   entry->nte_index = bfd_getb32 (buf);
-  
+
   if (bfd_bread (buf, 2, abfd) != 2)
     return -1;
   entry->physical_size = bfd_getb16 (buf);
-  
+
   if (entry->physical_size & 0x8000)
     {
       if (bfd_bread (buf, 4, abfd) != 4)
@@ -1180,12 +1202,13 @@ bfd_sym_symbol_name (abfd, index)
 
   if (index == 0)
     return "";
-  
+
   index *= 2;
-  if ((index / sdata->header.dshb_page_size) > sdata->header.dshb_nte.dti_page_count)
+  if ((index / sdata->header.dshb_page_size)
+      > sdata->header.dshb_nte.dti_page_count)
     return "\009[INVALID]";
-  
-  return ((const unsigned char *) sdata->name_table + index);
+
+  return (const unsigned char *) sdata->name_table + index;
 }
 
 const unsigned char *
@@ -1194,7 +1217,7 @@ bfd_sym_module_name (abfd, index)
      unsigned long index;
 {
   bfd_sym_modules_table_entry entry;
-  
+
   if (bfd_sym_fetch_modules_table_entry (abfd, &entry, index) < 0)
     return "\011[INVALID]";
 
@@ -1272,7 +1295,8 @@ bfd_sym_print_file_reference (abfd, f, entry)
   bfd_sym_file_references_table_entry frtentry;
   int ret;
 
-  ret = bfd_sym_fetch_file_references_table_entry (abfd, &frtentry, entry->fref_frte_index);
+  ret = bfd_sym_fetch_file_references_table_entry (abfd, &frtentry,
+						   entry->fref_frte_index);
   fprintf (f, "FILE ");
 
   if ((ret < 0) || (frtentry.generic.type != BFD_SYM_FILE_NAME_INDEX))
@@ -1296,7 +1320,7 @@ bfd_sym_print_resources_table_entry (abfd, f, entry)
 	   &bfd_sym_symbol_name (abfd, entry->rte_nte_index)[1],
 	   entry->rte_nte_index, entry->rte_res_type, entry->rte_res_number,
 	   entry->rte_res_size, entry->rte_mte_first, entry->rte_mte_last);
-}  
+}
 
 void
 bfd_sym_print_modules_table_entry (abfd, f, entry)
@@ -1308,27 +1332,28 @@ bfd_sym_print_modules_table_entry (abfd, f, entry)
 	   bfd_sym_symbol_name (abfd, entry->mte_nte_index)[0],
 	   &bfd_sym_symbol_name (abfd, entry->mte_nte_index)[1],
 	   entry->mte_nte_index);
-  
-  fprintf (f, "\n            ");          
+
+  fprintf (f, "\n            ");
 
   bfd_sym_print_file_reference (abfd, f, &entry->mte_imp_fref);
-  fprintf (f, " range %lu -- %lu", entry->mte_imp_fref.fref_offset, entry->mte_imp_end);
+  fprintf (f, " range %lu -- %lu",
+	   entry->mte_imp_fref.fref_offset, entry->mte_imp_end);
 
-  fprintf (f, "\n            ");          
+  fprintf (f, "\n            ");
 
   fprintf (f, "kind %s", bfd_sym_unparse_module_kind (entry->mte_kind));
   fprintf (f, ", scope %s", bfd_sym_unparse_symbol_scope (entry->mte_scope));
-  
+
   fprintf (f, ", RTE %lu, offset %lu, size %lu",
 	   entry->mte_rte_index, entry->mte_res_offset, entry->mte_size);
 
-  fprintf (f, "\n            ");          
+  fprintf (f, "\n            ");
 
-  fprintf (f, "CMTE %lu, CVTE %lu, CLTE %lu, CTTE %lu, CSNTE1 %lu, CSNTE2 %lu", 
+  fprintf (f, "CMTE %lu, CVTE %lu, CLTE %lu, CTTE %lu, CSNTE1 %lu, CSNTE2 %lu",
 	   entry->mte_cmte_index, entry->mte_cvte_index,
 	   entry->mte_clte_index, entry->mte_ctte_index,
 	   entry->mte_csnte_idx_1, entry->mte_csnte_idx_2);
-  
+
   if (entry->mte_parent != 0)
     fprintf (f, ", parent %lu", entry->mte_parent);
   else
@@ -1364,7 +1389,7 @@ bfd_sym_print_file_references_table_entry (abfd, f, entry)
   switch (entry->generic.type)
     {
     case BFD_SYM_FILE_NAME_INDEX:
-      fprintf (f, "FILE \"%.*s\" (NTE %lu), modtime ", 
+      fprintf (f, "FILE \"%.*s\" (NTE %lu), modtime ",
 	       bfd_sym_symbol_name (abfd, entry->filename.nte_index)[0],
 	       &bfd_sym_symbol_name (abfd, entry->filename.nte_index)[1],
 	       entry->filename.nte_index);
@@ -1421,19 +1446,19 @@ bfd_sym_print_contained_variables_table_entry (abfd, f, entry)
       fprintf (f, "END");
       return;
     }
-  
+
   if (entry->generic.type == BFD_SYM_SOURCE_FILE_CHANGE)
     {
       bfd_sym_print_file_reference (abfd, f, &entry->file.fref);
       fprintf (f, " offset %lu", entry->file.fref.fref_offset);
       return;
     }
-  
+
   fprintf (f, "\"%.*s\" (NTE %lu)",
 	   bfd_sym_symbol_name (abfd, entry->entry.nte_index)[0],
 	   &bfd_sym_symbol_name (abfd, entry->entry.nte_index)[1],
 	   entry->entry.nte_index);
-	   
+
   fprintf (f, ", TTE %lu", entry->entry.tte_index);
   fprintf (f, ", offset %lu", entry->entry.file_delta);
   fprintf (f, ", scope %s", bfd_sym_unparse_symbol_scope (entry->entry.scope));
@@ -1454,7 +1479,7 @@ bfd_sym_print_contained_variables_table_entry (abfd, f, entry)
     }
   else if (entry->entry.la_size == BFD_SYM_CVTE_BIG_LA)
     fprintf (f, ", bigla %lu, biglakind %u",
-	     entry->entry.address.biglastruct.big_la, 
+	     entry->entry.address.biglastruct.big_la,
 	     entry->entry.address.biglastruct.big_la_kind);
 
   else
@@ -1472,7 +1497,7 @@ bfd_sym_print_contained_statements_table_entry (abfd, f, entry)
       fprintf (f, "END");
       return;
     }
-      
+
   if (entry->generic.type == BFD_SYM_SOURCE_FILE_CHANGE)
     {
       bfd_sym_print_file_reference (abfd, f, &entry->file.fref);
@@ -1661,9 +1686,9 @@ bfd_sym_print_type_information (abfd, f, buf, len, offset, offsetptr)
 
       if (offsetptr != NULL)
 	*offsetptr = offset;
-      return; 
+      return;
   }
-  
+
   type = buf[offset];
   offset++;
 
@@ -1688,7 +1713,7 @@ bfd_sym_print_type_information (abfd, f, buf, len, offset, offsetptr)
 	long value;
 	bfd_sym_type_information_table_entry tinfo;
 
-	bfd_sym_fetch_long (buf, len, offset, &offset, &value); 
+	bfd_sym_fetch_long (buf, len, offset, &offset, &value);
 	if (value <= 0)
 	  fprintf (f, "[INVALID]");
 	else
@@ -1696,7 +1721,7 @@ bfd_sym_print_type_information (abfd, f, buf, len, offset, offsetptr)
 	    if (bfd_sym_fetch_type_table_information (abfd, &tinfo, value) < 0)
 	      fprintf (f, "[INVALID]");
 	    else
-	      fprintf (f, "\"%.*s\"", 
+	      fprintf (f, "\"%.*s\"",
 		       bfd_sym_symbol_name (abfd, tinfo.nte_index)[0],
 		       &bfd_sym_symbol_name (abfd, tinfo.nte_index)[1]);
 	  }
@@ -1719,7 +1744,7 @@ bfd_sym_print_type_information (abfd, f, buf, len, offset, offsetptr)
 	fprintf (f, " (%lu)", value);
 	break;
       }
-    
+
     case 5:
       {
 	unsigned long lower, upper, nelem;
@@ -1727,9 +1752,9 @@ bfd_sym_print_type_information (abfd, f, buf, len, offset, offsetptr)
 
 	fprintf (f, "enumeration (0x%x) of ", type);
 	bfd_sym_print_type_information (abfd, f, buf, len, offset, &offset);
-	bfd_sym_fetch_long (buf, len, offset, &offset, &lower); 
-	bfd_sym_fetch_long (buf, len, offset, &offset, &upper); 
-	bfd_sym_fetch_long (buf, len, offset, &offset, &nelem); 
+	bfd_sym_fetch_long (buf, len, offset, &offset, &lower);
+	bfd_sym_fetch_long (buf, len, offset, &offset, &upper);
+	bfd_sym_fetch_long (buf, len, offset, &offset, &nelem);
 	fprintf (f, " from %lu to %lu with %lu elements: ", lower, upper, nelem);
 
 	for (i = 0; i < nelem; i++)
@@ -1757,15 +1782,15 @@ bfd_sym_print_type_information (abfd, f, buf, len, offset, offsetptr)
 	  fprintf (f, "record (0x%x) of ", type);
 	else
 	  fprintf (f, "union (0x%x) of ", type);
-      
-	bfd_sym_fetch_long (buf, len, offset, &offset, &nrec); 
-	fprintf (f, "%lu elements: ", nrec); 
+
+	bfd_sym_fetch_long (buf, len, offset, &offset, &nrec);
+	fprintf (f, "%lu elements: ", nrec);
 
 	for (i = 0; i < nrec; i++)
 	  {
-	    bfd_sym_fetch_long (buf, len, offset, &offset, &eloff); 
+	    bfd_sym_fetch_long (buf, len, offset, &offset, &eloff);
 	    fprintf (f, "\n                ");
-	    fprintf (f, "offset %lu: ", eloff); 
+	    fprintf (f, "offset %lu: ", eloff);
 	    bfd_sym_print_type_information (abfd, f, buf, len, offset, &offset);
 	  }
 	break;
@@ -1785,11 +1810,11 @@ bfd_sym_print_type_information (abfd, f, buf, len, offset, offsetptr)
       long value;
 
       fprintf (f, "named type (0x%x) ", type);
-      bfd_sym_fetch_long (buf, len, offset, &offset, &value); 
+      bfd_sym_fetch_long (buf, len, offset, &offset, &value);
       if (value <= 0)
 	fprintf (f, "[INVALID]");
       else
-	fprintf (f, "\"%.*s\"", 
+	fprintf (f, "\"%.*s\"",
 		 bfd_sym_symbol_name (abfd, value)[0],
 		 &bfd_sym_symbol_name (abfd, value)[1]);
 
@@ -1802,7 +1827,7 @@ bfd_sym_print_type_information (abfd, f, buf, len, offset, offsetptr)
     fprintf (f, "%s (0x%x)", bfd_sym_type_operator_name (type), type);
     break;
     }
-  
+
   if (type == (0x40 | 0x6))
     {
       /* Vector.  */
@@ -1810,14 +1835,14 @@ bfd_sym_print_type_information (abfd, f, buf, len, offset, offsetptr)
       long l;
       long i;
 
-      bfd_sym_fetch_long (buf, len, offset, &offset, &n); 
-      bfd_sym_fetch_long (buf, len, offset, &offset, &width); 
-      bfd_sym_fetch_long (buf, len, offset, &offset, &m); 
+      bfd_sym_fetch_long (buf, len, offset, &offset, &n);
+      bfd_sym_fetch_long (buf, len, offset, &offset, &width);
+      bfd_sym_fetch_long (buf, len, offset, &offset, &m);
       /* fprintf (f, "\n                "); */
       fprintf (f, " N %ld, width %ld, M %ld, ", n, width, m);
       for (i = 0; i < m; i++)
 	{
-	  bfd_sym_fetch_long (buf, len, offset, &offset, &l); 
+	  bfd_sym_fetch_long (buf, len, offset, &offset, &l);
 	  if (i != 0)
 	    fprintf (f, " ");
 	  fprintf (f, "%ld", l);
@@ -1828,8 +1853,8 @@ bfd_sym_print_type_information (abfd, f, buf, len, offset, offsetptr)
       /* Other packed type.  */
       long msb, lsb;
 
-      bfd_sym_fetch_long (buf, len, offset, &offset, &msb); 
-      bfd_sym_fetch_long (buf, len, offset, &offset, &lsb); 
+      bfd_sym_fetch_long (buf, len, offset, &offset, &msb);
+      bfd_sym_fetch_long (buf, len, offset, &offset, &lsb);
       /* fprintf (f, "\n                "); */
       fprintf (f, " msb %ld, lsb %ld", msb, lsb);
     }
@@ -1856,7 +1881,7 @@ bfd_sym_print_type_information_table_entry (abfd, f, entry)
 	   entry->nte_index,
 	   entry->physical_size, entry->offset, entry->logical_size);
 
-  fprintf (f, "\n            ");          
+  fprintf (f, "\n            ");
 
   buf = alloca (entry->physical_size);
   if (buf == NULL)
@@ -1885,7 +1910,7 @@ bfd_sym_print_type_information_table_entry (abfd, f, entry)
     }
 
   fprintf (f, "]");
-  fprintf (f, "\n            ");          
+  fprintf (f, "\n            ");
 
   bfd_sym_print_type_information (abfd, f, buf, entry->physical_size, 0, &offset);
 
@@ -1923,16 +1948,16 @@ bfd_sym_display_name_table_entry (abfd, f, entry)
   BFD_ASSERT (bfd_sym_valid (abfd));
   sdata = abfd->tdata.sym_data;
   index = (entry - sdata->name_table) / 2;
-  
-  if ((sdata->version >= BFD_SYM_VERSION_3_4) && (entry[0] == 255) && (entry[1] == 0)) 
+
+  if (sdata->version >= BFD_SYM_VERSION_3_4 && entry[0] == 255 && entry[1] == 0)
     {
-      unsigned short length = bfd_getb16 (entry + 2);  
+      unsigned short length = bfd_getb16 (entry + 2);
       fprintf (f, "[%8lu] \"%.*s\"\n", index, length, entry + 4);
       offset = 2 + length + 1;
     }
   else
     {
-      if (! ((entry[0] == 0) || ((entry[0] == 1) && (entry[1] == '\0'))))
+      if (! (entry[0] == 0 || (entry[0] == 1 && entry[1] == '\0')))
 	fprintf (f, "[%8lu] \"%.*s\"\n", index, entry[0], entry + 1);
 
       if (sdata->version >= BFD_SYM_VERSION_3_4)
@@ -1959,9 +1984,9 @@ bfd_sym_display_name_table (abfd, f)
   name_table_len = sdata->header.dshb_nte.dti_page_count * sdata->header.dshb_page_size;
   name_table = sdata->name_table;
   name_table_end = name_table + name_table_len;
-  
+
   fprintf (f, "name table (NTE) contains %lu bytes:\n\n", name_table_len);
-  
+
   cur = name_table;
   for (;;)
     {
@@ -1985,7 +2010,7 @@ bfd_sym_display_resources_table (abfd, f)
 
   fprintf (f, "resource table (RTE) contains %lu objects:\n\n",
 	   sdata->header.dshb_rte.dti_object_count);
-  
+
   for (i = 1; i <= sdata->header.dshb_rte.dti_object_count; i++)
     {
       if (bfd_sym_fetch_resources_table_entry (abfd, &entry, i) < 0)
@@ -2061,7 +2086,7 @@ bfd_sym_display_contained_modules_table (abfd, f)
      FILE *f;
 {
   unsigned long i;
-  bfd_sym_contained_modules_table_entry entry;  
+  bfd_sym_contained_modules_table_entry entry;
   bfd_sym_data_struct *sdata = NULL;
 
   BFD_ASSERT (bfd_sym_valid (abfd));
@@ -2069,7 +2094,7 @@ bfd_sym_display_contained_modules_table (abfd, f)
 
   fprintf (f, "contained modules table (CMTE) contains %lu objects:\n\n",
 	   sdata->header.dshb_cmte.dti_object_count);
-  
+
   for (i = 1; i <= sdata->header.dshb_cmte.dti_object_count; i++)
     {
       if (bfd_sym_fetch_contained_modules_table_entry (abfd, &entry, i) < 0)
@@ -2097,7 +2122,7 @@ bfd_sym_display_contained_variables_table (abfd, f)
 
   fprintf (f, "contained variables table (CVTE) contains %lu objects:\n\n",
 	   sdata->header.dshb_cvte.dti_object_count);
-  
+
   for (i = 1; i <= sdata->header.dshb_cvte.dti_object_count; i++)
     {
       if (bfd_sym_fetch_contained_variables_table_entry (abfd, &entry, i) < 0)
@@ -2119,7 +2144,7 @@ bfd_sym_display_contained_statements_table (abfd, f)
      FILE *f;
 {
   unsigned long i;
-  bfd_sym_contained_statements_table_entry entry;  
+  bfd_sym_contained_statements_table_entry entry;
   bfd_sym_data_struct *sdata = NULL;
 
   BFD_ASSERT (bfd_sym_valid (abfd));
@@ -2127,7 +2152,7 @@ bfd_sym_display_contained_statements_table (abfd, f)
 
   fprintf (f, "contained statements table (CSNTE) contains %lu objects:\n\n",
 	   sdata->header.dshb_csnte.dti_object_count);
-  
+
   for (i = 1; i <= sdata->header.dshb_csnte.dti_object_count; i++)
     {
       if (bfd_sym_fetch_contained_statements_table_entry (abfd, &entry, i) < 0)
@@ -2155,7 +2180,7 @@ bfd_sym_display_contained_labels_table (abfd, f)
 
   fprintf (f, "contained labels table (CLTE) contains %lu objects:\n\n",
 	   sdata->header.dshb_clte.dti_object_count);
-  
+
   for (i = 1; i <= sdata->header.dshb_clte.dti_object_count; i++)
     {
       if (bfd_sym_fetch_contained_labels_table_entry (abfd, &entry, i) < 0)
@@ -2175,7 +2200,7 @@ bfd_sym_display_contained_types_table (abfd, f)
      FILE *f;
 {
   unsigned long i;
-  bfd_sym_contained_types_table_entry entry;  
+  bfd_sym_contained_types_table_entry entry;
   bfd_sym_data_struct *sdata = NULL;
 
   BFD_ASSERT (bfd_sym_valid (abfd));
@@ -2183,7 +2208,7 @@ bfd_sym_display_contained_types_table (abfd, f)
 
   fprintf (f, "contained types table (CTTE) contains %lu objects:\n\n",
 	   sdata->header.dshb_ctte.dti_object_count);
-  
+
   for (i = 1; i <= sdata->header.dshb_ctte.dti_object_count; i++)
     {
       if (bfd_sym_fetch_contained_types_table_entry (abfd, &entry, i) < 0)
@@ -2203,7 +2228,7 @@ bfd_sym_display_file_references_index_table (abfd, f)
      FILE *f;
 {
   unsigned long i;
-  bfd_sym_file_references_index_table_entry entry;  
+  bfd_sym_file_references_index_table_entry entry;
   bfd_sym_data_struct *sdata = NULL;
 
   BFD_ASSERT (bfd_sym_valid (abfd));
@@ -2211,7 +2236,7 @@ bfd_sym_display_file_references_index_table (abfd, f)
 
   fprintf (f, "file references index table (FITE) contains %lu objects:\n\n",
 	   sdata->header.dshb_fite.dti_object_count);
-  
+
   for (i = 1; i <= sdata->header.dshb_fite.dti_object_count; i++)
     {
       if (bfd_sym_fetch_file_references_index_table_entry (abfd, &entry, i) < 0)
@@ -2231,7 +2256,7 @@ bfd_sym_display_constant_pool (abfd, f)
      FILE *f;
 {
   unsigned long i;
-  bfd_sym_constant_pool_entry entry;  
+  bfd_sym_constant_pool_entry entry;
   bfd_sym_data_struct *sdata = NULL;
 
   BFD_ASSERT (bfd_sym_valid (abfd));
@@ -2239,7 +2264,7 @@ bfd_sym_display_constant_pool (abfd, f)
 
   fprintf (f, "constant pool (CONST) contains %lu objects:\n\n",
 	   sdata->header.dshb_const.dti_object_count);
-  
+
   for (i = 1; i <= sdata->header.dshb_const.dti_object_count; i++)
     {
       if (bfd_sym_fetch_constant_pool_entry (abfd, &entry, i) < 0)
@@ -2260,7 +2285,7 @@ bfd_sym_display_type_information_table (abfd, f)
 {
   unsigned long i;
   bfd_sym_type_table_entry index;
-  bfd_sym_type_information_table_entry entry;  
+  bfd_sym_type_information_table_entry entry;
   bfd_sym_data_struct *sdata = NULL;
 
   BFD_ASSERT (bfd_sym_valid (abfd));
@@ -2274,7 +2299,7 @@ bfd_sym_display_type_information_table (abfd, f)
       fprintf (f, "type table (TINFO) contains [INVALID] objects:\n\n");
       return;
     }
-  
+
   for (i = 100; i <= sdata->header.dshb_tte.dti_object_count; i++)
     {
       if (bfd_sym_fetch_type_table_entry (abfd, &index, i - 100) < 0)
@@ -2293,65 +2318,75 @@ bfd_sym_display_type_information_table (abfd, f)
     }
 }
 
-const bfd_target *
-bfd_sym_object_p (abfd)
+int
+bfd_sym_scan (abfd, version, mdata)
      bfd *abfd;
+     bfd_sym_version version;
+     bfd_sym_data_struct *mdata;
 {
-  bfd_sym_data_struct *mdata = NULL;
   asection *bfdsec;
   const char *name = "symbols";
-  
-  mdata = ((bfd_sym_data_struct *) 
-	   bfd_alloc (abfd, sizeof (bfd_sym_data_struct)));
-  if (mdata == NULL)
-    return NULL;
-
-  abfd->tdata.sym_data = mdata;
 
   mdata->name_table = 0;
   mdata->sbfd = abfd;
+  mdata->version = version;
 
   bfd_seek (abfd, 0, SEEK_SET);
-  if (bfd_sym_read_version (abfd, &mdata->version) != 0)
-    {
-      abfd->tdata.sym_data = NULL;
-      bfd_set_error (bfd_error_wrong_format);
-      return NULL;
-    }
-  
-  bfd_seek (abfd, 0, SEEK_SET);
   if (bfd_sym_read_header (abfd, &mdata->header, mdata->version) != 0)
-    {
-      abfd->tdata.sym_data = NULL;
-      bfd_set_error (bfd_error_wrong_format);
-      return NULL;
-    }
+    return -1;
 
   mdata->name_table = bfd_sym_read_name_table (abfd, &mdata->header);
   if (mdata->name_table == NULL)
-    {
-      abfd->tdata.sym_data = NULL;
-      bfd_set_error (bfd_error_wrong_format);
-      return NULL;
-    }
+    return -1;
 
   bfdsec = bfd_make_section_anyway (abfd, name);
   if (bfdsec == NULL)
-    {
-      abfd->tdata.sym_data = NULL;
-      bfd_set_error (bfd_error_wrong_format);
-      return NULL; 
-    }
-  
+    return -1;
+
   bfdsec->vma = 0;
   bfdsec->lma = 0;
   bfdsec->_raw_size = 0;
   bfdsec->filepos = 0;
   bfdsec->alignment_power = 0;
-  
+
   bfdsec->flags = SEC_HAS_CONTENTS;
 
+  abfd->tdata.sym_data = mdata;
+
+  return 0;
+}
+
+const bfd_target *
+bfd_sym_object_p (abfd)
+     bfd *abfd;
+{
+  struct bfd_preserve preserve;
+  bfd_sym_version version = -1;
+
+  preserve.marker = NULL;
+  bfd_seek (abfd, 0, SEEK_SET);
+  if (bfd_sym_read_version (abfd, &version) != 0)
+    goto wrong;
+
+  preserve.marker = bfd_alloc (abfd, sizeof (bfd_sym_data_struct));
+  if (preserve.marker == NULL
+      || ! bfd_preserve_save (abfd, &preserve))
+    goto fail;
+
+  if (bfd_sym_scan (abfd, version,
+		    (bfd_sym_data_struct *) preserve.marker) != 0)
+    goto wrong;
+
+  bfd_preserve_finish (abfd, &preserve);
   return abfd->xvec;
+
+ wrong:
+  bfd_set_error (bfd_error_wrong_format);
+
+ fail:
+  if (preserve.marker != NULL)
+    bfd_preserve_restore (abfd, &preserve);
+  return NULL;
 }
 
 asymbol *
@@ -2443,7 +2478,7 @@ const bfd_target sym_vec =
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   NULL,
-  
+
   NULL
 };
 

@@ -1,3 +1,30 @@
+2002-11-13  Klee Dienes  <kdienes@apple.com>
+	    Alan Modra  <amodra@bigpond.net.au>
+
+	* bfd.c (struct bfd_preserve): New.
+	(bfd_preserve_save): New function.
+	(bfd_preserve_restore): Ditto.
+	(bfd_preserve_finish): Ditto.
+	* bfd-in2.h: Regenerate.
+	* mach-o.c: Formatting.
+	(bfd_mach_o_scan_read_symtab_symbol): Make "value" unsigned.
+	(bfd_mach_o_object_p): Use bfd_preserve_save/restore/finish.
+	(bfd_mach_o_core_p): Ditto.
+	(bfd_mach_o_scan): Pass in mdata.
+	* mach-o.h (bfd_mach_o_scan): Update prototype.
+	* pef.c: Formatting.
+	(bfd_pef_object_p): Use bfd_preserve_save/restore/finish.
+	(bfd_pef_xlib_object_p): Ditto.
+	(bfd_pef_scan): Pass in mdata.  Move version check to bfd_pef_object_p.
+	* pef.h (bfd_pef_scan): Update prototype.
+	* xsym.c: Formatting, K&R fixes.
+	(bfd_sym_object_p): Use bfd_preserve_save/restore/finish.
+	(bfd_sym_scan): New function split out from bfd_sym_object_p.
+	* xsym.h (bfd_sym_scan): Declare.
+	* elfcode.h (elf_object_p): Use bfd_preserve_save/restore/finish.
+	(elf_core_file_p): Likewise.
+	* targets.c (_bfd_target_vector): Revert 2002-11-08 change.
+
 2002-11-12  Nick Clifton  <nickc@redhat.com>
 
 	* po/da.po: Updated Danish translation.
