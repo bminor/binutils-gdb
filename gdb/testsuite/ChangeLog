@@ -1,3 +1,19 @@
+2002-02-20  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.base/sizeof.c (main): Call fill_structs.  Print value of
+	signed, unsigned and straight char.
+	(padding_char, padding_short, padding_int, padding_long,
+	padding_long_long, padding_float, padding_double,
+	padding_long_double): New global variables.
+	(fill, fill_structs): New functions.
+
+	* gdb.base/sizeof.exp: Check for signed and unsigned char.  Check
+	for correctly sized writes.  Update copyright.
+	(get_valueof): New procedure.
+	(get_sizeof): Call get_valueof.
+	(check_valueof): New procedure.
+	(check_padding): New procedure.
+
 2002-02-20  Michael Chastain  <mec@shout.net>
 
 	* gdb.c++/virtfunc.exp (test_virtual_calls): Remove obsolete calls
