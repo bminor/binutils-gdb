@@ -180,14 +180,6 @@ struct m68hc11_unwind_cache
   struct trad_frame_saved_reg *saved_regs;
 };
 
-struct frame_extra_info
-{
-  CORE_ADDR return_pc;
-  int frameless;
-  int size;
-  enum insn_return_kind return_kind;
-};
-
 /* Table of registers for 68HC11.  This includes the hard registers
    and the soft registers used by GCC.  */
 static char *
@@ -412,59 +404,6 @@ m68hc11_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
   
   *lenptr = sizeof (breakpoint);
   return breakpoint;
-}
-
-/* Immediately after a function call, return the saved pc before the frame
-   is setup.  */
-
-static CORE_ADDR
-m68hc11_saved_pc_after_call (struct frame_info *frame)
-{
-  CORE_ADDR addr;
-  ULONGEST sp;
-
-  regcache_cooked_read_unsigned (current_regcache, HARD_SP_REGNUM, &sp);
-  sp += STACK_CORRECTION;
-  addr = sp & 0x0ffff;
-  return read_memory_integer (addr, 2) & 0x0FFFF;
-}
-
-static CORE_ADDR
-m68hc11_frame_saved_pc (struct frame_info *frame)
-{
-  return get_frame_extra_info (frame)->return_pc;
-}
-
-/* Discard from the stack the innermost frame, restoring all saved
-   registers.  */
-
-static void
-m68hc11_pop_frame (void)
-{
-  register struct frame_info *frame = get_current_frame ();
-  register CORE_ADDR fp, sp;
-  register int regnum;
-
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
-				   get_frame_base (frame),
-				   get_frame_base (frame)))
-    generic_pop_dummy_frame ();
-  else
-    {
-      fp = get_frame_base (frame);
-      DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
-
-      /* Copy regs from where they were saved in the frame.  */
-      for (regnum = 0; regnum < M68HC11_ALL_REGS; regnum++)
-	if (get_frame_saved_regs (frame)[regnum])
-	  write_register (regnum,
-                          read_memory_integer (get_frame_saved_regs (frame)[regnum], 2));
-
-      write_register (HARD_PC_REGNUM, get_frame_extra_info (frame)->return_pc);
-      sp = (fp + get_frame_extra_info (frame)->size + 2) & 0x0ffff;
-      write_register (HARD_SP_REGNUM, sp);
-    }
-  flush_cached_frames ();
 }
 
 
@@ -828,118 +767,6 @@ m68hc11_skip_prologue (CORE_ADDR pc)
   pc = m68hc11_scan_prologue (pc, (CORE_ADDR) -1, &tmp_cache);
   return pc;
 }
-
-/* Given a GDB frame, determine the address of the calling function's
-   frame.  This will be used to create a new GDB frame struct, and
-   then DEPRECATED_INIT_EXTRA_FRAME_INFO and DEPRECATED_INIT_FRAME_PC
-   will be called for the new frame.  */
-
-static CORE_ADDR
-m68hc11_frame_chain (struct frame_info *frame)
-{
-  CORE_ADDR addr;
-
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
-				   get_frame_base (frame),
-				   get_frame_base (frame)))
-    return get_frame_base (frame);	/* dummy frame same as caller's frame */
-
-  if (get_frame_extra_info (frame)->return_pc == 0
-      || inside_entry_file (get_frame_extra_info (frame)->return_pc))
-    return (CORE_ADDR) 0;
-
-  if (get_frame_base (frame) == 0)
-    {
-      return (CORE_ADDR) 0;
-    }
-
-  addr = get_frame_base (frame) + get_frame_extra_info (frame)->size + STACK_CORRECTION - 2;
-  addr = read_memory_unsigned_integer (addr, 2) & 0x0FFFF;
-  return addr;
-}  
-#if 0
-/* Put here the code to store, into a struct frame_saved_regs, the
-   addresses of the saved registers of frame described by FRAME_INFO.
-   This includes special registers such as pc and fp saved in special
-   ways in the stack frame.   sp is even more special: the address we
-   return for it IS the sp for the next frame.  */
-static void
-m68hc11_frame_init_saved_regs (struct frame_info *fi)
-{
-  CORE_ADDR pc;
-  CORE_ADDR addr;
-
-  if (get_frame_saved_regs (fi) == NULL)
-    frame_saved_regs_zalloc (fi);
-  else
-    memset (get_frame_saved_regs (fi), 0, SIZEOF_FRAME_SAVED_REGS);
-
-  pc = get_frame_pc (fi);
-  get_frame_extra_info (fi)->return_kind = m68hc11_get_return_insn (pc);
-  m68hc11_guess_from_prologue (pc, pc, get_frame_base (fi), &pc,
-			       &get_frame_extra_info (fi)->size,
-                               get_frame_saved_regs (fi));
-
-  addr = get_frame_base (fi) + get_frame_extra_info (fi)->size + STACK_CORRECTION;
-  if (soft_regs[SOFT_FP_REGNUM].name)
-    get_frame_saved_regs (fi)[SOFT_FP_REGNUM] = addr - 2;
-
-  /* Take into account how the function was called/returns.  */
-  if (get_frame_extra_info (fi)->return_kind == RETURN_RTC)
-    {
-      get_frame_saved_regs (fi)[HARD_PAGE_REGNUM] = addr;
-      addr++;
-    }
-  else if (get_frame_extra_info (fi)->return_kind == RETURN_RTI)
-    {
-      get_frame_saved_regs (fi)[HARD_CCR_REGNUM] = addr;
-      get_frame_saved_regs (fi)[HARD_D_REGNUM] = addr + 1;
-      get_frame_saved_regs (fi)[HARD_X_REGNUM] = addr + 3;
-      get_frame_saved_regs (fi)[HARD_Y_REGNUM] = addr + 5;
-      addr += 7;
-    }
-  get_frame_saved_regs (fi)[HARD_SP_REGNUM] = addr;
-  get_frame_saved_regs (fi)[HARD_PC_REGNUM] = get_frame_saved_regs (fi)[HARD_SP_REGNUM];
-}
-
-static void
-m68hc11_init_extra_frame_info (int fromleaf, struct frame_info *fi)
-{
-  CORE_ADDR addr;
-
-  frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
-  
-  if (get_next_frame (fi))
-    deprecated_update_frame_pc_hack (fi, DEPRECATED_FRAME_SAVED_PC (get_next_frame (fi)));
-  
-  m68hc11_frame_init_saved_regs (fi);
-
-  if (fromleaf)
-    {
-      get_frame_extra_info (fi)->return_kind = m68hc11_get_return_insn (get_frame_pc (fi));
-      get_frame_extra_info (fi)->return_pc = m68hc11_saved_pc_after_call (fi);
-    }
-  else
-    {
-      addr = get_frame_saved_regs (fi)[HARD_PC_REGNUM];
-      addr = read_memory_unsigned_integer (addr, 2) & 0x0ffff;
-
-      /* Take into account the 68HC12 specific call (PC + page).  */
-      if (get_frame_extra_info (fi)->return_kind == RETURN_RTC
-          && addr >= 0x08000 && addr < 0x0c000
-          && USE_PAGE_REGISTER)
-        {
-          CORE_ADDR page_addr = get_frame_saved_regs (fi)[HARD_PAGE_REGNUM];
-
-          unsigned page = read_memory_unsigned_integer (page_addr, 1);
-          addr -= 0x08000;
-          addr += ((page & 0x0ff) << 14);
-          addr += 0x1000000;
-        }
-      get_frame_extra_info (fi)->return_pc = addr;
-    }
-}
-#endif
 
 static CORE_ADDR
 m68hc11_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
@@ -1440,15 +1267,6 @@ m68hc11_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   return sp + 2;
 }
 
-
-/* Return a location where we can set a breakpoint that will be hit
-   when an inferior function call returns.  */
-static CORE_ADDR
-m68hc11_call_dummy_address (void)
-{
-  return entry_point_address ();
-}
-
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
 
@@ -1469,15 +1287,6 @@ m68hc11_register_type (struct gdbarch *gdbarch, int reg_nr)
     default:
       return builtin_type_uint16;
     }
-}
-
-static void
-m68hc11_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
-{
-  /* The struct address computed by gdb is on the stack.
-     It uses the stack pointer so we must apply the stack
-     correction offset.  */
-  write_register (HARD_D_REGNUM, addr + STACK_CORRECTION);
 }
 
 static void

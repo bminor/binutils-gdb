@@ -1,5 +1,17 @@
 2003-07-27  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* m68hc11-tdep.c (struct frame_extra_info): Remove.
+	(m68hc11_pop_frame): Remove.
+	(m68hc11_frame_saved_pc): Remove.
+	(m68hc11_frame_chain): Remove.
+	(m68hc11_frame_init_saved_regs): Remove.
+	(m68hc11_init_extra_frame_info): Remove.
+	(m68hc11_store_struct_return): Remove.
+	(m68hc11_saved_pc_after_call): Remove.
+	(m68hc11_call_dummy_address): Remove.
+
+2003-07-27  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* m68hc11-tdep.c (struct m68hc11_unwind_cache): New struct to hold
 	frame unwind information.
 	(m68hc11_scan_prologue): New function from m68hc11_guess_from_prologue
