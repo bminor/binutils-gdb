@@ -1,3 +1,10 @@
+2004-01-22  Mark Kettenis  <kettenis@gnu.org>
+
+	* osabi.c (MAX_NOTESZ): New define.
+	(check_note): New function.
+	(generic_elf_osabi_sniff_abi_tag_sections): Reorganize code using
+	check_note.
+
 2004-01-21  Roland McGrath  <roland@redhat.com>
 
 	* MAINTAINERS (write after approval): Add myself.
