@@ -1861,6 +1861,10 @@ get_ia64_segment_type (type)
     {
     case PT_IA_64_ARCHEXT:	return "IA_64_ARCHEXT";
     case PT_IA_64_UNWIND:	return "IA_64_UNWIND";
+    case PT_HP_TLS:		return "HP_TLS";
+    case PT_IA_64_HP_OPT_ANOT:	return "HP_OPT_ANNOT";
+    case PT_IA_64_HP_HSL_ANOT:	return "HP_HSL_ANNOT";
+    case PT_IA_64_HP_STACK:	return "HP_STACK";
     default:
       break;
     }
@@ -1922,6 +1926,9 @@ get_segment_type (p_type)
 	    {
 	    case EM_PARISC:
 	      result = get_parisc_segment_type (p_type);
+	      break;
+	    case EM_IA_64:
+	      result = get_ia64_segment_type (p_type);
 	      break;
 	    default:
 	      result = NULL;

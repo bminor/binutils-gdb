@@ -1,3 +1,8 @@
+2002-01-06  Steve Ellcey  <sje@cup.hp.com>
+
+	* readelf.c (get_ia64_segment_type): Add support for macros.
+	(get_segment_type): Add support for IA64 specific macros.
+
 2001-12-20  Julian v. Bock  <julian@wongr.net>
 
 	* readelf.c (print_symbol): New function: Print a formatted symbol
