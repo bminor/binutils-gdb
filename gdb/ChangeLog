@@ -1,3 +1,8 @@
+2004-01-07  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* hpread.c (hpread_read_struct_type): Call SET_FIELD_PHYSNAME
+	properly for static fields.
+
 2004-01-06  Jeff Johnston  <jjohnstn@redhat.com>
 	    Jason Molenda  <jmolenda@apple.com>
 
