@@ -1,5 +1,10 @@
 2004-04-19  Daniel Jacobowitz  <drow@mvista.com>
 
+	* dwarf2read.c (free_comp_units_worker): Remove incorrect aging.
+	(_initialize_dwarf2_read): Use var_zinteger.
+
+2004-04-19  Daniel Jacobowitz  <drow@mvista.com>
+
 	* Makefile.in (dwarf2read.o): Update dependencies.
 	* dwarf2read.c: Include "command.h" and "gdbcmd.h".
 	(MAX_CACHE_AGE): Remove.

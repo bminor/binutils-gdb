@@ -9177,10 +9177,7 @@ free_comp_units_worker (struct dwarf2_cu *target_cu, int aging)
 	  *last_chain = next_cu;
 	}
       else
-	{
-	  per_cu->cu->last_used++;
-	  last_chain = &per_cu->cu->read_in_chain;
-	}
+	last_chain = &per_cu->cu->read_in_chain;
 
       per_cu = next_cu;
     }
@@ -9453,17 +9450,17 @@ _initialize_dwarf2_read (void)
                   &show_dwarf2_cmdlist, "maintenance show dwarf2 ",
                   0/*allow-unknown*/, &maintenance_show_cmdlist);
 
-  add_setshow_uinteger_cmd ("max-cache-age", class_obscure,
-                            &dwarf2_max_cache_age,
-			    "Set an upper bound on the age of cached "
-			    "compilation units.\n"
-			    "A higher limit means that cached "
-			    "compilation units will be stored\n"
-			    "in memory longer, and more total memory will "
-			    "be used.  Zero disables\n"
-			    "caching, which can slow down startup.",
-			    "Show the upper bound on the age of cached "
-			    "dwarf2 compilation units.",
-                            NULL, NULL, &set_dwarf2_cmdlist,
-                            &show_dwarf2_cmdlist);
+  add_setshow_cmd ("max-cache-age", class_obscure, var_zinteger,
+		   &dwarf2_max_cache_age,
+		   "Set an upper bound on the age of cached "
+		   "compilation units.\n"
+		   "A higher limit means that cached "
+		   "compilation units will be stored\n"
+		   "in memory longer, and more total memory will "
+		   "be used.  Zero disables\n"
+		   "caching, which can slow down startup.",
+		   "Show the upper bound on the age of cached "
+		   "dwarf2 compilation units.",
+		   NULL, NULL, &set_dwarf2_cmdlist,
+		   &show_dwarf2_cmdlist);
 }
