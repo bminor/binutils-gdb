@@ -5670,7 +5670,7 @@ elf_bfd_final_link (abfd, info)
 	goto error_return;
     }
 
-  if (info->eh_frame_hdr)
+  if (info->eh_frame_hdr && elf_hash_table (info)->dynobj)
     {
       o = bfd_get_section_by_name (elf_hash_table (info)->dynobj,
 				   ".eh_frame_hdr");

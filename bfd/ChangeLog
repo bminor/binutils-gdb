@@ -1,3 +1,11 @@
+2001-12-31  Jakub Jelinek  <jakub@redhat.com>
+
+	* elflink.h (elf_bfd_final_link): Check if dynobj is not NULL
+	before looking for .eh_frame_hdr section.
+	* elf-eh-frame.c (_bfd_elf_write_section_eh_frame_hdr): If
+	.eh_frame_hdr section is being stripped from output, don't do
+	anything.
+
 2001-12-27  Tom Rix  <trix@redhat.com>
 	
 	* coff-rs6000.c (xcoff_generate_rtinit): Clean data_buffer alloc/free.

@@ -1149,6 +1149,9 @@ _bfd_elf_write_section_eh_frame_hdr (abfd, sec)
 	      == ELF_INFO_TYPE_EH_FRAME_HDR);
   hdr_info = (struct eh_frame_hdr_info *)
 	     elf_section_data (sec)->sec_info;
+  if (hdr_info->strip)
+    return true;
+
   size = EH_FRAME_HDR_SIZE;
   if (hdr_info->array && hdr_info->array_count == hdr_info->fde_count)
     size += 4 + hdr_info->fde_count * 8;
