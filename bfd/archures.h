@@ -32,10 +32,4 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$ */
 
-#define	bfd_mach_i960_core	1
-#define	bfd_mach_i960_kb_sb	2
-#define	bfd_mach_i960_mc	3
-#define	bfd_mach_i960_xa	4
-#define	bfd_mach_i960_ca	5
-#define	bfd_mach_i960_ka_sa	6
 
