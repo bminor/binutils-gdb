@@ -1,3 +1,10 @@
+2000-04-05  Jim Blandy  <jimb@redhat.com>
+
+	* solib.c (update_solib_list): New function.
+	(solib_add): Call update_solib_list, and then read symbols.
+	(info_sharedlibrary_command): Call update_solib_list, not
+	solib_add.
+
 2000-04-05  Scott Bambrough <scottb@netwinder.org>
 
 	* arm-linux-tdep.c: Resolve implicit function declarations by 
