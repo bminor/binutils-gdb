@@ -26,6 +26,7 @@ Things-to-keep:
 cpu32bug.exp
 est.exp
 gdbserver.exp
+hmsirom.exp
 hppro.exp
 mips-gdb.exp
 monitor.exp
