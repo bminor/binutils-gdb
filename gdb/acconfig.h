@@ -13,6 +13,21 @@
 /* Define if gregset_t type is available. */
 #undef HAVE_GREGSET_T
 
+/* Define if <sys/procfs.h> has prgregset_t. */
+#undef HAVE_PRGREGSET_T
+
+/* Define if <sys/procfs.h> has prfpregset_t. */
+#undef HAVE_PRFPREGSET_T
+
+/* Define if <sys/procfs.h> has lwpid_t. */
+#undef HAVE_LWPID_T
+
+/* Define if <sys/procfs.h> has psaddr_t. */
+#undef HAVE_PSADDR_T
+
+/* Define if the prfpregset_t type is broken. */
+#undef PRFPREGSET_T_BROKEN
+
 /* Define if you want to use new multi-fd /proc interface
    (replaces HAVE_MULTIPLE_PROC_FDS as well as other macros). */
 #undef NEW_PROC_API
