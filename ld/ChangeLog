@@ -1,5 +1,7 @@
 2002-05-25  Alan Modra  <amodra@bigpond.net.au>
 
+	* ldlang.c (lang_process): Formatting, grammar.
+
 	* ldlex.l: Use #include "" instead of <> for local header files.
 
 2002-05-24  TAMURA Kent <kent@netbsd.org>

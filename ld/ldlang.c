@@ -4289,10 +4289,10 @@ lang_process ()
 			       (fill_type *) 0, (bfd_vma) 0);
 
 	  /* Perform another relax pass - this time we know where the
-	     globals are, so can make better guess.  */
+	     globals are, so can make a better guess.  */
 	  lang_size_sections (statement_list.head,
 			      abs_output_section,
-			      &(statement_list.head), 0, (bfd_vma) 0,
+			      &statement_list.head, 0, (bfd_vma) 0,
 			      &relax_again);
 	}
       while (relax_again);
