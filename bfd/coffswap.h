@@ -357,6 +357,9 @@ coff_swap_sym_in (abfd, ext1, in1)
   }
   in->n_sclass = bfd_h_get_8(abfd, ext->e_sclass);
   in->n_numaux = bfd_h_get_8(abfd, ext->e_numaux);
+#ifdef COFF_ADJUST_SYM_IN_POST
+  COFF_ADJUST_SYM_IN_POST (abfd, ext1, in1);
+#endif
 }
 
 static unsigned int
@@ -390,6 +393,9 @@ coff_swap_sym_out (abfd, inp, extp)
       }
   bfd_h_put_8(abfd,  in->n_sclass , ext->e_sclass);
   bfd_h_put_8(abfd,  in->n_numaux , ext->e_numaux);
+#ifdef COFF_ADJUST_SYM_OUT_POST
+  COFF_ADJUST_SYM_OUT_POST (abfd, inp, extp);
+#endif
   return SYMESZ;
 }
 

@@ -1,3 +1,12 @@
+2000-02-10  Timothy Wall  <twall@cygnus.com>
+
+	* coffswap.h (coff_swap_sym_in): Add hook SWAP_SYM_IN_POST to
+	allow final modifications of swapped-in symbol.
+	(coff_swap_sym_out): Ditto with SWAP_SYM_OUT_POST.
+	* coffcode.h (coff_write_relocs): Use macro
+	SECTION_RELATIVE_ABSOLUTE_SYMBOL_P if defined to determine whether
+	symbol index should be set to -1.
+
 Thu Feb 10 20:07:50 GMT 2000  Toshiyasu Morita (toshi.morita@sega.com)
 
 	* coff-sh.c (USES1_REG, USES2_REG, SETS1_REG, SETS2_REG,

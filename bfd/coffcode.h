@@ -2268,7 +2268,11 @@ coff_write_relocs (abfd, first_undef)
 #endif
 	    if (q->sym_ptr_ptr)
 	      {
+#ifdef SECTION_RELATIVE_ABSOLUTE_SYMBOL_P
+                if (SECTION_RELATIVE_ABSOLUTE_SYMBOL_P (q,s))
+#else
 		if (q->sym_ptr_ptr == bfd_abs_section_ptr->symbol_ptr_ptr)
+#endif
 		  /* This is a relocation relative to the absolute symbol.  */
 		  n.r_symndx = -1;
 		else
