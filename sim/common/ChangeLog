@@ -4,6 +4,21 @@ Tue Nov 25 00:12:38 1997  Doug Evans  <devans@seba.cygnus.com>
 	Use libgloss/syscall.h for sparc.
 	* nltvals.def: Regenerate.
 
+	* callback.c (os_stat): Make 3rd arg a host struct stat ptr.
+	(os_fstat): Likewise.  Validate fd argument.
+	(cb_host_to_target_stat): Delete big_p arg.  If HS arg is NULL,
+	just compute target stat struct length.
+	* syscall.c: #include "libiberty.h", <sys/types.h>, <sys/stat.h>.
+	(ENOSYS,ENAMETOOLONG): Provide definitions if missing.
+	(get_string): Return host errno values so they can be properly
+	translated later.
+	(cb_syscall): Likewise.
+	(cb_syscall, cases open,unlink): Use get_path instead of get_string.
+	(cb_syscall, case read): Use read_stdin for file descriptor 0.
+	(cb_syscall, case write): Use write_stderr for file descriptor 2.
+	(cb_syscall): Add cases for lseek, unlink, stat, fstat, time.
+	(get_path): New function.
+
 Mon Nov 24 18:56:07 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* sim-io.c (sim_io_syscalls): New function to provide system call

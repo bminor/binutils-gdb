@@ -28,6 +28,7 @@
 #include "config.h"
 #endif
 #include "ansidecl.h"
+#include "libiberty.h"
 #ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
 #else
@@ -37,35 +38,46 @@
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#include <errno.h>
-#include <fcntl.h>
-#include <time.h>
-#include "callback.h"
-#include "remote-sim.h"
-#include "targ-vals.h"
-
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include <errno.h>
+#include <fcntl.h>
+#include <time.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include "callback.h"
+#include "targ-vals.h"
 
-/* When doing file read/writes, do this many bytes at a time.  */
-#define FILE_XFR_SIZE 4096
+#ifndef ENOSYS
+#define ENOSYS EINVAL
+#endif
+#ifndef ENAMETOOLONG
+#define ENAMETOOLONG EINVAL
+#endif
 
 /* Maximum length of a path name.  */
 #ifndef MAX_PATH_LEN
 #define MAX_PATH_LEN 1024
 #endif
 
-/* Utility of cb_syscall to fetch a path name from the target.
-   The result is 0 for success or a target errno value.  */
+/* When doing file read/writes, do this many bytes at a time.  */
+#define FILE_XFR_SIZE 4096
+
+/* FIXME: for now */
+#define TWORD unsigned long
+#define TADDR unsigned long
+
+/* Utility of cb_syscall to fetch a path name or other string from the target.
+   The result is 0 for success or a host errno value.  */
 
 static int
-get_path (cb, sc, buf, buflen, addr)
+get_string (cb, sc, buf, buflen, addr)
      host_callback *cb;
      CB_SYSCALL *sc;
      char *buf;
      int buflen;
-     long addr;
+     TADDR addr;
 {
   char *p, *pend;
 
@@ -74,17 +86,40 @@ get_path (cb, sc, buf, buflen, addr)
       /* No, it isn't expected that this would cause one transaction with
 	 the remote target for each byte.  The target could send the
 	 path name along with the syscall request, and cache the file
-	 name somewhere.  */
+	 name somewhere (or otherwise tweak this as desired).  */
       unsigned int count = (*sc->read_mem) (cb, sc, addr, p, 1);
 				    
       if (count != 1)
-	return TARGET_EINVAL;
+	return EINVAL;
       if (*p == 0)
 	break;
     }
   if (p == pend)
-    return TARGET_ENAMETOOLONG;
+    return ENAMETOOLONG;
   return 0;
+}
+
+/* Utility of cb_syscall to fetch a path name.
+   The buffer is malloc'd and the address is stored in BUFP.
+   The result is that of get_string.
+   If an error occurs, no buffer is left malloc'd.  */
+
+static int
+get_path (cb, sc, addr, bufp)
+     host_callback *cb;
+     CB_SYSCALL *sc;
+     TADDR addr;
+     char **bufp;
+{
+  char *buf = xmalloc (MAX_PATH_LEN);
+  int result;
+
+  result = get_string (cb, sc, buf, MAX_PATH_LEN, addr);
+  if (result == 0)
+    *bufp = buf;
+  else
+    free (buf);
+  return result;
 }
 
 /* Perform a system call on behalf of the target.  */
@@ -129,11 +164,11 @@ cb_syscall (cb, sc)
     case CB_SYS_argv :
       {
 	/* Pointer to target's buffer.  */
-	SIM_ADDR tbuf = sc->arg1;
+	TADDR tbuf = sc->arg1;
 	/* Buffer size.  */
 	int bufsize = sc->arg2;
 	/* Q is the target address of where all the strings go.  */
-	SIM_ADDR q;
+	TADDR q;
 	int word_size = cb->word_size;
 	int i,argc,envc,len;
 	const char **argv = cb->init_argv;
@@ -149,7 +184,7 @@ cb_syscall (cb, sc)
 		if (written != len)
 		  {
 		    result = -1;
-		    errcode = TARGET_EINVAL;
+		    errcode = EINVAL;
 		    goto FinishSyscall;
 		  }
 		tbuf = len + 1;
@@ -158,7 +193,7 @@ cb_syscall (cb, sc)
 	if ((*sc->write_mem) (cb, sc, tbuf, "", 1) != 1)
 	  {
 	    result = -1;
-	    errcode = TARGET_EINVAL;
+	    errcode = EINVAL;
 	    goto FinishSyscall;
 	  }
 	tbuf++;
@@ -172,7 +207,7 @@ cb_syscall (cb, sc)
 		if (written != len)
 		  {
 		    result = -1;
-		    errcode = TARGET_EINVAL;
+		    errcode = EINVAL;
 		    goto FinishSyscall;
 		  }
 		tbuf = len + 1;
@@ -181,7 +216,7 @@ cb_syscall (cb, sc)
 	if ((*sc->write_mem) (cb, sc, tbuf, "", 1) != 1)
 	  {
 	    result = -1;
-	    errcode = TARGET_EINVAL;
+	    errcode = EINVAL;
 	    goto FinishSyscall;
 	  }
 	result = argc;
@@ -196,22 +231,25 @@ cb_syscall (cb, sc)
 
     case CB_SYS_open :
       {
-	char path[MAX_PATH_LEN];
-	int errcode;
+	char *path;
 
-	errcode = get_path (cb, sc, path, MAX_PATH_LEN, sc->arg1);
+	errcode = get_path (cb, sc, sc->arg1, &path);
 	if (errcode != 0)
 	  {
 	    result = -1;
-	    errcode = errcode;
 	    goto FinishSyscall;
 	  }
 	result = (*cb->open) (cb, path, sc->arg2 /*, sc->arg3*/);
+	free (path);
+	if (result < 0)
+	  goto ErrorFinish;
       }
       break;
 
     case CB_SYS_close :
       result = (*cb->close) (cb, sc->arg1);
+      if (result < 0)
+	goto ErrorFinish;
       break;
 
     case CB_SYS_read :
@@ -222,22 +260,28 @@ cb_syscall (cb, sc)
 	   malloc'ing/free'ing the space.  Maybe later.  */
 	char buf[FILE_XFR_SIZE];
 	int fd = sc->arg1;
-	SIM_ADDR addr = sc->arg2;
+	TADDR addr = sc->arg2;
 	size_t count = sc->arg3;
 	size_t bytes_read = 0;
 	int bytes_written;
 
 	while (count > 0)
 	  {
-	    result = (int) (*cb->read) (cb, fd, buf,
-					count < FILE_XFR_SIZE ? count : FILE_XFR_SIZE);
+	    if (fd == 0)
+	      result = (int) (*cb->read_stdin) (cb, buf,
+						(count < FILE_XFR_SIZE
+						 ? count : FILE_XFR_SIZE));
+	    else
+	      result = (int) (*cb->read) (cb, fd, buf,
+					  (count < FILE_XFR_SIZE
+					   ? count : FILE_XFR_SIZE));
 	    if (result == -1)
-	      goto FinishSyscall;
+	      goto ErrorFinish;
 	    bytes_written = (*sc->write_mem) (cb, sc, addr, buf, result);
 	    if (bytes_written != result)
 	      {
 		result = -1;
-		errcode = TARGET_EINVAL;
+		errcode = EINVAL;
 		goto FinishSyscall;
 	      }
 	    bytes_read += result;
@@ -256,7 +300,7 @@ cb_syscall (cb, sc)
 	   malloc'ing/free'ing the space.  Maybe later.  */
 	char buf[FILE_XFR_SIZE];
 	int fd = sc->arg1;
-	SIM_ADDR addr = sc->arg2;
+	TADDR addr = sc->arg2;
 	size_t count = sc->arg3;
 	int bytes_read;
 	size_t bytes_written = 0;
@@ -268,15 +312,17 @@ cb_syscall (cb, sc)
 	    if (bytes_read != bytes_to_read)
 	      {
 		result = -1;
-		errcode = TARGET_EINVAL;
+		errcode = EINVAL;
 		goto FinishSyscall;
 	      }
 	    if (fd == 1)
 	      result = (int) (*cb->write_stdout) (cb, buf, bytes_read);
+	    if (fd == 2)
+	      result = (int) (*cb->write_stderr) (cb, buf, bytes_read);
 	    else
 	      result = (int) (*cb->write) (cb, fd, buf, bytes_read);
 	    if (result == -1)
-	      goto FinishSyscall;
+	      goto ErrorFinish;
 	    bytes_written += result;
 	    count -= result;
 	    addr += result;
@@ -285,22 +331,139 @@ cb_syscall (cb, sc)
       }
       break;
 
+    case CB_SYS_lseek :
+      {
+	int fd = sc->arg1;
+	unsigned long offset = sc->arg2;
+	int whence = sc->arg3;
+
+	result = (*cb->lseek) (cb, fd, offset, whence);
+	if (result < 0)
+	  goto ErrorFinish;
+      }
+      break;
+
+    case CB_SYS_unlink :
+      {
+	char *path;
+
+	errcode = get_path (cb, sc, sc->arg1, &path);
+	if (errcode != 0)
+	  {
+	    result = -1;
+	    goto FinishSyscall;
+	  }
+	result = (*cb->unlink) (cb, path);
+	free (path);
+	if (result < 0)
+	  goto ErrorFinish;
+      }
+      break;
+
+    case CB_SYS_stat :
+      {
+	char *path,*buf;
+	int buflen;
+	struct stat statbuf;
+	TADDR addr = sc->arg2;
+
+	errcode = get_path (cb, sc, sc->arg1, &path);
+	if (errcode != 0)
+	  {
+	    result = -1;
+	    goto FinishSyscall;
+	  }
+	result = (*cb->stat) (cb, path, &statbuf);
+	free (path);
+	if (result < 0)
+	  goto ErrorFinish;
+	buflen = cb_host_to_target_stat (cb, NULL, NULL);
+	buf = xmalloc (buflen);
+	if (cb_host_to_target_stat (cb, &statbuf, buf) != buflen)
+	  {
+	    /* The translation failed.  This is due to an internal
+	       host program error, not the target's fault.  */
+	    free (buf);
+	    errcode = ENOSYS;
+	    result = -1;
+	    goto FinishSyscall;
+	  }
+	if ((*sc->write_mem) (cb, sc, addr, buf, buflen) != buflen)
+	  {
+	    free (buf);
+	    errcode = EINVAL;
+	    result = -1;
+	    goto FinishSyscall;
+	  }
+	free (buf);
+      }
+      break;
+
+    case CB_SYS_fstat :
+      {
+	char *buf;
+	int buflen;
+	struct stat statbuf;
+	TADDR addr = sc->arg2;
+
+	result = (*cb->fstat) (cb, sc->arg1, &statbuf);
+	if (result < 0)
+	  goto ErrorFinish;
+	buflen = cb_host_to_target_stat (cb, NULL, NULL);
+	buf = xmalloc (buflen);
+	if (cb_host_to_target_stat (cb, &statbuf, buf) != buflen)
+	  {
+	    /* The translation failed.  This is due to an internal
+	       host program error, not the target's fault.  */
+	    free (buf);
+	    errcode = ENOSYS;
+	    result = -1;
+	    goto FinishSyscall;
+	  }
+	if ((*sc->write_mem) (cb, sc, addr, buf, buflen) != buflen)
+	  {
+	    free (buf);
+	    errcode = EINVAL;
+	    result = -1;
+	    goto FinishSyscall;
+	  }
+	free (buf);
+      }
+      break;
+
+    case CB_SYS_time :
+      {
+	/* FIXME: May wish to change CB_SYS_time to something else.
+	   We might also want gettimeofday or times, but if system calls
+	   can be built on others, we can keep the number we have to support
+	   here down.  */
+	time_t t = (*cb->time) (cb, (time_t *) 0);
+	result = t;
+	/* It is up to target code to process the argument to time().  */
+      }
+      break;
+
+    case CB_SYS_chdir :
+    case CB_SYS_chmod :
+    case CB_SYS_utime :
+      /* fall through for now */
+
     default :
       result = -1;
-#ifdef TARGET_ENOSYS
-      errcode = TARGET_ENOSYS;
-#else
-      errcode = TARGET_EINVAL;
-#endif
+      errcode = ENOSYS;
       break;
     }
 
  FinishSyscall:
   sc->result = result;
   if (errcode == 0)
-    sc->errcode = (*cb->get_errno) (cb);
+    sc->errcode = 0;
   else
-    sc->errcode = errcode;
+    sc->errcode = cb_host_to_target_errno (cb, errcode);
+  return CB_RC_OK;
 
+ ErrorFinish:
+  sc->result = result;
+  sc->errcode = (*cb->get_errno) (cb);
   return CB_RC_OK;
 }
