@@ -1,3 +1,8 @@
+2004-01-17  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh: Update copyright year.
+	* gdbarch.h, gdbarch.c: Re-generate.
+
 2004-01-17  Daniel Jacobowitz  <drow@mvista.com>
 
 	Suggested by George Anzinger.
