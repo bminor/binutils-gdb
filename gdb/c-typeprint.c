@@ -169,7 +169,8 @@ cp_type_print_method_args (struct type *mtype, char *prefix, char *varstring,
     {
       while (i < nargs)
 	{
-	  type_print (args[i++].type, "", stream, 0);
+	  /* Don't recursively expand classes in method arguments.  */
+	  type_print (args[i++].type, "", stream, -1);
 
 	  if (i == nargs && varargs)
 	    fprintf_filtered (stream, ", ...");
@@ -923,17 +924,16 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 	    {
 	      struct fn_field *f = TYPE_FN_FIELDLIST1 (type, i);
 	      int j, len2 = TYPE_FN_FIELDLIST_LENGTH (type, i);
-	      char *method_name = TYPE_FN_FIELDLIST_NAME (type, i);
+	      char *method_name;
 	      char *name = type_name_no_tag (type);
-	      int is_constructor = name && STREQ (method_name, name);
+	      int is_constructor, is_destructor;
+
+	      check_stub_method_group (type, i);
+	      method_name = TYPE_FN_FIELDLIST_NAME (type, i);
+	      is_constructor = name && STREQ (method_name, name);
+	      is_destructor = method_name[0] == '~';
 	      for (j = 0; j < len2; j++)
 		{
-		  char *physname = TYPE_FN_FIELD_PHYSNAME (f, j);
-		  int is_full_physname_constructor =
-		   is_constructor_name (physname) 
-		   || is_destructor_name (physname)
-		   || method_name[0] == '~';
-
 		  /* Do not print out artificial methods.  */
 		  if (TYPE_FN_FIELD_ARTIFICIAL (f, j))
 		    continue;
@@ -970,6 +970,7 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 		    fprintf_filtered (stream, "virtual ");
 		  else if (TYPE_FN_FIELD_STATIC_P (f, j))
 		    fprintf_filtered (stream, "static ");
+
 		  if (TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j)) == 0)
 		    {
 		      /* Keep GDB from crashing here.  */
@@ -977,69 +978,22 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 					TYPE_FN_FIELD_PHYSNAME (f, j));
 		      break;
 		    }
-		  else if (!is_constructor &&	/* constructors don't have declared types */
-			   !is_full_physname_constructor &&	/*    " "  */
-			   !is_type_conversion_operator (type, i, j))
+		  else if (!is_constructor && !is_destructor
+			   && !is_type_conversion_operator (type, i, j))
 		    {
+		      /* Print the return type for methods other than
+			 constructors, destructors, and cast
+			 operators.  */
 		      type_print (TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j)),
 				  "", stream, -1);
 		      fputs_filtered (" ", stream);
 		    }
-		  if (TYPE_FN_FIELD_STUB (f, j))
-		    /* Build something we can demangle.  */
-		    mangled_name = gdb_mangle_name (type, i, j);
-		  else
-		    mangled_name = TYPE_FN_FIELD_PHYSNAME (f, j);
 
-		  demangled_name =
-		    cplus_demangle (mangled_name,
-				    DMGL_ANSI | DMGL_PARAMS);
-		  if (demangled_name == NULL)
-		    {
-		      /* in some cases (for instance with the HP demangling),
-		         if a function has more than 10 arguments, 
-		         the demangling will fail.
-		         Let's try to reconstruct the function signature from 
-		         the symbol information */
-		      if (!TYPE_FN_FIELD_STUB (f, j))
-			{
-			  int staticp = TYPE_FN_FIELD_STATIC_P (f, j);
-			  struct type *mtype = TYPE_FN_FIELD_TYPE (f, j);
-			  cp_type_print_method_args (mtype,
-						     "",
-						     method_name,
-						     staticp,
-						     stream);
-			}
-		      else
-			fprintf_filtered (stream, "<badly mangled name '%s'>",
-					  mangled_name);
-		    }
-		  else
-		    {
-		      char *p;
-		      char *demangled_no_class
-			= remove_qualifiers (demangled_name);
-
-		      /* get rid of the `static' appended by the demangler */
-		      p = strstr (demangled_no_class, " static");
-		      if (p != NULL)
-			{
-			  int length = p - demangled_no_class;
-			  demangled_no_static = (char *) xmalloc (length + 1);
-			  strncpy (demangled_no_static, demangled_no_class, length);
-			  *(demangled_no_static + length) = '\0';
-			  fputs_filtered (demangled_no_static, stream);
-			  xfree (demangled_no_static);
-			}
-		      else
-			fputs_filtered (demangled_no_class, stream);
-		      xfree (demangled_name);
-		    }
-
-		  if (TYPE_FN_FIELD_STUB (f, j))
-		    xfree (mangled_name);
-
+		  cp_type_print_method_args (TYPE_FN_FIELD_TYPE (f, j),
+					     "",
+					     method_name,
+					     TYPE_FN_FIELD_STATIC_P (f, j),
+					     stream);
 		  fprintf_filtered (stream, ";\n");
 		}
 	    }

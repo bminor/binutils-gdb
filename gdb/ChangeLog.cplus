@@ -1,0 +1,8 @@
+2002-10-05  Daniel Jacobowitz  <drow@mvista.com>
+
+	* c-typeprint.c (cp_type_print_method_args): Don't recursively
+	expand classes in the arguments to methods.
+	(c_type_print_base): Use the name of the method to figure out
+	if it is a constructor or destructor.  Use the type information
+	to print out the method signature, instead of using the demangled
+	name.
