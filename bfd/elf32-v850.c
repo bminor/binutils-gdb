@@ -523,9 +523,11 @@ v850_elf_reloc_type_lookup (abfd, code)
   for (i = ARRAY_SIZE (v850_elf_reloc_map); i --;)
     if (v850_elf_reloc_map[i].bfd_reloc_val == code)
       {
-	BFD_ASSERT (v850_elf_howto_table[code].type == v850_elf_reloc_map[i].elf_reloc_val);
+	int elf_reloc_val = v850_elf_reloc_map[i].elf_reloc_val;
+	
+	BFD_ASSERT (v850_elf_howto_table[elf_reloc_val].type == elf_reloc_val);
 
-	return v850_elf_howto_table + code;
+	return v850_elf_howto_table + elf_reloc_val;
       }
 
   return NULL;
