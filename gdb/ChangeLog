@@ -1,3 +1,7 @@
+Wed Sep 29 10:52:19 1993  Kung Hsu  (kung@cygnus.com)
+
+	* c-valprint.c: to fix virtual table print bug (pr2695).
+
 Wed Sep 29 10:52:19 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* target.c (target_detach): Call generic_mourn_inferior.
