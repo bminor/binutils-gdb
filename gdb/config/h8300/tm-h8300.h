@@ -19,7 +19,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Contributed by Steve Chamberlain sac@cygnus.com */
 
+
+/* 1 if debugging H8/300H application */
 extern int h8300hmode;
+
+/* Number of bytes in a word */
 
 #define BINWORD (h8300hmode?4:2)
 
@@ -78,7 +82,7 @@ extern CORE_ADDR h8300_skip_prologue ();
 /* If your kernel resets the pc after the trap happens you may need to
    define this before including this file.  */
 
-#define DECR_PC_AFTER_BREAK 0
+#define DECR_PC_AFTER_BREAK 2
 
 /* Nonzero if instruction at PC is a return instruction.  */
 /* Allow any of the return instructions, including a trapv and a return
@@ -94,11 +98,7 @@ extern CORE_ADDR h8300_skip_prologue ();
 
 #define REGISTER_TYPE  unsigned short
 
-#if 0
-#  define NUM_REGS 20 /* 20 for fake HW support */
-#else
 #define NUM_REGS 13  
-#endif
 
 #define REGISTER_BYTES (NUM_REGS * 4)
 
@@ -134,15 +134,8 @@ extern CORE_ADDR h8300_skip_prologue ();
 /* Initializer for an array of names of registers.
    Entries beyond the first NUM_REGS are ignored.  */
 
-#if NUM_REGS==20
-#define REGISTER_NAMES  \
- {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "sp",\
-  "ccr","pc","cycles","hcheck","tier","tcsr","frc",\
-   "ocra","ocrb","tcr","tocr","icra"} 
-#else
 #define REGISTER_NAMES \
   {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "sp", "ccr","pc","cycles","tick","inst"}
-#endif
 
 /* Register numbers of various important registers.
    Note that some of these values are "real" register numbers,
@@ -156,15 +149,10 @@ extern CORE_ADDR h8300_skip_prologue ();
 #define CCR_REGNUM 8		/* Contains processor status */
 #define PC_REGNUM 9		/* Contains program counter */
 
-/* Store the address of the place in which to copy the structure the
-   subroutine will return.  This is called from call_function. */
-
-/*#define STORE_STRUCT_RETURN(ADDR, SP) \
-  { write_register (0, (ADDR)); abort(); }*/
-
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  */
+
 /* FIXME: Won't work with both h8/300's.  */
 
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
@@ -258,16 +246,12 @@ extern CORE_ADDR h8300_skip_prologue ();
 
 #define POP_FRAME		{ h8300_pop_frame (); }
 
-#define SHORT_INT_MAX 32767
-#define SHORT_INT_MIN -32768
-
-#define	BEFORE_MAIN_LOOP_HOOK	\
-  hms_before_main_loop();
-
 typedef unsigned short INSN_WORD;
 
-#define ADDR_BITS_REMOVE(addr) ((addr) & 0xffff)
-
-#define DONT_USE_REMOTE
 
 #define	PRINT_REGISTER_HOOK(regno) print_register_hook(regno)
+
+#define GDB_TARGET_IS_H8300
+
+#define NUM_REALREGS 10
+#define NOP {0,0}
