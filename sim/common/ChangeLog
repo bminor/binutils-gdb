@@ -1,5 +1,13 @@
 Thu Jun  5 13:48:37 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
+	* callback.c (target_to_host_open): Handle hosts with O_BINARY.
+
+Thu Jun  5 08:47:10 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* Make-common.in (libsim.a): Fix typo.
+
+Thu Jun  5 13:48:37 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
 	* nrun.c (main): Verify the structure returned before using it.
 
 Wed Jun  4 11:44:06 1997  Andrew Cagney  <cagney@b1.cygnus.com>
