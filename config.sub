@@ -1,6 +1,6 @@
 #!/bin/sh
 # Configuration validation subroutine script, version 1.0.
-#   Copyright (C) 1991 Free Software Foundation, Inc.
+#   Copyright (C) 1991, 1992 Free Software Foundation, Inc.
 
 #This file is free software; you can redistribute it and/or modify
 #it under the terms of the GNU General Public License as published by
@@ -91,7 +91,7 @@ esac
 case $basic_machine in
 	# Recognize the basic CPU types with without company name.
 	tahoe | i386 | i860 | m68k | m68000 | m88k | ns32k | arm | pyramid \
-		| tron | a29k | 580 | i960 | h8300)
+		| tron | a29k | 580 | i960 | h8300 | v70)
 		basic_machine=$basic_machine-unknown
 		;;
 	# Recognize the basic CPU types with with company name.
@@ -138,6 +138,10 @@ case $basic_machine in
 	vms)
 		basic_machine=vax-dec
 		os=-vms
+		;;
+	i386mach)
+		basic_machine=i386-mach
+		os=-mach
 		;;
 	i386v32)
 		basic_machine=i386-unknown
@@ -202,9 +206,13 @@ case $basic_machine in
 	genix)
 		basic_machine=ns32k-ns
 		;;
-	iris | iris4d)
+	iris | iris3 | iris4d)
 		basic_machine=mips-sgi
-		os=-irix
+		os=-irix3
+		;;
+	iris4)
+		basic_machine=mips-sgi
+		os=-irix4
 		;;
 	news | news700 | news800 | news900)
 		basic_machine=m68k-sony
@@ -291,6 +299,10 @@ case $basic_machine in
 		basic_machine=m68k-apollo
 		os=-sysv
 		;;
+	apollo68bsd)
+		basic_machine=m68k-apollo
+		os=-bsd
+		;;
 	altos | altos3068)
 		basic_machine=m68k-altos
 		;;
@@ -303,6 +315,9 @@ case $basic_machine in
 	news-3600 | risc-news)
 		basic_machine=mips-sony
 		os=-newsos
+		;;
+	st2000)
+		basic_machine=m68kmote-tandem
 		;;
 	decstation-dec | decstation | decstation-3100 | pmax | pmin | dec3100 | decstatn)
 		basic_machine=mips-dec
@@ -390,6 +405,10 @@ case $basic_machine in
 		basic_machine=i386-ncr
 		os=-sysv4
 		;;
+	necv70)
+		basic_machine=v70-nec
+		os=-sysv
+		;;
 	news1000)
 		basic_machine=m68030-sony
 		os=-newsos
@@ -464,7 +483,7 @@ case $os in
 	-bsd* | -sysv* | -mach* | -minix* | -genix* | -ultrix* \
 	      | -vms* | -sco* | -esix* | -isc* | -aix* | -sunos* | -hpux* \
 	      | -unos* | -osf* | -v88r* | -luna* | -dgux* | -solari* | -sym* \
-	      | -amigados* | -msdos* | -none* | -os68k* \
+	      | -amigados* | -msdos* | -none* | -os68k* | -irix* \
 	      | -nindy* | -vxworks* | -ebmon* | -hds* | -m88kbcs*)
 		;;
 # start-sanitize-v9
@@ -486,7 +505,7 @@ case $os in
 	-aos*)
 		os=-bsd
 		;;
-	-ctix* | -irix* | -uts*)
+	-ctix* | -uts*)
 		os=-sysv
 		;;
 	-svr4)

@@ -27,7 +27,10 @@ esac
 case "${host_vendor}" in
 apollo*)	case "${host_cpu}" in
 		m68k*)
-			host_makefile_frag=config/mh-apollo68 ;;
+			case "${host_os}" in
+			sysv*) host_makefile_frag=config/mh-apollo68 ;;
+			bsd*) host_makefile_frag=config/mh-a68bsd ;;
+			esac;;
 		esac ;;
 esac
 
