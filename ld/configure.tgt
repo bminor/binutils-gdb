@@ -86,6 +86,7 @@ i[3456]86-*-linux-gnu*)	targ_emul=elf_i386
 			tdir_i386linux=${targ_alias}aout
 			;;
 i[3456]86-*-sysv4*)	targ_emul=elf_i386 ;;
+i[3456]86-*-solaris2*)	targ_emul=elf_i386 ;;
 i[3456]86-*-unixware)	targ_emul=elf_i386 ;;
 i[3456]86-*-solaris*)	targ_emul=elf_i386 ;;
 i[3456]86-*-netbsd*)	targ_emul=i386nbsd ;;
@@ -103,7 +104,8 @@ i[3456]86-*-winnt*)	targ_emul=i386pe ;;
 i[3456]86-*-pe)		targ_emul=i386pe ;;
 i[3456]86-*-cygwin*)	targ_emul=i386pe ;
 			targ_extra_ofiles="deffilep.o pe-dll.o" ;;
-i[3456]86-*-mingw32*)	targ_emul=i386pe ;;
+i[3456]86-*-mingw32*)	targ_emul=i386pe ;
+			targ_extra_ofiles="deffilep.o pe-dll.o" ;;
 # start-sanitize-beos
 i[3456]86-*-beospe*)    targ_emul=i386beos ;;
 i[3456]86-*-beos*)	targ_emul=elf_i386 ;;
@@ -215,9 +217,11 @@ z8k-*-coff) 		targ_emul=z8002; targ_extra_emuls=z8001 ;;
 ns32k-pc532-mach* | ns32k-pc532-ux*)	targ_emul=pc532macha ;;
 ns32k-pc532-netbsd* | ns32k-pc532-lites*) targ_emul=ns32knbsd ;;
 powerpc-*-elf* | powerpc-*-eabi* | powerpc-*-linux-gnu* | powerpc-*-sysv* \
-  | powerpc-*-netbsd*)
+  | powerpc-*-netbsd* | powerpc-*-vxworks*)
 	targ_emul=elf32ppc ;;
-powerpcle-*-elf* | powerpcle-*-eabi* | powerpcle-*-solaris* | powerpcle-*-sysv*)	targ_emul=elf32lppc ;;
+powerpcle-*-elf* | powerpcle-*-eabi* | powerpcle-*-solaris* \
+  | powerpcle-*-sysv* | powerpcle-*-vxworks*)
+	targ_emul=elf32lppc ;;
 powerpc-*-rtems*)	targ_emul=elf32ppc ;;
 powerpc-*-macos*)	targ_emul=ppcmacos ;;
 powerpc-*-netware*)	targ_emul=ppcnw ;;
@@ -238,7 +242,7 @@ v850e-*-*)		targ_emul=v850 ;;
 v850ea-*-*)		targ_emul=v850 ;;
 # end-sanitize-v850e
 w65-*-*)		targ_emul=w65 ;;
-fr30-*-*)		targ_emul=fr30 ;;
+fr30-*-*)		targ_emul=elf32fr30 ;;
 *-*-aout)		targ_emul=${target_cpu}-${target_vendor} ;;
 *-*-coff)		targ_emul=${target_cpu}-${target_vendor} ;;
 *-*-netware)		targ_emul=${target_cpu}-nw ;;

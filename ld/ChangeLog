@@ -1,3 +1,21 @@
+1999-01-31 17:57:31 1998  Michael Meissner  <meissner@cygnus.com>
+
+	* scripttempl/elfppc.sc: Add support for -fleading-underscores
+	switch in all linker generated symbols.
+
+	* configure.tgt (powerpc{,le}*-*-vxworks): Add as aliases for
+	powerpc{,le}-*-eabi.
+
+Wed Jan 20 17:01:48 1999  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.tgt (i[3456]86-*-solaris2*): New target.  From Pavel
+	Roskin <pavel_roskin@geocities.com>.
+
+1999-01-19  Nick Clifton  <nickc@cygnus.com>
+
+	* ldlang.c (lang_size_sections): Count loadable sections as
+          contributing to the size of the current segment.
+
 1999-01-15  Nick Clifton  <nickc@cygnus.com>
 
 	* ldlang.c (lang_size_sections): Only update the current

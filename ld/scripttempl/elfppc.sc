@@ -43,6 +43,7 @@ ${RELOCATING- /* For some reason, the Solaris linker makes bad executables
   bug.  But for now assigning the zero vmas works.  */}
 
 ${RELOCATING+PROVIDE (__stack = 0);}
+${RELOCATING+PROVIDE (___stack = 0);}
 SECTIONS
 {
   /* Read-only sections, merged into text segment: */
@@ -106,6 +107,7 @@ SECTIONS
   .rodata1	${RELOCATING-0} : { *(.rodata1) }
   ${RELOCATING+_etext = .;}
   ${RELOCATING+PROVIDE (etext = .);}
+  ${RELOCATING+PROVIDE (__etext = .);}
   ${CREATE_SHLIB-${SDATA2}}
   ${CREATE_SHLIB-${SBSS2}}
   ${RELOCATING+${OTHER_READONLY_SECTIONS}}
@@ -145,9 +147,11 @@ SECTIONS
      The current compiler no longer needs this, but keep it around for 2.7.2  */
 
 		${RELOCATING+PROVIDE (_GOT2_START_ = .);}
+		${RELOCATING+PROVIDE (__GOT2_START_ = .);}
   .got2		${RELOCATING-0} :  { *(.got2) }
 
 		${RELOCATING+PROVIDE (__CTOR_LIST__ = .);}
+		${RELOCATING+PROVIDE (___CTOR_LIST__ = .);}
   .ctors	${RELOCATING-0} : {
 			/* gcc uses crtbegin.o to find the start of
 			   the constructors, so we make sure it is
@@ -162,25 +166,33 @@ SECTIONS
 			KEEP (*(SORT(.ctors.*)))
 			KEEP (*(.ctors)) }
 		${RELOCATING+PROVIDE (__CTOR_END__ = .);}
+		${RELOCATING+PROVIDE (___CTOR_END__ = .);}
 
 		${RELOCATING+PROVIDE (__DTOR_LIST__ = .);}
+		${RELOCATING+PROVIDE (___DTOR_LIST__ = .);}
   .dtors	${RELOCATING-0} : {
 			KEEP (*crtbegin.o(.dtors))
 			KEEP (*(SORT(.dtors.*)))
 			KEEP (*(.dtors)) }
 		${RELOCATING+PROVIDE (__DTOR_END__ = .);}
+		${RELOCATING+PROVIDE (___DTOR_END__ = .);}
 
 		${RELOCATING+PROVIDE (_FIXUP_START_ = .);}
+		${RELOCATING+PROVIDE (__FIXUP_START_ = .);}
   .fixup	${RELOCATING-0} : { *(.fixup) }
 		${RELOCATING+PROVIDE (_FIXUP_END_ = .);}
+		${RELOCATING+PROVIDE (__FIXUP_END_ = .);}
 		${RELOCATING+PROVIDE (_GOT2_END_ = .);}
+		${RELOCATING+PROVIDE (__GOT2_END_ = .);}
 
 		${RELOCATING+PROVIDE (_GOT_START_ = .);}
+		${RELOCATING+PROVIDE (__GOT_START_ = .);}
   .got		${RELOCATING-0} : { *(.got) }
   .got.plt	${RELOCATING-0} : { *(.got.plt) }
   ${CREATE_SHLIB+${SDATA2}}
   ${CREATE_SHLIB+${SBSS2}}
 		${RELOCATING+PROVIDE (_GOT_END_ = .);}
+		${RELOCATING+PROVIDE (__GOT_END_ = .);}
 
   /* We want the small data sections together, so single-instruction offsets
      can access them all, and initialized data all before uninitialized, so
@@ -188,25 +200,30 @@ SECTIONS
   .sdata	${RELOCATING-0} : { *(.sdata) }
   ${RELOCATING+_edata  =  .;}
   ${RELOCATING+PROVIDE (edata = .);}
+  ${RELOCATING+PROVIDE (__edata = .);}
   .sbss    ${RELOCATING-0} :
   {
     ${RELOCATING+PROVIDE (__sbss_start = .);}
+    ${RELOCATING+PROVIDE (___sbss_start = .);}
     *(.sbss)
     *(.scommon)
     *(.dynsbss)
     ${RELOCATING+PROVIDE (__sbss_end = .);}
+    ${RELOCATING+PROVIDE (___sbss_end = .);}
   }
   ${PLT}
   .bss     ${RELOCATING-0} :
   {
    ${RELOCATING+${OTHER_BSS_SYMBOLS}}
    ${RELOCATING+PROVIDE (__bss_start = .);}
+   ${RELOCATING+PROVIDE (___bss_start = .);}
    *(.dynbss)
    *(.bss)
    *(COMMON)
   }
   ${RELOCATING+_end = . ;}
   ${RELOCATING+PROVIDE (end = .);}
+  ${RELOCATING+PROVIDE (__end = .);}
 
   /* These are needed for ELF backends which have not yet been
      converted to the new style linker.  */
