@@ -1,4 +1,12 @@
-Tue May 14 15:31:20 PDT 1991  Roland Pesch (pesch at cygint.cygnus.com)
+Tue May 14 16:29:53 PDT 1991  Roland Pesch (pesch at cygint.cygnus.com)
+
+	* Makefile.dist: put gdb.dvi stuff (updated to use M4 preprocessor
+	stuff for config manual) here where it counts; updated
+	to use new subdir structure (gdb/doc/).
+
+	* Makefile: generated from above via 
+		    config.gdb none 
+	before checkin
 
 	* gdbint.texinfo: added instructions on generating gdb.info* files
 	locally for release.  These are ordinary info

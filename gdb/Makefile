@@ -420,7 +420,7 @@ OTHERS = Makefile.dist depend alldeps.mak Makefile.sdir \
 	 createtags munch config.gdb config.status \
 	 ChangeLog ChangeLog-3.x \
 	 README TODO TAGS WHATS.NEW \
-	 gdb.texinfo gdbint.texinfo gdbrc.tex threecol.tex \
+	 doc \
 	.gdbinit COPYING expread.tab.c stab.def \
 	 copying.c Projects Convex.notes copying.awk \
 	 saber.suppress standalone.c stuff.c kdb-start.c \
@@ -650,8 +650,8 @@ realclean: clean
 	rm -f tm.h xm.h config.status
 	rm -f Makefile
 
-gdb-all.texinfo: gdb.texinfo
-	${M4} pretex.m4 none.m4 all.m4 gdb.texinfo >gdb-all.texinfo
+gdb-all.texinfo: ${srcdir}/doc/gdb.texinfo
+	${M4} $(srcdir)/doc/pretex.m4 $(srcdir)/doc/none.m4 $(srcdir)/doc/all.m4 $(srcdir)/doc/gdb.texinfo >gdb-all.texinfo
 
 gdb.dvi : gdb-all.texinfo
 	tex gdb-all.texinfo
