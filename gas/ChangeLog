@@ -1,6 +1,7 @@
 2000-08-01  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-arm.c (do_mrs): Fix skip fo 'cpsr_all' flag.
+	Undo some formatting fixes.
 
 2000-08-01  Kazu Hirata  <kazu@hxi.com>
 
