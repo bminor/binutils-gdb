@@ -1,7 +1,17 @@
+Wed May 27 09:27:57 1992  John Gilmore  (gnu at cygnus.com)
+
+	* valops.c (value_assign):  Lint, by Pierre Willard.
+
 Tue May 19 19:38:10 1992  John Gilmore  (gnu at cygnus.com)
 
-	88K changes inspired by Ted Lemon (uunet!lupine!mellon)
+	* coredep.c (fetch_core_registers):  Remove premature warning,
+	which triggers on DECstation even though all regs are accessible.
 
+	* m68k-pinsn.c (print_insn_arg):  Use new macros to get
+	sign-extension of instruction fields even on unsigned-char hosts.
+	Bug found by Fred J Roeber, fjr@sgfb.ssd.ray.com.
+
+	88K changes inspired by Ted Lemon (uunet!lupine!mellon):
 	* tm-m88k.h, tm-umax.h:  Avoid sizeof() in REGISTER_xxx macros,
 	since they define the target, not the host.
 	* m88k-pinsn.c:  Fix typo.
