@@ -1,5 +1,9 @@
 Tue Nov 17 13:42:42 1998  Nick Clifton  <nickc@cygnus.com>
 
+start-sanitize-fr30
+	* config/tc-fr30.c (md_cgen_lookup_reloc): Updated to match latest
+	opcode list.
+end-sanitize-fr30
 	* listing.c: Ignore line terminator characters found inside
 	strings. 
 

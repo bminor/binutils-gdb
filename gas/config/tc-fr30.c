@@ -453,13 +453,17 @@ md_cgen_lookup_reloc (insn, operand, fixP)
 {
   switch (CGEN_OPERAND_TYPE (operand))
     {
-    case FR30_OPERAND_PC :   return BFD_RELOC_FR30_12_PCREL;
-    case FR30_OPERAND_RI :   
-    case FR30_OPERAND_RJ :   
-    case FR30_OPERAND_NBIT : 
-    case FR30_OPERAND_VBIT :
-    case FR30_OPERAND_ZBIT :
-    case FR30_OPERAND_CBIT :
+    case FR30_OPERAND_LABEL9:  fixP->fx_pcrel = 1; return BFD_RELOC_FR30_9_PCREL;
+    case FR30_OPERAND_LABEL12: fixP->fx_pcrel = 1; return BFD_RELOC_FR30_12_PCREL;
+    case FR30_OPERAND_DISP10:  return BFD_RELOC_FR30_10_IN_8;
+    case FR30_OPERAND_DISP9:   return BFD_RELOC_FR30_9_IN_8;
+    case FR30_OPERAND_DISP8:   return BFD_RELOC_FR30_8_IN_8;
+    case FR30_OPERAND_UDISP6:  return BFD_RELOC_FR30_6_IN_4;
+    case FR30_OPERAND_I8:      return BFD_RELOC_8;
+      /* waiting for these to be defined by Dave....
+    case FR30_OPERAND_I20:     return BFD_RELOC_FR30_20;
+    case FR30_OPERAND_I30:     return BFD_RELOC_32;
+    */
     default : /* avoid -Wall warning */
       break;
     }
@@ -601,9 +605,9 @@ fr30_is_colon_insn (start)
 	  static char * delay_insns [] =
 	  {
 	    "call", "jmp", "ret", "bra", "bno",
-	    "beq", "bne", "bc", "bnc", "bn", "bp",
-	    "bv", "bnv", "blt", "bge", "ble", "bgt",
-	    "bls", "bhi"
+	    "beq",  "bne", "bc",  "bnc", "bn",
+	    "bp",   "bv",  "bnv", "blt", "bge",
+	    "ble",  "bgt", "bls", "bhi"
 	  };
 
 	  for (i = sizeof (delay_insns) / sizeof (delay_insns[0]); i--;)
@@ -615,10 +619,8 @@ fr30_is_colon_insn (start)
 		continue;
 	      
 	      while (len --)
-		{
-		  if (tolower (start [len]) != insn [len])
-		    break;
-		}
+		if (tolower (start [len]) != insn [len])
+		  break;
 	      
 	      if (len == -1)
 		return restore_colon (1);
@@ -631,21 +633,15 @@ fr30_is_colon_insn (start)
 
   /* Check to see if the text following the colon is '8' */
   if (i_l_p[1] == '8' && (i_l_p[2] == ' ' || i_l_p[2] == '\t'))
-    {
-      return restore_colon (2);
-    }
+    return restore_colon (2);
 
   /* Check to see if the text following the colon is '20' */
   else if (i_l_p[1] == '2' && i_l_p[2] =='0' && (i_l_p[3] == ' ' || i_l_p[3] == '\t'))
-    {
-      return restore_colon (3);
-    }
+    return restore_colon (3);
 
   /* Check to see if the text following the colon is '32' */
   else if (i_l_p[1] == '3' && i_l_p[2] =='2' && (i_l_p[3] == ' ' || i_l_p[3] == '\t'))
-    {
-      return restore_colon (3);
-    }
+    return restore_colon (3);
 
   return 0;
 }
