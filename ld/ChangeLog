@@ -1,3 +1,9 @@
+2002-07-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c: (strip_excluded_output_sections): New function.
+	(lang_process): Call it.
+	(lang_size_sections_1): Revert 2002-06-10 change.
+
 2002-07-03  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am (check-DEJAGNU): Revert 2002-06-25 change.

@@ -97,6 +97,7 @@ static void lang_place_undefineds PARAMS ((void));
 static void map_input_to_output_sections
   PARAMS ((lang_statement_union_type *, const char *,
 	   lang_output_section_statement_type *));
+static void strip_excluded_output_sections PARAMS ((void));
 static void print_output_section_statement
   PARAMS ((lang_output_section_statement_type *));
 static void print_assignment
@@ -2161,6 +2162,41 @@ map_input_to_output_sections (s, target, output_section_statement)
     }
 }
 
+/* An output section might have been removed after its statement was
+   added.  For example, ldemul_before_allocation can remove dynamic
+   sections if they turn out to be not needed.  Clean them up here.  */
+
+static void
+strip_excluded_output_sections ()
+{
+  lang_statement_union_type *u;
+
+  for (u = lang_output_section_statement.head;
+       u != NULL;
+       u = u->output_section_statement.next)
+    {
+      lang_output_section_statement_type *os;
+      asection *s;
+
+      os = &u->output_section_statement;
+      s = os->bfd_section;
+      if (s != NULL && (s->flags & SEC_EXCLUDE) != 0)
+	{
+	  asection **p;
+
+	  os->bfd_section = NULL;
+
+	  for (p = &output_bfd->sections; *p; p = &(*p)->next)
+	    if (*p == s)
+	      {
+		bfd_section_list_remove (output_bfd, p);
+		output_bfd->section_count--;
+		break;
+	      }
+	}
+    }
+}
+
 static void
 print_output_section_statement (output_section_statement)
      lang_output_section_statement_type *output_section_statement;
@@ -2901,14 +2937,6 @@ lang_size_sections_1 (s, output_section_statement, prev, fill, dot, relax)
 	    os = &s->output_section_statement;
 	    if (os->bfd_section == NULL)
 	      /* This section was never actually created.  */
-	      break;
-
-	    /* The section might have been removed after its statement was
-	       added.  For example, ldemul_before_allocation can remove
-	       dynamic sections if they turn out not to be needed.  */
-	    if (!link_info.relocateable
-		&& (bfd_get_section_flags (output_bfd, os->bfd_section)
-		    & SEC_EXCLUDE) != 0)
 	      break;
 
 	    /* If this is a COFF shared library section, use the size and
@@ -4251,6 +4279,9 @@ lang_process ()
   /* Do anything special before sizing sections.  This is where ELF
      and other back-ends size dynamic sections.  */
   ldemul_before_allocation ();
+
+  if (!link_info.relocateable)
+    strip_excluded_output_sections ();
 
   /* We must record the program headers before we try to fix the
      section positions, since they will affect SIZEOF_HEADERS.  */
