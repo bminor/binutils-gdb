@@ -1155,6 +1155,52 @@ update_FRdouble_latency_for_load (SIM_CPU *cpu, INT out_FR, int cycles)
 /* Top up the post-processing time of the given FR by the given number of
    cycles.  */
 void
+update_FR_ptime (SIM_CPU *cpu, INT out_FR, int cycles)
+{
+  if (out_FR >= 0)
+    {
+      FRV_PROFILE_STATE *ps = CPU_PROFILE_STATE (cpu);
+      /* If a load is pending on this register, then add the cycles to
+	 the post processing time for this register. Otherwise apply it
+	 directly to the latency of the register.  */
+      if (! load_pending_for_register (cpu, out_FR, 1, REGTYPE_FR))
+	{
+	  int *fr = ps->fr_latency;
+	  fr[out_FR] += cycles;
+	}
+      else
+	ps->fr_ptime[out_FR] += cycles;
+    }
+}
+
+void
+update_FRdouble_ptime (SIM_CPU *cpu, INT out_FR, int cycles)
+{
+  if (out_FR >= 0)
+    {
+      FRV_PROFILE_STATE *ps = CPU_PROFILE_STATE (cpu);
+      /* If a load is pending on this register, then add the cycles to
+	 the post processing time for this register. Otherwise apply it
+	 directly to the latency of the register.  */
+      if (! load_pending_for_register (cpu, out_FR, 2, REGTYPE_FR))
+	{
+	  int *fr = ps->fr_latency;
+	  fr[out_FR] += cycles;
+	  if (out_FR < 63)
+	    fr[out_FR + 1] += cycles;
+	}
+      else
+	{
+	  ps->fr_ptime[out_FR] += cycles;
+	  if (out_FR < 63)
+	    ps->fr_ptime[out_FR + 1] += cycles;
+	}
+    }
+}
+
+/* Top up the post-processing time of the given ACC by the given number of
+   cycles.  */
+void
 update_ACC_ptime (SIM_CPU *cpu, INT out_ACC, int cycles)
 {
   if (out_ACC >= 0)
@@ -1164,6 +1210,21 @@ update_ACC_ptime (SIM_CPU *cpu, INT out_ACC, int cycles)
 	 directly to the latency of the register.  */
       int *acc = ps->acc_latency;
       acc[out_ACC] += cycles;
+    }
+}
+
+/* Top up the post-processing time of the given SPR by the given number of
+   cycles.  */
+void
+update_SPR_ptime (SIM_CPU *cpu, INT out_SPR, int cycles)
+{
+  if (out_SPR >= 0)
+    {
+      FRV_PROFILE_STATE *ps = CPU_PROFILE_STATE (cpu);
+      /* No load can be pending on this register. Apply the cycles
+	 directly to the latency of the register.  */
+      int *spr = ps->spr_latency;
+      spr[out_SPR] += cycles;
     }
 }
 
@@ -1181,6 +1242,26 @@ decrease_ACC_busy (SIM_CPU *cpu, INT out_ACC, int cycles)
     }
 }
 
+/* start-sanitize-frv */
+void
+increase_ACC_busy (SIM_CPU *cpu, INT out_ACC, int cycles)
+{
+  if (out_ACC >= 0)
+    {
+      FRV_PROFILE_STATE *ps = CPU_PROFILE_STATE (cpu);
+      int *acc = ps->acc_busy;
+      acc[out_ACC] += cycles;
+    }
+}
+
+void
+enforce_full_acc_latency (SIM_CPU *cpu, INT in_ACC)
+{
+  FRV_PROFILE_STATE *ps = CPU_PROFILE_STATE (cpu);
+  ps->acc_busy_adjust [in_ACC] = -1;
+}
+
+/* end-sanitize-frv */
 void
 decrease_FR_busy (SIM_CPU *cpu, INT out_FR, int cycles)
 {
@@ -1465,7 +1546,7 @@ vliw_wait_for_fdiv_resource (SIM_CPU *cpu, INT in_resource)
     {
       if (TRACE_INSN_P (cpu))
 	{
-	  sprintf (hazard_name, "Resource hazard for integer division in slot I%d:", in_resource);
+	  sprintf (hazard_name, "Resource hazard for floating point division in slot F%d:", in_resource);
 	}
       ps->vliw_wait = r[in_resource];
     }
@@ -1485,7 +1566,7 @@ vliw_wait_for_fsqrt_resource (SIM_CPU *cpu, INT in_resource)
     {
       if (TRACE_INSN_P (cpu))
 	{
-	  sprintf (hazard_name, "Resource hazard for integer division in slot I%d:", in_resource);
+	  sprintf (hazard_name, "Resource hazard for square root in slot F%d:", in_resource);
 	}
       ps->vliw_wait = r[in_resource];
     }
@@ -1690,6 +1771,20 @@ post_wait_for_CCR (SIM_CPU *cpu, INT in_CCR)
 	  else
 	    sprintf (hazard_name, "Data hazard for fcc%d:", in_CCR);
 	}
+    }
+}
+
+int
+post_wait_for_SPR (SIM_CPU *cpu, INT in_SPR)
+{
+  FRV_PROFILE_STATE *ps = CPU_PROFILE_STATE (cpu);
+  int *spr = ps->spr_busy;
+
+  if (in_SPR >= 0 && spr[in_SPR] > ps->post_wait)
+    {
+      ps->post_wait = spr[in_SPR];
+      if (TRACE_INSN_P (cpu))
+	sprintf (hazard_name, "Data hazard for spr[%d]:", in_SPR);
     }
 }
 

@@ -580,6 +580,41 @@ frvbf_model_fr500_u_clrfr (SIM_CPU *cpu, const IDESC *idesc,
 }
 
 int
+frvbf_model_fr500_u_commit (SIM_CPU *cpu, const IDESC *idesc,
+			    int unit_num, int referenced,
+			    INT in_GRk, INT in_FRk)
+{
+  int cycles;
+
+  if (model_insn == FRV_INSN_MODEL_PASS_1)
+    {
+      /* If GR is specified, then FR is not and vice-versa. If neither is
+	 then it's a commitga or commitfa. Check the insn attribute to
+	 figure out which.  */
+      if (in_GRk != -1)
+	vliw_wait_for_SPR (cpu, GNER_FOR_GR (in_GRk));
+      else if (in_FRk != -1)
+	vliw_wait_for_SPR (cpu, FNER_FOR_FR (in_FRk));
+      else if (CGEN_ATTR_VALUE(idesc, idesc->attrs, CGEN_INSN_FR_ACCESS))
+	{
+	  vliw_wait_for_SPR (cpu, H_SPR_FNER0);
+	  vliw_wait_for_SPR (cpu, H_SPR_FNER1);
+	}
+      else
+	{
+	  vliw_wait_for_SPR (cpu, H_SPR_GNER0);
+	  vliw_wait_for_SPR (cpu, H_SPR_GNER1);
+	}
+      handle_resource_wait (cpu);
+      trace_vliw_wait_cycles (cpu);
+      return 0;
+    }
+
+  cycles = idesc->timing->units[unit_num].done;
+  return cycles;
+}
+
+int
 frvbf_model_fr500_u_set_hilo (SIM_CPU *cpu, const IDESC *idesc,
 			     int unit_num, int referenced,
 			     INT out_GRkhi, INT out_GRklo)
@@ -656,9 +691,20 @@ frvbf_model_fr500_u_gr_load (SIM_CPU *cpu, const IDESC *idesc,
   update_GR_latency_for_load (cpu, out_GRk, cycles);
   update_GRdouble_latency_for_load (cpu, out_GRdoublek, cycles);
 
-  set_use_is_gr_complex (cpu, out_GRk);
-  set_use_is_gr_complex (cpu, out_GRdoublek);
-  set_use_is_gr_complex (cpu, out_GRdoublek + 1);
+  if (CGEN_ATTR_VALUE(idesc, idesc->attrs, CGEN_INSN_NON_EXCEPTING))
+    {
+      /* GNER has a latency of 2 cycles.  */
+      update_SPR_latency (cpu, GNER_FOR_GR (out_GRk), cycles + 2);
+      update_SPR_latency (cpu, GNER_FOR_GR (out_GRdoublek), cycles + 2);
+    }
+
+  if (out_GRk >= 0)
+    set_use_is_gr_complex (cpu, out_GRk);
+  if (out_GRdoublek != -1)
+    {
+      set_use_is_gr_complex (cpu, out_GRdoublek);
+      set_use_is_gr_complex (cpu, out_GRdoublek + 1);
+    }
 
   return cycles;
 }
@@ -786,6 +832,11 @@ frvbf_model_fr500_u_fr_load (SIM_CPU *cpu, const IDESC *idesc,
       vliw_wait_for_GR (cpu, in_GRj);
       vliw_wait_for_FR (cpu, out_FRk);
       vliw_wait_for_FRdouble (cpu, out_FRdoublek);
+      if (CGEN_ATTR_VALUE(idesc, idesc->attrs, CGEN_INSN_NON_EXCEPTING))
+	{
+	  vliw_wait_for_SPR (cpu, FNER_FOR_FR (out_FRk));
+	  vliw_wait_for_SPR (cpu, FNER_FOR_FR (out_FRdoublek));
+	}
       handle_resource_wait (cpu);
       load_wait_for_GR (cpu, in_GRi);
       load_wait_for_GR (cpu, in_GRj);
@@ -801,6 +852,13 @@ frvbf_model_fr500_u_fr_load (SIM_CPU *cpu, const IDESC *idesc,
      the the data from the cache or memory.  */
   update_FR_latency_for_load (cpu, out_FRk, cycles);
   update_FRdouble_latency_for_load (cpu, out_FRdoublek, cycles);
+
+  if (CGEN_ATTR_VALUE(idesc, idesc->attrs, CGEN_INSN_NON_EXCEPTING))
+    {
+      /* FNER has a latency of 3 cycles.  */
+      update_SPR_latency (cpu, FNER_FOR_FR (out_FRk), cycles + 3);
+      update_SPR_latency (cpu, FNER_FOR_FR (out_FRdoublek), cycles + 3);
+    }
 
   fr500_reset_fr_flags (cpu, out_FRk);
 
@@ -1061,7 +1119,7 @@ frvbf_model_fr500_u_gr2fr (SIM_CPU *cpu, const IDESC *idesc,
 	  if (use_is_media (cpu, out_FRk))
 	    decrease_FR_busy (cpu, out_FRk, 1);
 	  else
-	    adjust_float_register_busy (cpu, -1, out_FRk, -1, 1);
+	    adjust_float_register_busy (cpu, -1, -1, out_FRk, 1);
 	}
       vliw_wait_for_GR (cpu, in_GRj);
       vliw_wait_for_FR (cpu, out_FRk);
@@ -1385,52 +1443,6 @@ frvbf_model_fr500_u_dcul (SIM_CPU *cpu, const IDESC *idesc,
   return cycles;
 }
 
-/* Top up the post-processing time of the given FR by the given number of
-   cycles.  */
-static void
-update_FR_ptime (SIM_CPU *cpu, INT out_FR, int cycles)
-{
-  if (out_FR >= 0)
-    {
-      FRV_PROFILE_STATE *ps = CPU_PROFILE_STATE (cpu);
-      /* If a load is pending on this register, then add the cycles to
-	 the post processing time for this register. Otherwise apply it
-	 directly to the latency of the register.  */
-      if (! load_pending_for_register (cpu, out_FR, 1, REGTYPE_FR))
-	{
-	  int *fr = ps->fr_latency;
-	  fr[out_FR] += cycles;
-	}
-      else
-	ps->fr_ptime[out_FR] += cycles;
-    }
-}
-
-static void
-update_FRdouble_ptime (SIM_CPU *cpu, INT out_FR, int cycles)
-{
-  if (out_FR >= 0)
-    {
-      FRV_PROFILE_STATE *ps = CPU_PROFILE_STATE (cpu);
-      /* If a load is pending on this register, then add the cycles to
-	 the post processing time for this register. Otherwise apply it
-	 directly to the latency of the register.  */
-      if (! load_pending_for_register (cpu, out_FR, 2, REGTYPE_FR))
-	{
-	  int *fr = ps->fr_latency;
-	  fr[out_FR] += cycles;
-	  if (out_FR < 63)
-	    fr[out_FR + 1] += cycles;
-	}
-      else
-	{
-	  ps->fr_ptime[out_FR] += cycles;
-	  if (out_FR < 63)
-	    ps->fr_ptime[out_FR + 1] += cycles;
-	}
-    }
-}
-
 int
 frvbf_model_fr500_u_float_arith (SIM_CPU *cpu, const IDESC *idesc,
 				 int unit_num, int referenced,
@@ -1460,6 +1472,11 @@ frvbf_model_fr500_u_float_arith (SIM_CPU *cpu, const IDESC *idesc,
   post_wait_for_FRdouble (cpu, in_FRdoublei);
   post_wait_for_FRdouble (cpu, in_FRdoublej);
   post_wait_for_FRdouble (cpu, out_FRdoublek);
+  if (CGEN_ATTR_VALUE(idesc, idesc->attrs, CGEN_INSN_NON_EXCEPTING))
+    {
+      post_wait_for_SPR (cpu, FNER_FOR_FR (out_FRk));
+      post_wait_for_SPR (cpu, FNER_FOR_FR (out_FRdoublek));
+    }
   restore_float_register_busy (cpu, in_FRi, in_FRj, out_FRk, 1);
   restore_double_register_busy (cpu, in_FRdoublei, in_FRdoublej, out_FRdoublek,
 				1);
@@ -1468,9 +1485,21 @@ frvbf_model_fr500_u_float_arith (SIM_CPU *cpu, const IDESC *idesc,
   update_FR_latency (cpu, out_FRk, ps->post_wait);
   update_FRdouble_latency (cpu, out_FRdoublek, ps->post_wait);
 
+  if (CGEN_ATTR_VALUE(idesc, idesc->attrs, CGEN_INSN_NON_EXCEPTING))
+    {
+      update_SPR_latency (cpu, FNER_FOR_FR (out_FRk), ps->post_wait);
+      update_SPR_latency (cpu, FNER_FOR_FR (out_FRdoublek), ps->post_wait);
+    }
+
   /* Once initiated, post-processing will take 3 cycles.  */
   update_FR_ptime (cpu, out_FRk, 3);
   update_FRdouble_ptime (cpu, out_FRdoublek, 3);
+
+  if (CGEN_ATTR_VALUE(idesc, idesc->attrs, CGEN_INSN_NON_EXCEPTING))
+    {
+      update_SPR_ptime (cpu, FNER_FOR_FR (out_FRk), 3);
+      update_SPR_ptime (cpu, FNER_FOR_FR (out_FRdoublek), 3);
+    }
 
   /* Mark this use of the register as a floating point op.  */
   if (out_FRk >= 0)
@@ -1536,6 +1565,13 @@ frvbf_model_fr500_u_float_dual_arith (SIM_CPU *cpu, const IDESC *idesc,
   post_wait_for_FRdouble (cpu, dual_FRdoublei);
   post_wait_for_FRdouble (cpu, dual_FRdoublej);
   post_wait_for_FRdouble (cpu, dual_FRdoublek);
+  if (CGEN_ATTR_VALUE(idesc, idesc->attrs, CGEN_INSN_NON_EXCEPTING))
+    {
+      post_wait_for_SPR (cpu, FNER_FOR_FR (out_FRk));
+      post_wait_for_SPR (cpu, FNER_FOR_FR (dual_FRk));
+      post_wait_for_SPR (cpu, FNER_FOR_FR (out_FRdoublek));
+      post_wait_for_SPR (cpu, FNER_FOR_FR (dual_FRdoublek));
+    }
   restore_float_register_busy (cpu, in_FRi, in_FRj, out_FRk, 1);
   restore_float_register_busy (cpu, dual_FRi, dual_FRj, dual_FRk, 1);
   restore_double_register_busy (cpu, in_FRdoublei, in_FRdoublej, out_FRdoublek,
@@ -1549,11 +1585,27 @@ frvbf_model_fr500_u_float_dual_arith (SIM_CPU *cpu, const IDESC *idesc,
   update_FRdouble_latency (cpu, out_FRdoublek, ps->post_wait);
   update_FRdouble_latency (cpu, dual_FRdoublek, ps->post_wait);
 
+  if (CGEN_ATTR_VALUE(idesc, idesc->attrs, CGEN_INSN_NON_EXCEPTING))
+    {
+      update_SPR_latency (cpu, FNER_FOR_FR (out_FRk), ps->post_wait);
+      update_SPR_latency (cpu, FNER_FOR_FR (dual_FRk), ps->post_wait);
+      update_SPR_latency (cpu, FNER_FOR_FR (out_FRdoublek), ps->post_wait);
+      update_SPR_latency (cpu, FNER_FOR_FR (dual_FRdoublek), ps->post_wait);
+    }
+
   /* Once initiated, post-processing will take 3 cycles.  */
   update_FR_ptime (cpu, out_FRk, 3);
   update_FR_ptime (cpu, dual_FRk, 3);
   update_FRdouble_ptime (cpu, out_FRdoublek, 3);
   update_FRdouble_ptime (cpu, dual_FRdoublek, 3);
+
+  if (CGEN_ATTR_VALUE(idesc, idesc->attrs, CGEN_INSN_NON_EXCEPTING))
+    {
+      update_SPR_ptime (cpu, FNER_FOR_FR (out_FRk), 3);
+      update_SPR_ptime (cpu, FNER_FOR_FR (dual_FRk), 3);
+      update_SPR_ptime (cpu, FNER_FOR_FR (out_FRdoublek), 3);
+      update_SPR_ptime (cpu, FNER_FOR_FR (dual_FRdoublek), 3);
+    }
 
   /* Mark this use of the register as a floating point op.  */
   if (out_FRk >= 0)
@@ -1599,6 +1651,8 @@ frvbf_model_fr500_u_float_div (SIM_CPU *cpu, const IDESC *idesc,
   post_wait_for_FR (cpu, in_FRi);
   post_wait_for_FR (cpu, in_FRj);
   post_wait_for_FR (cpu, out_FRk);
+  if (CGEN_ATTR_VALUE(idesc, idesc->attrs, CGEN_INSN_NON_EXCEPTING))
+    post_wait_for_SPR (cpu, FNER_FOR_FR (out_FRk));
   vliw = CPU_VLIW (cpu);
   slot = vliw->next_slot - 1;
   slot = (*vliw->current_vliw)[slot] - UNIT_FM0;
@@ -1609,6 +1663,13 @@ frvbf_model_fr500_u_float_div (SIM_CPU *cpu, const IDESC *idesc,
   /* Once initiated, post-processing will take 10 cycles.  */
   update_FR_latency (cpu, out_FRk, ps->post_wait);
   update_FR_ptime (cpu, out_FRk, 10);
+
+  if (CGEN_ATTR_VALUE(idesc, idesc->attrs, CGEN_INSN_NON_EXCEPTING))
+    {
+      /* FNER has a latency of 10 cycles.  */
+      update_SPR_latency (cpu, FNER_FOR_FR (out_FRk), ps->post_wait);
+      update_SPR_ptime (cpu, FNER_FOR_FR (out_FRk), 10);
+    }
 
   /* The latency of the fdiv unit will be at least the latency of the other
      inputs.  Once initiated, post-processing will take 9 cycles.  */
@@ -1646,6 +1707,8 @@ frvbf_model_fr500_u_float_sqrt (SIM_CPU *cpu, const IDESC *idesc,
   post_wait_for_FR (cpu, out_FRk);
   post_wait_for_FRdouble (cpu, in_FRdoublej);
   post_wait_for_FRdouble (cpu, out_FRdoublek);
+  if (CGEN_ATTR_VALUE(idesc, idesc->attrs, CGEN_INSN_NON_EXCEPTING))
+    post_wait_for_SPR (cpu, FNER_FOR_FR (out_FRk));
   vliw = CPU_VLIW (cpu);
   slot = vliw->next_slot - 1;
   slot = (*vliw->current_vliw)[slot] - UNIT_FM0;
@@ -1656,10 +1719,15 @@ frvbf_model_fr500_u_float_sqrt (SIM_CPU *cpu, const IDESC *idesc,
   /* The latency of FRk will be at least the latency of the other inputs.  */
   update_FR_latency (cpu, out_FRk, ps->post_wait);
   update_FRdouble_latency (cpu, out_FRdoublek, ps->post_wait);
+  if (CGEN_ATTR_VALUE(idesc, idesc->attrs, CGEN_INSN_NON_EXCEPTING))
+    update_SPR_latency (cpu, FNER_FOR_FR (out_FRk), ps->post_wait);
 
   /* Once initiated, post-processing will take 15 cycles.  */
   update_FR_ptime (cpu, out_FRk, 15);
   update_FRdouble_ptime (cpu, out_FRdoublek, 15);
+
+  if (CGEN_ATTR_VALUE(idesc, idesc->attrs, CGEN_INSN_NON_EXCEPTING))
+    update_SPR_ptime (cpu, FNER_FOR_FR (out_FRk), 15);
 
   /* The latency of the sqrt unit will be the latency of the other
      inputs plus 14 cycles.  */
@@ -1844,6 +1912,12 @@ frvbf_model_fr500_u_float_convert (SIM_CPU *cpu, const IDESC *idesc,
   post_wait_for_FR (cpu, out_FRk);
   post_wait_for_FR (cpu, out_FRintk);
   post_wait_for_FRdouble (cpu, out_FRdoublek);
+  if (CGEN_ATTR_VALUE(idesc, idesc->attrs, CGEN_INSN_NON_EXCEPTING))
+    {
+      post_wait_for_SPR (cpu, FNER_FOR_FR (out_FRk));
+      post_wait_for_SPR (cpu, FNER_FOR_FR (out_FRintk));
+      post_wait_for_SPR (cpu, FNER_FOR_FR (out_FRdoublek));
+    }
   restore_float_register_busy (cpu, -1, in_FRj, out_FRk, 1);
   restore_float_register_busy (cpu, -1, in_FRintj, out_FRintk, 1);
   restore_double_register_busy (cpu, -1, in_FRdoublej, out_FRdoublek, 1);
@@ -1853,10 +1927,24 @@ frvbf_model_fr500_u_float_convert (SIM_CPU *cpu, const IDESC *idesc,
   update_FR_latency (cpu, out_FRintk, ps->post_wait);
   update_FRdouble_latency (cpu, out_FRdoublek, ps->post_wait);
 
+  if (CGEN_ATTR_VALUE(idesc, idesc->attrs, CGEN_INSN_NON_EXCEPTING))
+    {
+      update_SPR_latency (cpu, FNER_FOR_FR (out_FRk), ps->post_wait);
+      update_SPR_latency (cpu, FNER_FOR_FR (out_FRintk), ps->post_wait);
+      update_SPR_latency (cpu, FNER_FOR_FR (out_FRdoublek), ps->post_wait);
+    }
+
   /* Once initiated, post-processing will take 3 cycles.  */
   update_FR_ptime (cpu, out_FRk, 3);
   update_FR_ptime (cpu, out_FRintk, 3);
   update_FRdouble_ptime (cpu, out_FRdoublek, 3);
+
+  if (CGEN_ATTR_VALUE(idesc, idesc->attrs, CGEN_INSN_NON_EXCEPTING))
+    {
+      update_SPR_ptime (cpu, FNER_FOR_FR (out_FRk), 3);
+      update_SPR_ptime (cpu, FNER_FOR_FR (out_FRintk), 3);
+      update_SPR_ptime (cpu, FNER_FOR_FR (out_FRdoublek), 3);
+    }
 
   /* Mark this use of the register as a floating point op.  */
   if (out_FRk >= 0)
@@ -2632,7 +2720,7 @@ frvbf_model_fr500_u_media_dual_expand (SIM_CPU *cpu, const IDESC *idesc,
   if (dual_FRk >= 0)
     fr[dual_FRk] += busy_adjustment[2];
 
-  /* The latency of tht output register will be at least the latency of the
+  /* The latency of the output register will be at least the latency of the
      other inputs.  Once initiated, post-processing will take 3 cycles.  */
   update_FR_latency (cpu, out_FRk, ps->post_wait);
   update_FR_ptime (cpu, out_FRk, 3);

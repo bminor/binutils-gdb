@@ -140,7 +140,7 @@ frvbf_h_spr_set_handler (current_cpu, (index), (x));\
   UQI h_iccr[4];
 #define GET_H_ICCR(a1) CPU (h_iccr)[a1]
 #define SET_H_ICCR(a1, x) (CPU (h_iccr)[a1] = (x))
-  /* Integer condition code registers */
+  /* Floating point condition code registers */
   UQI h_fccr[4];
 #define GET_H_FCCR(a1) CPU (h_fccr)[a1]
 #define SET_H_FCCR(a1, x) (CPU (h_fccr)[a1] = (x))
@@ -419,12 +419,6 @@ union sem_fields {
     unsigned char out_GRklo;
   } sfmt_setlo;
   struct { /*  */
-    UINT f_ACCGk;
-    UINT f_FRi;
-    unsigned char in_FRinti;
-    unsigned char out_ACCGk;
-  } sfmt_mwtaccg;
-  struct { /*  */
     UINT f_ACCGi;
     UINT f_FRk;
     unsigned char in_ACCGi;
@@ -484,6 +478,13 @@ union sem_fields {
     unsigned short out_spr;
     unsigned char in_GRj;
   } sfmt_movgs;
+  struct { /*  */
+    UINT f_ACCGk;
+    UINT f_FRi;
+    unsigned char in_ACCGk;
+    unsigned char in_FRinti;
+    unsigned char out_ACCGk;
+  } sfmt_mwtaccg;
   struct { /*  */
     INT f_s6;
     UINT f_ACC40Si;

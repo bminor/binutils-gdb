@@ -5317,35 +5317,6 @@ frvbf_load_quad_FRint (current_cpu, pc, tmp_address, FLD (f_FRk));
 #undef FLD
 }
 
-/* nldqi: nldqi$pack @($GRi,$d12),$GRk */
-
-static SEM_PC
-SEM_FN_NAME (frvbf,nldqi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_stdi.f
-  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  int UNUSED written = 0;
-  IADDR UNUSED pc = abuf->addr;
-  SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
-
-{
-  SI tmp_address;
-{
-  BI tmp_do_op;
-  tmp_do_op = frvbf_check_non_excepting_load (current_cpu, FLD (f_GRi), -1, FLD (f_GRk), FLD (f_d12), 6, 0);
-if (tmp_do_op) {
-{
-  tmp_address = ADDSI (GET_H_GR (FLD (f_GRi)), FLD (f_d12));
-frvbf_load_quad_GR (current_cpu, pc, tmp_address, FLD (f_GRk));
-}
-}
-}
-}
-
-  return vpc;
-#undef FLD
-}
-
 /* nldqfi: nldqfi$pack @($GRi,$d12),$FRintk */
 
 static SEM_PC
@@ -27777,11 +27748,14 @@ SEM_FN_NAME (frvbf,mwtaccg) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
+{
+frv_ref_SI (GET_H_ACCG (FLD (f_ACCGk)));
   {
     USI opval = GET_H_FR_INT (FLD (f_FRi));
     sim_queue_fn_si_write (current_cpu, frvbf_h_accg_set, FLD (f_ACCGk), opval);
     TRACE_RESULT (current_cpu, abuf, "accg", 'x', opval);
   }
+}
 
   return vpc;
 #undef FLD
@@ -28009,7 +27983,6 @@ static const struct sem_fn_desc sem_fns[] = {
   { FRVBF_INSN_NLDDFI, SEM_FN_NAME (frvbf,nlddfi) },
   { FRVBF_INSN_LDQI, SEM_FN_NAME (frvbf,ldqi) },
   { FRVBF_INSN_LDQFI, SEM_FN_NAME (frvbf,ldqfi) },
-  { FRVBF_INSN_NLDQI, SEM_FN_NAME (frvbf,nldqi) },
   { FRVBF_INSN_NLDQFI, SEM_FN_NAME (frvbf,nldqfi) },
   { FRVBF_INSN_STB, SEM_FN_NAME (frvbf,stb) },
   { FRVBF_INSN_STH, SEM_FN_NAME (frvbf,sth) },

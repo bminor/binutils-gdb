@@ -1,3 +1,37 @@
+2003-09-24  Dave Brolley  <brolley@redhat.com>
+
+	* profile.h (update_FR_ptime): New prototype.
+	(update_FRdouble_ptime): Ditto.
+	(update_SPR_ptime): Ditto.
+	(increase_ACC_busy): Ditto.
+	(enforce_full_acc_latency): Ditto.
+	(post_wait_for_SPR): Ditto.
+	* profile.c (update_FR_ptime): Moved here from profile-fr500.c.
+	(update_FRdouble_ptime): Ditto.
+	(update_SPR_ptime): New function.
+	(increase_ACC_busy): Ditto.
+	(enforce_full_acc_latency): Ditto.
+	(vliw_wait_for_fdiv_resource): Correct resource name.
+	(vliw_wait_for_fsqrt_resource): Ditto.
+	(post_wait_for_SPR): New function.
+	* profile-fr500.c (frvbf_model_fr500_u_commit): New function.
+	(frvbf_model_fr500_u_gr2fr): Pass out_FRk as output register to
+	adjust_float_register_busy.
+	(frvbf_model_fr500_u_gr_load): Record latency of SPR registers.
+	(frvbf_model_fr500_u_fr_load): Wait for and record latency of SPR
+	registers.
+	(frvbf_model_fr500_u_float_arith): Ditto.
+	(frvbf_model_fr500_u_float_dual_arith): Ditto.
+	(frvbf_model_fr500_u_float_div): Ditto.
+	(frvbf_model_fr500_u_float_sqrt): Ditto.
+	(frvbf_model_fr500_u_float_convert): Ditto.
+	(update_FR_ptime): Moved to profile.c
+	(update_FRdouble_ptime): Moved to profile.c
+	* profile-fr400.c (update_FR_ptime): Removed. Identical to functions
+	for other machines.
+	(update_FRdouble_ptime): Ditto.
+	* arch.h,cpu.h,sem.c,decode.[ch],model.c,sem.c: Regenerated.
+
 2003-09-12  Dave Brolley  <brolley@redhat.com>
 
 	* registers.c (frv_check_spr_read_access): Check for access to

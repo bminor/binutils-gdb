@@ -621,55 +621,6 @@ frvbf_model_fr400_u_gr2spr (SIM_CPU *cpu, const IDESC *idesc,
 				     in_GRj, out_spr);
 }
 
-/* Top up the post-processing time of the given FR by the given number of
-   cycles.  */
-static void
-update_FR_ptime (SIM_CPU *cpu, INT out_FR, int cycles)
-{
-  if (out_FR >= 0)
-    {
-      FRV_PROFILE_STATE *ps = CPU_PROFILE_STATE (cpu);
-      /* If a load is pending on this register, then add the cycles to
-	 the post processing time for this register. Otherwise apply it
-	 directly to the latency of the register.  */
-      if (! load_pending_for_register (cpu, out_FR, 1, REGTYPE_FR))
-	{
-	  int *fr = ps->fr_latency;
-	  fr[out_FR] += cycles;
-	}
-      else
-	ps->fr_ptime[out_FR] += cycles;
-    }
-}
-
-static void
-update_FRdouble_ptime (SIM_CPU *cpu, INT out_FR, int cycles)
-{
-  if (out_FR >= 0)
-    {
-      FRV_PROFILE_STATE *ps = CPU_PROFILE_STATE (cpu);
-      /* If a load is pending on this register, then add the cycles to
-	 the post processing time for this register. Otherwise apply it
-	 directly to the latency of the register.  */
-      if (! load_pending_for_register (cpu, out_FR, 2, REGTYPE_FR))
-	{
-	  int *fr = ps->fr_latency;
-	  fr[out_FR] += cycles;
-	  if (out_FR < 63)
-	    fr[out_FR + 1] += cycles;
-	}
-      else
-	{
-	  /* On the fr400, loads are available to media insns one cycle early,
-	     so knock one cycle off the post processing time to account for
-	     this.  */
-	  ps->fr_ptime[out_FR] += cycles - 1;
-	  if (out_FR < 63)
-	    ps->fr_ptime[out_FR + 1] += cycles - 1;
-	}
-    }
-}
-
 int
 frvbf_model_fr400_u_media_1 (SIM_CPU *cpu, const IDESC *idesc,
 			     int unit_num, int referenced,

@@ -2627,22 +2627,6 @@ model_frv_ldqfi (SIM_CPU *current_cpu, void *sem_arg)
 }
 
 static int
-model_frv_nldqi (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_stdi.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_frv_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
 model_frv_nldqfi (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.sfmt_stdfi.f
@@ -15913,28 +15897,6 @@ model_fr500_ldqfi (SIM_CPU *current_cpu, void *sem_arg)
 }
 
 static int
-model_fr500_nldqi (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_stdi.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    INT in_GRi = -1;
-    INT in_GRj = -1;
-    INT out_GRk = -1;
-    INT out_GRdoublek = -1;
-    in_GRi = FLD (in_GRi);
-    if (insn_referenced & (1 << 0)) referenced |= 1 << 0;
-    cycles += frvbf_model_fr500_u_gr_load (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, out_GRk, out_GRdoublek);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
 model_fr500_nldqfi (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.sfmt_stdfi.f
@@ -24215,7 +24177,9 @@ model_fr500_commitgr (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_fr500_u_exec (current_cpu, idesc, 0, referenced);
+    INT in_GRk = -1;
+    INT in_FRk = -1;
+    cycles += frvbf_model_fr500_u_commit (current_cpu, idesc, 0, referenced, in_GRk, in_FRk);
   }
   return cycles;
 #undef FLD
@@ -24231,7 +24195,9 @@ model_fr500_commitfr (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_fr500_u_exec (current_cpu, idesc, 0, referenced);
+    INT in_GRk = -1;
+    INT in_FRk = -1;
+    cycles += frvbf_model_fr500_u_commit (current_cpu, idesc, 0, referenced, in_GRk, in_FRk);
   }
   return cycles;
 #undef FLD
@@ -24247,7 +24213,9 @@ model_fr500_commitga (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_fr500_u_exec (current_cpu, idesc, 0, referenced);
+    INT in_GRk = -1;
+    INT in_FRk = -1;
+    cycles += frvbf_model_fr500_u_commit (current_cpu, idesc, 0, referenced, in_GRk, in_FRk);
   }
   return cycles;
 #undef FLD
@@ -24263,7 +24231,9 @@ model_fr500_commitfa (SIM_CPU *current_cpu, void *sem_arg)
   {
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_fr500_u_exec (current_cpu, idesc, 0, referenced);
+    INT in_GRk = -1;
+    INT in_FRk = -1;
+    cycles += frvbf_model_fr500_u_commit (current_cpu, idesc, 0, referenced, in_GRk, in_FRk);
   }
   return cycles;
 #undef FLD
@@ -25316,17 +25286,14 @@ model_fr500_cfdivs (SIM_CPU *current_cpu, void *sem_arg)
     int UNUSED insn_referenced = abuf->written;
     INT in_FRi = -1;
     INT in_FRj = -1;
-    INT in_FRdoublei = -1;
-    INT in_FRdoublej = -1;
     INT out_FRk = -1;
-    INT out_FRdoublek = -1;
     in_FRi = FLD (in_FRi);
     in_FRj = FLD (in_FRj);
     out_FRk = FLD (out_FRk);
     if (insn_referenced & (1 << 1)) referenced |= 1 << 0;
     if (insn_referenced & (1 << 2)) referenced |= 1 << 1;
-    if (insn_referenced & (1 << 4)) referenced |= 1 << 4;
-    cycles += frvbf_model_fr500_u_float_arith (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FRk, out_FRdoublek);
+    if (insn_referenced & (1 << 4)) referenced |= 1 << 2;
+    cycles += frvbf_model_fr500_u_float_div (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, out_FRk);
   }
   return cycles;
 #undef FLD
@@ -25428,17 +25395,14 @@ model_fr500_nfdivs (SIM_CPU *current_cpu, void *sem_arg)
     int UNUSED insn_referenced = abuf->written;
     INT in_FRi = -1;
     INT in_FRj = -1;
-    INT in_FRdoublei = -1;
-    INT in_FRdoublej = -1;
     INT out_FRk = -1;
-    INT out_FRdoublek = -1;
     in_FRi = FLD (in_FRi);
     in_FRj = FLD (in_FRj);
     out_FRk = FLD (out_FRk);
     referenced |= 1 << 0;
     referenced |= 1 << 1;
-    referenced |= 1 << 4;
-    cycles += frvbf_model_fr500_u_float_arith (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, in_FRdoublei, in_FRdoublej, out_FRk, out_FRdoublek);
+    referenced |= 1 << 2;
+    cycles += frvbf_model_fr500_u_float_div (current_cpu, idesc, 0, referenced, in_FRi, in_FRj, out_FRk);
   }
   return cycles;
 #undef FLD
@@ -31857,22 +31821,6 @@ static int
 model_tomcat_ldqfi (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.sfmt_stdfi.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_tomcat_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_tomcat_nldqi (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_stdi.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -44807,22 +44755,6 @@ static int
 model_fr400_ldqfi (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.sfmt_stdfi.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_fr400_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_fr400_nldqi (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_stdi.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -59685,22 +59617,6 @@ model_simple_ldqfi (SIM_CPU *current_cpu, void *sem_arg)
 }
 
 static int
-model_simple_nldqi (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_stdi.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_simple_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
 model_simple_nldqfi (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.sfmt_stdfi.f
@@ -69106,7 +69022,6 @@ static const INSN_TIMING frv_timing[] = {
   { FRVBF_INSN_NLDDFI, model_frv_nlddfi, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_LDQI, model_frv_ldqi, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_LDQFI, model_frv_ldqfi, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_NLDQI, model_frv_nldqi, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_NLDQFI, model_frv_nldqfi, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STB, model_frv_stb, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STH, model_frv_sth, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
@@ -69857,7 +69772,6 @@ static const INSN_TIMING fr500_timing[] = {
   { FRVBF_INSN_NLDDFI, model_fr500_nlddfi, { { (int) UNIT_FR500_U_FR_LOAD, 1, 1 } } },
   { FRVBF_INSN_LDQI, model_fr500_ldqi, { { (int) UNIT_FR500_U_GR_LOAD, 1, 1 } } },
   { FRVBF_INSN_LDQFI, model_fr500_ldqfi, { { (int) UNIT_FR500_U_FR_LOAD, 1, 1 } } },
-  { FRVBF_INSN_NLDQI, model_fr500_nldqi, { { (int) UNIT_FR500_U_GR_LOAD, 1, 1 } } },
   { FRVBF_INSN_NLDQFI, model_fr500_nldqfi, { { (int) UNIT_FR500_U_FR_LOAD, 1, 1 } } },
   { FRVBF_INSN_STB, model_fr500_stb, { { (int) UNIT_FR500_U_GR_STORE, 1, 1 } } },
   { FRVBF_INSN_STH, model_fr500_sth, { { (int) UNIT_FR500_U_GR_STORE, 1, 1 } } },
@@ -70227,10 +70141,10 @@ static const INSN_TIMING fr500_timing[] = {
   { FRVBF_INSN_CLRFR, model_fr500_clrfr, { { (int) UNIT_FR500_U_CLRFR, 1, 1 } } },
   { FRVBF_INSN_CLRGA, model_fr500_clrga, { { (int) UNIT_FR500_U_CLRGR, 1, 1 } } },
   { FRVBF_INSN_CLRFA, model_fr500_clrfa, { { (int) UNIT_FR500_U_CLRFR, 1, 1 } } },
-  { FRVBF_INSN_COMMITGR, model_fr500_commitgr, { { (int) UNIT_FR500_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_COMMITFR, model_fr500_commitfr, { { (int) UNIT_FR500_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_COMMITGA, model_fr500_commitga, { { (int) UNIT_FR500_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_COMMITFA, model_fr500_commitfa, { { (int) UNIT_FR500_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_COMMITGR, model_fr500_commitgr, { { (int) UNIT_FR500_U_COMMIT, 1, 1 } } },
+  { FRVBF_INSN_COMMITFR, model_fr500_commitfr, { { (int) UNIT_FR500_U_COMMIT, 1, 1 } } },
+  { FRVBF_INSN_COMMITGA, model_fr500_commitga, { { (int) UNIT_FR500_U_COMMIT, 1, 1 } } },
+  { FRVBF_INSN_COMMITFA, model_fr500_commitfa, { { (int) UNIT_FR500_U_COMMIT, 1, 1 } } },
   { FRVBF_INSN_FITOS, model_fr500_fitos, { { (int) UNIT_FR500_U_FLOAT_CONVERT, 1, 1 } } },
   { FRVBF_INSN_FSTOI, model_fr500_fstoi, { { (int) UNIT_FR500_U_FLOAT_CONVERT, 1, 1 } } },
   { FRVBF_INSN_FITOD, model_fr500_fitod, { { (int) UNIT_FR500_U_FLOAT_CONVERT, 1, 1 } } },
@@ -70272,11 +70186,11 @@ static const INSN_TIMING fr500_timing[] = {
   { FRVBF_INSN_CFADDS, model_fr500_cfadds, { { (int) UNIT_FR500_U_FLOAT_ARITH, 1, 1 } } },
   { FRVBF_INSN_CFSUBS, model_fr500_cfsubs, { { (int) UNIT_FR500_U_FLOAT_ARITH, 1, 1 } } },
   { FRVBF_INSN_CFMULS, model_fr500_cfmuls, { { (int) UNIT_FR500_U_FLOAT_ARITH, 1, 1 } } },
-  { FRVBF_INSN_CFDIVS, model_fr500_cfdivs, { { (int) UNIT_FR500_U_FLOAT_ARITH, 1, 1 } } },
+  { FRVBF_INSN_CFDIVS, model_fr500_cfdivs, { { (int) UNIT_FR500_U_FLOAT_DIV, 1, 1 } } },
   { FRVBF_INSN_NFADDS, model_fr500_nfadds, { { (int) UNIT_FR500_U_FLOAT_ARITH, 1, 1 } } },
   { FRVBF_INSN_NFSUBS, model_fr500_nfsubs, { { (int) UNIT_FR500_U_FLOAT_ARITH, 1, 1 } } },
   { FRVBF_INSN_NFMULS, model_fr500_nfmuls, { { (int) UNIT_FR500_U_FLOAT_ARITH, 1, 1 } } },
-  { FRVBF_INSN_NFDIVS, model_fr500_nfdivs, { { (int) UNIT_FR500_U_FLOAT_ARITH, 1, 1 } } },
+  { FRVBF_INSN_NFDIVS, model_fr500_nfdivs, { { (int) UNIT_FR500_U_FLOAT_DIV, 1, 1 } } },
   { FRVBF_INSN_FCMPS, model_fr500_fcmps, { { (int) UNIT_FR500_U_FLOAT_COMPARE, 1, 1 } } },
   { FRVBF_INSN_FCMPD, model_fr500_fcmpd, { { (int) UNIT_FR500_U_FLOAT_COMPARE, 1, 1 } } },
   { FRVBF_INSN_CFCMPS, model_fr500_cfcmps, { { (int) UNIT_FR500_U_FLOAT_COMPARE, 1, 1 } } },
@@ -70608,7 +70522,6 @@ static const INSN_TIMING tomcat_timing[] = {
   { FRVBF_INSN_NLDDFI, model_tomcat_nlddfi, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_LDQI, model_tomcat_ldqi, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_LDQFI, model_tomcat_ldqfi, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_NLDQI, model_tomcat_nldqi, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_NLDQFI, model_tomcat_nldqfi, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STB, model_tomcat_stb, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STH, model_tomcat_sth, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
@@ -71359,7 +71272,6 @@ static const INSN_TIMING fr400_timing[] = {
   { FRVBF_INSN_NLDDFI, model_fr400_nlddfi, { { (int) UNIT_FR400_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_LDQI, model_fr400_ldqi, { { (int) UNIT_FR400_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_LDQFI, model_fr400_ldqfi, { { (int) UNIT_FR400_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_NLDQI, model_fr400_nldqi, { { (int) UNIT_FR400_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_NLDQFI, model_fr400_nldqfi, { { (int) UNIT_FR400_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STB, model_fr400_stb, { { (int) UNIT_FR400_U_GR_STORE, 1, 1 } } },
   { FRVBF_INSN_STH, model_fr400_sth, { { (int) UNIT_FR400_U_GR_STORE, 1, 1 } } },
@@ -72110,7 +72022,6 @@ static const INSN_TIMING simple_timing[] = {
   { FRVBF_INSN_NLDDFI, model_simple_nlddfi, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_LDQI, model_simple_ldqi, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_LDQFI, model_simple_ldqfi, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_NLDQI, model_simple_nldqi, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_NLDQFI, model_simple_nldqfi, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STB, model_simple_stb, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STH, model_simple_sth, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
