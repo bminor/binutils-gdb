@@ -50,10 +50,11 @@ static const template i386_optab[] = {
 #define bw_Suf (No_lSuf|No_sSuf)
 #define bl_Suf (No_wSuf|No_sSuf)
 #define wl_Suf (No_bSuf|No_sSuf)
+#define sl_Suf (No_bSuf|No_wSuf)
 #define bwl_Suf No_sSuf
 #define FP (NoSuf|IgnoreDataSize)
 #define l_FP (l_Suf|IgnoreDataSize)
-#define sl_FP (No_bSuf|No_wSuf|IgnoreDataSize)
+#define sl_FP (sl_Suf|IgnoreDataSize)
 #if UNIXWARE_COMPAT
 #define FloatDR FloatD
 #else
@@ -62,7 +63,7 @@ static const template i386_optab[] = {
 
 /* move instructions */
 #define MOV_AX_DISP32 0xa0
-{ "mov",   2,	0xa0, X, bwl_Suf|D|W,			{ Disp32, Acc, 0 } },
+{ "mov",   2,	0xa0, X, bwl_Suf|D|W,			{ Disp16|Disp32, Acc, 0 } },
 { "mov",   2,	0x88, X, bwl_Suf|D|W|Modrm,		{ Reg, Reg|AnyMem, 0 } },
 { "mov",   2,	0xb0, X, bwl_Suf|W|ShortForm,		{ Imm, Reg, 0 } },
 { "mov",   2,	0xc6, X, bwl_Suf|W|Modrm,		{ Imm, Reg|AnyMem, 0 } },
@@ -219,8 +220,8 @@ static const template i386_optab[] = {
 /* conversion insns */
 /* conversion:	intel naming */
 {"cbw",	   0,	0x98, X, NoSuf|Data16,		{ 0, 0, 0} },
-{"cwd",	   0,	0x99, X, NoSuf|Data16,		{ 0, 0, 0} },
 {"cwde",   0,	0x98, X, NoSuf|Data32,		{ 0, 0, 0} },
+{"cwd",	   0,	0x99, X, NoSuf|Data16,		{ 0, 0, 0} },
 {"cdq",	   0,	0x99, X, NoSuf|Data32,		{ 0, 0, 0} },
 /*  att naming */
 {"cbtw",   0,	0x98, X, NoSuf|Data16,		{ 0, 0, 0} },
@@ -296,31 +297,23 @@ static const template i386_optab[] = {
 {"sar",	   1,	0xd0, 7, bwl_Suf|W|Modrm,	{ Reg|AnyMem, 0, 0} },
 
 /* control transfer instructions */
-{"call",   1,	0xe8, X, NoSuf|JumpDword,	{ Disp32, 0, 0} },
-{"call",   1,	0xff, 2, NoSuf|Modrm|Data32,	{ WordReg|WordMem|JumpAbsolute, 0, 0} },
-{"callw",  1,	0xff, 2, NoSuf|Modrm|Data16,	{ WordReg|WordMem|JumpAbsolute, 0, 0} },
-{"lcall",  2,	0x9a, X, NoSuf|JumpInterSegment, { Imm16, Imm32, 0} },
-{"lcall",  1,	0xff, 3, NoSuf|Modrm|Data32,	{ WordMem, 0, 0} },
-{"lcallw", 1,	0xff, 3, NoSuf|Modrm|Data16,	{ WordMem, 0, 0} },
+{"call",   1,	0xe8, X, wl_Suf|JumpDword,	{ Disp16|Disp32, 0, 0} },
+{"call",   1,	0xff, 2, wl_Suf|Modrm,		{ WordReg|WordMem|JumpAbsolute, 0, 0} },
+{"lcall",  2,	0x9a, X, wl_Suf|JumpInterSegment, { Imm16, Imm16|Imm32, 0} },
+{"lcall",  1,	0xff, 3, wl_Suf|Modrm,		{ WordMem, 0, 0} },
 
 #define JUMP_PC_RELATIVE 0xeb
 {"jmp",	   1,	0xeb, X, NoSuf|Jump,		{ Disp, 0, 0} },
 {"jmp",	   1,	0xff, 4, wl_Suf|Modrm,		{ WordReg|WordMem|JumpAbsolute, 0, 0} },
-{"ljmp",   2,	0xea, X, NoSuf|JumpInterSegment, { Imm16, Imm32, 0} },
+{"ljmp",   2,	0xea, X, wl_Suf|JumpInterSegment, { Imm16, Imm16|Imm32, 0} },
 {"ljmp",   1,	0xff, 5, wl_Suf|Modrm,		{ WordMem, 0, 0} },
 
-{"ret",	   0,	0xc3, X, l_Suf|Data32,		{ 0, 0, 0} },
-{"ret",	   1,	0xc2, X, l_Suf|Data32,		{ Imm16, 0, 0} },
-{"retw",   0,	0xc3, X, NoSuf|Data16,		{ 0, 0, 0} },
-{"retw",   1,	0xc2, X, NoSuf|Data16,		{ Imm16, 0, 0} },
-{"lret",   0,	0xcb, X, l_Suf|Data32,		{ 0, 0, 0} },
-{"lret",   1,	0xca, X, l_Suf|Data32,		{ Imm16, 0, 0} },
-{"lretw",  0,	0xcb, X, NoSuf|Data16,		{ 0, 0, 0} },
-{"lretw",  1,	0xca, X, NoSuf|Data16,		{ Imm16, 0, 0} },
-{"enter",  2,	0xc8, X, l_Suf|Data32,		{ Imm16, Imm8, 0} },
-{"leave",  0,	0xc9, X, l_Suf|Data32,		{ 0, 0, 0} },
-{"enterw", 2,	0xc8, X, NoSuf|Data16,		{ Imm16, Imm8, 0} },
-{"leavew", 0,	0xc9, X, NoSuf|Data16,		{ 0, 0, 0} },
+{"ret",	   0,	0xc3, X, wl_Suf,		{ 0, 0, 0} },
+{"ret",	   1,	0xc2, X, wl_Suf,		{ Imm16, 0, 0} },
+{"lret",   0,	0xcb, X, wl_Suf,		{ 0, 0, 0} },
+{"lret",   1,	0xca, X, wl_Suf,		{ Imm16, 0, 0} },
+{"enter",  2,	0xc8, X, wl_Suf,		{ Imm16, Imm8, 0} },
+{"leave",  0,	0xc9, X, wl_Suf,		{ 0, 0, 0} },
 
 /* conditional jumps */
 {"jo",	   1,	0x70, X, NoSuf|Jump,		{ Disp, 0, 0} },
@@ -454,15 +447,13 @@ static const template i386_optab[] = {
 {"int",	   1,	0xcd, X, NoSuf,			{ Imm8, 0, 0} },
 {"int3",   0,	0xcc, X, NoSuf,			{ 0, 0, 0} },
 {"into",   0,	0xce, X, NoSuf,			{ 0, 0, 0} },
-{"iret",   0,	0xcf, X, l_Suf|Data32,		{ 0, 0, 0} },
-{"iretw",  0,	0xcf, X, NoSuf|Data16,		{ 0, 0, 0} },
+{"iret",   0,	0xcf, X, wl_Suf,		{ 0, 0, 0} },
 /* i386sl, i486sl, later 486, and Pentium */
 {"rsm",	   0, 0x0faa, X, NoSuf,			{ 0, 0, 0} },
 
 {"bound",  2,	0x62, X, wl_Suf|Modrm,		{ WordReg, WordMem, 0} },
 
 {"hlt",	   0,	0xf4, X, NoSuf,			{ 0, 0, 0} },
-{"wait",   0,	0x9b, X, NoSuf,			{ 0, 0, 0} },
 /* nop is actually 'xchgl %eax, %eax' */
 {"nop",	   0,	0x90, X, NoSuf,			{ 0, 0, 0} },
 
@@ -694,17 +685,14 @@ static const template i386_optab[] = {
 {"fstsw",  0, 0xdfe0, X, FP|FWait,		{ 0, 0, 0} },
 {"fnclex", 0, 0xdbe2, X, FP,			{ 0, 0, 0} },
 {"fclex",  0, 0xdbe2, X, FP|FWait,		{ 0, 0, 0} },
-{"fnstenv",1,	0xd9, 6, NoSuf|Modrm|Data32,	{ LLongMem, 0, 0} },
-{"fstenv", 1,	0xd9, 6, NoSuf|FWait|Modrm|Data32, { LLongMem, 0, 0} },
-{"fldenv", 1,	0xd9, 4, NoSuf|Modrm|Data32,	{ LLongMem, 0, 0} },
-{"fnsave", 1,	0xdd, 6, NoSuf|Modrm,		{ LLongMem, 0, 0} },
-{"fsave",  1,	0xdd, 6, NoSuf|FWait|Modrm,	{ LLongMem, 0, 0} },
-{"frstor", 1,	0xdd, 4, NoSuf|Modrm,		{ LLongMem, 0, 0} },
 /* Short forms of fldenv, fstenv use data size prefix.
-   FIXME: Are these the right names?  */
-{"fnstenvs",1,	0xd9, 6, NoSuf|Modrm|Data16,	{ LLongMem, 0, 0} },
-{"fstenvs", 1,	0xd9, 6, NoSuf|FWait|Modrm|Data16, { LLongMem, 0, 0} },
-{"fldenvs", 1,	0xd9, 4, NoSuf|Modrm|Data16,	{ LLongMem, 0, 0} },
+   FIXME: Are these the right suffixes?  */
+{"fnstenv",1,	0xd9, 6, sl_Suf|Modrm,		{ LLongMem, 0, 0} },
+{"fstenv", 1,	0xd9, 6, sl_Suf|FWait|Modrm,	{ LLongMem, 0, 0} },
+{"fldenv", 1,	0xd9, 4, sl_Suf|Modrm,		{ LLongMem, 0, 0} },
+{"fnsave", 1,	0xdd, 6, sl_Suf|Modrm,		{ LLongMem, 0, 0} },
+{"fsave",  1,	0xdd, 6, sl_Suf|FWait|Modrm,	{ LLongMem, 0, 0} },
+{"frstor", 1,	0xdd, 4, sl_Suf|Modrm,		{ LLongMem, 0, 0} },
 
 {"ffree",  1, 0xddc0, X, FP|ShortForm,		{ FloatReg, 0, 0} },
 /* P6:free st(i), pop st */
@@ -715,24 +703,39 @@ static const template i386_optab[] = {
 
 /*
   opcode prefixes; we allow them as seperate insns too
-  (see prefix table below)
 */
-{"aword",  0,	0x67, X, NoSuf,			{ 0, 0, 0} },
-{"addr16", 0,	0x67, X, NoSuf,			{ 0, 0, 0} },
-{"word",   0,	0x66, X, NoSuf,			{ 0, 0, 0} },
-{"data16", 0,	0x66, X, NoSuf,			{ 0, 0, 0} },
-{"lock",   0,	0xf0, X, NoSuf,			{ 0, 0, 0} },
-{"cs",	   0,	0x2e, X, NoSuf,			{ 0, 0, 0} },
-{"ds",	   0,	0x3e, X, NoSuf,			{ 0, 0, 0} },
-{"es",	   0,	0x26, X, NoSuf,			{ 0, 0, 0} },
-{"fs",	   0,	0x64, X, NoSuf,			{ 0, 0, 0} },
-{"gs",	   0,	0x65, X, NoSuf,			{ 0, 0, 0} },
-{"ss",	   0,	0x36, X, NoSuf,			{ 0, 0, 0} },
-{"rep",	   0,	0xf3, X, NoSuf,			{ 0, 0, 0} },
-{"repe",   0,	0xf3, X, NoSuf,			{ 0, 0, 0} },
-{"repz",   0,	0xf3, X, NoSuf,			{ 0, 0, 0} },
-{"repne",  0,	0xf2, X, NoSuf,			{ 0, 0, 0} },
-{"repnz",  0,	0xf2, X, NoSuf,			{ 0, 0, 0} },
+#define ADDR_PREFIX_OPCODE 0x67
+{"addr16", 0,	0x67, X, NoSuf|IsPrefix,	{ 0, 0, 0} },
+{"addr32", 0,	0x67, X, NoSuf|IsPrefix,	{ 0, 0, 0} },
+{"aword",  0,	0x67, X, NoSuf|IsPrefix,	{ 0, 0, 0} },
+{"adword", 0,	0x67, X, NoSuf|IsPrefix,	{ 0, 0, 0} },
+#define DATA_PREFIX_OPCODE 0x66
+{"data16", 0,	0x66, X, NoSuf|IsPrefix,	{ 0, 0, 0} },
+{"data32", 0,	0x66, X, NoSuf|IsPrefix,	{ 0, 0, 0} },
+{"word",   0,	0x66, X, NoSuf|IsPrefix,	{ 0, 0, 0} },
+{"dword",  0,	0x66, X, NoSuf|IsPrefix,	{ 0, 0, 0} },
+#define LOCK_PREFIX_OPCODE 0xf0
+{"lock",   0,	0xf0, X, NoSuf|IsPrefix,	{ 0, 0, 0} },
+{"wait",   0,   0x9b, X, NoSuf|IsPrefix,	{ 0, 0, 0} },
+#define CS_PREFIX_OPCODE 0x2e
+{"cs",	   0,	0x2e, X, NoSuf|IsPrefix,	{ 0, 0, 0} },
+#define DS_PREFIX_OPCODE 0x3e
+{"ds",	   0,	0x3e, X, NoSuf|IsPrefix,	{ 0, 0, 0} },
+#define ES_PREFIX_OPCODE 0x26
+{"es",	   0,	0x26, X, NoSuf|IsPrefix,	{ 0, 0, 0} },
+#define FS_PREFIX_OPCODE 0x64
+{"fs",	   0,	0x64, X, NoSuf|IsPrefix,	{ 0, 0, 0} },
+#define GS_PREFIX_OPCODE 0x65
+{"gs",	   0,	0x65, X, NoSuf|IsPrefix,	{ 0, 0, 0} },
+#define SS_PREFIX_OPCODE 0x36
+{"ss",	   0,	0x36, X, NoSuf|IsPrefix,	{ 0, 0, 0} },
+#define REPNE_PREFIX_OPCODE 0xf2
+#define REPE_PREFIX_OPCODE  0xf3
+{"rep",	   0,	0xf3, X, NoSuf|IsPrefix,	{ 0, 0, 0} },
+{"repe",   0,	0xf3, X, NoSuf|IsPrefix,	{ 0, 0, 0} },
+{"repz",   0,	0xf3, X, NoSuf|IsPrefix,	{ 0, 0, 0} },
+{"repne",  0,	0xf2, X, NoSuf|IsPrefix,	{ 0, 0, 0} },
+{"repnz",  0,	0xf2, X, NoSuf|IsPrefix,	{ 0, 0, 0} },
 
 /* 486 extensions */
 
@@ -848,7 +851,7 @@ static const template i386_optab[] = {
 {"punpckldq",2, 0x0f62, X, NoSuf|Modrm,		{ RegMMX|LongMem, RegMMX, 0 } },
 {"pxor",     2, 0x0fef, X, NoSuf|Modrm,		{ RegMMX|LongMem, RegMMX, 0 } },
 
-{"", 0, 0, 0, 0, { 0, 0, 0} }	/* sentinel */
+{NULL, 0, 0, 0, 0, { 0, 0, 0} }	/* sentinel */
 };
 #undef X
 #undef ReverseModrm
@@ -859,13 +862,14 @@ static const template i386_optab[] = {
 #undef bw_Suf
 #undef bl_Suf
 #undef wl_Suf
+#undef sl_Suf
 #undef bwl_Suf
 #undef FP
 #undef l_FP
 #undef sl_FP
 
-static const template *const i386_optab_end
-  = i386_optab + sizeof (i386_optab)/sizeof(i386_optab[0]);
+#define MAX_OPCODE_SIZE 16	/* for parsing opcodes from input */
+
 
 /* 386 register table */
 
@@ -883,11 +887,11 @@ static const reg_entry i386_regtab[] = {
   {"ax", Reg16|Acc, 0},
   {"cx", Reg16, 1},
   {"dx", Reg16|InOutPortReg, 2},
-  {"bx", Reg16, 3},
+  {"bx", Reg16|BaseIndex, 3},
   {"sp", Reg16, 4},
-  {"bp", Reg16, 5},
-  {"si", Reg16, 6},
-  {"di", Reg16, 7},
+  {"bp", Reg16|BaseIndex, 5},
+  {"si", Reg16|BaseIndex, 6},
+  {"di", Reg16|BaseIndex, 7},
   /* 32 bit regs */
   {"eax", Reg32|BaseIndex|Acc, 0},
   {"ecx", Reg32|BaseIndex, 1},
@@ -950,9 +954,6 @@ static const reg_entry i386_regtab[] = {
 
 #define MAX_REG_NAME_SIZE 8	/* for parsing register names from input */
 
-static const reg_entry *const i386_regtab_end
-  = i386_regtab + sizeof(i386_regtab)/sizeof(i386_regtab[0]);
-
 /* segment stuff */
 static const seg_entry cs = { "cs", 0x2e };
 static const seg_entry ds = { "ds", 0x3e };
@@ -960,39 +961,5 @@ static const seg_entry ss = { "ss", 0x36 };
 static const seg_entry es = { "es", 0x26 };
 static const seg_entry fs = { "fs", 0x64 };
 static const seg_entry gs = { "gs", 0x65 };
-
-static const prefix_entry i386_prefixtab[] = {
-#define ADDR_PREFIX_OPCODE 0x67
-  { "addr16", 0x67 },		/* address size prefix ==> 16bit addressing
-				   useful when loop isns should use %cx.  */
-#define DATA_PREFIX_OPCODE 0x66
-  { "data16", 0x66 },		/* operand size prefix */
-#define LOCK_PREFIX_OPCODE 0xf0
-  { "lock", 0xf0 },		/* bus lock prefix */
-  { "wait", FWAIT_OPCODE },	/* wait for coprocessor, not really a prefix */
-#define CS_PREFIX_OPCODE 0x2e
-  { "cs", 0x2e },		/* segment overrides ... */
-#define DS_PREFIX_OPCODE 0x3e
-  { "ds", 0x3e },
-#define ES_PREFIX_OPCODE 0x26
-  { "es", 0x26 },
-#define FS_PREFIX_OPCODE 0x64
-  { "fs", 0x64 },
-#define GS_PREFIX_OPCODE 0x65
-  { "gs", 0x65 },
-#define SS_PREFIX_OPCODE 0x36
-  { "ss", 0x36 },
-/* REPE & REPNE used to detect rep/repne with a non-string instruction */
-#define REPNE 0xf2
-#define REPE  0xf3
-  { "rep", 0xf3 },		/* repeat string instructions */
-  { "repe", 0xf3 },
-  { "repz", 0xf3 },
-  { "repne", 0xf2 },
-  { "repnz", 0xf2 }
-};
-
-static const prefix_entry *const i386_prefixtab_end
-  = i386_prefixtab + sizeof(i386_prefixtab)/sizeof(i386_prefixtab[0]);
 
 /* end of i386-opcode.h */

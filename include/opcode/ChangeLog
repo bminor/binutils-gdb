@@ -1,3 +1,23 @@
+Mon Jun  8 12:15:52 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* i386.h (REPNE): Rename to REPNE_PREFIX_OPCODE.
+	(REPE): Rename to REPE_PREFIX_OPCODE.
+	(i386_regtab_end): Remove.
+	(i386_prefixtab, i386_prefixtab_end): Remove.
+	(i386_optab): Use NULL as sentinel rather than "" to suit rewrite
+	of md_begin.
+	(MAX_OPCODE_SIZE): Define.
+	(i386_optab_end): Remove.
+	(sl_Suf): Define.
+	(sl_FP): Use sl_Suf.
+
+	* i386.h (i386_optab): Allow 16 bit displacement for `mov
+	mem,acc'.  Combine 16 and 32 bit forms of various insns.  Allow 16
+	bit form of ljmp.  Add IsPrefix modifier to prefixes.  Add addr32,
+	data32, dword, and adword prefixes.
+	(i386_regtab): Add BaseIndex modifier to valid 16 bit base/index
+	regs.
+
 Fri Jun  5 23:42:43 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* i386.h (i386_regtab): Remove BaseIndex modifier from esp.
