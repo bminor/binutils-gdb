@@ -1,3 +1,7 @@
+2004-03-01  Richard Sandiford  <rsandifo@redhat.com>
+
+	* decode.c, decode.h, model.c, sem.c: Regenerate.
+
 2003-11-24  Kevin Buettner  <kevinb@redhat.com>
 
 	* frv-sim.h (GR_REGNUM_MAX, FR_REGNUM_MAX, PC_REGNUM, SPR_REGNUM_MIN)

@@ -4469,36 +4469,6 @@
 
 (store-r-r stc   SI OP_03 OPE1_25 CPR (MACH frv) () "Store coprocessor word")
 
-(define-pmacro (r-store name mode op ope reg size is_float profile comment)
-  (dni name
-       (comment)
-       ((UNIT STORE) (FR500-MAJOR I-3) (MACH frv))
-       (.str name "$pack $" reg "k,@($GRi,$GRj)")
-       (+ pack (.sym reg k) op GRi ope GRj)
-       (sequence ((WI address))
-		 (set address (add GRi GRj))
-		 (c-call VOID (.str "@cpu@_write_mem_" mode)
-			 pc address (.sym reg k))
-		 (c-call VOID "@cpu@_check_recovering_store"
-			 address (index-of (.sym reg k)) size is_float))
-       profile
-  )
-)
-
-(r-store rstb  QI OP_03 OPE1_20 GR 1 0
-	 ((fr500 (unit u-gr-r-store))) "Store unsigned byte")
-(r-store rsth  HI OP_03 OPE1_21 GR 2 0
-	 ((fr500 (unit u-gr-r-store))) "Store unsigned half")
-(r-store rst   SI OP_03 OPE1_22 GR 4 0
-	 ((fr500 (unit u-gr-r-store))) "Store          word")
-
-(r-store rstbf QI OP_03 OPE1_28 FRint 1 1
-	 ((fr500 (unit u-fr-r-store))) "Store byte float")
-(r-store rsthf HI OP_03 OPE1_29 FRint 2 1
-	 ((fr500 (unit u-fr-r-store))) "Store half float")
-(r-store rstf  SI OP_03 OPE1_2A FRint 4 1
-	 ((fr500 (unit u-fr-r-store))) "Store word float")
-
 ; Semantics for a store-double insn
 ;
 (define-pmacro (store-double-semantics mode regtype address arg)
@@ -4530,26 +4500,6 @@
 (store-double-r-r stdc DI OP_03 OPE1_26 CPR (MACH frv)
 		  () "Store coprocessor double word")
 
-(define-pmacro (r-store-double
-		name mode op ope regtype is_float attr profile comment)
-  (dni name
-       (comment)
-       ((UNIT STORE) (FR500-MAJOR I-3) (MACH frv) attr)
-       (.str name "$pack $" regtype "doublek,@($GRi,$GRj)")
-       (+ pack (.sym regtype doublek) op GRi ope GRj)
-       (sequence ((WI address))
-		 (store-double-semantics mode regtype address GRj)
-		 (c-call VOID "@cpu@_check_recovering_store"
-			 address (index-of (.sym regtype doublek)) 8 is_float))
-       profile
-  )
-)
-
-(r-store-double rstd  DI OP_03 OPE1_23 GR 0 NA
-		((fr500 (unit u-gr-r-store))) "Store double word")
-(r-store-double rstdf DF OP_03 OPE1_2B FR 1 FR-ACCESS
-		((fr500 (unit u-fr-r-store))) "Store double float")
-
 ; Semantics for a store-quad insn
 ;
 (define-pmacro (store-quad-semantics regtype address arg)
@@ -4578,25 +4528,6 @@
 		"Store quad float")
 (store-quad-r-r stqc  OP_03 OPE1_27 CPR   NA
 		() "Store coprocessor quad word")
-
-(define-pmacro (r-store-quad name op ope regtype is_float attr profile comment)
-  (dni name
-       (comment)
-       ((UNIT STORE) (FR500-MAJOR I-3) (MACH frv) attr)
-       (.str name "$pack $" regtype "k,@($GRi,$GRj)")
-       (+ pack (.sym regtype k) op GRi ope GRj)
-       (sequence ((WI address))
-		 (store-quad-semantics regtype address GRj)
-		 (c-call VOID "@cpu@_check_recovering_store"
-			 address (index-of (.sym regtype k)) 16 is_float))
-       profile
-  )
-)
-
-(r-store-quad rstq  OP_03 OPE1_24 GR    0 NA
-	      ((fr500 (unit u-gr-r-store))) "Store quad word")
-(r-store-quad rstqf OP_03 OPE1_2C FRint 1 FR-ACCESS
-	      ((fr500 (unit u-fr-r-store))) "Store quad float")
 
 (define-pmacro (store-r-r-u name mode op ope regtype attr profile comment)
   (dni name

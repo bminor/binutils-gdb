@@ -1,3 +1,7 @@
+2004-03-01  Richard Sandiford  <rsandifo@redhat.com>
+
+	* frv-desc.c, frv-opc.c, frv-opc.h: Regenerate.
+
 2004-02-26  Andrew Stubbs  <andrew.stubbs@superh.com>
 
 	* sh-opc.h: Move fsca and fsrra instructions from sh4a to sh4.

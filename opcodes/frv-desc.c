@@ -3220,36 +3220,6 @@ static const CGEN_IBASE frv_cgen_insn_table[MAX_INSNS] =
     FRV_INSN_STC, "stc", "stc", 32,
     { 0, { (1<<MACH_FRV), UNIT_STORE, FR400_MAJOR_I_3, FR500_MAJOR_I_3, FR550_MAJOR_I_4 } }
   },
-/* rstb$pack $GRk,@($GRi,$GRj) */
-  {
-    FRV_INSN_RSTB, "rstb", "rstb", 32,
-    { 0, { (1<<MACH_FRV), UNIT_STORE, FR400_MAJOR_NONE, FR500_MAJOR_I_3, FR550_MAJOR_NONE } }
-  },
-/* rsth$pack $GRk,@($GRi,$GRj) */
-  {
-    FRV_INSN_RSTH, "rsth", "rsth", 32,
-    { 0, { (1<<MACH_FRV), UNIT_STORE, FR400_MAJOR_NONE, FR500_MAJOR_I_3, FR550_MAJOR_NONE } }
-  },
-/* rst$pack $GRk,@($GRi,$GRj) */
-  {
-    FRV_INSN_RST, "rst", "rst", 32,
-    { 0, { (1<<MACH_FRV), UNIT_STORE, FR400_MAJOR_NONE, FR500_MAJOR_I_3, FR550_MAJOR_NONE } }
-  },
-/* rstbf$pack $FRintk,@($GRi,$GRj) */
-  {
-    FRV_INSN_RSTBF, "rstbf", "rstbf", 32,
-    { 0, { (1<<MACH_FRV), UNIT_STORE, FR400_MAJOR_NONE, FR500_MAJOR_I_3, FR550_MAJOR_NONE } }
-  },
-/* rsthf$pack $FRintk,@($GRi,$GRj) */
-  {
-    FRV_INSN_RSTHF, "rsthf", "rsthf", 32,
-    { 0, { (1<<MACH_FRV), UNIT_STORE, FR400_MAJOR_NONE, FR500_MAJOR_I_3, FR550_MAJOR_NONE } }
-  },
-/* rstf$pack $FRintk,@($GRi,$GRj) */
-  {
-    FRV_INSN_RSTF, "rstf", "rstf", 32,
-    { 0, { (1<<MACH_FRV), UNIT_STORE, FR400_MAJOR_NONE, FR500_MAJOR_I_3, FR550_MAJOR_NONE } }
-  },
 /* std$pack $GRdoublek,@($GRi,$GRj) */
   {
     FRV_INSN_STD, "std", "std", 32,
@@ -3265,16 +3235,6 @@ static const CGEN_IBASE frv_cgen_insn_table[MAX_INSNS] =
     FRV_INSN_STDC, "stdc", "stdc", 32,
     { 0, { (1<<MACH_FRV), UNIT_STORE, FR400_MAJOR_I_3, FR500_MAJOR_I_3, FR550_MAJOR_I_4 } }
   },
-/* rstd$pack $GRdoublek,@($GRi,$GRj) */
-  {
-    FRV_INSN_RSTD, "rstd", "rstd", 32,
-    { 0, { (1<<MACH_FRV), UNIT_STORE, FR400_MAJOR_NONE, FR500_MAJOR_I_3, FR550_MAJOR_NONE } }
-  },
-/* rstdf$pack $FRdoublek,@($GRi,$GRj) */
-  {
-    FRV_INSN_RSTDF, "rstdf", "rstdf", 32,
-    { 0|A(FR_ACCESS), { (1<<MACH_FRV), UNIT_STORE, FR400_MAJOR_NONE, FR500_MAJOR_I_3, FR550_MAJOR_NONE } }
-  },
 /* stq$pack $GRk,@($GRi,$GRj) */
   {
     FRV_INSN_STQ, "stq", "stq", 32,
@@ -3289,16 +3249,6 @@ static const CGEN_IBASE frv_cgen_insn_table[MAX_INSNS] =
   {
     FRV_INSN_STQC, "stqc", "stqc", 32,
     { 0, { (1<<MACH_FRV), UNIT_STORE, FR400_MAJOR_NONE, FR500_MAJOR_I_3, FR550_MAJOR_NONE } }
-  },
-/* rstq$pack $GRk,@($GRi,$GRj) */
-  {
-    FRV_INSN_RSTQ, "rstq", "rstq", 32,
-    { 0, { (1<<MACH_FRV), UNIT_STORE, FR400_MAJOR_NONE, FR500_MAJOR_I_3, FR550_MAJOR_NONE } }
-  },
-/* rstqf$pack $FRintk,@($GRi,$GRj) */
-  {
-    FRV_INSN_RSTQF, "rstqf", "rstqf", 32,
-    { 0|A(FR_ACCESS), { (1<<MACH_FRV), UNIT_STORE, FR400_MAJOR_NONE, FR500_MAJOR_I_3, FR550_MAJOR_NONE } }
   },
 /* stbu$pack $GRk,@($GRi,$GRj) */
   {

@@ -5630,138 +5630,6 @@ frvbf_write_mem_SI (current_cpu, pc, ADDSI (GET_H_GR (FLD (f_GRi)), GET_H_GR (FL
 #undef FLD
 }
 
-/* rstb: rstb$pack $GRk,@($GRi,$GRj) */
-
-static SEM_PC
-SEM_FN_NAME (frvbf,rstb) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cswap.f
-  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  int UNUSED written = 0;
-  IADDR UNUSED pc = abuf->addr;
-  SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
-
-{
-  SI tmp_address;
-  tmp_address = ADDSI (GET_H_GR (FLD (f_GRi)), GET_H_GR (FLD (f_GRj)));
-frvbf_write_mem_QI (current_cpu, pc, tmp_address, GET_H_GR (FLD (f_GRk)));
-frvbf_check_recovering_store (current_cpu, tmp_address, FLD (f_GRk), 1, 0);
-}
-
-  return vpc;
-#undef FLD
-}
-
-/* rsth: rsth$pack $GRk,@($GRi,$GRj) */
-
-static SEM_PC
-SEM_FN_NAME (frvbf,rsth) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cswap.f
-  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  int UNUSED written = 0;
-  IADDR UNUSED pc = abuf->addr;
-  SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
-
-{
-  SI tmp_address;
-  tmp_address = ADDSI (GET_H_GR (FLD (f_GRi)), GET_H_GR (FLD (f_GRj)));
-frvbf_write_mem_HI (current_cpu, pc, tmp_address, GET_H_GR (FLD (f_GRk)));
-frvbf_check_recovering_store (current_cpu, tmp_address, FLD (f_GRk), 2, 0);
-}
-
-  return vpc;
-#undef FLD
-}
-
-/* rst: rst$pack $GRk,@($GRi,$GRj) */
-
-static SEM_PC
-SEM_FN_NAME (frvbf,rst) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cswap.f
-  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  int UNUSED written = 0;
-  IADDR UNUSED pc = abuf->addr;
-  SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
-
-{
-  SI tmp_address;
-  tmp_address = ADDSI (GET_H_GR (FLD (f_GRi)), GET_H_GR (FLD (f_GRj)));
-frvbf_write_mem_SI (current_cpu, pc, tmp_address, GET_H_GR (FLD (f_GRk)));
-frvbf_check_recovering_store (current_cpu, tmp_address, FLD (f_GRk), 4, 0);
-}
-
-  return vpc;
-#undef FLD
-}
-
-/* rstbf: rstbf$pack $FRintk,@($GRi,$GRj) */
-
-static SEM_PC
-SEM_FN_NAME (frvbf,rstbf) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstbfu.f
-  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  int UNUSED written = 0;
-  IADDR UNUSED pc = abuf->addr;
-  SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
-
-{
-  SI tmp_address;
-  tmp_address = ADDSI (GET_H_GR (FLD (f_GRi)), GET_H_GR (FLD (f_GRj)));
-frvbf_write_mem_QI (current_cpu, pc, tmp_address, GET_H_FR_INT (FLD (f_FRk)));
-frvbf_check_recovering_store (current_cpu, tmp_address, FLD (f_FRk), 1, 1);
-}
-
-  return vpc;
-#undef FLD
-}
-
-/* rsthf: rsthf$pack $FRintk,@($GRi,$GRj) */
-
-static SEM_PC
-SEM_FN_NAME (frvbf,rsthf) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstbfu.f
-  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  int UNUSED written = 0;
-  IADDR UNUSED pc = abuf->addr;
-  SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
-
-{
-  SI tmp_address;
-  tmp_address = ADDSI (GET_H_GR (FLD (f_GRi)), GET_H_GR (FLD (f_GRj)));
-frvbf_write_mem_HI (current_cpu, pc, tmp_address, GET_H_FR_INT (FLD (f_FRk)));
-frvbf_check_recovering_store (current_cpu, tmp_address, FLD (f_FRk), 2, 1);
-}
-
-  return vpc;
-#undef FLD
-}
-
-/* rstf: rstf$pack $FRintk,@($GRi,$GRj) */
-
-static SEM_PC
-SEM_FN_NAME (frvbf,rstf) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstbfu.f
-  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  int UNUSED written = 0;
-  IADDR UNUSED pc = abuf->addr;
-  SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
-
-{
-  SI tmp_address;
-  tmp_address = ADDSI (GET_H_GR (FLD (f_GRi)), GET_H_GR (FLD (f_GRj)));
-frvbf_write_mem_SI (current_cpu, pc, tmp_address, GET_H_FR_INT (FLD (f_FRk)));
-frvbf_check_recovering_store (current_cpu, tmp_address, FLD (f_FRk), 4, 1);
-}
-
-  return vpc;
-#undef FLD
-}
-
 /* std: std$pack $GRdoublek,@($GRi,$GRj) */
 
 static SEM_PC
@@ -5831,54 +5699,6 @@ frvbf_write_mem_DI (current_cpu, pc, tmp_address, GET_H_CPR_DOUBLE (FLD (f_CPRk)
 #undef FLD
 }
 
-/* rstd: rstd$pack $GRdoublek,@($GRi,$GRj) */
-
-static SEM_PC
-SEM_FN_NAME (frvbf,rstd) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstdu.f
-  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  int UNUSED written = 0;
-  IADDR UNUSED pc = abuf->addr;
-  SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
-
-{
-  SI tmp_address;
-{
-  tmp_address = ADDSI (GET_H_GR (FLD (f_GRi)), GET_H_GR (FLD (f_GRj)));
-frvbf_write_mem_DI (current_cpu, pc, tmp_address, GET_H_GR_DOUBLE (FLD (f_GRk)));
-}
-frvbf_check_recovering_store (current_cpu, tmp_address, FLD (f_GRk), 8, 0);
-}
-
-  return vpc;
-#undef FLD
-}
-
-/* rstdf: rstdf$pack $FRdoublek,@($GRi,$GRj) */
-
-static SEM_PC
-SEM_FN_NAME (frvbf,rstdf) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstdfu.f
-  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  int UNUSED written = 0;
-  IADDR UNUSED pc = abuf->addr;
-  SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
-
-{
-  SI tmp_address;
-{
-  tmp_address = ADDSI (GET_H_GR (FLD (f_GRi)), GET_H_GR (FLD (f_GRj)));
-frvbf_write_mem_DF (current_cpu, pc, tmp_address, GET_H_FR_DOUBLE (FLD (f_FRk)));
-}
-frvbf_check_recovering_store (current_cpu, tmp_address, FLD (f_FRk), 8, 1);
-}
-
-  return vpc;
-#undef FLD
-}
-
 /* stq: stq$pack $GRk,@($GRi,$GRj) */
 
 static SEM_PC
@@ -5942,54 +5762,6 @@ SEM_FN_NAME (frvbf,stqc) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   tmp_address = ADDSI (GET_H_GR (FLD (f_GRi)), GET_H_GR (FLD (f_GRj)));
 frvbf_store_quad_CPR (current_cpu, pc, tmp_address, FLD (f_CPRk));
 }
-}
-
-  return vpc;
-#undef FLD
-}
-
-/* rstq: rstq$pack $GRk,@($GRi,$GRj) */
-
-static SEM_PC
-SEM_FN_NAME (frvbf,rstq) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_smulcc.f
-  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  int UNUSED written = 0;
-  IADDR UNUSED pc = abuf->addr;
-  SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
-
-{
-  SI tmp_address;
-{
-  tmp_address = ADDSI (GET_H_GR (FLD (f_GRi)), GET_H_GR (FLD (f_GRj)));
-frvbf_store_quad_GR (current_cpu, pc, tmp_address, FLD (f_GRk));
-}
-frvbf_check_recovering_store (current_cpu, tmp_address, FLD (f_GRk), 16, 0);
-}
-
-  return vpc;
-#undef FLD
-}
-
-/* rstqf: rstqf$pack $FRintk,@($GRi,$GRj) */
-
-static SEM_PC
-SEM_FN_NAME (frvbf,rstqf) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstdfu.f
-  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
-  int UNUSED written = 0;
-  IADDR UNUSED pc = abuf->addr;
-  SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
-
-{
-  SI tmp_address;
-{
-  tmp_address = ADDSI (GET_H_GR (FLD (f_GRi)), GET_H_GR (FLD (f_GRj)));
-frvbf_store_quad_FRint (current_cpu, pc, tmp_address, FLD (f_FRk));
-}
-frvbf_check_recovering_store (current_cpu, tmp_address, FLD (f_FRk), 16, 1);
 }
 
   return vpc;
@@ -28264,22 +28036,12 @@ static const struct sem_fn_desc sem_fns[] = {
   { FRVBF_INSN_STHF, SEM_FN_NAME (frvbf,sthf) },
   { FRVBF_INSN_STF, SEM_FN_NAME (frvbf,stf) },
   { FRVBF_INSN_STC, SEM_FN_NAME (frvbf,stc) },
-  { FRVBF_INSN_RSTB, SEM_FN_NAME (frvbf,rstb) },
-  { FRVBF_INSN_RSTH, SEM_FN_NAME (frvbf,rsth) },
-  { FRVBF_INSN_RST, SEM_FN_NAME (frvbf,rst) },
-  { FRVBF_INSN_RSTBF, SEM_FN_NAME (frvbf,rstbf) },
-  { FRVBF_INSN_RSTHF, SEM_FN_NAME (frvbf,rsthf) },
-  { FRVBF_INSN_RSTF, SEM_FN_NAME (frvbf,rstf) },
   { FRVBF_INSN_STD, SEM_FN_NAME (frvbf,std) },
   { FRVBF_INSN_STDF, SEM_FN_NAME (frvbf,stdf) },
   { FRVBF_INSN_STDC, SEM_FN_NAME (frvbf,stdc) },
-  { FRVBF_INSN_RSTD, SEM_FN_NAME (frvbf,rstd) },
-  { FRVBF_INSN_RSTDF, SEM_FN_NAME (frvbf,rstdf) },
   { FRVBF_INSN_STQ, SEM_FN_NAME (frvbf,stq) },
   { FRVBF_INSN_STQF, SEM_FN_NAME (frvbf,stqf) },
   { FRVBF_INSN_STQC, SEM_FN_NAME (frvbf,stqc) },
-  { FRVBF_INSN_RSTQ, SEM_FN_NAME (frvbf,rstq) },
-  { FRVBF_INSN_RSTQF, SEM_FN_NAME (frvbf,rstqf) },
   { FRVBF_INSN_STBU, SEM_FN_NAME (frvbf,stbu) },
   { FRVBF_INSN_STHU, SEM_FN_NAME (frvbf,sthu) },
   { FRVBF_INSN_STU, SEM_FN_NAME (frvbf,stu) },

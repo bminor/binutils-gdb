@@ -2867,102 +2867,6 @@ model_frv_stc (SIM_CPU *current_cpu, void *sem_arg)
 }
 
 static int
-model_frv_rstb (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cswap.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_frv_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_frv_rsth (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cswap.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_frv_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_frv_rst (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cswap.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_frv_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_frv_rstbf (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstbfu.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_frv_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_frv_rsthf (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstbfu.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_frv_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_frv_rstf (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstbfu.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_frv_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
 model_frv_std (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.sfmt_cstdu.f
@@ -3011,38 +2915,6 @@ model_frv_stdc (SIM_CPU *current_cpu, void *sem_arg)
 }
 
 static int
-model_frv_rstd (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstdu.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_frv_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_frv_rstdf (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstdfu.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_frv_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
 model_frv_stq (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.sfmt_smulcc.f
@@ -3078,38 +2950,6 @@ static int
 model_frv_stqc (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.sfmt_stdcu.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_frv_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_frv_rstq (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_smulcc.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_frv_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_frv_rstqf (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstdfu.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -16253,102 +16093,6 @@ model_fr550_stc (SIM_CPU *current_cpu, void *sem_arg)
 }
 
 static int
-model_fr550_rstb (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cswap.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_fr550_rsth (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cswap.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_fr550_rst (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cswap.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_fr550_rstbf (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstbfu.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_fr550_rsthf (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstbfu.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_fr550_rstf (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstbfu.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
 model_fr550_std (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.sfmt_cstdu.f
@@ -16417,38 +16161,6 @@ model_fr550_stdc (SIM_CPU *current_cpu, void *sem_arg)
 }
 
 static int
-model_fr550_rstd (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstdu.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_fr550_rstdf (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstdfu.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
 model_fr550_stq (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.sfmt_smulcc.f
@@ -16484,38 +16196,6 @@ static int
 model_fr550_stqc (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.sfmt_stdcu.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_fr550_rstq (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_smulcc.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_fr550_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_fr550_rstqf (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstdfu.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -33251,162 +32931,6 @@ model_fr500_stc (SIM_CPU *current_cpu, void *sem_arg)
 }
 
 static int
-model_fr500_rstb (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cswap.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    INT in_GRi = -1;
-    INT in_GRj = -1;
-    INT in_GRk = -1;
-    INT in_GRdoublek = -1;
-    in_GRi = FLD (in_GRi);
-    in_GRj = FLD (in_GRj);
-    in_GRk = FLD (in_GRk);
-    referenced |= 1 << 0;
-    referenced |= 1 << 1;
-    referenced |= 1 << 2;
-    cycles += frvbf_model_fr500_u_gr_r_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_GRk, in_GRdoublek);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_fr500_rsth (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cswap.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    INT in_GRi = -1;
-    INT in_GRj = -1;
-    INT in_GRk = -1;
-    INT in_GRdoublek = -1;
-    in_GRi = FLD (in_GRi);
-    in_GRj = FLD (in_GRj);
-    in_GRk = FLD (in_GRk);
-    referenced |= 1 << 0;
-    referenced |= 1 << 1;
-    referenced |= 1 << 2;
-    cycles += frvbf_model_fr500_u_gr_r_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_GRk, in_GRdoublek);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_fr500_rst (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cswap.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    INT in_GRi = -1;
-    INT in_GRj = -1;
-    INT in_GRk = -1;
-    INT in_GRdoublek = -1;
-    in_GRi = FLD (in_GRi);
-    in_GRj = FLD (in_GRj);
-    in_GRk = FLD (in_GRk);
-    referenced |= 1 << 0;
-    referenced |= 1 << 1;
-    referenced |= 1 << 2;
-    cycles += frvbf_model_fr500_u_gr_r_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_GRk, in_GRdoublek);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_fr500_rstbf (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstbfu.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    INT in_GRi = -1;
-    INT in_GRj = -1;
-    INT in_FRintk = -1;
-    INT in_FRdoublek = -1;
-    in_GRi = FLD (in_GRi);
-    in_GRj = FLD (in_GRj);
-    in_FRintk = FLD (in_FRintk);
-    referenced |= 1 << 0;
-    referenced |= 1 << 1;
-    referenced |= 1 << 2;
-    cycles += frvbf_model_fr500_u_fr_r_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_FRintk, in_FRdoublek);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_fr500_rsthf (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstbfu.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    INT in_GRi = -1;
-    INT in_GRj = -1;
-    INT in_FRintk = -1;
-    INT in_FRdoublek = -1;
-    in_GRi = FLD (in_GRi);
-    in_GRj = FLD (in_GRj);
-    in_FRintk = FLD (in_FRintk);
-    referenced |= 1 << 0;
-    referenced |= 1 << 1;
-    referenced |= 1 << 2;
-    cycles += frvbf_model_fr500_u_fr_r_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_FRintk, in_FRdoublek);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_fr500_rstf (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstbfu.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    INT in_GRi = -1;
-    INT in_GRj = -1;
-    INT in_FRintk = -1;
-    INT in_FRdoublek = -1;
-    in_GRi = FLD (in_GRi);
-    in_GRj = FLD (in_GRj);
-    in_FRintk = FLD (in_FRintk);
-    referenced |= 1 << 0;
-    referenced |= 1 << 1;
-    referenced |= 1 << 2;
-    cycles += frvbf_model_fr500_u_fr_r_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_FRintk, in_FRdoublek);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
 model_fr500_std (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.sfmt_cstdu.f
@@ -33475,58 +32999,6 @@ model_fr500_stdc (SIM_CPU *current_cpu, void *sem_arg)
 }
 
 static int
-model_fr500_rstd (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstdu.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    INT in_GRi = -1;
-    INT in_GRj = -1;
-    INT in_GRk = -1;
-    INT in_GRdoublek = -1;
-    in_GRi = FLD (in_GRi);
-    in_GRj = FLD (in_GRj);
-    in_GRdoublek = FLD (in_GRdoublek);
-    referenced |= 1 << 0;
-    referenced |= 1 << 1;
-    referenced |= 1 << 3;
-    cycles += frvbf_model_fr500_u_gr_r_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_GRk, in_GRdoublek);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_fr500_rstdf (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstdfu.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    INT in_GRi = -1;
-    INT in_GRj = -1;
-    INT in_FRintk = -1;
-    INT in_FRdoublek = -1;
-    in_GRi = FLD (in_GRi);
-    in_GRj = FLD (in_GRj);
-    in_FRdoublek = FLD (in_FRdoublek);
-    referenced |= 1 << 0;
-    referenced |= 1 << 1;
-    referenced |= 1 << 3;
-    cycles += frvbf_model_fr500_u_fr_r_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_FRintk, in_FRdoublek);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
 model_fr500_stq (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.sfmt_smulcc.f
@@ -33585,54 +33057,6 @@ model_fr500_stqc (SIM_CPU *current_cpu, void *sem_arg)
     int referenced = 0;
     int UNUSED insn_referenced = abuf->written;
     cycles += frvbf_model_fr500_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_fr500_rstq (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_smulcc.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    INT in_GRi = -1;
-    INT in_GRj = -1;
-    INT in_GRk = -1;
-    INT in_GRdoublek = -1;
-    in_GRi = FLD (in_GRi);
-    in_GRj = FLD (in_GRj);
-    referenced |= 1 << 0;
-    referenced |= 1 << 1;
-    cycles += frvbf_model_fr500_u_gr_r_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_GRk, in_GRdoublek);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_fr500_rstqf (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstdfu.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    INT in_GRi = -1;
-    INT in_GRj = -1;
-    INT in_FRintk = -1;
-    INT in_FRdoublek = -1;
-    in_GRi = FLD (in_GRi);
-    in_GRj = FLD (in_GRj);
-    referenced |= 1 << 0;
-    referenced |= 1 << 1;
-    cycles += frvbf_model_fr500_u_fr_r_store (current_cpu, idesc, 0, referenced, in_GRi, in_GRj, in_FRintk, in_FRdoublek);
   }
   return cycles;
 #undef FLD
@@ -49218,102 +48642,6 @@ model_tomcat_stc (SIM_CPU *current_cpu, void *sem_arg)
 }
 
 static int
-model_tomcat_rstb (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cswap.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_tomcat_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_tomcat_rsth (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cswap.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_tomcat_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_tomcat_rst (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cswap.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_tomcat_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_tomcat_rstbf (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstbfu.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_tomcat_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_tomcat_rsthf (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstbfu.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_tomcat_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_tomcat_rstf (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstbfu.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_tomcat_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
 model_tomcat_std (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.sfmt_cstdu.f
@@ -49362,38 +48690,6 @@ model_tomcat_stdc (SIM_CPU *current_cpu, void *sem_arg)
 }
 
 static int
-model_tomcat_rstd (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstdu.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_tomcat_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_tomcat_rstdf (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstdfu.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_tomcat_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
 model_tomcat_stq (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.sfmt_smulcc.f
@@ -49429,38 +48725,6 @@ static int
 model_tomcat_stqc (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.sfmt_stdcu.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_tomcat_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_tomcat_rstq (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_smulcc.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_tomcat_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_tomcat_rstqf (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstdfu.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -62368,102 +61632,6 @@ model_fr400_stc (SIM_CPU *current_cpu, void *sem_arg)
 }
 
 static int
-model_fr400_rstb (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cswap.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_fr400_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_fr400_rsth (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cswap.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_fr400_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_fr400_rst (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cswap.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_fr400_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_fr400_rstbf (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstbfu.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_fr400_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_fr400_rsthf (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstbfu.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_fr400_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_fr400_rstf (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstbfu.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_fr400_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
 model_fr400_std (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.sfmt_cstdu.f
@@ -62532,38 +61700,6 @@ model_fr400_stdc (SIM_CPU *current_cpu, void *sem_arg)
 }
 
 static int
-model_fr400_rstd (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstdu.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_fr400_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_fr400_rstdf (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstdfu.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_fr400_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
 model_fr400_stq (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.sfmt_smulcc.f
@@ -62599,38 +61735,6 @@ static int
 model_fr400_stqc (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.sfmt_stdcu.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_fr400_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_fr400_rstq (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_smulcc.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_fr400_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_fr400_rstqf (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstdfu.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -77269,102 +76373,6 @@ model_simple_stc (SIM_CPU *current_cpu, void *sem_arg)
 }
 
 static int
-model_simple_rstb (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cswap.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_simple_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_simple_rsth (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cswap.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_simple_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_simple_rst (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cswap.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_simple_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_simple_rstbf (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstbfu.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_simple_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_simple_rsthf (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstbfu.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_simple_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_simple_rstf (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstbfu.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_simple_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
 model_simple_std (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.sfmt_cstdu.f
@@ -77413,38 +76421,6 @@ model_simple_stdc (SIM_CPU *current_cpu, void *sem_arg)
 }
 
 static int
-model_simple_rstd (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstdu.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_simple_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_simple_rstdf (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstdfu.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_simple_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
 model_simple_stq (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.sfmt_smulcc.f
@@ -77480,38 +76456,6 @@ static int
 model_simple_stqc (SIM_CPU *current_cpu, void *sem_arg)
 {
 #define FLD(f) abuf->fields.sfmt_stdcu.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_simple_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_simple_rstq (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_smulcc.f
-  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
-  const IDESC * UNUSED idesc = abuf->idesc;
-  int cycles = 0;
-  {
-    int referenced = 0;
-    int UNUSED insn_referenced = abuf->written;
-    cycles += frvbf_model_simple_u_exec (current_cpu, idesc, 0, referenced);
-  }
-  return cycles;
-#undef FLD
-}
-
-static int
-model_simple_rstqf (SIM_CPU *current_cpu, void *sem_arg)
-{
-#define FLD(f) abuf->fields.sfmt_cstdfu.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -86561,22 +85505,12 @@ static const INSN_TIMING frv_timing[] = {
   { FRVBF_INSN_STHF, model_frv_sthf, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STF, model_frv_stf, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STC, model_frv_stc, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTB, model_frv_rstb, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTH, model_frv_rsth, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RST, model_frv_rst, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTBF, model_frv_rstbf, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTHF, model_frv_rsthf, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTF, model_frv_rstf, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STD, model_frv_std, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STDF, model_frv_stdf, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STDC, model_frv_stdc, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTD, model_frv_rstd, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTDF, model_frv_rstdf, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STQ, model_frv_stq, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STQF, model_frv_stqf, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STQC, model_frv_stqc, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTQ, model_frv_rstq, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTQF, model_frv_rstqf, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STBU, model_frv_stbu, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STHU, model_frv_sthu, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STU, model_frv_stu, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
@@ -87318,22 +86252,12 @@ static const INSN_TIMING fr550_timing[] = {
   { FRVBF_INSN_STHF, model_fr550_sthf, { { (int) UNIT_FR550_U_FR_STORE, 1, 1 } } },
   { FRVBF_INSN_STF, model_fr550_stf, { { (int) UNIT_FR550_U_FR_STORE, 1, 1 } } },
   { FRVBF_INSN_STC, model_fr550_stc, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTB, model_fr550_rstb, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTH, model_fr550_rsth, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RST, model_fr550_rst, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTBF, model_fr550_rstbf, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTHF, model_fr550_rsthf, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTF, model_fr550_rstf, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STD, model_fr550_std, { { (int) UNIT_FR550_U_GR_STORE, 1, 1 } } },
   { FRVBF_INSN_STDF, model_fr550_stdf, { { (int) UNIT_FR550_U_FR_STORE, 1, 1 } } },
   { FRVBF_INSN_STDC, model_fr550_stdc, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTD, model_fr550_rstd, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTDF, model_fr550_rstdf, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STQ, model_fr550_stq, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STQF, model_fr550_stqf, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STQC, model_fr550_stqc, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTQ, model_fr550_rstq, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTQF, model_fr550_rstqf, { { (int) UNIT_FR550_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STBU, model_fr550_stbu, { { (int) UNIT_FR550_U_GR_STORE, 1, 1 } } },
   { FRVBF_INSN_STHU, model_fr550_sthu, { { (int) UNIT_FR550_U_GR_STORE, 1, 1 } } },
   { FRVBF_INSN_STU, model_fr550_stu, { { (int) UNIT_FR550_U_GR_STORE, 1, 1 } } },
@@ -88075,22 +86999,12 @@ static const INSN_TIMING fr500_timing[] = {
   { FRVBF_INSN_STHF, model_fr500_sthf, { { (int) UNIT_FR500_U_FR_STORE, 1, 1 } } },
   { FRVBF_INSN_STF, model_fr500_stf, { { (int) UNIT_FR500_U_FR_STORE, 1, 1 } } },
   { FRVBF_INSN_STC, model_fr500_stc, { { (int) UNIT_FR500_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTB, model_fr500_rstb, { { (int) UNIT_FR500_U_GR_R_STORE, 1, 1 } } },
-  { FRVBF_INSN_RSTH, model_fr500_rsth, { { (int) UNIT_FR500_U_GR_R_STORE, 1, 1 } } },
-  { FRVBF_INSN_RST, model_fr500_rst, { { (int) UNIT_FR500_U_GR_R_STORE, 1, 1 } } },
-  { FRVBF_INSN_RSTBF, model_fr500_rstbf, { { (int) UNIT_FR500_U_FR_R_STORE, 1, 1 } } },
-  { FRVBF_INSN_RSTHF, model_fr500_rsthf, { { (int) UNIT_FR500_U_FR_R_STORE, 1, 1 } } },
-  { FRVBF_INSN_RSTF, model_fr500_rstf, { { (int) UNIT_FR500_U_FR_R_STORE, 1, 1 } } },
   { FRVBF_INSN_STD, model_fr500_std, { { (int) UNIT_FR500_U_GR_STORE, 1, 1 } } },
   { FRVBF_INSN_STDF, model_fr500_stdf, { { (int) UNIT_FR500_U_FR_STORE, 1, 1 } } },
   { FRVBF_INSN_STDC, model_fr500_stdc, { { (int) UNIT_FR500_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTD, model_fr500_rstd, { { (int) UNIT_FR500_U_GR_R_STORE, 1, 1 } } },
-  { FRVBF_INSN_RSTDF, model_fr500_rstdf, { { (int) UNIT_FR500_U_FR_R_STORE, 1, 1 } } },
   { FRVBF_INSN_STQ, model_fr500_stq, { { (int) UNIT_FR500_U_GR_STORE, 1, 1 } } },
   { FRVBF_INSN_STQF, model_fr500_stqf, { { (int) UNIT_FR500_U_FR_STORE, 1, 1 } } },
   { FRVBF_INSN_STQC, model_fr500_stqc, { { (int) UNIT_FR500_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTQ, model_fr500_rstq, { { (int) UNIT_FR500_U_GR_R_STORE, 1, 1 } } },
-  { FRVBF_INSN_RSTQF, model_fr500_rstqf, { { (int) UNIT_FR500_U_FR_R_STORE, 1, 1 } } },
   { FRVBF_INSN_STBU, model_fr500_stbu, { { (int) UNIT_FR500_U_GR_STORE, 1, 1 } } },
   { FRVBF_INSN_STHU, model_fr500_sthu, { { (int) UNIT_FR500_U_GR_STORE, 1, 1 } } },
   { FRVBF_INSN_STU, model_fr500_stu, { { (int) UNIT_FR500_U_GR_STORE, 1, 1 } } },
@@ -88832,22 +87746,12 @@ static const INSN_TIMING tomcat_timing[] = {
   { FRVBF_INSN_STHF, model_tomcat_sthf, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STF, model_tomcat_stf, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STC, model_tomcat_stc, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTB, model_tomcat_rstb, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTH, model_tomcat_rsth, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RST, model_tomcat_rst, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTBF, model_tomcat_rstbf, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTHF, model_tomcat_rsthf, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTF, model_tomcat_rstf, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STD, model_tomcat_std, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STDF, model_tomcat_stdf, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STDC, model_tomcat_stdc, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTD, model_tomcat_rstd, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTDF, model_tomcat_rstdf, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STQ, model_tomcat_stq, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STQF, model_tomcat_stqf, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STQC, model_tomcat_stqc, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTQ, model_tomcat_rstq, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTQF, model_tomcat_rstqf, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STBU, model_tomcat_stbu, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STHU, model_tomcat_sthu, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STU, model_tomcat_stu, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
@@ -89589,22 +88493,12 @@ static const INSN_TIMING fr400_timing[] = {
   { FRVBF_INSN_STHF, model_fr400_sthf, { { (int) UNIT_FR400_U_FR_STORE, 1, 1 } } },
   { FRVBF_INSN_STF, model_fr400_stf, { { (int) UNIT_FR400_U_FR_STORE, 1, 1 } } },
   { FRVBF_INSN_STC, model_fr400_stc, { { (int) UNIT_FR400_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTB, model_fr400_rstb, { { (int) UNIT_FR400_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTH, model_fr400_rsth, { { (int) UNIT_FR400_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RST, model_fr400_rst, { { (int) UNIT_FR400_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTBF, model_fr400_rstbf, { { (int) UNIT_FR400_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTHF, model_fr400_rsthf, { { (int) UNIT_FR400_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTF, model_fr400_rstf, { { (int) UNIT_FR400_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STD, model_fr400_std, { { (int) UNIT_FR400_U_GR_STORE, 1, 1 } } },
   { FRVBF_INSN_STDF, model_fr400_stdf, { { (int) UNIT_FR400_U_FR_STORE, 1, 1 } } },
   { FRVBF_INSN_STDC, model_fr400_stdc, { { (int) UNIT_FR400_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTD, model_fr400_rstd, { { (int) UNIT_FR400_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTDF, model_fr400_rstdf, { { (int) UNIT_FR400_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STQ, model_fr400_stq, { { (int) UNIT_FR400_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STQF, model_fr400_stqf, { { (int) UNIT_FR400_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STQC, model_fr400_stqc, { { (int) UNIT_FR400_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTQ, model_fr400_rstq, { { (int) UNIT_FR400_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTQF, model_fr400_rstqf, { { (int) UNIT_FR400_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STBU, model_fr400_stbu, { { (int) UNIT_FR400_U_GR_STORE, 1, 1 } } },
   { FRVBF_INSN_STHU, model_fr400_sthu, { { (int) UNIT_FR400_U_GR_STORE, 1, 1 } } },
   { FRVBF_INSN_STU, model_fr400_stu, { { (int) UNIT_FR400_U_GR_STORE, 1, 1 } } },
@@ -90346,22 +89240,12 @@ static const INSN_TIMING simple_timing[] = {
   { FRVBF_INSN_STHF, model_simple_sthf, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STF, model_simple_stf, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STC, model_simple_stc, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTB, model_simple_rstb, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTH, model_simple_rsth, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RST, model_simple_rst, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTBF, model_simple_rstbf, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTHF, model_simple_rsthf, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTF, model_simple_rstf, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STD, model_simple_std, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STDF, model_simple_stdf, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STDC, model_simple_stdc, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTD, model_simple_rstd, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTDF, model_simple_rstdf, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STQ, model_simple_stq, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STQF, model_simple_stqf, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STQC, model_simple_stqc, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTQ, model_simple_rstq, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_RSTQF, model_simple_rstqf, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STBU, model_simple_stbu, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STHU, model_simple_sthu, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_STU, model_simple_stu, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },

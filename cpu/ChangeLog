@@ -1,3 +1,9 @@
+2004-03-01  Richard Sandiford  <rsandifo@redhat.com>
+
+	* frv.cpu (r-store, r-store-dual, r-store-quad): Delete.
+	(rstb, rsth, rst, rstd, rstq): Delete.
+	(rstbf, rsthf, rstf, rstdf, rstqf): Delete.
+
 2004-02-23  Nick Clifton  <nickc@redhat.com>
 
 	* Apply these patches from Renesas:
