@@ -1,3 +1,7 @@
+2001-06-22  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* doc/internals.texi (CPU backend): Document md_atof.
+
 2001-06-22  Matthew Wilcox  <willy@ldl.fc.hp.com>
 
 	* config/tc-hppa.c: Add %mrp (millicode return pointer) alias

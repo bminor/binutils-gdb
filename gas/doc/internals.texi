@@ -1130,6 +1130,22 @@ the MIPS which support options to change the endianness, which function to call
 is a runtime decision.  On other targets, @code{md_number_to_chars} can be a
 simple macro.
 
+@item md_atof (@var{type},@var{litP},@var{sizeP})
+@cindex md_atof
+This function is called to convert an ASCII string into a floating point value
+in format used by the CPU.  It takes three arguments.  The first is @var{type}
+which is a byte describing the type of floating point number to be created.
+Possible values are @var{'f'} or @var{'s'} for single precision, @var{'d'} or
+@var{'r'} for double precision and @var{'x'} or @var{'p'} for extended
+precision.  Either lower or upper case versions of these letters can be used.
+
+The second parameter is @var{litP} which is a pointer to a byte array where the
+converted value should be stored.  The third argument is @var{sizeP}, which is
+a pointer to a integer that should be filled in with the number of
+@var{LITTLENUM}s emitted into the byte array.  (@var{LITTLENUM} is defined in
+gas/bignum.h).  The function should return NULL upon success or an error string
+upon failure.
+
 @item md_reloc_size
 @cindex md_reloc_size
 This variable is only used in the original version of gas (not
