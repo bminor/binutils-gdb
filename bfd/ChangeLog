@@ -1,3 +1,11 @@
+2002-09-24  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf32-sparc.c (elf32_sparc_relocate_section): Put R_SPARC_RELATIVE
+	addend into r_addend, not *r_offset.
+	(elf32_sparc_finish_dynamic_symbol): Likewise.
+	* elf64-sparc.c (sparc64_elf_finish_dynamic_symbol): Clear xword at
+	R_SPARC_RELATIVE's r_offset.
+
 2002-09-23  Nathan Tallent  <eraxxon@alumni.rice.edu>
 
 	* dwarf2.c (decode_line_info): Update to correctly decode
