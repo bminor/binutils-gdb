@@ -1,5 +1,11 @@
 2003-11-06  Elena Zannoni  <ezannoni@redhat.com>
 
+	Reported by Jim Ingham <jingham@apple.com>:
+	* gdb.base/annota1.exp: Match at least one occurrence of the
+	signal handler annotation.
+
+2003-11-06  Elena Zannoni  <ezannoni@redhat.com>
+
         * gdb.cp/annota2.exp: Make sure we can match 'Hardware watchpoint'
         as well as 'Watchpoint'.
 
