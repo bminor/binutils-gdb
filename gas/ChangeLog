@@ -1,3 +1,12 @@
+Wed Feb 26 18:19:00 1997  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* configure.in (mips*-*-lnews*): New target, also make empty
+	emulation list for this target.
+	* configure: Update.
+	* tc-mips.c (ECOFF_LITTLE_FORMAT): Define.
+	(mips_target_format): Use.
+	* te-lnews.h: New file.
+
 start-sanitize-tic80
 Wed Feb 26 15:33:46 1997  Fred Fish  <fnf@cygnus.com>
 

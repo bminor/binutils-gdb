@@ -93,6 +93,12 @@ static char *mips_regmask_frag;
 
 #define ILLEGAL_REG (32)
 
+/* Allow override of standard little-endian ECOFF format.  */
+
+#ifndef ECOFF_LITTLE_FORMAT
+#define ECOFF_LITTLE_FORMAT "ecoff-littlemips"
+#endif
+
 extern int target_big_endian;
 
 /* 1 is we should use the 64 bit MIPS ELF ABI, 0 if we should use the
@@ -108,7 +114,7 @@ mips_target_format ()
     case bfd_target_aout_flavour:
       return target_big_endian ? "a.out-mips-big" : "a.out-mips-little";
     case bfd_target_ecoff_flavour:
-      return target_big_endian ? "ecoff-bigmips" : "ecoff-littlemips";
+      return target_big_endian ? "ecoff-bigmips" : ECOFF_LITTLE_FORMAT;
     case bfd_target_elf_flavour:
       return (target_big_endian
 	      ? (mips_64 ? "elf64-bigmips" : "elf32-bigmips")
@@ -8457,12 +8463,9 @@ MIPS options:\n\
 void
 mips_init_after_args ()
 {
-  if (itbl_have_entries)
-    {
-      /* initialize opcodes */
-      bfd_mips_num_opcodes = bfd_mips_num_builtin_opcodes;
-      mips_opcodes = (struct mips_opcode *) mips_builtin_opcodes;
-    }
+  /* initialize opcodes */
+  bfd_mips_num_opcodes = bfd_mips_num_builtin_opcodes;
+  mips_opcodes = (struct mips_opcode*) mips_builtin_opcodes;
 }
 
 long
