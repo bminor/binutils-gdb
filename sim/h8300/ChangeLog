@@ -1,3 +1,11 @@
+Sat Oct 23 15:01:18 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* compile.c (sim_stop_signal): Result is now enum sim_stop.
+
+Fri Oct 15 23:49:27 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* compile.c (sim_kill, sim_open, sim_set_args): New functions.
+
 Thu Oct  7 16:24:10 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 
 	* compile.c (sim_set_pc): Write to the pc direcly.

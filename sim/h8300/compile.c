@@ -1627,9 +1627,12 @@ sim_trace ()
   return 0;
 }
 
-sim_stop_signal ()
+enum sim_stop
+sim_stop_signal (sigrc)
+     int *sigrc
 {
-  return cpu.exception;
+  *sigrc = cpu.exception;
+  return sim_stopped;
 }
 
 sim_set_pc (n)
@@ -1689,3 +1692,19 @@ set_h8300h ()
   h8300hmode = 1;
 }
 
+void
+sim_kill()
+{
+}
+
+sim_open ()
+{
+  return 0;
+}
+
+sim_set_args(argv, env)
+char **argv;
+char **env;
+{
+  return 0;
+}
