@@ -1,7 +1,7 @@
 start-sanitize-v850
 Fri Sep 27 17:43:06 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
-	* configure.in:  Recognize v850 target.
+	* configure configure.in:  Recognize v850 target.
 	* v850-tdep.c:  New file, NEC V850 target support.
 	* config/v850/{v850.mt tm-v850.h}:  New files for NEC V850 support.
 
