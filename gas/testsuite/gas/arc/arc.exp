@@ -111,12 +111,18 @@ if [istarget arc*-*-*] then {
 #    run_dump_test "sr"
 
     # Host extension instructions
-    test_template_insn host math mul64 20
-    test_template_insn host math mulu64 21
+    run_dump_test "mul64"
+    test_template_insn host math asl 16
+    test_template_insn host math asr 18
+    test_template_insn host math lsr 17
+    test_template_insn host math ror 19
 
     # Graphics extension instructions
-    test_template_insn graphics math mul64 20
-    test_template_insn graphics math mulu64 21
+    #run_dump_test "mul64" - .cpu field wrong
+    test_template_insn graphics math asl 16
+    test_template_insn graphics math asr 18
+    test_template_insn graphics math lsr 17
+    test_template_insn graphics math ror 19
     test_template_insn graphics math padc 25
     test_template_insn graphics math padd 24
     test_template_insn graphics math pand 28
