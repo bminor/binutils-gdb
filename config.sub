@@ -88,6 +88,13 @@ delta | 3300 | motorola-3300 | motorola-delta \
 	vendor=motorola
 	os=sysv # maybe?
 	;;
+
+delta88)
+	cpu=m88k
+	vendor=motorola
+	os=m88kbcs
+	;;
+
 gmicro)
 	cpu=tron
 	vendor=gmicro
