@@ -1,3 +1,14 @@
+Thu Oct  7 10:50:38 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+
+	Make support for relaxing more generic.
+	* reloc16.c: Add new target entry - bfd_coff_reloc16_estimate,
+	fix bit rot.
+	* libcoff.h, libcoff-in.h: declarations. Prototypes
+	* coffcode.h (bfd_coff_std_swap_table): Add calls to
+	coff_reloc_16_extra_cases and coff_reloc16_estimate.
+	(dummy_reloc16_estimate): New function.
+	* coff-h8300.c (h8300_reloc16_estimate): New function
+
 Thu Oct  7 14:24:13 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* elfcode.h (EALIGN): Define, dependent on ARCH_SIZE.
