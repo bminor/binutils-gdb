@@ -1,4 +1,4 @@
-# Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997
+# Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998
 # Free Software Foundation, Inc.
 
 # This file is part of GDB.
@@ -88,19 +88,9 @@ INCLUDE_CFLAGS = -I$(INCLUDE_DIR)
 # Where is the "-liberty" library?  Typically in ../libiberty.
 LIBIBERTY = ../libiberty/libiberty.a
 
-# Where is the MMALLOC library?  Typically in ../mmalloc.
-# Note that mmalloc can still be used on systems without mmap().
-# To use your system malloc, in the host makefile fragment set MMALLOC_CFLAGS
-# to -DNO_MMALLOC and set MMALLOC to empty.
-# To use mmalloc but not use heap checking, in the host makefile fragment set
-# MMALLOC_CFLAGS to the value below but add -DNO_MMCHECK.
-# To use mmalloc and heap checking on a system where the C runtime allocates
-# memory that is never freed, in the host makefile fragment set MMALLOC_CFLAGS
-# to the value below and add -DFORCE_MMCHECK=1
-MMALLOC_DIR = ../mmalloc
-MMALLOC_SRC = $(srcdir)/$(MMALLOC_DIR)
-MMALLOC = $(MMALLOC_DIR)/libmmalloc.a
-MMALLOC_CFLAGS = -I$(MMALLOC_SRC)
+# Configured by the --with-mmalloc option to configure.
+MMALLOC = @MMALLOC@
+MMALLOC_CFLAGS = @MMALLOC_CFLAGS@
 
 # Where is the BFD library?  Typically in ../bfd.
 BFD_DIR = ../bfd
@@ -549,7 +539,7 @@ DISTSTUFF = $(YYFILES)
 .c.o:
 	$(CC) -c $(INTERNAL_CFLAGS) $<
 
-all: gdb
+all: gdb$(EXEEXT)
 	@$(MAKE) $(FLAGS_TO_PASS) DO=all "DODIRS=`echo $(SUBDIRS) | sed 's/testsuite//'`" subdir_do
 
 installcheck:
@@ -609,7 +599,7 @@ uninstall: force
 		else \
 		  true ; \
 		fi ; \
-		rm -f $(bindir)/$$transformed_name $(man1dir)/$$transformed_name.1
+		rm -f $(bindir)/$$transformed_name$(EXEEXT) $(man1dir)/$$transformed_name.1
 	@$(MAKE) DO=uninstall "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do 
 
 # We do this by grepping through sources.  If that turns out to be too slow,
@@ -655,7 +645,7 @@ init.c: $(OBS) $(TSOBS)
 .PRECIOUS: init.c
 
 # Removing the old gdb first works better if it is running, at least on SunOS.
-gdb: $(OBS) $(TSOBS) $(ADD_DEPS) $(CDEPS) init.o
+gdb$(EXEEXT): $(OBS) $(TSOBS) $(ADD_DEPS) $(CDEPS) init.o
 	rm -f gdb$(EXEEXT)
 	$(HLDENV) $(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) -o gdb$(EXEEXT) \
 	  init.o $(OBS) $(TSOBS) $(ADD_FILES) $(CLIBS) $(LOADLIBES)
@@ -707,7 +697,7 @@ stop-gdb: stop-gdb.o
 # gdb and put a copy in gdb1, and you can run it with "gdb gdb1".
 # Removing gdb1 before the copy is the right thing if gdb1 is open
 # in another process.
-gdb1: gdb
+gdb1$(EXEEXT): gdb$(EXEEXT)
 	rm -f gdb1$(EXEEXT)
 	cp gdb$(EXEEXT) gdb1$(EXEEXT)
 
@@ -770,8 +760,8 @@ clean mostlyclean:
 	@$(MAKE) $(FLAGS_TO_PASS) DO=clean "DODIRS=$(SUBDIRS)" subdir_do 
 	rm -f *.o *.a $(ADD_FILES) *~ init.c-tmp
 	rm -f init.c version.c
-	rm -f gdb core make.log libgdb-files
-	rm -f gdb[0-9]
+	rm -f gdb$(EXEEXT) core make.log libgdb-files
+	rm -f gdb[0-9]$(EXEEXT)
 
 # This used to depend on c-exp.tab.c m2-exp.tab.c TAGS
 # I believe this is wrong; the makefile standards for distclean just

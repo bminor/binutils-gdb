@@ -1,3 +1,11 @@
+Mon Jan 19 13:34:40 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (all): Change gdb dependency to gdb$(EXEEXT).
+	(uninstall): Add $(EXEEXT) to file name to remove.
+	(gdb$(EXEEXT)): Rename target from plain gdb.
+	(gdb1$(EXEEXT)): Rename target from plain gdb1.
+	(clean, mostlyclean): Add $(EXEEXT) to binary names to remove.
+
 1998-01-16  Felix Lee  <flee@cygnus.com>
 
 	* top.c (print_gdb_version): delete stutter.
