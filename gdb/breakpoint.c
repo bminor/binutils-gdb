@@ -722,7 +722,7 @@ insert_catchpoint (struct ui_out *uo, void *args)
       val = target_insert_exec_catchpoint (PIDGET (inferior_ptid));
       break;
     default:
-      warning ("Internal error, %s line %d.", __FILE__, __LINE__);
+      internal_error (__FILE__, __LINE__, "unknown breakpoint type");
       break;
     }
 
