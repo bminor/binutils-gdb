@@ -559,10 +559,6 @@ read_type_number (pp, typenums)
 }
 
 
-#if !defined (REG_STRUCT_HAS_ADDR)
-#define REG_STRUCT_HAS_ADDR(gcc_p,type) 0
-#endif
-
 #define VISIBILITY_PRIVATE	'0'	/* Stabs character for private field */
 #define VISIBILITY_PROTECTED	'1'	/* Stabs character for protected fld */
 #define VISIBILITY_PUBLIC	'2'	/* Stabs character for public field */
@@ -1899,6 +1895,7 @@ define_symbol (valu, string, desc, type, objfile)
 	  if (local_symbols
 	      && local_symbols->nsyms > 0
 #ifndef USE_REGISTER_NOT_ARG
+	      && REG_STRUCT_HAS_ADDR_P ()
 	      && REG_STRUCT_HAS_ADDR (processing_gcc_compilation,
 				      SYMBOL_TYPE (sym))
 	      && (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_STRUCT
@@ -2156,8 +2153,9 @@ define_symbol (valu, string, desc, type, objfile)
   /* When passing structures to a function, some systems sometimes pass
      the address in a register, not the structure itself. */
 
-  if (REG_STRUCT_HAS_ADDR (processing_gcc_compilation, SYMBOL_TYPE (sym))
-    && (SYMBOL_CLASS (sym) == LOC_REGPARM || SYMBOL_CLASS (sym) == LOC_ARG))
+  if (REG_STRUCT_HAS_ADDR_P ()
+      && REG_STRUCT_HAS_ADDR (processing_gcc_compilation, SYMBOL_TYPE (sym))
+      && (SYMBOL_CLASS (sym) == LOC_REGPARM || SYMBOL_CLASS (sym) == LOC_ARG))
     {
       struct type *symbol_type = check_typedef (SYMBOL_TYPE (sym));
 

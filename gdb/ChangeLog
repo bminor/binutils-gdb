@@ -1,3 +1,18 @@
+Fri Apr 21 15:23:13 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* stabsread.c (REG_STRUCT_HAS_ADDR): Delete default.
+	(define_symbol): Check REG_STRUCT_HAS_ADDR_P before using
+ 	REG_STRUCT_HAS_ADDR.
+	(define_symbol): Ditto.
+
+	* valops.c (hand_function_call): Replace #ifdef
+ 	REG_STRUCT_HAS_ADDR with if REG_STRUCT_HAS_ADDR_P.  Re-indent
+ 	affected code.
+
+	* gdbarch.sh (REG_STRUCT_HAS_ADDR): Add along with the predicate
+ 	function REG_STRUCT_HAS_ADDR_P.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	
 2000-04-21  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* gdb-stabs.h (SECT_OFF_MAX): Increase to 40.

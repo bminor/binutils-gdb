@@ -214,6 +214,7 @@ struct gdbarch
   gdbarch_saved_pc_after_call_ftype *saved_pc_after_call;
   gdbarch_frame_num_args_ftype *frame_num_args;
   gdbarch_stack_align_ftype *stack_align;
+  gdbarch_reg_struct_has_addr_ftype *reg_struct_has_addr;
 };
 
 
@@ -278,6 +279,7 @@ struct gdbarch startup_gdbarch = {
   0,
   0,
   generic_get_saved_register,
+  0,
   0,
   0,
   0,
@@ -623,6 +625,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
       && (gdbarch->frame_num_args == 0))
     internal_error ("gdbarch: verify_gdbarch: frame_num_args invalid");
   /* Skip verify of stack_align, has predicate */
+  /* Skip verify of reg_struct_has_addr, has predicate */
 }
 
 
@@ -962,6 +965,10 @@ gdbarch_dump (void)
                       "gdbarch_update: STACK_ALIGN = 0x%08lx\n",
                       (long) current_gdbarch->stack_align
                       /*STACK_ALIGN ()*/);
+  fprintf_unfiltered (gdb_stdlog,
+                      "gdbarch_update: REG_STRUCT_HAS_ADDR = 0x%08lx\n",
+                      (long) current_gdbarch->reg_struct_has_addr
+                      /*REG_STRUCT_HAS_ADDR ()*/);
 }
 
 struct gdbarch_tdep *
@@ -2515,6 +2522,29 @@ set_gdbarch_stack_align (struct gdbarch *gdbarch,
                          gdbarch_stack_align_ftype stack_align)
 {
   gdbarch->stack_align = stack_align;
+}
+
+int
+gdbarch_reg_struct_has_addr_p (struct gdbarch *gdbarch)
+{
+  return gdbarch->reg_struct_has_addr != 0;
+}
+
+int
+gdbarch_reg_struct_has_addr (struct gdbarch *gdbarch, int gcc_p, struct type *type)
+{
+  if (gdbarch->reg_struct_has_addr == 0)
+    internal_error ("gdbarch: gdbarch_reg_struct_has_addr invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_reg_struct_has_addr called\n");
+  return gdbarch->reg_struct_has_addr (gcc_p, type);
+}
+
+void
+set_gdbarch_reg_struct_has_addr (struct gdbarch *gdbarch,
+                                 gdbarch_reg_struct_has_addr_ftype reg_struct_has_addr)
+{
+  gdbarch->reg_struct_has_addr = reg_struct_has_addr;
 }
 
 

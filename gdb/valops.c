@@ -1510,72 +1510,72 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 		  }
     }
 
-#if defined (REG_STRUCT_HAS_ADDR)
-  {
-    /* This is a machine like the sparc, where we may need to pass a pointer
-       to the structure, not the structure itself.  */
-    for (i = nargs - 1; i >= 0; i--)
-      {
-	struct type *arg_type = check_typedef (VALUE_TYPE (args[i]));
-	if ((TYPE_CODE (arg_type) == TYPE_CODE_STRUCT
-	     || TYPE_CODE (arg_type) == TYPE_CODE_UNION
-	     || TYPE_CODE (arg_type) == TYPE_CODE_ARRAY
-	     || TYPE_CODE (arg_type) == TYPE_CODE_STRING
-	     || TYPE_CODE (arg_type) == TYPE_CODE_BITSTRING
-	     || TYPE_CODE (arg_type) == TYPE_CODE_SET
-	     || (TYPE_CODE (arg_type) == TYPE_CODE_FLT
-		 && TYPE_LENGTH (arg_type) > 8)
-	    )
-	    && REG_STRUCT_HAS_ADDR (using_gcc, arg_type))
-	  {
-	    CORE_ADDR addr;
-	    int len;		/*  = TYPE_LENGTH (arg_type); */
-	    int aligned_len;
-	    arg_type = check_typedef (VALUE_ENCLOSING_TYPE (args[i]));
-	    len = TYPE_LENGTH (arg_type);
+  if (REG_STRUCT_HAS_ADDR_P ())
+    {
+      /* This is a machine like the sparc, where we may need to pass a
+	 pointer to the structure, not the structure itself.  */
+      for (i = nargs - 1; i >= 0; i--)
+	{
+	  struct type *arg_type = check_typedef (VALUE_TYPE (args[i]));
+	  if ((TYPE_CODE (arg_type) == TYPE_CODE_STRUCT
+	       || TYPE_CODE (arg_type) == TYPE_CODE_UNION
+	       || TYPE_CODE (arg_type) == TYPE_CODE_ARRAY
+	       || TYPE_CODE (arg_type) == TYPE_CODE_STRING
+	       || TYPE_CODE (arg_type) == TYPE_CODE_BITSTRING
+	       || TYPE_CODE (arg_type) == TYPE_CODE_SET
+	       || (TYPE_CODE (arg_type) == TYPE_CODE_FLT
+		   && TYPE_LENGTH (arg_type) > 8)
+	       )
+	      && REG_STRUCT_HAS_ADDR (using_gcc, arg_type))
+	    {
+	      CORE_ADDR addr;
+	      int len;		/*  = TYPE_LENGTH (arg_type); */
+	      int aligned_len;
+	      arg_type = check_typedef (VALUE_ENCLOSING_TYPE (args[i]));
+	      len = TYPE_LENGTH (arg_type);
 
-	    if (STACK_ALIGN_P ())
-	      /* MVS 11/22/96: I think at least some of this
-		 stack_align code is really broken.  Better to let
-		 PUSH_ARGUMENTS adjust the stack in a target-defined
-		 manner.  */
-	      aligned_len = STACK_ALIGN (len);
-	    else
-	      aligned_len = len;
-	    if (INNER_THAN (1, 2))
-	      {
-		/* stack grows downward */
-		sp -= aligned_len;
-	      }
-	    else
-	      {
-		/* The stack grows up, so the address of the thing we push
-		   is the stack pointer before we push it.  */
-		addr = sp;
-	      }
-	    /* Push the structure.  */
-	    write_memory (sp, VALUE_CONTENTS_ALL (args[i]), len);
-	    if (INNER_THAN (1, 2))
-	      {
-		/* The stack grows down, so the address of the thing we push
-		   is the stack pointer after we push it.  */
-		addr = sp;
-	      }
-	    else
-	      {
-		/* stack grows upward */
-		sp += aligned_len;
-	      }
-	    /* The value we're going to pass is the address of the thing
-	       we just pushed.  */
-	    /*args[i] = value_from_longest (lookup_pointer_type (value_type),
-	       (LONGEST) addr); */
-	    args[i] = value_from_pointer (lookup_pointer_type (arg_type),
-					  addr);
-	  }
-      }
-  }
-#endif /* REG_STRUCT_HAS_ADDR.  */
+	      if (STACK_ALIGN_P ())
+		/* MVS 11/22/96: I think at least some of this
+		   stack_align code is really broken.  Better to let
+		   PUSH_ARGUMENTS adjust the stack in a target-defined
+		   manner.  */
+		aligned_len = STACK_ALIGN (len);
+	      else
+		aligned_len = len;
+	      if (INNER_THAN (1, 2))
+		{
+		  /* stack grows downward */
+		  sp -= aligned_len;
+		}
+	      else
+		{
+		  /* The stack grows up, so the address of the thing
+		     we push is the stack pointer before we push it.  */
+		  addr = sp;
+		}
+	      /* Push the structure.  */
+	      write_memory (sp, VALUE_CONTENTS_ALL (args[i]), len);
+	      if (INNER_THAN (1, 2))
+		{
+		  /* The stack grows down, so the address of the thing
+		     we push is the stack pointer after we push it.  */
+		  addr = sp;
+		}
+	      else
+		{
+		  /* stack grows upward */
+		  sp += aligned_len;
+		}
+	      /* The value we're going to pass is the address of the
+		 thing we just pushed.  */
+	      /*args[i] = value_from_longest (lookup_pointer_type (value_type),
+		(LONGEST) addr); */
+	      args[i] = value_from_pointer (lookup_pointer_type (arg_type),
+					    addr);
+	    }
+	}
+    }
+
 
   /* Reserve space for the return structure to be written on the
      stack, if necessary */

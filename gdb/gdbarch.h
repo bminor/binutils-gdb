@@ -815,6 +815,23 @@ extern void set_gdbarch_stack_align (struct gdbarch *gdbarch, gdbarch_stack_alig
 #define STACK_ALIGN(sp) (gdbarch_stack_align (current_gdbarch, sp))
 #endif
 
+#if defined (REG_STRUCT_HAS_ADDR)
+/* Legacy for systems yet to multi-arch REG_STRUCT_HAS_ADDR */
+#define REG_STRUCT_HAS_ADDR_P() (1)
+#endif
+
+extern int gdbarch_reg_struct_has_addr_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > 1) || !defined (REG_STRUCT_HAS_ADDR_P)
+#define REG_STRUCT_HAS_ADDR_P() (gdbarch_reg_struct_has_addr_p (current_gdbarch))
+#endif
+
+typedef int (gdbarch_reg_struct_has_addr_ftype) (int gcc_p, struct type *type);
+extern int gdbarch_reg_struct_has_addr (struct gdbarch *gdbarch, int gcc_p, struct type *type);
+extern void set_gdbarch_reg_struct_has_addr (struct gdbarch *gdbarch, gdbarch_reg_struct_has_addr_ftype *reg_struct_has_addr);
+#if (GDB_MULTI_ARCH > 1) || !defined (REG_STRUCT_HAS_ADDR)
+#define REG_STRUCT_HAS_ADDR(gcc_p, type) (gdbarch_reg_struct_has_addr (current_gdbarch, gcc_p, type))
+#endif
+
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
 
