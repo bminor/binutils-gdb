@@ -1,3 +1,26 @@
+Wed Jun  7 19:01:30 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* elfcode.h (elf_fake_sections): Permit .scommon or COMMON
+	sections as random SHT_NOBITS sections, in case a linker script is
+	strange.
+
+Tue Jun  6 17:29:32 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* bfd-in.h (NT_subsystem, NT_stack_heap): Moved from pe.h
+	* coff-i386.c (coff_i386_rtype_to_howto): Get PE relocs right.
+	* coffcode.h (coff_mkobject): Set pe tdata bit when using PE.
+	* cofflink.c (COFF_WITH_PE code): Test on obj_pe bit rather
+	than conditional compile.
+	* configure.in: Fix PE dependencies.
+	* libcoff-in.h (obj_pe): New.
+	(coff_tdata): Added pe entry.
+	* libcoff.h: Regenerated.
+
+Mon Jun  5 09:07:13 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* coff-a29k.c (coff_a29k_adjust_symndx): Completely parenthesize
+	macro. (pr ld/7127)
+
 Mon Jun  5 02:15:20 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
 
 	Linker support for m68k-elf from Andreas Schwab
