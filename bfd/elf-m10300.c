@@ -2370,7 +2370,8 @@ compute_function_info (abfd, hash, addr, contents)
       if (hash->movm_args & 0x08)
 	hash->movm_stack_size += 8 * 4;
 
-      if (bfd_get_mach (abfd) == bfd_mach_am33)
+      if (bfd_get_mach (abfd) == bfd_mach_am33
+	  || bfd_get_mach (abfd) == bfd_mach_am33_2)
 	{
 	  /* "exother" space.  e0, e1, mdrq, mcrh, mcrl, mcvf */
 	  if (hash->movm_args & 0x1)
@@ -2750,6 +2751,9 @@ elf_mn10300_mach (flags)
 
     case E_MN10300_MACH_AM33:
       return bfd_mach_am33;
+
+    case E_MN10300_MACH_AM33_2:
+      return bfd_mach_am33_2;
     }
 }
 
@@ -2773,6 +2777,10 @@ _bfd_mn10300_elf_final_write_processing (abfd, linker)
 
     case bfd_mach_am33:
       val = E_MN10300_MACH_AM33;
+      break;
+
+    case bfd_mach_am33_2:
+      val = E_MN10300_MACH_AM33_2;
       break;
     }
 

@@ -1,3 +1,22 @@
+2003-07-09  Alexandre Oliva  <aoliva@redhat.com>
+
+	2001-05-06  Alexandre Oliva  <aoliva@redhat.com>
+	* elf-m10300.c (compute_function_info): Account for AM33
+	registers in `movm' when computing stack space for `call' when
+	linking for AM33/2.0 link.
+	2000-04-01  Alexandre Oliva  <aoliva@cygnus.com>
+	* archures.c (bfd_mach_am33_2): Renamed from bfd_mach_am332.
+	* bfd-in2.h: Rebuilt.
+	* cpu-m10300.c (bfd_am33_2_arch): Renamed from bfd_am332_arch.
+	* elf-m10300.c: Updated.
+	2000-03-31  Alexandre Oliva  <aoliva@cygnus.com>
+	* archures.c (bfd_mach_am332): Defined.
+	* bfd-in2.h: Rebuilt.
+	* cpu-m10300.c (bfd_am332_arch): Defined.
+	(bfd_am33_arch): Chained with am33-2.
+	* elf-m10300.c (elf_mn10300_mach): Handle am332.
+	(_bfd_mn10300_elf_final_write_processing): Likewise.
+
 2003-07-09  H.J. Lu <hongjiu.lu@intel.com>
 
 	* elfxx-ia64.c (IA64_HOWTO): Set dst_mask to -1LL.
