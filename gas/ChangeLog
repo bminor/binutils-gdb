@@ -1,3 +1,9 @@
+2001-02-13  Alan Modra  <alan@linuxcare.com.au>
+
+	* expr.c (operator): Don't bump input_line_pointer for two char
+	operators.  Instead return operator size via new param num_chars.
+	(expr): Use above to parse multi-char operators correctly.
+
 2001-02-12  Philip Blundell  <pb@futuretv.com>
 
 	* config/tc-arm.c (do_ldst): Improve warnings for unpredictable
