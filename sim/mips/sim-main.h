@@ -824,15 +824,22 @@ decode_coproc (SD, CPU, cia, (instruction))
 #define AccessLength_DOUBLEWORD (7)
 #define AccessLength_QUADWORD   (15)
 
+#if (WITH_IGEN)
+#define LOADDRMASK (WITH_TARGET_WORD_BITSIZE == 64 \
+		    ? AccessLength_DOUBLEWORD /*7*/ \
+		    : AccessLength_WORD /*3*/)
+#define PSIZE (WITH_TARGET_ADDRESS_BITSIZE)
+#endif
+
 int address_translation PARAMS ((SIM_DESC sd, sim_cpu *, address_word cia, address_word vAddr, int IorD, int LorS, address_word *pAddr, int *CCA, int raw));
 #define AddressTranslation(vAddr,IorD,LorS,pAddr,CCA,host,raw) \
 address_translation (SD, CPU, cia, vAddr, IorD, LorS, pAddr, CCA, raw)
 
-void load_memory PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, uword64* memvalp, uword64* memval1p, int CCA, int AccessLength, address_word pAddr, address_word vAddr, int IorD));
+void load_memory PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, uword64* memvalp, uword64* memval1p, int CCA, unsigned int AccessLength, address_word pAddr, address_word vAddr, int IorD));
 #define LoadMemory(memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD,raw) \
 load_memory (SD, CPU, cia, memvalp, memval1p, CCA, AccessLength, pAddr, vAddr, IorD)
 
-void store_memory PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int CCA, int AccessLength, uword64 MemElem, uword64 MemElem1, address_word pAddr, address_word vAddr));
+void store_memory PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int CCA, unsigned int AccessLength, uword64 MemElem, uword64 MemElem1, address_word pAddr, address_word vAddr));
 #define StoreMemory(CCA,AccessLength,MemElem,MemElem1,pAddr,vAddr,raw) \
 store_memory (SD, CPU, cia, CCA, AccessLength, MemElem, MemElem1, pAddr, vAddr)
 

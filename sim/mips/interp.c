@@ -82,9 +82,7 @@ char* pr_uword64 PARAMS ((uword64 addr));
 
 
 /* Get the simulator engine description, without including the code: */
-#if (WITH_IGEN)
-#define LOADDRMASK (WITH_TARGET_WORD_BITSIZE == 64 ? 0x7 : 0x3)
-#else
+#if !(WITH_IGEN)
 #define SIM_MANIFESTS
 #include "oengine.c"
 #undef SIM_MANIFESTS
@@ -1626,7 +1624,7 @@ load_memory (SIM_DESC sd,
 	     uword64* memvalp,
 	     uword64* memval1p,
 	     int CCA,
-	     int AccessLength,
+	     unsigned int AccessLength,
 	     address_word pAddr,
 	     address_word vAddr,
 	     int IorD)
@@ -1653,9 +1651,9 @@ load_memory (SIM_DESC sd,
   if (((pAddr & LOADDRMASK) + AccessLength) > LOADDRMASK)
     {
       /* In reality this should be a Bus Error */
-      sim_io_error (sd, "AccessLength of %d would extend over %dbit aligned boundary for physical address 0x%s\n",
+      sim_io_error (sd, "LOAD AccessLength of %d would extend over %d bit aligned boundary for physical address 0x%s\n",
 		    AccessLength,
-		    (LOADDRMASK + 1) << 2,
+		    (LOADDRMASK + 1) << 3,
 		    pr_addr (pAddr));
     }
 
@@ -1717,13 +1715,13 @@ load_memory (SIM_DESC sd,
 	 (int)(pAddr & LOADDRMASK),pr_uword64(value1),pr_uword64(value));
 #endif /* DEBUG */
   
-  /* See also store_memory. */
-  if (AccessLength <= AccessLength_DOUBLEWORD)
+  /* See also store_memory. Position data in correct byte lanes. */
+  if (AccessLength <= LOADDRMASK)
     {
       if (BigEndianMem)
 	/* for big endian target, byte (pAddr&LOADDRMASK == 0) is
 	   shifted to the most significant byte position.  */
-	value <<= (((7 - (pAddr & LOADDRMASK)) - AccessLength) * 8);
+	value <<= (((LOADDRMASK - (pAddr & LOADDRMASK)) - AccessLength) * 8);
       else
 	/* For little endian target, byte (pAddr&LOADDRMASK == 0)
 	   is already in the correct postition. */
@@ -1758,7 +1756,7 @@ store_memory (SIM_DESC sd,
 	      sim_cpu *cpu,
 	      address_word cia,
 	      int CCA,
-	      int AccessLength,
+	      unsigned int AccessLength,
 	      uword64 MemElem,
 	      uword64 MemElem1,   /* High order 64 bits */
 	      address_word pAddr,
@@ -1774,7 +1772,10 @@ store_memory (SIM_DESC sd,
 #endif /* WARN_MEM */
   
   if (((pAddr & LOADDRMASK) + AccessLength) > LOADDRMASK)
-    sim_io_error(sd,"AccessLength of %d would extend over %dbit aligned boundary for physical address 0x%s\n",AccessLength,(LOADDRMASK + 1)<<2,pr_addr(pAddr));
+    sim_io_error (sd, "STORE AccessLength of %d would extend over %d bit aligned boundary for physical address 0x%s\n",
+		  AccessLength,
+		  (LOADDRMASK + 1) << 3,
+		  pr_addr(pAddr));
   
 #if defined(TRACE)
   dotrace (SD, CPU, tracefh,1,(unsigned int)(pAddr&0xFFFFFFFF),(AccessLength + 1),"store");
@@ -1784,13 +1785,13 @@ store_memory (SIM_DESC sd,
   printf("DBG: StoreMemory: offset = %d MemElem = 0x%s%s\n",(unsigned int)(pAddr & LOADDRMASK),pr_uword64(MemElem1),pr_uword64(MemElem));
 #endif /* DEBUG */
   
-  /* See also load_memory */
-  if (AccessLength <= AccessLength_DOUBLEWORD)
+  /* See also load_memory. Position data in correct byte lanes. */
+  if (AccessLength <= LOADDRMASK)
     {
       if (BigEndianMem)
 	/* for big endian target, byte (pAddr&LOADDRMASK == 0) is
 	   shifted to the most significant byte position.  */
-	MemElem >>= (((7 - (pAddr & LOADDRMASK)) - AccessLength) * 8);
+	MemElem >>= (((LOADDRMASK - (pAddr & LOADDRMASK)) - AccessLength) * 8);
       else
 	/* For little endian target, byte (pAddr&LOADDRMASK == 0)
 	   is already in the correct postition. */
@@ -1954,7 +1955,7 @@ signal_exception (SIM_DESC sd,
         code = (instruction >> 6) & 0xFFFFF;
         
         sim_io_eprintf(sd,"Ignoring instruction `syscall %d' (PC 0x%s)\n",
-                    code, pr_addr(cia));
+		       code, pr_addr(cia));
       }
      break;
 

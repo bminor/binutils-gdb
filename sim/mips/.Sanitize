@@ -78,7 +78,7 @@ Things-to-lose:
 
 Do-last:
 
-r5900_files="ChangeLog configure configure.in sim-main.h interp.c gencode.c mips.igen mips.dc m16.igen r5900.igen"
+r5900_files="ChangeLog configure configure.in sim-main.h interp.c gencode.c mips.igen mips.dc m16.igen r5900.igen tx.igen"
 
 if ( echo $* | grep keep\-r5900 > /dev/null ) ; then
 	for i in $r5900_files ; do
