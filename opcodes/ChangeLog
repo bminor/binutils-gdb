@@ -1,5 +1,9 @@
 Wed Jun 19 15:55:12 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* sparc-dis.c (print_insn_sparc): Remove unused local variable i.
+	Set imm_added_to_rs1 even if the source and destination register
+	are not the same.
+
 	* sparc-opc.c: Add some two operand forms of the wr instruction.
 
 Tue Jun 18 15:58:27 1996  Jeffrey A. Law  <law@rtl.cygnus.com>
