@@ -828,7 +828,10 @@ elf_link_add_object_symbols (abfd, info)
 	      else
 		new_flag = ELF_LINK_HASH_DEF_DYNAMIC;
 	      if ((old_flags & (ELF_LINK_HASH_DEF_REGULAR
-				| ELF_LINK_HASH_REF_REGULAR)) != 0)
+				| ELF_LINK_HASH_REF_REGULAR)) != 0
+		  || (h->weakdef != NULL
+		      && (old_flags & (ELF_LINK_HASH_DEF_DYNAMIC
+				       | ELF_LINK_HASH_REF_DYNAMIC)) != 0))
 		dynsym = true;
 	    }
 
