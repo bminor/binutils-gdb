@@ -1,3 +1,9 @@
+Thu Apr 17 02:20:23 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* remote-sim.c (gdbsim_load): Update call to sim_load.
+	(gdbsim_create_inferior): No longer pass start_address to
+	sim_create_inferior.
+
 Tue Apr 15 15:31:09 1997  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* remote.c (get_offsets): Don't use scanf for interpreting

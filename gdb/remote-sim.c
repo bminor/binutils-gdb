@@ -405,11 +405,13 @@ gdbsim_load (prog, fromtty)
 
   inferior_pid = 0;
 
-  /* This must be done before calling gr_load_image.  */
-  program_loaded = 1;
+  /* FIXME: We will print two messages on error.
+     Need error to either not print anything if passed NULL or need
+     another routine that doesn't take any arguments.  */
+  if (sim_load (gdbsim_desc, prog, NULL, fromtty) == SIM_RC_FAIL)
+    error ("unable to load program");
 
-  if (sim_load (gdbsim_desc, prog, fromtty) != 0)
-    generic_load (prog, fromtty);
+  program_loaded = 1;
 }
 
 
@@ -455,7 +457,7 @@ gdbsim_create_inferior (exec_file, args, env)
   strcat (arg_buf, args);
   argv = buildargv (arg_buf);
   make_cleanup (freeargv, (char *) argv);
-  sim_create_inferior (gdbsim_desc, entry_pt, argv, env);
+  sim_create_inferior (gdbsim_desc, argv, env);
 
   inferior_pid = 42;
   insert_breakpoints ();	/* Needed to get correct instruction in cache */
@@ -490,14 +492,11 @@ gdbsim_open (args, from_tty)
 
   init_callbacks ();
 
-  len = 7 + 1 + (args ? strlen (args) : 0) + 1 + /*slop*/ 10;
+  len = 7 + 1 + (args ? strlen (args) : 0) + 50;
   arg_buf = (char *) alloca (len);
-  strcpy (arg_buf, "gdbsim");
-  if (args)
-    {
-      strcat (arg_buf, " ");
-      strcat (arg_buf, args);
-    }
+  sprintf (arg_buf, "gdbsim%s%s -E %s",
+	   args ? " " : "", args ? args : "",
+	   TARGET_BYTE_ORDER == BIG_ENDIAN ? "big" : "little");
   argv = buildargv (arg_buf);
   if (argv == NULL)
     error ("Insufficient memory available to allocate simulator arg list.");
