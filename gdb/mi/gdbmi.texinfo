@@ -117,7 +117,6 @@ Elena Zannoni.
 * GDB/MI Thread Commands::
 * GDB/MI Tracepoint Commands::
 * GDB/MI Variable Objects::
-* GDB/MI Draft Changes to Output Syntax::
 @end menu
 
 @c When these are implemented, they should be moved to be between Misc and
@@ -257,13 +256,23 @@ corresponding output for that command will also be prefixed by that same
 depending on the needs---this is still in development).
 
 @item @var{result} @expansion{}
-@code{[ @var{string} "=" ] @var{value}}
+@code{ @var{variable} "=" @var{value}}
+
+@item @var{variable} @expansion{}
+@code{ @var{string} }
 
 @item @var{value} @expansion{}
-@code{@var{const} | "@{" @var{result} ( "," @var{result} )* "@}"}
+@code{ @var{const} | @var{tuple} | @var{list} }
 
 @item @var{const} @expansion{}
 @code{@var{c-string}}
+
+@item @var{tuple} @expansion{}
+@code{ "@{@}" | "@{" @var{result} ( "," @var{result} )* "@}" }
+
+@item @var{list} @expansion{}
+@code{ "[]" | "[" @var{value} ( "," @var{value} )* "]" | "["
+@var{result} ( "," @var{result} )* "]" }
 
 @item @var{stream-record} @expansion{}
 @code{@var{console-stream-output} | @var{target-stream-output} | @var{log-stream-output}}
@@ -339,13 +348,17 @@ All the target output is prefixed by @samp{@@}.
 @var{log-stream-output} is output text coming from @value{GDBN}'s internals, for
 instance messages that should be displayed as part of an error log.  All
 the log output is prefixed by @samp{&}.
+
+@item
+@cindex list output in @sc{gdb/mi}
+New @sc{gdb/mi} commands should only output @var{lists} containing
+@var{values}.
+
+
 @end itemize
 
 @xref{GDB/MI Stream Records, , @sc{gdb/mi} Stream Records}, for more
 details about the various output records.
-
-@xref{GDB/MI Draft Changes to Output Syntax, , @sc{gdb/mi} Draft Changes
-to Output Syntax}, for proposed revisions to the current output syntax.
 
 @node GDB/MI Simple Examples
 @subsection Simple Examples of @sc{gdb/mi} Interaction
@@ -3741,164 +3754,6 @@ by @var{name}.  The object must be @samp{editable}.
 Update the value of the variable object @var{name} by evaluating its
 expression after fetching all the new values from memory or registers.
 A @samp{*} causes all existing variable objects to be updated.
-
-@c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-@node GDB/MI Draft Changes to Output Syntax
-@section  @sc{gdb/mi} Draft Changes to Output Syntax
-
-@cindex draft changes to output syntax of @sc{gdb/mi}
-@cindex @sc{gdb/mi}, draft changes to output syntax
-
-One problem identified in the existing @sc{gdb/mi} output syntax was the
-difficulty in differentiating between a tuple such as:
-
-@example
-@{number="1",type="breakpoint",disp="keep",enabled="y"@}
-@end example
-
-where each value has a unique label, and a list such as:
-
-@example
-@{"1","2","4"@}
-@{bp="1",bp="2",bp="4"@}
-@end example
-
-where values are un-labeled or the label is duplicated.
-
-What follows is a draft revision to the output specification that
-addresses this problem.
-
-The output from @sc{gdb/mi} consists of zero or more out-of-band records
-optionally followed by a single result record, the result record being
-for the most recent command input.  The sequence is terminated by
-@samp{(@value{GDBP})}.
-
-Asynchronous @sc{gdb/mi} output is similar.
-
-Each output record directly associated with an input command is prefixed
-by the input command's @code{@var{token}}.
-
-@table @code
-@item @var{output} @expansion{}
-@{ @var{out-of-band-record} @} @code{[} @var{result-record} @code{]} "@code{(@value{GDBP})}" @var{nl}
-
-@item @var{result-record} @expansion{}
-@code{[} @var{token} @code{]} "^" @var{result-class} @{ "," @var{result} @} @var{nl}
-
-@item @var{out-of-band-record} @expansion{}
-@var{async-record} @code{|} @var{stream-record}
-
-@item @var{async-record} @expansion{}
-@var{exec-async-output} @code{|} @var{status-async-output} @code{|} @var{notify-async-output}
-
-@item @var{exec-async-output} @expansion{}
-@code{[} @var{token} @code{]} "*" @var{async-output}
-
-@item @var{status-async-output} @expansion{}
-@code{[} @var{token} @code{]} "+" @var{async-output}
-
-@item @var{notify-async-output} @expansion{}
-@code{[} @var{token} @code{]} "=" @var{async-output}
-
-@item @var{async-output} @expansion{}
-@var{async-class} @{ "," @var{result} @} @var{nl}
-
-@item @var{result-class} @expansion{}
-"done" @code{|} "running" @code{|} "connected" @code{|} "error" @code{|} "exit"
-
-@item @var{async-class} @expansion{}
-"stopped" @code{|} @emph{others depending on need as still in development}
-
-@item @var{result} @expansion{}
-@var{string} "=" @var{value}
-
-@item @var{value} @expansion{}
-@var{c-string} @code{|} @var{tupple} @code{|} @var{list}
-
-@item @var{tupple} @expansion{}
-"@{@}" @code{|} "@{" @var{result} @{ "," @var{result} @} "@}"
-
-@item @var{list} @expansion{}
-"@code{[]}" @code{|} "@code{[}" @var{value} @{ "," @var{value} @} "@code{]}"
-
-@item @var{string} @expansion{}
-@emph{[-A-Za-z\.0-9_]*}
-
-@item @var{c-string} @expansion{}
-@emph{See the input specification}
-
-@item @var{stream-record} @expansion{}
-@var{console-stream-output} @code{|} @var{target-stream-output} @code{|} @var{log-stream-output}
-
-@item @var{console-stream-output} @expansion{}
-"~" @var{c-string}
-
-@item @var{target-stream-output} @expansion{}
-"@@" @var{c-string}
-
-@item @var{log-stream-output} @expansion{}
-"&" @var{c-string}
-
-@item @var{nl} @expansion{}
-CR @code{|} CR-LF
-
-@item @var{token} @expansion{}
-"any sequence of digits"
-
-@end table
-
-In addition, the following are still being developed.
-
-@table @code
-
-@item @var{query}
-This action is currently undefined.
-
-@end table
-
-Notes:
-
-@itemize @bullet
-
-@item
-All output sequences end in a single line containing a period.
-
-@item
-The @code{@var{token}} is from the corresponding request.  If an execution
-command is interrupted by the @code{-exec-interrupt} command, the token
-associated with the `*stopped' message is the one of the original
-execution command, not the one of the interrupt command.
-
-@item
-@var{status-async-output} contains on-going status information about the
-progress of a slow operation.  It can be discarded.  All status output is
-prefixed by the prefix @samp{+}.
-
-@item
-@var{exec-async-output} contains asynchronous state change on the target
-(stopped, started, disappeared).  All async output is prefixed by
-the prefix @samp{*}.
-
-@item
-@var{notify-async-output} contains supplementary information that the
-client should handle (new breakpoint information).  All notify output is
-prefixed by the prefix @samp{=}.
-
-@item
-@var{console-stream-output} is output that should be displayed as is, in the
-console.  It is the textual response to a CLI command.  All the console
-output is prefixed by the prefix @samp{~}.
-
-@item
-@var{target-stream-output} is the output produced by the target program.
-All the target output is prefixed by the prefix @samp{@@}.
-
-@item
-@var{log-stream-output} is output text coming from @value{GDBN}'s
-internals, for instance messages that should be displayed as part of an
-error log.  All the log output is prefixed by the prefix @samp{&}.
-
-@end itemize
 
 @c Local variables:
 @c change-log-default-name: "ChangeLog-mi"

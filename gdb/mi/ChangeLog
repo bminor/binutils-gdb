@@ -1,3 +1,9 @@
+2001-06-07  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbmi.texinfo (GDB/MI Output Syntax): Add tuples and lists to
+	syntax.
+	(GDB/MI Draft Changes to Output Syntax): Delete section.
+	
 Mon Jun 11 17:22:25 2001  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mi-out.c: Fix typo. s/supress/suppress/.
