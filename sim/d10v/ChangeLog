@@ -1,3 +1,39 @@
+Mon Dec  8 12:58:33 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* simops.c (OP_5F00): From Martin Hunt <hunt@cygnus.com>. Change
+ 	reserved trap from 0 to 15. Add trap emulation code for 0-14.
+
+	* interp.c (sim_resume): From Martin Hunt <hunt@cygnus.com>. Check
+ 	IBA for SDBT.
+
+	* d10v_sim.h (AE_VECTOR_START, RIE_VECTOR_START,
+ 	SDBT_VECTOR_START, TRAP_VECTOR_START): Define.
+	
+	* simops.c (OP_5F00): For "trap", mask out all but SM bit in PSW,
+ 	use move_to_cr.
+	(OP_5F00): For "trap", update BPSW with move_to_cr.
+
+Fri Dec  5 15:31:17 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* d10v_sim.h (enum): Enumerate CR register names.
+	(enum): Enumerate PSW bit values.
+	(PSW): Obtain value uing move_from_cr.
+	(MOD_S, MOD_E, BPSW): Make r-values.
+	(move_from_cr, move_to_cr): Declare functions.
+	
+	* interp.c (sim_fetch_register, sim_store_register): Use
+ 	move_from_cr and move_to_cr for CR register transfers.
+
+	* simops.c (move_from_cr, move_to_cr): New functions.
+	(OP_5F40): Move BPSW to PSW using move_to_cr and move_from_cr.
+	(OP_5600): For "mvtc", use function move_to_cr.
+	(OP_5200): For "mvfc", use function move_from_cr.
+
+Fri Dec  5 13:33:14 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* simops.c (OP_5600): For "mvtc" MOD_E and MOD_S, ensure that the
+ 	LSbit is zero.
+
 Thu Dec  4 09:21:05 1997  Doug Evans  <devans@canuck.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

@@ -109,16 +109,48 @@ extern bfd_vma text_start;
 extern bfd_vma text_end;
 extern bfd *prog_bfd;
 
-#define PC	(State.cregs[2])
-#define PSW	(State.cregs[0])
-#define BPSW	(State.cregs[1])
-#define BPC	(State.cregs[3])
-#define RPT_C	(State.cregs[7])
-#define RPT_S	(State.cregs[8])
-#define RPT_E	(State.cregs[9])
-#define MOD_S	(State.cregs[10])
-#define MOD_E	(State.cregs[11])
-#define IBA	(State.cregs[14])
+enum
+{
+  PSW_CR = 0,
+  BPSW_CR = 1,
+  PC_CR = 2,
+  BPC_CR = 3,
+  RPT_C_CR = 7,
+  RPT_S_CR = 8,
+  RPT_E_CR = 9,
+  MOD_S_CR = 10,
+  MOD_E_CR = 11,
+  IBA_CR = 14,
+};
+
+enum
+{
+  PSW_SM_BIT = 0x8000,
+  PSW_EA_BIT = 0x2000,
+  PSW_DB_BIT = 0x1000,
+  PSW_DM_BIT = 0x0800,
+  PSW_IE_BIT = 0x0400,
+  PSW_RP_BIT = 0x0200,
+  PSW_MD_BIT = 0x0100,
+  PSW_FX_BIT = 0x0080,
+  PSW_ST_BIT = 0x0040,
+  PSW_F0_BIT = 0x0008,
+  PSW_F1_BIT = 0x0004,
+  PSW_C_BIT = 0x0001,
+};
+
+/* See simopsc.:move_to_cr() for registers that can not be read-from
+   or assigned-to directly */
+#define PC	(State.cregs[PC_CR])
+#define PSW	(move_from_cr (PSW_CR))
+#define BPSW	(0 + State.cregs[PSW_CR])
+#define BPC	(State.cregs[BPC_CR])
+#define RPT_C	(State.cregs[RPT_C_CR])
+#define RPT_S	(State.cregs[RPT_E_CR])
+#define RPT_E	(State.cregs[RPT_E_CR])
+#define MOD_S	(0 + State.cregs[MOD_S_CR])
+#define MOD_E	(0 + State.cregs[MOD_E_CR])
+#define IBA	(State.cregs[IBA_CR])
 
 #define SIG_D10V_STOP	-1
 #define SIG_D10V_EXIT	-2
@@ -194,3 +226,11 @@ extern void write_longlong PARAMS ((uint8 *addr, int64 data));
 #define SET_DMAP(x)		SW(0xff04,x)
 
 #define JMP(x)			{ PC = (x); State.pc_changed = 1; }
+
+#define AE_VECTOR_START 0xffc3
+#define RIE_VECTOR_START 0xffc2
+#define SDBT_VECTOR_START 0xffd5
+#define TRAP_VECTOR_START 0xffc4	/* vector for trap 0 */
+
+extern void move_to_cr PARAMS ((int cr, reg_t val));
+extern reg_t move_from_cr PARAMS ((int cr));

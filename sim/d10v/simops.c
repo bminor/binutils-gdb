@@ -43,6 +43,76 @@ enum op_types {
   OP_R2R3
 };
 
+
+void
+move_to_cr (int cr, reg_t val)
+{
+  switch (cr)
+    {
+    case PSW_CR:
+      State.SM = (val & PSW_SM_BIT) != 0;
+      State.EA = (val & PSW_EA_BIT) != 0;
+      State.DB = (val & PSW_DB_BIT) != 0;
+      State.DM = (val & PSW_DM_BIT) != 0;
+      State.IE = (val & PSW_IE_BIT) != 0;
+      State.RP = (val & PSW_RP_BIT) != 0;
+      State.MD = (val & PSW_MD_BIT) != 0;
+      State.FX = (val & PSW_FX_BIT) != 0;
+      State.ST = (val & PSW_ST_BIT) != 0;
+      State.F0 = (val & PSW_F0_BIT) != 0;
+      State.F1 = (val & PSW_F1_BIT) != 0;
+      State.C =  (val & PSW_C_BIT) != 0;
+      if (State.ST && !State.FX)
+	{
+	  (*d10v_callback->printf_filtered)
+	    (d10v_callback,
+	     "ERROR at PC 0x%x: ST can only be set when FX is set.\n",
+	     PC<<2);
+	  State.exception = SIGILL;
+	}
+      State.cregs[PSW_CR] = (val & ~0x4032);
+      break;
+    case BPSW_CR:
+      State.cregs[BPSW_CR] = (val & ~0x4032);
+      break;
+    case MOD_S_CR:
+    case MOD_E_CR:
+      State.cregs[cr] = (val & ~0x1);
+      break;
+    default:
+      State.cregs[cr] = val;
+      break;
+    }
+}
+
+reg_t
+move_from_cr (int cr)
+{
+  reg_t val = 0;
+  switch (cr)
+    {
+    case PSW_CR:
+      if (State.SM) val |= PSW_SM_BIT;
+      if (State.EA) val |= PSW_EA_BIT;
+      if (State.DB) val |= PSW_DB_BIT;
+      if (State.DM) val |= PSW_DM_BIT;
+      if (State.IE) val |= PSW_IE_BIT;
+      if (State.RP) val |= PSW_RP_BIT;
+      if (State.MD) val |= PSW_MD_BIT;
+      if (State.FX) val |= PSW_FX_BIT;
+      if (State.ST) val |= PSW_ST_BIT;
+      if (State.F0) val |= PSW_F0_BIT;
+      if (State.F1) val |= PSW_F1_BIT;
+      if (State.C) val |= PSW_C_BIT;
+      break;
+    default:
+      val = State.cregs[cr];
+      break;
+    }
+  return val;
+}
+
+
 #ifdef DEBUG
 static void trace_input_func PARAMS ((char *name,
 				      enum op_types in1,
@@ -1704,24 +1774,7 @@ void
 OP_5200 ()
 {
   trace_input ("mvfc", OP_REG_OUTPUT, OP_CR, OP_VOID);
-  if (OP[1] == 0)
-    {
-      /* PSW is treated specially */
-      PSW = 0;
-      if (State.SM) PSW |= 0x8000;
-      if (State.EA) PSW |= 0x2000;
-      if (State.DB) PSW |= 0x1000;
-      if (State.DM) PSW |= 0x800;
-      if (State.IE) PSW |= 0x400;
-      if (State.RP) PSW |= 0x200;
-      if (State.MD) PSW |= 0x100;
-      if (State.FX) PSW |= 0x80;
-      if (State.ST) PSW |= 0x40;
-      if (State.F0) PSW |= 8;
-      if (State.F1) PSW |= 4;
-      if (State.C) PSW |= 1;
-    }
-  State.regs[OP[0]] = State.cregs[OP[1]];
+  State.regs[OP[0]] = move_from_cr (OP[1]);
   trace_output (OP_REG);
 }
 
@@ -1761,30 +1814,7 @@ void
 OP_5600 ()
 {
   trace_input ("mvtc", OP_REG, OP_CR_OUTPUT, OP_VOID);
-  State.cregs[OP[1]] =  State.regs[OP[0]];
-  if (OP[1] == 0)
-    {
-      /* PSW is treated specially */
-      State.SM = (PSW & 0x8000) ? 1 : 0;
-      State.EA = (PSW & 0x2000) ? 1 : 0;
-      State.DB = (PSW & 0x1000) ? 1 : 0;
-      State.DM = (PSW & 0x800) ? 1 : 0;
-      State.IE = (PSW & 0x400) ? 1 : 0;
-      State.RP = (PSW & 0x200) ? 1 : 0;
-      State.MD = (PSW & 0x100) ? 1 : 0;
-      State.FX = (PSW & 0x80) ? 1 : 0;
-      State.ST = (PSW & 0x40) ? 1 : 0;
-      State.F0 = (PSW & 8) ? 1 : 0;
-      State.F1 = (PSW & 4) ? 1 : 0;
-      State.C = PSW & 1;
-      if (State.ST && !State.FX)
-	{
-	  (*d10v_callback->printf_filtered) (d10v_callback,
-					     "ERROR at PC 0x%x: ST can only be set when FX is set.\n",
-					     PC<<2);
-	  State.exception = SIGILL;
-	}
-    }
+  move_to_cr (OP[1], State.regs[OP[0]]);
   trace_output (OP_CR_REVERSE);
 }
 
@@ -2033,7 +2063,7 @@ OP_5F40 ()
 {
   trace_input ("rte", OP_VOID, OP_VOID, OP_VOID);
   PC = BPC;
-  PSW = BPSW;
+  move_to_cr (PSW_CR, BPSW);
   trace_output (OP_VOID);
 }
 
@@ -2621,42 +2651,14 @@ OP_5F00 ()
   switch (OP[0])
     {
     default:
-#if 0
-      (*d10v_callback->printf_filtered) (d10v_callback, "Unknown trap code %d\n", OP[0]);
-      State.exception = SIGILL;
-#else
-      /* Use any other traps for batch debugging. */
       {
-	int i;
-	static int first_time = 1;
-
-	if (first_time)
-	  {
-	    first_time = 0;
-	    (*d10v_callback->printf_filtered) (d10v_callback, "Trap  #     PC ");
-	    for (i = 0; i < 16; i++)
-	      (*d10v_callback->printf_filtered) (d10v_callback, "  %sr%d", (i > 9) ? "" : " ", i);
-	    (*d10v_callback->printf_filtered) (d10v_callback, "         a0         a1 f0 f1 c\n");
-	  }
-
-	(*d10v_callback->printf_filtered) (d10v_callback, "Trap %2d 0x%.4x:", (int)OP[0], (int)PC);
-
-	for (i = 0; i < 16; i++)
-	  (*d10v_callback->printf_filtered) (d10v_callback, " %.4x", (int) State.regs[i]);
-
-	for (i = 0; i < 2; i++)
-	  (*d10v_callback->printf_filtered) (d10v_callback, " %.2x%.8lx",
-					     ((int)(State.a[i] >> 32) & 0xff),
-					     ((unsigned long)State.a[i]) & 0xffffffff);
-
-	(*d10v_callback->printf_filtered) (d10v_callback, "  %d  %d %d\n",
-					   State.F0 != 0, State.F1 != 0, State.C != 0);
-	(*d10v_callback->flush_stdout) (d10v_callback);
-	break;
+	uint16 vec = OP[0] + TRAP_VECTOR_START;
+	BPC = PC + 1;
+	move_to_cr (BPSW_CR, PSW);
+	move_to_cr (PSW_CR, PSW & PSW_SM_BIT);
+	JMP (vec);
       }
-#endif
-
-    case 0:			/* old system call trap, to be deleted */
+      break;
     case 15:			/* new system call trap */
       /* Trap 15 is used for simulating low-level I/O */
       {
