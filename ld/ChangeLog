@@ -1,3 +1,9 @@
+2004-12-23  Nick Clifton  <nickc@redhat.com>
+
+	PR 600
+	* emulparams/shelf.sh (.stack): Increase stack start address to
+	0x300000.
+
 2004-12-20  Nick Clifton  <nickc@redhat.com>
 
 	* ldmain.c (main): Issue an error message if -static and -shared
