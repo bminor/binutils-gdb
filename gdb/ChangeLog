@@ -1,5 +1,13 @@
 2002-02-19  Richard Earnshaw  <rearnsha@arm.com>
 
+	* armnbsd-nat.c : ANSIfy all function declarations.
+	(fetch_register, fetch_regs, fetch_fp_register, fetch_fp_regs): New.
+	(fetch_inferior_registers): Re-implement in terms of above.
+	(store_register, store_regs, store_fp_register, store_fp_regs): New.
+	(store_inferior_registers): Re-implement in terms of above.
+
+2002-02-19  Richard Earnshaw  <rearnsha@arm.com>
+
 	* arm-linux-nat.c: Linux -> GNU/Linux when not talking about the 
 	kernel.
 	* arm-linux-tdep.c: Likewise.

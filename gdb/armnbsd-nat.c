@@ -31,45 +31,332 @@
 #include "inferior.h"
 #include "regcache.h"
 
-void
-fetch_inferior_registers (regno)
-     int regno;
+extern int arm_apcs_32;
+
+static void
+fetch_register (int regno)
 {
   struct reg inferior_registers;
-  struct fpreg inferior_fpregisters;
+  int ret;
 
-  ptrace (PT_GETREGS, PIDGET (inferior_ptid),
-	  (PTRACE_ARG3_TYPE) &inferior_registers, 0);
-  memcpy (&registers[REGISTER_BYTE (0)], &inferior_registers,
-	  16 * sizeof (unsigned int));
-  memcpy (&registers[REGISTER_BYTE (ARM_PS_REGNUM)],
-	  &inferior_registers.r_cpsr,
-	  sizeof (unsigned int));
-  ptrace (PT_GETFPREGS, PIDGET (inferior_ptid),
-	  (PTRACE_ARG3_TYPE) &inferior_fpregisters, 0);
-  memcpy (&registers[REGISTER_BYTE (ARM_F0_REGNUM)],
-	  &inferior_fpregisters.fpr[0],
-	  8 * sizeof (fp_reg_t));
-  memcpy (&registers[REGISTER_BYTE (ARM_FPS_REGNUM)],
-	  &inferior_fpregisters.fpr_fpsr, sizeof (unsigned int));
-  registers_fetched ();
+  ret = ptrace (PT_GETREGS, PIDGET (inferior_ptid),
+		(PTRACE_ARG3_TYPE) &inferior_registers, 0);
+
+  if (ret < 0)
+    {
+      warning ("unable to fetch general register");
+      return;
+    }
+
+  switch (regno)
+    {
+    case ARM_SP_REGNUM:
+      supply_register (ARM_SP_REGNUM, (char *) &inferior_registers.r_sp);
+      break;
+
+    case ARM_LR_REGNUM:
+      supply_register (ARM_LR_REGNUM, (char *) &inferior_registers.r_lr);
+      break;
+
+    case ARM_PC_REGNUM:
+      /* This is ok: we're running native... */
+      inferior_registers.r_pc = ADDR_BITS_REMOVE (inferior_registers.r_pc);
+      supply_register (ARM_PC_REGNUM, (char *) &inferior_registers.r_pc);
+      break;
+
+    case ARM_PS_REGNUM:
+      if (arm_apcs_32)
+	supply_register (ARM_PS_REGNUM, (char *) &inferior_registers.r_cpsr);
+      else
+	supply_register (ARM_PS_REGNUM, (char *) &inferior_registers.r_pc);
+      break;
+
+    default:
+      supply_register (regno, (char *) &inferior_registers.r[regno]);
+      break;
+    }
+}
+
+static void
+fetch_regs ()
+{
+  struct reg inferior_registers;
+  int ret;
+  int regno;
+
+  ret = ptrace (PT_GETREGS, PIDGET (inferior_ptid),
+		(PTRACE_ARG3_TYPE) &inferior_registers, 0);
+
+  if (ret < 0)
+    {
+      warning ("unable to fetch general registers");
+      return;
+    }
+
+  for (regno = ARM_A1_REGNUM; regno < ARM_SP_REGNUM; regno++)
+    supply_register (regno, (char *) &inferior_registers.r[regno]);
+
+  supply_register (ARM_SP_REGNUM, (char *) &inferior_registers.r_sp);
+  supply_register (ARM_LR_REGNUM, (char *) &inferior_registers.r_lr);
+  /* This is ok: we're running native... */
+  inferior_registers.r_pc = ADDR_BITS_REMOVE (inferior_registers.r_pc);
+  supply_register (ARM_PC_REGNUM, (char *) &inferior_registers.r_pc);
+
+  if (arm_apcs_32)
+    supply_register (ARM_PS_REGNUM, (char *) &inferior_registers.r_cpsr);
+  else
+    supply_register (ARM_PS_REGNUM, (char *) &inferior_registers.r_pc);
+}
+
+static void
+fetch_fp_register (int regno)
+{
+  struct fpreg inferior_fp_registers;
+  int ret;
+
+  ret = ptrace (PT_GETFPREGS, PIDGET (inferior_ptid),
+		(PTRACE_ARG3_TYPE) &inferior_fp_registers, 0);
+
+  if (ret < 0)
+    {
+      warning ("unable to fetch floating-point register");
+      return;
+    }
+
+  switch (regno)
+    {
+    case ARM_FPS_REGNUM:
+      supply_register (ARM_FPS_REGNUM,
+		       (char *) &inferior_fp_registers.fpr_fpsr);
+      break;
+
+    default:
+      supply_register
+	(regno, (char *) &inferior_fp_registers.fpr[regno - ARM_F0_REGNUM]);
+      break;
+    }
+}
+
+static void
+fetch_fp_regs ()
+{
+  struct fpreg inferior_fp_registers;
+  int ret;
+  int regno;
+
+  ret = ptrace (PT_GETFPREGS, PIDGET (inferior_ptid),
+		(PTRACE_ARG3_TYPE) &inferior_fp_registers, 0);
+
+  if (ret < 0)
+    {
+      warning ("unable to fetch general registers");
+      return;
+    }
+
+  for (regno = ARM_F0_REGNUM; regno <= ARM_F7_REGNUM; regno++)
+    supply_register
+      (regno, (char *) &inferior_fp_registers.fpr[regno - ARM_F0_REGNUM]);
+
+  supply_register (ARM_FPS_REGNUM, (char *) &inferior_fp_registers.fpr_fpsr);
 }
 
 void
-store_inferior_registers (regno)
-     int regno;
+fetch_inferior_registers (int regno)
+{
+  if (regno >= 0)
+    {
+      if (regno < ARM_F0_REGNUM || regno > ARM_FPS_REGNUM)
+	fetch_register (regno);
+      else
+	fetch_fp_register (regno);
+    }
+  else
+    {
+      fetch_regs ();
+      fetch_fp_regs ();
+    }
+}
+
+
+static void
+store_register (int regno)
 {
   struct reg inferior_registers;
+  int ret;
 
-  memcpy (&inferior_registers, &registers[REGISTER_BYTE (0)],
-	  16 * sizeof (unsigned int));
-  memcpy (&inferior_registers.r_cpsr,
-	  &registers[REGISTER_BYTE (ARM_PS_REGNUM)],
-	  sizeof (unsigned int));
-  ptrace (PT_SETREGS, PIDGET (inferior_ptid),
-	  (PTRACE_ARG3_TYPE) &inferior_registers, 0);
+  ret = ptrace (PT_GETREGS, PIDGET (inferior_ptid),
+		(PTRACE_ARG3_TYPE) &inferior_registers, 0);
 
-  /* XXX Set FP regs. */
+  if (ret < 0)
+    {
+      warning ("unable to fetch general registers");
+      return;
+    }
+
+  switch (regno)
+    {
+    case ARM_SP_REGNUM:
+      regcache_collect (ARM_SP_REGNUM, (char *) &inferior_registers.r_sp);
+      break;
+
+    case ARM_LR_REGNUM:
+      regcache_collect (ARM_LR_REGNUM, (char *) &inferior_registers.r_lr);
+      break;
+
+    case ARM_PC_REGNUM:
+      if (arm_apcs_32)
+	regcache_collect (ARM_PC_REGNUM, (char *) &inferior_registers.r_pc);
+      else
+	{
+	  unsigned pc_val;
+
+	  regcache_collect (ARM_PC_REGNUM, (char *) &pc_val);
+	  
+	  pc_val = ADDR_BITS_REMOVE (pc_val);
+	  inferior_registers.r_pc
+	    ^= ADDR_BITS_REMOVE (inferior_registers.r_pc);
+	  inferior_registers.r_pc |= pc_val;
+	}
+      break;
+
+    case ARM_PS_REGNUM:
+      if (arm_apcs_32)
+	regcache_collect (ARM_PS_REGNUM, (char *) &inferior_registers.r_cpsr);
+      else
+	{
+	  unsigned psr_val;
+
+	  regcache_collect (ARM_PS_REGNUM, (char *) &psr_val);
+
+	  psr_val ^= ADDR_BITS_REMOVE (psr_val);
+	  inferior_registers.r_pc = ADDR_BITS_REMOVE (inferior_registers.r_pc);
+	  inferior_registers.r_pc |= psr_val;
+	}
+      break;
+
+    default:
+      regcache_collect (regno, (char *) &inferior_registers.r[regno]);
+      break;
+    }
+
+  ret = ptrace (PT_SETREGS, PIDGET (inferior_ptid),
+		(PTRACE_ARG3_TYPE) &inferior_registers, 0);
+
+  if (ret < 0)
+    warning ("unable to write register %d to inferior", regno);
+}
+
+static void
+store_regs ()
+{
+  struct reg inferior_registers;
+  int ret;
+  int regno;
+
+
+  for (regno = ARM_A1_REGNUM; regno < ARM_SP_REGNUM; regno++)
+    regcache_collect (regno, (char *) &inferior_registers.r[regno]);
+
+  regcache_collect (ARM_SP_REGNUM, (char *) &inferior_registers.r_sp);
+  regcache_collect (ARM_LR_REGNUM, (char *) &inferior_registers.r_lr);
+
+  if (arm_apcs_32)
+    {
+      regcache_collect (ARM_PC_REGNUM, (char *) &inferior_registers.r_pc);
+      regcache_collect (ARM_PS_REGNUM, (char *) &inferior_registers.r_cpsr);
+    }
+  else
+    {
+      unsigned pc_val;
+      unsigned psr_val;
+
+      regcache_collect (ARM_PC_REGNUM, (char *) &pc_val);
+      regcache_collect (ARM_PS_REGNUM, (char *) &psr_val);
+	  
+      pc_val = ADDR_BITS_REMOVE (pc_val);
+      psr_val ^= ADDR_BITS_REMOVE (psr_val);
+
+      inferior_registers.r_pc = pc_val | psr_val;
+    }
+
+  ret = ptrace (PT_SETREGS, PIDGET (inferior_ptid),
+		(PTRACE_ARG3_TYPE) &inferior_registers, 0);
+
+  if (ret < 0)
+    warning ("unable to store general registers");
+}
+
+static void
+store_fp_register (int regno)
+{
+  struct fpreg inferior_fp_registers;
+  int ret;
+
+  ret = ptrace (PT_GETFPREGS, PIDGET (inferior_ptid),
+		(PTRACE_ARG3_TYPE) &inferior_fp_registers, 0);
+
+  if (ret < 0)
+    {
+      warning ("unable to fetch floating-point registers");
+      return;
+    }
+
+  switch (regno)
+    {
+    case ARM_FPS_REGNUM:
+      regcache_collect (ARM_FPS_REGNUM,
+			(char *) &inferior_fp_registers.fpr_fpsr);
+      break;
+
+    default:
+      regcache_collect
+	(regno, (char *) &inferior_fp_registers.fpr[regno - ARM_F0_REGNUM]);
+      break;
+    }
+
+  ret = ptrace (PT_SETFPREGS, PIDGET (inferior_ptid),
+		(PTRACE_ARG3_TYPE) &inferior_fp_registers, 0);
+
+  if (ret < 0)
+    warning ("unable to write register %d to inferior", regno);
+}
+
+static void
+store_fp_regs ()
+{
+  struct fpreg inferior_fp_registers;
+  int ret;
+  int regno;
+
+
+  for (regno = ARM_F0_REGNUM; regno <= ARM_F7_REGNUM; regno++)
+    regcache_collect
+      (regno, (char *) &inferior_fp_registers.fpr[regno - ARM_F0_REGNUM]);
+
+  regcache_collect (ARM_FPS_REGNUM, (char *) &inferior_fp_registers.fpr_fpsr);
+
+  ret = ptrace (PT_SETFPREGS, PIDGET (inferior_ptid),
+		(PTRACE_ARG3_TYPE) &inferior_fp_registers, 0);
+
+  if (ret < 0)
+    warning ("unable to store floating-point registers");
+}
+
+void
+store_inferior_registers (int regno)
+{
+  if (regno >= 0)
+    {
+      if (regno < ARM_F0_REGNUM || regno > ARM_FPS_REGNUM)
+	store_register (regno);
+      else
+	store_fp_register (regno);
+    }
+  else
+    {
+      store_regs ();
+      store_fp_regs ();
+    }
 }
 
 struct md_core
@@ -79,11 +366,8 @@ struct md_core
 };
 
 void
-fetch_core_registers (core_reg_sect, core_reg_size, which, ignore)
-     char *core_reg_sect;
-     unsigned core_reg_size;
-     int which;
-     CORE_ADDR ignore;
+fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
+		      int which, CORE_ADDR ignore)
 {
   struct md_core *core_reg = (struct md_core *) core_reg_sect;
 
