@@ -913,12 +913,21 @@ DEPTC_i960_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-i960.h \
   $(INCDIR)/safe-ctype.h $(INCDIR)/obstack.h $(INCDIR)/opcode/i960.h
 
+DEPTC_ip2k_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-ip2k.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h dwarf2dbg.h \
+  subsegs.h $(INCDIR)/obstack.h $(srcdir)/../opcodes/ip2k-desc.h \
+  $(INCDIR)/opcode/cgen.h $(srcdir)/../opcodes/ip2k-opc.h \
+  cgen.h $(INCDIR)/elf/common.h $(INCDIR)/elf/ip2k.h \
+  $(INCDIR)/elf/reloc-macros.h $(BFDDIR)/libbfd.h
+
 DEPTC_ip2k_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-ip2k.h \
-  $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
-  $(srcdir)/../opcodes/ip2k-desc.h $(INCDIR)/opcode/cgen.h \
-  $(srcdir)/../opcodes/ip2k-opc.h cgen.h
+  dwarf2dbg.h subsegs.h $(INCDIR)/obstack.h $(srcdir)/../opcodes/ip2k-desc.h \
+  $(INCDIR)/opcode/cgen.h $(srcdir)/../opcodes/ip2k-opc.h \
+  cgen.h $(INCDIR)/elf/ip2k.h $(INCDIR)/elf/reloc-macros.h \
+  $(BFDDIR)/libbfd.h
 
 DEPTC_m32r_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
   $(srcdir)/config/tc-m32r.h $(INCDIR)/coff/internal.h \
@@ -1549,6 +1558,11 @@ DEPOBJ_i960_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
   struc-symbol.h $(INCDIR)/aout/aout64.h
 
+DEPOBJ_ip2k_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-ip2k.h $(INCDIR)/coff/internal.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h \
+  subsegs.h
+
 DEPOBJ_ip2k_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-ip2k.h \
@@ -2085,6 +2099,10 @@ DEP_i960_elf = $(srcdir)/config/obj-elf.h $(INCDIR)/symcat.h \
   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-i960.h
 
+DEP_ip2k_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-ip2k.h \
+  $(INCDIR)/symcat.h $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h \
+  $(INCDIR)/bfdlink.h
+
 DEP_ip2k_elf = $(srcdir)/config/obj-elf.h $(INCDIR)/symcat.h \
   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-ip2k.h
@@ -2400,7 +2418,7 @@ configure configure.in gdbinit.in itbl-lex.c itbl-parse.c
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP_ENV = --best
 SOURCES = $(gasp_new_SOURCES) $(itbl_test_SOURCES) $(as_new_SOURCES) $(EXTRA_as_new_SOURCES)
 OBJECTS = $(gasp_new_OBJECTS) $(itbl_test_OBJECTS) $(as_new_OBJECTS)
