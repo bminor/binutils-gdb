@@ -3528,8 +3528,7 @@ gdb_set_bp (clientData, interp, objc, objv)
     return TCL_ERROR;
 
   sal.line = line;
-  sal.pc = find_line_pc (sal.symtab, sal.line);
-  if (sal.pc == 0)
+  if (!find_line_pc (sal.symtab, sal.line, &sal.pc))
     return TCL_ERROR;
 
   sal.section = find_pc_overlay (sal.pc);
