@@ -1,3 +1,8 @@
+Thu Sep 12 12:03:05 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* simops.c (trace_input): Use find_nearest_line to print line
+	number, function name or file name of PC.
+
 Wed Sep 11 16:44:37 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* simops.c: Add tracing support.  Use SEXTxx macros instead of

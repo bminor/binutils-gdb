@@ -2,6 +2,7 @@
 #include "v850_sim.h"
 #include "simops.h"
 #include "sys/syscall.h"
+#include "bfd.h"
 
 enum op_types {
   OP_UNKNOWN,
@@ -32,6 +33,11 @@ enum op_types {
 #ifdef DEBUG
 static void trace_input PARAMS ((char *name, enum op_types type, int size));
 static void trace_output PARAMS ((enum op_types result));
+static int init_text_p = 0;
+static asection *text;
+static bfd_vma text_start;
+static bfd_vma text_end;
+extern bfd *sim_bfd;
 
 #ifndef SIZE_INSTRUCTION
 #define SIZE_INSTRUCTION 6
@@ -45,23 +51,78 @@ static void trace_output PARAMS ((enum op_types result));
 #define SIZE_VALUES 11
 #endif
 
+#ifndef SIZE_LOCATION
+#define SIZE_LOCATION 40
+#endif
+
 static void
 trace_input (name, type, size)
      char *name;
      enum op_types type;
      int size;
 {
-  char buf[80];
+  char buf[1024];
+  char *p;
   uint32 values[3];
   int num_values, i;
   char *cond;
+  asection *s;
+  const char *filename;
+  const char *functionname;
+  unsigned int linenumber;
 
   if ((v850_debug & DEBUG_TRACE) == 0)
     return;
 
-  (*v850_callback->printf_filtered) (v850_callback,
-				     "0x%.8x: %-*s",
+  buf[0] = '\0';
+  if (!init_text_p)
+    {
+      init_text_p = 1;
+      for (s = sim_bfd->sections; s; s = s->next)
+	if (strcmp (bfd_get_section_name (sim_bfd, s), ".text") == 0)
+	  {
+	    text = s;
+	    text_start = bfd_get_section_vma (sim_bfd, s);
+	    text_end = text_start + bfd_section_size (sim_bfd, s);
+	    break;
+	  }
+    }
+
+  if (text && PC >= text_start && PC < text_end)
+    {
+      filename = (const char *)0;
+      functionname = (const char *)0;
+      linenumber = 0;
+      if (bfd_find_nearest_line (sim_bfd, text, (struct symbol_cache_entry **)0, PC - text_start,
+				 &filename, &functionname, &linenumber))
+	{
+	  p = buf;
+	  if (linenumber)
+	    {
+	      sprintf (p, "Line %5d ", linenumber);
+	      p += strlen (p);
+	    }
+
+	  if (functionname)
+	    {
+	      sprintf (p, "Func %s ", functionname);
+	      p += strlen (p);
+	    }
+	  else if (filename)
+	    {
+	      char *q = (char *) strrchr (filename, '/');
+	      sprintf (p, "File %s ", (q) ? q+1 : filename);
+	      p += strlen (p);
+	    }
+
+	  if (*p == ' ')
+	    *p = '\0';
+	}
+    }
+
+  (*v850_callback->printf_filtered) (v850_callback, "0x%.8x: %-*.*s %-*s",
 				     (unsigned)PC,
+				     SIZE_LOCATION, SIZE_LOCATION, buf,
 				     SIZE_INSTRUCTION, name);
 
   switch (type)
