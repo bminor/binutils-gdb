@@ -1,3 +1,13 @@
+Fri Oct  6 11:56:49 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
+
+	* callback.c (fdbad): Fix typo in comment.
+	(os_close, os_isatty, os_lseek, os_read, os_write): Use if statements
+	rather than || to get correct return value.
+	(os_write_stdout): Pass missing first argument to os_write.
+	* remote-sim.c: Include callback.h.
+	(_initialize_remote_sim): Call sim_set_callbacks and then initialize
+	the callbacks.
+
 Thu Oct  5 17:28:09 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* values.c allocate_repeat_value):  Allocate an array type, and

@@ -34,6 +34,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdbcore.h"
 #include "remote-sim.h"
 #include "remote-utils.h"
+#include "callback.h"
 
 /* Naming convention:
 
@@ -459,4 +460,7 @@ _initialize_remote_sim ()
 
   add_com ("sim <command>", class_obscure, simulator_command,
 	   "Send a command to the simulator."); 
+
+  sim_set_callbacks (&default_callback);
+  default_callback.init (&default_callback);
 }

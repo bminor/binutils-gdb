@@ -56,7 +56,7 @@ wrap (p, val)
   return val;
 }
 
-/* Make sure the FD provided is ok.  If not, return non -1
+/* Make sure the FD provided is ok.  If not, return non-zero
    and set errno. */
 
 static int 
@@ -85,7 +85,13 @@ os_close (p, fd)
      host_callback *p;
      int fd;
 {
-  return fdbad (p, fd) || wrap (p, close (fdmap (p, fd)));
+  int result;
+
+  result = fdbad (p, fd);
+  if (result)
+    return result;
+  result = wrap (p, close (fdmap (p, fd)));
+  return result;
 }
 
 int 
@@ -102,7 +108,13 @@ os_isatty (p, fd)
      host_callback *p;
      int fd;
 {
-  return fdbad (p, fd) || wrap (p, isatty (fdmap (fd)));
+  int result;
+
+  result = fdbad (p, fd);
+  if (result)
+    return result;
+  result = wrap (p, isatty (fdmap (fd)));
+  return result;
 }
 
 int 
@@ -112,7 +124,13 @@ os_lseek (p, fd, off, way)
      long off;
      int way;
 {
-  return fdbad (p, fd) || lseek (fdmap (p, fd), off, way);
+  int result;
+
+  result = fdbad (p, fd);
+  if (result)
+    return result;
+  result = lseek (fdmap (p, fd), off, way);
+  return result;
 }
 
 int 
@@ -148,7 +166,13 @@ os_read (p, fd, buf, len)
      char *buf;
      int len;
 {
-  return fdbad (p, fd) || wrap (p, read (fdmap (p, fd), buf, len));
+  int result;
+
+  result = fdbad (p, fd);
+  if (result)
+    return result;
+  result = wrap (p, read (fdmap (p, fd), buf, len));
+  return result;
 }
 
 int 
@@ -167,7 +191,13 @@ os_write (p, fd, buf, len)
      const char *buf;
      int len;
 {
-  return fdbad (p, fd) || wrap (p, write (fdmap (p, fd), buf, len));
+  int result;
+
+  result = fdbad (p, fd);
+  if (result)
+    return result;
+  result = wrap (p, write (fdmap (p, fd), buf, len));
+  return result;
 }
 
 /* ignore the grossness of INSIDE_SIMULATOR, it will go away one day. */
@@ -178,7 +208,7 @@ os_write_stdout (p, buf, len)
      int len;
 {
 #ifdef INSIDE_SIMULATOR
-  return os_write (1, buf, len);
+  return os_write (p, 1, buf, len);
 #else
   int i;
   char b[2];
