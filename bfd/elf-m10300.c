@@ -21,6 +21,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "sysdep.h"
 #include "libbfd.h"
 #include "elf-bfd.h"
+
+#define START_RELOC_NUMBERS(name)   enum name {
+#define RELOC_NUMBER(name, number)  name = number ,
+#define END_RELOC_NUMBERS           R_MN10300_MAX };
 #include "elf/mn10300.h"
 
 struct elf32_mn10300_link_hash_entry
@@ -112,22 +116,6 @@ static void compute_function_info
    does absolutely nothing.  */
 #define USE_RELA
 
-enum reloc_type
-{
-  R_MN10300_NONE = 0,
-  R_MN10300_32,
-  R_MN10300_16,
-  R_MN10300_8,
-  R_MN10300_PCREL32,
-  R_MN10300_PCREL16,
-  R_MN10300_PCREL8,
-
-  /* These are GNU extensions to enable C++ vtable garbage collection.  */
-  R_MN10300_GNU_VTINHERIT,
-  R_MN10300_GNU_VTENTRY,
-
-  R_MN10300_MAX
-};
 
 static reloc_howto_type elf_mn10300_howto_table[] =
 {
@@ -458,7 +446,7 @@ mn10300_elf_final_link_relocate (howto, input_bfd, output_bfd,
     case R_MN10300_8:
       value += addend;
 
-      if ((long)value > 0x7fff || (long)value < -0x8000)
+      if ((long)value > 0x7f || (long)value < -0x80)
 	return bfd_reloc_overflow;
 
       bfd_put_8 (input_bfd, value, hit_data);
@@ -765,7 +753,7 @@ elf32_mn10300_finish_hash_table_entry (gen_entry, in_args)
 	We don't handle imm16->imm8 or d16->d8 as they're very rare
 	and somewhat more difficult to support.  */
 
-static boolean 
+static boolean
 mn10300_elf_relax_section (abfd, sec, link_info, again)
      bfd *abfd;
      asection *sec;
@@ -925,7 +913,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 			  new_name = alloca (strlen (sym_name) + 10);
 			  sprintf (new_name, "%s_%08x", sym_name, (int)sym_sec);
 			  sym_name = new_name;
-		
+
 			  hash = (struct elf32_mn10300_link_hash_entry *)
 				   elf_link_hash_lookup (&hash_table->static_hash_table->root,
 						         sym_name, true,
@@ -945,7 +933,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 					contents + irel->r_offset - 1);
 		      if (code != 0xdd && code != 0xcd)
 			hash->flags |= MN10300_CONVERT_CALL_TO_CALLS;
-		
+
 		      /* If this is a jump/call, then bump the direct_calls
 			 counter.  Else force "call" to "calls" conversions.  */
 		      if (r_type == R_MN10300_PCREL32
@@ -964,7 +952,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 
 		  Elf32_External_Sym *esym, *esymend;
 		  int idx, shndx;
-		 
+
 		  shndx = _bfd_elf_section_from_bfd_section (input_bfd,
 							     section);
 
@@ -1118,7 +1106,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	      int shndx;
 	      Elf32_External_Sym *esym, *esymend;
 	      int idx;
-	      
+
 	      /* Skip non-code sections and empty sections.  */
 	      if ((section->flags & SEC_CODE) == 0 || section->_raw_size == 0)
 		continue;
@@ -1201,7 +1189,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 
 		  if (sym_hash == NULL)
 		    continue;
-		      
+
 		  if (! ((sym_hash)->flags & MN10300_CONVERT_CALL_TO_CALLS)
 		      && ! ((sym_hash)->flags & MN10300_DELETED_PROLOGUE_BYTES))
 		    {
@@ -1774,7 +1762,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	    continue;
 
 	  /* Now make sure we are a conditional branch.  This may not
-	     be necessary, but why take the chance. 
+	     be necessary, but why take the chance.
 
 	     Note these checks assume that R_MN10300_PCREL8 relocs
 	     only occur on bCC and bCCx insns.  If they occured
@@ -1851,7 +1839,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		break;
 	    }
 	  bfd_put_8 (abfd, code, contents + irel->r_offset - 1);
-	  
+
 	  /* Set the reloc type and symbol for the first branch
 	     from the second branch.  */
 	  irel->r_info = nrel->r_info;
@@ -1877,7 +1865,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	  bfd_vma value = symval;
 	  value += irel->r_addend;
 
-	  /* See if the value will fit in 16 bits. 
+	  /* See if the value will fit in 16 bits.
 	     We allow any 16bit match here.  We prune those we can't
 	     handle below.  */
 	  if ((long)value < 0x7fff && (long)value > -0x8000)
@@ -1886,7 +1874,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 
 	      /* Most insns which have 32bit operands are 6 bytes long;
 		 exceptions are pcrel insns and bit insns.
-		 
+
 		 We handle pcrel insns above.  We don't bother trying
 		 to handle the bit insns here.
 
@@ -2704,6 +2692,30 @@ _bfd_mn10300_elf_object_p (abfd)
   return true;
 }
 
+/* Merge backend specific data from an object file to the output
+   object file when linking.  */
+
+boolean
+_bfd_mn10300_elf_merge_private_bfd_data (ibfd, obfd)
+     bfd *ibfd;
+     bfd *obfd;
+{
+  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
+      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+    return true;
+
+  if (bfd_get_arch (obfd) == bfd_get_arch (ibfd)
+      && bfd_get_mach (obfd) < bfd_get_mach (ibfd))
+    {
+      if (! bfd_set_arch_mach (obfd, bfd_get_arch (ibfd),
+                               bfd_get_mach (ibfd)))
+        return false;
+    }
+
+  return true;
+}
+
+
 #define TARGET_LITTLE_SYM	bfd_elf32_mn10300_vec
 #define TARGET_LITTLE_NAME	"elf32-mn10300"
 #define ELF_ARCH		bfd_arch_mn10300
@@ -2728,6 +2740,9 @@ _bfd_mn10300_elf_object_p (abfd)
 #define elf_backend_final_write_processing \
                                         _bfd_mn10300_elf_final_write_processing
 #define elf_backend_object_p            _bfd_mn10300_elf_object_p
+
+#define bfd_elf32_bfd_merge_private_bfd_data \
+                                        _bfd_mn10300_elf_merge_private_bfd_data
 
 
 #include "elf32-target.h"

@@ -1,3 +1,8 @@
+1998-07-22 13:08  Ulrich Drepper  <drepper@cygnus.com>
+
+	* elf-mn10300.c: Before include system specific ELF header define
+	START_RELOC_NUMBERS, RELOC_NUMBER, and END_RELOC_NUMBERS.
+
 Wed Jul 22 13:46:51 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf64-mips.c (mips_elf64_reloc_type): Copy Ulrich's elf32-mips.c
