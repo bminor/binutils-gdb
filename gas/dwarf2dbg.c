@@ -44,8 +44,13 @@
 #include "dwarf2dbg.h"
 
 #ifndef DWARF2_FORMAT
-#define DWARF2_FORMAT() dwarf2_format_32bit
+# define DWARF2_FORMAT() dwarf2_format_32bit
 #endif
+
+#ifndef DWARF2_ADDR_SIZE
+# define DWARF2_ADDR_SIZE(bfd) (bfd_arch_bits_per_address (bfd) / 8);
+#endif
+
 
 #ifdef BFD_ASSEMBLER
 
@@ -1341,7 +1346,7 @@ dwarf2_finish ()
     return;
 
   /* Calculate the size of an address for the target machine.  */
-  sizeof_address = bfd_arch_bits_per_address (stdoutput) / 8;
+  sizeof_address = DWARF2_ADDR_SIZE (stdoutput);
 
   /* Create and switch to the line number section.  */
   line_seg = subseg_new (".debug_line", 0);

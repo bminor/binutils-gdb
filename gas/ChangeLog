@@ -1,3 +1,10 @@
+2002-12-25  Alexandre Oliva  <aoliva@redhat.com>
+
+	* dwarf2dbg.c (DWARF2_ADDR_SIZE): New macro.
+	(dwarf2_finish): Use it.
+	* doc/internals.texi (DWARF2_ADDR_SIZE): Document it.
+	* config/tc-mips.h (DWARF2_ADDR_SIZE): Override.
+
 2002-12-20  DJ Delorie  <dj@redhat.com>
 
 	* config/tc-xstormy16.c (md_cgen_lookup_reloc): Support

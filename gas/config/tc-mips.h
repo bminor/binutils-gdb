@@ -185,4 +185,7 @@ extern void mips_enable_auto_align PARAMS ((void));
 extern enum dwarf2_format mips_dwarf2_format PARAMS ((void));
 #define DWARF2_FORMAT() mips_dwarf2_format ()
 
+#define DWARF2_ADDR_SIZE(bfd) \
+  (DWARF2_FORMAT () == dwarf2_format_32bit ? 4 : 8)
+
 #endif /* TC_MIPS */
