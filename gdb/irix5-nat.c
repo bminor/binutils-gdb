@@ -761,7 +761,7 @@ GLOBAL FUNCTION
 
 SYNOPSIS
 
-	int solib_address (CORE_ADDR address)
+	char *solib_address (CORE_ADDR address)
 
 DESCRIPTION
 
@@ -777,7 +777,7 @@ DESCRIPTION
 	mapped in.
  */
 
-int
+char *
 solib_address (address)
      CORE_ADDR address;
 {
@@ -789,9 +789,7 @@ solib_address (address)
 	{
 	  if ((address >= (CORE_ADDR) LM_ADDR (so)) &&
 	      (address < (CORE_ADDR) so -> lmend))
-	    {
-	      return (1);
-	    }
+	    return (so->lm.o_path);
 	}
     }
   return (0);
