@@ -46,10 +46,6 @@ typedef struct
 {
   asymbol symbol;
   Elf_Internal_Sym internal_elf_sym;
-  /* these are used for the generation of .stabX symbols (?) */
-  short desc;
-  unsigned char type;
-  char other;
   union
     {
       unsigned int hppa_arg_reloc;

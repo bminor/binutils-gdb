@@ -1,3 +1,12 @@
+Tue Sep 14 18:20:36 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* elf32-i386.c (elf_howto_table): Add bfd_elf_generic_reloc
+	special function for all reloc entries.
+	* elf32-target.h (TARGET_LITTLE_SYM): Add SEC_CODE to
+	section_flags.
+	* libelf.h (elf_symbol_type): Remove desc, type and other fields.
+	* Makefile.in (elf32-*.o): These depend upon elf32-target.h.
+
 Tue Sep 14 14:34:45 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 
 	* libbfd-in.h (struct artdata):  Add armap_timestamp and
