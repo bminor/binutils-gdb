@@ -690,6 +690,8 @@ ld.dvi: $(srcdir)/ld.texinfo configdoc.texi ldver.texi
 	TEXINPUTS=$(top_srcdir)/../texinfo:$$TEXINPUTS \
 	  MAKEINFO='$(MAKEINFO) -I $(srcdir) -I $(BFDDIR)/doc' $(TEXI2DVI) $(srcdir)/ld.texinfo
 
+MAINTAINERCLEANFILES = ldver.texi
+
 # We want to reconfigure if configure.host or configure.tgt changes.
 config.status: $(srcdir)/configure $(srcdir)/configure.host $(srcdir)/configure.tgt
 	$(SHELL) ./config.status --recheck
