@@ -6374,30 +6374,40 @@ elf_section_ignore_discarded_relocs (asection *sec)
   return FALSE;
 }
 
-/* Return TRUE if we should complain about a reloc in SEC against a
-   symbol defined in a discarded section.  */
+enum action_discarded
+  {
+    COMPLAIN = 1,
+    PRETEND = 2
+  };
 
-static bfd_boolean
-elf_section_complain_discarded (asection *sec)
+/* Return a mask saying how ld should treat relocations in SEC against
+   symbols defined in discarded sections.  If this function returns
+   COMPLAIN set, ld will issue a warning message.  If this function
+   returns PRETEND set, and the discarded section was link-once and the
+   same size as the kept link-once section, ld will pretend that the
+   symbol was actually defined in the kept section.  Otherwise ld will
+   zero the reloc (at least that is the intent, but some cooperation by
+   the target dependent code is needed, particularly for REL targets).  */
+
+static unsigned int
+elf_action_discarded (asection *sec)
 {
-  if (strncmp (".stab", sec->name, 5) == 0
-      && (!sec->name[5] ||
-	  (sec->name[5] == '.' && ISDIGIT (sec->name[6]))))
-    return FALSE;
+  if (sec->flags & SEC_DEBUGGING)
+    return PRETEND;
 
   if (strcmp (".eh_frame", sec->name) == 0)
-    return FALSE;
+    return 0;
 
   if (strcmp (".gcc_except_table", sec->name) == 0)
-    return FALSE;
+    return 0;
 
   if (strcmp (".PARISC.unwind", sec->name) == 0)
-    return FALSE;
+    return 0;
 
   if (strcmp (".fixup", sec->name) == 0)
-    return FALSE;
+    return 0;
 
-  return TRUE;
+  return COMPLAIN | PRETEND;
 }
 
 /* Find a match between a section and a member of a section group.  */
@@ -6692,7 +6702,7 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 	  if (!elf_section_ignore_discarded_relocs (o))
 	    {
 	      Elf_Internal_Rela *rel, *relend;
-	      bfd_boolean complain = elf_section_complain_discarded (o);
+	      unsigned int action = elf_action_discarded (o);
 
 	      rel = internal_relocs;
 	      relend = rel + o->reloc_count * bed->s->int_rels_per_ext_rel;
@@ -6736,7 +6746,7 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 		      asection *kept;
 
 		      BFD_ASSERT (r_symndx != 0);
-		      if (complain && (o->flags & SEC_DEBUGGING) == 0)
+		      if (action & COMPLAIN)
 			{
 			  (*_bfd_error_handler)
 			    (_("`%s' referenced in section `%A' of %B: "
@@ -6756,9 +6766,7 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 			 debug sections tend to come after other
 			 sections.  */
 		      kept = sec->kept_section;
-		      if (kept != NULL
-			  && (complain
-			      || (o->flags & SEC_DEBUGGING) != 0))
+		      if (kept != NULL && (action & PRETEND))
 			{
 			  if (elf_sec_group (sec) != NULL)
 			    kept = match_group_member (sec, kept);
