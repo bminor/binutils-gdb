@@ -1,3 +1,8 @@
+2003-02-28  David Carlton  <carlton@math.stanford.edu>
+
+	* linespec.c (decode_compound): Extract code into find_method.
+	(find_method): New.
+
 2003-02-28  J. Brobecker  <brobecker@gnat.com>
 
 	* Makefile.in: Add rules to build and link in observer.o.
