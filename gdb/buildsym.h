@@ -130,7 +130,6 @@ struct pending_stabs {
 };
 
 EXTERN struct pending_stabs *global_stabs;
-EXTERN struct pending_stabs *file_stabs;
 
 /* List of symbols declared since the last BCOMM.  This list is a tail
    of local_symbols.  When ECOMM is seen, the symbols on the list
