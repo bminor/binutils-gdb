@@ -1,4 +1,32 @@
+Thu Aug 22 11:27:06 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
+
+	* bfd.texinfo: some cleanup, reincorporated more intro matter from
+	bfd.doc 
+	bfd.c, targets.c: minor rewording of doc segments
+
+
+Wed Aug 21 19:13:22 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* trad-core.c (trad_unix_core_file_p):  Use HOST_TEXT_START_ADDR,
+	etc, rather than TEXT_START_ADDR.
+	* host-aout.c:  Remove #if 0 around whole thing.
+	Update to modern (32/64-bit) a.out naming conventions.
+	Include a large chunk of ../include/a.out.gnu.h to get macros that
+	are not defined by the system include files.
+	(host_aout_{32,64}_write_object_contents):  Use the WRITE_HEADERS
+	macro used by the other a.out implementations.
+	* Makefile.in:  Give dependencies to OPTIONAL_BACKENDS.
+
 Wed Aug 21 14:33:06 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
+
+	* Makefile.in: use targets "bfd.dvi" and "bfd.ps" instead of
+	texdoc and psdoc; make these depend on generated .texi's
+	
+	* scanit, (new) unPROTO: turn PROTO macros into ANSI declarations in
+	doc
+	
+	* bfd.c, reloc.c, syms.c: minor spelling/wording fixes in doc
+	portions	 
 
 	* Makefile.in, awkscan-ip, awkscan-p, intobfd,
 	libbfd.h, libcoff.h, tolibcoff; new bfd-in.h, libbfd-in.h,
