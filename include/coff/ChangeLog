@@ -1,3 +1,29 @@
+Wed Oct  4 10:56:35 1995  Kim Knuttila  <krk@cygnus.com>
+
+	* pe.h: Moved DOSMAGIC and NT_SIGNATURE defines here
+	* powerpc.h: removed DOSMAGIC, NT_SIGNATURE, and DEFAULT_* defines
+	Also removed other unused defines (various MAGIC ones)
+	* i386.h: removed DOSMAGIC, NT_SIGNATURE, and DEFAULT_* defines
+	* arm.h: removed DOSMAGIC, NT_SIGNATURE, and DEFAULT_* defines
+	* apollo.h: removed unused DEFAULT_* defines
+	* alpha.h: removed unused DEFAULT_* defines
+	* h8500.h: removed unused DEFAULT_* defines
+	* h8300.h: removed unused DEFAULT_* defines
+	* i960.h: removed unused DEFAULT_* defines
+	* m88k.h: removed unused DEFAULT_* defines
+	* we32k.h: removed unused DEFAULT_* defines
+	* rs6000.h: removed unused DEFAULT_* defines
+	* mips.h: removed unused DEFAULT_* defines
+	* m68k.h: removed unused DEFAULT_* defines
+	* z8k.h: removed unused DEFAULT_* defines
+	* w65.h: removed unused DEFAULT_* defines
+	* sparc.h: removed unused DEFAULT_* defines
+	* sh.h: removed unused DEFAULT_* defines
+
+Fri Sep 29 08:40:08 1995  Kim Knuttila  <krk@cygnus.com>
+
+	* powerpc.h: Reformatted to GNU coding conventions.
+
 Wed Sep 27 06:50:50 1995  Kim Knuttila  <krk@nellie>
 
 	* pe.h: added defines for more section characteristics
