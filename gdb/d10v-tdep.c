@@ -413,7 +413,8 @@ d10v_pointer_to_address (struct type *type, void *buf)
 
   /* Is it a code address?  */
   if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC
-      || TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_METHOD)
+      || TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_METHOD ||
+      (TYPE_FLAGS (TYPE_TARGET_TYPE (type)) & TYPE_FLAG_CODE_SPACE) != 0)
     return d10v_make_iaddr (addr);
   else
     return d10v_make_daddr (addr);

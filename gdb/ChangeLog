@@ -1,4 +1,11 @@
 2001-11-14  Michael Snyder  <msnyder@redhat.com>
+
+	* d10v-tdep.c (d10v_pointer_to_address): Use new type flag
+	TYPE_FLAG_CODE_SPACE to recognize a pointer that has been cast
+	into the instruction address space.
+	* Makefile.in (doublest.o): Add dependency on gdbtypes.h.
+
+2001-11-14  Michael Snyder  <msnyder@redhat.com>
 	Add address space identifiers to expression language for types.
 	* c-exp.y (space_identifier, cv_with_space_id, 
 	const_or_volatile_or_space_identifier_noopt, 
