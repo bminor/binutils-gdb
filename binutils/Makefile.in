@@ -57,6 +57,7 @@ AR_FLAGS = rc
 CC = @CC@
 CFLAGS = @CFLAGS@
 LDFLAGS = @LDFLAGS@
+HLDFLAGS = @HLDFLAGS@
 MAKEINFO = makeinfo
 TEXI2DVI = texi2dvi
 RANLIB = ranlib
@@ -144,17 +145,21 @@ GENERATED_CFILES = \
 .c.o:
 	$(CC) -c $(ALL_CFLAGS) $<
 
-DEBUG_OBJS = rddbg.o debug.o stabs.o ieee.o prdbg.o
+DEBUG_OBJS = rddbg.o debug.o stabs.o ieee.o
 
 LIBIBERTY = ../libiberty/libiberty.a
 
 # Code shared by all the binutils.
 BULIBS = bucomm.o version.o filemode.o
 
-ADDL_LIBS = $(BULIBS) $(BFD) $(LIBIBERTY) 
+BFDLIB_DEP = ../bfd/libbfd.a
+BFDLIB = @BFDLIB@
 
-BFD = ../bfd/libbfd.a
-OPCODES = ../opcodes/libopcodes.a
+OPCODES_DEP = ../opcodes/libopcodes.a
+OPCODES = @OPCODES@
+
+ADDL_DEPS = $(BULIBS) $(BFDLIB_DEP) $(LIBIBERTY)
+ADDL_LIBS = $(BULIBS) $(BFDLIB) $(LIBIBERTY) 
 
 EXPECT = `if [ -f $$r/../expect/expect ] ; then \
           echo $$r/../expect/expect ; \
@@ -187,7 +192,7 @@ FLAGS_TO_PASS = \
 #
 ## The rules
 
-all: $(ADDL_LIBS) $(PROGS)
+all: $(ADDL_DEPS) $(PROGS)
 
 # These targets are for the dejagnu testsuites. The file site.exp 
 # contains global variables that all the testsuites will use.
@@ -224,6 +229,8 @@ check: site.exp
 	r=`pwd`; export r ; \
 	srcroot=`cd ${srcdir}; pwd` ; export srcroot ; \
 	EXPECT=${EXPECT} ; export EXPECT ; \
+	LD_LIBRARY_PATH=$$r/../bfd:$$r/../opcodes:$$LD_LIBRARY_PATH; \
+	export LD_LIBRARY_PATH; \
 	if [ -f $$r/../expect/expect ] ; then  \
 	   TCL_LIBRARY=$${srcroot}/../tcl/library ; \
 	   export TCL_LIBRARY ; else true; fi ; \
@@ -237,23 +244,23 @@ info: binutils.info
 
 dvi: binutils.dvi
 
-$(SIZE_PROG): $(ADDL_LIBS) size.o $(BFD)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $(SIZE_PROG) size.o $(ADDL_LIBS) $(EXTRALIBS)
+$(SIZE_PROG): $(ADDL_DEPS) size.o
+	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(SIZE_PROG) size.o $(ADDL_LIBS) $(EXTRALIBS)
 
-$(OBJCOPY_PROG): $(ADDL_LIBS) objcopy.o not-strip.o $(DEBUG_OBJS) $(BFD)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $(OBJCOPY_PROG) objcopy.o not-strip.o $(DEBUG_OBJS) $(ADDL_LIBS) $(EXTRALIBS)
+$(OBJCOPY_PROG): $(ADDL_DEPS) objcopy.o not-strip.o $(DEBUG_OBJS)
+	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(OBJCOPY_PROG) objcopy.o not-strip.o $(DEBUG_OBJS) $(ADDL_LIBS) $(EXTRALIBS)
 
-$(STRINGS_PROG): $(ADDL_LIBS) strings.o $(BFD)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $(STRINGS_PROG) strings.o $(ADDL_LIBS) $(EXTRALIBS)
+$(STRINGS_PROG): $(ADDL_DEPS) strings.o
+	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(STRINGS_PROG) strings.o $(ADDL_LIBS) $(EXTRALIBS)
 
-$(STRIP_PROG): $(ADDL_LIBS) objcopy.o is-strip.o $(DEBUG_OBJS) $(BFD)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $(STRIP_PROG) objcopy.o is-strip.o $(DEBUG_OBJS) $(ADDL_LIBS) $(EXTRALIBS)
+$(STRIP_PROG): $(ADDL_DEPS) objcopy.o is-strip.o $(DEBUG_OBJS)
+	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(STRIP_PROG) objcopy.o is-strip.o $(DEBUG_OBJS) $(ADDL_LIBS) $(EXTRALIBS)
 
-$(NM_PROG): $(ADDL_LIBS) nm.o $(BFD)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $(NM_PROG) nm.o $(ADDL_LIBS) $(EXTRALIBS)
+$(NM_PROG): $(ADDL_DEPS) nm.o
+	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(NM_PROG) nm.o $(ADDL_LIBS) $(EXTRALIBS)
 
-$(OBJDUMP_PROG): $(ADDL_LIBS) objdump.o $(DEBUG_OBJS) $(BFD) $(OPCODES)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $(OBJDUMP_PROG) objdump.o $(DEBUG_OBJS) $(OPCODES) $(ADDL_LIBS) $(EXTRALIBS)
+$(OBJDUMP_PROG): $(ADDL_DEPS) objdump.o prdbg.o $(DEBUG_OBJS) $(OPCODES_DEP)
+	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(OBJDUMP_PROG) objdump.o prdbg.o $(DEBUG_OBJS) $(OPCODES) $(ADDL_LIBS) $(EXTRALIBS)
 
 underscore.c: stamp-under ; @true
 
@@ -270,7 +277,7 @@ cplus-dem.o: $(BASEDIR)/libiberty/cplus-dem.c $(INCDIR)/getopt.h
 	$(CC) -c -DMAIN -DVERSION='"$(VERSION)"' $(ALL_CFLAGS) $(BASEDIR)/libiberty/cplus-dem.c
 
 $(DEMANGLER_PROG): cplus-dem.o $(LIBIBERTY) underscore.o $(DEMANGLER_PROG).1
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $(DEMANGLER_PROG) cplus-dem.o $(LIBIBERTY) $(EXTRALIBS) underscore.o
+	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(DEMANGLER_PROG) cplus-dem.o $(LIBIBERTY) $(EXTRALIBS) underscore.o
 
 arparse.c: arparse.y
 	$(BISON) $(BISONFLAGS)  $(srcdir)/arparse.y
@@ -285,11 +292,11 @@ arlex.c: arlex.l
 	$(LEX) $(LEX_OPTIONS) $(srcdir)/arlex.l
 	mv lex.yy.c arlex.c
 
-$(AR_PROG): $(ADDL_LIBS) ar.o arparse.o arlex.o not-ranlib.o $(BFD) arsup.o
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $(AR_PROG) ar.o arparse.o arlex.o arsup.o not-ranlib.o $(ADDL_LIBS) $(EXTRALIBS)
+$(AR_PROG): $(ADDL_DEPS) ar.o arparse.o arlex.o not-ranlib.o arsup.o
+	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(AR_PROG) ar.o arparse.o arlex.o arsup.o not-ranlib.o $(ADDL_LIBS) $(EXTRALIBS)
 
-$(RANLIB_PROG): $(ADDL_LIBS) ar.o is-ranlib.o arparse.o arlex.o arsup.o $(BFD)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $(RANLIB_PROG) ar.o arparse.o arlex.o arsup.o is-ranlib.o $(ADDL_LIBS) $(EXTRALIBS)
+$(RANLIB_PROG): $(ADDL_DEPS) ar.o is-ranlib.o arparse.o arlex.o arsup.o
+	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(RANLIB_PROG) ar.o arparse.o arlex.o arsup.o is-ranlib.o $(ADDL_LIBS) $(EXTRALIBS)
 
 # This rule creates a single binary that switches between ar and ranlib
 # by looking at argv[0].  Use this kludge to save some disk space.
@@ -298,15 +305,15 @@ $(RANLIB_PROG): $(ADDL_LIBS) ar.o is-ranlib.o arparse.o arlex.o arsup.o $(BFD)
 
 # Alternatively, you can install ranlib.sh as ranlib.
 
-ar_with_ranlib: $(ADDL_LIBS) ar.o maybe-ranlib.o $(BFD)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $(AR_PROG) ar.o maybe-ranlib.o $(ADDL_LIBS) $(EXTRALIBS)
+ar_with_ranlib: $(ADDL_DEPS) ar.o maybe-ranlib.o
+	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(AR_PROG) ar.o maybe-ranlib.o $(ADDL_LIBS) $(EXTRALIBS)
 	-rm -f $(RANLIB_PROG)
 	-ln $(AR_PROG) $(RANLIB_PROG)
 
 # objcopy and strip in one binary that uses argv[0] to decide its action.
 
-objcopy_with_strip: $(ADDL_LIBS) objcopy.o maybe-strip.o $(BFD)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $(OBJCOPY_PROG) objcopy.o maybe-strip.o $(ADDL_LIBS) $(EXTRALIBS)
+objcopy_with_strip: $(ADDL_DEPS) objcopy.o maybe-strip.o
+	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $(OBJCOPY_PROG) objcopy.o maybe-strip.o $(ADDL_LIBS) $(EXTRALIBS)
 	-rm -f $(STRIP_PROG)
 	-ln $(OBJCOPY_PROG) $(STRIP_PROG)
 
@@ -351,11 +358,11 @@ sysinfo.o: sysinfo.c
 	  $(CC_FOR_BUILD) -c -I. $(CFLAGS) $(srcdir)/sysinfo.c ; \
 	fi
 
-srconv: srconv.o coffgrok.o $(ADDL_LIBS)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ srconv.o coffgrok.o $(ADDL_LIBS) $(EXTRALIBS)
+srconv: srconv.o coffgrok.o $(ADDL_DEPS)
+	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ srconv.o coffgrok.o $(ADDL_LIBS) $(EXTRALIBS)
 
-dlltool:dlltool.o defparse.o deflex.o cplus-dem.o
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ dlltool.o defparse.o deflex.o $(ADDL_LIBS) $(EXTRALIBS)
+dlltool: dlltool.o defparse.o deflex.o cplus-dem.o $(ADDL_DEPS)
+	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ dlltool.o defparse.o deflex.o $(ADDL_LIBS) $(EXTRALIBS)
 
 defparse.c:defparse.y
 	$(BISON)  $(BISONFLAGS)  $(srcdir)/defparse.y
@@ -371,11 +378,11 @@ deflex.c:deflex.l
 dlltool.o:dlltool.c
 	$(CC) -c @DLLTOOL_DEFS@ $(ALL_CFLAGS) $(srcdir)/dlltool.c
 
-coffdump: coffdump.o coffgrok.o $(ADDL_LIBS)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@  coffdump.o coffgrok.o $(ADDL_LIBS) $(EXTRALIBS)
+coffdump: coffdump.o coffgrok.o $(ADDL_DEPS)
+	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $@  coffdump.o coffgrok.o $(ADDL_LIBS) $(EXTRALIBS)
 
-sysdump: sysdump.o $(ADDL_LIBS)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ sysdump.o $(ADDL_LIBS) $(EXTRALIBS)
+sysdump: sysdump.o $(ADDL_DEPS)
+	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ sysdump.o $(ADDL_LIBS) $(EXTRALIBS)
 
 # Depend upon sysinfo.c to avoid building both nlmheader.c and sysinfo.c
 # simultaneously.
@@ -390,8 +397,8 @@ nlmconv.o: nlmconv.c $(INCDIR)/coff/sym.h $(INCDIR)/coff/ecoff.h
 	ldname=`echo ld | sed '$(program_transform_name)'`; \
 	$(CC) -c -DLD_NAME="\"$${ldname}\"" @NLMCONV_DEFS@ $(ALL_CFLAGS) $(srcdir)/nlmconv.c
 
-$(NLMCONV_PROG): nlmconv.o nlmheader.o $(ADDL_LIBS) $(BFD)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ nlmconv.o nlmheader.o $(ADDL_LIBS) $(EXTRALIBS)
+$(NLMCONV_PROG): nlmconv.o nlmheader.o $(ADDL_DEPS)
+	$(CC) $(HLDFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ nlmconv.o nlmheader.o $(ADDL_LIBS) $(EXTRALIBS)
 
 # Targets to rebuild dependencies in this Makefile.
 # Have to get rid of .dep1 here so that "$?" later includes all of $(CFILES).
@@ -513,7 +520,7 @@ distclean:
 	-rm -f Makefile config.status *.o *~ \#* core y.*
 	-rm -f binutils.?? binutils.??s binutils.aux binutils.log binutils.toc
 	-rm -f $(PROGS) underscore.c config.h stamp-h config.cache config.log
-	-rm -f dep.sed stamp-under
+	-rm -f dep.sed stamp-under $(DEMANGLER_PROG).1
 maintainer-clean realclean: clean distclean
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
@@ -630,7 +637,7 @@ config.h: stamp-h ; @true
 stamp-h: config.in config.status
 	CONFIG_FILES= CONFIG_HEADERS=config.h:config.in $(SHELL) ./config.status
 
-config.status: configure
+config.status: configure $(srcdir)/../bfd/configure.host $(srcdir)/../bfd/config.bfd
 	$(SHELL) ./config.status --recheck
 
 # What appears below is generated by a hacked mkdep using gcc -MM.

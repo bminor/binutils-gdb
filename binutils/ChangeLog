@@ -1,3 +1,41 @@
+Wed Feb  7 14:17:45 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Check for --enable-shared.  Substitute new
+	variables BFDLIB and OPCODES.
+	* configure: Rebuild.
+	* Makefile.in (BFDLIB): Set to @BFDLIB@.
+	(OPCODES): Set to @OPCODES@.
+
+Mon Feb  5 16:18:42 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	Support for building bfd and opcodes as shared libraries, based on
+	patches from Alan Modra <alan@spri.levels.unisa.edu.au>:
+	* configure.in (HLDFLAGS): New substitution.
+	* configure: Rebuild.
+	* Makefile.in (HLDFLAGS): New variable.  Make all links use
+	$(HLDFLAGS) before $(CFLAGS) and $(LDFLAGS).
+	(BFDLIB_DEP): New variable.  Replace all occurrences of $(BFD) as
+	a dependency with $(BFDLIB_DEP).  Remove $(BFD) as a dependency if
+	there is also a dependency on $(ADDL_DEPS).
+	(BFDLIB): Rename from BFD; change all uses; set to -L../bfd -lbfd.
+	(OPCODES_DEP): New variable.  Replace all occurrends of $(OPCODES)
+	as a dependency with $(OPCODES_DEP).
+	(OPCODES): Set to -L../opcodes -lopcodes.
+	(ADDL_DEPS): New variable.  Replace all occurrences of
+	$(ADDL_LIBS) as a dependency with $(ADDL_DEPS).
+	(check): Set LD_LIBRARY_PATH in the environment.
+	(config.status): Depend upon BFD configure.host and config.bfd.
+
+Fri Feb  2 17:02:59 1996  Doug Evans  <dje@charmed.cygnus.com>
+
+	* objdump.c: #include stdarg.h or varargs.h.
+	(objdump_print_value): Change FILE* arg to struct disassemble_info*.
+	All callers updated.  Use fprintf_func.
+	(objdump_print_address): Consistently use fprintf_func.
+	(objdump_sprintf): New function.
+	(disassemble_data): Print insn into a buffer, print raw insn ourselves,
+	then print insn mnemonic.
+
 Fri Feb  2 16:48:55 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure: Regenerate.

@@ -13,6 +13,8 @@ ac_default_prefix=/usr/local
 # Any additions from configure.in:
 ac_help="$ac_help
   --enable-targets        alternative target configurations"
+ac_help="$ac_help
+  --enable-shared         build shared BFD library"
 
 # Initialize some variables set by options.
 # The variables have the same names as the options, with
@@ -528,6 +530,15 @@ if test "${enable_targets+set}" = set; then
   *)        enable_targets=$enableval ;;
 esac
 fi
+# Check whether --enable-shared or --disable-shared was given.
+if test "${enable_shared+set}" = set; then
+  enableval="$enable_shared"
+  case "${enableval}" in
+  yes) shared=true ;;
+  no)  shared=false ;;
+  *)   { echo "configure: error: bad value ${enableval} for BFD shared option" 1>&2; exit 1; } ;;
+esac
+fi
 
 
 
@@ -666,6 +677,7 @@ test "$program_transform_name" = "" && program_transform_name="s,x,x,"
 
 HDEFINES=
 LDFLAGS=
+HLDFLAGS=
 
 . ${srcdir}/../bfd/configure.host
 
@@ -743,6 +755,7 @@ else
   GCC=
   test "${CFLAGS+set}" = set || CFLAGS="-g"
 fi
+
 
 
 
@@ -837,6 +850,24 @@ test -z "$INSTALL_PROGRAM" && INSTALL_PROGRAM='${INSTALL}'
 test -z "$INSTALL_DATA" && INSTALL_DATA='${INSTALL} -m 644'
 
 
+# For most hosts we can use a simple definition to pick up the BFD and
+# opcodes libraries.  However, if we are building shared libraries, we
+# need to handle some hosts specially.
+BFDLIB='-L../bfd -lbfd'
+OPCODES='-L../opcodes -lopcodes'
+if test "${shared}" = "true"; then
+  case "${host}" in
+  *-*-sunos*)
+    # On SunOS, we must link against the name we are going to install,
+    # not -lbfd, since SunOS does not support SONAME.
+    BFDLIB='-L../bfd -l`echo bfd | sed '"'"'$(program_transform_name)'"'"'`'
+    OPCODES='-L../opcodes -l`echo opcodes | sed '"'"'$(program_transform_name)'"'"'`'
+    ;;
+  esac
+fi
+
+
+
 # If we cannot run a trivial program, we must be cross compiling.
 echo $ac_n "checking whether cross-compiling""... $ac_c" 1>&6
 if eval "test \"`echo '$''{'ac_cv_c_cross'+set}'`\" = set"; then
@@ -846,7 +877,7 @@ else
   ac_cv_c_cross=yes
 else
 cat > conftest.$ac_ext <<EOF
-#line 850 "configure"
+#line 881 "configure"
 #include "confdefs.h"
 main(){return(0);}
 EOF
@@ -888,7 +919,7 @@ else
   # On the NeXT, cc -E runs the code through the compiler's parser,
   # not just through cpp.
   cat > conftest.$ac_ext <<EOF
-#line 892 "configure"
+#line 923 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -902,7 +933,7 @@ else
   rm -rf conftest*
   CPP="${CC-cc} -E -traditional-cpp"
   cat > conftest.$ac_ext <<EOF
-#line 906 "configure"
+#line 937 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -935,7 +966,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 939 "configure"
+#line 970 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
@@ -968,7 +999,7 @@ if eval "test \"`echo '$''{'ac_cv_header_sys_wait_h'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 972 "configure"
+#line 1003 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -1011,7 +1042,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1015 "configure"
+#line 1046 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1061,7 +1092,7 @@ if eval "test \"`echo '$''{'bu_cv_decl_time_t_time_h'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1065 "configure"
+#line 1096 "configure"
 #include "confdefs.h"
 #include <time.h>
 int main() { return 0; }
@@ -1093,7 +1124,7 @@ if eval "test \"`echo '$''{'bu_cv_decl_time_t_types_h'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1097 "configure"
+#line 1128 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
 int main() { return 0; }
@@ -1127,7 +1158,7 @@ if eval "test \"`echo '$''{'bu_cv_header_utime_h'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1131 "configure"
+#line 1162 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
 #ifdef HAVE_TIME_H
@@ -1163,7 +1194,7 @@ if eval "test \"`echo '$''{'bfd_cv_decl_needed_fprintf'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1167 "configure"
+#line 1198 "configure"
 #include "confdefs.h"
 
 #include <stdio.h>
@@ -1201,7 +1232,7 @@ fi
 
 
 case "${host}" in
-i[345]86-*-msdos* | i[345]86-*-go32* | i[345]86-*-win32)
+i[345]86-*-msdos* | i[345]86-*-go32* | *-*-cygwin32)
   cat >> confdefs.h <<\EOF
 #define USE_BINARY_FOPEN 1
 EOF
@@ -1426,10 +1457,13 @@ s%@build_vendor@%$build_vendor%g
 s%@build_os@%$build_os%g
 s%@CC@%$CC%g
 s%@HDEFINES@%$HDEFINES%g
+s%@HLDFLAGS@%$HLDFLAGS%g
 s%@AR@%$AR%g
 s%@RANLIB@%$RANLIB%g
 s%@INSTALL_PROGRAM@%$INSTALL_PROGRAM%g
 s%@INSTALL_DATA@%$INSTALL_DATA%g
+s%@BFDLIB@%$BFDLIB%g
+s%@OPCODES@%$OPCODES%g
 s%@CC_FOR_BUILD@%$CC_FOR_BUILD%g
 s%@CPP@%$CPP%g
 s%@NLMCONV_DEFS@%$NLMCONV_DEFS%g
