@@ -2,6 +2,9 @@
 
 Changes in version 2.10:
 
+* Added AT> to the linker script language to allow load-time allocation of 
+  sections into regions.
+
 * Added garbage collection of unused sections, enabled by --gc-sections. 
   It does require a bit of backend support; currently implemented are
   ppc-elf, mips-elf, and mn10300-elf.  Others will ignore the option.
