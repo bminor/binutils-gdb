@@ -533,9 +533,13 @@ const struct alpha_opcode alpha_opcodes[] = {
   { "halt",		SPCD(0x00,0x0000), BASE, ARG_NONE },
   { "draina",		SPCD(0x00,0x0002), BASE, ARG_NONE },
   { "bpt",		SPCD(0x00,0x0080), BASE, ARG_NONE },
+  { "bugchk",		SPCD(0x00,0x0081), BASE, ARG_NONE },
   { "callsys",		SPCD(0x00,0x0083), BASE, ARG_NONE },
   { "chmk", 		SPCD(0x00,0x0083), BASE, ARG_NONE },
   { "imb",		SPCD(0x00,0x0086), BASE, ARG_NONE },
+  { "rduniq",		SPCD(0x00,0x009e), BASE, ARG_NONE },
+  { "wruniq",		SPCD(0x00,0x009f), BASE, ARG_NONE },
+  { "gentrap",		SPCD(0x00,0x00aa), BASE, ARG_NONE },
   { "call_pal",		PCD(0x00), BASE, ARG_PCD },
   { "pal",		PCD(0x00), BASE, ARG_PCD },		/* alias */
 

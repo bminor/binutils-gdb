@@ -1,3 +1,8 @@
+2003-01-17  Richard Henderson  <rth@redhat.com>
+
+	* alpha-opc.c (alpha_opcodes): Add bugchk, rduniq, wruniq, gentrap
+	PAL entry points.
+
 2003-01-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".
