@@ -1,3 +1,8 @@
+2004-05-05  Alexandre Oliva  <aoliva@redhat.com>
+
+	* ld-frv/fdpic.exp: Restore $LDFLAGS at the end.
+	* ld-frv/fr450-link.d: Match fdpic as well.
+
 2004-05-05  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* ld-sh/sh64/crange1.rd: Update sh_info to decimal.

@@ -6,6 +6,6 @@
 #ld: -r
 #objdump: -p
 
-.*:     file format elf32-frv
-private flags = 0x8000000: -mcpu=fr450
+.*:     file format elf32-frv(|fdpic)
+private flags = 0x800[08]000: -mcpu=fr450(| -mfdpic)
 
