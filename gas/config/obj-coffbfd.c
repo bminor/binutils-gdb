@@ -2497,6 +2497,19 @@ DEFUN (fixup_segment, (segP, this_segment_type),
 		{
 		  add_number -= S_GET_VALUE (sub_symbolP);
 		}
+#ifdef DIFF_EXPR_OK
+	      else if (!pcrel
+		       && S_GET_SEGMENT (sub_symbolP) == this_segment_type)
+		{
+		  /* Make it pc-relative.  */
+		  add_number += (md_pcrel_from (fixP)
+				 - S_GET_VALUE (sub_symbolP));
+		  pcrel = 1;
+		  fixP->fx_pcrel = 1;
+		  sub_symbolP = 0;
+		  fixP->fx_subsy = 0;
+		}
+#endif
 	      else
 		{
 		  as_bad ("Can't emit reloc {- %s-seg symbol \"%s\"} @ file address %ld.",
