@@ -102,6 +102,8 @@ static bfd_boolean elf_xtensa_new_section_hook
 
 /* Local helper functions.  */
 
+static bfd_boolean xtensa_elf_dynamic_symbol_p
+  PARAMS ((struct elf_link_hash_entry *, struct bfd_link_info *));
 static int property_table_compare
   PARAMS ((const PTR, const PTR));
 static bfd_boolean elf_xtensa_in_literal_pool
@@ -131,8 +133,6 @@ static void do_fix_for_relocatable_link
   PARAMS ((Elf_Internal_Rela *, bfd *, asection *));
 static void do_fix_for_final_link
   PARAMS ((Elf_Internal_Rela *, asection *, bfd_vma *));
-static bfd_boolean xtensa_elf_dynamic_symbol_p
-  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
 static bfd_vma elf_xtensa_create_plt_entry
   PARAMS ((bfd *, bfd *, unsigned));
 static int elf_xtensa_combine_prop_entries
@@ -448,6 +448,21 @@ static const bfd_byte elf_xtensa_le_plt_entry[PLT_ENTRY_SIZE] =
   0xa0, 0x08, 0x00,	/* jx    a8 */
   0			/* unused */
 };
+
+
+static inline bfd_boolean
+xtensa_elf_dynamic_symbol_p (h, info)
+     struct elf_link_hash_entry *h;
+     struct bfd_link_info *info;
+{
+  /* Check if we should do dynamic things to this symbol.  The
+     "ignore_protected" argument need not be set, because Xtensa code
+     does not require special handling of STV_PROTECTED to make function
+     pointer comparisons work properly.  The PLT addresses are never
+     used for function pointers.  */
+
+  return _bfd_elf_dynamic_symbol_p (h, info, 0);
+}
 
 
 static int
@@ -1063,7 +1078,7 @@ elf_xtensa_fix_refcounts (h, arg)
   if (h->root.type == bfd_link_hash_warning)
     h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
-  if (! xtensa_elf_dynamic_symbol_p (info, h))
+  if (! xtensa_elf_dynamic_symbol_p (h, info))
     elf_xtensa_make_sym_local (info, h);
 
   /* If the symbol has a relocation outside the GOT, set the
@@ -1830,17 +1845,6 @@ elf_xtensa_create_plt_entry (dynobj, output_bfd, reloc_index)
 }
 
 
-static bfd_boolean
-xtensa_elf_dynamic_symbol_p (info, h)
-     struct bfd_link_info *info;
-     struct elf_link_hash_entry *h;
-{
-  /* ??? What, if anything, needs to happen wrt STV_PROTECTED and PLT
-     entries?  For now assume the worst.  */
-  return _bfd_elf_dynamic_symbol_p (h, info, 1);
-}
-
-
 /* Relocate an Xtensa ELF section.  This is invoked by the linker for
    both relocatable and final links.  */
 
@@ -2067,7 +2071,7 @@ elf_xtensa_relocate_section (output_bfd, info, input_bfd,
       /* Generate dynamic relocations.  */
       if (elf_hash_table (info)->dynamic_sections_created)
 	{
-	  bfd_boolean dynamic_symbol = xtensa_elf_dynamic_symbol_p (info, h);
+	  bfd_boolean dynamic_symbol = xtensa_elf_dynamic_symbol_p (h, info);
 
 	  if (dynamic_symbol && (r_type == R_XTENSA_OP0
 				 || r_type == R_XTENSA_OP1
@@ -4963,7 +4967,7 @@ shrink_dynamic_reloc_sections (info, abfd, input_section, rel)
   else
     h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 
-  dynamic_symbol = xtensa_elf_dynamic_symbol_p (info, h);
+  dynamic_symbol = xtensa_elf_dynamic_symbol_p (h, info);
 
   if ((r_type == R_XTENSA_32 || r_type == R_XTENSA_PLT)
       && (input_section->flags & SEC_ALLOC) != 0

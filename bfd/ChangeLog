@@ -1,5 +1,14 @@
 2003-07-23  Bob Wilson  <bob.wilson@acm.org>
 
+	* elf32-xtensa.c (xtensa_elf_dynamic_symbol_p): Make inline and move
+	near the beginning of the file.  Swap order of arguments.  Call
+	_bfd_elf_dynamic_symbol_p with "ignore_protected" set to 0.
+	(elf_xtensa_fix_refcounts): Adjust xtensa_elf_dynamic_symbol_p call.
+	(elf_xtensa_relocate_section): Likewise.
+	(shrink_dynamic_reloc_sections): Likewise.
+
+2003-07-23  Bob Wilson  <bob.wilson@acm.org>
+
 	* elf32-xtensa.c (plt_reloc_count): Fix typo in comment.
 	(elf_xtensa_size_dynamic_sections): Use elf_discarded_section.
 	(elf_xtensa_combine_prop_entries): Avoid returning non-zero without
