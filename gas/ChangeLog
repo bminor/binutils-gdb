@@ -1,5 +1,8 @@
 Mon Dec  9 17:09:42 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c (mips16_extended_frag): Avoid an infinite loop
+	when extending because the value is exactly maxtiny + 1.
+
 	* config/tc-mips.c (RELAX_MIPS16_ENCODE): Add small and ext
 	arguments, and store them.  Adjust other RELAX_MIPS16 macros.
 	(RELAX_MIPS16_USER_SMALL): Define.

@@ -9154,8 +9154,30 @@ mips16_extended_frag (fragp, sec, stretch)
       /* If any of the shifted bits are set, we must use an extended
          opcode.  If the address depends on the size of this
          instruction, this can lead to a loop, so we arrange to always
-         use an extended opcode.  */
-      if ((val & ((1 << op->shift) - 1)) != 0)
+         use an extended opcode.  We only check this when we are in
+         the main relaxation loop, when SEC is NULL.  */
+      if ((val & ((1 << op->shift) - 1)) != 0 && sec == NULL)
+	{
+	  fragp->fr_subtype =
+	    RELAX_MIPS16_MARK_LONG_BRANCH (fragp->fr_subtype);
+	  return 1;
+	}
+
+      /* If we are about to mark a frag as extended because the value
+         is precisely maxtiny + 1, then there is a chance of an
+         infinite loop as in the following code:
+	     la	$4,foo
+	     .skip	1020
+	     .align	2
+	   foo:
+	 In this case when the la is extended, foo is 0x3fc bytes
+	 away, so the la can be shrunk, but then foo is 0x400 away, so
+	 the la must be extended.  To avoid this loop, we mark the
+	 frag as extended if it was small, and is about to become
+	 extended with a value of maxtiny + 1.  */
+      if (val == ((maxtiny + 1) << op->shift)
+	  && ! RELAX_MIPS16_EXTENDED (fragp->fr_subtype)
+	  && sec == NULL)
 	{
 	  fragp->fr_subtype =
 	    RELAX_MIPS16_MARK_LONG_BRANCH (fragp->fr_subtype);
