@@ -1,3 +1,8 @@
+2003-10-16  Andrew Cagney  <cagney@redhat.com>
+
+	* infrun.c (handle_inferior_event): Add comment about
+	"frame_id_inner" being too weak.
+
 2003-10-16  Elena Zannoni  <ezannoni@redhat.com>
 
 	* minsyms.c (lookup_minimal_symbol_solib_trampoline): Remove

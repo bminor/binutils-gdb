@@ -2636,6 +2636,22 @@ process_event_stop_test:
   /* In the case where we just stepped out of a function into the
      middle of a line of the caller, continue stepping, but
      step_frame_id must be modified to current frame */
+#if 0
+  /* NOTE: cagney/2003-10-16: I think this frame ID inner test is too
+     generous.  It will trigger on things like a step into a frameless
+     stackless leaf function.  I think the logic should instead look
+     at the unwound frame ID has that should give a more robust
+     indication of what happened.  */
+     if (step-ID == current-ID)
+       still stepping in same function;
+     else if (step-ID == unwind (current-ID))
+       stepped into a function;
+     else
+       stepped out of a function;
+     /* Of course this assumes that the frame ID unwind code is robust
+        and we're willing to introduce frame unwind logic into this
+        function.  Fortunatly, those days are nearly upon us.  */
+#endif
   {
     struct frame_id current_frame = get_frame_id (get_current_frame ());
     if (!(frame_id_inner (current_frame, step_frame_id)))
