@@ -1,6 +1,7 @@
 /* Parameters for execution on an NEC V850 processor.
-   Copyright 1996, 1997, 1998, 1999, 2000
-   Free Software Foundation, Inc.
+
+   Copyright 1996, 1997, 1998, 1999, 2000, 2002 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,6 +21,8 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "regcache.h"
+#include "symtab.h"		/* For namespace_enum.  */
+#include "symfile.h"		/* For entry_point_address().  */
 
 #define NUM_REGS 66
 

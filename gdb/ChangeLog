@@ -1,3 +1,9 @@
+2002-05-01  Andrew Cagney  <cagney@redhat.com>
+
+	* config/mn10200/tm-mn10200.h: Include "symfile.h" and "symtab.h".
+	* config/mcore/tm-mcore.h: Ditto.  Update copyright.
+	* config/v850/tm-v850.h: Ditto.  Update copyright.
+
 2002-04-30  Andrew Cagney  <ac131313@redhat.com>
 
 	* cris-tdep.c (cris_gdbarch_init): Use arches instead of

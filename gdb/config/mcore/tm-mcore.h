@@ -20,6 +20,8 @@
    Boston, MA 02111-1307, USA. */
 
 #include "regcache.h"
+#include "symtab.h"		/* For namespace_enum.  */
+#include "symfile.h"		/* For entry_point_address().  */
 
 /* All registers are 32 bits */
 #define REGISTER_SIZE 4

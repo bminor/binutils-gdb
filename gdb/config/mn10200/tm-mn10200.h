@@ -1,5 +1,7 @@
 /* Parameters for execution on a Matsushita mn10200 processor.
-   Copyright 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 1997, 1998, 1999, 2000, 2001, 2002 Free Software
+   Foundation, Inc.
 
    Contributed by Geoffrey Noer <noer@cygnus.com>
 
@@ -24,6 +26,8 @@
    declared in "regcache.h".  The ``correct fix'' is to convert those
    macros into functions.  */
 #include "regcache.h"
+#include "symtab.h"		/* For namespace_enum.  */
+#include "symfile.h"		/* For entry_point_address().  */
 
 /* ints are only 16bits on the mn10200.  */
 #undef TARGET_INT_BIT
