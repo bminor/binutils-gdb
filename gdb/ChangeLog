@@ -1,3 +1,12 @@
+2003-02-11  Andrew Cagney  <ac131313@redhat.com>
+
+	* acinclude.m4 (no_tcl): SUBST TCL_CC_SEARCH_FLAGS.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+	* Makefile.in (TCL): Use TCL_CC_SEARCH_FLAGS instead of
+	TCL_LD_SEARCH_FLAGS.
+
 2003-02-10  Michal Ludvig  <mludvig@suse.cz>
 
 	* dwarf2cfi.c: Reindented.
