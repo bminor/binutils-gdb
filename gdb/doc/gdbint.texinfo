@@ -2320,8 +2320,6 @@ state.c
 state.c
 @item SEM
 coffread.c
-@item SET_STACK_LIMIT_HUGE
-infrun.c
 @item SHELL_COMMAND_CONCAT
 infrun.c
 @item SHELL_FILE

@@ -1,3 +1,7 @@
+Wed Feb 17 08:15:24 1993  John Gilmore  (gnu@cygnus.com)
+
+	* gdbint.texinfo:  Remove SET_STACK_LIMIT_HUGE from target defines.
+
 Thu Feb 11 10:38:40 1993  John Gilmore  (gnu@cygnus.com)
 
 	* gdbint.texinfo:  Fix thinko (NM_FILE => NAT_FILE).  Found
