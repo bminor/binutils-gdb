@@ -1,13 +1,15 @@
+2001-07-04  H.J. Lu  <hjl@gnu.org>
+
+	* bfd/elf32-mips.c (_bfd_mips_elf_final_write_processing):
+	Handle bfd_mach_mips4400, bfd_mach_mips4600 and
+	bfd_mach_mips5000.
+
 2001-07-03  Mark Elbrecht  <snowball3@softhome.net>
 
 	* bfd.c (bfd_get_sign_extend_vma): Support DJGPP COFF targets.
 
 	* cofflink.c (_bfd_coff_link_input_bfd): Skip section symbols from
 	sections being discarded.
-
-2001-07-03  Nick Clifton  <nickc@cambridge.redhat.com>
-
-	* cofflink.c (_bfd_coff_link_input_bfd): 
 
 2001-06-30  Alan Modra  <amodra@bigpond.net.au>
 

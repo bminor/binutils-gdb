@@ -2375,6 +2375,8 @@ _bfd_mips_elf_final_write_processing (abfd, linker)
 
     case bfd_mach_mips4000:
     case bfd_mach_mips4300:
+    case bfd_mach_mips4400:
+    case bfd_mach_mips4600:
       val = E_MIPS_ARCH_3;
       break;
 
@@ -2394,6 +2396,7 @@ _bfd_mips_elf_final_write_processing (abfd, linker)
       val = E_MIPS_ARCH_3 | E_MIPS_MACH_4650;
       break;
 
+    case bfd_mach_mips5000:
     case bfd_mach_mips8000:
     case bfd_mach_mips10000:
     case bfd_mach_mips12000:
