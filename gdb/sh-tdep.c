@@ -4292,7 +4292,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_do_registers_info (gdbarch, sh_do_registers_info);
   set_gdbarch_breakpoint_from_pc (gdbarch, sh_breakpoint_from_pc);
   set_gdbarch_frame_chain (gdbarch, sh_frame_chain);
-  set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
+  set_gdbarch_get_saved_register (gdbarch, deprecated_generic_get_saved_register);
   set_gdbarch_init_extra_frame_info (gdbarch, sh_init_extra_frame_info);
   set_gdbarch_deprecated_extract_return_value (gdbarch, sh_extract_return_value);
   set_gdbarch_push_arguments (gdbarch, sh_push_arguments);

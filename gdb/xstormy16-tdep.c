@@ -186,7 +186,7 @@ xstormy16_get_saved_register (char *raw_buffer,
 			      struct frame_info *fi,
 			      int regnum, enum lval_type *lval)
 {
-  generic_get_saved_register (raw_buffer, optimized, addrp, fi, regnum, lval);
+  deprecated_generic_get_saved_register (raw_buffer, optimized, addrp, fi, regnum, lval);
 }
 
 /* Function: xstormy16_type_is_scalar
@@ -439,7 +439,7 @@ xstormy16_frame_saved_register (struct frame_info *fi, int regnum)
   int size = xstormy16_register_raw_size (regnum);
   char *buf = (char *) alloca (size);
 
-  generic_get_saved_register (buf, NULL, NULL, fi, regnum, NULL);
+  deprecated_generic_get_saved_register (buf, NULL, NULL, fi, regnum, NULL);
   return (CORE_ADDR) extract_unsigned_integer (buf, size);
 }
 

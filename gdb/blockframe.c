@@ -1550,9 +1550,10 @@ frame_saved_regs_register_unwind (struct frame_info *frame, void **cache,
    The argument RAW_BUFFER must point to aligned memory.  */
 
 void
-generic_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
-			    struct frame_info *frame, int regnum,
-			    enum lval_type *lval)
+deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
+				       CORE_ADDR *addrp,
+				       struct frame_info *frame, int regnum,
+				       enum lval_type *lval)
 {
   if (!target_has_registers)
     error ("No registers.");

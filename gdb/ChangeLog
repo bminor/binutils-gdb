@@ -1,3 +1,17 @@
+2002-11-01  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.h (deprecated_generic_get_saved_register): Rename
+	generic_get_saved_register.
+	* blockframe.c (deprecated_generic_get_saved_register): Update.
+	* xstormy16-tdep.c (xstormy16_get_saved_register): Update.
+	(xstormy16_frame_saved_register): Update.
+	* sh-tdep.c (sh_gdbarch_init): Update.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Update.
+	* ia64-tdep.c (ia64_get_saved_register): Update.
+	* cris-tdep.c (cris_gdbarch_init): Update.
+	* config/m32r/tm-m32r.h (GET_SAVED_REGISTER): Update.
+	* arm-tdep.c (arm_gdbarch_init): Update.
+
 2002-10-31  Daniel Jacobowitz  <drow@mvista.com>
 
 	* lin-lwp.c (lin_lwp_resume): Remove resume_all test for !step.

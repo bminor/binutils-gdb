@@ -4289,7 +4289,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
 
-  set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
+  set_gdbarch_get_saved_register (gdbarch, deprecated_generic_get_saved_register);
   
   /* No register requires conversion from raw format to virtual format.  */
   set_gdbarch_register_convertible (gdbarch, generic_register_convertible_not);
