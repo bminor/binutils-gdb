@@ -268,6 +268,12 @@ Options:\n\
                           emulate output (default %s)\n"), def_em);
   }
 #endif
+#if defined BFD_ASSEMBLER && (defined OBJ_ELF || defined OBJ_MAYBE_ELF)
+  fprintf (stream, _("\
+  --execstack             require executable stack for this object\n"));
+  fprintf (stream, _("\
+  --noexecstack           don't require executable stack for this object\n"));
+#endif
   fprintf (stream, _("\
   -f                      skip whitespace and comment preprocessing\n"));
   fprintf (stream, _("\
@@ -437,7 +443,13 @@ parse_args (pargc, pargv)
     {"warn", no_argument, NULL, OPTION_WARN},
 #define OPTION_TARGET_HELP (OPTION_STD_BASE + 19)
     {"target-help", no_argument, NULL, OPTION_TARGET_HELP},
-#define OPTION_WARN_FATAL (OPTION_STD_BASE + 20)
+#if defined BFD_ASSEMBLER && (defined OBJ_ELF || defined OBJ_MAYBE_ELF)
+#define OPTION_EXECSTACK (OPTION_STD_BASE + 20)
+    {"execstack", no_argument, NULL, OPTION_EXECSTACK},
+#define OPTION_NOEXECSTACK (OPTION_STD_BASE + 21)
+    {"noexecstack", no_argument, NULL, OPTION_NOEXECSTACK},
+#endif
+#define OPTION_WARN_FATAL (OPTION_STD_BASE + 22)
     {"fatal-warnings", no_argument, NULL, OPTION_WARN_FATAL}
     /* When you add options here, check that they do not collide with
        OPTION_MD_BASE.  See as.h.  */
@@ -698,6 +710,18 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 	  flag_fatal_warnings = 1;
 	  break;
 
+#if defined BFD_ASSEMBLER && (defined OBJ_ELF || defined OBJ_MAYBE_ELF)
+	case OPTION_EXECSTACK:
+	  flag_execstack = 1;
+	  flag_noexecstack = 0;
+	  break;
+
+	case OPTION_NOEXECSTACK:
+	  flag_noexecstack = 1;
+	  flag_execstack = 0;
+	  break;
+#endif
+
 	case 'Z':
 	  flag_always_generate_output = 1;
 	  break;
@@ -905,6 +929,19 @@ main (argc, argv)
 
 #ifdef md_end
   md_end ();
+#endif
+
+#if defined BFD_ASSEMBLER && (defined OBJ_ELF || defined OBJ_MAYBE_ELF)
+  if ((flag_execstack || flag_noexecstack)
+      && OUTPUT_FLAVOR == bfd_target_elf_flavour)
+    {
+      segT gnustack;
+
+      gnustack = subseg_new (".note.GNU-stack", 0);
+      bfd_set_section_flags (stdoutput, gnustack,
+			     SEC_READONLY | (flag_execstack ? SEC_CODE : 0));
+                                                                             
+    }
 #endif
 
   /* If we've been collecting dwarf2 .debug_line info, either for
