@@ -30,6 +30,7 @@ void obj_elf_version PARAMS ((void));
 static void obj_elf_size PARAMS ((void));
 static void obj_elf_type PARAMS ((void));
 static void obj_elf_ident PARAMS ((void));
+static void obj_elf_weak PARAMS ((void));
 
 const pseudo_typeS obj_pseudo_table[] =
 {
@@ -39,6 +40,7 @@ const pseudo_typeS obj_pseudo_table[] =
   {"size", obj_elf_size, 0},
   {"type", obj_elf_type, 0},
   {"version", obj_elf_version, 0},
+  {"weak", obj_elf_weak, 0},
 
 /* These are used for stabs-in-elf configurations.  */
   {"desc", obj_elf_desc, 0},
@@ -52,10 +54,12 @@ const pseudo_typeS obj_pseudo_table[] =
   /* These are used for dwarf. */
   {"2byte", cons, 2},
   {"4byte", cons, 4},
+  {"8byte", cons, 8},
 
   {NULL}			/* end sentinel */
 };
 
+#undef NO_RELOC
 #include "aout/aout64.h"
 
 void
@@ -78,6 +82,34 @@ elf_file_symbol (s)
     }
 }
 
+static void 
+obj_elf_weak ()
+{
+  char *name;
+  int c;
+  symbolS *symbolP;
+
+  do
+    {
+      name = input_line_pointer;
+      c = get_symbol_end ();
+      symbolP = symbol_find_or_make (name);
+      *input_line_pointer = c;
+      SKIP_WHITESPACE ();
+      S_SET_WEAK (symbolP);
+      symbolP->local = 1;
+      if (c == ',')
+	{
+	  input_line_pointer++;
+	  SKIP_WHITESPACE ();
+	  if (*input_line_pointer == '\n')
+	    c = '\n';
+	}
+    }
+  while (c == ',');
+  demand_empty_rest_of_line ();
+}
+
 static segT previous_section;
 static int previous_subsection;
 
@@ -98,6 +130,7 @@ obj_elf_section (xxx)
   flagword default_flags = 0;
 
   SKIP_WHITESPACE ();
+  /* Get name of section.  */
   if (*input_line_pointer == '"')
     string = demand_copy_C_string (&xxx);
   else
@@ -118,6 +151,7 @@ obj_elf_section (xxx)
   else if (!strcmp (string, ".init")
 	   || !strcmp (string, ".fini"))
     default_flags = SEC_ALLOC | SEC_READONLY | SEC_RELOC | SEC_CODE;
+
   SKIP_WHITESPACE ();
   if (*input_line_pointer != ',')
     flags = default_flags;
@@ -128,6 +162,17 @@ obj_elf_section (xxx)
       char *p, oldp;
 
       input_line_pointer++;
+
+      /* Under i386-svr4, gcc emits a string here.  I don't know what this
+	 string is supposed to signify or how to handle it.  Ignore it for
+	 now, unless it becomes a problem.  */
+      if (*input_line_pointer == '"')
+	{
+	  demand_copy_C_string (&xxx);
+	  SKIP_WHITESPACE ();
+	  continue;
+	}
+
       if (*input_line_pointer != '#' && *input_line_pointer != '@')
 	{
 	  as_bad ("unrecognized syntax in .section command");
@@ -143,6 +188,7 @@ obj_elf_section (xxx)
       CHECK ("write", SEC_READONLY, 1);
       CHECK ("alloc", SEC_ALLOC, 0);
       CHECK ("execinstr", SEC_CODE, 1);
+      CHECK ("progbits", SEC_LOAD, 1);
 #undef CHECK
 
       p = input_line_pointer;
@@ -800,9 +846,9 @@ obj_elf_type ()
     }
   input_line_pointer++;
   SKIP_WHITESPACE ();
-  if (*input_line_pointer != '#')
+  if (*input_line_pointer != '#' && *input_line_pointer != '@')
     {
-      as_bad ("expected `#' after comma in .type directive");
+      as_bad ("expected `#' or `@' after comma in .type directive");
       goto egress;
     }
   input_line_pointer++;
