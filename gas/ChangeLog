@@ -1,3 +1,39 @@
+Mon Feb  1 20:37:30 1999  Catherine Moore  <clm@cygnus.com>
+
+        * config/tc-i386.h (LONG_DOUBLE_MNEM_SUFFIX):  Define.
+        (INTEL_DWORD_MNEM_SUFFIX):  Define.
+        (BYTE_PTR):  Define.
+        (WORD_PTR):  Define.
+        (DWORD_PTR):  Define.
+        (XWORD_PTR):  Define.
+        (SHORT):  Define.
+        (OFFSET_FLAT):  Define.
+        (FLAT):  Define.
+        (NONE_FOUND):  Define.
+        (No_dSuf):  Define.
+        (No_xSuf):  Define.
+        * config/tc-i386.c  (set_intel_syntax):  New routine.
+        (intel_syntax):  Declare.
+        (allow_naked_reg):  Declare.
+        (md_pseudo_table):  Support .intel_syntax and .att_syntax.
+        (intel_float_operand):  New routine.
+        (md_assemble):  Handle INTEL_DWORD_MNEM_SUFFIX.
+        Handle brackets as well as parens.  Call i386_intel_operand for
+        intel syntax.  Reverse operands if appropriate.  Handle new
+        suffixes.  Handle movzx and movsx.
+        (i386_is_reg):  New routine.
+        (i386_immediate):  New routine.
+        (i386_scale):  New routine.
+        (i386_displacement):  New routine.
+        (i386_operand_modifier):  New routine.
+        (build_displacement_string):  New routine.
+        (i386_parse_seg):  New routine.
+        (i386_intel_memory_operand):  New routine.
+        (i386_intel_operand):  New routine.
+        (i386_operand):  Call i386_displacement, i386_immediate,
+        i386_scale, etc.  instead of handling inline.
+        (parse_register):  Handle registers without prefix.
+
 Mon Feb  1 12:24:58 1999  Catherine Moore  <clm@cygnus.com>
 
         * configure:  Regenerate.
