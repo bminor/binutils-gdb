@@ -494,6 +494,7 @@ mcore-*-elf)		targ_emul=elf32mcore ;;
 s390x-*-linux*)         targ_emul=elf64_s390 ;;
 s390-*-linux*)          targ_emul=elf_s390 ;;
 *-*-ieee*)		targ_emul=vanilla ;;
+ip2k-*-elf)		targ_emul=elf32ip2k ;;
 
 *)
   echo 2>&1 "*** ld does not support target ${targ}"

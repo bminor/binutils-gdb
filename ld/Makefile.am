@@ -161,6 +161,7 @@ ALL_EMULATIONS = \
 	eelf32fr30.o \
 	eelf32frv.o \
 	eelf32i370.o \
+	eelf32ip2k.o \
 	eelf32l4300.o \
 	eelf32lmip.o \
 	eelf32lppc.o \
@@ -626,6 +627,9 @@ eelf64lppc.c: $(srcdir)/emulparams/elf64lppc.sh \
 eelf32i370.c: $(srcdir)/emulparams/elf32i370.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elfi370.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32i370 "$(tdir_elf32i370)"
+eelf32ip2k.c: $(srcdir)/emulparams/elf32ip2k.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/ip2k.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32ip2k "$(tdir_ip2k)"
 eelf64alpha.c: $(srcdir)/emulparams/elf64alpha.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64alpha "$(tdir_elf64alpha)"

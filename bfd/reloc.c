@@ -3123,6 +3123,55 @@ ENUMDOC
   32 bit rel. offset to GOT entry.
 
 ENUM
+  BFD_RELOC_IP2K_FR9
+ENUMDOC
+  Scenix IP2K - 9-bit register number / data address
+ENUM
+  BFD_RELOC_IP2K_BANK
+ENUMDOC
+  Scenix IP2K - 4-bit register/data bank number
+ENUM
+  BFD_RELOC_IP2K_ADDR16CJP
+ENUMDOC
+  Scenix IP2K - low 13 bits of instruction word address
+ENUM
+  BFD_RELOC_IP2K_PAGE3
+ENUMDOC
+  Scenix IP2K - high 3 bits of instruction word address
+ENUM
+  BFD_RELOC_IP2K_LO8DATA
+ENUMX
+  BFD_RELOC_IP2K_HI8DATA
+ENUMX
+  BFD_RELOC_IP2K_EX8DATA
+ENUMDOC
+  Scenix IP2K - ext/low/high 8 bits of data address
+ENUM
+  BFD_RELOC_IP2K_LO8INSN
+ENUMX
+  BFD_RELOC_IP2K_HI8INSN
+ENUMDOC
+  Scenix IP2K - low/high 8 bits of instruction word address
+ENUM
+  BFD_RELOC_IP2K_PC_SKIP
+ENUMDOC
+  Scenix IP2K - even/odd PC modifier to modify snb pcl.0
+ENUM
+  BFD_RELOC_IP2K_TEXT
+ENUMDOC
+  Scenix IP2K - 16 bit word address in text section.
+ENUM
+  BFD_RELOC_IP2K_FR_OFFSET
+ENUMDOC
+  Scenix IP2K - 7-bit sp or dp offset
+ENUM
+  BFD_RELOC_VPE4KMATH_DATA
+ENUMX
+  BFD_RELOC_VPE4KMATH_INSN
+ENUMDOC
+  Scenix VPE4K coprocessor - data/insn-space addressing
+
+ENUM
   BFD_RELOC_VTABLE_INHERIT
 ENUMX
   BFD_RELOC_VTABLE_ENTRY

@@ -1,4 +1,7 @@
 -*- text -*-
+
+* IP2K support added by Denis Chertykov.
+
 Changes in 2.13:
 
 * Support for the Fujitsu FRV architecture added by Red Hat. Models for FR400

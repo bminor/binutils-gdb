@@ -518,6 +518,10 @@ case "${targ}" in
     targ_selvecs="icoff_little_vec icoff_big_vec"
     ;;
 
+  ip2k-*-elf)
+    targ_defvec=bfd_elf32_ip2k_vec
+    ;;
+
   m32r-*-*)
     targ_defvec=bfd_elf32_m32r_vec
     ;;

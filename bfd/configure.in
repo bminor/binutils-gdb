@@ -582,6 +582,7 @@ do
     bfd_elf32_i960_vec)		tb="$tb elf32-i960.lo elf32.lo $elf" ;;
     bfd_elf32_ia64_big_vec)	tb="$tb elf32-ia64.lo elf32.lo $elf" ;;
     bfd_elf32_ia64_hpux_big_vec) tb="$tb elf32-ia64.lo elf32.lo $elf";;
+    bfd_elf32_ip2k_vec)		tb="$tb elf32-ip2k.lo elf32.lo $elf" ;;
     bfd_elf32_little_generic_vec) tb="$tb elf32-gen.lo elf32.lo $elf" ;;
     bfd_elf32_littlearc_vec)	tb="$tb elf32-arc.lo elf32.lo $elf" ;;
     bfd_elf32_littlearm_oabi_vec) tb="$tb elfarm-oabi.lo elf32.lo $elf" ;;

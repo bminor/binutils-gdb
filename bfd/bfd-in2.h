@@ -1648,6 +1648,9 @@ enum bfd_architecture
   bfd_arch_ia64,      /* HP/Intel ia64 */
 #define bfd_mach_ia64_elf64    0
 #define bfd_mach_ia64_elf32    1
+  bfd_arch_ip2k,      /* Ubicom IP2K microcontrollers. */
+#define bfd_mach_ip2022        0
+#define bfd_mach_ip2022ext     1
   bfd_arch_pj,
   bfd_arch_avr,       /* Atmel AVR microcontrollers.  */
 #define bfd_mach_avr1          1
@@ -2900,6 +2903,40 @@ into 22 bits.  */
 
 /* 32 bit rel. offset to GOT entry.  */
   BFD_RELOC_390_GOTENT,
+
+/* Scenix IP2K - 9-bit register number / data address  */
+  BFD_RELOC_IP2K_FR9,
+
+/* Scenix IP2K - 4-bit register/data bank number  */
+  BFD_RELOC_IP2K_BANK,
+
+/* Scenix IP2K - low 13 bits of instruction word address  */
+  BFD_RELOC_IP2K_ADDR16CJP,
+
+/* Scenix IP2K - high 3 bits of instruction word address  */
+  BFD_RELOC_IP2K_PAGE3,
+
+/* Scenix IP2K - ext/low/high 8 bits of data address  */
+  BFD_RELOC_IP2K_LO8DATA,
+  BFD_RELOC_IP2K_HI8DATA,
+  BFD_RELOC_IP2K_EX8DATA,
+
+/* Scenix IP2K - low/high 8 bits of instruction word address  */
+  BFD_RELOC_IP2K_LO8INSN,
+  BFD_RELOC_IP2K_HI8INSN,
+
+/* Scenix IP2K - even/odd PC modifier to modify snb pcl.0  */
+  BFD_RELOC_IP2K_PC_SKIP,
+
+/* Scenix IP2K - 16 bit word address in text section.  */
+  BFD_RELOC_IP2K_TEXT,
+
+/* Scenix IP2K - 7-bit sp or dp offset  */
+  BFD_RELOC_IP2K_FR_OFFSET,
+
+/* Scenix VPE4K coprocessor - data/insn-space addressing  */
+  BFD_RELOC_VPE4KMATH_DATA,
+  BFD_RELOC_VPE4KMATH_INSN,
 
 /* These two relocations are used by the linker to determine which of
 the entries in a C++ virtual function table are actually used.  When

@@ -1,3 +1,25 @@
+2002-07-15  Denis Chertykov  <denisc@overta.ru>
+	    Frank Ch. Eigler  <fche@redhat.com>
+	    Ben Elliston  <bje@redhat.com>
+	    Alan Lehotsky  <alehotsky@cygnus.com>
+	    John Healy  <jhealy@redhat.com>
+	    Graham Stott  <grahams@redhat.com>
+	    Jeff Johnston  <jjohnstn@redhat.com>
+
+	* Makefile.am: Add support for ip2k.
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+	* archures.c: Add support for ip2k.
+	* config.bfd: Add support for ip2k.
+	* configure.in: Add support for ip2k.
+	* configure: Regenerate.
+	* reloc.c: Add support for ip2k.
+	* targets.c: Add support for ip2k.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* cpu-ip2k.c: New file.
+	* elf32-ip2k.c: New file.
+
 2002-07-17  Ian Rickards  <irickard@arm.com>
 
 	* dwarf2.c (concat_filename): If we can't establish the directory 

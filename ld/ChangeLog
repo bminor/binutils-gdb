@@ -1,3 +1,15 @@
+2002-07-16  Denis Chertykov  <denisc@overta.ru>
+	    Nick Clifton  <nickc@redhat.com>
+	    Frank Ch. Eigler  <fche@redhat.com>
+	    John Healy  <jhealy@redhat.com>
+
+	* configure.tgt: Add support for ip2k-elf.
+	* Makefile.am: Add support for ip2k-elf.
+	* Makefile.in: Regenerate.
+	* emulparams/elf32ip2k.sh: New file.
+	* scripttempl/ip2k.sc: New file
+	* NEWS: Mention support for new port.
+
 2002-07-16  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* NEWS: Add 'Changes in 2.13'.
