@@ -54,6 +54,7 @@ ld
 libiberty
 libg++
 make
+newlib
 prms
 rcs
 readline
