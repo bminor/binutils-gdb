@@ -1,5 +1,13 @@
 2001-08-11  Andrew Cagney  <ac131313@redhat.com>
 
+	* config/i386/tm-symmetry.h (REGISTER_CONVERT_TO_VIRTUAL): Make
+	val a DOUBLEST.  Use floatformat_to_doublest.
+	(REGISTER_CONVERT_TO_RAW): Ditto.  Use foatformat_from_doublest.
+	* config/m88k/tm-m88k.h (REGISTER_CONVERT_TO_VIRTUAL): Ditto.
+	(REGISTER_CONVERT_TO_RAW): Ditto.
+
+2001-08-11  Andrew Cagney  <ac131313@redhat.com>
+
 	* config/mn10300/tm-mn10300.h (PC_REGNUM, SP_REGNUM): Delete.
 	* mn10300-tdep.c (mn10300_gdbarch_init): Initialize pc_regnum and
 	sp_regnum.
