@@ -45,9 +45,6 @@
 typedef struct som_symbol
   {
     asymbol symbol;
-    short desc;
-    char other;
-    unsigned char type;
     unsigned int som_type;
 
     /* Structured like the ELF tc_data union.  Allows more code sharing
@@ -106,6 +103,7 @@ struct somdata
     struct header *file_hdr;
     struct copyright_aux_hdr *copyright_aux_hdr;
     struct user_string_aux_hdr *version_aux_hdr;
+    struct som_exec_auxhdr *exec_hdr;
 
     /* Pointers to a saved copy of the symbol and string tables.  These
        need not be copied for objcopy or strip to work.  */
@@ -174,6 +172,7 @@ struct som_section_data_struct
 #define somdata(bfd)			((bfd)->tdata.som_data->a)
 #define obj_som_exec_data(bfd)		(somdata(bfd).exec_data)
 #define obj_som_file_hdr(bfd)		(somdata(bfd).file_hdr)
+#define obj_som_exec_hdr(bfd)		(somdata(bfd).exec_hdr)
 #define obj_som_copyright_hdr(bfd)	(somdata(bfd).copyright_aux_hdr)
 #define obj_som_version_hdr(bfd)	(somdata(bfd).version_aux_hdr)
 #define obj_som_symtab(bfd)		(somdata(bfd).symtab)
@@ -203,7 +202,7 @@ struct som_section_data_struct
 #define	R_HPPA_GOTOFF			R_DP_RELATIVE
 #define R_HPPA_ENTRY			R_ENTRY
 #define R_HPPA_EXIT			R_EXIT
-#define R_COMPLEX			R_COMP1
+#define R_HPPA_COMPLEX			R_COMP1
 
 /* Exported functions, mostly for use by GAS.  */
 boolean bfd_som_set_section_attributes PARAMS ((asection *, int, int,

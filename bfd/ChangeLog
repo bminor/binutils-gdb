@@ -1,5 +1,10 @@
 Tue Sep 13 17:57:00 1994  Jeff Law  (law@snake.cs.utah.edu)
 
+	* som.h (som_symbol_type): Delete unused a.out-related fields.
+
+	* som.c (bfd_section_from_som_symbol): Use bfd_abs_section_ptr
+	instead of &bfd_abs_section.
+
 	* som.c (som_object_setup): Handle exec_entry and exec_flags being
 	switched in executables created by the OSF1 linker.
 	(som_write_fixups): Handle R_EXIT just like the R_{F,L,R}SEL

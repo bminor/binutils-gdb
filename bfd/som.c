@@ -2310,7 +2310,6 @@ som_prep_for_fixups (abfd, syms, num_syms)
 	}
     }
 
-  /* Now sort the symbols.  */
   qsort (syms, num_syms, sizeof (asymbol *), compare_syms);
 
   /* Compute the symbol indexes, they will be needed by the relocation
@@ -3678,7 +3677,7 @@ bfd_section_from_som_symbol (abfd, symbol)
 
       /* Could be a symbol from an external library (such as an OMOS
 	 shared library).  Don't abort.  */
-      return &bfd_abs_section;
+      return bfd_abs_section_ptr;
 
     }
   else
@@ -3696,7 +3695,7 @@ bfd_section_from_som_symbol (abfd, symbol)
 
       /* Could be a symbol from an external library (such as an OMOS
 	 shared library).  Don't abort.  */
-      return &bfd_abs_section;
+      return bfd_abs_section_ptr;
 
     }
 }
