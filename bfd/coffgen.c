@@ -1,6 +1,6 @@
 /* Support for the generic parts of COFF, for BFD.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001
+   2000, 2001, 2002
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -1438,13 +1438,13 @@ coff_section_symbol (abfd, name)
 	  combined_entry_type e[10];
 	};
       struct foo *f;
-      f = (struct foo *) bfd_alloc (abfd, (bfd_size_type) sizeof (*f));
+
+      f = (struct foo *) bfd_zalloc (abfd, (bfd_size_type) sizeof (*f));
       if (!f)
 	{
 	  bfd_set_error (bfd_error_no_error);
 	  return NULL;
 	}
-      memset ((char *) f, 0, sizeof (*f));
       coff_symbol_from (abfd, sym)->native = csym = f->e;
     }
   csym[0].u.syment.n_sclass = C_STAT;
@@ -1835,10 +1835,9 @@ coff_get_normalized_symtab (abfd)
 		if (internal_ptr->u.syment._n._n_name[i] == '\0')
 		  break;
 
-	      newstring = (PTR) bfd_alloc (abfd, (bfd_size_type) (i + 1));
+	      newstring = (PTR) bfd_zalloc (abfd, (bfd_size_type) (i + 1));
 	      if (newstring == NULL)
 		return (NULL);
-	      memset (newstring, 0, i + 1);
 	      strncpy (newstring, internal_ptr->u.syment._n._n_name, i);
 	      internal_ptr->u.syment._n._n_n._n_offset = (long int) newstring;
 	      internal_ptr->u.syment._n._n_n._n_zeroes = 0;
@@ -1897,10 +1896,9 @@ coff_make_empty_symbol (abfd)
      bfd *abfd;
 {
   bfd_size_type amt = sizeof (coff_symbol_type);
-  coff_symbol_type *new = (coff_symbol_type *) bfd_alloc (abfd, amt);
+  coff_symbol_type *new = (coff_symbol_type *) bfd_zalloc (abfd, amt);
   if (new == NULL)
     return (NULL);
-  memset (new, 0, sizeof *new);
   new->symbol.section = 0;
   new->native = 0;
   new->lineno = (alent *) NULL;
@@ -2453,11 +2451,9 @@ bfd_coff_set_symbol_class (abfd, symbol, class)
       combined_entry_type * native;
       bfd_size_type amt = sizeof (* native);
 
-      native = (combined_entry_type *) bfd_alloc (abfd, amt);
+      native = (combined_entry_type *) bfd_zalloc (abfd, amt);
       if (native == NULL)
 	return false;
-
-      memset (native, 0, sizeof (* native));
 
       native->u.syment.n_type   = T_NULL;
       native->u.syment.n_sclass = class;

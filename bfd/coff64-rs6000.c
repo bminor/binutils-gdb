@@ -2264,11 +2264,9 @@ xcoff64_generate_rtinit (abfd, init, fini, rtld)
   data_buffer_size = 0x0058 + initsz + finisz;
   data_buffer_size += (data_buffer_size & 7) ? 8 - (data_buffer_size & 7) : 0;
   data_buffer = NULL;
-  data_buffer = (bfd_byte *)bfd_malloc (data_buffer_size);
+  data_buffer = (bfd_byte *) bfd_zmalloc (data_buffer_size);
   if (data_buffer == NULL)
     return false;
-
-  memset (data_buffer, 0, data_buffer_size);
 
   if (initsz)
     {
@@ -2302,8 +2300,10 @@ xcoff64_generate_rtinit (abfd, init, fini, rtld)
   if (true == rtld)
     string_table_size += strlen (rtld_name) + 1;
 
-  string_table = (bfd_byte *)bfd_malloc (string_table_size);
-  memset (string_table, 0, string_table_size);
+  string_table = (bfd_byte *) bfd_zmalloc (string_table_size);
+  if (string_table == NULL)
+    return false;
+
   val = string_table_size;
   bfd_put_32 (abfd, val, &string_table[0]);
   st_tmp = string_table + 4;

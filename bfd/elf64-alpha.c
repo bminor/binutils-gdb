@@ -2974,11 +2974,10 @@ get_got_entry (abfd, h, r_type, r_symndx, r_addend)
 	  size *= sizeof (struct alpha_elf_got_entry *);
 
 	  local_got_entries
-	    = (struct alpha_elf_got_entry **) bfd_alloc (abfd, size);
+	    = (struct alpha_elf_got_entry **) bfd_zalloc (abfd, size);
 	  if (!local_got_entries)
 	    return NULL;
 
-	  memset (local_got_entries, 0, (size_t) size);
 	  alpha_elf_tdata (abfd)->local_got_entries = local_got_entries;
 	}
 

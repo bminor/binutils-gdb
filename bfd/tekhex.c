@@ -354,17 +354,13 @@ find_chunk (abfd, vma)
     }
   if (!d)
     {
-      char *sname = bfd_alloc (abfd, (bfd_size_type) 12);
-
       /* No chunk for this address, so make one up */
       d = ((struct data_struct *)
-	   bfd_alloc (abfd, (bfd_size_type) sizeof (struct data_struct)));
+	   bfd_zalloc (abfd, (bfd_size_type) sizeof (struct data_struct)));
 
-      if (!sname || !d)
+      if (!d)
 	return NULL;
 
-      memset (d->chunk_init, 0, CHUNK_MASK + 1);
-      memset (d->chunk_data, 0, CHUNK_MASK + 1);
       d->next = abfd->tdata.tekhex_data->data;
       d->vma = vma;
       abfd->tdata.tekhex_data->data = d;

@@ -2398,10 +2398,9 @@ do_with_relocs (abfd, s)
       if ((PTR) stream == (PTR) NULL)
 	{
 	  /* Outputting a section without data, fill it up */
-	  stream = (unsigned char *) (bfd_alloc (abfd, s->_raw_size));
+	  stream = (unsigned char *) bfd_zalloc (abfd, s->_raw_size);
 	  if (!stream)
 	    return false;
-	  memset ((PTR) stream, 0, (size_t) s->_raw_size);
 	}
       while (current_byte_index < s->_raw_size)
 	{

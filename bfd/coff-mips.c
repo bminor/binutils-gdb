@@ -2116,10 +2116,9 @@ mips_relax_section (abfd, sec, info, again)
 	  bfd_size_type size;
 
 	  size = (bfd_size_type) sec->reloc_count * sizeof (long);
-	  offsets = (long *) bfd_alloc (abfd, size);
+	  offsets = (long *) bfd_zalloc (abfd, size);
 	  if (offsets == (long *) NULL)
 	    goto error_return;
-	  memset (offsets, 0, (size_t) size);
 	  section_tdata->offsets = offsets;
 	}
 

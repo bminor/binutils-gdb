@@ -1,5 +1,42 @@
 2002-06-07  Alan Modra  <amodra@bigpond.net.au>
 
+	* aoutx.h (NAME(aout,slurp_symbol_table)): Use bfd_zmalloc.
+	(NAME(aout,slurp_reloc_table)): Likewise.
+	* coff-mips.c (mips_relax_section): Use bfd_zalloc.
+	* coff-rs6000.c (xcoff_write_armap_big): Use bfd_zmalloc.
+	(xcoff_write_archive_contents_big): Likewise.
+	(xcoff_generate_rtinit): Likewise.
+	(xcoff_generate_rtinit): Likewise, and check error return.
+	* coff64-rs6000.c (xcoff64_generate_rtinit): Likewise.
+	* coffgen.c (coff_section_symbol): Use bfd_zalloc.
+	(coff_get_normalized_symtab): Likewise.
+	(coff_make_empty_symbol): Likewise.
+	(bfd_coff_set_symbol_class): Likewise.
+	* cofflink.c (coff_link_add_symbols): Likewise.
+	* ecoff.c (_bfd_ecoff_make_empty_symbol): Likewise.
+	* ecofflink.c (ecoff_write_shuffle): Use bfd_zmalloc.
+	(bfd_ecoff_write_accumulated_debug): Likewise.
+	* elf64-alpha.c (get_got_entry): Use bfd_zalloc.
+	* i386linux.c (bfd_i386linux_size_dynamic_sections): Likewise.
+	* i386lynx.c (NAME(lynx,slurp_reloc_table)): Use bfd_zmalloc.
+	* ieee.c (do_with_relocs): Use bfd_zalloc.
+	* m68klinux.c (bfd_m68klinux_size_dynamic_sections): Likewise.
+	* pdp11.c (NAME(aout,slurp_symbol_table)): Use bfd_zmalloc.
+	(NAME(aout,slurp_reloc_table)): Likewise.
+	(NAME(aout,squirt_out_relocs)): Don't memset when zalloc'd.
+	* reloc16.c (bfd_coff_reloc16_relax_section): Use bfd_zmalloc.
+	* som.c (som_build_and_write_symbol_table): Likewise.
+	(som_slurp_string_table): Likewise.
+	(som_slurp_symbol_table): Likewise.
+	(som_bfd_ar_write_symbol_stuff): Likewise.
+	* sparclinux.c (bfd_sparclinux_size_dynamic_sections): Use bfd_zalloc.
+	* sunos.c (bfd_sunos_size_dynamic_sections): Likewise.
+	* tekhex.c (find_chunk): Likewise.  Get rid of unused "sname".
+	* vms-gsd.c (_bfd_vms_slurp_gsd): Use bfd_zmalloc.
+	* xcofflink.c (xcoff_link_add_symbols): Use bfd_zalloc/bfd_zmalloc.
+
+2002-06-07  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf-bfd.h (struct bfd_elf_section_data <group_name>): Replace with
 	"group" union.
 	(elf_group_name): Update.
@@ -476,9 +513,9 @@
 
 	* elf32-arm.h (bfd_elf32_arm_get_bfd_for_interworking): Don't add glue
 	sections only record bfd.
-	(bfd_elf32_arm_add_glue_sections_to_bfd): New function. 
+	(bfd_elf32_arm_add_glue_sections_to_bfd): New function.
 	* bfd-in.h (bfd_elf32_arm_add_glue_sections_to_bfd): Declare it.
-	* bfd-in2.h: Regenerate.	  
+	* bfd-in2.h: Regenerate.
 
 2002-05-28  Nick Clifton  <nickc@cambridge.redhat.com>
 

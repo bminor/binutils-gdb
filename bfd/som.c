@@ -4141,10 +4141,9 @@ som_build_and_write_symbol_table (abfd)
      to hold the symbol table as we build it.  */
   symtab_size = num_syms;
   symtab_size *= sizeof (struct symbol_dictionary_record);
-  som_symtab = (struct symbol_dictionary_record *) bfd_malloc (symtab_size);
+  som_symtab = (struct symbol_dictionary_record *) bfd_zmalloc (symtab_size);
   if (som_symtab == NULL && symtab_size != 0)
     goto error_return;
-  memset (som_symtab, 0, (size_t) symtab_size);
 
   /* Walk over each symbol.  */
   for (i = 0; i < num_syms; i++)
@@ -4230,10 +4229,9 @@ som_slurp_string_table (abfd)
 
   /* Allocate and read in the string table.  */
   amt = obj_som_stringtab_size (abfd);
-  stringtab = bfd_malloc (amt);
+  stringtab = bfd_zmalloc (amt);
   if (stringtab == NULL)
     return false;
-  memset (stringtab, 0, obj_som_stringtab_size (abfd));
 
   if (bfd_seek (abfd, obj_som_str_filepos (abfd), SEEK_SET) != 0)
     return false;
@@ -4336,10 +4334,9 @@ som_slurp_symbol_table (abfd)
 
   amt = symbol_count;
   amt *= sizeof (som_symbol_type);
-  symbase = (som_symbol_type *) bfd_malloc (amt);
+  symbase = (som_symbol_type *) bfd_zmalloc (amt);
   if (symbase == NULL)
     goto error_return;
-  memset (symbase, 0, symbol_count * sizeof (som_symbol_type));
 
   /* Read in the external SOM representation.  */
   amt = symbol_count;
@@ -5899,31 +5896,25 @@ som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst, elength)
 
   amt = lst.hash_size;
   amt *= sizeof (unsigned int);
-  hash_table = (unsigned int *) bfd_malloc (amt);
+  hash_table = (unsigned int *) bfd_zmalloc (amt);
   if (hash_table == NULL && lst.hash_size != 0)
     goto error_return;
 
   amt = lst.module_count;
   amt *= sizeof (struct som_entry);
-  som_dict = (struct som_entry *) bfd_malloc (amt);
+  som_dict = (struct som_entry *) bfd_zmalloc (amt);
   if (som_dict == NULL && lst.module_count != 0)
     goto error_return;
 
   amt = lst.hash_size;
   amt *= sizeof (struct lst_symbol_record *);
-  last_hash_entry = ((struct lst_symbol_record **) bfd_malloc (amt));
+  last_hash_entry = ((struct lst_symbol_record **) bfd_zmalloc (amt));
   if (last_hash_entry == NULL && lst.hash_size != 0)
     goto error_return;
 
   /* Lots of fields are file positions relative to the start
      of the lst record.  So save its location.  */
   lst_filepos = bfd_tell (abfd) - sizeof (struct lst_header);
-
-  /* Some initialization.  */
-  memset (hash_table, 0, 4 * lst.hash_size);
-  memset (som_dict, 0, lst.module_count * sizeof (struct som_entry));
-  memset (last_hash_entry, 0,
-	  lst.hash_size * sizeof (struct lst_symbol_record *));
 
   /* Symbols have som_index fields, so we have to keep track of the
      index of each SOM in the archive.

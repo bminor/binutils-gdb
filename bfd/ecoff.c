@@ -661,10 +661,9 @@ _bfd_ecoff_make_empty_symbol (abfd)
   ecoff_symbol_type *new;
   bfd_size_type amt = sizeof (ecoff_symbol_type);
 
-  new = (ecoff_symbol_type *) bfd_alloc (abfd, amt);
+  new = (ecoff_symbol_type *) bfd_zalloc (abfd, amt);
   if (new == (ecoff_symbol_type *) NULL)
     return (asymbol *) NULL;
-  memset ((PTR) new, 0, sizeof *new);
   new->symbol.section = (asection *) NULL;
   new->fdr = (FDR *) NULL;
   new->local = false;

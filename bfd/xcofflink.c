@@ -1086,21 +1086,19 @@ xcoff_link_add_symbols (abfd, info)
   /* We keep a list of the linker hash table entries that correspond
      to each external symbol.  */
   amt = symcount * sizeof (struct xcoff_link_hash_entry *);
-  sym_hash = (struct xcoff_link_hash_entry **) bfd_alloc (abfd, amt);
+  sym_hash = (struct xcoff_link_hash_entry **) bfd_zalloc (abfd, amt);
   if (sym_hash == NULL && symcount != 0)
     goto error_return;
   coff_data (abfd)->sym_hashes = (struct coff_link_hash_entry **) sym_hash;
-  memset (sym_hash, 0, (size_t) amt);
 
   /* Because of the weird stuff we are doing with XCOFF csects, we can
      not easily determine which section a symbol is in, so we store
      the information in the tdata for the input file.  */
   amt = symcount * sizeof (asection *);
-  csect_cache = (asection **) bfd_alloc (abfd, amt);
+  csect_cache = (asection **) bfd_zalloc (abfd, amt);
   if (csect_cache == NULL && symcount != 0)
     goto error_return;
   xcoff_data (abfd)->csects = csect_cache;
-  memset (csect_cache, 0, (size_t) amt);
 
   /* While splitting sections into csects, we need to assign the
      relocs correctly.  The relocs and the csects must both be in
@@ -1109,10 +1107,9 @@ xcoff_link_add_symbols (abfd, info)
      into reloc_info using the section target_index.  */
   amt = abfd->section_count + 1;
   amt *= sizeof (struct reloc_info_struct);
-  reloc_info = (struct reloc_info_struct *) bfd_malloc (amt);
+  reloc_info = (struct reloc_info_struct *) bfd_zmalloc (amt);
   if (reloc_info == NULL)
     goto error_return;
-  memset ((PTR) reloc_info, 0, (size_t) amt);
 
   /* Read in the relocs and line numbers for each section.  */
   linesz = bfd_coff_linesz (abfd);
@@ -1129,11 +1126,9 @@ xcoff_link_add_symbols (abfd, info)
 					false, (struct internal_reloc *) NULL);
 	  amt = o->reloc_count;
 	  amt *= sizeof (asection *);
-	  reloc_info[o->target_index].csects = (asection **) bfd_malloc (amt);
+	  reloc_info[o->target_index].csects = (asection **) bfd_zmalloc (amt);
 	  if (reloc_info[o->target_index].csects == NULL)
 	    goto error_return;
-	  memset (reloc_info[o->target_index].csects, 0, (size_t) amt);
-
 	}
 
       if ((info->strip == strip_none || info->strip == strip_some)

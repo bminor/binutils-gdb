@@ -1839,10 +1839,9 @@ xcoff_write_armap_big (abfd, elength, map, orl_count, stridx)
 	+ str_32 + (str_32 & 1);
 
       symbol_table = NULL;
-      symbol_table = (bfd_byte *) bfd_malloc (symbol_table_size);
+      symbol_table = (bfd_byte *) bfd_zmalloc (symbol_table_size);
       if (symbol_table == NULL)
 	return false;
-      memset (symbol_table, 0, symbol_table_size);
 
       hdr = (struct xcoff_ar_hdr_big *) symbol_table;
 	
@@ -1943,10 +1942,9 @@ xcoff_write_armap_big (abfd, elength, map, orl_count, stridx)
 	+ str_64 + (str_64 & 1);
 
       symbol_table = NULL;
-      symbol_table = (bfd_byte *) bfd_malloc (symbol_table_size);
+      symbol_table = (bfd_byte *) bfd_zmalloc (symbol_table_size);
       if (symbol_table == NULL)
 	return false;
-      memset (symbol_table, 0, symbol_table_size);
 
       hdr = (struct xcoff_ar_hdr_big *) symbol_table;
 
@@ -2457,10 +2455,9 @@ xcoff_write_archive_contents_big (abfd)
 
   member_table_size += member_table_size & 1;
   member_table = NULL;
-  member_table = (bfd_byte *) bfd_malloc (member_table_size);
+  member_table = (bfd_byte *) bfd_zmalloc (member_table_size);
   if (member_table == NULL)
     return false;
-  memset (member_table, 0, member_table_size);
 
   hdr = (struct xcoff_ar_hdr_big *) member_table;
 
@@ -3719,11 +3716,9 @@ xcoff_generate_rtinit  (abfd, init, fini, rtld)
   data_buffer_size = 0x0040 + initsz + finisz;
   data_buffer_size += (data_buffer_size & 7) ? 8 - (data_buffer_size & 7) : 0;
   data_buffer = NULL;
-  data_buffer = (bfd_byte *) bfd_malloc (data_buffer_size);
+  data_buffer = (bfd_byte *) bfd_zmalloc (data_buffer_size);
   if (data_buffer == NULL)
     return false;
-  
-  memset (data_buffer, 0, data_buffer_size);
 
   if (initsz) 
     {
@@ -3757,8 +3752,10 @@ xcoff_generate_rtinit  (abfd, init, fini, rtld)
   if (string_table_size)
     {
       string_table_size += 4;
-      string_table = (bfd_byte *)bfd_malloc (string_table_size);
-      memset (string_table, 0, string_table_size);
+      string_table = (bfd_byte *) bfd_zmalloc (string_table_size);
+      if (string_table_size == NULL)
+	return false;
+
       val = string_table_size;
       bfd_h_put_32 (abfd, val, &string_table[0]);
       st_tmp = string_table + 4;
