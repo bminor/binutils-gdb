@@ -1,3 +1,8 @@
+2003-10-10  Corinna Vinschen  <vinschen@redhat.com>
+
+	* sh-tdep.c (sh_use_struct_convention): Clean up to have a
+	more readable code.  Accomodate passing of bitfields.
+
 2003-10-10  Andrew Cagney  <cagney@redhat.com>
 
 	* Makefile.in (ppc-sysv-tdep.o): Add $(gdb_assert_h).

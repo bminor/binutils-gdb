@@ -589,8 +589,30 @@ sh_use_struct_convention (int gcc_p, struct type *type)
 {
   int len = TYPE_LENGTH (type);
   int nelem = TYPE_NFIELDS (type);
-  return ((len != 1 && len != 2 && len != 4 && len != 8) || nelem != 1) &&
-    (len != 8 || TYPE_LENGTH (TYPE_FIELD_TYPE (type, 0)) != 4);
+
+  /* Non-power of 2 length types and types bigger than 8 bytes (which don't
+     fit in two registers anyway) use struct convention.  */
+  if (len != 1 && len != 2 && len != 4 && len != 8)
+    return 1;
+
+  /* Scalar types and aggregate types with exactly one field are aligned
+     by definition.  They are returned in registers.  */
+  if (nelem <= 1)
+    return 0;
+
+  /* If the first field in the aggregate has the same length as the entire
+     aggregate type, the type is returned in registers.  */
+  if (TYPE_LENGTH (TYPE_FIELD_TYPE (type, 0)) == len)
+    return 0;
+
+  /* If the size of the aggregate is 8 bytes and the first field is
+     of size 4 bytes its alignment is equal to long long's alignment,
+     so it's returned in registers.  */
+  if (len == 8 && TYPE_LENGTH (TYPE_FIELD_TYPE (type, 0)) == 4)
+    return 0;
+
+  /* Otherwise use struct convention.  */
+  return 1;
 }
 
 /* Extract from an array REGBUF containing the (raw) register state
