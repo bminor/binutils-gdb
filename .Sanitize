@@ -231,6 +231,39 @@ else
 	done
 fi
 
+if [ -n "${verbose}" ] ; then
+	echo Processing \"jaguar\"...
+fi
+
+jaguar_files="config.sub configure.in cfg-ml-com.in"
+
+if ( echo $* | grep keep\-jaguar > /dev/null ) ; then
+	for i in $jaguar_files ; do
+		if test ! -d $i && (grep sanitize-jaguar $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping jaguar stuff in $i
+			fi
+		fi
+	done
+else
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-jaguar $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"jaguar\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-jaguar/,/end-\sanitize\-jaguar/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
 psion_files="config.sub configure.in"
 
 if ( echo $* | grep keep\-psion > /dev/null ) ; then

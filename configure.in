@@ -422,6 +422,10 @@ case "${target}" in
     # but that's okay since emacs doesn't work anyway
     noconfigdirs="$noconfigdirs emacs emacs19"
     ;;
+# start-sanitize-jaguar
+  jaguar-*-*)
+    ;;
+# end-sanitize-jaguar
   powerpc-*-aix*)
     # copied from rs6000-*-* entry
     noconfigdirs="$noconfigdirs ld gprof textutils cvs"

@@ -108,6 +108,11 @@ h8300-*-*)
 h8500-*-*)
 	multidirs="mbig msmall mcompact mmedium"
 	;;
+# start-sanitize-jaguar
+jaguar-*-*)
+	multidirs="be"
+	;;
+# end-sanitize-jaguar
 sh-*-*)
 	multidirs="ml"
 # start-sanitize-sh3e
