@@ -1,8 +1,28 @@
 Fri Sep 19 10:37:20 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
+	* v850.igen (disp16): Use EXTEND16 to sign extend disp.
+	(disp22): Only shift left by 1, not 2.
+	("jmp"): Ensure PC is 2 byte aligned.
+
+	* simops.c, v850.igen: Move "Bcond", "jr", "jarl" code to
+ 	v850.igen. Fix tracing.
+
+	* simops.c (OP_300, OP_400, OP_500): Move "sdl.b", "sld.h",
+ 	"sld.w" insns to v850.igen.  Fix tracing.
+start-sanitize-v850eq
+	(OP_70): Ditto for "sld.hu".
+end-sanitize-v850eq
+
+	* v850.igen: Clarify tracing of "sld.b", "sld.h" et.al.
+
+end-sanitize-v850eq
 	* simops.c (condition_met): Make global.
 
-	* sim-main.h (TRACE_ALU_INPUT3, TRACE_BRANCH0): Define.
+	* sim-main.h (TRACE_ALU_INPUT3, TRACE_BRANCH0, TRACE_LD,
+ 	TRACE_ST): Define.
+start-sanitize-v850eq
+	(TRACE_LD_NAME): Define.
+end-sanitize-v850eq
 
 start-sanitize-v850e
 	* simops.c: Move "cmov", "cmov imm" to v850.igen, fix.

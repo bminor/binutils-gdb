@@ -384,6 +384,43 @@ do { \
   } \
 } while (0)
 
+#define TRACE_LD(ADDR,RESULT) \
+do { \
+  if (TRACE_MEMORY_P (CPU)) { \
+    trace_module = "memory"; \
+    trace_pc = cia; \
+    trace_name = itable[MY_INDEX].name; \
+    trace_values[0] = (ADDR); \
+    trace_num_values = 1; \
+    trace_result (1, (RESULT)); \
+  } \
+} while (0)
+
+/* start-sanitize-v850e */
+#define TRACE_LD_NAME(NAME, ADDR,RESULT) \
+do { \
+  if (TRACE_MEMORY_P (CPU)) { \
+    trace_module = "memory"; \
+    trace_pc = cia; \
+    trace_name = (NAME); \
+    trace_values[0] = (ADDR); \
+    trace_num_values = 1; \
+    trace_result (1, (RESULT)); \
+  } \
+} while (0)
+
+/* end-sanitize-v850e */
+#define TRACE_ST(ADDR,RESULT) \
+do { \
+  if (TRACE_MEMORY_P (CPU)) { \
+    trace_module = "memory"; \
+    trace_pc = cia; \
+    trace_name = itable[MY_INDEX].name; \
+    trace_values[0] = (ADDR); \
+    trace_num_values = 1; \
+    trace_result (1, (RESULT)); \
+  } \
+} while (0)
 
 #else
 #define trace_input(NAME, IN1, IN2)
@@ -401,6 +438,10 @@ do { \
 #define TRACE_BRANCH1(IN1)
 #define TRACE_BRANCH2(IN1, IN2)
 #define TRACE_BRANCH2(IN1, IN2, IN3)
+
+#define TRACE_LD(ADDR,RESULT)
+#define TRACE_ST(ADDR,RESULT)
+
 #endif
 
 
