@@ -4502,7 +4502,7 @@ elf_link_sort_relocs (abfd, info, psec)
 	    struct elf_link_sort_rela *s;
 
 	    erel = (Elf_External_Rel *) o->contents;
-	    erelend = (Elf_External_Rel *) ((PTR) o->contents + o->_raw_size);
+	    erelend = (Elf_External_Rel *) (o->contents + o->_raw_size);
 	    s = rela + o->output_offset / sizeof (Elf_External_Rel);
 	    for (; erel < erelend; erel++, s++)
 	      {
@@ -4519,7 +4519,7 @@ elf_link_sort_relocs (abfd, info, psec)
 	    struct elf_link_sort_rela *s;
 
 	    erela = (Elf_External_Rela *) o->contents;
-	    erelaend = (Elf_External_Rela *) ((PTR) o->contents + o->_raw_size);
+	    erelaend = (Elf_External_Rela *) (o->contents + o->_raw_size);
 	    s = rela + o->output_offset / sizeof (Elf_External_Rela);
 	    for (; erela < erelaend; erela++, s++)
 	      {

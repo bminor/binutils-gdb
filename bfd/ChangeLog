@@ -1,3 +1,8 @@
+2001-10-16  Jeff Holcomb  <jeffh@redhat.com>
+
+	* elflink.h (elf_link_sort_relocs): Remove unnecessary pointer
+	casts.
+
 2001-10-15  H.J. Lu <hjl@gnu.org>
 
 	* elflink.h (elf_link_input_bfd): Set type to BFD_RELOC_NONE
