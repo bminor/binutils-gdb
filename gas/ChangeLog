@@ -1,5 +1,9 @@
 Thu Jul 18 15:54:54 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	From Andrew Gierth <ANDREWG@microlise.co.uk>:
+	* configure.in (sparc-*-sysv4*): New target.
+	* configure: Rebuild.
+
 	* config/tc-sparc.c (md_pseudo_table): Change uahalf, uaword, and
 	uaxword to use s_uacons.
 	(sparc_no_align_cons): New static variable.

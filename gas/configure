@@ -924,7 +924,7 @@ for this_target in $target $canon_targets ; do
       sparc-*-coff)         fmt=coff ;;
       sparc-*-lynxos*)      fmt=coff em=lynx ;;
       sparc-fujitsu-none)   fmt=aout ;;
-      sparc-*-elf | sparc-*-solaris*)
+      sparc-*-elf | sparc-*-sysv4* | sparc-*-solaris*)
 			    fmt=elf ;;
       sparc-*-netbsd*)      fmt=aout em=nbsd bfd_gas=yes ;;
 
