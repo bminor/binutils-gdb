@@ -1,3 +1,9 @@
+2002-02-23  Richard Earnshaw  <rearnsha"arm.com>
+
+	* arm-linux-nat.c (store_newfpe_single): Use regcache_collect.
+	(store_newfpe_double, store_newfpe_extended, store_fpregister)
+	(store_register, store_regs, fill_gregset, fill_fpregset): Likewise.
+
 2002-02-22  Jim Blandy  <jimb@redhat.com>
 
 	Indicate that the bcache functions don't change the strings
