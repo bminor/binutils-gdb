@@ -903,6 +903,7 @@ parse_number (p, len, parsed_float, putithere)
      here, and we do kind of silly things like cast to unsigned.  */
   register LONGEST n = 0;
   register LONGEST prevn = 0;
+  unsigned LONGEST un;
 
   register int i = 0;
   register int c;
@@ -1023,8 +1024,9 @@ parse_number (p, len, parsed_float, putithere)
      the case where it is we just always shift the value more than
      once, with fewer bits each time.  */
 
+  un = (unsigned LONGEST)n >> 2;
   if (long_p == 0
-      && (((unsigned LONGEST)n >> 2) >> (TARGET_INT_BIT - 2)) == 0)
+      && (un >> (TARGET_INT_BIT - 2)) == 0)
     {
       high_bit = ((unsigned LONGEST)1) << (TARGET_INT_BIT-1);
 
@@ -1038,7 +1040,7 @@ parse_number (p, len, parsed_float, putithere)
       signed_type = builtin_type_int;
     }
   else if (long_p <= 1
-	   && (((unsigned LONGEST)n >> 2) >> (TARGET_LONG_BIT - 2)) == 0)
+	   && (un >> (TARGET_LONG_BIT - 2)) == 0)
     {
       high_bit = ((unsigned LONGEST)1) << (TARGET_LONG_BIT-1);
       unsigned_type = builtin_type_unsigned_long;

@@ -1,5 +1,8 @@
 Sun Jan 16 12:46:01 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* c-exp.y (parse_number): Assign to temporary between the right
+	shifts, to work around a bug in the SCO compiler.
+
 	* Makefile.in (ALLCONFIG, ALLPARAM, ALLDEPFILES, HFILES_NO_SRCDIR):
 	Add various files which were added to GDB recently.
 
