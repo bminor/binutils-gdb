@@ -1,3 +1,12 @@
+2005-01-10  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/609
+	* ldmisc.c (vfinfo): Add an extra argument: is_warning.  Use this
+	to determine whether config.make_executable should be set to FALSE in
+	conjunction with config.fatal_warnings.
+	(info_msg, minfo, lfinof): Pass FALSE as the extra argument.
+	(einfo): Pass TRUE as the extra argument.
+
 2005-01-10  Greg Schaffer  <gschafer@zip.com.au>
 
 	* configure.host (linux targets): Use "${CC} -dumpspecs" instead

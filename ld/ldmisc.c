@@ -1,6 +1,6 @@
 /* ldmisc.c
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2002, 2003, 2004
+   2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support.
 
@@ -61,7 +61,7 @@
 */
 
 static void
-vfinfo (FILE *fp, const char *fmt, va_list arg)
+vfinfo (FILE *fp, const char *fmt, va_list arg, bfd_boolean is_warning)
 {
   bfd_boolean fatal = FALSE;
 
@@ -398,7 +398,7 @@ vfinfo (FILE *fp, const char *fmt, va_list arg)
 	}
     }
 
-  if (config.fatal_warnings)
+  if (is_warning && config.fatal_warnings)
     config.make_executable = FALSE;
 
   if (fatal)
@@ -458,7 +458,7 @@ info_msg (const char *fmt, ...)
   va_list arg;
 
   va_start (arg, fmt);
-  vfinfo (stdout, fmt, arg);
+  vfinfo (stdout, fmt, arg, FALSE);
   va_end (arg);
 }
 
@@ -470,7 +470,7 @@ einfo (const char *fmt, ...)
   va_list arg;
 
   va_start (arg, fmt);
-  vfinfo (stderr, fmt, arg);
+  vfinfo (stderr, fmt, arg, TRUE);
   va_end (arg);
 }
 
@@ -488,7 +488,7 @@ minfo (const char *fmt, ...)
   va_list arg;
 
   va_start (arg, fmt);
-  vfinfo (config.map_file, fmt, arg);
+  vfinfo (config.map_file, fmt, arg, FALSE);
   va_end (arg);
 }
 
@@ -498,7 +498,7 @@ lfinfo (FILE *file, const char *fmt, ...)
   va_list arg;
 
   va_start (arg, fmt);
-  vfinfo (file, fmt, arg);
+  vfinfo (file, fmt, arg, FALSE);
   va_end (arg);
 }
 
