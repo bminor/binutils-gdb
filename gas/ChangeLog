@@ -3,6 +3,9 @@ Mon Nov 18 15:22:28 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/tc-d10v.c (parallel_ok): Branch and link instructions
 	modify r13.
+	(write_2_short): Call parallel_ok to check whether two short
+	instructions the user requested execute in parallel, can be
+	executed that way.
 
 Thu Nov 14 11:17:49 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
