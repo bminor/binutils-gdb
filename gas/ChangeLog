@@ -1,3 +1,17 @@
+2001-10-31  Chris Demetriou  <cgd@broadcom.com>
+
+	* config/tc-mips.c (HAVE_32BIT_ADDRESSES): If compiling embedded
+	PIC code, assume pointers the same size as GPRs.
+	(macro): In M_LA_AB handling for embedded PIC code, support
+	"la $treg,foo-bar($breg)".  In load/store handling
+	(label ld_st) support "<op> $treg,<sym>-<local_sym>($breg)"
+	which is used by the compiler for switch statements.
+	In load/store double multi-instruction macro handling
+	(label ldd_std) add a comment that no special handling
+	is currently done for embedded PIC.
+	(mips_ip): In 'o' (16-bit offset) case, only accept 16
+	bit offsets.
+
 2001-10-31  Richard Earnshaw  <rearnsha@arm.com>
 
 	General cleanup of feature definitions.

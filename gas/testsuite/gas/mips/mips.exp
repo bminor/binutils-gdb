@@ -160,6 +160,7 @@ if { [istarget mips*-*-*] } then {
 	}
 	run_dump_test "elf${el}-rel3"
 	run_dump_test "${tmips}${el}empic"
+	run_dump_test "empic2"
 	if { !$no_mips16 } { 
 	    run_dump_test "${tmips}mips${el}16-e" 
 	    run_dump_test "${tmips}mips${el}16-f" 

@@ -246,10 +246,11 @@ static int mips_fp32 = 0;
 
 /* We can only have 64bit addresses if the object file format
    supports it.  */
-#define HAVE_32BIT_ADDRESSES                       \
-   (HAVE_32BIT_GPRS                                \
-    || bfd_arch_bits_per_address (stdoutput) == 32 \
-    || ! HAVE_64BIT_OBJECTS)
+#define HAVE_32BIT_ADDRESSES                           \
+   (HAVE_32BIT_GPRS                                    \
+    || ((bfd_arch_bits_per_address (stdoutput) == 32   \
+         || ! HAVE_64BIT_OBJECTS)                      \
+        && mips_pic != EMBEDDED_PIC))
 
 #define HAVE_64BIT_ADDRESSES (! HAVE_32BIT_ADDRESSES)
 
@@ -4447,9 +4448,21 @@ macro (ip)
       /* Load the address of a symbol into a register.  If breg is not
 	 zero, we then add a base register to it.  */
 
+      if (treg == breg)
+	{
+	  tempreg = AT;
+	  used_at = 1;
+	}
+      else
+	{
+	  tempreg = treg;
+	  used_at = 0;
+	}
+
       /* When generating embedded PIC code, we permit expressions of
 	 the form
-	   la	$4,foo-bar
+	   la	$treg,foo-bar
+	   la	$treg,foo-bar($breg)
 	 where bar is an address in the current section.  These are used
 	 when getting the addresses of functions.  We don't permit
 	 X_add_number to be non-zero, because if the symbol is
@@ -4464,16 +4477,30 @@ macro (ip)
 		     (symbol_get_value_expression (offset_expr.X_op_symbol)
 		      ->X_add_symbol)
 		     == now_seg)))
-	  && breg == 0
 	  && (offset_expr.X_add_number == 0
 	      || OUTPUT_FLAVOR == bfd_target_elf_flavour))
 	{
-	  macro_build ((char *) NULL, &icnt, &offset_expr, "lui", "t,u",
-		       treg, (int) BFD_RELOC_PCREL_HI16_S);
+	  if (breg == 0)
+	    {
+	      tempreg = treg;
+	      used_at = 0;
+	      macro_build ((char *) NULL, &icnt, &offset_expr, "lui", "t,u",
+			   tempreg, (int) BFD_RELOC_PCREL_HI16_S);
+	    }
+	  else
+	    {
+	      macro_build ((char *) NULL, &icnt, &offset_expr, "lui", "t,u",
+			   tempreg, (int) BFD_RELOC_PCREL_HI16_S);
+	      macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
+			   HAVE_32BIT_ADDRESSES ? "addu" : "daddu",
+			   "d,v,t", tempreg, tempreg, breg);
+	    }
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
 		       HAVE_32BIT_ADDRESSES ? "addiu" : "daddiu",
-		       "t,r,j", treg, treg, (int) BFD_RELOC_PCREL_LO16);
-	  return;
+		       "t,r,j", treg, tempreg, (int) BFD_RELOC_PCREL_LO16);
+	  if (! used_at)
+	    return;
+	  break;
 	}
 
       if (offset_expr.X_op != O_symbol
@@ -4481,17 +4508,6 @@ macro (ip)
 	{
 	  as_bad (_("expression too complex"));
 	  offset_expr.X_op = O_constant;
-	}
-
-      if (treg == breg)
-	{
-	  tempreg = AT;
-	  used_at = 1;
-	}
-      else
-	{
-	  tempreg = treg;
-	  used_at = 0;
 	}
 
       if (offset_expr.X_op == O_constant)
@@ -5289,6 +5305,46 @@ macro (ip)
       else
 	fmt = "t,o(b)";
 
+      /* For embedded PIC, we allow loads where the offset is calculated
+         by subtracting a symbol in the current segment from an unknown
+         symbol, relative to a base register, e.g.:
+		<op>	$treg, <sym>-<localsym>($breg)
+	 This is used by the compiler for switch statements.  */
+      if (mips_pic == EMBEDDED_PIC 
+          && offset_expr.X_op == O_subtract
+          && (symbol_constant_p (offset_expr.X_op_symbol)
+              ? S_GET_SEGMENT (offset_expr.X_op_symbol) == now_seg
+              : (symbol_equated_p (offset_expr.X_op_symbol)
+                 && (S_GET_SEGMENT
+                     (symbol_get_value_expression (offset_expr.X_op_symbol)
+                      ->X_add_symbol)
+                     == now_seg)))
+          && breg != 0
+          && (offset_expr.X_add_number == 0
+              || OUTPUT_FLAVOR == bfd_target_elf_flavour))
+        {
+          /* For this case, we output the instructions:
+                lui     $tempreg,<sym>          (BFD_RELOC_PCREL_HI16_S)
+                addiu   $tempreg,$tempreg,$breg
+                <op>    $treg,<sym>($tempreg)   (BFD_RELOC_PCREL_LO16)
+             If the relocation would fit entirely in 16 bits, it would be
+             nice to emit:
+                <op>    $treg,<sym>($breg)      (BFD_RELOC_PCREL_LO16)
+             instead, but that seems quite difficult.  */
+          macro_build ((char *) NULL, &icnt, &offset_expr, "lui", "t,u",
+                       tempreg, (int) BFD_RELOC_PCREL_HI16_S);
+          macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
+                       ((bfd_arch_bits_per_address (stdoutput) == 32
+                         || ! ISA_HAS_64BIT_REGS (mips_opts.isa))
+                        ? "addu" : "daddu"),
+                       "d,v,t", tempreg, tempreg, breg);
+          macro_build ((char *) NULL, &icnt, &offset_expr, s, fmt, treg,
+                       (int) BFD_RELOC_PCREL_LO16, tempreg);
+          if (! used_at)
+            return;
+          break;
+        }
+
       if (offset_expr.X_op != O_constant
 	  && offset_expr.X_op != O_symbol)
 	{
@@ -5893,6 +5949,11 @@ macro (ip)
       fmt = "t,o(b)";
 
     ldd_std:
+      /* We do _not_ bother to allow embedded PIC (symbol-local_symbol)
+	 loads for the case of doing a pair of loads to simulate an 'ld'.
+	 This is not currently done by the compiler, and assembly coders
+	 writing embedded-pic code can cope.  */
+
       if (offset_expr.X_op != O_symbol
 	  && offset_expr.X_op != O_constant)
 	{
@@ -8216,23 +8277,11 @@ mips_ip (str, ip)
 
 	      /* If this value won't fit into a 16 bit offset, then go
 		 find a macro that will generate the 32 bit offset
-		 code pattern.  As a special hack, we accept the
-		 difference of two local symbols as a constant.  This
-		 is required to suppose embedded PIC switches, which
-		 use an instruction which looks like
-		     lw $4,$L12-$LS12($4)
-		 The problem with handling this in a more general
-		 fashion is that the macro function doesn't expect to
-		 see anything which can be handled in a single
-		 constant instruction.  */
+		 code pattern.  */
 	      if (c == S_EX_NONE
 		  && (offset_expr.X_op != O_constant
 		      || offset_expr.X_add_number >= 0x8000
-		      || offset_expr.X_add_number < -0x8000)
-		  && (mips_pic != EMBEDDED_PIC
-		      || offset_expr.X_op != O_subtract
-		      || (S_GET_SEGMENT (offset_expr.X_add_symbol)
-			  != S_GET_SEGMENT (offset_expr.X_op_symbol))))
+		      || offset_expr.X_add_number < -0x8000))
 		break;
 
 	      if (c == S_EX_HI)

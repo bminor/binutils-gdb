@@ -1,3 +1,8 @@
+2001-10-31  Chris Demetriou  <cgd@demetriou.com>
+
+	* elf32-mips.c (_bfd_mips_elf_hi16_reloc): Handle PC-relative
+	relocations properly.
+
 2001-10-31  H.J. Lu <hjl@gnu.org>
 
 	* elflink.h (elf_link_output_extsym): Don't clear the visibility

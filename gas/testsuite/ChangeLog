@@ -1,3 +1,16 @@
+2001-10-31  Chris Demetriou  <cgd@broadcom.com>
+
+	* gas/mips/empic.s: Undo damage inflicted on 2000-12-02.
+	* gas/mips/empic.d: Likewise.
+	* gas/mips/elempic.d: Likewise (it was copied into other files).
+	* gas/mips/telempic.d: Likewise.
+	* gas/mips/tempic.d: Likewise.
+
+	* gas/mips/empic2.s: New test to check new 'la' and 'lw' (and
+	related ops) syntax, test loads with large offsets.
+	* gas/mips/emcic2.d: Likewise.
+	* gas/mips/mips.exp: Run the new test on ELF platforms.
+
 2001-10-31  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* gas/mmix/pop-op.l: Update to match latest listing behaviour.

@@ -1190,6 +1190,8 @@ _bfd_mips_elf_hi16_reloc (abfd,
   relocation += symbol->section->output_section->vma;
   relocation += symbol->section->output_offset;
   relocation += reloc_entry->addend;
+  if (reloc_entry->howto->pc_relative)
+    relocation -= reloc_entry->address;
 
   if (reloc_entry->address > input_section->_cooked_size)
     return bfd_reloc_outofrange;
