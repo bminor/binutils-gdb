@@ -207,6 +207,9 @@ enum bp_loc_type
 
 struct bp_location
 {
+  /* Chain pointer to the next breakpoint location.  */
+  struct bp_location *next;
+
   /* Type of this breakpoint location.  */
   enum bp_loc_type loc_type;
 

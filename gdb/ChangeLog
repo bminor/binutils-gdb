@@ -1,5 +1,15 @@
 2003-11-06  Daniel Jacobowitz  <drow@mvista.com>
 
+	* breakpoint.h (struct bp_location): Add a chain pointer.
+	* breakpoint.c (ALL_BP_LOCATIONS, ALL_BP_LOCATIONS_SAFE): New
+	macros.
+	(bp_location_chain): New variable.
+	(allocate_bp_location): New function.
+	(set_raw_breakpoint): Use it.
+	(delete_breakpoint): Remove ->loc from the bp_location_chain.
+
+2003-11-06  Daniel Jacobowitz  <drow@mvista.com>
+
 	* breakpoint.h (enum bp_loc_type, struct bp_location): New.
 	(struct breakpoint): Remove address, shadow_contents, inserted,
 	and duplicate.  Add a struct bp_location.

@@ -235,6 +235,15 @@ static int overlay_events_enabled;
 	     B ? (TMP=B->next, 1): 0;	\
 	     B = TMP)
 
+/* Similar iterators for the low-level breakpoints.  */
+
+#define ALL_BP_LOCATIONS(B)  for (B = bp_location_chain; B; B = B->next)
+
+#define ALL_BP_LOCATIONS_SAFE(B,TMP)	\
+	for (B = bp_location_chain;	\
+	     B ? (TMP=B->next, 1): 0;	\
+	     B = TMP)
+
 /* True if SHIFT_INST_REGS defined, false otherwise.  */
 
 int must_shift_inst_regs =
@@ -249,9 +258,11 @@ int must_shift_inst_regs =
 
 int show_breakpoint_hit_counts = 1;
 
-/* Chain of all breakpoints defined.  */
+/* Chains of all breakpoints defined.  */
 
 struct breakpoint *breakpoint_chain;
+
+struct bp_location *bp_location_chain;
 
 /* Number of last breakpoint made.  */
 
@@ -3896,6 +3907,31 @@ adjust_breakpoint_address (CORE_ADDR bpaddr)
     }
 }
 
+/* Allocate a struct bp_location.  */
+
+struct bp_location *
+allocate_bp_location (void)
+{
+  struct bp_location *loc, *loc_p;
+
+  loc = xmalloc (sizeof (struct bp_location));
+  memset (loc, 0, sizeof (*loc));
+
+  /* Add this breakpoint to the end of the chain.  */
+
+  loc_p = bp_location_chain;
+  if (loc_p == 0)
+    bp_location_chain = loc;
+  else
+    {
+      while (loc_p->next)
+	loc_p = loc_p->next;
+      loc_p->next = loc;
+    }
+
+  return loc;
+}
+
 /* set_raw_breakpoint() is a low level routine for allocating and
    partially initializing a breakpoint of type BPTYPE.  The newly
    created breakpoint's address, section, source file name, and line
@@ -3918,8 +3954,7 @@ set_raw_breakpoint (struct symtab_and_line sal, enum bptype bptype)
 
   b = (struct breakpoint *) xmalloc (sizeof (struct breakpoint));
   memset (b, 0, sizeof (*b));
-  b->loc = (struct bp_location *) xmalloc (sizeof (struct bp_location));
-  memset (b->loc, 0, sizeof (*b->loc));
+  b->loc = allocate_bp_location ();
   b->loc->requested_address = sal.pc;
   b->loc->address = adjust_breakpoint_address (b->loc->requested_address);
   if (sal.symtab == NULL)
@@ -6569,6 +6604,7 @@ delete_breakpoint (struct breakpoint *bpt)
 {
   struct breakpoint *b;
   bpstat bs;
+  struct bp_location *loc;
 
   if (bpt == NULL)
     error ("Internal error (attempted to delete a NULL breakpoint)");
@@ -6600,6 +6636,9 @@ delete_breakpoint (struct breakpoint *bpt)
   if (breakpoint_chain == bpt)
     breakpoint_chain = bpt->next;
 
+  if (bp_location_chain == bpt->loc)
+    bp_location_chain = bpt->loc->next;
+
   /* If we have callback-style exception catchpoints, don't go through
      the adjustments to the C++ runtime library etc. if the inferior
      isn't actually running.  target_enable_exception_callback for a
@@ -6628,6 +6667,13 @@ delete_breakpoint (struct breakpoint *bpt)
       b->next = bpt->next;
       break;
     }
+
+  ALL_BP_LOCATIONS (loc)
+    if (loc->next == bpt->loc)
+      {
+	loc->next = bpt->loc->next;
+	break;
+      }
 
   check_duplicates (bpt);
   /* If this breakpoint was inserted, and there is another breakpoint
