@@ -1,3 +1,7 @@
+Sat Jan  3 12:11:05 1998 Franz Sirl <franz.sirl-kernel@lauterbach.com>
+
+	* configure.in: Finalize support for {alpha|powerpc}*-*-linux-gnulibc1
+
 Sun Dec 28 11:28:58 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* Makefile.in (INSTALL_TARGET): Do install-gcc first.
@@ -20,13 +24,20 @@ Mon Dec 22 14:08:27 1997  Doug Evans  <devans@canuck.cygnus.com>
 	* config.sub: Recognize txvu cpu.
 
 end-sanitize-sky
->>>>>>> 1.1122
 start-sanitize-vr5400
 Mon Dec 22 11:27:12 1997  Jeffrey A Law  (law@cygnus.com)
 
         * config.sub (mips64vr5xxx-elf): Handle.  Treat as mips64vr5000-elf.
 
 end-sanitize-vr5400
+
+Sun Dec 21 16:53:12 1997  H.J. Lu  (hjl@gnu.ai.mit.edu)
+
+        * configure.in (host_makefile_frag, target_makefile_frag):
+        Handle multiple config files.
+        (alpha-*-linux*): Treat alpha-*-linux* as alpha-*-linux* and
+        alpha-*-*.
+
 Thu Dec 18 13:13:03 1997  Doug Evans  <devans@canuck.cygnus.com>
 
 	* mkdep: New file.
