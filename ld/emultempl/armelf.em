@@ -70,6 +70,8 @@ gld${EMULATION_NAME}_before_parse ()
 #ifndef TARGET_			/* I.e., if not generic.  */
   ldfile_set_output_arch ("`echo ${ARCH}`");
 #endif /* not TARGET_ */
+  config.dynamic_link = ${DYNAMIC_LINK-true};
+  config.has_shared = `if test -n "$GENERATE_SHLIB_SCRIPT" ; then echo true ; else echo false ; fi`;
 }
 
 /* Try to open a dynamic archive.  This is where we know that ELF

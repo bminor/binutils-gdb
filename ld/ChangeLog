@@ -1,3 +1,10 @@
+1999-05-24  Philip Blundell  <philb@gnu.org>
+
+	* emultempl/armelf.em (before_parse): Set config.dynamic_link and
+ 	config.has_shared.
+	* emulparams/armelf.sh (GENERATE_SHLIB_SCRIPT): Define.
+	* emulparams/armelf_linux.sh (GENERATE_SHLIB_SCRIPT): Likewise.
+
 1999-04-13  Philip Blundell  <philb@gnu.org>
 
 	* emultempl/armelf.em: Add definitions related to shared objects
