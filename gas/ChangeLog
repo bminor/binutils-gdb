@@ -1,5 +1,10 @@
 2001-06-12  Nick Clifton  <nickc@cambridge.redhat.com>
 
+	* doc/as.texinfo (Infix Ops): Document that comparison and
+	combiner operators can be used as infix operators.
+
+2001-06-12  Nick Clifton  <nickc@cambridge.redhat.com>
+
 	* config/tc-arm.c: Fix test for overlow of literal pool.
 
 2001-06-11  Alan Modra  <amodra@bigpond.net.au>
