@@ -1,3 +1,60 @@
+Fri Apr 24 11:04:46 1998  Andrew Cagney  <cagney@chook.cygnus.com>
+
+	* interp.c (struct hash_entry): OPCODE and MASK are unsigned.
+
+	* d10v_sim.h (remote-sim.h, sim-config.h): Include.
+	
+Sat Apr  4 20:36:25 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Wed Apr  1 12:59:17 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* simops.c (trace_input_func): Use move_from_cr / CREGS to obtain
+ 	up-to-date CR value.
+	(OP_OP_1000000, add3): Trace inputs before performing add.
+	(OP_5F00, <*>): Trace input registers before making system call.
+	(OP_5F00, <kill>): Trace R0, R1 not REGn.
+	(OP_5F00, <getpid>): Always return 47.
+	
+	* d10v_sim.h (SLOT, SLOT_NR, SLOT_PEND_MASK, SLOT_PEND,
+ 	SLOT_DISCARD, SLOT_FLUSH): Define.  An implementation of write
+ 	back slots.
+	(struct _state): Add struct slot slot to global state variable.
+	(struct _state): Delete fields SM, EA, DB, DM, IE, RP, MD, FX, ST,
+ 	F0, F1, C from global State variable.
+	(struct _state): Add struct trace to global State variable.
+	(GPR, SET_GPR): Define.  SET_GPR uses SLOT_PEND.
+	(PSW*, SET_PSW*): Define. SET_PSW* uses SET_CREG.
+	(CREG, SET_CREG, SET_*): Define. SET_CREG uses func move_to_cr.
+	(INC_ADDR): Re-implement.  Use SET_GPR to update registers.
+	(JMP): Re-implement. Use SET_* to update registers.
+
+	* interp.c: Use new SET_* et.al. macros to fetch / store
+ 	registers.
+	(get_operands): Squirrel away trace values at start of each
+ 	operand decode.
+	(do_2_short): Flush pending writes before issuing second
+ 	instruction.
+	(sim_resume): Flush pending writes at end of instruction cycle.
+	(sim_fetch_register, sim_store_register, sim_create_inferior):
+ 	After scheduling updates to registers using SET_*, flush updates.
+	(sim_resume): Re-order handling of RPT/repeat and IBA/hbreak so
+ 	that each sets pc using SET_* and last SET_* eventually winds out.
+	
+	* simops.c: Use new SET_* et.al. macros to fetch / store
+ 	registers.
+	(move_to_cr): Add MASK argument for selective update of CREG bits.
+  	Re-implement using new SET_* macros.
+	(trace_output_func, trace_output): Delete. Replace with.
+	(do_trace_output_flush, trace_output_finish, trace_output_40,
+ 	trace_output_32, trace_output_16, trace_output_void,
+ 	trace_output_flag): New functions.  Handle specific trace cases.
+	(OP_*): Re-write tracing to use new trace_output_* functions.
+	(OP_*): Re-write to use new SET_* et.al. macros.
+	(FUNC, PARM[1-4], RETVAL, RETVAL32): Redo definition.
+	(RETVAL_HIGH, RETVAL_LOW): Delete, use RETVAL32.
+	
 Wed Apr  1 12:55:18 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (SIM_AC_OPTION_WARNINGS): Add.
