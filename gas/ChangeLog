@@ -1,3 +1,12 @@
+2005-01-03  David Mosberger  <davidm@hpl.hp.com>
+
+	* config/tc-ia64.c (md): Add member "loc_directive_seen".
+	(dot_loc): New function.
+	(md_pseudo_table): Add entry to map .loc to dot_loc().
+	(emit_one_bundle): Only call dwarf2_gen_line_info() if we have
+	seen a .loc directive or we're generating DWARF2 debug info for
+	assembly source.
+
 2004-12-29  Alan Modra  <amodra@bigpond.net.au>
 
 	PR gas/619

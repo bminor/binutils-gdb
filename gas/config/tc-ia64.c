@@ -241,7 +241,8 @@ static struct
 	unsigned int
 	  end_of_insn_group : 1,
 	  manual_bundling_on : 1,
-	  manual_bundling_off : 1;
+	  manual_bundling_off : 1,
+	  loc_directive_seen : 1;
 	signed char user_template;	/* user-selected template, if any */
 	unsigned char qp_regno;		/* qualifying predicate */
 	/* This duplicates a good fraction of "struct fix" but we
@@ -3041,6 +3042,17 @@ dot_radix (dummy)
     }
 }
 
+/* Helper function for .loc directives.  If the assembler is not generating
+   line number info, then we need to remember which instructions have a .loc
+   directive, and only call dwarf2_gen_line_info for those instructions.  */
+
+static void
+dot_loc (int x)
+{
+  CURR_SLOT.loc_directive_seen = 1;
+  dwarf2_directive_loc (x);
+}
+
 /* .sbss, .bss etc. are macros that expand into ".section SECNAME".  */
 static void
 dot_special_section (which)
@@ -4972,6 +4984,7 @@ const pseudo_typeS md_pseudo_table[] =
   {
     { "radix", dot_radix, 0 },
     { "lcomm", s_lcomm_bytes, 1 },
+    { "loc", dot_loc, 0 },
     { "bss", dot_special_section, SPECIAL_SECTION_BSS },
     { "sbss", dot_special_section, SPECIAL_SECTION_SBSS },
     { "sdata", dot_special_section, SPECIAL_SECTION_SDATA },
@@ -6419,12 +6432,13 @@ emit_one_bundle ()
 	  continue;		/* try next slot */
 	}
 
-      {
-	bfd_vma addr;
+      if (debug_type == DEBUG_DWARF2 || md.slot[curr].loc_directive_seen)
+	{
+	  bfd_vma addr = frag_now->fr_address + frag_now_fix () - 16 + i;
 
-	addr = frag_now->fr_address + frag_now_fix () - 16 + i;
-	dwarf2_gen_line_info (addr, &md.slot[curr].debug_line);
-      }
+	  md.slot[curr].loc_directive_seen = 0;
+	  dwarf2_gen_line_info (addr, &md.slot[curr].debug_line);
+	}
 
       if (errata_nop_necessary_p (md.slot + curr, insn_unit))
 	as_warn (_("Additional NOP may be necessary to workaround Itanium processor A/B step errata"));
