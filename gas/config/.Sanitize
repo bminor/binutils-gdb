@@ -92,6 +92,7 @@ tc-d10v.c
 tc-d10v.h
 tc-d30v.c
 tc-d30v.h
+tc-fr30.c
 tc-generic.c
 tc-generic.h
 tc-h8300.c
