@@ -1,3 +1,7 @@
+Wed Oct 14 10:02:40 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbint.texinfo: Fix minor typos.
+
 Wed Sep 30 18:03:19 1998  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* gdbint.texinfo: Complete overhaul.  Group descriptions more
