@@ -1,5 +1,41 @@
 Mon Mar 14 14:29:45 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
+	* write.c (write_object_file): Check both S_IS_LOCAL and
+	S_IS_EXTERNAL when deciding whether to discard a symbol.
+
+	* config-gas.com: Scan Makefile.in, not version.c, for current
+	version number.  Delete all versions of temp files when finished
+	with them.  Create config.h.
+
+	* config/obj-vms.c (VMS_Initialized_Data_Size): Cache symbol
+	values to reduce number of lookups with S_GET_VALUE.  Skip debug
+	symbols to avoid "a really nasty bug".  (From Holger Teutsch,
+	holger@botbso.rhein-main.de.)
+	(VMS_write_object_file): For "__vt.*" symbols, set S_GET_OTHER
+	field.  (Also from Holger Teutsch.)  Watch for a would-be register
+	mask that spans frags.
+
+	* config/obj-coffbfd.c (obj_coff_line): Set symbol lnno field with
+	this_base, not line_base.  (Patch from Andreas Arens,
+	ari@obelix.av.rwth-aachen.de.)
+
+	* config/obj-aout.c (obj_crawl_symbol_chain): Retain symbols that
+	look local if they're exported or undefined.  Used to be done for
+	i960 only.
+
+	* read.c (s_lcomm, s_comm): Print symbol name being redefined.
+	Get it from the looked-up symbol, instead of using the string from
+	the input stream, which is no longer null-terminated.
+	(LEX_PCT): New macro, defaults to 0.
+	(lex_type): Use it for `%'.
+
+	* config/tc-vax.c (md_parse_option): Handle `-h#' option for VMS.
+	(vip_op): Now static, and returns void.  Callers changed.  Added
+	forward decl.
+	(vip): Ditto.  Call as_fatal directly if a program bug is
+	detected.
+	(op_hash): Let default initialization suffice.
+
 	* Makefile.in (literal.o): Provide dependencies.
 
 	* configure.in: Set new makefile variable OPCODES_LIB.
