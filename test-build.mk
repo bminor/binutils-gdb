@@ -48,7 +48,7 @@ release_root := $(ROOTING)/$(RELEASE_TAG)
 
 TIME := time
 GCC := gcc -O
-GNU_MAKE := /usr/latest/bin/make
+GNU_MAKE := /usr/latest/bin/make -f test-build.mk
 override MAKE := make
 override MAKEFLAGS :=
 override MFLAGS :=
