@@ -50,6 +50,7 @@
  *
  *    g             return the value of the CPU registers  hex data or ENN
  *    G             set the value of the CPU registers     OK or ENN
+ *    P             set the value of a single CPU register OK or ENN
  *
  *    mAA..AA,LLLL  Read LLLL bytes at address AA..AA      hex data or ENN
  *    MAA..AA,LLLL: Write LLLL bytes at address AA.AA      OK or ENN
@@ -831,7 +832,7 @@ handle_exception (registers)
 		    hex2mem (ptr, (char *)&registers[regno], 4, 0);
 		else
 		  {
-		    strcpy (remcomOutBuffer, "P01");
+		    strcpy (remcomOutBuffer, "E01");
 		    break;
 		  }
 	      }

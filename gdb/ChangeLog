@@ -1,3 +1,8 @@
+1999-10-18  J.T. Conklin  <jtc@redback.com>
+
+        * m32r-stub.c, sparcl-stub.c, sparclet-stub.c (handle_exception):
+        Return E01 instead of P01 when 'P' command fails.
+
 2000-02-05  J.T. Conklin  <jtc@redback.com>
 
 	* remote.c (putpkt_binary): Handle NAK from target stub.
