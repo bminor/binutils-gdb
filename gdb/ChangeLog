@@ -1,3 +1,9 @@
+Tue Apr  8 10:45:24 1997  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* config/pa/{hppabsd.mt hppahpux.mt hppaosf.mt}:  Remove
+	remote-pa.o from TDEPFILES.  Nobody uses it, and besides, it's a
+	lousy out-of-date clone of remote.c.
+
 Fri Apr  4 08:21:21 1997  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* remote.c:  Fix problems realized while showering.
