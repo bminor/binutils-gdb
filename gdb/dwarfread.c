@@ -853,7 +853,9 @@ struct_type (dip, thisdie, enddie, objfile)
 	  new -> next = list;
 	  list = new;
 	  /* Save the data.  */
-	  list -> field.name = savestring (mbr.at_name, strlen (mbr.at_name));
+	  list -> field.name =
+	      obsavestring (mbr.at_name, strlen (mbr.at_name),
+			    &objfile -> type_obstack);
 	  list -> field.type = decode_die_type (&mbr);
 	  list -> field.bitpos = 8 * locval (mbr.at_location);
 	  /* Handle bit fields. */
@@ -1440,7 +1442,8 @@ enum_type (dip, objfile)
 	    target_to_host (scan, TARGET_FT_LONG_SIZE (objfile), GET_SIGNED,
 			    objfile);
 	  scan += TARGET_FT_LONG_SIZE (objfile);
-	  list -> field.name = savestring (scan, strlen (scan));
+	  list -> field.name = obsavestring (scan, strlen (scan),
+					     &objfile -> type_obstack);
 	  scan += strlen (scan) + 1;
 	  nfields++;
 	  /* Handcraft a new symbol for this enum member. */

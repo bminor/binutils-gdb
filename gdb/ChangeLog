@@ -1,3 +1,12 @@
+Thu Jun 25 12:06:00 1992  Fred Fish  (fnf@cygnus.com)
+
+	* mipsread.c:  Pass NULL name pointer to init_type, not 0.
+	* gdbtypes.c (init_type):  Use copy of typename on type_obstack.
+	* dwarfread.c (enum_type):  Save enum names on type_obstack.
+	* dwarfread.c (struct_type):  Save member name on type_obstack.
+	* symtab.c (_initialize_symtab):  Fix misspelling.
+	* regex.c (store_jump, insert_jump):  Return void.
+
 Thu Jun 25 04:00:10 1992  John Gilmore  (gnu at cygnus.com)
 
 	* defs.h (PARAMS):  Move to ../include/ansidecl.h.

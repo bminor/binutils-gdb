@@ -177,7 +177,7 @@ re_set_syntax (syntax)
       pending_exact += c; \
   }
 
-static int store_jump (), insert_jump ();
+static void store_jump (), insert_jump ();
 
 char *
 re_compile_pattern (pattern, size, bufp)
@@ -659,7 +659,7 @@ re_compile_pattern (pattern, size, bufp)
 /* Store where `from' points a jump operation to jump to where `to' points.
   `opcode' is the opcode to store. */
 
-static int
+static void
 store_jump (from, opcode, to)
      char *from, *to;
      char opcode;
@@ -676,7 +676,7 @@ store_jump (from, opcode, to)
 
    If you call this function, you must zero out pending_exact.  */
 
-static int
+static void
 insert_jump (op, from, to, current_end)
      char op;
      char *from, *to, *current_end;

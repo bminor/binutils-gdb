@@ -845,7 +845,12 @@ allocate_cplus_struct_type (type)
     }
 }
 
-/* Helper function to initialize the standard scalar types.  */
+/* Helper function to initialize the standard scalar types.
+
+   If NAME is non-NULL and OBJFILE is non-NULL, then we make a copy
+   of the string pointed to by name in the type_obstack for that objfile,
+   and initialize the type name to that copy.  There are places (mipsread.c
+   in particular, where init_type is called with a NULL value for NAME). */
 
 struct type *
 init_type (code, length, flags, name, objfile)
@@ -861,7 +866,15 @@ init_type (code, length, flags, name, objfile)
   TYPE_CODE (type) = code;
   TYPE_LENGTH (type) = length;
   TYPE_FLAGS (type) |= flags;
-  TYPE_NAME (type) = name;
+  if ((name != NULL) && (objfile != NULL))
+    {
+      TYPE_NAME (type) =
+	obsavestring (name, strlen (name), &objfile -> type_obstack);
+    }
+  else
+    {
+      TYPE_NAME (type) = name;
+    }
 
   /* C++ fancies.  */
 

@@ -2782,7 +2782,7 @@ _initialize_symtab ()
 #if 0
   add_info ("methods", methods_info,
 	    "All method names, or those matching REGEXP::REGEXP.\n\
-If the class qualifier is ommited, it is assumed to be the current scope.\n\
+If the class qualifier is omitted, it is assumed to be the current scope.\n\
 If the first REGEXP is omitted, then all methods matching the second REGEXP\n\
 are listed.");
 #endif

@@ -67,12 +67,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/param.h>
 #include <sys/file.h>
 #include <sys/stat.h>
-#include <strings.h>
-
-/* Undo brain-damage in some <strings.h> that '#define index strchr'.
-   Note that tm-mips.h includes coff/sym.h, which has a structure with a
-   member named 'index'. */
-#undef index
 
 #include "coff/mips.h"		/* COFF-like aspects of ecoff files */
 #include "coff/ecoff-ext.h"	/* External forms of ecoff sym structures */
@@ -1455,7 +1449,8 @@ parse_type(ax, bs, bigend)
 		ax += cross_ref(ax, &tp, type_code, &pn, bigend);
 		/* reading .o file ? */
 		if (UNSAFE_DATA_ADDR(tp))
-		    tp = init_type(type_code, 0, 0, 0, (struct objfile *) NULL);
+		    tp = init_type(type_code, 0, 0, (char *) NULL,
+				   (struct objfile *) NULL);
 		/* SOMEONE OUGHT TO FIX DBXREAD TO DROP "STRUCT" */
 		sprintf(name, fmt, pn);
 
@@ -1545,7 +1540,8 @@ upgrade_type(tpp, tq, ax, bigend)
 
 	case tqArray:
 		off = 0;
-		t = init_type(TYPE_CODE_ARRAY, 0, 0, 0, (struct objfile *) NULL);
+		t = init_type(TYPE_CODE_ARRAY, 0, 0, (char *) NULL,
+			      (struct objfile *) NULL);
 		TYPE_TARGET_TYPE(t) = *tpp;
 
 		/* Determine and record the domain type (type of index) */
@@ -2580,7 +2576,8 @@ cross_ref(ax, tpp, type_code, pname, bigend)
 		    if (p)
 			*tpp = p->t;
 		    else {
-			*tpp = init_type(type_code, 0, 0, 0, (struct objfile *) NULL);
+			*tpp = init_type(type_code, 0, 0, (char *) NULL,
+					 (struct objfile *) NULL);
 			add_pending(fh, sh, *tpp);
 		    }
 		}
@@ -2997,7 +2994,8 @@ fixup_sigtramp()
 	 */
 	SYMBOL_NAMESPACE(s) = VAR_NAMESPACE;
 	SYMBOL_CLASS(s) = LOC_BLOCK;
-	SYMBOL_TYPE(s) = init_type(TYPE_CODE_FUNC, 4, 0, 0, (struct objfile *) NULL);
+	SYMBOL_TYPE(s) = init_type(TYPE_CODE_FUNC, 4, 0, (char *) NULL,
+				   (struct objfile *) NULL);
 	TYPE_TARGET_TYPE(SYMBOL_TYPE(s)) = builtin_type_void;
 
 	/* Need a block to allocate .gdbinfo. in */
