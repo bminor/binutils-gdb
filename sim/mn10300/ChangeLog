@@ -1,3 +1,10 @@
+Mon Feb 23 20:23:19 1998  Mark Alexander  <marka@cygnus.com>
+
+	* Makefile.in: Last change was bad.  Define NL_TARGET
+	so that targ-vals.h will be used instead of syscall.h.
+	* simops.c: Use targ-vals.h instead of syscall.h.
+	(OP_F020): Disable unsupported system calls.
+
 Mon Feb 23 09:44:38 1998  Mark Alexander  <marka@cygnus.com>
 
 	* Makefile.in: Get header files from libgloss/mn10300/sys.

@@ -19,8 +19,10 @@
 ## COMMON_PRE_CONFIG_FRAG
 
 SIM_OBJS = interp.o table.o simops.o sim-load.o
-SIM_EXTRA_CFLAGS = -I$(srcdir)/../../libgloss/mn10300/sys
 SIM_EXTRA_CLEAN = clean-extra
+
+# This selects the m32r newlib/libgloss syscall definitions.
+NL_TARGET = -DNL_TARGET_mn10300
 
 INCLUDE = mn10300_sim.h $(srcdir)/../../include/callback.h
 
