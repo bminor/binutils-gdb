@@ -459,13 +459,13 @@ char **where;
 {
 	symbolS *symbolP;
 
-#ifdef CROSS_ASSEMBLE
+#ifdef CROSS_COMPILE
 	/* Gotta do md_ byte-ordering stuff for string_byte_count first - KWK */
 	md_number_to_chars(*where, string_byte_count, sizeof(string_byte_count));
 	*where += sizeof(string_byte_count);
-#else /* CROSS_ASSEMBLE */
+#else /* CROSS_COMPILE */
 	append(where, (char *) &string_byte_count, (unsigned long) sizeof(string_byte_count));
-#endif /* CROSS_ASSEMBLE */
+#endif /* CROSS_COMPILE */
 
 	for(symbolP = symbol_rootP; symbolP; symbolP = symbol_next(symbolP)) {
 		if(S_GET_NAME(symbolP))

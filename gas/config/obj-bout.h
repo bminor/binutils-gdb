@@ -60,9 +60,9 @@ to the Free Software Foundation, 675 Mass Ave, Cambridge, MA
 #include "targ-cpu.h"
 
  /* bout uses host byte order for headers */
-#ifdef CROSS_ASSEMBLE
-#undef CROSS_ASSEMBLE
-#endif /* CROSS_ASSEMBLE */
+#ifdef CROSS_COMPILE
+#undef CROSS_COMPILE
+#endif /* CROSS_COMPILE */
 
  /* We want \v. */
 #define BACKSLASH_V 1
