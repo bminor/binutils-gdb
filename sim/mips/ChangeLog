@@ -1,3 +1,9 @@
+Mon Apr 21 17:16:13 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* gencode.c (build_instruction): DIV instructions: check 
+	for division by zero and integer overflow before using 
+	host's division operation.
+
 Thu Apr 17 03:18:14 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* Makefile.in (SIM_OBJS): Add sim-load.o.

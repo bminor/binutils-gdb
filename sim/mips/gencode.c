@@ -2241,30 +2241,53 @@ build_instruction (doisa, features, mips16, insn)
     case DIV:
      {
       int boolU = (insn->flags & UNSIGNED);
-      int pipe1 = (insn->flags & PIPE1);
+      char* pipe = (insn->flags & PIPE1) ? "1" : "";
 
       if (features & FEATURE_WARN_LOHI) {
-	printf("   CHECKHILO(\"Division\");\n");
+        printf("   CHECKHILO(\"Division\");\n");
       }
       printf("   {\n");
+
       if (GETDATASIZEINSN(insn) == DOUBLEWORD) {
-	printf("   LO%s = ((%sword64)op1 / (%sword64)op2);\n",
-               (pipe1 ? "1" : ""),
-               (boolU ? "u" : ""),(boolU ? "u" : ""));
-	printf("   HI%s = ((%sword64)op1 %c (%sword64)op2);\n",
-               (pipe1 ? "1" : ""),
-               (boolU ? "u" : ""),'%',(boolU ? "u" : ""));
+        printf("   %sword64 d1 = op1;\n", (boolU ? "u" : ""));
+        printf("   %sword64 d2 = op2;\n", (boolU ? "u" : ""));
+        printf("   if (d2 == 0)\n");
+        printf("     {\n");
+        printf("     LO%s = 0x8000000000000000LL;\n", pipe);
+        printf("     HI%s = 0;\n", pipe);
+        printf("     }\n");
+        printf("   else if (d2 == -1 && d1 == 0x8000000000000000LL)\n");
+        printf("     {\n");
+        printf("     LO%s = 0x8000000000000000LL;\n", pipe);
+        printf("     HI%s = 0;\n", pipe);
+        printf("     }\n");
+        printf("   else\n");
+        printf("     {\n");
+        printf("     LO%s = (d1 / d2);\n", pipe);
+        printf("     HI%s = (d1 %% d2);\n", pipe);
+        printf("     }\n");
       } else {
-	printf("   LO%s = SIGNEXTEND(((%sint)op1 / (%sint)op2),32);\n",
-               (pipe1 ? "1" : ""),
-               (boolU ? "unsigned " : ""),(boolU ? "unsigned " : ""));
-	printf("   HI%s = SIGNEXTEND(((%sint)op1 %c (%sint)op2),32);\n",
-               (pipe1 ? "1" : ""),
-               (boolU ? "unsigned " : ""),'%',(boolU ? "unsigned " : ""));
+        printf("   %sint d1 = op1;\n", (boolU ? "unsigned " : ""));
+        printf("   %sint d2 = op2;\n", (boolU ? "unsigned " : ""));
+        printf("   if (d2 == 0)\n");
+        printf("     {\n");
+	printf("     LO%s = SIGNEXTEND(0x80000000,32);\n",pipe);
+	printf("     HI%s = SIGNEXTEND(0,32);\n", pipe);
+        printf("     }\n");
+        printf("   else if (d2 == -1 && d1 == 0x80000000)\n");
+        printf("     {\n");
+	printf("     LO%s = SIGNEXTEND(0x80000000,32);\n",pipe);
+	printf("     HI%s = SIGNEXTEND(0,32);\n", pipe);
+        printf("     }\n");
+        printf("   else\n");
+        printf("     {\n");
+	printf("     LO%s = SIGNEXTEND((d1 / d2),32);\n", pipe);
+	printf("     HI%s = SIGNEXTEND((d1 %% d2),32);\n", pipe);
+        printf("     }\n");
       }
       printf("   }\n");
      }
-     break ;
+    break ;
 
     case SHIFT:
      {
