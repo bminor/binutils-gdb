@@ -3269,8 +3269,8 @@ macro_build_ldst_constoffset (char *place, int *counter, expressionS *ep,
   /* Sign-extending 32-bit constants makes their handling easier.  */
   if (! dbl)
     {
-      if (ep->X_add_number & ~((bfd_vma) 0xffffffff)
-	  && ~(ep->X_add_number | 0xffffffff))
+      if (ep->X_add_number & ~((bfd_vma) 0x7fffffff)
+	  && ~(ep->X_add_number | 0x7fffffff))
 	as_bad (_("too large constant specified"));
 
     ep->X_add_number = (((ep->X_add_number & 0xffffffff) ^ 0x80000000)
@@ -3278,7 +3278,7 @@ macro_build_ldst_constoffset (char *place, int *counter, expressionS *ep,
     }
 
   /* Right now, this routine can only handle signed 32-bit contants.  */
-  if (! IS_SEXT_32BIT_NUM(ep->X_add_number))
+  if (! IS_SEXT_32BIT_NUM(ep->X_add_number + 0x8000))
     as_warn (_("operand overflow"));
 
   if (IS_SEXT_16BIT_NUM(ep->X_add_number))
@@ -3433,8 +3433,8 @@ load_register (int *counter, int reg, expressionS *ep, int dbl)
       /* Sign-extending 32-bit constants makes their handling easier.  */
       if (! dbl)
 	{
-	  if (ep->X_add_number & ~((bfd_vma) 0xffffffff)
-	      && ~(ep->X_add_number | 0xffffffff))
+	  if (ep->X_add_number & ~((bfd_vma) 0x7fffffff)
+	      && ~(ep->X_add_number | 0x7fffffff))
 	    as_bad (_("too large constant specified"));
 
 	ep->X_add_number = (((ep->X_add_number & 0xffffffff) ^ 0x80000000)
@@ -5113,7 +5113,7 @@ macro (struct mips_cl_insn *ip)
 				RELAX_ENCODE (8, 4, 0, 0, 0, 0),
 				offset_expr.X_add_symbol, 0, NULL);
 		}
-	      else if (IS_SEXT_32BIT_NUM (expr1.X_add_number))
+	      else if (IS_SEXT_32BIT_NUM (expr1.X_add_number + 0x8000))
 		{
 		  int dreg;
 
@@ -5461,7 +5461,7 @@ macro (struct mips_cl_insn *ip)
 					  mips_opts.warn_about_macros),
 			    offset_expr.X_add_symbol, 0, NULL);
 	    }
-	  else if (IS_SEXT_32BIT_NUM (expr1.X_add_number))
+	  else if (IS_SEXT_32BIT_NUM (expr1.X_add_number + 0x8000))
 	    {
 	      int dreg;
 
@@ -5943,8 +5943,8 @@ macro (struct mips_cl_insn *ip)
 	   && (! HAVE_64BIT_GPRS && offset_expr.X_op == O_constant))
           && (offset_expr.X_op == O_constant))
 	{
-	  if (offset_expr.X_add_number & ~((bfd_vma) 0xffffffff)
-	      && ~(offset_expr.X_add_number | 0xffffffff))
+	  if (offset_expr.X_add_number & ~((bfd_vma) 0x7fffffff)
+	      && ~(offset_expr.X_add_number | 0x7fffffff))
 	    as_bad (_("too large constant specified"));
 
 	offset_expr.X_add_number = (((offset_expr.X_add_number & 0xffffffff)
@@ -6137,7 +6137,7 @@ macro (struct mips_cl_insn *ip)
 	    }
 
 	  if (offset_expr.X_op == O_constant
-	      && ! IS_SEXT_32BIT_NUM (offset_expr.X_add_number))
+	      && ! IS_SEXT_32BIT_NUM (offset_expr.X_add_number + 0x8000))
 	    as_bad (_("load/store address overflow (max 32 bits)"));
 
 	  if (breg == 0)

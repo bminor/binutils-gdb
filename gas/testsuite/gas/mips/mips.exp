@@ -714,4 +714,13 @@ if { [istarget mips*-*-*] } then {
     run_dump_test "hwr-names-numeric"
     run_dump_test "hwr-names-mips32r2"
     run_dump_test "hwr-names-mips64r2"
+
+    run_dump_test "ldstla-32"
+    run_dump_test "ldstla-32-shared"
+    if $has_newabi {
+	run_dump_test "ldstla-n32"
+	run_dump_test "ldstla-n32-shared"
+	run_dump_test "ldstla-n64"
+	run_dump_test "ldstla-n64-shared"
+    }
 }

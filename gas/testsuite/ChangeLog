@@ -1,3 +1,16 @@
+2003-10-01  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* gas/mips/ldstla-32-shared.d: New file.
+	* gas/mips/ldstla-32.d: New file.
+	* gas/mips/ldstla-32.s: New file.
+	* gas/mips/ldstla-n32-shared.d: New file.
+	* gas/mips/ldstla-n32.d: New file.
+	* gas/mips/ldstla-n32.s: New file.
+	* gas/mips/ldstla-n64-shared.d: New file.
+	* gas/mips/ldstla-n64.d: New file.
+	* gas/mips/ldstla-n64.s: New file.
+	* gas/mips/mips.exp: Add ld-st-la tests.
+
 2003-09-30  Chris Demetriou  <cgd@broadcom.com>
 
 	* lib/gas-defs.exp (run_dump_test): If stderr file is specified
