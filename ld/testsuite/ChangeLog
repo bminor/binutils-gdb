@@ -1,4 +1,13 @@
+Tue Dec 19 18:01:01 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-srec/srec.exp: Add setup_xfails for XCOFF targets.
+
 Fri Dec 15 16:36:17 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-srec/srec.exp: On a29k targets, use --defsym to define
+	V_SPILL and V_FILL.
+	* ld-srec/sr1.c (V_SPILL, V_FILL): Remove definitions.
+	* ld-srec/sr3.cc: Likewise.
 
 	* ld-srec/srec.exp: Remove i960 COFF setup_xfail.
 
