@@ -264,8 +264,7 @@ proc test_ptype_class_objects {} {
 	    # gcc 2.95.3 -gdwarf-2
 	    # gcc 3.3.2 -gdwarf-2
 	    # gcc HEAD 2003-12-28 21:08:30 UTC -gdwarf-2
-	    # TODO: this is not obsolescent!
-	    pass "ptype class B (obsolescent gcc or gdb)"
+	    pass "ptype class B"
 	}
 	-re "type = class B : public A \{${ws}public:${ws}int b;${ws}int x;${ws}B ?& ?operator ?=\\(B const ?&\\);${ws}B\\(B const ?&\\);${ws}B\\((void|)\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
@@ -282,8 +281,7 @@ proc test_ptype_class_objects {} {
 	    # gcc 2.95.3 -gdwarf-2
 	    # gcc 3.3.2 -gdwarf-2
 	    # gcc HEAD 2003-12-28 21:08:30 UTC -gdwarf-2
-	    # TODO: this is not obsolescent!
-	    pass "ptype class C (obsolescent gcc or gdb)"
+	    pass "ptype class C"
 	}
 	-re "type = class C : public A \{${ws}public:${ws}int c;${ws}int x;${ws}C ?& ?operator ?=\\(C const ?&\\);${ws}C\\(C const ?&\\);${ws}C\\((void|)\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
@@ -300,8 +298,7 @@ proc test_ptype_class_objects {} {
 	    # gcc 2.95.3 -gdwarf-2
 	    # gcc 3.3.2 -gdwarf-2
 	    # gcc HEAD 2003-12-28 21:08:30 UTC -gdwarf-2
-	    # TODO: this is not obsolescent!
-	    pass "ptype class D (obsolescent gcc or gdb)"
+	    pass "ptype class D"
 	}
 	-re "type = class D : public B, public C \{${ws}public:${ws}int d;${ws}int x;${ws}D ?& ?operator ?=\\(D const ?&\\);${ws}D\\(D const ?&\\);${ws}D\\((void|)\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
@@ -510,9 +507,8 @@ proc test_ptype_class_objects {} {
 	-re "type = class Foo \{${ws}public:${ws}int x;${ws}int y;${ws}static int st;${ws}Foo ?& ?operator ?=\\(Foo const ?&\\);${ws}Foo\\(Foo const ?&\\);${ws}Foo\\(int, int\\);${ws}int operator ?!\\((void|)\\);${ws}int operator int\\((void|)\\);${ws}int times\\(int\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+
 	    # TODO: "int operator int()" is a bug
-	    # TODO: this is not obsolescent!
 	    # kfail "gdb/1497" "ptype class Foo"
-	    pass "ptype class Foo (obsolescent gcc or gdb)"
+	    pass "ptype class Foo"
 	}
 	-re "type = class Foo \{${ws}public:${ws}int x;${ws}int y;${ws}static int st;${ws}Foo ?& ?operator ?=\\(Foo const ?&\\);${ws}Foo\\(Foo const ?&\\);${ws}Foo\\(int, int\\);${ws}int operator ?!\\((void|)\\);${ws}operator int\\((void|)\\);${ws}int times\\(int\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 3.3.2 -gstabs+
@@ -531,8 +527,7 @@ proc test_ptype_class_objects {} {
 	    # gcc 2.95.3 -gdwarf-2
 	    # gcc 3.3.2 -gdwarf-2
 	    # gcc HEAD 2003-12-28 21:08:30 UTC -gdwarf-2
-	    # TODO: this is not obsolescent!
-	    pass "ptype class Bar (obsolescent gcc or gdb)"
+	    pass "ptype class Bar"
 	}
 	-re "type = class Bar : public Base1, public Foo \{${ws}public:${ws}int z;${ws}Bar ?& ?operator ?=\\(Bar const ?&\\);${ws}Bar\\(Bar const ?&\\);${ws}Bar\\(int, int, int\\);$nl\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gstabs+

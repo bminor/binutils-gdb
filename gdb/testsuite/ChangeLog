@@ -1,5 +1,10 @@
 2004-01-10  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.cp/classes.exp: Remove old "(obsolescent gcc or gdb)"
+	decorations.
+
+2004-01-10  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.cp/virtfunc.exp: Remove old "(obsolescent gcc or gdb)"
 	and "(aCC)" decorations.  Remove obsolete doco about old
 	test results.
