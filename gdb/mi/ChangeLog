@@ -1,3 +1,12 @@
+2002-04-07  Michael Chastain  <mec@shout.net>
+
+	Merge from HEAD to fix PR gdb/381:
+
+	2002-04-04  Daniel Jacobowitz  <drow@mvista.com>
+
+	* mi-cmd-disas.c (mi_cmd_disassemble): Skip end-of-function
+ 	markers in the line table.
+ 
 2002-02-24  Andrew Cagney  <ac131313@redhat.com>
 
 	From wiz at danbala:

@@ -1,5 +1,5 @@
 /* MI Command Set - disassemble commands.
-   Copyright 2000, 2001 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions (a Red Hat company).
 
    This file is part of GDB.
@@ -331,6 +331,10 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
 	  if (le[i].line == le[i + 1].line
 	      && le[i].pc == le[i + 1].pc)
 	    continue;		/* Ignore duplicates */
+
+	  /* Skip any end-of-function markers.  */
+	  if (le[i].line == 0)
+	    continue;
 
 	  mle[newlines].line = le[i].line;
 	  if (le[i].line > le[i + 1].line)
