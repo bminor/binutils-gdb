@@ -613,6 +613,7 @@ calc_hex (list)
 	  data_buffer_size += 2;
 	  octet_in_frag++;
 	}
+    if (frag_ptr->fr_type == rs_fill)
       {
 	unsigned int var_rep_max = octet_in_frag;
 	unsigned int var_rep_idx = octet_in_frag;

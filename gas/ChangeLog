@@ -1,3 +1,8 @@
+2000-12-29  H.J. Lu  <hjl@gnu.org>
+
+	* listing.c (calc_hex): Print the variable part only if the
+	fragment type is rs_fill.
+
 2000-12-29  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* doc/internals.texi (tc_conditional_pseudoop,
