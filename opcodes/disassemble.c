@@ -397,3 +397,21 @@ disassembler_usage (stream)
 
   return;
 }
+
+void
+disassemble_init_for_target (struct disassemble_info * info)
+{
+  if (info == NULL)
+    return;
+
+  switch (info->arch)
+    {
+#ifdef ARCH_arm
+    case bfd_arch_arm:
+      info->symbol_is_valid = arm_symbol_is_valid;
+      break;
+#endif
+    default:
+      break;
+    }
+}

@@ -1,3 +1,15 @@
+2003-11-14  Nick Clifton  <nickc@redhat.com>
+
+	* dis-init.c (init_disassemble_info): Initialise
+	symbol_is_valid field.
+	* dis-buf.c (generic_symbol_is_valid): New function.  Always
+ 	returns TRUE.
+	* arm-dis.c (arm_symbol_is_valid): New function.  Return FALSE
+        for ARM ELF mapping symbols.
+        * disassemble.c (disassemble_init_for_target): Set
+	symbol_is_valid field to arm_symbol_is_valid of the target is
+	an ARM.
+
 2003-11-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* m68k-opc.c (m68k_opcodes): Reorder "fmovel".

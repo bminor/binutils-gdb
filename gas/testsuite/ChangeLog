@@ -1,3 +1,13 @@
+2003-11-14  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/arm7.d: Pass -D instead of -d to objdump in order to
+        display the contents of data fields in the .text section.
+        This change is necessary after the addition of arm elf mapping
+        symbol support to gas.
+        * gas/arm/pic.d: Expect addresses with function name offsets.
+        This change is necessary after the addition of arm elf mapping
+        symbol support to gas.
+        
 2003-11-13  Nick Clifton  <nickc@redhat.com>
 
 	* gas/arm/mapping.s: New test: Source for ARM ELF mapping

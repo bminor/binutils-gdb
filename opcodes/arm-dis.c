@@ -1145,6 +1145,23 @@ print_insn_thumb (pc, info, given)
   abort ();
 }
 
+/* Disallow mapping symbols ($a, $b, $d, $t etc) from
+   being displayed in symbol relative addresses.  */
+
+bfd_boolean
+arm_symbol_is_valid (asymbol * sym,
+		     struct disassemble_info * info ATTRIBUTE_UNUSED)
+{
+  const char * name;
+  
+  if (sym == NULL)
+    return FALSE;
+
+  name = bfd_asymbol_name (sym);
+
+  return (name && *name != '$');
+}
+
 /* Parse an individual disassembler option.  */
 
 void

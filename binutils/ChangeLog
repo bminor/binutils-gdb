@@ -1,3 +1,16 @@
+2003-11-14  Nick Clifton  <nickc@redhat.com>
+
+	* objdump.c (find_symbol_for_address): Change parameters so
+	that the entire disassemble_info structure is passed, not just
+	a few fields.  Use the symbol_is_valid field to check the
+	validity of located symbols and continue searching if they are
+	not valid.
+        (objdump_print_addr): Alter parameters passed to
+	find_symbol_for_address.
+        (objdump_symbol_at_address): Likewise.
+        (disassemble_address): Likewise.  Also use symbol_is_valid
+	function to check the validity of located symbols.
+
 2003-11-13  Tobias Burnus  <tobias.burnus@physik.fu-berlin.de>
 
 	* ar.c (open_inarch): Emit a warning when an archive is created
