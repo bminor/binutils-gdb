@@ -1151,7 +1151,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	mips-tdep.c mipsm3-nat.c mipsv4-nat.c news-xdep.c \
 	nindy-share/Onindy.c nindy-share/nindy.c \
 	nindy-share/ttyflush.c nindy-tdep.c \
-	ns32k-tdep.c ns32km3-nat.c osfsolib.c \
+	ns32k-tdep.c osfsolib.c \
 	somread.c somsolib.c $(HPREAD_SOURCE) \
 	ppc-linux-nat.c ppc-linux-tdep.c \
 	procfs.c \
@@ -1165,7 +1165,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	sh-tdep.c solib.c sparc-nat.c \
 	sparc-tdep.c sparcl-tdep.c sun3-nat.c sun386-nat.c \
 	symm-tdep.c symm-nat.c \
-	ultra3-nat.c ultra3-xdep.c umax-xdep.c \
+	ultra3-nat.c ultra3-xdep.c \
 	vax-tdep.c \
 	vx-share/xdr_ld.c vx-share/xdr_ptrace.c vx-share/xdr_rdb.c \
 	win32-nat.c \
@@ -1667,7 +1667,7 @@ nlmread.o: nlmread.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
 	gdb-stabs.h objfiles.h symfile.h $(symtab_h) stabsread.h \
 	gdb_string.h
 
-ns32km3-nat.o: ns32km3-nat.c $(defs_h) $(inferior_h) $(regcache_h)
+# OBSOLETE ns32km3-nat.o: ns32km3-nat.c $(defs_h) $(inferior_h) $(regcache_h)
 
 ttyflush.o: nindy-share/ttyflush.c
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/nindy-share/ttyflush.c
@@ -1986,7 +1986,7 @@ ultra3-nat.o: ultra3-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) $(regcache_h)
 
 ultra3-xdep.o: ultra3-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 
-umax-xdep.o: umax-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h) $(regcache_h)
+# OBSOLETE umax-xdep.o: umax-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h) $(regcache_h)
 
 utils.o: utils.c $(bfd_h) $(defs_h) $(expression_h) $(gdbcmd_h) \
 	language.h target.h terminal.h $(readline_headers) \

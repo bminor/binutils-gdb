@@ -16,6 +16,8 @@ x86 FreeBSD 3.x and 4.x				i[3456]86*-freebsd[34]*
 
 x86 FreeBSD before 2.2				i[3456]86*-freebsd{1,2.[01]}*, 
 Harris/CXUX m88k				m88*-harris-cxux*
+Most ns32k hosts and targets			ns32k-*-mach3* ns32k-umax-*
+						ns32k-utek-sysv* ns32k-utek-*
 
 stuff.c (Program to stuff files into a specially prepared space in kdb)
 kdb-start.c (Main loop for the standalone kernel debugger)

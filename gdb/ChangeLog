@@ -1,3 +1,32 @@
+2001-04-01  Andrew Cagney  <ac131313@redhat.com>
+
+	Obsolete ns32k-*-mach3*, ns32k-umax-*, ns32k-utek-sysv* and
+	ns32k-utek-*.
+	* Makefile.in (ALLDEPFILES): Delete umax-xdep.c and ns32km3-nat.c.
+	(umax-xdep.o, ns32km3-nat.o): Obsolete.
+	* configure.tgt (ns32k-*-mach3*, ns32k-utek-sysv*, ns32k-utek-*):
+	Obsolete.
+	* configure.host (ns32k-*-mach3*, ns32k-umax-*, ns32k-utek-sysv*):
+	Obsolete.
+	* config/ns32k/merlin.mh: Obsolete.
+	* config/ns32k/merlin.mt: Obsolete.
+	* config/ns32k/xm-merlin.h: Obsolete.
+	* config/ns32k/tm-merlin.h: Obsolete.
+	* config/ns32k/nm-umax.h: Obsolete.
+	* config/ns32k/umax.mh: Obsolete.
+	* config/ns32k/umax.mt: Obsolete.
+	* config/ns32k/xm-umax.h: Obsolete.
+	* umax-xdep.c: Obsolete.
+	* config/ns32k/ns32km3.mh: Obsolete.
+	* config/ns32k/ns32km3.mt: Obsolete.
+	* config/ns32k/tm-ns32km3.h: Obsolete.
+	* config/ns32k/xm-ns32km3.h: Obsolete.
+	* ns32km3-nat.c: Obsolete.
+	* ns32k-tdep.c (merlin_skip_prologue): Obsolete.
+	(merlin_frame_num_args): Ditto.
+	* NEWS: Update.
+	* TODO: Update.
+
 2001-04-02  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* config/djgpp/fnchange.lst: Tweak due to

@@ -125,10 +125,10 @@ mips-*-riscos*)		gdb_host=riscos ;;
 
 none-*-*)		gdb_host=none ;;
 
-ns32k-*-mach3*)		gdb_host=ns32km3 ;;
+# OBSOLETE ns32k-*-mach3*)		gdb_host=ns32km3 ;;
 ns32k-*-netbsd*)	gdb_host=nbsd ;;
-ns32k-umax-*)		gdb_host=umax ;;
-ns32k-utek-sysv*)	gdb_host=merlin ;;
+# OBSOLETE ns32k-umax-*)		gdb_host=umax ;;
+# OBSOLETE ns32k-utek-sysv*)	gdb_host=merlin ;;
 
 powerpc-*-aix*)		gdb_host=aix ;;
 powerpcle-*-cygwin*)	gdb_host=cygwin ;;

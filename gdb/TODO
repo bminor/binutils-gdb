@@ -176,35 +176,46 @@ Possible selection criteria are:
 
 Steps:		   
 	  
-	o	post proposals to gdb@ (DONE)
+	o	Identify TUPPLE : CPU / HOST / TARGET
+		combinations.
 
-	o	post announcement to gdb-announce@
+		  TUPPLE	        CPU	 HOST	  TARGET     ZAPPED
+		  ------		---	 ----	  ------     ------
+		  ns32k-*-mach3*        ns32k	 ns32km3  ns32km3    yes
+		  ns32k-umax-*		ns32k	 umax	  -	     yes
+		  ns32k-utek-sysv*	ns32k	 merlin	  merlin     yes
+		  ns32k-utek-*		ns32k	 -	  umax	     yes
+		  tic80-*		tic80	 -	  tic80
+		  m68*-isi-*		m68k	 isi	  isi
+		  m68*-sony-*		m68k	 news	  news
+		  m68030-sony-*		m68k	 news1000 -
+		  m68*-rom68k-*		m68k	 -	  (monitor)
+		  m68*-*bug-*		m68k	 -	  (monitor)
+		  m68*-monitor-*	m68k	 -	  (monitor)
+		  m68*-est-*		m68k	 -	  (monitor)
+		  a29k-*-*		a29k	 ultra3	  -
+		  a29k-*-sym1*		a29k	 -	  ultra3
+		  powerpcle-*-solaris*	powerpc	 solaris  solaris
+		  powerpcle-*-cygwin*	powerpc	 cygwin	  cygwin
+		  powerpc-*-netware*	powerpc  -	  ppc-nw
+		  w65-*-*		w65	 -	  w65
+		  i[3456]86-*-sunos*	i386	 sun386	  sun386
+
+		(DONE)
+
+	o	post proposals to gdb@
+		(DONE)
+
+	o	post revised proposals to gdb-announce@
 		crossed with gdb@ reply-to to gdb@
 		(DONE)
 
-	                ns32k-*-mach3*
-        	        ns32k-umax-*
-                	ns32k-utek-sysv*
-		        tic80-*
-			m68*-isi-*
-			m68*-sony-*
-			m68*-rom68k-*
-			m68*-*bug-*
-			m68*-monitor-*
-			m68*-est-*
-			a29k-ultra3
-			powerpcle-*-solaris*
-			powerpcle-*-cygwin*
-			powerpc-*-netware*
-		        w65-*-*
-			i[3456]86-*-sunos*
-
-	o	clobber the files:
-
-			configure.{in,host,tgt}
-			Makefile.in
+	o	clobber the tupple and files:
+			configure.host
+			configure.tgt
+			config/CPU/*HOST*
+			config/CPU/*TARGET*
 			*-tdep.c *-nat.c *-xdep.c
-			configure/*/*
 
 	o	update NEWS
 
