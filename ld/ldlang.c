@@ -1474,7 +1474,7 @@ load_symbols (entry, place)
       bfd_error_type err;
       lang_statement_list_type *hold;
       boolean bad_load = true;
-      
+
       err = bfd_get_error ();
 
       /* See if the emulation has some special knowledge.  */
@@ -1496,7 +1496,7 @@ load_symbols (entry, place)
 	  einfo (_("%F%B: file not recognized: %E\n"), entry->the_bfd);
       else
 	bad_load = false;
-      
+
       bfd_close (entry->the_bfd);
       entry->the_bfd = NULL;
 
@@ -1537,7 +1537,7 @@ load_symbols (entry, place)
     case bfd_archive:
       if (entry->whole_archive)
 	{
-	  bfd * member = NULL;
+	  bfd *member = NULL;
 	  boolean loaded = true;
 
 	  for (;;)
@@ -1546,7 +1546,7 @@ load_symbols (entry, place)
 
 	      if (member == NULL)
 		break;
-	      
+
 	      if (! bfd_check_format (member, bfd_object))
 		{
 		  einfo (_("%F%B: member %B in archive is not an object\n"),
@@ -1602,7 +1602,7 @@ wild (s, target, output)
       if (sec->spec.name != NULL && strcmp (sec->spec.name, "COMMON") == 0)
 	{
 	  /* Remember the section that common is going to in case we
-	     later get something which doesn't know where to put it.  */ 
+	     later get something which doesn't know where to put it.  */
 	  default_common_section = output;
 	}
     }
@@ -2842,23 +2842,23 @@ os_region_check (os, region, tree, base)
   if ((region->current < region->origin
        || (region->current - region->origin > region->length))
       && ((region->current != region->origin + region->length)
-           || base == 0))
+	  || base == 0))
     {
       if (tree != (etree_type *) NULL)
-        {
-          einfo (_("%X%P: address 0x%v of %B section %s is not within region %s\n"),
-                 region->current,
-                 os->bfd_section->owner,
-                 os->bfd_section->name,
-                 region->name);
-        }
+	{
+	  einfo (_("%X%P: address 0x%v of %B section %s is not within region %s\n"),
+		 region->current,
+		 os->bfd_section->owner,
+		 os->bfd_section->name,
+		 region->name);
+	}
       else
-        {
-          einfo (_("%X%P: region %s is full (%B section %s)\n"),
-                 region->name,
-                 os->bfd_section->owner,
-                 os->bfd_section->name);
-        }
+	{
+	  einfo (_("%X%P: region %s is full (%B section %s)\n"),
+		 region->name,
+		 os->bfd_section->owner,
+		 os->bfd_section->name);
+	}
       /* Reset the region pointer.  */
       region->current = region->origin;
     }
@@ -3353,8 +3353,8 @@ lang_do_assignments (s, output_section_statement, fill, dot)
 	    if (value.valid_p == false)
 	      einfo (_("%F%P: invalid data statement\n"));
 	  }
-          {
-            unsigned int size;
+	  {
+	    unsigned int size;
 	    switch (s->data_statement.type)
 	      {
 	      default:
@@ -3478,9 +3478,9 @@ lang_set_startof ()
       h = bfd_link_hash_lookup (link_info.hash, buf, false, false, true);
       if (h != NULL && h->type == bfd_link_hash_undefined)
 	{
-          unsigned opb;
+	  unsigned opb;
 
-          opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture,
+	  opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture,
 					       ldfile_output_machine);
 	  h->type = bfd_link_hash_defined;
 	  if (s->_cooked_size != 0)
@@ -3627,7 +3627,7 @@ lang_check ()
       else if (bfd_count_sections (input_bfd))
 	{
 	  /* If the input bfd has no contents, it shouldn't set the
-	     private data of the output bfd. */
+	     private data of the output bfd.  */
 
 	  bfd_error_handler_type pfn = NULL;
 
@@ -4520,7 +4520,7 @@ lang_leave_output_section_statement (fill, memspec, phdrs, lma_memspec)
       /* If no runtime region has been given, but the load region has
          been, use the load region.  */
       if (strcmp (memspec, "*default*") == 0)
-        current_section->region = lang_memory_region_lookup (lma_memspec);
+	current_section->region = lang_memory_region_lookup (lma_memspec);
     }
   current_section->phdrs = phdrs;
   stat_ptr = &statement_list;
@@ -4896,7 +4896,7 @@ lang_leave_overlay_section (fill, phdrs)
   name = current_section->name;
 
   lang_leave_output_section_statement (fill, "*default*",
-                                       phdrs, "*default*");
+				       phdrs, "*default*");
 
   /* Define the magic symbols.  */
 
@@ -4933,7 +4933,7 @@ lang_leave_overlay (fill, memspec, phdrs, lma_memspec)
      const char *lma_memspec;
 {
   lang_memory_region_type *region;
-  lang_memory_region_type * default_region;
+  lang_memory_region_type *default_region;
   lang_memory_region_type *lma_region;
   struct overlay_list *l;
   struct lang_nocrossref *nocrossref;
@@ -5246,7 +5246,7 @@ lang_do_version_exports_section ()
       bfd_size_type len;
 
       if (sec == NULL)
-        continue;
+	continue;
 
       len = bfd_section_size (is->the_bfd, sec);
       contents = xmalloc (len);

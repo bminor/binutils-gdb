@@ -935,13 +935,13 @@ exp_print_tree (tree)
 {
   if (config.map_file == NULL)
     config.map_file = stderr;
-  
+
   if (tree == NULL)
     {
       minfo ("NULL TREE\n");
       return;
     }
-  
+
   switch (tree->type.node_class)
     {
     case etree_value:

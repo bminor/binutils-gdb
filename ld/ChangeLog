@@ -1,3 +1,13 @@
+2002-05-03  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* ld.h: Fix formatting.
+	* ldexp.c: Likewise.
+	* ldfile.c: Likewise.
+	* ldlang.c: Likewise.
+	* ldmain.c: Likewise.
+	* lexsup.c: Likewise.
+	* pe-dll.c: Likewise.
+
 2002-05-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/ppc64elf.em (gld${EMULATION_NAME}_after_allocation):

@@ -804,7 +804,7 @@ parse_args (argc, argv)
 	       increment optind, and continue because getopt is too confused
 	       and will seg-fault the next time around.  */
 	    einfo(_("%P%F: bad -rpath option\n"));
-	     
+
 	  link_info.relocateable = true;
 	  config.build_constructors = false;
 	  config.magic_demand_paged = false;
@@ -954,8 +954,8 @@ parse_args (argc, argv)
 	  break;
 	case OPTION_TARGET_HELP:
 	  /* Mention any target specific options.  */
-          ldemul_list_emulation_options (stdout);
-          exit (0);
+	  ldemul_list_emulation_options (stdout);
+	  exit (0);
 	case OPTION_TBSS:
 	  set_section_start (".bss", optarg);
 	  break;
@@ -1009,7 +1009,7 @@ parse_args (argc, argv)
              version information.  Read it, but don't assume that
              we've seen a linker script.  */
 	  {
-	    FILE * hold_script_handle;
+	    FILE *hold_script_handle;
 
 	    hold_script_handle = saved_script_handle;
 	    ldfile_open_command_file (optarg);
@@ -1225,7 +1225,7 @@ help ()
 		  int two_dashes =
 		    (ld_options[j].control == TWO_DASHES
 		     || ld_options[j].control == EXACTLY_TWO_DASHES);
-		  
+
 		  printf ("%s-%s%s",
 			  comma ? ", " : "",
 			  two_dashes ? "-" : "",

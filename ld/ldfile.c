@@ -1,5 +1,5 @@
 /* Linker file opening and searching.
-   Copyright 1991, 1992, 1993, 1994, 1995, 1998, 1999, 2000, 2001
+   Copyright 1991, 1992, 1993, 1994, 1995, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
@@ -352,7 +352,7 @@ ldfile_open_command_file (name)
 
   ldfile_input_filename = name;
   lineno = 1;
-  
+
   saved_script_handle = ldlex_input_stack;
 }
 

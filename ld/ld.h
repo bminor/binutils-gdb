@@ -1,5 +1,5 @@
 /* ld.h -- general linker header file
-   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000
+   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2002
    Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
@@ -103,7 +103,7 @@ typedef struct {
   /* 1 => assign space to common symbols even if `relocatable_output'.  */
   boolean force_common_definition;
 
-  /* 1 => do not assign addresses to common symbols. */
+  /* 1 => do not assign addresses to common symbols.  */
   boolean inhibit_common_definition;
   boolean relax;
 

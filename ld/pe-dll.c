@@ -47,7 +47,7 @@
     at the end of this file.  This function is not re-entrant and is
     normally only called once, so static variables are used to reduce
     the number of parameters and return values required.
-    
+
     See also: ld/emultempl/pe.em.  */
 
 /*  Auto-import feature by Paul Sokolovsky
@@ -243,7 +243,7 @@ static autofilter_entry_type autofilter_objlist[] =
   { "dllcrt2.o", 9 },
   { "gcrt0.o", 7 },
   { "gcrt1.o", 7 },
-  { "gcrt2.o", 7 },  
+  { "gcrt2.o", 7 },
   { NULL, 0 }
 };
 
@@ -317,7 +317,7 @@ pe_dll_id_target (target)
   exit (1);
 }
 
-/* Helper functions for qsort.  Relocs must be sorted so that we can write 
+/* Helper functions for qsort.  Relocs must be sorted so that we can write
    them out by pages.  */
 
 typedef struct
@@ -446,11 +446,11 @@ auto_export (abfd, d, n)
 
       if (abfd && (p = lbasename (abfd->filename)))
 	{
-          afptr = autofilter_objlist;
-          while (afptr->name)
+	  afptr = autofilter_objlist;
+	  while (afptr->name)
 	    {
-	      if ( strcmp (p, afptr->name) == 0 )
-	        return 0;
+	      if (strcmp (p, afptr->name) == 0)
+		return 0;
 	      afptr++;
 	    }
 	}
@@ -466,7 +466,7 @@ auto_export (abfd, d, n)
 	  if (strcmp (n, afptr->name) == 0)
 	    return 0;
 
-	  afptr ++;
+	  afptr++;
 	}
 
       /* Next, exclude symbols starting with ...  */
@@ -476,7 +476,7 @@ auto_export (abfd, d, n)
 	  if (strncmp (n, afptr->name, afptr->len) == 0)
 	    return 0;
 
-	  afptr ++;
+	  afptr++;
 	}
 
       /* Finally, exclude symbols ending with ...  */
@@ -484,13 +484,13 @@ auto_export (abfd, d, n)
       afptr = autofilter_symbolsuffixlist;
       while (afptr->name)
 	{
-	  if ((len >= afptr->len) && 
+	  if ((len >= afptr->len)
 	      /* Add 1 to insure match with trailing '\0'.  */
-	      strncmp (n + len - afptr->len, afptr->name, 
-		       afptr->len + 1) == 0)
+	      && strncmp (n + len - afptr->len, afptr->name,
+			  afptr->len + 1) == 0)
 	    return 0;
 
-	  afptr ++;
+	  afptr++;
 	}
     }
 
@@ -560,10 +560,10 @@ process_def_file (abfd, info)
 		    sprintf (name, "%s%s", U("_imp_"), sn);
 
 		    blhe = bfd_link_hash_lookup (info->hash, name,
-						  false, false, false);
+						 false, false, false);
 		    free (name);
 
-		    if (blhe && blhe->type == bfd_link_hash_defined) 
+		    if (blhe && blhe->type == bfd_link_hash_defined)
 		      continue;
 		  }
 
@@ -863,7 +863,7 @@ generate_edata (abfd, info)
       if (pe_def_file->exports[i].ordinal == -1)
 	{
 	  while (exported_symbols[next_ordinal - min_ordinal] != -1)
-	    next_ordinal ++;
+	    next_ordinal++;
 
 	  exported_symbols[next_ordinal - min_ordinal] = i;
 	  pe_def_file->exports[i].ordinal = next_ordinal;
@@ -1112,9 +1112,9 @@ generate_reloc (abfd, info)
 	  for (i = 0; i < nrelocs; i++)
 	    {
 	      if (pe_dll_extra_pe_debug)
-		{              
+		{
 		  struct symbol_cache_entry *sym = *relocs[i]->sym_ptr_ptr;
-		  printf("rel: %s\n",sym->name);
+		  printf ("rel: %s\n", sym->name);
 		}
 	      if (!relocs[i]->howto->pc_relative
 		  && relocs[i]->howto->type != pe_details->imagebase_reloc)
@@ -1193,7 +1193,7 @@ generate_reloc (abfd, info)
       if (reloc_data[i].type == 4)
 	reloc_sz += 2;
     }
-  
+
   reloc_sz = (reloc_sz + 3) & ~3;	/* 4-byte align.  */
   reloc_d = (unsigned char *) xmalloc (reloc_sz);
   sec_page = (unsigned long) (-1);
@@ -1551,11 +1551,11 @@ save_relocs (asection *sec)
  	.long		0
  	.rva		__my_dll_iname
  	.rva		fthunk
- 
+
  	.section	.idata$5
  	.long		0
    fthunk:
- 
+
  	.section	.idata$4
  	.long		0
    hname:                              */
@@ -1695,10 +1695,10 @@ make_tail (parent)
  	.global		__imp__function
   _function:
  	jmp		*__imp__function:
- 
+
  	.section	idata$7
  	.long		__head_my_dll
- 
+
  	.section	.idata$5
   ___imp_function:
   __imp__function:
@@ -1949,9 +1949,9 @@ make_import_fixup_mark (rel)
   static int counter;
   static char *fixup_name = NULL;
   static size_t buffer_len = 0;
-  
+
   struct symbol_cache_entry *sym = *rel->sym_ptr_ptr;
-  
+
   bfd *abfd = bfd_asymbol_bfd (sym);
   struct coff_link_hash_entry *myh = NULL;
 
@@ -1962,7 +1962,7 @@ make_import_fixup_mark (rel)
     }
 
   if (strlen (sym->name) + 25 > buffer_len)
-  /* Assume 25 chars for "__fu" + counter + "_".  If counter is 
+  /* Assume 25 chars for "__fu" + counter + "_".  If counter is
      bigger than 20 digits long, we've got worse problems than
      overflowing this buffer...  */
     {
@@ -1972,17 +1972,17 @@ make_import_fixup_mark (rel)
       buffer_len = ((strlen (sym->name) + 25) + 127) & ~127;
       fixup_name = (char *) xmalloc (buffer_len);
     }
-  
+
   sprintf (fixup_name, "__fu%d_%s", counter++, sym->name);
 
-  bfd_coff_link_add_one_symbol (&link_info, abfd, fixup_name, BSF_GLOBAL, 
+  bfd_coff_link_add_one_symbol (&link_info, abfd, fixup_name, BSF_GLOBAL,
 				current_sec, /* sym->section, */
 				rel->address, NULL, true, false,
 				(struct bfd_link_hash_entry **) &myh);
 
 #if 0
-    printf ("type:%d\n", myh->type);
-    printf ("%s\n", myh->root.u.def.section->name);
+  printf ("type:%d\n", myh->type);
+  printf ("%s\n", myh->root.u.def.section->name);
 #endif
   return fixup_name;
 }
@@ -1995,7 +1995,7 @@ make_import_fixup_mark (rel)
  	.rva		__fuNN_SYM (pointer to reference (address) in text)  */
 
 static bfd *
-make_import_fixup_entry (name, fixup_name, dll_symname,parent)
+make_import_fixup_entry (name, fixup_name, dll_symname, parent)
      const char *name;
      const char *fixup_name;
      const char *dll_symname;
@@ -2021,8 +2021,8 @@ make_import_fixup_entry (name, fixup_name, dll_symname,parent)
   symtab = (asymbol **) xmalloc (6 * sizeof (asymbol *));
   id3 = quick_section (abfd, ".idata$3", SEC_HAS_CONTENTS, 2);
 
-#if 0  
-  quick_symbol (abfd, U ("_head_"), dll_symname, "", id2, BSF_GLOBAL, 0); 
+#if 0
+  quick_symbol (abfd, U ("_head_"), dll_symname, "", id2, BSF_GLOBAL, 0);
 #endif
   quick_symbol (abfd, U ("_nm_thnk_"), name, "", UNDSEC, BSF_GLOBAL, 0);
   quick_symbol (abfd, U (""), dll_symname, "_iname", UNDSEC, BSF_GLOBAL, 0);

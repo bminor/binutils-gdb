@@ -318,12 +318,12 @@ main (argc, argv)
   if (saved_script_handle == NULL)
     {
       int isfile;
-      char *s = ldemul_get_script (& isfile);
+      char *s = ldemul_get_script (&isfile);
 
       if (isfile)
 	ldfile_open_command_file (s);
       else
-	{	
+	{
 	  lex_string = s;
 	  lex_redirect (s);
 	}
@@ -349,7 +349,7 @@ main (argc, argv)
 	  rewind (saved_script_handle);
 	  while ((n = fread (buf, 1, ld_bufsz - 1, saved_script_handle)) > 0)
 	    {
-	      buf [n] = 0;
+	      buf[n] = 0;
 	      info_msg (buf);
 	    }
 	  rewind (saved_script_handle);
@@ -359,9 +359,9 @@ main (argc, argv)
 	{
 	  int isfile;
 
-	  info_msg (ldemul_get_script (& isfile));
+	  info_msg (ldemul_get_script (&isfile));
 	}
-      
+
       info_msg ("\n==================================================\n");
     }
 
