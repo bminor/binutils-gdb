@@ -1,3 +1,13 @@
+Mon Dec  9 15:58:51 1996  Mark Alexander  <marka@cygnus.com>
+
+	* config/mips/tm-mips.h: Get rid of call-dummy code.
+	Minor changes to make pre-ANSI compilers happy.
+	* mips-tdep.c: Minor changes to make pre-ANSI compilers happy.
+	(mips_push_arguments): Rewrite to partially support EABI.
+	(mips_pc_in_call_dummy): New function.
+	* infcmd.c: Include symfile.h to get prototype of entry_point_address,
+	which fixes 64-bit sign extension bug on MIPS.
+
 Mon Dec  9 00:14:49 1996  Geoffrey Noer  <noer@cygnus.com>
 
 	* config/mn10300/tm-mn10300.h: fix register names
