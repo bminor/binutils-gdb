@@ -2618,6 +2618,8 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 		case R_RSEL:
 		case R_COMP1:
 		case R_COMP2:
+		case R_BEGIN_BRTAB:
+		case R_END_BRTAB:
 		  reloc_offset = bfd_reloc->address;
 		  break;
 
@@ -2747,6 +2749,8 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 		case R_FSEL:
 		case R_LSEL:
 		case R_RSEL:
+		case R_BEGIN_BRTAB:
+		case R_END_BRTAB:
 		  bfd_put_8 (abfd, bfd_reloc->howto->type, p);
 		  subspace_reloc_size += 1;
 		  p += 1;
@@ -5952,6 +5956,7 @@ som_bfd_link_split_section (abfd, sec)
 #define som_truncate_arname		bfd_bsd_truncate_arname
 #define som_slurp_extended_name_table	_bfd_slurp_extended_name_table
 #define som_update_armap_timestamp	bfd_true
+#define som_bfd_print_private_bfd_data  _bfd_generic_bfd_print_private_bfd_data
 
 #define som_get_lineno                  _bfd_nosymbols_get_lineno
 #define som_bfd_make_debug_symbol	_bfd_nosymbols_bfd_make_debug_symbol
@@ -5982,7 +5987,6 @@ const bfd_target som_vec =
   0,
   '/',				/* ar_pad_char */
   14,				/* ar_max_namelen */
-  3,				/* minimum alignment */
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,
   bfd_getb32, bfd_getb_signed_32, bfd_putb32,
   bfd_getb16, bfd_getb_signed_16, bfd_putb16,	/* data */

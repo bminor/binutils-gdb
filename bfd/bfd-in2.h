@@ -2120,7 +2120,6 @@ typedef struct bfd_target
   char symbol_leading_char;
   char ar_pad_char;            
   unsigned short ar_max_namelen;
-  unsigned int align_power_min;
   bfd_vma      (*bfd_getx64) PARAMS ((const bfd_byte *));
   bfd_signed_vma (*bfd_getx_signed_64) PARAMS ((const bfd_byte *));
   void         (*bfd_putx64) PARAMS ((bfd_vma, bfd_byte *));

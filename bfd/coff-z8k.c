@@ -17,7 +17,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -27,6 +27,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "coff/z8k.h"
 #include "coff/internal.h"
 #include "libcoff.h"
+
+#define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (1)
 
 static reloc_howto_type r_imm32 =
 HOWTO (R_IMM32, 0, 1, 32, false, 0,
@@ -136,7 +138,7 @@ reloc_processing (relent, reloc, symbols, abfd, section)
     }
   else
     {
-      relent->sym_ptr_ptr = &(bfd_abs_symbol);
+      relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
     }
 
 
@@ -250,7 +252,6 @@ const bfd_target z8kcoff_vec =
   '_',				/* leading symbol underscore */
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
-  1,				/* minimum section alignment */
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,
      bfd_getb32, bfd_getb_signed_32, bfd_putb32,
      bfd_getb16, bfd_getb_signed_16, bfd_putb16,	/* data */

@@ -265,6 +265,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	    (cache_ptr)->howto = aoutarm_std_reloc_howto + (dst)->r_type;
 
 #define coff_rtype_to_howto coff_arm_rtype_to_howto
+
 static reloc_howto_type *
 coff_arm_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
      bfd *abfd;
@@ -280,9 +281,7 @@ coff_arm_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
 
   if (rel->r_type == 11)
     {
-      /* Gross, where can I get this from ?? */
-      struct bfd_link_info *link_info = coff_data(sec->output_section->owner)->link_info;
-      *addendp -= link_info->pe_info->image_base.value;
+      *addendp -= pe_data(sec->output_section->owner)->pe_opthdr.ImageBase;
     }
   return howto;
 
@@ -409,6 +408,7 @@ arm_reloc_type_lookup(abfd,code)
 /* We use the special COFF backend linker.  */
 #define coff_relocate_section _bfd_coff_generic_relocate_section
 
+
 #include "coffcode.h"
 
 #ifdef TARGET_LITTLE_SYM
@@ -432,7 +432,6 @@ const bfd_target TARGET_LITTLE_SYM =
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
 
-  2,				/* minimum alignment power */
   bfd_getl64, bfd_getl_signed_64, bfd_putl64,
      bfd_getl32, bfd_getl_signed_32, bfd_putl32,
      bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* data */
@@ -483,7 +482,6 @@ const bfd_target TARGET_BIG_SYM =
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
 
-  2,				/* minimum alignment power */
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,
      bfd_getb32, bfd_getb_signed_32, bfd_putb32,
      bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* data */

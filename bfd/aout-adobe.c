@@ -502,7 +502,6 @@ const bfd_target a_out_adobe_vec =
   '_',				/*  symbol leading char */
   ' ',				/* ar_pad_char */
   16,				/* ar_max_namelen */
-  2,				/* minumum alignment power */
 
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,
      bfd_getb32, bfd_getb_signed_32, bfd_putb32,

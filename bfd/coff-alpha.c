@@ -17,7 +17,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -1166,7 +1166,7 @@ alpha_ecoff_get_relocated_section_contents (abfd, link_info, link_order,
 
 /* Get the howto structure for a generic reloc type.  */
 
-static CONST struct reloc_howto_struct *
+static reloc_howto_type *
 alpha_bfd_reloc_type_lookup (abfd, code)
      bfd *abfd;
      bfd_reloc_code_real_type code;
@@ -1230,7 +1230,7 @@ alpha_bfd_reloc_type_lookup (abfd, code)
       break;
 #endif
     default:
-      return (CONST struct reloc_howto_struct *) NULL;
+      return (reloc_howto_type *) NULL;
     }
 
   return &alpha_howto_table[alpha_type];
@@ -1253,7 +1253,8 @@ alpha_convert_external_reloc (output_bfd, info, input_bfd, ext_rel, h)
 
   BFD_ASSERT (info->relocateable);
 
-  if (h->root.type == bfd_link_hash_defined)
+  if (h->root.type == bfd_link_hash_defined
+      || h->root.type == bfd_link_hash_defweak)
     {
       asection *hsec;
       const char *name;
@@ -1636,7 +1637,8 @@ alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	      if (! info->relocateable)
 		{
-		  if (h->root.type == bfd_link_hash_defined)
+		  if (h->root.type == bfd_link_hash_defined
+		      || h->root.type == bfd_link_hash_defweak)
 		    addend = (h->root.u.def.value
 			      + h->root.u.def.section->output_section->vma
 			      + h->root.u.def.section->output_offset);
@@ -1656,6 +1658,7 @@ alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	      else
 		{
 		  if (h->root.type != bfd_link_hash_defined
+		      && h->root.type != bfd_link_hash_defweak
 		      && h->indx == -1)
 		    {
 		      /* This symbol is not being written out.  Pass
@@ -1785,6 +1788,7 @@ alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	      if (r_extern)
 		{
 		  if (h->root.type != bfd_link_hash_defined
+		      && h->root.type != bfd_link_hash_defweak
 		      && h->indx == -1)
 		    {
 		      /* This symbol is not being written out.  */
@@ -1833,7 +1837,8 @@ alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	      if (r_extern)
 		{
 		  /* This is a reloc against a symbol.  */
-		  if (h->root.type == bfd_link_hash_defined)
+		  if (h->root.type == bfd_link_hash_defined
+		      || h->root.type == bfd_link_hash_defweak)
 		    {
 		      asection *hsec;
 
@@ -1953,7 +1958,7 @@ static const struct ecoff_backend_data alpha_ecoff_backend_data =
     alpha_ecoff_mkobject_hook, _bfd_ecoff_styp_to_sec_flags,
     _bfd_ecoff_make_section_hook, _bfd_ecoff_set_alignment_hook,
     _bfd_ecoff_slurp_symbol_table,
-    NULL, NULL, NULL, NULL, NULL, NULL
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL
   },
   /* Supported architecture.  */
   bfd_arch_alpha,
@@ -2042,12 +2047,10 @@ const bfd_target ecoffalpha_little_vec =
    HAS_LINENO | HAS_DEBUG |
    HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
 
-  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* sect
-							    flags */
+  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_CODE | SEC_DATA),
   0,				/* leading underscore */
   ' ',				/* ar_pad_char */
   15,				/* ar_max_namelen */
-  4,				/* minimum alignment power */
   bfd_getl64, bfd_getl_signed_64, bfd_putl64,
      bfd_getl32, bfd_getl_signed_32, bfd_putl32,
      bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* data */

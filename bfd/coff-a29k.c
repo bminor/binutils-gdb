@@ -581,7 +581,6 @@ const bfd_target a29kcoff_big_vec =
   '_',				/* leading underscore */
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
-  2,				/* minimum section alignment */
   /* data */
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,
      bfd_getb32, bfd_getb_signed_32,   bfd_putb32,

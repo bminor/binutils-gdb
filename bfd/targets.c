@@ -197,10 +197,6 @@ The maximum number of characters in an archive header.
 
 .  unsigned short ar_max_namelen;
 
-The minimum alignment restriction for any section.
-
-.  unsigned int align_power_min;
-
 Entries for byte swapping for data. These are different from the other
 entry points, since they don't take a BFD asthe first argument.
 Certain other handlers could do the same.

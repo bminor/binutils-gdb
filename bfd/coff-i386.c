@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -43,6 +43,7 @@ static reloc_howto_type *coff_i386_rtype_to_howto
 
 #define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (2)
 /* The page size is a guess based on ELF.  */
+
 #define COFF_PAGE_SIZE 0x1000
 
 /* For some reason when using i386 COFF the value stored in the .text
@@ -70,6 +71,7 @@ coff_i386_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
   if (output_bfd == (bfd *) NULL)
     return bfd_reloc_continue;
 
+
   if (bfd_is_com_section (symbol->section))
     {
       /* We are relocating a common symbol.  The current value in the
@@ -94,44 +96,53 @@ coff_i386_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
       diff = reloc_entry->addend;
     }
 
+
+#ifdef COFF_WITH_PE
+  if (reloc_entry->howto->type == 7)
+    {
+/*      diff -= coff_data(output_bfd)->link_info->pe_info.image_base.value;*/
+      exit(1);
+    }
+#endif
+
 #define DOIT(x) \
   x = ((x & ~howto->dst_mask) | (((x & howto->src_mask) + diff) & howto->dst_mask))
 
-  if (diff != 0)
-    {
-      reloc_howto_type *howto = reloc_entry->howto;
-      unsigned char *addr = (unsigned char *) data + reloc_entry->address;
+    if (diff != 0)
+      {
+	reloc_howto_type *howto = reloc_entry->howto;
+	unsigned char *addr = (unsigned char *) data + reloc_entry->address;
 
-      switch (howto->size)
-	{
-	case 0:
+	switch (howto->size)
 	  {
-	    char x = bfd_get_8 (abfd, addr);
-	    DOIT (x);
-	    bfd_put_8 (abfd, x, addr);
-	  }
-	  break;
+	  case 0:
+	    {
+	      char x = bfd_get_8 (abfd, addr);
+	      DOIT (x);
+	      bfd_put_8 (abfd, x, addr);
+	    }
+	    break;
 
-	case 1:
-	  {
-	    short x = bfd_get_16 (abfd, addr);
-	    DOIT (x);
-	    bfd_put_16 (abfd, x, addr);
-	  }
-	  break;
+	  case 1:
+	    {
+	      short x = bfd_get_16 (abfd, addr);
+	      DOIT (x);
+	      bfd_put_16 (abfd, x, addr);
+	    }
+	    break;
 
-	case 2:
-	  {
-	    long x = bfd_get_32 (abfd, addr);
-	    DOIT (x);
-	    bfd_put_32 (abfd, x, addr);
-	  }
-	  break;
+	  case 2:
+	    {
+	      long x = bfd_get_32 (abfd, addr);
+	      DOIT (x);
+	      bfd_put_32 (abfd, x, addr);
+	    }
+	    break;
 
-	default:
-	  abort ();
-	}
-    }
+	  default:
+	    abort ();
+	  }
+      }
 
   /* Now let bfd_perform_relocation finish everything up.  */
   return bfd_reloc_continue;
@@ -165,7 +176,7 @@ static reloc_howto_type howto_table[] =
 	 0xffffffff,            /* dst_mask */                             
 	 true),                /* pcrel_offset */
   /* {7}, */
-  HOWTO (7,               /* type */                                 
+  HOWTO (R_IMAGEBASE,            /* type */                                 
 	 0,	                /* rightshift */                           
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */ 
 	 32,	                /* bitsize */                   
@@ -173,7 +184,7 @@ static reloc_howto_type howto_table[] =
 	 0,	                /* bitpos */                               
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 coff_i386_reloc,       /* special_function */                     
-	 "dir32",               /* name */                                 
+	 "rva32",	           /* name */                                 
 	 true,	                /* partial_inplace */                      
 	 0xffffffff,            /* src_mask */                             
 	 0xffffffff,            /* dst_mask */                             
@@ -353,12 +364,12 @@ coff_i386_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
 
 
 #ifndef COFF_WITH_PE
- /* I think we *do* want to bypass this.  If we don't, I have seen some data
-    parameters get the wrong relcation address.  If I link two versions
-    with and without this section bypassed and then do a binary comparison,
-    the addresses which are different can be looked up in the map.  The 
-    case in which this section has been bypassed has addresses which correspond
-    to values I can find in the map */
+      /* I think we *do* want to bypass this.  If we don't, I have seen some data
+	 parameters get the wrong relcation address.  If I link two versions
+	 with and without this section bypassed and then do a binary comparison,
+	 the addresses which are different can be looked up in the map.  The 
+	 case in which this section has been bypassed has addresses which correspond
+	 to values I can find in the map */
       *addendp -= sym->n_value;
 #endif
     }
@@ -372,7 +383,12 @@ coff_i386_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
 
 #ifdef COFF_WITH_PE
   if (howto->pc_relative)
-  *addendp -= 4;
+    *addendp -= 4;
+
+  if (rel->r_type == R_IMAGEBASE)
+    {
+      *addendp -= pe_data(sec->output_section->owner)->pe_opthdr.ImageBase;
+    }
 #endif
 
   return howto;
@@ -418,7 +434,6 @@ const bfd_target
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
 
-  2,				/* minimum alignment power */
   bfd_getl64, bfd_getl_signed_64, bfd_putl64,
      bfd_getl32, bfd_getl_signed_32, bfd_putl32,
      bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* data */

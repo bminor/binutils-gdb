@@ -1,7 +1,12 @@
+Tue Sep 19 17:02:26 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* targets.c (bfd_target): Remove unused align_power_min field.
+	* bfd-in2.h: Rebuild.
+	* All backends: Remove initialization of align_power_min.
+
 Tue Sep 19 14:02:21 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* peicode.h (coff_swap_scnhdr_out): Get sizes for BSS right.
-	(pr 8045)	
 
 Mon Sep 18 14:35:01 1995  Arne H. Juul  <arnej@pvv.unit.no>
 

@@ -17,7 +17,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -104,6 +104,7 @@ static void mips_relocate_hi PARAMS ((struct internal_reloc *refhi,
 static boolean mips_relocate_section PARAMS ((bfd *, struct bfd_link_info *,
 					      bfd *, asection *,
 					      bfd_byte *, PTR));
+static boolean mips_read_relocs PARAMS ((bfd *, asection *));
 static boolean mips_relax_section PARAMS ((bfd *, asection *,
 					   struct bfd_link_info *,
 					   boolean *));
@@ -1065,7 +1066,7 @@ mips_switch_reloc (abfd,
 
 /* Get the howto structure for a generic reloc type.  */
 
-static CONST struct reloc_howto_struct *
+static reloc_howto_type *
 mips_bfd_reloc_type_lookup (abfd, code)
      bfd *abfd;
      bfd_reloc_code_real_type code;
@@ -1109,7 +1110,7 @@ mips_bfd_reloc_type_lookup (abfd, code)
       mips_type = MIPS_R_SWITCH;
       break;
     default:
-      return (CONST struct reloc_howto_struct *) NULL;
+      return (reloc_howto_type *) NULL;
     }
 
   return &mips_howto_table[mips_type];
@@ -1372,16 +1373,17 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
 	      addend = ecoff_data (input_bfd)->gp - gp;
 	    }
 	  else if (! info->relocateable
-		   || h->root.type == bfd_link_hash_defined)
+		   || h->root.type == bfd_link_hash_defined
+		   || h->root.type == bfd_link_hash_defweak)
 	    {
-	      /* This is a relocation against an undefined or common
-		 symbol.  The current addend in the instruction is
-		 simply the desired offset into the symbol (normally
-		 zero).  We are going to change this into a relocation
-		 against a defined symbol, so we want the instruction
-		 to hold the difference between the final definition
-		 of the symbol (which will end up in RELOCATION) and
-		 the GP value of OUTPUT_BFD (which is in GP).  */
+	      /* This is a relocation against a defined symbol.  The
+		 current addend in the instruction is simply the
+		 desired offset into the symbol (normally zero).  We
+		 are going to change this into a relocation against a
+		 defined symbol, so we want the instruction to hold
+		 the difference between the final definition of the
+		 symbol (which will end up in RELOCATION) and the GP
+		 value of OUTPUT_BFD (which is in GP).  */
 	      addend = - gp;
 	    }
 	  else
@@ -1422,8 +1424,8 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
 		      + int_rel.r_vaddr
 		      - input_section->vma);
 	      memmove (here + PCREL16_EXPANSION_ADJUSTMENT, here,
-		       (input_section->_raw_size
-			- (int_rel.r_vaddr - input_section->vma)));
+		       (size_t) (input_section->_raw_size
+				 - (int_rel.r_vaddr - input_section->vma)));
 		       
 	      /* Generate the new instructions.  */
 	      if (! mips_relax_pcrel16 (info, input_bfd, input_section,
@@ -1487,7 +1489,9 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
 	     the existing reloc.  */
 	  if (int_rel.r_extern)
 	    {
-	      if (h->root.type == bfd_link_hash_defined)
+	      if ((h->root.type == bfd_link_hash_defined
+		   || h->root.type == bfd_link_hash_defweak)
+		  && ! bfd_is_abs_section (h->root.u.def.section))
 		{
 		  const char *name;
 
@@ -1676,7 +1680,8 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
 	  if (int_rel.r_extern)
 	    {
 	      /* This is a reloc against a symbol.  */
-	      if (h->root.type == bfd_link_hash_defined)
+	      if (h->root.type == bfd_link_hash_defined
+		  || h->root.type == bfd_link_hash_defweak)
 		{
 		  asection *hsec;
 
@@ -1781,6 +1786,57 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
   return true;
 }
 
+/* Read in the relocs for a section.  */
+
+static boolean
+mips_read_relocs (abfd, sec)
+     bfd *abfd;
+     asection *sec;
+{
+  struct ecoff_section_tdata *section_tdata;
+
+  section_tdata = ecoff_section_data (abfd, sec);
+  if (section_tdata == (struct ecoff_section_tdata *) NULL)
+    {
+      sec->used_by_bfd =
+	(PTR) bfd_alloc_by_size_t (abfd, sizeof (struct ecoff_section_tdata));
+      if (sec->used_by_bfd == NULL)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  return false;
+	}
+
+      section_tdata = ecoff_section_data (abfd, sec);
+      section_tdata->external_relocs = NULL;
+      section_tdata->contents = NULL;
+      section_tdata->offsets = NULL;
+    }
+
+  if (section_tdata->external_relocs == NULL)
+    {
+      bfd_size_type external_relocs_size;
+
+      external_relocs_size = (ecoff_backend (abfd)->external_reloc_size
+			      * sec->reloc_count);
+
+      section_tdata->external_relocs =
+	(PTR) bfd_alloc (abfd, external_relocs_size);
+      if (section_tdata->external_relocs == NULL && external_relocs_size != 0)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  return false;
+	}
+
+      if (bfd_seek (abfd, sec->rel_filepos, SEEK_SET) != 0
+	  || (bfd_read (section_tdata->external_relocs, 1,
+			external_relocs_size, abfd)
+	      != external_relocs_size))
+	return false;
+    }
+
+  return true;
+}
+
 /* Relax a section when linking a MIPS ECOFF file.  This is used for
    embedded PIC code, which always uses PC relative branches which
    only have an 18 bit range on MIPS.  If a branch is not in range, we
@@ -1838,40 +1894,16 @@ mips_relax_section (abfd, sec, info, again)
 
   /* Read in the relocs, if we haven't already got them.  */
   section_tdata = ecoff_section_data (abfd, sec);
-  if (section_tdata == (struct ecoff_section_tdata *) NULL)
+  if (section_tdata == (struct ecoff_section_tdata *) NULL
+      || section_tdata->external_relocs == NULL)
     {
-      bfd_size_type external_reloc_size;
-      bfd_size_type external_relocs_size;
-
-      sec->used_by_bfd =
-	(PTR) bfd_alloc_by_size_t (abfd, sizeof (struct ecoff_section_tdata));
-      if (sec->used_by_bfd == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  goto error_return;
-	}
-
-      section_tdata = ecoff_section_data (abfd, sec);
-      section_tdata->contents = NULL;
-      section_tdata->offsets = NULL;
-
-      external_reloc_size = ecoff_backend (abfd)->external_reloc_size;
-      external_relocs_size = external_reloc_size * sec->reloc_count;
-
-      section_tdata->external_relocs =
-	(PTR) bfd_alloc (abfd, external_relocs_size);
-      if (section_tdata->external_relocs == NULL && external_relocs_size != 0)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  goto error_return;
-	}
-
-      if (bfd_seek (abfd, sec->rel_filepos, SEEK_SET) != 0
-	  || (bfd_read (section_tdata->external_relocs, 1,
-			external_relocs_size, abfd)
-	      != external_relocs_size))
+      if (! mips_read_relocs (abfd, sec))
 	goto error_return;
+      section_tdata = ecoff_section_data (abfd, sec);
+    }
 
+  if (sec->_cooked_size == 0)
+    {
       /* We must initialize _cooked_size only the first time we are
 	 called.  */
       sec->_cooked_size = sec->_raw_size;
@@ -1927,7 +1959,8 @@ mips_relax_section (abfd, sec, info, again)
       if (h == (struct ecoff_link_hash_entry *) NULL)
 	abort ();
 
-      if (h->root.type != bfd_link_hash_defined)
+      if (h->root.type != bfd_link_hash_defined
+	  && h->root.type != bfd_link_hash_defweak)
 	{
 	  /* Just ignore undefined symbols.  These will presumably
 	     generate an error later in the link.  */
@@ -1972,7 +2005,7 @@ mips_relax_section (abfd, sec, info, again)
 	  if (info->keep_memory)
 	    contents = (bfd_byte *) bfd_alloc (abfd, sec->_raw_size);
 	  else
-	    contents = (bfd_byte *) malloc (sec->_raw_size);
+	    contents = (bfd_byte *) malloc ((size_t) sec->_raw_size);
 	  if (contents == (bfd_byte *) NULL)
 	    {
 	      bfd_set_error (bfd_error_no_memory);
@@ -2180,7 +2213,8 @@ mips_relax_section (abfd, sec, info, again)
 
 	  adj_h = *adj_h_ptr;
 	  if (adj_h != (struct ecoff_link_hash_entry *) NULL
-	      && adj_h->root.type == bfd_link_hash_defined
+	      && (adj_h->root.type == bfd_link_hash_defined
+		  || adj_h->root.type == bfd_link_hash_defweak)
 	      && adj_h->root.u.def.section == sec
 	      && adj_h->esym.asym.value > int_rel.r_vaddr)
 	    adj_h->root.u.def.value += PCREL16_EXPANSION_ADJUSTMENT;
@@ -2258,6 +2292,133 @@ mips_relax_pcrel16 (info, input_bfd, input_section, h, location, address)
 
   return true;
 }
+
+/* Given a .sdata section and a .rel.sdata in-memory section, store
+   relocation information into the .rel.sdata section which can be
+   used at runtime to relocate the section.  This is called by the
+   linker when the --embedded-relocs switch is used.  This is called
+   after the add_symbols entry point has been called for all the
+   objects, and before the final_link entry point is called.  This
+   function presumes that the object was compiled using
+   -membedded-pic.  */
+
+boolean
+bfd_mips_ecoff_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
+     bfd *abfd;
+     struct bfd_link_info *info;
+     asection *datasec;
+     asection *relsec;
+     char **errmsg;
+{
+  struct ecoff_link_hash_entry **sym_hashes;
+  struct ecoff_section_tdata *section_tdata;
+  struct external_reloc *ext_rel;
+  struct external_reloc *ext_rel_end;
+  bfd_byte *p;
+
+  BFD_ASSERT (! info->relocateable);
+
+  *errmsg = NULL;
+
+  if (datasec->reloc_count == 0)
+    return true;
+
+  sym_hashes = ecoff_data (abfd)->sym_hashes;
+
+  if (! mips_read_relocs (abfd, datasec))
+    return false;
+
+  relsec->contents = (bfd_byte *) bfd_alloc (abfd, datasec->reloc_count * 4);
+  if (relsec->contents == NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return false;
+    }
+
+  p = relsec->contents;
+
+  section_tdata = ecoff_section_data (abfd, datasec);
+  ext_rel = (struct external_reloc *) section_tdata->external_relocs;
+  ext_rel_end = ext_rel + datasec->reloc_count;
+  for (; ext_rel < ext_rel_end; ext_rel++, p += 4)
+    {
+      struct internal_reloc int_rel;
+      boolean text_relative;
+
+      mips_ecoff_swap_reloc_in (abfd, (PTR) ext_rel, &int_rel);
+
+      /* We are going to write a four byte word into the runtime reloc
+	 section.  The word will be the address in the data section
+	 which must be relocated.  This must be on a word boundary,
+	 which means the lower two bits must be zero.  We use the
+	 least significant bit to indicate how the value in the data
+	 section must be relocated.  A 0 means that the value is
+	 relative to the text section, while a 1 indicates that the
+	 value is relative to the data section.  Given that we are
+	 assuming the code was compiled using -membedded-pic, there
+	 should not be any other possibilities.  */
+
+      /* We can only relocate REFWORD relocs at run time.  */
+      if (int_rel.r_type != MIPS_R_REFWORD)
+	{
+	  *errmsg = "unsupported reloc type";
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
+	}
+
+      if (int_rel.r_extern)
+	{
+	  struct ecoff_link_hash_entry *h;
+
+	  h = sym_hashes[int_rel.r_symndx];
+	  /* If h is NULL, that means that there is a reloc against an
+	     external symbol which we thought was just a debugging
+	     symbol.  This should not happen.  */
+	  if (h == (struct ecoff_link_hash_entry *) NULL)
+	    abort ();
+	  if ((h->root.type == bfd_link_hash_defined
+	       || h->root.type == bfd_link_hash_defweak)
+	      && (h->root.u.def.section->flags & SEC_CODE) != 0)
+	    text_relative = true;
+	  else
+	    text_relative = false;
+	}
+      else
+	{
+	  switch (int_rel.r_symndx)
+	    {
+	    case RELOC_SECTION_TEXT:
+	      text_relative = true;
+	      break;
+	    case RELOC_SECTION_SDATA:
+	    case RELOC_SECTION_SBSS:
+	    case RELOC_SECTION_LIT8:
+	      text_relative = false;
+	      break;
+	    default:
+	      /* No other sections should appear in -membedded-pic
+                 code.  */
+	      *errmsg = "reloc against unsupported section";
+	      bfd_set_error (bfd_error_bad_value);
+	      return false;
+	    }
+	}
+
+      if ((int_rel.r_offset & 3) != 0)
+	{
+	  *errmsg = "reloc not properly aligned";
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
+	}
+
+      bfd_put_32 (abfd,
+		  (int_rel.r_vaddr - datasec->vma + datasec->output_offset
+		   + (text_relative ? 0 : 1)),
+		  p);
+    }
+
+  return true;
+}
 
 /* This is the ECOFF backend structure.  The backend field of the
    target vector points to this.  */
@@ -2282,7 +2443,7 @@ static const struct ecoff_backend_data mips_ecoff_backend_data =
     _bfd_ecoff_mkobject_hook, _bfd_ecoff_styp_to_sec_flags,
     _bfd_ecoff_make_section_hook, _bfd_ecoff_set_alignment_hook,
     _bfd_ecoff_slurp_symbol_table,
-    NULL, NULL, NULL, NULL, NULL, NULL
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL
   },
   /* Supported architecture.  */
   bfd_arch_mips,
@@ -2371,12 +2532,10 @@ const bfd_target ecoff_little_vec =
    HAS_LINENO | HAS_DEBUG |
    HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
 
-  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* sect
-							    flags */
+  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_CODE | SEC_DATA),
   0,				/* leading underscore */
   ' ',				/* ar_pad_char */
   15,				/* ar_max_namelen */
-  4,				/* minimum alignment power */
   bfd_getl64, bfd_getl_signed_64, bfd_putl64,
      bfd_getl32, bfd_getl_signed_32, bfd_putl32,
      bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* data */
@@ -2415,11 +2574,10 @@ const bfd_target ecoff_big_vec =
    HAS_LINENO | HAS_DEBUG |
    HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
 
-  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* sect flags */
+  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_CODE | SEC_DATA),
   0,				/* leading underscore */
   ' ',				/* ar_pad_char */
   15,				/* ar_max_namelen */
-  4,				/* minimum alignment power */
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,
      bfd_getb32, bfd_getb_signed_32, bfd_putb32,
      bfd_getb16, bfd_getb_signed_16, bfd_putb16,

@@ -1,5 +1,5 @@
 /* BFD back-end for OSF/1 core files.
-   Copyright 1993 Free Software Foundation, Inc.
+   Copyright 1993, 1994 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -15,13 +15,10 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* This file can only be compiled on systems which use OSF/1 style
-   core files.  In the config/XXXXXX.mh file for such a system add
-      HDEFINES=-DOSF_CORE
-      HDEPFILES=osf-core.o
-   */
+   core files.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -39,7 +36,7 @@ make_bfd_asection PARAMS ((bfd *, CONST char *, flagword, bfd_size_type,
 			   bfd_vma, file_ptr));
 static asymbol *
 osf_core_make_empty_symbol PARAMS ((bfd *));
-static bfd_target *
+static const bfd_target *
 osf_core_core_file_p PARAMS ((bfd *));
 static char *
 osf_core_core_file_failing_command PARAMS ((bfd *));
@@ -73,7 +70,7 @@ make_bfd_asection (abfd, name, flags, _raw_size, vma, filepos)
 {
   asection *asect;
 
-  asect = bfd_make_section (abfd, name);
+  asect = bfd_make_section_anyway (abfd, name);
   if (!asect)
     return NULL;
 
@@ -96,7 +93,7 @@ osf_core_make_empty_symbol (abfd)
   return new;
 }
 
-static bfd_target *
+static const bfd_target *
 osf_core_core_file_p (abfd)
      bfd *abfd;
 {
@@ -104,7 +101,6 @@ osf_core_core_file_p (abfd)
   int i;
   char *secname;
   struct core_filehdr core_header;
-  int dseccnt = 0;
 
   val = bfd_read ((PTR)&core_header, 1, sizeof core_header, abfd);
   if (val != sizeof core_header)
@@ -124,6 +120,7 @@ osf_core_core_file_p (abfd)
   for (i = 0; i < core_header.nscns; i++)
     {
       struct core_scnhdr core_scnhdr;
+      flagword flags;
 
       val = bfd_read ((PTR)&core_scnhdr, 1, sizeof core_scnhdr, abfd);
       if (val != sizeof core_scnhdr)
@@ -136,22 +133,16 @@ osf_core_core_file_p (abfd)
       switch (core_scnhdr.scntype)
 	{
 	case SCNRGN:
-	  /* OSF/1 has multiple data sections (data, bss and data/bss sections
-	     for shared libraries), but bfd doesn't permit data sections with
-	     the same name. Construct a unique section name.  */
-	  secname = bfd_alloc (abfd, 40);
-	  if (!secname)
-	    {
-	      bfd_set_error (bfd_error_no_memory);
-	      return NULL;
-	    }
-	  sprintf (secname, ".data%d", dseccnt++);
+	  secname = ".data";
+	  flags = SEC_ALLOC + SEC_LOAD + SEC_HAS_CONTENTS;
 	  break;
 	case SCNSTACK:
 	  secname = ".stack";
+	  flags = SEC_ALLOC + SEC_LOAD + SEC_HAS_CONTENTS;
 	  break;
 	case SCNREGS:
 	  secname = ".reg";
+	  flags = SEC_HAS_CONTENTS;
 	  break;
 	default:
 	  fprintf (stderr, "Unhandled OSF/1 core file section type %d\n",
@@ -159,8 +150,7 @@ osf_core_core_file_p (abfd)
 	  continue;
 	}
 
-      if (!make_bfd_asection (abfd, secname,
-			      SEC_ALLOC+SEC_LOAD+SEC_HAS_CONTENTS,
+      if (!make_bfd_asection (abfd, secname, flags,
 			      (bfd_size_type) core_scnhdr.size,
 			      (bfd_vma) core_scnhdr.vaddr,
 			      (file_ptr) core_scnhdr.scnptr))
@@ -203,6 +193,8 @@ osf_core_core_file_matches_executable_p (core_bfd, exec_bfd)
 #define osf_core_get_lineno _bfd_nosymbols_get_lineno
 #define osf_core_find_nearest_line _bfd_nosymbols_find_nearest_line
 #define osf_core_bfd_make_debug_symbol _bfd_nosymbols_bfd_make_debug_symbol
+#define osf_core_read_minisymbols _bfd_nosymbols_read_minisymbols
+#define osf_core_minisymbol_to_symbol _bfd_nosymbols_minisymbol_to_symbol
 
 /* If somebody calls any byte-swapping routines, shoot them.  */
 static void
@@ -215,7 +207,7 @@ swap_abort()
 #define	NO_SIGNED_GET \
   ((bfd_signed_vma (*) PARAMS ((const bfd_byte *))) swap_abort )
 
-bfd_target osf_core_vec =
+const bfd_target osf_core_vec =
   {
     "osf-core",
     bfd_target_unknown_flavour,
@@ -228,7 +220,6 @@ bfd_target osf_core_vec =
     0,			                                   /* symbol prefix */
     ' ',						   /* ar_pad_char */
     16,							   /* ar_max_namelen */
-    3,							   /* minimum alignment power */
     NO_GET, NO_SIGNED_GET, NO_PUT,	/* 64 bit data */
     NO_GET, NO_SIGNED_GET, NO_PUT,	/* 32 bit data */
     NO_GET, NO_SIGNED_GET, NO_PUT,	/* 16 bit data */
@@ -259,6 +250,7 @@ bfd_target osf_core_vec =
        BFD_JUMP_TABLE_RELOCS (_bfd_norelocs),
        BFD_JUMP_TABLE_WRITE (_bfd_generic),
        BFD_JUMP_TABLE_LINK (_bfd_nolink),
+       BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
     (PTR) 0			/* backend_data */
 };
