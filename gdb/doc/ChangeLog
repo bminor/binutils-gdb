@@ -1,3 +1,10 @@
+2004-01-19  Nick Roberts  <nick@nick.uklinux.net>
+
+	* gdb.texinfo (GDB/MI Stack Manipulation): Describe extension to
+	-stack-list-locals.
+	(GDB/MI Variable Objects): Describe extension to
+	-var-list-children.
+
 2004-01-17  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdbint.texinfo (DECR_PC_AFTER_HW_BREAK): Don't document.

@@ -1,3 +1,10 @@
+2004-01-20  Nick Roberts  <nick@nick.uklinux.net>
+
+	* gdb.mi/mi-stack.exp (test_stack_locals_listing): Test for
+	case "-stack-list-locals 2".
+	* gdb.mi/mi-var-child.exp: Test for case
+	"-var-list-children --all-values NAME".
+
 2004-01-18  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.cp/local.exp: Accept correct output for gcc v3 -gstabs+.
