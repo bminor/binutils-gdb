@@ -8657,6 +8657,7 @@ typedef struct Frame_Chunk
   int cfa_offset;
   int ra;
   unsigned char fde_encoding;
+  unsigned char cfa_exp;
 }
 Frame_Chunk;
 
@@ -8723,7 +8724,10 @@ frame_display_row (fc, need_col_headers, max_regs)
     }
 
   printf ("%08lx ", fc->pc_begin);
-  sprintf (tmp, "r%d%+d", fc->cfa_reg, fc->cfa_offset);
+  if (fc->cfa_exp)
+    strcpy (tmp, "exp");
+  else
+    sprintf (tmp, "r%d%+d", fc->cfa_reg, fc->cfa_offset);
   printf ("%-8s ", tmp);
 
   for (r = 0; r < fc->ncols; r++)
@@ -8743,6 +8747,9 @@ frame_display_row (fc, need_col_headers, max_regs)
 	      break;
 	    case DW_CFA_register:
 	      sprintf (tmp, "r%d", fc->col_offset[r]);
+	      break;
+	    case DW_CFA_expression:
+	      strcpy (tmp, "exp");
 	      break;
 	    default:
 	      strcpy (tmp, "n/a");
@@ -9014,7 +9021,7 @@ display_debug_frames (section, start, file)
 	  while (start < block_end)
 	    {
 	      unsigned op, opa;
-	      unsigned long reg;
+	      unsigned long reg, tmp;
 
 	      op = *start++;
 	      opa = op & 0x3f;
@@ -9082,6 +9089,17 @@ display_debug_frames (section, start, file)
 		case DW_CFA_def_cfa_offset:
 		  LEB ();
 		  break;
+		case DW_CFA_def_cfa_expression:
+		  tmp = LEB ();
+		  start += tmp;
+		  break;
+		case DW_CFA_expression:
+		  reg = LEB ();
+		  tmp = LEB ();
+		  start += tmp;
+		  frame_need_space (fc, reg);
+		  fc->col_type[reg] = DW_CFA_undefined;
+		  break;
 		case DW_CFA_offset_extended_sf:
 		  reg = LEB (); SLEB ();
 		  frame_need_space (fc, reg);
@@ -9092,6 +9110,9 @@ display_debug_frames (section, start, file)
 		  break;
 		case DW_CFA_def_cfa_offset_sf:
 		  SLEB ();
+		  break;
+		case DW_CFA_MIPS_advance_loc8:
+		  start += 8;
 		  break;
 		case DW_CFA_GNU_args_size:
 		  LEB ();
@@ -9270,6 +9291,7 @@ display_debug_frames (section, start, file)
 	    case DW_CFA_def_cfa:
 	      fc->cfa_reg = LEB ();
 	      fc->cfa_offset = LEB ();
+	      fc->cfa_exp = 0;
 	      if (! do_debug_frames_interp)
 		printf ("  DW_CFA_def_cfa: r%d ofs %d\n",
 			fc->cfa_reg, fc->cfa_offset);
@@ -9277,6 +9299,7 @@ display_debug_frames (section, start, file)
 
 	    case DW_CFA_def_cfa_register:
 	      fc->cfa_reg = LEB ();
+	      fc->cfa_exp = 0;
 	      if (! do_debug_frames_interp)
 		printf ("  DW_CFA_def_cfa_reg: r%d\n", fc->cfa_reg);
 	      break;
@@ -9290,6 +9313,31 @@ display_debug_frames (section, start, file)
 	    case DW_CFA_nop:
 	      if (! do_debug_frames_interp)
 		printf ("  DW_CFA_nop\n");
+	      break;
+
+	    case DW_CFA_def_cfa_expression:
+	      ul = LEB ();
+	      if (! do_debug_frames_interp)
+		{
+		  printf ("  DW_CFA_def_cfa_expression (");
+		  decode_location_expression (start, addr_size, ul);
+		  printf (")\n");
+		}
+	      fc->cfa_exp = 1;
+	      start += ul;
+	      break;
+
+	    case DW_CFA_expression:
+	      reg = LEB ();
+	      ul = LEB ();
+	      if (! do_debug_frames_interp)
+		{
+		  printf ("  DW_CFA_expression: r%ld (", reg);
+		  decode_location_expression (start, addr_size, ul);
+		  printf (")\n");
+		}
+	      fc->col_type[reg] = DW_CFA_expression;
+	      start += ul;
 	      break;
 
 	    case DW_CFA_offset_extended_sf:
@@ -9306,6 +9354,7 @@ display_debug_frames (section, start, file)
 	    case DW_CFA_def_cfa_sf:
 	      fc->cfa_reg = LEB ();
 	      fc->cfa_offset = SLEB ();
+	      fc->cfa_exp = 0;
 	      if (! do_debug_frames_interp)
 		printf ("  DW_CFA_def_cfa_sf: r%d ofs %d\n",
 			fc->cfa_reg, fc->cfa_offset);
@@ -9315,6 +9364,17 @@ display_debug_frames (section, start, file)
 	      fc->cfa_offset = SLEB ();
 	      if (! do_debug_frames_interp)
 		printf ("  DW_CFA_def_cfa_offset_sf: %d\n", fc->cfa_offset);
+	      break;
+
+	    case DW_CFA_MIPS_advance_loc8:
+	      ofs = byte_get (start, 8); start += 8;
+	      if (do_debug_frames_interp)
+		frame_display_row (fc, &need_col_headers, &max_regs);
+	      else
+		printf ("  DW_CFA_MIPS_advance_loc8: %ld to %08lx\n",
+			ofs * fc->code_factor,
+			fc->pc_begin + ofs * fc->code_factor);
+	      fc->pc_begin += ofs * fc->code_factor;
 	      break;
 
 	    case DW_CFA_GNU_window_save:
@@ -9337,17 +9397,6 @@ display_debug_frames (section, start, file)
 			reg, l * fc->data_factor);
 	      fc->col_type[reg] = DW_CFA_offset;
 	      fc->col_offset[reg] = l * fc->data_factor;
-	      break;
-
-	    /* FIXME: How do we handle these? */
-	    case DW_CFA_def_cfa_expression:
-	      fprintf (stderr, "unsupported DW_CFA_def_cfa_expression\n");
-	      start = block_end;
-	      break;
-
-	    case DW_CFA_expression:
-	      fprintf (stderr, "unsupported DW_CFA_expression\n");
-	      start = block_end;
 	      break;
 
 	    default:
