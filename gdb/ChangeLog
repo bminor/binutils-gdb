@@ -1,5 +1,9 @@
 2005-01-10  Andrew Cagney  <cagney@gnu.org>
 
+	* MAINTAINERS: List Andrew Cagney and Kevin Buettner as can commit
+	changes to PowerPC, and Andrew Cagney as lead PowerPC GNU/Linux
+	maintainer.
+
 	* MAINTAINERS: Hans-Peter Nilsson and Orjan Friberg can commit
 	changes to CRIS.
 
