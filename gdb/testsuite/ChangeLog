@@ -1,3 +1,8 @@
+2002-04-17  David S. Miller  <davem@redhat.com>
+
+	* gdb.asm/sparc64.inc: New file.
+	* gdb.asm/asm-source.exp: Handle sparc64-*-*.
+
 2002-04-19  Elena Zannoni  <ezannoni@redhat.com>
 
 	* gdb.asm/asm-source.exp: Don't use a symlink, just copy the
