@@ -64,11 +64,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "os9k.h"
 #include "stabsread.h"
 
-#if !defined (SEEK_SET)
-#define SEEK_SET 0
-#define SEEK_CUR 1
-#endif
-
 /* Each partial symbol table entry contains a pointer to private data for the
    read_symtab() function to use when expanding a partial symbol table entry
    to a full symbol table entry.

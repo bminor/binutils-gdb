@@ -50,11 +50,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "stabsread.h"
 #include "complaints.h"
 
-#if !defined (SEEK_SET)
-#define SEEK_SET 0
-#define SEEK_CUR 1
-#endif
-
 /* These are needed if the tm.h file does not contain the necessary
    mips specific definitions.  */
 

@@ -1,5 +1,9 @@
 Thu Oct 19 12:15:37 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
+	* defs.h (SEEK_SET, SEEK_CUR): Add default definitions.
+	* dbxread.c, mdebugread.c, os9kread.c (SEEK_SET, SEEK_CUR):
+	Remove default definitions.
+
 	* Makefile.in (CC-LD): Rename to CC_LD, so MPW xform works.
 	(MMALLOC_SRC): Define.
 	(MMALLOC_CFLAGS): Use.
@@ -33,6 +37,17 @@ Tue Oct 17 08:04:26 1995  Fred Fish  <fnf@rtl.cygnus.com>
 
 	* NEWS: Fix typo.
 
+start-sanitize-sh3e
+Mon Oct 16 18:24:03 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
+
+	* config/sh/tm-sh.h (REGISTER_VIRTUAL_TYPE): Return builtin_type_float
+	for FP registers.
+	(REGISTER_NAMES): Add FP register names.  Remove ticks, stalls, cycles,
+	insts, plr, and tlr.
+	(NUM_REGS, NUM_REALREGS): Increase from 23 to 41.
+	(FPUL_REGNUM, FP0_REGNUM): New macros.
+
+end-sanitize-sh3e
 Mon Oct 16 11:27:06 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* remote-mips.c:  Add support for speedy (about 10x faster)
