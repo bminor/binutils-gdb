@@ -1,3 +1,167 @@
+2002-02-08  Alexandre Oliva  <aoliva@redhat.com>
+
+	Contribute sh64-elf.
+	2002-02-02  Alexandre Oliva  <aoliva@redhat.com>
+	* ld-sh/sh64/crange3-cmpct.rd: Adjust offsets.
+	* ld-sh/sh64/crange3-media.rd: Likewise.
+	* ld-sh/sh64/crange3.rd: Likewise.
+	* ld-sh/sh64/crangerel1.rd: Likewise.
+	* ld-sh/sh64/crangerel2.rd: Likewise.
+	* ld-sh/sh64/reldl32.rd: Likewise.
+	* ld-sh/sh64/reldl64.rd: Likewise.
+	2002-01-28  Alexandre Oliva  <aoliva@redhat.com>
+	* ld-sh/sh64/abi32.xd: Formatting changes to match the current
+	output of objdump.
+	* ld-sh/sh64/cmpct1.xd: Likewise.
+	* ld-sh/sh64/crange1.rd: Likewise.
+	* ld-sh/sh64/crange2.rd: Likewise.
+	* ld-sh/sh64/crange3-cmpct.rd: Likewise.
+	* ld-sh/sh64/crange3-media.rd: Likewise.
+	* ld-sh/sh64/crange3.rd: Likewise.
+	* ld-sh/sh64/crangerel1.rd: Likewise.
+	* ld-sh/sh64/crangerel2.rd: Likewise.
+	* ld-sh/sh64/mix1.xd: Likewise.
+	* ld-sh/sh64/mix2.xd: Likewise.
+	* ld-sh/sh64/rel32.xd: Likewise.
+	* ld-sh/sh64/reldl32.rd: Likewise.
+	* ld-sh/sh64/reldl64.rd: Likewise.
+	* ld-sh/sh64/sh64.exp: Likewise.  Reordered cranges and stack
+	sessions, to match changes in the linker script.
+	2001-06-14  Alexandre Oliva  <aoliva@redhat.com>
+	* ld-sh/sh64/reldl32.rd, ld-sh/sh64/reldl64.rd: Adjust relocation
+	info to reflect renumbering of relocation types.
+	2001-03-14  DJ Delorie	<dj@redhat.com>
+	* ld-sh/sh64/endian.dbd: New file, endian tests.
+	* ld-sh/sh64/endian.dld: Ditto.
+	* ld-sh/sh64/endian.ld:	 Ditto.
+	* ld-sh/sh64/endian.s:	Ditto.
+	* ld-sh/sh64/endian.sbd:  Ditto.
+	* ld-sh/sh64/endian.sld:  Ditto.
+	* ld-sh/sh64/sh64.exp: Add above tests.	 Add -L option to ld.
+	2001-03-12  DJ Delorie	<dj@redhat.com>
+	* ld-sh/sh64/relax.exp: New file, test disabling relaxing.
+	* ld-sh/sh64/relax1.s: Ditto.
+	* ld-sh/sh64/relax2.s: Ditto.
+	* ld-sh/sh64/relax3.s: Ditto.
+	* ld-sh/sh64/relax4.s: Ditto.
+	* ld-sh/sh64/relfail.exp: New file, test for bogus relocs.
+	* ld-sh/sh64/relfail.s: Ditto.
+	2001-03-12  DJ Delorie	<dj@redhat.com>
+	* ld-sh/sh.exp: This test isn't appropriate for SH64 since it
+	uses SH32 assembler files.
+	2001-03-07  DJ Delorie	<dj@redhat.com>
+	* ld-selective/selective.exp: Pass "-e _start" for sh64 to
+	accomodate expected start symbol in test.
+	2001-03-06  DJ Delorie	<dj@redhat.com>
+	* ld-scripts/crossref.exp: Pass -mshelf32 to the linker for sh64,
+	to match what gcc passes to the linker by default.
+	* ld-selective/selective.exp: Ditto.
+	* ld-srec/srec.exp: Ditto, plus XFAIL for sh64.
+	* ld-undefined/undefined.exp: Add XFAIL for sh64 (it's dwarf2).
+	2001-03-06  DJ Delorie	<dj@redhat.com>
+	* ld-sh/sh64/abi32.xd (stack): Adjust for new default stack layout.
+	* ld-sh/sh64/abi64.xd (stack): Ditto.
+	* ld-sh/sh64/cmpct1.xd (stack): Ditto.
+	* ld-sh/sh64/crange1.rd (stack): Ditto.
+	* ld-sh/sh64/crange2.rd (stack): Ditto.
+	* ld-sh/sh64/crange3-cmpct.rd (stack): Ditto.
+	* ld-sh/sh64/crange3-media.rd (stack): Ditto.
+	* ld-sh/sh64/crange3.rd (stack): Ditto.
+	* ld-sh/sh64/mix1.xd (stack): Ditto.
+	* ld-sh/sh64/mix2.xd (stack): Ditto.
+	* ld-sh/sh64/shdl32.xd (stack): Ditto.
+	* ld-sh/sh64/shdl64.xd (stack): Ditto.
+	2001-01-14  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* ld-sh/sh64/mix1.xd: Add SORT_ENTRIES for .cranges section.
+	* ld-sh/sh64/mix2.xd: Ditto.
+	2001-01-08  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* ld-sh/sh64/abi32.xd: Adjust for bit 0 set on an entry address
+	being SHmedia.
+	* ld-sh/sh64/shdl64.xd: Ditto.
+	* ld-sh/sh64/shdl32.xd: Ditto.
+	* ld-sh/sh64/mix2.xd: Ditto.
+	* ld-sh/sh64/crange3-media.rd: Ditto.
+	* ld-sh/sh64/abi64.xd: Ditto.
+	2001-01-06  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* ld-sh/sh64/crange-2a.s (diversion2): New global symbol.
+	* ld-sh/sh64/crange1.rd: Adjust to presence of new symbol.
+	Adjust section type for .cranges; expect sorted contents.
+	* ld-sh/sh64/crange2.rd: Ditto.
+	* ld-sh/sh64/crange3.dd, ld-sh/sh64/crange3.rd: Ditto.
+	* ld-sh/sh64/crangerel1.rd: Adjust to presence of new symbol.
+	* ld-sh/sh64/crangerel2.rd: Ditto.
+	* ld-sh/sh64/mix1.xd: Adjust to DEBUGGING being set for .cranges.
+	* ld-sh/sh64/mix2.xd: Ditto.
+	* ld-sh/sh64/crange3-cmpct.rd, ld-sh/sh64/crange3-media.rd: New
+	tests.
+	* ld-sh/sh64/sh64.exp: Tweak test message.  Run new tests.
+	2001-01-05  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* ld-sh/sh64/shmix-1.s (start2): Add a NOP to provide a valid
+	target for (unexpanded) PTB.  Add an .align 2 to SHmedia code to
+	keep properly aligned.
+	* ld-sh/sh64/mix1.sd, ld-sh/sh64/mix1.xd: Adjust accordingly.
+	* ld-sh/sh64/mix1-noexp.sd, ld-sh/sh64/mix2-noexp.sd,
+	ld-sh/sh64/abixx-noexp.sd: New tests for GAS -no-expand and
+	R_SH_PT_16 relocation.
+	* ld-sh/sh64/sh64.exp: Run new tests.
+	2000-12-30  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* ld-sh/sh64/crange-2f.s, ld-sh/sh64/crange-2g.s,
+	ld-sh/sh64/crange-2h.s, ld-sh/sh64/crange-2i.s,
+	ld-sh/sh64/crange3.dd, ld-sh/sh64/crange3.rd: New tests.
+	* ld-sh/sh64/sh64.exp: Run new tests.
+	* ld-sh/sh64/crange1.rd: Correct section flags.
+	* ld-sh/sh64/crange2.rd: Ditto.
+	* ld-sh/sh64/crangerel1.rd: Ditto.
+	2000-12-18  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* ld-sh/sh64/crange-1.s, ld-sh/sh64/crange-2a.s,
+	ld-sh/sh64/crange-2b.s, ld-sh/sh64/crange-2c.s,
+	ld-sh/sh64/crange-2d.s, ld-sh/sh64/crange-2e.s,
+	ld-sh/sh64/crange1.rd, ld-sh/sh64/crange2.rd,
+	ld-sh/sh64/crangerel1.rd, ld-sh/sh64/crangerel2.rd: New tests for
+	handling .cranges section.
+	* ld-sh/sh64/sh64.exp: Run new tests.
+	* ld-sh/sh64/mix1.sd, ld-sh/sh64/mix1.xd, ld-sh/sh64/mix2.sd,
+	ld-sh/sh64/mix2.xd: Adjust for .cranges section.
+	2000-12-15  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* ld-sh/sh64/abi32.sd, ld-sh/sh64/abi32.xd, ld-sh/sh64/abi64.sd,
+	ld-sh/sh64/abi64.xd, ld-sh/sh64/cmpct1.xd, ld-sh/sh64/mix1.sd,
+	ld-sh/sh64/mix1.xd, ld-sh/sh64/mix2.sd, ld-sh/sh64/mix2.xd,
+	ld-sh/sh64/shdl32.xd, ld-sh/sh64/shdl64.xd: Adjust to .bss and
+	.data individually 8-byte aligned.
+	2000-12-09  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* ld-sh/sh64/rel-1.s, ld-sh/sh64/rel-2.s, ld-sh/sh64/rel32.xd,
+	ld-sh/sh64/rel64.xd, ld-sh/sh64/reldl-1.s, ld-sh/sh64/reldl-2.s,
+	ld-sh/sh64/reldl32.rd, ld-sh/sh64/reldl64.rd: New tests.
+	* ld-sh/sh64/sh64.exp: Make it possible to use readelf as
+	inspection tool.  Run new tests.
+	2000-12-07  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* ld-sh/sh64/abi64.sd, ld-sh/sh64/abi32.sd, ld-sh/sh64/mix1.sd,
+	ld-sh/sh64/mix2.sd: Correct offsets in PT/PTA/PTB expansions.
+	* ld-sh/sh64/shdl-1.s, ld-sh/sh64/shdl-2.s, ld-sh/sh64/shdl64.sd,
+	ld-sh/sh64/shdl64.xd, ld-sh/sh64/shdl32.xd: New tests.
+	* ld-sh/sh64/sh64.exp: Run new tests.
+	2000-12-01  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* ld-sh/sh64/cmpct1.sd, ld-sh/sh64/cmpct1.xd,
+	ld-sh/sh64/shcmp-1.s: New test.
+	* ld-sh/sh64/sh64.exp: Add new test to sh64tests.  Reformat.
+	2000-11-30  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* ld-sh/sh64/sh64.exp: Use linker option -mshelf64 for 64-bit ABI
+	test.
+	* ld-sh/sh64/abi64.xd: Tweak for 64-bit ELF.
+	2000-11-29  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* ld-sh/sh64/sh64.exp (sh64tests): Use linker option -mshelf32 for
+	tests.
+	2000-11-27  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* ld-sh/sh64/abi32.sd, ld-sh/sh64/abi64.sd: Correct MOVI
+	registers.
+	* ld-sh/sh64/mix1.sd, ld-sh/sh64/mix1.xd, ld-sh/sh64/shmix-1.s:
+	New test.
+	* ld-sh/sh64/mix2.sd, ld-sh/sh64/mix2.xd, ld-sh/sh64/shmix-2.s,
+	ld-sh/sh64/shmix-3.s: New test.
+	* ld-sh/sh64/sh64.exp: Add new tests to sh64tests.
+	2000-11-26  Hans-Peter Nilsson	<hpn@cygnus.com>
+	* ld-sh/sh64: New testsuite.
+
 2002-02-07  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-selective/keepdot.s: Remove section specifier.

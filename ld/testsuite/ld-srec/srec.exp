@@ -243,6 +243,14 @@ proc run_srec_test { test objs } {
 	set flags "$flags --defsym V_SPILL=0 --defsym V_FILL=0"
     }
 
+    if [istarget sh64*-*-elf] {
+        # This is what gcc passes to ld by default.
+        set flags "-mshelf32"
+        # SH64 targets cannot convert format in the linker 
+        # using the -oformat command line switch.
+	setup_xfail "sh64*-*-*"
+    }
+
     if {[istarget arm*-*-*]       || \
         [istarget strongarm*-*-*] || \
         [istarget xscale*-*-*]    || \

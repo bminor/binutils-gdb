@@ -56,6 +56,13 @@ set cflags "-w -O -ffunction-sections -fdata-sections"
 set cxxflags "-fvtable-gc -fno-exceptions -fno-rtti"
 set ldflags "--gc-sections -Bstatic"
 
+if [istarget sh64*-*-elf] {
+    # This is what gcc passes to ld by default, plus switch to the
+    # "usual" ELF _start (shelf32 normally uses just `start' for COFF
+    # compatibility)
+    set ldflags "-e _start -mshelf32 $ldflags"
+}
+
 # If we don't have g++ for the target, mark all tests as untested.
 if { [which $CXX] == 0 } {
     foreach testitem $seltests {

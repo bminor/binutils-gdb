@@ -134,6 +134,7 @@ setup_xfail i?86-*-freebsd*
 #setup_xfail thumb-*-elf
 setup_xfail mcore-*-elf
 setup_xfail mips-sgi-irix6*
+setup_xfail "sh64-*-*"
 
 # The undefined test fails on 31 bit s/390 because the address of the 
 # function `this_function_is_not_defined' is stored in the literal pool of
