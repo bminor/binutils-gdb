@@ -1,3 +1,7 @@
+Mon Mar 18 17:38:03 CET 2002  Jan Hubicka  <jh@suse.cz>
+
+	* cpu-i386.c (bfd_x86_64_arch): Rename to "i386:x86-64"
+
 2002-03-18  Tom Rix  <trix@redhat.com>
 
 	* aix5ppc.core.c : New file for AIX 5 64 bit core support.

@@ -1,3 +1,11 @@
+Mon Mar 18 17:38:39 CET 2002  Jan Hubicka  <jh@suse.cz>
+			      Andreas Jaeger  <aj@suse.de>
+			      Andreas Schwab  <schwab@suse.de>
+
+	* configure.tgt (x86_64-*-linux-gnu*): Configure i386 as native.
+	* elf_x86_64.sh (ARCH): Set to i386:x86-64
+	set libraries to default to lib64 paths.
+
 2002-03-18  Tom Rix  <trix@redhat.com>
 
 	* Makefile.am : Add eaix5ppc and eaix5rs6, AIX 5 support.
