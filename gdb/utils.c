@@ -1032,6 +1032,9 @@ prompt_for_continue ()
      from system to system, and because telling them what to do in
      the prompt is more user-friendly than expecting them to think of
      SIGINT.  */
+  /* Call readline, not gdb_readline, because GO32 readline handles control-C
+     whereas control-C to gdb_readline will cause the user to get dumped
+     out to DOS.  */
   ignore =
     readline ("---Type <return> to continue, or q <return> to quit---");
   if (ignore)
