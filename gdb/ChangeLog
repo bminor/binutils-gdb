@@ -1,3 +1,8 @@
+Mon Aug 19 00:41:04 1991  Michael Tiemann  (tiemann at cygint.cygnus.com)
+
+	* dbxread.c (read_struct_type): Grok anon structs for C++.
+	(vb_name, vptr_name): Null terminate these strings.
+
 Thu Aug 15 18:43:57 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	* main.c: Remove unused terminating_signals and catch_termination().
