@@ -9174,11 +9174,24 @@ _bfd_mips_elf_merge_private_bfd_data (ibfd, obfd)
 
   /* Check if we have the same endianess */
   if (! _bfd_generic_verify_endian_match (ibfd, obfd))
-    return FALSE;
+    {
+      (*_bfd_error_handler)
+	(_("%s: endianness incompatible with that of the selected emulation"),
+	 bfd_archive_filename (ibfd));
+      return FALSE;
+    }
 
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
     return TRUE;
+
+  if (strcmp (bfd_get_target (ibfd), bfd_get_target (obfd)) != 0)
+    {
+      (*_bfd_error_handler)
+	(_("%s: ABI is incompatible with that of the selected emulation"),
+	 bfd_archive_filename (ibfd));
+      return FALSE;
+    }
 
   new_flags = elf_elfheader (ibfd)->e_flags;
   elf_elfheader (obfd)->e_flags |= new_flags & EF_MIPS_NOREORDER;

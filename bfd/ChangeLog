@@ -1,3 +1,9 @@
+2003-05-06  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_merge_private_bfd_data): Improve
+	error message for mixing different-endian files.  Check for ABI
+	compatibility of input files with the selected emulation.
+
 2003-05-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-i386.c (allocate_dynrelocs): For undef weak syms with
