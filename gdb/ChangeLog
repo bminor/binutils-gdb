@@ -1,3 +1,8 @@
+2003-10-13  Kevin Buettner  <kevinb@redhat.com>
+
+ 	* gdbarch.sh (ADJUST_BREAKPOINT_ADDRESS): New method.
+ 	* gdbarch.h, gdbarch.c: Regenerate.
+
 2003-10-11  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386bsd-tdep.c (i386bsd_init_abi): Use ARRAY_SIZE to initialize

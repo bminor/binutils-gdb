@@ -219,6 +219,7 @@ struct gdbarch
   gdbarch_prologue_frameless_p_ftype *prologue_frameless_p;
   gdbarch_inner_than_ftype *inner_than;
   gdbarch_breakpoint_from_pc_ftype *breakpoint_from_pc;
+  gdbarch_adjust_breakpoint_address_ftype *adjust_breakpoint_address;
   gdbarch_memory_insert_breakpoint_ftype *memory_insert_breakpoint;
   gdbarch_memory_remove_breakpoint_ftype *memory_remove_breakpoint;
   CORE_ADDR decr_pc_after_break;
@@ -389,6 +390,7 @@ struct gdbarch startup_gdbarch =
   0,  /* prologue_frameless_p */
   0,  /* inner_than */
   0,  /* breakpoint_from_pc */
+  0,  /* adjust_breakpoint_address */
   0,  /* memory_insert_breakpoint */
   0,  /* memory_remove_breakpoint */
   0,  /* decr_pc_after_break */
@@ -710,6 +712,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->breakpoint_from_pc == 0))
     fprintf_unfiltered (log, "\n\tbreakpoint_from_pc");
+  /* Skip verify of adjust_breakpoint_address, has predicate */
   /* Skip verify of memory_insert_breakpoint, invalid_p == 0 */
   /* Skip verify of memory_remove_breakpoint, invalid_p == 0 */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
@@ -876,6 +879,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       (long) current_gdbarch->addr_bits_remove
                       /*ADDR_BITS_REMOVE ()*/);
 #endif
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_adjust_breakpoint_address_p() = %d\n",
+                      gdbarch_adjust_breakpoint_address_p (current_gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: adjust_breakpoint_address = 0x%08lx\n",
+                      (long) current_gdbarch->adjust_breakpoint_address);
 #ifdef BELIEVE_PCC_PROMOTION
   fprintf_unfiltered (file,
                       "gdbarch_dump: BELIEVE_PCC_PROMOTION # %s\n",
@@ -4532,6 +4541,30 @@ set_gdbarch_breakpoint_from_pc (struct gdbarch *gdbarch,
                                 gdbarch_breakpoint_from_pc_ftype breakpoint_from_pc)
 {
   gdbarch->breakpoint_from_pc = breakpoint_from_pc;
+}
+
+int
+gdbarch_adjust_breakpoint_address_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->adjust_breakpoint_address != NULL;
+}
+
+CORE_ADDR
+gdbarch_adjust_breakpoint_address (struct gdbarch *gdbarch, CORE_ADDR bpaddr)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->adjust_breakpoint_address != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_adjust_breakpoint_address called\n");
+  return gdbarch->adjust_breakpoint_address (gdbarch, bpaddr);
+}
+
+void
+set_gdbarch_adjust_breakpoint_address (struct gdbarch *gdbarch,
+                                       gdbarch_adjust_breakpoint_address_ftype adjust_breakpoint_address)
+{
+  gdbarch->adjust_breakpoint_address = adjust_breakpoint_address;
 }
 
 int
