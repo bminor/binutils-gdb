@@ -1,3 +1,14 @@
+2001-05-09  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_register_virtual_type): New function.
+	(i386_register_convertible): New function.
+	* config/i386/tm-i386.h (REGISTER_VIRTUAL_TYPE): Redefine in terms
+	of i386_register_virtual_type.
+	(REGISTER_CONVERTIBLE): Redefine in terms of
+	i386_register_convertible.
+	(i386_register_virtual_type, i386_register_convertible): New
+	prototypes.
+
 2001-05-08  Jim Blandy  <jimb@redhat.com>
 
 	* Makefile.in (mn10300-tdep.o): New rule.

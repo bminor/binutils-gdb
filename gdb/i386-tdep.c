@@ -905,6 +905,37 @@ i386_extract_struct_value_address (char *regbuf)
 }
 
 
+/* Return the GDB type object for the "standard" data type of data in
+   register REGNUM.  Perhaps %esi and %edi should go here, but
+   potentially they could be used for things other than address.  */
+
+struct type *
+i386_register_virtual_type (int regnum)
+{
+  if (regnum == PC_REGNUM || regnum == FP_REGNUM || regnum == SP_REGNUM)
+    return lookup_pointer_type (builtin_type_void);
+
+  if (IS_FP_REGNUM (regnum))
+    return builtin_type_long_double;
+
+  if (IS_SSE_REGNUM (regnum))
+    return builtin_type_v4sf;
+
+  return builtin_type_int;
+}
+
+/* Return true iff register REGNUM's virtual format is different from
+   its raw format.  Note that this definition assumes that the host
+   supports IEEE 32-bit floats, since it doesn't say that SSE
+   registers need conversion.  Even if we can't find a counterexample,
+   this is still sloppy.  */
+
+int
+i386_register_convertible (int regnum)
+{
+  return IS_FP_REGNUM (regnum);
+}
+
 /* Convert data from raw format for register REGNUM in buffer FROM to
    virtual format with type TYPE in buffer TO.  In principle both
    formats are identical except that the virtual format has two extra

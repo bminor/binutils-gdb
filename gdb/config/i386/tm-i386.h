@@ -238,23 +238,17 @@ extern int i386_register_virtual_size[];
 /* Largest value REGISTER_VIRTUAL_SIZE can have.  */
 #define MAX_REGISTER_VIRTUAL_SIZE 16
 
-/* Return the GDB type object for the "standard" data type of data in 
-   register N.  Perhaps si and di should go here, but potentially they
-   could be used for things other than address.  */
+/* Return the GDB type object for the "standard" data type of data in
+   register REGNUM.  */
 
-#define REGISTER_VIRTUAL_TYPE(N)				\
-  (((N) == PC_REGNUM || (N) == FP_REGNUM || (N) == SP_REGNUM)	\
-   ? lookup_pointer_type (builtin_type_void)			\
-   : IS_FP_REGNUM(N) ? builtin_type_long_double			\
-   : IS_SSE_REGNUM(N) ? builtin_type_v4sf			\
-   : builtin_type_int)
+#define REGISTER_VIRTUAL_TYPE(regnum) i386_register_virtual_type (regnum)
+extern struct type *i386_register_virtual_type (int regnum);
 
-/* REGISTER_CONVERTIBLE(N) is true iff register N's virtual format is
-   different from its raw format.  Note that this definition assumes
-   that the host supports IEEE 32-bit floats, since it doesn't say
-   that SSE registers need conversion.  Even if we can't find a
-   counterexample, this is still sloppy.  */
-#define REGISTER_CONVERTIBLE(n) (IS_FP_REGNUM (n))
+/* Return true iff register REGNUM's virtual format is different from
+   its raw format.  */
+
+#define REGISTER_CONVERTIBLE(regnum) i386_register_convertible (regnum)
+extern int i386_register_convertible (int regnum);
 
 /* Convert data from raw format for register REGNUM in buffer FROM to
    virtual format with type TYPE in buffer TO.  */
