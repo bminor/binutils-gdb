@@ -714,8 +714,7 @@ dwarf2_frame_cache (struct frame_info *next_frame, void **this_cache)
 }
 
 static void
-dwarf2_frame_this_id (const struct frame_unwind *self,
-		      struct frame_info *next_frame, void **this_cache,
+dwarf2_frame_this_id (struct frame_info *next_frame, void **this_cache,
 		      struct frame_id *this_id)
 {
   struct dwarf2_frame_cache *cache =
@@ -725,8 +724,7 @@ dwarf2_frame_this_id (const struct frame_unwind *self,
 }
 
 static void
-dwarf2_frame_prev_register (const struct frame_unwind *self,
-			    struct frame_info *next_frame, void **this_cache,
+dwarf2_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 			    int regnum, int *optimizedp,
 			    enum lval_type *lvalp, CORE_ADDR *addrp,
 			    int *realnump, void *valuep)
@@ -847,8 +845,7 @@ dwarf2_frame_sniffer (struct frame_info *next_frame)
    response to the "info frame" command.  */
 
 static CORE_ADDR
-dwarf2_frame_base_address (const struct frame_base *self,
-			   struct frame_info *next_frame, void **this_cache)
+dwarf2_frame_base_address (struct frame_info *next_frame, void **this_cache)
 {
   struct dwarf2_frame_cache *cache =
     dwarf2_frame_cache (next_frame, this_cache);

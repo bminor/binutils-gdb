@@ -238,8 +238,7 @@ get_frame_id (struct frame_info *fi)
 	  fi->type = fi->unwind->type;
 	}
       /* Find THIS frame's ID.  */
-      fi->unwind->this_id (fi->unwind, fi->next, &fi->prologue_cache,
-			   &fi->this_id.value);
+      fi->unwind->this_id (fi->next, &fi->prologue_cache, &fi->this_id.value);
       fi->this_id.p = 1;
       if (frame_debug)
 	{
@@ -547,8 +546,7 @@ frame_register_unwind (struct frame_info *frame, int regnum,
   /* Ask this frame to unwind its register.  See comment in
      "frame-unwind.h" for why NEXT frame and this unwind cace are
      passed in.  */
-  frame->unwind->prev_register (frame->unwind, frame->next,
-				&frame->prologue_cache, regnum,
+  frame->unwind->prev_register (frame->next, &frame->prologue_cache, regnum,
 				optimizedp, lvalp, addrp, realnump, bufferp);
 
   if (frame_debug)
@@ -942,8 +940,7 @@ select_frame (struct frame_info *fi)
    most frame.  */
 
 static void
-legacy_saved_regs_prev_register (const struct frame_unwind *self,
-				 struct frame_info *next_frame,
+legacy_saved_regs_prev_register (struct frame_info *next_frame,
 				 void **this_prologue_cache,
 				 int regnum, int *optimizedp,
 				 enum lval_type *lvalp, CORE_ADDR *addrp,
@@ -1029,8 +1026,7 @@ legacy_saved_regs_prev_register (const struct frame_unwind *self,
 }
 
 static void
-legacy_saved_regs_this_id (const struct frame_unwind *self,
-			   struct frame_info *next_frame,
+legacy_saved_regs_this_id (struct frame_info *next_frame,
 			   void **this_prologue_cache,
 			   struct frame_id *id)
 {
@@ -1500,7 +1496,7 @@ legacy_get_prev_frame (struct frame_info *this_frame)
              to the new frame code.  Implement FRAME_CHAIN the way the
              new frame will.  */
 	  /* Find PREV frame's unwinder.  */
-	  prev->unwind = frame_unwind_find_by_frame (this_frame->next,
+	  prev->unwind = frame_unwind_find_by_frame (this_frame,
 						     &prev->prologue_cache);
 	  /* FIXME: cagney/2003-04-02: Rather than storing the frame's
 	     type in the frame, the unwinder's type should be returned
@@ -1509,7 +1505,7 @@ legacy_get_prev_frame (struct frame_info *this_frame)
 	     using the method deprecated_set_frame_type().  */
 	  prev->type = prev->unwind->type;
 	  /* Find PREV frame's ID.  */
-	  prev->unwind->this_id (prev->unwind, this_frame,
+	  prev->unwind->this_id (this_frame,
 				 &prev->prologue_cache,
 				 &prev->this_id.value);
 	  prev->this_id.p = 1;
@@ -2060,12 +2056,13 @@ get_frame_base_address (struct frame_info *fi)
   if (get_frame_type (fi) != NORMAL_FRAME)
     return 0;
   if (fi->base == NULL)
-    fi->base = frame_base_find_by_frame (fi->next);
+    fi->base = frame_base_find_by_frame (fi->next, &fi->base_cache,
+					 fi->unwind, &fi->prologue_cache);
   /* Sneaky: If the low-level unwind and high-level base code share a
      common unwinder, let them share the prologue cache.  */
   if (fi->base->unwind == fi->unwind)
-    return fi->base->this_base (fi->base, fi->next, &fi->prologue_cache);
-  return fi->base->this_base (fi->base, fi->next, &fi->base_cache);
+    return fi->base->this_base (fi->next, &fi->prologue_cache);
+  return fi->base->this_base (fi->next, &fi->base_cache);
 }
 
 CORE_ADDR
@@ -2076,14 +2073,15 @@ get_frame_locals_address (struct frame_info *fi)
     return 0;
   /* If there isn't a frame address method, find it.  */
   if (fi->base == NULL)
-    fi->base = frame_base_find_by_frame (fi->next);
+    fi->base = frame_base_find_by_frame (fi->next, &fi->base_cache,
+					 fi->unwind, &fi->prologue_cache);
   /* Sneaky: If the low-level unwind and high-level base code share a
      common unwinder, let them share the prologue cache.  */
   if (fi->base->unwind == fi->unwind)
     cache = &fi->prologue_cache;
   else
     cache = &fi->base_cache;
-  return fi->base->this_locals (fi->base, fi->next, cache);
+  return fi->base->this_locals (fi->next, cache);
 }
 
 CORE_ADDR
@@ -2094,14 +2092,15 @@ get_frame_args_address (struct frame_info *fi)
     return 0;
   /* If there isn't a frame address method, find it.  */
   if (fi->base == NULL)
-    fi->base = frame_base_find_by_frame (fi->next);
+    fi->base = frame_base_find_by_frame (fi->next, &fi->base_cache,
+					 fi->unwind, &fi->prologue_cache);
   /* Sneaky: If the low-level unwind and high-level base code share a
      common unwinder, let them share the prologue cache.  */
   if (fi->base->unwind == fi->unwind)
     cache = &fi->prologue_cache;
   else
     cache = &fi->base_cache;
-  return fi->base->this_args (fi->base, fi->next, cache);
+  return fi->base->this_args (fi->next, cache);
 }
 
 /* Level of the selected frame: 0 for innermost, 1 for its caller, ...
@@ -2133,7 +2132,7 @@ get_frame_type (struct frame_info *frame)
     {
       /* Initialize the frame's unwinder because it is that which
          provides the frame's type.  */
-      frame->unwind = frame_unwind_find_by_frame (frame->next,
+      frame->unwind = frame_unwind_find_by_frame (frame->next, 
 						  &frame->prologue_cache);
       /* FIXME: cagney/2003-04-02: Rather than storing the frame's
 	 type in the frame, the unwinder's type should be returned

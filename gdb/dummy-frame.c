@@ -32,8 +32,7 @@
 #include "command.h"
 #include "gdbcmd.h"
 
-static void dummy_frame_this_id (const struct frame_unwind *self,
-				 struct frame_info *next_frame,
+static void dummy_frame_this_id (struct frame_info *next_frame,
 				 void **this_prologue_cache,
 				 struct frame_id *this_id);
 
@@ -302,8 +301,7 @@ generic_pop_dummy_frame (void)
    register value is taken from the local copy of the register buffer.  */
 
 static void
-dummy_frame_prev_register (const struct frame_unwind *self,
-			   struct frame_info *next_frame,
+dummy_frame_prev_register (struct frame_info *next_frame,
 			   void **this_prologue_cache,
 			   int regnum, int *optimized,
 			   enum lval_type *lvalp, CORE_ADDR *addrp,
@@ -314,7 +312,7 @@ dummy_frame_prev_register (const struct frame_unwind *self,
 
   /* Call the ID method which, if at all possible, will set the
      prologue cache.  */
-  dummy_frame_this_id (self, next_frame, this_prologue_cache, &id);
+  dummy_frame_this_id (next_frame, this_prologue_cache, &id);
   dummy = (*this_prologue_cache);
   gdb_assert (dummy != NULL);
 
@@ -343,8 +341,7 @@ dummy_frame_prev_register (const struct frame_unwind *self,
    dummy cache is located and and saved in THIS_PROLOGUE_CACHE.  */
 
 static void
-dummy_frame_this_id (const struct frame_unwind *self,
-		     struct frame_info *next_frame,
+dummy_frame_this_id (struct frame_info *next_frame,
 		     void **this_prologue_cache,
 		     struct frame_id *this_id)
 {

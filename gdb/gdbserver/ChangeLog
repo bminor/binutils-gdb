@@ -1,3 +1,12 @@
+2004-03-12  Daniel Jacobowitz  <drow@mvista.com>
+
+	* linux-low.c: Include <errno.h>.  Remove extern declaration of
+	errno.
+
+2004-03-12  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdbreplay.c, server.h, utils.c: Update copyright years.
+
 2004-03-04  Nathan J. Williams  <nathanw@wasabisystems.com>
 
 	* server.c (main): Print child status or termination signal from

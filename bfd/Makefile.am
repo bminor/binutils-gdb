@@ -1160,7 +1160,7 @@ elf32-fr30.lo: elf32-fr30.c $(INCDIR)/filenames.h elf-bfd.h \
 elf32-frv.lo: elf32-frv.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/elf/frv.h $(INCDIR)/elf/reloc-macros.h \
-  elf32-target.h
+  $(INCDIR)/elf/dwarf2.h $(INCDIR)/hashtab.h elf32-target.h
 elf32-gen.lo: elf32-gen.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h elf32-target.h

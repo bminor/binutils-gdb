@@ -1147,12 +1147,13 @@ elf32_hppa_check_relocs (bfd *abfd,
 	    }
 	  break;
 
-	case R_PARISC_SEGBASE: /* Used to set segment base.  */
+	case R_PARISC_SEGBASE:  /* Used to set segment base.  */
 	case R_PARISC_SEGREL32: /* Relative reloc, used for unwind.  */
 	case R_PARISC_PCREL14F: /* PC relative load/store.  */
 	case R_PARISC_PCREL14R:
 	case R_PARISC_PCREL17R: /* External branches.  */
 	case R_PARISC_PCREL21L: /* As above, and for load/store too.  */
+	case R_PARISC_PCREL32:
 	  /* We don't need to propagate the relocation if linking a
 	     shared object since these are section relative.  */
 	  continue;
@@ -2792,8 +2793,7 @@ elf32_hppa_size_stubs
 			}
 		      else if (hash->elf.root.type == bfd_link_hash_undefined)
 			{
-			  if (! (info->shared
-				 && info->unresolved_syms_in_objects == RM_IGNORE
+			  if (! (info->unresolved_syms_in_objects == RM_IGNORE
 				 && (ELF_ST_VISIBILITY (hash->elf.other)
 				     == STV_DEFAULT)
 				 && hash->elf.type != STT_PARISC_MILLI))
@@ -3145,6 +3145,7 @@ final_link_relocate (asection *input_section,
     case R_PARISC_PCREL17R:
     case R_PARISC_PCREL14R:
     case R_PARISC_PCREL14F:
+    case R_PARISC_PCREL32:
       /* Make it a pc relative offset.  */
       value -= location;
       addend -= 8;
@@ -3238,6 +3239,7 @@ final_link_relocate (asection *input_section,
     case R_PARISC_DIR17F:
     case R_PARISC_PCREL17C:
     case R_PARISC_PCREL14F:
+    case R_PARISC_PCREL32:
     case R_PARISC_DPREL14F:
     case R_PARISC_PLABEL32:
     case R_PARISC_DLTIND14F:
@@ -3440,16 +3442,13 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 	      && hh->root.type != bfd_link_hash_defweak
 	      && hh->root.type != bfd_link_hash_undefweak)
 	    {
-	      if (!info->executable
-		  && info->unresolved_syms_in_objects == RM_IGNORE
+	      if (info->unresolved_syms_in_objects == RM_IGNORE
 		  && ELF_ST_VISIBILITY (hh->other) == STV_DEFAULT
 		  && hh->type == STT_PARISC_MILLI)
 		{
 		  if (! info->callbacks->undefined_symbol
 		      (info, hh->root.root.string, input_bfd,
-		       input_section, rel->r_offset,
-		       ((info->shared && info->unresolved_syms_in_shared_libs == RM_GENERATE_ERROR)
-			|| (!info->shared && info->unresolved_syms_in_objects == RM_GENERATE_ERROR))))
+		       input_section, rel->r_offset, FALSE))
 		    return FALSE;
 		  warned_undef = TRUE;
 		}

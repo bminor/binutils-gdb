@@ -116,8 +116,10 @@ WIN32LIBADD = @WIN32LIBADD@
 all_backends = @all_backends@
 bfd_backends = @bfd_backends@
 bfd_default_target_size = @bfd_default_target_size@
+bfd_file_ptr = @bfd_file_ptr@
 bfd_libs = @bfd_libs@
 bfd_machines = @bfd_machines@
+bfd_ufile_ptr = @bfd_ufile_ptr@
 bfd_version = @bfd_version@
 bfd_version_string = @bfd_version_string@
 l = @l@
@@ -941,7 +943,7 @@ libbfd.la: $(libbfd_la_OBJECTS) $(libbfd_la_DEPENDENCIES)
 all-recursive install-data-recursive install-exec-recursive \
 installdirs-recursive install-recursive uninstall-recursive install-info-recursive \
 check-recursive installcheck-recursive info-recursive dvi-recursive:
-	@set fnord $$MAKEFLAGS; amf=$$2; \
+	@set fnord $(MAKEFLAGS); amf=$$2; \
 	dot_seen=no; \
 	target=`echo $@ | sed s/-recursive//`; \
 	list='$(SUBDIRS)'; for subdir in $$list; do \
@@ -961,7 +963,7 @@ check-recursive installcheck-recursive info-recursive dvi-recursive:
 
 mostlyclean-recursive clean-recursive distclean-recursive \
 maintainer-clean-recursive:
-	@set fnord $$MAKEFLAGS; amf=$$2; \
+	@set fnord $(MAKEFLAGS); amf=$$2; \
 	dot_seen=no; \
 	rev=''; list='$(SUBDIRS)'; for subdir in $$list; do \
 	  rev="$$subdir $$rev"; \
@@ -1695,7 +1697,7 @@ elf32-fr30.lo: elf32-fr30.c $(INCDIR)/filenames.h elf-bfd.h \
 elf32-frv.lo: elf32-frv.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/elf/frv.h $(INCDIR)/elf/reloc-macros.h \
-  elf32-target.h
+  $(INCDIR)/elf/dwarf2.h $(INCDIR)/hashtab.h elf32-target.h
 elf32-gen.lo: elf32-gen.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h elf32-target.h

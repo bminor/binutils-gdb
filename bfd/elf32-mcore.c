@@ -472,30 +472,11 @@ mcore_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	}
       else
 	{
-	  h = sym_hashes [r_symndx - symtab_hdr->sh_info];
-	  if (   h->root.type == bfd_link_hash_defined
-	      || h->root.type == bfd_link_hash_defweak)
-	    {
-	      sec = h->root.u.def.section;
-	      relocation = (h->root.u.def.value
-			    + sec->output_section->vma
-			    + sec->output_offset);
-	    }
-	  else if (h->root.type == bfd_link_hash_undefweak)
-	    relocation = 0;
-	  else if (info->shared
-		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
-	    relocation = 0;
-	  else
-	    {
-	      if (! ((*info->callbacks->undefined_symbol)
-			(info, h->root.root.string, input_bfd,
-		 	 input_section, rel->r_offset, TRUE)))
-		return FALSE;
+	  bfd_boolean unresolved_reloc, warned;
 
-	      ret = FALSE;
-	      continue;
-	    }
+	  RELOC_FOR_GLOBAL_SYMBOL (h, sym_hashes, r_symndx, symtab_hdr,
+				   relocation, sec, unresolved_reloc,
+				   info, warned);
 	}
 
       switch (r_type)

@@ -31,13 +31,6 @@ struct regcache;
 
 #include "frame.h"		/* For enum frame_type.  */
 
-/* Given the NEXT frame, take a wiff of THIS frame's registers (namely
-   the PC and attributes) and if it is the applicable unwinder, return
-   an unwind cache (allocated using frame_obstack_zalloc).  */
-
-typedef void *(frame_sniffer_ftype) (const struct frame_unwind *self,
-				     struct frame_info *next_frame);
-
 /* The following unwind functions assume a chain of frames forming the
    sequence: (outer) prev <-> this <-> next (inner).  All the
    functions are called with called with the next frame's `struct
@@ -49,6 +42,14 @@ typedef void *(frame_sniffer_ftype) (const struct frame_unwind *self,
    THIS frame's prologue cache can be used to cache information such
    as where this frame's prologue stores the previous frame's
    registers.  */
+
+/* Given the NEXT frame, take a wiff of THIS frame's registers (namely
+   the PC and attributes) and if SELF is the applicable unwinder,
+   return non-zero.  Possibly also initialize THIS_PROLOGUE_CACHE.  */
+
+typedef int (frame_sniffer_ftype) (const struct frame_unwind *self,
+				   struct frame_info *next_frame,
+				   void **this_prologue_cache);
 
 /* Assuming the frame chain: (outer) prev <-> this <-> next (inner);
    use the NEXT frame, and its register unwind method, to determine
@@ -73,8 +74,7 @@ typedef void *(frame_sniffer_ftype) (const struct frame_unwind *self,
    with the other unwind methods.  Memory for that cache should be
    allocated using frame_obstack_zalloc().  */
 
-typedef void (frame_this_id_ftype) (const struct frame_unwind *self,
-				    struct frame_info *next_frame,
+typedef void (frame_this_id_ftype) (struct frame_info *next_frame,
 				    void **this_prologue_cache,
 				    struct frame_id *this_id);
 
@@ -110,8 +110,7 @@ typedef void (frame_this_id_ftype) (const struct frame_unwind *self,
    with the other unwind methods.  Memory for that cache should be
    allocated using frame_obstack_zalloc().  */
 
-typedef void (frame_prev_register_ftype) (const struct frame_unwind *self,
-					  struct frame_info *next_frame,
+typedef void (frame_prev_register_ftype) (struct frame_info *next_frame,
 					  void **this_prologue_cache,
 					  int prev_regnum,
 					  int *optimized,
@@ -132,10 +131,10 @@ struct frame_unwind
   frame_sniffer_ftype *sniffer;
 };
 
-/* Register a frame unwinder, appending it to the end of the search
+/* Register a frame unwinder, _appending_ it to the end of the search
    list.  */
-extern void frame_unwind_append (struct gdbarch *gdbarch,
-				 const struct frame_unwind *unwinder);
+extern void frame_unwind_register_unwinder (struct gdbarch *gdbarch,
+					    const struct frame_unwind *unwinder);
 
 
 /* Given the NEXT frame, take a wiff of THIS frame's registers (namely

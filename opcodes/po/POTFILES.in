@@ -18,6 +18,7 @@ d30v-dis.c
 d30v-opc.c
 disassemble.c
 dis-buf.c
+dis-init.c
 dlx-dis.c
 fr30-asm.c
 fr30-desc.c

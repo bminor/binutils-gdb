@@ -29,6 +29,6 @@
 #define TARGET_ELF64
 
 extern int ia64_linux_in_sigtramp (CORE_ADDR pc, char *func_name);
-#define IN_SIGTRAMP(pc,func_name) ia64_linux_in_sigtramp (pc, func_name)
+#define DEPRECATED_IN_SIGTRAMP(pc,func_name) ia64_linux_in_sigtramp (pc, func_name)
 
 #endif /* #ifndef TM_LINUX_H */

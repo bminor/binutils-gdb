@@ -1,6 +1,6 @@
 /* PowerPC-specific support for 32-bit ELF
-   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
-   Free Software Foundation, Inc.
+   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
+   2004 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1816,10 +1816,7 @@ ppc_elf_relax_section (bfd *abfd,
       symaddr = tsec->output_section->vma + tsec->output_offset + toff;
 
       roff = irel->r_offset;
-
-      reladdr = (isec->output_section->vma
-		 + isec->output_offset
-		 + roff);
+      reladdr = isec->output_section->vma + isec->output_offset + roff;
 
       /* If the branch is in range, no need to do anything.  */
       if (symaddr - reladdr + max_branch_offset < 2 * max_branch_offset)

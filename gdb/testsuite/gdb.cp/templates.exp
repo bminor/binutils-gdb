@@ -455,6 +455,7 @@ send_gdb "ptype quxint\n"
 gdb_expect {   
    -re "type = class Qux<int, ?&string> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*.*int qux\\(int, int\\);\r\n\\}\r\n$gdb_prompt $" { pass "ptype quxint" }
    -re "type = class Qux<int, ?&string> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*int qux\\(int, int\\);.*\r\n\\}\r\n$gdb_prompt $" { pass "ptype quxint" }
+   -re "type = class Qux<int, ?\\(char ?\\*\\)\\(&string\\)> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*int qux\\(int, int\\);.*\r\n\\}\r\n$gdb_prompt $" { pass "ptype quxint" }
    -re "type = class Qux<int, ?&\\(string\\)> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*int qux\\(int, int\\);.*\r\n\\}\r\n$gdb_prompt $" {
        kfail "gdb/1512" "ptype quxint"
    }

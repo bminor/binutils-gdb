@@ -27,6 +27,7 @@
 #include "objfiles.h"
 #include "target.h"
 #include "trad-frame.h"
+#include "frame-base.h"
 
 struct frame_data
 {
@@ -36,12 +37,12 @@ struct frame_data
 struct tramp_frame_cache
 {
   CORE_ADDR func;
+  const struct tramp_frame *tramp_frame;
   struct trad_frame_cache *trad_cache;
 };
 
 static struct trad_frame_cache *
-tramp_frame_cache (const struct frame_unwind *self,
-		   struct frame_info *next_frame,
+tramp_frame_cache (struct frame_info *next_frame,
 		   void **this_cache)
 {
   CORE_ADDR pc = frame_pc_unwind (next_frame);
@@ -49,28 +50,26 @@ tramp_frame_cache (const struct frame_unwind *self,
   if (tramp_cache->trad_cache == NULL)
     {
       tramp_cache->trad_cache = trad_frame_cache_zalloc (next_frame);
-      self->unwind_data->tramp_frame->init (self->unwind_data->tramp_frame,
-					    next_frame,
-					    tramp_cache->trad_cache,
-					    tramp_cache->func);
+      tramp_cache->tramp_frame->init (tramp_cache->tramp_frame,
+				      next_frame,
+				      tramp_cache->trad_cache,
+				      tramp_cache->func);
     }
   return tramp_cache->trad_cache;
 }
 
 static void
-tramp_frame_this_id (const struct frame_unwind *self,
-		     struct frame_info *next_frame,
+tramp_frame_this_id (struct frame_info *next_frame,
 		     void **this_cache,
 		     struct frame_id *this_id)
 {
   struct trad_frame_cache *trad_cache
-    = tramp_frame_cache (self, next_frame, this_cache);
-  trad_frame_this_id (trad_cache, next_frame, this_id);
+    = tramp_frame_cache (next_frame, this_cache);
+  (*this_id) = trad_cache->this_id;
 }
 
 static void
-tramp_frame_prev_register (const struct frame_unwind *self,
-			   struct frame_info *next_frame,
+tramp_frame_prev_register (struct frame_info *next_frame,
 			   void **this_cache,
 			   int prev_regnum,
 			   int *optimizedp,
@@ -79,9 +78,9 @@ tramp_frame_prev_register (const struct frame_unwind *self,
 			   int *realnump, void *valuep)
 {
   struct trad_frame_cache *trad_cache
-    = tramp_frame_cache (self, next_frame, this_cache);
-  trad_frame_prev_register (trad_cache, next_frame, prev_regnum, optimizedp,
-			    lvalp, addrp, realnump, valuep);
+    = tramp_frame_cache (next_frame, this_cache);
+  trad_frame_prev_register (next_frame, trad_cache->prev_regs, prev_regnum,
+			    optimizedp, lvalp, addrp, realnump, valuep);
 }
 
 static CORE_ADDR
@@ -112,9 +111,10 @@ tramp_frame_start (CORE_ADDR pc, const struct tramp_frame *tramp)
   return 0;
 }
 
-static void *
+static int
 tramp_frame_sniffer (const struct frame_unwind *self,
-		     struct frame_info *next_frame)
+		     struct frame_info *next_frame,
+		     void **this_cache)
 {
   const struct tramp_frame *tramp = self->unwind_data->tramp_frame;
   CORE_ADDR pc = frame_pc_unwind (next_frame);
@@ -126,18 +126,20 @@ tramp_frame_sniffer (const struct frame_unwind *self,
      trampoline.  */
   find_pc_partial_function (pc, &name, NULL, NULL);
   if (name != NULL)
-    return NULL;
+    return 0;
   /* If the function lives in a valid section (even without a starting
      point) it isn't a trampoline.  */
   if (find_pc_section (pc) != NULL)
-    return NULL;
+    return 0;
   /* Finally, check that the trampoline matches at PC.  */
   func = tramp_frame_start (pc, tramp);
   if (func == 0)
-    return NULL;
+    return 0;
   tramp_cache = FRAME_OBSTACK_ZALLOC (struct tramp_frame_cache);
   tramp_cache->func = func;
-  return tramp_cache;
+  tramp_cache->tramp_frame = tramp;
+  (*this_cache) = tramp_cache;
+  return 1;
 }
 
 void
@@ -156,6 +158,5 @@ tramp_frame_append (struct gdbarch *gdbarch,
   unwinder->sniffer = tramp_frame_sniffer;
   unwinder->this_id = tramp_frame_this_id;
   unwinder->prev_register = tramp_frame_prev_register;
-
-  frame_unwind_append (gdbarch, unwinder);
+  frame_unwind_register_unwinder (gdbarch, unwinder);
 }

@@ -1,3 +1,66 @@
+2004-03-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* aclocal.m4: Regenerate.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* po/POTFILES.in: Regenerate.
+	* po/opcodes.pot: Regenerate.
+
+2004-03-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-dis.c (print_insn_powerpc): Don't print tabs.  Handle
+	PPC_OPERANDS_GPR_0.
+	* ppc-opc.c (RA0): Define.
+	(RAQ, RAL, RAM, RAS, RSQ, RTQ, RSO): Use PPC_OPERAND_GPR_0.
+	(RAOPT): Rename from RAO.  Update all uses.
+	(powerpc_opcodes): Use RA0 as appropriate.
+
+2004-03-15  Aldy Hernandez  <aldyh@redhat.com>
+
+	* ppc-opc.c (powerpc_opcodes): Add BOOKE versions of mfsprg.
+
+2004-03-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* sparc-dis.c (print_insn_sparc): Update getword prototype.
+
+2004-03-12  Michal Ludvig  <mludvig@suse.cz>
+
+	* i386-dis.c (GRPPLOCK): Delete.
+	(grps): Delete GRPPLOCK entry.
+
+2004-03-12  Alan Modra  <amodra@bigpond.net.au>
+
+	* i386-dis.c (OP_M, OP_0f0e, OP_0fae, NOP_Fixup): New functions.
+	(M, Mp): Use OP_M.
+	(None, PADLOCK_SPECIAL, PADLOCK_0): Delete.
+	(GRPPADLCK): Define.
+	(dis386): Use NOP_Fixup on "nop".
+	(dis386_twobyte): Use GRPPADLCK on opcode 0xa7.
+	(twobyte_has_modrm): Set for 0xa7.
+	(padlock_table): Delete.  Move to..
+	(grps): ..here, using OP_0f07.  Use OP_Ofae on lfence, mfence
+	and clflush.
+	(print_insn): Revert PADLOCK_SPECIAL code.
+	(OP_E): Delete sfence, lfence, mfence checks.
+
+2004-03-12  Jakub Jelinek  <jakub@redhat.com>
+
+	* i386-dis.c (grps): Use INVLPG_Fixup instead of OP_E for invlpg.
+	(INVLPG_Fixup): New function.
+	(PNI_Fixup): Remove ATTRIBUTE_UNUSED from sizeflag.
+
+2004-03-12  Michal Ludvig  <mludvig@suse.cz>
+
+	* i386-dis.c (PADLOCK_SPECIAL, PADLOCK_0): New defines.
+	(dis386_twobyte): Opcode 0xa7 is PADLOCK_0.
+	(padlock_table): New struct with PadLock instructions.
+	(print_insn): Handle PADLOCK_SPECIAL.
+
+2004-03-12  Alan Modra  <amodra@bigpond.net.au>
+
+	* i386-dis.c (grps): Use clflush by default for 0x0fae/7.
+	(OP_E): Twiddle clflush to sfence here.
+
 2004-03-08  Nick Clifton  <nickc@redhat.com>
 
 	* po/de.po: Updated German translation.
@@ -46,8 +109,8 @@
 	Adjust the bit patterns in a few comments.
 
 2004-02-25  Aldy Hernandez  <aldyh@redhat.com>
-                                                                                
-        * ppc-opc.c (powerpc_opcodes): Change mask for dcbt and dcbtst.
+
+	* ppc-opc.c (powerpc_opcodes): Change mask for dcbt and dcbtst.
 
 2004-02-20  Aldy Hernandez  <aldyh@redhat.com>
 
@@ -58,13 +121,13 @@
 	* ppc-opc.c (powerpc_opcodes): Add m*ivor35.
 
 2004-02-20  Aldy Hernandez  <aldyh@redhat.com>
- 
-        * ppc-opc.c (powerpc_opcodes): Add mfivor32, mfivor33, mfivor34,
-        mtivor32, mtivor33, mtivor34.
+
+	* ppc-opc.c (powerpc_opcodes): Add mfivor32, mfivor33, mfivor34,
+	mtivor32, mtivor33, mtivor34.
 
 2004-02-19  Aldy Hernandez  <aldyh@redhat.com>
- 
-        * ppc-opc.c (powerpc_opcodes): Add mfmcar.
+
+	* ppc-opc.c (powerpc_opcodes): Add mfmcar.
 
 2004-02-10  Petko Manolov  <petkan@nucleusys.com>
 

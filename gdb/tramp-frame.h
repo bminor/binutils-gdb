@@ -26,7 +26,7 @@ struct trad_frame;
 struct frame_info;
 struct trad_frame_cache;
 
-/* A trampline consists of a small sequence of instructions placed at
+/* A trampoline consists of a small sequence of instructions placed at
    an unspecified location in the inferior's address space.  The only
    identifying attribute of the trampoline's address is that it does
    not fall inside an object file's section.
@@ -34,7 +34,7 @@ struct trad_frame_cache;
    The only way to identify a trampoline is to perform a brute force
    examination of the instructions at and around the PC.
 
-   This module provides a convient interface for performing that
+   This module provides a convent interface for performing that
    operation.  */
 
 /* A trampoline descriptor.  */
@@ -43,10 +43,10 @@ struct tramp_frame
 {
   /* The trampoline's entire instruction sequence.  Search for this in
      the inferior at or around the frame's PC.  It is assumed that the
-     PC is INSN_SIZE aligned, and that each element of TRAMP containts
+     PC is INSN_SIZE aligned, and that each element of TRAMP contains
      one INSN_SIZE instruction.  It is also assumed that TRAMP[0]
      contains the first instruction of the trampoline and hence the
-     address of the instruction matching TRAMP[0] is the trampolines
+     address of the instruction matching TRAMP[0] is the trampoline's
      "func" address.  */
   int insn_size;
   ULONGEST insn[8];

@@ -570,6 +570,7 @@ elf_reloc_macros_h =	$(INCLUDE_DIR)/elf/reloc-macros.h
 elf_sh_h =	$(INCLUDE_DIR)/elf/sh.h
 elf_arm_h =	$(INCLUDE_DIR)/elf/arm.h $(elf_reloc_macros_h)
 elf_bfd_h =	$(BFD_SRC)/elf-bfd.h
+elf_frv_h =	$(INCLUDE_DIR)/elf/frv.h $(elf_reloc_macros_h)
 libaout_h =	$(BFD_SRC)/libaout.h
 libbfd_h =	$(BFD_SRC)/libbfd.h
 remote_sim_h =	$(INCLUDE_DIR)/gdb/remote-sim.h
@@ -614,7 +615,6 @@ nm_h =		@nm_h@
 ada_lang_h = ada-lang.h $(value_h) $(gdbtypes_h)
 alphabsd_tdep_h = alphabsd-tdep.h
 alpha_tdep_h = alpha-tdep.h
-amd64_linux_tdep_h = amd64-linux-tdep.h
 amd64_nat_h = amd64-nat.h
 amd64_tdep_h = amd64-tdep.h $(i386_tdep_h)
 annotate_h = annotate.h $(symtab_h) $(gdbtypes_h)
@@ -659,6 +659,7 @@ f_lang_h = f-lang.h
 frame_base_h = frame-base.h
 frame_h = frame.h
 frame_unwind_h = frame-unwind.h $(frame_h)
+frv_tdep_h = frv-tdep.h
 gdbarch_h = gdbarch.h
 gdb_assert_h = gdb_assert.h
 gdbcmd_h = gdbcmd.h $(command_h) $(ui_out_h)
@@ -1529,10 +1530,10 @@ amd64fbsd-tdep.o: amd64fbsd-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) \
 amd64-linux-nat.o: amd64-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 	$(regcache_h) $(linux_nat_h) $(gdb_assert_h) $(gdb_string_h) \
 	$(gdb_proc_service_h) $(gregset_h) $(amd64_tdep_h) \
-	$(amd64_linux_tdep_h) $(i386_linux_tdep_h) $(amd64_nat_h)
-amd64-linux-tdep.o: amd64-linux-tdep.c $(defs_h) $(inferior_h) $(gdbcore_h) \
+	$(i386_linux_tdep_h) $(amd64_nat_h)
+amd64-linux-tdep.o: amd64-linux-tdep.c $(defs_h) $(frame_h) $(gdbcore_h) \
 	$(regcache_h) $(osabi_h) $(gdb_string_h) $(amd64_tdep_h) \
-	$(amd64_linux_tdep_h)
+	$(solib_svr4_h)
 amd64-nat.o: amd64-nat.c $(defs_h) $(gdbarch_h) $(regcache_h) \
 	$(gdb_assert_h) $(i386_tdep_h) $(amd64_tdep_h)
 amd64nbsd-nat.o: amd64nbsd-nat.c $(defs_h) $(gdb_assert_h) $(amd64_tdep_h) \
@@ -1759,18 +1760,22 @@ f-lang.o: f-lang.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 fork-child.o: fork-child.c $(defs_h) $(gdb_string_h) $(frame_h) \
 	$(inferior_h) $(target_h) $(gdb_wait_h) $(gdb_vfork_h) $(gdbcore_h) \
 	$(terminal_h) $(gdbthread_h) $(command_h)
-frame-base.o: frame-base.c $(defs_h) $(frame_base_h) $(frame_h)
+frame-base.o: frame-base.c $(defs_h) $(frame_base_h) $(frame_h) \
+	$(gdb_obstack_h)
 frame.o: frame.c $(defs_h) $(frame_h) $(target_h) $(value_h) $(inferior_h) \
 	$(regcache_h) $(gdb_assert_h) $(gdb_string_h) $(user_regs_h) \
 	$(gdb_obstack_h) $(dummy_frame_h) $(sentinel_frame_h) $(gdbcore_h) \
 	$(annotate_h) $(language_h) $(frame_unwind_h) $(frame_base_h) \
 	$(command_h) $(gdbcmd_h)
 frame-unwind.o: frame-unwind.c $(defs_h) $(frame_h) $(frame_unwind_h) \
-	$(gdb_assert_h) $(dummy_frame_h)
+	$(gdb_assert_h) $(dummy_frame_h) $(gdb_obstack_h)
+frv-linux-tdep.o: frv-linux-tdep.c $(defs_h) $(target_h) $(osabi_h) \
+	$(elf_bfd_h) $(elf_frv_h) $(frv_tdep_h)
 frv-tdep.o: frv-tdep.c $(defs_h) $(gdb_string_h) $(inferior_h) $(gdbcore_h) \
 	$(arch_utils_h) $(regcache_h) $(frame_h) $(frame_unwind_h) \
 	$(frame_base_h) $(trad_frame_h) $(dis_asm_h) $(gdb_assert_h) \
-	$(sim_regno_h) $(gdb_sim_frv_h) $(opcodes_frv_desc_h) $(symtab_h)
+	$(sim_regno_h) $(gdb_sim_frv_h) $(opcodes_frv_desc_h) $(symtab_h) \
+	$(elf_bfd_h) $(elf_frv_h) $(osabi_h) $(frv_tdep_h)
 f-typeprint.o: f-typeprint.c $(defs_h) $(gdb_obstack_h) $(bfd_h) $(symtab_h) \
 	$(gdbtypes_h) $(expression_h) $(value_h) $(gdbcore_h) $(target_h) \
 	$(f_lang_h) $(gdb_string_h)
@@ -2052,7 +2057,7 @@ mipsnbsd-nat.o: mipsnbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(mipsnbsd_tdep_h)
 mipsnbsd-tdep.o: mipsnbsd-tdep.c $(defs_h) $(gdbcore_h) $(regcache_h) \
 	$(target_h) $(value_h) $(osabi_h) $(nbsd_tdep_h) $(mipsnbsd_tdep_h) \
-	$(solib_svr4_h)
+	$(mips_tdep_h) $(solib_svr4_h)
 mipsread.o: mipsread.c $(defs_h) $(gdb_string_h) $(bfd_h) $(symtab_h) \
 	$(objfiles_h) $(buildsym_h) $(stabsread_h) $(coff_sym_h) \
 	$(coff_internal_h) $(coff_ecoff_h) $(libcoff_h) $(libecoff_h) \
@@ -2297,6 +2302,9 @@ solib.o: solib.c $(defs_h) $(gdb_string_h) $(symtab_h) $(bfd_h) $(symfile_h) \
 	$(objfiles_h) $(gdbcore_h) $(command_h) $(target_h) $(frame_h) \
 	$(gdb_regex_h) $(inferior_h) $(environ_h) $(language_h) $(gdbcmd_h) \
 	$(completer_h) $(filenames_h) $(exec_h) $(solist_h) $(readline_h)
+solib-frv.o: solib-frv.c $(defs_h) $(gdb_string_h) $(inferior_h) $(gdbcore_h) \
+	$(solist_h) $(frv_tdep_h) $(objfiles_h) $(symtab_h) $(language_h) \
+	$(command_h) $(gdbcmd_h) $(elf_frv_h)
 solib-irix.o: solib-irix.c $(defs_h) $(symtab_h) $(bfd_h) $(symfile_h) \
 	$(objfiles_h) $(gdbcore_h) $(target_h) $(inferior_h) $(solist_h)
 solib-legacy.o: solib-legacy.c $(defs_h) $(gdbcore_h) $(solib_svr4_h)

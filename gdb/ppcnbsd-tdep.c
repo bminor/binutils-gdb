@@ -263,7 +263,7 @@ ppcnbsd_sigtramp_cache_init (const struct tramp_frame *self,
   this_cache->this_id = frame_id_build (this_cache->this_base, func);
 }
 
-/* Given the NEXTE frame, examine the instructions at and around this
+/* Given the NEXT frame, examine the instructions at and around this
    frame's resume address (aka PC) to see of they look like a signal
    trampoline.  Return the address of the trampolines first
    instruction, or zero if it isn't a signal trampoline.  */

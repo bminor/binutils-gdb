@@ -457,33 +457,11 @@ elf32_msp430_relocate_section (output_bfd, info, input_bfd, input_section,
 	}
       else
 	{
-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  bfd_boolean unresolved_reloc, warned;
 
-	  while (h->root.type == bfd_link_hash_indirect
-		 || h->root.type == bfd_link_hash_warning)
-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
-	  name = h->root.root.string;
-
-	  if (h->root.type == bfd_link_hash_defined
-	      || h->root.type == bfd_link_hash_defweak)
-	    {
-	      sec = h->root.u.def.section;
-	      relocation = (h->root.u.def.value
-			    + sec->output_section->vma + sec->output_offset);
-	    }
-	  else if (h->root.type == bfd_link_hash_undefweak)
-	    {
-	      relocation = 0;
-	    }
-	  else
-	    {
-	      if (!((*info->callbacks->undefined_symbol)
-		    (info, h->root.root.string, input_bfd,
-		     input_section, rel->r_offset, TRUE)))
-		return FALSE;
-	      relocation = 0;
-	    }
+	  RELOC_FOR_GLOBAL_SYMBOL (h, sym_hashes, r_symndx, symtab_hdr,
+				   relocation, sec, unresolved_reloc,
+				   info, warned);
 	}
 
       r = msp430_final_link_relocate (howto, input_bfd, input_section,

@@ -38,9 +38,22 @@ GDB support for location expressions has been extended to support function
 arguments and frame bases.  Older versions of GDB could crash when they
 encountered these.
 
+* C++ nested types and namespaces
+
+GDB's support for nested types and namespaces in C++ has been
+improved, especially if you use the DWARF 2 debugging format.  (This
+is the default for recent versions of GCC on most platforms.)
+Specifically, if you have a class "Inner" defined within a class or
+namespace "Outer", then GDB realizes that the class's name is
+"Outer::Inner", not simply "Inner".  This should greatly reduce the
+frequency of complaints about not finding RTTI symbols.  In addition,
+if you are stopped at inside of a function defined within a namespace,
+GDB modifies its name lookup accordingly.
+
 * New native configurations
 
 NetBSD/amd64					x86_64-*-netbsd*
+OpenBSD/amd64					x86_64-*-openbsd*
 OpenBSD/alpha					alpha*-*-openbsd*
 OpenBSD/sparc					sparc-*-openbsd*
 OpenBSD/sparc64					sparc64-*-openbsd*

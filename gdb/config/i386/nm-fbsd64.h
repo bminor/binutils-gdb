@@ -22,16 +22,10 @@
 #ifndef NM_FBSD64_H
 #define NM_FBSD64_H
 
-/* Type of the third argument to the `ptrace' system call.  */
-#define PTRACE_ARG3_TYPE caddr_t
-
-/* Override copies of {fetch,store}_inferior_registers in `infptrace.c'.  */
-#define FETCH_INFERIOR_REGISTERS
+/* Get generic BSD native definitions.  */
+#include "config/nm-bsd.h"
 
 /* Override child_pid_to_exec_file in 'inftarg.c'.  */
 #define CHILD_PID_TO_EXEC_FILE
-
-/* We can attach and detach.  */
-#define ATTACH_DETACH
 
 #endif /* nm-fbsd64.h */

@@ -62,6 +62,8 @@ extern "C" {
 #if @BFD_HOST_64_BIT_DEFINED@
 #define BFD_HOST_64_BIT @BFD_HOST_64_BIT@
 #define BFD_HOST_U_64_BIT @BFD_HOST_U_64_BIT@
+typedef BFD_HOST_64_BIT bfd_int64_t;
+typedef BFD_HOST_U_64_BIT bfd_uint64_t;
 #endif
 
 #if BFD_ARCH_SIZE >= 64
@@ -101,24 +103,6 @@ typedef int bfd_boolean;
 #define false dont_use_false_in_bfd
 #define true dont_use_true_in_bfd
 #endif
-
-/* Support for different sizes of target format ints and addresses.
-   If the type `long' is at least 64 bits, BFD_HOST_64BIT_LONG will be
-   set to 1 above.  Otherwise, if the host compiler used during
-   configuration supports long long, this code will use it.
-   Otherwise, BFD_HOST_64_BIT must be defined above.  */
-
-#ifndef BFD_HOST_64_BIT
-# if BFD_HOST_64BIT_LONG
-#  define BFD_HOST_64_BIT long
-#  define BFD_HOST_U_64_BIT unsigned long
-# else
-#  if BFD_HOST_LONG_LONG
-#    define BFD_HOST_64_BIT long long
-#    define BFD_HOST_U_64_BIT unsigned long long
-#  endif /* ! BFD_HOST_LONG_LONG */
-# endif /* ! BFD_HOST_64BIT_LONG */
-#endif /* ! defined (BFD_HOST_64_BIT) */
 
 #ifdef BFD64
 
@@ -166,6 +150,15 @@ typedef unsigned long bfd_size_type;
 #define sprintf_vma(s,x) sprintf (s, "%08lx", x)
 
 #endif /* not BFD64  */
+
+#ifndef BFD_HOST_64_BIT
+/* Fall back on a 32 bit type.  The idea is to make these types always
+   available for function return types, but in the case that
+   BFD_HOST_64_BIT is undefined such a function should abort or
+   otherwise signal an error.  */
+typedef bfd_signed_vma bfd_int64_t;
+typedef bfd_vma bfd_uint64_t;
+#endif
 
 /* An offset into a file.  BFD always uses the largest possible offset
    based on the build time availability of fseek, fseeko, or fseeko64.  */
@@ -525,29 +518,29 @@ extern bfd_boolean bfd_record_phdr
 
 /* Byte swapping routines.  */
 
-bfd_vma bfd_getb64 (const unsigned char *);
-bfd_vma bfd_getl64 (const unsigned char *);
-bfd_signed_vma bfd_getb_signed_64 (const unsigned char *);
-bfd_signed_vma bfd_getl_signed_64 (const unsigned char *);
-bfd_vma bfd_getb32 (const unsigned char *);
-bfd_vma bfd_getl32 (const unsigned char *);
-bfd_signed_vma bfd_getb_signed_32 (const unsigned char *);
-bfd_signed_vma bfd_getl_signed_32 (const unsigned char *);
-bfd_vma bfd_getb16 (const unsigned char *);
-bfd_vma bfd_getl16 (const unsigned char *);
-bfd_signed_vma bfd_getb_signed_16 (const unsigned char *);
-bfd_signed_vma bfd_getl_signed_16 (const unsigned char *);
-void bfd_putb64 (bfd_vma, unsigned char *);
-void bfd_putl64 (bfd_vma, unsigned char *);
-void bfd_putb32 (bfd_vma, unsigned char *);
-void bfd_putl32 (bfd_vma, unsigned char *);
-void bfd_putb16 (bfd_vma, unsigned char *);
-void bfd_putl16 (bfd_vma, unsigned char *);
+bfd_uint64_t bfd_getb64 (const void *);
+bfd_uint64_t bfd_getl64 (const void *);
+bfd_int64_t bfd_getb_signed_64 (const void *);
+bfd_int64_t bfd_getl_signed_64 (const void *);
+bfd_vma bfd_getb32 (const void *);
+bfd_vma bfd_getl32 (const void *);
+bfd_signed_vma bfd_getb_signed_32 (const void *);
+bfd_signed_vma bfd_getl_signed_32 (const void *);
+bfd_vma bfd_getb16 (const void *);
+bfd_vma bfd_getl16 (const void *);
+bfd_signed_vma bfd_getb_signed_16 (const void *);
+bfd_signed_vma bfd_getl_signed_16 (const void *);
+void bfd_putb64 (bfd_uint64_t, void *);
+void bfd_putl64 (bfd_uint64_t, void *);
+void bfd_putb32 (bfd_vma, void *);
+void bfd_putl32 (bfd_vma, void *);
+void bfd_putb16 (bfd_vma, void *);
+void bfd_putl16 (bfd_vma, void *);
 
 /* Byte swapping routines which take size and endiannes as arguments.  */
 
-bfd_vma bfd_get_bits (bfd_byte *, int, bfd_boolean);
-void bfd_put_bits (bfd_vma, bfd_byte *, int, bfd_boolean);
+bfd_uint64_t bfd_get_bits (const void *, int, bfd_boolean);
+void bfd_put_bits (bfd_uint64_t, void *, int, bfd_boolean);
 
 /* Externally visible ECOFF routines.  */
 
@@ -613,6 +606,12 @@ struct bfd_link_needed_list
   const char *name;
 };
 
+enum dynamic_lib_link_class {
+  DYN_NORMAL = 0,
+  DYN_AS_NEEDED = 1,
+  DYN_DT_NEEDED = 2
+};
+
 extern bfd_boolean bfd_elf_record_link_assignment
   (bfd *, struct bfd_link_info *, const char *, bfd_boolean);
 extern struct bfd_link_needed_list *bfd_elf_get_needed_list
@@ -627,10 +626,10 @@ extern bfd_boolean bfd_elf64_size_dynamic_sections
    struct bfd_link_info *, struct bfd_section **, struct bfd_elf_version_tree *);
 extern void bfd_elf_set_dt_needed_name
   (bfd *, const char *);
-extern void bfd_elf_set_dt_needed_soname
-  (bfd *, const char *);
 extern const char *bfd_elf_get_dt_soname
   (bfd *);
+extern void bfd_elf_set_dyn_lib_class
+  (bfd *, int);
 extern struct bfd_link_needed_list *bfd_elf_get_runpath_list
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean bfd_elf32_discard_info
@@ -873,7 +872,7 @@ bfd_boolean bfd_fill_in_gnu_debuglink_section
 /* Byte swapping macros for user section data.  */
 
 #define bfd_put_8(abfd, val, ptr) \
-  ((void) (*((unsigned char *) (ptr)) = (unsigned char) (val)))
+  ((void) (*((unsigned char *) (ptr)) = (val) & 0xff))
 #define bfd_put_signed_8 \
   bfd_put_8
 #define bfd_get_8(abfd, ptr) \
@@ -961,52 +960,24 @@ bfd_boolean bfd_fill_in_gnu_debuglink_section
 #define bfd_h_get_signed_64(abfd, ptr) \
   BFD_SEND (abfd, bfd_h_getx_signed_64, (ptr))
 
-/* Refinements on the above, which should eventually go away.  Save
-   cluttering the source with (bfd_vma) and (bfd_byte *) casts.  */
+/* Aliases for the above, which should eventually go away.  */
 
-#define H_PUT_64(abfd, val, where) \
-  bfd_h_put_64 ((abfd), (bfd_vma) (val), (bfd_byte *) (where))
-
-#define H_PUT_32(abfd, val, where) \
-  bfd_h_put_32 ((abfd), (bfd_vma) (val), (bfd_byte *) (where))
-
-#define H_PUT_16(abfd, val, where) \
-  bfd_h_put_16 ((abfd), (bfd_vma) (val), (bfd_byte *) (where))
-
-#define H_PUT_8 bfd_h_put_8
-
-#define H_PUT_S64(abfd, val, where) \
-  bfd_h_put_signed_64 ((abfd), (bfd_vma) (val), (bfd_byte *) (where))
-
-#define H_PUT_S32(abfd, val, where) \
-  bfd_h_put_signed_32 ((abfd), (bfd_vma) (val), (bfd_byte *) (where))
-
-#define H_PUT_S16(abfd, val, where) \
-  bfd_h_put_signed_16 ((abfd), (bfd_vma) (val), (bfd_byte *) (where))
-
-#define H_PUT_S8 bfd_h_put_signed_8
-
-#define H_GET_64(abfd, where) \
-  bfd_h_get_64 ((abfd), (bfd_byte *) (where))
-
-#define H_GET_32(abfd, where) \
-  bfd_h_get_32 ((abfd), (bfd_byte *) (where))
-
-#define H_GET_16(abfd, where) \
-  bfd_h_get_16 ((abfd), (bfd_byte *) (where))
-
-#define H_GET_8 bfd_h_get_8
-
-#define H_GET_S64(abfd, where) \
-  bfd_h_get_signed_64 ((abfd), (bfd_byte *) (where))
-
-#define H_GET_S32(abfd, where) \
-  bfd_h_get_signed_32 ((abfd), (bfd_byte *) (where))
-
-#define H_GET_S16(abfd, where) \
-  bfd_h_get_signed_16 ((abfd), (bfd_byte *) (where))
-
-#define H_GET_S8 bfd_h_get_signed_8
+#define H_PUT_64  bfd_h_put_64
+#define H_PUT_32  bfd_h_put_32
+#define H_PUT_16  bfd_h_put_16
+#define H_PUT_8   bfd_h_put_8
+#define H_PUT_S64 bfd_h_put_signed_64
+#define H_PUT_S32 bfd_h_put_signed_32
+#define H_PUT_S16 bfd_h_put_signed_16
+#define H_PUT_S8  bfd_h_put_signed_8
+#define H_GET_64  bfd_h_get_64
+#define H_GET_32  bfd_h_get_32
+#define H_GET_16  bfd_h_get_16
+#define H_GET_8   bfd_h_get_8
+#define H_GET_S64 bfd_h_get_signed_64
+#define H_GET_S32 bfd_h_get_signed_32
+#define H_GET_S16 bfd_h_get_signed_16
+#define H_GET_S8  bfd_h_get_signed_8
 
 
 /* Extracted from bfdio.c.  */
@@ -4130,26 +4101,26 @@ typedef struct bfd_target
   /* Entries for byte swapping for data. These are different from the
      other entry points, since they don't take a BFD asthe first argument.
      Certain other handlers could do the same.  */
-  bfd_vma        (*bfd_getx64) (const bfd_byte *);
-  bfd_signed_vma (*bfd_getx_signed_64) (const bfd_byte *);
-  void           (*bfd_putx64) (bfd_vma, bfd_byte *);
-  bfd_vma        (*bfd_getx32) (const bfd_byte *);
-  bfd_signed_vma (*bfd_getx_signed_32) (const bfd_byte *);
-  void           (*bfd_putx32) (bfd_vma, bfd_byte *);
-  bfd_vma        (*bfd_getx16) (const bfd_byte *);
-  bfd_signed_vma (*bfd_getx_signed_16) (const bfd_byte *);
-  void           (*bfd_putx16) (bfd_vma, bfd_byte *);
+  bfd_uint64_t   (*bfd_getx64) (const void *);
+  bfd_int64_t    (*bfd_getx_signed_64) (const void *);
+  void           (*bfd_putx64) (bfd_uint64_t, void *);
+  bfd_vma        (*bfd_getx32) (const void *);
+  bfd_signed_vma (*bfd_getx_signed_32) (const void *);
+  void           (*bfd_putx32) (bfd_vma, void *);
+  bfd_vma        (*bfd_getx16) (const void *);
+  bfd_signed_vma (*bfd_getx_signed_16) (const void *);
+  void           (*bfd_putx16) (bfd_vma, void *);
 
   /* Byte swapping for the headers.  */
-  bfd_vma        (*bfd_h_getx64) (const bfd_byte *);
-  bfd_signed_vma (*bfd_h_getx_signed_64) (const bfd_byte *);
-  void           (*bfd_h_putx64) (bfd_vma, bfd_byte *);
-  bfd_vma        (*bfd_h_getx32) (const bfd_byte *);
-  bfd_signed_vma (*bfd_h_getx_signed_32) (const bfd_byte *);
-  void           (*bfd_h_putx32) (bfd_vma, bfd_byte *);
-  bfd_vma        (*bfd_h_getx16) (const bfd_byte *);
-  bfd_signed_vma (*bfd_h_getx_signed_16) (const bfd_byte *);
-  void           (*bfd_h_putx16) (bfd_vma, bfd_byte *);
+  bfd_uint64_t   (*bfd_h_getx64) (const void *);
+  bfd_int64_t    (*bfd_h_getx_signed_64) (const void *);
+  void           (*bfd_h_putx64) (bfd_uint64_t, void *);
+  bfd_vma        (*bfd_h_getx32) (const void *);
+  bfd_signed_vma (*bfd_h_getx_signed_32) (const void *);
+  void           (*bfd_h_putx32) (bfd_vma, void *);
+  bfd_vma        (*bfd_h_getx16) (const void *);
+  bfd_signed_vma (*bfd_h_getx_signed_16) (const void *);
+  void           (*bfd_h_putx16) (bfd_vma, void *);
 
   /* Format dependent routines: these are vectors of entry points
      within the target vector structure, one for each format to check.  */

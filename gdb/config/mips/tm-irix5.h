@@ -30,8 +30,8 @@
 #define SIGFRAME_FPREGSAVE_OFF	(SIGFRAME_BASE + 3 * 4 + 32 * 4 + 4)
 
 /* The signal handler trampoline is called _sigtramp.  */
-#undef IN_SIGTRAMP
-#define IN_SIGTRAMP(pc, name) ((name) && DEPRECATED_STREQ ("_sigtramp", name))
+#undef DEPRECATED_IN_SIGTRAMP
+#define DEPRECATED_IN_SIGTRAMP(pc, name) ((name) && DEPRECATED_STREQ ("_sigtramp", name))
 
 /* Irix 5 saves a full 64 bits for each register.  We skip 2 * 4 to
    get to the saved PC (the register mask and status register are both

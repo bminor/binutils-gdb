@@ -1,5 +1,5 @@
 /* ELF linking support for BFD.
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -653,8 +653,7 @@ _bfd_elf_link_renumber_dynsyms (bfd *output_bfd, struct bfd_link_info *info)
    TYPE_CHANGE_OK if it is OK for the type to change.  We set
    SIZE_CHANGE_OK if it is OK for the size to change.  By OK to
    change, we mean that we shouldn't warn if the type or size does
-   change. DT_NEEDED indicates if it comes from a DT_NEEDED entry of
-   a shared object.  */
+   change.  */
 
 bfd_boolean
 _bfd_elf_merge_symbol (bfd *abfd,
@@ -667,8 +666,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
 		       bfd_boolean *skip,
 		       bfd_boolean *override,
 		       bfd_boolean *type_change_ok,
-		       bfd_boolean *size_change_ok,
-		       bfd_boolean dt_needed)
+		       bfd_boolean *size_change_ok)
 {
   asection *sec;
   struct elf_link_hash_entry *h;
@@ -676,7 +674,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
   int bind;
   bfd *oldbfd;
   bfd_boolean newdyn, olddyn, olddef, newdef, newdyncommon, olddyncommon;
-  bfd_boolean newweakdef, oldweakdef, newweakundef, oldweakundef;
+  bfd_boolean newweak, oldweak;
 
   *skip = FALSE;
   *override = FALSE;
@@ -814,7 +812,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
 	     is the first time we see it in a dynamic object, we mark
 	     if it is weak. Otherwise, we clear it.  */
 	  if ((h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) == 0)
-	    { 
+	    {
 	      if (bind == STB_WEAK)
 		h->elf_link_hash_flags |= ELF_LINK_DYNAMIC_WEAK;
 	    }
@@ -882,48 +880,39 @@ _bfd_elf_merge_symbol (bfd *abfd,
       return TRUE;
     }
 
-  /* We need to treat weak definition right, depending on if there is a
-     definition from a dynamic object.  */
-  if (bind == STB_WEAK)
-    {
-      if (olddef)
-	{
-	   newweakdef = TRUE;
-	   newweakundef = FALSE;
-	}
-      else
-	{
-	   newweakdef = FALSE;
-	   newweakundef = TRUE;
-	}
-    }
-  else
-    newweakdef = newweakundef = FALSE;
+  /* Differentiate strong and weak symbols.  */
+  newweak = bind == STB_WEAK;
+  oldweak = (h->root.type == bfd_link_hash_defweak
+	     || h->root.type == bfd_link_hash_undefweak);
 
-  /* If the new weak definition comes from a relocatable file and the
-     old symbol comes from a dynamic object, we treat the new one as
-     strong.  */
-  if (newweakdef && !newdyn && olddyn)
-    newweakdef = FALSE;
+  /* If a new weak symbol comes from a regular file and the old symbol
+     comes from a dynamic library, we treat the new one as strong.
+     Similarly, an old weak symbol from a regular file is treated as
+     strong when the new symbol comes from a dynamic library.  Further,
+     an old weak symbol from a dynamic library is treated as strong if
+     the new symbol is from a dynamic library.  This reflects the way
+     glibc's ld.so works.  */
+  if (!newdyn && olddyn)
+    newweak = FALSE;
+  if (newdyn)
+    oldweak = FALSE;
 
-  if (h->root.type == bfd_link_hash_defweak)
-    {
-      oldweakdef = TRUE;
-      oldweakundef = FALSE;
-    }
-  else if (h->root.type == bfd_link_hash_undefweak)
-    {
-      oldweakdef = FALSE;
-      oldweakundef = TRUE;
-    }
-  else
-    oldweakdef = oldweakundef = FALSE;
+  /* It's OK to change the type if either the existing symbol or the
+     new symbol is weak.  A type change is also OK if the old symbol
+     is undefined and the new symbol is defined.  */
 
-  /* If the old weak definition comes from a relocatable file and the
-     new symbol comes from a dynamic object, we treat the old one as
-     strong.  */
-  if (oldweakdef && !olddyn && newdyn)
-    oldweakdef = FALSE;
+  if (oldweak
+      || newweak
+      || (newdef
+	  && h->root.type == bfd_link_hash_undefined))
+    *type_change_ok = TRUE;
+
+  /* It's OK to change the size if either the existing symbol or the
+     new symbol is weak, or if the old symbol is undefined.  */
+
+  if (*type_change_ok
+      || h->root.type == bfd_link_hash_undefined)
+    *size_change_ok = TRUE;
 
   /* NEWDYNCOMMON and OLDDYNCOMMON indicate whether the new or old
      symbol, respectively, appears to be a common symbol in a dynamic
@@ -950,11 +939,10 @@ _bfd_elf_merge_symbol (bfd *abfd,
 
   if (newdyn
       && newdef
+      && !newweak
       && (sec->flags & SEC_ALLOC) != 0
       && (sec->flags & SEC_LOAD) == 0
       && sym->st_size > 0
-      && !newweakdef
-      && !newweakundef
       && ELF_ST_TYPE (sym->st_info) != STT_FUNC)
     newdyncommon = TRUE;
   else
@@ -971,28 +959,6 @@ _bfd_elf_merge_symbol (bfd *abfd,
     olddyncommon = TRUE;
   else
     olddyncommon = FALSE;
-
-  /* It's OK to change the type if either the existing symbol or the
-     new symbol is weak unless it comes from a DT_NEEDED entry of
-     a shared object, in which case, the DT_NEEDED entry may not be
-     required at the run time. The type change is also OK if the
-     old symbol is undefined and the new symbol is defined.  */
-
-  if ((! dt_needed && oldweakdef)
-      || oldweakundef
-      || newweakdef
-      || newweakundef
-      || (newdef
-	  && (h->root.type == bfd_link_hash_undefined
-	      || h->root.type == bfd_link_hash_undefweak)))
-    *type_change_ok = TRUE;
-
-  /* It's OK to change the size if either the existing symbol or the
-     new symbol is weak, or if the old symbol is undefined.  */
-
-  if (*type_change_ok
-      || h->root.type == bfd_link_hash_undefined)
-    *size_change_ok = TRUE;
 
   /* If both the old and the new symbols look like common symbols in a
      dynamic object, set the size of the symbol to the larger of the
@@ -1031,24 +997,14 @@ _bfd_elf_merge_symbol (bfd *abfd,
      represent variables; this can cause confusion in principle, but
      any such confusion would seem to indicate an erroneous program or
      shared library.  We also permit a common symbol in a regular
-     object to override a weak symbol in a shared object.
-
-     We prefer a non-weak definition in a shared library to a weak
-     definition in the executable unless it comes from a DT_NEEDED
-     entry of a shared object, in which case, the DT_NEEDED entry
-     may not be required at the run time.  */
+     object to override a weak symbol in a shared object.  */
 
   if (newdyn
       && newdef
       && (olddef
 	  || (h->root.type == bfd_link_hash_common
-	      && (newweakdef
-		  || newweakundef
-		  || ELF_ST_TYPE (sym->st_info) == STT_FUNC)))
-      && (!oldweakdef
-	  || dt_needed
-	  || newweakdef
-	  || newweakundef))
+	      && (newweak
+		  || ELF_ST_TYPE (sym->st_info) == STT_FUNC))))
     {
       *override = TRUE;
       newdef = FALSE;
@@ -1092,20 +1048,17 @@ _bfd_elf_merge_symbol (bfd *abfd,
 
      As above, we again permit a common symbol in a regular object to
      override a definition in a shared object if the shared object
-     symbol is a function or is weak.
-
-     As above, we permit a non-weak definition in a shared object to
-     override a weak definition in a regular object.  */
+     symbol is a function or is weak.  */
 
   flip = NULL;
   if (! newdyn
       && (newdef
 	  || (bfd_is_com_section (sec)
-	      && (oldweakdef || h->type == STT_FUNC)))
+	      && (oldweak
+		  || h->type == STT_FUNC)))
       && olddyn
       && olddef
-      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
-      && ((!newweakdef && !newweakundef) || oldweakdef))
+      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0)
     {
       /* Change the hash table entry to undefined, and let
 	 _bfd_generic_link_add_one_symbol do the right thing with the
@@ -1194,57 +1147,13 @@ _bfd_elf_merge_symbol (bfd *abfd,
 	}
     }
 
-  /* Handle the special case of a weak definition in a regular object
-     followed by a non-weak definition in a shared object.  In this
-     case, we prefer the definition in the shared object unless it
-     comes from a DT_NEEDED entry of a shared object, in which case,
-     the DT_NEEDED entry may not be required at the run time.  */
-  if (olddef
-      && ! dt_needed
-      && oldweakdef
-      && newdef
-      && newdyn
-      && !newweakdef
-      && !newweakundef)
-    {
-      /* To make this work we have to frob the flags so that the rest
-	 of the code does not think we are using the regular
-	 definition.  */
-      if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0)
-	h->elf_link_hash_flags |= ELF_LINK_HASH_REF_REGULAR;
-      else if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0)
-	h->elf_link_hash_flags |= ELF_LINK_HASH_REF_DYNAMIC;
-      h->elf_link_hash_flags &= ~ (ELF_LINK_HASH_DEF_REGULAR
-				   | ELF_LINK_HASH_DEF_DYNAMIC);
-
-      /* If H is the target of an indirection, we want the caller to
-	 use H rather than the indirect symbol.  Otherwise if we are
-	 defining a new indirect symbol we will wind up attaching it
-	 to the entry we are overriding.  */
-      *sym_hash = h;
-    }
-
-  /* Handle the special case of a non-weak definition in a shared
-     object followed by a weak definition in a regular object.  In
-     this case we prefer the definition in the shared object.  To make
-     this work we have to tell the caller to not treat the new symbol
-     as a definition.  */
-  if (olddef
-      && olddyn
-      && !oldweakdef
-      && newdef
-      && ! newdyn
-      && (newweakdef || newweakundef))
-    *override = TRUE;
-
   return TRUE;
 }
 
 /* This function is called to create an indirect symbol from the
    default for the symbol with the default version if needed. The
    symbol is described by H, NAME, SYM, PSEC, VALUE, and OVERRIDE.  We
-   set DYNSYM if the new indirect symbol is dynamic. DT_NEEDED
-   indicates if it comes from a DT_NEEDED entry of a shared object.  */
+   set DYNSYM if the new indirect symbol is dynamic.  */
 
 bfd_boolean
 _bfd_elf_add_default_symbol (bfd *abfd,
@@ -1255,8 +1164,7 @@ _bfd_elf_add_default_symbol (bfd *abfd,
 			     asection **psec,
 			     bfd_vma *value,
 			     bfd_boolean *dynsym,
-			     bfd_boolean override,
-			     bfd_boolean dt_needed)
+			     bfd_boolean override)
 {
   bfd_boolean type_change_ok;
   bfd_boolean size_change_ok;
@@ -1317,7 +1225,7 @@ _bfd_elf_add_default_symbol (bfd *abfd,
   sec = *psec;
   if (!_bfd_elf_merge_symbol (abfd, info, shortname, sym, &sec, value,
 			      &hi, &skip, &override, &type_change_ok,
-			      &size_change_ok, dt_needed))
+			      &size_change_ok))
     return FALSE;
 
   if (skip)
@@ -1384,12 +1292,6 @@ _bfd_elf_add_default_symbol (bfd *abfd,
     {
       struct elf_link_hash_entry *ht;
 
-      /* If the symbol became indirect, then we assume that we have
-	 not seen a definition before.  */
-      BFD_ASSERT ((hi->elf_link_hash_flags
-		   & (ELF_LINK_HASH_DEF_DYNAMIC
-		      | ELF_LINK_HASH_DEF_REGULAR)) == 0);
-
       ht = (struct elf_link_hash_entry *) hi->root.u.i.link;
       (*bed->elf_backend_copy_indirect_symbol) (bed, ht, hi);
 
@@ -1430,7 +1332,7 @@ nondefault:
   sec = *psec;
   if (!_bfd_elf_merge_symbol (abfd, info, shortname, sym, &sec, value,
 			      &hi, &skip, &override, &type_change_ok,
-			      &size_change_ok, dt_needed))
+			      &size_change_ok))
     return FALSE;
 
   if (skip)
@@ -1462,12 +1364,6 @@ nondefault:
 
       if (hi->root.type == bfd_link_hash_indirect)
 	{
-	  /* If the symbol became indirect, then we assume that we have
-	     not seen a definition before.  */
-	  BFD_ASSERT ((hi->elf_link_hash_flags
-		       & (ELF_LINK_HASH_DEF_DYNAMIC
-			  | ELF_LINK_HASH_DEF_REGULAR)) == 0);
-
 	  (*bed->elf_backend_copy_indirect_symbol) (bed, h, hi);
 
 	  /* See if the new flags lead us to realize that the symbol
@@ -1880,10 +1776,6 @@ elf_link_read_relocs_from_section (bfd *abfd,
   Elf_Internal_Shdr *symtab_hdr;
   size_t nsyms;
 
-  /* If there aren't any relocations, that's OK.  */
-  if (!shdr)
-    return TRUE;
-
   /* Position ourselves at the start of the section.  */
   if (bfd_seek (abfd, shdr->sh_offset, SEEK_SET) != 0)
     return FALSE;
@@ -1909,7 +1801,7 @@ elf_link_read_relocs_from_section (bfd *abfd,
     }
 
   erela = external_relocs;
-  erelaend = erela + NUM_SHDR_ENTRIES (shdr) * shdr->sh_entsize;
+  erelaend = erela + shdr->sh_size;
   irela = internal_relocs;
   while (erela < erelaend)
     {
@@ -1995,12 +1887,13 @@ _bfd_elf_link_read_relocs (bfd *abfd,
 					  external_relocs,
 					  internal_relocs))
     goto error_return;
-  if (!elf_link_read_relocs_from_section
-      (abfd, o,
-       elf_section_data (o)->rel_hdr2,
-       ((bfd_byte *) external_relocs) + rel_hdr->sh_size,
-       internal_relocs + (NUM_SHDR_ENTRIES (rel_hdr)
-			  * bed->s->int_rels_per_ext_rel)))
+  if (elf_section_data (o)->rel_hdr2
+      && (!elf_link_read_relocs_from_section
+	  (abfd, o,
+	   elf_section_data (o)->rel_hdr2,
+	   ((bfd_byte *) external_relocs) + rel_hdr->sh_size,
+	   internal_relocs + (NUM_SHDR_ENTRIES (rel_hdr)
+			      * bed->s->int_rels_per_ext_rel))))
     goto error_return;
 
   /* Cache the results for next time, if we can.  */

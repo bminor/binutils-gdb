@@ -103,8 +103,6 @@ extern int hppa_instruction_nullified (void);
 
 #define REG_PARM_STACK_SPACE 16
 
-#define	GDB_TARGET_IS_HPPA
-
 /*
  * Unwind table and descriptor.
  */
