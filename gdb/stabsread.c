@@ -2892,11 +2892,11 @@ rs6000_builtin_type (typenum)
       break;
     case 25:
       /* Complex type consisting of two IEEE single precision values.  */
-      rettype = init_type (TYPE_CODE_ERROR, 8, 0, "complex", NULL);
+      rettype = init_type (TYPE_CODE_COMPLEX, 8, 0, "complex", NULL);
       break;
     case 26:
       /* Complex type consisting of two IEEE double precision values.  */
-      rettype = init_type (TYPE_CODE_ERROR, 16, 0, "double complex", NULL);
+      rettype = init_type (TYPE_CODE_COMPLEX, 16, 0, "double complex", NULL);
       break;
     case 27:
       rettype = init_type (TYPE_CODE_INT, 1, 0, "integer*1", NULL);
@@ -4413,7 +4413,7 @@ read_sun_floating_type (pp, typenums, objfile)
       || details == NF_COMPLEX32)
     /* This is a type we can't handle, but we do know the size.
        We also will be able to give it a name.  */
-    return init_type (TYPE_CODE_ERROR, nbytes, 0, NULL, objfile);
+    return init_type (TYPE_CODE_COMPLEX, nbytes, 0, NULL, objfile);
 
   return init_type (TYPE_CODE_FLT, nbytes, 0, NULL, objfile);
 }
@@ -4617,20 +4617,28 @@ read_range_type (pp, typenums, objfile)
   if (self_subrange && n2 == 0 && n3 == 0)
     return init_type (TYPE_CODE_VOID, 1, 0, NULL, objfile);
 
-  /* If n3 is zero and n2 is positive, we want a floating type,
-     and n2 is the width in bytes.
+  /* If n3 is zero and n2 is positive, we want a floating type, and n2
+     is the width in bytes.
 
-     Fortran programs appear to use this for complex types also,
-     and they give no way to distinguish between double and single-complex!
+     Fortran programs appear to use this for complex types also.  To
+     distinguish between floats and complex, g77 (and others?)  seem
+     to use self-subranges for the complexes, and subranges of int for
+     the floats.
 
-     GDB does not have complex types.
-
-     Just return the complex as a float of that size.  It won't work right
-     for the complex values, but at least it makes the file loadable.  */
+     Also note that for complexes, g77 sets n2 to the size of one of
+     the member floats, not the whole complex beast.  My guess is that
+     this was to work well with pre-COMPLEX versions of gdb. */
 
   if (n3 == 0 && n2 > 0)
     {
-      return init_type (TYPE_CODE_FLT, n2, 0, NULL, objfile);
+      if (self_subrange)
+	{
+	  return init_type (TYPE_CODE_COMPLEX, 2 * n2, 0, NULL, objfile);
+	}
+      else
+	{
+	  return init_type (TYPE_CODE_FLT, n2, 0, NULL, objfile);
+	}
     }
 
   /* If the upper bound is -1, it must really be an unsigned int.  */

@@ -1,3 +1,12 @@
+Mon Oct  5 19:44:39 1998  Stan Shebs  <shebs@andros.cygnus.com>
+
+	From David Purves  <purves@apogee.com>:
+	* stabsread.c (rs6000_builtin_type): Create a complex float instead
+	of an error.
+	(read_sun_floating_type): Similarly.
+	(read_range_type): Create a complex float if self_subrange is
+ 	true.
+
 Fri Oct  2 19:42:31 1998  Stu Grossman  <grossman@babylon-5.cygnus.com>
 
 	* c-lang.c (emit_char c_printchar c_printstr), c-lang.h (c_printstr)
