@@ -65,6 +65,7 @@
 #
 #	6	Comma separated list of functional units
 
+
 # PowerPC models
 ::model:604:ppc604:  PPC_UNIT_BAD,   PPC_UNIT_BAD,   1,  1,  0
 ::model:603e:ppc603e:PPC_UNIT_BAD,   PPC_UNIT_BAD,   1,  1,  0
@@ -95,29 +96,23 @@
 	  unsigned32	    flags;			/* any flags that are needed */
 	};
 
-	/* Register mappings */
-	#define PPC_INT_REG	0			/* start of integer registers */
-	#define PPC_FLOAT_REG	(PPC_INT_REG + 32)	/* start of floating point registers */
-	#define PPC_CR_REG	(PPC_FLOAT_REG + 32)	/* start of CR0 .. CR7 */
-	#define PPC_SPR_REG	(PPC_CR_REG + 8)	/* start of special purpose registers */
-	#define PPC_FPSCR_REG	(PPC_SPR_REG + 1024)	/* start of fpscr register */
-	#define NR_PPC_REGS	(PPC_FPSCR_REG + 1)	/* # of registers to allocate */
+	/* Register mappings in status masks */
+	#define PPC_CR_REG	0			/* start of CR0 .. CR7 */
+	#define PPC_FPSCR_REG	(PPC_CR_REG + 8)	/* start of fpscr register */
 
-	/* Structure for each register to indicate whether it is free or not */
-	typedef struct _model_reg model_reg;
-	struct _model_reg {
-	  model_reg *next;				/* next register to be released */
-	  int in_use;					/* non zero if register is used */
-	};
+	#define PPC_NO_SPR	(-1)			/* flag for no SPR register */
 
 	/* Structure for each functional unit that is busy */
 	typedef struct _model_busy model_busy;
 	struct _model_busy {
 	  model_busy *next;				/* next function unit */
-	  model_reg *reg;				/* list of registers to release */
 	  ppc_function_unit unit;			/* function unit name */
-	  signed16 issue;				/* # of cycles until unit can accept another insn */
-	  signed16 done;				/* # of cycles until insn is done */
+	  unsigned32 int_busy;				/* int registers that are busy */
+	  unsigned32 fp_busy;				/* floating point registers that are busy */
+	  unsigned32 cr_fpscr_busy;			/* CR/FPSCR registers that are busy */
+	  signed16 spr_busy;				/* SPR register that is busy or PPC_NO_SPR */
+	  signed8 issue;				/* # of cycles until unit can accept another insn */
+	  signed8 done;					/* # of cycles until insn is done */
 	};
 
 	/* Structure to hold the current state information for the simulated CPU model */
@@ -127,7 +122,6 @@
 	  const model_time *timing;			/* timing information */
 	  model_busy *busy_list;			/* list of busy function units */
 	  model_busy *free_list;			/* list of model_busy structs not in use */
-	  model_reg registers[NR_PPC_REGS];		/* register status */
 	  count_type nr_cycles;				/* # cycles */
 	  count_type nr_branches;			/* # branches */
 	  count_type nr_branches_fallthrough;		/* # conditional branches that fell through */
@@ -136,10 +130,12 @@
 	  count_type nr_stalls_data;			/* # of stalls for data */
 	  count_type nr_stalls_unit;			/* # of stalls waiting for a function unit */
 	  count_type nr_stalls_serialize;		/* # of stalls waiting for things to quiet down */
-	  count_type nr_insns_not_handled;		/* # of instructions not handled */
 	  count_type nr_units[nr_ppc_function_units];	/* function unit counts */
-	  int insn_handled;				/* whether last insn was handled */
-	  unsigned_1 busy[nr_ppc_function_units];	/* whether a function is busy or not */
+	  unsigned32 int_busy;				/* int registers that are busy */
+	  unsigned32 fp_busy;				/* floating point registers that are busy */
+	  unsigned32 cr_fpscr_busy;			/* CR/FPSCR registers that are busy */
+	  unsigned8 spr_busy[nr_of_sprs];		/* SPR registers that are busy */
+	  unsigned8 busy[nr_ppc_function_units];	/* whether a function is busy or not */
 	};
 
 	STATIC_MODEL const char *const ppc_function_unit_name[ (int)nr_ppc_function_units ] = {
@@ -154,15 +150,69 @@
 	  "branch functional unit instruction",
 	};
 
-# Code called after executing the semantics of the function
-void::model-function::model_cleanup:itable_index index, model_data *model_ptr
-	if (model_ptr->insn_handled)
-	  model_ptr->insn_handled = 0;
-	else {
-	  model_ptr->nr_insns_not_handled++;
-	  TRACE(trace_tbd,("model specific code for %s not done\n", itable[index].name));
+
+# Trace releasing resources
+void::model-static::model_trace_release:model_data *model_ptr, model_busy *busy
+	int i;
+	TRACE(trace_model,("done, %s\n", ppc_function_unit_name[busy->unit]));
+	if (busy->int_busy) {
+	  for(i = 0; i < 32; i++) {
+	    if (((1 << i) & busy->int_busy) != 0) {
+	      TRACE(trace_model, ("Register r%d is now available.\n", i));
+	    }
+	  }
 	}
+	if (busy->fp_busy) {
+	  for(i = 0; i < 32; i++) {
+	    if (((1 << i) & busy->fp_busy) != 0) {
+	      TRACE(trace_model, ("Register f%d is now available.\n", i));
+	    }
+	  }
+	}
+	if (busy->cr_fpscr_busy) {
+	  for(i = 0; i < 8; i++) {
+	    if (((1 << i) & busy->cr_fpscr_busy) != 0) {
+	      TRACE(trace_model, ("Register cr%d is now available.\n", i));
+	    }
+	  }
+	  if (busy->cr_fpscr_busy & 0x100)
+	    TRACE(trace_model, ("Register fpscr is now available.\n"));
+	}
+	if (busy->spr_busy != PPC_NO_SPR)
+	  TRACE(trace_model, ("Register %s is now available.\n", spr_name(busy->spr_busy)));
 
+# Trace waiting for registers to become available
+void::model-static::model_trace_busy_p:model_data *model_ptr, unsigned32 int_busy, unsigned32 fp_busy, unsigned32 cr_or_fpscr_busy, int spr_busy
+	int i;
+	if (int_busy) {
+	  int_busy &= model_ptr->int_busy;
+	  for(i = 0; i < 32; i++) {
+	    if (((1 << i) & int_busy) != 0) {
+	      TRACE(trace_model, ("Waiting for register r%d.\n", i));
+	    }
+	  }
+	}
+	if (fp_busy) {
+	  fp_busy &= model_ptr->fp_busy;
+	  for(i = 0; i < 32; i++) {
+	    if (((1 << i) & fp_busy) != 0) {
+	      TRACE(trace_model, ("Waiting for register f%d.\n", i));
+	    }
+	  }
+	}
+	if (cr_or_fpscr_busy) {
+	  cr_or_fpscr_busy &= model_ptr->cr_fpscr_busy;
+	  for(i = 0; i < 8; i++) {
+	    if (((1 << i) & cr_or_fpscr_busy) != 0) {
+	      TRACE(trace_model, ("Waiting for register cr%d.\n", i));
+	    }
+	  }
+	  if (cr_or_fpscr_busy & 0x100)
+	    TRACE(trace_model, ("Waiting for register fpscr.\n"));
+	}
+	if (spr_busy != PPC_NO_SPR && model_ptr->spr_busy[spr_busy])
+	  TRACE(trace_model, ("Waiting for register %s.\n", spr_name(spr_busy)));
+
 # Advance state to next cycle, releasing any registers allocated
 void::model-internal::model_new_cycle:model_data *model_ptr
 	model_busy *cur_busy  = model_ptr->busy_list;
@@ -174,13 +224,15 @@ void::model-internal::model_new_cycle:model_data *model_ptr
 	for ( ; cur_busy; cur_busy = next) {
 	  next = cur_busy->next;
 	  if (--cur_busy->done <= 0) {		/* function unit done, release registers */
-	    model_reg *reg = cur_busy->reg;
-	    TRACE(trace_model,("done, retiring %s\n", ppc_function_unit_name[cur_busy->unit]));
-	    while (reg) {
-	      TRACE(trace_model,("freeing up reg, address 0x%lx (%d)\n", (long)reg, reg - &model_ptr->registers[0]));
-	      reg->in_use = 0;
-	      reg = reg->next;
-	    }
+	    model_ptr->int_busy &= ~cur_busy->int_busy;
+	    model_ptr->fp_busy &= ~cur_busy->fp_busy;
+	    model_ptr->cr_fpscr_busy &= ~cur_busy->cr_fpscr_busy;
+	    if (cur_busy->spr_busy != PPC_NO_SPR)
+	      model_ptr->spr_busy[cur_busy->spr_busy] = 0;
+
+	    if (WITH_TRACE && ppc_trace[trace_model])
+	      model_trace_release(model_ptr, cur_busy);
+
 	    model_ptr->busy[cur_busy->unit] = 0;
 	    cur_busy->next = free_list;
 	    free_list = cur_busy;
@@ -204,12 +256,11 @@ void::model-internal::model_new_cycle:model_data *model_ptr
 	model_ptr->busy_list = next_busy;
 	model_ptr->free_list = free_list;
 
-# Mark a function unit as busy, return the busy structure so regs can be added to be released
+# Mark a function unit as busy, return the busy structure
 model_busy *::model-internal::model_make_busy:model_data *model_ptr, ppc_function_unit unit, int issue, int done
 	model_busy *busy;
 
 	TRACE(trace_model,("unit = %s, issue = %d, done = %d\n", ppc_function_unit_name[unit], issue, done));
-	model_ptr->insn_handled = 1;
 
 	if (!model_ptr->free_list) {
 	  busy = ZALLOC(model_busy);
@@ -217,17 +268,45 @@ model_busy *::model-internal::model_make_busy:model_data *model_ptr, ppc_functio
 	else {
 	  busy = model_ptr->free_list;
 	  model_ptr->free_list = busy->next;
-	  busy->reg = (model_reg *)0;
 	}
 	busy->next = model_ptr->busy_list;
 	busy->unit = unit;
 	busy->issue = issue;
 	busy->done = done;
+	busy->int_busy = 0;
+	busy->fp_busy = 0;
+	busy->cr_fpscr_busy = 0;
+	busy->spr_busy = PPC_NO_SPR;
 	model_ptr->busy_list = busy;
 	model_ptr->busy[unit] = 1;
 	model_ptr->nr_units[unit]++;
 	return busy;
+
+# Make a given integer register busy
+void::model-internal::model_make_int_reg_busy:model_data *model_ptr, model_busy *busy_ptr, int regno
+	TRACE(trace_model,("Marking register r%d as busy\n", regno));
+	busy_ptr->int_busy |= (1 << regno);
+	model_ptr->int_busy |= (1 << regno);
 
+# Make a given floating point register busy
+void::model-internal::model_make_fp_reg_busy:model_data *model_ptr, model_busy *busy_ptr, int regno
+	TRACE(trace_model,("Marking register f%d as busy\n", regno));
+	busy_ptr->fp_busy |= (1 << regno);
+	model_ptr->fp_busy |= (1 << regno);
+
+# Make a given CR register busy
+void::model-internal::model_make_cr_reg_busy:model_data *model_ptr, model_busy *busy_ptr, int regno
+	TRACE(trace_model,("Marking register cr%d as busy\n", regno));
+	busy_ptr->cr_fpscr_busy |= (1 << regno);
+	model_ptr->cr_fpscr_busy |= (1 << regno);
+
+# Make a given SPR register busy
+void::model-internal::model_make_spr_reg_busy:model_data *model_ptr, model_busy *busy_ptr, int regno
+	TRACE(trace_model,("Marking register %s as busy\n", spr_name(regno)));
+	busy_ptr->spr_busy = regno;
+	model_ptr->spr_busy[regno] = 1;
+
+
 # Wait until a function unit is non-busy, and then allocate a busy pointer & return the pointer
 model_busy *::model-internal::model_wait_for_unit:itable_index index, model_data *const model_ptr, const model_time *const time_ptr
 	ppc_function_unit first_unit = time_ptr->first_unit;
@@ -266,11 +345,13 @@ void::model-function::model_serialize:itable_index index, model_data *model_ptr
 # Wait for a CR to become unbusy
 void::model-function::model_wait_for_cr:model_data *model_ptr, unsigned CRBIT
 	unsigned u;
+	unsigned32 cr_mask;
 	int cr_var = 0;
 	for (u = 0xc0000000; (u != 0) && (CRBIT & u) == 0; u >>= 4 )
 	  cr_var++;
 
-	while (model_ptr->registers[cr_var + PPC_CR_REG].in_use) {
+	cr_mask = (1 << cr_var);
+	while ((model_ptr->cr_fpscr_busy & cr_mask) != 0) {
 	  TRACE(trace_model,("waiting for CR %d\n", cr_var));
 	  model_ptr->nr_stalls_data++;
 	  model_new_cycle(model_ptr);
@@ -278,92 +359,144 @@ void::model-function::model_wait_for_cr:model_data *model_ptr, unsigned CRBIT
 
 # Schedule an instruction that takes 2 integer input registers and produces an output register & possibly sets CR0
 void::model-function::ppc_insn_int2:itable_index index, cpu *processor, model_data *model_ptr, signed_word *rD, signed_word *rA, signed_word *rB, unsigned Rc
+	registers *cpu_regs = cpu_registers(processor);
+	const unsigned ppc_RA = (rA - &cpu_regs->gpr[0]);
+	const unsigned ppc_RB = (rB - &cpu_regs->gpr[0]);
+	const unsigned ppc_RD = (rD - &cpu_regs->gpr[0]);
+	const unsigned32 int_mask = (1 << ppc_RA) | (1 << ppc_RB) | (1 << ppc_RD);
+	model_busy *busy_ptr;
+
 	if (!WITH_MODEL_ISSUE)
 	  return;
 
-	else {
-	  registers *cpu_regs = cpu_registers(processor);
-	  const unsigned ppc_RA = (rA - &cpu_regs->gpr[0]) + PPC_INT_REG;
-	  const unsigned ppc_RB = (rB - &cpu_regs->gpr[0]) + PPC_INT_REG;
-	  const unsigned ppc_RD = (rD - &cpu_regs->gpr[0]) + PPC_INT_REG;
-	  model_reg *ppc_regs = model_ptr->registers;
-	  model_busy *busy_ptr;
-
-	  if (ppc_regs[ppc_RA].in_use | ppc_regs[ppc_RB].in_use) {
+	else if (!Rc) {
+	  if ((model_ptr->int_busy & int_mask) != 0) {
 	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
 
-	    while (ppc_regs[ppc_RA].in_use | ppc_regs[ppc_RB].in_use) {
+	    while ((model_ptr->int_busy & int_mask) != 0) {
+	      if (WITH_TRACE && ppc_trace[trace_model])
+		model_trace_busy_p(model_ptr, int_mask, 0, 0, PPC_NO_SPR);
+
 	      model_ptr->nr_stalls_data++;
 	      model_new_cycle(model_ptr);
 	    }
 	  }
 
 	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  ppc_regs[ppc_RD].next = (model_reg *)0;
-	  ppc_regs[ppc_RD].in_use = 1;
-	  if (!Rc)
-	    busy_ptr->reg = &ppc_regs[ppc_RD];
-	  else {
-	    model_reg *reg_CR0 = &ppc_regs[0 + PPC_CR_REG];
-	    reg_CR0->next = &ppc_regs[ppc_RD];
-	    busy_ptr->reg = reg_CR0;
+	  model_make_int_reg_busy(model_ptr, busy_ptr, ppc_RD);
+	  return;
+	}
+
+	else {
+	  const unsigned32 cr_mask = (1 << 0);
+
+	  if ((model_ptr->int_busy & int_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
+	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
+
+	    while ((model_ptr->int_busy & int_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
+	      if (WITH_TRACE && ppc_trace[trace_model])
+		model_trace_busy_p(model_ptr, int_mask, 0, cr_mask, PPC_NO_SPR);
+
+	      model_ptr->nr_stalls_data++;
+	      model_new_cycle(model_ptr);
+	    }
 	  }
+
+	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
+	  model_make_int_reg_busy(model_ptr, busy_ptr, ppc_RD);
+	  model_make_cr_reg_busy(model_ptr, busy_ptr, 0);
+	  return;
 	}
 
 # Schedule an instruction that takes 1 integer input registers and produces an output register & possibly sets CR0
 void::model-function::ppc_insn_int1:itable_index index, cpu *processor, model_data *model_ptr, signed_word *rD, signed_word *rA, unsigned Rc
+	registers *cpu_regs = cpu_registers(processor);
+	const unsigned ppc_RA = (rA - &cpu_regs->gpr[0]);
+	const unsigned ppc_RD = (rD - &cpu_regs->gpr[0]);
+	const unsigned32 int_mask = (1 << ppc_RA) | (1 << ppc_RD);
+	model_busy *busy_ptr;
+
 	if (!WITH_MODEL_ISSUE)
 	  return;
 
-	else {
-	  registers *cpu_regs = cpu_registers(processor);
-	  const unsigned ppc_RA = (rA - &cpu_regs->gpr[0]) + PPC_INT_REG;
-	  const unsigned ppc_RD = (rD - &cpu_regs->gpr[0]) + PPC_INT_REG;
-	  model_reg *ppc_regs = model_ptr->registers;
-	  model_busy *busy_ptr;
-
-	if (ppc_regs[ppc_RA].in_use) {
+	else if (!Rc) {
+	  if ((model_ptr->int_busy & int_mask) != 0) {
 	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
 
-	    while (ppc_regs[ppc_RA].in_use) {
+	    while ((model_ptr->int_busy & int_mask) != 0) {
+	      if (WITH_TRACE && ppc_trace[trace_model])
+		model_trace_busy_p(model_ptr, int_mask, 0, 0, PPC_NO_SPR);
+
 	      model_ptr->nr_stalls_data++;
 	      model_new_cycle(model_ptr);
 	    }
 	  }
 
 	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  ppc_regs[ppc_RD].next = (model_reg *)0;
-	  ppc_regs[ppc_RD].in_use = 1;
-	  if (!Rc)
-	    busy_ptr->reg = &ppc_regs[ppc_RD];
-	  else {
-	    model_reg *reg_CR0 = &ppc_regs[0 + PPC_CR_REG];
-	    reg_CR0->next = &ppc_regs[ppc_RD];
-	    busy_ptr->reg = reg_CR0;
+	  model_make_int_reg_busy(model_ptr, busy_ptr, ppc_RD);
+	  return;
+	}
+
+	else {
+	  const unsigned32 cr_mask = (1 << 0);
+
+	  if ((model_ptr->int_busy & int_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
+	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
+
+	    while ((model_ptr->int_busy & int_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
+	      if (WITH_TRACE && ppc_trace[trace_model])
+		model_trace_busy_p(model_ptr, int_mask, 0, cr_mask, PPC_NO_SPR);
+
+	      model_ptr->nr_stalls_data++;
+	      model_new_cycle(model_ptr);
+	    }
 	  }
+
+	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
+	  model_make_int_reg_busy(model_ptr, busy_ptr, ppc_RD);
+	  model_make_cr_reg_busy(model_ptr, busy_ptr, 0);
+	  return;
 	}
 
 # Schedule an instruction that takes no integer input registers and produces an output register & possibly sets CR0
 void::model-function::ppc_insn_int0:itable_index index, cpu *processor, model_data *model_ptr, signed_word *rD, unsigned Rc
+	registers *cpu_regs = cpu_registers(processor);
+	const unsigned ppc_RD = (rD - &cpu_regs->gpr[0]);
+	const unsigned32 int_mask = (1 << ppc_RD);
+	model_busy *busy_ptr;
+
 	if (!WITH_MODEL_ISSUE)
 	  return;
 
-	else {
-	  registers *cpu_regs = cpu_registers(processor);
-	  const unsigned ppc_RD = (rD - &cpu_regs->gpr[0]) + PPC_INT_REG;
-	  model_reg *ppc_regs = model_ptr->registers;
-	  model_busy *busy_ptr;
+	else if (!Rc) {
+	  while ((model_ptr->int_busy & int_mask) != 0) {
+	    if (WITH_TRACE && ppc_trace[trace_model])
+	      model_trace_busy_p(model_ptr, int_mask, 0, 0, PPC_NO_SPR);
+
+	      model_ptr->nr_stalls_data++;
+	      model_new_cycle(model_ptr);
+	  }
 
 	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  ppc_regs[ppc_RD].next = (model_reg *)0;
-	  ppc_regs[ppc_RD].in_use = 1;
-	  if (!Rc)
-	    busy_ptr->reg = &ppc_regs[ppc_RD];
-	  else {
-	    model_reg *reg_CR0 = &ppc_regs[0 + PPC_CR_REG];
-	    reg_CR0->next = &ppc_regs[ppc_RD];
-	    busy_ptr->reg = reg_CR0;
+	  model_make_int_reg_busy(model_ptr, busy_ptr, ppc_RD);
+	  return;
+	}
+
+	else {
+	  const unsigned32 cr_mask = (1 << 0);
+
+	  while ((model_ptr->int_busy & int_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
+	    if (WITH_TRACE && ppc_trace[trace_model])
+	      model_trace_busy_p(model_ptr, int_mask, 0, cr_mask, PPC_NO_SPR);
+
+	      model_ptr->nr_stalls_data++;
+	      model_new_cycle(model_ptr);
 	  }
+
+	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
+	  model_make_int_reg_busy(model_ptr, busy_ptr, ppc_RD);
+	  model_make_cr_reg_busy(model_ptr, busy_ptr, 0);
+	  return;
 	}
 
 # Schedule an instruction that takes 2 integer input registers and produces an output register & updates a second register
@@ -373,28 +506,27 @@ void::model-function::ppc_insn_int2_update:itable_index index, cpu *processor, m
 
 	else {
 	  registers *cpu_regs = cpu_registers(processor);
-	  const unsigned ppc_RA = (rA - &cpu_regs->gpr[0]) + PPC_INT_REG;
-	  const unsigned ppc_RB = (rB - &cpu_regs->gpr[0]) + PPC_INT_REG;
-	  const unsigned ppc_RD = (rD - &cpu_regs->gpr[0]) + PPC_INT_REG;
-	  model_reg *ppc_regs = model_ptr->registers;
+	  const unsigned ppc_RA = (rA - &cpu_regs->gpr[0]);
+	  const unsigned ppc_RB = (rB - &cpu_regs->gpr[0]);
+	  const unsigned ppc_RD = (rD - &cpu_regs->gpr[0]);
+	  const unsigned32 int_mask = (1 << ppc_RA) | (1 << ppc_RB) | (1 << ppc_RD);
 	  model_busy *busy_ptr;
 
-	  if (ppc_regs[ppc_RA].in_use | ppc_regs[ppc_RB].in_use) {
+	  if ((model_ptr->int_busy & int_mask) != 0) {
 	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
 
-	    while (ppc_regs[ppc_RA].in_use | ppc_regs[ppc_RB].in_use) {
+	    while ((model_ptr->int_busy & int_mask) != 0) {
+	      if (WITH_TRACE && ppc_trace[trace_model])
+		model_trace_busy_p(model_ptr, int_mask, 0, 0, PPC_NO_SPR);
+
 	      model_ptr->nr_stalls_data++;
 	      model_new_cycle(model_ptr);
 	    }
 	  }
 
 	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  ppc_regs[ppc_RA].next = (model_reg *)0;
-	  ppc_regs[ppc_RA].in_use = 1;
-
-	  ppc_regs[ppc_RD].next = &ppc_regs[ppc_RA];
-	  ppc_regs[ppc_RD].in_use = 1;
-	  busy_ptr->reg = &ppc_regs[ppc_RD];
+	  model_make_int_reg_busy(model_ptr, busy_ptr, ppc_RA);
+	  model_make_int_reg_busy(model_ptr, busy_ptr, ppc_RD);
 	}
 
 # Schedule an instruction that takes 1 integer input registers and produces an output register & updates the other register
@@ -404,27 +536,26 @@ void::model-function::ppc_insn_int1_update:itable_index index, cpu *processor, m
 
 	else {
 	  registers *cpu_regs = cpu_registers(processor);
-	  const unsigned ppc_RA = (rA - &cpu_regs->gpr[0]) + PPC_INT_REG;
-	  const unsigned ppc_RD = (rD - &cpu_regs->gpr[0]) + PPC_INT_REG;
-	  model_reg *ppc_regs = model_ptr->registers;
+	  const unsigned ppc_RA = (rA - &cpu_regs->gpr[0]);
+	  const unsigned ppc_RD = (rD - &cpu_regs->gpr[0]);
+	  const unsigned32 int_mask = (1 << ppc_RA) | (1 << ppc_RD);
 	  model_busy *busy_ptr;
 
-	  if (ppc_regs[ppc_RA].in_use) {
+	  if ((model_ptr->int_busy & int_mask) != 0) {
 	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
 
-	    while (ppc_regs[ppc_RA].in_use) {
+	    while ((model_ptr->int_busy & int_mask) != 0) {
+	      if (WITH_TRACE && ppc_trace[trace_model])
+		model_trace_busy_p(model_ptr, int_mask, 0, 0, PPC_NO_SPR);
+
 	      model_ptr->nr_stalls_data++;
 	      model_new_cycle(model_ptr);
 	    }
 	  }
 
 	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  ppc_regs[ppc_RA].next = (model_reg *)0;
-	  ppc_regs[ppc_RA].in_use = 1;
-
-	  ppc_regs[ppc_RD].next = &ppc_regs[ppc_RA];
-	  ppc_regs[ppc_RD].in_use = 1;
-	  busy_ptr->reg = &ppc_regs[ppc_RD];
+	  model_make_int_reg_busy(model_ptr, busy_ptr, ppc_RA);
+	  model_make_int_reg_busy(model_ptr, busy_ptr, ppc_RD);
 	}
 
 # Schedule an instruction that takes 2 integer input registers and produces no output register
@@ -434,14 +565,17 @@ void::model-function::ppc_insn_int2_noout:itable_index index, cpu *processor, mo
 
 	else {
 	  registers *cpu_regs = cpu_registers(processor);
-	  const unsigned ppc_RA = (rA - &cpu_regs->gpr[0]) + PPC_INT_REG;
-	  const unsigned ppc_RB = (rB - &cpu_regs->gpr[0]) + PPC_INT_REG;
-	  model_reg *ppc_regs = model_ptr->registers;
+	  const unsigned ppc_RA = (rA - &cpu_regs->gpr[0]);
+	  const unsigned ppc_RB = (rB - &cpu_regs->gpr[0]);
+	  const unsigned32 int_mask = (1 << ppc_RA) | (1 << ppc_RB);
 
-	  if (ppc_regs[ppc_RA].in_use | ppc_regs[ppc_RB].in_use) {
+	  if ((model_ptr->int_busy & int_mask) != 0) {
 	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
 
-	    while (ppc_regs[ppc_RA].in_use | ppc_regs[ppc_RB].in_use) {
+	    while ((model_ptr->int_busy & int_mask) != 0) {
+	      if (WITH_TRACE && ppc_trace[trace_model])
+		model_trace_busy_p(model_ptr, int_mask, 0, 0, PPC_NO_SPR);
+
 	      model_ptr->nr_stalls_data++;
 	      model_new_cycle(model_ptr);
 	    }
@@ -457,13 +591,16 @@ void::model-function::ppc_insn_int1_noout:itable_index index, cpu *processor, mo
 
 	else {
 	  registers *cpu_regs = cpu_registers(processor);
-	  const unsigned ppc_RA = (rA - &cpu_regs->gpr[0]) + PPC_INT_REG;
-	  model_reg *ppc_regs = model_ptr->registers;
+	  const unsigned ppc_RA = (rA - &cpu_regs->gpr[0]);
+	  const unsigned32 int_mask = (1 << ppc_RA);
 
-	  if (ppc_regs[ppc_RA].in_use) {
+	  if ((model_ptr->int_busy & int_mask) != 0) {
 	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
 
-	    while (ppc_regs[ppc_RA].in_use) {
+	    while ((model_ptr->int_busy & int_mask) != 0) {
+	      if (WITH_TRACE && ppc_trace[trace_model])
+		model_trace_busy_p(model_ptr, int_mask, 0, 0, PPC_NO_SPR);
+
 	      model_ptr->nr_stalls_data++;
 	      model_new_cycle(model_ptr);
 	    }
@@ -488,25 +625,26 @@ void::model-function::ppc_insn_int2_cr:itable_index index, cpu *processor, model
 
 	else {
 	  registers *cpu_regs = cpu_registers(processor);
-	  const unsigned ppc_RA = (rA - &cpu_regs->gpr[0]) + PPC_INT_REG;
-	  const unsigned ppc_RB = (rB - &cpu_regs->gpr[0]) + PPC_INT_REG;
-	  const unsigned ppc_CRD = CRD + PPC_CR_REG;
-	  model_reg *ppc_regs = model_ptr->registers;
+	  const unsigned ppc_RA = (rA - &cpu_regs->gpr[0]);
+	  const unsigned ppc_RB = (rB - &cpu_regs->gpr[0]);
+	  const unsigned32 int_mask = (1 << ppc_RA) | (1 << ppc_RB);
+	  const unsigned32 cr_mask = (1 << CRD);
 	  model_busy *busy_ptr;
 
-	  if (ppc_regs[ppc_RA].in_use | ppc_regs[ppc_RB].in_use) {
+	  if ((model_ptr->int_busy & int_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
 	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
 
-	    while (ppc_regs[ppc_RA].in_use | ppc_regs[ppc_RB].in_use) {
+	    while ((model_ptr->int_busy & int_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
+	      if (WITH_TRACE && ppc_trace[trace_model])
+		model_trace_busy_p(model_ptr, int_mask, 0, cr_mask, PPC_NO_SPR);
+
 	      model_ptr->nr_stalls_data++;
 	      model_new_cycle(model_ptr);
 	    }
 	  }
 
 	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  ppc_regs[ppc_CRD].next = (model_reg *)0;
-	  ppc_regs[ppc_CRD].in_use = 1;
-	  busy_ptr->reg = &ppc_regs[ppc_CRD];
+	  model_make_cr_reg_busy(model_ptr, busy_ptr, CRD);
 	}
 
 # Schedule an instruction that takes 1 integer input register and produces a CR output register
@@ -516,24 +654,271 @@ void::model-function::ppc_insn_int1_cr:itable_index index, cpu *processor, model
 
 	else {
 	  registers *cpu_regs = cpu_registers(processor);
-	  const unsigned ppc_RA = (rA - &cpu_regs->gpr[0]) + PPC_INT_REG;
-	  const unsigned ppc_CRD = CRD + PPC_CR_REG;
-	  model_reg *ppc_regs = model_ptr->registers;
+	  const unsigned ppc_RA = (rA - &cpu_regs->gpr[0]);
+	  const unsigned32 int_mask = (1 << ppc_RA);
+	  const unsigned32 cr_mask = (1 << CRD);
 	  model_busy *busy_ptr;
 
-	  if (ppc_regs[ppc_RA].in_use) {
+	  if ((model_ptr->int_busy & int_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
 	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
 
-	    while (ppc_regs[ppc_RA].in_use) {
+	    while ((model_ptr->int_busy & int_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
+	      if (WITH_TRACE && ppc_trace[trace_model])
+		model_trace_busy_p(model_ptr, int_mask, 0, cr_mask, PPC_NO_SPR);
+
 	      model_ptr->nr_stalls_data++;
 	      model_new_cycle(model_ptr);
 	    }
 	  }
 
 	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  ppc_regs[ppc_CRD].next = (model_reg *)0;
-	  ppc_regs[ppc_CRD].in_use = 1;
-	  busy_ptr->reg = &ppc_regs[ppc_CRD];
+	  model_make_cr_reg_busy(model_ptr, busy_ptr, CRD);
+	}
+
+# Schedule an instruction that takes 3 floating point input registers and produces an output register & possibly sets CR1
+void::model-function::ppc_insn_fp3:itable_index index, cpu *processor, model_data *model_ptr, unsigned64 *rD, unsigned64 *rA, unsigned64 *rB, unsigned64 *rC, unsigned Rc
+	registers *cpu_regs = cpu_registers(processor);
+	const unsigned ppc_RA = (rA - &cpu_regs->fpr[0]);
+	const unsigned ppc_RB = (rB - &cpu_regs->fpr[0]);
+	const unsigned ppc_RC = (rC - &cpu_regs->fpr[0]);
+	const unsigned ppc_RD = (rD - &cpu_regs->fpr[0]);
+	const unsigned32 fp_mask = (1 << ppc_RA) | (1 << ppc_RB) | (1 << ppc_RC) | (1 << ppc_RD);
+	model_busy *busy_ptr;
+
+	if (!WITH_MODEL_ISSUE)
+	  return;
+
+	else if (!Rc) {
+	  if ((model_ptr->fp_busy & fp_mask) != 0) {
+	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
+
+	    while ((model_ptr->fp_busy & fp_mask) != 0) {
+	      if (WITH_TRACE && ppc_trace[trace_model])
+		model_trace_busy_p(model_ptr, 0, fp_mask, 0, PPC_NO_SPR);
+
+	      model_ptr->nr_stalls_data++;
+	      model_new_cycle(model_ptr);
+	    }
+	  }
+
+	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
+	  model_make_fp_reg_busy(model_ptr, busy_ptr, ppc_RD);
+	  return;
+	}
+
+	else {
+	  const unsigned32 cr_mask = (1 << 1);
+	  if ((model_ptr->fp_busy & fp_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
+	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
+
+	    while ((model_ptr->fp_busy & fp_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
+	      if (WITH_TRACE && ppc_trace[trace_model])
+		model_trace_busy_p(model_ptr, 0, fp_mask, cr_mask, PPC_NO_SPR);
+
+	      model_ptr->nr_stalls_data++;
+	      model_new_cycle(model_ptr);
+	    }
+	  }
+
+	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
+	  model_make_fp_reg_busy(model_ptr, busy_ptr, ppc_RD);
+	  model_make_cr_reg_busy(model_ptr, busy_ptr, 1);
+	  return;
+	}
+
+# Schedule an instruction that takes 2 floating point input registers and produces an output register & possibly sets CR1
+void::model-function::ppc_insn_fp2:itable_index index, cpu *processor, model_data *model_ptr, unsigned64 *rD, unsigned64 *rA, unsigned64 *rB, unsigned Rc
+	registers *cpu_regs = cpu_registers(processor);
+	const unsigned ppc_RA = (rA - &cpu_regs->fpr[0]);
+	const unsigned ppc_RB = (rB - &cpu_regs->fpr[0]);
+	const unsigned ppc_RD = (rD - &cpu_regs->fpr[0]);
+	const unsigned32 fp_mask = (1 << ppc_RA) | (1 << ppc_RB) | (1 << ppc_RD);
+	model_busy *busy_ptr;
+
+	if (!WITH_MODEL_ISSUE)
+	  return;
+
+	else if (!Rc) {
+	  if ((model_ptr->fp_busy & fp_mask) != 0) {
+	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
+
+	    while ((model_ptr->fp_busy & fp_mask) != 0) {
+	      if (WITH_TRACE && ppc_trace[trace_model])
+		model_trace_busy_p(model_ptr, 0, fp_mask, 0, PPC_NO_SPR);
+
+	      model_ptr->nr_stalls_data++;
+	      model_new_cycle(model_ptr);
+	    }
+	  }
+
+	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
+	  model_make_fp_reg_busy(model_ptr, busy_ptr, ppc_RD);
+	}
+
+	else {
+	  const unsigned32 cr_mask = (1 << 1);
+
+	  if ((model_ptr->fp_busy & fp_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
+	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
+
+	    while ((model_ptr->fp_busy & fp_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
+	      if (WITH_TRACE && ppc_trace[trace_model])
+		model_trace_busy_p(model_ptr, 0, fp_mask, cr_mask, PPC_NO_SPR);
+
+	      model_ptr->nr_stalls_data++;
+	      model_new_cycle(model_ptr);
+	    }
+	  }
+
+	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
+	  model_make_fp_reg_busy(model_ptr, busy_ptr, ppc_RD);
+	  model_make_cr_reg_busy(model_ptr, busy_ptr, 1);
+	}
+
+# Schedule an instruction that takes 1 floating point input registers and produces an output register & possibly sets CR1
+void::model-function::ppc_insn_fp1:itable_index index, cpu *processor, model_data *model_ptr, unsigned64 *rD, unsigned64 *rA, unsigned Rc
+	registers *cpu_regs = cpu_registers(processor);
+	const unsigned ppc_RA = (rA - &cpu_regs->fpr[0]);
+	const unsigned ppc_RD = (rD - &cpu_regs->fpr[0]);
+	const unsigned32 fp_mask = (1 << ppc_RA) | (1 << ppc_RD);
+	model_busy *busy_ptr;
+
+	if (!WITH_MODEL_ISSUE)
+	  return;
+
+	else if (!Rc) {
+	  if ((model_ptr->fp_busy & fp_mask) != 0) {
+	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
+
+	    while ((model_ptr->fp_busy & fp_mask) != 0) {
+	      if (WITH_TRACE && ppc_trace[trace_model])
+		model_trace_busy_p(model_ptr, 0, fp_mask, 0, PPC_NO_SPR);
+
+	      model_ptr->nr_stalls_data++;
+	      model_new_cycle(model_ptr);
+	    }
+	  }
+
+	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
+	  model_make_fp_reg_busy(model_ptr, busy_ptr, ppc_RD);
+	}
+
+	else {
+	  const unsigned32 cr_mask = (1 << 1);
+
+	  if ((model_ptr->fp_busy & fp_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
+	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
+
+	    while ((model_ptr->fp_busy & fp_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
+	      if (WITH_TRACE && ppc_trace[trace_model])
+		model_trace_busy_p(model_ptr, 0, fp_mask, cr_mask, PPC_NO_SPR);
+
+	      model_ptr->nr_stalls_data++;
+	      model_new_cycle(model_ptr);
+	    }
+	  }
+
+	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
+	  model_make_fp_reg_busy(model_ptr, busy_ptr, ppc_RD);
+	  model_make_cr_reg_busy(model_ptr, busy_ptr, 1);
+	}
+
+# Schedule an instruction that takes 1 floating point input register & 2 integer registers and does not produce an output
+# (or takes 2 integer registers and produces an output in the floating point register)
+void::model-function::ppc_insn_int2_fp1:itable_index index, cpu *processor, model_data *model_ptr, unsigned64 *rD, signed_word *rA, signed_word *rB, int RD_is_output, int RA_is_update
+	if (!WITH_MODEL_ISSUE)
+	  return;
+
+	else {
+	  registers *cpu_regs = cpu_registers(processor);
+	  const unsigned ppc_RA = (rA - &cpu_regs->gpr[0]);
+	  const unsigned ppc_RB = (rB - &cpu_regs->gpr[0]);
+	  const unsigned ppc_RD = (rD - &cpu_regs->fpr[0]);
+	  const unsigned32 int_mask =  (1 << ppc_RB) | ((ppc_RA == 0) ? 0 : (1 << ppc_RA));
+	  const unsigned32 fp_mask = (1 << ppc_RD);
+	  model_busy *busy_ptr;
+
+	  if ((model_ptr->int_busy & int_mask) || (model_ptr->fp_busy & fp_mask)) {
+	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
+
+	    while ((model_ptr->int_busy & int_mask) || (model_ptr->fp_busy & fp_mask)) {
+	      if (WITH_TRACE && ppc_trace[trace_model])
+		model_trace_busy_p(model_ptr, int_mask, fp_mask, 0, PPC_NO_SPR);
+
+	      model_ptr->nr_stalls_data++;
+	      model_new_cycle(model_ptr);
+	    }
+	  }
+
+	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
+	  if (RD_is_output)
+	    model_make_fp_reg_busy(model_ptr, busy_ptr, ppc_RD);
+
+	  if (RA_is_update)
+	    model_make_int_reg_busy(model_ptr, busy_ptr, ppc_RA);
+	}
+
+# Schedule an instruction that takes 1 floating point input register & 1 integer register and does not produce an output
+# (or takes 1 integer register and produces an output in the floating point register)
+void::model-function::ppc_insn_int1_fp1:itable_index index, cpu *processor, model_data *model_ptr, unsigned64 *rD, signed_word *rA, int RD_is_output, int RA_is_update
+	if (!WITH_MODEL_ISSUE)
+	  return;
+
+	else {
+	  registers *cpu_regs = cpu_registers(processor);
+	  const unsigned ppc_RA = (rA - &cpu_regs->gpr[0]);
+	  const unsigned ppc_RD = (rD - &cpu_regs->fpr[0]);
+	  const unsigned32 int_mask = ((ppc_RA == 0) ? 0 : (1 << ppc_RA));
+	  const unsigned32 fp_mask = (1 << ppc_RD);
+	  model_busy *busy_ptr;
+
+	  if ((model_ptr->int_busy & int_mask) || (model_ptr->fp_busy & fp_mask)) {
+	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
+
+	    while ((model_ptr->int_busy & int_mask) || (model_ptr->fp_busy & fp_mask)) {
+	      if (WITH_TRACE && ppc_trace[trace_model])
+		model_trace_busy_p(model_ptr, int_mask, fp_mask, 0, PPC_NO_SPR);
+
+	      model_ptr->nr_stalls_data++;
+	      model_new_cycle(model_ptr);
+	    }
+	  }
+
+	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
+	  if (RD_is_output)
+	    model_make_fp_reg_busy(model_ptr, busy_ptr, ppc_RD);
+
+	  if (RA_is_update)
+	    model_make_int_reg_busy(model_ptr, busy_ptr, ppc_RA);
+	}
+
+# Schedule an instruction that takes 2 floating input registers and produces a CR output register
+void::model-function::ppc_insn_fp2_cr:itable_index index, cpu *processor, model_data *model_ptr, unsigned CRD, unsigned64 *rA, unsigned64 *rB
+	if (!WITH_MODEL_ISSUE)
+	  return;
+
+	else {
+	  registers *cpu_regs = cpu_registers(processor);
+	  const unsigned ppc_RA = (rA - &cpu_regs->fpr[0]);
+	  const unsigned ppc_RB = (rB - &cpu_regs->fpr[0]);
+	  const unsigned32 fp_mask = (1 << ppc_RA) | (1 << ppc_RB);
+	  const unsigned32 cr_mask = (1 << CRD);
+	  model_busy *busy_ptr;
+
+	  if (((model_ptr->fp_busy & fp_mask) | (model_ptr->cr_fpscr_busy & cr_mask)) != 0) {
+	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
+
+	    while (((model_ptr->fp_busy & fp_mask) | (model_ptr->cr_fpscr_busy & cr_mask)) != 0) {
+	      if (WITH_TRACE && ppc_trace[trace_model])
+		model_trace_busy_p(model_ptr, 0, fp_mask, cr_mask, PPC_NO_SPR);
+
+	      model_ptr->nr_stalls_data++;
+	      model_new_cycle(model_ptr);
+	    }
+	  }
+
+	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
+	  model_make_cr_reg_busy(model_ptr, busy_ptr, CRD);
 	}
 
 # Schedule an MFSPR instruction that takes 1 special purpose register and produces an integer output register
@@ -543,20 +928,20 @@ void::model-function::ppc_insn_from_spr:itable_index index, cpu *processor, mode
 
 	else {
 	  registers *cpu_regs = cpu_registers(processor);
-	  const unsigned ppc_RD = (rD - &cpu_regs->gpr[0]) + PPC_INT_REG;
-	  const unsigned ppc_SPR = nSPR + PPC_SPR_REG;
-	  model_reg *ppc_regs = model_ptr->registers;
+	  const unsigned ppc_RD = (rD - &cpu_regs->gpr[0]);
+	  const unsigned32 int_mask = (1 << ppc_RD);
 	  model_busy *busy_ptr;
 
-	  while (ppc_regs[ppc_SPR].in_use) {
+	  while ((model_ptr->int_busy & int_mask) != 0 || model_ptr->spr_busy[nSPR] != 0) {
+	    if (WITH_TRACE && ppc_trace[trace_model])
+	      model_trace_busy_p(model_ptr, int_mask, 0, 0, nSPR);
+
 	    model_ptr->nr_stalls_data++;
 	    model_new_cycle(model_ptr);
 	  }
 
 	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  ppc_regs[ppc_RD].next = (model_reg *)0;
-	  ppc_regs[ppc_RD].in_use = 1;
-	  busy_ptr->reg = &ppc_regs[ppc_RD];
+	  model_make_int_reg_busy(model_ptr, busy_ptr, ppc_RD);
 	}
 
 # Schedule an MTSPR instruction that takes 1 integer register and produces a special purpose output register
@@ -566,20 +951,20 @@ void::model-function::ppc_insn_to_spr:itable_index index, cpu *processor, model_
 
 	else {
 	  registers *cpu_regs = cpu_registers(processor);
-	  const unsigned ppc_RS = (rS - &cpu_regs->gpr[0]) + PPC_INT_REG;
-	  const unsigned ppc_SPR = nSPR + PPC_SPR_REG;
-	  model_reg *ppc_regs = model_ptr->registers;
+	  const unsigned ppc_RS = (rS - &cpu_regs->gpr[0]);
+	  const unsigned32 int_mask = (1 << ppc_RS);
 	  model_busy *busy_ptr;
 
-	  while (ppc_regs[ppc_RS].in_use) {
+	  while ((model_ptr->int_busy & int_mask) != 0 || model_ptr->spr_busy[nSPR] != 0) {
+	    if (WITH_TRACE && ppc_trace[trace_model])
+	      model_trace_busy_p(model_ptr, int_mask, 0, 0, nSPR);
+
 	    model_ptr->nr_stalls_data++;
 	    model_new_cycle(model_ptr);
 	  }
 
 	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  ppc_regs[ppc_SPR].next = (model_reg *)0;
-	  ppc_regs[ppc_SPR].in_use = 1;
-	  busy_ptr->reg = &ppc_regs[ppc_SPR];
+	  model_make_spr_reg_busy(model_ptr, busy_ptr, nSPR);
 	}
 
 # Schedule a MFCR instruction that moves the CR into an integer regsiter
@@ -589,59 +974,55 @@ void::model-function::ppc_insn_mfcr:itable_index index, cpu *processor, model_da
 
 	else {
 	  registers *cpu_regs = cpu_registers(processor);
-	  const unsigned ppc_RD = (rD - &cpu_regs->gpr[0]) + PPC_INT_REG;
-	  model_reg *ppc_regs = model_ptr->registers;
+	  const unsigned ppc_RD = (rD - &cpu_regs->gpr[0]);
+	  const unsigned32 int_mask = (1 << ppc_RD);
+	  const unsigned32 cr_mask = 0xff;
 	  model_busy *busy_ptr;
 
-	  while (ppc_regs[0 + PPC_CR_REG].in_use
-		 | ppc_regs[1 + PPC_CR_REG].in_use
-		 | ppc_regs[2 + PPC_CR_REG].in_use
-		 | ppc_regs[3 + PPC_CR_REG].in_use
-		 | ppc_regs[4 + PPC_CR_REG].in_use
-		 | ppc_regs[5 + PPC_CR_REG].in_use
-		 | ppc_regs[6 + PPC_CR_REG].in_use
-		 | ppc_regs[7 + PPC_CR_REG].in_use) {
+	  while (((model_ptr->int_busy & int_mask) | (model_ptr->cr_fpscr_busy & cr_mask)) != 0) {
+	    if (WITH_TRACE && ppc_trace[trace_model])
+	      model_trace_busy_p(model_ptr, int_mask, 0, cr_mask, PPC_NO_SPR);
 
 	    model_ptr->nr_stalls_data++;
 	    model_new_cycle(model_ptr);
 	  }
 
 	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  ppc_regs[ppc_RD].next = (model_reg *)0;
-	  ppc_regs[ppc_RD].in_use = 1;
-	  busy_ptr->reg = &ppc_regs[ppc_RD];
+	  model_make_int_reg_busy(model_ptr, busy_ptr, ppc_RD);
 	}
 
 # Schedule a MTCR instruction that moves an integer register into the CR
-void::model-function::ppc_insn_mtcr:itable_index index, cpu *processor, model_data *model_ptr, signed_word *rT
+void::model-function::ppc_insn_mtcr:itable_index index, cpu *processor, model_data *model_ptr, signed_word *rT, unsigned FXM
 	if (!WITH_MODEL_ISSUE)
 	  return;
 
 	else {
 	  registers *cpu_regs = cpu_registers(processor);
-	  const unsigned ppc_RT = (rT - &cpu_regs->gpr[0]) + PPC_INT_REG;
-	  model_reg *ppc_regs = model_ptr->registers;
+	  const unsigned ppc_RT = (rT - &cpu_regs->gpr[0]);
+	  const unsigned32 int_mask = (1 << ppc_RT);
+	  const unsigned32 cr_mask = 0xff;
+	  const model_time *normal_time = &model_ptr->timing[index];
+	  static const model_time ppc604_1bit_time = { PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0 };
 	  model_busy *busy_ptr;
-	  model_reg *prev_reg;
 	  int i;
 
-	  if (ppc_regs[ppc_RT].in_use) {
-	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
+	  while (((model_ptr->int_busy & int_mask) | (model_ptr->cr_fpscr_busy & cr_mask)) != 0) {
+	    if (WITH_TRACE && ppc_trace[trace_model])
+	      model_trace_busy_p(model_ptr, int_mask, 0, cr_mask, PPC_NO_SPR);
 
-	    while (ppc_regs[ppc_RT].in_use) {
-	      model_ptr->nr_stalls_data++;
-	      model_new_cycle(model_ptr);
-	    }
+	    model_ptr->nr_stalls_data++;
+	    model_new_cycle(model_ptr);
 	  }
 
-	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  prev_reg = (model_reg *)0;
+	  /* If only one bit is being moved, use the SCIU, not the MCIU on the 604 */
+	  if (CURRENT_MODEL == MODEL_ppc604 && (FXM & (FXM-1)) == 0) {
+	    normal_time = &ppc604_1bit_time;
+	  }
+
+	  busy_ptr = model_wait_for_unit(index, model_ptr, normal_time);
 	  for (i = 0; i < 8; i++) {
-	    ppc_regs[i + PPC_CR_REG].next = prev_reg;
-	    ppc_regs[i + PPC_CR_REG].in_use = 1;
-	    prev_reg = &ppc_regs[i + PPC_CR_REG];
+	    model_make_cr_reg_busy(model_ptr, busy_ptr, i);
 	  }
-	  busy_ptr->reg = prev_reg;
 	}
 
 # Convert a BIT32(x) number back into the original number
@@ -661,21 +1042,21 @@ void::model-function::ppc_insn_cr2:itable_index index, cpu *processor, model_dat
 	  return;
 
 	else {
-	  const unsigned ppc_CRA = ppc_undo_bit32(crA_bit) + PPC_CR_REG;
-	  const unsigned ppc_CRB = ppc_undo_bit32(crB_bit) + PPC_CR_REG;
-	  const unsigned ppc_CRD = crD + PPC_CR_REG;
-	  model_reg *ppc_regs = model_ptr->registers;
+	  const unsigned ppc_CRA = ppc_undo_bit32(crA_bit);
+	  const unsigned ppc_CRB = ppc_undo_bit32(crB_bit);
+	  const unsigned32 cr_mask = (1 << ppc_CRA) | (1 << ppc_CRB) | (1 << crD);
 	  model_busy *busy_ptr;
 
-	  while (ppc_regs[ppc_CRA].in_use | ppc_regs[ppc_CRB].in_use) {
+	  while ((model_ptr->cr_fpscr_busy & cr_mask) != 0) {
+	    if (WITH_TRACE && ppc_trace[trace_model])
+		model_trace_busy_p(model_ptr, 0, 0, cr_mask, PPC_NO_SPR);
+
 	    model_ptr->nr_stalls_data++;
 	    model_new_cycle(model_ptr);
 	  }
 
 	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  ppc_regs[ppc_CRD].next = (model_reg *)0;
-	  ppc_regs[ppc_CRD].in_use = 1;
-	  busy_ptr->reg = &ppc_regs[ppc_CRD];
+	  model_make_cr_reg_busy(model_ptr, busy_ptr, crD);
 	}
 
 # Schedule an instruction that takes 1 CR input registers and produces an output CR register
@@ -684,20 +1065,19 @@ void::model-function::ppc_insn_cr1:itable_index index, cpu *processor, model_dat
 	  return;
 
 	else {
-	  const unsigned ppc_CRA = CRA + PPC_CR_REG;
-	  const unsigned ppc_CRD = crD + PPC_CR_REG;
-	  model_reg *ppc_regs = model_ptr->registers;
+	  const unsigned32 cr_mask = (1 << CRA) | (1 << crD);
 	  model_busy *busy_ptr;
 
-	  while (ppc_regs[ppc_CRA].in_use) {
+	  while ((model_ptr->cr_fpscr_busy & cr_mask) != 0) {
+	    if (WITH_TRACE && ppc_trace[trace_model])
+		model_trace_busy_p(model_ptr, 0, 0, cr_mask, PPC_NO_SPR);
+
 	    model_ptr->nr_stalls_data++;
 	    model_new_cycle(model_ptr);
 	  }
 
 	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
-	  ppc_regs[ppc_CRD].next = (model_reg *)0;
-	  ppc_regs[ppc_CRD].in_use = 1;
-	  busy_ptr->reg = &ppc_regs[ppc_CRD];
+	  model_make_cr_reg_busy(model_ptr, busy_ptr, crD);
 	}
 
 model_data *::model-function::model_create:cpu *processor
@@ -720,6 +1100,7 @@ model_print *::model-function::model_mon_info:model_data *model_ptr
 	model_print *head;
 	model_print *tail;
 	ppc_function_unit i;
+	count_type nr_insns;
 
 	head = tail = ZALLOC(model_print);
 	tail->count = model_ptr->nr_cycles;
@@ -752,15 +1133,6 @@ model_print *::model-function::model_mon_info:model_data *model_ptr
 	  tail->name = "stall";
 	  tail->suffix_plural = "s waiting for serialization";
 	  tail->suffix_singular = " waiting for serialization";
-	}
-
-	if (model_ptr->nr_insns_not_handled) {
-	  tail->next = ZALLOC(model_print);
-	  tail = tail->next;
-	  tail->count = model_ptr->nr_insns_not_handled;
-	  tail->name = "instruction";
-	  tail->suffix_plural = "s that were not accounted for in timing info";
-	  tail->suffix_singular = " that was not accounted for in timing info";
 	}
 
 	if (model_ptr->nr_branches) {
@@ -799,8 +1171,10 @@ model_print *::model-function::model_mon_info:model_data *model_ptr
 	  tail->suffix_singular = "";
 	}
 
+	nr_insns = 0;
 	for (i = PPC_UNIT_BAD; i < nr_ppc_function_units; i++) {
 	  if (model_ptr->nr_units[i]) {
+	    nr_insns += model_ptr->nr_units[i];
 	    tail->next = ZALLOC(model_print);
 	    tail = tail->next;
 	    tail->count = model_ptr->nr_units[i];
@@ -809,6 +1183,13 @@ model_print *::model-function::model_mon_info:model_data *model_ptr
 	    tail->suffix_singular = "";
 	  }
 	}
+
+	tail->next = ZALLOC(model_print);
+	tail = tail->next;
+	tail->count = nr_insns;
+	tail->name = "instruction";
+	tail->suffix_plural = "s that were accounted for in timing info";
+	tail->suffix_singular = " that was accounted for in timing info";
 
 	tail->next = (model_print *)0;
 	return head;
@@ -822,7 +1203,6 @@ void::model-function::model_mon_info_free:model_data *model_ptr, model_print *pt
 
 void::model-function::model_branches:model_data *model_ptr, int failed
 	model_ptr->nr_units[PPC_UNIT_BPU]++;
-	model_ptr->insn_handled = 1;
 	if (failed)
 	  model_ptr->nr_branches_fallthrough++;
 	else
@@ -835,6 +1215,7 @@ void::model-function::model_branch_predict:model_data *model_ptr, int success
 	else
 	  model_ptr->nr_branch_predict_falses++;
 
+
 # The following (illegal) instruction is `known' by gen and is
 # called when ever an illegal instruction is encountered
 ::internal::illegal
@@ -3060,7 +3441,6 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	}
 	ppc_insn_from_spr(my_index, processor, cpu_model(processor), rT, n);
 
-# FIXME: 604 uses SCIU{1,2} if only one bit is being set
 0.31,6.RS,11./,12.FXM,20./,21.144,31./:XFX::mtfcr:Move to Condition Register Fields
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    2,  2,  0
 *603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
@@ -3078,7 +3458,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  }
 	  CR = (MASKED(*rS, 32, 63) & mask) | (CR & ~mask);
 	}
-	ppc_insn_mtcr(my_index, processor, cpu_model(processor), rS);
+	ppc_insn_mtcr(my_index, processor, cpu_model(processor), rS, FXM);
 
 0.31,6.BF,9./,11./,16./,21.512,31./:X:::Move to Condition Register from XER
 
@@ -3105,6 +3485,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else         b = *rA;
 	EA = b + EXTS(D);
 	*frT = DOUBLE(MEM(unsigned, EA, 4));
+	ppc_insn_int1_fp1(my_index, processor, cpu_model(processor), frT, rA, 0/*RD_is_output*/, 0/*RA_is_update*/);
 
 0.31,6.FRT,11.RA,16.RB,21.535,31./:X:f::Load Floating-Point Single Indexed
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    3,  3,  0
@@ -3117,6 +3498,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else         b = *rA;
 	EA = b + *rB;
 	*frT = DOUBLE(MEM(unsigned, EA, 4));
+	ppc_insn_int2_fp1(my_index, processor, cpu_model(processor), frT, rA, rB, 0/*RD_is_output*/, 0/*RA_is_update*/);
 
 0.49,6.FRT,11.RA,16.D:D:f::Load Floating-Point Single with Update
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    3,  3,  0
@@ -3130,6 +3512,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + EXTS(D);
 	*frT = DOUBLE(MEM(unsigned, EA, 4));
 	*rA = EA;
+	ppc_insn_int1_fp1(my_index, processor, cpu_model(processor), frT, rA, 0/*RD_is_output*/, 1/*RA_is_update*/);
 
 0.31,6.FRT,11.RA,16.RB,21.576,31./:X:f::Load Floating-Point Single with Update Indexed
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    3,  3,  0
@@ -3143,6 +3526,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + *rB;
 	*frT = DOUBLE(MEM(unsigned, EA, 4));
 	*rA = EA;
+	ppc_insn_int2_fp1(my_index, processor, cpu_model(processor), frT, rA, rB, 0/*RD_is_output*/, 1/*RA_is_update*/);
 
 0.50,6.FRT,11.RA,16.D:D:f::Load Floating-Point Double
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    3,  3,  0
@@ -3155,6 +3539,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else         b = *rA;
 	EA = b + EXTS(D);
 	*frT = MEM(unsigned, EA, 8);
+	ppc_insn_int1_fp1(my_index, processor, cpu_model(processor), frT, rA, 0/*RD_is_output*/, 0/*RA_is_update*/);
 
 0.31,6.FRT,11.RA,16.RB,21.599,31./:X:f::Load Floating-Point Double Indexed
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    3,  3,  0
@@ -3167,6 +3552,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else         b = *rA;
 	EA = b + *rB;
 	*frT = MEM(unsigned, EA, 8);
+	ppc_insn_int2_fp1(my_index, processor, cpu_model(processor), frT, rA, rB, 0/*RD_is_output*/, 0/*RA_is_update*/);
 
 0.51,6.FRT,11.RA,16.D:D:f::Load Floating-Point Double with Update
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    3,  3,  0
@@ -3180,6 +3566,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + EXTS(D);
 	*frT = MEM(unsigned, EA, 8);
 	*rA = EA;
+	ppc_insn_int1_fp1(my_index, processor, cpu_model(processor), frT, rA, 0/*RD_is_output*/, 1/*RA_is_update*/);
 
 0.31,6.FRT,11.RA,16.RB,21.631,31./:X:f::Load Floating-Point Double with Update Indexed
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    3,  3,  0
@@ -3193,6 +3580,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + *rB;
 	*frT = MEM(unsigned, EA, 8);
 	*rA = EA;
+	ppc_insn_int2_fp1(my_index, processor, cpu_model(processor), frT, rA, rB, 0/*RD_is_output*/, 1/*RA_is_update*/);
 
 
 #
@@ -3210,6 +3598,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else         b = *rA;
 	EA = b + EXTS(D);
 	STORE(EA, 4, SINGLE(*frS));
+	ppc_insn_int1_fp1(my_index, processor, cpu_model(processor), frS, rA, 1/*RD_is_output*/, 0/*RA_is_update*/);
 
 0.31,6.FRS,11.RA,16.RB,21.663,31./:X:f::Store Floating-Point Single Indexed
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -3222,6 +3611,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else         b = *rA;
 	EA = b + *rB;
 	STORE(EA, 4, SINGLE(*frS));
+	ppc_insn_int2_fp1(my_index, processor, cpu_model(processor), frS, rA, rB, 1/*RD_is_output*/, 0/*RA_is_update*/);
 
 0.53,6.FRS,11.RA,16.D:D:f::Store Floating-Point Single with Update
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -3235,6 +3625,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + EXTS(D);
 	STORE(EA, 4, SINGLE(*frS));
 	*rA = EA;
+	ppc_insn_int1_fp1(my_index, processor, cpu_model(processor), frS, rA, 1/*RD_is_output*/, 1/*RA_is_update*/);
 
 0.31,6.FRS,11.RA,16.RB,21.695,31./:X:f::Store Floating-Point Single with Update Indexed
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -3248,6 +3639,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + *rB;
 	STORE(EA, 4, SINGLE(*frS));
 	*rA = EA;
+	ppc_insn_int2_fp1(my_index, processor, cpu_model(processor), frS, rA, rB, 1/*RD_is_output*/, 1/*RA_is_update*/);
 
 0.54,6.FRS,11.RA,16.D:D:f::Store Floating-Point Double
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -3260,6 +3652,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else         b = *rA;
 	EA = b + EXTS(D);
 	STORE(EA, 8, *frS);
+	ppc_insn_int1_fp1(my_index, processor, cpu_model(processor), frS, rA, 1/*RD_is_output*/, 0/*RA_is_update*/);
 
 0.31,6.FRS,11.RA,16.RB,21.727,31./:X:f::Store Floating-Point Double Indexed
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -3272,6 +3665,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else         b = *rA;
 	EA = b + *rB;
 	STORE(EA, 8, *frS);
+	ppc_insn_int2_fp1(my_index, processor, cpu_model(processor), frS, rA, rB, 1/*RD_is_output*/, 0/*RA_is_update*/);
 
 0.55,6.FRS,11.RA,16.D:D:f::Store Floating-Point Double with Update
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -3285,6 +3679,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + EXTS(D);
 	STORE(EA, 8, *frS);
 	*rA = EA;
+	ppc_insn_int1_fp1(my_index, processor, cpu_model(processor), frS, rA, 1/*RD_is_output*/, 1/*RA_is_update*/);
 
 0.31,6.FRS,11.RA,16.RB,21.759,31./:X:f::Store Floating-Point Double with Update Indexed
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -3298,6 +3693,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + *rB;
 	STORE(EA, 8, *frS);
 	*rA = EA;
+	ppc_insn_int2_fp1(my_index, processor, cpu_model(processor), frS, rA, rB, 1/*RD_is_output*/, 1/*RA_is_update*/);
 
 
 #
@@ -3311,6 +3707,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 	*frT = *frB;
 	CR1_UPDATE(Rc);
+	ppc_insn_fp1(my_index, processor, cpu_model(processor), frT, frB, Rc);
 
 0.63,6.FRT,11./,16.FRB,21.40,31.Rc:X:f::Floating Negate
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
@@ -3319,6 +3716,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 	*frT = *frB ^ BIT64(0);
 	CR1_UPDATE(Rc);
+	ppc_insn_fp1(my_index, processor, cpu_model(processor), frT, frB, Rc);
 
 0.63,6.FRT,11./,16.FRB,21.264,31.Rc:X:f::Floating Absolute Value
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
@@ -3327,6 +3725,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 	*frT = *frB & ~BIT64(0);
 	CR1_UPDATE(Rc);
+	ppc_insn_fp1(my_index, processor, cpu_model(processor), frT, frB, Rc);
 
 0.63,6.FRT,11./,16.FRB,21.136,31.Rc:X:f::Floating Negative Absolute Value
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
@@ -3335,6 +3734,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 	*frT = *frB | BIT64(0);
 	CR1_UPDATE(Rc);
+	ppc_insn_fp1(my_index, processor, cpu_model(processor), frT, frB, Rc);
 
 
 
@@ -3366,6 +3766,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  *(double*)frT = s;
 	}
 	FPSCR_END(Rc);
+	ppc_insn_fp2(my_index, processor, cpu_model(processor), frT, frA, frB, Rc);
 
 0.59,6.FRT,11.FRA,16.FRB,21./,26.21,31.Rc:A:f:fadds:Floating Add Single
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
@@ -3391,6 +3792,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  *(double*)frT = s;
 	}
 	FPSCR_END(Rc);
+	ppc_insn_fp2(my_index, processor, cpu_model(processor), frT, frA, frB, Rc);
 
 0.63,6.FRT,11.FRA,16.FRB,21./,26.20,31.Rc:A:f:fsub:Floating Subtract
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
@@ -3416,6 +3818,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  *(double*)frT = s;
 	}
 	FPSCR_END(Rc);
+	ppc_insn_fp2(my_index, processor, cpu_model(processor), frT, frA, frB, Rc);
 
 0.59,6.FRT,11.FRA,16.FRB,21./,26.20,31.Rc:A:f:fsubs:Floating Subtract Single
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
@@ -3440,6 +3843,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  float s = *(double*)frA - *(double*)frB;
 	  *(double*)frT = s;
 	}
+	ppc_insn_fp2(my_index, processor, cpu_model(processor), frT, frA, frB, Rc);
 	FPSCR_END(Rc);
 
 0.63,6.FRT,11.FRA,16./,21.FRC,26.25,31.Rc:A:f:fmul:Floating Multiply
@@ -3466,6 +3870,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  *(double*)frT = s;
 	}
 	FPSCR_END(Rc);
+	ppc_insn_fp2(my_index, processor, cpu_model(processor), frT, frA, frC, Rc);
 
 0.59,6.FRT,11.FRA,16./,21.FRC,26.25,31.Rc:A:f:fmuls:Floating Multiply Single
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
@@ -3491,6 +3896,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  *(double*)frT = s;
 	}
 	FPSCR_END(Rc);
+	ppc_insn_fp2(my_index, processor, cpu_model(processor), frT, frA, frC, Rc);
 
 0.63,6.FRT,11.FRA,16.FRB,21./,26.18,31.Rc:A:f:fdiv:Floating Divide
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   31, 31, 0
@@ -3516,6 +3922,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  *(double*)frT = s;
 	}
 	FPSCR_END(Rc);
+	ppc_insn_fp2(my_index, processor, cpu_model(processor), frT, frA, frB, Rc);
 
 0.59,6.FRT,11.FRA,16.FRB,21./,26.18,31.Rc:A:f:fdivs:Floating Divide Single
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   17, 17, 0
@@ -3541,6 +3948,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  *(double*)frT = s;
 	}
 	FPSCR_END(Rc);
+	ppc_insn_fp2(my_index, processor, cpu_model(processor), frT, frA, frB, Rc);
 
 0.63,6.FRT,11.FRA,16.FRB,21.FRC,26.29,31.Rc:A:f:fmadd:Floating Multiply-Add
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   5,  5,  0
@@ -3585,48 +3993,322 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  *(double*)frT = s;
 	}
 	FPSCR_END(Rc);
+	ppc_insn_fp3(my_index, processor, cpu_model(processor), frT, frA, frB, frC, Rc);
 
 0.59,6.FRT,11.FRA,16.FRB,21.FRC,26.29,31.Rc:A:f::Floating Multiply-Add Single
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
 *603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 *603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 *604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+	FPSCR_BEGIN;
+	float product; /*HACK! - incorrectly loosing precision ... */
+	/* compute the multiply */
+	if (is_invalid_operation(processor, cia,
+	                         *frA, *frC,
+	                         fpscr_vxsnan | fpscr_vximz,
+	                         1, /*single?*/
+	                         0) /*negate?*/) {
+	  invalid_arithemetic_operation(processor, cia,
+	                                (unsigned64*)&product, *frA, 0, *frC,
+	                                0, /*instruction_is_frsp*/
+	                                0, /*instruction_is_convert_to_64bit*/
+	                                0, /*instruction_is_convert_to_32bit*/
+	                                0); /*single-precision*/
+	}
+	else {
+	  /*HACK!*/
+	  product = *(double*)frA * *(double*)frC;
+	}
+	/* compute the add */
+	if (is_invalid_operation(processor, cia,
+	                         product, *frB,
+	                         fpscr_vxsnan | fpscr_vxisi,
+	                         1, /*single?*/
+	                         0) /*negate?*/) {
+	  invalid_arithemetic_operation(processor, cia,
+	                                frT, product, *frB, 0,
+	                                0, /*instruction_is_frsp*/
+	                                0, /*instruction_is_convert_to_64bit*/
+	                                0, /*instruction_is_convert_to_32bit*/
+	                                0); /*single-precision*/
+	}
+	else {
+	  /*HACK!*/
+	  float s = product + *(double*)frB;
+	  *(double*)frT = (double)s;
+	}
+	FPSCR_END(Rc);
+	ppc_insn_fp3(my_index, processor, cpu_model(processor), frT, frA, frB, frC, Rc);
 
 0.63,6.FRT,11.FRA,16.FRB,21.FRC,26.28,31.Rc:A:f::Floating Multiply-Subtract
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   5,  5,  0
 *603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   2,  4,  0
 *603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   2,  4,  0
 *604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+	FPSCR_BEGIN;
+	double product; /*HACK! - incorrectly loosing precision ... */
+	/* compute the multiply */
+	if (is_invalid_operation(processor, cia,
+	                         *frA, *frC,
+	                         fpscr_vxsnan | fpscr_vximz,
+	                         0, /*single?*/
+	                         0) /*negate?*/) {
+	  invalid_arithemetic_operation(processor, cia,
+	                                (unsigned64*)&product, *frA, 0, *frC,
+	                                0, /*instruction_is_frsp*/
+	                                0, /*instruction_is_convert_to_64bit*/
+	                                0, /*instruction_is_convert_to_32bit*/
+	                                0); /*single-precision*/
+	}
+	else {
+	  /*HACK!*/
+	  product = *(double*)frA * *(double*)frC;
+	}
+	/* compute the subtract */
+	if (is_invalid_operation(processor, cia,
+	                         product, *frB,
+	                         fpscr_vxsnan | fpscr_vxisi,
+	                         0, /*single?*/
+	                         0) /*negate?*/) {
+	  invalid_arithemetic_operation(processor, cia,
+	                                frT, product, *frB, 0,
+	                                0, /*instruction_is_frsp*/
+	                                0, /*instruction_is_convert_to_64bit*/
+	                                0, /*instruction_is_convert_to_32bit*/
+	                                0); /*single-precision*/
+	}
+	else {
+	  /*HACK!*/
+	  double s = product - *(double*)frB;
+	  *(double*)frT = s;
+	}
+	FPSCR_END(Rc);
+	ppc_insn_fp3(my_index, processor, cpu_model(processor), frT, frA, frB, frC, Rc);
 
 0.59,6.FRT,11.FRA,16.FRB,21.FRC,26.28,31.Rc:A:f::Floating Multiply-Subtract Single
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
 *603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 *603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 *604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+	FPSCR_BEGIN;
+	float product; /*HACK! - incorrectly loosing precision ... */
+	/* compute the multiply */
+	if (is_invalid_operation(processor, cia,
+	                         *frA, *frC,
+	                         fpscr_vxsnan | fpscr_vximz,
+	                         1, /*single?*/
+	                         0) /*negate?*/) {
+	  invalid_arithemetic_operation(processor, cia,
+	                                (unsigned64*)&product, *frA, 0, *frC,
+	                                0, /*instruction_is_frsp*/
+	                                0, /*instruction_is_convert_to_64bit*/
+	                                0, /*instruction_is_convert_to_32bit*/
+	                                0); /*single-precision*/
+	}
+	else {
+	  /*HACK!*/
+	  product = *(double*)frA * *(double*)frC;
+	}
+	/* compute the subtract */
+	if (is_invalid_operation(processor, cia,
+	                         product, *frB,
+	                         fpscr_vxsnan | fpscr_vxisi,
+	                         1, /*single?*/
+	                         0) /*negate?*/) {
+	  invalid_arithemetic_operation(processor, cia,
+	                                frT, product, *frB, 0,
+	                                0, /*instruction_is_frsp*/
+	                                0, /*instruction_is_convert_to_64bit*/
+	                                0, /*instruction_is_convert_to_32bit*/
+	                                0); /*single-precision*/
+	}
+	else {
+	  /*HACK!*/
+	  float s = product - *(double*)frB;
+	  *(double*)frT = (double)s;
+	}
+	FPSCR_END(Rc);
+	ppc_insn_fp3(my_index, processor, cpu_model(processor), frT, frA, frB, frC, Rc);
 
 0.63,6.FRT,11.FRA,16.FRB,21.FRC,26.31,31.Rc:A:f::Floating Negative Multiply-Add
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   5,  5,  0
 *603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   2,  4,  0
 *603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   2,  4,  0
 *604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+	FPSCR_BEGIN;
+	double product; /*HACK! - incorrectly loosing precision ... */
+	/* compute the multiply */
+	if (is_invalid_operation(processor, cia,
+	                         *frA, *frC,
+	                         fpscr_vxsnan | fpscr_vximz,
+	                         0, /*single?*/
+	                         0) /*negate?*/) {
+	  invalid_arithemetic_operation(processor, cia,
+	                                (unsigned64*)&product, *frA, 0, *frC,
+	                                0, /*instruction_is_frsp*/
+	                                0, /*instruction_is_convert_to_64bit*/
+	                                0, /*instruction_is_convert_to_32bit*/
+	                                0); /*single-precision*/
+	}
+	else {
+	  /*HACK!*/
+	  product = *(double*)frA * *(double*)frC;
+	}
+	/* compute the add */
+	if (is_invalid_operation(processor, cia,
+	                         product, *frB,
+	                         fpscr_vxsnan | fpscr_vxisi,
+	                         0, /*single?*/
+	                         0) /*negate?*/) {
+	  invalid_arithemetic_operation(processor, cia,
+	                                frT, product, *frB, 0,
+	                                0, /*instruction_is_frsp*/
+	                                0, /*instruction_is_convert_to_64bit*/
+	                                0, /*instruction_is_convert_to_32bit*/
+	                                0); /*single-precision*/
+	}
+	else {
+	  /*HACK!*/
+	  double s = -(product + *(double*)frB);
+	  *(double*)frT = s;
+	}
+	FPSCR_END(Rc);
+	ppc_insn_fp3(my_index, processor, cpu_model(processor), frT, frA, frB, frC, Rc);
 
 0.59,6.FRT,11.FRA,16.FRB,21.FRC,26.31,31.Rc:A:f::Floating Negative Multiply-Add Single
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
 *603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 *603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 *604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+	FPSCR_BEGIN;
+	float product; /*HACK! - incorrectly loosing precision ... */
+	/* compute the multiply */
+	if (is_invalid_operation(processor, cia,
+	                         *frA, *frC,
+	                         fpscr_vxsnan | fpscr_vximz,
+	                         1, /*single?*/
+	                         0) /*negate?*/) {
+	  invalid_arithemetic_operation(processor, cia,
+	                                (unsigned64*)&product, *frA, 0, *frC,
+	                                0, /*instruction_is_frsp*/
+	                                0, /*instruction_is_convert_to_64bit*/
+	                                0, /*instruction_is_convert_to_32bit*/
+	                                0); /*single-precision*/
+	}
+	else {
+	  /*HACK!*/
+	  product = *(double*)frA * *(double*)frC;
+	}
+	/* compute the add */
+	if (is_invalid_operation(processor, cia,
+	                         product, *frB,
+	                         fpscr_vxsnan | fpscr_vxisi,
+	                         1, /*single?*/
+	                         0) /*negate?*/) {
+	  invalid_arithemetic_operation(processor, cia,
+	                                frT, product, *frB, 0,
+	                                0, /*instruction_is_frsp*/
+	                                0, /*instruction_is_convert_to_64bit*/
+	                                0, /*instruction_is_convert_to_32bit*/
+	                                0); /*single-precision*/
+	}
+	else {
+	  /*HACK!*/
+	  float s = -(product + *(double*)frB);
+	  *(double*)frT = (double)s;
+	}
+	FPSCR_END(Rc);
+	ppc_insn_fp3(my_index, processor, cpu_model(processor), frT, frA, frB, frC, Rc);
 
 0.63,6.FRT,11.FRA,16.FRB,21.FRC,26.30,31.Rc:A:f::Floating Negative Multiply-Subtract
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   5,  5,  0
 *603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   2,  4,  0
 *603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   2,  4,  0
 *604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+	FPSCR_BEGIN;
+	double product; /*HACK! - incorrectly loosing precision ... */
+	/* compute the multiply */
+	if (is_invalid_operation(processor, cia,
+	                         *frA, *frC,
+	                         fpscr_vxsnan | fpscr_vximz,
+	                         0, /*single?*/
+	                         0) /*negate?*/) {
+	  invalid_arithemetic_operation(processor, cia,
+	                                (unsigned64*)&product, *frA, 0, *frC,
+	                                0, /*instruction_is_frsp*/
+	                                0, /*instruction_is_convert_to_64bit*/
+	                                0, /*instruction_is_convert_to_32bit*/
+	                                0); /*single-precision*/
+	}
+	else {
+	  /*HACK!*/
+	  product = *(double*)frA * *(double*)frC;
+	}
+	/* compute the subtract */
+	if (is_invalid_operation(processor, cia,
+	                         product, *frB,
+	                         fpscr_vxsnan | fpscr_vxisi,
+	                         0, /*single?*/
+	                         0) /*negate?*/) {
+	  invalid_arithemetic_operation(processor, cia,
+	                                frT, product, *frB, 0,
+	                                0, /*instruction_is_frsp*/
+	                                0, /*instruction_is_convert_to_64bit*/
+	                                0, /*instruction_is_convert_to_32bit*/
+	                                0); /*single-precision*/
+	}
+	else {
+	  /*HACK!*/
+	  double s = -(product - *(double*)frB);
+	  *(double*)frT = s;
+	}
+	FPSCR_END(Rc);
+	ppc_insn_fp3(my_index, processor, cpu_model(processor), frT, frA, frB, frC, Rc);
 
 0.59,6.FRT,11.FRA,16.FRB,21.FRC,26.30,31.Rc:A:f::Floating Negative Multiply-Subtract Single
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
 *603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 *603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 *604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+	FPSCR_BEGIN;
+	float product; /*HACK! - incorrectly loosing precision ... */
+	/* compute the multiply */
+	if (is_invalid_operation(processor, cia,
+	                         *frA, *frC,
+	                         fpscr_vxsnan | fpscr_vximz,
+	                         1, /*single?*/
+	                         0) /*negate?*/) {
+	  invalid_arithemetic_operation(processor, cia,
+	                                (unsigned64*)&product, *frA, 0, *frC,
+	                                0, /*instruction_is_frsp*/
+	                                0, /*instruction_is_convert_to_64bit*/
+	                                0, /*instruction_is_convert_to_32bit*/
+	                                0); /*single-precision*/
+	}
+	else {
+	  /*HACK!*/
+	  product = *(double*)frA * *(double*)frC;
+	}
+	/* compute the subtract */
+	if (is_invalid_operation(processor, cia,
+	                         product, *frB,
+	                         fpscr_vxsnan | fpscr_vxisi,
+	                         1, /*single?*/
+	                         0) /*negate?*/) {
+	  invalid_arithemetic_operation(processor, cia,
+	                                frT, product, *frB, 0,
+	                                0, /*instruction_is_frsp*/
+	                                0, /*instruction_is_convert_to_64bit*/
+	                                0, /*instruction_is_convert_to_32bit*/
+	                                0); /*single-precision*/
+	}
+	else {
+	  /*HACK!*/
+	  float s = -(product - *(double*)frB);
+	  *(double*)frT = (double)s;
+	}
+	FPSCR_END(Rc);
+	ppc_insn_fp3(my_index, processor, cpu_model(processor), frT, frA, frB, frC, Rc);
 
 
 #
@@ -3839,6 +4521,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  if (sign == 1) FPSCR_SET_FPRF(fpscr_rf_neg_normal_number);
 	  goto Done;
 	Done:
+	ppc_insn_fp1(my_index, processor, cpu_model(processor), frT, frB, Rc);
 
 0.63,6.FRT,11./,16.FRB,21.814,31.Rc:X:64,f::Floating Convert To Integer Doubleword
 
@@ -3856,6 +4539,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	                   frT, *frB,
 	                   fpscr_rn_round_towards_zero, 32);
 	FPSCR_END(Rc);
+	ppc_insn_fp1(my_index, processor, cpu_model(processor), frT, frB, Rc);
 
 0.63,6.FRT,11./,16.FRB,21.846,31.Rc:X:64,f::Floating Convert from Integer Doubleword
 	int sign = EXTRACTED64(*frB, 0, 0);
@@ -3884,6 +4568,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  goto Done;
 	/**/
 	Done:
+	ppc_insn_fp1(my_index, processor, cpu_model(processor), frT, frB, Rc);
 
 #
 # I.4.6.7 Floating-Point Compare Instructions
@@ -3909,6 +4594,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	if (is_SNaN(*frA, 0) || is_SNaN(*frB, 0))
 	  FPSCR_OR_VX(fpscr_vxsnan);
 	FPSCR_END(0);
+	ppc_insn_fp2_cr(my_index, processor, cpu_model(processor), BF, frA, frB);
 
 0.63,6.BF,9./,11.FRA,16.FRB,21.32,31./:X:f:fcmpo:Floating Compare Ordered
 *601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
@@ -3936,6 +4622,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  FPSCR_OR_VX(fpscr_vxvc);
 	}
 	FPSCR_END(0);
+	ppc_insn_fp2_cr(my_index, processor, cpu_model(processor), BF, frA, frB);
 
 
 #
@@ -3992,6 +4679,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	#if WITH_IDECODE_CACHE_SIZE
 	cpu_flush_icache(processor);
 	#endif
+	if (RA == 0)
+	  ppc_insn_int1_noout(my_index, processor, cpu_model(processor), rB);
+	else
+	  ppc_insn_int2_noout(my_index, processor, cpu_model(processor), rA, rB);
 
 0.19,6./,11./,16./,21.150,31./:XL::isync:Instruction Synchronize
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -3999,6 +4690,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 *604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  1,  0
 	cpu_synchronize_context(processor);
+	ppc_insn_int0_noout(my_index, processor, cpu_model(processor));
 
 
 #
@@ -4011,6 +4703,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   2,  2,  0
 *604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  1,  0
 	TRACE(trace_tbd,("Data Cache Block Touch\n"));
+	if (RA == 0)
+	  ppc_insn_int1_noout(my_index, processor, cpu_model(processor), rB);
+	else
+	  ppc_insn_int2_noout(my_index, processor, cpu_model(processor), rA, rB);
 
 0.31,6./,11.RA,16.RB,21.246,31./:X:::Data Cache Block Touch for Store
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -4018,6 +4714,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   2,  2,  0
 *604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	TRACE(trace_tbd,("Data Cache Block Touch for Store\n"));
+	if (RA == 0)
+	  ppc_insn_int1_noout(my_index, processor, cpu_model(processor), rB);
+	else
+	  ppc_insn_int2_noout(my_index, processor, cpu_model(processor), rA, rB);
 
 0.31,6./,11.RA,16.RB,21.1014,31./:X:::Data Cache Block set to Zero
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -4025,6 +4725,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   10, 10, 0
 *604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	TRACE(trace_tbd,("Data Cache Block set to Zero\n"));
+	if (RA == 0)
+	  ppc_insn_int1_noout(my_index, processor, cpu_model(processor), rB);
+	else
+	  ppc_insn_int2_noout(my_index, processor, cpu_model(processor), rA, rB);
 
 0.31,6./,11.RA,16.RB,21.54,31./:X:::Data Cache Block Store
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -4032,6 +4736,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   5,  5,  0
 *604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  1,  0
 	TRACE(trace_tbd,("Data Cache Block Store\n"));
+	if (RA == 0)
+	  ppc_insn_int1_noout(my_index, processor, cpu_model(processor), rB);
+	else
+	  ppc_insn_int2_noout(my_index, processor, cpu_model(processor), rA, rB);
 
 0.31,6./,11.RA,16.RB,21.86,31./:X:::Data Cache Block Flush
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -4039,6 +4747,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   5,  5,  0
 *604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  1,  0
 	TRACE(trace_tbd,("Data Cache Block Flush\n"));
+	if (RA == 0)
+	  ppc_insn_int1_noout(my_index, processor, cpu_model(processor), rB);
+	else
+	  ppc_insn_int2_noout(my_index, processor, cpu_model(processor), rA, rB);
 
 #
 # II.3.3 Enforce In-order Execution of I/O Instruction

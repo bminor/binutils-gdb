@@ -634,6 +634,9 @@ static insn *last_model_function;
 static insn *model_internal;
 static insn *last_model_internal;
 
+static insn *model_static;
+static insn *last_model_static;
+
 static insn *model_data;
 static insn *last_model_data;
 
@@ -1033,6 +1036,9 @@ insn_table_load_insns(char *file_name)
     else if (it_is("model-internal", file_entry->fields[insn_flags])) {
       model_table_insert_specific(table, file_entry, &model_internal, &last_model_internal);
     }
+    else if (it_is("model-static", file_entry->fields[insn_flags])) {
+      model_table_insert_specific(table, file_entry, &model_static, &last_model_static);
+    }
     else if (it_is("model-data", file_entry->fields[insn_flags])) {
       model_table_insert_specific(table, file_entry, &model_data, &last_model_data);
     }
@@ -1316,6 +1322,12 @@ lf_print_my_prefix(lf *file,
 	    (idecode ? "idecode" : "semantics"),
 	    file_entry->fields[insn_name],
 	    file_entry->line_nr);
+  lf_printf(file, "const itable_index my_index = ");
+  lf_print_function_name(file,
+			 file_entry->fields[insn_name],
+			 NULL,
+			 function_name_prefix_itable);
+  lf_printf(file, ";\n");
 }
 
 
@@ -2133,16 +2145,6 @@ lf_print_c_semantic(lf *file,
 			 NULL,
 			 function_name_prefix_itable);
   lf_printf(file, ", processor, cia);\n");
-  lf_printf(file, "\n");
-  lf_printf(file, "  if (WITH_MODEL_ISSUE)\n");
-  lf_printf(file, "    model_issue(");
-  lf_print_function_name(file,
-			 instruction->file_entry->fields[insn_name],
-			 NULL,
-			 function_name_prefix_itable);
-  lf_printf(file, ", cpu_model(processor), cia, %s);\n",
-	    ((idecode_cache) ? "cache_entry, 0" : "(idecode_cache *)0, instruction"));
-
   lf_printf(file, "}\n");
   lf_printf(file, "\n");
 
@@ -2177,7 +2179,6 @@ lf_print_c_semantic(lf *file,
     lf_printf(file, "\n");
   }
 
-  /* the function footer */
   lf_printf(file, "return nia;\n");
   lf_indent(file, -2);
   lf_printf(file, "}\n");
@@ -2979,7 +2980,6 @@ gen_model_h(insn_table *table, lf *file)
   int model_create_p = 0;
   int model_init_p = 0;
   int model_halt_p = 0;
-  int model_issue_p = 0;
   int model_mon_info_p = 0;
   int model_mon_info_free_p = 0;
 
@@ -3040,8 +3040,6 @@ gen_model_h(insn_table *table, lf *file)
       model_init_p = 1;
     else if (strcmp (name, "model_halt") == 0)
       model_halt_p = 1;
-    else if (strcmp (name, "model_issue") == 0)
-      model_issue_p = 1;
     else if (strcmp (name, "model_mon_info") == 0)
       model_mon_info_p = 1;
     else if (strcmp (name, "model_mon_info_free") == 0)
@@ -3063,16 +3061,6 @@ gen_model_h(insn_table *table, lf *file)
   if (!model_halt_p) {
     lf_printf(file, "INLINE_MODEL void model_halt\n");
     lf_printf(file, "(model_data *model_ptr);\n");
-    lf_printf(file, "\n");
-  }
-
-  if (!model_issue_p) {
-    lf_printf(file, "INLINE_MODEL void model_issue\n");
-    lf_printf(file, "(itable_index index,\n");
-    lf_printf(file, " model_data *model_ptr,\n");
-    lf_printf(file, " unsigned_word cia,\n");
-    lf_printf(file, " idecode_cache *cache_entry,\n");
-    lf_printf(file, " instruction_word instruction);\n");
     lf_printf(file, "\n");
   }
 
@@ -3170,7 +3158,6 @@ gen_model_c(insn_table *table, lf *file)
   int model_create_p = 0;
   int model_init_p = 0;
   int model_halt_p = 0;
-  int model_issue_p = 0;
   int model_mon_info_p = 0;
   int model_mon_info_free_p = 0;
 
@@ -3191,8 +3178,16 @@ gen_model_c(insn_table *table, lf *file)
     model_c_or_h_data(table, file, insn_ptr->file_entry);
   }
 
+  for(insn_ptr = model_static; insn_ptr; insn_ptr = insn_ptr->next) {
+    model_c_or_h_function(table, file, insn_ptr->file_entry, "STATIC_MODEL");
+  }
+
   for(insn_ptr = model_internal; insn_ptr; insn_ptr = insn_ptr->next) {
     model_c_or_h_function(table, file, insn_ptr->file_entry, "STATIC_INLINE_MODEL");
+  }
+
+  for(insn_ptr = model_static; insn_ptr; insn_ptr = insn_ptr->next) {
+    model_c_function(table, file, insn_ptr->file_entry, "STATIC_MODEL");
   }
 
   for(insn_ptr = model_internal; insn_ptr; insn_ptr = insn_ptr->next) {
@@ -3208,8 +3203,6 @@ gen_model_c(insn_table *table, lf *file)
       model_init_p = 1;
     else if (strcmp (name, "model_halt") == 0)
       model_halt_p = 1;
-    else if (strcmp (name, "model_issue") == 0)
-      model_issue_p = 1;
     else if (strcmp (name, "model_mon_info") == 0)
       model_mon_info_p = 1;
     else if (strcmp (name, "model_mon_info_free") == 0)
@@ -3233,17 +3226,6 @@ gen_model_c(insn_table *table, lf *file)
 
   if (!model_halt_p) {
     lf_printf(file, "INLINE_MODEL void model_halt(model_data *model_ptr)\n");
-    lf_printf(file, "{\n");
-    lf_printf(file, "}\n");
-    lf_printf(file, "\n");
-  }
-
-  if (!model_issue_p) {
-    lf_printf(file, "INLINE_MODEL void model_issue(itable_index index,\n");
-    lf_printf(file, "                              model_data *model_ptr,\n");
-    lf_printf(file, "                              unsigned_word cia,\n");
-    lf_printf(file, "                              idecode_cache *cache_entry,\n");
-    lf_printf(file, "                              instruction_word instruction)\n");
     lf_printf(file, "{\n");
     lf_printf(file, "}\n");
     lf_printf(file, "\n");

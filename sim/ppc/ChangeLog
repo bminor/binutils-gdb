@@ -1,3 +1,15 @@
+Tue Nov 21 16:31:25 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* igen.c (insn_table_load_insns): Add support for model-static for
+	internal functions that should not be inlined.
+	(lf_print_c_semantic): Remove model_cleanup.
+	(gen_model_{c,h}): Ditto.
+
+	* ppc-instructions: Redo model specific support once again.  Add
+	floating point support to the model specific information.  Flesh
+	out all of the floating mutiply add/subtract instructions.  Add
+	better tracing support to the model specific information.
+
 Sun Nov 19 23:00:52 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* ppc-instructions (model data, model_busy): Rather than using a
