@@ -170,18 +170,20 @@ ld [ -o @var{output} ]  @var{objfile}@dots{}
   [ -A@var{architecture} ]  [ -b @var{input-format} ]  [ -Bstatic ]  
   [ -c @var{MRI-commandfile} ]  [ -d | -dc | -dp ]  
   [ -defsym @var{symbol}=@var{expression} ]
+  [ -dynamic-linker @var{file} ]
   [ -e @var{entry} ]  [ -F ]  [ -F @var{format} ]
   [ -format @var{input-format} ]  [ -g ]  [ -G @var{size} ]  [ -help ]
   [ -i ]  [ -l@var{archive} ]  [ -L@var{searchdir} ]  [ -M ]
   [ -Map @var{mapfile} ]  [ -m @var{emulation} ]  [ -N | -n ]
   [ -noinhibit-exec ]  [ -oformat @var{output-format} ]
   [ -R @var{filename} ]  [ -relax ]  [ -retain-symbols-file @var{filename} ]
-  [ -r | -Ur ]  [ -S ]  [ -s ]  [ -sort-common ] [ -stats ]
-  [ -T @var{commandfile} ]
+  [ -r | -Ur ]  [ -rpath @var{dir} ] [ -S ]  [ -s ]  [ -sort-common ]
+  [ -stats ] [ -T @var{commandfile} ]
   [ -Ttext @var{org} ]  [ -Tdata @var{org} ]
   [ -Tbss @var{org} ]  [ -t ] [ -traditional-format ]
   [ -u @var{symbol}]  [-V]  [-v]  [ -version ]
   [ -warn-common ]  [ -y @var{symbol} ]  [ -X ]  [-x ]
+  [ -( [ archives ] -) ] [ --start-group [ archives ] --end-group ]
 @end smallexample
 
 This plethora of command-line options may seem intimidating, but in
@@ -295,8 +297,8 @@ Commands}.
 
 @kindex -Bstatic
 @item -Bstatic 
-Ignored.  This option is accepted for command-line compatibility with
-the SunOS linker.
+Do not link against shared libraries.  This option is accepted for
+command-line compatibility with the SunOS linker.
 
 @kindex -c @var{MRI-cmdfile}
 @cindex compatibility, MRI
@@ -337,6 +339,16 @@ using the linker command language from a script (@pxref{Assignment, ,
 Assignment: Symbol Definitions}).  @emph{Note:}  there should be no
 white space between @var{symbol}, the equals sign (``@key{=}''), and
 @var{expression}.
+
+@ifset GENERIC
+@cindex dynamic linker, from command line
+@kindex -dynamic-linker @var{file}
+@item -dynamic-linker @var{file}
+Set the name of the dynamic linker.  This is only meaningful when
+generating dynamically linked ELF executables.  The default dynamic
+linker is normally correct; don't use this unless you know what you are
+doing.
+@end ifset
 
 @cindex entry point, from command line
 @kindex -e @var{entry}
@@ -530,6 +542,16 @@ or symbols needed for relocations.
 
 You may only specify @samp{-retain-symbols-file} once in the command
 line.  It overrides @samp{-s} and @samp{-S}.
+
+@ifset GENERIC
+@item -rpath @var{dir}
+@cindex runtime library search path
+@kindex -rpath
+Add a directory to the runtime library search path.  This is only
+meaningful when linking an ELF executable with shared objects.  All
+-rpath arguments are concatenated and passed to the runtime linker,
+which uses them to locate shared objects at runtime.
+@end ifset
 
 @cindex partial link
 @cindex relocatable output
@@ -757,6 +779,26 @@ to prepend an underscore.
 
 This option is useful when you have an undefined symbol in your link but
 don't know where the reference is coming from.
+
+@item -( @var{archives} -)
+@itemx --start-group @var{archives} --end-group
+@kindex -(
+@cindex groups of archives
+The @var{archives} should be a list of archive files.  They may be
+either explicit file names, or @samp{-l} options.
+
+The specified archives are searched repeatedly until no new undefined
+references are created.  Normally, an archive is searched only once in
+the order that it is specified on the command line.  If a symbol in that
+archive is needed to resolve an undefined symbol referred to by an
+object in an archive that appears later on the command line, the linker
+would not be able to resolve that reference.  By grouping the archives,
+they all be searched repeatedly until all possible references are
+resolved.
+
+Using this option has a significant performance cost.  It is best to use
+it only when there are unavoidable circular references between two or
+more archives.
 @end table
 
 @ifset UsesEnvVars

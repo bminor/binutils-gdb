@@ -1,3 +1,14 @@
+Wed Jul 20 15:49:27 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* ld.h (args_type): Add field rpath.
+	* lexsup.c (S_ISDIR): Define if not already defined.
+	(parse_args): Add support for -rpath.  If -R is used to name a
+	directory, treat it as -rpath for Solaris compatibility.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_allocation):
+	Pass command_line.rpath to bfd_elf32_size_dynamic_sections.
+	* ldmain.c (main): Initialize command_line.rpath to NULL.
+	* ld.texinfo: Document -rpath option.
+
 Sun Jul 10 00:33:24 1994  Ian Dall  (dall@hfrd.dsto.gov.au)
 
 	* emulparams/pc532machaout.sh: New file. Pc532 mach script
