@@ -113,13 +113,16 @@ do
 	elif [ -n "${next_srcdir}" ] ; then srcdir=${arg} ; next_srcdir=		
 	elif [ -n "${next_target}" ] ; then
 		next_target=
-		if [ -z "${targets}" ] ; then
+		case "${targets}" in
+		"")
 			newtargets="${targets} ${arg}"
 			targets="${newtargets}"
-		else
+			;;
+		*)
 			echo '***' Can only configure for one target at a time.
 			fatal=yes
-		fi
+			;;
+		esac
 	elif [ -n "${next_tmpdir}" ] ; then
 		next_tmpdir=
 		tmpdiroption="--tmpdir=${arg}"
@@ -141,13 +144,16 @@ do
 			fatal=true
 			;;
 		-host=* | --host=* | --hos=* | --ho=*)
-			if [ -z "${hosts}" ] ; then
+			case "${hosts}" in
+			"")
 				newhosts="${hosts} `echo ${arg} | sed 's/^[-a-z]*=//'`"
 				hosts="${newhosts}"
-			else
+				;;
+			*)
 				echo '***' Can only configure for one host at a time.
 				fatal=yes
-			fi
+				;;
+			esac
 			;;
 		-nfp | --nf*)
 			floating_point=no
@@ -182,13 +188,16 @@ do
 			next_srcdir=yes
 			;;
 		-target=* | --target=* | --targe=* | --targ=* | --tar=* | --ta=*)
-			if [ -z "${targets}" ] ; then
+			case "${targets}" in
+			"")
 				newtargets="${targets} `echo ${arg} | sed 's/^[-a-z]*=//'`"
 				targets="${newtargets}"
-			else
+				;;
+			*)
 				echo '***' Can only configure for one target at a time.
 				fatal=yes
-			fi
+				;;
+			esac
 			;;
 		-target | --target | --targe | --targ | --tar | --ta)
 			next_target=yes
@@ -215,20 +224,24 @@ do
 			fatal=true
 			;;
 		*)
-			if [ -z "${undefs}" ] ; then
+			case "${undefs}" in
+			"")
 				newundefs="${undefs} ${arg}"
 				undefs=${newundefs}
-			else
+				;;
+			*)
 				echo '***' Can only configure for one host and one target at a time.
 				fatal=yes
-			fi
+				;;
+			esac
 			;;
 		esac
 	fi
 done
 
 # process host and target
-if [ -z "${fatal}" ] ; then
+case "${fatal}" in
+"")
 #	# Complain if an arg is missing
 #	if [ -z "${hosts}" ] ; then
 #		(echo ;
@@ -252,19 +265,24 @@ if [ -z "${fatal}" ] ; then
 		echo '***' You must tell me for which host you want to configure.
 		fatal=yes
 	else
-		if [ -z "${hosts}" ] ; then
-			hosts=${undefs}
-		fi
+		case "${hosts}" in
+		"") hosts=${undefs} ;;
+		*) ;;
+		esac
 
-		if [ -z "${targets}" ] ; then
-			if [ -n "${undefs}" ] ; then
-				targets=${undefs}
-			else
-				targets=${hosts}
-			fi
-		fi
+		case "${targets}" in
+		"")
+			case "${undefs}" in
+			"")	targets=${hosts} ;;
+			*)	targets=${undefs} ;;
+			esac
+			;;
+		*) ;;
+		esac
 	fi
-fi
+	;;
+*) ;;
+esac
 
 if [ -n "${fatal}" -o "${hosts}" = "help" ] ; then
 	(echo "Usage: configure HOST" ;
@@ -302,30 +320,40 @@ else
 	exit 1
 fi
 
-if [ -z "${srcdir}" ] ; then
+case "${srcdir}" in
+"")
 	if [ -r configure.in ] ; then
 		srcdir=.
 	else
 		echo '***' "Can't find configure.in.  Try using -srcdir=some_dir"
 		exit 1
 	fi
-fi
+	;;
+*) ;;
+esac
 
 
 ### break up ${srcdir}/configure.in.
-if [ -z "`grep '^# per\-host:' ${srcdir}/configure.in`" ] ; then
+case "`grep '^# per\-host:' ${srcdir}/configure.in`" in
+"")
 	echo '***' ${srcdir}/configure.in has no "per-host:" line. 1>&2
 	exit 1
-fi
+	;;
+*) ;;
+esac
 
-if [ -z "`grep '^# per\-target:' ${srcdir}/configure.in`" ] ; then
+case "`grep '^# per\-target:' ${srcdir}/configure.in`" in
+"")
 	echo '***' ${srcdir}/configure.in has no "per-target:" line. 1>&2
 	exit 1
-fi
+	;;
+*) ;;
+esac
 
-if [ -z "${TMPDIR}" ] ; then
-	TMPDIR=/tmp ; export TMPDIR
-fi
+case "${TMPDIR}" in
+"") TMPDIR=/tmp ; export TMPDIR ;;
+*) ;;
+esac
 
 # keep this filename short for &%*%$*# 14 char file names
 tmpfile=${TMPDIR}/cONf$$
@@ -348,10 +376,13 @@ fi
 . ${tmpfile}.com
 
 # some sanity checks on configure.in
-if [ -z "${srctrigger}" ] ; then
+case "${srctrigger}" in
+"")
 	echo '***' srctrigger not set in ${PWD}/configure.in.
 	exit 1
-fi
+	;;
+*) ;;
+esac
 
 for host in ${hosts} ; do
 	# Default other arg
@@ -391,34 +422,35 @@ for host in ${hosts} ; do
 
 		. ${tmpfile}.tgt
 
-		if [ "${host_alias}" = "${target_alias}" ] ; then
-			subdirname=H-${host_alias}
-		else
-			subdirname=X-${host_alias}-${target_alias}
-		fi
+		case "${host_alias}" in
+		"${target_alias}")	subdirname=H-${host_alias} ;;
+		*)			subdirname=X-${host_alias}-${target_alias} ;;
+		esac
 
-		if [ -n "${namesubdir}" ] ; then
-			subdirname=${namesubdir}
-		fi
+		case "${namesubdir}" in
+		"") ;;
+		*) subdirname=${namesubdir} ;;
+		esac
 
-		if [ -n "${removing}" ] ; then
-				rm -f ${Makefile} config.status ${links}
-		else
+		case "${removing}" in
+		"")
 			# Find the source files, if location was not specified.
-			if [ -z "${srcdir}" ] ; then
+			case "${srcdir}" in
+			"")
 				srcdirdefaulted=1
 				srcdir=.
 				if [ ! -r ${srctrigger} ] ; then
 					srcdir=..
 				fi
-			fi
+				;;
+			*) ;;
+			esac
 
 			if [ ! -r ${srcdir}/${srctrigger} ] ; then
-				if [ -z "${srcdirdefaulted}" ] ; then
-					echo '***' "${progname}: Can't find ${srcname} sources in ${PWD}/${srcdir}" 1>&2
-				else
-					echo '***' "${progname}: Can't find ${srcname} sources in ${PWD}/. or ${PWD}/.." 1>&2
-				fi
+				case "${srcdirdefaulted}" in
+				"") echo '***' "${progname}: Can't find ${srcname} sources in ${PWD}/${srcdir}" 1>&2 ;;
+				*)  echo '***' "${progname}: Can't find ${srcname} sources in ${PWD}/. or ${PWD}/.." 1>&2 ;;
+				esac
 
 				echo '***' \(At least ${srctrigger} is missing.\) 1>&2
 				exit 1
@@ -449,9 +481,10 @@ for host in ${hosts} ; do
 					exit 1
 				fi
 
-				if [ -n "${verbose}" ] ; then
-					echo "Linked \"${link}\" to \"${srcdir}/${file}\"."
-				fi
+				case "${verbose}" in
+				"") ;;
+				*)  echo "Linked \"${link}\" to \"${srcdir}/${file}\"." ;;
+				esac
 			done
 
 			# Create a .gdbinit file which runs the one in srcdir
@@ -479,12 +512,13 @@ for host in ${hosts} ; do
 		# template is stable, these should be optimized. xoxorich.
 
 			# Define macro CROSS_COMPILE in compilation if this is a cross-compiler.
-			if [ "${host}" != "${target}" ] ; then
+			case "${host}" in
+			"${target}") echo "ALL=all.internal" > ${Makefile} ;;
+			*)
 				echo "CROSS=-DCROSS_COMPILE" > ${Makefile}
 				echo "ALL=all.cross" >> ${Makefile}
-			else
-				echo "ALL=all.internal" > ${Makefile}
-			fi
+				;;
+			esac
 
 			# set target, host, VPATH
 			echo "host_alias = ${host_alias}" >> ${Makefile}
@@ -506,7 +540,9 @@ for host in ${hosts} ; do
 			cat ${srcdir}/${Makefile_in} >> ${Makefile}
 
 			# Conditionalize the makefile for this site.
-			if [ -n "${site}" ] ; then
+			case "${site}" in
+			"") ;;
+			*)
 				site_makefile_frag=config/ms-${site}
 
 				if [ -f ${srcdir}/${site_makefile_frag} ] ; then
@@ -517,7 +553,8 @@ for host in ${hosts} ; do
 					cat ${Makefile} >> Makefile.tem
 				fi
 				mv Makefile.tem ${Makefile}
-			fi
+				;;
+			esac
 
 			# Conditionalize the makefile for this host.
 			if [ -f ${srcdir}/${host_makefile_frag} ] ; then
@@ -544,16 +581,22 @@ for host in ${hosts} ; do
 			mv Makefile.tem ${Makefile}
 
 			# set prefix
-			if [ -n "${prefix}" ] ; then
+			case "${prefix}" in
+			"") ;;
+			*)
 				sed "s:^prefix[ 	]*=.*$:prefix = ${prefix}:" ${Makefile} > Makefile.tem
 				mv Makefile.tem ${Makefile}
-			fi
+				;;
+			esac
 
 			# set datadir
-			if [ -n "${datadir}" ] ; then
+			case "${datadir}" in
+			"") ;;
+			*)
 				sed "s:^datadir[ 	]*=.*$:datadir = ${datadir}:" ${Makefile} > Makefile.tem
 				mv Makefile.tem ${Makefile}
-			fi
+				;;
+			esac
 
 			# reset SUBDIRS
 			sed "s:^SUBDIRS[ 	]*=.*$:SUBDIRS = ${configdirs}:" ${Makefile} > Makefile.tem
@@ -579,10 +622,14 @@ for host in ${hosts} ; do
 			if [ -f ${srcdir}/${target_makefile_frag} ] ; then
 				using="${using} and \"${target_makefile_frag}\""
 			fi
-			if [ -n "${site}" -a \
-			     -f ${srcdir}/${site_makefile_frag} ] ; then
-				using="${using} and \"${site_makefile_frag}\""
-			fi
+			case "${site}" in
+			"") ;;
+			*)
+				if [ -f ${srcdir}/${site_makefile_frag} ] ; then
+					using="${using} and \"${site_makefile_frag}\""
+				fi
+				;;
+			esac
 			using=`echo "${using}" | sed 's/and/using/'`
 			using="Created \"${Makefile}\" in ${PWD}${using}."
 
@@ -597,9 +644,10 @@ for host in ${hosts} ; do
 			# the same configuration.  Used in Makefiles to rebuild
 			# Makefiles.
 
-			if [ -z "${norecursion}" ] ; then
-				arguments="${arguments} -norecursion"
-			fi
+			case "${norecursion}" in
+			"") arguments="${arguments} -norecursion" ;;
+			*) ;;
+			esac
 
 			echo "#!/bin/sh
 # ${NO_EDIT}
@@ -607,22 +655,27 @@ for host in ${hosts} ; do
 ${progname}" ${arguments}  "
 # ${using}" > config.status
 			chmod a+x config.status
-
-		fi
+			;;
+		*) 	rm -f ${Makefile} config.status ${links} ;;
+		esac
 
 		# If there are subdirectories, then recur. 
 		if [ -z "${norecursion}" -a -n "${configdirs}" ] ; then 
 			for configdir in ${configdirs} ; do
-				if [ -n "${verbose}" ] ; then
-					echo Configuring ${configdir}...
-				fi
+				case "${verbose}" in
+				"") ;;
+				*) echo Configuring ${configdir}... ;;
+				esac
 
 				if [ -d ${srcdir}/${configdir} ] ; then
-					if [ "${srcdir}" != "." ] ; then
+					case "${srcdir}" in
+					".")
 						if [ ! -d ./${configdir} ] ; then
 							mkdir ./${configdir}
 						fi
-					fi
+						;;
+					*) ;;
+					esac
 
 					POPDIR=${PWD}
 					cd ${configdir} 
@@ -651,8 +704,11 @@ ${progname}" ${arguments}  "
 					fi
 
 					cd ${POPDIR}
-				elif [ -n "${verbose}" ] ; then
-					echo Warning: source directory \"${srcdir}/${configdir}\" is missing.
+				else
+					case "${verbose}" in
+					"") ;;
+					*) echo Warning: source directory \"${srcdir}/${configdir}\" is missing. ;;
+					esac
 				fi
 			done
 		fi
