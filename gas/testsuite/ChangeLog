@@ -41,6 +41,12 @@ Tue Aug  1 11:41:30 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* Makefile.in: Remove superfluous runtest gasp.
 
+Mon Jul 31 18:19:26 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+ 	* gasp/*: New.
+	* Makefile.in: Use gasp tests.
+	* config/default.exp: Add gasp stuff.
+
 Thu Jul 20 18:56:48 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* gas/all/gas.exp: Disable tests that are not appropriate for
