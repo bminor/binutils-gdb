@@ -1,3 +1,10 @@
+Thu May  9 12:33:32 1996  Rob Savoye  <rob@chinadoll.cygnus.com>
+
+	* abug-rom.c: Config file for the older style ABug monitor that
+	runs on the mvme13x boards.
+	* config/m68k/monitor.mt: Add abug support for m68k cross
+	debugging.
+
 Wed May  8 20:33:24 1996  Fred Fish  <fnf@cygnus.com>
 
 	* infcmd.c (do_registers_info):  Always print the raw floating

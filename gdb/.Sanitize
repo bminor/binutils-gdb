@@ -98,6 +98,7 @@ README
 TODO
 a29k-tdep.c
 a68v-nat.c
+abug-rom.c
 aclocal.m4
 acconfig.h
 alpha-nat.c
