@@ -1,3 +1,8 @@
+2001-03-21  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.c++/userdef.exp: Check that GDB tolerates whitespace in
+	unmangled operator names.
+
 2001-03-20  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.threads/linux-dp.exp: Recognize an additional message

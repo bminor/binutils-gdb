@@ -1,3 +1,9 @@
+2001-03-21  Jim Blandy  <jimb@redhat.com>
+
+	* linespec.c (find_methods): Whitespace differences aren't
+	significant in *un*mangled method names.  Use strcmp_iw to compare
+	them, not STREQ.  (Fix from Daniel Berlin.)
+
 2001-03-21  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbarch.sh: Allow a non- multi-arch target to override a

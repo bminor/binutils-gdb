@@ -338,5 +338,9 @@ gdb_expect {
     timeout           { fail "(timeout) print value of two=one" }
   }
 
+# Check that GDB tolerates whitespace in operator names.
+gdb_test "break A1::'operator+'" ".*Breakpoint $decimal at.*"
+gdb_test "break A1::'operator +'" ".*Breakpoint $decimal at.*"
+
 gdb_exit
 return 0

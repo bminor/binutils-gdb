@@ -140,7 +140,7 @@ find_methods (struct type *t, char *name, struct symbol **sym_arr)
 		method_name = dem_opname;
 	    }
 
-	  if (STREQ (name, method_name))
+	  if (strcmp_iw (name, method_name) == 0)
 	    /* Find all the overloaded methods with that name.  */
 	    for (field_counter = TYPE_FN_FIELDLIST_LENGTH (t, method_counter) - 1;
 		 field_counter >= 0;
