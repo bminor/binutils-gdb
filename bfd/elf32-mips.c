@@ -209,8 +209,10 @@ static int sort_dynamic_relocs
 
 extern const bfd_target bfd_elf32_tradbigmips_vec;
 extern const bfd_target bfd_elf32_tradlittlemips_vec;
+#ifdef BFD64
 extern const bfd_target bfd_elf64_tradbigmips_vec;
 extern const bfd_target bfd_elf64_tradlittlemips_vec;
+#endif
 
 /* The level of IRIX compatibility we're striving for.  */
 
@@ -234,14 +236,19 @@ static bfd *reldyn_sorting_bfd;
 
 /* Depending on the target vector we generate some version of Irix
    executables or "normal" MIPS ELF ABI executables.  */
-
+#ifdef BFD64
 #define IRIX_COMPAT(abfd) \
   (((abfd->xvec == &bfd_elf64_tradbigmips_vec) || \
     (abfd->xvec == &bfd_elf64_tradlittlemips_vec) || \
     (abfd->xvec == &bfd_elf32_tradbigmips_vec) || \
     (abfd->xvec == &bfd_elf32_tradlittlemips_vec)) ? ict_none : \
   ((ABI_N32_P (abfd) || ABI_64_P (abfd)) ? ict_irix6 : ict_irix5))
-
+#else
+#define IRIX_COMPAT(abfd) \
+  (((abfd->xvec == &bfd_elf32_tradbigmips_vec) || \
+    (abfd->xvec == &bfd_elf32_tradlittlemips_vec)) ? ict_none : \
+  ((ABI_N32_P (abfd) || ABI_64_P (abfd)) ? ict_irix6 : ict_irix5))
+#endif
 /* Whether we are trying to be compatible with IRIX at all.  */
 
 #define SGI_COMPAT(abfd) \

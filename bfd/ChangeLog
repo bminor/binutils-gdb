@@ -1,3 +1,27 @@
+2001-04-24  Johan Rydberg  <jrydberg@opencores.org>
+
+	* cpu-openrisc.c: New file.
+	* elf32-openrisc.c: Likewise.
+
+	* Makefile.am (ALL_MACHINES): Add cpu-openrisc.lo.
+	(ALL_MACHINES_CFILES): Add cpu-openrisc.c.
+	(BFD32_BACKENDS): Add elf32-openrisc.lo.
+	(BFD32_BACKENDS_CFILES): Add elf32-openrisc.c.
+	(cpu-openrisc.lo, elf32-openrisc.lo): New rules.
+	* Makefile.in: Regenerated.
+	* config.bfd: (openrisc-*-elf): New target.
+	* configure.in (bfd_elf32_openrisc_vec): New vector. 
+	* configure: Regenerated.
+	* libbfd.h: Regenerated.
+	* bfd-in2.h: Regenerated.
+	* reloc.c: Add OpenRISC relocations.
+	* targets.c (bfd_elf32_openrisc_vec): Declare. 
+	(bfd_target_vect): Add bfd_elf32_openrisc_vec.
+	* archures.c (enum bfd_architecture): Add bfd_arch_openrisc.
+	(bfd_openrisc_arch): Declare.
+	(bfd_archures_list): Add bfd_openrisc_arch.
+	* elf.c (prep_headers): Add bfd_arch_openrisc.
+
 2001-04-23  Bo Thorsen  <bo@suse.de>
 
 	* elf64-x86-64.c: Add c++ vtable hack.

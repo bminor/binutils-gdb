@@ -1539,6 +1539,7 @@ enum bfd_architecture
   bfd_arch_s390,      /* IBM s390 */
 #define bfd_mach_s390_esa      0
 #define bfd_mach_s390_esame    1
+  bfd_arch_openrisc,  /* OpenRISC */
   bfd_arch_last
   };
 
@@ -2758,6 +2759,10 @@ This is the 3 bits of a value. */
   BFD_RELOC_860_HIGH,
   BFD_RELOC_860_HIGOT,
   BFD_RELOC_860_HIGOTOFF,
+
+/* OpenRISC Relocations. */
+  BFD_RELOC_OPENRISC_ABS_26,
+  BFD_RELOC_OPENRISC_REL_26,
   BFD_RELOC_UNUSED };
 typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;
 reloc_howto_type *

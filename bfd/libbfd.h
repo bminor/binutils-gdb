@@ -1062,6 +1062,8 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_860_HIGH",
   "BFD_RELOC_860_HIGOT",
   "BFD_RELOC_860_HIGOTOFF",
+  "BFD_RELOC_OPENRISC_ABS_26",
+  "BFD_RELOC_OPENRISC_REL_26",
  "@@overflow: BFD_RELOC_UNUSED@@",
 };
 #endif

@@ -3413,7 +3413,10 @@ prep_headers (abfd)
     case bfd_arch_cris:
       i_ehdrp->e_machine = EM_CRIS;
       break;
-      /* also note that EM_M32, AT&T WE32100 is unknown to bfd */
+    case bfd_arch_openrisc:
+      i_ehdrp->e_machine = EM_OPENRISC;
+      break;
+      /* Also note that EM_M32, AT&T WE32100 is unknown to bfd.  */
     default:
       i_ehdrp->e_machine = EM_NONE;
     }

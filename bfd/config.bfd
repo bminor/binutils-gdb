@@ -696,6 +696,10 @@ case "${targ}" in
     targ_underscore=yes
     ;;
 
+  openrisc-*-elf)
+    targ_defvec=bfd_elf32_openrisc_vec
+    ;;
+
   pdp11-*-*)
     targ_defvec=pdp11_aout_vec
     targ_underscore=yes

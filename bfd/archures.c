@@ -257,6 +257,7 @@ DESCRIPTION
 .  bfd_arch_s390,      {* IBM s390 *}
 .#define bfd_mach_s390_esa      0
 .#define bfd_mach_s390_esame    1
+.  bfd_arch_openrisc,  {* OpenRISC *}
 .  bfd_arch_last
 .  };
 */
@@ -334,6 +335,7 @@ extern const bfd_arch_info_type bfd_mcore_arch;
 extern const bfd_arch_info_type bfd_avr_arch;
 extern const bfd_arch_info_type bfd_ia64_arch;
 extern const bfd_arch_info_type bfd_s390_arch;
+extern const bfd_arch_info_type bfd_openrisc_arch;
 
 static const bfd_arch_info_type * const bfd_archures_list[] = {
 #ifdef SELECT_ARCHITECTURES
@@ -380,6 +382,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] = {
   &bfd_avr_arch,
   &bfd_ia64_arch,
   &bfd_s390_arch,
+  &bfd_openrisc_arch,
 #endif
   0
 };
