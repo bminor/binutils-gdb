@@ -26,6 +26,7 @@
 #include "symfile.h"
 #include "gdbcore.h"
 #include "inferior.h"
+#include "arch-utils.h"
 
 /* Functions declared and used only in this file */
 
@@ -41,7 +42,7 @@ int mcore_use_struct_convention (int gcc_p, struct type *type);
 
 void _initialize_mcore (void);
 
-void mcore_init_extra_frame_info (struct frame_info *fi);
+void mcore_init_extra_frame_info (int fromleaf, struct frame_info *fi);
 
 CORE_ADDR mcore_frame_saved_pc (struct frame_info *fi);
 
@@ -54,9 +55,9 @@ CORE_ADDR mcore_frame_locals_address (struct frame_info *fi);
 CORE_ADDR mcore_push_return_address (CORE_ADDR pc, CORE_ADDR sp);
 
 CORE_ADDR mcore_push_arguments (int nargs, struct value ** args, CORE_ADDR sp,
-			unsigned char struct_return, CORE_ADDR struct_addr);
+			int struct_return, CORE_ADDR struct_addr);
 
-void mcore_pop_frame (struct frame_info *fi);
+void mcore_pop_frame ();
 
 CORE_ADDR mcore_skip_prologue (CORE_ADDR pc);
 
@@ -241,6 +242,26 @@ mcore_breakpoint_from_pc (CORE_ADDR * bp_addr, int *bp_size)
   {0x00, 0x00};
   *bp_size = 2;
   return breakpoint;
+}
+
+static CORE_ADDR
+mcore_saved_pc_after_call (struct frame_info *frame)
+{
+  return read_register (PR_REGNUM);
+}
+
+/* This is currently handled by init_extra_frame_info.  */
+static void
+mcore_frame_init_saved_regs (struct frame_info *frame)
+{
+
+}
+
+/* This is currently handled by mcore_push_arguments  */
+static void
+mcore_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
+{
+
 }
 
 /* Helper function for several routines below.  This funtion simply
@@ -749,9 +770,10 @@ mcore_frame_saved_pc (struct frame_info * fi)
    command, or the call dummy breakpoint gets hit. */
 
 void
-mcore_pop_frame (struct frame_info *fi)
+mcore_pop_frame ()
 {
   int rn;
+  struct frame_info *fi = get_current_frame ();
 
   if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     generic_pop_dummy_frame ();
@@ -798,7 +820,7 @@ mcore_pop_frame (struct frame_info *fi)
 
 CORE_ADDR
 mcore_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
-		      unsigned char struct_return, CORE_ADDR struct_addr)
+		      int struct_return, CORE_ADDR struct_addr)
 {
   int argreg;
   int argnum;
@@ -998,9 +1020,9 @@ mcore_store_return_value (struct type *type, char *valbuf)
    the prologue of this frame. */
 
 void
-mcore_init_extra_frame_info (struct frame_info *fi)
+mcore_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
-  if (fi->next)
+  if (fi && fi->next)
     fi->pc = FRAME_SAVED_PC (fi->next);
 
   frame_saved_regs_zalloc (fi);
@@ -1047,16 +1069,24 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   gdbarch = gdbarch_alloc (&info, 0);
 
+  /* Registers: */
+
   /* All registers are 32 bits */
   set_gdbarch_register_size (gdbarch, MCORE_REG_SIZE);
   set_gdbarch_max_register_raw_size (gdbarch, MCORE_REG_SIZE);
   set_gdbarch_max_register_virtual_size (gdbarch, MCORE_REG_SIZE);
-
   set_gdbarch_register_name (gdbarch, mcore_register_name);
   set_gdbarch_register_virtual_type (gdbarch, mcore_register_virtual_type);
   set_gdbarch_register_virtual_size (gdbarch, mcore_register_size);
   set_gdbarch_register_raw_size (gdbarch, mcore_register_size);
   set_gdbarch_register_byte (gdbarch, mcore_register_byte);
+  set_gdbarch_register_bytes (gdbarch, MCORE_REG_SIZE * MCORE_NUM_REGS);
+  set_gdbarch_num_regs (gdbarch, MCORE_NUM_REGS);
+  set_gdbarch_pc_regnum (gdbarch, 64);
+  set_gdbarch_sp_regnum (gdbarch, 0);
+  set_gdbarch_fp_regnum (gdbarch, 0);
+
+  /* Call Dummies:  */
 
   set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
@@ -1071,6 +1101,38 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
   set_gdbarch_pc_in_call_dummy (gdbarch, generic_pc_in_call_dummy);
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
+  set_gdbarch_saved_pc_after_call (gdbarch, mcore_saved_pc_after_call);
+  set_gdbarch_function_start_offset (gdbarch, 0);
+  set_gdbarch_decr_pc_after_break (gdbarch, 0);
+  set_gdbarch_breakpoint_from_pc (gdbarch, mcore_breakpoint_from_pc);
+  set_gdbarch_push_return_address (gdbarch, mcore_push_return_address);
+  set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
+  set_gdbarch_push_arguments (gdbarch, mcore_push_arguments);
+
+  /* Frames:  */
+
+  set_gdbarch_init_extra_frame_info (gdbarch, mcore_init_extra_frame_info);
+  set_gdbarch_frame_chain (gdbarch, mcore_frame_chain);
+  set_gdbarch_frame_chain_valid (gdbarch, generic_file_frame_chain_valid);
+  set_gdbarch_frame_init_saved_regs (gdbarch, mcore_frame_init_saved_regs);
+  set_gdbarch_frame_saved_pc (gdbarch, mcore_frame_saved_pc);
+  set_gdbarch_store_return_value (gdbarch, mcore_store_return_value);
+  set_gdbarch_deprecated_extract_return_value (gdbarch, 
+					       mcore_extract_return_value);
+  set_gdbarch_store_struct_return (gdbarch, mcore_store_struct_return);
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, 
+						       mcore_extract_struct_value_address);
+  set_gdbarch_skip_prologue (gdbarch, mcore_skip_prologue);
+  set_gdbarch_frame_args_skip (gdbarch, 0);
+  set_gdbarch_frame_args_address (gdbarch, mcore_frame_args_address);
+  set_gdbarch_frame_locals_address (gdbarch, mcore_frame_locals_address);
+  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
+  set_gdbarch_pop_frame (gdbarch, mcore_pop_frame);
+
+  /* Misc.:  */
+
+  /* Stack grows down.  */
+  set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
   return gdbarch;
 }

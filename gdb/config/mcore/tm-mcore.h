@@ -37,9 +37,9 @@
 #define REGISTER_RAW_SIZE(REG) 4
 
 #define MAX_REGISTER_VIRTUAL_SIZE 4
-#endif
 
 #define REGISTER_BYTES (NUM_REGS * REGISTER_SIZE)
+#endif
 
 #if !GDB_MULTI_ARCH
 extern char *mcore_register_names[];
@@ -54,10 +54,12 @@ extern char *mcore_register_names[];
    + 1 pc
    ------
    65 registers */
+#if !GDB_MULTI_ARCH
 #define NUM_REGS 65
 #define PC_REGNUM 64
 #define SP_REGNUM 0
 #define FP_REGNUM (SP_REGNUM)
+#endif
 #define PR_REGNUM 15
 #define FIRST_ARGREG 2
 #define LAST_ARGREG 7
@@ -65,6 +67,7 @@ extern char *mcore_register_names[];
 
 /* Offset from address of function to start of its code.
    Zero on most machines.  */
+#if !GDB_MULTI_ARCH
 #define FUNCTION_START_OFFSET 0
 
 #define DECR_PC_AFTER_BREAK 0
@@ -78,11 +81,13 @@ extern const unsigned char *mcore_breakpoint_from_pc (CORE_ADDR *pcptr,
 #define INNER_THAN(LHS,RHS) ((LHS) < (RHS))
 
 #define SAVED_PC_AFTER_CALL(FRAME)  read_register (PR_REGNUM)
+#endif
 
 struct frame_info;
 struct type;
 struct value;
 
+#if !GDB_MULTI_ARCH
 extern void mcore_init_extra_frame_info (struct frame_info *fi);
 #define INIT_EXTRA_FRAME_INFO(FROMLEAF, FI) mcore_init_extra_frame_info ((FI))
 #define INIT_FRAME_PC		/* Not necessary */
@@ -122,6 +127,7 @@ extern CORE_ADDR mcore_frame_locals_address (struct frame_info *fi);
 
 extern void mcore_pop_frame (struct frame_info *fi);
 #define POP_FRAME mcore_pop_frame (get_current_frame ())
+#endif
 
 #if !GDB_MULTI_ARCH
 #define USE_GENERIC_DUMMY_FRAMES 1
@@ -133,7 +139,6 @@ extern void mcore_pop_frame (struct frame_info *fi);
 #define CALL_DUMMY_ADDRESS()         entry_point_address ()
 #define SIZEOF_CALL_DUMMY_WORDS      0
 #define SAVE_DUMMY_FRAME_TOS(SP)     generic_save_dummy_frame_tos (SP)
-#endif
 
 extern CORE_ADDR mcore_push_return_address (CORE_ADDR, CORE_ADDR);
 #define PUSH_RETURN_ADDRESS(PC, SP)  mcore_push_return_address (PC, SP)
@@ -144,6 +149,7 @@ extern CORE_ADDR mcore_push_arguments (int, struct value **, CORE_ADDR,
 				       unsigned char, CORE_ADDR);
 #define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
   (SP) = mcore_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR)
+#endif
 
 #if !GDB_MULTI_ARCH
 #define PC_IN_CALL_DUMMY(PC, SP, FP) generic_pc_in_call_dummy (PC, SP, FP)

@@ -1,3 +1,27 @@
+2002-07-03  Grace Sainsbury  <graces@redhat.com>
+
+	* config/mcore/tm-mcore.h (REGISTER_BYTES, NUM_REGS, PC_REGNUM)
+	(SP_REGNUM, FP_REGNUM, FUNCTION_START_OFFSET, DECR_PC_AFTER_BREAK)
+	(BREAKPOINT_FROM_PC, INNER_THAN, SAVED_PC_AFTER_CALL)
+	(INIT_EXTRA_FRAME_INFO, FRAME_INIT_SAVED_REGS, INIT_FRAME_PC)
+	(FRAME_CHAIN, FRAME_CHAIN_VALID, FRAME_SAVED_PC)
+	(STORE_RETURN_VALUE, DEPRECATED_EXTRACT_RETURN_VALUE)
+	(STORE_STRUCT_RETURN, DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS)
+	(SKIP_PROLOGUE, FRAME_ARGS_SKIP, FRAME_ARGS_ADDRESS)
+	(FRAME_LOCALS_ADDRESS, FRAME_NUM_ARGS, POP_FRAME)
+	(PUSH_RETURN_ADDRESS, PUSH_DUMMY_FRAME, PUSH_ARGUMENTS): Remove.
+	* mcore-tdep.c (mcore_init_extra_frame_info): Add fromleaf
+	argument so the function fits the prototype in the architecture
+	vector.
+	(mcore_pop_frame): Remove argument so the function fits the
+	prototype. Use get_current_frame instead of the argument.
+	(mcore_push_arguments): Change type of struct_return so the
+	function can be used in the architecture vector.
+	(mcore_store_struct_return): Add.
+	(mcore_frame_init_saved_regs): Add.
+	(mcore_gdbarch_init): Add function calls to replace the macros
+	removed from tm-mcore.h
+
 2002-07-03  Andrew Cagney  <ac131313@redhat.com>
 
 	* infcmd.c (print_return_value): Remove compatibility code calling
