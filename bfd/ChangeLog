@@ -1,3 +1,8 @@
+Fri Jul  2 12:21:10 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* libhppa.h (HPPA_R_ARG_RELOC): Delete.
+	(HPPA_R_CONSTANT, HPPA_R_ADDEND): Likewise.
+
 1999-07-01  Mark Mitchell  <mark@codesourcery.com>
 
 	* elf-bfd.h (bfd_elf_section_data): Add rel_count and rel_count2

@@ -177,21 +177,6 @@ enum hppa_reloc_expr_type_alt
   };
 
 
-/* Relocations for function calls must be accompanied by parameter
-   relocation bits.  These bits describe exactly where the caller has
-   placed the function's arguments and where it expects to find a return
-   value.
-
-   Both ELF and SOM encode this information within the addend field
-   of the call relocation.  (Note this could break very badly if one
-   was to make a call like bl foo + 0x12345678).
-
-   The high order 10 bits contain parameter relocation information,
-   the low order 22 bits contain the constant offset.  */
-   
-#define HPPA_R_ARG_RELOC(a)	(((a) >> 22) & 0x3FF)
-#define HPPA_R_CONSTANT(a)	((((int)(a)) << 10) >> 10)
-#define HPPA_R_ADDEND(r,c)	(((r) << 22) + ((c) & 0x3FFFFF))
 #define HPPA_WIDE	       (0) /* PSW W-bit, need to check! FIXME */
 
 /* These macros get bit fields using HP's numbering (MSB = 0),
