@@ -316,27 +316,10 @@ extern void pa_do_strcat_registers_info (int, int, struct ui_file *, enum precis
 
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
-   into VALBUF. 
-
-   elz: changed what to return when length is > 4: the stored result is 
-   in register 28 and in register 29, with the lower order word being in reg 29, 
-   so we must start reading it from somehere in the middle of reg28
-
-   FIXME: Not sure what to do for soft float here.  */
+   into VALBUF.  */
 
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
-  { \
-    if (TYPE_CODE (TYPE) == TYPE_CODE_FLT && !SOFT_FLOAT) \
-      memcpy ((VALBUF), \
-	      ((char *)(REGBUF)) + REGISTER_BYTE (FP4_REGNUM), \
-	      TYPE_LENGTH (TYPE)); \
-    else \
-      memcpy ((VALBUF), \
-	      (char *)(REGBUF) + REGISTER_BYTE (28) + \
-	      (TYPE_LENGTH (TYPE) > 4 ? (8 - TYPE_LENGTH (TYPE)) : (4 - TYPE_LENGTH (TYPE))), \
-	      TYPE_LENGTH (TYPE)); \
-  }
-
+  hppa_extract_return_value (TYPE, REGBUF, VALBUF);
 
  /* elz: decide whether the function returning a value of type type
     will put it on the stack or in the registers.
@@ -353,20 +336,10 @@ extern use_struct_convention_fn hppa_use_struct_convention;
 #define USE_STRUCT_CONVENTION(gcc_p,type) hppa_use_struct_convention (gcc_p,type)
 
 /* Write into appropriate registers a function return value
-   of type TYPE, given in virtual format.
-
-   For software floating point the return value goes into the integer
-   registers.  But we don't have any flag to key this on, so we always
-   store the value into the integer registers, and if it's a float value,
-   then we put it in the float registers too.  */
+   of type TYPE, given in virtual format.  */
 
 #define STORE_RETURN_VALUE(TYPE,VALBUF) \
-  write_register_bytes (REGISTER_BYTE (28),(VALBUF), TYPE_LENGTH (TYPE)) ; \
-  if (!SOFT_FLOAT) \
-    write_register_bytes ((TYPE_CODE(TYPE) == TYPE_CODE_FLT \
-			   ? REGISTER_BYTE (FP4_REGNUM) \
-			   : REGISTER_BYTE (28)),		\
-			  (VALBUF), TYPE_LENGTH (TYPE))
+  hppa_store_return_value (TYPE, VALBUF);
 
 /* Extract from an array REGBUF containing the (raw) register state
    the address in which a function should return its structure value,

@@ -1,6 +1,11 @@
 Wed Dec 19 12:18:57 2001  Jeffrey A Law  (law@redhat.com)
 
-	* infttrate.c (child_acknowledge_created_inferior): Pass
+	* config/pa/tm-hppa.h (STORE_RETURN_VALUE): Use hppa_store_return_value.
+	(EXTRACT_RETURN_VALUE): Similarly.
+	* hppa-tdep.c (hppa_store_return_value): New function.
+	(hppa_extract_return_value): New function.
+
+	* infttrace.c (child_acknowledge_created_inferior): Pass
 	correct argument to add_thread.
 	(update_thread_state_after_attach): Likewise.
 

@@ -4680,3 +4680,53 @@ _initialize_hppa_tdep (void)
 	   "Print unwind table entry at given address.",
 	   &maintenanceprintlist);
 }
+
+/* Copy the function value from VALBUF into the proper location
+   for a function return.
+
+   Called only in the context of the "return" command.  */
+
+void
+hppa_store_return_value (struct type *type, char *valbuf)
+{
+  /* For software floating point, the return value goes into the
+     integer registers.  But we do not have any flag to key this on,
+     so we always store the value into the integer registers.
+
+     If its a float value, then we also store it into the floating
+     point registers.  */
+  write_register_bytes (REGISTER_BYTE (28)
+		        + (TYPE_LENGTH (type) > 4
+			   ? (8 - TYPE_LENGTH (type))
+			   : (4 - TYPE_LENGTH (type))),
+			valbuf,
+			TYPE_LENGTH (type));
+  if (! SOFT_FLOAT && TYPE_CODE (type) == TYPE_CODE_FLT)
+    write_register_bytes (REGISTER_BYTE (FP4_REGNUM),
+			  valbuf,
+			  TYPE_LENGTH (type));
+}
+
+/* Copy the function's return value into VALBUF.
+
+   This function is called only in the context of "target function calls",
+   ie. when the debugger forces a function to be called in the child, and
+   when the debugger forces a fucntion to return prematurely via the
+   "return" command.  */
+
+void
+hppa_extract_return_value (struct type *type, char *regbuf, char *valbuf)
+{
+  if (! SOFT_FLOAT && TYPE_CODE (type) == TYPE_CODE_FLT)
+    memcpy (valbuf,
+	    (char *)regbuf + REGISTER_BYTE (FP4_REGNUM),
+	    TYPE_LENGTH (type));
+  else
+    memcpy (valbuf,
+	    ((char *)regbuf
+	     + REGISTER_BYTE (28)
+	     + (TYPE_LENGTH (type) > 4
+		? (8 - TYPE_LENGTH (type))
+		: (4 - TYPE_LENGTH (type)))),
+	    TYPE_LENGTH (type));
+}
