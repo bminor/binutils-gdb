@@ -401,7 +401,6 @@ static struct bfd_elf_version_expr *
 gld${EMULATION_NAME}_new_vers_pattern (struct bfd_elf_version_expr *entry)
 {
   struct bfd_elf_version_expr *dot_entry;
-  struct bfd_elf_version_expr *next;
   unsigned int len;
   char *dot_pat;
 
