@@ -12,33 +12,54 @@ ENTRY(_mainCRTStartup)
 SECTIONS
 {
 
-  .text ${RELOCATING+ 0x401000} : 
+  .text ${RELOCATING+ __image_base__ + __section_alignment__ } : 
 	{
 	    ${RELOCATING+ *(.init);}
 	    *(.text)
-	    ${CONSTRUCTING+ ___CTOR_LIST__ = .; LONG (-1); *(.ctor); LONG (0); }
-            ${CONSTRUCTING+ ___DTOR_LIST__ = .; LONG (-1); *(.dtor); LONG (0); }
+	    ${CONSTRUCTING+ ___CTOR_LIST__ = .; __CTOR_LIST__ = . ; 
+		              LONG (-1); *(.ctors); *(.ctor); LONG (0); }
+            ${CONSTRUCTING+ ___DTOR_LIST__ = .; __DTOR_LIST__ = . ; 
+				LONG (-1); *(.dtors); *(.dtor);  LONG (0); }
 	    ${RELOCATING+ *(.fini);}
 	    ${RELOCATING+ etext  =  .};
 	  }
 
-  .bss BLOCK(0x1000)  :
+  .bss BLOCK(__section_alignment__)  :
 	{
-	*(.bss)
+	__bss_start__ = . ;
+	*(.bss) ;
 	*(COMMON);
+	__bss_end__ = . ;
+	}
+  .data BLOCK(__section_alignment__) : 
+	{
+	__data_start__ = . ; 
+	*(.data);
+	*(.data2);
+ 	__data_end__ = . ; 
 	}
 
-  .rdata BLOCK(0x1000) :
+  .rdata BLOCK(__section_alignment__) :
   { 					
     *(.rdata)
     ;
   }
-  .data BLOCK(0x1000) : {
-    *(.data)
-    *(.data2)
+
+
+
+  .edata BLOCK(__section_alignment__) :   { 					
+    *(.edata)   ;
+  }
+
+  .junk BLOCK(__section_alignment__) : {
+    *(.debug\$S)
+    *(.debug\$T)
+    *(.debug\$F)
+    *(.drectve)
     ;
   }
-  .idata BLOCK(0x1000) :
+
+  .idata BLOCK(__section_alignment__) :
   { 					
     *(.idata\$2)
     *(.idata\$3)
@@ -48,7 +69,7 @@ SECTIONS
     *(.idata\$7)
     ;
   }
-  .CRT BLOCK(0x1000) :
+  .CRT BLOCK(__section_alignment__) :
   { 					
     *(.CRT\$XCA)
     *(.CRT\$XCC)
@@ -65,33 +86,35 @@ SECTIONS
     *(.CRT\$XTZ)
     ;
   }
-  .rsrc BLOCK(0x1000) :
+  .rsrc BLOCK(__section_alignment__) :
   { 					
     *(.rsrc\$01)
     *(.rsrc\$02)
     ;
   }
-  .reloc BLOCK(0x1000) :
-  { 					
-    *(.reloc)
-    ;
+
+  .endjunk BLOCK(__section_alignment__) :
+  {
+    ${RELOCATING+ end =  .};
   }
-  .junk BLOCK(0x1000) :
-  { 					
-    *(.debug\$S)
-    *(.debug\$T)
-    *(.debug\$F)
-    *(.drectve)
-    ;
-  }
-  .stab  0 ${RELOCATING+(NOLOAD)} : 
+
+  .stab BLOCK(__section_alignment__)  ${RELOCATING+(NOLOAD)} : 
   {
     [ .stab ]
   }
 
-  .stabstr  0 ${RELOCATING+(NOLOAD)} :
+  .stabstr BLOCK(__section_alignment__) ${RELOCATING+(NOLOAD)} :
   {
     [ .stabstr ]
   }
+
+
+  .reloc BLOCK(__section_alignment__) :
+  { 					
+    *(.reloc)
+    ;
+  }
+
+
 }
 EOF
