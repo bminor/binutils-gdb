@@ -1,5 +1,10 @@
 Mon Sep 16 12:39:36 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* coff-arm.c (aoutarm_std_reloc_howto): Change dst_mask for ARM26D
+ 	reloc to 0.
+	(coff_arm_adjust_symndx): New static function.
+	(coff_adjust_symndx): Define.
+
 	* srec.c (srec_scan): Accept multiple symbols on a single line.
 	From Pascal Martin <pmartin@alsys.com>.
 
