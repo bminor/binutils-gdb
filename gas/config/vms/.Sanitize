@@ -33,20 +33,15 @@ vms.c
 
 Do-last:
 
-if ( echo $* | grep keep\-v9 > /dev/null ) ; then
-	echo Keeping v9 stuff in tc-sparc.c.
-else
-	echo Cleaning tc-sparc.c...
-	sed '/start\-sanitize/,/end-sanitize/d' < tc-sparc.c > new
-	mv new tc-sparc.c
-fi
-
 echo Done in `pwd`.
 
 #
 #
 # $Log$
-# Revision 1.1  1991/05/23 17:10:40  rich
+# Revision 1.2  1991/05/23 17:11:51  rich
+# No tc-sparc.c here.
+#
+# Revision 1.1  1991/05/23  17:10:40  rich
 # Initial revision
 #
 # Revision 1.1  1991/05/23  17:09:03  rich
