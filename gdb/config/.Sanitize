@@ -25,6 +25,7 @@ mh-3b1
 mh-altos
 mh-altosgas
 mh-amix
+mh-apollo68v
 mh-arm
 mh-bigmips
 mh-convex
@@ -100,6 +101,7 @@ mt-news1000
 mt-nindy960
 mt-none
 mt-np1
+mt-os68k
 mt-pn
 mt-pyramid
 mt-rs6000
