@@ -4404,6 +4404,8 @@ defined or left undefined, to control compilation when the host and
 target systems are the same.  These macros should be defined (or left
 undefined) in @file{nm-@var{system}.h}.
 
+@table @code
+
 @item CHILD_PREPARE_TO_STORE
 @findex CHILD_PREPARE_TO_STORE
 If the machine stores all registers at once in the child process, then

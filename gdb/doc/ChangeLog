@@ -1,3 +1,8 @@
+2004-06-09  Andrew Cagney  <cagney@gnu.org>
+
+	* gdbint.texinfo (Native Debugging): Restore "@table @code"
+	deleted by previous patch.
+
 2004-06-08  Andrew Cagney  <cagney@gnu.org>
 
 	* gdbint.texinfo (Native Debugging): Delete documentation on
