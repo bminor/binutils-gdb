@@ -723,6 +723,13 @@ main (argc, argv)
 		 need.  However, we would have to figure out the sizes
 		 of the external and public information, and that can
 		 not be done without reading through them.  */
+	      if (sharedhdr.uninitializedDataSize > 0)
+		{
+		  /* There is no place to record this information.  */
+		  fprintf (stderr,
+			   "%s:%s: warning: shared libraries can not have uninitialized data\n",
+			   program_name, sharelib_file);
+		}
 	      shared_offset = st.st_size;
 	      if (shared_offset > sharedhdr.codeImageOffset)
 		shared_offset = sharedhdr.codeImageOffset;
