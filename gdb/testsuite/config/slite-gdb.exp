@@ -70,6 +70,10 @@ proc gdb_load { arg } {
 	    send "y\n"
 	    exp_continue
 	}
+        -re "Load new symbol table.*y or n. $" {
+	    send "y\n"
+	    exp_continue
+	}
 	-re "Reading symbols from.*done..*$prompt $" {}
 	-re "$prompt $" { perror "GDB couldn't read file" }
 	timeout { perror "(timeout) read symbol file" ; return -1 }
