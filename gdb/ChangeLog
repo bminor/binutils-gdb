@@ -1,3 +1,12 @@
+2000-03-02  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/tm-i386aix.h (NUM_FPREGS, NUM_REGS, REGISTER_BYTES):
+	Override definitions to include the normal FPU registers.
+	(REGISTER_CONVERTIBLE, REGISTER_CONVERT_TO_VIRTUAL,
+	REGISTER_CONVERT_TO_RAW): Removed.  The default definitions are
+	fine for AIX/i386.
+	(i387_to_double, double_to_i387): Remove prototypes.
+
 2000-03-02  Kevin Buettner  <kevinb@redhat.com>
 
 	* findvar.c (extract_floating, store_floating): Use target

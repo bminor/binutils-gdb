@@ -1,5 +1,5 @@
 /* Macro defintions for IBM AIX PS/2 (i386).
-   Copyright 1986, 1987, 1989, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1992, 1993, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -29,40 +29,27 @@
 #ifndef I386
 #define I386 1
 #endif
+
+/* FIXME: kettenis/2000-03-02: This is used in
+   i386-tdep.c:i386_extract_return_value(), and will be remove once
+   I've fixed that.  Meanwhile don't use it for any other purpose
+   please!  */
 #ifndef I386_AIX_TARGET
 #define I386_AIX_TARGET 1
 #endif
 
-/* Nonzero if register N requires conversion
-   from raw format to virtual format.  */
+/* AIX/i386 has FPU support.  However, the native configuration (which
+   is the only supported configuration) doesn't make the FPU control
+   registers available.  Override the appropriate symbols such that
+   only the normal FPU registers are included in GDB's register array.  */
 
-#undef  REGISTER_CONVERTIBLE
-#define REGISTER_CONVERTIBLE(N) \
-  ((N < FP0_REGNUM) ? 0 : 1)
+#undef NUM_FPREGS
+#define NUM_FPREGS (8)
 
-/* Convert data from raw format for register REGNUM in buffer FROM
-   to virtual format with type TYPE in buffer TO.  */
+#undef NUM_REGS
+#define NUM_REGS (NUM_GREGS + NUM_FPREGS)
 
-#undef REGISTER_CONVERT_TO_VIRTUAL
-#define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,TYPE,FROM,TO) \
-{ \
-  double val; \
-  i387_to_double ((FROM), (char *)&val); \
-  store_floating ((TO), TYPE_LENGTH (TYPE), val); \
-}
-extern void
-i387_to_double PARAMS ((char *, char *));
-
-/* Convert data from virtual format with type TYPE in buffer FROM
-   to raw format for register REGNUM in buffer TO.  */
-
-#undef REGISTER_CONVERT_TO_RAW
-#define REGISTER_CONVERT_TO_RAW(TYPE,REGNUM,FROM,TO) \
-{ \
-  double val = extract_floating ((FROM), TYPE_LENGTH (TYPE)); \
-  double_to_i387((char *)&val, (TO)); \
-}
-extern void
-double_to_i387 PARAMS ((char *, char *));
+#undef REGISTER_BYTES
+#define REGISTER_BYTES (SIZEOF_GREGS + SIZEOF_FPU_REGS)
 
 #endif /* TM_I386AIX_H */
