@@ -1882,6 +1882,7 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 	    case 'F':
 	      function_stab_type = type;
 
+#ifdef SUN_FIXED_LBRAC_BUG
 	      /* The Sun acc compiler, under SunOS4, puts out
 		 functions with N_GSYM or N_STSYM.  The problem is
 		 that the address of the symbol is no good (for N_GSYM
@@ -1914,7 +1915,6 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 		    valu = last_pc_address;
 		}
 
-#ifdef SUN_FIXED_LBRAC_BUG
 	      last_pc_address = valu;	/* Save for SunOS bug circumcision */
 #endif
 
