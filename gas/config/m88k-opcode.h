@@ -533,7 +533,7 @@ static struct m88k_opcode m88k_opcodes[] =
   _MC88xxx (0x84005800, "trnc.ss",	"d,2")
   _MC88110 (0x8400d800, "trnc.ss",	"d,x2")
   _MC88110 (0x8400d900, "trnc.sx",	"d,x2")
-  _MC88xxx (0x8000c000, "xcr",		"d,1,c")
+  _MC88xxx (0x8000c000, "xcr",		"d,3,c")
   _MC88xxx (0xf4000600, "xmem",		"d,1[2]")
   _MC88xxx (0xf4000400, "xmem",		"d,1,2")
   _MC88100 (0x04000000, "xmem",		"?d,1,I")
