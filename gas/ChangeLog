@@ -1,3 +1,7 @@
+Fri May 20 17:59:34 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* as.h: Don't declare parameters for strstr.
+
 Thu May 19 15:40:13 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-sparc.c (md_section_align): Don't change the size if

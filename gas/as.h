@@ -97,6 +97,11 @@
       as_fatal("Case value %ld unexpected at line %d of file \"%s\"\n", \
 	       (long) val, __LINE__, __FILE__); \
 	   }
+
+/* Version 2.1 of Solaris had problems with this declaration, but I
+   think that bug has since been fixed.  If it causes problems on your
+   system, just delete it.  */
+extern char *strstr ();
 
 
 /* These are assembler-wide concepts */
@@ -407,11 +412,8 @@ char *atof_ieee PARAMS ((char *str, int what_kind, LITTLENUM_TYPE * words));
 char *input_scrub_include_file PARAMS ((char *filename, char *position));
 char *input_scrub_new_file PARAMS ((char *filename));
 char *input_scrub_next_buffer PARAMS ((char **bufp));
-#if 0 /* incompatible with solaris 2 native cc */
-char *strstr PARAMS ((const char *s, const char *wanted));
-#endif
-char *xmalloc PARAMS ((unsigned long size));
-char *xrealloc PARAMS ((char *ptr, unsigned long n));
+PTR xmalloc PARAMS ((unsigned long size));
+PTR xrealloc PARAMS ((PTR ptr, unsigned long n));
 int do_scrub_next_char PARAMS ((int (*get) (void), void (*unget) (int)));
 int gen_to_words PARAMS ((LITTLENUM_TYPE * words, int precision,
 			  long exponent_bits));
@@ -422,7 +424,7 @@ int scrub_from_string PARAMS ((void));
 int seen_at_least_1_file PARAMS ((void));
 void app_pop PARAMS ((char *arg));
 void as_howmuch PARAMS ((FILE * stream));
-void as_perror PARAMS ((char *gripe, char *filename));
+void as_perror PARAMS ((const char *gripe, const char *filename));
 void as_where PARAMS ((char **namep, unsigned int *linep));
 void bump_line_counters PARAMS ((void));
 void do_scrub_begin PARAMS ((void));
@@ -437,6 +439,9 @@ void subseg_change PARAMS ((segT seg, int subseg));
 segT subseg_new PARAMS ((const char *name, subsegT subseg));
 segT subseg_force_new PARAMS ((const char *name, subsegT subseg));
 void subseg_set PARAMS ((segT seg, subsegT subseg));
+#ifdef BFD_ASSEMBLER
+segT subseg_get PARAMS ((const char *, int));
+#endif
 
 struct expressionS;
 struct fix;
