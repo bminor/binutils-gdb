@@ -5605,7 +5605,7 @@ subject, see the hardware manufacturer's manual.
 @ifset ARM
 * ARM-Dependent::               ARM Dependent Features
 @end ifset
-@ifset MMIX
+@ifset CRIS
 * CRIS-Dependent::              CRIS Dependent Features
 @end ifset
 @ifset D10V
