@@ -63,6 +63,10 @@ Things-to-lose:
 
 Do-last:
 
+if [ -n "${verbose}" ] ; then
+	echo Processing \"tic80\"...
+fi
+
 tic80_files="ChangeLog dis-asm.h"
 if ( echo $* | grep keep\-tic80 > /dev/null ) ; then
 	for i in $tic80_files ; do
@@ -89,6 +93,10 @@ else
 			mv new $i
 		fi
 	done
+fi
+
+if [ -n "${verbose}" ] ; then
+	echo Processing \"d30v\"...
 fi
 
 d30v_files="ChangeLog dis-asm.h"
@@ -119,6 +127,10 @@ else
 	done
 fi
 
+if [ -n "${verbose}" ] ; then
+	echo Processing \"sky\"...
+fi
+
 sky_files="ChangeLog dis-asm.h"
 if ( echo $* | grep keep\-sky > /dev/null ) ; then
 	for i in $sky_files ; do
@@ -136,6 +148,38 @@ else
 			fi
 			cp $i new
 			sed '/start\-sanitize\-sky/,/end-\sanitize\-sky/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
+if [ -n "${verbose}" ] ; then
+	echo Processing \"java\"...
+fi
+
+java_files="ChangeLog demangle.h"
+if ( echo $* | grep keep\-java > /dev/null ) ; then
+	for i in $java_files ; do
+		if test ! -d $i && (grep sanitize-java $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping java stuff in $i
+			fi
+		fi
+	done
+else
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-java $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"java\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-java/,/end-\sanitize\-java/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...

@@ -1,3 +1,7 @@
+Thu May 14 5:51:00 1998  Ron Unrau  <runrau@cygnus.com>
+
+	* symtab.c (decode_line_1): set section for "break *<addr>"
+
 Wed May 13 20:58:02 1998  Mark Alexander  <marka@cygnus.com>
 
 	* corefile.c (reopen_exec_file): Reopen the exec file if
@@ -16,9 +20,10 @@ Wed May 13 14:42:21 1998  Ian Lance Taylor  <ian@cygnus.com>
 	* defs.h: Check HAVE_ALLOCA_H rather than sparc.  Add _AIX pragma
 	alloca.
 	* configure: Rebuild.
-
+start-sanitize-java
 	* Makefile.in (jv-lang.o, jv-typeprint.o, jv-valprint.o): New
 	targets.
+end-sanitize-java
 
 Thu May  7 14:49:38 1998  Bob Manson  <manson@charmed.cygnus.com>
 
@@ -234,10 +239,12 @@ Thu Apr 23 16:37:20 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 
         * README:  Minor changes for 4.17 release.
 
+start-sanitize-java	
 Thu Apr 23 15:44:39 1998  Per Bothner  <bothner@cygnus.com>
 
 	* symfile.c (deduce_language_from_filename):  .class implies java.
 
+end-sanitize-java	
 Thu Apr 23 12:52:21 1998  Philippe De Muyter  <phdm@macqel.be>
 
         * configure.in (strerror): Check if function must be declared.
@@ -944,7 +951,10 @@ Mon Feb 24 11:24:57 1998  Richard Henderson  <rth@cygnus.com>
 
         * Makefile.in (BISON): Don't even pretend to use yacc.
         (c-exp.tab.o): Use bison -o to use a unique intermediate file.
-        (jv-exp.tab.o, f-exp.tab.o, m2-exp.tab.o): Likewise.
+        (f-exp.tab.o, m2-exp.tab.o): Likewise.
+start-sanitize-java	
+        (jv-exp.tab.o): Likewise.
+end-sanitize-java	
 
 Tue Feb 24 03:32:59 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 

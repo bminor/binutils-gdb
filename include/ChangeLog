@@ -1,3 +1,15 @@
+Tue Feb 24 13:05:02 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* dis-asm.h (disassemble_info): Member `symbol' renamed to `symbols'
+	and made an "asymbol **".  New member num_symbols.
+	(INIT_DISASSEMBLE_INFO_NO_ARCH): Update.
+
+Tue Feb 17 12:32:18 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote-sim.h (sim_fetch_register, sim_store_register): Add
+ 	register length parameter.  Functions return actual length of
+ 	register.
+
 Thu Feb 12 16:29:01 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* getopt.h: Update to latest FSF version.
@@ -120,10 +132,12 @@ Fri Aug  8 16:43:56 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* dis-asm.h (arc_get_disassembler): Declare.
 
+start-sanitize-java
 Wed Jul 30 11:39:50 1997  Per Bothner  <bothner@deneb.cygnus.com>
 
 	* demangle.h (DMGL_JAVA):  New option to request Java demangling.
 
+end-sanitize-java
 Tue Jul 22 17:59:54 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* libiberty.h (PEXECUTE_*): Define.
