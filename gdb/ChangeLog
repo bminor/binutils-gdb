@@ -1,5 +1,9 @@
 2002-06-30  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/i386/tm-i386.h (struct frame_info, struct
+	frame_saved_regs, struct value, struct type): Remove forward
+	declarations.
+
 	* config/i386/tm-linux.h [HAVE_PTRACE_GETFPXREGS]
 	(FILL_FPXREGSET, HAVE_SSE_REGS): Remove define.
 	* config/i386/nm-linux.h [HAVE_PTRACE_GETFPXREGS]
