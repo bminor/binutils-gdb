@@ -1117,12 +1117,8 @@ set_async_prompt (char *args, int from_tty, struct cmd_list_element *c)
    interface, i.e. via a callback function (rl_callback_read_char),
    and hook up instream to the event loop. */
 void
-gdb_setup_readline (void)
+_initialize_event_loop (void)
 {
-  /* This function is a noop for the sync case.  The assumption is that
-     the sync setup is ALL done in gdb_init, and we would only mess it up
-     here.  The sync stuff should really go away over time. */
-
   if (event_loop_p)
     {
       /* If the input stream is connected to a terminal, turn on
@@ -1157,6 +1153,9 @@ gdb_setup_readline (void)
          register it with the event loop. */
       input_fd = fileno (instream);
 
+      /* Tell gdb to use the cli_command_loop as the main loop. */
+      command_loop_hook = cli_command_loop;
+
       /* Now we need to create the event sources for the input file
          descriptor. */
       /* At this point in time, this is the only event source that we
@@ -1165,17 +1164,5 @@ gdb_setup_readline (void)
          only when it actually exists (I.e. after we say 'run' or
          after we connect to a remote target. */
       add_file_handler (input_fd, stdin_event_handler, 0);
-    }
-}
-
-void
-_initialize_event_loop (void)
-{
-  gdb_setup_readline ();
-
-  if (event_loop_p && command_loop_hook == NULL)
-    {
-      /* Tell gdb to use the cli_command_loop as the main loop. */
-      command_loop_hook = cli_command_loop;
     }
 }

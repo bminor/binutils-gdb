@@ -486,23 +486,6 @@ ui_out_field_int (struct ui_out *uiout,
 }
 
 void
-ui_out_field_fmt_int (struct ui_out *uiout,
-                      int input_width,
-                      enum ui_align input_align,
-		      const char *fldname,
-		      int value)
-{
-  int fldno;
-  int width;
-  int align;
-  struct ui_out_level *current = current_level (uiout);
-
-  verify_field (uiout, &fldno, &width, &align);
-
-  uo_field_int (uiout, fldno, input_width, input_align, fldname, value);
-}
-
-void
 ui_out_field_core_addr (struct ui_out *uiout,
 			const char *fldname,
 			CORE_ADDR address)

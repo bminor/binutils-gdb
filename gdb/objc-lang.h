@@ -19,7 +19,9 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+#ifdef __STDC__		/* Forward decls for prototypes.  */
 struct value;
+#endif
 
 extern int objc_parse (void);		/* Defined in c-exp.y */
 

@@ -3388,8 +3388,6 @@ struct elf_sh_link_hash_entry
 
   /* Track dynamic relocs copied for this symbol.  */
   struct elf_sh_dyn_relocs *dyn_relocs;
-
-  bfd_signed_vma gotplt_refcount;
 };
 
 /* sh ELF linker hash table.  */
@@ -3454,7 +3452,6 @@ sh_elf_link_hash_newfunc (entry, table, string)
 
       eh = (struct elf_sh_link_hash_entry *) ret;
       eh->dyn_relocs = NULL;
-      eh->gotplt_refcount = 0;
 #ifdef INCLUDE_SHMEDIA
       ret->datalabel_got_offset = (bfd_vma) -1;
 #endif
@@ -3870,18 +3867,6 @@ allocate_dynrelocs (h, inf)
   info = (struct bfd_link_info *) inf;
   htab = sh_elf_hash_table (info);
 
-  eh = (struct elf_sh_link_hash_entry *) h;
-  if ((h->got.refcount > 0
-      || (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL))
-      && eh->gotplt_refcount > 0)
-    {
-      /* The symbol has been forced local, or we have some direct got refs,
-         so treat all the gotplt refs as got refs. */
-      h->got.refcount += eh->gotplt_refcount;
-      if (h->plt.refcount >= eh->gotplt_refcount)
-	h->plt.refcount -= eh->gotplt_refcount;
-    }
-
   if (htab->root.dynamic_sections_created
       && h->plt.refcount > 0)
     {
@@ -3976,6 +3961,7 @@ allocate_dynrelocs (h, inf)
   else
     h->got.offset = (bfd_vma) -1;
 
+  eh = (struct elf_sh_link_hash_entry *) h;
   if (eh->dyn_relocs == NULL)
     return true;
 
@@ -5214,7 +5200,6 @@ sh_elf_gc_sweep_hook (abfd, info, sec, relocs)
   const Elf_Internal_Rela *rel, *relend;
   unsigned long r_symndx;
   struct elf_link_hash_entry *h;
-  struct elf_sh_link_hash_entry *eh;
 
   elf_section_data (sec)->local_dynrel = NULL;
 
@@ -5317,15 +5302,10 @@ sh_elf_gc_sweep_hook (abfd, info, sec, relocs)
 	if (r_symndx >= symtab_hdr->sh_info)
 	  {
 	    h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	    eh = (struct elf_sh_link_hash_entry *) h;
-	    if (eh->gotplt_refcount > 0)
-	      {
-		eh->gotplt_refcount -= 1;
-		if (h->plt.refcount > 0)
-		  h->plt.refcount -= 1;
-	      }
-	    else if (h->got.refcount > 0)
+	    if (h->got.refcount > 0)
 	      h->got.refcount -= 1;
+	    if (h->plt.refcount > 0)
+	      h->plt.refcount -= 1;
 	  }
 	else if (local_got_refcounts != NULL)
 	  {
@@ -5385,8 +5365,6 @@ sh_elf_copy_indirect_symbol (bed, dir, ind)
       edir->dyn_relocs = eind->dyn_relocs;
       eind->dyn_relocs = NULL;
     }
-  edir->gotplt_refcount = eind->gotplt_refcount;
-  eind->gotplt_refcount = 0;
 
   _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
 }
@@ -5561,7 +5539,6 @@ sh_elf_check_relocs (abfd, info, sec, relocs)
 
 	  h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
 	  h->plt.refcount += 1;
-	  ((struct elf_sh_link_hash_entry *) h)->gotplt_refcount += 1;
 
 	  break;
 

@@ -1,17 +1,3 @@
-2002-10-02  Jim Blandy  <jimb@redhat.com>
-
-	* gdb.c++/casts.cc, gdb.c++/casts.exp: New test.
-
-2002-10-01  Andrew Cagney  <ac131313@redhat.com>
-
-	* mi1-basics.exp: Copy of mi1-basics.exp MIFLAGS set "-i=mi1".
-	* mi1-break.exp, mi1-console.exp, mi1-disassemble.exp: Ditto.
-	* mi1-eval.exp, mi1-hack-cli.exp, mi1-pthreads.exp: Ditto.
-	* mi1-read-memory.exp, mi1-regs.exp, mi1-return.exp: Ditto.
-	* mi1-simplerun.exp, mi1-stack.exp, mi1-stepi.exp: Ditto.
-	* mi1-until.exp, mi1-var-block.exp, mi1-var-child.exp: Ditto.
-	* mi1-var-cmd.exp, mi1-var-display.exp, mi1-watch.exp: Ditto.
-
 2002-09-29  Andrew Cagney  <ac131313@redhat.com>
 
 	* mi0-basics.exp, mi0-break.exp, mi0-console.exp: Delete.

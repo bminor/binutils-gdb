@@ -2625,7 +2625,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 		  if (val == 0xa1)
 		    {
 		      /* movl foo, %eax.  */
-		      bfd_put_8 (output_bfd, 0xb8, contents + rel->r_offset - 1);
+		      bfd_put_8 (output_bfd, 0xb8, contents + rel->r_offset - 2);
 		    }
 		  else if (type == 0x8b)
 		    {
@@ -2926,7 +2926,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	  break;
 
 	case R_386_TLS_LDO_32:
-	  if (info->shared || (input_section->flags & SEC_CODE) == 0)
+	  if (info->shared)
 	    relocation -= dtpoff_base (info);
 	  else
 	    /* When converting LDO to LE, we must negate.  */

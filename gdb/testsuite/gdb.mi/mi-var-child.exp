@@ -750,7 +750,7 @@ mi_gdb_test "-var-delete weird" \
 # Test: c_variable-5.1
 # Desc: check that nothing changed
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\\\[\\\]" \
+	"\\^done,changelist=\{\}" \
 	"update all vars. None changed"
 
 # Step over "struct_declarations.integer = 123;"
@@ -760,7 +760,7 @@ mi_step_to do_children_tests {} {.*var-cmd.c} $line "step $line"
 # Test: c_variable-5.2
 # Desc: check that integer changed
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\\\[\{name=\"struct_declarations.integer\",in_scope=\"true\",type_changed=\"false\"\}\\\]" \
+	"\\^done,changelist=\{name=\"struct_declarations.integer\",in_scope=\"true\",type_changed=\"false\"\}" \
 	"update all vars struct_declarations.integer"
 
 # Step over:
@@ -773,7 +773,7 @@ mi_execute_to "exec-step 3" "end-stepping-range" do_children_tests {} {.*var-cmd
 # Test: c_variable-5.3
 # Desc: check that char_ptr changed
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\\\[\{name=\"struct_declarations.char_ptr\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"struct_declarations.char_ptr.\\*char_ptr\",in_scope=\"true\",type_changed=\"false\"\}\\\]" \
+	"\\^done,changelist=\{name=\"struct_declarations.char_ptr\",in_scope=\"true\",type_changed=\"false\",name=\"struct_declarations.char_ptr.\\*char_ptr\",in_scope=\"true\",type_changed=\"false\"\}" \
 	"update all vars struct_declarations.char_ptr"
 
 # Step over "struct_declarations.int_ptr_ptr = &foo;"
@@ -783,7 +783,7 @@ mi_step_to do_children_tests {} {.*var-cmd.c} $line "step $line"
 # Test: c_variable-5.4
 # Desc: check that int_ptr_ptr and children changed
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\\\[\{name=\"weird->int_ptr_ptr\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"weird->int_ptr_ptr.\\*weird->int_ptr_ptr\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"weird->int_ptr_ptr.\\*weird->int_ptr_ptr.\\*\\*weird->int_ptr_ptr\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"struct_declarations.int_ptr_ptr\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"struct_declarations.int_ptr_ptr.\\*int_ptr_ptr\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"struct_declarations.int_ptr_ptr.\\*int_ptr_ptr.\\*\\*int_ptr_ptr\",in_scope=\"true\",type_changed=\"false\"\}\\\]" \
+	"\\^done,changelist=\{name=\"weird->int_ptr_ptr\",in_scope=\"true\",type_changed=\"false\",name=\"weird->int_ptr_ptr.\\*weird->int_ptr_ptr\",in_scope=\"true\",type_changed=\"false\",name=\"weird->int_ptr_ptr.\\*weird->int_ptr_ptr.\\*\\*weird->int_ptr_ptr\",in_scope=\"true\",type_changed=\"false\",name=\"struct_declarations.int_ptr_ptr\",in_scope=\"true\",type_changed=\"false\",name=\"struct_declarations.int_ptr_ptr.\\*int_ptr_ptr\",in_scope=\"true\",type_changed=\"false\",name=\"struct_declarations.int_ptr_ptr.\\*int_ptr_ptr.\\*\\*int_ptr_ptr\",in_scope=\"true\",type_changed=\"false\"\}" \
 	"update all vars int_ptr_ptr and children changed"
 
 # Step over "weird->long_array[0] = 1234;"
@@ -793,7 +793,7 @@ mi_step_to do_children_tests {} {.*var-cmd.c} $line "step $line"
 # Test: c_variable-5.5
 # Desc: check that long_array[0] changed
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\\\[\{name=\"struct_declarations.long_array.0\",in_scope=\"true\",type_changed=\"false\"\}\\\]" \
+	"\\^done,changelist=\{name=\"struct_declarations.long_array.0\",in_scope=\"true\",type_changed=\"false\"\}" \
 	"update all vars struct_declarations.long_array.0 changed"
 
 # Step over "struct_declarations.long_array[1] = 2345;"
@@ -803,7 +803,7 @@ mi_step_to do_children_tests {} {.*var-cmd.c} $line "step $line"
 # Test: c_variable-5.6
 # Desc: check that long_array[1] changed
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\\\[\{name=\"struct_declarations.long_array.1\",in_scope=\"true\",type_changed=\"false\"\}\\\]" \
+	"\\^done,changelist=\{name=\"struct_declarations.long_array.1\",in_scope=\"true\",type_changed=\"false\"\}" \
 	"update all vars struct_declarations.long_array.1 changed"
 
 # Step over "weird->long_array[2] = 3456;"
@@ -813,7 +813,7 @@ mi_step_to do_children_tests {} {.*var-cmd.c} $line "step $line"
 # Test: c_variable-5.7
 # Desc: check that long_array[2] changed
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\\\[\{name=\"struct_declarations.long_array.2\",in_scope=\"true\",type_changed=\"false\"\}\\\]" \
+	"\\^done,changelist=\{name=\"struct_declarations.long_array.2\",in_scope=\"true\",type_changed=\"false\"\}" \
 	"update all vars struct_declarations.long_array.2 changed"
 
 # Step over:
@@ -830,7 +830,7 @@ mi_execute_to "exec-step 7" "end-stepping-range" do_children_tests {} {.*var-cmd
 # Test: c_variable-5.8
 # Desc: check that long_array[3-9] changed
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\\\[\{name=\"struct_declarations.long_array.3\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"struct_declarations.long_array.4\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"struct_declarations.long_array.5\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"struct_declarations.long_array.6\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"struct_declarations.long_array.7\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"struct_declarations.long_array.8\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"struct_declarations.long_array.9\",in_scope=\"true\",type_changed=\"false\"\}\\\]" \
+	"\\^done,changelist=\{name=\"struct_declarations.long_array.3\",in_scope=\"true\",type_changed=\"false\",name=\"struct_declarations.long_array.4\",in_scope=\"true\",type_changed=\"false\",name=\"struct_declarations.long_array.5\",in_scope=\"true\",type_changed=\"false\",name=\"struct_declarations.long_array.6\",in_scope=\"true\",type_changed=\"false\",name=\"struct_declarations.long_array.7\",in_scope=\"true\",type_changed=\"false\",name=\"struct_declarations.long_array.8\",in_scope=\"true\",type_changed=\"false\",name=\"struct_declarations.long_array.9\",in_scope=\"true\",type_changed=\"false\"\}" \
 	"update all vars struct_declarations.long_array.3-9 changed"
 
 
@@ -841,7 +841,7 @@ mi_step_to do_children_tests {} {.*var-cmd.c} $line "step $line"
 # Test: c_variable-5.9
 # Desc: check that func_ptr changed
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\\\[\{name=\"struct_declarations.func_ptr\",in_scope=\"true\",type_changed=\"false\"\}\\\]" \
+	"\\^done,changelist=\{name=\"struct_declarations.func_ptr\",in_scope=\"true\",type_changed=\"false\"\}" \
 	"update all vars struct_declarations.func_ptr changed"
 
 # Delete all variables
@@ -1133,7 +1133,7 @@ mi_step_to do_children_tests {} {.*var-cmd.c} $line "step $line"
 # Test: c_variable-5.47
 # Desc: check that psnp->char_ptr (and [0].char_ptr) changed
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\\\[\{name=\"psnp->ptrs.0.char_ptr\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"psnp->char_ptr\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"psnp->char_ptr.\\*psnp->char_ptr\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"psnp->char_ptr.\\*psnp->char_ptr.\\*\\*psnp->char_ptr\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"psnp->char_ptr.\\*psnp->char_ptr.\\*\\*psnp->char_ptr.\\*\\*\\*psnp->char_ptr\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"psnp->char_ptr.\\*psnp->char_ptr.\\*\\*psnp->char_ptr.\\*\\*\\*psnp->char_ptr.\\*\\*\\*\\*psnp->char_ptr\",in_scope=\"true\",type_changed=\"false\"\}\\\]" \
+	"\\^done,changelist=\{name=\"psnp->ptrs.0.char_ptr\",in_scope=\"true\",type_changed=\"false\",name=\"psnp->char_ptr\",in_scope=\"true\",type_changed=\"false\",name=\"psnp->char_ptr.\\*psnp->char_ptr\",in_scope=\"true\",type_changed=\"false\",name=\"psnp->char_ptr.\\*psnp->char_ptr.\\*\\*psnp->char_ptr\",in_scope=\"true\",type_changed=\"false\",name=\"psnp->char_ptr.\\*psnp->char_ptr.\\*\\*psnp->char_ptr.\\*\\*\\*psnp->char_ptr\",in_scope=\"true\",type_changed=\"false\",name=\"psnp->char_ptr.\\*psnp->char_ptr.\\*\\*psnp->char_ptr.\\*\\*\\*psnp->char_ptr.\\*\\*\\*\\*psnp->char_ptr\",in_scope=\"true\",type_changed=\"false\"\}" \
 	"update all vars psnp->char_ptr (and 0.char_ptr) changed"
 
 #  Step over "snp1.char_ptr = &c3;"
@@ -1143,7 +1143,7 @@ mi_step_to do_children_tests {} {.*var-cmd.c} $line "step $line"
 # Test: c_variable-5.48
 # Desc: check that psnp->next->char_ptr (and [1].char_ptr) changed
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\\\[\{name=\"psnp->ptrs.0.next.char_ptr\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"psnp->ptrs.0.next.char_ptr.\\*char_ptr\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"psnp->ptrs.0.next.char_ptr.\\*char_ptr.\\*\\*char_ptr\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"psnp->ptrs.0.next.char_ptr.\\*char_ptr.\\*\\*char_ptr.\\*\\*\\*char_ptr\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"psnp->ptrs.0.next.char_ptr.\\*char_ptr.\\*\\*char_ptr.\\*\\*\\*char_ptr.\\*\\*\\*\\*char_ptr\",in_scope=\"true\",type_changed=\"false\"\}\\\]" \
+	"\\^done,changelist=\{name=\"psnp->ptrs.0.next.char_ptr\",in_scope=\"true\",type_changed=\"false\",name=\"psnp->ptrs.0.next.char_ptr.\\*char_ptr\",in_scope=\"true\",type_changed=\"false\",name=\"psnp->ptrs.0.next.char_ptr.\\*char_ptr.\\*\\*char_ptr\",in_scope=\"true\",type_changed=\"false\",name=\"psnp->ptrs.0.next.char_ptr.\\*char_ptr.\\*\\*char_ptr.\\*\\*\\*char_ptr\",in_scope=\"true\",type_changed=\"false\",name=\"psnp->ptrs.0.next.char_ptr.\\*char_ptr.\\*\\*char_ptr.\\*\\*\\*char_ptr.\\*\\*\\*\\*char_ptr\",in_scope=\"true\",type_changed=\"false\"\}" \
 	"update all vars psnp->next->char_ptr (and 1.char_ptr) changed"
 
 
@@ -1154,7 +1154,7 @@ mi_step_to do_children_tests {} {.*var-cmd.c} $line "step $line"
 # Test: c_variable-5.49
 # Desc: check that psnp->next->next->char_ptr (and [2].char_ptr) changed
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\\\[\{name=\"psnp->ptrs.0.next.next.char_ptr\",in_scope=\"true\",type_changed=\"false\"\}\\\]" \
+	"\\^done,changelist=\{name=\"psnp->ptrs.0.next.next.char_ptr\",in_scope=\"true\",type_changed=\"false\"\}" \
 	"update all vars psnp->next->next->char_ptr (and 2.char_ptr) changed"
 
 
@@ -1165,7 +1165,7 @@ mi_step_to do_children_tests {} {.*var-cmd.c} $line "step $line"
 # Test: c_variable-5.50
 # Desc: check that psnp->long_ptr (and [0].long_ptr) changed
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\\\[\{name=\"psnp->ptrs.0.long_ptr\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"psnp->long_ptr\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"psnp->long_ptr.\\*psnp->long_ptr\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"psnp->long_ptr.\\*psnp->long_ptr.\\*\\*psnp->long_ptr\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"psnp->long_ptr.\\*psnp->long_ptr.\\*\\*psnp->long_ptr.\\*\\*\\*psnp->long_ptr\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"psnp->long_ptr.\\*psnp->long_ptr.\\*\\*psnp->long_ptr.\\*\\*\\*psnp->long_ptr.\\*\\*\\*\\*psnp->long_ptr\",in_scope=\"true\",type_changed=\"false\"\}\\\]" \
+	"\\^done,changelist=\{name=\"psnp->ptrs.0.long_ptr\",in_scope=\"true\",type_changed=\"false\",name=\"psnp->long_ptr\",in_scope=\"true\",type_changed=\"false\",name=\"psnp->long_ptr.\\*psnp->long_ptr\",in_scope=\"true\",type_changed=\"false\",name=\"psnp->long_ptr.\\*psnp->long_ptr.\\*\\*psnp->long_ptr\",in_scope=\"true\",type_changed=\"false\",name=\"psnp->long_ptr.\\*psnp->long_ptr.\\*\\*psnp->long_ptr.\\*\\*\\*psnp->long_ptr\",in_scope=\"true\",type_changed=\"false\",name=\"psnp->long_ptr.\\*psnp->long_ptr.\\*\\*psnp->long_ptr.\\*\\*\\*psnp->long_ptr.\\*\\*\\*\\*psnp->long_ptr\",in_scope=\"true\",type_changed=\"false\"\}" \
 	"update all vars psnp->long_ptr (and 0.long_ptr) changed"
 
 
@@ -1178,7 +1178,7 @@ mi_step_to do_children_tests {} {.*var-cmd.c} $line "step $line"
 # Why does this have a FIXME?
 setup_xfail *-*-*
 mi_gdb_test "-var-update *" \
-	"FIXME\\^done,changelist=\\\[\{name=\"psnp->ptrs.0.next.long_ptr\",in_scope=\"true\",type_changed=\"false\"\}\\\]" \
+	"FIXME\\^done,changelist=\{name=\"psnp->ptrs.0.next.long_ptr\",in_scope=\"true\",type_changed=\"false\"\}" \
 	"update all vars psnp->next->long_ptr (and 1.long_ptr) changed"
 clear_xfail *-*-*
 
@@ -1193,7 +1193,7 @@ mi_step_to do_children_tests {} {.*var-cmd.c} $line "step $line"
 # Test: c_variable-5.52
 # Desc: check that psnp->next->next->long_ptr (and [2].long_ptr) changed
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\\\[\{name=\"psnp->ptrs.0.next.next.long_ptr\",in_scope=\"true\",type_changed=\"false\"\}\\\]" \
+	"\\^done,changelist=\{name=\"psnp->ptrs.0.next.next.long_ptr\",in_scope=\"true\",type_changed=\"false\"\}" \
 	"update all vars psnp->next->next->long_ptr (and 2.long_ptr) changed"
 
 

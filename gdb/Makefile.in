@@ -1976,7 +1976,7 @@ ppc-linux-tdep.o: ppc-linux-tdep.c $(defs_h) $(frame_h) $(inferior_h) \
 	$(symtab_h) $(target_h) $(gdbcore_h) $(gdbcmd_h) $(symfile_h) \
 	$(objfiles_h) $(regcache_h) $(value_h) $(solib_svr4_h) $(ppc_tdep_h)
 ppc-sysv-tdep.o: ppc-sysv-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) \
-	$(regcache_h) $(value_h) $(gdb_string_h) $(ppc_tdep_h)
+	$(regcache_h) $(value_h) $(ppc_tdep_h)
 ppcbug-rom.o: ppcbug-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(serial_h) $(regcache_h)
 ppcnbsd-nat.o: ppcnbsd-nat.c $(defs_h) $(inferior_h) $(ppc_tdep_h) \
@@ -2493,7 +2493,7 @@ mi-main.o: $(srcdir)/mi/mi-main.c $(defs_h) $(target_h) $(inferior_h) \
 	$(gdb_string_h) $(top_h) $(gdbthread_h) $(mi_cmds_h) $(mi_parse_h) \
 	$(mi_getopt_h) $(mi_console_h) $(ui_out_h) $(mi_out_h) \
 	$(event_loop_h) $(event_top_h) $(gdbcore_h) $(value_h) $(regcache_h) \
-	$(gdb_h) $(frame_h)
+	$(gdb_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-main.c
 mi-out.o: $(srcdir)/mi/mi-out.c $(defs_h) $(ui_out_h) $(mi_out_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-out.c

@@ -69,6 +69,7 @@
 int tui_target_has_run = 0;
 
 static void (* tui_target_new_objfile_chain) (struct objfile*);
+extern void (*selected_frame_level_changed_hook) (int);
 static void tui_event_loop (void);
 static void tui_command_loop (void);
 

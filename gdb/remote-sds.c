@@ -978,7 +978,6 @@ getmessage (unsigned char *buf, int forever)
       /* Try the whole thing again.  */
     retry:
       /* need to do something here */
-      ;
     }
 
   /* We have tried hard enough, and just can't receive the packet.  Give up. */

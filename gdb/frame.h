@@ -373,13 +373,4 @@ extern int frame_register_read (struct frame_info *frame, int regnum,
 extern int frame_map_name_to_regnum (const char *name, int strlen);
 extern const char *frame_map_regnum_to_name (int regnum);
 
-/* From stack.c.  */
-extern void args_info (char *, int);
-
-extern void locals_info (char *, int);
-
-extern void (*selected_frame_level_changed_hook) (int);
-
-extern void return_command (char *, int);
-
 #endif /* !defined (FRAME_H)  */

@@ -405,7 +405,6 @@ mi_cmd_var_update (char *command, char **argv, int argc)
   struct varobj *var;
   struct varobj **rootlist;
   struct varobj **cr;
-  struct cleanup *cleanup;
   char *name;
   int nv;
 
@@ -420,13 +419,10 @@ mi_cmd_var_update (char *command, char **argv, int argc)
   if ((*name == '*') && (*(name + 1) == '\0'))
     {
       nv = varobj_list (&rootlist);
-      if (mi_version (uiout) <= 1)
-        cleanup = make_cleanup_ui_out_tuple_begin_end (uiout, "changelist");
-      else
-        cleanup = make_cleanup_ui_out_list_begin_end (uiout, "changelist");
+      ui_out_tuple_begin (uiout, "changelist");
       if (nv <= 0)
 	{
-	  do_cleanups (cleanup);
+	  ui_out_tuple_end (uiout);
 	  return MI_CMD_DONE;
 	}
       cr = rootlist;
@@ -436,7 +432,7 @@ mi_cmd_var_update (char *command, char **argv, int argc)
 	  cr++;
 	}
       xfree (rootlist);
-      do_cleanups (cleanup);
+      ui_out_tuple_end (uiout);
     }
   else
     {
@@ -445,12 +441,9 @@ mi_cmd_var_update (char *command, char **argv, int argc)
       if (var == NULL)
 	error ("mi_cmd_var_update: Variable object not found");
 
-      if (mi_version (uiout) <= 1)
-        cleanup = make_cleanup_ui_out_tuple_begin_end (uiout, "changelist");
-      else
-        cleanup = make_cleanup_ui_out_list_begin_end (uiout, "changelist");
+      ui_out_tuple_begin (uiout, "changelist");
       varobj_update_one (var);
-      do_cleanups (cleanup);
+      ui_out_tuple_end (uiout);
     }
     return MI_CMD_DONE;
 }
@@ -464,7 +457,6 @@ varobj_update_one (struct varobj *var)
 {
   struct varobj **changelist;
   struct varobj **cc;
-  struct cleanup *cleanup = NULL;
   int nc;
 
   nc = varobj_update (&var, &changelist);
@@ -477,25 +469,17 @@ varobj_update_one (struct varobj *var)
     return 1;
   else if (nc == -1)
     {
-      if (mi_version (uiout) > 1)
-        cleanup = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
       ui_out_field_string (uiout, "name", varobj_get_objname(var));
       ui_out_field_string (uiout, "in_scope", "false");
-      if (mi_version (uiout) > 1)
-        do_cleanups (cleanup);
       return -1;
     }
   else if (nc == -2)
     {
-      if (mi_version (uiout) > 1)
-        cleanup = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
       ui_out_field_string (uiout, "name", varobj_get_objname (var));
       ui_out_field_string (uiout, "in_scope", "true");
       ui_out_field_string (uiout, "new_type", varobj_get_type(var));
       ui_out_field_int (uiout, "new_num_children", 
 			   varobj_get_num_children(var));
-      if (mi_version (uiout) > 1)
-        do_cleanups (cleanup);
     }
   else
     {
@@ -503,13 +487,9 @@ varobj_update_one (struct varobj *var)
       cc = changelist;
       while (*cc != NULL)
 	{
-	  if (mi_version (uiout) > 1)
-	    cleanup = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
 	  ui_out_field_string (uiout, "name", varobj_get_objname (*cc));
 	  ui_out_field_string (uiout, "in_scope", "true");
 	  ui_out_field_string (uiout, "type_changed", "false");
-	  if (mi_version (uiout) > 1)
-	    do_cleanups (cleanup);
 	  cc++;
 	}
       xfree (changelist);

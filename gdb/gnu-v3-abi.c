@@ -324,9 +324,6 @@ gnuv3_virtual_fn_field (struct value **value_p,
      type now.  */
   if (TYPE_VPTR_FIELDNO (vfn_base) < 0)
     fill_in_vptr_fieldno (vfn_base);
-  if (TYPE_VPTR_FIELDNO (vfn_base) < 0)
-    error ("Could not find virtual table pointer for class \"%s\".",
-	   TYPE_TAG_NAME (vfn_base) ? TYPE_TAG_NAME (vfn_base) : "<unknown>");
 
   /* Now that we know which base class is defining our virtual
      function, cast our value to that baseclass.  This takes care of

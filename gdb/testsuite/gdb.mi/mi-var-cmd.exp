@@ -176,7 +176,7 @@ mi_gdb_test "-var-create int * int" \
 # Test: c_variable-2.1
 # Desc: check whether values changed at do_block_tests
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\\\[\\\]" \
+	"\\^done,changelist=\{\}" \
 	"update all vars"
 
 # Step over "linteger = 1234;"
@@ -185,7 +185,7 @@ mi_step_to "do_locals_tests" "" "var-cmd.c" "107" "step at do_locals_test"
 # Test: c_variable-2.2
 # Desc: check whether only linteger changed values
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\\\[\{name=\"linteger\",in_scope=\"true\",type_changed=\"false\"\}\\\]" \
+	"\\^done,changelist=\{name=\"linteger\",in_scope=\"true\",type_changed=\"false\"\}" \
 	"update all vars: linteger changed"
 
 # Step over "lpinteger = &linteger;"
@@ -194,7 +194,7 @@ mi_step_to "do_locals_tests" "" "var-cmd.c" 108 "step at do_locals_tests (2)"
 # Test: c_variable-2.3
 # Desc: check whether only lpinteger changed
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\\\[\{name=\"lpinteger\",in_scope=\"true\",type_changed=\"false\"\}\\\]" \
+	"\\^done,changelist=\{name=\"lpinteger\",in_scope=\"true\",type_changed=\"false\"\}" \
 	"update all vars: lpinteger changed"
 
 # Step over "lcharacter = 'a';"
@@ -203,7 +203,7 @@ mi_step_to "do_locals_tests" "" "var-cmd.c" "109" "step at do_locals_tests (3)"
 # Test: c_variable-2.4
 # Desc: check whether only lcharacter changed
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\\\[\{name=\"lcharacter\",in_scope=\"true\",type_changed=\"false\"\}\\\]" \
+	"\\^done,changelist=\{name=\"lcharacter\",in_scope=\"true\",type_changed=\"false\"\}" \
 	"update all vars: lcharacter changed"
 
 # Step over "lpcharacter = &lcharacter;"
@@ -212,7 +212,7 @@ mi_step_to "do_locals_tests" "" "var-cmd.c" "110" "step at do_locals_tests (4)"
 # Test: c_variable-2.5
 # Desc: check whether only lpcharacter changed
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\\\[\{name=\"lpcharacter\",in_scope=\"true\",type_changed=\"false\"\}\\\]" \
+	"\\^done,changelist=\{name=\"lpcharacter\",in_scope=\"true\",type_changed=\"false\"\}" \
 	"update all vars: lpcharacter changed"
 
 
@@ -234,7 +234,7 @@ mi_execute_to "exec-step 9" "end-stepping-range" "do_locals_tests" "" \
 # Desc: check whether llong, lplong, lfloat, lpfloat, ldouble, lpdouble, lsimple.integer,
 #       lsimple.unsigned_character lsimple.integer lsimple.character changed
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\\\[\{name=\"lsimple.integer\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"lsimple->integer\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"lsimple.character\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"lpdouble\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"ldouble\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"lpfloat\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"lfloat\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"lplong\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"llong\",in_scope=\"true\",type_changed=\"false\"\}\\\]" \
+	"\\^done,changelist=\{name=\"lsimple.integer\",in_scope=\"true\",type_changed=\"false\",name=\"lsimple->integer\",in_scope=\"true\",type_changed=\"false\",name=\"lsimple.character\",in_scope=\"true\",type_changed=\"false\",name=\"lpdouble\",in_scope=\"true\",type_changed=\"false\",name=\"ldouble\",in_scope=\"true\",type_changed=\"false\",name=\"lpfloat\",in_scope=\"true\",type_changed=\"false\",name=\"lfloat\",in_scope=\"true\",type_changed=\"false\",name=\"lplong\",in_scope=\"true\",type_changed=\"false\",name=\"llong\",in_scope=\"true\",type_changed=\"false\"\}" \
 	"update all vars: many changed"
 
 # Step over:
@@ -249,7 +249,7 @@ mi_execute_to "exec-step 4" "end-stepping-range" "do_locals_tests" "" \
 # Test: c_variable-2.7
 # Desc: check whether (lsimple.signed_character, lsimple.char_ptr) lpsimple, func changed
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\\\[\{name=\"func\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"lpsimple\",in_scope=\"true\",type_changed=\"false\"\}\\\]" \
+	"\\^done,changelist=\{name=\"func\",in_scope=\"true\",type_changed=\"false\",name=\"lpsimple\",in_scope=\"true\",type_changed=\"false\"\}" \
 	"update all vars: func and lpsimple changed"
 
 # Step over
@@ -271,7 +271,7 @@ mi_execute_to "exec-step 8" "end-stepping-range" "do_locals_tests" "" \
 # Note: this test also checks that lpsimple->integer and lsimple.integer have
 #       changed (they are the same)
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\\\[\{name=\"lsimple.integer\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"lsimple->integer\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"lsimple.character\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"ldouble\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"lfloat\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"llong\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"lcharacter\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"linteger\",in_scope=\"true\",type_changed=\"false\"\}\\\]" \
+	"\\^done,changelist=\{name=\"lsimple.integer\",in_scope=\"true\",type_changed=\"false\",name=\"lsimple->integer\",in_scope=\"true\",type_changed=\"false\",name=\"lsimple.character\",in_scope=\"true\",type_changed=\"false\",name=\"ldouble\",in_scope=\"true\",type_changed=\"false\",name=\"lfloat\",in_scope=\"true\",type_changed=\"false\",name=\"llong\",in_scope=\"true\",type_changed=\"false\",name=\"lcharacter\",in_scope=\"true\",type_changed=\"false\",name=\"linteger\",in_scope=\"true\",type_changed=\"false\"\}" \
 	"update all vars: func and lpsimple changed"
 
 
@@ -421,7 +421,7 @@ mi_step_to "subroutine1" "\{name=\"i\",value=\".*\"\},\{name=\"l\",value=\".*\"\
 # Test: c_variable-2.13
 # Desc: change subroutine1 local i
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\\\[\{name=\"i\",in_scope=\"true\",type_changed=\"false\"\}\\\]" \
+	"\\^done,changelist=\{name=\"i\",in_scope=\"true\",type_changed=\"false\"\}" \
 	"update all vars: i changed"
 
 mi_step_to "subroutine1" "\{name=\"i\",value=\".*\"\},\{name=\"l\",value=\".*\"\}" \
@@ -430,7 +430,7 @@ mi_step_to "subroutine1" "\{name=\"i\",value=\".*\"\},\{name=\"l\",value=\".*\"\
 # Test: c_variable-2.14
 # Desc: change do_locals_tests local llong
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\\\[\{name=\"llong\",in_scope=\"true\",type_changed=\"false\"\}\\\]" \
+	"\\^done,changelist=\{name=\"llong\",in_scope=\"true\",type_changed=\"false\"\}" \
 	"update all vars: llong changed"
 
 mi_next_to "do_locals_tests" ""	"var-cmd.c" "136" "next out of subroutine1"
@@ -438,7 +438,7 @@ mi_next_to "do_locals_tests" ""	"var-cmd.c" "136" "next out of subroutine1"
 # Test: c_variable-2.15
 # Desc: check for out of scope subroutine1 locals
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\\\[\{name=\"l\",in_scope=\"false\"\},\{name=\"i\",in_scope=\"false\"\}\\\]" \
+	"\\^done,changelist=\{name=\"l\",in_scope=\"false\",name=\"i\",in_scope=\"false\"\}" \
 	"update all vars: all now out of scope"
 
 # Done with locals/globals tests. Erase all variables
@@ -538,15 +538,15 @@ mi_gdb_test "-break-insert incr_a" \
 mi_continue_to {.*} incr_a {.*} {.*var-cmd.c} {.*} {stop in incr_a}
 
 mi_gdb_test "-var-update selected_a" \
-	"\\^done,changelist=\\\[\{name=\"selected_a\",in_scope=\"true\",new_type=\"char\",new_num_children=\"0\"\}\\\]" \
-	"update selected_a in incr_a"
+  {\^done,changelist=\{name="selected_a",in_scope="true",new_type="char",new_num_children="0"\}} \
+  "update selected_a in incr_a"
 
 mi_next "step a line in incr_a"
 mi_next "return from incr_a to do_special_tests"
 
 mi_gdb_test "-var-update selected_a" \
-	"\\^done,changelist=\\\[\{name=\"selected_a\",in_scope=\"true\",new_type=\"int\",new_num_children=\"0\"\}\\\]" \
-	"update selected_a in do_special_tests"
+  {\^done,changelist=\{name="selected_a",in_scope="true",new_type="int",new_num_children="0"\}} \
+  "update selected_a in do_special_tests"
 
 mi_gdb_exit
 return 0
