@@ -1067,7 +1067,7 @@ print_return_value (int structure_return, struct type *value_type)
    only chance we have to complete this command is in
    fetch_inferior_event, which is called by the event loop as soon as it
    detects that the target has stopped. This function is called via the
-   cmd_continaution pointer. */
+   cmd_continuation pointer. */
 void
 finish_command_continuation (struct continuation_arg *arg)
 {
