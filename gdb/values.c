@@ -538,12 +538,9 @@ CORE_ADDR
 value_as_pointer (val)
      value val;
 {
-  /* This coerces arrays and functions, which is necessary (e.g.
-     in disassemble_command).  It also dereferences references, which
-     I suspect is the most logical thing to do.  */
-  if (TYPE_CODE (VALUE_TYPE (val)) != TYPE_CODE_ENUM)
-    COERCE_ARRAY (val);
-  return unpack_pointer (VALUE_TYPE (val), VALUE_CONTENTS (val));
+  /* Assume a CORE_ADDR can fit in a LONGEST (for now).  Not sure
+     whether we want this to be true eventually.  */
+  return value_as_long (val);
 }
 
 /* Unpack raw data (copied from debugee, target byte order) at VALADDR
@@ -687,9 +684,8 @@ unpack_long (type, valaddr)
 	  error ("That operation is not possible on an integer of that size.");
 	}
     }
-#if 0
-  /* There is no guarantee that a pointer can fit within a LONGEST.
-     Callers should use unpack_pointer instead.  */
+  /* Assume a CORE_ADDR can fit in a LONGEST (for now).  Not sure
+     whether we want this to be true eventually.  */
   else if (code == TYPE_CODE_PTR
 	   || code == TYPE_CODE_REF)
     {
@@ -701,15 +697,10 @@ unpack_long (type, valaddr)
 	  return retval;
 	}
     }
-#endif
   else if (code == TYPE_CODE_MEMBER)
     error ("not implemented: member types in unpack_long");
 
-#if 0
   error ("Value not integer or pointer.");
-#else
-  error ("Value not integer.");
-#endif
   return 0; 	/* For lint -- never reached */
 }
 
@@ -790,6 +781,9 @@ unpack_pointer (type, valaddr)
      struct type *type;
      char *valaddr;
 {
+#if 0
+  /* The user should be able to use an int (e.g. 0x7892) in contexts
+     where a pointer is expected.  So this doesn't do enough.  */
   register enum type_code code = TYPE_CODE (type);
   register int len = TYPE_LENGTH (type);
 
@@ -810,6 +804,11 @@ unpack_pointer (type, valaddr)
 
   error ("Value is not a pointer.");
   return 0; 	/* For lint -- never reached */
+#else
+  /* Assume a CORE_ADDR can fit in a LONGEST (for now).  Not sure
+     whether we want this to be true eventually.  */
+  return unpack_long (type, valaddr);
+#endif
 }
 
 /* Given a value ARG1 (offset by OFFSET bytes)
