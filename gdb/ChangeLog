@@ -1,5 +1,8 @@
 2005-03-17  Mark Kettenis  <kettenis@gnu.org>
 
+	* defs.h (xsnprintf): New prototype.
+	* utils.c (xsnprintf): New function.
+
 	* corelow.c (get_core_register_section): Replace usage of sprintf
 	and strcpy with xstrprintf and xstrdup.
 
