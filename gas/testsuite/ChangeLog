@@ -1,4 +1,13 @@
+Wed Mar  5 13:01:24 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/all/gas.exp: xfail a couple tests for the mn10300.
+
 start-sanitize-tic80
+Mon Mar  3 11:41:00 1997  Fred Fish  <fnf@cygnus.com>
+
+	* gas/tic80/{add.d, float.d, regops2.d, relocs1.d, relocs1b.d,
+	relocs2.d, relocs2b.d}: Adjust to objdump format tweaks.
+
 Thu Feb 27 15:21:46 1997  Fred Fish  <fnf@cygnus.com>
 
 	* gas/tic80/{align.d, align.lst, align.s} New test for the
