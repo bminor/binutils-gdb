@@ -38,7 +38,7 @@ host_tools="texinfo byacc flex bison binutils ld gas gcc gdb make patch
 # these libraries are built for the target environment, and are built after
 # the host libraries and the host tools (which may be a cross compiler)
 #
-target_libs="libm xiberty newlib libg++"
+target_libs="libm xiberty newlib libio libg++"
 
 ## start-sanitize-chill
 target_libs="${target_libs} chill chillrt"
