@@ -230,6 +230,8 @@ struct mips_opcode
 #define INSN_ISA3		    0x20000000
 /* MIPS R4650 instruction.  */
 #define INSN_4650		    0x30000000
+/* MIPS ISA 4 instruction (R8000).  */
+#define INSN_ISA4		    0x40000000
 
 /* Instruction is actually a macro.  It should be ignored by the
    disassembler, and requires special treatment by the assembler.  */
@@ -295,6 +297,8 @@ enum {
     M_DIV_3I,
     M_DIVU_3,
     M_DIVU_3I,
+    M_DLA_AB,
+    M_DLI,
     M_DMUL,
     M_DMUL_I, 
     M_DMULO,
