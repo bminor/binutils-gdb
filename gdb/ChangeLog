@@ -1,3 +1,9 @@
+2001-12-07  Jim Blandy  <jimb@redhat.com>
+
+	* s390-tdep.c (s390_store_return_value): Don't convert float
+	values to double format when returning them; just return them in
+	the first half of the FP register, as the ABI specifies.
+
 2001-12-07  Daniel Jacobowitz  <drow@mvista.com>
 
 	* valops.c (hand_function_call): Check for method arguments in

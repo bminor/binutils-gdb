@@ -1144,12 +1144,13 @@ s390_store_return_value (struct type *valtype, char *valbuf)
 
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT)
     {
-      DOUBLEST tempfloat = extract_floating (valbuf, TYPE_LENGTH (valtype));
-
-      floatformat_from_doublest (&floatformat_ieee_double_big, &tempfloat,
-				 reg_buff);
-      write_register_bytes (REGISTER_BYTE (S390_FP0_REGNUM), reg_buff,
-			    S390_FPR_SIZE);
+      if (TYPE_LENGTH (valtype) == 4
+          || TYPE_LENGTH (valtype) == 8)
+        write_register_bytes (REGISTER_BYTE (S390_FP0_REGNUM), valbuf,
+                              TYPE_LENGTH (valtype));
+      else
+        error ("GDB is unable to return `long double' values "
+               "on this architecture.");
     }
   else
     {
