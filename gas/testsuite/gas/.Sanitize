@@ -27,11 +27,10 @@ Do-first:
 Things-to-keep:
 
 all
-i386-bsd
+i386
 ieee.fp
 m68k
 m68k-coff
-sparc
 sparc-solaris
 template
 
