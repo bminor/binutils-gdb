@@ -1,3 +1,8 @@
+2004-09-20  Tomer Levi  <Tomer.Levi@nsc.com>
+
+        * config/tc-crx.c (handle_LoadStor): New function. 
+	Handle load/stor unique instructions before parsing. 
+
 2004-09-17  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (s_arm_rel31): New funciton.
