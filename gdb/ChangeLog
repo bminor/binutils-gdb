@@ -1,5 +1,8 @@
 Mon Aug  9 09:53:45 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* environ.c (set_in_environ): Remove G960BASE and G960BIN; they are
+	no longer used.
+
 	* gdbcore.h: New variable gnutarget.
 	* core.c: Add commands to set and show it.
 	* Callers to bfd_*open*: Pass gnutarget instead of NULL as target.
