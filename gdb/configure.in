@@ -460,6 +460,40 @@ if test ${build} = ${host} -a ${host} = ${target} ; then
    AC_SUBST(CONFIG_LDFLAGS)
 fi
 
+dnl The CLI cannot be disabled yet, but may be in the future  
+
+dnl Handle CLI sub-directory configury.
+AC_ARG_ENABLE(gdbcli,
+[  --enable-gdbcli            Enable GDB-CLI interface],
+[
+  case "${enable_gdbcli}" in
+    yes) ;;
+    "")  enable_gdbcli=yes ;;
+    no) 
+      AC_MSG_ERROR(The CLI cannot be disabled yet)
+    ;;
+    *)
+      AC_MSG_ERROR(Bad value for --enable-gdbmi: ${enableval})
+    ;;
+  esac
+],
+[enable_gdbcli=yes])
+case ${enable_gdbcli} in
+  "yes" )
+    if test -d "${srcdir}/mi" ; then
+      CONFIG_OBS="${CONFIG_OBS} \$(SUBDIR_CLI_OBS)"
+      CONFIG_DEPS="${CONFIG_DEPS} \$(SUBDIR_CLI_DEPS)"
+      CONFIG_SRCS="${CONFIG_SRS} \$(SUBDIR_CLI_SRCS)"
+      CONFIG_INITS="${CONFIG_INITS} \$(SUBDIR_CLI_INITS)"
+      ENABLE_CFLAGS="${ENABLE_CFLAGS} \$(SUBDIR_CLI_CFLAGS)"
+      CONFIG_ALL="${CONFIG_ALL} \$(SUBDIR_CLI_ALL)"
+      CONFIG_CLEAN="${CONFIG_CLEAN} \$(SUBDIR_CLI_CLEAN)"
+      CONFIG_INSTALL="${CONFIG_INSTALL} \$(SUBDIR_CLI_INSTALL)"
+      CONFIG_UNINSTALL="${CONFIG_UNINSTALL} \$(SUBDIR_CLI_UNINSTALL)"
+    fi
+    ;;
+esac
+
 dnl Handle optional features that can be enabled.
 
 dnl Handle MI sub-directory configury.

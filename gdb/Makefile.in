@@ -135,6 +135,22 @@ INTL_SRC = $(srcdir)/$(INTL_DIR)
 INTL_CFLAGS = -I$(INTL_DIR) -I$(INTL_SRC)
 
 #
+# CLI sub directory definitons
+#
+SUBDIR_CLI_OBS = \
+	cli-decode.o cli-script.o cli-cmds.o cli-setshow.o
+SUBDIR_CLI_SRCS = \
+	cli/cli-decode.c cli/cli-script.c cli/cli-cmds.c  cli/cli-setshow.c
+SUBDIR_CLI_DEPS =
+SUBDIR_CLI_INITS =
+SUBDIR_CLI_LDFLAGS=
+SUBDIR_CLI_CFLAGS=
+SUBDIR_CLI_ALL=
+SUBDIR_CLI_CLEAN=
+SUBDIR_CLI_INSTALL=
+SUBDIR_CLI_UNINSTALL=
+
+#
 # MI sub directory definitons
 #
 SUBDIR_MI_OBS = \
@@ -477,7 +493,7 @@ TARGET_FLAGS_TO_PASS = \
 SFILES = ax-general.c ax-gdb.c bcache.c blockframe.c breakpoint.c \
 	buildsym.c c-exp.y c-lang.c c-typeprint.c c-valprint.c \
 	ch-exp.c ch-lang.c ch-typeprint.c ch-valprint.c coffread.c \
-	command.c complaints.c completer.c corefile.c cp-valprint.c dbxread.c \
+	complaints.c completer.c corefile.c cp-valprint.c dbxread.c \
 	demangle.c dwarfread.c dwarf2read.c elfread.c environ.c eval.c \
 	event-loop.c event-top.c \
 	expprint.c f-exp.y f-lang.c f-typeprint.c f-valprint.c \
@@ -548,8 +564,8 @@ breakpoint_h =	breakpoint.h $(frame_h) $(value_h)
 
 command_h =	command.h
 gdbcmd_h =	gdbcmd.h $(command_h)
-
 call_cmds_h =	call-cmds.h
+
 xm_h =		@xm_h@
 tm_h =		@tm_h@
 nm_h =		@nm_h@
@@ -567,6 +583,11 @@ version_h = 	version.h
 ui_out_h =      ui-out.h
 cli_out_h =	cli-out.h
 arch_utils_h = arch-utils.h
+
+cli_decode_h =	$(srcdir)/cli/cli-decode.h
+cli_cmds_h =	$(srcdir)/cli/cli-cmds.h
+cli_script_h =	$(srcdir)/cli/cli-script.h
+cli_setshow_h =	$(srcdir)/cli/cli-setshow.h
 
 # Header files that need to have srcdir added.  Note that in the cases
 # where we use a macro like $(gdbcmd_h), things are carefully arranged
@@ -621,7 +642,7 @@ TAGFILES_WITH_SRCDIR = $(HFILES_WITH_SRCDIR)
 
 COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
 	source.o values.o eval.o valops.o valarith.o valprint.o printcmd.o \
-	symtab.o symfile.o symmisc.o linespec.o infcmd.o infrun.o command.o \
+	symtab.o symfile.o symmisc.o linespec.o infcmd.o infrun.o \
 	expprint.o environ.o stack.o thread.o \
 	event-loop.o event-top.o inf-loop.o completer.o \
 	gdbarch.o arch-utils.o gdbtypes.o copying.o $(DEPFILES) \
@@ -1214,8 +1235,8 @@ coffread.o: coffread.c $(bfd_h) $(breakpoint_h) buildsym.h \
 	symfile.h $(symtab_h) gdb-stabs.h stabsread.h target.h \
 	gdb_string.h
 
-command.o: command.c $(defs_h) $(expression_h) $(gdbcmd_h) \
-	$(gdbtypes_h) $(symtab_h) $(value_h) gdb_string.h gdb_wait.h
+# OBSOLETE command.o: command.c $(defs_h) $(expression_h) $(gdbcmd_h) \
+# OBSOLETE 	$(gdbtypes_h) $(symtab_h) $(value_h) gdb_string.h gdb_wait.h
 
 complaints.o: complaints.c complaints.h $(defs_h) $(gdbcmd_h)
 
@@ -2012,6 +2033,32 @@ varobj.o: varobj.c $(defs_h) $(frame_h) $(value_h) \
 	$(language_h) valprint.h varobj.h wrapper.h
 	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $<
 wrapper.o: wrapper.c $(defs_h) $(frame_h) $(value_h) wrapper.h
+
+#
+# CLI dependencies
+#
+# Need to explicitly specify the compile rule as make will do nothing
+# or try to compile the object file into the cli directory.
+
+cli-decode.o: $(srcdir)/cli/cli-decode.c $(cli_decode_h) \
+		$(cli_cmds_h) $(defs_h) $(ui_out_h) \
+		$(symtab_h) gnu-regex.h
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-decode.c
+
+cli-cmds.o: $(srcdir)/cli/cli-cmds.c  $(cli_cmds_h) $(cli_decode_h) \
+		$(cli_script_h) $(cli_setshow_h) top.h completer.h $(defs_h) \
+		$(target_h) gdb_wait.h gnu-regex.h $(ui_out_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-cmds.c
+
+cli-setshow.o: $(srcdir)/cli/cli-setshow.c $(cli_setshow_h) \
+		$(cli_decode_h) $(cli_cmds_h) $(defs_h) \
+		$(value_h) $(ui_out_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-setshow.c
+
+cli-script.o: $(srcdir)/cli/cli-script.c $(cli_script_h) \
+		$(cli_cmds_h) $(cli_decode_h) top.h \
+		$(defs_h) $(value_h) language.h $(ui_out_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-script.c
 
 #
 # MI dependencies

@@ -1,12 +1,5 @@
-/* ***DEPRECATED***  The gdblib files must not be calling/using things in any
-   of the possible command languages.  If necessary, a hook (that may be
-   present or not) must be used and set to the appropriate routine by any
-   command language that cares about it.  If you are having to include this
-   file you are possibly doing things the old way.  This file will disapear.
-   fnasser@redhat.com    */
-
-/* Prototypes for GDB commands that are called internally by other functions.
-   Copyright 1992 Free Software Foundation, Inc.
+/* Header file for GDB CLI set and show commands implementation.
+   Copyright (C) 2000 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -23,10 +16,17 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-extern void initialize_all_files (void);
+#if !defined (CLI_SETSHOW_H)
+#define CLI_SETSHOW_H 1
 
-extern void exec_file_command (char *, int);
+/* Exported to cli/cli-cmds.c and gdb/top.c */
 
-extern void core_file_command (char *, int);
+extern void do_setshow_command (char *arg, int from_tty,
+				struct cmd_list_element *c);
 
-extern void break_command (char *, int);
+/* Exported to cli/cli-cmds.c and gdb/top.c, language.c and valprint.c */
+
+extern void cmd_show_list (struct cmd_list_element *list, int from_tty,
+			   char *prefix);
+
+#endif /* !defined (CLI_SETSHOW_H) */

@@ -1,12 +1,5 @@
-/* ***DEPRECATED***  The gdblib files must not be calling/using things in any
-   of the possible command languages.  If necessary, a hook (that may be
-   present or not) must be used and set to the appropriate routine by any
-   command language that cares about it.  If you are having to include this
-   file you are possibly doing things the old way.  This file will disapear.
-   fnasser@redhat.com    */
-
-/* Header file for command-reading library command.c.
-   Copyright (C) 1986, 1989, 1990, 2000 Free Software Foundation, Inc.
+/* Header file for GDB command decoding library.
+   Copyright (C) 2000 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -23,8 +16,10 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#if !defined (COMMAND_H)
-#define COMMAND_H 1
+#if !defined (CLI_DECODE_H)
+#define CLI_DECODE_H 1
+
+#include "gnu-regex.h"   /* Needed by apropos_cmd. */
 
 /* Command classes are top-level categories into which commands are broken
    down for "help" purposes.  
@@ -247,7 +242,7 @@ struct cmd_list_element
     struct cmd_list_element *cmd_pointer;
   };
 
-/* Forward-declarations of the entry-points of command.c.  */
+/* API to the manipulation of command lists.  */
 
 extern struct cmd_list_element *add_cmd (char *, enum command_class,
 					 void (*fun) (char *, int), char *,
@@ -312,11 +307,6 @@ extern char **complete_on_enum (const char *enumlist[], char *, char *);
 
 extern void delete_cmd (char *, struct cmd_list_element **);
 
-extern void help_cmd (char *, struct ui_file *);
-
-extern void help_list (struct cmd_list_element *, char *,
-		       enum command_class, struct ui_file *);
-
 extern void help_cmd_list (struct cmd_list_element *, enum command_class,
 			   char *, int, struct ui_file *);
 
@@ -343,25 +333,25 @@ extern struct cmd_list_element *add_show_from_set (struct cmd_list_element *,
 						   struct cmd_list_element
 						   **);
 
-/* Do a "set" or "show" command.  ARG is NULL if no argument, or the text
-   of the argument, and FROM_TTY is nonzero if this command is being entered
-   directly by the user (i.e. these are just like any other
-   command).  C is the command list element for the command.  */
+/* Functions that implement commands about CLI commands. */
 
-extern void do_setshow_command (char *, int, struct cmd_list_element *);
+extern void help_cmd (char *, struct ui_file *);
 
-/* Do a "show" command for each thing on a command list.  */
+extern void help_list (struct cmd_list_element *, char *,
+		       enum command_class, struct ui_file *);
 
-extern void cmd_show_list (struct cmd_list_element *, int, char *);
-
-extern NORETURN void error_no_arg (char *) ATTR_NORETURN;
-
-extern void dont_repeat (void);
+extern void apropos_cmd (struct ui_file *, struct cmd_list_element *,
+                         struct re_pattern_buffer *, char *);
 
 /* Used to mark commands that don't do anything.  If we just leave the
    function field NULL, the command is interpreted as a help topic, or
    as a class of commands.  */
 
-extern void not_just_help_class_command (char *, int);
+extern void not_just_help_class_command (char *arg, int from_tty);
 
-#endif /* !defined (COMMAND_H) */
+/* Exported to cli/cli-setshow.c */
+
+extern void print_doc_line (struct ui_file *, char *);
+
+
+#endif /* !defined (CLI_DECODE_H) */

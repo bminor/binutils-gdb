@@ -1,3 +1,71 @@
+2000-12-01  Fernando Nasser  <fnasser@redhat.com>
+
+	* cli/cli-decode.c: New file. Handle lists of commands, their decoding
+	and documentation.
+	(add_cmd, deprecate_cmd, add_abbrev_cmd, add_alias_cmd, add_prefix_cmd,
+	add_abbrev_prefix_cmd, not_just_help_class_command, empty_sfunc,
+	add_set_cmd, add_set_enum_cmd, add_set_auto_boolean_cmd,
+	add_show_from_set, delete_cmd, apropos_cmd, help_cmd, help_list,
+	help_all, print_doc_line, help_cmd_list, find_cmd, lookup_cmd_1,
+	undef_cmd_error, lookup_cmd, deprecated_cmd_warning,
+	lookup_cmd_composition, complete_on_cmdlist, complete_on_enum):
+	Moved here from command.c.
+	(add_info, add_info_alias, add_com, add_com_alias): Moved here from
+	top.c.
+	* cli/cli-decode.h: Definitions/declarations for the above.
+	* cli/cli-cmds.c: New file.  GDB CLI commands.
+	(error_no_arg, info_command, show_command, help_command, show_version, 
+	quit_command, pwd_command, cd_command, echo_command, shell_escape,
+	make_command, show_user, set_debug, show_debug, init_cmd_lists):
+	Moved here from top.c.
+	(apropos_command): Moved here from command.c.
+	(complete_command, source_command): Moved here (part) from top.c.
+	(is_complete_command): New function. Checks if a command is the
+	"complete" command.
+	(init_cli_cmds): New function. Add commands to the CLI (from code
+	previously in top.c.
+	* cli/cli-cmds.h: Definitions/declarations for the above.
+	* cli/cli-script.c: New file. GDB CLI command scripting.
+	(build_command_line, get_command_line, print_command_lines,
+	print_command_line, execute_user_command, execute_control_command,
+	while_command, if_command, arg_cleanup, setup_user_args, locate_arg,
+	insert_args, realloc_body_list, read_next_line,
+	recurse_read_control_structure, read_command_lines, free_command_lines,
+	do_free_command_lines_cleanup, make_cleanup_free_command_lines,
+	validate_comname, user_defined_command, define_command,
+	document_command, source_cleanup_lines, do_fclose_cleanup,
+	show_user_1): Moved here from top.c.
+	(script_from_file): New function. Implements execution of a script
+	contained in a file (part of code for the source_command() that used
+	to exist in top.c).
+	* cli/cli-script.h: Definitions/declarations for the above.
+	* cli/cli-setshow.c: New file. Handle set and show GDB CLI commands.
+	(parse_auto_binary_operation, parse_binary_operation,
+	do_setshow_command, cmd_show_list): Moved here from command.c.
+	* cli/cli-setshow.h: Definitions/declarations for the above.
+	* top.c: Remove all CLI code, except the command loop.
+	(gdb_init): Call init_cli_cmds().
+	* command.c: Remove obsolete file.
+	* command.h: Mark as DEPRECATED.
+	* gdbcmd.h: Ditto.
+	* call-cmds.h: Ditto.
+	* Makefile.in (SFILES): Remove command.c.
+	(COMMON_OBS): Remove command.o.
+	(command.o): Remove obsolete target.
+	(cli_decode_h, cli_cmds_h, cli_script_h, cli_setshow_h): New macros.
+	Refer to CLI header files.
+	(cli-decode.o, cli-cmds.o, cli-setshow.o, cli-script.o): New targets.
+	(SUBDIR_CLI_OBS, SUBDIR_CLI_SRCS, SUBDIR_CLI_DEPS, SUBDIR_CLI_INITS,
+	SUBDIR_CLI_LDFLAGS, SUBDIR_CLI_CFLAGS, SUBDIR_CLI_ALL, SUBDIR_CLI_CLEAN,
+	SUBDIR_CLI_INSTALL, SUBDIR_CLI_UNINSTALL): New macros for new cli
+	subdirectory.
+	* configure.in (enable_gdbcli): New option. Include the CLI in the
+	executable (cannot be disabled yet).
+	(CONFIG_OBS, CONFIG_DEPS, CONFIG_SRCS, CONFIG_INITS, ENABLE_CFLAGS,
+	CONFIG_ALL, CONFIG_CLEAN, CONFIG_INSTALL, CONFIG_UNINSTALL): Add
+	the corresponding SUBDIR_CLI_* macros if CLI requested.
+	* configure: Regenerate.
+
 2000-10-27  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* p-exp.y (yylex): avoid problem with symbol name 

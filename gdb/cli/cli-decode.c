@@ -17,52 +17,29 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
-#include "gdbcmd.h"
 #include "symtab.h"
-#include "value.h"
 #include <ctype.h>
-#include "gdb_string.h"
+#include "gnu-regex.h"
+
 #ifdef UI_OUT
 #include "ui-out.h"
 #endif
 
-#include "gdb_wait.h"
-#include "gnu-regex.h"
-/* FIXME: this should be auto-configured!  */
-#ifdef __MSDOS__
-# define CANT_FORK
-#endif
+#include "cli/cli-cmds.h"
+#include "cli/cli-decode.h"
 
 /* Prototypes for local functions */
 
 static void undef_cmd_error (char *, char *);
-
-static void show_user (char *, int);
-
-static void show_user_1 (struct cmd_list_element *, struct ui_file *);
-
-static void make_command (char *, int);
-
-static void shell_escape (char *, int);
-
-static int parse_binary_operation (char *);
-
-static void print_doc_line (struct ui_file *, char *);
 
 static struct cmd_list_element *find_cmd (char *command,
 					  int len,
 					  struct cmd_list_element *clist,
 					  int ignore_help_classes,
 					  int *nfound);
-static void apropos_cmd_helper (struct ui_file *, struct cmd_list_element *, 
-		    		struct re_pattern_buffer *, char *);
 
 static void help_all (struct ui_file *stream);
-
-void apropos_command (char *, int);
-
-void _initialize_command (void);
-
+
 /* Add element named NAME.
    CLASS is the top level category into which commands are broken down
    for "help" purposes.
@@ -396,12 +373,49 @@ delete_cmd (char *name, struct cmd_list_element **list)
 	  c = c->next;
       }
 }
+
+/* Shorthands to the commands above. */
+
+/* Add an element to the list of info subcommands.  */
+
+struct cmd_list_element *
+add_info (char *name, void (*fun) (char *, int), char *doc)
+{
+  return add_cmd (name, no_class, fun, doc, &infolist);
+}
+
+/* Add an alias to the list of info subcommands.  */
+
+struct cmd_list_element *
+add_info_alias (char *name, char *oldname, int abbrev_flag)
+{
+  return add_alias_cmd (name, oldname, 0, abbrev_flag, &infolist);
+}
+
+/* Add an element to the list of commands.  */
+
+struct cmd_list_element *
+add_com (char *name, enum command_class class, void (*fun) (char *, int),
+	 char *doc)
+{
+  return add_cmd (name, class, fun, doc, &cmdlist);
+}
+
+/* Add an alias or abbreviation command to the list of commands.  */
+
+struct cmd_list_element *
+add_com_alias (char *name, char *oldname, enum command_class class,
+	       int abbrev_flag)
+{
+  return add_alias_cmd (name, oldname, class, abbrev_flag, &cmdlist);
+}
+
 /* Recursively walk the commandlist structures, and print out the
    documentation of commands that match our regex in either their
    name, or their documentation.
 */
-static void 
-apropos_cmd_helper (struct ui_file *stream, struct cmd_list_element *commandlist,
+void 
+apropos_cmd (struct ui_file *stream, struct cmd_list_element *commandlist,
 			 struct re_pattern_buffer *regex, char *prefix)
 {
   register struct cmd_list_element *c;
@@ -445,38 +459,10 @@ apropos_cmd_helper (struct ui_file *stream, struct cmd_list_element *commandlist
 	  /* Recursively call ourselves on the subcommand list,
 	     passing the right prefix in.
 	  */
-	  apropos_cmd_helper(stream,*c->prefixlist,regex,c->prefixname);
+	  apropos_cmd (stream,*c->prefixlist,regex,c->prefixname);
 	}
     }
 }
-/* Search through names of commands and documentations for a certain
-   regular expression.
-*/
-void 
-apropos_command (char *searchstr, int from_tty)
-{
-  extern struct cmd_list_element *cmdlist; /*This is the main command list*/
-  regex_t pattern;
-  char *pattern_fastmap;
-  char errorbuffer[512];
-  pattern_fastmap=calloc(256,sizeof(char));
-  if (searchstr == NULL)
-      error("REGEXP string is empty");
-
-  if (regcomp(&pattern,searchstr,REG_ICASE) == 0)
-    {
-      pattern.fastmap=pattern_fastmap;
-      re_compile_fastmap(&pattern);
-      apropos_cmd_helper(gdb_stdout,cmdlist,&pattern,"");
-    }
-  else
-    {
-      regerror(regcomp(&pattern,searchstr,REG_ICASE),NULL,errorbuffer,512);
-      error("Error in regular expression:%s",errorbuffer);
-    }
-  free(pattern_fastmap);
-}
-
 
 /* This command really has to deal with two things:
  *     1) I want documentation on *this string* (usually called by
@@ -626,7 +612,7 @@ help_all (struct ui_file *stream)
 }
 
 /* Print only the first line of STR on STREAM.  */
-static void
+void
 print_doc_line (struct ui_file *stream, char *str)
 {
   static char *line_buffer = 0;
@@ -1504,577 +1490,3 @@ complete_on_enum (const char *enumlist[],
   return matchlist;
 }
 
-static enum cmd_auto_boolean
-parse_auto_binary_operation (const char *arg)
-{
-  if (arg != NULL && *arg != '\0')
-    {
-      int length = strlen (arg);
-      while (isspace (arg[length - 1]) && length > 0)
-	length--;
-      if (strncmp (arg, "on", length) == 0
-	  || strncmp (arg, "1", length) == 0
-	  || strncmp (arg, "yes", length) == 0
-	  || strncmp (arg, "enable", length) == 0)
-	return CMD_AUTO_BOOLEAN_TRUE;
-      else if (strncmp (arg, "off", length) == 0
-	       || strncmp (arg, "0", length) == 0
-	       || strncmp (arg, "no", length) == 0
-	       || strncmp (arg, "disable", length) == 0)
-	return CMD_AUTO_BOOLEAN_FALSE;
-      else if (strncmp (arg, "auto", length) == 0
-	       || (strncmp (arg, "-1", length) == 0 && length > 1))
-	return CMD_AUTO_BOOLEAN_AUTO;
-    }
-  error ("\"on\", \"off\" or \"auto\" expected.");
-  return CMD_AUTO_BOOLEAN_AUTO; /* pacify GCC */
-}
-
-static int
-parse_binary_operation (char *arg)
-{
-  int length;
-
-  if (!arg || !*arg)
-    return 1;
-
-  length = strlen (arg);
-
-  while (arg[length - 1] == ' ' || arg[length - 1] == '\t')
-    length--;
-
-  if (strncmp (arg, "on", length) == 0
-      || strncmp (arg, "1", length) == 0
-      || strncmp (arg, "yes", length) == 0
-      || strncmp (arg, "enable", length) == 0)
-    return 1;
-  else if (strncmp (arg, "off", length) == 0
-	   || strncmp (arg, "0", length) == 0
-	   || strncmp (arg, "no", length) == 0
-	   || strncmp (arg, "disable", length) == 0)
-    return 0;
-  else
-    {
-      error ("\"on\" or \"off\" expected.");
-      return 0;
-    }
-}
-
-/* Do a "set" or "show" command.  ARG is NULL if no argument, or the text
-   of the argument, and FROM_TTY is nonzero if this command is being entered
-   directly by the user (i.e. these are just like any other
-   command).  C is the command list element for the command.  */
-void
-do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
-{
-  if (c->type == set_cmd)
-    {
-      switch (c->var_type)
-	{
-	case var_string:
-	  {
-	    char *new;
-	    char *p;
-	    char *q;
-	    int ch;
-
-	    if (arg == NULL)
-	      arg = "";
-	    new = (char *) xmalloc (strlen (arg) + 2);
-	    p = arg;
-	    q = new;
-	    while ((ch = *p++) != '\000')
-	      {
-		if (ch == '\\')
-		  {
-		    /* \ at end of argument is used after spaces
-		       so they won't be lost.  */
-		    /* This is obsolete now that we no longer strip
-		       trailing whitespace and actually, the backslash
-		       didn't get here in my test, readline or
-		       something did something funky with a backslash
-		       right before a newline.  */
-		    if (*p == 0)
-		      break;
-		    ch = parse_escape (&p);
-		    if (ch == 0)
-		      break;	/* C loses */
-		    else if (ch > 0)
-		      *q++ = ch;
-		  }
-		else
-		  *q++ = ch;
-	      }
-#if 0
-	    if (*(p - 1) != '\\')
-	      *q++ = ' ';
-#endif
-	    *q++ = '\0';
-	    new = (char *) xrealloc (new, q - new);
-	    if (*(char **) c->var != NULL)
-	      free (*(char **) c->var);
-	    *(char **) c->var = new;
-	  }
-	  break;
-	case var_string_noescape:
-	  if (arg == NULL)
-	    arg = "";
-	  if (*(char **) c->var != NULL)
-	    free (*(char **) c->var);
-	  *(char **) c->var = savestring (arg, strlen (arg));
-	  break;
-	case var_filename:
-	  if (arg == NULL)
-	    error_no_arg ("filename to set it to.");
-	  if (*(char **) c->var != NULL)
-	    free (*(char **) c->var);
-	  *(char **) c->var = tilde_expand (arg);
-	  break;
-	case var_boolean:
-	  *(int *) c->var = parse_binary_operation (arg);
-	  break;
-	case var_auto_boolean:
-	  *(enum cmd_auto_boolean *) c->var = parse_auto_binary_operation (arg);
-	  break;
-	case var_uinteger:
-	  if (arg == NULL)
-	    error_no_arg ("integer to set it to.");
-	  *(unsigned int *) c->var = parse_and_eval_long (arg);
-	  if (*(unsigned int *) c->var == 0)
-	    *(unsigned int *) c->var = UINT_MAX;
-	  break;
-	case var_integer:
-	  {
-	    unsigned int val;
-	    if (arg == NULL)
-	      error_no_arg ("integer to set it to.");
-	    val = parse_and_eval_long (arg);
-	    if (val == 0)
-	      *(int *) c->var = INT_MAX;
-	    else if (val >= INT_MAX)
-	      error ("integer %u out of range", val);
-	    else
-	      *(int *) c->var = val;
-	    break;
-	  }
-	case var_zinteger:
-	  if (arg == NULL)
-	    error_no_arg ("integer to set it to.");
-	  *(int *) c->var = parse_and_eval_long (arg);
-	  break;
-	case var_enum:
-	  {
-	    int i;
-	    int len;
-	    int nmatches;
-	    const char *match = NULL;
-	    char *p;
-
-	    /* if no argument was supplied, print an informative error message */
-	    if (arg == NULL)
-	      {
-		char msg[1024];
-		strcpy (msg, "Requires an argument. Valid arguments are ");
-		for (i = 0; c->enums[i]; i++)
-		  {
-		    if (i != 0)
-		      strcat (msg, ", ");
-		    strcat (msg, c->enums[i]);
-		  }
-		strcat (msg, ".");
-		error (msg);
-	      }
-
-	    p = strchr (arg, ' ');
-
-	    if (p)
-	      len = p - arg;
-	    else
-	      len = strlen (arg);
-
-	    nmatches = 0;
-	    for (i = 0; c->enums[i]; i++)
-	      if (strncmp (arg, c->enums[i], len) == 0)
-		{
-		  if (c->enums[i][len] == '\0')
-		    {
-		      match = c->enums[i];
-		      nmatches = 1;
-		      break; /* exact match. */
-		    }
-		  else
-		    {
-		      match = c->enums[i];
-		      nmatches++;
-		    }
-		}
-
-	    if (nmatches <= 0)
-	      error ("Undefined item: \"%s\".", arg);
-
-	    if (nmatches > 1)
-	      error ("Ambiguous item \"%s\".", arg);
-
-	    *(const char **) c->var = match;
-	  }
-	  break;
-	default:
-	  error ("gdb internal error: bad var_type in do_setshow_command");
-	}
-    }
-  else if (c->type == show_cmd)
-    {
-#ifdef UI_OUT
-      struct cleanup *old_chain;
-      struct ui_stream *stb;
-      int quote;
-
-      stb = ui_out_stream_new (uiout);
-      old_chain = make_cleanup_ui_out_stream_delete (stb);
-#endif /* UI_OUT */
-
-      /* Print doc minus "show" at start.  */
-      print_doc_line (gdb_stdout, c->doc + 5);
-
-#ifdef UI_OUT
-      ui_out_text (uiout, " is ");
-      ui_out_wrap_hint (uiout, "    ");
-      quote = 0;
-      switch (c->var_type)
-	{
-	case var_string:
-	  {
-	    unsigned char *p;
-
-	    if (*(unsigned char **) c->var)
-	      fputstr_filtered (*(unsigned char **) c->var, '"', stb->stream);
-	    quote = 1;
-	  }
-	  break;
-	case var_string_noescape:
-	case var_filename:
-	case var_enum:
-	  if (*(char **) c->var)
-	    fputs_filtered (*(char **) c->var, stb->stream);
-	  quote = 1;
-	  break;
-	case var_boolean:
-	  fputs_filtered (*(int *) c->var ? "on" : "off", stb->stream);
-	  break;
-	case var_auto_boolean:
-	  switch (*(enum cmd_auto_boolean*) c->var)
-	    {
-	    case CMD_AUTO_BOOLEAN_TRUE:
-	      fputs_filtered ("on", stb->stream);
-	      break;
-	    case CMD_AUTO_BOOLEAN_FALSE:
-	      fputs_filtered ("off", stb->stream);
-	      break;
-	    case CMD_AUTO_BOOLEAN_AUTO:
-	      fputs_filtered ("auto", stb->stream);
-	      break;
-	    default:
-	      internal_error ("do_setshow_command: invalid var_auto_boolean");
-	      break;
-	    }
-	  break;
-	case var_uinteger:
-	  if (*(unsigned int *) c->var == UINT_MAX)
-	    {
-	      fputs_filtered ("unlimited", stb->stream);
-	      break;
-	    }
-	  /* else fall through */
-	case var_zinteger:
-	  fprintf_filtered (stb->stream, "%u", *(unsigned int *) c->var);
-	  break;
-	case var_integer:
-	  if (*(int *) c->var == INT_MAX)
-	    {
-	      fputs_filtered ("unlimited", stb->stream);
-	    }
-	  else
-	    fprintf_filtered (stb->stream, "%d", *(int *) c->var);
-	  break;
-
-	default:
-	  error ("gdb internal error: bad var_type in do_setshow_command");
-	}
-      if (quote)
-	ui_out_text (uiout, "\"");
-      ui_out_field_stream (uiout, "value", stb);
-      if (quote)
-	ui_out_text (uiout, "\"");
-      ui_out_text (uiout, ".\n");
-      do_cleanups (old_chain);
-#else
-      fputs_filtered (" is ", gdb_stdout);
-      wrap_here ("    ");
-      switch (c->var_type)
-	{
-	case var_string:
-	  {
-	    fputs_filtered ("\"", gdb_stdout);
-	    if (*(unsigned char **) c->var)
-	      fputstr_filtered (*(unsigned char **) c->var, '"', gdb_stdout);
-	    fputs_filtered ("\"", gdb_stdout);
-	  }
-	  break;
-	case var_string_noescape:
-	case var_filename:
-	case var_enum:
-	  fputs_filtered ("\"", gdb_stdout);
-	  if (*(char **) c->var)
-	    fputs_filtered (*(char **) c->var, gdb_stdout);
-	  fputs_filtered ("\"", gdb_stdout);
-	  break;
-	case var_boolean:
-	  fputs_filtered (*(int *) c->var ? "on" : "off", gdb_stdout);
-	  break;
-	case var_auto_boolean:
-	  switch (*(enum cmd_auto_boolean*) c->var)
-	    {
-	    case CMD_AUTO_BOOLEAN_TRUE:
-	      fputs_filtered ("on", gdb_stdout);
-	      break;
-	    case CMD_AUTO_BOOLEAN_FALSE:
-	      fputs_filtered ("off", gdb_stdout);
-	      break;
-	    case CMD_AUTO_BOOLEAN_AUTO:
-	      fputs_filtered ("auto", gdb_stdout);
-	      break;
-	    default:
-	      internal_error ("do_setshow_command: invalid var_auto_boolean");
-	      break;
-	    }
-	  break;
-	case var_uinteger:
-	  if (*(unsigned int *) c->var == UINT_MAX)
-	    {
-	      fputs_filtered ("unlimited", gdb_stdout);
-	      break;
-	    }
-	  /* else fall through */
-	case var_zinteger:
-	  fprintf_filtered (gdb_stdout, "%u", *(unsigned int *) c->var);
-	  break;
-	case var_integer:
-	  if (*(int *) c->var == INT_MAX)
-	    {
-	      fputs_filtered ("unlimited", gdb_stdout);
-	    }
-	  else
-	    fprintf_filtered (gdb_stdout, "%d", *(int *) c->var);
-	  break;
-
-	default:
-	  error ("gdb internal error: bad var_type in do_setshow_command");
-	}
-      fputs_filtered (".\n", gdb_stdout);
-#endif
-    }
-  else
-    error ("gdb internal error: bad cmd_type in do_setshow_command");
-  (*c->function.sfunc) (NULL, from_tty, c);
-  if (c->type == set_cmd && set_hook)
-    set_hook (c);
-}
-
-/* Show all the settings in a list of show commands.  */
-
-void
-cmd_show_list (struct cmd_list_element *list, int from_tty, char *prefix)
-{
-#ifdef UI_OUT
-  ui_out_list_begin (uiout, "showlist");
-#endif
-  for (; list != NULL; list = list->next)
-    {
-      /* If we find a prefix, run its list, prefixing our output by its
-         prefix (with "show " skipped).  */
-#ifdef UI_OUT
-      if (list->prefixlist && !list->abbrev_flag)
-	{
-	  ui_out_list_begin (uiout, "optionlist");
-	  ui_out_field_string (uiout, "prefix", list->prefixname + 5);
-	  cmd_show_list (*list->prefixlist, from_tty, list->prefixname + 5);
-	  ui_out_list_end (uiout);
-	}
-      if (list->type == show_cmd)
-	{
-	  ui_out_list_begin (uiout, "option");
-	  ui_out_text (uiout, prefix);
-	  ui_out_field_string (uiout, "name", list->name);
-	  ui_out_text (uiout, ":  ");
-	  do_setshow_command ((char *) NULL, from_tty, list);
-	  ui_out_list_end (uiout);
-	}
-#else
-      if (list->prefixlist && !list->abbrev_flag)
-	cmd_show_list (*list->prefixlist, from_tty, list->prefixname + 5);
-      if (list->type == show_cmd)
-	{
-	  fputs_filtered (prefix, gdb_stdout);
-	  fputs_filtered (list->name, gdb_stdout);
-	  fputs_filtered (":  ", gdb_stdout);
-	  do_setshow_command ((char *) NULL, from_tty, list);
-	}
-#endif
-    }
-#ifdef UI_OUT
-  ui_out_list_end (uiout);
-#endif
-}
-
-/* ARGSUSED */
-static void
-shell_escape (char *arg, int from_tty)
-{
-#ifdef CANT_FORK
-  /* If ARG is NULL, they want an inferior shell, but `system' just
-     reports if the shell is available when passed a NULL arg.  */
-  int rc = system (arg ? arg : "");
-
-  if (!arg)
-    arg = "inferior shell";
-
-  if (rc == -1)
-    {
-      fprintf_unfiltered (gdb_stderr, "Cannot execute %s: %s\n", arg,
-			  safe_strerror (errno));
-      gdb_flush (gdb_stderr);
-    }
-  else if (rc)
-    {
-      fprintf_unfiltered (gdb_stderr, "%s exited with status %d\n", arg, rc);
-      gdb_flush (gdb_stderr);
-    }
-#ifdef __DJGPP__
-  /* Make sure to return to the directory GDB thinks it is, in case the
-     shell command we just ran changed it.  */
-  chdir (current_directory);
-#endif
-#else /* Can fork.  */
-  int rc, status, pid;
-  char *p, *user_shell;
-
-  if ((user_shell = (char *) getenv ("SHELL")) == NULL)
-    user_shell = "/bin/sh";
-
-  /* Get the name of the shell for arg0 */
-  if ((p = strrchr (user_shell, '/')) == NULL)
-    p = user_shell;
-  else
-    p++;			/* Get past '/' */
-
-  if ((pid = fork ()) == 0)
-    {
-      if (!arg)
-	execl (user_shell, p, 0);
-      else
-	execl (user_shell, p, "-c", arg, 0);
-
-      fprintf_unfiltered (gdb_stderr, "Cannot execute %s: %s\n", user_shell,
-			  safe_strerror (errno));
-      gdb_flush (gdb_stderr);
-      _exit (0177);
-    }
-
-  if (pid != -1)
-    while ((rc = wait (&status)) != pid && rc != -1)
-      ;
-  else
-    error ("Fork failed");
-#endif /* Can fork.  */
-}
-
-static void
-make_command (char *arg, int from_tty)
-{
-  char *p;
-
-  if (arg == 0)
-    p = "make";
-  else
-    {
-      p = xmalloc (sizeof ("make ") + strlen (arg));
-      strcpy (p, "make ");
-      strcpy (p + sizeof ("make ") - 1, arg);
-    }
-
-  shell_escape (p, from_tty);
-}
-
-static void
-show_user_1 (struct cmd_list_element *c, struct ui_file *stream)
-{
-  register struct command_line *cmdlines;
-
-  cmdlines = c->user_commands;
-  if (!cmdlines)
-    return;
-  fputs_filtered ("User command ", stream);
-  fputs_filtered (c->name, stream);
-  fputs_filtered (":\n", stream);
-
-#ifdef UI_OUT
-  print_command_lines (uiout, cmdlines, 1);
-  fputs_filtered ("\n", stream);
-#else
-  while (cmdlines)
-    {
-      print_command_line (cmdlines, 4, stream);
-      cmdlines = cmdlines->next;
-    }
-  fputs_filtered ("\n", stream);
-#endif
-}
-
-/* ARGSUSED */
-static void
-show_user (char *args, int from_tty)
-{
-  struct cmd_list_element *c;
-  extern struct cmd_list_element *cmdlist;
-
-  if (args)
-    {
-      c = lookup_cmd (&args, cmdlist, "", 0, 1);
-      if (c->class != class_user)
-	error ("Not a user command.");
-      show_user_1 (c, gdb_stdout);
-    }
-  else
-    {
-      for (c = cmdlist; c; c = c->next)
-	{
-	  if (c->class == class_user)
-	    show_user_1 (c, gdb_stdout);
-	}
-    }
-}
-
-void
-_initialize_command (void)
-{
-  add_com ("shell", class_support, shell_escape,
-	   "Execute the rest of the line as a shell command.  \n\
-With no arguments, run an inferior shell.");
-
-  /* NOTE: cagney/2000-03-20: Being able to enter ``(gdb) !ls'' would
-     be a really useful feature.  Unfortunately, the below wont do
-     this.  Instead it adds support for the form ``(gdb) ! ls''
-     (i.e. the space is required).  If the ``!'' command below is
-     added the complains about no ``!'' command would be replaced by
-     complains about how the ``!'' command is broken :-) */
-  if (xdb_commands)
-    add_com_alias ("!", "shell", class_support, 0);
-
-  add_com ("make", class_support, make_command,
-       "Run the ``make'' program using the rest of the line as arguments.");
-  add_cmd ("user", no_class, show_user,
-	   "Show definitions of user defined commands.\n\
-Argument is the name of the user defined command.\n\
-With no argument, show definitions of all user defined commands.", &showlist);
-  add_com ("apropos", class_support, apropos_command, "Search for commands matching a REGEXP");
-}
