@@ -1,4 +1,5 @@
 /* DWARF 2 debugging format support for GDB.
+
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
    2004
    Free Software Foundation, Inc.
@@ -1260,7 +1261,7 @@ dwarf2_build_psymtabs_easy (struct objfile *objfile, int mainline)
 #endif
 
 /* Read in the comp unit header information from the debug_info at
-   info_ptr. */
+   info_ptr.  */
 
 static char *
 read_comp_unit_head (struct comp_unit_head *cu_header,
@@ -5838,13 +5839,13 @@ read_address (bfd *abfd, char *buf, struct dwarf2_cu *cu, int *bytes_read)
    sense for the 32-bit format, this initial zero can be considered to
    be an escape value which indicates the presence of the older 64-bit
    format.  As written, the code can't detect (old format) lengths
-   greater than 4GB.  If it becomes necessary to handle lengths somewhat
-   larger than 4GB, we could allow other small values (such as the
-   non-sensical values of 1, 2, and 3) to also be used as escape values
-   indicating the presence of the old format.
+   greater than 4GB.  If it becomes necessary to handle lengths
+   somewhat larger than 4GB, we could allow other small values (such
+   as the non-sensical values of 1, 2, and 3) to also be used as
+   escape values indicating the presence of the old format.
 
-   The value returned via bytes_read should be used to increment
-   the relevant pointer after calling read_initial_length().
+   The value returned via bytes_read should be used to increment the
+   relevant pointer after calling read_initial_length().
    
    As a side effect, this function sets the fields initial_length_size
    and offset_size in cu_header to the values appropriate for the
@@ -5861,8 +5862,8 @@ read_address (bfd *abfd, char *buf, struct dwarf2_cu *cu, int *bytes_read)
      This document is only a draft and is subject to change.  (So beware.)
 
      Details regarding the older, non-standard 64-bit format were
-     determined empirically by examining 64-bit ELF files produced
-     by the SGI toolchain on an IRIX 6.5 machine.
+     determined empirically by examining 64-bit ELF files produced by
+     the SGI toolchain on an IRIX 6.5 machine.
 
      - Kevin, July 16, 2002
    ] */
@@ -5907,11 +5908,11 @@ read_initial_length (bfd *abfd, char *buf, struct comp_unit_head *cu_header,
 	}
     }
 
- return retval;
+  return retval;
 }
 
 /* Read an offset from the data stream.  The size of the offset is
-   given by cu_header->offset_size. */
+   given by cu_header->offset_size.  */
 
 static LONGEST
 read_offset (bfd *abfd, char *buf, const struct comp_unit_head *cu_header,
@@ -5935,7 +5936,7 @@ read_offset (bfd *abfd, char *buf, const struct comp_unit_head *cu_header,
 		      bfd_get_filename (abfd));
     }
 
- return retval;
+  return retval;
 }
 
 static char *

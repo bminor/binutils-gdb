@@ -1,3 +1,7 @@
+2004-11-10  Mark Kettenis  <kettenis@gnu.org>
+
+	* dwarf2read.c: Fix formatting.
+
 2004-11-10  Andrew Cagney  <cagney@gnu.org>
 
 	* value.h (COERCE_REF, COERCE_ARRAY, COERCE_NUMBER, COERCE_ENUM)
