@@ -1245,7 +1245,7 @@ setup_section (ibfd, isection, obfdarg)
   bfd_vma vma;
   bfd_vma lma;
   flagword flags;
-  char *err;
+  const char *err;
 
   if ((bfd_get_section_flags (ibfd, isection) & SEC_DEBUGGING) != 0
       && (strip_symbols == STRIP_DEBUG
@@ -1268,7 +1268,7 @@ setup_section (ibfd, isection, obfdarg)
 
   if (osection == NULL)
     {
-      err = "making";
+      err = _("making");
       goto loser;
     }
 
@@ -1277,7 +1277,7 @@ setup_section (ibfd, isection, obfdarg)
     size = (size + interleave - 1) / interleave;
   if (! bfd_set_section_size (obfd, osection, size))
     {
-      err = "size";
+      err = _("size");
       goto loser;
     }
 
@@ -1291,7 +1291,7 @@ setup_section (ibfd, isection, obfdarg)
 
   if (! bfd_set_section_vma (obfd, osection, vma))
     {
-      err = "vma";
+      err = _("vma");
       goto loser;
     }
 
@@ -1317,7 +1317,7 @@ setup_section (ibfd, isection, obfdarg)
 				 bfd_section_alignment (ibfd, isection))
       == false)
     {
-      err = "alignment";
+      err = _("alignment");
       goto loser;
     }
 
@@ -1326,7 +1326,7 @@ setup_section (ibfd, isection, obfdarg)
     flags = p->flags | (flags & SEC_HAS_CONTENTS);
   if (!bfd_set_section_flags (obfd, osection, flags))
     {
-      err = "flags";
+      err = _("flags");
       goto loser;
     }
 
@@ -1340,7 +1340,7 @@ setup_section (ibfd, isection, obfdarg)
      from the input section to the output section.  */
   if (!bfd_copy_private_section_data (ibfd, isection, obfd, osection))
     {
-      err = "private data";
+      err = _("private data");
       goto loser;
     }
 
