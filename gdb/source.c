@@ -179,6 +179,8 @@ get_current_or_default_source_symtab_and_line (void)
   
   cursal.symtab = current_source_symtab;
   cursal.line = current_source_line;
+  cursal.pc = 0;
+  cursal.end = 0;
   
   return cursal;
 }
@@ -197,6 +199,8 @@ set_current_source_symtab_and_line (struct symtab_and_line *sal)
 
   current_source_symtab = sal->symtab;
   current_source_line = sal->line;
+  cursal.pc = 0;
+  cursal.end = 0;
   
   return cursal;
 }

@@ -1,3 +1,13 @@
+2002-09-22  Fernando Nasser  <fnasser@redhat.com>
+
+	* source.c (get_current_source_symtab_and_line): Initialize sal.pc and
+	sal.end fields.
+	(get_current_or_default_source_symtab_and_line): Ditto.
+	* breakpoint.c (parse_breakpoint_sals): Use correct accessor function
+	so we do not cause a new source symtab to be searched for (reverting an
+	unintentional change from the 2002-09-20 patch).
+	* scm-lang.c (scm_unpac): Ditto.
+
 2002-09-21  Andrew Cagney  <cagney@redhat.com>
 
 	* complaints.c (symfile_explanations): Remove new-line from
