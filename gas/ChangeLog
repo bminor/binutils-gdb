@@ -1,3 +1,7 @@
+Sun Dec 15 15:26:37 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* write.c (adjust_reloc_syms): Fix linkonce check for ELF.
+
 Sat Dec 14 22:37:27 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (prev_insn_reloc_type): New static variable.
