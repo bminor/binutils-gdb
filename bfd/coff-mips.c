@@ -1430,7 +1430,7 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
 	  if (gp_undefined)
 	    {
 	      if (! ((*info->callbacks->reloc_dangerous)
-		     (info, _("GP relative relocation when GP not defined"),
+		     (info, _("GP relative relocation used when GP not defined"),
 		      input_bfd, input_section,
 		      int_rel.r_vaddr - input_section->vma)))
 		return false;

@@ -1,3 +1,9 @@
+2002-01-25  Philipp Thomas  <pthomas@suse.de>
+
+	* coff-alpha.c (alpha_relocate_section): Unify warning message
+	for GP relative relocations without GP defined.
+	* coff-mips.c (mips_relocate_section): Likewise.
+
 2002-01-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-eh-frame.c (_bfd_elf_eh_frame_section_offset): Avoid
