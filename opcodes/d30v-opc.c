@@ -283,7 +283,7 @@ const struct d30v_opcode d30v_opcode_table[] = {
   { "mulxs", IALU2, 0x19, { SHORT_AA }, IU, FLAG_MUL32, 0, 0 },
   { "mvfacc", IALU2, 0x1f, { SHORT_RA }, IU, 0, 0, 0 },
   { "mvfsys", BRA, 0x1e, { SHORT_C1 }, MU, FLAG_ALL, FLAG_ALL, 0 },
-  { "mvtacc", IALU2, 0xf, { SHORT_AA }, IU, 0, 0, 0 },
+  { "mvtacc", IALU2, 0xf, { SHORT_AR }, IU, 0, 0, 0 },
   { "mvtsys", BRA, 0xe, { SHORT_C2 }, MU, FLAG_ALL, FLAG_ALL, 0 },
   { "nop", BRA, 0xF, { SHORT_NONE }, EITHER, 0, 0, 0 },
   { "not", LOGIC, 0x19, { SHORT_U }, EITHER, 0, 0, 0 },
@@ -471,6 +471,7 @@ const struct d30v_format d30v_format_table[] =
   { LONG_2b, 3, { Ra3, IMM32 } },		/* Ra,imm32 */
   { LONG_D, 2, { IMM6S3, IMM32 } },		/* imm6s3,imm32 */
   { LONG_Db, 2, { IMM6U, IMM32 } },		/* imm6,imm32 */
+  { SHORT_AR, 0, { Aa, Rb, Rc } },		/* Aa,Rb,Rc */
   { 0, 0, { 0 } },
 };
 
