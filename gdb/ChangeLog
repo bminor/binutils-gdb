@@ -1,5 +1,9 @@
 2004-09-02  Andrew Cagney  <cagney@gnu.org>
 
+	* gdbarch.sh: Delete check for GDB_MULTI_ARCH_PARTIAL when
+	validating architecture methods.
+	* gdbarch.c: Re-generate.
+	
 	* gdbarch.sh: Delete check for consistency between GDB_MULTI_ARCH
 	and GDB_TM_FILE.  Check for GDB_TM_FILE instead of
 	GDB_MULTI_ARCH_PARTIAL.

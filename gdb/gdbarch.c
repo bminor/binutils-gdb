@@ -528,8 +528,7 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of virtual_frame_pointer, invalid_p == 0 */
   /* Skip verify of pseudo_register_read, has predicate */
   /* Skip verify of pseudo_register_write, has predicate */
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (current_gdbarch->num_regs == -1))
+  if (current_gdbarch->num_regs == -1)
     fprintf_unfiltered (log, "\n\tnum_regs");
   /* Skip verify of num_pseudo_regs, invalid_p == 0 */
   /* Skip verify of sp_regnum, invalid_p == 0 */
@@ -567,14 +566,11 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of store_return_value, invalid_p == 0 */
   /* Skip verify of deprecated_use_struct_convention, invalid_p == 0 */
   /* Skip verify of deprecated_extract_struct_value_address, has predicate */
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (current_gdbarch->skip_prologue == 0))
+  if (current_gdbarch->skip_prologue == 0)
     fprintf_unfiltered (log, "\n\tskip_prologue");
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (current_gdbarch->inner_than == 0))
+  if (current_gdbarch->inner_than == 0)
     fprintf_unfiltered (log, "\n\tinner_than");
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (current_gdbarch->breakpoint_from_pc == 0))
+  if (current_gdbarch->breakpoint_from_pc == 0)
     fprintf_unfiltered (log, "\n\tbreakpoint_from_pc");
   /* Skip verify of adjust_breakpoint_address, has predicate */
   /* Skip verify of memory_insert_breakpoint, invalid_p == 0 */
@@ -595,8 +591,7 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of addr_bits_remove, invalid_p == 0 */
   /* Skip verify of smash_text_address, invalid_p == 0 */
   /* Skip verify of software_single_step, has predicate */
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (current_gdbarch->print_insn == 0))
+  if (current_gdbarch->print_insn == 0)
     fprintf_unfiltered (log, "\n\tprint_insn");
   /* Skip verify of skip_trampoline_code, invalid_p == 0 */
   /* Skip verify of skip_solib_resolver, invalid_p == 0 */

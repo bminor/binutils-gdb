@@ -1451,13 +1451,11 @@ do
 	    printf "    current_gdbarch->${function} = ${postdefault};\n"
 	elif [ -n "${invalid_p}" ]
 	then
-	    printf "  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)\n"
-	    printf "      && (${invalid_p}))\n"
+	    printf "  if (${invalid_p})\n"
 	    printf "    fprintf_unfiltered (log, \"\\\\n\\\\t${function}\");\n"
 	elif [ -n "${predefault}" ]
 	then
-	    printf "  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)\n"
-	    printf "      && (current_gdbarch->${function} == ${predefault}))\n"
+	    printf "  if (current_gdbarch->${function} == ${predefault})\n"
 	    printf "    fprintf_unfiltered (log, \"\\\\n\\\\t${function}\");\n"
 	fi
     fi
