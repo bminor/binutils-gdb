@@ -242,6 +242,7 @@ main (ac, av)
      sim_stop_reason() can be used to determine any stop reason. */
   if (trace)
     sim_set_trace ();
+  sigrc = 0;
   do
     {
       prev_sigint = signal (SIGINT, cntrl_c);
@@ -265,6 +266,7 @@ main (ac, av)
   else
     {
       prev_sigint = signal (SIGINT, cntrl_c);
+      sigrc = 0;
       sim_resume (sd, 0, sigrc);
       signal (SIGINT, prev_sigint);
       sim_stop_reason (sd, &reason, &sigrc);
