@@ -72,10 +72,10 @@ char *gdb_sysroot = 0;
 struct ui_file *gdb_stdout;
 struct ui_file *gdb_stderr;
 struct ui_file *gdb_stdlog;
-struct ui_file *gdb_stdtarg;
 struct ui_file *gdb_stdin;
 /* target IO streams */
 struct ui_file *gdb_stdtargin;
+struct ui_file *gdb_stdtarg;
 struct ui_file *gdb_stdtargerr;
 
 /* Whether to enable writing into executable and core files */
