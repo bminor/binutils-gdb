@@ -1,3 +1,7 @@
+2000-11-27  Kazu Hirata  <kazu@hxi.com>
+
+	* aout-adobe.c: Fix formatting.
+
 2000-11-27  Philip Blundell  <pb@futuretv.com>
 
 	* libcoff-in.h (coff_tdata): Add `strings_written' flag.
