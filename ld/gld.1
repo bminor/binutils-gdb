@@ -1,7 +1,7 @@
-.\" Copyright (c) 1991 Free Software Foundation
+.\" Copyright (c) 1991, 1992 Free Software Foundation
 .\" See section COPYING for conditions for redistribution
 .\" $Id$
-.TH gld 1 "5 November 1991" "cygnus support" "GNU Development Tools"
+.TH gld 1 "23 January 1992" "cygnus support" "GNU Development Tools"
 .de BP
 .sp
 .ti \-.2i
@@ -64,6 +64,7 @@ gld \- the GNU linker
 .RB "[\|" "\-R\ "\c
 .I filename\c
 \&\|]
+.RB "[\|" \-relax "\|]"
 .RB "[\|" \-r | \-Ur "\|]" 
 .RB "[\|" \-S "\|]" 
 .RB "[\|" \-s "\|]" 
@@ -553,6 +554,20 @@ to refer symbolically to absolute locations of memory defined in other
 programs.
 
 .TP
+.B \-relax
+An option with machine dependent effects.  Currently this option is only
+supported on the H8/300.
+
+On some platforms, use this option to perform global optimizations that
+become possible when the linker resolves addressing in your program, such
+as relaxing address modes and synthesizing new instructions in the
+output object file.  
+
+On platforms where this is not supported, `\|\c
+.B \-relax\c
+\&\|' is accepted, but has no effect.
+
+.TP
 .B \-r 
 Generates relocatable output\(em\&i.e., generate an output file that can in
 turn serve as input to \c
@@ -995,7 +1010,7 @@ The GNU Binary Utilities\c
 , Roland H. Pesch.
 
 .SH COPYING
-Copyright (c) 1991 Free Software Foundation, Inc.
+Copyright (c) 1991, 1992 Free Software Foundation, Inc.
 .PP
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
