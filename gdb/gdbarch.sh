@@ -476,7 +476,7 @@ f:2:D10V_CONVERT_IADDR_TO_RAW:CORE_ADDR:d10v_convert_iaddr_to_raw:CORE_ADDR x:x:
 #
 f:2:STORE_STRUCT_RETURN:void:store_struct_return:CORE_ADDR addr, CORE_ADDR sp:addr, sp:::0
 f:2:STORE_RETURN_VALUE:void:store_return_value:struct type *type, char *valbuf:type, valbuf:::0
-f:2:EXTRACT_STRUCT_VALUE_ADDRESS:CORE_ADDR:extract_struct_value_address:char *regbuf:regbuf:::0
+F:2:EXTRACT_STRUCT_VALUE_ADDRESS:CORE_ADDR:extract_struct_value_address:char *regbuf:regbuf:::0
 f:2:USE_STRUCT_CONVENTION:int:use_struct_convention:int gcc_p, struct type *value_type:gcc_p, value_type:::0
 #
 f:2:FRAME_INIT_SAVED_REGS:void:frame_init_saved_regs:struct frame_info *frame:frame::0:0
@@ -1041,17 +1041,6 @@ extern disassemble_info tm_print_insn_info;
    USE of these macro's is *STRONGLY* discouraged. */
 
 #define GDB_TARGET_IS_D10V (TARGET_ARCHITECTURE->arch == bfd_arch_d10v)
-
-
-/* Fallback definition for EXTRACT_STRUCT_VALUE_ADDRESS */
-#ifndef EXTRACT_STRUCT_VALUE_ADDRESS
-#define EXTRACT_STRUCT_VALUE_ADDRESS_P (0)
-#define EXTRACT_STRUCT_VALUE_ADDRESS(X) (internal_error (__FILE__, __LINE__, "gdbarch: EXTRACT_STRUCT_VALUE_ADDRESS"), 0)
-#else
-#ifndef EXTRACT_STRUCT_VALUE_ADDRESS_P
-#define EXTRACT_STRUCT_VALUE_ADDRESS_P (1)
-#endif
-#endif
 
 
 /* Set the dynamic target-system-dependent parameters (architecture,

@@ -1328,7 +1328,7 @@ value_being_returned (struct type *valtype, char *retbuf, int struct_return)
   CORE_ADDR addr;
 
   /* If this is not defined, just use EXTRACT_RETURN_VALUE instead.  */
-  if (EXTRACT_STRUCT_VALUE_ADDRESS_P)
+  if (EXTRACT_STRUCT_VALUE_ADDRESS_P ())
     if (struct_return)
       {
 	addr = EXTRACT_STRUCT_VALUE_ADDRESS (retbuf);

@@ -1,3 +1,12 @@
+2001-06-15  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbarch.sh (EXTRACT_STRUCT_VALUE_ADDRESS_P): Delete definition.
+	(EXTRACT_STRUCT_VALUE_ADDRESS): Change to a function with
+	predicate.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* values.c (value_being_returned): Change the reference to
+	EXTRACT_STRUCT_VALUE_ADDRESS_P to a function call.
+
 2001-06-15  Joel Brobecker <brobecker@act-europe.fr>
 
         * MAINTAINERS: Add Paul Hilfinger and Joel Brobecker to the

@@ -690,10 +690,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
       && (gdbarch->store_return_value == 0))
     internal_error (__FILE__, __LINE__,
                     "gdbarch: verify_gdbarch: store_return_value invalid");
-  if ((GDB_MULTI_ARCH >= 2)
-      && (gdbarch->extract_struct_value_address == 0))
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: verify_gdbarch: extract_struct_value_address invalid");
+  /* Skip verify of extract_struct_value_address, has predicate */
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->use_struct_convention == 0))
     internal_error (__FILE__, __LINE__,
@@ -3694,6 +3691,12 @@ set_gdbarch_store_return_value (struct gdbarch *gdbarch,
                                 gdbarch_store_return_value_ftype store_return_value)
 {
   gdbarch->store_return_value = store_return_value;
+}
+
+int
+gdbarch_extract_struct_value_address_p (struct gdbarch *gdbarch)
+{
+  return gdbarch->extract_struct_value_address != 0;
 }
 
 CORE_ADDR

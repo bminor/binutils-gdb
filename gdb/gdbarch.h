@@ -1097,6 +1097,28 @@ extern void set_gdbarch_store_return_value (struct gdbarch *gdbarch, gdbarch_sto
 #endif
 #endif
 
+#if defined (EXTRACT_STRUCT_VALUE_ADDRESS)
+/* Legacy for systems yet to multi-arch EXTRACT_STRUCT_VALUE_ADDRESS */
+#if !defined (EXTRACT_STRUCT_VALUE_ADDRESS_P)
+#define EXTRACT_STRUCT_VALUE_ADDRESS_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (EXTRACT_STRUCT_VALUE_ADDRESS_P)
+#define EXTRACT_STRUCT_VALUE_ADDRESS_P() (0)
+#endif
+
+extern int gdbarch_extract_struct_value_address_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (EXTRACT_STRUCT_VALUE_ADDRESS_P)
+#define EXTRACT_STRUCT_VALUE_ADDRESS_P() (gdbarch_extract_struct_value_address_p (current_gdbarch))
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (EXTRACT_STRUCT_VALUE_ADDRESS)
+#define EXTRACT_STRUCT_VALUE_ADDRESS(regbuf) (internal_error (__FILE__, __LINE__, "EXTRACT_STRUCT_VALUE_ADDRESS"), 0)
+#endif
+
 typedef CORE_ADDR (gdbarch_extract_struct_value_address_ftype) (char *regbuf);
 extern CORE_ADDR gdbarch_extract_struct_value_address (struct gdbarch *gdbarch, char *regbuf);
 extern void set_gdbarch_extract_struct_value_address (struct gdbarch *gdbarch, gdbarch_extract_struct_value_address_ftype *extract_struct_value_address);
@@ -1810,17 +1832,6 @@ extern disassemble_info tm_print_insn_info;
    USE of these macro's is *STRONGLY* discouraged. */
 
 #define GDB_TARGET_IS_D10V (TARGET_ARCHITECTURE->arch == bfd_arch_d10v)
-
-
-/* Fallback definition for EXTRACT_STRUCT_VALUE_ADDRESS */
-#ifndef EXTRACT_STRUCT_VALUE_ADDRESS
-#define EXTRACT_STRUCT_VALUE_ADDRESS_P (0)
-#define EXTRACT_STRUCT_VALUE_ADDRESS(X) (internal_error (__FILE__, __LINE__, "gdbarch: EXTRACT_STRUCT_VALUE_ADDRESS"), 0)
-#else
-#ifndef EXTRACT_STRUCT_VALUE_ADDRESS_P
-#define EXTRACT_STRUCT_VALUE_ADDRESS_P (1)
-#endif
-#endif
 
 
 /* Set the dynamic target-system-dependent parameters (architecture,
