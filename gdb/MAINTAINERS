@@ -13,6 +13,12 @@ check in changes outside of the immediate domain that they maintain.
 If there is no maintainer for a given domain then the problem falls to
 the head maintainer.
 
+If there are several maintainers for a given domain then the problem
+falls to the first maintainer.  The second and third maintainers are
+firstly known to have expertise in the given domain and secondly are
+available to step in if the first maintainer is to be absent for any
+reason.
+
 
 Target/Architecture: Generic ISA - Instruction Set Architecture -
 issues. API variants, CPU variants.  *-tdep.c.
