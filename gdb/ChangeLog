@@ -1,3 +1,8 @@
+Mon Jul 14 18:02:53 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
+
+	* procfs.c (wait_fd): Handle an fd that has "hung up" or 
+	otherwise terminated (Solaris threads).
+
 start-sanitize-gdbtk
 Thu Jul 10 00:02:41 1997  Martin M. Hunt  <hunt@cygnus.com>
 

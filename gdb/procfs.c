@@ -840,7 +840,7 @@ procfs_write_pckill (pi)
 static struct procinfo *
 wait_fd ()
 {
-  struct procinfo *pi;
+  struct procinfo *pi, *next_pi;
 #ifndef LOSING_POLL
   int num_fds;
   int i;
@@ -850,6 +850,7 @@ wait_fd ()
 			   attached process. */
   set_sigio_trap ();
 
+ wait_again:
 #ifndef LOSING_POLL
   while (1)
     {
@@ -891,20 +892,24 @@ wait_fd ()
       if (0 == (poll_list[i].revents & 
 		(POLLWRNORM | POLLPRI | POLLERR | POLLHUP | POLLNVAL)))
 	continue;
-      for (pi = procinfo_list; pi; pi = pi->next)
+      for (pi = procinfo_list; pi; pi = next_pi)
 	{
+	  next_pi = pi->next;
 	  if (poll_list[i].fd == pi->ctl_fd)
 	    {
-	      if (!procfs_read_status(pi))
-		{
-		  /* The LWP has apparently terminated.  */
-		  if (info_verbose)
-		    printf_filtered ("LWP %d doesn't respond.\n", 
-				     (pi->pid >> 16) & 0xffff);
-		  /* could call close_proc_file here, but I'm afraid to... */
-		}
-
 	      num_fds--;
+	      if ((poll_list[i].revents & POLLHUP) != 0	||
+		  !procfs_read_status(pi))
+		{ /* The LWP has apparently terminated.  */
+		  if (info_verbose)
+		    printf_filtered ("LWP %d exited.\n", 
+				     (pi->pid >> 16) & 0xffff);
+		  close_proc_file (pi);
+		  if (num_fds != 0)
+		    continue;		/* already another event to process */
+		  else
+		    goto wait_again; 	/* wait for another event */
+		}
 	      pi->had_event = 1;
 	      break;
 	    }
@@ -3398,7 +3403,7 @@ procfs_wait (pid, ourstatus)
 	default:
 	  error ("PIOCWSTOP, unknown why %d, what %d", why, what);
 	}
-/* Stop all the other threads when any of them stops.  */
+      /* Stop all the other threads when any of them stops.  */
 
       {
 	struct procinfo *procinfo, *next_pi;
