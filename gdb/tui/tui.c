@@ -39,10 +39,12 @@
 #include "tuiRegs.h"
 #include "tuiStack.h"
 #include "tuiWin.h"
+#include "tuiSourceWin.h"
 #include "readline/readline.h"
 #include "target.h"
 #include "frame.h"
 #include "breakpoint.h"
+#include "inferior.h"
 
 /* Tells whether the TUI is active or not.  */
 int tui_active = 0;
@@ -55,10 +57,13 @@ tui_switch_mode (void)
   if (tui_active)
     {
       tui_disable ();
+      rl_prep_terminal (0);
+
       printf_filtered ("Left the TUI mode\n");
     }
   else
     {
+      rl_deprep_terminal ();
       tui_enable ();
       printf_filtered ("Entered the TUI mode\n");
     }
@@ -74,6 +79,9 @@ tui_switch_mode (void)
      will be able to setup the terminal for its needs.  By re-entering
      in readline, we also redisplay its prompt in the non-curses mode.  */
   rl_newline (1, '\n');
+
+  /* Make sure the \n we are returning does not repeat the last command.  */
+  dont_repeat ();
   return 0;
 }
 
@@ -232,6 +240,9 @@ tui_enable (void)
   tui_version = 1;
   tui_active = 1;
   refresh ();
+
+  /* Update gdb's knowledge of its terminal.  */
+  terminal_save_ours ();
 }
 
 /* Leave the tui mode.
@@ -254,6 +265,8 @@ tui_disable (void)
      so that terminal management with the inferior works.  */
   tui_setup_io (0);
 
+  /* Update gdb's knowledge of its terminal.  */
+  terminal_save_ours ();
   tui_version = 0;
   tui_active = 0;
 }
@@ -276,7 +289,7 @@ CORE_ADDR
 tuiGetLowDisassemblyAddress (CORE_ADDR low, CORE_ADDR pc)
 {
   int line;
-  Opaque newLow;
+  CORE_ADDR newLow;
 
   /* Determine where to start the disassembly so that the pc is about in the
      middle of the viewport.  */
@@ -385,6 +398,15 @@ _tuiReset (void)
 }				/* _tuiReset */
 #endif
 
+void
+tui_show_source (const char *file, int line)
+{
+  /* make sure that the source window is displayed */
+  tuiAddWinToLayout (SRC_WIN);
+
+  tuiUpdateSourceWindowsWithLine (current_source_symtab, line);
+  tuiUpdateLocatorFilename (file);
+}
 
 void
 tui_show_assembly (CORE_ADDR addr)

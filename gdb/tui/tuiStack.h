@@ -27,7 +27,7 @@
 
 extern void tuiSetLocatorInfo (char *, char *, int, CORE_ADDR,
 			       TuiLocatorElementPtr);
-extern void tuiUpdateLocatorFilename (char *);
+extern void tuiUpdateLocatorFilename (const char *);
 extern void tuiUpdateLocatorInfoFromFrame
   (struct frame_info *, TuiLocatorElementPtr);
 extern void tuiUpdateLocatorDisplay (struct frame_info *);

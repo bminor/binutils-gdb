@@ -106,6 +106,19 @@ extern void tui_enable (void);
 /* Leave the tui mode.  */
 extern void tui_disable (void);
 
+extern void tui_initialize_io (void);
+
+extern void tui_initialize_readline (void);
+
+extern int tui_active;
+
+extern void tui_install_hooks (void);
+extern void tui_remove_hooks (void);
+
+extern void tui_show_source (const char *file, int line);
+
+extern struct ui_out *tui_out_new (struct ui_file *stream);
+
 /* tuiDataWin.c */
 extern void tui_vCheckDataValues (va_list);
 

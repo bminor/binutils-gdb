@@ -126,7 +126,7 @@ tuiSetLocatorInfo (char *fname, char *procname, int lineNo,
    **        Update only the filename portion of the locator.
  */
 void
-tuiUpdateLocatorFilename (char *fileName)
+tuiUpdateLocatorFilename (const char *fileName)
 {
   TuiGenWinInfoPtr locator = locatorWinInfoPtr ();
 

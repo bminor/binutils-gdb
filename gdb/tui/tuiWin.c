@@ -317,7 +317,7 @@ Usage: w <#lines>\n");
   /* Define the tui control variables.  */
   c = add_set_enum_cmd
     ("tui-border-kind", class_tui,
-     tui_border_kind_enums, (char*) &tui_border_kind,
+     tui_border_kind_enums, &tui_border_kind,
      "Set the kind of border for TUI windows.\n"
      "This variable controls the border of TUI windows:\n"
      "space           use a white space\n"
@@ -328,7 +328,7 @@ Usage: w <#lines>\n");
 
   c = add_set_enum_cmd
     ("tui-border-mode", class_tui,
-     tui_border_mode_enums, (char*) &tui_border_mode,
+     tui_border_mode_enums, &tui_border_mode,
      "Set the attribute mode to use for the TUI window borders.\n"
      "This variable controls the attributes to use for the window borders:\n"
      "normal          normal display\n"
@@ -343,7 +343,7 @@ Usage: w <#lines>\n");
 
   c = add_set_enum_cmd
     ("tui-active-border-mode", class_tui,
-     tui_border_mode_enums, (char*) &tui_active_border_mode,
+     tui_border_mode_enums, &tui_active_border_mode,
      "Set the attribute mode to use for the active TUI window border.\n"
      "This variable controls the attributes to use for the active window border:\n"
      "normal          normal display\n"
