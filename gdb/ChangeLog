@@ -1,3 +1,8 @@
+2001-03-06  Stan Shebs  <shebs@apple.com>
+
+	* MAINTAINERS: Remove self from specific maintenance domains
+	(macos, gdbserver, documentation, testsuite).
+
 2001-03-06  Kevin Buettner  <kevinb@redhat.com>
 
 	* 29k-share/udi/udip2soc.c, Makefile.in, a29k-tdep.c,

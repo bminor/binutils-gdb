@@ -183,7 +183,6 @@ GNU/Linux PPC native	Kevin Buettner		kevinb@cygnus.com
 FreeBSD native & host	Mark Kettenis		kettenis@gnu.org
 			David O'Brien		obrien@freebsd.org
 hurd native		Mark Kettenis		kettenis@gnu.org
-macos host & native	Stan Shebs		shebs@apple.com
 hpux, hp pa native	Jeff Law		law@cygnus.com
 NetBSD native & host	J.T. Conklin		jtc@redback.com
 SCO/Unixware		Nick Duffek		nsd@cygnus.com
@@ -251,11 +250,8 @@ sds protocol		Fernando Nasser		fnasser@cygnus.com
 			Jim Ingham		jingham@apple.com
 rdi/adp protocol	Fernando Nasser		fnasser@cygnus.com
 			Jim Ingham		jingham@apple.com
-gdbserver		Stan Shebs		shebs@apple.com
-documentation	 	Stan Shebs		shebs@apple.com
-			Eli Zaretskii		eliz@gnu.org
-testsuite	 	Stan Shebs		shebs@apple.com
-			Fernando Nasser		fnasser@cygnus.com
+documentation		Eli Zaretskii		eliz@gnu.org
+testsuite		Fernando Nasser		fnasser@cygnus.com
   hp tests (gdb.hp)	Jimmy Guo		guo@cup.hp.com
   Java tests (gdb.java)	Anthony Green 		green@cygnus.com
 Kernel Object Display	Fernando Nasser		fnasser@cygnus.com
