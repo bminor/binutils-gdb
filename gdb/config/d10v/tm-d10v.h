@@ -19,14 +19,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Contributed by Martin Hunt, hunt@cygnus.com */
 
-
 #define GDB_TARGET_IS_D10V
-
 
 /* Define the bit, byte, and word ordering of the machine.  */
 
 #define TARGET_BYTE_ORDER	BIG_ENDIAN
-
 
 /* Offset from address of function to start of its code.
    Zero on most machines.  */
@@ -40,21 +37,12 @@ extern CORE_ADDR d10v_skip_prologue ();
 #define SKIP_PROLOGUE(ip) \
     {(ip) = d10v_skip_prologue(ip);}
 
-
-/* Immediately after a function call, return the saved pc.
-   Can't always go through the frames for this because on some machines
-   the new frame is not set up until the new function executes
-   some instructions. 
-
-   The return address is the value saved in the PR register + 4  */
-
 #define SAVED_PC_AFTER_CALL(frame) (read_register(LR_REGNUM) << 2 )
 
 /* Stack grows downward.  */
-
 #define INNER_THAN <
 
-    /* for a breakpoint, use "dbt || nop" */
+/* for a breakpoint, use "dbt || nop" */
 #define BREAKPOINT {0x2f, 0x90, 0x5e, 0x00} 
 
 /* If your kernel resets the pc after the trap happens you may need to
@@ -127,13 +115,6 @@ extern CORE_ADDR d10v_skip_prologue ();
 #define STORE_STRUCT_RETURN(ADDR, SP) \
     { write_register (2, (ADDR));  }
 
-/* Extract from an array REGBUF containing the (raw) register state
-   a function return value of type TYPE, and copy that, in virtual format,
-   into VALBUF.  */
-
-#define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
-  memcpy (VALBUF, (char *)(REGBUF), TYPE_LENGTH(TYPE))
-
 
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format.  
@@ -157,6 +138,7 @@ extern CORE_ADDR d10v_skip_prologue ();
 
 #define EXTRA_FRAME_INFO \
     CORE_ADDR return_pc; \
+    int dummy; \
     int size;
 
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fi) \
@@ -195,32 +177,71 @@ extern CORE_ADDR d10v_skip_prologue ();
    d10v_frame_find_saved_regs(frame_info, &(frame_saved_regs))
 
 #define NAMES_HAVE_UNDERSCORE
+      
+/* 
+DUMMY FRAMES.  Need these to support inferior function calls.  They work
+like this on D10V:  First we set a breakpoint at 0 or __start.  Then we push
+all the registers onto the stack.  Then put the function arguments in the proper
+registers and set r13 to our breakpoint address.  Finally call the function directly.
+When it hits the breakpoint, clear the break point and pop the old register contents
+off the stack.
+*/
 
-typedef unsigned short INSN_WORD;
+#define CALL_DUMMY		{ }  
+#define PUSH_DUMMY_FRAME
+#define CALL_DUMMY_START_OFFSET	0	
+#define CALL_DUMMY_LOCATION	AT_ENTRY_POINT
+#define CALL_DUMMY_BREAKPOINT_OFFSET (0)
 
-#define ADDR_BITS_REMOVE(addr) ((addr))
+extern CORE_ADDR d10v_call_dummy_address PARAMS ((void));
+#define CALL_DUMMY_ADDRESS() d10v_call_dummy_address()
 
-#define CALL_DUMMY_LENGTH 10
+#define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p) \
+d10v_fix_call_dummy (dummyname, pc, fun, nargs, args, type, gcc_p)
+
+#define PC_IN_CALL_DUMMY(pc, sp, frame_address)			\
+  ((pc>>2) >= CALL_DUMMY_ADDRESS ()				\
+   && (pc>>2) <= (CALL_DUMMY_ADDRESS () + DECR_PC_AFTER_BREAK))
+
+#ifdef __STDC__		/* Forward decls for prototypes */
+struct type;
+struct value;
+#endif
+extern void d10v_fix_call_dummy PARAMS ((char *, CORE_ADDR, CORE_ADDR,
+					   int, struct value **,
+					   struct type *, int));
+#define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
+    sp = d10v_push_arguments((nargs), (args), (sp), (struct_return), (struct_addr))
+extern CORE_ADDR d10v_push_arguments PARAMS ((int, struct value **, CORE_ADDR, int, CORE_ADDR));
+
+
+/* Extract from an array REGBUF containing the (raw) register state
+   a function return value of type TYPE, and copy that, in virtual format,
+   into VALBUF.  */
+
+#define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
+d10v_extract_return_value(TYPE, REGBUF, VALBUF)
+  extern void
+d10v_extract_return_value PARAMS ((struct type *, char *, char *));
+
 
 /* Discard from the stack the innermost frame,
    restoring all saved registers.  */
-
 #define POP_FRAME d10v_pop_frame();
 
 #define REGISTER_SIZE 2
 
-#  ifdef CC_HAS_LONG_LONG
-#    define LONGEST long long
-#  else
-#    define LONGEST long
-#  endif 
+#ifdef CC_HAS_LONG_LONG
+#  define LONGEST long long
+#else
+#  define LONGEST long
+#endif 
 
 void d10v_write_register_pid PARAMS (( int regno, LONGEST val, int pid));
 CORE_ADDR d10v_read_register_pid PARAMS ((int regno, int pid));
 
 #define TARGET_READ_PC(pid)		d10v_read_register_pid (PC_REGNUM, pid)
 #define TARGET_WRITE_PC(val,pid)	d10v_write_register_pid (PC_REGNUM, val, pid)
-
 
 /* Number of bits in the appropriate type */
 #define TARGET_INT_BIT (2 * TARGET_CHAR_BIT)
