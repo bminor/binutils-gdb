@@ -22,7 +22,7 @@ Do-first:
 Things-to-keep:
 
 ChangeLog
-Do-last:
+
 mh-a68bsd
 mh-aix
 mh-apollo68
@@ -43,6 +43,6 @@ mt-os68k
 mt-vxworks68
 mt-vxworks960
 
-echo Done in `pwd`.
+Do-last:
 
 # End of file.
