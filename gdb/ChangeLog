@@ -1,3 +1,9 @@
+2002-03-29  Jim Blandy  <jimb@redhat.com>
+
+	* cli/cli-dump.c (_initialize_cli_dump): Older GCC's tolerate
+	unescaped newlines in string literals, but newer ones don't.  So
+	escape them.
+
 2002-03-26  Michael Snyder  <msnyder@redhat.com>
 	    Andrew Cagney <cagney@redhat.com>
 

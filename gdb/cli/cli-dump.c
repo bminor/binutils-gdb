@@ -816,7 +816,7 @@ to the specified FILE in raw target ordered bytes.",
 	       "Restore the contents of FILE to target memory.\n\
 Arguments are FILE OFFSET START END where all except FILE are optional.\n\
 OFFSET will be added to the base address of the file (default zero).\n\
-If START and END are given, only the file contents within that range
+If START and END are given, only the file contents within that range\n\
 (file relative) will be restored to target memory.");
   c->completer = filename_completer;
   /* FIXME: completers for other commands. */
