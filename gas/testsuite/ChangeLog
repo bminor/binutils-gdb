@@ -1,3 +1,9 @@
+2005-03-10  Jeff Baker  <jbaker@qnx.com>
+	    Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/ppc/booke.s: Add new m[t,f]sprg testcases.
+	* gas/ppc/booke.d: Likewise.
+
 2005-03-09  Richard Sandiford  <rsandifo@redhat.com>
 
 	* gas/mips/vr4130.[sd]: New test.
@@ -93,12 +99,11 @@
 
 2005-03-03  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
 
-	* gas/arc/extensions.s: Add tests for extcoreregister
-	* gas/arc/extensions.d: Likewise.  
-	* gas/arc/warn.s: Warnings for readonly core registers
-	accessed .
-	* gas/arc/warn.d:Likewise.
-	* testsuite/gas/arc/arc.exp:Run extensions testcase.
+	* gas/arc/extensions.s: Add tests for extcoreregister.
+	* gas/arc/extensions.d: Likewise.
+	* gas/arc/warn.s: Warnings for readonly core registers accessed.
+	* gas/arc/warn.d: Likewise.
+	* testsuite/gas/arc/arc.exp: Run extensions testcase.
 
 2005-03-03  Richard Sandiford  <rsandifo@redhat.com>
 
@@ -106,8 +111,8 @@
 
 2005-03-03  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
 
-	* gas/arc/ld.s:Add checks for short immediates with ld
-	* gas/arc/ld.d:Likewise. 
+	* gas/arc/ld.s: Add checks for short immediates with ld.
+	* gas/arc/ld.d: Likewise.
 
 2005-03-02  Daniel Jacobowitz  <dan@codesourcery.com>
 

@@ -84,6 +84,8 @@ static unsigned long insert_sh6 (unsigned long, long, int, const char **);
 static long extract_sh6 (unsigned long, int, int *);
 static unsigned long insert_spr (unsigned long, long, int, const char **);
 static long extract_spr (unsigned long, int, int *);
+static unsigned long insert_sprg (unsigned long, long, int, const char **);
+static long extract_sprg (unsigned long, int, int *);
 static unsigned long insert_tbr (unsigned long, long, int, const char **);
 static long extract_tbr (unsigned long, int, int *);
 static unsigned long insert_ev2 (unsigned long, long, int, const char **);
@@ -465,8 +467,7 @@ const struct powerpc_operand powerpc_operands[] =
 
   /* The SPRG register number in an XFX form m[ft]sprg instruction.  */
 #define SPRG SPRBAT + 1
-#define SPRG_MASK (0x3 << 16)
-  { 2, 16, NULL, NULL, 0 },
+  { 5, 16, insert_sprg, extract_sprg, 0 },
 
   /* The SR field in an X form instruction.  */
 #define SR SPRG + 1
@@ -1397,6 +1398,47 @@ extract_spr (unsigned long insn,
   return ((insn >> 16) & 0x1f) | ((insn >> 6) & 0x3e0);
 }
 
+/* Some dialects have 8 SPRG registers instead of the standard 4.  */
+
+static unsigned long
+insert_sprg (unsigned long insn,
+	     long value,
+	     int dialect,
+	     const char **errmsg)
+{
+  /* This check uses PPC_OPCODE_403 because PPC405 is later defined
+     as a synonym.  If ever a 405 specific dialect is added this
+     check should use that instead.  */
+  if (value > 7
+      || (value > 3
+	  && (dialect & (PPC_OPCODE_BOOKE | PPC_OPCODE_403)) == 0))
+    *errmsg = _("invalid sprg number");
+
+  /* If this is mfsprg4..7 then use spr 260..263 which can be read in
+     user mode.  Anything else must use spr 272..279.  */
+  if (value <= 3 || (insn & 0x100) != 0)
+    value |= 0x10;
+
+  return insn | ((value & 0x17) << 16);
+}
+
+static long
+extract_sprg (unsigned long insn,
+	      int dialect,
+	      int *invalid)
+{
+  unsigned long val = (insn >> 16) & 0x1f;
+
+  /* mfsprg can use 260..263 and 272..279.  mtsprg only uses spr 272..279
+     If not BOOKE or 405, then both use only 272..275.  */
+  if (val <= 3
+      || (val < 0x10 && (insn & 0x100) != 0)
+      || (val - 0x10 > 3
+	  && (dialect & (PPC_OPCODE_BOOKE | PPC_OPCODE_403)) == 0))
+    *invalid = 1;
+  return val & 7;
+}
+
 /* The TBR field in an XFX instruction.  This is just like SPR, but it
    is optional.  When TBR is omitted, it must be inserted as 268 (the
    magic number of the TB register).  These functions treat 0
@@ -1705,7 +1747,7 @@ extract_tbr (unsigned long insn,
 
 /* An XFX form instruction with the SPR field filled in except for the
    SPRG field.  */
-#define XSPRG_MASK (XSPR_MASK &~ SPRG_MASK)
+#define XSPRG_MASK (XSPR_MASK & ~(0x17 << 16))
 
 /* An X form instruction with everything filled in except the E field.  */
 #define XE_MASK (0xffff7fff)
@@ -3677,25 +3719,21 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "mfbar",      XSPR(31,339,159),  XSPR_MASK, PPC860,	{ RT } },
 { "mfvrsave",   XSPR(31,339,256),  XSPR_MASK, PPCVEC,	{ RT } },
 { "mfusprg0",   XSPR(31,339,256),  XSPR_MASK, BOOKE,    { RT } },
-{ "mfsprg4",    XSPR(31,339,260),  XSPR_MASK, PPC405,	{ RT } },
-{ "mfsprg4",    XSPR(31,339,260),  XSPR_MASK, BOOKE,	{ RT } },
-{ "mfsprg5",    XSPR(31,339,261),  XSPR_MASK, PPC405,	{ RT } },
-{ "mfsprg5",    XSPR(31,339,261),  XSPR_MASK, BOOKE,	{ RT } },
-{ "mfsprg6",    XSPR(31,339,262),  XSPR_MASK, PPC405,	{ RT } },
-{ "mfsprg6",    XSPR(31,339,262),  XSPR_MASK, BOOKE,	{ RT } },
-{ "mfsprg7",    XSPR(31,339,263),  XSPR_MASK, PPC405,	{ RT } },
-{ "mfsprg7",    XSPR(31,339,263),  XSPR_MASK, BOOKE,	{ RT } },
 { "mftb",       X(31,371),	   X_MASK,    CLASSIC,	{ RT, TBR } },
 { "mftb",       XSPR(31,339,268),  XSPR_MASK, BOOKE,    { RT } },
 { "mftbl",      XSPR(31,371,268),  XSPR_MASK, CLASSIC,	{ RT } },
 { "mftbl",      XSPR(31,339,268),  XSPR_MASK, BOOKE,    { RT } },
 { "mftbu",      XSPR(31,371,269),  XSPR_MASK, CLASSIC,	{ RT } },
 { "mftbu",      XSPR(31,339,269),  XSPR_MASK, BOOKE,    { RT } },
-{ "mfsprg",     XSPR(31,339,272),  XSPRG_MASK, PPC,	{ RT, SPRG } },
+{ "mfsprg",     XSPR(31,339,256),  XSPRG_MASK, PPC,	{ RT, SPRG } },
 { "mfsprg0",    XSPR(31,339,272),  XSPR_MASK, PPC,	{ RT } },
 { "mfsprg1",    XSPR(31,339,273),  XSPR_MASK, PPC,	{ RT } },
 { "mfsprg2",    XSPR(31,339,274),  XSPR_MASK, PPC,	{ RT } },
 { "mfsprg3",    XSPR(31,339,275),  XSPR_MASK, PPC,	{ RT } },
+{ "mfsprg4",    XSPR(31,339,260),  XSPR_MASK, PPC405 | BOOKE,	{ RT } },
+{ "mfsprg5",    XSPR(31,339,261),  XSPR_MASK, PPC405 | BOOKE,	{ RT } },
+{ "mfsprg6",    XSPR(31,339,262),  XSPR_MASK, PPC405 | BOOKE,	{ RT } },
+{ "mfsprg7",    XSPR(31,339,263),  XSPR_MASK, PPC405 | BOOKE,	{ RT } },
 { "mfasr",      XSPR(31,339,280),  XSPR_MASK, PPC64,	{ RT } },
 { "mfear",      XSPR(31,339,282),  XSPR_MASK, PPC,	{ RT } },
 { "mfpir",      XSPR(31,339,286),  XSPR_MASK, BOOKE,    { RT } },
@@ -3998,7 +4036,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "mtbar",     XSPR(31,467,159),  XSPR_MASK, PPC860,	{ RS } },
 { "mtvrsave",  XSPR(31,467,256),  XSPR_MASK, PPCVEC,	{ RS } },
 { "mtusprg0",  XSPR(31,467,256),  XSPR_MASK, BOOKE,     { RS } },
-{ "mtsprg",    XSPR(31,467,272),  XSPRG_MASK,PPC,	{ SPRG, RS } },
+{ "mtsprg",    XSPR(31,467,256),  XSPRG_MASK,PPC,	{ SPRG, RS } },
 { "mtsprg0",   XSPR(31,467,272),  XSPR_MASK, PPC,	{ RS } },
 { "mtsprg1",   XSPR(31,467,273),  XSPR_MASK, PPC,	{ RS } },
 { "mtsprg2",   XSPR(31,467,274),  XSPR_MASK, PPC,	{ RS } },
