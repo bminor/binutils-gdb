@@ -248,14 +248,7 @@ add_to_thread_list (bfd *abfd, asection *asect, PTR reg_sect_arg)
 
   if (reg_sect != NULL
       && asect->filepos == reg_sect->filepos)	/* Did we find .reg? */
-#ifdef pid_to_ptid
-    /* Needed to prevent regressions in ptid conversion phase 1.  This
-       bit of code will be deleted in favor of the #else branch in
-       phase 3.  */
-    inferior_ptid = thread_id;	/* Yes, make it current */
-#else
     inferior_ptid = pid_to_ptid (thread_id);	/* Yes, make it current */
-#endif
 }
 
 /* This routine opens and sets up the core file bfd.  */
@@ -413,16 +406,8 @@ get_core_register_section (char *name,
   bfd_size_type size;
   char *contents;
 
-#ifdef pid_to_ptid
-    /* Needed to prevent regressions in ptid conversion phase 1.  This
-       bit of code will be deleted in favor of the #else branch in
-       phase 3.  */
-  if (inferior_ptid)
-    sprintf (section_name, "%s/%d", name, inferior_ptid);
-#else
   if (PIDGET (inferior_ptid))
     sprintf (section_name, "%s/%d", name, PIDGET (inferior_ptid));
-#endif
   else
     strcpy (section_name, name);
 

@@ -51,6 +51,33 @@ extern void write_inferior_status_register (struct inferior_status
 					    *inf_status, int regno,
 					    LONGEST val);
 
+/* The -1 ptid, often used to indicate either an error condition
+   or a "don't care" condition, i.e, "run all threads."  */
+extern ptid_t minus_one_ptid;
+
+/* The null or zero ptid, often used to indicate no process. */
+extern ptid_t null_ptid;
+
+/* Attempt to find and return an existing ptid with the given PID, LWP,
+   and TID components.  If none exists, create a new one and return
+   that.  */
+ptid_t ptid_build (int pid, long lwp, long tid);
+
+/* Find/Create a ptid from just a pid. */
+ptid_t pid_to_ptid (int pid);
+
+/* Fetch the pid (process id) component from a ptid. */
+int ptid_get_pid (ptid_t ptid);
+
+/* Fetch the lwp (lightweight process) component from a ptid. */
+long ptid_get_lwp (ptid_t ptid);
+
+/* Fetch the tid (thread id) component from a ptid. */
+long ptid_get_tid (ptid_t ptid);
+
+/* Compare two ptids to see if they are equal */
+extern int ptid_equal (ptid_t p1, ptid_t p2);
+
 /* Save value of inferior_ptid so that it may be restored by
    a later call to do_cleanups().  Returns the struct cleanup
    pointer needed for later doing the cleanup.  */

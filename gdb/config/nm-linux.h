@@ -49,14 +49,6 @@ extern int linuxthreads_prepare_to_proceed (int step);
 /* Defined to make stepping-over-breakpoints be thread-atomic.  */
 #define USE_THREAD_STEP_NEEDED 1
 
-/* Macros to extract process id and thread id from a composite pid/tid.
-   Allocate lower 19 bits for process id, next 12 bits for thread id, and
-   one bit for a flag to indicate a user thread vs. a kernel thread.  */
-#define PIDGET0(PID)           (((PID) & 0xffff))
-#define PIDGET(PID)           ((PIDGET0 (PID) == 0xffff) ? -1 : PIDGET0 (PID))
-#define TIDGET(PID)           (((PID) & 0x7fffffff) >> 16)
-#define MERGEPID(PID, TID)    (((PID) & 0xffff) | ((TID) << 16))
-
 /* Use elf_gregset_t and elf_fpregset_t, rather than
    gregset_t and fpregset_t.  */
 

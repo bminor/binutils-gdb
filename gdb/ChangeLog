@@ -1,3 +1,70 @@
+2001-05-14  Kevin Buettner  <kevinb@redhat.com>
+
+	* inferior.h (null_ptid, minus_one_ptid): New variable declarations.
+	(ptid_build, pid_to_ptid, ptid_get_pid, ptid_get_lwp)
+	(ptid_get_tid, ptid_equal): New function declarations.
+	* infrun.c (null_ptid, minus_one_ptid): New variables.
+	(ptid_build, pid_to_ptid, ptid_get_pid, ptid_get_lwp)
+	(ptid_get_tid, ptid_equal): New functions.
+	(_initialize_infrun): Initialize null_ptid, minus_one_ptid,
+	inferior_ptid, and target_last_wait_ptid.
+
+	* defs.h (ptid_t): Redefine to be a struct rather than an int.
+	(pid_to_ptid, null_ptid, ptid_equal): Delete these macros.
+	(PIDGET, TIDGET, MERGEPID): Redefine these macros using the
+	new ptid accessors and constructor.
+
+	* config/i386/tm-i386v42mp.h (PIDGET, TIDGET, LIDGET, MERGEPID,
+	MKLID, MKTID, ISTID): Provide new definitions for these macros.
+	The old macros are retained, but disabled via #if 0 in order
+	to aid in future restructuring.  See FIXME.
+
+	* arm-linux-nat.c (PIDGET, TIDGET): Delete macro definitions.
+	* i386-linux-nat.c (PIDGET, TIDGET): Likewise.
+	* infptrace.c (PIDGET, TIDGET): Likewise.
+	* lin-lwp.c (PIDGET0, PIDGET, TIDGET, MERGEPID): Likewise.
+	* lin-thread.c (PIDGET0, PIDGET, TIDGET, MERGEPID): Likewise.
+	* proc-service.c (MERGEPID): Likewise.
+	* procfs.c (PIDGET, TIDGET, MERGEPID): Likewise.
+	* thread-db.c (PIDGET0, PIDGET, TIDGET, MERGEPID): Likewise.
+	* config/nm-linux.h (PIDGET0, PIDGET, TIDGET, MERGEPID): Likewise.
+	* config/i386/tm-i386sol2.h (PIDGET0, PIDGET, TIDGET, MERGEPID):
+	Likewise.
+	* config/sparc/tm-sun4sol2.h (PIDGET0, PIDGET, TIDGET, MERGEPID):
+	Likewise.
+
+	* lin-lwp.c (THREAD_FLAG): Delete macro definition.
+	(GET_LWP): Redefine in terms of ptid_get_lwp().
+	(GET_PID): Redefine in terms of ptid_get_pid().
+	(is_lwp): Redefine without the need for THREAD_FLAG.
+	(BUILD_LWP): Redefine in terms of ptid_build().
+	* lin-thread.c (THREAD_FLAG): Delete macro definition.
+	(GET_LWP): Redefine in terms of ptid_get_lwp().
+	(GET_PID): Redefine in terms of ptid_get_pid().
+	(GET_THREAD): Redefine in terms of ptid_get_tid().
+	(BUILD_THREAD, BUILD_LWP): Redefine in terms of ptid_build().
+	(is_lwp, is_thread): Redefine.
+	(linux_child_wait, check_all_signal_numbers)
+	(linuxthreads_discard_global_state, attach_thread): Declare these
+	functions to squash warnings about missing declarations.
+	* sol-thread.c (THREAD_FLAG): Delete macro definition.
+	(GET_PID): Redefine in terms of ptid_get_pid().
+	(GET_LWP): Redefine in terms of ptid_get_lwp().
+	(GET_THREAD): Redefine in terms of ptid_get_tid().
+	(BUILD_THREAD, BUILD_LWP): Redefine in terms of ptid_build().
+	(is_lwp, is_thread): Redefine.
+	* thread-db.c (THREAD_FLAG): Delete macro definition.
+	(GET_PID): Redefine in terms of ptid_get_pid().
+	(GET_LWP): Redefine in terms of ptid_get_lwp().
+	(GET_THREAD): Redefine in terms of ptid_get_tid().
+	(BUILD_THREAD, BUILD_LWP): Redefine in terms of ptid_build().
+	(is_lwp, is_thread): Redefine.
+
+	* corelow.c (add_to_thread_list, get_core_register_section):
+	Eliminate hacks needed to prevent regressions when inferior_ptid
+	wasn't wide enough to hold the core file thread id in the pid
+	component of inferior_ptid.
+
 2001-05-14  Michael Snyder  <msnyder@redhat.com>
 
 	* remote.c (hex2bin): 	Make first argument const.

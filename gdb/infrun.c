@@ -4192,7 +4192,67 @@ discard_inferior_status (struct inferior_status *inf_status)
   free_inferior_status (inf_status);
 }
 
-/* Helper function for save_inferior_ptid */
+/* Oft used ptids */
+ptid_t null_ptid;
+ptid_t minus_one_ptid;
+
+/* Create a ptid given the necessary PID, LWP, and TID components.  */
+   
+ptid_t
+ptid_build (int pid, long lwp, long tid)
+{
+  ptid_t ptid;
+
+  ptid.pid = pid;
+  ptid.lwp = lwp;
+  ptid.tid = tid;
+  return ptid;
+}
+
+/* Create a ptid from just a pid.  */
+
+ptid_t
+pid_to_ptid (int pid)
+{
+  return ptid_build (pid, 0, 0);
+}
+
+/* Fetch the pid (process id) component from a ptid.  */
+
+int
+ptid_get_pid (ptid_t ptid)
+{
+  return ptid.pid;
+}
+
+/* Fetch the lwp (lightweight process) component from a ptid.  */
+
+long
+ptid_get_lwp (ptid_t ptid)
+{
+  return ptid.lwp;
+}
+
+/* Fetch the tid (thread id) component from a ptid.  */
+
+long
+ptid_get_tid (ptid_t ptid)
+{
+  return ptid.tid;
+}
+
+/* ptid_equal() is used to test equality of two ptids.  */
+
+int
+ptid_equal (ptid_t ptid1, ptid_t ptid2)
+{
+  return (ptid1.pid == ptid2.pid && ptid1.lwp == ptid2.lwp
+          && ptid1.tid == ptid2.tid);
+}
+
+/* restore_inferior_ptid() will be used by the cleanup machinery
+   to restore the inferior_ptid value saved in a call to
+   save_inferior_ptid().  */
 
 static void
 restore_inferior_ptid (void *arg)
@@ -4400,4 +4460,10 @@ instruction of that function. Otherwise, the function is skipped and\n\
 the step command stops at a different source line.",
 			&setlist);
   add_show_from_set (c, &showlist);
+
+  /* ptid initializations */
+  null_ptid = ptid_build (0, 0, 0);
+  minus_one_ptid = ptid_build (-1, 0, 0);
+  inferior_ptid = null_ptid;
+  target_last_wait_ptid = minus_one_ptid;
 }

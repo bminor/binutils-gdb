@@ -125,21 +125,25 @@
 /* Prototypes for supply_gregset etc. */
 #include "gregset.h"
 
-#ifndef TIDGET
-#define TIDGET(PID)		(((PID) & 0x7fffffff) >> 16)
-#define PIDGET0(PID)		(((PID) & 0xffff))
-#define PIDGET(PID)		((PIDGET0 (PID) == 0xffff) ? -1 : PIDGET0 (PID))
-#define MERGEPID(PID, TID)	(((PID) & 0xffff) | ((TID) << 16))
-#endif
-
 /* Macros for superimposing PID and TID into inferior_ptid.  */
-#define THREAD_FLAG		0x80000000
-#define is_thread(ARG)		(((ARG) & THREAD_FLAG) != 0)
-#define is_lwp(ARG)		(((ARG) & THREAD_FLAG) == 0)
-#define GET_LWP(PID)		TIDGET (PID)
-#define GET_THREAD(PID)		TIDGET (PID)
-#define BUILD_LWP(TID, PID)	MERGEPID (PID, TID)
-#define BUILD_THREAD(TID, PID)	(MERGEPID (PID, TID) | THREAD_FLAG)
+#define GET_PID(ptid)		ptid_get_pid (ptid)
+#define GET_LWP(ptid)		ptid_get_lwp (ptid)
+#define GET_THREAD(ptid)	ptid_get_tid (ptid)
+
+#define is_lwp(ptid)		(GET_LWP (ptid) != 0)
+#define is_thread(ptid)		(GET_THREAD (ptid) != 0)
+
+#define BUILD_LWP(lwp, pid)	ptid_build (pid, lwp, 0)
+#define BUILD_THREAD(tid, pid)	ptid_build (pid, 0, tid)
+
+/* From linux-thread.c.  FIXME: These should go in a separate header
+   file, but I'm told that the life expectancy of lin-thread.c and
+   linux-thread.c isn't very long... */
+
+extern int linux_child_wait (int, int *, int *);
+extern void check_all_signal_numbers (void);
+extern void linuxthreads_discard_global_state (void);
+extern void attach_thread (int);
 
 /*
  * target_beneath is a pointer to the target_ops underlying this one.

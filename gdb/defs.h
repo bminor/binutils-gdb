@@ -844,36 +844,37 @@ enum val_prettyprint
     Val_pretty_default
   };
 
-/* A collection of the various "ids" necessary for identifying
-   the inferior.  This consists of the process id (pid, thread
-   id (tid), and other fields necessary for uniquely identifying
-   the inferior process/thread being debugged.
+/* The ptid struct is a collection of the various "ids" necessary
+   for identifying the inferior.  This consists of the process id
+   (pid), thread id (tid), and other fields necessary for uniquely
+   identifying the inferior process/thread being debugged.  When
+   manipulating ptids, the constructors, accessors, and predicate
+   declared in inferior.h should be used.  These are as follows:
 
-   The present typedef is obviously quite naive with respect to
-   the magnitudes that real life pids and tids can take on and
-   will be replaced with something more robust shortly.  */
+      ptid_build	- Make a new ptid from a pid, lwp, and tid.
+      pid_to_ptid	- Make a new ptid from just a pid.
+      ptid_get_pid	- Fetch the pid component of a ptid.
+      ptid_get_lwp	- Fetch the lwp component of a ptid.
+      ptid_get_tid	- Fetch the tid component of a ptid.
+      ptid_equal	- Test to see if two ptids are equal.
 
-typedef int ptid_t;
+   Please do NOT access the struct ptid members directly (except, of
+   course, in the implementation of the above ptid manipulation
+   functions).  */
 
-/* Convert a pid to a ptid_t.  This macro is temporary and will
-   be replaced shortly.  */
+struct ptid
+  {
+    /* Process id */
+    int pid;
 
-#define pid_to_ptid(PID) ((ptid_t) MERGEPID ((PID),0))
+    /* Lightweight process id */
+    long lwp;
 
-/* Define a value for the null (or zero) pid.  This macro is temporary
-   and will go away shortly.  */
+    /* Thread id */
+    long tid;
+  };
 
-#define null_ptid (pid_to_ptid (0))
-
-/* Define a value for the -1 pid.  This macro is temporary and will go
-   away shortly.  */
-
-#define minus_one_ptid (pid_to_ptid (-1))
-
-/* Define a ptid comparison operator.  This macro is temporary and will
-   be replaced with a real function shortly.  */
-
-#define ptid_equal(PTID1,PTID2) ((PTID1) == (PTID2))
+typedef struct ptid ptid_t;
 
 
 
@@ -1391,15 +1392,16 @@ extern int use_windows;
 #define ROOTED_P(X) (SLASH_P((X)[0]))
 #endif
 
-/* On some systems, PIDGET is defined to extract the inferior pid from
-   an internal pid that has the thread id and pid in seperate bit
-   fields.  If not defined, then just use the entire internal pid as
-   the actual pid. */
+/* Provide default definitions of PIDGET, TIDGET, and MERGEPID.
+   The name ``TIDGET'' is a historical accident.  Many uses of TIDGET
+   in the code actually refer to a lightweight process id, i.e,
+   something that can be considered a process id in its own right for
+   certain purposes.  */
 
 #ifndef PIDGET
-#define PIDGET(PID) (PID)
-#define TIDGET(PID) 0
-#define MERGEPID(PID, TID) (PID)
+#define PIDGET(PTID) (ptid_get_pid (PTID))
+#define TIDGET(PTID) (ptid_get_lwp (PTID))
+#define MERGEPID(PID, TID) ptid_build (PID, TID, 0)
 #endif
 
 /* Define well known filenos if the system does not define them.  */

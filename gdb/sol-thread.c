@@ -111,14 +111,15 @@ static void init_sol_core_ops (void);
 /* Default definitions: These must be defined in tm.h 
    if they are to be shared with a process module such as procfs.  */
 
-#define THREAD_FLAG		0x80000000
-#define is_thread(ARG)		(((ARG) & THREAD_FLAG) != 0)
-#define is_lwp(ARG)		(((ARG) & THREAD_FLAG) == 0)
-#define GET_LWP(PID)		TIDGET (PID)
-#define GET_THREAD(PID)		TIDGET (PID)
-#define BUILD_LWP(TID, PID)	MERGEPID (PID, TID)
+#define GET_PID(ptid)		ptid_get_pid (ptid)
+#define GET_LWP(ptid)		ptid_get_lwp (ptid)
+#define GET_THREAD(ptid)	ptid_get_tid (ptid)
 
-#define BUILD_THREAD(TID, PID)	(MERGEPID (PID, TID) | THREAD_FLAG)
+#define is_lwp(ptid)		(GET_LWP (ptid) != 0)
+#define is_thread(ptid)		(GET_THREAD (ptid) != 0)
+
+#define BUILD_LWP(lwp, pid)	ptid_build (pid, lwp, 0)
+#define BUILD_THREAD(tid, pid)	ptid_build (pid, 0, tid)
 
 /* Pointers to routines from lithread_db resolved by dlopen() */
 

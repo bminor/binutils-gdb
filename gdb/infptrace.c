@@ -110,22 +110,6 @@ static void fetch_register (int);
 static void store_register (int);
 #endif
 
-/*
- * Some systems (Linux) may have threads implemented as pseudo-processes, 
- * in which case we may be tracing more than one process at a time.
- * In that case, inferior_pid will contain the main process ID and the 
- * individual thread (process) id mashed together.  These macros are 
- * used to separate them out.  The definitions may be overridden in tm.h
- *
- * NOTE: default definitions here are for systems with no threads.
- * Useful definitions MUST be provided in tm.h
- */
-
-#if !defined (PIDGET)	/* Default definition for PIDGET/TIDGET.  */
-#define PIDGET(PID)	PID
-#define TIDGET(PID)	0
-#endif
-
 void _initialize_kernel_u_addr (void);
 void _initialize_infptrace (void);
 

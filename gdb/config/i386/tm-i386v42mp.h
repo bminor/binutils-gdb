@@ -30,6 +30,7 @@
 
 #define UNIXWARE
 
+#if 0
 /* The following macros extract process and lwp/thread ids from a
    composite id.
 
@@ -43,8 +44,7 @@
 #define PIDBITS 16
 
 /* Return the process id stored in composite PID. */
-#define PIDGET0(PID)            (((PID) & ((1 << PIDBITS) - 1)))
-#define PIDGET(PID)             ((PIDGET0 (PID) == ((1 << PIDBITS) -1)) ? -1 : PIDGET0 (PID))
+#define PIDGET(PID)             (((PID) & ((1 << PIDBITS) - 1)))
 
 /* Return the thread or lwp id stored in composite PID. */
 #define TIDGET(PID)             (((PID) & 0x3fffffff) >> PIDBITS)
@@ -61,5 +61,33 @@
 
 /* Return whether PID contains a user-space thread id. */
 #define ISTID(PID)              ((PID) & 0x40000000)
+#endif
+
+/* New definitions of the ptid stuff.  Due to the way the
+   code is structured in uw-thread.c, I'm overloading the thread id
+   and lwp id onto the lwp field.  The tid field is used to indicate
+   whether the lwp is a tid or not.  
+   
+   FIXME: Check that core file support is not broken.  (See original
+   #if 0'd comments above.)
+   FIXME: Restructure uw-thread.c so that the struct ptid fields
+   can be used as intended. */
+
+/* Return the process id stored in composite PID. */
+#define PIDGET(PID) (ptid_get_pid (PID))
+
+/* Return the thread or lwp id stored in composite PID. */
+#define TIDGET(PID) (ptid_get_lwp (PID))
+#define LIDGET(PID) TIDGET(PID)
+
+#define MERGEPID(PID, LID) (ptid_build ((PID), (LID), 0))
+#define MKLID(PID, LID) (ptid_build ((PID), (LID), 0))
+
+/* Construct a composite id from thread TID and the process portion of
+   composite PID. */
+#define MKTID(PID, TID) (ptid_build ((PID), (TID), 1))
+
+/* Return whether PID contains a user-space thread id. */
+#define ISTID(PID) (ptid_get_tid (PID))
 
 #endif /* ifndef TM_I386V42MP_H */

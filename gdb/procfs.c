@@ -315,18 +315,6 @@ typedef prstatus_t gdb_prstatus_t;
 typedef prstatus_t gdb_lwpstatus_t;
 #endif /* NEW_PROC_API */
 
-
-/* Provide default composite pid manipulation macros for systems that
-   don't have threads. */
-
-#ifndef PIDGET
-#define PIDGET(PID)		(PID)
-#define TIDGET(PID)		(PID)
-#endif
-#ifndef MERGEPID
-#define MERGEPID(PID, TID)	(PID)
-#endif
-
 typedef struct procinfo {
   struct procinfo *next;
   int pid;			/* Process ID    */

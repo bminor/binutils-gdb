@@ -102,18 +102,10 @@ static int num_lwps;
 static int threaded;
 
 
-#ifndef TIDGET
-#define TIDGET(PID)		(((PID) & 0x7fffffff) >> 16)
-#define PIDGET0(PID)		(((PID) & 0xffff))
-#define PIDGET(PID)		((PIDGET0 (PID) == 0xffff) ? -1 : PIDGET0 (PID))
-#define MERGEPID(PID, TID)	(((PID) & 0xffff) | ((TID) << 16))
-#endif
-
-#define THREAD_FLAG		0x80000000
-#define is_lwp(pid)		(((pid) & THREAD_FLAG) == 0 && TIDGET (pid))
-#define GET_LWP(pid)		TIDGET (pid)
-#define GET_PID(pid)		PIDGET (pid)
-#define BUILD_LWP(tid, pid)	MERGEPID (pid, tid)
+#define GET_LWP(ptid)		ptid_get_lwp (ptid)
+#define GET_PID(ptid)		ptid_get_pid (ptid)
+#define is_lwp(ptid)		(GET_LWP (ptid) != 0)
+#define BUILD_LWP(lwp, pid)	ptid_build (pid, lwp, 0)
 
 #define is_cloned(pid)	(GET_LWP (pid) != GET_PID (pid))
 

@@ -79,14 +79,8 @@ static unsigned int os_version, os_major, os_minor, os_release;
 /* On Linux, threads are implemented as pseudo-processes, in which
    case we may be tracing more than one process at a time.  In that
    case, inferior_ptid will contain the main process ID and the
-   individual thread (process) ID mashed together.  These macros are
-   used to separate them out.  These definitions should be overridden
-   if thread support is included.  */
-
-#if !defined (PIDGET)	/* Default definition for PIDGET/TIDGET.  */
-#define PIDGET(PID)	PID
-#define TIDGET(PID)	0
-#endif
+   individual thread (process) ID.  get_thread_id () is used to
+   get the thread id if it's available, and the process id otherwise. */
 
 int
 get_thread_id (ptid_t ptid)

@@ -123,24 +123,17 @@ static void thread_db_find_new_threads (void);
 
 /* Building process ids.  */
 
-#ifndef TIDGET
-#define TIDGET(PID)		(((PID) & 0x7fffffff) >> 16)
-#define PIDGET0(PID)		(((PID) & 0xffff))
-#define PIDGET(PID)		((PIDGET0 (PID) == 0xffff) ? -1 : PIDGET0 (PID))
-#define MERGEPID(PID, TID)	(((PID) & 0xffff) | ((TID) << 16))
-#endif
 
-#define THREAD_FLAG		0x80000000
+#define GET_PID(ptid)		ptid_get_pid (ptid)
+#define GET_LWP(ptid)		ptid_get_lwp (ptid)
+#define GET_THREAD(ptid)	ptid_get_tid (ptid)
 
-#define is_lwp(pid)		(((pid) & THREAD_FLAG) == 0 && TIDGET (pid))
-#define is_thread(pid)		((pid) & THREAD_FLAG)
+#define is_lwp(ptid)		(GET_LWP (ptid) != 0)
+#define is_thread(ptid)		(GET_THREAD (ptid) != 0)
 
-#define GET_PID(pid)		PIDGET (pid)
-#define GET_LWP(pid)		TIDGET (pid)
-#define GET_THREAD(pid)		TIDGET (pid)
+#define BUILD_LWP(lwp, pid)	ptid_build (pid, lwp, 0)
+#define BUILD_THREAD(tid, pid)	ptid_build (pid, 0, tid)
 
-#define BUILD_LWP(tid, pid)	MERGEPID (pid, tid)
-#define BUILD_THREAD(tid, pid)	(MERGEPID (pid, tid) | THREAD_FLAG)
 
 
 struct private_thread_info
