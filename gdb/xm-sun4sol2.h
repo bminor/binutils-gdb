@@ -62,3 +62,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* May be needed, may be not?  From Pace Willisson's port.  FIXME.  */
 #define NEED_POSIX_SETPGID
+
+/* Solaris PSRVADDR support does not seem to include a place for nPC.  */
+#define PRSVADDR_BROKEN

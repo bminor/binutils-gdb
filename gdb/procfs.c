@@ -2041,7 +2041,7 @@ child_resume (step, signo)
   errno = 0;
   pi.prrun.pr_flags = PRSTRACE | PRSFAULT | PRCFAULT;
 
-#if !defined(sun) && !defined(sparc)
+#ifdef PRSVADDR_BROKEN
 /* Can't do this under Solaris running on a Sparc, as there seems to be no
    place to put nPC.  In fact, if you use this, nPC seems to be set to some
    random garbage.  We have to rely on the fact that PC and nPC have been
