@@ -75,10 +75,14 @@ INCLUDE_DEP = $$(INCLUDE_DIR)
 BFD_DIR =  ${srcdir}/../bfd
 BFD_DEP = $$(BFD_DIR)
 
+# the parent of the directory in which live the readline headers.
+READLINE_DIR = ${srcdir}/..
+READLINE_DEP = $$(READLINE_DIR)
+
 # All the includes used for CFLAGS and for lint.
 # -I. for config files.
 # -I${srcdir} possibly for regex.h also.
-INCLUDE_CFLAGS = -I. -I${srcdir} -I$(INCLUDE_DIR) -I${srcdir}/vx-share
+INCLUDE_CFLAGS = -I. -I${srcdir} -I$(INCLUDE_DIR) -I$(READLINE_DIR) -I${srcdir}/vx-share
 
 # {X,T}M_CFLAGS, if defined, has system-dependent CFLAGS.
 # CFLAGS for both GDB and readline.
@@ -106,9 +110,9 @@ TERMCAP = -ltermcap
 # For example, -lPW for System V to get alloca().
 # FIXME STOPGAP FOR BFD LIBRARY: BFD stuff
 CLIBS = ${TERMCAP} $(XM_CLIBS) ${TM_CLIBS} ${BFD_DIR}${subdir}/libbfd.a \
-	${LIBIBERTY}
-CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_DIR}/libbfd.a \
-	${LIBIBERTY}
+	${LIBIBERTY} ${READLINE_DIR}/readline${subdir}/libreadline.a
+CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_DIR}${subdir}/libbfd.a \
+	${LIBIBERTY} ${READLINE_DIR}/readline${subdir}/libreadline.a
 
 ADD_FILES = ${REGEX} ${ALLOCA} ${GNU_MALLOC}
 ADD_DEPS = ${REGEX1} ${ALLOCA1} ${GNU_MALLOC}
@@ -176,9 +180,11 @@ HFILES=	breakpoint.h command.h defs.h environ.h \
 	target.h tdesc.h terminal.h tm-68k.h tm-i960.h tm-sunos.h \
 	value.h
 
-OPCODES = pn-opcode.h np1-opcode.h sparc-opcode.h vax-opcode.h m68k-opcode.h \
-	  ns32k-opcode.h convx-opcode.h pyr-opcode.h mips-opcode.h \
-	  am29k-opcode.h
+OPCODES = $(INCLUDE_DIR)/pn-opcode.h $(INCLUDE_DIR)/np1-opcode.h \
+	$(INCLUDE_DIR)/sparc-opcode.h $(INCLUDE_DIR)/vax-opcode.h \
+	$(INCLUDE_DIR)/m68k-opcode.h $(INCLUDE_DIR)/ns32k-opcode.h \
+	$(INCLUDE_DIR)/convx-opcode.h $(INCLUDE_DIR)/pyr-opcode.h \
+	$(INCLUDE_DIR)/mips-opcode.h $(INCLUDE_DIR)/am29k-opcode.h
 
 REMOTE_EXAMPLES = rem-m68k.shar rem-multi.shar
 
@@ -229,7 +235,7 @@ TSSTART = /lib/crt0.o
 
 NTSSTART = kdb-start.o
 
-RL_LIB = readline/libreadline.a
+RL_LIB = ../readline/libreadline.a
 RL_LIB_DEP = $(RL_LIB)
 
 # Prevent Sun make from putting in the machine type.  Setting
@@ -357,7 +363,7 @@ depend: $(SOURCES) Makefile.dist
 	@echo can safely be ignored.
 	@echo Also ignore parse errors in valops.c, and any errors in
 	@echo arm-convert.s.
-	-$(GCC) -MM $(CFLAGS) -I$(BFD_DIR) \
+	-$(GCC) -MM $(CFLAGS) -I$(READLINE_DIR) -I$(BFD_DIR) \
 	    `ls $(SOURCES) | sort -u` >depend.tmp
 	<depend.tmp sed -e 's/ [xt]m.h/& config.status/g'  \
 	  -e 's; vx-share/; $${srcdir}/vx-share/;g'  \

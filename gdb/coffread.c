@@ -20,6 +20,7 @@ You should have received a copy of the GNU General Public License
 along with GDB; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+
 #include <stdio.h>
 #include "defs.h"
 #include "param.h"
@@ -27,6 +28,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "breakpoint.h"
 #include "bfd.h"
 #include "symfile.h"
+
+#ifndef NO_COFF
 
 #if defined (TDESC)
 /* Need to get C_VERSION and friends.  */
@@ -2048,3 +2051,5 @@ _initialize_coffread ()
 {
   add_symtab_fns(&coff_sym_fns);
 }
+
+#endif /* NO_COFF */

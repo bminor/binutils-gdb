@@ -141,7 +141,6 @@ ALLCONFIG=\
 ./tconfig/isi\
 ./tconfig/littlemips\
 ./tconfig/m88k\
-./tconfig/m88k.orig\
 ./tconfig/merlin\
 ./tconfig/news\
 ./tconfig/news1000\
@@ -180,7 +179,6 @@ ALLCONFIG=\
 ./xconfig/isi\
 ./xconfig/littlemips\
 ./xconfig/m88k\
-./xconfig/m88k.orig\
 ./xconfig/merlin\
 ./xconfig/news\
 ./xconfig/news1000\

@@ -37,6 +37,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 extern char register_valid[];
 
+int deferred_stores = 0;	/* Cumulates stores we want to do eventually. */
+
 /* Fetch one or more registers from the inferior.  REGNO == -1 to get
    them all.  We actually fetch more than requested, when convenient,
    marking them as valid so we won't fetch them again.  */
@@ -131,7 +133,6 @@ fetch_inferior_registers (regno)
 #define	INT_REGS	1
 #define	STACK_REGS	2
 #define	FP_REGS		4
-int deferred_stores = 0;	/* Cumulates stores we want to do eventually. */
 
 int
 store_inferior_registers (regno)

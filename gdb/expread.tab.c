@@ -223,7 +223,65 @@ static const char yytranslate[] = {     0,
     44,    45,    52,    53,    54,    55
 };
 
-static const short yyrline[] = {     0,
+static const short yyprhs[] = {     0,
+     0,     2,     4,     8,    11,    14,    17,    20,    23,    26,
+    29,    32,    35,    38,    42,    47,    51,    56,    61,    62,
+    68,    69,    71,    75,    80,    85,    89,    93,    97,   101,
+   105,   109,   113,   117,   121,   125,   129,   133,   137,   141,
+   145,   149,   153,   157,   161,   165,   171,   175,   179,   181,
+   183,   185,   187,   189,   191,   193,   195,   197,   199,   204,
+   206,   208,   210,   214,   218,   222,   227,   230,   232,   234,
+   237,   239,   242,   244,   247,   249,   253,   256,   258,   261,
+   263,   266,   270,   273,   275,   279,   286,   295,   305,   307,
+   309,   311,   313,   316,   320,   323,   327,   331,   336,   339,
+   343,   346,   349,   352,   355,   357,   360,   362,   364,   366,
+   368,   370,   372,   376,   378,   380,   382,   384,   386,   388
+};
+
+static const short yyrhs[] = {    67,
+     0,    68,     0,    67,    29,    68,     0,    49,    68,     0,
+    37,    68,     0,    48,    68,     0,    59,    68,     0,    60,
+    68,     0,    53,    68,     0,    54,    68,     0,    68,    53,
+     0,    68,    54,     0,    16,    68,     0,    68,    55,    82,
+     0,    68,    55,    49,    68,     0,    68,    56,    82,     0,
+    68,    56,    49,    68,     0,    68,    57,    67,    61,     0,
+     0,    68,    58,    69,    70,    62,     0,     0,    68,     0,
+    70,    29,    68,     0,    63,    78,    64,    68,     0,    58,
+    78,    62,    68,     0,    58,    67,    62,     0,    68,    46,
+    68,     0,    68,    49,    68,     0,    68,    50,    68,     0,
+    68,    51,    68,     0,    68,    47,    68,     0,    68,    48,
+    68,     0,    68,    44,    68,     0,    68,    45,    68,     0,
+    68,    38,    68,     0,    68,    39,    68,     0,    68,    42,
+    68,     0,    68,    43,    68,     0,    68,    40,    68,     0,
+    68,    41,    68,     0,    68,    37,    68,     0,    68,    36,
+    68,     0,    68,    35,    68,     0,    68,    34,    68,     0,
+    68,    33,    68,     0,    68,    32,    68,    65,    68,     0,
+    68,    31,    68,     0,    68,    27,    68,     0,     3,     0,
+    11,     0,     5,     0,    12,     0,     4,     0,     6,     0,
+    72,     0,    24,     0,    25,     0,    26,     0,    16,    58,
+    78,    62,     0,     7,     0,    28,     0,     9,     0,    71,
+    18,    82,     0,    71,    18,    82,     0,    79,    18,    82,
+     0,    79,    18,    60,    82,     0,    18,    82,     0,    83,
+     0,    79,     0,    79,    74,     0,    49,     0,    49,    74,
+     0,    37,     0,    37,    74,     0,    75,     0,    58,    74,
+    62,     0,    75,    76,     0,    76,     0,    75,    77,     0,
+    77,     0,    57,    61,     0,    57,     3,    61,     0,    58,
+    62,     0,    73,     0,    79,    18,    49,     0,    78,    58,
+    79,    18,    49,    62,     0,    78,    58,    79,    18,    49,
+    62,    58,    62,     0,    78,    58,    79,    18,    49,    62,
+    58,    81,    62,     0,    10,     0,    23,     0,    21,     0,
+    22,     0,    21,    23,     0,    17,    21,    23,     0,    21,
+    21,     0,    21,    21,    23,     0,    17,    21,    21,     0,
+    17,    21,    21,    23,     0,    22,    23,     0,    17,    22,
+    23,     0,    13,    82,     0,    14,    82,     0,    15,    82,
+     0,    17,    80,     0,    17,     0,    20,    80,     0,    20,
+     0,    10,     0,    23,     0,    21,     0,    22,     0,    78,
+     0,    81,    29,    78,     0,     8,     0,     9,     0,    10,
+     0,    11,     0,    12,     0,     8,     0,     9,     0
+};
+
+#if YYDEBUG != 0
+static const short yyrline[] = { 0,
    225,   229,   230,   235,   238,   241,   245,   249,   253,   257,
    261,   265,   269,   273,   279,   283,   289,   293,   297,   301,
    307,   310,   314,   318,   324,   330,   336,   340,   344,   348,
@@ -238,15 +296,18 @@ static const short yyrline[] = {     0,
    889,   898,   903,   910,   911,   912,   913,   914,   917,   918
 };
 
-static const char * const yytname[] = {     0,
+static const char * const yytname[] = {   "$",
 "error","$illegal.","INT","CHAR","UINT","FLOAT","STRING","NAME","BLOCKNAME","TYPENAME",
 "NAME_OR_INT","NAME_OR_UINT","STRUCT","UNION","ENUM","SIZEOF","UNSIGNED","COLONCOLON","ERROR","SIGNED",
 "LONG","SHORT","INT_KEYWORD","LAST","REGNAME","VARIABLE","ASSIGN_MODIFY","THIS","','","ABOVE_COMMA",
 "'='","'?'","OR","AND","'|'","'^'","'&'","EQUAL","NOTEQUAL","'<'",
 "'>'","LEQ","GEQ","LSH","RSH","'@'","'+'","'-'","'*'","'/'",
 "'%'","UNARY","INCREMENT","DECREMENT","ARROW","'.'","'['","'('","'!'","'~'",
-"']'","')'","'{'","'}'","':'","start"
+"']'","')'","'{'","'}'","':'","start","exp1","exp","@1","arglist",
+"block","variable","ptype","abs_decl","direct_abs_decl","array_mod","func_mod","type","typebase","typename",
+"nonempty_typelist","name","name_not_typename",""
 };
+#endif
 
 static const short yyr1[] = {     0,
     66,    67,    67,    68,    68,    68,    68,    68,    68,    68,
@@ -461,13 +522,11 @@ static const short yycheck[] = {    14,
     53,    54,    55,    56,    57,    58,    -1,    49,    50,    51,
     -1,    53,    54,    55,    56,    57,    58
 };
-#define YYPURE 1
-
 /* -*-C-*-  Note some compilers choke on comments on `#line' lines.  */
-#line 3 "bison.simple"
+#line 3 "/usr/unsupported/lib/bison.simple"
 
 /* Skeleton output parser for bison,
-   Copyright (C) 1984 Bob Corbett and Richard Stallman
+   Copyright (C) 1984, 1989, 1990 Bob Corbett and Richard Stallman
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -484,9 +543,19 @@ static const short yycheck[] = {    14,
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 
+#ifndef alloca
+#ifdef __GNUC__
+#define alloca __builtin_alloca
+#else /* Not GNU C.  */
 #if (!defined (__STDC__) && defined (sparc)) || defined (__sparc__)
 #include <alloca.h>
-#endif
+#else /* Not sparc */
+#ifdef MSDOS
+#include <malloc.h>
+#endif /* MSDOS */
+#endif /* Not sparc.  */
+#endif /* Not GNU C.  */
+#endif /* alloca not defined.  */
 
 /* This is the parser code that is written into each bison parser
   when the %semantic_parser declaration is not specified in the grammar.
@@ -501,35 +570,57 @@ static const short yycheck[] = {    14,
 #define yyclearin	(yychar = YYEMPTY)
 #define YYEMPTY		-2
 #define YYEOF		0
-#define YYFAIL		goto yyerrlab;
 #define YYACCEPT	return(0)
 #define YYABORT 	return(1)
-#define YYERROR		goto yyerrlab
+#define YYERROR		goto yyerrlab1
+/* Like YYERROR except do call yyerror.
+   This remains here temporarily to ease the
+   transition to the new meaning of YYERROR, for GCC.
+   Once GCC version 2 has supplanted version 1, this can go.  */
+#define YYFAIL		goto yyerrlab
+#define YYRECOVERING()  (!!yyerrstatus)
+#define YYBACKUP(token, value) \
+do								\
+  if (yychar == YYEMPTY && yylen == 1)				\
+    { yychar = (token), yylval = (value);			\
+      yychar1 = YYTRANSLATE (yychar);				\
+      YYPOPSTACK;						\
+      goto yybackup;						\
+    }								\
+  else								\
+    { yyerror ("syntax error: cannot back up"); YYERROR; }	\
+while (0)
 
 #define YYTERROR	1
 #define YYERRCODE	256
 
-#ifndef YYIMPURE
+#ifndef YYPURE
 #define YYLEX		yylex()
 #endif
 
-#ifndef YYPURE
+#ifdef YYPURE
+#ifdef YYLSP_NEEDED
 #define YYLEX		yylex(&yylval, &yylloc)
+#else
+#define YYLEX		yylex(&yylval)
+#endif
 #endif
 
 /* If nonreentrant, generate the variables here */
 
-#ifndef YYIMPURE
+#ifndef YYPURE
 
 int	yychar;			/*  the lookahead symbol		*/
 YYSTYPE	yylval;			/*  the semantic value of the		*/
 				/*  lookahead symbol			*/
 
+#ifdef YYLSP_NEEDED
 YYLTYPE yylloc;			/*  location data for the lookahead	*/
 				/*  symbol				*/
+#endif
 
 int yynerrs;			/*  number of parse errors so far       */
-#endif  /* YYIMPURE */
+#endif  /* not YYPURE */
 
 #if YYDEBUG != 0
 int yydebug;			/*  nonzero means print parse trace	*/
@@ -537,21 +628,59 @@ int yydebug;			/*  nonzero means print parse trace	*/
    from coexisting.  */
 #endif
 
-/*  YYMAXDEPTH indicates the initial size of the parser's stacks	*/
+/*  YYINITDEPTH indicates the initial size of the parser's stacks	*/
 
-#ifndef	YYMAXDEPTH
-#define YYMAXDEPTH 200
+#ifndef	YYINITDEPTH
+#define YYINITDEPTH 200
 #endif
 
-/*  YYMAXLIMIT is the maximum size the stacks can grow to
+/*  YYMAXDEPTH is the maximum size the stacks can grow to
     (effective only if the built-in stack extension method is used).  */
 
-#ifndef YYMAXLIMIT
-#define YYMAXLIMIT 10000
+#if YYMAXDEPTH == 0
+#undef YYMAXDEPTH
 #endif
 
+#ifndef YYMAXDEPTH
+#define YYMAXDEPTH 10000
+#endif
+
+#ifndef __cplusplus
 
-#line 90 "bison.simple"
+/* This is the most reliable way to avoid incompatibilities
+   in available built-in functions on various systems.  */
+static void
+__yy_bcopy (from, to, count)
+     char *from;
+     char *to;
+     int count;
+{
+  register char *f = from;
+  register char *t = to;
+  register int i = count;
+
+  while (i-- > 0)
+    *t++ = *f++;
+}
+
+#else /* __cplusplus */
+
+/* This is the most reliable way to avoid incompatibilities
+   in available built-in functions on various systems.  */
+static void
+__yy_bcopy (char *from, char *to, int count)
+{
+  register char *f = from;
+  register char *t = to;
+  register int i = count;
+
+  while (i-- > 0)
+    *t++ = *f++;
+}
+
+#endif
+
+#line 160 "/usr/unsupported/lib/bison.simple"
 int
 yyparse()
 {
@@ -559,25 +688,34 @@ yyparse()
   register int yyn;
   register short *yyssp;
   register YYSTYPE *yyvsp;
-  YYLTYPE *yylsp;
   int yyerrstatus;	/*  number of tokens to shift before error messages enabled */
   int yychar1;		/*  lookahead token as an internal (translated) token number */
 
-  short	yyssa[YYMAXDEPTH];	/*  the state stack			*/
-  YYSTYPE yyvsa[YYMAXDEPTH];	/*  the semantic value stack		*/
-  YYLTYPE yylsa[YYMAXDEPTH];	/*  the location stack			*/
+  short	yyssa[YYINITDEPTH];	/*  the state stack			*/
+  YYSTYPE yyvsa[YYINITDEPTH];	/*  the semantic value stack		*/
 
   short *yyss = yyssa;		/*  refer to the stacks thru separate pointers */
   YYSTYPE *yyvs = yyvsa;	/*  to allow yyoverflow to reallocate them elsewhere */
+
+#ifdef YYLSP_NEEDED
   YYLTYPE *yyls = yylsa;
+  YYLTYPE *yylsp;
+  YYLTYPE yylsa[YYINITDEPTH];	/*  the location stack			*/
 
-  int yymaxdepth = YYMAXDEPTH;
+#define YYPOPSTACK   (yyvsp--, yysp--, yylsp--)
+#else
+#define YYPOPSTACK   (yyvsp--, yysp--)
+#endif
 
-#ifndef YYPURE
+  int yystacksize = YYINITDEPTH;
+
+#ifdef YYPURE
   int yychar;
   YYSTYPE yylval;
-  YYLTYPE yylloc;
   int yynerrs;
+#ifdef YYLSP_NEEDED
+  YYLTYPE yylloc;
+#endif
 #endif
 
   YYSTYPE yyval;		/*  the variable used to return		*/
@@ -602,7 +740,9 @@ yyparse()
 
   yyssp = yyss - 1;
   yyvsp = yyvs;
+#ifdef YYLSP_NEEDED
   yylsp = yyls;
+#endif
 
 /* Push a new state, which is found in  yystate  .  */
 /* In all cases, when you get here, the value and location stacks
@@ -611,13 +751,15 @@ yynewstate:
 
   *++yyssp = yystate;
 
-  if (yyssp >= yyss + yymaxdepth - 1)
+  if (yyssp >= yyss + yystacksize - 1)
     {
       /* Give user a chance to reallocate the stack */
       /* Use copies of these so that the &'s don't force the real ones into memory. */
       YYSTYPE *yyvs1 = yyvs;
-      YYLTYPE *yyls1 = yyls;
       short *yyss1 = yyss;
+#ifdef YYLSP_NEEDED
+      YYLTYPE *yyls1 = yyls;
+#endif
 
       /* Get the current used size of the three stacks, in elements.  */
       int size = yyssp - yyss + 1;
@@ -628,24 +770,32 @@ yynewstate:
       yyoverflow("parser stack overflow",
 		 &yyss1, size * sizeof (*yyssp),
 		 &yyvs1, size * sizeof (*yyvsp),
+#ifdef YYLSP_NEEDED
 		 &yyls1, size * sizeof (*yylsp),
-		 &yymaxdepth);
+#endif
+		 &yystacksize);
 
-      yyss = yyss1; yyvs = yyvs1; yyls = yyls1;
+      yyss = yyss1; yyvs = yyvs1;
+#ifdef YYLSP_NEEDED
+      yyls = yyls1;
+#endif
 #else /* no yyoverflow */
       /* Extend the stack our own way.  */
-      if (yymaxdepth >= YYMAXLIMIT)
-	yyerror("parser stack overflow");
-      yymaxdepth *= 2;
-      if (yymaxdepth > YYMAXLIMIT)
-	yymaxdepth = YYMAXLIMIT;
-      yyss = (short *) alloca (yymaxdepth * sizeof (*yyssp));
-      bcopy ((char *)yyss1, (char *)yyss, size * sizeof (*yyssp));
-      yyvs = (YYSTYPE *) alloca (yymaxdepth * sizeof (*yyvsp));
-      bcopy ((char *)yyvs1, (char *)yyvs, size * sizeof (*yyvsp));
+      if (yystacksize >= YYMAXDEPTH)
+	{
+	  yyerror("parser stack overflow");
+	  return 2;
+	}
+      yystacksize *= 2;
+      if (yystacksize > YYMAXDEPTH)
+	yystacksize = YYMAXDEPTH;
+      yyss = (short *) alloca (yystacksize * sizeof (*yyssp));
+      __yy_bcopy ((char *)yyss1, (char *)yyss, size * sizeof (*yyssp));
+      yyvs = (YYSTYPE *) alloca (yystacksize * sizeof (*yyvsp));
+      __yy_bcopy ((char *)yyvs1, (char *)yyvs, size * sizeof (*yyvsp));
 #ifdef YYLSP_NEEDED
-      yyls = (YYLTYPE *) alloca (yymaxdepth * sizeof (*yylsp));
-      bcopy ((char *)yyls1, (char *)yyls, size * sizeof (*yylsp));
+      yyls = (YYLTYPE *) alloca (yystacksize * sizeof (*yylsp));
+      __yy_bcopy ((char *)yyls1, (char *)yyls, size * sizeof (*yylsp));
 #endif
 #endif /* no yyoverflow */
 
@@ -657,10 +807,10 @@ yynewstate:
 
 #if YYDEBUG != 0
       if (yydebug)
-	fprintf(stderr, "Stack size increased to %d\n", yymaxdepth);
+	fprintf(stderr, "Stack size increased to %d\n", yystacksize);
 #endif
 
-      if (yyssp >= yyss + yymaxdepth - 1)
+      if (yyssp >= yyss + yystacksize - 1)
 	YYABORT;
     }
 
@@ -669,9 +819,11 @@ yynewstate:
     fprintf(stderr, "Entering state %d\n", yystate);
 #endif
 
+ yybackup:
+
 /* Do appropriate processing given the current state.  */
 /* Read a lookahead token if we need one and don't already have one.  */
-yyresume:
+/* yyresume: */
 
   /* First try to decide what to do without reference to lookahead token.  */
 
@@ -778,12 +930,15 @@ yyreduce:
 #if YYDEBUG != 0
   if (yydebug)
     {
-      if (yylen == 1)
-	fprintf (stderr, "Reducing 1 value via line %d, ",
-		 yyrline[yyn]);
-      else
-	fprintf (stderr, "Reducing %d values via line %d, ",
-		 yylen, yyrline[yyn]);
+      int i;
+
+      fprintf (stderr, "Reducing via rule %d (line %d), ",
+	       yyn, yyrline[yyn]);
+
+      /* Print the symboles being reduced, and their result.  */
+      for (i = yyprhs[yyn]; yyrhs[i] > 0; i++)
+	fprintf (stderr, "%s ", yytname[yyrhs[i]]);
+      fprintf (stderr, " -> %s\n", yytname[yyr1[yyn]]);
     }
 #endif
 
@@ -1543,7 +1698,7 @@ case 118:
     break;}
 }
    /* the action file gets copied in in place of this dollarsign */
-#line 327 "bison.simple"
+#line 423 "/usr/unsupported/lib/bison.simple"
 
   yyvsp -= yylen;
   yyssp -= yylen;
@@ -1602,8 +1757,44 @@ yyerrlab:   /* here on detecting error */
     /* If not already recovering from an error, report this error.  */
     {
       ++yynerrs;
-      yyerror("parse error");
+
+#ifdef YYERROR_VERBOSE
+      yyn = yypact[yystate];
+
+      if (yyn > YYFLAG && yyn < YYLAST)
+	{
+	  int size = 0;
+	  char *msg;
+	  int x, count;
+
+	  count = 0;
+	  for (x = 0; x < (sizeof(yytname) / sizeof(char *)); x++)
+	    if (yycheck[x + yyn] == x)
+	      size += strlen(yytname[x]) + 15, count++;
+	  msg = (char *) xmalloc(size + 15);
+	  strcpy(msg, "parse error");
+
+	  if (count < 5)
+	    {
+	      count = 0;
+	      for (x = 0; x < (sizeof(yytname) / sizeof(char *)); x++)
+		if (yycheck[x + yyn] == x)
+		  {
+		    strcat(msg, count == 0 ? ", expecting `" : " or `");
+		    strcat(msg, yytname[x]);
+		    strcat(msg, "'");
+		    count++;
+		  }
+	    }
+	  yyerror(msg);
+	  free(msg);
+	}
+      else
+#endif /* YYERROR_VERBOSE */
+	yyerror("parse error");
     }
+
+yyerrlab1:   /* here on error raised explicitly by an action */
 
   if (yyerrstatus == 3)
     {

@@ -12,7 +12,7 @@ if [ ! -f xconfig/${host} ]; then
 	exit 1
 fi
 
-targetfile=`awk '
+hostfile=`awk '
   $1 == "XM_FILE=" { print $2 }' <xconfig/$host`
 if [ "${targetfile}" = "/" ] ; then
 	targetfile=/dev/null
@@ -30,7 +30,7 @@ if [ -z "${removing}" ] ; then
 		print substr($0,6)}'
 fi
 
-hostfile=`awk '
+targetfile=`awk '
   $1 == "TM_FILE=" { print $2 }' <tconfig/$target`
 if [ "${hostfile}" = "/" ] ; then
 	hostfile=/dev/null

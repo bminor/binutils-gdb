@@ -22,3 +22,5 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #undef STACK_END_ADDRESS
 #define STACK_END_ADDRESS 0xf8000000
+
+#define NO_COFF
