@@ -1,5 +1,8 @@
 Tue Oct  1 12:37:48 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-m68k.c (init_table): Correct access control unit
+	register numbers.  From Ken Rose <rose@netcom.com>.
+
 	* config/tc-alpha.c: Add some static function prototypes.
  	(alpha_macros): Move to top of file.  Make static.
 	(alpha_num_macros): Move to top of file.

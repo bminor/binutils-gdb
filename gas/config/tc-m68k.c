@@ -259,7 +259,7 @@ add_fix (width, exp, pc_rel, pc_fix)
      int pc_rel;
      int pc_fix;
 {
-  the_ins.reloc[the_ins.nrel].n = (((width)=='B')
+  the_ins.reloc[the_ins.nrel].n = ((width == 'B' || width == '3')
 				   ? (the_ins.numo*2-1)
 				   : (((width)=='b')
 				      ? (the_ins.numo*2+1)
@@ -992,12 +992,10 @@ m68k_ip (instring)
       /* If we didn't get the right number of ops, or we have no
 	 common model with this pattern then reject this pattern. */
 
+      ok_arch |= opcode->m_arch;
       if (opsfound != opcode->m_opnum
 	  || ((opcode->m_arch & current_architecture) == 0))
-	{
-	  ++losing;
-	  ok_arch |= opcode->m_arch;
-	}
+	++losing;
       else
 	{
 	  for (s = opcode->m_operands, opP = &the_ins.operands[0];
@@ -3026,11 +3024,13 @@ static const struct init_entry init_table[] =
   { "dacr0", DTT0 },		/* Data Access Control Register 0 */
   { "dacr1", DTT1 },		/* Data Access Control Register 0 */
 
-  /* mcf5200 versions of same */
-  { "acr2", ITT0 },		/* Access Control Unit 2 */
-  { "acr3", ITT1 },		/* Access Control Unit 3 */
-  { "acr0", DTT0 },		/* Access Control Unit 0 */
-  { "acr1", DTT1 },		/* Access Control Unit 1 */
+  /* mcf5200 versions of same.  The ColdFire programmer's reference
+     manual indicated that the order is 2,3,0,1, but Ken Rose
+     <rose@netcom.com> says that 0,1,2,3 is the correct order.  */
+  { "acr0", ITT0 },		/* Access Control Unit 0 */
+  { "acr1", ITT1 },		/* Access Control Unit 1 */
+  { "acr2", DTT0 },		/* Access Control Unit 2 */
+  { "acr3", DTT1 },		/* Access Control Unit 3 */
 
   { "tc", TC },			/* MMU Translation Control Register */
   { "tcr", TC },
@@ -3210,7 +3210,7 @@ md_assemble (str)
 	      n = 1;
 	      break;
 	    case '3':
-	      n = 2;
+	      n = 1;
 	      break;
 	    case 'w':
 	      n = 2;
