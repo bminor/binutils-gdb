@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with GLD; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /*
 This module is in charge of working out the contents of expressions.
@@ -161,7 +161,7 @@ etree_type *
 exp_intop (value)
      bfd_vma value;
 {
-  etree_type *new = (etree_type *)stat_alloc((bfd_size_type)(sizeof(new->value)));
+  etree_type *new = (etree_type *) stat_alloc(sizeof(new->value));
   new->type.node_code = INT;
   new->value.value = value;
   new->type.node_class = etree_value;
@@ -238,8 +238,9 @@ fold_binary (tree, current_section, allocation_done, dot, dotp)
 	     value from a relative value is meaningful, and is an
 	     exception.  */
 	  if (current_section != abs_output_section
-	      && (result.section == abs_output_section
-		  || other.section == abs_output_section)
+	      && (other.section == abs_output_section
+		  || (result.section == abs_output_section
+		      && tree->type.node_code == '+'))
 	      && (tree->type.node_code == '+'
 		  || tree->type.node_code == '-'))
 	    {
@@ -247,7 +248,7 @@ fold_binary (tree, current_section, allocation_done, dot, dotp)
 
 	      /* If there is only one absolute term, make sure it is the
 		 second one.  */
-	      if (result.section == abs_output_section)
+	      if (other.section != abs_output_section)
 		{
 		  hold = result;
 		  result = other;
@@ -345,10 +346,12 @@ fold_name (tree, current_section, allocation_done, dot)
 	  {
 	    struct bfd_link_hash_entry *h;
 
-	    h = bfd_link_hash_lookup (link_info.hash, tree->name.name,
-				      false, false, true);
+	    h = bfd_wrapped_link_hash_lookup (output_bfd, &link_info,
+					      tree->name.name,
+					      false, false, true);
 	    result.value = (h != (struct bfd_link_hash_entry *) NULL
 			    && (h->type == bfd_link_hash_defined
+				|| h->type == bfd_link_hash_defweak
 				|| h->type == bfd_link_hash_common));
 	    result.section = 0;
 	    result.valid = true;
@@ -367,13 +370,17 @@ fold_name (tree, current_section, allocation_done, dot)
 	  {
 	    struct bfd_link_hash_entry *h;
 
-	    h = bfd_link_hash_lookup (link_info.hash, tree->name.name,
-				      false, false, true);
-	    if (h != NULL && h->type == bfd_link_hash_defined)
+	    h = bfd_wrapped_link_hash_lookup (output_bfd, &link_info,
+					      tree->name.name,
+					      false, false, true);
+	    if (h != NULL
+		&& (h->type == bfd_link_hash_defined
+		    || h->type == bfd_link_hash_defweak))
 	      {
 		if (bfd_is_abs_section (h->u.def.section))
 		  result = new_abs (h->u.def.value);
-		else if (allocation_done == lang_final_phase_enum)
+		else if (allocation_done == lang_final_phase_enum
+			 || allocation_done == lang_allocating_phase_enum)
 		  {
 		    lang_output_section_statement_type *os;
 		
@@ -472,28 +479,15 @@ exp_fold_tree (tree, current_section, allocation_done, dot, dotp)
 	  }
 	  break;
 	 case ABSOLUTE:
-	  if (allocation_done != lang_first_phase_enum) 
-	  {
-	    if (current_section 
-		== (lang_output_section_statement_type*)NULL) 
+	  if (allocation_done != lang_first_phase_enum && result.valid)
 	    {
-	      /* Outside a section, so it's all ok */
-
-	    }
-	    else {
-	      /* Inside a section, subtract the base of the section,
-		 so when it's added again (in an assignment), everything comes out fine
-		 */
+	      result.value += result.section->bfd_section->vma;
 	      result.section = abs_output_section;
-	      result.value -= current_section->bfd_section->vma;
-	      result.valid = true;
 	    }
-	  }
 	  else 
-	  {
-	    result.valid = false;
-	  }
-
+	    {
+	      result.valid = false;
+	    }
 	  break;
 	 case '~':
 	  make_abs(&result);
@@ -546,7 +540,9 @@ exp_fold_tree (tree, current_section, allocation_done, dot, dotp)
 	/* Assignment to dot can only be done during allocation */
 	if (tree->type.node_class == etree_provide)
 	  einfo ("%F%S can not PROVIDE assignment to location counter\n");
-	if (allocation_done == lang_allocating_phase_enum) {
+	if (allocation_done == lang_allocating_phase_enum
+	    || (allocation_done == lang_final_phase_enum
+		&& current_section == abs_output_section)) {
 	  result = exp_fold_tree(tree->assign.src,
 				 current_section,
 				 lang_allocating_phase_enum, dot, dotp);
@@ -561,7 +557,7 @@ exp_fold_tree (tree, current_section, allocation_done, dot, dotp)
 	    else {
 	      bfd_vma nextdot =result.value +
 	       current_section->bfd_section->vma;
-	      if (nextdot < dot) {
+	      if (nextdot < dot && current_section != abs_output_section) {
 		einfo("%F%S cannot move location counter backwards (from %V to %V)\n", dot, nextdot);
 	      }
 	      else {
@@ -651,7 +647,7 @@ exp_binop (code, lhs, rhs)
     {
       return exp_intop(r.value);
     }
-  new = (etree_type *)stat_alloc((bfd_size_type)(sizeof(new->binary)));
+  new = (etree_type *) stat_alloc (sizeof (new->binary));
   memcpy((char *)new, (char *)&value, sizeof(new->binary));
   return new;
 }
@@ -675,7 +671,7 @@ exp_trinop (code, cond, lhs, rhs)
   if (r.valid) {
     return exp_intop(r.value);
   }
-  new = (etree_type *)stat_alloc((bfd_size_type)(sizeof(new->trinary)));
+  new = (etree_type *) stat_alloc (sizeof (new->trinary));
   memcpy((char *)new,(char *) &value, sizeof(new->trinary));
   return new;
 }
@@ -697,7 +693,7 @@ exp_unop (code, child)
   if (r.valid) {
     return exp_intop(r.value);
   }
-  new = (etree_type *)stat_alloc((bfd_size_type)(sizeof(new->unary)));
+  new = (etree_type *) stat_alloc (sizeof (new->unary));
   memcpy((char *)new, (char *)&value, sizeof(new->unary));
   return new;
 }
@@ -721,7 +717,7 @@ exp_nameop (code, name)
   if (r.valid) {
     return exp_intop(r.value);
   }
-  new = (etree_type *)stat_alloc((bfd_size_type)(sizeof(new->name)));
+  new = (etree_type *) stat_alloc (sizeof (new->name));
   memcpy((char *)new, (char *)&value, sizeof(new->name));
   return new;
 
@@ -750,7 +746,7 @@ exp_assop (code, dst, src)
     return exp_intop(result);
   }
 #endif
-  new = (etree_type*)stat_alloc((bfd_size_type)(sizeof(new->assign)));
+  new = (etree_type*) stat_alloc (sizeof (new->assign));
   memcpy((char *)new, (char *)&value, sizeof(new->assign));
   return new;
 }
@@ -887,7 +883,7 @@ exp_get_value_int (tree,def,name, allocation_done)
 }
 
 
-int
+bfd_vma
 exp_get_abs_int (tree, def, name, allocation_done)
      etree_type *tree;
      int def;

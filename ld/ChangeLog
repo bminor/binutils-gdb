@@ -1,3 +1,12 @@
+Tue Apr 16 16:38:32 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldexp.c (fold_binary): Correct handling of subtraction with
+	absolute values.
+	(fold_name): Permit symbols in lang_allocating_phase_enum.
+
+	* scripttempl/aout.sc: Only PROVIDE __stack when RELOCATING.  Undo
+	accidental changes in last patch.
+
 Tue Apr 16 10:25:42 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* configure.tgt (powerpc*-*-{sysv,linux}): Add aliases.
