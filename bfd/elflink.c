@@ -6763,13 +6763,10 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 		    {
 		      /* I suppose the backend ought to fill in the
 			 section of any STT_SECTION symbol against a
-			 processor specific section.  If we have
-			 discarded a section, the output_section will
-			 be the absolute section.  */
-		      if (bfd_is_abs_section (sec)
-			  || (sec != NULL
-			      && bfd_is_abs_section (sec->output_section)))
-			r_symndx = 0;
+			 processor specific section.  */
+		      r_symndx = 0;
+		      if (bfd_is_abs_section (sec))
+			;
 		      else if (sec == NULL || sec->owner == NULL)
 			{
 			  bfd_set_error (bfd_error_bad_value);
@@ -6777,8 +6774,25 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 			}
 		      else
 			{
-			  r_symndx = sec->output_section->target_index;
-			  BFD_ASSERT (r_symndx != 0);
+			  asection *osec = sec->output_section;
+
+			  /* If we have discarded a section, the output
+			     section will be the absolute section.  In
+			     case of discarded link-once and discarded
+			     SEC_MERGE sections, use the kept section.  */
+			  if (bfd_is_abs_section (osec)
+			      && sec->kept_section != NULL
+			      && sec->kept_section->output_section != NULL)
+			    {
+			      osec = sec->kept_section->output_section;
+			      irela->r_addend -= osec->vma;
+			    }
+
+			  if (!bfd_is_abs_section (osec))
+			    {
+			      r_symndx = osec->target_index;
+			      BFD_ASSERT (r_symndx != 0);
+			    }
 			}
 
 		      /* Adjust the addend according to where the
