@@ -1,5 +1,12 @@
 2001-07-22  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
+	* tuiIO.c (tui_initialize_io): Install tui_cont_sig signal handler
+	if SIGCONT is defined.
+	(tui_cont_sig): New function when SIGCONT is defined.
+	(tui_setup_io): Save tty setting to restore by SIGCONT.
+	
+2001-07-22  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
 	* tui.h (tui_show_assembly): Declare.
 	(tui_is_window_visible): Declare.
 	* tui.c (tui_show_assembly): New function.

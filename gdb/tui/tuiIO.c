@@ -37,6 +37,7 @@
 #include "ui-out.h"
 #include "cli-out.h"
 #include <fcntl.h>
+#include <signal.h>
 
 /* This file controls the IO interactions between gdb and curses.
    When the TUI is enabled, gdb has two modes a curses and a standard
@@ -267,6 +268,9 @@ tui_setup_io (int mode)
       gdb_stdlog = gdb_stdout;	/* for moment */
       gdb_stdtarg = gdb_stderr;	/* for moment */
       uiout = tui_out;
+
+      /* Save tty for SIGCONT.  */
+      savetty ();
     }
   else
     {
@@ -284,13 +288,38 @@ tui_setup_io (int mode)
       rl_getc_function = tui_old_rl_getc_function;
       rl_outstream = tui_old_rl_outstream;
       readline_echoing_p = tui_old_readline_echoing_p;
+
+      /* Save tty for SIGCONT.  */
+      savetty ();
     }
 }
+
+#ifdef SIGCONT
+/* Catch SIGCONT to restore the terminal and refresh the screen.  */
+static void
+tui_cont_sig (int sig)
+{
+  if (tui_active)
+    {
+      /* Restore the terminal setting because another process (shell)
+         might have changed it.  */
+      resetty ();
+
+      /* Force a refresh of the screen.  */
+      tuiRefreshAll ();
+    }
+  signal (sig, tui_cont_sig);
+}
+#endif
 
 /* Initialize the IO for gdb in curses mode.  */
 void
 tui_initialize_io ()
 {
+#ifdef SIGCONT
+  signal (SIGCONT, tui_cont_sig);
+#endif
+
   /* Create tui output streams.  */
   tui_stdout = tui_fileopen (stdout);
   tui_stderr = tui_fileopen (stderr);
