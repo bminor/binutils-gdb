@@ -38,7 +38,7 @@ void (*bfd_error_trap)();
 
 
 
-typedef void generic_symbol_type;
+
 /* These values are correct for the SPARC.  I dunno about anything else */
 #define PAGE_SIZE 0x02000
 #define SEGMENT_SIZE PAGE_SIZE
@@ -809,42 +809,44 @@ sunos4_set_section_contents (abfd, section, location, offset, count)
       int count;
 {
   if (abfd->output_has_begun == false)
-    {				/* set by bfd.c handler */
-      if ((obj_textsec (abfd) == NULL) || (obj_datasec (abfd) == NULL)
+      {				/* set by bfd.c handler */
+	if ((obj_textsec (abfd) == NULL) || (obj_datasec (abfd) == NULL)
 	  
-	  /*||
-	    (obj_textsec (abfd)->size == 0) || (obj_datasec (abfd)->size=
-	    0)*/
-	  ) 
-	{
-	  bfd_error = invalid_operation;
-	  return false;
-	}
+	    /*||
+	      (obj_textsec (abfd)->size == 0) || (obj_datasec (abfd)->size=
+	      0)*/
+	    ) 
+	    {
+	      bfd_error = invalid_operation;
+	      return false;
+	    }
 
 
 #if 0
-      if (abfd->flags & D_PAGED)
-	{
-	  obj_textsec (abfd)->filepos = sizeof(struct exec);
-	  obj_datasec(abfd)->filepos =  obj_textsec (abfd)->size;
-	}
-      else 
+	if (abfd->flags & D_PAGED)
+	    {
+	      obj_textsec (abfd)->filepos = sizeof(struct exec);
+	      obj_datasec(abfd)->filepos =  obj_textsec (abfd)->size;
+	    }
+	else 
 #endif
-	{
-	  obj_textsec (abfd)->filepos = sizeof(struct exec);
-	  obj_datasec(abfd)->filepos = obj_textsec(abfd)->filepos  + obj_textsec (abfd)->size;
+	    {
+	      obj_textsec (abfd)->filepos = sizeof(struct exec);
+	      obj_datasec(abfd)->filepos = obj_textsec(abfd)->filepos  + obj_textsec (abfd)->size;
 
-	}
-    }
+	    }
+      }
   /* regardless, once we know what we're doing, we might as well get going */
+  if (section != obj_bsssec(abfd)) {
+    bfd_seek (abfd, section->filepos + offset, SEEK_SET);
 
-  bfd_seek (abfd, section->filepos + offset, SEEK_SET);
-
-  if (count) {
-    return (bfd_write ((PTR)location, 1, count, abfd) == count) ?
-      true : false;
+    if (count) {
+      return (bfd_write ((PTR)location, 1, count, abfd) == count) ?
+	true : false;
+    }
+    return false;
   }
-  return false;
+  return true;
 }
 boolean
 sunos4_get_section_contents (abfd, section, location, offset, count)
@@ -1044,7 +1046,7 @@ translate_from_native_sym_flags (sym_pointer, cache_ptr, abfd)
 void
 translate_to_native_sym_flags (sym_pointer, cache_ptr_g, abfd)
      struct nlist *sym_pointer;
-     generic_symbol_type *cache_ptr_g;
+     PTR cache_ptr_g;
      bfd *abfd;
 {
   asymbol *cache_ptr = (asymbol *)cache_ptr_g;
@@ -1252,7 +1254,7 @@ DEFUN(sunos4_write_syms,(abfd),
 
 
     nsp.n_value = g->value;
-    translate_to_native_sym_flags (&nsp, (generic_symbol_type *)g, abfd);
+    translate_to_native_sym_flags (&nsp, (PTR)g, abfd);
 
 
     bfd_h_putshort (abfd, nsp.n_desc, (unsigned char *)&nsp.n_desc);
@@ -1918,7 +1920,7 @@ sunos4_reclaim_reloc (ignore_abfd, section)
 alent *
 sunos4_get_lineno(ignore_abfd, ignore_symbol)
 bfd *ignore_abfd;
-generic_symbol_type *ignore_symbol;
+PTR ignore_symbol;
 {
 return (alent *)NULL;
 }
