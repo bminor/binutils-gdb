@@ -1,3 +1,8 @@
+Tue Aug  5 12:32:07 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* cond.c (s_else): If not listing false conditionals, turn listing
+	off in the false branch of the else.
+
 Mon Aug  4 11:28:35 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (macro): Fix handling of a double load from a
