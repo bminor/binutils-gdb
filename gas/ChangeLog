@@ -1,6 +1,8 @@
 start-sanitize-tic80
 Tue Mar  4 19:34:21 1997  Fred Fish  <fnf@cygnus.com>
 
+	* config/tc-tic80.c (md_pseudo_table): Add "sect" and "section"
+	pseudo-ops.
 	* config/tc-tic80.c (md_begin): Declare external variable
 	coff_flags and insert an F_AR32WR bit into it.
 
