@@ -1,3 +1,8 @@
+Tue Sep 13 20:47:58 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* ldlang.c (print_output_section_statement): Print all lines
+	to the map file.
+
 Tue Sep 13 16:30:11 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* ldlang.c (load_symbols): Check for archive before object.  Use

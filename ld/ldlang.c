@@ -1157,7 +1157,7 @@ print_output_section_statement (output_section_statement)
     print_address (section->vma);
     print_space ();
     print_size (section->_raw_size);
-    print_space();
+    print_space ();
     print_size(section->_cooked_size);
     print_space ();
     print_alignment (section->alignment_power);
@@ -1185,19 +1185,19 @@ print_output_section_statement (output_section_statement)
     {
       int b = exp_get_abs_int(output_section_statement->load_base,
 				0, "output base", lang_final_phase_enum);
-      printf("Output address   %08x\n", b);
+      fprintf (config.map_file, "Output address   %08x\n", b);
     }
   if (output_section_statement->section_alignment >= 0
       || output_section_statement->section_alignment >= 0) 
   {
-    printf("\t\t\t\t\tforced alignment ");
-    if ( output_section_statement->section_alignment >= 0) 
+    fprintf (config.map_file, "\t\t\t\t\tforced alignment ");
+    if (output_section_statement->section_alignment >= 0) 
     {
-      printf("section 2**%d ",output_section_statement->section_alignment );
+      fprintf (config.map_file, "section 2**%d ",output_section_statement->section_alignment );
     }
     if ( output_section_statement->subsection_alignment >= 0) 
     {
-      printf("subsection 2**%d ",output_section_statement->subsection_alignment );
+      fprintf (config.map_file, "subsection 2**%d ",output_section_statement->subsection_alignment );
     }
   
     print_nl ();
