@@ -2973,8 +2973,11 @@ psymtab_to_symtab_1 (pst, filename)
 	 We must do this before parse_procedure calls lookup_symbol.  */
       sort_symtab_syms (st);
 
-      /* This may not be necessary for stabs symtabs.  FIXME.  */
-      sort_blocks (st);
+      /* There used to be a call to sort_blocks here, but this should not
+	 be necessary for stabs symtabs.  And as sort_blocks modifies the
+	 start address of the GLOBAL_BLOCK to the FIRST_LOCAL_BLOCK,
+	 it did the wrong thing if the first procedure in a file was
+	 generated via asm statements.  */
 
       /* Fill in procedure info next.  */
       first_pdr = 1;

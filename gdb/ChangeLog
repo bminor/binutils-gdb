@@ -1,3 +1,11 @@
+Thu Apr 28 01:20:39 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* mdebugread.c (psymtab_to_symtab_1):  Do not call sort_blocks
+	for stabs symtabs.
+	* mips-tdep.c (mips_skip_prologue):  Handle prologues for functions
+	that have a stack frame size of 32k or larger (from Paul Flinders).
+	Remove #if 0'd code.
+
 Wed Apr 27 16:33:51 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* lynx-nat.c (CANNOT_STORE_REGISTER): Add a fallback definition
