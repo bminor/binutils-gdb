@@ -636,17 +636,19 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 	    h->elf_link_hash_flags |= ELF_LINK_NON_GOT_REF;
 
 	  /* If we are creating a shared library, and this is a reloc
-             against a global symbol, or a non PC relative reloc
-             against a local symbol, then we need to copy the reloc
-             into the shared library.  However, if we are linking with
-             -Bsymbolic, we do not need to copy a reloc against a
-             global symbol which is defined in an object we are
-             including in the link (i.e., DEF_REGULAR is set).  At
-             this point we have not seen all the input files, so it is
-             possible that DEF_REGULAR is not set now but will be set
-             later (it is never cleared).  We account for that
-             possibility below by storing information in the
-             pcrel_relocs_copied field of the hash table entry.  */
+	     against a global symbol, or a non PC relative reloc
+	     against a local symbol, then we need to copy the reloc
+	     into the shared library.  However, if we are linking with
+	     -Bsymbolic, we do not need to copy a reloc against a
+	     global symbol which is defined in an object we are
+	     including in the link (i.e., DEF_REGULAR is set).  At
+	     this point we have not seen all the input files, so it is
+	     possible that DEF_REGULAR is not set now but will be set
+	     later (it is never cleared).  We account for that
+	     possibility below by storing information in the
+	     pcrel_relocs_copied field of the hash table entry.
+	     A similar situation occurs when creating shared libraries
+	     and symbol visibility changes render the symbol local.  */
 	  if (info->shared
 	      && (sec->flags & SEC_ALLOC) != 0
 	      && (ELF32_R_TYPE (rel->r_info) != R_386_PC32
@@ -656,8 +658,8 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 			      & ELF_LINK_HASH_DEF_REGULAR) == 0))))
 	    {
 	      /* When creating a shared object, we must copy these
-                 reloc types into the output file.  We create a reloc
-                 section in dynobj and make room for this reloc.  */
+		 reloc types into the output file.  We create a reloc
+		 section in dynobj and make room for this reloc.  */
 	      if (sreloc == NULL)
 		{
 		  const char *name;
@@ -692,15 +694,13 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 
 	      sreloc->_raw_size += sizeof (Elf32_External_Rel);
 
-	      /* If we are linking with -Bsymbolic, and this is a
-                 global symbol, we count the number of PC relative
-                 relocations we have entered for this symbol, so that
-                 we can discard them again if the symbol is later
-                 defined by a regular object.  Note that this function
-                 is only called if we are using an elf_i386 linker
-                 hash table, which means that h is really a pointer to
-                 an elf_i386_link_hash_entry.  */
-	      if (h != NULL && info->symbolic
+	      /* If this is a global symbol, we count the number of PC
+		 relative relocations we have entered for this symbol,
+		 so that we can discard them later as necessary.  Note
+		 that this function is only called if we are using an
+		 elf_i386 linker hash table, which means that h is
+		 really a pointer to an elf_i386_link_hash_entry.  */
+	      if (h != NULL
 		  && ELF32_R_TYPE (rel->r_info) == R_386_PC32)
 		{
 		  struct elf_i386_link_hash_entry *eh;
@@ -1100,10 +1100,10 @@ elf_i386_size_dynamic_sections (output_bfd, info)
      PC relative relocs against symbols defined in a regular object.
      We allocated space for them in the check_relocs routine, but we
      will not fill them in in the relocate_section routine.  */
-  if (info->shared && info->symbolic)
+  if (info->shared)
     elf_i386_link_hash_traverse (elf_i386_hash_table (info),
 				 elf_i386_discard_copies,
-				 (PTR) NULL);
+				 (PTR) info);
 
   /* The check_relocs and adjust_dynamic_symbol entry points have
      determined the sizes of the various dynamic sections.  Allocate
@@ -1197,12 +1197,11 @@ elf_i386_size_dynamic_sections (output_bfd, info)
 	  continue;
 	}
 
-      /* Allocate memory for the section contents.  */
-      /* FIXME: This should be a call to bfd_alloc not bfd_zalloc.
-	 Unused entries should be reclaimed before the section's contents
-	 are written out, but at the moment this does not happen.  Thus in
-	 order to prevent writing out garbage, we initialise the section's
-	 contents to zero.  */
+      /* Allocate memory for the section contents.  We use bfd_zalloc
+	 here in case unused entries are not reclaimed before the
+	 section's contents are written out.  This should not happen,
+	 but this way if it does, we get a R_386_NONE reloc instead
+	 of garbage.  */
       s->contents = (bfd_byte *) bfd_zalloc (dynobj, s->_raw_size);
       if (s->contents == NULL && s->_raw_size != 0)
 	return false;
@@ -1251,26 +1250,33 @@ elf_i386_size_dynamic_sections (output_bfd, info)
 }
 
 /* This function is called via elf_i386_link_hash_traverse if we are
-   creating a shared object with -Bsymbolic.  It discards the space
-   allocated to copy PC relative relocs against symbols which are
-   defined in regular objects.  We allocated space for them in the
+   creating a shared object.  In the -Bsymbolic case, it discards the
+   space allocated to copy PC relative relocs against symbols which
+   are defined in regular objects.  For the normal non-symbolic case,
+   we also discard space for relocs that have become local due to
+   symbol visibility changes.  We allocated space for them in the 
    check_relocs routine, but we won't fill them in in the
    relocate_section routine.  */
 
 /*ARGSUSED*/
 static boolean
-elf_i386_discard_copies (h, ignore)
+elf_i386_discard_copies (h, inf)
      struct elf_i386_link_hash_entry *h;
-     PTR ignore ATTRIBUTE_UNUSED;
+     PTR inf;
 {
   struct elf_i386_pcrel_relocs_copied *s;
+  struct bfd_link_info *info = (struct bfd_link_info *) inf;
 
-  /* We only discard relocs for symbols defined in a regular object.  */
-  if ((h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
-    return true;
-
-  for (s = h->pcrel_relocs_copied; s != NULL; s = s->next)
-    s->section->_raw_size -= s->count * sizeof (Elf32_External_Rel);
+  /* If a symbol has been forced local or we have found a regular
+     definition for the symbolic link case, then we won't be needing
+     any relocs.  */
+  if ((h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0
+      && ((h->root.elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0
+	  || info->symbolic))
+    {
+      for (s = h->pcrel_relocs_copied; s != NULL; s = s->next)
+	s->section->_raw_size -= s->count * sizeof (Elf32_External_Rel);
+    }
 
   return true;
 }
@@ -1878,7 +1884,9 @@ elf_i386_finish_dynamic_symbol (output_bfd, info, h, sym)
       ++srel->reloc_count;
     }
 
-  if ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_COPY) != 0)
+  if ((h->elf_link_hash_flags & (ELF_LINK_HASH_NEEDS_COPY
+				 | ELF_LINK_FORCED_LOCAL))
+      == ELF_LINK_HASH_NEEDS_COPY)
     {
       asection *s;
       Elf_Internal_Rel rel;
