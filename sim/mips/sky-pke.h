@@ -412,6 +412,13 @@ struct pke_device
   int qw_pc;    /* 0 .. 3:                     word index of next instruction */
 };
 
+extern struct pke_device pke0_device;
+extern struct pke_device pke1_device;
+
+int read_pke_reg (struct pke_device *device, int regno, void *buf);
+int write_pke_reg (struct pke_device *device, int regno, const void *buf);
+int read_pke_pc (struct pke_device *device, void *buf);
+
 
 /* Flags for PKE.flags */
 

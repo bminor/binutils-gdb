@@ -197,6 +197,68 @@ pke_attach(SIM_DESC sd, struct pke_device* me)
   }
 }
 
+/* Read PKE Pseudo-PC into buf in target order */
+int
+read_pke_pc (struct pke_device *me, void *buf)
+{
+  *((int *) buf) = H2T_4( me->fifo_pc );
+  return 4;
+}
+
+/* Read PKE reg into buf in target order */
+int
+read_pke_reg (struct pke_device *me, int reg_num, void *buf)
+{
+  /* handle reads to individual registers; clear `readable' on error */
+  switch (reg_num)
+    {
+    /* handle common case of register reading, side-effect free */
+    /* PKE1-only registers*/
+    case PKE_REG_BASE:
+    case PKE_REG_OFST:
+    case PKE_REG_TOPS:
+    case PKE_REG_TOP:
+    case PKE_REG_DBF:
+      if (me->pke_number == 0)
+	{
+	  *((int *) buf) = 0;
+	  break;
+	}
+      /* fall through */
+
+    /* PKE0 & PKE1 common registers*/
+    case PKE_REG_STAT:
+    case PKE_REG_ERR:
+    case PKE_REG_MARK:
+    case PKE_REG_CYCLE:
+    case PKE_REG_MODE:
+    case PKE_REG_NUM:
+    case PKE_REG_MASK:
+    case PKE_REG_CODE:
+    case PKE_REG_ITOPS:
+    case PKE_REG_ITOP:
+    case PKE_REG_R0:
+    case PKE_REG_R1:
+    case PKE_REG_R2:
+    case PKE_REG_R3:
+    case PKE_REG_C0:
+    case PKE_REG_C1:
+    case PKE_REG_C2:
+    case PKE_REG_C3:
+      *((int *) buf) = H2T_4(me->regs[reg_num][0]);
+      break;
+
+    /* handle common case of write-only registers */
+    case PKE_REG_FBRST:
+      *((int *) buf) = 0;
+      break;
+
+    default:
+      ASSERT(0); /* tests above should prevent this possibility */
+    }
+
+  return 4;
+}
 
 
 /* Handle a PKE read; return no. of bytes read */
@@ -231,68 +293,15 @@ pke_io_read_buffer(device *me_,
       /* register bank */
       int reg_num = ADDR_TRUNC_QW(addr - my_reg_start) >> 4;
       int reg_byte = ADDR_OFFSET_QW(addr);      /* find byte-offset inside register bank */
-      int readable = 1;
       quadword result;
 
       /* clear result */
       result[0] = result[1] = result[2] = result[3] = 0;
 
-      /* handle reads to individual registers; clear `readable' on error */
-      switch(reg_num)
-	{
-	  /* handle common case of register reading, side-effect free */
-	  /* PKE1-only registers*/
-	case PKE_REG_BASE:
-	case PKE_REG_OFST:
-	case PKE_REG_TOPS:
-	case PKE_REG_TOP:
-	case PKE_REG_DBF:
-	  if(me->pke_number == 0)
-	    readable = 0;
-	  /* fall through */
-	  /* PKE0 & PKE1 common registers*/
-	case PKE_REG_STAT:
-	case PKE_REG_ERR:
-	case PKE_REG_MARK:
-	case PKE_REG_CYCLE:
-	case PKE_REG_MODE:
-	case PKE_REG_NUM:
-	case PKE_REG_MASK:
-	case PKE_REG_CODE:
-	case PKE_REG_ITOPS:
-	case PKE_REG_ITOP:
-	case PKE_REG_R0:
-	case PKE_REG_R1:
-	case PKE_REG_R2:
-	case PKE_REG_R3:
-	case PKE_REG_C0:
-	case PKE_REG_C1:
-	case PKE_REG_C2:
-	case PKE_REG_C3:
-	  result[0] = H2T_4(me->regs[reg_num][0]);
-	  break;
-
-	  /* handle common case of write-only registers */
-	case PKE_REG_FBRST:
-	  readable = 0;
-	  break;
-
-	default:
-	  ASSERT(0); /* test above should prevent this possibility */
-	}
+      read_pke_reg (me, reg_num, result);
 
       /* perform transfer & return */
-      if(readable) 
-	{
-	  /* copy the bits */
-	  memcpy(dest, ((unsigned_1*) &result) + reg_byte, nr_bytes);
-	  /* okay */
-	}
-      else
-	{
-	  /* return zero bits */
-	  memset(dest, 0, nr_bytes);
-	} 
+      memcpy(dest, ((unsigned_1*) &result) + reg_byte, nr_bytes);
 
       return nr_bytes;
       /* NOTREACHED */
@@ -311,8 +320,102 @@ pke_io_read_buffer(device *me_,
   return 0;
 }
 
+/* Write PKE reg from buf, which is in target order */
+int
+write_pke_reg (struct pke_device *me, int reg_num, const void *buf)
+{
+  int writeable = 1;
+  /* make words host-endian */
+  unsigned_4 input = T2H_4( *((unsigned_4 *) buf) );
 
-/* Handle a PKE read; return no. of bytes written */
+  /* handle writes to individual registers; clear `writeable' on error */
+  switch (reg_num)
+    {
+    case PKE_REG_FBRST:
+      /* Order these tests from least to most overriding, in case
+	 multiple bits are set. */
+      if(BIT_MASK_GET(input, PKE_REG_FBRST_STC_B, PKE_REG_FBRST_STC_E))
+	{
+	  /* clear a bunch of status bits */
+	  PKE_REG_MASK_SET(me, STAT, PSS, 0);
+	  PKE_REG_MASK_SET(me, STAT, PFS, 0);
+	  PKE_REG_MASK_SET(me, STAT, PIS, 0);
+	  PKE_REG_MASK_SET(me, STAT, INT, 0);
+	  PKE_REG_MASK_SET(me, STAT, ER0, 0);
+	  PKE_REG_MASK_SET(me, STAT, ER1, 0);
+	  me->flags &= ~PKE_FLAG_PENDING_PSS;
+	  /* will allow resumption of possible stalled instruction */
+	}
+      if(BIT_MASK_GET(input, PKE_REG_FBRST_STP_B, PKE_REG_FBRST_STP_E))
+	{
+	  me->flags |= PKE_FLAG_PENDING_PSS;
+	}
+      if(BIT_MASK_GET(input, PKE_REG_FBRST_FBK_B, PKE_REG_FBRST_FBK_E))
+	{
+	  PKE_REG_MASK_SET(me, STAT, PFS, 1);
+	}
+      if(BIT_MASK_GET(input, PKE_REG_FBRST_RST_B, PKE_REG_FBRST_RST_E))
+	{
+	  pke_reset(me);
+	}
+      break;
+      
+    case PKE_REG_ERR:
+      /* copy bottom three bits */
+      BIT_MASK_SET(me->regs[PKE_REG_ERR][0], 0, 2, BIT_MASK_GET(input, 0, 2));
+      break;
+
+    case PKE_REG_MARK:
+      /* copy bottom sixteen bits */
+      PKE_REG_MASK_SET(me, MARK, MARK, BIT_MASK_GET(input, 0, 15));
+      /* reset MRK bit in STAT */
+      PKE_REG_MASK_SET(me, STAT, MRK, 0);
+      break;
+
+      /* handle common case of read-only registers */
+      /* PKE1-only registers - not really necessary to handle separately */
+    case PKE_REG_BASE:
+    case PKE_REG_OFST:
+    case PKE_REG_TOPS:
+    case PKE_REG_TOP:
+    case PKE_REG_DBF:
+      if(me->pke_number == 0)
+	writeable = 0;
+      /* fall through */
+      /* PKE0 & PKE1 common registers*/
+    case PKE_REG_STAT:
+      /* ignore FDR bit for PKE1_STAT -- simulator does not implement PKE->RAM transfers */
+    case PKE_REG_CYCLE:
+    case PKE_REG_MODE:
+    case PKE_REG_NUM:
+    case PKE_REG_MASK:
+    case PKE_REG_CODE:
+    case PKE_REG_ITOPS:
+    case PKE_REG_ITOP:
+    case PKE_REG_R0:
+    case PKE_REG_R1:
+    case PKE_REG_R2:
+    case PKE_REG_R3:
+    case PKE_REG_C0:
+    case PKE_REG_C1:
+    case PKE_REG_C2:
+    case PKE_REG_C3:
+      writeable = 0;
+      break;
+
+    default:
+      ASSERT(0); /* test above should prevent this possibility */
+    }
+
+  /* perform return */
+  if(! writeable) 
+    {
+      return 0; /* error */
+    } 
+
+  return 4;
+}
+/* Handle a PKE write; return no. of bytes written */
 
 int
 pke_io_write_buffer(device *me_,
@@ -344,7 +447,6 @@ pke_io_write_buffer(device *me_,
       /* register bank */
       int reg_num = ADDR_TRUNC_QW(addr - my_reg_start) >> 4;
       int reg_byte = ADDR_OFFSET_QW(addr);      /* find byte-offset inside register bank */
-      int writeable = 1;
       quadword input;
 
       /* clear input */
@@ -353,95 +455,7 @@ pke_io_write_buffer(device *me_,
       /* write user-given bytes into input */
       memcpy(((unsigned_1*) &input) + reg_byte, src, nr_bytes);
 
-      /* make words host-endian */
-      input[0] = T2H_4(input[0]);
-      /* we may ignore other words */
-
-      /* handle writes to individual registers; clear `writeable' on error */
-      switch(reg_num)
-	{
-	case PKE_REG_FBRST:
-	  /* Order these tests from least to most overriding, in case
-             multiple bits are set. */
-	  if(BIT_MASK_GET(input[0], PKE_REG_FBRST_STC_B, PKE_REG_FBRST_STC_E))
-	    {
-	      /* clear a bunch of status bits */
-	      PKE_REG_MASK_SET(me, STAT, PSS, 0);
-	      PKE_REG_MASK_SET(me, STAT, PFS, 0);
-	      PKE_REG_MASK_SET(me, STAT, PIS, 0);
-	      PKE_REG_MASK_SET(me, STAT, INT, 0);
-	      PKE_REG_MASK_SET(me, STAT, ER0, 0);
-	      PKE_REG_MASK_SET(me, STAT, ER1, 0);
-	      me->flags &= ~PKE_FLAG_PENDING_PSS;
-	      /* will allow resumption of possible stalled instruction */
-	    }
-	  if(BIT_MASK_GET(input[0], PKE_REG_FBRST_STP_B, PKE_REG_FBRST_STP_E))
-	    {
-	      me->flags |= PKE_FLAG_PENDING_PSS;
-	    }
-	  if(BIT_MASK_GET(input[0], PKE_REG_FBRST_FBK_B, PKE_REG_FBRST_FBK_E))
-	    {
-	      PKE_REG_MASK_SET(me, STAT, PFS, 1);
-	    }
-	  if(BIT_MASK_GET(input[0], PKE_REG_FBRST_RST_B, PKE_REG_FBRST_RST_E))
-	    {
-	      pke_reset(me);
-	    }
-	  break;
-
-	case PKE_REG_ERR:
-	  /* copy bottom three bits */
-	  BIT_MASK_SET(me->regs[PKE_REG_ERR][0], 0, 2, BIT_MASK_GET(input[0], 0, 2));
-	  break;
-
-	case PKE_REG_MARK:
-	  /* copy bottom sixteen bits */
-	  PKE_REG_MASK_SET(me, MARK, MARK, BIT_MASK_GET(input[0], 0, 15));
-	  /* reset MRK bit in STAT */
-	  PKE_REG_MASK_SET(me, STAT, MRK, 0);
-	  break;
-
-	  /* handle common case of read-only registers */
-	  /* PKE1-only registers - not really necessary to handle separately */
-	case PKE_REG_BASE:
-	case PKE_REG_OFST:
-	case PKE_REG_TOPS:
-	case PKE_REG_TOP:
-	case PKE_REG_DBF:
-	  if(me->pke_number == 0)
-	    writeable = 0;
-	  /* fall through */
-	  /* PKE0 & PKE1 common registers*/
-	case PKE_REG_STAT:
-	  /* ignore FDR bit for PKE1_STAT -- simulator does not implement PKE->RAM transfers */
-	case PKE_REG_CYCLE:
-	case PKE_REG_MODE:
-	case PKE_REG_NUM:
-	case PKE_REG_MASK:
-	case PKE_REG_CODE:
-	case PKE_REG_ITOPS:
-	case PKE_REG_ITOP:
-	case PKE_REG_R0:
-	case PKE_REG_R1:
-	case PKE_REG_R2:
-	case PKE_REG_R3:
-	case PKE_REG_C0:
-	case PKE_REG_C1:
-	case PKE_REG_C2:
-	case PKE_REG_C3:
-	  writeable = 0;
-	  break;
-
-	default:
-	  ASSERT(0); /* test above should prevent this possibility */
-	}
-
-      /* perform return */
-      if(! writeable) 
-	{
-	  ; /* error */
-	} 
-
+      write_pke_reg (me, reg_num, input);
       return nr_bytes;
 
       /* NOTREACHED */
