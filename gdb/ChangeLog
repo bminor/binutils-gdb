@@ -1,3 +1,15 @@
+2002-01-07  Michael Snyder  <msnyder@redhat.com>
+
+	* infptrace.c (GDB_MAX_ALLOCA): New define.
+	(child_xfer_memory): Use xmalloc/xfree instead of alloca if the
+	size of the buffer exceeds GDB_MAX_ALLOCA (default 1 megabyte, 
+	can be overridden with whatever value is appropriate to the host).
+	* infttrace.c (child_xfer_memory): Add FIXME warning about use of
+	alloca to allocate potentially large buffer.
+	* rs6000-nat.c (child_xfer_memory): Ditto.
+	* symm-nat.c (child_xfer_memory): Ditto.
+	* x86-64-linux-nat.c (child_xfer_memory): Ditto.
+
 2002-01-07  Jackie Smith Cashion  <jsmith@redhat.com>
 
 	From Nick Clifton  <nickc@redhat.com>

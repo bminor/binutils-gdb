@@ -764,8 +764,11 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
   = (((memaddr + len) - addr) + sizeof (PTRACE_XFER_TYPE) - 1)
   / sizeof (PTRACE_XFER_TYPE);
   /* Allocate buffer of that many longwords.  */
+  /* FIXME (alloca): This code, cloned from infptrace.c, is unsafe
+     because it uses alloca to allocate a buffer of arbitrary size.
+     For very large xfers, this could crash GDB's stack.  */
   register PTRACE_XFER_TYPE *buffer
-  = (PTRACE_XFER_TYPE *) alloca (count * sizeof (PTRACE_XFER_TYPE));
+    = (PTRACE_XFER_TYPE *) alloca (count * sizeof (PTRACE_XFER_TYPE));
 
   if (write)
     {

@@ -480,6 +480,11 @@ store_inferior_registers (int regno)
 #endif /* !defined (FETCH_INFERIOR_REGISTERS).  */
 
 
+/* Set an upper limit on alloca.  */
+#ifndef GDB_MAX_ALLOCA
+#define GDB_MAX_ALLOCA 0x1000
+#endif
+
 #if !defined (CHILD_XFER_MEMORY)
 /* NOTE! I tried using PTRACE_READDATA, etc., to read and write memory
    in the NEW_SUN_PTRACE case.  It ought to be straightforward.  But
@@ -506,9 +511,20 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
   /* Round ending address up; get number of longwords that makes.  */
   int count = ((((memaddr + len) - addr) + sizeof (PTRACE_XFER_TYPE) - 1)
 	       / sizeof (PTRACE_XFER_TYPE));
+  int alloc = count * sizeof (PTRACE_XFER_TYPE);
+  PTRACE_XFER_TYPE *buffer;
+  struct cleanup *old_chain = NULL;
+
   /* Allocate buffer of that many longwords.  */
-  PTRACE_XFER_TYPE *buffer =
-    (PTRACE_XFER_TYPE *) alloca (count * sizeof (PTRACE_XFER_TYPE));
+  if (len < GDB_MAX_ALLOCA)
+    {
+      buffer = (PTRACE_XFER_TYPE *) alloca (alloc);
+    }
+  else
+    {
+      buffer = (PTRACE_XFER_TYPE *) xmalloc (alloc);
+      old_chain = make_cleanup (xfree, buffer);
+    }
 
   if (write)
     {
@@ -573,6 +589,8 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 	      len);
     }
 
+  if (old_chain != NULL)
+    do_cleanups (old_chain);
   return len;
 }
 

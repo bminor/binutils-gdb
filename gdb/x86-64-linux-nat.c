@@ -147,8 +147,7 @@ fill_gregset (elf_gregset_t * gregsetp, int regno)
 
   for (i = 0; i < X86_64_NUM_GREGS; i++)
     if ((regno == -1 || regno == i))
-      *(regp + x86_64_regmap[i]) =
-	*(elf_greg_t *) & registers[REGISTER_BYTE (i)];
+      read_register_gen (i, regp + x86_64_regmap[i]);
 }
 
 /* Fetch all general-purpose registers from process/thread TID and
@@ -417,6 +416,9 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
     = (((memaddr + len) - addr) + sizeof (PTRACE_XFER_TYPE) - 1)
     / sizeof (PTRACE_XFER_TYPE);
   /* Allocate buffer of that many longwords.  */
+  /* FIXME (alloca): This code, cloned from infptrace.c, is unsafe
+     because it uses alloca to allocate a buffer of arbitrary size.
+     For very large xfers, this could crash GDB's stack.  */
   register PTRACE_XFER_TYPE *buffer
     = (PTRACE_XFER_TYPE *) alloca (count * sizeof (PTRACE_XFER_TYPE));
 
