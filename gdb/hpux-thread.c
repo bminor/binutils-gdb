@@ -554,6 +554,7 @@ init_hpux_thread_ops (void)
   hpux_thread_ops.to_terminal_init = terminal_init_inferior;
   hpux_thread_ops.to_terminal_inferior = terminal_inferior;
   hpux_thread_ops.to_terminal_ours_for_output = terminal_ours_for_output;
+  hpux_thread_ops.to_terminal_save_ours = terminal_save_ours;
   hpux_thread_ops.to_terminal_ours = terminal_ours;
   hpux_thread_ops.to_terminal_info = child_terminal_info;
   hpux_thread_ops.to_kill = hpux_thread_kill_inferior;

@@ -200,6 +200,23 @@ terminal_init_inferior_with_pgrp (int pgrp)
     }
 }
 
+/* Save the terminal settings again.  This is necessary for the TUI
+   when it switches to TUI or non-TUI mode;  curses changes the terminal
+   and gdb must be able to restore it correctly.  */
+
+void
+terminal_save_ours ()
+{
+  if (gdb_has_a_terminal ())
+    {
+      /* We could just as well copy our_ttystate (if we felt like adding
+         a new function serial_copy_tty_state).  */
+      if (our_ttystate)
+        xfree (our_ttystate);
+      our_ttystate = serial_get_tty_state (stdin_serial);
+    }
+}
+
 void
 terminal_init_inferior (void)
 {

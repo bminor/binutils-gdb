@@ -1556,6 +1556,7 @@ init_sol_thread_ops (void)
   sol_thread_ops.to_terminal_inferior = terminal_inferior;
   sol_thread_ops.to_terminal_ours_for_output = terminal_ours_for_output;
   sol_thread_ops.to_terminal_ours = terminal_ours;
+  sol_thread_ops.to_terminal_save_ours = terminal_save_ours;
   sol_thread_ops.to_terminal_info = child_terminal_info;
   sol_thread_ops.to_kill = sol_thread_kill_inferior;
   sol_thread_ops.to_load = 0;

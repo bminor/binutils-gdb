@@ -264,6 +264,7 @@ struct target_ops
     void (*to_terminal_inferior) (void);
     void (*to_terminal_ours_for_output) (void);
     void (*to_terminal_ours) (void);
+    void (*to_terminal_save_ours) (void);
     void (*to_terminal_info) (char *, int);
     void (*to_kill) (void);
     void (*to_load) (char *, int);
@@ -625,6 +626,14 @@ extern void print_section_info (struct target_ops *, bfd *);
 
 #define target_terminal_ours() \
      (*current_target.to_terminal_ours) ()
+
+/* Save our terminal settings.
+   This is called from TUI after entering or leaving the curses
+   mode.  Since curses modifies our terminal this call is here
+   to take this change into account.  */
+
+#define target_terminal_save_ours() \
+     (*current_target.to_terminal_save_ours) ()
 
 /* Print useful information about our terminal status, if such a thing
    exists.  */

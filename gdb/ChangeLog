@@ -1,3 +1,24 @@
+2002-08-26  Stephane Carrez  <stcarrez@nerim.fr>
+
+	Fix PR gdb/393:
+	* inflow.c (terminal_save_ours): New function to save terminal
+	settings.
+	* inferior.h (terminal_save_ours): Declare.
+	* target.c (debug_to_terminal_save_ours): New function.
+	(cleanup_target): Defaults to_terminal_save_ours.
+	(update_current_target): Inherit to_terminal_save_ours.
+	(setup_target_debug): Set to_terminal_save_ours.
+	* target.h (target_terminal_save_ours): New to save terminal settings.
+	(target_ops): New member to_terminal_save_ours.
+	* gnu-nat.c (init_gnu_ops): Set to_terminal_save_ours.
+	* hpux-thread.c (init_hpux_thread_ops): Likewise.
+	* inftarg.c (init_child_ops): Likewise.
+	* m3-nat.c (init_m3_ops): Likewise.
+	* procfs.c (init_procfs_ops): Likewise.
+	* wince.c (init_child_ops): Likewise.
+	* win32-nat.c (init_child_ops): Likewise.
+	* sol-thread.c (init_sol_thread_ops): Likewise.
+
 2002-08-26  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.c (i386_store_return_value): Undeprecate.  Convert to
