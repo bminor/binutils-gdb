@@ -1235,7 +1235,7 @@ fp_recip2(sim_cpu *cpu,
 {
   static const unsigned64 one_single = UNSIGNED64 (0x3F800000);
   static const unsigned64 one_double = UNSIGNED64 (0x3FF0000000000000);
-  static const unsigned64 one_ps = (one_single << 32 | one_single);
+  static const unsigned64 one_ps = (UNSIGNED64 (0x3F800000) << 32 | UNSIGNED64 (0x3F800000));
   unsigned64 one;
 
   /* Implemented as nmsub fd, 1, fs, ft.  */
@@ -1333,7 +1333,7 @@ fp_rsqrt2(sim_cpu *cpu,
 {
   static const unsigned64 half_single = UNSIGNED64 (0x3F000000);
   static const unsigned64 half_double = UNSIGNED64 (0x3FE0000000000000);
-  static const unsigned64 half_ps = (half_single << 32 | half_single);
+  static const unsigned64 half_ps = (UNSIGNED64 (0x3F000000) << 32 | UNSIGNED64 (0x3F000000));
   unsigned64 half;
 
   /* Implemented as (nmsub fd, 0.5, fs, ft)/2, where the divide is
