@@ -1,3 +1,10 @@
+Tue Sep 29 10:51:55 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* tc-i960.h, tc-i960.c: avoid the ANSI preprocessor addition
+	#elif, since it is not supported by old compilers.
+	ho-rs6000.h, tc-m68k.c: the native RS/6000 compiler miscompiles a
+	couple of expressions in tc-m68k.c.
+
 Mon Sep 28 21:16:51 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* tc-i960.c (get_cdisp): Use NO_RELOC, not 0, in call to fix_new.

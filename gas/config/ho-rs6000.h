@@ -29,6 +29,11 @@
 #define BROKEN_ASSERT
 #endif
 
+/* The RS/6000 native compiler miscompiles an expression in tc-m68k.c.  */
+#ifndef __STDC__
+#define IBM_COMPILER_SUX
+#endif
+
 extern void free ();
 
 /* end of ho-rs6000.h */
