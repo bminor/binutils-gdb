@@ -3120,13 +3120,14 @@ decode_coproc(sd,cia,instruction)
 #if (WITH_IGEN > 1)
 void old_engine_run PARAMS ((SIM_DESC sd, int next_cpu_nr, int siggnal));
 void
-old_engine_run (sd, next_cpu_nr, siggnal)
+old_engine_run (sd, next_cpu_nr, nr_cpus, siggnal)
 #else
 void
-sim_engine_run (sd, next_cpu_nr, siggnal)
+sim_engine_run (sd, next_cpu_nr, nr_cpus, siggnal)
 #endif
      SIM_DESC sd;
      int next_cpu_nr; /* ignore */
+     int nr_cpus; /* ignore */
      int siggnal; /* ignore */
 {
 #if !defined(FASTSIM)

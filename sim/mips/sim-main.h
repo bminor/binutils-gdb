@@ -289,7 +289,8 @@ struct _sim_cpu {
 
 
   /* The following are internal simulator state variables: */
-#define CPU_CIA(CPU) (PC)
+#define CIA_GET(CPU) ((CPU)->registers[PCIDX] + 0)
+#define CIA_SET(CPU,CIA) ((CPU)->registers[PCIDX] = (CIA))
   address_word dspc;  /* delay-slot PC */
 #define DSPC ((STATE_CPU (sd,0))->dspc)
 
@@ -378,7 +379,8 @@ struct _sim_cpu {
 #define FGR     (&REGISTERS[FGRIDX])
 #define LO      (REGISTERS[33])
 #define HI      (REGISTERS[34])
-#define PC      (REGISTERS[37])
+#define PCIDX	37
+#define PC      (REGISTERS[PCIDX])
 #define CAUSE   (REGISTERS[36])
 #define SRIDX   (32)
 #define SR      (REGISTERS[SRIDX])      /* CPU status register */

@@ -1,3 +1,8 @@
+Fri Jan 30 11:47:50 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* cpu.h (CPU_CIA): Delete macro, replace with...
+ 	(CIA_SET, CIA_GET): Define.
+
 Wed Jan 28 18:44:33 1998  Michael Meissner  <meissner@cygnus.com>
 
 	* misc.c (tic80_trace_cmp_internal): New function to return

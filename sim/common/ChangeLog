@@ -1,3 +1,21 @@
+Fri Jan 30 09:36:33 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-engine.h (sim_engine_run): Add argument nr_cpus.
+	* sim-run.c (sim_engine_run): Update.
+	
+	* sim-engine.h (SIM_ENGINE_HALT_HOOK): Use SET_CPU_CIA instead of
+ 	CPU_CIA.
+  	* sim-run.c (sim_engine_run): Ditto.
+
+	* sim-resume.c (sim_resume): Obtain nr_cpus from sim_engine.
+	(sim_resume): Pass nr_cpus to sim_engine_run.
+
+	* sim-engine.h (struct _sim_engine): Add member nr_cpus.
+	
+	* sim-engine.c (sim_engine_init): Hardwire nr_cpus to
+ 	MAX_NR_PROCESSORS.
+	(sim_engine_nr_cpus) sim-engine.c, sim-engine.h: New function
+	
 Thu Jan 29 12:13:01 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* cgen.sh: Portably read parms past $9.

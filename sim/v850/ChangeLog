@@ -1,3 +1,8 @@
+Fri Jan 30 09:51:27 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-main.h (CPU_CIA): Delete, replaced by.
+	(CIA_SET, CIA_SET): Define.
+
 Mon Jan 19 22:26:29 1998  Doug Evans  <devans@seba>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

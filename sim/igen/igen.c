@@ -353,7 +353,7 @@ static void
 print_itrace_format (lf *file,
 		     insn_mnemonic_entry *assembler)
 {
-  /* pass=1 is fmt string; pass=2 is is arguments */
+  /* pass=1 is fmt string; pass=2 is arguments */
   int pass;
   /* print the format string */
   for (pass = 1; pass <= 2; pass++)
@@ -786,9 +786,22 @@ gen_idecode_h (lf *file,
       gen_list *entry;
       for (entry = gen->tables; entry != NULL; entry = entry->next)
 	{
+	  if (entry->model != NULL)
+	    print_idecode_issue_function_header (file,
+						 entry->model->name,
+						 is_function_declaration,
+						 1/*ALWAYS ONE WORD*/);
+	  else
+	    print_idecode_issue_function_header (file,
+						 NULL,
+						 is_function_declaration,
+						 1/*ALWAYS ONE WORD*/);
+	}
+      if (options.gen.multi_sim)
+	{
 	  print_idecode_issue_function_header (file,
-					       entry->processor,
-					       0/*is definition*/,
+					       NULL,
+					       is_function_variable,
 					       1/*ALWAYS ONE WORD*/);
 	}
     }
@@ -825,10 +838,16 @@ gen_idecode_c (lf *file,
 	    /* output the main idecode routine */
 	    if (!options.gen.icache)
 	      {
-		print_idecode_issue_function_header (file,
-						     entry->processor,
-						     1/*is definition*/,
-						     1/*ALWAYS ONE WORD*/);
+		if (entry->model != NULL)
+		  print_idecode_issue_function_header (file,
+						       entry->model->name,
+						       1/*is definition*/,
+						       1/*ALWAYS ONE WORD*/);
+		else
+		  print_idecode_issue_function_header (file,
+						       NULL,
+						       1/*is definition*/,
+						       1/*ALWAYS ONE WORD*/);
 		lf_printf (file, "{\n");
 		lf_indent (file, +2);
 		lf_printf (file, "%sinstruction_address nia;\n",
@@ -860,11 +879,22 @@ gen_run_c (lf *file,
   gen_list *entry;
   lf_printf (file, "#include \"sim-main.h\"\n");
   lf_printf (file, "#include \"engine.h\"\n");
+  lf_printf (file, "#include \"idecode.h\"\n");
   lf_printf (file, "#include \"bfd.h\"\n");
   lf_printf (file, "\n");
+
+  if (options.gen.multi_sim)
+    {
+      print_idecode_issue_function_header (file, NULL, is_function_variable, 1);
+      lf_printf (file, "\n");
+      print_engine_run_function_header (file, NULL, is_function_variable);
+      lf_printf (file, "\n");
+    }
+  
   lf_printf (file, "void\n");
   lf_printf (file, "sim_engine_run (SIM_DESC sd,\n");
   lf_printf (file, "                int next_cpu_nr,\n");
+  lf_printf (file, "                int nr_cpus,\n");
   lf_printf (file, "                int siggnal)\n");
   lf_printf (file, "{\n");
   lf_indent (file, +2);
@@ -880,37 +910,62 @@ gen_run_c (lf *file,
       lf_indent (file, +2);
       for (entry = gen->tables; entry != NULL; entry = entry->next)
 	{
-	  lf_printf (file, "case bfd_mach_%s:\n", entry->processor);
+	  if (options.gen.default_model != NULL
+	      && (strcmp (entry->model->name, options.gen.default_model) == 0
+		  || strcmp (entry->model->full_name, options.gen.default_model) == 0))
+	    lf_printf (file, "default:\n");
+	  lf_printf (file, "case bfd_mach_%s:\n", entry->model->full_name);
 	  lf_indent (file, +2);
+	  print_function_name (file,
+			       "issue",
+			       NULL, /* format name */
+			       NULL, /* NO processor */
+			       NULL, /* expanded bits */
+			       function_name_prefix_idecode);
+	  lf_printf (file, " = ");
+	  print_function_name (file,
+			       "issue",
+			       NULL, /* format name */
+			       entry->model->name,
+			       NULL, /* expanded bits */
+			       function_name_prefix_idecode);
+	  lf_printf (file, ";\n");
 	  print_function_name (file,
 			       "run",
 			       NULL, /* format name */
-			       entry->processor,
+			       NULL, /* NO processor */
 			       NULL, /* expanded bits */
 			       function_name_prefix_engine);
-	  lf_printf (file, " (sd, next_cpu_nr, siggnal);\n");
+	  lf_printf (file, " = ");
+	  print_function_name (file,
+			       "run",
+			       NULL, /* format name */
+			       entry->model->name,
+			       NULL, /* expanded bits */
+			       function_name_prefix_engine);
+	  lf_printf (file, ";\n");
 	  lf_printf (file, "break;\n");
 	  lf_indent (file, -2);
 	}
-      lf_printf (file, "default:\n");
-      lf_indent (file, +2);
-      lf_printf (file, "sim_engine_abort (sd, NULL, NULL_CIA,\n");
-      lf_printf (file, "                  \"sim_engine_run - unknown machine\");\n");
-      lf_printf (file, "break;\n");
-      lf_indent (file, -2);
+      if (options.gen.default_model == NULL)
+	{
+	  lf_printf (file, "default:\n");
+	  lf_indent (file, +2);
+	  lf_printf (file, "sim_engine_abort (sd, NULL, NULL_CIA,\n");
+	  lf_printf (file, "                  \"sim_engine_run - unknown machine\");\n");
+	  lf_printf (file, "break;\n");
+	  lf_indent (file, -2);
+	}
       lf_indent (file, -2);
       lf_printf (file, "  }\n");
     }
-  else
-    {
-      print_function_name (file,
-			   "run",
-			   NULL, /* format name */
-			   NULL, /* NO processor */
-			   NULL, /* expanded bits */
-			   function_name_prefix_engine);
-      lf_printf (file, " (sd, next_cpu_nr, siggnal);\n");
-    }
+  print_function_name (file,
+		       "run",
+		       NULL, /* format name */
+		       NULL, /* NO processor */
+		       NULL, /* expanded bits */
+		       function_name_prefix_engine);
+  lf_printf (file, " (sd, next_cpu_nr, nr_cpus, siggnal);\n");
   lf_indent (file, -2);
   lf_printf (file, "}\n");
 }
@@ -1021,7 +1076,8 @@ main (int argc,
       printf ("\t gen-icache[=<N>        - generate an instruction cracking cache of size <N>\n");
       printf ("\t                          Default size is %d\n", options.gen.icache_size);
       printf ("\t gen-insn-in-icache     - save original instruction when cracking\n");
-      printf ("\t gen-multi-sim          - generate multiple simulators - one per model\n");
+      printf ("\t gen-multi-sim[=MODEL]  - generate multiple simulators - one per model\n");
+      printf ("\t                          If specified MODEL is made the default architecture.\n");
       printf ("\t                          By default, a single simulator that will\n");
       printf ("\t                          execute any instruction is generated\n");
       printf ("\t gen-multi-word         - generate code allowing for multi-word insns\n");
@@ -1292,7 +1348,8 @@ main (int argc,
 		  {
 		  case '=':
 		    options.gen.icache_size = atoi (argp + strlen ("gen-icache") + 1);
-		    /* fall through */
+		    options.gen.icache = enable_p;
+		    break;
 		  case '\0':
 		    options.gen.icache = enable_p;
 		    break;
@@ -1304,9 +1361,25 @@ main (int argc,
 	      {
 		options.gen.insn_in_icache = enable_p;
 	      }
-	    else if (strcmp (argp, "gen-multi-sim") == 0)
+	    else if (strncmp (argp, "gen-multi-sim", strlen ("gen-multi-sim")) == 0)
 	      {
-		options.gen.multi_sim = enable_p;
+		char *arg = &argp[strlen ("gen-multi-sim")];
+		switch (arg[0])
+		  {
+		  case '=':
+		    options.gen.multi_sim = enable_p;
+		    options.gen.default_model = arg + 1;
+		    if (! filter_is_member (options.model_filter, options.gen.default_model))
+		      error (NULL, "multi-sim model %s unknown\n", options.gen.default_model);
+		    break;
+		  case '\0':
+		    options.gen.multi_sim = enable_p;
+		    options.gen.default_model = NULL;
+		    break;
+		  default:
+		    error (NULL, "Expecting -Ggen-multi-sim or -Ggen-multi-sim=<MODEL>\n");
+		    break;
+		  }
 	      }
 	    else if (strcmp (argp, "gen-multi-word") == 0)
 	      {

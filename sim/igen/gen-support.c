@@ -110,18 +110,30 @@ extern void
 gen_support_h (lf *file,
 	       insn_table *table)
 {
-  /* output the definition of `_SD'*/
+  /* output the definition of `SD_'*/
   if (options.gen.smp) 
     {
-      lf_printf(file, "#define _SD cpu, cia, MY_INDEX\n");
+      lf_printf(file, "#define _SD cpu, cia, MY_INDEX /* depreciated */\n");
+      lf_printf(file, "#define SD_ cpu, cia, MY_INDEX\n");
       lf_printf(file, "#define SD CPU_STATE (cpu)\n");
       lf_printf(file, "#define CPU cpu\n");
     }
   else
     {
-      lf_printf(file, "#define _SD sd, cia, MY_INDEX\n");
+      lf_printf(file, "#define _SD sd, cia, MY_INDEX /* depreciated */\n");
+      lf_printf(file, "#define SD_ sd, cia, MY_INDEX\n");
       lf_printf(file, "#define SD sd\n");
       lf_printf(file, "#define CPU (STATE_CPU (sd, 0))\n");
+    }
+  if (options.gen.delayed_branch)
+    {
+      lf_printf(file, "#define CIA cia.ip\n");
+      lf_printf(file, "/* #define NIA nia.dp -- do not define, ambigious */\n");
+    }
+  else
+    {
+      lf_printf(file, "#define CIA cia\n");
+      lf_printf(file, "#define NIA nia\n");
     }
   lf_printf(file, "\n");
   /* output a declaration for all functions */
@@ -155,7 +167,7 @@ support_c_function (lf *file,
   table_print_code (file, function->code);
   if (function->is_internal)
     {
-      lf_printf (file, "sim_io_error (sd, \"Internal function must longjump\\n\");\n");
+      lf_printf (file, "sim_engine_abort (SD, CPU, cia, \"Internal function must longjump\\n\");\n");
       lf_printf (file, "return cia;\n");
     }
   lf_indent (file, -2);

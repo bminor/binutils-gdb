@@ -1,3 +1,30 @@
+Sat Jan 31 14:50:27 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gen-engine.c (print_run_body): Use CIA_GET & CIA_SET instead of
+ 	CPU_CIA.  Parameterize with CPU argument.
+
+Fri Jan 30 09:09:39 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gen.h (struct _gen_list): Replace processor with model.
+
+	* igen.c (gen_idecode_h): Update.
+	(gen_run_c): For generated switch, use model->full_name.
+
+	* gen.c (print_gen_entry_path): Ditto.
+	(make_table):  Ditto.
+	(gen_entry_expand_insns):  Ditto.
+	(make_gen_tables):  Ditto.
+
+	* igen.c (gen_run_c): Add extra argument `nr_cpus' to generated
+ 	function sim_engine_run.  Pass argument on to engine_run.
+
+	* gen-engine.c (print_engine_run_function_header): Add extra
+ 	argument `nr_cpus' to generated function engine_run.
+	(print_run_body): Fix SMP case.
+
+	* gen-support.c (support_c_function): Call sim_engine_abort when
+ 	internal function fails to long jump.
+
 Wed Jan 21 18:00:22 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gen-semantics.c (print_semantic_body): Use GPR_SET to zero

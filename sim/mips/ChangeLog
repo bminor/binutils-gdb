@@ -1,3 +1,12 @@
+Sat Jan 31 14:49:24 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_engine_run): Add `nr_cpus' argument.
+
+	* mips.igen (model): Map processor names onto BFD name.	
+
+	* sim-main.h (CPU_CIA): Delete.
+ 	(SET_CIA, GET_CIA): Define
+
 Wed Jan 21 16:16:27 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-main.h (GPR_SET): Define, used by igen when zeroing a
