@@ -1,3 +1,21 @@
+Tue Jun 21 11:47:20 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* section.c (bfd_abs_section): Make const.
+	(bfd_abs_section_ptr, bfd_is_abs_section): Define.
+	(bfd_und_section): Make const.
+	(bfd_und_section_ptr, bfd_is_und_section): Define.
+	(bfd_com_section): Make const.
+	(bfd_com_section_ptr): Define.
+	(bfd_ind_section): Make const.
+	(bfd_ind_section_ptr, bfd_is_ind_section): Define.
+	(bfd_abs_symbol, bfd_com_symbol): Make const.
+	(bfd_und_symbol, bfd_ind_symbol): Likewise.
+	(global_syms): Cast initialization of section field.
+	(STD_SECTION): Define as const, and cast initializations.
+	* bfd-in2.h: Rebuilt.
+	* Many files: Change uses of bfd_abs_section, etc., to use
+	bfd_abs_section_ptr or bfd_is_abs_section, etc.
+
 Mon Jun 20 11:06:27 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* Many files: change all bfd_target vectors to be const.  Change

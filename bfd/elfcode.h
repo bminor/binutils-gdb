@@ -1462,7 +1462,7 @@ sym_is_global (abfd, sym)
 
       return 1;
     }
-  if (sym->section == &bfd_und_section)
+  if (bfd_is_und_section (sym->section))
     return 1;
   if (bfd_is_com_section (sym->section))
     return 1;
@@ -2323,7 +2323,7 @@ swap_out_syms (abfd)
 
 	if (bfd_is_com_section (syms[idx]->section))
 	  sym.st_info = ELF_ST_INFO (STB_GLOBAL, STT_OBJECT);
-	else if (syms[idx]->section == &bfd_und_section)
+	else if (bfd_is_und_section (syms[idx]->section))
 	  sym.st_info = ELF_ST_INFO (STB_GLOBAL, STT_NOTYPE);
 	else if (syms[idx]->flags & BSF_SECTION_SYM)
 	  sym.st_info = ELF_ST_INFO (STB_LOCAL, STT_SECTION);
@@ -2507,13 +2507,13 @@ section_from_elf_index (abfd, index)
      bfd *abfd;
      unsigned int index;
 {
-  /* @@ Is bfd_com_section really correct in all the places it could
+  /* @@ Is bfd_com_section_ptr really correct in all the places it could
      be returned from this routine?  */
 
   if (index == SHN_ABS)
-    return &bfd_com_section;	/* not abs? */
+    return bfd_com_section_ptr;	/* not abs? */
   if (index == SHN_COMMON)
-    return &bfd_com_section;
+    return bfd_com_section_ptr;
 
   if (index > elf_elfheader (abfd)->e_shnum)
     return NULL;
@@ -2536,7 +2536,7 @@ section_from_elf_index (abfd, index)
 	return (struct sec *) hdr->rawdata;
 
       default:
-	return (struct sec *) &bfd_abs_section;
+	return bfd_abs_section_ptr;
       }
   }
 }
@@ -2552,12 +2552,18 @@ elf_section_from_bfd_section (abfd, asect)
   Elf_Internal_Shdr *hdr;
   int maxindex = elf_elfheader (abfd)->e_shnum;
 
-  if (asect == &bfd_abs_section)
-    return SHN_ABS;
-  if (asect == &bfd_com_section)
-    return SHN_COMMON;
-  if (asect == &bfd_und_section)
-    return SHN_UNDEF;
+  if (asect->owner == NULL)
+    {
+      if (bfd_is_abs_section (asect))
+	return SHN_ABS;
+      if (bfd_is_com_section (asect))
+	return SHN_COMMON;
+      if (bfd_is_und_section (asect))
+	return SHN_UNDEF;
+      return -1;
+    }
+
+  BFD_ASSERT (asect->owner == abfd);
 
   for (index = 0; index < maxindex; index++)
     {
@@ -2749,16 +2755,16 @@ elf_slurp_symbol_table (abfd, symptrs, dynamic)
 		  /* This symbol is in a section for which we did not
 		     create a BFD section.  Just use bfd_abs_section,
 		     although it is wrong.  FIXME.  */
-		  sym->symbol.section = &bfd_abs_section;
+		  sym->symbol.section = bfd_abs_section_ptr;
 		}
 	    }
 	  else if (i_sym.st_shndx == SHN_ABS)
 	    {
-	      sym->symbol.section = &bfd_abs_section;
+	      sym->symbol.section = bfd_abs_section_ptr;
 	    }
 	  else if (i_sym.st_shndx == SHN_COMMON)
 	    {
-	      sym->symbol.section = &bfd_com_section;
+	      sym->symbol.section = bfd_com_section_ptr;
 	      /* Elf puts the alignment into the `value' field, and
 		 the size into the `size' field.  BFD wants to see the
 		 size in the value field, and doesn't care (at the
@@ -2767,10 +2773,10 @@ elf_slurp_symbol_table (abfd, symptrs, dynamic)
 	    }
 	  else if (i_sym.st_shndx == SHN_UNDEF)
 	    {
-	      sym->symbol.section = &bfd_und_section;
+	      sym->symbol.section = bfd_und_section_ptr;
 	    }
 	  else
-	    sym->symbol.section = &bfd_abs_section;
+	    sym->symbol.section = bfd_abs_section_ptr;
 
 	  sym->symbol.value -= sym->symbol.section->vma;
 
@@ -2971,7 +2977,7 @@ elf_slurp_reloca_table (abfd, asect, symbols)
 	 of zero points to the dummy symbol, which was not read into
 	 the symbol table SYMBOLS.  */
       if (ELF_R_SYM (dst.r_info) == 0)
-	cache_ptr->sym_ptr_ptr = bfd_abs_section.symbol_ptr_ptr;
+	cache_ptr->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
       else
 	{
 	  asymbol *s;
@@ -3139,7 +3145,7 @@ elf_slurp_reloc_table (abfd, asect, symbols)
 	 of zero points to the dummy symbol, which was not read into
 	 the symbol table SYMBOLS.  */
       if (ELF_R_SYM (dst.r_info) == 0)
-	cache_ptr->sym_ptr_ptr = bfd_abs_section.symbol_ptr_ptr;
+	cache_ptr->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
       else
 	{
 	  asymbol *s;
@@ -4293,7 +4299,7 @@ elf_link_add_object_symbols (abfd, info)
 	}
 
       if (sym.st_shndx == SHN_UNDEF)
-	sec = &bfd_und_section;
+	sec = bfd_und_section_ptr;
       else if (sym.st_shndx > 0 && sym.st_shndx < SHN_LORESERVE)
 	{
 	  sec = section_from_elf_index (abfd, sym.st_shndx);
@@ -4302,10 +4308,10 @@ elf_link_add_object_symbols (abfd, info)
 	  value -= sec->vma;
 	}
       else if (sym.st_shndx == SHN_ABS)
-	sec = &bfd_abs_section;
+	sec = bfd_abs_section_ptr;
       else if (sym.st_shndx == SHN_COMMON)
 	{
-	  sec = &bfd_com_section;
+	  sec = bfd_com_section_ptr;
 	  /* What ELF calls the size we call the value.  What ELF
 	     calls the value we call the alignment.  */
 	  value = sym.st_size;
@@ -4338,7 +4344,7 @@ elf_link_add_object_symbols (abfd, info)
 	  goto error_return;
 	}
 
-      if (sec == &bfd_und_section
+      if (bfd_is_und_section (sec)
 	  || bfd_is_com_section (sec))
 	definition = false;
       else
@@ -4361,11 +4367,11 @@ elf_link_add_object_symbols (abfd, info)
 	     by some other object.  If it has, we want to use the
 	     existing definition, and we do not want to report a
 	     multiple symbol definition error; we do this by
-	     clobbering sec to be bfd_und_section.  */
+	     clobbering sec to be bfd_und_section_ptr.  */
 	  if (dynamic && definition)
 	    {
 	      if (h->root.type == bfd_link_hash_defined)
-		sec = &bfd_und_section;
+		sec = bfd_und_section_ptr;
 	    }
 
 	  /* Similarly, if we are not looking at a dynamic object, and
@@ -5268,7 +5274,7 @@ elf_bfd_final_link (abfd, info)
   for (i = 1; i < elf_elfheader (abfd)->e_shnum; i++)
     {
       o = section_from_elf_index (abfd, i);
-      if (o != &bfd_abs_section)
+      if (! bfd_is_abs_section (o))
 	o->target_index = abfd->symcount;
       elfsym.st_shndx = i;
       if (! elf_link_output_sym (&finfo, (const char *) NULL, &elfsym))
@@ -5883,7 +5889,7 @@ elf_link_input_bfd (finfo, input_bfd)
 	}
 
       if (isym->st_shndx == SHN_UNDEF)
-	isec = &bfd_und_section;
+	isec = bfd_und_section_ptr;
       else if (isym->st_shndx > 0 && isym->st_shndx < SHN_LORESERVE)
 	{
 	  isec = section_from_elf_index (input_bfd, isym->st_shndx);
@@ -5891,9 +5897,9 @@ elf_link_input_bfd (finfo, input_bfd)
 	    return false;
 	}
       else if (isym->st_shndx == SHN_ABS)
-	isec = &bfd_abs_section;
+	isec = bfd_abs_section_ptr;
       else if (isym->st_shndx == SHN_COMMON)
-	isec = &bfd_com_section;
+	isec = bfd_com_section_ptr;
       else
 	{
 	  /* Who knows?  */
@@ -6117,15 +6123,13 @@ elf_link_input_bfd (finfo, input_bfd)
 		      /* I suppose the backend ought to fill in the
 			 section of any STT_SECTION symbol against a
 			 processor specific section.  */
-		      if (sec == NULL
-			  || sec == &bfd_und_section
-			  || sec == &bfd_com_section)
+		      if (sec != NULL && bfd_is_abs_section (sec))
+			r_symndx = 0;
+		      else if (sec == NULL || sec->owner == NULL)
 			{
 			  bfd_set_error (bfd_error_bad_value);
 			  return false;
 			}
-		      else if (sec == &bfd_abs_section)
-			r_symndx = 0;
 		      else
 			{
 			  r_symndx = sec->output_section->target_index;

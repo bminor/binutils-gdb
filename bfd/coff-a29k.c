@@ -96,7 +96,8 @@ a29k_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
 
   }
 
-  if (symbol_in && (symbol_in->section == &bfd_und_section))
+  if (symbol_in != NULL
+      && bfd_is_und_section (symbol_in->section))
   {
     /* Keep the state machine happy in case we're called again */
     if (r_type == R_IHIHALF) 
@@ -274,7 +275,7 @@ reloc_processing (relent,reloc, symbols, abfd, section)
 	relent->address = ihihalf_vaddr;
 	ihihalf_vaddr = (bfd_vma) -1;
 	relent->addend = reloc->r_symndx;		
-	relent->sym_ptr_ptr= bfd_abs_section.symbol_ptr_ptr;
+	relent->sym_ptr_ptr= bfd_abs_section_ptr->symbol_ptr_ptr;
     }
     else 
     {
