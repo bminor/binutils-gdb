@@ -1,3 +1,17 @@
+1998-12-04  Doug Evans  <devans@casey.cygnus.com>
+
+	* sim-arange.c: New file.
+	* sim-arange.h: New file.
+
+1998-12-03  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* sim-memopt.c (sim_memory_uninstall): Deallocate all memory
+ 	regions.
+
+1998-12-01  Doug Evans  <devans@casey.cygnus.com>
+
+	* sim-inline.c (SIM_INLINE_P): Fix typo.
+
 start-sanitize-gxsim
 1998-12-01  Frank Ch. Eigler  <fche@elastic.org>
 

@@ -93,6 +93,8 @@ run.c
 run.1
 sim-abort.c
 sim-alu.h
+sim-arange.c
+sim-arange.h
 sim-assert.h
 sim-base.h
 sim-basics.h
