@@ -1,3 +1,20 @@
+Thu Aug 22 10:54:38 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* libieee.h (NSECTIONS): Don't define.
+	(ieee_data_struct): Change section_table to asection **.  Add
+	section_table_size.
+	* ieee.c (get_section_entry): If the table isn't big enough, make
+	it bigger.
+	(ieee_slurp_sections): Remove assertion about number of sections.
+	(ieee_object_p): Adjust initialization of ieee to match changes to
+	the structure.
+
+	* xcofflink.c (xcoff_mark): Don't copy relocs for undefined
+	symbols merely because we are generating a shared library.
+	(xcoff_build_ldsyms): Don't set up global linkage code for an
+	undefined symbol merely because we are generating a shared
+	library.
+
 start-sanitize-v850
 Tue Aug 20 15:06:05 1996  J.T. Conklin  <jtc@hippo.cygnus.com>
 	
