@@ -10239,6 +10239,21 @@ md_apply_fix (fixP, valueP)
   switch (fixP->fx_r_type)
     {
     case BFD_RELOC_MIPS_JMP:
+    case BFD_RELOC_MIPS_SHIFT5:
+    case BFD_RELOC_MIPS_SHIFT6:
+    case BFD_RELOC_MIPS_GOT_DISP:
+    case BFD_RELOC_MIPS_GOT_PAGE:
+    case BFD_RELOC_MIPS_GOT_OFST:
+    case BFD_RELOC_MIPS_SUB:
+    case BFD_RELOC_MIPS_INSERT_A:
+    case BFD_RELOC_MIPS_INSERT_B:
+    case BFD_RELOC_MIPS_DELETE:
+    case BFD_RELOC_MIPS_HIGHEST:
+    case BFD_RELOC_MIPS_HIGHER:
+    case BFD_RELOC_MIPS_SCN_DISP:
+    case BFD_RELOC_MIPS_REL16:
+    case BFD_RELOC_MIPS_RELGOT:
+    case BFD_RELOC_MIPS_JALR:
     case BFD_RELOC_HI16:
     case BFD_RELOC_HI16_S:
     case BFD_RELOC_MIPS_GPREL:
