@@ -924,7 +924,7 @@ operand (expressionP)
 		  {
 		  case 0:
 		  case ERROR_EXPONENT_OVERFLOW:
-		    if (cp[-1] == 'f' || cp[-1] == 'b')
+		    if (cp == input_line_pointer + 1)
 		      /* looks like a difference expression */
 		      goto is_0f_label;
 		    else
