@@ -1908,7 +1908,7 @@ reread_symbols (void)
 	      objfile->free_psymtabs = NULL;
 	      objfile->cp_namespace_symtab = NULL;
 	      objfile->msymbols = NULL;
-	      objfile->sym_private = NULL;
+	      objfile->deprecated_sym_private = NULL;
 	      objfile->minimal_symbol_count = 0;
 	      memset (&objfile->msymbol_hash, 0,
 		      sizeof (objfile->msymbol_hash));

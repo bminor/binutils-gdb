@@ -623,9 +623,9 @@ dbx_symfile_init (struct objfile *objfile)
   unsigned char size_temp[DBX_STRINGTAB_SIZE_SIZE];
 
   /* Allocate struct to keep track of the symfile */
-  objfile->sym_stab_info = (struct dbx_symfile_info *)
+  objfile->deprecated_sym_stab_info = (struct dbx_symfile_info *)
     xmalloc (sizeof (struct dbx_symfile_info));
-  memset (objfile->sym_stab_info, 0, sizeof (struct dbx_symfile_info));
+  memset (objfile->deprecated_sym_stab_info, 0, sizeof (struct dbx_symfile_info));
 
   DBX_TEXT_SECTION (objfile) = bfd_get_section_by_name (sym_bfd, ".text");
   DBX_DATA_SECTION (objfile) = bfd_get_section_by_name (sym_bfd, ".data");
@@ -733,7 +733,7 @@ dbx_symfile_init (struct objfile *objfile)
 static void
 dbx_symfile_finish (struct objfile *objfile)
 {
-  if (objfile->sym_stab_info != NULL)
+  if (objfile->deprecated_sym_stab_info != NULL)
     {
       if (HEADER_FILES (objfile) != NULL)
 	{
@@ -747,7 +747,7 @@ dbx_symfile_finish (struct objfile *objfile)
 	    }
 	  xfree (hfiles);
 	}
-      xfree (objfile->sym_stab_info);
+      xfree (objfile->deprecated_sym_stab_info);
     }
   free_header_files ();
 }
@@ -3239,7 +3239,7 @@ coffstab_build_psymtabs (struct objfile *objfile, int mainline,
 
   /* There is already a dbx_symfile_info allocated by our caller.
      It might even contain some info from the coff symtab to help us.  */
-  info = objfile->sym_stab_info;
+  info = objfile->deprecated_sym_stab_info;
 
   DBX_TEXT_ADDR (objfile) = textaddr;
   DBX_TEXT_SIZE (objfile) = textsize;
@@ -3331,7 +3331,7 @@ elfstab_build_psymtabs (struct objfile *objfile, int mainline,
 
   /* There is already a dbx_symfile_info allocated by our caller.
      It might even contain some info from the ELF symtab to help us.  */
-  info = objfile->sym_stab_info;
+  info = objfile->deprecated_sym_stab_info;
 
   /* Find the first and last text address.  dbx_symfile_read seems to
      want this.  */
@@ -3423,9 +3423,9 @@ stabsect_build_psymtabs (struct objfile *objfile, int mainline, char *stab_name,
     error ("stabsect_build_psymtabs:  Found stabs (%s), but not string section (%s)",
 	   stab_name, stabstr_name);
 
-  objfile->sym_stab_info = (struct dbx_symfile_info *)
+  objfile->deprecated_sym_stab_info = (struct dbx_symfile_info *)
     xmalloc (sizeof (struct dbx_symfile_info));
-  memset (objfile->sym_stab_info, 0, sizeof (struct dbx_symfile_info));
+  memset (objfile->deprecated_sym_stab_info, 0, sizeof (struct dbx_symfile_info));
 
   text_sect = bfd_get_section_by_name (sym_bfd, text_name);
   if (!text_sect)

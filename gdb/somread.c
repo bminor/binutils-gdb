@@ -378,7 +378,7 @@ som_symfile_read (struct objfile *objfile, int mainline)
   hpread_build_psymtabs (objfile, mainline);
 
   /* Force hppa-tdep.c to re-read the unwind descriptors.  */
-  objfile->obj_private = NULL;
+  objfile->deprecated_obj_private = NULL;
 }
 
 /* Initialize anything that needs initializing when a completely new symbol
@@ -402,9 +402,9 @@ som_new_init (struct objfile *ignore)
 static void
 som_symfile_finish (struct objfile *objfile)
 {
-  if (objfile->sym_stab_info != NULL)
+  if (objfile->deprecated_sym_stab_info != NULL)
     {
-      xfree (objfile->sym_stab_info);
+      xfree (objfile->deprecated_sym_stab_info);
     }
   hpread_symfile_finish (objfile);
 }

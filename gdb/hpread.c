@@ -75,7 +75,7 @@ struct hpread_symfile_info
 
 /* Accessor macros to get at the fields.  */
 #define HPUX_SYMFILE_INFO(o) \
-  ((struct hpread_symfile_info *)((o)->sym_private))
+  ((struct hpread_symfile_info *)((o)->deprecated_sym_private))
 #define GNTT(o)                 (HPUX_SYMFILE_INFO(o)->gntt)
 #define LNTT(o)                 (HPUX_SYMFILE_INFO(o)->lntt)
 #define SLT(o)                  (HPUX_SYMFILE_INFO(o)->slt)
@@ -1667,9 +1667,9 @@ hpread_symfile_init (struct objfile *objfile)
   asection *vt_section, *slt_section, *lntt_section, *gntt_section;
 
   /* Allocate struct to keep track of the symfile */
-  objfile->sym_private =
+  objfile->deprecated_sym_private =
     xmalloc (sizeof (struct hpread_symfile_info));
-  memset (objfile->sym_private, 0, sizeof (struct hpread_symfile_info));
+  memset (objfile->deprecated_sym_private, 0, sizeof (struct hpread_symfile_info));
 
   /* We haven't read in any types yet.  */
   DNTT_TYPE_VECTOR (objfile) = 0;
@@ -2284,9 +2284,9 @@ hpread_build_psymtabs (struct objfile *objfile, int mainline)
 void
 hpread_symfile_finish (struct objfile *objfile)
 {
-  if (objfile->sym_private != NULL)
+  if (objfile->deprecated_sym_private != NULL)
     {
-      xfree (objfile->sym_private);
+      xfree (objfile->deprecated_sym_private);
     }
 }
 

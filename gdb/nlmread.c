@@ -211,9 +211,9 @@ nlm_symfile_read (struct objfile *objfile, int mainline)
 static void
 nlm_symfile_finish (struct objfile *objfile)
 {
-  if (objfile->sym_private != NULL)
+  if (objfile->deprecated_sym_private != NULL)
     {
-      xfree (objfile->sym_private);
+      xfree (objfile->deprecated_sym_private);
     }
 }
 

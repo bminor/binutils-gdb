@@ -1,3 +1,20 @@
+2004-10-23  Andrew Cagney  <cagney@gnu.org>
+
+	* objfiles.h (struct objfile): Rename obj_private to
+	deprecated_obj_private, sym_private to deprecated_sym_private, and
+	sym_stab_info to deprecated_sym_stab_info.
+	* gdb-stabs.h: Update.
+	* elfread.c: Update.
+	* dbxread.c: Update.
+	* coffread.c: Update.
+	* xcoffread.c: Update.
+	* symfile.c: Update.
+	* somread.c: Update.
+	* nlmread.c: Update.
+	* mdebugread.c: Update.
+	* hpread.c: Update.
+	* coffread.c: Update.
+
 2004-10-23  Mark Kettenis  <kettenis@gnu.org>
 
 	* mips64obsd-nat.c, mips64obsd-tdep.c: New files.

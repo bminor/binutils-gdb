@@ -44,8 +44,8 @@ struct stab_section_info
   };
 
 /* Information is passed among various dbxread routines for accessing
-   symbol files.  A pointer to this structure is kept in the sym_stab_info
-   field of the objfile struct.  */
+   symbol files.  A pointer to this structure is kept in the
+   deprecated_sym_stab_info field of the objfile struct.  */
 
 struct dbx_symfile_info
   {
@@ -74,7 +74,7 @@ struct dbx_symfile_info
     asection *stab_section;
   };
 
-#define DBX_SYMFILE_INFO(o)	((o)->sym_stab_info)
+#define DBX_SYMFILE_INFO(o)	((o)->deprecated_sym_stab_info)
 #define DBX_TEXT_ADDR(o)	(DBX_SYMFILE_INFO(o)->text_addr)
 #define DBX_TEXT_SIZE(o)	(DBX_SYMFILE_INFO(o)->text_size)
 #define DBX_SYMCOUNT(o)		(DBX_SYMFILE_INFO(o)->symcount)

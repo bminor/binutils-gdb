@@ -436,16 +436,16 @@ static void
 coff_symfile_init (struct objfile *objfile)
 {
   /* Allocate struct to keep track of stab reading. */
-  objfile->sym_stab_info = (struct dbx_symfile_info *)
+  objfile->deprecated_sym_stab_info = (struct dbx_symfile_info *)
     xmalloc (sizeof (struct dbx_symfile_info));
 
-  memset (objfile->sym_stab_info, 0,
+  memset (objfile->deprecated_sym_stab_info, 0,
 	  sizeof (struct dbx_symfile_info));
 
   /* Allocate struct to keep track of the symfile */
-  objfile->sym_private = xmalloc (sizeof (struct coff_symfile_info));
+  objfile->deprecated_sym_private = xmalloc (sizeof (struct coff_symfile_info));
 
-  memset (objfile->sym_private, 0, sizeof (struct coff_symfile_info));
+  memset (objfile->deprecated_sym_private, 0, sizeof (struct coff_symfile_info));
 
   /* COFF objects may be reordered, so set OBJF_REORDERED.  If we
      find this causes a significant slowdown in gdb then we could
@@ -512,8 +512,8 @@ coff_symfile_read (struct objfile *objfile, int mainline)
   int len;
   char * target;
   
-  info = (struct coff_symfile_info *) objfile->sym_private;
-  dbxinfo = objfile->sym_stab_info;
+  info = (struct coff_symfile_info *) objfile->deprecated_sym_private;
+  dbxinfo = objfile->deprecated_sym_stab_info;
   symfile_bfd = abfd;		/* Kludge for swap routines */
 
 /* WARNING WILL ROBINSON!  ACCESSING BFD-PRIVATE DATA HERE!  FIXME!  */
@@ -659,9 +659,9 @@ coff_new_init (struct objfile *ignore)
 static void
 coff_symfile_finish (struct objfile *objfile)
 {
-  if (objfile->sym_private != NULL)
+  if (objfile->deprecated_sym_private != NULL)
     {
-      xfree (objfile->sym_private);
+      xfree (objfile->deprecated_sym_private);
     }
 
   /* Let stabs reader clean up */

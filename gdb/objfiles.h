@@ -338,26 +338,35 @@ struct objfile
 
     /* Information about stabs.  Will be filled in with a dbx_symfile_info
        struct by those readers that need it. */
+    /* NOTE: cagney/2004-10-23: This has been replaced by per-objfile
+       data points implemented using "data" and "num_data" below.  For
+       an example of how to use this replacement, see "objfile_data"
+       in "mips-tdep.c".  */
 
-    struct dbx_symfile_info *sym_stab_info;
+    struct dbx_symfile_info *deprecated_sym_stab_info;
 
     /* Hook for information for use by the symbol reader (currently used
        for information shared by sym_init and sym_read).  It is
        typically a pointer to malloc'd memory.  The symbol reader's finish
        function is responsible for freeing the memory thusly allocated.  */
+    /* NOTE: cagney/2004-10-23: This has been replaced by per-objfile
+       data points implemented using "data" and "num_data" below.  For
+       an example of how to use this replacement, see "objfile_data"
+       in "mips-tdep.c".  */
 
-    void *sym_private;
+    void *deprecated_sym_private;
 
     /* Hook for target-architecture-specific information.  This must
        point to memory allocated on one of the obstacks in this objfile,
        so that it gets freed automatically when reading a new object
        file. */
 
-    void *obj_private;
+    void *deprecated_obj_private;
 
     /* Per objfile data-pointers required by other GDB modules.  */
     /* FIXME: kettenis/20030711: This mechanism could replace
-       sym_stab_info, sym_private and obj_private entirely.  */
+       deprecated_sym_stab_info, deprecated_sym_private and
+       deprecated_obj_private entirely.  */
 
     void **data;
     unsigned num_data;

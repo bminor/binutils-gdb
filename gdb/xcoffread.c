@@ -553,7 +553,7 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
 {
   int offset, ii;
   file_ptr max_offset =
-  ((struct coff_symfile_info *) this_symtab_psymtab->objfile->sym_private)
+  ((struct coff_symfile_info *) this_symtab_psymtab->objfile->deprecated_sym_private)
   ->max_lineno_offset;
 
   /* subfile structure for the main compilation unit.  */
@@ -762,7 +762,7 @@ enter_line_range (struct subfile *subfile, unsigned beginoffset, unsigned endoff
     return;
   curoffset = beginoffset;
   limit_offset =
-    ((struct coff_symfile_info *) this_symtab_psymtab->objfile->sym_private)
+    ((struct coff_symfile_info *) this_symtab_psymtab->objfile->deprecated_sym_private)
     ->max_lineno_offset;
 
   if (endoffset != 0)
@@ -882,7 +882,7 @@ xcoff_next_symbol_text (struct objfile *objfile)
   else if (symbol.n_sclass & 0x80)
     {
       retval =
-	((struct coff_symfile_info *) objfile->sym_private)->debugsec
+	((struct coff_symfile_info *) objfile->deprecated_sym_private)->debugsec
 	+ symbol.n_offset;
       raw_symbol +=
 	coff_data (objfile->obfd)->local_symesz;
@@ -907,9 +907,9 @@ read_xcoff_symtab (struct partial_symtab *pst)
   struct objfile *objfile = pst->objfile;
   bfd *abfd = objfile->obfd;
   char *raw_auxptr;		/* Pointer to first raw aux entry for sym */
-  char *strtbl = ((struct coff_symfile_info *) objfile->sym_private)->strtbl;
+  char *strtbl = ((struct coff_symfile_info *) objfile->deprecated_sym_private)->strtbl;
   char *debugsec =
-  ((struct coff_symfile_info *) objfile->sym_private)->debugsec;
+  ((struct coff_symfile_info *) objfile->deprecated_sym_private)->debugsec;
   char *debugfmt = bfd_xcoff_is_xcoff64 (abfd) ? "XCOFF64" : "XCOFF";
 
   struct internal_syment symbol[1];
@@ -955,7 +955,7 @@ read_xcoff_symtab (struct partial_symtab *pst)
   first_object_file_end = 0;
 
   raw_symbol =
-    ((struct coff_symfile_info *) objfile->sym_private)->symtbl
+    ((struct coff_symfile_info *) objfile->deprecated_sym_private)->symtbl
     + symnum * local_symesz;
 
   while (symnum < max_symnum)
@@ -1581,7 +1581,7 @@ coff_getfilename (union internal_auxent *aux_entry, struct objfile *objfile)
 
   if (aux_entry->x_file.x_n.x_zeroes == 0)
     strcpy (buffer,
-	    ((struct coff_symfile_info *) objfile->sym_private)->strtbl
+	    ((struct coff_symfile_info *) objfile->deprecated_sym_private)->strtbl
 	    + aux_entry->x_file.x_n.x_offset);
   else
     {
@@ -1596,11 +1596,9 @@ static void
 read_symbol (struct internal_syment *symbol, int symno)
 {
   int nsyms =
-  ((struct coff_symfile_info *) this_symtab_psymtab->objfile->sym_private)
-  ->symtbl_num_syms;
+  ((struct coff_symfile_info *) this_symtab_psymtab->objfile->deprecated_sym_private)->symtbl_num_syms;
   char *stbl =
-  ((struct coff_symfile_info *) this_symtab_psymtab->objfile->sym_private)
-  ->symtbl;
+  ((struct coff_symfile_info *) this_symtab_psymtab->objfile->deprecated_sym_private)->symtbl;
   if (symno < 0 || symno >= nsyms)
     {
       complaint (&symfile_complaints, "Invalid symbol offset");
@@ -1635,7 +1633,7 @@ read_symbol_lineno (int symno)
   int xcoff64 = bfd_xcoff_is_xcoff64 (objfile->obfd);
 
   struct coff_symfile_info *info =
-    (struct coff_symfile_info *)objfile->sym_private;
+    (struct coff_symfile_info *)objfile->deprecated_sym_private;
   int nsyms = info->symtbl_num_syms;
   char *stbl = info->symtbl;
   char *strtbl = info->strtbl;
@@ -1838,7 +1836,7 @@ static void
 xcoff_symfile_init (struct objfile *objfile)
 {
   /* Allocate struct to keep track of the symfile */
-  objfile->sym_private = xmalloc (sizeof (struct coff_symfile_info));
+  objfile->deprecated_sym_private = xmalloc (sizeof (struct coff_symfile_info));
 
   /* XCOFF objects may be reordered, so set OBJF_REORDERED.  If we
      find this causes a significant slowdown in gdb then we could
@@ -1856,9 +1854,9 @@ xcoff_symfile_init (struct objfile *objfile)
 static void
 xcoff_symfile_finish (struct objfile *objfile)
 {
-  if (objfile->sym_private != NULL)
+  if (objfile->deprecated_sym_private != NULL)
     {
-      xfree (objfile->sym_private);
+      xfree (objfile->deprecated_sym_private);
     }
 
   /* Start with a fresh include table for the next objfile.  */
@@ -1879,7 +1877,7 @@ init_stringtab (bfd *abfd, file_ptr offset, struct objfile *objfile)
   unsigned char lengthbuf[4];
   char *strtbl;
 
-  ((struct coff_symfile_info *) objfile->sym_private)->strtbl = NULL;
+  ((struct coff_symfile_info *) objfile->deprecated_sym_private)->strtbl = NULL;
 
   if (bfd_seek (abfd, offset, SEEK_SET) < 0)
     error ("cannot seek to string table in %s: %s",
@@ -1898,7 +1896,7 @@ init_stringtab (bfd *abfd, file_ptr offset, struct objfile *objfile)
      as long as we have its symbol table around. */
 
   strtbl = (char *) obstack_alloc (&objfile->objfile_obstack, length);
-  ((struct coff_symfile_info *) objfile->sym_private)->strtbl = strtbl;
+  ((struct coff_symfile_info *) objfile->deprecated_sym_private)->strtbl = strtbl;
 
   /* Copy length buffer, the first byte is usually zero and is
      used for stabs with a name length of zero.  */
@@ -2093,12 +2091,12 @@ swap_sym (struct internal_syment *symbol, union internal_auxent *aux,
     }
   else if (symbol->n_sclass & 0x80)
     {
-      *name = ((struct coff_symfile_info *) objfile->sym_private)->debugsec
+      *name = ((struct coff_symfile_info *) objfile->deprecated_sym_private)->debugsec
 	+ symbol->n_offset;
     }
   else
     {
-      *name = ((struct coff_symfile_info *) objfile->sym_private)->strtbl
+      *name = ((struct coff_symfile_info *) objfile->deprecated_sym_private)->strtbl
 	+ symbol->n_offset;
     }
   ++*symnump;
@@ -2173,8 +2171,8 @@ scan_xcoff_symtab (struct objfile *objfile)
 
   abfd = objfile->obfd;
 
-  sraw_symbol = ((struct coff_symfile_info *) objfile->sym_private)->symtbl;
-  nsyms = ((struct coff_symfile_info *) objfile->sym_private)->symtbl_num_syms;
+  sraw_symbol = ((struct coff_symfile_info *) objfile->deprecated_sym_private)->symtbl;
+  nsyms = ((struct coff_symfile_info *) objfile->deprecated_sym_private)->symtbl_num_syms;
   ssymnum = 0;
   while (ssymnum < nsyms)
     {
@@ -2823,7 +2821,7 @@ scan_xcoff_symtab (struct objfile *objfile)
      If no XMC_TC0 is found, toc_offset should be zero. Another place to obtain
      this information would be file auxiliary header. */
 
-  ((struct coff_symfile_info *) objfile->sym_private)->toc_offset = toc_offset;
+  ((struct coff_symfile_info *) objfile->deprecated_sym_private)->toc_offset = toc_offset;
 }
 
 /* Return the toc offset value for a given objfile.  */
@@ -2832,7 +2830,7 @@ CORE_ADDR
 get_toc_offset (struct objfile *objfile)
 {
   if (objfile)
-    return ((struct coff_symfile_info *) objfile->sym_private)->toc_offset;
+    return ((struct coff_symfile_info *) objfile->deprecated_sym_private)->toc_offset;
   return 0;
 }
 
@@ -2859,7 +2857,7 @@ xcoff_initial_scan (struct objfile *objfile, int mainline)
   char *name;
   unsigned int size;
 
-  info = (struct coff_symfile_info *) objfile->sym_private;
+  info = (struct coff_symfile_info *) objfile->deprecated_sym_private;
   symfile_bfd = abfd = objfile->obfd;
   name = objfile->name;
 
@@ -2900,7 +2898,7 @@ xcoff_initial_scan (struct objfile *objfile, int mainline)
 		  }
 	      }
 	  }
-	((struct coff_symfile_info *) objfile->sym_private)->debugsec =
+	((struct coff_symfile_info *) objfile->deprecated_sym_private)->debugsec =
 	  debugsec;
       }
     }
@@ -2912,12 +2910,12 @@ xcoff_initial_scan (struct objfile *objfile, int mainline)
     error ("Error reading symbols from %s: %s",
 	   name, bfd_errmsg (bfd_get_error ()));
   size = coff_data (abfd)->local_symesz * num_symbols;
-  ((struct coff_symfile_info *) objfile->sym_private)->symtbl =
+  ((struct coff_symfile_info *) objfile->deprecated_sym_private)->symtbl =
     obstack_alloc (&objfile->objfile_obstack, size);
-  ((struct coff_symfile_info *) objfile->sym_private)->symtbl_num_syms =
+  ((struct coff_symfile_info *) objfile->deprecated_sym_private)->symtbl_num_syms =
     num_symbols;
 
-  val = bfd_bread (((struct coff_symfile_info *) objfile->sym_private)->symtbl,
+  val = bfd_bread (((struct coff_symfile_info *) objfile->deprecated_sym_private)->symtbl,
 		   size, abfd);
   if (val != size)
     perror_with_name ("reading symbol table");
