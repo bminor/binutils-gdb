@@ -37,6 +37,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ldmisc.h"
 #include "ldmain.h"
 #include "mri.h"
+#include "ldlex.h"
 
 #define YYDEBUG 1
 
@@ -111,10 +112,6 @@ static int error_index;
 %token FORMAT PUBLIC DEFSYMEND BASE ALIAS TRUNCATE REL
 %token INPUT_SCRIPT INPUT_MRI_SCRIPT INPUT_DEFSYM
 
-%{
-/* For byacc, this has to come after INPUT_SCRIPT et al. are defined.  */
-#include "ldlex.h"
-%}
 %%
 
 file:	

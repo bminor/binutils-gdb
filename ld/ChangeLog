@@ -1,5 +1,12 @@
 Fri Feb 25 19:12:03 1994  Ian Lance Taylor  (ian@cygnus.com)
 
+	* ldgram.y: Move include of ldlex.h back with other includes.
+	* ldlex.h (input_type): Don't initialize enum constants to
+	particular values.
+	* ldlex.l: Use a switch to return the right token based on
+	input_type, rather than knowing that input_type has a value based
+	on a token type.
+
 	* ldgram.y (dirlist_ptr): Removed; not used.
 	* lexsup.c: Include ldver.h.
 	* Makefile.in: Rebuilt dependencies.
