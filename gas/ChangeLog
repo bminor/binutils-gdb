@@ -1,3 +1,9 @@
+Fri Jan  7 11:14:07 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* config/tc-mips.c (macro): Add a LOSING_COMPILER ifdef that
+	splits the function.
+	(macro2): New function, if LOSING_COMPILER defined.
+
 Fri Jan  7 09:38:25 1994  Steve Chamberlain  (sac@cygnus.com)
 
 	* config/obj-coffbfd.c (fill_section):  Don't ever fill past the

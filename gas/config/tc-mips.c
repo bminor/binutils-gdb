@@ -289,6 +289,9 @@ static void check_absolute_expr PARAMS ((struct mips_cl_insn * ip,
 static void load_register PARAMS ((int *counter, int reg, expressionS * ep));
 static void load_address PARAMS ((int *counter, int reg, expressionS *ep));
 static void macro PARAMS ((struct mips_cl_insn * ip));
+#ifdef LOSING_COMPILER
+static void macro2 PARAMS ((struct mips_cl_insn * ip));
+#endif
 static void mips_ip PARAMS ((char *str, struct mips_cl_insn * ip));
 static int my_getSmallExpression PARAMS ((expressionS * ep, char *str));
 static void my_getExpression PARAMS ((expressionS * ep, char *str));
@@ -3111,6 +3114,48 @@ macro (ip)
       macro_build ((char *) NULL, &icnt, &offset_expr, s, "t,o(b)", treg + 1,
 		   (int) BFD_RELOC_LO16, breg);
       return;
+#ifdef LOSING_COMPILER
+    default:
+      macro2 (ip);
+      return;
+    }
+  if (mips_noat)
+    as_warn ("Macro used $at after \".set noat\"");
+}
+          
+static void
+macro2 (ip)
+     struct mips_cl_insn *ip;
+{
+  register int treg, sreg, dreg, breg;
+  int tempreg;
+  int mask;
+  int icnt = 0;
+  int used_at;
+  expressionS expr1;
+  const char *s;
+  const char *s2;
+  const char *fmt;
+  int likely = 0;
+  int dbl = 0;
+  int coproc = 0;
+  offsetT maxnum;
+  bfd_reloc_code_real_type r;
+  char *p;
+          
+  treg = (ip->insn_opcode >> 16) & 0x1f;
+  dreg = (ip->insn_opcode >> 11) & 0x1f;
+  sreg = breg = (ip->insn_opcode >> 21) & 0x1f;
+  mask = ip->insn_mo->mask;
+          
+  expr1.X_op = O_constant;
+  expr1.X_op_symbol = NULL;
+  expr1.X_add_symbol = NULL;
+  expr1.X_add_number = 1;
+          
+  switch (mask)
+    {
+#endif /* LOSING_COMPILER */
 
     case M_DMUL:
       dbl = 1;
