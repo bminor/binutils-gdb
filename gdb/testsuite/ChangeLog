@@ -1,5 +1,7 @@
 2003-12-17  Jim Blandy  <jimb@redhat.com>
 
+	* gdb.base/freebpcmd.c: Add copyright notice.
+
 	* gdb.base/freebpcmd.exp: Mark the interesting failure as known.
 
 2003-12-16  Michael Chastain  <mec.gnu@mindspring.com>
