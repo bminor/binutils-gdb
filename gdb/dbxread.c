@@ -1524,10 +1524,15 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
     case N_FUN:
     case N_FNAME:
 #if 0
-/* It seems that the Sun ANSI C compiler (acc) replaces N_FUN with N_GSYM and
-   N_STSYM with a type code of f or F.  Can't enable this until we get some
-   stuff straightened out with psymtabs.  FIXME. */
-
+      /* The Sun acc compiler, under SunOS4, puts out functions with N_GSYM
+	 or N_STSYM.  The problem is that the address of the symbol is no
+	 good (for N_GSYM it doesn't even attept an address; for N_STSYM
+	 it puts out an address but then it gets relocated relative to the
+	 data segment, not the text segment), so we would have to keep track of
+	 where we would use the address (e.g. to close off the block for
+	 the previous function), and patch it later (we already do this for
+	 some symbols, e.g. 'G', but in that case we just need to patch the
+	 symbol, not other data structures).  */
     case N_GSYM:
     case N_STSYM:
 #endif /* 0 */
@@ -1844,6 +1849,24 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
       valu += ANOFFSET (section_offsets, SECT_OFF_TEXT);
       goto define_a_symbol;
 
+    /* The following symbol types we don't know how to process.  Handle
+       them in a "default" way, but complain to people who care.  */
+    default:
+    case N_CATCH:		/* Exception handler catcher */
+    case N_EHDECL:		/* Exception handler name */
+    case N_PC:			/* Global symbol in Pascal */
+    case N_M2C:			/* Modula-2 compilation unit */
+    /*   N_MOD2:	overlaps with N_EHDECL */
+    case N_SCOPE:		/* Modula-2 scope information */
+    case N_ECOML:		/* End common (local name) */
+    case N_NBTEXT:		/* Gould Non-Base-Register symbols??? */
+    case N_NBDATA:
+    case N_NBBSS:
+    case N_NBSTS:
+    case N_NBLCS:
+      complain (&unknown_symtype_complaint, local_hex_string(type));
+      /* FALLTHROUGH */
+
     /* The following symbol types don't need the address field relocated,
        since it is either unused, or is absolute.  */
     define_a_symbol:
@@ -1857,7 +1880,21 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
     case N_PSYM:		/* Parameter variable */
     case N_LENG:		/* Length of preceding symbol type */
       if (name)
-	define_symbol (valu, name, desc, type, objfile);
+	{
+	  struct symbol *sym;
+	  sym = define_symbol (valu, name, desc, type, objfile);
+	  if (sym != NULL && SYMBOL_CLASS (sym) == LOC_BLOCK)
+	    {
+	      /* We're not prepared to deal with this case; we won't
+		 patch up the SYMBOL_BLOCK_VALUE in finish_block.
+		 Setting the class to LOC_STATIC isn't particularly useful,
+		 but at least we won't dump core.  */
+	      static struct complaint msg = {
+		"function encountered with unexpected n_type", 0, 0};
+	      complain (&msg);
+	      SYMBOL_CLASS (sym) = LOC_STATIC;
+	    }
+	}
       break;
 
     /* We use N_OPT to carry the gcc2_compiled flag.  Sun uses it
@@ -1889,25 +1926,6 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
     case N_ENDM:		/* Solaris 2:  End of module */
     case N_MAIN:		/* Name of main routine.  */
       break;
-      
-    /* The following symbol types we don't know how to process.  Handle
-       them in a "default" way, but complain to people who care.  */
-    default:
-    case N_CATCH:		/* Exception handler catcher */
-    case N_EHDECL:		/* Exception handler name */
-    case N_PC:			/* Global symbol in Pascal */
-    case N_M2C:			/* Modula-2 compilation unit */
-    /*   N_MOD2:	overlaps with N_EHDECL */
-    case N_SCOPE:		/* Modula-2 scope information */
-    case N_ECOML:		/* End common (local name) */
-    case N_NBTEXT:		/* Gould Non-Base-Register symbols??? */
-    case N_NBDATA:
-    case N_NBBSS:
-    case N_NBSTS:
-    case N_NBLCS:
-      complain (&unknown_symtype_complaint, local_hex_string(type));
-      if (name)
-	define_symbol (valu, name, desc, type, objfile);
     }
 
   previous_stab_code = type;
