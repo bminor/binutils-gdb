@@ -9,7 +9,7 @@ Disassembly of section .text:
    0:	66 26 ff 23 [ 	]*jmpw   \*%es:\(%ebx\)
    4:	8a 25 50 00 00 00 [ 	]*mov    0x50,%ah
    a:	b2 20 [ 	]*mov    \$0x20,%dl
-   c:	bb 00 00 00 00 [ 	]*mov    \$0x0,%ebx	d: (R_386_)?32	.text
+   c:	bb 00 00 00 00 [ 	]*mov    \$0x0,%ebx	d: (R_386_)?(dir)?32	.text
   11:	d9 c9 [ 	]*fxch   %st\(1\)
   13:	36 8c a4 81 d2 04 00 00 [ 	]*movl   %fs,%ss:0x4d2\(%ecx,%eax,4\)
   1b:	8c 2c ed 00 00 00 00 [ 	]*movl   %gs,0x0\(,%ebp,8\)

@@ -1,3 +1,7 @@
+1999-09-01  H.J. Lu  <hjl@gnu.org>
+
+	* gas/i386/naked.d: Fix for coff targets.
+
 Mon Aug 30 12:18:40 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/hppa/unsorted/*.s: Use .code instead of .SPACE/.SUBSPA for
