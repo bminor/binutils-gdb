@@ -1,3 +1,8 @@
+2003-02-24  David Carlton  <carlton@math.stanford.edu>
+
+	* symtab.h: Declare 'struct objfile'; don't declare 'struct
+	using_direct_node'.
+
 2003-02-21  David Carlton  <carlton@math.stanford.edu>
 
 	* linespec.c (locate_compound_sym): Update call to

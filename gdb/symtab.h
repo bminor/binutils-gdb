@@ -27,9 +27,9 @@
 /* Opaque declarations.  */
 
 struct obstack;
+struct objfile;
 struct block;
 struct blockvector;
-struct using_direct_node;
 
 /* Don't do this; it means that if some .o's are compiled with GNU C
    and some are not (easy to do accidentally the way we configure
