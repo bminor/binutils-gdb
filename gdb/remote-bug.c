@@ -65,11 +65,6 @@ static int bug_write_inferior_memory ();
 
 #endif /* not __STDC__ */
 
-/* To be silent, or to loudly echo all input and output to and from
-   the target.  */
-
-static int bug88k_snoop = 0;
-
 /* This is the serial descriptor to our target.  */
 
 static serial_t desc = NULL;
@@ -326,7 +321,7 @@ readchar ()
   if (buf == SERIAL_TIMEOUT)
     error ("Timeout reading from remote system.");
 
-  if (bug88k_snoop)
+  if (remote_debug)
     printf ("%c", buf);
 
   return buf & 0x7f;
@@ -340,7 +335,7 @@ readchar_nofail ()
   buf = SERIAL_READCHAR (desc, timeout);
   if (buf == SERIAL_TIMEOUT)
     buf = 0;
-  if (bug88k_snoop)
+  if (remote_debug)
     if (buf)
       printf ("%c", buf);
     else
@@ -358,7 +353,7 @@ pollchar()
   buf = SERIAL_READCHAR (desc, 0);
   if (buf == SERIAL_TIMEOUT)
     buf = 0;
-  if (bug88k_snoop)
+  if (remote_debug)
     if (buf)
       printf ("%c", buf);
     else
@@ -888,7 +883,7 @@ bug_write (a, l)
 
   SERIAL_WRITE (desc, a, l);
 
-  if (bug88k_snoop)
+  if (remote_debug)
     for (i = 0; i < l; i++)
       {
 	printf ("%c", a[i]);
@@ -940,7 +935,7 @@ bug_srec_write_cr (s)
   if (srec_echo_pace)
     for (p = s; *p; ++p)
       {
-	if (bug88k_snoop)
+	if (remote_debug)
 	  printf ("%c", *p);
 
 	do
@@ -1194,7 +1189,7 @@ bug_write_inferior_memory (memaddr, myaddr, len)
 
       if (retries > 0)
 	{
-	  if (bug88k_snoop)
+	  if (remote_debug)
 	    printf("\n<retrying...>\n");
 
 	  /* This expect_prompt call is extremely important.  Without
@@ -1263,7 +1258,7 @@ bug_write_inferior_memory (memaddr, myaddr, len)
 
 	  if ((x = pollchar()) != 0)
 	    {
-	      if (bug88k_snoop)
+	      if (remote_debug)
 		printf("\n<retrying...>\n");
 
 	      ++retries;
@@ -1637,15 +1632,6 @@ This affects the communication protocol with the remote target.",
 Set echo-verification.\n\
 When on, use verification by echo when downloading S-records.  This is\n\
 much slower, but generally more reliable.", 
-		  &setlist),
-     &showlist);
-
-  add_show_from_set
-    (add_set_cmd ("bug88k-snoop", class_support, var_boolean,
-		  (char *) &bug88k_snoop,
-		  "\
-Set echoing of what's going to and from the monitor.\n\
-When on, echo data going out on and coming back from the serial line.", 
 		  &setlist),
      &showlist);
 
