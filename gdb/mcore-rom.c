@@ -25,6 +25,7 @@
 #include "monitor.h"
 #include "gdb_string.h"
 #include "regcache.h"
+#include "serial.h"
 
 /* Functions used only in this file. */
 

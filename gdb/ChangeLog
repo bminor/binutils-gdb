@@ -1,5 +1,10 @@
 2001-07-10  Andrew Cagney  <ac131313@redhat.com>
 
+	* mcore-rom.c: Include "serial.h".
+	* Makefile.in (mcore-rom.o): Depends on "serial.h".
+
+2001-07-10  Andrew Cagney  <ac131313@redhat.com>
+
 	* Makefile.in (remote-bug.o): Depends on serial.h.
 	* remote-bug.c: Include "serial.h".
 	* MAINTAINERS: Mark m88k target as buildable.

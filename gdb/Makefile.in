@@ -1662,7 +1662,7 @@ mcore-tdep.o: mcore-tdep.c $(defs_h) $(frame_h) $(gdbcmd_h) $(value_h) \
 	$(symtab_h) $(symfile_h) $(gdbcore_h) $(inferior_h)
 
 mcore-rom.o: mcore-rom.c $(defs_h) $(gdbcore_h) target.h monitor.h \
-	$(gdb_string_h) $(regcache_h)
+	$(gdb_string_h) $(regcache_h) serial.h
 
 mdebugread.o: mdebugread.c buildsym.h complaints.h $(bfd_h) $(defs_h) \
 	$(expression_h) gdb-stabs.h $(gdbcore_h) $(gdbtypes_h) language.h \
