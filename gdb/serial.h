@@ -167,4 +167,7 @@ void serial_close PARAMS ((serial_t, int));
 
 #define SERIAL_UN_FDOPEN(SERIAL_T) serial_close(SERIAL_T, 0)
 
+extern void serial_printf PARAMS ((serial_t desc, const char *, ...))
+     ATTR_FORMAT(printf, 2, 3);
+
 #endif /* SERIAL_H */

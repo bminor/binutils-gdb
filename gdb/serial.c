@@ -307,6 +307,35 @@ connect_command (args, fromtty)
 }
 #endif /* 0 */
 
+/* VARARGS */
+void
+#ifdef ANSI_PROTOTYPES
+serial_printf (serial_t desc, const char *format, ...)
+#else
+serial_printf (va_alist)
+     va_dcl
+#endif
+{
+  va_list args;
+  char *buf;
+#ifdef ANSI_PROTOTYPES
+  va_start (args, format);
+#else
+  serial_t desc;
+  char *format;
+
+  va_start (args);
+  desc = va_arg (args, serial_t);
+  format = va_arg (args, char *);
+#endif
+
+  vasprintf (&buf, format, args);
+  SERIAL_WRITE (desc, buf, strlen (buf));
+
+  free (buf);
+  va_end (args);
+}
+
 void
 _initialize_serial ()
 {

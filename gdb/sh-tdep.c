@@ -213,23 +213,11 @@ frame_find_saved_regs (fi, fsr)
   fi->f_offset = depth - where[FP_REGNUM] - 4;
   /* Work out the return pc - either from the saved pr or the pr
      value */
-  /* Just called, so dig out the real return */
-  if (fi->return_pc == 0)
-    {
-      fi->return_pc = read_register (PR_REGNUM) + 4;
-    }
-  else
-    {
 
-      if (fsr->regs[PR_REGNUM])
-	{
-	  fi->return_pc = read_memory_integer (fsr->regs[PR_REGNUM], 4) + 4;
-	}
-      else
-	{
-	  fi->return_pc = read_register (PR_REGNUM) + 4;
-	}
-    }
+  if (fsr->regs[PR_REGNUM])
+    fi->return_pc = read_memory_integer (fsr->regs[PR_REGNUM], 4);
+  else
+    fi->return_pc = read_register (PR_REGNUM);
 }
 
 /* initialize the extra info saved in a FRAME */
@@ -240,6 +228,9 @@ init_extra_frame_info (fromleaf, fi)
      struct frame_info *fi;
 {
   struct frame_saved_regs dummy;
+
+  if (fi->next)
+    fi->pc = fi->next->return_pc;
 
   frame_find_saved_regs (fi, &dummy);
 }

@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "target.h"
 #include "monitor.h"
 #include "serial.h"
+#include "srec.h"
 
 static void sh3_open PARAMS ((char *args, int from_tty));
 
@@ -102,6 +103,24 @@ sh3_supply_register (regname, regnamelen, val, vallen)
       val = monitor_supply_register (regno++, val);
 }
 
+static void
+sh3_load (desc, file, hashmark)
+     serial_t desc;
+     char *file;
+     int hashmark;
+{
+  monitor_printf ("il;s:x\r");
+  monitor_expect ("\005", NULL, 0); /* Look for ENQ */
+  SERIAL_WRITE (desc, "\006", 1); /* Send ACK */
+  monitor_expect ("LO x\r", NULL, 0); /* Look for filename */
+
+  load_srec (desc, file, 80, SREC_ALL, hashmark);
+
+  monitor_expect ("\005", NULL, 0); /* Look for ENQ */
+  SERIAL_WRITE (desc, "\006", 1); /* Send ACK */
+  monitor_expect_prompt (NULL, 0);
+}
+
 /* This array of registers need to match the indexes used by GDB.
    This exists because the various ROM monitors use different strings
    than does GDB, and don't necessarily support all the registers
@@ -167,8 +186,8 @@ static struct monitor_ops sh3_cmds =
 				/* register_pattern */
   "\\(\\w+\\)=\\([0-9a-fA-F]+\\( +[0-9a-fA-F]+\\b\\)*\\)",
   sh3_supply_register,		/* supply_register */
-  NULL,				/* load_routine (defaults to SRECs) */
-  "il;s:x\r\006",		/* download command */
+  sh3_load,			/* load_routine */
+  NULL,				/* download command */
   NULL,				/* Load response */
   "\n:",			/* monitor command prompt */
   "\r",				/* end-of-line terminator */

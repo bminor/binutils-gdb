@@ -1,3 +1,22 @@
+Tue Nov 14 14:51:05 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* monitor.c (monitor_load_srec monitor_make_srec):  Move all
+	S-record download code into srec.c.
+	* srec.c srec.h:  New files.  Contain S-record loading routines
+	formerly in monitor.c.
+	* serial.c serial.h:  New routine just like fprintf, but uses
+	serial_t instead of FILE *.
+	* sh-tdep.c (frame_find_saved_regs init_extra_frame_info):
+	Don't add four to saved pc (makes things match manual).  Also, fix
+	bug where we didn't get pc from stack frame correctly.
+	* config/sh/tm-sh.h (SAVED_PC_AFTER_CALL):  Don't add four to
+	saved pc.  Real hardware does this for you.
+	* sh3-rom.c (sh3_load):  New routine.  Sets up for download then
+	calls generic S-record loader.
+	* config/h8300/h8300.mt, config/h8500/h8500.mt,
+	config/m68k/monitor.mt, config/pa/hppapro.mt, config/sh/sh.mt:
+	Add srec.o to TDEPFILES.
+
 Tue Nov 14 15:57:36 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* remote-ppcbug.c: New file to support the Motorola PPCBUG monitor

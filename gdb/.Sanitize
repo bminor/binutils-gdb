@@ -327,6 +327,8 @@ sparc-stub.c
 sparc-tdep.c
 sparcl-stub.c
 sparcl-tdep.c
+srec.c
+srec.h
 stabsread.c
 stabsread.h
 stack.c
