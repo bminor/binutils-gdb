@@ -1,3 +1,7 @@
+Wed Mar  4 12:08:14 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* m32r-opc.h,m32r-opc.c,m32r-asm.c,m32r-dis.c: Regenerate.
+
 Tue Mar  3 18:51:22 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen-asm.in: Move insertion of generated routines to top of file.
