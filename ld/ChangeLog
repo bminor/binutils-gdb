@@ -1,3 +1,10 @@
+2001-02-26  H.J. Lu  <hjl@gnu.org>
+
+	* ldlang.c (open_input_bfds): Set the bfd error handler so
+        that problems can be caught whilst loading symbols.
+        (record_bfd_errors): New function: Report BFD errors and mark
+        the executable output as being invalid.
+
 2001-02-22  Timothy Wall  <twall@cygnus.com>
 
 	* configure.host: Add configuration for ia64-*-aix*.

@@ -1,3 +1,15 @@
+2001-02-26  Nick Clifton <nickc@redhat.com>
+
+	* coffcode.h (styp_to_sec_flags) [COFF_WITH_PE version]: Tidy
+	up, replacing multiple if statements with a switch.
+        (handle_COMDAT): New function.
+
+2001-02-26  H.J. Lu  <hjl@gnu.org>
+
+	* coffcode.h (styp_to_sec_flags) [COFF_WITH_PE version]: Issue
+	a warning for section flags we do not handle instead of
+	aborting.
+
 2001-02-26  Andreas Jaeger  <aj@suse.de>
 
 	* elf64-x86-64.c (x86_64_elf_howto_table): Fix order of entries.

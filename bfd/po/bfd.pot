@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2001-02-18 15:14-0800\n"
+"POT-Creation-Date: 2001-02-26 17:19-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -326,37 +326,42 @@ msgstr ""
 msgid "Warning: Clearing the interworking flag of %s due to outside request"
 msgstr ""
 
-#: coffcode.h:2136
+#: coffcode.h:1080
+#, c-format
+msgid "%s (%s): Section flag %s (0x%x) ignored"
+msgstr ""
+
+#: coffcode.h:2194
 #, c-format
 msgid "Unrecognized TI COFF target id '0x%x'"
 msgstr ""
 
-#: coffcode.h:4194
+#: coffcode.h:4252
 #, c-format
 msgid "%s: warning: illegal symbol index %ld in line numbers"
 msgstr ""
 
-#: coffcode.h:4208
+#: coffcode.h:4266
 #, c-format
 msgid "%s: warning: duplicate line number information for `%s'"
 msgstr ""
 
-#: coffcode.h:4568
+#: coffcode.h:4626
 #, c-format
 msgid "%s: Unrecognized storage class %d for %s symbol `%s'"
 msgstr ""
 
-#: coffcode.h:4699
+#: coffcode.h:4757
 #, c-format
 msgid "warning: %s: local symbol `%s' has no section"
 msgstr ""
 
-#: coff-tic54x.c:376 coffcode.h:4810
+#: coff-tic54x.c:376 coffcode.h:4868
 #, c-format
 msgid "%s: warning: illegal symbol index %ld in relocs"
 msgstr ""
 
-#: coffcode.h:4848
+#: coffcode.h:4906
 #, c-format
 msgid "%s: illegal relocation type %d at address 0x%lx"
 msgstr ""
@@ -890,7 +895,7 @@ msgstr ""
 msgid "%s: ABI mismatch: linking %s module with previous %s modules"
 msgstr ""
 
-#: elf32-mips.c:2673 elf32-ppc.c:1477 elf64-sparc.c:2991
+#: elf32-mips.c:2673 elf32-ppc.c:1477 elf64-sparc.c:2998
 #, c-format
 msgid "%s: uses different e_flags (0x%lx) fields than previous modules (0x%lx)"
 msgstr ""
@@ -1078,12 +1083,12 @@ msgstr ""
 msgid "%s: probably compiled without -fPIC?"
 msgstr ""
 
-#: elf32-sparc.c:1962
+#: elf32-sparc.c:1969
 #, c-format
 msgid "%s: compiled for a 64 bit system and target is 32 bit"
 msgstr ""
 
-#: elf32-sparc.c:1976
+#: elf32-sparc.c:1983
 #, c-format
 msgid "%s: linking little endian files with big endian files"
 msgstr ""
@@ -1194,7 +1199,7 @@ msgstr ""
 msgid "Symbol `%s' has differing types: REGISTER in %s, %s in %s"
 msgstr ""
 
-#: elf64-sparc.c:2972
+#: elf64-sparc.c:2979
 #, c-format
 msgid "%s: linking UltraSPARC specific with HAL specific code"
 msgstr ""

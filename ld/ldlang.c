@@ -127,6 +127,7 @@ static bfd_vma size_input_section
 	   fill_type, bfd_vma, boolean));
 static void lang_finish PARAMS ((void));
 static void ignore_bfd_errors PARAMS ((const char *, ...));
+static void record_bfd_errors PARAMS ((const char *, ...));
 static void lang_check PARAMS ((void));
 static void lang_common PARAMS ((void));
 static boolean lang_one_common PARAMS ((struct bfd_link_hash_entry *, PTR));
@@ -1894,6 +1895,7 @@ open_input_bfds (s, force)
 	  if (s->input_statement.real)
 	    {
 	      lang_statement_list_type add;
+	      bfd_error_handler_type pfn;
 
 	      s->input_statement.target = current_target;
 
@@ -1908,9 +1910,16 @@ open_input_bfds (s, force)
 				       bfd_archive))
 		s->input_statement.loaded = false;
 
-	      lang_list_init (&add);
+	      lang_list_init (& add);
+
+	      /* We need to know if an error occurs whilst loading the 
+		 symbols, since this means that a valid executable can
+		 not be produced.  */
+	      pfn = bfd_set_error_handler (record_bfd_errors);
 
 	      load_symbols (&s->input_statement, &add);
+
+	      bfd_set_error_handler (pfn);
 
 	      if (add.head != NULL)
 		{
@@ -3435,6 +3444,53 @@ lang_finish ()
     }
 }
 
+
+/* This is the routine to handle BFD error messages.  */
+
+#ifdef ANSI_PROTOTYPES
+
+static void
+record_bfd_errors (const char *s, ...)
+{
+  va_list p;
+
+  einfo ("%P: ");
+
+  va_start (p, s);
+
+  vfprintf (stderr, s, p);
+
+  va_end (p);
+
+  fprintf (stderr, "\n");
+
+  einfo ("%X");
+}
+
+#else /* ! defined (ANSI_PROTOTYPES) */
+
+static void
+record_bfd_errors (va_alist)
+     va_dcl
+{
+  va_list p;
+  const char *s;
+
+  einfo ("%P: ");
+
+  va_start (p);
+
+  s = va_arg (p, const char *);
+  vfprintf (stderr, s, p);
+
+  va_end (p);
+
+  fprintf (stderr, "\n");
+
+  einfo ("%X");
+}
+
+#endif /* ! defined (ANSI_PROTOTYPES) */
 /* This is a small function used when we want to ignore errors from
    BFD.  */
 
