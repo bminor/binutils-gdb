@@ -1,3 +1,9 @@
+Tue May 28 11:14:58 1996  Tom Tromey  <tromey@creche.cygnus.com>
+
+	* configure: Regenerated.
+	* aclocal.m4 (CY_AC_PATH_TCLH): Don't use AC_TRY_RUN.
+	(CY_AC_PATH_TKH): Don't use AC_TRY_RUN.
+
 Sun May 26 14:14:49 1996  Fred Fish  <fnf@cygnus.com>
 
 	Changes from: David Mosberger-Tang  <davidm@azstarnet.com>

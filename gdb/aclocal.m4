@@ -119,35 +119,34 @@ if test x"${ac_cv_c_tclh}" != x ; then
 fi
 
 AC_MSG_CHECKING([Tcl version])
-rm -rf tclmajor tclminor
 orig_includes="$CPPFLAGS"
 
 if test x"${TCLHDIR}" != x ; then
   CPPFLAGS="$CPPFLAGS $TCLHDIR"
 fi
 
-AC_TRY_RUN([
-#include <stdio.h>
+# Get major and minor versions of Tcl.
+cat > conftest.c <<'EOF'
 #include "tcl.h"
-main() {
-	FILE *maj = fopen("tclmajor","w");
-	FILE *min = fopen("tclminor","w");
-	fprintf(maj,"%d",TCL_MAJOR_VERSION);
-	fprintf(min,"%d",TCL_MINOR_VERSION);
-	fclose(maj);
-	fclose(min);
-	return 0;
-}],
-	tclmajor=`cat tclmajor`
-	tclminor=`cat tclminor`
-	tclversion=$tclmajor.$tclminor
-	AC_MSG_RESULT($tclversion)
-	rm -f tclmajor tclminor
-,
-	AC_MSG_RESULT([can't happen])
-,
-	AC_MSG_ERROR([can't be cross compiled])
-)
+major = TCL_MAJOR_VERSION
+minor = TCL_MINOR_VERSION
+EOF
+
+tclmajor=
+tclminor=
+if (eval "$CPP $CPPFLAGS conftest.c") 2>/dev/null >conftest.out; then
+   # Success.
+   tclmajor=`egrep '^major = ' conftest.out | sed -e 's/^major = *//' -e 's/ *$//'`
+   tclminor=`egrep '^minor = ' conftest.out | sed -e 's/^minor = *//' -e 's/ *$//'`
+fi
+rm -f conftest.c conftest.out
+
+if test -z "$tclmajor" || test -z "$tclminor"; then
+   AC_MSG_RESULT([fatal error: could not find major or minor version number of Tcl])
+   exit 1
+fi
+AC_MSG_RESULT(${tclmajor}.${tclminor})
+
 CPPFLAGS="${orig_includes}"
 
 AC_PROVIDE([$0])
@@ -378,7 +377,6 @@ fi
 # if Tk is installed, extract the major/minor version
 if test x"${no_tk}" = x ; then
 AC_MSG_CHECKING([Tk version])
-rm -rf tkmajor tkminor
 orig_includes="$CPPFLAGS"
 
 if test x"${TCLHDIR}" != x ; then
@@ -391,30 +389,28 @@ if test x"${x_includes}" != x -a x"${x_includes}" != xNONE ; then
   CPPFLAGS="$CPPFLAGS -I$x_includes"
 fi
 
-AC_TRY_RUN([
-#include <stdio.h>
+# Get major and minor versions of Tk.
+cat > conftest.c <<'EOF'
 #include "tk.h"
-  main() {
-	FILE *maj = fopen("tkmajor","w");
-	FILE *min = fopen("tkminor","w");
-	fprintf(maj,"%d",TK_MAJOR_VERSION);
-	fprintf(min,"%d",TK_MINOR_VERSION);
-	fclose(maj);
-	fclose(min);
-	return 0;
-}],
-	tkmajor=`cat tkmajor`
-	tkminor=`cat tkminor`
-	tkversion=$tkmajor.$tkminor
-	AC_MSG_RESULT($tkversion)
-	rm -f tkmajor tkminor
-,
-	AC_MSG_ERROR([
-cannot compile a simple X program - suspect your xmkmf is
-misconfigured and is incorrectly reporting the location of your X
-include or libraries - report this to your system admin]) ,
-	AC_MSG_ERROR([can't be cross compiled])
-)
+major = TK_MAJOR_VERSION
+minor = TK_MINOR_VERSION
+EOF
+
+tkmajor=
+tkminor=
+if (eval "$CPP $CPPFLAGS conftest.c") 2>/dev/null >conftest.out; then
+   # Success.
+   tkmajor=`egrep '^major = ' conftest.out | sed -e 's/^major = *//' -e 's/ *$//'`
+   tkminor=`egrep '^minor = ' conftest.out | sed -e 's/^minor = *//' -e 's/ *$//'`
+fi
+rm -f conftest.c conftest.out
+
+if test -z "$tkmajor" || test -z "$tkminor"; then
+   AC_MSG_RESULT([fatal error: could not find major or minor version number of Tk])
+   exit 1
+fi
+AC_MSG_RESULT(${tkmajor}.${tkminor})
+
 CPPFLAGS="${orig_includes}"
 fi
 
