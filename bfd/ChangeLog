@@ -1,3 +1,10 @@
+Mon May 18 00:09:28 1998  Richard Henderson  <rth@cygnus.com>
+
+	* elf64-alpha.c (elf64_alpha_relax_section): Set again on changes.
+	(elf64_alpha_can_merge_gots, elf64_alpha_merge_gots,
+	elf64_alpha_size_got_sections): Rewrite, handling multiple got
+	subsections during relaxation more correctly.
+
 Thu May 14 14:22:58 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* bfd-in2.h: Add new prototype: bfd_coff_set_symbol_class ().
