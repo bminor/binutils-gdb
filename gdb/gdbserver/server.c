@@ -29,9 +29,7 @@ jmp_buf toplevel;
 int inferior_pid;
 
 static unsigned char
-start_inferior (argv, statusptr)
-     char *argv[];
-     char *statusptr;
+start_inferior (char *argv[], char *statusptr)
 {
   inferior_pid = create_inferior (argv[0], argv);
   fprintf (stderr, "Process %s created; pid = %d\n", argv[0], inferior_pid);
@@ -43,9 +41,7 @@ start_inferior (argv, statusptr)
 extern int remote_debug;
 
 int
-main (argc, argv)
-     int argc;
-     char *argv[];
+main (int argc, char *argv[])
 {
   char ch, status, own_buf[PBUFSIZ], mem_buf[2000];
   int i = 0;

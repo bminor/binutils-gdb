@@ -285,9 +285,7 @@ play (FILE *fp)
 }
 
 int
-main (argc, argv)
-     int argc;
-     char *argv[];
+main (int argc, char *argv[])
 {
   FILE *fp;
   int ch;
