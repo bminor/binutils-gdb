@@ -35,8 +35,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/socket.h>
+#define malloc bogon_malloc	/* Sun claims "char *malloc()" not void * */
 #define free bogon_free		/* Sun claims "int free()" not void */
 #include <rpc/rpc.h>
+#undef malloc
 #undef free
 #include <sys/time.h>		/* UTek's <rpc/rpc.h> doesn't #incl this */
 #include <netdb.h>
