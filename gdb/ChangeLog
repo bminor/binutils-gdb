@@ -1,3 +1,13 @@
+Sun Apr 28 22:04:47 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
+
+	* param-no-tm.h: Make BITS_BIG_ENDIAN defined to 0/1, not defined
+	or not defined.  Don't define it based on TARGET_BYTE_ORDER if
+	it's already defined (in the tm.h file).
+	mips-opcode.h (BIT_FIELDS_*),
+	values.c (modify_field, unpack_field_as_long):
+	Use #if BITS_BIG_ENDIAN not #ifdef BITS_BIG_ENDIAN.
+	{x,t}m-tahoe.h, tahoe-pinsn.c, tahoe-opcode.h: New files.
+
 Fri Apr 26 12:02:06 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
 
 	* tm-sparc.h: Add comments about gcc version 2 and structure passing.
