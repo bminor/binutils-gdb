@@ -1,11 +1,13 @@
+Mon Jul 13 17:33:00 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* ldmain.c(main): prevent -r and -relax from being on at the same
+	time.
+
 Wed Jul  1 17:51:19 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* ldmain.c (Q_enter_global_ref), ldindr.c (add_indirect): fix for
 	aliasing problems
 	
-Tue Jun 30 20:25:28 1992  D. V. Henkel-Wallace  (gumby@cygnus.com)
-
-	* Makefile.in: Add program_suffix (parallel to program_prefix)
 
 Thu Jun 18 09:38:56 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
