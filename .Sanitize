@@ -89,6 +89,7 @@ tk
 test-build.mk
 texinfo
 tgas
+uudecode
 wdiff
 xiberty
 z8ksim
