@@ -174,7 +174,6 @@ struct alpha_mdebug_unwind_cache
   alpha_extra_func_info_t proc_desc;
   CORE_ADDR vfp;
   CORE_ADDR *saved_regs;
-  void *in_prologue_cache;
 };
 
 /* Extract all of the information about the frame from PROC_DESC
@@ -204,21 +203,6 @@ alpha_mdebug_frame_unwind_cache (struct frame_info *next_frame,
   proc_desc = find_proc_desc (pc);
   info->proc_desc = proc_desc;
   gdb_assert (proc_desc != NULL);
-
-  /* If we're in the prologue, the PDR for this frame is not yet valid.  */
-  /* ??? We could have said "no" in alpha_mdebug_frame_p, and we'd
-     walk down the list of unwinders and try the heuristic unwinder
-     and things would have been fine. However, since we have the PDR,
-     we know how to skip the search for the start of the procedure,
-     and all the uncertainty involved there.  So instead, arrange for
-     us to defer to the heuristic unwinder directly.  */
-  if (alpha_mdebug_in_prologue (pc, proc_desc))
-    {
-      alpha_heuristic_frame_unwind_cache (next_frame,
-      					  &info->in_prologue_cache,
-					  PROC_LOW_ADDR (proc_desc));
-      return info;
-    }
 
   info->saved_regs = frame_obstack_zalloc (SIZEOF_FRAME_SAVED_REGS);
 
@@ -275,12 +259,7 @@ alpha_mdebug_frame_this_id (struct frame_info *next_frame,
   struct alpha_mdebug_unwind_cache *info
     = alpha_mdebug_frame_unwind_cache (next_frame, this_prologue_cache);
 
-  /* If we're in the prologue, defer to the heuristic unwinder.  */
-  if (info->in_prologue_cache)
-    alpha_heuristic_frame_this_id (next_frame, &info->in_prologue_cache,
-    				   this_id);
-  else
-    *this_id = frame_id_build (info->vfp, frame_func_unwind (next_frame));
+  *this_id = frame_id_build (info->vfp, frame_func_unwind (next_frame));
 }
 
 /* Retrieve the value of REGNUM in FRAME.  Don't give up!  */
@@ -294,16 +273,6 @@ alpha_mdebug_frame_prev_register (struct frame_info *next_frame,
 {
   struct alpha_mdebug_unwind_cache *info
     = alpha_mdebug_frame_unwind_cache (next_frame, this_prologue_cache);
-
-  /* If we're in the prologue, defer to the heuristic unwinder.  */
-  if (info->in_prologue_cache)
-    {
-      alpha_heuristic_frame_prev_register (next_frame,
-      					   &info->in_prologue_cache,
-					   regnum, optimizedp, lvalp,
-					   addrp, realnump, bufferp);
-      return;
-    }
 
   /* The PC of the previous frame is stored in the link register of
      the current frame.  Frob regnum so that we pull the value from
@@ -359,6 +328,11 @@ alpha_mdebug_frame_p (CORE_ADDR pc)
   if (proc_desc == NULL)
     return NULL;
 
+  /* If we're in the prologue, the PDR for this frame is not yet valid.
+     Say no here and we'll fall back on the heuristic unwinder.  */
+  if (alpha_mdebug_in_prologue (pc, proc_desc))
+    return NULL;
+
   return &alpha_mdebug_frame_unwind;
 }
 
@@ -369,11 +343,7 @@ alpha_mdebug_frame_base_address (struct frame_info *next_frame,
   struct alpha_mdebug_unwind_cache *info
     = alpha_mdebug_frame_unwind_cache (next_frame, this_prologue_cache);
 
-  if (info->in_prologue_cache)
-    return alpha_heuristic_frame_base_address (next_frame,
-    					       &info->in_prologue_cache);
-  else
-    return info->vfp;
+  return info->vfp;
 }
 
 static CORE_ADDR
@@ -382,15 +352,8 @@ alpha_mdebug_frame_locals_address (struct frame_info *next_frame,
 {
   struct alpha_mdebug_unwind_cache *info
     = alpha_mdebug_frame_unwind_cache (next_frame, this_prologue_cache);
-  CORE_ADDR vfp;
 
-  if (info->in_prologue_cache)
-    vfp = alpha_heuristic_frame_base_address (next_frame,
-    					      &info->in_prologue_cache);
-  else
-    vfp = info->vfp;
-
-  return vfp - PROC_LOCALOFF (info->proc_desc);
+  return info->vfp - PROC_LOCALOFF (info->proc_desc);
 }
 
 static CORE_ADDR
@@ -399,15 +362,8 @@ alpha_mdebug_frame_args_address (struct frame_info *next_frame,
 {
   struct alpha_mdebug_unwind_cache *info
     = alpha_mdebug_frame_unwind_cache (next_frame, this_prologue_cache);
-  CORE_ADDR vfp;
 
-  if (info->in_prologue_cache)
-    vfp = alpha_heuristic_frame_base_address (next_frame,
-    					      &info->in_prologue_cache);
-  else
-    vfp = info->vfp;
-
-  return vfp - ALPHA_NUM_ARG_REGS * 8;
+  return info->vfp - ALPHA_NUM_ARG_REGS * 8;
 }
 
 static const struct frame_base alpha_mdebug_frame_base = {

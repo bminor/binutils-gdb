@@ -1,3 +1,21 @@
+2003-05-30  Richard Henderson  <rth@redhat.com>
+
+        * alpha-mdebug-tdep.c (alpha_mdebug_frame_p): Reject prologues.
+        (alpha_mdebug_frame_unwind_cache): Don't call the heuristic unwinder.
+        (alpha_mdebug_frame_this_id): Likewise.
+        (alpha_mdebug_frame_prev_register): Likewise.
+        (alpha_mdebug_frame_base_address): Likewise.
+        (alpha_mdebug_frame_locals_address): Likewise.
+        (alpha_mdebug_frame_args_address): Likewise.
+        (struct alpha_mdebug_unwind_cache): Remove in_prologue_cache.
+        * alpha-tdep.c (alpha_heuristic_proc_start): Use get_pc_function_start.
+        (alpha_heuristic_frame_unwind_cache): Make static; add missing
+        loop increment.
+        (alpha_heuristic_frame_this_id): Make static.
+        (alpha_heuristic_frame_prev_register): Likewise.
+        (alpha_heuristic_frame_base_address): Likewise.
+        * alpha-tdep.h: Update.
+
 2003-05-29  Richard Henderson  <rth@redhat.com>
 
 	* alpha-linux-tdep.c (alpha_linux_sigtramp_offset_1): New.
