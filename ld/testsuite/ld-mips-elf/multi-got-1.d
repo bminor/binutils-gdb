@@ -15,7 +15,7 @@ Dynamic segment at offset 0xcc contains 18 entries:
  0x00000015 \(DEBUG\)                      0x0
  0x00000003 \(PLTGOT\)                     0xe3ba0
  0x00000011 \(REL\)                        0x83b34
- 0x00000012 \(RELSZ\)                      65624 \(bytes\)
+ 0x00000012 \(RELSZ\)                      65544 \(bytes\)
  0x00000013 \(RELENT\)                     8 \(bytes\)
  0x70000001 \(MIPS_RLD_VERSION\)           1
  0x70000005 \(MIPS_FLAGS\)                 NOTPOT

@@ -6088,30 +6088,6 @@ _bfd_mips_elf_size_dynamic_sections (output_bfd, info)
 	    return FALSE;
 	}
 
-      if (SGI_COMPAT (output_bfd))
-	{
-	  if (!MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_MIPS_CONFLICTNO, 0))
-	    return FALSE;
-	}
-
-      if (SGI_COMPAT (output_bfd))
-	{
-	  if (!MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_MIPS_LIBLISTNO, 0))
-	    return FALSE;
-	}
-
-      if (bfd_get_section_by_name (dynobj, ".conflict") != NULL)
-	{
-	  if (! MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_MIPS_CONFLICT, 0))
-	    return FALSE;
-
-	  s = bfd_get_section_by_name (dynobj, ".liblist");
-	  BFD_ASSERT (s != NULL);
-
-	  if (! MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_MIPS_LIBLIST, 0))
-	    return FALSE;
-	}
-
       if (! MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_MIPS_RLD_VERSION, 0))
 	return FALSE;
 
@@ -6881,13 +6857,6 @@ _bfd_mips_elf_finish_dynamic_sections (output_bfd, info)
 
 	    case DT_PLTGOT:
 	      name = ".got";
-	      goto get_vma;
-	    case DT_MIPS_CONFLICT:
-	      name = ".conflict";
-	      goto get_vma;
-	    case DT_MIPS_LIBLIST:
-	      name = ".liblist";
-	    get_vma:
 	      s = bfd_get_section_by_name (output_bfd, name);
 	      BFD_ASSERT (s != NULL);
 	      dyn.d_un.d_ptr = s->vma;
@@ -6899,27 +6868,6 @@ _bfd_mips_elf_finish_dynamic_sections (output_bfd, info)
 
 	    case DT_MIPS_FLAGS:
 	      dyn.d_un.d_val = RHF_NOTPOT; /* XXX */
-	      break;
-
-	    case DT_MIPS_CONFLICTNO:
-	      name = ".conflict";
-	      elemsize = sizeof (Elf32_Conflict);
-	      goto set_elemno;
-
-	    case DT_MIPS_LIBLISTNO:
-	      name = ".liblist";
-	      elemsize = sizeof (Elf32_Lib);
-	    set_elemno:
-	      s = bfd_get_section_by_name (output_bfd, name);
-	      if (s != NULL)
-		{
-		  if (s->_cooked_size != 0)
-		    dyn.d_un.d_val = s->_cooked_size / elemsize;
-		  else
-		    dyn.d_un.d_val = s->_raw_size / elemsize;
-		}
-	      else
-		dyn.d_un.d_val = 0;
 	      break;
 
 	    case DT_MIPS_TIME_STAMP:
@@ -6989,9 +6937,16 @@ _bfd_mips_elf_finish_dynamic_sections (output_bfd, info)
 	      dyn.d_un.d_ptr = s->vma;
 	      break;
 
-	    case DT_MIPS_MSYM:
-	      s = (bfd_get_section_by_name (output_bfd, ".msym"));
-	      dyn.d_un.d_ptr = s->vma;
+	    case DT_RELSZ:
+	      /* Reduce DT_RELSZ to account for any relocations we
+		 decided not to make.  This is for the n64 irix rld,
+		 which doesn't seem to apply any relocations if there
+		 are trailing null entries.  */
+	      s = mips_elf_rel_dyn_section (dynobj, FALSE);
+	      dyn.d_un.d_val = (s->reloc_count
+				* (ABI_64_P (output_bfd)
+				   ? sizeof (Elf64_Mips_External_Rel)
+				   : sizeof (Elf32_External_Rel)));
 	      break;
 
 	    default:
@@ -7372,7 +7327,7 @@ _bfd_mips_elf_modify_segment_map (abfd)
 
   /* For IRIX 6, we don't have .mdebug sections, nor does anything but
      .dynamic end up in PT_DYNAMIC.  However, we do have to insert a
-     PT_OPTIONS segment immediately following the program header
+     PT_MIPS_OPTIONS segment immediately following the program header
      table.  */
   if (NEWABI_P (abfd)
       /* On non-IRIX6 new abi, we'll have already created a segment
@@ -7389,15 +7344,11 @@ _bfd_mips_elf_modify_segment_map (abfd)
 	{
 	  struct elf_segment_map *options_segment;
 
-	  /* Usually, there's a program header table.  But, sometimes
-	     there's not (like when running the `ld' testsuite).  So,
-	     if there's no program header table, we just put the
-	     options segment at the end.  */
-	  for (pm = &elf_tdata (abfd)->segment_map;
-	       *pm != NULL;
-	       pm = &(*pm)->next)
-	    if ((*pm)->p_type == PT_PHDR)
-	      break;
+	  pm = &elf_tdata (abfd)->segment_map;
+	  while (*pm != NULL
+		 && ((*pm)->p_type == PT_PHDR
+		     || (*pm)->p_type == PT_INTERP))
+	    pm = &(*pm)->next;
 
 	  amt = sizeof (struct elf_segment_map);
 	  options_segment = bfd_zalloc (abfd, amt);
@@ -9087,6 +9038,11 @@ _bfd_mips_elf_merge_private_bfd_data (ibfd, obfd)
      doesn't seem to matter.  */
   new_flags &= ~EF_MIPS_XGOT;
   old_flags &= ~EF_MIPS_XGOT;
+
+  /* MIPSpro generates ucode info in n64 objects.  Again, we should
+     just be able to ignore this.  */
+  new_flags &= ~EF_MIPS_UCODE;
+  old_flags &= ~EF_MIPS_UCODE;
 
   if (new_flags == old_flags)
     return TRUE;

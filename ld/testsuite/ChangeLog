@@ -1,3 +1,8 @@
+2003-10-13  Richard Sandiford  <rsandifo@redht.com>
+
+	* ld-mips-elf/multi-got-1.d (RELSZ): Don't include the size of the
+	trailing null relocs.
+
 2003-10-12  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* ld-sh/rd-sh.exp (LDFLAGS): Define appropriately for each

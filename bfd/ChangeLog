@@ -1,3 +1,13 @@
+2003-10-13  Richard Sandiford  <rsandifo@redht.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_size_dynamic_sections): Don't add
+	DT_MIPS_LIBLIST or DT_MIPS_CONFLICT entries.
+	(_bfd_mips_elf_finish_dynamic_symbol): Don't handle them.  Don't
+	handle DT_MIPS_MSYM.  Set DT_RELSZ based on the number of relocations
+	that were needed.
+	(_bfd_mips_elf_modify_segment_map): Fix placement of PT_MIPS_OPTIONS.
+	(_bfd_mips_elf_merge_private_bfd_data): Ignore EF_MIPS_UCODE.
+
 2003-10-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* bfd-in.h (bfd_elf32_ia64_after_parse): New prototype.
