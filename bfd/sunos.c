@@ -1155,6 +1155,8 @@ bfd_sunos_get_needed_list (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
 {
+  if (info->hash->creator != &MY(xvec))
+    return NULL;
   return sunos_hash_table (info)->needed;
 }
 

@@ -29,6 +29,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define STRING_SIZE_SIZE (4)
 
+/* In order to support linking different object file formats into an
+   XCOFF format, we need to be able to determine whether a particular
+   bfd_target is an XCOFF vector.  FIXME: We need to rethink this
+   whole approach.  */
+#define XCOFF_XVECP(xv) \
+  (strcmp ((xv)->name, "aixcoff-rs6000") == 0 \
+   || strcmp ((xv)->name, "xcoff-powermac") == 0)
+
 /* Get the XCOFF hash table entries for a BFD.  */
 #define obj_xcoff_sym_hashes(bfd) \
   ((struct xcoff_link_hash_entry **) obj_coff_sym_hashes (bfd))
@@ -2130,6 +2138,9 @@ bfd_xcoff_link_record_set (output_bfd, info, harg, size)
   struct xcoff_link_hash_entry *h = (struct xcoff_link_hash_entry *) harg;
   struct xcoff_link_size_list *n;
 
+  if (! XCOFF_XVECP (output_bfd->xvec))
+    return true;
+
   /* This will hardly ever be called.  I don't want to burn four bytes
      per global symbol, so instead the size is kept on a linked list
      attached to the hash table.  */
@@ -2165,6 +2176,9 @@ bfd_xcoff_import_symbol (output_bfd, info, harg, val, imppath, impfile,
      const char *impmember;
 {
   struct xcoff_link_hash_entry *h = (struct xcoff_link_hash_entry *) harg;
+
+  if (! XCOFF_XVECP (output_bfd->xvec))
+    return true;
 
   h->flags |= XCOFF_IMPORT;
 
@@ -2249,6 +2263,9 @@ bfd_xcoff_export_symbol (output_bfd, info, harg, syscall)
 {
   struct xcoff_link_hash_entry *h = (struct xcoff_link_hash_entry *) harg;
 
+  if (! XCOFF_XVECP (output_bfd->xvec))
+    return true;
+
   h->flags |= XCOFF_EXPORT;
 
   /* FIXME: I'm not at all sure what syscall is supposed to mean, so
@@ -2272,6 +2289,9 @@ bfd_xcoff_link_count_reloc (output_bfd, info, name)
      const char *name;
 {
   struct xcoff_link_hash_entry *h;
+
+  if (! XCOFF_XVECP (output_bfd->xvec))
+    return true;
 
   h = xcoff_link_hash_lookup (xcoff_hash_table (info), name, false, false,
 			      false);
@@ -2302,6 +2322,9 @@ bfd_xcoff_record_link_assignment (output_bfd, info, name)
      const char *name;
 {
   struct xcoff_link_hash_entry *h;
+
+  if (! XCOFF_XVECP (output_bfd->xvec))
+    return true;
 
   h = xcoff_link_hash_lookup (xcoff_hash_table (info), name, true, true,
 			      false);
@@ -2368,6 +2391,9 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
   bfd *sub;
   struct bfd_strtab_hash *debug_strtab;
   bfd_byte *debug_contents = NULL;
+
+  if (! XCOFF_XVECP (output_bfd->xvec))
+    return true;
 
   ldinfo.failed = false;
   ldinfo.output_bfd = output_bfd;

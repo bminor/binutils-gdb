@@ -1,5 +1,19 @@
 Wed Nov  1 11:45:07 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf.c (bfd_elf_set_dt_needed_name): Don't do anything if the
+	BFD is not of the right type.
+	(bfd_elf_get_needed_list): Likewise.
+	* i386linux.c (bfd_linux_size_dynamic_sections): Likewise.
+	* sunos.c (bfd_sunos_get_needed_list): Likewise.
+	* xcofflink.c (XCOFF_XVECP): Define.
+	(bfd_xcoff_link_record_set): Don't do anything if the BFD is not
+	of the right type.
+	(bfd_xcoff_import_symbol): Likewise.
+	(bfd_xcoff_export_symbol): Likewise.
+	(bfd_xcoff_link_count_reloc): Likewise.
+	(bfd_xcoff_record_link_assignment): Likewise.
+	(bfd_xcoff_size_dynamic_sections): Likewise.
+
 	* sunos.c (sunos_scan_ext_relocs): Only check the reloc symbol
 	table index against the number of symbols for a base relative
 	reloc.

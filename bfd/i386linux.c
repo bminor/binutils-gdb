@@ -549,6 +549,9 @@ bfd_linux_size_dynamic_sections (output_bfd, info)
   struct fixup *f;
   asection *s;
 
+  if (output_bfd->xvec != &MY(vec))
+    return true;
+
   /* First find the fixups... */
   linux_link_hash_traverse (linux_hash_table (info),
 			    linux_tally_symbols,

@@ -446,7 +446,8 @@ bfd_elf_set_dt_needed_name (abfd, name)
      bfd *abfd;
      const char *name;
 {
-  elf_dt_needed_name (abfd) = name;
+  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
+    elf_dt_needed_name (abfd) = name;
 }
 
 /* Get the list of DT_NEEDED entries for a link.  */
@@ -456,6 +457,8 @@ bfd_elf_get_needed_list (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
 {
+  if (info->hash->creator->flavour != bfd_target_elf_flavour)
+    return NULL;
   return elf_hash_table (info)->needed;
 }
 
