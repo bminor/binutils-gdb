@@ -1,3 +1,10 @@
+Fri Mar  8 11:41:25 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* defs.h (extract_long_unsigned_integer): Declare.
+	* findvar.c (extract_long_unsigned_integer): New function.
+	* printcmd.c (print_scalar_formatted): Use it.
+	* valprint.c (val_print_type_code_int): Likewise.
+
 Thu Mar  7 17:40:50 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* infcmd.c (do_registers_info): Ignore anonymous registers.
