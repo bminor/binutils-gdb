@@ -709,16 +709,13 @@ proc default_gdb_start { } {
 	return 0;
     }
 
-    if [is_remote host] {
-	set res [remote_spawn host "$GDB -nw $GDBFLAGS --command gdbinit"];
-    } else {
+    if ![is_remote host] {
 	if { [which $GDB] == 0 } then {
 	    perror "$GDB does not exist."
 	    exit 1
 	}
-
-	set res [remote_spawn host "$GDB -nw $GDBFLAGS"];
     }
+    set res [remote_spawn host "$GDB -nw $GDBFLAGS [host_info gdb_opts]"];
     if { $res < 0 || $res == "" } {
 	perror "Spawning $GDB failed."
 	return 1;

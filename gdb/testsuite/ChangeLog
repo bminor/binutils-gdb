@@ -1,5 +1,7 @@
 Sat Jun 28 13:31:11 1997  Bob Manson  <manson@charmed.cygnus.com>
 
+	* lib/gdb.exp(default_gdb_start): Use gdb_opts host feature.
+
 	* gdb.c++/virtfunc.exp: Remove setting of libs variable.
 
 Fri Jun 27 07:44:25 1997  Fred Fish  <fnf@cygnus.com>
