@@ -1,5 +1,10 @@
 2002-12-11  Andrew Cagney  <ac131313@redhat.com>
 
+	* frame.c (get_frame_extra_info): New function.
+	* frame.h (get_frame_extra_info): Declare.
+
+2002-12-11  Andrew Cagney  <ac131313@redhat.com>
+
 	* breakpoint.h (struct breakpoint): Replace frame with frame_id.
 	(set_momentary_breaokpoint): Replace `struct frame_info' parameter
 	with `struct frame_id'.

@@ -643,4 +643,12 @@ extern struct frame_info *deprecated_selected_frame;
 extern void set_current_frame (struct frame_info *);
 extern struct frame_info *create_new_frame (CORE_ADDR, CORE_ADDR);
 
+
+/* NOTE: cagney/2002-12-10:
+
+   Let older code access the member `extra_info'.  This member is
+   always initialized during frame creation so is always non-null.  */
+
+extern struct frame_extra_info *get_frame_extra_info (struct frame_info *fi);
+
 #endif /* !defined (FRAME_H)  */

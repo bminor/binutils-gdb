@@ -1203,6 +1203,12 @@ deprecated_get_frame_saved_regs (struct frame_info *frame,
 }
 #endif
 
+struct frame_extra_info *
+get_frame_extra_info (struct frame_info *fi)
+{
+  return fi->extra_info;
+}
+
 void
 _initialize_frame (void)
 {
