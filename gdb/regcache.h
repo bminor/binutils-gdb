@@ -42,6 +42,10 @@ extern void regcache_raw_read_signed (struct regcache *regcache,
 				      int regnum, LONGEST *val);
 extern void regcache_raw_read_unsigned (struct regcache *regcache,
 					int regnum, ULONGEST *val);
+extern void regcache_raw_write_signed (struct regcache *regcache,
+				       int regnum, LONGEST val);
+extern void regcache_raw_write_unsigned (struct regcache *regcache,
+					 int regnum, ULONGEST val);
 
 /* Partial transfer of a raw registers.  These perform read, modify,
    write style operations.  */

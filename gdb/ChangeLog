@@ -1,3 +1,10 @@
+2002-08-26  Mark Kettenis  <kettenis@gnu.org>
+
+	* regcache.c (regcache_raw_write_signed,
+	regcache_raw_write_unsigned): New functions.
+	* regcache.h (regcache_raw_write_signed,
+	regcache_raw_write_unsigned): New prototypes.
+
 2002-08-25  Andrew Cagney  <ac131313@redhat.com>
 
 	* Makefile.in (c-exp.tab.o, jv-exp.tab.o, f-exp.tab.o)
