@@ -1,3 +1,8 @@
+2004-02-19  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf32-sparc.c (elf32_sparc_finish_dynamic_sections): Clear
+	.plt sh_entsize.
+
 2004-02-18  Daniel Jacobowitz  <drow@mvista.com>
 
 	* configure.in: Update version to 2.15.90.
