@@ -189,7 +189,7 @@ main (argc, argv)
   link_info.hash = NULL;
   link_info.keep_hash = NULL;
   link_info.notice_hash = NULL;
-
+  link_info.wrap_hash = NULL;
   
   ldfile_add_arch ("");
 

@@ -108,7 +108,7 @@ parse_args (argc, argv)
 #define OPTION_SPLIT_BY_RELOC		(OPTION_WARN_ONCE + 1)
 #define OPTION_SPLIT_BY_FILE 	    	(OPTION_SPLIT_BY_RELOC + 1)
 #define OPTION_WHOLE_ARCHIVE		(OPTION_SPLIT_BY_FILE + 1)
-
+#define OPTION_WRAP			(OPTION_WHOLE_ARCHIVE + 1)
 
   static struct option longopts[] = {
   /* Sorted alphabeticaly, except for the PE options grouped at the end. */
@@ -165,8 +165,8 @@ parse_args (argc, argv)
     {"split-by-reloc", required_argument, NULL, OPTION_SPLIT_BY_RELOC},
     {"split-by-file", no_argument, NULL, OPTION_SPLIT_BY_FILE},
     {"whole-archive", no_argument, NULL, OPTION_WHOLE_ARCHIVE},
+    {"wrap", required_argument, NULL, OPTION_WRAP},
 
-      
     {NULL, no_argument, NULL, 0}
   };
 
@@ -497,6 +497,20 @@ parse_args (argc, argv)
 	  break;
 	case OPTION_WHOLE_ARCHIVE:
 	  whole_archive = true;
+	  break;
+	case OPTION_WRAP:
+	  if (link_info.wrap_hash == NULL)
+	    {
+	      link_info.wrap_hash = ((struct bfd_hash_table *)
+				     xmalloc (sizeof (struct bfd_hash_table)));
+	      if (! bfd_hash_table_init_n (link_info.wrap_hash,
+					   bfd_hash_newfunc,
+					   61))
+		einfo ("%P%F: bfd_hash_table_init failed: %E\n");
+	    }
+	  if (bfd_hash_lookup (link_info.wrap_hash, optarg, true, true)
+	      == NULL)
+	    einfo ("%P%F: bfd_hash_lookup failed: %E\n");
 	  break;
 	case 'X':
 	  link_info.discard = discard_l;

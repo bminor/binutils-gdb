@@ -184,12 +184,12 @@ ld [ -o @var{output} ]  @var{objfile}@dots{}
   [ -Ttext @var{org} ]  [ -Tdata @var{org} ]
   [ -Tbss @var{org} ]  [ -t ] [ -traditional-format ]
   [ -u @var{symbol}]  [-V]  [-v]  [ -verbose]  [ -version ]
-  [ -warn-common ] [ -warn-constructors] [ -warn-multiple-gp ] [ -warn-once ]
-  [ -y @var{symbol} ]  [ -X ]  [-x ]
+  [ -warn-common ] [ -warn-constructors] [ -warn-multiple-gp ]
+  [ -warn-once ] [ -y @var{symbol} ]  [ -X ]  [-x ]
   [ -( [ archives ] -) ]
   [ --start-group [ archives ] --end-group ]
   [ -split-by-reloc @var{count} ] [ -split-by-file ]
-  [ --whole-archive ] [ --no-whole-archive ]
+  [ --whole-archive ] [ --no-whole-archive ] [ --wrap @var{symbol} ]
 @end smallexample
 
 This plethora of command-line options may seem intimidating, but in
@@ -967,6 +967,40 @@ library.
 @item --no-whole-archive
 Turn off the effect of the @code{--whole-archive} option for archives
 which appear later on the command line.
+
+@kindex --wrap
+@item --wrap @var{symbol}
+Use a wrapper function for @var{symbol}.  Any undefined reference to
+@var{symbol} will be resolved to @code{__wrap_@var{symbol}}.  Any
+undefined reference to @code{__real_@var{symbol}} will be resolved to
+@var{symbol}.
+
+This can be used to provide a wrapper for a system function.  The
+wrapper function should be called @code{__wrap_@var{symbol}}.  If it
+wishes to call the system function, it should call
+@code{__real_@var{symbol}}.
+
+Here is a trivial example:
+
+@smallexample
+void *
+__wrap_malloc (int c)
+@{
+  printf ("malloc called with %ld\n", c);
+  return __real_malloc (c);
+@}
+@end smallexample
+
+If you link other code with this file using @code{--wrap malloc}, then
+all calls to @code{malloc} will call the function @code{__wrap_malloc}
+instead.  The call to @code{__real_malloc} in @code{__wrap_malloc} will
+call the real @code{malloc} function.
+
+You may wish to provide a @code{__real_malloc} function as well, so that
+links without the @code{--wrap} option will succeed.  If you do this,
+you should not put the definition of @code{__real_malloc} in the same
+file as @code{__wrap_malloc}; if you do, the assembler may resolve the
+call before the linker has a chance to wrap it to @code{malloc}.
 
 @kindex -X
 @cindex local symbols, deleting

@@ -123,6 +123,9 @@ ld \- the GNU linker
 .RB "[\|" \-warn\-once "\|]" 
 .RB "[\|" \-\-whole\-archive "\|]" 
 .RB "[\|" \-\-no\-whole\-archive "\|]" 
+.RB "[\|" "\-\-wrap\ "\c
+.I symbol\c
+\&\|]
 .RB "[\|" \-X "\|]" 
 .RB "[\|" \-x "\|]" 
 .ad b
@@ -932,6 +935,19 @@ every object to be included in the resulting shared library.
 Turn off the effect of the
 .B \-\-whole\-archive
 option for archives which appear later on the command line.
+
+.TP
+.BI "--wrap " "symbol"
+Use a wrapper function for 
+.I symbol.
+Any undefined reference to
+.I symbol
+will be resolved to
+.BI "__wrap_" "symbol".
+Any undefined reference to
+.BI "__real_" "symbol"
+will be resolved to
+.I symbol.
 
 .TP
 .B \-X 

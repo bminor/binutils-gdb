@@ -8,6 +8,12 @@ Tue Mar 12 12:43:59 1996  David Mosberger-Tang  <davidm@koala.azstarnet.com>
 
 Tue Mar 12 12:02:21 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* lexsup.c (parse_args): Handle --wrap.
+	* ldmain.c (main): Initialize link_info.wrap_hash.
+	* ldexp.c (fold_name): Use bfd_wrapped_link_hash_lookup in DEFINED
+	and NAME cases.
+	* ld.texinfo, ld.1: Document --wrap.
+
 	* configure: Rebuild with autoconf 2.8.
 
 	Don't do SunOS style dynamic linking for sparc-aout:
