@@ -1,3 +1,7 @@
+2000-10-17  Philip Blundell  <pb@futuretv.com>
+
+	* lib/ld-lib.exp, ld-elfvsb: Update from trunk version.
+
 2000-04-12  Alan Modra  <alan@linuxcare.com.au>
 
 	* ld-selective/selective.exp (test4): Delete incorrect foo__1B test.
