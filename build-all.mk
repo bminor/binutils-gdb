@@ -8,7 +8,7 @@
 TREE	= devo
 include $(TREE)/release-info
 
-TEST_INSTALL_DISK = /cirdan/abc
+TEST_INSTALL_DISK = /big
 
 INSTALLDIR = $(TEST_INSTALL_DISK)/$(TREE)-test/$(RELEASE_TAG)
 
@@ -48,63 +48,87 @@ ifeq ($(canonhost),i386-unknown-go32)
 canonhost := i386-go32
 endif
 
-ifeq ($(canonhost),sparc-sun-sunos4.1.1)
-TARGETS = $(NATIVE)	i386-go32	m68k-aout	m68k-vxworks \
-	i960-intel-nindy 		i386-aout	a29k-amd-udi \
-	sparc-vxworks	m68k-coff 	i960-vxworks	sparc-aout \
-	sparclite-aout	sparclitefrwcompat-aout 	h8300-hms \
-	z8k-sim		mips-idt-ecoff
+ifeq ($(canonhost),sparc-sun-sunos4.1.3)
+TARGETS = $(NATIVE) \
+	a29k-amd-udi 	\
+	h8300-hms 	h8500-hms \
+	i386-aout	i386-go32	i386-coff \
+	i960-vxworks 	i960-intel-nindy \
+	mips-idt-ecoff	\
+	m68k-aout	m68k-vxworks 	m68k-coff \
+	m88k-coff \
+	sparc-aout	sparc-vxworks	sparclitefrwcompat-aout	sparclite-aout \
+	z8k-sim		
+GCC = gcc -O -pipe
 all: all-cygnus
 endif
 
 ifeq ($(canonhost),m68k-sun-sunos4.1.1)
-TARGETS = $(NATIVE) m68k-aout m68k-vxworks m68k-coff
+TARGETS = $(NATIVE) \
+	i960-intel-nindy \
+	m68k-aout 	m68k-vxworks 	m68k-coff 	i960
 GCC = gcc -O -msoft-float
 CC = cc -J
 all: all-cygnus
 endif
 
 ifeq ($(canonhost),sparc-sun-solaris2)
-TARGETS = $(NATIVE) m68k-vxworks m68k-aout sparc-aout mips-idt-ecoff
+TARGETS = $(NATIVE) \
+	a29k-amd-udi \
+	m68k-vxworks 	m68k-coff 	m68k-aout \
+	mips-idt-ecoff \
+	i386-aout \
+	i960-vxworks 	i960-intel-nindy \
+	sparc-aout	sparc-vxworks	sparclite-aout 
 CC = cc -Xs
+GCC = gcc -O -pipe
 all: all-cygnus
 endif
 
 ifeq ($(canonhost),mips-dec-ultrix)
 TARGETS = $(NATIVE) m68k-aout
-# TARGETS	= $(NATIVE) m68k-vxworks m68k-aout i960-vxworks \
-#	  sparc-vxworks m68k-coff i386-aout sparc-aout i960-intel-nindy
 CC = cc -Wf,-XNg1000
 all: all-cygnus
 endif
 
 ifeq ($(canonhost),mips-sgi-irix4)
-TARGETS	= $(NATIVE) m68k-vxworks
+TARGETS	= $(NATIVE) 
 CC = cc -cckr -Wf,-XNg1500 -Wf,-XNk1000 -Wf,-XNh1500
 all: all-cygnus
 endif
 
 ifeq ($(canonhost),rs6000-ibm-aix)
-TARGETS	= $(NATIVE) m68k-aout m68k-vxworks i960-vxworks
+TARGETS	= $(NATIVE) \
+	i960-vxworks	i960-intel-nindy \
+	m68k-aout 	m68k-vxworks 
 all: all-cygnus
 endif
 
 ifeq ($(canonhost),m68k-hp-hpux)
-TARGETS	= $(NATIVE) m68k-vxworks
+TARGETS	= $(NATIVE) 
 TMPDIR := $(shell mkdir $(canonhost)-tmpdir; cd $(canonhost)-tmpdir ; pwd)
-CC = cc +O1000 -Wp,-P
-CFLAGS = 
+CC = cc -Wp,-P 
+#CFLAGS = +O1000 
+CFLAGS = -g
 all: all-cygnus
 endif
 
 ifeq ($(canonhost),hppa1.1-hp-hpux)
-TARGETS = i960-vxworks m68k-aout m68k-vxworks m68k-hp-hpux
-#TARGETS	= m68k-aout m68k-coff m68k-vxworks i960-vxworks a29k-amd-udi
-#TARGETS	= m68k-aout	i386-aout	a29k-amd-udi \
-#	  i960-vxworks	m68k-coff	m68k-vxworks \
-#	  sparc-aout			sparc-vxworks \
-#	  sparclite-aout		sparclitefrwcompat-aout
-CC = cc +Obb2000
+TARGETS = \
+	i960-vxworks \
+	m68k-aout	m68k-vxworks
+#	a29k-amd-udi 	\
+#	h8300-hms 	h8500-hms \
+#	i386-aout	i386-go32 \
+#	i960-vxworks 	i960-intel-nindy \
+#	mips-idt-ecoff	\
+#	m68k-aout	m68k-vxworks 	m68k-coff \
+#	m88k-coff \
+#	sparc-aout	sparclite-aout \
+#	z8k-sim		
+CC = cc 
+#CFLAGS = +Obb2000
+CFLAGS = -g
 all: all-native
 endif
 
@@ -114,17 +138,25 @@ all: all-cygnus
 endif
 
 ifeq ($(canonhost),i386-go32)
-TARGETS = m68k-aout a29k-amd-udi m68k-coff i386-aout sparclite-aout \
-	  h8300-sim mips-idt-ecoff
-ifndef build
-build := $(shell $(TREE)/config.guess)
-endif
+TARGETS = \
+	a29k-amd-udi \
+	h8300-hms \
+	i386-aout \
+	m68k-aout	m68k-coff \
+	mips-idt-ecoff \
+	sparclite-aout
 CC = i386-go32-gcc
 GCC = i386-go32-gcc -O
 CFLAGS =
 CXXFLAGS = -O
 MAKEINFOFLAGS = --no-split
 all: all-cross
+endif
+
+ifeq ($(canonhost),i386-univel-sysv4)
+TARGETS	= $(NATIVE) 
+CC = cc
+all: all-cygnus
 endif
 
 FLAGS_TO_PASS := \
