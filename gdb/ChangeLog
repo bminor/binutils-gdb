@@ -1,3 +1,22 @@
+Tue Aug  9 09:44:42 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* infrun.c (wait_for_inferior):  Call target_resume() upon
+	detection of new processes.
+
+	* procfs.c (create_procinfo):  Return pointer to new procinfo
+	structure.
+	* (do_detach):  Spacing & formatting cleanup.
+	* (procfs_wait):  Move wait_again label to ensure that we really
+	wait again.  On exit from fork, release new child from gdbs'
+	clutches.
+	* (procfs_set_sproc_trap):  Enable trapping of fork and vfork.
+
+Mon Aug  8 15:09:32 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
+
+	* i386-nlmstub.c (handle_exception): Wait until the thread has
+	  been started before killing the NLM by pointing the PC at
+	  _exit().
+
 Sat Aug  6 22:27:30 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* config/mips/tm-irix5.h (IN_SIGTRAMP):  Redefine for Irix 5,

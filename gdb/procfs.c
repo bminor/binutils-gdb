@@ -1425,12 +1425,13 @@ LOCAL FUNCTION
 
 SYNOPSIS
 
-	void create_procinfo (int pid)
+	struct procinfo * create_procinfo (int pid)
 
 DESCRIPTION
 
-	Allocate a procinfo structure, open the /proc file and then sets up
-	the set of signals and faults that are to be traced.
+	Allocate a procinfo structure, open the /proc file and then set up the
+	set of signals and faults that are to be traced.  Returns a pointer to
+	the new procinfo structure.
 
 NOTES
 
@@ -1439,7 +1440,7 @@ NOTES
 
  */
 
-static void
+static struct procinfo *
 create_procinfo (pid)
      int pid;
 {
@@ -1471,6 +1472,8 @@ create_procinfo (pid)
 
   if (ioctl (pi->fd, PIOCSFAULT, &pi->prrun.pr_fault) < 0)
     proc_init_failed (pi, "PIOCSFAULT failed");
+
+  return pi;
 }
 
 /*
@@ -2129,20 +2132,20 @@ do_detach (signal)
 	    {
 	      /* Clear any fault that might have stopped it.  */
 	      if (ioctl (pi->fd, PIOCCFAULT, 0))
-  		{
-  		  print_sys_errmsg (pi->pathname, errno);
+		{
+		  print_sys_errmsg (pi->pathname, errno);
 		  printf_unfiltered ("PIOCCFAULT failed.\n");
-  		}
+		}
 
 	      /* Make it run again when we close it.  */
-#if defined (PIOCSET)	/* New method */
+#if defined (PIOCSET)		/* New method */
 	      {
-		  long pr_flags;
-		  pr_flags = PR_RLC;
-		  result = ioctl (pi->fd, PIOCSET, &pr_flags);
+		long pr_flags;
+		pr_flags = PR_RLC;
+		result = ioctl (pi->fd, PIOCSET, &pr_flags);
 	      }
 #else
-#if defined (PIOCSRLC)	/* Original method */
+#if defined (PIOCSRLC)		/* Original method */
 	      result = ioctl (pi->fd, PIOCSRLC, 0);
 #endif
 #endif
@@ -2202,10 +2205,12 @@ procfs_wait (pid, ourstatus)
       if (pi->had_event)
 	break;
 
-wait_again:
-
   if (!pi)
-    pi = wait_fd ();
+    {
+    wait_again:
+
+      pi = wait_fd ();
+    }
 
   if (pid != -1)
     for (pi = procinfo_list; pi; pi = pi->next)
@@ -2308,6 +2313,28 @@ wait_again:
 	      statval = (SIGTRAP << 8) | 0177;
 
 	      break;
+	    case SYS_fork:
+#ifdef SYS_vfork
+	    case SYS_vfork:
+#endif
+/* At this point, we've detected the completion of a fork (or vfork) call in
+   our child.  The grandchild is also stopped because we set inherit-on-fork
+   earlier.  (Note that nobody has the grandchilds' /proc file open at this
+   point.)  We will release the grandchild from the debugger by opening it's
+   /proc file and then closing it.  Since run-on-last-close is set, the
+   grandchild continues on its' merry way.  */
+
+	      {
+		struct procinfo *pitemp;
+
+		pitemp = create_procinfo (pi->prstatus.pr_rval1);
+		if (pitemp)
+		  close_proc_file (pitemp);
+
+		if (ioctl (pi->fd, PIOCRUN, &pi->prrun) != 0)
+		  perror_with_name (pi->pathname);
+	      }
+	      goto wait_again;
 #endif /* SYS_sproc */
 
 	    default:
@@ -3387,16 +3414,16 @@ No process.  Start debugging a program or specify an explicit process ID.");
 
 LOCAL FUNCTION
 
-	procfs_set_sproc_trap -- arrange for exec'd child stop on sproc
+	procfs_set_sproc_trap -- arrange for child to stop on sproc().
 
 SYNOPSIS
 
-	void procfs_set_sproc_trap (void)
+	void procfs_set_sproc_trap (struct procinfo *)
 
 DESCRIPTION
 
 	This function sets up a trap on sproc system call exits so that we can
-	detect the arrival of a new thread.  We are called with the child
+	detect the arrival of a new thread.  We are called with the new thread
 	stopped prior to it's first instruction.
 
 	Also note that we turn on the inherit-on-fork flag in the child process
@@ -3418,6 +3445,16 @@ procfs_set_sproc_trap (pi)
     }
 
   praddset (&exitset, SYS_sproc);
+
+  /* We trap on fork() and vfork() in order to disable debugging in our grand-
+     children and descendant processes.  At this time, GDB can only handle
+     threads (multiple processes, one address space).  forks (and execs) result
+     in the creation of multiple address spaces, which GDB can't handle yet.  */
+
+  praddset (&exitset, SYS_fork);
+#ifdef SYS_vfork
+  praddset (&exitset, SYS_vfork);
+#endif
 
   if (ioctl (pi->fd, PIOCSEXIT, &exitset) < 0)
     {
