@@ -325,8 +325,8 @@ static int prev_prev_insn_unreordered;
     | ((warn) ? 1 : 0)))
 #define RELAX_OLD(i) (((i) >> 24) & 0xff)
 #define RELAX_NEW(i) (((i) >> 16) & 0xff)
-#define RELAX_RELOC1(i) ((((i) >> 9) & 0x7f) - 64)
-#define RELAX_RELOC2(i) ((((i) >> 2) & 0x7f) - 64)
+#define RELAX_RELOC1(i) ((bfd_vma)(((i) >> 9) & 0x7f) - 64)
+#define RELAX_RELOC2(i) ((bfd_vma)(((i) >> 2) & 0x7f) - 64)
 #define RELAX_RELOC3(i) (((i) >> 1) & 1)
 #define RELAX_WARN(i) ((i) & 1)
 

@@ -1,5 +1,8 @@
 Mon Jan  9 16:22:28 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
+	* config/tc-mips.c (RELAX_RELOC1, RELAX_RELOC2): Cast values to
+	bfd_vma before subtracting.
+
 	* config/obj-coff.c (size_section): Handle rs_space like rs_fill,
 	but make sure fr_symbol is null.
 	(fill_section): Ditto.
