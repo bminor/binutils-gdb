@@ -66,7 +66,7 @@ nto_target (void)
 }
 
 void
-nto_set_target(struct nto_target_ops *targ)
+nto_set_target (struct nto_target_ops *targ)
 {
   nto_regset_id = targ->regset_id;
   nto_supply_gregset = targ->supply_gregset;
@@ -345,40 +345,9 @@ enum gdb_osabi
 nto_elf_osabi_sniffer (bfd *abfd)
 {
   if (nto_is_nto_target)
-      return nto_is_nto_target (abfd);
+    return nto_is_nto_target (abfd);
   return GDB_OSABI_UNKNOWN;
 }
-
-static void
-fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
-		      int which, CORE_ADDR reg_addr)
-{
-  nto_regset_t regset;
-
-/* See corelow.c:get_core_registers for values of WHICH.  */
-  if (which == 0)
-    {
-      memcpy ((char *) &regset, core_reg_sect,
-	      min (core_reg_size, sizeof (regset)));
-      nto_supply_gregset ((char *) &regset);
-    }
-  else if (which == 2)
-    {
-      memcpy ((char *) &regset, core_reg_sect,
-	      min (core_reg_size, sizeof (regset)));
-      nto_supply_fpregset ((char *) &regset);
-    }
-}
-
-/* Register that we are able to handle ELF file formats using standard
-   procfs "regset" structures.  */
-static struct core_fns regset_core_fns = {
-  bfd_target_elf_flavour,	/* core_flavour */
-  default_check_format,		/* check_format */
-  default_core_sniffer,		/* core_sniffer */
-  fetch_core_registers,		/* core_read_registers */
-  NULL				/* next */
-};
 
 void
 nto_initialize_signals (void)
@@ -414,6 +383,4 @@ When non-zero, nto specific debug info is\n\
 displayed. Different information is displayed\n\
 for different positive values.", "\
 QNX NTO internal debugging is %s.", NULL, NULL, &setdebuglist, &showdebuglist);
-  /* Register core file support.  */
-  deprecated_add_core_fns (&regset_core_fns);
 }

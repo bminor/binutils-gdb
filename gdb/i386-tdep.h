@@ -166,6 +166,14 @@ extern void i386_supply_gregset (const struct regset *regset,
 				 struct regcache *regcache, int regnum,
 				 const void *gregs, size_t len);
 
+/* Collect register REGNUM from the register cache REGCACHE and store
+   it in the buffer specified by GREGS and LEN as described by the
+   general-purpose register set REGSET.  If REGNUM is -1, do this for
+   all registers in REGSET.  */
+extern void i386_collect_gregset (const struct regset *regset,
+				  const struct regcache *regcache,
+				  int regnum, void *gregs, size_t len);
+
 /* Return the appropriate register set for the core section identified
    by SECT_NAME and SECT_SIZE.  */
 extern const struct regset *

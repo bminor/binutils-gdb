@@ -35,6 +35,9 @@
 #include "nto-tdep.h"
 #include "solib-svr4.h"
 
+/* Target vector for QNX NTO x86.  */
+static struct nto_target_ops i386_nto_target;
+
 #ifndef X86_CPU_FXSR
 #define X86_CPU_FXSR (1L << 12)
 #endif
@@ -44,47 +47,51 @@
    that is just filler.  Don't ask me, ask the kernel guys.  */
 #define NUM_GPREGS 13
 
-/* Map a GDB register number to an offset in the reg structure.  */
-static int regmap[] = {
-  (7 * 4),			/* eax */
-  (6 * 4),			/* ecx */
-  (5 * 4),			/* edx */
-  (4 * 4),			/* ebx */
-  (11 * 4),			/* esp */
-  (2 * 4),			/* epb */
-  (1 * 4),			/* esi */
-  (0 * 4),			/* edi */
-  (8 * 4),			/* eip */
-  (10 * 4),			/* eflags */
-  (9 * 4),			/* cs */
-  (12 * 4),			/* ss */
-  (-1 * 4)			/* filler */
+/* Mapping between the general-purpose registers in `struct xxx'
+   format and GDB's register cache layout.  */
+
+/* From <x86/context.h>.  */
+static int i386nto_gregset_reg_offset[] =
+{
+  7 * 4,			/* %eax */
+  6 * 4,			/* %ecx */
+  5 * 4,			/* %edx */
+  4 * 4,			/* %ebx */
+  11 * 4,			/* %esp */
+  2 * 4,			/* %epb */
+  1 * 4,			/* %esi */
+  0 * 4,			/* %edi */
+  8 * 4,			/* %eip */
+  10 * 4,			/* %eflags */
+  9 * 4,			/* %cs */
+  12 * 4,			/* %ss */
+  -1				/* filler */
 };
 
-static struct nto_target_ops i386_nto_target;
+/* Given a GDB register number REGNUM, return the offset into
+   Neutrino's register structure or -1 if the register is unknown.  */
 
-/* Given a gdb regno, return the offset into Neutrino's register structure
-   or -1 if register is unknown.  */
 static int
-nto_reg_offset (int regno)
+nto_reg_offset (int regnum)
 {
-  return (regno >= 0 && regno < NUM_GPREGS) ? regmap[regno] : -1;
+  if (regnum >= 0 && regnum < ARRAY_SIZE (i386nto_gregset_reg_offset))
+    return i386nto_gregset_reg_offset[regnum];
+
+  return -1;
 }
 
 static void
 i386nto_supply_gregset (char *gpregs)
 {
-  unsigned regno;
-  int empty = 0;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
-  for (regno = 0; regno < I386_NUM_GREGS; regno++)
-    {
-      int offset = nto_reg_offset (regno);
-      if (offset == -1)
-	regcache_raw_supply (current_regcache, regno, (char *) &empty);
-      else
-	regcache_raw_supply (current_regcache, regno, gpregs + offset);
-    }
+  if(tdep->gregset == NULL)
+    tdep->gregset = regset_alloc (current_gdbarch, i386_supply_gregset,
+				  i386_collect_gregset);
+
+  gdb_assert (tdep->gregset_reg_offset == i386nto_gregset_reg_offset);
+  tdep->gregset->supply_regset (tdep->gregset, current_regcache, -1,
+				gpregs, NUM_GPREGS * 4);
 }
 
 static void
@@ -101,7 +108,7 @@ i386nto_supply_regset (int regset, char *data)
 {
   switch (regset)
     {
-    case NTO_REG_GENERAL:	/* QNX has different ordering of GP regs than GDB.  */
+    case NTO_REG_GENERAL:
       i386nto_supply_gregset (data);
       break;
     case NTO_REG_FLOAT:
@@ -257,6 +264,10 @@ i386nto_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* NTO has shared libraries.  */
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
+
+  tdep->gregset_reg_offset = i386nto_gregset_reg_offset;
+  tdep->gregset_num_regs = ARRAY_SIZE (i386nto_gregset_reg_offset);
+  tdep->sizeof_gregset = NUM_GPREGS * 4;
 
   tdep->sigtramp_p = i386nto_sigtramp_p;
   tdep->sigcontext_addr = i386nto_sigcontext_addr;
