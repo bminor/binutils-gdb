@@ -749,7 +749,6 @@ bfd_get_arch_size (abfd)
   if (abfd->xvec->flavour == bfd_target_elf_flavour)
     return (get_elf_backend_data (abfd))->s->arch_size;
 
-  bfd_set_error (bfd_error_wrong_format);
   return -1;
 }
 

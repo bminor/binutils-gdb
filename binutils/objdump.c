@@ -361,7 +361,11 @@ dump_headers (abfd)
 #ifndef BFD64
   printf (_("Idx Name          Size      VMA       LMA       File off  Algn"));
 #else
-  printf (_("Idx Name          Size      VMA               LMA               File off  Algn"));
+  /* With BFD64, non-ELF returns -1 and wants always 64 bit addresses.  */
+  if (bfd_get_arch_size (abfd) == 32)
+    printf (_("Idx Name          Size      VMA       LMA       File off  Algn"));
+  else
+    printf (_("Idx Name          Size      VMA               LMA               File off  Algn"));
 #endif
 
   if (wide_output)

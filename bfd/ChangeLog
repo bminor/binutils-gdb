@@ -1,5 +1,10 @@
 2002-05-21  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
+	* bfd/bfd.c (bfd_get_arch_size): Remove bfd_set_error call for
+	non-ELF targets.
+
+2002-05-21  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
 	* elf-bfd.h (elf_backend_emit_relocs): Change prototype to return
 	an error value.
 	* elflink.h (elf_link_output_relocs): Likewise. Improve error message.
