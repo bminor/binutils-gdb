@@ -207,6 +207,10 @@ proc default_ld_nm { nm object } {
 	return 0
     }
 
+    if {[info exists nm_output]} {
+      unset nm_output
+    }
+
     if ![info exists NMFLAGS] { set NMFLAGS "" }
 
     verbose -log "$nm $NMFLAGS $object >tmpdir/nm.out"

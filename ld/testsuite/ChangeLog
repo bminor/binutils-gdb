@@ -1,3 +1,8 @@
+1999-06-04  H.J. Lu  <hjl@gnu.org>
+
+	* lib/ld-lib.exp (default_ld_nm): Clear nm_output first if
+	necessary.
+
 1999-05-17  Nick Clifton  <nickc@cygnus.com>
 
 	* ld-undefined/undefined.exp: Add xfail for mcore-elf.
