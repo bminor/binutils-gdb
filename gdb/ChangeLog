@@ -1,3 +1,9 @@
+2002-09-03  David Carlton  <carlton@math.stanford.edu>
+
+	* dwarf2read.c (dwarf2_add_member_fn): Add the 'type'
+	argument (PR gdb/653).  Update call to smash_to_method_type.
+	(read_structure_scope): Update call to dwarf2_add_member_fn.
+
 2002-09-03  Michal Ludvig  <mludvig@suse.cz>
 
 	* x86-64-linux-tdep.c: Include gdb_string.h
