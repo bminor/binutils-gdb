@@ -3,6 +3,10 @@
 
 *** Changes since GDB 5.2:
 
+* New native configurations
+
+Alpha NetBSD					alpha*-*-netbsd*
+
 * Changes in Alpha configurations. 
 
 Multi-arch support is enabled for all Alpha configurations.

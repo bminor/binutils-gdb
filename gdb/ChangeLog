@@ -1,5 +1,21 @@
 2002-04-24  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* Makefile.in (ALLDEPFILES): Add alphanbsd-nat.c and
+	alphanbsd-tdep.c.
+	(alphanbsd-nat.o): New dependency list.
+	(alphanbsd-tdep.o): Ditto.
+	* NEWS: Note new native NetBSD/alpha configuration.
+	* alphanbsd-nat.c: New file.
+	* alphanbsd-tdep.c: Ditto.
+	* configure.host (alpha*-*-netbsd*): New host.
+	* configure.tgt (alpha*-*-netbsd*): New target.
+	* config/alpha/nbsd.mh: New file.
+	* config/alpha/nbsd.mt: Ditto.
+	* config/alpha/nm-nbsd.h: Ditto.
+	* config/alpha/tm-nbsd.h: Ditto.
+
+2002-04-24  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* Makefile.in (ALLDEPFILES): Add alpha-osf1-tdep.c.
 	(alpha-osf1-tdep.o): New dependency list.
 	* alpha-tdep.h (gdbarch_tdep): Add dynamic_sigtramp_offset

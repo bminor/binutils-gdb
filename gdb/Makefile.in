@@ -1178,8 +1178,9 @@ unexport CHILLFLAGS CHILL_LIB CHILL_FOR_TARGET :
 ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	29k-share/udi/udi2go32.c \
 	a29k-tdep.c a68v-nat.c \
-	alpha-nat.c alphabsd-nat.c alpha-tdep.c \
-	alpha-linux-tdep.c alpha-osf1-tdep.c alphafbsd-tdep.c \
+	alpha-nat.c alphabsd-nat.c alphanbsd-nat.c \
+	alpha-tdep.c alpha-linux-tdep.c alphanbsd-tdep.c alpha-osf1-tdep.c \
+	alphafbsd-tdep.c \
 	arm-linux-nat.c arm-linux-tdep.c arm-tdep.c \
 	armnbsd-nat.c armnbsd-tdep.c \
 	coff-solib.c \
@@ -1249,6 +1250,9 @@ alpha-nat.o: alpha-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) $(target_h) \
 alphabsd-nat.o: alphabsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 	alpha-tdep.h
 
+alphanbsd-nat.o: alphanbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
+	$(gdbcore_h) alpha-tdep.h
+
 alpha-tdep.o: alpha-tdep.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) $(symtab_h) $(dis_asm_h) $(gdb_string_h) $(linespec_h) \
 	$(regcache_h) $(doublest_h) $(BFD_SRC)/elf-bfd.h alpha-tdep.h
@@ -1258,6 +1262,9 @@ alpha-linux-tdep.o: alpha-linux-tdep.c $(defs_h) $(value_h) alpha-tdep.h
 alpha-osf1-tdep.o: alpha-osf1-tdep.c $(defs_h) $(value_h) alpha-tdep.h
 
 alphafbsd-tdep.o: alphafbsd-tdep.c $(defs_h) $(value_h) alpha-tdep.h
+
+alphanbsd-tdep.o: alphanbsd-tdep.c $(defs_h) $(gdbcore_h) $(value_h) \
+	alpha-tdep.h
 
 annotate.o: annotate.c $(defs_h) $(annotate_h) $(value_h) $(target_h) $(gdbtypes_h)
 
