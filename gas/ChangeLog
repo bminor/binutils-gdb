@@ -1,3 +1,7 @@
+2001-01-16  Kazu Hirata  <kazu@hxi.com>
+
+	* config/tc-i386.c: Fix formatting.
+
 2001-01-16  Alan Modra  <alan@linuxcare.com.au>
 
 	* config/tc-hppa.c (tc_gen_reloc): Use SEGREL32 instead of DIR32
