@@ -1,3 +1,10 @@
+Mon Apr 11 19:21:27 1994  Stu Grossman  (grossman at cygnus.com)
+
+	* xcoffread.c (read_xcoff_symtab):  Ignore symbols of class C_EXT,
+	smtyp XTY_LD, sclass XMC_DS (external data segment label).  They
+	often have the same names as debug symbols for functions, and
+	confuse lookup_symbol().
+
 Mon Apr 11 10:44:35 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* remote.c: Around redefinition of PBUFSIZE, adjust whitespace.

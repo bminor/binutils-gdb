@@ -1370,7 +1370,7 @@ function_entry_point:
 #endif
 	    continue;
 	  }
-	  break;
+	  continue;
 
 	default :		/* all other XTY_XXXs */
 	  break;
