@@ -633,6 +633,14 @@ floatformat_from_length (int len)
     return TARGET_DOUBLE_FORMAT;
   else if (len * TARGET_CHAR_BIT == TARGET_LONG_DOUBLE_BIT)
     return TARGET_LONG_DOUBLE_FORMAT;
+  /* On i386 the 'long double' type takes 96 bits,
+     while the real number of used bits is only 80,
+     both in processor and in memory.  
+     The code below accepts the real bit size.  */ 
+  else if ((TARGET_LONG_DOUBLE_FORMAT != NULL) 
+	   && (len * TARGET_CHAR_BIT ==
+               TARGET_LONG_DOUBLE_FORMAT->totalsize))
+    return TARGET_LONG_DOUBLE_FORMAT;
 
   return NULL;
 }

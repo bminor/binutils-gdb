@@ -875,7 +875,7 @@ hppa_saved_pc_after_call (struct frame_info *frame)
      the stub will return to out of the stack.  */
   u = find_unwind_entry (pc);
   if (u && u->stub_unwind.stub_type != 0)
-    return FRAME_SAVED_PC (frame);
+    return DEPRECATED_FRAME_SAVED_PC (frame);
   else
     return pc;
 }
@@ -1075,7 +1075,7 @@ hppa_init_extra_frame_info (int fromleaf, struct frame_info *frame)
     {
       /* Find the framesize of *this* frame without peeking at the PC
          in the current frame structure (it isn't set yet).  */
-      framesize = find_proc_framesize (FRAME_SAVED_PC (get_next_frame (frame)));
+      framesize = find_proc_framesize (DEPRECATED_FRAME_SAVED_PC (get_next_frame (frame)));
 
       /* Now adjust our base frame accordingly.  If we have a frame pointer
          use it, else subtract the size of this frame from the current
@@ -1185,7 +1185,7 @@ hppa_frame_chain (struct frame_info *frame)
   /* Get frame sizes for the current frame and the frame of the 
      caller.  */
   my_framesize = find_proc_framesize (frame->pc);
-  caller_pc = FRAME_SAVED_PC (frame);
+  caller_pc = DEPRECATED_FRAME_SAVED_PC (frame);
 
   /* If we can't determine the caller's PC, then it's not likely we can
      really determine anything meaningful about its frame.  We'll consider
@@ -1193,7 +1193,7 @@ hppa_frame_chain (struct frame_info *frame)
   if (caller_pc == (CORE_ADDR) 0)
     return (CORE_ADDR) 0;
 
-  caller_framesize = find_proc_framesize (FRAME_SAVED_PC (frame));
+  caller_framesize = find_proc_framesize (DEPRECATED_FRAME_SAVED_PC (frame));
 
   /* If caller does not have a frame pointer, then its frame
      can be found at current_frame - caller_framesize.  */
@@ -1316,7 +1316,7 @@ hppa_frame_chain (struct frame_info *frame)
 		  || (saved_regs.regs[FLAGS_REGNUM] == 0
 		      && read_register (FLAGS_REGNUM) & 0x2)))
 	    {
-	      u = find_unwind_entry (FRAME_SAVED_PC (frame));
+	      u = find_unwind_entry (DEPRECATED_FRAME_SAVED_PC (frame));
 	      if (!u)
 		{
 		  return read_memory_integer (saved_regs.regs[FP_REGNUM],
@@ -1351,7 +1351,7 @@ hppa_frame_chain (struct frame_info *frame)
 	      || (saved_regs.regs[FLAGS_REGNUM] == 0
 		  && read_register (FLAGS_REGNUM) & 0x2)))
 	{
-	  u = find_unwind_entry (FRAME_SAVED_PC (frame));
+	  u = find_unwind_entry (DEPRECATED_FRAME_SAVED_PC (frame));
 	  if (!u)
 	    {
 	      return read_memory_integer (saved_regs.regs[FP_REGNUM],
@@ -1392,7 +1392,7 @@ hppa_frame_chain_valid (CORE_ADDR chain, struct frame_info *thisframe)
      indistinguishable (as nearly as I can tell) from the symbol for a function
      which is (legitimately, since it is in the user's namespace)
      named Ltext_end, so we can't just ignore it.  */
-  msym_us = lookup_minimal_symbol_by_pc (FRAME_SAVED_PC (thisframe));
+  msym_us = lookup_minimal_symbol_by_pc (DEPRECATED_FRAME_SAVED_PC (thisframe));
   msym_start = lookup_minimal_symbol ("_start", NULL, NULL);
   if (msym_us
       && msym_start
@@ -5011,7 +5011,7 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_chain_valid (gdbarch, hppa_frame_chain_valid);
   set_gdbarch_frameless_function_invocation
     (gdbarch, hppa_frameless_function_invocation);
-  set_gdbarch_frame_saved_pc (gdbarch, hppa_frame_saved_pc);
+  set_gdbarch_deprecated_frame_saved_pc (gdbarch, hppa_frame_saved_pc);
   set_gdbarch_frame_args_address (gdbarch, hppa_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, hppa_frame_locals_address);
   set_gdbarch_frame_num_args (gdbarch, hppa_frame_num_args);

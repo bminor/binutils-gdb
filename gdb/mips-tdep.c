@@ -1694,7 +1694,7 @@ mips_init_frame_pc_first (int fromleaf, struct frame_info *prev)
   pc = ((fromleaf)
 	? SAVED_PC_AFTER_CALL (get_next_frame (prev))
 	: get_next_frame (prev)
-	? FRAME_SAVED_PC (get_next_frame (prev))
+	? DEPRECATED_FRAME_SAVED_PC (get_next_frame (prev))
 	: read_pc ());
   tmp = SKIP_TRAMPOLINE_CODE (pc);
   return tmp ? tmp : pc;
@@ -2432,7 +2432,7 @@ mips_frame_chain (struct frame_info *frame)
 {
   mips_extra_func_info_t proc_desc;
   CORE_ADDR tmp;
-  CORE_ADDR saved_pc = FRAME_SAVED_PC (frame);
+  CORE_ADDR saved_pc = DEPRECATED_FRAME_SAVED_PC (frame);
 
   if (saved_pc == 0 || inside_entry_file (saved_pc))
     return 0;
@@ -3844,7 +3844,7 @@ mips_pop_frame (void)
       return;
     }
 
-  write_register (PC_REGNUM, FRAME_SAVED_PC (frame));
+  write_register (PC_REGNUM, DEPRECATED_FRAME_SAVED_PC (frame));
   if (get_frame_saved_regs (frame) == NULL)
     DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
   for (regnum = 0; regnum < NUM_REGS; regnum++)
@@ -4150,7 +4150,7 @@ do_fp_register_row (int regnum)
     {
       /* Eight byte registers: print each one as float AND as double.  */
       mips_read_fp_register_single (regnum, raw_buffer);
-      flt1 = unpack_double (mips_double_register_type (), raw_buffer, &inv1);
+      flt1 = unpack_double (mips_float_register_type (), raw_buffer, &inv1);
 
       mips_read_fp_register_double (regnum, raw_buffer);
       doub = unpack_double (mips_double_register_type (), raw_buffer, &inv3);
@@ -5546,22 +5546,36 @@ mips_saved_pc_after_call (struct frame_info *frame)
 static int
 mips_stab_reg_to_regnum (int num)
 {
-  if (num < 32)
+  if (num >= 0 && num < 32)
     return num;
-  else
+  else if (num >= 38 && num < 70)
     return num + FP0_REGNUM - 38;
+  else
+    {
+      /* This will hopefully (eventually) provoke a warning.  Should
+         we be calling complaint() here?  */
+      return NUM_REGS + NUM_PSEUDO_REGS;
+    }
 }
 
-/* Convert a ecoff register number to a gdb REGNUM */
+
+/* Convert a dwarf, dwarf2, or ecoff register number to a gdb REGNUM */
 
 static int
-mips_ecoff_reg_to_regnum (int num)
+mips_dwarf_dwarf2_ecoff_reg_to_regnum (int num)
 {
-  if (num < 32)
+  if (num >= 0 && num < 32)
     return num;
-  else
+  else if (num >= 32 && num < 64)
     return num + FP0_REGNUM - 32;
+  else
+    {
+      /* This will hopefully (eventually) provoke a warning.  Should
+         we be calling complaint() here?  */
+      return NUM_REGS + NUM_PSEUDO_REGS;
+    }
 }
+
 
 /* Convert an integer into an address.  By first converting the value
    into a pointer and then extracting it signed, the address is
@@ -5979,7 +5993,9 @@ mips_gdbarch_init (struct gdbarch_info info,
 
   /* Map debug register numbers onto internal register numbers.  */
   set_gdbarch_stab_reg_to_regnum (gdbarch, mips_stab_reg_to_regnum);
-  set_gdbarch_ecoff_reg_to_regnum (gdbarch, mips_ecoff_reg_to_regnum);
+  set_gdbarch_ecoff_reg_to_regnum (gdbarch, mips_dwarf_dwarf2_ecoff_reg_to_regnum);
+  set_gdbarch_dwarf_reg_to_regnum (gdbarch, mips_dwarf_dwarf2_ecoff_reg_to_regnum);
+  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, mips_dwarf_dwarf2_ecoff_reg_to_regnum);
 
   /* Initialize a frame */
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, mips_frame_init_saved_regs);
@@ -6011,7 +6027,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_frame_chain (gdbarch, mips_frame_chain);
   set_gdbarch_frameless_function_invocation (gdbarch, 
 					     generic_frameless_function_invocation_not);
-  set_gdbarch_frame_saved_pc (gdbarch, mips_frame_saved_pc);
+  set_gdbarch_deprecated_frame_saved_pc (gdbarch, mips_frame_saved_pc);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_frame_args_skip (gdbarch, 0);
 

@@ -43,7 +43,6 @@ static gdbarch_skip_prologue_ftype vax_skip_prologue;
 static gdbarch_saved_pc_after_call_ftype vax_saved_pc_after_call;
 static gdbarch_frame_num_args_ftype vax_frame_num_args;
 static gdbarch_frame_chain_ftype vax_frame_chain;
-static gdbarch_frame_saved_pc_ftype vax_frame_saved_pc;
 static gdbarch_frame_args_address_ftype vax_frame_args_address;
 static gdbarch_frame_locals_address_ftype vax_frame_locals_address;
 
@@ -375,7 +374,7 @@ vax_skip_prologue (CORE_ADDR pc)
 static CORE_ADDR
 vax_saved_pc_after_call (struct frame_info *frame)
 {
-  return (FRAME_SAVED_PC(frame));
+  return (DEPRECATED_FRAME_SAVED_PC(frame));
 }
 
 /* Print the vax instruction at address MEMADDR in debugged memory,
@@ -650,7 +649,7 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 				   generic_frameless_function_invocation_not);
 
   set_gdbarch_frame_chain (gdbarch, vax_frame_chain);
-  set_gdbarch_frame_saved_pc (gdbarch, vax_frame_saved_pc);
+  set_gdbarch_deprecated_frame_saved_pc (gdbarch, vax_frame_saved_pc);
 
   set_gdbarch_frame_args_address (gdbarch, vax_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, vax_frame_locals_address);

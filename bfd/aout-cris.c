@@ -1,5 +1,5 @@
 /* BFD backend for CRIS a.out binaries.
-   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
    Contributed by Axis Communications AB.
    Written by Hans-Peter Nilsson.
 
@@ -23,7 +23,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    functions.  Beware; some of the information there is outdated.  */
 
 #define N_HEADER_IN_TEXT(x) 0
-#define BYTES_IN_WORD 4
 #define N_TXTOFF(x) 32
 #define ENTRY_CAN_BE_ZERO
 #define TEXT_START_ADDR 0

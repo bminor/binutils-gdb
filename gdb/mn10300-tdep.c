@@ -688,7 +688,7 @@ mn10300_frame_chain (struct frame_info *fi)
   /* The easiest way to get that info is to analyze our caller's frame.
      So we set up a dummy frame and call mn10300_analyze_prologue to
      find stuff for us.  */
-  dummy = analyze_dummy_frame (FRAME_SAVED_PC (fi), get_frame_base (fi));
+  dummy = analyze_dummy_frame (DEPRECATED_FRAME_SAVED_PC (fi), get_frame_base (fi));
 
   if (get_frame_extra_info (dummy)->status & MY_FRAME_IN_FP)
     {
@@ -728,7 +728,7 @@ mn10300_pop_frame_regular (struct frame_info *frame)
 {
   int regnum;
 
-  write_register (PC_REGNUM, FRAME_SAVED_PC (frame));
+  write_register (PC_REGNUM, DEPRECATED_FRAME_SAVED_PC (frame));
 
   /* Restore any saved registers.  */
   for (regnum = 0; regnum < NUM_REGS; regnum++)
@@ -900,7 +900,7 @@ static void
 mn10300_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
   if (get_next_frame (fi))
-    deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (get_next_frame (fi)));
+    deprecated_update_frame_pc_hack (fi, DEPRECATED_FRAME_SAVED_PC (get_next_frame (fi)));
 
   frame_saved_regs_zalloc (fi);
   frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
@@ -1171,7 +1171,7 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_noop);
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, mn10300_frame_init_saved_regs);
   set_gdbarch_frame_chain (gdbarch, mn10300_frame_chain);
-  set_gdbarch_frame_saved_pc (gdbarch, mn10300_frame_saved_pc);
+  set_gdbarch_deprecated_frame_saved_pc (gdbarch, mn10300_frame_saved_pc);
   set_gdbarch_deprecated_extract_return_value (gdbarch, mn10300_extract_return_value);
   set_gdbarch_deprecated_extract_struct_value_address
     (gdbarch, mn10300_extract_struct_value_address);

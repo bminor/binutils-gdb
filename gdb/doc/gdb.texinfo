@@ -14801,6 +14801,7 @@ compiled with the @samp{-pg} compiler option.
 * General Query Packets::
 * Register Packet Format::
 * Examples::
+* File-I/O remote protocol extension::
 @end menu
 
 @node Overview
@@ -15025,9 +15026,12 @@ Reserved for future use.
 
 Reserved for future use.
 
-@item @code{F} --- reserved
+@item @code{F}@var{RC}@code{,}@var{EE}@code{,}@var{CF}@code{;}@var{XX} --- Reply to target's F packet.
+@cindex @code{F} packet
 
-Reserved for future use.
+This packet is send by @value{GDBN} as reply to a @code{F} request packet
+sent by the target.  This is part of the File-I/O protocol extension.
+@xref{File-I/O remote protocol extension}, for the specification.
 
 @item @code{g} --- read registers
 @anchor{read registers packet}
@@ -15526,6 +15530,24 @@ is a query initiated by the host debugger.}
 any time while the program is running and the debugger should continue
 to wait for @samp{W}, @samp{T}, etc.
 
+@item F@var{call-id}@code{,}@var{parameter@dots{}}
+
+@var{call-id} is the identifier which says which host system call should
+be called.  This is just the name of the function.  Translation into the
+correct system call is only applicable as it's defined in @value{GDBN}.
+@xref{File-I/O remote protocol extension}, for a list of implemented
+system calls.
+
+@var{parameter@dots{}} is a list of parameters as defined for this very
+system call.
+
+The target replies with this packet when it expects @value{GDBN} to call
+a host system call on behalf of the target.  @value{GDBN} replies with
+an appropriate @code{F} packet and keeps up waiting for the next reply
+packet from the target.  The latest @samp{C}, @samp{c}, @samp{S} or
+@samp{s} action is expected to be continued.
+@xref{File-I/O remote protocol extension}, for more details.
+
 @end table
 
 @node General Query Packets
@@ -15766,6 +15788,1149 @@ Example sequence of a target being stepped by a single instruction:
 <- @code{+}
 <- @code{1455@dots{}}
 -> @code{+}
+@end smallexample
+
+@node File-I/O remote protocol extension
+@section File-I/O remote protocol extension
+@cindex File-I/O remote protocol extension
+
+@menu
+* File-I/O Overview::
+* Protocol basics::
+* The `F' request packet::
+* The `F' reply packet::
+* Memory transfer::
+* The Ctrl-C message::
+* Console I/O::
+* The isatty call::
+* The system call::
+* List of supported calls::
+* Protocol specific representation of datatypes::
+* Constants::
+* File-I/O Examples::
+@end menu
+
+@node File-I/O Overview
+@subsection File-I/O Overview
+@cindex file-i/o overview
+
+The File I/O remote protocol extension (short: File-I/O) allows the
+target to use the hosts file system and console I/O when calling various
+system calls.  System calls on the target system are translated into a
+remote protocol packet to the host system which then performs the needed
+actions and returns with an adequate response packet to the target system.
+This simulates file system operations even on targets that lack file systems.
+
+The protocol is defined host- and target-system independent.  It uses
+it's own independent representation of datatypes and values.  Both,
+@value{GDBN} and the target's @value{GDBN} stub are responsible for
+translating the system dependent values into the unified protocol values
+when data is transmitted.
+
+The communication is synchronous.  A system call is possible only
+when GDB is waiting for the @samp{C}, @samp{c}, @samp{S} or @samp{s}
+packets.  While @value{GDBN} handles the request for a system call,
+the target is stopped to allow deterministic access to the target's
+memory.  Therefore File-I/O is not interuptible by target signals.  It
+is possible to interrupt File-I/O by a user interrupt (Ctrl-C), though.
+
+The target's request to perform a host system call does not finish
+the latest @samp{C}, @samp{c}, @samp{S} or @samp{s} action.  That means,
+after finishing the system call, the target returns to continuing the
+previous activity (continue, step).  No additional continue or step
+request from @value{GDBN} is required.
+
+@smallexample
+(gdb) continue
+  <- target requests 'system call X'
+  target is stopped, @value{GDBN} executes system call
+  -> GDB returns result
+  ... target continues, GDB returns to wait for the target
+  <- target hits breakpoint and sends a Txx packet
+@end smallexample
+
+The protocol is only used for files on the host file system and
+for I/O on the console.  Character or block special devices, pipes,
+named pipes or sockets or any other communication method on the host
+system are not supported by this protocol.
+
+@node Protocol basics
+@subsection Protocol basics
+@cindex protocol basics, file-i/o
+
+The File-I/O protocol uses the @code{F} packet, as request as well
+as as reply packet.  Since a File-I/O system call can only occur when
+@value{GDBN} is waiting for the continuing or stepping target, the 
+File-I/O request is a reply that @value{GDBN} has to expect as a result
+of a former @samp{C}, @samp{c}, @samp{S} or @samp{s} packet.
+This @code{F} packet contains all information needed to allow @value{GDBN}
+to call the appropriate host system call:
+
+@itemize @bullet
+@item 
+A unique identifier for the requested system call.
+
+@item
+All parameters to the system call.  Pointers are given as addresses
+in the target memory address space.  Pointers to strings are given as
+pointer/length pair.  Numerical values are given as they are. 
+Numerical control values are given in a protocol specific representation.
+
+@end itemize
+
+At that point @value{GDBN} has to perform the following actions.
+
+@itemize @bullet
+@item 
+If parameter pointer values are given, which point to data needed as input
+to a system call, @value{GDBN} requests this data from the target with a
+standard @code{m} packet request.  This additional communication has to be
+expected by the target implementation and is handled as any other @code{m}
+packet.
+
+@item
+@value{GDBN} translates all value from protocol representation to host
+representation as needed.  Datatypes are coerced into the host types.
+
+@item
+@value{GDBN} calls the system call
+
+@item
+It then coerces datatypes back to protocol representation.
+
+@item
+If pointer parameters in the request packet point to buffer space in which
+a system call is expected to copy data to, the data is transmitted to the
+target using a @code{M} or @code{X} packet.  This packet has to be expected
+by the target implementation and is handled as any other @code{M} or @code{X}
+packet.
+
+@end itemize
+
+Eventually @value{GDBN} replies with another @code{F} packet which contains all
+necessary information for the target to continue.  This at least contains
+
+@itemize @bullet
+@item
+Return value.
+
+@item
+@code{errno}, if has been changed by the system call.
+
+@item
+``Ctrl-C'' flag.
+
+@end itemize
+
+After having done the needed type and value coercion, the target continues
+the latest continue or step action.
+
+@node The `F' request packet
+@subsection The @code{F} request packet
+@cindex file-i/o request packet
+@cindex @code{F} request packet
+
+The @code{F} request packet has the following format:
+
+@table @samp
+
+@smallexample
+@code{F}@var{call-id}@code{,}@var{parameter@dots{}}
+@end smallexample
+
+@var{call-id} is the identifier to indicate the host system call to be called.
+This is just the name of the function.
+
+@var{parameter@dots{}} are the parameters to the system call.
+
+@end table 
+
+Parameters are hexadecimal integer values, either the real values in case
+of scalar datatypes, as pointers to target buffer space in case of compound
+datatypes and unspecified memory areas or as pointer/length pairs in case
+of string parameters.  These are appended to the call-id, each separated
+from its predecessor by a comma.  All values are transmitted in ASCII
+string representation, pointer/length pairs separated by a slash.
+
+@node The `F' reply packet
+@subsection The @code{F} reply packet
+@cindex file-i/o reply packet
+@cindex @code{F} reply packet
+
+The @code{F} reply packet has the following format:
+
+@table @samp
+
+@smallexample
+@code{F}@var{retcode}@code{,}@var{errno}@code{,}@var{Ctrl-C flag}@code{;}@var{call specific attachment}
+@end smallexample
+
+@var{retcode} is the return code of the system call as hexadecimal value.
+
+@var{errno} is the errno set by the call, in protocol specific representation.
+This parameter can be omitted if the call was successful.
+
+@var{Ctrl-C flag} is only send if the user requested a break.  In this
+case, @var{errno} must be send as well, even if the call was successful.
+The @var{Ctrl-C flag} itself consists of the character 'C':
+
+@smallexample
+F0,0,C
+@end smallexample
+
+@noindent
+or, if the call was interupted before the host call has been performed:
+
+@smallexample
+F-1,4,C
+@end smallexample
+
+@noindent
+assuming 4 is the protocol specific representation of @code{EINTR}.
+
+@end table
+
+@node Memory transfer
+@subsection Memory transfer
+@cindex memory transfer, in file-i/o protocol
+
+Structured data which is transferred using a memory read or write as e.g.@:
+a @code{struct stat} is expected to be in a protocol specific format with
+all scalar multibyte datatypes being big endian.  This should be done by
+the target before the @code{F} packet is sent resp.@: by @value{GDBN} before
+it transfers memory to the target.  Transferred pointers to structured
+data should point to the already coerced data at any time.
+
+@node The Ctrl-C message
+@subsection The Ctrl-C message
+@cindex ctrl-c message, in file-i/o protocol
+
+A special case is, if the @var{Ctrl-C flag} is set in the @value{GDBN}
+reply packet.  In this case the target should behave, as if it had
+gotten a break message.  The meaning for the target is ``system call
+interupted by @code{SIGINT}''.  Consequentially, the target should actually stop
+(as with a break message) and return to @value{GDBN} with a @code{T02}
+packet.  In this case, it's important for the target to know, in which 
+state the system call was interrupted.  Since this action is by design
+not an atomic operation, we have to differ between two cases:
+
+@itemize @bullet
+@item
+The system call hasn't been performed on the host yet.
+
+@item
+The system call on the host has been finished.
+
+@end itemize
+
+These two states can be distinguished by the target by the value of the
+returned @code{errno}.  If it's the protocol representation of @code{EINTR}, the system
+call hasn't been performed.  This is equivalent to the @code{EINTR} handling
+on POSIX systems.  In any other case, the target may presume that the
+system call has been finished --- successful or not --- and should behave
+as if the break message arrived right after the system call.
+
+@value{GDBN} must behave reliable.  If the system call has not been called
+yet, @value{GDBN} may send the @code{F} reply immediately, setting @code{EINTR} as
+@code{errno} in the packet.  If the system call on the host has been finished
+before the user requests a break, the full action must be finshed by
+@value{GDBN}.  This requires sending @code{M} or @code{X} packets as they fit.
+The @code{F} packet may only be send when either nothing has happened
+or the full action has been completed.
+
+@node Console I/O
+@subsection Console I/O
+@cindex console i/o as part of file-i/o
+
+By default and if not explicitely closed by the target system, the file
+descriptors 0, 1 and 2 are connected to the @value{GDBN} console.  Output
+on the @value{GDBN} console is handled as any other file output operation
+(@code{write(1, @dots{})} or @code{write(2, @dots{})}).  Console input is handled
+by @value{GDBN} so that after the target read request from file descriptor
+0 all following typing is buffered until either one of the following
+conditions is met:
+
+@itemize @bullet
+@item
+The user presses @kbd{Ctrl-C}.  The behaviour is as explained above, the
+@code{read}
+system call is treated as finished.
+
+@item
+The user presses @kbd{Enter}.  This is treated as end of input with a trailing
+line feed.
+
+@item
+The user presses @kbd{Ctrl-D}.  This is treated as end of input.  No trailing
+character, especially no Ctrl-D is appended to the input.
+
+@end itemize
+
+If the user has typed more characters as fit in the buffer given to
+the read call, the trailing characters are buffered in @value{GDBN} until
+either another @code{read(0, @dots{})} is requested by the target or debugging
+is stopped on users request.
+
+@node The isatty call
+@subsection The isatty(3) call
+@cindex isatty call, file-i/o protocol
+
+A special case in this protocol is the library call @code{isatty} which
+is implemented as it's own call inside of this protocol.  It returns
+1 to the target if the file descriptor given as parameter is attached
+to the @value{GDBN} console, 0 otherwise.  Implementing through system calls
+would require implementing @code{ioctl} and would be more complex than
+needed.
+
+@node The system call
+@subsection The system(3) call
+@cindex system call, file-i/o protocol
+
+The other special case in this protocol is the @code{system} call which
+is implemented as it's own call, too.  @value{GDBN} is taking over the full
+task of calling the necessary host calls to perform the @code{system}
+call.  The return value of @code{system} is simplified before it's returned
+to the target.  Basically, the only signal transmitted back is @code{EINTR}
+in case the user pressed @kbd{Ctrl-C}.  Otherwise the return value consists
+entirely of the exit status of the called command.
+
+Due to security concerns, the @code{system} call is refused to be called
+by @value{GDBN} by default.  The user has to allow this call explicitly by 
+entering
+
+@table @samp
+@kindex set remote system-call-allowed 1
+@item @code{set remote system-call-allowed 1}
+@end table
+
+Disabling the @code{system} call is done by
+
+@table @samp
+@kindex set remote system-call-allowed 0
+@item @code{set remote system-call-allowed 0}
+@end table
+
+The current setting is shown by typing
+
+@table @samp
+@kindex show remote system-call-allowed
+@item @code{show remote system-call-allowed}
+@end table
+
+@node List of supported calls
+@subsection List of supported calls
+@cindex list of supported file-i/o calls
+
+@menu
+* open::
+* close::
+* read::
+* write::
+* lseek::
+* rename::
+* unlink::
+* stat/fstat::
+* gettimeofday::
+* isatty::
+* system::
+@end menu
+
+@node open
+@unnumberedsubsubsec open
+@cindex open, file-i/o system call
+
+@smallexample
+@exdent Synopsis:
+int open(const char *pathname, int flags);
+int open(const char *pathname, int flags, mode_t mode);
+
+@exdent Request:     
+Fopen,pathptr/len,flags,mode
+@end smallexample
+
+@noindent
+@code{flags} is the bitwise or of the following values:
+
+@table @code
+@item O_CREAT    
+If the file does not exist it will be created.  The host
+rules apply as far as file ownership and time stamps
+are concerned.
+
+@item O_EXCL     
+When used with O_CREAT, if the file already exists it is
+an error and open() fails.
+
+@item O_TRUNC    
+If the file already exists and the open mode allows
+writing (O_RDWR or O_WRONLY is given) it will be
+truncated to length 0.
+
+@item O_APPEND   
+The file is opened in append mode.
+
+@item O_RDONLY   
+The file is opened for reading only.
+
+@item O_WRONLY   
+The file is opened for writing only.
+
+@item O_RDWR     
+The file is opened for reading and writing.
+
+@noindent
+Each other bit is silently ignored.
+
+@end table
+
+@noindent
+@code{mode} is the bitwise or of the following values:
+
+@table @code
+@item S_IRUSR    
+User has read permission.
+
+@item S_IWUSR    
+User has write permission.
+
+@item S_IRGRP    
+Group has read permission.
+
+@item S_IWGRP    
+Group has write permission.
+
+@item S_IROTH    
+Others have read permission.
+
+@item S_IWOTH    
+Others have write permission.
+
+@noindent
+Each other bit is silently ignored.
+
+@end table
+
+@smallexample
+@exdent Return value:
+open returns the new file descriptor or -1 if an error
+occured.
+
+@exdent Errors:
+@end smallexample
+
+@table @code
+@item EEXIST     
+pathname already exists and O_CREAT and O_EXCL were used.
+
+@item EISDIR     
+pathname refers to a directory.
+
+@item EACCES     
+The requested access is not allowed.
+
+@item ENAMETOOLONG
+pathname was too long.
+
+@item ENOENT     
+A directory component in pathname does not exist.
+
+@item ENODEV     
+pathname refers to a device, pipe, named pipe or socket.
+
+@item EROFS      
+pathname refers to a file on a read-only filesystem and
+write access was requested.
+
+@item EFAULT     
+pathname is an invalid pointer value.
+
+@item ENOSPC     
+No space on device to create the file.
+
+@item EMFILE     
+The process already has the maximum number of files open.
+
+@item ENFILE     
+The limit on the total number of files open on the system
+has been reached.
+
+@item EINTR      
+The call was interrupted by the user.
+@end table
+
+@node close
+@unnumberedsubsubsec close
+@cindex close, file-i/o system call
+
+@smallexample
+@exdent Synopsis:    
+int close(int fd);
+
+@exdent Request:     
+Fclose,fd
+
+@exdent Return value:
+close returns zero on success, or -1 if an error occurred.
+
+@exdent Errors:
+@end smallexample
+
+@table @code
+@item EBADF      
+fd isn't a valid open file descriptor.
+
+@item EINTR      
+The call was interrupted by the user.
+@end table
+
+@node read
+@unnumberedsubsubsec read
+@cindex read, file-i/o system call
+
+@smallexample
+@exdent Synopsis:    
+int read(int fd, void *buf, unsigned int count);
+
+@exdent Request:     
+Fread,fd,bufptr,count
+
+@exdent Return value:
+On success, the number of bytes read is returned.
+Zero indicates end of file.  If count is zero, read
+returns zero as well.  On error, -1 is returned. 
+
+@exdent Errors:
+@end smallexample
+
+@table @code
+@item EBADF      
+fd is not a valid file descriptor or is not open for
+reading.
+
+@item EFAULT     
+buf is an invalid pointer value.
+
+@item EINTR      
+The call was interrupted by the user.
+@end table
+
+@node write
+@unnumberedsubsubsec write
+@cindex write, file-i/o system call
+
+@smallexample
+@exdent Synopsis:    
+int write(int fd, const void *buf, unsigned int count);
+
+@exdent Request:     
+Fwrite,fd,bufptr,count
+
+@exdent Return value:
+On success, the number of bytes written are returned.
+Zero indicates nothing was written.  On error, -1
+is returned.
+
+@exdent Errors:
+@end smallexample
+
+@table @code
+@item EBADF      
+fd is not a valid file descriptor or is not open for
+writing.
+
+@item EFAULT     
+buf is an invalid pointer value.
+
+@item EFBIG      
+An attempt was made to write a file that exceeds the
+host specific maximum file size allowed.
+
+@item ENOSPC     
+No space on device to write the data.
+
+@item EINTR      
+The call was interrupted by the user.
+@end table
+
+@node lseek
+@unnumberedsubsubsec lseek
+@cindex lseek, file-i/o system call
+
+@smallexample
+@exdent Synopsis:    
+long lseek (int fd, long offset, int flag);
+
+@exdent Request:     
+Flseek,fd,offset,flag
+@end smallexample
+
+@code{flag} is one of:
+
+@table @code
+@item SEEK_SET   
+The offset is set to offset bytes.
+
+@item SEEK_CUR   
+The offset is set to its current location plus offset
+bytes.
+
+@item SEEK_END   
+The offset is set to the size of the file plus offset
+bytes.
+@end table
+
+@smallexample
+@exdent Return value:
+On success, the resulting unsigned offset in bytes from
+the beginning of the file is returned.  Otherwise, a
+value of -1 is returned.
+
+@exdent Errors:
+@end smallexample
+
+@table @code
+@item EBADF      
+fd is not a valid open file descriptor.
+
+@item ESPIPE     
+fd is associated with the @value{GDBN} console.
+
+@item EINVAL     
+flag is not a proper value.
+
+@item EINTR      
+The call was interrupted by the user.
+@end table
+
+@node rename
+@unnumberedsubsubsec rename
+@cindex rename, file-i/o system call
+
+@smallexample
+@exdent Synopsis:    
+int rename(const char *oldpath, const char *newpath);
+
+@exdent Request:     
+Frename,oldpathptr/len,newpathptr/len
+
+@exdent Return value:
+On success, zero is returned.  On error, -1 is returned.
+
+@exdent Errors:
+@end smallexample
+
+@table @code
+@item EISDIR     
+newpath is an existing directory, but oldpath is not a
+directory.
+
+@item EEXIST     
+newpath is a non-empty directory.
+
+@item EBUSY      
+oldpath or newpath is a directory that is in use by some
+process.
+
+@item EINVAL     
+An attempt was made to make a directory a subdirectory
+of itself.
+
+@item ENOTDIR    
+A  component used as a directory in oldpath or new
+path is not a directory.  Or oldpath is a directory
+and newpath exists but is not a directory.
+
+@item EFAULT     
+oldpathptr or newpathptr are invalid pointer values.
+
+@item EACCES     
+No access to the file or the path of the file.
+
+@item ENAMETOOLONG
+             
+oldpath or newpath was too long.
+
+@item ENOENT     
+A directory component in oldpath or newpath does not exist.
+
+@item EROFS      
+The file is on a read-only filesystem.
+
+@item ENOSPC     
+The device containing the file has no room for the new
+directory entry.
+
+@item EINTR      
+The call was interrupted by the user.
+@end table
+
+@node unlink
+@unnumberedsubsubsec unlink
+@cindex unlink, file-i/o system call
+
+@smallexample
+@exdent Synopsis:    
+int unlink(const char *pathname);
+
+@exdent Request:     
+Funlink,pathnameptr/len
+
+@exdent Return value:
+On success, zero is returned.  On error, -1 is returned.
+
+@exdent Errors:
+@end smallexample
+
+@table @code
+@item EACCES     
+No access to the file or the path of the file.
+
+@item EPERM      
+The system does not allow unlinking of directories.
+
+@item EBUSY      
+The file pathname cannot be unlinked because it's
+being used by another process.
+
+@item EFAULT     
+pathnameptr is an invalid pointer value.
+
+@item ENAMETOOLONG
+pathname was too long.
+
+@item ENOENT     
+A directory component in pathname does not exist.
+
+@item ENOTDIR    
+A component of the path is not a directory.
+
+@item EROFS      
+The file is on a read-only filesystem.
+
+@item EINTR      
+The call was interrupted by the user.
+@end table
+
+@node stat/fstat
+@unnumberedsubsubsec stat/fstat
+@cindex fstat, file-i/o system call
+@cindex stat, file-i/o system call
+
+@smallexample
+@exdent Synopsis:    
+int stat(const char *pathname, struct stat *buf);
+int fstat(int fd, struct stat *buf);
+
+@exdent Request:     
+Fstat,pathnameptr/len,bufptr
+Ffstat,fd,bufptr
+
+@exdent Return value:
+On success, zero is returned.  On error, -1 is returned.
+
+@exdent Errors:
+@end smallexample
+
+@table @code
+@item EBADF      
+fd is not a valid open file.
+
+@item ENOENT     
+A directory component in pathname does not exist or the
+path is an empty string.
+
+@item ENOTDIR    
+A component of the path is not a directory.
+
+@item EFAULT     
+pathnameptr is an invalid pointer value.
+
+@item EACCES     
+No access to the file or the path of the file.
+
+@item ENAMETOOLONG
+pathname was too long.
+
+@item EINTR      
+The call was interrupted by the user.
+@end table
+
+@node gettimeofday
+@unnumberedsubsubsec gettimeofday
+@cindex gettimeofday, file-i/o system call
+
+@smallexample
+@exdent Synopsis:    
+int gettimeofday(struct timeval *tv, void *tz);
+
+@exdent Request:     
+Fgettimeofday,tvptr,tzptr
+
+@exdent Return value:
+On success, 0 is returned, -1 otherwise.
+
+@exdent Errors:
+@end smallexample
+
+@table @code
+@item EINVAL     
+tz is a non-NULL pointer.
+
+@item EFAULT     
+tvptr and/or tzptr is an invalid pointer value.
+@end table
+
+@node isatty
+@unnumberedsubsubsec isatty
+@cindex isatty, file-i/o system call
+
+@smallexample
+@exdent Synopsis:    
+int isatty(int fd);
+
+@exdent Request:     
+Fisatty,fd
+
+@exdent Return value:
+Returns 1 if fd refers to the @value{GDBN} console, 0 otherwise.
+
+@exdent Errors:
+@end smallexample
+
+@table @code
+@item EINTR      
+The call was interrupted by the user.
+@end table
+
+@node system
+@unnumberedsubsubsec system
+@cindex system, file-i/o system call
+
+@smallexample
+@exdent Synopsis:    
+int system(const char *command);
+
+@exdent Request:     
+Fsystem,commandptr/len
+
+@exdent Return value:
+The value returned is -1 on error and the return status
+of the command otherwise.  Only the exit status of the
+command is returned, which is extracted from the hosts
+system return value by calling WEXITSTATUS(retval).
+In case /bin/sh could not be executed, 127 is returned.
+
+@exdent Errors:
+@end smallexample
+
+@table @code
+@item EINTR      
+The call was interrupted by the user.
+@end table
+
+@node Protocol specific representation of datatypes
+@subsection Protocol specific representation of datatypes
+@cindex protocol specific representation of datatypes, in file-i/o protocol
+
+@menu
+* Integral datatypes::
+* Pointer values::
+* struct stat::
+* struct timeval::
+@end menu
+
+@node Integral datatypes
+@unnumberedsubsubsec Integral datatypes
+@cindex integral datatypes, in file-i/o protocol
+
+The integral datatypes used in the system calls are
+
+@smallexample
+int@r{,} unsigned int@r{,} long@r{,} unsigned long@r{,} mode_t @r{and} time_t
+@end smallexample
+
+@code{Int}, @code{unsigned int}, @code{mode_t} and @code{time_t} are
+implemented as 32 bit values in this protocol.
+
+@code{Long} and @code{unsigned long} are implemented as 64 bit types. 
+    
+@xref{Limits}, for corresponding MIN and MAX values (similar to those
+in @file{limits.h}) to allow range checking on host and target.
+
+@code{time_t} datatypes are defined as seconds since the Epoch.
+
+All integral datatypes transferred as part of a memory read or write of a
+structured datatype e.g.@: a @code{struct stat} have to be given in big endian
+byte order.
+
+@node Pointer values
+@unnumberedsubsubsec Pointer values
+@cindex pointer values, in file-i/o protocol
+
+Pointers to target data are transmitted as they are.  An exception
+is made for pointers to buffers for which the length isn't
+transmitted as part of the function call, namely strings.  Strings
+are transmitted as a pointer/length pair, both as hex values, e.g.@:
+
+@smallexample
+@code{1aaf/12}
+@end smallexample
+
+@noindent
+which is a pointer to data of length 18 bytes at position 0x1aaf.
+The length is defined as the full string length in bytes, including
+the trailing null byte.  Example:
+
+@smallexample
+``hello, world'' at address 0x123456
+@end smallexample
+
+@noindent
+is transmitted as
+
+@smallexample
+@code{123456/d}
+@end smallexample
+
+@node struct stat
+@unnumberedsubsubsec struct stat
+@cindex struct stat, in file-i/o protocol
+
+The buffer of type struct stat used by the target and @value{GDBN} is defined
+as follows:
+
+@smallexample
+struct stat @{
+    unsigned int  st_dev;      /* device */
+    unsigned int  st_ino;      /* inode */
+    mode_t        st_mode;     /* protection */
+    unsigned int  st_nlink;    /* number of hard links */
+    unsigned int  st_uid;      /* user ID of owner */
+    unsigned int  st_gid;      /* group ID of owner */
+    unsigned int  st_rdev;     /* device type (if inode device) */
+    unsigned long st_size;     /* total size, in bytes */
+    unsigned long st_blksize;  /* blocksize for filesystem I/O */
+    unsigned long st_blocks;   /* number of blocks allocated */
+    time_t        st_atime;    /* time of last access */
+    time_t        st_mtime;    /* time of last modification */
+    time_t        st_ctime;    /* time of last change */
+@};
+@end smallexample
+
+The integral datatypes are conforming to the definitions given in the
+approriate section (see @ref{Integral datatypes}, for details) so this
+structure is of size 64 bytes.
+
+The values of several fields have a restricted meaning and/or
+range of values.
+
+@smallexample
+st_dev:     0       file
+            1       console
+
+st_ino:     No valid meaning for the target.  Transmitted unchanged.
+
+st_mode:    Valid mode bits are described in Appendix C.  Any other
+            bits have currently no meaning for the target.
+
+st_uid:     No valid meaning for the target.  Transmitted unchanged.
+
+st_gid:     No valid meaning for the target.  Transmitted unchanged.
+
+st_rdev:    No valid meaning for the target.  Transmitted unchanged.
+
+st_atime, st_mtime, st_ctime:
+            These values have a host and file system dependent
+            accuracy.  Especially on Windows hosts the file systems
+            don't support exact timing values.
+@end smallexample
+
+The target gets a struct stat of the above representation and is
+responsible to coerce it to the target representation before
+continuing.
+
+Note that due to size differences between the host and target
+representation of stat members, these members could eventually
+get truncated on the target.
+
+@node struct timeval
+@unnumberedsubsubsec struct timeval
+@cindex struct timeval, in file-i/o protocol
+
+The buffer of type struct timeval used by the target and @value{GDBN}
+is defined as follows:
+
+@smallexample
+struct timeval @{ 
+    time_t tv_sec;  /* second */
+    long   tv_usec; /* microsecond */
+@};
+@end smallexample
+
+The integral datatypes are conforming to the definitions given in the
+approriate section (see @ref{Integral datatypes}, for details) so this
+structure is of size 8 bytes.
+
+@node Constants
+@subsection Constants
+@cindex constants, in file-i/o protocol
+
+The following values are used for the constants inside of the
+protocol.  @value{GDBN} and target are resposible to translate these
+values before and after the call as needed.
+
+@menu
+* Open flags::
+* mode_t values::
+* Errno values::
+* Lseek flags::
+* Limits::
+@end menu
+
+@node Open flags
+@unnumberedsubsubsec Open flags
+@cindex open flags, in file-i/o protocol
+
+All values are given in hexadecimal representation.
+
+@smallexample
+  O_RDONLY        0x0
+  O_WRONLY        0x1
+  O_RDWR          0x2
+  O_APPEND        0x8
+  O_CREAT       0x200
+  O_TRUNC       0x400
+  O_EXCL        0x800
+@end smallexample
+
+@node mode_t values
+@unnumberedsubsubsec mode_t values
+@cindex mode_t values, in file-i/o protocol
+
+All values are given in octal representation.
+
+@smallexample
+  S_IFREG       0100000
+  S_IFDIR        040000
+  S_IRUSR          0400
+  S_IWUSR          0200
+  S_IXUSR          0100
+  S_IRGRP           040
+  S_IWGRP           020
+  S_IXGRP           010
+  S_IROTH            04
+  S_IWOTH            02
+  S_IXOTH            01
+@end smallexample
+
+@node Errno values
+@unnumberedsubsubsec Errno values
+@cindex errno values, in file-i/o protocol
+
+All values are given in decimal representation.
+
+@smallexample
+  EPERM           1
+  ENOENT          2
+  EINTR           4
+  EBADF           9
+  EACCES         13
+  EFAULT         14
+  EBUSY          16
+  EEXIST         17
+  ENODEV         19
+  ENOTDIR        20
+  EISDIR         21
+  EINVAL         22
+  ENFILE         23
+  EMFILE         24
+  EFBIG          27
+  ENOSPC         28
+  ESPIPE         29
+  EROFS          30
+  ENAMETOOLONG   91
+  EUNKNOWN       9999
+@end smallexample
+
+  EUNKNOWN is used as a fallback error value if a host system returns
+  any error value not in the list of supported error numbers.
+
+@node Lseek flags
+@unnumberedsubsubsec Lseek flags
+@cindex lseek flags, in file-i/o protocol
+
+@smallexample
+  SEEK_SET      0
+  SEEK_CUR      1
+  SEEK_END      2
+@end smallexample
+
+@node Limits
+@unnumberedsubsubsec Limits
+@cindex limits, in file-i/o protocol
+
+All values are given in decimal representation.
+
+@smallexample
+  INT_MIN       -2147483648
+  INT_MAX        2147483647
+  UINT_MAX       4294967295
+  LONG_MIN      -9223372036854775808
+  LONG_MAX       9223372036854775807
+  ULONG_MAX      18446744073709551615
+@end smallexample
+
+@node File-I/O Examples
+@subsection File-I/O Examples
+@cindex file-i/o examples
+
+Example sequence of a write call, file descriptor 3, buffer is at target
+address 0x1234, 6 bytes should be written:
+
+@smallexample
+<- @code{Fwrite,3,1234,6}
+@emph{request memory read from target}
+-> @code{m1234,6}
+<- XXXXXX
+@emph{return "6 bytes written"}
+-> @code{F6}
+@end smallexample
+
+Example sequence of a read call, file descriptor 3, buffer is at target
+address 0x1234, 6 bytes should be read:
+
+@smallexample
+<- @code{Fread,3,1234,6}
+@emph{request memory write to target}
+-> @code{X1234,6:XXXXXX}
+@emph{return "6 bytes read"}
+-> @code{F6}
+@end smallexample
+
+Example sequence of a read call, call fails on the host due to invalid
+file descriptor (EBADF):
+
+@smallexample
+<- @code{Fread,3,1234,6}
+-> @code{F-1,9}
+@end smallexample
+
+Example sequence of a read call, user presses Ctrl-C before syscall on
+host is called:
+
+@smallexample
+<- @code{Fread,3,1234,6}
+-> @code{F-1,4,C}
+<- @code{T02}
+@end smallexample
+
+Example sequence of a read call, user presses Ctrl-C after syscall on
+host is called:
+
+@smallexample
+<- @code{Fread,3,1234,6}
+-> @code{X1234,6:XXXXXX}
+<- @code{T02}
 @end smallexample
 
 @include gpl.texi

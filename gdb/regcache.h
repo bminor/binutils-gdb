@@ -75,6 +75,10 @@ extern void regcache_cooked_read_signed (struct regcache *regcache,
 					 int regnum, LONGEST *val);
 extern void regcache_cooked_read_unsigned (struct regcache *regcache,
 					   int regnum, ULONGEST *val);
+extern void regcache_cooked_write_signed (struct regcache *regcache,
+					  int regnum, LONGEST val);
+extern void regcache_cooked_write_unsigned (struct regcache *regcache,
+					    int regnum, ULONGEST val);
 
 /* Partial transfer of a cooked register.  These perform read, modify,
    write style operations.  */
@@ -155,15 +159,19 @@ extern int max_register_size (struct gdbarch *gdbarch);
 extern int register_size (struct gdbarch *gdbarch, int regnum);
 
 
-/* Save/restore a register cache.  The registers saved/restored is
-   determined by the save_reggroup and restore_reggroup (although you
-   can't restore a register that wasn't saved as well :-).  You can
-   only save to a read-only cache (default from regcache_xmalloc())
-   from a live cache and you can only restore from a read-only cache
-   to a live cache.  */
+/* Save/restore a register cache.  The set of registers saved /
+   restored into the DST regcache determined by the save_reggroup /
+   restore_reggroup respectively.  COOKED_READ returns zero iff the
+   register's value can't be returned.  */
 
-extern void regcache_save (struct regcache *dst, struct regcache *src);
-extern void regcache_restore (struct regcache *dst, struct regcache *src);
+typedef int (regcache_cooked_read_ftype) (void *src, int regnum, void *buf);
+
+extern void regcache_save (struct regcache *dst,
+			   regcache_cooked_read_ftype *cooked_read,
+			   void *src);
+extern void regcache_restore (struct regcache *dst,
+			      regcache_cooked_read_ftype *cooked_read,
+			      void *src);
 
 /* Copy/duplicate the contents of a register cache.  By default, the
    operation is pass-through.  Writes to DST and reads from SRC will

@@ -547,7 +547,7 @@ setup_arbitrary_frame (int argc, CORE_ADDR *argv)
 		    "create_new_frame returned invalid frame");
 
   get_frame_extra_info (frame)->bottom = argv[1];
-  deprecated_update_frame_pc_hack (frame, FRAME_SAVED_PC (frame));
+  deprecated_update_frame_pc_hack (frame, DEPRECATED_FRAME_SAVED_PC (frame));
   return frame;
 }
 
@@ -3147,7 +3147,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_chain (gdbarch, sparc_frame_chain);
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sparc_frame_init_saved_regs);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
-  set_gdbarch_frame_saved_pc (gdbarch, sparc_frame_saved_pc);
+  set_gdbarch_deprecated_frame_saved_pc (gdbarch, sparc_frame_saved_pc);
   set_gdbarch_frameless_function_invocation (gdbarch, 
 					     frameless_look_for_prologue);
   set_gdbarch_get_saved_register (gdbarch, sparc_get_saved_register);

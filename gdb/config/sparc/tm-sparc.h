@@ -484,7 +484,7 @@ extern CORE_ADDR sparc_frame_chain (struct frame_info *);
 
 /* Where is the PC for a specific frame */
 
-#define FRAME_SAVED_PC(FRAME) sparc_frame_saved_pc (FRAME)
+#define DEPRECATED_FRAME_SAVED_PC(FRAME) sparc_frame_saved_pc (FRAME)
 extern CORE_ADDR sparc_frame_saved_pc (struct frame_info *);
 
 /* If the argument is on the stack, it will be here.  */
@@ -519,7 +519,7 @@ extern CORE_ADDR init_frame_pc_noop (int fromleaf, struct frame_info *prev);
 #define	DEPRECATED_INIT_FRAME_PC(FROMLEAF, PREV)	(init_frame_pc_noop (FROMLEAF, PREV))
 #define DEPRECATED_INIT_FRAME_PC_FIRST(FROMLEAF, PREV) \
   ((FROMLEAF) ? SAVED_PC_AFTER_CALL ((PREV)->next) : \
-	      (PREV)->next ? FRAME_SAVED_PC ((PREV)->next) : read_pc ())
+	      (PREV)->next ? DEPRECATED_FRAME_SAVED_PC ((PREV)->next) : read_pc ())
 
 /* Define other aspects of the stack frame.  */
 

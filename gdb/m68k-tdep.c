@@ -359,7 +359,7 @@ int
 isi_frame_num_args (struct frame_info *fi)
 {
   int val;
-  CORE_ADDR pc = FRAME_SAVED_PC (fi);
+  CORE_ADDR pc = DEPRECATED_FRAME_SAVED_PC (fi);
   int insn = read_memory_unsigned_integer (pc, 2);
   val = 0;
   if (insn == 0047757 || insn == 0157374)	/* lea W(sp),sp or addaw #W,sp */
@@ -381,7 +381,7 @@ int
 delta68_frame_num_args (struct frame_info *fi)
 {
   int val;
-  CORE_ADDR pc = FRAME_SAVED_PC (fi);
+  CORE_ADDR pc = DEPRECATED_FRAME_SAVED_PC (fi);
   int insn = read_memory_unsigned_integer (pc, 2);
   val = 0;
   if (insn == 0047757 || insn == 0157374)	/* lea W(sp),sp or addaw #W,sp */
@@ -403,7 +403,7 @@ int
 news_frame_num_args (struct frame_info *fi)
 {
   int val;
-  CORE_ADDR pc = FRAME_SAVED_PC (fi);
+  CORE_ADDR pc = DEPRECATED_FRAME_SAVED_PC (fi);
   int insn = read_memory_unsigned_integer (pc, 2);
   val = 0;
   if (insn == 0047757 || insn == 0157374)	/* lea W(sp),sp or addaw #W,sp */
@@ -1011,7 +1011,7 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_store_return_value (gdbarch, m68k_store_return_value);
 
   set_gdbarch_frame_chain (gdbarch, m68k_frame_chain);
-  set_gdbarch_frame_saved_pc (gdbarch, m68k_frame_saved_pc);
+  set_gdbarch_deprecated_frame_saved_pc (gdbarch, m68k_frame_saved_pc);
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, m68k_frame_init_saved_regs);
   set_gdbarch_frameless_function_invocation (gdbarch,
 					     m68k_frameless_function_invocation);

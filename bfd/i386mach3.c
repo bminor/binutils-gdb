@@ -1,5 +1,5 @@
 /* BFD back-end for i386 a.out binaries.
-   Copyright 1990, 1991, 1993, 1994, 1995, 1997, 2001, 2002
+   Copyright 1990, 1991, 1993, 1994, 1995, 1997, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -28,7 +28,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define	SEGMENT_SIZE	0x1000
 #define TEXT_START_ADDR	0x10000
 #define ARCH 32
-#define BYTES_IN_WORD 4
 /* This macro is only relevant when N_MAGIC(x) == ZMAGIC.  */
 #define N_HEADER_IN_TEXT(x)	1
 

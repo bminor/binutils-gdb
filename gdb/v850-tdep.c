@@ -826,7 +826,7 @@ v850_frame_chain (struct frame_info *fi)
   CORE_ADDR callers_pc, fp;
 
   /* First, find out who called us */
-  callers_pc = FRAME_SAVED_PC (fi);
+  callers_pc = DEPRECATED_FRAME_SAVED_PC (fi);
   /* If caller is a call-dummy, then our FP bears no relation to his FP! */
   fp = v850_find_callers_reg (fi, E_FP_RAW_REGNUM);
   if (DEPRECATED_PC_IN_CALL_DUMMY (callers_pc, fp, fp))
@@ -892,7 +892,7 @@ v850_pop_frame (void)
     generic_pop_dummy_frame ();
   else
     {
-      write_register (E_PC_REGNUM, FRAME_SAVED_PC (frame));
+      write_register (E_PC_REGNUM, DEPRECATED_FRAME_SAVED_PC (frame));
 
       for (regnum = 0; regnum < E_NUM_REGS; regnum++)
 	if (get_frame_saved_regs (frame)[regnum] != 0)
@@ -1165,7 +1165,7 @@ v850_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   struct prologue_info pi;
 
   if (get_next_frame (fi))
-    deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (get_next_frame (fi)));
+    deprecated_update_frame_pc_hack (fi, DEPRECATED_FRAME_SAVED_PC (get_next_frame (fi)));
 
   v850_frame_init_saved_regs (fi);
 }
@@ -1246,7 +1246,7 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, v850_init_extra_frame_info);
   set_gdbarch_frame_chain (gdbarch, v850_frame_chain);
   set_gdbarch_saved_pc_after_call (gdbarch, v850_saved_pc_after_call);
-  set_gdbarch_frame_saved_pc (gdbarch, v850_frame_saved_pc);
+  set_gdbarch_deprecated_frame_saved_pc (gdbarch, v850_frame_saved_pc);
   set_gdbarch_skip_prologue (gdbarch, v850_skip_prologue);
 
   /* 

@@ -671,7 +671,7 @@ mcore_frame_chain (struct frame_info * fi)
 
      If our caller does not have a frame pointer, then his frame base
      is <our base> + -<caller's frame size>. */
-  dummy = analyze_dummy_frame (FRAME_SAVED_PC (fi), get_frame_base (fi));
+  dummy = analyze_dummy_frame (DEPRECATED_FRAME_SAVED_PC (fi), get_frame_base (fi));
 
   if (get_frame_extra_info (dummy)->status & MY_FRAME_IN_FP)
     {
@@ -803,7 +803,7 @@ mcore_pop_frame (void)
   else
     {
       /* Write out the PC we saved. */
-      write_register (PC_REGNUM, FRAME_SAVED_PC (fi));
+      write_register (PC_REGNUM, DEPRECATED_FRAME_SAVED_PC (fi));
 
       /* Restore any saved registers. */
       for (rn = 0; rn < NUM_REGS; rn++)
@@ -1047,7 +1047,7 @@ void
 mcore_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
   if (fi && get_next_frame (fi))
-    deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (get_next_frame (fi)));
+    deprecated_update_frame_pc_hack (fi, DEPRECATED_FRAME_SAVED_PC (get_next_frame (fi)));
 
   frame_saved_regs_zalloc (fi);
 
@@ -1139,7 +1139,7 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, mcore_init_extra_frame_info);
   set_gdbarch_frame_chain (gdbarch, mcore_frame_chain);
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, mcore_frame_init_saved_regs);
-  set_gdbarch_frame_saved_pc (gdbarch, mcore_frame_saved_pc);
+  set_gdbarch_deprecated_frame_saved_pc (gdbarch, mcore_frame_saved_pc);
   set_gdbarch_deprecated_store_return_value (gdbarch, mcore_store_return_value);
   set_gdbarch_deprecated_extract_return_value (gdbarch, 
 					       mcore_extract_return_value);

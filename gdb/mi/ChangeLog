@@ -1,3 +1,8 @@
+2003-03-08  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-out.c: Update copyright.
+	(mi_out_data): Define typedef.  Use instead of ui_out_data.
+
 2003-03-01  Andrew Cagney  <cagney@redhat.com>
 
 	* mi-main.c (get_register): Use register_type instead of

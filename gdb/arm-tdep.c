@@ -159,7 +159,7 @@ struct frame_extra_info
 static int
 arm_frame_chain_valid (CORE_ADDR chain, struct frame_info *thisframe)
 {
-  return (FRAME_SAVED_PC (thisframe) >= LOWEST_PC);
+  return (DEPRECATED_FRAME_SAVED_PC (thisframe) >= LOWEST_PC);
 }
 
 /* Set to true if the 32-bit mode is in use.  */
@@ -1032,7 +1032,7 @@ arm_frame_chain (struct frame_info *fi)
     return 0;
 
   /* If the caller is the startup code, we're at the end of the chain.  */
-  caller_pc = FRAME_SAVED_PC (fi);
+  caller_pc = DEPRECATED_FRAME_SAVED_PC (fi);
 
   /* If the caller is Thumb and the caller is ARM, or vice versa,
      the frame register of the caller is different from ours.
@@ -1090,7 +1090,7 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   get_frame_extra_info (fi)->framereg = 0;
 
   if (get_next_frame (fi))
-    deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (get_next_frame (fi)));
+    deprecated_update_frame_pc_hack (fi, DEPRECATED_FRAME_SAVED_PC (get_next_frame (fi)));
 
   memset (get_frame_saved_regs (fi), '\000', sizeof get_frame_saved_regs (fi));
 
@@ -1535,7 +1535,7 @@ arm_pop_frame (void)
 		  read_memory_integer (get_frame_saved_regs (frame)[regnum],
 				       REGISTER_RAW_SIZE (regnum)));
 
-  write_register (ARM_PC_REGNUM, FRAME_SAVED_PC (frame));
+  write_register (ARM_PC_REGNUM, DEPRECATED_FRAME_SAVED_PC (frame));
   write_register (ARM_SP_REGNUM, old_SP);
 
   flush_cached_frames ();
@@ -2909,7 +2909,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_chain (gdbarch, arm_frame_chain);
   set_gdbarch_frameless_function_invocation
     (gdbarch, arm_frameless_function_invocation);
-  set_gdbarch_frame_saved_pc (gdbarch, arm_frame_saved_pc);
+  set_gdbarch_deprecated_frame_saved_pc (gdbarch, arm_frame_saved_pc);
   set_gdbarch_frame_args_address (gdbarch, arm_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, arm_frame_locals_address);
   set_gdbarch_frame_num_args (gdbarch, arm_frame_num_args);

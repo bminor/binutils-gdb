@@ -1,3 +1,67 @@
+2003-03-13  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in (LINGUAS): Add zh_CN.
+	* configure: Regenerate.
+	* po/zh_CN.po: New file.
+
+2003-03-13  Elias Athanasopoulos  <elathan@phys.uoa.gr>
+
+	* aout-cris.c (BYTES_IN_WORD): Don't define.
+	aout-encap.c: Likewise.
+	aout-ns32k.c: Likewise.
+	aout-tic30.c: Likewise.
+	hp300bsd.c: Likewise.
+	i386aout.c: Likewise.
+	i386dynix.c: Likewise.
+	i386linux.c: Likewise.
+	i386lynx.c: Likewise.
+	i386mach3.c: Likewise.
+	m68k4knetbsd.c: Likewise.
+	m68klinux.c: Likewise.
+	m68klynx.c: Likewise.
+	m68knetbsd.c: Likewise.
+	m88kmach3.c: Likewise.
+	mipsbsd.c: Likewise.
+	newsos3.c: Likewise.
+	sparclinux.c: Likewise.
+	sparclynx.c: Likewise.
+	sparcnetbsd.c: Likewise.
+	vaxbsd.c: Likewise. Fix comment formatting.
+
+2003-03-12  Alexandre Oliva  <aoliva@redhat.com>
+
+	* Reverted 2003-03-02's patch.
+
+	* elfxx-target.h (bfd_elfNN_canonicalize_reloc): Make it
+	overridable.
+	* elf64-mips.c (mips_elf64_canonicalize_reloc,
+	mips_elf64_get_dynamic_reloc_upper_bound,
+	mips_elf64_canonicalize_dynamic_reloc): New, adapted from elf.c.
+	(bfd_elf64_get_canonicalize_reloc,
+	bfd_elf64_get_dynamic_reloc_upper_bound,
+	bfd_elf64_canonicalize_dynamic_reloc): Define.
+	(mips_elf64_slurp_reloc_table): Support dynamic.
+	(mips_elf64_slurp_one_reloc_table): Adjust.
+
+2003-03-12  Nick Clifton  <nickc@redhat.com>
+
+	* xsym.c (bfd_sym_fetch_type_information_table_entry): Change
+	'index' to 'offset' in test for zero value.
+
+2003-03-11  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elfxx-mips.c (mips_elf_create_dynamic_relocation): Do not create
+	dynamic relocations pointing to local or section symbols, use the
+	NULL symbol instead.  Document the choice to not emit an
+	additional R_MIPS_64 relocation.
+
+2003-03-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (ppc_elf_relocate_section): Subtract tls seg vma from
+	zero index dynamic tls relocs generated for the GOT.  Tidy code.
+	Set "relocation" to 1 on DTPMOD32 relocs.  Optimize HA adjustment.
+	* elf64-ppc.c (ppc64_elf_relocate_section): Likewise.
+
 2003-03-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (ppc_elf_relocate_section): Don't look for a nop after

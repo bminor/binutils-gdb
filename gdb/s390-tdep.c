@@ -1221,7 +1221,7 @@ s390_pop_frame_regular (struct frame_info *frame)
 {
   int regnum;
 
-  write_register (S390_PC_REGNUM, FRAME_SAVED_PC (frame));
+  write_register (S390_PC_REGNUM, DEPRECATED_FRAME_SAVED_PC (frame));
 
   /* Restore any saved registers.  */
   if (get_frame_saved_regs (frame))
@@ -1839,7 +1839,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frameless_function_invocation (gdbarch,
 					     s390_frameless_function_invocation);
   /* Return saved PC from a frame */
-  set_gdbarch_frame_saved_pc (gdbarch, s390_frame_saved_pc);
+  set_gdbarch_deprecated_frame_saved_pc (gdbarch, s390_frame_saved_pc);
   /* FRAME_CHAIN takes a frame's nominal address
      and produces the frame's chain-pointer. */
   set_gdbarch_frame_chain (gdbarch, s390_frame_chain);
