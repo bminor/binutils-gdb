@@ -4513,17 +4513,13 @@ remote_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
     {
       char *buf = alloca (PBUFSIZ);
       char *p = buf;
-      CORE_ADDR addr2;
       
-      addr2 = remote_address_masked (addr);
-      if (ADJUST_REMOTE_Z_BREAKPOINT_P ())
-	ADJUST_REMOTE_Z_BREAKPOINT (&addr2);
-
+      addr = remote_address_masked (addr);
       *(p++) = 'Z';
       *(p++) = '0';
       *(p++) = ',';
-      p += hexnumstr (p, (ULONGEST) addr2);
-      BREAKPOINT_FROM_PC (&addr2, &bp_size);
+      p += hexnumstr (p, (ULONGEST) addr);
+      BREAKPOINT_FROM_PC (&addr, &bp_size);
       sprintf (p, ",%d", bp_size);
       
       putpkt (buf);
@@ -4568,18 +4564,14 @@ remote_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
     {
       char *buf = alloca (PBUFSIZ);
       char *p = buf;
-      CORE_ADDR addr2;
       
       *(p++) = 'z';
       *(p++) = '0';
       *(p++) = ',';
 
-      addr2 = remote_address_masked (addr);
-      if (ADJUST_REMOTE_Z_BREAKPOINT_P ())
-	ADJUST_REMOTE_Z_BREAKPOINT (&addr2);
-
-      p += hexnumstr (p, (ULONGEST) addr2);
-      BREAKPOINT_FROM_PC (&addr2, &bp_size);
+      addr = remote_address_masked (addr);
+      p += hexnumstr (p, (ULONGEST) addr);
+      BREAKPOINT_FROM_PC (&addr, &bp_size);
       sprintf (p, ",%d", bp_size);
       
       putpkt (buf);
@@ -5235,8 +5227,8 @@ Specify the serial device it is connected to\n\
   remote_ops.to_mourn_inferior = remote_mourn;
   remote_ops.to_thread_alive = remote_thread_alive;
   remote_ops.to_find_new_threads = remote_threads_info;
-  remote_ops.to_pid_to_str = remote_pid_to_str;
   remote_ops.to_extra_thread_info = remote_threads_extra_info;
+  remote_ops.to_pid_to_str = remote_pid_to_str;
   remote_ops.to_stop = remote_stop;
   remote_ops.to_query = remote_query;
   remote_ops.to_rcmd = remote_rcmd;
@@ -5644,8 +5636,7 @@ Specify the serial device it is connected to (e.g. host:2020).";
   remote_cisco_ops.to_mourn_inferior = remote_cisco_mourn;
   remote_cisco_ops.to_thread_alive = remote_thread_alive;
   remote_cisco_ops.to_find_new_threads = remote_threads_info;
-  remote_cisco_ops.to_pid_to_str = remote_pid_to_str;
-  remote_cisco_ops.to_extra_thread_info = remote_threads_extra_info;
+  remote_ops.to_extra_thread_info = remote_threads_extra_info;
   remote_cisco_ops.to_stratum = process_stratum;
   remote_cisco_ops.to_has_all_memory = 1;
   remote_cisco_ops.to_has_memory = 1;
@@ -5735,8 +5726,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   remote_async_ops.to_mourn_inferior = remote_async_mourn;
   remote_async_ops.to_thread_alive = remote_thread_alive;
   remote_async_ops.to_find_new_threads = remote_threads_info;
-  remote_async_ops.to_pid_to_str = remote_pid_to_str;
-  remote_async_ops.to_extra_thread_info = remote_threads_extra_info;
+  remote_ops.to_extra_thread_info = remote_threads_extra_info;
   remote_async_ops.to_stop = remote_stop;
   remote_async_ops.to_query = remote_query;
   remote_async_ops.to_rcmd = remote_rcmd;
