@@ -986,8 +986,26 @@ sparc_push_dummy_frame (void)
 
   if (strcmp (target_shortname, "sim") != 0)
     {
-      write_fp (old_sp);
-
+      /* NOTE: cagney/2002-04-04: The code below originally contained
+         GDB's _only_ call to write_fp().  That call was eliminated by
+         inlining the corresponding code.  For the 64 bit case, the
+         old function (sparc64_write_fp) did the below although I'm
+         not clear why.  The same goes for why this is only done when
+         the underlying target is a simulator.  */
+      if (gdbarch_tdep (current_gdbarch)->intreg_size == 8)
+	{
+	  /* Target is a 64 bit SPARC.  */
+	  CORE_ADDR oldfp = read_register (FP_REGNUM);
+	  if (oldfp & 1)
+	    write_register (FP_REGNUM, old_sp - 2047);
+	  else
+	    write_register (FP_REGNUM, old_sp);
+	}
+      else
+	{
+	  /* Target is a 32 bit SPARC.  */
+	  write_register (FP_REGNUM, old_sp);
+	}
       /* Set return address register for the call dummy to the current PC.  */
       write_register (I7_REGNUM, read_pc () - 8);
     }
@@ -2261,16 +2279,6 @@ sparc64_write_sp (CORE_ADDR val)
     write_register (SP_REGNUM, val);
 }
 
-void
-sparc64_write_fp (CORE_ADDR val)
-{
-  CORE_ADDR oldfp = read_register (FP_REGNUM);
-  if (oldfp & 1)
-    write_register (FP_REGNUM, val - 2047);
-  else
-    write_register (FP_REGNUM, val);
-}
-
 /* The SPARC 64 ABI passes floating-point arguments in FP0 to FP31,
    and all other arguments in O0 to O5.  They are also copied onto
    the stack in the correct places.  Apparently (empirically), 
@@ -3038,7 +3046,6 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_store_struct_return (gdbarch, sparc32_store_struct_return);
       set_gdbarch_use_struct_convention (gdbarch, 
 					 generic_use_struct_convention);
-      set_gdbarch_write_fp (gdbarch, generic_target_write_fp);
       set_gdbarch_write_sp (gdbarch, generic_target_write_sp);
       tdep->y_regnum = SPARC32_Y_REGNUM;
       tdep->fp_max_regnum = SPARC_FP0_REGNUM + 32;
@@ -3097,7 +3104,6 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_store_struct_return (gdbarch, sparc64_store_struct_return);
       set_gdbarch_use_struct_convention (gdbarch, 
 					 sparc64_use_struct_convention);
-      set_gdbarch_write_fp (gdbarch, sparc64_write_fp);
       set_gdbarch_write_sp (gdbarch, sparc64_write_sp);
       tdep->y_regnum = SPARC64_Y_REGNUM;
       tdep->fp_max_regnum = SPARC_FP0_REGNUM + 48;
