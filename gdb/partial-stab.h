@@ -104,12 +104,12 @@ switch (CUR_SYMBOL_TYPE)
 	if (past_first_source_file && pst
 	/* The gould NP1 uses low values for .o and -l symbols
 	   which are not the address.  */
-	    && CUR_SYMBOL_VALUE >= pst->textlow)
+	    && CUR_SYMBOL_VALUE >= TEXTLOW (pst))
 	  {
 	    END_PSYMTAB (pst, psymtab_include_list, includes_used,
 			 symnum * symbol_size,
-			 CUR_SYMBOL_VALUE > pst->texthigh
-			 ? CUR_SYMBOL_VALUE : pst->texthigh,
+			 CUR_SYMBOL_VALUE > TEXTHIGH (pst)
+			 ? CUR_SYMBOL_VALUE : TEXTHIGH (pst),
 		       dependency_list, dependencies_used, textlow_not_set);
 	    pst = (struct partial_symtab *) 0;
 	    includes_used = 0;
@@ -236,7 +236,7 @@ switch (CUR_SYMBOL_TYPE)
 	    {
 	      END_PSYMTAB (pst, psymtab_include_list, includes_used,
 			   symnum * symbol_size,
-			   valu > pst->texthigh ? valu : pst->texthigh,
+			   valu > TEXTHIGH (pst) ? valu : TEXTHIGH (pst),
 			   dependency_list, dependencies_used,
 			   prev_textlow_not_set);
 	      pst = (struct partial_symtab *) 0;
@@ -405,8 +405,8 @@ switch (CUR_SYMBOL_TYPE)
 	   function relative stabs, or the address of the function's
 	   end for old style stabs.  */
 	valu = CUR_SYMBOL_VALUE + last_function_start;
-	if (pst->texthigh == 0 || valu > pst->texthigh)
-	  pst->texthigh = valu;
+	if (TEXTHIGH (pst) == 0 || valu > TEXTHIGH (pst))
+	  TEXTHIGH (pst) = valu;
 	break;
       }
 #endif
@@ -610,7 +610,7 @@ switch (CUR_SYMBOL_TYPE)
 	  }
 	if (pst && textlow_not_set)
 	  {
-	    pst->textlow = CUR_SYMBOL_VALUE;
+	    TEXTLOW (pst) = CUR_SYMBOL_VALUE;
 	    textlow_not_set = 0;
 	  }
 #endif
@@ -626,12 +626,12 @@ switch (CUR_SYMBOL_TYPE)
 	   the partial symbol table.  */
 	if (pst
             && (textlow_not_set
-                || (CUR_SYMBOL_VALUE < pst->textlow
+                || (CUR_SYMBOL_VALUE < TEXTLOW (pst)
                     && (CUR_SYMBOL_VALUE
                         != ANOFFSET (objfile->section_offsets,
                                      SECT_OFF_TEXT (objfile))))))
 	  {
-	    pst->textlow = CUR_SYMBOL_VALUE;
+	    TEXTLOW (pst) = CUR_SYMBOL_VALUE;
 	    textlow_not_set = 0;
 	  }
 #endif /* DBXREAD_ONLY */
@@ -677,7 +677,7 @@ switch (CUR_SYMBOL_TYPE)
 	  }
 	if (pst && textlow_not_set)
 	  {
-	    pst->textlow = CUR_SYMBOL_VALUE;
+	    TEXTLOW (pst) = CUR_SYMBOL_VALUE;
 	    textlow_not_set = 0;
 	  }
 #endif
@@ -693,12 +693,12 @@ switch (CUR_SYMBOL_TYPE)
 	   the partial symbol table.  */
 	if (pst
             && (textlow_not_set
-                || (CUR_SYMBOL_VALUE < pst->textlow
+                || (CUR_SYMBOL_VALUE < TEXTLOW (pst)
                     && (CUR_SYMBOL_VALUE
                         != ANOFFSET (objfile->section_offsets,
                                      SECT_OFF_TEXT (objfile))))))
 	  {
-	    pst->textlow = CUR_SYMBOL_VALUE;
+	    TEXTLOW (pst) = CUR_SYMBOL_VALUE;
 	    textlow_not_set = 0;
 	  }
 #endif /* DBXREAD_ONLY */
@@ -813,7 +813,7 @@ switch (CUR_SYMBOL_TYPE)
   case N_ENDM:
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
     /* Solaris 2 end of module, finish current partial symbol table.
-       END_PSYMTAB will set pst->texthigh to the proper value, which
+       END_PSYMTAB will set TEXTHIGH (pst) to the proper value, which
        is necessary if a module compiled without debugging info
        follows this module.  */
     if (pst)

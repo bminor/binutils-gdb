@@ -1,3 +1,29 @@
+2001-10-23  Jim Blandy  <jimb@redhat.com>
+
+	Isolate STABS readers' use of the `textlow' and `texthigh' fields
+	of `struct partial_symtab' to only a few locations.  This change
+	is not supposed to affect the way the values are computed, only
+	where they live.
+
+	* dbxread.c (struct symloc): Add `textlow' and `texthigh' fields
+	to the reader-specific structure.
+	* mdebugread.c (struct symloc): Same.
+	* dbxread.c (TEXTLOW, TEXTHIGH): New accessor macros.
+	* mdebugread.c (TEXTLOW, TEXTHIGH): Same.
+	* dbxread.c (dbx_symfile_read): After we've built all our partial
+	symbol tables, set each partial symtab's `textlow' and `texthigh'
+	fields from our reader-specific structure.
+	* mdebugread.c (mdebug_build_psymtabs): Same.
+	* dbxread.c (start_psymtab): Initialize the reader-specific
+	structure's `textlow' and `texthigh' from the new psymtab's.
+	* mdebugread.c (parse_partial_symbols, new_psymtab): Same.
+	* dbxread.c (read_dbx_symtab, end_psymtab, read_ofile_symtab): Use
+	the reader-specific `textlow' and `texthigh', not the generic
+	psymtab fields.
+	* mdebugread.c (parse_lines, parse_partial_symbols,
+	psymtab_to_symtab_1): Same.
+	* partial-stab.h: Same.
+
 Tue Oct 23 18:59:42 2001  Andrew Cagney  <cagney@redhat.com>
 
 	* hp-psymtab-read.c, hppah-nat.c, hppa-tdep.c: Fix -Wformat
