@@ -1,4 +1,9 @@
-Fri Apr 12 16:40:56 1996  Rob Savoye  <rob@chinadoll>
+Mon Apr 15 14:50:56 1996  Rob Savoye  <rob@chinadoll.cygnus.com>
+
+	* scripttempl/aout.sc: Add PROVIDE (__stack = 0) so I can use it
+	in m68k/crt0.S without things blowing up.
+
+Fri Apr 12 16:40:56 1996  Rob Savoye  <rob@chinadoll.cygnus.com>
 
 	* scripttempl/m68kcoff.sc: Remove default address for .data so
 	.text, .data, and .bss are all sequential.
