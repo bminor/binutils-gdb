@@ -1,3 +1,8 @@
+2004-01-02  Eli Zaretskii  <eliz@elta.co.il>
+
+	* config/djgpp/fnchange.lst: Add lines for gdb/ChangeLog-2003 and
+	bfd/ChangeLog-0203.
+
 2004-01-02  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.in: Check for <machine/reg.h>.  Check for `struct reg'
