@@ -1,5 +1,10 @@
 2003-04-05  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* gas/m68hc11/bug-1825.d (_table): Update.
+	* gas/m68hc11/bug-1825.s (_table): Add tests for 16-bit absolute relocs
+
+2003-04-05  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* gas/m68hc11/insns.s: Add %page and %addr checks.
 	* gas/m68hc11/insns12.s: Likewise.
 	* gas/m68hc11/insns-dwarf2.d: Update.

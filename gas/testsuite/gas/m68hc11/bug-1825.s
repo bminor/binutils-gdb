@@ -44,3 +44,6 @@ L7:
 	nop
 _table:
 	.ds.b	16,0
+	leax	_table,sp	; 16-bit absolute reloc
+	leay	_table,x
+	leax	_table,y

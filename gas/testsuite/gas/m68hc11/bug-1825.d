@@ -107,7 +107,7 @@ L7:
 	addd	_table\+12,pc
  549:	e3 f8 11    	addd	17,PC \{55d <_table\+0xc>\}
 	addd	_table\+16,pc
- 54c:	e3 f8 12    	addd	18,PC \{561 <.L0>\}
+ 54c:	e3 f8 12    	addd	18,PC \{561 <_table\+0x10>\}
 	rts
  54f:	3d          	rts
 	nop
@@ -115,3 +115,14 @@ L7:
 
 0+551 <_table>:
 	...
+_table:
+	.ds.b	16,0
+	leax	_table,sp	; 16\-bit absolute reloc
+ 561:	1a f2 00 00 	leax	0,SP
+			563: R_M68HC12_16	_table
+	leay	_table,x
+ 565:	19 e2 00 00 	leay	0,X
+			567: R_M68HC12_16	_table
+	leax	_table,y
+ 569:	1a ea 00 00 	leax	0,Y
+			56b: R_M68HC12_16	_table
