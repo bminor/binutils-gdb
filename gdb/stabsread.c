@@ -30,6 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "obstack.h"
 #include "symtab.h"
 #include "gdbtypes.h"
+#include "expression.h"
 #include "symfile.h"
 #include "objfiles.h"
 #include "aout/stab_gnu.h"	/* We always use GNU stabs, not native */
@@ -39,6 +40,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "buildsym.h"
 #include "complaints.h"
 #include "demangle.h"
+#include "language.h"
 
 #include <ctype.h>
 

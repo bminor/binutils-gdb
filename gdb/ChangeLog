@@ -3,6 +3,9 @@ Tue Sep 12 15:46:18 1995  Kung Hsu  <kung@mexican.cygnus.com>
 	* stabsread.c (read_one_struct_field): Add a patch to handle cfront
 	generated stabs that each field is in full mangled name.
 
+	* stabsread.c: To include language.h and expression.h for the reason
+	above.
+	
 	* infcmd.c (attach_command): Add solibs only when
 	auto_solib_add_at_startup is set.
 
