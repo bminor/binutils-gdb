@@ -109,6 +109,8 @@ static void set_initial_language (void);
 
 static void load_command (char *, int);
 
+static void symbol_file_add_main_1 (char *args, int from_tty, int flags);
+
 static void add_symbol_file_command (char *, int);
 
 static void add_shared_symbol_files_command (char *, int);
@@ -896,13 +898,34 @@ symbol_file_add (char *name, int from_tty, struct section_addr_info *addrs,
   return (objfile);
 }
 
-/* Just call the above with default values.
-   Used when the file is supplied in the gdb command line. */
+/* Call symbol_file_add() with default values and update whatever is
+   affected by the loading of a new main().
+   Used when the file is supplied in the gdb command line
+   and by some targets with special loading requirements.
+   The auxiliary function, symbol_file_add_main_1(), has the flags
+   argument for the switches that can only be specified in the symbol_file
+   command itself.  */
    
 void
 symbol_file_add_main (char *args, int from_tty)
 {
-  symbol_file_add (args, from_tty, NULL, 1, 0);
+  symbol_file_add_main_1 (args, from_tty, 0);
+}
+
+static void
+symbol_file_add_main_1 (char *args, int from_tty, int flags)
+{
+  symbol_file_add (args, from_tty, NULL, 1, flags);
+
+#ifdef HPUXHPPA
+  RESET_HP_UX_GLOBALS ();
+#endif
+
+  /* Getting new symbols may change our opinion about
+     what is frameless.  */
+  reinit_frame_cache ();
+
+  set_initial_language ();
 }
 
 void
@@ -979,15 +1002,8 @@ symbol_file_command (char *args, int from_tty)
 	      else
 		{
                   name = *argv;
-		  symbol_file_add (name, from_tty, NULL, 1, flags);
-#ifdef HPUXHPPA
-		  RESET_HP_UX_GLOBALS ();
-#endif
-		  /* Getting new symbols may change our opinion about
-		     what is frameless.  */
-		  reinit_frame_cache ();
 
-		  set_initial_language ();
+		  symbol_file_add_main_1 (name, from_tty, flags);
 		}
 	  argv++;
 	}

@@ -1,3 +1,12 @@
+2001-05-10  Fernando Nasser  <fnasser@redhat.com>
+
+	* symfile.c (symbol_file_add_main_1): New static function. 
+	Passes the flags arguments to  symbol_file_add() and takes care
+	of any necessary reinitializations.
+        (symbol_file_command): Call symbol_file_add_main_1() instead of
+        symbol_file_add().  
+        (symbol_file_add_main): Ditto.
+
 2001-05-09  Kevin Buettner  <kevinb@redhat.com>
 
 	* lin-lwp.c (lin_lwp_pid_to_str): Revert inadvertent format
