@@ -1,5 +1,16 @@
 2004-02-22  Mark Kettenis  <kettenis@gnu.org>
 
+	Remove old 386BSD support.
+	* configure.host: Remove i[34567]86-*-bsd*.
+	* configure.tgt: Remove i[34567]86-*-bsd*.
+	* i386b-nat.c: Removed.
+	* Makefile.in (ALLDEPFILES): Remove i386b-nat.c.
+	* config/i386/i386bsd.mh: Removed.
+	* config/i386/i386bsd.mt: Removed.
+	* config/i386/nm-i386bsd.h: Removed.
+	* config/i386/tm-i386bsd.h: Removed.
+	* config/i386/xm-i386bsd.h: Removed.
+
 	* x86-64-tdep.h (amd64obsd_r_reg_offset): New extern declaration.
 
 	* amd64fbsd-tdep.c: Include "solib-svr4.h".

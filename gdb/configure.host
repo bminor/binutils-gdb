@@ -50,7 +50,6 @@ hppa*-*-hpux11*)	gdb_host=hpux11 ;;
 hppa*-*-hpux*)		gdb_host=hppahpux ;;
 
 i[34567]86-ncr-*)	gdb_host=ncr3000 ;;
-i[34567]86-*-bsd*)	gdb_host=i386bsd ;;
 i[34567]86-*-dgux*)	gdb_host=i386v4 ;;
 i[34567]86-*-freebsd* | i[34567]86-*-kfreebsd*-gnu)
 			gdb_host=fbsd ;;

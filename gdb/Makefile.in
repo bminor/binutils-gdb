@@ -1319,7 +1319,7 @@ ALLDEPFILES = \
 	go32-nat.c h8300-tdep.c \
 	hppa-tdep.c hppa-hpux-tdep.c \
 	hppah-nat.c hpread.c \
-	i386-tdep.c i386b-nat.c i386v-nat.c i386-linux-nat.c \
+	i386-tdep.c i386v-nat.c i386-linux-nat.c \
 	i386v4-nat.c i386ly-tdep.c i386-cygwin-tdep.c \
 	i386bsd-nat.c i386bsd-tdep.c i386fbsd-nat.c i386fbsd-tdep.c \
 	i387-tdep.c \
@@ -1524,19 +1524,19 @@ amd64fbsd-nat.o: amd64fbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(gdb_assert_h) $(gregset_h) $(x86_64_tdep_h) $(amd64_nat_h)
 amd64fbsd-tdep.o: amd64fbsd-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) \
 	$(gdbcore_h) $(regcache_h) $(osabi_h) $(gdb_string_h) \
-	$(x86_64_tdep_h)
+	$(x86_64_tdep_h)  $(solib_svr4_h)
 amd64-nat.o: amd64-nat.c $(defs_h) $(gdbarch_h) $(regcache_h) \
 	$(gdb_assert_h) $(i386_tdep_h) $(x86_64_tdep_h)
 amd64nbsd-nat.o: amd64nbsd-nat.c $(defs_h) $(gdb_assert_h) $(x86_64_tdep_h) \
 	$(amd64_nat_h)
 amd64nbsd-tdep.o: amd64nbsd-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) \
-	$(gdbcore_h) $(osabi_h) $(gdb_assert_h) $(nbsd_tdep_h) \
-	$(x86_64_tdep_h)
+	$(gdbcore_h) $(osabi_h) $(gdb_assert_h) $(x86_64_tdep_h) \
+	$(nbsd_tdep_h) $(solib_svr4_h)
 amd64obsd-nat.o: amd64nbsd-nat.c $(defs_h) $(gdb_assert_h) $(x86_64_tdep_h) \
 	$(amd64_nat_h)
 amd64obsd-tdep.o: amd64nbsd-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) \
 	$(gdbcore_h) $(osabi_h) $(regset_h) $(target_h) $(gdb_assert_h) \
-	$(gdb_string_h) $(x86_64_tdep_h) $(i387_tdep_h)
+	$(gdb_string_h) $(x86_64_tdep_h) $(i387_tdep_h) $(solib_svr4_h)
 annotate.o: annotate.c $(defs_h) $(annotate_h) $(value_h) $(target_h) \
 	$(gdbtypes_h) $(breakpoint_h)
 arch-utils.o: arch-utils.c $(defs_h) $(arch_utils_h) $(buildsym_h) \
@@ -1809,7 +1809,6 @@ hpread.o: hpread.c $(defs_h) $(bfd_h) $(gdb_string_h) $(hp_symtab_h) \
 	$(somsolib_h) $(gdb_assert_h) $(gdb_string_h)
 hpux-thread.o: hpux-thread.c $(defs_h) $(gdbthread_h) $(target_h) \
 	$(inferior_h) $(regcache_h) $(gdb_stat_h) $(gdbcore_h)
-i386b-nat.o: i386b-nat.c $(defs_h)
 i386bsd-nat.o: i386bsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(gdb_assert_h) $(gregset_h) $(i386_tdep_h) $(i387_tdep_h)
 i386bsd-tdep.o: i386bsd-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) \
@@ -1819,7 +1818,7 @@ i386-cygwin-tdep.o: i386-cygwin-tdep.c $(defs_h) $(osabi_h) $(gdb_string_h) \
 i386fbsd-nat.o: i386fbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(i386_tdep_h)
 i386fbsd-tdep.o: i386fbsd-tdep.c $(defs_h) $(arch_utils_h) $(osabi_h) \
-	$(i386_tdep_h) $(i387_tdep_h)
+	$(i386_tdep_h) $(i387_tdep_h) $(solib_svr4_h)
 i386gnu-nat.o: i386gnu-nat.c $(defs_h) $(inferior_h) $(floatformat_h) \
 	$(regcache_h) $(gdb_assert_h) $(i386_tdep_h) $(gnu_nat_h) \
 	$(i387_tdep_h) $(gregset_h)

@@ -77,7 +77,6 @@ hppa*-*-hiux*)		gdb_target=hppahpux ;;
 hppa*-*-*)		gdb_target=hppa ;;
 
 i[34567]86-ncr-*)	gdb_target=ncr3000 ;;
-i[34567]86-*-bsd*)	gdb_target=i386bsd ;;
 i[34567]86-*-netbsd* | i[34567]86-*-knetbsd*-gnu)
 			gdb_target=nbsd ;;
 i[34567]86-*-openbsd*)	gdb_target=obsd ;;
