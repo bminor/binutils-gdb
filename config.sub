@@ -105,7 +105,7 @@ case $basic_machine in
 		basic_machine=$basic_machine-unknown
 		;;
 	# Recognize the basic CPU types with with company name.
-	vax-* | tahoe-* | i386-* | i860-* | m68k-* \
+	vax-* | tahoe-* | i386-* | i486-* | i860-* | m68k-* \
 	      | m680[01234]0-* | m683?2-* | m88k-* \
 	      | sparc-* | ns32k-* | alliant-* | arm-* | c[123]* \
 	      | mips-* | pyramid-* | tron-* | a29k-* | romp-* | rs6000-* \

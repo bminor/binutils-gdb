@@ -1,3 +1,7 @@
+Thu Aug 27 21:59:44 1992  John Gilmore  (gnu@cygnus.com)
+
+	* config.sub:  Accept i486 where i386 ok.
+
 Thu Aug 27 13:04:42 1992  Brendan Kehoe  (brendan@rtl.cygnus.com)
 
 	* config.sub: accept we32k
