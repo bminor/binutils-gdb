@@ -105,10 +105,9 @@ blockframe.c, and plenty more. (I count 634 as of 940621 - sts)
 to get to that spot by accident.  E.g. "n" over execute_command which has
 an error.
 
-Watchpoints seem not entirely reliable, though they haven't failed me recently.
-
-"set zeroprint off", don't bother printing members of structs which are entirely
-zero.  Useful for those big structs with few useful members.
+"set zeroprint off", don't bother printing members of structs which
+are entirely zero.  Useful for those big structs with few useful
+members.
 
 GDB does four ioctl's for every command, probably switching terminal modes
 to/from inferior or for readline or something.
@@ -180,7 +179,9 @@ but not get too snowed if it finds references to the older copy.
 
 Generalize and Standardize the RPC interface to a target program,
 improve it beyond the "ptrace" interface, and see if it can become a
-standard for remote debugging.
+standard for remote debugging.  (This is talking about the vxworks
+interface.  Seems unlikely to me that there will be "a standard" for
+remote debugging anytime soon --kingdon, 8 Nov 1994).
 
 Remove all references to:
 	text_offset

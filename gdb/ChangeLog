@@ -1,4 +1,15 @@
+Tue Nov  8 13:20:14 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* TODO: Remove "Watchpoints seem not entirely reliable, though
+	they haven't failed me recently." item--this old (4.6 at least)
+	item is too vague to be useful (some watchpoint bugs have been
+	fixed since then).
+	* TODO: Add explanation of "RPC interface" item.
+
 Mon Nov  7 22:25:21 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hppa-tdep.c (read_unwind_info): Use "text_offset" for linker
+	stub unwind descriptors too.
 
 	* Enable backtracing from inside a SOM shared library back into
 	user code.
