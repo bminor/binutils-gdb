@@ -368,6 +368,9 @@ case "${target}" in
   *-*-vxworks*)
     noconfigdirs="$noconfigdirs target-newlib"
     ;;
+  *-*-ose)
+    noconfigdirs="$noconfigdirs target-libgloss"
+    ;;
   alpha-dec-osf*)
     # ld works, but does not support shared libraries.  emacs doesn't
     # work.  newlib is not 64 bit ready.  I'm not sure about fileutils or grep.
