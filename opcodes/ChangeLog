@@ -1,5 +1,11 @@
 Tue Oct  8 11:55:35 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* mn10300-opc.c (mn10300_operands): Remove "REGS" operand.
+	Fix various typos.  Add "PAREN" operand.
+	(MEM, MEM2): Define.
+	(mn10300_opcodes): Surround all memory addresses with "PAREN"
+	operands.  Fix several typos.
+
 	* mn10300-opc.c (mn10300_opcodes): Fix typos in yesterday's
 	changes.
 
