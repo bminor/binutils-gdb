@@ -1,4 +1,14 @@
+Thu Jan 13 11:59:22 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gas/all/gas.exp: No longer expect difference of forward
+	references to fail.
+	* gas/all/x930509.s: Fix testcase to match how the expect code was
+	written.
+
 Wed Jan 12 13:41:10 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/reloc/reloc.exp: Fix typo in last change.  Latest test
+	for cross-subspace call bugs is no longer expected to fail.
 
 	* gas/hppa/more.parse/procbug.s: Add test for another bug relating
 	to having a function's label follow the .PROC directive.
