@@ -1,3 +1,9 @@
+2004-02-02  Mark Kettenis  <kettenis@gnu.org>
+
+	* dwarf2-frame.c (dwarf2_frame_cache): Deal with a return address
+	column that's "empty" or "same value" when eliminating REG_RA
+	rules.
+
 2004-02-02  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* breakpoint.h (struct breakpoint): Add new flag, from_tty,

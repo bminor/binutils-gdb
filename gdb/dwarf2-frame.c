@@ -661,14 +661,19 @@ dwarf2_frame_cache (struct frame_info *next_frame, void **this_cache)
       {
 	if (cache->reg[regnum].how == REG_RA)
 	  {
-	    if (fs->retaddr_column < fs->regs.num_regs)
+	    /* It seems rather bizarre to specify an "empty" column as
+               the return adress column.  However, this is exactly
+               what GCC does on some targets.  It turns out that GCC
+               assumes that the return address can be found in the
+               register corresponding to the return address column.
+               Incidentally, that's how should treat a return address
+               column specifying "same value" too.  */
+	    if (fs->retaddr_column < fs->regs.num_regs
+		&& fs->regs.reg[fs->retaddr_column].how != REG_UNSPECIFIED
+		&& fs->regs.reg[fs->retaddr_column].how != REG_SAME_VALUE)
 	      cache->reg[regnum] = fs->regs.reg[fs->retaddr_column];
 	    else
 	      {
-		/* It turns out that GCC assumes that if the return
-                   address column is "empty" the return address can be
-                   found in the register corresponding to the return
-                   address column.  */
 		cache->reg[regnum].loc.reg = fs->retaddr_column;
 		cache->reg[regnum].how = REG_SAVED_REG;
 	      }
