@@ -10,7 +10,7 @@ GENERATE_SHLIB_SCRIPT=yes
 DATA_START_SYMBOLS='__data_start = . ;';
 OTHER_TEXT_SECTIONS='*(.glue_7t) *(.glue_7)'
 OTHER_BSS_SYMBOLS='__bss_start__ = .;'
-OTHER_BSS_END_SYMBOLS='_bss_end__ = . ; __bss_end__ = . ;'
+OTHER_BSS_END_SYMBOLS='_bss_end__ = . ; __bss_end__ = . ; __end__ = . ;'
 
 # This needs to be high enough so that we can load ld.so below it,
 # yet low enough to stay away from the mmap area at 0x40000000.

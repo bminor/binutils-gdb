@@ -1,3 +1,9 @@
+1999-08-25  Philip Blundell  <pb@nexus.co.uk>
+
+	* emulparams/armelf.sh (OTHER_BSS_SYMBOLS): Add __end__.
+	* emulparams/armelf_linux.sh: Likewise.
+	* emulparams/armelf_linux26.sh: Likewise.
+
 1999-08-24  Nick Clifton  <nickc@cygnus.com>
 
 	From a patch submitted by Roland McGrath  <roland@baalperazim.frob.com>
