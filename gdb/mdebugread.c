@@ -788,7 +788,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	  struct blockvector *bv = BLOCKVECTOR (top_stack->cur_st);
 	  /* The next test should normally be true, but provides a
 	     hook for nested functions (which we don't want to make
-	     global). */
+	     global).  */
 	  if (b == BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK))
 	    b = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
 	  /* Irix 5 sometimes has duplicate names for the same
