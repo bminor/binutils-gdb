@@ -177,27 +177,27 @@ int symbol_reloading = SYMBOL_RELOADING_DEFAULT;
 int symbol_reloading = 0;
 #endif
 
-/* If non-zero, then on HP-UX (i.e., platforms that use somsolib.c),
-   this variable is interpreted as a threshhold.  If adding a new
-   library's symbol table to those already known to the debugger would
-   exceed this threshhold, then the shlib's symbols are not added.
-
-   If non-zero on other platforms, shared library symbols will be added
-   automatically when the inferior is created, new libraries are loaded,
-   or when attaching to the inferior.  This is almost always what users
-   will want to have happen; but for very large programs, the startup
-   time will be excessive, and so if this is a problem, the user can
-   clear this flag and then add the shared library symbols as needed.
-   Note that there is a potential for confusion, since if the shared
+/* If non-zero, shared library symbols will be added automatically
+   when the inferior is created, new libraries are loaded, or when
+   attaching to the inferior.  This is almost always what users will
+   want to have happen; but for very large programs, the startup time
+   will be excessive, and so if this is a problem, the user can clear
+   this flag and then add the shared library symbols as needed.  Note
+   that there is a potential for confusion, since if the shared
    library symbols are not loaded, commands like "info fun" will *not*
-   report all the functions that are actually present. 
-
-   Note that HP-UX interprets this variable to mean, "threshhold size
-   in megabytes, where zero means never add".  Other platforms interpret
-   this variable to mean, "always add if non-zero, never add if zero."
- */
+   report all the functions that are actually present. */
 
 int auto_solib_add = 1;
+
+/* For systems that support it, a threshold size in megabytes.  If
+   automatically adding a new library's symbol table to those already
+   known to the debugger would cause the total shared library symbol
+   size to exceed this threshhold, then the shlib's symbols are not
+   added.  The threshold is ignored if the user explicitly asks for a
+   shlib to be added, such as when using the "sharedlibrary"
+   command. */
+
+int auto_solib_limit;
 
 
 /* Since this function is called from within qsort, in an ANSI environment

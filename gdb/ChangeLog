@@ -1,3 +1,39 @@
+2001-10-27  Fred Fish  <fnf@redhat.com>
+
+	* symfile.c (auto_solib_add): Update comment to note that
+	this variable is now just used as a boolean to control shlib
+	autoloading, and clarify when it is used.
+	* symfile.h (auto_solib_add): Ditto.
+
+	* symfile.c (auto_solib_limit): New variable that holds the
+	autoloading threshold instead of overloading auto_solib_add.
+	* symfile.h (auto_solib_limit): Ditto.
+
+	* irix5-nat.c (_initialize_solib): Change auto-solib-add
+	variable from var_zinteger to var_boolean and update help.
+	* osfsolib.c (_initialize_solib): Ditto.
+	* pa64solib.c (_initialize_pa64_solib): Ditto.
+	* solib.c (_initialize_solib): Ditto.
+	* somsolib.c (_initialize_som_solib): Ditto.
+	* xcoffsolib.c (_initialize_solib): Ditto.
+
+	* pa64solib.c (pa64_solib_total_st_size): Update comment to
+	note that the new auto_solib_limit variable is used instead
+	of overloading auto_solib_add variable.
+	(_initialize_pa64_solib): Ditto.
+	* somsolib.c (som_solib_total_st_size): Ditto.
+	(_initialize_som_solib): Ditto.
+
+	* pa64solib.c (_initialize_pa64_solib): Add new set/show
+	commands for auto-solib-limit variable.
+	* somsolib.c (_initialize_som_solib): Ditto
+
+	* pa64solib.c (add_to_solist): Check that auto_solib_add is
+	set and use auto_solib_limit as the threshold size instead
+	of auto_solib_add.
+	* somsolib.c (som_solib_add): Ditto, and also change warning
+	text about size threshold exceeded.
+
 2001-10-21  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/i386/tm-i386v.h: Don't include "regcache.h".

@@ -8965,6 +8965,31 @@ automatically loads the symbols at the time of the @code{shl_load} call.
 @c FIXME...symbols---eg in a break cmd---assuming they are from a shared
 @c FIXME...lib; check this from time to time when updating manual
 
+There are times, however, when you may wish to not automatically load
+symbol definitions from shared libraries, such as when they are
+particularly large or there are many of them.
+
+To control the automatic loading of shared library symbols, use the
+commands:
+
+@table @code
+@kindex set auto-solib-add
+@item set auto-solib-add @var{mode}
+If @var{mode} is @code{on}, symbols from all shared object libraries
+will be loaded automatically when the inferior begins execution, you
+attach to an independently started inferior, or when the dynamic linker
+informs @value{GDBN} that a new library has been loaded.  If @var{mode}
+is @code{off}, symbols must be loaded manually, using the
+@code{sharedlibrary} command.  The default value is @code{on}.
+
+@kindex show auto-solib-add
+@item show auto-solib-add
+Display the current autoloading mode.
+@end table
+
+To explicitly load shared library symbols, use the @code{sharedlibrary}
+command:
+
 @table @code
 @kindex info sharedlibrary
 @kindex info share
@@ -8984,9 +9009,12 @@ required by your program for a core file or after typing @code{run}.  If
 loaded.
 @end table
 
-On HP-UX systems, @value{GDBN} detects the loading of a shared library
-and automatically reads in symbols from the newly loaded library, up to
-a threshold that is initially set but that you can modify if you wish.
+On some systems, such as HP-UX systems, @value{GDBN} supports
+autoloading shared library symbols until a limiting threshold size is
+reached.  This provides the benefit of allowing autoloading to remain on
+by default, but avoids autoloading excessively large shared libraries,
+up to a threshold that is initially set, but which you can modify if you
+wish.
 
 Beyond that threshold, symbols from shared libraries must be explicitly
 loaded.  To load these symbols, use the command @code{sharedlibrary
@@ -8996,18 +9024,18 @@ automatically by @value{GDBN} and need not be specified.
 To display or set the threshold, use the commands:
 
 @table @code
-@kindex set auto-solib-add
-@item set auto-solib-add @var{threshold}
-Set the autoloading size threshold, in megabytes.  If @var{threshold} is
-nonzero, symbols from all shared object libraries will be loaded
-automatically when the inferior begins execution or when the dynamic
-linker informs @value{GDBN} that a new library has been loaded, until
-the symbol table of the program and libraries exceeds this threshold.
+@kindex set auto-solib-limit
+@item set auto-solib-limit @var{threshold}
+Set the autoloading size threshold, in an integral number of megabytes.
+If @var{threshold} is nonzero and shared library autoloading is enabled,
+symbols from all shared object libraries will be loaded until the total
+size of the loaded shared library symbols exceeds this threshold.
 Otherwise, symbols must be loaded manually, using the
-@code{sharedlibrary} command.  The default threshold is 100 megabytes.
+@code{sharedlibrary} command.  The default threshold is 100 (i.e. 100
+Mb).
 
-@kindex show auto-solib-add
-@item show auto-solib-add
+@kindex show auto-solib-limit
+@item show auto-solib-limit
 Display the current autoloading size threshold, in megabytes.
 @end table
 

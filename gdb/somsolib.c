@@ -161,11 +161,10 @@ static struct so_list *so_list_head;
    shared objects on the so_list_head list.  (When we say size, here
    we mean of the information before it is brought into memory and
    potentially expanded by GDB.)  When adding a new shlib, this value
-   is compared against the threshold size, held by auto_solib_add
+   is compared against the threshold size, held by auto_solib_limit
    (in megabytes).  If adding symbols for the new shlib would cause
-   the total size to exceed the threshold, then the new shlib's symbols
-   are not loaded.
- */
+   the total size to exceed the threshold, then the new shlib's
+   symbols are not loaded.  */
 static LONGEST som_solib_total_st_size;
 
 /* When the threshold is reached for any shlib, we refuse to add
@@ -403,7 +402,7 @@ som_solib_load_symbols (struct so_list *so, char *name, int from_tty,
 
 
 /* Add symbols from shared libraries into the symtab list, unless the
-   size threshold (specified by auto_solib_add, in megabytes) would
+   size threshold specified by auto_solib_limit (in megabytes) would
    be exceeded.  */
 
 void
@@ -778,12 +777,13 @@ som_solib_add (char *arg_string, int from_tty, struct target_ops *target)
       st_size = som_solib_sizeof_symbol_table (name);
       som_solib_st_size_threshold_exceeded =
 	!from_tty &&
-	((st_size + som_solib_total_st_size) > (auto_solib_add * (LONGEST) 1000000));
+	auto_solib_add &&
+	((st_size + som_solib_total_st_size) > (auto_solib_limit * (LONGEST) 1000000));
 
       if (som_solib_st_size_threshold_exceeded)
 	{
 	  if (!threshold_warning_given)
-	    warning ("Symbols for some libraries have not been loaded, because\ndoing so would exceed the size threshold specified by auto-solib-add.\nTo manually load symbols, use the 'sharedlibrary' command.\nTo raise the threshold, set auto-solib-add to a larger value and rerun\nthe program.\n");
+	    warning ("Symbols for some libraries have not been loaded, because\ndoing so would exceed the size threshold specified by auto-solib-limit.\nTo manually load symbols, use the 'sharedlibrary' command.\nTo raise the threshold, set auto-solib-limit to a larger value and rerun\nthe program.\n");
 	  threshold_warning_given = 1;
 
 	  /* We'll still make note of this shlib, even if we don't
@@ -1571,28 +1571,37 @@ _initialize_som_solib (void)
 	   "Load shared object library symbols for files matching REGEXP.");
   add_info ("sharedlibrary", som_sharedlibrary_info_command,
 	    "Status of loaded shared object libraries.");
+
   add_show_from_set
-    (add_set_cmd ("auto-solib-add", class_support, var_zinteger,
+    (add_set_cmd ("auto-solib-add", class_support, var_boolean,
 		  (char *) &auto_solib_add,
-		  "Set autoloading size threshold (in megabytes) of shared library symbols.\n\
-If nonzero, symbols from all shared object libraries will be loaded\n\
-automatically when the inferior begins execution or when the dynamic linker\n\
-informs gdb that a new library has been loaded, until the symbol table\n\
-of the program and libraries exceeds this threshold.\n\
-Otherwise, symbols must be loaded manually, using `sharedlibrary'.",
+		  "Set autoloading of shared library symbols.\n\
+If \"on\", symbols from all shared object libraries will be loaded\n\
+automatically when the inferior begins execution, when the dynamic linker\n\
+informs gdb that a new library has been loaded, or when attaching to the\n\
+inferior.  Otherwise, symbols must be loaded manually, using `sharedlibrary'.",
 		  &setlist),
      &showlist);
 
-  /* ??rehrauer: On HP-UX, the kernel parameter MAXDSIZ limits how much
-     data space a process can use.  We ought to be reading MAXDSIZ and
-     setting auto_solib_add to some large fraction of that value.  If
-     not that, we maybe ought to be setting it smaller than the default
-     for MAXDSIZ (that being 64Mb, I believe).  However, [1] this threshold
-     is only crudely approximated rather than actually measured, and [2]
-     50 Mbytes is too small for debugging gdb itself.  Thus, the arbitrary
-     100 figure.
-   */
-  auto_solib_add = 100;		/* Megabytes */
+  add_show_from_set
+    (add_set_cmd ("auto-solib-limit", class_support, var_zinteger,
+		  (char *) &auto_solib_limit,
+		  "Set threshold (in Mb) for autoloading shared library symbols.\n\
+When shared library autoloading is enabled, new libraries will be loaded\n\
+only until the total size of shared library symbols exceeds this\n\
+threshold in megabytes.  Is ignored when using `sharedlibrary'.",
+		  &setlist),
+     &showlist);
+
+  /* ??rehrauer: On HP-UX, the kernel parameter MAXDSIZ limits how
+     much data space a process can use.  We ought to be reading
+     MAXDSIZ and setting auto_solib_limit to some large fraction of
+     that value.  If not that, we maybe ought to be setting it smaller
+     than the default for MAXDSIZ (that being 64Mb, I believe).
+     However, [1] this threshold is only crudely approximated rather
+     than actually measured, and [2] 50 Mbytes is too small for
+     debugging gdb itself.  Thus, the arbitrary 100 figure.  */
+  auto_solib_limit = 100;	/* Megabytes */
 
   som_solib_restart ();
 }

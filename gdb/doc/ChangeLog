@@ -1,3 +1,9 @@
+2001-10-28  Fred Fish  <fnf@redhat.com>
+
+	* gdb.texinfo (auto-solib-add): Change docs to match
+	implementation change.
+	(auto-solib-limit): Add docs for new variable.
+
 2001-10-15  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Function

@@ -218,18 +218,27 @@ extern char *obconcat (struct obstack *obstackp, const char *, const char *,
 
 			/*   Variables   */
 
-/* whether to auto load solibs at startup time:  0/1. 
-
-   On all platforms, 0 means "don't auto load".
-
-   On HP-UX, > 0 means a threshhold, in megabytes, of symbol table which will
-   be auto loaded.  When the cumulative size of solib symbol table exceeds
-   this threshhold, solibs' symbol tables will not be loaded.
-
-   On other platforms, > 0 means, "always auto load".
- */
+/* If non-zero, shared library symbols will be added automatically
+   when the inferior is created, new libraries are loaded, or when
+   attaching to the inferior.  This is almost always what users will
+   want to have happen; but for very large programs, the startup time
+   will be excessive, and so if this is a problem, the user can clear
+   this flag and then add the shared library symbols as needed.  Note
+   that there is a potential for confusion, since if the shared
+   library symbols are not loaded, commands like "info fun" will *not*
+   report all the functions that are actually present. */
 
 extern int auto_solib_add;
+
+/* For systems that support it, a threshold size in megabytes.  If
+   automatically adding a new library's symbol table to those already
+   known to the debugger would cause the total shared library symbol
+   size to exceed this threshhold, then the shlib's symbols are not
+   added.  The threshold is ignored if the user explicitly asks for a
+   shlib to be added, such as when using the "sharedlibrary"
+   command. */
+
+extern int auto_solib_limit;
 
 /* From symfile.c */
 
