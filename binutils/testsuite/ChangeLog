@@ -1,3 +1,20 @@
+2000-11-02  Chris Demetriou  <cgd@sibyte.com>
+
+        * binutils-all/readelf.exp (regexp_diff): Add code
+        from gas testsuite to treat "#..." at beginning of line
+        as an indicator to skip extra non-matching lines at that
+        location.
+        (readelf_test): Add support for using a machine-specific
+        regexp comparison file.
+        (readelf -S test, readelf -s test): Remove v850*-*-* and
+        mips*-*-* from list of expected failures.
+        * binutils-all/readelf.s: Accomodate changes due to
+        additional sections (and therefore section numbering
+        differences) on v850*-*-* and mips*-*-* targets.
+        * binutils-all/readelf.ss: Likewise.
+        * binutils-all/readelf.ss-mips: New file, which matches
+        expected output of readelf -s test for mips*-*-*.
+
 2000-10-25  Hans-Peter Nilsson  <hp@axis.com>
 
 	* binutils-all/readelf.exp (-wi test): Add cris-*-* to xfails.

@@ -76,6 +76,20 @@ proc regexp_diff { file_1 file_2 } {
 		set end_2 1
 		set diff_pass 1
 		break
+	    } elseif [ string match "#..." $line_b ] {
+		if { [gets $file_b line_b] == $eof } {
+		    set end_2 1
+		    break
+		}
+		verbose "looking for \"^$line_b$\"" 3
+		while { ![regexp "^$line_b$" "$line_a"] } {
+		    verbose "skipping    \"$line_a\"" 3
+		    if { [gets $file_a line_a] == $eof } {
+			set end_1 1
+			break
+		    }
+		}
+		break
 	    }
 	    if { [gets $file_b line_b] == $eof } {
 		set end_2 1
@@ -176,7 +190,16 @@ proc readelf_test { options binary_file regexp_file xfails } {
 	return
     }
 
-    if { [file exists $srcdir/$subdir/$regexp_file-$readelf_size] } then {
+    set target_machine ""
+    if [istarget "mips*-*-*"] then {
+      set target_machine mips
+    }
+
+    if { $target_machine != "" && [file exists $srcdir/$subdir/$regexp_file-$readelf_size-$target_machine] } then {
+	set regexp_file $regexp_file-$readelf_size-$target_machine
+    } elseif { $target_machine != "" && [file exists $srcdir/$subdir/$regexp_file-$target_machine] } then {
+	set regexp_file $regexp_file-$target_machine
+    } elseif { [file exists $srcdir/$subdir/$regexp_file-$readelf_size] } then {
 	set regexp_file $regexp_file-$readelf_size
     }
 
@@ -227,15 +250,8 @@ readelf_find_size $tempfile
 
 # Run the tests.
 readelf_test -h $tempfile readelf.h  {}
-
-# The v850 fails the next two tests because it creates two special
-# sections of its own: .call_table_data and .call_table_text
-# The regexp scripts are not expecting these sections...
-# MIPS targets fail because they add .rela.txt (empty), .mdebug,
-# and .reginfo sections.
-
-readelf_test -S $tempfile readelf.s  {v850*-*-* mips*-*-*}
-readelf_test -s $tempfile readelf.ss {v850*-*-* mips*-*-*}
+readelf_test -S $tempfile readelf.s  {}
+readelf_test -s $tempfile readelf.ss {}
 readelf_test -r $tempfile readelf.r  {}
 
 
