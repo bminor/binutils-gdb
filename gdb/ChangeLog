@@ -1,3 +1,8 @@
+2000-10-26  Kevin Buettner  <kevinb@redhat.com>
+
+	* sun3-nat.c (fetch_core_registers): Protoize.
+	* symm-nat.c (print_1167_regs, child_xfer_memory): Protoize.
+
 2000-10-26  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* stabsread.c (define_symbol): Update comment.
