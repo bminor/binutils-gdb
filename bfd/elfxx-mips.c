@@ -745,9 +745,6 @@ ecoff_swap_rpdr_out (bfd *abfd, const RPDR *in, struct rpdr_ext *ex)
   H_PUT_16 (abfd, in->pcreg, ex->p_pcreg);
 
   H_PUT_32 (abfd, in->irpss, ex->p_irpss);
-#if 0 /* FIXME */
-  H_PUT_S32 (abfd, in->exception_info, ex->p_exception_info);
-#endif
 }
 
 /* Create a runtime procedure table from the .mdebug section.  */
@@ -1691,9 +1688,6 @@ mips_elf_output_extsym (struct mips_elf_link_hash_entry *h, void *data)
 	      else
 		h->esym.asym.value = 0;
 	    }
-#if 0 /* FIXME?  */
-	  h->esym.ifd = 0;
-#endif
 	}
     }
 
@@ -3810,30 +3804,6 @@ mips_elf_create_dynamic_relocation (bfd *output_bfd,
     _bfd_elf_section_offset (output_bfd, info, input_section, rel[1].r_offset);
   outrel[2].r_offset =
     _bfd_elf_section_offset (output_bfd, info, input_section, rel[2].r_offset);
-
-#if 0
-  /* We begin by assuming that the offset for the dynamic relocation
-     is the same as for the original relocation.  We'll adjust this
-     later to reflect the correct output offsets.  */
-  if (input_section->sec_info_type != ELF_INFO_TYPE_STABS)
-    {
-      outrel[1].r_offset = rel[1].r_offset;
-      outrel[2].r_offset = rel[2].r_offset;
-    }
-  else
-    {
-      /* Except that in a stab section things are more complex.
-	 Because we compress stab information, the offset given in the
-	 relocation may not be the one we want; we must let the stabs
-	 machinery tell us the offset.  */
-      outrel[1].r_offset = outrel[0].r_offset;
-      outrel[2].r_offset = outrel[0].r_offset;
-      /* If we didn't need the relocation at all, this value will be
-	 -1.  */
-      if (outrel[0].r_offset == MINUS_ONE)
-	skip = TRUE;
-    }
-#endif
 
   if (outrel[0].r_offset == MINUS_ONE)
     /* The relocation field has been deleted.  */
@@ -6147,22 +6117,6 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
       if (! MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_MIPS_FLAGS, 0))
 	return FALSE;
 
-#if 0
-      /* Time stamps in executable files are a bad idea.  */
-      if (! MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_MIPS_TIME_STAMP, 0))
-	return FALSE;
-#endif
-
-#if 0 /* FIXME  */
-      if (! MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_MIPS_ICHECKSUM, 0))
-	return FALSE;
-#endif
-
-#if 0 /* FIXME  */
-      if (! MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_MIPS_IVERSION, 0))
-	return FALSE;
-#endif
-
       if (! MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_MIPS_BASE_ADDRESS, 0))
 	return FALSE;
 
@@ -8236,47 +8190,6 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		     - g->global_gotsym->dynindx)
 		    <= g->global_gotno);
     }
-
-#if 0
-  /* We want to set the GP value for ld -r.  */
-  /* On IRIX5, we omit the .options section.  On IRIX6, however, we
-     include it, even though we don't process it quite right.  (Some
-     entries are supposed to be merged.)  Empirically, we seem to be
-     better off including it then not.  */
-  if (IRIX_COMPAT (abfd) == ict_irix5 || IRIX_COMPAT (abfd) == ict_none)
-    for (secpp = &abfd->sections; *secpp != NULL; secpp = &(*secpp)->next)
-      {
-	if (strcmp ((*secpp)->name, MIPS_ELF_OPTIONS_SECTION_NAME (abfd)) == 0)
-	  {
-	    for (p = (*secpp)->link_order_head; p != NULL; p = p->next)
-	      if (p->type == bfd_indirect_link_order)
-		p->u.indirect.section->flags &= ~SEC_HAS_CONTENTS;
-	    (*secpp)->link_order_head = NULL;
-	    bfd_section_list_remove (abfd, secpp);
-	    --abfd->section_count;
-
-	    break;
-	  }
-      }
-
-  /* We include .MIPS.options, even though we don't process it quite right.
-     (Some entries are supposed to be merged.)  At IRIX6 empirically we seem
-     to be better off including it than not.  */
-  for (secpp = &abfd->sections; *secpp != NULL; secpp = &(*secpp)->next)
-    {
-      if (strcmp ((*secpp)->name, ".MIPS.options") == 0)
-	{
-	  for (p = (*secpp)->link_order_head; p != NULL; p = p->next)
-	    if (p->type == bfd_indirect_link_order)
-	      p->u.indirect.section->flags &=~ SEC_HAS_CONTENTS;
-	  (*secpp)->link_order_head = NULL;
-	  bfd_section_list_remove (abfd, secpp);
-	  --abfd->section_count;
-
-	  break;
-	}
-    }
-#endif
 
   /* Get a value for the GP register.  */
   if (elf_gp (abfd) == 0)
