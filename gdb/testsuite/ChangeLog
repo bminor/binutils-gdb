@@ -1,3 +1,7 @@
+Thu Jul 15 11:54:58 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t15/funcargs.exp (localvars_in_indirect_call): New test.
+
 Wed Jul 14 09:36:42 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.t16/printcmds.exp: Add another printf test.
