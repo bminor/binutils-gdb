@@ -348,7 +348,7 @@ static void
 debug (int level, const char *format, ...)
 {
   /* Just to get rid of warnings.  */
-  format = level = 0;
+  format = (char *) level = 0;
 }
 #endif
 
@@ -411,7 +411,8 @@ letter_range (l)
 int
 insn_index (char *insn)
 {
-  int i, found = -1;
+  unsigned int i;
+  int found = -1;
 
   for (i = 0; i < or32_num_opcodes; i++)
     if (!strcmp (or32_opcodes[i].name, insn))
@@ -426,7 +427,7 @@ const char *
 insn_name (index)
      int index;
 {
-  if (index >= 0 && index < or32_num_opcodes)
+  if (index >= 0 && index < (int) or32_num_opcodes)
     return or32_opcodes[index].name;
   else
     return "???";
@@ -507,7 +508,9 @@ cover_insn (cur, pass, mask)
      int pass;
      unsigned int mask;
 {
-  int best_first = 0, best_len = 0, i, last_match = -1, ninstr = 0;
+  int best_first = 0, last_match = -1, ninstr = 0;
+  unsigned int best_len = 0;
+  unsigned int i;
   unsigned long cur_mask = mask;
   unsigned long *next;
 
@@ -539,7 +542,7 @@ cover_insn (cur, pass, mask)
       /* Find longest match.  */
       for (i = 0; i < 32; i++)
 	{
-	  int len;
+	  unsigned int len;
 
 	  for (len = best_len + 1; len < MIN (MAX_LEN, 33 - i); len++)
 	    {
@@ -587,9 +590,9 @@ cover_insn (cur, pass, mask)
       cur += 1 << best_len;
       cur_mask = (1 << (unsigned long)best_len) - 1;
       
-      for (i = 0; i < (1 << (unsigned long)best_len); i++)
+      for (i = 0; i < ((unsigned) 1 << best_len); i++)
 	{
-	  int j;
+	  unsigned int j;
 	  unsigned long *c;
 
 	  curpass++;
@@ -755,7 +758,7 @@ parse_params (opcode, cur)
 void
 build_automata ()
 {
-  int i;
+  unsigned int i;
   unsigned long *end;
   struct insn_op_struct *cur;
   

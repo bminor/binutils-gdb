@@ -25,8 +25,9 @@
 #include "opcode/or32.h"
 #include "safe-ctype.h"
 #include <string.h>
+#include <stdlib.h>
 
-#define EXTEND29(x) ((x) & 0x10000000 ? ((x) | 0xf0000000) : ((x)))
+#define EXTEND29(x) ((x) & (unsigned long) 0x10000000 ? ((x) | (unsigned long) 0xf0000000) : ((x)))
 
 static void          find_bytes_big       PARAMS ((unsigned char *, unsigned long *));
 static void          find_bytes_little    PARAMS ((unsigned char *, unsigned long *));
@@ -81,10 +82,12 @@ or32_extract (param_ch, enc_initial, insn)
 
   for (enc = enc_initial; *enc != '\0'; enc++)
     if (*enc == param_ch)
-      if (enc - 2 >= enc_initial && (*(enc - 2) == '0') && (*(enc - 1) == 'x'))
-	continue;
-      else
-	param_pos++;
+      {
+	if (enc - 2 >= enc_initial && (*(enc - 2) == '0') && (*(enc - 1) == 'x'))
+	  continue;
+	else
+	  param_pos++;
+      }
 
 #if DEBUG
   printf ("or32_extract: %c %x ", param_ch, param_pos);
@@ -98,7 +101,7 @@ or32_extract (param_ch, enc_initial, insn)
 
 	if ((param_ch == '0') || (param_ch == '1'))
 	  {
-	    unsigned long tmp = strtol (enc, NULL, 16);
+	    unsigned long tmp = strtoul (enc, NULL, 16);
 #if DEBUG
 	    printf (" enc=%s, tmp=%x ", enc, tmp);
 #endif
@@ -126,7 +129,7 @@ or32_extract (param_ch, enc_initial, insn)
 
 	if (!param_pos
 	    && letter_signed (param_ch)
-	    && ret >> letter_range (param_ch) - 1)
+	    && ret >> (letter_range (param_ch) - 1))
 	  {
 #if DEBUG
 	    printf ("\n  ret=%x opc_pos=%x, param_pos=%x\n",
@@ -254,7 +257,7 @@ print_insn (memaddr, info)
   /* The raw instruction.  */
   unsigned char insn_ch[4];
   /* Address. Will be sign extened 27-bit.  */
-  int addr;
+  unsigned long addr;
   /* The four bytes of the instruction.  */
   unsigned long insn;
   find_byte_func_type find_byte_func = (find_byte_func_type)info->private_data;

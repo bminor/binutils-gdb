@@ -1,3 +1,7 @@
+2002-02-08  Ivan Guzvinec <ivang@opencores.org>
+
+	* coff-or32.c: Fix compile time warning messages.
+
 2002-02-08  Alexandre Oliva  <aoliva@redhat.com>
 
 	Contribute sh64-elf.

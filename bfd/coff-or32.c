@@ -28,9 +28,10 @@
 #include "libcoff.h"
 
 static long                   get_symbol_value           PARAMS ((asymbol *));
-static bfd_reloc_status_type  or1_reloc                  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
-static boolean                coff_or1_relocate_section  PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *, struct internal_reloc *, struct internal_syment *, asection **));
-static boolean                coff_or1_adjust_symndx     PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, struct internal_reloc *, boolean *));
+static bfd_reloc_status_type  or32_reloc                 PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+static boolean                coff_or32_relocate_section PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *, struct internal_reloc *, struct internal_syment *, asection **));
+static boolean                coff_or32_adjust_symndx    PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, struct internal_reloc *, boolean *));
+static void                   reloc_processing           PARAMS ((arelent *, struct internal_reloc *, asymbol **, bfd *, asection *));
 
 #define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (2)
 
@@ -249,9 +250,29 @@ or32_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
 static reloc_howto_type howto_table[] = 
 {
   { R_ABS,      0, 3, 32, false,  0, complain_overflow_bitfield,  or32_reloc, "ABS",     true, 0xffffffff,0xffffffff, false },
-  {1},  {2},  {3},   {4},  {5},  {6},  {7},  {8},  {9}, {10},
-  {11}, {12}, {13}, {14}, {15}, {16}, {17}, {18}, {19}, {20},
-  {21}, {22}, {23},
+    EMPTY_HOWTO (1),
+    EMPTY_HOWTO (2),
+    EMPTY_HOWTO (3),
+    EMPTY_HOWTO (4),
+    EMPTY_HOWTO (5),
+    EMPTY_HOWTO (6),
+    EMPTY_HOWTO (7),
+    EMPTY_HOWTO (8),
+    EMPTY_HOWTO (9),
+    EMPTY_HOWTO (10),
+    EMPTY_HOWTO (11),
+    EMPTY_HOWTO (12),
+    EMPTY_HOWTO (13),
+    EMPTY_HOWTO (14),
+    EMPTY_HOWTO (15),
+    EMPTY_HOWTO (16),
+    EMPTY_HOWTO (17),
+    EMPTY_HOWTO (18),
+    EMPTY_HOWTO (19),
+    EMPTY_HOWTO (20),
+    EMPTY_HOWTO (21),
+    EMPTY_HOWTO (22),
+    EMPTY_HOWTO (23),
   { R_IREL,     0, 3, 32, true,   0, complain_overflow_signed,    or32_reloc, "IREL",    true, 0xffffffff,0xffffffff, false },
   { R_IABS,     0, 3, 32, false,  0, complain_overflow_bitfield,  or32_reloc, "IABS",    true, 0xffffffff,0xffffffff, false },
   { R_ILOHALF,  0, 3, 16, true,   0, complain_overflow_signed,    or32_reloc, "ILOHALF", true, 0x0000ffff,0x0000ffff, false },
@@ -318,7 +339,7 @@ reloc_processing (relent,reloc, symbols, abfd, section)
 static boolean
 coff_or32_relocate_section (output_bfd, info, input_bfd, input_section,
                             contents, relocs, syms, sections)
-     bfd *output_bfd;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;
      bfd *input_bfd;
      asection *input_section;

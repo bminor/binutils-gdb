@@ -1,3 +1,7 @@
+2002-02-08  Ivan Guzvinec <ivang@opencores.org>
+
+	* configure.tgt: Add or32-*-rtems target.
+
 2002-02-08  Alexandre Oliva  <aoliva@redhat.com>
 
 	Contribute sh64-elf.
