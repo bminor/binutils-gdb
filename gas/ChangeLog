@@ -2,7 +2,7 @@ Tue Aug 26 12:23:25 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-i386.c (md_assemble): In JumpByte case, when looking
 	for a WORD_PREFIX_OPCODE, change it to ADDR_PREFIX_OPCODE if this
-	is jcxz.
+	is jcxz or a loop instruction.
 
 start-sanitize-v850
 Mon Aug 25 16:04:14 1997  Nick Clifton  <nickc@cygnus.com>

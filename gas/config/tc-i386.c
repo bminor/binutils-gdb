@@ -1737,11 +1737,17 @@ md_assemble (line)
 		   ADDR_PREFIX_OPCODE.  This is a hack, but, then, so
 		   is the instruction itself.
 
+		   If an explicit suffix is used for the loop
+		   instruction, that actually controls whether we use
+		   cx vs. ecx.  This is also controlled by
+		   ADDR_PREFIX_OPCODE.
+
 		   I don't know if there is any valid case in which we
 		   want to emit WORD_PREFIX_OPCODE, but I am keeping
 		   the old behaviour for safety.  */
 
-		if (IS_JUMP_ON_CX_ZERO (t->base_opcode))
+		if (IS_JUMP_ON_CX_ZERO (t->base_opcode)
+		    || IS_LOOP_ECX_TIMES (t->base_opcode))
 		  FRAG_APPEND_1_CHAR (ADDR_PREFIX_OPCODE);
 		else
 		  FRAG_APPEND_1_CHAR (WORD_PREFIX_OPCODE);
