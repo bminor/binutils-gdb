@@ -1,3 +1,16 @@
+2000-02-09  Mark Kettenis  <kettenis@gnu.org>
+
+	* gnu-nat.c (proc_string): Make global.
+	(do_mach_notify_dead_name): Suppress dead name notifications if we
+	know that the task is dead.
+
+1999-12-13  Mark Kettenis  <kettenis@gnu.org>
+
+	* gnu-nat.c (inf_validate_task_sc): Get task info via proc server
+	instead of directly from the kernel.  Add some hackery to make
+	sure that the info isn't influenced by suspension of the task in
+	the proc server itself.
+
 2000-02-10  Jim Kingdon  <kingdon@redhat.com>
 
 	* defs.h (MERGEPID): Added.  Patch submitted by Andrew Hobson and

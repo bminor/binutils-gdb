@@ -1,5 +1,5 @@
 /* Interface GDB to the GNU Hurd.
-   Copyright (C) 1992, 1995, 1996, 1997, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1992, 95, 96, 97, 1999, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -31,11 +31,6 @@
 #include <setjmp.h>
 #include <limits.h>
 #include <sys/ptrace.h>
-
-/* We include this because we don't need the access macros and they conflict
-   with gdb's definitions (ick).  This is very non standard!  */
-#define _SYS_WAIT_H		/* Inhibit warning from <bits/waitflags.h>.  */
-#include <bits/waitflags.h>
 
 #include <mach.h>
 #include <mach/message.h>
@@ -794,32 +789,58 @@ inf_validate_procinfo (struct inf *inf)
     }
 }
 
-/* Validates INF's task suspend count.  If it's higher than we expect, verify
-   with the user before `stealing' the extra count.  */
+/* Validates INF's task suspend count.  If it's higher than we expect,
+   verify with the user before `stealing' the extra count.  */
 static void
 inf_validate_task_sc (struct inf *inf)
 {
-  struct task_basic_info info;
-  mach_msg_type_number_t info_len = TASK_BASIC_INFO_COUNT;
-  error_t err =
-  task_info (inf->task->port, TASK_BASIC_INFO, (task_info_t) & info, &info_len);
+  char *noise;
+  mach_msg_type_number_t noise_len = 0;
+  struct procinfo *pi;
+  mach_msg_type_number_t pi_len = 0;
+  int info_flags = PI_FETCH_TASKINFO;
+  int suspend_count = -1;
+  error_t err;
 
+ retry:
+  err = proc_getprocinfo (proc_server, inf->pid, &info_flags,
+			  &pi, &pi_len, &noise, &noise_len);
   if (err)
-    inf->task->dead = 1;	/* oh well */
-  else if (inf->task->cur_sc < info.suspend_count)
+    {
+      inf->task->dead = 1; /* oh well */
+      return;
+    }
+
+  if (inf->task->cur_sc < pi->taskinfo.suspend_count && suspend_count == -1)
+    {
+      /* The proc server might have suspended the task while stopping
+         it.  This happens when the task is handling a traced signal.
+         Refetch the suspend count.  The proc server should be
+         finished stopping the task by now.  */
+      suspend_count = pi->taskinfo.suspend_count;
+      goto retry;
+    }
+
+  suspend_count = pi->taskinfo.suspend_count;
+
+  vm_deallocate (mach_task_self (), (vm_address_t) pi, pi_len);
+  if (noise_len > 0)
+    vm_deallocate (mach_task_self (), (vm_address_t) pi, pi_len);
+
+  if (inf->task->cur_sc < suspend_count)
     {
       int abort;
 
       target_terminal_ours ();	/* Allow I/O.  */
-      abort =
-	!query ("Pid %d has an additional task suspend count of %d; clear it? ",
-		inf->pid, info.suspend_count - inf->task->cur_sc);
+      abort = !query ("Pid %d has an additional task suspend count of %d;"
+		      " clear it? ", inf->pid,
+		      suspend_count - inf->task->cur_sc);
       target_terminal_inferior ();	/* Give it back to the child.  */
 
       if (abort)
 	error ("Additional task suspend count left untouched.");
 
-      inf->task->cur_sc = info.suspend_count;
+      inf->task->cur_sc = suspend_count;
     }
 }
 
@@ -1665,6 +1686,10 @@ do_mach_notify_dead_name (mach_port_t notify, mach_port_t dead_port)
 	  proc_debug (thread, "is dead");
 	  thread->port = MACH_PORT_NULL;
 	}
+
+      if (inf->task->dead)
+	/* Since the task is dead, its threads are dying with it.  */
+	inf->wait.suppress = 1;
     }
 
   mach_port_deallocate (mach_task_self (), dead_port);
@@ -2413,7 +2438,7 @@ gnu_xfer_memory (memaddr, myaddr, len, write, target)
 }
 
 /* Return printable description of proc.  */
-static char *
+char *
 proc_string (struct proc *proc)
 {
   static char tid_str[80];
