@@ -1,5 +1,9 @@
 Sun May  2 11:39:44 1993  Fred Fish  (fnf@cygnus.com)
 
+	* trad-core.c (NO_SIGNED_GET):  New macro.
+	* trad-core.c (trad_core_vec):  Use new NO_SIGNED_GET instead of
+	signed NO_GET, where appropriate.
+
 	* configure.in (i[34]86-*-linux*):  Add; bfd_target = i386-linux.
 	* configure.in (*-*-linux*):  Remove until linux port for a
 	non-i386/i486 system is actually available.
