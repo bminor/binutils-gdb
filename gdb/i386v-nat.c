@@ -46,19 +46,8 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 
-
-/* FIXME: 1998-10-21/jsm: The following used to be just "#include
-   <sys/debugreg.h>", but the the Linux kernel (version 2.1.x) and
-   glibc 2.0.x are not in sync; including <sys/debugreg.h> will result
-   in an error.  With luck, these losers will get their act together
-   and we can trash this hack in the near future.  */
-
 #ifdef TARGET_HAS_HARDWARE_WATCHPOINTS
-#ifdef HAVE_ASM_DEBUGREG_H
-#include <asm/debugreg.h>
-#else
 #include <sys/debugreg.h>
-#endif
 #endif
 
 #include <sys/file.h>

@@ -1368,10 +1368,30 @@ _bfd_strip_section_from_output (info, s)
 	if (*spp == os)
 	  {
 	    bfd_section_list_remove (os->owner, spp);
+	    os->flags |= SEC_EXCLUDE;
 	    os->owner->section_count--;
 	    break;
 	  }
     }
 
   s->flags |= SEC_EXCLUDE;
+}
+
+/*
+FUNCTION
+	bfd_generic_discard_group
+
+SYNOPSIS
+	boolean bfd_generic_discard_group (bfd *abfd, asection *group);
+
+DESCRIPTION
+	Remove all members of @var{group} from the output.
+*/
+
+boolean
+bfd_generic_discard_group (abfd, group)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *group ATTRIBUTE_UNUSED;
+{
+  return true;
 }

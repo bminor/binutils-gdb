@@ -96,7 +96,7 @@
 #define PARPORT2   "/dev/par1"
 #endif
 
-#if defined(_WIN32) || defined (__CYGWIN32__) 
+#if defined(_WIN32) || defined (__CYGWIN__) 
 #define SERIAL_PREFIX "com"
 #define SERPORT1   "com1"
 #define SERPORT2   "com2"
@@ -248,7 +248,7 @@ extern int Unix_IsSerialInUse(void)
 
 extern int Unix_OpenSerial(const char *name)
 {
-#if defined(BSD) || defined(__CYGWIN32__)
+#if defined(BSD) || defined(__CYGWIN__)
     serpfd = open(name, O_RDWR);
 #else
     serpfd = open(name, O_RDWR | O_NONBLOCK);

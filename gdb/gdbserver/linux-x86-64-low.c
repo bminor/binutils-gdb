@@ -71,10 +71,12 @@ x86_64_store_fpregset (void *buf)
 
 struct regset_info target_regsets[] = {
   { PTRACE_GETREGS, PTRACE_SETREGS, sizeof (elf_gregset_t),
+    GENERAL_REGS,
     x86_64_fill_gregset, x86_64_store_gregset },
   { PTRACE_GETFPREGS, PTRACE_SETFPREGS, sizeof (elf_fpregset_t),
+    FP_REGS,
     x86_64_fill_fpregset, x86_64_store_fpregset },
-  { 0, 0, -1, NULL, NULL }
+  { 0, 0, -1, -1, NULL, NULL }
 };
 
 struct linux_target_ops the_low_target = {

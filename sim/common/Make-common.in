@@ -248,6 +248,9 @@ LIB_OBJS = callback.o syscall.o targ-map.o $(SIM_OBJS)
 
 RUNTESTFLAGS =
 
+callback_h = $(srcroot)/include/gdb/callback.h
+remote_sim_h = $(srcroot)/include/gdb/remote-sim.h
+
 all: $(SIM_EXTRA_ALL) libsim.a run .gdbinit
 
 libsim.a: $(LIB_OBJS)
@@ -259,8 +262,7 @@ run: $(SIM_RUN_OBJS) libsim.a $(LIBDEPS)
 	$(CC) $(ALL_CFLAGS) -o run$(EXEEXT) \
 	  $(SIM_RUN_OBJS) libsim.a $(EXTRA_LIBS)
 
-run.o: $(srccom)/run.c config.h tconfig.h \
-	  $(srcroot)/include/remote-sim.h $(srcroot)/include/callback.h
+run.o: $(srccom)/run.c config.h tconfig.h $(remote_sim_h) $(callback_h)
 	$(CC) -c $(srccom)/run.c $(ALL_CFLAGS)
 
 # FIXME: Ideally, callback.o and friends live in a library outside of
@@ -268,12 +270,10 @@ run.o: $(srccom)/run.c config.h tconfig.h \
 # devo/libremote because this directory would contain more than just
 # a library).
 
-callback.o: $(srccom)/callback.c config.h tconfig.h \
-	  $(srcroot)/include/callback.h targ-vals.h
+callback.o: $(srccom)/callback.c config.h tconfig.h $(callback_h) targ-vals.h
 	$(CC) -c $(srccom)/callback.c $(ALL_CFLAGS)
 
-syscall.o: $(srccom)/syscall.c config.h tconfig.h \
-	  $(srcroot)/include/callback.h targ-vals.h
+syscall.o: $(srccom)/syscall.c config.h tconfig.h $(callback_h) targ-vals.h
 	$(CC) -c $(srccom)/syscall.c $(ALL_CFLAGS)
 
 targ-map.o: targ-map.c targ-vals.h
@@ -399,21 +399,18 @@ sim-fpu.o: $(srccom)/sim-fpu.c $(sim-fpu_h) \
 	  $(SIM_EXTRA_DEPS)
 	$(CC) -c $(srccom)/sim-fpu.c $(ALL_CFLAGS)
 
-sim-hload.o: $(srccom)/sim-hload.c $(sim-assert_h) \
-	  $(srcroot)/include/remote-sim.h \
+sim-hload.o: $(srccom)/sim-hload.c $(sim-assert_h) $(remote_sim_h) \
 	  $(SIM_EXTRA_DEPS)
 	$(CC) -c $(srccom)/sim-hload.c $(ALL_CFLAGS)
 
-sim-hrw.o: $(srccom)/sim-hrw.c $(sim-assert_h) $(sim_core_h) \
-	  $(srcroot)/include/remote-sim.h \
+sim-hrw.o: $(srccom)/sim-hrw.c $(sim-assert_h) $(sim_core_h) $(remote_sim_h) \
 	  $(SIM_EXTRA_DEPS)
 	$(CC) -c $(srccom)/sim-hrw.c $(ALL_CFLAGS)
 
 sim-hw.o: $(srccom)/sim-hw.c $(sim_main_headers)
 	$(CC) -c $(srccom)/sim-hw.c $(ALL_CFLAGS)
 
-sim-info.o: $(srccom)/sim-info.c $(sim-assert_h) \
-	  $(srcroot)/include/remote-sim.h \
+sim-info.o: $(srccom)/sim-info.c $(sim-assert_h) $(remote_sim_h) \
 	  $(SIM_EXTRA_DEPS)
 	$(CC) -c $(srccom)/sim-info.c $(ALL_CFLAGS)
 
@@ -423,8 +420,8 @@ sim-inline.c: $(srccom)/sim-inline.c
 	cat $(srccom)/$@ >> tmp-$@
 	$(SHELL) $(srcdir)/../../move-if-change tmp-$@ $@
 
-sim-io.o: $(srccom)/sim-io.c $(sim_main_headers) $(sim-io_h) \
-	  $(srcroot)/include/remote-sim.h targ-vals.h
+sim-io.o: $(srccom)/sim-io.c $(sim_main_headers) $(sim-io_h) $(remote_sim_h) \
+	  targ-vals.h
 	$(CC) -c $(srccom)/sim-io.c $(ALL_CFLAGS)
 
 sim-memopt.o: $(srccom)/sim-memopt.c $(sim_main_headers) \
@@ -439,16 +436,13 @@ sim-options.o: $(srccom)/sim-options.c $(sim_main_headers) \
 	  $(sim-options_h) $(sim-io_h)
 	$(CC) -c $(srccom)/sim-options.c $(ALL_CFLAGS)
 
-sim-reason.o: $(srccom)/sim-reason.c $(sim_main_headers) \
-	  $(srcroot)/include/remote-sim.h
+sim-reason.o: $(srccom)/sim-reason.c $(sim_main_headers) $(remote_sim_h)
 	$(CC) -c $(srccom)/sim-reason.c $(ALL_CFLAGS)
 
-sim-reg.o: $(srccom)/sim-reg.c $(sim_main_headers) \
-	  $(srcroot)/include/remote-sim.h
+sim-reg.o: $(srccom)/sim-reg.c $(sim_main_headers) $(remote_sim_h)
 	$(CC) -c $(srccom)/sim-reg.c $(ALL_CFLAGS)
 
-sim-resume.o: $(srccom)/sim-resume.c $(sim_main_headers) \
-	  $(srcroot)/include/remote-sim.h
+sim-resume.o: $(srccom)/sim-resume.c $(sim_main_headers) $(remote_sim_h)
 	$(CC) -c $(srccom)/sim-resume.c $(ALL_CFLAGS)
 
 sim-run.o: $(srccom)/sim-run.c $(sim_main_headers)
@@ -478,7 +472,7 @@ sim-utils.o: $(srccom)/sim-utils.c $(sim_main_headers)
 sim-watch.o: $(srccom)/sim-watch.c $(sim_main_headers)
 	$(CC) -c $(srccom)/sim-watch.c $(ALL_CFLAGS)
 
-sim-load.o: $(srccom)/sim-load.c $(srcroot)/include/callback.h
+sim-load.o: $(srccom)/sim-load.c $(callback_h)
 	$(CC) -c $(srccom)/sim-load.c $(ALL_CFLAGS)
 
 sim-break.o: $(srccom)/sim-break.c $(sim_main_headers) \
@@ -547,8 +541,7 @@ dv-sockser.o: $(srccom)/dv-sockser.h $(sim_main_headers)
 	$(CC) -c $(srccom)/dv-sockser.c $(ALL_CFLAGS)
 
 
-nrun.o: $(srccom)/nrun.c config.h tconfig.h \
-	  $(srcroot)/include/remote-sim.h $(srcroot)/include/callback.h \
+nrun.o: $(srccom)/nrun.c config.h tconfig.h $(remote_sim_h) $(callback_h) \
 	  $(sim_main_headers)
 	$(CC) -c $(srccom)/nrun.c $(ALL_CFLAGS)
 
@@ -685,7 +678,7 @@ cgen-arch: force
 	$(SHELL) $(srccom)/cgen.sh arch $(srcdir) \
 		$(CGEN) $(CGENDIR) "$(CGENFLAGS)" \
 		$(arch) "$(FLAGS)" ignored "$(isa)" $(mach) ignored ignored
-	
+
 cgen-cpu: force
 	$(SHELL) $(srccom)/cgen.sh cpu $(srcdir) \
 		$(CGEN) $(CGENDIR) "$(CGENFLAGS)" \

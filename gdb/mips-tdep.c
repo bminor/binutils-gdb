@@ -61,13 +61,26 @@ enum
 
 enum mips_abi
   {
-    MIPS_ABI_UNKNOWN,
+    MIPS_ABI_UNKNOWN = 0,
     MIPS_ABI_N32,
     MIPS_ABI_O32,
     MIPS_ABI_O64,
     MIPS_ABI_EABI32,
-    MIPS_ABI_EABI64
+    MIPS_ABI_EABI64,
+    MIPS_ABI_LAST
   };
+
+static const char *mips_abi_string;
+
+static const char *mips_abi_strings[] = {
+  "auto",
+  "n32",
+  "o32",
+  "o64",
+  "eabi32",
+  "eabi64",
+  NULL
+};
 
 struct frame_extra_info
   {
@@ -106,12 +119,6 @@ enum mips_fpu_type
 #endif
 static int mips_fpu_type_auto = 1;
 static enum mips_fpu_type mips_fpu_type = MIPS_DEFAULT_FPU_TYPE;
-#define MIPS_FPU_TYPE mips_fpu_type
-
-/* Do not use "TARGET_IS_MIPS64" to test the size of floating point registers */
-#ifndef FP_REGISTER_DOUBLE
-#define FP_REGISTER_DOUBLE (REGISTER_VIRTUAL_SIZE(FP0_REGNUM) == 8)
-#endif
 
 static int mips_debug = 0;
 
@@ -123,7 +130,7 @@ struct gdbarch_tdep
 
     /* mips options */
     enum mips_abi mips_abi;
-    const char *mips_abi_string;
+    enum mips_abi found_abi;
     enum mips_fpu_type mips_fpu_type;
     int mips_last_arg_regnum;
     int mips_last_fp_arg_regnum;
@@ -137,35 +144,18 @@ struct gdbarch_tdep
     enum gdb_osabi osabi;
   };
 
-#if GDB_MULTI_ARCH
-#undef MIPS_EABI
 #define MIPS_EABI (gdbarch_tdep (current_gdbarch)->mips_abi == MIPS_ABI_EABI32 \
 		   || gdbarch_tdep (current_gdbarch)->mips_abi == MIPS_ABI_EABI64)
-#endif
 
-#if GDB_MULTI_ARCH
-#undef MIPS_LAST_FP_ARG_REGNUM
 #define MIPS_LAST_FP_ARG_REGNUM (gdbarch_tdep (current_gdbarch)->mips_last_fp_arg_regnum)
-#endif
 
-#if GDB_MULTI_ARCH
-#undef MIPS_LAST_ARG_REGNUM
 #define MIPS_LAST_ARG_REGNUM (gdbarch_tdep (current_gdbarch)->mips_last_arg_regnum)
-#endif
 
-#if GDB_MULTI_ARCH
-#undef MIPS_FPU_TYPE
 #define MIPS_FPU_TYPE (gdbarch_tdep (current_gdbarch)->mips_fpu_type)
-#endif
 
 /* Return the currently configured (or set) saved register size. */
 
-#if GDB_MULTI_ARCH
-#undef MIPS_DEFAULT_SAVED_REGSIZE
 #define MIPS_DEFAULT_SAVED_REGSIZE (gdbarch_tdep (current_gdbarch)->mips_default_saved_regsize)
-#elif !defined (MIPS_DEFAULT_SAVED_REGSIZE)
-#define MIPS_DEFAULT_SAVED_REGSIZE MIPS_REGSIZE
-#endif
 
 static const char *mips_saved_regsize_string = size_auto;
 
@@ -212,31 +202,18 @@ mips2_fp_compat (void)
    form double-precision values).  Do not use "TARGET_IS_MIPS64" to
    determine if the ABI is using double-precision registers.  See also
    MIPS_FPU_TYPE. */
-#if GDB_MULTI_ARCH
-#undef FP_REGISTER_DOUBLE
 #define FP_REGISTER_DOUBLE (gdbarch_tdep (current_gdbarch)->mips_fp_register_double)
-#endif
 
 /* Does the caller allocate a ``home'' for each register used in the
    function call?  The N32 ABI and MIPS_EABI do not, the others do. */
 
-#if GDB_MULTI_ARCH
-#undef MIPS_REGS_HAVE_HOME_P
 #define MIPS_REGS_HAVE_HOME_P (gdbarch_tdep (current_gdbarch)->mips_regs_have_home_p)
-#elif !defined (MIPS_REGS_HAVE_HOME_P)
-#define MIPS_REGS_HAVE_HOME_P (!MIPS_EABI)
-#endif
 
 /* The amount of space reserved on the stack for registers. This is
    different to MIPS_SAVED_REGSIZE as it determines the alignment of
    data allocated after the registers have run out. */
 
-#if GDB_MULTI_ARCH
-#undef MIPS_DEFAULT_STACK_ARGSIZE
 #define MIPS_DEFAULT_STACK_ARGSIZE (gdbarch_tdep (current_gdbarch)->mips_default_stack_argsize)
-#elif !defined (MIPS_DEFAULT_STACK_ARGSIZE)
-#define MIPS_DEFAULT_STACK_ARGSIZE (MIPS_DEFAULT_SAVED_REGSIZE)
-#endif
 
 #define MIPS_STACK_ARGSIZE (mips_stack_argsize ())
 
@@ -253,17 +230,9 @@ mips_stack_argsize (void)
     return 4;
 }
 
-#if GDB_MULTI_ARCH
-#undef GDB_TARGET_IS_MIPS64
 #define GDB_TARGET_IS_MIPS64 (gdbarch_tdep (current_gdbarch)->gdb_target_is_mips64 + 0)
-#endif
 
-#if GDB_MULTI_ARCH
-#undef MIPS_DEFAULT_MASK_ADDRESS_P
 #define MIPS_DEFAULT_MASK_ADDRESS_P (gdbarch_tdep (current_gdbarch)->default_mask_address_p)
-#elif !defined (MIPS_DEFAULT_MASK_ADDRESS_P)
-#define MIPS_DEFAULT_MASK_ADDRESS_P (0)
-#endif
 
 #define VM_MIN_ADDRESS (CORE_ADDR)0x400000
 
@@ -314,7 +283,7 @@ static struct cmd_list_element *showmipscmdlist = NULL;
 char *mips_generic_reg_names[] = MIPS_REGISTER_NAMES;
 char **mips_processor_reg_names = mips_generic_reg_names;
 
-char *
+const char *
 mips_register_name (int i)
 {
   return mips_processor_reg_names[i];
@@ -425,6 +394,8 @@ static unsigned int heuristic_fence_post = 0;
 #define PROC_REG_OFFSET(proc) ((proc)->pdr.regoffset)
 #define PROC_FREG_OFFSET(proc) ((proc)->pdr.fregoffset)
 #define PROC_PC_REG(proc) ((proc)->pdr.pcreg)
+/* FIXME drow/2002-06-10: If a pointer on the host is bigger than a long,
+   this will corrupt pdr.iline.  Fortunately we don't use it.  */
 #define PROC_SYMBOL(proc) (*(struct symbol**)&(proc)->pdr.isym)
 #define _PROC_MAGIC_ 0x0F0F0F0F
 #define PROC_DESC_IS_DUMMY(proc) ((proc)->pdr.isym == _PROC_MAGIC_)
@@ -511,19 +482,19 @@ mips_register_convert_to_raw (struct type *virtual_type, int n,
 }
 
 /* Should the upper word of 64-bit addresses be zeroed? */
-enum cmd_auto_boolean mask_address_var = CMD_AUTO_BOOLEAN_AUTO;
+enum auto_boolean mask_address_var = AUTO_BOOLEAN_AUTO;
 
 static int
 mips_mask_address_p (void)
 {
   switch (mask_address_var)
     {
-    case CMD_AUTO_BOOLEAN_TRUE:
+    case AUTO_BOOLEAN_TRUE:
       return 1;
-    case CMD_AUTO_BOOLEAN_FALSE:
+    case AUTO_BOOLEAN_FALSE:
       return 0;
       break;
-    case CMD_AUTO_BOOLEAN_AUTO:
+    case AUTO_BOOLEAN_AUTO:
       return MIPS_DEFAULT_MASK_ADDRESS_P;
     default:
       internal_error (__FILE__, __LINE__,
@@ -533,17 +504,17 @@ mips_mask_address_p (void)
 }
 
 static void
-show_mask_address (char *cmd, int from_tty)
+show_mask_address (char *cmd, int from_tty, struct cmd_list_element *c)
 {
   switch (mask_address_var)
     {
-    case CMD_AUTO_BOOLEAN_TRUE:
+    case AUTO_BOOLEAN_TRUE:
       printf_filtered ("The 32 bit mips address mask is enabled\n");
       break;
-    case CMD_AUTO_BOOLEAN_FALSE:
+    case AUTO_BOOLEAN_FALSE:
       printf_filtered ("The 32 bit mips address mask is disabled\n");
       break;
-    case CMD_AUTO_BOOLEAN_AUTO:
+    case AUTO_BOOLEAN_AUTO:
       printf_filtered ("The 32 bit address mask is set automatically.  Currently %s\n",
 		       mips_mask_address_p () ? "enabled" : "disabled");
       break;
@@ -1932,6 +1903,30 @@ heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
   return &temp_proc_desc;
 }
 
+struct mips_objfile_private
+{
+  bfd_size_type size;
+  char *contents;
+};
+
+/* Global used to communicate between non_heuristic_proc_desc and
+   compare_pdr_entries within qsort ().  */
+static bfd *the_bfd;
+
+static int
+compare_pdr_entries (const void *a, const void *b)
+{
+  CORE_ADDR lhs = bfd_get_32 (the_bfd, (bfd_byte *) a);
+  CORE_ADDR rhs = bfd_get_32 (the_bfd, (bfd_byte *) b);
+
+  if (lhs < rhs)
+    return -1;
+  else if (lhs == rhs)
+    return 0;
+  else
+    return 1;
+}
+
 static mips_extra_func_info_t
 non_heuristic_proc_desc (CORE_ADDR pc, CORE_ADDR *addrptr)
 {
@@ -1939,22 +1934,144 @@ non_heuristic_proc_desc (CORE_ADDR pc, CORE_ADDR *addrptr)
   mips_extra_func_info_t proc_desc;
   struct block *b = block_for_pc (pc);
   struct symbol *sym;
+  struct obj_section *sec;
+  struct mips_objfile_private *priv;
+
+  if (PC_IN_CALL_DUMMY (pc, 0, 0))
+    return NULL;
 
   find_pc_partial_function (pc, NULL, &startaddr, NULL);
   if (addrptr)
     *addrptr = startaddr;
-  if (b == NULL || PC_IN_CALL_DUMMY (pc, 0, 0))
-    sym = NULL;
-  else
+
+  priv = NULL;
+
+  sec = find_pc_section (pc);
+  if (sec != NULL)
     {
-      if (startaddr > BLOCK_START (b))
-	/* This is the "pathological" case referred to in a comment in
-	   print_frame_info.  It might be better to move this check into
-	   symbol reading.  */
-	sym = NULL;
-      else
-	sym = lookup_symbol (MIPS_EFI_SYMBOL_NAME, b, LABEL_NAMESPACE, 0, NULL);
+      priv = (struct mips_objfile_private *) sec->objfile->obj_private;
+
+      /* Search the ".pdr" section generated by GAS.  This includes most of
+	 the information normally found in ECOFF PDRs.  */
+
+      the_bfd = sec->objfile->obfd;
+      if (priv == NULL
+	  && (the_bfd->format == bfd_object
+	      && bfd_get_flavour (the_bfd) == bfd_target_elf_flavour
+	      && elf_elfheader (the_bfd)->e_ident[EI_CLASS] == ELFCLASS64))
+	{
+	  /* Right now GAS only outputs the address as a four-byte sequence.
+	     This means that we should not bother with this method on 64-bit
+	     targets (until that is fixed).  */
+
+	  priv = obstack_alloc (& sec->objfile->psymbol_obstack,
+				sizeof (struct mips_objfile_private));
+	  priv->size = 0;
+	  sec->objfile->obj_private = priv;
+	}
+      else if (priv == NULL)
+	{
+	  asection *bfdsec;
+
+	  priv = obstack_alloc (& sec->objfile->psymbol_obstack,
+				sizeof (struct mips_objfile_private));
+
+	  bfdsec = bfd_get_section_by_name (sec->objfile->obfd, ".pdr");
+	  if (bfdsec != NULL)
+	    {
+	      priv->size = bfd_section_size (sec->objfile->obfd, bfdsec);
+	      priv->contents = obstack_alloc (& sec->objfile->psymbol_obstack,
+					      priv->size);
+	      bfd_get_section_contents (sec->objfile->obfd, bfdsec,
+					priv->contents, 0, priv->size);
+
+	      /* In general, the .pdr section is sorted.  However, in the
+		 presence of multiple code sections (and other corner cases)
+		 it can become unsorted.  Sort it so that we can use a faster
+		 binary search.  */
+	      qsort (priv->contents, priv->size / 32, 32, compare_pdr_entries);
+	    }
+	  else
+	    priv->size = 0;
+
+	  sec->objfile->obj_private = priv;
+	}
+      the_bfd = NULL;
+
+      if (priv->size != 0)
+	{
+	  int low, mid, high;
+	  char *ptr;
+
+	  low = 0;
+	  high = priv->size / 32;
+
+	  do
+	    {
+	      CORE_ADDR pdr_pc;
+
+	      mid = (low + high) / 2;
+
+	      ptr = priv->contents + mid * 32;
+	      pdr_pc = bfd_get_signed_32 (sec->objfile->obfd, ptr);
+	      pdr_pc += ANOFFSET (sec->objfile->section_offsets,
+				  SECT_OFF_TEXT (sec->objfile));
+	      if (pdr_pc == startaddr)
+		break;
+	      if (pdr_pc > startaddr)
+		high = mid;
+	      else
+		low = mid + 1;
+	    }
+	  while (low != high);
+
+	  if (low != high)
+	    {
+	      struct symbol *sym = find_pc_function (pc);
+
+	      /* Fill in what we need of the proc_desc.  */
+	      proc_desc = (mips_extra_func_info_t)
+		obstack_alloc (&sec->objfile->psymbol_obstack,
+			       sizeof (struct mips_extra_func_info));
+	      PROC_LOW_ADDR (proc_desc) = startaddr;
+
+	      /* Only used for dummy frames.  */
+	      PROC_HIGH_ADDR (proc_desc) = 0;
+
+	      PROC_FRAME_OFFSET (proc_desc)
+		= bfd_get_32 (sec->objfile->obfd, ptr + 20);
+	      PROC_FRAME_REG (proc_desc) = bfd_get_32 (sec->objfile->obfd,
+						       ptr + 24);
+	      PROC_FRAME_ADJUST (proc_desc) = 0;
+	      PROC_REG_MASK (proc_desc) = bfd_get_32 (sec->objfile->obfd,
+						      ptr + 4);
+	      PROC_FREG_MASK (proc_desc) = bfd_get_32 (sec->objfile->obfd,
+						       ptr + 12);
+	      PROC_REG_OFFSET (proc_desc) = bfd_get_32 (sec->objfile->obfd,
+							ptr + 8);
+	      PROC_FREG_OFFSET (proc_desc)
+		= bfd_get_32 (sec->objfile->obfd, ptr + 16);
+	      PROC_PC_REG (proc_desc) = bfd_get_32 (sec->objfile->obfd,
+						    ptr + 28);
+	      proc_desc->pdr.isym = (long) sym;
+
+	      return proc_desc;
+	    }
+	}
     }
+
+  if (b == NULL)
+    return NULL;
+
+  if (startaddr > BLOCK_START (b))
+    {
+      /* This is the "pathological" case referred to in a comment in
+	 print_frame_info.  It might be better to move this check into
+	 symbol reading.  */
+      return NULL;
+    }
+
+  sym = lookup_symbol (MIPS_EFI_SYMBOL_NAME, b, LABEL_NAMESPACE, 0, NULL);
 
   /* If we never found a PDR for this function in symbol reading, then
      examine prologues to find the information.  */
@@ -3567,10 +3684,7 @@ set_mipsfpu_single_command (char *args, int from_tty)
 {
   mips_fpu_type = MIPS_FPU_SINGLE;
   mips_fpu_type_auto = 0;
-  if (GDB_MULTI_ARCH)
-    {
-      gdbarch_tdep (current_gdbarch)->mips_fpu_type = MIPS_FPU_SINGLE;
-    }
+  gdbarch_tdep (current_gdbarch)->mips_fpu_type = MIPS_FPU_SINGLE;
 }
 
 static void
@@ -3578,10 +3692,7 @@ set_mipsfpu_double_command (char *args, int from_tty)
 {
   mips_fpu_type = MIPS_FPU_DOUBLE;
   mips_fpu_type_auto = 0;
-  if (GDB_MULTI_ARCH)
-    {
-      gdbarch_tdep (current_gdbarch)->mips_fpu_type = MIPS_FPU_DOUBLE;
-    }
+  gdbarch_tdep (current_gdbarch)->mips_fpu_type = MIPS_FPU_DOUBLE;
 }
 
 static void
@@ -3589,10 +3700,7 @@ set_mipsfpu_none_command (char *args, int from_tty)
 {
   mips_fpu_type = MIPS_FPU_NONE;
   mips_fpu_type_auto = 0;
-  if (GDB_MULTI_ARCH)
-    {
-      gdbarch_tdep (current_gdbarch)->mips_fpu_type = MIPS_FPU_NONE;
-    }
+  gdbarch_tdep (current_gdbarch)->mips_fpu_type = MIPS_FPU_NONE;
 }
 
 static void
@@ -4126,6 +4234,45 @@ mips_integer_to_address (struct type *type, void *buf)
 				 TYPE_LENGTH (builtin_type_void_data_ptr));
 }
 
+static void
+mips_find_abi_section (bfd *abfd, asection *sect, void *obj)
+{
+  enum mips_abi *abip = (enum mips_abi *) obj;
+  const char *name = bfd_get_section_name (abfd, sect);
+
+  if (*abip != MIPS_ABI_UNKNOWN)
+    return;
+
+  if (strncmp (name, ".mdebug.", 8) != 0)
+    return;
+
+  if (strcmp (name, ".mdebug.abi32") == 0)
+    *abip = MIPS_ABI_O32;
+  else if (strcmp (name, ".mdebug.abiN32") == 0)
+    *abip = MIPS_ABI_N32;
+  else if (strcmp (name, ".mdebug.abiO64") == 0)
+    *abip = MIPS_ABI_O64;
+  else if (strcmp (name, ".mdebug.eabi32") == 0)
+    *abip = MIPS_ABI_EABI32;
+  else if (strcmp (name, ".mdebug.eabi64") == 0)
+    *abip = MIPS_ABI_EABI64;
+  else
+    warning ("unsupported ABI %s.", name + 8);
+}
+
+static enum mips_abi
+global_mips_abi (void)
+{
+  int i;
+
+  for (i = 0; mips_abi_strings[i] != NULL; i++)
+    if (mips_abi_strings[i] == mips_abi_string)
+      return (enum mips_abi) i;
+
+  internal_error (__FILE__, __LINE__,
+		  "unknown ABI string");
+}
+
 static struct gdbarch *
 mips_gdbarch_init (struct gdbarch_info info,
 		   struct gdbarch_list *arches)
@@ -4135,7 +4282,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   struct gdbarch *gdbarch;
   struct gdbarch_tdep *tdep;
   int elf_flags;
-  enum mips_abi mips_abi;
+  enum mips_abi mips_abi, found_abi, wanted_abi;
   enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
 
   /* Reset the disassembly info, in case it was set to something
@@ -4180,6 +4327,15 @@ mips_gdbarch_init (struct gdbarch_info info,
       break;
     }
 
+  /* GCC creates a pseudo-section whose name describes the ABI.  */
+  if (mips_abi == MIPS_ABI_UNKNOWN && info.abfd != NULL)
+    bfd_map_over_sections (info.abfd, mips_find_abi_section, &mips_abi);
+
+  /* If we have no bfd, then mips_abi will still be MIPS_ABI_UNKNOWN.
+     Use the ABI from the last architecture if there is one.  */
+  if (info.abfd == NULL && arches != NULL)
+    mips_abi = gdbarch_tdep (arches->gdbarch)->found_abi;
+
   /* Try the architecture for any hint of the corect ABI */
   if (mips_abi == MIPS_ABI_UNKNOWN
       && info.bfd_arch_info != NULL
@@ -4200,10 +4356,21 @@ mips_gdbarch_init (struct gdbarch_info info,
 	  break;
 	}
     }
+
 #ifdef MIPS_DEFAULT_ABI
   if (mips_abi == MIPS_ABI_UNKNOWN)
     mips_abi = MIPS_DEFAULT_ABI;
 #endif
+
+  if (mips_abi == MIPS_ABI_UNKNOWN)
+    mips_abi = MIPS_ABI_O32;
+
+  /* Now that we have found what the ABI for this binary would be,
+     check whether the user is overriding it.  */
+  found_abi = mips_abi;
+  wanted_abi = global_mips_abi ();
+  if (wanted_abi != MIPS_ABI_UNKNOWN)
+    mips_abi = wanted_abi;
 
   if (gdbarch_debug)
     {
@@ -4213,6 +4380,9 @@ mips_gdbarch_init (struct gdbarch_info info,
       fprintf_unfiltered (gdb_stdlog,
 			  "mips_gdbarch_init: mips_abi = %d\n",
 			  mips_abi);
+      fprintf_unfiltered (gdb_stdlog,
+			  "mips_gdbarch_init: found_mips_abi = %d\n",
+			  found_abi);
     }
 
   /* try to find a pre-existing architecture */
@@ -4243,12 +4413,12 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_double_bit (gdbarch, 64);
   set_gdbarch_long_double_bit (gdbarch, 64);
   set_gdbarch_register_raw_size (gdbarch, mips_register_raw_size);
+  tdep->found_abi = found_abi;
   tdep->mips_abi = mips_abi;
 
   switch (mips_abi)
     {
     case MIPS_ABI_O32:
-      tdep->mips_abi_string = "o32";
       tdep->mips_default_saved_regsize = 4;
       tdep->mips_default_stack_argsize = 4;
       tdep->mips_fp_register_double = 0;
@@ -4262,7 +4432,6 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_long_bit (gdbarch, 64);
       break;
     case MIPS_ABI_O64:
-      tdep->mips_abi_string = "o64";
       tdep->mips_default_saved_regsize = 8;
       tdep->mips_default_stack_argsize = 8;
       tdep->mips_fp_register_double = 1;
@@ -4276,7 +4445,6 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_long_bit (gdbarch, 64);
       break;
     case MIPS_ABI_EABI32:
-      tdep->mips_abi_string = "eabi32";
       tdep->mips_default_saved_regsize = 4;
       tdep->mips_default_stack_argsize = 4;
       tdep->mips_fp_register_double = 0;
@@ -4290,7 +4458,6 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_long_bit (gdbarch, 64);
       break;
     case MIPS_ABI_EABI64:
-      tdep->mips_abi_string = "eabi64";
       tdep->mips_default_saved_regsize = 8;
       tdep->mips_default_stack_argsize = 8;
       tdep->mips_fp_register_double = 1;
@@ -4304,7 +4471,6 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_long_bit (gdbarch, 64);
       break;
     case MIPS_ABI_N32:
-      tdep->mips_abi_string = "n32";
       tdep->mips_default_saved_regsize = 4;
       tdep->mips_default_stack_argsize = 8;
       tdep->mips_fp_register_double = 1;
@@ -4329,19 +4495,8 @@ mips_gdbarch_init (struct gdbarch_info info,
 	tm_print_insn_info.mach = bfd_mach_mips8000;
       break;
     default:
-      tdep->mips_abi_string = "default";
-      tdep->mips_default_saved_regsize = MIPS_REGSIZE;
-      tdep->mips_default_stack_argsize = MIPS_REGSIZE;
-      tdep->mips_fp_register_double = (REGISTER_VIRTUAL_SIZE (FP0_REGNUM) == 8);
-      tdep->mips_last_arg_regnum = A0_REGNUM + 8 - 1;
-      tdep->mips_last_fp_arg_regnum = FPA0_REGNUM + 8 - 1;
-      tdep->mips_regs_have_home_p = 1;
-      tdep->gdb_target_is_mips64 = 0;
-      tdep->default_mask_address_p = 0;
-      set_gdbarch_long_bit (gdbarch, 32);
-      set_gdbarch_ptr_bit (gdbarch, 32);
-      set_gdbarch_long_long_bit (gdbarch, 64);
-      break;
+      internal_error (__FILE__, __LINE__,
+		      "unknown ABI in switch");
     }
 
   /* FIXME: jlarmour/2000-04-07: There *is* a flag EF_MIPS_32BIT_MODE
@@ -4454,6 +4609,18 @@ mips_gdbarch_init (struct gdbarch_info info,
 }
 
 static void
+mips_abi_update (char *ignore_args, int from_tty, 
+		 struct cmd_list_element *c)
+{
+  struct gdbarch_info info;
+
+  /* Force the architecture to update, and (if it's a MIPS architecture)
+     mips_gdbarch_init will take care of the rest.  */
+  gdbarch_info_init (&info);
+  gdbarch_update_p (info);
+}
+
+static void
 mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
@@ -4494,7 +4661,7 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
       fprintf_unfiltered (file,
 			  "mips_dump_tdep: tdep->mips_abi = %d (%s)\n",
 			  tdep->mips_abi,
-			  tdep->mips_abi_string);
+			  mips_abi_strings[tdep->mips_abi]);
       fprintf_unfiltered (file,
 			  "mips_dump_tdep: mips_mask_address_p() %d (default %d)\n",
 			  mips_mask_address_p (),
@@ -4870,6 +5037,11 @@ _initialize_mips_tdep (void)
   static struct cmd_list_element *mipsfpulist = NULL;
   struct cmd_list_element *c;
 
+  mips_abi_string = mips_abi_strings [MIPS_ABI_UNKNOWN];
+  if (MIPS_ABI_LAST + 1
+      != sizeof (mips_abi_strings) / sizeof (mips_abi_strings[0]))
+    internal_error (__FILE__, __LINE__, "mips_abi_strings out of sync");
+
   gdbarch_register (bfd_arch_mips, mips_gdbarch_init, mips_dump_tdep);
   if (!tm_print_insn)		/* Someone may have already set it */
     tm_print_insn = gdb_print_insn_mips;
@@ -4912,6 +5084,21 @@ This option can be set to one of:\n\
 				       &setmipscmdlist),
 		     &showmipscmdlist);
 
+  /* Allow the user to override the ABI. */
+  c = add_set_enum_cmd
+    ("abi", class_obscure, mips_abi_strings, &mips_abi_string,
+     "Set the ABI used by this program.\n"
+     "This option can be set to one of:\n"
+     "  auto  - the default ABI associated with the current binary\n"
+     "  o32\n"
+     "  o64\n"
+     "  n32\n"
+     "  eabi32\n"
+     "  eabi64",
+     &setmipscmdlist);
+  add_show_from_set (c, &showmipscmdlist);
+  set_cmd_sfunc (c, mips_abi_update);
+
   /* Let the user turn off floating point and set the fence post for
      heuristic_proc_start.  */
 
@@ -4940,21 +5127,6 @@ This option can be set to one of:\n\
 	   "Show current use of MIPS floating-point coprocessor target.",
 	   &showlist);
 
-#if !GDB_MULTI_ARCH
-  c = add_set_cmd ("processor", class_support, var_string_noescape,
-		   (char *) &tmp_mips_processor_type,
-		   "Set the type of MIPS processor in use.\n\
-Set this to be able to access processor-type-specific registers.\n\
-",
-		   &setlist);
-  set_cmd_cfunc (c, mips_set_processor_type_command);
-  c = add_show_from_set (c, &showlist);
-  set_cmd_cfunc (c, mips_show_processor_type_command);
-
-  tmp_mips_processor_type = xstrdup (DEFAULT_MIPS_TYPE);
-  mips_set_processor_type_command (xstrdup (DEFAULT_MIPS_TYPE), 0);
-#endif
-
   /* We really would like to have both "0" and "unlimited" work, but
      command.c doesn't deal with that.  So make it a var_zinteger
      because the user can always use "999999" or some such for unlimited.  */
@@ -4973,13 +5145,13 @@ search.  The only need to set it is when debugging a stripped executable.",
 
   /* Allow the user to control whether the upper bits of 64-bit
      addresses should be zeroed.  */
-  c = add_set_auto_boolean_cmd ("mask-address", no_class, &mask_address_var,
-				"Set zeroing of upper 32 bits of 64-bit addresses.\n\
-Use \"on\" to enable the masking, \"off\" to disable it and \"auto\" to allow GDB to determine\n\
-the correct value.\n",
-				&setmipscmdlist);
-  add_cmd ("mask-address", no_class, show_mask_address,
-	       "Show current mask-address value", &showmipscmdlist);
+  add_setshow_auto_boolean_cmd ("mask-address", no_class, &mask_address_var, "\
+Set zeroing of upper 32 bits of 64-bit addresses.\n\
+Use \"on\" to enable the masking, \"off\" to disable it and \"auto\" to \n\
+allow GDB to determine the correct value.\n", "\
+Show zeroing of upper 32 bits of 64-bit addresses.",
+				NULL, show_mask_address,
+				&setmipscmdlist, &showmipscmdlist);
 
   /* Allow the user to control the size of 32 bit registers within the
      raw remote packet.  */

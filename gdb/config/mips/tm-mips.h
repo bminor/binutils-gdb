@@ -38,10 +38,6 @@ struct value;
 #include "coff/sym.h"		/* Needed for PDR below.  */
 #include "coff/symconst.h"
 
-#if !defined (MIPS_EABI)
-#define MIPS_EABI 0
-#endif
-
 /* PC should be masked to remove possible MIPS16 flag */
 #if !defined (GDB_TARGET_MASK_DISAS_PC)
 #define GDB_TARGET_MASK_DISAS_PC(addr) UNMAKE_MIPS16_ADDR(addr)
@@ -97,7 +93,7 @@ extern int in_sigtramp (CORE_ADDR, char *);
 
 /* Given the register index, return the name of the corresponding
    register. */
-extern char *mips_register_name (int regnr);
+extern const char *mips_register_name (int regnr);
 #define REGISTER_NAME(i) mips_register_name (i)
 
 /* Initializer for an array of names of registers.
@@ -130,11 +126,6 @@ extern char *mips_register_name (int regnr);
 #define ZERO_REGNUM 0		/* read-only register, always 0 */
 #define V0_REGNUM 2		/* Function integer return value */
 #define A0_REGNUM 4		/* Loc of first arg during a subr call */
-#if MIPS_EABI
-#define MIPS_LAST_ARG_REGNUM 11	/* EABI uses R4 through R11 for args */
-#else
-#define MIPS_LAST_ARG_REGNUM 7	/* old ABI uses R4 through R7 for args */
-#endif
 #define T9_REGNUM 25		/* Contains address of callee in PIC */
 #define SP_REGNUM 29		/* Contains address of top of stack */
 #define RA_REGNUM 31		/* Contains return address value */
@@ -146,11 +137,6 @@ extern char *mips_register_name (int regnr);
 #define PC_REGNUM 37		/* Contains program counter */
 #define FP0_REGNUM 38		/* Floating point register 0 (single float) */
 #define FPA0_REGNUM (FP0_REGNUM+12)	/* First float argument register */
-#if MIPS_EABI			/* EABI uses F12 through F19 for args */
-#define MIPS_LAST_FP_ARG_REGNUM (FP0_REGNUM+19)
-#else /* old ABI uses F12 through F15 for args */
-#define MIPS_LAST_FP_ARG_REGNUM (FP0_REGNUM+15)
-#endif
 #define FCRCS_REGNUM 70		/* FP control/status */
 #define FCRIR_REGNUM 71		/* FP implementation/revision */
 #define FP_REGNUM 72		/* Pseudo register that contains true address of executing stack frame */
@@ -256,7 +242,7 @@ void mips_register_convert_to_raw (struct type *virtual_type, int reg_nr,
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  XXX floats */
 
-#define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
+#define DEPRECATED_EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
   mips_extract_return_value(TYPE, REGBUF, VALBUF)
 extern void mips_extract_return_value (struct type *, char[], char *);
 
@@ -275,7 +261,7 @@ extern void mips_store_return_value (struct type *, char *);
    convention is specified by the System V ABI, so I think we can rely
    on it.  */
 
-#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
+#define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
   (extract_address (REGBUF + REGISTER_BYTE (V0_REGNUM), \
 		    REGISTER_RAW_SIZE (V0_REGNUM)))
 

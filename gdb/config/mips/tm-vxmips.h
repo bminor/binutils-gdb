@@ -20,7 +20,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "mips/tm-mips.h"
-#include "tm-vxworks.h"
+#include "config/tm-vxworks.h"
 
 /* FIXME: These are almost certainly wrong. */
 

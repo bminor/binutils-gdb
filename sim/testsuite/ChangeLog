@@ -1,3 +1,7 @@
+2002-06-16  Andrew Cagney  <ac131313@redhat.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 2001-07-31  Ben Elliston  <bje@redhat.com>
 
 	* lib/sim-defs.exp (run_sim_test): Include a description such as

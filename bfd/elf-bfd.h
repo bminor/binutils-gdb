@@ -353,6 +353,8 @@ struct elf_size_info {
     PARAMS ((bfd *));
   void (*write_relocs)
     PARAMS ((bfd *, asection *, PTR));
+  void (*swap_symbol_in)
+    PARAMS ((bfd *, const PTR, const PTR, Elf_Internal_Sym *));
   void (*swap_symbol_out)
     PARAMS ((bfd *, const Elf_Internal_Sym *, PTR, PTR));
   boolean (*slurp_reloc_table)
@@ -490,7 +492,7 @@ struct elf_backend_data
   /* A function to handle unusual section types when creating BFD
      sections from ELF sections.  */
   boolean (*elf_backend_section_from_shdr)
-    PARAMS ((bfd *, Elf32_Internal_Shdr *, char *));
+    PARAMS ((bfd *, Elf32_Internal_Shdr *, const char *));
 
   /* A function to convert machine dependent section header flags to
      BFD internal section header flags.  */
@@ -760,6 +762,22 @@ struct elf_backend_data
   boolean (*elf_backend_write_section)
     PARAMS ((bfd *, asection *, bfd_byte *));
 
+  /* This function, if defined, sets  up the file positions for non PT_LOAD
+     segments, especially for segments containing non-allocated sections.  */
+  void (*set_nonloadable_filepos)
+    PARAMS ((bfd *, Elf_Internal_Phdr *));
+
+  /* This function, if defined, returns true if the section is contained
+     within the segment.  File positions are compared.  */
+  boolean (*is_contained_by_filepos)
+    PARAMS ((asection *, Elf_Internal_Phdr *));
+
+  /* This function, if defined, returns true if copy_private_bfd_data
+     should be called.  It provides a way of overriding default 
+     test conditions in _bfd_elf_copy_private_section_data.  */
+  boolean (*copy_private_bfd_data_p)
+    PARAMS ((bfd *, asection *, bfd *, asection *));
+
   /* The level of IRIX compatibility we're striving for.
      MIPS ELF specific function.  */
   irix_compat_t (*elf_backend_mips_irix_compat)
@@ -898,8 +916,13 @@ struct bfd_elf_section_data
   /* Type of that information.  */
   enum elf_link_info_type sec_info_type;
 
-  /* Group name, if this section is part of a group.  */
-  const char *group_name;
+  union {
+    /* Group name, if this section is a member of a group.  */
+    const char *name;
+
+    /* Group signature sym, if this is the SHT_GROUP section.  */
+    struct symbol_cache_entry *id;
+  } group;
 
   /* A linked list of sections in the group.  Circular when used by
      the linker.  */
@@ -910,11 +933,16 @@ struct bfd_elf_section_data
 
   /* Nonzero if this section uses RELA relocations, rather than REL.  */
   unsigned int use_rela_p:1;
+
+  /* Nonzero when a group is COMDAT.  */
+  unsigned int linkonce_p:1;
 };
 
 #define elf_section_data(sec)  ((struct bfd_elf_section_data*)sec->used_by_bfd)
-#define elf_group_name(sec)    (elf_section_data(sec)->group_name)
+#define elf_group_name(sec)    (elf_section_data(sec)->group.name)
+#define elf_group_id(sec)      (elf_section_data(sec)->group.id)
 #define elf_next_in_group(sec) (elf_section_data(sec)->next_in_group)
+#define elf_linkonce_p(sec)    (elf_section_data(sec)->linkonce_p)
 
 /* Return true if section has been discarded.  */
 #define elf_discarded_section(sec)					\
@@ -1241,6 +1269,10 @@ extern boolean _bfd_elf_slurp_version_tables
   PARAMS ((bfd *));
 extern boolean _bfd_elf_merge_sections
   PARAMS ((bfd *, struct bfd_link_info *));
+extern boolean bfd_elf_discard_group
+  PARAMS ((bfd *, struct sec *));
+extern void bfd_elf_set_group_contents
+  PARAMS ((bfd *, asection *, PTR));
 extern void _bfd_elf_link_just_syms
   PARAMS ((asection *, struct bfd_link_info *));
 extern boolean _bfd_elf_copy_private_symbol_data
@@ -1419,8 +1451,7 @@ extern boolean bfd_elf32_bfd_final_link
   PARAMS ((bfd *, struct bfd_link_info *));
 
 extern void bfd_elf32_swap_symbol_in
-  PARAMS ((bfd *, const Elf32_External_Sym *, const Elf_External_Sym_Shndx *,
-	   Elf_Internal_Sym *));
+  PARAMS ((bfd *, const PTR, const PTR, Elf_Internal_Sym *));
 extern void bfd_elf32_swap_symbol_out
   PARAMS ((bfd *, const Elf_Internal_Sym *, PTR, PTR));
 extern void bfd_elf32_swap_reloc_in
@@ -1472,8 +1503,7 @@ extern boolean bfd_elf64_bfd_final_link
   PARAMS ((bfd *, struct bfd_link_info *));
 
 extern void bfd_elf64_swap_symbol_in
-  PARAMS ((bfd *, const Elf64_External_Sym *, const Elf_External_Sym_Shndx *,
-	   Elf_Internal_Sym *));
+  PARAMS ((bfd *, const PTR, const PTR, Elf_Internal_Sym *));
 extern void bfd_elf64_swap_symbol_out
   PARAMS ((bfd *, const Elf_Internal_Sym *, PTR, PTR));
 extern void bfd_elf64_swap_reloc_in

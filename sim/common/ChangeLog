@@ -1,3 +1,49 @@
+2002-06-17  Andrew Cagney  <cagney@redhat.com>
+
+	* hw-events.c (hw_event_queue_schedule): Initialize `dummy'.
+
+	* sim-memopt.c: Include <unistd.h>.
+	(do_memopt_add): Fix printf format.
+	* sim-events.c (sim_events_schedule): Initialize ``dummy''.
+
+2002-06-16  Andrew Cagney  <ac131313@redhat.com>
+
+	* aclocal.m4 (SIM_AC_OPTION_WARNINGS): Update to match GDB's
+	--enable-gdb-build-warnings.
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+2002-06-09  Aldy Hernandez  <aldyh@redhat.com>
+
+        * sim-fpu.c (unpack_fpu): Initialize exponent for
+        sim_fpu_class_zero.
+        (i2fpu): Same.
+        (sim_fpu_sqrt): Same.
+
+2002-06-08  Andrew Cagney  <cagney@redhat.com>
+
+	* gentmap.c (gen_targ_map_c): Generate "gdb/callback.h".
+	* sim-basics.h: Include "gdb/callback.h" and "gdb/remote-sim.h".
+	* run.c: Ditto.
+	* sim-load.c: Ditto.
+	* callback.c: Ditto.
+	* syscall.c: Ditto.
+	* Make-common.in (callback_h): Define.
+	(remote_sim_h): Define.
+	(run.o): Update.
+	(callback.o): Update.
+	(syscall.o): Update.
+	(sim-load.o): 
+	(nrun.o): Update.
+	(sim-hload.o): Update.
+	(sim-io.o): Update.
+	(sim-reason.o): Update.
+	(sim-reg.o): Update.
+	(sim-resume.o): Update.
+
+2002-05-30  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* run.c: Fix formatting.
+
 2002-05-20  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* run-sim.h: New header.  Provide prototypes for functions used

@@ -56,7 +56,7 @@ static boolean ppc_elf_create_dynamic_sections
 
 static boolean ppc_elf_section_from_shdr PARAMS ((bfd *,
 						  Elf32_Internal_Shdr *,
-						  char *));
+						  const char *));
 static boolean ppc_elf_fake_sections
   PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *));
 
@@ -1490,7 +1490,7 @@ static boolean
 ppc_elf_section_from_shdr (abfd, hdr, name)
      bfd *abfd;
      Elf32_Internal_Shdr *hdr;
-     char *name;
+     const char *name;
 {
   asection *newsect;
   flagword flags;

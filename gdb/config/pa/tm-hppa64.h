@@ -221,13 +221,13 @@ call_dummy
 
 #undef REG_STRUCT_HAS_ADDR
 
-#undef EXTRACT_RETURN_VALUE
+#undef DEPRECATED_EXTRACT_RETURN_VALUE
 /* RM: floats are returned in FR4R, doubles in FR4
  *     integral values are in r28, padded on the left 
  *     aggregates less that 65 bits are in r28, right padded 
  *     aggregates upto 128 bits are in r28 and r29, right padded
  */ 
-#define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
+#define DEPRECATED_EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
   { \
     if (TYPE_CODE (TYPE) == TYPE_CODE_FLT && !SOFT_FLOAT) \
       memcpy ((VALBUF), \

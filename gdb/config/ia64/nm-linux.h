@@ -22,7 +22,7 @@
 #ifndef NM_LINUX_H
 #define NM_LINUX_H
 
-#include "nm-linux.h"
+#include "config/nm-linux.h"
 
 /* Note:  It seems likely that we'll have to eventually define
    FETCH_INFERIOR_REGISTERS.  But until that time, we'll make do

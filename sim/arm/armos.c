@@ -83,7 +83,7 @@ extern int _fisatty (FILE *);
 /* For RDIError_BreakpointReached.  */
 #include "dbg_rdi.h"
 
-#include "callback.h"
+#include "gdb/callback.h"
 extern host_callback *sim_callback;
 
 extern unsigned ARMul_OSInit       (ARMul_State *);

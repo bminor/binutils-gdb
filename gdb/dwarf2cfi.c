@@ -201,26 +201,27 @@ static void fde_chunks_need_space ();
 
 static struct context *context_alloc ();
 static struct frame_state *frame_state_alloc ();
+static void unwind_tmp_obstack_init ();
 static void unwind_tmp_obstack_free ();
 static void context_cpy (struct context *dst, struct context *src);
 
-static unsigned int read_1u (bfd *abfd, char **p);
-static int read_1s (bfd *abfd, char **p);
-static unsigned int read_2u (bfd *abfd, char **p);
-static int read_2s (bfd *abfd, char **p);
-static unsigned int read_4u (bfd *abfd, char **p);
-static int read_4s (bfd *abfd, char **p);
-static ULONGEST read_8u (bfd *abfd, char **p);
-static LONGEST read_8s (bfd *abfd, char **p);
+static unsigned int read_1u (bfd * abfd, char **p);
+static int read_1s (bfd * abfd, char **p);
+static unsigned int read_2u (bfd * abfd, char **p);
+static int read_2s (bfd * abfd, char **p);
+static unsigned int read_4u (bfd * abfd, char **p);
+static int read_4s (bfd * abfd, char **p);
+static ULONGEST read_8u (bfd * abfd, char **p);
+static LONGEST read_8s (bfd * abfd, char **p);
 
-static ULONGEST read_uleb128 (bfd *abfd, char **p);
-static LONGEST read_sleb128 (bfd *abfd, char **p);
-static CORE_ADDR read_pointer (bfd *abfd, char **p);
-static CORE_ADDR read_encoded_pointer (bfd *abfd, char **p,
+static ULONGEST read_uleb128 (bfd * abfd, char **p);
+static LONGEST read_sleb128 (bfd * abfd, char **p);
+static CORE_ADDR read_pointer (bfd * abfd, char **p);
+static CORE_ADDR read_encoded_pointer (bfd * abfd, char **p,
 				       unsigned char encoding);
 
-static LONGEST read_initial_length (bfd *abfd, char *buf, int *bytes_read);
-static ULONGEST read_length (bfd *abfd, char *buf, int *bytes_read,
+static LONGEST read_initial_length (bfd * abfd, char *buf, int *bytes_read);
+static ULONGEST read_length (bfd * abfd, char *buf, int *bytes_read,
 			     int dwarf64);
 
 static int is_cie (ULONGEST cie_id, int dwarf64);
@@ -235,11 +236,12 @@ static void frame_state_for (struct context *context, struct frame_state *fs);
 static void get_reg (char *reg, struct context *context, int regnum);
 static CORE_ADDR execute_stack_op (struct objfile *objfile,
 				   char *op_ptr, char *op_end,
-				   struct context *context, CORE_ADDR initial);
+				   struct context *context,
+				   CORE_ADDR initial);
 static void update_context (struct context *context, struct frame_state *fs,
 			    int chain);
-
 
+
 /* Memory allocation functions.  */
 static struct fde_unit *
 fde_unit_alloc (void)
@@ -301,17 +303,23 @@ frame_state_alloc ()
   fs = (struct frame_state *) obstack_alloc (&unwind_tmp_obstack,
 					     sizeof (struct frame_state));
   memset (fs, 0, sizeof (struct frame_state));
-  fs->regs.reg = (struct frame_state_reg *)  obstack_alloc (&unwind_tmp_obstack,
-							    regs_size);
+  fs->regs.reg =
+    (struct frame_state_reg *) obstack_alloc (&unwind_tmp_obstack, regs_size);
   memset (fs->regs.reg, 0, regs_size);
   return fs;
+}
+
+static void
+unwind_tmp_obstack_init ()
+{
+  obstack_init (&unwind_tmp_obstack);
 }
 
 static void
 unwind_tmp_obstack_free ()
 {
   obstack_free (&unwind_tmp_obstack, NULL);
-  obstack_init (&unwind_tmp_obstack);
+  unwind_tmp_obstack_init ();
 }
 
 static void
@@ -334,92 +342,92 @@ context_cpy (struct context *dst, struct context *src)
   dreg = dst->reg;
   *dst = *src;
   dst->reg = dreg;
-  
+
   memcpy (dst->reg, src->reg, regs_size);
 }
 
 static unsigned int
-read_1u (bfd *abfd, char **p)
+read_1u (bfd * abfd, char **p)
 {
   unsigned ret;
 
-  ret= bfd_get_8 (abfd, (bfd_byte *) *p);
-  (*p) ++;
+  ret = bfd_get_8 (abfd, (bfd_byte *) * p);
+  (*p)++;
   return ret;
 }
 
 static int
-read_1s (bfd *abfd, char **p)
+read_1s (bfd * abfd, char **p)
 {
   int ret;
 
-  ret= bfd_get_signed_8 (abfd, (bfd_byte *) *p);
-  (*p) ++;
+  ret = bfd_get_signed_8 (abfd, (bfd_byte *) * p);
+  (*p)++;
   return ret;
 }
 
 static unsigned int
-read_2u (bfd *abfd, char **p)
+read_2u (bfd * abfd, char **p)
 {
   unsigned ret;
 
-  ret= bfd_get_16 (abfd, (bfd_byte *) *p);
-  (*p) ++;
+  ret = bfd_get_16 (abfd, (bfd_byte *) * p);
+  (*p)++;
   return ret;
 }
 
 static int
-read_2s (bfd *abfd, char **p)
+read_2s (bfd * abfd, char **p)
 {
   int ret;
 
-  ret= bfd_get_signed_16 (abfd, (bfd_byte *) *p);
+  ret = bfd_get_signed_16 (abfd, (bfd_byte *) * p);
   (*p) += 2;
   return ret;
 }
 
 static unsigned int
-read_4u (bfd *abfd, char **p)
+read_4u (bfd * abfd, char **p)
 {
   unsigned int ret;
 
-  ret= bfd_get_32 (abfd, (bfd_byte *) *p);
+  ret = bfd_get_32 (abfd, (bfd_byte *) * p);
   (*p) += 4;
   return ret;
 }
 
 static int
-read_4s (bfd *abfd, char **p)
+read_4s (bfd * abfd, char **p)
 {
   int ret;
 
-  ret= bfd_get_signed_32 (abfd, (bfd_byte *) *p);
+  ret = bfd_get_signed_32 (abfd, (bfd_byte *) * p);
   (*p) += 4;
   return ret;
 }
 
 static ULONGEST
-read_8u (bfd *abfd, char **p)
+read_8u (bfd * abfd, char **p)
 {
   ULONGEST ret;
 
-  ret = bfd_get_64 (abfd, (bfd_byte *) *p);
+  ret = bfd_get_64 (abfd, (bfd_byte *) * p);
   (*p) += 8;
   return ret;
 }
 
 static LONGEST
-read_8s (bfd *abfd, char **p)
+read_8s (bfd * abfd, char **p)
 {
   LONGEST ret;
 
-  ret = bfd_get_signed_64 (abfd, (bfd_byte *) *p);
+  ret = bfd_get_signed_64 (abfd, (bfd_byte *) * p);
   (*p) += 8;
   return ret;
 }
 
 static ULONGEST
-read_uleb128 (bfd *abfd, char **p)
+read_uleb128 (bfd * abfd, char **p)
 {
   ULONGEST ret;
   int i, shift;
@@ -430,8 +438,8 @@ read_uleb128 (bfd *abfd, char **p)
   i = 0;
   while (1)
     {
-      byte = bfd_get_8 (abfd, (bfd_byte *) *p);
-      (*p) ++;
+      byte = bfd_get_8 (abfd, (bfd_byte *) * p);
+      (*p)++;
       ret |= ((unsigned long) (byte & 127) << shift);
       if ((byte & 128) == 0)
 	{
@@ -443,7 +451,7 @@ read_uleb128 (bfd *abfd, char **p)
 }
 
 static LONGEST
-read_sleb128 (bfd *abfd, char **p)
+read_sleb128 (bfd * abfd, char **p)
 {
   LONGEST ret;
   int i, shift, size, num_read;
@@ -456,8 +464,8 @@ read_sleb128 (bfd *abfd, char **p)
   i = 0;
   while (1)
     {
-      byte = bfd_get_8 (abfd, (bfd_byte *) *p);
-      (*p) ++;
+      byte = bfd_get_8 (abfd, (bfd_byte *) * p);
+      (*p)++;
       ret |= ((long) (byte & 127) << shift);
       shift += 7;
       if ((byte & 128) == 0)
@@ -473,7 +481,7 @@ read_sleb128 (bfd *abfd, char **p)
 }
 
 static CORE_ADDR
-read_pointer (bfd *abfd, char **p)
+read_pointer (bfd * abfd, char **p)
 {
   switch (TARGET_ADDR_BIT / TARGET_CHAR_BIT)
     {
@@ -487,7 +495,7 @@ read_pointer (bfd *abfd, char **p)
 }
 
 static CORE_ADDR
-read_encoded_pointer (bfd *abfd, char **p, unsigned char encoding)
+read_encoded_pointer (bfd * abfd, char **p, unsigned char encoding)
 {
   CORE_ADDR ret;
 
@@ -535,7 +543,7 @@ read_encoded_pointer (bfd *abfd, char **p, unsigned char encoding)
       case DW_EH_PE_absptr:
 	break;
       case DW_EH_PE_pcrel:
-	ret += (CORE_ADDR) *p;
+	ret += (CORE_ADDR) * p;
 	break;
       case DW_EH_PE_textrel:
       case DW_EH_PE_datarel:
@@ -584,8 +592,8 @@ read_length (bfd * abfd, char *buf, int *bytes_read, int dwarf64)
 }
 
 static void
-execute_cfa_program ( struct objfile *objfile, char *insn_ptr, char *insn_end,
-		      struct context *context, struct frame_state *fs)
+execute_cfa_program (struct objfile *objfile, char *insn_ptr, char *insn_end,
+		     struct context *context, struct frame_state *fs)
 {
   struct frame_state_regs *unused_rs = NULL;
 
@@ -604,7 +612,7 @@ execute_cfa_program ( struct objfile *objfile, char *insn_ptr, char *insn_end,
 	{
 	  reg = insn & 0x3f;
 	  uoffset = read_uleb128 (objfile->obfd, &insn_ptr);
-	  offset = (long) uoffset * fs->data_align;
+	  offset = (long) uoffset *fs->data_align;
 	  fs->regs.reg[reg].how = REG_SAVED_OFFSET;
 	  fs->regs.reg[reg].loc.offset = offset;
 	}
@@ -806,13 +814,13 @@ frame_state_for (struct context *context, struct frame_state *fs)
 
   if (fde == NULL)
     return;
-  
+
   fs->pc = fde->initial_location;
 
   if (fde->cie_ptr)
-  {
+    {
       cie = fde->cie_ptr;
-      
+
       fs->code_align = cie->code_align;
       fs->data_align = cie->data_align;
       fs->retaddr_column = cie->ra;
@@ -823,11 +831,10 @@ frame_state_for (struct context *context, struct frame_state *fs)
 			   cie->data + cie->data_length, context, fs);
       execute_cfa_program (cie->objfile, fde->data,
 			   fde->data + fde->data_length, context, fs);
-  }
+    }
   else
-	internal_error (__FILE__, __LINE__,
-		"%s(): Internal error: fde->cie_ptr==NULL !", 
-		__func__);
+    internal_error (__FILE__, __LINE__,
+		    "%s(): Internal error: fde->cie_ptr==NULL !", __func__);
 }
 
 static void
@@ -854,8 +861,7 @@ get_reg (char *reg, struct context *context, int regnum)
 	      REGISTER_RAW_SIZE (regnum));
       break;
     default:
-      internal_error (__FILE__, __LINE__,
-		      "get_reg: unknown register rule");
+      internal_error (__FILE__, __LINE__, "get_reg: unknown register rule");
     }
 }
 
@@ -1208,8 +1214,8 @@ execute_stack_op (struct objfile *objfile,
 	      case DW_OP_ne:
 		result = (LONGEST) first != (LONGEST) second;
 		break;
-	      default:	/* This label is here just to avoid warning.  */
-	        break; 
+	      default:		/* This label is here just to avoid warning.  */
+		break;
 	      }
 	  }
 	  break;
@@ -1255,8 +1261,11 @@ update_context (struct context *context, struct frame_state *fs, int chain)
   CORE_ADDR cfa;
   long i;
 
+  unwind_tmp_obstack_init ();
+
   orig_context = context_alloc ();
   context_cpy (orig_context, context);
+
   /* Compute this frame's CFA.  */
   switch (fs->cfa_how)
     {
@@ -1267,9 +1276,9 @@ update_context (struct context *context, struct frame_state *fs, int chain)
 
     case CFA_EXP:
       /* ??? No way of knowing what register number is the stack pointer
-	 to do the same sort of handling as above.  Assume that if the
-	 CFA calculation is so complicated as to require a stack program
-	 that this will not be a problem.  */
+         to do the same sort of handling as above.  Assume that if the
+         CFA calculation is so complicated as to require a stack program
+         that this will not be a problem.  */
       {
 	char *exp = fs->cfa_exp;
 	ULONGEST len;
@@ -1380,7 +1389,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
   char *end = NULL;
   int from_eh = 0;
 
-  obstack_init (&unwind_tmp_obstack);
+  unwind_tmp_obstack_init ();
 
   dwarf_frame_buffer = 0;
 
@@ -1490,31 +1499,34 @@ dwarf2_build_frame_info (struct objfile *objfile)
 	      fde = fde_unit_alloc ();
 
 	      fde_chunks.array[fde_chunks.elems++] = fde;
-	      
+
 	      fde->initial_location = read_pointer (abfd, &start)
-	        + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+		+ ANOFFSET (objfile->section_offsets,
+			    SECT_OFF_TEXT (objfile));
 	      fde->address_range = read_pointer (abfd, &start);
 
 	      cie = cie_chunks;
-	      while(cie)
-	      {
-	        if (cie->objfile == objfile)
+	      while (cie)
 		{
-		  if (from_eh && (cie->offset == (unit_offset + bytes_read - cie_id)))
-		      break;
-		  if (!from_eh && (cie->offset == cie_id))
-		    break;
+		  if (cie->objfile == objfile)
+		    {
+		      if (from_eh
+			  && (cie->offset ==
+			      (unit_offset + bytes_read - cie_id)))
+			break;
+		      if (!from_eh && (cie->offset == cie_id))
+			break;
+		    }
+
+		  cie = cie->next;
 		}
 
-		cie = cie->next;
-	      }
-	    
 	      if (!cie)
 		error ("%s(): can't find CIE pointer", __func__);
 	      fde->cie_ptr = cie;
 
 	      if (cie->augmentation[0] == 'z')
-		  read_uleb128 (abfd, &start);
+		read_uleb128 (abfd, &start);
 
 	      fde->data = start;
 	      fde->data_length = block_end - start;
@@ -1535,6 +1547,8 @@ cfi_read_fp ()
   struct frame_state *fs;
   CORE_ADDR cfa;
 
+  unwind_tmp_obstack_init ();
+
   context = context_alloc ();
   fs = frame_state_alloc ();
 
@@ -1544,7 +1558,9 @@ cfi_read_fp ()
   update_context (context, fs, 0);
 
   cfa = context->cfa;
+
   unwind_tmp_obstack_free ();
+
   return cfa;
 }
 
@@ -1555,6 +1571,8 @@ cfi_write_fp (CORE_ADDR val)
 {
   struct context *context;
   struct frame_state *fs;
+
+  unwind_tmp_obstack_init ();
 
   context = context_alloc ();
   fs = frame_state_alloc ();
@@ -1603,6 +1621,8 @@ cfi_frame_chain (struct frame_info *fi)
   struct frame_state *fs;
   CORE_ADDR cfa;
 
+  unwind_tmp_obstack_init ();
+
   context = context_alloc ();
   fs = frame_state_alloc ();
   context_cpy (context, UNWIND_CONTEXT (fi));
@@ -1619,7 +1639,7 @@ cfi_frame_chain (struct frame_info *fi)
 
   cfa = context->cfa;
   unwind_tmp_obstack_free ();
-  
+
   return cfa;
 }
 
@@ -1638,6 +1658,8 @@ void
 cfi_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
   struct frame_state *fs;
+
+  unwind_tmp_obstack_init ();
 
   fs = frame_state_alloc ();
   fi->context = frame_obstack_alloc (sizeof (struct context));
@@ -1658,6 +1680,7 @@ cfi_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       frame_state_for (UNWIND_CONTEXT (fi), fs);
       update_context (UNWIND_CONTEXT (fi), fs, 0);
     }
+
   unwind_tmp_obstack_free ();
 }
 
@@ -1764,6 +1787,8 @@ cfi_virtual_frame_pointer (CORE_ADDR pc, int *frame_reg,
 {
   struct context *context;
   struct frame_state *fs;
+
+  unwind_tmp_obstack_init ();
 
   context = context_alloc ();
   fs = frame_state_alloc ();

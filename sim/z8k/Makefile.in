@@ -49,14 +49,11 @@ tc-gen3.h:writecode
 tc-genb3.h:writecode
 	./writecode  -b3 >tc-genb3.h
 
-writecode: writecode.o list.o bquick.o
-	$(CC_FOR_BUILD) -o writecode writecode.o list.o bquick.o
+writecode: writecode.o bquick.o
+	$(CC_FOR_BUILD) -o writecode writecode.o bquick.o
 
 writecode.o: writecode.c $(CONFIG_H)
 	$(CC_FOR_BUILD) -c $(CFLAGS) $(HDEFINES) $(CSEARCH) $(CSWITCHES) $(srcdir)/writecode.c
-
-list.o: list.c
-	$(CC_FOR_BUILD) -c $(CFLAGS) $(HDEFINES) $(CSEARCH) $(CSWITCHES) $(srcdir)/list.c
 
 # Two copies of quick.o are created.  One for $build and one for $host.
 bquick.o: quick.c

@@ -25,7 +25,7 @@ SIM_EXTRA_CLEAN = clean-extra
 # Select mn10200 support in nltvals.def.
 NL_TARGET = -DNL_TARGET_mn10200
 
-INCLUDE = mn10200_sim.h $(srcdir)/../../include/callback.h
+INCLUDE = mn10200_sim.h $(srcdir)/../../include/gdb/callback.h
 
 ## COMMON_POST_CONFIG_FRAG
 

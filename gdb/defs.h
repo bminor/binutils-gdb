@@ -222,6 +222,14 @@ enum precision_type
     unspecified_precision
   };
 
+/* A generic, not quite boolean, enumeration.  */
+enum auto_boolean
+{
+  AUTO_BOOLEAN_TRUE,
+  AUTO_BOOLEAN_FALSE,
+  AUTO_BOOLEAN_AUTO
+};
+
 /* the cleanup list records things that have to be undone
    if an error happens (descriptors to be closed, memory to be freed, etc.)
    Each link in the chain records a function to call and an

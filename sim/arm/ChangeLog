@@ -1,3 +1,25 @@
+2002-06-16  Andrew Cagney  <ac131313@redhat.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+2002-06-12  Andrew Cagney  <ac131313@redhat.com>
+
+	* Makefile.in: Update copyright.
+	(wrapper.o): Specify dependencies.
+	* wrapper.c: Include "gdb/sim-arm.h".
+	(sim_store_register, sim_fetch_register): Rewrite using `enum
+	arm_sim_regs' and a switch.
+
+2002-06-09  Andrew Cagney  <cagney@redhat.com>
+
+	* wrapper.c: Include "gdb/callback.h" and "gdb/remote-sim.h".
+	* armos.c: Include "gdb/callback.h".
+
+2002-05-29  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* armcopro.c (XScale_check_memacc): Set the FSR and FAR registers
+	if a Data Abort is detected.
+
 2002-05-27  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* armvirt.c (GetWord): Only perform access checks if 'check'

@@ -278,7 +278,7 @@ static int SerparOpen(const char *name, const char *arg)
 
     serpar_reset();
 
-#if defined(__unix) || defined(__CYGWIN32__)
+#if defined(__unix) || defined(__CYGWIN__)
     Unix_ioctlNonBlocking();
 #endif
 

@@ -36,8 +36,8 @@ typedef address_word sim_cia;
 
 #include "opcode/m68hc11.h"
 
-#include "callback.h"
-#include "remote-sim.h"
+#include "gdb/callback.h"
+#include "gdb/remote-sim.h"
 #include "opcode/m68hc11.h"
 #include "sim-types.h"
 

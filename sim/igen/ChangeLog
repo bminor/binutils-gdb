@@ -1,3 +1,23 @@
+2002-06-17  Andrew Cagney  <cagney@redhat.com>
+
+	* gen.c (gen_entry_expand_opcode): Initialize ``value'' to -1 and
+	``t'' to NULL.
+	* igen.c (main): Add default case to switch.
+	* gen-icache.c (print_icache_extraction): Ditto.
+
+2002-06-17  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in (BUILD_CFLAGS): Remove -O0.
+
+2002-06-16  Andrew Cagney  <ac131313@redhat.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+2002-06-03  Richard Henderson  <rth@redhat.com>
+
+	* gen-engine.c (print_run_body): Avoid multi-line strings.
+	* lf.c (lf_print__gnu_copyleft): Likewise.
+
 2002-05-01  Chris Demetriou  <cgd@broadcom.com>
 
 	* igen.c: Use 'deprecated' rather than 'depreciated.'

@@ -36,10 +36,15 @@
 #include "solib-svr4.h"
 
 #include "arm-tdep.h"
+#include "gdb/sim-arm.h"
 
 #include "elf-bfd.h"
 #include "coff/internal.h"
 #include "elf/arm.h"
+
+#include "gdb_assert.h"
+
+static int arm_debug;
 
 /* Each OS has a different mechanism for accessing the various
    registers stored in the sigcontext structure.
@@ -1407,104 +1412,125 @@ static CORE_ADDR
 arm_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		    int struct_return, CORE_ADDR struct_addr)
 {
-  char *fp;
-  int argnum, argreg, nstack_size;
+  CORE_ADDR fp;
+  int argnum;
+  int argreg;
+  int nstack;
+  int simd_argreg;
+  int second_pass;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
   /* Walk through the list of args and determine how large a temporary
      stack is required.  Need to take care here as structs may be
-     passed on the stack, and we have to to push them.  */
-  nstack_size = -4 * REGISTER_SIZE;	/* Some arguments go into A1-A4.  */
-  if (struct_return)			/* The struct address goes in A1.  */
-    nstack_size += REGISTER_SIZE;
-
-  /* Walk through the arguments and add their size to nstack_size.  */
-  for (argnum = 0; argnum < nargs; argnum++)
+     passed on the stack, and we have to to push them.  On the second
+     pass, do the store.  */
+  nstack = 0;
+  fp = sp;
+  for (second_pass = 0; second_pass < 2; second_pass++)
     {
-      int len;
-      struct type *arg_type;
+      /* Compute the FP using the information computed during the
+         first pass.  */
+      if (second_pass)
+	fp = sp - nstack;
 
-      arg_type = check_typedef (VALUE_TYPE (args[argnum]));
-      len = TYPE_LENGTH (arg_type);
+      simd_argreg = 0;
+      argreg = ARM_A1_REGNUM;
+      nstack = 0;
 
-      nstack_size += len;
-    }
-
-  /* Allocate room on the stack, and initialize our stack frame
-     pointer.  */
-  fp = NULL;
-  if (nstack_size > 0)
-    {
-      sp -= nstack_size;
-      fp = (char *) sp;
-    }
-
-  /* Initialize the integer argument register pointer.  */
-  argreg = ARM_A1_REGNUM;
-
-  /* The struct_return pointer occupies the first parameter passing
-     register.  */
-  if (struct_return)
-    write_register (argreg++, struct_addr);
-
-  /* Process arguments from left to right.  Store as many as allowed
-     in the parameter passing registers (A1-A4), and save the rest on
-     the temporary stack.  */
-  for (argnum = 0; argnum < nargs; argnum++)
-    {
-      int len;
-      char *val;
-      CORE_ADDR regval;
-      enum type_code typecode;
-      struct type *arg_type, *target_type;
-
-      arg_type = check_typedef (VALUE_TYPE (args[argnum]));
-      target_type = TYPE_TARGET_TYPE (arg_type);
-      len = TYPE_LENGTH (arg_type);
-      typecode = TYPE_CODE (arg_type);
-      val = (char *) VALUE_CONTENTS (args[argnum]);
-
-#if 1
-      /* I don't know why this code was disable. The only logical use
-         for a function pointer is to call that function, so setting
-         the mode bit is perfectly fine.  FN */
-      /* If the argument is a pointer to a function, and it is a Thumb
-         function, set the low bit of the pointer.  */
-      if (TYPE_CODE_PTR == typecode
-	  && NULL != target_type
-	  && TYPE_CODE_FUNC == TYPE_CODE (target_type))
+      /* The struct_return pointer occupies the first parameter
+	 passing register.  */
+      if (struct_return)
 	{
-	  CORE_ADDR regval = extract_address (val, len);
-	  if (arm_pc_is_thumb (regval))
-	    store_address (val, len, MAKE_THUMB_ADDR (regval));
-	}
-#endif
-      /* Copy the argument to general registers or the stack in
-         register-sized pieces.  Large arguments are split between
-         registers and stack.  */
-      while (len > 0)
-	{
-	  int partial_len = len < REGISTER_SIZE ? len : REGISTER_SIZE;
-
-	  if (argreg <= ARM_LAST_ARG_REGNUM)
+	  if (second_pass)
 	    {
-	      /* It's an argument being passed in a general register.  */
-	      regval = extract_address (val, partial_len);
-	      write_register (argreg++, regval);
+	      if (arm_debug)
+		fprintf_unfiltered (gdb_stdlog,
+				    "struct return in %s = 0x%s\n",
+				    REGISTER_NAME (argreg),
+				    paddr (struct_addr));
+	      write_register (argreg, struct_addr);
 	    }
-	  else
+	  argreg++;
+	}
+
+      for (argnum = 0; argnum < nargs; argnum++)
+	{
+	  int len;
+	  struct type *arg_type;
+	  struct type *target_type;
+	  enum type_code typecode;
+	  char *val;
+	  
+	  arg_type = check_typedef (VALUE_TYPE (args[argnum]));
+	  len = TYPE_LENGTH (arg_type);
+	  target_type = TYPE_TARGET_TYPE (arg_type);
+	  typecode = TYPE_CODE (arg_type);
+	  val = VALUE_CONTENTS (args[argnum]);
+	  
+	  /* If the argument is a pointer to a function, and it is a
+	     Thumb function, create a LOCAL copy of the value and set
+	     the THUMB bit in it.  */
+	  if (second_pass
+	      && TYPE_CODE_PTR == typecode
+	      && target_type != NULL
+	      && TYPE_CODE_FUNC == TYPE_CODE (target_type))
 	    {
-	      /* Push the arguments onto the stack.  */
-	      write_memory ((CORE_ADDR) fp, val, REGISTER_SIZE);
-	      fp += REGISTER_SIZE;
+	      CORE_ADDR regval = extract_address (val, len);
+	      if (arm_pc_is_thumb (regval))
+		{
+		  val = alloca (len);
+		  store_address (val, len, MAKE_THUMB_ADDR (regval));
+		}
 	    }
 
-	  len -= partial_len;
-	  val += partial_len;
+	  /* Copy the argument to general registers or the stack in
+	     register-sized pieces.  Large arguments are split between
+	     registers and stack.  */
+	  while (len > 0)
+	    {
+	      int partial_len = len < REGISTER_SIZE ? len : REGISTER_SIZE;
+	      
+	      if (argreg <= ARM_LAST_ARG_REGNUM)
+		{
+		  /* The argument is being passed in a general purpose
+		     register.  */
+		  if (second_pass)
+		    {
+		      CORE_ADDR regval = extract_address (val,
+							  partial_len);
+		      if (arm_debug)
+			fprintf_unfiltered (gdb_stdlog,
+					    "arg %d in %s = 0x%s\n",
+					    argnum,
+					    REGISTER_NAME (argreg),
+					    phex (regval, REGISTER_SIZE));
+		      write_register (argreg, regval);
+		    }
+		  argreg++;
+		}
+	      else
+		{
+		  if (second_pass)
+		    {
+		      /* Push the arguments onto the stack.  */
+		      if (arm_debug)
+			fprintf_unfiltered (gdb_stdlog,
+					    "arg %d @ 0x%s + %d\n",
+					    argnum, paddr (fp), nstack);
+		      write_memory (fp + nstack, val, REGISTER_SIZE);
+		    }
+		  nstack += REGISTER_SIZE;
+		}
+	      
+	      len -= partial_len;
+	      val += partial_len;
+	    }
+
 	}
     }
 
-  /* Return adjusted stack pointer.  */
-  return sp;
+  /* Return the botom of the argument list (pointed to by fp).  */
+  return fp;
 }
 
 /* Pop the current frame.  So long as the frame info has been
@@ -1558,7 +1584,8 @@ print_fpu_flags (int flags)
 /* Print interesting information about the floating point processor
    (if present) or emulator.  */
 static void
-arm_print_float_info (void)
+arm_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
+		      struct frame_info *frame)
 {
   register unsigned long status = read_register (ARM_FPS_REGNUM);
   int type;
@@ -1635,6 +1662,27 @@ arm_register_virtual_size (int regnum)
     return STATUS_REGISTER_SIZE;
 }
 
+/* Map GDB internal REGNUM onto the Arm simulator register numbers.  */
+static int
+arm_register_sim_regno (int regnum)
+{
+  int reg = regnum;
+  gdb_assert (reg >= 0 && reg < NUM_REGS);
+
+  if (reg < NUM_GREGS)
+    return SIM_ARM_R0_REGNUM + reg;
+  reg -= NUM_GREGS;
+
+  if (reg < NUM_FREGS)
+    return SIM_ARM_FP0_REGNUM + reg;
+  reg -= NUM_FREGS;
+
+  if (reg < NUM_SREGS)
+    return SIM_ARM_FPS_REGNUM + reg;
+  reg -= NUM_SREGS;
+
+  internal_error (__FILE__, __LINE__, "Bad REGNUM %d", regnum);
+}
 
 /* NOTE: cagney/2001-08-20: Both convert_from_extended() and
    convert_to_extended() use floatformat_arm_ext_littlebyte_bigword.
@@ -2869,16 +2917,19 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_max_register_virtual_size (gdbarch, FP_REGISTER_VIRTUAL_SIZE);
   set_gdbarch_register_virtual_type (gdbarch, arm_register_type);
 
+  /* Internal <-> external register number maps.  */
+  set_gdbarch_register_sim_regno (gdbarch, arm_register_sim_regno);
+
   /* Integer registers are 4 bytes.  */
   set_gdbarch_register_size (gdbarch, 4);
   set_gdbarch_register_name (gdbarch, arm_register_name);
 
   /* Returning results.  */
-  set_gdbarch_extract_return_value (gdbarch, arm_extract_return_value);
+  set_gdbarch_deprecated_extract_return_value (gdbarch, arm_extract_return_value);
   set_gdbarch_store_return_value (gdbarch, arm_store_return_value);
   set_gdbarch_store_struct_return (gdbarch, arm_store_struct_return);
   set_gdbarch_use_struct_convention (gdbarch, arm_use_struct_convention);
-  set_gdbarch_extract_struct_value_address (gdbarch,
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch,
 					    arm_extract_struct_value_address);
 
   /* Single stepping.  */
@@ -3076,4 +3127,10 @@ The valid values are:\n");
   prologue_cache.saved_regs = NULL;
   prologue_cache.extra_info = (struct frame_extra_info *)
     xcalloc (1, sizeof (struct frame_extra_info));
+
+  /* Debugging flag.  */
+  add_show_from_set (add_set_cmd ("arm", class_maintenance, var_zinteger,
+				  &arm_debug, "Set arm debugging.\n\
+When non-zero, arm specific debugging is enabled.", &setdebuglist),
+		     &showdebuglist);
 }

@@ -1,5 +1,5 @@
 /* Native-dependent code for FreeBSD/i386.
-   Copyright 2001 Free Software Foundation, Inc.
+   Copyright 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -79,7 +79,7 @@ _initialize_i386fbsd_nat (void)
 {
   /* FreeBSD provides a kern.ps_strings sysctl that we can use to
      locate the sigtramp.  That way we can still recognize a sigtramp
-     if it's location is changed in a new kernel.  Of course this is
+     if its location is changed in a new kernel.  Of course this is
      still based on the assumption that the sigtramp is placed
      directly under the location where the program arguments and
      environment can be found.  */
@@ -89,13 +89,16 @@ _initialize_i386fbsd_nat (void)
     int ps_strings;
     size_t len;
 
+    extern CORE_ADDR i386fbsd_sigtramp_start;
+    extern CORE_ADDR i386fbsd_sigtramp_end;
+
     mib[0] = CTL_KERN;
     mib[1] = KERN_PS_STRINGS;
     len = sizeof (ps_strings);
     if (sysctl (mib, 2, &ps_strings, &len, NULL, 0) == 0)
       {
-	i386bsd_sigtramp_start = ps_strings - 128;
-	i386bsd_sigtramp_end = ps_strings;
+	i386fbsd_sigtramp_start = ps_strings - 128;
+	i386fbsd_sigtramp_end = ps_strings;
       }
   }
 #endif

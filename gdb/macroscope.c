@@ -58,7 +58,7 @@ sal_macro_scope (struct symtab_and_line sal)
 
 
 struct macro_scope *
-default_macro_scope ()
+default_macro_scope (void)
 {
   struct symtab_and_line sal;
   struct macro_source_file *main;

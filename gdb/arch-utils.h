@@ -48,7 +48,7 @@ extern gdbarch_frameless_function_invocation_ftype generic_frameless_function_in
 extern gdbarch_return_value_on_stack_ftype generic_return_value_on_stack_not;
 
 /* Map onto old REGISTER_NAMES. */
-extern char *legacy_register_name (int i);
+extern const char *legacy_register_name (int i);
 
 /* Accessor for old global function pointer for disassembly. */
 extern int legacy_print_insn (bfd_vma vma, disassemble_info *info);
@@ -93,11 +93,6 @@ extern void set_architecture_from_arch_mach (enum bfd_architecture, unsigned lon
    status indicates that the target did not like the change. */
 
 extern int (*target_architecture_hook) (const struct bfd_arch_info *);
-
-
-/* Default raw->sim register re-numbering - does nothing. */
-
-extern int default_register_sim_regno (int reg_nr);
 
 /* Identity function on a CORE_ADDR.  Just returns its parameter.  */
 
@@ -147,7 +142,9 @@ extern int generic_in_solib_call_trampoline (CORE_ADDR pc, char *name);
 
 extern int generic_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc);
 
-extern void default_print_float_info (void);
+extern void default_print_float_info (struct gdbarch *gdbarch,
+				      struct ui_file *file,
+				      struct frame_info *frame);
 
 /* Assume that the world is sane, a registers raw and virtual size
    both match its type.  */
@@ -165,6 +162,12 @@ extern int legacy_pc_in_sigtramp (CORE_ADDR pc, char *name);
 extern int legacy_convert_register_p (int regnum);
 extern void legacy_register_to_value (int regnum, struct type *type, char *from, char *to);
 extern void legacy_value_to_register (struct type *type, int regnum, char *from, char *to);
+
+/* For compatibility with older architectures, returns
+   (LEGACY_SIM_REGNO_IGNORE) when the register doesn't have a valid
+   name.  */
+
+extern int legacy_register_sim_regno (int regnum);
 
 /* Initialize a ``struct info''.  Can't use memset(0) since some
    default values are not zero.  */

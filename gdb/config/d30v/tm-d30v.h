@@ -188,7 +188,7 @@ void d30v_do_registers_info (int regnum, int fpregs);
 /* Extract from an array REGBUF containing the (raw) register state
    the address in which a function should return its structure value,
    as a CORE_ADDR (or an expression that can be used as one).  */
-#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) (((CORE_ADDR *)(REGBUF))[2])
+#define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) (((CORE_ADDR *)(REGBUF))[2])
 
 
 /* Define other aspects of the stack frame. 
@@ -291,7 +291,7 @@ extern CORE_ADDR d30v_push_arguments (int, struct value **, CORE_ADDR, int,
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  */
 
-#define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
+#define DEPRECATED_EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
 d30v_extract_return_value(TYPE, REGBUF, VALBUF)
 extern void d30v_extract_return_value (struct type *, char *, char *);
 

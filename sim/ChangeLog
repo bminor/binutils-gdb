@@ -1,3 +1,18 @@
+2002-06-16  Andrew Cagney  <ac131313@redhat.com>
+
+	* Makefile.in (autoconf-changelog autoheader-changelog): Let name,
+	id, date and host to be overriden by NAME, ID, DATE and HOST
+	respectfully.  Use ISO dates.
+
+Thu Jun  6 12:34:13 2002  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in (ChangeLog): New makefile variable.
+	* README-HACKING: Mention the ChangeLog makefile variable.
+
+2002-06-01  Andrew Cagney  <ac131313@redhat.com>
+
+	* tic80/: Delete directory.
+
 2002-05-16  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* MAINTAINERS: Update my email address.

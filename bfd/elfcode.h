@@ -1,6 +1,6 @@
 /* ELF executable support for BFD.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001 Free Software Foundation, Inc.
+   2001, 2002 Free Software Foundation, Inc.
 
    Written by Fred Fish @ Cygnus Support, from information published
    in "UNIX System V Release 4, Programmers Guide: ANSI C and
@@ -203,12 +203,14 @@ static char *elf_symbol_flags PARAMS ((flagword));
    format.  */
 
 void
-elf_swap_symbol_in (abfd, src, shndx, dst)
+elf_swap_symbol_in (abfd, psrc, pshn, dst)
      bfd *abfd;
-     const Elf_External_Sym *src;
-     const Elf_External_Sym_Shndx *shndx;
+     const PTR psrc;
+     const PTR pshn;
      Elf_Internal_Sym *dst;
 {
+  const Elf_External_Sym *src = (const Elf_External_Sym *) psrc;
+  const Elf_External_Sym_Shndx *shndx = (const Elf_External_Sym_Shndx *) pshn;
   int signed_vma = get_elf_backend_data (abfd)->sign_extend_vma;
 
   dst->st_name = H_GET_32 (abfd, src->st_name);
@@ -622,6 +624,10 @@ elf_object_p (abfd)
   if (i_ehdrp->e_shentsize != sizeof (x_shdr) && i_ehdrp->e_shnum != 0)
     goto got_wrong_format_error;
 
+  /* Further sanity check.  */
+  if (i_ehdrp->e_shoff == 0 && i_ehdrp->e_shnum != 0)
+    goto got_wrong_format_error;
+
   ebd = get_elf_backend_data (abfd);
 
   /* Check that the ELF e_machine field matches what this particular
@@ -675,25 +681,28 @@ elf_object_p (abfd)
   /* Remember the entry point specified in the ELF file header.  */
   bfd_set_start_address (abfd, i_ehdrp->e_entry);
 
-  /* Seek to the section header table in the file.  */
-  if (bfd_seek (abfd, (file_ptr) i_ehdrp->e_shoff, SEEK_SET) != 0)
-    goto got_no_match;
+  if (i_ehdrp->e_shoff != 0)
+    {
+      /* Seek to the section header table in the file.  */
+      if (bfd_seek (abfd, (file_ptr) i_ehdrp->e_shoff, SEEK_SET) != 0)
+	goto got_no_match;
 
-  /* Read the first section header at index 0, and convert to internal
-     form.  */
-  if (bfd_bread ((PTR) & x_shdr, (bfd_size_type) sizeof x_shdr, abfd)
-      != sizeof (x_shdr))
-    goto got_no_match;
-  elf_swap_shdr_in (abfd, &x_shdr, &i_shdr);
+      /* Read the first section header at index 0, and convert to internal
+	 form.  */
+      if (bfd_bread ((PTR) & x_shdr, (bfd_size_type) sizeof x_shdr, abfd)
+	  != sizeof (x_shdr))
+	goto got_no_match;
+      elf_swap_shdr_in (abfd, &x_shdr, &i_shdr);
 
-  /* If the section count is zero, the actual count is in the first
-     section header.  */
-  if (i_ehdrp->e_shnum == SHN_UNDEF)
-    i_ehdrp->e_shnum = i_shdr.sh_size;
+      /* If the section count is zero, the actual count is in the first
+	 section header.  */
+      if (i_ehdrp->e_shnum == SHN_UNDEF)
+	i_ehdrp->e_shnum = i_shdr.sh_size;
 
-  /* And similarly for the string table index.  */
-  if (i_ehdrp->e_shstrndx == SHN_XINDEX)
-    i_ehdrp->e_shstrndx = i_shdr.sh_link;
+      /* And similarly for the string table index.  */
+      if (i_ehdrp->e_shstrndx == SHN_XINDEX)
+	i_ehdrp->e_shstrndx = i_shdr.sh_link;
+    }
 
   /* Allocate space for a copy of the section header table in
      internal form.  */
@@ -749,7 +758,7 @@ elf_object_p (abfd)
 	}
     }
 
-  if (i_ehdrp->e_shstrndx)
+  if (i_ehdrp->e_shstrndx && i_ehdrp->e_shoff)
     {
       if (! bfd_section_from_shdr (abfd, i_ehdrp->e_shstrndx))
 	goto got_no_match;
@@ -787,7 +796,7 @@ elf_object_p (abfd)
      bfd_section_from_shdr with it (since this particular strtab is
      used to find all of the ELF section names.) */
 
-  if (i_ehdrp->e_shstrndx != 0)
+  if (i_ehdrp->e_shstrndx != 0 && i_ehdrp->e_shoff)
     {
       unsigned int num_sec;
 
@@ -1242,8 +1251,9 @@ elf_slurp_symbol_table (abfd, symptrs, dynamic)
       /* Skip first symbol, which is a null dummy.  */
       for (i = 1; i < symcount; i++)
 	{
-	  elf_swap_symbol_in (abfd, x_symp + i,
-			      x_shndx + (x_shndx != NULL ? i : 0), &i_sym);
+	  elf_swap_symbol_in (abfd, (const PTR) (x_symp + i),
+			      (const PTR) (x_shndx + (x_shndx ? i : 0)),
+			      &i_sym);
 	  memcpy (&sym->internal_elf_sym, &i_sym, sizeof (Elf_Internal_Sym));
 #ifdef ELF_KEEP_EXTSYM
 	  memcpy (&sym->native_elf_sym, x_symp + i, sizeof (Elf_External_Sym));
@@ -1695,6 +1705,7 @@ const struct elf_size_info NAME(_bfd_elf,size_info) = {
   elf_write_out_phdrs,
   elf_write_shdrs_and_ehdr,
   elf_write_relocs,
+  elf_swap_symbol_in,
   elf_swap_symbol_out,
   elf_slurp_reloc_table,
   elf_slurp_symbol_table,

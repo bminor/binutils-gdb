@@ -310,7 +310,7 @@ extern void pa_do_strcat_registers_info (int, int, struct ui_file *, enum precis
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  */
 
-#define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
+#define DEPRECATED_EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
   hppa_extract_return_value (TYPE, REGBUF, VALBUF);
 
  /* elz: decide whether the function returning a value of type type
@@ -337,20 +337,19 @@ extern use_struct_convention_fn hppa_use_struct_convention;
    the address in which a function should return its structure value,
    as a CORE_ADDR (or an expression that can be used as one).  */
 
-#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
+#define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
   (*(int *)((REGBUF) + REGISTER_BYTE (28)))
 
 /* elz: Return a large value, which is stored on the stack at addr.
-   This is defined only for the hppa, at this moment. 
-   The above macro EXTRACT_STRUCT_VALUE_ADDRESS is not called anymore,
-   because it assumes that on exit from a called function which returns
-   a large structure on the stack, the address of the ret structure is 
-   still in register 28. Unfortunately this register is usually overwritten
-   by the called function itself, on hppa. This is specified in the calling
-   convention doc. As far as I know, the only way to get the return value
-   is to have the caller tell us where it told the callee to put it, rather
-   than have the callee tell us.
- */
+   This is defined only for the hppa, at this moment.  The above macro
+   DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS is not called anymore,
+   because it assumes that on exit from a called function which
+   returns a large structure on the stack, the address of the ret
+   structure is still in register 28. Unfortunately this register is
+   usually overwritten by the called function itself, on hppa. This is
+   specified in the calling convention doc. As far as I know, the only
+   way to get the return value is to have the caller tell us where it
+   told the callee to put it, rather than have the callee tell us.  */
 #define VALUE_RETURNED_FROM_STACK(valtype,addr) \
   hppa_value_returned_from_stack (valtype, addr)
 

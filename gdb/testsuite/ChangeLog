@@ -4,15 +4,50 @@
 	out what version of MI is running. Use this to determine the proper
 	output of setting a breakpoint.
 
-2002-05-27  Michael Chastain  <mec@shout.net>
-From Benjamin Kosnik  <bkoz@redhat.com>
+2002-06-11  Jim Blandy  <jimb@redhat.com>
 
+	* lib/gdb.exp (get_debug_format): Tolerate message saying whether
+	preprocessor macro information is present.
+
+	* macscp.exp, macscp1.c, macscp2.h, macscp3.h, macscp4.h: New
+	tests.
+
+2002-06-06  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/overlays.exp: Record addresses of overlay
+	functions in TCL variables rather than in GDB variables,
+	to avoid having GDB convert them to pointers (with loss
+	of information).
+
+	* gdb.base/d10v.ld: Merge in several years worth of 
+	default linker script changes.
+	* gdb.base/long_long.exp: Add check for sizeof (long double).
+
+2002-06-06  Michal Ludvig  <mludvig@suse.cz>
+
+	* gdb.asm/asm-source.exp: Add x86-64 target.
+	* gdb.asm/x86_64.inc: New.
+	
+2002-05-30  Michael Chastain  <mec@shout.net>
+
+	From Benjamin Kosnik <bkoz@redhat.com>:
+	* gdb.c++/m-static.cc: New file.
+	* gdb.c++/m-static.exp: New file.
+
+2002-05-28  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/call-ar-st.exp: Allow for reduced floating point
+	precision.
+
+2002-05-27  Michael Chastain  <mec@shout.net>
+
+	From Benjamin Kosnik <bkoz@redhat.com>:
 	* gdb.c++/m-data.cc: New file.
 	* gdb.c++/m-data.exp: New file.
 
 2002-05-27  Michael Chastain  <mec@shout.net>
-From Benjamin Kosnik  <bkoz@redhat.com>
 
+	From Benjamin Kosnik <bkoz@redhat.com>:
 	* gdb.c++/try_catch.cc: New file.
 	* gdb.c++/try_catch.exp: New file.	
 

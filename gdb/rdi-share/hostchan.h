@@ -15,14 +15,6 @@
 #ifndef angsd_hostchan_h
 #define angsd_hostchan_h
 
-/* If under Cygwin, provide backwards compatibility with older
-   Cygwin compilers that don't define the current cpp define. */
-#ifdef __CYGWIN32__
-#ifndef __CYGWIN__
-#define __CYGWIN__
-#endif
-#endif
-
 /* A temporary sop to older compilers */
 #if defined (__NetBSD__) || defined (unix)
 #  ifndef __unix              /* (good for long-term portability?)  */
@@ -31,7 +23,7 @@
 #endif
 
 /* struct timeval */
-#if defined(__unix) || defined(__CYGWIN32__)
+#if defined(__unix) || defined(__CYGWIN__)
 #  include <sys/time.h>
 #else
 #  include "winsock.h"

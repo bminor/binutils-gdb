@@ -1456,6 +1456,7 @@ b_out_bfd_get_relocated_section_contents (output_bfd, link_info, link_order,
 #define b_out_bfd_link_split_section  _bfd_generic_link_split_section
 #define b_out_bfd_gc_sections  bfd_generic_gc_sections
 #define b_out_bfd_merge_sections  bfd_generic_merge_sections
+#define b_out_bfd_discard_group bfd_generic_discard_group
 
 #define aout_32_get_section_contents_in_window \
   _bfd_generic_get_section_contents_in_window

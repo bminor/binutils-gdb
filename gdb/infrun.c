@@ -3910,7 +3910,6 @@ struct inferior_status
   CORE_ADDR step_resume_break_address;
   int stop_after_trap;
   int stop_soon_quietly;
-  CORE_ADDR selected_frame_address;
   char *stop_registers;
 
   /* These are here because if call_function_by_hand has written some
@@ -3918,7 +3917,9 @@ struct inferior_status
      any registers.  */
   char *registers;
 
-  int selected_level;
+  /* A frame unique identifier.  */
+  struct frame_id selected_frame_id;
+
   int breakpoint_proceeded;
   int restore_stack_info;
   int proceed_to_finish;
@@ -3987,38 +3988,21 @@ save_inferior_status (int restore_stack_info)
 
   read_register_bytes (0, inf_status->registers, REGISTER_BYTES);
 
-  record_selected_frame (&(inf_status->selected_frame_address),
-			 &(inf_status->selected_level));
+  get_frame_id (selected_frame, &inf_status->selected_frame_id);
   return inf_status;
 }
-
-struct restore_selected_frame_args
-{
-  CORE_ADDR frame_address;
-  int level;
-};
 
 static int
 restore_selected_frame (void *args)
 {
-  struct restore_selected_frame_args *fr =
-  (struct restore_selected_frame_args *) args;
+  struct frame_id *fid =  (struct frame_id *) args;
   struct frame_info *frame;
-  int level = fr->level;
 
-  frame = find_relative_frame (get_current_frame (), &level);
+  frame = frame_find_by_id (*fid);
 
   /* If inf_status->selected_frame_address is NULL, there was no
      previously selected frame.  */
-  if (frame == NULL ||
-  /*  FRAME_FP (frame) != fr->frame_address || */
-  /* elz: deleted this check as a quick fix to the problem that
-     for function called by hand gdb creates no internal frame
-     structure and the real stack and gdb's idea of stack are
-     different if nested calls by hands are made.
-
-     mvs: this worries me.  */
-      level != 0)
+  if (frame == NULL)
     {
       warning ("Unable to restore previously selected frame.\n");
       return 0;
@@ -4066,19 +4050,14 @@ restore_inferior_status (struct inferior_status *inf_status)
 
   if (target_has_stack && inf_status->restore_stack_info)
     {
-      struct restore_selected_frame_args fr;
-      fr.level = inf_status->selected_level;
-      fr.frame_address = inf_status->selected_frame_address;
       /* The point of catch_errors is that if the stack is clobbered,
-         walking the stack might encounter a garbage pointer and error()
-         trying to dereference it.  */
-      if (catch_errors (restore_selected_frame, &fr,
+         walking the stack might encounter a garbage pointer and
+         error() trying to dereference it.  */
+      if (catch_errors (restore_selected_frame, &inf_status->selected_frame_id,
 			"Unable to restore previously selected frame:\n",
 			RETURN_MASK_ERROR) == 0)
 	/* Error in restoring the selected frame.  Select the innermost
 	   frame.  */
-
-
 	select_frame (get_current_frame ());
 
     }

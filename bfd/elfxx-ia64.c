@@ -174,7 +174,7 @@ static boolean elfNN_ia64_relax_section
 static boolean is_unwind_section_name
   PARAMS ((bfd *abfd, const char *));
 static boolean elfNN_ia64_section_from_shdr
-  PARAMS ((bfd *, ElfNN_Internal_Shdr *, char *));
+  PARAMS ((bfd *, ElfNN_Internal_Shdr *, const char *));
 static boolean elfNN_ia64_section_flags
   PARAMS ((flagword *, ElfNN_Internal_Shdr *));
 static boolean elfNN_ia64_fake_sections
@@ -812,7 +812,8 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 	  /* A local symbol.  */
 	  esym = extsyms + ELFNN_R_SYM (irel->r_info);
 	  shndx = shndx_buf + (shndx_buf ? ELFNN_R_SYM (irel->r_info) : 0);
-	  bfd_elfNN_swap_symbol_in (abfd, esym, shndx, &isym);
+	  bfd_elfNN_swap_symbol_in (abfd, (const PTR) esym, (const PTR) shndx,
+				    &isym);
 	  if (isym.st_shndx == SHN_UNDEF)
 	    continue;	/* We can't do anthing with undefined symbols.  */
 	  else if (isym.st_shndx == SHN_ABS)
@@ -1047,7 +1048,7 @@ static boolean
 elfNN_ia64_section_from_shdr (abfd, hdr, name)
      bfd *abfd;
      ElfNN_Internal_Shdr *hdr;
-     char *name;
+     const char *name;
 {
   asection *newsect;
 

@@ -547,7 +547,7 @@ cris_elf_grok_psinfo (abfd, note)
 static const bfd_byte elf_cris_plt0_entry[PLT_ENTRY_SIZE] =
 {
   0xfc, 0xe1,
-  0x7e, 0x7e,	/* push mof. */
+  0x7e, 0x7e,	/* push mof.  */
   0x7f, 0x0d,   /*  (dip [pc+]) */
   0, 0, 0, 0,	/*  Replaced with address of .got + 4.  */
   0x30, 0x7a,	/* move [...],mof */

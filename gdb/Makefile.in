@@ -568,10 +568,12 @@ LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
 getopt_h =	$(INCLUDE_DIR)/getopt.h
 floatformat_h =	$(INCLUDE_DIR)/floatformat.h
 bfd_h =		$(BFD_DIR)/bfd.h
+callback_h =	$(INCLUDE_DIR)/gdb/callback.h
 dis_asm_h =	$(INCLUDE_DIR)/dis-asm.h 
-remote_sim_h =	$(INCLUDE_DIR)/remote-sim.h
+remote_sim_h =	$(INCLUDE_DIR)/gdb/remote-sim.h
 demangle_h =    $(INCLUDE_DIR)/demangle.h
 obstack_h =     $(INCLUDE_DIR)/obstack.h
+sim_arm_h =	$(INCLUDE_DIR)/gdb/sim-arm.h
 sim_d10v_h =	$(INCLUDE_DIR)/gdb/sim-d10v.h
 splay_tree_h =  $(INCLUDE_DIR)/splay-tree.h
 
@@ -635,6 +637,9 @@ gdbcmd_h =	gdbcmd.h $(command_h) $(ui_out_h)
 gdbcore_h =	gdbcore.h $(bfd_h)
 gdbthread_h =	gdbthread.h $(breakpoint_h)
 gdbtypes_h =	gdbtypes.h
+i386_tdep_h =	i386-tdep.h
+i386_linux_tdep_h = i386-linux-tdep.h
+i387_tdep_h =	i387-tdep.h
 inf_loop_h =  	inf-loop.h
 inferior_h =	inferior.h $(breakpoint_h)
 interps_h =	interps.h
@@ -647,12 +652,14 @@ memattr_h =     memattr.h
 monitor_h =	monitor.h
 objfiles_h =	objfiles.h
 parser_defs_h =	parser-defs.h $(doublest_h)
+ppc_tdep_h =	ppc-tdep.h osabi.h
 regcache_h =	regcache.h
 remote_h =	remote.h
 remote_utils_h =  remote-utils.h $(target_h)
 ser_unix_h =	ser-unix.h
 serial_h =	serial.h
 sh_tdep_h =	sh-tdep.h osabi.h
+sim_regno_h =	sim-regno.h
 solist_h =	solist.h
 source_h =	source.h
 stabsread_h =	stabsread.h
@@ -842,7 +849,16 @@ uninstall: force $(CONFIG_UNINSTALL)
 # list includes a file twice (because of some mistake somewhere else) 
 # the _initialize_* function will be included twice in init.c. Second, 
 # init.c may force unnecessary files to be linked in.
-#
+
+# FIXME: cagney/2002-06-09: gdb/564: gdb/563: Force the order so that
+# the first call is to _initialize_gdbtypes.  This is a hack to ensure
+# that all the architecture dependant global builtin_type_* variables
+# are initialized before anything else (per-architecture code is
+# called in the same order that it is registered).  The ``correct
+# fix'' is to have all the builtin types made part of the architecture
+# and initialize them on-demand (using gdbarch_data) just like
+# everything else.  The catch is that other modules still take the
+# address of these builtin types forcing them to be variables, sigh!
 
 INIT_FILES = $(OBS) $(TSOBS) $(CONFIG_OBS) $(CONFIG_INITS)
 init.c: $(INIT_FILES)
@@ -867,7 +883,8 @@ init.c: $(INIT_FILES)
 	    -e 's,signals\.c,signals/signals\.c,' \
 	    -e 's|\([^  ][^     ]*\)|$(srcdir)/\1|g' | \
 	while read f; do grep '^_initialize_[a-z_0-9A-Z]* *(' $$f 2>/dev/null; done | \
-	sed -e 's/^.*://' -e 's/^\([a-z_0-9A-Z]*\).*/\1/' > init.l-tmp
+	sed -e 's/^.*://' -e 's/^\([a-z_0-9A-Z]*\).*/\1/' | \
+	( echo _initialize_gdbtypes ; grep -v -e '^_initialize_gdbtypes$$' ) > init.l-tmp
 	@echo '/* Do not modify this file.  */' >>init.c-tmp
 	@echo '/* It is created automatically by the Makefile.  */'>>init.c-tmp
 	@echo '#include "defs.h"' >>init.c-tmp
@@ -1226,7 +1243,8 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	nindy-share/ttyflush.c nindy-tdep.c \
 	ns32k-tdep.c solib-osf.c \
 	somread.c somsolib.c $(HPREAD_SOURCE) \
-	ppc-linux-nat.c ppc-linux-tdep.c \
+	ppc-sysv-tdep.o ppc-linux-nat.c ppc-linux-tdep.c \
+	ppcnbsd-nat.o ppcnbsd-tdep.o \
 	procfs.c \
 	remote-adapt.c remote-array.c remote-bug.c remote-e7000.c remote-eb.c \
 	remote-es.c remote-hms.c remote-mips.c \
@@ -1239,6 +1257,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	sh-tdep.c shnbsd-tdep.c shnbsd-nat.c \
 	solib.c solib-svr4.c solib-sunos.c sparc-linux-nat.c \
 	sparc-nat.c \
+	sparc64nbsd-nat.c sparcnbsd-nat.c sparcnbsd-tdep.c \
 	sparc-tdep.c sparcl-tdep.c sun3-nat.c \
 	symm-tdep.c symm-nat.c \
 	vax-tdep.c \
@@ -1293,7 +1312,7 @@ arm-tdep.o: arm-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(gdb_string_h) $(dis_asm_h) $(regcache_h) $(doublest_h) \
 	$(value_h) $(arch_utils_h) $(solib_svr4_h) $(arm_tdep_h) \
 	$(BFD_SRC)/elf-bfd.h $(INCLUDE_DIR)/coff/internal.h \
-	$(INCLUDE_DIR)/elf/arm.h 
+	$(INCLUDE_DIR)/elf/arm.h $(sim_arm_h) $(gdb_assert_h)
 
 armnbsd-nat.o: armnbsd-nat.c $(defs_h) $(arm_tdep_h) $(inferior_h) \
 	$(regcache_h) $(gdbcore_h)
@@ -1406,7 +1425,8 @@ dcache.o: dcache.c $(dcache_h) $(defs_h) $(gdbcmd_h) $(gdb_string_h) \
 d10v-tdep.o: d10v-tdep.c $(defs_h) $(frame_h) $(obstack_h) $(symtab_h) \
 	$(gdbtypes_h) $(gdbcmd_h) $(gdbcore_h) $(gdb_string_h) $(value_h) \
 	$(inferior_h) $(dis-asm_h) $(symfile_h) $(objfiles_h) $(language_h) \
-	$(arch_utils_h) $(regcache_h) $(floatformat_h) $(sim_d10v_h)
+	$(arch_utils_h) $(regcache_h) $(floatformat_h) $(sim_d10v_h) \
+	$(sim_regno_h)
 
 dbxread.o: dbxread.c $(breakpoint_h) $(buildsym_h) $(command_h) \
 	$(complaints_h) $(defs_h) $(expression_h) $(gdb_stabs_h) $(gdbcore_h) \
@@ -1585,7 +1605,7 @@ arch-utils.o: arch-utils.c $(defs_h) $(bfd_h) $(gdbcmd_h) \
 	$(arch_utils_h) $(gdb_assert_h) $(inferior_h) \
 	$(gdb_string_h) $(symtab.h) $(frame_h) $(breakpoint_h) $(gdb_wait_h) \
 	$(gdbcore_h) $(target_h) $(annotate_h) $(regcache_h) $(gdb_assert_h) \
-	$(version_h) $(floatformat_h)
+	$(version_h) $(floatformat_h) $(sim_regno_h)
 
 gdbtypes.o: gdbtypes.c $(bfd_h) $(complaints_h) $(defs_h) $(expression_h) \
 	$(gdbtypes_h) $(language_h) $(objfiles_h) $(symfile_h) $(symtab_h) \
@@ -1661,7 +1681,8 @@ i386v-nat.o: i386v-nat.c $(floatformat_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) $(language_h) $(target_h)
 
 i386-linux-nat.o: i386-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
-	$(symtab_h) $(symfile_h) $(objfiles_h) $(regcache_h)
+	$(symtab_h) $(symfile_h) $(objfiles_h) $(regcache_h) \
+	$(i386_linux_tdep_h) $(i386_tdep_h) $(i387_tdep_h)
 
 i386-linux-tdep.o: i386-linux-tdep.c $(defs_h) $(gdbcore_h) $(frame_h) \
 	$(value_h) $(regcache_h)
@@ -1900,10 +1921,20 @@ ppc-bdm.o: ppc-bdm.c $(defs_h) $(gdbcore_h) $(gdb_string_h) $(frame_h) \
 	$(objfiles_h) $(gdb_stabs_h) $(serial_h) ocd.h $(regcache_h)
 
 ppc-linux-nat.o: ppc-linux-nat.c $(defs_h) $(gdbcore_h) $(frame_h) \
-	$(inferior_h) $(target_h) $(regcache_h) ppc-tdep.h
+	$(inferior_h) $(target_h) $(regcache_h) $(ppc_tdep_h)
 
 ppc-linux-tdep.o: ppc-linux-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) \
-	$(target_h) ppc-tdep.h $(regcache_h) $(value_h)
+	$(target_h) $(ppc_tdep_h) $(regcache_h) $(value_h)
+
+ppc-sysv-tdep.o: ppc-sysv-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) \
+	$(value_h) $(regcache_h) $(ppc_tdep_h)
+
+ppcnbsd-nat.o: ppcnbsd-nat.c $(defs_h) $(inferior_h) $(ppc_tdep_h) \
+	ppcnbsd-tdep.h
+
+ppcnbsd-tdep.o: ppcnbsd-tdep.c $(defs_h) $(gdbcore_h) $(regcache_h) \
+	$(target_h) $(breakpoint_h) $(value_h) $(ppc_tdep_t) ppcnbsd-tdep.h \
+	nbsd-tdep.h
 
 ppcbug-rom.o: ppcbug-rom.c $(monitor_h) $(bfd_h) $(gdb_wait_h) $(defs_h) \
 	$(gdbcmd_h) $(inferior_h) $(target_h) $(serial_h) $(terminal_h) \
@@ -1961,7 +1992,7 @@ rdi-share/libangsd.a:	force
 	fi
 
 remote-rdp.o: remote-rdp.c $(defs_h) $(gdbcore_h) \
-	$(inferior_h) $(gdb_string_h) $(arm_tdep_h)
+	$(inferior_h) $(gdb_string_h) $(arm_tdep_h) $(callback_h)
 
 remote-bug.o: remote-bug.c $(defs_h) $(gdbcore_h) $(serial_h) \
 	$(inferior_h) $(target_h) $(terminal_h) $(remote_utils_h) \
@@ -1998,8 +2029,9 @@ remote-sds.o: remote-sds.c $(bfd_h) $(defs_h) $(gdbcmd_h) \
 	$(gdb_string_h) $(regcache_h)
 
 remote-sim.o: remote-sim.c $(defs_h) $(inferior_h) $(value_h) $(gdb_string_h) \
-	$(terminal_h) $(target_h) $(gdbcore_h) $(INCLUDE_DIR)/callback.h \
-	$(remote_sim_h) $(remote_utils_h) $(command_h) $(regcache_h) 
+	$(terminal_h) $(target_h) $(gdbcore_h) $(callback_h) \
+	$(remote_sim_h) $(remote_utils_h) $(command_h) $(regcache_h) \
+	$(sim_regno_h)
 
 remote-st.o: remote-st.c $(defs_h) $(gdbcore_h) $(serial_h) \
 	$(target_h) $(gdb_string_h) $(regcache_h)
@@ -2039,7 +2071,7 @@ rs6000-nat.o: rs6000-nat.c $(bfd_h) $(defs_h) $(inferior_h) $(target_h) \
 	$(gdb_stabs_h) $(regcache_h) $(arch_utils_h)
 
 rs6000-tdep.o: rs6000-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) \
-	$(target_h) ppc-tdep.h $(regcache_h) $(value_h) $(parser_defs_h)
+	$(target_h) $(ppc_tdep_h) $(regcache_h) $(value_h) $(parser_defs_h)
 
 s390-tdep.o: s390-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) $(inferior_h) \
 	$(symtab_h) $(target_h) $(gdbcore_h) $(gdbcmd_h) $(symfile_h) \
@@ -2110,9 +2142,19 @@ sparc-nat.o: sparc-nat.c $(bfd_h) $(defs_h) $(inferior_h) $(gdbcore_h) \
 
 sparc-tdep.o: sparc-tdep.c $(floatformat_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) $(objfiles_h) $(symfile_h) $(target_h) $(gdb_string_h) \
-	$(arch_utils_h) $(regcache_h)
+	$(arch_utils_h) $(regcache_h) osabi.h
 
 sparcl-tdep.o: sparcl-tdep.c $(defs_h) $(gdbcore_h) $(target_h) $(regcache_h)
+
+sparc64nbsd-nat.o: sparc64nbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
+	sparcnbsd-tdep.h
+
+sparcnbsd-nat.o: sparcnbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
+	sparcnbsd-tdep.h 
+
+sparcnbsd-tdep.o: sparcnbsd-tdep.c $(defs_h) $(gdbcore_h) $(regcache_h) \
+	$(target_h) $(value_h) osabi.h sparcnbsd-tdep.h nbsd-tdep.h \
+	solib-svr4.h
 
 xstormy16-tdep.o: xstormy16-tdep.c $(defs_h) $(value_h) $(inferior_h) \
 	$(symfile_h) $(arch_utils_h) $(regcache_h) $(gdbcore_h)

@@ -481,6 +481,7 @@ sim_events_schedule (SIM_DESC sd,
 		     void *data)
 {
   va_list dummy;
+  memset (&dummy, 0, sizeof dummy);
   return sim_events_schedule_vtracef (sd, delta_time, handler, data,
 				      NULL, dummy);
 }

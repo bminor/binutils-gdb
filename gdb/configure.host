@@ -153,6 +153,7 @@ sparc-*-*)		gdb_host=sun4os4 ;;
 sparc64-*-freebsd*|ultrasparc-*-freebsd*|sparcv9-*-freebsd*)
 			gdb_host=fbsd ;;
 sparc64-*-linux*)	gdb_host=linux ;;
+sparc64-*-netbsd*)	gdb_host=nbsd64 ;;
 sparcv9-*-* | sparc64-*-*) gdb_host=sun4sol2 ;;
 
 strongarm-*-*)		gdb_host=arm ;;

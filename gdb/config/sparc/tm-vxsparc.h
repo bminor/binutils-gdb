@@ -20,7 +20,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "sparc/tm-spc-em.h"
-#include "tm-vxworks.h"
+#include "config/tm-vxworks.h"
 
 /* FIXME: These are almost certainly wrong. */
 

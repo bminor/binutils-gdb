@@ -3,7 +3,7 @@
 #include <ctype.h>
 #include <limits.h>
 #include "ansidecl.h"
-#include "callback.h"
+#include "gdb/callback.h"
 #include "opcode/d10v.h"
 #include "bfd.h"
 
@@ -21,7 +21,7 @@
 
 extern int d10v_debug;
 
-#include "remote-sim.h"
+#include "gdb/remote-sim.h"
 #include "sim-config.h"
 #include "sim-types.h"
 
@@ -318,7 +318,7 @@ enum
 #define PSW CREG (PSW_CR)
 #define SET_PSW(VAL) SET_CREG (PSW_CR, (VAL))
 #define SET_HW_PSW(VAL) SET_HW_CREG (PSW_CR, (VAL))
-#define SET_PSW_BIT(MASK,VAL) move_to_cr (PSW_CR, ~(MASK), (VAL) ? (MASK) : 0, 1)
+#define SET_PSW_BIT(MASK,VAL) move_to_cr (PSW_CR, ~((reg_t) MASK), (VAL) ? (MASK) : 0, 1)
 
 #define PSW_SM ((PSW & PSW_SM_BIT) != 0)
 #define SET_PSW_SM(VAL) SET_PSW_BIT (PSW_SM_BIT, (VAL))
@@ -435,7 +435,7 @@ do \
   { \
     int test_i = i < 0 ? i : ~((i) - 1); \
     if (PSW_MD && GPR (x) == (MOD_E & test_i)) \
-      SET_GPR (x, MOD_S); \
+      SET_GPR (x, MOD_S & test_i); \
     else \
       SET_GPR (x, GPR (x) + (i)); \
   } \

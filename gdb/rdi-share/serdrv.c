@@ -254,7 +254,7 @@ static int SerialOpen(const char *name, const char *arg)
 
     serial_reset();
 
-#if defined(__unix) || defined(__CYGWIN32__)
+#if defined(__unix) || defined(__CYGWIN__)
     Unix_ioctlNonBlocking();
 #endif
 

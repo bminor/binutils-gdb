@@ -53,9 +53,9 @@ static gdbarch_register_convert_to_virtual_ftype
     alpha_register_convert_to_virtual;
 static gdbarch_register_convert_to_raw_ftype alpha_register_convert_to_raw;
 static gdbarch_store_struct_return_ftype alpha_store_struct_return;
-static gdbarch_extract_return_value_ftype alpha_extract_return_value;
+static gdbarch_deprecated_extract_return_value_ftype alpha_extract_return_value;
 static gdbarch_store_return_value_ftype alpha_store_return_value;
-static gdbarch_extract_struct_value_address_ftype
+static gdbarch_deprecated_extract_struct_value_address_ftype
     alpha_extract_struct_value_address;
 static gdbarch_use_struct_convention_ftype alpha_use_struct_convention;
 
@@ -277,7 +277,7 @@ push_sigtramp_desc (CORE_ADDR low_addr)
 }
 
 
-static char *
+static const char *
 alpha_register_name (int regno)
 {
   static char *register_names[] =
@@ -649,11 +649,13 @@ heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
 		     struct frame_info *next_frame)
 {
   CORE_ADDR sp = read_next_frame_reg (next_frame, SP_REGNUM);
+  CORE_ADDR vfp = sp;
   CORE_ADDR cur_pc;
   int frame_size;
   int has_frame_reg = 0;
   unsigned long reg_mask = 0;
   int pcreg = -1;
+  int regno;
 
   if (start_pc == 0)
     return NULL;
@@ -678,7 +680,12 @@ heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
       if ((word & 0xffff0000) == 0x23de0000)	/* lda $sp,n($sp) */
 	{
 	  if (word & 0x8000)
-	    frame_size += (-word) & 0xffff;
+          {
+            /* Consider only the first stack allocation instruction
+               to contain the static size of the frame. */
+            if (frame_size == 0)
+	        frame_size += (-word) & 0xffff;
+          }
 	  else
 	    /* Exit loop if a positive stack adjustment is found, which
 	       usually means that the stack cleanup code in the function
@@ -690,7 +697,16 @@ heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
 	{
 	  int reg = (word & 0x03e00000) >> 21;
 	  reg_mask |= 1 << reg;
-	  temp_saved_regs[reg] = sp + (short) word;
+
+          /* Do not compute the address where the register was saved yet,
+             because we don't know yet if the offset will need to be
+             relative to $sp or $fp (we can not compute the address relative
+             to $sp if $sp is updated during the execution of the current
+             subroutine, for instance when doing some alloca). So just store
+             the offset for the moment, and compute the address later
+             when we know whether this frame has a frame pointer or not.
+           */
+          temp_saved_regs[reg] = (short) word;
 
 	  /* Starting with OSF/1-3.2C, the system libraries are shipped
 	     without local symbols, but they still contain procedure
@@ -719,8 +735,15 @@ heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
 	}
       else if ((word & 0xffe0ffff) == 0x6be08001)	/* ret zero,reg,1 */
 	pcreg = (word >> 16) & 0x1f;
-      else if (word == 0x47de040f)	/* bis sp,sp fp */
-	has_frame_reg = 1;
+      else if (word == 0x47de040f || word == 0x47fe040f) /* bis sp,sp fp */
+        {
+          /* ??? I am not sure what instruction is 0x47fe040f, and I
+             am suspecting that there was a typo and should have been
+             0x47fe040f. I'm keeping it in the test above until further
+             investigation */
+	    has_frame_reg = 1;
+          vfp = read_next_frame_reg (next_frame, ALPHA_GCC_FP_REGNUM);
+        }
     }
   if (pcreg == -1)
     {
@@ -759,6 +782,18 @@ heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
     PROC_FRAME_REG (&temp_proc_desc) = ALPHA_GCC_FP_REGNUM;
   else
     PROC_FRAME_REG (&temp_proc_desc) = SP_REGNUM;
+
+  /* At this point, we know which of the Stack Pointer or the Frame Pointer
+     to use as the reference address to compute the saved registers address.
+     But in both cases, the processing above has set vfp to this reference
+     address, so just need to increment the offset of each saved register
+     by this address. */
+  for (regno = 0; regno < NUM_REGS; regno++)
+    {
+      if (reg_mask & 1 << regno)
+	temp_saved_regs[regno] += vfp;
+    }
+
   PROC_FRAME_OFFSET (&temp_proc_desc) = frame_size;
   PROC_REG_MASK (&temp_proc_desc) = reg_mask;
   PROC_PC_REG (&temp_proc_desc) = (pcreg == -1) ? ALPHA_RA_REGNUM : pcreg;
@@ -1872,11 +1907,11 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_get_saved_register (gdbarch, alpha_get_saved_register);
 
   set_gdbarch_use_struct_convention (gdbarch, alpha_use_struct_convention);
-  set_gdbarch_extract_return_value (gdbarch, alpha_extract_return_value);
+  set_gdbarch_deprecated_extract_return_value (gdbarch, alpha_extract_return_value);
 
   set_gdbarch_store_struct_return (gdbarch, alpha_store_struct_return);
   set_gdbarch_store_return_value (gdbarch, alpha_store_return_value);
-  set_gdbarch_extract_struct_value_address (gdbarch,
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch,
 					    alpha_extract_struct_value_address);
 
   /* Settings for calling functions in the inferior.  */

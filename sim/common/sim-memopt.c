@@ -46,6 +46,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 /* Memory fill byte. */
 static unsigned8 fill_byte_value;
@@ -167,7 +170,7 @@ do_memopt_add (SIM_DESC sd,
 	    {
 	      sim_io_error (sd,
 			    "Error, cannot confirm that mmap file is large enough "
-			    "(>= %d bytes)\n", bytes);
+			    "(>= %ld bytes)\n", bytes);
 	    }
 
 	  free_buffer = mmap (0, bytes, PROT_READ|PROT_WRITE, MAP_SHARED, mmap_next_fd, 0);

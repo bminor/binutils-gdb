@@ -54,7 +54,10 @@ esac
 
 # Run indent per GDB specs
 
-types="-T FILE `cat *.h | sed -n \
+types="\
+-T FILE \
+-T prgregset_t -T fpregset_t -T gregset_t \
+`cat *.h | sed -n \
     -e 's/^.*[^a-z0-9_]\([a-z0-9_]*_ftype\).*$/-T \1/p' \
     -e 's/^.*[^a-z0-9_]\([a-z0-9_]*_func\).*$/-T \1/p' \
     -e 's/^typedef.*[^a-zA-Z0-9_]\([a-zA-Z0-9_]*[a-zA-Z0-9_]\);$/-T \1/p' \

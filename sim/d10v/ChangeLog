@@ -1,3 +1,38 @@
+2002-06-17  Andrew Cagney  <cagney@redhat.com>
+
+	* d10v_sim.h (SET_PSW_BIT): Add cast to avoid inverting an enum.
+
+2002-06-16  Andrew Cagney  <ac131313@redhat.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+2002-06-13  Tom Rix  <trix@redhat.com>
+
+	* interp.c (xfer_mem): Fix transfers across multiple segments.
+ 
+2002-06-09  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in (INCLUDE): Update path to callback.h.
+	* gencode.c: Do not include "callback.h".
+	* d10v_sim.h: Include "gdb/callback.h" and "gdb/remote-sim.h".
+	* interp.c: Ditto.
+
+2002-06-08  Andrew Cagney  <cagney@redhat.com>
+
+	* interp.c (sim_fetch_register): Fix name of enum used in cast.
+	(sim_store_register): Ditto.
+
+2002-06-02  Elena Zannoni  <ezannoni@redhat.com>
+
+        From Jason Eckhardt <jle@redhat.com>
+        * d10v_sim.h (INC_ADDR): Correctly handle the case where MOD_E is
+        less than MOD_S (post-decrement).
+
+2002-06-01  Andrew Cagney  <ac131313@redhat.com>
+
+	* interp.c (sim_fetch_register, sim_store_register): Use a switch
+	statement and enums from "sim-d10v.h".
+
 2002-05-28  Elena Zannoni  <ezannoni@redhat.com>
 
 	* interp.c (sim_create_inferior): Add comment.

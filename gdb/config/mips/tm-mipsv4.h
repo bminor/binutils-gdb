@@ -19,7 +19,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "mips/tm-bigmips.h"
-#include "tm-sysv4.h"
+#include "config/tm-sysv4.h"
 
 /* The signal handler trampoline is called _sigtramp.  */
 #undef IN_SIGTRAMP

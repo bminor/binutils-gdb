@@ -21,6 +21,6 @@
 #ifndef NM_SPARCLYNX_H
 #define NM_SPARCLYNX_H
 
-#include "nm-lynx.h"
+#include "config/nm-lynx.h"
 
 #endif /* NM_SPARCLYNX_H */

@@ -43,6 +43,7 @@ typedef struct fpreg fpregset_t;
 #endif
 
 #include "gregset.h"
+#include "i386-tdep.h"
 
 
 /* In older BSD versions we cannot get at some of the segment
@@ -125,7 +126,7 @@ supply_gregset (gregset_t *gregsetp)
 {
   int i;
 
-  for (i = 0; i < NUM_GREGS; i++)
+  for (i = 0; i < I386_NUM_GREGS; i++)
     {
       if (CANNOT_FETCH_REGISTER (i))
 	supply_register (i, NULL);
@@ -143,7 +144,7 @@ fill_gregset (gregset_t *gregsetp, int regno)
 {
   int i;
 
-  for (i = 0; i < NUM_GREGS; i++)
+  for (i = 0; i < I386_NUM_GREGS; i++)
     if ((regno == -1 || regno == i) && ! CANNOT_STORE_REGISTER (i))
       regcache_collect (i, REG_ADDR (gregsetp, i));
 }
@@ -382,19 +383,39 @@ kernel_u_size (void)
   return (sizeof (struct user));
 }
 
-/* See i386bsd-tdep.c.  */
-extern int i386bsd_sigcontext_pc_offset;
-
 void
 _initialize_i386bsd_nat (void)
 {
+  int sc_pc_offset;
+
   /* To support the recognition of signal handlers, i386bsd-tdep.c
      hardcodes some constants.  Inclusion of this file means that we
      are compiling a native debugger, which means that we can use the
      system header files and sysctl(3) to get at the relevant
      information.  */
 
+#if defined (__FreeBSD_version) && __FreeBSD_version >= 400011
+  extern int i386fbsd4_sc_pc_offset;
+#define SC_PC_OFFSET i386fbsd4_sc_pc_offset
+#elif defined (NetBSD) || defined (__NetBSD_Version__)
+  extern int i386nbsd_sc_pc_offset;
+#define SC_PC_OFFSET i386nbsd_sc_pc_offset
+#else
+  extern int i386bsd_sc_pc_offset;
+#define SC_PC_OFFSET i386bsd_sc_pc_offset
+#endif
+
   /* Override the default value for the offset of the program counter
      in the sigcontext structure.  */
-  i386bsd_sigcontext_pc_offset = offsetof (struct sigcontext, sc_pc);
+  sc_pc_offset = offsetof (struct sigcontext, sc_pc);
+
+  if (SC_PC_OFFSET != sc_pc_offset)
+    {
+      warning ("\
+offsetof (struct sigcontext, sc_pc) yields %d instead of %d.\n\
+Please report this to <bug-gdb@gnu.org>.",
+	       sc_pc_offset, SC_PC_OFFSET);
+    }
+
+  SC_PC_OFFSET = sc_pc_offset;
 }

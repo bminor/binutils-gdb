@@ -20,4 +20,4 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "m88k/nm-m88k.h"
-#include "nm-sysv4.h"
+#include "config/nm-sysv4.h"

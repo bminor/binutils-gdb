@@ -273,8 +273,8 @@ extern void sparc64_write_sp (CORE_ADDR);
 #define TARGET_READ_FP() (sparc64_read_fp ())
 #define TARGET_WRITE_SP(X) (sparc64_write_sp (X))
 
-#undef EXTRACT_RETURN_VALUE
-#define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
+#undef DEPRECATED_EXTRACT_RETURN_VALUE
+#define DEPRECATED_EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
      sp64_extract_return_value(TYPE, REGBUF, VALBUF, 0)
 extern void sp64_extract_return_value (struct type *, char[], char *, int);
 

@@ -19,7 +19,7 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#include "nm-sysv4.h"
+#include "config/nm-sysv4.h"
 #undef IN_SOLIB_DYNSYM_RESOLVE_CODE
 
 #define TARGET_HAS_HARDWARE_WATCHPOINTS

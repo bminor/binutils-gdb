@@ -46,7 +46,7 @@
 #include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include "callback.h"
+#include "gdb/callback.h"
 #include "targ-vals.h"
 
 #ifndef ENOSYS

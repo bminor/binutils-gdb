@@ -27,8 +27,8 @@
 
 #include "sysdep.h"
 #include "bfd.h"
-#include "callback.h"
-#include "remote-sim.h"
+#include "gdb/callback.h"
+#include "gdb/remote-sim.h"
 
 /* This file is local - if newlib changes, then so should this.  */
 #include "syscall.h"
@@ -1717,7 +1717,7 @@ sim_resume (sd, step, siggnal)
     }
   /* Check for SIGBUS due to insn fetch.  */
   else if (! saved_state.asregs.exception)
-    saved_state.asregs.exception == SIGBUS;
+    saved_state.asregs.exception = SIGBUS;
 
   saved_state.asregs.ticks += get_now () - tick_start;
   saved_state.asregs.cycles += cycles;

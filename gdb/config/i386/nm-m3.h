@@ -20,4 +20,4 @@
 
 /* Include the generic Mach 3 definitions.  */
 
-#include "nm-m3.h"
+#include "config/nm-m3.h"

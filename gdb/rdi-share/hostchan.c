@@ -556,7 +556,7 @@ static unsigned long tv_diff(const struct timeval *time_now,
             - ((time_was->tv_sec * 1000000) + time_was->tv_usec) );
 }
 
-#if !defined(__unix) && !defined(__CYGWIN32__)
+#if !defined(__unix) && !defined(__CYGWIN__)
 static void gettimeofday( struct timeval *time_now, void *dummy )
 {
     time_t t = clock();

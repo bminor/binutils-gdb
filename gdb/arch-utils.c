@@ -42,6 +42,7 @@
 #endif
 #include "regcache.h"
 #include "gdb_assert.h"
+#include "sim-regno.h"
 
 #include "version.h"
 
@@ -91,6 +92,22 @@ legacy_breakpoint_from_pc (CORE_ADDR * pcptr, int *lenptr)
 }
 
 int
+legacy_register_sim_regno (int regnum)
+{
+  /* Only makes sense to supply raw registers.  */
+  gdb_assert (regnum >= 0 && regnum < NUM_REGS);
+  /* NOTE: cagney/2002-05-13: The old code did it this way and it is
+     suspected that some GDB/SIM combinations may rely on this
+     behavour.  The default should be one2one_register_sim_regno
+     (below).  */
+  if (REGISTER_NAME (regnum) != NULL
+      && REGISTER_NAME (regnum)[0] != '\0')
+    return regnum;
+  else
+    return LEGACY_SIM_REGNO_IGNORE;
+}
+
+int
 generic_frameless_function_invocation_not (struct frame_info *fi)
 {
   return 0;
@@ -120,7 +137,7 @@ generic_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   return 0;
 }
 
-char *
+const char *
 legacy_register_name (int i)
 {
 #ifdef REGISTER_NAMES
@@ -224,7 +241,8 @@ default_double_format (struct gdbarch *gdbarch)
 }
 
 void
-default_print_float_info (void)
+default_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
+			  struct frame_info *frame)
 {
 #ifdef FLOAT_INFO
 #if GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL
@@ -232,7 +250,8 @@ default_print_float_info (void)
 #endif
   FLOAT_INFO;
 #else
-  printf_filtered ("No floating point info available for this processor.\n");
+  fprintf_filtered (file, "\
+No floating point info available for this processor.\n");
 #endif
 }
 
@@ -266,13 +285,6 @@ generic_cannot_extract_struct_value_address (char *dummy)
 {
   return 0;
 }
-
-int
-default_register_sim_regno (int num)
-{
-  return num;
-}
-
 
 CORE_ADDR
 core_addr_identity (CORE_ADDR addr)

@@ -36,7 +36,7 @@
 #define REALTIME_LO 32
 #define REALTIME_HI 128
 
-#include "tm-linux.h"
+#include "config/tm-linux.h"
 
 /* There's an E_MIPS_ABI_O32 flag in e_flags, but we don't use it - in
    fact, using it may violate the o32 ABI.  */

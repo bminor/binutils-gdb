@@ -23,9 +23,12 @@
 
 int cont_thread;
 int general_thread;
+int step_thread;
 int thread_from_wait;
 int old_thread_from_wait;
 int extended_protocol;
+int server_waiting;
+
 jmp_buf toplevel;
 
 static unsigned char
@@ -33,11 +36,12 @@ start_inferior (char *argv[], char *statusptr)
 {
   /* FIXME Check error? Or turn to void.  */
   create_inferior (argv[0], argv);
-  /* FIXME Print pid properly.  */
-  fprintf (stderr, "Process %s created; pid = %d\n", argv[0], signal_pid);
+
+  fprintf (stderr, "Process %s created; pid = %d\n", argv[0],
+	   all_threads.head->id);
 
   /* Wait till we are at 1st instruction in program, return signal number.  */
-  return mywait (statusptr);
+  return mywait (statusptr, 0);
 }
 
 static int
@@ -48,7 +52,7 @@ attach_inferior (int pid, char *statusptr, unsigned char *sigptr)
   if (myattach (pid) != 0)
     return -1;
 
-  *sigptr = mywait (statusptr);
+  *sigptr = mywait (statusptr, 0);
 
   return 0;
 }
@@ -59,6 +63,8 @@ extern int remote_debug;
 void
 handle_query (char *own_buf)
 {
+  static struct inferior_list_entry *thread_ptr;
+
   if (strcmp ("qSymbol::", own_buf) == 0)
     {
       if (the_target->look_up_symbols != NULL)
@@ -68,6 +74,29 @@ handle_query (char *own_buf)
       return;
     }
 
+  if (strcmp ("qfThreadInfo", own_buf) == 0)
+    {
+      thread_ptr = all_threads.head;
+      sprintf (own_buf, "m%x", thread_ptr->id);
+      thread_ptr = thread_ptr->next;
+      return;
+    }
+  
+  if (strcmp ("qsThreadInfo", own_buf) == 0)
+    {
+      if (thread_ptr != NULL)
+	{
+	  sprintf (own_buf, "m%x", thread_ptr->id);
+	  thread_ptr = thread_ptr->next;
+	  return;
+	}
+      else
+	{
+	  sprintf (own_buf, "l");
+	  return;
+	}
+    }
+      
   /* Otherwise we didn't know what packet it was.  Say we didn't
      understand it.  */
   own_buf[0] = 0;
@@ -188,10 +217,14 @@ main (int argc, char *argv[])
 		case 'g':
 		  general_thread = strtol (&own_buf[2], NULL, 16);
 		  write_ok (own_buf);
-		  fetch_inferior_registers (0);
+		  set_desired_inferior (1);
 		  break;
 		case 'c':
 		  cont_thread = strtol (&own_buf[2], NULL, 16);
+		  write_ok (own_buf);
+		  break;
+		case 's':
+		  step_thread = strtol (&own_buf[2], NULL, 16);
 		  write_ok (own_buf);
 		  break;
 		default:
@@ -202,11 +235,12 @@ main (int argc, char *argv[])
 		}
 	      break;
 	    case 'g':
+	      set_desired_inferior (1);
 	      registers_to_string (own_buf);
 	      break;
 	    case 'G':
+	      set_desired_inferior (1);
 	      registers_from_string (&own_buf[1]);
-	      store_inferior_registers (-1);
 	      write_ok (own_buf);
 	      break;
 	    case 'm':
@@ -227,8 +261,9 @@ main (int argc, char *argv[])
 		signal = target_signal_to_host (sig);
 	      else
 		signal = 0;
+	      set_desired_inferior (0);
 	      myresume (0, signal);
-	      signal = mywait (&status);
+	      signal = mywait (&status, 1);
 	      prepare_resume_reply (own_buf, status, signal);
 	      break;
 	    case 'S':
@@ -237,18 +272,21 @@ main (int argc, char *argv[])
 		signal = target_signal_to_host (sig);
 	      else
 		signal = 0;
+	      set_desired_inferior (0);
 	      myresume (1, signal);
-	      signal = mywait (&status);
+	      signal = mywait (&status, 1);
 	      prepare_resume_reply (own_buf, status, signal);
 	      break;
 	    case 'c':
+	      set_desired_inferior (0);
 	      myresume (0, 0);
-	      signal = mywait (&status);
+	      signal = mywait (&status, 1);
 	      prepare_resume_reply (own_buf, status, signal);
 	      break;
 	    case 's':
+	      set_desired_inferior (0);
 	      myresume (1, 0);
-	      signal = mywait (&status);
+	      signal = mywait (&status, 1);
 	      prepare_resume_reply (own_buf, status, signal);
 	      break;
 	    case 'k':

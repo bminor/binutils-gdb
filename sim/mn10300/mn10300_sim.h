@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "ansidecl.h"
-#include "callback.h"
+#include "gdb/callback.h"
 #include "opcode/mn10300.h"
 #include <limits.h>
-#include "remote-sim.h"
+#include "gdb/remote-sim.h"
 #include "bfd.h"
 
 #ifndef INLINE

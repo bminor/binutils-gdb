@@ -41,7 +41,7 @@
 /* Flag indicating target was compiled by HP compiler */
 extern int hp_som_som_object_present;
 
-static void cp_type_print_method_args (struct type ** args, char *prefix,
+static void cp_type_print_method_args (struct type *mtype, char *prefix,
 				       char *varstring, int staticp,
 				       struct ui_file *stream);
 
@@ -147,40 +147,40 @@ cp_type_print_derivation_info (struct ui_file *stream, struct type *type)
       fputs_filtered (" ", stream);
     }
 }
+
 /* Print the C++ method arguments ARGS to the file STREAM.  */
 
 static void
-cp_type_print_method_args (struct type **args, char *prefix, char *varstring,
+cp_type_print_method_args (struct type *mtype, char *prefix, char *varstring,
 			   int staticp, struct ui_file *stream)
 {
+  struct field *args = TYPE_FIELDS (mtype);
+  int nargs = TYPE_NFIELDS (mtype);
+  int varargs = TYPE_VARARGS (mtype);
   int i;
 
   fprintf_symbol_filtered (stream, prefix, language_cplus, DMGL_ANSI);
   fprintf_symbol_filtered (stream, varstring, language_cplus, DMGL_ANSI);
   fputs_filtered ("(", stream);
-  if (args && args[!staticp] && TYPE_CODE (args[!staticp]) != TYPE_CODE_VOID)
+
+  /* Skip the class variable.  */
+  i = staticp ? 0 : 1;
+  if (nargs > i)
     {
-      i = !staticp;		/* skip the class variable */
-      while (1)
+      while (i < nargs)
 	{
-	  type_print (args[i++], "", stream, 0);
-	  if (!args[i])
-	    {
-	      fprintf_filtered (stream, " ...");
-	      break;
-	    }
-	  else if (TYPE_CODE (args[i]) != TYPE_CODE_VOID)
-	    {
-	      fprintf_filtered (stream, ", ");
-	    }
-	  else
-	    break;
+	  type_print (args[i++].type, "", stream, 0);
+
+	  if (i == nargs && varargs)
+	    fprintf_filtered (stream, ", ...");
+	  else if (i < nargs)
+	    fprintf_filtered (stream, ", ");
 	}
     }
+  else if (varargs)
+    fprintf_filtered (stream, "...");
   else if (current_language->la_language == language_cplus)
-    {
-      fprintf_filtered (stream, "void");
-    }
+    fprintf_filtered (stream, "void");
 
   fprintf_filtered (stream, ")");
 }
@@ -336,39 +336,31 @@ static void
 c_type_print_args (struct type *type, struct ui_file *stream)
 {
   int i;
-  struct type **args;
+  struct field *args;
 
   fprintf_filtered (stream, "(");
-  args = TYPE_ARG_TYPES (type);
+  args = TYPE_FIELDS (type);
   if (args != NULL)
     {
-      if (args[1] == NULL)
+      int i;
+
+      /* FIXME drow/2002-05-31: Always skips the first argument,
+	 should we be checking for static members?  */
+
+      for (i = 1; i < TYPE_NFIELDS (type); i++)
 	{
-	  fprintf_filtered (stream, "...");
-	}
-      else if ((TYPE_CODE (args[1]) == TYPE_CODE_VOID) &&
-	       (current_language->la_language == language_cplus))
-	{
-	  fprintf_filtered (stream, "void");
-	}
-      else
-	{
-	  for (i = 1;
-	       args[i] != NULL && TYPE_CODE (args[i]) != TYPE_CODE_VOID;
-	       i++)
+	  c_print_type (args[i].type, "", stream, -1, 0);
+	  if (i != TYPE_NFIELDS (type))
 	    {
-	      c_print_type (args[i], "", stream, -1, 0);
-	      if (args[i + 1] == NULL)
-		{
-		  fprintf_filtered (stream, "...");
-		}
-	      else if (TYPE_CODE (args[i + 1]) != TYPE_CODE_VOID)
-		{
-		  fprintf_filtered (stream, ",");
-		  wrap_here ("    ");
-		}
+	      fprintf_filtered (stream, ",");
+	      wrap_here ("    ");
 	    }
 	}
+      if (TYPE_VARARGS (type))
+	fprintf_filtered (stream, "...");
+      else if (i == 1
+	       && (current_language->la_language == language_cplus))
+	fprintf_filtered (stream, "void");
     }
   else if (current_language->la_language == language_cplus)
     {
@@ -1010,10 +1002,15 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 		         Let's try to reconstruct the function signature from 
 		         the symbol information */
 		      if (!TYPE_FN_FIELD_STUB (f, j))
-			cp_type_print_method_args (TYPE_FN_FIELD_ARGS (f, j), "",
-						   method_name,
-					      TYPE_FN_FIELD_STATIC_P (f, j),
-						   stream);
+			{
+			  int staticp = TYPE_FN_FIELD_STATIC_P (f, j);
+			  struct type *mtype = TYPE_FN_FIELD_TYPE (f, j);
+			  cp_type_print_method_args (mtype,
+						     "",
+						     method_name,
+						     staticp,
+						     stream);
+			}
 		      else
 			fprintf_filtered (stream, "<badly mangled name '%s'>",
 					  mangled_name);

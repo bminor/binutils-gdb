@@ -55,12 +55,14 @@ static bfd_reloc_status_type ppc64_elf_toc64_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static bfd_reloc_status_type ppc64_elf_unhandled_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+static void ppc64_elf_get_symbol_info
+  PARAMS ((bfd *, asymbol *, symbol_info *));
 static boolean ppc64_elf_set_private_flags
   PARAMS ((bfd *, flagword));
 static boolean ppc64_elf_merge_private_bfd_data
   PARAMS ((bfd *, bfd *));
 static boolean ppc64_elf_section_from_shdr
-  PARAMS ((bfd *, Elf64_Internal_Shdr *, char *));
+  PARAMS ((bfd *, Elf64_Internal_Shdr *, const char *));
 
 
 /* The name of the dynamic interpreter.  This is put in the .interp
@@ -106,7 +108,7 @@ static boolean ppc64_elf_section_from_shdr
 #define CROR_151515	0x4def7b82
 #define CROR_313131	0x4ffffb82
 
-/* .glink entries for the first 32k functions are two instructions. */
+/* .glink entries for the first 32k functions are two instructions.  */
 #define LI_R0_0		0x38000000	/* li    %r0,0		*/
 #define B_DOT		0x48000000	/* b     .		*/
 
@@ -523,7 +525,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
-	 /* FIXME: Verify.  Was complain_overflow_bitfield. */
+	 /* FIXME: Verify.  Was complain_overflow_bitfield.  */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC64_REL32",	/* name */
@@ -796,7 +798,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 0xffffffffffffffff,	/* dst_mask */
 	 true),			/* pcrel_offset */
 
-  /* 64-bit relocation to the symbol's procedure linkage table. */
+  /* 64-bit relocation to the symbol's procedure linkage table.  */
   HOWTO (R_PPC64_PLT64,		/* type */
 	 0,			/* rightshift */
 	 4,			/* size (0=byte, 1=short, 2=long, 4=64 bits) */
@@ -1386,7 +1388,7 @@ ppc64_elf_ha_reloc (abfd, reloc_entry, symbol, data,
      call the generic function.  Any adjustment will be done at final
      link time.  */
   if (output_bfd != NULL)
-    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,	
+    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,
 				  input_section, output_bfd, error_message);
 
   /* Adjust the addend for sign extension of the low 16 bits.
@@ -1417,7 +1419,7 @@ ppc64_elf_brtaken_reloc (abfd, reloc_entry, symbol, data,
      call the generic function.  Any adjustment will be done at final
      link time.  */
   if (output_bfd != NULL)
-    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,	
+    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,
 				  input_section, output_bfd, error_message);
 
   octets = reloc_entry->address * bfd_octets_per_byte (abfd);
@@ -1426,7 +1428,7 @@ ppc64_elf_brtaken_reloc (abfd, reloc_entry, symbol, data,
   r_type = (enum elf_ppc_reloc_type) reloc_entry->howto->type;
   if (r_type == R_PPC64_ADDR14_BRTAKEN
       || r_type == R_PPC64_REL14_BRTAKEN)
-    insn |= 0x01 << 21; /* 'y' or 't' bit, lowest bit of BO field. */
+    insn |= 0x01 << 21; /* 'y' or 't' bit, lowest bit of BO field.  */
 
   if (is_power4)
     {
@@ -1478,7 +1480,7 @@ ppc64_elf_sectoff_reloc (abfd, reloc_entry, symbol, data,
      call the generic function.  Any adjustment will be done at final
      link time.  */
   if (output_bfd != NULL)
-    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,	
+    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,
 				  input_section, output_bfd, error_message);
 
   /* Subtract the symbol section base address.  */
@@ -1501,7 +1503,7 @@ ppc64_elf_sectoff_ha_reloc (abfd, reloc_entry, symbol, data,
      call the generic function.  Any adjustment will be done at final
      link time.  */
   if (output_bfd != NULL)
-    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,	
+    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,
 				  input_section, output_bfd, error_message);
 
   /* Subtract the symbol section base address.  */
@@ -1529,7 +1531,7 @@ ppc64_elf_toc_reloc (abfd, reloc_entry, symbol, data,
      call the generic function.  Any adjustment will be done at final
      link time.  */
   if (output_bfd != NULL)
-    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,	
+    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,
 				  input_section, output_bfd, error_message);
 
   TOCstart = _bfd_get_gp_value (input_section->output_section->owner);
@@ -1558,7 +1560,7 @@ ppc64_elf_toc_ha_reloc (abfd, reloc_entry, symbol, data,
      call the generic function.  Any adjustment will be done at final
      link time.  */
   if (output_bfd != NULL)
-    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,	
+    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,
 				  input_section, output_bfd, error_message);
 
   TOCstart = _bfd_get_gp_value (input_section->output_section->owner);
@@ -1591,7 +1593,7 @@ ppc64_elf_toc64_reloc (abfd, reloc_entry, symbol, data,
      call the generic function.  Any adjustment will be done at final
      link time.  */
   if (output_bfd != NULL)
-    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,	
+    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,
 				  input_section, output_bfd, error_message);
 
   TOCstart = _bfd_get_gp_value (input_section->output_section->owner);
@@ -1618,7 +1620,7 @@ ppc64_elf_unhandled_reloc (abfd, reloc_entry, symbol, data,
      call the generic function.  Any adjustment will be done at final
      link time.  */
   if (output_bfd != NULL)
-    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,	
+    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,
 				  input_section, output_bfd, error_message);
 
   if (error_message != NULL)
@@ -1629,6 +1631,22 @@ ppc64_elf_unhandled_reloc (abfd, reloc_entry, symbol, data,
       *error_message = buf;
     }
   return bfd_reloc_dangerous;
+}
+
+/* Return symbol info as per usual for ELF targets, except that
+   symbols in .opd are given 'd' or 'D' for type.  */
+
+static void
+ppc64_elf_get_symbol_info (abfd, symbol, ret)
+     bfd *abfd;
+     asymbol *symbol;
+     symbol_info *ret;
+{
+  _bfd_elf_get_symbol_info (abfd, symbol, ret);
+  if (ret->type == '?'
+      && (symbol->flags & (BSF_GLOBAL | BSF_LOCAL)) != 0
+      && strcmp (symbol->section->name, ".opd") == 0)
+    ret->type = (symbol->flags & BSF_GLOBAL) != 0 ? 'D' : 'd';
 }
 
 /* Function to set whether a module needs the -mrelocatable bit set.  */
@@ -1718,7 +1736,7 @@ ppc64_elf_merge_private_bfd_data (ibfd, obfd)
 	elf_elfheader (obfd)->e_flags &= ~EF_PPC_RELOCATABLE_LIB;
 
       /* The output is -mrelocatable iff it can't be -mrelocatable-lib,
-         but each input file is either -mrelocatable or -mrelocatable-lib.  */
+	 but each input file is either -mrelocatable or -mrelocatable-lib.  */
       if (! (elf_elfheader (obfd)->e_flags & EF_PPC_RELOCATABLE_LIB)
 	  && (new_flags & (EF_PPC_RELOCATABLE_LIB | EF_PPC_RELOCATABLE))
 	  && (old_flags & (EF_PPC_RELOCATABLE_LIB | EF_PPC_RELOCATABLE)))
@@ -1757,7 +1775,7 @@ static boolean
 ppc64_elf_section_from_shdr (abfd, hdr, name)
      bfd *abfd;
      Elf64_Internal_Shdr *hdr;
-     char *name;
+     const char *name;
 {
   asection *newsect;
   flagword flags;
@@ -2690,14 +2708,14 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
 	case R_PPC64_PLT32:
 	case R_PPC64_PLT64:
 	  /* This symbol requires a procedure linkage table entry.  We
-             actually build the entry in adjust_dynamic_symbol,
-             because this might be a case of linking PIC code without
-             linking in any dynamic objects, in which case we don't
-             need to generate a procedure linkage table after all.  */
+	     actually build the entry in adjust_dynamic_symbol,
+	     because this might be a case of linking PIC code without
+	     linking in any dynamic objects, in which case we don't
+	     need to generate a procedure linkage table after all.  */
 	  if (h == NULL)
 	    {
 	      /* It does not make sense to have a procedure linkage
-                 table entry for a local symbol.  */
+		 table entry for a local symbol.  */
 	      bfd_set_error (bfd_error_bad_value);
 	      return false;
 	    }
@@ -3905,6 +3923,10 @@ ppc64_elf_size_dynamic_sections (output_bfd, info)
 	  continue;
 	}
 
+      /* .plt is in the bss section.  We don't initialise it.  */
+      if ((s->flags & SEC_LOAD) == 0)
+	continue;
+
       /* Allocate memory for the section contents.  We use bfd_zalloc
 	 here in case unused entries are not reclaimed before the
 	 section's contents are written out.  This should not happen,
@@ -4310,7 +4332,7 @@ ppc_size_one_stub (gen_entry, in_arg)
 
 /* Set up various things so that we can make a list of input sections
    for each output section included in the link.  Returns -1 on error,
-   0 when no stubs will be needed, and 1 on success. */
+   0 when no stubs will be needed, and 1 on success.  */
 
 int
 ppc64_elf_setup_section_lists (output_bfd, info)
@@ -4572,7 +4594,8 @@ get_local_syms (input_bfd, htab)
 	     isym = local_syms, shndx = shndx_buf;
 	   esym < end_sy;
 	   esym++, isym++, shndx = (shndx ? shndx + 1 : NULL))
-	bfd_elf64_swap_symbol_in (input_bfd, esym, shndx, isym);
+	bfd_elf64_swap_symbol_in (input_bfd, (const PTR) esym,
+				  (const PTR) shndx, isym);
 
       /* Now we can free the external symbols.  */
       free (shndx_buf);
@@ -5208,8 +5231,8 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  /* Branch taken prediction relocations.  */
 	case R_PPC64_ADDR14_BRTAKEN:
 	case R_PPC64_REL14_BRTAKEN:
-	  insn = 0x01 << 21; /* 'y' or 't' bit, lowest bit of BO field. */
-	  /* Fall thru. */
+	  insn = 0x01 << 21; /* 'y' or 't' bit, lowest bit of BO field.  */
+	  /* Fall thru.  */
 
 	  /* Branch not taken prediction relocations.  */
 	case R_PPC64_ADDR14_BRNTAKEN:
@@ -5591,12 +5614,17 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  relocate = true;
 		  if (r_type == R_PPC64_ADDR64 || r_type == R_PPC64_TOC)
 		    {
-		      if (is_opd && h != NULL && info->shared)
+		      if (is_opd && h != NULL)
 			{
 			  /* Lie about opd entries.  This case occurs
 			     when building shared libraries and we
 			     reference a function in another shared
-			     lib.  In that case we won't use the opd
+			     lib.  The same thing happens for a weak
+			     definition in an application that's
+			     overridden by a strong definition in a
+			     shared lib.  (I believe this is a generic
+			     bug in binutils handling of weak syms.)
+			     In these cases we won't use the opd
 			     entry in this lib;  We ought to edit the
 			     opd section to remove unused entries.  */
 			  unresolved_reloc = false;
@@ -5854,7 +5882,7 @@ ppc64_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
       Elf64_External_Rela *loc;
 
       /* This symbol has an entry in the procedure linkage table.  Set
-         it up.  */
+	 it up.  */
 
       if (htab->splt == NULL
 	  || htab->srelplt == NULL
@@ -5881,7 +5909,7 @@ ppc64_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
       Elf64_External_Rela *loc;
 
       /* This symbol has an entry in the global offset table.  Set it
-         up.  */
+	 up.  */
 
       if (htab->sgot == NULL || htab->srelgot == NULL)
 	abort ();
@@ -6108,6 +6136,7 @@ ppc64_elf_finish_dynamic_sections (output_bfd, info)
 #define bfd_elf64_bfd_merge_private_bfd_data  ppc64_elf_merge_private_bfd_data
 #define bfd_elf64_bfd_link_hash_table_create  ppc64_elf_link_hash_table_create
 #define bfd_elf64_bfd_link_hash_table_free    ppc64_elf_link_hash_table_free
+#define bfd_elf64_get_symbol_info	      ppc64_elf_get_symbol_info
 
 #define elf_backend_section_from_shdr	      ppc64_elf_section_from_shdr
 #define elf_backend_create_dynamic_sections   ppc64_elf_create_dynamic_sections

@@ -41,6 +41,7 @@
 
 #include "floatformat.h"
 #include "gdb/sim-d10v.h"
+#include "sim-regno.h"
 
 struct frame_extra_info
   {
@@ -93,6 +94,10 @@ enum
 /* Local functions */
 
 extern void _initialize_d10v_tdep (void);
+
+static CORE_ADDR d10v_read_sp (void);
+
+static CORE_ADDR d10v_read_fp (void);
 
 static void d10v_eva_prepare_to_trace (void);
 
@@ -182,7 +187,7 @@ enum ts2_regnums
     TS2_A0_REGNUM = 35
   };
 
-static char *
+static const char *
 d10v_ts2_register_name (int reg_nr)
 {
   static char *register_names[] =
@@ -208,7 +213,7 @@ enum ts3_regnums
     TS3_A0_REGNUM = 32
   };
 
-static char *
+static const char *
 d10v_ts3_register_name (int reg_nr)
 {
   static char *register_names[] =
@@ -296,6 +301,8 @@ d10v_imap_register (int reg_nr)
 static int
 d10v_ts2_register_sim_regno (int nr)
 {
+  if (legacy_register_sim_regno (nr) < 0)
+    return legacy_register_sim_regno (nr);
   if (nr >= TS2_IMAP0_REGNUM
       && nr < TS2_IMAP0_REGNUM + NR_IMAP_REGS)
     return nr - TS2_IMAP0_REGNUM + SIM_D10V_IMAP0_REGNUM;
@@ -310,6 +317,8 @@ d10v_ts2_register_sim_regno (int nr)
 static int
 d10v_ts3_register_sim_regno (int nr)
 {
+  if (legacy_register_sim_regno (nr) < 0)
+    return legacy_register_sim_regno (nr);
   if (nr >= TS3_IMAP0_REGNUM
       && nr < TS3_IMAP0_REGNUM + NR_IMAP_REGS)
     return nr - TS3_IMAP0_REGNUM + SIM_D10V_IMAP0_REGNUM;
@@ -361,6 +370,8 @@ d10v_register_virtual_type (int reg_nr)
 {
   if (reg_nr == PC_REGNUM)
     return builtin_type_void_func_ptr;
+  if (reg_nr == _SP_REGNUM || reg_nr == _FP_REGNUM)
+    return builtin_type_void_data_ptr;
   else if (reg_nr >= A0_REGNUM
       && reg_nr < (A0_REGNUM + NR_A_REGS))
     return builtin_type_int64;
@@ -439,20 +450,16 @@ d10v_pointer_to_address (struct type *type, void *buf)
     return d10v_make_daddr (addr);
 }
 
+/* Don't do anything if we have an integer, this way users can type 'x
+   <addr>' w/o having gdb outsmart them.  The internal gdb conversions
+   to the correct space are taken care of in the pointer_to_address
+   function.  If we don't do this, 'x $fp' wouldn't work.  */
 static CORE_ADDR
 d10v_integer_to_address (struct type *type, void *buf)
 {
   LONGEST val;
   val = unpack_long (type, buf);
-  if (TYPE_CODE (type) == TYPE_CODE_INT
-      && TYPE_LENGTH (type) <= TYPE_LENGTH (builtin_type_void_data_ptr))
-    /* Convert small integers that would would be directly copied into
-       a pointer variable into an address pointing into data space.  */
-    return d10v_make_daddr (val & 0xffff);
-  else
-    /* The value is too large to fit in a pointer.  Assume this was
-       intentional and that the user in fact specified a raw address.  */
-    return val;
+  return val;
 }
 
 /* Store the address of the place in which to copy the structure the
@@ -475,9 +482,20 @@ d10v_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 static void
 d10v_store_return_value (struct type *type, char *valbuf)
 {
-  write_register_bytes (REGISTER_BYTE (RET1_REGNUM),
-			valbuf,
-			TYPE_LENGTH (type));
+  char tmp = 0;
+  /* Only char return values need to be shifted right within R0.  */
+  if (TYPE_LENGTH (type) == 1
+      && TYPE_CODE (type) == TYPE_CODE_INT)
+    {
+      write_register_bytes (REGISTER_BYTE (RET1_REGNUM),
+			    &tmp, 1);	/* zero the high byte */
+      write_register_bytes (REGISTER_BYTE (RET1_REGNUM) + 1,
+			    valbuf, 1);	/* copy the low byte */
+    }
+  else
+    write_register_bytes (REGISTER_BYTE (RET1_REGNUM),
+			  valbuf,
+			  TYPE_LENGTH (type));
 }
 
 /* Extract from an array REGBUF containing the (raw) register state
@@ -843,7 +861,7 @@ d10v_frame_init_saved_regs (struct frame_info *fi)
   fi->extra_info->size = -next_addr;
 
   if (!(fp & 0xffff))
-    fp = d10v_make_daddr (read_register (SP_REGNUM));
+    fp = d10v_read_sp ();
 
   for (i = 0; i < NUM_REGS - 1; i++)
     if (fi->saved_regs[i])
@@ -870,7 +888,7 @@ d10v_frame_init_saved_regs (struct frame_info *fi)
       /* otherwise, it isn't being used, so we use the SP instead */
       if (uses_frame)
 	fi->saved_regs[SP_REGNUM] 
-	  = read_register (FP_REGNUM) + fi->extra_info->size;
+	  = d10v_read_fp () + fi->extra_info->size;
       else
 	{
 	  fi->saved_regs[SP_REGNUM] = fp + fi->extra_info->size;
@@ -1068,6 +1086,15 @@ d10v_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   int i;
   int regnum = ARG1_REGNUM;
   struct stack_item *si = NULL;
+  long val;
+
+  /* If struct_return is true, then the struct return address will
+     consume one argument-passing register.  No need to actually 
+     write the value to the register -- that's done by 
+     d10v_store_struct_return().  */
+
+  if (struct_return)
+    regnum++;
 
   /* Fill in registers and arg lists */
   for (i = 0; i < nargs; i++)
@@ -1076,38 +1103,37 @@ d10v_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
       struct type *type = check_typedef (VALUE_TYPE (arg));
       char *contents = VALUE_CONTENTS (arg);
       int len = TYPE_LENGTH (type);
+      int aligned_regnum = (regnum + 1) & ~1;
+
       /* printf ("push: type=%d len=%d\n", TYPE_CODE (type), len); */
+      if (len <= 2 && regnum <= ARGN_REGNUM)
+	/* fits in a single register, do not align */
 	{
-	  int aligned_regnum = (regnum + 1) & ~1;
-	  if (len <= 2 && regnum <= ARGN_REGNUM)
-	    /* fits in a single register, do not align */
+	  val = extract_unsigned_integer (contents, len);
+	  write_register (regnum++, val);
+	}
+      else if (len <= (ARGN_REGNUM - aligned_regnum + 1) * 2)
+	/* value fits in remaining registers, store keeping left
+	   aligned */
+	{
+	  int b;
+	  regnum = aligned_regnum;
+	  for (b = 0; b < (len & ~1); b += 2)
 	    {
-	      long val = extract_unsigned_integer (contents, len);
+	      val = extract_unsigned_integer (&contents[b], 2);
 	      write_register (regnum++, val);
 	    }
-	  else if (len <= (ARGN_REGNUM - aligned_regnum + 1) * 2)
-	    /* value fits in remaining registers, store keeping left
-	       aligned */
+	  if (b < len)
 	    {
-	      int b;
-	      regnum = aligned_regnum;
-	      for (b = 0; b < (len & ~1); b += 2)
-		{
-		  long val = extract_unsigned_integer (&contents[b], 2);
-		  write_register (regnum++, val);
-		}
-	      if (b < len)
-		{
-		  long val = extract_unsigned_integer (&contents[b], 1);
-		  write_register (regnum++, (val << 8));
-		}
+	      val = extract_unsigned_integer (&contents[b], 1);
+	      write_register (regnum++, (val << 8));
 	    }
-	  else
-	    {
-	      /* arg will go onto stack */
-	      regnum = ARGN_REGNUM + 1;
-	      si = push_stack_item (si, contents, len);
-	    }
+	}
+      else
+	{
+	  /* arg will go onto stack */
+	  regnum = ARGN_REGNUM + 1;
+	  si = push_stack_item (si, contents, len);
 	}
     }
 
@@ -1130,25 +1156,31 @@ d10v_extract_return_value (struct type *type, char regbuf[REGISTER_BYTES],
 			   char *valbuf)
 {
   int len;
-  /*    printf("RET: TYPE=%d len=%d r%d=0x%x\n", TYPE_CODE (type), TYPE_LENGTH (type), RET1_REGNUM - R0_REGNUM, (int) extract_unsigned_integer (regbuf + REGISTER_BYTE(RET1_REGNUM), REGISTER_RAW_SIZE (RET1_REGNUM)));  */
+#if 0
+  printf("RET: TYPE=%d len=%d r%d=0x%x\n", TYPE_CODE (type), 
+	 TYPE_LENGTH (type), RET1_REGNUM - R0_REGNUM, 
+	 (int) extract_unsigned_integer (regbuf + REGISTER_BYTE(RET1_REGNUM), 
+					 REGISTER_RAW_SIZE (RET1_REGNUM)));
+#endif
+  len = TYPE_LENGTH (type);
+  if (len == 1)
     {
-      len = TYPE_LENGTH (type);
-      if (len == 1)
-	{
-	  unsigned short c = extract_unsigned_integer (regbuf + REGISTER_BYTE (RET1_REGNUM), REGISTER_RAW_SIZE (RET1_REGNUM));
-	  store_unsigned_integer (valbuf, 1, c);
-	}
-      else if ((len & 1) == 0)
-	memcpy (valbuf, regbuf + REGISTER_BYTE (RET1_REGNUM), len);
-      else
-	{
-	  /* For return values of odd size, the first byte is in the
-	     least significant part of the first register.  The
-	     remaining bytes in remaining registers. Interestingly,
-	     when such values are passed in, the last byte is in the
-	     most significant byte of that same register - wierd. */
-	  memcpy (valbuf, regbuf + REGISTER_BYTE (RET1_REGNUM) + 1, len);
-	}
+      unsigned short c;
+
+      c = extract_unsigned_integer (regbuf + REGISTER_BYTE (RET1_REGNUM), 
+				    REGISTER_RAW_SIZE (RET1_REGNUM));
+      store_unsigned_integer (valbuf, 1, c);
+    }
+  else if ((len & 1) == 0)
+    memcpy (valbuf, regbuf + REGISTER_BYTE (RET1_REGNUM), len);
+  else
+    {
+      /* For return values of odd size, the first byte is in the
+	 least significant part of the first register.  The
+	 remaining bytes in remaining registers. Interestingly,
+	 when such values are passed in, the last byte is in the
+	 most significant byte of that same register - wierd. */
+      memcpy (valbuf, regbuf + REGISTER_BYTE (RET1_REGNUM) + 1, len);
     }
 }
 
@@ -1575,14 +1607,14 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
 
-  set_gdbarch_extract_return_value (gdbarch, d10v_extract_return_value);
+  set_gdbarch_deprecated_extract_return_value (gdbarch, d10v_extract_return_value);
   set_gdbarch_push_arguments (gdbarch, d10v_push_arguments);
   set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_push_return_address (gdbarch, d10v_push_return_address);
 
   set_gdbarch_store_struct_return (gdbarch, d10v_store_struct_return);
   set_gdbarch_store_return_value (gdbarch, d10v_store_return_value);
-  set_gdbarch_extract_struct_value_address (gdbarch, d10v_extract_struct_value_address);
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, d10v_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, d10v_use_struct_convention);
 
   set_gdbarch_frame_init_saved_regs (gdbarch, d10v_frame_init_saved_regs);

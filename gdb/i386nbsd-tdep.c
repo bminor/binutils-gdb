@@ -137,16 +137,6 @@ static struct core_fns i386nbsd_elfcore_fns =
   NULL					/* next */
 };
 
-/* FIXME: should be multi-arch'd */
-int
-i386nbsd_aout_use_struct_convention (int gcc_p, struct type *type)
-{
-  return !(TYPE_LENGTH (type) == 1
-	   || TYPE_LENGTH (type) == 2
-	   || TYPE_LENGTH (type) == 4
-	   || TYPE_LENGTH (type) == 8);
-}
-
 void
 _initialize_i386nbsd_tdep (void)
 {

@@ -1440,7 +1440,7 @@ proc get_debug_format { } {
     set debug_format "unknown"
     send_gdb "info source\n"
     gdb_expect 10 {
-	-re "Compiled with (.*) debugging format.\r\n$gdb_prompt $" {
+	-re "Compiled with (.*) debugging format.\r\n.*$gdb_prompt $" {
 	    set debug_format $expect_out(1,string)
 	    verbose "debug format is $debug_format"
 	    return 1;

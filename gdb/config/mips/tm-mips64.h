@@ -34,4 +34,4 @@
 #define OP_LDGPR 067		/* ld */
 
 /* Get the basic MIPS definitions.  */
-#include "tm-mips.h"
+#include "mips/tm-mips.h"

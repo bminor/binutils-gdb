@@ -2299,16 +2299,15 @@ initialize_targets (void)
 When non-zero, target debugging is enabled.", &setdebuglist),
      &showdebuglist);
 
-  add_show_from_set 
-    (add_set_boolean_cmd 
-     ("trust-readonly-sections", class_support, 
-      &trust_readonly, 
-      "Set mode for reading from readonly sections.\n\
+  add_setshow_boolean_cmd ("trust-readonly-sections", class_support, 
+			   &trust_readonly, "\
+Set mode for reading from readonly sections.\n\
 When this mode is on, memory reads from readonly sections (such as .text)\n\
 will be read from the object file instead of from the target.  This will\n\
-result in significant performance improvement for remote targets.",
-      &setlist),
-     &showlist);
+result in significant performance improvement for remote targets.", "\
+Set mode for reading from readonly sections.\n",
+			   NULL, NULL,
+			   &setlist, &showlist);
 
   add_com ("monitor", class_obscure, do_monitor_command,
 	   "Send a command to the remote monitor (remote targets only).");

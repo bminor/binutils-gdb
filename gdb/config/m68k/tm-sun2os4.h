@@ -18,4 +18,4 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "m68k/tm-sun2.h"
-#include "tm-sunos.h"
+#include "config/tm-sunos.h"

@@ -1,5 +1,5 @@
 /* D10V-specific support for 32-bit ELF
-   Copyright 1996, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1996, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
    Contributed by Martin Hunt (hunt@cygnus.com).
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -67,10 +67,10 @@ static reloc_howto_type elf_d10v_howto_table[] =
     HOWTO (R_D10V_10_PCREL_R,	/* type */
 	   2,	                /* rightshift */
 	   2,	                /* size (0 = byte, 1 = short, 2 = long) */
-	   8,	                /* bitsize */
+	   7,	                /* bitsize */
 	   true,	        /* pc_relative */
 	   0,	                /* bitpos */
-	   complain_overflow_signed, /* complain_on_overflow */
+	   complain_overflow_bitfield, /* complain_on_overflow */
 	   bfd_elf_generic_reloc, /* special_function */
 	   "R_D10V_10_PCREL_R",	/* name */
 	   false,	        /* partial_inplace */
@@ -83,10 +83,10 @@ static reloc_howto_type elf_d10v_howto_table[] =
     HOWTO (R_D10V_10_PCREL_L,	/* type */
 	   2,	                /* rightshift */
 	   2,	                /* size (0 = byte, 1 = short, 2 = long) */
-	   8,	                /* bitsize */
+	   7,	                /* bitsize */
 	   true,	        /* pc_relative */
 	   15,	                /* bitpos */
-	   complain_overflow_signed, /* complain_on_overflow */
+	   complain_overflow_bitfield, /* complain_on_overflow */
 	   bfd_elf_generic_reloc, /* special_function */
 	   "R_D10V_10_PCREL_L",	/* name */
 	   false,	        /* partial_inplace */
@@ -128,10 +128,10 @@ static reloc_howto_type elf_d10v_howto_table[] =
     HOWTO (R_D10V_18_PCREL,	/* type */
 	   2,			/* rightshift */
 	   2,			/* size (0 = byte, 1 = short, 2 = long) */
-	   16,			/* bitsize */
+	   15,			/* bitsize */
 	   true,		/* pc_relative */
 	   0,			/* bitpos */
-	   complain_overflow_signed, /* complain_on_overflow */
+	   complain_overflow_bitfield, /* complain_on_overflow */
 	   bfd_elf_generic_reloc, /* special_function */
 	   "R_D10V_18_PCREL",	/* name */
 	   false,		/* partial_inplace */

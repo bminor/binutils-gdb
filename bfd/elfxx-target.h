@@ -44,7 +44,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef bfd_elfNN_get_reloc_upper_bound
 #define bfd_elfNN_get_reloc_upper_bound _bfd_elf_get_reloc_upper_bound
 #endif
+#ifndef bfd_elfNN_get_symbol_info
 #define bfd_elfNN_get_symbol_info	_bfd_elf_get_symbol_info
+#endif
 #define bfd_elfNN_get_symtab		_bfd_elf_get_symtab
 #define bfd_elfNN_get_symtab_upper_bound _bfd_elf_get_symtab_upper_bound
 #if 0 /* done in elf-bfd.h */
@@ -124,6 +126,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef bfd_elfNN_bfd_merge_sections
 #define bfd_elfNN_bfd_merge_sections \
   _bfd_elf_merge_sections
+#endif
+
+#ifndef bfd_elfNN_bfd_discard_group
+#define bfd_elfNN_bfd_discard_group bfd_elf_discard_group
 #endif
 
 #ifndef bfd_elfNN_bfd_make_debug_symbol
@@ -376,6 +382,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef elf_backend_write_section
 #define elf_backend_write_section		NULL
 #endif
+#ifndef elf_backend_set_nonloadable_filepos
+#define elf_backend_set_nonloadable_filepos	NULL
+#endif
+#ifndef elf_backend_is_contained_by_filepos
+#define elf_backend_is_contained_by_filepos	NULL
+#endif
+#ifndef elf_backend_copy_private_bfd_data_p
+#define elf_backend_copy_private_bfd_data_p	NULL
+#endif
 #ifndef elf_backend_mips_irix_compat
 #define elf_backend_mips_irix_compat		NULL
 #endif
@@ -477,6 +492,9 @@ static const struct elf_backend_data elfNN_bed =
   elf_backend_discard_info,
   elf_backend_ignore_discarded_relocs,
   elf_backend_write_section,
+  elf_backend_set_nonloadable_filepos,
+  elf_backend_is_contained_by_filepos,
+  elf_backend_copy_private_bfd_data_p,
   elf_backend_mips_irix_compat,
   elf_backend_mips_rtype_to_howto,
   elf_backend_ecoff_debug_swap,

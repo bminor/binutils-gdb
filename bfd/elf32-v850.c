@@ -1,5 +1,5 @@
 /* V850-specific support for 32-bit ELF
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -79,7 +79,7 @@ static boolean v850_elf_link_output_symbol_hook
   PARAMS ((bfd *, struct bfd_link_info *, const char *,
 	   Elf_Internal_Sym *, asection *));
 static boolean v850_elf_section_from_shdr
-  PARAMS ((bfd *, Elf_Internal_Shdr *, char *));
+  PARAMS ((bfd *, Elf_Internal_Shdr *, const char *));
 static boolean v850_elf_gc_sweep_hook
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   const Elf_Internal_Rela *));
@@ -2135,7 +2135,7 @@ static boolean
 v850_elf_section_from_shdr (abfd, hdr, name)
      bfd *               abfd;
      Elf_Internal_Shdr * hdr;
-     char *              name;
+     const char *        name;
 {
   /* There ought to be a place to keep ELF backend specific flags, but
      at the moment there isn't one.  We just keep track of the

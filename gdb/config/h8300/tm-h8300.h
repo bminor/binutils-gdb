@@ -166,7 +166,7 @@ extern char **h8300_register_names;
 /* FIXME: Won't work with both h8/300's.  */
 
 extern void h8300_extract_return_value (struct type *, char *, char *);
-#define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
+#define DEPRECATED_EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
     h8300_extract_return_value (TYPE, (char *)(REGBUF), (char *)(VALBUF))
 
 /* Write into appropriate registers a function return value
@@ -188,7 +188,7 @@ extern void h8300_store_return_value (struct type *, char *);
    the address in which a function should return its structure value,
    as a CORE_ADDR (or an expression that can be used as one).  */
 
-#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
+#define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
      extract_address (REGBUF + REGISTER_BYTE (0), \
 		      REGISTER_RAW_SIZE (0))
 

@@ -26,6 +26,38 @@
 struct target_ops *the_target;
 
 void
+set_desired_inferior (int use_general)
+{
+  struct thread_info *found;
+
+  if (use_general == 1)
+    {
+      found = (struct thread_info *) find_inferior_id (&all_threads,
+						       general_thread);
+    }
+  else
+    {
+      found = NULL;
+
+      /* If we are continuing any (all) thread(s), use step_thread
+	 to decide which thread to step and/or send the specified
+	 signal to.  */
+      if (step_thread > 0 && (cont_thread == 0 || cont_thread == -1))
+	found = (struct thread_info *) find_inferior_id (&all_threads,
+							 step_thread);
+
+      if (found == NULL)
+	found = (struct thread_info *) find_inferior_id (&all_threads,
+							 cont_thread);
+    }
+
+  if (found == NULL)
+    current_inferior = (struct thread_info *) all_threads.head;
+  else
+    current_inferior = found;
+}
+
+void
 read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
 {
   (*the_target->read_memory) (memaddr, myaddr, len);
@@ -33,10 +65,41 @@ read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
 }
 
 int
-write_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
+write_inferior_memory (CORE_ADDR memaddr, const char *myaddr, int len)
 {
-  check_mem_write (memaddr, myaddr, len);
-  return (*the_target->write_memory) (memaddr, myaddr, len);
+  /* Lacking cleanups, there is some potential for a memory leak if the
+     write fails and we go through error().  Make sure that no more than
+     one buffer is ever pending by making BUFFER static.  */
+  static char *buffer = 0;
+  int res;
+
+  if (buffer != NULL)
+    free (buffer);
+
+  buffer = malloc (len);
+  memcpy (buffer, myaddr, len);
+  check_mem_write (memaddr, buffer, len);
+  res = (*the_target->write_memory) (memaddr, buffer, len);
+  free (buffer);
+  buffer = NULL;
+
+  return res;
+}
+
+unsigned char
+mywait (char *statusp, int connected_wait)
+{
+  unsigned char ret;
+
+  if (connected_wait)
+    server_waiting = 1;
+
+  ret = (*the_target->wait) (statusp);
+
+  if (connected_wait)
+    server_waiting = 0;
+
+  return ret;
 }
 
 void

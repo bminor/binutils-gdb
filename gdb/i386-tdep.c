@@ -36,8 +36,6 @@
 #include "value.h"
 #include "gdb_assert.h"
 
-#include "elf-bfd.h"
-
 #include "i386-tdep.h"
 
 /* Names of the registers.  The first 10 registers match the register
@@ -60,11 +58,11 @@ static char *i386_register_names[] =
 /* i386_register_offset[i] is the offset into the register file of the
    start of register number i.  We initialize this from
    i386_register_size.  */
-static int i386_register_offset[MAX_NUM_REGS];
+static int i386_register_offset[I386_SSE_NUM_REGS];
 
 /* i386_register_size[i] is the number of bytes of storage in GDB's
    register array occupied by register i.  */
-static int i386_register_size[MAX_NUM_REGS] = {
+static int i386_register_size[I386_SSE_NUM_REGS] = {
    4,  4,  4,  4,
    4,  4,  4,  4,
    4,  4,  4,  4,
@@ -80,7 +78,7 @@ static int i386_register_size[MAX_NUM_REGS] = {
 
 /* Return the name of register REG.  */
 
-char *
+const char *
 i386_register_name (int reg)
 {
   if (reg < 0)
@@ -108,18 +106,10 @@ i386_register_raw_size (int reg)
   return i386_register_size[reg];
 }
 
-/* Return the size in bytes of the virtual type of register REG.  */
-
-int
-i386_register_virtual_size (int reg)
-{
-  return TYPE_LENGTH (REGISTER_VIRTUAL_TYPE (reg));
-}
-
 /* Convert stabs register number REG to the appropriate register
    number used by GDB.  */
 
-int
+static int
 i386_stab_reg_to_regnum (int reg)
 {
   /* This implements what GCC calls the "default" register map.  */
@@ -150,10 +140,10 @@ i386_stab_reg_to_regnum (int reg)
   return NUM_REGS + NUM_PSEUDO_REGS;
 }
 
-/* Convert Dwarf register number REG to the appropriate register
+/* Convert DWARF register number REG to the appropriate register
    number used by GDB.  */
 
-int
+static int
 i386_dwarf_reg_to_regnum (int reg)
 {
   /* The DWARF register numbering includes %eip and %eflags, and
@@ -466,7 +456,7 @@ i386_get_frame_setup (CORE_ADDR pc)
    frame's nominal address is the address of a 4-byte word containing
    the calling frame's address.  */
 
-CORE_ADDR
+static CORE_ADDR
 i386_frame_chain (struct frame_info *frame)
 {
   if (frame->signal_handler_caller)
@@ -493,30 +483,24 @@ i386_frameless_function_invocation (struct frame_info *frame)
 
 /* Return the saved program counter for FRAME.  */
 
-CORE_ADDR
+static CORE_ADDR
 i386_frame_saved_pc (struct frame_info *frame)
 {
-  /* FIXME: kettenis/2001-05-09: Conditionalizing the next bit of code
-     on SIGCONTEXT_PC_OFFSET and I386V4_SIGTRAMP_SAVED_PC should be
-     considered a temporary hack.  I plan to come up with something
-     better when we go multi-arch.  */
-#if defined (SIGCONTEXT_PC_OFFSET) || defined (I386V4_SIGTRAMP_SAVED_PC)
   if (frame->signal_handler_caller)
-    return sigtramp_saved_pc (frame);
-#endif
+    {
+      CORE_ADDR (*sigtramp_saved_pc) (struct frame_info *);
+      sigtramp_saved_pc = gdbarch_tdep (current_gdbarch)->sigtramp_saved_pc;
+
+      gdb_assert (sigtramp_saved_pc != NULL);
+      return sigtramp_saved_pc (frame);
+    }
 
   return read_memory_unsigned_integer (frame->frame + 4, 4);
 }
 
-CORE_ADDR
-i386go32_frame_saved_pc (struct frame_info *frame)
-{
-  return read_memory_integer (frame->frame + 4, 4);
-}
-
 /* Immediately after a function call, return the saved pc.  */
 
-CORE_ADDR
+static CORE_ADDR
 i386_saved_pc_after_call (struct frame_info *frame)
 {
   return read_memory_unsigned_integer (read_register (SP_REGNUM), 4);
@@ -682,8 +666,8 @@ i386_frame_init_saved_regs (struct frame_info *fip)
 
 /* Return PC of first real instruction.  */
 
-int
-i386_skip_prologue (int pc)
+CORE_ADDR
+i386_skip_prologue (CORE_ADDR pc)
 {
   unsigned char op;
   int i;
@@ -765,6 +749,24 @@ i386_skip_prologue (int pc)
   return (codestream_tell ());
 }
 
+/* Use the program counter to determine the contents and size of a
+   breakpoint instruction.  Return a pointer to a string of bytes that
+   encode a breakpoint instruction, store the length of the string in
+   *LEN and optionally adjust *PC to point to the correct memory
+   location for inserting the breakpoint.
+
+   On the i386 we have a single breakpoint that fits in a single byte
+   and can be inserted anywhere.  */
+   
+static const unsigned char *
+i386_breakpoint_from_pc (CORE_ADDR *pc, int *len)
+{
+  static unsigned char break_insn[] = { 0xcc };	/* int 3 */
+  
+  *len = sizeof (break_insn);
+  return break_insn;
+}
+
 void
 i386_push_dummy_frame (void)
 {
@@ -784,6 +786,19 @@ i386_push_dummy_frame (void)
   write_register (SP_REGNUM, sp);
   write_register (FP_REGNUM, fp);
 }
+
+/* The i386 call dummy sequence:
+
+     call 11223344 (32-bit relative)
+     int 3
+
+   It is 8 bytes long.  */
+
+static LONGEST i386_call_dummy_words[] =
+{
+  0x223344e8,
+  0xcc11
+};
 
 /* Insert the (relative) function address into the call sequence
    stored at DYMMY.  */
@@ -834,49 +849,35 @@ i386_pop_frame (void)
 }
 
 
-#ifdef GET_LONGJMP_TARGET
-
-/* FIXME: Multi-arching does not set JB_PC and JB_ELEMENT_SIZE yet.  
-   Fill in with dummy value to enable compilation.  */
-#ifndef JB_PC
-#define JB_PC 0
-#endif /* JB_PC */
-
-#ifndef JB_ELEMENT_SIZE
-#define JB_ELEMENT_SIZE 4
-#endif /* JB_ELEMENT_SIZE */
-
 /* Figure out where the longjmp will land.  Slurp the args out of the
    stack.  We expect the first arg to be a pointer to the jmp_buf
-   structure from which we extract the pc (JB_PC) that we will land
-   at.  The pc is copied into PC.  This routine returns true on
+   structure from which we extract the address that we will land at.
+   This address is copied into PC.  This routine returns true on
    success.  */
 
-int
-get_longjmp_target (CORE_ADDR *pc)
+static int
+i386_get_longjmp_target (CORE_ADDR *pc)
 {
-  char buf[TARGET_PTR_BIT / TARGET_CHAR_BIT];
+  char buf[4];
   CORE_ADDR sp, jb_addr;
+  int jb_pc_offset = gdbarch_tdep (current_gdbarch)->jb_pc_offset;
+
+  /* If JB_PC_OFFSET is -1, we have no way to find out where the
+     longjmp will land.  */
+  if (jb_pc_offset == -1)
+    return 0;
 
   sp = read_register (SP_REGNUM);
-
-  if (target_read_memory (sp + SP_ARG0,	/* Offset of first arg on stack.  */
-			  buf,
-			  TARGET_PTR_BIT / TARGET_CHAR_BIT))
+  if (target_read_memory (sp + 4, buf, 4))
     return 0;
 
-  jb_addr = extract_address (buf, TARGET_PTR_BIT / TARGET_CHAR_BIT);
-
-  if (target_read_memory (jb_addr + JB_PC * JB_ELEMENT_SIZE, buf,
-			  TARGET_PTR_BIT / TARGET_CHAR_BIT))
+  jb_addr = extract_address (buf, 4);
+  if (target_read_memory (jb_addr + jb_pc_offset, buf, 4))
     return 0;
 
-  *pc = extract_address (buf, TARGET_PTR_BIT / TARGET_CHAR_BIT);
-
+  *pc = extract_address (buf, 4);
   return 1;
 }
-
-#endif /* GET_LONGJMP_TARGET */
 
 
 CORE_ADDR
@@ -927,7 +928,7 @@ i386_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
-      if (NUM_FREGS == 0)
+      if (FP0_REGNUM == 0)
 	{
 	  warning ("Cannot find floating-point return value.");
 	  memset (valbuf, 0, len);
@@ -981,7 +982,7 @@ i386_store_return_value (struct type *type, char *valbuf)
       unsigned int fstat;
       char buf[FPU_REG_RAW_SIZE];
 
-      if (NUM_FREGS == 0)
+      if (FP0_REGNUM == 0)
 	{
 	  warning ("Cannot set floating-point return value.");
 	  return;
@@ -1041,6 +1042,37 @@ i386_extract_struct_value_address (char *regbuf)
 {
   return extract_address (&regbuf[REGISTER_BYTE (LOW_RETURN_REGNUM)],
 			  REGISTER_RAW_SIZE (LOW_RETURN_REGNUM));
+}
+
+
+/* This is the variable that is set with "set struct-convention", and
+   its legitimate values.  */
+static const char default_struct_convention[] = "default";
+static const char pcc_struct_convention[] = "pcc";
+static const char reg_struct_convention[] = "reg";
+static const char *valid_conventions[] =
+{
+  default_struct_convention,
+  pcc_struct_convention,
+  reg_struct_convention,
+  NULL
+};
+static const char *struct_convention = default_struct_convention;
+
+static int
+i386_use_struct_convention (int gcc_p, struct type *type)
+{
+  enum struct_return struct_return;
+
+  if (struct_convention == default_struct_convention)
+    struct_return = gdbarch_tdep (current_gdbarch)->struct_return;
+  else if (struct_convention == pcc_struct_convention)
+    struct_return = pcc_struct_return;
+  else
+    struct_return = reg_struct_return;
+
+  return generic_use_struct_convention (struct_return == reg_struct_return,
+					type);
 }
 
 
@@ -1122,34 +1154,6 @@ i386_register_convert_to_raw (struct type *type, int regnum,
 }
      
 
-#ifdef I386V4_SIGTRAMP_SAVED_PC
-/* Get saved user PC for sigtramp from the pushed ucontext on the
-   stack for all three variants of SVR4 sigtramps.  */
-
-CORE_ADDR
-i386v4_sigtramp_saved_pc (struct frame_info *frame)
-{
-  CORE_ADDR saved_pc_offset = 4;
-  char *name = NULL;
-
-  find_pc_partial_function (frame->pc, &name, NULL, NULL);
-  if (name)
-    {
-      if (STREQ (name, "_sigreturn"))
-	saved_pc_offset = 132 + 14 * 4;
-      else if (STREQ (name, "_sigacthandler"))
-	saved_pc_offset = 80 + 14 * 4;
-      else if (STREQ (name, "sigvechandler"))
-	saved_pc_offset = 120 + 14 * 4;
-    }
-
-  if (frame->next)
-    return read_memory_integer (frame->next->frame + saved_pc_offset, 4);
-  return read_memory_integer (read_register (SP_REGNUM) + saved_pc_offset, 4);
-}
-#endif /* I386V4_SIGTRAMP_SAVED_PC */
-
-
 #ifdef STATIC_TRANSFORM_NAME
 /* SunPRO encodes the static variables.  This is not related to C++
    mangling, it is done for C too.  */
@@ -1199,6 +1203,16 @@ skip_trampoline_code (CORE_ADDR pc, char *name)
 }
 
 
+/* Return non-zero if PC and NAME show that we are in a signal
+   trampoline.  */
+
+static int
+i386_pc_in_sigtramp (CORE_ADDR pc, char *name)
+{
+  return (name && strcmp ("_sigtramp", name) == 0);
+}
+
+
 /* We have two flavours of disassembly.  The machinery on this page
    deals with switching between those.  */
 
@@ -1213,229 +1227,132 @@ gdb_print_insn_i386 (bfd_vma memaddr, disassemble_info *info)
      or intel_flavor.  */
   internal_error (__FILE__, __LINE__, "failed internal consistency check");
 }
-
 
-/* This table matches the indices assigned to enum i386_abi.  Keep
-   them in sync.  */
-static const char * const i386_abi_names[] =
-{
-  "<unknown>",
-  "SVR4",
-  "NetBSD",
-  "GNU/Linux",
-  "GNU/Hurd",
-  "Solaris",
-  "FreeBSD",
-  NULL
-};
 
+/* There are a few i386 architecture variants that differ only
+   slightly from the generic i386 target.  For now, we don't give them
+   their own source file, but include them here.  As a consequence,
+   they'll always be included.  */
 
-#define ABI_TAG_OS_GNU_LINUX	I386_ABI_LINUX
-#define ABI_TAG_OS_GNU_HURD	I386_ABI_HURD
-#define ABI_TAG_OS_GNU_SOLARIS	I386_ABI_INVALID
-#define ABI_TAG_OS_FREEBSD	I386_ABI_FREEBSD
-#define ABI_TAG_OS_NETBSD	I386_ABI_NETBSD
-
-static void
-process_note_sections (bfd *abfd, asection *sect, void *obj)
-{
-  int *abi = obj;
-  const char *name;
-  unsigned int sectsize;
-
-  name = bfd_get_section_name (abfd, sect);
-  sectsize = bfd_section_size (abfd, sect);
-
-  if (strcmp (name, ".note.ABI-tag") == 0 && sectsize > 0)
-    {
-      unsigned int name_length, data_length, note_type;
-      char *note;
-
-      /* If the section is larger than this, it's probably not what we
-	 are looking for.  */
-      if (sectsize > 128)
-	sectsize = 128;
-
-      note = alloca (sectsize);
-
-      bfd_get_section_contents (abfd, sect, note,
-				(file_ptr) 0, (bfd_size_type) sectsize);
-
-      name_length = bfd_h_get_32 (abfd, note);
-      data_length = bfd_h_get_32 (abfd, note + 4);
-      note_type = bfd_h_get_32 (abfd, note + 8);
-
-      if (name_length == 4 && data_length == 16
-	  && note_type == NT_GNU_ABI_TAG
-	  && strcmp (note + 12, "GNU") == 0)
-	{
-	  int abi_tag_os = bfd_h_get_32 (abfd, note + 16);
-
-	  /* The case numbers are from abi-tags in glibc.  */
-	  switch (abi_tag_os)
-	    {
-	    case GNU_ABI_TAG_LINUX:
-	      *abi = ABI_TAG_OS_GNU_LINUX;
-	      break;
-
-	    case GNU_ABI_TAG_HURD:
-	      *abi = ABI_TAG_OS_GNU_HURD;
-	      break;
-
-	    case GNU_ABI_TAG_SOLARIS:
-	      *abi = ABI_TAG_OS_GNU_SOLARIS;
-	      break;
-
-	    default:
-	      internal_error
-		(__FILE__, __LINE__,
-		 "process_note_abi_sections: unknown ABI OS tag %d",
-		 abi_tag_os);
-	      break;
-	    }
-	}
-      else if (name_length == 8 && data_length == 4
-	       && note_type == NT_FREEBSD_ABI_TAG
-	       && strcmp (note + 12, "FreeBSD") == 0)
-	*abi = ABI_TAG_OS_FREEBSD;
-    }
-  /* NetBSD uses a similar trick.  */
-  else if (strcmp (name, ".note.netbsd.ident") == 0 && sectsize > 0)
-    {
-      unsigned int name_length, desc_length, note_type;
-      char *note;
-
-      /* If the section is larger than this, it's probably not what we are
-         looking for.  */
-      if (sectsize > 128)
-	sectsize = 128;
-
-      note = alloca (sectsize);
-
-      bfd_get_section_contents (abfd, sect, note,
-				(file_ptr) 0, (bfd_size_type) sectsize);
-
-      name_length = bfd_h_get_32 (abfd, note);
-      desc_length = bfd_h_get_32 (abfd, note + 4);
-      note_type = bfd_h_get_32 (abfd, note + 8);
-
-      if (name_length == 7 && desc_length == 4
-	  && note_type == NT_NETBSD_IDENT
-	  && strcmp (note + 12, "NetBSD") == 0)
-	*abi = ABI_TAG_OS_NETBSD;
-    }
-}
+/* System V Release 4 (SVR4).  */
 
 static int
-i386_elf_abi_from_note (bfd *abfd)
+i386_svr4_pc_in_sigtramp (CORE_ADDR pc, char *name)
 {
-  enum i386_abi abi = I386_ABI_UNKNOWN;
-  
-  bfd_map_over_sections (abfd, process_note_sections, &abi);
-
-  return abi;
+  return (name && (strcmp ("_sigreturn", name) == 0
+		   || strcmp ("_sigacthandler", name) == 0
+		   || strcmp ("sigvechandler", name) == 0));
 }
 
-static enum i386_abi
-i386_elf_abi (bfd *abfd)
+/* Get saved user PC for sigtramp from the pushed ucontext on the
+   stack for all three variants of SVR4 sigtramps.  */
+
+CORE_ADDR
+i386_svr4_sigtramp_saved_pc (struct frame_info *frame)
 {
-  int elfosabi = elf_elfheader (abfd)->e_ident[EI_OSABI];
+  CORE_ADDR saved_pc_offset = 4;
+  char *name = NULL;
 
-  /* The fact that the EI_OSABI byte is set to ELFOSABI_NONE doesn't
-     necessarily mean that this is a System V ELF binary.  To further
-     distinguish between binaries for differens operating systems,
-     check for vendor-specific note elements.  */
-  if (elfosabi == ELFOSABI_NONE)
+  find_pc_partial_function (frame->pc, &name, NULL, NULL);
+  if (name)
     {
-      enum i386_abi abi = i386_elf_abi_from_note (abfd);
-
-      if (abi != I386_ABI_UNKNOWN)
-	return abi;
-
-      /* FreeBSD folks are naughty; they stored the string "FreeBSD"
-	 in the padding of the e_ident field of the ELF header.  */
-      if (strcmp (&elf_elfheader (abfd)->e_ident[8], "FreeBSD") == 0)
-	return I386_ABI_FREEBSD;
+      if (strcmp (name, "_sigreturn") == 0)
+	saved_pc_offset = 132 + 14 * 4;
+      else if (strcmp (name, "_sigacthandler") == 0)
+	saved_pc_offset = 80 + 14 * 4;
+      else if (strcmp (name, "sigvechandler") == 0)
+	saved_pc_offset = 120 + 14 * 4;
     }
 
-  switch (elfosabi)
-    {
-    case ELFOSABI_NONE:
-      return I386_ABI_SVR4;
-    case ELFOSABI_FREEBSD:
-      return I386_ABI_FREEBSD;
-    }
-
-  return I386_ABI_UNKNOWN;
+  if (frame->next)
+    return read_memory_integer (frame->next->frame + saved_pc_offset, 4);
+  return read_memory_integer (read_register (SP_REGNUM) + saved_pc_offset, 4);
 }
+
 
-struct i386_abi_handler
+/* DJGPP.  */
+
+static int
+i386_go32_pc_in_sigtramp (CORE_ADDR pc, char *name)
 {
-  struct i386_abi_handler *next;
-  enum i386_abi abi;
-  void (*init_abi)(struct gdbarch_info, struct gdbarch *);
-};
+  /* DJGPP doesn't have any special frames for signal handlers.  */
+  return 0;
+}
+
 
-struct i386_abi_handler *i386_abi_handler_list = NULL;
+/* Generic ELF.  */
 
 void
-i386_gdbarch_register_os_abi (enum i386_abi abi,
-			      void (*init_abi)(struct gdbarch_info,
-					       struct gdbarch *))
+i386_elf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct i386_abi_handler **handler_p;
-
-  for (handler_p = &i386_abi_handler_list; *handler_p != NULL;
-       handler_p = &(*handler_p)->next)
-    {
-      if ((*handler_p)->abi == abi)
-	{
-	  internal_error
-	    (__FILE__, __LINE__,
-	     "i386_gdbarch_register_abi: A handler for this ABI variant "
-	     "(%d) has already been registered", (int) abi);
-	  /* If user wants to continue, override previous definition.  */
-	  (*handler_p)->init_abi = init_abi;
-	  return;
-	}
-    }
-  (*handler_p)
-    = (struct i386_abi_handler *) xmalloc (sizeof (struct i386_abi_handler));
-  (*handler_p)->next = NULL;
-  (*handler_p)->abi = abi;
-  (*handler_p)->init_abi = init_abi;
+  /* We typically use stabs-in-ELF with the DWARF register numbering.  */
+  set_gdbarch_stab_reg_to_regnum (gdbarch, i386_dwarf_reg_to_regnum);
 }
+
+/* System V Release 4 (SVR4).  */
+
+void
+i386_svr4_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  /* System V Release 4 uses ELF.  */
+  i386_elf_init_abi (info, gdbarch);
+
+  /* FIXME: kettenis/20020511: Why do we override this function here?  */
+  set_gdbarch_frame_chain_valid (gdbarch, func_frame_chain_valid);
+
+  set_gdbarch_pc_in_sigtramp (gdbarch, i386_svr4_pc_in_sigtramp);
+  tdep->sigtramp_saved_pc = i386_svr4_sigtramp_saved_pc;
+
+  tdep->jb_pc_offset = 20;
+}
+
+/* DJGPP.  */
+
+void
+i386_go32_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  set_gdbarch_pc_in_sigtramp (gdbarch, i386_go32_pc_in_sigtramp);
+
+  tdep->jb_pc_offset = 36;
+}
+
+/* NetWare.  */
+
+void
+i386_nw_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  /* FIXME: kettenis/20020511: Why do we override this function here?  */
+  set_gdbarch_frame_chain_valid (gdbarch, func_frame_chain_valid);
+
+  tdep->jb_pc_offset = 24;
+}
+
 
 struct gdbarch *
 i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch_tdep *tdep;
   struct gdbarch *gdbarch;
-  enum i386_abi abi = I386_ABI_UNKNOWN;
-  struct i386_abi_handler *abi_handler;
+  enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
 
+  /* Try to determine the OS ABI of the object we're loading.  */
   if (info.abfd != NULL)
-    {
-      switch (bfd_get_flavour (info.abfd))
-	{
-	case bfd_target_elf_flavour:
-	  abi= i386_elf_abi (info.abfd);
-	  break;
-
-	default:
-	  /* Not sure what to do here, leave the ABI as unknown.  */
-	  break;
-	}
-    }
+    osabi = gdbarch_lookup_osabi (info.abfd);
 
   /* Find a candidate among extant architectures.  */
   for (arches = gdbarch_list_lookup_by_info (arches, &info);
        arches != NULL;
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
     {
-      /* Make sure the ABI selection matches.  */
+      /* Make sure the OS ABI selection matches.  */
       tdep = gdbarch_tdep (arches->gdbarch);
-      if (tdep && tdep->abi == abi)
+      if (tdep && tdep->osabi == osabi)
         return arches->gdbarch;
     }
 
@@ -1443,69 +1360,153 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep = XMALLOC (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
-  tdep->abi = abi;
+  tdep->osabi = osabi;
 
-  /* FIXME: kettenis/2001-11-24: Although not all IA-32 processors
-     have the SSE registers, it's easier to set the default to 8.  */
-  tdep->num_xmm_regs = 8;
+  /* The i386 default settings don't include the SSE registers.
+     FIXME: kettenis/20020614: They do include the FPU registers for
+     now, which probably is not quite right.  */
+  tdep->num_xmm_regs = 0;
+
+  tdep->jb_pc_offset = -1;
+  tdep->struct_return = pcc_struct_return;
+  tdep->sigtramp_saved_pc = NULL;
+  tdep->sigtramp_start = 0;
+  tdep->sigtramp_end = 0;
+  tdep->sc_pc_offset = -1;
+
+  /* The format used for `long double' on almost all i386 targets is
+     the i387 extended floating-point format.  In fact, of all targets
+     in the GCC 2.95 tree, only OSF/1 does it different, and insists
+     on having a `long double' that's not `long' at all.  */
+  set_gdbarch_long_double_format (gdbarch, &floatformat_i387_ext);
+  
+  /* Although the i386 extended floating-point has only 80 significant
+     bits, a `long double' actually takes up 96, probably to enforce
+     alignment.  */
+  set_gdbarch_long_double_bit (gdbarch, 96);
+
+  /* NOTE: tm-i386aix.h, tm-i386bsd.h, tm-i386os9k.h, tm-ptx.h,
+     tm-symmetry.h currently override this.  Sigh.  */
+  set_gdbarch_num_regs (gdbarch, I386_NUM_GREGS + I386_NUM_FREGS);
+  
+  set_gdbarch_sp_regnum (gdbarch, 4);
+  set_gdbarch_fp_regnum (gdbarch, 5);
+  set_gdbarch_pc_regnum (gdbarch, 8);
+  set_gdbarch_ps_regnum (gdbarch, 9);
+  set_gdbarch_fp0_regnum (gdbarch, 16);
+
+  /* Use the "default" register numbering scheme for stabs and COFF.  */
+  set_gdbarch_stab_reg_to_regnum (gdbarch, i386_stab_reg_to_regnum);
+  set_gdbarch_sdb_reg_to_regnum (gdbarch, i386_stab_reg_to_regnum);
+
+  /* Use the DWARF register numbering scheme for DWARF and DWARF 2.  */
+  set_gdbarch_dwarf_reg_to_regnum (gdbarch, i386_dwarf_reg_to_regnum);
+  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, i386_dwarf_reg_to_regnum);
+
+  /* We don't define ECOFF_REG_TO_REGNUM, since ECOFF doesn't seem to
+     be in use on any of the supported i386 targets.  */
+
+  set_gdbarch_register_name (gdbarch, i386_register_name);
+  set_gdbarch_register_size (gdbarch, 4);
+  set_gdbarch_register_bytes (gdbarch, I386_SIZEOF_GREGS + I386_SIZEOF_FREGS);
+  set_gdbarch_register_byte (gdbarch, i386_register_byte);
+  set_gdbarch_register_raw_size (gdbarch, i386_register_raw_size);
+  set_gdbarch_max_register_raw_size (gdbarch, 16);
+  set_gdbarch_max_register_virtual_size (gdbarch, 16);
+  set_gdbarch_register_virtual_type (gdbarch, i386_register_virtual_type);
+
+  set_gdbarch_get_longjmp_target (gdbarch, i386_get_longjmp_target);
 
   set_gdbarch_use_generic_dummy_frames (gdbarch, 0);
 
   /* Call dummy code.  */
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
+  set_gdbarch_call_dummy_start_offset (gdbarch, 0);
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 5);
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
+  set_gdbarch_call_dummy_length (gdbarch, 8);
   set_gdbarch_call_dummy_p (gdbarch, 1);
+  set_gdbarch_call_dummy_words (gdbarch, i386_call_dummy_words);
+  set_gdbarch_sizeof_call_dummy_words (gdbarch,
+				       sizeof (i386_call_dummy_words));
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
+  set_gdbarch_fix_call_dummy (gdbarch, i386_fix_call_dummy);
+
+  set_gdbarch_register_convertible (gdbarch, i386_register_convertible);
+  set_gdbarch_register_convert_to_virtual (gdbarch,
+					   i386_register_convert_to_virtual);
+  set_gdbarch_register_convert_to_raw (gdbarch, i386_register_convert_to_raw);
 
   set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
   set_gdbarch_push_arguments (gdbarch, i386_push_arguments);
 
   set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_on_stack);
 
-  /* NOTE: tm-i386nw.h and tm-i386v4.h override this.  */
-  set_gdbarch_frame_chain_valid (gdbarch, file_frame_chain_valid);
+  /* "An argument's size is increased, if necessary, to make it a
+     multiple of [32-bit] words.  This may require tail padding,
+     depending on the size of the argument" -- from the x86 ABI.  */
+  set_gdbarch_parm_boundary (gdbarch, 32);
 
-  /* NOTE: tm-i386aix.h, tm-i386bsd.h, tm-i386os9k.h, tm-linux.h,
-     tm-ptx.h, tm-symmetry.h currently override this.  Sigh.  */
-  set_gdbarch_num_regs (gdbarch, NUM_GREGS + NUM_FREGS + NUM_SSE_REGS);
+  set_gdbarch_deprecated_extract_return_value (gdbarch,
+					       i386_extract_return_value);
+  set_gdbarch_push_arguments (gdbarch, i386_push_arguments);
+  set_gdbarch_push_dummy_frame (gdbarch, i386_push_dummy_frame);
+  set_gdbarch_pop_frame (gdbarch, i386_pop_frame);
+  set_gdbarch_store_struct_return (gdbarch, i386_store_struct_return);
+  set_gdbarch_store_return_value (gdbarch, i386_store_return_value);
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch,
+					    i386_extract_struct_value_address);
+  set_gdbarch_use_struct_convention (gdbarch, i386_use_struct_convention);
+
+  set_gdbarch_frame_init_saved_regs (gdbarch, i386_frame_init_saved_regs);
+  set_gdbarch_skip_prologue (gdbarch, i386_skip_prologue);
+
+  /* Stack grows downward.  */
+  set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
+
+  set_gdbarch_breakpoint_from_pc (gdbarch, i386_breakpoint_from_pc);
+  set_gdbarch_decr_pc_after_break (gdbarch, 1);
+  set_gdbarch_function_start_offset (gdbarch, 0);
+
+  /* The following redefines make backtracing through sigtramp work.
+     They manufacture a fake sigtramp frame and obtain the saved pc in
+     sigtramp from the sigcontext structure which is pushed by the
+     kernel on the user stack, along with a pointer to it.  */
+
+  set_gdbarch_frame_args_skip (gdbarch, 8);
+  set_gdbarch_frameless_function_invocation (gdbarch,
+                                           i386_frameless_function_invocation);
+  set_gdbarch_frame_chain (gdbarch, i386_frame_chain);
+  set_gdbarch_frame_chain_valid (gdbarch, file_frame_chain_valid);
+  set_gdbarch_frame_saved_pc (gdbarch, i386_frame_saved_pc);
+  set_gdbarch_frame_args_address (gdbarch, default_frame_address);
+  set_gdbarch_frame_locals_address (gdbarch, default_frame_address);
+  set_gdbarch_saved_pc_after_call (gdbarch, i386_saved_pc_after_call);
+  set_gdbarch_frame_num_args (gdbarch, i386_frame_num_args);
+  set_gdbarch_pc_in_sigtramp (gdbarch, i386_pc_in_sigtramp);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
-  if (abi == I386_ABI_UNKNOWN)
-    {
-      /* Don't complain about not knowing the ABI variant if we don't
-	 have an inferior.  */
-      if (info.abfd)
-	fprintf_filtered
-	  (gdb_stderr, "GDB doesn't recognize the ABI of the inferior.  "
-	   "Attempting to continue with the default i386 settings");
-    }
-  else
-    {
-      for (abi_handler = i386_abi_handler_list; abi_handler != NULL;
-	   abi_handler = abi_handler->next)
-	if (abi_handler->abi == abi)
-	  break;
+  gdbarch_init_osabi (info, gdbarch, osabi);
 
-      if (abi_handler)
-	abi_handler->init_abi (info, gdbarch);
-      else
-	{
-	  /* We assume that if GDB_MULTI_ARCH is less than
-	     GDB_MULTI_ARCH_TM that an ABI variant can be supported by
-	     overriding definitions in this file.  */
-	  if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-	    fprintf_filtered
-	      (gdb_stderr,
-	       "A handler for the ABI variant \"%s\" is not built into this "
-	       "configuration of GDB.  "
-	       "Attempting to continue with the default i386 settings",
-	       i386_abi_names[abi]);
-	}
-    }
-  
   return gdbarch;
 }
+
+static enum gdb_osabi
+i386_coff_osabi_sniffer (bfd *abfd)
+{
+  if (strcmp (bfd_get_target (abfd), "coff-go32-exe") == 0
+      || strcmp (bfd_get_target (abfd), "coff-go32") == 0)
+    return GDB_OSABI_GO32;
+
+  return GDB_OSABI_UNKNOWN;
+}
+
+static enum gdb_osabi
+i386_nlm_osabi_sniffer (bfd *abfd)
+{
+  return GDB_OSABI_NETWARE;
+}
+
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 void _initialize_i386_tdep (void);
@@ -1521,7 +1522,7 @@ _initialize_i386_tdep (void)
     int i, offset;
 
     offset = 0;
-    for (i = 0; i < MAX_NUM_REGS; i++)
+    for (i = 0; i < I386_SSE_NUM_REGS; i++)
       {
 	i386_register_offset[i] = offset;
 	offset += i386_register_size[i];
@@ -1544,4 +1545,30 @@ and the default value is \"att\".",
 				&setlist);
     add_show_from_set (new_cmd, &showlist);
   }
+
+  /* Add the variable that controls the convention for returning
+     structs.  */
+  {
+    struct cmd_list_element *new_cmd;
+
+    new_cmd = add_set_enum_cmd ("struct-convention", no_class,
+				 valid_conventions,
+				&struct_convention, "\
+Set the convention for returning small structs, valid values \
+are \"default\", \"pcc\" and \"reg\", and the default value is \"default\".",
+                                &setlist);
+    add_show_from_set (new_cmd, &showlist);
+  }
+
+  gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_coff_flavour,
+				  i386_coff_osabi_sniffer);
+  gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_nlm_flavour,
+				  i386_nlm_osabi_sniffer);
+
+  gdbarch_register_osabi (bfd_arch_i386, GDB_OSABI_SVR4,
+			  i386_svr4_init_abi);
+  gdbarch_register_osabi (bfd_arch_i386, GDB_OSABI_GO32,
+			  i386_go32_init_abi);
+  gdbarch_register_osabi (bfd_arch_i386, GDB_OSABI_NETWARE,
+			  i386_nw_init_abi);
 }

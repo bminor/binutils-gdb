@@ -27,8 +27,4 @@
 #define IN_SOLIB_CALL_TRAMPOLINE(pc, name) \
   (name && !strcmp(name, "_DYNAMIC"))
 
-extern use_struct_convention_fn i386nbsd_aout_use_struct_convention;
-#define USE_STRUCT_CONVENTION(gcc_p, type) \
-        i386nbsd_aout_use_struct_convention(gcc_p, type)
-
 #endif /* TM_NBSDAOUT_H */

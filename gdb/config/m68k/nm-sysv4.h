@@ -20,4 +20,4 @@
 
 /* Include the generic SVR4 definitions.  */
 
-#include "nm-sysv4.h"
+#include "config/nm-sysv4.h"

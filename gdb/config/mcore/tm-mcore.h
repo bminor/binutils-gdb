@@ -94,13 +94,13 @@ extern void mcore_store_return_value (struct type *type, char *valbuf);
 #define STORE_RETURN_VALUE(TYPE, VALBUF) mcore_store_return_value ((TYPE), (VALBUF))
 
 extern void mcore_extract_return_value (struct type *type, char *regbut, char *valbuf);
-#define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
+#define DEPRECATED_EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
     mcore_extract_return_value ((TYPE), (REGBUF), (VALBUF));
 
 #define STORE_STRUCT_RETURN(ADDR, SP)	/* handled by mcore_push_arguments */
 
 extern CORE_ADDR mcore_extract_struct_value_address (char *regbuf);
-#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
+#define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
     mcore_extract_struct_value_address (REGBUF)
 
 extern CORE_ADDR mcore_skip_prologue (CORE_ADDR pc);

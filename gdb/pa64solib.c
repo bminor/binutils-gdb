@@ -1,5 +1,6 @@
 /* Handle HP ELF shared libraries for GDB, the GNU Debugger.
-   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -47,7 +48,6 @@
 #include "gdb-stabs.h"
 #include "gdb_stat.h"
 #include "gdbcmd.h"
-#include "assert.h"
 #include "language.h"
 #include "regcache.h"
 
@@ -109,7 +109,7 @@ static int pa64_solib_st_size_threshold_exceeded;
 typedef struct
   {
     CORE_ADDR dld_flags_addr;
-    long long dld_flags;
+    LONGEST dld_flags;
     sec_ptr dyninfo_sect;
     boolean have_read_dld_descriptor;
     boolean is_valid;
@@ -251,7 +251,7 @@ pa64_solib_add_solib_objfile (struct so_list *so, char *name, int from_tty,
 
   /* Now find the true lowest section in the shared library.  */
   sec = NULL;
-  bfd_map_over_sections (tmp_bfd, find_lowest_section, (PTR) &sec);
+  bfd_map_over_sections (tmp_bfd, find_lowest_section, &sec);
 
   if (sec)
     {
@@ -283,7 +283,7 @@ pa64_solib_add_solib_objfile (struct so_list *so, char *name, int from_tty,
 		       sizeof (obj_private_data_t));
       obj_private->unwind_info = NULL;
       obj_private->so_info = NULL;
-      so->objfile->obj_private = (PTR) obj_private;
+      so->objfile->obj_private = obj_private;
     }
 
   obj_private = (obj_private_data_t *) so->objfile->obj_private;
@@ -1224,13 +1224,13 @@ bfd_lookup_symbol (bfd *abfd, char *symname)
   if (storage_needed > 0)
     {
       symbol_table = (asymbol **) xmalloc (storage_needed);
-      back_to = make_cleanup (xfree, (PTR) symbol_table);
+      back_to = make_cleanup (xfree, symbol_table);
       number_of_symbols = bfd_canonicalize_symtab (abfd, symbol_table);
 
       for (i = 0; i < number_of_symbols; i++)
 	{
 	  sym = *symbol_table++;
-	  if (STREQ (sym->name, symname))
+	  if (strcmp (sym->name, symname) == 0)
 	    {
 	      /* Bfd symbols are section relative. */
 	      symaddr = sym->value + sym->section->vma;

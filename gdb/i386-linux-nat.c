@@ -62,6 +62,9 @@
 /* Defines for XMM0_REGNUM etc. */
 #include "i386-tdep.h"
 
+/* Defines I386_LINUX_ORIG_EAX_REGNUM.  */
+#include "i386-linux-tdep.h"
+
 /* Prototypes for local functions.  */
 static void dummy_sse_values (void);
 
@@ -168,7 +171,7 @@ kernel_u_size (void)
 #endif
 
 /* Registers we shouldn't try to fetch.  */
-#define OLD_CANNOT_FETCH_REGISTER(regno) ((regno) >= NUM_GREGS)
+#define OLD_CANNOT_FETCH_REGISTER(regno) ((regno) >= I386_NUM_GREGS)
 
 /* Fetch one register.  */
 
@@ -234,7 +237,7 @@ old_fetch_inferior_registers (int regno)
 }
 
 /* Registers we shouldn't try to store.  */
-#define OLD_CANNOT_STORE_REGISTER(regno) ((regno) >= NUM_GREGS)
+#define OLD_CANNOT_STORE_REGISTER(regno) ((regno) >= I386_NUM_GREGS)
 
 /* Store one register. */
 
@@ -308,10 +311,11 @@ supply_gregset (elf_gregset_t *gregsetp)
   elf_greg_t *regp = (elf_greg_t *) gregsetp;
   int i;
 
-  for (i = 0; i < NUM_GREGS; i++)
+  for (i = 0; i < I386_NUM_GREGS; i++)
     supply_register (i, (char *) (regp + regmap[i]));
 
-  supply_register (I386_LINUX_ORIG_EAX_REGNUM, (char *) (regp + ORIG_EAX));
+  if (I386_LINUX_ORIG_EAX_REGNUM < NUM_REGS)
+    supply_register (I386_LINUX_ORIG_EAX_REGNUM, (char *) (regp + ORIG_EAX));
 }
 
 /* Fill register REGNO (if it is a general-purpose register) in
@@ -324,11 +328,12 @@ fill_gregset (elf_gregset_t *gregsetp, int regno)
   elf_greg_t *regp = (elf_greg_t *) gregsetp;
   int i;
 
-  for (i = 0; i < NUM_GREGS; i++)
-    if ((regno == -1 || regno == i))
+  for (i = 0; i < I386_NUM_GREGS; i++)
+    if (regno == -1 || regno == i)
       regcache_collect (i, regp + regmap[i]);
 
-  if (regno == -1 || regno == I386_LINUX_ORIG_EAX_REGNUM)
+  if ((regno == -1 || regno == I386_LINUX_ORIG_EAX_REGNUM)
+      && I386_LINUX_ORIG_EAX_REGNUM < NUM_REGS)
     regcache_collect (I386_LINUX_ORIG_EAX_REGNUM, regp + ORIG_EAX);
 }
 

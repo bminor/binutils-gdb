@@ -583,7 +583,7 @@ struct packet_config
   {
     char *name;
     char *title;
-    enum cmd_auto_boolean detect;
+    enum auto_boolean detect;
     enum packet_support support;
   };
 
@@ -602,13 +602,13 @@ update_packet_config (struct packet_config *config)
 {
   switch (config->detect)
     {
-    case CMD_AUTO_BOOLEAN_TRUE:
+    case AUTO_BOOLEAN_TRUE:
       config->support = PACKET_ENABLE;
       break;
-    case CMD_AUTO_BOOLEAN_FALSE:
+    case AUTO_BOOLEAN_FALSE:
       config->support = PACKET_DISABLE;
       break;
-    case CMD_AUTO_BOOLEAN_AUTO:
+    case AUTO_BOOLEAN_AUTO:
       config->support = PACKET_SUPPORT_UNKNOWN;
       break;
     }
@@ -632,12 +632,12 @@ show_packet_config_cmd (struct packet_config *config)
     }
   switch (config->detect)
     {
-    case CMD_AUTO_BOOLEAN_AUTO:
+    case AUTO_BOOLEAN_AUTO:
       printf_filtered ("Support for remote protocol `%s' (%s) packet is auto-detected, currently %s.\n",
 		       config->name, config->title, support);
       break;
-    case CMD_AUTO_BOOLEAN_TRUE:
-    case CMD_AUTO_BOOLEAN_FALSE:
+    case AUTO_BOOLEAN_TRUE:
+    case AUTO_BOOLEAN_FALSE:
       printf_filtered ("Support for remote protocol `%s' (%s) packet is currently %s.\n",
 		       config->name, config->title, support);
       break;
@@ -648,11 +648,8 @@ static void
 add_packet_config_cmd (struct packet_config *config,
 		       char *name,
 		       char *title,
-		       void (*set_func) (char *args, int from_tty,
-					 struct cmd_list_element *
-					 c),
-		       void (*show_func) (char *name,
-					  int from_tty),
+		       cmd_sfunc_ftype *set_func,
+		       cmd_sfunc_ftype *show_func,
 		       struct cmd_list_element **set_remote_list,
 		       struct cmd_list_element **show_remote_list,
 		       int legacy)
@@ -664,7 +661,7 @@ add_packet_config_cmd (struct packet_config *config,
   char *cmd_name;
   config->name = name;
   config->title = title;
-  config->detect = CMD_AUTO_BOOLEAN_AUTO;
+  config->detect = AUTO_BOOLEAN_AUTO;
   config->support = PACKET_SUPPORT_UNKNOWN;
   xasprintf (&set_doc, "Set use of remote protocol `%s' (%s) packet",
 	     name, title);
@@ -672,12 +669,10 @@ add_packet_config_cmd (struct packet_config *config,
 	     name, title);
   /* set/show TITLE-packet {auto,on,off} */
   xasprintf (&cmd_name, "%s-packet", title);
-  set_cmd = add_set_auto_boolean_cmd (cmd_name, class_obscure,
-				&config->detect, set_doc,
-				set_remote_list);
-  set_cmd_sfunc (set_cmd, set_func);
-  show_cmd = add_cmd (cmd_name, class_obscure, show_func, show_doc,
-		      show_remote_list);
+  add_setshow_auto_boolean_cmd (cmd_name, class_obscure,
+				&config->detect, set_doc, show_doc,
+				set_func, show_func,
+				set_remote_list, show_remote_list);
   /* set/show remote NAME-packet {auto,on,off} -- legacy */
   if (legacy)
     {
@@ -730,7 +725,7 @@ packet_ok (const char *buf, struct packet_config *config)
       switch (config->support)
 	{
 	case PACKET_ENABLE:
-	  if (config->detect == CMD_AUTO_BOOLEAN_AUTO)
+	  if (config->detect == AUTO_BOOLEAN_AUTO)
 	    /* If the stub previously indicated that the packet was
 	       supported then there is a protocol error.. */
 	    error ("Protocol error: %s (%s) conflicting enabled responses.",
@@ -765,7 +760,8 @@ set_remote_protocol_qSymbol_packet_cmd (char *args, int from_tty,
 }
 
 static void
-show_remote_protocol_qSymbol_packet_cmd (char *args, int from_tty)
+show_remote_protocol_qSymbol_packet_cmd (char *args, int from_tty,
+					 struct cmd_list_element *c)
 {
   show_packet_config_cmd (&remote_protocol_qSymbol);
 }
@@ -781,7 +777,8 @@ set_remote_protocol_e_packet_cmd (char *args, int from_tty,
 }
 
 static void
-show_remote_protocol_e_packet_cmd (char *args, int from_tty)
+show_remote_protocol_e_packet_cmd (char *args, int from_tty,
+				   struct cmd_list_element *c)
 {
   show_packet_config_cmd (&remote_protocol_e);
 }
@@ -798,7 +795,8 @@ set_remote_protocol_E_packet_cmd (char *args, int from_tty,
 }
 
 static void
-show_remote_protocol_E_packet_cmd (char *args, int from_tty)
+show_remote_protocol_E_packet_cmd (char *args, int from_tty,
+				   struct cmd_list_element *c)
 {
   show_packet_config_cmd (&remote_protocol_E);
 }
@@ -816,7 +814,8 @@ set_remote_protocol_P_packet_cmd (char *args, int from_tty,
 }
 
 static void
-show_remote_protocol_P_packet_cmd (char *args, int from_tty)
+show_remote_protocol_P_packet_cmd (char *args, int from_tty,
+				   struct cmd_list_element *c)
 {
   show_packet_config_cmd (&remote_protocol_P);
 }
@@ -846,7 +845,8 @@ set_remote_protocol_Z_software_bp_packet_cmd (char *args, int from_tty,
 }
 
 static void
-show_remote_protocol_Z_software_bp_packet_cmd (char *args, int from_tty)
+show_remote_protocol_Z_software_bp_packet_cmd (char *args, int from_tty,
+					       struct cmd_list_element *c)
 {
   show_packet_config_cmd (&remote_protocol_Z[Z_PACKET_SOFTWARE_BP]);
 }
@@ -859,7 +859,8 @@ set_remote_protocol_Z_hardware_bp_packet_cmd (char *args, int from_tty,
 }
 
 static void
-show_remote_protocol_Z_hardware_bp_packet_cmd (char *args, int from_tty)
+show_remote_protocol_Z_hardware_bp_packet_cmd (char *args, int from_tty,
+					       struct cmd_list_element *c)
 {
   show_packet_config_cmd (&remote_protocol_Z[Z_PACKET_HARDWARE_BP]);
 }
@@ -872,7 +873,8 @@ set_remote_protocol_Z_write_wp_packet_cmd (char *args, int from_tty,
 }
 
 static void
-show_remote_protocol_Z_write_wp_packet_cmd (char *args, int from_tty)
+show_remote_protocol_Z_write_wp_packet_cmd (char *args, int from_tty,
+					    struct cmd_list_element *c)
 {
   show_packet_config_cmd (&remote_protocol_Z[Z_PACKET_WRITE_WP]);
 }
@@ -885,7 +887,8 @@ set_remote_protocol_Z_read_wp_packet_cmd (char *args, int from_tty,
 }
 
 static void
-show_remote_protocol_Z_read_wp_packet_cmd (char *args, int from_tty)
+show_remote_protocol_Z_read_wp_packet_cmd (char *args, int from_tty,
+					   struct cmd_list_element *c)
 {
   show_packet_config_cmd (&remote_protocol_Z[Z_PACKET_READ_WP]);
 }
@@ -898,7 +901,8 @@ set_remote_protocol_Z_access_wp_packet_cmd (char *args, int from_tty,
 }
 
 static void
-show_remote_protocol_Z_access_wp_packet_cmd (char *args, int from_tty)
+show_remote_protocol_Z_access_wp_packet_cmd (char *args, int from_tty,
+					     struct cmd_list_element *c)
 {
   show_packet_config_cmd (&remote_protocol_Z[Z_PACKET_ACCESS_WP]);
 }
@@ -906,7 +910,7 @@ show_remote_protocol_Z_access_wp_packet_cmd (char *args, int from_tty)
 /* For compatibility with older distributions.  Provide a ``set remote
    Z-packet ...'' command that updates all the Z packet types. */
 
-static enum cmd_auto_boolean remote_Z_packet_detect;
+static enum auto_boolean remote_Z_packet_detect;
 
 static void
 set_remote_protocol_Z_packet_cmd (char *args, int from_tty,
@@ -921,7 +925,8 @@ set_remote_protocol_Z_packet_cmd (char *args, int from_tty,
 }
 
 static void
-show_remote_protocol_Z_packet_cmd (char *args, int from_tty)
+show_remote_protocol_Z_packet_cmd (char *args, int from_tty,
+				   struct cmd_list_element *c)
 {
   int i;
   for (i = 0; i < NR_Z_PACKET_TYPES; i++)
@@ -962,8 +967,8 @@ set_remote_protocol_binary_download_cmd (char *args,
 }
 
 static void
-show_remote_protocol_binary_download_cmd (char *args,
-					  int from_tty)
+show_remote_protocol_binary_download_cmd (char *args, int from_tty,
+					  struct cmd_list_element *c)
 {
   show_packet_config_cmd (&remote_protocol_binary_download);
 }
@@ -5968,13 +5973,14 @@ set_remote_cmd (char *args, int from_tty)
 static void
 show_remote_cmd (char *args, int from_tty)
 {
-  
-  show_remote_protocol_Z_packet_cmd (args, from_tty);
-  show_remote_protocol_e_packet_cmd (args, from_tty);
-  show_remote_protocol_E_packet_cmd (args, from_tty);
-  show_remote_protocol_P_packet_cmd (args, from_tty);
-  show_remote_protocol_qSymbol_packet_cmd (args, from_tty);
-  show_remote_protocol_binary_download_cmd (args, from_tty);
+  /* FIXME: cagney/2002-06-15: This function should iterate over
+     remote_show_cmdlist for a list of sub commands to show.  */
+  show_remote_protocol_Z_packet_cmd (args, from_tty, NULL);
+  show_remote_protocol_e_packet_cmd (args, from_tty, NULL);
+  show_remote_protocol_E_packet_cmd (args, from_tty, NULL);
+  show_remote_protocol_P_packet_cmd (args, from_tty, NULL);
+  show_remote_protocol_qSymbol_packet_cmd (args, from_tty, NULL);
+  show_remote_protocol_binary_download_cmd (args, from_tty, NULL);
 }
 
 static void
@@ -6069,11 +6075,11 @@ response packet.  GDB supplies the initial `$' character, and the\n\
 terminating `#' character and checksum.",
 	   &maintenancelist);
 
-  add_show_from_set
-    (add_set_boolean_cmd ("remotebreak", no_class, &remote_break,
-			  "Set whether to send break if interrupted.\n",
-			  &setlist),
-     &showlist);
+  add_setshow_boolean_cmd ("remotebreak", no_class, &remote_break,
+			   "Set whether to send break if interrupted.\n",
+			   "Show whether to send break if interrupted.\n",
+			   NULL, NULL,
+			   &setlist, &showlist);
 
   /* Install commands for configuring memory read/write packets. */
 
@@ -6150,7 +6156,7 @@ in a memory packet.\n",
 			 0);
   /* Disable by default.  The ``e'' packet has nasty interactions with
      the threading code - it relies on global state.  */
-  remote_protocol_e.detect = CMD_AUTO_BOOLEAN_FALSE;
+  remote_protocol_e.detect = AUTO_BOOLEAN_FALSE;
   update_packet_config (&remote_protocol_e);
 
   add_packet_config_cmd (&remote_protocol_E,
@@ -6161,7 +6167,7 @@ in a memory packet.\n",
 			 0);
   /* Disable by default.  The ``e'' packet has nasty interactions with
      the threading code - it relies on global state.  */
-  remote_protocol_E.detect = CMD_AUTO_BOOLEAN_FALSE;
+  remote_protocol_E.detect = AUTO_BOOLEAN_FALSE;
   update_packet_config (&remote_protocol_E);
 
   add_packet_config_cmd (&remote_protocol_P,
@@ -6207,12 +6213,11 @@ in a memory packet.\n",
 			 0);
 
   /* Keep the old ``set remote Z-packet ...'' working. */
-  tmpcmd = add_set_auto_boolean_cmd ("Z-packet", class_obscure,
-				     &remote_Z_packet_detect,
-				     "\
-Set use of remote protocol `Z' packets", &remote_set_cmdlist);
-  set_cmd_sfunc (tmpcmd, set_remote_protocol_Z_packet_cmd);
-  add_cmd ("Z-packet", class_obscure, show_remote_protocol_Z_packet_cmd,
-	   "Show use of remote protocol `Z' packets ",
-	   &remote_show_cmdlist);
+  add_setshow_auto_boolean_cmd ("Z-packet", class_obscure,
+				&remote_Z_packet_detect, "\
+Set use of remote protocol `Z' packets",
+				"Show use of remote protocol `Z' packets ",
+				set_remote_protocol_Z_packet_cmd,
+				show_remote_protocol_Z_packet_cmd,
+				&remote_set_cmdlist, &remote_show_cmdlist);
 }

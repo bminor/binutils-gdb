@@ -44,6 +44,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define nlm_bfd_relax_section bfd_generic_relax_section
 #define nlm_bfd_gc_sections bfd_generic_gc_sections
 #define nlm_bfd_merge_sections bfd_generic_merge_sections
+#define nlm_bfd_discard_group bfd_generic_discard_group
 #define nlm_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define nlm_bfd_link_hash_table_free _bfd_generic_link_hash_table_free
 #define nlm_bfd_link_add_symbols _bfd_generic_link_add_symbols
