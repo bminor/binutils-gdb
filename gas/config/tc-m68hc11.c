@@ -37,8 +37,9 @@ const char FLT_CHARS[] = "dD";
 #define STATE_CONDITIONAL_BRANCH	(1)
 #define STATE_PC_RELATIVE		(2)
 #define STATE_INDEXED_OFFSET            (3)
-#define STATE_XBCC_BRANCH               (4)
-#define STATE_CONDITIONAL_BRANCH_6812	(5)
+#define STATE_INDEXED_PCREL             (4)
+#define STATE_XBCC_BRANCH               (5)
+#define STATE_CONDITIONAL_BRANCH_6812	(6)
 
 #define STATE_BYTE			(0)
 #define STATE_BITS5                     (0)
@@ -87,6 +88,14 @@ relax_typeS md_relax_table[] = {
   /* Relax for indexed offset: 5-bits, 9-bits, 16-bits.  */
   {(15), (-16), 0, ENCODE_RELAX (STATE_INDEXED_OFFSET, STATE_BITS9)},
   {(255), (-256), 1, ENCODE_RELAX (STATE_INDEXED_OFFSET, STATE_BITS16)},
+  {0, 0, 2, 0},
+  {1, 1, 0, 0},
+
+  /* Relax for PC relative offset: 5-bits, 9-bits, 16-bits.
+     For the 9-bit case, there will be a -1 correction to take into
+     account the new byte that's why the range is -255..256.  */
+  {(15), (-16), 0, ENCODE_RELAX (STATE_INDEXED_PCREL, STATE_BITS9)},
+  {(256), (-255), 1, ENCODE_RELAX (STATE_INDEXED_PCREL, STATE_BITS16)},
   {0, 0, 2, 0},
   {1, 1, 0, 0},
 
@@ -1955,7 +1964,7 @@ build_indexed_byte (op, format, move_insn)
 	  f = frag_more (1);
 	  number_to_chars_bigendian (f, byte, 1);
 	  frag_var (rs_machine_dependent, 2, 2,
-		    ENCODE_RELAX (STATE_INDEXED_OFFSET, STATE_UNDF),
+		    ENCODE_RELAX (STATE_INDEXED_PCREL, STATE_UNDF),
 		    op->exp.X_add_symbol,
 		    op->exp.X_add_number, f);
 	}
@@ -2762,11 +2771,14 @@ m68hc11_relax_frag (seg, fragP, stretch)
      because of the different reasons that it's not relaxable.  */
   switch (fragP->fr_subtype)
     {
+    case ENCODE_RELAX (STATE_INDEXED_PCREL, STATE_BITS16):
     case ENCODE_RELAX (STATE_INDEXED_OFFSET, STATE_BITS16):
       /* When we get to this state, the frag won't grow any more.  */
       return 0;
 
+    case ENCODE_RELAX (STATE_INDEXED_PCREL, STATE_BITS5):
     case ENCODE_RELAX (STATE_INDEXED_OFFSET, STATE_BITS5):
+    case ENCODE_RELAX (STATE_INDEXED_PCREL, STATE_BITS9):
     case ENCODE_RELAX (STATE_INDEXED_OFFSET, STATE_BITS9):
       if (fragP->fr_symbol == NULL
 	  || S_GET_SEGMENT (fragP->fr_symbol) != absolute_section)
@@ -2892,20 +2904,26 @@ md_convert_frag (abfd, sec, fragP)
       fragP->fr_fix += 2;
       break;
 
-    case ENCODE_RELAX (STATE_INDEXED_OFFSET, STATE_BITS5):
-      if (fragP->fr_opcode[0] == 3
-          && fragP->fr_symbol != 0
+    case ENCODE_RELAX (STATE_INDEXED_PCREL, STATE_BITS5):
+      if (fragP->fr_symbol != 0
           && S_GET_SEGMENT (fragP->fr_symbol) != absolute_section)
         value = disp;
+      /* fall through  */
+
+    case ENCODE_RELAX (STATE_INDEXED_OFFSET, STATE_BITS5):
       fragP->fr_opcode[0] = fragP->fr_opcode[0] << 6;
       fragP->fr_opcode[0] |= value & 0x1f;
       break;
 
-    case ENCODE_RELAX (STATE_INDEXED_OFFSET, STATE_BITS9):
-      if (fragP->fr_opcode[0] == 3
-          && fragP->fr_symbol != 0
+    case ENCODE_RELAX (STATE_INDEXED_PCREL, STATE_BITS9):
+      /* For a PC-relative offset, use the displacement with a -1 correction
+         to take into account the additional byte of the insn.  */
+      if (fragP->fr_symbol != 0
           && S_GET_SEGMENT (fragP->fr_symbol) != absolute_section)
-        value = disp;
+        value = disp - 1;
+      /* fall through  */
+
+    case ENCODE_RELAX (STATE_INDEXED_OFFSET, STATE_BITS9):
       fragP->fr_opcode[0] = (fragP->fr_opcode[0] << 3);
       fragP->fr_opcode[0] |= 0xE0;
       fragP->fr_opcode[0] |= (value >> 8) & 1;
@@ -2913,6 +2931,7 @@ md_convert_frag (abfd, sec, fragP)
       fragP->fr_fix += 1;
       break;
 
+    case ENCODE_RELAX (STATE_INDEXED_PCREL, STATE_BITS16):
     case ENCODE_RELAX (STATE_INDEXED_OFFSET, STATE_BITS16):
       fragP->fr_opcode[0] = (fragP->fr_opcode[0] << 3);
       fragP->fr_opcode[0] |= 0xe2;
@@ -2923,7 +2942,6 @@ md_convert_frag (abfd, sec, fragP)
 	  fixp = fix_new (fragP, fragP->fr_fix, 2,
 			  fragP->fr_symbol, fragP->fr_offset,
 			  1, BFD_RELOC_16_PCREL);
-	  fixp->fx_pcrel_adjust = 2;
 	}
       else
 	{
@@ -3047,6 +3065,29 @@ md_estimate_size_before_relax (fragP, segment)
                 }
 	      break;
 
+	    case STATE_INDEXED_PCREL:
+	      assert (current_architecture & cpu6812);
+
+              if (fragP->fr_symbol
+                  && S_GET_SEGMENT (fragP->fr_symbol) == absolute_section)
+                {
+                   fragP->fr_subtype = ENCODE_RELAX (STATE_INDEXED_PCREL,
+                                                     STATE_BITS5);
+                   /* Return the size of the variable part of the frag. */
+                   return md_relax_table[fragP->fr_subtype].rlx_length;
+                }
+              else
+                {
+                   fixS* fixp;
+
+                   fragP->fr_opcode[0] = fragP->fr_opcode[0] << 3;
+                   fragP->fr_opcode[0] |= 0xe2;
+                   fixp = fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol,
+                                   fragP->fr_offset, 1, BFD_RELOC_16_PCREL);
+                   fragP->fr_fix += 2;
+                }
+	      break;
+
 	    case STATE_XBCC_BRANCH:
 	      assert (current_architecture & cpu6812);
 
@@ -3107,6 +3148,13 @@ md_estimate_size_before_relax (fragP, segment)
 	  assert (current_architecture & cpu6812);
 
 	  fragP->fr_subtype = ENCODE_RELAX (STATE_INDEXED_OFFSET,
+					    STATE_BITS5);
+	  break;
+
+	case STATE_INDEXED_PCREL:
+	  assert (current_architecture & cpu6812);
+
+	  fragP->fr_subtype = ENCODE_RELAX (STATE_INDEXED_PCREL,
 					    STATE_BITS5);
 	  break;
 

@@ -1,3 +1,13 @@
+2002-12-08  Stephane Carrez  <stcarrez@nerim.fr>
+
+	Fix Bug savannah/1825:
+	* config/tc-m68hc11.c (STATE_INDEXED_PCREL): New relax code.
+	(md_relax_table): Define specific relax for PC-rel offsets.
+	(build_indexed_byte): Use a STATE_INDEXED_PCREL relax code.
+	(m68hc11_relax_frag): Handle the new relax code.
+	(md_convert_frag): Likewise.
+	(md_estimate_size_before_relax): Likewise.
+
 2002-12-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* subsegs.c (section_symbol): Use the symbol, not the section, name.
