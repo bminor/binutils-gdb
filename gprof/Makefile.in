@@ -6,23 +6,23 @@ VPATH = @srcdir@
 srcdir = @srcdir@
 prefix = @prefix@
 
-exec_prefix 	= $(prefix)
+exec_prefix 	= @exec_prefix@
 program_transform_name = @program_transform_name@
 
-bindir 	= $(exec_prefix)/bin
-libdir 	= $(exec_prefix)/lib
+bindir 	= @bindir@
+libdir 	= @libdir@
 tooldir = $(libdir)
-mandir 	= $(prefix)/man
+mandir 	= @mandir@
 man1dir = $(mandir)/man1
 
-infodir	= $(prefix)/info
-datadir = $(prefix)/lib
+infodir	= @infodir@
+datadir = @datadir@
 
 SHELL = /bin/sh
 
 INSTALL = `cd $(srcdir); pwd`/../install.sh -c
-INSTALL_PROGRAM = $(INSTALL)
-INSTALL_DATA = $(INSTALL)
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
 INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
 INSTALL_XFORM1 = $(INSTALL_XFORM) -b=.1
 MAKEINFO	= makeinfo

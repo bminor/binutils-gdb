@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_PREREQ(2.3)dnl
+AC_PREREQ(2.5)dnl
 AC_INIT(gprof.c)
 
 AC_ARG_ENABLE(shared,
@@ -12,6 +12,7 @@ AC_ARG_ENABLE(shared,
 esac])dnl
 
 AC_PROG_CC
+AC_PROG_INSTALL
 
 AC_CANONICAL_SYSTEM
 AC_ARG_PROGRAM
