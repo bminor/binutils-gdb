@@ -1,3 +1,7 @@
+Wed Feb 21 14:24:04 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* solib.c (solib_create_inferior_hook): Fix thinko.
+
 Tue Feb 20 23:59:19 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* solib.c (solib_break_names): Define for Solaris and Linux.

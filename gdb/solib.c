@@ -1568,7 +1568,7 @@ solib_create_inferior_hook()
       return;
     }
 
-#ifndef BKPT_AT_SYMBOL
+#ifndef SVR4_SHARED_LIBS
   /* Only SunOS needs the loop below, other systems should be using the
      special shared library breakpoints and the shared library breakpoint
      service routine.
