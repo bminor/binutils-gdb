@@ -118,6 +118,7 @@ typedef union {
 
 /* Union of old and new vm_info structures. */
 
+#ifdef CORE_VERSION_1
 typedef union {
 #ifdef AIX_CORE_DUMPX_CORE
     struct vm_infox new;
@@ -126,6 +127,7 @@ typedef union {
 #endif
     struct vm_info old;
 } VmInfo;
+#endif
 
 /* Return whether CoreHdr C is in new or old format. */
 
