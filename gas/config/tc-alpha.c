@@ -1399,8 +1399,6 @@ alpha_force_relocation (f)
       return 0;
 
     default:
-      assert ((int) f->fx_r_type < 0
-	      && -(int) f->fx_r_type < (int) alpha_num_operands);
       return 0;
     }
 }
@@ -1448,8 +1446,6 @@ alpha_fix_adjustable (f)
       return 1;
 
     default:
-      assert ((int) f->fx_r_type < 0
-	      && - (int) f->fx_r_type < (int) alpha_num_operands);
       return 1;
     }
   /*NOTREACHED*/

@@ -1,3 +1,9 @@
+2002-02-08  Richard Henderson  <rth@redhat.com>
+
+	* config/tc-alpha.c (alpha_force_relocation): Don't assert that
+	we've eliminated all foreign relocation types yet.
+	(alpha_fix_adjustable): Likewise.
+
 2002-02-08  Alexandre Oliva  <aoliva@redhat.com>
 
 	Contribute sh64-elf.
