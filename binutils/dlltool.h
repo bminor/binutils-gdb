@@ -24,9 +24,10 @@
 extern void def_code PARAMS ((int));
 extern void def_data PARAMS ((int));
 extern void def_description PARAMS ((const char *));
-extern void def_exports PARAMS ((const char *, const char *, int, int, int));
+extern void def_exports
+  PARAMS ((const char *, const char *, int, int, int, int));
 extern void def_heapsize PARAMS ((int, int));
-extern void def_import PARAMS ((const char *, const char *, const char *));
+extern void def_import PARAMS ((char *, char *, char *, char *, int));
 extern void def_library PARAMS ((const char *, int));
 extern void def_name PARAMS ((const char *, int));
 extern void def_section PARAMS ((const char *, int));

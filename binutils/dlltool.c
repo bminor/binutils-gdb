@@ -254,6 +254,50 @@
 #endif /* defined (_WIN32) && ! defined (__CYGWIN32__) */
 #endif /* ! HAVE_SYS_WAIT_H */
 
+/* ifunc and ihead data structures: ttk@cygnus.com 1997            
+     When IMPORT declarations are encountered in a .def file the  
+  function import information is stored in a structure referenced 
+  by the global variable "(iheadtype*) import_list".  The struc-  
+  ture is a linked list containing the names of the dll files     
+  each function is imported from and a linked list of functions   
+  being imported from that dll file.  This roughly parallels the  
+  structure of the .idata section in the PE object file.          
+     The contents of .def file are interpreted from within the    
+  process__def_file() function.  Every time an IMPORT declaration 
+  is encountered, it is broken up into its component parts and    
+  passed to def_import().  import_list is initialized to NULL in  
+  function main().                                                
+ */
+ 
+typedef struct ifunct      
+  {
+     char          *name;   /* name of function being imported */
+     int            ord;    /* two-byte ordinal value associated with function */
+     struct ifunct *next;
+  } 
+ifunctype;
+
+typedef struct iheadt      
+  {
+     char          *dllname;  /* name of dll file imported from */
+     long           nfuncs;   /* number of functions in list */
+     struct ifunct *funchead; /* first function in list */
+     struct ifunct *functail; /* last  function in list */
+     struct iheadt *next;     /* next dll file in list */
+  } 
+iheadtype;
+ 
+/* ignore_imports: if true, IMPORT declarations are ignored   
+     and no .import section will be created.  
+  import_list: structure containing all import information as   
+    defined in .def file (qv "ihead structure").                
+  nheads: count of number of dll files recorded in import_list.
+ */
+
+static boolean      ignore_imports = false;           
+static iheadtype   *import_list    = NULL;            
+static long         nheads;                           
+
 static char *as_name = "as";
 
 static int no_idata4;
@@ -492,6 +536,9 @@ asm_prefix (machine)
 #define HOW_JTAB_ROFF      mtable[machine].how_jtab_roff
 static char **oav;
 
+FILE *yyin;          /* communications with flex */
+extern int linenumber;
+
 void
 process_def_file (name)
      const char *name;
@@ -607,19 +654,6 @@ new_directive (dir)
 }
 
 void
-def_stacksize (reserve, commit)
-     int reserve;
-     int commit;
-{
-  char b[200];
-  if (commit > 0)
-    sprintf (b, "-stack 0x%x,0x%x ", reserve, commit);
-  else
-    sprintf (b, "-stack 0x%x ", reserve);
-  new_directive (xstrdup (b));
-}
-
-void
 def_heapsize (reserve, commit)
      int reserve;
      int commit;
@@ -633,14 +667,138 @@ def_heapsize (reserve, commit)
 }
 
 void
-def_import (internal, module, entry)
-     const char *internal;
-     const char *module;
-     const char *entry;
+def_stacksize (reserve, commit)
+     int reserve;
+     int commit;
 {
-  if (verbose)
-    fprintf (stderr, _("%s: IMPORTS are ignored"), program_name);
+  char b[200];
+  if (commit > 0)
+    sprintf (b, "-stack 0x%x,0x%x ", reserve, commit);
+  else
+    sprintf (b, "-stack 0x%x ", reserve);
+  new_directive (xstrdup (b));
 }
+
+/*  append_import() simply adds the given import definition
+   to the global import_list.  It is used by def_import().
+ */
+void 
+append_import (symbol_name, dll_name, func_ordinal)
+     char *symbol_name;
+     char *dll_name;
+     char *func_ordinal;
+  { 
+    iheadtype *headptr;
+
+    if (import_list == NULL) 
+      { 
+        import_list = xmalloc (sizeof (iheadtype));
+        import_list->dllname  = xstrdup (dll_name);
+        import_list->nfuncs   = 1;
+        import_list->funchead = xmalloc (sizeof (ifunctype));
+        import_list->functail = import_list->funchead;
+        import_list->next     = NULL;
+        import_list->functail->name = xstrdup (symbol_name);
+        import_list->functail->ord  = atoi (func_ordinal);
+        import_list->functail->next = NULL;
+        return;
+      } /* END of case import_list == NULL */
+    headptr = import_list;
+    while ((strcmp (headptr->dllname,dll_name)) 
+           && (headptr->next != NULL))
+      headptr = headptr->next; 
+    if (!strcmp (headptr->dllname, dll_name)) 
+      { 
+        headptr->functail->next = xmalloc (sizeof (ifunctype));
+        headptr->functail = headptr->functail->next;
+        headptr->functail->ord  = atoi (func_ordinal);
+        headptr->functail->name = xstrdup (symbol_name);
+        headptr->functail->next = NULL;
+        headptr->nfuncs++;
+      } 
+    else 
+      { /* this dll doesn't already have entry */
+        headptr->next = xmalloc (sizeof (iheadtype));
+        headptr = headptr->next;
+        headptr->dllname  = xstrdup (dll_name);
+        headptr->nfuncs   = 1;
+        headptr->funchead = xmalloc (sizeof (ifunctype));
+        headptr->functail = headptr->funchead;
+        headptr->next     = NULL;
+        headptr->functail->name = xstrdup (symbol_name);
+        headptr->functail->ord  = atoi (func_ordinal);
+        headptr->functail->next = NULL;
+      } /* END of if..else clause */
+  } /* END of function append_import */
+
+/*  def_import() is called from within defparse.y when an
+   IMPORT declaration is encountered.  Depending on the
+   form of the declaration, the module name may or may not
+   need ".dll" to be appended to it, the name of the func-
+   tion may be stored in internal or entry, and there may
+   or may not be an ordinal value associated with it.  
+   The interface between def_import() and append_import()
+   is a bit convoluted because append_import() was written
+   to handle a simpler case of IMPORT declaration and I 
+   didn't have the time to rewrite it.
+ */
+
+/* A note regarding the parse modes:
+   In yyparse.y we have to accept import declarations which
+   follow any one of the following forms:
+     <func_name_in_app> = <dll_name>.<func_name_in_dll>
+     <func_name_in_app> = <dll_name>.<number>
+     <dll_name>.<func_name_in_dll>
+     <dll_name>.<number>
+   Furthermore, the dll's name may or may not end with ".dll",
+   which complicates the parsing a little.  Normally the dll's
+   name is passed to def_import() in the "module" parameter,
+   but when it ends with ".dll" it gets passed in "module" sans
+   ".dll" and that needs to be reappended.
+
+  def_import() gets five parameters:
+  app_name - the name of the function in the application, if 
+             present, or NULL if not present.
+  module   - the name of the dll, possibly sans extension (ie, '.dll').
+  dllext   - the extension of the dll, if present, NULL if not present.
+  entry    - the name of the function in the dll, if present, or NULL.
+  ord_val  - the numerical tag of the function in the dll, if present, 
+             or NULL.  Exactly one of <entry> or <ord_val> must be 
+             present (ie, not NULL).
+ */
+
+void 
+def_import (app_name, module, dllext, entry, ord_val)
+     char *app_name;
+     char *module;
+     char *dllext;
+     char *entry;
+     int   ord_val; /* two-byte value */
+  { 
+    char *application_name;
+    char *module_name;
+    char *entry_name;
+    char  ord_string[7];
+    char  zero_str[1] = { 0 };
+    
+    sprintf (ord_string, "%d", ord_val);  
+    if (entry)
+      application_name = entry;
+    else
+      if (app_name)
+        application_name = app_name;
+      else
+        application_name = zero_str;
+    if (dllext)
+      {
+        module_name = (char*) alloca (strlen (module) + strlen(dllext) + 2);
+        sprintf (module_name, "%s.%s", module, dllext);
+      }
+    else
+      module_name = module;
+    entry_name = ord_string;
+    append_import (application_name, module_name, entry_name); 
+  } /* END of function def_import */
 
 void
 def_version (major, minor)
@@ -941,11 +1099,141 @@ gen_def_file ()
     }
 }
 
+/*  generate_idata_ofile() generates the portable assembly source code
+    for the idata sections.  It may be passed an open FILE* or a NULL.  
+    In the former case it appends the source code to the end of the 
+    file and returns NULL.  In the latter case it creates a file named
+    doi.s, assembles it to doi.o, opens doi.o as a bfd, and returns the
+    bfd*.  generate_idata_ofile() is currently used in the former manner
+    in gen_exp_file().
+ */
+ 
+bfd * 
+generate_idata_ofile ( fd )
+ FILE *fd;
+ {
+   FILE      *filvar;
+   int        result;
+   iheadtype *headptr;
+   ifunctype *funcptr;
+   int        headindex;
+   int        funcindex;
+   char       as_args[16];
+   
+   if (fd != NULL)
+     filvar = fd;
+   else 
+     filvar = fopen ("doi.s", "w");
+   if (!filvar) 
+     {
+        fprintf (stderr, "%s: Can't open doi.s\n", program_name);
+        return ((bfd*)-1);
+     }
+   fprintf (filvar, "%s Import data sections\n", ASM_C);
+   fprintf (filvar, "\n\t.section\t.idata$2\n");
+   fprintf (filvar, "\t%s\tdoi_idata\n", ASM_GLOBAL);
+   fprintf (filvar, "doi_idata:\n");
+ 
+   nheads = 0;
+   for (headptr = import_list; headptr != NULL; headptr = headptr->next)
+    {
+       fprintf (filvar, "\t%slistone%d%s\t%s %s\n",
+                ASM_RVA_BEFORE, (int)nheads, ASM_RVA_AFTER,
+                ASM_C, headptr->dllname);
+       fprintf (filvar, "\t%s\t0\n", ASM_LONG);
+       fprintf (filvar, "\t%s\t0\n", ASM_LONG);
+       fprintf (filvar, "\t%sdllname%d%s\n", 
+                ASM_RVA_BEFORE, (int)nheads, ASM_RVA_AFTER);
+       fprintf (filvar, "\t%slisttwo%d%s\n\n", 
+                ASM_RVA_BEFORE, (int)nheads, ASM_RVA_AFTER);
+       nheads++;  
+    } /* END of headptr for-loop */
+ 
+   fprintf (filvar, "\t%s\t0\n", ASM_LONG); /* NULL record at */
+   fprintf (filvar, "\t%s\t0\n", ASM_LONG); /* end of idata$2 */
+   fprintf (filvar, "\t%s\t0\n", ASM_LONG); /* section        */
+   fprintf (filvar, "\t%s\t0\n", ASM_LONG);
+   fprintf (filvar, "\t%s\t0\n", ASM_LONG);
+ 
+   fprintf (filvar, "\n\t.section\t.idata$4\n");
+   headindex = 0; 
+   for (headptr = import_list; headptr != NULL; headptr = headptr->next)
+     {
+       fprintf (filvar, "listone%d:\n", headindex);
+       for ( funcindex = 0; funcindex < headptr->nfuncs; funcindex++ )
+         fprintf (filvar, "\t%sfuncptr%d_%d%s\n",
+                  ASM_RVA_BEFORE, headindex, funcindex, ASM_RVA_AFTER);
+       fprintf (filvar,"\t%s\t0\n", ASM_LONG); /* NULL terminating list */
+       headindex++;
+     } /* END of headptr for loop */
+ 
+   fprintf (filvar, "\n\t.section\t.idata$5\n");
+   headindex = 0; 
+   for (headptr = import_list; headptr != NULL; headptr = headptr->next)
+     {
+       fprintf (filvar, "listtwo%d:\n", headindex);
+       for ( funcindex = 0; funcindex < headptr->nfuncs; funcindex++ )
+         fprintf (filvar, "\t%sfuncptr%d_%d%s\n",
+                  ASM_RVA_BEFORE, headindex, funcindex, ASM_RVA_AFTER);
+       fprintf (filvar,"\t%s\t0\n", ASM_LONG); /* NULL terminating list */
+       headindex++;
+     } /* END of headptr for-loop */
+ 
+   fprintf (filvar, "\n\t.section\t.idata$6\n");
+   headindex = 0;
+   for (headptr = import_list; headptr != NULL; headptr = headptr->next)
+     {
+       funcindex = 0;
+       for (funcptr = headptr->funchead; funcptr != NULL; 
+            funcptr = funcptr->next)
+         {
+           fprintf (filvar,"funcptr%d_%d:\n",headindex,funcindex);
+           fprintf (filvar,"\t%s\t%d\n",ASM_SHORT,((funcptr->ord) & 0xFFFF));
+           fprintf (filvar,"\t%s\t%c%s%c\n",ASM_TEXT,'"',funcptr->name,'"');
+           fprintf (filvar,"\t%s\t0\n",ASM_BYTE);
+           funcindex++; 
+          } /* END of funcptr for loop */
+       headindex++;
+      } /* END of headptr for loop */
+ 
+   fprintf (filvar, "\n\t.section\t.idata$7\n");
+   headindex = 0;
+   for (headptr = import_list; headptr != NULL; headptr = headptr->next)
+     {
+       fprintf (filvar,"dllname%d:\n",headindex);
+       fprintf (filvar,"\t%s\t%c%s%c\n",ASM_TEXT,'"',headptr->dllname,'"');
+       fprintf (filvar,"\t%s\t0\n",ASM_BYTE);
+       headindex++;
+     } /* END of headptr for loop */
+ 
+   if (fd == NULL) 
+     {
+       result = fclose (filvar);
+       if ( result ) 
+         {
+           fprintf (stderr, "%s: Can't close doi.s\n", program_name);
+           return ((bfd*) -1);
+         } /* END of if clause */
+       sprintf (as_args, "-o doi.o doi.s");
+       run (as_name, as_args);
+ 
+       if (dontdeltemps == 0)
+         {
+           sprintf (outfile, "doi.s");
+           unlink  (outfile);         
+          }
+       return (bfd_openr ("doi.o", HOW_BFD_TARGET));  
+      } /* END of if clause */
+    else
+      return NULL;
+  } /* END of function generate_idata_ofile() */
+
 static void
 gen_exp_file ()
 {
   FILE *f;
   int i;
+  bfd *result;
   export_type *exp;
   dlist_type *dl;
 
@@ -1163,6 +1451,14 @@ gen_exp_file ()
 /*	  fprintf (f, "\t%s\t0,0\t%s End\n", ASM_LONG, ASM_C);*/
 	}
     }
+
+    result = generate_idata_ofile (f);                    
+    if ( result != NULL )                                 
+      {                                                   
+        fprintf (stderr, "%s: error writing idata section\n", 
+                 program_name);                           
+        exit (1);                                         
+      }                                                   
 
   fclose (f);
 
@@ -2402,7 +2698,7 @@ main (ac, av)
 
   if (!dll_name && exp_name)
     {
-      char len = strlen (exp_name) + 5;
+      int len = strlen (exp_name) + 5;
       dll_name = xmalloc (len);
       strcpy (dll_name, exp_name);
       strcat (dll_name, ".dll");

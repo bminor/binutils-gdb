@@ -29,7 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 };
 
 %token NAME, LIBRARY, DESCRIPTION, STACKSIZE, HEAPSIZE, CODE, DATA
-%token SECTIONS, EXPORTS, IMPORTS, VERSION, BASE, CONSTANT
+%token SECTIONS, EXPORTS, IMPORTS, VERSIONK, BASE, CONSTANT
 %token READ WRITE EXECUTE SHARED NONAME
 %token <id> ID
 %token <number> NUMBER
@@ -54,14 +54,15 @@ command:
 	|	DATA attr_list  { def_data ($2);}
 	|	SECTIONS seclist
 	|	IMPORTS implist
-	|	VERSION NUMBER { def_version ($2,0);}
-	|	VERSION NUMBER '.' NUMBER { def_version ($2,$4);}
+	|	VERSIONK NUMBER { def_version ($2,0);}
+	|	VERSIONK NUMBER '.' NUMBER { def_version ($2,$4);}
 	;
 
 
 explist:
-		explist expline
+		/* EMPTY */
 	|	expline
+	|	explist expline
 	;
 
 expline:
@@ -74,9 +75,16 @@ implist:
 	;
 
 impline:
-		ID '=' ID '.' ID { def_import ($1,$3,$5);}
-	|	ID '.' ID	 { def_import (0, $1,$3);}
-	;
+               ID '=' ID '.' ID '.' ID     { def_import ($1,$3,$5,$7, 0); }
+       |       ID '=' ID '.' ID '.' NUMBER { def_import ($1,$3,$5, 0,$7); }
+       |       ID '=' ID '.' ID            { def_import ($1,$3, 0,$5, 0); }
+       |       ID '=' ID '.' NUMBER        { def_import ($1,$3, 0, 0,$5); }
+       |       ID '.' ID '.' ID            { def_import ( 0,$1,$3,$5, 0); }
+       |       ID '.' ID '.' NUMBER        { def_import ( 0,$1,$3, 0,$5); }
+       |       ID '.' ID                   { def_import ( 0,$1, 0,$3, 0); }
+       |       ID '.' NUMBER               { def_import ( 0,$1, 0, 0,$3); }
+;
+
 seclist:
 		seclist secline
 	|	secline
