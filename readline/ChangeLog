@@ -1,3 +1,7 @@
+Sun Jun 13 13:04:09 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* Makefile.in ({real,dist}clean): Remove sysdep.h.
+
 Thu Jun 10 11:22:41 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* Makefile.in: Add mostlyclean, distclean, and realclean targets.

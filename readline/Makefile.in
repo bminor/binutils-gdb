@@ -1,6 +1,6 @@
 #
 # Makefile
-#   Copyright (C) 1990, 1991 Cygnus Support
+#   Copyright (C) 1990, 1991, 1992 Free Software Foundation
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,10 +25,12 @@ srcdir = .
 
 prefix = /usr/local
 
-bindir = $(prefix)/bin
+exec_prefix = $(prefix)
+bindir = $(exec_prefix)/bin
+libdir = $(exec_prefix)/lib
+
 datadir = $(prefix)/lib
-libdir = $(prefix)/lib
-mandir = $(datadir)/man
+mandir = $(prefix)/man
 man1dir = $(mandir)/man1
 man2dir = $(mandir)/man2
 man3dir = $(mandir)/man3
@@ -50,12 +52,10 @@ INSTALL_DATA = $(INSTALL)
 
 AR = ar
 AR_FLAGS = qv
+CFLAGS = -g
 BISON = bison
 MAKEINFO = makeinfo
 RANLIB = ranlib
-
-#### Host, target, and site specific Makefile fragments come in here.
-###
 
 # Define TYPES as -DVOID_SIGHANDLER if your operating system uses
 # a return type of "void" for signal handlers.
@@ -71,10 +71,8 @@ TYPES = -DVOID_SIGHANDLER
 # the vi line editing mode and features.
 READLINE_DEFINES = $(TYPES) -DVI_MODE
 
-MINUS_G=-g
 DEBUG_FLAGS = $(MINUS_G)
 LDFLAGS = $(DEBUG_FLAGS) 
-CFLAGS = $(H_CFLAGS) $(DEBUG_FLAGS) $(USG) -I. $(LOCAL_INCLUDES) $(CPPFLAGS) $(READLINE_DEFINES)
 
 # A good alternative is gcc -traditional.
 #CC = gcc -traditional
@@ -96,24 +94,28 @@ SUPPORT = COPYING Makefile $(DOCUMENTATION) ChangeLog
 
 THINGS_TO_TAR = $(SOURCES) $(SUPPORT)
 
-##########################################################################
+#### Host, target, and site specific Makefile fragments come in here.
+###
+
+.c.o:
+	$(CC) -c $(CFLAGS) $(H_CFLAGS) $(DEBUG_FLAGS) $(USG) -I. $(LOCAL_INCLUDES) $(CPPFLAGS) $(READLINE_DEFINES) $<
 
 STAGESTUFF = *.o
 
 all: libreadline.a
 
+check:
+installcheck:
 info:
-	echo FIXME
-	echo FIXME
-	echo FIXME
+dvi:
 
 clean-info: force
 	-rm -f *.info*
 
-history.info: history.texi
+history.info: $(srcdir)/history.texi
 	$(MAKEINFO) -o history.info $(srcdir)/history.texi
 
-readline.info: readline.texi inc-read.texi
+readline.info: $(srcdir)/readline.texi $(srcdir)/inc-read.texi
 	$(MAKEINFO) -o readline.info $(srcdir)/readline.texi
 
 libreadline.a:	readline.o history.o funmap.o keymaps.o tilde.o vi_mode.o
@@ -127,10 +129,10 @@ funmap.o:	readline.h
 keymaps.o:	emacs_keymap.c vi_keymap.c keymaps.h chardefs.h keymaps.c
 
 tilde.o:	$(srcdir)/../glob/tilde.c
-	$(CC) -c $(CFLAGS) $(srcdir)/../glob/tilde.c
+	$(CC) -c $(CFLAGS) $(H_CFLAGS) $(DEBUG_FLAGS) $(USG) -I. $(LOCAL_INCLUDES) $(CPPFLAGS) $(READLINE_DEFINES) $(srcdir)/../glob/tilde.c
 
 libtest:	libreadline.a libtest.c
-	$(CC) -o libtest $(CFLAGS) $(CPPFLAGS) -L. libtest.c -lreadline -ltermcap
+	$(CC) -o libtest $(CFLAGS) $(H_CFLAGS) $(DEBUG_FLAGS) $(USG) -I. $(LOCAL_INCLUDES) $(CPPFLAGS) $(READLINE_DEFINES) -L. libtest.c -lreadline -ltermcap
 
 readline: readline.c history.o keymaps.o funmap.o readline.h chardefs.h vi_mode.o
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(READLINE_DEFINES) \
@@ -144,29 +146,45 @@ readline.tar.Z:	readline.tar
 		compress -f readline.tar
 
 install:
+		-parent=`echo $(libdir)|sed -e 's@/[^/]*$$@@'`; \
+		if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
+		-if [ -d $(libdir) ] ; then true ; else mkdir $(libdir) ; fi
 		$(INSTALL_DATA) libreadline.a $(libdir)/libreadline.a
 		$(RANLIB) $(libdir)/libreadline.a
-		[ -d $(includedir)/readline ] || mkdir $(includedir)/readline
-		$(INSTALL_DATA) readline.h $(includedir)/readline/readline.h
-		$(INSTALL_DATA) keymaps.h $(includedir)/readline/keymaps.h
-		$(INSTALL_DATA) chardefs.h $(includedir)/readline/chardefs.h
+		-parent=`echo $(includedir)|sed -e 's@/[^/]*$$@@'`; \
+		if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
+		-if [ -d $(includedir) ] ; then true ; else mkdir $(includedir) ; fi
+		-if [ -d $(includedir)/readline ] ; then true ; else mkdir $(includedir)/readline ; fi
+		$(INSTALL_DATA) $(srcdir)/readline.h $(includedir)/readline/readline.h
+		$(INSTALL_DATA) $(srcdir)/keymaps.h $(includedir)/readline/keymaps.h
+		$(INSTALL_DATA) $(srcdir)/chardefs.h $(includedir)/readline/chardefs.h
 
 install-info: info
-		for i in *.info* ; do \
-			$(INSTALL_DATA) $$i $(infodir)/$$i ; \
-		done
+#		-parent=`echo $(infodir)|sed -e 's@/[^/]*$$@@'`; \
+#		if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
+#		-if [ -d $(infodir) ] ; then true ; else mkdir $(infodir) ; fi
+#		for i in *.info* ; do \
+#			$(INSTALL_DATA) $$i $(infodir)/$$i ; \
+#		done
 
 includes:
-		if [ ! -r $(INCDIR)/readline ]; then\
-		 mkdir $(INCDIR)/readline;\
-		 chmod a+r $(INCDIR)/readline;\
+		-parent=`echo $(includedir)|sed -e 's@/[^/]*$$@@'`; \
+		if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
+		-if [ -d $(includedir) ] ; then true ; else mkdir $(includedir) ; fi
+		-if [ ! -r $(includedir)/readline ]; then\
+		 mkdir $(includedir)/readline;\
+		 chmod a+r $(includedir)/readline;\
 		fi
-		$(INSTALL_FILE) $(srcdir)/readline.h $(INCDIR)/readline/
-		$(INSTALL_FILE) $(srcdir)/keymaps.h $(INCDIR)/readline/
-		$(INSTALL_FILE) $(srcdir)/chardefs.h $(INCDIR)/readline/
-clean:
+		$(INSTALL_FILE) $(srcdir)/readline.h $(includedir)/readline/readline.h
+		$(INSTALL_FILE) $(srcdir)/keymaps.h $(includedir)/readline/keymaps.h
+		$(INSTALL_FILE) $(srcdir)/chardefs.h $(includedir)/readline/chardefs.h
+
+clean mostlyclean:
 		rm -f $(STAGESTUFF) *.a *.log *.cp *.tp *.vr *.fn
 		rm -f *.aux *.pg *.toc
+
+distclean realclean: clean
+	rm -f Makefile config.status sysdep.h
 
 $(DESTDIR)/libreadline.a: libreadline.a
 
