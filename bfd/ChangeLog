@@ -1,3 +1,8 @@
+2004-02-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-ia64.c (elfNN_ia64_check_relocs): Fix call to
+	count_dyn_reloc.
+
 2004-02-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfxx-ia64.c (elfNN_ia64_dyn_reloc_entry): Add the reltext.

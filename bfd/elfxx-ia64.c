@@ -2487,7 +2487,7 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
 		return FALSE;
 	    }
 	  if (!count_dyn_reloc (abfd, dyn_i, srel, dynrel_type,
-				(sec->flags & SEC_READONLY)))
+				(sec->flags & SEC_READONLY) != 0))
 	    return FALSE;
 	}
     }
