@@ -1,3 +1,8 @@
+Thu Apr 11 18:49:42 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* remote.c (remotewritesize): New GDB variable, controls size
+	of memory packets sent to the target.
+
 Thu Apr 11 13:47:52 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* dcache.c:  Add prototypes.  Make many functions static.
