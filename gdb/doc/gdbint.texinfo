@@ -4879,7 +4879,7 @@ object.
 A module registers one or more per-architecture data-pointers using the
 function @code{register_gdbarch_data}:
 
-@deftypefun struct gdbarch_data *register_gdbarch_data (gdbarch_data_init_ftype *@var{init}, gdbarch_data_free_ftype *@var{free})
+@deftypefun struct gdbarch_data *register_gdbarch_data (gdbarch_data_init_ftype *@var{init})
 
 The @var{init} function is used to obtain an initial value for a
 per-architecture data-pointer.  The function is called, after the
@@ -4888,10 +4888,9 @@ uninitialized (@code{NULL}) and its value has been requested via a call
 to @code{gdbarch_data}.  A data-pointer can also be initialize
 explicitly using @code{set_gdbarch_data}.
 
-The @var{free} function is called when a data-pointer needs to be
-destroyed.  This occurs when either the corresponding @code{struct
-gdbarch} object is being destroyed or when @code{set_gdbarch_data} is
-overriding a non-@code{NULL} data-pointer value.
+Any memory required by the @var{init} function should be allocated
+using @code{GDBARCH_OBSTACK_ZALLOC}.  That memory is automatically
+released when the corresponding architecture is deleted.
 
 The function @code{register_gdbarch_data} returns a @code{struct
 gdbarch_data} that is used to identify the data-pointer that was added
@@ -4899,22 +4898,17 @@ to the module.
 
 @end deftypefun
 
-A typical module has @code{init} and @code{free} functions of the form:
+A typical module has an @code{init} function of the form:
 
 @smallexample
+struct nozel @{ int total; @};
 static struct gdbarch_data *nozel_handle;
 static void *
 nozel_init (struct gdbarch *gdbarch)
 @{
-  struct nozel *data = XMALLOC (struct nozel);
+  struct nozel *data = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct nozel);
   @dots{}
   return data;
-@}
-@dots{}
-static void
-nozel_free (struct gdbarch *gdbarch, void *data)
-@{
-  xfree (data);
 @}
 @end smallexample
 
@@ -4930,7 +4924,7 @@ The data-pointer is registered with the call:
 void
 _initialize_nozel (void)
 @{
-  nozel_handle = register_gdbarch_data (nozel_init, nozel_free);
+  nozel_handle = register_gdbarch_data (nozel_init);
 @dots{}
 @end smallexample
 
@@ -4958,35 +4952,37 @@ nozel_total (struct gdbarch *gdbarch)
 
 It is also possible to directly initialize the data-pointer using:
 
-@deftypefun void set_gdbarch_data (struct gdbarch *@var{gdbarch}, struct gdbarch_data *handle, void *@var{pointer})
-Update the data-pointer corresponding to @var{handle} with the value of
-@var{pointer}.  If the previous data-pointer value is non-NULL, then it
-is freed using data-pointers @var{free} function.
+@deftypefun void set_gdbarch_data (struct gdbarch *@var{gdbarch}, struct gdbarch_data *@var{handle}, void *@var{pointer})
+Set the still @code{NULL} data-pointer corresponding to @var{handle}
+to the non-@code{NULL} @var{pointer} value.
 @end deftypefun
 
 This function is used by modules that require a mechanism for explicitly
 setting the per-architecture data-pointer during architecture creation:
 
 @smallexample
-/* Called during architecture creation.  */
-extern void
-set_gdbarch_nozel (struct gdbarch *gdbarch,
-                   int total)
+/* Always return a non-NULL nozel.  */
+static struct nozel *
+gdbarch_nozel (struct gdbarch *gdbarch)
 @{
-  struct nozel *data = XMALLOC (struct nozel);
-  @dots{}
-  set_gdbarch_data (gdbarch, nozel_handle, nozel);
+  struct nozel *nozel = gdbarch_data (gdbarch, nozel_handle);
+  if (nozel == NULL)
+    @{
+      nozel = nozel_init (gdbarch);
+      set_gdbarch_data (gdbarch, nozel_handle, nozel);
+    @}
+  return nozel;
 @}
 @end smallexample
 
 @smallexample
-/* Default, called when nozel not set by set_gdbarch_nozel().  */
-static void *
-nozel_init (struct gdbarch *gdbarch)
+/* Called during architecture creation.  */
+extern void
+set_gdbarch_nozel (struct gdbarch *gdbarch, int total)
 @{
-  struct nozel *default_nozel = XMALLOC (struc nozel);
+  struct nozel *data = gdbarch_nozel (gdbarch);
   @dots{}
-  return default_nozel;
+  data->total = total;
 @}
 @end smallexample
 
@@ -4994,7 +4990,7 @@ nozel_init (struct gdbarch *gdbarch)
 void
 _initialize_nozel (void)
 @{
-  nozel_handle = register_gdbarch_data (nozel_init, NULL);
+  nozel_handle = register_gdbarch_data (nozel_init);
   @dots{}
 @end smallexample
 
