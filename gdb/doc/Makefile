@@ -49,12 +49,14 @@ clean:
 refcard.dvi : refcard.tex
 	rm -f rcfonts.tex; cp rc-cm.tex rcfonts.tex
 	TEXINPUTS=.:$$TEXINPUTS tex refcard.tex; rm -f refcard.log 
+	rm -f rcfonts.tex
 
 # GDB QUICK REFERENCE (PostScript output, common PS fonts)
 refcard.ps : refcard.tex
 	rm -f rcfonts.tex; cp rc-ps.tex rcfonts.tex
 	TEXINPUTS=.:$$TEXINPUTS tex refcard.tex
 	dvips -t landscape refcard -o; rm -f refcard.dvi refcard.log
+	rm -f rcfonts.tex
 
 # Cover file for "Readline" appendices
 rdl-apps.texi: ${READLINE_DIR}/inc-readline.texinfo \
