@@ -1,3 +1,8 @@
+Mon Mar 31 14:01:40 1997  Philippe De Muyter  <phdm@info.ucl.ac.be>
+
+	* config/tc-m68k.h (TARGET_FORMAT): Set to "coff-m68k-sysv" if
+	TE_DELTA.
+
 Fri Mar 28 18:03:19 1997  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* configure.in: Add AC_ARG_ENABLE for commonbfdlib.  If it is set,
