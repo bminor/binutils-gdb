@@ -365,7 +365,7 @@ locate_opcode_ent (ia64_insn opcode, enum ia64_insn_type type)
       unsigned int op;
       int currbitnum = bitpos[currstatenum];
       int oplen;
-      int opval[3];
+      int opval[3] = {0};
       int next_op;
       int currbit;
 

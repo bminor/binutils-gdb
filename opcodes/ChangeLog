@@ -1,8 +1,28 @@
 2005-02-23  Nick Clifton  <nickc@redhat.com>
 
+	* cgen-dis.in: Use bfd_byte for buffers that are passed to
+	read_memory.
+	
+	* ia64-opc.c (locate_opcode_ent): Initialise opval array.
+	
 	* crx-dis.c (make_instruction): Move argument structure into inner
 	scope and ensure that all of its fields are initialised before
 	they are used.
+
+	* fr30-asm.c: Regenerate.
+	* fr30-dis.c: Regenerate.
+	* frv-asm.c: Regenerate.
+	* frv-dis.c: Regenerate.
+	* ip2k-asm.c: Regenerate.
+	* ip2k-dis.c: Regenerate.
+	* iq2000-asm.c: Regenerate.
+	* iq2000-dis.c: Regenerate.
+	* m32r-asm.c: Regenerate.
+	* m32r-dis.c: Regenerate.
+	* openrisc-asm.c: Regenerate.
+	* openrisc-dis.c: Regenerate.
+	* xstormy16-asm.c: Regenerate.
+	* xstormy16-dis.c: Regenerate.
 
 2005-02-22  Alan Modra  <amodra@bigpond.net.au>
 

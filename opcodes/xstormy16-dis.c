@@ -49,11 +49,11 @@ static void print_keyword
 static void print_insn_normal
   (CGEN_CPU_DESC, void *, const CGEN_INSN *, CGEN_FIELDS *, bfd_vma, int);
 static int print_insn
-  (CGEN_CPU_DESC, bfd_vma,  disassemble_info *, char *, unsigned);
+  (CGEN_CPU_DESC, bfd_vma,  disassemble_info *, bfd_byte *, unsigned);
 static int default_print_insn
   (CGEN_CPU_DESC, bfd_vma, disassemble_info *) ATTRIBUTE_UNUSED;
 static int read_insn
-  (CGEN_CPU_DESC, bfd_vma, disassemble_info *, char *, int, CGEN_EXTRACT_INFO *,
+  (CGEN_CPU_DESC, bfd_vma, disassemble_info *, bfd_byte *, int, CGEN_EXTRACT_INFO *,
    unsigned long *);
 
 /* -- disassembler routines inserted here */
@@ -309,7 +309,7 @@ static int
 read_insn (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 	   bfd_vma pc,
 	   disassemble_info *info,
-	   char *buf,
+	   bfd_byte *buf,
 	   int buflen,
 	   CGEN_EXTRACT_INFO *ex_info,
 	   unsigned long *insn_value)
@@ -339,7 +339,7 @@ static int
 print_insn (CGEN_CPU_DESC cd,
 	    bfd_vma pc,
 	    disassemble_info *info,
-	    char *buf,
+	    bfd_byte *buf,
 	    unsigned int buflen)
 {
   CGEN_INSN_INT insn_value;
@@ -363,7 +363,7 @@ print_insn (CGEN_CPU_DESC cd,
   /* The instructions are stored in hash lists.
      Pick the first one and keep trying until we find the right one.  */
 
-  insn_list = CGEN_DIS_LOOKUP_INSN (cd, buf, insn_value);
+  insn_list = CGEN_DIS_LOOKUP_INSN (cd, (char *) buf, insn_value);
   while (insn_list != NULL)
     {
       const CGEN_INSN *insn = insn_list->insn;
@@ -447,7 +447,7 @@ print_insn (CGEN_CPU_DESC cd,
 static int
 default_print_insn (CGEN_CPU_DESC cd, bfd_vma pc, disassemble_info *info)
 {
-  char buf[CGEN_MAX_INSN_SIZE];
+  bfd_byte buf[CGEN_MAX_INSN_SIZE];
   int buflen;
   int status;
 

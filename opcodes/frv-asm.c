@@ -51,7 +51,7 @@ static const char * parse_insn_normal
 static const char * parse_ulo16
   PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
 static const char * parse_uslo16
-  PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
+  PARAMS ((CGEN_CPU_DESC, const char **, int, signed long *));
 static const char * parse_uhi16
   PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
 static long parse_register_number
@@ -67,11 +67,11 @@ static const char * parse_u12
 static const char * parse_even_register
   PARAMS ((CGEN_CPU_DESC, const char **, CGEN_KEYWORD *, long *));
 static const char * parse_A0
-  PARAMS ((CGEN_CPU_DESC, const char **, int, long *));
+  PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
 static const char * parse_A1
-  PARAMS ((CGEN_CPU_DESC, const char **, int, long *));
+  PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
 static const char * parse_A
-  PARAMS ((CGEN_CPU_DESC, const char **, int, long *, long));
+  PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *, long));
 
 inline static const char *
 parse_symbolic_address (CGEN_CPU_DESC cd,
@@ -100,7 +100,7 @@ static const char *
 parse_ldd_annotation (CGEN_CPU_DESC cd,
 		      const char **strp,
 		      int opindex,
-		      long *valuep)
+		      unsigned long *valuep)
 {
   const char *errmsg;
   enum cgen_parse_operand_result result_type;
@@ -139,7 +139,7 @@ static const char *
 parse_call_annotation (CGEN_CPU_DESC cd,
 		       const char **strp,
 		       int opindex,
-		       long *valuep)
+		       unsigned long *valuep)
 {
   const char *errmsg;
   enum cgen_parse_operand_result result_type;
@@ -178,7 +178,7 @@ static const char *
 parse_ld_annotation (CGEN_CPU_DESC cd,
 		     const char **strp,
 		     int opindex,
-		     long *valuep)
+		     unsigned long *valuep)
 {
   const char *errmsg;
   enum cgen_parse_operand_result result_type;
@@ -337,7 +337,7 @@ parse_ulo16 (cd, strp, opindex, valuep)
 	  return errmsg;
 	}
     }
-  return cgen_parse_signed_integer (cd, strp, opindex, valuep);
+  return cgen_parse_unsigned_integer (cd, strp, opindex, valuep);
 }
 
 static const char *
@@ -345,7 +345,7 @@ parse_uslo16 (cd, strp, opindex, valuep)
      CGEN_CPU_DESC cd;
      const char **strp;
      int opindex;
-     unsigned long *valuep;
+     signed long *valuep;
 {
   const char *errmsg;
   enum cgen_parse_operand_result result_type;
@@ -464,7 +464,7 @@ parse_uslo16 (cd, strp, opindex, valuep)
 	  return errmsg;
 	}
     }
-  return cgen_parse_unsigned_integer (cd, strp, opindex, valuep);
+  return cgen_parse_signed_integer (cd, strp, opindex, valuep);
 }
 
 static const char *
@@ -923,7 +923,7 @@ parse_A (cd, strp, opindex, valuep, A)
      CGEN_CPU_DESC cd;
      const char **strp;
      int opindex;
-     long *valuep;
+     unsigned long *valuep;
      long A;
 {
   const char *errmsg;
@@ -946,7 +946,7 @@ parse_A0 (cd, strp, opindex, valuep)
      CGEN_CPU_DESC cd;
      const char **strp;
      int opindex;
-     long *valuep;
+     unsigned long *valuep;
 {
   return parse_A (cd, strp, opindex, valuep, 0);
 }
@@ -956,7 +956,7 @@ parse_A1 (cd, strp, opindex, valuep)
      CGEN_CPU_DESC cd;
      const char **strp;
      int opindex;
-     long *valuep;
+     unsigned long *valuep;
 {
   return parse_A (cd, strp, opindex, valuep, 1);
 }
@@ -1045,10 +1045,10 @@ frv_cgen_parse_operand (cd, opindex, strp, fields)
   switch (opindex)
     {
     case FRV_OPERAND_A0 :
-      errmsg = parse_A0 (cd, strp, FRV_OPERAND_A0, &fields->f_A);
+      errmsg = parse_A0 (cd, strp, FRV_OPERAND_A0, (unsigned long *) (& fields->f_A));
       break;
     case FRV_OPERAND_A1 :
-      errmsg = parse_A1 (cd, strp, FRV_OPERAND_A1, &fields->f_A);
+      errmsg = parse_A1 (cd, strp, FRV_OPERAND_A1, (unsigned long *) (& fields->f_A));
       break;
     case FRV_OPERAND_ACC40SI :
       errmsg = cgen_parse_keyword (cd, strp, & frv_cgen_opval_acc_names, & fields->f_ACC40Si);
@@ -1180,46 +1180,46 @@ frv_cgen_parse_operand (cd, opindex, strp, fields)
       errmsg = cgen_parse_keyword (cd, strp, & frv_cgen_opval_iccr_names, & fields->f_ICCi_3);
       break;
     case FRV_OPERAND_LI :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_LI, &fields->f_LI);
+      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_LI, (unsigned long *) (& fields->f_LI));
       break;
     case FRV_OPERAND_LRAD :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_LRAD, &fields->f_LRAD);
+      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_LRAD, (unsigned long *) (& fields->f_LRAD));
       break;
     case FRV_OPERAND_LRAE :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_LRAE, &fields->f_LRAE);
+      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_LRAE, (unsigned long *) (& fields->f_LRAE));
       break;
     case FRV_OPERAND_LRAS :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_LRAS, &fields->f_LRAS);
+      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_LRAS, (unsigned long *) (& fields->f_LRAS));
       break;
     case FRV_OPERAND_TLBPRL :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_TLBPRL, &fields->f_TLBPRL);
+      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_TLBPRL, (unsigned long *) (& fields->f_TLBPRL));
       break;
     case FRV_OPERAND_TLBPROPX :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_TLBPROPX, &fields->f_TLBPRopx);
+      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_TLBPROPX, (unsigned long *) (& fields->f_TLBPRopx));
       break;
     case FRV_OPERAND_AE :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_AE, &fields->f_ae);
+      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_AE, (unsigned long *) (& fields->f_ae));
       break;
     case FRV_OPERAND_CALLANN :
-      errmsg = parse_call_annotation (cd, strp, FRV_OPERAND_CALLANN, &fields->f_reloc_ann);
+      errmsg = parse_call_annotation (cd, strp, FRV_OPERAND_CALLANN, (unsigned long *) (& fields->f_reloc_ann));
       break;
     case FRV_OPERAND_CCOND :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_CCOND, &fields->f_ccond);
+      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_CCOND, (unsigned long *) (& fields->f_ccond));
       break;
     case FRV_OPERAND_COND :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_COND, &fields->f_cond);
+      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_COND, (unsigned long *) (& fields->f_cond));
       break;
     case FRV_OPERAND_D12 :
-      errmsg = parse_d12 (cd, strp, FRV_OPERAND_D12, &fields->f_d12);
+      errmsg = parse_d12 (cd, strp, FRV_OPERAND_D12, (long *) (& fields->f_d12));
       break;
     case FRV_OPERAND_DEBUG :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_DEBUG, &fields->f_debug);
+      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_DEBUG, (unsigned long *) (& fields->f_debug));
       break;
     case FRV_OPERAND_EIR :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_EIR, &fields->f_eir);
+      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_EIR, (unsigned long *) (& fields->f_eir));
       break;
     case FRV_OPERAND_HINT :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_HINT, &fields->f_hint);
+      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_HINT, (unsigned long *) (& fields->f_hint));
       break;
     case FRV_OPERAND_HINT_NOT_TAKEN :
       errmsg = cgen_parse_keyword (cd, strp, & frv_cgen_opval_h_hint_not_taken, & fields->f_hint);
@@ -1242,55 +1242,55 @@ frv_cgen_parse_operand (cd, opindex, strp, fields)
       }
       break;
     case FRV_OPERAND_LDANN :
-      errmsg = parse_ld_annotation (cd, strp, FRV_OPERAND_LDANN, &fields->f_reloc_ann);
+      errmsg = parse_ld_annotation (cd, strp, FRV_OPERAND_LDANN, (unsigned long *) (& fields->f_reloc_ann));
       break;
     case FRV_OPERAND_LDDANN :
-      errmsg = parse_ldd_annotation (cd, strp, FRV_OPERAND_LDDANN, &fields->f_reloc_ann);
+      errmsg = parse_ldd_annotation (cd, strp, FRV_OPERAND_LDDANN, (unsigned long *) (& fields->f_reloc_ann));
       break;
     case FRV_OPERAND_LOCK :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_LOCK, &fields->f_lock);
+      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_LOCK, (unsigned long *) (& fields->f_lock));
       break;
     case FRV_OPERAND_PACK :
       errmsg = cgen_parse_keyword (cd, strp, & frv_cgen_opval_h_pack, & fields->f_pack);
       break;
     case FRV_OPERAND_S10 :
-      errmsg = cgen_parse_signed_integer (cd, strp, FRV_OPERAND_S10, &fields->f_s10);
+      errmsg = cgen_parse_signed_integer (cd, strp, FRV_OPERAND_S10, (long *) (& fields->f_s10));
       break;
     case FRV_OPERAND_S12 :
-      errmsg = parse_s12 (cd, strp, FRV_OPERAND_S12, &fields->f_d12);
+      errmsg = parse_s12 (cd, strp, FRV_OPERAND_S12, (long *) (& fields->f_d12));
       break;
     case FRV_OPERAND_S16 :
-      errmsg = cgen_parse_signed_integer (cd, strp, FRV_OPERAND_S16, &fields->f_s16);
+      errmsg = cgen_parse_signed_integer (cd, strp, FRV_OPERAND_S16, (long *) (& fields->f_s16));
       break;
     case FRV_OPERAND_S5 :
-      errmsg = cgen_parse_signed_integer (cd, strp, FRV_OPERAND_S5, &fields->f_s5);
+      errmsg = cgen_parse_signed_integer (cd, strp, FRV_OPERAND_S5, (long *) (& fields->f_s5));
       break;
     case FRV_OPERAND_S6 :
-      errmsg = cgen_parse_signed_integer (cd, strp, FRV_OPERAND_S6, &fields->f_s6);
+      errmsg = cgen_parse_signed_integer (cd, strp, FRV_OPERAND_S6, (long *) (& fields->f_s6));
       break;
     case FRV_OPERAND_S6_1 :
-      errmsg = cgen_parse_signed_integer (cd, strp, FRV_OPERAND_S6_1, &fields->f_s6_1);
+      errmsg = cgen_parse_signed_integer (cd, strp, FRV_OPERAND_S6_1, (long *) (& fields->f_s6_1));
       break;
     case FRV_OPERAND_SLO16 :
-      errmsg = parse_uslo16 (cd, strp, FRV_OPERAND_SLO16, &fields->f_s16);
+      errmsg = parse_uslo16 (cd, strp, FRV_OPERAND_SLO16, (long *) (& fields->f_s16));
       break;
     case FRV_OPERAND_SPR :
       errmsg = parse_spr (cd, strp, & frv_cgen_opval_spr_names, & fields->f_spr);
       break;
     case FRV_OPERAND_U12 :
-      errmsg = parse_u12 (cd, strp, FRV_OPERAND_U12, &fields->f_u12);
+      errmsg = parse_u12 (cd, strp, FRV_OPERAND_U12, (long *) (& fields->f_u12));
       break;
     case FRV_OPERAND_U16 :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_U16, &fields->f_u16);
+      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_U16, (unsigned long *) (& fields->f_u16));
       break;
     case FRV_OPERAND_U6 :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_U6, &fields->f_u6);
+      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_U6, (unsigned long *) (& fields->f_u6));
       break;
     case FRV_OPERAND_UHI16 :
-      errmsg = parse_uhi16 (cd, strp, FRV_OPERAND_UHI16, &fields->f_u16);
+      errmsg = parse_uhi16 (cd, strp, FRV_OPERAND_UHI16, (unsigned long *) (& fields->f_u16));
       break;
     case FRV_OPERAND_ULO16 :
-      errmsg = parse_ulo16 (cd, strp, FRV_OPERAND_ULO16, &fields->f_u16);
+      errmsg = parse_ulo16 (cd, strp, FRV_OPERAND_ULO16, (unsigned long *) (& fields->f_u16));
       break;
 
     default :

@@ -1,6 +1,7 @@
 /* M32R opcode support.  -*- C -*-
 
-   Copyright 1998, 1999, 2000, 2001, 2004 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2004, 2005
+   Free Software Foundation, Inc.
 
    Contributed by Red Hat Inc; developed under contract from
    Mitsubishi Electric Corporation.
@@ -88,7 +89,7 @@ m32r_cgen_dis_hash (buf, value)
 
 /* -- asm.c */
 static const char * parse_hash
-  PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
+  PARAMS ((CGEN_CPU_DESC, const char **, int, long *));
 static const char * parse_hi16
   PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
 static const char * parse_slo16
@@ -103,7 +104,7 @@ parse_hash (cd, strp, opindex, valuep)
      CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      const char **strp;
      int opindex ATTRIBUTE_UNUSED;
-     unsigned long *valuep ATTRIBUTE_UNUSED;
+     long *valuep ATTRIBUTE_UNUSED;
 {
   if (**strp == '#')
     ++*strp;

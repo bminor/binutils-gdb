@@ -1,3 +1,9 @@
+2005-02-23  Nick Clifton  <nickc@redhat.com>
+
+	* frv.opc: Fixed compile time warnings about differing signed'ness
+	of pointers passed to functions.
+	* m32r.opc: Likewise.
+
 2005-02-11  Nick Clifton  <nickc@redhat.com>
 
 	* iq2000.opc (parse_jtargq10): Change type of valuep argument to
