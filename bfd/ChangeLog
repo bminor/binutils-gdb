@@ -1,3 +1,9 @@
+1999-08-03  Mark Mitchell  <mark@codesourcery.com>
+
+	* elf32-mips.c (mips_elf_calculate_relocation): Restore
+	_DYNAMIC_LINK handling and handling of undefined symbols in shared
+	libraries.
+
 1999-08-03  Ian Lance Taylor  <ian@zembu.com>
 
 	* elf32-ppc.c (ppc_elf_relocate_section): Don't use the relocation

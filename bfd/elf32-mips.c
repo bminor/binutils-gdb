@@ -5877,6 +5877,19 @@ mips_elf_calculate_relocation (abfd,
 	   and check to see if they exist by looking at their
 	   addresses.  */
 	symbol = 0;
+      else if (info->shared && !info->symbolic && !info->no_undefined)
+	relocation = 0;
+      else if (strcmp (h->root.root.root.string, "_DYNAMIC_LINK") == 0)
+	{
+	  /* If this is a dynamic link, we should have created a
+	     _DYNAMIC_LINK symbol in mips_elf_create_dynamic_sections.
+	     Otherwise, we should define the symbol with a value of 0.
+	     FIXME: It should probably get into the symbol table
+	     somehow as well.  */
+	  BFD_ASSERT (! info->shared);
+	  BFD_ASSERT (bfd_get_section_by_name (abfd, ".dynamic") == NULL);
+	  relocation = 0;
+	}
       else
 	{
 	  (*info->callbacks->undefined_symbol)
