@@ -1,5 +1,68 @@
 2001-09-29  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-ppc.c (struct ppc_dyn_relocs): New.
+	(IS_ABSOLUTE_RELOC): Define.
+	(struct ppc_link_hash_entry): New.
+	(struct ppc_link_hash_table): New.
+	(ppc_hash_table): Define.
+	(link_hash_newfunc): New function.
+	(ppc64_elf_link_hash_table_create): New function.
+	(create_got_section): New function.
+	(ppc64_elf_create_dynamic_sections): Call create_got_section.  Stash
+	pointers to our dynamic sections in hash table.
+	(ppc64_elf_copy_indirect_symbol): New function.
+	(ppc64_elf_check_relocs): Remove DEBUG code.  Use short-cuts to
+	dynamic sections.  Localise vars.  Modify code for refcounts
+	starting from zero.  Don't allocate here, or force symbols dynamic.
+	Don't copy all relocs if shared, select ones we need.  Add code
+	to track possible copy relocs for non-shared link.
+	(ppc64_elf_gc_mark_hook): Update comment.
+	(ppc64_elf_gc_sweep_hook): Sweep dynrelocs too.
+	(ppc64_elf_adjust_dynamic_symbol): Remove DEBUG code.  Rewrite .plt
+	code for reference counting garbage collection.  Don't create .plt
+	entries for functions that don't comply with ABI naming convention,
+	and don't allocate .plt space here.  Use short-cuts to dynamic
+	sections.  If possible, keep dynamic relocations instead of using
+	copy relocs.  Remove confused comments.
+	(ppc_adjust_dynindx): Delete.
+	(WILL_CALL_FINISH_DYNAMIC_SYMBOL): Define.
+	(allocate_dynrelocs): New function.
+	(readonly_dynrelocs): New function.
+	(ppc64_elf_size_dynamic_sections): Rewrite.  Allocate local .got
+	space here, and call allocate_dynrelocs to allocate space for
+	global .plt, .got and reloc sections.  Use short-cuts to dynamic
+	sections.  Call readonly_dynrelocs to determine whether we need
+	DT_TEXTREL.  Don't generate section symbols here, the generic
+	ELF linker code does it for us.
+	(ppc64_elf_final_link): Call regular ELF backend linker rather than
+	gc variety, since we do our own .got handling.
+	(ppc64_elf_relocate_section): Remove DEBUG code.  Make use of
+	dynamic section short-cuts.  Localise vars, and delay setting.
+	Handle unknown relocs in main switch statement.  Replace ugly
+	complicated tests for unresolvable relocs with a simple direct
+	scheme using "unresolved_reloc" var.  Test ELF_ST_VISIBILITY
+	before allowing an undefined sym in a shared lib.  Do R_*_DS tests
+	after main switch, when we've set addend.  Do non-addend insn
+	tweaks before main swithc.  Ignore input_section->vma when
+	calculating reloc offsets as it's always zero.  Rewrite dynamic
+	reloc handling.  Consolidate R_*_HA handling.  Handle more relocs.
+	(ppc64_elf_finish_dynamic_symbol): Remove DEBUG code.  Make use
+	of dynamic section short-cuts.  Reorganise .plt handling code.
+	Remove confused comments.  Take note of ELF_LINK_FORCED_LOCAL.
+	Move expressions out of swap_reloca_out function calls.
+	(ppc64_elf_reloc_type_class): New function.
+	(ppc64_elf_info_to_howto): Move common expression to local var.
+	(ppc64_elf_finish_dynamic_sections): Remove DEBUG code.  Make use
+	of dynamic section short-cuts.  Don't fiddle with section syms
+	here as the ELF linker does it for us.
+	(elf_backend_can_refcount): Define.
+	(bfd_elf64_bfd_link_hash_table_create): Define.
+	(elf_backend_copy_indirect_symbol): Define.
+	(elf_backend_reloc_type_class): Define.
+	(elf_backend_*, bfd_elf64_bfd_* defines): Sort.
+
+2001-09-29  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf-bfd.h (struct elf_link_local_dynamic_entry): Add init_refcount.
 	(struct elf_backend_data): Add can_refcount.
 	* elf.c (_bfd_elf_link_hash_newfunc): Get rid of a few casts.  Set
