@@ -38,12 +38,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Prototypes for local functions */
 
-#if !defined (NO_MALLOC_CHECK)
+#if defined (NO_MMALLOC) || defined (NO_MMALLOC_CHECK)
+#else
 
 static void
 malloc_botch PARAMS ((void));
 
-#endif /* NO_MALLOC_CHECK  */
+#endif /* NO_MMALLOC, etc */
 
 static void
 fatal_dump_core ();	/* Can't prototype with <varargs.h> usage... */
@@ -1135,53 +1136,6 @@ fputs_filtered (linebuffer, stream)
     }
 }
 
-
-/* fputs_demangled attempts to demangle NAME, a symbol in language LANG, using
-   demangling args ARG_MODE, and print it filtered to STREAM.  If the name is
-   not mangled, or the language for the name is unknown, or demangling is off,
-   the name is printed in its "raw" form. */
-
-void
-fputs_demangled (name, stream, arg_mode, lang)
-     char *name;
-     FILE *stream;
-     int arg_mode;
-     enum language lang;
-{
-  char *demangled;
-
-  if (name != NULL)
-    {
-      /* If user wants to see raw output, no problem.  */
-      if (!demangle)
-	{
-	  fputs_filtered (name, stream);
-	}
-      else
-	{
-	  switch (lang)
-	    {
-	    case language_cplus:
-	      demangled = cplus_demangle (name, arg_mode);
-	      break;
-	      /* start-sanitize-chill */
-	    case language_chill:
-	      demangled = chill_demangle (name);
-	      break;
-	      /* end-sanitize-chill */
-	    default:
-	      demangled = NULL;
-	      break;
-	    }
-	  fputs_filtered (demangled ? demangled : name, stream);
-	  if (demangled != NULL)
-	    {
-	      free (demangled);
-	    }
-	}
-    }
-}
-
 /* Print a variable number of ARGS using format FORMAT.  If this
    information is going to put the amount written (since the last call
    to REINITIALIZE_MORE_FILTER or the last page break) over the page size,
@@ -1366,38 +1320,49 @@ print_spaces_filtered (n, stream)
 
 /* C++ demangler stuff.  */
 
-/* Print NAME on STREAM, demangling if necessary.  */
+/* fprintf_symbol_filtered attempts to demangle NAME, a symbol in language
+   LANG, using demangling args ARG_MODE, and print it filtered to STREAM.
+   If the name is not mangled, or the language for the name is unknown, or
+   demangling is off, the name is printed in its "raw" form. */
+
 void
-fprint_symbol (stream, name)
+fprintf_symbol_filtered (stream, name, lang, arg_mode)
      FILE *stream;
      char *name;
+     enum language lang;
+     int arg_mode;
 {
-  char *demangled = NULL;
+  char *demangled;
 
-  if (demangle)
+  if (name != NULL)
     {
-      /* Lacking a better method of knowing what demangler to use, pick
-	 one appropriate for whatever the current language is.  (FIXME) */
-      switch (current_language -> la_language)
+      /* If user wants to see raw output, no problem.  */
+      if (!demangle)
 	{
-	  case language_cplus:
-	    demangled = cplus_demangle (name, DMGL_PARAMS | DMGL_ANSI);
-	    break;
-	  /* start-sanitize-chill */
-	  case language_chill:
-	    demangled = chill_demangle (name);
-	    break;
-	  /* end-sanitize-chill */
+	  fputs_filtered (name, stream);
 	}
-    }
-  if (demangled == NULL)
-    {
-      fputs_filtered (name, stream);
-    }
-  else
-    {
-      fputs_filtered (demangled, stream);
-      free (demangled);
+      else
+	{
+	  switch (lang)
+	    {
+	    case language_cplus:
+	      demangled = cplus_demangle (name, arg_mode);
+	      break;
+	      /* start-sanitize-chill */
+	    case language_chill:
+	      demangled = chill_demangle (name);
+	      break;
+	      /* end-sanitize-chill */
+	    default:
+	      demangled = NULL;
+	      break;
+	    }
+	  fputs_filtered (demangled ? demangled : name, stream);
+	  if (demangled != NULL)
+	    {
+	      free (demangled);
+	    }
+	}
     }
 }
 

@@ -1,5 +1,6 @@
 /* Read dbx symbol tables and convert to internal format, for GDB.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993
+   Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -164,6 +165,9 @@ struct complaint string_table_offset_complaint =
 
 struct complaint unknown_symtype_complaint =
   {"unknown symbol type %s", 0, 0};
+
+struct complaint unknown_symchar_complaint =
+  {"unknown symbol type character `%c'", 0, 0};
 
 struct complaint lbrac_rbrac_complaint =
   {"block start larger than block end", 0, 0};
@@ -561,6 +565,9 @@ dbx_symfile_init (objfile)
 
   if (STRING_TABLE_OFFSET == 0)
     {
+      /* It appears that with the existing bfd code, STRING_TABLE_OFFSET
+	 will never be zero, even when there is no string table.  This
+	 would appear to be a bug in bfd. */
       DBX_STRINGTAB_SIZE (objfile) = 0;
       DBX_STRINGTAB (objfile) = NULL;
     }
@@ -573,28 +580,47 @@ dbx_symfile_init (objfile)
       memset ((PTR) size_temp, 0, sizeof (size_temp));
       val = bfd_read ((PTR) size_temp, sizeof (size_temp), 1, sym_bfd);
       if (val < 0)
-	perror_with_name (name);
-      
-      DBX_STRINGTAB_SIZE (objfile) = bfd_h_get_32 (sym_bfd, size_temp);
-      
-      if (DBX_STRINGTAB_SIZE (objfile) < sizeof (size_temp)
-	  || DBX_STRINGTAB_SIZE (objfile) > bfd_get_size (sym_bfd))
-	error ("ridiculous string table size (%d bytes).",
-	       DBX_STRINGTAB_SIZE (objfile));
-      
-      DBX_STRINGTAB (objfile) =
-	(char *) obstack_alloc (&objfile -> psymbol_obstack,
-				DBX_STRINGTAB_SIZE (objfile));
-      
-      /* Now read in the string table in one big gulp.  */
-      
-      val = bfd_seek (sym_bfd, STRING_TABLE_OFFSET, L_SET);
-      if (val < 0)
-	perror_with_name (name);
-      val = bfd_read (DBX_STRINGTAB (objfile), DBX_STRINGTAB_SIZE (objfile), 1,
-		      sym_bfd);
-      if (val != DBX_STRINGTAB_SIZE (objfile))
-	perror_with_name (name);
+	{
+	  perror_with_name (name);
+	}
+      else if (val == 0)
+	{
+	  /* With the existing bfd code, STRING_TABLE_OFFSET will be set to
+	     EOF if there is no string table, and attempting to read the size
+	     from EOF will read zero bytes. */
+	  DBX_STRINGTAB_SIZE (objfile) = 0;
+	  DBX_STRINGTAB (objfile) = NULL;
+	}
+      else
+	{
+	  /* Read some data that would appear to be the string table size.
+	     If there really is a string table, then it is probably the right
+	     size.  Byteswap if necessary and validate the size.  Note that
+	     the minimum is DBX_STRINGTAB_SIZE_SIZE.  If we just read some
+	     random data that happened to be at STRING_TABLE_OFFSET, because
+	     bfd can't tell us there is no string table, the sanity checks may
+	     or may not catch this. */
+	  DBX_STRINGTAB_SIZE (objfile) = bfd_h_get_32 (sym_bfd, size_temp);
+	  
+	  if (DBX_STRINGTAB_SIZE (objfile) < sizeof (size_temp)
+	      || DBX_STRINGTAB_SIZE (objfile) > bfd_get_size (sym_bfd))
+	    error ("ridiculous string table size (%d bytes).",
+		   DBX_STRINGTAB_SIZE (objfile));
+	  
+	  DBX_STRINGTAB (objfile) =
+	    (char *) obstack_alloc (&objfile -> psymbol_obstack,
+				    DBX_STRINGTAB_SIZE (objfile));
+	  
+	  /* Now read in the string table in one big gulp.  */
+	  
+	  val = bfd_seek (sym_bfd, STRING_TABLE_OFFSET, L_SET);
+	  if (val < 0)
+	    perror_with_name (name);
+	  val = bfd_read (DBX_STRINGTAB (objfile), DBX_STRINGTAB_SIZE (objfile), 1,
+			  sym_bfd);
+	  if (val != DBX_STRINGTAB_SIZE (objfile))
+	    perror_with_name (name);
+	}
     }
 }
 
@@ -1421,7 +1447,7 @@ read_ofile_symtab (objfile, sym_offset, sym_size, text_offset, text_size,
   if (last_source_start_addr == 0)
     last_source_start_addr = text_offset;
 
-  rtn = end_symtab (text_offset + text_size, 0, 0, objfile);
+  rtn = end_symtab (text_offset + text_size, 0, 0, objfile, SECT_OFF_TEXT);
   end_stabs ();
   return (rtn);
 }
@@ -1668,7 +1694,7 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 	      patch_subfile_names (current_subfile, name);
 	      break;		/* Ignore repeated SOs */
 	    }
-	  end_symtab (valu, 0, 0, objfile);
+	  end_symtab (valu, 0, 0, objfile, SECT_OFF_TEXT);
 	  end_stabs ();
 	}
       start_stabs ();

@@ -1,3 +1,11 @@
+Thu Apr 15 02:37:48 1993  John Gilmore  (gnu@cacophony.cygnus.com)
+
+	* dbxread.c (unknown_symchar_complaint):  Add new complaint.
+	* stabsread.c:  Declare it.
+	* partial-stab.h:  Use it.
+
+	* utils.c (malloc_botch):  Don't forward-declare if NO_MMALLOC.
+
 Wed Apr 14 17:12:51 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* stack.c (print_frame_info): Print specially if dummy frame.

@@ -1,6 +1,6 @@
 /* Shared code to pre-read a stab (dbx-style), when building a psymtab.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992 Free Software Foundation,
-   Inc.
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993
+   Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -518,9 +518,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 	      /* Global functions were ignored here, but now they
 	         are put into the global psymtab like one would expect.
-		 They're also in the misc fn vector... 
-		 FIXME, why did it used to ignore these?  That broke
-		 "i fun" on these functions.  */
+		 They're also in the minimal symbol table.  */
 	    case 'F':
 #ifdef DBXREAD_ONLY
 	      /* Kludges for ELF/STABS with Sun ACC */
@@ -563,6 +561,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 		 Someone says sun cc puts out symbols like
 		 /foo/baz/maclib::/usr/local/bin/maclib,
 		 which would get here with a symbol type of ':'.  */
+	      complain (&unknown_symchar_complaint, p[1]);
 	      continue;
 	    }
 
