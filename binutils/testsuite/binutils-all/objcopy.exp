@@ -425,7 +425,7 @@ strip_test_with_saving_a_symbol
 
 # Build a final executable.
 
-if { [istarget *-*-cygwin] } {
+if { [istarget *-*-cygwin] || [istarget *-*-mingw32] } {
     set test_prog "testprog.exe"
 } else {
     set test_prog "testprog"

@@ -1,3 +1,8 @@
+2003-06-29  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* binutils-all/objcopy.exp: Initialise $test_prog to
+	testprog.exe on mingw targeted systems too.
+
 2003-06-28  Danny Smith  <dannysmith@users.sourceforge.net>
 
 	* binutils-all/windres/checkbox.rc: New file.
