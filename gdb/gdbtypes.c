@@ -1484,11 +1484,11 @@ check_stub_method (type, method_id, signature_id)
   argtypetext = p;
   while (*p)
     {
-      if (*p == '(')
+      if (*p == '(' || *p == '<')
 	{
 	  depth += 1;
 	}
-      else if (*p == ')')
+      else if (*p == ')' || *p == '>')
 	{
 	  depth -= 1;
 	}
@@ -1527,11 +1527,11 @@ check_stub_method (type, method_id, signature_id)
 	      argtypetext = p + 1;
 	    }
 
-	  if (*p == '(')
+	  if (*p == '(' || *p == '<')
 	    {
 	      depth += 1;
 	    }
-	  else if (*p == ')')
+	  else if (*p == ')' || *p == '>')
 	    {
 	      depth -= 1;
 	    }
@@ -2198,6 +2198,16 @@ rank_one_type (parm, arg)
     parm = check_typedef (parm);
   if (TYPE_CODE (arg) == TYPE_CODE_TYPEDEF)
     arg = check_typedef (arg);
+
+  /*
+     Well, damnit, if the names are exactly the same,
+     i'll say they are exactly the same. This happens when we generate
+     method stubs. The types won't point to the same address, but they
+     really are the same.
+  */
+
+  if (TYPE_NAME (parm) == TYPE_NAME (arg))
+      return 0;
 
   /* Check if identical after resolving typedefs */
   if (parm == arg)

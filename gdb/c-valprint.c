@@ -481,6 +481,17 @@ c_value_print (val, stream, format, pretty)
 	}
       else if (objectprint && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_CLASS))
 	{
+
+	  if (TYPE_CODE(type) == TYPE_CODE_REF)
+	    {
+	      /* Copy value, change to pointer, so we don't get an
+	       * error about a non-pointer type in value_rtti_target_type
+	       */
+	      value_ptr temparg;
+	      temparg=value_copy(val);
+	      VALUE_TYPE (temparg) = lookup_pointer_type(TYPE_TARGET_TYPE(type));
+	      val=temparg;
+	    }
 	  /* Pointer to class, check real type of object */
 	  fprintf_filtered (stream, "(");
           real_type = value_rtti_target_type (val, &full, &top, &using_enc);
@@ -497,6 +508,9 @@ c_value_print (val, stream, format, pretty)
                   /* create a reference type referencing the real type */
                   type = lookup_reference_type (real_type);
                 }
+	      /* JYG: Need to adjust pointer value. */
+              val->aligner.contents[0] -= top;
+
               /* Note: When we look up RTTI entries, we don't get any 
                  information on const or volatile attributes */
             }

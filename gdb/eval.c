@@ -37,6 +37,9 @@ extern int hp_som_som_object_present;
 /* This is defined in valops.c */
 extern int overload_resolution;
 
+/* JYG: lookup rtti type of STRUCTOP_PTR when this is set to continue
+   on with successful lookup for member/method of the rtti type. */
+extern int objectprint;
 
 /* Prototypes for local functions. */
 
@@ -428,32 +431,16 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
       (*pos) += 3;
       if (noside == EVAL_SKIP)
 	goto nosideret;
-      if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	{
-	  struct symbol *sym = exp->elts[pc + 2].symbol;
-	  enum lval_type lv;
 
-	  switch (SYMBOL_CLASS (sym))
-	    {
-	    case LOC_CONST:
-	    case LOC_LABEL:
-	    case LOC_CONST_BYTES:
-	      lv = not_lval;
-	      break;
+      /* JYG: We used to just return value_zero of the symbol type
+	 if we're asked to avoid side effects.  Otherwise we return
+	 value_of_variable (...).  However I'm not sure if
+	 value_of_variable () has any side effect.
+	 We need a full value object returned here for whatis_exp ()
+	 to call evaluate_type () and then pass the full value to
+	 value_rtti_target_type () if we are dealing with a pointer
+	 or reference to a base class and print object is on. */
 
-	    case LOC_REGISTER:
-	    case LOC_REGPARM:
-	      lv = lval_register;
-	      break;
-
-	    default:
-	      lv = lval_memory;
-	      break;
-	    }
-
-	  return value_zero (SYMBOL_TYPE (sym), lv);
-	}
-      else
 	return value_of_variable (exp->elts[pc + 2].symbol,
 				  exp->elts[pc + 1].block);
 
@@ -1051,6 +1038,31 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
+
+      /* JYG: if print object is on we need to replace the base type
+	 with rtti type in order to continue on with successful
+	 lookup of member / method only available in the rtti type. */
+      {
+        struct type *type = VALUE_TYPE (arg1);
+        struct type *real_type;
+        int full, top, using_enc;
+        
+        if (objectprint && TYPE_TARGET_TYPE(type) &&
+            (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_CLASS))
+          {
+            real_type = value_rtti_target_type (arg1, &full, &top, &using_enc);
+            if (real_type)
+              {
+                if (TYPE_CODE (type) == TYPE_CODE_PTR)
+                  real_type = lookup_pointer_type (real_type);
+                else
+                  real_type = lookup_reference_type (real_type);
+
+                arg1 = value_cast (real_type, arg1);
+              }
+          }
+      }
+
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	return value_zero (lookup_struct_elt_type (VALUE_TYPE (arg1),
 						   &exp->elts[pc + 2].string,

@@ -892,7 +892,7 @@ value_fn_field (arg1p, f, j, type, offset)
 	*arg1p = value_ind (value_cast (lookup_pointer_type (type),
 					value_addr (*arg1p)));
 
-      /* Move the `this' pointer according to the offset. 
+      /* Move the `this' pointer according to the offset.
          VALUE_OFFSET (*arg1p) += offset;
        */
     }
@@ -1102,7 +1102,12 @@ value_virtual_fn_field (arg1p, f, j, type, offset)
    return the most derived type we find.  The caller must
    be satisfied when the return value == DTYPE.
 
-   FIXME-tiemann: should work with dossier entries as well.  */
+   FIXME-tiemann: should work with dossier entries as well.
+   NOTICE - djb: I see no good reason at all to keep this function now that
+   we have RTTI support. It's used in literally one place, and it's
+   hard to keep this function up to date when it's purpose is served
+   by value_rtti_type efficiently.
+   Consider it gone for 5.1. */
 
 static value_ptr
 value_headof (in_arg, btype, dtype)
@@ -1110,12 +1115,8 @@ value_headof (in_arg, btype, dtype)
      struct type *btype, *dtype;
 {
   /* First collect the vtables we must look at for this object.  */
-  /* FIXME-tiemann: right now, just look at top-most vtable.  */
-  value_ptr arg, vtbl, entry, best_entry = 0;
-  int i, nelems;
-  int offset, best_offset = 0;
+  value_ptr arg, vtbl;
   struct symbol *sym;
-  CORE_ADDR pc_for_sym;
   char *demangled_name;
   struct minimal_symbol *msymbol;
 
@@ -1123,72 +1124,45 @@ value_headof (in_arg, btype, dtype)
   CHECK_TYPEDEF (btype);
   arg = in_arg;
   if (btype != dtype)
-    arg = value_cast (lookup_pointer_type (btype), arg);
+      arg = value_cast (lookup_pointer_type (btype), arg);
+  if (TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_REF)
+      {
+	  /*
+	   * Copy the value, but change the type from (T&) to (T*).
+	   * We keep the same location information, which is efficient,
+	   * and allows &(&X) to get the location containing the reference.
+	   */
+	  arg = value_copy (arg);
+	  VALUE_TYPE (arg) = lookup_pointer_type (TYPE_TARGET_TYPE (VALUE_TYPE (arg)));
+      }
+  if (VALUE_ADDRESS(value_field (value_ind(arg), TYPE_VPTR_FIELDNO (btype)))==0)
+      return arg;
+
   vtbl = value_ind (value_field (value_ind (arg), TYPE_VPTR_FIELDNO (btype)));
+  /* Turn vtable into typeinfo function */
+  VALUE_OFFSET(vtbl)+=4;
 
-  /* Check that VTBL looks like it points to a virtual function table.  */
-  msymbol = lookup_minimal_symbol_by_pc (VALUE_ADDRESS (vtbl));
+  msymbol = lookup_minimal_symbol_by_pc ( value_as_pointer(value_ind(vtbl)) );
   if (msymbol == NULL
-      || (demangled_name = SYMBOL_NAME (msymbol)) == NULL
-      || !VTBL_PREFIX_P (demangled_name))
-    {
-      /* If we expected to find a vtable, but did not, let the user
-         know that we aren't happy, but don't throw an error.
-         FIXME: there has to be a better way to do this.  */
-      struct type *error_type = (struct type *) xmalloc (sizeof (struct type));
-      memcpy (error_type, VALUE_TYPE (in_arg), sizeof (struct type));
-      TYPE_NAME (error_type) = savestring ("suspicious *", sizeof ("suspicious *"));
-      VALUE_TYPE (in_arg) = error_type;
-      return in_arg;
-    }
+      || (demangled_name = SYMBOL_NAME (msymbol)) == NULL)
+      {
+	  /* If we expected to find a vtable, but did not, let the user
+	     know that we aren't happy, but don't throw an error.
+	     FIXME: there has to be a better way to do this.  */
+	  struct type *error_type = (struct type *) xmalloc (sizeof (struct type));
+	  memcpy (error_type, VALUE_TYPE (in_arg), sizeof (struct type));
+	  TYPE_NAME (error_type) = savestring ("suspicious *", sizeof ("suspicious *"));
+	  VALUE_TYPE (in_arg) = error_type;
+	  return in_arg;
+      }
+  demangled_name = cplus_demangle(demangled_name,DMGL_ANSI);
+  *(strchr (demangled_name, ' ')) = '\0';
 
-  /* Now search through the virtual function table.  */
-  entry = value_ind (vtbl);
-  nelems = longest_to_int (value_as_long (value_field (entry, 2)));
-  for (i = 1; i <= nelems; i++)
-    {
-      entry = value_subscript (vtbl, value_from_longest (builtin_type_int,
-							 (LONGEST) i));
-      /* This won't work if we're using thunks. */
-      if (TYPE_CODE (check_typedef (VALUE_TYPE (entry))) != TYPE_CODE_STRUCT)
-	break;
-      offset = longest_to_int (value_as_long (value_field (entry, 0)));
-      /* If we use '<=' we can handle single inheritance
-       * where all offsets are zero - just use the first entry found. */
-      if (offset <= best_offset)
-	{
-	  best_offset = offset;
-	  best_entry = entry;
-	}
-    }
-  /* Move the pointer according to BEST_ENTRY's offset, and figure
-     out what type we should return as the new pointer.  */
-  if (best_entry == 0)
-    {
-      /* An alternative method (which should no longer be necessary).
-       * But we leave it in for future use, when we will hopefully
-       * have optimizes the vtable to use thunks instead of offsets. */
-      /* Use the name of vtable itself to extract a base type. */
-      demangled_name += 4;	/* Skip _vt$ prefix. */
-    }
-  else
-    {
-      pc_for_sym = value_as_pointer (value_field (best_entry, 2));
-      sym = find_pc_function (pc_for_sym);
-      demangled_name = cplus_demangle (SYMBOL_NAME (sym), DMGL_ANSI);
-      *(strchr (demangled_name, ':')) = '\0';
-    }
   sym = lookup_symbol (demangled_name, 0, VAR_NAMESPACE, 0, 0);
   if (sym == NULL)
-    error ("could not find type declaration for `%s'", demangled_name);
-  if (best_entry)
-    {
-      free (demangled_name);
-      arg = value_add (value_cast (builtin_type_int, arg),
-		       value_field (best_entry, 0));
-    }
-  else
-    arg = in_arg;
+      error ("could not find type declaration for `%s'", demangled_name);
+
+  arg = in_arg;
   VALUE_TYPE (arg) = lookup_pointer_type (SYMBOL_TYPE (sym));
   return arg;
 }
@@ -1458,7 +1432,7 @@ retry:
 }
 
 /* Create a value for a string constant to be stored locally
-   (not in the inferior's memory space, but in GDB memory).  
+   (not in the inferior's memory space, but in GDB memory).
    This is analogous to value_from_longest, which also does not
    use inferior memory.  String shall NOT contain embedded nulls.  */
 
