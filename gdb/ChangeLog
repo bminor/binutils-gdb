@@ -1,5 +1,10 @@
 2001-03-15  Andrew Cagney  <ac131313@redhat.com>
 
+	* MAINTAINERS: Fix typo - w65 not w64.  Still doesn't build.
+	* TODO (GDB 5.1 - Cleanups): Add status of targets being obsoleted.
+
+2001-03-15  Andrew Cagney  <ac131313@redhat.com>
+
 	* wince.c (child_xfer_memory): Add attrib parameter.
 	* symm-nat.c (child_xfer_memory): Ditto.
 	* mac-nat.c (child_xfer_memory): Ditto.

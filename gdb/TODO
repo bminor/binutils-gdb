@@ -154,15 +154,54 @@ The following code cleanups will hopefully be applied to GDB 5.1.
 
 -- 2001-03-14
 
-Resolve the status of all broken targets as identified by the MAINTAINERS
-file.
+Resolve the build status of all broken targets as identified by the
+MAINTAINERS file.
 
 	o	arm-* vs NetBSD's lack of ``unix''
 	o	arm-* vs IRIX (see below)
 
-	o	delete TiC80
-
 	o	delete m88k?
+
+-- 2001-03-15
+
+			Obsolete some targets.
+
+Possible selection criteria are:
+
+	o	uses a deprecated feature
+
+	o	doesn't build
+
+	o	doesn't have a maintainer
+
+Steps:		   
+	  
+	o	post proposals to gdb@ (DONE)
+
+	o	post announcement to gdb-announce@
+		crossed with gdb@ reply-to to gdb@
+		(DONE)
+
+	                ns32k-*-mach3*
+        	        ns32k-umax-*
+                	ns32k-utek-sysv*
+		        tic80-*
+			m68*-isi-*
+			m68*-sony-*
+			a29k-ultra3
+			powerpcle-*-solaris*
+			powerpcle-*-cygwin*
+		        w65-*-*
+			i[3456]86-*-sunos*
+
+	o	clobber the files:
+
+			configure.{in,host,tgt}
+			Makefile.in
+			*-tdep.c *-nat.c *-xdep.c
+			configure/*/*
+
+	o	update NEWS
 
 --
 

@@ -141,7 +141,7 @@ maintainer works with the native maintainer when resolving API issues.
 	vax		--target=vax-dec-vms5.5 ,-Werror
 			Maintenance only
 
-	w65		(--target=w64 broken)
+	w65		(--target=w65 broken)
 			Maintenance only
 
 	z8k		(--target=z8k-coff broken)
