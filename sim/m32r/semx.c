@@ -3367,7 +3367,7 @@ m32rx_h_cr_set (current_cpu, 6, ADDSI (OPRND (pc), 4));
   TRACE_RESULT (current_cpu, "cr-6", 'x', m32rx_h_cr_get (current_cpu, 6));
 m32rx_h_cr_set (current_cpu, 0, ANDSI (SLLSI (OPRND (h_cr_0), 8), 65408));
   TRACE_RESULT (current_cpu, "cr-0", 'x', m32rx_h_cr_get (current_cpu, 0));
-  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, a_m32r_trap (current_cpu, OPRND (uimm4))));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, m32r_trap (current_cpu, OPRND (uimm4))));
   taken_p = 1;
   TRACE_RESULT (current_cpu, "pc", 'x', new_pc);
 } while (0);
