@@ -1,3 +1,9 @@
+2003-12-15  David Carlton  <carlton@kealia.com>
+
+	* dwarf2read.c (get_scope_pc_bounds): New.
+	(psymtab_to_symtab_1): Use get_scope_pc_bounds.
+	(read_file_scope): Ditto.
+
 2003-11-11  David Carlton  <carlton@kealia.com>
 
 	* valops.c: Tweak comments to match proposed patch.
