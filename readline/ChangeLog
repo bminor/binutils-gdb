@@ -1,3 +1,12 @@
+Sun May 26 15:14:42 1996  Fred Fish  <fnf@cygnus.com>
+
+	From: David Mosberger-Tang  <davidm@azstarnet.com>
+
+	* sysdep-linux.h: New file.
+	* display.c: Add include of "sysdep.h" to get HAVE_VARARGS_H.
+	* configure.in: Change pattern i[345]86-*-linux* into *-*-linux* to
+	support non-x86 based Linux platforms.
+
 Sun Apr  7 22:06:11 1996  Fred Fish  <fnf@cygnus.com>
 
 	From: Miles Bader  <miles@gnu.ai.mit.edu>

@@ -52,6 +52,7 @@ signals.c
 sysdep-aix.h
 sysdep-cxux7.h
 sysdep-irix.h
+sysdep-linux.h
 sysdep-norm.h
 sysdep-obsd.h
 sysdep-sco.h
