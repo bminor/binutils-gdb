@@ -1,3 +1,10 @@
+2002-07-22  Keith Seitz  <keiths@redhat.com>
+
+	* lib/mi-support.exp (mi_delete_breakpoints): Allow for breakpoint
+	delete events in output of -break-delete.
+	(mi_run_to_main): Don't assume that breakpoint at main is first
+	breakpoint installed.
+
 2002-06-24  Keith Seitz  <keiths@redhat.com>
 
 	* lib/mi-support.exp (mi_gdb_test): Move expected pattern higher
