@@ -174,7 +174,6 @@ static void out_debug_line PARAMS ((segT));
 static void out_debug_aranges PARAMS ((segT, segT));
 static void out_debug_abbrev PARAMS ((segT));
 static void out_debug_info PARAMS ((segT, segT, segT));
-static void scale_addr_delta PARAMS ((int *));
 
 /* Find or create an entry for SEG+SUBSEG in ALL_SEGS.  */
 
@@ -598,9 +597,11 @@ out_set_addr (seg, frag, ofs)
 }
 
 #if DWARF2_LINE_MIN_INSN_LENGTH > 1
+static void scale_addr_delta PARAMS ((addressT *));
+
 static void
 scale_addr_delta (addr_delta)
-     int *addr_delta;
+     addressT *addr_delta;
 {
   static int printed_this = 0;
   if (*addr_delta % DWARF2_LINE_MIN_INSN_LENGTH != 0)

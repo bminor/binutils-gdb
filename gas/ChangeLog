@@ -1,3 +1,8 @@
+2002-12-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* dwarf2dbg.c (scale_addr_delta): Correct parameter.  Move prototype
+	inside #if.
+
 2002-12-03  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-ppc.c (ppc_cleanup): Do not set SEC_MERGE flag on
