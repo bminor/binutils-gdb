@@ -1,3 +1,7 @@
+Thu Jun 22 13:12:33 1995  Kung Hsu  <kung@mexican.cygnus.com>
+
+	* remote-nindy.c (nindy_wait): Change timeout in SERIAL_READCHAR.
+
 Wed Jun 21 13:24:41 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* hppam3-nat.c: Change HP800_THREAD_STATE to TRACE_FLAVOR and

@@ -359,14 +359,14 @@ nindy_wait( pid, status )
   while (1)
     {
 	  /* Input on remote */
-	  c = SERIAL_READCHAR (nindy_serial, 0);
+	  c = SERIAL_READCHAR (nindy_serial, -1);
 	  if (c == SERIAL_ERROR)
 	    {
 	      error ("Cannot read from serial line");
 	    }
 	  else if (c == 0x1b) /* ESC */
 	    {
-	      c = SERIAL_READCHAR (nindy_serial, 0);
+	      c = SERIAL_READCHAR (nindy_serial, 1);
 	      c &= ~0x40;
 	    } 
 	  else if (c != 0x10) /* DLE */
