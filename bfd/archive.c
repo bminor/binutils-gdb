@@ -1146,11 +1146,7 @@ _bfd_write_archive_contents (arch)
   char *etable = NULL;
   unsigned int elength = 0;
 
-  /* This used to be:  boolean makemap = bfd_has_map (arch).
-     But Posix.2 prohibits requiring a separate ranlib program, so we
-     need to make a map whenever there are object files in the archive. */
-  boolean makemap = true;
-
+  boolean makemap = bfd_has_map (arch);
   boolean hasobjects = false;	/* if no .o's, don't bother to make a map */
   unsigned int i;
 
