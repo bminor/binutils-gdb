@@ -1,3 +1,10 @@
+2002-01-15   Richard Earnshaw  <rearnsha@arm.com>
+
+	* gas/arm/vfp1.s gas/arm/vf1.d: New files.
+	* gas/arm/vfp1xD.s gas/arm/vf1xD.d: New files.
+	* gas/arm/vfp-bad.s gas/arm/vfp-bad.l: New files.
+	* gas/arm/arm.exp: Run new VFP tests.
+
 2002-01-15  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* gas/elf/section2.e-m32r: New file.

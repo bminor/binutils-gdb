@@ -1,5 +1,39 @@
 2002-01-15  Richard Earnshaw  <rearnsha@arm.com>
 
+	Support for VFP instructions
+	* tc-arm.c (CP_WB_OK, CP_NO_WB): New defines.
+	(cp_address_required_here): New argument wb_ok.  When false, do not
+	accept write-back forms of addressing.  Change all callers.
+	(FPU_VFP_EXT_NONE, FPU_VFP_EXT_V1xD, FPU_VFP_VFP_V1)
+	(FPU_VFP_EXT_V2): Define.
+	(FPU_ARCH_VFP, FPU_ARCH_VFP_V1xD, FPU_ARCH_VFP_V1, FPU_ARCH_VFP_V2):
+	Define in terms of above.
+	(vfp_dp_reg_pos, vfp_sp_reg_pos, vfp_ldstm_type): New enums.
+	(vfp_reg): New struct.
+	(vfp_regs): New array of registers.
+	(insns): Add VFP instructions.
+	(sn_table): New array of VFP single-precision register names.
+	(dn_table): New array of VFP double-precision register names.
+	(all_reg_maps): Add the new register tables.
+	(arm_reg_type): Add new values for above.  Increase RET_TYPE_MAX.
+	(vfp_sp_reg_required_here, vfp_dp_reg_required_here, do_vfp_sp_monadic)
+	(do_vfp_dp_monadic, do_vfp_sp_dyadic, do_vfp_dp_dyadic)
+	(do_vfp_reg_from_sp, do_vfp_sp_reg2, do_vfp_sp_from_reg)
+	(do_vfp_reg_from_dp, do_vfp_reg2_from_dp, do_vfp_dp_from_reg)
+	(do_vfp_dp_from_reg2, vfp_psr_parse, vfp_psr_required_here)
+	(do_vfp_reg_from_ctrl, do_vfp_ctrl_from_reg, do_vfp_sp_ldst)
+	(do_vfp_dp_ldst, vfp_sp_reg_list, vfp_dp_reg_list, vfp_sp_ldstm)
+	(vfp_dp_ldstm, do_vfp_sp_ldstmia, do_vfp_sp_ldstmdb, do_vfp_ldstmia)
+	(do_vfp_dp_ldstmdb, do_vfp_xp_ldstmia, do_vfp_xp_ldstmdb)
+	(do_vfp_sp_compare_z, do_vfp_dp_compare_z, do_vfp_dp_sp_cvt)
+	(do_vfp_sp_dp_cvt): New functions.
+	(md_begin): Set soft-float flag for appropriate VFP work.
+	(md_atof): Handle VFP-format doubles.
+	(md_parse_option): Handle VFP command-line options.
+	(md_show_usage): Display VFP command-line options.
+
+2002-01-15  Richard Earnshaw  <rearnsha@arm.com>
+
 	* tc-arm.c (md_parse_option): Tidy up setting of cpu_variant for 
 	various command line options.
 

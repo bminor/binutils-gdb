@@ -82,12 +82,21 @@
 #define ARM_ANY		0x00ffffff
 #define ARM_ALL		ARM_ANY
 
-#define FPU_FPA_EXT_V1	0x80000000	/* Base FPA instruction set.  */
-#define FPU_FPA_EXT_V2	0x40000000	/* LFM/SFM.		      */
-#define FPU_NONE	0
+#define FPU_FPA_EXT_V1	 0x80000000	/* Base FPA instruction set.  */
+#define FPU_FPA_EXT_V2	 0x40000000	/* LFM/SFM.		      */
+#define FPU_VFP_EXT_NONE 0x20000000	/* Use VFP word-ordering.     */
+#define FPU_VFP_EXT_V1xD 0x10000000	/* Base VFP instruction set.  */
+#define FPU_VFP_EXT_V1	 0x08000000	/* Double-precision insns.    */
+#define FPU_VFP_EXT_V2	 0x04000000	/* ARM10E VFPr1.	      */
+#define FPU_NONE	 0
 
 #define FPU_ARCH_FPE	 FPU_FPA_EXT_V1
 #define FPU_ARCH_FPA	(FPU_ARCH_FPE | FPU_FPA_EXT_V2)
+
+#define FPU_ARCH_VFP       FPU_VFP_EXT_NONE
+#define FPU_ARCH_VFP_V1xD (FPU_VFP_EXT_V1xD | FPU_VFP_EXT_NONE)
+#define FPU_ARCH_VFP_V1   (FPU_ARCH_VFP_V1xD | FPU_VFP_EXT_V1)
+#define FPU_ARCH_VFP_V2	  (FPU_ARCH_VFP_V1 | FPU_VFP_EXT_V2)
 
 /* Some useful combinations.  */
 #define FPU_ANY		0xff000000	/* Note this is ~ARM_ANY.  */
@@ -116,6 +125,7 @@
 #endif
 #endif
 
+/* For backwards compatibility we default to the FPA.  */
 #ifndef FPU_DEFAULT
 #define FPU_DEFAULT FPU_ARCH_FPA
 #endif
@@ -263,6 +273,10 @@ LITTLENUM_TYPE fp_values[NUM_FLOAT_VALS][MAX_LITTLENUMS];
 
 #define FAIL	(-1)
 #define SUCCESS (0)
+
+/* Whether a Co-processor load/store operation accepts write-back forms.  */
+#define CP_WB_OK 1
+#define CP_NO_WB 0
 
 #define SUFF_S 1
 #define SUFF_D 2
@@ -468,6 +482,38 @@ static const struct asm_psr psrs[] =
   {"SPSR_cxsf",	false, PSR_c | PSR_x | PSR_s | PSR_f},
 };
 
+enum vfp_dp_reg_pos
+{
+  VFP_REG_Dd, VFP_REG_Dm, VFP_REG_Dn
+};
+
+enum vfp_sp_reg_pos
+{
+  VFP_REG_Sd, VFP_REG_Sm, VFP_REG_Sn
+};
+
+enum vfp_ldstm_type
+{
+  VFP_LDSTMIA, VFP_LDSTMDB, VFP_LDSTMIAX, VFP_LDSTMDBX
+};
+
+/* VFP system registers.  */
+struct vfp_reg
+{
+  const char *name;
+  unsigned long regno;
+};
+
+static const struct vfp_reg vfp_regs[] = 
+{
+  {"fpsid", 0x00000000},
+  {"FPSID", 0x00000000},
+  {"fpscr", 0x00010000},
+  {"FPSCR", 0x00010000},
+  {"fpexc", 0x00080000},
+  {"FPEXC", 0x00080000}
+};
+
 /* Structure for a hash table entry for a register.  */
 struct reg_entry
 {
@@ -529,6 +575,30 @@ static const struct reg_entry fn_table[] =
 {
   {"f0", 0},   {"f1", 1},   {"f2", 2},   {"f3", 3},
   {"f4", 4},   {"f5", 5},   {"f6", 6},   {"f7", 7},
+  {NULL, 0}
+};
+
+/* VFP SP Registers.  */
+static const struct reg_entry sn_table[] =
+{
+  {"s0",  0},  {"s1",  1},  {"s2",  2},	 {"s3", 3},
+  {"s4",  4},  {"s5",  5},  {"s6",  6},	 {"s7", 7},
+  {"s8",  8},  {"s9",  9},  {"s10", 10}, {"s11", 11},
+  {"s12", 12}, {"s13", 13}, {"s14", 14}, {"s15", 15},
+  {"s16", 16}, {"s17", 17}, {"s18", 18}, {"s19", 19},
+  {"s20", 20}, {"s21", 21}, {"s22", 22}, {"s23", 23},
+  {"s24", 24}, {"s25", 25}, {"s26", 26}, {"s27", 27},
+  {"s28", 28}, {"s29", 29}, {"s30", 30}, {"s31", 31},
+  {NULL, 0}
+};
+
+/* VFP DP Registers.  */
+static const struct reg_entry dn_table[] =
+{
+  {"d0",  0},  {"d1",  1},  {"d2",  2},	 {"d3", 3},
+  {"d4",  4},  {"d5",  5},  {"d6",  6},	 {"d7", 7},
+  {"d8",  8},  {"d9",  9},  {"d10", 10}, {"d11", 11},
+  {"d12", 12}, {"d13", 13}, {"d14", 14}, {"d15", 15},
   {NULL, 0}
 };
 
@@ -595,6 +665,8 @@ struct reg_map all_reg_maps[] =
   {cp_table,        15, NULL, N_("bad or missing co-processor number")},
   {cn_table,        15, NULL, N_("co-processor register expected")},
   {fn_table,         7, NULL, N_("FPA register expected")},
+  {sn_table,	    31, NULL, N_("VFP single precision register expected")},
+  {dn_table,	    15, NULL, N_("VFP double precision register expected")},
   {mav_mvf_table,   15, NULL, N_("Maverick MVF register expected")},
   {mav_mvd_table,   15, NULL, N_("Maverick MVD register expected")},
   {mav_mvfx_table,  15, NULL, N_("Maverick MVFX register expected")},
@@ -611,14 +683,16 @@ enum arm_reg_type
   REG_TYPE_CP = 1,
   REG_TYPE_CN = 2,
   REG_TYPE_FN = 3,
-  REG_TYPE_MVF = 4,
-  REG_TYPE_MVD = 5,
-  REG_TYPE_MVFX = 6,
-  REG_TYPE_MVDX = 7,
-  REG_TYPE_MVAX = 8,
-  REG_TYPE_DSPSC = 9,
+  REG_TYPE_SN = 4,
+  REG_TYPE_DN = 5,
+  REG_TYPE_MVF = 6,
+  REG_TYPE_MVD = 7,
+  REG_TYPE_MVFX = 8,
+  REG_TYPE_MVDX = 9,
+  REG_TYPE_MVAX = 10,
+  REG_TYPE_DSPSC = 11,
 
-  REG_TYPE_MAX = 10
+  REG_TYPE_MAX = 12
 };
 
 /* Functions called by parser.  */
@@ -690,6 +764,33 @@ static void do_fpa_monadic	PARAMS ((char *));
 static void do_fpa_cmp		PARAMS ((char *));
 static void do_fpa_from_reg	PARAMS ((char *));
 static void do_fpa_to_reg	PARAMS ((char *));
+
+/* VFP instructions.  */
+static void do_vfp_sp_monadic	PARAMS ((char *));
+static void do_vfp_dp_monadic	PARAMS ((char *));
+static void do_vfp_sp_dyadic	PARAMS ((char *));
+static void do_vfp_dp_dyadic	PARAMS ((char *));
+static void do_vfp_reg_from_sp  PARAMS ((char *));
+static void do_vfp_sp_from_reg  PARAMS ((char *));
+static void do_vfp_sp_reg2	PARAMS ((char *));
+static void do_vfp_reg_from_dp  PARAMS ((char *));
+static void do_vfp_reg2_from_dp PARAMS ((char *));
+static void do_vfp_dp_from_reg  PARAMS ((char *));
+static void do_vfp_dp_from_reg2 PARAMS ((char *));
+static void do_vfp_reg_from_ctrl PARAMS ((char *));
+static void do_vfp_ctrl_from_reg PARAMS ((char *));
+static void do_vfp_sp_ldst	PARAMS ((char *));
+static void do_vfp_dp_ldst	PARAMS ((char *));
+static void do_vfp_sp_ldstmia	PARAMS ((char *));
+static void do_vfp_sp_ldstmdb	PARAMS ((char *));
+static void do_vfp_dp_ldstmia	PARAMS ((char *));
+static void do_vfp_dp_ldstmdb	PARAMS ((char *));
+static void do_vfp_xp_ldstmia	PARAMS ((char *));
+static void do_vfp_xp_ldstmdb	PARAMS ((char *));
+static void do_vfp_sp_compare_z	PARAMS ((char *));
+static void do_vfp_dp_compare_z	PARAMS ((char *));
+static void do_vfp_dp_sp_cvt	PARAMS ((char *));
+static void do_vfp_sp_dp_cvt	PARAMS ((char *));
 
 /* XScale.  */
 static void do_mia		PARAMS ((char *));
@@ -776,8 +877,16 @@ static int co_proc_number	PARAMS ((char **));
 static int cp_opc_expr		PARAMS ((char **, int, int));
 static int cp_reg_required_here	PARAMS ((char **, int));
 static int fp_reg_required_here	PARAMS ((char **, int));
+static int vfp_sp_reg_required_here PARAMS ((char **, enum vfp_sp_reg_pos));
+static int vfp_dp_reg_required_here PARAMS ((char **, enum vfp_dp_reg_pos));
+static void vfp_sp_ldstm	PARAMS ((char *, enum vfp_ldstm_type));
+static void vfp_dp_ldstm	PARAMS ((char *, enum vfp_ldstm_type));
+static long vfp_sp_reg_list	PARAMS ((char **, enum vfp_sp_reg_pos));
+static long vfp_dp_reg_list	PARAMS ((char **));
+static int vfp_psr_required_here PARAMS ((char **str));
+static const struct vfp_reg *vfp_psr_parse PARAMS ((char **str));
 static int cp_address_offset	PARAMS ((char **));
-static int cp_address_required_here	PARAMS ((char **));
+static int cp_address_required_here	PARAMS ((char **, int));
 static int my_get_float_expression	PARAMS ((char **));
 static int skip_past_comma	PARAMS ((char **));
 static int walk_no_bignums	PARAMS ((symbolS *));
@@ -1472,6 +1581,119 @@ static const struct asm_opcode insns[] =
   {"sfm",        0xec000200, 3,  FPU_FPA_EXT_V2,   do_fpa_ldmstm},
   {"sfmfd",      0xed000200, 3,  FPU_FPA_EXT_V2,   do_fpa_ldmstm},
   {"sfmea",      0xec800200, 3,  FPU_FPA_EXT_V2,   do_fpa_ldmstm},
+
+  /* VFP V1xD (single precision).  */
+  /* Moves and type conversions.  */
+  {"fcpys",   0xeeb00a40, 5, FPU_VFP_EXT_V1xD, do_vfp_sp_monadic},
+  {"fmrs",    0xee100a10, 4, FPU_VFP_EXT_V1xD, do_vfp_reg_from_sp},
+  {"fmsr",    0xee000a10, 4, FPU_VFP_EXT_V1xD, do_vfp_sp_from_reg},
+  {"fmstat",  0xeef1fa10, 6, FPU_VFP_EXT_V1xD, do_empty},
+  {"fsitos",  0xeeb80ac0, 6, FPU_VFP_EXT_V1xD, do_vfp_sp_monadic},
+  {"fuitos",  0xeeb80a40, 6, FPU_VFP_EXT_V1xD, do_vfp_sp_monadic},
+  {"ftosis",  0xeebd0a40, 6, FPU_VFP_EXT_V1xD, do_vfp_sp_monadic},
+  {"ftosizs", 0xeebd0ac0, 7, FPU_VFP_EXT_V1xD, do_vfp_sp_monadic},
+  {"ftouis",  0xeebc0a40, 6, FPU_VFP_EXT_V1xD, do_vfp_sp_monadic},
+  {"ftouizs", 0xeebc0ac0, 7, FPU_VFP_EXT_V1xD, do_vfp_sp_monadic},
+  {"fmrx",    0xeef00a10, 4, FPU_VFP_EXT_V1xD, do_vfp_reg_from_ctrl},
+  {"fmxr",    0xeee00a10, 4, FPU_VFP_EXT_V1xD, do_vfp_ctrl_from_reg},
+
+  /* Memory operations.  */
+  {"flds",    0xed100a00, 4, FPU_VFP_EXT_V1xD, do_vfp_sp_ldst},
+  {"fsts",    0xed000a00, 4, FPU_VFP_EXT_V1xD, do_vfp_sp_ldst},
+  {"fldmias", 0xec900a00, 7, FPU_VFP_EXT_V1xD, do_vfp_sp_ldstmia},
+  {"fldmfds", 0xec900a00, 7, FPU_VFP_EXT_V1xD, do_vfp_sp_ldstmia},
+  {"fldmdbs", 0xed300a00, 7, FPU_VFP_EXT_V1xD, do_vfp_sp_ldstmdb},
+  {"fldmeas", 0xed300a00, 7, FPU_VFP_EXT_V1xD, do_vfp_sp_ldstmdb},
+  {"fldmiax", 0xec900b00, 7, FPU_VFP_EXT_V1xD, do_vfp_xp_ldstmia},
+  {"fldmfdx", 0xec900b00, 7, FPU_VFP_EXT_V1xD, do_vfp_xp_ldstmia},
+  {"fldmdbx", 0xed300b00, 7, FPU_VFP_EXT_V1xD, do_vfp_xp_ldstmdb},
+  {"fldmeax", 0xed300b00, 7, FPU_VFP_EXT_V1xD, do_vfp_xp_ldstmdb},
+  {"fstmias", 0xec800a00, 7, FPU_VFP_EXT_V1xD, do_vfp_sp_ldstmia},
+  {"fstmeas", 0xec800a00, 7, FPU_VFP_EXT_V1xD, do_vfp_sp_ldstmia},
+  {"fstmdbs", 0xed200a00, 7, FPU_VFP_EXT_V1xD, do_vfp_sp_ldstmdb},
+  {"fstmfds", 0xed200a00, 7, FPU_VFP_EXT_V1xD, do_vfp_sp_ldstmdb},
+  {"fstmiax", 0xec800b00, 7, FPU_VFP_EXT_V1xD, do_vfp_xp_ldstmia},
+  {"fstmeax", 0xec800b00, 7, FPU_VFP_EXT_V1xD, do_vfp_xp_ldstmia},
+  {"fstmdbx", 0xed200b00, 7, FPU_VFP_EXT_V1xD, do_vfp_xp_ldstmdb},
+  {"fstmfdx", 0xed200b00, 7, FPU_VFP_EXT_V1xD, do_vfp_xp_ldstmdb},
+
+  /* Monadic operations.  */
+  {"fabss",   0xeeb00ac0, 5, FPU_VFP_EXT_V1xD, do_vfp_sp_monadic},
+  {"fnegs",   0xeeb10a40, 5, FPU_VFP_EXT_V1xD, do_vfp_sp_monadic},
+  {"fsqrts",  0xeeb10ac0, 6, FPU_VFP_EXT_V1xD, do_vfp_sp_monadic},
+
+  /* Dyadic operations.  */
+  {"fadds",   0xee300a00, 5, FPU_VFP_EXT_V1xD, do_vfp_sp_dyadic},
+  {"fsubs",   0xee300a40, 5, FPU_VFP_EXT_V1xD, do_vfp_sp_dyadic},
+  {"fmuls",   0xee200a00, 5, FPU_VFP_EXT_V1xD, do_vfp_sp_dyadic},
+  {"fdivs",   0xee800a00, 5, FPU_VFP_EXT_V1xD, do_vfp_sp_dyadic},
+  {"fmacs",   0xee000a00, 5, FPU_VFP_EXT_V1xD, do_vfp_sp_dyadic},
+  {"fmscs",   0xee100a00, 5, FPU_VFP_EXT_V1xD, do_vfp_sp_dyadic},
+  {"fnmuls",  0xee200a40, 6, FPU_VFP_EXT_V1xD, do_vfp_sp_dyadic},
+  {"fnmacs",  0xee000a40, 6, FPU_VFP_EXT_V1xD, do_vfp_sp_dyadic},
+  {"fnmscs",  0xee100a40, 6, FPU_VFP_EXT_V1xD, do_vfp_sp_dyadic},
+
+  /* Comparisons.  */
+  {"fcmps",   0xeeb40a40, 5, FPU_VFP_EXT_V1xD, do_vfp_sp_monadic},
+  {"fcmpzs",  0xeeb50a40, 6, FPU_VFP_EXT_V1xD, do_vfp_sp_compare_z},
+  {"fcmpes",  0xeeb40ac0, 6, FPU_VFP_EXT_V1xD, do_vfp_sp_monadic},
+  {"fcmpezs", 0xeeb50ac0, 7, FPU_VFP_EXT_V1xD, do_vfp_sp_compare_z},
+
+  /* VFP V1 (Double precision).  */
+  /* Moves and type conversions.  */
+  {"fcpyd",   0xeeb00b40, 5, FPU_VFP_EXT_V1,   do_vfp_dp_monadic},
+  {"fcvtds",  0xeeb70ac0, 6, FPU_VFP_EXT_V1,   do_vfp_dp_sp_cvt},
+  {"fcvtsd",  0xeeb70bc0, 6, FPU_VFP_EXT_V1,   do_vfp_sp_dp_cvt},
+  {"fmdhr",   0xee200b10, 5, FPU_VFP_EXT_V1,   do_vfp_dp_from_reg},
+  {"fmdlr",   0xee000b10, 5, FPU_VFP_EXT_V1,   do_vfp_dp_from_reg},
+  {"fmrdh",   0xee300b10, 5, FPU_VFP_EXT_V1,   do_vfp_reg_from_dp},
+  {"fmrdl",   0xee100b10, 5, FPU_VFP_EXT_V1,   do_vfp_reg_from_dp},
+  {"fsitod",  0xeeb80bc0, 6, FPU_VFP_EXT_V1,   do_vfp_dp_sp_cvt},
+  {"fuitod",  0xeeb80b40, 6, FPU_VFP_EXT_V1,   do_vfp_dp_sp_cvt},
+  {"ftosid",  0xeebd0b40, 6, FPU_VFP_EXT_V1,   do_vfp_sp_dp_cvt},
+  {"ftosizd", 0xeebd0bc0, 7, FPU_VFP_EXT_V1,   do_vfp_sp_dp_cvt},
+  {"ftouid",  0xeebc0b40, 6, FPU_VFP_EXT_V1,   do_vfp_sp_dp_cvt},
+  {"ftouizd", 0xeebc0bc0, 7, FPU_VFP_EXT_V1,   do_vfp_sp_dp_cvt},
+
+  /* Memory operations.  */
+  {"fldd",    0xed100b00, 4, FPU_VFP_EXT_V1,   do_vfp_dp_ldst},
+  {"fstd",    0xed000b00, 4, FPU_VFP_EXT_V1,   do_vfp_dp_ldst},
+  {"fldmiad", 0xec900b00, 7, FPU_VFP_EXT_V1,   do_vfp_dp_ldstmia},
+  {"fldmfdd", 0xec900b00, 7, FPU_VFP_EXT_V1,   do_vfp_dp_ldstmia},
+  {"fldmdbd", 0xed300b00, 7, FPU_VFP_EXT_V1,   do_vfp_dp_ldstmdb},
+  {"fldmead", 0xed300b00, 7, FPU_VFP_EXT_V1,   do_vfp_dp_ldstmdb},
+  {"fstmiad", 0xec800b00, 7, FPU_VFP_EXT_V1,   do_vfp_dp_ldstmia},
+  {"fstmead", 0xec800b00, 7, FPU_VFP_EXT_V1,   do_vfp_dp_ldstmia},
+  {"fstmdbd", 0xed200b00, 7, FPU_VFP_EXT_V1,   do_vfp_dp_ldstmdb},
+  {"fstmfdd", 0xed200b00, 7, FPU_VFP_EXT_V1,   do_vfp_dp_ldstmdb},
+
+  /* Monadic operations.  */
+  {"fabsd",   0xeeb00bc0, 5, FPU_VFP_EXT_V1,   do_vfp_dp_monadic},
+  {"fnegd",   0xeeb10b40, 5, FPU_VFP_EXT_V1,   do_vfp_dp_monadic},
+  {"fsqrtd",  0xeeb10bc0, 6, FPU_VFP_EXT_V1,   do_vfp_dp_monadic},
+
+  /* Dyadic operations.  */
+  {"faddd",   0xee300b00, 5, FPU_VFP_EXT_V1,   do_vfp_dp_dyadic},
+  {"fsubd",   0xee300b40, 5, FPU_VFP_EXT_V1,   do_vfp_dp_dyadic},
+  {"fmuld",   0xee200b00, 5, FPU_VFP_EXT_V1,   do_vfp_dp_dyadic},
+  {"fdivd",   0xee800b00, 5, FPU_VFP_EXT_V1,   do_vfp_dp_dyadic},
+  {"fmacd",   0xee000b00, 5, FPU_VFP_EXT_V1,   do_vfp_dp_dyadic},
+  {"fmscd",   0xee100b00, 5, FPU_VFP_EXT_V1,   do_vfp_dp_dyadic},
+  {"fnmuld",  0xee200b40, 6, FPU_VFP_EXT_V1,   do_vfp_dp_dyadic},
+  {"fnmacd",  0xee000b40, 6, FPU_VFP_EXT_V1,   do_vfp_dp_dyadic},
+  {"fnmscd",  0xee100b40, 6, FPU_VFP_EXT_V1,   do_vfp_dp_dyadic},
+
+  /* Comparisons.  */
+  {"fcmpd",   0xeeb40b40, 5, FPU_VFP_EXT_V1,   do_vfp_dp_monadic},
+  {"fcmpzd",  0xeeb50b40, 6, FPU_VFP_EXT_V1,   do_vfp_dp_compare_z},
+  {"fcmped",  0xeeb40bc0, 6, FPU_VFP_EXT_V1,   do_vfp_dp_monadic},
+  {"fcmpezd", 0xeeb50bc0, 7, FPU_VFP_EXT_V1,   do_vfp_dp_compare_z},
+
+  /* VFP V2.  */
+  {"fmsrr",   0xec400a10, 5, FPU_VFP_EXT_V2,   do_vfp_sp_reg2},
+  {"fmrrs",   0xec500a10, 5, FPU_VFP_EXT_V2,   do_vfp_sp_reg2},
+  {"fmdrr",   0xec400b10, 5, FPU_VFP_EXT_V2,   do_vfp_dp_from_reg2},
+  {"fmrrd",   0xec500b10, 5, FPU_VFP_EXT_V2,   do_vfp_reg2_from_dp},
 
   /* Intel XScale extensions to ARM V5 ISA.  (All use CP0).  */
   {"mia",        0xee200010, 3,  ARM_EXT_XSCALE,   do_mia},
@@ -2723,8 +2945,9 @@ cp_address_offset (str)
 }
 
 static int
-cp_address_required_here (str)
+cp_address_required_here (str, wb_ok)
      char ** str;
+     int wb_ok;
 {
   char * p = * str;
   int    pre_inc = 0;
@@ -2746,7 +2969,7 @@ cp_address_required_here (str)
 	{
 	  p++;
 
-	  if (skip_past_comma (& p) == SUCCESS)
+	  if (wb_ok && skip_past_comma (& p) == SUCCESS)
 	    {
 	      /* [Rn], #expr  */
 	      write_back = WRITE_BACK;
@@ -2788,7 +3011,7 @@ cp_address_required_here (str)
 
 	  skip_whitespace (p);
 
-	  if (*p == '!')
+	  if (wb_ok && *p == '!')
 	    {
 	      if (reg == REG_PC)
 		{
@@ -3496,7 +3719,7 @@ do_lstc2 (str)
 	inst.error = BAD_ARGS;
     }
   else if (skip_past_comma (& str) == FAIL
-	   || cp_address_required_here (& str) == FAIL)
+	   || cp_address_required_here (&str, CP_WB_OK) == FAIL)
     {
       if (! inst.error)
 	inst.error = BAD_ARGS;
@@ -5724,7 +5947,7 @@ do_lstc (str)
     }
 
   if (skip_past_comma (&str) == FAIL
-      || cp_address_required_here (&str) == FAIL)
+      || cp_address_required_here (&str, CP_WB_OK) == FAIL)
     {
       if (! inst.error)
 	inst.error = BAD_ARGS;
@@ -5831,7 +6054,7 @@ do_fpa_ldst (str)
     }
 
   if (skip_past_comma (&str) == FAIL
-      || cp_address_required_here (&str) == FAIL)
+      || cp_address_required_here (&str, CP_WB_OK) == FAIL)
     {
       if (!inst.error)
 	inst.error = BAD_ARGS;
@@ -5970,7 +6193,7 @@ do_fpa_ldmstm (str)
       inst.instruction |= offset;
     }
   else if (skip_past_comma (&str) == FAIL
-	   || cp_address_required_here (&str) == FAIL)
+	   || cp_address_required_here (&str, CP_WB_OK) == FAIL)
     {
       if (! inst.error)
 	inst.error = BAD_ARGS;
@@ -6099,6 +6322,907 @@ do_fpa_to_reg (str)
 
   if (skip_past_comma (&str) == FAIL
       || fp_reg_required_here (&str, 0) == FAIL)
+    {
+      if (! inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  end_of_line (str);
+  return;
+}
+
+static int
+vfp_sp_reg_required_here (str, pos)
+     char **str;
+     enum vfp_sp_reg_pos pos;
+{
+  int    reg;
+  char *start = *str;
+
+  if ((reg = arm_reg_parse (str, all_reg_maps[REG_TYPE_SN].htab)) != FAIL)
+    {
+      switch (pos)
+	{
+	case VFP_REG_Sd:
+	  inst.instruction |= ((reg >> 1) << 12) | ((reg & 1) << 22);
+	  break;
+
+	case VFP_REG_Sn:
+	  inst.instruction |= ((reg >> 1) << 16) | ((reg & 1) << 7);
+	  break;
+
+	case VFP_REG_Sm:
+	  inst.instruction |= ((reg >> 1) << 0) | ((reg & 1) << 5);
+	  break;
+
+	default:
+	  abort ();
+	}
+      return reg;
+    }
+
+  /* In the few cases where we might be able to accept something else
+     this error can be overridden.  */
+  inst.error = _(all_reg_maps[REG_TYPE_SN].expected);
+
+  /* Restore the start point.  */
+  *str = start;
+  return FAIL;
+}
+
+static int
+vfp_dp_reg_required_here (str, pos)
+     char **str;
+     enum vfp_sp_reg_pos pos;
+{
+  int   reg;
+  char *start = *str;
+
+  if ((reg = arm_reg_parse (str, all_reg_maps[REG_TYPE_DN].htab)) != FAIL)
+    {
+      switch (pos)
+	{
+	case VFP_REG_Dd:
+	  inst.instruction |= reg << 12;
+	  break;
+
+	case VFP_REG_Dn:
+	  inst.instruction |= reg << 16;
+	  break;
+
+	case VFP_REG_Dm:
+	  inst.instruction |= reg << 0;
+	  break;
+
+	default:
+	  abort ();
+	}
+      return reg;
+    }
+
+  /* In the few cases where we might be able to accept something else
+     this error can be overridden.  */
+  inst.error = _(all_reg_maps[REG_TYPE_DN].expected);
+
+  /* Restore the start point.  */
+  *str = start;
+  return FAIL;
+}
+
+static void
+do_vfp_sp_monadic (str)
+     char *str;
+{
+  skip_whitespace (str);
+
+  if (vfp_sp_reg_required_here (&str, VFP_REG_Sd) == FAIL)
+    return;
+
+  if (skip_past_comma (&str) == FAIL
+      || vfp_sp_reg_required_here (&str, VFP_REG_Sm) == FAIL)
+    {
+      if (! inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  end_of_line (str);
+  return;
+}
+
+static void
+do_vfp_dp_monadic (str)
+     char *str;
+{
+  skip_whitespace (str);
+
+  if (vfp_dp_reg_required_here (&str, VFP_REG_Dd) == FAIL)
+    return;
+
+  if (skip_past_comma (&str) == FAIL
+      || vfp_dp_reg_required_here (&str, VFP_REG_Dm) == FAIL)
+    {
+      if (! inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  end_of_line (str);
+  return;
+}
+
+static void
+do_vfp_sp_dyadic (str)
+     char *str;
+{
+  skip_whitespace (str);
+
+  if (vfp_sp_reg_required_here (&str, VFP_REG_Sd) == FAIL)
+    return;
+
+  if (skip_past_comma (&str) == FAIL
+      || vfp_sp_reg_required_here (&str, VFP_REG_Sn) == FAIL
+      || skip_past_comma (&str) == FAIL
+      || vfp_sp_reg_required_here (&str, VFP_REG_Sm) == FAIL)
+    {
+      if (! inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  end_of_line (str);
+  return;
+}
+
+static void
+do_vfp_dp_dyadic (str)
+     char *str;
+{
+  skip_whitespace (str);
+
+  if (vfp_dp_reg_required_here (&str, VFP_REG_Dd) == FAIL)
+    return;
+
+  if (skip_past_comma (&str) == FAIL
+      || vfp_dp_reg_required_here (&str, VFP_REG_Dn) == FAIL
+      || skip_past_comma (&str) == FAIL
+      || vfp_dp_reg_required_here (&str, VFP_REG_Dm) == FAIL)
+    {
+      if (! inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  end_of_line (str);
+  return;
+}
+
+static void
+do_vfp_reg_from_sp (str)
+     char *str;
+{
+  skip_whitespace (str);
+
+  if (reg_required_here (&str, 12) == FAIL)
+    return;
+
+  if (skip_past_comma (&str) == FAIL
+      || vfp_sp_reg_required_here (&str, VFP_REG_Sn) == FAIL)
+    {
+      if (! inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  end_of_line (str);
+  return;
+}
+
+static void
+do_vfp_sp_reg2 (str)
+     char *str;
+{
+  skip_whitespace (str);
+
+  if (reg_required_here (&str, 12) == FAIL)
+    return;
+
+  if (skip_past_comma (&str) == FAIL
+      || reg_required_here (&str, 16) == FAIL
+      || skip_past_comma (&str) == FAIL)
+    {
+      if (! inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  /* We require exactly two consecutive SP registers.  */
+  if (vfp_sp_reg_list (&str, VFP_REG_Sm) != 2)
+    {
+      if (! inst.error)
+	inst.error = _("only two consecutive VFP SP registers allowed here");
+    }
+
+  end_of_line (str);
+  return;
+}
+
+static void
+do_vfp_sp_from_reg (str)
+     char *str;
+{
+  skip_whitespace (str);
+
+  if (vfp_sp_reg_required_here (&str, VFP_REG_Sn) == FAIL)
+    return;
+
+  if (skip_past_comma (&str) == FAIL
+      || reg_required_here (&str, 12) == FAIL)
+    {
+      if (! inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  end_of_line (str);
+  return;
+}
+
+static void
+do_vfp_reg_from_dp (str)
+     char *str;
+{
+  skip_whitespace (str);
+
+  if (reg_required_here (&str, 12) == FAIL)
+    return;
+
+  if (skip_past_comma (&str) == FAIL
+      || vfp_dp_reg_required_here (&str, VFP_REG_Dn) == FAIL)
+    {
+      if (! inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  end_of_line (str);
+  return;
+}
+
+static void
+do_vfp_reg2_from_dp (str)
+     char *str;
+{
+  skip_whitespace (str);
+
+  if (reg_required_here (&str, 12) == FAIL)
+    return;
+
+  if (skip_past_comma (&str) == FAIL
+      || reg_required_here (&str, 16) == FAIL
+      || skip_past_comma (&str) == FAIL
+      || vfp_dp_reg_required_here (&str, VFP_REG_Dm) == FAIL)
+    {
+      if (! inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  end_of_line (str);
+  return;
+}
+
+static void
+do_vfp_dp_from_reg (str)
+     char *str;
+{
+  skip_whitespace (str);
+
+  if (vfp_dp_reg_required_here (&str, VFP_REG_Dn) == FAIL)
+    return;
+
+  if (skip_past_comma (&str) == FAIL
+      || reg_required_here (&str, 12) == FAIL)
+    {
+      if (! inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  end_of_line (str);
+  return;
+}
+
+static void
+do_vfp_dp_from_reg2 (str)
+     char *str;
+{
+  skip_whitespace (str);
+
+  if (vfp_dp_reg_required_here (&str, VFP_REG_Dm) == FAIL)
+    return;
+
+  if (skip_past_comma (&str) == FAIL
+      || reg_required_here (&str, 12) == FAIL
+      || skip_past_comma (&str) == FAIL
+      || reg_required_here (&str, 16))
+    {
+      if (! inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  end_of_line (str);
+  return;
+}
+
+static const struct vfp_reg *
+vfp_psr_parse (str)
+     char **str;
+{
+  char *start = *str;
+  char  c;
+  char *p;
+  const struct vfp_reg *vreg;
+
+  p = start;
+
+  /* Find the end of the current token.  */
+  do
+    {
+      c = *p++;
+    }
+  while (ISALPHA (c));
+
+  /* Mark it.  */
+  *--p = 0;
+
+  for (vreg = vfp_regs + 0; 
+       vreg < vfp_regs + sizeof (vfp_regs) / sizeof (struct vfp_reg);
+       vreg++)
+    {
+      if (strcmp (start, vreg->name) == 0)
+	{
+	  *p = c;
+	  *str = p;
+	  return vreg;
+	}
+    }
+
+  *p = c;
+  return NULL;
+}
+
+static int
+vfp_psr_required_here (str)
+     char **str;
+{
+  char *start = *str;
+  const struct vfp_reg *vreg;
+
+  vreg = vfp_psr_parse (str);
+
+  if (vreg)
+    {
+      inst.instruction |= vreg->regno;
+      return SUCCESS;
+    }
+
+  inst.error = _("VFP system register expected");
+
+  *str = start;
+  return FAIL;
+}
+
+static void
+do_vfp_reg_from_ctrl (str)
+     char *str;
+{
+  skip_whitespace (str);
+
+  if (reg_required_here (&str, 12) == FAIL)
+    return;
+
+  if (skip_past_comma (&str) == FAIL
+      || vfp_psr_required_here (&str) == FAIL)
+    {
+      if (! inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  end_of_line (str);
+  return;
+}
+
+static void
+do_vfp_ctrl_from_reg (str)
+     char *str;
+{
+  skip_whitespace (str);
+
+  if (vfp_psr_required_here (&str) == FAIL)
+    return;
+
+  if (skip_past_comma (&str) == FAIL
+      || reg_required_here (&str, 12) == FAIL)
+    {
+      if (! inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  end_of_line (str);
+  return;
+}
+
+static void
+do_vfp_sp_ldst (str)
+     char *str;
+{
+  skip_whitespace (str);
+
+  if (vfp_sp_reg_required_here (&str, VFP_REG_Sd) == FAIL)
+    {
+      if (!inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  if (skip_past_comma (&str) == FAIL
+      || cp_address_required_here (&str, CP_NO_WB) == FAIL)
+    {
+      if (!inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  end_of_line (str);
+  return;
+}
+
+static void
+do_vfp_dp_ldst (str)
+     char *str;
+{
+  skip_whitespace (str);
+
+  if (vfp_dp_reg_required_here (&str, VFP_REG_Dd) == FAIL)
+    {
+      if (!inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  if (skip_past_comma (&str) == FAIL
+      || cp_address_required_here (&str, CP_NO_WB) == FAIL)
+    {
+      if (!inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  end_of_line (str);
+  return;
+}
+
+/* Parse and encode a VFP SP register list, storing the initial
+   register in position POS and returning the range as the result.  If
+   the string is invalid return FAIL (an invalid range).  */
+static long
+vfp_sp_reg_list (str, pos)
+     char **str;
+     enum vfp_sp_reg_pos pos;
+{
+  long range = 0;
+  int base_reg = 0;
+  int new_base;
+  long base_bits = 0;
+  int count = 0;
+  long tempinst;
+  unsigned long mask = 0;
+  int warned = 0;
+
+  if (**str != '{')
+    return FAIL;
+
+  (*str)++;
+  skip_whitespace (*str);
+
+  tempinst = inst.instruction;
+
+  do
+    {
+      inst.instruction = 0;
+
+      if ((new_base = vfp_sp_reg_required_here (str, pos)) == FAIL)
+	return FAIL;
+
+      if (count == 0 || base_reg > new_base)
+	{
+	  base_reg = new_base;
+	  base_bits = inst.instruction;
+	}
+
+      if (mask & (1 << new_base))
+	{
+	  inst.error = _("invalid register list");
+	  return FAIL;
+	}
+
+      if ((mask >> new_base) != 0 && ! warned)
+	{
+	  as_tsktsk (_("register list not in ascending order"));
+	  warned = 1;
+	}
+
+      mask |= 1 << new_base;
+      count++;
+
+      skip_whitespace (*str);
+
+      if (**str == '-') /* We have the start of a range expression */
+	{
+	  int high_range;
+
+	  (*str)++;
+
+	  if ((high_range
+	       = arm_reg_parse (str, all_reg_maps[REG_TYPE_SN].htab))
+	      == FAIL)
+	    {
+	      inst.error = _(all_reg_maps[REG_TYPE_SN].expected);
+	      return FAIL;
+	    }
+
+	  if (high_range <= new_base)
+	    {
+	      inst.error = _("register range not in ascending order");
+	      return FAIL;
+	    }
+
+	  for (new_base++; new_base <= high_range; new_base++)
+	    {
+	      if (mask & (1 << new_base))
+		{
+		  inst.error = _("invalid register list");
+		  return FAIL;
+		}
+
+	      mask |= 1 << new_base;
+	      count++;
+	    }
+	}
+    }
+  while (skip_past_comma (str) != FAIL);
+
+  if (**str != '}')
+    {
+      inst.error = _("invalid register list");
+      return FAIL;
+    }
+
+  (*str)++;
+
+  range = count;
+
+  /* Sanity check -- should have raised a parse error above.  */
+  if (count == 0 || count > 32)
+    abort();
+
+  /* Final test -- the registers must be consecutive.  */
+  while (count--)
+    {
+      if ((mask & (1 << base_reg++)) == 0)
+	{
+	  inst.error = _("non-contiguous register range");
+	  return FAIL;
+	}
+    }
+
+  inst.instruction = tempinst | base_bits;
+  return range;
+}
+
+static long
+vfp_dp_reg_list (str)
+     char **str;
+{
+  long range = 0;
+  int base_reg = 0;
+  int new_base;
+  int count = 0;
+  long tempinst;
+  unsigned long mask = 0;
+  int warned = 0;
+
+  if (**str != '{')
+    return FAIL;
+
+  (*str)++;
+  skip_whitespace (*str);
+
+  tempinst = inst.instruction;
+
+  do
+    {
+      inst.instruction = 0;
+
+      if ((new_base = vfp_dp_reg_required_here (str, VFP_REG_Dd)) == FAIL)
+	return FAIL;
+
+      if (count == 0 || base_reg > new_base)
+	{
+	  base_reg = new_base;
+	  range = inst.instruction;
+	}
+
+      if (mask & (1 << new_base))
+	{
+	  inst.error = _("invalid register list");
+	  return FAIL;
+	}
+
+      if ((mask >> new_base) != 0 && ! warned)
+	{
+	  as_tsktsk (_("register list not in ascending order"));
+	  warned = 1;
+	}
+
+      mask |= 1 << new_base;
+      count++;
+
+      skip_whitespace (*str);
+
+      if (**str == '-') /* We have the start of a range expression */
+	{
+	  int high_range;
+
+	  (*str)++;
+
+	  if ((high_range
+	       = arm_reg_parse (str, all_reg_maps[REG_TYPE_DN].htab))
+	      == FAIL)
+	    {
+	      inst.error = _(all_reg_maps[REG_TYPE_DN].expected);
+	      return FAIL;
+	    }
+
+	  if (high_range <= new_base)
+	    {
+	      inst.error = _("register range not in ascending order");
+	      return FAIL;
+	    }
+
+	  for (new_base++; new_base <= high_range; new_base++)
+	    {
+	      if (mask & (1 << new_base))
+		{
+		  inst.error = _("invalid register list");
+		  return FAIL;
+		}
+
+	      mask |= 1 << new_base;
+	      count++;
+	    }
+	}
+    }
+  while (skip_past_comma (str) != FAIL);
+
+  if (**str != '}')
+    {
+      inst.error = _("invalid register list");
+      return FAIL;
+    }
+
+  (*str)++;
+
+  range |= 2 * count;
+
+  /* Sanity check -- should have raised a parse error above.  */
+  if (count == 0 || count > 16)
+    abort();
+
+  /* Final test -- the registers must be consecutive.  */
+  while (count--)
+    {
+      if ((mask & (1 << base_reg++)) == 0)
+	{
+	  inst.error = _("non-contiguous register range");
+	  return FAIL;
+	}
+    }
+
+  inst.instruction = tempinst;
+  return range;
+}
+
+static void
+vfp_sp_ldstm(str, ldstm_type)
+     char *str;
+     enum vfp_ldstm_type ldstm_type;
+{
+  long range;
+
+  skip_whitespace (str);
+
+  if (reg_required_here (&str, 16) == FAIL)
+    return;
+
+  skip_whitespace (str);
+
+  if (*str == '!')
+    {
+      inst.instruction |= WRITE_BACK;
+      str++;
+    }
+  else if (ldstm_type != VFP_LDSTMIA)
+    {
+      inst.error = _("this addressing mode requires base-register writeback");
+      return;
+    }
+
+  if (skip_past_comma (&str) == FAIL
+      || (range = vfp_sp_reg_list (&str, VFP_REG_Sd)) == FAIL)
+    {
+      if (!inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  inst.instruction |= range;
+  end_of_line (str);
+}
+
+static void
+vfp_dp_ldstm(str, ldstm_type)
+     char *str;
+     enum vfp_ldstm_type ldstm_type;
+{
+  long range;
+
+  skip_whitespace (str);
+
+  if (reg_required_here (&str, 16) == FAIL)
+    return;
+
+  skip_whitespace (str);
+
+  if (*str == '!')
+    {
+      inst.instruction |= WRITE_BACK;
+      str++;
+    }
+  else if (ldstm_type != VFP_LDSTMIA && ldstm_type != VFP_LDSTMIAX)
+    {
+      inst.error = _("this addressing mode requires base-register writeback");
+      return;
+    }
+
+  if (skip_past_comma (&str) == FAIL
+      || (range = vfp_dp_reg_list (&str)) == FAIL)
+    {
+      if (!inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  if (ldstm_type == VFP_LDSTMIAX || ldstm_type == VFP_LDSTMDBX)
+    range += 1;
+
+  inst.instruction |= range;
+  end_of_line (str);
+}
+
+static void
+do_vfp_sp_ldstmia (str)
+     char *str;
+{
+  vfp_sp_ldstm (str, VFP_LDSTMIA);
+}
+
+static void
+do_vfp_sp_ldstmdb (str)
+     char *str;
+{
+  vfp_sp_ldstm (str, VFP_LDSTMDB);
+}
+
+static void
+do_vfp_dp_ldstmia (str)
+     char *str;
+{
+  vfp_dp_ldstm (str, VFP_LDSTMIA);
+}
+
+static void
+do_vfp_dp_ldstmdb (str)
+     char *str;
+{
+  vfp_dp_ldstm (str, VFP_LDSTMDB);
+}
+
+static void
+do_vfp_xp_ldstmia (str)
+     char *str;
+{
+  vfp_dp_ldstm (str, VFP_LDSTMIAX);
+}
+
+static void
+do_vfp_xp_ldstmdb (str)
+     char *str;
+{
+  vfp_dp_ldstm (str, VFP_LDSTMDBX);
+}
+
+static void
+do_vfp_sp_compare_z (str)
+     char *str;
+{
+  skip_whitespace (str);
+
+  if (vfp_sp_reg_required_here (&str, VFP_REG_Sd) == FAIL)
+    {
+      if (!inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  end_of_line (str);
+  return;
+}
+
+static void
+do_vfp_dp_compare_z (str)
+     char *str;
+{
+  skip_whitespace (str);
+
+  if (vfp_dp_reg_required_here (&str, VFP_REG_Dd) == FAIL)
+    {
+      if (!inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  end_of_line (str);
+  return;
+}
+
+static void
+do_vfp_dp_sp_cvt (str)
+     char *str;
+{
+  skip_whitespace (str);
+
+  if (vfp_dp_reg_required_here (&str, VFP_REG_Dd) == FAIL)
+    return;
+
+  if (skip_past_comma (&str) == FAIL
+      || vfp_sp_reg_required_here (&str, VFP_REG_Sm) == FAIL)
+    {
+      if (! inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  end_of_line (str);
+  return;
+}
+
+static void
+do_vfp_sp_dp_cvt (str)
+     char *str;
+{
+  skip_whitespace (str);
+
+  if (vfp_sp_reg_required_here (&str, VFP_REG_Sd) == FAIL)
+    return;
+
+  if (skip_past_comma (&str) == FAIL
+      || vfp_dp_reg_required_here (&str, VFP_REG_Dm) == FAIL)
     {
       if (! inst.error)
 	inst.error = BAD_ARGS;
@@ -8014,7 +9138,9 @@ md_begin ()
     if (support_interwork) flags |= F_INTERWORK;
     if (uses_apcs_float)   flags |= F_APCS_FLOAT;
     if (pic_code)          flags |= F_PIC;
-    if ((cpu_variant & FPU_ANY) == FPU_NONE) flags |= F_SOFT_FLOAT;
+    if ((cpu_variant & FPU_ANY) == FPU_NONE
+	|| (cpu_variant & FPU_ANY) == FPU_ARCH_VFP)
+      flags |= F_SOFT_FLOAT;
 
     bfd_set_private_flags (stdoutput, flags);
 
@@ -8201,14 +9327,21 @@ md_atof (type, litP, sizeP)
     }
   else
     {
-      /* For a 4 byte float the order of elements in `words' is 1 0.  For an
-	 8 byte float the order is 1 0 3 2.  */
-      for (i = 0; i < prec; i += 2)
-	{
-	  md_number_to_chars (litP, (valueT) words[i + 1], 2);
-	  md_number_to_chars (litP + 2, (valueT) words[i], 2);
-	  litP += 4;
-	}
+      if (cpu_variant & FPU_ARCH_VFP)
+	for (i = prec - 1; i >= 0; i--)
+	  {
+	    md_number_to_chars (litP, (valueT) words[i], 2);
+	    litP += 2;
+	  }
+      else
+	/* For a 4 byte float the order of elements in `words' is 1 0.
+	   For an 8 byte float the order is 1 0 3 2.  */
+	for (i = 0; i < prec; i += 2)
+	  {
+	    md_number_to_chars (litP, (valueT) words[i + 1], 2);
+	    md_number_to_chars (litP + 2, (valueT) words[i], 2);
+	    litP += 4;
+	  }
     }
 
   return 0;
@@ -9271,6 +10404,8 @@ md_assemble (str)
       FP variants:
               -mfpa10, -mfpa11        FPA10 and 11 co-processor instructions
               -mfpe-old               (No float load/store multiples)
+	      -mvfpxd		      VFP Single precision
+	      -mvfp		      All VFP
               -mno-fpu                Disable all floating point instructions
       Run-time endian selection:
               -EB                     big endian cpu
@@ -9374,6 +10509,15 @@ md_parse_option (c, arg)
 	      support_interwork = true;
 #endif
 	    }
+	  else
+	    goto bad;
+	  break;
+
+	case 'v':
+	  if (streq (str, "vfpxd"))
+	    cpu_variant = (cpu_variant & ~FPU_ANY) | FPU_ARCH_VFP_V1xD;
+	  else if (streq (str, "vfp"))
+	    cpu_variant = (cpu_variant & ~FPU_ANY) | FPU_ARCH_VFP_V2;
 	  else
 	    goto bad;
 	  break;
@@ -9676,6 +10820,8 @@ md_show_usage (fp)
   -mall                     allow any instruction\n\
   -mfpa10, -mfpa11          select floating point architecture\n\
   -mfpe-old                 don't allow floating-point multiple instructions\n\
+  -mvfpxd                   allow vfp single-precision instructions\n\
+  -mvfp                     allow all vfp instructions\n\
   -mno-fpu                  don't allow any floating-point instructions.\n\
   -k                        generate PIC code.\n"));
 #if defined OBJ_COFF || defined OBJ_ELF

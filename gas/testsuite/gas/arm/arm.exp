@@ -47,6 +47,12 @@ if {[istarget *arm*-*-*] || [istarget "xscale-*-*"]} then {
 
     run_dump_test "fpa-mem"
 
+    run_dump_test "vfp1xD"
+
+    run_dump_test "vfp1"
+
+    run_errors_test "vfp-bad" "-mvfp" "VFP errors"
+
     run_dump_test "xscale"
 
     run_dump_test "adrl"
