@@ -1,5 +1,10 @@
 Wed May  4 06:26:11 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* annotate.texi: Change edition to 0.5 and date to May 1994.
+	Add index.
+	(Frames): New node, for frame annotation.
+	(Displays): New node, for display annotation.
+
 	* remote.texi (MIPS Remote): Say that set timeout doesn't apply
 	when waiting for your program to stop.
 
