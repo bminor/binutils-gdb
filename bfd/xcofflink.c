@@ -300,6 +300,8 @@ struct xcoff_link_hash_entry
 #define XCOFF_HAS_SIZE (04000)
   /* Symbol is a function descriptor.  */
 #define XCOFF_DESCRIPTOR (010000)
+  /* Multiple definitions have been for the symbol.  */
+#define XCOFF_MULTIPLY_DEFINED (020000)
 
   /* The storage mapping class.  */
   unsigned char smclas;
@@ -2128,12 +2130,25 @@ xcoff_link_add_symbols (abfd, info)
 	      || sym._n._n_n._n_offset == 0)
 	    copy = true;
 
+	  /* The AIX linker appears to only detect multiple symbol
+	     definitions when there is a reference to the symbol.  If
+	     a symbol is defined multiple times, and the only
+	     references are from the same object file, the AIX linker
+	     appears to permit it.  It does not merge the different
+	     definitions, but handles them independently.  On the
+	     other hand, if there is a reference, the linker reports
+	     an error.
+
+	     This matters because the AIX <net/net_globals.h> header
+	     file actually defines an initialized array, so we have to
+	     actually permit that to work.
+
+	     We also have to handle the case of statically linking a
+	     shared object, which will cause symbol redefinitions,
+	     although this is an easier case to detect.  */
+
 	  if (info->hash->creator == abfd->xvec)
 	    {
-	      /* If we are statically linking a shared object, it is
-                 OK for symbol redefinitions to occur.  I can't figure
-                 out just what the XCOFF linker is doing, but
-                 something like this is required for -bnso to work.  */
 	      if (! bfd_is_und_section (section))
 		*sym_hash = xcoff_link_hash_lookup (xcoff_hash_table (info),
 						    name, true, copy, false);
@@ -2148,25 +2163,71 @@ xcoff_link_add_symbols (abfd, info)
 		  && ! bfd_is_und_section (section)
 		  && ! bfd_is_com_section (section))
 		{
-		  /* If the existing symbol is to global linkage code,
-                     and this symbol is not global linkage code, then
-                     replace the existing symbol.  */
+		  /* This is a second definition of a defined symbol.  */
 		  if ((abfd->flags & DYNAMIC) != 0
 		      && ((*sym_hash)->smclas != XMC_GL
 			  || aux.x_csect.x_smclas == XMC_GL
 			  || ((*sym_hash)->root.u.def.section->owner->flags
 			      & DYNAMIC) == 0))
 		    {
+		      /* The new symbol is from a shared library, and
+                         either the existing symbol is not global
+                         linkage code or this symbol is global linkage
+                         code.  If the existing symbol is global
+                         linkage code and the new symbol is not, then
+                         we want to use the new symbol.  */
 		      section = bfd_und_section_ptr;
 		      value = 0;
 		    }
 		  else if (((*sym_hash)->root.u.def.section->owner->flags
 			    & DYNAMIC) != 0)
 		    {
+		      /* The existing symbol is from a shared library.
+                         Replace it.  */
 		      (*sym_hash)->root.type = bfd_link_hash_undefined;
 		      (*sym_hash)->root.u.undef.abfd =
 			(*sym_hash)->root.u.def.section->owner;
 		    }
+		  else if ((*sym_hash)->root.next != NULL
+			   || info->hash->undefs_tail == &(*sym_hash)->root)
+		    {
+		      /* This symbol has been referenced.  In this
+                         case, we just continue and permit the
+                         multiple definition error.  See the comment
+                         above about the behaviour of the AIX linker.  */
+		    }
+		  else if ((*sym_hash)->smclas == aux.x_csect.x_smclas)
+		    {
+		      /* The symbols are both csects of the same
+                         class.  There is at least a chance that this
+                         is a semi-legitimate redefinition.  */
+		      section = bfd_und_section_ptr;
+		      value = 0;
+		      (*sym_hash)->flags |= XCOFF_MULTIPLY_DEFINED;
+		    }
+		}
+	      else if (((*sym_hash)->flags & XCOFF_MULTIPLY_DEFINED) != 0
+		       && ((*sym_hash)->root.type == bfd_link_hash_defined
+			   || (*sym_hash)->root.type == bfd_link_hash_defweak)
+		       && (bfd_is_und_section (section)
+			   || bfd_is_com_section (section)))
+		{
+		  /* This is a reference to a multiply defined symbol.
+		     Report the error now.  See the comment above
+		     about the behaviour of the AIX linker.  We could
+		     also do this with warning symbols, but I'm not
+		     sure the XCOFF linker is wholly prepared to
+		     handle them, and that would only be a warning,
+		     not an error.  */
+		  if (! ((*info->callbacks->multiple_definition)
+			 (info, (*sym_hash)->root.root.string,
+			  (bfd *) NULL, (asection *) NULL, 0,
+			  (*sym_hash)->root.u.def.section->owner,
+			  (*sym_hash)->root.u.def.section,
+			  (*sym_hash)->root.u.def.value)))
+		    goto error_return;
+		  /* Try not to give this error too many times.  */
+		  (*sym_hash)->flags &= ~XCOFF_MULTIPLY_DEFINED;
 		}
 	    }
 
