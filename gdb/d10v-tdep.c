@@ -45,6 +45,14 @@
 
 #include "gdb_assert.h"
 
+static void d10v_frame_register_unwind (struct frame_info *next_frame,
+					void **this_cache,
+					int prev_regnum, int *optimizedp,
+					enum lval_type *lvalp,
+					CORE_ADDR *addrp,
+					int *realnump, void *bufferp);
+
+
 struct frame_extra_info
   {
     CORE_ADDR return_pc;
@@ -616,7 +624,7 @@ d10v_skip_prologue (CORE_ADDR pc)
 
 struct d10v_unwind_cache
 {
-  CORE_ADDR return_pc;
+  CORE_ADDR base;
   int frameless;
   int size;
   CORE_ADDR *saved_regs;
@@ -698,30 +706,30 @@ prologue_find_regs (struct d10v_unwind_cache *info, unsigned short op,
    for it IS the sp for the next frame. */
 
 struct d10v_unwind_cache *
-d10v_frame_unwind_cache (struct frame_info *fi,
-			 void **cache)
+d10v_frame_unwind_cache (struct frame_info *next_frame,
+			 void **this_cache)
 {
-  CORE_ADDR fp, pc;
+  CORE_ADDR pc;
+  ULONGEST sp;
+  ULONGEST base;
   unsigned long op;
   unsigned short op1, op2;
   int i;
   struct d10v_unwind_cache *info;
 
-  if ((*cache))
-    return (*cache);
+  if ((*this_cache))
+    return (*this_cache);
 
   info = FRAME_OBSTACK_ZALLOC (struct d10v_unwind_cache);
-  (*cache) = info;
+  (*this_cache) = info;
   info->saved_regs = frame_obstack_zalloc (SIZEOF_FRAME_SAVED_REGS);
 
   info->frameless = 0;
   info->size = 0;
-  info->return_pc = 0;
 
-  fp = get_frame_base (fi);
   info->next_addr = 0;
 
-  pc = get_pc_function_start (get_frame_pc (fi));
+  pc = get_pc_function_start (frame_pc_unwind (next_frame));
 
   info->uses_frame = 0;
   while (1)
@@ -776,45 +784,40 @@ d10v_frame_unwind_cache (struct frame_info *fi,
 
   info->size = -info->next_addr;
 
-  if (!(fp & 0xffff))
-    fp = d10v_read_sp ();
+  /* Start out with the frame's stack top.  */
+  frame_unwind_unsigned_register (next_frame, SP_REGNUM, &sp);
+  sp = d10v_make_daddr (sp);
 
   for (i = 0; i < NUM_REGS - 1; i++)
     if (info->saved_regs[i])
       {
-	info->saved_regs[i] = fp - (info->next_addr - info->saved_regs[i]);
+	info->saved_regs[i] = sp - (info->next_addr - info->saved_regs[i]);
       }
 
-  if (info->saved_regs[LR_REGNUM])
+  /* Compute the frame's base.  */
+  if (info->saved_regs[FP_REGNUM])
     {
-      CORE_ADDR return_pc 
-	= read_memory_unsigned_integer (info->saved_regs[LR_REGNUM], 
-					register_size (current_gdbarch, LR_REGNUM));
-      info->return_pc = d10v_make_iaddr (return_pc);
+      /* The FP was saved, which means that the current FP is live.
+         Unwind its value from the NEXT frame.  */
+      frame_unwind_unsigned_register (next_frame, FP_REGNUM, &base);
+    }
+  else if (info->saved_regs[SP_REGNUM])
+    {
+      /* The SP was saved (this is very unusual), the frame base is
+	 just the PREV's frame's TOP-OF-STACK.  */
+      base = read_memory_unsigned_integer (info->saved_regs[SP_REGNUM], 
+					   register_size (current_gdbarch,
+							  SP_REGNUM));
+      info->frameless = 1;
     }
   else
     {
-      ULONGEST return_pc;
-      frame_read_unsigned_register (fi, LR_REGNUM, &return_pc);
-      info->return_pc = d10v_make_iaddr (return_pc);
+      /* Assume that the FP is this frame's SP but with that pushed
+         stack space added back.  */
+      frame_unwind_unsigned_register (next_frame, SP_REGNUM, &base);
+      base += info->size;
     }
-
-  /* The SP is not normally (ever?) saved, but check anyway */
-  if (!info->saved_regs[SP_REGNUM])
-    {
-      /* if the FP was saved, that means the current FP is valid, */
-      /* otherwise, it isn't being used, so we use the SP instead */
-      if (info->uses_frame)
-	info->saved_regs[SP_REGNUM] 
-	  = d10v_read_fp () + info->size;
-      else
-	{
-	  info->saved_regs[SP_REGNUM] = fp + info->size;
-	  info->frameless = 1;
-	  info->saved_regs[FP_REGNUM] = 0;
-	}
-    }
-
+  info->base = d10v_make_daddr (base);
   return info;
 }
 
@@ -1423,95 +1426,93 @@ display_trace (int low, int high)
 
 
 static CORE_ADDR
-d10v_frame_pc_unwind (struct frame_info *frame,
-		      void **cache)
+d10v_frame_pc_unwind (struct frame_info *next_frame,
+		      void **this_cache)
 {
-  struct d10v_unwind_cache *info = d10v_frame_unwind_cache (frame, cache);
-  return info->return_pc;
+  /* FIXME: This shouldn't be needed.  Instead a per-architecture
+     method should be called.  */
+  int optimized;
+  enum lval_type lval;
+  CORE_ADDR addr;
+  int realnum;
+  ULONGEST lr;
+  void *buffer = alloca (max_register_size (current_gdbarch));
+  d10v_frame_register_unwind (next_frame, this_cache, LR_REGNUM, 
+			      &optimized, &lval, &addr, &realnum,
+			      buffer);
+  lr = extract_unsigned_integer (buffer, register_size (current_gdbarch,
+							LR_REGNUM));
+  return d10v_make_iaddr (lr);
+			
 }
 
-/* Given a GDB frame, determine the address of the calling function's
+/* Given the next frame, determine the address of this function's
    frame.  This will be used to create a new GDB frame struct.  */
 
 static void
-d10v_frame_id_unwind (struct frame_info *frame,
-		      void **cache,
-		      struct frame_id *id)
+d10v_frame_id_unwind (struct frame_info *next_frame,
+		      void **this_cache,
+		      struct frame_id *this_id)
 {
-  struct d10v_unwind_cache *info = d10v_frame_unwind_cache (frame, cache);
-  CORE_ADDR addr;
+  struct d10v_unwind_cache *info
+    = d10v_frame_unwind_cache (next_frame, this_cache);
+  CORE_ADDR base;
+  CORE_ADDR pc;
 
   /* Start with a NULL frame ID.  */
-  (*id) = null_frame_id;
+  (*this_id) = null_frame_id;
 
-  if (info->return_pc == IMEM_START
-      || info->return_pc <= IMEM_START
-      || inside_entry_file (info->return_pc))
+  /* The PC is easy.  */
+  pc = frame_pc_unwind (next_frame);
+
+  /* This is meant to halt the backtrace at "_start".  Make sure we
+     don't halt it at a generic dummy frame. */
+  if (pc == IMEM_START || pc <= IMEM_START || inside_entry_file (pc))
     {
-      /* This is meant to halt the backtrace at "_start".
-	 Make sure we don't halt it at a generic dummy frame. */
       return;
     }
 
+#if 0
   if (!info->saved_regs[FP_REGNUM])
     {
       if (!info->saved_regs[SP_REGNUM]
 	  || info->saved_regs[SP_REGNUM] == STACK_START)
 	return;
 
-      id->base = info->saved_regs[SP_REGNUM];
-      id->pc = info->return_pc;
+      this_id->base = info->saved_regs[SP_REGNUM];
+      this_id->pc = info->return_pc;
     }
 
   addr = read_memory_unsigned_integer (info->saved_regs[FP_REGNUM],
 				       register_size (current_gdbarch, FP_REGNUM));
   if (addr == 0)
     return;
+#endif
 
-  id->base = d10v_make_daddr (addr);
-  id->pc = info->return_pc;
+  /* Hopefully the prolog analysis has correctly determined the
+     frame's base.  */
+  this_id->base = info->base;
+  this_id->pc = pc;
 }
 
 static void
-saved_regs_unwinder (struct frame_info *frame,
+saved_regs_unwinder (struct frame_info *next_frame,
 		     CORE_ADDR *saved_regs,
-		     int regnum, int *optimizedp,
+		     int prev_regnum, int *optimizedp,
 		     enum lval_type *lvalp, CORE_ADDR *addrp,
 		     int *realnump, void *bufferp)
 {
-  /* If we're using generic dummy frames, we'd better not be in a call
-     dummy.  (generic_call_dummy_register_unwind ought to have been called
-     instead.)  */
-  gdb_assert (!(DEPRECATED_USE_GENERIC_DUMMY_FRAMES
-		&& (get_frame_type (frame) == DUMMY_FRAME)));
-
-  if (saved_regs[regnum] != 0)
+  if (saved_regs[prev_regnum] != 0)
     {
-      if (regnum == SP_REGNUM)
+      *optimizedp = 0;
+      *lvalp = lval_memory;
+      *addrp = saved_regs[prev_regnum];
+      *realnump = -1;
+      if (bufferp != NULL)
 	{
-	  /* SP register treated specially.  */
-	  *optimizedp = 0;
-	  *lvalp = not_lval;
-	  *addrp = 0;
-	  *realnump = -1;
-	  if (bufferp != NULL)
-	    store_address (bufferp, register_size (current_gdbarch, regnum),
-			   saved_regs[regnum]);
-	}
-      else
-	{
-	  /* Any other register is saved in memory, fetch it but cache
-	     a local copy of its value.  */
-	  *optimizedp = 0;
-	  *lvalp = lval_memory;
-	  *addrp = saved_regs[regnum];
-	  *realnump = -1;
-	  if (bufferp != NULL)
-	    {
-	      /* Read the value in from memory.  */
-	      read_memory (saved_regs[regnum], bufferp,
-			   register_size (current_gdbarch, regnum));
-	    }
+	  /* Read the value in from memory.  */
+	  read_memory (saved_regs[prev_regnum], bufferp,
+		       register_size (current_gdbarch, prev_regnum));
 	}
       return;
     }
@@ -1520,20 +1521,23 @@ saved_regs_unwinder (struct frame_info *frame,
      value.  If a value is needed, pass the request on down the chain;
      otherwise just return an indication that the value is in the same
      register as the next frame.  */
-  frame_register (frame, regnum, optimizedp, lvalp, addrp,
-		  realnump, bufferp);
+  frame_register_unwind (next_frame, prev_regnum, optimizedp, lvalp, addrp,
+			 realnump, bufferp);
 }
 
 
 static void
-d10v_frame_register_unwind (struct frame_info *frame,
-			    void **cache,
-			    int regnum, int *optimizedp,
+d10v_frame_register_unwind (struct frame_info *next_frame,
+			    void **this_cache,
+			    int prev_regnum, int *optimizedp,
 			    enum lval_type *lvalp, CORE_ADDR *addrp,
 			    int *realnump, void *bufferp)
 {
-  struct d10v_unwind_cache *info = d10v_frame_unwind_cache (frame, cache);
-  saved_regs_unwinder (frame, info->saved_regs, regnum, optimizedp,
+  struct d10v_unwind_cache *info
+    = d10v_frame_unwind_cache (next_frame, this_cache);
+  if (prev_regnum == PC_REGNUM)
+    prev_regnum = LR_REGNUM;
+  saved_regs_unwinder (next_frame, info->saved_regs, prev_regnum, optimizedp,
 		       lvalp, addrp, realnump, bufferp);
 }
 

@@ -135,14 +135,27 @@ frame_find_by_id (struct frame_id id)
 }
 
 CORE_ADDR
-frame_pc_unwind (struct frame_info *frame)
+frame_pc_unwind (struct frame_info *this_frame)
 {
-  if (!frame->pc_unwind_cache_p)
+  if (!this_frame->pc_unwind_cache_p)
     {
-      frame->pc_unwind_cache = frame->unwind->pc (frame, &frame->unwind_cache);
-      frame->pc_unwind_cache_p = 1;
+      this_frame->pc_unwind_cache
+	= this_frame->unwind->pc (this_frame->next, &this_frame->unwind_cache);
+      this_frame->pc_unwind_cache_p = 1;
     }
-  return frame->pc_unwind_cache;
+  return this_frame->pc_unwind_cache;
+}
+
+struct frame_id
+frame_id_unwind (struct frame_info *this_frame)
+{
+  if (!this_frame->id_unwind_cache_p)
+    {
+      this_frame->unwind->id (this_frame->next, &this_frame->unwind_cache,
+			      &this_frame->id_unwind_cache);
+      this_frame->id_unwind_cache_p = 1;
+    }
+  return this_frame->id_unwind_cache;
 }
 
 void
@@ -154,12 +167,12 @@ frame_pop (struct frame_info *frame)
      values are needed to restore other registers.  Instead, this code
      should pass in a scratch cache and, as a second step, restore the
      registers using that.  */
-  frame->unwind->pop (frame, &frame->unwind_cache, current_regcache);
+  frame->unwind->pop (frame->next, &frame->unwind_cache, current_regcache);
   flush_cached_frames ();
 }
 
 void
-frame_register_unwind (struct frame_info *frame, int regnum,
+frame_register_unwind (struct frame_info *this_frame, int prev_regnum,
 		       int *optimizedp, enum lval_type *lvalp,
 		       CORE_ADDR *addrp, int *realnump, void *bufferp)
 {
@@ -177,11 +190,13 @@ frame_register_unwind (struct frame_info *frame, int regnum,
      is broken.  There is always a frame.  If there, for some reason,
      isn't, there is some pretty busted code as it should have
      detected the problem before calling here.  */
-  gdb_assert (frame != NULL);
+  gdb_assert (this_frame != NULL && this_frame->next != NULL);
 
-  /* Ask this frame to unwind its register.  */
-  frame->unwind->reg (frame, &frame->unwind_cache, regnum,
-		      optimizedp, lvalp, addrp, realnump, bufferp);
+  /* Ask this frame's register unwinder to return the value of
+     PREV_REGNUM using register values unwound from the NEXT frame.  */
+  this_frame->unwind->reg (this_frame->next, &this_frame->unwind_cache,
+			   prev_regnum, optimizedp, lvalp, addrp, realnump,
+			   bufferp);
 }
 
 void
@@ -1336,8 +1351,8 @@ get_prev_frame (struct frame_info *next_frame)
   {
     /* FIXME: cagney/2002-12-18: Instead of this hack, should just
        save the frame ID directly.  */
-    struct frame_id id = prev_frame->unwind->id (next_frame,
-						 &prev_frame->unwind_cache);
+    struct frame_id id;
+    prev_frame->unwind->id (next_frame, &prev_frame->unwind_cache, &id);
     /* Check that the unwound ID is valid.  As of 2003-02-24 the
        x86-64 was returning an invalid frame ID when trying to do an
        unwind a sentinel frame that belonged to a frame dummy.  */

@@ -45,19 +45,25 @@ sentinel_frame_cache (struct regcache *regcache)
 /* Here the register value is taken direct from the register cache.  */
 
 void
-sentinel_frame_register_unwind (struct frame_info *frame,
-				void **unwind_cache,
-				int regnum, int *optimized,
+sentinel_frame_register_unwind (struct frame_info *next_frame,
+				void **this_cache,
+				int prev_regnum, int *optimized,
 				enum lval_type *lvalp, CORE_ADDR *addrp,
 				int *realnum, void *bufferp)
 {
-  struct frame_unwind_cache *cache = *unwind_cache;
+  /* Hey don't let on but, for the sentinel frame, next_frame->next ==
+     next_frame.  Fortunatly, that local knowledge isn't needed,
+     instead THIS_CACHE contains all the information needed to find
+     the frame's thread's REGCACHE and that REGCACHE is then accessed
+     directly.  */
+  struct frame_unwind_cache *cache = *this_cache;
+
   /* Describe the register's location.  A reg-frame maps all registers
      onto the corresponding hardware register.  */
   *optimized = 0;
   *lvalp = lval_register;
-  *addrp = REGISTER_BYTE (regnum);
-  *realnum = regnum;
+  *addrp = REGISTER_BYTE (prev_regnum);
+  *realnum = prev_regnum;
 
   /* If needed, find and return the value of the register.  */
   if (bufferp != NULL)
@@ -66,13 +72,13 @@ sentinel_frame_register_unwind (struct frame_info *frame,
       /* Use the regcache_cooked_read() method so that it, on the fly,
          constructs either a raw or pseudo register from the raw
          register cache.  */
-      regcache_cooked_read (cache->regcache, regnum, bufferp);
+      regcache_cooked_read (cache->regcache, prev_regnum, bufferp);
     }
 }
 
 CORE_ADDR
-sentinel_frame_pc_unwind (struct frame_info *frame,
-			  void **cache)
+sentinel_frame_pc_unwind (struct frame_info *next_frame,
+			  void **this_cache)
 {
   /* FIXME: cagney/2003-01-08: This should be using a per-architecture
      method that doesn't suffer from DECR_PC_AFTER_BREAK problems.
@@ -82,21 +88,16 @@ sentinel_frame_pc_unwind (struct frame_info *frame,
 }
 
 void
-sentinel_frame_id_unwind (struct frame_info *frame,
-			  void **cache,
-			  struct frame_id *id)
+sentinel_frame_id_unwind (struct frame_info *next_frame,
+			  void **this_cache,
+			  struct frame_id *this_id)
 {
-  /* FIXME: cagney/2003-01-08: This should be using a per-architecture
-     method that doesn't suffer from DECR_PC_AFTER_BREAK problems.
-     Such a method would take unwind_cache, regcache and stop reason
-     parameters.  */
-  id->base = read_fp ();
-  id->pc = read_pc ();
+  internal_error (__FILE__, __LINE__, "sentinel_frame_id_unwind called");
 }
 
 static void
-sentinel_frame_pop (struct frame_info *frame,
-		    void **cache,
+sentinel_frame_pop (struct frame_info *next_frame,
+		    void **this_cache,
 		    struct regcache *regcache)
 {
   internal_error (__FILE__, __LINE__, "Function sentinal_frame_pop called");

@@ -105,11 +105,12 @@ find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
 }
 
 struct dummy_frame *
-cached_find_dummy_frame (struct frame_info *frame, void **cache)
+cached_find_dummy_frame (struct frame_info *next_frame, void **this_cache)
 {
-  if ((*cache) == NULL)
-    (*cache) = find_dummy_frame (get_frame_pc (frame), get_frame_base (frame));
-  return (*cache);
+  if ((*this_cache) == NULL)
+    (*this_cache) = find_dummy_frame (frame_pc_unwind (next_frame),
+				      frame_id_unwind (next_frame).base);
+  return (*this_cache);
 }
 
 struct regcache *
@@ -286,13 +287,13 @@ discard_innermost_dummy (struct dummy_frame **stack)
    dummy stack frame. */
 
 static void
-dummy_frame_pop (struct frame_info *fi, void **cache,
+dummy_frame_pop (struct frame_info *next_frame, void **this_cache,
 		 struct regcache *regcache)
 {
-  struct dummy_frame *dummy = cached_find_dummy_frame (fi, cache);
+  struct dummy_frame *dummy = cached_find_dummy_frame (next_frame, this_cache);
 
   /* If it isn't, what are we even doing here?  */
-  gdb_assert (get_frame_type (fi) == DUMMY_FRAME);
+  /* gdb_assert (get_frame_type (fi) == DUMMY_FRAME); */
 
   if (dummy == NULL)
     error ("Can't pop dummy frame!");
@@ -344,12 +345,12 @@ generic_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
    register value is taken from the local copy of the register buffer.  */
 
 static void
-dummy_frame_register_unwind (struct frame_info *frame, void **cache,
-			     int regnum, int *optimized,
+dummy_frame_register_unwind (struct frame_info *next_frame, void **this_cache,
+			     int prev_regnum, int *optimized,
 			     enum lval_type *lvalp, CORE_ADDR *addrp,
 			     int *realnum, void *bufferp)
 {
-  struct dummy_frame *dummy = cached_find_dummy_frame (frame, cache);
+  struct dummy_frame *dummy = cached_find_dummy_frame (next_frame, this_cache);
   gdb_assert (dummy != NULL);
 
   /* Describe the register's location.  Generic dummy frames always
@@ -366,7 +367,7 @@ dummy_frame_register_unwind (struct frame_info *frame, void **cache,
       /* Use the regcache_cooked_read() method so that it, on the fly,
          constructs either a raw or pseudo register from the raw
          register cache.  */
-      regcache_cooked_read (dummy->regcache, regnum, bufferp);
+      regcache_cooked_read (dummy->regcache, prev_regnum, bufferp);
     }
 }
 
@@ -374,10 +375,10 @@ dummy_frame_register_unwind (struct frame_info *frame, void **cache,
    previous frame.  */
 
 static CORE_ADDR
-dummy_frame_pc_unwind (struct frame_info *frame,
-		       void **cache)
+dummy_frame_pc_unwind (struct frame_info *next_frame,
+		       void **this_cache)
 {
-  struct dummy_frame *dummy = cached_find_dummy_frame (frame, cache);
+  struct dummy_frame *dummy = cached_find_dummy_frame (next_frame, this_cache);
   /* Oops!  In a dummy-frame but can't find the stack dummy.  Pretend
      that the frame doesn't unwind.  Should this function instead
      return a has-no-caller indication?  */
@@ -391,18 +392,18 @@ dummy_frame_pc_unwind (struct frame_info *frame,
    (the frame that the dummy has the saved state of).  */
 
 static void
-dummy_frame_id_unwind (struct frame_info *frame,
-		       void **cache,
-		       struct frame_id *id)
+dummy_frame_id_unwind (struct frame_info *next_frame,
+		       void **this_cache,
+		       struct frame_id *this_id)
 {
-  struct dummy_frame *dummy = cached_find_dummy_frame (frame, cache);
+  struct dummy_frame *dummy = cached_find_dummy_frame (next_frame, this_cache);
   /* Oops!  In a dummy-frame but can't find the stack dummy.  Pretend
      that the frame doesn't unwind.  Should this function instead
      return a has-no-caller indication?  */
   if (dummy == NULL)
-    (*id) = null_frame_id;
+    (*this_id) = null_frame_id;
   else
-    (*id) = dummy->id;
+    (*this_id) = dummy->id;
 }
 
 static struct frame_unwind dummy_frame_unwind =

@@ -47,54 +47,102 @@ extern const struct frame_unwind *frame_unwind_find_by_pc (struct gdbarch
 							   *gdbarch,
 							   CORE_ADDR pc);
 
-/* Return the location (and possibly value) of REGNUM for the previous
-   (older, up) frame.  All parameters except VALUEP can be assumed to
-   be non NULL.  When VALUEP is NULL, just the location of the
-   register should be returned.
+/* The following unwind functions all assume a frame chain like:
+   (outer) prev <-> this <-> next (inner); Even though some unwind to
+   THIS frame (frame ID) and others unwind the PREV frame, they are
+   all, consistently passed NEXT frame and THIS cache.
 
-   UNWIND_CACHE is provided as mechanism for implementing a per-frame
-   local cache.  It's initial value being NULL.  Memory for that cache
-   should be allocated using frame_obstack_zalloc().
+   The intent is to clarify the relationship between NEXT frame and
+   THIS cache.  It is, of course, at the expense of confusing somewhat
+   the expected unwind behavior of PC/REG unwind VS ID unwind.  Sigh.  */
 
-   Register window architectures (eg SPARC) should note that REGNUM
-   identifies the register for the previous frame.  For instance, a
-   request for the value of "o1" for the previous frame would be found
-   in the register "i1" in this FRAME.  */
+/* Assuming the frame chain: (outer) prev <-> this <-> next (inner);
+   use the NEXT frame, and its register unwind method, to determine
+   the frame ID of THIS frame.
 
-typedef void (frame_unwind_reg_ftype) (struct frame_info * frame,
-				       void **unwind_cache,
-				       int regnum,
+   A frame ID provides an invariant that can be used to re-identify an
+   instance of a frame.  It is a combination of the frame's `base' and
+   the frame's function's code.
+
+   Traditionally, THIS frame's ID was determined by examining THIS
+   frame's function's prologue and identifying which register/offset
+   are being used as THIS frame's base.
+
+   THIS_CACHE can be used to share any prolog analysis data with the
+   other unwind methods.  Memory for that cache should be allocated
+   using frame_obstack_zalloc().  */
+
+typedef void (frame_unwind_id_ftype) (struct frame_info *next_frame,
+				      void **this_cache,
+				      struct frame_id *this_id);
+
+/* Assuming the frame chain: (outer) prev <-> this <-> next (inner);
+   use the NEXT frame, and its register unwind method, to unwind THIS
+   frame's registers, returning the value of REGNUM in PREV frame.
+
+   Traditionally, THIS frame's registers were unwound by examining
+   THIS frame's function's prologue and identifying which registers
+   that prolog code saved on the stack.
+
+   Ex: Assuming THIS is a frameless function that has saved the return
+   address (to PREV) in R1, then: a request to unwind THIS's PC
+   (returning the value of PC in PREV), becomes a request for the
+   value of R1 in THIS (that is where the value was saved), which
+   becomes a request to unwind R1 from NEXT.
+
+   THIS_CACHE can be used to share any prologue analysis data with the
+   other unwind methods.  Memory for that cache should be allocated
+   using frame_obstack_zalloc().  */
+
+typedef void (frame_unwind_reg_ftype) (struct frame_info *next_frame,
+				       void **this_cache,
+				       int prev_regnum,
 				       int *optimized,
 				       enum lval_type * lvalp,
 				       CORE_ADDR *addrp,
 				       int *realnump, void *valuep);
 
-/* Same as for registers above, but return the address at which the
-   calling frame would resume.  */
+/* Assuming the frame chain: (outer) prev <-> this <-> next (inner);
+   use the NEXT frame, and its register unwind method, to unwind THIS
+   frame's PC, returning the value of PC (the return address) in PREV
+   frame.
 
-typedef CORE_ADDR (frame_unwind_pc_ftype) (struct frame_info * frame,
-					   void **unwind_cache);
+   Traditionally, THIS frame's PC was unwound by examining THIS
+   frame's function prolog and identifying where (in a register or on
+   the stack) that return address was saved.
 
-/* Same as for registers above, but return the ID of the frame that
-   called this one.  */
+   Please note that this per-frame method may be superseeded by an
+   architecture specific method that determines the unwound PC (aka
+   return address) using just the register unwind methods.
 
-typedef void (frame_unwind_id_ftype) (struct frame_info * frame,
-				      void **unwind_cache,
-				      struct frame_id * id);
+   THIS_CACHE can be used to share any prologue analysis data with the
+   other unwind methods.  Memory for that cache should be allocated
+   using frame_obstack_zalloc().  */
 
-/* Discard the frame by restoring the registers (in regcache) back to
-   that of the caller.  */
-/* NOTE: cagney/2003-01-19: While at present the callers all pop each
+typedef CORE_ADDR (frame_unwind_pc_ftype) (struct frame_info *next_frame,
+					   void **this_cache);
+
+/* Assuming the frame chain: (outer) prev <-> this <-> next (inner);
+   use the NEXT frame, and its register unwind method, to unwind THIS
+   frame's entire stack, writing PREV's frames register values into
+   REGCACHE.
+
+   NOTE: cagney/2003-01-19: While at present the callers all pop each
    frame in turn, the implementor should try to code things so that
-   any frame can be popped directly.  */
-/* FIXME: cagney/2003-01-19: Since both FRAME and REGCACHE refer to a
+   any frame can be popped directly.
+
+   FIXME: cagney/2003-01-19: Since both FRAME and REGCACHE refer to a
    common register cache, care must be taken when restoring the
    registers.  The `correct fix' is to first first save the registers
    in a scratch cache, and second write that scratch cache back to to
-   the real register cache.  */
+   the real register cache.
 
-typedef void (frame_unwind_pop_ftype) (struct frame_info *frame,
-				       void **unwind_cache,
+   FIXME: cagney/2003-03-04: Isn't this entire function redundant?
+   Shouldn't the code instead just iterate through the restore
+   reggroup unwinding those registers?  */
+
+typedef void (frame_unwind_pop_ftype) (struct frame_info *next_frame,
+				       void **this_cache,
 				       struct regcache *regcache);
 
 struct frame_unwind

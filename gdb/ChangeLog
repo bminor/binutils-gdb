@@ -1,3 +1,29 @@
+2003-03-04  Andrew Cagney  <cagney@redhat.com>
+
+	* d10v-tdep.c (d10v_frame_unwind_cache): Update to work with
+	NEXT_FRAME and THIS_CACHE.
+	(d10v_frame_pc_unwind): Ditto.
+	(d10v_frame_id_unwind): Ditto.
+	(saved_regs_unwinder): Ditto.
+	(d10v_frame_register_unwind): Ditto.
+	* dummy-frame.c (dummy_frame_register_unwind): Ditto.
+	(dummy_frame_pc_unwind): Ditto.
+	(cached_find_dummy_frame): Ditto.
+	(dummy_frame_id_unwind): Ditto.
+	(dummy_frame_pop): Ditto.
+	* sentinel-frame.c (sentinel_frame_register_unwind): Ditto.
+	(sentinel_frame_pc_unwind): Ditto.
+	(sentinel_frame_id_unwind): Ditto.
+	(sentinel_frame_pop): Ditto.
+	* frame.c (frame_id_unwind): Reinstate function.
+	* frame.h (frame_id_unwind): Reinstate declaration.
+	* frame.c (frame_pc_unwind): Pass frame->next to the PC's unwind
+	method.
+	(frame_pop, frame_register_unwind): Ditto.
+	* frame-unwind.h (frame_unwind_id_ftype, frame_unwind_reg_ftype)
+	(frame_unwind_pc_ftype, frame_unwind_pop_ftype): Re-specify
+	behavior in terms of PREV_REGNUM, THIS_CACHE and NEXT_FRAME.
+
 2003-03-03  Andrew Cagney  <cagney@redhat.com>
 
 	* frame.c (frame_id_unwind): Delete function.
