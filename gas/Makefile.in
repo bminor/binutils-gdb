@@ -447,13 +447,15 @@ itbl-ops.o: $(srcdir)/itbl-ops.c \
 	$(srcdir)/itbl-ops.h itbl-cpu.h itbl-parse.h
 	$(CC) -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) $(srcdir)/itbl-ops.c
 
-# stand-alone assembler & disassembler
+# stand-alone itbl assembler & disassembler
 itbl-test-ops.o: $(srcdir)/itbl-ops.c \
 	$(srcdir)/itbl-ops.h itbl-cpu.h itbl-parse.h
 	$(CC) -o itbl-test-ops.o -DSTAND_ALONE -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) $(srcdir)/itbl-ops.c
 
-itbl-test.o: $(srcdir)/itbl-test.c $(srcdir)/itbl-ops.h itbl-cpu.h
-	$(CC) -c -DSTAND_ALONE $(ALL_CFLAGS) $(INCLUDES) $(srcdir)/itbl-test.c
+itbl-test.o: $(srcdir)/testsuite/gas/all/itbl-test.c $(srcdir)/itbl-ops.h\
+	itbl-cpu.h
+	$(CC) -c -DSTAND_ALONE $(ALL_CFLAGS) $(INCLUDES)\
+	$(srcdir)/testsuite/gas/all/itbl-test.c
 
 IT_TEST_OBJS= itbl-parse.o itbl-lex.o itbl-test-ops.o
 itbl-test: $(IT_TEST_OBJS) itbl-test.o $(LIBDEPS)
