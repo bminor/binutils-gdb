@@ -1,5 +1,10 @@
 2003-04-24  Adam Fedor  <fedor@gnu.org>
 
+	* objc-lang.c: Include "valprint.h"
+	* Makefile.in (objc-lang.o): Update dependencies.
+
+2003-04-24  Adam Fedor  <fedor@gnu.org>
+
 	* objc-lang.c (FETCH_ARGUMENT, CONVERT_FUNCPTR): Remove 
 	architecture dependant compilation and mark as unimplemented
 	(until they get put in the gdbarch vector).

@@ -43,6 +43,7 @@
 #include "regcache.h"
 #include "block.h"
 #include "infcall.h"
+#include "valprint.h"
 
 #include <ctype.h>
 
