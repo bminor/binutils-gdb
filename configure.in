@@ -619,12 +619,10 @@ case "${target}" in
   v850e-*-*)
     noconfigdirs="$noconfigdirs target-libgloss"
     ;;
-# end-sanitize-v850e
-# start-sanitize-v850eq
   v850eq-*-*)
     noconfigdirs="$noconfigdirs target-libgloss"
     ;;
-# end-sanitize-v850eq
+# end-sanitize-v850e
   vax-*-vms)
     noconfigdirs="$noconfigdirs bfd binutils gdb ld target-newlib opcodes target-libgloss"
     ;;
