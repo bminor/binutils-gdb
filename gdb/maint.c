@@ -697,7 +697,7 @@ Configure variables internal to GDB that aid in GDB's maintenance",
 #ifndef _WIN32
   add_cmd ("dump-me", class_maintenance, maintenance_dump_me,
 	   "Get fatal error; make debugger dump its core.\n\
-GDB sets it's handling of SIGQUIT back to SIG_DFL and then sends\n\
+GDB sets its handling of SIGQUIT back to SIG_DFL and then sends\n\
 itself a SIGQUIT signal.",
 	   &maintenancelist);
 #endif

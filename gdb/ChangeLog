@@ -1,3 +1,8 @@
+2002-11-21  Daniel Jacobowitz  <drow@mvista.com>
+
+	* maint.c (_initialize_maint_cmds): Fix typo.  From
+	Francesco Potorti` <pot@gnu.org>.
+
 2002-11-21  Andrew Cagney  <cagney@redhat.com>
 
 	* mips-tdep.c (mips_dump_tdep): Delete references to
