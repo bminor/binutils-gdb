@@ -20,6 +20,7 @@ t-sub.s
 t-subi.s
 t-sub2w.s
 t-mvtac.s
+t-mvtc.s
 
 Things-to-lose:
 

@@ -82,6 +82,7 @@ struct _state
   uint8 SM;
   uint8 EA;
   uint8 DB;
+  uint8 DM;
   uint8 IE;
   uint8 RP;
   uint8 MD;

@@ -42,6 +42,7 @@ TESTS = \
 	hello.hi \
 	t-mac.ok \
 	t-mvtac.ok \
+	t-mvtc.ok \
 	t-msbu.ok \
 	t-mulxu.ok \
 	t-rac.ok \

@@ -1711,6 +1711,7 @@ OP_5200 ()
       if (State.SM) PSW |= 0x8000;
       if (State.EA) PSW |= 0x2000;
       if (State.DB) PSW |= 0x1000;
+      if (State.DM) PSW |= 0x800;
       if (State.IE) PSW |= 0x400;
       if (State.RP) PSW |= 0x200;
       if (State.MD) PSW |= 0x100;
@@ -1767,6 +1768,7 @@ OP_5600 ()
       State.SM = (PSW & 0x8000) ? 1 : 0;
       State.EA = (PSW & 0x2000) ? 1 : 0;
       State.DB = (PSW & 0x1000) ? 1 : 0;
+      State.DM = (PSW & 0x800) ? 1 : 0;
       State.IE = (PSW & 0x400) ? 1 : 0;
       State.RP = (PSW & 0x200) ? 1 : 0;
       State.MD = (PSW & 0x100) ? 1 : 0;
