@@ -10275,6 +10275,8 @@ main (argc, argv)
      char **argv;
 {
   int err;
+  char *cmdline_dump_sects = NULL;
+  unsigned num_cmdline_dump_sects = 0;
 
 #if defined (HAVE_SETLOCALE) && defined (HAVE_LC_MESSAGES)
   setlocale (LC_MESSAGES, "");
@@ -10290,12 +10292,38 @@ main (argc, argv)
   if (optind < (argc - 1))
     show_name = 1;
 
+  /* When processing more than one file remember the dump requests
+     issued on command line to reset them after each file.  */
+  if (optind + 1 < argc && dump_sects != NULL)
+    {
+      cmdline_dump_sects = malloc (num_dump_sects);
+      if (cmdline_dump_sects == NULL)
+	error (_("Out of memory allocating dump request table."));
+      else
+	{
+	  memcpy (cmdline_dump_sects, dump_sects, num_dump_sects);
+	  num_cmdline_dump_sects = num_dump_sects;
+	}
+    }
+
   err = 0;
   while (optind < argc)
-    err |= process_file (argv[optind++]);
+    {
+      err |= process_file (argv[optind++]);
+
+      /* Reset dump requests.  */
+      if (optind < argc && dump_sects != NULL)
+	{
+	  num_dump_sects = num_cmdline_dump_sects;
+	  if (num_cmdline_dump_sects > 0)
+	    memcpy (dump_sects, cmdline_dump_sects, num_cmdline_dump_sects);
+	}
+    }
 
   if (dump_sects != NULL)
     free (dump_sects);
+  if (cmdline_dump_sects != NULL)
+    free (cmdline_dump_sects);
 
   return err;
 }

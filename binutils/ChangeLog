@@ -1,3 +1,7 @@
+2002-12-23  Andreas Schwab  <schwab@suse.de>
+
+	* readelf.c (main): Reset dump request after each file.
+
 2002-12-23  Nick Clifton  <nickc@redhat.com>
 
 	* nlmconv.c (main): Pass TRUE as third argument to
