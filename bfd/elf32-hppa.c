@@ -3024,7 +3024,9 @@ elf32_hppa_set_gp (abfd, info)
   h = elf_link_hash_lookup (&hplink->root, "$global$",
 			    false, false, false);
 
-  if (h != NULL && h->root.type == bfd_link_hash_defined)
+  if (h != NULL
+      && (h->root.type == bfd_link_hash_defined
+	  || h->root.type == bfd_link_hash_defweak))
     {
       gp_val = h->root.u.def.value;
       sec = h->root.u.def.section;
@@ -3066,6 +3068,16 @@ elf32_hppa_set_gp (abfd, info)
 	      /* No .plt or .got.  Who cares what the LTP is?  */
 	      sec = bfd_get_section_by_name (abfd, ".data");
 	    }
+	}
+
+      if (h != NULL)
+	{
+	  h->root.type = bfd_link_hash_defined;
+	  h->root.u.def.value = gp_val;
+	  if (sec != NULL)
+	    h->root.u.def.section = sec;
+	  else
+	    h->root.u.def.section = bfd_abs_section_ptr;
 	}
     }
 
