@@ -259,6 +259,8 @@ echo >depend
 ./config.gdb none
 rm depend
 make depend
+echo "Making GDB texinfo and info files"
+make gdb.info
 echo Done in `pwd`.
 
 # End of file.
