@@ -87,7 +87,8 @@ static void   gdbtk_modify_tracepoint PARAMS ((struct tracepoint *));
 static void   gdbtk_create_breakpoint PARAMS ((struct breakpoint *));
 static void   gdbtk_delete_breakpoint PARAMS ((struct breakpoint *));
 static void   gdbtk_modify_breakpoint PARAMS ((struct breakpoint *));
-static void   gdbtk_exec_file_changed PARAMS ((char *));
+static void   gdbtk_file_changed PARAMS ((char *));
+static void   gdbtk_exec_file_display PARAMS ((char *));
 static void   tk_command_loop PARAMS ((void));
 static void   gdbtk_call_command PARAMS ((struct cmd_list_element *, char *, int));
 static int    gdbtk_wait PARAMS ((int, struct target_waitstatus *));
@@ -153,7 +154,8 @@ gdbtk_add_hooks(void)
 #endif
   pre_add_symbol_hook    = gdbtk_pre_add_symbol;
   post_add_symbol_hook   = gdbtk_post_add_symbol;
-  exec_file_display_hook = gdbtk_exec_file_changed;
+  file_changed_hook      = gdbtk_file_changed;
+  exec_file_display_hook = gdbtk_exec_file_display;
 
   create_tracepoint_hook = gdbtk_create_tracepoint;
   delete_tracepoint_hook = gdbtk_delete_tracepoint;
@@ -706,10 +708,18 @@ gdbtk_context_change (num)
   gdb_context = num;
 }
 
-/* Called from exec_file_command */
+/* Called from file_command */
 static void
-gdbtk_exec_file_changed (filename)
+gdbtk_file_changed (filename)
      char *filename;
 {
-  gdbtk_two_elem_cmd ("gdbtk_tcl_exec_file_changed", filename);
+  gdbtk_two_elem_cmd ("gdbtk_tcl_file_changed", filename);
+}
+
+/* Called from exec_file_command */
+static void
+gdbtk_exec_file_display (filename)
+     char *filename;
+{
+  gdbtk_two_elem_cmd ("gdbtk_tcl_exec_file_display", filename);
 }

@@ -1,3 +1,11 @@
+1998-10-08  Keith Seitz  <keiths@cygnus.com>
+
+	* gdbtk-hooks.c (gdbtk_add_hooks): Install a hook for
+	(new) file_changed_hook.
+	(gdbtk_exec_file_changed): Rename to gdbtk_exec_file_display
+	to mimic hook's name.
+	(gdbtk_file_changed): New hook function.
+	
 Tue Oct  6 22:57:13 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (links): Link gdbtcl2 directory instead of gdbtcl.
