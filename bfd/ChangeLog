@@ -1,3 +1,8 @@
+Mon Aug  3 00:35:29 1992  Fred Fish  (fnf@cygnus.com)
+
+	* configure.in:  Recognize i486 host cpu, and use i386-elf
+	for i486-ncr-sysv4.
+
 Sat Aug  1 13:49:59 1992  Fred Fish  (fnf@cygnus.com)
 
 	* config/stratus.mt (CC):  Remove definition.

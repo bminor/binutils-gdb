@@ -69,7 +69,7 @@ m68k|m680[01234]0)
 i860)	my_host=stratus
 	;;
 
-i386)
+i386 | i486)
 	case "${host_vendor}" in
 	ncr*)
 		case "${host_os}" in
@@ -115,7 +115,7 @@ vax)
 	*) my_host=vaxbsd ;;
 	esac
 	;;
-hppa)
+hppa*)
 	case "${host_vendor}" in
 	hp)
 		case "${host_os}" in
@@ -133,9 +133,9 @@ links="sysdep.h"
 
 if [ ! -f ${srcdir}/${files} ] ; then
 	if [ -n "${my_host}" ] ; then
-		echo '***' No file ${srcdir}/${files}
+		echo '***' No file ${srcdir}/${files} 1>&2
 	fi
-	echo '***' ${srcname} does not support host ${host}
+	echo '***' ${srcname} does not support host ${host} 1>&2
 	exit 1
 fi
 
@@ -160,6 +160,8 @@ h8300-hitachi-*		) bfd_target=h8300-coff ;;
 i960-wrs-*		) bfd_target=i960-bout ;;
 m68k-wrs-*		) bfd_target=m68k-aout ;;
 m680[01234]0-wrs-*	) bfd_target=m68k-aout ;;
+
+m68*-ericsson-*		) bfd_target=m68k-aout ;;
 
 m68k-sun-*		) bfd_target=m68k-aout ;;
 m680[01234]0-sun-*	) bfd_target=m68k-aout ;;
@@ -194,8 +196,10 @@ m88k-motorola-*		) bfd_target=m88k-coff ;;
 vax-*-*			) bfd_target=vax ;;
 tahoe-*-*		) bfd_target=tahoe ;;
 
-hppa-hp-hpux		) bfd_target=hppahpux ;;
-hppa-hp-bsd		) bfd_target=hppabsd ;;
+hppa*-hp-hpux		) bfd_target=hppahpux ;;
+hppa*-hp-bsd		) bfd_target=hppabsd ;;
+
+i[34]86-ncr-sysv4*	) bfd_target=i386-elf ;;
 
 *-*-aout		) bfd_target=${target_cpu}-aout ;;
 *-*-bsd			) bfd_target=${target_cpu}-aout ;;
@@ -225,10 +229,10 @@ esac
 
 if [ ! -f ${srcdir}/config/${bfd_target}.mt ] ; then
 	if [ -n "${bfd_target}" ] ; then
-		echo '***' No file ${srcdir}/config/${bfd_target}.mt
+		echo '***' No file ${srcdir}/config/${bfd_target}.mt 1>&2
 	fi
-	echo '***' BFD does not support target ${target}
-	echo '***' Look in bfd/configure.in for supported targets
+	echo '***' BFD does not support target ${target} 1>&2
+	echo '***' Look in bfd/configure.in for supported targets 1>&2
 	exit 1
 fi
 target_makefile_frag=config/${bfd_target}.mt
