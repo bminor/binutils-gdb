@@ -1103,7 +1103,9 @@ s_lcomm (needs_align)
    if (!needs_align)
      {
        /* FIXME. This needs to be machine independent. */
-       if (temp >= 4)
+       if (temp >= 8)
+	 align = 3;
+       else if (temp >= 4)
 	 align = 2;
        else if (temp >= 2)
 	 align = 1;
