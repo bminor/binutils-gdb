@@ -1,3 +1,26 @@
+Fri Jun 12 11:04:06 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	Fix problems when bfd_vma is wider than long.
+	* i386-dis.c: Make op_address and start_pc unsigned.
+	(set_op): Make parameter unsigned.
+	(print_insn_x86): Cast to bfd_vma when passing a value to
+	print_address_func.
+	* ns32k-dis.c (CORE_ADDR): Don't define.
+ 	(print_insn_ns32k): Change type of addr to bfd_vma.  Use
+	bfd_scan_vma to read back address.
+	(print_insn_arg): Change type of addr to bfd_vma.  Use sprintf_vma
+	to format it.
+	* m68k-dis.c (COERCE32): Cast to bfd_signed_vma to avoid overflow.
+	(NEXTULONG): New definition.
+	(print_insn_m68k): Avoid overflow when computing third argument of
+	print_insn_arg.
+	(print_insn_arg): Use NEXTULONG to fetch 32 bit address values.
+	Use disp instead of val to store offset values.
+	(print_indexed): Use base_disp instead of word to store base
+	displacement, to avoid overflow.
+	* m10300-dis.c (disassemble): Cast value to long when computing
+	pc-relative address, to get correct sign extension.
+
 Wed Jun 10 15:58:37 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* m32r-opc.c: Regenerate.

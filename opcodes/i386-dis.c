@@ -189,7 +189,7 @@ static void OP_EM PARAMS ((int, int));
 static void OP_MS PARAMS ((int, int));
 
 static void append_seg PARAMS ((void));
-static void set_op PARAMS ((int op));
+static void set_op PARAMS ((unsigned int op));
 static void putop PARAMS ((char *template, int sizeflag));
 static void dofloat PARAMS ((int sizeflag));
 static int get16 PARAMS ((void));
@@ -1146,8 +1146,9 @@ ckprefix ()
 }
 
 static char op1out[100], op2out[100], op3out[100];
-static int op_address[3], op_ad, op_index[3];
-static int start_pc;
+static int op_ad, op_index[3];
+static unsigned int op_address[3];
+static unsigned int start_pc;
 
 
 /*
@@ -1326,7 +1327,7 @@ print_insn_x86 (pc, info, sizeflag)
   if (*first)
     {
       if (op_index[0] != -1)
-	(*info->print_address_func) (op_address[op_index[0]], info);
+	(*info->print_address_func) ((bfd_vma) op_address[op_index[0]], info);
       else
 	(*info->fprintf_func) (info->stream, "%s", first);
       needcomma = 1;
@@ -1336,7 +1337,7 @@ print_insn_x86 (pc, info, sizeflag)
       if (needcomma)
 	(*info->fprintf_func) (info->stream, ",");
       if (op_index[1] != -1)
-	(*info->print_address_func) (op_address[op_index[1]], info);
+	(*info->print_address_func) ((bfd_vma) op_address[op_index[1]], info);
       else
 	(*info->fprintf_func) (info->stream, "%s", second);
       needcomma = 1;
@@ -1346,7 +1347,7 @@ print_insn_x86 (pc, info, sizeflag)
       if (needcomma)
 	(*info->fprintf_func) (info->stream, ",");
       if (op_index[2] != -1)
-	(*info->print_address_func) (op_address[op_index[2]], info);
+	(*info->print_address_func) ((bfd_vma) op_address[op_index[2]], info);
       else
 	(*info->fprintf_func) (info->stream, "%s", third);
     }
@@ -1929,7 +1930,7 @@ get16 ()
 
 static void
 set_op (op)
-     int op;
+     unsigned int op;
 {
   op_index[op_ad] = op_ad;
   op_address[op_ad] = op;
