@@ -1,3 +1,13 @@
+Thu May 29 12:58:26 1997  Ben Pfaff  <pfaffben@pilot.msu.edu>
+
+	* as.c: (parse_args) `-t' option requires an argument.
+
+Wed May 28 15:45:07 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-arm.c (md_begin): Change call to
+	coff_arm_bfd_set_private_flags() to a call to
+	bfd_set_private_flags(). 
+
 Wed May 28 16:17:34 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in: Rebuild dependencies.
