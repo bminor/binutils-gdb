@@ -871,6 +871,12 @@ parallel_ok (op1, insn1, op2, insn2, exec_type)
 		  used[j] |= 1 << regno ;
 		  if (flags & OPERAND_EVEN)
 		    used[j] |= 1 << (regno + 1);
+
+		  /* Auto inc/dec also modifies the register.  */
+		  if (op->operands[i+1] != 0
+		      && (d10v_operands[op->operands[i+1]].flags
+			  & (OPERAND_PLUS | OPERAND_MINUS)) != 0)
+		    mod[j] |= 1 << regno;
 		}
 	    }
 	}
