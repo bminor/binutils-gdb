@@ -1,5 +1,10 @@
 2001-06-25  Andrew Cagney  <ac131313@redhat.com>
 
+	* mi-regs.exp: Update patters matching register-values.  Outputs a
+	list.
+
+2001-06-25  Andrew Cagney  <ac131313@redhat.com>
+
 	* mi-regs.exp: Update patters matching register-names.  Now
 	outputs a list.
 

@@ -1,5 +1,11 @@
 2001-06-25  Andrew Cagney  <ac131313@redhat.com>
 
+	* mi-main.c (mi_cmd_data_list_register_values): Output a list of
+	register values.
+	* gdbmi.texinfo (data-list-register-values): Update documentation.
+
+2001-06-25  Andrew Cagney  <ac131313@redhat.com>
+
 	* mi-main.c (mi_cmd_data_list_register_names): Output a list of
 	register names.
 	(mi_cmd_data_list_register_names): Include the pseudo registers.

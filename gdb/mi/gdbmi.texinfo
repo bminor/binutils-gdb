@@ -1326,11 +1326,11 @@ don't appear in the actual output):
 @smallexample
 (@value{GDBP})
 -data-list-register-values r 64 65
-^done,register-values=@{@{number="64",value="0xfe00a300"@},
-@{number="65",value="0x00029002"@}@}
+^done,register-values=[@{number="64",value="0xfe00a300"@},
+@{number="65",value="0x00029002"@}]
 (@value{GDBP})
 -data-list-register-values x
-^done,register-values=@{@{number="0",value="0xfe0043c8"@},
+^done,register-values=[@{number="0",value="0xfe0043c8"@},
 @{number="1",value="0x3fff88"@},@{number="2",value="0xfffffffe"@},
 @{number="3",value="0x0"@},@{number="4",value="0xa"@},
 @{number="5",value="0x3fff68"@},@{number="6",value="0x3fff58"@},
@@ -1365,7 +1365,7 @@ don't appear in the actual output):
 @{number="63",value="0x0"@},@{number="64",value="0xfe00a300"@},
 @{number="65",value="0x29002"@},@{number="66",value="0x202f04b5"@},
 @{number="67",value="0xfe0043b0"@},@{number="68",value="0xfe00b3e4"@},
-@{number="69",value="0x20002b03"@}@}
+@{number="69",value="0x20002b03"@}]
 (@value{GDBP})
 @end smallexample
 

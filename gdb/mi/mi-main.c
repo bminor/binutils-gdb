@@ -432,7 +432,7 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
       return MI_CMD_ERROR;
     }
 
-  ui_out_tuple_begin (uiout, "register-values");
+  ui_out_list_begin (uiout, "register-values");
 
   if (argc == 1)		/* No args, beside the format: do all the regs */
     {
@@ -475,7 +475,7 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
 	  return MI_CMD_ERROR;
 	}
     }
-  ui_out_tuple_end (uiout);
+  ui_out_list_end (uiout);
   return MI_CMD_DONE;
 }
 

@@ -120,33 +120,33 @@ proc sparc_register_tests { } {
 	    "list register names"
 
     mi_gdb_test "222-data-list-register-values x" \
-	    "222\\^done,register-values=\{\{number=\"0\",value=\"$hex\"\}.*\{number=\"71\",value=\"$hex\"\}\}" \
+	    "222\\^done,register-values=\\\[\{number=\"0\",value=\"$hex\"\}.*\{number=\"71\",value=\"$hex\"\}\\\]" \
 	    "register values x"
 
     mi_gdb_test "333-data-list-register-values f" \
-	    "333\\^done,register-values=\{\{number=\"0\",value=\"$float\"\},\{number=\"1\",value=\"$float\"\},.*\{number=\"71\",value=\"$float\"\}\}" \
+	    "333\\^done,register-values=\\\[\{number=\"0\",value=\"$float\"\},\{number=\"1\",value=\"$float\"\},.*\{number=\"71\",value=\"$float\"\}\\\]" \
 	    "register values f"
 
     mi_gdb_test "444-data-list-register-values d" \
-	    "444\\^done,register-values=\{\{number=\"0\",value=\"$decimal\"\}.*\{number=\"71\",value=\"$decimal\"\}\}" \
+	    "444\\^done,register-values=\\\[\{number=\"0\",value=\"$decimal\"\}.*\{number=\"71\",value=\"$decimal\"\}\\\]" \
 	    "register values d"
 
     mi_gdb_test "555-data-list-register-values o" \
-	    "555\\^done,register-values=\{\{number=\"0\",value=\"$octal\"\}.*\{number=\"71\",value=\"$octal\"\}\}" \
+	    "555\\^done,register-values=\\\[\{number=\"0\",value=\"$octal\"\}.*\{number=\"71\",value=\"$octal\"\}\\\]" \
 	    "register values o"
 
     mi_gdb_test "666-data-list-register-values t" \
-	    "666\\^done,register-values=\{\{number=\"0\",value=\"$binary\"\}.*\{number=\"71\",value=\"$binary\"\}\}" \
+	    "666\\^done,register-values=\\\[\{number=\"0\",value=\"$binary\"\}.*\{number=\"71\",value=\"$binary\"\}\\\]" \
 	    "register values t"
 
     # On the sparc, registers 0-31 are int, 32-63 float, 64-71 int
 
     mi_gdb_test "777-data-list-register-values N" \
-	    "777\\^done,register-values=\{\{number=\"0\",value=\"$decimal\"\}.*\{number=\"31\",value=\"$decimal\"\},\{number=\"32\",value=\"$float\"\}.*\{number=\"63\",value=\"$float\"\},\{number=\"64\",value=\"$decimal\"\}.*\{number=\"71\",value=\"$decimal\"\}\}" \
+	    "777\\^done,register-values=\\\[\{number=\"0\",value=\"$decimal\"\}.*\{number=\"31\",value=\"$decimal\"\},\{number=\"32\",value=\"$float\"\}.*\{number=\"63\",value=\"$float\"\},\{number=\"64\",value=\"$decimal\"\}.*\{number=\"71\",value=\"$decimal\"\}\\\]" \
 	    "register values N"
 
     mi_gdb_test "888-data-list-register-values r" \
-	    "888\\^done,register-values=\{\{number=\"0\",value=\"$hex\"\}.*\{number=\"71\",value=\"$hex\"\}\}" \
+	    "888\\^done,register-values=\\\[\{number=\"0\",value=\"$hex\"\}.*\{number=\"71\",value=\"$hex\"\}\\\]" \
 	    "register values r"
 
     mi_gdb_test "999-data-list-register-names 68 69 70 71" \
@@ -154,7 +154,7 @@ proc sparc_register_tests { } {
 	    "list names of some regs"
 
     mi_gdb_test "001-data-list-register-values x 68 69 70 71" \
-	    "001\\^done,register-values=\{\{number=\"68\",value=\"$hex\"\},\{number=\"69\",value=\"$hex\"\},\{number=\"70\",value=\"$hex\"\},\{number=\"71\",value=\"$hex\"\}\}" \
+	    "001\\^done,register-values=\\\[\{number=\"68\",value=\"$hex\"\},\{number=\"69\",value=\"$hex\"\},\{number=\"70\",value=\"$hex\"\},\{number=\"71\",value=\"$hex\"\}\\\]" \
 	    "list values of some regs"
 
     # Don't know how useful this test is
