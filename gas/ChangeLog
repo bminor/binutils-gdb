@@ -1,3 +1,11 @@
+Wed Oct  4 16:17:02 1995  Kim Knuttila  <krk@cygnus.com>
+
+	* config/tc-ppc.c (parse_toc_entry): New function to parse [toc]
+	qualifiers and detect errors if present.
+	(md_assemble): Add call to parse_toc_entry. Also added some support
+	for the [tocv] qualifier.
+	(ppc_pe_tocd): New function to support data in the toc section.
+
 Wed Oct  4 14:03:39 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-ppc.c (ppc_frob_symbol): Don't create an aux entry for
