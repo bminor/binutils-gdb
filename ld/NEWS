@@ -22,6 +22,9 @@ affects ELF shared library generation).
 
 * The -e option now accepts a number as well as a symbol name.
 
+* Added --no-undefined option to disallow undefined symbols when creating a
+  shared library.
+
 * Added --demangle and --no-demangle options.
 
 Changes in version 2.9:
