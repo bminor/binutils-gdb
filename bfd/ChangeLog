@@ -1,3 +1,8 @@
+Wed Oct 20 12:22:37 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* aoutf1.h (MACHTYPE_OK): Accept M_UNKNOWN.
+	(NAME(sunos,set_arch_mach)): Treat M_UNKNOWN as 68000, not 68020.
+
 Wed Oct 20 10:28:27 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* hosts/i386bsd.h [__bsdi__]: Define HOST_DATA_START_ADDR.
