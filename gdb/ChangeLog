@@ -1,3 +1,34 @@
+Thu Oct  1 01:57:56 1992  John Gilmore  (gnu@cygnus.com)
+
+	Add `command hooks' and a hook for inferior program stopping.
+
+	* command.h (struct cmd_list_element):  Remove unused `aux'
+	field.  Add new `hook', `hookee', and `cmd_pointer' fields.
+	* command.c (add_cmd):  Initialize new fields, elim old.
+	(add_alias_cmd):  Clone new fields.
+	(delete_cmd):  Un-hook hookee if we're deleting hook.
+	(help_cmd):  Tell user the command is hooked, if it is.
+	(lookup_cmd_1):  Abbreviations return the original command
+	instead of themselves, so that hooks on the original cmd will be
+	run.
+	* defs.h (enum command_class):  Add class_pseudo and comments.
+	* gdbcmd.h (execute_user_command):  Add prototype.
+	* infrun.c (normal_stop):  If the stop command is hooked,
+	run the hook whenever we stop.
+	(hook_stop_stub):  Stub for catch_errors.
+	(_initialize_infrun):  Set up pseudo "stop" command.
+	* main.c (execute_user_command):  Code extracted from execute_command.
+	(execute_command):  If hooked, run the hook before the command.
+	(define_command):  If defining a new hook, check the command it
+	is hooking, and warn if none.  Install the hook.
+	* source.c (_initialize_source):  "l" is an abbrev for "list".
+	* doc/gdb.texinfo:  Document command hooks.
+
+	* Makefile.in (VERSION):  Roll to 4.6.7.
+	* config/sun4os4.mh:  Remove dup inftarg.o from NATDEPFILES.
+	* infrun.c (breakpoints_inserted):  Make it static again.
+	* tm-symmetry.h (FLOAT_INFO):  #if 0 it for cross-ptrace abuse.
+
 Wed Sep 30 15:33:22 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	Native file renaming.
@@ -954,7 +985,7 @@ Sat Aug  8 23:12:22 1992  Fred Fish  (fnf@cygnus.com)
 Fri Aug  7 11:18:23 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* xm-go32.h: Define LSEEK_NOT_LINEAR
-	* serial.c (find_source_lines): if LSEEK_NOT_LINEAR is defined
+	* source.c (find_source_lines): if LSEEK_NOT_LINEAR is defined
 	then work out the lseek positions of newlines by running through
 	the file and `tell'ing.  This makes source file listing work on
 	OS's where the relationship between physical position in file and

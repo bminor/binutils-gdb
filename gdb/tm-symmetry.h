@@ -84,10 +84,14 @@ i386_skip_prologue PARAMS ((int));
 
 #define INVALID_FLOAT(p, len) (0)
 
+#if 0
+ --- this code can't be used unless we know we are running native,
+     since it uses host specific ptrace calls.
 /* code for 80387 fpu.  Functions are from i386-dep.c, copied into
  * symm-dep.c.
  */
 #define FLOAT_INFO { i386_float_info(); }
+#endif
 
 /* Say how long (ordinary) registers are.  */
 

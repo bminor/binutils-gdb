@@ -78,8 +78,10 @@ add_cmd (name, class, fun, doc, list)
   c->prefixlist = 0;
   c->prefixname = (char *)NULL;
   c->allow_unknown = 0;
+  c->hook = 0;
+  c->hookee = 0;
+  c->cmd_pointer = 0;
   c->abbrev_flag = 0;
-  c->aux = 0;
   c->type = not_set_cmd;
   c->completer = make_symbol_completion_list;
   c->var = 0;
@@ -137,7 +139,7 @@ add_alias_cmd (name, oldname, class, abbrev_flag, list)
   c->prefixname = old->prefixname;
   c->allow_unknown = old->allow_unknown;
   c->abbrev_flag = abbrev_flag;
-  c->aux = old->aux;
+  c->cmd_pointer = old;
   return c;
 }
 
@@ -263,6 +265,8 @@ delete_cmd (name, list)
 
   while (*list && !strcmp ((*list)->name, name))
     {
+      if ((*list)->hookee)
+	(*list)->hookee->hook = 0;	/* Hook slips out of its mouth */
       p = (*list)->next;
       free ((PTR)*list);
       *list = p;
@@ -273,6 +277,8 @@ delete_cmd (name, list)
       {
 	if (!strcmp (c->next->name, name))
 	  {
+	    if (c->next->hookee)
+	      c->next->hookee->hook = 0;  /* hooked cmd gets away.  */
 	    p = c->next->next;
 	    free ((PTR)c->next);
 	    c->next = p;
@@ -338,6 +344,10 @@ help_cmd (command, stream)
   /* If this is a class name, print all of the commands in the class */
   if (c->function.cfunc == NULL)
     help_list (cmdlist, "", c->class, stream);
+
+  if (c->hook)
+    fprintf_filtered (stream, "\nThis command has a hook defined: %s\n",
+		      c->hook->name);
 }
 
 /*
@@ -481,6 +491,9 @@ help_cmd_list (list, class, prefix, recurse, stream)
    the list in which there are ambiguous choices (and *TEXT will be set to
    the ambiguous text string).
 
+   If the located command was an abbreviation, this routine returns the base
+   command of the abbreviation.
+
    It does no error reporting whatsoever; control will always return
    to the superior routine.
 
@@ -572,6 +585,14 @@ lookup_cmd_1 (text, clist, result_list, ignore_help_classes)
   /* We've matched something on this list.  Move text pointer forward. */
 
   *text = p;
+
+  /* If this was an abbreviation, use the base command instead.  */
+
+  if (found->cmd_pointer)
+    found = found->cmd_pointer;
+
+  /* If we found a prefix command, keep looking.  */
+
   if (found->prefixlist)
     {
       c = lookup_cmd_1 (text, *found->prefixlist, result_list,
