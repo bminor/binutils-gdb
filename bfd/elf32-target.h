@@ -51,7 +51,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define bfd_elf32_bfd_make_debug_symbol \
   ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
 
-static CONST struct elf32_backend_data elf32_bed =
+static CONST struct elf_backend_data elf32_bed =
 {
 #ifdef USE_REL
   0,				/* use_rela_p */

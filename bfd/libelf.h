@@ -51,8 +51,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 typedef struct
 {
   asymbol symbol;
-  ElfNAME (Internal_Sym) internal_elf_sym;
-  ElfNAME (External_Sym) native_elf_sym;
+  Elf_Internal_Sym internal_elf_sym;
   /* these are used for the generation of .stabX symbols (?) */
   short desc;
   unsigned char type;
@@ -63,6 +62,7 @@ typedef struct
       PTR any;
     }
   tc_data;
+  ElfNAME (External_Sym) native_elf_sym;
 }
 
 elfNAME (symbol_type);
@@ -71,23 +71,22 @@ elfNAME (symbol_type);
    BFD sections to produce ELF sections.  */
 typedef struct
 {
-  ElfNAME (Internal_Ehdr) * i_ehdr;
-  ElfNAME (Internal_Shdr) * i_shdrp;
+  Elf_Internal_Ehdr * i_ehdr;
+  Elf_Internal_Shdr * i_shdrp;
   struct strtab *shstrtab;
   int symtab_section;
 }
-
 elf_sect_thunk;
 
-struct elfNAME(backend_data)
+struct elf_backend_data
 {
   int use_rela_p;
   int elf_64_p;
   enum bfd_architecture arch;
   void (*elf_info_to_howto) PARAMS ((bfd *, arelent *,
-				     ElfNAME (Internal_Rela) *));
+				     Elf_Internal_Rela *));
   void (*elf_info_to_howto_rel) PARAMS ((bfd *, arelent *,
-					 ElfNAME (Internal_Rel) *));
+					 Elf_Internal_Rel *));
 
   /* @@ I really don't think this should be here.  I don't know what
      global_sym is supposed to be used for, but I doubt it's something
@@ -138,7 +137,7 @@ extern void bfd_elf32_no_info_to_howto PARAMS ((bfd *, arelent *,
 						Elf32_Internal_Rela *));
 
 #define get_elf_backend_data(abfd) \
-  ((struct elfNAME (backend_data) *) (abfd)->xvec->backend_data)
+  ((struct elf_backend_data *) (abfd)->xvec->backend_data)
 
 struct strtab
 {
