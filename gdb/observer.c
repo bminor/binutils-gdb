@@ -159,37 +159,6 @@ generic_observer_notify (struct observer_list *subject, const void *args)
     }
 }
 
-/* normal_stop notifications.  */
-
-static struct observer_list *normal_stop_subject = NULL;
-
-static void
-observer_normal_stop_notification_stub (const void *data,
-					const void *unused_args)
-{
-  observer_normal_stop_ftype *notify = (observer_normal_stop_ftype *) data;
-  (*notify) ();
-}
-
-struct observer *
-observer_attach_normal_stop (observer_normal_stop_ftype *f)
-{
-  return generic_observer_attach (&normal_stop_subject,
-				  &observer_normal_stop_notification_stub,
-				  (void *) f);
-}
-
-void
-observer_detach_normal_stop (struct observer *observer)
-{
-  generic_observer_detach (&normal_stop_subject, observer);
-}
-
-void
-observer_notify_normal_stop (void)
-{
-  generic_observer_notify (normal_stop_subject, NULL);
-}
 
 /* The following code is only used to unit-test the observers from our
    testsuite.  DO NOT USE IT within observer.c (or anywhere else for
@@ -220,3 +189,4 @@ observer_test_third_notification_function (void)
   observer_test_third_observer++;
 }
 
+#include "observer.inc"

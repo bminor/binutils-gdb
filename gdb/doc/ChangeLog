@@ -1,3 +1,8 @@
+2004-04-08  Andrew Cagney  <cagney@redhat.com>
+
+	* observer.texi (GDB Observers): Rework, provide generic observer
+	definitions and then a list of observable events.
+
 2004-04-04  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbint.texinfo (Host Definition): Delete reference to

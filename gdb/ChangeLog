@@ -1,3 +1,17 @@
+2004-04-15  Andrew Cagney  <cagney@redhat.com>
+
+	* observer.c (normal_stop_subject, observer_notify_normal_stop)
+	(observer_normal_stop_notification_stub)
+	(observer_attach_normal_stop, observer_detach_normal_stop):
+	Delete, replaced by #include "observer.inc".
+	* infrun.c (normal_stop): Pass "stop_bpstat" to
+	observer_notify_normal_stop.
+	* Makefile.in (observer_inc): Define.
+	(observer.o): Update dependencies.
+	(observer.h, observer.inc): New rules.
+	* observer.h: Delete file.
+	* observer.sh: New file.
+
 2004-04-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* vax-tdep.c (vax_frame_cache): Fix typo.

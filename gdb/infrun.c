@@ -3276,7 +3276,7 @@ normal_stop (void)
 
 done:
   annotate_stopped ();
-  observer_notify_normal_stop ();
+  observer_notify_normal_stop (stop_bpstat);
 }
 
 static int
