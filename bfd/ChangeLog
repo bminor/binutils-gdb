@@ -1,3 +1,19 @@
+Fri Sep 15 10:24:36 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	Make the COFF backend linker merge common types:
+	* cofflink.c (struct coff_debug_merge_element): Define.
+	(struct coff_debug_merge_type): Define.
+	(struct coff_debug_merge_hash_entry): Define.
+	(struct coff_debug_merge_hash_table): Define.
+	(coff_debug_merge_hash_table_init): Define.
+	(coff_debug_merge_hash_table_free): Define.
+	(coff_debug_merge_hash_lookup): Define.
+	(struct coff_final_link_info): Add debug_merge field.
+	(coff_debug_merge_hash_newfunc): New static function.
+	(_bfd_coff_final_link): Allocate and free debug_merge table.
+	(coff_link_input_bfd): Merge identical enum, struct and union
+	types.
+
 Thu Sep 14 14:53:58 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	Convert i960 COFF to use COFF backend linker.
