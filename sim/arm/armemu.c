@@ -279,15 +279,13 @@ extern int stop_simulator;
    are being executed: */
 ARMword isize;
 
+ARMword
 #ifdef MODE32
-ARMword
 ARMul_Emulate32 (register ARMul_State * state)
-{
 #else
-ARMword
 ARMul_Emulate26 (register ARMul_State * state)
-{
 #endif
+{
   register ARMword instr,	/* the current instruction */
     dest = 0,			/* almost the DestBus */
     temp,			/* ubiquitous third hand */
@@ -1356,27 +1354,28 @@ ARMul_Emulate26 (register ARMul_State * state)
 		      if (! SWI_vector_installed)
 			ARMul_OSHandleSWI (state, SWI_Breakpoint);
 		      else
-		    
-			/* BKPT - normally this will cause an abort, but for the
-			   XScale if bit 31 in register 10 of coprocessor 14 is
-			   clear, then this is treated as a no-op.  */
-			if (state->is_XScale)
-			  {
-			    if (read_cp14_reg (10) & (1UL << 31))
-			      {
-				ARMword value;
-				
-				value = read_cp14_reg (10);
-				value &= ~0x1c;
-				value |= 0xc;
-				
-				write_cp14_reg (10, value);
-				write_cp15_reg (5, 0, 0, 0x200);  /* Set FSR.  */
-				write_cp15_reg (6, 0, 0, pc);     /* Set FAR.  */
-			      }
-			    else
-			      break;
-			  }
+			{
+			  /* BKPT - normally this will cause an abort, but for the
+			     XScale if bit 31 in register 10 of coprocessor 14 is
+			     clear, then this is treated as a no-op.  */
+			  if (state->is_XScale)
+			    {
+			      if (read_cp14_reg (10) & (1UL << 31))
+				{
+				  ARMword value;
+				  
+				  value = read_cp14_reg (10);
+				  value &= ~0x1c;
+				  value |= 0xc;
+				  
+				  write_cp14_reg (10, value);
+				  write_cp15_reg (5, 0, 0, 0x200);  /* Set FSR.  */
+				  write_cp15_reg (6, 0, 0, pc);     /* Set FAR.  */
+				}
+			      else
+				break;
+			    }
+			}
 
 		      ARMul_Abort (state, ARMul_PrefetchAbortV);
 		      break;
@@ -3423,7 +3422,8 @@ ARMul_Emulate26 (register ARMul_State * state)
 	    case 0xfe:
 	    case 0xff:
 	      if (instr == ARMul_ABORTWORD && state->AbortAddr == pc)
-		{		/* a prefetch abort */
+		{
+		  /* A prefetch abort.  */
 		  ARMul_Abort (state, ARMul_PrefetchAbortV);
 		  break;
 		}
@@ -4293,7 +4293,9 @@ LoadMult (ARMul_State * state, ARMword instr, ARMword address, ARMword WBBase)
   if (!state->abortSig && !state->Aborted)
     state->Reg[temp++] = dest;
   else if (!state->Aborted)
-    state->Aborted = ARMul_DataAbortV;
+    {
+      state->Aborted = ARMul_DataAbortV;
+    }
 
   for (; temp < 16; temp++)	/* S cycles from here on */
     if (BIT (temp))
@@ -4303,7 +4305,9 @@ LoadMult (ARMul_State * state, ARMword instr, ARMword address, ARMword WBBase)
 	if (!state->abortSig && !state->Aborted)
 	  state->Reg[temp] = dest;
 	else if (!state->Aborted)
-	  state->Aborted = ARMul_DataAbortV;
+	  {
+	    state->Aborted = ARMul_DataAbortV;
+	  }
       }
 
   if (BIT (15) && !state->Aborted)
@@ -4329,8 +4333,10 @@ LoadMult (ARMul_State * state, ARMword instr, ARMword address, ARMword WBBase)
 \***************************************************************************/
 
 static void
-LoadSMult (ARMul_State * state, ARMword instr,
-	   ARMword address, ARMword WBBase)
+LoadSMult (ARMul_State * state,
+	   ARMword       instr,
+	   ARMword       address,
+	   ARMword       WBBase)
 {
   ARMword dest, temp;
 
@@ -4365,7 +4371,9 @@ LoadSMult (ARMul_State * state, ARMword instr,
   if (!state->abortSig)
     state->Reg[temp++] = dest;
   else if (!state->Aborted)
-    state->Aborted = ARMul_DataAbortV;
+    {
+      state->Aborted = ARMul_DataAbortV;
+    }
 
   for (; temp < 16; temp++)
     /* S cycles from here on.  */
@@ -4378,7 +4386,9 @@ LoadSMult (ARMul_State * state, ARMword instr,
 	if (!state->abortSig && !state->Aborted)
 	  state->Reg[temp] = dest;
 	else if (!state->Aborted)
-	  state->Aborted = ARMul_DataAbortV;
+	  {
+	    state->Aborted = ARMul_DataAbortV;
+	  }
       }
 
   if (BIT (15) && !state->Aborted)
@@ -4403,6 +4413,7 @@ LoadSMult (ARMul_State * state, ARMword instr,
 	}
       else
 	ARMul_R15Altered (state);
+
       FLUSHPIPE;
 #endif
     }
@@ -4418,6 +4429,7 @@ LoadSMult (ARMul_State * state, ARMword instr,
     {
       if (BIT (21) && LHSReg != 15)
 	LSBase = WBBase;
+
       TAKEABORT;
     }
 }
@@ -4473,8 +4485,11 @@ StoreMult (ARMul_State * state, ARMword instr,
   else
     ARMul_StoreWordN (state, address, state->Reg[temp++]);
 #endif
+
   if (state->abortSig && !state->Aborted)
-    state->Aborted = ARMul_DataAbortV;
+    {
+      state->Aborted = ARMul_DataAbortV;
+    }
 
   if (BIT (21) && LHSReg != 15)
     LSBase = WBBase;
@@ -4483,10 +4498,15 @@ StoreMult (ARMul_State * state, ARMword instr,
     if (BIT (temp))
       {				/* save this register */
 	address += 4;
+
 	ARMul_StoreWordS (state, address, state->Reg[temp]);
+
 	if (state->abortSig && !state->Aborted)
-	  state->Aborted = ARMul_DataAbortV;
+	  {
+	    state->Aborted = ARMul_DataAbortV;
+	  }
       }
+
   if (state->Aborted)
     {
       TAKEABORT;
@@ -4501,8 +4521,7 @@ StoreMult (ARMul_State * state, ARMword instr,
 \***************************************************************************/
 
 static void
-StoreSMult (
-	    ARMul_State * state,
+StoreSMult (ARMul_State * state,
 	    ARMword       instr,
 	    ARMword       address,
 	    ARMword       WBBase)
@@ -4548,9 +4567,10 @@ StoreSMult (
 	  {
 	    /* Save this register.  */
 	    address += 4;
+
 	    (void) ARMul_LoadWordS (state, address);
 	  }
-      
+
       if (BIT (21) && LHSReg != 15)
 	LSBase = WBBase;
 
@@ -4563,7 +4583,9 @@ StoreSMult (
 #endif
 
   if (state->abortSig && !state->Aborted)
-    state->Aborted = ARMul_DataAbortV;
+    {
+      state->Aborted = ARMul_DataAbortV;
+    }
 
   for (; temp < 16; temp++)
     /* S cycles from here on.  */
@@ -4575,7 +4597,9 @@ StoreSMult (
 	ARMul_StoreWordS (state, address, state->Reg[temp]);
 
 	if (state->abortSig && !state->Aborted)
-	  state->Aborted = ARMul_DataAbortV;
+	  {
+	    state->Aborted = ARMul_DataAbortV;
+	  }
       }
 
   if (state->Mode != USER26MODE && state->Mode != USER32MODE)
