@@ -1,3 +1,11 @@
+2003-06-13  Richard Earnshaw  <rearnsha@arm.com>
+
+	* tc-arm.c (FPU_DEFAULT, case TE_LINUX): Default to FPU_ARCH_FPA.
+	(FPU_DEFAULT, case TE_NetBSD): Default to FPU_ARCH_VFP for ELF,
+	FPU_ARCH_FPA for AOUT.
+	(md_begin): Don't try to guess the floating point architecture from
+	the CPU if the OS ABI (Linux, NetBSD) mandates a particular form.
+
 2003-06-13  Robert Millan  <zeratul2@wanadoo.es>
 
 	* configure.in: Add i386-netbsd-gnu target.
