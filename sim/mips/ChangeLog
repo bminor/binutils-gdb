@@ -1,0 +1,12 @@
+Fri Dec  1 16:37:19 1995  James G. Smith  <jsmith@cygnus.co.uk>
+
+	* gencode.c: Tidied instruction decoding, and added FP instruction
+ 	support.
+
+	* interp.c: Added dineroIII, and BSD profiling support. Also
+ 	run-time FP handling.
+
+Sun Oct 22 00:57:18 1995  James G. Smith  <jsmith@pasanda.cygnus.co.uk>
+
+	* Changelog, Makefile.in, README.Cygnus, configure, configure.in,
+ 	gencode.c, interp.c, support.h: created.
