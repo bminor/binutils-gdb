@@ -137,11 +137,10 @@ if [istarget hppa*-*-*] then {
     gas_test_error "undefbug.s" "" "Check for error when using undefined symbol"
 
     # This file has code and assembler directives before switching into any
-    # space/subspace pair.  This should report an error.
-    if ![istarget hppa*-*-*elf*] then {
-	setup_xfail hppa*-*-*
-    }
-    gas_test_error "nosubspace.s" "" "Check for error if no subspace directive"
+    # space/subspace pair.  This should report an error for SOM (it is not
+    # an error for ELF.  The file also has mismatched entry/exit and
+    # proc/procend pairs which are errors for both SOM and ELF.
+    gas_test_error "nosubspace.s" "" "Check for error(s) in input file "
 
     # This file should return errors for both the ENTRY_GR and ENTRY_FR
     # directives (they are out-of-range)
