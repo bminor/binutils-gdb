@@ -120,6 +120,17 @@ ns32k_register_virtual_type (int regno)
   return (builtin_type_double);
 }
 
+/* Immediately after a function call, return the saved PC.  Can't
+   always go through the frames for this because on some systems,
+   the new frame is not set up until the new function executes some
+   instructions.  */
+
+CORE_ADDR
+ns32k_saved_pc_after_call (struct frame_info *frame)
+{
+  return (read_memory_integer (read_register (SP_REGNUM), 4));
+}
+
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 
@@ -431,6 +442,33 @@ ns32k_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
   flipped = - nargs * 4;
   flip_bytes (&flipped, 4);
   store_unsigned_integer (dummy + NS32K_CALL_DUMMY_NARGS, 4, flipped);
+}
+
+void
+ns32k_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
+{
+  /* On this machine, this is a no-op (Encore Umax didn't use GCC).  */
+}
+
+void
+ns32k_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
+{
+  memcpy (valbuf,
+          regbuf + REGISTER_BYTE (TYPE_CODE (valtype) == TYPE_CODE_FLT ?
+				  FP0_REGNUM : 0), TYPE_LENGTH (valtype));
+}
+
+void
+ns32k_store_return_value (struct type *valtype, char *valbuf)
+{
+  write_register_bytes (TYPE_CODE (valtype) == TYPE_CODE_FLT ?
+			FP0_REGNUM : 0, valbuf, TYPE_LENGTH (valtype));
+}
+
+CORE_ADDR
+ns32k_extract_struct_value_address (char *regbuf)
+{
+  return (extract_address (regbuf + REGISTER_BYTE (0), REGISTER_RAW_SIZE (0)));
 }
 
 void

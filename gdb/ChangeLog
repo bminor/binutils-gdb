@@ -1,5 +1,19 @@
 2002-05-26  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* ns32k-tdep.c (ns32k_saved_pc_after_call,
+	ns32k_store_struct_return, ns32k_extract_return_value,
+	ns32k_store_return_value, ns32k_extract_struct_value_address): New
+	functions.
+	* config/ns32k/tm-umax.h (SAVED_PC_AFTER_CALL): Define as
+	ns32k_saved_pc_after_call.
+	(STORE_STRUCT_RETURN): Define as ns32k_store_struct_return.
+	(EXTRACT_RETURN_VALUE): Define as ns32k_extract_return_value.
+	(STORE_RETURN_VALUE): Define as ns32k_store_return_value.
+	(EXTRACT_STRUCT_VALUE_ADDRESS): Define as
+	ns32k_extract_struct_value_address.
+
+2002-05-26  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* ns32k-tdep.c (ns32k_call_dummy_words, sizeof_ns32k_call_dummy_words,
 	ns32k_fix_call_dummy): New.
 	* config/ns32k/tm-umax.h (CALL_DUMMY_WORDS): Define as

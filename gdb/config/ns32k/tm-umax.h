@@ -21,6 +21,9 @@
 
 #include "regcache.h"
 
+struct value;
+struct type;
+
 /* Need to get function ends by adding this to epilogue address from .bf
    record, not using x_fsize field.  */
 #define FUNCTION_EPILOGUE_SIZE 4
@@ -36,13 +39,8 @@
 extern CORE_ADDR umax_skip_prologue (CORE_ADDR);
 #define SKIP_PROLOGUE(pc) (umax_skip_prologue (pc))
 
-/* Immediately after a function call, return the saved pc.
-   Can't always go through the frames for this because on some machines
-   the new frame is not set up until the new function executes
-   some instructions.  */
-
-#define SAVED_PC_AFTER_CALL(frame) \
-	read_memory_integer (read_register (SP_REGNUM), 4)
+CORE_ADDR ns32k_saved_pc_after_call (struct frame_info *);
+#define SAVED_PC_AFTER_CALL(frame) ns32k_saved_pc_after_call ((frame))
 
 /* Address of end of stack space.  */
 
@@ -126,32 +124,21 @@ extern int ns32k_register_virtual_size (int);
 struct type *ns32k_register_virtual_type (int);
 #define REGISTER_VIRTUAL_TYPE(N) ns32k_register_virtual_type ((N))
 
-/* Store the address of the place in which to copy the structure the
-   subroutine will return.  This is called from call_function.
+extern void ns32k_store_struct_return (CORE_ADDR, CORE_ADDR);
+#define STORE_STRUCT_RETURN(ADDR, SP) \
+  ns32k_store_struct_return ((ADDR), (SP))
 
-   On this machine this is a no-op, because gcc isn't used on it
-   yet.  So this calling convention is not used. */
-
-#define STORE_STRUCT_RETURN(ADDR, SP)
-
-/* Extract from an array REGBUF containing the (raw) register state
-   a function return value of type TYPE, and copy that, in virtual format,
-   into VALBUF.  */
-
+extern void ns32k_extract_return_value (struct type *, char *, char *);
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
-  memcpy (VALBUF, REGBUF+REGISTER_BYTE (TYPE_CODE (TYPE) == TYPE_CODE_FLT ? FP0_REGNUM : 0), TYPE_LENGTH (TYPE))
+  ns32k_extract_return_value ((TYPE), (REGBUF), (VALBUF))
 
-/* Write into appropriate registers a function return value
-   of type TYPE, given in virtual format.  */
-
+extern void ns32k_store_return_value (struct type *, char *);
 #define STORE_RETURN_VALUE(TYPE,VALBUF) \
-  write_register_bytes (REGISTER_BYTE (TYPE_CODE (TYPE) == TYPE_CODE_FLT ? FP0_REGNUM : 0), VALBUF, TYPE_LENGTH (TYPE))
+  ns32k_store_return_value ((TYPE), (VALBUF))
 
-/* Extract from an array REGBUF containing the (raw) register state
-   the address in which a function should return its structure value,
-   as a CORE_ADDR (or an expression that can be used as one).  */
-
-#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) (*(int *)(REGBUF))
+extern CORE_ADDR ns32k_extract_struct_value_address (char *);
+#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
+  ns32k_extract_struct_value_address ((REGBUF))
 
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
@@ -198,8 +185,6 @@ extern int sizeof_ns32k_call_dummy_words;
 
 #define CALL_DUMMY_START_OFFSET	3
 
-struct value;
-struct type;
 extern void ns32k_fix_call_dummy (char *, CORE_ADDR, CORE_ADDR, int,
                                   struct value **, struct type *, int);
 #define FIX_CALL_DUMMY(dummy, pc, fun, nargs, args, type, gcc_p) \
