@@ -1524,7 +1524,7 @@ coff_print_symbol (abfd, filep, symbol, how)
 	  combined_entry_type *root = obj_raw_syments (abfd);
 	  struct lineno_cache_entry *l = coffsymbol(symbol)->lineno;
 	
-	  fprintf (file,"[%3d]", combined - root);
+	  fprintf (file,"[%3ld]", (long) (combined - root));
 
 	  fprintf (file,
 		   "(sc %2d)(fl 0x%02x)(ty %3x)(sc %3d) (nx %d) 0x%08lx %s",
