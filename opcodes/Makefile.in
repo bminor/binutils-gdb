@@ -1,6 +1,6 @@
-# Makefile.in generated automatically by automake 1.4-p6 from Makefile.am
+# Makefile.in generated automatically by automake 1.4 from Makefile.am
 
-# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -393,8 +393,13 @@ OFILES = @BFD_MACHINES@
 INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(INCDIR) -I$(BFDDIR) @HDEFINES@ -I$(srcdir)/../intl -I../intl
 
 libopcodes_la_SOURCES = dis-buf.c disassemble.c dis-init.c
-libopcodes_la_DEPENDENCIES = $(OFILES) ../bfd/libbfd.la
-libopcodes_la_LIBADD = $(OFILES) @WIN32LIBADD@ ../bfd/libbfd.la
+# It's desirable to list ../bfd/libbfd.la in DEPENDENCIES and LIBADD.
+# Unfortunately this causes libtool to add -L$(libdir), referring to the
+# planned install directory of libbfd.  This can cause us to pick up an
+# old version of libbfd, or to pick up libbfd for the wrong architecture
+# if host != build.
+libopcodes_la_DEPENDENCIES = $(OFILES)
+libopcodes_la_LIBADD = $(OFILES) @WIN32LIBADD@
 libopcodes_la_LDFLAGS = -release $(VERSION) @WIN32LDFLAGS@
 
 # libtool will build .libs/libopcodes.a.  We create libopcodes.a in
@@ -617,7 +622,7 @@ maintainer-clean-recursive:
 	dot_seen=no; \
 	rev=''; list='$(SUBDIRS)'; for subdir in $$list; do \
 	  rev="$$subdir $$rev"; \
-	  test "$$subdir" != "." || dot_seen=yes; \
+	  test "$$subdir" = "." && dot_seen=yes; \
 	done; \
 	test "$$dot_seen" = "no" && rev=". $$rev"; \
 	target=`echo $@ | sed s/-recursive//`; \
