@@ -1,5 +1,13 @@
 2001-03-17  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.c: Fix formatting.
+	(i386_get_frame_setup, i386_follow_jump, codestream_read,
+	codestream_seek, codestream_fill, skip_trampoline_code,
+	gdb_print_insn_i386, _initialize_i386_tdep): Remove redundant
+	prototypoes.
+
+2001-03-17  Mark Kettenis  <kettenis@gnu.org>
+
 	* config/i386/tm-linux.h (TARGET_ANALYZE_FLOATING): Remove.  It's
 	no longer used.  Also remove associated FIXME.
 

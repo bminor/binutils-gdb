@@ -33,22 +33,6 @@
 #include "arch-utils.h"
 #include "regcache.h"
 
-static long i386_get_frame_setup (CORE_ADDR);
-
-static void i386_follow_jump (void);
-
-static void codestream_read (unsigned char *, int);
-
-static void codestream_seek (CORE_ADDR);
-
-static unsigned char codestream_fill (int);
-
-CORE_ADDR skip_trampoline_code (CORE_ADDR, char *);
-
-static int gdb_print_insn_i386 (bfd_vma, disassemble_info *);
-
-void _initialize_i386_tdep (void);
-
 /* i386_register_byte[i] is the offset into the register file of the
    start of register number i.  We initialize this from
    i386_register_raw_size.  */
@@ -73,10 +57,10 @@ int i386_register_raw_size[MAX_NUM_REGS] = {
 /* i386_register_virtual_size[i] is the size in bytes of the virtual
    type of register i.  */
 int i386_register_virtual_size[MAX_NUM_REGS];
+
 
-
-/* This is the variable the is set with "set disassembly-flavor",
-   and its legitimate values. */
+/* This is the variable that is set with "set disassembly-flavor", and
+   its legitimate values.  */
 static const char att_flavor[] = "att";
 static const char intel_flavor[] = "intel";
 static const char *valid_flavors[] =
@@ -87,31 +71,32 @@ static const char *valid_flavors[] =
 };
 static const char *disassembly_flavor = att_flavor;
 
-static void i386_print_register (char *, int, int);
-
-/* This is used to keep the bfd arch_info in sync with the disassembly flavor.  */
+/* This is used to keep the bfd arch_info in sync with the disassembly
+   flavor.  */
 static void set_disassembly_flavor_sfunc (char *, int,
 					  struct cmd_list_element *);
 static void set_disassembly_flavor (void);
+
 
-/* Stdio style buffering was used to minimize calls to ptrace, but this
-   buffering did not take into account that the code section being accessed
-   may not be an even number of buffers long (even if the buffer is only
-   sizeof(int) long).  In cases where the code section size happened to
-   be a non-integral number of buffers long, attempting to read the last
-   buffer would fail.  Simply using target_read_memory and ignoring errors,
-   rather than read_memory, is not the correct solution, since legitimate
-   access errors would then be totally ignored.  To properly handle this
-   situation and continue to use buffering would require that this code
-   be able to determine the minimum code section size granularity (not the
-   alignment of the section itself, since the actual failing case that
-   pointed out this problem had a section alignment of 4 but was not a
-   multiple of 4 bytes long), on a target by target basis, and then
-   adjust it's buffer size accordingly.  This is messy, but potentially
-   feasible.  It probably needs the bfd library's help and support.  For
-   now, the buffer size is set to 1.  (FIXME -fnf) */
+/* Stdio style buffering was used to minimize calls to ptrace, but
+   this buffering did not take into account that the code section
+   being accessed may not be an even number of buffers long (even if
+   the buffer is only sizeof(int) long).  In cases where the code
+   section size happened to be a non-integral number of buffers long,
+   attempting to read the last buffer would fail.  Simply using
+   target_read_memory and ignoring errors, rather than read_memory, is
+   not the correct solution, since legitimate access errors would then
+   be totally ignored.  To properly handle this situation and continue
+   to use buffering would require that this code be able to determine
+   the minimum code section size granularity (not the alignment of the
+   section itself, since the actual failing case that pointed out this
+   problem had a section alignment of 4 but was not a multiple of 4
+   bytes long), on a target by target basis, and then adjust it's
+   buffer size accordingly.  This is messy, but potentially feasible.
+   It probably needs the bfd library's help and support.  For now, the
+   buffer size is set to 1.  (FIXME -fnf) */
 
-#define CODESTREAM_BUFSIZ 1	/* Was sizeof(int), see note above. */
+#define CODESTREAM_BUFSIZ 1	/* Was sizeof(int), see note above.  */
 static CORE_ADDR codestream_next_addr;
 static CORE_ADDR codestream_addr;
 static unsigned char codestream_buf[CODESTREAM_BUFSIZ];
@@ -119,10 +104,12 @@ static int codestream_off;
 static int codestream_cnt;
 
 #define codestream_tell() (codestream_addr + codestream_off)
-#define codestream_peek() (codestream_cnt == 0 ? \
-			   codestream_fill(1): codestream_buf[codestream_off])
-#define codestream_get() (codestream_cnt-- == 0 ? \
-			 codestream_fill(0) : codestream_buf[codestream_off++])
+#define codestream_peek() \
+  (codestream_cnt == 0 ? \
+   codestream_fill(1) : codestream_buf[codestream_off])
+#define codestream_get() \
+  (codestream_cnt-- == 0 ? \
+   codestream_fill(0) : codestream_buf[codestream_off++])
 
 static unsigned char
 codestream_fill (int peek_flag)
@@ -159,8 +146,9 @@ codestream_read (unsigned char *buf, int count)
   for (i = 0; i < count; i++)
     *p++ = codestream_get ();
 }
+
 
-/* next instruction is a jump, move to target */
+/* If the next instruction is a jump, move to its target.  */
 
 static void
 i386_follow_jump (void)
@@ -183,13 +171,14 @@ i386_follow_jump (void)
   switch (codestream_get ())
     {
     case 0xe9:
-      /* relative jump: if data16 == 0, disp32, else disp16 */
+      /* Relative jump: if data16 == 0, disp32, else disp16.  */
       if (data16)
 	{
 	  codestream_read (buf, 2);
 	  delta = extract_signed_integer (buf, 2);
 
-	  /* include size of jmp inst (including the 0x66 prefix).  */
+	  /* Include the size of the jmp instruction (including the
+             0x66 prefix).  */
 	  pos += delta + 4;
 	}
       else
@@ -201,7 +190,7 @@ i386_follow_jump (void)
 	}
       break;
     case 0xeb:
-      /* relative jump, disp8 (ignore data16) */
+      /* Relative jump, disp8 (ignore data16).  */
       codestream_read (buf, 1);
       /* Sign-extend it.  */
       delta = extract_signed_integer (buf, 1);
@@ -212,13 +201,11 @@ i386_follow_jump (void)
   codestream_seek (pos);
 }
 
-/*
- * find & return amound a local space allocated, and advance codestream to
- * first register push (if any)
- *
- * if entry sequence doesn't make sense, return -1, and leave 
- * codestream pointer random
- */
+/* Find & return the amount a local space allocated, and advance the
+   codestream to the first register push (if any).
+
+   If the entry sequence doesn't make sense, return -1, and leave
+   codestream pointer at a random spot.  */
 
 static long
 i386_get_frame_setup (CORE_ADDR pc)
@@ -233,26 +220,22 @@ i386_get_frame_setup (CORE_ADDR pc)
 
   if (op == 0x58)		/* popl %eax */
     {
-      /*
-       * this function must start with
-       * 
-       *    popl %eax             0x58
-       *    xchgl %eax, (%esp)  0x87 0x04 0x24
-       * or xchgl %eax, 0(%esp) 0x87 0x44 0x24 0x00
-       *
-       * (the system 5 compiler puts out the second xchg
-       * inst, and the assembler doesn't try to optimize it,
-       * so the 'sib' form gets generated)
-       * 
-       * this sequence is used to get the address of the return
-       * buffer for a function that returns a structure
-       */
+      /* This function must start with
+
+	    popl %eax             0x58
+            xchgl %eax, (%esp)    0x87 0x04 0x24
+         or xchgl %eax, 0(%esp)   0x87 0x44 0x24 0x00
+
+	 (the System V compiler puts out the second `xchg'
+	 instruction, and the assembler doesn't try to optimize it, so
+	 the 'sib' form gets generated).  This sequence is used to get
+	 the address of the return buffer for a function that returns
+	 a structure.  */
       int pos;
       unsigned char buf[4];
-      static unsigned char proto1[3] =
-      {0x87, 0x04, 0x24};
-      static unsigned char proto2[4] =
-      {0x87, 0x44, 0x24, 0x00};
+      static unsigned char proto1[3] = { 0x87, 0x04, 0x24 };
+      static unsigned char proto2[4] = { 0x87, 0x44, 0x24, 0x00 };
+
       pos = codestream_tell ();
       codestream_read (buf, 4);
       if (memcmp (buf, proto1, 3) == 0)
@@ -261,25 +244,26 @@ i386_get_frame_setup (CORE_ADDR pc)
 	pos += 4;
 
       codestream_seek (pos);
-      op = codestream_get ();	/* update next opcode */
+      op = codestream_get ();	/* Update next opcode.  */
     }
 
   if (op == 0x68 || op == 0x6a)
     {
-      /*
-       * this function may start with
-       *
-       *   pushl constant
-       *   call _probe
-       *   addl $4, %esp
-       *      followed by 
-       *     pushl %ebp
-       *     etc.
-       */
+      /* This function may start with
+
+            pushl constant
+            call _probe
+	    addl $4, %esp
+	   
+	 followed by
+
+            pushl %ebp
+
+	 etc.  */
       int pos;
       unsigned char buf[8];
 
-      /* Skip past the pushl instruction; it has either a one-byte 
+      /* Skip past the `pushl' instruction; it has either a one-byte 
          or a four-byte operand, depending on the opcode.  */
       pos = codestream_tell ();
       if (op == 0x68)
@@ -288,81 +272,78 @@ i386_get_frame_setup (CORE_ADDR pc)
 	pos += 1;
       codestream_seek (pos);
 
-      /* Read the following 8 bytes, which should be "call _probe" (6 bytes)
-         followed by "addl $4,%esp" (2 bytes).  */
+      /* Read the following 8 bytes, which should be "call _probe" (6
+         bytes) followed by "addl $4,%esp" (2 bytes).  */
       codestream_read (buf, sizeof (buf));
       if (buf[0] == 0xe8 && buf[6] == 0xc4 && buf[7] == 0x4)
 	pos += sizeof (buf);
       codestream_seek (pos);
-      op = codestream_get ();	/* update next opcode */
+      op = codestream_get ();	/* Update next opcode.  */
     }
 
   if (op == 0x55)		/* pushl %ebp */
     {
-      /* check for movl %esp, %ebp - can be written two ways */
+      /* Check for "movl %esp, %ebp" -- can be written in two ways.  */
       switch (codestream_get ())
 	{
 	case 0x8b:
 	  if (codestream_get () != 0xec)
-	    return (-1);
+	    return -1;
 	  break;
 	case 0x89:
 	  if (codestream_get () != 0xe5)
-	    return (-1);
+	    return -1;
 	  break;
 	default:
-	  return (-1);
+	  return -1;
 	}
-      /* check for stack adjustment 
+      /* Check for stack adjustment 
 
-       *  subl $XXX, %esp
-       *
-       * note: you can't subtract a 16 bit immediate
-       * from a 32 bit reg, so we don't have to worry
-       * about a data16 prefix 
-       */
+           subl $XXX, %esp
+
+	 NOTE: You can't subtract a 16 bit immediate from a 32 bit
+	 reg, so we don't have to worry about a data16 prefix.  */
       op = codestream_peek ();
       if (op == 0x83)
 	{
-	  /* subl with 8 bit immed */
+	  /* `subl' with 8 bit immediate.  */
 	  codestream_get ();
 	  if (codestream_get () != 0xec)
-	    /* Some instruction starting with 0x83 other than subl.  */
+	    /* Some instruction starting with 0x83 other than `subl'.  */
 	    {
 	      codestream_seek (codestream_tell () - 2);
 	      return 0;
 	    }
-	  /* subl with signed byte immediate 
-	   * (though it wouldn't make sense to be negative)
-	   */
+	  /* `subl' with signed byte immediate (though it wouldn't
+	     make sense to be negative).  */
 	  return (codestream_get ());
 	}
       else if (op == 0x81)
 	{
 	  char buf[4];
-	  /* Maybe it is subl with 32 bit immedediate.  */
+	  /* Maybe it is `subl' with a 32 bit immedediate.  */
 	  codestream_get ();
 	  if (codestream_get () != 0xec)
-	    /* Some instruction starting with 0x81 other than subl.  */
+	    /* Some instruction starting with 0x81 other than `subl'.  */
 	    {
 	      codestream_seek (codestream_tell () - 2);
 	      return 0;
 	    }
-	  /* It is subl with 32 bit immediate.  */
+	  /* It is `subl' with a 32 bit immediate.  */
 	  codestream_read ((unsigned char *) buf, 4);
 	  return extract_signed_integer (buf, 4);
 	}
       else
 	{
-	  return (0);
+	  return 0;
 	}
     }
   else if (op == 0xc8)
     {
       char buf[2];
-      /* enter instruction: arg is 16 bit unsigned immed */
+      /* `enter' with 16 bit unsigned immediate.  */
       codestream_read ((unsigned char *) buf, 2);
-      codestream_get ();	/* flush final byte of enter instruction */
+      codestream_get ();	/* Flush final byte of enter instruction.  */
       return extract_unsigned_integer (buf, 2);
     }
   return (-1);
@@ -378,44 +359,43 @@ i386_frame_num_args (struct frame_info *fi)
   return -1;
 #else
   /* This loses because not only might the compiler not be popping the
-     args right after the function call, it might be popping args from both
-     this call and a previous one, and we would say there are more args
-     than there really are.  */
+     args right after the function call, it might be popping args from
+     both this call and a previous one, and we would say there are
+     more args than there really are.  */
 
   int retpc;
   unsigned char op;
   struct frame_info *pfi;
 
-  /* on the 386, the instruction following the call could be:
+  /* On the i386, the instruction following the call could be:
      popl %ecx        -  one arg
      addl $imm, %esp  -  imm/4 args; imm may be 8 or 32 bits
-     anything else    -  zero args  */
+     anything else    -  zero args.  */
 
   int frameless;
 
   frameless = FRAMELESS_FUNCTION_INVOCATION (fi);
   if (frameless)
-    /* In the absence of a frame pointer, GDB doesn't get correct values
-       for nameless arguments.  Return -1, so it doesn't print any
-       nameless arguments.  */
+    /* In the absence of a frame pointer, GDB doesn't get correct
+       values for nameless arguments.  Return -1, so it doesn't print
+       any nameless arguments.  */
     return -1;
 
   pfi = get_prev_frame (fi);
   if (pfi == 0)
     {
-      /* Note:  this can happen if we are looking at the frame for
-         main, because FRAME_CHAIN_VALID won't let us go into
-         start.  If we have debugging symbols, that's not really
-         a big deal; it just means it will only show as many arguments
-         to main as are declared.  */
+      /* NOTE: This can happen if we are looking at the frame for
+         main, because FRAME_CHAIN_VALID won't let us go into start.
+         If we have debugging symbols, that's not really a big deal;
+         it just means it will only show as many arguments to main as
+         are declared.  */
       return -1;
     }
   else
     {
       retpc = pfi->pc;
       op = read_memory_integer (retpc, 1);
-      if (op == 0x59)
-	/* pop %ecx */
+      if (op == 0x59)		/* pop %ecx */
 	return 1;
       else if (op == 0x83)
 	{
@@ -426,8 +406,8 @@ i386_frame_num_args (struct frame_info *fi)
 	  else
 	    return 0;
 	}
-      else if (op == 0x81)
-	{			/* add with 32 bit immediate */
+      else if (op == 0x81)	/* `add' with 32 bit immediate.  */
+	{
 	  op = read_memory_integer (retpc + 1, 1);
 	  if (op == 0xc4)
 	    /* addl $<imm 32>, %esp */
@@ -443,34 +423,31 @@ i386_frame_num_args (struct frame_info *fi)
 #endif
 }
 
-/*
- * parse the first few instructions of the function to see
- * what registers were stored.
- *
- * We handle these cases:
- *
- * The startup sequence can be at the start of the function,
- * or the function can start with a branch to startup code at the end.
- *
- * %ebp can be set up with either the 'enter' instruction, or 
- * 'pushl %ebp, movl %esp, %ebp' (enter is too slow to be useful,
- * but was once used in the sys5 compiler)
- *
- * Local space is allocated just below the saved %ebp by either the
- * 'enter' instruction, or by 'subl $<size>, %esp'.  'enter' has
- * a 16 bit unsigned argument for space to allocate, and the
- * 'addl' instruction could have either a signed byte, or
- * 32 bit immediate.
- *
- * Next, the registers used by this function are pushed.  In
- * the sys5 compiler they will always be in the order: %edi, %esi, %ebx
- * (and sometimes a harmless bug causes it to also save but not restore %eax);
- * however, the code below is willing to see the pushes in any order,
- * and will handle up to 8 of them.
- *
- * If the setup sequence is at the end of the function, then the
- * next instruction will be a branch back to the start.
- */
+/* Parse the first few instructions the function to see what registers
+   were stored.
+   
+   We handle these cases:
+
+   The startup sequence can be at the start of the function, or the
+   function can start with a branch to startup code at the end.
+
+   %ebp can be set up with either the 'enter' instruction, or "pushl
+   %ebp, movl %esp, %ebp" (`enter' is too slow to be useful, but was
+   once used in the System V compiler).
+
+   Local space is allocated just below the saved %ebp by either the
+   'enter' instruction, or by "subl $<size>, %esp".  'enter' has a 16
+   bit unsigned argument for space to allocate, and the 'addl'
+   instruction could have either a signed byte, or 32 bit immediate.
+
+   Next, the registers used by this function are pushed.  With the
+   System V compiler they will always be in the order: %edi, %esi,
+   %ebx (and sometimes a harmless bug causes it to also save but not
+   restore %eax); however, the code below is willing to see the pushes
+   in any order, and will handle up to 8 of them.
+ 
+   If the setup sequence is at the end of the function, then the next
+   instruction will be a branch back to the start.  */
 
 void
 i386_frame_init_saved_regs (struct frame_info *fip)
@@ -478,7 +455,7 @@ i386_frame_init_saved_regs (struct frame_info *fip)
   long locals = -1;
   unsigned char op;
   CORE_ADDR dummy_bottom;
-  CORE_ADDR adr;
+  CORE_ADDR addr;
   CORE_ADDR pc;
   int i;
 
@@ -487,20 +464,19 @@ i386_frame_init_saved_regs (struct frame_info *fip)
 
   frame_saved_regs_zalloc (fip);
 
-  /* if frame is the end of a dummy, compute where the
-   * beginning would be
-   */
+  /* If the frame is the end of a dummy, compute where the beginning
+     would be.  */
   dummy_bottom = fip->frame - 4 - REGISTER_BYTES - CALL_DUMMY_LENGTH;
 
-  /* check if the PC is in the stack, in a dummy frame */
+  /* Check if the PC points in the stack, in a dummy frame.  */
   if (dummy_bottom <= fip->pc && fip->pc <= fip->frame)
     {
-      /* all regs were saved by push_call_dummy () */
-      adr = fip->frame;
+      /* All registers were saved by push_call_dummy.  */
+      addr = fip->frame;
       for (i = 0; i < NUM_REGS; i++)
 	{
-	  adr -= REGISTER_RAW_SIZE (i);
-	  fip->saved_regs[i] = adr;
+	  addr -= REGISTER_RAW_SIZE (i);
+	  fip->saved_regs[i] = addr;
 	}
       return;
     }
@@ -511,7 +487,7 @@ i386_frame_init_saved_regs (struct frame_info *fip)
 
   if (locals >= 0)
     {
-      adr = fip->frame - 4 - locals;
+      addr = fip->frame - 4 - locals;
       for (i = 0; i < 8; i++)
 	{
 	  op = codestream_get ();
@@ -519,11 +495,11 @@ i386_frame_init_saved_regs (struct frame_info *fip)
 	    break;
 #ifdef I386_REGNO_TO_SYMMETRY
 	  /* Dynix uses different internal numbering.  Ick.  */
-	  fip->saved_regs[I386_REGNO_TO_SYMMETRY (op - 0x50)] = adr;
+	  fip->saved_regs[I386_REGNO_TO_SYMMETRY (op - 0x50)] = addr;
 #else
-	  fip->saved_regs[op - 0x50] = adr;
+	  fip->saved_regs[op - 0x50] = addr;
 #endif
-	  adr -= 4;
+	  addr -= 4;
 	}
     }
 
@@ -531,7 +507,7 @@ i386_frame_init_saved_regs (struct frame_info *fip)
   fip->saved_regs[FP_REGNUM] = fip->frame;
 }
 
-/* return pc of first real instruction */
+/* Return PC of first real instruction.  */
 
 int
 i386_skip_prologue (int pc)
@@ -539,34 +515,36 @@ i386_skip_prologue (int pc)
   unsigned char op;
   int i;
   static unsigned char pic_pat[6] =
-  {0xe8, 0, 0, 0, 0,		/* call   0x0 */
-   0x5b,			/* popl   %ebx */
+  { 0xe8, 0, 0, 0, 0,		/* call   0x0 */
+    0x5b,			/* popl   %ebx */
   };
   CORE_ADDR pos;
 
   if (i386_get_frame_setup (pc) < 0)
     return (pc);
 
-  /* found valid frame setup - codestream now points to 
-   * start of push instructions for saving registers
-   */
+  /* Found valid frame setup -- codestream now points to start of push
+     instructions for saving registers.  */
 
-  /* skip over register saves */
+  /* Skip over register saves.  */
   for (i = 0; i < 8; i++)
     {
       op = codestream_peek ();
-      /* break if not pushl inst */
+      /* Break if not `pushl' instrunction.  */
       if (op < 0x50 || op > 0x57)
 	break;
       codestream_get ();
     }
 
-  /* The native cc on SVR4 in -K PIC mode inserts the following code to get
-     the address of the global offset table (GOT) into register %ebx.
-     call       0x0
-     popl       %ebx
-     movl       %ebx,x(%ebp)    (optional)
-     addl       y,%ebx
+  /* The native cc on SVR4 in -K PIC mode inserts the following code
+     to get the address of the global offset table (GOT) into register
+     %ebx
+     
+        call	0x0
+	popl    %ebx
+        movl    %ebx,x(%ebp)    (optional)
+        addl    y,%ebx
+
      This code is with the rest of the prologue (at the end of the
      function), so we have to skip it to get to the first real
      instruction at the start of the function.  */
@@ -587,17 +565,17 @@ i386_skip_prologue (int pc)
       if (op == 0x89)		/* movl %ebx, x(%ebp) */
 	{
 	  op = codestream_get ();
-	  if (op == 0x5d)	/* one byte offset from %ebp */
+	  if (op == 0x5d)	/* One byte offset from %ebp.  */
 	    {
 	      delta += 3;
 	      codestream_read (buf, 1);
 	    }
-	  else if (op == 0x9d)	/* four byte offset from %ebp */
+	  else if (op == 0x9d)	/* Four byte offset from %ebp.  */
 	    {
 	      delta += 6;
 	      codestream_read (buf, 4);
 	    }
-	  else			/* unexpected instruction */
+	  else			/* Unexpected instruction.  */
 	    delta = -1;
 	  op = codestream_get ();
 	}
@@ -665,11 +643,11 @@ i386_pop_frame (void)
 
   for (regnum = 0; regnum < NUM_REGS; regnum++)
     {
-      CORE_ADDR adr;
-      adr = frame->saved_regs[regnum];
-      if (adr)
+      CORE_ADDR addr;
+      addr = frame->saved_regs[regnum];
+      if (addr)
 	{
-	  read_memory (adr, regbuf, REGISTER_RAW_SIZE (regnum));
+	  read_memory (addr, regbuf, REGISTER_RAW_SIZE (regnum));
 	  write_register_bytes (REGISTER_BYTE (regnum), regbuf,
 				REGISTER_RAW_SIZE (regnum));
 	}
@@ -679,13 +657,15 @@ i386_pop_frame (void)
   write_register (SP_REGNUM, fp + 8);
   flush_cached_frames ();
 }
+
 
 #ifdef GET_LONGJMP_TARGET
 
-/* Figure out where the longjmp will land.  Slurp the args out of the stack.
-   We expect the first arg to be a pointer to the jmp_buf structure from which
-   we extract the pc (JB_PC) that we will land at.  The pc is copied into PC.
-   This routine returns true on success. */
+/* Figure out where the longjmp will land.  Slurp the args out of the
+   stack.  We expect the first arg to be a pointer to the jmp_buf
+   structure from which we extract the pc (JB_PC) that we will land
+   at.  The pc is copied into PC.  This routine returns true on
+   success.  */
 
 int
 get_longjmp_target (CORE_ADDR *pc)
@@ -695,7 +675,7 @@ get_longjmp_target (CORE_ADDR *pc)
 
   sp = read_register (SP_REGNUM);
 
-  if (target_read_memory (sp + SP_ARG0,		/* Offset of first arg on stack */
+  if (target_read_memory (sp + SP_ARG0,	/* Offset of first arg on stack.  */
 			  buf,
 			  TARGET_PTR_BIT / TARGET_CHAR_BIT))
     return 0;
@@ -712,6 +692,7 @@ get_longjmp_target (CORE_ADDR *pc)
 }
 
 #endif /* GET_LONGJMP_TARGET */
+
 
 /* These registers are used for returning integers (and on some
    targets also for returning `struct' and `union' values when their
@@ -836,6 +817,7 @@ i386_store_return_value (struct type *type, char *valbuf)
 			"Cannot store return value of %d bytes long.", len);
     }
 }
+
 
 /* Convert data from raw format for register REGNUM in buffer FROM to
    virtual format with type TYPE in buffer TO.  In principle both
@@ -861,11 +843,11 @@ i386_register_convert_to_raw (struct type *type, int regnum,
 {
   memcpy (to, from, FPU_REG_RAW_SIZE);
 }
-
      
+
 #ifdef I386V4_SIGTRAMP_SAVED_PC
-/* Get saved user PC for sigtramp from the pushed ucontext on the stack
-   for all three variants of SVR4 sigtramps.  */
+/* Get saved user PC for sigtramp from the pushed ucontext on the
+   stack for all three variants of SVR4 sigtramps.  */
 
 CORE_ADDR
 i386v4_sigtramp_saved_pc (struct frame_info *frame)
@@ -889,11 +871,11 @@ i386v4_sigtramp_saved_pc (struct frame_info *frame)
   return read_memory_integer (read_register (SP_REGNUM) + saved_pc_offset, 4);
 }
 #endif /* I386V4_SIGTRAMP_SAVED_PC */
-
+
 
 #ifdef STATIC_TRANSFORM_NAME
-/* SunPRO encodes the static variables.  This is not related to C++ mangling,
-   it is done for C too.  */
+/* SunPRO encodes the static variables.  This is not related to C++
+   mangling, it is done for C too.  */
 
 char *
 sunpro_static_transform_name (char *name)
@@ -901,8 +883,8 @@ sunpro_static_transform_name (char *name)
   char *p;
   if (IS_STATIC_TRANSFORM_NAME (name))
     {
-      /* For file-local statics there will be a period, a bunch
-         of junk (the contents of which match a string given in the
+      /* For file-local statics there will be a period, a bunch of
+         junk (the contents of which match a string given in the
          N_OPT), a period and the name.  For function-local statics
          there will be a bunch of junk (which seems to change the
          second character from 'A' to 'B'), a period, the name of the
@@ -915,19 +897,18 @@ sunpro_static_transform_name (char *name)
   return name;
 }
 #endif /* STATIC_TRANSFORM_NAME */
+
 
-
-
-/* Stuff for WIN32 PE style DLL's but is pretty generic really. */
+/* Stuff for WIN32 PE style DLL's but is pretty generic really.  */
 
 CORE_ADDR
 skip_trampoline_code (CORE_ADDR pc, char *name)
 {
-  if (pc && read_memory_unsigned_integer (pc, 2) == 0x25ff)	/* jmp *(dest) */
+  if (pc && read_memory_unsigned_integer (pc, 2) == 0x25ff) /* jmp *(dest) */
     {
       unsigned long indirect = read_memory_unsigned_integer (pc + 2, 4);
       struct minimal_symbol *indsym =
-      indirect ? lookup_minimal_symbol_by_pc (indirect) : 0;
+	indirect ? lookup_minimal_symbol_by_pc (indirect) : 0;
       char *symname = indsym ? SYMBOL_NAME (indsym) : 0;
 
       if (symname)
@@ -937,8 +918,12 @@ skip_trampoline_code (CORE_ADDR pc, char *name)
 	    return name ? 1 : read_memory_unsigned_integer (indirect, 4);
 	}
     }
-  return 0;			/* not a trampoline */
+  return 0;			/* Not a trampoline.  */
 }
+
+
+/* We have two flavours of disassembly.  The machinery on this page
+   deals with switching between those.  */
 
 static int
 gdb_print_insn_i386 (bfd_vma memaddr, disassemble_info *info)
@@ -947,13 +932,13 @@ gdb_print_insn_i386 (bfd_vma memaddr, disassemble_info *info)
     return print_insn_i386_att (memaddr, info);
   else if (disassembly_flavor == intel_flavor)
     return print_insn_i386_intel (memaddr, info);
-  /* Never reached - disassembly_flavour is always either att_flavor
-     or intel_flavor */
+  /* Never reached -- disassembly_flavour is always either att_flavor
+     or intel_flavor.  */
   internal_error (__FILE__, __LINE__, "failed internal consistency check");
 }
 
-/* If the disassembly mode is intel, we have to also switch the
-   bfd mach_type.  This function is run in the set disassembly_flavor
+/* If the disassembly mode is intel, we have to also switch the bfd
+   mach_type.  This function is run in the set disassembly_flavor
    command, and does that.  */
 
 static void
@@ -969,9 +954,10 @@ set_disassembly_flavor (void)
   if (disassembly_flavor == att_flavor)
     set_architecture_from_arch_mach (bfd_arch_i386, bfd_mach_i386_i386);
   else if (disassembly_flavor == intel_flavor)
-    set_architecture_from_arch_mach (bfd_arch_i386, bfd_mach_i386_i386_intel_syntax);
+    set_architecture_from_arch_mach (bfd_arch_i386,
+				     bfd_mach_i386_i386_intel_syntax);
 }
-
+
 
 void
 _initialize_i386_tdep (void)
@@ -1000,14 +986,15 @@ _initialize_i386_tdep (void)
   tm_print_insn = gdb_print_insn_i386;
   tm_print_insn_info.mach = bfd_lookup_arch (bfd_arch_i386, 0)->mach;
 
-  /* Add the variable that controls the disassembly flavor */
+  /* Add the variable that controls the disassembly flavor.  */
   {
     struct cmd_list_element *new_cmd;
 
     new_cmd = add_set_enum_cmd ("disassembly-flavor", no_class,
 				valid_flavors,
 				&disassembly_flavor,
-				"Set the disassembly flavor, the valid values are \"att\" and \"intel\", \
+				"\
+Set the disassembly flavor, the valid values are \"att\" and \"intel\", \
 and the default value is \"att\".",
 				&setlist);
     new_cmd->function.sfunc = set_disassembly_flavor_sfunc;
@@ -1015,7 +1002,6 @@ and the default value is \"att\".",
   }
 
   /* Finally, initialize the disassembly flavor to the default given
-     in the disassembly_flavor variable */
-
+     in the disassembly_flavor variable.  */
   set_disassembly_flavor ();
 }
