@@ -116,7 +116,7 @@ BFD_SRC_DIR =  ${srcdir}/../bfd
 BFD_OBJ_DIR = ./../bfd${subdir}
 BFD_DEP = $$(BFD_SRC_DIR)
 BFD_LIB = $(BFD_OBJ_DIR)/libbfd.a
-BFD_INCLUDES = -I${BFD_SRC_DIR} -I${BFD_OBJ_DIR}/../include
+BFD_INCLUDES = -I${BFD_SRC_DIR} -I${BFD_OBJ_DIR}
 
 # Where is the source dir for the READLINE library?  Traditionally in .. or .
 # (For the binary library built from it, we use ${READLINE_DIR}${subdir}.)
