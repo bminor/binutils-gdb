@@ -620,7 +620,6 @@ init.c: $(OBS) $(TSOBS)
 	tr ' ' '\012' | \
 	sed -e '/^Onindy.o/d' \
 	    -e '/^nindy.o/d' \
-	    -e '/^mswin/d' \
 	    -e '/ttyflush.o/d' \
 	    -e '/xdr_ld.o/d' \
 	    -e '/xdr_ptrace.o/d' \

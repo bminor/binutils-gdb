@@ -1,3 +1,8 @@
+Tue Jul 29 10:12:44 1997  Felix Lee  <flee@cygnus.com>
+
+	* Makefile.in (init.c): except some mswin files do need to be
+ 	scanned.  oh well.
+
 Mon Jul 28 14:04:39 1997  Felix Lee  <flee@cygnus.com>
 
 	* Makefile.in (init.c): don't try to scan mswin for _initialize
