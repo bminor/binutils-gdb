@@ -1,5 +1,9 @@
 Tue Aug 10 09:56:56 1993  Fred Fish  (fnf@deneb.cygnus.com)
 
+	* gdb.t17/interrupt.exp:  Set up xfail for *-*-sysv4*, in chain of
+	xfails for other systems.  Match a missing 'Continuing.' as an
+	explicit fail for i*86-*-sysv4*, so it doesn't hose other tests.
+
 	* gdb.t20 {classes.exp, inherit.exp, misc.exp}, gdb.t21/cplusfuncs.exp,
 	gdb.t22/virtfunc.exp, gdb.t23/templates.exp, gdb.t31/chillvars.exp:
 	Only issue warning for missing executables if -all option is used.
