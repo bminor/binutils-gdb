@@ -1,3 +1,22 @@
+2002-06-04  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* Makefile.am (BFD32_BACKENDS): Add elf32-sh64-nbsd.lo.
+	(BFD32_BACKENDS_CFILES): Add elf32-sh64-nbsd.c.
+	(BFD64_BACKENDS): Add elf64-sh64-nbsd.lo.
+	(BFD64_BACKENDS_CFILES): Add elf64-sh64-nbsd.c.
+	(elf32-sh64-nbsd.lo, elf64-sh64-nbsd.lo): New rules.
+	* Makefile.in: Regenerate.
+	* config.bfd (sh5le-*-netbsd*, sh5-*-netbsd*, sh64le-*-netbsd*)
+	(sh64-*-netbsd*): New targets.
+	* configure.in: Add bfd_elf32_sh64nbsd_vec, bfd_elf32_sh64lnbsd_vec,
+	bfd_elf64_sh64nbsd_vec, and bfd_elf64_sh64lnbsd_vec.
+	* configure: Regenerate.
+	* elf32-sh64-nbsd.c: New file.
+	* elf64-sh64-nbsd.c: New file.
+	* targets.c: Add extern decls for bfd_elf32_sh64nbsd_vec,
+	bfd_elf32_sh64lnbsd_vec, bfd_elf64_sh64nbsd_vec, and
+	bfd_elf64_sh64lnbsd_vec.
+
 2002-06-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (setup_group): Set SEC_LINK_ONCE on GRP_COMDAT groups.

@@ -1,5 +1,14 @@
 2002-06-04  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* configure.in (sh5*): Set cpu_type to sh64 and endian to big.
+	(sh5le*, sh64le*): Set cpu_type to sh64 and endian to little.
+	(sh5*-*-netbsd*, sh64*-*-netbsd*): New targets.
+	* configure: Regenerate.
+	* config/tc-sh64.c (sh64_target_format): Add support for NetBSD
+	environment.
+
+2002-06-04  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* config/tc-sh64.h (MD_PCREL_FROM_SECTION): Undef before redefining.
 
 2002-06-04  Alan Modra  <amodra@bigpond.net.au>

@@ -2948,6 +2948,24 @@ sh64_target_format ()
   return "FIXME: No linux target yet";
 #endif
 
+#ifdef TE_NetBSD
+  /* For NetBSD, if the ISA is unspecified, always use SHmedia.  */
+  if (sh64_isa_mode == sh64_isa_unspecified)
+    sh64_isa_mode = sh64_isa_shmedia;
+
+  /* If the ABI is unspecified, select a default: based on how
+     we were configured: sh64 == sh64_abi_64, else sh64_abi_32.  */
+  if (sh64_abi == sh64_abi_unspecified)
+    {
+      if (sh64_isa_mode == sh64_isa_shcompact)
+	sh64_abi = sh64_abi_32;
+      else if (strncmp (TARGET_CPU, "sh64", 4) == 0)
+        sh64_abi = sh64_abi_64;
+      else
+        sh64_abi = sh64_abi_32;
+    }
+#endif
+
   if (sh64_abi == sh64_abi_64 && sh64_isa_mode == sh64_isa_unspecified)
     sh64_isa_mode = sh64_isa_shmedia;
 
@@ -2979,6 +2997,12 @@ sh64_target_format ()
   if (sh64_pt32 && ! sh64_expand)
     as_bad (_("-expand-pt32 invalid together with -no-expand"));
 
+#ifdef TE_NetBSD
+  if (sh64_abi == sh64_abi_64)
+    return (target_big_endian ? "elf64-sh64-nbsd" : "elf64-sh64l-nbsd");
+  else
+    return (target_big_endian ? "elf32-sh64-nbsd" : "elf32-sh64l-nbsd");
+#else
   /* When the ISA is not one of SHmedia or SHcompact, use the old SH
      object format.  */
   if (sh64_isa_mode == sh64_isa_unspecified)
@@ -2987,6 +3011,7 @@ sh64_target_format ()
     return (target_big_endian ? "elf64-sh64" : "elf64-sh64l");
   else
     return (target_big_endian ? "elf32-sh64" : "elf32-sh64l");
+#endif
 }
 
 /* The worker function of TARGET_MACH.  */

@@ -145,7 +145,10 @@ changequote([,])dnl
       rs6000*)		cpu_type=ppc ;;
       s390x*)		cpu_type=s390 arch=s390x ;;
       s390*)		cpu_type=s390 arch=s390 ;;
-      sh64*)            cpu_type=sh64 endian=big;;
+      sh5*)		cpu_type=sh64 endian=big ;;
+      sh5le*)		cpu_type=sh64 endian=little ;;
+      sh64*)            cpu_type=sh64 endian=big ;;
+      sh64le*)		cpu_type=sh64 endian=little ;;
       sh*le)		cpu_type=sh endian=little ;;
       sh*)		cpu_type=sh endian=big ;;
       sparclite*)	cpu_type=sparc arch=sparclite ;;
@@ -424,6 +427,8 @@ changequote([,])dnl
 				sh*)
 					endian=little ;;
 			    esac ;;
+      sh5*-*-netbsd*)       fmt=elf em=nbsd ;;
+      sh64*-*-netbsd*)      fmt=elf em=nbsd ;;
       sh*-*-netbsdelf*)     fmt=elf em=nbsd ;;
       sh-*-elf*)	    fmt=elf ;;
       sh-*-coff*)           fmt=coff ;;

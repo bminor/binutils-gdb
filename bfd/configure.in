@@ -613,6 +613,10 @@ do
     bfd_elf32_sh64l_vec)	tb="$tb elf32-sh64.lo elf32.lo $elf cofflink.lo" target_size=64 ;;
     bfd_elf64_sh64_vec)		tb="$tb elf64-sh64.lo elf64.lo $elf" target_size=64 ;;
     bfd_elf64_sh64l_vec)	tb="$tb elf64-sh64.lo elf64.lo $elf" target_size=64 ;;
+    bfd_elf32_sh64nbsd_vec)	tb="$tb elf32-sh64-nbsd.lo elf32.lo $elf cofflink.lo" ;;
+    bfd_elf32_sh64lnbsd_vec)	tb="$tb elf32-sh64-nbsd.lo elf32.lo $elf cofflink.lo" ;;
+    bfd_elf64_sh64nbsd_vec)	tb="$tb elf64-sh64-nbsd.lo elf64.lo $elf" target_size=64 ;;
+    bfd_elf64_sh64lnbsd_vec)	tb="$tb elf64-sh64-nbsd.lo elf64.lo $elf" target_size=64 ;;
     bfd_elf32_sparc_vec)	tb="$tb elf32-sparc.lo elf32.lo $elf" ;;
     bfd_elf32_tradbigmips_vec)  tb="$tb elf32-mips.lo elfxx-mips.lo elf32.lo $elf ecofflink.lo" ;;
     bfd_elf32_tradlittlemips_vec) tb="$tb elf32-mips.lo elfxx-mips.lo elf32.lo $elf ecofflink.lo" ;;

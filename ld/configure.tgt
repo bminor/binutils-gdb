@@ -270,6 +270,22 @@ sh*eb-*-linux*)
 sh*-*-linux*)
 			targ_emul=shlelf_linux
 			;;
+sh5le-*-netbsd*)
+			targ_emul=shlelf32_nbsd
+			targ_extra_emuls="shelf32_nbsd shelf64_nbsd shlelf64_nbsd shelf_nbsd shlelf_nbsd"
+			;;
+sh5-*-netbsd*)
+			targ_emul=shelf32_nbsd
+			targ_extra_emuls="shlelf32_nbsd shelf64_nbsd shlelf64_nbsd shelf_nbsd shlelf_nbsd"
+			;;
+sh64le-*-netbsd*)
+			targ_emul=shlelf64_nbsd
+			targ_extra_emuls="shelf64_nbsd shelf32_nbsd shlelf32_nbsd shelf_nbsd shlelf_nbsd"
+			;;
+sh64-*-netbsd*)
+			targ_emul=shelf64_nbsd
+			targ_extra_emuls="shlelf64_nbsd shelf32_nbsd shlelf32_nbsd shelf_nbsd shlelf_nbsd"
+			;;
 sh*le-*-netbsdelf*)
 			targ_emul=shlelf_nbsd
 			targ_extra_emuls=shelf_nbsd

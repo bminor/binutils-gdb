@@ -1,3 +1,9 @@
+2002-06-04  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* configure.in: Add "sh5*-*" to list of targets which include
+	sh64 support.
+	* configure: Regenerate.
+
 2002-05-31  Chris G. Demetriou  <cgd@broadcom.com>
 
 	* mips-opc.c: Clean up a few whitespace issues, and sort a

@@ -1,3 +1,17 @@
+2002-06-04  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* Makefile.am (ALL_EMULATIONS): Add eshelf32_nbsd.o,
+	eshlelf32_nbsd.o, eshelf64_nbsd.o, and eshlelf64_nbsd.o.
+	(eshelf32_nbsd.c, eshelf64_nbsd.c, eshlelf32_nbsd.c)
+	(eshlelf64_nbsd.c): New rules.
+	* Makefile.in: Regenerate.
+	* configure.tgt (sh5le-*-netbsd*, sh5-*-netbsd*, sh64le-*-netbsd*)
+	(sh64-*-netbsd*): New targets.
+	* emulparams/shelf32_nbsd.sh: New file.
+	* emulparams/shelf64_nbsd.sh: New file.
+	* emulparams/shlelf32_nbsd.sh: New file.
+	* emulparams/shlelf64_nbsd.sh: New file.
+
 2002-06-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (section_already_linked): Call bfd_discard_group.  Typo fix.

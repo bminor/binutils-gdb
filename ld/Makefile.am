@@ -252,6 +252,8 @@ ALL_EMULATIONS = \
 	esh.o \
 	eshelf32.o \
 	eshlelf32.o \
+	eshelf32_nbsd.o \
+	eshlelf32_nbsd.o \
 	eshelf.o \
 	eshelf_linux.o \
 	eshlelf_linux.o \
@@ -285,6 +287,8 @@ ALL_64_EMULATIONS = \
 	eelf64_ia64_fbsd.o \
 	eshelf64.o \
 	eshlelf64.o \
+	eshelf64_nbsd.o \
+	eshlelf64_nbsd.o \
 	eelf_x86_64.o \
 	eelf_x86_64_fbsd.o \
 	eelf64_s390.o \
@@ -940,9 +944,19 @@ eshelf32.c: $(srcdir)/emulparams/shelf32.sh \
   $(srcdir)/emultempl/sh64elf.em $(INCDIR)/elf/sh.h $(BFDDIR)/elf-bfd.h \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} shelf32 "$(tdir_shelf32)"
+eshelf32_nbsd.c: $(srcdir)/emulparams/shelf32_nbsd.sh \
+  $(srcdir)/emulparams/shelf32.sh \
+  $(BFDDIR)/libbfd.h $(INCDIR)/libiberty.h \
+  $(srcdir)/emultempl/sh64elf.em $(INCDIR)/elf/sh.h $(BFDDIR)/elf-bfd.h \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} shelf32_nbsd "$(tdir_shelf32_nbsd)"
 eshelf64.c: $(srcdir)/emulparams/shelf64.sh $(srcdir)/emulparams/shelf32.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} shelf64 "$(tdir_shelf64)"
+eshelf64_nbsd.c: $(srcdir)/emulparams/shelf64_nbsd.sh \
+  $(srcdir)/emulparams/shelf32_nbsd.sh $(srcdir)/emulparams/shelf32.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} shelf64_nbsd "$(tdir_shelf64_nbsd)"
 eshelf_linux.c: $(srcdir)/emulparams/shelf_linux.sh \
   $(srcdir)/emulparams/shlelf_linux.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
@@ -968,10 +982,21 @@ eshlelf32.c: $(srcdir)/emulparams/shlelf32.sh \
   $(srcdir)/emultempl/sh64elf.em $(INCDIR)/elf/sh.h $(BFDDIR)/elf-bfd.h \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} shlelf32 "$(tdir_shlelf32)"
+eshlelf32_nbsd.c: $(srcdir)/emulparams/shlelf32_nbsd.sh \
+  $(srcdir)/emulparams/shelf32_nbsd.sh $(srcdir)/emulparams/shelf32.sh \
+  $(BFDDIR)/libbfd.h $(INCDIR)/libiberty.h \
+  $(srcdir)/emultempl/sh64elf.em $(INCDIR)/elf/sh.h $(BFDDIR)/elf-bfd.h \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} shlelf32_nbsd "$(tdir_shlelf32_nbsd)"
 eshlelf64.c: $(srcdir)/emulparams/shlelf64.sh \
   $(srcdir)/emulparams/shelf64.sh $(srcdir)/emulparams/shelf32.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} shlelf64 "$(tdir_shlelf64)"
+eshlelf64_nbsd.c: $(srcdir)/emulparams/shlelf64_nbsd.sh \
+  $(srcdir)/emulparams/shelf64_nbsd.sh \
+  $(srcdir)/emulparams/shelf32_nbsd.sh $(srcdir)/emulparams/shelf32.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} shlelf64_nbsd "$(tdir_shlelf64_nbsd)"
 eshl.c: $(srcdir)/emulparams/shl.sh \
   $(srcdir)/emulparams/sh.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/sh.sc ${GEN_DEPENDS}

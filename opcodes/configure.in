@@ -217,7 +217,7 @@ if test x${all_targets} = xfalse ; then
 	  # Include it just for ELF targets, since the SH5 bfd:s are ELF only.
 	  for t in $target $canon_targets; do
 	    case $t in
-	      all |  sh64-* | sh-*-*elf* | shl-*-*elf* | shle-*-*elf* | \
+	      all |  sh5*-* | sh64*-* | sh-*-*elf* | shl*-*-*elf* | \
 	      sh-*-linux* | shl-*-linux*)
 				ta="$ta sh64-dis.lo sh64-opc.lo"
 				archdefs="$archdefs -DINCLUDE_SHMEDIA"
