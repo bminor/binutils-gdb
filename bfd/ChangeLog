@@ -1,3 +1,15 @@
+Sun Feb 27 11:18:47 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* elf32-hppa.c: Second half of major cleanup.  More comments,
+	PARAMize and staticize rest of functions.  Delete unused
+	functions.  Delete unused/unnecessary arguments to some functions.
+	Group static vars together.  Abort for bad errors until we have
+	error code propogation working.  Work on spacing and indention.
+	Add FIXMEs for unresolved problems.  Use enums rather than
+	#defines for lots of things.  Merge two functions which build
+	linker stubs into a single function (so they can easily share a
+	ton of common code).
+
 Sat Feb 26 10:00:45 1994  Ian Lance Taylor  (ian@cygnus.com)
 
 	* reloc.c (_bfd_relocate_contents): Adjust handling of overflow to

@@ -44,7 +44,155 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "aout/aout64.h"
 #include "hppa_stubs.h"
 
-/* ELF/PA relocation howto entries.  */
+/* The basic stub types supported.  If/when shared libraries are
+   implemented some form of IMPORT and EXPORT stubs will be needed.  */
+typedef enum
+{
+  HPPA_STUB_ILLEGAL,
+  HPPA_STUB_ARG_RELOC,
+  HPPA_STUB_LONG_CALL,
+} hppa_stub_type;
+
+/* This is a list of all the stubs for a particular BFD.  */
+
+typedef struct elf32_hppa_stub_name_list_struct
+{
+  /* The symbol associated with this stub.  */
+  asymbol *sym;
+  /* Pointer to chain of all stub chains.  */
+  struct elf32_hppa_stub_description_struct *stub_desc;
+  /* Pointer to the stub contents (eg instructions).  */  
+  int *stub_secp;
+  /* Size of this stub?  (in what units?  FIXME).  */
+  unsigned size;
+  /* Pointer to the next stub entry in the chain.  */
+  struct elf32_hppa_stub_name_list_struct *next;
+} elf32_hppa_stub_name_list;
+
+/* This is a linked list in which each entry describes all the
+   linker stubs for a particular bfd.  */
+   
+typedef struct elf32_hppa_stub_description_struct
+{
+  /* The next group of stubs.  */
+  struct elf32_hppa_stub_description_struct *next;
+  /* Used to identify this group of stubs as belonging
+     to a particular bfd.  */
+  bfd *this_bfd;
+  /* FIXME: The stub section for this group of stubs?  Is
+     this redundant with stub_listP->sym->section?  */
+  asection *stub_sec;
+  /* FIXME: what the hell is this?  */
+  unsigned relocs_allocated_cnt;
+  /* The current real size of the stubs (in bytes?).  */
+  unsigned real_size;
+  /* How much space we have allocated for stubs (in bytes?).  */
+  unsigned allocated_size;
+  /* Pointer to the first available space for new stubs.  */
+  int *stub_secp;
+  /* Pointer to the beginning of the stubs.  FIXME: Why an int *
+     above and a char * here?  */
+  char *stub_contents;
+  /* The list of stubs for this bfd.  */
+  elf32_hppa_stub_name_list *stub_listP;
+  /* I guess we just carry this around for fun.  */
+  struct bfd_link_info *link_info;
+} elf32_hppa_stub_description;
+
+/* FIXME.  */
+#define ARGUMENTS	0
+#define RETURN_VALUE	1
+
+/* The various argument relocations that may be performed.
+   Note GRX,GRY really means ARGX,ARGY.  */
+typedef enum
+{
+  /* No relocation.  */
+  NO_ARG_RELOC,
+  /* Relocate 32 bits from general to FP register.  */
+  R_TO_FR,
+  /* Relocate 64 bits from arg0,arg1 to FParg1.  */
+  R01_TO_FR,
+  /* Relocate 64 bits from arg2,arg3 to FParg3.  */
+  R23_TO_FR,
+  /* Relocate 32 bits from FP to general register.  */
+  FR_TO_R,
+  /* Relocate 64 bits from FParg1 to arg0,arg1.  */
+  FR_TO_R01,
+  /* Relocate 64 bits from FParg3 to arg2,arg3.  */
+  FR_TO_R23,
+  /* Death.  */
+  ARG_RELOC_ERR,
+} arg_reloc_type;
+
+/* Where (what register type) is an argument comming from?  */
+typedef enum
+{
+  /* Not in a register.  */
+  AR_NO,
+  /* In a general argument register.  */
+  AR_GR,
+  /* In right half of a FP argument register.  */
+  AR_FR,
+  /* In upper (left) half of a FP argument register.  */
+  AR_FU,
+  /* In general argument register pair 0 (arg0, arg1).  */
+  AR_DBL01,
+  /* In general argument register pair 1 (arg2, arg3).  */
+  AR_DBL23,
+} arg_location;
+
+/* What is being relocated (eg which argument or the return value).  */
+typedef enum
+{
+  ARG0, ARG1, ARG2, ARG3, RETVAL,
+} arg_reloc_location;
+
+/* Horizontal represents callee's argument location information, vertical
+   represents caller's argument location information.  Value at a particular
+   X, Y location represents what (if any) argument relocation needs to
+   be performed to make caller and callee agree.  */
+static CONST arg_reloc_type mismatches[6][6] =
+{
+ {NO_ARG_RELOC, NO_ARG_RELOC, NO_ARG_RELOC, ARG_RELOC_ERR,
+    NO_ARG_RELOC, NO_ARG_RELOC},
+ {NO_ARG_RELOC, NO_ARG_RELOC, R_TO_FR, ARG_RELOC_ERR,
+    R01_TO_FR, ARG_RELOC_ERR},
+ {NO_ARG_RELOC, FR_TO_R, NO_ARG_RELOC, ARG_RELOC_ERR,
+    ARG_RELOC_ERR, ARG_RELOC_ERR},
+ {ARG_RELOC_ERR, ARG_RELOC_ERR, ARG_RELOC_ERR, ARG_RELOC_ERR,
+    ARG_RELOC_ERR, ARG_RELOC_ERR},
+ {NO_ARG_RELOC, FR_TO_R01, NO_ARG_RELOC, ARG_RELOC_ERR,
+    NO_ARG_RELOC, ARG_RELOC_ERR},
+ {NO_ARG_RELOC, FR_TO_R23, NO_ARG_RELOC, ARG_RELOC_ERR,
+    ARG_RELOC_ERR, NO_ARG_RELOC},
+};
+
+/* Likewise for the return value.  */
+static CONST arg_reloc_type retval_mismatches[6][6] =
+{
+ {NO_ARG_RELOC, NO_ARG_RELOC, NO_ARG_RELOC, ARG_RELOC_ERR,
+    NO_ARG_RELOC, NO_ARG_RELOC},
+ {NO_ARG_RELOC, NO_ARG_RELOC, FR_TO_R, ARG_RELOC_ERR,
+    FR_TO_R01, ARG_RELOC_ERR},
+ {NO_ARG_RELOC, R_TO_FR, NO_ARG_RELOC, ARG_RELOC_ERR,
+    ARG_RELOC_ERR, ARG_RELOC_ERR},
+ {ARG_RELOC_ERR, ARG_RELOC_ERR, ARG_RELOC_ERR, ARG_RELOC_ERR,
+    ARG_RELOC_ERR, ARG_RELOC_ERR},
+ {NO_ARG_RELOC, R01_TO_FR, NO_ARG_RELOC, ARG_RELOC_ERR,
+    NO_ARG_RELOC, ARG_RELOC_ERR},
+ {NO_ARG_RELOC, R23_TO_FR, NO_ARG_RELOC, ARG_RELOC_ERR,
+    ARG_RELOC_ERR, NO_ARG_RELOC},
+};
+
+/* Used for index mapping in symbol-extension sections.  */
+struct elf32_hppa_symextn_map_struct
+{
+  int old_index;
+  bfd *bfd;
+  asymbol *sym;
+  int new_index;
+};
 
 static bfd_reloc_status_type hppa_elf_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
@@ -58,11 +206,71 @@ static void hppa_elf_relocate_unwind_table
 	   unsigned long, unsigned long));
 
 static long get_symbol_value PARAMS ((asymbol *));
+
 static bfd_reloc_status_type hppa_elf_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd*, char **));
 
 static CONST reloc_howto_type * elf_hppa_reloc_type_lookup
   PARAMS ((bfd_arch_info_type *, bfd_reloc_code_real_type));
+
+static symext_entryS elf32_hppa_get_sym_extn PARAMS ((bfd *, asymbol *, int));
+
+static elf32_hppa_stub_description * find_stubs PARAMS ((bfd *, asection *));
+
+static elf32_hppa_stub_description * new_stub
+  PARAMS ((bfd *, asection *, struct bfd_link_info *));
+
+static arg_reloc_type type_of_mismatch PARAMS ((int, int, int));
+
+static elf32_hppa_stub_name_list * find_stub_by_name
+  PARAMS ((bfd *, asection *, char *));
+
+static elf32_hppa_stub_name_list * add_stub_by_name
+  PARAMS ((bfd *, asection *, asymbol *, struct bfd_link_info *));
+
+static void hppa_elf_stub_finish PARAMS ((bfd *));
+
+static void hppa_elf_stub_reloc
+  PARAMS ((elf32_hppa_stub_description *, bfd *, asymbol *, int,
+	   elf32_hppa_reloc_type));
+
+static int hppa_elf_arg_reloc_needed_p
+  PARAMS ((bfd *, arelent *, arg_reloc_type [5], symext_entryS));
+
+static asymbol * hppa_elf_build_linker_stub
+  PARAMS ((bfd *, bfd *, struct bfd_link_info *, arelent *,
+	   arg_reloc_type [5], int, unsigned *, hppa_stub_type));
+
+static void hppa_elf_create_stub_sec 
+  PARAMS ((bfd *, bfd *, asection **, struct bfd_link_info *));
+
+static int hppa_elf_long_branch_needed_p
+  PARAMS ((bfd *, asection *, arelent *, asymbol *, unsigned));
+
+static boolean hppa_elf_set_section_contents
+  PARAMS ((bfd *, sec_ptr, PTR, file_ptr, bfd_size_type));
+
+static void elf_info_to_howto
+  PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
+
+static void elf32_hppa_backend_symbol_processing PARAMS ((bfd *, asymbol *));
+
+static boolean elf32_hppa_backend_section_processing
+  PARAMS ((bfd *, Elf32_Internal_Shdr *));
+
+static boolean elf32_hppa_backend_symbol_table_processing
+  PARAMS ((bfd *, elf_symbol_type *, int));
+
+static boolean elf32_hppa_backend_section_from_shdr
+  PARAMS ((bfd *, Elf32_Internal_Shdr *, char *));
+
+static boolean elf32_hppa_backend_fake_sections
+  PARAMS ((bfd *, Elf_Internal_Shdr *, asection *));
+
+static boolean elf32_hppa_backend_section_from_bfd_section
+  PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *, int *));
+
+/* ELF/PA relocation howto entries.  */
 
 static reloc_howto_type elf_hppa_howto_table[ELF_HOWTO_TABLE_SIZE] =
 {
@@ -197,9 +405,18 @@ static long global_value;
 static long GOT_value;
 static asymbol *global_symbol;
 static int global_sym_defined;
-
 static symext_entryS *symextn_contents;
 static unsigned int symextn_contents_real_size;
+static elf32_hppa_stub_description *elf_hppa_stub_rootP;
+static boolean stubs_finished = false;
+static struct elf32_hppa_symextn_map_struct *elf32_hppa_symextn_map;
+static int elf32_hppa_symextn_map_size;
+
+static char *linker_stubs = NULL;
+static int linker_stubs_size = 0;
+static int linker_stubs_max_size = 0;
+#define STUB_ALLOC_INCR	100
+#define STUB_SYM_BUFFER_INC	5
 
 /* Relocate the given INSN given the various input parameters.
 
@@ -364,9 +581,7 @@ get_symbol_value (symbol)
 }
 
 /* Return one (or more) BFD relocations which implement the base
-   relocation with modifications based on format and field.
-
-   FIXME:  Needs a decl in elf32-hppa.h.  */
+   relocation with modifications based on format and field.  */
 
 elf32_hppa_reloc_type **
 hppa_elf_gen_reloc_type (abfd, base_type, format, field)
@@ -1477,109 +1692,37 @@ elf_hppa_tc_make_sections (abfd, symext_root)
   return;
 }
 
-/* Support for HP PA-RISC stub generation.
+/* Return the symbol extension record of type TYPE for the symbol SYM.  */
 
-   Written by
-
-	Center for Software Science
-	Department of Computer Science
-	University of Utah
-
-    */
-
-/*
-    HP-PA calling conventions state:
-
-    1. an argument relocation stub is required whenever the callee and
-    caller argument relocation bits do not match exactly.  The exception
-    to this rule is if either the caller or callee argument relocation
-    bit are 00 (do not relocate).
-
-    2. The linker can optionally add a symbol record for the stub so that
-    the stub can be reused.  The symbol record will be the same as the
-    original export symbol record, except that the relocation bits will
-    reflect the input of the stub, the type would be STUB and the symbol
-    value will be the location of the relocation stub.
-
-    Other notes:
-
-    Stubs can be inserted *before* the section of the caller.  The stubs
-    can be treated as calls to code that manipulates the arguments.
-
- */
-
-typedef enum
-  {
-    HPPA_STUB_ILLEGAL,
-    HPPA_STUB_ARG_RELOC,
-    HPPA_STUB_LONG_BRANCH
-  } hppa_stub_type;
-
-symext_entryS
+static symext_entryS
 elf32_hppa_get_sym_extn (abfd, sym, type)
      bfd *abfd;
      asymbol *sym;
      int type;
 {
-  /* This function finds the symbol extension record of the */
-  /* specified type for the specified symbol.  It returns the */
-  /* value of the symbol extension record.	*/
-  symext_entryS retval;
-
   switch (type)
     {
-    case HPPA_SXT_NULL:
-      retval = (symext_entryS) 0;
-      break;
     case HPPA_SXT_SYMNDX:
-      retval = (symext_entryS) 0;	/* XXX: need to fix this */
-      break;
+    case HPPA_SXT_NULL:
+      return (symext_entryS) 0;
     case HPPA_SXT_ARG_RELOC:
       {
 	elf_symbol_type *esymP = (elf_symbol_type *) sym;
 
-	retval = (symext_entryS) esymP->tc_data.hppa_arg_reloc;
-	break;
+	return (symext_entryS) esymP->tc_data.hppa_arg_reloc;
       }
     /* This should never happen.  */
     default:
       abort();
     }
-  return retval;
 }
 
-typedef struct elf32_hppa_stub_name_list_struct
-{
-  /* name of this stub  */
-  asymbol *sym;
-  /* stub description for this stub  */
-  struct elf32_hppa_stub_description_struct *stub_desc;
-  /* pointer into stub contents  */
-  int *stub_secp;
-  /* size of this stub  */
-  unsigned size;
-  /* next stub name entry  */
-  struct elf32_hppa_stub_name_list_struct *next;
-} elf32_hppa_stub_name_list;
+/* Search the chain of stub descriptions and locate the stub
+   description for this the given section within the given bfd.
 
-typedef struct elf32_hppa_stub_description_struct
-  {
-    struct elf32_hppa_stub_description_struct *next;
-    bfd *this_bfd;		/* bfd to which this stub applies */
-    asection *stub_sec;		/* stub section for this bfd */
-    unsigned relocs_allocated_cnt; /* count of relocations for this stub section */
-    unsigned real_size;
-    unsigned allocated_size;
-    int *stub_secp;		/* pointer to the next available location in the buffer */
-    char *stub_contents;	/* contents of the stubs for this bfd */
-    elf32_hppa_stub_name_list *stub_listP;
-    struct bfd_link_info *link_info;
-  }
-elf32_hppa_stub_description;
+   FIXME:  I see yet another wonderful linear linked list search
+   here.  This is probably bad.  */
 
-static elf32_hppa_stub_description *elf_hppa_stub_rootP;
-
-/* Locate the stub section information for the given bfd. */
 static elf32_hppa_stub_description *
 find_stubs (abfd, stub_sec)
      bfd *abfd;
@@ -1589,12 +1732,11 @@ find_stubs (abfd, stub_sec)
 
   for (stubP = elf_hppa_stub_rootP; stubP; stubP = stubP->next)
     {
-      if (stubP->this_bfd == abfd
-	  && stubP->stub_sec == stub_sec)
+      /* Is this the right one?  */ 
+      if (stubP->this_bfd == abfd && stubP->stub_sec == stub_sec)
 	return stubP;
     }
-
-  return (elf32_hppa_stub_description *) NULL;
+  return NULL;
 }
 
 static elf32_hppa_stub_description *
@@ -1605,10 +1747,13 @@ new_stub (abfd, stub_sec, link_info)
 {
   elf32_hppa_stub_description *stub = find_stubs (abfd, stub_sec);
 
+  /* If we found a list for this bfd, then use it.  */
   if (stub)
     return stub;
 
-  stub = (elf32_hppa_stub_description *) bfd_zalloc (abfd, sizeof (elf32_hppa_stub_description));
+  /* Nope, allocate and initialize a new entry in the stub list chain.  */
+  stub = (elf32_hppa_stub_description *)
+    bfd_zalloc (abfd, sizeof (elf32_hppa_stub_description));
   if (stub)
     {
       stub->this_bfd = abfd;
@@ -1631,30 +1776,37 @@ new_stub (abfd, stub_sec, link_info)
   return stub;
 }
 
-/* Locate the stub by the given name.  */
+/* Try and locate a stub with the name NAME within the stubs
+   associated with ABFD.  More linked list searches.  */
+
 static elf32_hppa_stub_name_list *
 find_stub_by_name (abfd, stub_sec, name)
      bfd *abfd;
      asection *stub_sec;
      char *name;
 {
+  /* Find the stubs associated with this bfd.  */
   elf32_hppa_stub_description *stub = find_stubs (abfd, stub_sec);
 
+  /* If found, then we have to walk down them looking for a match.  */
   if (stub)
     {
       elf32_hppa_stub_name_list *name_listP;
 
-      for (name_listP = stub->stub_listP; name_listP; name_listP = name_listP->next)
+      for (name_listP = stub->stub_listP;
+	   name_listP;
+	   name_listP = name_listP->next)
 	{
 	  if (!strcmp (name_listP->sym->name, name))
 	    return name_listP;
 	}
     }
 
+  /* Not found.  */
   return 0;
 }
 
-/* Locate the stub by the given name.  */
+/* Add a new stub (SYM) to the list of stubs associated with the given BFD.  */
 static elf32_hppa_stub_name_list *
 add_stub_by_name(abfd, stub_sec, sym, link_info)
      bfd *abfd;
@@ -1665,11 +1817,14 @@ add_stub_by_name(abfd, stub_sec, sym, link_info)
   elf32_hppa_stub_description *stub = find_stubs (abfd, stub_sec);
   elf32_hppa_stub_name_list *stub_entry;
 
+  /* If no stubs are associated with this bfd, then we have to make
+     a chain-of-stubs associated with this bfd.  */
   if (!stub)
-    stub = new_stub(abfd, stub_sec, link_info);
+    stub = new_stub (abfd, stub_sec, link_info);
 
   if (stub)
     {
+      /* Allocate and initialize an entry in the stub chain.  */
       stub_entry = (elf32_hppa_stub_name_list *)
 	bfd_zalloc (abfd, sizeof (elf32_hppa_stub_name_list));
 
@@ -1681,6 +1836,7 @@ add_stub_by_name(abfd, stub_sec, sym, link_info)
 	  /* First byte of this stub is the pointer to
 	     the next available location in the stub buffer.  */
 	  stub_entry->stub_secp = stub->stub_secp;
+	  /* Add it to the chain.  */
 	  if (stub->stub_listP)
 	    stub_entry->next = stub->stub_listP;
 	  else
@@ -1694,84 +1850,16 @@ add_stub_by_name(abfd, stub_sec, sym, link_info)
 	  abort();		/* FIXME */
 	}
     }
-
+  /* Death by mis-adventure.  */
+  abort ();
   return (elf32_hppa_stub_name_list *)NULL;
 }
 
-#define ARGUMENTS	0
-#define RETURN_VALUE	1
+/* For the given caller/callee argument location information and the
+   type of relocation (arguments or return value), return the type
+   of argument relocation needed to make caller and callee happy.  */
 
-#define	NO_ARG_RELOC	0
-#define R_TO_FR		1
-#define R01_TO_FR	2
-#define R23_TO_FR	3
-#define FR_TO_R		4
-#define FR_TO_R01	5
-#define FR_TO_R23	6
-#define	ARG_RELOC_ERR	7
-
-#define ARG0	0
-#define ARG1	1
-#define ARG2	2
-#define ARG3	3
-#define RETVAL	4
-
-#define AR_NO	0
-#define AR_GR	1
-#define AR_FR	2
-#define AR_FU	3
-/* FP register in arg0/arg1.  This value can only appear in the arg0 location. */
-#define AR_DBL01	4
-/* FP register in arg2/arg3.  This value can only appear in the arg2 location. */
-#define AR_DBL23	5
-
-#define AR_WARN(type,loc) \
-  fprintf(stderr,"WARNING:  Illegal argument relocation: %s for %s\n", \
-	  reloc_type_strings[type],reloc_loc_strings[loc])
-
-static CONST char *CONST reloc_type_strings[] =
-{
-  "NONE", "GR->FR", "GR0,GR1->FR1", "GR2,GR3->FR3", "FR->GR", "FR->GR0,GR1", "FR->GR2,GR3", "ERROR"
-};
-
-static CONST char *CONST reloc_loc_strings[] =
-{
-  "ARG0", "ARG1", "ARG2", "ARG3", "RETVAL"
-};
-
-static CONST char mismatches[6][6] =
-{				/* 	CALLEE NONE	CALLEE GR	CALLEE FR	CALLEE FU	CALLEE DBL01	CALLEE DBL23	*/
-  /* CALLER NONE	*/
- {NO_ARG_RELOC, NO_ARG_RELOC, NO_ARG_RELOC, ARG_RELOC_ERR, NO_ARG_RELOC, NO_ARG_RELOC},
- /* CALLER GR	*/
- {NO_ARG_RELOC, NO_ARG_RELOC, R_TO_FR, ARG_RELOC_ERR, R01_TO_FR, ARG_RELOC_ERR},
- /* CALLER FR	*/
- {NO_ARG_RELOC, FR_TO_R, NO_ARG_RELOC, ARG_RELOC_ERR, ARG_RELOC_ERR},
- /* CALLER FU	*/
- {ARG_RELOC_ERR, ARG_RELOC_ERR, ARG_RELOC_ERR, ARG_RELOC_ERR, ARG_RELOC_ERR, ARG_RELOC_ERR},
- /* CALLER DBL01	*/
- {NO_ARG_RELOC, FR_TO_R01, NO_ARG_RELOC, ARG_RELOC_ERR, NO_ARG_RELOC, ARG_RELOC_ERR},
- /* CALLER DBL23	*/
- {NO_ARG_RELOC, FR_TO_R23, NO_ARG_RELOC, ARG_RELOC_ERR, ARG_RELOC_ERR, NO_ARG_RELOC},
-};
-
-static CONST char retval_mismatches[6][6] =
-{	/* 	CALLEE NONE	CALLEE GR	CALLEE FR	CALLEE FU	CALLEE DBL01	CALLEE DBL23	*/
-  /* CALLER NONE	*/
- {NO_ARG_RELOC, NO_ARG_RELOC, NO_ARG_RELOC, ARG_RELOC_ERR, NO_ARG_RELOC, NO_ARG_RELOC},
- /* CALLER GR	*/
- {NO_ARG_RELOC, NO_ARG_RELOC, FR_TO_R, ARG_RELOC_ERR, FR_TO_R01, ARG_RELOC_ERR},
- /* CALLER FR	*/
- {NO_ARG_RELOC, R_TO_FR, NO_ARG_RELOC, ARG_RELOC_ERR, ARG_RELOC_ERR, ARG_RELOC_ERR},
- /* CALLER FU	*/
- {ARG_RELOC_ERR, ARG_RELOC_ERR, ARG_RELOC_ERR, ARG_RELOC_ERR, ARG_RELOC_ERR, ARG_RELOC_ERR},
- /* CALLER DBL01	*/
- {NO_ARG_RELOC, R01_TO_FR, NO_ARG_RELOC, ARG_RELOC_ERR, NO_ARG_RELOC, ARG_RELOC_ERR},
- /* CALLER DBL23	*/
- {NO_ARG_RELOC, R23_TO_FR, NO_ARG_RELOC, ARG_RELOC_ERR, ARG_RELOC_ERR, NO_ARG_RELOC},
-};
-
-static int
+static arg_reloc_type
 type_of_mismatch (caller_bits, callee_bits, type)
      int caller_bits;
      int callee_bits;
@@ -1784,76 +1872,84 @@ type_of_mismatch (caller_bits, callee_bits, type)
     case RETURN_VALUE:
       return retval_mismatches[caller_bits][callee_bits];
     }
-
-  return 0;
+  return ARG_RELOC_ERR;
 }
 
-#define EXTRACT_ARBITS(ar,which)	((ar) >> (8-(which*2))) & 3
+/* Extract specific argument location bits for WHICH from the
+   the full argument location information in AR.  */
+#define EXTRACT_ARBITS(ar, which)	((ar) >> (8 - ((which) * 2))) & 3
 
-#define NEW_INSTRUCTION(entry,insn)	\
+/* Add the new instruction INSN into the stub area denoted by ENTRY.
+   FIXME:  Looks like more cases where we assume sizeof (int) ==
+   sizeof (insn) which may not be true if building cross tools.  */
+#define NEW_INSTRUCTION(entry, insn)	\
 { \
   *((entry)->stub_desc->stub_secp)++ = (insn);	\
-  (entry)->stub_desc->real_size += sizeof(int);	\
+  (entry)->stub_desc->real_size += sizeof (int);	\
   (entry)->size += sizeof(int);	\
   bfd_set_section_size((entry)->stub_desc->this_bfd,	\
 		       (entry)->stub_desc->stub_sec,	\
 		       (entry)->stub_desc->real_size);	\
 }
 
+/* Find the offset of the current stub?  Looks more like it
+   finds the offset of the last instruction to me.  */
 #define CURRENT_STUB_OFFSET(entry)	\
   ((char *)(entry)->stub_desc->stub_secp \
    - (char *)(entry)->stub_desc->stub_contents - 4)
 
-static boolean stubs_finished = false;
+/* All the stubs have already been built, finish up stub stuff
+   by applying relocations to the stubs.  */
 
-void
+static void
 hppa_elf_stub_finish (output_bfd)
      bfd *output_bfd;
 {
   elf32_hppa_stub_description *stub_list = elf_hppa_stub_rootP;
-  /* All the stubs have been built.  Finish up building	*/
-  /* stub section.  Apply relocations to the section.	*/
 
+  /* If the stubs have been finished, then we're already done.  */
   if (stubs_finished)
     return;
 
+  /* Walk down the list of stub lists. */
   for (; stub_list; stub_list = stub_list->next)
     {
+      /* If this list has stubs, then do something.  */
       if (stub_list->real_size)
 	{
 	  bfd *stub_bfd = stub_list->this_bfd;
-	  asection *stub_sec = bfd_get_section_by_name (stub_bfd, ".hppa_linker_stubs");
+	  asection *stub_sec = bfd_get_section_by_name (stub_bfd,
+							".hppa_linker_stubs");
 	  bfd_size_type reloc_size;
 	  arelent **reloc_vector;
 
+	  /* Some sanity checking.  */
 	  BFD_ASSERT (stub_sec == stub_list->stub_sec);
-	  reloc_size = bfd_get_reloc_upper_bound (stub_bfd, stub_sec);
-	  reloc_vector = (arelent **) alloca (reloc_size);
-
 	  BFD_ASSERT (stub_sec);
 
-	  /* We are not relaxing the section, so just copy the size info */
+	  /* For stub sections raw_size == cooked_size.  Also update
+	     reloc_done as we're handling the relocs now.  */
 	  stub_sec->_cooked_size = stub_sec->_raw_size;
 	  stub_sec->reloc_done = true;
 
+	  /* Make space to hold the relocations for the stub section.  */
+	  reloc_size = bfd_get_reloc_upper_bound (stub_bfd, stub_sec);
+	  reloc_vector = (arelent **) alloca (reloc_size);
 
-	  if (bfd_canonicalize_reloc (stub_bfd,
-				      stub_sec,
-				      reloc_vector,
+	  /* If we have relocations, do them.  */
+	  if (bfd_canonicalize_reloc (stub_bfd, stub_sec, reloc_vector,
 				      output_bfd->outsymbols))
 	    {
 	      arelent **parent;
-	      for (parent = reloc_vector; *parent != (arelent *) NULL;
-		   parent++)
+	      for (parent = reloc_vector; *parent != NULL; parent++)
 		{
-		  char *err = (char *) NULL;
+		  char *err = NULL;
 		  bfd_reloc_status_type r =
-		    bfd_perform_relocation (stub_bfd,
-					    *parent,
+		    bfd_perform_relocation (stub_bfd, *parent,
 					    stub_list->stub_contents,
 					    stub_sec, (bfd *) NULL, &err);
 
-
+		  /* If there was an error, tell someone about it.  */
 		  if (r != bfd_reloc_ok)
 		    {
 		      struct bfd_link_info *link_info = stub_list->link_info;
@@ -1894,89 +1990,35 @@ hppa_elf_stub_finish (output_bfd)
 		}
 	    }
 
-	  bfd_set_section_contents (output_bfd,
-				    stub_sec,
+	  /* All done with the relocations.  Set the final contents
+	     of the stub section.  FIXME: no check of return value!  */
+	  bfd_set_section_contents (output_bfd, stub_sec,
 				    stub_list->stub_contents,
-				    0,
-				    stub_list->real_size);
-
-	  free (reloc_vector);
+				    0, stub_list->real_size);
 	}
     }
+  /* All done.  */
   stubs_finished = true;
 }
 
-void
-hppa_elf_stub_branch_reloc (stub_desc,	/* the bfd */
-			    output_bfd,	/* the output bfd */
-			    target_sym,	/* the target symbol */
-			    offset)	/* the offset within the stub buffer (pre-calculated) */
-     elf32_hppa_stub_description *stub_desc;
-     bfd *output_bfd;
-     asymbol *target_sym;
-     int offset;
-{
-  /* Allocate a new relocation entry. */
-  arelent relent;
-  int size;
+/* Allocate a new relocation entry to be used in a linker stub.  */
 
-  if (stub_desc->relocs_allocated_cnt == stub_desc->stub_sec->reloc_count)
-    {
-      if (stub_desc->stub_sec->relocation == NULL)
-	{
-	  stub_desc->relocs_allocated_cnt = STUB_RELOC_INCR;
-	  size = sizeof (arelent) * stub_desc->relocs_allocated_cnt;
-	  stub_desc->stub_sec->relocation = (arelent *) bfd_zmalloc (size);
-	}
-      else
-	{
-	  stub_desc->relocs_allocated_cnt += STUB_RELOC_INCR;
-	  size = sizeof (arelent) * stub_desc->relocs_allocated_cnt;
-	  stub_desc->stub_sec->relocation = (arelent *) realloc (stub_desc->stub_sec->relocation,
-								 size);
-	}
-      if (!stub_desc->stub_sec->relocation)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  abort();		/* FIXME */
-	}
-    }
-
-  /* Fill in the details. */
-  relent.address = offset;
-  relent.addend = 0;
-  relent.sym_ptr_ptr = (asymbol **) bfd_zalloc (stub_desc->this_bfd, sizeof (asymbol *));
-  BFD_ASSERT (relent.sym_ptr_ptr); /* FIXME */
-
-  relent.sym_ptr_ptr[0] = target_sym;
-  relent.howto = bfd_reloc_type_lookup (stub_desc->this_bfd, R_HPPA_PCREL_CALL_17);
-
-  /* Save it in the array of relocations for the stub section. */
-
-  memcpy (&stub_desc->stub_sec->relocation[stub_desc->stub_sec->reloc_count++],
-	  &relent,
-	  sizeof (arelent));
-}
-
-void
-hppa_elf_stub_reloc (stub_desc,	/* the bfd */
-		     output_bfd,	/* the output bfd */
-		     target_sym,	/* the target symbol */
-		     offset,	/* the offset within the stub buffer (pre-calculated) */
-		     type)
+static void
+hppa_elf_stub_reloc (stub_desc, output_bfd, target_sym, offset, type)
      elf32_hppa_stub_description *stub_desc;
      bfd *output_bfd;
      asymbol *target_sym;
      int offset;
      elf32_hppa_reloc_type type;
 {
-  /* Allocate a new relocation entry. */
   arelent relent;
   int size;
   Elf_Internal_Shdr *rela_hdr;
 
+  /* I really don't like the realloc nonsense in here.  FIXME.  */
   if (stub_desc->relocs_allocated_cnt == stub_desc->stub_sec->reloc_count)
     {
+      /* Allocate the first few relocation entries.  */
       if (stub_desc->stub_sec->relocation == NULL)
 	{
 	  stub_desc->relocs_allocated_cnt = STUB_RELOC_INCR;
@@ -1985,15 +2027,17 @@ hppa_elf_stub_reloc (stub_desc,	/* the bfd */
 	}
       else
 	{
+	  /* We've used all the entries we've already allocated.  So get
+	     some more.  */
 	  stub_desc->relocs_allocated_cnt += STUB_RELOC_INCR;
 	  size = sizeof (arelent) * stub_desc->relocs_allocated_cnt;
-	  stub_desc->stub_sec->relocation = (arelent *) realloc (stub_desc->stub_sec->relocation,
-								 size);
+	  stub_desc->stub_sec->relocation = (arelent *)
+	    realloc (stub_desc->stub_sec->relocation, size);
 	}
       if (!stub_desc->stub_sec->relocation)
 	{
 	  bfd_set_error (bfd_error_no_memory);
-	  abort();		/* FIXME */
+	  abort ();		/* FIXME */
 	}
     }
 
@@ -2003,39 +2047,40 @@ hppa_elf_stub_reloc (stub_desc,	/* the bfd */
   /* Fill in the details. */
   relent.address = offset;
   relent.addend = 0;
-  relent.sym_ptr_ptr = (asymbol **) bfd_zalloc (stub_desc->this_bfd, sizeof (asymbol *));
-  BFD_ASSERT (relent.sym_ptr_ptr); /* FIXME */
-
-  relent.sym_ptr_ptr[0] = target_sym;
+  relent.sym_ptr_ptr = &target_sym;
   relent.howto = bfd_reloc_type_lookup (stub_desc->this_bfd, type);
 
-  /* Save it in the array of relocations for the stub section. */
-
+  /* Save it in the array of relocations for the stub section.  */
   memcpy (&stub_desc->stub_sec->relocation[stub_desc->stub_sec->reloc_count++],
-	  &relent,
-	  sizeof (arelent));
+	  &relent, sizeof (arelent));
 }
 
-asymbol *
-hppa_elf_build_arg_reloc_stub (abfd, output_bfd, link_info, reloc_entry,
-			       stub_types, rtn_adjust, data)
+/* Build an argument relocation stub.  RTN_ADJUST is a hint that an
+   adjust to the return pointer from within the stub itself may be
+   needed.  */
+
+static asymbol *
+hppa_elf_build_linker_stub (abfd, output_bfd, link_info, reloc_entry,
+			    stub_types, rtn_adjust, data, linker_stub_type)
      bfd *abfd;
      bfd *output_bfd;
      struct bfd_link_info *link_info;
      arelent *reloc_entry;
-     int stub_types[5];
+     arg_reloc_type stub_types[5];
      int rtn_adjust;
      unsigned *data;
+     hppa_stub_type linker_stub_type;
 {
-  asection *stub_sec = bfd_get_section_by_name (abfd, ".hppa_linker_stubs");
-  elf32_hppa_stub_description *stub_desc = find_stubs (abfd, stub_sec);
-  asymbol *stub_sym = NULL;
-  asymbol *target_sym = reloc_entry->sym_ptr_ptr[0];
-  asection *output_text_section = bfd_get_section_by_name (output_bfd, ".text");
   int i;
+  boolean milli, dyncall;
   char stub_sym_name[128];
   elf32_hppa_stub_name_list *stub_entry;
+  /* Some initialization.  */
   unsigned insn = data[0];
+  asymbol *stub_sym = NULL;
+  asymbol *target_sym = reloc_entry->sym_ptr_ptr[0];
+  asection *stub_sec = bfd_get_section_by_name (abfd, ".hppa_linker_stubs");
+  elf32_hppa_stub_description *stub_desc = find_stubs (abfd, stub_sec);
 
   /* Perform some additional checks on whether we should really do the
      return adjustment.  For example, if the instruction is nullified
@@ -2053,18 +2098,45 @@ hppa_elf_build_arg_reloc_stub (abfd, output_bfd, link_info, reloc_entry,
 	rtn_adjust = false;
     }
 
-  /* See if the proper stub entry has already been made.  */
+  /* Some special code for long-call stubs.  */
+  if (linker_stub_type == HPPA_STUB_LONG_CALL)
+    {
+      
+      /* Is this a millicode call?  If so, the return address
+	 comes in on r31 rather than r2 (rp) so a slightly
+	 different code sequence is needed.  */
+      unsigned rtn_reg = (insn & 0x03e00000) >> 21;
+      if (rtn_reg == 31)
+	milli = true;
+      
+      /* Dyncall is special because the user code has already
+	 put the return pointer in %r2 (aka RP).  Other millicode
+	 calls have the return pointer in %r31.  */
+      if (strcmp (target_sym->name, "$$dyncall") == 0)
+	dyncall = true;
+      
+      /* If we are creating a call from a stub to another stub, then
+	 never do the instruction reordering.  We can tell if we are
+	 going to be calling one stub from another by the fact that
+	 the symbol name has '_stub_' (arg. reloc. stub) or '_lb_stub_'
+	 prepended to the name.  Alternatively, the section of the
+	 symbol will be '.hppa_linker_stubs'.  This is only an issue
+	 for long-calls; they are the only stubs allowed to call another
+	 stub.  */
+      if ((strncmp (target_sym->name, "_stub_", 6) == 0)
+	  || (strncmp (target_sym->name, "_lb_stub_", 9) == 0))
+	{
+	  BFD_ASSERT (strcmp (target_sym->section->name, ".hppa_linker_stubs")
+		      == 0);
+	  rtn_adjust = false;
+	}
+    }
+
+  /* Create the stub section if necessary.  */
   if (!stub_sec)
     {
       BFD_ASSERT (stub_desc == NULL);
-      stub_sec = bfd_make_section (abfd, ".hppa_linker_stubs");
-      bfd_set_section_flags (abfd,
-			     stub_sec,
-			     SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD
-			     | SEC_RELOC | SEC_CODE | SEC_READONLY);
-      stub_sec->output_section = output_text_section->output_section;
-      stub_sec->output_offset = 0;
-      bfd_set_section_alignment (abfd, stub_sec, 2);
+      hppa_elf_create_stub_sec (abfd, output_bfd, &stub_sec, link_info);
       stub_desc = new_stub (abfd, stub_sec, link_info);
     }
 
@@ -2073,16 +2145,11 @@ hppa_elf_build_arg_reloc_stub (abfd, output_bfd, link_info, reloc_entry,
     stub_desc = new_stub (abfd, stub_sec, link_info);
 
   /* Allocate space to write the stub.
-     FIXME.  Why using realloc?!?  */
+     FIXME:  Why using realloc?!?  */
   if (!stub_desc->stub_contents)
     {
       stub_desc->allocated_size = STUB_BUFFER_INCR;
       stub_desc->stub_contents = (char *) malloc (STUB_BUFFER_INCR);
-      if (!stub_desc->stub_contents)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return NULL;
-	}
     }
   else if ((stub_desc->allocated_size - stub_desc->real_size) < STUB_MAX_SIZE)
     {
@@ -2091,35 +2158,45 @@ hppa_elf_build_arg_reloc_stub (abfd, output_bfd, link_info, reloc_entry,
 						   stub_desc->allocated_size);
     }
 
+  /* If no memory die.  (I seriously doubt the other routines
+     are prepared to get a NULL return value).  */
+  if (!stub_desc->stub_contents)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      abort ();
+    }
+
+  /* Generate an appropriate name for this stub.  */
+  if (linker_stub_type == HPPA_STUB_ARG_RELOC)
+    sprintf (stub_sym_name,
+	     "_stub_%s_%02d_%02d_%02d_%02d_%02d_%s",
+	     reloc_entry->sym_ptr_ptr[0]->name,
+	     stub_types[0], stub_types[1], stub_types[2],
+	     stub_types[3], stub_types[4],
+	     rtn_adjust ? "RA" : "");
+  else
+    sprintf (stub_sym_name,
+	     "_lb_stub_%s_%s", reloc_entry->sym_ptr_ptr[0]->name,
+	     rtn_adjust ? "RA" : "");
+
+
   stub_desc->stub_secp
     = (int *) (stub_desc->stub_contents + stub_desc->real_size);
-
-  sprintf (stub_sym_name,
-	   "_stub_%s_%02d_%02d_%02d_%02d_%02d_%s",
-	   reloc_entry->sym_ptr_ptr[0]->name,
-	   stub_types[0], stub_types[1], stub_types[2],
-	   stub_types[3], stub_types[4],
-	   rtn_adjust ? "RA" : "");
   stub_entry = find_stub_by_name (abfd, stub_sec, stub_sym_name);
 
+  /* See if we already have one by this name.  */
   if (stub_entry)
     {
+      /* Yes, re-use it.  Redirect the original relocation from the
+	 old symbol (a function symbol) to the stub (the stub will call
+	 the original function).  */
       stub_sym = stub_entry->sym;
-      /* Redirect the original relocation from the old symbol (a function)
-	 to the stub (the stub calls the function).  Should we need to
-	 change the relocation type?  */
-      reloc_entry->sym_ptr_ptr = (asymbol **) bfd_zalloc (stub_desc->this_bfd,
-							  sizeof (asymbol *));
-      if (!reloc_entry->sym_ptr_ptr)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return NULL;
-	}
-      reloc_entry->sym_ptr_ptr[0] = stub_sym;
-      if (reloc_entry->howto->type != R_HPPA_PLABEL_32
-	  && (get_opcode(insn) == BLE
-	      || get_opcode (insn) == BE
-	      || get_opcode (insn) == BL))
+      reloc_entry->sym_ptr_ptr = &stub_sym;
+      if (linker_stub_type == HPPA_STUB_LONG_CALL
+	  || (reloc_entry->howto->type != R_HPPA_PLABEL_32
+	      && (get_opcode(insn) == BLE
+		  || get_opcode (insn) == BE
+		  || get_opcode (insn) == BL)))
 	reloc_entry->howto = bfd_reloc_type_lookup (abfd, R_HPPA_STUB_CALL_17);
     }
   else
@@ -2129,13 +2206,13 @@ hppa_elf_build_arg_reloc_stub (abfd, output_bfd, link_info, reloc_entry,
       if (!stub_sym)
 	{
 	  bfd_set_error (bfd_error_no_memory);
-	  return NULL;
+	  abort ();
 	}
       stub_sym->name = bfd_zalloc (abfd, strlen (stub_sym_name) + 1);
       if (!stub_sym->name)
 	{
 	  bfd_set_error (bfd_error_no_memory);
-	  return NULL;
+	  abort ();
 	}
       strcpy ((char *) stub_sym->name, stub_sym_name);
       stub_sym->value
@@ -2145,221 +2222,282 @@ hppa_elf_build_arg_reloc_stub (abfd, output_bfd, link_info, reloc_entry,
       stub_entry = add_stub_by_name (abfd, stub_sec, stub_sym, link_info);
 
       /* Redirect the original relocation from the old symbol (a function)
-	 to the stub (the stub calls the function).  Change the type of
-	 relocation to be the internal use only stub R_HPPA_STUB_CALL_17.  */
-      reloc_entry->sym_ptr_ptr = (asymbol **) bfd_zalloc (stub_desc->this_bfd,
-							  sizeof (asymbol *));
-      if (!reloc_entry->sym_ptr_ptr)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return NULL;
-	}
-      reloc_entry->sym_ptr_ptr[0] = stub_sym;
-      if (reloc_entry->howto->type != R_HPPA_PLABEL_32
-	  && (get_opcode (insn) == BLE
-	      || get_opcode (insn) == BE
-	      || get_opcode (insn) == BL))
+	 to the stub (the stub calls the function).  */
+      reloc_entry->sym_ptr_ptr = &stub_sym;
+      if (linker_stub_type == HPPA_STUB_LONG_CALL
+	  || (reloc_entry->howto->type != R_HPPA_PLABEL_32
+	      && (get_opcode (insn) == BLE
+		  || get_opcode (insn) == BE
+		  || get_opcode (insn) == BL)))
 	reloc_entry->howto = bfd_reloc_type_lookup (abfd, R_HPPA_STUB_CALL_17);
 
-      /* Generate common code for all stubs.  */
+      /* Now generate the code for the stub.  Starting with two
+	 common instructions.
 
-      NEW_INSTRUCTION (stub_entry, LDSID_31_1);
-      NEW_INSTRUCTION (stub_entry, MTSP_1_SR0);
-      NEW_INSTRUCTION (stub_entry, ADDI_8_SP);
+	 FIXME:  Do we still need the SP adjustment?
+		 Do we still need to muck with space registers?  */
+      NEW_INSTRUCTION (stub_entry, LDSID_31_1)
+      NEW_INSTRUCTION (stub_entry, MTSP_1_SR0)
 
-      /* Generate code to move the arguments around.  */
-      for (i = ARG0; i < ARG3; i++)
+      if (linker_stub_type == HPPA_STUB_ARG_RELOC)
 	{
-	  if (stub_types[i] != NO_ARG_RELOC)
-	    {
-	      switch (stub_types[i])
-		{
-		case R_TO_FR:
-		  switch (i)
-		    {
-		    case ARG0:
-		      NEW_INSTRUCTION (stub_entry, STWS_ARG0_M8SP);
-		      NEW_INSTRUCTION (stub_entry, FLDWS_M8SP_FARG0);
-		      break;
-		    case ARG1:
-		      NEW_INSTRUCTION (stub_entry, STWS_ARG1_M8SP);
-		      NEW_INSTRUCTION (stub_entry, FLDWS_M8SP_FARG1);
-		      break;
-		    case ARG2:
-		      NEW_INSTRUCTION (stub_entry, STWS_ARG2_M8SP);
-		      NEW_INSTRUCTION (stub_entry, FLDWS_M8SP_FARG2);
-		      break;
-		    case ARG3:
-		      NEW_INSTRUCTION (stub_entry, STWS_ARG3_M8SP);
-		      NEW_INSTRUCTION (stub_entry, FLDWS_M8SP_FARG3);
-		      break;
-		    }
-		  continue;
-		  
-		case R01_TO_FR:
-		  switch (i)
-		    {
-		    case ARG0:
-		      NEW_INSTRUCTION (stub_entry, STWS_ARG0_M4SP);
-		      NEW_INSTRUCTION (stub_entry, STWS_ARG1_M8SP);
-		      NEW_INSTRUCTION (stub_entry, FLDDS_M8SP_FARG1);
-		      break;
-		    default:
-		      AR_WARN (stub_types[i],i);
-		      break;
-		    }
-		  continue;
-		  
-		case R23_TO_FR:
-		  switch (i)
-		    {
-		    case ARG2:
-		      NEW_INSTRUCTION (stub_entry, STWS_ARG2_M4SP);
-		      NEW_INSTRUCTION (stub_entry, STWS_ARG3_M8SP);
-		      NEW_INSTRUCTION (stub_entry, FLDDS_M8SP_FARG3);
-		      break;
-		    default:
-		      AR_WARN (stub_types[i],i);
-		      break;
-		    }
-		  continue;
-		  
-		case FR_TO_R:
-		  switch (i)
-		    {
-		    case ARG0:
-		      NEW_INSTRUCTION (stub_entry, FSTWS_FARG0_M8SP);
-		      NEW_INSTRUCTION (stub_entry, LDWS_M4SP_ARG0);
-		      break;
-		    case ARG1:
-		      NEW_INSTRUCTION (stub_entry, FSTWS_FARG1_M8SP);
-		      NEW_INSTRUCTION (stub_entry, LDWS_M4SP_ARG1);
-		      break;
-		    case ARG2:
-		      NEW_INSTRUCTION (stub_entry, FSTWS_FARG2_M8SP);
-		      NEW_INSTRUCTION (stub_entry, LDWS_M4SP_ARG2);
-		      break;
-		    case ARG3:
-		      NEW_INSTRUCTION (stub_entry, FSTWS_FARG3_M8SP);
-		      NEW_INSTRUCTION (stub_entry, LDWS_M4SP_ARG3);
-		      break;
-		    }
-		  continue;
-		  
-		case FR_TO_R01:
-		  switch (i)
-		    {
-		    case ARG0:
-		      NEW_INSTRUCTION (stub_entry, FSTDS_FARG1_M8SP);
-		      NEW_INSTRUCTION (stub_entry, LDWS_M4SP_ARG0);
-		      NEW_INSTRUCTION (stub_entry, LDWS_M8SP_ARG1);
-		      break;
-		    default:
-		      AR_WARN (stub_types[i],i);
-		      break;
-		    }
-		  continue;
-		  
-		case FR_TO_R23:
-		  switch (i)
-		    {
-		    case ARG2:
-		      NEW_INSTRUCTION (stub_entry, FSTDS_FARG3_M8SP);
-		      NEW_INSTRUCTION (stub_entry, LDWS_M4SP_ARG2);
-		      NEW_INSTRUCTION (stub_entry, LDWS_M8SP_ARG3);
-		      break;
-		    default:
-		      AR_WARN (stub_types[i],i);
-		      break;
-		    }
-		  continue;
-		  
-		}
-	    }
+	  NEW_INSTRUCTION (stub_entry, ADDI_8_SP)
+
+	  /* Examine each argument, generating code to relocate it
+	     into a different register if necessary.  */
+	    for (i = ARG0; i < ARG3; i++)
+	      {
+		switch (stub_types[i])
+		  {
+
+		  case NO_ARG_RELOC:
+		    continue;
+
+		  case R_TO_FR:
+		    switch (i)
+		      {
+		      case ARG0:
+			NEW_INSTRUCTION (stub_entry, STWS_ARG0_M8SP)
+			NEW_INSTRUCTION (stub_entry, FLDWS_M8SP_FARG0)
+			  break;
+		      case ARG1:
+			NEW_INSTRUCTION (stub_entry, STWS_ARG1_M8SP)
+		        NEW_INSTRUCTION (stub_entry, FLDWS_M8SP_FARG1)
+			  break;
+		      case ARG2:
+			NEW_INSTRUCTION (stub_entry, STWS_ARG2_M8SP)
+			NEW_INSTRUCTION (stub_entry, FLDWS_M8SP_FARG2)
+			  break;
+		      case ARG3:
+			NEW_INSTRUCTION (stub_entry, STWS_ARG3_M8SP)
+			NEW_INSTRUCTION (stub_entry, FLDWS_M8SP_FARG3)
+			  break;
+		      }
+		    continue;
+	      
+		  case R01_TO_FR:
+		    switch (i)
+		      {
+		      case ARG0:
+			NEW_INSTRUCTION (stub_entry, STWS_ARG0_M4SP)
+			NEW_INSTRUCTION (stub_entry, STWS_ARG1_M8SP)
+			NEW_INSTRUCTION (stub_entry, FLDDS_M8SP_FARG1)
+			  break;
+		      default:
+			abort ();
+			break;
+		      }
+		    continue;
+
+		  case R23_TO_FR:
+		    switch (i)
+		      {
+		      case ARG2:
+			NEW_INSTRUCTION (stub_entry, STWS_ARG2_M4SP)
+			NEW_INSTRUCTION (stub_entry, STWS_ARG3_M8SP)
+			NEW_INSTRUCTION (stub_entry, FLDDS_M8SP_FARG3)
+			  break;
+		      default:
+			abort ();
+			break;
+		      }
+		    continue;
+
+		  case FR_TO_R:
+		    switch (i)
+		      {
+		      case ARG0:
+			NEW_INSTRUCTION (stub_entry, FSTWS_FARG0_M8SP)
+			NEW_INSTRUCTION (stub_entry, LDWS_M4SP_ARG0)
+			  break;
+		      case ARG1:
+			NEW_INSTRUCTION (stub_entry, FSTWS_FARG1_M8SP)
+			NEW_INSTRUCTION (stub_entry, LDWS_M4SP_ARG1)
+			  break;
+		      case ARG2:
+			NEW_INSTRUCTION (stub_entry, FSTWS_FARG2_M8SP)
+			NEW_INSTRUCTION (stub_entry, LDWS_M4SP_ARG2)
+			  break;
+		      case ARG3:
+			NEW_INSTRUCTION (stub_entry, FSTWS_FARG3_M8SP)
+			NEW_INSTRUCTION (stub_entry, LDWS_M4SP_ARG3)
+			  break;
+		      }
+		    continue;
+	      
+		  case FR_TO_R01:
+		    switch (i)
+		      {
+		      case ARG0:
+			NEW_INSTRUCTION (stub_entry, FSTDS_FARG1_M8SP)
+			NEW_INSTRUCTION (stub_entry, LDWS_M4SP_ARG0)
+			NEW_INSTRUCTION (stub_entry, LDWS_M8SP_ARG1)
+			  break;
+		      default:
+			abort ();
+			break;
+		      }
+		    continue;
+	      
+		  case FR_TO_R23:
+		    switch (i)
+		      {
+		      case ARG2:
+			NEW_INSTRUCTION (stub_entry, FSTDS_FARG3_M8SP)
+			NEW_INSTRUCTION (stub_entry, LDWS_M4SP_ARG2)
+			NEW_INSTRUCTION (stub_entry, LDWS_M8SP_ARG3)
+			  break;
+		      default:
+			abort ();
+			break;
+		      }
+		    continue;
+
+		  default:
+		    abort ();
+		    break;
+		  }
+	      }
+
+	  /* Put the stack pointer back.  FIXME:  Is this still necessary?  */
+	  NEW_INSTRUCTION (stub_entry, ADDI_M8_SP_SP)
 	}
 
-      NEW_INSTRUCTION (stub_entry, ADDI_M8_SP_SP);
-
-      /* Adjust the return address if necessary.  */
-      if (rtn_adjust)
+      /* Common code again.  Return pointer adjustment and the like.  */
+      if (!dyncall)
 	{
-	  NEW_INSTRUCTION (stub_entry, ADDI_M4_31_RP);
+	  /* This isn't dyncall.  */ 
+	  if (!milli)
+	    {
+	      /* It's not a millicode call, so get the correct return
+		 value into %r2 (aka RP).  */
+	      if (rtn_adjust)
+		NEW_INSTRUCTION (stub_entry, ADDI_M4_31_RP)
+	      else
+		NEW_INSTRUCTION (stub_entry, COPY_31_2)
+	    }
+	  else
+	    {
+	      /* It is a millicode call, so get the correct return
+		 value into %r1?!?.  FIXME:  Shouldn't this be
+		 %r31?  Yes, and a little re-arrangement of the
+		 code below would make that possible.  */
+	      if (rtn_adjust)
+		NEW_INSTRUCTION (stub_entry, ADDI_M4_31_1)
+	      else
+		NEW_INSTRUCTION (stub_entry, COPY_31_1)
+	    }
 	}
       else
-	NEW_INSTRUCTION (stub_entry, COPY_31_2);
+	{
+	  /* This is dyncall, so the code is a little different as the
+	     return pointer is already in %r2 (aka RP).  */
+	  if (rtn_adjust)
+	    NEW_INSTRUCTION (stub_entry, ADDI_M4_31_RP)
+	}
 
       /* Save the return address.  */
-      NEW_INSTRUCTION (stub_entry, STW_RP_M8SP);
+      if (linker_stub_type == HPPA_STUB_ARG_RELOC)
+	NEW_INSTRUCTION (stub_entry, STW_RP_M8SP)
 
       /* Long branch to the target function.  */
-      NEW_INSTRUCTION (stub_entry, LDIL_XXX_31);
+      NEW_INSTRUCTION (stub_entry, LDIL_XXX_31)
       hppa_elf_stub_reloc (stub_entry->stub_desc,
-			   abfd,
-			   target_sym,
+			   abfd, target_sym,
 			   CURRENT_STUB_OFFSET (stub_entry),
 			   R_HPPA_L21);
-      NEW_INSTRUCTION (stub_entry, BLE_XXX_0_31);
+      NEW_INSTRUCTION (stub_entry, BLE_XXX_0_31)
       hppa_elf_stub_reloc (stub_entry->stub_desc,
-			   abfd,
-			   target_sym,
+			   abfd, target_sym,
 			   CURRENT_STUB_OFFSET (stub_entry),
 			   R_HPPA_ABS_CALL_R17);
-      NEW_INSTRUCTION (stub_entry, COPY_31_2);
-      
 
-      /* Restore the return address.  */
-      NEW_INSTRUCTION (stub_entry, LDW_M8SP_RP);
-      
-      /* Generate the code to move the return value around.  */
-      i = RETVAL;
-      if (stub_types[i] != NO_ARG_RELOC)
+      if (linker_stub_type == HPPA_STUB_ARG_RELOC)
 	{
-	  switch (stub_types[i])
-	    {
-	    case R_TO_FR:
-	      NEW_INSTRUCTION (stub_entry, STWS_RET0_M8SP);
-	      NEW_INSTRUCTION (stub_entry, FLDWS_M8SP_FRET0);
-	      break;
-	      
-	    case FR_TO_R:
-	      NEW_INSTRUCTION (stub_entry, FSTWS_FRET0_M8SP);
-	      NEW_INSTRUCTION (stub_entry, LDWS_M4SP_RET0);
-	      break;
-	    }
-	}
-      NEW_INSTRUCTION (stub_entry, BV_N_0_RP);
-    }
+	  /* In delay slot of long-call, copy %r31 into %r2 so that
+	     the callee can return in the normal fashion.  */
+	  NEW_INSTRUCTION (stub_entry, COPY_31_2)
 
+	  /* Restore the return address.  */
+	  NEW_INSTRUCTION (stub_entry, LDW_M8SP_RP)
+      
+	  /* Generate the code to move the return value around.  */
+	    switch (stub_types[RETVAL])
+	      {
+	      case NO_ARG_RELOC:
+		break;
+	  
+	      case R_TO_FR:
+		NEW_INSTRUCTION (stub_entry, STWS_RET0_M8SP)
+		NEW_INSTRUCTION (stub_entry, FLDWS_M8SP_FRET0)
+		  break;
+	  
+	      case FR_TO_R:
+		NEW_INSTRUCTION (stub_entry, FSTWS_FRET0_M8SP)
+		NEW_INSTRUCTION (stub_entry, LDWS_M4SP_RET0)
+		  break;
+
+	      default:
+		abort ();
+		break;
+	      }
+
+	  /* Return back to the main code stream.  */
+	  NEW_INSTRUCTION (stub_entry, BV_N_0_RP)
+	}
+      else
+	{
+	  if (!dyncall)
+	    {
+	      /* Get return address into %r31.  Both variants may be necessary
+		 (I think) as we could be cascading into another stub.  */
+	      if (!milli)
+		NEW_INSTRUCTION (stub_entry, COPY_2_31)
+	      else
+		NEW_INSTRUCTION (stub_entry, COPY_1_31)
+	    }
+	  else
+	    {
+	      /* Get the return address into %r31 too.  Might be necessary
+		 (I think) as we could be cascading into another stub.  */
+	      NEW_INSTRUCTION (stub_entry, COPY_2_31)
+	    }
+
+	  /* No need for a return to the main stream.  */
+	}
+    }
   return stub_sym;
 }
 
-int
+/* Return nonzero if an argument relocation will be needed to call
+   the function (symbol in RELOC_ENTRY) assuming the caller has
+   argument relocation bugs CALLER_AR.  */
+
+static int
 hppa_elf_arg_reloc_needed_p (abfd, reloc_entry, stub_types, caller_ar)
      bfd *abfd;
      arelent *reloc_entry;
-     int stub_types[5];
+     arg_reloc_type stub_types[5];
      symext_entryS caller_ar;
 {
-  /* If the symbol is still undefined, there is	*/
-  /* no way to know if a stub is required.	*/
-
-  if (reloc_entry->sym_ptr_ptr[0] && reloc_entry->sym_ptr_ptr[0]->section != &bfd_und_section)
+  /* If the symbol is still undefined, then it's impossible to know
+     if an argument relocation is needed.  */
+  if (reloc_entry->sym_ptr_ptr[0] 
+      && reloc_entry->sym_ptr_ptr[0]->section != &bfd_und_section)
     {
       symext_entryS callee_ar = elf32_hppa_get_sym_extn (abfd,
 						reloc_entry->sym_ptr_ptr[0],
 							 HPPA_SXT_ARG_RELOC);
 
-      /* Now, determine if a stub is */
-      /* required.  A stub is required if they the callee and caller	*/
-      /* argument relocation bits are both nonzero and not equal.	*/
-
+      /* Now examine all the argument and return value location
+	 information to determine if a relocation stub will be needed.  */
       if (caller_ar && callee_ar)
 	{
-	  /* Both are non-zero, we need to do further checking. */
-	  /* First, check if there is a return value relocation to be done */
-	  int caller_loc[5];
-	  int callee_loc[5];
+	  arg_location caller_loc[5];
+	  arg_location callee_loc[5];
 
+	  /* Extract the location information for the return value
+	     and argument registers separately.  */
 	  callee_loc[RETVAL] = EXTRACT_ARBITS (callee_ar, RETVAL);
 	  caller_loc[RETVAL] = EXTRACT_ARBITS (caller_ar, RETVAL);
 	  callee_loc[ARG0] = EXTRACT_ARBITS (callee_ar, ARG0);
@@ -2371,9 +2509,11 @@ hppa_elf_arg_reloc_needed_p (abfd, reloc_entry, stub_types, caller_ar)
 	  callee_loc[ARG3] = EXTRACT_ARBITS (callee_ar, ARG3);
 	  caller_loc[ARG3] = EXTRACT_ARBITS (caller_ar, ARG3);
 
-	  /* Check some special combinations.  For */
-	  /* example, if FU appears in ARG1 or ARG3, we */
-	  /* can move it to ARG0 or ARG2, respectively. */
+	  /* Check some special combinations.  For example, if FU 
+	     appears in ARG1 or ARG3, we can move it to ARG0 or ARG2,
+	     respectively.  (I guess this braindamage is correct?  It'd
+	     take an hour or two of reading PA calling conventions to
+	     really know).  */
 
 	  if (caller_loc[ARG0] == AR_FU || caller_loc[ARG1] == AR_FU)
 	    {
@@ -2396,368 +2536,110 @@ hppa_elf_arg_reloc_needed_p (abfd, reloc_entry, stub_types, caller_ar)
 	      callee_loc[ARG3] = AR_NO;
 	    }
 
-	  stub_types[ARG0] = type_of_mismatch (caller_loc[ARG0], callee_loc[ARG0], ARGUMENTS);
-	  stub_types[ARG1] = type_of_mismatch (caller_loc[ARG1], callee_loc[ARG1], ARGUMENTS);
-	  stub_types[ARG2] = type_of_mismatch (caller_loc[ARG2], callee_loc[ARG2], ARGUMENTS);
-	  stub_types[ARG3] = type_of_mismatch (caller_loc[ARG3], callee_loc[ARG3], ARGUMENTS);
-	  stub_types[RETVAL] = type_of_mismatch (caller_loc[RETVAL], callee_loc[RETVAL], RETURN_VALUE);
+	  /* Now look up potential mismatches.  */
+	  stub_types[ARG0] = type_of_mismatch (caller_loc[ARG0],
+					       callee_loc[ARG0],
+					       ARGUMENTS);
+	  stub_types[ARG1] = type_of_mismatch (caller_loc[ARG1],
+					       callee_loc[ARG1],
+					       ARGUMENTS);
+	  stub_types[ARG2] = type_of_mismatch (caller_loc[ARG2],
+					       callee_loc[ARG2],
+					       ARGUMENTS);
+	  stub_types[ARG3] = type_of_mismatch (caller_loc[ARG3],
+					       callee_loc[ARG3],
+					       ARGUMENTS);
+	  stub_types[RETVAL] = type_of_mismatch (caller_loc[RETVAL],
+						 callee_loc[RETVAL],
+						 RETURN_VALUE);
 
-	  /* Steps involved in building stubs: */
-	  /* 1. Determine what argument registers need to relocated.  This */
-	  /* 	step is already done here. */
-	  /* 2. Build the appropriate stub in the .hppa_linker_stubs section. */
-	  /* 	This section should never appear in an object file.  It is */
-	  /* 	only used internally.  The output_section of the */
-	  /* 	.hppa_linker_stubs section is the .text section of the */
-	  /* 	executable.	*/
-	  /* 3. Build a symbol that is used (internally only) as the entry */
-	  /*	point of the stub. */
-	  /* 4. Change the instruction of the original branch into a branch to */
-	  /* 	the stub routine. */
-	  /* 5. Build a relocation entry for the instruction of the original */
-	  /*	branch to be R_HPPA_PCREL_CALL to the stub routine. */
-
-
-	  if (stub_types[0]
-	      || stub_types[1]
-	      || stub_types[2]
-	      || stub_types[3]
-	      || stub_types[4])
-	    {
-#ifdef DETECT_STUBS
-	      int i;
-
-	      fprintf (stderr, "Stub needed for %s @ %s+0x%x: callee/caller ar=0x%x/0x%x ",
-		       reloc_entry->sym_ptr_ptr[0]->name,
-		       abfd->filename, reloc_entry->address,
-		       callee_ar, caller_ar);
-	      for (i = ARG0; i < RETVAL; i++)
-		{
-		  if (stub_types[i] != NO_ARG_RELOC)
-		    {
-		      fprintf (stderr, "%s%d: %s ",
-			       i == RETVAL ? "ret" : "arg",
-			       i == RETVAL ? 0 : i,
-			       reloc_type_strings[stub_types[i]]);
-		    }
-		}
-	      fprintf (stderr, "\n");
-#endif
-	      return 1;
-	    }
-
+	  /* If any of the arguments or return value need an argument
+	     relocation, then we will need an argument relocation stub.  */
+	  if (stub_types[ARG0] != NO_ARG_RELOC
+	      || stub_types[ARG1] != NO_ARG_RELOC
+	      || stub_types[ARG2] != NO_ARG_RELOC
+	      || stub_types[ARG3] != NO_ARG_RELOC
+	      || stub_types[RETVAL] != NO_ARG_RELOC)
+	    return 1;
 	}
     }
   return 0;
 }
 
-asymbol *
-hppa_elf_build_long_branch_stub (abfd, output_bfd, link_info, reloc_entry,
-				 symbol, data)
+/* Create the linker stub section.  */
+
+static void
+hppa_elf_create_stub_sec (abfd, output_bfd, secptr, link_info)
      bfd *abfd;
      bfd *output_bfd;
+     asection **secptr;
      struct bfd_link_info *link_info;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     unsigned *data;
 {
-  asection *stub_sec = bfd_get_section_by_name (abfd, ".hppa_linker_stubs");
-  elf32_hppa_stub_description *stub_desc = find_stubs (abfd, stub_sec);
-  asymbol *stub_sym = NULL;
-  asymbol *target_sym = reloc_entry->sym_ptr_ptr[0];
-  asection *output_text_section = bfd_get_section_by_name (output_bfd, ".text");
-  char stub_sym_name[128];
-  int milli = false;
-  int dyncall = false;
-  elf32_hppa_stub_name_list *stub_entry;
-  int rtn_adjust = true;
-  int rtn_reg;
-  unsigned insn;
-
-  /* Create the stub section if it does not already exist.  */
-  if (!stub_sec)
-    {
-      BFD_ASSERT (stub_desc == NULL);
-      stub_sec = bfd_make_section (abfd, ".hppa_linker_stubs");
-      bfd_set_section_flags (abfd,
-			     stub_sec,
-			     SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD
-			     | SEC_RELOC | SEC_CODE | SEC_READONLY);
-      stub_sec->output_section = output_text_section->output_section;
-      stub_sec->output_offset = 0;
-
-      /* Set up the ELF section header for this new section.  This
-	 is basically the same processing as elf_make_sections().  
-	 elf_make_sections is static and therefore not accessable
-	 here.  */
-      {
-	Elf_Internal_Shdr *this_hdr;
-	this_hdr = &elf_section_data (stub_sec)->this_hdr;
-	
-	/* Set the sizes of this section.  The contents have already
-	   been set up ?!?  */
-	this_hdr->sh_addr = stub_sec->vma;
-	this_hdr->sh_size = stub_sec->_raw_size;
-	
-	/* Set appropriate flags for sections with relocations.  */
-	if (stub_sec->flags & SEC_RELOC)
-	  {
-	    Elf_Internal_Shdr *rela_hdr;
-	    int use_rela_p = get_elf_backend_data (abfd)->use_rela_p;
-	    
-	    rela_hdr = &elf_section_data (stub_sec)->rel_hdr;
-	    
-	    if (use_rela_p)
-	      {
-		rela_hdr->sh_type = SHT_RELA;
-		rela_hdr->sh_entsize = sizeof (Elf32_External_Rela);
-	      }
-	    else
-	      {
-		rela_hdr->sh_type = SHT_REL;
-		rela_hdr->sh_entsize = sizeof (Elf32_External_Rel);
-	      }
-	    rela_hdr->sh_flags = 0;
-	    rela_hdr->sh_addr = 0;
-	    rela_hdr->sh_offset = 0;
-	    rela_hdr->sh_addralign = 0;
-	    rela_hdr->size = 0;
-	  }
-
-	if (stub_sec->flags & SEC_ALLOC)
-	  {
-	    this_hdr->sh_flags |= SHF_ALLOC;
-	    /* FIXME.  If SEC_LOAD is true should we do something with
-	       with sh_type?  */
-	  }
-
-	if (!(stub_sec->flags & SEC_READONLY))
-	  this_hdr->sh_flags |= SHF_WRITE;
-	
-	if (stub_sec->flags & SEC_CODE)
-	  this_hdr->sh_flags |= SHF_EXECINSTR;
-      }
-      
-      bfd_set_section_alignment (abfd, stub_sec, 2);
-      stub_desc = new_stub (abfd, stub_sec, link_info);
-    }
+  asection *output_text_section;
   
-  if (!stub_desc)
-    stub_desc = new_stub (abfd, stub_sec, link_info);
+  output_text_section = bfd_get_section_by_name (output_bfd, ".text");
+  *secptr = bfd_make_section (abfd, ".hppa_linker_stubs");
+  bfd_set_section_flags (abfd, *secptr,
+			 SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD
+			 | SEC_RELOC | SEC_CODE | SEC_READONLY);
+  (*secptr)->output_section = output_text_section->output_section;
+  (*secptr)->output_offset = 0;
   
-  /* Allocate memory to contain the stub.  FIXME.  Why isn't this using
-     the BFD memory allocation routines?  */
-  if (!stub_desc->stub_contents)
-    {
-      stub_desc->allocated_size = STUB_BUFFER_INCR;
-      stub_desc->stub_contents = (char *) malloc (STUB_BUFFER_INCR);
-    }
-  else if ((stub_desc->allocated_size - stub_desc->real_size) < STUB_MAX_SIZE)
-    {
-      stub_desc->allocated_size = stub_desc->allocated_size + STUB_BUFFER_INCR;
-      stub_desc->stub_contents = (char *) realloc (stub_desc->stub_contents,
-						   stub_desc->allocated_size);
-    }
-  
-  stub_desc->stub_secp
-    = (int *) (stub_desc->stub_contents + stub_desc->real_size);
-  
-  /* Is this a millicode call?  If so, the return address
-     comes in on r31 rather than r2 (rp) so a slightly
-     different code sequence is needed.  */
-  
-  insn = data[0];
-  rtn_reg = (insn & 0x03e00000) >> 21;
-  if (rtn_reg == 31)
-    milli = true;
-  
-  if (strcmp (symbol->name, "$$dyncall") == 0)
-    dyncall = true;
-
-  /* If we are creating a call from a stub to another stub, then
-     never do the instruction reordering.  We can tell if we are
-     going to be calling one stub from another by the fact that
-     the symbol name has '_stub_' (arg. reloc. stub) or '_lb_stub_'
-     prepended to the name.  Alternatively, the section of the
-     symbol will be '.hppa_linker_stubs'.  */
-
-  if ((strncmp (symbol->name, "_stub_", 6) == 0)
-      || (strncmp (symbol->name, "_lb_stub_", 9) == 0))
-    {
-      BFD_ASSERT (strcmp (symbol->section->name, ".hppa_linker_stubs") == 0);
-      rtn_adjust = false;
-    }
-  
-  /* Check to see if we modify the return pointer
-     in the delay slot of the branch.  */
+  /* Set up the ELF section header for this new section.  This
+     is basically the same processing as elf_make_sections().  
+     elf_make_sections is static and therefore not accessable
+     here.  */
   {
-    unsigned delay_insn = data[1];
+    Elf_Internal_Shdr *this_hdr;
+    this_hdr = &elf_section_data ((*secptr))->this_hdr;
     
-    /* If we nullify the delay slot, or if the delay slot contains an
-       instruction that modifies the return pointer, then no additional
-       modification of the return pointer is necessary.  */
-    if (insn & 2 || insn == 0)
-      rtn_adjust = false;
-    else
+    /* Set the sizes of this section.  The contents have already
+       been set up ?!?  */
+    this_hdr->sh_addr = (*secptr)->vma;
+    this_hdr->sh_size = (*secptr)->_raw_size;
+    
+    /* Set appropriate flags for sections with relocations.  */
+    if ((*secptr)->flags & SEC_RELOC)
       {
-	if (get_opcode (delay_insn) == LDO
-	    && (((delay_insn & 0x001f0000) >> 16) == rtn_reg))
-	  rtn_adjust = false;
-        if (milli)
-          rtn_adjust = false;
+	Elf_Internal_Shdr *rela_hdr;
+	int use_rela_p = get_elf_backend_data (abfd)->use_rela_p;
+	
+	rela_hdr = &elf_section_data ((*secptr))->rel_hdr;
+	
+	if (use_rela_p)
+	  {
+	    rela_hdr->sh_type = SHT_RELA;
+	    rela_hdr->sh_entsize = sizeof (Elf32_External_Rela);
+	  }
+	else
+	  {
+	    rela_hdr->sh_type = SHT_REL;
+	    rela_hdr->sh_entsize = sizeof (Elf32_External_Rel);
+	  }
+	rela_hdr->sh_flags = 0;
+	rela_hdr->sh_addr = 0;
+	rela_hdr->sh_offset = 0;
+	rela_hdr->sh_addralign = 0;
+	rela_hdr->size = 0;
       }
+    
+    if ((*secptr)->flags & SEC_ALLOC)
+      this_hdr->sh_flags |= SHF_ALLOC;
+    
+    if (!((*secptr)->flags & SEC_READONLY))
+      this_hdr->sh_flags |= SHF_WRITE;
+    
+    if ((*secptr)->flags & SEC_CODE)
+      this_hdr->sh_flags |= SHF_EXECINSTR;
   }
   
-  sprintf (stub_sym_name,
-	   "_lb_stub_%s_%s", reloc_entry->sym_ptr_ptr[0]->name,
-	   rtn_adjust ? "RA" : "");
-  stub_entry = find_stub_by_name(abfd, stub_sec, stub_sym_name);
-
-  /* If a copy of this stub already exists re-use it.  */
-  if (stub_entry)
-    {
-      stub_sym = stub_entry->sym;
-
-      /* Change symbol associated with the original relocation to point
-	 to the stub.
-
-	 FIXME.  Is there a need to change the relocation type too?  */
-      reloc_entry->sym_ptr_ptr = (asymbol **) bfd_zalloc (stub_desc->this_bfd,
-							  sizeof (asymbol *));
-      if (!reloc_entry->sym_ptr_ptr)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return NULL;
-	}
-      reloc_entry->sym_ptr_ptr[0] = stub_sym;
-      reloc_entry->howto = bfd_reloc_type_lookup (abfd, R_HPPA_STUB_CALL_17);
-    }
-  else
-    {
-      /* We will need to allocate a new stub.  */
-      stub_sym = bfd_make_empty_symbol (abfd);
-      if (!stub_sym)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return NULL;
-	}
-      stub_sym->name = bfd_zalloc (abfd, strlen (stub_sym_name) + 1);
-      if (!stub_sym->name)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return NULL;
-	}
-      strcpy ((char *) stub_sym->name, stub_sym_name);
-      stub_sym->value
-	= (char *) stub_desc->stub_secp - (char *) stub_desc->stub_contents;
-      stub_sym->section = stub_sec;
-      stub_sym->flags = BSF_LOCAL | BSF_FUNCTION;
-      stub_entry = add_stub_by_name (abfd, stub_sec, stub_sym, link_info);
-      
-      /* Change symbol associated with the original relocation to point
-	 to the stub.
-
-	 FIXME.  Is there a need to change the relocation type too?  */
-      reloc_entry->sym_ptr_ptr = (asymbol **) bfd_zalloc (stub_desc->this_bfd,
-							  sizeof (asymbol *));
-      if (!reloc_entry->sym_ptr_ptr)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return NULL;
-	}
-      reloc_entry->sym_ptr_ptr[0] = stub_sym;
-      reloc_entry->howto = bfd_reloc_type_lookup (abfd, R_HPPA_STUB_CALL_17);
-      
-      /* Build the stub.  */
-      
-      /* 1. initialization for the call. */
-      NEW_INSTRUCTION (stub_entry, LDSID_31_1);
-      NEW_INSTRUCTION (stub_entry, MTSP_1_SR0);
-      
-      if (!dyncall)
-	{
-	  if (!milli)
-	    {
-	      if (rtn_adjust)
-		{
-		  NEW_INSTRUCTION (stub_entry, ADDI_M4_31_RP);
-		}
-	      else
-		{
-		  NEW_INSTRUCTION (stub_entry, COPY_31_2);
-		}
-	    }
-	  else
-	    {
-	      if (rtn_adjust)
-		{
-		  NEW_INSTRUCTION (stub_entry, ADDI_M4_31_1);
-		}
-	      else
-		{
-		  NEW_INSTRUCTION (stub_entry, COPY_31_1);
-		}
-	    }
-	  
-	  NEW_INSTRUCTION (stub_entry, LDIL_XXX_31);
-	  hppa_elf_stub_reloc (stub_desc,
-			       abfd,
-			       target_sym,
-			       CURRENT_STUB_OFFSET (stub_entry),
-			       R_HPPA_L21);
-	  
-	  /* 2. Make the call. */
-	  if (!milli)
-	    {
-	      NEW_INSTRUCTION (stub_entry, BE_XXX_0_31);
-	      hppa_elf_stub_reloc (stub_desc,
-				   abfd,
-				   target_sym,
-				   CURRENT_STUB_OFFSET (stub_entry),
-				   R_HPPA_ABS_CALL_R17);
-	      NEW_INSTRUCTION (stub_entry, COPY_2_31);
-	    }
-	  else
-	    {
-	      NEW_INSTRUCTION (stub_entry, BE_XXX_0_31);
-	      hppa_elf_stub_reloc (stub_desc,
-				   abfd,
-				   target_sym,
-				   CURRENT_STUB_OFFSET (stub_entry),
-				   R_HPPA_ABS_CALL_R17);
-	      NEW_INSTRUCTION (stub_entry, COPY_1_31);
-	    }
-	}
-      else
-	{
-	  /* 3. Branch back to the original location.
-	     (For non-millicode calls, this is accomplished with the
-	     COPY_31_2 instruction.  For millicode calls, the return
-	     location is already in r2.)  */
-	  if (rtn_adjust)
-	    {
-	      NEW_INSTRUCTION (stub_entry, ADDI_M4_31_RP);
-	    }
-	  NEW_INSTRUCTION (stub_entry, LDIL_XXX_31);
-	  hppa_elf_stub_reloc (stub_desc,
-			       abfd,
-			       target_sym,
-			       CURRENT_STUB_OFFSET (stub_entry),
-			       R_HPPA_L21);
-	  
-	  NEW_INSTRUCTION (stub_entry, BE_XXX_0_31);
-	  hppa_elf_stub_reloc (stub_desc,
-			       abfd,
-			       target_sym,
-			       CURRENT_STUB_OFFSET (stub_entry),
-			       R_HPPA_ABS_CALL_R17);
-	  NEW_INSTRUCTION (stub_entry, COPY_2_31);
-	}
-    }
-  return stub_sym;
+  bfd_set_section_alignment (abfd, *secptr, 2);
 }
 
-int
+/* Return nonzero if a long-call stub will be needed to call the
+   function (symbol in RELOC_ENTRY).  */
+
+static int
 hppa_elf_long_branch_needed_p (abfd, asec, reloc_entry, symbol, insn)
      bfd *abfd;
      asection *asec;
@@ -2765,32 +2647,35 @@ hppa_elf_long_branch_needed_p (abfd, asec, reloc_entry, symbol, insn)
      asymbol *symbol;
      unsigned insn;
 {
-  long sym_value = get_symbol_value(symbol);
+  long sym_value = get_symbol_value (symbol);
   int fmt = reloc_entry->howto->bitsize;
-  unsigned char op = get_opcode(insn);
+  unsigned char op = get_opcode (insn);
   unsigned raddr;
 
-#define too_far(val,num_bits)	((int)(val) > (1<<(num_bits))-1) || ((int)(val) < (-1<<(num_bits)))
+#define too_far(val,num_bits) \
+  ((int)(val) > (1 << (num_bits)) - 1) || ((int)(val) < (-1 << (num_bits)))
 
   switch (op)
     {
     case BL:
       raddr =
 	reloc_entry->address + asec->output_offset + asec->output_section->vma;
-      if (too_far(sym_value - raddr,fmt+1))
-	{
-#ifdef DETECT_STUBS
-	  fprintf(stderr,"long_branch needed on BL insn: abfd=%s,sym=%s,distance=0x%x\n",abfd->filename,symbol->name,sym_value - reloc_entry->address);
-#endif
+      /* If the symbol and raddr (relocated addr?) are too far away from
+	 each other, then a long-call stub will be needed.  */
+      if (too_far (sym_value - raddr, fmt + 1))
 	  return 1;
-	}
       break;
     }  
   return 0;
 }
 
-#define STUB_SYM_BUFFER_INC	5
+/* Search the given section and determine if linker stubs will be
+   needed for any calls within that section.
 
+   Return any new stub symbols created.
+
+   Used out of hppaelf.em in the linker.  */
+   
 asymbol *
 hppa_look_for_stubs_in_section (stub_bfd, abfd, output_bfd, asec,
 				syms, new_sym_cnt, link_info)
@@ -2803,28 +2688,31 @@ hppa_look_for_stubs_in_section (stub_bfd, abfd, output_bfd, asec,
      struct bfd_link_info *link_info;
 {
   int i;
-  int stub_types[5];
-  asymbol *new_syms = (asymbol *) NULL;
+  arg_reloc_type stub_types[5];
+  asymbol *new_syms = NULL;
   int new_cnt = 0;
   int new_max = 0;
 
   /* Relocations are in different places depending on whether this is
      an output section or an input section.  Also, the relocations are
-     in different forms.  Sigh.  Luckily, we have
-     bfd_canonicalize_reloc() to straighten this out for us . */
-
+     in different forms.  Sigh.  Luckily, we have bfd_canonicalize_reloc()
+     to straighten this out for us . */
   if (asec->reloc_count > 0)
     {
       arelent **reloc_vector
 	= (arelent **) alloca (asec->reloc_count * (sizeof (arelent *) + 1));
 
       bfd_canonicalize_reloc (abfd, asec, reloc_vector, syms);
+
+      /* Examine each relocation entry in this section.  */
       for (i = 0; i < asec->reloc_count; i++)
 	{
 	  arelent *rle = reloc_vector[i];
 
 	  switch (rle->howto->type)
 	    {
+	    /* Any call could need argument relocation stubs, and
+	       some may need long-call stubs.  */
 	    case R_HPPA_ABS_CALL_11:
 	    case R_HPPA_ABS_CALL_14:
 	    case R_HPPA_ABS_CALL_17:
@@ -2867,8 +2755,11 @@ hppa_look_for_stubs_in_section (stub_bfd, abfd, output_bfd, asec,
 		  = (symext_entryS) HPPA_R_ARG_RELOC (rle->addend);
 		unsigned insn[2];
 
+		/* We'll need this for the long-call checks.  */
 		bfd_get_section_contents (abfd, asec, insn, rle->address,
 					  sizeof(insn));
+
+		/* See if this call needs an argument relocation stub.  */
 		if (hppa_elf_arg_reloc_needed_p (abfd, rle, stub_types,
 						 caller_ar))
 		  {
@@ -2880,22 +2771,19 @@ hppa_look_for_stubs_in_section (stub_bfd, abfd, output_bfd, asec,
 			new_max += STUB_SYM_BUFFER_INC;
 			new_syms = (asymbol *)
 			  realloc (new_syms, new_max * sizeof (asymbol));
+			if (new_syms == NULL)
+			  abort ();
 		      }
 
-		    /* The rtn_adjust argument is true here because we
-		       know that we have a branch and (with a few exceptions
-		       detailed under the relocation code for relocation type
-		       R_HPPA_STUB_CALL_17) it will be possible to perform
-		       the code reorientation.  */
-		    r = hppa_elf_build_arg_reloc_stub (stub_bfd, output_bfd,
-						       link_info, rle,
-						       stub_types,
-						       true, insn);
+		    /* Build the argument relocation stub.  */
+		    r = hppa_elf_build_linker_stub (stub_bfd, output_bfd,
+						    link_info, rle,
+						    stub_types, true, insn, 
+						    HPPA_STUB_ARG_RELOC);
 		    new_syms[new_cnt++] = *r;
 		  }
 
-		/* We need to retrieve the section contents to check for
-		   long branch stubs.  */
+		/* See if this call needs a long-call stub.  */
 		if (hppa_elf_long_branch_needed_p (abfd, asec, rle,
 						   rle->sym_ptr_ptr[0],
 						   insn[0]))
@@ -2908,16 +2796,21 @@ hppa_look_for_stubs_in_section (stub_bfd, abfd, output_bfd, asec,
 			new_max += STUB_SYM_BUFFER_INC;
 			new_syms = (asymbol *)
 			  realloc (new_syms, (new_max * sizeof (asymbol)));
+			if (! new_syms)
+			  abort ();
 		      }
-		    r = hppa_elf_build_long_branch_stub (stub_bfd, output_bfd,
-							 link_info, rle,
-							 rle->sym_ptr_ptr[0],
-							 insn);
+
+		    /* Build the long-call stub.  */
+		    r = hppa_elf_build_linker_stub (stub_bfd, output_bfd,
+						    link_info, rle,
+						    NULL, true, insn, 
+						    HPPA_STUB_LONG_CALL);
 		    new_syms[new_cnt++] = *r;
 		  }
 	      }
 	      break;
 
+	    /* PLABELs may need argument relocation stubs.  */
 	    case R_HPPA_PLABEL_32:
 	    case R_HPPA_PLABEL_11:
 	    case R_HPPA_PLABEL_14:
@@ -2926,14 +2819,17 @@ hppa_look_for_stubs_in_section (stub_bfd, abfd, output_bfd, asec,
 	    case R_HPPA_PLABEL_R14:
 	      {
 		/* On a plabel relocation, assume the arguments of the
-		   caller are set up in general registers.
-		   NOTE:  0x155 = ARGW0=CR,ARGW1=GR,ARGW2=GR,RETVAL=GR */
+		   caller are set up in general registers (indirect
+		   calls only use general registers.
+		   NOTE:  0x155 = ARGW0=GR,ARGW1=GR,ARGW2=GR,RETVAL=GR.  */
 		symext_entryS caller_ar = (symext_entryS) 0x155;
 		unsigned insn[2];
 
+		/* Do we really need this?  */
 		bfd_get_section_contents (abfd, asec, insn, rle->address,
 					  sizeof(insn));
 
+		/* See if this call needs an argument relocation stub.  */
 		if (hppa_elf_arg_reloc_needed_p (abfd, rle, stub_types,
 						 caller_ar))
 		  {
@@ -2953,7 +2849,6 @@ hppa_look_for_stubs_in_section (stub_bfd, abfd, output_bfd, asec,
 		       (see the relocation code for relocation type 
 		       R_HPPA_STUB_CALL_17) is possible.  Basically,
 		       determine whether we are looking at a branch or not.  */
-							      
 		    if (rle->howto->type == R_HPPA_PLABEL_32)
 		      rtn_adjust = false;
 		    else
@@ -2968,10 +2863,12 @@ hppa_look_for_stubs_in_section (stub_bfd, abfd, output_bfd, asec,
 			    rtn_adjust = false;
 			  }
 		      }
-		    r = hppa_elf_build_arg_reloc_stub (stub_bfd, output_bfd,
-						       link_info, rle,
-						       stub_types,
-						       rtn_adjust, insn);
+
+		    /* Build the argument relocation stub.  */
+		    r = hppa_elf_build_linker_stub (stub_bfd, output_bfd,
+						    link_info, rle, stub_types,
+						    rtn_adjust, insn,
+						    HPPA_STUB_ARG_RELOC);
 		    new_syms[new_cnt++] = *r;
 		  }
 	      }
@@ -2979,21 +2876,18 @@ hppa_look_for_stubs_in_section (stub_bfd, abfd, output_bfd, asec,
 
 	    default:
 	      break;
-
 	    }
 	}
     }
+
+  /* Return the new symbols and update the counters.  */
   *new_sym_cnt = new_cnt;
   return new_syms;
 }
 
+/* Set the contents of a particular section at a particular location.  */
 
-char *linker_stubs = NULL;
-int linker_stubs_size = 0;
-int linker_stubs_max_size = 0;
-#define STUB_ALLOC_INCR	100
-
-boolean
+static boolean
 hppa_elf_set_section_contents (abfd, section, location, offset, count)
      bfd *abfd;
      sec_ptr section;
@@ -3001,21 +2895,27 @@ hppa_elf_set_section_contents (abfd, section, location, offset, count)
      file_ptr offset;
      bfd_size_type count;
 {
-  if (strcmp(section->name, ".hppa_linker_stubs") == 0)
+  /* Linker stubs are handled a little differently.  */
+  if (! strcmp (section->name, ".hppa_linker_stubs"))
     {
       if (linker_stubs_max_size < offset + count)
 	{
 	  linker_stubs_max_size = offset + count + STUB_ALLOC_INCR;
-	  linker_stubs = (char *)realloc(linker_stubs, linker_stubs_max_size);
+	  linker_stubs = (char *)realloc (linker_stubs, linker_stubs_max_size);
+	  if (! linker_stubs)
+	    abort ();
 	}
 
       if (offset + count > linker_stubs_size)
 	linker_stubs_size = offset + count;
 
-      memcpy(linker_stubs + offset,location,count);
+      /* Set the contents.  */
+      memcpy(linker_stubs + offset, location, count);
       return (true);
     }
   else
+    /* For everything but the linker stub section, use the generic
+       code.  */
     return bfd_elf32_set_section_contents (abfd, section, location,
 					   offset, count);
 }
@@ -3077,14 +2977,14 @@ hppa_elf_get_section_contents (abfd, section, location, offset, count)
 	{
 	  int i;
 	  int *symtab_map =
-	    (int *) elf_sym_extra(section->output_section->owner);
+	    (int *) elf_sym_extra (section->output_section->owner);
 	  
 	  for (i = 0; i < section->output_section->owner->symcount; i++)
 	    {
-	      elf_hppa_tc_symbol(section->output_section->owner,
-				 ((elf_symbol_type *)
-				  section->output_section->owner->outsymbols[i]),
-				 symtab_map[i], &symext_rootP, &symext_lastP);
+	      elf_hppa_tc_symbol (section->output_section->owner,
+				  ((elf_symbol_type *)
+				   section->output_section->owner->outsymbols[i]),
+				  symtab_map[i], &symext_rootP, &symext_lastP);
 	    }
 	  symext_chain_built++;
 	  elf_hppa_tc_make_sections (section->output_section->owner, 
@@ -3102,14 +3002,18 @@ hppa_elf_get_section_contents (abfd, section, location, offset, count)
 	return (false);
       
       memcpy (location,
-	      ((char *)symextn_contents + section->output_offset + offset),
+	      (char *)symextn_contents + section->output_offset + offset,
 	      count);
       return (true);
     }
   else
+    /* It's not the symbol extension or linker stub sections, use
+       the generic routines.  */
     return bfd_generic_get_section_contents (abfd, section, location,
 					     offset, count);
 }
+
+/* Translate from an elf into field into a howto relocation pointer.  */
 
 static void
 elf_info_to_howto (abfd, cache_ptr, dst)
@@ -3118,8 +3022,11 @@ elf_info_to_howto (abfd, cache_ptr, dst)
      Elf32_Internal_Rela *dst;
 {
   BFD_ASSERT (ELF32_R_TYPE(dst->r_info) < (unsigned int) R_HPPA_UNIMPLEMENTED);
-  cache_ptr->howto = &elf_hppa_howto_table[ELF32_R_TYPE(dst->r_info)];
+  cache_ptr->howto = &elf_hppa_howto_table[ELF32_R_TYPE (dst->r_info)];
 }
+
+/* Do PA ELF specific processing for symbols.  Needed to find the
+   value of $global$.  */
 
 static void
 elf32_hppa_backend_symbol_processing (abfd, sym)
@@ -3128,7 +3035,6 @@ elf32_hppa_backend_symbol_processing (abfd, sym)
 {
   /* Is this a definition of $global$?  If so, keep it because it will be
     needed if any relocations are performed.  */
-
   if (!strcmp (sym->name, "$global$")
       && sym->section != &bfd_und_section)
     {
@@ -3136,43 +3042,29 @@ elf32_hppa_backend_symbol_processing (abfd, sym)
     }
 }
 
-#define elf_backend_symbol_processing	elf32_hppa_backend_symbol_processing
-
-struct elf32_hppa_symextn_map_struct
-{
-  int old_index;
-  bfd *bfd;
-  asymbol *sym;
-  int new_index;
-};
-
-static struct elf32_hppa_symextn_map_struct *elf32_hppa_symextn_map;
-static int elf32_hppa_symextn_map_size;
-
+/* Do some PA ELF specific work after reading in the symbol table.
+   In particular attach the argument relocation from the 
+   symbol extension section to the appropriate symbols.  */
 static boolean
 elf32_hppa_backend_symbol_table_processing (abfd, esyms,symcnt)
      bfd *abfd;
      elf_symbol_type *esyms;
      int symcnt;
 {
-  Elf32_Internal_Shdr *symextn_hdr = bfd_elf_find_section (abfd, SYMEXTN_SECTION_NAME);
-  int i;
-  int current_sym_idx = 0;
+  Elf32_Internal_Shdr *symextn_hdr =
+    bfd_elf_find_section (abfd, SYMEXTN_SECTION_NAME);
+  int i, current_sym_idx = 0;
 
-  /* If the symbol extension section does not exist, all the symbol */
-  /* all the symbol extension information is assumed to be zero.	*/
-
+  /* If no symbol extension existed, then all symbol extension information
+     is assumed to be zero.  */
   if (symextn_hdr == NULL)
     {
       for (i = 0; i < symcnt; i++)
-	{
-	  esyms[i].tc_data.hppa_arg_reloc = 0;
-	}
+	esyms[i].tc_data.hppa_arg_reloc = 0;
       return (true);
     }
 
-  /* allocate a buffer of the appropriate size for the symextn section */
-
+  /* Allocate a buffer of the appropriate size for the symextn section.  */
   symextn_hdr->contents = bfd_zalloc(abfd,symextn_hdr->sh_size);
   if (!symextn_hdr->contents)
     {
@@ -3181,8 +3073,7 @@ elf32_hppa_backend_symbol_table_processing (abfd, esyms,symcnt)
     }
   symextn_hdr->size = symextn_hdr->sh_size;
 	
-  /* read in the symextn section */
-
+  /* Read in the symextn section.  */
   if (bfd_seek (abfd, symextn_hdr->sh_offset, SEEK_SET) == -1)
     {
       bfd_set_error (bfd_error_system_call);
@@ -3191,18 +3082,17 @@ elf32_hppa_backend_symbol_table_processing (abfd, esyms,symcnt)
   if (bfd_read ((PTR) symextn_hdr->contents, 1, symextn_hdr->size, abfd) 
       != symextn_hdr->size)
     {
-      free ((PTR)symextn_hdr->contents);
       bfd_set_error (bfd_error_system_call);
       return (false);
     }	
 
-  /* parse the entries, updating the symtab entries as we go */
-
+  /* Parse entries in the symbol extension section, updating the symtab
+     entries as we go */
   for (i = 0; i < symextn_hdr->size / sizeof(symext_entryS); i++)
     {
       symext_entryS *seP = ((symext_entryS *)symextn_hdr->contents) + i;
-      int se_value = ELF32_HPPA_SX_VAL(*seP);
-      int se_type = ELF32_HPPA_SX_TYPE(*seP);
+      int se_value = ELF32_HPPA_SX_VAL (*seP);
+      int se_type = ELF32_HPPA_SX_TYPE (*seP);
 
       switch (se_type)
 	{
@@ -3213,7 +3103,6 @@ elf32_hppa_backend_symbol_table_processing (abfd, esyms,symcnt)
 	  if (se_value >= symcnt)
 	    {
 	      bfd_set_error (bfd_error_bad_value);
-	      bfd_perror("elf32_hppa_backend_symbol_table_processing -- symbol index");
 	      return (false);
 	    }
 	  current_sym_idx = se_value - 1;
@@ -3225,29 +3114,30 @@ elf32_hppa_backend_symbol_table_processing (abfd, esyms,symcnt)
 
 	default:
 	  bfd_set_error (bfd_error_bad_value);
-	  bfd_perror("elf32_hppa_backend_symbol_table_processing");
 	  return (false);
 	}
     }
   return (true);
 }
 
-#define elf_backend_symbol_table_processing	elf32_hppa_backend_symbol_table_processing
+/* Perform on PA ELF specific processing once a section has been
+   read in.  In particular keep the symbol indexes correct for
+   the symbol extension information.  */
 
 static boolean
 elf32_hppa_backend_section_processing (abfd, secthdr)
      bfd *abfd;
      Elf32_Internal_Shdr *secthdr;
 {
-  int i,j,k;
+  int i, j, k;
 
   if (secthdr->sh_type == SHT_HPPA_SYMEXTN)
     {
-      for (i = 0; i < secthdr->size / sizeof(symext_entryS); i++)
+      for (i = 0; i < secthdr->size / sizeof (symext_entryS); i++)
 	{
 	  symext_entryS *seP = ((symext_entryS *)secthdr->contents) + i;
-	  int se_value = ELF32_HPPA_SX_VAL(*seP);
-	  int se_type = ELF32_HPPA_SX_TYPE(*seP);
+	  int se_value = ELF32_HPPA_SX_VAL (*seP);
+	  int se_type = ELF32_HPPA_SX_TYPE (*seP);
 	  
 	  switch (se_type)
 	    {
@@ -3257,15 +3147,16 @@ elf32_hppa_backend_section_processing (abfd, secthdr)
 	    case HPPA_SXT_SYMNDX:
 	      for (j = 0; j < abfd->symcount; j++)
 		{
-		  /* locate the map entry for this symbol, if there is one. */
-		  /* modify the symbol extension section symbol index entry */
-		  /* to reflect the new symbol table index */
-		  
+		  /* Locate the map entry for this symbol and modify the
+		     symbol extension section symbol index entry to reflect
+		     the new symbol table index.  */
 		  for (k = 0; k < elf32_hppa_symextn_map_size; k++)
 		    {
 		      if (elf32_hppa_symextn_map[k].old_index == se_value
-			  && elf32_hppa_symextn_map[k].bfd == abfd->outsymbols[j]->the_bfd
-			  && elf32_hppa_symextn_map[k].sym == abfd->outsymbols[j])
+			  && elf32_hppa_symextn_map[k].bfd
+			     == abfd->outsymbols[j]->the_bfd
+			  && elf32_hppa_symextn_map[k].sym
+			     == abfd->outsymbols[j])
 			{
 			  bfd_put_32(abfd,
 				     ELF32_HPPA_SX_WORD (HPPA_SXT_SYMNDX, j),
@@ -3280,7 +3171,6 @@ elf32_hppa_backend_section_processing (abfd, secthdr)
 	      
 	    default:
 	      bfd_set_error (bfd_error_bad_value);
-	      bfd_perror("elf32_hppa_backend_section_processing");
 	      return (false);
 	    }
 	}
@@ -3288,7 +3178,9 @@ elf32_hppa_backend_section_processing (abfd, secthdr)
   return true;
 }
 
-#define elf_backend_section_processing	elf32_hppa_backend_section_processing
+/* What does this really do?  Just determine if there is an appropriate
+   mapping from ELF section headers to backend sections?  More symbol
+   extension braindamage.  */
 
 static boolean
 elf32_hppa_backend_section_from_shdr (abfd, hdr, name)
@@ -3300,9 +3192,9 @@ elf32_hppa_backend_section_from_shdr (abfd, hdr, name)
 
   if (hdr->sh_type == SHT_HPPA_SYMEXTN)
     {
-      BFD_ASSERT (strcmp(name,".hppa_symextn") == 0);
+      BFD_ASSERT (strcmp (name, ".hppa_symextn") == 0);
 
-      /* Bits that get saved. This one is real. */
+      /* Bits that get saved. This one is real.  */
       if (!hdr->rawdata)
 	{
 	  newsect = bfd_make_section (abfd, name);
@@ -3310,7 +3202,7 @@ elf32_hppa_backend_section_from_shdr (abfd, hdr, name)
 	    {
 	      newsect->vma = hdr->sh_addr;
 	      newsect->_raw_size = hdr->sh_size;
-	      newsect->filepos = hdr->sh_offset;	/* so we can read back the bits */
+	      newsect->filepos = hdr->sh_offset;
 	      newsect->flags |= SEC_HAS_CONTENTS;
 	      newsect->alignment_power = hdr->sh_addralign;
 
@@ -3324,7 +3216,7 @@ elf32_hppa_backend_section_from_shdr (abfd, hdr, name)
 		newsect->flags |= SEC_READONLY;
 
 	      if (hdr->sh_flags & SHF_EXECINSTR)
-		newsect->flags |= SEC_CODE;	/* FIXME: may only contain SOME code */
+		newsect->flags |= SEC_CODE;
 	      else
 		newsect->flags |= SEC_DATA;
 
@@ -3336,7 +3228,7 @@ elf32_hppa_backend_section_from_shdr (abfd, hdr, name)
   return false;
 }
 
-#define elf_backend_section_from_shdr	elf32_hppa_backend_section_from_shdr
+/* Return true if the given section is a fake section.  */
 
 static boolean
 elf32_hppa_backend_fake_sections (abfd, secthdr, asect)
@@ -3379,14 +3271,15 @@ elf32_hppa_backend_fake_sections (abfd, secthdr, asect)
   return false;
 }
 
-#define elf_backend_fake_sections	elf32_hppa_backend_fake_sections
+/* Return true if there is a mapping from bfd section into a
+   backend section.  */
 
 static boolean
-elf32_hppa_backend_section_from_bfd_section (abfd, hdr, asect, retval)
+elf32_hppa_backend_section_from_bfd_section (abfd, hdr, asect, ignored)
      bfd *abfd;
      Elf32_Internal_Shdr *hdr;
      asection *asect;
-     int *retval;
+     int *ignored;
 {
   if (hdr->sh_type == SHT_HPPA_SYMEXTN)
     {
@@ -3394,7 +3287,7 @@ elf32_hppa_backend_section_from_bfd_section (abfd, hdr, asect, retval)
 	{
 	  if (((struct sec *) (hdr->rawdata)) == asect)
 	    {
-	      BFD_ASSERT (strcmp(asect->name, ".hppa_symextn") == 0);
+	      BFD_ASSERT (strcmp (asect->name, ".hppa_symextn") == 0);
 	      return true;
 	    }
 	}
@@ -3417,8 +3310,16 @@ elf32_hppa_backend_section_from_bfd_section (abfd, hdr, asect, retval)
 #define bfd_elf32_bfd_reloc_type_lookup	elf_hppa_reloc_type_lookup
 #define elf_backend_section_from_bfd_section	elf32_hppa_backend_section_from_bfd_section
 
+#define elf_backend_symbol_processing	elf32_hppa_backend_symbol_processing
+#define elf_backend_symbol_table_processing	elf32_hppa_backend_symbol_table_processing
+
 #define bfd_generic_get_section_contents	hppa_elf_get_section_contents
 #define bfd_elf32_set_section_contents		hppa_elf_set_section_contents
+
+#define elf_backend_section_processing	elf32_hppa_backend_section_processing
+
+#define elf_backend_section_from_shdr	elf32_hppa_backend_section_from_shdr
+#define elf_backend_fake_sections	elf32_hppa_backend_fake_sections
 
 #define TARGET_BIG_SYM		bfd_elf32_hppa_vec
 #define TARGET_BIG_NAME		"elf32-hppa"

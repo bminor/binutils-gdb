@@ -342,13 +342,17 @@ struct symext_chain
 
 typedef struct symext_chain symext_chainS;
 
-void elf_hppa_tc_symbol PARAMS ((bfd *, elf_symbol_type *, int,
-				 symext_chainS **, symext_chainS **));
-void elf_hppa_tc_make_sections PARAMS ((bfd *, symext_chainS *));
-void hppa_elf_stub_finish PARAMS ((bfd *));
-elf32_hppa_reloc_type **hppa_elf_gen_reloc_type PARAMS ((bfd *, 
-							 elf32_hppa_reloc_type,
-							 int, int));
+void elf_hppa_tc_symbol
+  PARAMS ((bfd *, elf_symbol_type *, int, symext_chainS **, symext_chainS **));
+
+elf32_hppa_reloc_type **hppa_elf_gen_reloc_type
+  PARAMS ((bfd *, elf32_hppa_reloc_type, int, int));
+
+asymbol * hppa_look_for_stub_in_section
+  PARAMS ((bfd *, bfd *, bfd *, asection *, asymbol **,
+	   int *, struct bfd_link_info *));
+
 void elf_hppa_final_processing PARAMS ((void));
+void elf_hppa_tc_make_sections PARAMS ((bfd *, symext_chainS *));
 
 #endif /* _ELF32_HPPA_H */
