@@ -48,6 +48,7 @@ include
 ld
 libiberty
 libg++
+rcs
 readline
 texinfo
 
@@ -58,7 +59,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.9  1991/08/25 21:48:37  rich
+# Revision 1.10  1991/08/25 23:40:20  rich
+# rcs enters the soup.
+#
+# Revision 1.9  1991/08/25  21:48:37  rich
 # Adding diff to the fray.
 #
 # Revision 1.8  1991/08/23  07:15:55  gnu

@@ -16,12 +16,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #
-# Last Mod Tue Aug 20 12:48:54 PDT 1991, by rich@cygint.cygnus.com
+# Last Mod Sun Aug 25 15:21:45 PDT 1991, by rich@cygint.cygnus.com
 #
 # $Id$
 
 srcdir = .
 destdir = /usr/local
+
+SHELL=/bin/sh
 
 #CC = gcc -b$(target) # -B$(srcdir)/../gas/Host-$(host)/Target-$(target)/
 #CFLAGS = -g -nostdinc -nostdlib -I- -I/usr/local/lib/gcc/$(target)/1.92/include -I$(srcdir) -I$(srcdir)/../include -I$(OSINCLUDE)
@@ -170,7 +172,8 @@ Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
 #
 # Build GDB distributions that contain BFD, Include, Libiberty, Readline, etc
 
-DEVO_SUPPORT= README.configure Makefile.in configure configure.in 
+DEVO_SUPPORT= README README.configure Makefile.in configure configure.in \
+	config.sub 
 GDB_SUPPORT_DIRS= bfd include libiberty readline texinfo/fsf/texinfo.tex
 
 bfd.ilrt.tar.Z: force_update
@@ -187,7 +190,16 @@ force_update:
 
 #
 # $Log$
-# Revision 1.25  1991/08/22 07:15:49  rich
+# Revision 1.28  1991/08/25 23:40:22  rich
+# rcs enters the soup.
+#
+# Revision 1.27  1991/08/23  07:15:56  gnu
+# Make README stick...
+#
+# Revision 1.26  1991/08/22  09:20:07  gnu
+# Build a top-level README for devo.
+#
+# Revision 1.25  1991/08/22  07:15:49  rich
 # Three part names, etc.
 #
 # Revision 1.24  1991/08/20  01:57:31  rich

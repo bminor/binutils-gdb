@@ -3,7 +3,7 @@
 # script appropriate for this directory.  For more information, check
 # any existing configure script.
 
-configdirs="libiberty bfd binutils bison gcc readline ld gas gnulib ${clib} gdb make grep diff prms "
+configdirs="libiberty bfd binutils bison gcc readline ld gas gnulib ${clib} gdb make grep diff rcs prms "
 srctrigger=README.configure
 srcname="gnu development package"
 
