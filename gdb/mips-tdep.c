@@ -2385,9 +2385,11 @@ mips_frame_chain (struct frame_info *frame)
      we loop forever if we see a zero size frame.  */
   if (PROC_FRAME_REG (proc_desc) == SP_REGNUM
       && PROC_FRAME_OFFSET (proc_desc) == 0
-  /* The previous frame from a sigtramp frame might be frameless
-     and have frame size zero.  */
-      && !frame->signal_handler_caller)
+      /* The previous frame from a sigtramp frame might be frameless
+	 and have frame size zero.  */
+      && !frame->signal_handler_caller
+      /* Check if this is a call dummy frame.  */
+      && frame->pc != mips_call_dummy_address ())
     return 0;
   else
     return get_frame_pointer (frame, proc_desc);
