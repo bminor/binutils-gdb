@@ -1,3 +1,11 @@
+2000-04-16  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* Makefile.in (LN_S): Define.
+	(gdb-cfg.texi, gdb.dvi, links2roff, inc-hist.texinfo): Don't
+	invoke "ln -s" unless it is known to work.
+
+	* configure.in (AC_PROG_LN_S): Add.
+
 2000-04-14  Jim Blandy  <jimb@redhat.com>
 
 	* gdbint.texinfo (Pointers Are Not Always Addresses): New manual

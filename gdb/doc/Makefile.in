@@ -27,6 +27,8 @@ htmldir = $(prefix)/html
 
 SHELL = @SHELL@
 
+LN_S = @LN_S@
+
 INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA = @INSTALL_DATA@
@@ -200,7 +202,8 @@ GDBvn.texi : ${gdbdir}/Makefile.in
 # not one for their binary config---which may not be specifically
 # defined anyways).
 gdb-cfg.texi: ${srcdir}/${DOC_CONFIG}-cfg.texi
-	ln -s ${srcdir}/${DOC_CONFIG}-cfg.texi gdb-cfg.texi || \
+	(test "$$LN_S" = "ln -s" && \
+	  ln -s ${srcdir}/${DOC_CONFIG}-cfg.texi gdb-cfg.texi) || \
 	ln ${srcdir}/${DOC_CONFIG}-cfg.texi gdb-cfg.texi || \
 	cp ${srcdir}/${DOC_CONFIG}-cfg.texi gdb-cfg.texi
 
@@ -216,7 +219,7 @@ gdb-cfg.texi: ${srcdir}/${DOC_CONFIG}-cfg.texi
 # GDB MANUAL: TeX dvi file
 gdb.dvi: ${SFILES_DOC}
 	if [ ! -f ./GDBvn.texi ]; then \
-		ln -s $(srcdir)/GDBvn.texi . || \
+		(test "$$LN_S" = "ln -s" && ln -s $(srcdir)/GDBvn.texi .) || \
 		ln $(srcdir)/GDBvn.texi . || \
 		cp $(srcdir)/GDBvn.texi . ; else true; fi
 	$(SET_TEXINPUTS) $(TEX) gdb.texinfo
@@ -251,7 +254,7 @@ gdb.info: ${SFILES_DOC}
 # in main sourcedir.
 links2roff: $(SFILES_INCLUDED)
 	if [ ! -f gdb.texinfo ]; then \
-		ln -s $(SFILES_INCLUDED) . || \
+		(test "$$LN_S" = "ln -s" && ln -s $(SFILES_INCLUDED) .) || \
 		ln $(SFILES_INCLUDED)    . || \
 		cp $(SFILES_INCLUDED)    . ; \
 	fi
@@ -267,7 +270,8 @@ rluser.texinfo: ${READLINE_DIR}/rluser.texinfo
 		${READLINE_DIR}/rluser.texinfo > ./rluser.texinfo
 
 inc-hist.texinfo: ${READLINE_DIR}/inc-hist.texinfo
-	ln -s ${READLINE_DIR}/inc-hist.texinfo . || \
+	(test "$$LN_S" = "ln -s" && \
+	 ln -s ${READLINE_DIR}/inc-hist.texinfo .) || \
 	ln ${READLINE_DIR}/inc-hist.texinfo . || \
 	cp ${READLINE_DIR}/inc-hist.texinfo .
 
