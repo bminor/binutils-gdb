@@ -63,6 +63,7 @@
 //  Instructions for the ASEs are in separate .igen files.
 //  ASEs add instructions on to a base ISA.
 :model:::mips16:mips16:			// m16.igen (and m16.dc)
+:model:::mips3d:mips3d:			// mips3d.igen
 :model:::mdmx:mdmx:			// mdmx.igen
 
 //  Vendor Extensions
@@ -4028,7 +4029,7 @@
 }
 
 
-010001,10,3.FMT,00000,5.FS,5.FD,100100:COP1:32,f::CVT.W.fmt
+010001,10,3.FMT!6,00000,5.FS,5.FD,100100:COP1:32,f::CVT.W.fmt
 "cvt.w.%s<FMT> f<FD>, f<FS>"
 *mipsI:
 *mipsII:
@@ -5123,6 +5124,7 @@
 
 :include:::m16.igen
 :include:::mdmx.igen
+:include:::mips3d.igen
 :include:::sb1.igen
 :include:::tx.igen
 :include:::vr.igen

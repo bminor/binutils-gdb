@@ -2,7 +2,8 @@
 /* MIPS Simulator FPU (CoProcessor 1) support.
    Copyright (C) 2002 Free Software Foundation, Inc.
    Originally created by Cygnus Solutions, modified substially
-   by Broadcom Corporation (SiByte).
+   by Broadcom Corporation (SiByte).  Paired-single operation support
+   and MIPS-3D support contributed by Broadcom Corporation (SiByte).
 
 This file is part of GDB, the GNU debugger.
 
@@ -1095,6 +1096,256 @@ fp_nmsub(sim_cpu *cpu,
          FP_formats fmt)
 {
   return fp_mac(cpu, cia, &sim_fpu_sub, op1, op2, op3, 0, 1, fmt);
+}
+
+
+/* MIPS-3D ASE operations.  */
+
+/* Variant of fp_binary for *r.ps MIPS-3D operations. */
+static unsigned64
+fp_binary_r(sim_cpu *cpu,
+	    address_word cia,
+	    int (*sim_fpu_op)(sim_fpu *, const sim_fpu *, const sim_fpu *),
+	    unsigned64 op1,
+	    unsigned64 op2) 
+{
+  sim_fpu wop1;
+  sim_fpu wop2;
+  sim_fpu ans;
+  sim_fpu_round round = rounding_mode (GETRM ());
+  sim_fpu_denorm denorm = denorm_mode (cpu);
+  sim_fpu_status status_u, status_l;
+  unsigned64 result;
+  unsigned32 res_u, res_l;
+
+  /* The format must be fmt_ps.  */
+  status_u = 0;
+  sim_fpu_32to (&wop1, FP_PS_upper (op1));
+  sim_fpu_32to (&wop2, FP_PS_lower (op1));
+  status_u |= (*sim_fpu_op) (&ans, &wop1, &wop2);
+  status_u |= sim_fpu_round_32 (&ans, round, denorm);
+  sim_fpu_to32 (&res_u, &ans);
+  status_l = 0;
+  sim_fpu_32to (&wop1, FP_PS_upper (op2));
+  sim_fpu_32to (&wop2, FP_PS_lower (op2));
+  status_l |= (*sim_fpu_op) (&ans, &wop1, &wop2);
+  status_l |= sim_fpu_round_32 (&ans, round, denorm);
+  sim_fpu_to32 (&res_l, &ans);
+  result = FP_PS_cat (res_u, res_l);
+
+  update_fcsr (cpu, cia, status_u | status_l);
+  return result;
+}
+
+unsigned64
+fp_add_r(sim_cpu *cpu,
+         address_word cia,
+         unsigned64 op1,
+         unsigned64 op2,
+         FP_formats fmt)
+{
+  return fp_binary_r (cpu, cia, &sim_fpu_add, op1, op2);
+}
+
+unsigned64
+fp_mul_r(sim_cpu *cpu,
+         address_word cia,
+         unsigned64 op1,
+         unsigned64 op2,
+         FP_formats fmt)
+{
+  return fp_binary_r (cpu, cia, &sim_fpu_mul, op1, op2);
+}
+
+#define NR_FRAC_GUARD   (60)
+#define IMPLICIT_1 LSBIT64 (NR_FRAC_GUARD)
+
+static int
+fpu_inv1(sim_fpu *f, const sim_fpu *l)
+{
+  static const sim_fpu sim_fpu_one = {
+    sim_fpu_class_number, 0, IMPLICIT_1, 0
+  };
+  int  status = 0;
+  sim_fpu t;
+
+  if (sim_fpu_is_zero (l))
+    {
+      *f = sim_fpu_maxfp;
+      f->sign = l->sign;
+      return sim_fpu_status_invalid_div0;
+    }
+  if (sim_fpu_is_infinity (l))
+    {
+      *f = sim_fpu_zero;
+      f->sign = l->sign;
+      return status;
+    }
+  status |= sim_fpu_div (f, &sim_fpu_one, l);
+  return status;
+}
+
+static int
+fpu_inv1_32(sim_fpu *f, const sim_fpu *l)
+{
+  if (sim_fpu_is_zero (l))
+    {
+      *f = sim_fpu_max32;
+      f->sign = l->sign;
+      return sim_fpu_status_invalid_div0;
+    }
+  return fpu_inv1 (f, l);
+}
+
+static int
+fpu_inv1_64(sim_fpu *f, const sim_fpu *l)
+{
+  if (sim_fpu_is_zero (l))
+    {
+      *f = sim_fpu_max64;
+      f->sign = l->sign;
+      return sim_fpu_status_invalid_div0;
+    }
+  return fpu_inv1 (f, l);
+}
+
+unsigned64
+fp_recip1(sim_cpu *cpu,
+          address_word cia,
+          unsigned64 op,
+          FP_formats fmt)
+{
+  switch (fmt)
+    {
+    case fmt_single:
+    case fmt_ps:
+      return fp_unary (cpu, cia, &fpu_inv1_32, op, fmt);
+    case fmt_double:
+      return fp_unary (cpu, cia, &fpu_inv1_64, op, fmt);
+    }
+  return 0;
+}
+
+unsigned64
+fp_recip2(sim_cpu *cpu,
+          address_word cia,
+          unsigned64 op1,
+          unsigned64 op2,
+          FP_formats fmt)
+{
+  static const unsigned64 one_single = UNSIGNED64 (0x3F800000);
+  static const unsigned64 one_double = UNSIGNED64 (0x3FF0000000000000);
+  static const unsigned64 one_ps = (one_single << 32 | one_single);
+  unsigned64 one;
+
+  /* Implemented as nmsub fd, 1, fs, ft.  */
+  switch (fmt)
+    {
+    case fmt_single:  one = one_single;  break;
+    case fmt_double:  one = one_double;  break;
+    case fmt_ps:      one = one_ps;      break;
+    default:          one = 0;           abort ();
+    }
+  return fp_mac (cpu, cia, &sim_fpu_sub, op1, op2, one, 0, 1, fmt);
+}
+
+static int
+fpu_inv_sqrt1(sim_fpu *f, const sim_fpu *l)
+{
+  static const sim_fpu sim_fpu_one = {
+    sim_fpu_class_number, 0, IMPLICIT_1, 0
+  };
+  int  status = 0;
+  sim_fpu t;
+
+  if (sim_fpu_is_zero (l))
+    {
+      *f = sim_fpu_maxfp;
+      f->sign = l->sign;
+      return sim_fpu_status_invalid_div0;
+    }
+  if (sim_fpu_is_infinity (l))
+    {
+      if (!l->sign)
+	{
+	  f->class = sim_fpu_class_zero;
+	  f->sign = 0;
+	}
+      else
+	{
+	  *f = sim_fpu_qnan;
+	  status = sim_fpu_status_invalid_sqrt;
+	}
+      return status;
+    }
+  status |= sim_fpu_sqrt (&t, l);
+  status |= sim_fpu_div (f, &sim_fpu_one, &t);
+  return status;
+}
+
+static int
+fpu_inv_sqrt1_32(sim_fpu *f, const sim_fpu *l)
+{
+  if (sim_fpu_is_zero (l))
+    {
+      *f = sim_fpu_max32;
+      f->sign = l->sign;
+      return sim_fpu_status_invalid_div0;
+    }
+  return fpu_inv_sqrt1 (f, l);
+}
+
+static int
+fpu_inv_sqrt1_64(sim_fpu *f, const sim_fpu *l)
+{
+  if (sim_fpu_is_zero (l))
+    {
+      *f = sim_fpu_max64;
+      f->sign = l->sign;
+      return sim_fpu_status_invalid_div0;
+    }
+  return fpu_inv_sqrt1 (f, l);
+}
+
+unsigned64
+fp_rsqrt1(sim_cpu *cpu,
+          address_word cia,
+          unsigned64 op,
+          FP_formats fmt)
+{
+  switch (fmt)
+    {
+    case fmt_single:
+    case fmt_ps:
+      return fp_unary (cpu, cia, &fpu_inv_sqrt1_32, op, fmt);
+    case fmt_double:
+      return fp_unary (cpu, cia, &fpu_inv_sqrt1_64, op, fmt);
+    }
+  return 0;
+}
+
+unsigned64
+fp_rsqrt2(sim_cpu *cpu,
+          address_word cia,
+          unsigned64 op1,
+          unsigned64 op2,
+          FP_formats fmt)
+{
+  static const unsigned64 half_single = UNSIGNED64 (0x3F000000);
+  static const unsigned64 half_double = UNSIGNED64 (0x3FE0000000000000);
+  static const unsigned64 half_ps = (half_single << 32 | half_single);
+  unsigned64 half;
+
+  /* Implemented as (nmsub fd, 0.5, fs, ft)/2, where the divide is
+     done by scaling the exponent during multiply.  */
+  switch (fmt)
+    {
+    case fmt_single:  half = half_single;  break;
+    case fmt_double:  half = half_double;  break;
+    case fmt_ps:      half = half_ps;      break;
+    default:          half = 0;            abort ();
+    }
+  return fp_mac (cpu, cia, &sim_fpu_sub, op1, op2, half, -1, 1, fmt);
 }
 
 

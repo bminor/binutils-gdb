@@ -82,6 +82,10 @@ typedef enum {
  fmt_uninterpreted_64 = 0x80000000U,
 } FP_formats;
 
+/* For paired word (pw) operations, the opcode representation is fmt_word,
+   but register transfers (StoreFPR, ValueFPR, etc.) are done as fmt_long.  */
+#define fmt_pw fmt_long
+
 /* This should be the COC1 value at the start of the preceding
    instruction: */
 #define PREVCOC1() ((STATE & simPCOC1) ? 1 : 0)
@@ -730,6 +734,23 @@ unsigned64 convert (SIM_STATE, int rm, unsigned64 op, FP_formats from, FP_format
 unsigned64 convert_ps (SIM_STATE, int rm, unsigned64 op, FP_formats from,
 		       FP_formats to);
 #define ConvertPS(rm,op,from,to) convert_ps (SIM_ARGS, rm, op, from, to)
+
+
+/* MIPS-3D ASE operations.  */
+#define CompareAbs(op1,op2,fmt,cond,cc) \
+fp_cmp(SIM_ARGS, op1, op2, fmt, 1, cond, cc)
+unsigned64 fp_add_r (SIM_STATE, unsigned64 op1, unsigned64 op2, FP_formats fmt);
+#define AddR(op1,op2,fmt) fp_add_r(SIM_ARGS, op1, op2, fmt)
+unsigned64 fp_mul_r (SIM_STATE, unsigned64 op1, unsigned64 op2, FP_formats fmt);
+#define MultiplyR(op1,op2,fmt) fp_mul_r(SIM_ARGS, op1, op2, fmt)
+unsigned64 fp_recip1 (SIM_STATE, unsigned64 op, FP_formats fmt);
+#define Recip1(op,fmt) fp_recip1(SIM_ARGS, op, fmt)
+unsigned64 fp_recip2 (SIM_STATE, unsigned64 op1, unsigned64 op2, FP_formats fmt);
+#define Recip2(op1,op2,fmt) fp_recip2(SIM_ARGS, op1, op2, fmt)
+unsigned64 fp_rsqrt1 (SIM_STATE, unsigned64 op, FP_formats fmt);
+#define RSquareRoot1(op,fmt) fp_rsqrt1(SIM_ARGS, op, fmt)
+unsigned64 fp_rsqrt2 (SIM_STATE, unsigned64 op1, unsigned64 op2, FP_formats fmt);
+#define RSquareRoot2(op1,op2,fmt) fp_rsqrt2(SIM_ARGS, op1, op2, fmt)
 
 
 /* MDMX access.  */

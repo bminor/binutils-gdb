@@ -4028,7 +4028,7 @@ case "${target}" in
 			sim_igen_filter="32,64,f"
 			;;
   mipsisa64*-*-*)	sim_gen=IGEN
-		        sim_igen_machine="-M mips64"
+		        sim_igen_machine="-M mips64,mips3d"
 			sim_igen_filter="32,64,f"
 			;;
   mips*lsi*)	        sim_gen=M16

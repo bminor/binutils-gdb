@@ -1,3 +1,23 @@
+2002-06-14  Chris Demetriou  <cgd@broadcom.com>
+            Ed Satterthwaite  <ehs@broadcom.com>
+
+	* mips3d.igen: New file which contains MIPS-3D ASE instructions.
+	* Makefile.in (IGEN_INCLUDE): Add mips3d.igen.
+	* mips.igen: Include mips3d.igen.
+	(mips3d): New model name for MIPS-3D ASE instructions.
+	(CVT.W.fmt): Don't use this instruction for word (source) format
+	instructions. 
+	* cp1.c (fp_binary_r, fp_add_r, fp_mul_r, fpu_inv1, fpu_inv1_32)
+	(fpu_inv1_64, fp_recip1, fp_recip2, fpu_inv_sqrt1, fpu_inv_sqrt1_32)
+	(fpu_inv_sqrt1_64, fp_rsqrt1, fp_rsqrt2): New functions.
+	(NR_FRAC_GUARD, IMPLICIT_1): New macros.
+	* sim-main.h (fmt_pw, CompareAbs, AddR, MultiplyR, Recip1, Recip2)
+	(RSquareRoot1, RSquareRoot2): New macros.
+	(fp_add_r, fp_mul_r, fp_recip1, fp_recip2, fp_rsqrt1)
+	(fp_rsqrt2): New functions.
+	* configure.in: Add MIPS-3D support to mipsisa64 simulator.
+	* configure: Regenerate.
+
 2002-06-13  Chris Demetriou  <cgd@broadcom.com>
             Ed Satterthwaite  <ehs@broadcom.com>
 
