@@ -1,3 +1,9 @@
+Fri Jul 26 14:07:37 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* printcmd.c (_initialize_printcmd): Initialize
+	tm_print_insn_info.flavour.
+	* gdbtk.c (gdb_disassemble): Initialize di.flavour.
+
 Thu Jul 25 19:41:31 1996  Fred Fish  <fnf@cygnus.com>
 
 	* Makefile.in (scm-valprint.o): Depends upon gdbcore_h.

@@ -930,6 +930,7 @@ gdb_disassemble (clientData, interp, argc, argv)
     {
       INIT_DISASSEMBLE_INFO_NO_ARCH (di, gdb_stdout,
 				     (fprintf_ftype) fprintf_unfiltered);
+      di.flavour = bfd_target_unknown_flavour;
       di.memory_error_func = dis_asm_memory_error;
       di.print_address_func = dis_asm_print_address;
       di_initialized = 1;
