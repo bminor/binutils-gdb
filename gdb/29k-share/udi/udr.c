@@ -26,6 +26,9 @@ static char udr_c_AMD[]="@(#)udr.c	2.3, AMD";
 *	and de-serialised back into the approproiate objects.
 ********************************************************************** HISTORY
 */
+/* This is all unneeded on DOS machines.  */
+#ifndef __GO32__
+
 #include <stdio.h>
 #include <sys/types.h>
 
@@ -421,3 +424,4 @@ int	size;
     offset = offset & (size -1);
     if(offset) udr_setpos(udrs, align + offset);
 }
+#endif /* __GO32__ */

@@ -1011,6 +1011,9 @@ ALLCONFIG = config/a29k/a29k-kern.mt config/a29k/a29k-udi.mt \
 udip2soc.o: $(srcdir)/29k-share/udi/udip2soc.c $(udiheaders)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/29k-share/udi/udip2soc.c
 
+udi2go32.o: $(srcdir)/29k-share/udi/udi2go32.c $(udiheaders)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/29k-share/udi/udi2go32.c
+
 udr.o: $(srcdir)/29k-share/udi/udr.c $(udiheaders) 
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/29k-share/udi/udr.c
 

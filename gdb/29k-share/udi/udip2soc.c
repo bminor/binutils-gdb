@@ -24,6 +24,9 @@ static  char udip2soc_c_AMD[]="@(#)udip2soc.c	2.8, AMD";
 *	It is used by DFE client processes
 ********************************************************************** HISTORY
 */
+/* This is all unneeded on DOS machines.  */
+#ifndef __GO32__
+
 #include <stdio.h>
 #include <string.h>
 
@@ -1245,3 +1248,4 @@ UDIUInt32 UDIGetDFEIPCId()
 {
     return ((company_c << 16) + (product_c << 12) + version_c);
 }
+#endif /* __GO32__ */

@@ -1,5 +1,14 @@
 Wed Nov  3 09:20:18 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	Merge changes for dos x udi:
+	* Makefile.in (udi2go32.o): add rule to build this file
+	* 29k-share/udi/udi2go32.c: new file
+	* config/a29k/a29k-udi.mt: add udi2go32.o
+	* 29k-share/udi/{udr.c, udip2soc.c}: #ifdef out the entire file 
+	  if __GO32__ is defined.  What a hack.
+
+Wed Nov  3 09:20:18 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
 	* remote.c (putpkt, getpkt): Don't call interrupt_query.
 
 	* findvar.c (value_of_register): Rename val to reg_val to avoid
