@@ -1,4 +1,8 @@
 -*- text -*-
+Changes in version 2.13:
+
+* DEC VAX ELF support, by Matt Thomas.
+
 Changes in version 2.12:
 
 * Support for Don Knuth's MMIX, by Hans-Peter Nilsson.
