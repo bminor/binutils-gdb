@@ -1978,7 +1978,7 @@ make_import_fixup_mark (rel)
   struct symbol_cache_entry *sym = *rel->sym_ptr_ptr;
 
   bfd *abfd = bfd_asymbol_bfd (sym);
-  struct coff_link_hash_entry *myh = NULL;
+  struct bfd_link_hash_entry *bh;
 
   if (!fixup_name)
     {
@@ -2000,15 +2000,20 @@ make_import_fixup_mark (rel)
 
   sprintf (fixup_name, "__fu%d_%s", counter++, sym->name);
 
+  bh = NULL;
   bfd_coff_link_add_one_symbol (&link_info, abfd, fixup_name, BSF_GLOBAL,
 				current_sec, /* sym->section, */
-				rel->address, NULL, true, false,
-				(struct bfd_link_hash_entry **) &myh);
+				rel->address, NULL, true, false, &bh);
 
-#if 0
-  printf ("type:%d\n", myh->type);
-  printf ("%s\n", myh->root.u.def.section->name);
-#endif
+  if (0)
+    {
+      struct coff_link_hash_entry *myh;
+
+      myh = (struct coff_link_hash_entry *) bh;
+      printf ("type:%d\n", myh->type);
+      printf ("%s\n", myh->root.u.def.section->name);
+    }
+
   return fixup_name;
 }
 

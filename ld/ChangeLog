@@ -1,5 +1,7 @@
 2002-10-11  Alan Modra  <amodra@bigpond.net.au>
 
+	* pe-dll.c (make_import_fixup_mark): Avoid type-punned pointer.
+
 	* ldgram.y (memory_spec): Provide empty action.
 	(section <NAME>): Likewise.
 
