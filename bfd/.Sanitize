@@ -101,6 +101,7 @@ cpu-i960.c
 cpu-m68k.c
 cpu-m88k.c
 cpu-mips.c
+cpu-powerpc.c
 cpu-rs6000.c
 cpu-sh.c
 cpu-sparc.c
