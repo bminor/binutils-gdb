@@ -194,7 +194,7 @@ AC_ARG_ENABLE(gdbtk,
     *)
       AC_MSG_ERROR([bad value $enableval for --enable-gdbtk]) ;;
   esac],
-  [if test -d $srcdir/gdbtk; then
+  [if test -d $srcdir/gdbtk -a -d $srcdir/../itcl; then
     enable_gdbtk=yes
   else
     enable_gdbtk=no
