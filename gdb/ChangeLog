@@ -1,5 +1,9 @@
 2004-05-30  Mark Kettenis  <kettenis@gnu.org>
 
+	* m88k-tdep.c (m88k_analyze_prologue): Fix handling of branch
+	instructions.
+	(m88k_frame_prev_register): Simplify code a bit.
+
 	* amd64-tdep.c (amd64_supply_fpregset): Adjust comment.
 	(amd64_collect_fpregset): New function.
 	(amd64_regset_from_core_section): Use amd64_collect_fpregset.
