@@ -1657,6 +1657,17 @@ thumb_get_next_pc (CORE_ADDR pc)
       offset = (sbits (inst1, 0, 10) << 12) + (bits (inst2, 0, 10) << 1);
       nextpc = pc_val + offset;
     }
+  else if ((inst1 & 0xff80) == 0x4700)	/* branch and exchange (bx) */
+    {
+      if (bits (inst1, 3, 6) == 0x0f)
+	nextpc = pc_val;
+      else
+	nextpc = read_register (bits (inst1, 3, 6));
+
+      nextpc = ADDR_BITS_REMOVE (nextpc);
+      if (nextpc == pc)
+	error ("Infinite loop detected");
+    }
 
   return nextpc;
 }
@@ -1696,6 +1707,20 @@ arm_get_next_pc (CORE_ADDR pc)
 	    if (bits (this_instr, 22, 25) == 0
 		&& bits (this_instr, 4, 7) == 9)	/* multiply */
 	      error ("Illegal update to pc in instruction");
+
+	    /* BX <reg>, BLX <reg> */
+	    if (bits (this_instr, 4, 28) == 0x12fff1
+		|| bits (this_instr, 4, 28) == 0x12fff3)
+	      {
+		rn = bits (this_instr, 0, 3);
+		result = (rn == 15) ? pc_val + 8 : read_register (rn);
+		nextpc = (CORE_ADDR) ADDR_BITS_REMOVE (result);
+
+		if (nextpc == pc)
+		  error ("Infinite loop detected");
+
+		return nextpc;
+	      }
 
 	    /* Multiply into PC */
 	    c = (status & FLAG_C) ? 1 : 0;
@@ -1861,6 +1886,10 @@ arm_get_next_pc (CORE_ADDR pc)
 	case 0xa:		/* branch */
 	  {
 	    nextpc = BranchDest (pc, this_instr);
+
+	    /* BLX */
+	    if (bits (this_instr, 28, 31) == INST_NV)
+	      nextpc |= bit (this_instr, 24) << 1;
 
 	    nextpc = ADDR_BITS_REMOVE (nextpc);
 	    if (nextpc == pc)
