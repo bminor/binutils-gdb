@@ -1,5 +1,5 @@
 /* Parse options for the GNU linker.
-   Copyright (C) 1991, 92, 93, 94, 1995 Free Software Foundation, Inc.
+   Copyright (C) 1991, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
 
@@ -103,7 +103,8 @@ parse_args (argc, argv)
 #define OPTION_VERSION			(OPTION_VERBOSE + 1)
 #define OPTION_WARN_COMMON		(OPTION_VERSION + 1)
 #define OPTION_WARN_CONSTRUCTORS	(OPTION_WARN_COMMON + 1)
-#define OPTION_WARN_ONCE		(OPTION_WARN_CONSTRUCTORS + 1)
+#define OPTION_WARN_MULTIPLE_GP		(OPTION_WARN_CONSTRUCTORS + 1)
+#define OPTION_WARN_ONCE		(OPTION_WARN_MULTIPLE_GP + 1)
 #define OPTION_SPLIT_BY_RELOC		(OPTION_WARN_ONCE + 1)
 #define OPTION_SPLIT_BY_FILE 	    	(OPTION_SPLIT_BY_RELOC + 1)
 #define OPTION_WHOLE_ARCHIVE		(OPTION_SPLIT_BY_FILE + 1)
@@ -159,6 +160,7 @@ parse_args (argc, argv)
     {"version", no_argument, NULL, OPTION_VERSION},
     {"warn-common", no_argument, NULL, OPTION_WARN_COMMON},
     {"warn-constructors", no_argument, NULL, OPTION_WARN_CONSTRUCTORS},
+    {"warn-multiple-gp", no_argument, NULL, OPTION_WARN_MULTIPLE_GP},
     {"warn-once", no_argument, NULL, OPTION_WARN_ONCE},
     {"split-by-reloc", required_argument, NULL, OPTION_SPLIT_BY_RELOC},
     {"split-by-file", no_argument, NULL, OPTION_SPLIT_BY_FILE},
@@ -486,6 +488,9 @@ parse_args (argc, argv)
 	  break;
 	case OPTION_WARN_CONSTRUCTORS:
 	  config.warn_constructors = true;
+	  break;
+	case OPTION_WARN_MULTIPLE_GP:
+	  config.warn_multiple_gp = true;
 	  break;
 	case OPTION_WARN_ONCE:
 	  config.warn_once = true;

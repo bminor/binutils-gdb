@@ -184,7 +184,7 @@ ld [ -o @var{output} ]  @var{objfile}@dots{}
   [ -Ttext @var{org} ]  [ -Tdata @var{org} ]
   [ -Tbss @var{org} ]  [ -t ] [ -traditional-format ]
   [ -u @var{symbol}]  [-V]  [-v]  [ -verbose]  [ -version ]
-  [ -warn-common ] [ -warn-constructors] [ -warn-once ]
+  [ -warn-common ] [ -warn-constructors] [ -warn-multiple-gp ] [ -warn-once ]
   [ -y @var{symbol} ]  [ -X ]  [-x ]
   [ -( [ archives ] -) ]
   [ --start-group [ archives ] --end-group ]
@@ -932,6 +932,20 @@ Warn if any global constructors are used.  This is only useful for a few
 object file formats.  For formats like COFF or ELF, the linker can not
 detect the use of global constructors.
 
+@kindex -warn-multiple-gp
+@item -warn-multiple-gp
+Warn if multiple global pointer values are required in the output file.
+This is only meaningful for certain processors, such as the Alpha.
+Specifically, some processors put large-valued constants in a special
+section.  A special register (the global pointer) points into the middle
+of this section, so that constants can be loaded efficiently via a
+base-register relative addressing mode.  Since the offset in
+base-register relative mode is fixed and relatively small (e.g., 16
+bits), this limits the maximum size of the constant pool.  Thus, in
+large programs, it is often necessary to use multiple global pointer
+values in order to be able to address all possible constants.  This
+option causes a warning to be issued whenever this case occurs.
+
 @kindex -warn-once
 @cindex warnings, on undefined symbols
 @cindex undefined symbols, warnings on
@@ -941,6 +955,7 @@ which refers to it.
 
 @kindex --whole-archive
 @cindex including an entire archive
+@item --whole-archive
 For each archive mentioned on the command line after the
 @code{--whole-archive} option, include every object file in the archive
 in the link, rather than searching the archive for the required object
@@ -949,6 +964,7 @@ library, forcing every object to be included in the resulting shared
 library.
 
 @kindex --no-whole-archive
+@item --no-whole-archive
 Turn off the effect of the @code{--whole-archive} option for archives
 which appear later on the command line.
 

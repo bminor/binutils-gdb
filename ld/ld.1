@@ -119,6 +119,7 @@ ld \- the GNU linker
 .RB "[\|" \-\-version "\|]"
 .RB "[\|" \-warn\-common "\|]" 
 .RB "[\|" \-warn\-constructors "\|]" 
+.RB "[\|" \-warn\-multiple\-gp "\|]" 
 .RB "[\|" \-warn\-once "\|]" 
 .RB "[\|" \-\-whole\-archive "\|]" 
 .RB "[\|" \-\-no\-whole\-archive "\|]" 
@@ -906,6 +907,11 @@ you to find potential problems from combining global symbols.
 Warn if any global constructors are used.  This is only useful for a
 few object file formats.  For formats like COFF or ELF, the linker can
 not detect the use of global constructors.
+
+.TP
+.B \-warn\-multiple\-gp
+Warn if the output file requires multiple global-pointer values.  This
+option is only meaningful for certain processors, such as the Alpha.
 
 .TP
 .B \-warn\-once

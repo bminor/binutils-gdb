@@ -735,7 +735,7 @@ add_to_set (info, h, reloc, abfd, section, value)
   if (! config.build_constructors)
     return true;
 
-  ldctor_add_set_entry (h, reloc, section, value);
+  ldctor_add_set_entry (h, reloc, (const char *) NULL, section, value);
 
   if (h->type == bfd_link_hash_new)
     {
@@ -775,7 +775,9 @@ constructor_callback (info, constructor, name, abfd, section, value)
 
   /* Ensure that BFD_RELOC_CTOR exists now, so that we can give a
      useful error message.  */
-  if (bfd_reloc_type_lookup (output_bfd, BFD_RELOC_CTOR) == NULL)
+  if (bfd_reloc_type_lookup (output_bfd, BFD_RELOC_CTOR) == NULL
+      && (link_info.relocateable
+	  || bfd_reloc_type_lookup (abfd, BFD_RELOC_CTOR) == NULL))
     einfo ("%P%F: BFD backend error: BFD_RELOC_CTOR unsupported\n");
 
   s = set_name;
@@ -802,7 +804,7 @@ constructor_callback (info, constructor, name, abfd, section, value)
 	 ourselves.  */
     }
 
-  ldctor_add_set_entry (h, BFD_RELOC_CTOR, section, value);
+  ldctor_add_set_entry (h, BFD_RELOC_CTOR, name, section, value);
   return true;
 }
 
@@ -829,6 +831,12 @@ warning_callback (info, warning, symbol, abfd, section, address)
      asection *section;
      bfd_vma address;
 {
+  /* This is a hack to support warn_multiple_gp.  FIXME: This should
+     have a cleaner interface, but what?  */
+  if (! config.warn_multiple_gp
+      && strcmp (warning, "using multiple gp values") == 0)
+    return true;
+
   if (section != NULL)
     einfo ("%C: %s\n", abfd, section, address, warning);
   else if (abfd == NULL)

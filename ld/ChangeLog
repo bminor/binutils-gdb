@@ -1,3 +1,11 @@
+Tue Mar 12 12:43:59 1996  David Mosberger-Tang  <davidm@koala.azstarnet.com>
+
+	* ld.h (ld_config_type): Add warn_multiple_gp field.
+	* lexsup.c (parse_args): Handle --warn-multiple-gp.
+	* ldmain.c (warning_callback): Suppress multiple gp values warning
+	if --warn_multiple_gp was not used.
+	* ld.texinfo, ld.1: Document --warn-multiple-gp.
+
 Tue Mar 12 12:02:21 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure: Rebuild with autoconf 2.8.
