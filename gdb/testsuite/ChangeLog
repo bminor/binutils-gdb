@@ -1,3 +1,7 @@
+1998-12-07  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* gdb.base/restore.exp, gdb.base/restore.c: New tests.
+
 Wed Dec  2 20:03:53 1998  Stan Shebs  <shebs@andros.cygnus.com>
 
 	From Brendan Kehoe:
