@@ -1,3 +1,20 @@
+Thu Jun 18 10:22:24 1998  John Metzler  <jmetzler@cygnus.com>
+
+	* mips-dis.c (print_insn_little_mips): Previously, instruction
+ 	printing references the symbol table to determine whether the
+ 	instruction resides in a block regular instructions or mips16
+ 	instructions. However, when the disassembler gets used in other
+ 	environments where the symbol table is not present, we no longer
+ 	rely in the symbol table, rather, use the low bit of the
+ 	instructions address to guess. There should be no change for usage
+ 	of the disassembler in host based programse, gdb ,objdump.
+	(print_insn_big_mips): ditto.
+	(print_insn_mips): ditto
+
+Wed Jun 17 21:19:01 1998  Mark Alexander  <marka@cygnus.com>
+
+	* m10200-dis.c (print_insn_mn10200): Don't bomb on unknown opcodes.
+
 Wed Jun 17 17:49:23 1998  Jeffrey A Law  (law@cygnus.com)
 
 start-sanitize-am33

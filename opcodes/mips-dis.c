@@ -24,10 +24,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "opcode/mips.h"
 #include "opintl.h"
 
-/* FIXME: These are needed to figure out if this is a mips16 symbol or
-   not.  It would be better to think of a cleaner way to do this.  */
+/* FIXME: These are needed to figure out if the code is mips16 or
+   not. The low bit of the address is often a good indicator.  No
+   symbol table is available when this code runs out in an embedded
+   system as when it is used for disassembler support in a monitor.
+*/
+#if !defined(EMBEDDED_ENV)
+#define SYMTAB_AVAILABLE 1
 #include "elf-bfd.h"
 #include "elf/mips.h"
+#endif
 
 static int print_insn_mips16 PARAMS ((bfd_vma, struct disassemble_info *));
 static void print_mips16_insn_arg
@@ -375,40 +381,11 @@ print_insn_arg (d, l, pc, info)
    always 4.  BIGENDIAN must be 1 if this is big-endian code, 0 if
    this is little-endian code.  */
 
-static int
-_print_insn_mips (memaddr, word, info)
-     bfd_vma memaddr;
-     unsigned long int word;
-     struct disassemble_info *info;
+#if SYMTAB_AVAILABLE
+
+static set_mips_isa_type(int mach,int * isa, int *cputype ) 
 {
-  register const struct mips_opcode *op;
-  int target_processor, mips_isa;
-  static boolean init = 0;
-  static const struct mips_opcode *mips_hash[OP_MASK_OP + 1];
-
-  /* Build a hash table to shorten the search time.  */
-  if (! init)
-    {
-      unsigned int i;
-
-      for (i = 0; i <= OP_MASK_OP; i++)
-	{
-	  for (op = mips_opcodes; op < &mips_opcodes[NUMOPCODES]; op++)
-	    {
-	      if (op->pinfo == INSN_MACRO)
-		continue;
-	      if (i == ((op->match >> OP_SH_OP) & OP_MASK_OP))
-		{
-		  mips_hash[i] = op;
-		  break;
-		}
-	    }
-        }
-
-      init = 1;
-    }
-
-  switch (info->mach)
+    switch (info->mach)
     {
       /* start-sanitize-tx19 */
       case bfd_mach_mips1900:
@@ -502,6 +479,51 @@ _print_insn_mips (memaddr, word, info)
 	break;
 
     }
+    *isa = mips_isa ;
+    *cputype = target_processor ;
+      
+}
+#endif /* symbol table available */
+
+static int
+_print_insn_mips (memaddr, word, info)
+     bfd_vma memaddr;
+     unsigned long int word;
+     struct disassemble_info *info;
+{
+  register const struct mips_opcode *op;
+  int target_processor, mips_isa;
+  static boolean init = 0;
+  static const struct mips_opcode *mips_hash[OP_MASK_OP + 1];
+
+  /* Build a hash table to shorten the search time.  */
+  if (! init)
+    {
+      unsigned int i;
+
+      for (i = 0; i <= OP_MASK_OP; i++)
+	{
+	  for (op = mips_opcodes; op < &mips_opcodes[NUMOPCODES]; op++)
+	    {
+	      if (op->pinfo == INSN_MACRO)
+		continue;
+	      if (i == ((op->match >> OP_SH_OP) & OP_MASK_OP))
+		{
+		  mips_hash[i] = op;
+		  break;
+		}
+	    }
+        }
+
+      init = 1;
+    }
+#if ! SYMTAB_AVAILABLE
+  /* This is running out on a target machine, not in a host tool */
+  target_processor = mips_target_info.processor ;
+  mips_isa = mips_target_info.isa ;
+#else  
+  set_mips_isa_type(info->mach,&target_processor,&mips_isa) ;
+#endif  
 
   info->bytes_per_chunk = 4;
   info->display_endian = info->endian;
@@ -589,6 +611,15 @@ _print_insn_mips (memaddr, word, info)
   return 4;
 }
 
+
+/* In an environment where we do not know the symbol type of the instruction
+   we are forces to assumd the low order bit of the instructions address
+   may mark it as a mips16 instruction. If we are sincle stepping or the
+   pc is within the disassembled function, this works. Otherwise,
+   we need a clue. Sometimes.
+   */
+   
+
 int
 print_insn_big_mips (memaddr, info)
      bfd_vma memaddr;
@@ -597,12 +628,20 @@ print_insn_big_mips (memaddr, info)
   bfd_byte buffer[4];
   int status;
 
+#if 1
+  /* FIXME: If odd address, this is CLEARLY a mips 16 instruction */
+  /* Only a few tools will work this way */
+  if (memaddr & 0x01)  return print_insn_mips16 (memaddr, info);
+#endif  
+
+#if SYMTAB_AVAILABLE
   if (info->mach == 16
       || (info->flavour == bfd_target_elf_flavour
 	  && info->symbols != NULL
 	  && ((*(elf_symbol_type **) info->symbols)->internal_elf_sym.st_other
 	      == STO_MIPS16)))
     return print_insn_mips16 (memaddr, info);
+#endif  
 
   status = (*info->read_memory_func) (memaddr, buffer, 4, info);
   if (status == 0)
@@ -638,12 +677,18 @@ print_insn_little_mips (memaddr, info)
 #endif
   /* end-sanitize-sky */
 
+#if 1
+  if (memaddr & 0x01)  return print_insn_mips16 (memaddr, info);
+#endif  
+
+#if SYMTAB_AVAILABLE
   if (info->mach == 16
       || (info->flavour == bfd_target_elf_flavour
 	  && info->symbols != NULL
 	  && ((*(elf_symbol_type **) info->symbols)->internal_elf_sym.st_other
 	      == STO_MIPS16)))
     return print_insn_mips16 (memaddr, info);
+#endif  
 
   status = (*info->read_memory_func) (memaddr, buffer, 4, info);
   if (status == 0)
@@ -1073,7 +1118,7 @@ print_mips16_insn_arg (type, op, l, use_extend, extend, memaddr, info)
 	    if (signedp && immed >= (1 << (nbits - 1)))
 	      immed -= 1 << nbits;
 	    immed <<= shift;
-	    if ((type == '<' || type == '>' || type == '[' || type == '[')
+	    if ((type == '<' || type == '>' || type == '[' || type == ']')
 		&& immed == 0)
 	      immed = 8;
 	  }
