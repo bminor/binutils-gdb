@@ -1,12 +1,13 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR Free Software Foundation, Inc.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2003-06-05 11:34+0100\n"
+"POT-Creation-Date: 2003-07-11 13:56+0930\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -88,13 +89,13 @@ msgid "Address 0x%x is out of bounds.\n"
 msgstr ""
 
 #: fr30-asm.c:323 frv-asm.c:626 ip2k-asm.c:574 iq2000-asm.c:460 m32r-asm.c:325
-#: openrisc-asm.c:244 xstormy16-asm.c:284
+#: openrisc-asm.c:261 xstormy16-asm.c:284
 #, c-format
 msgid "Unrecognized field %d while parsing.\n"
 msgstr ""
 
 #: fr30-asm.c:373 frv-asm.c:676 ip2k-asm.c:624 iq2000-asm.c:510 m32r-asm.c:375
-#: openrisc-asm.c:294 xstormy16-asm.c:334
+#: openrisc-asm.c:311 xstormy16-asm.c:334
 msgid "missing mnemonic in syntax string"
 msgstr ""
 
@@ -103,42 +104,42 @@ msgstr ""
 #: frv-asm.c:816 frv-asm.c:903 frv-asm.c:1005 ip2k-asm.c:760 ip2k-asm.c:764
 #: ip2k-asm.c:851 ip2k-asm.c:953 iq2000-asm.c:646 iq2000-asm.c:650
 #: iq2000-asm.c:737 iq2000-asm.c:839 m32r-asm.c:511 m32r-asm.c:515
-#: m32r-asm.c:602 m32r-asm.c:704 openrisc-asm.c:430 openrisc-asm.c:434
-#: openrisc-asm.c:521 openrisc-asm.c:623 xstormy16-asm.c:470
+#: m32r-asm.c:602 m32r-asm.c:704 openrisc-asm.c:447 openrisc-asm.c:451
+#: openrisc-asm.c:538 openrisc-asm.c:640 xstormy16-asm.c:470
 #: xstormy16-asm.c:474 xstormy16-asm.c:561 xstormy16-asm.c:663
 msgid "unrecognized instruction"
 msgstr ""
 
 #: fr30-asm.c:556 frv-asm.c:859 ip2k-asm.c:807 iq2000-asm.c:693 m32r-asm.c:558
-#: openrisc-asm.c:477 xstormy16-asm.c:517
+#: openrisc-asm.c:494 xstormy16-asm.c:517
 #, c-format
 msgid "syntax error (expected char `%c', found `%c')"
 msgstr ""
 
 #: fr30-asm.c:566 frv-asm.c:869 ip2k-asm.c:817 iq2000-asm.c:703 m32r-asm.c:568
-#: openrisc-asm.c:487 xstormy16-asm.c:527
+#: openrisc-asm.c:504 xstormy16-asm.c:527
 #, c-format
 msgid "syntax error (expected char `%c', found end of instruction)"
 msgstr ""
 
 #: fr30-asm.c:594 frv-asm.c:897 ip2k-asm.c:845 iq2000-asm.c:731 m32r-asm.c:596
-#: openrisc-asm.c:515 xstormy16-asm.c:555
+#: openrisc-asm.c:532 xstormy16-asm.c:555
 msgid "junk at end of line"
 msgstr ""
 
 #: fr30-asm.c:701 frv-asm.c:1004 ip2k-asm.c:952 iq2000-asm.c:838
-#: m32r-asm.c:703 openrisc-asm.c:622 xstormy16-asm.c:662
+#: m32r-asm.c:703 openrisc-asm.c:639 xstormy16-asm.c:662
 msgid "unrecognized form of instruction"
 msgstr ""
 
 #: fr30-asm.c:713 frv-asm.c:1016 ip2k-asm.c:964 iq2000-asm.c:850
-#: m32r-asm.c:715 openrisc-asm.c:634 xstormy16-asm.c:674
+#: m32r-asm.c:715 openrisc-asm.c:651 xstormy16-asm.c:674
 #, c-format
 msgid "bad instruction `%.50s...'"
 msgstr ""
 
 #: fr30-asm.c:716 frv-asm.c:1019 ip2k-asm.c:967 iq2000-asm.c:853
-#: m32r-asm.c:718 openrisc-asm.c:637 xstormy16-asm.c:677
+#: m32r-asm.c:718 openrisc-asm.c:654 xstormy16-asm.c:677
 #, c-format
 msgid "bad instruction `%.50s'"
 msgstr ""
@@ -228,7 +229,7 @@ msgstr ""
 msgid "%02x\t\t*unknown*"
 msgstr ""
 
-#: i386-dis.c:1650
+#: i386-dis.c:1699
 msgid "<internal disassembler error>"
 msgstr ""
 
@@ -404,6 +405,7 @@ msgid "21-bit offset out of range"
 msgstr ""
 
 #: iq2000-asm.c:205 iq2000-asm.c:235 iq2000-asm.c:272 iq2000-asm.c:305
+#: openrisc-asm.c:96 openrisc-asm.c:155
 msgid "missing `)'"
 msgstr ""
 
@@ -417,7 +419,7 @@ msgstr ""
 msgid "unknown\t0x%04lx"
 msgstr ""
 
-#: m10300-dis.c:685
+#: m10300-dis.c:766
 #, c-format
 msgid "unknown\t0x%04x"
 msgstr ""
@@ -554,64 +556,84 @@ msgstr ""
 msgid "$<undefined>"
 msgstr ""
 
-#: ppc-opc.c:818 ppc-opc.c:851
+#: ppc-opc.c:781 ppc-opc.c:809
 msgid "invalid conditional option"
 msgstr ""
 
-#: ppc-opc.c:853
+#: ppc-opc.c:811
 msgid "attempt to set y bit when using + or - modifier"
 msgstr ""
 
-#: ppc-opc.c:881
+#: ppc-opc.c:840
+msgid "offset not a multiple of 16"
+msgstr ""
+
+#: ppc-opc.c:860
 msgid "offset not a multiple of 2"
 msgstr ""
 
-#: ppc-opc.c:883
+#: ppc-opc.c:862
 msgid "offset greater than 62"
 msgstr ""
 
-#: ppc-opc.c:904 ppc-opc.c:954 ppc-opc.c:1006
+#: ppc-opc.c:881 ppc-opc.c:927 ppc-opc.c:975
 msgid "offset not a multiple of 4"
 msgstr ""
 
-#: ppc-opc.c:906
+#: ppc-opc.c:883
 msgid "offset greater than 124"
 msgstr ""
 
-#: ppc-opc.c:927
+#: ppc-opc.c:902
 msgid "offset not a multiple of 8"
 msgstr ""
 
-#: ppc-opc.c:929
+#: ppc-opc.c:904
 msgid "offset greater than 248"
 msgstr ""
 
-#: ppc-opc.c:979
+#: ppc-opc.c:950
 msgid "offset not between -2048 and 2047"
 msgstr ""
 
-#: ppc-opc.c:1004
+#: ppc-opc.c:973
 msgid "offset not between -8192 and 8191"
 msgstr ""
 
-#: ppc-opc.c:1032
+#: ppc-opc.c:1011
+msgid "ignoring invalid mfcr mask"
+msgstr ""
+
+#: ppc-opc.c:1059
 msgid "ignoring least significant bits in branch offset"
 msgstr ""
 
-#: ppc-opc.c:1066 ppc-opc.c:1103
+#: ppc-opc.c:1090 ppc-opc.c:1125
 msgid "illegal bitmask"
 msgstr ""
 
-#: ppc-opc.c:1176
+#: ppc-opc.c:1192
 msgid "value out of range"
 msgstr ""
 
-#: ppc-opc.c:1252
+#: ppc-opc.c:1262
 msgid "index register in load range"
 msgstr ""
 
-#: ppc-opc.c:1268
+#: ppc-opc.c:1279
+msgid "source and target register operands must be different"
+msgstr ""
+
+#: ppc-opc.c:1294
 msgid "invalid register operand when updating"
+msgstr ""
+
+#: ppc-opc.c:1335
+msgid "target register operand must be even"
+msgstr ""
+
+#: ppc-opc.c:1350
+msgid "source register operand must be even"
 msgstr ""
 
 #. Mark as non-valid instruction.

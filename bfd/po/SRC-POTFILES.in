@@ -128,6 +128,7 @@ elf-m10200.c
 elf-m10300.c
 elf-strtab.c
 elf.c
+elf32-am33lin.c
 elf32-arc.c
 elf32-arm.h
 elf32-avr.c

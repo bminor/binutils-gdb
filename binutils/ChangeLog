@@ -1,3 +1,7 @@
+2003-07-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* po/binutils.pot: Regenerate.
+
 2003-07-05  Christopher Faylor  <cgf@redhat.com>
 
 	* dlltool.c (prefix_encode): Use a fixed length for alpha.

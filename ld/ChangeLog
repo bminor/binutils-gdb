@@ -1,3 +1,7 @@
+2003-07-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* po/ld.pot: Regenerate.
+
 2003-07-10  Bob Wilson  <bob.wilson@acm.org>
 
 	* emulparams/elf32xtensa.sh (OTHER_READONLY_SECTIONS): Replace .xt.lit

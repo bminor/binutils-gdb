@@ -1,3 +1,7 @@
+2003-07-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* po/gas.pot: Regenerate.
+
 2003-07-10  Jakub Jelinek  <jakub@redhat.com>
 
 	* config/tc-ppc.h (DWARF2_LINE_MIN_INSN_LENGTH): Define always.
