@@ -1,3 +1,16 @@
+start-sanitize-r5900
+Thu Mar 19 13:53:25 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* vu0.h: New file with cop2/vu0 instructions.
+	* mips-opc.c: Include vu0.h.
+	* mips-dis.c (print_insn_arg): Handle new args 0-9, +, -, %, K, &,
+	J, Q, X, and U.
+	(print_insn_mips): Do not emit a tab after an instruction if the
+	first arg is an instruction completer (&).  If the next arg is an
+	escape character (%), then print the next arg verbatim.
+	* Makefile.am (mips-opc.lo): Depend on vu0.h
+
+end-sanitize-r5900
 start-sanitize-sky
 Thu Mar 19 10:42:51 1998  Doug Evans  <devans@canuck.cygnus.com>
 

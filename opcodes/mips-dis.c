@@ -84,6 +84,10 @@ print_insn_arg (d, l, pc, info)
     case '[':
     case ']':
       /* end-sanitize-vr5400 */
+      /* start-sanitize-r5900 */
+    case '+':
+    case '-':
+      /* end-santiize-r5900 */
       (*info->fprintf_func) (info->stream, "%c", *d);
       break;
 
@@ -178,6 +182,113 @@ print_insn_arg (d, l, pc, info)
       (*info->fprintf_func) (info->stream, "$f%d",
 			     (l >> OP_SH_FS) & OP_MASK_FS);
       break;
+
+    /* start-sanitize-r5900
+    case '0':
+      (*info->fprintf_func) (info->stream, "0x%x",
+                             (l >> 6) & 0x1f);
+      break;
+
+    case '9':
+      (*info->fprintf_func) (info->stream, "vi19");
+      break;
+
+    case '1':
+      (*info->fprintf_func) (info->stream, "vf%d",
+			     (l >> OP_SH_FT) & OP_MASK_FT);
+      break;
+    case '2':
+      (*info->fprintf_func) (info->stream, "vf%d",
+			     (l >> OP_SH_FS) & OP_MASK_FS);
+      break;
+    case '3':
+      (*info->fprintf_func) (info->stream, "vf%d",
+			     (l >> OP_SH_FD) & OP_MASK_FD);
+      break;
+
+    case '4':
+      (*info->fprintf_func) (info->stream, "vi%d",
+			     (l >> OP_SH_FT) & OP_MASK_FT);
+      break;
+    case '5':
+      (*info->fprintf_func) (info->stream, "vi%d",
+			     (l >> OP_SH_FS) & OP_MASK_FS);
+      break;
+    case '6':
+      (*info->fprintf_func) (info->stream, "vi%d",
+			     (l >> OP_SH_FD) & OP_MASK_FD);
+      break;
+
+    case '7':
+      (*info->fprintf_func) (info->stream, "vf%d",
+			     (l >> OP_SH_FT) & OP_MASK_FT);
+      switch ((l >> 23) & 0x3)
+	{
+	  case 0:
+	    (*info->fprintf_func) (info->stream, "x");
+	    break;
+	  case 1:
+	    (*info->fprintf_func) (info->stream, "y");
+	    break;
+	  case 2:
+	    (*info->fprintf_func) (info->stream, "z");
+	    break;
+	  case 3:
+	    (*info->fprintf_func) (info->stream, "w");
+	    break;
+	}
+      break;
+    case 'K':
+      break;
+
+    case '&':
+      (*info->fprintf_func) (info->stream, ".");
+      if (l & (1 << 21))
+	(*info->fprintf_func) (info->stream, "w");
+      if (l & (1 << 24))
+	(*info->fprintf_func) (info->stream, "x");
+      if (l & (1 << 23))
+	(*info->fprintf_func) (info->stream, "y");
+      if (l & (1 << 22))
+	(*info->fprintf_func) (info->stream, "z");
+      (*info->fprintf_func) (info->stream, "\t");
+      break;
+	
+    case '8':
+      (*info->fprintf_func) (info->stream, "vf%d",
+			     (l >> OP_SH_FS) & OP_MASK_FS);
+      switch ((l >> 21) & 0x3)
+	{
+	  case 0:
+	    (*info->fprintf_func) (info->stream, "x");
+	    break;
+	  case 1:
+	    (*info->fprintf_func) (info->stream, "y");
+	    break;
+	  case 2:
+	    (*info->fprintf_func) (info->stream, "z");
+	    break;
+	  case 3:
+	    (*info->fprintf_func) (info->stream, "w");
+	    break;
+	}
+      break;
+    case 'J':
+      (*info->fprintf_func) (info->stream, "I");
+      break;
+
+    case 'Q':
+      (*info->fprintf_func) (info->stream, "Q");
+      break;
+
+    case 'X':
+      (*info->fprintf_func) (info->stream, "R");
+      break;
+
+    case 'U':
+      (*info->fprintf_func) (info->stream, "ACC");
+      break;
+    /* end-sanitize-r5900 */
 
     case 'T':
     case 'W':
@@ -309,6 +420,12 @@ _print_insn_mips (memaddr, word, info)
 	target_processor = 4300;
 	mips_isa = 3;
 	break;
+	/* start-sanitize-vr4320 */
+      case bfd_mach_mips4320:
+	target_processor = 4320;
+	mips_isa = 3;
+	break;
+	/* end-sanitize-vr4320 */
       case bfd_mach_mips4400:
 	target_processor = 4400;
 	mips_isa = 3;
@@ -397,6 +514,10 @@ _print_insn_mips (memaddr, word, info)
 		      && op->membership & INSN_4010) == 0
 		  && (target_processor == 4100
 		      && op->membership & INSN_4100) == 0
+		  /* start-sanitize-vr4320 */
+		  && (target_processor == 4320
+		      && op->membership & INSN_4320) == 0
+		  /* end-sanitize-vr4320 */
 		  /* start-sanitize-vr5400 */
 		  && (target_processor == 5400
 		      && op->membership & INSN_5400) == 0
@@ -418,9 +539,24 @@ _print_insn_mips (memaddr, word, info)
 	      d = op->args;
 	      if (d != NULL && *d != '\0')
 		{
-		  (*info->fprintf_func) (info->stream, "\t");
+		  /* start-sanitize-r5900 */
+		  /* If this is an opcode completer, then do not emit
+		     a tab after the opcode.  */
+		  if (*d != '&')
+		  /* end-sanitize-r5900 */
+		    (*info->fprintf_func) (info->stream, "\t");
 		  for (; *d != '\0'; d++)
-		    print_insn_arg (d, word, memaddr, info);
+		    /* start-sanitize-r5900 */
+		    /* If this is an escape character, go ahead and print the
+		       next character in the arg string verbatim.  */
+		    if (*d == '%')
+		      {
+			d++;
+			(*info->fprintf_func) (info->stream, "%c", *d);
+		      }
+		    else
+		    /* end-sanitize-r5900 */
+		      print_insn_arg (d, word, memaddr, info);
 		}
 
 	      return 4;
