@@ -1,3 +1,8 @@
+Mon Jun 20 16:30:54 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* expr.c (operand): If "0f" is followed by '\0', don't do eol
+	checks.
+
 Mon Jun 20 15:17:43 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* ecoff.c (ecoff_build_aux): Call swap_tir_out and swap_rndx_out
