@@ -2,6 +2,16 @@ dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.3)dnl
 AC_INIT(Makefile.in)
 
+AC_PROG_CC
+
+# Put a plausible default for CC_FOR_BUILD in Makefile.
+AC_C_CROSS
+if test "x$cross_compiling" = "xno"; then
+  CC_FOR_BUILD='$(CC)'
+else
+  CC_FOR_BUILD=gcc
+fi
+
 AC_ARG_ENABLE(sim-cflags,
 [  --enable-sim-cflags=opts		Extra CFLAGS for use in building simulator],
 [case "${enableval}" in
@@ -194,7 +204,17 @@ AC_ARG_ENABLE(sim-hostendian,
 esac
 if test x"$silent" != x"yes" && test x"$sim_hostendian" != x""; then
   echo "Setting hostendian flags = $sim_hostendian" 6>&1
-fi],[sim_hostendian=""])dnl
+fi],[
+if test "x$cross_compiling" = "xno"; then
+  AC_C_BIGENDIAN
+  if test $ac_cv_c_bigendian = yes; then
+    sim_hostendian="-DWITH_HOST_BYTE_ORDER=BIG_ENDIAN"
+  else
+    sim_hostendian="-DWITH_HOST_BYTE_ORDER=LITTLE_ENDIAN"
+  fi
+else
+  sim_hostendian="-DWITH_HOST_BYTE_ORDER=0"
+fi])dnl
 
 AC_ARG_ENABLE(sim-smp,
 [  --enable-sim-smp=n			Specify number of processors to configure for.],
@@ -383,7 +403,7 @@ AC_ARG_PROGRAM
 
 AC_CONFIG_HEADER(config.h:config.in)
 
-AC_PROG_CC
+AC_SUBST(CC_FOR_BUILD)
 AC_SUBST(CFLAGS)
 AC_SUBST(HDEFINES)
 AR=${AR-ar}
@@ -419,18 +439,6 @@ AC_SUBST(sim_model_issue)
 AC_SUBST(sim_stdio)
 
 AC_CHECK_FUNCS(getrusage)
-
-# Put a plausible default for CC_FOR_BUILD in Makefile.
-AC_C_CROSS
-if test "x$cross_compiling" = "xno"; then
-  CC_FOR_BUILD='$(CC)'
-else
-  CC_FOR_BUILD=gcc
-fi
-AC_SUBST(CC_FOR_BUILD)
-
-AC_C_BIGENDIAN
-AC_SUBST(WORDS_BIGENDIAN)
 
 AC_CHECK_HEADERS(string.h strings.h stdlib.h time.h sys/mount.h sys/types.h sys/time.h sys/times.h unistd.h sys/resource.h)
 AC_HEADER_DIRENT
