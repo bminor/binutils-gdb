@@ -205,12 +205,8 @@ val_print_type_code_int (struct type *type, char *valaddr,
     }
   else
     {
-#ifdef PRINT_TYPELESS_INTEGER
-      PRINT_TYPELESS_INTEGER (stream, type, unpack_long (type, valaddr));
-#else
       print_longest (stream, TYPE_UNSIGNED (type) ? 'u' : 'd', 0,
 		     unpack_long (type, valaddr));
-#endif
     }
 }
 

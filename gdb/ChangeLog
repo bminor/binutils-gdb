@@ -1,5 +1,8 @@
 2003-04-06  Andrew Cagney  <cagney@redhat.com>
 
+	* valprint.c (val_print_type_code_int): Delete #ifdef
+	PRINT_TYPELESS_INTEGER code.
+
 	* gdbarch.sh (DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
 	(CALL_DUMMY_LOCATION, DEPRECATED_PC_IN_CALL_DUMMY): Allow partial
 	multi-arch definition.
