@@ -1,5 +1,13 @@
 2002-09-19  Jakub Jelinek  <jakub@redhat.com>
 
+	* elf32-ppc.c (ppc_elf_finish_dynamic_symbol): Clear .got word
+	even if generating R_PPC_RELATIVE reloc.
+	(ppc_elf_relocate_section): Make sure relocation is performed
+	if skip == -2.  Clear memory at r_offset when creating dynamic
+	relocation.
+
+2002-09-19  Jakub Jelinek  <jakub@redhat.com>
+
 	* reloc.c (BFD_RELOC_386_TLS_TPOFF, BFD_RELOC_386_TLS_IE,
 	BFD_RELOC_386_TLS_GOTIE): Add.
 	* bfd-in2.h, libbfd.h: Rebuilt.
