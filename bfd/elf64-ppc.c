@@ -30,9 +30,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "elf/ppc.h"
 #include "elf64-ppc.h"
 
-#define USE_RELA		/* we want RELA relocations, not REL.  */
-
-
 static void ppc_howto_init
   PARAMS ((void));
 static reloc_howto_type *ppc64_elf_reloc_type_lookup

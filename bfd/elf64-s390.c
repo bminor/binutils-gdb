@@ -70,8 +70,6 @@ static boolean elf_s390_finish_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 static boolean elf_s390_object_p PARAMS ((bfd *));
 
-#define USE_RELA 1		/* We want RELA relocations, not REL.  */
-
 #include "elf/s390.h"
 
 /* In case we're on a 32-bit machine, construct a 64-bit "-1" value

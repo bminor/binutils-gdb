@@ -1,3 +1,50 @@
+2002-07-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-hppa.h (elf_hppa_relocate_section): If relocatable, return
+	immediately.  Remove code handling relocatable linking.
+	* elf32-avr.c (elf32_avr_relocate_section): Likewise.
+	* elf32-cris.c (cris_elf_relocate_section): Likewise.
+	* elf32-fr30.c (elf32_frv_relocate_section): Likewise.
+	* elf32-h8300.c (elf32_h8_relocate_section): Likewise.
+	* elf32-hppa.c (elf32_hppa_relocate_section): Likewise.
+	* elf32-ip2k.c (ip2k_elf_relocate_section): Likewise.
+	* elf32-sparc.c (elf32_sparc_relocate_section): Likewise.
+	* elf32-v850.c (v850_elf_relocate_section): Likewise.
+	* elf32-vax.c (elf_vax_relocate_section): Likewise.
+	* elf64-sparc.c (sparc64_elf_relocate_section): Likewise.
+	* elf32-avr.c (elf_backend_rela_normal): Define.
+	* elf32-cris.c: Likewise.
+	* elf32-fr30.c: Likewise.
+	* elf32-h8300.c: Likewise.
+	* elf32-hppa.c: Likewise.
+	* elf32-ip2k.c: Likewise.
+	* elf32-sparc.c: Likewise.
+	* elf32-v850.c: Likewise.
+	* elf32-vax.c: Likewise.
+	* elf64-hppa.c: Likewise.
+	* elf64-sparc.c: Likewise.
+	* elf32-fr30.c (elf32_frv_relocate_section): Edit comment.
+	* elf32-i860.c (elf32_i860_relocate_section): Likewise.
+	* elf32-ip2k.c (ip2k_elf_relocate_section): Likewise.
+	* elf32-m32r.c (m32r_elf_relocate_section): Likewise.
+	* elf32-openrisc.c (openrisc_elf_relocate_section): Likewise.
+	* elf32-xstormy16.c (xstormy16_elf_relocate_section): Likewise.
+	* elf-m10200.c (USE_RELA): Don't define.
+	* elf-m10300.c: Likewise.
+	* elf32-i370.c: Likewise.
+	* elf32-ip2k.c: Likewise.
+	* elf32-m68k.c: Likewise.
+	* elf32-mcore.c: Likewise.
+	* elf32-ppc.c: Likewise.
+	* elf32-s390.c: Likewise.
+	* elf32-vax.c: Likewise.
+	* elf64-ppc.c: Likewise.
+	* elf64-s390.c: Likewise.
+	* elf64-x86-64.c: Likewise.
+	* elfxx-ia64.c: Likewise.
+	* elf32-avr.c (USE_REL): Don't undef.
+	* elf32-ip2k.c: Likewise.
+
 2002-07-23  Nick Clifton  <nickc@redhat.com>
 
 	* elf-bfd.h (struct elf_backend_data): Add new bitfield

@@ -53,8 +53,6 @@
   MIN_PLT	Created by PLTOFF entries against dynamic symbols.  This
  		does not reqire dynamic relocations.  */
 
-#define USE_RELA		/* we want RELA relocs, not REL */
-
 #define NELEMS(a)	((int) (sizeof (a) / sizeof ((a)[0])))
 
 typedef struct bfd_hash_entry *(*new_hash_entry_func)

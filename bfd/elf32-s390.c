@@ -71,8 +71,6 @@ static boolean elf_s390_finish_dynamic_sections
 static boolean elf_s390_object_p PARAMS ((bfd *));
 static boolean elf_s390_grok_prstatus PARAMS ((bfd *, Elf_Internal_Note *));
 
-#define USE_RELA 1		/* We want RELA relocations, not REL.  */
-
 #include "elf/s390.h"
 
 /* The relocation "howto" table.  */

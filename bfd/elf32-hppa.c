@@ -3610,6 +3610,9 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
 
+  if (info->relocateable)
+    return true;
+
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
 
   htab = hppa_link_hash_table (info);
@@ -3641,27 +3644,8 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 	  || r_type == (unsigned int) R_PARISC_GNU_VTINHERIT)
 	continue;
 
-      r_symndx = ELF32_R_SYM (rel->r_info);
-
-      if (info->relocateable)
-	{
-	  /* This is a relocatable link.  We don't have to change
-	     anything, unless the reloc is against a section symbol,
-	     in which case we have to adjust according to where the
-	     section symbol winds up in the output section.  */
-	  if (r_symndx < symtab_hdr->sh_info)
-	    {
-	      sym = local_syms + r_symndx;
-	      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
-		{
-		  sym_sec = local_sections[r_symndx];
-		  rel->r_addend += sym_sec->output_offset;
-		}
-	    }
-	  continue;
-	}
-
       /* This is a final link.  */
+      r_symndx = ELF32_R_SYM (rel->r_info);
       h = NULL;
       sym = NULL;
       sym_sec = NULL;
@@ -4469,6 +4453,7 @@ elf32_hppa_elf_get_symbol_type (elf_sym, type)
 #define elf_backend_plt_readonly	     0
 #define elf_backend_want_plt_sym	     0
 #define elf_backend_got_header_size	     8
+#define elf_backend_rela_normal		     1
 
 #define TARGET_BIG_SYM		bfd_elf32_hppa_vec
 #define TARGET_BIG_NAME		"elf32-hppa"

@@ -1117,6 +1117,9 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
 
+  if (info->relocateable)
+    return true;
+
   dynobj = elf_hash_table (info)->dynobj;
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
@@ -1159,28 +1162,8 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 	}
       howto = _bfd_sparc_elf_howto_table + r_type;
 
-      r_symndx = ELF32_R_SYM (rel->r_info);
-
-      if (info->relocateable)
-	{
-	  /* This is a relocateable link.  We don't have to change
-	     anything, unless the reloc is against a section symbol,
-	     in which case we have to adjust according to where the
-	     section symbol winds up in the output section.  */
-	  if (r_symndx < symtab_hdr->sh_info)
-	    {
-	      sym = local_syms + r_symndx;
-	      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
-		{
-		  sec = local_sections[r_symndx];
-		  rel->r_addend += sec->output_offset + sym->st_value;
-		}
-	    }
-
-	  continue;
-	}
-
       /* This is a final link.  */
+      r_symndx = ELF32_R_SYM (rel->r_info);
       h = NULL;
       sym = NULL;
       sec = NULL;
@@ -2147,5 +2130,6 @@ elf32_sparc_reloc_type_class (rela)
 #define elf_backend_want_plt_sym 1
 #define elf_backend_got_header_size 4
 #define elf_backend_plt_header_size (4*PLT_ENTRY_SIZE)
+#define elf_backend_rela_normal 1
 
 #include "elf32-target.h"

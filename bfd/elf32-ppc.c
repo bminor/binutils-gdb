@@ -31,7 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "elf-bfd.h"
 #include "elf/ppc.h"
 
-#define USE_RELA		/* we want RELA relocations, not REL */
+/* RELA relocations are used here.  */
 
 static reloc_howto_type *ppc_elf_reloc_type_lookup
   PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));

@@ -26,9 +26,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "elf/x86-64.h"
 
-/* We use only the RELA entries.  */
-#define USE_RELA 1
-
 /* In case we're on a 32-bit machine, construct a 64-bit "-1" value.  */
 #define MINUS_ONE (~ (bfd_vma) 0)
 
