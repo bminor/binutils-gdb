@@ -7,6 +7,7 @@ Mon Feb 14 17:02:28 1994  Stu Grossman  (grossman at cygnus.com)
 	COREFILES_PLEASE.
 	* config/rs6000lynx.mh:  Turn on Lynx core file support.
 	* hosts/rs6000.h:  #define HOST_AIX.
+	* hosts/rs6000lynx.h:  Create this to enable Lynx host support.
 
 Sun Feb 13 14:30:00 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
