@@ -1,4 +1,4 @@
-/* config.in.  Generated automatically from configure.in by autoheader.  */
+/* config.in.  Generated automatically from configure.in by autoheader 2.13.  */
 
 /* Define if on AIX 3.
    System headers sometimes define this.
@@ -366,6 +366,9 @@
 
 /* Define if you have the <sys/poll.h> header file.  */
 #undef HAVE_SYS_POLL_H
+
+/* Define if you have the <sys/proc.h> header file.  */
+#undef HAVE_SYS_PROC_H
 
 /* Define if you have the <sys/procfs.h> header file.  */
 #undef HAVE_SYS_PROCFS_H

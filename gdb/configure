@@ -3387,7 +3387,7 @@ esac; esac
 
 for ac_hdr in ctype.h nlist.h link.h thread_db.h proc_service.h \
 	memory.h objlist.h ptrace.h sgtty.h stddef.h stdlib.h \
-	string.h sys/procfs.h sys/ptrace.h sys/reg.h stdint.h \
+	string.h sys/procfs.h sys/proc.h sys/ptrace.h sys/reg.h stdint.h \
 	term.h termio.h termios.h unistd.h wait.h sys/wait.h \
 	wchar.h wctype.h asm/debugreg.h sys/debugreg.h sys/select.h \
 	time.h sys/file.h sys/ioctl.h sys/user.h sys/fault.h sys/syscall.h \

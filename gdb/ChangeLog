@@ -1,3 +1,10 @@
+2002-07-09  Joel Brobecker  <brobecker@gnat.com>
+
+	Define HAVE_SYS_PROC_H if sys/proc.h exists
+	* configure.in: Add check for sys/proc.h
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2002-07-09  Grace Sainsbury  <graces@redhat.com>
 
 	* config/m68k/tm-m68k.h: Remove macros wrapped in 
