@@ -1946,6 +1946,7 @@ _initialize_infrun ()
   add_info ("signals", signals_info,
 	    "What debugger does when program gets various signals.\n\
 Specify a signal number as argument to print info on that signal only.");
+  add_info_alias ("handle", "signals", 0);
 
   add_com ("handle", class_run, handle_command,
 	   "Specify how to handle a signal.\n\

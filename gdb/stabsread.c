@@ -1327,8 +1327,21 @@ read_struct_type (pp, type, objfile)
       ALLOCATE_CPLUS_STRUCT_TYPE(type);
 
       n_baseclasses = read_number (pp, ',');
+      /* Some stupid compilers have trouble with the following, so break
+	 it up into simpler expressions.  */
+#if 0
       TYPE_FIELD_VIRTUAL_BITS (type) = (B_TYPE *)
 	TYPE_ALLOC (type, B_BYTES (n_baseclasses));
+#else
+      {
+	int num_bytes = B_BYTES (n_baseclasses);
+	char *pointer;
+	
+	pointer = (char *) TYPE_ALLOC (type, num_bytes);
+	TYPE_FIELD_VIRTUAL_BITS (type) = (B_TYPE *) pointer;
+      }
+#endif /* 0 */
+
       B_CLRALL (TYPE_FIELD_VIRTUAL_BITS (type), n_baseclasses);
 
       for (i = 0; i < n_baseclasses; i++)
