@@ -50,7 +50,7 @@ proc gdb_load { arg } {
     set result 0
 
     if [vxworks_ld $shell_id $arg]<0 then {
- perror "Couldn't load $arg"
+	perror "Couldn't load $arg"
 	return -1
     }
 
@@ -61,9 +61,6 @@ proc gdb_load { arg } {
 # gdb_start -- start gdb running and 
 #
 proc gdb_start { } {
-    global GDB
-    global GDBFLAGS
-    global spawn_id
     global prompt
     global verbose
     global targetname
@@ -107,49 +104,12 @@ proc gdb_start { } {
 }
 
 proc spawn_vxgdb { } {
-    global GDB
-    global GDBFLAGS
-    global spawn_id
     global prompt
     global verbose
     global targetname
 
-    # start GDB
-    if [ llength $GDBFLAGS ] then {
-	if {[which $GDB] != 0} then {
-	    spawn $GDB $GDBFLAGS
-	} else {
-            perror "$GDB does not exist."
-            exit 1
-        }
-    } else {
-        if {[which $GDB] != 0} then {
-	    spawn $GDB
-        } else {
-            perror "$GDB does not exist."
-            exit 1
-        }
-    }
-    expect  {
-	-re ".*$prompt $" {
-	    verbose "$GDB initialized for cross mode to Vxworks\n"
-	}
-	-re "$prompt $" {
-	    perror "GDB never initialized."
-	    return -1
-	}
-	timeout {
-	    perror "(timeout) GDB never initialized."
-	    return -1
-	}
-    }
+    default_gdb_start
 
-    # force the height to "unlimited", so no pagers get used
-    send "set height 0\n"
-    expect -re ".*$prompt $" {}
-    # force the width to "unlimited", so no wraparound occurs
-    send "set width 0\n"
-    expect -re ".*$prompt $" {}
     # set the default arguments to "main", so that "run" with no
     # arguments will work correctly.
     send "set args main\n"
