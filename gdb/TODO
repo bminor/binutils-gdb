@@ -49,6 +49,9 @@ http://sourceware.cygnus.com/ml/gdb-patches/2000-04/msg00000.html
 (Broken) support for GDB's remote protocol across UDP is to be
 included in the follow-on release.
 
+It should be noted that UDP can only work when the [Gg] packet fits in
+a single UDP packet.
+
 --
 
 Can't build IRIX -> arm GDB.
@@ -369,6 +372,13 @@ This requires internationalization.
 
 --
 
+Add support for:
+ 
+(gdb) p fwprintf(stdout,L"%S\n", f)
+No symbol "L" in current context.
+
+--
+
 Convert GDB build process to AUTOMAKE.
 
 See also sub-directory configure below.
@@ -670,6 +680,15 @@ on the fly - should it be returned in the ``T'' packet?
 
 Underlying problem is that the register file is target endian.  If the
 target endianess changes gdb doesn't know.
+
+--
+
+Use the recently added add_set_auto_boolean_cmd() function to
+implement the X-packet commands.
+
+--
+
+Rename read_register{,_pid}() to read_unsigned_register{,_pid}().
 
 --
 
