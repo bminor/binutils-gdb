@@ -1,3 +1,7 @@
+2002-02-13  Keith Seitz  <keiths@redhat.com>
+
+        * defs.h (core_addr_to_string_nz): New function.
+
 2002-02-13  Mark Kettenis  <kettenis@gnu.org>
 
 	Apply missing bits of 2002-01-15 patch.
@@ -6,7 +10,6 @@
 
 2002-02-12  Keith Seitz  <keiths@redhat.com>
 
-	* defs.h (core_addr_to_string_nz): New function.
 	* utils.c (core_addr_to_string): Use phex instead of phex_nz.
 	(core_addr_to_string_nz): New function.
 
