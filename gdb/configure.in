@@ -261,6 +261,11 @@ rm -f nat.h
 if [ "${nativefile}" != "" ]; then
 	files="${files} ${nativefile}"
 	links="${links} nat.h"
+# temporary scaffolding until all hosts have the host/target/native
+# split in place.
+else
+	files="${files} nat-trash.h"
+	links="${links} nat.h"
 fi
 
 # post-target:

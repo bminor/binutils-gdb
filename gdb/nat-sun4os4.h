@@ -1,6 +1,5 @@
-/* Parameters for execution on a Sun 4, for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
-   Contributed by Michael Tiemann (tiemann@mcc.com).
+/* Macro definitions for running gdb on a Sun 4 running sunos 4.
+   Copyright (C) 1989, 1992, Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -18,21 +17,11 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#define HOST_BYTE_ORDER BIG_ENDIAN
+/* Do implement the attach and detach commands.  */
 
-/* Get rid of any system-imposed stack limit if possible.  */
+#define ATTACH_DETACH
 
-#define SET_STACK_LIMIT_HUGE
+/* Override copies of {fetch,store}_inferior_registers in infptrace.c.  */
 
-/* Enable use of alternate code for Sun's format of core dump file.  */
-
-#define NEW_SUN_CORE
-
-/* Before storing, we need to read all the registers.  */
-
-#define CHILD_PREPARE_TO_STORE() read_register_bytes (0, NULL, REGISTER_BYTES)
-
-/* It does have a wait structure, and it might help things out . . . */
-
-#define HAVE_WAIT_STRUCT
+#define FETCH_INFERIOR_REGISTERS
 

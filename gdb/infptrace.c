@@ -22,6 +22,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "inferior.h"
 #include "target.h"
 
+#include "nat.h"
+
 #ifdef USG
 #include <sys/types.h>
 #endif
@@ -89,21 +91,16 @@ call_ptrace (request, pid, addr, data)
 #define ptrace call_ptrace
 #endif
 
-/* This is used when GDB is exiting.  It gives less chance of error.*/
-
-void
-kill_inferior_fast ()
-{
-  if (inferior_pid == 0)
-    return;
-  ptrace (PT_KILL, inferior_pid, (PTRACE_ARG3_TYPE) 0, 0);
-  wait ((int *)0);
-}
-
 void
 kill_inferior ()
 {
-  kill_inferior_fast ();
+  if (inferior_pid == 0)
+    return;
+  /* ptrace PT_KILL only works if process is stopped!!!  So stop it with
+     a real signal first, if we can.  */
+  kill (inferior_pid, SIGKILL);
+  ptrace (PT_KILL, inferior_pid, (PTRACE_ARG3_TYPE) 0, 0);
+  wait ((int *)0);
   target_mourn_inferior ();
 }
 

@@ -295,7 +295,7 @@ OBS = main.o blockframe.o breakpoint.o findvar.o stack.o source.o \
 
 RAPP_OBS = rgdb.o rudp.o rserial.o serial.o udp.o $(XDEPFILES)
 
-TSOBS = corelow.o inflow.o
+TSOBS = inflow.o
 
 NTSOBS = standalone.o
 

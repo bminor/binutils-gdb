@@ -1,5 +1,22 @@
 Tue Sep 29 14:35:00 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
+	Host/target/native split for sun4.
+
+	* Makefile.in (TSOBS): removed corelow.o.
+	* infptrace.c: included nat.h.
+	* nat-trash.h: temporary header file.  This should be removed once
+	  all hosts have the native/host/target split.
+	* configure.in: add a symlink from nat-trash.h to nat.h if no
+	  other nat file exists for this configuration.
+	* sparc-tdep.c: no longer include sys/ptrace.h.
+	* sparc-xdep.c: removed.  contents have been moved to nat-sparc.c.
+	* xm-sparc.h (ATTACH_DETACH, FETCH_INFERIOR_REGISTERS): moved to
+	  nat-sun4os4.h.
+	* nat-sparc.c, nat-sun4os4.h: new files for sun4 native support.
+	* config/sun4os4.mh (XDEPFILES): moved infptrace.o and inftarg.o
+	  to NATDEPFILES.  removed sparc-xdep.o.
+	  (NATDEPFILES, NAT_FILE): new macros for native support.
+
 	Break the direct connection from core_file_command to any
 	particular type of core file support.
 
