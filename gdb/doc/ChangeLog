@@ -1,3 +1,9 @@
+2004-10-12  Andrew Cagney  <cagney@gnu.org>
+
+	* gdbint.texinfo (Versions and Branches): New chapter.
+	(Releasing GDB): Delete "Versions and Branches" section.
+	(Top): Add "Versions and Branches".
+
 2004-10-08  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Editing, History): Add cross-references to the
