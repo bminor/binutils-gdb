@@ -1,3 +1,10 @@
+Thu Jan 21 17:51:51 1999  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* procfs.c (init_procfs_ops): New function, fills in procfs_ops,
+	init only nonzero fields, leave to_require_attach and
+	to_require_detach empty, not needed for /proc systems yet.
+	(_initialize_procfs): Call init_procfs_ops.
+
 Thu Jan 21 17:25:46 1999  Mark Alexander  <marka@cygnus.com>
 
 	* mon960-rom.c (_initialize_mon960): Call init_mon960_cmds

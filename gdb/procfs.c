@@ -137,7 +137,7 @@ regardless of whether or not the actual target has floating point hardware.
 
 #define MAX_PROC_NAME_SIZE sizeof("/proc/1234567890/status")
 
-extern struct target_ops procfs_ops;		/* Forward declaration */
+struct target_ops procfs_ops;
 
 int procfs_suppress_run = 0;	/* Non-zero if procfs should pretend not to
 				   be a runnable target.  Used by targets
@@ -652,6 +652,8 @@ struct procfs_syscall_handler
 
 static void procfs_resume PARAMS ((int pid, int step,
 				   enum target_signal signo));
+
+static void init_procfs_ops PARAMS ((void));
 
 /* External function prototypes that can't be easily included in any
    header file because the args are typedefs in system include files. */
@@ -5751,8 +5753,46 @@ procfs_pid_to_str (pid)
   return buf;
 }
 #endif /* TIDGET */
+
 
-struct target_ops procfs_ops;
+static void
+init_procfs_ops ()
+{
+  procfs_ops.to_shortname = "procfs";
+  procfs_ops.to_longname = "Unix /proc child process";
+  procfs_ops.to_doc = "Unix /proc child process (started by the \"run\" command).";
+  procfs_ops.to_open = procfs_open;
+  procfs_ops.to_attach = procfs_attach;
+  procfs_ops.to_detach = procfs_detach;
+  procfs_ops.to_resume = procfs_resume;
+  procfs_ops.to_wait = procfs_wait;
+  procfs_ops.to_fetch_registers = procfs_fetch_registers;
+  procfs_ops.to_store_registers = procfs_store_registers;
+  procfs_ops.to_prepare_to_store = procfs_prepare_to_store;
+  procfs_ops.to_xfer_memory = procfs_xfer_memory;
+  procfs_ops.to_files_info = procfs_files_info;
+  procfs_ops.to_insert_breakpoint = memory_insert_breakpoint;
+  procfs_ops.to_remove_breakpoint = memory_remove_breakpoint;
+  procfs_ops.to_terminal_init = terminal_init_inferior;
+  procfs_ops.to_terminal_inferior = terminal_inferior;
+  procfs_ops.to_terminal_ours_for_output = terminal_ours_for_output;
+  procfs_ops.to_terminal_ours = terminal_ours;
+  procfs_ops.to_terminal_info = child_terminal_info;
+  procfs_ops.to_kill = procfs_kill_inferior;
+  procfs_ops.to_create_inferior = procfs_create_inferior;
+  procfs_ops.to_mourn_inferior = procfs_mourn_inferior;
+  procfs_ops.to_can_run = procfs_can_run;
+  procfs_ops.to_notice_signals = procfs_notice_signals;
+  procfs_ops.to_thread_alive = procfs_thread_alive;
+  procfs_ops.to_stop = procfs_stop;
+  procfs_ops.to_stratum = process_stratum;
+  procfs_ops.to_has_all_memory = 1;
+  procfs_ops.to_has_memory = 1;
+  procfs_ops.to_has_stack = 1;
+  procfs_ops.to_has_registers = 1;
+  procfs_ops.to_has_execution = 1;
+  procfs_ops.to_magic = OPS_MAGIC;
+}
 
 void
 _initialize_procfs ()
@@ -5769,49 +5809,8 @@ _initialize_procfs ()
     return;
   close (fd);
 #endif
-  procfs_ops.to_shortname = "procfs";
-  procfs_ops.to_longname = "Unix /proc child process";
-  procfs_ops.to_doc = "Unix /proc child process (started by the \"run\" command).";
-  procfs_ops.to_open = procfs_open;
-  procfs_ops.to_close = 0;
-  procfs_ops.to_attach = procfs_attach;
-  procfs_ops.to_require_attach = procfs_attach;
-  procfs_ops.to_detach = procfs_detach;
-  procfs_ops.to_require_detach = procfs_detach;
-  procfs_ops.to_resume = procfs_resume;
-  procfs_ops.to_wait = procfs_wait;
-  procfs_ops.to_fetch_registers = procfs_fetch_registers;
-  procfs_ops.to_store_registers = procfs_store_registers;
-  procfs_ops.to_prepare_to_store = procfs_prepare_to_store;
-  procfs_ops.to_xfer_memory = procfs_xfer_memory;
-  procfs_ops.to_files_info = procfs_files_info;
-  procfs_ops.to_insert_breakpoint = memory_insert_breakpoint;
-  procfs_ops.to_remove_breakpoint = memory_remove_breakpoint;
-  procfs_ops.to_terminal_init = terminal_init_inferior;
-  procfs_ops.to_terminal_inferior = terminal_inferior;
-  procfs_ops.to_terminal_ours_for_output = terminal_ours_for_output;
-  procfs_ops.to_terminal_ours = terminal_ours;
-  procfs_ops.to_terminal_info = child_terminal_info;
-  procfs_ops.to_kill = procfs_kill_inferior;
-  procfs_ops.to_load = 0;
-  procfs_ops.to_lookup_symbol = 0;
-  procfs_ops.to_create_inferior = procfs_create_inferior;
-  procfs_ops.to_mourn_inferior = procfs_mourn_inferior;
-  procfs_ops.to_can_run = procfs_can_run;
-  procfs_ops.to_notice_signals = procfs_notice_signals;
-  procfs_ops.to_thread_alive = procfs_thread_alive;
-  procfs_ops.to_stop = procfs_stop;
-  procfs_ops.to_stratum = process_stratum;
-  procfs_ops.to_has_all_memory = 1;
-  procfs_ops.to_has_memory = 1;
-  procfs_ops.to_has_stack = 1;
-  procfs_ops.to_has_registers = 1;
-  procfs_ops.to_has_execution = 1;
-  procfs_ops.to_has_thread_control = tc_none;
-  procfs_ops.to_sections = 0;
-  procfs_ops.to_sections_end = 0;
-  procfs_ops.to_magic = OPS_MAGIC;
 
+  init_procfs_ops ();
   add_target (&procfs_ops);
 
   add_info ("processes", info_proc, 
