@@ -1630,7 +1630,7 @@ skip_trampoline_code (pc, name)
 	{
 	  /* Yup.  See if the previous instruction loaded
 	     a value into %r1.  If so compute and return the jump address.  */
-	  if ((prev_inst & 0xffe0e000) == 0x20202000)
+	  if ((prev_inst & 0xffe00000) == 0x20200000)
 	    return (extract_21 (prev_inst) + extract_17 (curr_inst)) & ~0x3;
 	  else
 	    {

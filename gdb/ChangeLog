@@ -1,3 +1,9 @@
+Fri Aug 19 00:40:55 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hppa-tdep.c (skip_trampoline_code): Revert incorrect change
+	from June 2, 1994 (what was I thinking?!?).  Fix it right this
+	time.
+
 Thu Aug 18 17:01:35 1994  J.T. Conklin  (jtc@rtl.cygnus.com)
 
 	* nlm/i386.c, nlm/i386.h: New files that contain i386 specific code.
