@@ -1,3 +1,10 @@
+Wed Jul 13 14:49:05 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* config/tc-m68k.c (m68k_ip): Change rp to be a const pointer.
+	(md_parse_option): Clear cpu field of current_architecture before
+	setting a new cpu type.  Clear no_68881 for m68881 or m68882.
+	Clear no_68851 for m68851.
+
 Tue Jul 12 21:27:05 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* config/ho-sysv.h (realloc): Declare.
