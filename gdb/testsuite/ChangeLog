@@ -10,6 +10,12 @@ Mon Jan 11 10:08:03 1999  David Taylor  <taylor@texas.cygnus.com>
 	* gdb.base/signals.exp: be more restrictive about which hppa
 	systems receive a setup_xfail.  new tests.
 
+	* gdb.base/solib_threshold.build: new file.
+	* gdb.base/solib_threshold.exp: new file.
+	* gdb.base/solib_threshold.link_opts: new file.
+	* gdb.base/solib_threshold.mk: new file.
+	* gdb.base/gen_solib_threshold.c: new file.
+
 	* gdb.c++/classes.exp: if on HPUX and not using gcc, skip the
 	tests.  New tests for enums inside classes.
 
@@ -24,6 +30,9 @@ Mon Jan 11 10:08:03 1999  David Taylor  <taylor@texas.cygnus.com>
 
 	* gdb.c++/templates.cc: changes to support HP's compiler; changes
 	to support new tests.
+
+	* gdb.c++/virtfunc.exp: if we are on HPUX and we are not using
+	gcc, then skip these tests.
 
 Sun Jan 10 23:44:11 1999  David Taylor  <taylor@texas.cygnus.com>
 
