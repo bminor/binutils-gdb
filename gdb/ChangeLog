@@ -1,6 +1,9 @@
 Tue Sep 30 13:35:54 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 start-sanitize-r5900
+	* config/mips/tm-r5900.h (REGISTER_NAMES, NUM_REGS): Overridei
+	instead of define.
+
 	* config/mips/tm-r5900.h (REGISTER_NAMES): Define.
 	(NUM_REGS): Ditto.
 
