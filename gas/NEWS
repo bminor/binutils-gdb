@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Added --gstabs+ switch to enable the generation of STABS debug format
+  information with GNU extensions.
+ 
 * Added support for MIPS64 Release 2.
 
 * Added support for v850e1.

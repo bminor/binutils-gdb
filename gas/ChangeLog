@@ -1,3 +1,16 @@
+2003-10-08  Philippe De Muyter  <phdm@macqel.be>
+
+	* as.c (use_gnu_debug_info_extensions) : New variable. 
+	(parse_args) : Accept new --gstabs+ option, and set
+	`use_gnu_debug_info_extensions'.
+	(show_usage) : Document --gstabs+ option.
+	* as.h (use_gnu_debug_info_extensions) : New extern declaration.
+	* stabs.c (stabs_generate_asm_file) : If
+	`use_gnu_debug_info_extensions' is set, add the compilation
+	directory to the stabs debug info.
+	* doc/as.texinfo : Document --gstabs+ option.
+	* NEWS: Mention new feature.
+
 2003-10-06      Matt Thomas <matt@3am-software.com>
 
          Switch NetBSD/hppa to use Linux PA-RISC ELF ABI and

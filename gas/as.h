@@ -476,6 +476,7 @@ enum debug_info_type {
 };
 
 extern enum debug_info_type debug_type;
+extern int use_gnu_debug_info_extensions;
 
 /* Maximum level of macro nesting.  */
 extern int max_macro_nest;

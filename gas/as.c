@@ -87,6 +87,7 @@ int listing;
 
 /* Type of debugging to generate.  */
 enum debug_info_type debug_type = DEBUG_UNSPECIFIED;
+int use_gnu_debug_info_extensions = 0;
 
 /* Maximum level of macro nesting.  */
 int max_macro_nest = 100;
@@ -276,6 +277,8 @@ Options:\n\
   fprintf (stream, _("\
   --gstabs                generate stabs debugging information\n"));
   fprintf (stream, _("\
+  --gstabs+               generate stabs debug info with GNU extensions\n"));
+  fprintf (stream, _("\
   --gdwarf2               generate DWARF2 debugging information\n"));
   fprintf (stream, _("\
   --help                  show this message and exit\n"));
@@ -403,6 +406,7 @@ parse_args (int * pargc, char *** pargv)
       OPTION_LISTING_CONT_LINES,
       OPTION_DEPFILE,
       OPTION_GSTABS,
+      OPTION_GSTABS_PLUS,
       OPTION_STRIP_LOCAL_ABSOLUTE,
       OPTION_TRADITIONAL_FORMAT,
       OPTION_GDWARF2,
@@ -442,6 +446,7 @@ parse_args (int * pargc, char *** pargv)
     {"listing-cont-lines", required_argument, NULL, OPTION_LISTING_CONT_LINES},
     {"MD", required_argument, NULL, OPTION_DEPFILE},
     {"gstabs", no_argument, NULL, OPTION_GSTABS},
+    {"gstabs+", no_argument, NULL, OPTION_GSTABS_PLUS},
     {"strip-local-absolute", no_argument, NULL, OPTION_STRIP_LOCAL_ABSOLUTE},
     {"traditional-format", no_argument, NULL, OPTION_TRADITIONAL_FORMAT},
     {"gdwarf2", no_argument, NULL, OPTION_GDWARF2},
@@ -643,6 +648,9 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 	  start_dependencies (optarg);
 	  break;
 
+	case OPTION_GSTABS_PLUS:
+	  use_gnu_debug_info_extensions = 1;
+	  /* Fall through.  */
 	case OPTION_GSTABS:
 	  debug_type = DEBUG_STABS;
 	  break;
