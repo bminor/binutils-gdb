@@ -947,6 +947,8 @@ yylex ()
 
  retry:
 
+  prev_lexptr = lexptr;
+
   tokstart = lexptr;
   explen = strlen (lexptr);
   /* See if it is a special token of length 3.  */
@@ -1481,5 +1483,8 @@ void
 yyerror (msg)
      char *msg;
 {
+  if (prev_lexptr)
+    lexptr = prev_lexptr;
+
   error ("A %s in expression, near `%s'.", (msg ? msg : "error"), lexptr);
 }
