@@ -1,3 +1,8 @@
+2001-03-20  Andrew Cagney  <ac131313@redhat.com>
+
+	* config/powerpc/tm-linux.h (SOFTWARE_SINGLE_STEP): Replace abort
+	with internal_error.
+
 2001-03-20  Jim Blandy  <jimb@redhat.com>
 
 	* linespec.c (find_methods): Just call CHECK_TYPEDEF on t, rather
