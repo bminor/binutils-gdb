@@ -183,8 +183,6 @@ extern CORE_ADDR sparc_pc_adjust();
 #define REGISTER_IN_WINDOW_P(regnum)	\
   ((regnum) >= 8 && (regnum) < 32)
 
-
-
 /* Number of bytes of storage in the actual machine representation
    for register N.  */
 
@@ -216,13 +214,13 @@ extern CORE_ADDR sparc_pc_adjust();
    to virtual format for register REGNUM.  */
 
 #define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,FROM,TO) \
-{ memcpy ((TO), (FROM), 4); }
+{ memcpy ((TO), (FROM), REGISTER_RAW_SIZE (REGNUM)); }
 
 /* Convert data from virtual format for register REGNUM
    to raw format for register REGNUM.  */
 
 #define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO)	\
-{ memcpy ((TO), (FROM), 4); }
+{ memcpy ((TO), (FROM), REGISTER_RAW_SIZE (REGNUM)); }
 
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
