@@ -1,3 +1,93 @@
+Mon Apr 26 12:28:27 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* expr.c (operand): Fix unary plus operator (previously was the
+	same as '~' operator!).
+
+Wed Apr 21 00:20:11 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* write.c (cvt_frag_to_fill): Define even if BFD is defined.
+	(write_object_file): Do define if BFD_ASSEMBLER.  Invoke
+	obj_check_file_symbols if defined.  Call verify_symbol_chain_2
+	instead of open-coding it.  Fix some bugs in patching up symbol
+	chain.
+	(relax_segment): Make some code we "ought to be able to" use for
+	all targets no longer conditionalized on ns32k target; instead, do
+	it always, and if the appropriate conditions fail, abort.
+
+	* symbols.c (DEBUG): Enabled.
+	(symbol_new): Make sure bfd_make_empty_symbol works.
+	(verify_symbol_chain_2): New funcion; takes one symbol as
+	argument, anywhere in the chain.
+	(dollar_label*): Use default initializers.
+
+	* as.c (perform_an_assembly_pass): Call md_begin here...
+	(main): ...and not here.
+
+	* config/tc-m68k.h (TARGET_FORMAT): Use a.out-sunos-big for a.out.
+	(tc_frob_symbol): New macro: Get rid of symbols in reg_section.
+
+	* config/tc-m68k.c (omagic): Don't define for BFD_ASSEMBLER.
+	(add_fix, add_frag): Now functions instead of macros.
+	(m68k_reg_parse, m68k_ip, md_estimate_size_before_relax, get_num,
+	s_data1, s_data2, s_bss): Use new *_section names, for
+	compatibility with BFD_ASSEMBLER mode; rewrite switch statements
+	to handle non-integral segT.
+	(tc_coff_fix2rtype, tc_aout_fix_to_chars,
+	tc_coff_symbol_emit_hook): Don't define for BFD_ASSEMBLER.
+	(tc_gen_reloc): New routine for BFD_ASSEMBLER.
+	(md_apply_fix, md_apply_fix_2): Renamed old md_apply_fix to
+	md_apply_fix_2; new md_apply_fix definition varies interface
+	depending on BFD_ASSEMBLER.
+	(md_convert_frag, md_convert_frag_1): Likewise.  Use new *_section
+	names.
+
+	* config/obj-vms.c: Include config.h.
+	(version_string): Delete declaration.
+	(Write_VMS_MHD_Records): Use GAS_VERSION instead.
+	(vms_resolve_symbol_redef): New function, taken from VMS code in
+	symbols.c.
+	(_doprnt): Deleted.
+	(VMS_Store_Struct, VMS_Def_Struct, VMS_Set_Struct,
+	VMS_TBT_Block_End, get_VMS_time_on_unix, generate_suffix,
+	VMS_Psect_Spec): Fixed to compiler under traditional C.
+	* config/obj-vms.h: Use PARAMS macro.
+	(vms_resolve_symbol_redef): Declare.
+	(RESOLVE_SYMBOL_REDEFINITION): New macro.
+	* symbols.c (colon): Remove some VMS-specific code, look for
+	RESOLVE_SYMBOL_REDEFINITION macro instead.
+
+	* config/tc-m68k.c (m68k_ip): Don't try expanding DBcc
+	instructions.
+
+	* config/tc-i386.c: Reordered some functions so inlining might
+	work.  Use PARAMS in function declarations.
+	(reloc): New routine.
+	(md_assemble): Rearrange switch statements to work with
+	non-integral segT.
+
+	* struc-symbol.h [BFD_ASSEMBLER]: Undefine
+	SYMBOLS_NEED_BACKPOINTERS before defining it.
+
+	* subsegs.c (subseg_new_rest): Now static.
+
+	* read.c (pseudo_set): Better error message for difference of
+	symbols in different frags.
+
+	* Makefile.in (check): Pass down some new variables, indicating
+	pathname or program name for cc, nm, objdump.
+
+	* as.h (OUTPUT_FLAVOR): New macro.
+	* config/tc-sparc.c (tc_gen_reloc): Use OUTPUT_FLAVOR.
+
+	* configure.in: Initialize bfd_gas properly.  Warn that ELF
+	support is incomplete.
+
+Thu Apr 15 22:39:05 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* read.c (float_cons): Accept null pointer return from md_atof.
+	* config/tc-m68k.c (md_atof): Return null for success.
+	* config/tc-sparc.c (md_atof): Ditto.
+
 Thu Apr 15 16:04:39 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
 	* doc/as.texinfo: formatting and comment cleanups; show SPARC
@@ -13,6 +103,14 @@ Thu Apr 15 16:04:39 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 Tue Apr 13 15:31:40 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
 	* doc/as.texinfo: mention SPARC architecture options.
+
+Fri Apr  9 17:43:11 1993  Ken Raeburn  (raeburn@cygnus.com)
+
+	* configure.in: Rearranged whitespace in per-host/per-target
+	sections.  Added hooks for dropping in HPPA support (not included
+	yet).  Separate out overrides of variables based on target format
+	and bfd-gas selection from actual target-specific commands.  Add
+	error message for recognized but unsupported format name.
 
 Fri Apr  9 09:05:47 1993  Ian Lance Taylor  (ian@cygnus.com)
 
@@ -69,6 +167,19 @@ Sun Apr  4 15:21:09 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* config/tc-h8500.c: Get relax size of branch instructions right,
 	(get_operand): Parse @sp+ correctly.
+
+Fri Apr  2 15:59:49 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* subsegs.h (segment_info_type) [BFD_ASSEMBLER]: Don't include
+	COFF section header field.
+
+	* configure.in: Print error message if host or target is not
+	supported.
+
+	* configure.in: If with-bfd-assembler, use obj-coff instead of
+	obj-coffbfd.
+
+	* config/ho-generic.h: Include string.h.
 
 Fri Apr  2 08:54:57 1993  Ian Lance Taylor  (ian@cygnus.com)
 
