@@ -38,7 +38,7 @@ host_tools="texinfo byacc flex bison binutils ld gas gcc gdb make patch
 # these libraries are built for the target environment, and are built after
 # the host libraries and the host tools (which may be a cross compiler)
 #
-target_libs="libm xiberty newlib libio libg++"
+target_libs="libm xiberty newlib libio librx libg++"
 
 
 # these tools are built using the target libs, and are intended to run only
@@ -236,7 +236,7 @@ case "${target}" in
     ;;    
   h8300*-*-* | \
   h8500-*-*)
-    noconfigdirs="$noconfigdirs libg++ libio"
+    noconfigdirs="$noconfigdirs libg++ libio librx"
     ;;
   hppa*-*-*elf*)
     # Do configure ld/binutils/gas for this case.
@@ -255,7 +255,7 @@ case "${target}" in
     # add the go32 support tools to the list
     # but don't build gdb
     configdirs=`echo go32 ${configdirs}`
-    noconfigdirs="$noconfigdirs gdb libg++ libio"
+    noconfigdirs="$noconfigdirs gdb libg++ libio librx"
     ;;
   i[34]86-*-sco*)
     noconfigdirs="$noconfigdirs gprof"

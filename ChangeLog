@@ -1,3 +1,7 @@
+Tue Aug 16 16:11:08 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* configure.in:  Also configure librx.
+
 Mon Aug 15 16:51:45 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	* Makefile.in:  Update various rules to reflect that librx
