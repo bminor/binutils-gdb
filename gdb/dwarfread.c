@@ -1810,7 +1810,7 @@ handle_producer (char *producer)
   else
     {
       processing_gcc_compilation =
-	STREQN (producer, GPLUS_PRODUCER, strlen (GPLUS_PRODUCER));
+	strncmp (producer, GPLUS_PRODUCER, strlen (GPLUS_PRODUCER)) == 0;
     }
 
   /* Select a demangling style if we can identify the producer and if

@@ -586,7 +586,7 @@ prim_record_minimal_symbol_and_info (const char *name, CORE_ADDR address,
 	const char *tempstring = name;
 	if (tempstring[0] == get_symbol_leading_char (objfile->obfd))
 	  ++tempstring;
-	if (STREQN (tempstring, "__gnu_compiled", 14))
+	if (strncmp (tempstring, "__gnu_compiled", 14) == 0)
 	  return (NULL);
       }
     }

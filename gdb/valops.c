@@ -2137,7 +2137,7 @@ destructor_name_p (const char *name, const struct type *type)
 	len = strlen (dname);
       else
 	len = cp - dname;
-      if (strlen (name + 1) != len || !STREQN (dname, name + 1, len))
+      if (strlen (name + 1) != len || strncmp (dname, name + 1, len) != 0)
 	error ("name of destructor must equal name of class");
       else
 	return 1;

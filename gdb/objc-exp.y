@@ -1592,7 +1592,7 @@ yylex ()
       if (STREQN (tokstart, "unsigned", 8))
 	return UNSIGNED;
       if (current_language->la_language == language_cplus
-	  && STREQN (tokstart, "template", 8))
+	  && strncmp (tokstart, "template", 8) == 0)
 	return TEMPLATE;
       if (STREQN (tokstart, "volatile", 8))
 	return VOLATILE_KEYWORD;
@@ -1609,7 +1609,7 @@ yylex ()
       break;
     case 5:
       if ((current_language->la_language == language_cplus)
-	  && STREQN (tokstart, "class", 5))
+	  && strncmp (tokstart, "class", 5) == 0)
 	return CLASS;
       if (STREQN (tokstart, "union", 5))
 	return UNION;

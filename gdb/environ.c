@@ -106,7 +106,7 @@ get_in_environ (const struct environ *e, const char *var)
   char *s;
 
   for (; (s = *vector) != NULL; vector++)
-    if (STREQN (s, var, len) && s[len] == '=')
+    if (strncmp (s, var, len) == 0 && s[len] == '=')
       return &s[len + 1];
 
   return 0;
@@ -123,7 +123,7 @@ set_in_environ (struct environ *e, const char *var, const char *value)
   char *s;
 
   for (i = 0; (s = vector[i]) != NULL; i++)
-    if (STREQN (s, var, len) && s[len] == '=')
+    if (strncmp (s, var, len) == 0 && s[len] == '=')
       break;
 
   if (s == 0)

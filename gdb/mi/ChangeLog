@@ -1,3 +1,8 @@
+2003-11-06  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-cmd-var.c (mi_cmd_var_set_format): Replace STREQN with
+	strncmp.
+
 2003-10-24  Andrew Cagney  <cagney@redhat.com>
 
 	* tui-out.c: Fix "fortunatly"[sic].

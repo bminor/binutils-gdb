@@ -1,4 +1,20 @@
 2003-11-06  Andrew Cagney  <cagney@redhat.com>
+
+	* valops.c (destructor_name_p): Replace STREQN with strncmp.
+	* top.c (command_line_input): Ditto.
+	* objc-exp.y (yylex): Ditto.
+	* minsyms.c (prim_record_minimal_symbol_and_info): Ditto.
+	* jv-exp.y (yylex): Ditto.
+	* f-exp.y (yylex): Ditto.
+	* event-top.c (command_line_handler): Ditto.
+	* environ.c (get_in_environ): Ditto.
+	(set_in_environ): Ditto.
+	* dwarfread.c (handle_producer): Ditto.
+	* dbxread.c (process_one_symbol): Ditto.
+	* c-typeprint.c (c_type_print_base): Ditto.
+	* c-exp.y (yylex): Ditto.
+
+2003-11-06  Andrew Cagney  <cagney@redhat.com>
 	    Jeff Johnston  <jjohnstn@redhat.com>
 
 	* target.c (add_target): Only set "to_xfer_partial" when NULL.

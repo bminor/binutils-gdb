@@ -3169,12 +3169,12 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 		  int l = colon_pos - name;
 
 		  m = lookup_minimal_symbol_by_pc (last_pc_address);
-		  if (m && STREQN (DEPRECATED_SYMBOL_NAME (m), name, l)
+		  if (m && strncmp (DEPRECATED_SYMBOL_NAME (m), name, l) == 0
 		      && DEPRECATED_SYMBOL_NAME (m)[l] == '\0')
 		    /* last_pc_address was in this function */
 		    valu = SYMBOL_VALUE (m);
 		  else if (m && DEPRECATED_SYMBOL_NAME (m + 1)
-			   && STREQN (DEPRECATED_SYMBOL_NAME (m + 1), name, l)
+			   && strncmp (DEPRECATED_SYMBOL_NAME (m + 1), name, l) == 0
 			   && DEPRECATED_SYMBOL_NAME (m + 1)[l] == '\0')
 		    /* last_pc_address was in last function */
 		    valu = SYMBOL_VALUE (m + 1);

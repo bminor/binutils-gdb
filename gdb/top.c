@@ -1266,7 +1266,7 @@ command_line_input (char *prompt_arg, int repeat, char *annotation_suffix)
 #define SERVER_COMMAND_LENGTH 7
   server_command =
     (p - linebuffer > SERVER_COMMAND_LENGTH)
-    && STREQN (linebuffer, "server ", SERVER_COMMAND_LENGTH);
+    && strncmp (linebuffer, "server ", SERVER_COMMAND_LENGTH) == 0;
   if (server_command)
     {
       /* Note that we don't set `line'.  Between this and the check in

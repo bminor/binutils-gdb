@@ -1340,7 +1340,7 @@ yylex ()
   tokstart = lexptr;
   /* See if it is a special token of length 3.  */
   for (i = 0; i < sizeof tokentab3 / sizeof tokentab3[0]; i++)
-    if (STREQN (tokstart, tokentab3[i].operator, 3))
+    if (strncmp (tokstart, tokentab3[i].operator, 3) == 0)
       {
 	lexptr += 3;
 	yylval.opcode = tokentab3[i].opcode;
@@ -1349,7 +1349,7 @@ yylex ()
 
   /* See if it is a special token of length 2.  */
   for (i = 0; i < sizeof tokentab2 / sizeof tokentab2[0]; i++)
-    if (STREQN (tokstart, tokentab2[i].operator, 2))
+    if (strncmp (tokstart, tokentab2[i].operator, 2) == 0)
       {
 	lexptr += 2;
 	yylval.opcode = tokentab2[i].opcode;
@@ -1645,52 +1645,52 @@ yylex ()
   switch (namelen)
     {
     case 8:
-      if (STREQN (tokstart, "unsigned", 8))
+      if (strncmp (tokstart, "unsigned", 8) == 0)
 	return UNSIGNED;
       if (current_language->la_language == language_cplus
-	  && STREQN (tokstart, "template", 8))
+	  && strncmp (tokstart, "template", 8) == 0)
 	return TEMPLATE;
-      if (STREQN (tokstart, "volatile", 8))
+      if (strncmp (tokstart, "volatile", 8) == 0)
 	return VOLATILE_KEYWORD;
       break;
     case 6:
-      if (STREQN (tokstart, "struct", 6))
+      if (strncmp (tokstart, "struct", 6) == 0)
 	return STRUCT;
-      if (STREQN (tokstart, "signed", 6))
+      if (strncmp (tokstart, "signed", 6) == 0)
 	return SIGNED_KEYWORD;
-      if (STREQN (tokstart, "sizeof", 6))      
+      if (strncmp (tokstart, "sizeof", 6) == 0)
 	return SIZEOF;
-      if (STREQN (tokstart, "double", 6))      
+      if (strncmp (tokstart, "double", 6) == 0)
 	return DOUBLE_KEYWORD;
       break;
     case 5:
       if (current_language->la_language == language_cplus)
         {
-          if (STREQN (tokstart, "false", 5))
+          if (strncmp (tokstart, "false", 5) == 0)
             return FALSEKEYWORD;
-          if (STREQN (tokstart, "class", 5))
+          if (strncmp (tokstart, "class", 5) == 0)
             return CLASS;
         }
-      if (STREQN (tokstart, "union", 5))
+      if (strncmp (tokstart, "union", 5) == 0)
 	return UNION;
-      if (STREQN (tokstart, "short", 5))
+      if (strncmp (tokstart, "short", 5) == 0)
 	return SHORT;
-      if (STREQN (tokstart, "const", 5))
+      if (strncmp (tokstart, "const", 5) == 0)
 	return CONST_KEYWORD;
       break;
     case 4:
-      if (STREQN (tokstart, "enum", 4))
+      if (strncmp (tokstart, "enum", 4) == 0)
 	return ENUM;
-      if (STREQN (tokstart, "long", 4))
+      if (strncmp (tokstart, "long", 4) == 0)
 	return LONG;
       if (current_language->la_language == language_cplus)
           {
-            if (STREQN (tokstart, "true", 4))
+            if (strncmp (tokstart, "true", 4) == 0)
               return TRUEKEYWORD;
           }
       break;
     case 3:
-      if (STREQN (tokstart, "int", 3))
+      if (strncmp (tokstart, "int", 3) == 0)
 	return INT_KEYWORD;
       break;
     default:
