@@ -1,3 +1,9 @@
+2002-11-15  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* coff-h8300.c (h8300_reloc16_estimate): Do not optimize away
+	jsr after a short jump.
+	* elf32-h8300.c (elf32_h8_relax_section): Likewise.
+
 2002-11-15  Klee Dienes  <kdienes@apple.com>
 
 	* pef.c (bfd_pef_convert_architecture): Move declaration of

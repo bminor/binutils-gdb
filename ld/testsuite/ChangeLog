@@ -1,3 +1,11 @@
+2002-11-15  Nick Clifton  <nickc@redhat.com>
+
+	* ld-h8300: New directory.
+	* ld-h8300/h8300.exp: New expect script.  Only run tests for h8300
+	targets.
+	* ld-h8300/relax.s: New assembler source file.
+	* ld-h8300/relax.d: New expected output file.
+
 2002-11-11  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-elf/sec64k.exp: New test.

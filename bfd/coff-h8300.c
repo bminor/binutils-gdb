@@ -4,21 +4,21 @@
    Free Software Foundation, Inc.
    Written by Steve Chamberlain, <sac@cygnus.com>.
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -483,6 +483,13 @@ h8300_reloc16_estimate (abfd, input_section, reloc, shrink, link_info)
 	 closer if we do relax this branch.  */
       if ((int) gap >= -128 && (int) gap <= 128)
 	{
+	  bfd_byte code;
+
+	  if (!bfd_get_section_contents (abfd, input_section, & code,
+					 reloc->address, 1))
+	    break;
+	  code = bfd_get_8 (abfd, & code);
+
 	  /* It's possible we may be able to eliminate this branch entirely;
 	     if the previous instruction is a branch around this instruction,
 	     and there's no label at this instruction, then we can reverse
@@ -494,9 +501,25 @@ h8300_reloc16_estimate (abfd, input_section, reloc, shrink, link_info)
 		lab1:				lab1:
 
 	     This saves 4 bytes instead of two, and should be relatively
-	     common.  */
+	     common.
 
-	  if (gap <= 126
+	     Only perform this optimisation for jumps (code 0x5a) not
+	     subroutine calls, as otherwise it could transform:
+	     
+	     	             mov.w   r0,r0
+	     	             beq     .L1
+	           	     jsr     @_bar
+	              .L1:   rts
+	              _bar:  rts
+	     into:
+	     	             mov.w   r0,r0
+	     	             bne     _bar
+	     	             rts
+	     	      _bar:  rts
+	     
+	     which changes the call (jsr) into a branch (bne).  */
+	  if (code == 0x5a
+	      && gap <= 126
 	      && last_reloc
 	      && last_reloc->howto->type == R_PCRBYTE)
 	    {
