@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #
-# Last Mod Tue Nov 5 12:18:34 PST 1991, by rich@rtl.cygnus.com
+# Last Mod Tue Nov 5 23:28:51 PST 1991, by rich@cygnus.com
 #
 # $Id$
 
@@ -35,6 +35,7 @@ BISON = `if [ -d $(unsubdir)/../bison ] ; \
 	then echo \`pwd\`/$(unsubdir)/../bison$(subdir)/bison -L \`pwd\`/$(unsubdir)/../bison$(subdir)/ ; \
 	else echo yacc ; fi`
 
+#\`(cd $(srcdir)/bison ; \\`pwd\\`)\`
 SUBDIRS = libiberty readline bfd gdb binutils ld gas gcc gnulib clib
 OTHERS = 
 
@@ -56,16 +57,14 @@ all.xclib:	all.normal
 
 subdir_do: force
 	for i in $(DODIRS); do \
-		if [ -f $(unsubdir)/$$i/localenv -o -f $(unsubdir)/$$i.$(target)/localenv ] ; then \
-			if (cd $(unsubdir)/$$i`if [ -d $(unsubdir)/$$i.$(target) ] ; \
-				then echo .$(target) ; fi`$(subdir); \
+		if [ -f $(unsubdir)/$$i/localenv ] ; then \
+			if (cd $(unsubdir)/$$i$(subdir); \
 				$(MAKE) \
 					"against=$(against)" \
 					"BISON=$(BISON)" $(DO)) ; then true ; \
 				else exit 1 ; fi ; \
-		else if [ -d $(unsubdir)/$$i -o -d $(unsubdir)/$$i.$(target) ] ; then \
-			if (cd $(unsubdir)/$$i`if [ -d $(unsubdir)/$$i.$(target) ] ; \
-				then echo .$(target) ; fi`$(subdir); \
+		else if [ -d $(unsubdir)/$$i ] ; then \
+			if (cd $(unsubdir)/$$i$(subdir); \
 				$(MAKE) \
 					"against=$(against)" \
 					"AR=$(AR)" \
@@ -103,26 +102,17 @@ bootstrap3:
 pass:
 	cp $(srcdir)/gcc/gstdarg.h $(unsubdir)/gas$(subdir)/stdarg.h
 	$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS)" \
-		"CC=`pwd`/$(unsubdir)/gcc`if [ -d $(unsubdir)/gcc.$(target) ] ; \
-		then echo .$(target) ; fi`$(subdir)/$(stagepass)/gcc \
+		"CC=`pwd`/$(unsubdir)/gcc$(subdir)/$(stagepass)/gcc \
 		-O \
-		-B`pwd`/$(unsubdir)/gcc`if [ -d $(unsubdir)/gcc.$(target) ] ; \
-		then echo .$(target) ; fi`$(subdir)/$(stagepass)/ \
-		-B`pwd`/$(unsubdir)/gas`if [ -d $(unsubdir)/gas.$(target) ] ; \
-		then echo .$(target) ; fi`$(subdir)/$(stagepass)/ \
-		-B`pwd`/$(unsubdir)/ld`if [ -d $(unsubdir)/ld.$(target) ] ; \
-		then echo .$(target) ; fi`$(subdir)/$(stagepass)/" \
-		"AR=`pwd`/$(unsubdir)/binutils`if [ -d $(unsubdir)/binutils.$(target) ] ; \
-		then echo .$(target) ; fi`$(subdir)/$(stagepass)/ar" \
-		"RANLIB=`pwd`/$(unsubdir)/binutils`if [ -d $(unsubdir)/binutils.$(target) ] ; \
-		then echo .$(target) ; fi`$(subdir)/$(stagepass)/ranlib" \
-		"LOADLIBES=`pwd`/$(unsubdir)/gnulib`if [ -d $(unsubdir)/binutils.$(target) ] ; \
-		then echo .$(target) ; fi`$(subdir)/$(stagepass)/gnulib.a /lib/libc.a" \
+		-B`pwd`/$(unsubdir)/gcc$(subdir)/$(stagepass)/ \
+		-B`pwd`/$(unsubdir)/gas$(subdir)/$(stagepass)/ \
+		-B`pwd`/$(unsubdir)/ld$(subdir)/$(stagepass)/" \
+		"AR=`pwd`/$(unsubdir)/binutil$(subdir)/$(stagepass)/ar" \
+		"RANLIB=`pwd`/$(unsubdir)/binutils$(subdir)/$(stagepass)/ranlib" \
+		"LOADLIBES=`pwd`/$(unsubdir)/gnulib$(subdir)/$(stagepass)/gnulib.a /lib/libc.a" \
 		"LDFLAGS=-nostdlib /lib/crt0.o \
-		-L`pwd`/$(unsubdir)/gnulib`if [ -d $(unsubdir)/gnulib.$(target) ] ; \
-		then echo .$(target) ; fi`$(subdir)/$(stagepass)/ \
-		-B`pwd`/$(unsubdir)/ld`if [ -d $(unsubdir)/ld.$(target) ] ; \
-		then echo .$(target) ; fi`$(subdir)/$(stagepass)/"
+		-L`pwd`/$(unsubdir)/gnulib$(subdir)/$(stagepass)/ \
+		-B`pwd`/$(unsubdir)/ld$(subdir)/$(stagepass)/"
 
 
 stage1:
@@ -178,19 +168,15 @@ install-dirs: force
 	- mkdir $(idestdir)/man/man6
 	- mkdir $(idestdir)/man/man7
 	- mkdir $(idestdir)/man/man8
-	if [ -d $(unsubdir)/gcc`if [ -d $(unsubdir)/gcc.$(target) ] ; \
-                then echo .$(target) ; fi`$(subdir) ] ; then \
-		(cd  $(unsubdir)/gcc`if [ -d $(unsubdir)/gcc.$(target) ] ; \
-	                then echo .$(target) ; fi`$(subdir) ; \
+	if [ -d $(unsubdir)/gcc$(subdir) ] ; then \
+		(cd  $(unsubdir)/gcc$(subdir) ; \
 				$(MAKE) install-dir) ; \
 	else true; \
 	fi
 
 install-fixed-includes: force
-	if [ -d $(unsubdir)/gcc`if [ -d $(unsubdir)/gcc.$(target) ] ; \
-                then echo .$(target) ; fi`$(subdir) ] ; then \
-		(cd  $(unsubdir)/gcc`if [ -d $(unsubdir)/gcc.$(target) ] ; \
-	                then echo .$(target) ; fi`$(subdir) ; \
+	if [ -d $(unsubdir)/gcc$(subdir) ] ; then \
+		(cd  $(unsubdir)/gcc$(subdir) ; \
 				$(MAKE) install-fixed-includes) ; \
 	else true; \
 	fi
