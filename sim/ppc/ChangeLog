@@ -1,3 +1,13 @@
+Wed Aug 27 10:24:15 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* idecode_expression.h (ALU_END): From Charles Lefurgy - Extract
+ 	sign bit using 64 bit and not a 32 bit mask.
+
+Wed Aug 27 10:15:48 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim_calls.c (sim_load): From Ian Lance Taylor - free argv after
+ 	it has been used, not before.
+	
 Tue Aug 26 10:41:35 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim_calls.c (sim_kill): Delete.

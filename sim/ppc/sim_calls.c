@@ -113,9 +113,6 @@ sim_load (SIM_DESC sd, char *prog, bfd *abfd, int from_tty)
   /* bring in all the data section */
   psim_init(simulator);
 
-  /* release the arguments */
-  freeargv(argv);
-
   /* get the start address */
   if (abfd != NULL)
     entry_point = bfd_get_start_address (abfd);
@@ -135,6 +132,9 @@ sim_load (SIM_DESC sd, char *prog, bfd *abfd, int from_tty)
       entry_point = bfd_get_start_address (abfd);
       bfd_close (abfd);
     }
+
+  /* release the arguments */
+  freeargv(argv);
 
   return SIM_RC_OK;
 }
