@@ -1,3 +1,8 @@
+2002-02-08  Chris Demetriou  <cgd@broadcom.com>
+
+	* ld.texinfo (Options): Add back in -nostdlib documentation,
+	which had been inadvertently removed.
+
 2002-02-09  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* emultempl/mmix-elfnmmo.em (mmix_after_allocation): Adjust
