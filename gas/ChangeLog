@@ -1,5 +1,8 @@
 Fri Dec  1 10:59:25 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.in: Improve message about unsupported ELF targets.
+	* configure: Rebuild.
+
 	* config/tc-m88k.c (m88k_do_align): Correct check for whether fill
 	pattern is zero.  From Manfred Hollstein.
 
