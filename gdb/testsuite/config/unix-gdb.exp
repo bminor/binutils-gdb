@@ -139,6 +139,7 @@ proc gdb_exit {} {
     }    
     catch "send \"quit\n\"" result
     if [string match "write\(spawn_id=\[0-9\]+\): Bad file number" $result] then {
+	catch "close"
 	return 0
     }
     expect {
@@ -161,6 +162,11 @@ proc gdb_exit {} {
 	        close
 	    }
     }
+    catch "close"
+
+    if $verbose>1 then {
+	send_user "Quitting $GDB $GDBFLAGS\n"
+    }    
 }
 
 #
