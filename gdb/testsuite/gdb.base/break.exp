@@ -132,7 +132,7 @@ if [istarget "*-*-vxworks"] then {
     send "run vxmain \"2\"\n"
     set timeout 120
 } else {
-	send "run 2\n"
+	send "run\n"
 }
 expect {
     -re "Starting program.*Breakpoint \[0-9\]+,.*main .*argc.*argv.* at .*$srcfile:56.*56\[\t \]+if .argc.* \{.*$prompt $"\
@@ -141,47 +141,25 @@ expect {
     timeout	            { fail "(timeout) run until function breakpoint" }
 }
 
-
 #
 # run until the breakpoint at a line number
 #
-send "continue\n"
-expect {
-    -re "continue.*Continuing..*Breakpoint \[0-9\]+, main .argc.*argv.* at .*$srcfile:60.*
-60\[\t ]+printf.*factorial.*$prompt $" { pass "run until breakpoint set at a line number" }
-    -re ".*$prompt $"       { fail "run until breakpoint set at a line number" }
-    timeout	            { fail "(timeout) run until breakpoint set at a line number" }
-}
-
+gdb_test continue "Continuing\\..*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.*, envp=.*\\) at .*$srcfile:60.*60\[\t \]+printf.*factorial" \
+			"run until breakpoint set at a line number"
 
 #
 # Run until the breakpoint set in a function in a file
 #
-send "continue\n"
-expect {
-    -re "continue.*Continuing..*Breakpoint \[0-9\]+, factorial .value=2. at .*$srcfile:72.*72\[\t ]+if .value > 1. \{.*$prompt $"\
-	{ send "continue\n"
-	    expect {
-		-re "continue.*Continuing..*Breakpoint \[0-9\]+, factorial .value=1. at .*$srcfile:72.*72\[\t ]+if .value > 1.*$prompt $" { pass "run until file:function breakpoint" }
-		-re ".*$prompt $"       { fail "run until file:function breakpoint" }
-		timeout	            { fail "(timeout) run until file:function breakpoint" }
-	    }
-	}
-    -re ".*$prompt $"       { fail "run until file:function breakpoint" }
-    timeout	            { fail "(timeout) run until file:function breakpoint" }
+for {set i 6} {$i >= 1} {incr i -1} {
+	gdb_test continue "Continuing\\..*Breakpoint \[0-9\]+, factorial \\(value=$i\\) at .*$srcfile:72.*72\[\t \]+if .value > 1. \{" \
+			"run until file:function($i) breakpoint"
 }
-
 
 #
 # run until the file:function breakpoint at a line number in a file
 #
-send "continue\n"
-expect {
-    -re "continue.*Continuing..*Breakpoint \[0-9\]+, main .*argc.*argv.* at .*$srcfile:66.*66\[\t ]+return 0;.*$prompt $" { pass "run until file:linenum breakpoint" }
-    -re ".*$prompt $"       { fail "run until file:linenum breakpoint" }
-    timeout	            { fail "(timeout) run until file:linenum breakpoint" }
-}
-
+gdb_test continue "Continuing\\..*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.*, envp=.*\\) at .*$srcfile:66.*66\[\t \]+return 0;" \
+		"run until file:linenum breakpoint"
 
 #
 # delete all breakpoints so we can start over, course this can be a test too
@@ -323,7 +301,7 @@ proc test_next_with_recursion {} {
     if [istarget "*-*-vxworks"] then {
 	send "run vxmain \"6\"\n"
     } else {
-	    send "run 6\n"
+	    send "run\n"
     }
     expect {
 	-re "Starting .*Break.* factorial .value=6. .*$prompt $" {}

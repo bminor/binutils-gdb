@@ -1,3 +1,13 @@
+Wed Mar 15 15:54:56 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* config/rom68k.exp:  New file to support Motorola IDP board.
+	* gdb.base/a2-run.exp:  Skip this file if noargs is set.
+	* gdb.base/break.c:  Change things around so that this program
+	doesn't depend upon args.  This is necessary to make remote
+	targets work (in general, they can't take args).
+	* gdb.base/break.exp:  Don't try to send args to program.  Don't
+	expect output.  Also, replace lots of code with gdb_test.
+
 Wed Mar 15 04:11:14 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.base/printcmds.exp (test_character_literals_accepted): Test
