@@ -49,7 +49,7 @@ Things-to-lose:
 
 Do-last:
 
-d10v_files="d10v"
+d10v_files="configure configure.in ChangeLog"
 if ( echo $* | grep keep\-d10v > /dev/null ) ; then
         for i in $d10v_files ; do
                 if test ! -d $i && (grep sanitize-d10v $i > /dev/null) ; then
