@@ -1,3 +1,8 @@
+Thu Jan 27 08:21:16 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gdb.t10/hppa.mt: A makefile fragment for the PA.
+	* gdb.t10/configure.in (hppa*-*-*): Use it.
+
 Tue Jan 25 12:58:26 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.t09/corefile:  Increase timeout when spawning gdb explicitly.
