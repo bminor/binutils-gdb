@@ -1,3 +1,17 @@
+Wed Dec 16 10:25:31 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in: Add lines defining CC and CXX, and use CXX rather
+	than gcc in definitions of CXX_FOR_BUILD and CXX_FOR_TARGET.
+
+Tue Dec 15 00:34:32 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in: change all $(host_cpu)-$(host_vendor)-$(host_os) to
+	$(host_canonical).
+
+	* configure.in: split the configdirs list into 4 categories (native
+	v. cross, library v. tool) and handle the cross-only and native-
+	only in more reasonable (and correct!) way.  
+
 Mon Dec 14 17:04:22 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* configure.in (hppa*-*-*):  Don't remove bfd and gdb from

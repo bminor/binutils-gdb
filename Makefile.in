@@ -52,7 +52,9 @@ INSTALL_DATA = $(INSTALL)
 AS = as
 AR = ar
 AR_FLAGS = rc
+CC = cc
 CFLAGS = -g
+CXX = gcc
 CXXFLAGS = -g -O
 RANLIB = ranlib
 NM = nm
@@ -70,10 +72,10 @@ MAKEINFO = `if [ -f $${rootme}/texinfo/C/makeinfo ] ; \
 	then echo $${rootme}/texinfo/C/makeinfo ; \
 	else echo makeinfo ; fi`
 
-# C compiler to use to create programs which must be run in the build
+# compilers to use to create programs which must be run in the build
 # environment.
 CC_FOR_BUILD = $(CC)
-CXX_FOR_BUILD = gcc
+CXX_FOR_BUILD = $(CXX)
 
 SUBDIRS = libiberty mmalloc glob readline opcodes bfd z8ksim gdb binutils ld gas tgas gcc libg++ newlib deja-gnu
 OTHERS = 
@@ -99,8 +101,8 @@ CXX_FOR_TARGET = ` \
   if [ -f $${rootme}/gcc/Makefile ] ; then \
     echo $${rootme}/gcc/gcc -B$${rootme}/gcc/; \
   else \
-    if [ "$(host_cpu)-$(host_vendor)-$(host_os)" = "$(target_cpu)-$(target_vendor)-$(target_os)" ] ; then \
-      echo gcc; \
+    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
+      echo $(CXX); \
     else \
       t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
     fi; \
@@ -110,7 +112,7 @@ AS_FOR_TARGET = ` \
   if [ -f $${rootme}/gas/Makefile ] ; then \
     echo $${rootme}/gas/as.new ; \
   else \
-    if [ "$(host_cpu)-$(host_vendor)-$(host_os)" = "$(target_cpu)-$(target_vendor)-$(target_os)" ] ; then \
+    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(AS); \
     else \
        t='$(program_transform_name)'; echo as | sed -e '' $$t ; \
@@ -917,7 +919,7 @@ install-libm: force
 
 ### libg++
 
-all-libg++: all-gas all-ld all-gcc all-xiberty
+all-libg++: all-gas all-ld all-gcc all-xiberty all-newlib
 	@if [ -f ./libg++/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		srcroot=`cd $(srcdir); pwd` ; export srcroot ; \
