@@ -147,10 +147,12 @@ all-cygnus:
 	ln -s $(INSTALLDIR) $(ROOTING)/$(RELEASE_TAG) 
 	@for i in $(TARGETS) ; do \
 	  if [ "$$i" = "native" ] ; then \
-            if [ ! -f $(canonhost)-3stage-done ] ; then \
+            if [ ! -f $(canonhost)-stamp-3stage-done ] ; then \
 	      echo "3staging $(canonhost) native" ; \
 	      $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) $(canonhost)-stamp-3stage-done $(log) && \
 	         echo "     completed successfully" ; \
+	    else \
+	      true ; \
 	    fi \
 	  else \
 	    echo "building $(canonhost) cross to $$i" ; \
