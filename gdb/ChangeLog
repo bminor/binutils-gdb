@@ -1,5 +1,8 @@
-Wed May  8 14:07:50 1996  Fred Fish  <fnf@cygnus.com>
+Wed May  8 20:33:24 1996  Fred Fish  <fnf@cygnus.com>
 
+	* infcmd.c (do_registers_info):  Always print the raw floating
+	point value's bytes in big endian order, so the the leftmost bit
+	is the most significant.
 	* breakpoint.c (clear_momentary_breakpoints): Remove dead code
 	that is referenced nowhere else.
 	(set_breakpoint): Ditto.
