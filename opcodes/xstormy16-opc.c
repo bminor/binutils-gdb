@@ -902,13 +902,13 @@ static const CGEN_OPCODE xstormy16_cgen_insn_opcode_table[MAX_INSNS] =
   {
     { 0, 0, 0, 0 },
     { { MNEM, 0 } },
-    & ifmt_iret, { 0xe0 }
+    & ifmt_iret, { 0xe8 }
   },
 /* divlh */
   {
     { 0, 0, 0, 0 },
     { { MNEM, 0 } },
-    & ifmt_iret, { 0xe8 }
+    & ifmt_iret, { 0xe0 }
   },
 /* nop */
   {
