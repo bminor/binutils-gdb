@@ -1,5 +1,9 @@
 2002-05-13  Elena Zannoni  <ezannoni@redhat.com>
 
+	* MAINTAINERS: List sh-elf as buildable with ,-Werror.
+
+2002-05-13  Elena Zannoni  <ezannoni@redhat.com>
+
 	* configure.tgt: Remove sh-hms target.
 	* MAINTAINERS: Don't list sh-hms as a separate target.
 
