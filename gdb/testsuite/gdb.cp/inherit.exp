@@ -351,7 +351,7 @@ proc test_ptype_vi { } {
     set re_access	"public:"
     set re_fields	"int vb;${ws}int vx;"
     set re_synth_gcc_2	"vB & operator=\\(vB const ?&\\);${ws}vB\\(int, vB const ?&\\);${ws}vB\\(int\\);"
-    set re_synth_gcc_3	"vB & operator=\\(vB const ?&\\);${ws}vB\\(vB const ?&\\);${ws}vB\\(\\);"
+    set re_synth_gcc_3	"vB & operator=\\(vB const ?&\\);${ws}vB\\(vB const ?&\\);${ws}vB\\((void|)\\);"
 
     set name "ptype vB"
     gdb_test_multiple "ptype vB" $name {
@@ -426,7 +426,7 @@ proc test_ptype_vi { } {
     set re_access	"public:"
     set re_fields	"int vc;${ws}int vx;"
     set re_synth_gcc_2	"vC & operator=\\(vC const ?&\\);${ws}vC\\(int, vC const ?&\\);${ws}vC\\(int\\);"
-    set re_synth_gcc_3	"vC & operator=\\(vC const ?&\\);${ws}vC\\(vC const ?&\\);${ws}vC\\(\\);"
+    set re_synth_gcc_3	"vC & operator=\\(vC const ?&\\);${ws}vC\\(vC const ?&\\);${ws}vC\\((void|)\\);"
 
     set name "ptype vC"
     gdb_test_multiple "ptype vC" $name {
@@ -509,7 +509,7 @@ proc test_ptype_mvi { } {
     set re_access	"public:"
     set re_fields	"int vd;${ws}int vx;"
     set re_synth_gcc_2	"vD & operator=\\(vD const ?&\\);${ws}vD\\(int, vD const ?&\\);${ws}vD\\(int\\);"
-    set re_synth_gcc_3	"vD & operator=\\(vD const ?&\\);${ws}vD\\(vD const ?&\\);${ws}vD\\(\\);"
+    set re_synth_gcc_3	"vD & operator=\\(vD const ?&\\);${ws}vD\\(vD const ?&\\);${ws}vD\\((void|)\\);"
 
     set name "ptype vD"
     gdb_test_multiple "ptype vD" $name {
@@ -584,7 +584,7 @@ proc test_ptype_mvi { } {
     set re_access	"public:"
     set re_fields	"int ve;${ws}int vx;"
     set re_synth_gcc_2	"vE & operator=\\(vE const ?&\\);${ws}vE\\(int, vE const ?&\\);${ws}vE\\(int\\);"
-    set re_synth_gcc_3	"vE & operator=\\(vE const ?&\\);${ws}vE\\(vE const ?&\\);${ws}vE\\(\\);"
+    set re_synth_gcc_3	"vE & operator=\\(vE const ?&\\);${ws}vE\\(vE const ?&\\);${ws}vE\\((void|)\\);"
 
     set name "ptype vE"
     gdb_test_multiple "ptype vE" $name {
