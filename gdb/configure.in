@@ -167,7 +167,7 @@ i[34]86-*-elf)		gdb_target=i386v ;;
 
 i[34]86-*-bsd*)		gdb_target=i386bsd ;;
 i[34]86-*-go32)		gdb_target=i386aout ;;
-i[34]86-*-lynx*)	gdb_target=i386lynx
+i[34]86-*-lynxos*)	gdb_target=i386lynx
 			configdirs="${configdirs} gdbserver"
 			;;
 i[34]86-*-solaris*)	gdb_target=i386sol2 ;;
