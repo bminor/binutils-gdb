@@ -1,3 +1,7 @@
+Thu Feb 20 13:32:24 1997  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdb.base/help.exp: Fix syntax of "help info all-registers" test.
+
 Thu Feb 20 10:34:21 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* gdb.disasm/mn10200.s: Add "nop" after "main" so that "main"

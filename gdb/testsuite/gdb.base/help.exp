@@ -163,7 +163,7 @@ gdb_test "help ignore" "Set ignore-count of breakpoint number N to COUNT..*\[\r\
 # test help info address
 gdb_test "help info address" "Describe where variable VAR is stored."  "help info address"
 # test help info all-registers
-gdb_test "help info all-registers" "List of all registers and their contents, for selected stack frame..*\[\r\n\]+Register name as argument means describe only that register." pass "help info all-registers"  "help info all-registers"
+gdb_test "help info all-registers" "List of all registers and their contents, for selected stack frame..*\[\r\n\]+Register name as argument means describe only that register." "help info all-registers"
 # test help info args
 gdb_test "help info args" "Argument variables of current stack frame."  "help info args"
 # test help info breakpoints
@@ -321,7 +321,6 @@ gdb_test "help set listsize" "Set number of source lines gdb will list by defaul
 # test help set print "p" abbreviation
 # FIXME -- Ultrix hangs randomly on this very long output from gdb and
 # continues with its output only if something is sent to gdb.
-# test.
 # Also, if the system is slow, it may time out because the output is large.
 gdb_test "help set p" ".*\[\r\n\]+Generic command for setting how things print..*\[\r\n\]+List of set print subcommands:.*\[\r\n\]+Type \"help set print\" followed by set print subcommand name for full documentation..*\[\r\n\]+Command name abbreviations are allowed if unambiguous." "help set print \"p\" abbreviatio"
 # test help set print "pr" abbreviation
@@ -366,9 +365,8 @@ gdb_test "help set write" "Set writing into executable and core files."  "help s
 # test help set
 # FIXME -- Ultrix hangs randomly on this very long output from gdb and
 # continues with its output only if something is sent to gdb.
-# test.
 # Also, if the system is slow, it may time out because the output is large.
-gdb_test "help set" ".*\[\r\n\]+Evaluate expression EXP and assign result to variable VAR, using assignment.*\[\r\n\]+syntax appropriate for the current language .VAR = EXP or VAR := EXP for.*\[\r\n\]+example..  VAR may be a debugger \"convenience\" variable .names starting.*\[\r\n\]+with \\\$., a register .a few standard names starting with \\\$., or an actual.*\[\r\n\]+variable in the program being debugged.  EXP is any valid expression.*\[\r\n\]+set listsize -- Set number of source lines gdb will list by default.*\[\r\n\]+Type \"help set\" followed by set subcommand name for full documentation..*\[\r\n\]+Command name abbreviations are allowed if unambiguous..*\[\r\n\]+" "help set"
+#gdb_test "help set" ".*\[\r\n\]+Evaluate expression EXP and assign result to variable VAR, using assignment.*\[\r\n\]+syntax appropriate for the current language .VAR = EXP or VAR := EXP for.*\[\r\n\]+example..  VAR may be a debugger \"convenience\" variable .names starting.*\[\r\n\]+with \\\$., a register .a few standard names starting with \\\$., or an actual.*\[\r\n\]+variable in the program being debugged.  EXP is any valid expression.*\[\r\n\]+set listsize -- Set number of source lines gdb will list by default.*\[\r\n\]+Type \"help set\" followed by set subcommand name for full documentation..*\[\r\n\]+Command name abbreviations are allowed if unambiguous..*\[\r\n\]+" "help set"
 # test help shell
 gdb_test "help shell" "Execute the rest of the line as a shell command.  .*\[\r\n\]+With no arguments, run an inferior shell." "help shell"
 #test help show annotate
@@ -462,8 +460,10 @@ gdb_test "help show width" "Show number of characters gdb thinks are in a line."
 # This is only supported on targets which use exec.o.
 gdb_test "help show write" "Show writing into executable and core files."  "help show write"
 # test help show
-# If the system is slow, it may time out because the output is large.
-gdb_test "help show" "Generic command for showing things about the debugger..*\[\r\n\]+List of show subcommands:.*\[\r\n\]+show listsize -- Show number of source lines gdb will list by default.*\[\r\n\]+show directories -- Current search path for finding source files.*\[\r\n\]+Type \"help show\" followed by show subcommand name for full documentation..*\[\r\n\]+Command name abbreviations are allowed if unambiguous." "help show"
+# FIXME -- Ultrix hangs randomly on this very long output from gdb and
+# continues with its output only if something is sent to gdb.
+# Also, if the system is slow, it may time out because the output is large.
+#gdb_test "help show" "Generic command for showing things about the debugger..*\[\r\n\]+List of show subcommands:.*\[\r\n\]+show listsize -- Show number of source lines gdb will list by default.*\[\r\n\]+show directories -- Current search path for finding source files.*\[\r\n\]+Type \"help show\" followed by show subcommand name for full documentation..*\[\r\n\]+Command name abbreviations are allowed if unambiguous." "help show"
 # test help step
 gdb_test "help step" "Step program until it reaches a different source line..*\[\r\n\]+Argument N means do this N times .or till program stops for another reason.." "help step"
 # test help stepi "si" abbreviation
@@ -476,15 +476,14 @@ gdb_test "help signal" "Continue program giving it signal.*"  "help signal"
 # vxgdb reads .vxgdbinit
 gdb_test "help source" "Read commands from a file named FILE..*\[\r\n\]+Note that the file \"\[^\"\]*\" is read automatically in this way.*\[\r\n\]+when gdb is started." "help source"
 # test help stack
-gdb_test "help stack" "Examining the stack..*\[\r\n\]+The stack is made up of stack frames.  Gdb assigns numbers to stack frames.*\[\r\n\]+counting from zero for the innermost .currently executing. frame..*\[\r\n\]+At any time gdb identifies one frame as the \"selected\" frame..*\[\r\n\]+Variable lookups are done with respect to the selected frame..*\[\r\n\]+When the program being debugged stops, gdb selects the innermost frame..*\[\r\n\]+The commands below can be used to select other frames by number or address..*\[\r\n\]+List of commands:.*\[\r\n\]+bt -- Print backtrace of all stack frames.*\[\r\n\]+backtrace -- Print backtrace of all stack frames.*\[\r\n\]+select-frame -- Select a stack frame without printing anything.*\[\r\n\]+frame -- Select and print a stack frame.*\[\r\n\]+down -- Select and print stack frame called by this one.*\[\r\n\]+up -- Select and print stack frame that called this one.*\[\r\n\]+return -- Make selected stack frame return to its caller.*\[\r\n\]+Type \"help\" followed by command name for full documentation..*\[\r\n\]+Command name abbreviations are allowed if unambiguous." "help stack"
+gdb_test "help stack" "Examining the stack..*\[\r\n\]+When the program being debugged stops, gdb selects the innermost frame..*\[\r\n\]+The commands below can be used to select other frames by number or address..*\[\r\n\]+List of commands:.*\[\r\n\]+bt -- Print backtrace of all stack frames.*\[\r\n\]+backtrace -- Print backtrace of all stack frames.*\[\r\n\]+select-frame -- Select a stack frame without printing anything.*\[\r\n\]+frame -- Select and print a stack frame.*\[\r\n\]+down -- Select and print stack frame called by this one.*\[\r\n\]+up -- Select and print stack frame that called this one.*\[\r\n\]+return -- Make selected stack frame return to its caller.*\[\r\n\]+Type \"help\" followed by command name for full documentation..*\[\r\n\]+Command name abbreviations are allowed if unambiguous." "help stack"
 # test help status
 gdb_test "help status" "Status inquiries..*\[\r\n\]+List of commands:.*\[\r\n\]+show -- Generic command for showing things about the debugger.*\[\r\n\]+info -- Generic command for showing things about the program being debugged.*\[\r\n\]+Type \"help\" followed by command name for full documentation..*\[\r\n\]+Command name abbreviations are allowed if unambiguous." "help status"
 # test help support
 # FIXME -- Ultrix hangs randomly on this very long output from gdb and
 # continues with its output only if something is sent to gdb.
-# test.
 # Also, if the system is slow, it may time out because the output is large.
-gdb_test "help support" "Support facilities..*\[\r\n\]+List of commands:.*\[\r\n\]+show confirm -- Show whether to confirm potentially dangerous operations.*\[\r\n\]+show history -- Generic command for showing command history parameters.*\[\r\n\]+down-silently -- Same as the `down' command.*\[\r\n\]+up-silently -- Same as the `up' command.*\[\r\n\]+Type \"help\" followed by command name for full documentation..*\[\r\n\]+Command name abbreviations are allowed if unambiguous." "help support"
+#gdb_test "help support" "Support facilities..*\[\r\n\]+List of commands:.*\[\r\n\]+show confirm -- Show whether to confirm potentially dangerous operations.*\[\r\n\]+show history -- Generic command for showing command history parameters.*\[\r\n\]+down-silently -- Same as the `down' command.*\[\r\n\]+up-silently -- Same as the `up' command.*\[\r\n\]+Type \"help\" followed by command name for full documentation..*\[\r\n\]+Command name abbreviations are allowed if unambiguous." "help support"
 # test help symbol-file
 gdb_test "help symbol-file" "Load symbol table from executable file FILE..*\[\r\n\]+The `file' command can also load symbol tables, as well as setting the file.*\[\r\n\]+to execute." "help symbol-file"
 # test help target child
