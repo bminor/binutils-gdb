@@ -1,5 +1,9 @@
 2004-11-29  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc-tdep.c (X_RS1, X_SIMM13): New macros.
+	(sparc32_skip_prologue): Skip instructions that store arguments in
+	registers into their corresponding stack slots.
+
 	* config/m68k/nbsdaout.mh (NAT_FILE): Set to solib.h instead of
 	tm-solib.h.
 	* config/m68k/obsd.mh (NAT_FILE): Likewise.

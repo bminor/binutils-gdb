@@ -80,10 +80,12 @@ struct regset;
 #define X_OP2(i) (((i) >> 22) & 0x7)
 #define X_IMM22(i) ((i) & 0x3fffff)
 #define X_OP3(i) (((i) >> 19) & 0x3f)
+#define X_RS1(i) (((i) >> 14) & 0x1f)
 #define X_I(i) (((i) >> 13) & 1)
 /* Sign extension macros.  */
 #define X_DISP22(i) ((X_IMM22 (i) ^ 0x200000) - 0x200000)
 #define X_DISP19(i) ((((i) & 0x7ffff) ^ 0x40000) - 0x40000)
+#define X_SIMM13(i) ((((i) & 0x1fff) ^ 0x1000) - 0x1000)
 
 /* Fetch the instruction at PC.  Instructions are always big-endian
    even if the processor operates in little-endian mode.  */
@@ -609,7 +611,36 @@ sparc32_skip_prologue (CORE_ADDR start_pc)
 	return sal.end;
     }
 
-  return sparc_analyze_prologue (start_pc, 0xffffffffUL, &cache);
+  start_pc = sparc_analyze_prologue (start_pc, 0xffffffffUL, &cache);
+
+  /* The psABI says that "Although the first 6 words of arguments
+     reside in registers, the standard stack frame reserves space for
+     them.".  It also suggests that a function may use that space to
+     "write incoming arguments 0 to 5" into that space, and that's
+     indeed what GCC seems to be doing.  In that case GCC will
+     generate debug information that points to the stack slots instead
+     of the registers, so we should consider the instructions that
+     write out these incoming arguments onto the stack.  Of course we
+     only need to do this if we have a stack frame.  */
+
+  while (!cache.frameless_p)
+    {
+      unsigned long insn = sparc_fetch_instruction (start_pc);
+
+      /* Recognize instructions that store incoming arguments in
+         %i0...%i5 into the corresponding stack slot.  */
+      if (X_OP (insn) == 3 && (X_OP3 (insn) & 0x3c) == 0x04 && X_I (insn)
+	  && (X_RD (insn) >= 24 && X_RD (insn) <= 29) && X_RS1 (insn) == 30
+	  && X_SIMM13 (insn) == 68 + (X_RD (insn) - 24) * 4)
+	{
+	  start_pc += 4;
+	  continue;
+	}
+
+      break;
+    }
+
+  return start_pc;
 }
 
 /* Normal frames.  */
