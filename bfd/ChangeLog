@@ -1,3 +1,7 @@
+Wed Jan 21 21:19:03 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* dwarf2.c: Include sysdep.h, not stdio.h and stdlib.h.
+
 Wed Jan 21 21:16:06 1998  Manfred Hollstein  <manfred@s-direktnet.de>
 
 	* coff-m88k.c (GET_SCNDHR_NRELOC): Fix typo in macro name.
