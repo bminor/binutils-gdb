@@ -464,7 +464,7 @@ value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
   struct value **argvec;
   char *ptr, *mangle_ptr;
   char tstr[13], mangle_tstr[13];
-  int static_memfuncp;
+  int static_memfuncp, nargs;
 
   COERCE_REF (arg1);
   COERCE_ENUM (arg1);
@@ -475,9 +475,11 @@ value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
   if (TYPE_CODE (check_typedef (VALUE_TYPE (arg1))) != TYPE_CODE_STRUCT)
     error ("Can't do that unary op on that type");	/* FIXME be explicit */
 
-  argvec = (struct value **) alloca (sizeof (struct value *) * 3);
+  argvec = (struct value **) alloca (sizeof (struct value *) * 4);
   argvec[1] = value_addr (arg1);
   argvec[2] = 0;
+
+  nargs = 1;
 
   /* make the right function name up */
   strcpy (tstr, "operator__");
@@ -490,13 +492,19 @@ value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
       strcpy (ptr, "++");
       break;
     case UNOP_PREDECREMENT:
-      strcpy (ptr, "++");
+      strcpy (ptr, "--");
       break;
     case UNOP_POSTINCREMENT:
       strcpy (ptr, "++");
+      argvec[2] = value_from_longest (builtin_type_int, 0);
+      argvec[3] = 0;
+      nargs ++;
       break;
     case UNOP_POSTDECREMENT:
-      strcpy (ptr, "++");
+      strcpy (ptr, "--");
+      argvec[2] = value_from_longest (builtin_type_int, 0);
+      argvec[3] = 0;
+      nargs ++;
       break;
     case UNOP_LOGICAL_NOT:
       strcpy (ptr, "!");
@@ -521,6 +529,7 @@ value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
       if (static_memfuncp)
 	{
 	  argvec[1] = argvec[0];
+	  nargs --;
 	  argvec++;
 	}
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
@@ -530,7 +539,7 @@ value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
 	    = TYPE_TARGET_TYPE (check_typedef (VALUE_TYPE (argvec[0])));
 	  return value_zero (return_type, VALUE_LVAL (arg1));
 	}
-      return call_function_by_hand (argvec[0], 1 - static_memfuncp, argvec + 1);
+      return call_function_by_hand (argvec[0], nargs, argvec + 1);
     }
   error ("member function %s not found", tstr);
   return 0;			/* For lint -- never reached */

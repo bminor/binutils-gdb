@@ -1,3 +1,13 @@
+2002-02-16  Daniel Jacobowitz  <drow@mvista.com>
+
+	* valarith.c (value_x_unop): Fix decrement; support post-decrement.
+
+2002-02-16  Daniel Jacobowitz  <drow@mvista.com>
+
+	From Peter Schauer <Peter.Schauer@Regent.E-Technik.TU-Muenchen.DE>:
+	* valops.c (value_arg_coerce): Don't take the address of a reference
+	to convert an argument to a reference.
+
 2002-02-15  Christopher Faylor  <cgf@redhat.com>
 
 	* win32-nat.c (get_image_name): New function.

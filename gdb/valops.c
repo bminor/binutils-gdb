@@ -1149,7 +1149,8 @@ value_arg_coerce (struct value *arg, struct type *param_type,
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_REF:
-      if (TYPE_CODE (arg_type) != TYPE_CODE_REF)
+      if (TYPE_CODE (arg_type) != TYPE_CODE_REF
+	  && TYPE_CODE (arg_type) != TYPE_CODE_PTR)
 	{
 	  arg = value_addr (arg);
 	  VALUE_TYPE (arg) = param_type;
