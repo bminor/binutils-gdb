@@ -1,5 +1,8 @@
 2001-05-08  Jim Blandy  <jimb@redhat.com>
 
+	* config/mn10300/tm-mn10300.h (mn10300_find_callers_reg): Delete
+	unused declaration.
+	
 	* mn10300-tdep.c (mn10300_gdbarch_init): Put the gdbarch methods
 	in some rational order.
 

@@ -57,8 +57,6 @@
 
 #define INIT_FRAME_PC		/* Not necessary */
 
-extern CORE_ADDR mn10300_find_callers_reg (struct frame_info *, int);
-
 extern void mn10300_pop_frame (struct frame_info *);
 #define POP_FRAME mn10300_pop_frame (get_current_frame ())
 
