@@ -97,14 +97,21 @@ extern CORE_ADDR mn10300_frame_saved_pc   PARAMS ((struct frame_info *));
    into VALBUF. */
 
 #define EXTRACT_RETURN_VALUE(TYPE, REGBUF, VALBUF) \
-  memcpy (VALBUF, REGBUF + REGISTER_BYTE (0), TYPE_LENGTH (TYPE))
+  if (TYPE_CODE (TYPE) == TYPE_CODE_PTR) \
+    memcpy (VALBUF, REGBUF + REGISTER_BYTE (4), TYPE_LENGTH (TYPE)); \
+  else \
+    memcpy (VALBUF, REGBUF + REGISTER_BYTE (0), TYPE_LENGTH (TYPE));
+
 
 #define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
   extract_address (REGBUF + REGISTER_BYTE (0), \
 		   REGISTER_RAW_SIZE (0))
 
 #define STORE_RETURN_VALUE(TYPE, VALBUF) \
-  write_register_bytes(REGISTER_BYTE (0), VALBUF, TYPE_LENGTH (TYPE));
+  if (TYPE_CODE (TYPE) == TYPE_CODE_PTR) \
+    write_register_bytes(REGISTER_BYTE (4), VALBUF, TYPE_LENGTH (TYPE)); \
+  else \
+    write_register_bytes(REGISTER_BYTE (0), VALBUF, TYPE_LENGTH (TYPE));
 
 #define STORE_STRUCT_RETURN(STRUCT_ADDR, SP) \
   (SP) = mn10300_store_struct_return (STRUCT_ADDR, SP)

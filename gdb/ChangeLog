@@ -1,3 +1,12 @@
+Thu Apr 24 13:31:10 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* config/mn10300/tm-mn10300.h (STORE_RETURN_VALUE): Pointers are
+	returned in $a0.
+	(EXTRACT_RETURN_VALUE): Likewise.
+
+	* mn10300-tdep.c (mn10300_analyze_prologue): Check for a return
+	insn at "pc", not "fi->pc".
+
 start-sanitize-tic80
 Thu Apr 24 16:11:47 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
