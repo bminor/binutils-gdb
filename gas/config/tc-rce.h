@@ -18,8 +18,8 @@
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#ifndef	TC_R16
-#define TC_R16 1
+#ifndef	TC_RCE
+#define TC_RCE 1
 
 #ifdef BFD_ASSEMBLER
 
@@ -47,7 +47,7 @@
 
 #define DO_NOT_STRIP 0
 #define DO_STRIP 0
-#define LISTING_HEADER "R16 Experimental GAS "
+#define LISTING_HEADER "RCE Experimental GAS "
 #define NEED_FX_R_TYPE 1
 #define COFF_FLAGS 1
 #define TC_COFF_SIZEMACHDEP(frag) tc_coff_sizemachdep(frag)
