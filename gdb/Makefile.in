@@ -844,7 +844,16 @@ uninstall: force $(CONFIG_UNINSTALL)
 # list includes a file twice (because of some mistake somewhere else) 
 # the _initialize_* function will be included twice in init.c. Second, 
 # init.c may force unnecessary files to be linked in.
-#
+
+# FIXME: cagney/2002-06-09: gdb/564: gdb/563: Force the order so that
+# the first call is to _initialize_gdbtypes.  This is a hack to ensure
+# that all the architecture dependant global builtin_type_* variables
+# are initialized before anything else (per-architecture code is
+# called in the same order that it is registered).  The ``correct
+# fix'' is to have all the builtin types made part of the architecture
+# and initialize them on-demand (using gdbarch_data) just like
+# everything else.  The catch is that other modules still take the
+# address of these builtin types forcing them to be variables, sigh!
 
 INIT_FILES = $(OBS) $(TSOBS) $(CONFIG_OBS) $(CONFIG_INITS)
 init.c: $(INIT_FILES)
@@ -869,7 +878,8 @@ init.c: $(INIT_FILES)
 	    -e 's,signals\.c,signals/signals\.c,' \
 	    -e 's|\([^  ][^     ]*\)|$(srcdir)/\1|g' | \
 	while read f; do grep '^_initialize_[a-z_0-9A-Z]* *(' $$f 2>/dev/null; done | \
-	sed -e 's/^.*://' -e 's/^\([a-z_0-9A-Z]*\).*/\1/' > init.l-tmp
+	sed -e 's/^.*://' -e 's/^\([a-z_0-9A-Z]*\).*/\1/' | \
+	( echo _initialize_gdbtypes ; grep -v -e '^_initialize_gdbtypes$$' ) > init.l-tmp
 	@echo '/* Do not modify this file.  */' >>init.c-tmp
 	@echo '/* It is created automatically by the Makefile.  */'>>init.c-tmp
 	@echo '#include "defs.h"' >>init.c-tmp

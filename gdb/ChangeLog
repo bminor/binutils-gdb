@@ -1,5 +1,10 @@
 2002-06-10  Andrew Cagney  <ac131313@redhat.com>
 
+	* Makefile.in (init.c): Move the call to _initialize_gdbtypes to
+	the front of the initialize list.
+
+2002-06-10  Andrew Cagney  <ac131313@redhat.com>
+
 	* infrun.c (struct inferior_status): Replace fields
 	selected_frame_address and selected_level with field
 	selected_frame_id.
