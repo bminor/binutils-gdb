@@ -4593,14 +4593,18 @@ read_range_type (char **pp, int typenums[2], struct objfile *objfile)
 
   if (n3 == 0 && n2 > 0)
     {
+      struct type *float_type
+	= init_type (TYPE_CODE_FLT, n2, 0, NULL, objfile);
+
       if (self_subrange)
 	{
-	  return init_type (TYPE_CODE_COMPLEX, 2 * n2, 0, NULL, objfile);
+	  struct type *complex_type = 
+	    init_type (TYPE_CODE_COMPLEX, 2 * n2, 0, NULL, objfile);
+	  TYPE_TARGET_TYPE (complex_type) = float_type;
+	  return complex_type;
 	}
       else
-	{
-	  return init_type (TYPE_CODE_FLT, n2, 0, NULL, objfile);
-	}
+	return float_type;
     }
 
   /* If the upper bound is -1, it must really be an unsigned int.  */

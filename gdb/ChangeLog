@@ -1,3 +1,8 @@
+2000-11-10  Jim Blandy  <jimb@redhat.com>
+
+	* stabsread.c (read_range_type): Properly construct complex
+	type nodes.
+
 2000-11-10  Fernando Nasser  <fnasser@totem.toronto.redhat.com>
 
 	* symtab.c (decode_line_1, total_number_of_methods, find_methods,
