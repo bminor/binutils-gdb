@@ -1,3 +1,11 @@
+2004-02-05  Mark Kettenis  <kettenis@gnu.org>
+
+	* infrun.c (handle_inferior_event): Allow for breakpoint
+	instructions to generate a SIGSEGV in addition to SIGTRAP, SIGILL
+	and SIGEMT.  Update comments.
+	* NEWS (Revised SPARC target): Mention support for non-executable
+	stack.
+
 2004-02-04  Mark Kettenis  <kettenis@gnu.org>
 
 	* target.h (target_object): Add TARGET_OBJECT_WCOOKIE.

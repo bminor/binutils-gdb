@@ -19,7 +19,9 @@ you should upgrade gdbserver on the remote side.
 
 The SPARC target has been completely revised, incorporating the
 FreeBSD/sparc64 support that was added for GDB 6.0.  As a result
-support for LynxOS and SunOS 4 has been dropped.
+support for LynxOS and SunOS 4 has been dropped.  Calling functions
+from within GDB on operating systems with a non-executable stack
+(Solaris, OpenBSD) now works.
 
 * New C++ demangler
 
