@@ -1486,7 +1486,7 @@ void
 set_solib_svr4_fetch_link_map_offsets (struct gdbarch *gdbarch,
                                        struct link_map_offsets *(*flmo) (void))
 {
-  set_gdbarch_data (gdbarch, fetch_link_map_offsets_gdbarch_data, flmo);
+  deprecated_set_gdbarch_data (gdbarch, fetch_link_map_offsets_gdbarch_data, flmo);
 }
 
 /* Initialize the architecture-specific link_map_offsets fetcher.
@@ -1584,7 +1584,7 @@ void
 _initialize_svr4_solib (void)
 {
   fetch_link_map_offsets_gdbarch_data =
-    register_gdbarch_data (init_fetch_link_map_offsets);
+    gdbarch_data_register_post_init (init_fetch_link_map_offsets);
 
   svr4_so_ops.relocate_section_addresses = svr4_relocate_section_addresses;
   svr4_so_ops.free_so = svr4_free_so;

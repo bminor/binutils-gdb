@@ -92,7 +92,7 @@ frame_base_table (struct gdbarch *gdbarch)
       /* ULGH, called during architecture initialization.  Patch
          things up.  */
       table = frame_base_init (gdbarch);
-      set_gdbarch_data (gdbarch, frame_base_data, table);
+      deprecated_set_gdbarch_data (gdbarch, frame_base_data, table);
     }
   return table;
 }
@@ -146,5 +146,5 @@ extern initialize_file_ftype _initialize_frame_base; /* -Wmissing-prototypes */
 void
 _initialize_frame_base (void)
 {
-  frame_base_data = register_gdbarch_data (frame_base_init);
+  frame_base_data = gdbarch_data_register_post_init (frame_base_init);
 }

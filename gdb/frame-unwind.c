@@ -63,7 +63,7 @@ frame_unwind_append_sniffer (struct gdbarch *gdbarch,
       /* ULGH, called during architecture initialization.  Patch
          things up.  */
       table = frame_unwind_init (gdbarch);
-      set_gdbarch_data (gdbarch, frame_unwind_data, table);
+      deprecated_set_gdbarch_data (gdbarch, frame_unwind_data, table);
     }
   append_predicate (table, sniffer);
 }
@@ -95,5 +95,5 @@ extern initialize_file_ftype _initialize_frame_unwind; /* -Wmissing-prototypes *
 void
 _initialize_frame_unwind (void)
 {
-  frame_unwind_data = register_gdbarch_data (frame_unwind_init);
+  frame_unwind_data = gdbarch_data_register_post_init (frame_unwind_init);
 }

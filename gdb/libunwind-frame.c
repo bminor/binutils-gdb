@@ -111,7 +111,7 @@ libunwind_frame_set_descr (struct gdbarch *gdbarch, struct libunwind_descr *desc
     {
       /* First time here.  Must initialize data area.  */
       arch_descr = libunwind_descr_init (gdbarch);
-      set_gdbarch_data (gdbarch, libunwind_descr_handle, arch_descr);
+      deprecated_set_gdbarch_data (gdbarch, libunwind_descr_handle, arch_descr);
     }
 
   /* Copy new descriptor info into arch descriptor.  */
@@ -381,7 +381,7 @@ void _initialize_libunwind_frame (void);
 void
 _initialize_libunwind_frame (void)
 {
-  libunwind_descr_handle = register_gdbarch_data (libunwind_descr_init);
+  libunwind_descr_handle = gdbarch_data_register_post_init (libunwind_descr_init);
 
   libunwind_initialized = libunwind_load ();
 }

@@ -48,6 +48,7 @@ struct reggroup;
 struct regset;
 struct disassemble_info;
 struct target_ops;
+struct obstack;
 
 extern struct gdbarch *current_gdbarch;
 
@@ -2517,10 +2518,6 @@ extern void deprecated_current_gdbarch_select_hack (struct gdbarch *gdbarch);
    for the reserved data-pointer is returned.  That identifer should
    be saved in a local static variable.
 
-   The per-architecture data-pointer is either initialized explicitly
-   (set_gdbarch_data()) or implicitly (by INIT() via a call to
-   gdbarch_data()).
-
    Memory for the per-architecture data shall be allocated using
    gdbarch_obstack_zalloc.  That memory will be deleted when the
    corresponding architecture object is deleted.
@@ -2534,11 +2531,13 @@ extern void deprecated_current_gdbarch_select_hack (struct gdbarch *gdbarch);
 
 struct gdbarch_data;
 
-typedef void *(gdbarch_data_init_ftype) (struct gdbarch *gdbarch);
-extern struct gdbarch_data *register_gdbarch_data (gdbarch_data_init_ftype *init);
-extern void set_gdbarch_data (struct gdbarch *gdbarch,
-			      struct gdbarch_data *data,
-			      void *pointer);
+typedef void *(gdbarch_data_pre_init_ftype) (struct obstack *obstack);
+extern struct gdbarch_data *gdbarch_data_register_pre_init (gdbarch_data_pre_init_ftype *init);
+typedef void *(gdbarch_data_post_init_ftype) (struct gdbarch *gdbarch);
+extern struct gdbarch_data *gdbarch_data_register_post_init (gdbarch_data_post_init_ftype *init);
+extern void deprecated_set_gdbarch_data (struct gdbarch *gdbarch,
+                                         struct gdbarch_data *data,
+			                 void *pointer);
 
 extern void *gdbarch_data (struct gdbarch *gdbarch, struct gdbarch_data *);
 
@@ -2554,7 +2553,7 @@ extern void *gdbarch_data (struct gdbarch *gdbarch, struct gdbarch_data *);
    Memory regions are swapped / initialized in the order that they are
    registered.  NULL DATA and/or INIT values can be specified.
 
-   New code should use register_gdbarch_data(). */
+   New code should use gdbarch_data_register_*(). */
 
 typedef void (gdbarch_swap_ftype) (void);
 extern void deprecated_register_gdbarch_swap (void *data, unsigned long size, gdbarch_swap_ftype *init);

@@ -1,5 +1,40 @@
 2004-03-15  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (gdbarch_data_pre_init_fytpe)
+	(gdbarch_data_register_pre_init, gdbarch_data_post_init_fytpe)
+	(gdbarch_data_register_post_init): Replace gdbarch_data_init_ftype
+	and register_gdbarch_data.
+	(deprecated_set_gdbarch_data): Rename set_gdbarch_data.
+	(struct gdbarch_data): Replace "init" by "pre_init" and
+	"post_init".
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* dwarf2-frame.c (dwarf2_frame_init): Replace "gdbarch" paramter
+	with"obstack", use OBSTACK_ZALLOC.
+	(dwarf2_frame_ops): Delete.
+	(dwarf2_frame_set_init_reg): Use gdbarch_data.
+	(dwarf2_frame_init_reg): Use gdbarch_data.
+	(_initialize_dwarf2_frame): Use gdbarch_data_register_pre_init.
+	* solib-svr4.c (set_solib_svr4_fetch_link_map_offsets) 
+	(_initialize_svr4_solib): Update.
+	* user-regs.c (_initialize_user_regs): Update.
+	* reggroups.c (_initialize_reggroup): Update.
+	* regcache.c (_initialize_regcache): Update.
+	* mips-linux-tdep.c (_initialize_mips_linux_tdep): Update.
+	* libunwind-frame.c (_initialize_libunwind_frame): Update.
+	* gnu-v3-abi.c (init_gnuv3_ops): Update.
+	* frame-unwind.c (_initialize_frame_unwind): Update.
+	* frame-base.c (_initialize_frame_base): Update.
+	* user-regs.c (user_reg_add): Update.
+	* reggroups.c (reggroup_add): Update.
+	* mips-linux-tdep.c (set_mips_linux_register_addr): Update.
+	* libunwind-frame.c (libunwind_frame_set_descr): Update.
+	* frame-unwind.c (frame_unwind_append_sniffer): Update.
+	* frame-base.c (frame_base_table): Update.
+	* remote.c (_initialize_remote): Update.
+	* gdb_obstack.h (OBSTACK_ZALLOC, OBSTACK_CALLOC): Define.
+	
+2004-03-15  Andrew Cagney  <cagney@redhat.com>
+
 	* cris-tdep.c (bfd_lookup_symbol): Delete unused function.
 
 2004-03-15  Kevin Buettner  <kevinb@redhat.com>
