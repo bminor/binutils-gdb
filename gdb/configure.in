@@ -94,7 +94,7 @@ i860)
 	gdb_host=stratus
 	;;
 
-i386)
+i386 | i486)
 	case "${host_vendor}" in
 	sun)	gdb_host=sun386 ;;
 	sco)	gdb_host=i386sco ;;
@@ -304,7 +304,7 @@ h8300)
 i860)	gdb_target=stratus
 	;;
 
-i386)
+i386 | i486)
 	case "${target_vendor}" in
 	sco)	gdb_target=i386sco ;;
 	sun)	gdb_target=sun386 ;;

@@ -52,6 +52,9 @@ static void
 type_print_base PARAMS ((struct type *, FILE *, int, int));
 
 static void
+type_print_args PARAMS ((struct type *, FILE *));
+
+static void
 type_print_varspec_suffix PARAMS ((struct type *, FILE *, int, int, int));
 
 static void
@@ -1431,46 +1434,46 @@ type_print_method_args (args, prefix, varstring, staticp, stream)
   fprintf_filtered (stream, ")");
 }
   
-/* If TYPE is a derived type, then print out derivation
-   information.  Print out all layers of the type heirarchy
-   until we encounter one with multiple inheritance.
-   At that point, print out that ply, and return.  */
+/* If TYPE is a derived type, then print out derivation information.
+   Print only the actual base classes of this type, not the base classes
+   of the base classes.  I.E.  for the derivation hierarchy:
+
+	class A { int a; };
+	class B : public A {int b; };
+	class C : public B {int c; };
+
+   Print the type of class C as:
+
+   	class C : public B {
+		int c;
+	}
+
+   Not as the following (like gdb used to), which is not legal C++ syntax for
+   derived types and may be confused with the multiple inheritance form:
+
+	class C : public B : public A {
+		int c;
+	}
+
+   In general, gdb should try to print the types as closely as possible to
+   the form that they appear in the source code. */
+
 static void
 type_print_derivation_info (stream, type)
      FILE *stream;
      struct type *type;
 {
   char *name;
-  int i, n_baseclasses = TYPE_N_BASECLASSES (type);
-  struct type *basetype = 0;
+  int i;
 
-  while (type && n_baseclasses > 0)
+  for (i = 0; i < TYPE_N_BASECLASSES (type); i++)
     {
-      /* Not actually sure about this one -- Bryan. */
-      check_stub_type (type);
-      
-      fprintf_filtered (stream, ": ");
-      for (i = 0; ;)
-	{
-	  basetype = TYPE_BASECLASS (type, i);
-	  if (name = type_name_no_tag (basetype))
-	    {
-	      fprintf_filtered (stream, "%s%s ",
-		       BASETYPE_VIA_PUBLIC(type, i) ? "public" : "private",
-		       BASETYPE_VIA_VIRTUAL(type, i) ? " virtual" : "");
-	      fputs_filtered (name, stream);
-	    }
-	  i++;
-	  if (i >= n_baseclasses)
-	      break;
-	  fprintf_filtered (stream, ", ");
-	}
-
-      fprintf_filtered (stream, " ");
-      if (n_baseclasses != 1)
-	break;
-      n_baseclasses = TYPE_N_BASECLASSES (basetype);
-      type = basetype;
+      fputs_filtered (i == 0 ? ": " : ", ", stream);
+      fprintf_filtered (stream, "%s%s ",
+			BASETYPE_VIA_PUBLIC (type, i) ? "public" : "private",
+			BASETYPE_VIA_VIRTUAL(type, i) ? " virtual" : "");
+      name = type_name_no_tag (TYPE_BASECLASS (type, i));
+      fprintf_filtered (stream, "%s ", name ? name : "(null)");
     }
 }
 
@@ -1571,6 +1574,44 @@ type_print_varspec_prefix (type, stream, show, passed_a_ptr)
     }
 }
 
+static void
+type_print_args (type, stream)
+     struct type *type;
+     FILE *stream;
+{
+  int i;
+  struct type **args;
+
+  fprintf_filtered (stream, "(");
+  args = TYPE_ARG_TYPES (type);
+  if (args != NULL)
+    {
+      if (args[1] == NULL)
+	{
+	  fprintf_filtered (stream, "...");
+	}
+      else
+	{
+	  for (i = 1;
+	       args[i] != NULL && args[i]->code != TYPE_CODE_VOID;
+	       i++)
+	    {
+	      type_print_1 (args[i], "", stream, -1, 0);
+	      if (args[i+1] == NULL)
+		{
+		  fprintf_filtered (stream, "...");
+		}
+	      else if (args[i+1]->code != TYPE_CODE_VOID)
+		{
+		  fprintf_filtered (stream, ",");
+		  wrap_here ("    ");
+		}
+	    }
+	}
+    }
+  fprintf_filtered (stream, ")");
+}
+
 /* Print any array sizes, function arguments or close parentheses
    needed after the variable name (to describe its type).
    Args work like type_print_varspec_prefix.  */
@@ -1621,23 +1662,7 @@ type_print_varspec_suffix (type, stream, show, passed_a_ptr, demangled_args)
       type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0, 0, 0);
       if (passed_a_ptr)
 	{
-	  int i;
-	  struct type **args = TYPE_ARG_TYPES (type);
-
-	  fprintf_filtered (stream, "(");
-	  if (args[1] == 0)
-	    fprintf_filtered (stream, "...");
-	  else for (i = 1; args[i] != 0 && args[i]->code != TYPE_CODE_VOID; i++)
-	    {
-	      type_print_1 (args[i], "", stream, -1, 0);
-	      if (args[i+1] == 0)
-		fprintf_filtered (stream, "...");
-	      else if (args[i+1]->code != TYPE_CODE_VOID) {
-		fprintf_filtered (stream, ",");
-		wrap_here ("    ");
-	      }
-	    }
-	  fprintf_filtered (stream, ")");
+	  type_print_args (type, stream);
 	}
       break;
 
@@ -1752,22 +1777,25 @@ type_print_base (type, stream, show, level)
 	  
 	  type_print_derivation_info (stream, type);
 	  
-	  fprintf_filtered (stream, "{");
-	  len = TYPE_NFIELDS (type);
-	  if (len)
-	    fprintf_filtered (stream, "\n");
-	  else
+	  fprintf_filtered (stream, "{\n");
+	  if ((TYPE_NFIELDS (type) == 0) && (TYPE_NFN_FIELDS (type) == 0))
 	    {
 	      if (TYPE_FLAGS (type) & TYPE_FLAG_STUB)
-		fprintf_filtered (stream, "<incomplete type>\n");
+		fprintfi_filtered (level + 4, stream, "<incomplete type>\n");
 	      else
-		fprintf_filtered (stream, "<no data fields>\n");
+		fprintfi_filtered (level + 4, stream, "<no data fields>\n");
 	    }
+
+	  /* Start off with no specific section type, so we can print
+	     one for the first field we find, and use that section type
+	     thereafter until we find another type. */
+
+	  section_type = s_none;
 
 	  /* If there is a base class for this type,
 	     do not print the field that it occupies.  */
 
-	  section_type = s_none;
+	  len = TYPE_NFIELDS (type);
 	  for (i = TYPE_N_BASECLASSES (type); i < len; i++)
 	    {
 	      QUIT;
@@ -1786,8 +1814,8 @@ type_print_base (type, stream, show, level)
 		      if (section_type != s_protected)
 			{
 			  section_type = s_protected;
-			  print_spaces_filtered (level + 4, stream);
-			  fprintf_filtered (stream, "protected:\n");
+			  fprintfi_filtered (level + 2, stream,
+					     "protected:\n");
 			}
 		    }
 		  else if (TYPE_FIELD_PRIVATE (type, i))
@@ -1795,8 +1823,7 @@ type_print_base (type, stream, show, level)
 		      if (section_type != s_private)
 			{
 			  section_type = s_private;
-			  print_spaces_filtered (level + 4, stream);
-			  fprintf_filtered (stream, "private:\n");
+			  fprintfi_filtered (level + 2, stream, "private:\n");
 			}
 		    }
 		  else
@@ -1804,8 +1831,7 @@ type_print_base (type, stream, show, level)
 		      if (section_type != s_public)
 			{
 			  section_type = s_public;
-			  print_spaces_filtered (level + 4, stream);
-			  fprintf_filtered (stream, "public:\n");
+			  fprintfi_filtered (level + 2, stream, "public:\n");
 			}
 		    }
 		}
@@ -1834,7 +1860,6 @@ type_print_base (type, stream, show, level)
 
 	  /* C++: print out the methods */
 	  len = TYPE_NFN_FIELDS (type);
-	  if (len) fprintf_filtered (stream, "\n");
 	  for (i = 0; i < len; i++)
 	    {
 	      struct fn_field *f = TYPE_FN_FIELDLIST1 (type, i);
@@ -1844,6 +1869,32 @@ type_print_base (type, stream, show, level)
 	      for (j = 0; j < len2; j++)
 		{
 		  QUIT;
+		  if (TYPE_FN_FIELD_PROTECTED (f, j))
+		    {
+		      if (section_type != s_protected)
+			{
+			  section_type = s_protected;
+			  fprintfi_filtered (level + 2, stream,
+					     "protected:\n");
+			}
+		    }
+		  else if (TYPE_FN_FIELD_PRIVATE (f, j))
+		    {
+		      if (section_type != s_private)
+			{
+			  section_type = s_private;
+			  fprintfi_filtered (level + 2, stream, "private:\n");
+			}
+		    }
+		  else
+		    {
+		      if (section_type != s_public)
+			{
+			  section_type = s_public;
+			  fprintfi_filtered (level + 2, stream, "public:\n");
+			}
+		    }
+
 		  print_spaces_filtered (level + 4, stream);
 		  if (TYPE_FN_FIELD_VIRTUAL_P (f, j))
 		    fprintf_filtered (stream, "virtual ");
@@ -1895,8 +1946,7 @@ type_print_base (type, stream, show, level)
 		}
 	    }
 
-	  print_spaces_filtered (level, stream);
-	  fprintf_filtered (stream, "}");
+	  fprintfi_filtered (level, stream, "}");
 	}
       break;
 

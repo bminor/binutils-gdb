@@ -1,3 +1,11 @@
+Mon Aug  3 00:25:56 1992  Fred Fish  (fnf@cygnus.com)
+
+	* configure.in:  Recognize i486 host cpu.
+	* valprint.c (type_print_derivation_info):  Print derivation info
+	in same form as class declarations in source.
+	* valprint.c (type_print_varspec_suffix):  Split arg printing
+	code out to type_print_args function.
+	
 Sat Aug  1 13:32:58 1992  Fred Fish  (fnf@cygnus.com)
 
 	* dwarfread.c (struct dieinfo):  Remove obsolete at_visibility, 
