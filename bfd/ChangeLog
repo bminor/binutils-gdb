@@ -1,3 +1,8 @@
+1999-09-14  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-m32r.c (ELF_MAXPAGESIZE): Change to 0x1 (at request of
+	Mitsubishi). 
+
 Mon Sep 13 20:01:47 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* elf-hppa.h (elf_hppa_record_segment_addrs): New function.
