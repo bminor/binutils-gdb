@@ -58,6 +58,8 @@ responsibility among the other maintainers.
   CRIS		   Hans-Peter Nilsson <hp@axis.com>
   D10V		   Tom Rix <trix@redhat.com>
   DWARF2	   Jason Merrill <jason@redhat.com>
+  FR30		   Dave Brolley <brolley@redhat.com>
+  FRV		   Dave Brolley <brolley@redhat.com>
   HPPA elf32	   Alan Modra <amodra@bigpond.net.au>
   IA64		   Jim Wilson <wilson@redhat.com>
   i860		   Jason Eckhardt <jle@redhat.com>

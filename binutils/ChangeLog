@@ -1,3 +1,7 @@
+2002-06-20  Dave Brolley  <brolley@redhat.com>
+
+	* MAINTAINERS: Add self as fr30 and frv maintainer.
+
 2002-06-18  H.J. Lu  (hjl@gnu.org)
 
 	* nm.c: Include "elf/common.h".
