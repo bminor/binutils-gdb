@@ -60,7 +60,10 @@ l5:
 	nop
 	.dword	2b		# R_MIPS_64	.text CC
 	.dword	2b-l5		# R_MIPS_PC64	.text 98  or 34
-	
+
+# align section end to 16-byte boundary for easier testing on multiple targets
+	.p2align 4
+
 	.section ".foo","ax",@progbits
 	nop
 l4:	
@@ -109,3 +112,6 @@ l4:
 l1:
 
 	nop
+
+# align section end to 16-byte boundary for easier testing on multiple targets
+	.p2align 4

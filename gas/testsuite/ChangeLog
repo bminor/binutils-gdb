@@ -20,6 +20,14 @@
         * gas/mips/sync.d: Expect "..." at end of objdump output
         because of zero bytes at end of section.
 
+        * gas/mips/empic.d: Pad sections out to 16 bytes, to avoid
+        alignment issues so tests are useful on multiple targets.
+        * gas/mips/empic.s: Likewise.
+        * gas/mips/mips16-e.d: Likewise.
+        * gas/mips/mips16-e.s: Likewise.
+        * gas/mips/mips16-f.d: Likewise.
+        * gas/mips/mips16-f.s: Likewise.
+
 2000-12-01  Chris Demetriou  <cgd@sibyte.com>
 
         * gas/mips/mips16.d: Expect mips16 nops to be used for padding
