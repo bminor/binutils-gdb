@@ -370,8 +370,8 @@ clean-info:
 	-rm -rf *.info*
 
 # Making a dist:
-# cvs rtag binutils-x-yy binutils
-# cvs co -r binutils-x-yy binutils
+# cvs rtag binutils-x-yy ld+utils
+# cvs co -r binutils-x-yy ld+utils
 # Sanitize
 # cd {HERE}; make dist [-f Makefile.in]
 
