@@ -1,5 +1,5 @@
 /* Target-dependent code for the Fujitsu FR-V, for GDB, the GNU Debugger.
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1097,8 +1097,6 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Settings for calling functions in the inferior.  */
   set_gdbarch_call_dummy_length (gdbarch, 0);
-  set_gdbarch_coerce_float_to_double (gdbarch, 
-				      standard_coerce_float_to_double);
   set_gdbarch_push_arguments (gdbarch, frv_push_arguments);
   set_gdbarch_push_return_address (gdbarch, frv_push_return_address);
   set_gdbarch_pop_frame (gdbarch, frv_pop_frame);

@@ -1,5 +1,12 @@
 2003-01-04  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdb.base/callfuncs.exp: Don't XFAIL unprototyped functions for
+	stabs.
+	* gdb.base/completion.exp: Allow marker1(void) as well as marker1().
+	* gdb.base/whatis.exp: Always allow (void) after function names.
+
+2003-01-04  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdb.c++/casts.exp: Correct regexp.
 
 2003-01-04  Mark Kettenis  <kettenis@gnu.org>

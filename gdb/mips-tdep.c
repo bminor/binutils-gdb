@@ -1,7 +1,7 @@
 /* Target-dependent code for the MIPS architecture, for GDB, the GNU Debugger.
 
    Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    Contributed by Alessandro Forin(af@cs.cmu.edu) at CMU
    and by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin.
@@ -5453,24 +5453,6 @@ mips_call_dummy_address (void)
 }
 
 
-/* If the current gcc for this target does not produce correct debugging
-   information for float parameters, both prototyped and unprototyped, then
-   define this macro.  This forces gdb to  always assume that floats are
-   passed as doubles and then converted in the callee.
-
-   For the mips chip, it appears that the debug info marks the parameters as
-   floats regardless of whether the function is prototyped, but the actual
-   values are passed as doubles for the non-prototyped case and floats for
-   the prototyped case.  Thus we choose to make the non-prototyped case work
-   for C and break the prototyped case, since the non-prototyped case is
-   probably much more common.  (FIXME). */
-
-static int
-mips_coerce_float_to_double (struct type *formal, struct type *actual)
-{
-  return current_language->la_language == language_c;
-}
-
 /* When debugging a 64 MIPS target running a 32 bit ABI, the size of
    the register stored on the stack (32) is different to its real raw
    size (64).  The below ensures that registers are fetched from the
@@ -6012,8 +5994,6 @@ mips_gdbarch_init (struct gdbarch_info info,
 					   mips_register_convert_to_virtual);
   set_gdbarch_register_convert_to_raw (gdbarch, 
 				       mips_register_convert_to_raw);
-
-  set_gdbarch_coerce_float_to_double (gdbarch, mips_coerce_float_to_double);
 
   set_gdbarch_frame_chain (gdbarch, mips_frame_chain);
   set_gdbarch_frame_chain_valid (gdbarch, func_frame_chain_valid);

@@ -1,4 +1,4 @@
-# Copyright 1988, 1990, 1991, 1992, 1994, 1995, 1996, 1997, 1999, 2002
+# Copyright 1988, 1990, 1991, 1992, 1994, 1995, 1996, 1997, 1999, 2002, 2003
 # Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -301,15 +301,13 @@ gdb_test "whatis v_union2" \
     "whatis unnamed union"
 
 
-if { [istarget "hppa*-hp-hpux*"] && $hp_aCC_compiler } {
-    # HP-UX: HP aCC compiler w/ +objdebug option detects language as
-    # c++, so we need the 'void' pattern here.
-    # Without +objdebug compilation option we still need to match ''.
-    # - guo
-    set void "(void|)"
-} else {
-    set void ""
-}
+# HP-UX: HP aCC compiler w/ +objdebug option detects language as
+# c++, so we need the 'void' pattern here.
+# Without +objdebug compilation option we still need to match ''.
+# - guo
+# Also, using stabs we will mark these functions as prototyped.  This
+# is harmless but causes an extra VOID to be printed.
+set void "(void|)"
 
 # test whatis command with functions return type
 gdb_test "whatis v_char_func" \

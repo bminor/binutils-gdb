@@ -1,5 +1,5 @@
 /* Target-dependent code for the ALPHA architecture, for GDB, the GNU Debugger.
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -1901,10 +1901,6 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
-
-  /* Floats are always passed as doubles.  */
-  set_gdbarch_coerce_float_to_double (gdbarch,
-                                      standard_coerce_float_to_double);
 
   set_gdbarch_breakpoint_from_pc (gdbarch, alpha_breakpoint_from_pc);
   set_gdbarch_decr_pc_after_break (gdbarch, 4);

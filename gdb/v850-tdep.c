@@ -1,5 +1,6 @@
 /* Target-dependent code for the NEC V850 for GDB, the GNU debugger.
-   Copyright 1996, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1996, 1998, 1999, 2000, 2001, 2002, 2003
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1256,8 +1257,6 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_skip (gdbarch, 0);
   /* OK to default this value to 'unknown'. */
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
-  /* W/o prototype, coerce float args to double. */
-  set_gdbarch_coerce_float_to_double (gdbarch, standard_coerce_float_to_double);
 
   /*
    * Call Dummies

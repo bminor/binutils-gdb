@@ -1,7 +1,7 @@
 /* Target-dependent code for the SPARC for GDB, the GNU debugger.
 
    Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation,
+   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation,
    Inc.
 
    This file is part of GDB.
@@ -3007,14 +3007,6 @@ sparc_gdbarch_fix_call_dummy (char *dummy,
     sparc_fix_call_dummy (dummy, pc, fun, type, gcc_p);
 }
 
-/* Coerce float to double: a no-op.  */
-
-static int
-sparc_coerce_float_to_double (struct type *formal, struct type *actual)
-{
-  return 1;
-}
-
 /* CALL_DUMMY_ADDRESS: fetch the breakpoint address for a call dummy.  */
 
 static CORE_ADDR
@@ -3138,8 +3130,6 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* First set settings that are common for all sparc architectures.  */
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
   set_gdbarch_breakpoint_from_pc (gdbarch, memory_breakpoint_from_pc);
-  set_gdbarch_coerce_float_to_double (gdbarch, 
-				      sparc_coerce_float_to_double);
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
   set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 1);

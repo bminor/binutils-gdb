@@ -1,7 +1,7 @@
 /* *INDENT-OFF* */ /* THIS FILE IS GENERATED */
 
 /* Dynamic architecture support for GDB, the GNU debugger.
-   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -38,7 +38,6 @@
 #include "dis-asm.h" /* Get defs for disassemble_info, which unfortunately is a typedef. */
 #if !GDB_MULTI_ARCH
 /* Pull in function declarations refered to, indirectly, via macros.  */
-#include "value.h" /* For default_coerce_float_to_double which is referenced by a macro.  */
 #include "inferior.h"		/* For unsigned_address_to_pointer().  */
 #endif
 
@@ -1271,23 +1270,6 @@ extern void set_gdbarch_believe_pcc_promotion_type (struct gdbarch *gdbarch, int
 #if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (BELIEVE_PCC_PROMOTION_TYPE)
 #define BELIEVE_PCC_PROMOTION_TYPE (gdbarch_believe_pcc_promotion_type (current_gdbarch))
-#endif
-#endif
-
-/* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (COERCE_FLOAT_TO_DOUBLE)
-#define COERCE_FLOAT_TO_DOUBLE(formal, actual) (default_coerce_float_to_double (formal, actual))
-#endif
-
-typedef int (gdbarch_coerce_float_to_double_ftype) (struct type *formal, struct type *actual);
-extern int gdbarch_coerce_float_to_double (struct gdbarch *gdbarch, struct type *formal, struct type *actual);
-extern void set_gdbarch_coerce_float_to_double (struct gdbarch *gdbarch, gdbarch_coerce_float_to_double_ftype *coerce_float_to_double);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (COERCE_FLOAT_TO_DOUBLE)
-#error "Non multi-arch definition of COERCE_FLOAT_TO_DOUBLE"
-#endif
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (COERCE_FLOAT_TO_DOUBLE)
-#define COERCE_FLOAT_TO_DOUBLE(formal, actual) (gdbarch_coerce_float_to_double (current_gdbarch, formal, actual))
 #endif
 #endif
 

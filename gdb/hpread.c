@@ -1,5 +1,5 @@
 /* Read hp debug symbols and convert to internal format, for GDB.
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -5241,6 +5241,11 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
        */
       SYMBOL_CLASS (sym) = LOC_BLOCK;
       SYMBOL_TYPE (sym) = hpread_read_function_type (hp_type, dn_bufp, objfile, 1);
+
+      /* All functions in C++ have prototypes.  For C we don't have enough
+         information in the debug info.  */
+      if (SYMBOL_LANGUAGE (s) == language_cplus)
+	TYPE_FLAGS (SYMBOL_TYPE (s)) |= TYPE_FLAG_PROTOTYPED;
 
       /* The "SYMBOL_NAME" field is expected to be the mangled name
        * (if any), which we get from the "alias" field of the SOM record

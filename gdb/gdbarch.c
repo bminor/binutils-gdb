@@ -1,7 +1,7 @@
 /* *INDENT-OFF* */ /* THIS FILE IS GENERATED */
 
 /* Dynamic architecture support for GDB, the GNU debugger.
-   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -199,7 +199,6 @@ struct gdbarch
   gdbarch_deprecated_init_frame_pc_ftype *deprecated_init_frame_pc;
   int believe_pcc_promotion;
   int believe_pcc_promotion_type;
-  gdbarch_coerce_float_to_double_ftype *coerce_float_to_double;
   gdbarch_get_saved_register_ftype *get_saved_register;
   gdbarch_register_convertible_ftype *register_convertible;
   gdbarch_register_convert_to_virtual_ftype *register_convert_to_virtual;
@@ -427,7 +426,6 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   0,
-  0,
   generic_in_function_epilogue_p,
   construct_inferior_arguments,
   0,
@@ -533,7 +531,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->call_dummy_words = legacy_call_dummy_words;
   current_gdbarch->sizeof_call_dummy_words = legacy_sizeof_call_dummy_words;
   current_gdbarch->call_dummy_stack_adjust_p = -1;
-  current_gdbarch->coerce_float_to_double = default_coerce_float_to_double;
   current_gdbarch->register_convertible = generic_register_convertible_not;
   current_gdbarch->convert_register_p = legacy_convert_register_p;
   current_gdbarch->register_to_value = legacy_register_to_value;
@@ -712,7 +709,6 @@ verify_gdbarch (struct gdbarch *gdbarch)
     fprintf_unfiltered (log, "\n\tfix_call_dummy");
   /* Skip verify of deprecated_init_frame_pc_first, has predicate */
   /* Skip verify of deprecated_init_frame_pc, has predicate */
-  /* Skip verify of coerce_float_to_double, invalid_p == 0 */
   /* Skip verify of get_saved_register, has predicate */
   /* Skip verify of register_convertible, invalid_p == 0 */
   /* Skip verify of register_convert_to_virtual, invalid_p == 0 */
@@ -1074,17 +1070,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: CANNOT_STORE_REGISTER = <0x%08lx>\n",
                         (long) current_gdbarch->cannot_store_register
                         /*CANNOT_STORE_REGISTER ()*/);
-#endif
-#ifdef COERCE_FLOAT_TO_DOUBLE
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "COERCE_FLOAT_TO_DOUBLE(formal, actual)",
-                      XSTRING (COERCE_FLOAT_TO_DOUBLE (formal, actual)));
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: COERCE_FLOAT_TO_DOUBLE = <0x%08lx>\n",
-                        (long) current_gdbarch->coerce_float_to_double
-                        /*COERCE_FLOAT_TO_DOUBLE ()*/);
 #endif
 #ifdef COFF_MAKE_MSYMBOL_SPECIAL
 #if GDB_MULTI_ARCH
@@ -3868,25 +3853,6 @@ set_gdbarch_believe_pcc_promotion_type (struct gdbarch *gdbarch,
                                         int believe_pcc_promotion_type)
 {
   gdbarch->believe_pcc_promotion_type = believe_pcc_promotion_type;
-}
-
-int
-gdbarch_coerce_float_to_double (struct gdbarch *gdbarch, struct type *formal, struct type *actual)
-{
-  gdb_assert (gdbarch != NULL);
-  if (gdbarch->coerce_float_to_double == 0)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_coerce_float_to_double invalid");
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_coerce_float_to_double called\n");
-  return gdbarch->coerce_float_to_double (formal, actual);
-}
-
-void
-set_gdbarch_coerce_float_to_double (struct gdbarch *gdbarch,
-                                    gdbarch_coerce_float_to_double_ftype coerce_float_to_double)
-{
-  gdbarch->coerce_float_to_double = coerce_float_to_double;
 }
 
 int

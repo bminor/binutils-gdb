@@ -1,6 +1,6 @@
 /* Parameters for execution on any Hewlett-Packard PA-RISC machine.
    Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1998, 1999, 2000 Free Software Foundation, Inc.
+   1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).
@@ -785,18 +785,6 @@ extern CORE_ADDR hppa_target_read_fp (void);
    of variables on the stack.  Ugh.  */
 #define HPREAD_ADJUST_STACK_ADDRESS(ADDR) hpread_adjust_stack_address(ADDR)
 extern int hpread_adjust_stack_address (CORE_ADDR);
-
-/* If the current gcc for for this target does not produce correct debugging
-   information for float parameters, both prototyped and unprototyped, then
-   define this macro.  This forces gdb to  always assume that floats are
-   passed as doubles and then converted in the callee.  */
-
-#if !GDB_MULTI_ARCH
-extern int hppa_coerce_float_to_double (struct type *formal,
-                                        struct type *actual);
-#define COERCE_FLOAT_TO_DOUBLE(formal, actual) \
-  hppa_coerce_float_to_double (formal, actual)
-#endif
 
 /* Here's how to step off a permanent breakpoint.  */
 #define SKIP_PERMANENT_BREAKPOINT (hppa_skip_permanent_breakpoint)

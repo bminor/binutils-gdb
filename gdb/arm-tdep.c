@@ -1,6 +1,6 @@
 /* Common target dependent code for GDB on ARM systems.
    Copyright 1988, 1989, 1991, 1992, 1993, 1995, 1996, 1998, 1999, 2000,
-   2001, 2002 Free Software Foundation, Inc.
+   2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -2913,8 +2913,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_push_return_address (gdbarch, arm_push_return_address);
 
   set_gdbarch_push_arguments (gdbarch, arm_push_arguments);
-  set_gdbarch_coerce_float_to_double (gdbarch,
-				      standard_coerce_float_to_double);
 
   /* Frame handling.  */
   set_gdbarch_frame_chain_valid (gdbarch, arm_frame_chain_valid);

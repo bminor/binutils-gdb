@@ -1,6 +1,6 @@
 /* Build symbol tables in GDB's internal format.
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1995, 1996,
-   1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+   1997, 1998, 1999, 2000, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -82,16 +82,6 @@ EXTERN unsigned char processing_gcc_compilation;
    compatible.  */
 
 EXTERN unsigned char processing_acc_compilation;
-
-/* elz: added this flag to know when a block is compiled with HP
-   compilers (cc, aCC). This is necessary because of the macro
-   COERCE_FLOAT_TO_DOUBLE defined in tm_hppa.h, which causes a
-   coercion of float to double to always occur in parameter passing
-   for a function called by gdb (see the function value_arg_coerce in
-   valops.c). This is necessary only if the target was compiled with
-   gcc, not with HP compilers or with g++ */
-
-EXTERN unsigned char processing_hp_compilation;
 
 /* Count symbols as they are processed, for error messages.  */
 

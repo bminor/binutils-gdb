@@ -1,5 +1,49 @@
 2003-01-04  Daniel Jacobowitz  <drow@mvista.com>
 
+	* buildsym.h (processing_hp_compilation): Remove obsolete variable.
+	* gdbarch.sh Remove include of "value.h" in gdbarch.h.
+	(COERCE_FLOAT_TO_DOUBLE): Remove.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Regenerate.
+	* Makefile.in: Remove value_h from gdbarch_h.
+	* valops.c (coerce_float_to_double): New variable.
+	(default_coerce_float_to_double): Remove.
+	(standard_coerce_float_to_double): Remove.
+	(value_arg_coerce): Use coerce_float_to_double.
+	(_initialize_valops): Add "set coerce-float-to-double".
+	* value.h (default_coerce_float_to_double): Remove prototype.
+	(standard_coerce_float_to_double): Remove prototype.
+
+	* hpread.c (hpread_process_one_debug_symbol): Mark C++ functions as
+	prototyped.
+	* mdebugread.c (parse_symbol): Likewise.
+	* stabsread.c (define_symbol): Mark all functions as prototyped.
+
+	* hppa-tdep.c (hppa_coerce_float_to_double): Remove.
+	* alpha-tdep.c (alpha_gdbarch_init): Remove call to
+	set_gdbarch_coerce_float_to_double.
+	* arm-tdep.c (arm_gdbarch_init): Likewise.
+	* frv-tdep.c (frv_gdbarch_init): Likewise.
+	* h8300-tdep.c (h8300_gdbarch_init): Likewise (commented out).
+	* i386-sol2-tdep.c (i386_sol2_init_abi): Likewise.
+	* mips-tdep.c (mips_gdbarch_init): Likewise.
+	(mips_coerce_float_to_double): Remove.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Likewise.
+	(rs6000_coerce_float_to_double): Remove.
+	* s390-tdep.c (s390_gdbarch_init): Likewise.
+	* sh-tdep.c (sh_gdbarch_init): Likewise.
+	(sh_coerce_float_to_double): Remove.
+	* sparc-tdep.c (sparc_gdbarch_init): Likewise.
+	(sparc_coerce_float_to_double): Remove.
+	* v850-tdep.c (v850_gdbarch_init): Likewise.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Likewise.
+	* config/m32r/tm-m32r.h (COERCE_FLOAT_TO_DOUBLE): Remove.
+	* config/pa/tm-hppa.h: (COERCE_FLOAT_TO_DOUBLE): Remove.
+	(hppa_coerce_float_to_double): Remove prototype.
+	* config/sparc/tm-sparc.h (COERCE_FLOAT_TO_DOUBLE): Remove.
+
+2003-01-04  Daniel Jacobowitz  <drow@mvista.com>
+
 	* regformats/reg-m68k.dat: Remove fpcode and fpflags.
 
 2003-01-04  Daniel Jacobowitz  <drow@mvista.com>

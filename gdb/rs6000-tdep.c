@@ -1,6 +1,6 @@
 /* Target-dependent code for GDB, the GNU debugger.
    Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000, 2001, 2002
+   1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -1855,17 +1855,6 @@ rs6000_register_virtual_type (int n)
     }
 }
 
-/* For the PowerPC, it appears that the debug info marks float parameters as
-   floats regardless of whether the function is prototyped, but the actual
-   values are always passed in as doubles.  Tell gdb to always assume that
-   floats are passed as doubles and then converted in the callee.  */
-
-static int
-rs6000_coerce_float_to_double (struct type *formal, struct type *actual)
-{
-  return 1;
-}
-
 /* Return whether register N requires conversion when moving from raw format
    to virtual format.
 
@@ -2906,7 +2895,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
   set_gdbarch_push_return_address (gdbarch, ppc_push_return_address);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
-  set_gdbarch_coerce_float_to_double (gdbarch, rs6000_coerce_float_to_double);
 
   set_gdbarch_register_convertible (gdbarch, rs6000_register_convertible);
   set_gdbarch_register_convert_to_virtual (gdbarch, rs6000_register_convert_to_virtual);

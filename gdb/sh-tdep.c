@@ -1,5 +1,5 @@
 /* Target-dependent code for Hitachi Super-H, for GDB.
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -2319,12 +2319,6 @@ sh_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
 }
 #endif
 
-static int
-sh_coerce_float_to_double (struct type *formal, struct type *actual)
-{
-  return 1;
-}
-
 /* Find a function's return value in the appropriate registers (in
    regbuf), and copy it into valbuf.  Extract from an array REGBUF
    containing the (raw) register state a function return value of type
@@ -4575,8 +4569,6 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
-  set_gdbarch_coerce_float_to_double (gdbarch, 
-				      sh_coerce_float_to_double);
 
   set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_push_return_address (gdbarch, sh_push_return_address);

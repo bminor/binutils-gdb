@@ -1,7 +1,7 @@
 /* Target-machine dependent code for Hitachi H8/300, for GDB.
 
    Copyright 1988, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998,
-   1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1134,9 +1134,6 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_frameless_function_invocation (gdbarch,
 					     frameless_look_for_prologue);
-
-  /* W/o prototype, coerce float args to double. */
-  /* set_gdbarch_coerce_float_to_double (gdbarch, standard_coerce_float_to_double); */
 
   /*
    * Call Dummies

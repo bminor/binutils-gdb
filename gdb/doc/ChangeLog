@@ -1,3 +1,9 @@
+2003-01-04  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.texinfo (Controlling GDB): Add ABI section.  Document
+	"set coerce-float-to-double".
+	* gdbint.texinfo (COERCE_FLOAT_TO_DOUBLE): Remove documentation.
+
 2003-01-02  Andrew Cagney  <ac131313@redhat.com>
 
 	* stabs.texinfo: Remove obsolete text.

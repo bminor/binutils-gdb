@@ -1,7 +1,7 @@
 #!/bin/sh -u
 
 # Architecture commands for GDB, the GNU debugger.
-# Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+# Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 #
 # This file is part of GDB.
 #
@@ -518,7 +518,6 @@ F::DEPRECATED_INIT_FRAME_PC:CORE_ADDR:deprecated_init_frame_pc:int fromleaf, str
 #
 v:2:BELIEVE_PCC_PROMOTION:int:believe_pcc_promotion:::::::
 v:2:BELIEVE_PCC_PROMOTION_TYPE:int:believe_pcc_promotion_type:::::::
-f:2:COERCE_FLOAT_TO_DOUBLE:int:coerce_float_to_double:struct type *formal, struct type *actual:formal, actual:::default_coerce_float_to_double::0
 F:2:GET_SAVED_REGISTER:void:get_saved_register:char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lval:raw_buffer, optimized, addrp, frame, regnum, lval
 #
 f:2:REGISTER_CONVERTIBLE:int:register_convertible:int nr:nr:::generic_register_convertible_not::0
@@ -732,7 +731,7 @@ cat <<EOF
 /* *INDENT-OFF* */ /* THIS FILE IS GENERATED */
 
 /* Dynamic architecture support for GDB, the GNU debugger.
-   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -779,7 +778,6 @@ cat <<EOF
 #include "dis-asm.h" /* Get defs for disassemble_info, which unfortunately is a typedef. */
 #if !GDB_MULTI_ARCH
 /* Pull in function declarations refered to, indirectly, via macros.  */
-#include "value.h" /* For default_coerce_float_to_double which is referenced by a macro.  */
 #include "inferior.h"		/* For unsigned_address_to_pointer().  */
 #endif
 

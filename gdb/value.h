@@ -1,6 +1,6 @@
 /* Definitions for values of C expressions, for GDB.
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -547,10 +547,6 @@ extern struct value *value_slice (struct value *, int, int);
 
 extern struct value *call_function_by_hand (struct value *, int,
 					    struct value **);
-
-extern int default_coerce_float_to_double (struct type *, struct type *);
-
-extern int standard_coerce_float_to_double (struct type *, struct type *);
 
 extern struct value *value_literal_complex (struct value *, struct value *,
 					    struct type *);

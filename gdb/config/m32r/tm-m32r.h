@@ -1,5 +1,6 @@
 /* Parameters for execution on a Mitsubishi m32r processor.
-   Copyright 1996, 1997 Free Software Foundation, Inc. 
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Free Software Foundation, Inc. 
 
    This file is part of GDB.
 
@@ -163,8 +164,6 @@ extern CORE_ADDR m32r_skip_prologue (CORE_ADDR pc);
 #define FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)
 /* mvs_no_check  FRAME_NUM_ARGS */
 #define FRAME_NUM_ARGS(fi) (-1)
-
-#define COERCE_FLOAT_TO_DOUBLE(formal, actual) (1)
 
 extern void m32r_write_sp (CORE_ADDR val);
 #define TARGET_WRITE_SP m32r_write_sp

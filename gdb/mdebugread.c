@@ -1,6 +1,6 @@
 /* Read a symbol table in ECOFF format (Third-Eye).
    Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002
+   1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Original version contributed by Alessandro Forin (af@cs.cmu.edu) at
    CMU.  Major work by Per Bothner, John Gilmore and Ian Lance Taylor
@@ -794,6 +794,11 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 
       /* Make a type for the procedure itself */
       SYMBOL_TYPE (s) = lookup_function_type (t);
+
+      /* All functions in C++ have prototypes.  For C we don't have enough
+         information in the debug info.  */
+      if (SYMBOL_LANGUAGE (s) == language_cplus)
+	TYPE_FLAGS (SYMBOL_TYPE (s)) |= TYPE_FLAG_PROTOTYPED;
 
       /* Create and enter a new lexical context */
       b = new_block (top_stack->maxsyms);

@@ -1,6 +1,6 @@
 /* Perform non-arithmetic operations on values, for GDB.
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -89,8 +89,30 @@ int overload_resolution = 0;
    The default is to stop in the frame where the signal was received. */
 
 int unwind_on_signal_p = 0;
-
 
+/* How you should pass arguments to a function depends on whether it
+   was defined in K&R style or prototype style.  If you define a
+   function using the K&R syntax that takes a `float' argument, then
+   callers must pass that argument as a `double'.  If you define the
+   function using the prototype syntax, then you must pass the
+   argument as a `float', with no promotion.
+
+   Unfortunately, on certain older platforms, the debug info doesn't
+   indicate reliably how each function was defined.  A function type's
+   TYPE_FLAG_PROTOTYPED flag may be clear, even if the function was
+   defined in prototype style.  When calling a function whose
+   TYPE_FLAG_PROTOTYPED flag is clear, GDB consults this flag to decide
+   what to do.
+
+   For modern targets, it is proper to assume that, if the prototype
+   flag is clear, that can be trusted: `float' arguments should be
+   promoted to `double'.  For some older targets, if the prototype
+   flag is clear, that doesn't tell us anything.  The default is to
+   trust the debug information; the user can override this behavior
+   with "set coerce-float-to-double 0".  */
+
+static int coerce_float_to_double;
+
 
 /* Find the address of function name NAME in the inferior.  */
 
@@ -1054,49 +1076,6 @@ default_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   return sp;
 }
 
-
-/* Functions to use for the COERCE_FLOAT_TO_DOUBLE gdbarch method.
-
-   How you should pass arguments to a function depends on whether it
-   was defined in K&R style or prototype style.  If you define a
-   function using the K&R syntax that takes a `float' argument, then
-   callers must pass that argument as a `double'.  If you define the
-   function using the prototype syntax, then you must pass the
-   argument as a `float', with no promotion.
-
-   Unfortunately, on certain older platforms, the debug info doesn't
-   indicate reliably how each function was defined.  A function type's
-   TYPE_FLAG_PROTOTYPED flag may be clear, even if the function was
-   defined in prototype style.  When calling a function whose
-   TYPE_FLAG_PROTOTYPED flag is clear, GDB consults the
-   COERCE_FLOAT_TO_DOUBLE gdbarch method to decide what to do.
-
-   For modern targets, it is proper to assume that, if the prototype
-   flag is clear, that can be trusted: `float' arguments should be
-   promoted to `double'.  You should register the function
-   `standard_coerce_float_to_double' to get this behavior.
-
-   For some older targets, if the prototype flag is clear, that
-   doesn't tell us anything.  So we guess that, if we don't have a
-   type for the formal parameter (i.e., the first argument to
-   COERCE_FLOAT_TO_DOUBLE is null), then we should promote it;
-   otherwise, we should leave it alone.  The function
-   `default_coerce_float_to_double' provides this behavior; it is the
-   default value, for compatibility with older configurations.  */
-int
-default_coerce_float_to_double (struct type *formal, struct type *actual)
-{
-  return formal == NULL;
-}
-
-
-int
-standard_coerce_float_to_double (struct type *formal, struct type *actual)
-{
-  return 1;
-}
-
-
 /* Perform the standard coercions that are specified
    for arguments to be passed to C functions.
 
@@ -1139,11 +1118,7 @@ value_arg_coerce (struct value *arg, struct type *param_type,
 	type = builtin_type_int;
       break;
     case TYPE_CODE_FLT:
-      /* FIXME: We should always convert floats to doubles in the
-         non-prototyped case.  As many debugging formats include
-         no information about prototyping, we have to live with
-         COERCE_FLOAT_TO_DOUBLE for now.  */
-      if (!is_prototyped && COERCE_FLOAT_TO_DOUBLE (param_type, arg_type))
+      if (!is_prototyped && coerce_float_to_double)
 	{
 	  if (TYPE_LENGTH (type) < TYPE_LENGTH (builtin_type_double))
 	    type = builtin_type_double;
@@ -3496,4 +3471,19 @@ is received while in a function called from gdb (call dummy).  If set, gdb\n\
 unwinds the stack and restore the context to what as it was before the call.\n\
 The default is to stop in the frame where the signal was received.", &setlist),
 		     &showlist);
+
+  add_show_from_set
+    (add_set_cmd ("coerce-float-to-double", class_obscure, var_boolean,
+		  (char *) &coerce_float_to_double,
+		  "Set coercion of floats to doubles when calling functions\n"
+ "Variables of type float should generally be converted to doubles before\n"
+ "calling an unprototyped function, and left alone when calling a prototyped\n"
+ "function.  However, some older debug info formats do not provide enough\n"
+ "information to determine that a function is prototyped.  If this flag is\n"
+ "set, GDB will perform the conversion for a function it considers\n"
+ "unprototyped.\n"
+ "The default is to perform the conversion.\n",
+		  &setlist),
+     &showlist);
+  coerce_float_to_double = 1;
 }

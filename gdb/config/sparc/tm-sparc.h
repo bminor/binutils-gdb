@@ -1,7 +1,7 @@
 /* Target machine sub-parameters for SPARC, for GDB, the GNU debugger.
    This is included by other tm-*.h files to define SPARC cpu-related info.
    Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000
+   1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Contributed by Michael Tiemann (tiemann@mcc.com)
 
@@ -279,14 +279,6 @@ extern void sparc_store_return_value (struct type *, char *);
      sparc_extract_struct_value_address (REGBUF)
 
 extern CORE_ADDR sparc_extract_struct_value_address (char *);
-
-/* If the current gcc for for this target does not produce correct
-   debugging information for float parameters, both prototyped and
-   unprototyped, then define this macro.  This forces gdb to always
-   assume that floats are passed as doubles and then converted in the
-   callee. */
-
-#define COERCE_FLOAT_TO_DOUBLE(FORMAL, ACTUAL) (1)
 
 /* Stack must be aligned on 64-bit boundaries when synthesizing
    function calls (128-bit for sparc64).  */

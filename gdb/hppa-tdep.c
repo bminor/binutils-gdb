@@ -1,7 +1,7 @@
 /* Target-dependent code for the HP PA architecture, for GDB.
 
    Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   1996, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).
@@ -175,7 +175,6 @@ CORE_ADDR hppa_smash_text_address (CORE_ADDR addr);
 CORE_ADDR hppa_target_read_pc (ptid_t ptid);
 void hppa_target_write_pc (CORE_ADDR v, ptid_t ptid);
 CORE_ADDR hppa_target_read_fp (void);
-int hppa_coerce_float_to_double (struct type *formal, struct type *actual);
 
 typedef struct
   {
@@ -4942,19 +4941,6 @@ hppa_smash_text_address (CORE_ADDR addr)
   return (addr &= ~0x3);
 }
 
-int
-hppa_coerce_float_to_double (struct type *formal, struct type *actual)
-{
-   /* FIXME: For the pa, it appears that the debug info marks the
-      parameters as floats regardless of whether the function is
-      prototyped, but the actual values are passed as doubles for the
-      non-prototyped case and floats for the prototyped case.  Thus we
-      choose to make the non-prototyped case work for C and break the
-      prototyped case, since the non-prototyped case is probably much
-      more common.  */
-  return (current_language -> la_language == language_c);
-}
-
 static struct gdbarch *
 hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
@@ -5040,7 +5026,6 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_read_pc (gdbarch, hppa_target_read_pc);
   set_gdbarch_write_pc (gdbarch, hppa_target_write_pc);
   set_gdbarch_read_fp (gdbarch, hppa_target_read_fp);
-  set_gdbarch_coerce_float_to_double (gdbarch, hppa_coerce_float_to_double);
 
   return gdbarch;
 }

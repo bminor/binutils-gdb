@@ -1,6 +1,6 @@
 /* Target-dependent code for GDB, the GNU debugger.
 
-   Copyright 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
 
    Contributed by D.J. Barrow (djbarrow@de.ibm.com,barrow_dj@yahoo.com)
    for IBM Deutschland Entwicklung GmbH, IBM Corporation.
@@ -1840,8 +1840,6 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_sizeof_call_dummy_words (gdbarch,
                                        sizeof (s390_call_dummy_words));
   set_gdbarch_call_dummy_words (gdbarch, s390_call_dummy_words);
-  set_gdbarch_coerce_float_to_double (gdbarch,
-                                      standard_coerce_float_to_double);
 
   switch (info.bfd_arch_info->mach)
     {

@@ -1,6 +1,6 @@
 /* Support routines for decoding "stabs" debugging information format.
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2002
+   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -1533,9 +1533,13 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       if (TYPE_CODE (SYMBOL_TYPE (sym)) != TYPE_CODE_FUNC)
 	SYMBOL_TYPE (sym) = lookup_function_type (SYMBOL_TYPE (sym));
 
-      /* All functions in C++ have prototypes.  */
-      if (SYMBOL_LANGUAGE (sym) == language_cplus)
-	TYPE_FLAGS (SYMBOL_TYPE (sym)) |= TYPE_FLAG_PROTOTYPED;
+      /* All functions in C++ have prototypes.  Stabs does not offer an
+         explicit way to identify prototyped or unprototyped functions,
+         but both GCC and Sun CC emit stabs for the "call-as" type rather
+         than the "declared-as" type for unprototyped functions, so
+         we treat all functions as if they were prototyped.  This is used
+         primarily for promotion when calling the function from GDB.  */
+      TYPE_FLAGS (SYMBOL_TYPE (sym)) |= TYPE_FLAG_PROTOTYPED;
 
       /* fall into process_prototype_types */
 

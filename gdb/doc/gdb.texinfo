@@ -1,6 +1,6 @@
 \input texinfo      @c -*-texinfo-*-
 @c Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998,
-@c 1999, 2000, 2001, 2002
+@c 1999, 2000, 2001, 2002, 2003
 @c Free Software Foundation, Inc.
 @c
 @c %**start of header
@@ -54,7 +54,7 @@ of @cite{Debugging with @value{GDBN}: the @sc{gnu} Source-Level Debugger}
 for @value{GDBN} Version @value{GDBVN}.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998,@*
-              1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+              1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1 or
@@ -87,7 +87,7 @@ development.''
 
 @vskip 0pt plus 1filll
 Copyright @copyright{} 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-1996, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+1996, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 @sp 2
 Published by the Free Software Foundation @*
 59 Temple Place - Suite 330, @*
@@ -118,7 +118,7 @@ This file describes @value{GDBN}, the @sc{gnu} symbolic debugger.
 This is the @value{EDITION} Edition, @value{DATE}, for @value{GDBN} Version
 @value{GDBVN}.
 
-Copyright (C) 1988-2002 Free Software Foundation, Inc.
+Copyright (C) 1988-2003 Free Software Foundation, Inc.
 
 @menu
 * Summary::                     Summary of @value{GDBN}
@@ -12256,6 +12256,7 @@ described here.
 * History::                     Command history
 * Screen Size::                 Screen size
 * Numbers::                     Numbers
+* ABI::                         Configuring the current ABI
 * Messages/Warnings::           Optional warnings and messages
 * Debugging Output::            Optional messages about internal happenings
 @end menu
@@ -12500,6 +12501,39 @@ Display the current default base for numeric input.
 @kindex show output-radix
 @item show output-radix
 Display the current default base for numeric display.
+@end table
+
+@node ABI
+@section Configuring the current ABI
+
+@value{GDBN} can determine the @dfn{ABI} (Application Binary Interface) of your
+application automatically.  However, sometimes you need to override its
+conclusions.  Use these commands to manage @value{GDBN}'s view of the
+current ABI.
+
+@cindex float promotion
+@kindex set coerce-float-to-double
+
+Generally, the way that an argument of type @code{float} is passed to a
+function depends on whether the function is prototyped.  For a prototyped
+(i.e.@: ANSI/ISO style) function, @code{float} arguments are passed unchanged,
+according to the architecture's convention for @code{float}.  For unprototyped
+(i.e.@: K&R style) functions, @code{float} arguments are first promoted to type
+@code{double} and then passed.
+
+Unfortunately, some forms of debug information do not reliably indicate whether
+a function is prototyped.  If @value{GDBN} calls a function that is not marked
+as prototyped, it consults @kbd{set coerce-float-to-double}.
+
+@table @code
+@item set coerce-float-to-double
+@itemx set coerce-float-to-double on
+Arguments of type @code{float} will be promoted to @code{double} when passed
+to an unprototyped function.  This is the default setting.
+
+@item set coerce-float-to-double off
+Arguments of type @code{float} will be passed directly to unprototyped
+functions.
 @end table
 
 @node Messages/Warnings

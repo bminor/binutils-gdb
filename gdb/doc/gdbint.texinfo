@@ -8,7 +8,7 @@
 
 @ifinfo
 This file documents the internals of the GNU debugger @value{GDBN}.
-Copyright 1990,1991,1992,1993,1994,1996,1998,1999,2000,2001,2002
+Copyright 1990,1991,1992,1993,1994,1996,1998,1999,2000,2001,2002,2003
    Free Software Foundation, Inc.
 Contributed by Cygnus Solutions.  Written by John Gilmore.
 Second Edition by Stan Shebs.
@@ -50,8 +50,8 @@ Software Foundation raise funds for GNU development.''
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1990,1991,1992,1993,1994,1996,1998,1999,2000,2001, 2002
-   Free Software Foundation, Inc.
+Copyright @copyright{} 1990,1991,1992,1993,1994,1996,1998,1999,2000,2001,
+   2002, 2003  Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1 or
@@ -3143,50 +3143,6 @@ Define this to execute any deferred stores of registers into the inferior,
 and to cancel any deferred stores.
 
 Currently only implemented correctly for native Sparc configurations?
-
-@item COERCE_FLOAT_TO_DOUBLE (@var{formal}, @var{actual})
-@findex COERCE_FLOAT_TO_DOUBLE
-@cindex promotion to @code{double}
-@cindex @code{float} arguments
-@cindex prototyped functions, passing arguments to
-@cindex passing arguments to prototyped functions
-Return non-zero if GDB should promote @code{float} values to
-@code{double} when calling a non-prototyped function.  The argument
-@var{actual} is the type of the value we want to pass to the function.
-The argument @var{formal} is the type of this argument, as it appears in
-the function's definition.  Note that @var{formal} may be zero if we
-have no debugging information for the function, or if we're passing more
-arguments than are officially declared (for example, varargs).  This
-macro is never invoked if the function definitely has a prototype.
-
-How you should pass arguments to a function depends on whether it was
-defined in K&R style or prototype style.  If you define a function using
-the K&R syntax that takes a @code{float} argument, then callers must
-pass that argument as a @code{double}.  If you define the function using
-the prototype syntax, then you must pass the argument as a @code{float},
-with no promotion.
-
-Unfortunately, on certain older platforms, the debug info doesn't
-indicate reliably how each function was defined.  A function type's
-@code{TYPE_FLAG_PROTOTYPED} flag may be unset, even if the function was
-defined in prototype style.  When calling a function whose
-@code{TYPE_FLAG_PROTOTYPED} flag is unset, GDB consults the
-@code{COERCE_FLOAT_TO_DOUBLE} macro to decide what to do.
-
-@findex standard_coerce_float_to_double
-For modern targets, it is proper to assume that, if the prototype flag
-is unset, that can be trusted: @code{float} arguments should be promoted
-to @code{double}.  You should use the function
-@code{standard_coerce_float_to_double} to get this behavior.
-
-@findex default_coerce_float_to_double
-For some older targets, if the prototype flag is unset, that doesn't
-tell us anything.  So we guess that, if we don't have a type for the
-formal parameter (@i{i.e.}, the first argument to
-@code{COERCE_FLOAT_TO_DOUBLE} is null), then we should promote it;
-otherwise, we should leave it alone.  The function
-@code{default_coerce_float_to_double} provides this behavior; it is the
-default value, for compatibility with older configurations.
 
 @item int CONVERT_REGISTER_P(@var{regnum})
 @findex CONVERT_REGISTER_P
