@@ -180,7 +180,7 @@ This is Edition 4.07, January 1993, for GDB Version @value{GDBVN}.
 @end ifset
 * Symbols::                     Examining the symbol table
 * Altering::                    Altering execution
-* GDB Files::                   @value{GDBN}'s files
+* GDB Files::                   @value{GDBN} files
 * Targets::                     Specifying a debugging target
 * Controlling GDB::             Controlling @value{GDBN}
 * Sequences::                   Canned sequences of commands
@@ -198,7 +198,7 @@ This is Edition 4.07, January 1993, for GDB Version @value{GDBVN}.
 @end menu
 @end ignore
 @c
-@c Since that doesn't work, we must unroll the above into 16 cases:
+@c Since that does not work, we must unroll the above into 16 cases:
 @c
 @c Menu for NOVEL && !BARETARGET && !CONLY && !DOSHOST
 @ifset NOVEL
@@ -219,7 +219,7 @@ This is Edition 4.07, January 1993, for GDB Version @value{GDBVN}.
 * Languages::                   Using @value{GDBN} with different languages
 * Symbols::                     Examining the symbol table
 * Altering::                    Altering execution
-* GDB Files::                   @value{GDBN}'s files
+* GDB Files::                   @value{GDBN} files
 * Targets::                     Specifying a debugging target
 * Controlling GDB::             Controlling @value{GDBN}
 * Sequences::                   Canned sequences of commands
@@ -255,7 +255,7 @@ This is Edition 4.07, January 1993, for GDB Version @value{GDBVN}.
 * Languages::                   Using @value{GDBN} with different languages
 * Symbols::                     Examining the symbol table
 * Altering::                    Altering execution
-* GDB Files::                   @value{GDBN}'s files
+* GDB Files::                   @value{GDBN} files
 * Targets::                     Specifying a debugging target
 * Controlling GDB::             Controlling @value{GDBN}
 * Sequences::                   Canned sequences of commands
@@ -290,7 +290,7 @@ This is Edition 4.07, January 1993, for GDB Version @value{GDBVN}.
 * C::                           C Language Support
 * Symbols::                     Examining the symbol table
 * Altering::                    Altering execution
-* GDB Files::                   @value{GDBN}'s files
+* GDB Files::                   @value{GDBN} files
 * Targets::                     Specifying a debugging target
 * Controlling GDB::             Controlling @value{GDBN}
 * Sequences::                   Canned sequences of commands
@@ -326,7 +326,7 @@ This is Edition 4.07, January 1993, for GDB Version @value{GDBVN}.
 * C::                           C Language Support
 * Symbols::                     Examining the symbol table
 * Altering::                    Altering execution
-* GDB Files::                   @value{GDBN}'s files
+* GDB Files::                   @value{GDBN} files
 * Targets::                     Specifying a debugging target
 * Controlling GDB::             Controlling @value{GDBN}
 * Sequences::                   Canned sequences of commands
@@ -360,7 +360,7 @@ This is Edition 4.07, January 1993, for GDB Version @value{GDBVN}.
 * Languages::                   Using @value{GDBN} with different languages
 * Symbols::                     Examining the symbol table
 * Altering::                    Altering execution
-* GDB Files::                   @value{GDBN}'s files
+* GDB Files::                   @value{GDBN} files
 * Targets::                     Specifying a debugging target
 * Controlling GDB::             Controlling @value{GDBN}
 * Sequences::                   Canned sequences of commands
@@ -395,7 +395,7 @@ This is Edition 4.07, January 1993, for GDB Version @value{GDBVN}.
 * Languages::                   Using @value{GDBN} with different languages
 * Symbols::                     Examining the symbol table
 * Altering::                    Altering execution
-* GDB Files::                   @value{GDBN}'s files
+* GDB Files::                   @value{GDBN} files
 * Targets::                     Specifying a debugging target
 * Controlling GDB::             Controlling @value{GDBN}
 * Sequences::                   Canned sequences of commands
@@ -429,7 +429,7 @@ This is Edition 4.07, January 1993, for GDB Version @value{GDBVN}.
 * C::                           C Language support
 * Symbols::                     Examining the symbol table
 * Altering::                    Altering execution
-* GDB Files::                   @value{GDBN}'s files
+* GDB Files::                   @value{GDBN} files
 * Targets::                     Specifying a debugging target
 * Controlling GDB::             Controlling @value{GDBN}
 * Sequences::                   Canned sequences of commands
@@ -464,7 +464,7 @@ This is Edition 4.07, January 1993, for GDB Version @value{GDBVN}.
 * C::                           C Language support
 * Symbols::                     Examining the symbol table
 * Altering::                    Altering execution
-* GDB Files::                   @value{GDBN}'s files
+* GDB Files::                   @value{GDBN} files
 * Targets::                     Specifying a debugging target
 * Controlling GDB::             Controlling @value{GDBN}
 * Sequences::                   Canned sequences of commands
@@ -498,7 +498,7 @@ This is Edition 4.07, January 1993, for GDB Version @value{GDBVN}.
 * Languages::                   Using @value{GDBN} with different languages
 * Symbols::                     Examining the symbol table
 * Altering::                    Altering execution
-* GDB Files::                   @value{GDBN}'s files
+* GDB Files::                   @value{GDBN} files
 * Targets::                     Specifying a debugging target
 * Controlling GDB::             Controlling @value{GDBN}
 * Sequences::                   Canned sequences of commands
@@ -532,7 +532,7 @@ This is Edition 4.07, January 1993, for GDB Version @value{GDBVN}.
 * Languages::                   Using @value{GDBN} with different languages
 * Symbols::                     Examining the symbol table
 * Altering::                    Altering execution
-* GDB Files::                   @value{GDBN}'s files
+* GDB Files::                   @value{GDBN} files
 * Targets::                     Specifying a debugging target
 * Controlling GDB::             Controlling @value{GDBN}
 * Sequences::                   Canned sequences of commands
@@ -565,7 +565,7 @@ This is Edition 4.07, January 1993, for GDB Version @value{GDBVN}.
 * C::                           C Language support
 * Symbols::                     Examining the symbol table
 * Altering::                    Altering execution
-* GDB Files::                   @value{GDBN}'s files
+* GDB Files::                   @value{GDBN} files
 * Targets::                     Specifying a debugging target
 * Controlling GDB::             Controlling @value{GDBN}
 * Sequences::                   Canned sequences of commands
@@ -599,7 +599,7 @@ This is Edition 4.07, January 1993, for GDB Version @value{GDBVN}.
 * C::                           C Language support
 * Symbols::                     Examining the symbol table
 * Altering::                    Altering execution
-* GDB Files::                   @value{GDBN}'s files
+* GDB Files::                   @value{GDBN} files
 * Targets::                     Specifying a debugging target
 * Controlling GDB::             Controlling @value{GDBN}
 * Sequences::                   Canned sequences of commands
@@ -631,7 +631,7 @@ This is Edition 4.07, January 1993, for GDB Version @value{GDBVN}.
 * Languages::                   Using @value{GDBN} with different languages
 * Symbols::                     Examining the symbol table
 * Altering::                    Altering execution
-* GDB Files::                   @value{GDBN}'s files
+* GDB Files::                   @value{GDBN} files
 * Targets::                     Specifying a debugging target
 * Controlling GDB::             Controlling @value{GDBN}
 * Sequences::                   Canned sequences of commands
@@ -664,7 +664,7 @@ This is Edition 4.07, January 1993, for GDB Version @value{GDBVN}.
 * Languages::                   Using @value{GDBN} with different languages
 * Symbols::                     Examining the symbol table
 * Altering::                    Altering execution
-* GDB Files::                   @value{GDBN}'s files
+* GDB Files::                   @value{GDBN} files
 * Targets::                     Specifying a debugging target
 * Controlling GDB::             Controlling @value{GDBN}
 * Sequences::                   Canned sequences of commands
@@ -696,7 +696,7 @@ This is Edition 4.07, January 1993, for GDB Version @value{GDBVN}.
 * C::                           C Language Support
 * Symbols::                     Examining the symbol table
 * Altering::                    Altering execution
-* GDB Files::                   @value{GDBN}'s files
+* GDB Files::                   @value{GDBN} files
 * Targets::                     Specifying a debugging target
 * Controlling GDB::             Controlling @value{GDBN}
 * Sequences::                   Canned sequences of commands
@@ -729,7 +729,7 @@ This is Edition 4.07, January 1993, for GDB Version @value{GDBVN}.
 * C::                           C Language Support
 * Symbols::                     Examining the symbol table
 * Altering::                    Altering execution
-* GDB Files::                   @value{GDBN}'s files
+* GDB Files::                   @value{GDBN} files
 * Targets::                     Specifying a debugging target
 * Controlling GDB::             Controlling @value{GDBN}
 * Sequences::                   Canned sequences of commands
@@ -815,13 +815,13 @@ Changes much prior to version 2.0 are lost in the mists of time.
 
 @quotation
 @emph{Plea:} Additions to this section are particularly welcome.  If you
-or your friends (or enemies; let's be evenhanded) have been unfairly
+or your friends (or enemies, to be evenhanded) have been unfairly
 omitted from this list, we would like to add your names!
 @end quotation
 
 So that they may not regard their long labor as thankless, we
 particularly thank those who shepherded GDB through major releases: Stu
-Grossman and John Gilmore (releases 4.6, 4.5, 4.4), John Gilmore
+Grossman and John Gilmore (releases 4.8, 4.7, 4.6, 4.5, 4.4), John Gilmore
 (releases 4.3, 4.2, 4.1, 4.0, and 3.9); Jim Kingdon (releases 3.5, 3.4,
 3.3); and Randy Smith (releases 3.2, 3.1, 3.0).  As major maintainer of
 GDB for some period, each contributed significantly to the structure,
@@ -908,7 +908,7 @@ GDB uses a new library called the Binary File Descriptor (BFD)
 Library to permit it to switch dynamically, without reconfiguration or
 recompilation, between different object-file formats.  Formats currently
 supported are COFF, a.out, and the Intel 960 b.out; files may be read as
-.o's, archive libraries, or core dumps.  BFD is available as a
+.o files, archive libraries, or core dumps.  BFD is available as a
 subroutine library so that other programs may take advantage of it, and
 the other GNU binary utilities are being converted to use it.
 
@@ -920,8 +920,8 @@ cross-debugger. @xref{Installing GDB}, for details on how to
 configure.
 
 @item Interaction
-The user interface to GDB's control variables has been simplified
-and consolidated in two commands, @code{set} and @code{show}.  Output
+The user interface to the GDB control variables is simpler,
+and is consolidated in two commands, @code{set} and @code{show}.  Output
 lines are now broken at readable places, rather than overflowing onto
 the next line.  You can suppress output of machine-level addresses,
 displaying only source language information.
@@ -980,8 +980,8 @@ to make it easier to pick out from the surrounding output.
 
 One of the preliminary versions of GNU @code{m4} (a generic macro
 processor) exhibits the following bug: sometimes, when we change its
-quote strings from the default, the commands used to capture one macro's
-definition in another stop working.  In the following short @code{m4}
+quote strings from the default, the commands used to capture one macro
+definition within another stop working.  In the following short @code{m4}
 session, we define a macro @code{foo} which expands to @code{0000}; we
 then use the @code{m4} built-in @code{defn} to define @code{bar} as the
 same thing.  However, when we change the open quote string to
@@ -1008,7 +1008,7 @@ m4: End of input: 0: fatal error: EOF in string
 @end smallexample
 
 @noindent
-Let's use @value{GDBN} to try to see what's going on.
+Let us use @value{GDBN} to try to see what is going on.
 
 @smallexample
 $ @b{@value{GDBP} m4}
@@ -1034,9 +1034,9 @@ will fit in this manual.
 @end smallexample
 
 @noindent
-Let's see how the @code{m4} built-in @code{changequote} works.
+We need to see how the @code{m4} built-in @code{changequote} works.
 Having looked at the source, we know the relevant subroutine is
-@code{m4_changequote}, so we set a breakpoint there with @value{GDBN}'s
+@code{m4_changequote}, so we set a breakpoint there with the @value{GDBN}
 @code{break} command.
 
 @smallexample
@@ -1116,7 +1116,7 @@ stack frame for each active subroutine.
 @end smallexample
 
 @noindent
-Let's step through a few more lines to see what happens.  The first two
+We will step through a few more lines to see what happens.  The first two
 times, we can use @samp{s}; the next two times we use @code{n} to avoid
 falling into the @code{xstrdup} subroutine.
 
@@ -1134,9 +1134,9 @@ def_lquote : xstrdup(lq);
 @end smallexample
 
 @noindent
-The last line displayed looks a little odd; let's examine the variables
+The last line displayed looks a little odd; we can examine the variables
 @code{lquote} and @code{rquote} to see if they are in fact the new left
-and right quotes we specified.  We can use the command @code{p}
+and right quotes we specified.  We use the command @code{p}
 (@code{print}) to see their values.
 
 @smallexample
@@ -1148,8 +1148,8 @@ $2 = 0x35d50 "<UNQUOTE>"
 
 @noindent
 @code{lquote} and @code{rquote} are indeed the new left and right quotes.
-Let's look at some context; we can display ten lines of source
-surrounding the current line, with the @code{l} (@code{list}) command.
+To look at some context, we can display ten lines of source
+surrounding the current line with the @code{l} (@code{list}) command.
 
 @smallexample
 (@value{GDBP}) @b{l}
@@ -1168,7 +1168,7 @@ surrounding the current line, with the @code{l} (@code{list}) command.
 @end smallexample
 
 @noindent
-Let's step past the two lines that set @code{len_lquote} and
+Let us step past the two lines that set @code{len_lquote} and
 @code{len_rquote}, and then examine the values of those variables.
 
 @smallexample
@@ -1185,8 +1185,8 @@ $4 = 7
 @noindent
 That certainly looks wrong, assuming @code{len_lquote} and
 @code{len_rquote} are meant to be the lengths of @code{lquote} and
-@code{rquote} respectively.  Let's try setting them to better values.
-We can use the @code{p} command for this, since it'll print the value of
+@code{rquote} respectively.  We can set them to better values using
+the @code{p} command, since it can print the value of
 any expression---and that expression can include subroutine calls and
 assignments.
 
@@ -1198,8 +1198,8 @@ $6 = 9
 @end smallexample
 
 @noindent
-Let's see if that fixes the problem of using the new quotes with the
-@code{m4} built-in @code{defn}.  We can allow @code{m4} to continue
+Is that enough to fix the problem of using the new quotes with the
+@code{m4} built-in @code{defn}?  We can allow @code{m4} to continue
 executing with the @code{c} (@code{continue}) command, and then try the
 example that caused trouble initially:
 
@@ -1216,7 +1216,7 @@ baz
 @noindent
 Success!  The new quotes now work just as well as the default ones.  The
 problem seems to have been just the two typos defining the wrong
-lengths.  We'll let @code{m4} exit by giving it an EOF as input.
+lengths.  We allow @code{m4} exit by giving it an EOF as input:
 
 @smallexample
 @b{C-d}
@@ -1480,7 +1480,7 @@ and will quickly map in symbol information from it, rather than reading
 the symbol table from the executable program.
 
 The @file{.syms} file is specific to the host machine on which @value{GDBN} is run.
-It holds an exact image of @value{GDBN}'s internal symbol table.  It cannot be
+It holds an exact image of the internal @value{GDBN} symbol table.  It cannot be
 shared across multiple host platforms.
 @end ifclear
 
@@ -1492,10 +1492,11 @@ This makes startup slower, but makes future operations faster.
 @end table
 
 @ifclear BARETARGET
-The @code{-mapped} and @code{-readnow} options are typically combined in order to
-build a @file{.syms} file that contains complete symbol information.
-A simple GDB invocation to do nothing but build a @file{.syms} file for future
-use is:
+The @code{-mapped} and @code{-readnow} options are typically combined in
+order to build a @file{.syms} file that contains complete symbol
+information.  (@xref{Files,,Commands to Specify Files}, for information
+on @file{.syms} files.)  A simple GDB invocation to do nothing but build
+a @file{.syms} file for future use is:
 
 @example
 	gdb -batch -nx -mapped -readnow programname
@@ -1638,7 +1639,7 @@ You can abbreviate a @value{GDBN} command to the first few letters of the comman
 name, if that abbreviation is unambiguous; and you can repeat certain
 @value{GDBN} commands by typing just @key{RET}.  You can also use the @key{TAB}
 key to get @value{GDBN} to fill out the rest of a word in a command (or to
-show you the alternatives available, if there's more than one possibility).
+show you the alternatives available, if there is more than one possibility).
 
 @menu
 * Command Syntax::              How to give commands to @value{GDBN}
@@ -1693,17 +1694,17 @@ This is useful mainly in command files (@pxref{Command Files}).
 
 @cindex completion
 @cindex word completion
-@value{GDBN} can fill in the rest of a word in a command for you, if there's
+@value{GDBN} can fill in the rest of a word in a command for you, if there is
 only one possibility; it can also show you what the valid possibilities
 are for the next word in a command, at any time.  This works for @value{GDBN}
 commands, @value{GDBN} subcommands, and the names of symbols in your program.
 
 Press the @key{TAB} key whenever you want @value{GDBN} to fill out the rest
-of a word.  If there's only one possibility, @value{GDBN} will fill in the
+of a word.  If there is only one possibility, @value{GDBN} will fill in the
 word, and wait for you to finish the command (or press @key{RET} to
 enter it).  For example, if you type
 
-@c FIXME "@key" doesn't distinguish its argument sufficiently to permit
+@c FIXME "@key" does not distinguish its argument sufficiently to permit
 @c complete accuracy in these examples; space introduced for clarity.
 @c If texinfo enhancements make it unnecessary, it would be nice to
 @c replace " @key" by "@key" in the following...
@@ -1712,7 +1713,7 @@ enter it).  For example, if you type
 @end example
 
 @noindent
-@value{GDBN} fills in the rest of the word @samp{breakpoints}, since that's
+@value{GDBN} fills in the rest of the word @samp{breakpoints}, since that is
 the only @code{info} subcommand beginning with @samp{bre}:
 
 @example
@@ -1722,7 +1723,7 @@ the only @code{info} subcommand beginning with @samp{bre}:
 @noindent
 You can either press @key{RET} at this point, to run the @code{info
 breakpoints} command, or backspace and enter something else, if
-@samp{breakpoints} doesn't look like the command you expected.  (If you
+@samp{breakpoints} does not look like the command you expected.  (If you
 were sure you wanted @code{info breakpoints} in the first place, you
 might as well just type @key{RET} immediately after @samp{info bre},
 to exploit command abbreviations rather than command completion).
@@ -2000,8 +2001,8 @@ your luck.
 @cindex optimized code, debugging
 @cindex debugging optimized code
 When you debug a program compiled with @samp{-g -O}, remember that the
-optimizer is rearranging your code; the debugger will show you what's
-really there.  Don't be too surprised when the execution path doesn't
+optimizer is rearranging your code; the debugger will show you what is
+really there.  Do not be too surprised when the execution path does not
 exactly match your source file!  An extreme example: if you define a
 variable, but never use it, @value{GDBN} will never see that
 variable---because the compiler optimizes it out of existence.
@@ -2082,7 +2083,7 @@ your program.  @xref{Environment, ,Your Program's Environment}.
 
 @item The @emph{working directory.}
 Your program inherits its working directory from @value{GDBN}.  You can set
-@value{GDBN}'s working directory with the @code{cd} command in @value{GDBN}.
+the @value{GDBN} working directory with the @code{cd} command in @value{GDBN}.
 @xref{Working Directory, ,Your Program's Working Directory}.
 
 @item The @emph{standard input and output.}
@@ -2215,10 +2216,10 @@ rather than assigning it an empty value.
 
 @cindex working directory (of your program)
 Each time you start your program with @code{run}, it inherits its
-working directory from the current working directory of @value{GDBN}.  @value{GDBN}'s
-working directory is initially whatever it inherited from its parent
-process (typically the shell), but you can specify a new working
-directory in @value{GDBN} with the @code{cd} command.
+working directory from the current working directory of @value{GDBN}.
+The @value{GDBN} working directory is initially whatever it inherited
+from its parent process (typically the shell), but you can specify a new
+working directory in @value{GDBN} with the @code{cd} command.
 
 The @value{GDBN} working directory also serves as a default for the commands
 that specify files for @value{GDBN} to operate on.  @xref{Files, ,Commands to
@@ -2227,11 +2228,11 @@ Specify Files}.
 @table @code
 @item cd @var{directory}
 @kindex cd
-Set @value{GDBN}'s working directory to @var{directory}.
+Set the @value{GDBN} working directory to @var{directory}.
 
 @item pwd
 @kindex pwd
-Print @value{GDBN}'s working directory.
+Print the @value{GDBN} working directory.
 @end table
 
 @node Input/Output
@@ -2249,7 +2250,7 @@ running your program.
 @table @code
 @item info terminal
 @kindex info terminal
-Displays @value{GDBN}'s recorded information about the terminal modes your
+Displays information recorded by @value{GDBN} about the terminal modes your
 program is using.
 @end table
 
@@ -2327,7 +2328,7 @@ attaching @value{GDBN} to the process.
 @item detach
 @kindex detach
 When you have finished debugging the attached process, you can use the
-@code{detach} command to release it from @value{GDBN}'s control.  Detaching
+@code{detach} command to release it from @value{GDBN} control.  Detaching
 the process continues its execution.  After the @code{detach} command,
 that process and @value{GDBN} become completely independent once more, and you
 are ready to @code{attach} another process or start one with @code{run}.
@@ -2396,8 +2397,8 @@ its children.
 
 @item info proc id
 @kindex info proc id
-Report on the process ID's related to your program: its own process id,
-the id of its parent, the process group id, and the session id.
+Report on the process IDs related to your program: its own process ID,
+the ID of its parent, the process group ID, and the session ID.
 
 @item info proc status
 @kindex info proc status
@@ -3653,8 +3654,8 @@ of the stack frame just selected.
 @kindex f
 Select frame number @var{n}.  Recall that frame zero is the innermost
 (currently executing) frame, frame one is the frame that called the
-innermost one, and so on.  The highest-numbered frame is @code{main}'s
-frame.
+innermost one, and so on.  The highest-numbered frame is the one for
+@code{main}.
 
 @item frame @var{addr}
 @itemx f @var{addr}
@@ -4901,7 +4902,7 @@ Show whether C++ virtual function tables are pretty printed, or not.
 @section Value History
 
 @cindex value history
-Values printed by the @code{print} command are saved in @value{GDBN}'s @dfn{value
+Values printed by the @code{print} command are saved in the @value{GDBN} @dfn{value
 history} so that you can refer to them in other expressions.  Values are
 kept until the symbol table is re-read or discarded (for example with
 the @code{file} or @code{symbol-file} commands).  When the symbol table
@@ -5154,7 +5155,7 @@ On AMD 29000 family processors, registers are saved in a separate
 ``register stack''.  There is no way for @value{GDBN} to determine the extent
 of this stack.  Normally, @value{GDBN} just assumes that the stack is ``large
 enough''.  This may result in @value{GDBN} referencing memory locations that
-don't exist.  If necessary, you can get around this problem by
+do not exist.  If necessary, you can get around this problem by
 specifying the ending address of the register stack with the @code{set
 rstack_high_address} command.  The argument should be an address, which
 you will probably want to precede with @samp{0x} to specify in
@@ -5407,7 +5408,7 @@ each language.
 @itemx set check type off
 Set type checking on or off, overriding the default setting for the
 current working language.  Issue a warning if the setting does not
-match the language's default.  If any type mismatches occur in
+match the language default.  If any type mismatches occur in
 evaluating an expression while typechecking is on, @value{GDBN} prints a
 message and aborts evaluation of the expression.
 
@@ -5468,7 +5469,7 @@ each language.
 @itemx set check range off
 Set range checking on or off, overriding the default setting for the
 current working language.  A warning is issued if the setting does not
-match the language's default.  If a range error occurs, then a message
+match the language default.  If a range error occurs, then a message
 is printed and evaluation of the expression is aborted.
 
 @item set check range warn
@@ -5664,7 +5665,7 @@ Pointer dereferencing.  Defined on pointer types.  Same precedence as
 Address operator.  Defined on variables.  Same precedence as @code{++}.
 
 @ifclear CONLY
-For debugging C++, @value{GDBN} implements a use of @samp{&} beyond what's
+For debugging C++, @value{GDBN} implements a use of @samp{&} beyond what is
 allowed in the C++ language itself: you can use @samp{&(&@var{ref})}
 (or, if you prefer, simply @samp{&&@var{ref}} to examine the address
 where a C++ reference variable (declared with @samp{&@var{ref}}) is
@@ -5774,7 +5775,7 @@ Pointer constants are an integral value.
 @subsubsection C++ Expressions
 
 @cindex expressions in C++
-@value{GDBN}'s expression handling has a number of extensions to
+@value{GDBN} expression handling has a number of extensions to
 interpret a significant subset of C++ expressions.
 
 @cindex C++ support, not in @sc{coff}
@@ -5926,7 +5927,7 @@ designed specifically for use with C++.  Here is a summary:
 @cindex break in overloaded functions
 @item @r{breakpoint menus}
 When you want a breakpoint in a function whose name is overloaded,
-@value{GDBN}'s breakpoint menus help you specify which function definition
+@value{GDBN} breakpoint menus help you specify which function definition
 you want.  @xref{Breakpoint Menus}.
 
 @cindex overloading in C++
@@ -5969,9 +5970,9 @@ Control the format for printing virtual function tables.
 
 @item @r{Overloaded symbol names}
 You can specify a particular definition of an overloaded symbol, using
-the same notation that's used to declare such symbols in C++: type
+the same notation that is used to declare such symbols in C++: type
 @code{@var{symbol}(@var{types})} rather than just @var{symbol}.  You can
-also use @value{GDBN}'s command-line word completion facilities to list the
+also use the @value{GDBN} command-line word completion facilities to list the
 available choices, or to finish the type list for you.
 @xref{Completion,, Command Completion}, for details on how to do this.
 @end table
@@ -6403,7 +6404,7 @@ Some @value{GDBN} commands have little use when debugging Modula-2 programs.
 Five subcommands of @code{set print} and @code{show print} apply
 specifically to C and C++: @samp{vtbl}, @samp{demangle},
 @samp{asm-demangle}, @samp{object}, and @samp{union}.  The first four
-apply to C++, and the last to C's @code{union} type, which has no direct
+apply to C++, and the last to the C @code{union} type, which has no direct
 analogue in Modula-2.
 
 The @code{@@} operator (@pxref{Expressions, ,Expressions}), while available
@@ -6875,13 +6876,13 @@ will be opened for writing as well as reading.
 @end table
 
 @node GDB Files
-@chapter @value{GDBN}'s Files
+@chapter @value{GDBN} Files
 
 @value{GDBN} needs to know the file name of the program to be debugged, both in
 order to read its symbol table and in order to start your program.  
 @ifclear BARETARGET
-To debug a core dump of a previous run, @value{GDBN} must be told the file
-name of the core dump.
+To debug a core dump of a previous run, you must also tell @value{GDBN}
+the name of the core dump file.
 @end ifclear
 
 @menu
@@ -6906,9 +6907,9 @@ the command argument given when you start @value{GDBN}, (@pxref{Invocation,
 @end ifset
 
 Occasionally it is necessary to change to a different file during a
-@value{GDBN} session.  Or you may run @value{GDBN} and forget to specify a file you
-want to use.  In these situations the @value{GDBN} commands to specify new files
-are useful.
+@value{GDBN} session.  Or you may run @value{GDBN} and forget to specify
+a file you want to use.  In these situations the @value{GDBN} commands
+to specify new files are useful.
 
 @table @code
 @item file @var{filename}
@@ -6917,7 +6918,7 @@ are useful.
 Use @var{filename} as the program to be debugged.  It is read for its
 symbols and for the contents of pure memory.  It is also the program
 executed when you use the @code{run} command.  If you do not specify a
-directory and the file is not found in @value{GDBN}'s working directory, @value{GDBN}
+directory and the file is not found in the @value{GDBN} working directory, @value{GDBN}
 uses the environment variable @code{PATH} as a list of directories to
 search, just as the shell does when looking for a program to run.  You
 can change the value of this variable, for both @value{GDBN} and your program,
@@ -6948,7 +6949,7 @@ Read symbol table information from file @var{filename}.  @code{PATH} is
 searched when necessary.  Use the @code{file} command to get both symbol
 table and program to run from the same file.
 
-@code{symbol-file} with no argument clears out @value{GDBN}'s information on your
+@code{symbol-file} with no argument clears out @value{GDBN} information on your
 program's symbol table.
 
 The @code{symbol-file} command causes @value{GDBN} to forget the contents of its
@@ -7002,7 +7003,7 @@ If memory-mapped files are available on your system through the
 @code{mmap} system call, you can use another option, @samp{-mapped}, to
 cause @value{GDBN} to write the symbols for your program into a reusable
 file.  Future @value{GDBN} debugging sessions will map in symbol information
-from this auxiliary symbol file (if the program hasn't changed), rather
+from this auxiliary symbol file (if the program has not changed), rather
 than spending time reading the symbol table from the executable
 program.  Using the @samp{-mapped} option has the same effect as
 starting @value{GDBN} with the @samp{-mapped} command-line option.
@@ -7010,15 +7011,16 @@ starting @value{GDBN} with the @samp{-mapped} command-line option.
 You can use both options together, to make sure the auxiliary symbol
 file has all the symbol information for your program.
 
-The @code{.syms} file is specific to the host machine on which GDB is run.
-It holds an exact image of GDB's internal symbol table.  It cannot be
-shared across multiple host platforms.
-
 The auxiliary symbol file for a program called @var{myprog} is called
 @samp{@var{myprog}.syms}.  Once this file exists (so long as it is newer
 than the corresponding executable), @value{GDBN} will always attempt to use
 it when you debug @var{myprog}; no special options or commands are
 needed.
+
+The @file{.syms} file is specific to the host machine where you run
+@value{GDBN}.  It holds an exact image of the internal @value{GDB}
+symbol table.  It cannot be shared across multiple host platforms.
+
 @c FIXME: for now no mention of directories, since this seems to be in
 @c flux.  13mar1992 status is that in theory GDB would look either in
 @c current dir or in same dir as myprog; but issues like competing
@@ -7052,7 +7054,7 @@ Depending on what remote debugging facilities are configured into
 @value{GDBN}, the @code{load} command may be available.  Where it exists, it
 is meant to make @var{filename} (an executable) available for debugging
 on the remote system---by downloading, or dynamic linking, for example.
-@code{load} also records @var{filename}'s symbol table in @value{GDBN}, like
+@code{load} also records the @var{filename} symbol table in @value{GDBN}, like
 the @code{add-symbol-file} command.
 
 If your @value{GDBN} does not have a @code{load} command, attempting to
@@ -7489,7 +7491,7 @@ configuration of GDB; use @code{help targets} to list them.
 @node Controlling GDB
 @chapter Controlling @value{GDBN}
 
-You can alter many aspects of @value{GDBN}'s interaction with you by using
+You can alter the way @value{GDBN} interacts with you by using
 the @code{set} command.  For commands controlling how @value{GDBN} displays
 data, @pxref{Print Settings, ,Print Settings}; other settings are described here.
 
@@ -7737,10 +7739,10 @@ see @code{symbol-file} in @ref{Files, ,Commands to Specify Files}.
 @table @code
 @kindex set verbose
 @item set verbose on
-Enables @value{GDBN}'s output of certain informational messages.
+Enables @value{GDBN} output of certain informational messages.
 
 @item set verbose off
-Disables @value{GDBN}'s output of certain informational messages.
+Disables @value{GDBN} output of certain informational messages.
 
 @kindex show verbose
 @item show verbose
@@ -7927,7 +7929,7 @@ rather than @code{bt}).  If an error occurs during the execution of your
 hook, execution of GDB commands stops and you are returned to the GDB
 prompt (before the command that you actually typed had a chance to run).
 
-If you try to define a hook which doesn't match any known command, you
+If you try to define a hook which does not match any known command, you
 will get a warning from the @code{define} command.
 
 @node Command Files
@@ -8804,7 +8806,7 @@ program specified there.
 
 To build @code{gdb} in a separate directory, run @code{configure}
 with the @samp{--srcdir} option to specify where to find the source.
-(You'll also need to specify a path to find @code{configure}
+(You also need to specify a path to find @code{configure}
 itself from your working directory.  If the path to @code{configure}
 would be the same as the argument to @samp{--srcdir}, you can leave out
 the @samp{--srcdir} option; it will be assumed.)
