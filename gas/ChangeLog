@@ -1,3 +1,17 @@
+2004-11-04  Bob Wilson  <bob.wilson@acm.org>
+
+	* config/tc-xtensa.c: Remove XTENSA_SECTION_RENAME ifdefs.
+	(add_section_rename): Delete.  Inlined into...
+	(build_section_rename): ...here.  Use xstrdup instead of strdup.
+	(xtensa_section_rename): Drop "const" from argument and return types.
+	(md_show_usage): Indent to match show_usage().
+	* config/tc-xtensa.h: Remove XTENSA_SECTION_RENAME ifdefs.
+	(tc_canonicalize_section_name): Define.
+	(md_elf_section_rename): Remove unused macro.
+	* doc/as.texinfo (Overview): Document Xtensa --rename-section option.
+	* doc/c-xtensa.texi (Xtensa Options): Likewise.
+	(Frame Directive): Delete.
+
 2004-11-04  Daniel Jacobowitz  <dan@debian.org>
 
 	* configure.in: Remove arm-*-oabi and thumb-*-oabi.

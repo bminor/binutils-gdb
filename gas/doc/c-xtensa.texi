@@ -85,6 +85,11 @@ including both relaxation and optimization.  The default is
 rare cases when the instructions must be exactly as specified in the
 assembly source.  Using @samp{--no-transform} causes out of range
 instruction operands to be errors.
+
+@item --rename-section @var{oldname}=@var{newname}
+@kindex --rename-section
+Rename the @var{oldname} section to @var{newname}.  This option can be used
+multiple times to rename multiple sections.
 @end table
 
 @node Xtensa Syntax
@@ -529,7 +534,6 @@ The following directives are available:
 * Literal Position Directive:: Specify Inline Literal Pool Locations.
 * Literal Prefix Directive::   Specify Literal Section Name Prefix.
 * Absolute Literals Directive:: Control PC-Relative vs. Absolute Literals.
-* Frame Directive::            Describe a stack frame.
 @end menu
 
 @node Schedule Directive
@@ -743,36 +747,6 @@ the @samp{--no-@-absolute-@-literals} command-line option is specified.
 Otherwise, the default is to assume PC-relative @code{L32R} addressing.
 The @code{absolute-@-literals} directive can then be used to override
 the default determined by the command-line options.
-
-@node Frame Directive
-@subsection frame
-@cindex @code{frame} directive
-
-This directive tells the assembler to emit information to allow the
-debugger to locate a function's stack frame.  The syntax is:
-
-@smallexample
-    .frame @var{reg}, @var{size}
-@end smallexample
-
-where @var{reg} is the register used to hold the frame pointer (usually
-the same as the stack pointer) and @var{size} is the size in bytes of
-the stack frame.  The @code{.frame} directive is typically placed
-near the @code{ENTRY} instruction for a function.
-
-In many circumstances, this information just duplicates the
-information given in the function's @code{ENTRY} instruction; however,
-there are two cases where this is not true:
-
-@enumerate
-@item
-The size of the stack frame is too big to fit in the immediate field
-of the @code{ENTRY} instruction.
-
-@item
-The frame pointer is different than the stack pointer, as with functions
-that call @code{alloca}.
-@end enumerate
 
 @c Local Variables:
 @c fill-column: 72

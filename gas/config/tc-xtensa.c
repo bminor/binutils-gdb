@@ -517,10 +517,9 @@ static void set_expr_symbol_offset_diff
 bfd_boolean expr_is_equal (expressionS *, expressionS *);
 static void copy_expr (expressionS *, const expressionS *);
 
-#ifdef XTENSA_SECTION_RENAME
+/* Section renaming.  */
+
 static void build_section_rename (const char *);
-static void add_section_rename (char *, char *);
-#endif
 
 
 /* ISA imported from bfd.  */
@@ -647,9 +646,7 @@ enum
 
   option_no_workarounds,
 
-#ifdef XTENSA_SECTION_RENAME
   option_rename_section_name,
-#endif
 
   option_prefer_l32r,
   option_prefer_const16,
@@ -716,9 +713,7 @@ struct option md_longopts[] =
   { "workaround-close-loop-end", no_argument, NULL,
     option_workaround_close_loop_end },
 
-#ifdef XTENSA_SECTION_RENAME
   { "rename-section", required_argument, NULL, option_rename_section_name },
-#endif /* XTENSA_SECTION_RENAME */
 
   { "link-relax", no_argument, NULL, option_link_relax },
   { "no-link-relax", no_argument, NULL, option_no_link_relax },
@@ -837,11 +832,9 @@ md_parse_option (int c, char *arg)
       warn_unaligned_branch_targets = TRUE;
       return 1;
 
-#ifdef XTENSA_SECTION_RENAME
     case option_rename_section_name:
       build_section_rename (arg);
       return 1;
-#endif /* XTENSA_SECTION_RENAME */
 
     case 'Q':
       /* -Qy, -Qn: SVR4 arguments controlling whether a .comment section
@@ -909,18 +902,14 @@ md_show_usage (FILE *stream)
 {
   fputs ("\n\
 Xtensa options:\n\
---[no-]text-section-literals\n\
-                        [Do not] put literals in the text section\n\
---[no-]absolute-literals\n\
-                        [Do not] default to use non-PC-relative literals\n\
---[no-]target-align     [Do not] try to align branch targets\n\
---[no-]longcalls        [Do not] emit 32-bit call sequences\n\
---[no-]transform        [Do not] transform instructions\n"
-#ifdef XTENSA_SECTION_RENAME
-"--rename-section old=new(:old1=new1)*\n\
-                        Rename section 'old' to 'new'\n"
-#endif /* XTENSA_SECTION_RENAME */
-	 , stream);
+  --[no-]text-section-literals\n\
+                          [Do not] put literals in the text section\n\
+  --[no-]absolute-literals\n\
+                          [Do not] default to use non-PC-relative literals\n\
+  --[no-]target-align     [Do not] try to align branch targets\n\
+  --[no-]longcalls        [Do not] emit 32-bit call sequences\n\
+  --[no-]transform        [Do not] transform instructions\n\
+  --rename-section old=new Rename section 'old' to 'new'\n", stream);
 }
 
 
@@ -11996,9 +11985,7 @@ copy_expr (expressionS *dst, const expressionS *src)
 }
 
 
-/* Support for Tensilica's "--rename-section" option.  */
-
-#ifdef XTENSA_SECTION_RENAME
+/* Support for the "--rename-section" option.  */
 
 struct rename_section_struct
 {
@@ -12010,17 +11997,22 @@ struct rename_section_struct
 static struct rename_section_struct *section_rename;
 
 
-/* Parse the string oldname=new_name:oldname2=new_name2
-   and call add_section_rename.  */
+/* Parse the string "oldname=new_name(:oldname2=new_name2)*" and add
+   entries to the section_rename list.  Note: Specifying multiple
+   renamings separated by colons is not documented and is retained only
+   for backward compatibility.  */
 
 static void
 build_section_rename (const char *arg)
 {
+  struct rename_section_struct *r;
   char *this_arg = NULL;
   char *next_arg = NULL;
 
-  for (this_arg = strdup (arg); this_arg != NULL; this_arg = next_arg)
+  for (this_arg = xstrdup (arg); this_arg != NULL; this_arg = next_arg)
     {
+      char *old_name, *new_name;
+
       if (this_arg)
 	{
 	  next_arg = strchr (this_arg, ':');
@@ -12030,56 +12022,47 @@ build_section_rename (const char *arg)
 	      next_arg++;
 	    }
 	}
-      {
-	char *old_name = this_arg;
-	char *new_name = strchr (this_arg, '=');
 
-	if (*old_name == '\0')
-	  {
-	    as_warn (_("ignoring extra '-rename-section' delimiter ':'"));
-	    continue;
-	  }
-	if (!new_name || new_name[1] == '\0')
-	  {
-	    as_warn (_("ignoring invalid '-rename-section' "
-		       "specification: '%s'"), old_name);
-	    continue;
-	  }
-	*new_name = '\0';
-	new_name++;
-	add_section_rename (old_name, new_name);
-      }
+      old_name = this_arg;
+      new_name = strchr (this_arg, '=');
+
+      if (*old_name == '\0')
+	{
+	  as_warn (_("ignoring extra '-rename-section' delimiter ':'"));
+	  continue;
+	}
+      if (!new_name || new_name[1] == '\0')
+	{
+	  as_warn (_("ignoring invalid '-rename-section' specification: '%s'"),
+		   old_name);
+	  continue;
+	}
+      *new_name = '\0';
+      new_name++;
+
+      /* Check for invalid section renaming.  */
+      for (r = section_rename; r != NULL; r = r->next)
+	{
+	  if (strcmp (r->old_name, old_name) == 0)
+	    as_bad (_("section %s renamed multiple times"), old_name);
+	  if (strcmp (r->new_name, new_name) == 0)
+	    as_bad (_("multiple sections remapped to output section %s"),
+		    new_name);
+	}
+
+      /* Now add it.  */
+      r = (struct rename_section_struct *)
+	xmalloc (sizeof (struct rename_section_struct));
+      r->old_name = xstrdup (old_name);
+      r->new_name = xstrdup (new_name);
+      r->next = section_rename;
+      section_rename = r;
     }
 }
 
 
-static void
-add_section_rename (char *old_name, char *new_name)
-{
-  struct rename_section_struct *r = section_rename;
-
-  /* Check for invalid section renaming.  */
-  for (r = section_rename; r != NULL; r = r->next)
-    {
-      if (strcmp (r->old_name, old_name) == 0)
-	as_bad (_("section %s renamed multiple times"), old_name);
-      if (strcmp (r->new_name, new_name) == 0)
-	as_bad (_("multiple sections remapped to output section %s"),
-		new_name);
-    }
-
-  /* Now add it.  */
-  r = (struct rename_section_struct *)
-    xmalloc (sizeof (struct rename_section_struct));
-  r->old_name = strdup (old_name);
-  r->new_name = strdup (new_name);
-  r->next = section_rename;
-  section_rename = r;
-}
-
-
-const char *
-xtensa_section_rename (const char *name)
+char *
+xtensa_section_rename (char *name)
 {
   struct rename_section_struct *r = section_rename;
 
@@ -12091,5 +12074,3 @@ xtensa_section_rename (const char *name)
 
   return name;
 }
-
-#endif /* XTENSA_SECTION_RENAME */

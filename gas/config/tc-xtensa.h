@@ -287,15 +287,6 @@ typedef struct xtensa_segment_info_struct
 } xtensa_segment_info;
 
 
-/* Section renaming is only supported in Tensilica's version of GAS.  */
-#ifdef XTENSA_SECTION_RENAME
-extern const char *xtensa_section_rename (const char *);
-#else
-/* Tensilica's section renaming feature is not included here.  */
-#define xtensa_section_rename(name)	(name)
-#endif /* XTENSA_SECTION_RENAME */
-
-
 extern const char *xtensa_target_format (void);
 extern void xtensa_init_fix_data (struct fix *);
 extern void xtensa_frag_init (fragS *);
@@ -312,6 +303,7 @@ extern void xtensa_elf_section_change_hook (void);
 extern int xtensa_unrecognized_line (int);
 extern bfd_boolean xtensa_check_inside_bundle (void);
 extern void xtensa_handle_align (fragS *);
+extern char *xtensa_section_rename (char *);
 
 #define TARGET_FORMAT			xtensa_target_format ()
 #define TARGET_ARCH			bfd_arch_xtensa
@@ -324,13 +316,13 @@ extern void xtensa_handle_align (fragS *);
 #define TC_FORCE_RELOCATION(fix)	xtensa_force_relocation (fix)
 #define NO_PSEUDO_DOT			xtensa_check_inside_bundle ()
 #define tc_canonicalize_symbol_name(s)	xtensa_section_rename (s)
+#define tc_canonicalize_section_name(s)	xtensa_section_rename (s)
 #define tc_init_after_args()		xtensa_file_arch_init (stdoutput)
 #define tc_fix_adjustable(fix)		xtensa_fix_adjustable (fix)
 #define tc_frob_label(sym)		xtensa_frob_label (sym)
 #define tc_unrecognized_line(ch)	xtensa_unrecognized_line (ch)
 #define md_do_align(a,b,c,d,e)		xtensa_flush_pending_output ()
 #define md_elf_section_change_hook	xtensa_elf_section_change_hook
-#define md_elf_section_rename(name)	xtensa_section_rename (name)
 #define md_end				xtensa_end
 #define md_flush_pending_output()	xtensa_flush_pending_output ()
 #define md_operand(x)
