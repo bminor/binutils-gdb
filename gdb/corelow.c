@@ -32,22 +32,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcore.h"
 #include "thread.h"
 
-static void
-core_files_info PARAMS ((struct target_ops *));
+static void core_files_info PARAMS ((struct target_ops *));
 
 #ifdef SOLIB_ADD
-static int 
-solib_add_stub PARAMS ((char *));
+static int solib_add_stub PARAMS ((char *));
 #endif
 
-static void
-core_close PARAMS ((int));
+static void core_close PARAMS ((int));
 
-static void
-get_core_registers PARAMS ((int));
+static void get_core_registers PARAMS ((int));
 
-/* Discard all vestiges of any previous core file
-   and mark data and stack spaces as empty.  */
+/* Discard all vestiges of any previous core file and mark data and stack
+   spaces as empty.  */
 
 /* ARGSUSED */
 static void
@@ -55,24 +51,27 @@ core_close (quitting)
      int quitting;
 {
   char *name;
+
   inferior_pid = 0;		/* Avoid confusion from thread stuff */
 
-  if (core_bfd) {
-    name = bfd_get_filename (core_bfd);
-    if (!bfd_close (core_bfd))
-      warning ("cannot close \"%s\": %s",
-	       bfd_filename, bfd_errmsg (bfd_get_error ()));
-    free (name);
-    core_bfd = NULL;
+  if (core_bfd)
+    {
+      name = bfd_get_filename (core_bfd);
+      if (!bfd_close (core_bfd))
+	warning ("cannot close \"%s\": %s",
+		 name, bfd_errmsg (bfd_get_error ()));
+      free (name);
+      core_bfd = NULL;
 #ifdef CLEAR_SOLIB
-    CLEAR_SOLIB ();
+      CLEAR_SOLIB ();
 #endif
-    if (core_ops.to_sections) {
-      free ((PTR)core_ops.to_sections);
-      core_ops.to_sections = NULL;
-      core_ops.to_sections_end = NULL;
+      if (core_ops.to_sections)
+	{
+	  free ((PTR)core_ops.to_sections);
+	  core_ops.to_sections = NULL;
+	  core_ops.to_sections_end = NULL;
+	}
     }
-  }
 }
 
 #ifdef SOLIB_ADD
@@ -113,7 +112,7 @@ add_to_thread_list (abfd, asect, reg_sect_arg)
     inferior_pid = thread_id;	/* Yes, make it current */
 }
 
-/* This routine opens and sets up the core file bfd */
+/* This routine opens and sets up the core file bfd.  */
 
 void
 core_open (filename, from_tty)
@@ -131,29 +130,28 @@ core_open (filename, from_tty)
   target_preopen (from_tty);
   if (!filename)
     {
-      error (core_bfd? 
+      error (core_bfd ? 
        "No core file specified.  (Use `detach' to stop debugging a core file.)"
      : "No core file specified.");
     }
 
   filename = tilde_expand (filename);
-  if (filename[0] != '/') {
-    temp = concat (current_directory, "/", filename, NULL);
-    free (filename);
-    filename = temp;
-  }
+  if (filename[0] != '/')
+    {
+      temp = concat (current_directory, "/", filename, NULL);
+      free (filename);
+      filename = temp;
+    }
 
   old_chain = make_cleanup (free, filename);
 
-  scratch_chan = open (filename, write_files? O_RDWR: O_RDONLY, 0);
+  scratch_chan = open (filename, write_files ? O_RDWR : O_RDONLY, 0);
   if (scratch_chan < 0)
     perror_with_name (filename);
 
   temp_bfd = bfd_fdopenr (filename, gnutarget, scratch_chan);
   if (temp_bfd == NULL)
-    {
-      perror_with_name (filename);
-    }
+    perror_with_name (filename);
 
   if (!bfd_check_format (temp_bfd, bfd_core))
     {
@@ -162,7 +160,8 @@ core_open (filename, from_tty)
 	 on error it does not free all the storage associated with the
 	 bfd).  */
       make_cleanup (bfd_close, temp_bfd);
-      error ("\"%s\" is not a core dump: %s", filename, bfd_errmsg(bfd_get_error ()));
+      error ("\"%s\" is not a core dump: %s",
+	     filename, bfd_errmsg (bfd_get_error ()));
     }
 
   /* Looks semi-reasonable.  Toss the old core file and work on the new.  */
@@ -177,8 +176,8 @@ core_open (filename, from_tty)
   /* Find the data section */
   if (build_section_table (core_bfd, &core_ops.to_sections,
 			   &core_ops.to_sections_end))
-    error ("Can't find sections in `%s': %s", bfd_get_filename(core_bfd),
-	   bfd_errmsg (bfd_get_error ()));
+    error ("\"%s\": Can't find sections: %s",
+	   bfd_get_filename (core_bfd), bfd_errmsg (bfd_get_error ()));
 
   ontop = !push_target (&core_ops);
   discard_cleanups (old_chain);
@@ -190,7 +189,7 @@ core_open (filename, from_tty)
   siggy = bfd_core_file_failing_signal (core_bfd);
   if (siggy > 0)
     printf_filtered ("Program terminated with signal %d, %s.\n", siggy,
-	    safe_strsignal (siggy));
+		     safe_strsignal (siggy));
 
   /* Build up thread list from BFD sections. */
 
@@ -198,32 +197,35 @@ core_open (filename, from_tty)
   bfd_map_over_sections (core_bfd, add_to_thread_list,
 			 bfd_get_section_by_name (core_bfd, ".reg"));
 
-  if (ontop) {
-    /* Fetch all registers from core file */
-    target_fetch_registers (-1);
+  if (ontop)
+    {
+      /* Fetch all registers from core file.  */
+      target_fetch_registers (-1);
 
-    /* Add symbols and section mappings for any shared libraries */
+      /* Add symbols and section mappings for any shared libraries.  */
 #ifdef SOLIB_ADD
-    catch_errors (solib_add_stub, &from_tty, (char *)0,
-		  RETURN_MASK_ALL);
+      catch_errors (solib_add_stub, &from_tty, (char *)0,
+		    RETURN_MASK_ALL);
 
-    /* solib_add_stub usually modifies current_target.to_sections, which
-       has to be reflected in core_ops to enable proper freeing of
-       the to_sections vector in core_close and correct section
-       mapping in xfer_memory and core_files_info.  */
-    core_ops.to_sections = current_target.to_sections;
-    core_ops.to_sections_end = current_target.to_sections_end;
+      /* solib_add_stub usually modifies current_target.to_sections, which
+	 has to be reflected in core_ops to enable proper freeing of
+	 the to_sections vector in core_close and correct section
+	 mapping in xfer_memory and core_files_info.  */
+      core_ops.to_sections = current_target.to_sections;
+      core_ops.to_sections_end = current_target.to_sections_end;
 #endif
 
-    /* Now, set up the frame cache, and print the top of stack */
-    flush_cached_frames ();
-    select_frame (get_current_frame (), 0);
-    print_stack_frame (selected_frame, selected_frame_level, 1);
-  } else {
-    warning (
+      /* Now, set up the frame cache, and print the top of stack.  */
+      flush_cached_frames ();
+      select_frame (get_current_frame (), 0);
+      print_stack_frame (selected_frame, selected_frame_level, 1);
+    }
+  else
+    {
+      warning (
 "you won't be able to access this core file until you terminate\n\
 your %s; do ``info files''", target_longname);
-  }
+    }
 }
 
 void
@@ -244,6 +246,7 @@ core_detach (args, from_tty)
    part, typically implemented in the xm-file for each architecture.  */
 
 /* We just get all the registers, so we don't use regno.  */
+
 /* ARGSUSED */
 static void
 get_core_registers (regno)
@@ -266,7 +269,8 @@ get_core_registers (regno)
     strcpy (secname, ".reg");
 
   reg_sec = bfd_get_section_by_name (core_bfd, secname);
-  if (!reg_sec) goto cant;
+  if (!reg_sec)
+    goto cant;
   size = bfd_section_size (core_bfd, reg_sec);
   the_regs = alloca (size);
   if (bfd_get_section_contents (core_bfd, reg_sec, the_regs, (file_ptr)0, size))
@@ -277,28 +281,31 @@ get_core_registers (regno)
   else
     {
 cant:
-      fprintf_filtered (gdb_stderr, "Couldn't fetch registers from core file: %s\n",
-	       bfd_errmsg (bfd_get_error ()));
+      fprintf_filtered (gdb_stderr,
+			"Couldn't fetch registers from core file: %s\n",
+			bfd_errmsg (bfd_get_error ()));
     }
 
   /* Now do it again for the float registers, if they exist.  */
   reg_sec = bfd_get_section_by_name (core_bfd, ".reg2");
-  if (reg_sec) {
-    size = bfd_section_size (core_bfd, reg_sec);
-    the_regs = alloca (size);
-    if (bfd_get_section_contents (core_bfd, reg_sec, the_regs, (file_ptr)0,
-				  size))
-      {
-	fetch_core_registers (the_regs, size, 2,
-			      (unsigned) bfd_section_vma (abfd,reg_sec));
-      }
-    else
-      {
-	fprintf_filtered (gdb_stderr, "Couldn't fetch register set 2 from core file: %s\n",
-		 bfd_errmsg (bfd_get_error ()));
-      }
-  }
-  registers_fetched();
+  if (reg_sec)
+    {
+      size = bfd_section_size (core_bfd, reg_sec);
+      the_regs = alloca (size);
+      if (bfd_get_section_contents (core_bfd, reg_sec, the_regs, (file_ptr)0,
+				    size))
+	{
+	  fetch_core_registers (the_regs, size, 2,
+				(unsigned) bfd_section_vma (abfd,reg_sec));
+	}
+      else
+	{
+	  fprintf_filtered (gdb_stderr, 
+			    "Couldn't fetch register set 2 from core file: %s\n",
+			    bfd_errmsg (bfd_get_error ()));
+	}
+    }
+  registers_fetched ();
 }
 
 static void

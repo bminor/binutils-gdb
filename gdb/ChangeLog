@@ -1,3 +1,8 @@
+Sat Oct 15 16:55:48 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* corelow.c: Format to standard.
+	(core_close): Use name instead of bfd_filename.
+
 Fri Oct 14 10:29:08 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* exec.c (map_vmap): Cast return from xmalloc to its proper type,
