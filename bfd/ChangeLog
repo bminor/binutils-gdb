@@ -1,5 +1,9 @@
 2002-06-25  Alan Modra  <amodra@bigpond.net.au>
 
+	* coff-rs6000.c (xcoff_generate_rtinit): Fix typo.
+
+2002-06-25  Alan Modra  <amodra@bigpond.net.au>
+
 	* aout-adobe.c: Don't compare against "true" or "false.
 	* aout-target.h: Likewise.
 	* aoutx.h: Likewise.

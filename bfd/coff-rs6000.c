@@ -3752,7 +3752,7 @@ xcoff_generate_rtinit  (abfd, init, fini, rtld)
     {
       string_table_size += 4;
       string_table = (bfd_byte *) bfd_zmalloc (string_table_size);
-      if (string_table_size == NULL)
+      if (string_table == NULL)
 	return false;
 
       val = string_table_size;
