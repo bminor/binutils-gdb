@@ -1,3 +1,8 @@
+2001-07-10  Jim Blandy  <jimb@redhat.com>
+
+	* valops.c (value_cast): When casting a pointer to an integer,
+	don't convert it to an address.
+
 2001-07-10  Andrew Cagney  <ac131313@redhat.com>
 
 	* remote-utils.h (struct serial): Declare as opaque.  Remove

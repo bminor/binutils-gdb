@@ -281,7 +281,18 @@ value_cast (struct type *type, register value_ptr arg2)
 	      break;		/* fall out and go to normal handling */
 	    }
 	}
-      longest = value_as_long (arg2);
+
+      /* When we cast pointers to integers, we mustn't use
+         POINTER_TO_ADDRESS to find the address the pointer
+         represents, as value_as_long would.  GDB should evaluate
+         expressions just as the compiler would --- and the compiler
+         sees a cast as a simple reinterpretation of the pointer's
+         bits.  */
+      if (code2 == TYPE_CODE_PTR)
+        longest = extract_unsigned_integer (VALUE_CONTENTS (arg2),
+                                            TYPE_LENGTH (type2));
+      else
+        longest = value_as_long (arg2);
       return value_from_longest (type, convert_to_boolean ?
 				 (LONGEST) (longest ? 1 : 0) : longest);
     }
