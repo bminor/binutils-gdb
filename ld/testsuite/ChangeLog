@@ -1,3 +1,8 @@
+2001-07-12  H.J. Lu  <hjl@gnu.org>
+
+	* ld-selective/selective.exp: Mark selective1, selective2,
+	selective4 and selective5 xfail on alpha*-*.
+
 2001-06-13  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* config/default.exp (AS, GASP, OBJDUMP, NM, NMFLAGS, OBJCOPY,
