@@ -14,7 +14,7 @@ Mon Oct 17 10:29:08 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	* coffread.c (cs_to_section, find_targ_sec): New functions.
 	(process_coff_symbol): Set SYMBOL_SECTION to result
 	from cs_to_section.
-	(coff_symtab_read): Call cs_to_section and deal appropriate
+	(coff_symtab_read): Call cs_to_section and deal with result
 	rather than assuming sections are in a certain order.  Deal with
 	BSS.
 	* coffread.c: Remove text_bfd_scnum variable.
