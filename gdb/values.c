@@ -1015,7 +1015,6 @@ value_headof (arg, btype, dtype)
 
   /* Now search through the virtual function table.  */
   entry = value_ind (vtbl);
-  entry_type = VALUE_TYPE (entry);
   nelems = longest_to_int (value_as_long (value_field (entry, 2)));
   for (i = 1; i <= nelems; i++)
     {
@@ -1372,8 +1371,8 @@ modify_field (addr, fieldval, bitpos, bitsize)
 
   /* Reject values too big to fit in the field in question,
      otherwise adjoining fields may be corrupted.  */
-  if ((0 != fieldval & ~((1<<bitsize)-1))
-   && bitsize < 8 * sizeof (fieldval))
+  if (bitsize < (8 * sizeof (fieldval))
+      && 0 != (fieldval & ~((1<<bitsize)-1)))
     error ("Value %d does not fit in %d bits.", fieldval, bitsize);
   
   bcopy (addr, &oword, sizeof oword);

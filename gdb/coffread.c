@@ -689,6 +689,7 @@ static bfd *symfile_bfd;
 /* FIXME!  Addr and Mainline are not used yet -- this will not work for
    shared libraries or add_file!  */
 
+/* ARGSUSED */
 void
 coff_symfile_read (sf, addr, mainline)
      struct sym_fns *sf;
@@ -756,17 +757,11 @@ coff_symfile_read (sf, addr, mainline)
 
   /* Go over the misc symbol bunches and install them in vector.  */
 
-  condense_misc_bunches (0);
+  condense_misc_bunches (!mainline);
 
   /* Make a default for file to list.  */
 
   select_source_symtab (0);	/* FIXME, this might be too slow, see dbxread */
-}
-
-void
-coff_symfile_discard ()
-{
-  /* There seems to be nothing to do here.  */
 }
 
 void
@@ -1322,6 +1317,12 @@ init_lineno (chan, offset, size)
 {
   int val;
 
+  linetab_offset = offset;
+  linetab_size = size;
+
+  if (size == 0)
+    return 0;
+
   if (lseek (chan, offset, 0) < 0)
     return -1;
   
@@ -1331,8 +1332,6 @@ init_lineno (chan, offset, size)
   if (val != size)
     return -1;
 
-  linetab_offset = offset;
-  linetab_size = size;
   make_cleanup (free, linetab);		/* Be sure it gets de-allocated. */
   return 0;
 }
@@ -1935,6 +1934,7 @@ read_struct_type (index, length, lastsym)
    Also defines the symbols that represent the values of the type.  */
 /* Currently assumes it's sizeof (int) and doesn't use length.  */
 
+/* ARGSUSED */
 static struct type *
 read_enum_type (index, length, lastsym)
      int index;
@@ -2033,8 +2033,7 @@ static struct sym_fns coff_sym_fns =
 #else /* not TDESC */
     "coff", 4,
 #endif /* not TDESC */
-    coff_new_init, coff_symfile_init,
-    coff_symfile_read, coff_symfile_discard
+    coff_new_init, coff_symfile_init, coff_symfile_read,
 };
 
 void

@@ -249,8 +249,7 @@ cplus_demangle (type, arg_mode)
       /* destructor */
       if (type[0] == '_' && type[1] == CPLUS_MARKER && type[2] == '_')
 	{
-	  int n = (strlen (type) - 3)*2 + 3 + 2 + 1;
-	  char *tem = (char *) xmalloc (n);
+	  char *tem = (char *) xmalloc ((strlen (type) - 3)*2 + 3 + 2 + 1);
 	  strcpy (tem, type + 3);
 	  strcat (tem, "::~");
 	  strcat (tem, type + 3);
@@ -260,8 +259,7 @@ cplus_demangle (type, arg_mode)
       /* static data member */
       if (*type != '_' && (p = strchr (type, CPLUS_MARKER)) != NULL)
 	{
-	  int n = strlen (type) + 2;
-	  char *tem = (char *) xmalloc (n);
+	  char *tem = (char *) xmalloc (strlen (type) + 2);
 	  memcpy (tem, type, p - type);
 	  strcpy (tem + (p - type), "::");
 	  strcpy (tem + (p - type) + 2, p + 1);
@@ -270,8 +268,7 @@ cplus_demangle (type, arg_mode)
       /* virtual table "_vt$" */
       if (type[0] == '_' && type[1] == 'v' && type[2] == 't' && type[3] == CPLUS_MARKER)
 	{
-	  int n = strlen (type + 4) + 14 + 1;
-	  char *tem = (char *) xmalloc (n);
+	  char *tem = (char *) xmalloc (strlen (type + 4) + 14 + 1);
 	  strcpy (tem, type + 4);
 	  strcat (tem, " virtual table");
 	  return tem;

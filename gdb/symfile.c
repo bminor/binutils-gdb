@@ -4,19 +4,19 @@
 
 This file is part of GDB.
 
-GDB is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-GDB is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GDB; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 #include "defs.h"
@@ -53,7 +53,10 @@ static void clear_symtab_users_once();
 struct sym_fns *symtab_fns = NULL;
 
 /* Saves the sym_fns of the current symbol table, so we can call
-   the right sym_discard function when we free it.  */
+   the right XXX_new_init function when we free it.  FIXME.  This
+   should be extended to calling the new_init function for each
+   existing symtab or psymtab, since the main symbol file and 
+   subsequent added symbol files can have different types.  */
 
 static struct sym_fns *symfile_fns;
 
@@ -86,6 +89,15 @@ long /* really time_t */ symfile_mtime = 0;
 /* Structures with which to manage partial symbol allocation.  */
 
 struct psymbol_allocation_list global_psymbols = {0}, static_psymbols = {0};
+
+/* Flag for whether user will be reloading symbols multiple times.
+   Defaults to ON for VxWorks, otherwise OFF.  */
+
+#ifdef SYMBOL_RELOADING_DEFAULT
+int symbol_reloading = SYMBOL_RELOADING_DEFAULT;
+#else
+int symbol_reloading = 0;
+#endif
 
 /* Structure to manage complaints about symbol file contents.  */
 
@@ -364,15 +376,7 @@ psymtab_to_symtab (pst)
       (*pst->read_symtab) (pst);
     }
 
-  /* Search through list for correct name. */
-  for (result = symtab_list; result; result = result->next)
-    if (!strcmp (result->filename, pst->filename))
-      {
-	pst->symtab = result;		/* Remember where it was.  */
-	return result;
-      }
-
-  return 0;
+  return pst->symtab;
 }
 
 /* Process a symbol file, as either the main file or as a dynamically
@@ -422,7 +426,7 @@ symbol_file_add (name, from_tty, addr, mainline)
 
   if (from_tty)
     {
-      printf_filtered ("Reading symbol data from %s...", name);
+      printf_filtered ("Reading symbols from %s...", name);
       wrap_here ("");
       fflush (stdout);
     }
@@ -607,31 +611,22 @@ load_command (arg, from_tty)
   target_load (arg, from_tty);
 }
 
-/* This function runs the add_syms command of our current target.  */
-
-void
-add_symbol_file_command (args, from_tty)
-     char *args;
-     int from_tty;
-{
-  /* Getting new symbols may change our opinion about what is
-     frameless.  */
-  reinit_frame_cache ();
-
-  target_add_syms (args, from_tty);
-}
-
-/* This function allows the addition of incrementally linked object files.  */
+/* This function allows the addition of incrementally linked object files.
+   It does not modify any state in the target, only in the debugger.  */
 
 /* ARGSUSED */
 void
-add_syms_addr_command (arg_string, from_tty)
-     char* arg_string;
+add_symbol_file_command (arg_string, from_tty)
+     char *arg_string;
      int from_tty;
 {
   char *name;
   CORE_ADDR text_addr;
   
+  /* Getting new symbols may change our opinion about what is
+     frameless.  */
+  reinit_frame_cache ();
+
   if (arg_string == 0)
     error ("add-symbol-file takes a file name and an address");
 
@@ -709,9 +704,10 @@ fill_in_vptr_fieldno (type)
 /* Functions to handle complaints during symbol reading.  */
 
 /* How many complaints about a particular thing should be printed before
-   we stop whining about it?  */
+   we stop whining about it?  Default is no whining at all, since so many
+   systems have ill-constructed symbol files.  */
 
-static unsigned stop_whining = 1;
+static unsigned stop_whining = 0;
 
 /* Print a complaint about the input symbols, and link the complaint block
    into a chain for later handling.  Result is 1 if the complaint was
@@ -864,6 +860,10 @@ free_named_symtabs (name)
   struct blockvector *bv;
   int blewit = 0;
 
+  /* We only wack things if the symbol-reload switch is set.  */
+  if (!symbol_reloading)
+    return 0;
+
   /* Some symbol formats have trouble providing file names... */
   if (name == 0 || *name == '\0')
     return 0;
@@ -954,6 +954,13 @@ for access from GDB.");
     (add_set_cmd ("complaints", class_support, var_uinteger,
 		  (char *)&stop_whining,
 	  "Set max number of complaints about incorrect symbols.",
+		  &setlist),
+     &showlist);
+
+  add_show_from_set
+    (add_set_cmd ("symbol-reloading", class_support, var_boolean,
+		  (char *)&symbol_reloading,
+	  "Set dynamic symbol table reloading multiple times in one run.",
 		  &setlist),
      &showlist);
 
