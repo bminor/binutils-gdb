@@ -1,5 +1,9 @@
 Tue Oct 17 12:22:05 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* emultempl/sunos.em (gld${EMULATION_NAME}_find_exp_assignment):
+	Search trinary.cond rather than searching trinary.lhs twice.  From
+	linli@ihp.PHys.ethz.CH.
+
 	* emultempl/sunos.em (gld${EMULATION_NAME}_find_so): Move
 	directory searching code into gld${EMULATION_NAME}_search_dir.
 	(gld${EMULATION_NAME}_search_dir): New static function, extracted
