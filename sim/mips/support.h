@@ -30,9 +30,11 @@
    architectures if desired. */
 
 /* Control via a build boolean for the moment */
-#if defined(__GNUC__) || defined(__WIN32__)
+#if defined(__GNUC__) || defined(_WIN32)
 
-#ifdef __WIN32__
+#ifdef _WIN32
+#define SIGTRAP 5
+#define SIGQUIT 3
 typedef signed __int64 word64;
 typedef unsigned __int64 uword64;
 #else
