@@ -1,3 +1,8 @@
+2004-03-17  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_merge_private_bfd_data): Correct
+	logic for null_input_bfd detection.
+
 2004-03-17  Ralf Corsepius <corsepiu@faw.uni-ulm.de>
 
 	* config.bfd: Switch sh-*-rtems* to ELF.  Add sh-*-rtemscoff*.
