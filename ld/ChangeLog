@@ -1,3 +1,8 @@
+2001-06-10  Philip Blundell  <philb@gnu.org>
+
+	* configure.in: Set version to 2.11.1.
+	* configure: Regenerate.
+
 2001-06-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (record_bfd_errors): Remove.
