@@ -55,6 +55,7 @@ opcode
 progress.h
 regs
 remote-sim.h
+splay-tree.h
 symcat.h
 wait.h
 
