@@ -587,6 +587,7 @@ static bfd *reldyn_sorting_bfd;
 /* In case we're on a 32-bit machine, construct a 64-bit "-1" value
    from smaller values.  Start with zero, widen, *then* decrement.  */
 #define MINUS_ONE	(((bfd_vma)0) - 1)
+#define MINUS_TWO	(((bfd_vma)0) - 2)
 
 /* The number of local .got entries we reserve.  */
 #define MIPS_RESERVED_GOTNO (2)
@@ -2822,7 +2823,7 @@ mips_elf_higher (bfd_vma value ATTRIBUTE_UNUSED)
   return ((value + (bfd_vma) 0x80008000) >> 32) & 0xffff;
 #else
   abort ();
-  return (bfd_vma) -1;
+  return MINUS_ONE;
 #endif
 }
 
@@ -2835,7 +2836,7 @@ mips_elf_highest (bfd_vma value ATTRIBUTE_UNUSED)
   return ((value + (((bfd_vma) 0x8000 << 32) | 0x80008000)) >> 48) & 0xffff;
 #else
   abort ();
-  return (bfd_vma) -1;
+  return MINUS_ONE;
 #endif
 }
 
@@ -3824,15 +3825,15 @@ mips_elf_create_dynamic_relocation (bfd *output_bfd,
       outrel[2].r_offset = outrel[0].r_offset;
       /* If we didn't need the relocation at all, this value will be
 	 -1.  */
-      if (outrel[0].r_offset == (bfd_vma) -1)
+      if (outrel[0].r_offset == MINUS_ONE)
 	skip = TRUE;
     }
 #endif
 
-  if (outrel[0].r_offset == (bfd_vma) -1)
+  if (outrel[0].r_offset == MINUS_ONE)
     /* The relocation field has been deleted.  */
     skip = TRUE;
-  else if (outrel[0].r_offset == (bfd_vma) -2)
+  else if (outrel[0].r_offset == MINUS_TWO)
     {
       /* The relocation field has been converted into a relative value of
 	 some sort.  Functions like _bfd_elf_write_section_eh_frame expect
@@ -6545,15 +6546,13 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
 				     Elf_Internal_Sym *sym)
 {
   bfd *dynobj;
-  bfd_vma gval;
   asection *sgot;
   struct mips_got_info *g, *gg;
   const char *name;
 
   dynobj = elf_hash_table (info)->dynobj;
-  gval = sym->st_value;
 
-  if (h->plt.offset != (bfd_vma) -1)
+  if (h->plt.offset != MINUS_ONE)
     {
       asection *s;
       bfd_byte stub[MIPS_FUNCTION_STUB_SIZE];
@@ -6586,8 +6585,8 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
       /* The run-time linker uses the st_value field of the symbol
 	 to reset the global offset table entry for this external
 	 to its stub address when unlinking a shared object.  */
-      gval = s->output_section->vma + s->output_offset + h->plt.offset;
-      sym->st_value = gval;
+      sym->st_value = (s->output_section->vma + s->output_offset
+		       + h->plt.offset);
     }
 
   BFD_ASSERT (h->dynindx != -1
