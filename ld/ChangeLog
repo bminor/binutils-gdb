@@ -1,3 +1,7 @@
+2001-03-26  Andreas Jaeger  <aj@suse.de>
+
+	* ld.texinfo (Overview): Fix syntax in texi code.
+
 2001-03-25  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* ld.texinfo: Put @c man indications to generate the ld man page.
@@ -80,8 +84,8 @@
 	* configure.tgt: Add ia64-*-aix* mapping.
 	* emulparams/elf64_aix.sh: Add settings for elf64 on aix5.
 	* testsuite/ld-bootstrap/bootstrap.exp: Exclude ia64 flavor from
-	AIX-specific test. 
-	
+	AIX-specific test.
+
 2001-02-20  H.J. Lu  <hjl@gnu.org>
 
 	* ldfile.c (ldfile_open_file): Set entry->search_dirs_flag to
@@ -116,7 +120,7 @@
 	* ldexp.h (node_type): Add etree_provided.
 	* ldexp.c (exp_fold_tree): Handle etree_provided. Set the node
 	type to etree_provided if defined by PROVIDE. Allow updating
-	for etree_provided. 
+	for etree_provided.
 	(exp_print_tree): Handle etree_provided.
 	* mpw-elfmips.c (gldelf32ebmip_find_exp_assignment): Handle
 	etree_provided.

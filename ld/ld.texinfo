@@ -158,7 +158,7 @@ section entitled "GNU Free Documentation License".
 @cindex @sc{gnu} linker
 @cindex what is this?
 
-@ifsef man
+@ifset man
 @c man begin SYNOPSIS
 ld [ options ] objfile...
 @c man end

@@ -1,3 +1,7 @@
+2001-03-26  Andreas Jaeger  <aj@suse.de>
+
+	* binutils.texi (nm): Fix texi syntax.
+
 2001-03-25  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* binutils.texi: Put @c man begin and @c man end indications
@@ -23,7 +27,7 @@
 	(copy_usage): Document -B/--binary-architecture.
 	(copy_main): Support -B/--binary-architecture.  Set
 	bfd_external_binary_architecture.
-	
+
 2001-03-11  Andreas Jaeger  <aj@suse.de>
 
 	* readelf.c (guess_is_rela): Handle EM_S390_OLD.

@@ -704,7 +704,7 @@ references.
 @ifclear man
 For more details on common symbols, see the discussion of
 --warn-common in @ref{Options,,Linker options,ld.info,The GNU linker}.
-@end man
+@end ifclear
 
 @item D
 The symbol is in the initialized data section.
