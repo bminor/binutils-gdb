@@ -193,7 +193,7 @@ else
 	done
 fi
 
-vr5400_files="ChangeLog mips-opc.c"
+vr5400_files="ChangeLog mips-opc.c mips-dis.c"
 if ( echo $* | grep keep\-vr5400 > /dev/null ) ; then
 	for i in $vr5400_files ; do
 		if test ! -d $i && (grep sanitize-vr5400 $i > /dev/null) ; then

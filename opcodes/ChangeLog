@@ -1,3 +1,12 @@
+start-sanitize-vr5400
+Mon Nov  3 13:23:15 1997  Ken Raeburn  <raeburn@cygnus.com>
+
+	* mips-opc.c (dror32, dror, rzu.ob): Fix bugs in encoding.
+	(c.*.ob, mula.ob, mull.ob, muls.ob, mulsl.ob): Put 'k' version
+	last.
+	* mips-dis.c (print_insn_arg): Handle VR5400 operand types.
+
+end-sanitize-vr5400
 start-sanitize-tx49
 Wed Oct 29 15:10:56 1997  Gavin Koch  <gavin@cygnus.com>
 
