@@ -319,7 +319,11 @@ clone_section (abfd, s, name, count)
       || (n = bfd_make_section_anyway (abfd, sname)) == NULL
       || (h = bfd_link_hash_lookup (link_info.hash,
 				    sname, true, true, false)) == NULL)
-    einfo (_("%F%P: clone section failed: %E\n"));
+    {
+      einfo (_("%F%P: clone section failed: %E\n"));
+      /* Silence gcc warnings.  einfo exits, so we never reach here.  */
+      return NULL;
+    }
 
   /* Set up section symbol.  */
   h->type = bfd_link_hash_defined;

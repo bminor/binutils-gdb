@@ -1,3 +1,7 @@
+2000-09-21  Alan Modra  <alan@linuxcare.com.au>
+
+	* ldwrite.c (clone_section): Silence gcc warnings.
+
 2000-09-20  Alan Modra  <alan@linuxcare.com.au>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Handle
