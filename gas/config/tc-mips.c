@@ -186,7 +186,7 @@ static int file_mips_gp32 = -1;
 static int file_mips_fp32 = -1;
 
 /* This is the struct we use to hold the current set of options.  Note
-   that we must set the isa field to ISA_UNKNOWN and the mips16 field to
+   that we must set the isa field to ISA_UNKNOWN and the ASE fields to
    -1 to indicate that they have not been initialized.  */
 
 static struct mips_set_options mips_opts =
@@ -202,6 +202,10 @@ unsigned long mips_cprmask[4];
 
 /* MIPS ISA we are using for this output file.  */
 static int file_mips_isa = ISA_UNKNOWN;
+
+/* True if -mips16 was passed or implied by arguments passed on the
+   command line (e.g., by -march).  */
+static int file_ase_mips16;
 
 /* True if -mips3d was passed or implied by arguments passed on the
    command line (e.g., by -march).  */
@@ -220,9 +224,6 @@ static int mips_arch = CPU_UNKNOWN;
 /* The argument of the -mtune= flag.  The architecture for which we
    are optimizing.  */
 static int mips_tune = CPU_UNKNOWN;
-
-/* Whether we should mark the file EABI64 or EABI32.  */
-static int mips_eabi64 = 0;
 
 /* If they asked for mips1 or mips2 and a cpu that is
    mips3 or greater, then mark the object file 32BITMODE.  */
@@ -277,12 +278,16 @@ static int mips_32bitmode = 0;
 
 #define HAVE_64BIT_ADDRESSES (! HAVE_32BIT_ADDRESSES)
 
+/* Return true if the given CPU supports the MIPS16 ASE.  */
+#define CPU_HAS_MIPS16(cpu)                            \
+   (strncmp (TARGET_CPU, "mips16", sizeof ("mips16") - 1) == 0)
+
 /* Return true if the given CPU supports the MIPS3D ASE.  */
 #define CPU_HAS_MIPS3D(cpu)	((cpu) == CPU_SB1      \
 				 )
 
 /* Return true if the given CPU supports the MDMX ASE.  */
-#define CPU_HAS_MDMX(cpu)	(0		      \
+#define CPU_HAS_MDMX(cpu)	(false                 \
 				 )
 
 /* Whether the processor uses hardware interlocks to protect
@@ -10419,7 +10424,6 @@ mips_after_parse_args ()
   const char *cpu;
   char *a = NULL;
   int mips_isa_from_cpu;
-  int target_cpu_had_mips16 = 0;
   const struct mips_cpu_info *ci;
 
   /* GP relative stuff not working for PE */
@@ -10439,15 +10443,6 @@ mips_after_parse_args ()
       a[(sizeof TARGET_CPU) - 3] = '\0';
       cpu = a;
     }
-
-  if (strncmp (cpu, "mips16", sizeof "mips16" - 1) == 0)
-    {
-      target_cpu_had_mips16 = 1;
-      cpu += sizeof "mips16" - 1;
-    }
-
-  if (mips_opts.mips16 < 0)
-    mips_opts.mips16 = target_cpu_had_mips16;
 
   /* Backward compatibility for historic -mcpu= option.  Check for
      incompatible options, warn if -mcpu is used.  */
@@ -10611,13 +10606,6 @@ mips_after_parse_args ()
   if (mips_opts.isa == ISA_MIPS1 && mips_trap)
     as_bad (_("trap exception not supported at ISA 1"));
 
-  /* Set the EABI kind based on the ISA before the user gets
-     to change the ISA with directives.  This isn't really
-     the best, but then neither is basing the abi on the isa.  */
-  if (ISA_HAS_64BIT_REGS (mips_opts.isa)
-      && mips_opts.abi == EABI_ABI)
-    mips_eabi64 = 1;
-
   /* If they asked for mips1 or mips2 and a cpu that is
      mips3 or greater, then mark the object file 32BITMODE.  */
   if (mips_isa_from_cpu != ISA_UNKNOWN
@@ -10627,10 +10615,12 @@ mips_after_parse_args ()
 
   /* If the selected architecture includes support for ASEs, enable
      generation of code for them.  */
+  if (mips_opts.mips16 == -1)
+    mips_opts.mips16 = (CPU_HAS_MIPS16 (mips_arch)) ? 1 : 0;
   if (mips_opts.ase_mips3d == -1)
-    mips_opts.ase_mips3d = CPU_HAS_MIPS3D (mips_arch);
+    mips_opts.ase_mips3d = (CPU_HAS_MIPS3D (mips_arch)) ? 1 : 0;
   if (mips_opts.ase_mdmx == -1)
-    mips_opts.ase_mdmx = CPU_HAS_MDMX (mips_arch);
+    mips_opts.ase_mdmx = (CPU_HAS_MDMX (mips_arch)) ? 1 : 0;
 
   if (file_mips_gp32 < 0)
     file_mips_gp32 = 0;
@@ -10639,6 +10629,7 @@ mips_after_parse_args ()
 
   file_mips_isa = mips_opts.isa;
   file_mips_abi = mips_opts.abi;
+  file_ase_mips16 = mips_opts.mips16;
   file_ase_mips3d = mips_opts.ase_mips3d;
   file_ase_mdmx = mips_opts.ase_mdmx;
   mips_opts.gp32 = file_mips_gp32;
@@ -11677,10 +11668,6 @@ s_mipsset (x)
     {
       mips_opts.nobopt = 1;
     }
-  else if (strcmp (name, "mdmx") == 0)
-    mips_opts.ase_mdmx = 1;
-  else if (strcmp (name, "nomdmx") == 0)
-    mips_opts.ase_mdmx = 0;
   else if (strcmp (name, "mips16") == 0
 	   || strcmp (name, "MIPS-16") == 0)
     mips_opts.mips16 = 1;
@@ -11691,6 +11678,10 @@ s_mipsset (x)
     mips_opts.ase_mips3d = 1;
   else if (strcmp (name, "nomips3d") == 0)
     mips_opts.ase_mips3d = 0;
+  else if (strcmp (name, "mdmx") == 0)
+    mips_opts.ase_mdmx = 1;
+  else if (strcmp (name, "nomdmx") == 0)
+    mips_opts.ase_mdmx = 0;
   else if (strncmp (name, "mips", 4) == 0)
     {
       int isa;
@@ -13206,6 +13197,8 @@ mips_elf_final_processing ()
     elf_elfheader (stdoutput)->e_flags |= EF_MIPS_PIC;
 
   /* Set MIPS ELF flags for ASEs.  */
+  if (file_ase_mips16)
+    elf_elfheader (stdoutput)->e_flags |= EF_MIPS_ARCH_ASE_M16;
 #if 0 /* XXX FIXME */
   if (file_ase_mips3d)
     elf_elfheader (stdoutput)->e_flags |= ???;
@@ -13222,7 +13215,9 @@ mips_elf_final_processing ()
     elf_elfheader (stdoutput)->e_flags |= E_MIPS_ABI_O64;
   else if (file_mips_abi == EABI_ABI)
     {
-      if (mips_eabi64)
+      /* Set the EABI kind based on the ISA.  This isn't really
+	 the best, but then neither is basing the abi on the isa.  */
+      if (ISA_HAS_64BIT_REGS (file_mips_isa))
 	elf_elfheader (stdoutput)->e_flags |= E_MIPS_ABI_EABI64;
       else
 	elf_elfheader (stdoutput)->e_flags |= E_MIPS_ABI_EABI32;
