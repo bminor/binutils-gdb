@@ -1,3 +1,11 @@
+start-sanitize-cygnus
+Thu Jan 22 16:10:32 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* cgen.sh: Rewrite to be like simulator's version.
+	* Makefile.am (cgen): Update call to cgen.sh.
+	* Makefile.in: Regenerate
+
+end-sanitize-cygnus
 Fri Jan 16 15:29:11 1998  Jim Blandy  <jimb@zwingli.cygnus.com>
 
 	* mips-opc.c (mips_builtin_opcodes): Move 4010's "addciu"

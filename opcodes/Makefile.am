@@ -164,7 +164,7 @@ ENDSAN = end-sanitize-cygnus
 
 # start-sanitize-cygnus
 cgen:
-	$(SHELL) $(srcdir)/cgen.sh $(srcdir) $(CGENDIR) $(CGENFLAGS) $(SCHEME) $(SCHEMEFLAGS) $(arch)
+	$(SHELL) $(srcdir)/cgen.sh opcodes $(srcdir) $(CGENDIR) $(CGENFLAGS) $(SCHEME) $(SCHEMEFLAGS) $(arch)
 	touch stamp-${arch}
 
 .PHONY: cgen
