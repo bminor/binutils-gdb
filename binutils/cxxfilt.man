@@ -1,6 +1,6 @@
 .\" Copyright (c) 1991 Free Software Foundation
 .\" See section COPYING for conditions for redistribution
-.TH c++filt 1 "June 1993" "cygnus support" "GNU Development Tools"
+.TH @PROGRAM@ 1 "June 1993" "cygnus support" "GNU Development Tools"
 .de BP
 .sp
 .ti \-.2i
@@ -8,13 +8,13 @@
 ..
 
 .SH NAME
-c++filt \- demangle C++ symbols
+@PROGRAM@ \- demangle C++ symbols
 
 .SH SYNOPSIS
 .hy 0
 .na
 .TP
-.B c++filt
+.B @PROGRAM@
 .RB "[\|" \-_ | \-\-strip-underscores "\|]"
 .RB "[\|" "\-s {gnu,lucid,arm} " | " \-\-format={gnu,lucid,arm}" "\|]"
 .RB "[\|" \-\-help "\|]"
@@ -27,7 +27,7 @@ of different types).  All C++ function names are encoded into a
 low-level assembly label (this process is known as
 .I mangling\c
 ).  The 
-.B c++filt
+.B @PROGRAM@
 program does the inverse mapping: it decodes (\fIdemangles\fR)
 low-level names into user-level names so that the linker can keep
 these overloaded functions from clashing.
@@ -38,14 +38,14 @@ label decodes into a C++ name, the C++ name replaces the low-level
 name in the output.
 .PP
 You can use
-.B c++filt
+.B @PROGRAM@
 to decipher individual symbols by specifying these symbols on the
 command line.
 .PP
 If no
 .B symbol
 arguments are given,
-.B c++filt
+.B @PROGRAM@
 reads symbol names from the standard input and writes the demangled
 names to the standard output.  All results are printed on the standard
 output.
@@ -76,13 +76,13 @@ GNU style.
 .TP
 .B \-\-help
 Print a summary of the options to
-.B c++filt
+.B @PROGRAM@
 and exit.
 
 .TP
 .B \-\-version
 Print the version number of
-.B c++filt
+.B @PROGRAM@
 and exit.
 
 .SH "SEE ALSO"
