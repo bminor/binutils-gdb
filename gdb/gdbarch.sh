@@ -1628,6 +1628,7 @@ do
 	printf "int\n"
 	printf "gdbarch_${function}_p (struct gdbarch *gdbarch)\n"
 	printf "{\n"
+        printf "  gdb_assert (gdbarch != NULL);\n"
 	if [ -n "${valid_p}" ]
 	then
 	    printf "  return ${valid_p};\n"
@@ -1647,6 +1648,7 @@ do
 	  printf "gdbarch_${function} (struct gdbarch *gdbarch, ${formal})\n"
 	fi
 	printf "{\n"
+        printf "  gdb_assert (gdbarch != NULL);\n"
         printf "  if (gdbarch->${function} == 0)\n"
         printf "    internal_error (__FILE__, __LINE__,\n"
 	printf "                    \"gdbarch: gdbarch_${function} invalid\");\n"
@@ -1688,6 +1690,7 @@ do
 	printf "${returntype}\n"
 	printf "gdbarch_${function} (struct gdbarch *gdbarch)\n"
 	printf "{\n"
+        printf "  gdb_assert (gdbarch != NULL);\n"
 	if [ "x${invalid_p}" = "x0" ]
 	then
 	    printf "  /* Skip verify of ${function}, invalid_p == 0 */\n"
@@ -1719,6 +1722,7 @@ do
 	printf "${returntype}\n"
 	printf "gdbarch_${function} (struct gdbarch *gdbarch)\n"
 	printf "{\n"
+        printf "  gdb_assert (gdbarch != NULL);\n"
 	printf "  if (gdbarch_debug >= 2)\n"
 	printf "    fprintf_unfiltered (gdb_stdlog, \"gdbarch_${function} called\\\\n\");\n"
 	printf "  return gdbarch->${function};\n"
