@@ -2,7 +2,8 @@ Fri Sep 16 11:27:39 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* objdump.c (struct objdump_disasm_info): Add field require_sec.
 	(objdump_print_address): If aux->require_sec, require that the
-	symbol be in aux->sec even if HAS_RELOC is not set.
+	symbol be in aux->sec even if HAS_RELOC is not set.  If we can't
+	find a smaller symbol in the right section, look for a larger one.
 	(disassemble_data): Set aux.require_sec around the
 	objdump_print_address call for the instruction address.
 

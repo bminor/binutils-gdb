@@ -422,12 +422,12 @@ objdump_print_address (vma, info)
     long i;
 
     aux = (struct objdump_disasm_info *) info->application_data;
-    if ((aux->require_sec
-	 || (aux->abfd->flags & HAS_RELOC) != 0)
-	&& vma >= bfd_get_section_vma (aux->abfd, aux->sec)
-	&& vma < (bfd_get_section_vma (aux->abfd, aux->sec)
-		  + bfd_get_section_size_before_reloc (aux->sec))
-	&& syms[thisplace]->section != aux->sec)
+    if (syms[thisplace]->section != aux->sec
+	&& (aux->require_sec
+	    || ((aux->abfd->flags & HAS_RELOC) != 0
+		&& vma >= bfd_get_section_vma (aux->abfd, aux->sec)
+		&& vma < (bfd_get_section_vma (aux->abfd, aux->sec)
+			  + bfd_get_section_size_before_reloc (aux->sec)))))
       {
 	for (i = thisplace + 1; i < symcount; i++)
 	  {
@@ -443,8 +443,23 @@ objdump_print_address (vma, info)
 		break;
 	      }
 	  }
+
+	if (syms[thisplace]->section != aux->sec)
+	  {
+	    /* We didn't find a good symbol with a smaller value.
+               Look for one with a larger value.  */
+	    for (i = thisplace + 1; i < symcount; i++)
+	      {
+		if (syms[i]->section == aux->sec)
+		  {
+		    thisplace = i;
+		    break;
+		  }
+	      }
+	  }
       }
   }
+
   fprintf (info->stream, " <%s", syms[thisplace]->name);
   if (syms[thisplace]->value > vma)
     {
