@@ -1,7 +1,11 @@
+Mon Feb 10 22:24:00 1997  Dawn Perchik  dawn@cygnus.com>
+
+        * gas/mips/itbl-test.c: Add copyright message and fix indentation.   
+
 Mon Feb 10 17:54:00 1997  Dawn Perchik  dawn@cygnus.com>
 
-	* itbl-test.c: New file.  Stand-alone assembler and dissassembler 
-	for itbl support.
+	* gas/mips/itbl-test.c: New file.  Stand-alone assembler and 
+	dissassembler for itbl support.
 
 Mon Feb 10 17:20:00 1997  Dawn Perchik  dawn@cygnus.com>
 
