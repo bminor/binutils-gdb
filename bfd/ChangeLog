@@ -1,3 +1,8 @@
+2002-07-14  H.J. Lu <hjl@gnu.org>
+
+	* elflink.h (elf_link_assign_sym_version): Hide the default
+	definition if there is a hidden versioned definition.
+
 2002-07-12  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elf32-cris.c (cris_elf_relocate_section): Drop nonsensical

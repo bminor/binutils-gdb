@@ -4345,6 +4345,7 @@ elf_link_assign_sym_version (h, data)
 	    (_("%s: undefined versioned symbol name %s"),
 	     bfd_get_filename (sinfo->output_bfd), h->root.root.string);
 	  bfd_set_error (bfd_error_bad_value);
+error_return:
 	  sinfo->failed = true;
 	  return false;
 	}
@@ -4415,6 +4416,43 @@ elf_link_assign_sym_version (h, data)
 	    {
 	      (*bed->elf_backend_hide_symbol) (info, h, true);
 	    }
+	}
+
+      /* We need to check if a hidden versioned definition should
+	 hide the default one.  */
+      if (h->dynindx != -1 && h->verinfo.vertree != NULL)
+	{
+	  const char *verstr, *name;
+	  size_t namelen, verlen, newlen;
+	  char *newname;
+	  struct elf_link_hash_entry *newh;
+
+	  name = h->root.root.string;
+	  namelen = strlen (name);
+	  verstr = h->verinfo.vertree->name;
+	  verlen = strlen (verstr);
+	  newlen = namelen + verlen + 2;
+
+	  newname = (char *) bfd_malloc ((bfd_size_type) newlen);
+	  if (newname == NULL)
+	    goto error_return;
+	  memcpy (newname, name, namelen);
+
+	  /* Check the hidden versioned definition.  */
+	  p = newname + namelen;
+	  *p++ = ELF_VER_CHR;
+	  memcpy (p, verstr, verlen + 1);
+	  newh = elf_link_hash_lookup (elf_hash_table (info), newname,
+				    false, false, false);
+
+	  if (newh
+	      && (newh->root.type == bfd_link_hash_defined
+		  || newh->root.type == bfd_link_hash_defweak))
+	    /* We find a hidden versioned definition. Hide the default
+	       one.  */
+	    (*bed->elf_backend_hide_symbol) (info, h, true);
+
+	  free (newname);
 	}
     }
 
