@@ -2,6 +2,7 @@ Thu Aug 19 09:45:51 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* configure.in, targets.c: Add missing vectors to the tables.
 	* targets.c (target_vector) [!SELECT_VECS]: Add DEFAULT_VECTOR.
+	Remove hp300bsd_vec due to clash with sunos_big_vec.
 
 Tue Aug 17 18:12:32 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 

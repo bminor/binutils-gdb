@@ -451,7 +451,9 @@ bfd_target *target_vector[] = {
 #if 0
 	&host_aout_vec,
 #endif
+#if 0				/* Clashes with sunos_big_vec magic no.  */
 	&hp300bsd_vec,
+#endif
 	&hp300hpux_vec,
 #if defined (HOST_HPPAHPUX) || defined (HOST_HPPABSD)
         &hppa_vec,
