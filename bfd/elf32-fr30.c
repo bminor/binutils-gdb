@@ -26,12 +26,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Forward declarations.  */
 static bfd_reloc_status_type fr30_elf_i20_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+static bfd_reloc_status_type fr30_elf_i32_reloc
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static reloc_howto_type * fr30_reloc_type_lookup
   PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
 static void fr30_info_to_howto_rela 
   PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
 static boolean fr30_elf_relocate_section 
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *, Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
+static bfd_reloc_status_type fr30_final_link_relocate
+  PARAMS ((reloc_howto_type *, bfd *, asection *, bfd_byte *, Elf_Internal_Rela *, bfd_vma));
 
 static reloc_howto_type fr30_elf_howto_table [] =
 {
@@ -88,7 +92,7 @@ static reloc_howto_type fr30_elf_howto_table [] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
+	 fr30_elf_i32_reloc,	/* special_function */
 	 "R_FR30_32",		/* name */
 	 true,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
@@ -214,7 +218,7 @@ fr30_elf_i20_reloc (abfd, reloc_entry, symbol, data,
 
   if (output_bfd != NULL)
     /* FIXME: See bfd_perform_relocation.  Is this right?  */
-    return bfd_reloc_continue;
+    return bfd_reloc_ok;
 
   relocation =
     symbol->value
@@ -228,6 +232,47 @@ fr30_elf_i20_reloc (abfd, reloc_entry, symbol, data,
   x = bfd_get_32 (abfd, data + reloc_entry->address);
   x = (x & 0xff0f0000) | (relocation & 0x0000ffff) | ((relocation & 0x000f0000) << 4);
   bfd_put_32 (abfd, x, data + reloc_entry->address);
+
+  return bfd_reloc_ok;
+}
+
+
+/* Utility to actually perform a R_FR30_32 reloc.  */
+
+static bfd_reloc_status_type
+fr30_elf_i32_reloc (abfd, reloc_entry, symbol, data,
+		    input_section, output_bfd, error_message)
+     bfd *      abfd;
+     arelent *  reloc_entry;
+     asymbol *  symbol;
+     PTR        data;
+     asection * input_section;
+     bfd *      output_bfd;
+     char **    error_message;
+{
+  bfd_vma       relocation;
+
+  /* This part is from bfd_elf_generic_reloc.  */
+  if (output_bfd != (bfd *) NULL
+      && (symbol->flags & BSF_SECTION_SYM) == 0
+      && (! reloc_entry->howto->partial_inplace
+	  || reloc_entry->addend == 0))
+    {
+      reloc_entry->address += input_section->output_offset;
+      return bfd_reloc_ok;
+    }
+
+  if (output_bfd != NULL)
+    /* FIXME: See bfd_perform_relocation.  Is this right?  */
+    return bfd_reloc_ok;
+
+  relocation =
+    symbol->value
+    + symbol->section->output_section->vma
+    + symbol->section->output_offset
+    + reloc_entry->addend;
+
+  bfd_put_32 (abfd, relocation, data + reloc_entry->address + 2);
 
   return bfd_reloc_ok;
 }
@@ -285,6 +330,47 @@ fr30_info_to_howto_rela (abfd, cache_ptr, dst)
   cache_ptr->howto = & fr30_elf_howto_table [r_type];
 }
 
+/* Perform a single relocation.  By default we use the standard BFD
+   routines, but a few relocs, we have to do them ourselves.  */
+
+static bfd_reloc_status_type
+fr30_final_link_relocate (howto, input_bfd, input_section, contents, rel, relocation)
+     reloc_howto_type *  howto;
+     bfd *               input_bfd;
+     asection *          input_section;
+     bfd_byte *          contents;
+     Elf_Internal_Rela * rel;
+     bfd_vma             relocation;
+{
+  bfd_reloc_status_type r = bfd_reloc_ok;
+  bfd_vma               x;
+  
+  switch (howto->type)
+    {
+    case R_FR30_20:
+      contents += rel->r_offset;
+      relocation += rel->r_addend;
+      x = bfd_get_32 (input_bfd, contents);
+      x = (x & 0xff0f0000) | (relocation & 0x0000ffff) | ((relocation & 0x000f0000) << 4);
+      bfd_put_32 (input_bfd, relocation, contents);
+      break;
+      
+    case R_FR30_32:
+      contents += rel->r_offset + 2;
+      relocation += rel->r_addend;
+      bfd_put_32 (input_bfd, relocation, contents);
+      break;
+      
+    default:
+      r = _bfd_final_link_relocate (howto, input_bfd, input_section,
+				    contents, rel->r_offset,
+				    relocation, rel->r_addend);
+    }
+
+  return r;
+}
+
+
 /* Relocate an FR30 ELF section.
    There is some attempt to make this function usable for many architectures,
    both USE_REL and USE_RELA ['twould be nice if such a critter existed],
@@ -338,7 +424,7 @@ fr30_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   symtab_hdr = & elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
   relend     = relocs + input_section->reloc_count;
-  
+
   for (rel = relocs; rel < relend; rel ++)
     {
       reloc_howto_type *           howto;
@@ -348,7 +434,7 @@ fr30_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       struct elf_link_hash_entry * h;
       bfd_vma                      relocation;
       bfd_reloc_status_type        r;
-      const char *                 name;
+      const char *                 name = NULL;
 
       r_symndx = ELF32_R_SYM (rel->r_info);
 
@@ -440,66 +526,50 @@ fr30_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      relocation = 0;
 	    }
 	}
-
-      r = _bfd_final_link_relocate (howto, input_bfd, input_section,
-				    contents, rel->r_offset,
-				    relocation, rel->r_addend);
+      
+      r = fr30_final_link_relocate (howto, input_bfd, input_section,
+				     contents, rel, relocation);
 
       if (r != bfd_reloc_ok)
 	{
-	  const char * msg = (const char *)0;
+	  const char * msg = (const char *) NULL;
 
 	  switch (r)
 	    {
 	    case bfd_reloc_overflow:
-	      if (! ((*info->callbacks->reloc_overflow)
-		     (info, name, howto->name, (bfd_vma) 0,
-		      input_bfd, input_section, rel->r_offset)))
-		return false;
+	      r = info->callbacks->reloc_overflow
+		(info, name, howto->name, (bfd_vma) 0,
+		 input_bfd, input_section, rel->r_offset);
 	      break;
-
+	      
 	    case bfd_reloc_undefined:
-	      if (! ((*info->callbacks->undefined_symbol)
-		     (info, name, input_bfd, input_section,
-		      rel->r_offset)))
-		return false;
+	      r = info->callbacks->undefined_symbol
+		(info, name, input_bfd, input_section, rel->r_offset);
 	      break;
-
+	      
 	    case bfd_reloc_outofrange:
 	      msg = _("internal error: out of range error");
-	      goto common_error;
+	      break;
 
 	    case bfd_reloc_notsupported:
 	      msg = _("internal error: unsupported relocation error");
-	      goto common_error;
+	      break;
 
 	    case bfd_reloc_dangerous:
 	      msg = _("internal error: dangerous relocation");
-	      goto common_error;
+	      break;
 
-	    case bfd_reloc_other:
-	      msg = _("could not locate special linker symbol __gp");
-	      goto common_error;
-
-	    case bfd_reloc_continue:
-	      msg = _("could not locate special linker symbol __ep");
-	      goto common_error;
-
-	    case (bfd_reloc_dangerous + 1):
-	      msg = _("could not locate special linker symbol __ctbp");
-	      goto common_error;
-	      
 	    default:
 	      msg = _("internal error: unknown error");
-	      /* fall through */
-
-	    common_error:
-	      if (!((*info->callbacks->warning)
-		    (info, msg, name, input_bfd, input_section,
-		     rel->r_offset)))
-		return false;
 	      break;
 	    }
+
+	  if (msg)
+	    r = info->callbacks->warning
+	      (info, msg, name, input_bfd, input_section, rel->r_offset);
+
+	  if (! r)
+	    return false;
 	}
     }
 

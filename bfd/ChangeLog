@@ -1,3 +1,24 @@
+Tue Nov 24 10:25:27 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-fr30.c (fr30_elf_relocate_section): Call
+	fr30_final_link_relocate.
+	(fr30_final_link_relocate): New function: Handle I20 and I32
+	relocs.
+	(fr30_elf_i32_reloc): New function: Handle I32 relocs.
+
+	* elf32-v850.c (v850_elf_relocate_section): Reset hi16s reloc
+	chain to empty.
+	
+	The following changes are based on a patch submitted by Gianluca
+	Moro <glctr@abc.it>:
+	
+	(v850_elf_perform_relocation): Only update a hi16s reloc if it has
+	not already been updated.
+	(find_remembered_hi16s_reloc): New parameter 'already_found'
+	returns state of remembered hi16s reloc.
+	(remember_hi16s_reloc): Set 'found' field to false.
+	(hi16s_location): Add 'found' field.
+
 1998-11-23  DJ Delorie  <dj@cygnus.com>
 
 	* coff-i386.c (bfd_pe_dll_not_recognized_hack): the linker wants
