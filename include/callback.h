@@ -17,6 +17,16 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+/* ??? This interface isn't intended to be specific to any particular kind
+   of remote (hardware, simulator, whatever).  However, at the present
+   time it is only used by the simulators.  At some point this should be
+   an entity onto itself.  For example, it's wrong that the definitions of the
+   functions host_to_target_errno, target_to_host_open live in the simulator
+   sources.  It would also be wrong for such functions to live in gdb
+   sources.  Until such time perhaps it would be best to avoid adding
+   prototypes of functions (and thus expanding the definition of the
+   interface).  */
+
 #ifndef CALLBACK_H
 #define CALLBACK_H
 
@@ -105,9 +115,5 @@ extern target_defs_map open_map[];
 
 extern int host_to_target_errno PARAMS ((int));
 extern int target_to_host_open PARAMS ((int));
-
-/* Cover functions to the vprintf callbacks.  */
-extern void cb_printf PARAMS ((host_callback *, const char *, ...));
-extern void cb_eprintf PARAMS ((host_callback *, const char *, ...));
 
 #endif
