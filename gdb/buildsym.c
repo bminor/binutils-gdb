@@ -412,6 +412,37 @@ start_subfile (name, dirname)
     {
       subfile->language = subfile->next->language;
     }
+
+  /* cfront output is a C program, so in most ways it looks like a C
+     program.  But to demangle we need to set the language to C++.  We
+     can distinguish cfront code by the fact that it has #line
+     directives which specify a file name ending in .C.
+
+     So if the filename of this subfile ends in .C, then change the language
+     of any pending subfiles from C to C++.  .cc is also accepted, even
+     though I don't think cfront allows it.  */
+
+  if (subfile->name)
+    {
+      char *p;
+      struct subfile *s;
+
+      p = strrchr (subfile->name, '.');
+      if (p != NULL
+	  && (p[1] == 'C' && p[2] == '\0'
+	      || p[1] == 'c' && p[2] == 'c' && p[3] == '\0'))
+	for (s = subfiles; s != NULL; s = s->next)
+	  if (s->language == language_c)
+	    s->language = language_cplus;
+    }
+
+  /* And patch up this file if necessary.  */
+  if (subfile->language == language_c
+      && subfile->next != NULL
+      && subfile->next->language == language_cplus)
+    {
+      subfile->language = language_cplus;
+    }
 }
 
 /* For stabs readers, the first N_SO symbol is assumed to be the source
