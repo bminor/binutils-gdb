@@ -1,4 +1,13 @@
+Sun Mar  7 21:58:53 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in (MAKEOVERRIDES): Define to be empty for GNU Make
+	3.63.
+
 Fri Mar  5 17:39:45 1993  John Gilmore  (gnu@cacophony.cygnus.com)
+
+	* printcmd.c (print_address_symbolic):  Only print if offset
+	is shorter than max_symbolic_offset.
+	(initialize_printcmd):  `set print max-symbolic-offset'.
 
 	* am29k-tdep.c (TAGWORD_ZERO_MASK):  New #define.
 	(examine_tag):  Use it.

@@ -183,7 +183,75 @@ FLAGS_TO_PASS = \
 	"AR_FLAGS=$(AR_FLAGS)" \
 	"CC=$(CC)" \
 	"CFLAGS=$(CFLAGS)" \
+$(start-sanitize-chill)\
+	"CHILLFLAGS=$(CHILLFLAGS)" \
+	"CHILL=$(CHILL)" \
+	"CHILL_LIB=$(CHILL_LIB)" \
+$(end-sanitize-chill)\
+	"CXX=$(CXX)" \
+	"CXXFLAGS=$(CXXFLAGS)" \
 	"RANLIB=$(RANLIB)" \
+	"MAKEINFO=$(MAKEINFO)" \
+	"INSTALL=$(INSTALL)" \
+	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
+	"INSTALL_DATA=$(INSTALL_DATA)" \
+	"BISON=$(BISON)"
+
+# Flags that we pass when building the testsuite.
+
+CC_FOR_TARGET = ` \
+  if [ -f $${rootme}/../gcc/Makefile ] ; then \
+    echo $${rootme}/../gcc/xgcc -B$${rootme}/../gcc/; \
+  else \
+    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
+      echo $(CC); \
+    else \
+      t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
+    fi; \
+  fi`
+
+CXX = gcc
+
+CXX_FOR_TARGET = ` \
+  if [ -f $${rootme}/../gcc/Makefile ] ; then \
+    echo $${rootme}/../gcc/xgcc -B$${rootme}/../gcc/; \
+  else \
+    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
+      echo $(CXX); \
+    else \
+      t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
+    fi; \
+  fi`
+
+$(start-sanitize-chill)
+CHILLFLAGS = $(CFLAGS)
+CHILL = gcc
+CHILL_FOR_TARGET = ` \
+  if [ -f $${rootme}/../gcc/Makefile ] ; then \
+    echo $${rootme}/../gcc/xgcc -B$${rootme}/../gcc/ -L$${rootme}/../chillrt/; \
+  else \
+    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
+      echo $(CC); \
+    else \
+      t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
+    fi; \
+  fi`
+CHILL_LIB = -lchill
+$(end-sanitize-chill)
+
+TARGET_FLAGS_TO_PASS = \
+	"prefix=$(prefix)" \
+	"exec_prefix=$(exec_prefix)" \
+	"against=$(against)" \
+	"CC=$(CC_FOR_TARGET)" \
+	"CFLAGS=$(CFLAGS)" \
+$(start-sanitize-chill)\
+	"CHILLFLAGS=$(CHILLFLAGS)" \
+	"CHILL=$(CHILL_FOR_TARGET)" \
+	"CHILL_LIB=$(CHILL_LIB)" \
+$(end-sanitize-chill)\
+	"CXX=$(CXX_FOR_TARGET)" \
+	"CXXFLAGS=$(CXXFLAGS)" \
 	"MAKEINFO=$(MAKEINFO)" \
 	"INSTALL=$(INSTALL)" \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
@@ -322,7 +390,7 @@ TSSTART = /lib/crt0.o
 
 NTSSTART = kdb-start.o
 
-SUBDIRS = doc
+SUBDIRS = doc testsuite
 
 # For now, shortcut the "configure GDB for fewer languages" stuff.
 YYFILES = c-exp.tab.c m2-exp.tab.c ch-exp.tab.c
@@ -334,7 +402,8 @@ YYOBJ = c-exp.tab.o m2-exp.tab.o ch-exp.tab.o
 	${CC} -c ${INTERNAL_CFLAGS} $<
 
 all: gdb
-	$(MAKE) $(FLAGS_TO_PASS) DO=all "DODIRS=$(SUBDIRS)" subdir_do
+	$(MAKE) $(FLAGS_TO_PASS) DO=all "DODIRS=`echo $(SUBDIRS) | sed 's/testsuite//'`" subdir_do
+	rootme=`pwd`; export rootme; $(MAKE) $(TARGET_FLAGS_TO_PASS) DO=all DODIRS=testsuite subdir_do
 check:
 	../dejagnu/runtest -to gdb $(DGFLAGS)
 
@@ -819,6 +888,11 @@ force_update:
 # Rumor is that this will be fixed (and this target can be removed)
 # in GNU Make 4.0.
 .NOEXPORT:
+
+# GNU Make 3.63 has a different problem: it keeps tacking command line
+# overrides onto the definition of $(MAKE).  This variable setting
+# will remove them.
+MAKEOVERRIDES=
 
 # This is the end of "Makefile.in".  When built into "Makefile"
 # by the configure script, two things are added below this point:
