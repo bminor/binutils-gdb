@@ -71,112 +71,9 @@ proc set_lang_chill {} {
     }
 }
 
-# Testing printing of a specific value.  Increment passcount for
-# success or issue fail message for failure.  In both cases, return
-# a 1 to indicate that more tests can proceed.  However a timeout
-# is a serious error, generates a special fail message, and causes
-# a 0 to be returned to indicate that more tests are likely to fail
-# as well.
-#
-# Args are:
-#
-#	First one is string to send to gdb
-#	Second one is string to match gdb result to
-#	Third one is an optional message to be printed
-
-proc test_print_accept { args } {
-    global prompt
-    global passcount
-    global verbose
-
-    if [llength $args]==3 then {
-	set message [lindex $args 2]
-    } else {
-	set message [lindex $args 0]
-    }
-    set sendthis [lindex $args 0]
-    set expectthis [lindex $args 1]
-    if $verbose>2 then {
-	send_user "Sending \"$sendthis\" to gdb\n"
-	send_user "Looking to match \"$expectthis\"\n"
-	send_user "Message is \"$message\"\n"
-    }
-    send "$sendthis\n"
-    expect {
-	-re ".* = $expectthis\r\n$prompt $" {
-	    incr passcount
-	    return 1
-	}
-	-re ".*$prompt $" {
-	    if ![string match "" $message] then {
-		fail "$sendthis ($message)"
-	    } else {
-		fail "$sendthis"
-	    }
-	    return 1
-	}
-	timeout {
-	    fail "$sendthis (timeout)"
-	    return 0
-	}
-    }
-}
-
-# Testing printing of a specific value.  Increment passcount for
-# success or issue fail message for failure.  In both cases, return
-# a 1 to indicate that more tests can proceed.  However a timeout
-# is a serious error, generates a special fail message, and causes
-# a 0 to be returned to indicate that more tests are likely to fail
-# as well.
-
-proc test_print_reject { args } {
-    global prompt
-    global passcount
-    global verbose
-
-    if [llength $args]==2 then {
-	set expectthis [lindex $args 1]
-    } else {
-	set expectthis "should never match this bogus string"
-    }
-    set sendthis [lindex $args 0]
-    if $verbose>2 then {
-	send_user "Sending \"$sendthis\" to gdb\n"
-	send_user "Looking to match \"$expectthis\"\n"
-    }
-    send "$sendthis\n"
-    expect {
-	-re ".*A .* in expression.*\\.*$prompt $" {
-	    incr passcount
-	    return 1
-	}
-	-re ".*Junk after end of expression.*$prompt $" {
-	    incr passcount
-	    return 1
-	}
-	-re ".*No symbol table is loaded.*$prompt $" {
-	    incr passcount
-	    return 1
-	}
-	-re ".*$expectthis.*$prompt $" {
-	    incr passcount
-	    return 1
-	}
-	-re ".*$prompt $" {
-	    fail "$sendthis not properly rejected"
-	    return 1
-	}
-	timeout {
-	    fail "$sendthis (timeout)"
-	    return 0
-	}
-    }
-}
-
 # checks if structure was accessed correctly
 proc test_write { args } {
     global prompt
-    global passcount
 
     if [llength $args]==5 then {
 	set message [lindex $args 4]
@@ -204,16 +101,14 @@ proc test_write { args } {
     verbose "setting var $value..."
     send "set var $location.m$extended := $value\n"
     expect -re ".*$prompt $" {}
-    test_print_accept "print $location" \
-	"\[\[\]\\.p1: 2863311530, \\.m: $matchval, \\.p2: 1431655765\[\]\]" \
-	"$message"
+    gdb_test "print $location" \
+      ".*= \[\[\]\\.p1: 2863311530, \\.m: $matchval, \\.p2: 1431655765\[\]\]"\
+      "$message"
 }
 
 # test write access from gdb (setvar x:=y) from gdb
 proc write_access { } {
-    global passcount
 
-    set passcount 0
     verbose "testing write access to locations"
     
     # discrete modes
@@ -338,16 +233,11 @@ proc write_access { } {
 	"structure write 6"
     test_write strul1 \"HUGO\" {\[\.a: 0, \.b: 0, \.ch: \"HUGO\"\]} \
 	{.ch} "structure write 7"
-
-    if $passcount then {
-	pass "$passcount correct write access tests"
-    }
 }
 
 # Start with a fresh gdb.
 
 set binfile "tests2.exe"
-global passcount
 
 gdb_exit
 gdb_start

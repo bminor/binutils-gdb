@@ -106,99 +106,12 @@ proc test_print_accept { args } {
     return $result
 }
 
-
-#
-# same function as above but $expectthis has to match exactly (no '=' is 
-# appended in regexp
-#
-proc test_print_accept_exact { args } {
-    global prompt
-    global passcount
-    global verbose
-
-    if [llength $args]==3 then {
-	set message [lindex $args 2]
-    } else {
-	set message [lindex $args 0]
-    }
-    set sendthis [lindex $args 0]
-    set expectthis [lindex $args 1]
-    if $verbose>2 then {
-	send_user "Sending \"$sendthis\" to gdb\n"
-	send_user "Looking to match \"$expectthis\"\n"
-	send_user "Message is \"$message\"\n"
-    }
-    send "$sendthis\n"
-    expect {
-	-re "$expectthis\r\n$prompt $" {
-	    incr passcount
-	    return 1
-	}
-	-re ".*$prompt $" {
-	    if ![string match "" $message] then {
-		fail "$sendthis ($message)"
-	    } else {
-		fail "$sendthis"
-	    }
-	    return 1
-	}
-	timeout {
-	    fail "$sendthis (timeout)"
-	    return 0
-	}
-    }
-}
-
 # Testing printing of a specific value.  Increment passcount for
 # success or issue fail message for failure.  In both cases, return
 # a 1 to indicate that more tests can proceed.  However a timeout
 # is a serious error, generates a special fail message, and causes
 # a 0 to be returned to indicate that more tests are likely to fail
 # as well.
-
-proc test_print_reject { args } {
-    global prompt
-    global passcount
-    global verbose
-
-    if [llength $args]==2 then {
-	set expectthis [lindex $args 1]
-    } else {
-	set expectthis "should never match this bogus string"
-    }
-    set sendthis [lindex $args 0]
-    if $verbose>2 then {
-	send_user "Sending \"$sendthis\" to gdb\n"
-	send_user "Looking to match \"$expectthis\"\n"
-    }
-    send "$sendthis\n"
-    expect {
-	-re ".*A .* in expression.*\\.*$prompt $" {
-	    incr passcount
-	    return 1
-	}
-	-re ".*Junk after end of expression.*$prompt $" {
-	    incr passcount
-	    return 1
-	}
-	-re ".*No symbol table is loaded.*$prompt $" {
-	    incr passcount
-	    return 1
-	}
-	-re ".*$expectthis.*$prompt $" {
-	    incr passcount
-	    return 1
-	}
-	-re ".*$prompt $" {
-	    fail "$sendthis not properly rejected"
-	    return 1
-	}
-	timeout {
-	    fail "$sendthis (timeout)"
-	    return 0
-	}
-    }
-}
 
 # various tests if modes are treated correctly
 # using ptype
@@ -614,7 +527,7 @@ proc test_locations {} {
     gdb_test "print strl1(-1:5)" \
 	".*slice.*out of range.*" \
 	"print invalid string slice"
-    test_print_accept_exact "print strl1(-1:7)" \
+    gdb_test "print strl1(-1:7)" \
 	".*slice.*out of range.*" \
 	"print invalid string slice"
     gdb_test "print strl1(0 up -1)" \
@@ -717,53 +630,53 @@ proc test_locations {} {
 
     # reject the following range fails
     # FIXME: adjust error messages
-    test_print_accept_exact "print arrl3(-1)" \
-	".* array or string index out of range.*" \
+    gdb_test "print arrl3(-1)" \
+	".*out of range.*" \
 	"check invalid array indices 1"
-    test_print_accept_exact "print arrl3(6)" \
-	".* array or string index out of range.*" \
+    gdb_test "print arrl3(6)" \
+	".*out of range.*" \
 	"check invalid array indices 2"
-    test_print_accept_exact "print arrl3(0,0)" \
-	".* array or string index out of range.*" \
+    gdb_test "print arrl3(0,0)" \
+	".*out of range.*" \
 	"check invalid array indices 3"
-    test_print_accept_exact "print arrl3(1,0)" \
-	".* array or string index out of range.*" \
+    gdb_test "print arrl3(1,0)" \
+	".*out of range.*" \
 	"check invalid array indices 4"
-    test_print_accept_exact "print arrl3(1,4)" \
-	".* array or string index out of range.*" \
+    gdb_test "print arrl3(1,4)" \
+	".*out of range.*" \
 	"check invalid array indices 5"
-    test_print_accept_exact "print arrl3(6,4)" \
-	".* array or string index out of range.*" \
+    gdb_test "print arrl3(6,4)" \
+	".*out of range.*" \
 	"check invalid array indices 6"
-    test_print_accept_exact "print arrl3(1,1,0)" \
-	".* array or string index out of range.*" \
+    gdb_test "print arrl3(1,1,0)" \
+	".*out of range.*" \
 	"check invalid array indices 7"
-    test_print_accept_exact "print arrl3(6,4,0)" \
-	".* array or string index out of range.*" \
+    gdb_test "print arrl3(6,4,0)" \
+	".*out of range.*" \
 	"check invalid array indices 8"
-    test_print_accept_exact "print arrl3(1,1,3)" \
-	".* array or string index out of range.*" \
+    gdb_test "print arrl3(1,1,3)" \
+	".*out of range.*" \
 	"check invalid array indices 9"
 
-    test_print_accept_exact "print arrl3(0)(0)" \
+    gdb_test "print arrl3(0)(0)" \
 	".* array or string index out of range.*" \
 	"check invalid array indices 10"
-    test_print_accept_exact "print arrl3(1)(0)" \
+    gdb_test "print arrl3(1)(0)" \
 	".* array or string index out of range.*" \
 	"check invalid array indices 11"
-    test_print_accept_exact "print arrl3(1)(4)" \
+    gdb_test "print arrl3(1)(4)" \
 	".* array or string index out of range.*" \
 	"check invalid array indices 12"
-    test_print_accept_exact "print arrl3(6)(4)" \
+    gdb_test "print arrl3(6)(4)" \
 	".* array or string index out of range.*" \
 	"check invalid array indices 13"
-    test_print_accept_exact "print arrl3(1)(1)(0)" \
+    gdb_test "print arrl3(1)(1)(0)" \
 	".* array or string index out of range.*" \
 	"check invalid array indices 14"
-    test_print_accept_exact "print arrl3(6)(4)(0)" \
+    gdb_test "print arrl3(6)(4)(0)" \
 	".* array or string index out of range.*" \
 	"check invalid array indices 15"
-    test_print_accept_exact "print arrl3(1)(1)(3)" \
+    gdb_test "print arrl3(1)(1)(3)" \
 	".* array or string index out of range.*" \
 	"check invalid array indices 16"
     
@@ -791,13 +704,13 @@ proc test_locations {} {
 #	"print array slice 4"
     # reject invalid slices
     # FIXME: adjust error messages
-    test_print_accept_exact "print arrl4(5:6)" \
+    gdb_test "print arrl4(5:6)" \
 	".*slice out of range.*" \
 	"check invalid range 1"
-    test_print_accept_exact "print arrl4(0:1)" \
+    gdb_test "print arrl4(0:1)" \
 	".*slice out of range.*" \
 	"check invalid range 2"
-    test_print_accept_exact "print arrl4(0:6)" \
+    gdb_test "print arrl4(0:6)" \
 	".*slice out of range.*" \
 	"check invalid range 3"
     gdb_test "print arrl4(3:2)" \

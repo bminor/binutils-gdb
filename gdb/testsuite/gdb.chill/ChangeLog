@@ -1,5 +1,13 @@
 Fri Dec  1 00:08:37 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
+	* tests1.exp, tests2.exp (test_print_reject):  Remove;  causes
+	conflicts with later tests using test_print_reject in ../lib/gdb.exp.
+	(passcount):  Remove.
+	* tests2.exp (test_print_accept):  Removed.
+	(test_write):  Re-write to use gdb_test rather than test_print_accept.
+	* tests1.exp (test_print_accept_exact):  Removed.
+	(tests_locations):  Rewrite to use gdb_test and not above proc.
+	
 	* tests1.ch, tests1.exp, tests2.ch, tests2.exp, Makefile.in:
 	New (extensive) test cases.
 	* chexp.exp:  Fix relations to return TRUE or FALSE.
