@@ -228,8 +228,8 @@ Please report this to <bug-gdb@gnu.org>.",
     len = sizeof (ps_strings);
     if (sysctl (mib, 2, &ps_strings, &len, NULL, 0) == 0)
       {
-	amd64fbsd_sigtramp_start = ps_strings - 32;
-	amd64fbsd_sigtramp_end = ps_strings;
+	amd64fbsd_sigtramp_start_addr = ps_strings - 32;
+	amd64fbsd_sigtramp_end_addr = ps_strings;
       }
   }
 }

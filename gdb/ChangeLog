@@ -1,3 +1,17 @@
+2004-02-22  Mark Kettenis  <kettenis@gnu.org>
+
+	* amd64fbsd-tdep.c (amd64fbsd_sigtramp_start_addr): Renamed from
+	amd64fbsd_sigtramp_start.
+	(amd64fbsd_sigtramp_end_addr): Renamed from
+	amd64fbsd_sigtramp_end.
+	(amd64fbsd_init_abi): Adjust for renamed variables.
+	* amd64fbsd-nat.c (_initialize_amd64fbsd_nat): Adjust for renamed
+	variables.
+	* x86-64-tdep.h (amd64fbsd_sigtramp_start_addr): Renamed from
+	amd64fbsd_sigtramp_start.
+	(amd64fbsd_sigtramp_end_addr): Renamed from
+	amd64fbsd_sigtramp_end.
+
 2004-02-22  Andrew Cagney  <cagney@redhat.com>
 
 	* hppa-tdep.c (hppa_gdbarch_init): Re-order separating

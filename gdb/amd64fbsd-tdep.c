@@ -86,8 +86,8 @@ static int amd64fbsd_r_reg_offset[] =
 };
 
 /* Location of the signal trampoline.  */
-CORE_ADDR amd64fbsd_sigtramp_start = 0x7fffffffffc0;
-CORE_ADDR amd64fbsd_sigtramp_end = 0x7fffffffffe0;
+CORE_ADDR amd64fbsd_sigtramp_start_addr = 0x7fffffffffc0;
+CORE_ADDR amd64fbsd_sigtramp_end_addr = 0x7fffffffffe0;
 
 /* From <machine/signal.h>.  */
 int amd64fbsd_sc_reg_offset[] =
@@ -132,8 +132,8 @@ amd64fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   x86_64_init_abi (info, gdbarch);
 
-  tdep->sigtramp_start = amd64fbsd_sigtramp_start;
-  tdep->sigtramp_end = amd64fbsd_sigtramp_end;
+  tdep->sigtramp_start = amd64fbsd_sigtramp_start_addr;
+  tdep->sigtramp_end = amd64fbsd_sigtramp_end_addr;
   tdep->sigcontext_addr = amd64fbsd_sigcontext_addr;
   tdep->sc_reg_offset = amd64fbsd_sc_reg_offset;
   tdep->sc_num_regs = ARRAY_SIZE (amd64fbsd_sc_reg_offset);
