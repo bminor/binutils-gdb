@@ -1,3 +1,22 @@
+Tue Feb 27 14:17:31 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* m68klinux.c: New file.
+	* hosts/m68klinux.h: New file.
+	* config.bfd (m68*-*-linuxaout*, m68*-*-linux*): New targets.
+	* configure.in (m68*-*-linux*): New native host.
+	(m68klinux_vec): New vector.
+	* configure: Rebuild.
+	* targets.c (m68klinux_vec): Declare.
+	* i386linux.c (bfd_i386linux_size_dynamic_sections): Renamed from
+	bfd_linux_size_dynmic_sections to avoid clash with m68klinux.c.
+	* bfd-in.h (bfd_i386linux_size_dynamic_sections): Rename
+	declaration from bfd_linux_size_dynamic_sections.
+	(bfd_m68klinux_size_dynamic_sections): Declare.
+	* bfd-in2.h: Rebuild.
+	* Makefile.in: Rebuild dependencies.
+	(BFD32_BACKENDS): Add m68klinux.o.
+	(BFD32_BACKENDS_CFILES): Add m68klinux.c.
+
 Tue Feb 27 11:31:34 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* libhppa.h (pa_arch): Add pa20.

@@ -71,11 +71,11 @@ changequote([,])dnl
   fi
 fi
 
+AC_PROG_CC
+
 # Permit host specific settings.
 . ${srcdir}/configure.host
 
-AC_PROG_CC
-AC_SUBST(CFLAGS)
 AC_SUBST(HDEFINES)
 AC_CHECK_PROG(AR, ar, ar, :)
 AC_PROG_RANLIB
@@ -160,8 +160,7 @@ changequote([,])dnl
 changequote(,)dnl
   i[345]86-*-netbsd*)
 changequote([,])dnl
-	COREFILE=trad-core.o
-	AC_DEFINE(TRAD_HEADER,"hosts/i386nbsd.h")
+	COREFILE=netbsd-core.o
 	;;
 changequote(,)dnl
   i[345]86-esix-sysv3*)
@@ -204,8 +203,7 @@ changequote([,])dnl
 	AC_DEFINE(TRAD_HEADER,"hosts/mipsmach3.h")
 	;;
   mips-*-netbsd*)
-	COREFILE=trad-core.o
-	AC_DEFINE(TRAD_HEADER,"hosts/mipsnbsd.h")
+	COREFILE=netbsd-core.o
 	;;
   mips-dec-*)
 	COREFILE=trad-core.o
@@ -235,6 +233,10 @@ changequote([,])dnl
 	COREFILE=trad-core.o
 	AC_DEFINE(TRAD_HEADER,"hosts/hp300bsd.h")
 	;;
+  m68*-*-linux*)
+	COREFILE=trad-core.o
+	AC_DEFINE(TRAD_HEADER,"hosts/m68klinux.h")
+	;;
   m68*-motorola-sysv*)
 	COREFILE=trad-core.o
 	AC_DEFINE(TRAD_HEADER, "hosts/delta68.h")
@@ -244,8 +246,7 @@ changequote([,])dnl
 	AC_DEFINE(TRAD_HEADER,"hosts/news.h")
 	;;
   m68*-*-netbsd*)
-	COREFILE=trad-core.o
-	AC_DEFINE(TRAD_HEADER,"hosts/m68knbsd.h")
+	COREFILE=netbsd-core.o
 	;;
   m68*-apple-aux*)
 	COREFILE=trad-core.o
@@ -262,8 +263,7 @@ changequote([,])dnl
 	AC_DEFINE(TRAD_HEADER,"hosts/pc532mach.h")
 	;;
   ns32k-*-netbsd*)
-	COREFILE=trad-core.o
-	AC_DEFINE(TRAD_HEADER,"hosts/ns32knbsd.h")
+	COREFILE=netbsd-core.o
 	;;
   rs6000-*-lynx*)	COREFILE=lynx-core.o ;;
   rs6000-*-aix4*)	COREFILE=rs6000-core.o ;;
@@ -271,8 +271,7 @@ changequote([,])dnl
   powerpc-*-aix4*)	COREFILE=rs6000-core.o ;;
   powerpc-*-aix*)	COREFILE=rs6000-core.o ;;
   sparc-*-netbsd*)
-	COREFILE=trad-core.o
-	AC_DEFINE(TRAD_HEADER,"hosts/sparcnbsd.h")
+	COREFILE=netbsd-core.o
 	;;
   tahoe-*-*)
 	COREFILE=trad-core.o
@@ -465,6 +464,7 @@ do
     ieee_vec)			tb="$tb ieee.o" ;;
     m68kcoff_vec)		tb="$tb coff-m68k.o cofflink.o" ;;
     m68kcoffun_vec)		tb="$tb coff-u68k.o coff-m68k.o cofflink.o" ;;
+    m68klinux_vec)		tb="$tb m68klinux.o aout32.o stab-syms.o" ;;
     m68klynx_aout_vec)		tb="$tb m68klynx.o lynx-core.o aout32.o stab-syms.o" ;;
     m68klynx_coff_vec)		tb="$tb cf-m68klynx.o coff-m68k.o cofflink.o lynx-core.o stab-syms.o" ;;
     m68knetbsd_vec)		tb="$tb m68knetbsd.o aout32.o stab-syms.o" ;;
