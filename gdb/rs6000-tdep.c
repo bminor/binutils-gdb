@@ -473,7 +473,7 @@ pop_frame ()
      still in the link register, otherwise walk the frames and retrieve the
      saved %pc value in the previous frame. */
 
-  addr = get_pc_function_start (fr->pc) + FUNCTION_START_OFFSET;
+  addr = get_pc_function_start (frame->pc) + FUNCTION_START_OFFSET;
   function_frame_info (addr, &fdata);
 
   if (fdata.frameless)
