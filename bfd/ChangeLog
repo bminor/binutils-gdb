@@ -1,5 +1,8 @@
 2000-05-08  Alan Modra  <alan@linuxcare.com.au>
 
+	* trad-core.c (trad_unix_core_file_p): Return
+	bfd_error_wrong_format rather than bfd_error_file_truncated.
+
 	* peigen.c (_bfd_pei_swap_aouthdr_out): Pass ImageBase to
 	add_data_entry.  DataDirectory virtual address is relative.
 	(pe_print_idata): Account for relative DataDirectory virtual
