@@ -5204,15 +5204,20 @@ ieee_add_bb11 (info, sec, low, high)
     }
   else
     {
-      const char *filename, *modname, *backslash;
+      const char *filename, *modname;
+#ifdef HAVE_DOS_BASED_FILE_SYSTEM
+      const char *backslash;
+#endif
       char *c, *s;
 
       /* Start the enclosing BB10 block.  */
       filename = bfd_get_filename (info->abfd);
       modname = strrchr (filename, '/');
+#ifdef HAVE_DOS_BASED_FILE_SYSTEM
       backslash = strrchr (filename, '\\');
       if (modname == NULL || (backslash != NULL && backslash > modname))
 	modname = backslash;
+#endif
 
       if (modname != NULL)
 	++modname;
