@@ -2471,28 +2471,35 @@ coff_write_object_contents (abfd)
 	{
 	  unsigned int i, count;
 	  asymbol **psym;
+	  coff_symbol_type *csym;
 
 	  count = bfd_get_symcount (abfd);
 	  for (i = 0, psym = abfd->outsymbols; i < count; i++, psym++)
 	    {
-	      coff_symbol_type *csym;
-	      combined_entry_type *aux;
-
-	      if (strcmp ((*psym)->name, current->name) != 0)
-		continue;
-
-	      csym = coff_symbol_from (abfd, *psym);
-	      if (csym == NULL
-		  || csym->native == NULL
-		  || csym->native->u.syment.n_numaux < 1
-		  || csym->native->u.syment.n_sclass != C_STAT
-		  || csym->native->u.syment.n_type != T_NULL)
-		continue;
-
 	      /* Here *PSYM is the section symbol for CURRENT.  */
 
+	      if (strcmp ((*psym)->name, current->name) == 0)
+		{
+		  csym = coff_symbol_from (abfd, *psym);
+		  if (csym == NULL
+		      || csym->native == NULL
+		      || csym->native->u.syment.n_numaux < 1
+		      || csym->native->u.syment.n_sclass != C_STAT
+		      || csym->native->u.syment.n_type != T_NULL)
+		    continue;
+		  break;
+		}
+	    }
+
+	  /* Did we find it?
+	     Note that we might not if we're converting the file from
+	     some other object file format.  */
+	  if (i < count)
+	    {
+	      combined_entry_type *aux;
+
 	      /* We don't touch the x_checksum field.  The
-                 x_associated field is not currently supported.  */
+		 x_associated field is not currently supported.  */
 
 	      aux = csym->native + 1;
 	      switch (current->flags & SEC_LINK_DUPLICATES)
