@@ -1,3 +1,8 @@
+2001-11-06  Andrew Cagney  <ac131313@redhat.com>
+
+	* blockframe.c (get_prev_frame): Replace #ifdef
+	INIT_EXTRA_FRAME_INFO with run-time test.
+
 2001-11-05  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbarch.sh (push_return_address): Change to a function with

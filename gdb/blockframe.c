@@ -437,9 +437,8 @@ get_prev_frame (struct frame_info *next_frame)
 
   INIT_FRAME_PC_FIRST (fromleaf, prev);
 
-#ifdef INIT_EXTRA_FRAME_INFO
-  INIT_EXTRA_FRAME_INFO (fromleaf, prev);
-#endif
+  if (INIT_EXTRA_FRAME_INFO_P ())
+    INIT_EXTRA_FRAME_INFO (fromleaf, prev);
 
   /* This entry is in the frame queue now, which is good since
      FRAME_SAVED_PC may use that queue to figure out its value
