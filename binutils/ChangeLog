@@ -1,3 +1,26 @@
+Mon Aug  2 11:28:23 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* nm.c: Add -B option, like --format=bsd.
+
+Tue Jul 27 16:29:54 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* objcopy.c (copy_file): If the file is neither an object nor an
+	archive, give an error rather than returning success.
+
+Mon Jul 19 16:13:40 1993  Ken Raeburn  (raeburn@rtl.cygnus.com)
+
+	* objdump.c (objdump_print_address): Prefer non-local symbols over
+	local ones, and especially discriminate against debugging symbols.
+	Also, for relocateable files, try to find a symbol in the current
+	section, instead of picking one from some random section with a
+	convenient value (read, section offset).
+	(disassemble_data): Cast argument to malloc to size_t first.
+	(dump_data): Likewise.
+	(dump_relocs): If a single section name is specified, show relocs
+	only for that section.  Otherwise, silently omit sections without
+	relocs.  Format table nicely even if values are printed using 16
+	digits instead of 8.
+
 Fri Jul 16 15:19:59 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* nm.c: Changes for final version of POSIX.2.
@@ -50,7 +73,7 @@ Fri Jun 25 23:12:12 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 Fri Jun 25 20:44:43 1993  Ken Raeburn  (raeburn@poseidon.cygnus.com)
 
-	* objdump.c: Use size-independend bfd elf section names.
+	* objdump.c: Use size-independent bfd elf section names.
 
 Sun Jun 20 23:09:06 1993  Ken Raeburn  (raeburn@poseidon.cygnus.com)
 

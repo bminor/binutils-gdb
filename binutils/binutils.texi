@@ -639,7 +639,7 @@ The GNU linker @code{ld} is now described in a separate manual.
 @kindex nm
 
 @smallexample
-nm [ -a | --debug-syms ]  [ -g | --extern-only ]
+nm [ -a | --debug-syms ]  [ -g | --extern-only ]  [ -B ]
    [ -s | --print-armap ]  [ -A | -o | --print-file-name ]  
    [ -n | -v | --numeric-sort ]  [ -p | --no-sort ]
    [ -r | --reverse-sort ]  [ -u | --undefined-only ]  
@@ -713,8 +713,15 @@ before all of its symbols.
 Display all symbols, even debugger-only symbols; normally these are not
 listed.
 
+@item -B
+@cindex @code{nm} format
+@cindex @code{nm} compatibility
+The same as @samp{--format=bsd}.
+
 @item -f @var{format}
 @itemx --format=@var{format}
+@cindex @code{nm} format
+@cindex @code{nm} compatibility
 Use the output format @var{format}, which can be @code{bsd},
 @code{sysv}, or @code{posix}.  The default is @code{bsd}.
 Only the first character of @var{format} is significant; it can be
@@ -972,7 +979,7 @@ The command line options have the following meanings:
 @item -A
 @itemx -B
 @itemx --format=@var{compatibility}
-@cindex size display format
+@cindex @code{size} display format
 Using one of these options, you can choose whether the output from GNU
 @code{size} resembles output from System V @code{size} (using @samp{-A},
 or @samp{--format=sysv}), or Berkeley @code{size} (using @samp{-B}, or
@@ -1019,7 +1026,7 @@ Show a summary of acceptable arguments and options.
 @itemx -o
 @itemx -x
 @itemx --radix=@var{number}
-@cindex size number format
+@cindex @code{size} number format
 @cindex radix for section sizes
 Using one of these options, you can control whether the size of each
 section is given in decimal (@samp{-d}, or @samp{--radix=10}); octal
