@@ -1,5 +1,11 @@
 2003-09-13  Mark Kettenis  <kettenis@gnu.org>
 
+	* gdbarch.sh (DEPRECATED_REG_STRUCT_HAS_ADDR): Renamed from
+	REG_STRUCT_HAS_ADDR.
+	* gdbarch.c, gdbarch.h: Updated.
+	* infcall.c (call_function_by_hand): Update.
+	* stabsread.c (define_symbol): Updated.
+	
 	* Makefile.in (xm-i386-sv32.h, tm-i386gas.h): Remove.
 
 2003-09-12  Christopher Faylor  <cgf@redhat.com>

@@ -3760,8 +3760,8 @@ or @code{NUL} to indicate that register @var{i} is not valid.
 @findex REGISTER_NAMES
 Deprecated in favor of @code{REGISTER_NAME}.
 
-@item REG_STRUCT_HAS_ADDR (@var{gcc_p}, @var{type})
-@findex REG_STRUCT_HAS_ADDR
+@item DEPRECATED_REG_STRUCT_HAS_ADDR (@var{gcc_p}, @var{type})
+@findex DEPRECATED_REG_STRUCT_HAS_ADDR
 Define this to return 1 if the given type will be passed by pointer
 rather than directly.
 

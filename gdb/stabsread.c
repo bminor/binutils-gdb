@@ -1752,7 +1752,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	     name to represent an argument passed in a register.
 	     GCC uses 'P' for the same case.  So if we find such a symbol pair
 	     we combine it into one 'P' symbol.  For Sun cc we need to do this
-	     regardless of REG_STRUCT_HAS_ADDR, because the compiler puts out
+	     regardless of DEPRECATED_REG_STRUCT_HAS_ADDR, because the compiler puts out
 	     the 'p' symbol even if it never saves the argument onto the stack.
 
 	     On most machines, we want to preserve both symbols, so that
@@ -1768,8 +1768,8 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	  if (local_symbols
 	      && local_symbols->nsyms > 0
 #ifndef USE_REGISTER_NOT_ARG
-	      && REG_STRUCT_HAS_ADDR_P ()
-	      && REG_STRUCT_HAS_ADDR (processing_gcc_compilation,
+	      && DEPRECATED_REG_STRUCT_HAS_ADDR_P ()
+	      && DEPRECATED_REG_STRUCT_HAS_ADDR (processing_gcc_compilation,
 				      SYMBOL_TYPE (sym))
 	      && (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_STRUCT
 		  || TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_UNION
@@ -2050,8 +2050,8 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
   /* When passing structures to a function, some systems sometimes pass
      the address in a register, not the structure itself. */
 
-  if (REG_STRUCT_HAS_ADDR_P ()
-      && REG_STRUCT_HAS_ADDR (processing_gcc_compilation, SYMBOL_TYPE (sym))
+  if (DEPRECATED_REG_STRUCT_HAS_ADDR_P ()
+      && DEPRECATED_REG_STRUCT_HAS_ADDR (processing_gcc_compilation, SYMBOL_TYPE (sym))
       && (SYMBOL_CLASS (sym) == LOC_REGPARM || SYMBOL_CLASS (sym) == LOC_ARG))
     {
       struct type *symbol_type = check_typedef (SYMBOL_TYPE (sym));
@@ -2061,7 +2061,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	  || (TYPE_CODE (symbol_type) == TYPE_CODE_BITSTRING)
 	  || (TYPE_CODE (symbol_type) == TYPE_CODE_SET))
 	{
-	  /* If REG_STRUCT_HAS_ADDR yields non-zero we have to convert
+	  /* If DEPRECATED_REG_STRUCT_HAS_ADDR yields non-zero we have to convert
 	     LOC_REGPARM to LOC_REGPARM_ADDR for structures and unions. */
 	  if (SYMBOL_CLASS (sym) == LOC_REGPARM)
 	    SYMBOL_CLASS (sym) = LOC_REGPARM_ADDR;

@@ -646,7 +646,7 @@ F:2:FRAME_NUM_ARGS:int:frame_num_args:struct frame_info *frame:frame
 # alignment.
 F:2:DEPRECATED_STACK_ALIGN:CORE_ADDR:deprecated_stack_align:CORE_ADDR sp:sp
 M:::CORE_ADDR:frame_align:CORE_ADDR address:address
-F:2:REG_STRUCT_HAS_ADDR:int:reg_struct_has_addr:int gcc_p, struct type *type:gcc_p, type
+F:2:DEPRECATED_REG_STRUCT_HAS_ADDR:int:deprecated_reg_struct_has_addr:int gcc_p, struct type *type:gcc_p, type
 v::FRAME_RED_ZONE_SIZE:int:frame_red_zone_size
 v:2:PARM_BOUNDARY:int:parm_boundary
 #

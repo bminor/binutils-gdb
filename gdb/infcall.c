@@ -664,7 +664,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
       }
   }
 
-  if (REG_STRUCT_HAS_ADDR_P ())
+  if (DEPRECATED_REG_STRUCT_HAS_ADDR_P ())
     {
       int i;
       /* This is a machine like the sparc, where we may need to pass a
@@ -681,7 +681,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 	       || (TYPE_CODE (arg_type) == TYPE_CODE_FLT
 		   && TYPE_LENGTH (arg_type) > 8)
 	       )
-	      && REG_STRUCT_HAS_ADDR (using_gcc, arg_type))
+	      && DEPRECATED_REG_STRUCT_HAS_ADDR (using_gcc, arg_type))
 	    {
 	      CORE_ADDR addr;
 	      int len;		/*  = TYPE_LENGTH (arg_type); */
@@ -760,8 +760,8 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 
   /* elz: on HPPA no need for this extra alignment, maybe it is needed
      on other architectures. This is because all the alignment is
-     taken care of in the above code (ifdef REG_STRUCT_HAS_ADDR) and
-     in hppa_push_arguments */
+     taken care of in the above code (ifdef DEPRECATED_REG_STRUCT_HAS_ADDR)
+     and in hppa_push_arguments */
   /* NOTE: cagney/2003-03-24: The below code is very broken.  Given an
      odd sized parameter the below will mis-align the stack.  As was
      suggested back in '96, better to let PUSH_ARGUMENTS handle it.  */
