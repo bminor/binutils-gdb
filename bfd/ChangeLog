@@ -1,3 +1,12 @@
+Fri Aug  9 12:44:57 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-mips.c (mips_elf_check_relocs): Create the .rel.dyn
+	section if it might be needed, not just if info->shared.
+	(mips_elf_adjust_dynamic_symbol): Make room for a null element at
+	the start of .rel.dyn if we are going to use it.
+	(mips_elf_finish_dynamic_sections): Only clear the first element
+	of .rel.dyn if the size is greater than zero.
+
 Thu Aug  8 16:24:55 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* xcofflink.c (xcoff_link_input_bfd): If we already called the
