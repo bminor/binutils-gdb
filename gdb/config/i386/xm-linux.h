@@ -26,10 +26,6 @@
 
 #define HOST_LONG_DOUBLE_FORMAT &floatformat_i387_ext
 
-/* This is the amount to subtract from u.u_ar0
-   to get the offset in the core file of the register values.  */
-#define KERNEL_U_ADDR 0x0
-
 #define NEED_POSIX_SETPGID
 
 /* Need R_OK etc, but USG isn't defined.  */

@@ -1,5 +1,9 @@
 2001-07-14  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/i386/xm-linux.h (KERNEL_U_ADDR): Move from here...
+	* config/i386/nm-linux.h: ...to here.  Change comments about user
+	area/struct a bit.
+
 	* config/i386/xm-linux.h (HAVE_TERMIOS): Really remove.
 
 	* Makefile.in (ALLDEPFILES): Add i386bsd-nat.c and i386bsd-tdep.c

@@ -29,18 +29,23 @@
 #include "i386/nm-i386.h"
 #include "nm-linux.h"
 
-/* Return sizeof user struct to callers in less machine dependent
-   routines.  */
+/* Support for the user area.  */
 
+/* Return the size of the user struct.  */
 extern int kernel_u_size (void);
 #define KERNEL_U_SIZE kernel_u_size()
 
+/* This is the amount to substract from u.u_ar0 to get the offset in
+   the core file of the register values.  */
+#define KERNEL_U_ADDR 0
+
+/* Offset of the registers within the user area.  */
 #define U_REGS_OFFSET 0
 
 extern CORE_ADDR register_u_addr (CORE_ADDR blockend, int regnum);
 #define REGISTER_U_ADDR(addr, blockend, regnum) \
   (addr) = register_u_addr (blockend, regnum)
-
+
 /* Provide access to the i386 hardware debugging registers.  */
 
 extern void i386_linux_dr_set_control (unsigned long control);
