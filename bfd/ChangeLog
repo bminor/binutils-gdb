@@ -1,3 +1,8 @@
+Sat Nov 23 13:26:18 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* som.c (setup_sections): Don't lose for a space which has
+	no data, but some symbols.
+
 Fri Nov 22 11:32:13 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* sunos.c (struct sunos_link_hash_table): Add got_needed field.
