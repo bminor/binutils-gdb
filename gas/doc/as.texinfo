@@ -379,8 +379,8 @@ Motorola 68000 series.
 @item -l
 Shorten references to undefined symbols, to one word instead of two.
 
-@item -m68000 | -m68008 | -m68010 | -m68020 | -m68030 | -m68040
-@itemx | -m68302 | -m68331 | -m68332 | -m68333 | -m68340 | -mcpu32
+@item -m68000 | -m68008 | -m68010 | -m68020 | -m68030 | -m68040 | -m68060
+@itemx | -m68302 | -m68331 | -m68332 | -m68333 | -m68340 | -mcpu32 | -m5200
 Specify what processor in the 68000 family is the target.  The default
 is normally the 68020, but this can be changed at configuration time.
 
@@ -1336,26 +1336,14 @@ This means you may not nest these comments.
 @cindex line comment character
 Anything from the @dfn{line comment} character to the next newline
 is considered a comment and is ignored.  The line comment character is
+@ifset A29K
+@samp{;} for the AMD 29K family;
+@end ifset
 @c start-sanitize-arc
 @ifset ARC
 @samp{;} on the ARC;
 @end ifset
 @c end-sanitize-arc
-@ifset VAX
-@samp{#} on the Vax;
-@end ifset
-@ifset I960
-@samp{#} on the i960;
-@end ifset
-@ifset SPARC
-@samp{!} on the SPARC;
-@end ifset
-@ifset M680X0
-@samp{|} on the 680x0;
-@end ifset
-@ifset A29K
-@samp{;} for the AMD 29K family;
-@end ifset
 @ifset H8/300
 @samp{;} for the H8/300 family;
 @end ifset
@@ -1365,8 +1353,20 @@ is considered a comment and is ignored.  The line comment character is
 @ifset HPPA
 @samp{;} for the HPPA;
 @end ifset
+@ifset I960
+@samp{#} on the i960;
+@end ifset
 @ifset SH
 @samp{!} for the Hitachi SH;
+@end ifset
+@ifset SPARC
+@samp{!} on the SPARC;
+@end ifset
+@ifset M680X0
+@samp{|} on the 680x0;
+@end ifset
+@ifset VAX
+@samp{#} on the Vax;
 @end ifset
 @ifset Z8000
 @samp{!} for the Z8000;
@@ -1634,13 +1634,11 @@ An octal character code.  The numeric code is 3 octal digits.
 For compatibility with other Unix systems, 8 and 9 are accepted as digits:
 for example, @code{\008} has the value 010, and @code{\009} the value 011.
 
-@ifset HPPA
-@cindex @code{\@var{xdd}} (hex character code)
-@cindex hex character code (@code{\@var{xdd}})
-@item \@code{x} @var{hex-digit} @var{hex-digit}
-A hex character code.  The numeric code is 2 hexadecimal digits.  Either
-upper or lower case @code{x} works.
-@end ifset
+@cindex @code{\@var{xd...}} (hex character code)
+@cindex hex character code (@code{\@var{xd...}})
+@item \@code{x} @var{hex-digits...}
+A hex character code.  All trailing hex digits are combined.  Either upper or
+lower case @code{x} works.
 
 @cindex @code{\\} (@samp{\} character)
 @cindex backslash (@code{\\})
@@ -1827,11 +1825,11 @@ One of the letters @samp{DFRS} (in upper or lower case).
 @ifset H8
 One of the letters @samp{DFPRSX} (in upper or lower case).
 @end ifset
-@ifset I960
-One of the letters @samp{DFT} (in upper or lower case).
-@end ifset
 @ifset HPPA
 The letter @samp{E} (upper case only).
+@end ifset
+@ifset I960
+One of the letters @samp{DFT} (in upper or lower case).
 @end ifset
 @end ifclear
 
@@ -2915,6 +2913,7 @@ Some machine configurations provide additional directives.
 @end ifclear
 
 * Ln::                          @code{.ln @var{line-number}}
+* Linkonce::			@code{.linkonce [@var{type}]}
 * List::                        @code{.list}
 * Long::                        @code{.long @var{expressions}}
 @ignore
@@ -2922,6 +2921,7 @@ Some machine configurations provide additional directives.
 @end ignore
 
 * Macro::			@code{.macro @var{name} @var{args}}@dots{}
+* MRI::				@code{.mri @var{val}}
 
 * Nolist::                      @code{.nolist}
 * Octa::                        @code{.octa @var{bignums}}
@@ -2945,6 +2945,7 @@ Some machine configurations provide additional directives.
 * Size::                        @code{.size}
 @end ifset
 
+* Skip::                        @code{.skip @var{size} , @var{fill}}
 * Space::                       @code{.space @var{size} , @var{fill}}
 @ifset have-stabs
 * Stab::                        @code{.stabd, .stabn, .stabs}
@@ -3004,7 +3005,7 @@ the padding bytes.  It (and the comma) may be omitted.  If it is
 omitted, the padding bytes are zero.
 
 The way the required alignment is specified varies from system to system.
-For the a29k, hppa, m86k, m88k, w65, sparc, and Hitachi SH, and i386 using ELF
+For the a29k, hppa, m68k, m88k, w65, sparc, and Hitachi SH, and i386 using ELF
 format,
 the first expression is the
 alignment request in bytes.  For example @samp{.align 8} advances
@@ -3388,7 +3389,7 @@ considered part of the source program being assembled if the argument
 (which must be an @var{absolute expression}) is non-zero.  The end of
 the conditional section of code must be marked by @code{.endif}
 (@pxref{Endif,,@code{.endif}}); optionally, you may include code for the
-alternative condition, flagged by @code{.else} (@pxref{Else,,@code{.else}}.
+alternative condition, flagged by @code{.else} (@pxref{Else,,@code{.else}}).
 
 The following variants of @code{.if} are also supported:
 @table @code
@@ -3406,7 +3407,7 @@ Not yet implemented.
 @cindex @code{ifndef} directive
 @cindex @code{ifnotdef} directive
 @item .ifndef @var{symbol}
-@itemx ifnotdef @var{symbol}
+@itemx .ifnotdef @var{symbol}
 Assembles the following section of code if the specified @var{symbol}
 has not been defined.  Both spelling variants are equivalent.
 
@@ -3570,6 +3571,43 @@ used by compilers to generate auxiliary symbol information for
 debugging.
 @end ifclear
 
+@node Linkonce
+@section @code{.linkonce [@var{type}]}
+@cindex COMDAT
+@cindex @code{linkonce} directive
+@cindex common sections
+Mark the current section so that the linker only includes a single copy of it.
+This may be used to include the same section in several different object files,
+but ensure that the linker will only include it once in the final output file.
+The @code{.linkonce} pseudo-op must be used for each instance of the section.
+Duplicate sections are detected based on the section name, so it should be
+unique.
+
+This directive is only supported by a few object file formats; as of this
+writing, the only object file format which supports it is the Portable
+Executable format used on Windows NT.
+
+The @var{type} argument is optional.  If specified, it must be one of the
+following strings.  For example:
+@smallexample
+.linkonce same_size
+@end smallexample
+Not all types may be supported on all object file formats.
+
+@table @code
+@item discard
+Silently discard duplicate sections.  This is the default.
+
+@item one_only
+Warn if there are duplicate sections, but still keep only one copy.
+
+@item same_size
+Warn if any of the duplicates have different sizes.
+
+@item same_contents
+Warn if any of the duplicates do not have exactly the same contents.
+@end table
+
 @node Ln
 @section @code{.ln @var{line-number}}
 
@@ -3590,6 +3628,16 @@ configured for @code{b.out}; its effect is only associated with COFF
 output format.
 @end ifset
 @end ifset
+
+@node MRI
+@section @code{.mri @var{val}}
+
+@cindex @code{mri} directive
+@cindex MRI mode, temporarily
+If @var{val} is non-zero, this tells @code{@value{AS}} to enter MRI mode.  If
+@var{val} is zero, this tells @code{@value{AS}} to exit MRI mode.  This change
+affects code assembled until the next @code{.mri} directive, or until the end
+of the file.  @xref{M, MRI mode, MRI mode}.
 
 @node List
 @section @code{.list}
@@ -4004,6 +4052,16 @@ ignores it.
 @end ifset
 
 @ifclear no-space-dir
+@node Skip
+@section @code{.skip @var{size} , @var{fill}}
+
+@cindex @code{skip} directive
+@cindex filling memory
+This directive emits @var{size} bytes, each of value @var{fill}.  Both
+@var{size} and @var{fill} are absolute expressions.  If the comma and
+@var{fill} are omitted, @var{fill} is assumed to be zero.  This is the same as
+@samp{.space}.
+
 @node Space
 @section @code{.space @var{size} , @var{fill}}
 
@@ -4011,7 +4069,8 @@ ignores it.
 @cindex filling memory
 This directive emits @var{size} bytes, each of value @var{fill}.  Both
 @var{size} and @var{fill} are absolute expressions.  If the comma
-and @var{fill} are omitted, @var{fill} is assumed to be zero.
+and @var{fill} are omitted, @var{fill} is assumed to be zero.  This is the same
+as @samp{.skip}.
 
 @ifset HPPA
 @quotation
@@ -4286,17 +4345,14 @@ include details on any machine's instruction set.  For details on that
 subject, see the hardware manufacturer's manual.
 
 @menu
+@ifset A29K
+* AMD29K-Dependent::            AMD 29K Dependent Features
+@end ifset
 @c start-sanitize-arc
 @ifset ARC
 * ARC-Dependent::               ARC Dependent Features
 @end ifset
 @c end-sanitize-arc
-@ifset VAX
-* Vax-Dependent::               VAX Dependent Features
-@end ifset
-@ifset A29K
-* AMD29K-Dependent::            AMD 29K Dependent Features
-@end ifset
 @ifset H8/300
 * H8/300-Dependent::            Hitachi H8/300 Dependent Features
 @end ifset
@@ -4306,8 +4362,8 @@ subject, see the hardware manufacturer's manual.
 @ifset HPPA
 * HPPA-Dependent::              HPPA Dependent Features
 @end ifset
-@ifset SH
-* SH-Dependent::                Hitachi SH Dependent Features
+@ifset I80386
+* i386-Dependent::              Intel 80386 Dependent Features
 @end ifset
 @ifset I960
 * i960-Dependent::              Intel 80960 Dependent Features
@@ -4315,17 +4371,20 @@ subject, see the hardware manufacturer's manual.
 @ifset M680X0
 * M68K-Dependent::              M680x0 Dependent Features
 @end ifset
+@ifset MIPS
+* MIPS-Dependent::              MIPS Dependent Features
+@end ifset
+@ifset SH
+* SH-Dependent::                Hitachi SH Dependent Features
+@end ifset
 @ifset SPARC
 * Sparc-Dependent::             SPARC Dependent Features
 @end ifset
 @ifset Z8000
 * Z8000-Dependent::             Z8000 Dependent Features
 @end ifset
-@ifset MIPS
-* MIPS-Dependent::              MIPS Dependent Features
-@end ifset
-@ifset I80386
-* i386-Dependent::              80386 Dependent Features
+@ifset VAX
+* Vax-Dependent::               VAX Dependent Features
 @end ifset
 @end menu
 
@@ -4417,10 +4476,6 @@ This must be followed by the desired cpu.  It must be one of
 @end ifset
 @c end-sanitize-arc
 
-@ifset VAX
-@include c-vax.texi
-@end ifset
-
 @ifset A29K
 @include c-a29k.texi
 @end ifset
@@ -4456,8 +4511,8 @@ family.
 @include c-hppa.texi
 @end ifset
 
-@ifset SH
-@include c-sh.texi
+@ifset I80386
+@include c-i386.texi
 @end ifset
 
 @ifset I960
@@ -4468,24 +4523,28 @@ family.
 @include c-m68k.texi
 @end ifset
 
+@ifset MIPS
+@include c-mips.texi
+@end ifset
+
 @ifset NS32K
 @include c-ns32k.texi
+@end ifset
+
+@ifset SH
+@include c-sh.texi
 @end ifset
 
 @ifset SPARC
 @include c-sparc.texi
 @end ifset
 
-@ifset I80386
-@include c-i386.texi
-@end ifset
-
 @ifset Z8000
 @include c-z8k.texi
 @end ifset
 
-@ifset MIPS
-@include c-mips.texi
+@ifset VAX
+@include c-vax.texi
 @end ifset
 
 @ifset GENERIC
@@ -4554,8 +4613,8 @@ required the proverbial one-bit fix.
 
 Ian Lance Taylor of Cygnus Support merged the Motorola and MIT syntax for the
 68k, completed support for some COFF targets (68k, i386 SVR3, and SCO Unix),
-added support for MIPS ECOFF and ELF targets, and made a few other minor
-patches.
+added support for MIPS ECOFF and ELF targets, wrote the initial RS/6000 and
+PowerPC assembler, and made a few other minor patches.
 
 Steve Chamberlain made @code{@value{AS}} able to generate listings.
 
@@ -4571,6 +4630,8 @@ Support (original, incomplete implementation for SPARC), Pete Hoogenboom and
 Jeff Law at the University of Utah (HPPA mainly), Michael Meissner of the Open
 Software Foundation (i386 mainly), and Ken Raeburn of Cygnus Support (sparc,
 and some initial 64-bit support).
+
+Richard Henderson rewrote the Alpha assembler.
 
 Several engineers at Cygnus Support have also provided many small bug fixes and
 configuration enhancements.

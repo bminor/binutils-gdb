@@ -1,5 +1,8 @@
 Fri Jul  5 10:32:58 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
 
+	* doc/c-m68k.texi: Document -m5200 flag.
+	* doc/as.texinfo: Likewise.
+
 	* config/tc-m68k.c (m68k_ip): The coldfire does not support 8x
  	scale factor.
 
