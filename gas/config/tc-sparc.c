@@ -5,7 +5,7 @@
    
    GAS is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 1, or (at your option)
+   the Free Software Foundation; either version 2, or (at your option)
    any later version.
    
    GAS is distributed in the hope that it will be useful,
@@ -500,15 +500,19 @@ char *str;
 				} /* if %asr */
 				break;
 
- /* start-sanitize */
+ /* start-sanitize-v9 */
 #ifndef NO_V9
+			case 'I':
+				the_insn.reloc = RELOC_11;
+				goto immediate;
+
 			case 'k':
-				the_insn.reloc = RELOC_WDISP14;
+				the_insn.reloc = RELOC_WDISP2_14;
 				the_insn.pcrel = 1;
 				goto immediate;
 				
-			case 'K':
-				the_insn.reloc = RELOC_WDISP21;
+			case 'G':
+				the_insn.reloc = RELOC_WDISP19;
 				the_insn.pcrel = 1;
 				goto immediate;
 				
@@ -532,9 +536,89 @@ char *str;
 					continue;
 				}
 				break;
-				
+
+			case 'z':
+				if (*s == ' ') {
+					++s;
+				}
+				if (strncmp(s, "icc", 3) == 0) {
+					s += 3;
+					continue;
+				}
+				break;
+
+			case 'Z':
+				if (*s == ' ') {
+					++s;
+				}
+				if (strncmp(s, "xcc", 3) == 0) {
+					s += 3;
+					continue;
+				}
+				break;
+
+			case '6':
+				if (*s == ' ') {
+					++s;
+				}
+				if (strncmp(s, "fcc0", 4) == 0) {
+					s += 4;
+					continue;
+				}
+				break;
+
+			case '7':
+				if (*s == ' ') {
+					++s;
+				}
+				if (strncmp(s, "fcc1", 4) == 0) {
+					s += 4;
+					continue;
+				}
+				break;
+
+			case '8':
+				if (*s == ' ') {
+					++s;
+				}
+				if (strncmp(s, "fcc2", 4) == 0) {
+					s += 4;
+					continue;
+				}
+				break;
+
+			case '9':
+				if (*s == ' ') {
+					++s;
+				}
+				if (strncmp(s, "fcc3", 4) == 0) {
+					s += 4;
+					continue;
+				}
+				break;
+
+			case 'P':
+				if (strncmp(s, "%pc", 3) == 0) {
+					s += 3;
+					continue;
+				}
+				break;
+
+			case 'E':
+				if (strncmp(s, "%modes", 6) == 0) {
+					s += 6;
+					continue;
+				}
+				break;
+
+			case 'W':
+				if (strncmp(s, "%tick", 5) == 0) {
+					s += 5;
+					continue;
+				}
+				break;
 #endif /* NO_V9 */
- /* end-sanitize */
+ /* end-sanitize-v9 */
 
 			case '\0':  /* end of args */
 				if (*s == '\0') {
@@ -700,7 +784,12 @@ char *str;
 				}
 				break;
 				
-			case 'e':    /* next operand is a floating point register */
+ /* start-sanitize-v9 */
+#ifndef NO_V9
+			case 'j':
+#endif /* NO_V9 */
+ /* end-sanitize-v9 */
+			case 'e': /* next operand is a floating point register */
 			case 'f':
 			case 'g':
 				if (*s++ == '%' && *s++ == 'f' && isdigit(*s)) {
@@ -716,16 +805,23 @@ char *str;
 					switch (*args) {
 						
 					case 'e':
-						opcode |= mask << 14;
+						opcode |= RS1(mask);
 						continue;
 						
 					case 'f':
-						opcode |= mask;
+						opcode |= RS2(mask);
 						continue;
 						
 					case 'g':
-						opcode |= mask << 25;
+						opcode |= RD(mask);
 						continue;
+ /* start-sanitize-v9 */
+#ifndef NO_V9
+					case 'j':
+						opcode |= (mask & 0x1f) << 9;
+						continue;
+#endif /* NO_V9 */
+ /* end-sanitize-v9 */
 					}
 				}
 				break;
@@ -737,16 +833,16 @@ char *str;
 				}
 				break;
 				
-			case 'h':       /* high 22 bits */
+			case 'h': /* high 22 bits */
 				the_insn.reloc = RELOC_HI22;
 				goto immediate;
 				
-			case 'l':   /* 22 bit PC relative immediate */
+			case 'l': /* 22 bit PC relative immediate */
 				the_insn.reloc = RELOC_WDISP22;
 				the_insn.pcrel = 1;
 				goto immediate;
 				
-			case 'L':   /* 30 bit immediate */
+			case 'L': /* 30 bit immediate */
 				the_insn.reloc = RELOC_WDISP30;
 				the_insn.pcrel = 1;
 				goto immediate;
@@ -1092,22 +1188,40 @@ long val;
 		buf[3] = val;
 		break;
 
- /* start-sanitize */
+ /* start-sanitize-v9 */
 #ifndef NO_V9
-	case RELOC_WDISP14:
-		val = (val >>= 2) + 1;
-		buf[2] |= (val >> 8) & 0x3f ;
-		buf[3] = val;
+	case RELOC_11:
+		if (val & 0x7ff) {
+			as_bad("relocation overflow");
+		} /* on overflow */
+
+		buf[2] = (val >> 8) & 0x7;
+		buf[3] = val & 0xff;
 		break;
 
-	case RELOC_WDISP21:
+	case RELOC_WDISP2_14:
+		if (val & ~0xffff) {
+			as_bad("relocation overflow.");
+		} /* on overflow */
+
 		val = (val >>= 2) + 1;
-		buf[1] |= (val >> 16) & 0x1f;
-		buf[2] = val >> 8;
-		buf[3] = val;
+		buf[1] |= ((val >> 14) & 0x3) << 3;
+		buf[2] |= (val >> 8) & 0x3f ;
+		buf[3] = val & 0xff;
+		break;
+
+	case RELOC_WDISP19:
+		if (val & ~0x7ffff) {
+			as_bad("relocation overflow.");
+		} /* on overflow */
+
+		val = (val >>= 2) + 1;
+		buf[1] |= (val >> 16) & 0x7;
+		buf[2] = (val >> 8) & 0xff;
+		buf[3] = val & 0xff;
 		break;
 #endif /* NO_V9 */
- /* end-sanitize */
+ /* end-sanitize-v9 */
 
 	case RELOC_HI22:
 		if(!fixP->fx_addsy) {
@@ -1376,9 +1490,9 @@ relax_addressT segment_address_in_file;
  *		instruction set you MUST -Acypress.
  *
  */
- /* start-sanitize */
+ /* start-sanitize-v9 */
  /* There is also a -Av9 architecture option.  xoxorich. */
- /* end-sanitize */
+ /* end-sanitize-v9 */
 int md_parse_option(argP, cntP, vecP)
 char **argP;
 int *cntP;
