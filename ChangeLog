@@ -1,3 +1,7 @@
+Fri Apr 11 16:37:10 1997  Niklas Hallqvist  <niklas@appli.se>
+
+	* config.guess: Recognize OpenBSD systems correctly.
+
 Fri Apr 11 17:07:04 1997  Jason Molenda  (crash@godzilla.cygnus.co.jp)
 
 	* README, Makefile.in (ETC_SUPPORT): Remove references to
