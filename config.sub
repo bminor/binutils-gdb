@@ -77,7 +77,7 @@ case $os in
 	-convergent* | -ncr* | -news | -32* | -3600* | -3100* | -hitachi* |\
 	-c[123]* | -convex* | -sun | -crds | -omron* | -dg | -ultra | -tti* | \
 	-harris | -dolphin | -highlevel | -gould | -cbm | -ns | -masscomp | \
-	-sim | -cisco)						# CYGNUS LOCAL
+	-sim | -cisco | -oki | -wec | -winbond )	# CYGNUS LOCAL
 		os=
 		basic_machine=$1
 		;;
@@ -142,7 +142,8 @@ case $basic_machine in
 		| h8300 | h8300h | sh \
 		| m88110 | sparc | m680[01234]0 | m683?2 | z8k | v70 \
 		| v810 \
-		| h8500 | mips64 | mipsel | mips64el) # CYGNUS LOCAL
+		| h8500 | mips64 | mipsel | mips64el \
+		| mips64orion | mips64orionel ) # CYGNUS LOCAL
 		basic_machine=$basic_machine-unknown
 		;;
 	# Object if more than one company name word.
@@ -160,7 +161,8 @@ case $basic_machine in
 	      | powerpc-* \
 	      | h8300-* | h8300h-* | sh-* \
 	      | m88110-* | m680[01234]0-* | m683?2-* | z8k-* | h8500-* \
-	      | mips64-* | mipsel-* | mips64el-*) # CYGNUS LOCAL
+	      | mips64-* | mipsel-* | mips64el-* \
+	      | mips64orion-* | mips64orionel-* ) # CYGNUS LOCAL
 		;;
 	# Recognize the various machine names and aliases which stand
 	# for a CPU type and a company and sometimes even an OS.
@@ -352,6 +354,22 @@ case $basic_machine in
 	hppaosf)
 		basic_machine=hppa1.1-hp
 		os=-osf
+		;;
+	w89k-*)
+		basic_machine=hppa1.1-winbond
+		os=-pro
+		;;
+	op50n-*)
+		basic_machine=hppa1.1-oki
+		os=-pro
+		;;
+	op60c-*)
+		basic_machine=hppa1.1-oki
+		os=-pro
+		;;
+	hppro)
+		basic_machine=hppa1.1-hp
+		os=-pro
 		;;
 	i370-ibm* | ibm*)
 		basic_machine=i370-ibm
@@ -672,6 +690,15 @@ case $basic_machine in
 
 # Here we handle the default manufacturer of certain CPU types.  It is in
 # some cases the only manufacturer, in others, it is the most popular.
+	w89k)					# CYGNUS LOCAL
+		basic_machine=hppa1.1-winbond
+		;;
+	op50n)					# CYGNUS LOCAL
+		basic_machine=hppa1.1-oki
+		;;
+	op60c)					# CYGNUS LOCAL
+		basic_machine=hppa1.1-oki
+		;;
 	mips)
 		basic_machine=mips-mips
 		;;
@@ -747,8 +774,9 @@ case $os in
 	      | -amigados* | -msdos* | -newsos* | -unicos* | -aos* \
 	      | -nindy* | -vxworks* | -ebmon* | -hms* | -mvs* | -clix* \
 	      | -riscos* | -linux* | -uniplus* | -iris* | -rtu* | -xenix* \
-	      | -hiux* | -386bsd* | -netbsd* | -nextstep | -riscix* | -lynxos*\
-	      | -go32 | -vsta | -sim | -es1800* | -udi | -hms* | -xray | -hds* \
+	      | -hiux* | -386bsd* | -netbsd* | -freebsd* | -nextstep* \
+	      | -riscix* | -lynxos* | -go32 | -vsta | -pro | -proelf \
+	      | -sim | -es1800* | -udi | -hms* | -xray | -hds* \
 	      | -os68k* | -none* | -v88r* | -aout* | -coff | -elf* | -bosx* \
 	      | -abug | -ecoff* | -netware* | -os9* )
 				# The last three lines above are CYGNUS LOCAL
@@ -867,6 +895,15 @@ case $basic_machine in
 		;;
 	*-hp)
 		os=-hpux
+		;;
+	*-wec)						# CYGNUS LOCAL
+		os=-pro
+		;;
+	*-winbond)					# CYGNUS LOCAL
+		os=-pro
+		;;
+	*-oki)						# CYGNUS LOCAL
+		os=-pro
 		;;
 	*-hitachi)
 		os=-hiux
