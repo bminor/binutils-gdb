@@ -1,3 +1,8 @@
+2001-12-08  Jim Blandy  <jimb@redhat.com>
+
+	* config/s390/s390.mh: Don't use the linux-thread.o module;
+ 	thread-db.o, lin-lwp.o, and proc-service.o should work just fine.
+
 2001-12-07  Andrew Cagney  <ac131313@redhat.com>
 
 	* PROBLEMS: New file.
