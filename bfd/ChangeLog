@@ -1,3 +1,9 @@
+2005-03-24  Nick Clifton  <nickc@redhat.com>
+
+	* targets.c (_bfd_target_vector): Only include the
+	bfd_elf32_ia64_hpux_big_vec vector when building a 64-bit BFD with
+	all targets enabled.
+
 2005-03-24  James E Wilson  <wilson@specifixinc.com>
 
 	* Makefile.am (BFD32_BACKENDS): Delete elf32-ia64.lo.

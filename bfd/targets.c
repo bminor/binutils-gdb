@@ -867,7 +867,9 @@ static const bfd_target * const _bfd_target_vector[] = {
 #if 0
 	&bfd_elf32_ia64_big_vec,
 #endif
+#ifdef BFD64
 	&bfd_elf32_ia64_hpux_big_vec,
+#endif
 	&bfd_elf32_ip2k_vec,
 	&bfd_elf32_iq2000_vec,
 	&bfd_elf32_little_generic_vec,
