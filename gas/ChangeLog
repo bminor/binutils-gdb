@@ -1,3 +1,7 @@
+2003-07-23  Daniel Jacobowitz  <drow@mvista.com>
+
+	* config/tc-arm.c (arm_archs): Add iwmmxt.
+
 2003-07-22  H.J. Lu <hongjiu.lu@intel.com>
  
 	* read.c (do_parse_cons_expression): Mark nbytes unused to
