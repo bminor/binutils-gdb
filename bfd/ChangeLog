@@ -1,5 +1,10 @@
 2002-09-21  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-ppc.c (ppc_elf_relocate_section): Allow ".sbss.*" and
+	".sdata.*" for R_PPC_SDAREL16, ".sbss2*" and ".sdata2*" for
+	R_PPC_EMB_SDA2REL.  Similarly for R_PPC_EMB_SDA21 and
+	R_PPC_EMB_RELSDA.
+
 	* elfcode.h (elf_slurp_reloc_table_from_section): Make "symcount"
 	unsigned.  Move "symcount" assignment out of loop.
 	* Makefile.am: Run "make dep-am".

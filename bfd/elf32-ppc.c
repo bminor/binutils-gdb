@@ -3483,8 +3483,10 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	    BFD_ASSERT (sec != (asection *) 0);
 	    name = bfd_get_section_name (abfd, sec->output_section);
-	    if (strcmp (name, ".sdata") != 0
-		&& strcmp (name, ".sbss") != 0)
+	    if (! ((strncmp (name, ".sdata", 6) == 0
+		    && (name[6] == 0 || name[6] == '.'))
+		   || (strncmp (name, ".sbss", 5) == 0
+		       && (name[5] == 0 || name[5] == '.'))))
 	      {
 		(*_bfd_error_handler) (_("%s: The target (%s) of a %s relocation is in the wrong output section (%s)"),
 				       bfd_archive_filename (input_bfd),
@@ -3505,7 +3507,8 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	    BFD_ASSERT (sec != (asection *) 0);
 	    name = bfd_get_section_name (abfd, sec->output_section);
-	    if (strcmp (name, ".sdata2") != 0 && strcmp (name, ".sbss2") != 0)
+	    if (! (strncmp (name, ".sdata2", 7) == 0
+		   || strncmp (name, ".sbss2", 6) == 0))
 	      {
 		(*_bfd_error_handler) (_("%s: The target (%s) of a %s relocation is in the wrong output section (%s)"),
 				       bfd_archive_filename (input_bfd),
@@ -3532,7 +3535,10 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	    BFD_ASSERT (sec != (asection *) 0);
 	    name = bfd_get_section_name (abfd, sec->output_section);
-	    if (strcmp (name, ".sdata") == 0 || strcmp (name, ".sbss") == 0)
+	    if (((strncmp (name, ".sdata", 6) == 0	
+		  && (name[6] == 0 || name[6] == '.'))
+		 || (strncmp (name, ".sbss", 5) == 0
+		     && (name[5] == 0 || name[5] == '.'))))
 	      {
 		reg = 13;
 		addend -= (sdata->sym_hash->root.u.def.value
@@ -3540,8 +3546,8 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			   + sdata->sym_hash->root.u.def.section->output_offset);
 	      }
 
-	    else if (strcmp (name, ".sdata2") == 0
-		     || strcmp (name, ".sbss2") == 0)
+	    else if (strncmp (name, ".sdata2", 7) == 0
+		     || strncmp (name, ".sbss2", 6) == 0)
 	      {
 		reg = 2;
 		addend -= (sdata2->sym_hash->root.u.def.value
