@@ -1,5 +1,11 @@
 2002-10-30  Daniel Jacobowitz  <drow@mvista.com>
 
+	* bfd-in2.h: Regenerated.
+	* po/SRC-POTFILES.in: Regenerated.
+	* po/bfd.pot: Regenerated.
+
+2002-10-30  Daniel Jacobowitz  <drow@mvista.com>
+
 	* coffcode.h: Remove extraneous '\'.
 
 2002-10-28  Daniel Jacobowitz  <drow@mvista.com>

@@ -1,12 +1,13 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR Free Software Foundation, Inc.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2002-07-23 15:58-0400\n"
+"POT-Creation-Date: 2002-10-30 10:08-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -14,21 +15,21 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: alpha.c:93 mips.c:47
+#: alpha.c:103 mips.c:57
 msgid "<indirect child>"
 msgstr ""
 
-#: alpha.c:110 mips.c:64
+#: alpha.c:120 mips.c:74
 #, c-format
 msgid "[find_call] %s: 0x%lx to 0x%lx\n"
 msgstr ""
 
-#: alpha.c:132
+#: alpha.c:142
 #, c-format
 msgid "[find_call] 0x%lx: jsr%s <indirect_child>\n"
 msgstr ""
 
-#: alpha.c:142
+#: alpha.c:152
 #, c-format
 msgid "[find_call] 0x%lx: bsr"
 msgstr ""
@@ -152,6 +153,7 @@ msgid "index"
 msgstr ""
 
 #: cg_print.c:97
+#, c-format
 msgid "%time"
 msgstr ""
 
@@ -337,7 +339,7 @@ msgstr ""
 msgid "\t%d basic-block count records\n"
 msgstr ""
 
-#: gprof.c:152
+#: gprof.c:163
 #, c-format
 msgid ""
 "Usage: %s [-[abcDhilLsTvwxyz]] [-[ACeEfFJnNOpPqQZ][name]] [-I dirs]\n"
@@ -355,59 +357,59 @@ msgid ""
 "\t[image-file] [profile-file...]\n"
 msgstr ""
 
-#: gprof.c:168
+#: gprof.c:179
 #, c-format
 msgid "Report bugs to %s\n"
 msgstr ""
 
-#: gprof.c:242
+#: gprof.c:253
 #, c-format
 msgid "%s: debugging not supported; -d ignored\n"
 msgstr ""
 
-#: gprof.c:322
+#: gprof.c:333
 #, c-format
 msgid "%s: unknown file format %s\n"
 msgstr ""
 
 #. This output is intended to follow the GNU standards document.
-#: gprof.c:406
+#: gprof.c:417
 #, c-format
 msgid "GNU gprof %s\n"
 msgstr ""
 
-#: gprof.c:407
+#: gprof.c:418
 msgid ""
 "Based on BSD gprof, copyright 1983 Regents of the University of California.\n"
 msgstr ""
 
-#: gprof.c:408
+#: gprof.c:419
 msgid ""
 "This program is free software.  This program has absolutely no warranty.\n"
 msgstr ""
 
-#: gprof.c:449
+#: gprof.c:460
 #, c-format
 msgid "%s: unknown demangling style `%s'\n"
 msgstr ""
 
-#: gprof.c:469
+#: gprof.c:480
 #, c-format
 msgid ""
 "%s: Only one of --function-ordering and --file-ordering may be specified.\n"
 msgstr ""
 
-#: gprof.c:569
+#: gprof.c:578
 #, c-format
 msgid "%s: sorry, file format `prof' is not yet supported\n"
 msgstr ""
 
-#: gprof.c:630
+#: gprof.c:639
 #, c-format
 msgid "%s: gmon.out file is missing histogram\n"
 msgstr ""
 
-#: gprof.c:637
+#: gprof.c:646
 #, c-format
 msgid "%s: gmon.out file is missing call-graph data\n"
 msgstr ""
@@ -479,12 +481,12 @@ msgstr ""
 msgid "Flat profile:\n"
 msgstr ""
 
-#: mips.c:75
+#: mips.c:85
 #, c-format
 msgid "[find_call] 0x%lx: jal"
 msgstr ""
 
-#: mips.c:100
+#: mips.c:110
 #, c-format
 msgid "[find_call] 0x%lx: jalr\n"
 msgstr ""
@@ -499,7 +501,7 @@ msgstr ""
 msgid "*** File %s:\n"
 msgstr ""
 
-#: utils.c:99
+#: utils.c:109
 #, c-format
 msgid " <cycle %d>"
 msgstr ""

@@ -407,14 +407,14 @@ static const short yyrline[] =
      761,   763,   765,   767,   769,   771,   773,   775,   777,   779,
      781,   783,   785,   787,   789,   791,   794,   796,   798,   800,
      802,   804,   806,   808,   810,   812,   814,   816,   821,   823,
-     826,   828,   831,   831,   831,   831,   831,   831,   848,   848,
-     848,   848,   848,   848,   866,   866,   866,   879,   881,   882,
-     883,   884,   887,   889,   890,   893,   895,   896,   901,   905,
-     907,   910,   913,   917,   920,   923,   928,   941,   943,   943,
-     943,   943,   959,   963,   965,   968,   968,   968,   978,  1008,
-    1013,  1025,  1032,  1037,  1045,  1045,  1059,  1059,  1069,  1071,
-    1074,  1079,  1083,  1089,  1094,  1100,  1105,  1109,  1113,  1117,
-    1123,  1128,  1132,  1132
+     826,   828,   831,   831,   831,   831,   831,   831,   849,   849,
+     849,   849,   849,   849,   867,   867,   867,   880,   882,   883,
+     884,   885,   888,   890,   891,   894,   896,   897,   902,   906,
+     908,   911,   914,   918,   921,   924,   929,   942,   944,   944,
+     944,   944,   960,   964,   966,   969,   969,   969,   979,  1009,
+    1014,  1026,  1033,  1038,  1046,  1046,  1060,  1060,  1070,  1072,
+    1075,  1080,  1084,  1090,  1095,  1101,  1106,  1110,  1114,  1118,
+    1124,  1129,  1133,  1133
 };
 #endif
 
@@ -988,7 +988,7 @@ static const short yycheck[] =
       25,    26,    27,    28,    29,    30,    31,    32,    33,    34
 };
 /* -*-C-*-  Note some compilers choke on comments on `#line' lines.  */
-#line 3 "/usr/share/bison/bison.simple"
+#line 3 "/usr/share/bison-1.35/bison.simple"
 
 /* Skeleton output parser for bison,
 
@@ -1301,7 +1301,7 @@ yystpcpy (yydest, yysrc)
 # endif
 #endif
 
-#line 315 "/usr/share/bison/bison.simple"
+#line 315 "/usr/share/bison-1.35/bison.simple"
 
 
 /* The user can define YYPARSE_PARAM as the name of an argument to be passed
@@ -2200,6 +2200,10 @@ case 153:
 #line 630 "ldgram.y"
 { region = lang_memory_region_lookup(yyvsp[0].name); }
     break;
+case 154:
+#line 633 "ldgram.y"
+{}
+    break;
 case 155:
 #line 638 "ldgram.y"
 { region->current =
@@ -2494,26 +2498,30 @@ case 226:
 		  lang_leave_output_section_statement (yyvsp[0].fill, yyvsp[-3].name, yyvsp[-1].section_phdr, yyvsp[-2].name);
 		}
     break;
+case 227:
+#line 848 "ldgram.y"
+{}
+    break;
 case 228:
-#line 849 "ldgram.y"
+#line 850 "ldgram.y"
 { ldlex_expression (); }
     break;
 case 229:
-#line 851 "ldgram.y"
+#line 852 "ldgram.y"
 { ldlex_popstate (); ldlex_script (); }
     break;
 case 230:
-#line 853 "ldgram.y"
+#line 854 "ldgram.y"
 {
 			  lang_enter_overlay (yyvsp[-4].etree);
 			}
     break;
 case 231:
-#line 858 "ldgram.y"
+#line 859 "ldgram.y"
 { ldlex_popstate (); ldlex_expression (); }
     break;
 case 232:
-#line 860 "ldgram.y"
+#line 861 "ldgram.y"
 {
 			  ldlex_popstate ();
 			  lang_leave_overlay (yyvsp[-10].etree, (int) yyvsp[-11].integer,
@@ -2521,92 +2529,92 @@ case 232:
 			}
     break;
 case 234:
-#line 870 "ldgram.y"
+#line 871 "ldgram.y"
 { ldlex_expression (); }
     break;
 case 235:
-#line 872 "ldgram.y"
+#line 873 "ldgram.y"
 {
 		  ldlex_popstate ();
 		  lang_add_assignment (exp_assop ('=', ".", yyvsp[0].etree));
 		}
     break;
 case 237:
-#line 880 "ldgram.y"
+#line 881 "ldgram.y"
 { sectype = noload_section; }
     break;
 case 238:
-#line 881 "ldgram.y"
+#line 882 "ldgram.y"
 { sectype = dsect_section; }
     break;
 case 239:
-#line 882 "ldgram.y"
+#line 883 "ldgram.y"
 { sectype = copy_section; }
     break;
 case 240:
-#line 883 "ldgram.y"
+#line 884 "ldgram.y"
 { sectype = info_section; }
     break;
 case 241:
-#line 884 "ldgram.y"
+#line 885 "ldgram.y"
 { sectype = overlay_section; }
     break;
 case 243:
-#line 889 "ldgram.y"
-{ sectype = normal_section; }
-    break;
-case 244:
 #line 890 "ldgram.y"
 { sectype = normal_section; }
     break;
+case 244:
+#line 891 "ldgram.y"
+{ sectype = normal_section; }
+    break;
 case 245:
-#line 894 "ldgram.y"
+#line 895 "ldgram.y"
 { yyval.etree = yyvsp[-2].etree; }
     break;
 case 246:
-#line 895 "ldgram.y"
+#line 896 "ldgram.y"
 { yyval.etree = (etree_type *)NULL;  }
     break;
 case 247:
-#line 900 "ldgram.y"
+#line 901 "ldgram.y"
 { yyval.etree = yyvsp[-3].etree; }
     break;
 case 248:
-#line 902 "ldgram.y"
+#line 903 "ldgram.y"
 { yyval.etree = yyvsp[-7].etree; }
     break;
 case 249:
-#line 906 "ldgram.y"
+#line 907 "ldgram.y"
 { yyval.etree = yyvsp[-1].etree; }
     break;
 case 250:
-#line 907 "ldgram.y"
+#line 908 "ldgram.y"
 { yyval.etree = (etree_type *) NULL;  }
     break;
 case 251:
-#line 912 "ldgram.y"
+#line 913 "ldgram.y"
 { yyval.integer = 0; }
     break;
 case 252:
-#line 914 "ldgram.y"
+#line 915 "ldgram.y"
 { yyval.integer = 1; }
     break;
 case 253:
-#line 919 "ldgram.y"
+#line 920 "ldgram.y"
 { yyval.name = yyvsp[0].name; }
     break;
 case 254:
-#line 920 "ldgram.y"
+#line 921 "ldgram.y"
 { yyval.name = "*default*"; }
     break;
 case 255:
-#line 925 "ldgram.y"
+#line 926 "ldgram.y"
 {
 		  yyval.section_phdr = NULL;
 		}
     break;
 case 256:
-#line 929 "ldgram.y"
+#line 930 "ldgram.y"
 {
 		  struct lang_output_section_phdr_list *n;
 
@@ -2619,40 +2627,40 @@ case 256:
 		}
     break;
 case 258:
-#line 945 "ldgram.y"
+#line 946 "ldgram.y"
 {
 			  ldlex_script ();
 			  lang_enter_overlay_section (yyvsp[0].name);
 			}
     break;
 case 259:
-#line 950 "ldgram.y"
+#line 951 "ldgram.y"
 { ldlex_popstate (); ldlex_expression (); }
     break;
 case 260:
-#line 952 "ldgram.y"
+#line 953 "ldgram.y"
 {
 			  ldlex_popstate ();
 			  lang_leave_overlay_section (yyvsp[0].fill, yyvsp[-1].section_phdr);
 			}
     break;
 case 265:
-#line 969 "ldgram.y"
+#line 970 "ldgram.y"
 { ldlex_expression (); }
     break;
 case 266:
-#line 970 "ldgram.y"
+#line 971 "ldgram.y"
 { ldlex_popstate (); }
     break;
 case 267:
-#line 972 "ldgram.y"
+#line 973 "ldgram.y"
 {
 		  lang_new_phdr (yyvsp[-5].name, yyvsp[-3].etree, yyvsp[-2].phdr.filehdr, yyvsp[-2].phdr.phdrs, yyvsp[-2].phdr.at,
 				 yyvsp[-2].phdr.flags);
 		}
     break;
 case 268:
-#line 980 "ldgram.y"
+#line 981 "ldgram.y"
 {
 		  yyval.etree = yyvsp[0].etree;
 
@@ -2681,13 +2689,13 @@ case 268:
 		}
     break;
 case 269:
-#line 1010 "ldgram.y"
+#line 1011 "ldgram.y"
 {
 		  memset (&yyval.phdr, 0, sizeof (struct phdr_info));
 		}
     break;
 case 270:
-#line 1014 "ldgram.y"
+#line 1015 "ldgram.y"
 {
 		  yyval.phdr = yyvsp[0].phdr;
 		  if (strcmp (yyvsp[-2].name, "FILEHDR") == 0 && yyvsp[-1].etree == NULL)
@@ -2701,131 +2709,131 @@ case 270:
 		}
     break;
 case 271:
-#line 1026 "ldgram.y"
+#line 1027 "ldgram.y"
 {
 		  yyval.phdr = yyvsp[0].phdr;
 		  yyval.phdr.at = yyvsp[-2].etree;
 		}
     break;
 case 272:
-#line 1034 "ldgram.y"
+#line 1035 "ldgram.y"
 {
 		  yyval.etree = NULL;
 		}
     break;
 case 273:
-#line 1038 "ldgram.y"
+#line 1039 "ldgram.y"
 {
 		  yyval.etree = yyvsp[-1].etree;
 		}
     break;
 case 274:
-#line 1046 "ldgram.y"
+#line 1047 "ldgram.y"
 {
 		  ldlex_version_file ();
 		  PUSH_ERROR (_("VERSION script"));
 		}
     break;
 case 275:
-#line 1051 "ldgram.y"
+#line 1052 "ldgram.y"
 {
 		  ldlex_popstate ();
 		  POP_ERROR ();
 		}
     break;
 case 276:
-#line 1060 "ldgram.y"
+#line 1061 "ldgram.y"
 {
 		  ldlex_version_script ();
 		}
     break;
 case 277:
-#line 1064 "ldgram.y"
+#line 1065 "ldgram.y"
 {
 		  ldlex_popstate ();
 		}
     break;
 case 280:
-#line 1076 "ldgram.y"
+#line 1077 "ldgram.y"
 {
 		  lang_register_vers_node (NULL, yyvsp[-2].versnode, NULL);
 		}
     break;
 case 281:
-#line 1080 "ldgram.y"
+#line 1081 "ldgram.y"
 {
 		  lang_register_vers_node (yyvsp[-4].name, yyvsp[-2].versnode, NULL);
 		}
     break;
 case 282:
-#line 1084 "ldgram.y"
+#line 1085 "ldgram.y"
 {
 		  lang_register_vers_node (yyvsp[-5].name, yyvsp[-3].versnode, yyvsp[-1].deflist);
 		}
     break;
 case 283:
-#line 1091 "ldgram.y"
+#line 1092 "ldgram.y"
 {
 		  yyval.deflist = lang_add_vers_depend (NULL, yyvsp[0].name);
 		}
     break;
 case 284:
-#line 1095 "ldgram.y"
+#line 1096 "ldgram.y"
 {
 		  yyval.deflist = lang_add_vers_depend (yyvsp[-1].deflist, yyvsp[0].name);
 		}
     break;
 case 285:
-#line 1102 "ldgram.y"
+#line 1103 "ldgram.y"
 {
 		  yyval.versnode = lang_new_vers_node (NULL, NULL);
 		}
     break;
 case 286:
-#line 1106 "ldgram.y"
+#line 1107 "ldgram.y"
 {
 		  yyval.versnode = lang_new_vers_node (yyvsp[-1].versyms, NULL);
 		}
     break;
 case 287:
-#line 1110 "ldgram.y"
+#line 1111 "ldgram.y"
 {
 		  yyval.versnode = lang_new_vers_node (yyvsp[-1].versyms, NULL);
 		}
     break;
 case 288:
-#line 1114 "ldgram.y"
+#line 1115 "ldgram.y"
 {
 		  yyval.versnode = lang_new_vers_node (NULL, yyvsp[-1].versyms);
 		}
     break;
 case 289:
-#line 1118 "ldgram.y"
+#line 1119 "ldgram.y"
 {
 		  yyval.versnode = lang_new_vers_node (yyvsp[-5].versyms, yyvsp[-1].versyms);
 		}
     break;
 case 290:
-#line 1125 "ldgram.y"
+#line 1126 "ldgram.y"
 {
 		  yyval.versyms = lang_new_vers_pattern (NULL, yyvsp[0].name, ldgram_vers_current_lang);
 		}
     break;
 case 291:
-#line 1129 "ldgram.y"
+#line 1130 "ldgram.y"
 {
 		  yyval.versyms = lang_new_vers_pattern (yyvsp[-2].versyms, yyvsp[0].name, ldgram_vers_current_lang);
 		}
     break;
 case 292:
-#line 1133 "ldgram.y"
+#line 1134 "ldgram.y"
 {
 			  yyval.name = ldgram_vers_current_lang;
 			  ldgram_vers_current_lang = yyvsp[-1].name;
 			}
     break;
 case 293:
-#line 1138 "ldgram.y"
+#line 1139 "ldgram.y"
 {
 			  yyval.versyms = yyvsp[-1].versyms;
 			  ldgram_vers_current_lang = yyvsp[-2].name;
@@ -2833,7 +2841,7 @@ case 293:
     break;
 }
 
-#line 705 "/usr/share/bison/bison.simple"
+#line 705 "/usr/share/bison-1.35/bison.simple"
 
 
   yyvsp -= yylen;
@@ -3064,7 +3072,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 1144 "ldgram.y"
+#line 1145 "ldgram.y"
 
 void
 yyerror(arg) 
