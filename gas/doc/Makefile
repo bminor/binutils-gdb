@@ -3,11 +3,11 @@
 # see pretex.m4 for discussion of preprocessor definitions
 
 # What version of the manual you want (see *.m4); "all" includes everything
-CONFIG=a29k-coff
+CONFIG=all
 
 # Sun/Berkeley m4 doesn't have all the things we need; use GNU or sV
-#M4=gm4
-M4=/usr/5bin/m4
+M4=gm4
+#M4=/usr/5bin/m4
 
 # Directory for gas source
 srcdir=..
@@ -18,9 +18,9 @@ TEXIDIR = $(srcdir)/../texinfo/fsf
 as.info: as-${CONFIG}.texinfo
 	makeinfo -o as.info as-${CONFIG}.texinfo
 
-# There's no index yet; when there is, add texindex call before tex 2nd pass
 as.dvi:	as-${CONFIG}.texinfo
 	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex as-${CONFIG}.texinfo
+	texindex as-${CONFIG}.??
 	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex as-${CONFIG}.texinfo
 	mv as-${CONFIG}.dvi as.dvi
 	rm as-${CONFIG}.?? as-${CONFIG}.???
