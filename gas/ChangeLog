@@ -1,5 +1,10 @@
 2002-12-01  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* config/tc-m68hc11.c (md_begin): Fix qsort warning.
+	(tc_gen_reloc): Mark section param as not used.
+
+2002-12-01  Stephane Carrez  <stcarrez@nerim.fr>
+
 	Fix Bug savannah/1825:
 	* config/tc-m68hc11.h (md_relax_frag): Define to support relaxations
 	that are not pc-relative.

@@ -638,7 +638,8 @@ md_begin ()
 	      }
 	}
     }
-  qsort (opcodes, num_opcodes, sizeof (struct m68hc11_opcode), cmp_opcode);
+  qsort (opcodes, num_opcodes, sizeof (struct m68hc11_opcode),
+         (int (*) PARAMS ((const PTR, const PTR))) cmp_opcode);
 
   opc = (struct m68hc11_opcode_def *)
     xmalloc (num_opcodes * sizeof (struct m68hc11_opcode_def));
@@ -2704,7 +2705,7 @@ md_pcrel_from (fixP)
    then it is done here.  */
 arelent *
 tc_gen_reloc (section, fixp)
-     asection *section;
+     asection *section ATTRIBUTE_UNUSED;
      fixS *fixp;
 {
   arelent *reloc;
