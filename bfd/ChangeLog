@@ -1,3 +1,8 @@
+Thu Jun 16 23:36:23 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* elfcode.h (elf_link_input_bfd): Don't try to read local symbols
+	if there aren't any in the input file.
+
 Thu Jun 16 14:25:22 1994  Eric Youngdale  (ericy@cais.cais.com)
 
 	* i386linux.c: Many new functions and definitions for linker

@@ -5850,10 +5850,11 @@ elf_link_input_bfd (finfo, input_bfd)
     }
 
   /* Read the local symbols.  */
-  if (bfd_seek (input_bfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-      || (bfd_read (finfo->external_syms, sizeof (Elf_External_Sym),
-		    locsymcount, input_bfd)
-	  != locsymcount * sizeof (Elf_External_Sym)))
+  if (locsymcount > 0
+      && (bfd_seek (input_bfd, symtab_hdr->sh_offset, SEEK_SET) != 0
+      	  || (bfd_read (finfo->external_syms, sizeof (Elf_External_Sym),
+			locsymcount, input_bfd)
+	      != locsymcount * sizeof (Elf_External_Sym))))
     return false;
 
   /* Swap in the local symbols and write out the ones which we know
