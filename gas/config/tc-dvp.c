@@ -44,9 +44,9 @@
 #define END_LABEL_PREFIX ".L.end."
 
 static long parse_float PARAMS ((char **, const char **));
-static struct symbol * create_label PARAMS ((const char *, const char *));
-static struct symbol * create_colon_label PARAMS ((const char *, const char *));
-static char * unique_name PARAMS ((void));
+static symbolS * create_label PARAMS ((const char *, const char *));
+static symbolS * create_colon_label PARAMS ((const char *, const char *));
+static char * unique_name PARAMS ((const char *));
 static long eval_expr PARAMS ((int, int, const char *, ...));
 static long parse_dma_addr_autocount ();
 static void inline_dma_data PARAMS ((int, DVP_INSN *));
@@ -100,6 +100,14 @@ static int cur_state_index;
 static void push_asm_state PARAMS ((asm_state));
 static void pop_asm_state PARAMS ((int));
 static void set_asm_state PARAMS ((asm_state));
+
+/* Current mach (machine variant) type state.
+   We copy the mips16 way of recording what the current machine type is in
+   the code.  A label is created whenever necessary and has an "other" value
+   the denotes the machine type.  */
+static dvp_cpu cur_mach;
+/* Record the current mach type.  */
+static void record_mach PARAMS ((dvp_cpu));
 
 /* Nonzero if inside .DmaData.  */
 static int dma_data_state = 0;
@@ -206,23 +214,18 @@ const pseudo_typeS md_pseudo_table[] =
 void
 md_begin ()
 {
-  flagword applicable;
-  segT seg;
-  subsegT subseg;
-
-  /* Save the current subseg so we can restore it [it's the default one and
-     we don't want the initial section to be .sbss.  */
-  seg = now_seg;
-  subseg = now_subseg;
-
-  subseg_set (seg, subseg);
-
   /* Initialize the opcode tables.
      This involves computing the hash chains.  */
   dvp_opcode_init_tables (0);
 
+  /* Set the current mach to an illegal value to force a label for the
+     first insn.  */
+  cur_mach = -1;
+
+  /* Initialize the parsing state.  */
   cur_state_index = 0;
   set_asm_state (ASM_INIT);
+
   dma_pack_vif_p = 0;
 }
 
@@ -347,6 +350,8 @@ assemble_dma (str)
   frag_align (4, 0, 0);
   record_alignment (now_seg, 4);
 
+  record_mach (DVP_DMA);
+
   len = 4;
   f = frag_more (len * 4);
 
@@ -416,6 +421,8 @@ assemble_vif (str)
      early if -no-vif.  */
   if (output_vif)
     {
+      record_mach (DVP_VIF);
+
       /* Reminder: it is important to fetch enough space in one call to
 	 `frag_more'.  We use (f - frag_now->fr_literal) to compute where
 	 we are and we don't want frag_now to change between calls.  */
@@ -513,13 +520,15 @@ assemble_gif (str)
   frag_align (4, 0, 0);
   record_alignment (now_seg, 4);
 
+  record_mach (DVP_GIF);
+
   gif_insn_frag = f = frag_more (16);
   for (i = 0; i < 4; ++i)
     md_number_to_chars (f + i * 4, insn_buf[i], 4);
 
   /* Insert a label so we can compute the number of quadwords when the
      .endgif is seen.  */
-  gif_data_name = S_GET_NAME (create_colon_label ("", unique_name ()));
+  gif_data_name = S_GET_NAME (create_colon_label ("", unique_name (NULL)));
 
   /* Record the type of the gif tag so we know how to compute nloop
      in s_endgif.  */
@@ -540,11 +549,15 @@ static void
 assemble_vu (str)
      char *str;
 {
+  char *f;
+  const dvp_opcode *opcode;
+
+  record_mach (DVP_VUUP);
+
   /* The lower instruction has the lower address.
      Handle this by grabbing 8 bytes now, and then filling each word
      as appropriate.  */
-  char *f = frag_more (8);
-  const dvp_opcode *opcode;
+  f = frag_more (8);
 
 #ifdef VERTICAL_BAR_SEPARATOR
   char *p = strchr (str, '|');
@@ -901,6 +914,33 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
   return 0;
 }
 
+/* Record the current mach type in the object file.  */
+
+static void
+record_mach (mach)
+     dvp_cpu mach;
+{
+  symbolS *label;
+  char *name;
+  int other;
+
+  if (mach == cur_mach)
+    return;
+
+  switch (mach)
+    {
+    case DVP_DMA : name = ".dma."; other = STO_DVP_DMA; break;
+    case DVP_VIF : name = ".vif."; other = STO_DVP_VIF; break;
+    case DVP_GIF : name = ".gif."; other = STO_DVP_GIF; break;
+    case DVP_VUUP : name = ".vu."; other = STO_DVP_VU; break;
+    default : abort ();
+    }
+
+  label = create_colon_label ("", unique_name (name));
+  S_SET_OTHER (label, other);
+  cur_mach = mach;
+}
+
 /* Push/pop the current parsing state.  */
 
 static void
@@ -1364,14 +1404,14 @@ eval_expr (opindex, offset, fmt, va_alist)
 
 /* Create a label named by concatenating PREFIX to NAME.  */
 
-static struct symbol *
+static symbolS *
 create_label (prefix, name)
      const char *prefix, *name;
 {
   int namelen = strlen (name);
   int prefixlen = strlen (prefix);
   char *fullname;
-  struct symbol *result;
+  symbolS *result;
 
   fullname = xmalloc (prefixlen + namelen + 1);
   strcpy (fullname, prefix);
@@ -1384,14 +1424,14 @@ create_label (prefix, name)
 /* Create a label named by concatenating PREFIX to NAME,
    and define it as `.'.  */
 
-static struct symbol *
+static symbolS *
 create_colon_label (prefix, name)
      const char *prefix, *name;
 {
   int namelen = strlen (name);
   int prefixlen = strlen (prefix);
   char *fullname;
-  struct symbol *result;
+  symbolS *result;
 
   fullname = xmalloc (prefixlen + namelen + 1);
   strcpy (fullname, prefix);
@@ -1401,17 +1441,21 @@ create_colon_label (prefix, name)
   return result;
 }
 
-/* Return a malloc'd string useful in creating unique labels.  */
+/* Return a malloc'd string useful in creating unique labels.
+   PREFIX is the prefix to use or NULL if we're to pick one.  */
 /* ??? Presumably such a routine already exists somewhere
    [but a first pass at finding it didn't turn up anything].  */
 
 static char *
-unique_name ()
+unique_name (prefix)
+     const char *prefix;
 {
   static int counter;
   char *result;
 
-  asprintf (&result, "dvptmp%d", counter);
+  if (prefix == NULL)
+    prefix = "dvptmp";
+  asprintf (&result, "%s%d", prefix, counter);
   ++counter;
   return result;
 }
@@ -1452,7 +1496,7 @@ inline_dma_data (autocount_p, insn_buf)
 
   if (autocount_p)
     {
-      dma_data_name = S_GET_NAME (create_colon_label ("", unique_name ()));
+      dma_data_name = S_GET_NAME (create_colon_label ("", unique_name (NULL)));
       setup_autocount (dma_data_name, insn_buf);
     }
   else
@@ -1474,7 +1518,7 @@ parse_dma_addr_autocount (opcode, operand, mods, insn_buf, pstr, errmsg)
   char *end = start;
   long retval;
   /* Data reference must be a .DmaData label.  */
-  struct symbol *label, *label2, *endlabel;
+  symbolS *label, *label2, *endlabel;
   const char *name;
   char c;
 
@@ -1559,7 +1603,13 @@ install_vif_length (buf, len)
   else if ((cmd & 0x60) == 0x60)
     {
       /* unpack */
-      /* FIXME */
+      /* FIXME: revisit */
+      /* ??? Worry about data /= 16 cuts off?  */
+      len /= 16;
+      if (len > 256)
+	as_bad ("`direct' data length must be between 1 and 256");
+      len = len == 256 ? 0 : len;
+      buf[2] = len;
     }
   else
     as_fatal ("bad call to install_vif_length");
@@ -1798,7 +1848,7 @@ s_dmapackvif (ignore)
     int ignore;
 {
   /* Syntax: .dmapackvif 0|1 */
-  struct symbol *label;		/* Points to symbol */
+  symbolS *label;		/* Points to symbol */
   char *name;			/* points to name of symbol */
 
   /* Leading whitespace is part of operand. */
