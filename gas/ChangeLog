@@ -1,3 +1,7 @@
+Tue Feb 22 10:07:32 1994  Ken Raeburn  (raeburn@rtl.cygnus.com)
+
+	* config/ho-mach3.h: New file.
+
 Mon Feb 21 11:41:18 1994  Ian Lance Taylor  (ian@cygnus.com)
 
 	* ecoff.c (ecoff_build_debug): Don't set hdr->magic here.  It is
