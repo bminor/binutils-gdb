@@ -1,3 +1,12 @@
+2005-03-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* infcmd.c (run_command_1): New function, extracted from
+	run_command.
+	(run_command): Replace implementation by call to run_command_1.
+	(start_command): Use run_command_1 to insert the temporary
+	breakpoint and run the program. Remove code that's no longer
+	needed, as already done at the proper time by run_command_1.
+
 2005-03-08  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* symfile.c (clear_symtab_users): Call

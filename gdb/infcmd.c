@@ -400,8 +400,12 @@ Start it from the beginning? "))
     }
 }
 
+/* Implement the "run" command. If TBREAK_AT_MAIN is set, then insert
+   a temporary breakpoint at the begining of the main program before
+   running the program.  */
+
 static void
-run_command (char *args, int from_tty)
+run_command_1 (char *args, int from_tty, int tbreak_at_main)
 {
   char *exec_file;
 
@@ -424,6 +428,10 @@ run_command (char *args, int from_tty)
      if the timestamp hasn't changed, I don't see the harm.  */
   reopen_exec_file ();
   reread_symbols ();
+
+  /* Insert the temporary breakpoint if a location was specified.  */
+  if (tbreak_at_main)
+    tbreak_command (main_name (), 0);
 
   exec_file = (char *) get_exec_file (0);
 
@@ -487,6 +495,12 @@ run_command (char *args, int from_tty)
 
 
 static void
+run_command (char *args, int from_tty)
+{
+  run_command_1 (args, from_tty, 0);
+}
+
+static void
 run_no_args_command (char *args, int from_tty)
 {
   char *old_args = set_inferior_args (xstrdup (""));
@@ -506,15 +520,8 @@ start_command (char *args, int from_tty)
   if (!have_minimal_symbols ())
     error (_("No symbol table loaded.  Use the \"file\" command."));
 
-  /* If the inferior is already running, we want to ask the user if we
-     should restart it or not before we insert the temporary breakpoint.
-     This makes sure that this command doesn't have any side effect if
-     the user changes its mind.  */
-  kill_if_already_running (from_tty);
-
-  /* Insert the temporary breakpoint, and run...  */
-  tbreak_command (main_name (), 0);
-  run_command (args, from_tty);
+  /* Run the program until reaching the main procedure...  */
+  run_command_1 (args, from_tty, 1);
 } 
 
 void
