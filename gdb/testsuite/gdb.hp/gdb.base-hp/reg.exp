@@ -30,7 +30,7 @@ if { [skip_hp_tests] } then { continue }
 
 set testfile "reg"
 
-if [istarget "hppa2.0w-hp-hpux*"] {
+if [istarget "hppa64-hp-hpux*"] {
     verbose "reg.exp is not for PA2.0W."
     return 0
 }

@@ -42,7 +42,7 @@ gdb_reinitialize_dir $srcdir/$subdir
 #  file or module boundaries", "No symbols in psymtab for file ..." or 
 #  "File ... has ending address after starting address of next file..."
 
-if [istarget "hppa2.0w-hp-hpux*" ] {
+if [istarget "hppa64-hp-hpux*" ] {
     gdb_test "file $binfile" \
         "Detected 64-bit executable..*Invoking .*gdb64..*Use \"run\" to continue execution." \
         "loading $binfile"

@@ -7,7 +7,25 @@
 
 Thu Dec 20 09:54:36 2001  Jeffrey A Law  (law@redhat.com)
 
+	* gdb.hp/gdb.base-hp/so-thresh.exp: Update text in expect strings
+	to match current gdb output.  Update due to using auto-solib-limit
+	for limiting instead of overloading auto-solib-add.
+	* gdb.hp/gdb.base-hp/so-thresh.mk: Always use "cc" to build the
+	test program.
+
 	* gdb.c++/templates.exp: Use "hppa64-*-*", not "hppa2.0w-*-*"
+	* gdb.hp/gdb.base-hp/dollar.exp: Likewise
+	* gdb.hp/gdb.base-hp/pxdb.exp: Likewise.
+	* gdb.hp/gdb.base-hp/reg-pa64.exp: Likewise.
+	* gdb.hp/gdb.base-hp/reg.exp: Likewise.
+	* gdb.hp/gdb.compat/xdb3.exp: Likewise.
+	* gdb.hp/gdb.defects/bs15503.exp: Likewise.
+	* gdb.hp/gdb.objdbg/objdbg01.exp: Likewise
+	* gdb.hp/gdb.objdbg/objdbg02.exp: Likewise
+	* gdb.hp/gdb.objdbg/objdbg03.exp: Likewise
+	* gdb.hp/gdb.threads-hp/usrthbasic.exp: Likewise.
+	* gdb.hp/gdb.threads-hp/usrthcore.exp: Likewise.
+	* gdb.hp/gdb.threads-hp/usrthfork.exp: Likewise.
 
 	* gdb.base/annota1.exp: Expect failure for hpux11 when posting
 	a SIGTRAP to the inferior.

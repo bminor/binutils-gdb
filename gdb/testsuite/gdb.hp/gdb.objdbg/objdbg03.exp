@@ -12,7 +12,7 @@ set srcsubdir ${srcdir}/${subdir}/objdbg03
 set objdbgdir ${objdir}/${subdir}/objdbg03
 set binfile ${objdbgdir}/${testfile}
 set toolssubdir ${srcdir}/${subdir}/tools
-if [istarget "hppa2.0w-*-*"] {
+if [istarget "hppa64-*-*"] {
   set symaddrfile ${toolssubdir}/symaddr.pa64
 } else {
   set symaddrfile ${toolssubdir}/symaddr
@@ -129,7 +129,7 @@ regsub -all "\[\r\n\]" ${exec_output_common10} "" exec_output_common10
 set exec_output_common11 [lindex [remote_exec build "${symaddrfile} ${binfile} common11"] 1]
 regsub -all "\[\r\n\]" ${exec_output_common11} "" exec_output_common11
 
-if [istarget "hppa2.0w-*-*"] {
+if [istarget "hppa64-*-*"] {
     gdb_test "p &data1" "..* = \\(int \[*\]\\) ${exec_output_data1}"
     gdb_test "p &data2" "..* = \\(int \[*\]\\) ${exec_output_data2}"
     gdb_test "p &data3" "..* = \\(int \[*\]\\) ${exec_output_data3}"

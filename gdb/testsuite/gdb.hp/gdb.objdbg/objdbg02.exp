@@ -65,7 +65,7 @@ gdb_test "s 1" "foo3 .*/x3.cc:5.*"
 gdb_test "s 1" ".*6.*"
 gdb_test "s 1" "main .*/x1.cc:15.*"
 gdb_test "s 1" ".*16.*"
-if [istarget "hppa2.0w-*-*"] {
+if [istarget "hppa64-*-*"] {
     gdb_test "s 1" "0x\[0-9a-f\]+ in .*START.*"
     gdb_test "c" ".*Program exited normally.*"
 } else {

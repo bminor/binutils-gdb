@@ -113,7 +113,7 @@ proc test_dir_list { } {
 #test_list_sources
 #
 proc test_list_sources { } {
-    if [istarget "hppa2.0w-*-*"] {
+    if [istarget "hppa64-*-*"] {
 	gdb_test "lf" "Source files for which symbols have been read in:\r\n\r\n.*average\\.c.*Source files for which symbols will be read in on demand:\r\n\r\nglobals,.*\[se\]\[un\]\[md\]\\.c.*\[se\]\[un\]\[md\]\\.c"
     } else {
 	gdb_test "lf" "Source files for which symbols have been read in:\r\n\r\n.*average\\.c.*\r\n\r\nSource files for which symbols will be read in on demand:\r\n\r\nglobals, end\\.c,.*sum\\.c"
@@ -130,7 +130,7 @@ proc test_vlist { } {
 #test_va
 #
 proc test_va { } {
-    if [istarget "hppa2.0w-*-*"] {
+    if [istarget "hppa64-*-*"] {
 	gdb_test "va main" "Dump of assembler code for function main:\r\n.*0x.* <main>:\[ \t\]+std %rp,-0x10\\(%sp\\)\r\n0x.* <main\\+4>:\[ \t\]+std,ma %r3,0xd0\\(%sp\\)\r\n.*0x.* <main\\+8>:\[ \t\]+std %r4,-0xc8\\(%sp\\)\r\n.*0x.* <main\\+12>:\[ \t\]+copy %ret1,%r3\r\n.*"
     } else {
 	gdb_test "va main" "Dump of assembler code for function main:\r\n.*0x.* <main>:\[ \t\]+stw %rp,-0x14\\(%sr0,%sp\\)\r\n0x.* <main\\+4>:\[ \t\]+ldo 0x\[48\]0\\(%sp\\),%sp\r\n.*0x.* <main\\+8>:\[ \t\]+stw %r0,-0x.*\\(%sr0,%sp\\)\r\n.*0x.* <main\\+12>:\[ \t\]+stw %r0,-0x.*\\(%sr0,%sp\\)\r\n.*"
@@ -149,7 +149,7 @@ proc test_list_globals { } {
 #test_list_registers
 #
 proc test_list_registers { } {
-    if [istarget "hppa2.0w-*-*"] {
+    if [istarget "hppa64-*-*"] {
 	gdb_test "lr" "\[ \t\]+flags:.*r17:.*pcsqh:.*cr0:.*\r\n\[ \t\]+r1:.*r18:.*pcoqt:.*cr8:.*"
     } else {
 	gdb_test "lr" "\[ \t\]+flags:.*r18:.*pcsqt:.*ccr:.*\r\n\[ \t\]+r1:.*r19:.*eiem:.*cr12:.*"

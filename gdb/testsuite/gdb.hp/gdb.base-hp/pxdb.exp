@@ -66,7 +66,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${objfile}" object {debug}]
 #
 #execute_anywhere "ksh -c \"export LD_PXDB=/dev/null\""
 
-if [istarget "hppa2.0w-*-*"] {
+if [istarget "hppa64-*-*"] {
 set cmdline  "ksh -c \"LD_PXDB=/dev/null ld -o ${binfile} ${objfile} /opt/langtools/lib/pa20_64/crt0.o /opt/langtools/lib/pa20_64/end.o -lc\""
 } else {
 set cmdline  "ksh -c \"LD_PXDB=/dev/null ld -o ${binfile} ${objfile} /usr/ccs/lib/crt0.o /opt/langtools/lib/end.o -lc\""

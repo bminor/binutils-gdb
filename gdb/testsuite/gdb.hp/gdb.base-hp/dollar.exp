@@ -65,8 +65,8 @@ if ![runto_main] then {
 }
 
 # Test for millicode routines
-# hppa2.0w does not support dyncall
-if ![istarget "hppa2.0w*-*-*"] {
+# hppa64 does not support dyncall
+if ![istarget "hppa64*-*-*"] {
 send_gdb "print \$\$dyncall\n"   
 gdb_expect {   
    -re "\\$\[0-9\]* = \\{<text variable, no debug info>\\} $hex <>.*$gdb_prompt $" { pass "print \$\$dyncall" }
@@ -114,8 +114,8 @@ gdb_expect {
 }
 
 # Try out some other $ name, not millicode
-if [istarget "hppa2.0w*-*-*"] {
-    #hppa2.0w uses __argv instead of $ARGV.
+if [istarget "hppa64*-*-*"] {
+    #hppa64 uses __argv instead of $ARGV.
     send_gdb "print \__argv\n"   
     gdb_expect {   
         -re "\\$\[0-9\]* = \[0-9\]*.*$gdb_prompt $" { pass "print \__argv" }

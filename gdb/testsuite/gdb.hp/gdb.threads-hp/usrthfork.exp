@@ -22,7 +22,7 @@ if $tracelevel {
     strace $tracelevel
 }
 
-if { ![istarget "hppa*-*-hpux*"] || [istarget "hppa2.0w-*-*"] } {
+if { ![istarget "hppa*-*-hpux*"] || [istarget "hppa64-*-*"] } {
     verbose "HPUX thread test ignored for non-hppa or PA64 targets."
     return 0
 }

@@ -32,8 +32,8 @@ if ![istarget "hppa*-*-*"] {
     return 0
 }
 
-if ![istarget "hppa2.0w-hp-hpux*"] {
-    verbose "reg-pa64.exp is only for PA2.0W."
+if ![istarget "hppa64-hp-hpux*"] {
+    verbose "reg-pa64.exp is only for PA2.0W (aka PA64)."
     return 0
 }
 
@@ -131,13 +131,13 @@ gdb_test "info reg fpe2" ".*fpe2 .*" "fpe2"
 gdb_test "info reg fpe3" ".*fpe3 .*" "fpe3"
 #DTS CLLbs16708
 #info reg should recognize fpe4..fpe7.
-setup_xfail hppa2.0w-hp-hpux* CLLbs16708
+setup_xfail hppa64-hp-hpux* CLLbs16708
 gdb_test "info reg fpe4" ".*fpe4 .*" "fpe4"
-setup_xfail hppa2.0w-hp-hpux* CLLbs16708
+setup_xfail hppa64-hp-hpux* CLLbs16708
 gdb_test "info reg fpe5" ".*fpe5 .*" "fpe5"
-setup_xfail hppa2.0w-hp-hpux* CLLbs16708
+setup_xfail hppa64-hp-hpux* CLLbs16708
 gdb_test "info reg fpe6" ".*fpe6 .*" "fpe6"
-setup_xfail hppa2.0w-hp-hpux* CLLbs16708
+setup_xfail hppa64-hp-hpux* CLLbs16708
 gdb_test "info reg fpe7" ".*fpe7 .*" "fpe7"
 
 gdb_test "info reg fr4"  ".*fr4.*(double precision).* 1.*"

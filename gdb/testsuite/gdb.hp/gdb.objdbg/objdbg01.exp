@@ -117,7 +117,7 @@ for {set filenum 0} {$filenum < 2} {incr filenum 1} {
         gdb_test "s 1" "foo .*/x3.cc:7.*"
         gdb_test "s 1" "main .*/x1.cc:24.*"
         gdb_test "s 1" ".*25.*"
-        if [istarget "hppa2.0w-*-*"] {
+        if [istarget "hppa64-*-*"] {
             gdb_test "s 1" "0x\[0-9a-f\]+ in .*"
             gdb_test "c" ".*Program exited normally.*"
         } else {
