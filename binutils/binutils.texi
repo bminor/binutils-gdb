@@ -743,6 +743,7 @@ objcopy [ -F @var{bfdname} | --target=@var{bfdname} ]
         [ -I @var{bfdname} | --input-target=@var{bfdname} ]
         [ -O @var{bfdname} | --output-target=@var{bfdname} ]
         [ -S | --strip-all ]  [ -g | --strip-debug ]
+        [ -K @var{symbolname} | --keep-symbol=@var{symbolname} ]
         [ -N @var{symbolname} | --strip-symbol=@var{symbolname} ]
         [ -x | --discard-all ]  [ -X | --discard-locals ]
         [ -b @var{byte} | --byte=@var{byte} ]
@@ -824,11 +825,16 @@ Do not copy relocation and symbol information from the source file.
 @itemx --strip-debug
 Do not copy debugging symbols from the source file.
 
+@item -K @var{symbolname}
+@itemx --keep-symbol=@var{symbolname}
+Copy only symbol @var{symbolname} from the source file.  This option may
+be given more than once.
+
 @item -N @var{symbolname}
 @itemx --strip-symbol=@var{symbolname}
-Do not copy symbol @var{symbolname} from the source file. This option
-may be given more than once, and may be combined with other strip
-options.
+Do not copy symbol @var{symbolname} from the source file.  This option
+may be given more than once, and may be combined with strip options
+other than @code{-K}.
 
 @item -x
 @itemx --discard-all
@@ -1319,6 +1325,7 @@ strip [ -F @var{bfdname} | --target=@var{bfdname} | --target=@var{bfdname} ]
       [ -I @var{bfdname} | --input-target=@var{bfdname} ]
       [ -O @var{bfdname} | --output-target=@var{bfdname} ]
       [ -s | --strip-all ] [ -S | -g | --strip-debug ]
+      [ -K @var{symbolname} | --keep-symbol=@var{symbolname} ]
       [ -N @var{symbolname} | --strip-symbol=@var{symbolname} ]
       [ -x | --discard-all ] [ -X | --discard-locals ]
       [ -R @var{sectionname} | --remove-section=@var{sectionname} ]
@@ -1369,11 +1376,16 @@ Remove all symbols.
 @itemx --strip-debug
 Remove debugging symbols only.
 
+@item -K @var{symbolname}
+@itemx --keep-symbol=@var{symbolname}
+Keep only symbol @var{symbolname} from the source file.  This option may
+be given more than once.
+
 @item -N @var{symbolname}
 @itemx --strip-symbol=@var{symbolname}
-Remove symbol @var{symbolname} from the source file. This option
-may be given more than once, and may be combined with other strip
-options.
+Remove symbol @var{symbolname} from the source file. This option may be
+given more than once, and may be combined with strip options other than
+@code{-K}.
 
 @item -x
 @itemx --discard-all

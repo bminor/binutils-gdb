@@ -15,15 +15,16 @@ objcopy \- copy and translate object files
 .na
 .TP
 .B objcopy
-.RB "[\|" \-F\ \fIbfdname\fB\ |\ \-\-target=\fIbfdname\fR "\|]" 
-.RB "[\|" \-I\ \fIbfdname\fB\ |\ \-\-input\-target=\fIbfdname\fR "\|]" 
-.RB "[\|" \-O\ \fIbfdname\fB\ |\ \-\-output\-target=\fIbfdname\fR "\|]" 
-.RB "[\|" \-R\ \fIsectionname\fB\ |\ \-\-remove\-section=\fIsectionname\fR "\|]"
-.RB "[\|" \-S\ |\ \-\-strip\-all\fR "\|]" 
-.RB "[\|" \-g\ |\ \-\-strip\-debug\fR "\|]" 
-.RB "[\|" \-N\ \fIsymbolname\fR\ |\ \-\-strip\-symbol=\fIsymbolname\fR "\|]" 
-.RB "[\|" \-x\ |\ \-\-discard\-all\fR "\|]" 
-.RB "[\|" \-X\ |\ \-\-discard\-locals\fR "\|]" 
+.RB "[\|" \-F\ \fIbfdname\fR\ |\ \fB\-\-target=\fIbfdname\fR "\|]" 
+.RB "[\|" \-I\ \fIbfdname\fR\ |\ \fB\-\-input\-target=\fIbfdname\fR "\|]" 
+.RB "[\|" \-O\ \fIbfdname\fR\ |\ \fB\-\-output\-target=\fIbfdname\fR "\|]" 
+.RB "[\|" \-R\ \fIsectionname\fR\ |\ \fB\-\-remove\-section=\fIsectionname\fR "\|]"
+.RB "[\|" \-S\fR\ |\ \fB\-\-strip\-all\fR "\|]" 
+.RB "[\|" \-g\fR\ |\ \fB\-\-strip\-debug\fR "\|]" 
+.RB "[\|" \-K\ \fIsymbolname\fR\ |\ \fB\-\-keep\-symbol=\fIsymbolname\fR "\|]" 
+.RB "[\|" \-N\ \fIsymbolname\fR\ |\ \fB\-\-strip\-symbol=\fIsymbolname\fR "\|]" 
+.RB "[\|" \-x\fR\ |\ \fB\-\-discard\-all\fR "\|]" 
+.RB "[\|" \-X\fR\ |\ \fB\-\-discard\-locals\fR "\|]" 
 .RB "[\|" \-b\ \fIbyte\fR\ |\ \fB\-\-byte=\fIbyte\fR "\|]" 
 .RB "[\|" \-i\ \fIinterleave\fR\ |\ \fB\-\-interleave=\fIinterleave\fR "\|]" 
 .RB "[\|" \-\-gap\-fill=\fIval\fR "\|]"
@@ -123,10 +124,14 @@ Do not copy relocation and symbol information from the source file.
 .B \-g\fR, \fB\-\-strip\-debug
 Do not copy debugging symbols from the source file.
 .TP
+.B \-K \fIsymbolname\fR, \fB\-\-keep\-symbol=\fIsymbolname
+Copy only symbol \fIsymbolname\fP from the source file. This option
+may be given more than once.
+.TP
 .B \-N \fIsymbolname\fR, \fB\-\-strip\-symbol=\fIsymbolname
 Do not copy symbol \fIsymbolname\fP from the source file. This option
-may be given more than once, and may be combined with other strip
-options.
+may be given more than once, and may be combined with strip options
+other than \fB\-K\fR.
 .TP
 .B \-x\fR, \fB \-\-discard\-all
 Do not copy non-global symbols from the source file.

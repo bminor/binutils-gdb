@@ -15,17 +15,19 @@ strip \- Discard symbols from object files.
 .na
 .TP
 .B strip
-.RB "[\|" \-F \fIbfdname\fP\ |\ \-\-target=\fIbfdname\fP "\|]"
-.RB "[\|" \-I \fIbfdname\fP\ |\ \-\-input\-target=\fIbfdname\fP "\|]"
-.RB "[\|" \-O \fIbfdname\fP\ |\ \-\-output\-target=\fIbfdname\fP "\|]"
-.RB "[\|" \-R \fIsectionname\fP\ |\ \-\-remove\-section=\fIsectionname\fP "\|]"
-.RB "[\|" \-s | \-\-strip\-all "\|]"
-.RB "[\|" \-S | -g | \-\-strip\-debug "\|]"
-.RB "[\|" \-x | \-\-discard\-all "\|]"
-.RB "[\|" \-X | \-\-discard\-locals "\|]"
-.RB "[\|" \-v | \-\-verbose "\|]"
-.RB "[\|" \-V | \-\-version "\|]"
-.RB "[\|" \-V | \-\-help "\|]"
+.RB "[\|" \-F\ \fIbfdname\fR\ |\ \fB\-\-target=\fIbfdname\fP "\|]"
+.RB "[\|" \-I\ \fIbfdname\fR\ |\ \fB\-\-input\-target=\fIbfdname\fP "\|]"
+.RB "[\|" \-O\ \fIbfdname\fR\ |\ \fB\-\-output\-target=\fIbfdname\fP "\|]"
+.RB "[\|" \-R\ \fIsectionname\fR\ |\ \fB\-\-remove\-section=\fIsectionname\fP "\|]"
+.RB "[\|" \-s\fR\ |\ \fB\-\-strip\-all "\|]"
+.RB "[\|" \-S\fR\ |\ \fB\-g\fR\ |\ \fB\-\-strip\-debug "\|]"
+.RB "[\|" \-x\fR\ |\ \fB\-\-discard\-all "\|]"
+.RB "[\|" \-X\fR\ |\ \fB\-\-discard\-locals "\|]"
+.RB "[\|" \-K\ \fIsymbolname\fR\ |\ \fB\-\-keep\-symbol=\fIsymbolname\fR "\|]" 
+.RB "[\|" \-N\ \fIsymbolname\fR\ |\ \fB\-\-strip\-symbol=\fIsymbolname\fR "\|]" 
+.RB "[\|" \-v\fR\ |\ \fB\-\-verbose "\|]"
+.RB "[\|" \-V\fR\ |\ \fB\-\-version "\|]"
+.RB "[\|" \-V\fR\ |\ \fB\-\-help "\|]"
 .I objfile\c
 \&.\|.\|.
 
@@ -109,6 +111,17 @@ Remove non-global symbols.
 .B "\-X \-\-discard\-locals"
 Remove compiler-generated local symbols.
 (These usually start with ``L'' or ``.''.)
+
+.TP
+.B \-K \fIsymbolname\fR, \fB\-\-keep\-symbol=\fIsymbolname
+Copy only symbol \fIsymbolname\fP from the source file. This option
+may be given more than once.
+
+.TP
+.B \-N \fIsymbolname\fR, \fB\-\-strip\-symbol=\fIsymbolname
+Do not copy symbol \fIsymbolname\fP from the source file. This option
+may be given more than once, and may be combined with strip options
+other than \fB\-K\fR.
 
 .TP
 .B \-v
