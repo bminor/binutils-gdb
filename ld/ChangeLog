@@ -1,3 +1,7 @@
+2003-10-07  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* configure.host (HOSTING_LIBS): Define for hppa*-*-linux*.
+
 2003-10-07  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ldwrite.c (unsplittable_name): New.

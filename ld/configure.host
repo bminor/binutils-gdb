@@ -95,6 +95,14 @@ hppa*64*-*-hpux11*)
   HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else if test "$GCC" = yes; then ${CC} --print-libgcc-file-name; else gcc --print-libgcc-file-name; fi fi` -lc /usr/lib/pa20_64/milli.a'
   ;;
 
+hppa*64*-*-linux*)
+  ;;
+
+hppa*-*-linux*)
+  # Need libgcc for $$dyncall.
+  HOSTING_LIBS='-L`dirname \`${CC} --print-file-name=libc.so\`` '"$HOSTING_LIBS"' `if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else ${CC} --print-libgcc-file-name; fi` `if [ -f ../gcc/crtend.o ]; then echo ../gcc/crtend.o; else ${CC} --print-file-name=crtend.o; fi` `${CC} --print-file-name=crtn.o`'
+  ;;
+
 i[3-7]86-*-bsd* | i[3-7]86-*-freebsd[12] | i[3-7]86-*-freebsd[12]\.* | i[3-7]86-*-freebsd*aout*)
   HOSTING_CRT0=/usr/lib/crt0.o
   ;;

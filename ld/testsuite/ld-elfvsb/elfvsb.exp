@@ -263,6 +263,9 @@ proc visibility_run {visibility} {
 		setup_xfail "s390x-*-linux*"
 	    }
 	    setup_xfail "x86_64-*-linux*"
+	    if { ![istarget hppa*64*-*-linux*] } {
+		setup_xfail "hppa*-*-linux*"
+	    }
 
 	    visibility_test $visibility vnp "visibility ($visibility) (non PIC)" mainnp.o sh1np.o sh2np.o elfvsb
 
@@ -294,6 +297,10 @@ proc visibility_run {visibility} {
 		setup_xfail "mips*-*-linux*"
 	    }
 	    setup_xfail "x86_64-*-linux*"
+	    if { ![istarget hppa*64*-*-linux*] } {
+		setup_xfail "hppa*-*-linux*"
+	    }
+
 	    visibility_test $visibility vnp "visibility ($visibility) (non PIC, load offset)" \
 		mainnp.o sh1np.o sh2np.o elfvsb \
 		"-T $srcdir/$subdir/elf-offset.ld"
@@ -353,6 +360,10 @@ proc visibility_run {visibility} {
 		    setup_xfail "s390x-*-linux*"
 		}
 		setup_xfail "x86_64-*-linux*"
+		if { ![istarget hppa*64*-*-linux*] } {
+		    setup_xfail "hppa*-*-linux*"
+		}
+
 		visibility_test $visibility vmpnp "visibility ($visibility) (PIC main, non PIC so)" mainp.o sh1np.o sh2np.o elfvsb
 	    }
 	} else {

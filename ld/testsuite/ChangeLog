@@ -1,3 +1,13 @@
+2003-10-07  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* ld-elfvsb/elfvsb.exp: xfail non-pic shared library tests for
+	non 64-bit hppa*-*-linux* targets.
+	* ld-elfvsb/main.c (main_visibility_check): Cast value returned by
+	visibility_funptr () to a function pointer.
+	* ld-shared/shared.exp: xfail shared (non PIC), shared (non PIC, load
+	offset), and shared (PIC main, non PIC so) tests for non 64-bit
+	hppa*-*-linux* targets.
+
 2003-09-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-checks/checks.exp (section_check): Remove ia64-*-elf*.

@@ -82,7 +82,7 @@ visibility ()
 static int
 main_visibility_check ()
 {
-  return visibility_funptr () != visibility;
+  return ((int (*) (void)) visibility_funptr ()) != visibility;
 }
 
 int visibility_var = 1;
@@ -117,7 +117,7 @@ main_visibility_check ()
 #ifdef WEAK_TEST
   return visibility_funptr () == NULL;
 #else
-  return visibility_funptr () == visibility;
+  return ((int (*) (void)) visibility_funptr ()) == visibility;
 #endif
 }
 
