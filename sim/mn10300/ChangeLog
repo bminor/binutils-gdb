@@ -1,11 +1,24 @@
 start-sanitize-am30
+Thu June 18 14:37:14 1998  Joyce Janczyn  <janczyn@cygnus.com>
+	* interp.c (sim_open): Fix typo in address of EXTMD register
+	(0x34000280, not 0x3400280).
+
+end-sanitize-am30
+Wed Jun 17 18:00:18 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* simops.c (syscall): Handle change in opcode # for syscall.
+	* mn10300.igen (syscall): Likewise.
+
+start-sanitize-am30
 Tue June 16 09:36:21 1998  Joyce Janczyn  <janczyn@cygnus.com>
 	* dv-mn103int.c (mn103int_finish): Regular interrupts (not NMI or
 	reset) are not enabled on reset.
 	
 Sun June 14 17:04:00 1998  Joyce Janczyn  <janczyn@cygnus.com>
-	* dv-mn103iop.c (write_*_reg): Check for attempt to write r/o register bits.
-	* dv-mn103ser.c: Fill in methods for reading and writing to serial device registers.
+	* dv-mn103iop.c (write_*_reg): Check for attempt to write r/o
+	register bits.
+	* dv-mn103ser.c: Fill in methods for reading and writing to serial
+	device registers.
 	* interp.c (sim_open): Make the serial device a polling device.
 	
 Fri June 12 16:24:00 1998  Joyce Janczyn  <janczyn@cygnus.com>

@@ -993,7 +993,7 @@ sim_open (kind, cb, abfd, argv)
 	 /* device support for mn1030002 */
 	 /* interrupt controller */
 
-	 sim_hw_parse (sd, "/mn103int@0x34000100/reg 0x34000100 0x7C 0x34000200 0x8 0x3400280 0x8");
+	 sim_hw_parse (sd, "/mn103int@0x34000100/reg 0x34000100 0x7C 0x34000200 0x8 0x34000280 0x8");
 
 	 /* DEBUG: NMI input's */
 	 sim_hw_parse (sd, "/glue@0x30000000/reg 0x30000000 12");
@@ -1084,6 +1084,7 @@ sim_open (kind, cb, abfd, argv)
 
 	 /* Serial devices 0,1,2 */
 	 sim_hw_parse (sd, "/mn103ser@0x34000800/reg 0x34000800 48");
+	 sim_hw_parse (sd, "/mn103ser@0x34000800/poll? true");
   
 	 /* Hook serial interrupts up to interrupt controller */
 	 sim_hw_parse (sd, "/mn103ser > serial-0-receive serial-0-receive /mn103int");
@@ -1092,6 +1093,8 @@ sim_open (kind, cb, abfd, argv)
 	 sim_hw_parse (sd, "/mn103ser > serial-1-transmit serial-0-transmit /mn103int");
 	 sim_hw_parse (sd, "/mn103ser > serial-2-receive serial-0-receive /mn103int");
 	 sim_hw_parse (sd, "/mn103ser > serial-2-transmit serial-0-transmit /mn103int");
+
+	 sim_hw_parse (sd, "/mn103iop@0x36008000/reg 0x36008000 8 0x36008020 8 0x36008040 0xc 0x36008060 8 0x36008080 8");
        }
   
   /* end-sanitize-am30 */
