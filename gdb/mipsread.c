@@ -95,9 +95,6 @@ typedef struct mips_extra_func_info {
 /* FIXME: coff/internal.h and aout/aout64.h both define N_ABS.  We
    want the definition from aout/aout64.h.  */
 #undef	N_ABS
-/* FIXME: coff/mips.h and aout/aout64.h both define ZMAGIC.  We don't
-   use it.  */
-#undef	ZMAGIC
 
 #include "libaout.h"		/* Private BFD a.out information.  */
 #include "aout/aout64.h"

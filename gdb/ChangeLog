@@ -1,3 +1,7 @@
+Fri Jul 16 09:56:42 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* mipsread.c: No longer need to undefine ZMAGIC.
+
 Thu Jul 15 18:03:37 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* m88k-pinsn.c: Moved code into opcodes/m88k-dis.c.
