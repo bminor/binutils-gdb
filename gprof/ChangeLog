@@ -1,3 +1,9 @@
+2001-05-16  Alexandre Oliva  <aoliva@redhat.com>
+
+	* gmon_io.c (gmon_io_read, gmon_io_write_vma,
+	gmon_io_write_32, gmon_io_write_8, gmon_io_write): Adjust
+	argument list for K&R C.
+
 2001-04-06  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* gprof.texi: Put @c man begin and @c man end indications

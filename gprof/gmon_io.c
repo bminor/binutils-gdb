@@ -76,7 +76,7 @@ DEFUN (gmon_io_read_32, (ifp, valp), FILE * ifp AND unsigned int *valp)
 }
 
 int
-DEFUN (gmon_io_read, (ifp, valp), FILE * ifp AND char *buf AND size_t n)
+DEFUN (gmon_io_read, (ifp, buf, n), FILE * ifp AND char *buf AND size_t n)
 {
   if (fread (buf, 1, n, ifp) != n)
     return 1;
@@ -84,7 +84,7 @@ DEFUN (gmon_io_read, (ifp, valp), FILE * ifp AND char *buf AND size_t n)
 }
 
 int
-DEFUN (gmon_io_write_vma, (ofp, valp), FILE * ofp AND bfd_vma val)
+DEFUN (gmon_io_write_vma, (ofp, val), FILE * ofp AND bfd_vma val)
 {
   char buf[8];
 
@@ -111,7 +111,7 @@ DEFUN (gmon_io_write_vma, (ofp, valp), FILE * ofp AND bfd_vma val)
 }
 
 int
-DEFUN (gmon_io_write_32, (ofp, valp), FILE * ofp AND unsigned int val)
+DEFUN (gmon_io_write_32, (ofp, val), FILE * ofp AND unsigned int val)
 {
   char buf[4];
 
@@ -122,7 +122,7 @@ DEFUN (gmon_io_write_32, (ofp, valp), FILE * ofp AND unsigned int val)
 }
 
 int
-DEFUN (gmon_io_write_8, (ofp, valp), FILE * ofp AND unsigned char val)
+DEFUN (gmon_io_write_8, (ofp, val), FILE * ofp AND unsigned char val)
 {
   char buf[1];
 
@@ -133,7 +133,7 @@ DEFUN (gmon_io_write_8, (ofp, valp), FILE * ofp AND unsigned char val)
 }
 
 int
-DEFUN (gmon_io_write, (ofp, valp), FILE * ofp AND char *buf AND size_t n)
+DEFUN (gmon_io_write, (ofp, buf, n), FILE * ofp AND char *buf AND size_t n)
 {
   if (fwrite (buf, 1, n, ofp) != n)
     return 1;
