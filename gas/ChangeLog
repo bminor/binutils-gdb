@@ -1,5 +1,9 @@
 Tue Oct 26 16:58:36 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* config/tc-ns32k.c (tc_aout_fix_to_chars): Output the symbol
+	number in the right place.  Untested.  Probably does not work for
+	cross assembly.  From cagney@cs.adelaide.edu.au (Andrew Cagney).
+
 	* config/tc-m68k.c (md_apply_fix_2): Error if a short branch uses
 	an illegal offset of 0 or -1.
 
