@@ -6583,13 +6583,6 @@ Remote PC-resident AMD EB29K board, attached over serial lines.
 name of the program to be debugged, as it appears to DOS on the PC.
 @xref{EB29K Remote, ,_GDBN__ with a Remote EB29K}.
 
-@item target udi
-@kindex target udi
-@cindex UDI interface to 29K
-@cindex AMD UDI-29K
-Remote AMD 29K board, attached over the AMD ``Universal Debug
-Interface'', a protocol based on TCP/IP.  @xref{UDI29K Remote,,_GDBN__
-and the UDI 29K protocol}.
 _fi__(_AMD29K__)
 _if__(_H8__)
 @item target hms

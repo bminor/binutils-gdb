@@ -628,24 +628,6 @@ of the commands sent to it.  Running @samp{tail -f} on this file in
 another window often helps to understand trouble with @code{EBMON}, or
 unexpected events on the PC side of the connection.
 
-@node UDI29K Remote
-@subsection _GDBN__ and the UDI 29K protocol
-
-If your 29K development system supports the UDI (``Universal Debug
-Interface'') protocol, using _GDBN__ is almost transparent.  UDI is a
-TCP/IP based protocol.  On some 29K development systens that do not
-support TCP/IP directly, however, the manufacturer supplies an interface
-adapter daemon, which translates UDI to whatever communications
-interface---typically a serial port---is available.
-
-Please see the manufacturer's documentation for your 29K system for how
-to set up the UDI connection for your hardware.
-
-Once the UDI connection is established, use @samp{target udi} from _GDBN__
-to start using it.  All the usual facilities of _GDBN__ are immediately
-available: use @code{load} to get your program to the board,
-@code{breakpoint} to say where to stop, @code{run} to start the program,
-and so on.
 _fi__(_AMD29K__)
 
 _if__(_ST2000__)

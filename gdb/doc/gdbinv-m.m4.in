@@ -10,7 +10,6 @@ _if__(_I960__)
 _fi__(_I960__)
 _if__(_AMD29K__)
 * EB29K Remote::		_GDBN__ with a remote EB29K
-* UDI29K Remote::               _GDBN__ and the UDI 29K protocol
 _fi__(_AMD29K__)
 _if__(_VXWORKS__)
 * VxWorks Remote::		_GDBN__ and VxWorks
