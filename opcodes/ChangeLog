@@ -1,3 +1,13 @@
+Wed Dec  4 14:52:18 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ppc-opc.c (insert_li): Give an error if the offset has the two
+	least significant bits set.
+
+Wed Nov 27 13:09:01 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* mips-dis.c (print_insn_mips16): Separate the instruction from
+	the arguments with a tab, not a space.
+
 Tue Nov 26 13:24:17 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10300-dis.c (disasemble): Finish conversion to '$' as
