@@ -97,7 +97,6 @@ _bfd_elf_create_got_section (abfd, info)
   return true;
 }
 
-
 /* Create dynamic sections when linking against a dynamic object.  */
 
 boolean
@@ -212,7 +211,6 @@ _bfd_elf_create_dynamic_sections (abfd, info)
   return true;
 }
 
-
 /* Record a new dynamic symbol.  We record the dynamic symbols as we
    read the input files, since we need to have a list of all of them
    before we can determine the final sizes of the output sections.
@@ -498,7 +496,6 @@ _bfd_elf_create_linker_section (abfd, info, which, defaults)
 
   return lsect;
 }
-
 
 /* Find a linker generated pointer with a given addend and type.  */
 
@@ -516,7 +513,6 @@ _bfd_elf_find_pointer_linker_section (linker_pointers, addend, which)
 
   return (elf_linker_section_pointers_t *)0;
 }
-
 
 /* Make the .rela section corresponding to the generated linker section.  */
 

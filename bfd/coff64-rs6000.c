@@ -349,4 +349,3 @@ end:
 #define TARGET_SYM rs6000coff64_vec
 
 #include "xcoff-target.h"
-

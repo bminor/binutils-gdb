@@ -283,7 +283,6 @@ fr30_elf_i20_reloc (abfd, reloc_entry, symbol, data,
 
   return bfd_reloc_ok;
 }
-
 
 /* Utility to actually perform a R_FR30_48 reloc.  */
 
@@ -460,7 +459,6 @@ fr30_final_link_relocate (howto, input_bfd, input_section, contents, rel, reloca
 
   return r;
 }
-
 
 /* Relocate an FR30 ELF section.
    There is some attempt to make this function usable for many architectures,

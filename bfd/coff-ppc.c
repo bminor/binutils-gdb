@@ -218,7 +218,6 @@ ppc_coff_link_hash_table_create (abfd)
 /* Now, tailor coffcode.h to use our hash stuff */
 
 #define coff_bfd_link_hash_table_create ppc_coff_link_hash_table_create
-
 
 /* The nt loader points the toc register to &toc + 32768, in order to */
 /* use the complete range of a 16-bit displacement. We have to adjust */
@@ -316,7 +315,6 @@ ppc_coff_link_hash_table_create (abfd)
 #define EXTRACT_FLAGS(x) ((x) & IMAGE_REL_PPC_FLAGMASK)
 #define EXTRACT_JUNK(x)  \
            ((x) & ~(IMAGE_REL_PPC_TYPEMASK | IMAGE_REL_PPC_FLAGMASK))
-
 
 /* static helper functions to make relocation work */
 /* (Work In Progress) */
@@ -344,7 +342,6 @@ static bfd_reloc_status_type ppc_pair_reloc PARAMS ((bfd *abfd,
 						     asection *section,
 						     bfd *output_bfd,
 						     char **error));
-
 
 static bfd_reloc_status_type ppc_toc16_reloc PARAMS ((bfd *abfd,
 						      arelent *reloc,
@@ -388,7 +385,6 @@ static bfd_reloc_status_type ppc_imglue_reloc PARAMS ((bfd *abfd,
 						       char **error));
 
 static boolean in_reloc_p PARAMS((bfd *abfd, reloc_howto_type *howto));
-
 
 /* FIXME: It'll take a while to get through all of these. I only need a few to
    get us started, so those I'll make sure work. Those marked FIXME are either
@@ -769,9 +765,7 @@ static reloc_howto_type ppc_coff_howto_table[] =
 	 false),                /* pcrel_offset */
 
 };
-
 
-
 /* Some really cheezy macros that can be turned on to test stderr :-) */
 
 #ifdef DEBUG_RELOC
@@ -814,7 +808,6 @@ static reloc_howto_type ppc_coff_howto_table[] =
 #define DUMP_RELOC(n,r)
 #define DUMP_RELOC2(n,r)
 #endif
-
 
 /* toc construction and management routines */
 
@@ -994,7 +987,6 @@ ppc_mark_symbol_as_glue(abfd, sym, rel)
 
 #endif /* COFF_IMAGE_WITH_PE */
 
-
 /* Return true if this relocation should
    appear in the output .reloc section.  */
 
@@ -1865,7 +1857,6 @@ ppc_pair_reloc (abfd,
 
   return bfd_reloc_undefined;
 }
-
 
 static bfd_reloc_status_type
 ppc_toc16_reloc (abfd,
@@ -2000,9 +1991,7 @@ ppc_imglue_reloc (abfd,
 
   return bfd_reloc_ok;
 }
-
 
-
 #define MAX_RELOC_INDEX  \
       (sizeof (ppc_coff_howto_table) / sizeof (ppc_coff_howto_table[0]) - 1)
 
@@ -2183,7 +2172,6 @@ ppc_coff_reloc_type_lookup (abfd, code)
 }
 
 #undef HOW2MAP
-
 
 /* Tailor coffcode.h -- macro heaven.  */
 
@@ -2229,9 +2217,7 @@ static void ppc_coff_swap_sym_in_hook PARAMS ((bfd *, PTR, PTR));
   COFF_ALIGNMENT_FIELD_EMPTY, COFF_ALIGNMENT_FIELD_EMPTY, 1 }
 
 #include "coffcode.h"
-
 
-
 #ifndef COFF_IMAGE_WITH_PE
 /* FIXME:
    What we're trying to do here is allocate a toc section (early), and attach
@@ -2826,7 +2812,6 @@ ppc_bfd_coff_final_link (abfd, info)
 }
 #endif
 
-
 /* Forward declaration for use by alternative_target field.  */
 #ifdef TARGET_BIG_SYM
 extern const bfd_target TARGET_BIG_SYM;

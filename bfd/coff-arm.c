@@ -992,7 +992,6 @@ insert_thumb_branch (br_insn, rel_off)
 
   return br_insn;
 }
-
 
 static struct coff_link_hash_entry *
 find_thumb_glue (info, name, input_bfd)
@@ -2550,4 +2549,3 @@ extern const bfd_target TARGET_BIG_SYM ;
 /* Target vectors.  */
 CREATE_LITTLE_COFF_TARGET_VEC (TARGET_LITTLE_SYM, TARGET_LITTLE_NAME, D_PAGED, EXTRA_S_FLAGS, TARGET_UNDERSCORE, & TARGET_BIG_SYM)
 CREATE_BIG_COFF_TARGET_VEC (TARGET_BIG_SYM, TARGET_BIG_NAME, D_PAGED, EXTRA_S_FLAGS, TARGET_UNDERSCORE, & TARGET_LITTLE_SYM)
-

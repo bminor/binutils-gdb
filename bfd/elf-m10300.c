@@ -526,7 +526,6 @@ mn10300_elf_final_link_relocate (howto, input_bfd, output_bfd,
       return bfd_reloc_notsupported;
     }
 }
-
 
 /* Relocate an MN10300 ELF section.  */
 static boolean

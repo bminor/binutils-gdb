@@ -2156,9 +2156,7 @@ m32r_elf_check_relocs (abfd, info, sec, relocs)
 
   return true;
 }
-
 
-
 #define ELF_ARCH		bfd_arch_m32r
 #define ELF_MACHINE_CODE	EM_CYGNUS_M32R
 #define ELF_MAXPAGESIZE		0x1 /* Explicitly requested by Mitsubishi.  */

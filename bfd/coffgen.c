@@ -2455,4 +2455,3 @@ bfd_coff_set_symbol_class (abfd, symbol, class)
 
   return true;
 }
-

@@ -211,7 +211,6 @@ elf_link_is_defined_archive_symbol (abfd, symdef)
   return result;
 }
 
-
 /* Add symbols from an ELF archive file to the linker hash table.  We
    don't use _bfd_generic_link_add_archive_symbols because of a
    problem which arises on UnixWare.  The UnixWare libc.so is an
@@ -2409,7 +2408,6 @@ elf_link_record_local_dynamic_symbol (info, input_bfd, input_indx)
   return true;
 }
 
-
 /* Read and swap the relocs from the section indicated by SHDR.  This
    may be either a REL or a RELA section.  The relocations are
    translated into RELA relocations and stored in INTERNAL_RELOCS,
@@ -2587,7 +2585,6 @@ NAME(_bfd_elf,link_read_relocs) (abfd, o, external_relocs, internal_relocs,
   return NULL;
 }
 
-
 /* Record an assignment to a symbol made by a linker script.  We need
    this in case some dynamic object refers to this symbol.  */
 
@@ -6053,7 +6050,6 @@ elf_reloc_link_order (output_bfd, info, output_section, link_order)
 
   return true;
 }
-
 
 /* Allocate a pointer to live in a linker created section.  */
 
@@ -6176,7 +6172,6 @@ elf_create_pointer_linker_section (abfd, info, lsect, h, rel)
 
   return true;
 }
-
 
 #if ARCH_SIZE==64
 #define bfd_put_ptr(BFD,VAL,ADDR) bfd_put_64 (BFD, VAL, ADDR)

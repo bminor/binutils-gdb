@@ -233,7 +233,6 @@ mcore_elf_howto_init ()
       mcore_elf_howto_table [type] = & mcore_elf_howto_raw [i];
     }
 }
-
 
 static reloc_howto_type *
 mcore_elf_reloc_type_lookup (abfd, code)
@@ -346,7 +345,6 @@ mcore_elf_merge_private_bfd_data (ibfd, obfd)
 
   return true;
 }
-
 
 /* Don't pretend we can deal with unsupported relocs.  */
 
@@ -370,7 +368,6 @@ mcore_elf_unsupported_reloc (abfd, reloc_entry, symbol, data, input_section,
 
   return bfd_reloc_notsupported;
 }
-
 
 /* The RELOCATE_SECTION function is called by the ELF backend linker
    to handle the relocations for a section.

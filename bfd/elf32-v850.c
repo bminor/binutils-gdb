@@ -501,7 +501,6 @@ static const struct v850_elf_reloc_map v850_elf_reloc_map[] =
   { BFD_RELOC_VTABLE_ENTRY,                 R_V850_GNU_VTENTRY },
 
 };
-
 
 /* Map a bfd relocation into the appropriate howto structure */
 static reloc_howto_type *
@@ -525,7 +524,6 @@ v850_elf_reloc_type_lookup (abfd, code)
 
   return NULL;
 }
-
 
 /* Set the howto pointer for an V850 ELF reloc.  */
 static void
@@ -554,7 +552,6 @@ v850_elf_info_to_howto_rela (abfd, cache_ptr, dst)
   BFD_ASSERT (r_type < (unsigned int) R_V850_max);
   cache_ptr->howto = &v850_elf_howto_table[r_type];
 }
-
 
 /* Look through the relocs for a section during the first phase, and
    allocate space in the global offset table or procedure linkage
@@ -1243,7 +1240,6 @@ v850_elf_perform_relocation (abfd, r_type, addend, address)
   bfd_put_16 (abfd, insn, address);
   return bfd_reloc_ok;
 }
-
 
 /* Insert the addend into the instruction.  */
 static bfd_reloc_status_type
@@ -1317,7 +1313,6 @@ v850_elf_reloc (abfd, reloc, symbol, data, isection, obfd, err)
   reloc->addend = relocation;
   return bfd_reloc_ok;
 }
-
 
 static boolean
 v850_elf_is_local_label_name (abfd, name)
@@ -1327,7 +1322,6 @@ v850_elf_is_local_label_name (abfd, name)
   return (   (name[0] == '.' && (name[1] == 'L' || name[1] == '.'))
 	  || (name[0] == '_' &&  name[1] == '.' && name[2] == 'L' && name[3] == '_'));
 }
-
 
 /* Perform a relocation as part of a final link.  */
 static bfd_reloc_status_type
@@ -1489,7 +1483,6 @@ v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
   /* Perform the relocation.  */
   return v850_elf_perform_relocation (input_bfd, r_type, value + addend, hit_data);
 }
-
 
 /* Relocate an V850 ELF section.  */
 static boolean
@@ -2189,7 +2182,6 @@ v850_elf_fake_sections (abfd, hdr, sec)
 
   return true;
 }
-
 
 #define TARGET_LITTLE_SYM			bfd_elf32_v850_vec
 #define TARGET_LITTLE_NAME			"elf32-v850"

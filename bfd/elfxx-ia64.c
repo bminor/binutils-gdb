@@ -273,7 +273,6 @@ static boolean elfNN_ia64_merge_private_bfd_data
   PARAMS ((bfd *ibfd, bfd *obfd));
 static boolean elfNN_ia64_print_private_bfd_data
   PARAMS ((bfd *abfd, PTR ptr));
-
 
 /* ia64-specific relocation */
 

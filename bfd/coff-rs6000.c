@@ -130,7 +130,6 @@ _bfd_xcoff_is_local_label_name (abfd, name)
   return false;
 }
 
-
 void
 _bfd_xcoff_swap_sym_in (abfd, ext1, in1)
      bfd            *abfd;
@@ -402,7 +401,6 @@ _bfd_xcoff_swap_aux_out (abfd, inp, type, class, indx, numaux, extp)
 end:
   return bfd_coff_auxesz (abfd);
 }
-
 
 /* The XCOFF reloc table.  Actually, XCOFF relocations specify the
    bitsize and whether they are signed or not, along with a
@@ -872,7 +870,6 @@ _bfd_xcoff_reloc_type_lookup (abfd, code)
       return NULL;
     }
 }
-
 
 /* XCOFF archive support.  The original version of this code was by
    Damon A. Permezel.  It was enhanced to permit cross support, and

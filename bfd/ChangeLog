@@ -1,3 +1,32 @@
+2001-01-23  Kazu Hirata  <kazu@hxi.com>
+
+	* coff64-rs6000.c: Fix formatting.
+	* coff-arm.c: Likewise.
+	* coffgen.c: Likewise.
+	* cofflink.c: Likewise.
+	* coff-mcore.c: Likewise.
+	* coff-mips.c: Likewise.
+	* coff-pmac.c: Likewise.
+	* coff-ppc.c: Likewise.
+	* coff-rs6000.c: Likewise.
+	* elf32.c: Likewise.
+	* elf32-fr30.c: Likewise.
+	* elf32-i370.c: Likewise.
+	* elf32-i860.c: Likewise.
+	* elf32-m32r.c: Likewise.
+	* elf32-m68k.c: Likewise.
+	* elf32-mcore.c: Likewise.
+	* elf32-ppc.c: Likewise.
+	* elf32-sh.c: Likewise.
+	* elf32-v850.c: Likewise.
+	* elf64-alpha.c: Likewise.
+	* elf64-sparc.c: Likewise.
+	* elflink.c: Likewise.
+	* elflink.h: Likewise.
+	* elf-m10200.c: Likewise.
+	* elf-m10300.c: Likewise.
+	* elfxx-ia64.c: Likewise.
+
 2001-01-22  Bo Thorsen  <bo@suse.de>
 
 	* elf64-x86-64.c: Added PIC support for X86-64.

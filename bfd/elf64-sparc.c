@@ -651,7 +651,6 @@ sparc64_elf_bfd_link_hash_table_create (abfd)
 
   return &ret->root.root;
 }
-
 
 /* Utility for performing the standard initial work of an instruction
    relocation.
@@ -961,7 +960,6 @@ sparc64_elf_plt_ptr_offset (index, max)
 	  + last * 6*4
 	  + ofs * 8);
 }
-
 
 /* Look through the relocs for a section during the first phase, and
    allocate space in the global offset table or procedure linkage

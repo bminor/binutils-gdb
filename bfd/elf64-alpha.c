@@ -129,7 +129,6 @@ static boolean elf64_alpha_merge_ind_symbols
   PARAMS((struct alpha_elf_link_hash_entry *, PTR));
 static Elf_Internal_Rela * elf64_alpha_find_reloc_at_ofs
   PARAMS ((Elf_Internal_Rela *, Elf_Internal_Rela *, bfd_vma, int));
-
 
 struct alpha_elf_link_hash_entry
 {

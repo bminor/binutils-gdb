@@ -541,7 +541,6 @@ static reloc_howto_type elf32_i860_howto_table [] =
 	 0xffffffff,		/* dst_mask */
 	 false),	        /* pcrel_offset */
 };
-
 
 static unsigned char elf_code_to_howto_index[R_860_max + 1];
 
@@ -698,7 +697,6 @@ elf32_i860_info_to_howto_rela (abfd, bfd_reloc, elf_reloc)
 {
   bfd_reloc->howto = lookup_howto (ELF32_R_TYPE (elf_reloc->r_info));
 }
-
 
 /* Specialized relocation handler for R_860_SPLITn.  These relocations
    involves a 16-bit field that is split into two contiguous parts.  */
@@ -1091,7 +1089,6 @@ elf32_i860_is_local_label_name (abfd, name)
 
   return _bfd_elf_is_local_label_name (abfd, name);
 }
-
 
 #define TARGET_BIG_SYM		bfd_elf32_i860_vec
 #define TARGET_BIG_NAME		"elf32-i860"

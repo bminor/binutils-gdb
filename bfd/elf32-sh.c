@@ -2845,7 +2845,6 @@ sh_elf_discard_copies (h, ignore)
 
   return true;
 }
-
 
 /* Relocate an SH ELF section.  */
 

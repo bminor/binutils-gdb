@@ -1487,7 +1487,6 @@ ppc_elf_merge_private_bfd_data (ibfd, obfd)
 
   return true;
 }
-
 
 /* Handle a PowerPC specific section when reading an object file.  This
    is called when elfcode.h finds a section with an unknown type.  */
@@ -1515,7 +1514,6 @@ ppc_elf_section_from_shdr (abfd, hdr, name)
   bfd_set_section_flags (abfd, newsect, flags);
   return true;
 }
-
 
 /* Set up any other section flags and such that may be necessary.  */
 
@@ -1533,7 +1531,6 @@ ppc_elf_fake_sections (abfd, shdr, asect)
 
   return true;
 }
-
 
 /* Create a special linker section */
 static elf_linker_section_t *
@@ -2057,7 +2054,6 @@ ppc_elf_size_dynamic_sections (output_bfd, info)
 
   return true;
 }
-
 
 /* Look through the relocs for a section during the first phase, and
    allocate space in the global offset table or procedure linkage

@@ -58,7 +58,6 @@ enum i370_reloc_type
 
   R_I370_max
 };
-
 
 static reloc_howto_type *i370_elf_howto_table[ (int)R_I370_max ];
 
@@ -251,13 +250,11 @@ static reloc_howto_type i370_elf_howto_raw[] =
 	 false),		/* pcrel_offset */
 
 };
-
 
 static void i370_elf_howto_init PARAMS ((void));
 static void i370_elf_info_to_howto PARAMS ((bfd *abfd, arelent *cache_ptr,
 					    Elf32_Internal_Rela *dst));
 static boolean i370_elf_set_private_flags PARAMS ((bfd *, flagword));
-
 
 /* Initialize the i370_elf_howto_table, so that linear accesses can be done.  */
 
@@ -273,7 +270,6 @@ i370_elf_howto_init ()
       i370_elf_howto_table[type] = &i370_elf_howto_raw[i];
     }
 }
-
 
 static reloc_howto_type *
 i370_elf_reloc_type_lookup (abfd, code)
@@ -434,7 +430,6 @@ i370_elf_merge_private_bfd_data (ibfd, obfd)
 
   return true;
 }
-
 
 /* Handle an i370 specific section when reading an object file.  This
    is called when elfcode.h finds a section with an unknown type.  */
@@ -466,7 +461,6 @@ i370_elf_section_from_shdr (abfd, hdr, name)
   bfd_set_section_flags (abfd, newsect, flags);
   return true;
 }
-
 
 /* Set up any other section flags and such that may be necessary.  */
 /* XXX hack alert bogus This routine is mostly all junk and almost
@@ -488,7 +482,6 @@ i370_elf_fake_sections (abfd, shdr, asect)
 
   return true;
 }
-
 
 #if 0
 /* Create a special linker section */
@@ -735,7 +728,6 @@ i370_elf_adjust_dynamic_symbol (info, h)
 
   return true;
 }
-
 
 /* Increment the index of a dynamic symbol by a given amount.  Called
    via elf_link_hash_traverse.  */
@@ -762,7 +754,6 @@ i370_elf_adjust_dynindx (h, cparg)
 
   return true;
 }
-
 
 /* Set the sizes of the dynamic sections.  */
 /* XXX hack alert bogus This routine is mostly all junk and almost
@@ -995,7 +986,6 @@ i370_elf_size_dynamic_sections (output_bfd, info)
 
   return true;
 }
-
 
 /* Look through the relocs for a section during the first phase, and
    allocate space in the global offset table or procedure linkage
@@ -1100,7 +1090,6 @@ i370_elf_check_relocs (abfd, info, sec, relocs)
 
   return true;
 }
-
 
 /* Finish up the dynamic sections.  */
 /* XXX hack alert bogus This routine is mostly all junk and almost
@@ -1241,7 +1230,6 @@ i370_elf_finish_dynamic_sections (output_bfd, info)
 
   return true;
 }
-
 
 /* The RELOCATE_SECTION function is called by the ELF backend linker
    to handle the relocations for a section.

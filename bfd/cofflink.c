@@ -3018,4 +3018,3 @@ _bfd_coff_generic_relocate_section (output_bfd, info, input_bfd,
     }
   return true;
 }
-

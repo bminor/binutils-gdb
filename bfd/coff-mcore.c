@@ -65,7 +65,6 @@ static reloc_howto_type *           coff_mcore_rtype_to_howto
 /* In case we're on a 32-bit machine, construct a 64-bit "-1" value
    from smaller values.  Start with zero, widen, *then* decrement.  */
 #define MINUS_ONE	(((bfd_vma)0) - 1)
-
 
 static reloc_howto_type mcore_coff_howto_table[] =
 {
@@ -283,7 +282,6 @@ mcore_coff_unsupported_reloc (abfd, reloc_entry, symbol, data, input_section,
 
   return bfd_reloc_notsupported;
 }
-
 
 /* A cheesy little macro to make the code a little more readable.  */
 #define HOW2MAP(bfd_rtype, mcore_rtype)  \
@@ -361,7 +359,6 @@ in_reloc_p (abfd, howto)
 {
   return ! howto->pc_relative && howto->type != IMAGE_REL_MCORE_RVA;
 }
-
 
 /* The reloc processing routine for the optimized COFF linker.  */
 static boolean
@@ -560,7 +557,6 @@ coff_mcore_relocate_section (output_bfd, info, input_bfd, input_section,
 
   return true;
 }
-
 
 /* Tailor coffcode.h -- macro heaven.  */
 
