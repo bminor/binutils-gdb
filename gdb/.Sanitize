@@ -84,6 +84,7 @@ expprint.c
 expression.h
 findvar.c
 frame.h
+gdb-stabs.h
 gdb.1
 gdbcmd.h
 gdbcore.h
