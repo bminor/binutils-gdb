@@ -55,9 +55,9 @@ int libunwind_is_initialized (void);
 int libunwind_search_unwind_table (void *as, long ip, void *di,
 				   void *pi, int need_unwind_info, void *args);
 
-unw_word_t libunwind_find_dyn_list (unw_addr_space_t, void *, size_t,
-				    unw_word_t, unw_word_t, void *);
-     
+unw_word_t libunwind_find_dyn_list (unw_addr_space_t, unw_dyn_info_t *,
+				    void *);
+
 #endif /* libunwind-frame.h */
 
 #endif /* HAVE_LIBUNWIND_H  */

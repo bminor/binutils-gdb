@@ -1,3 +1,18 @@
+2003-12-12  Kevin Buettner  <kevinb@redhat.com>
+
+	From David Mosberger  <davidm@hpl.hp.com>:
+	* libunwind-frame.c (unw_find_dyn_list_p): Replace most arguments
+	with a single unw_dyn_info_t pointer.
+	(libunwind_find_dyn_list): Likewise.
+	* libunwind-frame.h: Likewise.
+	* ia64-tdep.c (ia64_find_unwind_table): Switch to using
+	UNW_INFO_FORMAT_REMOTE_TABLE so we can avoid having to read in the
+	entire unwind-table at once.  Support for this table format has
+	been added to libunwind v0.95.
+	(ia64_find_proc_info_x): Adjust for remote-unwind-table changes.
+	(ia64_get_dyn_info_list): Adjust for interface change for
+	libunwind_find_dyn_list().
+
 2003-12-12  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* breakpoint.c (breakpoint_enabled): New function to test whether

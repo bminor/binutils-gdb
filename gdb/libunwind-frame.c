@@ -58,8 +58,8 @@ static int (*unw_init_remote_p) (unw_cursor_t *, unw_addr_space_t, void *);
 static unw_addr_space_t (*unw_create_addr_space_p) (unw_accessors_t *, int);
 static int (*unw_search_unwind_table_p) (unw_addr_space_t, unw_word_t, unw_dyn_info_t *,
 					 unw_proc_info_t *, int, void *);
-static unw_word_t (*unw_find_dyn_list_p) (unw_addr_space_t, void *, size_t,
-					  unw_word_t, unw_word_t, void *);
+static unw_word_t (*unw_find_dyn_list_p) (unw_addr_space_t, unw_dyn_info_t *,
+					  void *);
 
 
 struct libunwind_frame_cache
@@ -170,11 +170,10 @@ libunwind_frame_cache (struct frame_info *next_frame, void **this_cache)
   return cache;
 }
 
-unw_word_t 
-libunwind_find_dyn_list (unw_addr_space_t as, void *table, size_t table_size,
-			 unw_word_t segbase, unw_word_t gp, void *arg)
+unw_word_t
+libunwind_find_dyn_list (unw_addr_space_t as, unw_dyn_info_t *di, void *arg)
 {
-  return unw_find_dyn_list_p (as, table, table_size, segbase, gp, arg);
+  return unw_find_dyn_list_p (as, di, arg);
 }
 
 static const struct frame_unwind libunwind_frame_unwind =

@@ -2452,23 +2452,11 @@ ia64_find_unwind_table (struct objfile *objfile, unw_word_t ip,
   dip->start_ip = segbase;
   dip->end_ip = dip->start_ip + p_text->p_memsz;
   dip->gp = FIND_GLOBAL_POINTER (ip);
-  dip->format = UNW_INFO_FORMAT_TABLE;
-  dip->u.ti.name_ptr = (unw_word_t) bfd_get_filename (bfd);
-  dip->u.ti.segbase = segbase;
-  dip->u.ti.table_len = p_unwind->p_memsz / sizeof (unw_word_t);
-
-  /* The following can happen in corner cases where dynamically
-     generated code falls into the same page that contains the
-     data-segment and the page-offset of the code is within the first
-     page of the executable.  */
-  if (ip < dip->start_ip || ip >= dip->end_ip)
-    return -UNW_ENOINFO;
-
-  /* Read in the libunwind table.  */
-  *buf = xmalloc (p_unwind->p_memsz);
-  target_read_memory (p_unwind->p_vaddr + load_base, (char *)(*buf), p_unwind->p_memsz);
-
-  dip->u.ti.table_data = (unw_word_t *)(*buf);
+  dip->format = UNW_INFO_FORMAT_REMOTE_TABLE;
+  dip->u.rti.name_ptr = (unw_word_t) bfd_get_filename (bfd);
+  dip->u.rti.segbase = segbase;
+  dip->u.rti.table_len = p_unwind->p_memsz / sizeof (unw_word_t);
+  dip->u.rti.table_data = p_unwind->p_vaddr + load_base;
 
   return 0;
 }
@@ -2490,22 +2478,32 @@ ia64_find_proc_info_x (unw_addr_space_t as, unw_word_t ip, unw_proc_info_t *pi,
 	 version.  */
       if (get_kernel_table (ip, &di) < 0)
 	return -UNW_ENOINFO;
+
+      if (gdbarch_debug >= 1)
+	fprintf_unfiltered (gdb_stdlog, "%s: %lx -> "
+			    "(name=`%s',segbase=%lx,start=%lx,end=%lx,gp=%lx,"
+			    "length=%lu,data=%p)\n", __FUNCTION__,
+			    ip, (char *)di.u.ti.name_ptr,
+			    di.u.ti.segbase, di.start_ip, di.end_ip,
+			    di.gp, di.u.ti.table_len, di.u.ti.table_data);
     }
   else
     {
       ret = ia64_find_unwind_table (sec->objfile, ip, &di, &buf);
       if (ret < 0)
 	return ret;
+
+      if (gdbarch_debug >= 1)
+	fprintf_unfiltered (gdb_stdlog, "%s: %lx -> "
+			    "(name=`%s',segbase=%lx,start=%lx,end=%lx,gp=%lx,"
+			    "length=%lu,data=%lx)\n", __FUNCTION__,
+			    ip, (char *)di.u.rti.name_ptr,
+			    di.u.rti.segbase, di.start_ip, di.end_ip,
+			    di.gp, di.u.rti.table_len, di.u.rti.table_data);
     }
 
-  if (gdbarch_debug >= 1)
-    fprintf_unfiltered (gdb_stdlog, "acquire_unwind_info: %lx -> "
-			"(name=`%s',segbase=%lx,start=%lx,end=%lx,gp=%lx,"
-			"length=%lu,data=%p)\n", ip, (char *)di.u.ti.name_ptr,
-			di.u.ti.segbase, di.start_ip, di.end_ip,
-			di.gp, di.u.ti.table_len, di.u.ti.table_data);
-
-  ret = libunwind_search_unwind_table (&as, ip, &di, pi, need_unwind_info, arg);
+  ret = libunwind_search_unwind_table (&as, ip, &di, pi, need_unwind_info,
+				       arg);
 
   /* We no longer need the dyn info storage so free it.  */
   xfree (buf);
@@ -2545,10 +2543,7 @@ ia64_get_dyn_info_list (unw_addr_space_t as,
       ret = ia64_find_unwind_table (objfile, ip, &di, &buf);
       if (ret >= 0)
 	{
-	  addr = libunwind_find_dyn_list (as, di.u.ti.table_data,
-					  (di.u.ti.table_len
-					   * sizeof (di.u.ti.table_data[0])),
-					  di.u.ti.segbase, di.gp, arg);
+	  addr = libunwind_find_dyn_list (as, &di, arg);
 	  /* We no longer need the dyn info storage so free it.  */
 	  xfree (buf);
 
