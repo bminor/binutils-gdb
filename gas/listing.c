@@ -92,9 +92,12 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 */
 
 #include "as.h"
+
 #include <obstack.h>
 #include "input-file.h"
 #include "targ-cpu.h"
+
+char *malloc();
 
 #ifndef NO_LISTING
 #ifndef LISTING_HEADER
@@ -199,7 +202,7 @@ DEFUN(listing_message,(name, message),
       char *message)
 {
   unsigned int l = strlen(name) + strlen(message)+1;
-  char *n =  malloc(l);
+  char *n =  (char*)malloc(l);
   strcpy(n,name);
   strcat(n,message);
   if(listing_tail != (list_info_type *)NULL) 
@@ -255,7 +258,11 @@ DEFUN(file_info, (file_name),
   p->linenum = 0;
   p->end_pending = 0;
   
-  p->file = fopen(p->filename,"r");
+  p->file = fopen(p->filename,"rb");
+if (p->file)  fgetc(p->file);
+
+
+
   return p;
   
 }
@@ -334,11 +341,13 @@ DEFUN(buffer_line,(file, line, size),
 
   if (file->end_pending == 10) {
       *p ++ = '\n';
-      rewind(file->file);
+      fseek(file->file, 0,0 );
       file->linenum = 0;
       file->end_pending = 0;
     }  
   c = fgetc(file->file);
+
+  
   size -= 1;			/* leave room for null */
 
   while (c != EOF && c != '\n') 
@@ -348,13 +357,14 @@ DEFUN(buffer_line,(file, line, size),
     count++;
     
     c= fgetc(file->file);
+
   }
   if (c == EOF) 
   {
     file->end_pending ++;
-    *p++ = 'E';
-    *p++ = 'O';
-    *p++ = 'F';
+    *p++ = '.';
+    *p++ = '.';
+    *p++ = '.';
   }
   file->linenum++;  
   *p++ = 0;
@@ -618,6 +628,9 @@ DEFUN_VOID(list_symbol_table)
   {
     if (ptr->sy_frag->line) 
     {
+      if (S_GET_NAME(ptr)) 
+      {
+	
       if (strlen(S_GET_NAME(ptr))) 
       {
 	printf("%20s:%-5d  %2d:%08x %s \n",
@@ -626,7 +639,19 @@ DEFUN_VOID(list_symbol_table)
 	       S_GET_SEGMENT(ptr),
 	       S_GET_VALUE(ptr),
 	       S_GET_NAME(ptr));
+      }
+      
+      else 
+      {
+	printf("%20s:%-5d  %2d:%08x\n",
+	       ptr->sy_frag->line->file->filename,
+	       ptr->sy_frag->line->line,
+	       S_GET_SEGMENT(ptr),
+	       S_GET_VALUE(ptr));
+	
 
+      }
+      
 	on_page++;
 	listing_page(0);
       }      
@@ -642,7 +667,7 @@ DEFUN_VOID(list_symbol_table)
   
   for (ptr = symbol_rootP; ptr != (symbolS*)NULL; ptr = symbol_next(ptr))
   {
-    if (ptr && strlen(S_GET_NAME(ptr)) != 0) 
+    if (S_GET_NAME(ptr) && strlen(S_GET_NAME(ptr)) != 0) 
     {
       if (ptr->sy_frag->line == 0) 
       {
@@ -856,7 +881,7 @@ DEFUN_VOID(listing_psize)
   if (paper_height < 0 || paper_height > 1000) 
   {
     paper_height = 0;
-    as_warn("strantge paper height, set to no form");
+    as_warn("strange paper height, set to no form");
   }
  if (*input_line_pointer == ',') 
   {
