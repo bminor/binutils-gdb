@@ -65,12 +65,14 @@ extern int kernel_u_size (void);
 /* Override copies of {fetch,store}_inferior_registers in `infptrace.c'.  */
 #define FETCH_INFERIOR_REGISTERS
 
-/* Nevertheless, define CANNOT_{FETCH,STORE}_REGISTER, because we fall
+/* Nevertheless, define CANNOT_{FETCH,STORE}_REGISTER, because we might fall
    back on the code `infptrace.c' (well a copy of that code in
    `i386-linux-nat.c' for now) and we can access only the
    general-purpose registers in that way.  */
-#define CANNOT_FETCH_REGISTER(regno) ((regno) >= NUM_GREGS)
-#define CANNOT_STORE_REGISTER(regno) CANNOT_FETCH_REGISTER (regno)
+extern int cannot_fetch_register (int regno);
+extern int cannot_store_register (int regno);
+#define CANNOT_FETCH_REGISTER(regno) cannot_store_register (regno)
+#define CANNOT_STORE_REGISTER(regno) cannot_fetch_register (regno)
 
 /* Override child_resume in `infptrace.c'.  */
 #define CHILD_RESUME

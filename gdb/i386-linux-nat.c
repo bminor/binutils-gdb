@@ -133,9 +133,7 @@ int have_ptrace_getfpxregs =
 #endif
 
 /* Registers we shouldn't try to fetch.  */
-#if !defined (CANNOT_FETCH_REGISTER)
-#define CANNOT_FETCH_REGISTER(regno) 0
-#endif
+#define OLD_CANNOT_FETCH_REGISTER(regno) ((regno) >= NUM_GREGS)
 
 /* Fetch one register.  */
 
@@ -150,7 +148,7 @@ fetch_register (int regno)
   char buf[MAX_REGISTER_RAW_SIZE];
   int tid;
 
-  if (CANNOT_FETCH_REGISTER (regno))
+  if (OLD_CANNOT_FETCH_REGISTER (regno))
     {
       memset (buf, '\0', REGISTER_RAW_SIZE (regno));	/* Supply zeroes */
       supply_register (regno, buf);
@@ -201,9 +199,7 @@ old_fetch_inferior_registers (int regno)
 }
 
 /* Registers we shouldn't try to store.  */
-#if !defined (CANNOT_STORE_REGISTER)
-#define CANNOT_STORE_REGISTER(regno) 0
-#endif
+#define OLD_CANNOT_STORE_REGISTER(regno) ((regno) >= NUM_GREGS)
 
 /* Store one register. */
 
@@ -217,7 +213,7 @@ store_register (int regno)
   unsigned int offset;		/* Offset of registers within the u area.  */
   int tid;
 
-  if (CANNOT_STORE_REGISTER (regno))
+  if (OLD_CANNOT_STORE_REGISTER (regno))
     {
       return;
     }
@@ -512,6 +508,26 @@ static void dummy_sse_values (void) {}
 
 
 /* Transferring arbitrary registers between GDB and inferior.  */
+
+/* Check if register REGNO in the child process is accessible.
+   If we are accessing registers directly via the U area, only the
+   general-purpose registers are available.
+   All registers should be accessible if we have GETREGS support.  */
+   
+int
+cannot_fetch_register (int regno)
+{
+  if (! have_ptrace_getregs)
+    return OLD_CANNOT_FETCH_REGISTER (regno);
+  return 0;
+}
+int
+cannot_store_register (int regno)
+{
+  if (! have_ptrace_getregs)
+    return OLD_CANNOT_STORE_REGISTER (regno);
+  return 0;
+}
 
 /* Fetch register REGNO from the child process.  If REGNO is -1, do
    this for all registers (including the floating point and SSE

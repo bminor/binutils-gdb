@@ -1,3 +1,14 @@
+2000-09-22  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	* i386-linux-nat.c (OLD_CANNOT_FETCH_REGISTER,
+	OLD_CANNOT_FETCH_REGISTER):  New definitions for accessible registers
+	when accessing the registers via the U area.
+	(fetch_register, store_register):  Use them.
+	(cannot_fetch_register, cannot_store_register):  New functions,
+	all registers should be accessible if we have GETREGS support.
+	* config/i386/nm-linux.h:  Use cannot_fetch/store_register for
+	CANNOT_FETCH/STORE_REGISTER definitions.
+
 2000-09-06  Fred Fish  <fnf@cygnus.com>
 
 	* infttrace.c (update_thread_state_after_attach): Pass address
