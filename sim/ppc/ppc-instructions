@@ -216,7 +216,7 @@
 	  unsigned8 busy[nr_ppc_function_units];	/* whether a function is busy or not */
 	};
 
-	STATIC_MODEL const char *const ppc_function_unit_name[ (int)nr_ppc_function_units ] = {
+	static const char *const ppc_function_unit_name[ (int)nr_ppc_function_units ] = {
 	  "unknown functional unit instruction",
 	  "integer functional unit instruction",
 	  "system register functional unit instruction",
@@ -228,7 +228,7 @@
 	  "branch functional unit instruction",
 	};
 
-	STATIC_MODEL const char *const ppc_branch_conditional_name[32] = {
+	static const char *const ppc_branch_conditional_name[32] = {
 	  "branch if --CTR != 0 and condition is FALSE",				/* 0000y */
 	  "branch if --CTR != 0 and condition is FALSE, reverse branch likely",
 	  "branch if --CTR == 0 and condition is FALSE",				/* 0001y */
@@ -263,7 +263,7 @@
 	  "branch always (ignored bits 1,4,5 set to 1)",
 	};
 
-	STATIC_MODEL const char *const ppc_nr_mtcrf_crs[9] = {
+	static const char *const ppc_nr_mtcrf_crs[9] = {
 	  "mtcrf moving 0 CRs",
 	  "mtcrf moving 1 CR",
 	  "mtcrf moving 2 CRs",
@@ -1409,6 +1409,14 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 
 
 #
+# 0.0.0.0 Illegal instruction used for kernel mode emulation
+#
+0.0,6./,11./,16./,21./,31.1:X:::instruction_call
+	if (!os_emul_instruction_call(processor, cia, real_addr(cia, 1)))
+	  program_interrupt(processor, cia,
+	                    illegal_instruction_program_interrupt);
+
+#
 # I.2.4.1 Branch Instructions
 #
 0.18,6.LI,30.AA,31.LK:I:t::Branch
@@ -2258,6 +2266,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	if (RA_is_0)	*rT = EXTS(SI);
 	else		*rT = *rA + EXTS(SI);
+	ITRACE(trace_alu, (" Result = %ld (0x%lx)\n", (long)*rT, (long)*rT));
 	PPC_INSN_INT(RT_BITMASK, (RA_BITMASK & ~1), 0);
 
 0.15,6.RT,11.RA,16.SI:D:::Add Immediate Shifted
@@ -2267,6 +2276,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	if (RA_is_0)	*rT = EXTS(SI) << 16;
 	else		*rT = *rA + (EXTS(SI) << 16);
+	ITRACE(trace_alu, (" Result = %ld (0x%lx)\n", (long)*rT, (long)*rT));
 	PPC_INSN_INT(RT_BITMASK, (RA_BITMASK & ~1), 0);
 
 0.31,6.RT,11.RA,16.RB,21.OE,22.266,31.Rc:XO:::Add
@@ -2374,21 +2384,23 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
 *603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
-#	ALU_BEGIN(*rA);
-#	ALU_ADD_CA;
-#	ALU_SUB(1);
-#	ALU_END(*rT, 1/*CA*/, OE, Rc);
+	ALU_BEGIN(*rA);
+	ALU_ADD_CA;
+	ALU_ADD(-1);
+	ALU_END(*rT, 1/*CA*/, OE, Rc);
+	PPC_INSN_INT(RT_BITMASK, RA_BITMASK, Rc);
 
 0.31,6.RT,11.RA,16./,21.OE,22.232,31.Rc:XO:::Subtract From Minus One Extended
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
 *603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
 *603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
-#	ALU_BEGIN(*rA);
-#	ALU_NOT;
-#	ALU_ADD_CA;
-#	ALU_SUB(1);
-#	ALU_END(*rT, 1/*CA*/, OE, Rc);
+	ALU_BEGIN(*rA);
+	ALU_NOT;
+	ALU_ADD_CA;
+	ALU_ADD(-1);
+	ALU_END(*rT, 1/*CA*/, OE, Rc);
+	PPC_INSN_INT(RT_BITMASK, RA_BITMASK, Rc);
 
 0.31,6.RT,11.RA,16./,21.OE,22.202,31.Rc:XO::addze:Add to Zero Extended
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -2696,6 +2708,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = *rS & UI;
 	CR0_COMPARE(*rA, 0, 1/*Rc*/);
+	ITRACE(trace_alu, (" Result = %ld (0x%lx)\n", (long)*rA, (long)*rA));
 	PPC_INSN_INT(RA_BITMASK, RS_BITMASK, 1/*Rc*/);
 
 0.29,6.RS,11.RA,16.UI:D:::AND Immediate Shifted
@@ -2705,6 +2718,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = *rS & (UI << 16);
 	CR0_COMPARE(*rA, 0, 1/*Rc*/);
+	ITRACE(trace_alu, (" Result = %ld (0x%lx)\n", (long)*rA, (long)*rA));
 	PPC_INSN_INT(RA_BITMASK, RS_BITMASK, 1/*Rc*/);
 
 0.24,6.RS,11.RA,16.UI:D:::OR Immediate
@@ -2713,6 +2727,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = *rS | UI;
+	ITRACE(trace_alu, (" Result = %ld (0x%lx)\n", (long)*rA, (long)*rA));
 	PPC_INSN_INT(RA_BITMASK, RS_BITMASK, 0/*Rc*/);
 
 0.25,6.RS,11.RA,16.UI:D:::OR Immediate Shifted
@@ -2721,6 +2736,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = *rS | (UI << 16);
+	ITRACE(trace_alu, (" Result = %ld (0x%lx)\n", (long)*rA, (long)*rA));
 	PPC_INSN_INT(RA_BITMASK, RS_BITMASK, 0/*Rc*/);
 
 0.26,6.RS,11.RA,16.UI:D:::XOR Immediate
@@ -2729,6 +2745,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = *rS ^ UI;
+	ITRACE(trace_alu, (" Result = %ld (0x%lx)\n", (long)*rA, (long)*rA));
 	PPC_INSN_INT(RA_BITMASK, RS_BITMASK, 0/*Rc*/);
 
 0.27,6.RS,11.RA,16.UI:D:::XOR Immediate Shifted
@@ -2737,6 +2754,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = *rS ^ (UI << 16);
+	ITRACE(trace_alu, (" Result = %ld (0x%lx)\n", (long)*rA, (long)*rA));
 	PPC_INSN_INT(RA_BITMASK, RS_BITMASK, 0/*Rc*/);
 
 0.31,6.RS,11.RA,16.RB,21.28,31.Rc:X:::AND
@@ -2746,6 +2764,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = *rS & *rB;
 	CR0_COMPARE(*rA, 0, Rc);
+	ITRACE(trace_alu, (" Result = %ld (0x%lx)\n", (long)*rA, (long)*rA));
 	PPC_INSN_INT(RA_BITMASK, RS_BITMASK | RB_BITMASK, Rc);
 
 0.31,6.RS,11.RA,16.RB,21.444,31.Rc:X:::OR
@@ -2755,6 +2774,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = *rS | *rB;
 	CR0_COMPARE(*rA, 0, Rc);
+	ITRACE(trace_alu, (" Result = %ld (0x%lx)\n", (long)*rA, (long)*rA));
 	PPC_INSN_INT(RA_BITMASK, RS_BITMASK | RB_BITMASK, Rc);
 
 0.31,6.RS,11.RA,16.RB,21.316,31.Rc:X:::XOR
@@ -2764,6 +2784,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = *rS ^ *rB;
 	CR0_COMPARE(*rA, 0, Rc);
+	ITRACE(trace_alu, (" Result = %ld (0x%lx)\n", (long)*rA, (long)*rA));
 	PPC_INSN_INT(RA_BITMASK, RS_BITMASK | RB_BITMASK, Rc);
 
 0.31,6.RS,11.RA,16.RB,21.476,31.Rc:X:::NAND
@@ -2773,6 +2794,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = ~(*rS & *rB);
 	CR0_COMPARE(*rA, 0, Rc);
+	ITRACE(trace_alu, (" Result = %ld (0x%lx)\n", (long)*rA, (long)*rA));
 	PPC_INSN_INT(RA_BITMASK, RS_BITMASK | RB_BITMASK, Rc);
 
 0.31,6.RS,11.RA,16.RB,21.124,31.Rc:X:::NOR
@@ -2782,6 +2804,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = ~(*rS | *rB);
 	CR0_COMPARE(*rA, 0, Rc);
+	ITRACE(trace_alu, (" Result = %ld (0x%lx)\n", (long)*rA, (long)*rA));
 	PPC_INSN_INT(RA_BITMASK, RS_BITMASK | RB_BITMASK, Rc);
 
 0.31,6.RS,11.RA,16.RB,21.284,31.Rc:X:::Equivalent
@@ -2789,8 +2812,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
 *603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
-#	*rA = ~(*rS ^ *rB); /* A === B */
-#	CR0_COMPARE(*rA, 0, Rc);
+	*rA = ~(*rS ^ *rB); /* A === B */
+	CR0_COMPARE(*rA, 0, Rc);
+	ITRACE(trace_alu, (" Result = %ld (0x%lx)\n", (long)*rA, (long)*rA));
+	PPC_INSN_INT(RA_BITMASK, RS_BITMASK | RB_BITMASK, Rc);
 
 0.31,6.RS,11.RA,16.RB,21.60,31.Rc:X:::AND with Complement
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
@@ -2799,6 +2824,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = *rS & ~*rB;
 	CR0_COMPARE(*rA, 0, Rc);
+	ITRACE(trace_alu, (" Result = %ld (0x%lx)\n", (long)*rA, (long)*rA));
 	PPC_INSN_INT(RA_BITMASK, RS_BITMASK | RB_BITMASK, Rc);
 
 0.31,6.RS,11.RA,16.RB,21.412,31.Rc:X:::OR with Complement
@@ -2808,6 +2834,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = *rS | ~*rB;
 	CR0_COMPARE(*rA, 0, Rc);
+	ITRACE(trace_alu, (" Result = %ld (0x%lx)\n", (long)*rA, (long)*rA));
 	PPC_INSN_INT(RA_BITMASK, RS_BITMASK | RB_BITMASK, Rc);
 
 0.31,6.RS,11.RA,16./,21.954,31.Rc:X::extsb:Extend Sign Byte
@@ -2817,6 +2844,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = (signed_word)(signed8)*rS;
 	CR0_COMPARE(*rA, 0, Rc);
+	ITRACE(trace_alu, (" Result = %ld (0x%lx)\n", (long)*rA, (long)*rA));
 	PPC_INSN_INT(RA_BITMASK, RS_BITMASK, Rc);
 
 0.31,6.RS,11.RA,16./,21.922,31.Rc:X::extsh:Extend Sign Half Word
@@ -2826,6 +2854,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = (signed_word)(signed16)*rS;
 	CR0_COMPARE(*rA, 0, Rc);
+	ITRACE(trace_alu, (" Result = %ld (0x%lx)\n", (long)*rA, (long)*rA));
 	PPC_INSN_INT(RA_BITMASK, RS_BITMASK, Rc);
 
 0.31,6.RS,11.RA,16./,21.986,31.Rc:X:64::Extend Sign Word
@@ -2860,6 +2889,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  count++;
 	}
 	*rA = count;
+	ITRACE(trace_alu, (" Result = %ld (0x%lx)\n", (long)*rA, (long)*rA));
 	CR0_COMPARE(count, 0, Rc); /* FIXME - is this correct */
 
 
@@ -2874,6 +2904,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 #	unsigned_word m = MASK(b, 63);
 #	signed_word result = r & m;
 #	*rA = result;
+#	ITRACE(trace_alu, (" Result = %ld (0x%lx)\n", (long)*rA, (long)*rA));
 #	CR0_COMPARE(result, 0, Rc); /* FIXME - is this correct */
 
 0.30,6.RS,11.RA,16.sh_0_4,21.me,27.1,30.sh_5,31.Rc:MD:64::Rotate Left Doubleword Immediate then Clear Right
@@ -3024,6 +3055,8 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else
 	  XER &= ~xer_carry;
 	CR0_COMPARE(shifted, 0, Rc);
+	ITRACE(trace_alu, (" Result = %ld (0x%lx), XER = %ld\n",
+			   (long)*rA, (long)*rA, (long)XER));
 	PPC_INSN_INT(RA_BITMASK, RS_BITMASK, Rc);
 
 0.31,6.RS,11.RA,16.RB,21.794,31.Rc:X:64::Shift Right Algebraic Doubleword
@@ -3044,6 +3077,8 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else
 	  XER &= ~xer_carry;
 	CR0_COMPARE(shifted, 0, Rc);
+	ITRACE(trace_alu, (" Result = %ld (0x%lx), XER = %ld\n",
+			   (long)*rA, (long)*rA, (long)XER));
 	PPC_INSN_INT(RA_BITMASK, RS_BITMASK, Rc);
 
 #

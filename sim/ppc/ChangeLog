@@ -1,3 +1,19 @@
+Tue Jan 16 09:50:53 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* idecode_expression.h (ALU_END): Add ITRACE of the result.
+
+	* ppc-instructions (Equivalent): Enable this instruction.
+	(Add to Minus One Extended): Ditto.
+	(Subtract from Minus One Extended): Ditto.
+	(Add/And/Or/Xor Immediate): Add alu trace of result.
+	(Add/And/Or/Xor Shifted Immediate): Ditto.
+	(And/Or/Equivalent/Nand/Nor): Ditto.
+	(And/Or with Complement): Ditto.
+	(Extend Sign Byte/Half Word): Ditto.
+	(Count Leading Zeros): Ditto.
+	(Shift Right Algerbraic Word): Ditto.
+	(Shift Right Algerbraic Word Immediate): Ditto.
+
 Tue Jan  9 15:10:27 1996  Andrew Cagney  <cagney@highland.com.au>
 
 	* emul_bugapi.c (emul_bugapi_instruction_call) : Make format type
