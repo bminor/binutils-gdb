@@ -1,3 +1,9 @@
+Tue Jan  7 11:21:42 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-mn10300.c (tc_gen_reloc): Handle sym1-sym2 fixups
+	here since fixup_segment doesn't (linkrelax is set).
+	* config/tc-mn10200.c (tc_gen_reloc): Likewise.
+
 Mon Jan  6 15:19:32 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mn10200.c (md_assemble): Tweak fx_offset for pc-relative
