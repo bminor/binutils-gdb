@@ -4976,16 +4976,35 @@ macro (ip)
          or in offset_expr.  */
       if (imm_expr.X_op == O_constant || imm_expr.X_op == O_big)
 	{
-	  load_register (&icnt, treg, &imm_expr, mips_opts.isa >= 3);
-	  if (mips_opts.isa < 3 && treg != 31)
+	  if (mips_opts.isa >= 3)
+	    load_register (&icnt, treg, &imm_expr, 1);
+	  else
 	    {
-	      if (offset_expr.X_op == O_absent)
-		macro_build ((char *) NULL, &icnt, NULL, "move", "d,s",
-			     treg + 1, 0);
+	      int hreg, lreg;
+
+	      if (target_big_endian)
+		{
+		  hreg = treg;
+		  lreg = treg + 1;
+		}
 	      else
 		{
-		  assert (offset_expr.X_op == O_constant);
-		  load_register (&icnt, treg + 1, &offset_expr, 0);
+		  hreg = treg + 1;
+		  lreg = treg;
+		}
+
+	      if (hreg <= 31)
+		load_register (&icnt, hreg, &imm_expr, 0);
+	      if (lreg <= 31)
+		{
+		  if (offset_expr.X_op == O_absent)
+		    macro_build ((char *) NULL, &icnt, NULL, "move", "d,s",
+				 lreg, 0);
+		  else
+		    {
+		      assert (offset_expr.X_op == O_constant);
+		      load_register (&icnt, lreg, &offset_expr, 0);
+		    }
 		}
 	    }
 	  return;

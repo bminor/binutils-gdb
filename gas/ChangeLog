@@ -1,3 +1,8 @@
+Wed Oct 22 12:51:18 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (macro): Correct handling of constant in M_LI_D
+	case in little endian mode.
+
 Tue Oct 21 10:20:11 1997  Doug Evans  <devans@canuck.cygnus.com>
 
 	* config/tc-sparc.c (md_apply_fix3, cases ..._H44, ..._HIX22): Leave
