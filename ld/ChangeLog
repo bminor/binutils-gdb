@@ -1,5 +1,8 @@
 Sun Feb 27 16:29:38 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* emultempl/hppaelf.em (hppaelf_finish): Update comments.  This
+	works again.  Attach some output symbols to the stub file bfd.
+
 	* emultempl/hppaelf.em: Include elf32-hppa.h.
 	(file_chain): Add decl.
 	(hppa_look_for_stubs_in_section): Delete decl.
