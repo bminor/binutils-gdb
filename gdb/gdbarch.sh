@@ -667,7 +667,7 @@ f:=:CORE_ADDR:smash_text_address:CORE_ADDR addr:addr:::core_addr_identity::0
 # single step.  If not, then implement single step using breakpoints.
 F:=:void:software_single_step:enum target_signal sig, int insert_breakpoints_p:sig, insert_breakpoints_p
 # FIXME: cagney/2003-08-28: Need to find a better way of selecting the
-# disassembler.  Perhaphs objdump can handle it?
+# disassembler.  Perhaps objdump can handle it?
 f:TARGET_PRINT_INSN:int:print_insn:bfd_vma vma, struct disassemble_info *info:vma, info:::0:
 f:=:CORE_ADDR:skip_trampoline_code:CORE_ADDR pc:pc:::generic_skip_trampoline_code::0
 

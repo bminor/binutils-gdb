@@ -845,7 +845,7 @@ regcache_cooked_read (struct regcache *regcache, int regnum, void *buf)
   else if (regcache->readonly_p
 	   && regnum < regcache->descr->nr_cooked_registers
 	   && regcache->register_valid_p[regnum])
-    /* Read-only register cache, perhaphs the cooked value was cached?  */
+    /* Read-only register cache, perhaps the cooked value was cached?  */
     memcpy (buf, register_buffer (regcache, regnum),
 	    regcache->descr->sizeof_register[regnum]);
   else

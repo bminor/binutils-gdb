@@ -1749,7 +1749,7 @@ extern void set_gdbarch_software_single_step (struct gdbarch *gdbarch, gdbarch_s
 #endif
 
 /* FIXME: cagney/2003-08-28: Need to find a better way of selecting the
-   disassembler.  Perhaphs objdump can handle it? */
+   disassembler.  Perhaps objdump can handle it? */
 
 typedef int (gdbarch_print_insn_ftype) (bfd_vma vma, struct disassemble_info *info);
 extern int gdbarch_print_insn (struct gdbarch *gdbarch, bfd_vma vma, struct disassemble_info *info);

@@ -1,3 +1,15 @@
+2004-07-10  Michael Snyder  <msnyder@redhat.com>
+
+	* symfile.c (generic_load): Comment typo.
+	* stack.c (get_selected_block): Ditto.
+	* regcache.c (regcache_cooked_read): Ditto.
+	* monitor.c (monitor_debug): Ditto.
+	* mips-tdep.c (mips_read_pc): Ditto.
+	* i386-linux-nat.c (ps_get_thread_area): Ditto.
+	* gdb_mbuild.sh: Ditto.
+	* gdbarch.sh: Ditto.
+	* gdbarch.h: Ditto.
+
 2004-07-09  Paul N. Hilfinger  <Hilfinger@gnat.com>
 
 	Remove ARI problems:

@@ -825,7 +825,7 @@ pc_is_mips16 (bfd_vma memaddr)
     return 0;
 }
 
-/* MIPS believes that the PC has a sign extended value.  Perhaphs the
+/* MIPS believes that the PC has a sign extended value.  Perhaps the
    all registers should be sign extended for simplicity? */
 
 static CORE_ADDR

@@ -153,7 +153,7 @@ static void monitor_debug (const char *fmt, ...) ATTR_FORMAT(printf, 1, 2);
 static int monitor_debug_p = 0;
 
 /* NOTE: This file alternates between monitor_debug_p and remote_debug
-   when determining if debug information is printed.  Perhaphs this
+   when determining if debug information is printed.  Perhaps this
    could be simplified. */
 
 static void
