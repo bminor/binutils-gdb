@@ -255,11 +255,6 @@ struct elf_size_info {
 
 struct elf_backend_data
 {
-  /* Whether the backend uses REL or RELA relocations.  FIXME: some
-     ELF backends use both.  When we need to support one, this whole
-     approach will need to be changed.  */
-  int use_rela_p;
-
   /* The architecture for this backend.  */
   enum bfd_architecture arch;
 
@@ -540,6 +535,23 @@ struct elf_backend_data
   bfd_vma got_header_size;
   bfd_vma plt_header_size;
 
+  /* Whether the backend may use REL relocations.  (Some backends use
+     both REL and RELA relocations, and this flag is set for those
+     backends.)  */
+  unsigned may_use_rel_p : 1;
+    
+  /* Whether the backend may use RELA relocations.  (Some backends use
+     both REL and RELA relocations, and this flag is set for those
+     backends.)  */
+  unsigned may_use_rela_p : 1;
+
+  /* Whether the default relocation type is RELA.  If a backend with
+     this flag set wants REL relocations for a particular section,
+     it must note that explicitly.  Similarly, if this flag is clear,
+     and the backend wants RELA relocations for a particular 
+     section.  */   
+  unsigned default_use_rela_p : 1;
+
   unsigned want_got_plt : 1;
   unsigned plt_readonly : 1;
   unsigned want_plt_sym : 1;
@@ -582,6 +594,8 @@ struct bfd_elf_section_data
   PTR stab_info;
   /* A pointer available for the processor specific ELF backend.  */
   PTR tdata;
+  /* Nonzero if this section uses RELA relocations, rather than REL.  */
+  unsigned int use_rela_p:1;
 };
 
 #define elf_section_data(sec)  ((struct bfd_elf_section_data*)sec->used_by_bfd)

@@ -1265,6 +1265,10 @@ bfd_section_from_shdr (abfd, shindex)
 	target_sect->flags |= SEC_RELOC;
 	target_sect->relocation = NULL;
 	target_sect->rel_filepos = hdr->sh_offset;
+	/* In the section to which the relocations apply, mark whether
+	   its relocations are of the REL or RELA variety.  */
+	elf_section_data (target_sect)->use_rela_p 
+	  = (hdr->sh_type == SHT_RELA);
 	abfd->flags |= HAS_RELOC;
 	return true;
       }
@@ -1329,6 +1333,11 @@ _bfd_elf_new_section_hook (abfd, sec)
     return false;
   sec->used_by_bfd = (PTR) sdata;
   memset (sdata, 0, sizeof (*sdata));
+
+  /* Indicate whether or not this section should use RELA relocations.  */
+  sdata->use_rela_p 
+    = get_elf_backend_data (abfd)->default_use_rela_p;
+
   return true;
 }
 
@@ -1491,13 +1500,13 @@ elf_fake_sections (abfd, asect, failedptrarg)
       this_hdr->sh_entsize = bed->s->sizeof_dyn;
     }
   else if (strncmp (asect->name, ".rela.", 6) == 0
-	   && get_elf_backend_data (abfd)->use_rela_p)
+	   && get_elf_backend_data (abfd)->may_use_rela_p)
     {
       this_hdr->sh_type = SHT_RELA;
       this_hdr->sh_entsize = bed->s->sizeof_rela;
     }
   else if (strncmp (asect->name, ".rel.", 5) == 0
-	   && ! get_elf_backend_data (abfd)->use_rela_p)
+	   && get_elf_backend_data (abfd)->may_use_rel_p)
     {
       this_hdr->sh_type = SHT_REL;
       this_hdr->sh_entsize = bed->s->sizeof_rel;
@@ -1558,19 +1567,15 @@ elf_fake_sections (abfd, asect, failedptrarg)
     this_hdr->sh_flags |= SHF_EXECINSTR;
 
   /* Check for processor-specific section types.  */
-  {
-    struct elf_backend_data *bed = get_elf_backend_data (abfd);
-
-    if (bed->elf_backend_fake_sections)
-      (*bed->elf_backend_fake_sections) (abfd, this_hdr, asect);
-  }
+  if (bed->elf_backend_fake_sections)
+    (*bed->elf_backend_fake_sections) (abfd, this_hdr, asect);
 
   /* If the section has relocs, set up a section header for the
      SHT_REL[A] section.  */
   if ((asect->flags & SEC_RELOC) != 0)
     {
       Elf_Internal_Shdr *rela_hdr;
-      int use_rela_p = get_elf_backend_data (abfd)->use_rela_p;
+      int use_rela_p = elf_section_data (asect)->use_rela_p;
       char *name;
 
       rela_hdr = &elf_section_data (asect)->rel_hdr;
@@ -3836,6 +3841,9 @@ _bfd_elf_copy_private_section_data (ibfd, isec, obfd, osec)
       || ihdr->sh_type == SHT_GNU_verneed
       || ihdr->sh_type == SHT_GNU_verdef)
     ohdr->sh_info = ihdr->sh_info;
+
+  elf_section_data (osec)->use_rela_p
+    = elf_section_data (isec)->use_rela_p;
 
   return true;
 }

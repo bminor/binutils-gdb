@@ -729,7 +729,7 @@ write_relocs (abfd, sec, data)
   Elf_External_Rela *outbound_relocas;
   Elf_External_Rel *outbound_relocs;
   unsigned int idx;
-  int use_rela_p = get_elf_backend_data (abfd)->use_rela_p;
+  int use_rela_p;
   asymbol *last_sym = 0;
   int last_sym_idx = 0;
 
@@ -756,6 +756,16 @@ write_relocs (abfd, sec, data)
       *failedp = true;
       return;
     }
+
+  /* Figure out whether the relocations are RELA or REL relocations.  */
+  if (rela_hdr->sh_type == SHT_RELA)
+    use_rela_p = true;
+  else if (rela_hdr->sh_type == SHT_REL)
+    use_rela_p = false;
+  else
+    /* Every relocation section should be either an SHT_RELA or an
+       SHT_REL section.  */
+    abort ();
 
   /* orelocation has the data, reloc_count has the count... */
   if (use_rela_p)

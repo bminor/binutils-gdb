@@ -1,3 +1,22 @@
+1999-05-31  Mark Mitchell  <mark@codesourcery.com>
+
+	* elf-bfd.h (elf_backend_data): Remove use_rela_p.  Add
+	may_use_rel_p, may_use_rela_p, default_use_rela_p.
+	(bfd_elf_section_data): Add use_rela_p.
+	* elf.c (bfd_section_from_shdr): Set use_rela_p appropriately.
+	(_bfd_elf_new_section_hook): Likewise.
+	(elf_fake_sections): Use may_use_rela_p, etc., instead of
+	use_rela_p.
+	(_bfd_elf_copy_private_section_data): Copy use_rela_p.
+	* elfcode.h (write_relocs): Determine whether or not use rela
+	relocs based on the relocation section header.
+	* elflink.c (_bfd_elf_create_dynamic_sections): Use default_use_rela_p
+	instead of use_rela_p.
+	* elfxx-target.h (elf_backend_may_use_relp): New macro.
+	(elf_backend_may_use_rela_p): Likewise.
+	(elf_backend_default_use_rela_p): Likewise.
+	(elfNN_bed): Use them.
+	
 Wed Jun  2 12:38:49 1999  Miodrag Vallat <miodrag@multimania.com>
 
 	* hosts/alphalinux.h (TRAD_CORE_EXTRA_SIZE_ALLOWED): Expand to 4096.

@@ -294,6 +294,28 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define elf_backend_post_process_headers	NULL
 #endif
 
+/* Previously, backends could only use SHT_REL or SHT_RELA relocation
+   sections, but not both.  They defined USE_REL to indicate SHT_REL
+   sections, and left it undefined to indicated SHT_RELA sections.
+   For backwards compatibility, we still support this usage.  */
+#ifndef USE_REL
+#define USE_REL 0
+#else
+#undef USE_REL
+#define USE_REL 1
+#endif 
+
+/* Use these in new code.  */
+#ifndef elf_backend_may_use_rel_p 
+#define elf_backend_may_use_rel_p USE_REL
+#endif 
+#ifndef elf_backend_may_use_rela_p
+#define elf_backend_may_use_rela_p !USE_REL
+#endif
+#ifndef elf_backend_default_use_rela_p 
+#define elf_backend_default_use_rela_p !USE_REL
+#endif
+
 #ifndef ELF_MACHINE_ALT1
 #define ELF_MACHINE_ALT1 0
 #endif
@@ -310,11 +332,6 @@ extern const struct elf_size_info _bfd_elfNN_size_info;
 
 static CONST struct elf_backend_data elfNN_bed =
 {
-#ifdef USE_REL
-  0,				/* use_rela_p */
-#else
-  1,				/* use_rela_p */
-#endif
   ELF_ARCH,			/* arch */
   ELF_MACHINE_CODE,		/* elf_machine_code */
   ELF_MAXPAGESIZE,		/* maxpagesize */
@@ -355,6 +372,9 @@ static CONST struct elf_backend_data elfNN_bed =
   elf_backend_got_symbol_offset,
   elf_backend_got_header_size,
   elf_backend_plt_header_size,
+  elf_backend_may_use_rel_p,
+  elf_backend_may_use_rela_p,
+  elf_backend_default_use_rela_p,
   elf_backend_want_got_plt,
   elf_backend_plt_readonly,
   elf_backend_want_plt_sym,
