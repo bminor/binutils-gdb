@@ -1,8 +1,8 @@
 /* General utility routines for GDB, the GNU debugger.
 
    Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
-   Foundation, Inc.
+   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free
+   Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -638,17 +638,6 @@ fatal (const char *string, ...)
   va_list args;
   va_start (args, string);
   throw_vfatal (string, args);
-  va_end (args);
-}
-
-/* Cause a silent error to occur.  Any error message is recorded
-   though it is not issued.  */
-NORETURN void
-error_silent (const char *string, ...)
-{
-  va_list args;
-  va_start (args, string);
-  throw_vsilent (string, args);
   va_end (args);
 }
 

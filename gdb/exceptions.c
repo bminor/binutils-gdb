@@ -1,8 +1,8 @@
 /* Exception (throw catch) mechanism, for GDB, the GNU debugger.
 
    Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
-   Foundation, Inc.
+   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free
+   Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -401,15 +401,12 @@ throw_vfatal (const char *fmt, va_list ap)
 }
 
 NORETURN void
-throw_vsilent (const char *fmt, va_list ap)
+throw_error (enum errors error, const char *fmt, ...)
 {
-  struct exception e;
-  e.reason = RETURN_ERROR;
-  e.error = GENERIC_ERROR;
-  xfree (last_message);
-  last_message = xstrvprintf (fmt, ap);
-  e.message = last_message;
-  throw_exception (e);
+  va_list args;
+  va_start (args, fmt);
+  print_and_throw (RETURN_ERROR, error, error_pre_print, fmt, args);
+  va_end (args);
 }
 
 /* Call FUNC() with args FUNC_UIOUT and FUNC_ARGS, catching any

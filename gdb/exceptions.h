@@ -1,8 +1,8 @@
 /* Exception (throw catch) mechanism, for GDB, the GNU debugger.
 
    Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
-   Foundation, Inc.
+   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free
+   Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -51,6 +51,7 @@ enum errors {
   /* Any generic error, the corresponding text is in
      exception.message.  */
   GENERIC_ERROR,
+  NOT_FOUND_ERROR,
   /* Add more errors here.  */
   NR_ERRORS
 };
@@ -86,8 +87,8 @@ extern NORETURN void throw_reason (enum return_reason reason) ATTR_NORETURN;
 extern NORETURN void throw_verror (enum errors, const char *fmt,
 				   va_list ap) ATTR_NORETURN;
 extern NORETURN void throw_vfatal (const char *fmt, va_list ap) ATTR_NORETURN;
-extern NORETURN void throw_vsilent (const char *fmt, va_list ap) ATTR_NORETURN;
-
+extern NORETURN void throw_error (enum errors error, const char *fmt,
+				  ...) ATTR_NORETURN ATTR_FORMAT (printf, 2, 3);
 
 /* Call FUNC(UIOUT, FUNC_ARGS) but wrapped within an exception
    handler.  If an exception (enum return_reason) is thrown using

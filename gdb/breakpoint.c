@@ -1,7 +1,7 @@
 /* Everything about breakpoints, for GDB.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -117,8 +117,6 @@ static void commands_command (char *, int);
 static void condition_command (char *, int);
 
 static int get_number_trailer (char **, int);
-
-static int do_captured_parse_breakpoint (struct ui_out *, void *);
 
 void set_breakpoint_count (int);
 
@@ -5079,15 +5077,13 @@ breakpoint_sals_to_pc (struct symtabs_and_lines *sals,
     }
 }
 
-static int
+static void
 do_captured_parse_breakpoint (struct ui_out *ui, void *data)
 {
   struct captured_parse_breakpoint_args *args = data;
   
   parse_breakpoint_sals (args->arg_p, args->sals_p, args->addr_string_p, 
 		         args->not_found_ptr);
-
-  return GDB_RC_OK;
 }
 
 /* Set a breakpoint according to ARG (function, linenum or *address)
@@ -5100,6 +5096,7 @@ do_captured_parse_breakpoint (struct ui_out *ui, void *data)
 static int
 break_command_1 (char *arg, int flag, int from_tty, struct breakpoint *pending_bp)
 {
+  struct exception e;
   int tempflag, hardwareflag;
   struct symtabs_and_lines sals;
   struct expression **cond = 0;
@@ -5112,7 +5109,7 @@ break_command_1 (char *arg, int flag, int from_tty, struct breakpoint *pending_b
   struct cleanup *old_chain;
   struct cleanup *breakpoint_chain = NULL;
   struct captured_parse_breakpoint_args parse_args;
-  int i, rc;
+  int i;
   int pending = 0;
   int thread = -1;
   int ignore_count = 0;
@@ -5130,57 +5127,57 @@ break_command_1 (char *arg, int flag, int from_tty, struct breakpoint *pending_b
   parse_args.addr_string_p = &addr_string;
   parse_args.not_found_ptr = &not_found;
 
-  rc = catch_exceptions_with_msg (uiout, do_captured_parse_breakpoint, 
-		  		  &parse_args, NULL, &err_msg, 
-				  RETURN_MASK_ALL);
+  e = catch_exception (uiout, do_captured_parse_breakpoint, 
+		       &parse_args, RETURN_MASK_ALL);
 
   /* If caller is interested in rc value from parse, set value.  */
-
-  if (rc != GDB_RC_OK)
+  switch (e.reason)
     {
-      /* Check for file or function not found.  */
-      if (not_found)
+    case RETURN_QUIT:
+      exception_print (gdb_stderr, NULL, e);
+      return e.reason;
+    case RETURN_ERROR:
+      switch (e.error)
 	{
-	  /* If called to resolve pending breakpoint, just return error code.  */
+	case NOT_FOUND_ERROR:
+	  /* If called to resolve pending breakpoint, just return
+	     error code.  */
 	  if (pending_bp)
-	    {
-	      xfree (err_msg);
-	      return rc;
-	    }
+	    return e.reason;
 
-	  error_output_message (NULL, err_msg);
-	  xfree (err_msg);
+	  exception_print (gdb_stderr, NULL, e);
 
-	  /* If pending breakpoint support is turned off, throw error.  */
+	  /* If pending breakpoint support is turned off, throw
+	     error.  */
 
 	  if (pending_break_support == AUTO_BOOLEAN_FALSE)
 	    throw_reason (RETURN_ERROR);
 
-          /* If pending breakpoint support is auto query and the user selects 
-	     no, then simply return the error code.  */
+          /* If pending breakpoint support is auto query and the user
+	     selects no, then simply return the error code.  */
 	  if (pending_break_support == AUTO_BOOLEAN_AUTO && 
 	      !nquery ("Make breakpoint pending on future shared library load? "))
-	    return rc;
+	    return e.reason;
 
-	  /* At this point, either the user was queried about setting a 
-	     pending breakpoint and selected yes, or pending breakpoint 
-	     behavior is on and thus a pending breakpoint is defaulted 
-	     on behalf of the user.  */
+	  /* At this point, either the user was queried about setting
+	     a pending breakpoint and selected yes, or pending
+	     breakpoint behavior is on and thus a pending breakpoint
+	     is defaulted on behalf of the user.  */
 	  copy_arg = xstrdup (addr_start);
 	  addr_string = &copy_arg;
 	  sals.nelts = 1;
 	  sals.sals = &pending_sal;
 	  pending_sal.pc = 0;
 	  pending = 1;
+	  break;
+	default:
+	  exception_print (gdb_stderr, NULL, e);
+	  return e.reason;
 	}
-      else
-	{
-	  xfree (err_msg);
-	  return rc;
-	}
+    default:
+      if (!sals.nelts)
+	return GDB_RC_FAIL;
     }
-  else if (!sals.nelts)
-    return GDB_RC_FAIL;
 
   /* Create a chain of things that always need to be cleaned up. */
   old_chain = make_cleanup (null_cleanup, 0);

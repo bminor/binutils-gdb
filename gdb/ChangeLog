@@ -1,5 +1,18 @@
 2005-01-14  Andrew Cagney  <cagney@gnu.org>
 
+	* linespec.c (symtab_from_filename, decode_variable): Use
+	throw_error instead of error_silent.
+	* breakpoint.c (do_captured_parse_breakpoint): Change return type
+	to void.
+	(break_command_1): Use catch_exception and check the error return
+	status.
+	* exceptions.c (throw_error): New function.
+	(throw_vsilent): Delete function.
+	* exceptions.h (throw_error): Declare.
+	(throw_vsilent): Delete declaration.
+	* utils.c (error_silent): Delete function.
+	* defs.h (error_silent): Delete declaration.
+	
 	* mi/mi-main.c (mi_execute_command): Print the exception.
 	* cli/cli-interp.c (safe_execute_command): Print the exception.
 	* exceptions.h (exception_print): Declare.
