@@ -1,3 +1,9 @@
+Tue Dec  2 10:08:31 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* configure.in (noconfigdirs): Add support for Thumb target.
+
+	* config.sub (maybe_os): Add support for Thumb target.
+
 Tue Dec  2 06:51:40 1997  Keith Seitz  <keiths@onions.cygnus.com>
 
 	* configure (GDB_TK): add all-libide to dependency list

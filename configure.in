@@ -446,6 +446,9 @@ case "${target}" in
   arm-*-coff*)
     noconfigdirs="$noconfigdirs target-libgloss"
     ;;
+  thumb-*-coff) # CYGNUS LOCAL nickc/thumb
+    noconfigdirs="$noconfigdirs target-libgloss"
+    ;;
   arm-*-riscix*)
     noconfigdirs="$noconfigdirs ld target-libgloss"
     ;;
