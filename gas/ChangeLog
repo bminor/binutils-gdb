@@ -1,3 +1,10 @@
+Wed Jul 22 14:36:56 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* doc/as.texinfo: Add documentation for .end, .exitm, .fail,
+	.ifc, .ifeqs, .ifge, .ifgt, .ifle, .iflt, .ifnc, .ifne, .ifnes,
+	.print, .purgem, and .struct.  Remove documentation for
+	.app-file.
+
 Tue Jul 21 16:50:52 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen.c (cgen_md_apply_fix3): set_operand renamed to set_vma_operand.

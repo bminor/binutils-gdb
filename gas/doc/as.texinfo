@@ -16,6 +16,7 @@
 @set have-stabs
 @c ---
 @include asconfig.texi
+@include gasver.texi
 @c ---
 @c common OR combinations of conditions
 @ifset AOUT
@@ -115,7 +116,7 @@ into another language, under the above conditions for modified versions.
 @subtitle for the @value{TARGET} family
 @end ifclear
 @sp 1
-@subtitle January 1994
+@subtitle Version @value{VERSION}
 @sp 1
 @sp 13
 The Free Software Foundation Inc.  thanks The Nice Computer
@@ -160,7 +161,8 @@ into another language, under the above conditions for modified versions.
 @node Top
 @top Using @value{AS}
 
-This file is a user guide to the @sc{gnu} assembler @code{@value{AS}}.
+This file is a user guide to the @sc{gnu} assembler @code{@value{AS}} version
+@value{VERSION}.
 @ifclear GENERIC
 This version of the file describes @code{@value{AS}} configured to generate
 code for @value{TARGET} architectures.
@@ -843,10 +845,11 @@ number in a physical file; the other refers to a line number in a
 to @code{@value{AS}}.
 
 @dfn{Logical files} are simply names declared explicitly by assembler
-directives; they bear no relation to physical files.  Logical file names
-help error messages reflect the original source file, when @code{@value{AS}}
-source is itself synthesized from other files.
-@xref{App-File,,@code{.app-file}}.
+directives; they bear no relation to physical files.  Logical file names help
+error messages reflect the original source file, when @code{@value{AS}} source
+is itself synthesized from other files.  @code{@value{AS}} understands the
+@samp{#} directives emitted by the @code{@value{GCC}} preprocessor.  See also
+@ref{File,,@code{.file}}.
 
 @node Object
 @section Output (Object) File
@@ -905,9 +908,8 @@ file_name:@b{NNN}:Warning Message Text
 @noindent
 @cindex line numbers, in warnings/errors
 (where @b{NNN} is a line number).  If a logical file name has been given
-(@pxref{App-File,,@code{.app-file}}) it is used for the filename,
-otherwise the name of the current input file is used.  If a logical line
-number was given
+(@pxref{File,,@code{.file}}) it is used for the filename, otherwise the name of
+the current input file is used.  If a logical line number was given
 @ifset GENERIC
 (@pxref{Line,,@code{.line}})
 @end ifset
@@ -3025,7 +3027,6 @@ Some machine configurations provide additional directives.
 @end ifset
 
 * Align::                       @code{.align @var{abs-expr} , @var{abs-expr}}
-* App-File::                    @code{.app-file @var{string}}
 * Ascii::                       @code{.ascii "@var{string}"}@dots{}
 * Asciz::                       @code{.asciz "@var{string}"}@dots{}
 * Balign::                      @code{.balign @var{abs-expr} , @var{abs-expr}}
@@ -3045,6 +3046,7 @@ Some machine configurations provide additional directives.
 * Double::                      @code{.double @var{flonums}}
 * Eject::                       @code{.eject}
 * Else::                        @code{.else}
+* End::				@code{.end}
 @ifset COFF
 * Endef::                       @code{.endef}
 @end ifset
@@ -3054,7 +3056,9 @@ Some machine configurations provide additional directives.
 * Equ::                         @code{.equ @var{symbol}, @var{expression}}
 * Equiv::                       @code{.equiv @var{symbol}, @var{expression}}
 * Err::				@code{.err}
+* Exitm::			@code{.exitm}
 * Extern::                      @code{.extern}
+* Fail::			@code{.fail}
 @ifclear no-file-dir
 * File::                        @code{.file @var{string}}
 @end ifclear
@@ -3091,7 +3095,9 @@ Some machine configurations provide additional directives.
 * Octa::                        @code{.octa @var{bignums}}
 * Org::                         @code{.org @var{new-lc} , @var{fill}}
 * P2align::                     @code{.p2align @var{abs-expr} , @var{abs-expr}}
+* Print::			@code{.print @var{string}}
 * Psize::                       @code{.psize @var{lines}, @var{columns}}
+* Purgem::			@code{.purgem @var{name}}
 * Quad::                        @code{.quad @var{bignums}}
 * Rept::			@code{.rept @var{count}}
 * Sbttl::                       @code{.sbttl "@var{subheading}"}
@@ -3115,6 +3121,7 @@ Some machine configurations provide additional directives.
 @end ifset
 
 * String::                      @code{.string "@var{str}"}
+* Struct::			@code{.struct @var{expression}}
 @ifset ELF
 * Symver::                      @code{.symver @var{name},@var{name2@@nodename}}
 @end ifset
@@ -3201,24 +3208,6 @@ native assemblers for these systems which GAS must emulate.
 GAS also provides @code{.balign} and @code{.p2align} directives,
 described later, which have a consistent behavior across all
 architectures (but are specific to GAS).
-
-@node App-File
-@section @code{.app-file @var{string}}
-
-@cindex logical file name
-@cindex file name, logical
-@cindex @code{app-file} directive
-@code{.app-file}
-@ifclear no-file-dir
-(which may also be spelled @samp{.file})
-@end ifclear
-tells @code{@value{AS}} that we are about to start a new
-logical file.  @var{string} is the new file name.  In general, the
-filename is recognized whether or not it is surrounded by quotes @samp{"};
-but if you wish to specify an empty file name is permitted,
-you must give the quotes--@code{""}.  This statement may go away in
-future: it is only recognized to be compatible with old @code{@value{AS}}
-programs.@refill
 
 @node Ascii
 @section @code{.ascii "@var{string}"}@dots{}
@@ -3411,15 +3400,12 @@ assembly; @pxref{If,,@code{.if}}.  It marks the beginning of a section
 of code to be assembled if the condition for the preceding @code{.if}
 was false.
 
-@ignore
-@node End, Endef, Else, Pseudo Ops
+@node End
 @section @code{.end}
 
 @cindex @code{end} directive
-This doesn't do anything---but isn't an s_ignore, so I suspect it's
-meant to do something eventually (which is why it isn't documented here
-as "for compatibility with blah").
-@end ignore
+@code{.end} marks the end of the assembly file.  @code{@value{AS}} does not
+process anything in the file past the @code{.end} directive.
 
 @ifset COFF
 @node Endef
@@ -3484,6 +3470,10 @@ If @code{@value{AS}} assembles a @code{.err} directive, it will print an error
 message and, unless the @code{-Z} option was used, it will not generate an
 object file.  This can be used to signal error an conditionally compiled code.
 
+@node Exitm
+@section @code{.exitm}
+Exit early from the current macro definition.  @xref{Macro}.
+
 @node Extern
 @section @code{.extern}
 
@@ -3492,6 +3482,16 @@ object file.  This can be used to signal error an conditionally compiled code.
 with other assemblers---but it is ignored.  @code{@value{AS}} treats
 all undefined symbols as external.
 
+@node Fail
+@section @code{.fail @var{expression}}
+
+@cindex @code{fail} directive
+Generates an error or a warning.  If the value of the @var{expression} is 500
+or more, @code{@value{AS}} will print a warning message.  If the value is less
+than 500, @code{@value{AS}} will print an error message.  The message will
+include the value of @var{expression}.  This can occasionally be useful inside
+complex nested macros or conditional assembly.
+
 @ifclear no-file-dir
 @node File
 @section @code{.file @var{string}}
@@ -3499,13 +3499,12 @@ all undefined symbols as external.
 @cindex @code{file} directive
 @cindex logical file name
 @cindex file name, logical
-@code{.file} (which may also be spelled @samp{.app-file}) tells
-@code{@value{AS}} that we are about to start a new logical file.
-@var{string} is the new file name.  In general, the filename is
-recognized whether or not it is surrounded by quotes @samp{"}; but if
-you wish to specify an empty file name, you must give the
-quotes--@code{""}.  This statement may go away in future: it is only
-recognized to be compatible with old @code{@value{AS}} programs.
+@code{.file} tells @code{@value{AS}} that we are about to start a new logical
+file.  @var{string} is the new file name.  In general, the filename is
+recognized whether or not it is surrounded by quotes @samp{"}; but if you wish
+to specify an empty file name, you must give the quotes--@code{""}.  This
+statement may go away in future: it is only recognized to be compatible with
+old @code{@value{AS}} programs.
 @ifset A29K
 In some configurations of @code{@value{AS}}, @code{.file} has already been
 removed to avoid conflicts with other assemblers.  @xref{Machine Dependencies}.
@@ -3637,11 +3636,44 @@ The following variants of @code{.if} are also supported:
 Assembles the following section of code if the specified @var{symbol}
 has been defined.
 
-@ignore
+@cindex @code{ifc} directive
+@item .ifc @var{string1},@var{string2}
+Assembles the following section of code if the two strings are the same.  The
+strings may be optionally quoted with single quotes.  If they are not quoted,
+the first string stops at the first comma, and the second string stops at the
+end of the line.  Strings which contain whitespace should be quoted.  The
+string comparison is case sensitive.
+
+@cindex @code{ifeq} directive
+@item .ifeq @var{absolute expression}
+Assembles the following section of code if the argument is zero.
+
 @cindex @code{ifeqs} directive
-@item .ifeqs
-Not yet implemented.
-@end ignore
+@item .ifeqs @var{string1},@var{string2}
+Another form of @code{.ifc}.  The strings must be quoted using double quotes.
+
+@cindex @code{ifge} directive
+@item .ifge @var{absolute expression}
+Assembles the following section of code if the argument is greater than or
+equal to zero.
+
+@cindex @code{ifgt} directive
+@item .ifgt @var{absolute expression}
+Assembles the following section of code if the argument is greater than zero.
+
+@cindex @code{ifle} directive
+@item .ifle @var{absolute expression}
+Assembles the following section of code if the argument is less than or equal
+to zero.
+
+@cindex @code{iflt} directive
+@item .iflt @var{absolute expression}
+Assembles the following section of code if the argument is less than zero.
+
+@cindex @code{ifnc} directive
+@item .ifnc @var{string1},@var{string2}.
+Like @code{.ifc}, but the sense of the test is reversed: this assembles the
+following section of code if the two strings are not the same.
 
 @cindex @code{ifndef} directive
 @cindex @code{ifnotdef} directive
@@ -3650,10 +3682,15 @@ Not yet implemented.
 Assembles the following section of code if the specified @var{symbol}
 has not been defined.  Both spelling variants are equivalent.
 
-@ignore
-@item ifnes
-Not yet implemented.
-@end ignore
+@cindex @code{ifne} directive
+@item .ifne @var{absolute expression}
+Assembles the following section of code if the argument is not equal to zero
+(in other words, this is equivalent to @code{.if}).
+
+@cindex @code{ifnes} directive
+@item .ifnes @var{string1},@var{string2}
+Like @code{.ifeqs}, but the sense of the test is reversed: this assembles the
+following section of code if the two strings are not the same.
 @end table
 
 @node Include
@@ -4115,6 +4152,13 @@ filled in with the value 0x368d (the exact placement of the bytes depends upon
 the endianness of the processor).  If it skips 1 or 3 bytes, the fill value is
 undefined.
 
+@node Print
+@section @code{.print @var{string}}
+
+@cindex @code{print} directive
+@code{@value{AS}} will print @var{string} on the standard output during
+assembly.  You must put @var{string} in double quotes.
+
 @node Psize
 @section @code{.psize @var{lines} , @var{columns}}
 
@@ -4134,6 +4178,13 @@ lines is exceeded (or whenever you explicitly request one, using
 
 If you specify @var{lines} as @code{0}, no formfeeds are generated save
 those explicitly specified with @code{.eject}.
+
+@node Purgem
+@section @code{.purgem @var{name}}
+
+@cindex @code{purgem} directive
+Undefine the macro @var{name}, so that later uses of the string will not be
+expanded.  @xref{Macro}.
 
 @node Quad
 @section @code{.quad @var{bignums}}
@@ -4509,6 +4560,26 @@ one string to copy, separated by commas.  Unless otherwise specified for a
 particular machine, the assembler marks the end of each string with a 0 byte.
 You can use any of the escape sequences described in @ref{Strings,,Strings}.
 
+@node Struct
+@section @code{.struct @var{expression}}
+
+@cindex @code{struct} directive
+Switch to the absolute section, and set the section offset to @var{expression},
+which must be an absolute expression.  You might use this as follows:
+@smallexample
+        .struct 0
+field1:
+        .struct field1 + 4
+field2:
+        .struct field2 + 4
+field3:
+@end smallexample
+This would define the symbol @code{field1} to have the value 0, the symbol
+@code{field2} to have the value 4, and the symbol @code{field3} to have the
+value 8.  Assembly would be left in the absolute section, and you would need to
+use a @code{.section} directive of some sort to change to some other section
+before further assembly.
+
 @ifset ELF
 @node Symver
 @section @code{.symver}
@@ -4698,7 +4769,6 @@ One day these directives won't work.
 They are included for compatibility with older assemblers.
 @table @t
 @item .abort
-@item .app-file
 @item .line
 @end table
 
