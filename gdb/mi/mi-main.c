@@ -41,7 +41,6 @@
 #include "gdb.h"
 #include <ctype.h>
 #include <sys/time.h>
-#include "regbuf.h"
 
 enum
   {

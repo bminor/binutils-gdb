@@ -1,3 +1,7 @@
+2002-06-15  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-main.c: Do not include "regbuf.h".
+
 2002-05-16  Andrew Cagney  <ac131313@redhat.com>
 
 	* mi-main.c (register_changed_p): Update.

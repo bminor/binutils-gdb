@@ -1,3 +1,17 @@
+2002-06-15  Andrew Cagney  <ac131313@redhat.com>
+
+	* regcache.c (regcache_descr): New function.
+	(init_legacy_regcache_descr): Replace legacy_regcache_descr.
+	(init_regcache_descr): Replace regcache_descr.
+	(_initialize_regcache): Pass init_regcache_descr to
+	register_gdbarch_data.
+
+	* arch-utils.h (legacy_extract_return_value): Declare.
+
+	* blockframe.c (generic_call_dummy_register_unwind): Use
+	deprecated_grub_regcache_for_registers to get register value.
+	* values.c (value_being_returned): Ditto.  Include "regcache.h".
+
 2002-05-23  Andrew Cagney  <ac131313@redhat.com>
 
 	* regbuf.h, regbuf.c: Delete.

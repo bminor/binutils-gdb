@@ -34,6 +34,7 @@
 #include "demangle.h"
 #include "doublest.h"
 #include "gdb_assert.h"
+#include "regcache.h"
 
 /* Prototypes for exported functions. */
 
@@ -1230,7 +1231,6 @@ value_being_returned (struct type *valtype, struct regcache *retbuf,
   struct value *val;
   CORE_ADDR addr;
 
-#if 0
   /* If this is not defined, just use EXTRACT_RETURN_VALUE instead.  */
   if (EXTRACT_STRUCT_VALUE_ADDRESS_P ())
     if (struct_return)
@@ -1240,13 +1240,13 @@ value_being_returned (struct type *valtype, struct regcache *retbuf,
 	  error ("Function return value unknown.");
 	return value_at (valtype, addr, NULL);
       }
-#endif
 
   /* If this is not defined, just use EXTRACT_RETURN_VALUE instead.  */
   if (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P ())
     if (struct_return)
       {
-	addr = DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS (retbuf);
+	char *registers = deprecated_grub_regcache_for_registers (retbuf);
+	addr = DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS (registers);
 	if (!addr)
 	  error ("Function return value unknown.");
 	return value_at (valtype, addr, NULL);
@@ -1254,7 +1254,6 @@ value_being_returned (struct type *valtype, struct regcache *retbuf,
 
   val = allocate_value (valtype);
   CHECK_TYPEDEF (valtype);
-#define EXTRACT_RETURN_VALUE DEPRECATED_EXTRACT_RETURN_VALUE
   EXTRACT_RETURN_VALUE (valtype, retbuf, VALUE_CONTENTS_RAW (val));
 
   return val;

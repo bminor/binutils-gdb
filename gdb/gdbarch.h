@@ -1461,6 +1461,11 @@ extern void set_gdbarch_return_value_on_stack (struct gdbarch *gdbarch, gdbarch_
 #endif
 #endif
 
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (EXTRACT_RETURN_VALUE)
+#define EXTRACT_RETURN_VALUE(type, regcache, valbuf) (legacy_extract_return_value (type, regcache, valbuf))
+#endif
+
 typedef void (gdbarch_extract_return_value_ftype) (struct type *type, struct regcache *regcache, char *valbuf);
 extern void gdbarch_extract_return_value (struct gdbarch *gdbarch, struct type *type, struct regcache *regcache, char *valbuf);
 extern void set_gdbarch_extract_return_value (struct gdbarch *gdbarch, gdbarch_extract_return_value_ftype *extract_return_value);

@@ -1349,7 +1349,7 @@ generic_call_dummy_register_unwind (struct frame_info *frame, void **cache,
   /* If needed, find and return the value of the register.  */
   if (bufferp != NULL)
     {
-      char *registers;
+      struct regcache *registers;
 #if 1
       /* Get the address of the register buffer that contains all the
 	 saved registers for this dummy frame.  Cache that address.  */
@@ -1366,7 +1366,9 @@ generic_call_dummy_register_unwind (struct frame_info *frame, void **cache,
 #endif
       gdb_assert (registers != NULL);
       /* Return the actual value.  */
-      memcpy (bufferp, registers + REGISTER_BYTE (regnum),
+      memcpy (bufferp,
+	      (deprecated_grub_regcache_for_registers (registers)
+	       + REGISTER_BYTE (regnum)),
 	      REGISTER_RAW_SIZE (regnum));
     }
 }

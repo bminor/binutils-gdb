@@ -91,6 +91,16 @@ legacy_breakpoint_from_pc (CORE_ADDR * pcptr, int *lenptr)
   return NULL;
 }
 
+/* Implementation of extract return value that grubs around in the
+   register cache.  */
+void
+legacy_extract_return_value (struct type *type, struct regcache *regcache,
+			     char *valbuf)
+{
+  char *registers = deprecated_grub_regcache_for_registers (regcache);
+  DEPRECATED_EXTRACT_RETURN_VALUE (type, registers, valbuf);
+}
+
 int
 legacy_register_sim_regno (int regnum)
 {

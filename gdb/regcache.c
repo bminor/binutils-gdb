@@ -74,8 +74,8 @@ struct regcache_descr
 
 };
 
-static struct regcache_descr *
-legacy_regcache_descr (struct gdbarch *gdbarch)
+static void *
+init_legacy_regcache_descr (struct gdbarch *gdbarch)
 {
   int i;
   struct regcache_descr *descr;
@@ -83,10 +83,6 @@ legacy_regcache_descr (struct gdbarch *gdbarch)
      ``gdbarch'' as a parameter.  */
   gdb_assert (gdbarch != NULL);
 
-  descr = gdbarch_data (gdbarch, regcache_data_handle);
-  if (descr != NULL)
-    return descr;
-  
   descr = XMALLOC (struct regcache_descr);
   descr->gdbarch = gdbarch;
   descr->legacy_p = 1;
@@ -136,23 +132,18 @@ legacy_regcache_descr (struct gdbarch *gdbarch)
   return descr;
 }
 
-static struct regcache_descr *
-regcache_descr (struct gdbarch *gdbarch)
+static void *
+init_regcache_descr (struct gdbarch *gdbarch)
 {
   int i;
   struct regcache_descr *descr;
   gdb_assert (gdbarch != NULL);
 
-  /* If the value has previously been computed, just return that.  */
-  descr = gdbarch_data (gdbarch, regcache_data_handle);
-  if (descr != NULL)
-    return descr;
-  
   /* If an old style architecture, construct the register cache
      description using all the register macros.  */
   if (!gdbarch_register_read_p (gdbarch)
       && !gdbarch_register_write_p (gdbarch))
-    return legacy_regcache_descr (gdbarch);
+    return init_legacy_regcache_descr (gdbarch);
 
   descr = XMALLOC (struct regcache_descr);
   descr->gdbarch = gdbarch;
@@ -215,6 +206,12 @@ regcache_descr (struct gdbarch *gdbarch)
     }
   /* gdb_assert (descr->sizeof_raw_registers == REGISTER_BYTES (i));  */
   return descr;
+}
+
+static struct regcache_descr *
+regcache_descr (struct gdbarch *gdbarch)
+{
+  return gdbarch_data (gdbarch, regcache_data_handle);
 }
 
 static void
@@ -1238,7 +1235,8 @@ regcache_restore_no_passthrough (struct regcache *regcache)
 void
 _initialize_regcache (void)
 {
-  regcache_data_handle = register_gdbarch_data (NULL, xfree_regcache_descr);
+  regcache_data_handle = register_gdbarch_data (init_regcache_descr,
+						xfree_regcache_descr);
   REGISTER_GDBARCH_SWAP (current_regcache);
   register_gdbarch_swap (&registers, sizeof (registers), NULL);
   register_gdbarch_swap (&register_valid, sizeof (register_valid), NULL);

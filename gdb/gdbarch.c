@@ -516,6 +516,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->pointer_to_address = unsigned_pointer_to_address;
   current_gdbarch->address_to_pointer = unsigned_address_to_pointer;
   current_gdbarch->return_value_on_stack = generic_return_value_on_stack_not;
+  current_gdbarch->extract_return_value = legacy_extract_return_value;
   current_gdbarch->push_arguments = default_push_arguments;
   current_gdbarch->use_struct_convention = generic_use_struct_convention;
   current_gdbarch->prologue_frameless_p = generic_prologue_frameless_p;
@@ -700,9 +701,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of address_to_pointer, invalid_p == 0 */
   /* Skip verify of integer_to_address, has predicate */
   /* Skip verify of return_value_on_stack, invalid_p == 0 */
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->extract_return_value == 0))
-    fprintf_unfiltered (log, "\n\textract_return_value");
+  /* Skip verify of extract_return_value, invalid_p == 0 */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->deprecated_extract_return_value == 0))
     fprintf_unfiltered (log, "\n\tdeprecated_extract_return_value");
