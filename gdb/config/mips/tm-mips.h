@@ -380,12 +380,11 @@ extern int mips_frame_num_args PARAMS ((struct frame_info *));
    ways in the stack frame.  sp is even more special:
    the address we return for it IS the sp for the next frame.  */
 
-#define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs) \
+#define FRAME_INIT_SAVED_REGS(frame_info) \
   do { \
     if ((frame_info)->saved_regs == NULL) \
       mips_find_saved_regs (frame_info); \
-    (frame_saved_regs) = *(frame_info)->saved_regs; \
-    (frame_saved_regs).regs[SP_REGNUM] = (frame_info)->frame; \
+    (frame_info)->saved_regs[SP_REGNUM] = (frame_info)->frame; \
   } while (0)
 extern void mips_find_saved_regs PARAMS ((struct frame_info *));
 
@@ -455,8 +454,7 @@ typedef struct mips_extra_func_info {
 
 #define EXTRA_FRAME_INFO \
   mips_extra_func_info_t proc_desc; \
-  int num_args;\
-  struct frame_saved_regs *saved_regs;
+  int num_args;
 
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fci) init_extra_frame_info(fci)
 extern void init_extra_frame_info PARAMS ((struct frame_info *));

@@ -415,6 +415,8 @@ extern use_struct_convention_fn a29k_use_struct_convention;
 void read_register_stack ();
 long read_register_stack_integer ();
 
+#define FRAME_INIT_SAVED_REGS(fi) /*no-op*/
+
 #define EXTRA_FRAME_INFO  \
   CORE_ADDR saved_msp;    \
   unsigned int rsize;     \

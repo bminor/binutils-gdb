@@ -73,20 +73,15 @@ extern breakpoint_from_pc_fn mn10300_breakpoint_from_pc;
 
 #ifdef __STDC__
 struct frame_info;
-struct frame_saved_regs;
 struct type;
 struct value;
 #endif
-
-#define EXTRA_FRAME_INFO struct frame_saved_regs fsr; int status; int stack_size;
 
 extern void mn10300_init_extra_frame_info PARAMS ((struct frame_info *));
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fi) mn10300_init_extra_frame_info (fi)
 #define INIT_FRAME_PC		/* Not necessary */
 
-extern void mn10300_frame_find_saved_regs PARAMS ((struct frame_info *,
-						   struct frame_saved_regs *));
-#define FRAME_FIND_SAVED_REGS(fi, regaddr) regaddr = fi->fsr
+#define FRAME_INIT_SAVED_REGS(fi) /* handled by init_extra_frame_info */
 
 extern CORE_ADDR mn10300_frame_chain PARAMS ((struct frame_info *));
 #define FRAME_CHAIN(fi) mn10300_frame_chain (fi)

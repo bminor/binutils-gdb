@@ -197,6 +197,11 @@ extern CORE_ADDR mz8k_skip_prologue PARAMS ((CORE_ADDR ip));
 
 #define FRAME_ARGS_SKIP 8
 
+#ifdef __STDC__
+struct frame_info;
+#endif
+extern void z8k_frame_init_saved_regs PARAMS ((struct frame_info *));
+#define FRAME_INIT_SAVED_REGS(fi) z8k_frame_init_saved_regs (fi)
 
 
 /* Things needed for making the inferior call functions.

@@ -31,10 +31,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* FIXME: Some of this code should perhaps be merged with mips-tdep.c.  */
 
-/* FIXME: Put this declaration in frame.h.  */
-extern struct obstack frame_cache_obstack;
-
-
 /* Prototypes for local functions. */
 
 static alpha_extra_func_info_t push_sigtramp_desc PARAMS ((CORE_ADDR low_addr));
@@ -254,9 +250,7 @@ alpha_find_saved_regs (frame)
   alpha_extra_func_info_t proc_desc;
   int returnreg;
 
-  frame->saved_regs = (struct frame_saved_regs *)
-    obstack_alloc (&frame_cache_obstack, sizeof(struct frame_saved_regs));
-  memset (frame->saved_regs, 0, sizeof (struct frame_saved_regs));
+  frame_saved_regs_zalloc (frame);
 
   /* If it is the frame for __sigtramp, the saved registers are located
      in a sigcontext structure somewhere on the stack. __sigtramp
@@ -276,14 +270,14 @@ alpha_find_saved_regs (frame)
       for (ireg = 0; ireg < 32; ireg++)
 	{
  	  reg_position = sigcontext_addr + SIGFRAME_REGSAVE_OFF + ireg * 8;
- 	  frame->saved_regs->regs[ireg] = reg_position;
+ 	  frame->saved_regs[ireg] = reg_position;
 	}
       for (ireg = 0; ireg < 32; ireg++)
 	{
  	  reg_position = sigcontext_addr + SIGFRAME_FPREGSAVE_OFF + ireg * 8;
- 	  frame->saved_regs->regs[FP0_REGNUM + ireg] = reg_position;
+ 	  frame->saved_regs[FP0_REGNUM + ireg] = reg_position;
 	}
-      frame->saved_regs->regs[PC_REGNUM] = sigcontext_addr + SIGFRAME_PC_OFF;
+      frame->saved_regs[PC_REGNUM] = sigcontext_addr + SIGFRAME_PC_OFF;
       return;
     }
 
@@ -306,7 +300,7 @@ alpha_find_saved_regs (frame)
      register number.  */
   if (mask & (1 << returnreg))
     {
-      frame->saved_regs->regs[returnreg] = reg_position;
+      frame->saved_regs[returnreg] = reg_position;
       reg_position += 8;
       mask &= ~(1 << returnreg); /* Clear bit for RA so we
 				    don't save again later. */
@@ -315,7 +309,7 @@ alpha_find_saved_regs (frame)
   for (ireg = 0; ireg <= 31 ; ++ireg)
     if (mask & (1 << ireg))
       {
-	frame->saved_regs->regs[ireg] = reg_position;
+	frame->saved_regs[ireg] = reg_position;
 	reg_position += 8;
       }
 
@@ -328,11 +322,11 @@ alpha_find_saved_regs (frame)
   for (ireg = 0; ireg <= 31 ; ++ireg)
     if (mask & (1 << ireg))
       {
-	frame->saved_regs->regs[FP0_REGNUM+ireg] = reg_position;
+	frame->saved_regs[FP0_REGNUM+ireg] = reg_position;
 	reg_position += 8;
       }
 
-  frame->saved_regs->regs[PC_REGNUM] = frame->saved_regs->regs[returnreg];
+  frame->saved_regs[PC_REGNUM] = frame->saved_regs[returnreg];
 }
 
 static CORE_ADDR
@@ -350,8 +344,8 @@ read_next_frame_reg(fi, regno)
 	{
 	  if (fi->saved_regs == NULL)
 	    alpha_find_saved_regs (fi);
-	  if (fi->saved_regs->regs[regno])
-	    return read_memory_integer(fi->saved_regs->regs[regno], 8);
+	  if (fi->saved_regs[regno])
+	    return read_memory_integer(fi->saved_regs[regno], 8);
 	}
     }
   return read_register(regno);
@@ -855,12 +849,11 @@ init_extra_frame_info (frame)
 				    (CORE_ADDR *)NULL,(CORE_ADDR *)NULL);
 	  if (!IN_SIGTRAMP (frame->pc, name))
 	    {
-	      frame->saved_regs = (struct frame_saved_regs*)
-		obstack_alloc (&frame_cache_obstack,
-			       sizeof (struct frame_saved_regs));
-	      *frame->saved_regs = temp_saved_regs;
-	      frame->saved_regs->regs[PC_REGNUM]
-		= frame->saved_regs->regs[RA_REGNUM];
+	      frame->saved_regs = (CORE_ADDR*)
+		frame_obstack_alloc (SIZEOF_FRAME_SAVED_REGS);
+	      memcpy (frame->saved_regs, temp_saved_regs.regs, SIZEOF_FRAME_SAVED_REGS);
+	      frame->saved_regs[PC_REGNUM]
+		= frame->saved_regs[RA_REGNUM];
 	    }
 	}
     }
@@ -1116,12 +1109,12 @@ alpha_pop_frame()
       for (regnum = 32; --regnum >= 0; )
 	if (PROC_REG_MASK(proc_desc) & (1 << regnum))
 	  write_register (regnum,
-			  read_memory_integer (frame->saved_regs->regs[regnum],
+			  read_memory_integer (frame->saved_regs[regnum],
 					       8));
       for (regnum = 32; --regnum >= 0; )
 	if (PROC_FREG_MASK(proc_desc) & (1 << regnum))
 	  write_register (regnum + FP0_REGNUM,
-			  read_memory_integer (frame->saved_regs->regs[regnum + FP0_REGNUM], 8));
+			  read_memory_integer (frame->saved_regs[regnum + FP0_REGNUM], 8));
     }
   write_register (SP_REGNUM, new_sp);
   flush_cached_frames ();

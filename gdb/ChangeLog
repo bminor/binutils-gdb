@@ -1,3 +1,61 @@
+Sat Dec 12 09:28:13 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* frame.h (struct frame_info): Add CORE_ADDR *saved_regs and
+ 	struct frame_extra_info *extra_info.
+	(frame_obstack_alloc, frame_saved_regs_zalloc): Prototype.
+	(SIZEOF_FRAME_SAVED_REGS): Provide default.
+	(FRAME_INIT_SAVED_REGS): Provide default.
+	(struct frame_saved_regs): Deprecate.
+	(EXTRA_FRAME_INFO): Deprecate.
+	
+	* blockframe.c (frame_obstack_alloc, frame_saved_regs_zalloc): New
+ 	function.
+	(generic_get_saved_register): Use FRAME_INIT_SAVED_REGS and
+ 	frame->saved_regs.
+	(frame_cache_obstack): Make static.
+	(get_frame_saved_regs): Deprecate. Copy the saved regs into the
+ 	frame buffer.
+
+	* stack.c (frame_info): Rewrite using frame->saved_regs and
+ 	FRAME_INIT_SAVED_REGS.
+	* findvar.c (find_saved_register): Ditto.
+
+	* config/mn10300/tm-mn10300.h (EXTRA_FRAME_INFO): Delete.
+	(FRAME_FIND_SAVED_REGS): Replace with FRAME_INIT_SAVED_REGS. No-op.
+	* mn10300-tdep.c: Update.
+ 	(analyze_dummy_frame): New function.
+	(struct frame_extra_info): Define.
+	(mn10300_init_extra_frame_info): Update.
+	
+	* config/rs6000/tm-rs6000.h: (EXTRA_FRAME_INFO): Delete.
+ 	(FRAME_FIND_SAVED_REGS): Replace with FRAME_INIT_SAVED_REGS.
+	(FRAME_ARGS_ADDRESS): Replace with function.
+
+	* rs6000-tdep.c (frame_get_saved_regs): Rename from
+ 	frame_get_cache_fsr.
+	(rs6000_init_extra_frame_info): New function.
+	(rs6000_frame_init_saved_regs): Call frame_get_saved_regs.
+	(FUNCTION_START_OFFSET): Delete references, was ZERO.
+	(rs6000_frame_args_address): New function.
+	(frame_initial_stack_address): Update
+	
+	* config/mips/tm-mips.h (EXTRA_FRAME_INFO): Remove saved_regs.
+	(FRAME_INIT_SAVED_REGS): Rename FRAME_FIND_SAVED_REGS, update.
+	* mips-tdep.c (mips_find_saved_regs, read_next_frame_reg,
+ 	init_extra_frame_info, mips_pop_frame): Update.
+	* config/alpha/tm-alpha.h (FRAME_INIT_SAVED_REGS,
+ 	EXTRA_FRAME_INFO), alpha-tdep.c (alpha_find_saved_regs,
+ 	alpha_pop_frame, init_extra_frame_info): Ditto.
+	
+	* i960-tdep.c, m88k-tdep.c, h8300-tdep.c: Update.
+	* config/sparc/tm-sparc.h, config/a29k/tm-a29k.h: Define
+ 	FRAME_INIT_SAVED_REGS as no-op.
+
+	* z8k-tdep.c (z8k_init_frame_saved_regs): Rename
+ 	get_frame_saved_regs.
+	(examine_frame, z8k_skip_prologue): Update.
+	* config/z8k/tm-z8k.h (FRAME_INIT_SAVED_REGS): Define.
+
 1998-12-11  Fernando Nasser  <fnasser@totem.to.cygnus.com>
 
 	From J.T. Conklin  <jtc@redbacknetworks.com>:
@@ -32,8 +90,8 @@ Fri Dec 11 09:52:04 1998  Andrew Cagney  <cagney@chook>
 	* gdbtk-cmds.c, mipsm3-nat.c, hppah-nat.c, infptrace.c,
  	i386gnu-nat.c, hppab-nat.c, core-aout.c, arm-xdep.c, alpha-nat.c,
  	altos-xdep.c, pyr-xdep.c, remote-st.c, remote-os9k.c,
- 	tahoe-tdep.c, pyr-tdep.c, v850ice.c, vax-tdep.c: Replace reg_name
- 	with REGISTER_NAME.
+ 	tahoe-tdep.c, pyr-tdep.c, vax-tdep.c: Replace reg_name with
+ 	REGISTER_NAME.
 
 Thu Dec 10 15:19:40 1998  David Taylor  <taylor@texas.cygnus.com>
 
@@ -322,8 +380,8 @@ Fri Nov 27 11:00:25 1998  Andrew Cagney  <cagney@chook>
 start-sanitize-sky
 	* config/mips/tm-txvu.h (STEP_SKIPS_DELAY), txvu-tdep.c
  	(txvu_step_skips_delay): Change macro to function.
-end-sanitize-sky
 
+end-sanitize-sky
 Thu Nov 26 11:19:15 1998  Andrew Cagney  <cagney@amy.cygnus.com>
 
 	* config/alpha/tm-alpha.h (ABOUT_TO_RETURN): Replace macro.

@@ -388,31 +388,12 @@ CORE_ADDR rs6000_frame_chain PARAMS ((struct frame_info *));
 
 extern int frameless_function_invocation PARAMS((struct frame_info *));
 
-/* Functions calling alloca() change the value of the stack pointer. We
-   need to use initial stack pointer (which is saved in r31 by gcc) in 
-   such cases. If a compiler emits traceback table, then we should use the
-   alloca register specified in traceback table. FIXME. */
-/* Also, it is a good idea to cache information about frame's saved registers
-   in the frame structure to speed things up. See tm-m88k.h. FIXME. */
-
-#define	EXTRA_FRAME_INFO	\
-	CORE_ADDR initial_sp;			/* initial stack pointer. */ \
-	struct frame_saved_regs *cache_fsr;	/* saved registers	  */
-
 #define INIT_FRAME_PC_FIRST(fromleaf, prev) \
   prev->pc = (fromleaf ? SAVED_PC_AFTER_CALL (prev->next) : \
 	      prev->next ? FRAME_SAVED_PC (prev->next) : read_pc ());
 #define INIT_FRAME_PC(fromleaf, prev) /* nothing */
-#define	INIT_EXTRA_FRAME_INFO(fromleaf, fi)	\
-  fi->initial_sp = 0;		\
-  fi->cache_fsr = 0; \
-  if (fi->next != (CORE_ADDR)0 \
-      && fi->pc < TEXT_SEGMENT_BASE) \
-    /* We're in get_prev_frame_info */ \
-    /* and this is a special signal frame.  */ \
-    /* (fi->pc will be some low address in the kernel, */ \
-    /*  to which the signal handler returns).  */ \
-    fi->signal_handler_caller = 1;
+extern void rs6000_init_extra_frame_info (int fromleaf, struct frame_info *);
+#define	INIT_EXTRA_FRAME_INFO(fromleaf, fi) rs6000_init_extra_frame_info (fromleaf, fi)
 
 /* If the kernel has to deliver a signal, it pushes a sigcontext
    structure on the stack and then calls the signal handler, passing
@@ -433,11 +414,8 @@ extern int frameless_function_invocation PARAMS((struct frame_info *));
 
 extern unsigned long frame_saved_pc PARAMS ((struct frame_info *));
 
-#define FRAME_ARGS_ADDRESS(FI)	\
-  (((struct frame_info*)(FI))->initial_sp ?		\
-	((struct frame_info*)(FI))->initial_sp :	\
-	frame_initial_stack_address (FI))
-extern CORE_ADDR frame_initial_stack_address PARAMS ((struct frame_info *));
+extern CORE_ADDR rs6000_frame_args_address PARAMS ((struct frame_info *));
+#define FRAME_ARGS_ADDRESS(FI) rs6000_frame_args_address (FI)
 
 #define FRAME_LOCALS_ADDRESS(FI)	FRAME_ARGS_ADDRESS(FI)
 
@@ -463,66 +441,9 @@ extern CORE_ADDR frame_initial_stack_address PARAMS ((struct frame_info *));
    not sure if it will be needed. The following macro takes care of gpr's
    and fpr's only. */
 
-#define FRAME_FIND_SAVED_REGS(FRAME_INFO, FRAME_SAVED_REGS)		\
-{									\
-  int ii;								\
-  CORE_ADDR frame_addr, func_start;					\
-  struct rs6000_framedata fdata;					\
-									\
-  /* find the start of the function and collect info about its frame. */ \
-									\
-  func_start = get_pc_function_start ((FRAME_INFO)->pc) + FUNCTION_START_OFFSET; \
-  (void) skip_prologue (func_start, &fdata);				\
-  memset (&(FRAME_SAVED_REGS), '\0', sizeof (FRAME_SAVED_REGS));	\
-									\
-  /* if there were any saved registers, figure out parent's stack pointer. */ \
-  /* the following is true only if the frame doesn't have a call to alloca(), \
-      FIXME. */								\
-  if (fdata.saved_fpr == 0 && fdata.saved_gpr == 0 &&			\
-      fdata.lr_offset == 0 && fdata.cr_offset == 0) {			\
-    frame_addr = 0;							\
-									\
-  } else if ((FRAME_INFO)->prev && (FRAME_INFO)->prev->frame) {		\
-    frame_addr = (FRAME_INFO)->prev->frame;				\
-									\
-  } else {								\
-    frame_addr = read_memory_integer ((FRAME_INFO)->frame, 4);		\
-  }									\
-									\
-  /* if != -1, fdata.saved_fpr is the smallest number of saved_fpr. All	\
-     fpr's from saved_fpr to f31 are saved. */				\
-  if (fdata.saved_fpr >= 0) {						\
-    int fpr_offset = frame_addr + fdata.fpr_offset;			\
-    for (ii = fdata.saved_fpr; ii < 32; ii++) {				\
-      (FRAME_SAVED_REGS).regs [FP0_REGNUM + ii] = fpr_offset;		\
-      fpr_offset += 8;							\
-    }									\
-  }									\
-									\
-  /* if != -1, fdata.saved_gpr is the smallest number of saved_gpr. All	\
-     gpr's from saved_gpr to r31 are saved. */				\
-  if (fdata.saved_gpr >= 0) {						\
-    int gpr_offset = frame_addr + fdata.gpr_offset;			\
-    for (ii = fdata.saved_gpr; ii < 32; ii++) {				\
-      (FRAME_SAVED_REGS).regs [ii] = gpr_offset;			\
-      gpr_offset += 4;							\
-    }									\
-  }									\
-									\
-  /* If != 0, fdata.cr_offset is the offset from the frame that holds	\
-     the CR */								\
-  if (fdata.cr_offset != 0) {						\
-    (FRAME_SAVED_REGS).regs [CR_REGNUM] = frame_addr + fdata.cr_offset;	\
-  }									\
-									\
-  /* If != 0, fdata.cr_offset is the offset from the frame that holds	\
-     the LR */								\
-  if (fdata.lr_offset != 0) {						\
-    (FRAME_SAVED_REGS).regs [LR_REGNUM] = frame_addr + fdata.lr_offset;	\
-  }									\
-}
+extern void rs6000_frame_init_saved_regs PARAMS ((struct frame_info *));
+#define FRAME_INIT_SAVED_REGS(FI) rs6000_frame_init_saved_regs (FI)
 
-
 /* Things needed for making the inferior call functions.  */
 
 /* Push an empty stack frame, to record the current PC, etc.  */

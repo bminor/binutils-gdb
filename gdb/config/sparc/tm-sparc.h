@@ -330,6 +330,8 @@ sparc_extract_struct_value_address PARAMS ((char [REGISTER_BYTES]));
   /* time of the register saves.  */ \
   int sp_offset;
 
+#define FRAME_INIT_SAVED_REGS(fp) /*no-op*/
+
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fci) \
   sparc_init_extra_frame_info (fromleaf, fci)
 extern void sparc_init_extra_frame_info PARAMS((int, struct frame_info *));

@@ -41,9 +41,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Do not use "TARGET_IS_MIPS64" to test the size of floating point registers */
 #define FP_REGISTER_DOUBLE (REGISTER_VIRTUAL_SIZE(FP0_REGNUM) == 8)
 
-/* FIXME: Put this declaration in frame.h.  */
-extern struct obstack frame_cache_obstack;
-
 #if 0
 static int mips_in_lenient_prologue PARAMS ((CORE_ADDR, CORE_ADDR));
 #endif
@@ -829,9 +826,7 @@ mips_find_saved_regs (fci)
   mips_extra_func_info_t proc_desc;
   t_inst inst;
 
-  fci->saved_regs = (struct frame_saved_regs *)
-    obstack_alloc (&frame_cache_obstack, sizeof(struct frame_saved_regs));
-  memset (fci->saved_regs, 0, sizeof (struct frame_saved_regs));
+  frame_saved_regs_zalloc (fci);
 
   /* If it is the frame for sigtramp, the saved registers are located
      in a sigcontext structure somewhere on the stack.
@@ -857,15 +852,15 @@ mips_find_saved_regs (fci)
 	{
  	  reg_position = fci->frame + SIGFRAME_REGSAVE_OFF
 			 + ireg * SIGFRAME_REG_SIZE;
- 	  fci->saved_regs->regs[ireg] = reg_position;
+ 	  fci->saved_regs[ireg] = reg_position;
 	}
       for (ireg = 0; ireg < MIPS_NUMREGS; ireg++)
 	{
  	  reg_position = fci->frame + SIGFRAME_FPREGSAVE_OFF
 			 + ireg * SIGFRAME_REG_SIZE;
- 	  fci->saved_regs->regs[FP0_REGNUM + ireg] = reg_position;
+ 	  fci->saved_regs[FP0_REGNUM + ireg] = reg_position;
 	}
-      fci->saved_regs->regs[PC_REGNUM] = fci->frame + SIGFRAME_PC_OFF;
+      fci->saved_regs[PC_REGNUM] = fci->frame + SIGFRAME_PC_OFF;
       return;
     }
 
@@ -935,7 +930,7 @@ mips_find_saved_regs (fci)
   for (ireg= MIPS_NUMREGS-1; gen_mask; --ireg, gen_mask <<= 1)
     if (gen_mask & 0x80000000)
       {
-	fci->saved_regs->regs[ireg] = reg_position;
+	fci->saved_regs[ireg] = reg_position;
 	reg_position -= MIPS_REGSIZE;
 	/* start-sanitize-r5900 */
 #ifdef R5900_128BIT_GPR_HACK
@@ -968,7 +963,7 @@ mips_find_saved_regs (fci)
 	  /* Check if the s0 and s1 registers were pushed on the stack.  */
 	  for (reg = 16; reg < sreg_count+16; reg++)
 	    {
-	      fci->saved_regs->regs[reg] = reg_position;
+	      fci->saved_regs[reg] = reg_position;
 	      reg_position -= MIPS_REGSIZE;
 	    }
 	}
@@ -988,11 +983,11 @@ mips_find_saved_regs (fci)
   for (ireg = MIPS_NUMREGS-1; float_mask; --ireg, float_mask <<= 1)
     if (float_mask & 0x80000000)
       {
-	fci->saved_regs->regs[FP0_REGNUM+ireg] = reg_position;
+	fci->saved_regs[FP0_REGNUM+ireg] = reg_position;
 	reg_position -= MIPS_REGSIZE;
       }
 
-  fci->saved_regs->regs[PC_REGNUM] = fci->saved_regs->regs[RA_REGNUM];
+  fci->saved_regs[PC_REGNUM] = fci->saved_regs[RA_REGNUM];
 }
 
 static CORE_ADDR
@@ -1010,8 +1005,8 @@ read_next_frame_reg(fi, regno)
 	{
 	  if (fi->saved_regs == NULL)
 	    mips_find_saved_regs (fi);
-	  if (fi->saved_regs->regs[regno])
-	    return read_memory_integer(fi->saved_regs->regs[regno], MIPS_REGSIZE);
+	  if (fi->saved_regs[regno])
+	    return read_memory_integer(fi->saved_regs[regno], MIPS_REGSIZE);
 	}
     }
   return read_register (regno);
@@ -1716,12 +1711,11 @@ init_extra_frame_info(fci)
 				    (CORE_ADDR *)NULL,(CORE_ADDR *)NULL);
 	  if (!IN_SIGTRAMP (fci->pc, name))
 	    {
-	      fci->saved_regs = (struct frame_saved_regs*)
-		obstack_alloc (&frame_cache_obstack,
-			       sizeof (struct frame_saved_regs));
-	      *fci->saved_regs = temp_saved_regs;
-	      fci->saved_regs->regs[PC_REGNUM]
-		= fci->saved_regs->regs[RA_REGNUM];
+	      fci->saved_regs = (CORE_ADDR*)
+		frame_obstack_alloc (SIZEOF_FRAME_SAVED_REGS);
+	      memcpy (fci->saved_regs, temp_saved_regs.regs, SIZEOF_FRAME_SAVED_REGS);
+	      fci->saved_regs[PC_REGNUM]
+		= fci->saved_regs[RA_REGNUM];
 	    }
 	}
 
@@ -2107,9 +2101,9 @@ mips_pop_frame()
   for (regnum = 0; regnum < NUM_REGS; regnum++)
     {
       if (regnum != SP_REGNUM && regnum != PC_REGNUM
-	  && frame->saved_regs->regs[regnum])
+	  && frame->saved_regs[regnum])
 	write_register (regnum,
-			read_memory_integer (frame->saved_regs->regs[regnum],
+			read_memory_integer (frame->saved_regs[regnum],
 					     MIPS_REGSIZE)); 
     }
   write_register (SP_REGNUM, new_sp);

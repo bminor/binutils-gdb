@@ -1288,10 +1288,6 @@ register state, the address in which a function should return its
 structure value, as a CORE_ADDR (or an expression that can be used as
 one).
 
-@item EXTRA_FRAME_INFO
-If defined, this must be a list of slots that may be inserted into the
-@code{frame_info} structure defined in @code{frame.h}.
-
 @item FLOAT_INFO
 If defined, then the `info float' command will print information about
 the processor's floating point unit.
@@ -1326,8 +1322,14 @@ is not inside the startup file (such as @file{crt0.o}).
 nonzero and the given frame's PC is not in @code{main()} or a known
 entry point function (such as @code{_start()}).
 
-@item FRAME_FIND_SAVED_REGS
-stack.c
+@item FRAME_INIT_SAVED_REGS(frame)
+See @file{frame.h}.  Determines the address of all registers in the
+current stack frame storing each in @code{frame->saved_regs}.  Space for
+@code{frame->saved_regs} shall be allocated by
+@code{FRAME_INIT_SAVED_REGS} using either
+@code{frame_saved_regs_zalloc} or @code{frame_obstack_alloc}.
+
+@var{FRAME_FIND_SAVED_REGS} and @var{EXTRA_FRAME_INFO} are deprecated.
 
 @item FRAME_NUM_ARGS (val, fi)
 For the frame described by @var{fi}, set @var{val} to the number of arguments
@@ -1390,9 +1392,10 @@ repenting at leisure.
 @item IEEE_FLOAT
 Define this if the target system uses IEEE-format floating point numbers.
 
-@item INIT_EXTRA_FRAME_INFO (fromleaf, fci)
-If defined, this should be a C expression or statement that fills in the
-@code{EXTRA_FRAME_INFO} slots of the given frame @var{fci}.
+@item INIT_EXTRA_FRAME_INFO (fromleaf, frame)
+If additional information about the frame is required this should be
+stored in @code{frame->extra_info}.  Space for @code{frame->extra_info}
+is allocated using @code{frame_obstack_alloc}.
 
 @item INIT_FRAME_PC (fromleaf, prev)
 This is a C statement that sets the pc of the frame pointed to by

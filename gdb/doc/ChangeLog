@@ -1,3 +1,7 @@
+Thu Dec 10 16:07:09 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbint.texinfo (FRAME_FIND_SAVED_REGS): Document.
+
 Wed Dec  9 21:13:57 1998  Andrew Cagney  <cagney@chook>
 
 	* gdbint.texinfo (REGISTER_NAME): Replace REGISTER_NAMES.

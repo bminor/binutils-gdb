@@ -421,8 +421,8 @@ skip_prologue (ip)
    ways in the stack frame.  sp is even more special:
    the address we return for it IS the sp for the next frame.
 
-   We cache the result of doing this in the frame_cache_obstack, since
-   it is fairly expensive.  */
+   We cache the result of doing this in the frame_obstack, since it is
+   fairly expensive.  */
 
 void
 frame_find_saved_regs (fi, fsr)
@@ -430,7 +430,6 @@ frame_find_saved_regs (fi, fsr)
      struct frame_saved_regs *fsr;
 {
   register struct frame_saved_regs *cache_fsr;
-  extern struct obstack frame_cache_obstack;
   CORE_ADDR ip;
   struct symtab_and_line sal;
   CORE_ADDR limit;
@@ -438,8 +437,7 @@ frame_find_saved_regs (fi, fsr)
   if (!fi->fsr)
     {
       cache_fsr = (struct frame_saved_regs *)
-		  obstack_alloc (&frame_cache_obstack,
-				 sizeof (struct frame_saved_regs));
+	frame_obstack_alloc (sizeof (struct frame_saved_regs));
       memset (cache_fsr, '\0', sizeof (struct frame_saved_regs));
       fi->fsr = cache_fsr;
 
