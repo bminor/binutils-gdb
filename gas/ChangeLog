@@ -1,3 +1,7 @@
+Fri Jun 19 00:44:19 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-h8300.c (get_operand): Fix typos in ldm/stm support.
+
 start-sanitize-am33
 Wed Jun 17 18:09:03 1998  Jeffrey A Law  (law@cygnus.com)
 
