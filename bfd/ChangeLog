@@ -1,5 +1,8 @@
 Thu Nov  9 13:01:31 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* archive.c (bfd_generic_archive_p): Preserve tdata in case of
+	failure.
+
 	* aoutx.h (NAME(aout,final_link)): Report a reasonable error when
 	trying to do a relocateable link with a non-a.out object file.
 
