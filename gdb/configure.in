@@ -80,6 +80,10 @@ dnl use BFD to determine the default architecture and byte order
 dnl (bfd_vec->byteorder provides the latter).
 targ=${target}
 . ${srcdir}/../bfd/config.bfd
+
+dnl We only want the first arch, if there is more than one.
+targ_archs=`echo ${targ_archs} | sed -e 's/ .*//;'`
+
 if test x"${targ_archs}" != x ; then
     AC_DEFINE_UNQUOTED(DEFAULT_BFD_ARCH, ${targ_archs})
 fi

@@ -1,3 +1,9 @@
+Sun Jun 11 11:34:05 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From Sat Jun 10 17:54:04 2000 Hans-Peter Nilsson <hp@axis.com>:
+	* configure.in (targ_archs): Clear out secondary components.
+	* configure: Regenerate.
+
 Fri Jun  9 15:06:37 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbarch.sh (struct gdbarch): Add member dump_tdep.
