@@ -1,3 +1,8 @@
+2003-10-04  Bryce McKinlay  <bryce@mckinlay.net.nz>
+
+	* merge.c (_bfd_merge_sections): Set SEC_EXCLUDE flag on sections
+	which become empty after merging.
+
 2003-09-30  Jakub Jelinek  <jakub@redhat.com>
 
 	* elfxx-ia64.c (ia64_howto_table): Fix size of R_IA64_TPREL64[LM]SB,

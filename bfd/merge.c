@@ -787,11 +787,14 @@ _bfd_merge_sections (bfd *abfd ATTRIBUTE_UNUSED, void *xsinfo,
 	  secinfo->sec->_cooked_size = size;
 	}
 
-	/* Finally shrink all input sections which have not made it into
+	/* Finally remove all input sections which have not made it into
 	   the hash table at all.  */
 	for (secinfo = sinfo->chain; secinfo; secinfo = secinfo->next)
 	  if (secinfo->first == NULL)
-	    secinfo->sec->_cooked_size = 0;
+	    {
+	      secinfo->sec->_cooked_size = 0;
+	      secinfo->sec->flags |= SEC_EXCLUDE;
+	    }
     }
 
   return TRUE;
