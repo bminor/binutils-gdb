@@ -1,3 +1,13 @@
+Wed Sep  3 17:32:54 1997  Doug Evans  <dje@seba.cygnus.com>
+
+	* gdbinit.in: New file.
+	* aclocal.m4 (SIM_AC_OUTPUT): Build .gdbinit.
+	* Make-common.in (distclean): Delete .gdbinit.
+	(.gdbinit): Add rule for.
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+	* Make-common.in (cgen-run.o): Add rule for.
+
 Wed Sep  3 10:08:21 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-resume.c (sim_resume): Suspend/resume the simulator.

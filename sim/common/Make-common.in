@@ -311,6 +311,10 @@ nrun.o: $(srcdir)/../common/nrun.c config.h tconfig.h \
 
 # CGEN support.
 
+cgen-run.o: $(srcdir)/../common/cgen-run.c $(sim_main_headers) \
+	  $(SIM_EXTRA_DEPS)
+	$(CC) -c $(srcdir)/../common/cgen-run.c $(ALL_CFLAGS)
+
 cgen-scache.o: $(srcdir)/../common/cgen-scache.c $(sim_main_headers) \
 	  $(SIM_EXTRA_DEPS) $(srcdir)/../common/cgen-scache.h
 	$(CC) -c $(srcdir)/../common/cgen-scache.c $(ALL_CFLAGS)
@@ -356,7 +360,7 @@ clean: $(SIM_EXTRA_CLEAN)
 
 distclean mostlyclean maintainer-clean realclean: clean
 	rm -f TAGS
-	rm -f Makefile config.cache config.log config.status
+	rm -f Makefile config.cache config.log config.status .gdbinit
 	rm -f tconfig.h config.h stamp-h
 	rm -f targ-vals.def
 
@@ -375,5 +379,8 @@ config.status: configure
 config.h: stamp-h ; @true
 stamp-h: config.in config.status
 	CONFIG_FILES= CONFIG_HEADERS=config.h:config.in $(SHELL) ./config.status
+
+.gdbinit: config.status $(srcdir)/../common/gdbinit.in
+	CONFIG_FILES=$@:../common/gdbinit.in CONFIG_HEADERS= $(SHELL) ./config.status
 
 ## End COMMON_POST_CONFIG_FRAG

@@ -38,6 +38,7 @@ cgen-utils.c
 config.in
 configure.in
 configure
+gdbinit.in
 genmloop.sh
 gentmap.c
 gentvals.sh

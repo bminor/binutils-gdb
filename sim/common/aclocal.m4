@@ -575,8 +575,9 @@ dnl the target's fragment at the appropriate points.
 AC_DEFUN(SIM_AC_OUTPUT,
 [
 AC_LINK_FILES($sim_link_files, $sim_link_links)
-AC_OUTPUT(Makefile.sim:Makefile.in Make-common.sim:../common/Make-common.in,
-[case "x$CONFIG_FILES" in xMakefile*)
+AC_OUTPUT(Makefile.sim:Makefile.in Make-common.sim:../common/Make-common.in .gdbinit:../common/gdbinit.in,
+[case "x$CONFIG_FILES" in
+ xMakefile*)
    echo "Merging Makefile.sim+Make-common.sim into Makefile ..."
    rm -f Makesim1.tmp Makesim2.tmp Makefile
    sed -n -e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ p' <Make-common.sim >Makesim1.tmp
