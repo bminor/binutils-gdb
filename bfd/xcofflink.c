@@ -1911,6 +1911,207 @@ xcoff_link_add_dynamic_symbols (abfd, info)
 /* Routines that are called after all the input files have been
    handled, but before the sections are laid out in memory.  */
 
+/* Mark a symbol as not being garbage, including the section in which
+   it is defined.  */
+
+static INLINE boolean
+xcoff_mark_symbol (info, h)
+     struct bfd_link_info *info;
+     struct xcoff_link_hash_entry *h;
+{
+  if ((h->flags & XCOFF_MARK) != 0)
+    return true;
+
+  h->flags |= XCOFF_MARK;
+  if (h->root.type == bfd_link_hash_defined
+      || h->root.type == bfd_link_hash_defweak)
+    {
+      asection *hsec;
+
+      hsec = h->root.u.def.section;
+      if ((hsec->flags & SEC_MARK) == 0)
+	{
+	  if (! xcoff_mark (info, hsec))
+	    return false;
+	}
+    }
+
+  if (h->toc_section != NULL
+      && (h->toc_section->flags & SEC_MARK) == 0)
+    {
+      if (! xcoff_mark (info, h->toc_section))
+	return false;
+    }
+
+  return true;
+}
+
+/* The mark phase of garbage collection.  For a given section, mark
+   it, and all the sections which define symbols to which it refers.
+   Because this function needs to look at the relocs, we also count
+   the number of relocs which need to be copied into the .loader
+   section.  */
+
+static boolean
+xcoff_mark (info, sec)
+     struct bfd_link_info *info;
+     asection *sec;
+{
+  if ((sec->flags & SEC_MARK) != 0)
+    return true;
+
+  sec->flags |= SEC_MARK;
+
+  if (sec->owner->xvec == info->hash->creator
+      && coff_section_data (sec->owner, sec) != NULL
+      && xcoff_section_data (sec->owner, sec) != NULL)
+    {
+      register struct xcoff_link_hash_entry **hp, **hpend;
+      struct internal_reloc *rel, *relend;
+
+      /* Mark all the symbols in this section.  */
+
+      hp = (obj_xcoff_sym_hashes (sec->owner)
+	    + xcoff_section_data (sec->owner, sec)->first_symndx);
+      hpend = (obj_xcoff_sym_hashes (sec->owner)
+	       + xcoff_section_data (sec->owner, sec)->last_symndx);
+      for (; hp < hpend; hp++)
+	{
+	  register struct xcoff_link_hash_entry *h;
+
+	  h = *hp;
+	  if (h != NULL
+	      && (h->flags & XCOFF_MARK) == 0)
+	    {
+	      if (! xcoff_mark_symbol (info, h))
+		return false;
+	    }
+	}
+
+      /* Look through the section relocs.  */
+
+      if ((sec->flags & SEC_RELOC) != 0
+	  && sec->reloc_count > 0)
+	{
+	  rel = xcoff_read_internal_relocs (sec->owner, sec, true,
+					    (bfd_byte *) NULL, false,
+					    (struct internal_reloc *) NULL);
+	  if (rel == NULL)
+	    return false;
+	  relend = rel + sec->reloc_count;
+	  for (; rel < relend; rel++)
+	    {
+	      asection *rsec;
+	      struct xcoff_link_hash_entry *h;
+
+	      if ((unsigned int) rel->r_symndx
+		  > obj_raw_syment_count (sec->owner))
+		continue;
+
+	      h = obj_xcoff_sym_hashes (sec->owner)[rel->r_symndx];
+	      if (h != NULL
+		  && (h->flags & XCOFF_MARK) == 0)
+		{
+		  if (! xcoff_mark_symbol (info, h))
+		    return false;
+		}
+
+	      rsec = xcoff_data (sec->owner)->csects[rel->r_symndx];
+	      if (rsec != NULL
+		  && (rsec->flags & SEC_MARK) == 0)
+		{
+		  if (! xcoff_mark (info, rsec))
+		    return false;
+		}
+
+	      /* See if this reloc needs to be copied into the .loader
+                 section.  */
+	      switch (rel->r_type)
+		{
+		default:
+		  if (h == NULL
+		      || h->root.type == bfd_link_hash_defined
+		      || h->root.type == bfd_link_hash_defweak
+		      || h->root.type == bfd_link_hash_common
+		      || ((h->flags & XCOFF_CALLED) != 0
+			  && (h->flags & XCOFF_DEF_REGULAR) == 0
+			  && (h->flags & XCOFF_REF_DYNAMIC) != 0
+			  && (h->root.type == bfd_link_hash_undefined
+			      || h->root.type == bfd_link_hash_undefweak)
+			  && h->root.root.string[0] == '.'))
+		    break;
+		  /* Fall through.  */
+		case R_POS:
+		case R_NEG:
+		case R_RL:
+		case R_RLA:
+		  ++xcoff_hash_table (info)->ldrel_count;
+		  if (h != NULL)
+		    h->flags |= XCOFF_LDREL;
+		  break;
+		case R_TOC:
+		case R_GL:
+		case R_TCL:
+		case R_TRL:
+		case R_TRLA:
+		  /* We should never need a .loader reloc for a TOC
+		     relative reloc.  */
+		  break;
+		}
+	    }
+
+	  if (! info->keep_memory
+	      && coff_section_data (sec->owner, sec) != NULL
+	      && coff_section_data (sec->owner, sec)->relocs != NULL
+	      && ! coff_section_data (sec->owner, sec)->keep_relocs)
+	    {
+	      free (coff_section_data (sec->owner, sec)->relocs);
+	      coff_section_data (sec->owner, sec)->relocs = NULL;
+	    }
+	}
+    }
+
+  return true;
+}
+
+/* The sweep phase of garbage collection.  Remove all garbage
+   sections.  */
+
+static void
+xcoff_sweep (info)
+     struct bfd_link_info *info;
+{
+  bfd *sub;
+
+  for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+    {
+      asection *o;
+
+      for (o = sub->sections; o != NULL; o = o->next)
+	{
+	  if ((o->flags & SEC_MARK) == 0)
+	    {
+	      /* Keep all sections from non-XCOFF input files.  Keep
+                 special sections.  Keep .debug sections for the
+                 moment.  */
+	      if (sub->xvec != info->hash->creator
+		  || o == xcoff_hash_table (info)->debug_section
+		  || o == xcoff_hash_table (info)->loader_section
+		  || o == xcoff_hash_table (info)->linkage_section
+		  || o == xcoff_hash_table (info)->toc_section
+		  || strcmp (o->name, ".debug") == 0)
+		o->flags |= SEC_MARK;
+	      else
+		{
+		  o->_raw_size = 0;
+		  o->reloc_count = 0;
+		  o->lineno_count = 0;
+		}
+	    }
+	}
+    }
+}
+
 /* Record the number of elements in a set.  This is used to output the
    correct csect length.  */
 
@@ -2048,6 +2249,10 @@ bfd_xcoff_export_symbol (output_bfd, info, harg, syscall)
   /* FIXME: I'm not at all sure what syscall is supposed to mean, so
      I'm just going to ignore it until somebody explains it.  */
 
+  /* Make sure we don't garbage collect this symbol.  */
+  if (! xcoff_mark_symbol (info, h))
+    return false;
+
   return true;
 }
 
@@ -2076,29 +2281,8 @@ bfd_xcoff_link_count_reloc (output_bfd, info, name)
   ++xcoff_hash_table (info)->ldrel_count;
   
   /* Mark the symbol to avoid garbage collection.  */
-  if ((h->flags & XCOFF_MARK) == 0)
-    {
-      h->flags |= XCOFF_MARK;
-      if (h->root.type == bfd_link_hash_defined
-	  || h->root.type == bfd_link_hash_defweak)
-	{
-	  asection *hsec;
-
-	  hsec = h->root.u.def.section;
-	  if ((hsec->flags & SEC_MARK) == 0)
-	    {
-	      if (! xcoff_mark (info, hsec))
-		return false;
-	    }
-	}
-
-      if (h->toc_section != NULL
-	  && (h->toc_section->flags & SEC_MARK) == 0)
-	{
-	  if (! xcoff_mark (info, h->toc_section))
-	    return false;
-	}
-    }
+  if (! xcoff_mark_symbol (info, h))
+    return false;
 
   return true;
 }
@@ -2479,208 +2663,6 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
   return false;
 }
 
-/* The mark phase of garbage collection.  For a given section, mark
-   it, and all the sections which define symbols to which it refers.
-   Because this function needs to look at the relocs, we also count
-   the number of relocs which need to be copied into the .loader
-   section.  */
-
-static boolean
-xcoff_mark (info, sec)
-     struct bfd_link_info *info;
-     asection *sec;
-{
-  if ((sec->flags & SEC_MARK) != 0)
-    return true;
-
-  sec->flags |= SEC_MARK;
-
-  if (sec->owner->xvec == info->hash->creator
-      && coff_section_data (sec->owner, sec) != NULL
-      && xcoff_section_data (sec->owner, sec) != NULL)
-    {
-      register struct xcoff_link_hash_entry **hp, **hpend;
-      struct internal_reloc *rel, *relend;
-
-      /* Mark all the symbols in this section.  */
-
-      hp = (obj_xcoff_sym_hashes (sec->owner)
-	    + xcoff_section_data (sec->owner, sec)->first_symndx);
-      hpend = (obj_xcoff_sym_hashes (sec->owner)
-	       + xcoff_section_data (sec->owner, sec)->last_symndx);
-      for (; hp < hpend; hp++)
-	{
-	  register struct xcoff_link_hash_entry *h;
-
-	  h = *hp;
-	  if (h != NULL
-	      && (h->flags & XCOFF_MARK) == 0)
-	    {
-	      h->flags |= XCOFF_MARK;
-	      if (h->root.type == bfd_link_hash_defined
-		  || h->root.type == bfd_link_hash_defweak)
-		{
-		  asection *hsec;
-
-		  hsec = h->root.u.def.section;
-		  if ((hsec->flags & SEC_MARK) == 0)
-		    {
-		      if (! xcoff_mark (info, hsec))
-			return false;
-		    }
-		}
-
-	      if (h->toc_section != NULL
-		  && (h->toc_section->flags & SEC_MARK) == 0)
-		{
-		  if (! xcoff_mark (info, h->toc_section))
-		    return false;
-		}
-	    }
-	}
-
-      /* Look through the section relocs.  */
-
-      if ((sec->flags & SEC_RELOC) != 0
-	  && sec->reloc_count > 0)
-	{
-	  rel = xcoff_read_internal_relocs (sec->owner, sec, true,
-					    (bfd_byte *) NULL, false,
-					    (struct internal_reloc *) NULL);
-	  if (rel == NULL)
-	    return false;
-	  relend = rel + sec->reloc_count;
-	  for (; rel < relend; rel++)
-	    {
-	      asection *rsec;
-	      struct xcoff_link_hash_entry *h;
-
-	      if ((unsigned int) rel->r_symndx
-		  > obj_raw_syment_count (sec->owner))
-		continue;
-
-	      h = obj_xcoff_sym_hashes (sec->owner)[rel->r_symndx];
-	      if (h != NULL
-		  && (h->flags & XCOFF_MARK) == 0)
-		{
-		  h->flags |= XCOFF_MARK;
-		  if (h->root.type == bfd_link_hash_defined
-		      || h->root.type == bfd_link_hash_defweak)
-		    {
-		      asection *hsec;
-
-		      hsec = h->root.u.def.section;
-		      if ((hsec->flags & SEC_MARK) == 0)
-			{
-			  if (! xcoff_mark (info, hsec))
-			    return false;
-			}
-		    }
-
-		  if (h->toc_section != NULL
-		      && (h->toc_section->flags & SEC_MARK) == 0)
-		    {
-		      if (! xcoff_mark (info, h->toc_section))
-			return false;
-		    }
-		}
-
-	      rsec = xcoff_data (sec->owner)->csects[rel->r_symndx];
-	      if (rsec != NULL
-		  && (rsec->flags & SEC_MARK) == 0)
-		{
-		  if (! xcoff_mark (info, rsec))
-		    return false;
-		}
-
-	      /* See if this reloc needs to be copied into the .loader
-                 section.  */
-	      switch (rel->r_type)
-		{
-		default:
-		  if (h == NULL
-		      || h->root.type == bfd_link_hash_defined
-		      || h->root.type == bfd_link_hash_defweak
-		      || h->root.type == bfd_link_hash_common
-		      || ((h->flags & XCOFF_CALLED) != 0
-			  && (h->flags & XCOFF_DEF_REGULAR) == 0
-			  && (h->flags & XCOFF_REF_DYNAMIC) != 0
-			  && (h->root.type == bfd_link_hash_undefined
-			      || h->root.type == bfd_link_hash_undefweak)
-			  && h->root.root.string[0] == '.'))
-		    break;
-		  /* Fall through.  */
-		case R_POS:
-		case R_NEG:
-		case R_RL:
-		case R_RLA:
-		  ++xcoff_hash_table (info)->ldrel_count;
-		  if (h != NULL)
-		    h->flags |= XCOFF_LDREL;
-		  break;
-		case R_TOC:
-		case R_GL:
-		case R_TCL:
-		case R_TRL:
-		case R_TRLA:
-		  /* We should never need a .loader reloc for a TOC
-		     relative reloc.  */
-		  break;
-		}
-	    }
-
-	  if (! info->keep_memory
-	      && coff_section_data (sec->owner, sec) != NULL
-	      && coff_section_data (sec->owner, sec)->relocs != NULL
-	      && ! coff_section_data (sec->owner, sec)->keep_relocs)
-	    {
-	      free (coff_section_data (sec->owner, sec)->relocs);
-	      coff_section_data (sec->owner, sec)->relocs = NULL;
-	    }
-	}
-    }
-
-  return true;
-}
-
-/* The sweep phase of garbage collection.  Remove all garbage
-   sections.  */
-
-static void
-xcoff_sweep (info)
-     struct bfd_link_info *info;
-{
-  bfd *sub;
-
-  for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
-    {
-      asection *o;
-
-      for (o = sub->sections; o != NULL; o = o->next)
-	{
-	  if ((o->flags & SEC_MARK) == 0)
-	    {
-	      /* Keep all sections from non-XCOFF input files.  Keep
-                 special sections.  Keep .debug sections for the
-                 moment.  */
-	      if (sub->xvec != info->hash->creator
-		  || o == xcoff_hash_table (info)->debug_section
-		  || o == xcoff_hash_table (info)->loader_section
-		  || o == xcoff_hash_table (info)->linkage_section
-		  || o == xcoff_hash_table (info)->toc_section
-		  || strcmp (o->name, ".debug") == 0)
-		o->flags |= SEC_MARK;
-	      else
-		{
-		  o->_raw_size = 0;
-		  o->reloc_count = 0;
-		  o->lineno_count = 0;
-		}
-	    }
-	}
-    }
-}
-
 /* Add a symbol to the .loader symbols, if necessary.  */
 
 static boolean
@@ -2762,13 +2744,15 @@ xcoff_build_ldsyms (h, p)
 
   /* We need to add a symbol to the .loader section if it is mentioned
      in a reloc which we are copying to the .loader section and it was
-     not defined or common, or if it is the entry point.  */
+     not defined or common, or if it is the entry point, or if it is
+     being exported.  */
 
   if (((h->flags & XCOFF_LDREL) == 0
        || h->root.type == bfd_link_hash_defined
        || h->root.type == bfd_link_hash_defweak
        || h->root.type == bfd_link_hash_common)
-      && (h->flags & XCOFF_ENTRY) == 0)
+      && (h->flags & XCOFF_ENTRY) == 0
+      && (h->flags & XCOFF_EXPORT) == 0)
     {
       h->ldsym = NULL;
       return true;

@@ -1,3 +1,13 @@
+Tue Oct 31 12:34:11 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* xcofflink.c (xcoff_mark_symbol): New static function, broken out
+	of xcoff_mark.
+	(xcoff_mark): Call xcoff_mark_symbol.
+	(bfd_xcoff_export_symbol): Call xcoff_mark_symbol.
+	(bfd_xcoff_link_count_reloc): Call xcoff_mark_symbol rather than
+	doing it by hand.
+	(xcoff_build_ldsyms): Build a .loader symbol for an export symbol.
+
 Mon Oct 30 14:53:48 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* xcofflink.c (struct xcoff_final_link_info): Add new line_filepos
