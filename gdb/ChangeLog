@@ -1,3 +1,7 @@
+Fri Sep  2 19:11:40 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* configure.in:  Don't ln gdbtk.tcl if it's already there.
+
 Fri Sep  2 17:35:55 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
 	* configure.in: No longer looks for nm, tm, and xm headers in

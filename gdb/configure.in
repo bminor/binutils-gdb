@@ -390,7 +390,7 @@ else
 fi
 
 # Make it possible to use the GUI without doing a full install
-if [ "${enable_gdbtk}" = "yes" ] ; then
+if [ "${enable_gdbtk}" = "yes" -a ! -f gdbtk.tcl ] ; then
 	files="${files} gdbtk.tcl"
 	links="${links} gdbtk.tcl"
 fi
