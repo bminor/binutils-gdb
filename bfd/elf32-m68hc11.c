@@ -1194,7 +1194,7 @@ m68hc11_elf_relax_delete_bytes (abfd, sec, addr, count)
           offset = bfd_get_8 (abfd, contents + irel->r_offset + branch_pos);
           raddr += old_offset;
           raddr += ((unsigned short) offset | ((offset & 0x80) ? 0xff00 : 0));
-          if (irel->r_offset < addr && raddr >= addr)
+          if (irel->r_offset < addr && raddr > addr)
             {
               offset -= count;
               bfd_put_8 (abfd, offset, contents + irel->r_offset + branch_pos);

@@ -1,5 +1,11 @@
 2002-12-01  Stephane Carrez  <stcarrez@nerim.fr>
 
+	Fix PR savannah/1417:
+	* elf32-m68hc11.c (m68hc11_elf_relax_delete_bytes): Don't adjust
+	branch if it goes to the start of the deleted region.
+
+2002-12-01  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* bfd-in2.h (bfd_mach_m6812): Rebuild.
 	* archures.c (bfd_mach_m6812_default, bfd_mach_m6812,
 	bfd_mach_m6812s): Declare.
