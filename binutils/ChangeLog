@@ -1,3 +1,10 @@
+2004-12-07  Ben Elliston  <bje@au.ibm.com>
+
+	PR binutils/249
+	* doc/binutils.texi (def file format): New node.
+	(dlltool): Use the tool name as the @chapter name, like all the
+	other binutils.  Use @file{.def} throughout for consistency.
+
 2004-12-06  Ben Elliston  <bje@au.ibm.com>
 
 	* dlltool.c: Comment fix.
