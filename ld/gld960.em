@@ -105,11 +105,7 @@ gld960_choose_target()
   if (from_outside != (char *)NULL)
     return from_outside;
 
-#ifdef HOST_BIG_ENDIAN_P
-  return "b.out.big";
-#else
   return "b.out.little";
-#endif
 
 #endif
 }
