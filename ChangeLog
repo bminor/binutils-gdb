@@ -1,3 +1,13 @@
+Wed Feb 14 16:57:40 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config.sub: Merge with FSF.
+
+Tue Feb 13 14:27:48 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (RPATH_ENVVAR): New variable.
+	(REALLY_SET_LIB_PATH): Use it.
+	* configure.in: On HP/UX, set RPATH_ENVVAR to SHLIB_PATH.
+
 Mon Feb 12 15:28:49 1996  Doug Evans  <dje@charmed.cygnus.com>
 
 	* config.sub, configure.in: Recognize sparclet cpu.
