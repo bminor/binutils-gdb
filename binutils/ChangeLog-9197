@@ -159,7 +159,7 @@ Wed Sep 24 11:34:05 1997  Ian Lance Taylor  <ian@cygnus.com>
 	* binutils.texi (size): The object file argument is optional.
 	From Marty Leisner <leisner@sdsp.mc.xerox.com>.
 
-	* acloal.m4: Rebuild with new libtool.
+	* aclocal.m4: Rebuild with new libtool.
 	* configure: Rebuild.
 
 Tue Aug 26 17:48:34 1997  Ian Lance Taylor  <ian@cygnus.com>
