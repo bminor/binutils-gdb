@@ -1,3 +1,32 @@
+Sat Jun  4 18:17:03 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	Fix value_print, which used to be ostensibly langauge-indepentdent,
+	but would print pointers and arrays in C syntax.  Instead, call
+	a language-specific function.
+	* language.h (struct language_defn):  New functional field
+	la_value_print.  (LA_VALUE_PRINT):  New macro.
+	* language.c (unk_lang_value_print ):  New stub/dummy function.
+	(unknown_language_defn, auto_language_defn, local_language_defn):
+	Use it.
+	* c-valprint.c (c_value_print):  New function, with code moved from:
+	* valprint.c (value_print):  ... here.  Now just invoke
+	LA_VALUE_PRINT to do language-specific stuff.
+	* valprint.c (value_print_array_elements):  Make non-static.
+	* c-lang.c (c_language_defn, cplus_language_defn):  Add
+	c_value_print in the la_value_print field,
+	* m2-lang.c (m2_language_defn):  Likewise.
+	* ch-lang.c (chill_language_defn):  But here use chill_value_print.
+	* ch-valprint.c (chill_val_print):  Print null pointer as NULL.
+	* ch-valprint.c (chill_value_print):  New function, based on
+	c_value_print, but use Chill "look and feel."
+	* c-lang.h (c_value_print):  New prototype.
+	* ch-lang.h (chill_value_print):  New prototype.
+	* value.h (value_print_array_elements):  New prototype.
+
+	* ch-valprint.c (chill_val_print, case TYPE_CODE_BITSTRING
+	and case TYPE_CODE_SET):  Check that the element type isn't a stub.
+
+
 Fri Jun  3 09:15:00 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* main.c: Move entire file except for #ifndef MAIN_OVERRIDE code

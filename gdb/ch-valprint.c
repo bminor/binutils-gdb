@@ -242,6 +242,13 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	}
       addr = unpack_pointer (type, valaddr);
       elttype = TYPE_TARGET_TYPE (type);
+
+      /* We assume a NULL pointer is all zeros ... */
+      if (addr == 0)
+	{
+	  fputs_filtered ("NULL", stream);
+	  return 0;
+	}
       
       if (TYPE_CODE (elttype) == TYPE_CODE_FUNC)
 	{
@@ -287,8 +294,16 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 
     case TYPE_CODE_BITSTRING:
     case TYPE_CODE_SET:
+      elttype = TYPE_FIELD_TYPE (type, 0);
+      check_stub_type (elttype);
+      if (TYPE_FLAGS (elttype) & TYPE_FLAG_STUB)
+	{
+	  fprintf_filtered (stream, "<incomplete type>");
+	  gdb_flush (stream);
+	  break;
+	}
       {
-	struct type *range = TYPE_FIELD_TYPE (type, 0);
+	struct type *range = elttype;
 	int low_bound = TYPE_LOW_BOUND (range);
 	int high_bound = TYPE_HIGH_BOUND (range);
 	int i;
@@ -494,3 +509,73 @@ chill_print_value_fields (type, valaddr, stream, format, recurse, pretty,
     }
   fprintf_filtered (stream, "]");
 }
+
+int
+chill_value_print (val, stream, format, pretty)
+     value_ptr val;
+     GDB_FILE *stream;
+     int format;
+     enum val_prettyprint pretty;
+{
+  /* A "repeated" value really contains several values in a row.
+     They are made by the @ operator.
+     Print such values as if they were arrays.  */
+
+  if (VALUE_REPEATED (val))
+    {
+      register unsigned int n = VALUE_REPETITIONS (val);
+      register unsigned int typelen = TYPE_LENGTH (VALUE_TYPE (val));
+      fprintf_filtered (stream, "[");
+      /* Print arrays of characters using string syntax.  */
+      if (typelen == 1 && TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_INT
+	  && format == 0)
+	LA_PRINT_STRING (stream, VALUE_CONTENTS (val), n, 0);
+      else
+	{
+	  value_print_array_elements (val, stream, format, pretty);
+	}
+      fprintf_filtered (stream, "]");
+      return (n * typelen);
+    }
+  else
+    {
+      struct type *type = VALUE_TYPE (val);
+
+      /* If it is a pointer, indicate what it points to.
+
+	 Print type also if it is a reference.
+
+         C++: if it is a member pointer, we will take care
+	 of that when we print it.  */
+      if (TYPE_CODE (type) == TYPE_CODE_PTR ||
+	  TYPE_CODE (type) == TYPE_CODE_REF)
+	{
+	  char *valaddr = VALUE_CONTENTS (val);
+	  CORE_ADDR addr = unpack_pointer (type, valaddr);
+          if (TYPE_CODE (type) != TYPE_CODE_PTR || addr != 0)
+	    {
+	      int i;
+	      char *name = TYPE_NAME (type);
+	      if (name)
+		fputs_filtered (name, stream);
+	      else if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_VOID)
+		fputs_filtered ("PTR", stream);
+	      else
+		{
+		  fprintf_filtered (stream, "(");
+		  type_print (type, "", stream, -1);
+		  fprintf_filtered (stream, ")");
+		}
+	      fprintf_filtered (stream, "(");
+	      i = val_print (type, valaddr, VALUE_ADDRESS (val),
+			     stream, format, 1, 0, pretty);
+	      fprintf_filtered (stream, ")");
+	      return i;
+	    }
+	}
+      return (val_print (type, VALUE_CONTENTS (val),
+			 VALUE_ADDRESS (val), stream, format, 1, 0, pretty));
+    }
+}
+
+

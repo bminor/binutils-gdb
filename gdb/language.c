@@ -1165,6 +1165,16 @@ unk_lang_val_print (type, valaddr, address, stream, format, deref_ref,
   error ("internal error - unimplemented function unk_lang_val_print called.");
 }
 
+int
+unk_lang_value_print (val, stream, format, pretty)
+     value_ptr val;
+     GDB_FILE *stream;
+     int format;
+     enum val_prettyprint pretty;
+{
+  error ("internal error - unimplemented function unk_lang_value_print called.");
+}
+
 static struct type ** const (unknown_builtin_types[]) = { 0 };
 static const struct op_print unk_op_print_tab[] = {
     {NULL, OP_NULL, PREC_NULL, 0}
@@ -1183,6 +1193,7 @@ const struct language_defn unknown_language_defn = {
   unk_lang_create_fundamental_type,
   unk_lang_print_type,		/* Print a type using appropriate syntax */
   unk_lang_val_print,		/* Print a value using appropriate syntax */
+  unk_lang_value_print,		/* Print a top-level value */
   &builtin_type_error,		/* longest floating point type */
   {"",      "",    "",   ""},	/* Binary format info */
   {"0%lo",   "0",   "o",  ""},	/* Octal format info */
@@ -1206,6 +1217,7 @@ const struct language_defn auto_language_defn = {
   unk_lang_create_fundamental_type,
   unk_lang_print_type,		/* Print a type using appropriate syntax */
   unk_lang_val_print,		/* Print a value using appropriate syntax */
+  unk_lang_value_print,		/* Print a top-level value */
   &builtin_type_error,		/* longest floating point type */
   {"",      "",    "",   ""},	/* Binary format info */
   {"0%lo",   "0",   "o",  ""},	/* Octal format info */
@@ -1228,6 +1240,7 @@ const struct language_defn local_language_defn = {
   unk_lang_create_fundamental_type,
   unk_lang_print_type,		/* Print a type using appropriate syntax */
   unk_lang_val_print,		/* Print a value using appropriate syntax */
+  unk_lang_value_print,		/* Print a top-level value */
   &builtin_type_error,		/* longest floating point type */
   {"",      "",    "",   ""},	/* Binary format info */
   {"0%lo",   "0",   "o",  ""},	/* Octal format info */

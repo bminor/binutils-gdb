@@ -24,6 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "parser-defs.h"
 #include "language.h"
 #include "m2-lang.h"
+#include "c-lang.h"
 
 /* Print the character C on STREAM as part of the contents of a literal
    string whose delimiter is QUOTER.  Note that that format for printing
@@ -405,6 +406,7 @@ const struct language_defn m2_language_defn = {
   m2_create_fundamental_type,	/* Create fundamental type in this language */
   m2_print_type,		/* Print a type using appropriate syntax */
   m2_val_print,			/* Print a value using appropriate syntax */
+  c_value_print,		/* Print a top-level value */
   &builtin_type_m2_real,	/* longest floating point type */
   {"",      "",   "",   ""},	/* Binary format info */
   {"%loB",   "",   "o",  "B"},	/* Octal format info */

@@ -17,6 +17,10 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#ifdef __STDC__		/* Forward decls for prototypes */
+struct value;
+#endif
+
 extern int
 c_parse PARAMS ((void));	/* Defined in c-exp.y */
 
@@ -29,3 +33,6 @@ c_print_type PARAMS ((struct type *, char *, GDB_FILE *, int, int));
 extern int
 c_val_print PARAMS ((struct type *, char *, CORE_ADDR, GDB_FILE *, int, int,
 		     int, enum val_prettyprint));
+
+extern int
+c_value_print PARAMS ((struct value *, GDB_FILE *, int, enum val_prettyprint));

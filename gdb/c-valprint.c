@@ -434,3 +434,64 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
   gdb_flush (stream);
   return (0);
 }
+
+int
+c_value_print (val, stream, format, pretty)
+     value_ptr val;
+     GDB_FILE *stream;
+     int format;
+     enum val_prettyprint pretty;
+{
+  /* A "repeated" value really contains several values in a row.
+     They are made by the @ operator.
+     Print such values as if they were arrays.  */
+
+  if (VALUE_REPEATED (val))
+    {
+      register unsigned int n = VALUE_REPETITIONS (val);
+      register unsigned int typelen = TYPE_LENGTH (VALUE_TYPE (val));
+      fprintf_filtered (stream, "{");
+      /* Print arrays of characters using string syntax.  */
+      if (typelen == 1 && TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_INT
+	  && format == 0)
+	LA_PRINT_STRING (stream, VALUE_CONTENTS (val), n, 0);
+      else
+	{
+	  value_print_array_elements (val, stream, format, pretty);
+	}
+      fprintf_filtered (stream, "}");
+      return (n * typelen);
+    }
+  else
+    {
+      struct type *type = VALUE_TYPE (val);
+
+      /* If it is a pointer, indicate what it points to.
+
+	 Print type also if it is a reference.
+
+         C++: if it is a member pointer, we will take care
+	 of that when we print it.  */
+      if (TYPE_CODE (type) == TYPE_CODE_PTR ||
+	  TYPE_CODE (type) == TYPE_CODE_REF)
+	{
+	  /* Hack:  remove (char *) for char strings.  Their
+	     type is indicated by the quoted string anyway. */
+          if (TYPE_CODE (type) == TYPE_CODE_PTR &&
+	      TYPE_LENGTH (TYPE_TARGET_TYPE (type)) == sizeof(char) &&
+	      TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_INT &&
+	      !TYPE_UNSIGNED (TYPE_TARGET_TYPE (type)))
+	    {
+		/* Print nothing */
+	    }
+	  else
+	    {
+	      fprintf_filtered (stream, "(");
+	      type_print (type, "", stream, -1);
+	      fprintf_filtered (stream, ") ");
+	    }
+	}
+      return (val_print (type, VALUE_CONTENTS (val),
+			 VALUE_ADDRESS (val), stream, format, 1, 0, pretty));
+    }
+}
