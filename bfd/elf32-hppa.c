@@ -2686,12 +2686,15 @@ group_sections (htab, stub_group_size, stubs_always_before_branch)
 	  asection *curr;
 	  asection *prev;
 	  bfd_size_type total;
+	  bfd_boolean big_sec;
 
 	  curr = tail;
 	  if (tail->_cooked_size)
 	    total = tail->_cooked_size;
 	  else
 	    total = tail->_raw_size;
+	  big_sec = total >= stub_group_size;
+
 	  while ((prev = PREV_SEC (curr)) != NULL
 		 && ((total += curr->output_offset - prev->output_offset)
 		     < stub_group_size))
@@ -2719,8 +2722,11 @@ group_sections (htab, stub_group_size, stubs_always_before_branch)
 	  while (tail != curr && (tail = prev) != NULL);
 
 	  /* But wait, there's more!  Input sections up to 240000
-	     bytes before the stub section can be handled by it too.  */
-	  if (!stubs_always_before_branch)
+	     bytes before the stub section can be handled by it too.
+	     Don't do this if we have a really large section after the
+	     stubs, as adding more stubs increases the chance that
+	     branches may not reach into the stub section.  */
+	  if (!stubs_always_before_branch && !big_sec)
 	    {
 	      total = 0;
 	      while (prev != NULL

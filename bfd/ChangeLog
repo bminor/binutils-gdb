@@ -1,5 +1,8 @@
 2003-02-08  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-hppa.c (group_sections): Don't share a stub section if
+	stubs are for a large section.
+
 	* elf32-hppa.c (elf32_hppa_size_stubs): Double the size left for
 	stubs if !stubs_always_before_branch.
 
