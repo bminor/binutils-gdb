@@ -1,3 +1,10 @@
+2005-01-09  Eric Botcazou  <ebotcazou@libertysurf.fr>
+
+	* elf32-sparc.c (elf32_sparc_omit_section_dynsym): New function.
+	(elf_backend_omit_section_dynsym): Define to it.
+	* elf64-sparc.c (sparc64_elf_omit_section_dynsym): New function.
+	(elf_backend_omit_section_dynsym): Define to it.
+
 2005-01-07  Jakub Jelinek  <jakub@redhat.com>
 
 	* bfd/elf.c (INCLUDE_SECTION_IN_SEGMENT): Don't put empty sections into

@@ -39,6 +39,8 @@ static bfd_boolean allocate_dynrelocs
   PARAMS ((struct elf_link_hash_entry *, PTR));
 static bfd_boolean readonly_dynrelocs
   PARAMS ((struct elf_link_hash_entry *, PTR));
+static bfd_boolean elf32_sparc_omit_section_dynsym
+  PARAMS ((bfd *, struct bfd_link_info *, asection *));
 static bfd_boolean elf32_sparc_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 static bfd_boolean elf32_sparc_new_section_hook
@@ -1814,6 +1816,23 @@ readonly_dynrelocs (h, inf)
   return TRUE;
 }
 
+/* Return true if the dynamic symbol for a given section should be
+   omitted when creating a shared library.  */
+
+static bfd_boolean
+elf32_sparc_omit_section_dynsym (bfd *output_bfd,
+				 struct bfd_link_info *info,
+				 asection *p)
+{
+  /* We keep the .got section symbol so that explicit relocations
+     against the _GLOBAL_OFFSET_TABLE_ symbol emitted in PIC mode
+     can be turned into relocations against the .got symbol.  */
+  if (strcmp (p->name, ".got") == 0)
+    return FALSE;
+
+  return _bfd_elf_link_omit_section_dynsym (output_bfd, info, p);
+}
+
 /* Set the sizes of the dynamic sections.  */
 
 static bfd_boolean
@@ -3448,6 +3467,7 @@ elf32_sparc_plt_sym_val (bfd_vma i ATTRIBUTE_UNUSED,
 #define elf_backend_check_relocs	elf32_sparc_check_relocs
 #define elf_backend_adjust_dynamic_symbol \
 					elf32_sparc_adjust_dynamic_symbol
+#define elf_backend_omit_section_dynsym	elf32_sparc_omit_section_dynsym
 #define elf_backend_size_dynamic_sections \
 					elf32_sparc_size_dynamic_sections
 #define elf_backend_relocate_section	elf32_sparc_relocate_section

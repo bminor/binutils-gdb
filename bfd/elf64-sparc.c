@@ -56,6 +56,8 @@ static bfd_boolean sparc64_elf_check_relocs
 	   const Elf_Internal_Rela *));
 static bfd_boolean sparc64_elf_adjust_dynamic_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
+static bfd_boolean sparc64_elf_omit_section_dynsym
+  PARAMS ((bfd *, struct bfd_link_info *, asection *));
 static bfd_boolean sparc64_elf_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 static int sparc64_elf_get_symbol_type
@@ -1760,6 +1762,23 @@ sparc64_elf_adjust_dynamic_symbol (info, h)
   return TRUE;
 }
 
+/* Return true if the dynamic symbol for a given section should be
+   omitted when creating a shared library.  */
+
+static bfd_boolean
+sparc64_elf_omit_section_dynsym (bfd *output_bfd,
+				 struct bfd_link_info *info,
+				 asection *p)
+{
+  /* We keep the .got section symbol so that explicit relocations
+     against the _GLOBAL_OFFSET_TABLE_ symbol emitted in PIC mode
+     can be turned into relocations against the .got symbol.  */
+  if (strcmp (p->name, ".got") == 0)
+    return FALSE;
+
+  return _bfd_elf_link_omit_section_dynsym (output_bfd, info, p);
+}
+
 /* Set the sizes of the dynamic sections.  */
 
 static bfd_boolean
@@ -3198,6 +3217,8 @@ const struct elf_size_info sparc64_elf_size_info =
   sparc64_elf_check_relocs
 #define elf_backend_adjust_dynamic_symbol \
   sparc64_elf_adjust_dynamic_symbol
+#define elf_backend_omit_section_dynsym \
+  sparc64_elf_omit_section_dynsym
 #define elf_backend_size_dynamic_sections \
   sparc64_elf_size_dynamic_sections
 #define elf_backend_relocate_section \
