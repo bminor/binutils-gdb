@@ -1,5 +1,5 @@
 /* BFD back-end for Renesas H8/300 ELF binaries.
-   Copyright 1993, 1995, 1998, 1999, 2001, 2002, 2003
+   Copyright 1993, 1995, 1998, 1999, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -47,6 +47,11 @@ static bfd_boolean elf32_h8_symbol_address_p
 static bfd_byte *elf32_h8_get_relocated_section_contents
   (bfd *, struct bfd_link_info *, struct bfd_link_order *,
    bfd_byte *, bfd_boolean, asymbol **);
+static asection * elf32_h8_gc_mark_hook
+  (asection *, struct bfd_link_info *, Elf_Internal_Rela *,
+   struct elf_link_hash_entry *, Elf_Internal_Sym *);
+static bfd_boolean elf32_h8_gc_sweep_hook
+  (bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *);
 static bfd_reloc_status_type elf32_h8_final_link_relocate
   (unsigned long, bfd *, bfd *, asection *,
    bfd_byte *, bfd_vma, bfd_vma, bfd_vma,
@@ -1428,6 +1433,42 @@ elf32_h8_get_relocated_section_contents (bfd *output_bfd,
   return NULL;
 }
 
+static asection *
+elf32_h8_gc_mark_hook (asection *sec,
+		       struct bfd_link_info *info ATTRIBUTE_UNUSED,
+		       Elf_Internal_Rela *rel ATTRIBUTE_UNUSED,
+		       struct elf_link_hash_entry *h,
+		       Elf_Internal_Sym *sym)
+{
+  if (h != NULL)
+    {
+      switch (h->root.type)
+        {
+         case bfd_link_hash_defined:
+         case bfd_link_hash_defweak:
+          return h->root.u.def.section;
+          
+         case bfd_link_hash_common:
+          return h->root.u.c.p->section;
+          
+         default:
+          break;
+        }
+    }
+  else
+    return bfd_section_from_elf_index(sec->owner, sym->st_shndx);
+  return NULL;
+}
+
+static bfd_boolean
+elf32_h8_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
+			struct bfd_link_info *info ATTRIBUTE_UNUSED,
+                        asection *sec ATTRIBUTE_UNUSED,
+			const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED)
+{
+  return TRUE;
+}
+
 
 #define TARGET_BIG_SYM			bfd_elf32_h8300_vec
 #define TARGET_BIG_NAME			"elf32-h8300"
@@ -1446,6 +1487,8 @@ elf32_h8_get_relocated_section_contents (bfd *output_bfd,
   elf32_h8_object_p
 #define bfd_elf32_bfd_merge_private_bfd_data \
   elf32_h8_merge_private_bfd_data
+#define elf_backend_gc_mark_hook        elf32_h8_gc_mark_hook
+#define elf_backend_gc_sweep_hook       elf32_h8_gc_sweep_hook
 
 /* ??? when elf_backend_relocate_section is not defined, elf32-target.h
    defaults to using _bfd_generic_link_hash_table_create, but
@@ -1457,6 +1500,7 @@ elf32_h8_get_relocated_section_contents (bfd *output_bfd,
 /* Use an H8 specific linker, not the ELF generic linker.  */
 #define elf_backend_relocate_section elf32_h8_relocate_section
 #define elf_backend_rela_normal		1
+#define elf_backend_can_gc_sections	1
 
 /* And relaxing stuff.  */
 #define bfd_elf32_bfd_relax_section     elf32_h8_relax_section

@@ -1,3 +1,12 @@
+2004-01-01  Grant Edwards <grante@visi.com>
+
+	* elflink.h (elf_gc_sections): Warn when gc-sections option is ignored.
+	* elf32-h8300.c (elf32_h8_gc_mark_hook): New function.
+	(elf32_h8_gc_sweep_hook): New function.
+	(elf_backend_gc_mark_hook): Define.
+	(elf_backend_gc_sweep_hook): Define.
+	(elf_backend_can_gc_sections): Define.
+
 2003-12-19  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
 
 	Adfd m32r-linux and PIC support.  Add new ABI that uses RELA.
@@ -105,7 +114,7 @@
 
 	* peXXigen.c (_bfd_XXi_swap_scnhdr_out): Ensure that correct flags
 	are set on known section types.
-	
+
 2003-12-12  Nick Clifton  <nickc@redhat.com>
 
 	* po/ro.po: Updated translation.
@@ -210,7 +219,7 @@
 	* bfd-in2.h: Regenerate.
 	* cpu-m32r.c : Add new machine type.
 	* elf32-m32r.c (m32r_elf_object_p, m32r_elf_final_write_processing,
-        m32r_elf_merge_private_bfd_data): Add support for new machine
+	m32r_elf_merge_private_bfd_data): Add support for new machine
 	type.
 
 2003-12-03  Dave Airlie  <airlied@linux.ie>
