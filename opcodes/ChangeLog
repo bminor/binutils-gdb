@@ -1,3 +1,7 @@
+2002-03-23  matthew green  <mrg@redhat.com>
+
+	* ppc-opc.c (vmaddfp): Fix operand order.
+
 2002-03-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".

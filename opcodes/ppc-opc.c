@@ -1813,7 +1813,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "vctuxs",    VX(4,  906), VX_MASK,	PPCVEC,		{ VD, VB, UIMM } },
 { "vexptefp",  VX(4,  394), VX_MASK,	PPCVEC,		{ VD, VB } },
 { "vlogefp",   VX(4,  458), VX_MASK,	PPCVEC,		{ VD, VB } },
-{ "vmaddfp",   VXA(4,  46), VXA_MASK,	PPCVEC,		{ VD, VA, VB, VC } },
+{ "vmaddfp",   VXA(4,  46), VXA_MASK,	PPCVEC,		{ VD, VA, VC, VB } },
 { "vmaxfp",    VX(4, 1034), VX_MASK,	PPCVEC,		{ VD, VA, VB } },
 { "vmaxsb",    VX(4,  258), VX_MASK,	PPCVEC,		{ VD, VA, VB } },
 { "vmaxsh",    VX(4,  322), VX_MASK,	PPCVEC,		{ VD, VA, VB } },
