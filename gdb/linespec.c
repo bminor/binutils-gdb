@@ -104,23 +104,19 @@ find_methods (struct type *t, char *name, struct symbol **sym_arr)
 {
   int i1 = 0;
   int ibase;
-  struct symbol *sym_class;
   char *class_name = type_name_no_tag (t);
 
   /* Ignore this class if it doesn't have a name.  This is ugly, but
      unless we figure out how to get the physname without the name of
      the class, then the loop can't do any good.  */
   if (class_name
-      && (sym_class = lookup_symbol (class_name,
-				     (struct block *) NULL,
-				     STRUCT_NAMESPACE,
-				     (int *) NULL,
-				     (struct symtab **) NULL)))
+      && (lookup_symbol (class_name, (struct block *) NULL,
+			 STRUCT_NAMESPACE, (int *) NULL,
+			 (struct symtab **) NULL)))
     {
       int method_counter;
 
-      /* FIXME: Shouldn't this just be CHECK_TYPEDEF (t)?  */
-      t = SYMBOL_TYPE (sym_class);
+      CHECK_TYPEDEF (t);
 
       /* Loop over each method name.  At this level, all overloads of a name
          are counted as a single name.  There is an inner loop which loops over
@@ -168,7 +164,7 @@ find_methods (struct type *t, char *name, struct symbol **sym_arr)
 		  }
 		else
 		  phys_name = TYPE_FN_FIELD_PHYSNAME (f, field_counter);
-
+		
 		/* Destructor is handled by caller, dont add it to the list */
 		if (DESTRUCTOR_PREFIX_P (phys_name))
 		  continue;
