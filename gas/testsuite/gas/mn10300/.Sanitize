@@ -17,7 +17,7 @@
 
 Do-first:
 
-am33_files="am33.s am33_2.s am33_3.s am33_4.s am33_5.s"
+am33_files="am33.s am33_2.s am33_3.s am33_4.s am33_5.s am33_6.s am33_7.s am33_8.s"
 
 if ( echo $* | grep keep\-am33 > /dev/null ) ; then
         keep_these_too="${am33_files} ${keep_these_too}"

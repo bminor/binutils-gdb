@@ -1011,6 +1011,496 @@ proc do_am33_3 {} {
     # Did we find what we were looking for?  If not, flunk it.
     if [expr $x==36] then { pass $testname } else { fail $testname }
 }
+
+proc do_am33_4 {} {
+    set testname "am33_4.s: am33 tests part 4"
+    set x 0
+
+    gas_start "am33_4.s" "-al"
+
+    # Instead of having a variable for each match string just increment the
+    # total number of matches seen.  That's simpler when testing large numbers
+    # of instructions (as these tests to).
+    while 1 {
+	expect {
+	    -re "^ +\[0-9\]+ 0000 FD0822FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +2 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0006 FD1822FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +3 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 000c FD7822FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +4 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0012 FD8822FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +5 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0018 FD9822FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +6 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 001e FDA822FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +7 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0024 FDD822FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +8 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 002a FDF822FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +9 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0030 FD0922FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +10 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0036 FD1922FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +11 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 003c FD2922FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +12 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0042 FD4922FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +13 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0048 FD5922FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +14 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 004e FD6922FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +15 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0054 FDA922FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +16 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 005a FDB922FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +17 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0060 FDE922FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +18 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0066 FD0A21FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +19 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 006c FD1A21FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +20 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0072 FD2A21FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +21 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0078 FD3A21FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +22 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 007e FD4A21FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +23 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0084 FD5A21FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +24 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 008a FD8A20FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +27 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0090 FD9A20FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +28 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0096 FDAA20FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +29 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 009c FDBA20FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +30 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00a2 FDCA20FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +31 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00a8 FDDA20FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +32 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00ae FD0B22FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +35 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00b4 FD1B22FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +36 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00ba FD2B22FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +37 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00c0 FD3B22FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +38 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00c6 FD4B22FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +39 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00cc FD5B22FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +40 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00d2 FD0E20FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +41 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00d8 FD1E20FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +42 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00de FD2E20FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +43 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00e4 FD3E20FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +44 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00ea FD4E20FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +45 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00f0 FD5E20FF\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +46 +FE1F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "\[^\n\]*\n"				{ }
+	    timeout				{ perror "timeout\n"; break }
+	    eof					{ break }
+	}
+    }
+
+    # This was intended to do any cleanup necessary.  It kinda looks like it
+    # isn't needed, but just in case, please keep it in for now.
+    gas_finish
+
+    # Did we find what we were looking for?  If not, flunk it.
+    if [expr $x==82] then { pass $testname } else { fail $testname }
+}
+
+proc do_am33_5 {} {
+    set testname "am33_5.s: am33 tests part 5"
+    set x 0
+
+    gas_start "am33_5.s" "-al"
+
+    # Instead of having a variable for each match string just increment the
+    # total number of matches seen.  That's simpler when testing large numbers
+    # of instructions (as these tests to).
+    while 1 {
+	expect {
+	    -re "^ +\[0-9\]+ 0000 FE0822FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +2 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0007 FE1822FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +3 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 000e FE7822FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +4 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0015 FE8822FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +5 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 001c FE9822FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +6 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0023 FEA822FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +7 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 002a FED822FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +8 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0031 FEF822FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +9 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0038 FE0922FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +10 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 003f FE1922FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +11 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0046 FE2922FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +12 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 004d FE4922FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +13 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0054 FE5922FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +14 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 005b FE6922FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +15 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0062 FEA922FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +16 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0069 FEB922FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +17 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0070 FEE922FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +18 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0077 FE0A21FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +19 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 007e FE1A21FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +20 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0085 FE2A21FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +21 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 008c FE3A21FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +22 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0093 FE4A21FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +23 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 009a FE5A21FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +24 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00a1 FE8A20FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +27 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00a8 FE9A20FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +28 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00af FEAA20FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +29 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00b6 FEBA20FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +30 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00bd FECA20FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +31 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00c4 FEDA20FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +32 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00cb FE0B22FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +35 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00d2 FE1B22FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +36 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00d9 FE2B22FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +37 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00e0 FE3B22FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +38 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00e7 FE4B22FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +39 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00ee FE5B22FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +40 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00f5 FE6B22FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +41 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00fc FE7B22FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +42 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0103 FE8B22FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +43 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 010a FE9B22FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +44 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0111 FE0E20FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +45 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0118 FE1E20FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +46 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 011f FE2E20FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +47 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0126 FE3E20FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +48 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 012d FE4E20FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +49 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0134 FE5E20FC\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +50 +FDFE7F\[^\n\]*\n"		{ set x [expr $x+1] }
+	    -re "\[^\n\]*\n"				{ }
+	    timeout				{ perror "timeout\n"; break }
+	    eof					{ break }
+	}
+    }
+
+    # This was intended to do any cleanup necessary.  It kinda looks like it
+    # isn't needed, but just in case, please keep it in for now.
+    gas_finish
+
+    # Did we find what we were looking for?  If not, flunk it.
+    if [expr $x==90] then { pass $testname } else { fail $testname }
+}
+
+proc do_am33_6 {} {
+    set testname "am33_6.s: am33 tests part 6"
+    set x 0
+
+    gas_start "am33_6.s" "-al"
+
+    # Instead of having a variable for each match string just increment the
+    # total number of matches seen.  That's simpler when testing large numbers
+    # of instructions (as these tests to).
+    while 1 {
+	expect {
+	    -re "^ +\[0-9\]+ 0000 F7004123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0004 F7104123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0008 F7204123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 000c F7304123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0010 F7404123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0014 F7504123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0018 F7604123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 001c F7704123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0020 F7804123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0024 F7904123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0028 F7A04123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 002c F7B04123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0030 F7C04123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0034 F7D04123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0038 F7014123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 003c F7114123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0040 F7214123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0044 F7314123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0048 F7614123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 004c F7714123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0050 F7814123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0054 F7914123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0058 F7A14123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 005c F7B14123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0060 F7C14123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0064 F7D14123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0068 F7024123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 006c F7124123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0070 F7224123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0074 F7324123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0078 F7424123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 007c F7524123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0080 F7624123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0084 F7724123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0088 F7824123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 008c F7924123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0090 F7A24123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0094 F7B24123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0098 F7C24123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 009c F7D24123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00a0 F7034123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00a4 F7134123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00a8 F7234123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00ac F7334123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00b0 F7434123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00b4 F7534123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00b8 F7634123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00bc F7734123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00c0 F7834123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00c4 F7934123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00c8 F7A34123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00cc F7B34123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00d0 F7C34123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00d4 F7D34123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00d8 F7044123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00dc F7144123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00e0 F7244123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00e4 F7344123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00e8 F7444123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00ec F7544123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00f0 F7644123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00f4 F7744123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00f8 F7844123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00fc F7944123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0100 F7A44123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0104 F7B44123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0108 F7C44123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 010c F7D44123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "\[^\n\]*\n"				{ }
+	    timeout				{ perror "timeout\n"; break }
+	    eof					{ break }
+	}
+    }
+
+    # This was intended to do any cleanup necessary.  It kinda looks like it
+    # isn't needed, but just in case, please keep it in for now.
+    gas_finish
+
+    # Did we find what we were looking for?  If not, flunk it.
+    if [expr $x==68] then { pass $testname } else { fail $testname }
+}
+
+proc do_am33_7 {} {
+    set testname "am33_7.s: am33 tests part 7"
+    set x 0
+
+    gas_start "am33_7.s" "-al"
+
+    # Instead of having a variable for each match string just increment the
+    # total number of matches seen.  That's simpler when testing large numbers
+    # of instructions (as these tests to).
+    while 1 {
+	expect {
+	    -re "^ +\[0-9\]+ 0000 F7054123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0004 F7154123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0008 F7254123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 000c F7354123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0010 F7654123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0014 F7754123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0018 F7854123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 001c F7954123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0020 F7A54123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0024 F7B54123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0028 F7C54123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 002c F7D54123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0030 F7064123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0034 F7164123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0038 F7264123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 003c F7364123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0040 F7464123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0044 F7564123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0048 F7664123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 004c F7764123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0050 F7864123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0054 F7964123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0058 F7A64123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 005c F7B64123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0060 F7C64123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0064 F7D64123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0068 F7074123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 006c F7174123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0070 F7274123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0074 F7374123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0078 F7474123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 007c F7574123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0080 F7674123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0084 F7774123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0088 F7874123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 008c F7974123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0090 F7A74123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0094 F7B74123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0098 F7C74123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 009c F7D74123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00a0 F7084123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00a4 F7184123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00a8 F7284123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00ac F7384123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00b0 F7484123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00b4 F7584123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00b8 F7684123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00bc F7784123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00c0 F7884123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00c4 F7984123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00c8 F7A84123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00cc F7B84123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00d0 F7C84123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00d4 F7D84123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00d8 F7094123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00dc F7194123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00e0 F7294123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00e4 F7394123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00e8 F7494123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00ec F7594123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00f0 F7694123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00f4 F7794123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00f8 F7894123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00fc F7994123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0100 F7A94123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0104 F7B94123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0108 F7C94123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 010c F7D94123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "\[^\n\]*\n"				{ }
+	    timeout				{ perror "timeout\n"; break }
+	    eof					{ break }
+	}
+    }
+
+    # This was intended to do any cleanup necessary.  It kinda looks like it
+    # isn't needed, but just in case, please keep it in for now.
+    gas_finish
+
+    # Did we find what we were looking for?  If not, flunk it.
+    if [expr $x==68] then { pass $testname } else { fail $testname }
+}
+
+proc do_am33_8 {} {
+    set testname "am33_8.s: am33 tests part 8"
+    set x 0
+
+    gas_start "am33_8.s" "-al"
+
+    # Instead of having a variable for each match string just increment the
+    # total number of matches seen.  That's simpler when testing large numbers
+    # of instructions (as these tests to).
+    while 1 {
+	expect {
+	    -re "^ +\[0-9\]+ 0000 F70A4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0004 F71A4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0008 F72A4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 000c F73A4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0010 F74A4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0014 F75A4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0018 F76A4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 001c F77A4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0020 F78A4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0024 F79A4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0028 F7AA4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 002c F7BA4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0030 F7CA4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0034 F7DA4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0038 F70B4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 003c F71B4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0040 F72B4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0044 F73B4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0048 F74B4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 004c F75B4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0050 F76B4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0054 F77B4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0058 F78B4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 005c F79B4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0060 F7AB4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0064 F7BB4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0068 F7CB4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 006c F7DB4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0070 F70C4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0074 F71C4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0078 F72C4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 007c F73C4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0080 F74C4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0084 F75C4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0088 F76C4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 008c F77C4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0090 F78C4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0094 F79C4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0098 F7AC4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 009c F7BC4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00a0 F7CC4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00a4 F7DC4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00a8 F70D4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00ac F71D4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00b0 F72D4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00b4 F73D4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00b8 F74D4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00bc F75D4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00c0 F76D4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00c4 F77D4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00c8 F78D4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00cc F79D4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00d0 F7AD4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00d4 F7BD4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00d8 F7CD4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 00dc F7DD4123\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "\[^\n\]*\n"				{ }
+	    timeout				{ perror "timeout\n"; break }
+	    eof					{ break }
+	}
+    }
+
+    # This was intended to do any cleanup necessary.  It kinda looks like it
+    # isn't needed, but just in case, please keep it in for now.
+    gas_finish
+
+    # Did we find what we were looking for?  If not, flunk it.
+    if [expr $x==56] then { pass $testname } else { fail $testname }
+}
+
 # end-sanitize-am33
 
 if [istarget mn10300*-*-*] then {
@@ -1038,5 +1528,10 @@ if [istarget mn10300*-*-*] then {
     do_am33_1
     do_am33_2
     do_am33_3
+    do_am33_4
+    do_am33_5
+    do_am33_6
+    do_am33_7
+    do_am33_8
 # end-sanitize-am33
 }
