@@ -1,3 +1,8 @@
+2001-05-11  Fernando Nasser  <fnasser@redhat.com>
+
+	* mi-var-child.exp: Adjust for the fact that now (char *) can be
+	dereferenced.
+
 2001-03-06  Kevin Buettner  <kevinb@redhat.com>
 
 	* mi-basics.exp, mi-break.exp, mi-disassemble.exp,
