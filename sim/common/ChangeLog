@@ -1,3 +1,13 @@
+Tue Feb 24 00:29:57 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-trace.c (print_data): case trace_fmt_fp missing break.  Use
+ 	sim_fpu to safely print fp_word values.
+	(print_data): Add trace_fmt_bool and trace_fmt_addr.
+	(trace_result_bool1, trace_result_addr1): New functions.
+	(trace_input_bool1, trace_input_addr1): New functions.
+
+	* sim-trace.h (TRACE_FPU_*): Define.
+
 Mon Feb 23 13:24:54 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-fpu.h (enum sim_fpu_class): Add sim_fpu_class_denorm.

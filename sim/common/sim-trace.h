@@ -1,5 +1,5 @@
 /* Simulator tracing/debugging support.
-   Copyright (C) 1997 Free Software Foundation, Inc.
+   Copyright (C) 1997, 1998 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.
@@ -77,6 +77,16 @@ enum {
 #ifndef MAX_TRACE_VALUES
 #define MAX_TRACE_VALUES 32
 #endif
+
+/* The -t option only prints useful values.  It's easy to type and shouldn't
+   splat on the screen everything under the sun making nothing easy to
+   find.  */
+#define TRACE_USEFUL_MASK \
+((1 << TRACE_INSN_IDX) \
+ | (1 << TRACE_LINENUM_IDX) \
+ | (1 << TRACE_MEMORY_IDX) \
+ | (1 << TRACE_MODEL_IDX) \
+ | (1 << TRACE_EVENTS_IDX))
 
 /* Masks so WITH_TRACE can have symbolic values.
    The case choice here is on purpose.  The lowercase parts are args to
@@ -228,21 +238,29 @@ extern void trace_generic PARAMS ((SIM_DESC sd,
 extern void trace_input0 PARAMS ((SIM_DESC sd,
 				  sim_cpu *cpu,
 				  int trace_idx));
+
 extern void trace_input_word1 PARAMS ((SIM_DESC sd,
 				       sim_cpu *cpu,
 				       int trace_idx,
 				       unsigned_word d0));
+
 extern void trace_input_word2 PARAMS ((SIM_DESC sd,
 				       sim_cpu *cpu,
 				       int trace_idx,
 				       unsigned_word d0,
 				       unsigned_word d1));
+
 extern void trace_input_word3 PARAMS ((SIM_DESC sd,
 				       sim_cpu *cpu,
 				       int trace_idx,
 				       unsigned_word d0,
 				       unsigned_word d1,
 				       unsigned_word d2));
+
+extern void trace_input_bool1 PARAMS ((SIM_DESC sd,
+				       sim_cpu *cpu,
+				       int trace_idx,
+				       int d0));
 
 extern void trace_input_fp1 PARAMS ((SIM_DESC sd,
 				     sim_cpu *cpu,
@@ -287,6 +305,16 @@ extern void trace_result_word1 PARAMS ((SIM_DESC sd,
 					int trace_idx,
 					unsigned_word r0));
 
+extern void trace_result_bool1 PARAMS ((SIM_DESC sd,
+					sim_cpu *cpu,
+					int trace_idx,
+					int r0));
+
+extern void trace_result_addr1 PARAMS ((SIM_DESC sd,
+					sim_cpu *cpu,
+					int trace_idx,
+					address_word r0));
+
 extern void trace_result_fp1 PARAMS ((SIM_DESC sd,
 				      sim_cpu *cpu,
 				      int trace_idx,
@@ -312,6 +340,7 @@ extern void trace_result_word1_string1 PARAMS ((SIM_DESC sd,
 
 
 /* Macro's for tracing ALU instructions */
+
 #define TRACE_ALU_INPUT0() \
 do { \
   if (TRACE_ALU_P (CPU)) \
@@ -340,6 +369,60 @@ do { \
 do { \
   if (TRACE_ALU_P (CPU)) \
     trace_result_word1 (SD, CPU, TRACE_ALU_IDX, (R0)); \
+} while (0)
+
+
+/* Macro's for tracing FPU instructions */
+
+#define TRACE_FPU_INPUT0() \
+do { \
+  if (TRACE_FPU_P (CPU)) \
+    trace_input0 (SD, CPU, TRACE_FPU_IDX); \
+} while (0)
+    
+#define TRACE_FPU_INPUT1(V0) \
+do { \
+  if (TRACE_FPU_P (CPU)) \
+    trace_input_fp1 (SD, CPU, TRACE_FPU_IDX, (V0)); \
+} while (0)
+
+#define TRACE_FPU_INPUT2(V0,V1) \
+do { \
+  if (TRACE_FPU_P (CPU)) \
+    trace_input_fp2 (SD, CPU, TRACE_FPU_IDX, (V0), (V1)); \
+} while (0)
+
+#define TRACE_FPU_INPUT3(V0,V1,V2) \
+do { \
+  if (TRACE_FPU_P (CPU)) \
+    trace_input_fp3 (SD, CPU, TRACE_FPU_IDX, (V0), (V1), (V2)); \
+} while (0)
+
+#define TRACE_FPU_RESULT(R0) \
+do { \
+  if (TRACE_FPU_P (CPU)) \
+    trace_result_fp1 (SD, CPU, TRACE_FPU_IDX, (R0)); \
+} while (0)
+
+#define TRACE_FPU_RESULT_BOOL(R0) \
+do { \
+  if (TRACE_FPU_P (CPU)) \
+    trace_result_bool1 (SD, CPU, TRACE_FPU_IDX, (R0)); \
+} while (0)
+
+
+/* Macros for tracing branches */
+
+#define TRACE_BRANCH_INPUT(COND) \
+do { \
+  if (TRACE_BRANCH_P (CPU)) \
+    trace_input_bool1 (SD, CPU, TRACE_BRANCH_IDX, (COND)); \
+} while (0)
+
+#define TRACE_BRANCH_RESULT(DEST) \
+do { \
+  if (TRACE_BRANCH_P (CPU)) \
+    trace_result_addr1 (SD, CPU, TRACE_BRANCH_IDX, (DEST)); \
 } while (0)
 
 

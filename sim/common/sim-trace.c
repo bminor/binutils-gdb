@@ -384,6 +384,8 @@ typedef enum {
   trace_fmt_fp,
   trace_fmt_fpu,
   trace_fmt_string,
+  trace_fmt_bool,
+  trace_fmt_addr,
   trace_fmt_instruction_incomplete,
 } data_fmt;
 
@@ -428,28 +430,46 @@ print_data (SIM_DESC sd,
       trace_printf (sd, cpu, " (instruction incomplete)");
       break;
     case trace_fmt_word:
-      switch (size)
-	{
-	case sizeof (unsigned_word):
-	  trace_printf (sd, cpu, " 0x%08lx", (long) * (unsigned_word*) data);
-	  break;
-	default:
-	  abort ();
-	}
-      break;
+    case trace_fmt_addr:
+      {
+	switch (size)
+	  {
+	  case sizeof (unsigned32):
+	    trace_printf (sd, cpu, " 0x%08lx", (long) * (unsigned32*) data);
+	    break;
+	  case sizeof (unsigned64):
+	    trace_printf (sd, cpu, " 0x%08lx", (long) * (unsigned64*) data);
+	    break;
+	  default:
+	    abort ();
+	  }
+	break;
+      }
+    case trace_fmt_bool:
+      {
+	SIM_ASSERT (size == sizeof (int));
+	trace_printf (sd, cpu, " %-8s",
+		      (* (int*) data) ? "true" : "false");
+	break;
+      }
     case trace_fmt_fp:
-      switch (size)
-	{
-	  /* FIXME: Assumes sizeof float == 4; sizeof double == 8 */
-	case 4:
-	  trace_printf (sd, cpu, " %8g", * (float*) data);
-	  break;
-	case 8:
-	  trace_printf (sd, cpu, " %8g", * (double*) data);
-	  break;
-	default:
-	  abort ();
-	}
+      {
+	sim_fpu fp;
+	switch (size)
+	  {
+	    /* FIXME: Assumes sizeof float == 4; sizeof double == 8 */
+	  case 4:
+	    sim_fpu_32to (&fp, * (unsigned32*) data);
+	    break;
+	  case 8:
+	    sim_fpu_64to (&fp, * (unsigned32*) data);
+	    break;
+	  default:
+	    abort ();
+	  }
+	trace_printf (sd, cpu, " %8g", sim_fpu_2d (&fp));
+	break;
+      }
     case trace_fmt_fpu:
       /* FIXME: At present sim_fpu data is stored as a double */
       trace_printf (sd, cpu, " %8g", * (double*) data);
@@ -701,6 +721,28 @@ trace_input_word3 (SIM_DESC sd,
 }
 
 void
+trace_input_bool1 (SIM_DESC sd,
+		   sim_cpu *cpu,
+		   int trace_idx,
+		   int d0)
+{
+  TRACE_DATA *data = CPU_TRACE_DATA (cpu);
+  TRACE_IDX (data) = trace_idx;
+  save_data (sd, data, trace_fmt_bool, sizeof (d0), &d0);
+}
+
+void
+trace_input_addr1 (SIM_DESC sd,
+		   sim_cpu *cpu,
+		   int trace_idx,
+		   address_word d0)
+{
+  TRACE_DATA *data = CPU_TRACE_DATA (cpu);
+  TRACE_IDX (data) = trace_idx;
+  save_data (sd, data, trace_fmt_addr, sizeof (d0), &d0);
+}
+
+void
 trace_input_fp1 (SIM_DESC sd,
 		 sim_cpu *cpu,
 		 int trace_idx,
@@ -799,6 +841,38 @@ trace_result_word1 (SIM_DESC sd,
   /* Append any results to the end of the inputs */
   last_input = TRACE_INPUT_IDX (data);
   save_data (sd, data, trace_fmt_word, sizeof (unsigned_word), &r0);
+
+  trace_results (sd, cpu, trace_idx, last_input);
+}	      
+
+void
+trace_result_bool1 (SIM_DESC sd,
+		    sim_cpu *cpu,
+		    int trace_idx,
+		    int r0)
+{
+  TRACE_DATA *data = CPU_TRACE_DATA (cpu);
+  int last_input;
+
+  /* Append any results to the end of the inputs */
+  last_input = TRACE_INPUT_IDX (data);
+  save_data (sd, data, trace_fmt_bool, sizeof (r0), &r0);
+
+  trace_results (sd, cpu, trace_idx, last_input);
+}	      
+
+void
+trace_result_addr1 (SIM_DESC sd,
+		    sim_cpu *cpu,
+		    int trace_idx,
+		    address_word r0)
+{
+  TRACE_DATA *data = CPU_TRACE_DATA (cpu);
+  int last_input;
+
+  /* Append any results to the end of the inputs */
+  last_input = TRACE_INPUT_IDX (data);
+  save_data (sd, data, trace_fmt_addr, sizeof (r0), &r0);
 
   trace_results (sd, cpu, trace_idx, last_input);
 }	      
