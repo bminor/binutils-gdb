@@ -1,3 +1,12 @@
+2001-07-11  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/tm-linux.h: Do not include <signal.h>.  Instead provide
+	reasonable defaults for REALTIME_LO and REALTIME_HI if they're not
+	already defined.
+	* config/nm-linux.h: Include <signal.h>.
+	[__SIGRTMIN] (REALTIME_LO, REALTIME_HI): Define to __SIGRTMIN and
+	(__SIGRTMAX + 1) respectively.
+
 2001-07-10  Andrew Cagney  <ac131313@redhat.com>
 
 	* mcore-rom.c: Include "serial.h".

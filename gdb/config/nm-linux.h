@@ -1,4 +1,4 @@
-/* Native support for GNU/Linux, for GDB, the GNU debugger.
+/* Native support for GNU/Linux.
    Copyright 1999, 2000
    Free Software Foundation, Inc.
 
@@ -54,3 +54,13 @@ extern int linuxthreads_prepare_to_proceed (int step);
 
 #define GDB_GREGSET_T  elf_gregset_t
 #define GDB_FPREGSET_T elf_fpregset_t
+
+/* Since we're building a native debugger, we can include <signal.h>
+   to find the range of real-time signals.  */
+
+#include <signal.h>
+
+#ifdef __SIGRTMIN
+#define REALTIME_LO	__SIGRTMIN
+#define REALTIME_HI	(__SIGRTMAX + 1)
+#endif

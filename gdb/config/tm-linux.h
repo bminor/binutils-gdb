@@ -19,15 +19,12 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* Some versions of Linux have real-time signal support in the C library, and
-   some don't.  We have to include this file to find out.  */
-#include <signal.h>
+/* Pick reasonable defaults for the number of real-time signals.  */
 
-#ifdef __SIGRTMIN
-#define REALTIME_LO __SIGRTMIN
-#define REALTIME_HI (__SIGRTMAX + 1)
-#else
+#ifndef REALTIME_LO
 #define REALTIME_LO 32
+#endif
+#ifndef REALTIME_HI
 #define REALTIME_HI 64
 #endif
 
