@@ -2652,6 +2652,19 @@
     )
 )
 
+; dnpmop: define-normal-parsed-mode-operand: Normal mode operand with parse handler
+(define-pmacro (dnpmop xname xcomment xattrs xtype xindex xmode xparse)
+  (define-operand
+    (name xname)
+    (comment xcomment)
+    (.splice attrs (.unsplice xattrs))
+    (type xtype)
+    (index xindex)
+    (mode xmode)
+    (handlers (parse xparse))
+    )
+)
+
 (dnop  pack "packing bit" () h-pack f-pack)
 
 (dnmop GRi        "source register 1"      () h-gr        f-GRi  SI)
@@ -2659,7 +2672,7 @@
 (dnmop GRk        "destination register"   () h-gr        f-GRk  SI)
 (dnmop GRkhi      "destination register"   () h-gr_hi     f-GRk  UHI)
 (dnmop GRklo      "destination register"   () h-gr_lo     f-GRk  UHI)
-(dnmop GRdoublek  "destination register"   () h-gr_double f-GRk  DI)
+(dnpmop GRdoublek "destination register"   () h-gr_double f-GRk  DI "even_register")
 (dnmop ACC40Si    "signed accumulator"     () h-acc40S    f-ACC40Si DI)
 (dnmop ACC40Ui    "unsigned accumulator"   () h-acc40U    f-ACC40Ui UDI)
 (dnmop ACC40Sk    "target accumulator"     () h-acc40S    f-ACC40Sk DI)
@@ -2670,7 +2683,7 @@
 (dnmop CPRi       "source register"        ((MACH frv)) h-cpr        f-CPRi SI)
 (dnmop CPRj       "source register"        ((MACH frv)) h-cpr        f-CPRj SI)
 (dnmop CPRk       "destination register"   ((MACH frv)) h-cpr        f-CPRk SI)
-(dnmop CPRdoublek "destination register"   ((MACH frv)) h-cpr_double f-CPRk DI)
+(dnpmop CPRdoublek "destination register"  ((MACH frv)) h-cpr_double f-CPRk DI "even_register")
 
 ; floating point operands
 (dnmop FRinti    "source register 1"      () h-fr_int    f-FRi SI)
@@ -2681,9 +2694,9 @@
 (dnmop FRk       "destination register"   () h-fr        f-FRk SF)
 (dnmop FRkhi     "destination register"   () h-fr_hi     f-FRk UHI)
 (dnmop FRklo     "destination register"   () h-fr_lo     f-FRk UHI)
-(dnmop FRdoublei "source register 1"      () h-fr_double f-FRi DF)
-(dnmop FRdoublej "source register 2"      () h-fr_double f-FRj DF)
-(dnmop FRdoublek "target register"        () h-fr_double f-FRk DF)
+(dnpmop FRdoublei "source register 1"     () h-fr_double f-FRi DF "even_register")
+(dnpmop FRdoublej "source register 2"     () h-fr_double f-FRj DF "even_register")
+(dnpmop FRdoublek "target register"       () h-fr_double f-FRk DF "even_register")
 
 (dnop CRi       "source register 1"       () h-cccr f-CRi)
 (dnop CRj       "source register 2"       () h-cccr f-CRj)
@@ -4498,8 +4511,8 @@
   (dni name
        (comment)
        ((UNIT STORE) (FR550-MAJOR I-4) (FR500-MAJOR I-3) (FR400-MAJOR I-3) attr)
-       (.str name "$pack $" regtype "k,@($GRi,$GRj)")
-       (+ pack (.sym regtype k) op GRi ope GRj)
+       (.str name "$pack $" regtype "doublek,@($GRi,$GRj)")
+       (+ pack (.sym regtype doublek) op GRi ope GRj)
        (sequence ((WI address))
 		 (store-double-semantics mode regtype address GRj))
        profile
@@ -4521,12 +4534,12 @@
   (dni name
        (comment)
        ((UNIT STORE) (FR500-MAJOR I-3) (MACH frv) attr)
-       (.str name "$pack $" regtype "k,@($GRi,$GRj)")
-       (+ pack (.sym regtype k) op GRi ope GRj)
+       (.str name "$pack $" regtype "doublek,@($GRi,$GRj)")
+       (+ pack (.sym regtype doublek) op GRi ope GRj)
        (sequence ((WI address))
 		 (store-double-semantics mode regtype address GRj)
 		 (c-call VOID "@cpu@_check_recovering_store"
-			 address (index-of (.sym regtype k)) 8 is_float))
+			 address (index-of (.sym regtype doublek)) 8 is_float))
        profile
   )
 )
@@ -4627,8 +4640,8 @@
   (dni name
        (comment)
        ((UNIT STORE) (FR550-MAJOR I-4) (FR500-MAJOR I-3) (FR400-MAJOR I-3) attr)
-       (.str name "$pack $" regtype "k,@($GRi,$GRj)")
-       (+ pack (.sym regtype k) op GRi ope GRj)
+       (.str name "$pack $" regtype "doublek,@($GRi,$GRj)")
+       (+ pack (.sym regtype doublek) op GRi ope GRj)
        (sequence ((WI address))
 		 (store-double-semantics mode regtype address GRj)
 		 (set GRi address))
@@ -4864,8 +4877,8 @@
   (dni name
        (comment)
        ((UNIT STORE) (FR550-MAJOR I-4) (FR500-MAJOR I-3) (FR400-MAJOR I-3) CONDITIONAL attr)
-       (.str name "$pack $" regtype "k,@($GRi,$GRj),$CCi,$cond")
-       (+ pack (.sym regtype k) op GRi CCi  cond ope GRj)
+       (.str name "$pack $" regtype "doublek,@($GRi,$GRj),$CCi,$cond")
+       (+ pack (.sym regtype doublek) op GRi CCi  cond ope GRj)
        (if (eq CCi (or cond 2))
 	   (sequence ((WI address))
 		     (store-double-semantics mode regtype address GRj)))
@@ -4933,8 +4946,8 @@
   (dni name
        (comment)
        ((UNIT STORE) (FR550-MAJOR I-4) (FR500-MAJOR I-3) (FR400-MAJOR I-3) CONDITIONAL attr)
-       (.str name "$pack $" regtype "k,@($GRi,$GRj),$CCi,$cond")
-       (+ pack (.sym regtype k) op GRi CCi  cond ope GRj)
+       (.str name "$pack $" regtype "doublek,@($GRi,$GRj),$CCi,$cond")
+       (+ pack (.sym regtype doublek) op GRi CCi  cond ope GRj)
        (if (eq CCi (or cond 2))
 	   (sequence ((WI address))
 		     (store-double-semantics mode regtype address GRj)
@@ -4988,8 +5001,8 @@
   (dni name
        (comment)
        ((UNIT STORE) (FR550-MAJOR I-4) (FR500-MAJOR I-3) (FR400-MAJOR I-3) attr)
-       (.str name "$pack $" regtype "k,@($GRi,$d12)")
-       (+ pack (.sym regtype k) op GRi d12)
+       (.str name "$pack $" regtype "doublek,@($GRi,$d12)")
+       (+ pack (.sym regtype doublek) op GRi d12)
        (sequence ((WI address))
 		 (store-double-semantics mode regtype address d12))
        profile
@@ -6487,7 +6500,7 @@
 (ne-floating-point-conversion nfstoi OP_79 OPE1_21 fix   SI FRj FRintk "NE convert Single to Integer")
 
 (register-transfer fmovs OP_79 OPE1_02
-		   FRj FRk FM01
+		   FRj FRk FMALL
 		   ((FR500-MAJOR F-1) (FR550-MAJOR F-2) (MACH simple,tomcat,fr500,fr550,frv))
 		   ((fr500 (unit u-fr2fr)))
 		   "Move Single Float")

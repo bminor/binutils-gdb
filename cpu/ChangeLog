@@ -1,3 +1,16 @@
+2003-10-10  Dave Brolley  <brolley@redhat.com>
+
+	* frv.cpu (dnpmop): New p-macro.
+	(GRdoublek): Use dnpmop.
+	(CPRdoublek, FRdoublei, FRdoublej, FRdoublek): Ditto.
+	(store-double-r-r): Use (.sym regtype doublek).
+	(r-store-double): Ditto.
+	(store-double-r-r-u): Ditto.
+	(conditional-store-double): Ditto.
+	(conditional-store-double-u): Ditto.
+	(store-double-r-simm): Ditto.
+	(fmovs): Assign to UNIT FMALL.
+
 2003-10-06  Dave Brolley  <brolley@redhat.com>
 
 	* frv.cpu, frv.opc: Add support for fr550.
