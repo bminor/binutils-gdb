@@ -1,3 +1,8 @@
+2001-07-14  matthew green  <mrg@eterna.com.au>
+
+	* configure.in (i386-*-netbsdelf*): New target.
+	configure: Regenerate.
+
 2001-07-11  Jakub Jelinek  <jakub@redhat.com>
 
 	* testsuite/gas/sparc/unalign.s: Remove .uaxword test.
