@@ -1,5 +1,8 @@
 Tue Feb 17 17:27:30 1998  Doug Evans  <devans@seba.cygnus.com>
 
+	* Make-common.in (CGEN_MAIN_SCM): Update.
+	* aclocal.m4 (USE_MAINTAINER_MODE): New variable.
+
 	* cgen-sim.h (SEMANTIC_CACHE_FN): Delete.
 	(SEMANTIC_FN): Rewrite declaration.
 	(DECODE): Update type of semantic_fast member.
