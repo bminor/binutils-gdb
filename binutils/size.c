@@ -1,5 +1,5 @@
 /* size.c -- report size of various sections of an executable file.
-   Copyright (C) 1991 Free Software Foundation, Inc.
+   Copyright 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
 
@@ -37,9 +37,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define BSD_DEFAULT 1
 #endif
 
-PROTO(void, display_file, (char *filename));
-PROTO(void, print_sizes,  (bfd *file));
-
 /* Various program options */
 
 enum {decimal, octal, hex} radix = decimal;
@@ -53,6 +50,14 @@ int return_code = 0;
 extern char *program_version;
 extern char *program_name;
 extern char *target;
+
+/* Forward declarations */
+
+static void
+display_file PARAMS ((char *filename));
+
+static void
+print_sizes PARAMS ((bfd *file));
 
 /** main and like trivia */
 
@@ -81,7 +86,7 @@ usage ()
 struct option long_options[] = {{"radix",   no_argument, 0, 0},
 				{"format",  required_argument, 0, 0},
 				{"version", no_argument, &show_version, 1},
-				{"target",  optional_argument, NULL, NULL},
+				{"target",  optional_argument, NULL, 0},
 				{"help",    no_argument, &show_help, 1},
 				{0, no_argument, 0, 0}};
 
@@ -189,7 +194,7 @@ display_bfd (abfd)
   return;
 }
 
-void
+static void
 display_file(filename)
      char *filename;
 {
@@ -229,18 +234,20 @@ display_file(filename)
 /* This is what lexical functions are for */
 void
 lprint_number (width, num)
-     int width, num;
+     int width;
+     bfd_size_type num;
 {
-  printf ((radix == decimal ? "%-*d\t" :
-	   ((radix == octal) ? "%-*o\t" : "%-*x\t")), width, num);
+  printf ((radix == decimal ? "%-*ld\t" :
+	   ((radix == octal) ? "%-*lo\t" : "%-*lx\t")), width, (long)num);
 }
 
 void
 rprint_number(width, num)
-     int width, num;
+     int width;
+     bfd_size_type num;
 {
-  printf ((radix == decimal ? "%*d\t" :
-	   ((radix == octal) ? "%*o\t" : "%*x\t")), width, num);
+  printf ((radix == decimal ? "%*ld\t" :
+	   ((radix == octal) ? "%*lo\t" : "%*lx\t")), width, (long)num);
 }
 
 static char *bss_section_name = ".bss";
@@ -255,10 +262,10 @@ bfd *abfd;
   sec_ptr bsssection = NULL;
   sec_ptr datasection = NULL;
   sec_ptr textsection = NULL;
-  unsigned long bsssize = 0;
-  unsigned long datasize = 0;
-  unsigned long textsize = 0;
-  unsigned long total = 0;
+  bfd_size_type bsssize = 0;
+  bfd_size_type datasize = 0;
+  bfd_size_type textsize = 0;
+  bfd_size_type total = 0;
 
   
   if ((textsection = bfd_get_section_by_name (abfd, text_section_name))
@@ -297,14 +304,15 @@ bfd *abfd;
   lprint_number (7, textsize);
   lprint_number (7, datasize);
   lprint_number (7, bsssize);
-  printf (((radix == octal) ? "%-7o\t%-7x\t" : "%-7d\t%-7x\t"), total, total);
+  printf (((radix == octal) ? "%-7lo\t%-7lx\t" : "%-7ld\t%-7lx\t"),
+	  (long)total, (long)total);
 
   fputs(bfd_get_filename(abfd), stdout);
   if (abfd->my_archive) printf (" (ex %s)", abfd->my_archive->filename);
 }
 
 /* I REALLY miss lexical functions! */
-int svi_total = 0;
+bfd_size_type svi_total = 0;
 
 void
 sysv_internal_printer(file, sec, ignore)
@@ -312,7 +320,7 @@ sysv_internal_printer(file, sec, ignore)
      sec_ptr sec;
      PTR ignore;
 {
-  int size = bfd_section_size (file, sec);
+  bfd_size_type size = bfd_section_size (file, sec);
   if (sec!= &bfd_abs_section 
       && sec!= &bfd_com_section
       && sec!=&bfd_und_section) 
@@ -346,7 +354,7 @@ print_sysv_format(file)
   printf("\n");  printf("\n");
 }
 
-void
+static void
 print_sizes(file)
      bfd *file;
 {

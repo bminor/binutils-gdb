@@ -1,4 +1,19 @@
+Tue Dec 15 18:05:07 1992  Per Bothner  (bothner@cygnus.com)
+
+	* Makefile.in (dist):  Fix permissions before release.
+	* size.c:  Use bfd_size_type (and long) where appropriate.
+	* ar.c:  Make writing a map the default, to be compatible
+	with SYSV and Posix.2.  Remove some bogus kludges that
+	handled __.SYMDEF directly.
+	* NEWS:  New file.
+
+Mon Nov  9 13:36:53 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in: flex no longer needs the -S flag
+
 Sat Nov  7 15:06:13 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+        * ar.c (extract_file): utime needs a pointer to a utimbuf
 
 	* Makefile.in: handle -I includes better, adding $(BASEDIR)/bfd to
 	the list (since some of the bfd/hosts/*.h files include other

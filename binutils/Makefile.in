@@ -61,7 +61,7 @@ SYMLINK = ln -s
 BISON = `if [ -f ../byacc/byacc ] ; then echo ../byacc/byacc ; else echo byacc ; fi`
 # Comment these out if using lex.
 LEX_OPTIONS = -I -Cem 
-LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex -S../flex/flex.skel ; else echo flex ; fi`
+LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex ; else echo flex ; fi`
 
 # Distribution version
 VERSION=2.0
@@ -351,11 +351,18 @@ install-info: info
 clean-info:
 	-rm -rf *.info*
 
+# Making a dist:
+# cvs rtag binutils-x-yy binutils
+# cvs co -r binutils-x-yy binutils
+# Sanitize
+# cd {HERE}; make dist [-f Makefile.in]
+
 dist: $(DIST_NAME).tar.Z
 
 diststuff: $(DISTSTUFF)
 
 $(DIST_NAME).tar.Z:
+	cd ..; chmod og=u `find . -print`
 	cd ../..; rm -f $(DIST_NAME); ln -s devo $(DIST_NAME)
 	make diststuff -f Makefile.in
 	cd ../ld; make diststuff -f Makefile.in
