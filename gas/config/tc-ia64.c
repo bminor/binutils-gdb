@@ -153,7 +153,11 @@ struct label_fix
   struct symbol *sym;
 };
 
+/* This is the endianness of the current section.  */
 extern int target_big_endian;
+
+/* This is the default endianness.  */
+static int default_big_endian = TARGET_BYTES_BIG_ENDIAN;
 
 void (*ia64_number_to_chars) PARAMS ((char *, valueT, int));
 
@@ -4406,8 +4410,7 @@ dot_byteorder (byteorder)
   if (byteorder == -1)
     {
       if (seginfo->tc_segment_info_data.endian == 0)
-	seginfo->tc_segment_info_data.endian
-	  = TARGET_BYTES_BIG_ENDIAN ? 1 : 2;
+	seginfo->tc_segment_info_data.endian = default_big_endian ? 1 : 2;
       byteorder = seginfo->tc_segment_info_data.endian == 1;
     }
   else
@@ -6528,10 +6531,12 @@ md_parse_option (c, arg)
       else if (strcmp (arg, "le") == 0)
 	{
 	  md.flags &= ~EF_IA_64_BE;
+	  default_big_endian = 0;
 	}
       else if (strcmp (arg, "be") == 0)
 	{
 	  md.flags |= EF_IA_64_BE;
+	  default_big_endian = 1;
 	}
       else
 	return 0;
@@ -6704,7 +6709,7 @@ md_begin ()
 
   /* Make sure function pointers get initialized.  */
   target_big_endian = -1;
-  dot_byteorder (TARGET_BYTES_BIG_ENDIAN);
+  dot_byteorder (default_big_endian);
 
   alias_hash = hash_new ();
   alias_name_hash = hash_new ();

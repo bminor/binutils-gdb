@@ -1,3 +1,9 @@
+2004-07-09  James E Wilson  <wilson@specifixinc.com>
+
+	* config/tc-ia64.c (default_big_endian): New.
+	(dot_byteorder, md_begin): Use it.
+	(md_parse_option): Set it.
+	
 2004-07-09  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in: Change sh-sybmian-elf to sh-*-symbianelf.
