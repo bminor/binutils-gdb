@@ -1,3 +1,9 @@
+2002-07-05  Grace Sainsbury  <graces@redhat.com>
+
+	* config/mcore/tm-mcore.h: Remove file.
+	* config/mcore/mcore.mt: Remove definition of TM_FILE
+	* configure.tgt: Set gdb_multi_arch to yes for the mcore target.
+
 2002-07-05  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386bsd-tdep.c: Include "gdb_string.h".

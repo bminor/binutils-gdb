@@ -315,4 +315,5 @@ mn10300)	gdb_multi_arch=yes ;;
 x86-64linux)    gdb_multi_arch=yes ;;
 v850)           gdb_multi_arch=yes ;;
 xstormy16)      gdb_multi_arch=yes ;;
+mcore)		gdb_multi_arch=yes ;;
 esac
