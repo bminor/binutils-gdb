@@ -375,7 +375,7 @@ handle_load_dll (char *eventp)
 }
 
 
-static void
+static int
 handle_exception (DEBUG_EVENT * event, struct target_waitstatus *ourstatus)
 {
   int i;
@@ -411,6 +411,12 @@ handle_exception (DEBUG_EVENT * event, struct target_waitstatus *ourstatus)
       ourstatus->value.sig = TARGET_SIGNAL_TRAP;
       break;
     default:
+      /* This may be a structured exception handling exception.  In
+         that case, we want to let the program try to handle it, and
+         only break if we see the exception a second time.  */
+      if (event->u.Exception.dwFirstChance)
+	return 0;
+
       printf_unfiltered ("gdb: unknown target exception 0x%08x at 0x%08x\n",
 			 event->u.Exception.ExceptionRecord.ExceptionCode,
 			 event->u.Exception.ExceptionRecord.ExceptionAddress);
@@ -420,6 +426,7 @@ handle_exception (DEBUG_EVENT * event, struct target_waitstatus *ourstatus)
   context.ContextFlags = CONTEXT_FULL | CONTEXT_FLOATING_POINT;
   GetThreadContext (current_thread, &context);
   exception_count++;
+  return 1;
 }
 
 static int
@@ -436,11 +443,14 @@ child_wait (int pid, struct target_waitstatus *ourstatus)
       DEBUG_EVENT event;
       BOOL t = WaitForDebugEvent (&event, INFINITE);
       char *p;
+      DWORD continue_status;
 
       event_count++;
 
       current_thread_id = event.dwThreadId;
       current_process_id = event.dwProcessId;
+
+      continue_status = DBG_CONTINUE;
 
       switch (event.dwDebugEventCode)
 	{
@@ -490,8 +500,10 @@ child_wait (int pid, struct target_waitstatus *ourstatus)
 	  DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%d code=%s)\n",
 			event.dwProcessId, event.dwThreadId,
 			"EXCEPTION_DEBUG_EVENT"));
-	  handle_exception (&event, ourstatus);
-	  return current_process_id;
+	  if (handle_exception (&event, ourstatus))
+	    return current_process_id;
+	  continue_status = DBG_EXCEPTION_NOT_HANDLED;
+	  break;
 
 	case OUTPUT_DEBUG_STRING_EVENT: /* message from the kernel */
 	  DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%d code=%s)\n",
@@ -516,7 +528,7 @@ child_wait (int pid, struct target_waitstatus *ourstatus)
 		     current_process_id, current_thread_id));
       CHECK (ContinueDebugEvent (current_process_id,
 				 current_thread_id,
-				 DBG_CONTINUE));
+				 continue_status));
     }
 }
 
