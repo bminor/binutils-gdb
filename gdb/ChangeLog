@@ -1,5 +1,9 @@
 2001-05-11  Jim Blandy  <jimb@redhat.com>
 
+	* thread.c (do_captured_list_thread_ids): Use ui_out_tuple_begin
+	and ui_out_tuple_end instead of ui_out_list_begin and
+	ui_out_list_end.
+
 	* Makefile.in (gnu-v2-abi.o): Add $(demangle_h) to list of
 	dependencies.  Reorder dependencies to match #includes in file,
 	for easier verification.
