@@ -1230,16 +1230,6 @@ solib_add (char *pattern, int from_tty, struct target_ops *target)
   struct so_list *inferior = current_sos ();
   struct so_list *gdb, **gdb_link;
 
-  /* #define JIMB_DEBUG */
-#ifdef JIMB_DEBUG
-  printf ("GDB's shared library list:\n");
-  for (gdb = so_list_head; gdb; gdb = gdb->next)
-    printf ("  %s\n", gdb->so_original_name);
-  printf ("inferior's shared library list:\n");
-  for (gdb = inferior; gdb; gdb = gdb->next)
-    printf ("  %s\n", gdb->so_original_name);
-#endif
-
 #ifdef SVR4_SHARED_LIBS
   /* If we are attaching to a running process for which we 
      have not opened a symbol file, we may be able to get its 
@@ -1317,9 +1307,6 @@ solib_add (char *pattern, int from_tty, struct target_ops *target)
       if (i)
 	{
 	  *i_link = i->next;
-#ifdef JIMB_DEBUG
-	  printf ("unchanged: %s\n", i->so_name);
-#endif
 	  free_so (i);
 	  gdb_link = &gdb->next;
 	  gdb = *gdb_link;
@@ -1329,9 +1316,6 @@ solib_add (char *pattern, int from_tty, struct target_ops *target)
       else
 	{
 	  *gdb_link = gdb->next;
-#ifdef JIMB_DEBUG
-	  printf ("removed:   %s\n", gdb->so_name);
-#endif
 
 	  /* Unless the user loaded it explicitly, free SO's objfile.  */
 	  if (! (gdb->objfile->flags & OBJF_USERLOADED))
@@ -1378,9 +1362,6 @@ solib_add (char *pattern, int from_tty, struct target_ops *target)
 		}
 	      else
 		{
-#ifdef JIMB_DEBUG
-		  printf ("added:     %s\n", i->so_name);
-#endif
 		  if (catch_errors
 		      (symbol_add_stub, i,
 		       "Error while reading shared library symbols:\n",
@@ -1427,10 +1408,6 @@ solib_add (char *pattern, int from_tty, struct target_ops *target)
 
       special_symbol_handling ();
     }
-
-#ifdef JIMB_DEBUG
-  putchar ('\n');
-#endif
 }
 
 
