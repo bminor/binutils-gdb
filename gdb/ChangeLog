@@ -1,5 +1,7 @@
 2003-10-06  Andrew Cagney  <cagney@redhat.com>
 
+	* Makefile.in: Update all dependencies.
+
 	* MAINTAINERS: Mention that h8500, mn10200, and z8k were deleted.
 	No longer list PA as as obsolete candidate.  List m32r as
 	broken instead of obsolete.
