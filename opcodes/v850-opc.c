@@ -193,10 +193,10 @@ const struct v850_opcode v850_opcodes[] = {
 { "jr",		one(0x0780),		one(0xffe0),	{ D22 } },
 
 /* bit manipulation instructions */
-{ "set1",	two(0x07c0,0x0000),	two(0xc7e0,0x0000),	{B3, R1, D16} },
-{ "not1",	two(0x47c0,0x0000),	two(0xc7e0,0x0000),	{B3, R1, D16} },
-{ "clr1",	two(0x87c0,0x0000),	two(0xc7e0,0x0000),	{B3, R1, D16} },
-{ "tst1",	two(0xc7c0,0x0000),	two(0xc7e0,0x0000),	{B3, R1, D16} },
+{ "set1",	two(0x07c0,0x0000),	two(0xc7e0,0x0000),	{B3, D16, R1} },
+{ "not1",	two(0x47c0,0x0000),	two(0xc7e0,0x0000),	{B3, D16, R1} },
+{ "clr1",	two(0x87c0,0x0000),	two(0xc7e0,0x0000),	{B3, D16, R1} },
+{ "tst1",	two(0xc7c0,0x0000),	two(0xc7e0,0x0000),	{B3, D16, R1} },
 
 /* special instructions */
 { "di",		two(0x07e0,0x0160),	two(0xffff,0xffff),	{0} },
