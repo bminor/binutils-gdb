@@ -1,3 +1,7 @@
+2003-10-04  GDB Administrator  <gdbadmin@sourceware.org>
+
+	* version.in:  Bump toversion 6.0.0.90.
+
 2003-10-01  GDB Administrator  <gdbadmin@sourceware.org>
 
 	* version.in: Bump to version 6.0.
