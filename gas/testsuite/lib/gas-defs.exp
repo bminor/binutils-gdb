@@ -56,7 +56,7 @@ proc gas_start { prog as_opts } {
 
     verbose "Starting $AS $ASFLAGS $as_opts $prog" 2
     catch {
-	spawn -noecho -nottyinit $srcdir/lib/run $AS $ASFLAGS $as_opts $srcdir/$subdir/$prog
+	spawn -noecho -nottycopy $srcdir/lib/run $AS $ASFLAGS $as_opts $srcdir/$subdir/$prog
     } foo
     if ![regexp {^[0-9]+} $foo] then {
 	perror "Can't run $subdir/$prog: $foo"
