@@ -1,3 +1,7 @@
+Fri Aug  8 00:28:38 UTC 2003  Brendan Conoboy  <blc@redhat.com>
+
+	* MAINTAINERS (write after approval): Added self
+
 2003-08-07  Andrew Cagney  <cagney@redhat.com>
 
 	* inferior.h (AT_SYMBOL): Define.
