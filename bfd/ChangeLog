@@ -1,3 +1,10 @@
+1999-07-05  Nick Clifton  <nickc@cygnus.com>
+
+	* reloc.c: Add new, assembler only, ARM reloc:
+	BFD_RELOC_ARM_ADRL_IMMEDIATE.
+	
+	* bfd-in2.h: Regenerate.
+
 1999-07-02  Mark Mitchell  <mark@codesourcery.com>
 
 	* dwarf2.c (parse_comp_unit): Add ABBREV_LENGTH parameter.

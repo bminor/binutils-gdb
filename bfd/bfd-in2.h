@@ -1915,6 +1915,7 @@ not stored in the instruction. */
 /* These relocs are only used within the ARM assembler.  They are not
 (at present) written to any object files. */
   BFD_RELOC_ARM_IMMEDIATE,
+  BFD_RELOC_ARM_ADRL_IMMEDIATE,
   BFD_RELOC_ARM_OFFSET_IMM,
   BFD_RELOC_ARM_SHIFT_IMM,
   BFD_RELOC_ARM_SWI,
