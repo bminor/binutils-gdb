@@ -1,3 +1,27 @@
+2004-02-23  Nick Clifton  <nickc@redhat.com>
+
+	* Apply these patches from Renesas:
+
+	2004-02-10  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
+
+	* cpu/m32r.opc (my_print_insn): Fixed incorrect output when
+	disassembling codes for 0x*2 addresses.
+
+	2003-12-15  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
+
+	* cpu/m32r.cpu: Add PIPE_O attribute to "pop" instruction.
+
+	2003-12-03  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
+
+	* cpu/m32r.cpu : Add new model m32r2.
+	Add new instructions.
+	Replace occurrances of 'Mitsubishi' with 'Renesas'.
+	Changed PIPE attr of push from O to OS.
+	Care for Little-endian of M32R.
+	* cpu/m32r.opc (CGEN_DIS_HASH, my_print_insn):
+	Care for Little-endian of M32R.
+	(parse_slo16): signed extension for value.
+
 2004-02-20  Andrew Cagney  <cagney@redhat.com>
 
 	* m32r.opc, m32r.cpu: New files.  Written by , Doug Evans, Nick

@@ -27,7 +27,6 @@
 
 */
 
-
 /* This file is an addendum to m32r.cpu.  Heavy use of C code isn't
    appropriate in .cpu files, so it resides here.  This especially applies
    to assembly/disassembly where parsing/printing can be quite involved.
@@ -49,6 +48,7 @@
 #undef  CGEN_DIS_HASH_SIZE
 #define CGEN_DIS_HASH_SIZE 256
 #undef  CGEN_DIS_HASH
+#if 0
 #define X(b) (((unsigned char *) (b))[0] & 0xf0)
 #define CGEN_DIS_HASH(buffer, value) \
 (X (buffer) | \
@@ -56,7 +56,37 @@
   : X (buffer) == 0x70 || X (buffer) == 0xf0 ? (((unsigned char *) (buffer))[0] & 0xf) \
   : X (buffer) == 0x30 ? ((((unsigned char *) (buffer))[1] & 0x70) >> 4) \
   : ((((unsigned char *) (buffer))[1] & 0xf0) >> 4)))
+#else
+#define CGEN_DIS_HASH(buffer, value) m32r_cgen_dis_hash(buffer, value)
+extern unsigned int m32r_cgen_dis_hash(const char *, CGEN_INSN_INT);
+#endif
 
+/* -- */
+
+/* -- opc.c */
+unsigned int
+m32r_cgen_dis_hash (buf, value)
+     const char * buf ATTRIBUTE_UNUSED;
+     CGEN_INSN_INT value;
+{
+  unsigned int x;
+                                                                                
+  if (value & 0xffff0000) /* 32bit instructions */
+    value = (value >> 16) & 0xffff;
+                                                                                
+  x = (value>>8) & 0xf0;
+  if (x == 0x40 || x == 0xe0 || x == 0x60 || x == 0x50)
+    return x;
+                                                                                
+  if (x == 0x70 || x == 0xf0)
+    return x | ((value>>8) & 0x0f);
+                                                                                
+  if (x == 0x30)
+    return x | ((value & 0x70) >> 4);
+  else
+    return x | ((value & 0xf0) >> 4);
+}
+                                                                                
 /* -- */
 
 /* -- asm.c */
@@ -159,7 +189,11 @@ parse_slo16 (cd, strp, opindex, valuep)
       ++*strp;
       if (errmsg == NULL
 	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-	value &= 0xffff;
+        {
+	  value &= 0xffff;
+          if (value & 0x8000)
+             value |= 0xffff0000;
+        }
       *valuep = value;
       return errmsg;
     }
@@ -259,10 +293,13 @@ my_print_insn (cd, pc, info)
   char *buf = buffer;
   int status;
   int buflen = (pc & 3) == 0 ? 4 : 2;
+  int big_p = CGEN_CPU_INSN_ENDIAN (cd) == CGEN_ENDIAN_BIG;
+  char *x;
 
   /* Read the base part of the insn.  */
 
-  status = (*info->read_memory_func) (pc, buf, buflen, info);
+  status = (*info->read_memory_func) (pc - ((!big_p && (pc & 3) != 0) ? 2 : 0),
+                                      buf, buflen, info);
   if (status != 0)
     {
       (*info->memory_error_func) (status, pc, info);
@@ -270,22 +307,25 @@ my_print_insn (cd, pc, info)
     }
 
   /* 32 bit insn?  */
-  if ((pc & 3) == 0 && (buf[0] & 0x80) != 0)
+  x = (big_p ? &buf[0] : &buf[3]);
+  if ((pc & 3) == 0 && (*x & 0x80) != 0)
     return print_insn (cd, pc, info, buf, buflen);
 
   /* Print the first insn.  */
   if ((pc & 3) == 0)
     {
+      buf += (big_p ? 0 : 2);
       if (print_insn (cd, pc, info, buf, 2) == 0)
 	(*info->fprintf_func) (info->stream, UNKNOWN_INSN_MSG);
-      buf += 2;
+      buf += (big_p ? 2 : -2);
     }
 
-  if (buf[0] & 0x80)
+  x = (big_p ? &buf[0] : &buf[1]);
+  if (*x & 0x80)
     {
       /* Parallel.  */
       (*info->fprintf_func) (info->stream, " || ");
-      buf[0] &= 0x7f;
+      *x &= 0x7f;
     }
   else
     (*info->fprintf_func) (info->stream, " -> ");
