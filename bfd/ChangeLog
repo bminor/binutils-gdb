@@ -1,3 +1,20 @@
+2002-04-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-hppa.c (hppa_type_of_stub): Correct and simplify condition
+	under which a plt call stub is used.
+	(final_link_relocate): Similarly.
+	(allocate_plt_static): Clear h-plabel except when plt entry is
+	exclusively used for a plabel.
+	(allocate_dynrelocs): Use the above to simplify plt sizing.
+	(struct elf32_hppa_link_hash_table): Add has_22bit_branch.
+	(elf32_hppa_link_hash_table_create): Init.
+	(BL22_RP): Define.
+	(hppa_build_one_stub): Use BL22_RP if has_22bit_branch.
+	(elf32_hppa_check_relocs): Set has_22bit_branch.
+
+	* elf32-hppa.c (elf32_hppa_check_relocs): Remove debug message.
+	(final_link_relocate): Likewise.
+
 2002-04-22  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Don't build
