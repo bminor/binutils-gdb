@@ -3,7 +3,9 @@
 # unimportant.  The native linker aligns the sections on boundaries
 # specified by the -H option.
 cat <<EOF
+OUTPUT_FORMAT("${OUTPUT_FORMAT}")
 OUTPUT_ARCH(${ARCH})
+${RELOCATING+${LIB_SEARCH_DIRS}}
 ENTRY(__start)
 SECTIONS
 {
