@@ -24,8 +24,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define m32r_OPC_H
 
 #define CGEN_ARCH m32r
+
 /* Given symbol S, return m32r_cgen_<s>.  */
 #define CGEN_SYM(s) CGEN_CAT3 (m32r,_cgen_,s)
+
+/* Selected cpu families.  */
+#define HAVE_CPU_M32R
 
 #define CGEN_WORD_BITSIZE 32
 #define CGEN_DEFAULT_INSN_BITSIZE 32
