@@ -1607,6 +1607,11 @@ define_symbol (valu, string, desc, type, objfile)
 	 in GDB.  E.g. "int" is converted to "function returning int".  */
       if (TYPE_CODE (SYMBOL_TYPE (sym)) != TYPE_CODE_FUNC)
 	SYMBOL_TYPE (sym) = lookup_function_type (SYMBOL_TYPE (sym));
+
+      /* All functions in C++ have prototypes.  */
+      if (SYMBOL_LANGUAGE (sym) == language_cplus)
+	TYPE_FLAGS (SYMBOL_TYPE (sym)) |= TYPE_FLAG_PROTOTYPED;
+
       /* fall into process_prototype_types */
 
     process_prototype_types:
@@ -1614,10 +1619,15 @@ define_symbol (valu, string, desc, type, objfile)
 	 about their actual types (FIXME -- we should remember the whole
 	 function prototype), but the list may define some new types
 	 that we have to remember, so we must scan it now.  */
-      while (*p == ';') {
-	p++;
-	read_type (&p, objfile);
-      }
+      if (*p == ';')
+	{
+	  TYPE_FLAGS (SYMBOL_TYPE (sym)) |= TYPE_FLAG_PROTOTYPED;
+
+	  while (*p == ';') {
+	    p++;
+	    read_type (&p, objfile);
+	  }
+	}
       break;
 
     case 'F':
