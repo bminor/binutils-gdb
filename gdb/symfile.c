@@ -1963,9 +1963,9 @@ init_filename_language_table (void)
       add_filename_language (".c++", language_cplus);
       add_filename_language (".java", language_java);
       add_filename_language (".class", language_java);
-      add_filename_language (".ch", language_chill);
-      add_filename_language (".c186", language_chill);
-      add_filename_language (".c286", language_chill);
+      /* OBSOLETE add_filename_language (".ch", language_chill); */
+      /* OBSOLETE add_filename_language (".c186", language_chill); */
+      /* OBSOLETE add_filename_language (".c286", language_chill); */
       add_filename_language (".f", language_fortran);
       add_filename_language (".F", language_fortran);
       add_filename_language (".s", language_asm);
@@ -2443,9 +2443,9 @@ add_psymbol_with_dem_name_to_list (char *name, int namelength, char *dem_name,
       SYMBOL_CPLUS_DEMANGLED_NAME (&psymbol) =
 	bcache (buf, dem_namelength + 1, objfile->psymbol_cache);
       break;
-    case language_chill:
-      SYMBOL_CHILL_DEMANGLED_NAME (&psymbol) =
-	bcache (buf, dem_namelength + 1, objfile->psymbol_cache);
+      /* OBSOLETE case language_chill: */
+      /* OBSOLETE   SYMBOL_CHILL_DEMANGLED_NAME (&psymbol) = */
+      /* OBSOLETE     bcache (buf, dem_namelength + 1, objfile->psymbol_cache); */
 
       /* FIXME What should be done for the default case? Ignoring for now. */
     }

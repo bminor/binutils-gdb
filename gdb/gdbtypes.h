@@ -101,13 +101,14 @@ enum type_code
     TYPE_CODE_RANGE,		/* Range (integers within spec'd bounds) */
 
     /* A string type which is like an array of character but prints
-       differently (at least for CHILL).  It does not contain a length
-       field as Pascal strings (for many Pascals, anyway) do; if we want
-       to deal with such strings, we should use a new type code.  */
+       differently (at least for (OBSOLETE) CHILL (OBSOLETE)).  It
+       does not contain a length field as Pascal strings (for many
+       Pascals, anyway) do; if we want to deal with such strings, we
+       should use a new type code.  */
     TYPE_CODE_STRING,
 
-    /* String of bits; like TYPE_CODE_SET but prints differently (at least
-       for CHILL).  */
+    /* String of bits; like TYPE_CODE_SET but prints differently (at
+       least for (OBSOLETE) CHILL (OBSOLETE)).  */
     TYPE_CODE_BITSTRING,
 
     /* Unknown type.  The length field is valid if we were able to
@@ -994,13 +995,13 @@ extern struct type *builtin_type_m2_card;
 extern struct type *builtin_type_m2_real;
 extern struct type *builtin_type_m2_bool;
 
-/* Chill types */
+/* OBSOLETE Chill types */
 
-extern struct type *builtin_type_chill_bool;
-extern struct type *builtin_type_chill_char;
-extern struct type *builtin_type_chill_long;
-extern struct type *builtin_type_chill_ulong;
-extern struct type *builtin_type_chill_real;
+/* OBSOLETE extern struct type *builtin_type_chill_bool; */
+/* OBSOLETE extern struct type *builtin_type_chill_char; */
+/* OBSOLETE extern struct type *builtin_type_chill_long; */
+/* OBSOLETE extern struct type *builtin_type_chill_ulong; */
+/* OBSOLETE extern struct type *builtin_type_chill_real; */
 
 /* Fortran (F77) types */
 
@@ -1109,7 +1110,7 @@ extern struct type *create_string_type (struct type *, struct type *);
 
 extern struct type *create_set_type (struct type *, struct type *);
 
-extern int chill_varying_type (struct type *);
+/* OBSOLETE extern int chill_varying_type (struct type *); */
 
 extern struct type *lookup_unsigned_typename (char *);
 

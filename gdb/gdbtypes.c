@@ -1888,21 +1888,23 @@ is_integral_type (struct type *t)
 	 || (TYPE_CODE (t) == TYPE_CODE_BOOL)));
 }
 
-/* Chill varying string and arrays are represented as follows:
+/* (OBSOLETE) Chill (OBSOLETE) varying string and arrays are
+   represented as follows:
 
    struct { int __var_length; ELEMENT_TYPE[MAX_SIZE] __var_data};
 
-   Return true if TYPE is such a Chill varying type. */
+   Return true if TYPE is such a (OBSOLETE) Chill (OBSOLETE) varying
+   type. */
 
-int
-chill_varying_type (struct type *type)
-{
-  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
-      || TYPE_NFIELDS (type) != 2
-      || strcmp (TYPE_FIELD_NAME (type, 0), "__var_length") != 0)
-    return 0;
-  return 1;
-}
+/* OBSOLETE int */
+/* OBSOLETE chill_varying_type (struct type *type) */
+/* OBSOLETE { */
+/* OBSOLETE   if (TYPE_CODE (type) != TYPE_CODE_STRUCT */
+/* OBSOLETE       || TYPE_NFIELDS (type) != 2 */
+/* OBSOLETE       || strcmp (TYPE_FIELD_NAME (type, 0), "__var_length") != 0) */
+/* OBSOLETE     return 0; */
+/* OBSOLETE   return 1; */
+/* OBSOLETE } */
 
 /* Check whether BASE is an ancestor or base class or DCLASS 
    Return 1 if so, and 0 if not.

@@ -383,49 +383,49 @@ value_cast (struct type *type, struct value *arg2)
       VALUE_POINTED_TO_OFFSET (arg2) = 0;	/* pai: chk_val */
       return arg2;
     }
-  else if (chill_varying_type (type))
-    {
-      struct type *range1, *range2, *eltype1, *eltype2;
-      struct value *val;
-      int count1, count2;
-      LONGEST low_bound, high_bound;
-      char *valaddr, *valaddr_data;
-      /* For lint warning about eltype2 possibly uninitialized: */
-      eltype2 = NULL;
-      if (code2 == TYPE_CODE_BITSTRING)
-	error ("not implemented: converting bitstring to varying type");
-      if ((code2 != TYPE_CODE_ARRAY && code2 != TYPE_CODE_STRING)
-	  || (eltype1 = check_typedef (TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (type, 1))),
-	      eltype2 = check_typedef (TYPE_TARGET_TYPE (type2)),
-	      (TYPE_LENGTH (eltype1) != TYPE_LENGTH (eltype2)
-      /* || TYPE_CODE (eltype1) != TYPE_CODE (eltype2) */ )))
-	error ("Invalid conversion to varying type");
-      range1 = TYPE_FIELD_TYPE (TYPE_FIELD_TYPE (type, 1), 0);
-      range2 = TYPE_FIELD_TYPE (type2, 0);
-      if (get_discrete_bounds (range1, &low_bound, &high_bound) < 0)
-	count1 = -1;
-      else
-	count1 = high_bound - low_bound + 1;
-      if (get_discrete_bounds (range2, &low_bound, &high_bound) < 0)
-	count1 = -1, count2 = 0;	/* To force error before */
-      else
-	count2 = high_bound - low_bound + 1;
-      if (count2 > count1)
-	error ("target varying type is too small");
-      val = allocate_value (type);
-      valaddr = VALUE_CONTENTS_RAW (val);
-      valaddr_data = valaddr + TYPE_FIELD_BITPOS (type, 1) / 8;
-      /* Set val's __var_length field to count2. */
-      store_signed_integer (valaddr, TYPE_LENGTH (TYPE_FIELD_TYPE (type, 0)),
-			    count2);
-      /* Set the __var_data field to count2 elements copied from arg2. */
-      memcpy (valaddr_data, VALUE_CONTENTS (arg2),
-	      count2 * TYPE_LENGTH (eltype2));
-      /* Zero the rest of the __var_data field of val. */
-      memset (valaddr_data + count2 * TYPE_LENGTH (eltype2), '\0',
-	      (count1 - count2) * TYPE_LENGTH (eltype2));
-      return val;
-    }
+  /* OBSOLETE else if (chill_varying_type (type)) */
+  /* OBSOLETE   { */
+  /* OBSOLETE     struct type *range1, *range2, *eltype1, *eltype2; */
+  /* OBSOLETE     struct value *val; */
+  /* OBSOLETE     int count1, count2; */
+  /* OBSOLETE     LONGEST low_bound, high_bound; */
+  /* OBSOLETE     char *valaddr, *valaddr_data; */
+  /* OBSOLETE     *//* For lint warning about eltype2 possibly uninitialized: */
+  /* OBSOLETE     eltype2 = NULL; */
+  /* OBSOLETE     if (code2 == TYPE_CODE_BITSTRING) */
+  /* OBSOLETE       error ("not implemented: converting bitstring to varying type"); */
+  /* OBSOLETE     if ((code2 != TYPE_CODE_ARRAY && code2 != TYPE_CODE_STRING) */
+  /* OBSOLETE         || (eltype1 = check_typedef (TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (type, 1))), */
+  /* OBSOLETE       eltype2 = check_typedef (TYPE_TARGET_TYPE (type2)), */
+  /* OBSOLETE                                (TYPE_LENGTH (eltype1) != TYPE_LENGTH (eltype2) */
+  /* OBSOLETE     *//*|| TYPE_CODE (eltype1) != TYPE_CODE (eltype2) *//* ))) */
+  /* OBSOLETE      error ("Invalid conversion to varying type"); */
+  /* OBSOLETE     range1 = TYPE_FIELD_TYPE (TYPE_FIELD_TYPE (type, 1), 0); */
+  /* OBSOLETE     range2 = TYPE_FIELD_TYPE (type2, 0); */
+  /* OBSOLETE     if (get_discrete_bounds (range1, &low_bound, &high_bound) < 0) */
+  /* OBSOLETE       count1 = -1; */
+  /* OBSOLETE     else */
+  /* OBSOLETE       count1 = high_bound - low_bound + 1; */
+  /* OBSOLETE     if (get_discrete_bounds (range2, &low_bound, &high_bound) < 0) */
+  /* OBSOLETE       count1 = -1, count2 = 0;	*//* To force error before */
+  /* OBSOLETE     else */
+  /* OBSOLETE       count2 = high_bound - low_bound + 1; */
+  /* OBSOLETE     if (count2 > count1) */
+  /* OBSOLETE       error ("target varying type is too small"); */
+  /* OBSOLETE     val = allocate_value (type); */
+  /* OBSOLETE     valaddr = VALUE_CONTENTS_RAW (val); */
+  /* OBSOLETE     valaddr_data = valaddr + TYPE_FIELD_BITPOS (type, 1) / 8; */
+  /* OBSOLETE     *//* Set val's __var_length field to count2. */
+  /* OBSOLETE     store_signed_integer (valaddr, TYPE_LENGTH (TYPE_FIELD_TYPE (type, 0)), */
+  /* OBSOLETE 	    count2); */
+  /* OBSOLETE     *//* Set the __var_data field to count2 elements copied from arg2. */
+  /* OBSOLETE     memcpy (valaddr_data, VALUE_CONTENTS (arg2), */
+  /* OBSOLETE      count2 * TYPE_LENGTH (eltype2)); */
+  /* OBSOLETE     *//* Zero the rest of the __var_data field of val. */
+  /* OBSOLETE     memset (valaddr_data + count2 * TYPE_LENGTH (eltype2), '\0', */
+  /* OBSOLETE      (count1 - count2) * TYPE_LENGTH (eltype2)); */
+  /* OBSOLETE     return val; */
+  /* OBSOLETE   } */
   else if (VALUE_LVAL (arg2) == lval_memory)
     {
       return value_at_lazy (type, VALUE_ADDRESS (arg2) + VALUE_OFFSET (arg2),
@@ -2074,20 +2074,22 @@ search_struct_field (char *name, struct value *arg1, int offset,
 		/* Look for a match through the fields of an anonymous union,
 		   or anonymous struct.  C++ provides anonymous unions.
 
-		   In the GNU Chill implementation of variant record types,
-		   each <alternative field> has an (anonymous) union type,
-		   each member of the union represents a <variant alternative>.
-		   Each <variant alternative> is represented as a struct,
-		   with a member for each <variant field>.  */
+		   In the GNU Chill (OBSOLETE) implementation of
+		   variant record types, each <alternative field> has
+		   an (anonymous) union type, each member of the union
+		   represents a <variant alternative>.  Each <variant
+		   alternative> is represented as a struct, with a
+		   member for each <variant field>.  */
 
 		struct value *v;
 		int new_offset = offset;
 
-		/* This is pretty gross.  In G++, the offset in an anonymous
-		   union is relative to the beginning of the enclosing struct.
-		   In the GNU Chill implementation of variant records,
-		   the bitpos is zero in an anonymous union field, so we
-		   have to add the offset of the union here. */
+		/* This is pretty gross.  In G++, the offset in an
+		   anonymous union is relative to the beginning of the
+		   enclosing struct.  In the GNU Chill (OBSOLETE)
+		   implementation of variant records, the bitpos is
+		   zero in an anonymous union field, so we have to add
+		   the offset of the union here. */
 		if (TYPE_CODE (field_type) == TYPE_CODE_STRUCT
 		    || (TYPE_NFIELDS (field_type) > 0
 			&& TYPE_FIELD_BITPOS (field_type, 0) == 0))
@@ -3310,10 +3312,10 @@ value_slice (struct value *array, int lowbound, int length)
   if (get_discrete_bounds (range_type, &lowerbound, &upperbound) < 0)
     error ("slice from bad array or bitstring");
   if (lowbound < lowerbound || length < 0
-      || lowbound + length - 1 > upperbound
-  /* Chill allows zero-length strings but not arrays. */
-      || (current_language->la_language == language_chill
-	  && length == 0 && TYPE_CODE (array_type) == TYPE_CODE_ARRAY))
+      || lowbound + length - 1 > upperbound)
+    /* OBSOLETE Chill allows zero-length strings but not arrays. */
+    /* OBSOLETE || (current_language->la_language == language_chill */
+    /* OBSOLETE && length == 0 && TYPE_CODE (array_type) == TYPE_CODE_ARRAY)) */
     error ("slice out of range");
   /* FIXME-type-allocation: need a way to free this type when we are
      done with it.  */
@@ -3369,8 +3371,8 @@ value_slice (struct value *array, int lowbound, int length)
   return slice;
 }
 
-/* Assuming chill_varying_type (VARRAY) is true, return an equivalent
-   value as a fixed-length array. */
+/* Assuming OBSOLETE chill_varying_type (VARRAY) is true, return an
+   equivalent value as a fixed-length array. */
 
 struct value *
 varying_to_slice (struct value *varray)

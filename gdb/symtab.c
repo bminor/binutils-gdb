@@ -438,24 +438,26 @@ symbol_init_demangled_name (struct general_symbol_info *gsymbol,
           gsymbol->language_specific.cplus_specific.demangled_name = NULL;
         }
     }
-  if (demangled == NULL
-      && (gsymbol->language == language_chill
-          || gsymbol->language == language_auto))
-    {
-      demangled =
-        chill_demangle (gsymbol->name);
-      if (demangled != NULL)
-        {
-          gsymbol->language = language_chill;
-          gsymbol->language_specific.chill_specific.demangled_name =
-            obsavestring (demangled, strlen (demangled), obstack);
-          xfree (demangled);
-        }
-      else
-        {
-          gsymbol->language_specific.chill_specific.demangled_name = NULL;
-        }
-    }
+#if 0
+  /* OBSOLETE if (demangled == NULL */
+  /* OBSOLETE     && (gsymbol->language == language_chill */
+  /* OBSOLETE         || gsymbol->language == language_auto)) */
+  /* OBSOLETE   { */
+  /* OBSOLETE     demangled = */
+  /* OBSOLETE       chill_demangle (gsymbol->name); */
+  /* OBSOLETE     if (demangled != NULL) */
+  /* OBSOLETE       { */
+  /* OBSOLETE         gsymbol->language = language_chill; */
+  /* OBSOLETE         gsymbol->language_specific.chill_specific.demangled_name = */
+  /* OBSOLETE           obsavestring (demangled, strlen (demangled), obstack); */
+  /* OBSOLETE         xfree (demangled); */
+  /* OBSOLETE       } */
+  /* OBSOLETE     else */
+  /* OBSOLETE       { */
+  /* OBSOLETE         gsymbol->language_specific.chill_specific.demangled_name = NULL; */
+  /* OBSOLETE       } */
+  /* OBSOLETE   } */
+#endif
 }
 
 

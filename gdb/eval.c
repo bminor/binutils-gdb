@@ -186,8 +186,8 @@ get_label (register struct expression *exp, int *pos)
     return NULL;
 }
 
-/* This function evaluates tuples (in Chill) or brace-initializers
-   (in C/C++) for structure types.  */
+/* This function evaluates tuples (in (OBSOLETE) Chill) or
+   brace-initializers (in C/C++) for structure types.  */
 
 static struct value *
 evaluate_struct_tuple (struct value *struct_val,
@@ -325,13 +325,11 @@ evaluate_struct_tuple (struct value *struct_val,
   return struct_val;
 }
 
-/* Recursive helper function for setting elements of array tuples for Chill.
-   The target is ARRAY (which has bounds LOW_BOUND to HIGH_BOUND);
-   the element value is ELEMENT;
-   EXP, POS and NOSIDE are as usual.
-   Evaluates index expresions and sets the specified element(s) of
-   ARRAY to ELEMENT.
-   Returns last index value.  */
+/* Recursive helper function for setting elements of array tuples for
+   (OBSOLETE) Chill.  The target is ARRAY (which has bounds LOW_BOUND
+   to HIGH_BOUND); the element value is ELEMENT; EXP, POS and NOSIDE
+   are as usual.  Evaluates index expresions and sets the specified
+   element(s) of ARRAY to ELEMENT.  Returns last index value.  */
 
 static LONGEST
 init_array_element (struct value *array, struct value *element,

@@ -186,9 +186,9 @@ typedef unsigned int DIE_REF;	/* Reference to a DIE */
 #define LCC_PRODUCER "NCR C/C++"
 #endif
 
-#ifndef CHILL_PRODUCER
-#define CHILL_PRODUCER "GNU Chill "
-#endif
+/* OBSOLETE #ifndef CHILL_PRODUCER */
+/* OBSOLETE #define CHILL_PRODUCER "GNU Chill " */
+/* OBSOLETE #endif */
 
 /* Flags to target_to_host() that tell whether or not the data object is
    expected to be signed.  Used, for example, when fetching a signed
@@ -621,9 +621,9 @@ set_cu_language (struct dieinfo *dip)
     case LANG_C_PLUS_PLUS:
       cu_language = language_cplus;
       break;
-    case LANG_CHILL:
-      cu_language = language_chill;
-      break;
+      /* OBSOLETE case LANG_CHILL: */
+      /* OBSOLETE   cu_language = language_chill; */
+      /* OBSOLETE   break; */
     case LANG_MODULA2:
       cu_language = language_m2;
       break;
@@ -1822,8 +1822,8 @@ handle_producer (char *producer)
   else
     {
       processing_gcc_compilation =
-	STREQN (producer, GPLUS_PRODUCER, strlen (GPLUS_PRODUCER))
-	|| STREQN (producer, CHILL_PRODUCER, strlen (CHILL_PRODUCER));
+	STREQN (producer, GPLUS_PRODUCER, strlen (GPLUS_PRODUCER));
+      /* OBSOLETE || STREQN (producer, CHILL_PRODUCER, strlen (CHILL_PRODUCER)); */
     }
 
   /* Select a demangling style if we can identify the producer and if

@@ -1754,7 +1754,8 @@ Pascal set type.  @var{type-information} must be a small type such as an
 enumeration or a subrange, and the type is a bitmask whose length is
 specified by the number of elements in @var{type-information}.
 
-In CHILL, if it is a bitstring instead of a set, also use the @samp{S}
+In CHILL, @c OBSOLETE
+if it is a bitstring instead of a set, also use the @samp{S}
 type attribute (@pxref{String Field}).
 
 @item * @var{type-information}
@@ -1955,7 +1956,8 @@ string.  I don't know the difference.
 Pascal Stringptr.  What is this?  This is an AIX feature.
 @end table
 
-Languages, such as CHILL which have a string type which is basically
+Languages, such as CHILL @c OBSOLETE
+which have a string type which is basically
 just an array of characters use the @samp{S} type attribute
 (@pxref{String Field}).
 

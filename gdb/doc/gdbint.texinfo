@@ -1834,7 +1834,7 @@ The file @file{mdebugread.c} implements reading for this format.
 DWARF 1 is a debugging format that was originally designed to be
 used with ELF in SVR4 systems.
 
-@c CHILL_PRODUCER
+@c OBSOLETE CHILL_PRODUCER
 @c GCC_PRODUCER
 @c GPLUS_PRODUCER
 @c LCC_PRODUCER

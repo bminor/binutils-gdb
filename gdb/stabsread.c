@@ -3739,8 +3739,9 @@ read_struct_fields (struct field_info *fip, char **pp, struct type *type,
     }
   if (p[0] == ':' && p[1] == ':')
     {
-      /* chill the list of fields: the last entry (at the head) is a
-         partially constructed entry which we now scrub. */
+      /* (OBSOLETE) chill (OBSOLETE) the list of fields: the last
+         entry (at the head) is a partially constructed entry which we
+         now scrub. */
       fip->list = fip->list->next;
     }
   return 1;
@@ -4889,9 +4890,11 @@ read_range_type (char **pp, int typenums[2], struct objfile *objfile)
   else if (self_subrange && n2 == 0 && n3 == 127)
     return init_type (TYPE_CODE_INT, 1, 0, NULL, objfile);
 
-  else if (current_symbol && SYMBOL_LANGUAGE (current_symbol) == language_chill
-	   && !self_subrange)
-    goto handle_true_range;
+#if 0
+  /* OBSOLETE else if (current_symbol && SYMBOL_LANGUAGE (current_symbol) == language_chill */
+  /* OBSOLETE          && !self_subrange) */
+  /* OBSOLETE   goto handle_true_range; */
+#endif
 
   /* We used to do this only for subrange of self or subrange of int.  */
   else if (n2 == 0)

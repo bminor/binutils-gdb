@@ -27,17 +27,17 @@
 load_lib libgloss.exp
 
 global GDB
-global CHILL_LIB
-global CHILL_RT0
+# OBSOLETE global CHILL_LIB
+# OBSOLETE global CHILL_RT0
 
-if ![info exists CHILL_LIB] {
-    set CHILL_LIB [findfile $base_dir/../../gcc/ch/runtime/libchill.a "$base_dir/../../gcc/ch/runtime/libchill.a" [transform -lchill]]
-}
-verbose "using CHILL_LIB = $CHILL_LIB" 2
-if ![info exists CHILL_RT0] {
-    set CHILL_RT0 [findfile $base_dir/../../gcc/ch/runtime/chillrt0.o "$base_dir/../../gcc/ch/runtime/chillrt0.o" ""]
-}
-verbose "using CHILL_RT0 = $CHILL_RT0" 2
+# OBSOLETE if ![info exists CHILL_LIB] {
+# OBSOLETE     set CHILL_LIB [findfile $base_dir/../../gcc/ch/runtime/libchill.a "$base_dir/../../gcc/ch/runtime/libchill.a" [transform -lchill]]
+# OBSOLETE }
+# OBSOLETE verbose "using CHILL_LIB = $CHILL_LIB" 2
+# OBSOLETE if ![info exists CHILL_RT0] {
+# OBSOLETE     set CHILL_RT0 [findfile $base_dir/../../gcc/ch/runtime/chillrt0.o "$base_dir/../../gcc/ch/runtime/chillrt0.o" ""]
+# OBSOLETE }
+# OBSOLETE verbose "using CHILL_RT0 = $CHILL_RT0" 2
 
 if [info exists TOOL_EXECUTABLE] {
     set GDB $TOOL_EXECUTABLE;
@@ -920,25 +920,25 @@ proc skip_cplus_tests {} {
     return 0
 }
 
-# * For crosses, the CHILL runtime doesn't build because it can't find
-# setjmp.h, stdio.h, etc.
-# * For AIX (as of 16 Mar 95), (a) there is no language code for
-# CHILL in output_epilog in gcc/config/rs6000/rs6000.c, (b) collect2
-# does not get along with AIX's too-clever linker.
-# * On Irix5, there is a bug whereby set of bool, etc., don't get
-# TYPE_LOW_BOUND for the bool right because force_to_range_type doesn't
-# work with stub types.
-# Lots of things seem to fail on the PA, and since it's not a supported
-# chill target at the moment, don't run the chill tests.
+# OBSOLETE # * For crosses, the CHILL runtime doesn't build because it
+# OBSOLETE # can't find setjmp.h, stdio.h, etc.
+# OBSOLETE # * For AIX (as of 16 Mar 95), (a) there is no language code for
+# OBSOLETE # CHILL in output_epilog in gcc/config/rs6000/rs6000.c, (b) collect2
+# OBSOLETE # does not get along with AIX's too-clever linker.
+# OBSOLETE # * On Irix5, there is a bug whereby set of bool, etc., don't get
+# OBSOLETE # TYPE_LOW_BOUND for the bool right because force_to_range_type doesn't
+# OBSOLETE # work with stub types.
+# OBSOLETE # Lots of things seem to fail on the PA, and since it's not a supported
+# OBSOLETE # chill target at the moment, don't run the chill tests.
 
-proc skip_chill_tests {} {
-    if ![info exists do_chill_tests] {
-	return 1;
-    }
-    eval set skip_chill [expr ![isnative] || [istarget "*-*-aix*"] || [istarget "*-*-irix5*"] || [istarget "*-*-irix6*"] || [istarget "alpha-*-osf*"] || [istarget "hppa*-*-*"]]
-    verbose "Skip chill tests is $skip_chill"
-    return $skip_chill
-}
+# OBSOLETE proc skip_chill_tests {} {
+# OBSOLETE     if ![info exists do_chill_tests] {
+# OBSOLETE 	return 1;
+# OBSOLETE     }
+# OBSOLETE     eval set skip_chill [expr ![isnative] || [istarget "*-*-aix*"] || [istarget "*-*-irix5*"] || [istarget "*-*-irix6*"] || [istarget "alpha-*-osf*"] || [istarget "hppa*-*-*"]]
+# OBSOLETE     verbose "Skip chill tests is $skip_chill"
+# OBSOLETE     return $skip_chill
+# OBSOLETE }
 
 # Skip all the tests in the file if you are not on an hppa running
 # hpux target.

@@ -425,9 +425,6 @@ FLAGS_TO_PASS = \
 	"AR_FLAGS=$(AR_FLAGS)" \
 	"CC=$(CC)" \
 	"CFLAGS=$(CFLAGS)" \
-	"CHILLFLAGS=$(CHILLFLAGS)" \
-	"CHILL=$(CHILL)" \
-	"CHILL_LIB=$(CHILL_LIB)" \
 	"CXX=$(CXX)" \
 	"CXXFLAGS=$(CXXFLAGS)" \
 	"DLLTOOL=$(DLLTOOL)" \
@@ -477,25 +474,25 @@ CXX_FOR_TARGET = ` \
     fi; \
   fi`
 
-CHILLFLAGS = $(CFLAGS)
-CHILL = gcc
-CHILL_FOR_TARGET = ` \
-  if [ -f $${rootme}/../gcc/Makefile ] ; then \
-    echo $${rootme}/../gcc/xgcc -B$${rootme}/../gcc/ -L$${rootme}/../gcc/ch/runtime/; \
-  else \
-    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
-      echo $(CC); \
-    else \
-      t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
-    fi; \
-  fi`
-CHILL_LIB = ` \
-  if [ -f $${rootme}/../gcc/ch/runtime/libchill.a ] ; then \
-    echo $${rootme}/../gcc/ch/runtime/chillrt0.o \
-      $${rootme}/../gcc/ch/runtime/libchill.a; \
-  else \
-      echo -lchill; \
-  fi`
+# OBSOLETE CHILLFLAGS = $(CFLAGS)
+# OBSOLETE CHILL = gcc
+# OBSOLETE CHILL_FOR_TARGET = ` \
+# OBSOLETE   if [ -f $${rootme}/../gcc/Makefile ] ; then \
+# OBSOLETE     echo $${rootme}/../gcc/xgcc -B$${rootme}/../gcc/ -L$${rootme}/../gcc/ch/runtime/; \
+# OBSOLETE   else \
+# OBSOLETE     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
+# OBSOLETE       echo $(CC); \
+# OBSOLETE     else \
+# OBSOLETE       t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
+# OBSOLETE     fi; \
+# OBSOLETE   fi`
+# OBSOLETE CHILL_LIB = ` \
+# OBSOLETE   if [ -f $${rootme}/../gcc/ch/runtime/libchill.a ] ; then \
+# OBSOLETE     echo $${rootme}/../gcc/ch/runtime/chillrt0.o \
+# OBSOLETE       $${rootme}/../gcc/ch/runtime/libchill.a; \
+# OBSOLETE   else \
+# OBSOLETE       echo -lchill; \
+# OBSOLETE   fi`
 
 # The use of $$(x_FOR_TARGET) reduces the command line length by not
 # duplicating the lengthy definition.
@@ -506,10 +503,6 @@ TARGET_FLAGS_TO_PASS = \
 	'CC=$$(CC_FOR_TARGET)' \
 	"CC_FOR_TARGET=$(CC_FOR_TARGET)" \
 	"CFLAGS=$(CFLAGS)" \
-	"CHILLFLAGS=$(CHILLFLAGS)" \
-	'CHILL=$$(CHILL_FOR_TARGET)' \
-	"CHILL_FOR_TARGET=$(CHILL_FOR_TARGET)" \
-	"CHILL_LIB=$(CHILL_LIB)" \
 	'CXX=$$(CXX_FOR_TARGET)' \
 	"CXX_FOR_TARGET=$(CXX_FOR_TARGET)" \
 	"CXXFLAGS=$(CXXFLAGS)" \
@@ -527,7 +520,7 @@ TARGET_FLAGS_TO_PASS = \
 
 SFILES = ax-general.c ax-gdb.c bcache.c blockframe.c breakpoint.c \
 	buildsym.c c-exp.y c-lang.c c-typeprint.c c-valprint.c \
-	ch-exp.c ch-lang.c ch-typeprint.c ch-valprint.c coffread.c \
+	coffread.c \
 	complaints.c completer.c corefile.c cp-valprint.c dbxread.c \
 	demangle.c dwarfread.c dwarf2read.c elfread.c environ.c eval.c \
 	event-loop.c event-top.c \
@@ -697,7 +690,7 @@ HFILES_NO_SRCDIR = bcache.h buildsym.h call-cmds.h coff-solib.h defs.h \
 	objfiles.h parser-defs.h serial.h solib.h \
 	symfile.h stabsread.h target.h terminal.h typeprint.h xcoffsolib.h \
 	macrotab.h macroexp.h macroscope.h \
-	c-lang.h ch-lang.h f-lang.h \
+	c-lang.h f-lang.h \
 	jv-lang.h \
 	m2-lang.h  p-lang.h \
 	complaints.h valprint.h \
@@ -750,14 +743,14 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
 	exec.o bcache.o objfiles.o minsyms.o maint.o demangle.o \
 	dbxread.o coffread.o elfread.o \
 	dwarfread.o dwarf2read.o mipsread.o stabsread.o corefile.o \
-	c-lang.o ch-exp.o ch-lang.o f-lang.o \
+	c-lang.o f-lang.o \
 	ui-out.o cli-out.o \
 	varobj.o wrapper.o \
 	jv-lang.o jv-valprint.o jv-typeprint.o \
 	m2-lang.o p-lang.o p-typeprint.o p-valprint.o \
 	scm-exp.o scm-lang.o scm-valprint.o complaints.o typeprint.o \
-	c-typeprint.o ch-typeprint.o f-typeprint.o m2-typeprint.o \
-	c-valprint.o cp-valprint.o ch-valprint.o f-valprint.o m2-valprint.o \
+	c-typeprint.o f-typeprint.o m2-typeprint.o \
+	c-valprint.o cp-valprint.o f-valprint.o m2-valprint.o \
 	nlmread.o serial.o mdebugread.o top.o utils.o \
 	ui-file.o \
 	frame.o doublest.o \
@@ -1212,7 +1205,7 @@ MAKEOVERRIDES=
 ## This is ugly, but I don't want GNU make to put these variables in
 ## the environment.  Older makes will see this as a set of targets
 ## with no dependencies and no actions.
-unexport CHILLFLAGS CHILL_LIB CHILL_FOR_TARGET :
+# OBSOLETE unexport CHILLFLAGS CHILL_LIB CHILL_FOR_TARGET :
 
 ALLDEPFILES = a68v-nat.c \
 	aix-thread.c \
@@ -1367,19 +1360,19 @@ f-typeprint.o: f-typeprint.c $(defs_h) $(gdb_obstack_h) $(bfd_h) $(symtab_h) \
 f-valprint.o: f-valprint.c $(defs_h) $(expression_h) $(gdbtypes_h) \
 	$(language_h) $(symtab_h) $(valprint_h) $(value_h) $(gdb_string_h)
 
-ch-exp.o: ch-exp.c ch-lang.h $(defs_h) $(language_h) $(parser_defs_h) \
-	$(bfd_h) $(symfile_h) $(objfiles_h) $(value_h)
+# OBSOLETE ch-exp.o: ch-exp.c ch-lang.h $(defs_h) $(language_h) $(parser_defs_h) \
+# OBSOLETE 	$(bfd_h) $(symfile_h) $(objfiles_h) $(value_h)
 
-ch-lang.o: ch-lang.c ch-lang.h $(defs_h) $(expression_h) $(gdbtypes_h) \
-	$(language_h) $(parser_defs_h) $(symtab_h)
+# OBSOLETE ch-lang.o: ch-lang.c ch-lang.h $(defs_h) $(expression_h) $(gdbtypes_h) \
+# OBSOLETE 	$(language_h) $(parser_defs_h) $(symtab_h)
 
-ch-typeprint.o: ch-typeprint.c $(defs_h) $(gdb_obstack_h) $(bfd_h) \
-	$(symtab_h) $(gdbtypes_h) $(expression_h) $(value_h) $(gdbcore_h) \
-	$(target_h) $(language_h) $(ch_lang_h) $(typeprint_h) $(gdb_string_h)
+# OBSOLETE ch-typeprint.o: ch-typeprint.c $(defs_h) $(gdb_obstack_h) $(bfd_h) \
+# OBSOLETE 	$(symtab_h) $(gdbtypes_h) $(expression_h) $(value_h) $(gdbcore_h) \
+# OBSOLETE 	$(target_h) $(language_h) $(ch_lang_h) $(typeprint_h) $(gdb_string_h)
 
-ch-valprint.o: ch-valprint.c $(defs_h) $(gdb_obstack_h) $(symtab_h) \
-	$(gdbtypes_h) $(valprint_h) $(expression_h) $(value_h) $(language_h) \
-	$(demangle_h) $(c_lang_h) $(typeprint_h) $(ch_lang_h) $(annotate_h)
+# OBSOLETE ch-valprint.o: ch-valprint.c $(defs_h) $(gdb_obstack_h) $(symtab_h) \
+# OBSOLETE 	$(gdbtypes_h) $(valprint_h) $(expression_h) $(value_h) $(language_h) \
+# OBSOLETE 	$(demangle_h) $(c_lang_h) $(typeprint_h) $(ch_lang_h) $(annotate_h)
 
 coff-solib.o: coff-solib.c $(defs_h)
 

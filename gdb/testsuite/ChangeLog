@@ -1,3 +1,13 @@
+2002-08-01  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in (TARGET_FLAGS_TO_PASS): Remove CHILLFLAGS, CHILL,
+	CHILL_FOR_TARGET and CHILL_LIB.
+	* configure.in (configdirs): Remove gdb.chill.
+	* configure: Regenerate.
+	* lib/gdb.exp: Obsolete references to chill.
+	* gdb.fortran/types.exp: Ditto.
+	* gdb.fortran/exprs.exp: Ditto.
+
 2002-07-30  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.base/shlib-call.exp (additional_flags): Conditionally

@@ -17,7 +17,7 @@
 # Please email any bugs, comments, and/or additions to this file to:
 # bug-gdb@prep.ai.mit.edu
 
-# This file was adapted from Chill tests by Stan Shebs (shebs@cygnus.com).
+# This file was adapted from (OBSOLETE) Chill tests by Stan Shebs (shebs@cygnus.com).
 
 if $tracelevel then {
 	strace $tracelevel

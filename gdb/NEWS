@@ -64,6 +64,10 @@ OS/9000						i[34]86-*-os9k
 Fujitsu FR30					fr30-*-elf*
 Motorola Delta 88000 running Sys V		m88k-motorola-sysv  or  delta88
 
+* OBSOLETE languages
+
+CHILL, a Pascal like language used by telecommunications companies.
+
 * REMOVED configurations and files
 
 AMD 29k family via UDI				a29k-amd-udi, udi29k

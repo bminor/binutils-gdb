@@ -1,3 +1,66 @@
+2002-08-01  Andrew Cagney  <cagney@redhat.com>
+
+	* NEWS: Menion that CHILL has been made obsolete.
+
+	* gdbtypes.c (chill_varying_type): Make chill references obsolete.
+	* gdbserver/Makefile.in: Ditto.
+	* stabsread.c (read_range_type): Ditto.
+	* gdbtypes.h: Ditto.
+	* language.c (binop_type_check): Ditto.
+	(binop_result_type): Ditto.
+	(integral_type): Ditto.
+	(character_type): Ditto.
+	(string_type): Ditto.
+	(boolean_type): Ditto.
+	(structured_type): Ditto.
+	(lang_bool_type): Ditto.
+	(binop_type_check): Ditto.
+	* language.h (_LANG_chill): Ditto.
+	* dwarfread.c (set_cu_language): Ditto.
+	* dwarfread.c (CHILL_PRODUCER): Ditto.
+	* dwarfread.c (handle_producer): Ditto.
+	* expression.h (enum exp_opcode): Ditto.
+	* eval.c: Ditto for comments.
+	* typeprint.c (typedef_print) [_LANG_chill]: Ditto.
+	* expprint.c (print_subexp): Ditto.
+	(print_subexp): Ditto.
+	* valops.c (value_cast): Ditto.
+	(search_struct_field): Ditto.
+	* value.h (COERCE_VARYING_ARRAY): Ditto.
+	* symfile.c (init_filename_language_table): Ditto.
+	(add_psymbol_with_dem_name_to_list): Ditto.
+	* valarith.c (value_binop): Ditto.
+	(value_neg): Ditto.
+	* valops.c (value_slice): Ditto.
+	* symtab.h (union language_specific): Ditto.
+	(SYMBOL_INIT_LANGUAGE_SPECIFIC): Ditto.
+	(SYMBOL_DEMANGLED_NAME): Ditto.
+	(SYMBOL_CHILL_DEMANGLED_NAME): Ditto.
+	* defs.h (enum language): Ditto.
+	* symtab.c (got_symtab): Ditto.
+	* utils.c (fprintf_symbol_filtered): Ditto.
+
+	* ch-typeprint.c: Make file obsolete.
+	* ch-valprint.c: Make file obsolete.
+	* ch-lang.h: Make file obsolete.
+	* ch-exp.c: Make file obsolete.
+	* ch-lang.c: Make file obsolete.
+
+	* Makefile.in (FLAGS_TO_PASS): Do not pass CHILL or CHILLFLAGS or
+	CHILL_LIB.
+	(TARGET_FLAGS_TO_PASS): Ditto.
+	(CHILLFLAGS): Obsolete.
+	(CHILL): Obsolete.
+	(CHILL_FOR_TARGET): Obsolete.
+	(CHILL_LIB): Obsolete.
+	(SFILES): Remove ch-exp.c, ch-lang.c, ch-typeprint.c and
+	ch-valprint.c.
+	(HFILES_NO_SRCDIR): Remove ch-lang.h.
+	(COMMON_OBS): Remove ch-valprint.o, ch-typeprint.o, ch-exp.o and
+	ch-lang.o.
+	(ch-exp.o, ch-lang.o, ch-typeprint.o, ch-valprint.o): Delete
+	targets.
+
 2002-07-31  Joel Brobecker  <brobecker@gnat.com>
 
 	* dwarf2read.c (set_cu_language): Add handler for LANG_Ada95.
