@@ -1619,9 +1619,8 @@ process_xcoff_symbol (cs, objfile)
   return sym2;
 }
 
-/* Extract the file name from the aux entry of a C_FILE symbol.  Return
-   only the last component of the name.  Result is in static storage and
-   is only good for temporary use.  */
+/* Extract the file name from the aux entry of a C_FILE symbol.
+   Result is in static storage and is only good for temporary use.  */
 
 static char *
 coff_getfilename (aux_entry, objfile)
@@ -1629,8 +1628,6 @@ coff_getfilename (aux_entry, objfile)
      struct objfile *objfile;
 {
   static char buffer[BUFSIZ];
-  register char *temp;
-  char *result;
 
   if (aux_entry->x_file.x_n.x_zeroes == 0)
     strcpy (buffer,
@@ -1641,14 +1638,7 @@ coff_getfilename (aux_entry, objfile)
       strncpy (buffer, aux_entry->x_file.x_fname, FILNMLEN);
       buffer[FILNMLEN] = '\0';
     }
-  result = buffer;
-
-  /* FIXME: We should not be throwing away the information about what
-     directory.  It should go into dirname of the symtab, or some such
-     place.  */
-  if ((temp = strrchr (result, '/')) != NULL)
-    result = temp + 1;
-  return (result);
+  return (buffer);
 }
 
 /* Set *SYMBOL to symbol number symno in symtbl.  */

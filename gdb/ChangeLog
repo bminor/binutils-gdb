@@ -1,3 +1,8 @@
+Mon Jul 28 02:54:31 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* xcoffread.c (coff_getfilename):  Do not strip directory component
+	of filename.
+
 Fri Jul 25 16:48:18 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* top.c (execute_command): Force cleanup of alloca areas.
