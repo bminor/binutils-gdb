@@ -7,6 +7,11 @@
 
 1999-09-11  Donn Terry  <donn@interix.com>
 
+	* peicode.h (coff_swap_scnhdr_in): Don't check for a special
+	section name of _BSS; check IMAGE_SCN_CNT_UNINITIALIZED_DATA
+	instead.  Don't clear the s_paddr field for an uninitialized data
+	section.
+
 	* coffcode.h (coff_mkobject_hook): Set timestamp field in
 	coff_data_type to f_timdat.
 	* peicode.h (pe_mkobject_hook): Likewise.

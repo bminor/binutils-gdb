@@ -1112,10 +1112,10 @@ coff_swap_aouthdr_out (abfd, in, out)
 }
 
 static void
-    coff_swap_scnhdr_in (abfd, ext, in)
-      bfd            *abfd;
-  PTR	     ext;
-  PTR	     in;
+coff_swap_scnhdr_in (abfd, ext, in)
+     bfd            *abfd;
+     PTR	     ext;
+     PTR	     in;
 {
   SCNHDR *scnhdr_ext = (SCNHDR *) ext;
   struct internal_scnhdr *scnhdr_int = (struct internal_scnhdr *) in;
@@ -1143,10 +1143,16 @@ static void
       scnhdr_int->s_vaddr += pe_data (abfd)->pe_opthdr.ImageBase;
       scnhdr_int->s_vaddr &= 0xffffffff;
     }
-  if (strcmp (scnhdr_int->s_name, _BSS) == 0) 
+
+  /* If this section holds uninitialized data, use the virtual size
+     (stored in s_paddr) instead of the physical size.  */
+  if ((scnhdr_int->s_flags & IMAGE_SCN_CNT_UNINITIALIZED_DATA) != 0)
     {
       scnhdr_int->s_size = scnhdr_int->s_paddr;
-      scnhdr_int->s_paddr = 0;
+      /* This code used to set scnhdr_int->s_paddr to 0.  However,
+         coff_set_alignment_hook stores s_paddr in virt_size, which
+         only works if it correctly holds the virtual size of the
+         section.  */
     }
 }
 
