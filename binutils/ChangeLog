@@ -1,3 +1,17 @@
+Fri Dec  6 17:21:41 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ieee.c (parse_ieee_bb): Always initialize namcopy to avoid gcc
+	warning about uninitialized variable.
+	(ieee_read_cxx_class): Likewise, for pf.
+	(ieee_enum_type): Likewise, for i.
+
+Tue Nov 26 17:01:25 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* wrstabs.c (stab_array_type): Add casts when printing
+	bfd_signed_vma values.
+
+	* configure: Rebuild with autoconf 2.12.
+
 Mon Nov 25 16:53:18 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* objdump.c (disassemble_data): Don't crash if there is no
