@@ -5640,23 +5640,23 @@ to enable, disable, or remove a memory region, you specify that number.
 
 @table @code
 @kindex mem
-@item mem @var{address1} @var{address1} @var{attributes}@dots{}
+@item mem @var{address1} @var{address2} @var{attributes}@dots{}
 Define memory region bounded by @var{address1} and @var{address2}
 with attributes @var{attributes}@dots{}.
 
 @kindex delete mem
 @item delete mem @var{nums}@dots{}
-Remove memory region numbers @var{nums}.
+Remove memory regions @var{nums}@dots{}.
 
 @kindex disable mem
 @item disable mem @var{nums}@dots{}
-Disable memory region numbers @var{nums}.
+Disable memory regions @var{nums}@dots{}.
 A disabled memory region is not forgotten.  
 It may be enabled again later.
 
 @kindex enable mem
 @item enable mem @var{nums}@dots{}
-Enable memory region numbers @var{nums}.
+Enable memory regions @var{nums}@dots{}.
 
 @kindex info mem
 @item info mem
