@@ -273,9 +273,13 @@ hardwire_print_tty_state (scb, ttystate)
 #ifdef HAVE_TERMIOS
   printf_filtered ("c_iflag = 0x%x, c_oflag = 0x%x,\n",
 		   state->termios.c_iflag, state->termios.c_oflag);
-  printf_filtered ("c_cflag = 0x%x, c_lflag = 0x%x, c_line = 0x%x.\n",
-		   state->termios.c_cflag, state->termios.c_lflag,
-		   state->termios.c_line);
+  printf_filtered ("c_cflag = 0x%x, c_lflag = 0x%x\n",
+		   state->termios.c_cflag, state->termios.c_lflag);
+#if 0
+  /* This not in POSIX, and is not really documented by those systems
+     which have it (at least not Sun).  */
+  printf_filtered ("c_line = 0x%x.\n", state->termios.c_line);
+#endif
   printf_filtered ("c_cc: ");
   for (i = 0; i < NCCS; i += 1)
     printf_filtered ("0x%x ", state->termios.c_cc[i]);
@@ -664,7 +668,10 @@ _initialize_ser_hardwire ()
   /* Do all systems with termios have the POSIX way of identifying job
      control?  I hope so.  */
 #ifdef _POSIX_JOB_CONTROL
-  job_control = _POSIX_JOB_CONTROL;
+  /* AIX defines _POSIX_JOB_CONTROL to an empty string, so I guess
+     defining _POSIX_JOB_CONTROL to 0 to mean no job control doesn't work
+     (I don't have the standard handy).  */
+  job_control = 1;
 #else
   job_control = sysconf (_SC_JOB_CONTROL);
 #endif

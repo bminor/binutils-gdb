@@ -1,3 +1,10 @@
+Thu Jul  1 09:51:27 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* ser-unix.c (hardwire_print_tty_state) [HAVE_TERMIOS]: Don't
+	print c_line.
+	(_initialize_ser_hardwire): Just check whether _POSIX_JOB_CONTROL
+	is defined; don't care what it is defined to.
+
 Wed Jun 30 20:06:46 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/vax/xm-vaxult2.h: Define FD_SET and FD_ZERO.
