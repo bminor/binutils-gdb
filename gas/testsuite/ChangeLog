@@ -1,5 +1,15 @@
 2003-05-03  H.J. Lu <hjl@gnu.org>
 
+	* gas/elf/elf.exp (run_list_test): Support pipe for readelf.
+
+	* gas/elf/type.e-m32r: Removed.
+	* gas/elf/type.e-mips: Likewise.
+	* gas/elf/type.e-miwmmxt: Likewise.
+
+	* gas/elf/type.e: Updated.
+
+2003-05-03  H.J. Lu <hjl@gnu.org>
+
 	* gas/ia64/ia64.exp: Add unwind.
 
 	* gas/ia64/unwind.s: New. Test the new section attribute 'o'

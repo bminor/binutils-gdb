@@ -2,7 +2,7 @@
 # elf tests
 #
 
-proc run_list_test { name suffix opts } {
+proc run_list_test { name suffix opts readelf_pipe } {
     global READELF
     global srcdir subdir
     set testname "elf $name list"
@@ -15,7 +15,7 @@ proc run_list_test { name suffix opts } {
 	return
     }
     send_log "$READELF -s dump.o > dump.out\n"
-    catch "exec $READELF -s dump.o > dump.out\n" comp_output
+    catch "exec $READELF -s dump.o $readelf_pipe > dump.out\n" comp_output
     if ![string match "" $comp_output] then {
 	send_log "$comp_output\n"
 	fail $testname
@@ -53,7 +53,7 @@ if { ([istarget "*-*-elf*"]
     run_dump_test "ehopt0"
     run_dump_test "section0" 
     run_dump_test "section1" 
-    run_list_test "section2" "$target_machine" "-al"
+    run_list_test "section2" "$target_machine" "-al" ""
     run_dump_test "symver" 
-    run_list_test "type" "$target_machine" ""
+    run_list_test "type" "" "" "| grep \"1 \\\[FONT\\\]\""
 }
