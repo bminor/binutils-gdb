@@ -171,7 +171,7 @@ OTHERS =
 SPECIAL_LIBS = libdsp
 # end-sanitize-dsp
 
-TARGET_CONFIGDIRS = libiberty libgloss $(SPECIAL_LIBS) newlib libio librx libstdc++ libg++ winsup opcodes libstub cygmon
+TARGET_CONFIGDIRS = libiberty libgloss $(SPECIAL_LIBS) newlib libio librx libstdc++ libg++ winsup opcodes bsp libstub cygmon
 
 # Target libraries are put under this directory:
 # Changed by configure to $(target_alias) if cross.
@@ -826,6 +826,7 @@ ALL_TARGET_MODULES = \
 	all-target-librx \
 	all-target-libg++ \
 	all-target-newlib \
+	all-target-libtermcap \
 	all-target-winsup \
 	$(start-sanitize-dsp) \
 	all-target-libdsp \
@@ -840,6 +841,7 @@ ALL_TARGET_MODULES = \
 	all-target-boehm-gc \
 	all-target-qthreads \
 	$(end-sanitize-java) \
+	all-target-bsp \
 	all-target-cygmon
 
 # This is a list of the configure targets for all of the modules which
@@ -853,6 +855,7 @@ CONFIGURE_TARGET_MODULES = \
 	configure-target-librx \
 	configure-target-libg++ \
 	configure-target-newlib \
+	configure-target-libtermcap \
 	configure-target-winsup \
 	configure-target-libgloss \
 	configure-target-libiberty \
@@ -864,6 +867,7 @@ CONFIGURE_TARGET_MODULES = \
 	configure-target-boehm-gc \
 	configure-target-qthreads \
 	$(end-sanitize-java) \
+	configure-target-bsp \
 	configure-target-cygmon
 
 # This is a list of the check targets for all of the modules which are
@@ -895,9 +899,11 @@ INSTALL_TARGET_MODULES = \
 	install-target-libstdc++ \
 	install-target-libg++ \
 	install-target-newlib \
+	install-target-libtermcap \
 	install-target-winsup \
 	install-target-libgloss \
 	install-target-libiberty \
+	install-target-bsp \
 	$(start-sanitize-java) \
 	install-target-libjava \
 	install-target-boehm-gc \
@@ -1013,6 +1019,7 @@ CLEAN_TARGET_MODULES = \
 	clean-target-boehm-gc \
 	clean-target-qthreads \
 	$(end-sanitize-java) \
+	clean-target-bsp \
 	clean-target-cygmon
 
 # All of the x11 modules that can be cleaned
@@ -1434,15 +1441,22 @@ $(CONFIGURE_TARGET_MODULES):
 	      libsrcdir="$$s/$${dir}"; \
 	    fi; \
 	    if [ -f $${libsrcdir}/configure ] ; then \
-	      rm -f no-such-file; \
+	      rm -f no-such-file skip-this-dir; \
 	      CONFIG_SITE=no-such-file $(SHELL) $${libsrcdir}/configure \
 		$(CONFIG_ARGUMENTS) $${srcdiroption} \
 		--with-target-subdir="$(TARGET_SUBDIR)"; \
 	    else \
-	      rm -f no-such-file; \
+	      rm -f no-such-file skip-this-dir; \
 	      CONFIG_SITE=no-such-file $(SHELL) $$s/configure \
 		$(CONFIG_ARGUMENTS) $${srcdiroption} \
 		--with-target-subdir="$(TARGET_SUBDIR)"; \
+	    fi; \
+	    if [ -f skip-this-dir ] ; then \
+	      sh skip-this-dir; \
+	      rm -f skip-this-dir; \
+	      cd ..; rmdir $${dir} || true; \
+	    else \
+	      true; \
 	    fi; \
 	  else \
 	    true; \
@@ -1663,6 +1677,8 @@ all-bash:
 all-bfd: all-libiberty all-intl
 all-binutils: all-libiberty all-opcodes all-bfd all-flex all-bison all-byacc all-intl
 all-bison: all-texinfo
+configure-target-bsp: $(ALL_GCC)
+all-target-bsp: configure-target-bsp all-gas all-ld all-gcc
 # start-sanitize-java
 configure-target-boehm-gc: configure-target-newlib configure-target-qthreads
 all-target-boehm-gc: configure-target-boehm-gc
