@@ -194,7 +194,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	case N_SO: {
 	  unsigned long valu = CUR_SYMBOL_VALUE;
 	  static int last_so_symnum = -10;
-	  static int dir_so_symnum = -1;
+	  static int dir_so_symnum = -10;
 	  int tmp;
 	  char *p;
 	  
@@ -244,7 +244,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 			       tmp * symbol_size,
 			       objfile -> global_psymbols.next,
 			       objfile -> static_psymbols.next);
-	  dir_so_symnum = -1;
+	  dir_so_symnum = -10;
 	  continue;
 	}
 
