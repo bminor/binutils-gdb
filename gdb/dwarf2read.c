@@ -1542,15 +1542,15 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
          also happen.) This happens in VxWorks.  */
       free_named_symtabs (pst->filename);
 
+      info_ptr = beg_of_comp_unit + cu.header.length
+                                  + cu.header.initial_length_size;
+
       if (comp_unit_die.has_stmt_list)
         {
           /* Get the list of files included in the current compilation unit,
              and build a psymtab for each of them.  */
           dwarf2_build_include_psymtabs (&cu, &comp_unit_die, pst);
         }
-
-      info_ptr = beg_of_comp_unit + cu.header.length
-                                  + cu.header.initial_length_size;
 
       do_cleanups (back_to_inner);
     }
@@ -1641,6 +1641,7 @@ create_all_comp_units (struct objfile *objfile)
 
       /* Read just enough information to find out where the next
 	 compilation unit is.  */
+      cu_header.initial_length_size = 0;
       cu_header.length = read_initial_length (objfile->obfd, info_ptr,
 					      &cu_header, &bytes_read);
 
@@ -5860,7 +5861,7 @@ read_address (bfd *abfd, char *buf, struct dwarf2_cu *cu, int *bytes_read)
    As a side effect, this function sets the fields initial_length_size
    and offset_size in cu_header to the values appropriate for the
    length field.  (The format of the initial length field determines
-   the width of file offsets to be fetched later with fetch_offset().)
+   the width of file offsets to be fetched later with read_offset().)
    
    [ Note:  read_initial_length() and read_offset() are based on the
      document entitled "DWARF Debugging Information Format", revision
@@ -5882,43 +5883,41 @@ static LONGEST
 read_initial_length (bfd *abfd, char *buf, struct comp_unit_head *cu_header,
                      int *bytes_read)
 {
-  LONGEST retval = 0;
+  LONGEST length = bfd_get_32 (abfd, (bfd_byte *) buf);
 
-  retval = bfd_get_32 (abfd, (bfd_byte *) buf);
-
-  if (retval == 0xffffffff)
+  if (length == 0xffffffff)
     {
-      retval = bfd_get_64 (abfd, (bfd_byte *) buf + 4);
+      length = bfd_get_64 (abfd, (bfd_byte *) buf + 4);
       *bytes_read = 12;
-      if (cu_header != NULL)
-	{
-	  cu_header->initial_length_size = 12;
-	  cu_header->offset_size = 8;
-	}
     }
-  else if (retval == 0)
+  else if (length == 0)
     {
-      /* Handle (non-standard) 64-bit DWARF2 formats such as that used
-         by IRIX.  */
-      retval = bfd_get_64 (abfd, (bfd_byte *) buf);
+      /* Handle the (non-standard) 64-bit DWARF2 format used by IRIX.  */
+      length = bfd_get_64 (abfd, (bfd_byte *) buf);
       *bytes_read = 8;
-      if (cu_header != NULL)
-	{
-	  cu_header->initial_length_size = 8;
-	  cu_header->offset_size = 8;
-	}
     }
   else
     {
       *bytes_read = 4;
-      if (cu_header != NULL)
-	{
-	  cu_header->initial_length_size = 4;
-	  cu_header->offset_size = 4;
-	}
     }
 
-  return retval;
+  if (cu_header)
+    {
+      gdb_assert (cu_header->initial_length_size == 0
+		  || cu_header->initial_length_size == 4
+		  || cu_header->initial_length_size == 8
+		  || cu_header->initial_length_size == 12);
+
+      if (cu_header->initial_length_size != 0
+	  && cu_header->initial_length_size != *bytes_read)
+	complaint (&symfile_complaints,
+		   _("intermixed 32-bit and 64-bit DWARF sections"));
+
+      cu_header->initial_length_size = *bytes_read;
+      cu_header->offset_size = (*bytes_read == 4) ? 4 : 8;
+    }
+
+  return length;
 }
 
 /* Read an offset from the data stream.  The size of the offset is
@@ -6296,7 +6295,8 @@ dwarf_decode_line_header (unsigned int offset, bfd *abfd,
   line_ptr = dwarf2_per_objfile->line_buffer + offset;
 
   /* Read in the header.  */
-  lh->total_length = read_initial_length (abfd, line_ptr, NULL, &bytes_read);
+  lh->total_length = 
+    read_initial_length (abfd, line_ptr, &cu->header, &bytes_read);
   line_ptr += bytes_read;
   if (line_ptr + lh->total_length > (dwarf2_per_objfile->line_buffer
 				     + dwarf2_per_objfile->line_size))

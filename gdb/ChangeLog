@@ -1,3 +1,16 @@
+2005-02-25 Mark Kettenis  <kettenis@gnu.org>
+	
+	Committed by Elena Zannoni <ezannoni@redhat.com>
+
+	* dwarf2read.c (dwarf2_build_psymtabs_hard): Adjust 
+	info_ptr before building psymtabs for included files.
+	(create_all_comp_units): Initailize initial length size of
+	compilation header to zero.
+	(read_initial_length): Complain if both 32-bit and 64-bit DWARF
+	sections are encountered within the same compilation header.
+	(dwarf_decode_line_header): Pass compilation header in call to
+	read_initial_length.
+	
 2005-02-24  Andrew Cagney  <cagney@gnu.org>
 
 	Add show_VARIABLE functions, update add_setshow call.
