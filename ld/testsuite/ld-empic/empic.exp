@@ -89,7 +89,7 @@ if ![ld_simple_link $ld tmpdir/relax "--relax -T $srcdir$subdir/relax.t tmpdir/r
 
 	incr balcnt
 
-	if ![regexp "^(\[0-9a-fA-F\]+) (<\[a-z+0-9A-Z\]+>)? bal (\[0-9a-fA-F\]+)" $line whole addr label dest] {
+	if ![regexp "^(\[0-9a-fA-F\]+) (<\[a-z+0-9A-Z.\]+>)? bal (\[0-9a-fA-F\]+)" $line whole addr label dest] {
 	    perror "unrecognized format for $line"
 	    unresolved $testname
 	    return
