@@ -1,3 +1,8 @@
+2000-07-10  Alan Modra  <alan@linuxcare.com.au>
+
+	* lib/utils-lib.exp (default_binutils_assemble): Don't do the hppa
+	sed fudges for hppa-linux.
+
 2000-07-01  Frank Ch. Eigler  <fche@redhat.com>
 
 	* binutils-all/objdump.exp (cpus_expected, cpus_regex): Reorganize
