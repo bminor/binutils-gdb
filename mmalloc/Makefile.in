@@ -121,9 +121,9 @@ check: test1.c
 #	./a.out
 
 install:	all
-		$(INSTALL_DATA) $(TARGETLIB) $(libdir)/$(TARGETLIB).n
-		$(RANLIB) $(libdir)/$(TARGETLIB).n
-		mv -f $(libdir)/$(TARGETLIB).n $(libdir)/$(TARGETLIB)
+		$(INSTALL_DATA) $(TARGETLIB) $(libdir)/$(TARGETLIB)n
+		$(RANLIB) $(libdir)/$(TARGETLIB)n
+		mv -f $(libdir)/$(TARGETLIB)n $(libdir)/$(TARGETLIB)
 
 $(TARGETLIB):	$(TARGETOBJS)
 		$(RM) -rf $@
