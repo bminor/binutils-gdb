@@ -1040,13 +1040,10 @@ elf_hppa_final_link_relocate (howto, input_bfd, output_bfd,
    The list will be deleted eventually.
 
    27210 R_PARISC_SEGREL32
-   8458 R_PARISC_DLTREL14R
    8284 R_PARISC_DLTIND21L
    8218 R_PARISC_DLTIND14DR
    6675 R_PARISC_FPTR64
-   6561 R_PARISC_DLTREL21L
    3974 R_PARISC_DIR64
-   3715 R_PARISC_DLTREL14DR
    1584 R_PARISC_LTOFF_FPTR14DR
    1565 R_PARISC_LTOFF_FPTR21L
    1120 R_PARISC_PCREL64
@@ -1055,7 +1052,6 @@ elf_hppa_final_link_relocate (howto, input_bfd, output_bfd,
    791 R_PARISC_GPREL64
    772 R_PARISC_PLTOFF14DR
    386 R_PARISC_PLTOFF21L
-   77 R_PARISC_DLTREL14WR
    6 R_PARISC_LTOFF64
    5 R_PARISC_SEGREL64
    1 R_PARISC_DLTIND14R
@@ -1085,6 +1081,8 @@ elf_hppa_final_link_relocate (howto, input_bfd, output_bfd,
       }
 
     case R_PARISC_DLTREL14R:
+    case R_PARISC_DLTREL14DR:
+    case R_PARISC_DLTREL14WR:
       {
 	bfd_vma location;
 	r_field = e_rrsel;
@@ -1273,6 +1271,65 @@ elf_hppa_relocate_insn (abfd, input_sect, insn, address, sym_value,
 
 	/* And insert the proper bits into INSN.  */
         return insn | w;
+      }
+   
+    /* This is similar to a DLTREL14R relocation, except that it applies
+       to doubleword load/store instructions which have a slightly different
+       bit encoding for the displacement than singleword load/store
+       instructions.  */
+    case R_PARISC_DLTREL14DR:
+      {
+        int w;
+
+	/* Subtract out the global pointer value.  */
+	sym_value -= _bfd_get_gp_value (abfd);
+
+	/* Apply the desired field selector (R_FIELD).  */
+	sym_value = hppa_field_adjust (sym_value, r_addend, r_field);
+
+	/* Mask off bits in INSN we do not want.  */
+	insn &= 0xffffc00e;
+
+	/* The sign bit at 14 moves into bit zero in the destination.  */
+        insn |= ((sym_value & 0x2000) >> 13);
+
+	/* Turn off the bits in sym_value we do not care about.  */
+	sym_value &= 0x1ff8;
+
+	/* Now shift it one bit position left so that it lines up with the
+	   destination field in INSN.  */
+	sym_value <<= 1;
+
+	return insn | sym_value;
+      }
+
+    /* This is similar to DLTREL14R and DLTREL14DR relocation, except that it
+       applies to floating point single word load store instructions which
+       have a different encoding than other load/store instructions.  */
+    case R_PARISC_DLTREL14WR:
+      {
+        int w;
+
+	/* Subtract out the global pointer value.  */
+	sym_value -= _bfd_get_gp_value (abfd);
+
+	/* Apply the desired field selector (R_FIELD).  */
+	sym_value = hppa_field_adjust (sym_value, r_addend, r_field);
+
+	/* Mask off bits in INSN we do not want.  */
+	insn &= 0xffffc006;
+
+	/* The sign bit at 14 moves into bit zero in the destination.  */
+        insn |= ((sym_value & 0x2000) >> 13);
+
+	/* Turn off the bits in sym_value we do not care about.  */
+	sym_value &= 0x1ffc;
+
+	/* Now shift it one bit position left so that it lines up with the
+	   destination field in INSN.  */
+	sym_value <<= 1;
+
+	return insn | sym_value;
       }
    
     default:
