@@ -417,7 +417,12 @@ detach_callback (struct lwp_info *lp, void *data)
       lp->stopped = 0;
       lp->signalled = 0;
       lp->status = 0;
-      stop_wait_callback (lp, NULL);
+      /* FIXME drow/2003-08-26: There was a call to stop_wait_callback
+	 here.  But since lp->signalled was cleared above,
+	 stop_wait_callback didn't do anything; the process was left
+	 running.  Shouldn't we be waiting for it to stop?
+	 I've removed the call, since stop_wait_callback now does do
+	 something when called with lp->signalled == 0.  */
 
       gdb_assert (lp->status == 0 || WIFSTOPPED (lp->status));
     }
@@ -696,7 +701,7 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 {
   sigset_t *flush_mask = data;
 
-  if (!lp->stopped && lp->signalled)
+  if (!lp->stopped)
     {
       int status;
 
@@ -707,6 +712,12 @@ stop_wait_callback (struct lwp_info *lp, void *data)
       /* Ignore any signals in FLUSH_MASK.  */
       if (flush_mask && sigismember (flush_mask, WSTOPSIG (status)))
 	{
+	  if (!lp->signalled)
+	    {
+	      lp->stopped = 1;
+	      return 0;
+	    }
+
 	  errno = 0;
 	  ptrace (PTRACE_CONT, GET_LWP (lp->ptid), 0, 0);
 	  if (debug_lin_lwp)
@@ -817,6 +828,88 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 	  lp->stopped = 1;
 	  lp->signalled = 0;
 	}
+    }
+
+  return 0;
+}
+
+/* Check whether PID has any pending signals in FLUSH_MASK.  If so set
+   the appropriate bits in PENDING, and return 1 - otherwise return 0.  */
+
+static int
+lin_lwp_has_pending (int pid, sigset_t *pending, sigset_t *flush_mask)
+{
+  sigset_t blocked, ignored;
+  int i;
+
+  linux_proc_pending_signals (pid, pending, &blocked, &ignored);
+
+  if (!flush_mask)
+    return 0;
+
+  for (i = 1; i < NSIG; i++)
+    if (sigismember (pending, i))
+      if (!sigismember (flush_mask, i)
+	  || sigismember (&blocked, i)
+	  || sigismember (&ignored, i))
+	sigdelset (pending, i);
+
+  if (sigisemptyset (pending))
+    return 0;
+
+  return 1;
+}
+
+/* DATA is interpreted as a mask of signals to flush.  If LP has
+   signals pending, and they are all in the flush mask, then arrange
+   to flush them.  LP should be stopped, as should all other threads
+   it might share a signal queue with.  */
+
+static int
+flush_callback (struct lwp_info *lp, void *data)
+{
+  sigset_t *flush_mask = data;
+  sigset_t pending, intersection, blocked, ignored;
+  int pid, status;
+
+  /* Normally, when an LWP exits, it is removed from the LWP list.  The
+     last LWP isn't removed till later, however.  So if there is only
+     one LWP on the list, make sure it's alive.  */
+  if (lwp_list == lp && lp->next == NULL)
+    if (!lin_lwp_thread_alive (lp->ptid))
+      return 0;
+
+  /* Just because the LWP is stopped doesn't mean that new signals
+     can't arrive from outside, so this function must be careful of
+     race conditions.  However, because all threads are stopped, we
+     can assume that the pending mask will not shrink unless we resume
+     the LWP, and that it will then get another signal.  We can't
+     control which one, however.  */
+
+  if (lp->status)
+    {
+      if (debug_lin_lwp)
+	printf_unfiltered ("FC: LP has pending status %06x\n", lp->status);
+      if (WIFSTOPPED (lp->status) && sigismember (flush_mask, WSTOPSIG (lp->status)))
+	lp->status = 0;
+    }
+
+  while (lin_lwp_has_pending (GET_LWP (lp->ptid), &pending, flush_mask))
+    {
+      int ret;
+      
+      errno = 0;
+      ret = ptrace (PTRACE_CONT, GET_LWP (lp->ptid), 0, 0);
+      if (debug_lin_lwp)
+	fprintf_unfiltered (gdb_stderr,
+			    "FC: Sent PTRACE_CONT, ret %d %d\n", ret, errno);
+
+      lp->stopped = 0;
+      stop_wait_callback (lp, flush_mask);
+      if (debug_lin_lwp)
+	fprintf_unfiltered (gdb_stderr,
+			    "FC: Wait finished; saved status is %d\n",
+			    lp->status);
     }
 
   return 0;
@@ -1465,6 +1558,7 @@ retry:
   /* ... and wait until all of them have reported back that they're no
      longer running.  */
   iterate_over_lwps (stop_wait_callback, &flush_mask);
+  iterate_over_lwps (flush_callback, &flush_mask);
 
   /* If we're not waiting for a specific LWP, choose an event LWP from
      among those that have had events.  Giving equal priority to all

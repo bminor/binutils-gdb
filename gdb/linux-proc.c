@@ -35,6 +35,8 @@
 #include "cli/cli-decode.h"	/* for add_info */
 #include "gdb_string.h"
 
+#include <signal.h>
+
 #include "linux-nat.h"
 
 #ifndef O_LARGEFILE
@@ -621,4 +623,85 @@ linux_proc_xfer_memory (CORE_ADDR addr, char *myaddr, int len, int write,
 
   close (fd);
   return ret;
+}
+
+/* Parse LINE as a signal set and add its set bits to SIGS.  */
+
+static void
+linux_proc_add_line_to_sigset (const char *line, sigset_t *sigs)
+{
+  int len = strlen (line) - 1;
+  const char *p;
+  int signum;
+
+  if (line[len] != '\n')
+    error ("Could not parse signal set: %s", line);
+
+  p = line;
+  signum = len * 4;
+  while (len-- > 0)
+    {
+      int digit;
+
+      if (*p >= '0' && *p <= '9')
+	digit = *p - '0';
+      else if (*p >= 'a' && *p <= 'f')
+	digit = *p - 'a' + 10;
+      else
+	error ("Could not parse signal set: %s", line);
+
+      signum -= 4;
+
+      if (digit & 1)
+	sigaddset (sigs, signum + 1);
+      if (digit & 2)
+	sigaddset (sigs, signum + 2);
+      if (digit & 4)
+	sigaddset (sigs, signum + 3);
+      if (digit & 8)
+	sigaddset (sigs, signum + 4);
+
+      p++;
+    }
+}
+
+/* Find process PID's pending signals from /proc/pid/status and set SIGS
+   to match.  */
+
+void
+linux_proc_pending_signals (int pid, sigset_t *pending, sigset_t *blocked, sigset_t *ignored)
+{
+  FILE *procfile;
+  char buffer[MAXPATHLEN], fname[MAXPATHLEN];
+  int signum;
+
+  sigemptyset (pending);
+  sigemptyset (blocked);
+  sigemptyset (ignored);
+  sprintf (fname, "/proc/%d/status", pid);
+  procfile = fopen (fname, "r");
+  if (procfile == NULL)
+    error ("Could not open %s", fname);
+
+  while (fgets (buffer, MAXPATHLEN, procfile) != NULL)
+    {
+      /* Normal queued signals are on the SigPnd line in the status
+	 file.  However, 2.6 kernels also have a "shared" pending queue
+	 for delivering signals to a thread group, so check for a ShdPnd
+	 line also.
+
+	 Unfortunately some Red Hat kernels include the shared pending queue
+	 but not the ShdPnd status field.  */
+
+      if (strncmp (buffer, "SigPnd:\t", 8) == 0)
+	linux_proc_add_line_to_sigset (buffer + 8, pending);
+      else if (strncmp (buffer, "ShdPnd:\t", 8) == 0)
+	linux_proc_add_line_to_sigset (buffer + 8, pending);
+      else if (strncmp (buffer, "SigBlk:\t", 8) == 0)
+	linux_proc_add_line_to_sigset (buffer + 8, blocked);
+      else if (strncmp (buffer, "SigIgn:\t", 8) == 0)
+	linux_proc_add_line_to_sigset (buffer + 8, ignored);
+    }
+
+  fclose (procfile);
 }

@@ -1,5 +1,15 @@
 2003-09-07  Daniel Jacobowitz  <drow@mvista.com>
 
+	* lin-lwp.c (detach_callback): Don't call stop_wait_callback.
+	(stop_wait_callback): Handle !lp->signalled also.
+	(lin_lwp_has_pending, flush_callback): New functions.
+	(lin_lwp_wait): Call flush_callback.
+	* linux-proc.c (linux_proc_add_line_to_sigset): New function.
+	(linux_proc_pending_signals): New function.
+	* linux-nat.h (linux_proc_pending_signals): Add prototype.
+
+2003-09-07  Daniel Jacobowitz  <drow@mvista.com>
+
 	From Nick Kelsey <nickk@ubicom.com>:
 	* infrun.c (handle_inferior_event): Check IN_SOLIB_RETURN_TRAMPOLINE
 	when the stop PC is at the beginning of a function also.
