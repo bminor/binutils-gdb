@@ -1,3 +1,14 @@
+2001-07-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-hppa.c (pa_parse_nonneg_cmpsub_cmpltr): Remove
+	"isbranch" param as all calls have it set.
+	(pa_parse_neg_cmpsub_cmpltr): Likewise.
+	(pa_parse_nonneg_add_cmpltr): Likewise.  Remember result of
+	strcasecmp in "nullify" var.
+	(pa_parse_neg_add_cmpltr): Likewise.
+	(pa_ip): Don't "save_s" unnecessarily.  Update calls to above
+	functions.  Don't print wrong conditions in error messages.
+
 2001-07-23  Andreas Jaeger  <aj@suse.de>
 
 	* config/tc-s390.c (s390_force_relocation): Removed.

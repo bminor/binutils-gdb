@@ -508,10 +508,10 @@ static int evaluate_absolute PARAMS ((struct pa_it *));
 static unsigned int pa_build_arg_reloc PARAMS ((char *));
 static unsigned int pa_align_arg_reloc PARAMS ((unsigned int, unsigned int));
 static int pa_parse_nullif PARAMS ((char **));
-static int pa_parse_nonneg_cmpsub_cmpltr PARAMS ((char **, int));
-static int pa_parse_neg_cmpsub_cmpltr PARAMS ((char **, int));
-static int pa_parse_neg_add_cmpltr PARAMS ((char **, int));
-static int pa_parse_nonneg_add_cmpltr PARAMS ((char **, int));
+static int pa_parse_nonneg_cmpsub_cmpltr PARAMS ((char **));
+static int pa_parse_neg_cmpsub_cmpltr PARAMS ((char **));
+static int pa_parse_neg_add_cmpltr PARAMS ((char **));
+static int pa_parse_nonneg_add_cmpltr PARAMS ((char **));
 static int pa_parse_cmpb_64_cmpltr PARAMS ((char **));
 static int pa_parse_cmpib_64_cmpltr PARAMS ((char **));
 static int pa_parse_addb_64_cmpltr PARAMS ((char **));
@@ -1597,8 +1597,6 @@ pa_ip (str)
       as_fatal (_("Unknown opcode: `%s'"), str);
     }
 
-  save_s = str;
-
   /* Look up the opcode in the has table.  */
   if ((insn = (struct pa_opcode *) hash_find (op_hash, str)) == NULL)
     {
@@ -2425,10 +2423,10 @@ pa_ip (str)
 
 		  /* Handle non-negated add and branch condition.  */
 		  case 'd':
-		    cmpltr = pa_parse_nonneg_add_cmpltr (&s, 1);
+		    cmpltr = pa_parse_nonneg_add_cmpltr (&s);
 		    if (cmpltr < 0)
 		      {
-			as_bad (_("Invalid Add and Branch Condition: %c"), *s);
+			as_bad (_("Invalid Add and Branch Condition"));
 			cmpltr = 0;
 		      }
 		    INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 13);
@@ -2438,7 +2436,7 @@ pa_ip (str)
 		    cmpltr = pa_parse_addb_64_cmpltr (&s);
 		    if (cmpltr < 0)
 		      {
-			as_bad (_("Invalid Add and Branch Condition: %c"), *s);
+			as_bad (_("Invalid Add and Branch Condition"));
 			cmpltr = 0;
 		      }
 		    else
@@ -2452,11 +2450,11 @@ pa_ip (str)
 		     condition.  */
 		  case '@':
 		    save_s = s;
-		    cmpltr = pa_parse_nonneg_add_cmpltr (&s, 1);
+		    cmpltr = pa_parse_nonneg_add_cmpltr (&s);
 		    if (cmpltr < 0)
 		      {
 			s = save_s;
-			cmpltr = pa_parse_neg_add_cmpltr (&s, 1);
+			cmpltr = pa_parse_neg_add_cmpltr (&s);
 			if (cmpltr < 0)
 			  {
 			    as_bad (_("Invalid Compare/Subtract Condition"));
@@ -2594,10 +2592,10 @@ pa_ip (str)
 
 		  /* Handle a non-negated compare condition.  */
 		  case 't':
-		    cmpltr = pa_parse_nonneg_cmpsub_cmpltr (&s, 1);
+		    cmpltr = pa_parse_nonneg_cmpsub_cmpltr (&s);
 		    if (cmpltr < 0)
 		      {
-			as_bad (_("Invalid Compare/Subtract Condition: %c"), *s);
+			as_bad (_("Invalid Compare/Subtract Condition"));
 			cmpltr = 0;
 		      }
 		    INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 13);
@@ -2605,14 +2603,14 @@ pa_ip (str)
 		  /* Handle a 32 bit compare and branch condition.  */
 		  case 'n':
 		    save_s = s;
-		    cmpltr = pa_parse_nonneg_cmpsub_cmpltr (&s, 1);
+		    cmpltr = pa_parse_nonneg_cmpsub_cmpltr (&s);
 		    if (cmpltr < 0)
 		      {
 			s = save_s;
-			cmpltr = pa_parse_neg_cmpsub_cmpltr (&s, 1);
+			cmpltr = pa_parse_neg_cmpsub_cmpltr (&s);
 			if (cmpltr < 0)
 			  {
-			    as_bad (_("Invalid Compare and Branch Condition."));
+			    as_bad (_("Invalid Compare and Branch Condition"));
 			    cmpltr = 0;
 			  }
 			else
@@ -5348,16 +5346,11 @@ pa_parse_nullif (s)
 }
 
 /* Parse a non-negated compare/subtract completer returning the
-   number (for encoding in instrutions) of the given completer.
-
-   ISBRANCH specifies whether or not this is parsing a condition
-   completer for a branch (vs a nullification completer for a
-   computational instruction.  */
+   number (for encoding in instrutions) of the given completer.  */
 
 static int
-pa_parse_nonneg_cmpsub_cmpltr (s, isbranch)
+pa_parse_nonneg_cmpsub_cmpltr (s)
      char **s;
-     int isbranch;
 {
   int cmpltr;
   char *name = *s + 1;
@@ -5404,7 +5397,7 @@ pa_parse_nonneg_cmpsub_cmpltr (s, isbranch)
 	}
       /* If we have something like addb,n then there is no condition
          completer.  */
-      else if (strcasecmp (name, "n") == 0 && isbranch)
+      else if (strcasecmp (name, "n") == 0)
 	{
 	  cmpltr = 0;
 	  nullify = 1;
@@ -5424,16 +5417,11 @@ pa_parse_nonneg_cmpsub_cmpltr (s, isbranch)
 }
 
 /* Parse a negated compare/subtract completer returning the
-   number (for encoding in instrutions) of the given completer.
-
-   ISBRANCH specifies whether or not this is parsing a condition
-   completer for a branch (vs a nullification completer for a
-   computational instruction.  */
+   number (for encoding in instrutions) of the given completer.  */
 
 static int
-pa_parse_neg_cmpsub_cmpltr (s, isbranch)
+pa_parse_neg_cmpsub_cmpltr (s)
      char **s;
-     int isbranch;
 {
   int cmpltr;
   char *name = *s + 1;
@@ -5484,7 +5472,7 @@ pa_parse_neg_cmpsub_cmpltr (s, isbranch)
 	}
       /* If we have something like addb,n then there is no condition
          completer.  */
-      else if (strcasecmp (name, "n") == 0 && isbranch)
+      else if (strcasecmp (name, "n") == 0)
 	{
 	  cmpltr = 0;
 	  nullify = 1;
@@ -5663,21 +5651,17 @@ pa_parse_cmpib_64_cmpltr (s)
 }
 
 /* Parse a non-negated addition completer returning the number
-   (for encoding in instrutions) of the given completer.
-
-   ISBRANCH specifies whether or not this is parsing a condition
-   completer for a branch (vs a nullification completer for a
-   computational instruction.  */
+   (for encoding in instrutions) of the given completer.  */
 
 static int
-pa_parse_nonneg_add_cmpltr (s, isbranch)
+pa_parse_nonneg_add_cmpltr (s)
      char **s;
-     int isbranch;
 {
   int cmpltr;
   char *name = *s + 1;
   char c;
   char *save_s = *s;
+  int nullify = 0;
 
   cmpltr = 0;
   if (**s == ',')
@@ -5717,9 +5701,10 @@ pa_parse_nonneg_add_cmpltr (s, isbranch)
 	}
       /* If we have something like addb,n then there is no condition
          completer.  */
-      else if (strcasecmp (name, "n") == 0 && isbranch)
+      else if (strcasecmp (name, "n") == 0)
 	{
 	  cmpltr = 0;
+	  nullify = 1;
 	}
       else
 	{
@@ -5729,28 +5714,24 @@ pa_parse_nonneg_add_cmpltr (s, isbranch)
     }
 
   /* Reset pointers if this was really a ,n for a branch instruction.  */
-  if (cmpltr == 0 && *name == 'n' && isbranch)
+  if (nullify)
     *s = save_s;
 
   return cmpltr;
 }
 
 /* Parse a negated addition completer returning the number
-   (for encoding in instrutions) of the given completer.
-
-   ISBRANCH specifies whether or not this is parsing a condition
-   completer for a branch (vs a nullification completer for a
-   computational instruction).  */
+   (for encoding in instrutions) of the given completer.  */
 
 static int
-pa_parse_neg_add_cmpltr (s, isbranch)
+pa_parse_neg_add_cmpltr (s)
      char **s;
-     int isbranch;
 {
   int cmpltr;
   char *name = *s + 1;
   char c;
   char *save_s = *s;
+  int nullify = 0;
 
   cmpltr = 0;
   if (**s == ',')
@@ -5794,9 +5775,10 @@ pa_parse_neg_add_cmpltr (s, isbranch)
 	}
       /* If we have something like addb,n then there is no condition
          completer.  */
-      else if (strcasecmp (name, "n") == 0 && isbranch)
+      else if (strcasecmp (name, "n") == 0)
 	{
 	  cmpltr = 0;
+	  nullify = 1;
 	}
       else
 	{
@@ -5806,7 +5788,7 @@ pa_parse_neg_add_cmpltr (s, isbranch)
     }
 
   /* Reset pointers if this was really a ,n for a branch instruction.  */
-  if (cmpltr == 0 && *name == 'n' && isbranch)
+  if (nullify)
     *s = save_s;
 
   return cmpltr;
