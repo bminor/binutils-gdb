@@ -1,3 +1,8 @@
+2002-11-05  H.J. Lu <hjl@gnu.org>
+
+	* config/tc-mips.c (support_64bit_objects): Check *l before it
+	is freed.
+
 2002-11-04  Danny Smith  <dannysmith@users.sourceforge.net>
 
 	* config/obj-coff.c (obj-coff-section): Set SEC_DATA and
