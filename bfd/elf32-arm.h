@@ -1326,6 +1326,8 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	 into the output file to be resolved at run time.  */
       if (info->shared
 	  && (input_section->flags & SEC_ALLOC)
+	  && (r_type != R_ARM_REL32
+	      || !SYMBOL_CALLS_LOCAL (info, h))
 	  && (h == NULL
 	      || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 	      || h->root.type != bfd_link_hash_undefweak)
@@ -2967,7 +2969,8 @@ elf32_arm_check_relocs (abfd, info, sec, relocs)
 	    if (info->shared
 		&& (sec->flags & SEC_ALLOC) != 0
 		&& ((ELF32_R_TYPE (rel->r_info) != R_ARM_PC24
-		     && ELF32_R_TYPE (rel->r_info) != R_ARM_PLT32)
+		     && ELF32_R_TYPE (rel->r_info) != R_ARM_PLT32
+		     && ELF32_R_TYPE (rel->r_info) != R_ARM_REL32)
 		    || (h != NULL
 			&& (! info->symbolic
 			    || (h->elf_link_hash_flags

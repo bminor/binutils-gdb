@@ -1,3 +1,9 @@
+2004-04-21  Philip Blundell  <pb@nexus.co.uk>
+
+	* elf32-arm.h (elf32_arm_check_relocs): Don't output REL32
+	relocs for locally defined symbols during -shared final link.
+	(elf32_arm_final_link_relocate): Likewise.
+
 2004-04-21  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf32-xtensa.c (is_same_value): Add final_static_link argument and
