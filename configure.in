@@ -148,7 +148,7 @@ host_libs="intl mmalloc libiberty opcodes bfd readline tcl tk itcl libgui zlib l
 # know that we are building the simulator.
 # binutils, gas and ld appear in that order because it makes sense to run
 # "make check" in that particular order.
-host_tools="texinfo byacc flex bison binutils gas ld fixincludes gcc sid sim gdb make patch prms send-pr gprof etc expect dejagnu ash bash bzip2 m4 autoconf automake libtool diff rcs fileutils shellutils time textutils wdiff find uudecode hello tar gzip indent recode release sed utils guile perl gawk findutils gettext zip fastjar gnattools"
+host_tools="texinfo byacc flex bison binutils gas ld fixincludes gcc sid sim gdb make patch prms send-pr gprof etc expect dejagnu ash bash bzip2 m4 autoconf automake libtool diff rcs fileutils shellutils time textutils wdiff find uudecode hello tar gzip indent recode release sed utils guile perl gawk findutils gettext zip fastjar"
 
 # libgcj represents the runtime libraries only used by gcj.
 libgcj="target-libffi \
@@ -308,6 +308,9 @@ case "${host}" in
   powerpc-*-beos*)
     noconfigdirs="$noconfigdirs tk itcl libgui gdb dejagnu readline"
     ;;
+  *-*-darwin*)
+    noconfigdirs="$noconfigdirs tk itcl libgui"
+    ;;
 esac
 
 
@@ -317,7 +320,6 @@ ENABLE_LIBADA=$enableval,
 ENABLE_LIBADA=yes)
 if test "${ENABLE_LIBADA}" != "yes" ; then
   noconfigdirs="$noconfigdirs target-libada"
-  noconfigdirs="$noconfigdirs gnattools"
 fi
 
 # Save it here so that, even in case of --enable-libgcj, if the Java
@@ -498,13 +500,8 @@ case "${target}" in
   c54x*-*-* | tic54x-*-*)
     noconfigdirs="$noconfigdirs target-libstdc++-v3 target-libgloss ${libgcj} gcc gdb newlib"
     ;;
-  cris-*-* | crisv32-*-*)
-    case "${target}" in
-      *-*-elf | *-*-aout)
-	noconfigdirs="$noconfigdirs ${libgcj}";;
-      *)
-	noconfigdirs="$noconfigdirs ${libgcj} target-newlib target-libgloss";;
-    esac
+  cris-*-*)
+    noconfigdirs="$noconfigdirs ${libgcj} target-newlib target-libgloss"
     ;;
   crx-*-*)
     noconfigdirs="$noconfigdirs target-libstdc++-v3 target-mudflap ${libgcj}"
@@ -750,9 +747,6 @@ case "${target}" in
     else
            use_gnu_ld=no
     fi
-    ;;
-  sparc-*-solaris2.[[0-6]] | sparc-*-solaris2.[[0-6]].*)
-    noconfigdirs="$noconfigdirs ${libgcj}"
     ;;
   sparc-*-solaris* | sparc64-*-solaris* | sparcv9-*-solaris*)
     ;;
@@ -1989,7 +1983,7 @@ case " $target_configdirs " in
        # to it.  This is right: we don't want to search that directory
        # for binaries, but we want the header files in there, so add
        # them explicitly.
-       FLAGS_FOR_TARGET=$FLAGS_FOR_TARGET' -isystem $$r/$(HOST_SUBDIR)/gcc/include'
+       FLAGS_FOR_TARGET=$FLAGS_FOR_TARGET' -isystem $$r/gcc/include'
 
        # Someone might think of using the pre-installed headers on
        # Canadian crosses, in case the installed compiler is not fully
@@ -2036,13 +2030,13 @@ fi
 if test "x${use_gnu_ld}" = x &&
    echo " ${configdirs} " | grep " ld " > /dev/null ; then
   # Arrange for us to find uninstalled linker scripts.
-  FLAGS_FOR_TARGET=$FLAGS_FOR_TARGET' -L$$r/$(HOST_SUBDIR)/ld'
+  FLAGS_FOR_TARGET=$FLAGS_FOR_TARGET' -L$$r/ld'
 fi
 
 if test "x${CC_FOR_TARGET+set}" = xset; then
   :
 elif test -d ${srcdir}/gcc; then
-  CC_FOR_TARGET='$$r/$(HOST_SUBDIR)/gcc/xgcc -B$$r/$(HOST_SUBDIR)/gcc/'
+  CC_FOR_TARGET='$$r/gcc/xgcc -B$$r/gcc/'
 elif test "$host" = "$target"; then
   CC_FOR_TARGET='$(CC)'
 else
@@ -2053,7 +2047,7 @@ CC_FOR_TARGET=$CC_FOR_TARGET' $(FLAGS_FOR_TARGET)'
 if test "x${GCJ_FOR_TARGET+set}" = xset; then
   :
 elif test -d ${srcdir}/gcc; then
-  GCJ_FOR_TARGET='$$r/$(HOST_SUBDIR)/gcc/gcj -B$$r/$(HOST_SUBDIR)/gcc/'
+  GCJ_FOR_TARGET='$$r/gcc/gcj -B$$r/gcc/'
 elif test "$host" = "$target"; then
   GCJ_FOR_TARGET='gcj'
 else
@@ -2064,7 +2058,7 @@ GCJ_FOR_TARGET=$GCJ_FOR_TARGET' $(FLAGS_FOR_TARGET)'
 if test "x${GFORTRAN_FOR_TARGET+set}" = xset; then
   :
 elif test -d ${srcdir}/gcc; then
-  GFORTRAN_FOR_TARGET='$$r/$(HOST_SUBDIR)/gcc/gfortran -B$$r/$(HOST_SUBDIR)/gcc/'
+  GFORTRAN_FOR_TARGET='$$r/gcc/gfortran -B$$r/gcc/'
 elif test "$host" = "$target"; then
   GFORTRAN_FOR_TARGET='gfortran'
 else
@@ -2089,8 +2083,8 @@ elif test -d ${srcdir}/gcc; then
   # default whereas gcc does not.
   # RAW_CXX_FOR_TARGET is for linking C++ or java; CXX_FOR_TARGET is for
   # all other cases.
-  CXX_FOR_TARGET='$$r/$(HOST_SUBDIR)/gcc/g++ -B$$r/$(HOST_SUBDIR)/gcc/ -nostdinc++ '$libstdcxx_flags
-  RAW_CXX_FOR_TARGET='$$r/$(HOST_SUBDIR)/gcc/xgcc -shared-libgcc -B$$r/$(HOST_SUBDIR)/gcc/ -nostdinc++ '$raw_libstdcxx_flags
+  CXX_FOR_TARGET='$$r/gcc/g++ -B$$r/gcc/ -nostdinc++ '$libstdcxx_flags
+  RAW_CXX_FOR_TARGET='$$r/gcc/xgcc -shared-libgcc -B$$r/gcc/ -nostdinc++ '$raw_libstdcxx_flags
 elif test "$host" = "$target"; then
   CXX_FOR_TARGET='$(CXX)'
   RAW_CXX_FOR_TARGET=${CXX_FOR_TARGET}
@@ -2289,7 +2283,7 @@ AC_CACHE_CHECK([if symbolic links between directories work],
    && rm -f confdir.s2; then
   gcc_cv_prog_ln_s_dir=yes
 else
-  gcc_cv_prog_ln_s_dir=no
+  gcc_cv_prog_ln_s_dir=yes
 fi
 rm -rf confdir.s1 confdir.s2])
 

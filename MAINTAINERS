@@ -39,10 +39,10 @@ dejagnu/
 depcomp
         Send bug reports and patches to bug-automake@gnu.org.
 
-gdb/; readline/; sim/; GDB's part of include/
-	GDB: http://www.gnu.org/software/gdb/
+gdb/; mmalloc/; readline/; sim/; GDB's part of include/ & dejagnu/
+	gdb: http://sources.redhat.com/gdb/
 	Patches to gdb-patches@sources.redhat.com.
-	See also gdb/MAINTAINERS and sim/MAINTAINERS.
+	See also gdb/MAINTAINERS, sim/MAINTAINERS, mmalloc/MAINTAINERS.
 
 include/
 	See binutils/, gdb/, sid/, gcc/, libiberty/ etc.
