@@ -12,4 +12,4 @@ EXTRA_TARGET_HOST_INSTALL_MODULES=install-libtermcap
 
 all-gdb: all-libtermcap
 
-install-gdb: install-libtermcap
+install-gdb: all-libtermcap
