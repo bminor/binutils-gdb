@@ -1,3 +1,10 @@
+2001-08-29  Kevin Buettner  <kevinb@redhat.com>
+
+	From 2001-08-07  Daniel Jacobowitz  <drow@mvista.com>:
+	* solib-svr4.c (enable_break): Check the inferior link map
+	before assuming the inferior PC is at the start of the dynamic
+	loader.
+
 2001-08-28  Andrew Cagney  <cagney@toribio.toronto.redhat.com>
 
 	* frame.h (struct frame_info): Fix documentation on fields

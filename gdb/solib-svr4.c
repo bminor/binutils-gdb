@@ -1198,7 +1198,9 @@ enable_break (void)
     {
       unsigned int interp_sect_size;
       char *buf;
-      CORE_ADDR load_addr;
+      CORE_ADDR load_addr = 0;
+      int load_addr_found = 0;
+      struct so_list *inferior_sos;
       bfd *tmp_bfd = NULL;
       int tmp_fd = -1;
       char *tmp_pathname = NULL;
@@ -1235,10 +1237,30 @@ enable_break (void)
 	  goto bkpt_at_symbol;
 	}
 
-      /* We find the dynamic linker's base address by examining the
-         current pc (which point at the entry point for the dynamic
-         linker) and subtracting the offset of the entry point.  */
-      load_addr = read_pc () - tmp_bfd->start_address;
+      /* If the entry in _DYNAMIC for the dynamic linker has already
+         been filled in, we can read its base address from there. */
+      inferior_sos = svr4_current_sos ();
+      if (inferior_sos)
+	{
+	  /* Connected to a running target.  Update our shared library table. */
+	  solib_add (NULL, 0, NULL);
+	}
+      while (inferior_sos)
+	{
+	  if (strcmp (buf, inferior_sos->so_original_name) == 0)
+	    {
+	      load_addr_found = 1;
+	      load_addr = LM_ADDR (inferior_sos);
+	      break;
+	    }
+	  inferior_sos = inferior_sos->next;
+	}
+
+      /* Otherwise we find the dynamic linker's base address by examining
+	 the current pc (which should point at the entry point for the
+	 dynamic linker) and subtracting the offset of the entry point.  */
+      if (!load_addr_found)
+	load_addr = read_pc () - tmp_bfd->start_address;
 
       /* Record the relocated start and end address of the dynamic linker
          text and plt section for svr4_in_dynsym_resolve_code.  */
