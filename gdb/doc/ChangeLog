@@ -1,3 +1,7 @@
+2002-02-19  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* gdb.texinfo: Document Cygwin native specific commands.
+
 2002-02-15  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.texinfo: Document gdbserver ``--attach'' command.

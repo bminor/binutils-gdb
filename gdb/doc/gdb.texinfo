@@ -10487,6 +10487,7 @@ configurations.
 * HP-UX::                       HP-UX
 * SVR4 Process Information::    SVR4 process information
 * DJGPP Native::                Features specific to the DJGPP port
+* Cygwin Native::		Features specific to the Cygwin port
 @end menu
 
 @node HP-UX
@@ -10683,6 +10684,92 @@ this command clearly shows that addresses in conventional memory are
 mapped 1:1, i.e.@: the physical and linear addresses are identical.
 
 This command is supported only with some DPMI servers.
+@end table
+
+@node Cygwin Native
+@subsection Features for Debugging MS Windows PE executables
+@cindex MS Windows debugging
+@cindex native Cygwin debugging
+@cindex Cygwin-specific commands
+
+@value{GDBN} supports native debugging of MS Windows programs, and
+defines a few commands specific to the Cygwin port.  This
+subsection describes those commands.
+
+@table @code
+@kindex info w32
+@item info w32
+This is a prefix of MS Windows specific commands which print
+information about the target system and important OS structures.
+
+@item info w32 selector
+This command displays information returned by
+the Win32 API @code{GetThreadSelectorEntry} function.
+It takes an optional argument that is evaluated to
+a long value to give the information about this given selector.
+Without argument, this command displays information
+about the the six segment registers.
+
+@kindex info dll
+@item info dll
+This is a Cygwin specific alias of info shared.
+
+@kindex dll-symbols
+@item dll-symbols
+This command loads symbols from a dll similarly to
+add-sym command but without the need to specify a base address.
+
+@kindex set new-console 
+@item set new-console @var{mode}
+If @var{mode} is @code{on} the debuggee will 
+be started in a new console on next start.
+If @var{mode} is @code{off}i, the debuggee will
+be started in the same console as the debugger.
+
+@kindex show new-console
+@item show new-console
+Displays whether a new console is used
+when the debuggee is started.
+
+@kindex set new-group
+@item set new-group @var{mode}
+This boolean value controls whether the debuggee should
+start a new group or stay in the same group as the debugger.
+This affects the way the Windows OS handles
+Ctrl-C.
+
+@kindex show new-group
+@item show new-group
+Displays current value of new-group boolean.
+
+@kindex set debugevents
+@item set debugevents
+This boolean value adds debug output concerning events seen by the debugger.
+
+@kindex set debugexec
+@item set debugexec
+This boolean value adds debug output concerning execute events 
+seen by the debugger.
+
+@kindex set debugexceptions
+@item set debugexceptions
+This boolean value adds debug ouptut concerning exception events 
+seen by the debugger.
+
+@kindex set debugmemory
+@item set debugmemory
+This boolean value adds debug ouptut concerning memory events 
+seen by the debugger.
+
+@kindex set shell
+@item set shell
+This boolean values specifies whether the debuggee is called
+via a shell or directly (default value is on).
+
+@kindex show shell
+@item show shell
+Displays if the debuggee will be started with a shell.
+
 @end table
 
 @node Embedded OS
