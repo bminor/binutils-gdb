@@ -54,6 +54,8 @@
 #include "objfiles.h"
 #include "hppa-tdep.h"
 
+static int hppa_debug = 0;
+
 /* Some local constants.  */
 static const int hppa32_num_regs = 128;
 static const int hppa64_num_regs = 96;
@@ -607,9 +609,17 @@ find_unwind_entry (CORE_ADDR pc)
   struct objfile *objfile;
   struct hppa_objfile_private *priv;
 
+  if (hppa_debug)
+    fprintf_unfiltered (gdb_stdlog, "{ find_unwind_entry 0x%s -> ",
+		        paddr_nz (pc));
+
   /* A function at address 0?  Not in HP-UX! */
   if (pc == (CORE_ADDR) 0)
-    return NULL;
+    {
+      if (hppa_debug)
+	fprintf_unfiltered (gdb_stdlog, "NULL }\n");
+      return NULL;
+    }
 
   ALL_OBJFILES (objfile)
   {
@@ -633,7 +643,12 @@ find_unwind_entry (CORE_ADDR pc)
     if (ui->cache
 	&& pc >= ui->cache->region_start
 	&& pc <= ui->cache->region_end)
-      return ui->cache;
+      {
+	if (hppa_debug)
+	  fprintf_unfiltered (gdb_stdlog, "0x%s (cached) }\n",
+            paddr_nz ((CORE_ADDR) ui->cache));
+        return ui->cache;
+      }
 
     /* Not in the cache, do a binary search */
 
@@ -647,6 +662,9 @@ find_unwind_entry (CORE_ADDR pc)
 	    && pc <= ui->table[middle].region_end)
 	  {
 	    ui->cache = &ui->table[middle];
+	    if (hppa_debug)
+	      fprintf_unfiltered (gdb_stdlog, "0x%s }\n",
+                paddr_nz ((CORE_ADDR) ui->cache));
 	    return &ui->table[middle];
 	  }
 
@@ -656,6 +674,10 @@ find_unwind_entry (CORE_ADDR pc)
 	  first = middle + 1;
       }
   }				/* ALL_OBJFILES() */
+
+  if (hppa_debug)
+    fprintf_unfiltered (gdb_stdlog, "NULL (not found) }\n");
+
   return NULL;
 }
 
@@ -2041,8 +2063,17 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
   struct unwind_table_entry *u;
   int i;
 
+  if (hppa_debug)
+    fprintf_unfiltered (gdb_stdlog, "{ hppa_frame_cache (frame=%d) -> ",
+      frame_relative_level(next_frame));
+
   if ((*this_cache) != NULL)
-    return (*this_cache);
+    {
+      if (hppa_debug)
+        fprintf_unfiltered (gdb_stdlog, "base=0x%s (cached) }", 
+          paddr_nz (((struct hppa_frame_cache *)*this_cache)->base));
+      return (*this_cache);
+    }
   cache = FRAME_OBSTACK_ZALLOC (struct hppa_frame_cache);
   (*this_cache) = cache;
   cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
@@ -2050,7 +2081,11 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
   /* Yow! */
   u = find_unwind_entry (frame_func_unwind (next_frame));
   if (!u)
-    return (*this_cache);
+    {
+      if (hppa_debug)
+        fprintf_unfiltered (gdb_stdlog, "base=NULL (no unwind entry) }");
+      return (*this_cache);
+    }
 
   /* Turn the Entry_GR field into a bitmask.  */
   saved_gr_mask = 0;
@@ -2245,6 +2280,9 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
       }
   }
 
+  if (hppa_debug)
+    fprintf_unfiltered (gdb_stdlog, "base=0x%s }", 
+      paddr_nz (((struct hppa_frame_cache *)*this_cache)->base));
   return (*this_cache);
 }
 
@@ -2776,5 +2814,10 @@ be no argument or the argument must be a depth.\n"), NULL);
 			    break_at_finish_at_depth_command,
 "Set breakpoint at procedure exit.  Either there should\n\
 be no argument or the argument must be a depth.\n"), NULL);
+
+  /* Debug this files internals. */
+  add_show_from_set (add_set_cmd ("hppa", class_maintenance, var_zinteger,
+				  &hppa_debug, "Set hppa debugging.\n\
+When non-zero, hppa specific debugging is enabled.", &setdebuglist), &showdebuglist);
 }
 

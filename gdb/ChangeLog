@@ -1,3 +1,9 @@
+2004-04-22  Randolph Chung  <tausq@debian.org>
+
+	* hppa-tdep.c (hppa_debug): New variable.
+	(find_unwind_entry, hppa_frame_cache): Add debug output.
+	(_initialize_hppa_tdep): Add command to set debug flag.
+
 2004-04-22  Andrew Cagney  <cagney@redhat.com>
 
 	* ppcnbsd-tdep.c: Update copyright.  Include "tramp-frame.h" and
