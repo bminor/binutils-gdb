@@ -1,4 +1,12 @@
 start-sanitize-sky
+Mon Jan 26 16:25:51 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* txvu-dis.c (print_insn): Extract/print fns take pointer to
+	insn now and not insn itself.
+	* txvu-opc.c: insert/extract/print fns take pointer to
+	insn now and not insn itself.  Add initial dma,pke,gpuif support.
+	Parse fn no longer needs to set errmsg = NULL for success.
+
 Fri Jan 23 01:49:24 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* txvu-opc.c (txvu_operands, UBC): Add extract entry.

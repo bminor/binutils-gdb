@@ -125,7 +125,7 @@ print_insn (pc, info, insn, lower_p)
 	    }
 	  operand = txvu_operands + index;
 	  if (operand->extract)
-	    (*operand->extract) (insn, operand, mods, &invalid);
+	    (*operand->extract) (&insn, operand, mods, &invalid);
 	}
       if (invalid)
 	continue;
@@ -158,7 +158,7 @@ print_insn (pc, info, insn, lower_p)
 	  /* Extract the value from the instruction.  */
 	  if (operand->extract)
 	    {
-	      value = (*operand->extract) (insn, operand, mods, (int *) NULL);
+	      value = (*operand->extract) (&insn, operand, mods, (int *) NULL);
 	    }
 	  else
 	    {
@@ -176,7 +176,7 @@ print_insn (pc, info, insn, lower_p)
 
 	  /* Print the operand as directed by the flags.  */
 	  if (operand->print)
-	    (*operand->print) (info, insn, value);
+	    (*operand->print) (info, &insn, value);
 	  else if (operand->flags & TXVU_OPERAND_FAKE)
 	    ; /* nothing to do (??? at least not yet) */
 	  else if (operand->flags & TXVU_OPERAND_RELATIVE_BRANCH)

@@ -38,16 +38,16 @@
 static long CONCAT2 (parse_,fn) \
      PARAMS ((char **, const char **));
 #define INSERT_FN(fn) \
-static TXVU_INSN CONCAT2 (insert_,fn) \
-     PARAMS ((TXVU_INSN, const struct txvu_operand *, \
+static void CONCAT2 (insert_,fn) \
+     PARAMS ((TXVU_INSN *, const struct txvu_operand *, \
 	      int, long, const char **))
 #define EXTRACT_FN(fn) \
 static long CONCAT2 (extract_,fn) \
-     PARAMS ((TXVU_INSN, const struct txvu_operand *, \
+     PARAMS ((TXVU_INSN *, const struct txvu_operand *, \
 	      int, int *))
 #define PRINT_FN(fn) \
 static void CONCAT2 (print_,fn) \
-     PARAMS ((disassemble_info *, TXVU_INSN, long));
+     PARAMS ((disassemble_info *, TXVU_INSN *, long));
 
 PARSE_FN (dotdest);
 INSERT_FN (dotdest);
@@ -495,108 +495,6 @@ struct txvu_opcode txvu_lower_opcodes[] =
 };
 const int txvu_lower_opcodes_count = sizeof (txvu_lower_opcodes) / sizeof (txvu_lower_opcodes[0]);
 
-/* Indexed by first letter of opcode.  Points to chain of opcodes with same
-   first letter.  */
-/* ??? One can certainly use a better hash.  Later.  */
-static struct txvu_opcode *upper_opcode_map[26 + 1];
-static struct txvu_opcode *lower_opcode_map[26 + 1];
-
-/* Indexed by insn code.  Points to chain of opcodes with same insn code.  */
-static struct txvu_opcode *upper_icode_map[(1 << TXVU_ICODE_HASH_SIZE) - 1];
-static struct txvu_opcode *lower_icode_map[(1 << TXVU_ICODE_HASH_SIZE) - 1];
-
-/* Initialize any tables that need it.
-   Must be called once at start up (or when first needed).
-
-   FLAGS is currently unused but is intended to control initialization.  */
-
-void
-txvu_opcode_init_tables (flags)
-     int flags;
-{
-  static int init_p = 0;
-
-  /* We may be intentionally called more than once (for example gdb will call
-     us each time the user switches cpu).  These tables only need to be init'd
-     once though.  */
-  /* ??? We can remove the need for txvu_opcode_supported by taking it into
-     account here, but I'm not sure I want to do that yet (if ever).  */
-  if (!init_p)
-    {
-      int i,n;
-
-      memset (upper_opcode_map, 0, sizeof (upper_opcode_map));
-      memset (upper_icode_map, 0, sizeof (upper_icode_map));
-
-      /* Scan the table backwards so macros appear at the front.  */
-      for (i = txvu_upper_opcodes_count - 1; i >= 0; --i)
-	{
-	  int opcode_hash = TXVU_HASH_UPPER_OPCODE (txvu_upper_opcodes[i].mnemonic);
-	  int icode_hash = TXVU_HASH_UPPER_ICODE (txvu_upper_opcodes[i].value);
-
-	  txvu_upper_opcodes[i].next_asm = upper_opcode_map[opcode_hash];
-	  upper_opcode_map[opcode_hash] = &txvu_upper_opcodes[i];
-
-	  txvu_upper_opcodes[i].next_dis = upper_icode_map[icode_hash];
-	  upper_icode_map[icode_hash] = &txvu_upper_opcodes[i];
-	}
-
-      memset (lower_opcode_map, 0, sizeof (lower_opcode_map));
-      memset (lower_icode_map, 0, sizeof (lower_icode_map));
-
-      /* Scan the table backwards so macros appear at the front.  */
-      for (i = txvu_lower_opcodes_count - 1; i >= 0; --i)
-	{
-	  int opcode_hash = TXVU_HASH_LOWER_OPCODE (txvu_lower_opcodes[i].mnemonic);
-	  int icode_hash = TXVU_HASH_LOWER_ICODE (txvu_lower_opcodes[i].value);
-
-	  txvu_lower_opcodes[i].next_asm = lower_opcode_map[opcode_hash];
-	  lower_opcode_map[opcode_hash] = &txvu_lower_opcodes[i];
-
-	  txvu_lower_opcodes[i].next_dis = lower_icode_map[icode_hash];
-	  lower_icode_map[icode_hash] = &txvu_lower_opcodes[i];
-	}
-
-      init_p = 1;
-    }
-}
-
-/* Return the first insn in the chain for assembling upper INSN.  */
-
-const struct txvu_opcode *
-txvu_upper_opcode_lookup_asm (insn)
-     const char *insn;
-{
-  return upper_opcode_map[TXVU_HASH_UPPER_OPCODE (insn)];
-}
-
-/* Return the first insn in the chain for assembling lower INSN.  */
-
-const struct txvu_opcode *
-txvu_lower_opcode_lookup_asm (insn)
-     const char *insn;
-{
-  return lower_opcode_map[TXVU_HASH_LOWER_OPCODE (insn)];
-}
-
-/* Return the first insn in the chain for disassembling upper INSN.  */
-
-const struct txvu_opcode *
-txvu_upper_opcode_lookup_dis (insn)
-     TXVU_INSN insn;
-{
-  return upper_icode_map[TXVU_HASH_UPPER_ICODE (insn)];
-}
-
-/* Return the first insn in the chain for disassembling lower INSN.  */
-
-const struct txvu_opcode *
-txvu_lower_opcode_lookup_dis (insn)
-     TXVU_INSN insn;
-{
-  return lower_icode_map[TXVU_HASH_LOWER_ICODE (insn)];
-}
-
 /* Value of DEST in use.
    Each of the registers must specify the same value as the opcode.
    ??? Perhaps remove the duplication?  */
@@ -606,27 +504,6 @@ static int mnemonic_dest;
    The register specified for the ftreg must match the broadcast register
    specified in the opcode.  */
 static int mnemonic_bc;
-
-/* Init fns.
-   These are called before doing each of the respective activities.  */
-
-/* Called by the assembler before parsing an instruction.  */
-
-void
-txvu_opcode_init_parse ()
-{
-  mnemonic_dest = -1;
-  mnemonic_bc = -1;
-}
-
-/* Called by the disassembler before printing an instruction.  */
-
-void
-txvu_opcode_init_print ()
-{
-  mnemonic_dest = -1;
-  mnemonic_bc = -1;
-}
 
 /* Multiple destination choice support.
    The "dest" string selects any combination of x,y,z,w.
@@ -680,7 +557,6 @@ parse_dotdest (pstr, errmsg)
       return 0;
     }
 
-  *errmsg = NULL;
   return dest;
 }
 
@@ -723,7 +599,6 @@ parse_dotdest1 (pstr, errmsg)
       return 0;
     }
 
-  *errmsg = NULL;
   return dest;
 }
 
@@ -755,13 +630,12 @@ parse_dest1 (pstr, errmsg)
       return 0;
     }
 
-  *errmsg = NULL;
   return dest;
 }
 
-static TXVU_INSN
+static void
 insert_dotdest (insn, operand, mods, value, errmsg)
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      const struct txvu_operand *operand;
      int mods;
      long value;
@@ -769,18 +643,18 @@ insert_dotdest (insn, operand, mods, value, errmsg)
 {
   /* Record the DEST value in use so the register parser can use it.  */
   mnemonic_dest = value;
-  return insn |= value << operand->shift;
+  *insn |= value << operand->shift;
 }
 
 static long
 extract_dotdest (insn, operand, mods, pinvalid)
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      const struct txvu_operand *operand;
      int mods;
      int *pinvalid;
 {
   /* Record the DEST value in use so the register printer can use it.  */
-  mnemonic_dest = (insn >> operand->shift) & ((1 << operand->bits) - 1);
+  mnemonic_dest = (*insn >> operand->shift) & ((1 << operand->bits) - 1);
   return mnemonic_dest;
 }
 
@@ -789,7 +663,7 @@ extract_dotdest (insn, operand, mods, pinvalid)
 static void
 _print_dest (info, insn, value)
      disassemble_info *info;
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      long value;
 {
   if (value & TXVU_DEST_X)
@@ -805,7 +679,7 @@ _print_dest (info, insn, value)
 static void
 print_dotdest (info, insn, value)
      disassemble_info *info;
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      long value;
 {
   (*info->fprintf_func) (info->stream, ".");
@@ -815,7 +689,7 @@ print_dotdest (info, insn, value)
 static void
 print_dest1 (info, insn, value)
      disassemble_info *info;
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      long value;
 {
   _print_dest (info, insn, mnemonic_dest);
@@ -852,14 +726,13 @@ _parse_sdest (pstr, errmsg)
       return 0;
     }
 
-  *errmsg = NULL;
   return dest;
 }
 
 static void
 print_sdest (info, insn, value)
      disassemble_info *info;
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      long value;
 {
   char c;
@@ -896,12 +769,12 @@ parse_bc (pstr, errmsg)
 
 static long
 extract_bc (insn, operand, mods, pinvalid)
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      const struct txvu_operand *operand;
      int mods;
      int *pinvalid;
 {
-  mnemonic_bc = insn & 3;
+  mnemonic_bc = *insn & 3;
   return mnemonic_bc;
 }
 
@@ -944,14 +817,13 @@ parse_vfreg (pstr, errmsg)
       return 0;
     }
   *pstr = str;
-  *errmsg = NULL;
   return reg;
 }
 
 static void
 print_vfreg (info, insn, value)
      disassemble_info *info;
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      long value;
 {
   (*info->fprintf_func) (info->stream, "vf%02ld", value);
@@ -996,14 +868,13 @@ parse_bcftreg (pstr, errmsg)
       return 0;
     }
   *pstr = str;
-  *errmsg = NULL;
   return reg;
 }
 
 static void
 print_bcftreg (info, insn, value)
      disassemble_info *info;
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      long value;
 {
   (*info->fprintf_func) (info->stream, "vf%02ld", value);
@@ -1038,7 +909,6 @@ parse_accdest (pstr, errmsg)
       return 0;
     }
   *pstr = str;
-  *errmsg = NULL;
   /* Value isn't used, but we must return something.  */
   return 0;
 }
@@ -1046,7 +916,7 @@ parse_accdest (pstr, errmsg)
 static void
 print_accdest (info, insn, value)
      disassemble_info *info;
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      long value;
 {
   (*info->fprintf_func) (info->stream, "acc");
@@ -1057,20 +927,16 @@ print_accdest (info, insn, value)
    This simplifies the opmula,opmsub entries by keeping them equivalent to
    the others.  */
 
-static TXVU_INSN
+static void
 insert_xyz (insn, operand, mods, value, errmsg)
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      const struct txvu_operand *operand;
      int mods;
      long value;
      const char **errmsg;
 {
   if (mnemonic_dest != (TXVU_DEST_X | TXVU_DEST_Y | TXVU_DEST_Z))
-    {
-      *errmsg = "expecting `xyz' for `dest' value";
-      return insn;
-    }
-  return insn;
+    *errmsg = "expecting `xyz' for `dest' value";
 }
 
 /* F[ST] register using selector in F[ST]F field.
@@ -1107,45 +973,44 @@ parse_ffstreg (pstr, errmsg)
   if (*errmsg)
     return 0;
   *pstr = str;
-  *errmsg = NULL;
   return reg | (xyzw << 5);
 }
 
 static void
 print_ffstreg (info, insn, value)
      disassemble_info *info;
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      long value;
 {
   (*info->fprintf_func) (info->stream, "vf%02ld", value & TXVU_MASK_REG);
   print_sdest (info, insn, (value >> 5) & 3);
 }
 
-static TXVU_INSN
+static void
 insert_ffstreg (insn, operand, mods, value, errmsg)
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      const struct txvu_operand *operand;
      int mods;
      long value;
      const char **errmsg;
 {
   if (operand->shift == TXVU_SHIFT_SREG)
-    return insn | VLFSF (value >> 5) | VS (value);
+    *insn |= VLFSF (value >> 5) | VS (value);
   else
-    return insn | VLFTF (value >> 5) | VT (value);
+    *insn |= VLFTF (value >> 5) | VT (value);
 }
 
 static long
 extract_ffstreg (insn, operand, mods, pinvalid)
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      const struct txvu_operand *operand;
      int mods;
      int *pinvalid;
 {
   if (operand->shift == TXVU_SHIFT_SREG)
-    return (((insn & VLFSF (~0)) >> 21) << 5) | VS (insn);
+    return (((*insn & VLFSF (~0)) >> 21) << 5) | VS (*insn);
   else
-    return (((insn & VLFTF (~0)) >> 21) << 5) | VT (insn);
+    return (((*insn & VLFTF (~0)) >> 21) << 5) | VT (*insn);
 }
 
 /* F register.  */
@@ -1177,14 +1042,13 @@ parse_freg (pstr, errmsg)
       return 0;
     }
   *pstr = str;
-  *errmsg = NULL;
   return reg;
 }
 
 static void
 print_freg (info, insn, value)
      disassemble_info *info;
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      long value;
 {
   (*info->fprintf_func) (info->stream, "vf%02ld", value);
@@ -1219,14 +1083,13 @@ parse_ireg (pstr, errmsg)
       return 0;
     }
   *pstr = str;
-  *errmsg = NULL;
   return reg;
 }
 
 static void
 print_ireg (info, insn, value)
      disassemble_info *info;
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      long value;
 {
   (*info->fprintf_func) (info->stream, "vi%02ld", value);
@@ -1261,14 +1124,13 @@ parse_vi01 (pstr, errmsg)
       return 0;
     }
   *pstr = str;
-  *errmsg = NULL;
   return reg;
 }
 
 static void
 print_vi01 (info, insn, value)
      disassemble_info *info;
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      long value;
 {
   (*info->fprintf_func) (info->stream, "vi01");
@@ -1276,61 +1138,61 @@ print_vi01 (info, insn, value)
 
 /* Lower instruction 12 bit unsigned immediate.  */
 
-static TXVU_INSN
+static void
 insert_luimm12 (insn, operand, mods, value, errmsg)
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      const struct txvu_operand *operand;
      int mods;
      long value;
      const char **errmsg;
 {
-  return insn | VLUIMM12TOP ((value & (1 << 11)) != 0) | VLIMM11 (value);
+  *insn |= VLUIMM12TOP ((value & (1 << 11)) != 0) | VLIMM11 (value);
 }
 
 static long
 extract_luimm12 (insn, operand, mods, pinvalid)
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      const struct txvu_operand *operand;
      int mods;
      int *pinvalid;
 {
-  return (((insn & MLUIMM12TOP) != 0) << 11) | VLIMM11 (insn);
+  return (((*insn & MLUIMM12TOP) != 0) << 11) | VLIMM11 (*insn);
 }
 
 /* Lower instruction 12 bit unsigned immediate, upper 6 bits.  */
 
-static TXVU_INSN
+static void
 insert_luimm12up6 (insn, operand, mods, value, errmsg)
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      const struct txvu_operand *operand;
      int mods;
      long value;
      const char **errmsg;
 {
-  return insn | VLUIMM12TOP ((value & (1 << 11)) != 0) | (value & 0x7c0);
+  *insn |= VLUIMM12TOP ((value & (1 << 11)) != 0) | (value & 0x7c0);
 }
 
 /* Lower instruction 15 bit unsigned immediate.  */
 
-static TXVU_INSN
+static void
 insert_luimm15 (insn, operand, mods, value, errmsg)
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      const struct txvu_operand *operand;
      int mods;
      long value;
      const char **errmsg;
 {
-  return insn | VLUIMM15TOP (value >> 11) | VLIMM11 (value);
+  *insn |= VLUIMM15TOP (value >> 11) | VLIMM11 (value);
 }
 
 static long
 extract_luimm15 (insn, operand, mods, pinvalid)
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      const struct txvu_operand *operand;
      int mods;
      int *pinvalid;
 {
-  return (((insn & MLUIMM15TOP) >> 21) << 11) | VLIMM11 (insn);
+  return (((*insn & MLUIMM15TOP) >> 21) << 11) | VLIMM11 (*insn);
 }
 
 /* PKE support.  */
@@ -1356,7 +1218,7 @@ PRINT_FN (pke_unpacktype);
 
 PARSE_FN (pke_unpackaddr);
 
-const struct txvu_operand txvu_pke_operands[] =
+const struct txvu_operand pke_operands[] =
 {
   /* place holder (??? not sure if needed) */
 #define PKE_UNUSED 128
@@ -1427,7 +1289,7 @@ const struct txvu_operand txvu_pke_operands[] =
 #define VPKECMD(x) V ((x), 7, 24)
 #define VPKEUNPACK V (0x60, 8, 24)
 
-struct txvu_opcode txvu_pke_opcodes[] =
+struct txvu_opcode pke_opcodes[] =
 {
   { "pkenop", { PKE_IBIT }, 0x7fffffff, 0 },
   { "stcycle", { PKE_IBIT, SP, PKE_UIMM8UP, C, PKE_UIMM8LO }, MPKECMD, VPKECMD (1) },
@@ -1457,7 +1319,7 @@ struct txvu_opcode txvu_pke_opcodes[] =
   { "directhl", { PKE_IBIT, SP, PKE_VARLENDATA }, MPKECMD, VPKECMD (0x51), PKE_OPCODE_LENVAR + PKE_OPCODE_DIRECT },
   { "unpack", { PKE_IMRBITS, SP, PKE_UNPACKTYPE, C, PKE_UNPACKADDR, C, PKE_VARLENDATA }, MPKEUNPACK, VPKEUNPACK, PKE_OPCODE_LENVAR + PKE_OPCODE_UNPACK },
 };
-const int txvu_pke_opcodes_count = sizeof (txvu_pke_opcodes) / sizeof (txvu_pke_opcodes[0]);
+const int pke_opcodes_count = sizeof (pke_opcodes) / sizeof (pke_opcodes[0]);
 
 /* PKE parse,insert,extract,print helper fns.  */
 
@@ -1471,7 +1333,7 @@ parse_pke_ibit (pstr, errmsg)
 static void
 print_pke_ibit (info, insn, value)
      disassemble_info *info;
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      long value;
 {
   (*info->fprintf_func) (info->stream, "???");
@@ -1487,7 +1349,7 @@ parse_pke_mode (pstr, errmsg)
 static void
 print_pke_mode (info, insn, value)
      disassemble_info *info;
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      long value;
 {
   (*info->fprintf_func) (info->stream, "???");
@@ -1503,7 +1365,7 @@ parse_pke_ability (pstr, errmsg)
 static void
 print_pke_ability (info, insn, value)
      disassemble_info *info;
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      long value;
 {
   (*info->fprintf_func) (info->stream, "???");
@@ -1535,7 +1397,7 @@ parse_pke_imrbits (pstr, errmsg)
 static void
 print_pke_imrbits (info, insn, value)
      disassemble_info *info;
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      long value;
 {
   (*info->fprintf_func) (info->stream, "???");
@@ -1551,7 +1413,7 @@ parse_pke_unpacktype (pstr, errmsg)
 static void
 print_pke_unpacktype (info, insn, value)
      disassemble_info *info;
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      long value;
 {
   (*info->fprintf_func) (info->stream, "???");
@@ -1581,7 +1443,7 @@ INSERT_FN (dma_next);
 EXTRACT_FN (dma_next);
 PRINT_FN (dma_next);
 
-const struct txvu_operand txvu_dma_operands[] =
+const struct txvu_operand dma_operands[] =
 {
   /* place holder (??? not sure if needed) */
 #define DMA_UNUSED 128
@@ -1606,7 +1468,7 @@ const struct txvu_operand txvu_dma_operands[] =
   { 0 }
 };
 
-struct txvu_opcode txvu_dma_opcodes[] =
+struct txvu_opcode dma_opcodes[] =
 {
   { "dmacnt", { DMA_FLAGS, SP, DMA_DATA, C, DMA_NEXT }, 0, 1 },
   { "dmanext", { DMA_FLAGS, SP, DMA_DATA, C, DMA_NEXT }, 0, 2 },
@@ -1616,7 +1478,7 @@ struct txvu_opcode txvu_dma_opcodes[] =
   { "dmareg", { DMA_FLAGS, SP, DMA_DATA, C, DMA_NEXT }, 0, 6 },
   { "dmaend", { DMA_FLAGS, SP, DMA_DATA, C, DMA_NEXT }, 0, 7 }
 };
-const int txvu_dma_opcodes_count = sizeof (txvu_dma_opcodes) / sizeof (txvu_dma_opcodes[0]);
+const int dma_opcodes_count = sizeof (dma_opcodes) / sizeof (dma_opcodes[0]);
 
 /* DMA parse,insert,extract,print helper fns.  */
 
@@ -1625,22 +1487,42 @@ parse_dma_flags (pstr, errmsg)
      char **pstr;
      const char **errmsg;
 {
+  char *str = *pstr;
+  int flags = 0;
+
+  if (*str != '[')
+    return 0;
+
+  for (str = str + 1; *str != ']'; ++str)
+    {
+      switch (tolower (*str))
+	{
+	case '0' : flags |= DMA_FLAG_PCE0; break;
+	case '1' : flags |= DMA_FLAG_PCE1; break;
+	case 'i' : flags |= DMA_FLAG_INT; break;
+	case 's' : flags |= DMA_FLAG_SPR; break;
+	default : *errmsg = "unknown dma flag"; return 0;
+	}
+    }
+
+  *errmsg = NULL;
+  *pstr = str + 1;
+  return flags;
 }
 
-static TXVU_INSN
+static void
 insert_dma_flags (insn, operand, mods, value, errmsg)
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      const struct txvu_operand *operand;
      int mods;
      long value;
      const char **errmsg;
 {
-  return 0;
 }
 
 static long
 extract_dma_flags (insn, operand, mods, pinvalid)
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      const struct txvu_operand *operand;
      int mods;
      int *pinvalid;
@@ -1651,10 +1533,22 @@ extract_dma_flags (insn, operand, mods, pinvalid)
 static void
 print_dma_flags (info, insn, value)
      disassemble_info *info;
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      long value;
 {
-  (*info->fprintf_func) (info->stream, "???");
+  if (value)
+    {
+      (*info->fprintf_func) (info->stream, "[");
+      if (value & DMA_FLAG_PCE0)
+	(*info->fprintf_func) (info->stream, "0");
+      if (value & DMA_FLAG_PCE1)
+	(*info->fprintf_func) (info->stream, "1");
+      if (value & DMA_FLAG_INT)
+	(*info->fprintf_func) (info->stream, "i");
+      if (value & DMA_FLAG_SPR)
+	(*info->fprintf_func) (info->stream, "s");
+      (*info->fprintf_func) (info->stream, "]");
+    }
 }
 
 static long
@@ -1664,20 +1558,19 @@ parse_dma_data (pstr, errmsg)
 {
 }
 
-static TXVU_INSN
+static void
 insert_dma_data (insn, operand, mods, value, errmsg)
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      const struct txvu_operand *operand;
      int mods;
      long value;
      const char **errmsg;
 {
-  return 0;
 }
 
 static long
 extract_dma_data (insn, operand, mods, pinvalid)
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      const struct txvu_operand *operand;
      int mods;
      int *pinvalid;
@@ -1688,7 +1581,7 @@ extract_dma_data (insn, operand, mods, pinvalid)
 static void
 print_dma_data (info, insn, value)
      disassemble_info *info;
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      long value;
 {
   (*info->fprintf_func) (info->stream, "???");
@@ -1701,20 +1594,19 @@ parse_dma_next (pstr, errmsg)
 {
 }
 
-static TXVU_INSN
+static void
 insert_dma_next (insn, operand, mods, value, errmsg)
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      const struct txvu_operand *operand;
      int mods;
      long value;
      const char **errmsg;
 {
-  return 0;
 }
 
 static long
 extract_dma_next (insn, operand, mods, pinvalid)
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      const struct txvu_operand *operand;
      int mods;
      int *pinvalid;
@@ -1725,7 +1617,7 @@ extract_dma_next (insn, operand, mods, pinvalid)
 static void
 print_dma_next (info, insn, value)
      disassemble_info *info;
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      long value;
 {
   (*info->fprintf_func) (info->stream, "???");
@@ -1753,7 +1645,7 @@ INSERT_FN (gpuif_eop);
 EXTRACT_FN (gpuif_eop);
 PRINT_FN (gpuif_eop);
 
-const struct txvu_operand txvu_gpuif_operands[] =
+const struct txvu_operand gpuif_operands[] =
 {
   /* place holder (??? not sure if needed) */
 #define GPUIF_UNUSED 128
@@ -1779,13 +1671,13 @@ const struct txvu_operand txvu_gpuif_operands[] =
   { 0 }
 };
 
-struct txvu_opcode txvu_gpuif_opcodes[] =
+struct txvu_opcode gpuif_opcodes[] =
 {
   { "gpuifpacked", { SP, GPUIF_PRIM, C, GPUIF_REGS, C, GPUIF_NLOOP, C, GPUIF_EOP }, 0, 1 },
   { "gpuifreglist", { SP, GPUIF_REGS, C, GPUIF_NLOOP, C, GPUIF_EOP }, 0, 2 },
   { "gpuifimage", { SP, GPUIF_NLOOP }, 0, 3 },
 };
-const int txvu_gpuif_opcodes_count = sizeof (txvu_gpuif_opcodes) / sizeof (txvu_gpuif_opcodes[0]);
+const int gpuif_opcodes_count = sizeof (gpuif_opcodes) / sizeof (gpuif_opcodes[0]);
 
 /* GPUIF parse,insert,extract,print helper fns.  */
 
@@ -1796,20 +1688,19 @@ parse_gpuif_prim (pstr, errmsg)
 {
 }
 
-static TXVU_INSN
+static void
 insert_gpuif_prim (insn, operand, mods, value, errmsg)
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      const struct txvu_operand *operand;
      int mods;
      long value;
      const char **errmsg;
 {
-  return 0;
 }
 
 static long
 extract_gpuif_prim (insn, operand, mods, pinvalid)
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      const struct txvu_operand *operand;
      int mods;
      int *pinvalid;
@@ -1820,7 +1711,7 @@ extract_gpuif_prim (insn, operand, mods, pinvalid)
 static void
 print_gpuif_prim (info, insn, value)
      disassemble_info *info;
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      long value;
 {
   (*info->fprintf_func) (info->stream, "???");
@@ -1833,20 +1724,19 @@ parse_gpuif_regs (pstr, errmsg)
 {
 }
 
-static TXVU_INSN
+static void
 insert_gpuif_regs (insn, operand, mods, value, errmsg)
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      const struct txvu_operand *operand;
      int mods;
      long value;
      const char **errmsg;
 {
-  return 0;
 }
 
 static long
 extract_gpuif_regs (insn, operand, mods, pinvalid)
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      const struct txvu_operand *operand;
      int mods;
      int *pinvalid;
@@ -1857,7 +1747,7 @@ extract_gpuif_regs (insn, operand, mods, pinvalid)
 static void
 print_gpuif_regs (info, insn, value)
      disassemble_info *info;
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      long value;
 {
   (*info->fprintf_func) (info->stream, "???");
@@ -1870,20 +1760,19 @@ parse_gpuif_nloop (pstr, errmsg)
 {
 }
 
-static TXVU_INSN
+static void
 insert_gpuif_nloop (insn, operand, mods, value, errmsg)
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      const struct txvu_operand *operand;
      int mods;
      long value;
      const char **errmsg;
 {
-  return 0;
 }
 
 static long
 extract_gpuif_nloop (insn, operand, mods, pinvalid)
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      const struct txvu_operand *operand;
      int mods;
      int *pinvalid;
@@ -1894,7 +1783,7 @@ extract_gpuif_nloop (insn, operand, mods, pinvalid)
 static void
 print_gpuif_nloop (info, insn, value)
      disassemble_info *info;
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      long value;
 {
   (*info->fprintf_func) (info->stream, "???");
@@ -1907,20 +1796,19 @@ parse_gpuif_eop (pstr, errmsg)
 {
 }
 
-static TXVU_INSN
+static void
 insert_gpuif_eop (insn, operand, mods, value, errmsg)
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      const struct txvu_operand *operand;
      int mods;
      long value;
      const char **errmsg;
 {
-  return 0;
 }
 
 static long
 extract_gpuif_eop (insn, operand, mods, pinvalid)
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      const struct txvu_operand *operand;
      int mods;
      int *pinvalid;
@@ -1931,8 +1819,211 @@ extract_gpuif_eop (insn, operand, mods, pinvalid)
 static void
 print_gpuif_eop (info, insn, value)
      disassemble_info *info;
-     TXVU_INSN insn;
+     TXVU_INSN *insn;
      long value;
 {
   (*info->fprintf_func) (info->stream, "???");
+}
+
+/* Init fns.
+   These are called before doing each of the respective activities.  */
+
+/* Called by the assembler before parsing an instruction.  */
+
+void
+txvu_opcode_init_parse ()
+{
+  mnemonic_dest = -1;
+  mnemonic_bc = -1;
+}
+
+/* Called by the disassembler before printing an instruction.  */
+
+void
+txvu_opcode_init_print ()
+{
+  mnemonic_dest = -1;
+  mnemonic_bc = -1;
+}
+
+/* Indexed by first letter of opcode.  Points to chain of opcodes with same
+   first letter.  */
+/* ??? One can certainly use a better hash.  Later.  */
+static struct txvu_opcode *upper_opcode_map[26 + 1];
+static struct txvu_opcode *lower_opcode_map[26 + 1];
+
+/* Indexed by insn code.  Points to chain of opcodes with same insn code.  */
+static struct txvu_opcode *upper_icode_map[(1 << TXVU_ICODE_HASH_SIZE) - 1];
+static struct txvu_opcode *lower_icode_map[(1 << TXVU_ICODE_HASH_SIZE) - 1];
+
+/* Initialize any tables that need it.
+   Must be called once at start up (or when first needed).
+
+   FLAGS is currently unused but is intended to control initialization.  */
+
+void
+txvu_opcode_init_tables (flags)
+     int flags;
+{
+  static int init_p = 0;
+
+  /* We may be intentionally called more than once (for example gdb will call
+     us each time the user switches cpu).  These tables only need to be init'd
+     once though.  */
+  /* ??? We can remove the need for txvu_opcode_supported by taking it into
+     account here, but I'm not sure I want to do that yet (if ever).  */
+  if (!init_p)
+    {
+      int i,n;
+
+      /* Upper VU table.  */
+
+      memset (upper_opcode_map, 0, sizeof (upper_opcode_map));
+      memset (upper_icode_map, 0, sizeof (upper_icode_map));
+      /* Scan the table backwards so macros appear at the front.  */
+      for (i = txvu_upper_opcodes_count - 1; i >= 0; --i)
+	{
+	  int opcode_hash = TXVU_HASH_UPPER_OPCODE (txvu_upper_opcodes[i].mnemonic);
+	  int icode_hash = TXVU_HASH_UPPER_ICODE (txvu_upper_opcodes[i].value);
+
+	  txvu_upper_opcodes[i].next_asm = upper_opcode_map[opcode_hash];
+	  upper_opcode_map[opcode_hash] = &txvu_upper_opcodes[i];
+
+	  txvu_upper_opcodes[i].next_dis = upper_icode_map[icode_hash];
+	  upper_icode_map[icode_hash] = &txvu_upper_opcodes[i];
+	}
+
+      /* Lower VU table.  */
+
+      memset (lower_opcode_map, 0, sizeof (lower_opcode_map));
+      memset (lower_icode_map, 0, sizeof (lower_icode_map));
+      /* Scan the table backwards so macros appear at the front.  */
+      for (i = txvu_lower_opcodes_count - 1; i >= 0; --i)
+	{
+	  int opcode_hash = TXVU_HASH_LOWER_OPCODE (txvu_lower_opcodes[i].mnemonic);
+	  int icode_hash = TXVU_HASH_LOWER_ICODE (txvu_lower_opcodes[i].value);
+
+	  txvu_lower_opcodes[i].next_asm = lower_opcode_map[opcode_hash];
+	  lower_opcode_map[opcode_hash] = &txvu_lower_opcodes[i];
+
+	  txvu_lower_opcodes[i].next_dis = lower_icode_map[icode_hash];
+	  lower_icode_map[icode_hash] = &txvu_lower_opcodes[i];
+	}
+
+      /* PKE table.  */
+
+      for (i = pke_opcodes_count - 2; i >= 0; --i)
+	{
+	  pke_opcodes[i].next_asm = & pke_opcodes[i+1];
+	  pke_opcodes[i].next_dis = & pke_opcodes[i+1];
+	}
+
+      /* DMA table.  */
+
+      for (i = dma_opcodes_count - 2; i >= 0; --i)
+	{
+	  dma_opcodes[i].next_asm = & dma_opcodes[i+1];
+	  dma_opcodes[i].next_dis = & dma_opcodes[i+1];
+	}
+
+      /* GPUIF table.  */
+
+      for (i = gpuif_opcodes_count - 2; i >= 0; --i)
+	{
+	  gpuif_opcodes[i].next_asm = & gpuif_opcodes[i+1];
+	  gpuif_opcodes[i].next_dis = & gpuif_opcodes[i+1];
+	}
+
+      init_p = 1;
+    }
+}
+
+/* Return the first insn in the chain for assembling upper INSN.  */
+
+const struct txvu_opcode *
+txvu_upper_opcode_lookup_asm (insn)
+     const char *insn;
+{
+  return upper_opcode_map[TXVU_HASH_UPPER_OPCODE (insn)];
+}
+
+/* Return the first insn in the chain for disassembling upper INSN.  */
+
+const struct txvu_opcode *
+txvu_upper_opcode_lookup_dis (insn)
+     TXVU_INSN insn;
+{
+  return upper_icode_map[TXVU_HASH_UPPER_ICODE (insn)];
+}
+
+/* Return the first insn in the chain for assembling lower INSN.  */
+
+const struct txvu_opcode *
+txvu_lower_opcode_lookup_asm (insn)
+     const char *insn;
+{
+  return lower_opcode_map[TXVU_HASH_LOWER_OPCODE (insn)];
+}
+
+/* Return the first insn in the chain for disassembling lower INSN.  */
+
+const struct txvu_opcode *
+txvu_lower_opcode_lookup_dis (insn)
+     TXVU_INSN insn;
+{
+  return lower_icode_map[TXVU_HASH_LOWER_ICODE (insn)];
+}
+
+/* Return the first insn in the chain for assembling lower INSN.  */
+
+const struct txvu_opcode *
+pke_opcode_lookup_asm (insn)
+     const char *insn;
+{
+  return &pke_opcodes[0];
+}
+
+/* Return the first insn in the chain for disassembling lower INSN.  */
+
+const struct txvu_opcode *
+pke_opcode_lookup_dis (insn)
+     TXVU_INSN insn;
+{
+  return &pke_opcodes[0];
+}
+
+/* Return the first insn in the chain for assembling lower INSN.  */
+
+const struct txvu_opcode *
+dma_opcode_lookup_asm (insn)
+     const char *insn;
+{
+  return &dma_opcodes[0];
+}
+
+/* Return the first insn in the chain for disassembling lower INSN.  */
+
+const struct txvu_opcode *
+dma_opcode_lookup_dis (insn)
+     TXVU_INSN insn;
+{
+  return &dma_opcodes[0];
+}
+
+/* Return the first insn in the chain for assembling lower INSN.  */
+
+const struct txvu_opcode *
+gpuif_opcode_lookup_asm (insn)
+     const char *insn;
+{
+  return &gpuif_opcodes[0];
+}
+
+/* Return the first insn in the chain for disassembling lower INSN.  */
+
+const struct txvu_opcode *
+gpuif_opcode_lookup_dis (insn)
+     TXVU_INSN insn;
+{
+  return &gpuif_opcodes[0];
 }
