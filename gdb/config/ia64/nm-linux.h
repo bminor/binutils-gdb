@@ -69,4 +69,15 @@ extern int ia64_linux_insert_watchpoint (ptid_t ptid, CORE_ADDR addr,
 extern int ia64_linux_remove_watchpoint (ptid_t ptid, CORE_ADDR addr,
                                          int len);
 
+#include "target.h"
+
+#define NATIVE_XFER_UNWIND_TABLE ia64_linux_xfer_unwind_table
+extern LONGEST ia64_linux_xfer_unwind_table (struct target_ops *ops, 
+					     enum target_object object,
+					     const char *annex, 
+					     void *readbuf,
+					     const void *writebuf,
+					     ULONGEST offset, 
+					     LONGEST len);
+
 #endif /* #ifndef NM_LINUX_H */

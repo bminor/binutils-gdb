@@ -1,3 +1,13 @@
+2003-11-14  Jeff Johnston  <jjohnstn@redhat.com>
+ 
+	* config/ia64/nm-linux.h (NATIVE_XFER_UNWIND_TABLE): New macro to
+	set up the ia64 linux native target method for getting the kernel
+	unwind table.
+	* ia64-linux-nat.c (ia64_linux_xfer_unwind_table): New function.
+	* inftarg.c (child_xfer_partial): Enable section of code to
+	handle TARGET_OBJECT_UNWIND_TABLE.
+ 	* target.h (target_object): Add new TARGET_OBJECT_UNWIND_TABLE macro.
+
 2003-11-14  Ian Lance Taylor  <ian@wasabisystems.com>
 
 	* config/arm/nbsd.mt (TM_FILE): Define.

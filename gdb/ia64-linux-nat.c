@@ -34,6 +34,7 @@
 #ifdef HAVE_SYS_REG_H
 #include <sys/reg.h>
 #endif
+#include <sys/syscall.h>
 #include <sys/user.h>
 
 #include <asm/ptrace_offsets.h>
@@ -644,4 +645,14 @@ ia64_linux_stopped_by_watchpoint (ptid_t ptid)
   write_register_pid (IA64_PSR_REGNUM, psr, ptid);
 
   return (CORE_ADDR) siginfo.si_addr;
+}
+
+LONGEST 
+ia64_linux_xfer_unwind_table (struct target_ops *ops,
+			      enum target_object object,
+			      const char *annex,
+			      void *readbuf, const void *writebuf,
+			      ULONGEST offset, LONGEST len)
+{
+  return syscall (__NR_getunwind, readbuf, len);
 }
