@@ -1,5 +1,10 @@
 2002-06-08  Andrew Cagney  <ac131313@redhat.com>
 
+	* objfiles.h: Change type of obj_private to void pointer.
+	* pa64solib.c: Update copyright.  Don't include "assert.h", use
+	strcmp instead of STREQ, use LONGEST, do not use PTR
+	* somsolib.c: Ditto.
+
 	* config/djgpp/fnchange.lst: Fix problems with bfd/elf32-i386.c,
 	bfd/elf32-i386qnx.c, bfd/elf32-sh.c, bfd/elf32-sh64-nbsd.c,
 	bfd/elf64-sh64-nbsd.c bfd/elf64-sh64.c.
