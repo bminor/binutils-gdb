@@ -1,3 +1,33 @@
+Sat May 16 18:48:08 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* gdb.base/structs2.exp: New file.
+	* gdb.base/structs2.c: New file.
+
+Wed May 13 13:36:14 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* gdb.asm/common.inc: New file.
+	* gdb.asm/d10v.inc: New file.
+	* asm-source.exp: Pass -I's to gas to find .inc files.
+	Update line numbers in expected output.
+	* asmsrc1.s: Rewrite.
+	* asmsrc2.s: Rewrite.
+	* configure.in: Create arch.inc symlink.
+	* configure: Regenerate.
+	* Makefile.in (distclean): Delete arch.inc.
+
+Wed May  6 10:30:54 1998  John Metzler  <jmetzler@cygnus.com>
+
+	*  callfuncs.c (t_enum_value1) : Cleanup return value warnings
+ 	(t_enum_value2): ditto
+ 	(t_enum_value3): ditto
+ 	(main): ditto
+Fri May  1 09:33:37 1998  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	* gdb.base/break.exp:  Remove xfail for `deleting all breakpoints
+	when none' unexpected prompt case, fixed by breakpoint.c:delete_command
+	change.
+	Use gdb_test instead of send_gdb/gdb_expect sequences.
+
 Thu Apr 23 12:56:19 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 
 	* gdb.c++/virtfunc.cc: Declare extern "C" printf to return int,
