@@ -1,3 +1,23 @@
+Mon Jun 17 10:43:41 1996  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (DVIPS): New define, set to dvips.
+	(dvi): Add stabs.dvi.
+	(ps): New target.
+	(all-doc): Depend on info, dvi, and ps targets.
+	(STAGESTUFF): Add *.ps and *.dvi files.
+	(clean-info, clean-dvi): Remove.
+	(mostlyclean): Does not depend upon clean-info or clean-dvi,
+	rules completely rewritten.
+	(maintainer-clean): Remove clean-info and clean-dvi
+	dependencies and put their actions in the rules.
+	(gdb.ps): New target
+	(gdb.dvi, gdbgui.dvi, gdbint.dvi, stabs.dvi): Remove 
+	intermediate TeX files, whether they have 2 or 3 character
+	extensions.
+	(gdbint.ps): Add target and rules.
+	(gdb-internals): Delete unused target.
+	(Makefile): Depends upon config.status also.
+
 Sat Mar 16 15:10:20 1996  Fred Fish  <fnf@cygnus.com>
 
 	From Peter Schauer <Peter.Schauer@Regent.E-Technik.TU-Muenchen.DE>
