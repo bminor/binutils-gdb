@@ -422,7 +422,7 @@ static void s_proc();
 
 #endif /* not __STDC__ */
 
-static enum m68k_architecture current_architecture = 0;
+static enum m68k_architecture current_architecture = _m68k_undef;
 
 /* BCC68000 is for patching in an extra jmp instruction for long offsets
    on the 68000.  The 68000 doesn't support long branches with branchs */
