@@ -175,7 +175,7 @@ extern char *tic80_trace_nop	  PARAMS ((int));
 extern char *tic80_trace_sink1	  PARAMS ((int, unsigned32));
 extern char *tic80_trace_sink2	  PARAMS ((int, unsigned32, unsigned32));
 extern char *tic80_trace_sink3	  PARAMS ((int, unsigned32, unsigned32, unsigned32));
-extern char *tic80_trace_cond_br  PARAMS ((int, int, unsigned32, unsigned32));
+extern char *tic80_trace_cond_br  PARAMS ((int, int, unsigned32, unsigned32, int, int));
 extern char *tic80_trace_ucond_br PARAMS ((int, unsigned32));
 extern void tic80_trace_ldst	  PARAMS ((SIM_DESC, sim_cpu *, sim_cia, int, int, int, int, unsigned32, unsigned32, unsigned32));
 
@@ -292,12 +292,13 @@ do {									\
   }									\
 } while (0)
 
-#define TRACE_COND_BR(indx, jump_p, cond, target)			\
+#define TRACE_COND_BR(indx, jump_p, cond, target, size, code)		\
 do {									\
   if (TRACE_BRANCH_P (CPU)) {						\
     trace_one_insn (SD, CPU, cia.ip, 1, itable[indx].file,		\
 		    itable[indx].line_nr, "branch",			\
-		    tic80_trace_cond_br (indx, jump_p, cond, target));	\
+		    tic80_trace_cond_br (indx, jump_p, cond, target,	\
+					 size, code));			\
   }									\
 } while (0)
 
@@ -337,7 +338,7 @@ do {									\
 #define TRACE_SINK1(indx, input)
 #define TRACE_SINK2(indx, input1, input2)
 #define TRACE_SINK3(indx, input1, input2, input3)
-#define TRACE_COND_BR(indx, jump_p, cond, target)
+#define TRACE_COND_BR(indx, jump_p, cond, target, size, code)
 #define TRACE_UCOND_BR(indx, target)
 #define TRACE_LD(m, s, result, addr1, addr2)
 #define TRACE_ST(m, s, value, addr1, addr2)

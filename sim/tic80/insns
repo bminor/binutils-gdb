@@ -150,7 +150,7 @@
 	  }
 	else
 	  jump_p = 0;
-	TRACE_COND_BR(MY_INDEX, jump_p, bitnum, target);
+	TRACE_COND_BR(MY_INDEX, jump_p, bitnum, target, -1, -1);
 	return nia;
 :%s::::A:int A
 	if (A)
@@ -179,7 +179,7 @@
 	  }
 	else
 	  jump_p = 0;
-	TRACE_COND_BR(MY_INDEX, jump_p, bitnum, target);
+	TRACE_COND_BR(MY_INDEX, jump_p, bitnum, target, -1, -1);
 	return nia;
 31.BITNUM,26.Source,21.0b100100,15.A,14.SignedOffset::::bbz i
 "bbz%s<A> <SignedOffset>, r<Source>, <bitnum>"
@@ -221,7 +221,7 @@
 	  {
 	    nia = do_branch (_SD, annul, target, 0, NULL);
 	  }
-	TRACE_COND_BR(MY_INDEX, condition, source, target);
+	TRACE_COND_BR(MY_INDEX, condition, val, target, size, code);
 	return nia;
 31.Code,26.Source,21.0b100110,15.A,14.SignedOffset::::bcnd i
 "bcnd%s<A> <SignedOffset>, r<Source>, <Code>"

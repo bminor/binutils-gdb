@@ -477,24 +477,93 @@ char *
 tic80_trace_cond_br (int indx,
 		     int jump_p,
 		     unsigned32 cond,
-		     unsigned32 target)
+		     unsigned32 target,
+		     int size,
+		     int code)
 {
+  char *suffix1, *suffix2;
+
   if (!tic80_size_name)
     tic80_init_trace ();
 
+  if (size >= 0 && code >= 0)
+    {				/* BCND */
+      switch (code)
+	{
+	default: suffix1 = "???"; break;
+	case 0:  suffix1 = "nev"; break;
+	case 1:  suffix1 = "gt0"; break;
+	case 2:  suffix1 = "eq0"; break;
+	case 3:  suffix1 = "ge0"; break;
+	case 4:  suffix1 = "lt0"; break;
+	case 5:  suffix1 = "ne0"; break;
+	case 6:  suffix1 = "le0"; break;
+	case 7:  suffix1 = "alw"; break;
+	}
+
+      switch (size)
+	{
+	default: suffix2 = ".?"; break;
+	case 0:  suffix2 = ".b"; break;
+	case 1:  suffix2 = ".h"; break;
+	case 2:  suffix2 = ".w"; break;
+	}
+
+    } else {			/* BBO/BBZ */
+
+      suffix2 = "";
+      switch (cond)
+	{
+	default: suffix1 = "??.?"; break;
+	case 29: suffix1 = "hs.w"; break;
+	case 28: suffix1 = "lo.w"; break;
+	case 27: suffix1 = "ls.w"; break;
+	case 26: suffix1 = "hi.w"; break;
+	case 25: suffix1 = "ge.w"; break;
+	case 24: suffix1 = "lt.w"; break;
+	case 23: suffix1 = "le.w"; break;
+	case 22: suffix1 = "gt.w"; break;
+	case 21: suffix1 = "ne.w"; break;
+	case 20: suffix1 = "eq.w"; break;
+	case 19: suffix1 = "hs.h"; break;
+	case 18: suffix1 = "lo.h"; break;
+	case 17: suffix1 = "ls.h"; break;
+	case 16: suffix1 = "hi.h"; break;
+	case 15: suffix1 = "ge.h"; break;
+	case 14: suffix1 = "lt.h"; break;
+	case 13: suffix1 = "le.h"; break;
+	case 12: suffix1 = "gt.h"; break;
+	case 11: suffix1 = "ne.h"; break;
+	case 10: suffix1 = "eq.h"; break;
+	case  9: suffix1 = "hs.b"; break;
+	case  8: suffix1 = "lo.b"; break;
+	case  7: suffix1 = "ls.b"; break;
+	case  6: suffix1 = "hi.b"; break;
+	case  5: suffix1 = "ge.b"; break;
+	case  4: suffix1 = "lt.b"; break;
+	case  3: suffix1 = "le.b"; break;
+	case  2: suffix1 = "gt.b"; break;
+	case  1: suffix1 = "ne.b"; break;
+	case  0: suffix1 = "eq.b"; break;
+	}
+    }
+
   if (jump_p)
     sprintf (tic80_trace_buffer,
-	     "%-*s 0x%.*lx %*s 0x%.*lx/%*ld => 0x%.*lx",
+	     "%-*s 0x%.*lx %*s 0x%.*lx/%*ld => 0x%.*lx %s%s",
 	     tic80_size_name, itable[indx].name,
 	     SIZE_HEX, target, SIZE_DECIMAL, "",
 	     SIZE_HEX, cond, SIZE_DECIMAL, (long)(signed32)cond,
-	     SIZE_HEX, target);
+	     SIZE_HEX, target,
+	     suffix1, suffix2);
   else
     sprintf (tic80_trace_buffer,
-	     "%-*s 0x%.*lx %*s 0x%.*lx/%*ld => [fallthrough]",
+	     "%-*s 0x%.*lx %*s 0x%.*lx/%*ld => %-*s %s%s",
 	     tic80_size_name, itable[indx].name,
 	     SIZE_HEX, target, SIZE_DECIMAL, "",
-	     SIZE_HEX, cond, SIZE_DECIMAL, (long)(signed32)cond);
+	     SIZE_HEX, cond, SIZE_DECIMAL, (long)(signed32)cond,
+	     SIZE_HEX + 2, "[no jump]",
+	     suffix1, suffix2);
 
   return tic80_trace_buffer;
 }
