@@ -1,3 +1,8 @@
+Wed Aug 27 18:13:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
 Wed Aug 27 13:41:24 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* insns (do_st): Use U8_4 instead of V4_L8.

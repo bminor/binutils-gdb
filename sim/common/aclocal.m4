@@ -552,7 +552,7 @@ dnl it enables extra GCC specific warnings.
 AC_DEFUN(SIM_AC_OPTION_WARNINGS,
 [
 AC_ARG_ENABLE(sim-warnings,
-[  --enable-sim-warnings=opts		Extra CFLAGS for turning on compiler warnings except for idecode.o, semantics.o and psim.o],
+[  --enable-sim-warnings=opts		Extra CFLAGS for turning on compiler warnings],
 [case "${enableval}" in
   yes)	sim_warnings="-Werror -Wall -Wpointer-arith -Wmissing-prototypes -Wmissing-declarations ";;
   no)	sim_warnings="-w";;

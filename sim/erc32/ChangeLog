@@ -1,3 +1,8 @@
+Wed Aug 27 18:13:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
 Tue Aug 26 10:38:20 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* float.c (__setfpucw): Compile on any i386 target.  Not just NT.

@@ -32,7 +32,7 @@ ac_help="$ac_help
 ac_help="$ac_help
   --enable-sim-hostendain=end		Specify host byte endian orientation."
 ac_help="$ac_help
-  --enable-sim-warnings=opts		Extra CFLAGS for turning on compiler warnings except for idecode.o, semantics.o and psim.o"
+  --enable-sim-warnings=opts		Extra CFLAGS for turning on compiler warnings"
 ac_help="$ac_help
   --enable-sim-reserved-bits		Specify whether to check reserved bits in instruction."
 

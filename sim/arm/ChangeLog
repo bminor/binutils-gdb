@@ -1,3 +1,8 @@
+Wed Aug 27 18:13:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
 Tue Aug 26 10:37:27 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* wrapper.c (sim_kill): Delete.

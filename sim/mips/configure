@@ -30,7 +30,7 @@ ac_help="$ac_help
 ac_help="$ac_help
   --enable-sim-hostendain=end		Specify host byte endian orientation."
 ac_help="$ac_help
-  --enable-sim-warnings=opts		Extra CFLAGS for turning on compiler warnings except for idecode.o, semantics.o and psim.o"
+  --enable-sim-warnings=opts		Extra CFLAGS for turning on compiler warnings"
 
 # Initialize some variables set by options.
 # The variables have the same names as the options, with
