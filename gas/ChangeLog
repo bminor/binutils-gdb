@@ -1,3 +1,10 @@
+2000-07-28  Jason Eckhardt  <jle@cygnus.com>
+
+        * configure.in: Add bits for i860-stardent-{sysv4, elf}*.
+        * configure: Regenerated.
+        * config/obj-elf.c (obj_elf_type): Recognize a fifth type
+        of operand to the .type directive (.e.g, "type").
+
 2000-07-28  Alan Modra  <alan@linuxcare.com.au>
 
 	* as.h (warn_comment, found_comment, found_comment_file): Declare.
