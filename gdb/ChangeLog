@@ -1,3 +1,8 @@
+Mon Feb 19 15:25:51 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* config/xm-nbsd.h (CC_HAS_LONG_LONG, PRINTF_HAS_LONG_LONG):
+ 	Define.
+
 Mon Feb 19 01:09:32 1996  Doug Evans  <dje@cygnus.com>
 
 	* dwarfread.c (add_partial_symbol): Use ADD_PSYMBOL_ADDR_TO_LIST

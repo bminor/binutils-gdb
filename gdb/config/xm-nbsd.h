@@ -30,3 +30,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* NetBSD has termios facilities. */
 #define HAVE_TERMIOS
+
+#define CC_HAS_LONG_LONG	1
+#define PRINTF_HAS_LONG_LONG	1
