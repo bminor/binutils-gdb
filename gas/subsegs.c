@@ -29,6 +29,8 @@
 
 frchainS *frchain_root, *frchain_now;
 
+static struct obstack frchains;
+
 #ifndef BFD_ASSEMBLER
 #ifdef MANY_SEGMENTS
 segment_info_type segment_info[SEG_MAXIMUM_ORDINAL];
@@ -67,6 +69,10 @@ static segment_info_type *und_seg_info;
 #endif /* BFD_ASSEMBLER */
 
 static void subseg_set_rest PARAMS ((segT, subsegT));
+
+static fragS dummy_frag;
+
+static frchainS absolute_frchain;
 
 void
 subsegs_begin ()
@@ -87,16 +93,17 @@ subsegs_begin ()
   know (SEG_MAXIMUM_ORDINAL == SEG_REGISTER);
 #endif
 
+  obstack_begin (&frchains, chunksize);
+#if __GNUC__ >= 2
+  obstack_alignment_mask (&frchains) = __alignof__ (frchainS) - 1;
+#endif
+
   frchain_root = NULL;
   frchain_now = NULL;		/* Warn new_subseg() that we are booting. */
-  /* Fake up 1st frag.  It won't be used=> is ok if obstack...
-     pads the end of it for alignment. */
-  frag_now = (fragS *) obstack_alloc (&frags, SIZEOF_STRUCT_FRAG);
-  memset (frag_now, 0, SIZEOF_STRUCT_FRAG);
+
+  frag_now = &dummy_frag;
 
 #ifndef BFD_ASSEMBLER
-  /* This 1st frag will not be in any frchain.
-     We simply give subseg_new somewhere to scribble. */
   now_subseg = 42;		/* Lie for 1st call to subseg_new. */
 #ifdef MANY_SEGMENTS
   {
@@ -117,6 +124,11 @@ subsegs_begin ()
 #endif /* ! MANY_SEGMENTS */
 #endif /* ! BFD_ASSEMBLER */
 
+  absolute_frchain.frch_seg = absolute_section;
+  absolute_frchain.frch_subseg = 0;
+  absolute_frchain.fix_root = absolute_frchain.fix_tail = 0;
+  absolute_frchain.frch_frag_now = &zero_address_frag;
+  absolute_frchain.frch_root = absolute_frchain.frch_last = &zero_address_frag;
 }
 
 /*
@@ -136,6 +148,9 @@ subseg_change (seg, subseg)
 {
   now_seg = seg;
   now_subseg = subseg;
+
+  if (now_seg == absolute_section)
+    return;
 
 #ifdef BFD_ASSEMBLER
   {
@@ -195,26 +210,29 @@ subseg_set_rest (seg, subseg)
   register fragS *former_last_fragP;
   register fragS *new_fragP;
 
-  if (frag_now)		/* If not bootstrapping. */
-    {
-      frag_now->fr_fix = frag_now_fix ();
-      frag_wane (frag_now);	/* Close off any frag in old subseg. */
-    }
-  /*
-   * It would be nice to keep an obstack for each subsegment, if we swap
-   * subsegments a lot. Hence we would have much fewer frag_wanes().
-   */
-  {
-    obstack_finish (&frags);
-    /*
-     * If we don't do the above, the next object we put on obstack frags
-     * will appear to start at the fr_literal of the current frag.
-     * Also, above ensures that the next object will begin on a
-     * address that is aligned correctly for the engine that runs
-     * this program.
-     */
-  }
+  mri_common_symbol = NULL;
+
+  if (frag_now && frchain_now)
+    frchain_now->frch_frag_now = frag_now;
+
+  assert (frchain_now == 0
+	  || now_seg == undefined_section
+	  || now_seg == absolute_section
+	  || frchain_now->frch_last == frag_now);
+
   subseg_change (seg, (int) subseg);
+
+  if (seg == absolute_section)
+    {
+      frchain_now = &absolute_frchain;
+      frag_now = &zero_address_frag;
+      return;
+    }
+
+  assert (frchain_now == 0
+	  || now_seg == undefined_section
+	  || frchain_now->frch_last == frag_now);
+
   /*
    * Attempt to find or make a frchain for that sub seg.
    * Crawl along chain of frchainSs, begins @ frchain_root.
@@ -259,16 +277,22 @@ subseg_set_rest (seg, subseg)
       /*
        * This should be the only code that creates a frchainS.
        */
-      newP = (frchainS *) obstack_alloc (&frags, sizeof (frchainS));
-      newP->frch_root = 0;
+      extern fragS *frag_alloc ();
+      newP = (frchainS *) obstack_alloc (&frchains, sizeof (frchainS));
       newP->frch_subseg = subseg;
       newP->frch_seg = seg;
-      newP->frch_last = NULL;
 #ifdef BFD_ASSEMBLER
       newP->fix_root = NULL;
       newP->fix_tail = NULL;
 #endif
       obstack_begin (&newP->frch_obstack, 5000);
+#if __GNUC__ >= 2
+      obstack_alignment_mask (&newP->frch_obstack) = __alignof__ (fragS) - 1;
+#endif
+      newP->frch_frag_now = frag_alloc (&newP->frch_obstack);
+      newP->frch_frag_now->fr_type = rs_fill;
+
+      newP->frch_root = newP->frch_last = newP->frch_frag_now;
 
       *lastPP = newP;
       newP->frch_next = frcP;	/* perhaps NULL */
@@ -278,37 +302,9 @@ subseg_set_rest (seg, subseg)
    * Here with frcP pointing to the frchainS for subseg.
    */
   frchain_now = frcP;
-  /*
-   * Make a fresh frag for the subsegment.
-   */
-  /* We expect this to happen on a correct boundary since it was
-     proceeded by a obstack_done(). */
-  tmp = obstack_alignment_mask (&frags);	/* JF disable alignment */
-  obstack_alignment_mask (&frags) = 0;
-  frag_now = (fragS *) obstack_alloc (&frags, SIZEOF_STRUCT_FRAG);
-  memset (frag_now, 0, SIZEOF_STRUCT_FRAG);
-  obstack_alignment_mask (&frags) = tmp;
-  /* But we want any more chars to come immediately after the
-     structure we just made. */
-  new_fragP = frag_now;
-  new_fragP->fr_next = NULL;
-  /*
-   * Append new frag to current frchain.
-   */
-  former_last_fragP = frcP->frch_last;
-  if (former_last_fragP)
-    {
-      know (former_last_fragP->fr_next == NULL);
-      know (frchain_now->frch_root);
-      former_last_fragP->fr_next = new_fragP;
-    }
-  else
-    {
-      frcP->frch_root = new_fragP;
-    }
-  frcP->frch_last = new_fragP;
+  frag_now = frcP->frch_frag_now;
 
-  mri_common_symbol = NULL;
+  assert (frchain_now->frch_last == frag_now);
 }
 
 /*
@@ -379,7 +375,10 @@ subseg_set (seg, subseg)	/* begin assembly for a new sub-segment */
      register subsegT subseg;
 {
 #ifndef MANY_SEGMENTS
-  know (seg == SEG_DATA || seg == SEG_TEXT || seg == SEG_BSS);
+  know (seg == SEG_DATA
+	|| seg == SEG_TEXT
+	|| seg == SEG_BSS
+	|| seg == SEG_ABSOLUTE);
 #endif
 
   if (seg != now_seg || subseg != now_subseg)
