@@ -1,3 +1,17 @@
+start-sanitize-gdbtk
+Fri Jun 26 14:27:13 1998  Keith Seitz  <keiths@cygnus.com>
+
+	* lib/gdb.exp (gdbtk_start): Add startup for gdbtk.
+
+	* configure.in: Add options for gdbtk testsuite.
+
+	* configure: Regenerate.
+
+	* gdb.gdbtk: New directory to hold gdbtk tests.
+
+	* gdb.gdbtk/console.{exp, test}: New console window tests.
+
+end-sanitize-gdbtk
 Fri Jun 26 14:52:47 1998  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	* gdb.fortran/types.exp:  Escape brackets in expect patterns

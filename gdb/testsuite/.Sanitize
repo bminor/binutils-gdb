@@ -15,6 +15,20 @@
 
 Do-first:
 
+gdbtk_files="gdb.gdbtk"
+
+if ( echo $* | grep lose\-gdbtk > /dev/null ) ; then
+        lose_these_too="${gdbtk_files} ${lose_these_too}"
+        if [ -n "${verbose}" ] ; then
+                echo Deleting ${gdbtk_files}
+        fi
+else
+        keep_these_too="${gdbtk_files} ${keep_these_too}"
+        if [ -n "${verbose}" ] ; then
+                echo Keeping ${gdbtk_files}
+        fi
+fi
+
 # All files listed between the "Things-to-keep:" line and the
 # "Do-last:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -75,6 +89,36 @@ else
 			mv new $i
 		fi
 	done
+fi
+
+if ( echo $* | grep lose\-gdbtk > /dev/null ) ; then
+        echo Catering to RMS by removing traces of \"gdbtk\"...
+        for i in * ; do
+                if test ! -d $i && (grep sanitize-gdbtk $i > /dev/null) ; then
+                        echo Removing traces of \"gdbtk\" out of $i...
+                        cp $i new
+                        sed '/start\-sanitize\-gdbtk/,/end-\sanitize\-gdbtk/d' < $i > new
+                        if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+                                echo Caching $i in .Recover...
+                                mv $i .Recover
+                        fi
+                        mv new $i
+                fi
+        done
+else
+        echo Leaving \"gdbtk\" in the sources...
+        for i in * ; do
+                if test ! -d $i && (grep sanitize-gdbtk $i > /dev/null) ; then
+                        echo Keeping \"gdbtk\" stuff in $i, but editing out sanitize lines...
+                        cp $i new
+                        sed -e '/start\-sanitize\-gdbtk/d' -e '/end\-sanitize\-gdbtk/d' < $i > new
+                        if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+                                echo Caching $i in .Recover...
+                                mv $i .Recover
+                        fi
+                        mv new $i
+                fi
+        done
 fi
 
 for i in * ; do
