@@ -3218,14 +3218,14 @@ Otherwise return 0.
 Define this to adjust @var{address} so that it meets the alignment
 requirements for the start of a new stack frame.  A stack frame's
 alignment requirements are typically stronger than a target processors
-stack alignment requirements (@pxref{STACK_ALIGN}).
+stack alignment requirements (@pxref{DEPRECATED_STACK_ALIGN}).
 
 This function is used to ensure that, when creating a dummy frame, both
 the initial stack pointer and (if needed) the address of the return
 value are correctly aligned.
 
-Unlike @code{STACK_ALIGN}, this function always adjusts the address in
-the direction of stack growth.
+Unlike @code{DEPRECATED_STACK_ALIGN}, this function always adjusts the
+address in the direction of stack growth.
 
 By default, no frame based stack alignment is performed.
 
@@ -3812,9 +3812,9 @@ Define this to convert stab register numbers (as gotten from `r'
 declarations) into @value{GDBN} regnums.  If not defined, no conversion will be
 done.
 
-@item STACK_ALIGN (@var{addr})
-@anchor{STACK_ALIGN}
-@findex STACK_ALIGN
+@item DEPRECATED_STACK_ALIGN (@var{addr})
+@anchor{DEPRECATED_STACK_ALIGN}
+@findex DEPRECATED_STACK_ALIGN
 Define this to increase @var{addr} so that it meets the alignment
 requirements for the processor's stack.
 

@@ -1900,29 +1900,34 @@ extern void set_gdbarch_frame_num_args (struct gdbarch *gdbarch, gdbarch_frame_n
 #define FRAME_NUM_ARGS(frame) (gdbarch_frame_num_args (current_gdbarch, frame))
 #endif
 
-#if defined (STACK_ALIGN)
-/* Legacy for systems yet to multi-arch STACK_ALIGN */
-#if !defined (STACK_ALIGN_P)
-#define STACK_ALIGN_P() (1)
+/* DEPRECATED_STACK_ALIGN has been replaced by an initial aligning call
+   to frame_align and the requirement that methods such as
+   push_dummy_call and frame_red_zone_size maintain correct stack/frame
+   alignment. */
+
+#if defined (DEPRECATED_STACK_ALIGN)
+/* Legacy for systems yet to multi-arch DEPRECATED_STACK_ALIGN */
+#if !defined (DEPRECATED_STACK_ALIGN_P)
+#define DEPRECATED_STACK_ALIGN_P() (1)
 #endif
 #endif
 
-extern int gdbarch_stack_align_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (STACK_ALIGN_P)
-#error "Non multi-arch definition of STACK_ALIGN"
+extern int gdbarch_deprecated_stack_align_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_STACK_ALIGN_P)
+#error "Non multi-arch definition of DEPRECATED_STACK_ALIGN"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (STACK_ALIGN_P)
-#define STACK_ALIGN_P() (gdbarch_stack_align_p (current_gdbarch))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_STACK_ALIGN_P)
+#define DEPRECATED_STACK_ALIGN_P() (gdbarch_deprecated_stack_align_p (current_gdbarch))
 #endif
 
-typedef CORE_ADDR (gdbarch_stack_align_ftype) (CORE_ADDR sp);
-extern CORE_ADDR gdbarch_stack_align (struct gdbarch *gdbarch, CORE_ADDR sp);
-extern void set_gdbarch_stack_align (struct gdbarch *gdbarch, gdbarch_stack_align_ftype *stack_align);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (STACK_ALIGN)
-#error "Non multi-arch definition of STACK_ALIGN"
+typedef CORE_ADDR (gdbarch_deprecated_stack_align_ftype) (CORE_ADDR sp);
+extern CORE_ADDR gdbarch_deprecated_stack_align (struct gdbarch *gdbarch, CORE_ADDR sp);
+extern void set_gdbarch_deprecated_stack_align (struct gdbarch *gdbarch, gdbarch_deprecated_stack_align_ftype *deprecated_stack_align);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_STACK_ALIGN)
+#error "Non multi-arch definition of DEPRECATED_STACK_ALIGN"
 #endif
-#if !defined (STACK_ALIGN)
-#define STACK_ALIGN(sp) (gdbarch_stack_align (current_gdbarch, sp))
+#if !defined (DEPRECATED_STACK_ALIGN)
+#define DEPRECATED_STACK_ALIGN(sp) (gdbarch_deprecated_stack_align (current_gdbarch, sp))
 #endif
 
 extern int gdbarch_frame_align_p (struct gdbarch *gdbarch);

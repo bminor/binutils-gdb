@@ -1331,7 +1331,6 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_double_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_long_double_bit (gdbarch, 4 * TARGET_CHAR_BIT);
 
-  /* set_gdbarch_stack_align (gdbarch, SOME_stack_align); */
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
 
   /* Char is unsigned.  */

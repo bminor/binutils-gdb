@@ -640,7 +640,11 @@ F::DEPRECATED_FRAME_LOCALS_ADDRESS:CORE_ADDR:deprecated_frame_locals_address:str
 F::DEPRECATED_SAVED_PC_AFTER_CALL:CORE_ADDR:deprecated_saved_pc_after_call:struct frame_info *frame:frame
 F:2:FRAME_NUM_ARGS:int:frame_num_args:struct frame_info *frame:frame
 #
-F:2:STACK_ALIGN:CORE_ADDR:stack_align:CORE_ADDR sp:sp
+# DEPRECATED_STACK_ALIGN has been replaced by an initial aligning call
+# to frame_align and the requirement that methods such as
+# push_dummy_call and frame_red_zone_size maintain correct stack/frame
+# alignment.
+F:2:DEPRECATED_STACK_ALIGN:CORE_ADDR:deprecated_stack_align:CORE_ADDR sp:sp
 M:::CORE_ADDR:frame_align:CORE_ADDR address:address
 F:2:REG_STRUCT_HAS_ADDR:int:reg_struct_has_addr:int gcc_p, struct type *type:gcc_p, type
 v::FRAME_RED_ZONE_SIZE:int:frame_red_zone_size

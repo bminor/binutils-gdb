@@ -1870,7 +1870,7 @@ hppa_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 
   /* The value of SP as it was passed into this function after
      aligning.  */
-  CORE_ADDR orig_sp = STACK_ALIGN (sp);
+  CORE_ADDR orig_sp = DEPRECATED_STACK_ALIGN (sp);
 
   /* The number of stack bytes occupied by the current argument.  */
   int bytes_reserved;
@@ -1933,7 +1933,7 @@ hppa_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 
      The ABIs also mandate minimum stack alignments which we must
      preserve.  */
-  cum_bytes_aligned = STACK_ALIGN (cum_bytes_reserved);
+  cum_bytes_aligned = DEPRECATED_STACK_ALIGN (cum_bytes_reserved);
   sp += max (cum_bytes_aligned, REG_PARM_STACK_SPACE);
 
   /* Now write each of the args at the proper offset down the stack.  */
@@ -2040,7 +2040,7 @@ hppa_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 
      The ABI also mandates minimum stack alignments which we must
      preserve.  */
-  cum_bytes_aligned = STACK_ALIGN (cum_bytes_reserved);
+  cum_bytes_aligned = DEPRECATED_STACK_ALIGN (cum_bytes_reserved);
   sp += max (cum_bytes_aligned, REG_PARM_STACK_SPACE);
 
   /* Now write each of the args at the proper offset down the stack.
@@ -5118,7 +5118,7 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
           (gdbarch, hppa32_register_virtual_type);
         set_gdbarch_deprecated_call_dummy_length
           (gdbarch, hppa32_call_dummy_length);
-        set_gdbarch_stack_align (gdbarch, hppa32_stack_align);
+        set_gdbarch_deprecated_stack_align (gdbarch, hppa32_stack_align);
         set_gdbarch_reg_struct_has_addr (gdbarch, hppa_reg_struct_has_addr);
         set_gdbarch_deprecated_extract_return_value
           (gdbarch, hppa32_extract_return_value);
@@ -5136,7 +5136,7 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
           (gdbarch, hppa64_call_dummy_breakpoint_offset);
         set_gdbarch_deprecated_call_dummy_length
           (gdbarch, hppa64_call_dummy_length);
-        set_gdbarch_stack_align (gdbarch, hppa64_stack_align);
+        set_gdbarch_deprecated_stack_align (gdbarch, hppa64_stack_align);
         set_gdbarch_deprecated_extract_return_value
           (gdbarch, hppa64_extract_return_value);
         set_gdbarch_use_struct_convention

@@ -235,7 +235,7 @@ struct gdbarch
   gdbarch_deprecated_frame_locals_address_ftype *deprecated_frame_locals_address;
   gdbarch_deprecated_saved_pc_after_call_ftype *deprecated_saved_pc_after_call;
   gdbarch_frame_num_args_ftype *frame_num_args;
-  gdbarch_stack_align_ftype *stack_align;
+  gdbarch_deprecated_stack_align_ftype *deprecated_stack_align;
   gdbarch_frame_align_ftype *frame_align;
   gdbarch_reg_struct_has_addr_ftype *reg_struct_has_addr;
   int frame_red_zone_size;
@@ -403,7 +403,7 @@ struct gdbarch startup_gdbarch =
   get_frame_base,  /* deprecated_frame_locals_address */
   0,  /* deprecated_saved_pc_after_call */
   0,  /* frame_num_args */
-  0,  /* stack_align */
+  0,  /* deprecated_stack_align */
   0,  /* frame_align */
   0,  /* reg_struct_has_addr */
   0,  /* frame_red_zone_size */
@@ -727,7 +727,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of deprecated_frame_locals_address, has predicate */
   /* Skip verify of deprecated_saved_pc_after_call, has predicate */
   /* Skip verify of frame_num_args, has predicate */
-  /* Skip verify of stack_align, has predicate */
+  /* Skip verify of deprecated_stack_align, has predicate */
   /* Skip verify of frame_align, has predicate */
   /* Skip verify of reg_struct_has_addr, has predicate */
   if (gdbarch->float_format == 0)
@@ -1544,6 +1544,25 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: DEPRECATED_SIZEOF_CALL_DUMMY_WORDS = %d\n",
                       DEPRECATED_SIZEOF_CALL_DUMMY_WORDS);
 #endif
+#ifdef DEPRECATED_STACK_ALIGN_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_STACK_ALIGN_P()",
+                      XSTRING (DEPRECATED_STACK_ALIGN_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_STACK_ALIGN_P() = %d\n",
+                      DEPRECATED_STACK_ALIGN_P ());
+#endif
+#ifdef DEPRECATED_STACK_ALIGN
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_STACK_ALIGN(sp)",
+                      XSTRING (DEPRECATED_STACK_ALIGN (sp)));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_STACK_ALIGN = <0x%08lx>\n",
+                      (long) current_gdbarch->deprecated_stack_align
+                      /*DEPRECATED_STACK_ALIGN ()*/);
+#endif
 #ifdef DEPRECATED_STORE_RETURN_VALUE
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -2235,25 +2254,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: STAB_REG_TO_REGNUM = <0x%08lx>\n",
                       (long) current_gdbarch->stab_reg_to_regnum
                       /*STAB_REG_TO_REGNUM ()*/);
-#endif
-#ifdef STACK_ALIGN_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "STACK_ALIGN_P()",
-                      XSTRING (STACK_ALIGN_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: STACK_ALIGN_P() = %d\n",
-                      STACK_ALIGN_P ());
-#endif
-#ifdef STACK_ALIGN
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "STACK_ALIGN(sp)",
-                      XSTRING (STACK_ALIGN (sp)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: STACK_ALIGN = <0x%08lx>\n",
-                      (long) current_gdbarch->stack_align
-                      /*STACK_ALIGN ()*/);
 #endif
 #ifdef STORE_RETURN_VALUE
   fprintf_unfiltered (file,
@@ -4859,27 +4859,27 @@ set_gdbarch_frame_num_args (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_stack_align_p (struct gdbarch *gdbarch)
+gdbarch_deprecated_stack_align_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  return gdbarch->stack_align != NULL;
+  return gdbarch->deprecated_stack_align != NULL;
 }
 
 CORE_ADDR
-gdbarch_stack_align (struct gdbarch *gdbarch, CORE_ADDR sp)
+gdbarch_deprecated_stack_align (struct gdbarch *gdbarch, CORE_ADDR sp)
 {
   gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->stack_align != NULL);
+  gdb_assert (gdbarch->deprecated_stack_align != NULL);
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_stack_align called\n");
-  return gdbarch->stack_align (sp);
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_stack_align called\n");
+  return gdbarch->deprecated_stack_align (sp);
 }
 
 void
-set_gdbarch_stack_align (struct gdbarch *gdbarch,
-                         gdbarch_stack_align_ftype stack_align)
+set_gdbarch_deprecated_stack_align (struct gdbarch *gdbarch,
+                                    gdbarch_deprecated_stack_align_ftype deprecated_stack_align)
 {
-  gdbarch->stack_align = stack_align;
+  gdbarch->deprecated_stack_align = deprecated_stack_align;
 }
 
 int

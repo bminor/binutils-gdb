@@ -689,12 +689,12 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 	      arg_type = check_typedef (VALUE_ENCLOSING_TYPE (args[i]));
 	      len = TYPE_LENGTH (arg_type);
 
-	      if (STACK_ALIGN_P ())
+	      if (DEPRECATED_STACK_ALIGN_P ())
 		/* MVS 11/22/96: I think at least some of this
 		   stack_align code is really broken.  Better to let
 		   PUSH_ARGUMENTS adjust the stack in a target-defined
 		   manner.  */
-		aligned_len = STACK_ALIGN (len);
+		aligned_len = DEPRECATED_STACK_ALIGN (len);
 	      else
 		aligned_len = len;
 	      if (INNER_THAN (1, 2))
@@ -732,10 +732,10 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
   if (struct_return)
     {
       int len = TYPE_LENGTH (value_type);
-      if (STACK_ALIGN_P ())
+      if (DEPRECATED_STACK_ALIGN_P ())
 	/* NOTE: cagney/2003-03-22: Should rely on frame align, rather
            than stack align to force the alignment of the stack.  */
-	len = STACK_ALIGN (len);
+	len = DEPRECATED_STACK_ALIGN (len);
       if (INNER_THAN (1, 2))
 	{
 	  /* Stack grows downward.  Align STRUCT_ADDR and SP after
@@ -770,7 +770,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
       /* MVS 11/22/96: I think at least some of this stack_align code
 	 is really broken.  Better to let push_dummy_call() adjust the
 	 stack in a target-defined manner.  */
-      if (STACK_ALIGN_P () && INNER_THAN (1, 2))
+      if (DEPRECATED_STACK_ALIGN_P () && INNER_THAN (1, 2))
 	{
 	  /* If stack grows down, we must leave a hole at the top. */
 	  int len = 0;
@@ -779,7 +779,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 	    len += TYPE_LENGTH (VALUE_ENCLOSING_TYPE (args[i]));
 	  if (DEPRECATED_CALL_DUMMY_STACK_ADJUST_P ())
 	    len += DEPRECATED_CALL_DUMMY_STACK_ADJUST;
-	  sp -= STACK_ALIGN (len) - len;
+	  sp -= DEPRECATED_STACK_ALIGN (len) - len;
 	}
     }
 
@@ -824,13 +824,13 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
      handled any alignment issues, the code below is entirely
      redundant.  */
   if (!gdbarch_push_dummy_call_p (current_gdbarch)
-      && STACK_ALIGN_P () && !INNER_THAN (1, 2))
+      && DEPRECATED_STACK_ALIGN_P () && !INNER_THAN (1, 2))
     {
       /* If stack grows up, we must leave a hole at the bottom, note
          that sp already has been advanced for the arguments!  */
       if (DEPRECATED_CALL_DUMMY_STACK_ADJUST_P ())
 	sp += DEPRECATED_CALL_DUMMY_STACK_ADJUST;
-      sp = STACK_ALIGN (sp);
+      sp = DEPRECATED_STACK_ALIGN (sp);
     }
 
 /* XXX This seems wrong.  For stacks that grow down we shouldn't do

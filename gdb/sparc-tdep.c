@@ -3398,7 +3398,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 #else
       set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, 0);
 #endif
-      set_gdbarch_stack_align (gdbarch, sparc32_stack_align);
+      set_gdbarch_deprecated_stack_align (gdbarch, sparc32_stack_align);
       set_gdbarch_deprecated_extra_stack_alignment_needed (gdbarch, 1);
       set_gdbarch_deprecated_store_struct_return (gdbarch, sparc32_store_struct_return);
       set_gdbarch_use_struct_convention (gdbarch, 
@@ -3451,7 +3451,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 #else
       set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, 0);
 #endif
-      set_gdbarch_stack_align (gdbarch, sparc64_stack_align);
+      set_gdbarch_deprecated_stack_align (gdbarch, sparc64_stack_align);
       set_gdbarch_deprecated_extra_stack_alignment_needed (gdbarch, 1);
       set_gdbarch_deprecated_store_struct_return (gdbarch, sparc64_store_struct_return);
       set_gdbarch_use_struct_convention (gdbarch, 
