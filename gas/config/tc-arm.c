@@ -1359,7 +1359,9 @@ s_thumb_set (equiv)
   
   THUMB_SET_FUNC (symbolP, 1);
   ARM_SET_THUMB (symbolP, 1);
+#if defined OBJ_COFF || defined OBJ_ELF
   ARM_SET_INTERWORK (symbolP, support_interwork);
+#endif
 }
 
 /* If we change section we must dump the literal pool first.  */
@@ -6597,9 +6599,11 @@ md_parse_option (c, arg)
 	}
       break;
 
+#if defined OBJ_ELF || defined OBJ_COFF
     case 'k':
       pic_code = 1;
       break;
+#endif
       
     default:
       return 0;

@@ -1,3 +1,9 @@
+1999-09-08  Philip Blundell  <pb@nexus.co.uk>
+
+	* config/tc-arm.c (s_thumb_set): Only support interworking for ELF 
+	and COFF targets.
+	(md_parse_option): Only support -k flag for ELF and COFF targets.
+
 Tue Sep  7 13:28:59 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-hppa.c (pa_ip): Put strict register checks before
