@@ -43,7 +43,9 @@ extern struct block *expression_context_block;
    we've encountered so far. */
 extern struct block *innermost_block;
 
-/* The block in which the most recently discovered symbol was found. */
+/* The block in which the most recently discovered symbol was found.
+   FIXME: Should be declared along with lookup_symbol in symtab.h; is not
+   related specifically to parsing.  */
 extern struct block *block_found;
 
 /* Number of arguments seen so far in innermost function call.  */

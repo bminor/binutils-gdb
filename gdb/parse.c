@@ -45,7 +45,6 @@ int expout_size;
 int expout_ptr;
 struct block *expression_context_block;
 struct block *innermost_block;
-struct block *block_found;
 int arglist_len;
 union type_stack_elt *type_stack;
 int type_stack_depth, type_stack_size;

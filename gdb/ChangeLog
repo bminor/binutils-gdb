@@ -2,6 +2,8 @@ Wed Apr 20 08:37:16 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* dstread.c, coffread.c: Don't define pending_blocks; buildsym.c
 	takes care of it.
+	* parse.c: Don't define block_found; it is defined in symtab.c.
+	* parser-defs.h: Add comment regarding block_found.
 
 Tue Apr 19 09:46:05 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
