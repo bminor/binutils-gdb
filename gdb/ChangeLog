@@ -1,3 +1,10 @@
+start-sanitize-d10v
+Fri Sep 27 13:32:53 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/d10v/tm-d10v.h (TARGET_{INT,PTR}_BIT): Define.
+	(TARGET_{,LONG_}DOUBLE_BIT): Ditt.
+
+end-sanitize-d10v
 Thu Sep 26 23:10:26 1996  Mark Alexander  <marka@cygnus.com>
 
 	* configure.in, config/i386/tm-linux.h: Fix configure

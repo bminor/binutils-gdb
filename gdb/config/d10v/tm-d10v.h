@@ -220,3 +220,10 @@ CORE_ADDR d10v_read_register_pid PARAMS ((int regno, int pid));
 
 #define TARGET_READ_PC(pid)		d10v_read_register_pid (PC_REGNUM, pid)
 #define TARGET_WRITE_PC(val,pid)	d10v_write_register_pid (PC_REGNUM, val, pid)
+
+
+/* Number of bits in the appropriate type */
+#define TARGET_INT_BIT (2 * TARGET_CHAR_BIT)
+#define TARGET_PTR_BIT (2 * TARGET_CHAR_BIT)
+#define TARGET_DOUBLE_BIT (4 * TARGET_CHAR_BIT)
+#define TARGET_LONG_DOUBLE_BIT (8 * TARGET_CHAR_BIT)
