@@ -1,3 +1,8 @@
+Mon Oct  5 09:46:44 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* config/irix4.mh: added -lsun to XM_CLIBS to get RPC functions
+	needed for vxworks targets.
+
 Fri Oct  2 22:04:42 1992  John Gilmore  (gnu@cygnus.com)
 
 	* am29k-tdep.c (_initialize_29k):  Make it possible for the

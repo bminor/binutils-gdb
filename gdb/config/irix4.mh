@@ -4,5 +4,5 @@ XM_FILE= xm-irix4.h
 ALLOCA=alloca.o
 ALLOCA1=alloca.o
 MUNCH_DEFINE=-B
-XM_CLIBS=-lbsd
+XM_CLIBS=-lbsd -lsun
 INSTALL = cp
