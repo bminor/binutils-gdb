@@ -1,3 +1,16 @@
+Mon Mar 23 10:47:33 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* gas/all/align.s: Back out ".section text" change below;
+	use ".text" again.
+	* gas/macros/semi.s: Ditto.
+	
+start-sanitize-r5900
+Sun Mar 22 13:16:31 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/mips/vu0.d: We don't want relocations in the output.
+	(vcallms): Enable opcode checking on this test.
+
+end-sanitize-r5900
 Fri Mar 20 18:51:49 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* gas/all/align.s: Identify ".text" section explicitly.
