@@ -1,3 +1,9 @@
+Wed Sep 13 19:31:39 2000  Marco Franzen <marcof@thyron.com>
+
+	* som.c (som_write_symbol_strings): Do not used fixed buffers,
+	use size_t as a counter.
+	(som_write_space_strings): Similarly.
+
 2000-09-12  Jason Eckhardt  <jle@cygnus.com>
 
 	* elf32-i860.c (elf32_i860_relocate_pc26): New function

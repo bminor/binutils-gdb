@@ -1,9 +1,9 @@
 /* bfd back-end for HP PA-RISC SOM objects.
-   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 97, 1998
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 97, 1998, 2000
    Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
-   University of Utah (pa-gdb-bugs@cs.utah.edu).
+   University of Utah.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -3046,13 +3046,11 @@ som_write_space_strings (abfd, current_offset, string_sizep)
 {
   /* Chunk of memory that we can use as buffer space, then throw
      away.  */
-  unsigned char tmp_space[SOM_TMP_BUFSIZE];
-  unsigned char *p;
+  size_t tmp_space_size = SOM_TMP_BUFSIZE;
+  unsigned char *tmp_space = alloca (tmp_space_size);
+  unsigned char *p = tmp_space;
   unsigned int strings_size = 0;
   asection *section;
-
-  memset (tmp_space, 0, SOM_TMP_BUFSIZE);
-  p = tmp_space;
 
   /* Seek to the start of the space strings in preparation for writing
      them out.  */
@@ -3063,7 +3061,7 @@ som_write_space_strings (abfd, current_offset, string_sizep)
      building up and writing string table entries for their names.  */
   for (section = abfd->sections; section != NULL; section = section->next)
     {
-      int length;
+      size_t length;
 
       /* Only work with space/subspaces; avoid any other sections
 	 which might have been made (.text for example).  */
@@ -3074,14 +3072,32 @@ som_write_space_strings (abfd, current_offset, string_sizep)
       length = strlen (section->name);
 
       /* If there is not enough room for the next entry, then dump the
-	 current buffer contents now.  Each entry will take 4 bytes to
-	 hold the string length + the string itself + null terminator.  */
-      if (p - tmp_space + 5 + length > SOM_TMP_BUFSIZE)
+         current buffer contents now and maybe allocate a larger
+         buffer.  Each entry will take 4 bytes to hold the string
+         length + the string itself + null terminator.  */
+      if (p - tmp_space + 5 + length > tmp_space_size)
 	{
+	  /* Flush buffer before refilling or reallocating.  */
 	  if (bfd_write ((PTR) &tmp_space[0], p - tmp_space, 1, abfd)
 	      != p - tmp_space) 
 	    return false;
-	  /* Reset to beginning of the buffer space.  */
+
+	  /* Reallocate if now empty buffer still too small.  */
+	  if (5 + length > tmp_space_size)
+	    {
+	      /* Ensure a minimum growth factor to avoid O(n**2) space
+                 consumption for n strings.  The optimal minimum
+                 factor seems to be 2, as no other value can guarantee
+                 wasting less then 50% space.  (Note that we cannot
+                 deallocate space allocated by `alloca' without
+                 returning from this function.)  The same technique is
+                 used a few more times below when a buffer is
+                 reallocated.  */
+	      tmp_space_size = MAX (2 * tmp_space_size, 5 + length);
+	      tmp_space = alloca (tmp_space_size);
+	    }
+
+	  /* Reset to beginning of the (possibly new) buffer space.  */
 	  p = tmp_space;
 	}
 
@@ -3135,8 +3151,10 @@ som_write_symbol_strings (abfd, current_offset, syms, num_syms, string_sizep,
   
   /* Chunk of memory that we can use as buffer space, then throw
      away.  */
-  unsigned char tmp_space[SOM_TMP_BUFSIZE];
-  unsigned char *p;
+  size_t tmp_space_size = SOM_TMP_BUFSIZE;
+  unsigned char *tmp_space = alloca (tmp_space_size);
+  unsigned char *p = tmp_space;
+
   unsigned int strings_size = 0;
   unsigned char *comp[4];
 
@@ -3154,9 +3172,6 @@ som_write_symbol_strings (abfd, current_offset, syms, num_syms, string_sizep,
       comp[3] = compilation_unit->version_id.n_name;
     }
 
-  memset (tmp_space, 0, SOM_TMP_BUFSIZE);
-  p = tmp_space;
-
   /* Seek to the start of the space strings in preparation for writing
      them out.  */
   if (bfd_seek (abfd, current_offset, SEEK_SET) < 0)
@@ -3166,16 +3181,28 @@ som_write_symbol_strings (abfd, current_offset, syms, num_syms, string_sizep,
     {
       for (i = 0; i < 4; i++)
 	{
-	  int length = strlen (comp[i]);
+	  size_t length = strlen (comp[i]);
 
 	  /* If there is not enough room for the next entry, then dump
-	     the current buffer contents now.  */
-	  if (p - tmp_space + 5 + length > SOM_TMP_BUFSIZE)
+	     the current buffer contents now and maybe allocate a
+	     larger buffer.  */
+	  if (p - tmp_space + 5 + length > tmp_space_size)
 	    {
+	      /* Flush buffer before refilling or reallocating. */
 	      if (bfd_write ((PTR) &tmp_space[0], p - tmp_space, 1, abfd)
 		  != p - tmp_space)
 		return false;
-	      /* Reset to beginning of the buffer space.  */
+
+	      /* Reallocate if now empty buffer still too small.  */
+	      if (5 + length > tmp_space_size)
+		{
+		  /* See alloca above for discussion of new size.  */
+		  tmp_space_size = MAX (2 * tmp_space_size, 5 + length);
+		  tmp_space = alloca (tmp_space_size);
+		}
+
+	      /* Reset to beginning of the (possibly new) buffer
+                 space.  */
 	      p = tmp_space;
 	    }
 
@@ -3224,16 +3251,26 @@ som_write_symbol_strings (abfd, current_offset, syms, num_syms, string_sizep,
 
   for (i = 0; i < num_syms; i++)
     {
-      int length = strlen (syms[i]->name);
+      size_t length = strlen (syms[i]->name);
 
       /* If there is not enough room for the next entry, then dump the
-	 current buffer contents now.  */
-     if (p - tmp_space + 5 + length > SOM_TMP_BUFSIZE)
+	 current buffer contents now and maybe allocate a larger buffer.  */
+     if (p - tmp_space + 5 + length > tmp_space_size)
 	{
+	  /* Flush buffer before refilling or reallocating. */
 	  if (bfd_write ((PTR) &tmp_space[0], p - tmp_space, 1, abfd)
 	      != p - tmp_space)
 	    return false;
-	  /* Reset to beginning of the buffer space.  */
+
+	  /* Reallocate if now empty buffer still too small.  */
+	  if (5 + length > tmp_space_size)
+	    {
+	      /* See alloca above for discussion of new size.  */
+	      tmp_space_size = MAX (2 * tmp_space_size, 5 + length);
+	      tmp_space = alloca (tmp_space_size);
+	    }
+
+	  /* Reset to beginning of the (possibly new) buffer space.  */
 	  p = tmp_space;
 	}
 
