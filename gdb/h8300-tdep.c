@@ -482,8 +482,9 @@ print_register_hook (regno)
     }
 }
 
-
-/* Callbacks for remote-sim */
+/* This doesn't quite fit either in the simulator or in gdb proper.
+   Perhaps the simulator could return 1 to mean it loaded it and 0 to
+   mean "you deal with it, caller".  */
 
 int 
 sim_load (abfd, prog)
@@ -491,21 +492,4 @@ bfd *abfd;
 char *prog;
 {
   return sim_load_standard (abfd); 
-}
-
-void
-sim_kill()
-{
-}
-
-sim_open ()
-{
-  return 0;
-}
-
-sim_set_args(argv, env)
-char **argv;
-char **env;
-{
-  return 0;
 }
