@@ -1,3 +1,11 @@
+Tue Oct  6 09:31:15 1998  Catherine Moore  <clm@cygnus.com>
+
+        * tc-sparc.h (TC_FORCE_RELOCATION):  Define.
+        (elf32_sparc_force_relocation):  Declare.
+        * tc-sparc.c (md_apply_fix3):  Handle vtable relocs.
+        (tc_gen_reloc):  Handle vtable relocs.
+        (elf32_sparc_force_relocation):  New.
+
 Mon Oct  5 09:25:32 1998  Catherine Moore  <clm@cygnsu.com>
 
         * symbols.c (S_IS_FUNCTION):  New.
