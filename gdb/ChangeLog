@@ -1,3 +1,9 @@
+2002-10-06  Christopher Faylor  <cgf@redhat.com>
+
+	* Makefile.in (install-gdbtk): Add missing continuation backslash to
+	insure that shell variables, such as "transformed_name" are propagated
+	to later shell statements in rule.
+
 2002-10-06  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/i386/nm-i386sco.h: Add protection against
