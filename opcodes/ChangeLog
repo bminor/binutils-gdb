@@ -1,3 +1,12 @@
+Fri May 15 14:58:31 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* cgen-opc.c (cgen_hw_lookup_by_name): Renamed from cgen_hw_lookup.
+	(cgen_hw_lookup_by_enum): New function.
+
+start-sanitize-m32rx
+	* m32r-opc.c, m32r-opc.h: Regenerate, delete h-abort.
+
+end-sanitize-m32rx
 Wed May 13 17:03:59 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* m32r-asm.c: Regenerate (handle uppercase HIGH/SHIGH/LOW/SDA).
@@ -7,6 +16,15 @@ Wed May 13 14:34:31 1998  Mark Alexander  <marka@cygnus.com>
 	* sparc-dis.c (print_insn_sparc): Always fetch instructions
 	as big-endian on SPARClite.
 
+start-sanitize-m32rx
+Tue May 12 13:39:51 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* m32r-opc.c: Regenerated - SPECIAL attribute added to some
+	insns. 
+	* m32r-opc.h: Regenerated - SPECIAL attribute added to some
+	insns.
+	
+end-sanitize-m32rx
 Tue May 12 11:46:31 1998  Richard Henderson  <rth@cygnus.com>
 
 	* d30v-opc.c (pre_defined_register): Remove alias for r0.
