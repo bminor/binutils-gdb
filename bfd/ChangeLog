@@ -1,3 +1,9 @@
+2003-06-11 Federico G. Schwindt <fgsch@lodoss.net>
+	
+	* config.bfd (sparc-*-openbsd[0-2].* | sparc-*-openbsd3.[0-1]):
+	New target (was sparc-*-openbsd* before).
+	(sparc-*-openbsd*): Change to use bfd_elf32_sparc_vec.
+	
 2003-06-11  H.J. Lu <hongjiu.lu@intel.com>
 
 	* po/Make-in (DESTDIR): New.

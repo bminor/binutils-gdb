@@ -1108,9 +1108,13 @@ case "${targ}" in
     targ_selvecs=bfd_elf32_sparc_vec
     targ_underscore=yes
     ;;
-  sparc-*-openbsd*)
+  sparc-*-openbsd[0-2].* | sparc-*-openbsd3.[0-1])
     targ_defvec=sparcnetbsd_vec
     targ_underscore=yes
+    ;;
+  sparc-*-openbsd*)
+    targ_defvec=bfd_elf32_sparc_vec
+    targ_selvecs=sparcnetbsd_vec
     ;;
   sparc-*-elf* | sparc-*-solaris2.[0-6] | sparc-*-solaris2.[0-6].*)
     targ_defvec=bfd_elf32_sparc_vec
