@@ -1,3 +1,9 @@
+2000-10-10  Kazu Hirata  <kazu@hxi.com>
+
+	* deffile.h: Fix formatting.
+	* lexsup.c: Likewise.
+	* mri.c: Likewise.
+
 2000-10-09  Paul Sokolovsky  <Paul.Sokolovsky@technologist.com>
 
 	* pe-dll.c (make_one): Do not generate code thunk for DATA

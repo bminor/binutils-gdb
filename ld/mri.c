@@ -34,8 +34,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #include "ldgram.h"
 #include "libiberty.h"
 
-struct section_name_struct
-{
+struct section_name_struct {
   struct section_name_struct *next;
   CONST char *name;
   CONST char *alias;
@@ -91,7 +90,7 @@ mri_add_to_list (list, name, vma, zalias, align, subalign)
      etree_type *align;
      etree_type *subalign;
 {
-  struct section_name_struct **ptr = lookup (name,list);
+  struct section_name_struct **ptr = lookup (name, list);
 
   (*ptr)->name = name;
   (*ptr)->vma = vma;
@@ -107,7 +106,7 @@ mri_output_section (name, vma)
      CONST char *name;
      etree_type *vma;
 {
-  mri_add_to_list (& address, name, vma, 0,0,0);
+  mri_add_to_list (&address, name, vma, 0, 0, 0);
 }
 
 /* If any ABSOLUTE <name> are in the script, only load those files
@@ -117,7 +116,7 @@ void
 mri_only_load (name)
      CONST char *name;
 {
-  mri_add_to_list (&only_load, name, 0, 0,0,0);
+  mri_add_to_list (&only_load, name, 0, 0, 0, 0);
 }
 
 void
@@ -152,23 +151,22 @@ mri_draw_tree ()
 
   /* Attatch the addresses of any which have addresses,
      and add the ones not mentioned.  */
-  if (address != (struct section_name_struct *)NULL)
+  if (address != (struct section_name_struct *) NULL)
     {
       struct section_name_struct *alist;
       struct section_name_struct *olist;
 
-      if (order == (struct section_name_struct *)NULL)
+      if (order == (struct section_name_struct *) NULL)
 	order = address;
 
       for (alist = address;
-	   alist != (struct section_name_struct*)NULL;
+	   alist != (struct section_name_struct *) NULL;
 	   alist = alist->next)
 	{
 	  int done = 0;
 
 	  for (olist = order;
-	       done == 0 &&
-		 olist != (struct section_name_struct *)NULL;
+	       done == 0 && olist != (struct section_name_struct *) NULL;
 	       olist = olist->next)
 	    {
 	      if (strcmp (alist->name, olist->name) == 0)
@@ -181,19 +179,19 @@ mri_draw_tree ()
 	  if (!done)
 	    {
 	      /* Add this onto end of order list.  */
-	      mri_add_to_list (& order, alist->name, alist->vma, 0,0,0);
+	      mri_add_to_list (&order, alist->name, alist->vma, 0, 0, 0);
 	    }
 	}
     }
 
   /* If we're only supposed to load a subset of them in, then prune
      the list.  */
-  if (only_load != (struct section_name_struct *)NULL)
+  if (only_load != (struct section_name_struct *) NULL)
     {
       struct section_name_struct *ptr1;
       struct section_name_struct *ptr2;
 
-      if (order == (struct section_name_struct*)NULL)
+      if (order == (struct section_name_struct *) NULL)
 	order = only_load;
 
       /* See if this name is in the list, if it is then we can load it.  */
@@ -207,12 +205,12 @@ mri_draw_tree ()
       /* No only load list, so everything is ok to load.  */
       struct section_name_struct *ptr;
 
-      for (ptr = order; ptr; ptr=ptr->next)
+      for (ptr = order; ptr; ptr = ptr->next)
 	ptr->ok_to_load = 1;
-  }
+    }
 
   /* Create the order of sections to load.  */
-  if (order != (struct section_name_struct *)NULL)
+  if (order != (struct section_name_struct *) NULL)
     {
       /* Been told to output the sections in a certain order.  */
       struct section_name_struct *p = order;
@@ -224,28 +222,28 @@ mri_draw_tree ()
 	  etree_type *subalign = 0;
 
 	  /* See if an alignment has been specified.  */
-	  for (aptr = alignment; aptr; aptr= aptr->next)
+	  for (aptr = alignment; aptr; aptr = aptr->next)
 	    if (strcmp (aptr->name, p->name) == 0)
-	      align =  aptr->align;
+	      align = aptr->align;
 
-	  for (aptr = subalignment; aptr; aptr= aptr->next)
+	  for (aptr = subalignment; aptr; aptr = aptr->next)
 	    if (strcmp (aptr->name, p->name) == 0)
-	      subalign =  aptr->subalign;
+	      subalign = aptr->subalign;
 
 	  if (base == 0)
-	    base = p->vma ? p->vma :exp_nameop (NAME, ".");
+	    base = p->vma ? p->vma : exp_nameop (NAME, ".");
 
 	  lang_enter_output_section_statement (p->name, base,
 					       p->ok_to_load ? 0 : noload_section,
 					       1, align, subalign,
 					       (etree_type *) NULL);
 	  base = 0;
-	  lang_add_wild (p->name, false, (char *)NULL, false, false, NULL);
+	  lang_add_wild (p->name, false, (char *) NULL, false, false, NULL);
 
 	  /* If there is an alias for this section, add it too.  */
 	  for (aptr = alias; aptr; aptr = aptr->next)
 	    if (strcmp (aptr->alias, p->name) == 0)
-	      lang_add_wild (aptr->name, false, (char *)NULL, false, false, NULL);
+	      lang_add_wild (aptr->name, false, (char *) NULL, false, false, NULL);
 
 	  lang_leave_output_section_statement
 	    (0, "*default*", (struct lang_output_section_phdr_list *) NULL,
@@ -264,9 +262,9 @@ mri_load (name)
 {
   base = 0;
   lang_add_input_file (name,
-		       lang_input_file_is_file_enum, (char *)NULL);
+		       lang_input_file_is_file_enum, (char *) NULL);
 #if 0
-  lang_leave_output_section_statement (0,"*default*");
+  lang_leave_output_section_statement (0, "*default*");
 #endif
 }
 
@@ -274,7 +272,7 @@ void
 mri_order (name)
      CONST char *name;
 {
-  mri_add_to_list (& order, name, 0, 0,0,0);
+  mri_add_to_list (&order, name, 0, 0, 0, 0);
 }
 
 void
@@ -296,7 +294,7 @@ mri_alias (want, is, isn)
 	abort ();
     }
 
-  mri_add_to_list (& alias, is, 0, want,0,0);
+  mri_add_to_list (&alias, is, 0, want, 0, 0);
 }
 
 void
@@ -336,7 +334,7 @@ mri_align (name, exp)
      CONST char *name;
      etree_type *exp;
 {
-  mri_add_to_list (& alignment, name, 0, 0, exp, 0);
+  mri_add_to_list (&alignment, name, 0, 0, exp, 0);
 }
 
 void
@@ -344,7 +342,7 @@ mri_alignmod (name, exp)
      CONST char *name;
      etree_type *exp;
 {
-  mri_add_to_list (& subalignment, name, 0, 0, 0, exp);
+  mri_add_to_list (&subalignment, name, 0, 0, 0, exp);
 }
 
 void

@@ -130,8 +130,7 @@ int parsing_defsym = 0;
 /* The long options.  This structure is used for both the option
    parsing and the help text.  */
 
-struct ld_option
-{
+struct ld_option {
   /* The long option information.  */
   struct option opt;
   /* The short option with the same meaning ('\0' if none).  */
@@ -141,19 +140,17 @@ struct ld_option
   /* The documentation string.  If this is NULL, this is a synonym for
      the previous option.  */
   const char *doc;
-  enum
-    {
-      /* Use one dash before long option name.  */
-      ONE_DASH,
-      /* Use two dashes before long option name.  */
-      TWO_DASHES,
-      /* Don't mention this option in --help output.  */
-      NO_HELP
-    } control;
+  enum {
+    /* Use one dash before long option name.  */
+    ONE_DASH,
+    /* Use two dashes before long option name.  */
+    TWO_DASHES,
+    /* Don't mention this option in --help output.  */
+    NO_HELP
+  } control;
 };
 
-static const struct ld_option ld_options[] =
-{
+static const struct ld_option ld_options[] = {
   { {NULL, required_argument, NULL, '\0'},
       'a', N_("KEYWORD"), N_("Shared library control for HP/UX compatibility"),
       ONE_DASH },
@@ -604,7 +601,7 @@ parse_args (argc, argv)
 		       optarg);
 
 	      cplus_demangle_set_style (style);
-           }
+	    }
 	  break;
 	case OPTION_DYNAMIC_LINKER:
 	  command_line.interpreter = optarg;
@@ -873,7 +870,7 @@ parse_args (argc, argv)
 		xexit (1);
 	      }
 
-	    optarg2 ++;
+	    optarg2++;
 
 	    /* So far so good.  Are all the args present?  */
 	    if ((*optarg == '\0') || (*optarg2 == '\0'))
@@ -1050,24 +1047,24 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 	  lang_leave_group ();
 	  ingroup = 0;
 	  break;
-      case OPTION_MPC860C0:
-          link_info.mpc860c0 = 20;      /* default value (in bytes) */
-          if (optarg)
-            {
-              unsigned words;
+	case OPTION_MPC860C0:
+	  link_info.mpc860c0 = 20;      /* default value (in bytes) */
+	  if (optarg)
+	    {
+	      unsigned words;
 
-              words = is_num (optarg, 1, 10, 0);
-              if (words == 0)
-                {
-                  fprintf (stderr,
+	      words = is_num (optarg, 1, 10, 0);
+	      if (words == 0)
+		{
+		  fprintf (stderr,
 			   _("%s: Invalid argument to option \"mpc860c0\"\n"),
 			   program_name);
-                  xexit (1);
-                }
-              link_info.mpc860c0 = words * 4;   /* convert words to bytes */
-            }
-          command_line.relax = true;
-          break;
+		  xexit (1);
+		}
+	      link_info.mpc860c0 = words * 4;	/* convert words to bytes */
+	    }
+	  command_line.relax = true;
+	  break;
 
 	case OPTION_INIT:
 	  link_info.init_function = optarg;
