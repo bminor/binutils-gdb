@@ -20,4 +20,4 @@ Disassembly of section \.text:
 .*	lw	t9,.*
 .*	bal	.* <__start>
 .*	nop
-.*	nop
+	\.\.\.

@@ -20,6 +20,6 @@ Disassembly of section \.text:
 .*	ld	t9,.*
 .*	bal	.* <__start>
 .*	nop
-.*	nop
+	\.\.\.
 Disassembly of section \.MIPS\.stubs:
 	\.\.\.

@@ -21,3 +21,5 @@ Disassembly of section \.text:
 .*	bal	.* <__start>
 .*	nop
 	\.\.\.
+Disassembly of section \.MIPS\.stubs:
+	\.\.\.
