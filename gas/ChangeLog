@@ -1,5 +1,10 @@
 2002-05-31  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
+	* config/tc-mips.c (mips_ip): Use unsigned long values for
+	warning output.
+
+2002-05-31  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
 	* config/tc-mips.c (s_cpsetup): Fix initialization of
 	mips_cpreturn_register and mips_cpreturn_offset.
 

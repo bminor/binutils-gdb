@@ -8045,8 +8045,8 @@ mips_ip (str, ip)
 	      check_absolute_expr (ip, &imm_expr);
 	      if ((unsigned long) imm_expr.X_add_number > 31)
 		{
-		  as_warn (_("Improper shift amount (%ld)"),
-			   (long) imm_expr.X_add_number);
+		  as_warn (_("Improper shift amount (%lu)"),
+			   (unsigned long) imm_expr.X_add_number);
 		  imm_expr.X_add_number &= OP_MASK_SHAMT;
 		}
 	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_SHAMT;
@@ -8087,10 +8087,10 @@ mips_ip (str, ip)
 	    case 'c':		/* break code */
 	      my_getExpression (&imm_expr, s);
 	      check_absolute_expr (ip, &imm_expr);
-	      if ((unsigned) imm_expr.X_add_number > 1023)
+	      if ((unsigned long) imm_expr.X_add_number > 1023)
 		{
-		  as_warn (_("Illegal break code (%ld)"),
-			   (long) imm_expr.X_add_number);
+		  as_warn (_("Illegal break code (%lu)"),
+			   (unsigned long) imm_expr.X_add_number);
 		  imm_expr.X_add_number &= OP_MASK_CODE;
 		}
 	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_CODE;
@@ -8101,10 +8101,10 @@ mips_ip (str, ip)
 	    case 'q':		/* lower break code */
 	      my_getExpression (&imm_expr, s);
 	      check_absolute_expr (ip, &imm_expr);
-	      if ((unsigned) imm_expr.X_add_number > 1023)
+	      if ((unsigned long) imm_expr.X_add_number > 1023)
 		{
-		  as_warn (_("Illegal lower break code (%ld)"),
-			   (long) imm_expr.X_add_number);
+		  as_warn (_("Illegal lower break code (%lu)"),
+			   (unsigned long) imm_expr.X_add_number);
 		  imm_expr.X_add_number &= OP_MASK_CODE2;
 		}
 	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_CODE2;
@@ -8115,9 +8115,9 @@ mips_ip (str, ip)
 	    case 'B':           /* 20-bit syscall/break code.  */
 	      my_getExpression (&imm_expr, s);
 	      check_absolute_expr (ip, &imm_expr);
-	      if ((unsigned) imm_expr.X_add_number > OP_MASK_CODE20)
-		as_warn (_("Illegal 20-bit code (%ld)"),
-			 (long) imm_expr.X_add_number);
+	      if ((unsigned long) imm_expr.X_add_number > OP_MASK_CODE20)
+		as_warn (_("Illegal 20-bit code (%lu)"),
+			 (unsigned long) imm_expr.X_add_number);
 	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_CODE20;
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
@@ -8128,8 +8128,8 @@ mips_ip (str, ip)
 	      check_absolute_expr (ip, &imm_expr);
 	      if ((unsigned long) imm_expr.X_add_number >= (1 << 25))
 		{
-		  as_warn (_("Coproccesor code > 25 bits (%ld)"),
-			   (long) imm_expr.X_add_number);
+		  as_warn (_("Coproccesor code > 25 bits (%lu)"),
+			   (unsigned long) imm_expr.X_add_number);
 		  imm_expr.X_add_number &= ((1 << 25) - 1);
 		}
 	      ip->insn_opcode |= imm_expr.X_add_number;
@@ -8140,9 +8140,9 @@ mips_ip (str, ip)
 	    case 'J':           /* 19-bit wait code.  */
 	      my_getExpression (&imm_expr, s);
 	      check_absolute_expr (ip, &imm_expr);
-	      if ((unsigned) imm_expr.X_add_number > OP_MASK_CODE19)
-		as_warn (_("Illegal 19-bit code (%ld)"),
-			 (long) imm_expr.X_add_number);
+	      if ((unsigned long) imm_expr.X_add_number > OP_MASK_CODE19)
+		as_warn (_("Illegal 19-bit code (%lu)"),
+			 (unsigned long) imm_expr.X_add_number);
 	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_CODE19;
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
@@ -8153,8 +8153,8 @@ mips_ip (str, ip)
 	      check_absolute_expr (ip, &imm_expr);
 	      if (imm_expr.X_add_number != 0 && imm_expr.X_add_number != 1)
 		{
-		  as_warn (_("Invalid performance register (%ld)"),
-			   (long) imm_expr.X_add_number);
+		  as_warn (_("Invalid performance register (%lu)"),
+			   (unsigned long) imm_expr.X_add_number);
 		  imm_expr.X_add_number &= OP_MASK_PERFREG;
 		}
 	      ip->insn_opcode |= (imm_expr.X_add_number << OP_SH_PERFREG);
