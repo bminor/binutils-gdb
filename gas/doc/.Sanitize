@@ -90,7 +90,7 @@ else
 	done
 fi
 
-v850e_files="c-d30v.texi as.texinfo all.texi"
+d30v_files="as.texinfo all.texi"
 if ( echo $* | grep keep\-d30v > /dev/null ) ; then
 	for i in $d30v_files ; do
 		if test ! -d $i && (grep sanitize-d30v $i > /dev/null) ; then
