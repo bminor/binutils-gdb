@@ -25,6 +25,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* The private data for the register cache.  Note that we have one
+   per inferior; this is primarily for simplicity, as the performance
+   benefit is minimal.  */
+
 struct inferior_regcache_data
 {
   int registers_valid;

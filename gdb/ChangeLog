@@ -1,5 +1,9 @@
 2002-06-13  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdbserver/regcache.c: Add comment.
+
+2002-06-13  Daniel Jacobowitz  <drow@mvista.com>
+
 	* mips-tdep.c (PROC_SYMBOL): Add warning comment.
 	(struct mips_objfile_private, compare_pdr_entries): New.
 	(non_heuristic_proc_desc): Read the ".pdr" section if it
