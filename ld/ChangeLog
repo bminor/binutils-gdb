@@ -1,5 +1,8 @@
 Thu Feb 12 14:10:44 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* scripttempl/elf.sc: Align the _end symbol according to the ELF
+ 	format size.  From Gordon W. Ross <gwr@mc.com>.
+
 	NetBSD patches from Gordon W. Ross <gwr@mc.com>:
 	* configure.host (alpha*-*-netbsd*): New host.
 	* configure.tgt (alpha*-*-netbsd*, powerpc-*-netbsd*): New
