@@ -1406,9 +1406,9 @@ ldmisc.o: ldmisc.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   ldmisc.h ldexp.h ldlang.h ldgram.h ldlex.h ldmain.h \
   ldfile.h
 ldver.o: ldver.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/fopen-same.h \
-  ld.h $(INCDIR)/bin-bugs.h ldver.h ldexp.h ldlang.h \
-  ldfile.h ldemul.h ldmain.h
+  $(INCDIR)/symcat.h ../bfd/bfdver.h sysdep.h config.h \
+  $(INCDIR)/fopen-same.h ld.h $(INCDIR)/bin-bugs.h ldver.h \
+  ldexp.h ldlang.h ldfile.h ldemul.h ldmain.h
 ldwrite.o: ldwrite.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/libiberty.h ld.h $(INCDIR)/bin-bugs.h \

@@ -1,3 +1,9 @@
+2002-10-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* ldver.c: #include "bfdver.h".
+
 2002-10-13  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* scripttempl/elfm68hc11.sc: Use KEEP for .vectors, .installN,
