@@ -1,5 +1,7 @@
 Thu Oct 24 02:03:24 1991  Fred Fish  (fnf at cygnus.com)
 
+	* config/t-m68k-elf:  Set DEFAULT_VECTOR to elf_big_vec.
+
 	* config/{h-amix,h-dgux,h-irix3,h-ultra3}: For systems where
 	RANLIB is defined as echo, send the output to /dev/null to help
 	reduce clutter in the output from doing a make.
