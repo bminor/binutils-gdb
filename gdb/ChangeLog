@@ -1,5 +1,7 @@
 2002-05-17  Jim Blandy  <jimb@redhat.com>
 
+	* NEWS: Note addition of macro support.
+
 	Expand preprocessor macros in C expressions.
 	* c-lang.h: #include "macroexp.h", for macro_lookup_ftype.
 	(scan_macro_expansion, scanning_macro_expansion,

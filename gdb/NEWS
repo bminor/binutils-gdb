@@ -3,6 +3,28 @@
 
 *** Changes since GDB 5.2:
 
+* GDB now supports C/C++ preprocessor macros.
+
+GDB now expands preprocessor macro invocations in C/C++ expressions,
+and provides various commands for showing macro definitions and how
+they expand.
+
+Most compilers don't include information about macros in the debugging
+information by default.  In GCC 3.1, for example, you need to compile
+your program with the options `-gdwarf-2 -g3'.  If the macro
+information is present in the executable, GDB will read it.
+
+Here are the new commands for working with macros:
+
+** macro expand EXPRESSION
+
+Expand any macro invocations in expression, and show the result.
+
+** show macro MACRO-NAME
+
+Show the definition of the macro named MACRO-NAME, and where it was
+defined.
+
 * Multi-arched targets.
 
 NEC V850					v850-*-*
