@@ -2642,7 +2642,7 @@ coff_write_object_contents (abfd)
 #define __A_MAGIC_SET__
     internal_a.magic = ZMAGIC;
 #endif 
-#if defined(PPC)
+#if defined(PPC_PE)
 #define __A_MAGIC_SET__
     internal_a.magic = IMAGE_NT_OPTIONAL_HDR_MAGIC;
 #endif
@@ -2700,7 +2700,7 @@ coff_write_object_contents (abfd)
 	return false;
     }
 #ifdef COFF_IMAGE_WITH_PE
-#ifdef PPC
+#ifdef PPC_PE
   else if ((abfd->flags & EXEC_P) != 0)
     {
       bfd_byte b;

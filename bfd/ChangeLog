@@ -1,3 +1,15 @@
+Wed Apr 17 12:08:24 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* pe{,i}-ppc.c (PPC_PE): Define instead of PPC, so that compiling
+	on Solaris PowerPC systems doesn't get confused.
+
+	* ccffcode.h (coff_write_object_contents): Use #ifdef PPC_PE, not
+	#ifdef PPC.
+
+	* elfcore.h (bfd_prstatus, bfd_fpregset): Add thread argument.
+	(elf_corefile_note): If HAVE_SYS_PROCFS_H is not defined, don't
+	update did_reg and did_reg2.
+
 Wed Apr 17 13:07:37 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* linker.c (_bfd_generic_link_add_one_symbol): When calling the
