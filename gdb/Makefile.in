@@ -15,7 +15,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 prefix = @prefix@
 exec_prefix = @exec_prefix@
@@ -123,6 +123,10 @@ OPCODES = ../opcodes/libopcodes.a
 OP_INCLUDE = $(INCLUDE_DIR)/opcode
 OPCODES_CFLAGS = -I$(OP_INCLUDE)
 
+# The simulator is usually nonexistent; targets that include one
+# should set this to list all the .o or .a files to be linked in.
+SIM =
+
 #start-sanitize-gdbtk
 # Where is the TCL library?  Typically in ../tcl.
 TCL = @TCLLIB@
@@ -196,16 +200,16 @@ REGEX1 = regex.o
 # you can use 'CLIBS=$(INSTALLED_LIBS)' 'CDEPS='
 INSTALLED_LIBS=-lbfd -lreadline $(TERMCAP) -lopcodes -lmmalloc \
 	-liberty $(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) $(ENABLE_CLIBS)
-CLIBS = $(BFD) $(READLINE) $(OPCODES) $(MMALLOC) $(LIBIBERTY) \
+CLIBS = $(SIM) $(BFD) $(READLINE) $(OPCODES) $(MMALLOC) $(LIBIBERTY) \
 	$(ENABLE_CLIBS) $(TERMCAP) $(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) \
 	$(LIBIBERTY)
-CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(BFD) $(READLINE) $(OPCODES) \
-	$(MMALLOC) $(LIBIBERTY)
+CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
+	$(OPCODES) $(MMALLOC) $(LIBIBERTY)
 
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 4.14.1
+VERSION = 4.14.2
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -228,6 +232,9 @@ SER_HARDWIRE=ser-unix.o
 # The `remote' debugging target is supported for most architectures,
 # but not all (e.g. 960)
 REMOTE_OBS = remote.o dcache.o remote-utils.o
+
+# This is remote-sim.o if a simulator is to be linked in.
+SIM_OBS =
 
 ANNOTATE_OBS = annotate.o
 
@@ -277,7 +284,7 @@ CC_FOR_TARGET = ` \
 
 CXX = gcc
 CXX_FOR_TARGET = ` \
-  if [ -f $${rootme}/../gcc/Makefile ] ; then \
+  if [ -f $${rootme}/../gcc/xgcc ] ; then \
     if [ -f $${rootme}/../newlib/Makefile ] ; then \
       echo $${rootme}/../gcc/xgcc -B$${rootme}/../gcc/ -idirafter $${rootme}/newlib/targ-include -idirafter $${rootsrc}/../newlib/libc/include -nostdinc -L$${rootme}/../newlib -B$${rootme}/../newlib/; \
     else \
@@ -434,18 +441,14 @@ REMOTE_EXAMPLES = m68k-stub.c i386-stub.c sparc-stub.c rem-multi.shar
 
 POSSLIBS = regex.c regex.h
 
-# Subdirectories of gdb, which should be included in their entirety in
-# gdb-xxx.tar.Z:
-TARDIRS = doc gdbserver sparclite
-
 # {X,T,NAT}DEPFILES are something of a pain in that it's hard to
 # default their values the way we do for SER_HARDWIRE; in the future
 # maybe much of the stuff now in {X,T,NAT}DEPFILES will go into other
 # variables analogous to SER_HARDWIRE which get defaulted in this
 # Makefile.in
 
-DEPFILES = $(TDEPFILES) $(XDEPFILES) $(SER_HARDWIRE) $(NATDEPFILES) $(REMOTE_OBS) \
-	   $(ENABLE_OBS)
+DEPFILES = $(TDEPFILES) $(XDEPFILES) $(SER_HARDWIRE) $(NATDEPFILES) \
+	   $(REMOTE_OBS) $(SIM_OBS) $(ENABLE_OBS)
 
 SOURCES = $(SFILES) $(ALLDEPFILES) $(YYFILES)
 # Don't include YYFILES (*.tab.c) because we already include *.y in SFILES,
@@ -726,6 +729,7 @@ distclean: clean
 	@$(MAKE) $(FLAGS_TO_PASS) DO=distclean "DODIRS=$(SUBDIRS)" subdir_do 
 	rm -f nm.h tm.h xm.h config.status
 	rm -f y.output yacc.acts yacc.tmp y.tab.h
+	rm -f config.log config.cache
 	rm -f Makefile
 
 realclean: clean
@@ -734,6 +738,7 @@ realclean: clean
 	rm -f TAGS $(INFOFILES)
 	rm -f nm.h tm.h xm.h config.status
 	rm -f y.output yacc.acts yacc.tmp
+	rm -f config.log config.cache
 	rm -f Makefile
 
 diststuff: $(DISTSTUFF)
@@ -750,7 +755,7 @@ subdir_do: force
 		else true ; fi ; \
 	done
 
-Makefile: Makefile.in config.status @host_makefile_frag_path@ @target_makefile_frag_path@
+Makefile: Makefile.in config.status @frags@
 	$(SHELL) config.status
 
 config.status: configure
@@ -920,7 +925,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	remote-hms.c remote-mips.c \
 	remote-mm.c remote-nindy.c remote-os9k.c remote-sim.c \
 	remote-st.c remote-utils.c dcache.c \
-	remote-udi.c remote-vx.c remote-vx29k.c remote-z8k.c \
+	remote-udi.c remote-vx.c remote-vx29k.c \
 	rs6000-nat.c rs6000-tdep.c \
 	ser-go32.c ser-tcp.c sh-tdep.c solib.c sparc-nat.c \
 	sparc-tdep.c sparcl-tdep.c sun3-nat.c sun386-nat.c \
@@ -1377,9 +1382,6 @@ remote-vx29k.o: remote-vx29k.c $(wait_h) complaints.h $(defs_h) $(gdbcmd_h) \
         vx-share/ptrace.h vx-share/xdr_ld.h vx-share/xdr_ptrace.h \
         vx-share/xdr_rdb.h
 
-remote-z8k.o: remote-z8k.c $(wait_h) $(srcdir)/../sim/z8k/sim.h \
-	$(defs_h) $(gdbcore_h) $(inferior_h) target.h terminal.h
-
 remote-utils.o: remote-utils.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) $(remote_utils_h)
 
@@ -1498,7 +1500,7 @@ xcoffread.o: xcoffread.c $(bfd_h) $(INCLUDE_DIR)/aout/stab.def \
 	$(INCLUDE_DIR)/aout/stab_gnu.h $(INCLUDE_DIR)/coff/internal.h \
 	$(INCLUDE_DIR)/coff/rs6000.h $(BFD_SRC)/libcoff.h buildsym.h \
 	complaints.h $(defs_h) $(gdbtypes_h) objfiles.h stabsread.h symfile.h \
-	$(symtab_h)
+	$(symtab_h) partial-stab.h
 
 xcoffsolib.o: xcoffsolib.c $(bfd_h) $(defs_h) xcoffsolib.h
 
