@@ -1,5 +1,7 @@
 2001-09-08  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/xm-aix4.h (MEM_FNS_DECLARED): Removed.
+
 	* config/arm/xm-linux.h, config/ia64/xm-linux.h,
 	config/m68k/xm-linux.h, config/mips/xm-linux.h,
 	config/powerpc/xm-linux.h, config/sparc/xm-linux.h: Remove

@@ -47,11 +47,6 @@
 
 #define FIVE_ARG_PTRACE
 
-/* AIX declares the mem functions differently than defs.h does.  AIX is
-   right, but defs.h works on more old systems.  For now, override it.  */
-
-#define MEM_FNS_DECLARED 1
-
 /* This system requires that we open a terminal with O_NOCTTY for it to
    not become our controlling terminal.  */
 
