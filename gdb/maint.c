@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #if MAINTENANCE_CMDS	/* Entire rest of file goes away if not including maint cmds */
 
+#include <ctype.h>
 #include <signal.h>
 #include "command.h"
 #include "gdbcmd.h"
@@ -34,6 +35,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "language.h"
 #include "symfile.h"
 #include "objfiles.h"
+#include "value.h"
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>

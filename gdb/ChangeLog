@@ -1,3 +1,7 @@
+Tue Feb 18 13:36:34 1997  Mark Alexander  <marka@cygnus.com>
+
+	* maint.c: Eliminate -Wall warnings by including some header files.
+
 Tue Feb 18 13:06:30 1997  Mark Alexander  <marka@cygnus.com>
 
 	* remote-sim.c (init_callbacks): Undo previous change.
