@@ -617,11 +617,11 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
-  /* 32-bit section relative relocation.  */
+  /* 16-bit section relative relocation.  */
   HOWTO (R_PPC64_SECTOFF,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 32,			/* bitsize */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
@@ -629,10 +629,10 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 "R_PPC64_SECTOFF",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
-	 0xffffffff,		/* dst_mask */
+	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
-  /* 16-bit lower half section relative relocation.  */
+  /* Like R_PPC64_SECTOFF, but no overflow warning.  */
   HOWTO (R_PPC64_SECTOFF_LO,	/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -1072,8 +1072,8 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
   /* Like R_PPC64_SECTOFF, but for instructions with a DS field.  */
   HOWTO (R_PPC64_SECTOFF_DS,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 32,			/* bitsize */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
@@ -1081,7 +1081,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 "R_PPC64_SECTOFF_DS",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
-	 0xfffffffc,		/* dst_mask */
+	 0xfffc,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
   /* Like R_PPC64_SECTOFF_LO, but for instructions with a DS field.  */
@@ -1280,7 +1280,7 @@ ppc64_elf_reloc_type_lookup (abfd, code)
       break;
     case BFD_RELOC_HI16_S_PLTOFF:	 ppc_reloc = R_PPC64_PLT16_HA;
       break;
-    case BFD_RELOC_32_BASEREL:		 ppc_reloc = R_PPC64_SECTOFF;
+    case BFD_RELOC_16_BASEREL:		 ppc_reloc = R_PPC64_SECTOFF;
       break;
     case BFD_RELOC_LO16_BASEREL:	 ppc_reloc = R_PPC64_SECTOFF_LO;
       break;

@@ -1,5 +1,14 @@
 2002-05-02  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-ppc.c (ppc64_elf_howto_raw <R_PPC64_SECTOFF>): Change to a
+	16 bit reloc.
+	<R_PPC64_SECTOFF_DS>: Likewise.
+	(ppc64_elf_reloc_type_lookup): Map from BFD_RELOC_16_BASEREL to
+	SECTOFF reloc.
+	* elf32-ppc.c (ppc_elf_howto_raw <R_PPC_SECTOFF>): Correct.
+	(ppc_elf_reloc_type_lookup): Map from BFD_RELOC_16_BASEREL to
+	SECTOFF reloc.
+
 	* elf64-ppc.c (ppc64_elf_addr16_ha_reloc): Delete.
 	(ppc64_elf_ha_reloc): New function.
 	(ppc64_elf_brtaken_reloc): New function.

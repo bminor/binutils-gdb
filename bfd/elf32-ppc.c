@@ -679,20 +679,20 @@ static reloc_howto_type ppc_elf_howto_raw[] = {
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
-  /* 32-bit section relative relocation.  */
+  /* 16-bit section relative relocation.  */
   HOWTO (R_PPC_SECTOFF,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 32,			/* bitsize */
-	 true,			/* pc_relative */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC_SECTOFF",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
-	 0,			/* dst_mask */
-	 true),			/* pcrel_offset */
+	 0xffff,		/* dst_mask */
+	 false),		/* pcrel_offset */
 
   /* 16-bit lower half section relative relocation.  */
   HOWTO (R_PPC_SECTOFF_LO,	  /* type */
@@ -1295,7 +1295,7 @@ ppc_elf_reloc_type_lookup (abfd, code)
     case BFD_RELOC_HI16_PLTOFF:		ppc_reloc = R_PPC_PLT16_HI;		break;
     case BFD_RELOC_HI16_S_PLTOFF:	ppc_reloc = R_PPC_PLT16_HA;		break;
     case BFD_RELOC_GPREL16:		ppc_reloc = R_PPC_SDAREL16;		break;
-    case BFD_RELOC_32_BASEREL:		ppc_reloc = R_PPC_SECTOFF;		break;
+    case BFD_RELOC_16_BASEREL:		ppc_reloc = R_PPC_SECTOFF;		break;
     case BFD_RELOC_LO16_BASEREL:	ppc_reloc = R_PPC_SECTOFF_LO;		break;
     case BFD_RELOC_HI16_BASEREL:	ppc_reloc = R_PPC_SECTOFF_HI;		break;
     case BFD_RELOC_HI16_S_BASEREL:	ppc_reloc = R_PPC_SECTOFF_HA;		break;
