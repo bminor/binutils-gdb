@@ -1,5 +1,10 @@
 2001-12-07  Jakub Jelinek  <jakub@redhat.com>
 
+	* elf32-sparc.c (elf32_sparc_relocate_section): Revert
+	2001-09-14 change.
+
+2001-12-07  Jakub Jelinek  <jakub@redhat.com>
+
 	* elf.c (_bfd_elf_rela_local_sym): Only call
 	_bfd_merged_section_offset if merge_info is non-NULL.
 	(_bfd_elf_rel_local_sym, _bfd_elf_section_offset): New.
