@@ -1,3 +1,10 @@
+2002-12-24    Dmitry Diky <diwil@mail.ru>
+
+	* gas/msp430: New directory.
+	* gas/msp430/msp430.exp: Test msp430 assembler.
+	* gas/msp430/opcode.s: Test source file.
+	* gas/msp430/opcode.s: Expected disassembly.
+
 2002-12-27  Chris Demetriou  <cgd@broadcom.com>
 
 	* gas/mips/mips.exp: Define the notion of an "architecture data

@@ -1,3 +1,18 @@
+2002-12-30    Dmitry Diky <diwil@mail.ru>
+
+	* configure.in: Add msp430 target.
+	* configure: Regenerate.
+	* Makefile.am: Add msp430 target.
+	* Makefile.in: Regenerate.
+	* config/tc-msp430.c: New file: msp430 assembler.
+	* config/tc-msp430.h: New file: target macros for msp430.
+	* doc/Makefile.am: Add msp430 target.
+	* doc/Makefile.in: Regenerate.
+	* doc/as.texinfo: Include msp430 documenation.
+	* doc/all.texi: Enable msp430 documentation.
+	* doc/c-msp430.texi: New file: document msp430 specific features
+	of the assembler.
+
 2002-12-25  Alexandre Oliva  <aoliva@redhat.com>
 
 	* dwarf2dbg.c (DWARF2_ADDR_SIZE): New macro.

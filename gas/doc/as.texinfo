@@ -5758,6 +5758,9 @@ subject, see the hardware manufacturer's manual.
 @ifset MMIX
 * MMIX-Dependent::              MMIX Dependent Features
 @end ifset
+@ifset MSP430
+* MSP430-Dependent::		MSP430 Dependent Features
+@end ifset
 @ifset SH
 * SH-Dependent::                Hitachi SH Dependent Features
 * SH64-Dependent::              Hitachi SH64 Dependent Features
@@ -5904,6 +5907,10 @@ family.
 
 @ifset MMIX
 @include c-mmix.texi
+@end ifset
+
+@ifset MSP430
+@include c-msp430.texi
 @end ifset
 
 @ifset NS32K

@@ -1,3 +1,10 @@
+2002-12-30    Dmitry Diky <diwil@mail.ru>
+
+	* configure.in: Add msp430 target.
+	* configure: Regenerate.
+	* disassemble.c: Add entry for msp430 disassembly.
+	* msp430-dis.c: New file: msp430 disassembler.
+
 2002-12-27  Chris Demetriou  <cgd@broadcom.com>
 
 	* disassemble.c (disassembler_usage): Add invocation of

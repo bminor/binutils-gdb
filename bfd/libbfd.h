@@ -1373,6 +1373,11 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_VAX_GLOB_DAT",
   "BFD_RELOC_VAX_JMP_SLOT",
   "BFD_RELOC_VAX_RELATIVE",
+  "BFD_RELOC_MSP430_10_PCREL",
+  "BFD_RELOC_MSP430_16_PCREL",
+  "BFD_RELOC_MSP430_16",
+  "BFD_RELOC_MSP430_16_PCREL_BYTE",
+  "BFD_RELOC_MSP430_16_BYTE",
  "@@overflow: BFD_RELOC_UNUSED@@",
 };
 #endif

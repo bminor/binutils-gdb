@@ -807,6 +807,10 @@ case "${targ}" in
     targ_defvec=bfd_elf32_mn10300_vec
     ;;
 
+  msp430-*-*)
+    targ_defvec=bfd_elf32_msp430_vec
+    ;;
+
   ns32k-pc532-mach* | ns32k-pc532-ux*)
     targ_defvec=pc532machaout_vec
     targ_underscore=yes

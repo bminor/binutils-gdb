@@ -6,6 +6,7 @@
 @set H8300
 @set I960
 @set MMIX
+@set MSP430
 @set TICOFF
 @set WIN32
 

@@ -1519,6 +1519,7 @@ alpha_fix_adjustable (f)
 	 we're preventing this in the other assemblers.  Follow for now.  */
       return 0;
 
+#ifdef OBJ_ELF
     case BFD_RELOC_ALPHA_BRSGP:
       /* If we have a BRSGP reloc to a local symbol, adjust it to BRADDR and
          let it get resolved at assembly time.  */
@@ -1551,6 +1552,7 @@ alpha_fix_adjustable (f)
 	f->fx_offset += offset;
 	return 1;
       }
+#endif
 
     default:
       return 1;

@@ -286,6 +286,20 @@ DESCRIPTION
 .  bfd_arch_mmix,      {* Donald Knuth's educational processor.  *}
 .  bfd_arch_xstormy16,
 .#define bfd_mach_xstormy16	1
+.  bfd_arch_msp430,    {* Texas Instruments MSP430 architecture.  *}
+.#define bfd_mach_msp110         110
+.#define bfd_mach_msp11          11
+.#define bfd_mach_msp12          12
+.#define bfd_mach_msp13          13
+.#define bfd_mach_msp14          14
+.#define bfd_mach_msp41          41
+.#define bfd_mach_msp31          31
+.#define bfd_mach_msp32          32
+.#define bfd_mach_msp33          33
+.#define bfd_mach_msp43          43
+.#define bfd_mach_msp44          44
+.#define bfd_mach_msp15          15
+.#define bfd_mach_msp16          16  
 .  bfd_arch_last
 .  };
 */
@@ -355,6 +369,7 @@ extern const bfd_arch_info_type bfd_mips_arch;
 extern const bfd_arch_info_type bfd_mmix_arch;
 extern const bfd_arch_info_type bfd_mn10200_arch;
 extern const bfd_arch_info_type bfd_mn10300_arch;
+extern const bfd_arch_info_type bfd_msp430_arch;
 extern const bfd_arch_info_type bfd_ns32k_arch;
 extern const bfd_arch_info_type bfd_openrisc_arch;
 extern const bfd_arch_info_type bfd_or32_arch;
@@ -412,6 +427,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_mmix_arch,
     &bfd_mn10200_arch,
     &bfd_mn10300_arch,
+    &bfd_msp430_arch,
     &bfd_ns32k_arch,
     &bfd_openrisc_arch,
     &bfd_or32_arch,

@@ -1,3 +1,18 @@
+2002-12-30    Dmitry Diky <diwil@mail.ru>
+
+	* Makefile.am: Add msp430 target.
+	* configure.in: Likewise.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* archures.c: Add msp430 architecture vector.
+	* config.bfd: Likewise.
+	* reloc.c: Add msp430 relocs.
+	* targets.c: Add msp320 target.
+	* cpu-msp430.c: New file: msp430 cpu detection.
+	* elf32-msp430.c: New file: msp430 reloc processing.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2002-12-28  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf.c (elf_sort_sections): Don't reorder .tbss.

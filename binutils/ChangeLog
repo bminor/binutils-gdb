@@ -1,3 +1,9 @@
+2002-12-30    Dmitry Diky <diwil@mail.ru>
+
+	* Makefile.am: Add msp430 target.
+	* Makefile.in: Regenerate.
+	* readelf.c: Add support for msp430 target.
+
 2002-12-27  Chris Demetriou  <cgd@broadcom.com>
 
 	* doc/binutils.texi (objdump): Document MIPS -M options.

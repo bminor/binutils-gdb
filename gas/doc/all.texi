@@ -48,6 +48,7 @@
 @set MCORE
 @set MIPS
 @set MMIX
+@set MSP430
 @set PDP11
 @set PJ
 @set PPC

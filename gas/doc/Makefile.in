@@ -156,6 +156,7 @@ CPU_DOCS = \
 	c-m88k.texi \
 	c-mips.texi \
 	c-mmix.texi \
+	c-msp430.texi \
 	c-ns32k.texi \
 	c-pdp11.texi \
 	c-pj.texi \

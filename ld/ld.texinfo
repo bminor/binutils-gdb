@@ -36,6 +36,7 @@
 @set MCORE
 @set MIPS
 @set MMIX
+@set MSP430
 @set PDP11
 @set PJ
 @set SH
@@ -4393,6 +4394,9 @@ functionality are not listed.
 @ifset MMIX
 * MMIX::			@code{ld} and MMIX
 @end ifset
+@ifset MSP430
+* MSP430::			@code{ld} and MSP430
+@end ifset
 @ifset TICOFF
 * TI COFF::                     @command{ld} and TI COFF
 @end ifset
@@ -4890,6 +4894,39 @@ script uses these to set the default start address of a section.
 
 Initial and trailing multiples of zero-valued 32-bit words in a section,
 are left out from an mmo file.
+@end ifset
+
+@ifset MSP430
+@node  MSP430
+@section @code{ld} and MSP430
+For the MSP430 it is possible to select the MPU architecture.  The flag @samp{-m [mpu type]}
+will select an appropriate linker script for selected MPU type.  (To get a list of known MPUs
+just pass @samp{-m help} option to the linker).
+
+@cindex MSP430 extra sections
+The linker will recognize some extra sections which are MSP430 specific:
+
+@table @code
+@item @samp{.vectors}
+Defines a portion of ROM where interrupt vectors located.
+
+@item @samp{.bootloader}
+Defines the bootloader portion of the ROM (if applicable).  Any code
+in this section will be uploaded to the MPU.
+
+@item @samp{.infomem}
+Defines an information memory section (if applicable).  Any code in
+this section will be uploaded to the MPU.
+
+@item @samp{.infomemnobits} 
+This is the same as the @samp{.infomem} section except that any code
+in this section will not be uploaded to the MPU.
+
+@item @samp{.noinit}
+Denotes a portion of RAM located above @samp{.bss} section.
+
+The last two sections are used by gcc. 
+@end table
 @end ifset
 
 @ifset TICOFF
