@@ -3189,7 +3189,7 @@ som_write_symbol_strings (abfd, current_offset, syms, num_syms, string_sizep,
 
   /* Seek to the start of the space strings in preparation for writing
      them out.  */
-  if (bfd_seek (abfd, current_offset, SEEK_SET) != 0)
+  if (bfd_seek (abfd, (file_ptr) current_offset, SEEK_SET) != 0)
     return false;
 
   if (compilation_unit)

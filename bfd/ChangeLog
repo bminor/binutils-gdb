@@ -1,3 +1,8 @@
+2001-09-29  Alan Modra  <amodra@bigpond.net.au>
+
+	* som.c (som_write_symbol_strings): Cast current_offset in
+	bfd_seek call to match param type.
+
 2001-09-28  J. Brobecker <brobecker@gnat.com>
 
 	* som.c (som_write_symbol_strings): Fix incorrect type of
