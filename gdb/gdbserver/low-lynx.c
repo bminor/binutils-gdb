@@ -72,7 +72,7 @@ create_inferior (program, allargs)
       setpgrp(0, pgrp);
       ioctl (0, TIOCSPGRP, &pgrp);
 
-      ptrace (PTRACE_TRACEME);
+      ptrace (PTRACE_TRACEME, 0, (PTRACE_ARG3_TYPE)0, 0);
 
       execv (program, allargs);
 
