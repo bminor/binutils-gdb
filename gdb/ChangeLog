@@ -1,3 +1,8 @@
+2002-01-12  Elena Zannoni  <ezannoni@redhat.com>
+
+	* sh-tdep.c (sh_gdbarch_init): Move setting of long_bit earlier in
+	the function.
+
 2002-01-12  Andrew Cagney  <ac131313@redhat.com>
 
 	* language.c (longest_raw_hex_string): Delete unused function.
