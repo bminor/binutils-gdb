@@ -3,6 +3,11 @@
 	* scripttempl/h8300.sc: Fix formatting.  Fix a comment typo.
 	* scripttempl/h8300h.sc: Fix formatting.
 	* scripttempl/h8300s.sc: Likewise.
+	* scripttempl/h8500.sc: Likewise.
+	* scripttempl/h8500b.sc: Likewise.
+	* scripttempl/h8500c.sc: Likewise.
+	* scripttempl/h8500m.sc: Likewise.
+	* scripttempl/h8500s.sc: Likewise.
 
 2000-01-07  David O'Brien  <obrien@BSDi.com>
 

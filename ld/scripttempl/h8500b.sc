@@ -12,55 +12,50 @@ OUTPUT_ARCH(${ARCH})
 
 /* Code and data, both larger than 64k */
 
-SECTIONS 				
-{ 					
+SECTIONS
+{
 .text ${RELOCATING+ 0x10000} :
-	{ 					
-	  *(.text) 				
-
-   	 ${RELOCATING+ _etext = . ; }
+	{
+	  *(.text)
+	  ${RELOCATING+ _etext = . ; }
 	}
-
 
 .data  ${RELOCATING+ 0x20000} :
 	{
-	*(.data)
-	${RELOCATING+ _edata = . ; }
-	} 
+	  *(.data)
+	  ${RELOCATING+ _edata = . ; }
+	}
 
 .rdata  ${RELOCATING+ 0x30000} :
 	{
-	*(.rdata); 
+	  *(.rdata);
 	  *(.strings)
-	  
-	${CONSTRUCTING+${TORS}}
-	} 
+
+	  ${CONSTRUCTING+${TORS}}
+	}
 
 .bss  ${RELOCATING+ 0x40000} :
 	{
-	${RELOCATING+ __start_bss = . ; }
-	*(.bss)
-	*(COMMON)
-	${RELOCATING+ _end = . ;  }
+	  ${RELOCATING+ __start_bss = . ; }
+	  *(.bss)
+	  *(COMMON)
+	  ${RELOCATING+ _end = . ;  }
 	}
 
 .stack  ${RELOCATING+ 0x50000} :
 	{
-	${RELOCATING+ _stack = . ; }
-	*(.stack)
-	} 
+	  ${RELOCATING+ _stack = . ; }
+	  *(.stack)
+	}
 
-  .stab  0 ${RELOCATING+(NOLOAD)} : 
-  {
-    [ .stab ]
-  }
-  .stabstr  0 ${RELOCATING+(NOLOAD)} :
-  {
-    [ .stabstr ]
-  }
+.stab  0 ${RELOCATING+(NOLOAD)} :
+	{
+	  [ .stab ]
+	}
+
+.stabstr  0 ${RELOCATING+(NOLOAD)} :
+	{
+	  [ .stabstr ]
+	}
 }
 EOF
-
-
-
-

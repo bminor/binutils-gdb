@@ -12,27 +12,27 @@ OUTPUT_ARCH(${ARCH})
 
 /* Code and data 64k total */
 
-SECTIONS 				
-{ 					
-.text ${RELOCATING+ 0x0000 } :
-	{ 					
+SECTIONS
+{
+.text ${RELOCATING+ 0x0000} :
+	{
 	  *(.text)
-   	  ${RELOCATING+ _etext = . ; }
+	  ${RELOCATING+ _etext = . ; }
 	}
 
 .data  ${RELOCATING+ . } :
 	{
 	  *(.data)
 	  ${RELOCATING+ _edata = . ; }
-	} 
+	}
 
 .rdata  ${RELOCATING+ . } :
 	{
-	  *(.rdata); 
+	  *(.rdata);
 	  *(.strings)
-	  
+
 	  ${CONSTRUCTING+${TORS}}
-	} 
+	}
 
 .bss  ${RELOCATING+ . } :
 	{
@@ -46,20 +46,16 @@ SECTIONS
 	{
 	  ${RELOCATING+ _stack = . ; }
 	  *(.stack)
-	} 
+	}
 
-.stab  0 ${RELOCATING+(NOLOAD)} : 
+.stab  0 ${RELOCATING+(NOLOAD)} :
 	{
 	  [ .stab ]
 	}
-	
+
 .stabstr  0 ${RELOCATING+(NOLOAD)} :
 	{
 	  [ .stabstr ]
 	}
 }
 EOF
-
-
-
-
