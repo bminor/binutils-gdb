@@ -301,7 +301,7 @@ notstrs[] =
   { "subpb",	14,24,	0x2c4e,	"1B2B" },
   { "subpw",	14,24,	0x2d4e,	"1W2W" },
   { "subpd",	14,24,	0x2f4e,	"1D2D" },
-#ifndef NS32K_SVC_IMMED_OPERANDS
+#ifdef NS32K_SVC_IMMED_OPERANDS
   { "svc",	 8,8,	0xe2,	"2i1i" }, /* not really, but unix uses it */
 #else
   { "svc",	 8,8,	0xe2,	"" }, /* not really, but unix uses it */
