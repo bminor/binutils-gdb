@@ -1,3 +1,8 @@
+2003-08-07  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-interp.c (_initialize_mi_interp): Register "mi2" and "mi3".
+	Make "mi" select "mi2".
+
 2003-08-05  Andrew Cagney  <cagney@redhat.com>
 
 	* mi-cmd-env.c (env_execute_cli_command): Use an explicit "%s %s"

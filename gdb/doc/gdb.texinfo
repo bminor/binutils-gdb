@@ -1133,11 +1133,11 @@ communicate with @value{GDBN} using it as a back end.
 @xref{Interpreters, , Command Interpreters}.
 
 @samp{--interpreter=mi} (or @samp{--interpreter=mi2}) causes
-@value{GDBN} to use the current @dfn{@sc{gdb/mi} interface}
-(@pxref{GDB/MI, , The @sc{gdb/mi} Interface}).  The previous @sc{gdb/mi}
-interface, included in @value{GDBN} version 5.3, can be selected with
-@samp{--interpreter=mi1}.  Earlier @sc{gdb/mi} interfaces
-are not supported.
+@value{GDBN} to use the @dfn{@sc{gdb/mi} interface} (@pxref{GDB/MI, ,
+The @sc{gdb/mi} Interface}) included in @var{GDBN} version 6.0.  The
+previous @sc{gdb/mi} interface, included in @value{GDBN} version 5.3,
+can be selected with @samp{--interpreter=mi1}.  Earlier @sc{gdb/mi}
+interfaces are not supported.
 
 @item -write
 @cindex @code{--write}

@@ -407,8 +407,12 @@ _initialize_mi_interp (void)
     mi_interpreter_prompt_p	/* prompt_proc_p */
   };
 
-  /* Create MI1 interpreter */
+  /* The various interpreter levels.  */
   interp_add (interp_new (INTERP_MI1, NULL, mi_out_new (1), &procs));
+  interp_add (interp_new (INTERP_MI2, NULL, mi_out_new (2), &procs));
+  interp_add (interp_new (INTERP_MI3, NULL, mi_out_new (3), &procs));
 
-  interp_add (interp_new (INTERP_MI, NULL, mi_out_new (3), &procs));
+  /* "mi" selects the most recent released version.  "mi2" was
+     released as part of GDB 6.0.  */
+  interp_add (interp_new (INTERP_MI, NULL, mi_out_new (2), &procs));
 }
