@@ -84,7 +84,7 @@ native_only="autoconf cvs emacs emacs19 fileutils find gawk grep gzip hello inde
 
 # directories to be built in a cross environment only
 #
-cross_only="target-libiberty target-libgloss target-newlib"
+cross_only="target-libgloss target-newlib"
 
 ## All tools belong in one of the four categories, and are assigned above
 ## We assign ${configdirs} this way to remove all embedded newlines.  This
@@ -537,7 +537,7 @@ case "${target}" in
     noconfigdirs="$noconfigdirs ld gprof emacs target-libgloss"
     ;;
   mips*-*-irix6*)
-    # The GNU linker does not support shared libraries.
+    # The GNU assembler and linker do not support IRIX 6.
     # emacs is emacs 18, which does not work on Irix 5 (emacs19 does work)
     noconfigdirs="$noconfigdirs ld gas gprof emacs target-libgloss"
     ;;
@@ -844,6 +844,11 @@ targargs=`echo "${arguments}" | \
 # this option to be deprecated.  FIXME.
 if [ x${is_cross_compiler} = xyes ]; then
   targargs="--with-cross-host=${host_alias} ${targargs}"
+fi
+
+# Default to --enable-multilib.
+if [ x${enable_multilib} = x ]; then
+  targargs="--enable-multilib ${targargs}"
 fi
 
 targargs="--host=${target_alias} ${targargs}"

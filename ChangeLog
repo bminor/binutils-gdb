@@ -1,3 +1,16 @@
+Wed Apr 30 12:05:36 1997  Jason Merrill  <jason@yorick.cygnus.com>
+
+	* configure.in: Turn on multilib by default.
+	(cross_only): Remove target-libiberty.
+
+	* Makefile.in (all-gcc): Don't depend on libiberty.
+
+start-sanitize-ide
+Tue Apr 29 11:26:36 1997  Tom Tromey  <tromey@cygnus.com>
+
+	* configure.in (host_tools): Added vmake.
+
+end-sanitize-ide
 Mon Apr 28 18:39:45 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* config.guess: improve algorithm for recognizing Gnu Hurd x86.
