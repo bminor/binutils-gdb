@@ -367,7 +367,7 @@ extern int ada_prefer_type (struct type *, struct type *);
 
 extern struct type *ada_get_base_type (struct type *);
 
-extern struct type *ada_check_typedef (struct type *);
+extern struct type *ada_completed_type (struct type *);
 
 extern char *ada_encode (const char *);
 
@@ -375,7 +375,7 @@ extern const char *ada_enum_name (const char *);
 
 extern int ada_is_modular_type (struct type *);
 
-extern ULONGEST ada_modulus (struct type *);
+extern LONGEST ada_modulus (struct type *);
 
 extern struct value *ada_value_ind (struct value *);
 
@@ -412,6 +412,10 @@ extern int breakpoint_ada_task_match (CORE_ADDR, ptid_t);
 extern int ada_print_exception_breakpoint_nontask (struct breakpoint *);
 
 extern void ada_print_exception_breakpoint_task (struct breakpoint *);
+
+extern int ada_maybe_exception_partial_symbol (struct partial_symbol *sym);
+
+extern int ada_is_exception_sym (struct symbol *sym);
 
 extern void ada_find_printable_frame (struct frame_info *fi);
 

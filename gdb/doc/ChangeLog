@@ -1,39 +1,3 @@
-2004-10-12  Andrew Cagney  <cagney@gnu.org>
-
-	* gdbint.texinfo (Versions and Branches): New chapter.
-	(Releasing GDB): Delete "Versions and Branches" section.
-	(Top): Add "Versions and Branches".
-
-2004-10-08  Eli Zaretskii  <eliz@gnu.org>
-
-	* gdb.texinfo (Editing, History): Add cross-references to the
-	included Readline and History user documentation.  Remove
-	references to the symbol have-readline-appendices which is unused
-	and undefined.
-	(History): Fix indexing.
-
-2004-10-08  Jeff Johnston  <jjohnstn@redhat.com>
-
-	* gdbint.texinfo (target_stopped_data_address): Update to
-	new prototype.
-	(i386_stopped_data_address): Update prototype and description.
-	(i386_stopped_by_watchpoint): New function and description.
-
-2004-10-03  Paul N. Hilfinger  <hilfinger@gnat.com>
-
-	* gdb.texinfo (Filenames): Add Ada suffixes.
-	(Ada) New section.
-
-2004-09-27  Andrew Cagney  <cagney@gnu.org>
-	    Robert Picco  <Robert.Picco@hp.com>
-
-	* gdb.texinfo (Packets): Document the "p" packet.
-
-2004-09-21  Jason Molenda  (jmolenda@apple.com)
-
-	* gdb.texinfo (Paths and Names of the Source Files): Document the
-	meaning of values in the 'desc' field of a SO stab.
-
 2004-09-20  Daniel Jacobowitz  <dan@debian.org>
 
 	* gdb.texinfo (Maintenance Commands): Document "maint set dwarf2

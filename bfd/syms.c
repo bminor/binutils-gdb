@@ -355,7 +355,7 @@ bfd_is_local_label (bfd *abfd, asymbol *sym)
   /* The BSF_SECTION_SYM check is needed for IA-64, where every label that
      starts with '.' is local.  This would accidentally catch section names
      if we didn't reject them here.  */
-  if ((sym->flags & (BSF_GLOBAL | BSF_WEAK | BSF_FILE | BSF_SECTION_SYM)) != 0)
+  if ((sym->flags & (BSF_GLOBAL | BSF_WEAK | BSF_SECTION_SYM)) != 0)
     return FALSE;
   if (sym->name == NULL)
     return FALSE;
@@ -377,23 +377,6 @@ DESCRIPTION
 
 .#define bfd_is_local_label_name(abfd, name) \
 .  BFD_SEND (abfd, _bfd_is_local_label_name, (abfd, name))
-.
-*/
-
-/*
-FUNCTION
-	bfd_is_target_special_symbol
-
-SYNOPSIS
-        bfd_boolean bfd_is_target_special_symbol (bfd *abfd, asymbol *sym);
-
-DESCRIPTION
-	Return TRUE iff a symbol @var{sym} in the BFD @var{abfd} is something
-	special to the particular target represented by the BFD.  Such symbols
-	should normally not be mentioned to the user.
-
-.#define bfd_is_target_special_symbol(abfd, sym) \
-.  BFD_SEND (abfd, _bfd_is_target_special_symbol, (abfd, sym))
 .
 */
 
@@ -1033,10 +1016,6 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 	      asymbol *sym;
 
 	      r = *pr;
-	      /* Ignore R_*_NONE relocs.  */
-	      if (r->howto->dst_mask == 0)
-		continue;
-
 	      if (r->howto->rightshift != 0
 		  || r->howto->size != 2
 		  || r->howto->bitsize != 32

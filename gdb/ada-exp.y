@@ -852,7 +852,7 @@ write_object_renaming (struct block *orig_left_context,
 	  if (end == NULL)
 	    end = suffix + strlen (suffix);
 	  field_name.length = end - suffix;
-	  field_name.ptr = xmalloc (end - suffix + 1);
+	  field_name.ptr = (char *) malloc (end - suffix + 1);
 	  strncpy (field_name.ptr, suffix, end - suffix);
 	  field_name.ptr[end - suffix] = '\000';
 	  suffix = end;
@@ -952,13 +952,3 @@ _initialize_ada_exp (void)
 {
   obstack_init (&temp_parse_space);
 }
-
-/* FIXME: hilfingr/2004-10-05: Hack to remove warning.  The function
-   string_to_operator is supposed to be used for cases where one
-   calls an operator function with prefix notation, as in 
-   "+" (a, b), but at some point, this code seems to have gone
-   missing. */
-
-struct stoken (*dummy_string_to_ada_operator) (struct stoken) 
-     = string_to_operator;
-

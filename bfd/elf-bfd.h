@@ -286,10 +286,9 @@ struct cie
 
 struct eh_cie_fde
 {
-  /* For FDEs, this points to the CIE used.  */
-  struct eh_cie_fde *cie_inf;
-  unsigned int size;
   unsigned int offset;
+  unsigned int size;
+  asection *sec;
   unsigned int new_offset;
   unsigned char fde_encoding;
   unsigned char lsda_encoding;
@@ -298,8 +297,6 @@ struct eh_cie_fde
   unsigned int removed : 1;
   unsigned int make_relative : 1;
   unsigned int make_lsda_relative : 1;
-  unsigned int need_relative : 1;
-  unsigned int need_lsda_relative : 1;
   unsigned int per_encoding_relative : 1;
 };
 
@@ -320,15 +317,14 @@ struct eh_frame_hdr_info
 {
   struct cie last_cie;
   asection *last_cie_sec;
-  struct eh_cie_fde *last_cie_inf;
   asection *hdr_sec;
+  unsigned int last_cie_offset;
   unsigned int fde_count, array_count;
   struct eh_frame_array_ent *array;
   /* TRUE if .eh_frame_hdr should contain the sorted search table.
      We build it if we successfully read all .eh_frame input sections
      and recognize them.  */
   bfd_boolean table;
-  bfd_boolean offsets_adjusted;
 };
 
 /* ELF linker hash table.  */
@@ -1260,7 +1256,7 @@ struct elf_obj_tdata
   unsigned int cverrefs;
 
   /* Segment flags for the PT_GNU_STACK segment.  */
-  unsigned int stack_flags;
+  unsigned int stack_flags;  
 
   /* Should the PT_GNU_RELRO segment be emitted?  */
   bfd_boolean relro;
@@ -1532,7 +1528,7 @@ extern bfd_boolean _bfd_elf_discard_section_eh_frame
 extern bfd_boolean _bfd_elf_discard_section_eh_frame_hdr
   (bfd *, struct bfd_link_info *);
 extern bfd_vma _bfd_elf_eh_frame_section_offset
-  (bfd *, struct bfd_link_info *, asection *, bfd_vma);
+  (bfd *, asection *, bfd_vma);
 extern bfd_boolean _bfd_elf_write_section_eh_frame
   (bfd *, struct bfd_link_info *, asection *, bfd_byte *);
 extern bfd_boolean _bfd_elf_write_section_eh_frame_hdr

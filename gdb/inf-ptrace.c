@@ -32,7 +32,7 @@
 #include "gdbcmd.h"
 #include "gdb_string.h"
 
-#include "gdb_wait.h"
+#include <sys/wait.h>
 #include <signal.h>
 
 /* HACK: Save the ptrace ops returned by ptrace_target.  */
@@ -55,8 +55,8 @@ inf_ptrace_kill_inferior (void)
 
      The kill call causes problems under hpux10, so it's been removed;
      if this causes problems we'll deal with them as they arise.  */
-  ptrace (PT_KILL, pid, (PTRACE_TYPE_ARG3) 0, 0);
-  wait (&status);
+  call_ptrace (PT_KILL, pid, (PTRACE_TYPE_ARG3) 0, 0);
+  ptrace_wait (null_ptid, &status);
   target_mourn_inferior ();
 }
 
@@ -95,6 +95,145 @@ inf_ptrace_resume (ptid_t ptid, int step, enum target_signal signal)
     perror_with_name ("ptrace");
 }
 
+/* Set an upper limit on alloca.  */
+#define GDB_MAX_ALLOCA 0x1000
+
+/* NOTE! I tried using PTRACE_READDATA, etc., to read and write memory
+   in the NEW_SUN_PTRACE case.  It ought to be straightforward.  But
+   it appears that writing did not write the data that I specified.  I
+   cannot understand where it got the data that it actually did
+   write.  */
+
+/* Copy LEN bytes to or from inferior's memory starting at MEMADDR to
+   debugger memory starting at MYADDR.  Copy to inferior if WRITE is
+   nonzero.  TARGET is ignored.
+
+   Returns the length copied, which is either the LEN argument or
+   zero.  This xfer function does not do partial moves, since
+   ptrace_ops_hack doesn't allow memory operations to cross below us in the
+   target stack anyway.  */
+
+int
+inf_ptrace_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+			struct mem_attrib *attrib, struct target_ops *target)
+{
+  int i;
+  /* Round starting address down to longword boundary.  */
+  CORE_ADDR addr = memaddr & -(CORE_ADDR) sizeof (PTRACE_TYPE_RET);
+  /* Round ending address up; get number of longwords that makes.  */
+  int count = ((((memaddr + len) - addr) + sizeof (PTRACE_TYPE_RET) - 1)
+	       / sizeof (PTRACE_TYPE_RET));
+  int alloc = count * sizeof (PTRACE_TYPE_RET);
+  PTRACE_TYPE_RET *buffer;
+  struct cleanup *old_chain = NULL;
+
+#ifdef PT_IO
+  /* OpenBSD 3.1, NetBSD 1.6 and FreeBSD 5.0 have a new PT_IO request
+     that promises to be much more efficient in reading and writing
+     data in the traced process's address space.  */
+
+  {
+    struct ptrace_io_desc piod;
+
+    /* NOTE: We assume that there are no distinct address spaces for
+       instruction and data.  */
+    piod.piod_op = write ? PIOD_WRITE_D : PIOD_READ_D;
+    piod.piod_offs = (void *) memaddr;
+    piod.piod_addr = myaddr;
+    piod.piod_len = len;
+
+    if (ptrace (PT_IO, PIDGET (inferior_ptid), (caddr_t) & piod, 0) == -1)
+      {
+	/* If the PT_IO request is somehow not supported, fallback on
+	   using PT_WRITE_D/PT_READ_D.  Otherwise we will return zero
+	   to indicate failure.  */
+	if (errno != EINVAL)
+	  return 0;
+      }
+    else
+      {
+	/* Return the actual number of bytes read or written.  */
+	return piod.piod_len;
+      }
+  }
+#endif
+
+  /* Allocate buffer of that many longwords.  */
+  if (len < GDB_MAX_ALLOCA)
+    {
+      buffer = (PTRACE_TYPE_RET *) alloca (alloc);
+    }
+  else
+    {
+      buffer = (PTRACE_TYPE_RET *) xmalloc (alloc);
+      old_chain = make_cleanup (xfree, buffer);
+    }
+
+  if (write)
+    {
+      /* Fill start and end extra bytes of buffer with existing memory
+         data.  */
+      if (addr != memaddr || len < (int) sizeof (PTRACE_TYPE_RET))
+	{
+	  /* Need part of initial word -- fetch it.  */
+	  buffer[0] = ptrace (PT_READ_I, PIDGET (inferior_ptid),
+			      (PTRACE_TYPE_ARG3) addr, 0);
+	}
+
+      if (count > 1)		/* FIXME, avoid if even boundary.  */
+	{
+	  buffer[count - 1] =
+	    ptrace (PT_READ_I, PIDGET (inferior_ptid),
+		    ((PTRACE_TYPE_ARG3)
+		     (addr + (count - 1) * sizeof (PTRACE_TYPE_RET))), 0);
+	}
+
+      /* Copy data to be written over corresponding part of buffer.  */
+      memcpy ((char *) buffer + (memaddr & (sizeof (PTRACE_TYPE_RET) - 1)),
+	      myaddr, len);
+
+      /* Write the entire buffer.  */
+      for (i = 0; i < count; i++, addr += sizeof (PTRACE_TYPE_RET))
+	{
+	  errno = 0;
+	  ptrace (PT_WRITE_D, PIDGET (inferior_ptid),
+		  (PTRACE_TYPE_ARG3) addr, buffer[i]);
+	  if (errno)
+	    {
+	      /* Using the appropriate one (I or D) is necessary for
+	         Gould NP1, at least.  */
+	      errno = 0;
+	      ptrace (PT_WRITE_I, PIDGET (inferior_ptid),
+		      (PTRACE_TYPE_ARG3) addr, buffer[i]);
+	    }
+	  if (errno)
+	    return 0;
+	}
+    }
+  else
+    {
+      /* Read all the longwords.  */
+      for (i = 0; i < count; i++, addr += sizeof (PTRACE_TYPE_RET))
+	{
+	  errno = 0;
+	  buffer[i] = ptrace (PT_READ_I, PIDGET (inferior_ptid),
+			      (PTRACE_TYPE_ARG3) addr, 0);
+	  if (errno)
+	    return 0;
+	  QUIT;
+	}
+
+      /* Copy appropriate bytes out of the buffer.  */
+      memcpy (myaddr,
+	      (char *) buffer + (memaddr & (sizeof (PTRACE_TYPE_RET) - 1)),
+	      len);
+    }
+
+  if (old_chain != NULL)
+    do_cleanups (old_chain);
+  return len;
+}
+
 /* Wait for child to do something.  Return pid of child, or -1 in case
    of error; store status through argument pointer OURSTATUS.  */
 
@@ -116,7 +255,7 @@ inf_ptrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 				   attached process. */
       set_sigio_trap ();
 
-      pid = wait (&status);
+      pid = ptrace_wait (inferior_ptid, &status);
 
       save_errno = errno;
 
@@ -159,6 +298,14 @@ inf_ptrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
   return pid_to_ptid (pid);
 }
 
+void
+inf_ptrace_post_wait (ptid_t ptid, int wait_status)
+{
+  /* This version of Unix doesn't require a meaningful "post wait"
+     operation.
+   */
+}
+
 /* Check to see if the given thread is alive.
 
    FIXME: Is kill() ever the right way to do this?  I doubt it, but
@@ -188,7 +335,7 @@ inf_ptrace_attach (char *args, int from_tty)
   dummy = args;
   pid = strtol (args, &dummy, 0);
   /* Some targets don't set errno on errors, grrr! */
-  if (pid == 0 && args == dummy)
+  if ((pid == 0) && (args == dummy))
     error ("Illegal process-id: %s\n", args);
 
   if (pid == getpid ())		/* Trying to masturbate? */
@@ -208,15 +355,7 @@ inf_ptrace_attach (char *args, int from_tty)
       gdb_flush (gdb_stdout);
     }
 
-#ifdef PT_ATTACH
-  errno = 0;
-  ptrace (PT_ATTACH, pid, (PTRACE_TYPE_ARG3) 0, 0);
-  if (errno != 0)
-    perror_with_name ("ptrace");
-  attach_flag = 1;
-#else
-  error ("This system does not support attaching to a process");
-#endif
+  attach (pid);
 
   inferior_ptid = pid_to_ptid (pid);
   push_target (ptrace_ops_hack);
@@ -239,7 +378,7 @@ inf_ptrace_post_attach (int pid)
 static void
 inf_ptrace_detach (char *args, int from_tty)
 {
-  int sig = 0;
+  int siggnal = 0;
   int pid = PIDGET (inferior_ptid);
 
   if (from_tty)
@@ -252,17 +391,9 @@ inf_ptrace_detach (char *args, int from_tty)
       gdb_flush (gdb_stdout);
     }
   if (args)
-    sig = atoi (args);
+    siggnal = atoi (args);
 
-#ifdef PT_DETACH
-  errno = 0;
-  ptrace (PT_DETACH, pid, (PTRACE_TYPE_ARG3) 1, sig);
-  if (errno != 0)
-    perror_with_name ("ptrace");
-  attach_flag = 0;
-#else
-  error ("This system does not support detaching from a process");
-#endif
+  detach (siggnal);
 
   inferior_ptid = null_ptid;
   unpush_target (ptrace_ops_hack);
@@ -302,7 +433,7 @@ static void
 inf_ptrace_me (void)
 {
   /* "Trace me, Dr. Memory!" */
-  ptrace (0, 0, (PTRACE_TYPE_ARG3) 0, 0);
+  call_ptrace (0, 0, (PTRACE_TYPE_ARG3) 0, 0);
 }
 
 /* Stub function which causes the GDB that runs it, to start ptrace-ing
@@ -480,99 +611,13 @@ inf_ptrace_xfer_partial (struct target_ops *ops, enum target_object object,
   switch (object)
     {
     case TARGET_OBJECT_MEMORY:
-#ifdef PT_IO
-      /* OpenBSD 3.1, NetBSD 1.6 and FreeBSD 5.0 have a new PT_IO
-	 request that promises to be much more efficient in reading
-	 and writing data in the traced process's address space.  */
-      {
-	struct ptrace_io_desc piod;
-	
-	/* NOTE: We assume that there are no distinct address spaces
-	   for instruction and data.  */
-	piod.piod_op = writebuf ? PIOD_WRITE_D : PIOD_READ_D;
-	piod.piod_addr = writebuf ? (void *) writebuf : readbuf;
-	piod.piod_offs = (void *) (long) offset;
-	piod.piod_len = len;
-
-	errno = 0;
-	if (ptrace (PT_IO, PIDGET (inferior_ptid), (caddr_t) &piod, 0) == 0)
-	  /* Return the actual number of bytes read or written.  */
-	  return piod.piod_len;
-	/* If the PT_IO request is somehow not supported, fallback on
-	   using PT_WRITE_D/PT_READ_D.  Otherwise we will return zero
-	   to indicate failure.  */
-	if (errno != EINVAL)
-	  return 0;
-      }
-#endif
-      {
-	union
-	{
-	  PTRACE_TYPE_RET word;
-	  unsigned char byte[sizeof (PTRACE_TYPE_RET)];
-	} buffer;
-	ULONGEST rounded_offset;
-	LONGEST partial_len;
-	
-	/* Round the start offset down to the next long word
-	   boundary.  */
-	rounded_offset = offset & -(ULONGEST) sizeof (PTRACE_TYPE_RET);
-	
-	/* Since ptrace will transfer a single word starting at that
-	   rounded_offset the partial_len needs to be adjusted down to
-	   that (remember this function only does a single transfer).
-	   Should the required length be even less, adjust it down
-	   again.  */
-	partial_len = (rounded_offset + sizeof (PTRACE_TYPE_RET)) - offset;
-	if (partial_len > len)
-	  partial_len = len;
-	
-	if (writebuf)
-	  {
-	    /* If OFFSET:PARTIAL_LEN is smaller than
-	       ROUNDED_OFFSET:WORDSIZE then a read/modify write will
-	       be needed.  Read in the entire word.  */
-	    if (rounded_offset < offset
-		|| (offset + partial_len
-		    < rounded_offset + sizeof (PTRACE_TYPE_RET)))
-	      /* Need part of initial word -- fetch it.  */
-	      buffer.word = ptrace (PT_READ_I, PIDGET (inferior_ptid),
-				    (PTRACE_TYPE_ARG3) (long) rounded_offset,
-				    0);
-	    
-	    /* Copy data to be written over corresponding part of
-	       buffer.  */
-	    memcpy (buffer.byte + (offset - rounded_offset), writebuf, partial_len);
-	    
-	    errno = 0;
-	    ptrace (PT_WRITE_D, PIDGET (inferior_ptid),
-		    (PTRACE_TYPE_ARG3) (long) rounded_offset,
-		    buffer.word);
-	    if (errno)
-	      {
-		/* Using the appropriate one (I or D) is necessary for
-		   Gould NP1, at least.  */
-		errno = 0;
-		ptrace (PT_WRITE_I, PIDGET (inferior_ptid),
-			(PTRACE_TYPE_ARG3) (long) rounded_offset,
-			buffer.word);
-		if (errno)
-		  return 0;
-	      }
-	  }
-	if (readbuf)
-	  {
-	    errno = 0;
-	    buffer.word = ptrace (PT_READ_I, PIDGET (inferior_ptid),
-				  (PTRACE_TYPE_ARG3) (long) rounded_offset, 0);
-	    if (errno)
-	      return 0;
-	    /* Copy appropriate bytes out of the buffer.  */
-	    memcpy (readbuf, buffer.byte + (offset - rounded_offset),
-		    partial_len);
-	  }
-	return partial_len;
-      }
+      if (readbuf)
+	return inf_ptrace_xfer_memory (offset, readbuf, len, 0 /*write */ ,
+				       NULL, ops);
+      if (writebuf)
+	return inf_ptrace_xfer_memory (offset, readbuf, len, 1 /*write */ ,
+				       NULL, ops);
+      return -1;
 
     case TARGET_OBJECT_UNWIND_TABLE:
       return -1;
@@ -604,7 +649,9 @@ inf_ptrace_target (void)
   t->to_detach = inf_ptrace_detach;
   t->to_resume = inf_ptrace_resume;
   t->to_wait = inf_ptrace_wait;
+  t->to_post_wait = inf_ptrace_post_wait;
   t->to_prepare_to_store = inf_ptrace_prepare_to_store;
+  t->to_xfer_memory = inf_ptrace_xfer_memory;
   t->to_xfer_partial = inf_ptrace_xfer_partial;
   t->to_files_info = inf_ptrace_files_info;
   t->to_kill = inf_ptrace_kill_inferior;

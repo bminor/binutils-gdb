@@ -1450,23 +1450,16 @@ m32r_remove_watchpoint (CORE_ADDR addr, int len, int type)
   return 0;
 }
 
-int
-m32r_stopped_data_address (struct target_ops *target, CORE_ADDR *addr_p)
+CORE_ADDR
+m32r_stopped_data_address (void)
 {
-  int rc = 0;
-  if (hit_watchpoint_addr != 0x00000000)
-    {
-      *addr_p = hit_watchpoint_addr;
-      rc = 1;
-    }
-  return rc;
+  return hit_watchpoint_addr;
 }
 
 int
 m32r_stopped_by_watchpoint (void)
 {
-  CORE_ADDR addr;
-  return m32r_stopped_data_address (&current_target, &addr);
+  return (hit_watchpoint_addr != 0x00000000);
 }
 
 
@@ -1575,7 +1568,7 @@ init_m32r_ops (void)
   m32r_ops.to_fetch_registers = m32r_fetch_register;
   m32r_ops.to_store_registers = m32r_store_register;
   m32r_ops.to_prepare_to_store = m32r_prepare_to_store;
-  m32r_ops.deprecated_xfer_memory = m32r_xfer_memory;
+  m32r_ops.to_xfer_memory = m32r_xfer_memory;
   m32r_ops.to_files_info = m32r_files_info;
   m32r_ops.to_insert_breakpoint = m32r_insert_breakpoint;
   m32r_ops.to_remove_breakpoint = m32r_remove_breakpoint;

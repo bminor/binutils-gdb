@@ -22,14 +22,12 @@
 #include "defs.h"
 #include "inferior.h"
 #include "regcache.h"
-#include "target.h"
 
 #include <sys/types.h>
 #include <sys/ptrace.h>
 #include <machine/reg.h>
 
 #include "vax-tdep.h"
-#include "inf-ptrace.h"
 
 /* Supply the general-purpose registers stored in GREGS to REGCACHE.  */
 
@@ -64,8 +62,8 @@ vaxbsd_collect_gregset (const struct regcache *regcache,
 /* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
    for all registers.  */
 
-static void
-vaxbsd_fetch_inferior_registers (int regnum)
+void
+fetch_inferior_registers (int regnum)
 {
   struct reg regs;
 
@@ -79,8 +77,8 @@ vaxbsd_fetch_inferior_registers (int regnum)
 /* Store register REGNUM back into the inferior.  If REGNUM is -1, do
    this for all registers.  */
 
-static void
-vaxbsd_store_inferior_registers (int regnum)
+void
+store_inferior_registers (int regnum)
 {
   struct reg regs;
 
@@ -135,13 +133,6 @@ void _initialize_vaxbsd_nat (void);
 void
 _initialize_vaxbsd_nat (void)
 {
-  struct target_ops *t;
-
-  t = inf_ptrace_target ();
-  t->to_fetch_registers = vaxbsd_fetch_inferior_registers;
-  t->to_store_registers = vaxbsd_store_inferior_registers;
-  add_target (t);
-
   /* Support debugging kernel virtual memory images.  */
   bsd_kvm_add_target (vaxbsd_supply_pcb);
 }

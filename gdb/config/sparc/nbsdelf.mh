@@ -1,6 +1,6 @@
 # Host: NetBSD/sparc ELF
-NATDEPFILES= fork-child.o inf-ptrace.o \
-	sparc-nat.o sparcnbsd-nat.o bsd-kvm.o
+NATDEPFILES= sparc-nat.o sparcnbsd-nat.o bsd-kvm.o \
+	fork-child.o infptrace.o inftarg.o
 NAT_FILE= nm-nbsd.h
 
 LOADLIBES= -lkvm

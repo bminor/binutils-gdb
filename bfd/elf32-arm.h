@@ -25,9 +25,9 @@
 typedef unsigned long int insn32;
 typedef unsigned short int insn16;
 
-/* In lieu of proper flags, assume all EABIv4 objects are interworkable.  */
+/* In leiu of proper flags, assume all EABIv3 objects are interworkable.  */
 #define INTERWORK_FLAG(abfd)  \
-  (EF_ARM_EABI_VERSION (elf_elfheader (abfd)->e_flags) == EF_ARM_EABI_VER4 \
+  (EF_ARM_EABI_VERSION (elf_elfheader (abfd)->e_flags) == EF_ARM_EABI_VER3 \
   || (elf_elfheader (abfd)->e_flags & EF_ARM_INTERWORK))
 
 /* The linker script knows the section names for placement.
@@ -925,8 +925,6 @@ bfd_elf32_arm_set_target_relocs (struct bfd_link_info *link_info,
   globals->target1_is_rel = target1_is_rel;
   if (strcmp (target2_type, "rel") == 0)
     globals->target2_reloc = R_ARM_REL32;
-  else if (strcmp (target2_type, "abs") == 0)
-    globals->target2_reloc = R_ARM_ABS32;
   else if (strcmp (target2_type, "got-rel") == 0)
     globals->target2_reloc = R_ARM_GOT_PREL;
   else
@@ -2328,7 +2326,6 @@ elf32_arm_object_p (bfd *abfd)
 }
 
 /* Function to keep ARM specific flags in the ELF header.  */
-
 static bfd_boolean
 elf32_arm_set_private_flags (bfd *abfd, flagword flags)
 {
@@ -2504,7 +2501,7 @@ elf32_arm_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
   if (EF_ARM_EABI_VERSION (in_flags) != EF_ARM_EABI_VERSION (out_flags))
     {
       _bfd_error_handler
-	(_("ERROR: Source object %B has EABI version %d, but target %B has EABI version %d"),
+	(_("ERROR: %B is compiled for EABI version %d, whereas %B is compiled for version %d"),
 	 ibfd, obfd,
 	 (in_flags & EF_ARM_EABIMASK) >> 24,
 	 (out_flags & EF_ARM_EABIMASK) >> 24);
@@ -2705,10 +2702,6 @@ elf32_arm_print_private_bfd_data (bfd *abfd, void * ptr)
 
     case EF_ARM_EABI_VER3:
       fprintf (file, _(" [Version3 EABI]"));
-      break;
-
-    case EF_ARM_EABI_VER4:
-      fprintf (file, _(" [Version4 EABI]"));
 
       if (flags & EF_ARM_BE8)
 	fprintf (file, _(" [BE8]"));
@@ -3168,14 +3161,6 @@ is_arm_mapping_symbol_name (const char * name)
     && (name[2] == 0);
 }
 
-/* Treat mapping symbols as special target symbols.  */
-
-static bfd_boolean
-elf32_arm_is_target_special_symbol (bfd * abfd ATTRIBUTE_UNUSED, asymbol * sym)
-{
-  return is_arm_mapping_symbol_name (sym->name);
-}
-
 /* This is a copy of elf_find_function() from elf.c except that
    ARM mapping symbols are ignored when looking for function names
    and STT_ARM_TFUNC is considered to a function type.  */
@@ -3199,6 +3184,9 @@ arm_elf_find_function (bfd *         abfd ATTRIBUTE_UNUSED,
 
       q = (elf_symbol_type *) *p;
 
+      if (bfd_get_section (&q->symbol) != section)
+	continue;
+
       switch (ELF_ST_TYPE (q->internal_elf_sym.st_info))
 	{
 	default:
@@ -3214,7 +3202,7 @@ arm_elf_find_function (bfd *         abfd ATTRIBUTE_UNUSED,
 	    continue;
 	  /* Fall through.  */
 	case STT_NOTYPE:
-	  if (bfd_get_section (&q->symbol) == section
+	  if (q->symbol.section == section
 	      && q->symbol.value >= low_func
 	      && q->symbol.value <= offset)
 	    {
@@ -3853,8 +3841,7 @@ elf32_arm_finish_dynamic_symbol (bfd * output_bfd, struct bfd_link_info * info,
 			splt->contents + h->plt.offset + 4 * i);
 	  
 	  /* Fill in the entry in the .rel.plt section.  */
-	  rel.r_offset = (splt->output_section->vma
-			  + splt->output_offset
+	  rel.r_offset = (splt->output_offset
 			  + h->plt.offset + 4 * (i - 1));
 	  rel.r_info = ELF32_R_INFO (h->dynindx, R_ARM_GLOB_DAT);
 	}
@@ -4047,16 +4034,7 @@ elf32_arm_finish_dynamic_sections (bfd * output_bfd, struct bfd_link_info * info
 	    case DT_SYMTAB:
 	      name = ".dynsym";
 	      goto get_vma_if_bpabi;
-	    case DT_VERSYM:
-	      name = ".gnu.version";
-	      goto get_vma_if_bpabi;
-	    case DT_VERDEF:
-	      name = ".gnu.version_d";
-	      goto get_vma_if_bpabi;
-	    case DT_VERNEED:
-	      name = ".gnu.version_r";
-	      goto get_vma_if_bpabi;
-
+	      
 	    case DT_PLTGOT:
 	      name = ".got";
 	      goto get_vma;
@@ -4255,6 +4233,9 @@ elf32_arm_reloc_type_class (const Elf_Internal_Rela *rela)
     }
 }
 
+static bfd_boolean elf32_arm_section_flags           (flagword *, const Elf_Internal_Shdr *);
+static void        elf32_arm_final_write_processing  (bfd *, bfd_boolean);
+
 /* Set the right machine number for an Arm ELF file.  */
 
 static bfd_boolean
@@ -4272,65 +4253,6 @@ elf32_arm_final_write_processing (bfd *abfd, bfd_boolean linker ATTRIBUTE_UNUSED
   bfd_arm_update_notes (abfd, ARM_NOTE_SECTION);
 }
 
-/* Return TRUE if this is an unwinding table entry.  */
-
-static bfd_boolean
-is_arm_elf_unwind_section_name (bfd * abfd ATTRIBUTE_UNUSED, const char * name)
-{
-  size_t len1, len2;
-
-  len1 = sizeof (ELF_STRING_ARM_unwind) - 1;
-  len2 = sizeof (ELF_STRING_ARM_unwind_once) - 1;
-  return (strncmp (name, ELF_STRING_ARM_unwind, len1) == 0
-	  || strncmp (name, ELF_STRING_ARM_unwind_once, len2) == 0);
-}
-
-
-/* Set the type and flags for an ARM section.  We do this by
-   the section name, which is a hack, but ought to work.  */
-
-static bfd_boolean
-elf32_arm_fake_sections (bfd * abfd, Elf_Internal_Shdr * hdr, asection * sec)
-{
-  const char * name;
-
-  name = bfd_get_section_name (abfd, sec);
-
-  if (is_arm_elf_unwind_section_name (abfd, name))
-    {
-      hdr->sh_type = SHT_ARM_EXIDX;
-      hdr->sh_flags |= SHF_LINK_ORDER;
-    }
-  return TRUE;
-}
-
-/* Handle an ARM specific section when reading an object file.
-   This is called when elf.c finds a section with an unknown type.  */
-
-static bfd_boolean
-elf32_arm_section_from_shdr (bfd *abfd,
-			     Elf_Internal_Shdr * hdr,
-			     const char *name)
-{
-  /* There ought to be a place to keep ELF backend specific flags, but
-     at the moment there isn't one.  We just keep track of the
-     sections by their name, instead.  Fortunately, the ABI gives
-     names for all the ARM specific sections, so we will probably get
-     away with this.  */
-  switch (hdr->sh_type)
-    {
-    case SHT_ARM_EXIDX:
-      break;
-
-    default:
-      return FALSE;
-    }
-
-  if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name))
-    return FALSE;
-
-  return TRUE;
-}
 
 /* Called for each symbol.  Builds a section map based on mapping symbols.
    Does not alter any of the symbols.  */
@@ -4485,7 +4407,6 @@ elf32_arm_write_section (bfd *output_bfd ATTRIBUTE_UNUSED, asection *sec,
 #define bfd_elf32_bfd_reloc_type_lookup		elf32_arm_reloc_type_lookup
 #define bfd_elf32_find_nearest_line	        elf32_arm_find_nearest_line
 #define bfd_elf32_new_section_hook		elf32_arm_new_section_hook
-#define bfd_elf32_bfd_is_target_special_symbol	elf32_arm_is_target_special_symbol
 
 #define elf_backend_get_symbol_type             elf32_arm_get_symbol_type
 #define elf_backend_gc_mark_hook                elf32_arm_gc_mark_hook
@@ -4503,8 +4424,6 @@ elf32_arm_write_section (bfd *output_bfd ATTRIBUTE_UNUSED, asection *sec,
 #define elf_backend_reloc_type_class		elf32_arm_reloc_type_class
 #define elf_backend_object_p			elf32_arm_object_p
 #define elf_backend_section_flags		elf32_arm_section_flags
-#define elf_backend_fake_sections  		elf32_arm_fake_sections
-#define elf_backend_section_from_shdr  		elf32_arm_section_from_shdr
 #define elf_backend_final_write_processing      elf32_arm_final_write_processing
 #define elf_backend_copy_indirect_symbol        elf32_arm_copy_indirect_symbol
 

@@ -1739,7 +1739,6 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
     case SHT_INIT_ARRAY:	/* .init_array section.  */
     case SHT_FINI_ARRAY:	/* .fini_array section.  */
     case SHT_PREINIT_ARRAY:	/* .preinit_array section.  */
-    case SHT_GNU_LIBLIST:	/* .gnu.liblist section.  */
       return _bfd_elf_make_section_from_shdr (abfd, hdr, name);
 
     case SHT_DYNAMIC:	/* Dynamic linking information.  */
@@ -2133,8 +2132,6 @@ static struct bfd_elf_special_section const special_sections[] =
   { ".rela",           5, -1, SHT_RELA,     0 },
   { ".rel",            4, -1, SHT_REL,      0 },
   { ".stabstr",        5,  3, SHT_STRTAB,   0 },
-  { ".gnu.liblist",   12,  0, SHT_GNU_LIBLIST, SHF_ALLOC },
-  { ".gnu.conflict",  13,  0, SHT_RELA,     SHF_ALLOC },
   { NULL,              0,  0, 0,            0 }
 };
 
@@ -2968,17 +2965,6 @@ assign_section_numbers (bfd *abfd)
 	     used for the dynamic entries, or the symbol table, or the
 	     version strings.  */
 	  s = bfd_get_section_by_name (abfd, ".dynstr");
-	  if (s != NULL)
-	    d->this_hdr.sh_link = elf_section_data (s)->this_idx;
-	  break;
-
-	case SHT_GNU_LIBLIST:
-	  /* sh_link is the section header index of the prelink library
-	     list 
-	     used for the dynamic entries, or the symbol table, or the
-	     version strings.  */
-	  s = bfd_get_section_by_name (abfd, (sec->flags & SEC_ALLOC)
-					     ? ".dynstr" : ".gnu.libstr");
 	  if (s != NULL)
 	    d->this_hdr.sh_link = elf_section_data (s)->this_idx;
 	  break;
@@ -3880,8 +3866,8 @@ assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
   if (alloc != 0 && count > alloc)
     {
       ((*_bfd_error_handler)
-       (_("%B: Not enough room for program headers (allocated %u, need %u)"),
-	abfd, alloc, count));
+       (_("%s: Not enough room for program headers (allocated %u, need %u)"),
+	bfd_get_filename (abfd), alloc, count));
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
     }
@@ -3920,63 +3906,32 @@ assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
 	qsort (m->sections, (size_t) m->count, sizeof (asection *),
 	       elf_sort_sections);
 
-      /* An ELF segment (described by Elf_Internal_Phdr) may contain a
-	 number of sections with contents contributing to both p_filesz
-	 and p_memsz, followed by a number of sections with no contents
-	 that just contribute to p_memsz.  In this loop, OFF tracks next
-	 available file offset for PT_LOAD and PT_NOTE segments.  VOFF is
-	 an adjustment we use for segments that have no file contents
-	 but need zero filled memory allocation.  */
-      voff = 0;
       p->p_type = m->p_type;
       p->p_flags = m->p_flags;
 
       if (p->p_type == PT_LOAD
-	  && m->count > 0)
+	  && m->count > 0
+	  && (m->sections[0]->flags & SEC_ALLOC) != 0)
 	{
-	  bfd_size_type align;
-	  bfd_vma adjust;
-
 	  if ((abfd->flags & D_PAGED) != 0)
-	    align = bed->maxpagesize;
+	    off += vma_page_aligned_bias (m->sections[0]->vma, off,
+					  bed->maxpagesize);
 	  else
 	    {
-	      unsigned int align_power = 0;
+	      bfd_size_type align;
+
+	      align = 0;
 	      for (i = 0, secpp = m->sections; i < m->count; i++, secpp++)
 		{
-		  unsigned int secalign;
+		  bfd_size_type secalign;
 
 		  secalign = bfd_get_section_alignment (abfd, *secpp);
-		  if (secalign > align_power)
-		    align_power = secalign;
+		  if (secalign > align)
+		    align = secalign;
 		}
-	      align = (bfd_size_type) 1 << align_power;
-	    }
 
-	  adjust = vma_page_aligned_bias (m->sections[0]->vma, off, align);
-	  off += adjust;
-	  if (adjust != 0
-	      && !m->includes_filehdr
-	      && !m->includes_phdrs
-	      && (ufile_ptr) off >= align)
-	    {
-	      /* If the first section isn't loadable, the same holds for
-		 any other sections.  Since the segment won't need file
-		 space, we can make p_offset overlap some prior segment.
-		 However, .tbss is special.  If a segment starts with
-		 .tbss, we need to look at the next section to decide
-		 whether the segment has any loadable sections.  */
-	      i = 0;
-	      while ((m->sections[i]->flags & SEC_LOAD) == 0)
-		{
-		  if ((m->sections[i]->flags & SEC_THREAD_LOCAL) == 0
-		      || ++i >= m->count)
-		    {
-		      off -= adjust;
-		      voff = adjust - align;
-		      break;
-		    }
-		}
+	      off += vma_page_aligned_bias (m->sections[0]->vma, off,
+					    1 << align);
 	    }
 	}
       /* Make sure the .dynamic section is the first section in the
@@ -3986,8 +3941,8 @@ assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
 	       && strcmp (m->sections[0]->name, ".dynamic") != 0)
 	{
 	  _bfd_error_handler
-	    (_("%B: The first section in the PT_DYNAMIC segment is not the .dynamic section"),
-	     abfd);
+	    (_("%s: The first section in the PT_DYNAMIC segment is not the .dynamic section"),
+	     bfd_get_filename (abfd));
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
@@ -4030,8 +3985,8 @@ assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
 	      if (p->p_vaddr < (bfd_vma) off)
 		{
 		  (*_bfd_error_handler)
-		    (_("%B: Not enough room for program headers, try linking with -N"),
-		     abfd);
+		    (_("%s: Not enough room for program headers, try linking with -N"),
+		     bfd_get_filename (abfd));
 		  bfd_set_error (bfd_error_bad_value);
 		  return FALSE;
 		}
@@ -4089,7 +4044,7 @@ assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
 	  || (p->p_type == PT_NOTE && bfd_get_format (abfd) == bfd_core))
 	{
 	  if (! m->includes_filehdr && ! m->includes_phdrs)
-	    p->p_offset = off + voff;
+	    p->p_offset = off;
 	  else
 	    {
 	      file_ptr adjust;
@@ -4099,6 +4054,8 @@ assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
 	      p->p_memsz += adjust;
 	    }
 	}
+
+      voff = off;
 
       for (i = 0, secpp = m->sections; i < m->count; i++, secpp++)
 	{
@@ -4110,97 +4067,117 @@ assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
 	  flags = sec->flags;
 	  align = 1 << bfd_get_section_alignment (abfd, sec);
 
-	  if (p->p_type == PT_LOAD
-	      || p->p_type == PT_TLS)
+	  /* The section may have artificial alignment forced by a
+	     link script.  Notice this case by the gap between the
+	     cumulative phdr lma and the section's lma.  */
+	  if (p->p_paddr + p->p_memsz < sec->lma)
+	    {
+	      bfd_vma adjust = sec->lma - (p->p_paddr + p->p_memsz);
+
+	      p->p_memsz += adjust;
+	      if (p->p_type == PT_LOAD
+		  || (p->p_type == PT_NOTE
+		      && bfd_get_format (abfd) == bfd_core))
+		{
+		  off += adjust;
+		  voff += adjust;
+		}
+	      if ((flags & SEC_LOAD) != 0
+		  || (flags & SEC_THREAD_LOCAL) != 0)
+		p->p_filesz += adjust;
+	    }
+
+	  if (p->p_type == PT_LOAD)
 	    {
 	      bfd_signed_vma adjust;
 
 	      if ((flags & SEC_LOAD) != 0)
 		{
-		  adjust = sec->lma - (p->p_paddr + p->p_filesz);
+		  adjust = sec->lma - (p->p_paddr + p->p_memsz);
 		  if (adjust < 0)
-		    {
-		      (*_bfd_error_handler)
-			(_("%B: section %A lma 0x%lx overlaps previous sections"),
-			 abfd, sec, (unsigned long) sec->lma);
-		      adjust = 0;
-		    }
-		  off += adjust;
-		  p->p_filesz += adjust;
-		  p->p_memsz += adjust;
+		    adjust = 0;
 		}
-	      /* .tbss is special.  It doesn't contribute to p_memsz of
-		 normal segments.  */
-	      else if ((flags & SEC_THREAD_LOCAL) == 0
-		       || p->p_type == PT_TLS)
+	      else if ((flags & SEC_ALLOC) != 0)
 		{
 		  /* The section VMA must equal the file position
-		     modulo the page size.  */
-		  bfd_size_type page = align;
+		     modulo the page size.  FIXME: I'm not sure if
+		     this adjustment is really necessary.  We used to
+		     not have the SEC_LOAD case just above, and then
+		     this was necessary, but now I'm not sure.  */
 		  if ((abfd->flags & D_PAGED) != 0)
-		    page = bed->maxpagesize;
-		  adjust = vma_page_aligned_bias (sec->vma,
-						  p->p_vaddr + p->p_memsz,
-						  page);
-		  p->p_memsz += adjust;
+		    adjust = vma_page_aligned_bias (sec->vma, voff,
+						    bed->maxpagesize);
+		  else
+		    adjust = vma_page_aligned_bias (sec->vma, voff,
+						    align);
 		}
+	      else
+		adjust = 0;
+
+	      if (adjust != 0)
+		{
+		  if (i == 0)
+		    {
+		      (* _bfd_error_handler) (_("\
+Error: First section in segment (%s) starts at 0x%x whereas the segment starts at 0x%x"),
+					      bfd_section_name (abfd, sec),
+					      sec->lma,
+					      p->p_paddr);
+		      return FALSE;
+		    }
+		  p->p_memsz += adjust;
+		  off += adjust;
+		  voff += adjust;
+		  if ((flags & SEC_LOAD) != 0)
+		    p->p_filesz += adjust;
+		}
+
+	      sec->filepos = off;
+
+	      /* We check SEC_HAS_CONTENTS here because if NOLOAD is
+                 used in a linker script we may have a section with
+                 SEC_LOAD clear but which is supposed to have
+                 contents.  */
+	      if ((flags & SEC_LOAD) != 0
+		  || (flags & SEC_HAS_CONTENTS) != 0)
+		off += sec->size;
+
+	      if ((flags & SEC_ALLOC) != 0
+		  && ((flags & SEC_LOAD) != 0
+		      || (flags & SEC_THREAD_LOCAL) == 0))
+		voff += sec->size;
 	    }
 
 	  if (p->p_type == PT_NOTE && bfd_get_format (abfd) == bfd_core)
 	    {
-	      /* The section at i == 0 is the one that actually contains
-		 everything.  */
+	      /* The actual "note" segment has i == 0.
+		 This is the one that actually contains everything.  */
 	      if (i == 0)
 		{
 		  sec->filepos = off;
-		  off += sec->size;
 		  p->p_filesz = sec->size;
-		  p->p_memsz = 0;
-		  p->p_align = 1;
+		  off += sec->size;
+		  voff = off;
 		}
 	      else
 		{
-		  /* The rest are fake sections that shouldn't be written.  */
+		  /* Fake sections -- don't need to be written.  */
 		  sec->filepos = 0;
 		  sec->size = 0;
-		  sec->flags = 0;
-		  continue;
+		  flags = sec->flags = 0;
 		}
+	      p->p_memsz = 0;
+	      p->p_align = 1;
 	    }
 	  else
 	    {
-	      if (p->p_type == PT_LOAD)
-		{
-		  sec->filepos = off;
-		  /* FIXME: The SEC_HAS_CONTENTS test here dates back to
-		     1997, and the exact reason for it isn't clear.  One
-		     plausible explanation is that it is to work around
-		     a problem we have with linker scripts using data
-		     statements in NOLOAD sections.  I don't think it
-		     makes a great deal of sense to have such a section
-		     assigned to a PT_LOAD segment, but apparently
-		     people do this.  The data statement results in a
-		     bfd_data_link_order being built, and these need
-		     section contents to write into.  Eventually, we get
-		     to _bfd_elf_write_object_contents which writes any
-		     section with contents to the output.  Make room
-		     here for the write, so that following segments are
-		     not trashed.  */
-		  if ((flags & SEC_LOAD) != 0
-		      || (flags & SEC_HAS_CONTENTS) != 0)
-		    off += sec->size;
-		}
+	      if ((sec->flags & SEC_LOAD) != 0
+		  || (sec->flags & SEC_THREAD_LOCAL) == 0
+		  || p->p_type == PT_TLS)
+	      p->p_memsz += sec->size;
 
 	      if ((flags & SEC_LOAD) != 0)
-		{
-		  p->p_filesz += sec->size;
-		  p->p_memsz += sec->size;
-		}
-	      /* .tbss is special.  It doesn't contribute to p_memsz of
-		 normal segments.  */
-	      else if ((flags & SEC_THREAD_LOCAL) == 0
-		       || p->p_type == PT_TLS)
-		p->p_memsz += sec->size;
+		p->p_filesz += sec->size;
 
 	      if (p->p_type == PT_TLS
 		  && sec->size == 0
@@ -4516,8 +4493,8 @@ assign_file_positions_except_relocs (bfd *abfd,
 	  else if ((hdr->sh_flags & SHF_ALLOC) != 0)
 	    {
 	      ((*_bfd_error_handler)
-	       (_("%B: warning: allocated section `%s' not in segment"),
-		abfd,
+	       (_("%s: warning: allocated section `%s' not in segment"),
+		bfd_get_filename (abfd),
 		(hdr->bfd_section == NULL
 		 ? "*unknown*"
 		 : hdr->bfd_section->name)));
@@ -6318,6 +6295,9 @@ elf_find_function (bfd *abfd ATTRIBUTE_UNUSED,
 
       q = (elf_symbol_type *) *p;
 
+      if (bfd_get_section (&q->symbol) != section)
+	continue;
+
       switch (ELF_ST_TYPE (q->internal_elf_sym.st_info))
 	{
 	default:
@@ -6327,7 +6307,7 @@ elf_find_function (bfd *abfd ATTRIBUTE_UNUSED,
 	  break;
 	case STT_NOTYPE:
 	case STT_FUNC:
-	  if (bfd_get_section (&q->symbol) == section
+	  if (q->symbol.section == section
 	      && q->symbol.value >= low_func
 	      && q->symbol.value <= offset)
 	    {
@@ -7746,7 +7726,7 @@ _bfd_elf_rel_local_sym (bfd *abfd,
 
 bfd_vma
 _bfd_elf_section_offset (bfd *abfd,
-			 struct bfd_link_info *info,
+			 struct bfd_link_info *info ATTRIBUTE_UNUSED,
 			 asection *sec,
 			 bfd_vma offset)
 {
@@ -7756,7 +7736,7 @@ _bfd_elf_section_offset (bfd *abfd,
       return _bfd_stab_section_offset (sec, elf_section_data (sec)->sec_info,
 				       offset);
     case ELF_INFO_TYPE_EH_FRAME:
-      return _bfd_elf_eh_frame_section_offset (abfd, info, sec, offset);
+      return _bfd_elf_eh_frame_section_offset (abfd, sec, offset);
     default:
       return offset;
     }

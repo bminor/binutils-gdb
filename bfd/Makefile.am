@@ -1557,7 +1557,7 @@ xcofflink.lo: xcofflink.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/xcoff.h libcoff.h \
   libxcoff.h
 xsym.lo: xsym.c xsym.h $(INCDIR)/filenames.h
-xtensa-isa.lo: xtensa-isa.c $(INCDIR)/filenames.h $(INCDIR)/xtensa-isa.h \
+xtensa-isa.lo: xtensa-isa.c $(INCDIR)/xtensa-isa.h \
   $(INCDIR)/xtensa-isa-internal.h
 xtensa-modules.lo: xtensa-modules.c $(INCDIR)/xtensa-isa.h \
   $(INCDIR)/xtensa-isa-internal.h

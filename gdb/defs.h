@@ -197,7 +197,6 @@ enum language
     language_asm,		/* Assembly language */
     language_scm,    		/* Scheme / Guile */
     language_pascal,		/* Pascal */
-    language_ada,		/* Ada */
     language_minimal,		/* All other languages, minimal support only */
     nr_languages
   };
@@ -804,16 +803,11 @@ typedef struct ptid ptid_t;
 #include "tm.h"
 #endif
 
-/* Assume that fopen accepts the letter "b" in the mode string.
-   Support for is demanded by ISO C90, and should be supported on all
-   platforms that claim to have a standards conforming C library.  On
-   true POSIX systems it will be ignored and have no effect.  There
-   may still be systems without a standards conforming C library where
-   an ISO C90 compiler (GCC) is available.  Known examples are SunOS
-   4.x and 4.3BSD.  This assumption means these systems are no longer
-   supported.  */
+/* If the xm.h file did not define the mode string used to open the
+   files, assume that binary files are opened the same way as text
+   files */
 #ifndef FOPEN_RB
-# include "fopen-bin.h"
+#include "fopen-same.h"
 #endif
 
 /* Defaults for system-wide constants (if not defined by xm.h, we fake it).
@@ -857,6 +851,10 @@ extern int longest_to_int (LONGEST);
    defined.  */
 
 extern char *savestring (const char *, size_t);
+
+extern char *msavestring (void *, const char *, size_t);
+
+extern char *mstrsave (void *, const char *);
 
 /* xmalloc(), xrealloc() and xcalloc() have already been declared in
    "libiberty.h". */

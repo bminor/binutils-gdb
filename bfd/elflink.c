@@ -2,21 +2,21 @@
    Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
-   This file is part of BFD, the Binary File Descriptor library.
+This file is part of BFD, the Binary File Descriptor library.
 
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or
-   (at your option) any later version.
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -629,7 +629,8 @@ _bfd_elf_link_omit_section_dynsym (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  bfd *dynobj = elf_hash_table (info)->dynobj;
 
 	  if (dynobj != NULL
-	      && (ip = bfd_get_section_by_name (dynobj, p->name)) != NULL
+	      && (ip = bfd_get_section_by_name (dynobj, p->name))
+	      != NULL
 	      && (ip->flags & SEC_LINKER_CREATED)
 	      && ip->output_section == p)
 	    return TRUE;
@@ -708,7 +709,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
 		       bfd_boolean *type_change_ok,
 		       bfd_boolean *size_change_ok)
 {
-  asection *sec, *oldsec;
+  asection *sec;
   struct elf_link_hash_entry *h;
   struct elf_link_hash_entry *flip;
   int bind;
@@ -752,31 +753,26 @@ _bfd_elf_merge_symbol (bfd *abfd,
       return TRUE;
     }
 
-  /* OLDBFD and OLDSEC are a BFD and an ASECTION associated with the
-     existing symbol.  */
+  /* OLDBFD is a BFD associated with the existing symbol.  */
 
   switch (h->root.type)
     {
     default:
       oldbfd = NULL;
-      oldsec = NULL;
       break;
 
     case bfd_link_hash_undefined:
     case bfd_link_hash_undefweak:
       oldbfd = h->root.u.undef.abfd;
-      oldsec = NULL;
       break;
 
     case bfd_link_hash_defined:
     case bfd_link_hash_defweak:
       oldbfd = h->root.u.def.section->owner;
-      oldsec = h->root.u.def.section;
       break;
 
     case bfd_link_hash_common:
       oldbfd = h->root.u.c.p->section->owner;
-      oldsec = h->root.u.c.p->section;
       break;
     }
 
@@ -843,54 +839,6 @@ _bfd_elf_merge_symbol (bfd *abfd,
     olddef = FALSE;
   else
     olddef = TRUE;
-
-  /* Check TLS symbol.  */
-  if ((ELF_ST_TYPE (sym->st_info) == STT_TLS || h->type == STT_TLS)
-      && ELF_ST_TYPE (sym->st_info) != h->type)
-    {
-      bfd *ntbfd, *tbfd;
-      bfd_boolean ntdef, tdef;
-      asection *ntsec, *tsec;
-
-      if (h->type == STT_TLS)
-	{
-	  ntbfd = abfd; 
-	  ntsec = sec;
-	  ntdef = newdef;
-	  tbfd = oldbfd;
-	  tsec = oldsec;
-	  tdef = olddef;
-	}
-      else
-	{
-	  ntbfd = oldbfd;
-	  ntsec = oldsec;
-	  ntdef = olddef;
-	  tbfd = abfd;
-	  tsec = sec;
-	  tdef = newdef;
-	}
-
-      if (tdef && ntdef)
-	(*_bfd_error_handler)
-	  (_("%s: TLS definition in %B section %A mismatches non-TLS definition in %B section %A"),
-	   tbfd, tsec, ntbfd, ntsec, h->root.root.string);
-      else if (!tdef && !ntdef)
-	(*_bfd_error_handler)
-	  (_("%s: TLS reference in %B mismatches non-TLS reference in %B"),
-	   tbfd, ntbfd, h->root.root.string);
-      else if (tdef)
-	(*_bfd_error_handler)
-	  (_("%s: TLS definition in %B section %A mismatches non-TLS reference in %B"),
-	   tbfd, tsec, ntbfd, h->root.root.string);
-      else
-	(*_bfd_error_handler)
-	  (_("%s: TLS reference in %B mismatches non-TLS definition in %B section %A"),
-	   tbfd, ntbfd, ntsec, h->root.root.string);
-
-      bfd_set_error (bfd_error_bad_value);
-      return FALSE;
-    }
 
   /* We need to remember if a symbol has a definition in a dynamic
      object or is weak in all dynamic objects. Internal and hidden
@@ -2700,10 +2648,6 @@ _bfd_elf_add_dynamic_entry (struct bfd_link_info *info,
   if (! is_elf_hash_table (hash_table))
     return FALSE;
 
-  if (info->warn_shared_textrel && info->shared && tag == DT_TEXTREL)
-    _bfd_error_handler
-      (_("warning: creating a DT_TEXTREL in a shared object."));
-
   bed = get_elf_backend_data (hash_table->dynobj);
   s = bfd_get_section_by_name (hash_table->dynobj, ".dynamic");
   BFD_ASSERT (s != NULL);
@@ -3777,14 +3721,6 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  if (bed->elf_backend_merge_symbol_attribute)
 	    (*bed->elf_backend_merge_symbol_attribute) (h, isym, definition,
 							dynamic);
-
-	  /* If this symbol has default visibility and the user has requested
-	     we not re-export it, then mark it as hidden.  */
-	  if (definition && !dynamic
-	      && (abfd->no_export
-		  || (abfd->my_archive && abfd->my_archive->no_export))
-	      && ELF_ST_VISIBILITY (isym->st_other) != STV_INTERNAL)
-	    isym->st_other = STV_HIDDEN | (isym->st_other & ~ ELF_ST_VISIBILITY (-1));
 
 	  if (isym->st_other != 0 && !dynamic)
 	    {
@@ -5719,14 +5655,6 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 	bfd_byte *erel, *erelend;
 	asection *o = lo->u.indirect.section;
 
-	if (o->contents == NULL && o->size != 0)
-	  {
-	    /* This is a reloc section that is being handled as a normal
-	       section.  See bfd_section_from_shdr.  We can't combine
-	       relocs in this case.  */
-	    free (sort);
-	    return 0;
-	  }
 	erel = o->contents;
 	erelend = o->contents + o->size;
 	p = sort + o->output_offset / ext_size * sort_elt;
@@ -6382,40 +6310,30 @@ elf_section_ignore_discarded_relocs (asection *sec)
   return FALSE;
 }
 
-enum action_discarded
-  {
-    COMPLAIN = 1,
-    PRETEND = 2
-  };
+/* Return TRUE if we should complain about a reloc in SEC against a
+   symbol defined in a discarded section.  */
 
-/* Return a mask saying how ld should treat relocations in SEC against
-   symbols defined in discarded sections.  If this function returns
-   COMPLAIN set, ld will issue a warning message.  If this function
-   returns PRETEND set, and the discarded section was link-once and the
-   same size as the kept link-once section, ld will pretend that the
-   symbol was actually defined in the kept section.  Otherwise ld will
-   zero the reloc (at least that is the intent, but some cooperation by
-   the target dependent code is needed, particularly for REL targets).  */
-
-static unsigned int
-elf_action_discarded (asection *sec)
+static bfd_boolean
+elf_section_complain_discarded (asection *sec)
 {
-  if (sec->flags & SEC_DEBUGGING)
-    return PRETEND;
+  if (strncmp (".stab", sec->name, 5) == 0
+      && (!sec->name[5] ||
+	  (sec->name[5] == '.' && ISDIGIT (sec->name[6]))))
+    return FALSE;
 
   if (strcmp (".eh_frame", sec->name) == 0)
-    return 0;
+    return FALSE;
 
   if (strcmp (".gcc_except_table", sec->name) == 0)
-    return 0;
+    return FALSE;
 
   if (strcmp (".PARISC.unwind", sec->name) == 0)
-    return 0;
+    return FALSE;
 
   if (strcmp (".fixup", sec->name) == 0)
-    return 0;
+    return FALSE;
 
-  return COMPLAIN | PRETEND;
+  return TRUE;
 }
 
 /* Find a match between a section and a member of a section group.  */
@@ -6710,7 +6628,7 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 	  if (!elf_section_ignore_discarded_relocs (o))
 	    {
 	      Elf_Internal_Rela *rel, *relend;
-	      unsigned int action = elf_action_discarded (o);
+	      bfd_boolean complain = elf_section_complain_discarded (o);
 
 	      rel = internal_relocs;
 	      relend = rel + o->reloc_count * bed->s->int_rels_per_ext_rel;
@@ -6751,39 +6669,49 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 		     discarded section.  */
 		  if ((sec = *ps) != NULL && elf_discarded_section (sec))
 		    {
-		      asection *kept;
+		      if ((o->flags & SEC_DEBUGGING) != 0)
+			{
+			  BFD_ASSERT (r_symndx != 0);
 
-		      BFD_ASSERT (r_symndx != 0);
-		      if (action & COMPLAIN)
+			  /* Try to preserve debug information.
+			     FIXME: This is quite broken.  Modifying
+			     the symbol here means we will be changing
+			     all uses of the symbol, not just those in
+			     debug sections.  The only thing that makes
+			     this half reasonable is that debug sections
+			     tend to come after other sections.  Of
+			     course, that doesn't help with globals.
+			     ??? All link-once sections of the same name
+			     ought to define the same set of symbols, so
+			     it would seem that globals ought to always
+			     be defined in the kept section.  */
+			  if (sec->kept_section != NULL)
+			    {
+			      asection *member;
+
+			      /* Check if it is a linkonce section or
+				 member of a comdat group.  */
+			      if (elf_sec_group (sec) == NULL
+				  && sec->size == sec->kept_section->size)
+				{
+				  *ps = sec->kept_section;
+				  continue;
+				}
+			      else if (elf_sec_group (sec) != NULL
+				       && (member = match_group_member (sec, sec->kept_section))
+				       && sec->size == member->size)
+				{
+				  *ps = member;
+				  continue;
+				}
+			    }
+			}
+		      else if (complain)
 			{
 			  (*_bfd_error_handler)
 			    (_("`%s' referenced in section `%A' of %B: "
 			       "defined in discarded section `%A' of %B\n"),
 			     o, input_bfd, sec, sec->owner, sym_name);
-			}
-
-		      /* Try to do the best we can to support buggy old
-			 versions of gcc.  If we've warned, or this is
-			 debugging info, pretend that the symbol is
-			 really defined in the kept linkonce section.
-			 FIXME: This is quite broken.  Modifying the
-			 symbol here means we will be changing all later
-			 uses of the symbol, not just in this section.
-			 The only thing that makes this half reasonable
-			 is that we warn in non-debug sections, and
-			 debug sections tend to come after other
-			 sections.  */
-		      kept = sec->kept_section;
-		      if (kept != NULL && (action & PRETEND))
-			{
-			  if (elf_sec_group (sec) != NULL)
-			    kept = match_group_member (sec, kept);
-			  if (kept != NULL
-			      && sec->size == kept->size)
-			    {
-			      *ps = kept;
-			      continue;
-			    }
 			}
 
 		      /* Remove the symbol reference from the reloc, but
@@ -9276,11 +9204,88 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
   return ret;
 }
 
+struct already_linked_section
+{
+  asection *sec;
+  asection *linked;
+};
+
+/* Check if the member of a single member comdat group matches a
+   linkonce section and vice versa.  */
+static bfd_boolean
+try_match_symbols_in_sections
+  (struct bfd_section_already_linked_hash_entry *h, void *info)
+{
+  struct bfd_section_already_linked *l;
+  struct already_linked_section *s
+    = (struct already_linked_section *) info;
+
+  if (elf_sec_group (s->sec) == NULL)
+    {
+      /* It is a linkonce section. Try to match it with the member of a
+	 single member comdat group. */
+      for (l = h->entry; l != NULL; l = l->next)
+	if ((l->sec->flags & SEC_GROUP))
+	  {
+	    asection *first = elf_next_in_group (l->sec);
+
+	    if (first != NULL
+		&& elf_next_in_group (first) == first
+		&& bfd_elf_match_symbols_in_sections (first, s->sec))
+	      {
+		s->linked = first;
+		return FALSE;
+	      }
+	  }
+    }
+  else
+    {
+      /* It is the member of a single member comdat group. Try to match
+	 it with a linkonce section.  */
+      for (l = h->entry; l != NULL; l = l->next)
+	if ((l->sec->flags & SEC_GROUP) == 0
+	    && bfd_coff_get_comdat_section (l->sec->owner, l->sec) == NULL
+	    && bfd_elf_match_symbols_in_sections (l->sec, s->sec))
+	  {
+	    s->linked = l->sec;
+	    return FALSE;
+	  }
+    }
+
+  return TRUE;
+}
+
+static bfd_boolean
+already_linked (asection *sec, asection *group)
+{
+  struct already_linked_section result;
+
+  result.sec = sec;
+  result.linked = NULL;
+
+  bfd_section_already_linked_table_traverse
+    (try_match_symbols_in_sections, &result);
+
+  if (result.linked)
+    {
+      sec->output_section = bfd_abs_section_ptr;
+      sec->kept_section = result.linked;
+
+      /* Also discard the group section.  */
+      if (group)
+	group->output_section = bfd_abs_section_ptr;
+
+      return TRUE;
+    }
+
+  return FALSE;
+}
+
 void
 _bfd_elf_section_already_linked (bfd *abfd, struct bfd_section * sec)
 {
   flagword flags;
-  const char *name, *p;
+  const char *name;
   struct bfd_section_already_linked *l;
   struct bfd_section_already_linked_hash_entry *already_linked_list;
   asection *group;
@@ -9330,13 +9335,7 @@ _bfd_elf_section_already_linked (bfd *abfd, struct bfd_section * sec)
 
   name = bfd_get_section_name (abfd, sec);
 
-  if (strncmp (name, ".gnu.linkonce.", sizeof (".gnu.linkonce.") - 1) == 0
-      && (p = strchr (name + sizeof (".gnu.linkonce.") - 1, '.')) != NULL)
-    p++;
-  else
-    p = name;
-
-  already_linked_list = bfd_section_already_linked_table_lookup (p);
+  already_linked_list = bfd_section_already_linked_table_lookup (name);
 
   for (l = already_linked_list->entry; l != NULL; l = l->next)
     {
@@ -9346,11 +9345,10 @@ _bfd_elf_section_already_linked (bfd *abfd, struct bfd_section * sec)
 	 a linkonce section with a linkonce section, and ignore comdat
 	 section.  */
       if ((flags & SEC_GROUP) == (l->sec->flags & SEC_GROUP)
-	  && strcmp (name, l->sec->name) == 0
 	  && bfd_coff_get_comdat_section (l->sec->owner, l->sec) == NULL)
 	{
 	  /* The section has already been linked.  See if we should
-	     issue a warning.  */
+             issue a warning.  */
 	  switch (flags & SEC_LINK_DUPLICATES)
 	    {
 	    default:
@@ -9439,39 +9437,15 @@ _bfd_elf_section_already_linked (bfd *abfd, struct bfd_section * sec)
 	 section. We only record the discarded comdat group. Otherwise
 	 the undiscarded group will be discarded incorrectly later since
 	 itself has been recorded.  */
-      for (l = already_linked_list->entry; l != NULL; l = l->next)
-	if ((l->sec->flags & SEC_GROUP) == 0
-	    && bfd_coff_get_comdat_section (l->sec->owner, l->sec) == NULL
-	    && bfd_elf_match_symbols_in_sections (l->sec,
-						  elf_next_in_group (sec)))
-	  {
-	    elf_next_in_group (sec)->output_section = bfd_abs_section_ptr;
-	    elf_next_in_group (sec)->kept_section = l->sec;
-	    group->output_section = bfd_abs_section_ptr;
-	    break;
-	  }
-      if (l == NULL)
+      if (! already_linked (elf_next_in_group (sec), group))
 	return;
     }
   else
     /* There is no direct match. But for linkonce section, we should
        check if there is a match with comdat group member. We always
        record the linkonce section, discarded or not.  */
-    for (l = already_linked_list->entry; l != NULL; l = l->next)
-      if (l->sec->flags & SEC_GROUP)
-	{
-	  asection *first = elf_next_in_group (l->sec);
-
-	  if (first != NULL
-	      && elf_next_in_group (first) == first
-	      && bfd_elf_match_symbols_in_sections (first, sec))
-	    {
-	      sec->output_section = bfd_abs_section_ptr;
-	      sec->kept_section = l->sec;
-	      break;
-	    }
-	}
-
+    already_linked (sec, group);
+  
   /* This is the first section with this name.  Record it.  */
   bfd_section_already_linked_table_insert (already_linked_list, sec);
 }

@@ -418,7 +418,8 @@ fill_gregset (gregset_t *gregsetp, int regno)
 
 #define COPY_REG(_idx_,_regi_) \
   if ((regno == -1) || regno == _regi_) \
-    regcache_raw_collect (current_regcache, _regi_, regp + _idx_)
+    memcpy (regp + _idx_, &deprecated_registers[DEPRECATED_REGISTER_BYTE (_regi_)], \
+	    register_size (current_gdbarch, _regi_))
 
   for (regi = IA64_GR0_REGNUM; regi <= IA64_GR31_REGNUM; regi++)
     {
@@ -475,12 +476,17 @@ void
 fill_fpregset (fpregset_t *fpregsetp, int regno)
 {
   int regi;
+  char *to;
+  char *from;
 
   for (regi = IA64_FR0_REGNUM; regi <= IA64_FR127_REGNUM; regi++)
     {
       if ((regno == -1) || (regno == regi))
-	regcache_raw_collect (current_regcache, regi,
-			      &((*fpregsetp)[regi - IA64_FR0_REGNUM]));
+	{
+	  from = (char *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (regi)];
+	  to = (char *) &((*fpregsetp)[regi - IA64_FR0_REGNUM]);
+	  memcpy (to, from, register_size (current_gdbarch, regi));
+	}
     }
 }
 
@@ -630,13 +636,12 @@ ia64_linux_remove_watchpoint (ptid_t ptid, CORE_ADDR addr, int len)
   return -1;
 }
 
-int
-ia64_linux_stopped_data_address (CORE_ADDR *addr_p)
+CORE_ADDR
+ia64_linux_stopped_by_watchpoint (ptid_t ptid)
 {
   CORE_ADDR psr;
   int tid;
   struct siginfo siginfo;
-  ptid_t ptid = inferior_ptid;
 
   tid = TIDGET(ptid);
   if (tid == 0)
@@ -654,15 +659,7 @@ ia64_linux_stopped_data_address (CORE_ADDR *addr_p)
                            for the next instruction */
   write_register_pid (IA64_PSR_REGNUM, psr, ptid);
 
-  *addr_p = (CORE_ADDR)siginfo.si_addr;
-  return 1;
-}
-
-int
-ia64_linux_stopped_by_watchpoint (void)
-{
-  CORE_ADDR addr;
-  return ia64_linux_stopped_data_address (&addr);
+  return (CORE_ADDR) siginfo.si_addr;
 }
 
 LONGEST 
