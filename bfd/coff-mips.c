@@ -264,15 +264,6 @@ ecoff_set_section_linenos (abfd, section, location, offset, count)
    return 0;
 }
 
-
-/* ARGSUSED */
-boolean
-ecoff_close_and_cleanup (abfd)
-     bfd *abfd;
-{
-  return false;
-}
-
 /* ARGSUSED */
 static boolean
 ecoff_slurp_symbol_table(abfd)
@@ -373,59 +364,69 @@ return (alent *)NULL;
 #define ecoff_core_file_failing_command	_bfd_dummy_core_file_failing_command
 #define	ecoff_core_file_failing_signal	_bfd_dummy_core_file_failing_signal
 #define	ecoff_core_file_matches_executable_p	_bfd_dummy_core_file_matches_executable_p
+
+/* Archives not supported yet.  FIXME.  */
 #define	ecoff_slurp_armap		bfd_false
 #define	ecoff_slurp_extended_name_table	bfd_false
-#define	ecoff_truncate_arname		bfd_void
+#define	ecoff_truncate_arname		bfd_dont_truncate_arname
 #define	ecoff_write_armap		bfd_false
+#define	ecoff_openr_next_archived_file	bfd_generic_openr_next_archived_file
+#define	ecoff_generic_stat_arch_elt	bfd_generic_stat_arch_elt
+
+/* Unimplemented routines.  FIXME.  */
 #define	ecoff_print_symbol		bfd_void
 #define	ecoff_set_arch_mach		bfd_false
-#define	ecoff_openr_next_archived_file	bfd_generic_openr_next_archived_file
 #define	ecoff_find_nearest_line		bfd_false
-#define	ecoff_generic_stat_arch_elt	bfd_generic_stat_arch_elt
 #define	ecoff_sizeof_headers		bfd_0
+
+/* We use the generic BFD version of these.  */
+#define	ecoff_close_and_cleanup		bfd_generic_close_and_cleanup
 
 bfd_target ecoff_little_vec =
     {"ecoff-littlemips",      /* name */
-       bfd_target_coff_flavour_enum,
-       false,			/* data byte order is little */
-       false,			/* header byte order is little */
+	bfd_target_coff_flavour_enum,
+	false,			/* data byte order is little */
+	false,			/* header byte order is little */
 
-       (HAS_RELOC | EXEC_P |	/* object flags */
-	HAS_LINENO | HAS_DEBUG |
-	HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT),
+	(HAS_RELOC | EXEC_P |	/* object flags */
+	 HAS_LINENO | HAS_DEBUG |
+	 HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT),
 
-       (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
-       '/',			/* ar_pad_char */
-       15,			/* ar_max_namelen */
-       _do_getllong, _do_putllong, _do_getlshort, _do_putlshort, /* data */
-       _do_getllong, _do_putllong, _do_getlshort, _do_putlshort, /* hdrs */
+	(SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* sect flags */
+	'/',			/* ar_pad_char */
+	15,			/* ar_max_namelen */
+	_do_getllong, _do_putllong, _do_getlshort, _do_putlshort, /* data */
+	_do_getllong, _do_putllong, _do_getlshort, _do_putlshort, /* hdrs */
 
-       {_bfd_dummy_target, ecoff_object_p, /* bfd_check_format */
+	{_bfd_dummy_target, ecoff_object_p, /* bfd_check_format */
 	  bfd_generic_archive_p, _bfd_dummy_target},
-       {bfd_false, ecoff_mkobject, bfd_false, /* bfd_set_format */
+	{bfd_false, ecoff_mkobject, bfd_false, /* bfd_set_format */
 	  bfd_false},
-       JUMP_TABLE (ecoff)
+	{bfd_false, ecoff_write_object_contents, bfd_false, bfd_false},
+	JUMP_TABLE (ecoff)
 };
 
 bfd_target ecoff_big_vec =
     {"ecoff-bigmips",      /* name */
-    bfd_target_coff_flavour_enum,
-       true,			/* data byte order is big */
-       true,			/* header byte order is big */
+	bfd_target_coff_flavour_enum,
+	true,			/* data byte order is big */
+	true,			/* header byte order is big */
 
-       (HAS_RELOC | EXEC_P |	/* object flags */
-	HAS_LINENO | HAS_DEBUG |
-	HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT),
+	(HAS_RELOC | EXEC_P |	/* object flags */
+	 HAS_LINENO | HAS_DEBUG |
+	 HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT),
 
-       (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
-       ' ',			/* ar_pad_char */
-       16,			/* ar_max_namelen */
-       _do_getblong, _do_putblong, _do_getbshort, _do_putbshort, /* data */
-       _do_getblong, _do_putblong, _do_getbshort, _do_putbshort, /* hdrs */
+	(SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* sect flags */
+	' ',			/* ar_pad_char */
+	16,			/* ar_max_namelen */
+	_do_getblong, _do_putblong, _do_getbshort, _do_putbshort, /* data */
+	_do_getblong, _do_putblong, _do_getbshort, _do_putbshort, /* hdrs */
 
-       {_bfd_dummy_target, ecoff_object_p, /* bfd_check_format */
+	{_bfd_dummy_target, ecoff_object_p, /* bfd_check_format */
 	  bfd_generic_archive_p, _bfd_dummy_target},
-       {bfd_false, ecoff_mkobject, bfd_false, /* bfd_set_format */
+	{bfd_false, ecoff_mkobject, bfd_false, /* bfd_set_format */
 	  bfd_false},
-       JUMP_TABLE(ecoff)
+	{bfd_false, ecoff_write_object_contents, /* bfd_write_contents */
+	  bfd_false, bfd_false},
+	JUMP_TABLE(ecoff)
 };

@@ -257,11 +257,16 @@ boolean
 bfd_close (abfd)
      bfd *abfd;
 {
+  if (!bfd_read_p(abfd))
+    if (BFD_SEND_FMT (abfd, _bfd_write_contents, (abfd)) != true)
+      return false;
+
   if (BFD_SEND (abfd, _close_and_cleanup, (abfd)) != true) return false;
 
   bfd_cache_close(abfd);
-/* If the file was open for writing and is now executable
-  make it so */
+
+  /* If the file was open for writing and is now executable,
+     make it so */
   if (abfd->direction == write_direction 
       && abfd->flags & EXEC_P) {
     struct stat buf;
@@ -269,6 +274,7 @@ bfd_close (abfd)
     chmod(abfd->filename,buf.st_mode | S_IXUSR | S_IXGRP | S_IXOTH);
   }
   (void) obstack_free (&abfd->memory, (PTR)0);
+  /* FIXME, shouldn't we de-allocate the bfd as well? */
   return true;
 }
 

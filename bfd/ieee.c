@@ -999,12 +999,14 @@ DEFUN(ieee_object_p,(abfd),
 
 
 void 
-DEFUN(ieee_print_symbol,(ignore_abfd, file,  symbol, how),
+DEFUN(ieee_print_symbol,(ignore_abfd, afile,  symbol, how),
       bfd *ignore_abfd AND
-      FILE *file AND
+      PTR afile AND
       asymbol *symbol AND
       bfd_print_symbol_enum_type how)
 {
+  FILE *file = (FILE *)afile;
+
   switch (how) {
   case bfd_print_symbol_name_enum:
     fprintf(file,"%s", symbol->name);
@@ -1760,33 +1762,6 @@ DEFUN(ieee_make_empty_symbol,(abfd),
 
 }
 
-
-
-boolean
-ieee_close_and_cleanup (abfd)
-bfd *abfd;
-{
-  if (bfd_read_p (abfd) == false)
-    switch (abfd->format) {
-    case bfd_archive:
-      if (!_bfd_write_archive_contents (abfd)) {
-	return false;
-      }
-      break;
-    case bfd_object:
-      if (!ieee_write_object_contents (abfd)) {
-	return false;
-      }
-      break;
-    default:
-      bfd_error = invalid_operation;
-      return false;
-    }
-
-
-  return true;
-}
-
 static bfd *
 ieee_openr_next_archived_file(arch, prev)
 bfd *arch;
@@ -1869,6 +1844,7 @@ DEFUN(ieee_sizeof_headers,(abfd, x),
 #define ieee_truncate_arname (void (*)())bfd_nullvoidptr
 #define ieee_write_armap  (PROTO( boolean, (*),(bfd *, unsigned int, struct orl *, int, int))) bfd_nullvoidptr
 #define ieee_get_lineno (struct lineno_cache_entry *(*)())bfd_nullvoidptr
+#define	ieee_close_and_cleanup		bfd_generic_close_and_cleanup
 
 
 /*SUPPRESS 460 */
@@ -1900,5 +1876,11 @@ bfd_target ieee_vec =
     _bfd_generic_mkarchive,
     bfd_false
     },
-JUMP_TABLE(ieee)
+  {
+    bfd_false,
+    ieee_write_object_contents,
+    _bfd_write_archive_contents,
+    bfd_false,
+  },
+  JUMP_TABLE(ieee)
 };

@@ -29,7 +29,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
  only section we create. We arbitarily call this section ".text".
 
  When bfd_get_section_contents is called the file is read again, and
- this time the data is placed into a malloced area.
+ this time the data is placed into a bfd_alloc'd area.
 
  Any number of sections may be created for output, we just output them
  in the order provided to bfd_set_section_contents.
@@ -42,7 +42,11 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$
  * $Log$
- * Revision 1.7  1991/05/08 19:21:47  steve
+ * Revision 1.8  1991/05/11 00:38:46  gnu
+ * Cleanups of interface, including close_and_cleanup and write_contents
+ * transfer vector changes.  See ChangeLog.
+ *
+ * Revision 1.7  1991/05/08  19:21:47  steve
  * Various portability lints.
  * Fixed reloc bug in ieee and oasys.
  *
@@ -167,7 +171,7 @@ unsigned int length;
 }
 
 /*
- called once per input srecord, copies data from input into malloced area
+ called once per input srecord, copies data from input into bfd_alloc'd area
  */
 
 static void
@@ -291,7 +295,7 @@ file_ptr offset;
 unsigned      int count;
 {
   if (section->used_by_bfd == (PTR)NULL) {
-    section->used_by_bfd = (PTR)malloc(section->size);
+    section->used_by_bfd = (PTR)bfd_alloc (abfd, section->size);
     pass_over(abfd, fillup, section);
   }
   (void) memcpy(location, (bfd_byte *)(section->used_by_bfd) + offset, count);
@@ -394,33 +398,11 @@ int bytes_to_do;
   return true;
 }
 
-
 boolean
-srec_close_and_cleanup (abfd)
-bfd *abfd;
+srec_write_object_contents (abfd)
+     bfd *abfd;
 {
-  asection *s;
-  if (bfd_read_p (abfd) == false) {
-    switch (abfd->format) {
-    case bfd_archive:
-      if (!_bfd_write_archive_contents (abfd)) {
-	return false;
-      }
-      break;
-    case bfd_object:
-      bfd_write("S9030000FC\n", 1,11,abfd);
-      break;
-    default:
-      bfd_error = invalid_operation;
-      return false;
-    }
-  }
-  for (s = abfd->sections; s != (asection *)NULL;s = s->next) {
-    if (s->used_by_bfd != (void *)NULL) {
-      free(s->used_by_bfd);
-    }
-  }
-  return true;
+  bfd_write("S9030000FC\n", 1,11,abfd);
 }
 
 static int 
@@ -454,6 +436,8 @@ return 0;
 #define srec_write_armap  (PROTO( boolean, (*),(bfd *, unsigned int, struct orl *, int, int))) bfd_nullvoidptr
 #define srec_get_lineno (struct lineno_cache_entry *(*)())bfd_nullvoidptr
 
+#define	srec_close_and_cleanup	bfd_generic_close_and_cleanup
+
 
 bfd_target srec_vec =
 {
@@ -482,5 +466,11 @@ bfd_target srec_vec =
     _bfd_generic_mkarchive,
     bfd_false,
   },
-JUMP_TABLE(srec)
+  {				/* bfd_write_contents */
+    bfd_false,
+    srec_write_object_contents,
+    _bfd_write_archive_contents,
+    bfd_false,
+  },
+  JUMP_TABLE(srec)
 };

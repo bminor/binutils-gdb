@@ -165,11 +165,10 @@ bfd_target icoff_little_vec =
      bfd_generic_archive_p, _bfd_dummy_target},
   {bfd_false, coff_mkobject,	/* bfd_set_format */
      _bfd_generic_mkarchive, bfd_false},
-
+  {bfd_false, coff_write_object_contents,	/* bfd_write_contents */
+     _bfd_write_archive_contents, bfd_false},
   JUMP_TABLE(coff)
 };
-
-
 
 
 bfd_target icoff_big_vec =
@@ -190,9 +189,11 @@ bfd_target icoff_big_vec =
   _do_getllong, _do_putllong, _do_getlshort, _do_putlshort, /* data */
   _do_getblong, _do_putblong, _do_getbshort, _do_putbshort, /* hdrs */
 
-  {_bfd_dummy_target, coff_object_p,  bfd_generic_archive_p, _bfd_dummy_target},
-  {bfd_false, coff_mkobject, _bfd_generic_mkarchive,     bfd_false},
-
+  {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
+     bfd_generic_archive_p, _bfd_dummy_target},
+  {bfd_false, coff_mkobject,	/* bfd_set_format */
+     _bfd_generic_mkarchive, bfd_false},
+  {bfd_false, coff_write_object_contents,	/* bfd_write_contents */
+     _bfd_write_archive_contents, bfd_false},
   JUMP_TABLE(coff)
 };
-

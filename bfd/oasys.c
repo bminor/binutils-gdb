@@ -396,12 +396,14 @@ DEFUN(oasys_object_p,(abfd),
 
 
 static void 
-DEFUN(oasys_print_symbol,(ignore_abfd, file,  symbol, how),
+DEFUN(oasys_print_symbol,(ignore_abfd, afile, symbol, how),
       bfd *ignore_abfd AND
-      FILE *file AND
+      PTR afile AND
       asymbol *symbol AND
       bfd_print_symbol_enum_type how)
 {
+  FILE *file = (FILE *)afile;
+
   switch (how) {
   case bfd_print_symbol_name_enum:
   case bfd_print_symbol_type_enum:
@@ -650,9 +652,9 @@ static boolean
 DEFUN(oasys_get_section_contents,(abfd, section, location, offset, count),
       bfd *abfd AND
       sec_ptr section AND
-      void  *location AND
+      PTR location AND
       file_ptr offset AND
-      unsigned int count)
+      int count)
 {
   oasys_per_section_type *p = (oasys_per_section_type *) section->used_by_bfd;
   oasys_slurp_section_data(abfd);
@@ -1042,7 +1044,7 @@ static boolean
 DEFUN(oasys_set_section_contents,(abfd, section, location, offset, count),
       bfd *abfd AND
       sec_ptr section AND 
-      unsigned char *location AND
+      PTR location AND
       file_ptr offset AND
       int count)
 {
@@ -1084,34 +1086,6 @@ DEFUN(oasys_make_empty_symbol,(abfd),
 
 /* User should have checked the file flags; perhaps we should return
 BFD_NO_MORE_SYMBOLS if there are none? */
-
-
-
-boolean
-oasys_close_and_cleanup (abfd)
-bfd *abfd;
-{
-  if (bfd_read_p (abfd) == false)
-    switch (abfd->format) {
-    case bfd_archive:
-      if (!_bfd_write_archive_contents (abfd)) {
-	return false;
-      }
-      break;
-    case bfd_object:
-      if (!oasys_write_object_contents (abfd)) {
-	return false;
-      }
-      break;
-    default:
-      bfd_error = invalid_operation;
-      return false;
-    }
-
-
-
-  return true;
-}
 
 static bfd *
 oasys_openr_next_archived_file(arch, prev)
@@ -1199,7 +1173,7 @@ return 0;
 #define oasys_truncate_arname (void (*)())bfd_nullvoidptr
 #define oasys_write_armap 0 /* (PROTO( boolean, (*),(bfd *, unsigned int, struct orl *, int, int))) bfd_nullvoidptr*/
 #define oasys_get_lineno (struct lineno_cache_entry *(*)())bfd_nullvoidptr
-
+#define	oasys_close_and_cleanup		bfd_generic_close_and_cleanup
 
 
 
@@ -1226,11 +1200,17 @@ bfd_target oasys_vec =
      oasys_archive_p,
  _bfd_dummy_target,
      },
-  {
+  {				/* bfd_set_format */
     bfd_false,
     oasys_mkobject, 
     _bfd_generic_mkarchive,
     bfd_false
     },
-JUMP_TABLE(oasys)
+  {				/* bfd_write_contents */
+    bfd_false,
+    oasys_write_object_contents,
+    _bfd_write_archive_contents,
+    bfd_false,
+  },
+  JUMP_TABLE(oasys)
 };
