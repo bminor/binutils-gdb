@@ -11,13 +11,6 @@ Sat Mar 23 17:24:28 1996  Fred Fish  <fnf@cygnus.com>
  	address of cached data.  Use BCACHE_ALIGNMENT to compute
 	amount of space to allocate for each hashlink struct.
 
-Sat Mar 23 17:10:56 1996  Fred Fish  <fnf@cygnus.com>
-
-	* configure, testsuite/configure, testsuite/gdb.base/configure,
-	testsuite/gdb.c++/configure, testsuite/gdb.chill/configure,
-	testsuite/gdb.disasm/configure, testsuite/gdb.stabs/configure:
-	Regenerated with autoconf 2.9.
-
 Sat Mar 23 12:14:02 1996  Fred Fish  <fnf@cygnus.com>
 
 	* ch-lang.c (evaluate_subexp_chill): Fix typo.
