@@ -1364,6 +1364,8 @@ proc build_framework {win {title GDBtk} {label {}}} {
 		-command {echo "with GDBtk"}
 	${win}.menubar.help.menu add command -label "with this window" \
 		-command {echo "with this window"}
+	${win}.menubar.help.menu add command -label "Report bug" \
+		-command {exec send-pr}
 
 	tk_menuBar ${win}.menubar ${win}.menubar.file ${win}.menubar.view \
 		${win}.menubar.window ${win}.menubar.help
