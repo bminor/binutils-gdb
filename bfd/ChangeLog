@@ -1,3 +1,18 @@
+Sun Oct  1 01:34:41 1995  Jeff Law  (law@hurl.cygnus.com
+
+        * som.c (som_begin_writing): Don't write the symbol table or
+	symbol	strings.
+	(som_finish_writing): Write them here.  Place them after the
+	subspace data, but before the relocs.
+
+Fri Sep 29 11:01:55 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* sunos.c (sunos_add_one_symbol): Just pass false, not
+	info->shared_library, to sunos_create_dynamic_sections.
+	(sunos_scan_ext_relocs): Don't warn about a reloc in the .text
+	section.
+	(sunos_check_dynamic_reloc): Remove .text section assertion.
+
 Thu Sep 28 18:48:47 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* config.bfd: Add powerpc-*-macos*, powerpc-*-mpw*.

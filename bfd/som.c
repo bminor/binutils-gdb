@@ -2987,9 +2987,8 @@ som_begin_writing (abfd)
   unsigned long current_offset = 0;
   int strings_size = 0;
   unsigned int total_reloc_size = 0;
-  unsigned long num_spaces, num_subspaces, num_syms, i;
+  unsigned long num_spaces, num_subspaces, i;
   asection *section;
-  asymbol **syms = bfd_get_outsymbols (abfd);
   unsigned int total_subspaces = 0;
   struct som_exec_auxhdr *exec_header = NULL;
 
@@ -3119,37 +3118,6 @@ som_begin_writing (abfd)
   /* Record total string table size in the header and update the
      current offset.  */
   obj_som_file_hdr (abfd)->space_strings_size = strings_size;
-  current_offset += strings_size;
-
-  /* Next is the symbol table.  These are fixed length records.
-
-     Count the number of symbols to determine how much room is needed
-     in the object file for the symbol table.
-
-     The names of the symbols are stored in a separate string table,
-     and the index for each symbol name into the string table is computed
-     below.  Therefore, it is not possible to write the symobl table
-     at this time.  */
-  num_syms = bfd_get_symcount (abfd);
-  obj_som_file_hdr (abfd)->symbol_location = current_offset;
-  obj_som_file_hdr (abfd)->symbol_total = num_syms;
-  current_offset += num_syms * sizeof (struct symbol_dictionary_record);
-
-  /* Next are the symbol strings.
-     Align them to a word boundary.  */
-  if (current_offset % 4)
-    current_offset += (4 - (current_offset % 4));
-  obj_som_file_hdr (abfd)->symbol_strings_location = current_offset;
-
-  /* Scribble out the symbol strings.  */
-  if (som_write_symbol_strings (abfd, current_offset, syms,
-				num_syms, &strings_size)
-      == false)
-    return false;
-
-  /* Record total string table size in header and update the
-     current offset.  */
-  obj_som_file_hdr (abfd)->symbol_strings_size = strings_size;
   current_offset += strings_size;
 
   /* Next is the compiler records.  We do not use these.  */
@@ -3362,19 +3330,59 @@ som_finish_writing (abfd)
      bfd *abfd;
 {
   int num_spaces = som_count_spaces (abfd);
-  int i;
+  asymbol **syms = bfd_get_outsymbols (abfd);
+  int i, num_syms, strings_size;
   int subspace_index = 0;
   file_ptr location;
   asection *section;
   unsigned long current_offset;
   unsigned int total_reloc_size;
 
+  /* Next is the symbol table.  These are fixed length records.
+
+     Count the number of symbols to determine how much room is needed
+     in the object file for the symbol table.
+
+     The names of the symbols are stored in a separate string table,
+     and the index for each symbol name into the string table is computed
+     below.  Therefore, it is not possible to write the symbol table
+     at this time. 
+
+     These used to be output before the subspace contents, but they
+     were moved here to work around a stupid bug in the hpux linker
+     (fixed in hpux10).  */
+  current_offset = obj_som_file_hdr (abfd)->som_length;
+
+  /* Make sure we're on a word boundary.  */
+  if (current_offset % 4)
+    current_offset += (4 - (current_offset % 4)); 
+
+  num_syms = bfd_get_symcount (abfd);
+  obj_som_file_hdr (abfd)->symbol_location = current_offset;
+  obj_som_file_hdr (abfd)->symbol_total = num_syms;
+  current_offset += num_syms * sizeof (struct symbol_dictionary_record);
+
+  /* Next are the symbol strings.
+     Align them to a word boundary.  */
+  if (current_offset % 4)
+    current_offset += (4 - (current_offset % 4));
+  obj_som_file_hdr (abfd)->symbol_strings_location = current_offset;
+
+  /* Scribble out the symbol strings.  */
+  if (som_write_symbol_strings (abfd, current_offset, syms,
+				num_syms, &strings_size)
+      == false)
+    return false;
+
+  /* Record total string table size in header and update the
+     current offset.  */
+  obj_som_file_hdr (abfd)->symbol_strings_size = strings_size;
+  current_offset += strings_size;
+
   /* Do prep work before handling fixups.  */
   som_prep_for_fixups (abfd,
 		       bfd_get_outsymbols (abfd),
 		       bfd_get_symcount (abfd));
-
-  current_offset = obj_som_file_hdr (abfd)->som_length;
 
   /* At the end of the file is the fixup stream which starts on a
      word boundary.  */
@@ -3390,7 +3398,8 @@ som_finish_writing (abfd)
   /* Record the total size of the fixup stream in the file header.  */
   obj_som_file_hdr (abfd)->fixup_request_total = total_reloc_size;
 
-  obj_som_file_hdr (abfd)->som_length += total_reloc_size;
+  /* Done.  Store the total size of the SOM.  */
+  obj_som_file_hdr (abfd)->som_length = current_offset + total_reloc_size;
  
   /* Now that the symbol table information is complete, build and
      write the symbol table.  */
@@ -4976,7 +4985,7 @@ som_sizeof_headers (abfd, reloc)
      bfd *abfd;
      boolean reloc;
 {
-  fprintf (stderr, "som_sizeof_headers unimplemented\n");
+  (*_bfd_error_handler) ("som_sizeof_headers unimplemented");
   fflush (stderr);
   abort ();
   return (0);
