@@ -3195,11 +3195,11 @@ mips_load (file, from_tty)
   mips_initialize ();
 
   /* Finally, make the PC point at the start address */
-  if (mips_monitor == MON_DDB)
+  if (mips_monitor != MON_IDT)
     {
-      /* Work around problem where DDB monitor does not update the
-         PC after a load. The following ensures that the write_pc()
-         WILL update the PC value: */
+      /* Work around problem where PMON monitor updates the PC after a load
+	 to a different value than GDB thinks it has. The following ensures
+	 that the write_pc() WILL update the PC value: */
       register_valid[PC_REGNUM] = 0;
     }
   if (exec_bfd)
