@@ -24,7 +24,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define BADMAG(x) I960BADMAG(x)
 
 #include <ansidecl.h>
-#include "sysdep.h"
+
 #include "bfd.h"
 #include "libbfd.h"
 #include "obstack.h"
@@ -70,7 +70,7 @@ asection *ignore_input_section;
 	 to the correct location */
 	{
 	  union internal_auxent *aux = (union internal_auxent *)(cs->native+2);
-	  int word = bfd_getlong(abfd, data + reloc_entry->address);
+	  int word = bfd_get_32(abfd, data + reloc_entry->address);
 	  int olf = (aux->x_bal.x_balntry - cs->native->n_value);
 	  BFD_ASSERT(cs->native->n_numaux==2);
 	  /* We replace the original call instruction with a bal to */
@@ -80,7 +80,7 @@ asection *ignore_input_section;
 	  /* offset of the bal entry point */
 
 	  word = ((word +  olf)  & BAL_MASK) | BAL;
-  	  bfd_putlong(abfd, word,  data+reloc_entry->address);
+  	  bfd_put_32(abfd, word,  data+reloc_entry->address);
   	}
 	result = bfd_reloc_ok;
 	break;
@@ -158,17 +158,17 @@ bfd_target icoff_little_vec =
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
 
-  _do_getllong, _do_putllong, _do_getlshort, _do_putlshort, /* data */
-  _do_getllong, _do_putllong, _do_getlshort, _do_putlshort, /* hdrs */
+  _do_getl64, _do_putl64, _do_getl32, _do_putl32, _do_getl16, _do_putl16, /* data */
+  _do_getl64, _do_putl64, _do_getl32, _do_putl32, _do_getl16, _do_putl16, /* hdrs */
 
-  {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
-     bfd_generic_archive_p, _bfd_dummy_target},
-  {bfd_false, coff_mkobject,	/* bfd_set_format */
-     _bfd_generic_mkarchive, bfd_false},
-  {bfd_false, coff_write_object_contents,	/* bfd_write_contents */
-     _bfd_write_archive_contents, bfd_false},
+    {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
+       bfd_generic_archive_p, _bfd_dummy_target},
+    {bfd_false, coff_mkobject,	/* bfd_set_format */
+       _bfd_generic_mkarchive, bfd_false},
+    {bfd_false, coff_write_object_contents, /* bfd_write_contents */
+       _bfd_write_archive_contents, bfd_false},
   JUMP_TABLE(coff)
-};
+  };
 
 
 bfd_target icoff_big_vec =
@@ -186,8 +186,8 @@ bfd_target icoff_big_vec =
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
 
-  _do_getllong, _do_putllong, _do_getlshort, _do_putlshort, /* data */
-  _do_getblong, _do_putblong, _do_getbshort, _do_putbshort, /* hdrs */
+_do_getl64, _do_putl64,  _do_getl32, _do_putl32, _do_getl16, _do_putl16, /* data */
+_do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
 
   {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
      bfd_generic_archive_p, _bfd_dummy_target},

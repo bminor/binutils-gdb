@@ -29,7 +29,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "bfd.h"
 #include "libbfd.h"
-#include "sysdep.h"
+
 
 #include "intel-coff.h"
 #include "libcoff.h"		/* to allow easier abstraction-breaking */
@@ -50,8 +50,8 @@ bfd_target ecoff_little_vec =
 	(SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* sect flags */
 	'/',			/* ar_pad_char */
 	15,			/* ar_max_namelen */
-	_do_getllong, _do_putllong, _do_getlshort, _do_putlshort, /* data */
-	_do_getllong, _do_putllong, _do_getlshort, _do_putlshort, /* hdrs */
+_do_getl64, _do_putl64,	_do_getl32, _do_putl32, _do_getl16, _do_putl16, /* data */
+_do_getl64, _do_putl64,	_do_getl32, _do_putl32, _do_getl16, _do_putl16, /* hdrs */
 
 	{_bfd_dummy_target, coff_object_p, /* bfd_check_format */
 	  bfd_generic_archive_p, _bfd_dummy_target},
@@ -74,9 +74,8 @@ bfd_target ecoff_big_vec =
 	(SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* sect flags */
 	' ',			/* ar_pad_char */
 	16,			/* ar_max_namelen */
-	_do_getblong, _do_putblong, _do_getbshort, _do_putbshort, /* data */
-	_do_getblong, _do_putblong, _do_getbshort, _do_putbshort, /* hdrs */
-
+_do_getb64, _do_putb64,	_do_getb32, _do_putb32, _do_getb16, _do_putb16, /* data */
+_do_getb64, _do_putb64,	_do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
 	{_bfd_dummy_target, coff_object_p, /* bfd_check_format */
 	  bfd_generic_archive_p, _bfd_dummy_target},
 	{bfd_false, coff_mkobject, bfd_false, /* bfd_set_format */

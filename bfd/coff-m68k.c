@@ -41,8 +41,8 @@ static reloc_howto_type howto_table[] =
 
 
 /* Turn a howto into a reloc  nunmber */
-#define SELECT_RELOC(x,howto) { x = howto_table[howto->size +howto->pc_relative*3].type; }
 
+#define SELECT_RELOC(x,howto) { x = howto_table[howto->size +(int)howto->pc_relative*3].type; }
 #define BADMAG(x) M68KBADMAG(x)
 #include "coff-code.h"
 
@@ -65,8 +65,8 @@ bfd_target m68kcoff_vec =
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
 
-  _do_getblong, _do_putblong, _do_getbshort, _do_putbshort, /* data */
-  _do_getblong, _do_putblong, _do_getbshort, _do_putbshort, /* hdrs */
+_do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* data */
+_do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
 
   {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
      bfd_generic_archive_p, _bfd_dummy_target},

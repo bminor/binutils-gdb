@@ -57,13 +57,13 @@ asection *ignore_input_section)
 {
   long relocation;
   bfd_vma addr = reloc_entry->address;
-  long x = bfd_getshort(abfd, (bfd_byte *)data + addr);
+  long x = bfd_get_16(abfd, (bfd_byte *)data + addr);
 
   HOWTO_PREPARE(relocation, symbol_in);
 
   x = (x + relocation + reloc_entry->addend) >> 16;
 
-  bfd_putshort(abfd, x, (bfd_byte *)data + addr);
+  bfd_put_16(abfd, x, (bfd_byte *)data + addr);
   return bfd_reloc_ok;
 }
 
@@ -105,8 +105,8 @@ bfd_target m88k_bcs_vec =
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
 
-  _do_getblong, _do_putblong, _do_getbshort, _do_putbshort, /* data */
-  _do_getblong, _do_putblong, _do_getbshort, _do_putbshort, /* hdrs */
+_do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* data */
+_do_getb64, _do_putb64,   _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
 
   {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
      bfd_generic_archive_p, _bfd_dummy_target},

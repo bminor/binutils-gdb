@@ -108,9 +108,7 @@ gld960_before_allocation()
 static void
 gld960_set_output_arch()
 {
-  /* Set the output architecture and machine if possible */
-  unsigned long  machine = 0;
-  bfd_set_arch_mach(output_bfd, ldfile_output_architecture, machine);
+  bfd_set_arch_mach(output_bfd, ldfile_output_architecture, bfd_mach_i960_core);
 }
 
 static char *
@@ -119,7 +117,7 @@ gld960_choose_target()
 #ifdef GNU960
 
   output_filename = "b.out";
-  return bfd_make_targ_name(BFD_BOUT_FORMAT,HOST_BYTE_ORDER_BIG_P);
+  return bfd_make_targ_name(BFD_BOUT_FORMAT, 0);
 
 #else
 

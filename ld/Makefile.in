@@ -40,11 +40,6 @@ LINTFLAGS =  $(INCLUDES) $(EXTRA_DEF)
 
 .SUFFIXES: .y .x .script $(SUFFIXES)
 
-.y.o:
-	$(YACC) $<
-	mv y.tab.c ldgram.tab.c
-	$(CC) -c $(CFLAGS) ldgram.tab.c
-	mv ldgram.tab.o ldgram.o
 
 # go directly to ld.new in case this ld isn't capable of
 # linking native object on this host.  It can be renamed on
@@ -73,10 +68,10 @@ LDCSOURCES=ldlang.c ldmain.c ldwrite.c ldlnk960.c ldgld.c ldgld68k.c \
 	ldgldm88kbcs.c \
 	ldgld960.c ldemul.c ldver.c ldmisc.c ldexp.c ldsym.c ldfile.c ldvanilla.c
 
-GENERATED_SOURCES=ldgram.tab.c ldlex.c ldgram.tab.h y.tab.h
-GENERATED_HEADERS=ldgram.tab.h
+GENERATED_SOURCES=ldgramtb.c ldlex.c ldgramtb.h 
+GENERATED_HEADERS=ldgramtb.h
 
-LDSOURCES=$(LDCSOURCES) ldgram.y ldlex.l
+LDSOURCES=$(LDCSOURCES) ldgram.y ldlex.l ldgramtb.h
 
 BFDSOURCES=../../bfd/common/*.c
 
@@ -88,6 +83,13 @@ STAGESTUFF = $(GENERATED_SOURCES) $(GENERATED_HEADERS) $(PROCESSED_SCRIPTS) $(OF
 all: Makefile $(PROCESSED_SCRIPTS) $(LD_PROG)
 
 $(PROCESSED_SCRIPTS): mkscript $(SCRIPTS)
+
+ldgramtb.o ldgramtb.h:ldgram.y
+	$(YACC) $<
+	mv y.tab.c ldgramtb.c
+	mv y.tab.h ldgramtb.h
+	$(CC) -c $(CFLAGS) ldgramtb.c
+	mv ldgramtb.o ldgram.o
 
 
 #$(BFDLIB): $(BFDSOURCES)
@@ -116,9 +118,6 @@ ld.dvi:ld.tex
 
 mkscript: mkscript.c
 
-ldgram.o: ldgram.y
-ldgram.tab.h:ldgram.y
-	cp y.tab.h ldgram.tab.h
 
 ldgld.o: $(PROCESSED_SCRIPTS) ldgld.c 
 
@@ -186,7 +185,7 @@ lintlog:$(SOURCES) Makefile
 
 
 tags TAGS:$(SOURCES) $(HEADERS)
-	etags -t $(SOURCES) $(HEADERS)
+	etags -t $?
 
 release:
 	(cd /4/steve/ld; tar cf -  $(LDSOURCES) $(HEADERS) $(MANSOURCES)) | tar xf - 
@@ -220,7 +219,7 @@ roll:
 	echo Version $$V
 
 
-dep: $(LDSOURCES) $(PROCESSED_SCRIPTS)
+dep: $(LDSOURCES) $(PROCESSED_SCRIPTS) 
 	mkdep $(CFLAGS) $?
 
 # Dummy target to force execution of dependent targets.

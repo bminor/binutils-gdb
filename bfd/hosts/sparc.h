@@ -17,14 +17,14 @@ extern PROTO(int, close,(int));
 extern PROTO(int, fcntl,(int des, int cmd));
 extern PROTO(int, fprintf,(FILE *,char *,...));
 extern PROTO(int, printf,(char *,...));
-extern PROTO(int, oqsort,(void *data,int els, int siz, int func()));
+extern PROTO(int, qsort,(void *data,int els, int siz, int func()));
 extern PROTO(void, exit,(int));
 extern PROTO(int, fseek,(FILE*, int, int));
 extern PROTO(int, fclose,(FILE*));
 extern PROTO(void, bcopy,(char*,char*,int));
 extern PROTO(int, bcmp,(char *, char *, int));
 extern PROTO(void, bzero,(char *, int));
-extern PROTO(char *,memset,(char*, int, int));
+extern PROTO(PTR,memset,(PTR, int,unsigned int));
 PROTO(PTR, memcpy,(PTR,CONST PTR,unsigned int));
 extern char * strchr();
 extern PROTO(void, perror,(char *));
@@ -38,9 +38,13 @@ extern int fwrite();
 extern int sscanf();
 extern int stat();
 extern int strtol();
-void free();
-char *malloc();
-char *realloc();
+#ifndef DONTDECLARE_MALLOC
+extern PROTO(PTR,malloc,(unsigned));
+extern PROTO(PTR ,realloc, (PTR, unsigned));
+#endif
+
+extern PROTO(int, free,(PTR));
+
 PROTO (void, perror, (char *s));
 extern char *strrchr();
 extern char *ctime();
@@ -63,6 +67,16 @@ typedef unsigned short uint16e_type;
 typedef int int32e_type;
 typedef unsigned int uint32e_type;
 
+
+#ifdef __GNUC__
+typedef unsigned long long uint64e_type;
+
+#else
+typedef struct {
+  uint32e_type low, high;
+} uint64e_type;
+
+#endif
 /* CORRECT SIZE OR GREATER */
 typedef char int8_type;
 typedef unsigned char uint8_type;
@@ -71,3 +85,26 @@ typedef unsigned short uint16_type;
 typedef int int32_type;
 typedef unsigned int uint32_type;
 
+#ifdef __GNUC__
+typedef unsigned long long uint64_type;
+typedef long long int64_type;
+#else
+typedef struct {
+  uint32e_type low, high;
+} uint64_type;
+
+typedef struct {
+  uint32e_type low, high;
+} int64_type;
+
+#endif
+
+
+#define BYTES_IN_PRINTF_INT 4
+#ifndef __GNUC__
+#define uint64_typeLOW(x) (uint32_type)(((x).low))
+#define uint64_typeHIGH(x) (uint32_type)(((x).high))
+#else
+#define uint64_typeLOW(x) (uint32_type)(((x) & 0xffffffff))
+#define uint64_typeHIGH(x) (uint32_type)(((x) >> 32) & 0xffffffff)
+#endif

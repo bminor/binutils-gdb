@@ -42,7 +42,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define DGUX_SYS 9
 #define DEC3100_SYS 10
 #define HP9000_SYS 11
-
+#define APOLLO400_SYS 12
+#define DOS_SYS 13
 #include <ansidecl.h>
 
 #if __STDC__
@@ -99,6 +100,15 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define HOST_IS_HP9000 1
 #define USG 
 #include <sys/h-hp9000.h>
+#endif
+#if HOST_SYS==APOLLO400_SYS
+#define HOST_IS_APOLLO400 1
+#include <sys/h-ap400.h>
+#endif
+ 
+#if HOST_SYS==DOS_SYS
+#define HOST_IS_DOS 1
+#include <sys/h_dos.h>
 #endif
 
 #endif 

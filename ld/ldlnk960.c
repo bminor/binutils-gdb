@@ -244,7 +244,7 @@ lnk960_choose_target()
 {
 #ifdef GNU960
 
-  return bfd_make_targ_name(BFD_COFF_FORMAT,HOST_BYTE_ORDER_BIG_P);
+  return bfd_make_targ_name(BFD_COFF_FORMAT, 0);
 
 #else
 

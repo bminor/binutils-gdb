@@ -1,4 +1,6 @@
+
  	  /* A -*- C -*- header file for the bfd library */
+
 
 /*** bfd.h -- The only header file required by users of the bfd library */
 
@@ -27,6 +29,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define __BFD_H_SEEN__
 
 #include "ansidecl.h"
+#include "sysdep.h"
 #include "obstack.h"
 
 /* Make it easier to declare prototypes (puts conditional here) */
@@ -38,7 +41,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #	endif
 #endif
 
-#define BFD_VERSION "1.9"
+#define BFD_VERSION "1.10"
 
 /* forward declaration */
 typedef struct _bfd bfd;
@@ -52,11 +55,29 @@ typedef enum boolean {false, true} boolean;
 /* Try to avoid breaking stuff */
 typedef  long int file_ptr;
 
-/* This is used to refer to locations inside a section's rawdata */
-typedef unsigned long int rawdata_offset;
+/* Support for different sizes of target format ints */
 
+#ifdef TARGET_64_BIT
+/* 64 bit machines use these items */
+typedef uint64_type rawdata_offset;
+typedef uint64_type bfd_vma;
+typedef uint64_type bfd_word;
+typedef uint64_type bfd_offset;
+typedef uint64_type bfd_size_type;
+typedef uint64_type  symvalue;
+#define printf_vma(x) printf("%08x%08x",uint64_typeHIGH(x),    uint64_typeLOW(x))
+#define fprintf_vma(s,x) fprintf(s,"%08x%08x",uint64_typeHIGH(x), uint64_typeLOW(x))
+#else
+typedef unsigned long int rawdata_offset;
 typedef unsigned long bfd_vma;
 typedef unsigned long bfd_offset;
+typedef unsigned long bfd_word;
+typedef unsigned long bfd_size;
+typedef unsigned long symvalue;
+typedef unsigned long bfd_size_type;
+#define printf_vma(x) printf("%08x",x)
+#define fprintf_vma(s,x) fprintf(s,"%08x",x)
+#endif
 
 typedef unsigned int flagword;	/* 32 bits of flags */
 
@@ -91,12 +112,24 @@ enum bfd_architecture {
 	bfd_arch_m68k,		/* Motorola 68xxx */
 	bfd_arch_vax,		/* DEC Vax */
 	bfd_arch_i960,		/* Intel 960 */
-#define	bfd_mach_i960_core	0
-#define	bfd_mach_i960_kb_sb	1
-#define	bfd_mach_i960_mc	2
-#define	bfd_mach_i960_xa	3
-#define	bfd_mach_i960_ca	4
-#define	bfd_mach_i960_ka_sa	5
+ 			
+ 				/* The order of the following is important.
+ 				 * A lower number indicates a machine type
+ 				 * that only accepts a subset of the
+ 				 * instructions available to machines with
+ 				 * higher numbers.
+ 				 *
+ 				 * The exception is the "ca", which is
+ 				 * incompatible with all other machines except
+ 				 * "core".
+ 				 */
+#define	bfd_mach_i960_core	1
+#define	bfd_mach_i960_ka_sa	2
+#define	bfd_mach_i960_kb_sb	3
+#define	bfd_mach_i960_mc	4
+#define	bfd_mach_i960_xa	5
+#define	bfd_mach_i960_ca	6
+
 
 	bfd_arch_a29k,		/* AMD 29000 */
 	bfd_arch_sparc,		/* Sun (SPARC International) SPARC */
@@ -111,7 +144,7 @@ enum bfd_architecture {
 	bfd_arch_m88k,		/* Motorola 88xxx */
 	bfd_arch_pyramid,	/* Pyramid Technology */
 	bfd_arch_h8_300,	/* Hitachi H8/300 */
-	bfd_arch_last,
+	bfd_arch_last
 };
 
 /* symbols and relocation */
@@ -127,9 +160,9 @@ typedef enum {bfd_symclass_unknown = 0,
 	      bfd_symclass_undefined /* none known */
 	    } symclass;
 
-typedef unsigned long symvalue;	/* someday they may be 64-bit qtys */
+
 typedef int symtype;		/* Who knows, yet? */
-typedef int bfd_size_type;
+
 /* Symbol cache classifications: (Bfd-Symbol-Flag_FOOBAR) */
 #define BSF_NO_FLAGS    0x00
 #define BSF_LOCAL	0x01	/* bfd_symclass_unknown */
@@ -206,7 +239,8 @@ typedef enum bfd_reloc_status {
   bfd_reloc_dangerous}
  bfd_reloc_status_enum_type;
 
-typedef CONST struct rint { 
+typedef CONST struct rint 
+{ 
   unsigned int type;
   unsigned int rightshift;
   unsigned int size;
@@ -219,21 +253,21 @@ typedef CONST struct rint {
   bfd_reloc_status_enum_type (*special_function)();
   char *name;
   boolean partial_inplace;
-/* Two mask fields,
- the src_mask is used to select what parts of the read in data are to
- be used in the relocation sum. Eg, if this was an 8 bit bit of data
- which we read and relocated, this would be 0x000000ff. When we have
- relocs which have an addend, such as sun4 extended relocs, the value
- in the offset part of a relocating field is garbage so we never use
- it. In this case the mask would be 0x00000000.
-
- The dst_mask is what parts of the instruction are replaced into the
- instruction. In most cases src_mask == dst_mask, except in the above
- special case, where dst_mask would be 0x000000ff, and src_mask would
- be 0x00000000.
-*/
-  unsigned int src_mask; /* What things to take from the source */
-  unsigned int dst_mask; /* What things to put into the dest */
+  /* Two mask fields,
+     the src_mask is used to select what parts of the read in data are to
+     be used in the relocation sum. Eg, if this was an 8 bit bit of data
+     which we read and relocated, this would be 0x000000ff. When we have
+     relocs which have an addend, such as sun4 extended relocs, the value
+     in the offset part of a relocating field is garbage so we never use
+     it. In this case the mask would be 0x00000000.
+     
+     The dst_mask is what parts of the instruction are replaced into the
+     instruction. In most cases src_mask == dst_mask, except in the above
+     special case, where dst_mask would be 0x000000ff, and src_mask would
+     be 0x00000000.
+     */
+  bfd_word src_mask;		/* What things to take from the source */
+  bfd_word dst_mask;		/* What things to put into the dest */
 
   /* Does a pc rel offset already have the offset of the jump from the
      beginnining of the module in place - eg on the sun3, a pcrel
@@ -387,7 +421,7 @@ typedef enum
 { 
   bfd_print_symbol_name_enum,
   bfd_print_symbol_type_enum,
-  bfd_print_symbol_all_enum,
+  bfd_print_symbol_all_enum
 }  bfd_print_symbol_enum_type;
     
 
@@ -450,16 +484,20 @@ typedef struct bfd_target
   /* Byte swapping for data */
   /* Note that these don't take bfd as first arg.  Certain other handlers
      could do the same. */
-  SDEF (long, bfd_getxlong, (bfd_byte *));
-  SDEF (void, bfd_putxlong, (unsigned long, bfd_byte *));
-  SDEF (short, bfd_getxshort, (bfd_byte *));
-  SDEF (void, bfd_putxshort, (int, bfd_byte *));
+  SDEF (uint64_type,bfd_getx64, (bfd_byte *));
+  SDEF (void, bfd_putx64, (uint64_type, bfd_byte *));
+  SDEF (uint32_type, bfd_getx32, (bfd_byte *));
+  SDEF (void, bfd_putx32, (unsigned long, bfd_byte *));
+  SDEF (uint16_type, bfd_getx16, (bfd_byte *));
+  SDEF (void, bfd_putx16, (int, bfd_byte *));
 
   /* Byte swapping for headers */
-  SDEF (long, bfd_h_getxlong, (bfd_byte *));
-  SDEF (void, bfd_h_putxlong, (unsigned long, bfd_byte *));
-  SDEF (short, bfd_h_getxshort, (bfd_byte *));
-  SDEF (void, bfd_h_putxshort, (int, bfd_byte *));
+  SDEF (uint64_type, bfd_h_getx64, (bfd_byte *));
+  SDEF (void, bfd_h_putx64, (uint64_type, bfd_byte *));
+  SDEF (uint32_type, bfd_h_getx32, (bfd_byte *));
+  SDEF (void, bfd_h_putx32, (unsigned long, bfd_byte *));
+  SDEF (uint16_type, bfd_h_getx16, (bfd_byte *));
+  SDEF (void, bfd_h_putx16, (int, bfd_byte *));
 
   /* Format-dependent */
   SDEF_FMT (struct bfd_target *, _bfd_check_format, (bfd *));/* file fmt or 0 */
@@ -483,9 +521,9 @@ typedef struct bfd_target
   /* All the standard stuff */
   SDEF (boolean, _close_and_cleanup, (bfd *)); /* free any allocated data */
   SDEF (boolean, _bfd_set_section_contents, (bfd *, sec_ptr, PTR,
-					    file_ptr, int));
+					    file_ptr, bfd_size_type));
   SDEF (boolean, _bfd_get_section_contents, (bfd *, sec_ptr, PTR, 
-					     file_ptr, int));
+					     file_ptr, bfd_size_type));
   SDEF (boolean, _new_section_hook, (bfd *, sec_ptr));
 
   /* Symbols and relocation */
@@ -495,7 +533,7 @@ typedef struct bfd_target
   SDEF (unsigned int, _bfd_canonicalize_reloc, (bfd *, sec_ptr, arelent **,
 						asymbol**));
 
-  /* FIXME: For steve -- clean up later */
+
   SDEF (asymbol *, _bfd_make_empty_symbol, (bfd *));
   SDEF (void, _bfd_print_symbol, (bfd *, PTR, asymbol *,
 				  bfd_print_symbol_enum_type));
@@ -599,8 +637,8 @@ struct _bfd
   char *iostream;		/* stdio FILE *, unless an archive element */
 
   boolean cacheable;		/* iostream can be closed if desired */
-  struct _bfd *lru_prev; /* Used for file caching */
-  struct _bfd *lru_next; /* Used for file caching */
+  struct _bfd *lru_prev;	/* Used for file caching */
+  struct _bfd *lru_next;	/* Used for file caching */
   file_ptr where;		/* Where the file was when closed */
   boolean opened_once;
   boolean mtime_set;		/* Flag indicating mtime is available */
@@ -613,11 +651,11 @@ struct _bfd
 			both_direction = 3} direction;
 
   flagword flags;		/* format_specific */
-/* 
-Currently my_archive is tested before adding origin to anything. I
-believe that this can become always an add of origin, with origin set
-to 0 for non archive files
-*/
+  /* 
+    Currently my_archive is tested before adding origin to anything. I
+    believe that this can become always an add of origin, with origin set
+    to 0 for non archive files
+    */
 
   file_ptr origin;		/* for archive contents */
   boolean output_has_begun;	/* cf bfd_set_section_size */
@@ -634,13 +672,13 @@ to 0 for non archive files
   /* Archive stuff.  strictly speaking we don't need all three bfd* vars,
      but doing so would allow recursive archives! */
   PTR arelt_data;		/* needed if this came from an archive */
-  struct _bfd *my_archive; /* if this is an archive element */
-  struct _bfd *next;	/* output chain pointer */
-  struct _bfd *archive_head; /* for output archive */
+  struct _bfd *my_archive;	/* if this is an archive element */
+  struct _bfd *next;		/* output chain pointer */
+  struct _bfd *archive_head;	/* for output archive */
   boolean has_armap;		/* if an arch; has it an armap? */
   
   PTR tdata;			/* target-specific storage */
-  PTR usrdata;		/* application-specific storage */
+  PTR usrdata;			/* application-specific storage */
 
   /* Should probably be enabled here always, so that library may be changed
      to switch this on and off, while user code may remain unchanged */
@@ -687,10 +725,10 @@ PROTO (boolean, bfd_set_section_size, (bfd *abfd, sec_ptr ptr,
 				       unsigned long val));
 PROTO (boolean, bfd_get_section_contents, (bfd *abfd, sec_ptr section,
 					   PTR location,
-					   file_ptr offset, int count));
+					   file_ptr offset, bfd_size_type count));
 PROTO (boolean, bfd_set_section_contents, (bfd *abfd, sec_ptr section,
 					   PTR location,
-					   file_ptr offset, int count));
+					   file_ptr offset, bfd_size_type count));
 
 PROTO (unsigned long, bfd_get_next_mapent, (bfd *abfd, symindex prev, carsym **entry));
 PROTO (bfd *, bfd_get_elt_at_index, (bfd *abfd, int index));
@@ -773,26 +811,33 @@ BFD_SEND (abfd, _bfd_find_nearest_line, (abfd, section,symbols, offset, filename
 
 
 /* Some byte-swapping i/o operations */
+#define LONGLONG_SIZE 8
 #define LONG_SIZE 4
 #define SHORT_SIZE 2
 #define BYTE_SIZE 1
-#define bfd_putchar(abfd, val, ptr)    (*((char *)ptr) = (char)val)
-#define bfd_getchar(abfd, ptr)	       (*((char *)ptr))
+#define bfd_put_8(abfd, val, ptr)    (*((char *)ptr) = (char)val)
+#define bfd_get_8(abfd, ptr)	       (*((char *)ptr))
 
-#define bfd_putlong(abfd, val, ptr)    BFD_SEND(abfd, bfd_putxlong,   (val,ptr))
-#define bfd_getlong(abfd, ptr)	       BFD_SEND(abfd, bfd_getxlong,   (ptr))
+#define bfd_put_32(abfd, val, ptr)    BFD_SEND(abfd, bfd_putx32,   (val,ptr))
+#define bfd_get_32(abfd, ptr)	       BFD_SEND(abfd, bfd_getx32,   (ptr))
 
-#define bfd_putshort(abfd, val, ptr)   BFD_SEND(abfd, bfd_putxshort,  (val,ptr))
-#define bfd_getshort(abfd, ptr)	       BFD_SEND(abfd, bfd_getxshort,  (ptr))
+#define bfd_put_64(abfd, val, ptr) BFD_SEND(abfd, bfd_putx64,   (val,ptr))
+#define bfd_get_64(abfd, ptr)	BFD_SEND(abfd, bfd_getx64,   (ptr))
 
-#define	bfd_h_putchar(abfd, val, ptr)	bfd_putchar (abfd, val, ptr)
-#define	bfd_h_getchar(abfd, ptr)	bfd_getchar (abfd, ptr)
+#define bfd_put_16(abfd, val, ptr)   BFD_SEND(abfd, bfd_putx16,  (val,ptr))
+#define bfd_get_16(abfd, ptr)	       BFD_SEND(abfd, bfd_getx16,  (ptr))
 
-#define bfd_h_putlong(abfd, val, ptr)  BFD_SEND(abfd, bfd_h_putxlong, (val, (bfd_byte *) ptr))
-#define bfd_h_getlong(abfd, ptr)       BFD_SEND(abfd, bfd_h_getxlong, ((bfd_byte *) ptr))
+#define	bfd_h_put_8(abfd, val, ptr)	bfd_put_8 (abfd, val, ptr)
+#define	bfd_h_get_8(abfd, ptr)	bfd_get_8 (abfd, ptr)
 
-#define bfd_h_putshort(abfd, val, ptr) BFD_SEND(abfd, bfd_h_putxshort,(val,ptr))
-#define bfd_h_getshort(abfd, ptr)      BFD_SEND(abfd, bfd_h_getxshort,(ptr))
+#define bfd_h_put_32(abfd, val, ptr)  BFD_SEND(abfd, bfd_h_putx32, (val, (bfd_byte *) ptr))
+#define bfd_h_get_32(abfd, ptr)       BFD_SEND(abfd, bfd_h_getx32, ((bfd_byte *) ptr))
+
+#define bfd_h_put_64(abfd, val, ptr)  BFD_SEND(abfd, bfd_h_putx64, (val, (bfd_byte *) ptr))
+#define bfd_h_get_64(abfd, ptr)       BFD_SEND(abfd, bfd_h_getx64, ((bfd_byte *) ptr))
+
+#define bfd_h_put_16(abfd, val, ptr) BFD_SEND(abfd, bfd_h_putx16,(val,ptr))
+#define bfd_h_get_16(abfd, ptr)      BFD_SEND(abfd, bfd_h_getx16,(ptr))
 
 /* General purpose one fits all.  The do { } while (0) makes a single 
    statement out of it, for use in things like nested if-statements.
@@ -808,20 +853,21 @@ BFD_SEND (abfd, _bfd_find_nearest_line, (abfd, section,symbols, offset, filename
 
 #define bfd_h_put_x(abfd, val, ptr) \
   do {  \
+       if (sizeof((ptr)) == LONGLONG_SIZE) \
+		bfd_h_put_64  (abfd, val, (ptr));\
        if (sizeof((ptr)) == LONG_SIZE) \
-		bfd_h_putlong  (abfd, val, (ptr));\
+		bfd_h_put_32  (abfd, val, (ptr));\
   else if (sizeof((ptr)) == SHORT_SIZE) \
-		bfd_h_putshort (abfd, val, (ptr));\
+		bfd_h_put_16 (abfd, val, (ptr));\
   else if (sizeof((ptr)) == BYTE_SIZE) \
-		bfd_h_putchar  (abfd, val, (ptr));\
+		bfd_h_put_8  (abfd, val, (ptr));\
   else abort(); } while (0)
 
 #define bfd_h_get_x(abfd, ptr) \
-  ((sizeof((ptr))==LONG_SIZE) ?  bfd_h_getlong (abfd, &(ptr[0])):\
-   (sizeof((ptr))==SHORT_SIZE) ? bfd_h_getshort(abfd, &(ptr[0])):\
-   (sizeof((ptr))==BYTE_SIZE) ?  bfd_h_getchar (abfd, &(ptr[0])):\
-   (abort(),1) )
-
+  ((sizeof((ptr))==LONGLONG_SIZE) ? bfd_h_get_64 (abfd, &(ptr[0])):\
+  (sizeof((ptr))==LONG_SIZE) ?  bfd_h_get_32 (abfd, &(ptr[0])):\
+   (sizeof((ptr))==SHORT_SIZE) ? bfd_h_get_16(abfd, &(ptr[0])):\
+    bfd_h_get_8 (abfd, &(ptr[0])))
 #ifdef GNU960
 
 #define BFD_COFF_FORMAT	bfd_target_coff_flavour_enum
@@ -849,5 +895,7 @@ BFD_SEND (abfd, _bfd_find_nearest_line, (abfd, section,symbols, offset, filename
 extern PROTO (char *, bfd_make_targ_name,( enum target_flavour_enum format, int bigendian));
 
 #endif /* GNU960 */
+
+
 
 #endif /* __BFD_H_SEEN__ */

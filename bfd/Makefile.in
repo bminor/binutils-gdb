@@ -37,16 +37,16 @@ CFLAGS = -g $(HDEFINES) $(TDEFINES) $(CSEARCH) $(CSWITCHES) # -DINTEL960VERSION
 BFD_LIBS = libbfd.o opncls.o bfd.o archive.o targets.o cache.o \
 	archures.o 
 
-BFD_BACKENDS = oasys.o ieee.o srec.o aout.o sunos.o icoff.o b.out.o \
-	m68kcoff.o m88k-bcs.o coffswap.o ecoff.o newsos3.o # trad-core.o
+BFD_BACKENDS = oasys.o ieee.o srec.o aout64.o aout32.o sunos.o icoff.o demo64.o \
+	m68kcoff.o m88k-bcs.o coffswap.o ecoff.o newsos3.o # trad-core.o bout.o
 
 BFD_H=$(INCDIR)/bfd.h
 SYSDEP_H=$(INCDIR)/sysdep.h
 
 # C source files that correspond to .o's.
 CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c archures.c \
-	 aout.c sunos.c icoff.c b.out.c srec.c oasys.c ieee.c m68kcoff.c \
-	 m88k-bcs.c coffswap.c ecoff.c trad-core.c newsos3.c
+	 aout64.c aout32.c sunos.c demo64.c icoff.c srec.c oasys.c ieee.c m68kcoff.c \
+	 m88k-bcs.c coffswap.c ecoff.c trad-core.c newsos3.c #bout.c
 
 STAGESTUFF = $(TARGETLIB) $(OFILES)
 

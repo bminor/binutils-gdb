@@ -19,14 +19,14 @@ You should have received a copy of the GNU General Public License along with
 */
 
 /* Most of this hacked by Steve Chamberlain, steve@cygnus.com */
-
+#if 0
 #include <ansidecl.h>
 #include "intel-coff.h"
 #include "bfd.h"
 #include "libcoff.h"		/* to allow easier abstraction-breaking */
 
 #define sp(x) bfd_h_put_x(abfd, x, &x)
-#if 0
+
 /* All the generic swapping routines:
 
 FIXME

@@ -98,7 +98,7 @@ DEFUN(ldsym_get,(key),
 
   /* Nothing was found; create a new symbol table entry.  */
 
-  bp = (ldsym_type *) ldmalloc (sizeof (ldsym_type));
+  bp = (ldsym_type *) ldmalloc ((bfd_size_type)(sizeof (ldsym_type)));
   bp->srefs_chain = (asymbol **)NULL;
   bp->sdefs_chain = (asymbol **)NULL;
   bp->scoms_chain = (asymbol **)NULL;
@@ -149,9 +149,9 @@ list_file_locals (entry)
 lang_input_statement_type *entry;
 {
   asymbol **q;
-  fprintf (stderr, "\nLocal symbols of ");
+  printf ( "\nLocal symbols of ");
   info("%I", entry);
-  fprintf (stderr, ":\n\n");
+  printf (":\n\n");
   if (entry->asymbols) {
     for (q = entry->asymbols; *q; q++) 
       {
@@ -169,21 +169,21 @@ static void
 print_file_stuff(f)
 lang_input_statement_type *f;
 {
-  fprintf (stderr, "  %s", f->filename);
-  fprintf (stderr, " ");
+  fprintf (stdout, "  %s", f->filename);
+  fprintf (stdout, " ");
   if (f->just_syms_flag) 
     {
-      fprintf (stderr, " symbols only\n");
+      fprintf (stdout, " symbols only\n");
     }
   else 
     {
       asection *s;
-      if (option_longmap) {
+      if (true || option_longmap) {
 	for (s = f->the_bfd->sections;
 	     s != (asection *)NULL;
 	     s = s->next) {
-	  fprintf (stderr, "%08lx %08x 2**%2ud %s\n",
-		   s->output_offset,
+	  print_address(s->output_offset);
+	  printf ( "%08x 2**%2ud %s\n",
 		   (unsigned)s->size, s->alignment_power, s->name);
 	}
       }
@@ -191,12 +191,11 @@ lang_input_statement_type *f;
 	for (s = f->the_bfd->sections;
 	     s != (asection *)NULL;
 	     s = s->next) {
-	  fprintf (stderr, "%s %lx(%x) ",
-		   s->name,
-		   s->output_offset,
-		   (unsigned)   s->size);
+	  printf("%s ", s->name);
+	  print_address(s->output_offset);
+	  printf("(%x)", (unsigned)s->size);
 	}
-	fprintf (stderr, "hex \n");
+	printf("hex \n");
       }
     }
 }
@@ -204,11 +203,11 @@ lang_input_statement_type *f;
 void
 ldsym_print_symbol_table ()
 {
-  fprintf (stderr, "\nFiles:\n\n");
+  fprintf (stdout, "\nFiles:\n\n");
 
   lang_for_each_file(print_file_stuff);
 
-  fprintf (stderr, "\nGlobal symbols:\n\n");
+  fprintf (stdout, "\nGlobal symbols:\n\n");
   {
     register ldsym_type *sp;
 
@@ -218,41 +217,42 @@ ldsym_print_symbol_table ()
 	  {
 	    asymbol *defsym = *(sp->sdefs_chain);
 	    asection *defsec = bfd_get_section(defsym);
-	    fprintf(stderr,"%08lx ",defsym->value);
+	    print_address(defsym->value);
 	    if (defsec)
 	      {
-		fprintf(stderr,"%08lx ",defsym->value+defsec->vma);
-		fprintf(stderr,
-			"%7s",
+		print_space();
+		print_address(defsym->value+defsec->vma);
+		printf("%7s",
 			bfd_section_name(output_bfd,
 					 defsec));
 
 	      }
 	    else 
 	      {
-		fprintf(stderr,"         .......");
+		printf("         .......");
 	      }
 
 	  }	
 	else {
-	  fprintf(stderr,"undefined");
+	  printf("undefined");
 	}
 
 
 	if (sp->scoms_chain) {
-	  fprintf(stderr, " common size %5lu    %s",
-		  (*(sp->scoms_chain))->value, sp->name);
+	  printf(" common size ");
+	  print_address((*(sp->scoms_chain))->value);
+	  printf("%s ",sp->name);
 	}
 	if (sp->sdefs_chain) {
-	  fprintf(stderr, " symbol def %08lx    %s",
-		  (*(sp->sdefs_chain))->value,
-		  sp->name);
+	  printf(" symbol def ");
+	  print_address((*(sp->sdefs_chain))->value);
+	  printf("%s ",sp->name);
 	}
 	else {
-	  fprintf(stderr, " undefined    %s",
-		  sp->name);
+	  printf(" undefined    ");
+	  printf("%s ",sp->name);
 	}
-	fprintf(stderr, "\n");
+	print_nl();
 
       }
   }
@@ -414,7 +414,7 @@ ldsym_write()
     extern unsigned int total_symbols_seen;
 
     asymbol **  symbol_table =  (asymbol **) 
-      ldmalloc ((size_t)(global_symbol_count +
+      ldmalloc ((bfd_size_type)(global_symbol_count +
 			 total_files_seen +
 			 total_symbols_seen + 1) *     sizeof (asymbol *));
     asymbol ** tablep = write_file_locals(symbol_table);

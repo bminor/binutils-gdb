@@ -10,7 +10,7 @@
 /* Offset in a.out file of the text section.  For ZMAGIC, the text section
    actually includes the a.out header.  */
 
-#define N_TXTOFF(x)	( (N_MAGIC((x)) == ZMAGIC) ? 0 : sizeof(struct exec) )
+#define N_TXTOFF(x)	( (N_MAGIC((x)) == ZMAGIC) ? 0 : EXEC_BYTES_SIZE)
 
 /* Virtual Address of text segment from the a.out file.  For OMAGIC,
    (almost always "unlinked .o's" these days), should be zero.
