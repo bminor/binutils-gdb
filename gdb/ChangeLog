@@ -1,3 +1,10 @@
+Wed Jun  9 06:14:33 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* target.h (target_store_registers): Doc fix re error handling.
+
+	* findvar.c (write_register): Call SWAP_TARGET_AND_HOST regardless
+	of register_valid[regno].
+
 Tue Jun  8 14:42:10 1993  Jim Kingdon  (kingdon@rtl.cygnus.com)
 
 	* symtab.h, dwarfread.c: Doc fix re dependencies.
