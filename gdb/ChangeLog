@@ -1,3 +1,15 @@
+Sun Feb 27 21:05:06 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* config/m68k/tm-apollo68b.h: Remove HAVE_68881 define; it is
+	obsolete. 
+
+	* i387-tdep.c, i386-tdep.c i386v-nat.c, i386aix-nat.c,
+	i386m3-nat.c, config/m68k/tm-m68k.h, i960-tdep.c
+	config/i960/tm-i960.h, remote-nindy.c, config/m88k/tm-m88k.h,
+	m88k-tdep.c: Use floatformat.h instead of ieee-float.h.
+	* sparc-tdep.c: Remove now-obsolete ieee-float.h stuff
+	* findvar.c: Update comment regarding ieee-float.h.
+
 Sun Feb 27 21:39:48 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* config/i386/tm-i386v4.h (I386V4_SIGTRAMP_SAVED_PC, IN_SIGTRAMP,
