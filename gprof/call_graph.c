@@ -45,7 +45,7 @@ DEFUN (cg_tally, (from_pc, self_pc, count),
     {
       child->ncalls += count;
       DBG (TALLYDEBUG,
-	   printf ("[cg_tally] arc from %s to %s traversed %d times\n",
+	   printf (_("[cg_tally] arc from %s to %s traversed %d times\n"),
 		   parent->name, child->name, count));
       arc_add (parent, child, count);
     }
@@ -67,7 +67,7 @@ DEFUN (cg_read_rec, (ifp, filename), FILE * ifp AND CONST char *filename)
 
   if (fread (&arc, sizeof (arc), 1, ifp) != 1)
     {
-      fprintf (stderr, "%s: %s: unexpected end of file\n",
+      fprintf (stderr, _("%s: %s: unexpected end of file\n"),
 	       whoami, filename);
       done (1);
     }

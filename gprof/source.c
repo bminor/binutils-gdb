@@ -137,7 +137,7 @@ DEFUN (annotate_source, (sf, max_width, annote, arg),
 	{
 	  if (errno == ENOENT)
 	    {
-	      fprintf (stderr, "%s: could not locate `%s'\n",
+	      fprintf (stderr, _("%s: could not locate `%s'\n"),
 		       whoami, sf->name);
 	    }
 	  else
@@ -197,7 +197,7 @@ DEFUN (annotate_source, (sf, max_width, annote, arg),
 	{
 	  fprintf (ofp, "\f\n");
 	}
-      fprintf (ofp, "*** File %s:\n", sf->name);
+      fprintf (ofp, _("*** File %s:\n"), sf->name);
     }
 
   annotation = xmalloc (max_width + 1);

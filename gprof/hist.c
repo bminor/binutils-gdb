@@ -102,7 +102,7 @@ DEFUN (hist_read_rec, (ifp, filename), FILE * ifp AND const char *filename)
 
   if (fread (&hdr, sizeof (hdr), 1, ifp) != 1)
     {
-      fprintf (stderr, "%s: %s: unexpected end of file\n",
+      fprintf (stderr, _("%s: %s: unexpected end of file\n"),
 	       whoami, filename);
       done (1);
     }
@@ -139,7 +139,7 @@ DEFUN (hist_read_rec, (ifp, filename), FILE * ifp AND const char *filename)
   if (n_lowpc != s_lowpc || n_highpc != s_highpc
       || ncnt != hist_num_bins || hz != profrate)
     {
-      fprintf (stderr, "%s: `%s' is incompatible with first gmon file\n",
+      fprintf (stderr, _("%s: `%s' is incompatible with first gmon file\n"),
 	       whoami, filename);
       done (1);
     }
@@ -155,7 +155,7 @@ DEFUN (hist_read_rec, (ifp, filename), FILE * ifp AND const char *filename)
       if (fread (&count[0], sizeof (count), 1, ifp) != 1)
 	{
 	  fprintf (stderr,
-		   "%s: %s: unexpected EOF after reading %d of %d samples\n",
+		   _("%s: %s: unexpected EOF after reading %d of %d samples\n"),
 		   whoami, filename, i, hist_num_bins);
 	  done (1);
 	}
@@ -374,35 +374,35 @@ DEFUN (print_header, (prefix), const char prefix)
 {
   char unit[64];
 
-  sprintf (unit, "%c%c/call", prefix, hist_dimension_abbrev);
+  sprintf (unit, _("%c%c/call"), prefix, hist_dimension_abbrev);
 
   if (bsd_style_output)
     {
-      printf ("\ngranularity: each sample hit covers %ld byte(s)",
+      printf (_("\ngranularity: each sample hit covers %ld byte(s)"),
 	      (long) hist_scale * sizeof (UNIT));
       if (total_time > 0.0)
 	{
-	  printf (" for %.2f%% of %.2f %s\n\n",
+	  printf (_(" for %.2f%% of %.2f %s\n\n"),
 		  100.0 / total_time, total_time / hz, hist_dimension);
 	}
     }
   else
     {
-      printf ("\nEach sample counts as %g %s.\n", 1.0 / hz, hist_dimension);
+      printf (_("\nEach sample counts as %g %s.\n"), 1.0 / hz, hist_dimension);
     }
 
   if (total_time <= 0.0)
     {
-      printf (" no time accumulated\n\n");
+      printf (_(" no time accumulated\n\n"));
       /* this doesn't hurt since all the numerators will be zero: */
       total_time = 1.0;
     }
 
   printf ("%5.5s %10.10s %8.8s %8.8s %8.8s %8.8s  %-8.8s\n",
-	  "%  ", "cumulative", "self  ", "", "self  ", "total ", "");
+	  "%  ", _("cumulative"), _("self  "), "", _("self  "), _("total "), "");
   printf ("%5.5s %9.9s  %8.8s %8.8s %8.8s %8.8s  %-8.8s\n",
-	  "time", hist_dimension, hist_dimension, "calls", unit, unit,
-	  "name");
+	  _("time"), hist_dimension, hist_dimension, _("calls"), unit, unit,
+	  _("name"));
 }
 
 
@@ -512,13 +512,13 @@ DEFUN_VOID (hist_print)
     {
       if (print_descriptions)
 	{
-	  printf ("\n\n\nflat profile:\n");
+	  printf (_("\n\n\nflat profile:\n"));
 	  flat_blurb (stdout);
 	}
     }
   else
     {
-      printf ("Flat profile:\n");
+      printf (_("Flat profile:\n"));
     }
   /*
    * Sort the symbol table by time (call-count and name as secondary

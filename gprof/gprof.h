@@ -51,6 +51,29 @@
 #define	GMONNAME	"gmon.out"	/* default profile filename */
 #define	GMONSUM		"gmon.sum"	/* profile summary filename */
 
+#ifdef ENABLE_NLS
+#include <libintl.h>
+#define _(String) gettext (String)
+#ifdef gettext_noop
+#define N_(String) gettext_noop (String)
+#else
+#define N_(String) (String)
+#endif
+#else
+/* Stubs that do something close enough.  */
+#define textdomain(String) (String)
+#define gettext(String) (String)
+#define dgettext(Domain,Message) (Message)
+#define dcgettext(Domain,Message,Type) (Message)
+#define bindtextdomain(Domain,Directory) (Domain)
+#define _(String) (String)
+#define N_(String) (String)
+/* In this case we don't care about the value.  */
+#ifndef LC_MESSAGES
+#define LC_MESSAGES 0
+#endif
+#endif
+
 /*
  * These may already be defined on some systems.  We could probably
  * just use the BFD versions of these, since BFD has already dealt

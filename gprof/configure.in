@@ -19,6 +19,9 @@ AM_PROG_INSTALL
 
 AC_ISC_POSIX
 
+ALL_LINGUAS=
+CY_GNU_GETTEXT
+
 dnl We need to set BSD44_FORMAT on a host which uses the additional
 dnl header fields.  This is an attempt to do that.  I can't think of a
 dnl good feature test for this.
@@ -32,4 +35,5 @@ AM_MAINTAINER_MODE
 AM_CYGWIN32
 AM_EXEEXT
 
-AC_OUTPUT(Makefile)
+AC_OUTPUT(Makefile po/Makefile.in:po/Make-in,
+[sed -e '/POTFILES =/r po/POTFILES' po/Makefile.in > po/Makefile])

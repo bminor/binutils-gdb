@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1983 Regents of the University of California.
+ * Copyright (c) 1983, 1998 Regents of the University of California.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms are permitted
@@ -56,8 +56,8 @@ File_Format file_format = FF_AUTO;
 bool first_output = TRUE;
 
 char copyright[] =
-"@(#) Copyright (c) 1983 Regents of the University of California.\n\
- All rights reserved.\n";
+ N_("@(#) Copyright (c) 1983 Regents of the University of California.\n\
+ All rights reserved.\n");
 
 static char *gmon_name = GMONNAME;	/* profile filename */
 
@@ -141,7 +141,7 @@ static struct option long_options[] =
 static void
 DEFUN (usage, (stream, status), FILE * stream AND int status)
 {
-  fprintf (stream, "\
+  fprintf (stream, _("\
 Usage: %s [-[abcDhilLsTvwxyz]] [-[ACeEfFJnNOpPqQZ][name]] [-I dirs]\n\
 	[-d[num]] [-k from/to] [-m min-count] [-t table-length]\n\
 	[--[no-]annotated-source[=name]] [--[no-]exec-counts[=name]]\n\
@@ -154,10 +154,10 @@ Usage: %s [-[abcDhilLsTvwxyz]] [-[ACeEfFJnNOpPqQZ][name]] [-I dirs]\n\
 	[--static-call-graph] [--sum] [--table-length=len] [--traditional]\n\
 	[--version] [--width=n] [--ignore-non-functions]\n\
 	[--demangle] [--no-demangle]\n\
-	[image-file] [profile-file...]\n",
+	[image-file] [profile-file...]\n"),
 	   whoami);
   if (status == 0)
-    fprintf (stream, "Report bugs to bug-gnu-utils@gnu.org\n");
+    fprintf (stream, _("Report bugs to bug-gnu-utils@gnu.org\n"));
   done (status);
 }
 
@@ -168,6 +168,10 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
   char **sp, *str;
   Sym **cg = 0;
   int ch, user_specified = 0;
+
+  setlocale (LC_MESSAGES, "");
+  bindtextdomain (PACKAGE, LOCALEDIR);
+  textdomain (PACKAGE);
 
   whoami = argv[0];
   xmalloc_set_program_name (whoami);
@@ -220,7 +224,7 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
 	    }
 	  DBG (ANYDEBUG, printf ("[main] debug-level=0x%x\n", debug_level));
 #ifndef DEBUG
-	  printf ("%s: debugging not supported; -d ignored\n", whoami);
+	  printf (_("%s: debugging not supported; -d ignored\n"), whoami);
 #endif	/* DEBUG */
 	  break;
 	case 'D':
@@ -297,7 +301,7 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
 	      file_format = FF_PROF;
 	      break;
 	    default:
-	      fprintf (stderr, "%s: unknown file format %s\n",
+	      fprintf (stderr, _("%s: unknown file format %s\n"),
 		       optarg, whoami);
 	      done (1);
 	    }
@@ -381,10 +385,10 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
 	  break;
 	case 'v':
 	  /* This output is intended to follow the GNU standards document.  */
-	  printf ("GNU gprof %s\n", VERSION);
-	  printf ("Based on BSD gprof, copyright 1983 Regents of the University of California.\n");
-	  printf ("\
-This program is free software.  This program has absolutely no warranty.\n");
+	  printf (_("GNU gprof %s\n"), VERSION);
+	  printf (_("Based on BSD gprof, copyright 1983 Regents of the University of California.\n"));
+	  printf (_("\
+This program is free software.  This program has absolutely no warranty.\n"));
 	  done (0);
 	case 'w':
 	  output_width = atoi (optarg);
@@ -429,8 +433,8 @@ This program is free software.  This program has absolutely no warranty.\n");
   if ((user_specified & STYLE_FUNCTION_ORDER)
       && (user_specified & STYLE_FILE_ORDER))
     {
-      fprintf (stderr,"\
-%s: Only one of --function-ordering and --file-ordering may be specified.\n",
+      fprintf (stderr,_("\
+%s: Only one of --function-ordering and --file-ordering may be specified.\n"),
 	       whoami);
       done (1);
     }
@@ -529,7 +533,7 @@ This program is free software.  This program has absolutely no warranty.\n");
       while (optind++ < argc);
 #else
       fprintf (stderr,
-	       "%s: sorry, file format `prof' is not yet supported\n",
+	       _("%s: sorry, file format `prof' is not yet supported\n"),
 	       whoami);
       done (1);
 #endif
@@ -590,14 +594,14 @@ This program is free software.  This program has absolutely no warranty.\n");
   if ((output_style & STYLE_FLAT_PROFILE)
       && !(gmon_input & INPUT_HISTOGRAM))
     {
-      fprintf (stderr, "%s: gmon.out file is missing histogram\n", whoami);
+      fprintf (stderr, _("%s: gmon.out file is missing histogram\n"), whoami);
       done (1);
     }
 
   if ((output_style & STYLE_CALL_GRAPH) && !(gmon_input & INPUT_CALL_GRAPH))
     {
       fprintf (stderr,
-	       "%s: gmon.out file is missing call-graph data\n", whoami);
+	       _("%s: gmon.out file is missing call-graph data\n"), whoami);
       done (1);
     }
 

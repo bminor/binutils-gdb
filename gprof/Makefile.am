@@ -4,17 +4,20 @@ AUTOMAKE_OPTIONS = cygnus
 
 SUFFIXES = .m
 
-INCLUDES = -D_GNU_SOURCE -DDEBUG -I../bfd -I$(srcdir)/../include -I$(srcdir)/../bfd
+SUBDIRS = po
+
+INCLUDES = -D_GNU_SOURCE -DDEBUG -I../bfd -I$(srcdir)/../include -I$(srcdir)/../bfd -I$(srcdir)/../intl -I../intl -DLOCALEDIR="\"$(prefix)/share/locale\""
 
 bin_PROGRAMS = gprof
 
-gprof_SOURCES = basic_blocks.c call_graph.c cg_arcs.c cg_dfn.c \
+## Convenience var listing pure sources.
+sources = basic_blocks.c call_graph.c cg_arcs.c cg_dfn.c \
 	cg_print.c core.c gmon_io.c gprof.c hertz.c hist.c source.c \
 	search_list.c symtab.c sym_ids.c utils.c \
-	flat_bl.c bsd_callg_bl.c fsf_callg_bl.c \
 	i386.c alpha.c vax.c tahoe.c sparc.c
-gprof_DEPENDENCIES = ../bfd/libbfd.la ../libiberty/libiberty.a
-gprof_LDADD = ../bfd/libbfd.la ../libiberty/libiberty.a
+gprof_SOURCES = $(sources) flat_bl.c bsd_callg_blc. fsf_callg_bl.c
+gprof_DEPENDENCIES = ../bfd/libbfd.la ../libiberty/libiberty.a $(INTLDEPS)
+gprof_LDADD = ../bfd/libbfd.la ../libiberty/libiberty.a $(INTLLIBS)
 
 noinst_HEADERS = \
 	basic_blocks.h call_graph.h cg_arcs.h cg_dfn.h cg_print.h \
@@ -31,6 +34,11 @@ diststuff: $(BUILT_SOURCES) info
 	awk -f $(srcdir)/gen-c-prog.awk > ./$*.c \
 	    FUNCTION=`(echo $*|sed -e 's,.*/,,g' -e 's/_bl//')`_blurb \
 	    FILE=$*.m $(srcdir)/$*.m
+
+POTFILES = $(sources) $(noinst_HEADERS)
+po/POTFILES.in: @MAINT@ Makefile
+	for file in $(POTFILES); do echo $$file; done | sort > tmp \
+	  && mv tmp $(srcdir)/po/POTFILES.in
 
 info_TEXINFOS = gprof.texi
 man_MANS = gprof.1

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1983 Regents of the University of California.
+ * Copyright (c) 1983, 1998 Regents of the University of California.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms are permitted
@@ -86,7 +86,7 @@ alpha_find_call (parent, p_lowpc, p_highpc)
       delta = (bfd_vma) core_text_space - core_text_sect->vma;
 
       sym_init (&indirect_child);
-      indirect_child.name = "<indirect child>";
+      indirect_child.name = _("<indirect child>");
       indirect_child.cg.prop.fract = 1.0;
       indirect_child.cg.cyc.head = &indirect_child;
     }
@@ -103,7 +103,7 @@ alpha_find_call (parent, p_lowpc, p_highpc)
     {
       p_highpc = s_highpc;
     }
-  DBG (CALLDEBUG, printf ("[find_call] %s: 0x%lx to 0x%lx\n",
+  DBG (CALLDEBUG, printf (_("[find_call] %s: 0x%lx to 0x%lx\n"),
 			  parent->name, p_lowpc, p_highpc));
   for (pc = (alpha_Instruction *) (p_lowpc + delta);
        pc < (alpha_Instruction *) (p_highpc + delta);
@@ -124,7 +124,7 @@ alpha_find_call (parent, p_lowpc, p_highpc)
 	      || pc->j.func == Jxx_FUNC_JSR_COROUTINE)
 	    {
 	      DBG (CALLDEBUG,
-		   printf ("[find_call] 0x%lx: jsr%s <indirect_child>\n",
+		   printf (_("[find_call] 0x%lx: jsr%s <indirect_child>\n"),
 			   (bfd_vma) pc - delta,
 			   pc->j.func == Jxx_FUNC_JSR ? "" : "_coroutine"));
 	      arc_add (parent, &indirect_child, 0);
@@ -133,7 +133,7 @@ alpha_find_call (parent, p_lowpc, p_highpc)
 
 	case OP_BSR:
 	  DBG (CALLDEBUG,
-	       printf ("[find_call] 0x%lx: bsr", (bfd_vma) pc - delta));
+	       printf (_("[find_call] 0x%lx: bsr"), (bfd_vma) pc - delta));
 	  /*
 	   * Regular PC relative addressing.  Check that this is the
 	   * address of a function.  The linker sometimes redirects

@@ -36,7 +36,7 @@ DEFUN (read_function_mappings, (filename), const char *filename)
 
   if (!file)
     {
-      fprintf (stderr, "%s: could not open %s.\n", whoami, filename);
+      fprintf (stderr, _("%s: could not open %s.\n"), whoami, filename);
       done (1);
     }
 
@@ -50,7 +50,7 @@ DEFUN (read_function_mappings, (filename), const char *filename)
       matches = fscanf (file, "%[^\n:]", dummy);
       if (!matches)
 	{
-	  fprintf (stderr, "%s: unable to parse mapping file %s.\n",
+	  fprintf (stderr, _("%s: unable to parse mapping file %s.\n"),
 		   whoami, filename);
 	  done (1);
 	}
@@ -84,7 +84,7 @@ DEFUN (read_function_mappings, (filename), const char *filename)
       matches = fscanf (file, "%[^\n:]", dummy);
       if (!matches)
 	{
-	  fprintf (stderr, "%s: unable to parse mapping file %s.\n",
+	  fprintf (stderr, _("%s: unable to parse mapping file %s.\n"),
 		   whoami, filename);
 	  done (1);
 	}
@@ -125,7 +125,7 @@ DEFUN (core_init, (a_out_name), const char *a_out_name)
 
   if (!bfd_check_format (core_bfd, bfd_object))
     {
-      fprintf (stderr, "%s: %s: not in a.out format\n", whoami, a_out_name);
+      fprintf (stderr, _("%s: %s: not in a.out format\n"), whoami, a_out_name);
       done (1);
     }
 
@@ -136,7 +136,7 @@ DEFUN (core_init, (a_out_name), const char *a_out_name)
       core_text_sect = bfd_get_section_by_name (core_bfd, "$CODE$");
       if (!core_text_sect)
 	{
-	  fprintf (stderr, "%s: can't find .text section in %s\n",
+	  fprintf (stderr, _("%s: can't find .text section in %s\n"),
 		   whoami, a_out_name);
 	  done (1);
 	}
@@ -195,7 +195,7 @@ DEFUN (core_get_text_space, (core_bfd), bfd * core_bfd)
 
   if (!core_text_space)
     {
-      fprintf (stderr, "%s: ran out room for %ld bytes of text space\n",
+      fprintf (stderr, _("%s: ran out room for %ld bytes of text space\n"),
 	       whoami, core_text_sect->_raw_size);
       done (1);
     }
@@ -208,7 +208,7 @@ DEFUN (core_get_text_space, (core_bfd), bfd * core_bfd)
     }
   if (!core_text_space)
     {
-      fprintf (stderr, "%s: can't do -c\n", whoami);
+      fprintf (stderr, _("%s: can't do -c\n"), whoami);
     }
 }
 
@@ -240,7 +240,7 @@ DEFUN (find_call, (parent, p_lowpc, p_highpc),
       break;
 
     default:
-      fprintf (stderr, "%s: -c not supported on architecture %s\n",
+      fprintf (stderr, _("%s: -c not supported on architecture %s\n"),
 	       whoami, bfd_printable_name(core_bfd));
 
       /* Don't give the error more than once.  */
@@ -429,7 +429,7 @@ DEFUN (core_create_function_syms, (core_bfd), bfd * core_bfd)
 
   if (symtab.len == 0)
     {
-      fprintf (stderr, "%s: file `%s' has no symbols\n", whoami, a_out_name);
+      fprintf (stderr, _("%s: file `%s' has no symbols\n"), whoami, a_out_name);
       done (1);
     }
 
@@ -723,7 +723,7 @@ DEFUN (core_create_line_syms, (core_bfd), bfd * core_bfd)
   if ((unsigned int) (ltab.limit - ltab.base) != ltab.len)
     {
       fprintf (stderr,
-	       "%s: somebody miscounted: ltab.len=%d instead of %ld\n",
+	       _("%s: somebody miscounted: ltab.len=%d instead of %ld\n"),
 	       whoami, ltab.len, (long) (ltab.limit - ltab.base));
       done (1);
     }

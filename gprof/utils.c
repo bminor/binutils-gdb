@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1983 Regents of the University of California.
+ * Copyright (c) 1983, 1998 Regents of the University of California.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms are permitted
@@ -90,7 +90,7 @@ DEFUN (print_name, (self), Sym * self)
 
   if (self->cg.cyc.num != 0)
     {
-      printf (" <cycle %d>", self->cg.cyc.num);
+      printf (_(" <cycle %d>"), self->cg.cyc.num);
     }
   if (self->cg.index != 0)
     {

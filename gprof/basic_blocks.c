@@ -131,7 +131,7 @@ DEFUN (bb_read_rec, (ifp, filename), FILE * ifp AND const char *filename)
 
   if (fread (&nblocks, sizeof (nblocks), 1, ifp) != 1)
     {
-      fprintf (stderr, "%s: %s: unexpected end of file\n", whoami, filename);
+      fprintf (stderr, _("%s: %s: unexpected end of file\n"), whoami, filename);
       done (1);
     }
 
@@ -211,7 +211,7 @@ DEFUN (bb_read_rec, (ifp, filename), FILE * ifp AND const char *filename)
 	    {
 	      user_warned = TRUE;
 	      fprintf (stderr,
-		       "%s: warning: ignoring basic-block exec counts (use -l or --line)\n",
+		       _("%s: warning: ignoring basic-block exec counts (use -l or --line)\n"),
 		       whoami);
 	    }
 	}
@@ -319,16 +319,16 @@ DEFUN_VOID (print_exec_counts)
     {
       if (sym->ncalls > 0 || ! ignore_zeros)
 	{
-	  printf ("%s:%d: (%s:0x%lx) %d executions\n",
-		  sym->file ? sym->file->name : "<unknown>", sym->line_num,
+	  printf (_("%s:%d: (%s:0x%lx) %d executions\n"),
+		  sym->file ? sym->file->name : _("<unknown>"), sym->line_num,
 		  sym->name, sym->addr, sym->ncalls);
 	}
       for (j = 0; j < NBBS && sym->bb_addr[j]; j ++)
 	{
 	  if (sym->bb_calls[j] > 0 || ! ignore_zeros)
 	    {
-	      printf ("%s:%d: (%s:0x%lx) %d executions\n",
-		      sym->file ? sym->file->name : "<unknown>", sym->line_num,
+	      printf (_("%s:%d: (%s:0x%lx) %d executions\n"),
+		      sym->file ? sym->file->name : _("<unknown>"), sym->line_num,
 		      sym->name, sym->bb_addr[j], sym->bb_calls[j]);
 	    }
 	}
@@ -581,7 +581,7 @@ DEFUN_VOID (print_annotated_source)
 
       if (bb_table_length > 0)
 	{
-	  fprintf (ofp, "\n\nTop %d Lines:\n\n     Line      Count\n\n",
+	  fprintf (ofp, _("\n\nTop %d Lines:\n\n     Line      Count\n\n"),
 		   bb_table_length);
 
 	  /* abuse line arrays---it's not needed anymore: */
@@ -605,16 +605,16 @@ DEFUN_VOID (print_annotated_source)
       free (sf->line);
       sf->line = 0;
 
-      fprintf (ofp, "\nExecution Summary:\n\n");
-      fprintf (ofp, "%9ld   Executable lines in this file\n",
+      fprintf (ofp, _("\nExecution Summary:\n\n"));
+      fprintf (ofp, _("%9ld   Executable lines in this file\n"),
 	       num_executable_lines);
-      fprintf (ofp, "%9ld   Lines executed\n", num_lines_executed);
-      fprintf (ofp, "%9.2f   Percent of the file executed\n",
+      fprintf (ofp, _("%9ld   Lines executed\n"), num_lines_executed);
+      fprintf (ofp, _("%9.2f   Percent of the file executed\n"),
 	       num_executable_lines
 	       ? 100.0 * num_lines_executed / (double) num_executable_lines
 	       : 100.0);
-      fprintf (ofp, "\n%9d   Total number of line executions\n", sf->ncalls);
-      fprintf (ofp, "%9.2f   Average executions per line\n",
+      fprintf (ofp, _("\n%9d   Total number of line executions\n"), sf->ncalls);
+      fprintf (ofp, _("%9.2f   Average executions per line\n"),
 	       num_executable_lines
 	       ? sf->ncalls / (double) num_executable_lines
 	       : 0.0);

@@ -30,7 +30,7 @@ DEFUN (get_vma, (abfd, addr), bfd * abfd AND bfd_byte * addr)
     case 8:
       return bfd_get_64 (abfd, addr);
     default:
-      fprintf (stderr, "%s: bfd_vma has unexpected size of %ld bytes\n",
+      fprintf (stderr, _("%s: bfd_vma has unexpected size of %ld bytes\n"),
 	       whoami, (long) sizeof (char*));
       done (1);
     }
@@ -52,7 +52,7 @@ DEFUN (put_vma, (abfd, val, addr), bfd * abfd AND bfd_vma val AND bfd_byte * add
       bfd_put_64 (abfd, val, addr);
       break;
     default:
-      fprintf (stderr, "%s: bfd_vma has unexpected size of %ld bytes\n",
+      fprintf (stderr, _("%s: bfd_vma has unexpected size of %ld bytes\n"),
 	       whoami, (long) sizeof (char*));
       done (1);
     }
@@ -84,7 +84,7 @@ DEFUN (gmon_out_read, (filename), const char *filename)
     }
   if (fread (&ghdr, sizeof (struct gmon_hdr), 1, ifp) != 1)
     {
-      fprintf (stderr, "%s: file too short to be a gmon file\n",
+      fprintf (stderr, _("%s: file too short to be a gmon file\n"),
 	       filename);
       done (1);
     }
@@ -94,7 +94,7 @@ DEFUN (gmon_out_read, (filename), const char *filename)
     {
       if (file_format == FF_MAGIC && strncmp (&ghdr.cookie[0], GMON_MAGIC, 4))
 	{
-	  fprintf (stderr, "%s: file `%s' has bad magic cookie\n",
+	  fprintf (stderr, _("%s: file `%s' has bad magic cookie\n"),
 		   whoami, filename);
 	  done (1);
 	}
@@ -105,7 +105,7 @@ DEFUN (gmon_out_read, (filename), const char *filename)
       if (gmon_file_version != GMON_VERSION && gmon_file_version != 0)
 	{
 	  fprintf (stderr,
-		   "%s: file `%s' has unsupported version %d\n",
+		   _("%s: file `%s' has unsupported version %d\n"),
 		   whoami, filename, gmon_file_version);
 	  done (1);
 	}
@@ -135,7 +135,7 @@ DEFUN (gmon_out_read, (filename), const char *filename)
 
 	    default:
 	      fprintf (stderr,
-		       "%s: %s: found bad tag %d (file corrupted?)\n",
+		       _("%s: %s: found bad tag %d (file corrupted?)\n"),
 		       whoami, filename, tag);
 	      done (1);
 	    }
@@ -176,7 +176,7 @@ DEFUN (gmon_out_read, (filename), const char *filename)
       if (fread (&raw, 1, sizeof (struct raw_phdr), ifp)
 	  != sizeof (struct raw_phdr))
 	{
-	  fprintf (stderr, "%s: file too short to be a gmon file\n",
+	  fprintf (stderr, _("%s: file too short to be a gmon file\n"),
 		   filename);
 	  done (1);
 	}
@@ -194,7 +194,7 @@ DEFUN (gmon_out_read, (filename), const char *filename)
 	else if (hz != profrate)
 	  {
 	    fprintf (stderr,
-		     "%s: profiling rate incompatible with first gmon file\n",
+		     _("%s: profiling rate incompatible with first gmon file\n"),
 		     filename);
 	    done (1);
 	  }
@@ -204,7 +204,7 @@ DEFUN (gmon_out_read, (filename), const char *filename)
       if (s_highpc && (tmp.low_pc != h.low_pc ||
 		       tmp.high_pc != h.high_pc || tmp.ncnt != h.ncnt))
 	{
-	  fprintf (stderr, "%s: incompatible with first gmon file\n",
+	  fprintf (stderr, _("%s: incompatible with first gmon file\n"),
 		   filename);
 	  done (1);
 	}
@@ -242,7 +242,7 @@ DEFUN (gmon_out_read, (filename), const char *filename)
 	  if (fread (raw_bin_count, sizeof (raw_bin_count), 1, ifp) != 1)
 	    {
 	      fprintf (stderr,
-		       "%s: unexpected EOF after reading %d/%d bins\n",
+		       _("%s: unexpected EOF after reading %d/%d bins\n"),
 		       whoami, --i, hist_num_bins);
 	      done (1);
 	    }
@@ -277,26 +277,26 @@ DEFUN (gmon_out_read, (filename), const char *filename)
 	  if (hz == HZ_WRONG)
 	    {
 	      hz = 1;
-	      fprintf (stderr, "time is in ticks, not seconds\n");
+	      fprintf (stderr, _("time is in ticks, not seconds\n"));
 	    }
 	}
     }
   else
     {
-      fprintf (stderr, "%s: don't know how to deal with file format %d\n",
+      fprintf (stderr, _("%s: don't know how to deal with file format %d\n"),
 	       whoami, file_format);
       done (1);
     }
 
   if (output_style & STYLE_GMON_INFO)
     {
-      printf ("File `%s' (version %d) contains:\n",
+      printf (_("File `%s' (version %d) contains:\n"),
 	      filename, gmon_file_version);
-      printf ("\t%d histogram record%s\n",
+      printf (_("\t%d histogram record%s\n"),
 	      nhist, nhist == 1 ? "" : "s");
-      printf ("\t%d call-graph record%s\n",
+      printf (_("\t%d call-graph record%s\n"),
 	      narcs, narcs == 1 ? "" : "s");
-      printf ("\t%d basic-block count record%s\n",
+      printf (_("\t%d basic-block count record%s\n"),
 	      nbbs, nbbs == 1 ? "" : "s");
       first_output = FALSE;
     }
@@ -407,7 +407,7 @@ DEFUN (gmon_out_write, (filename), const char *filename)
     }
   else
     {
-      fprintf (stderr, "%s: don't know how to deal with file format %d\n",
+      fprintf (stderr, _("%s: don't know how to deal with file format %d\n"),
 	       whoami, file_format);
       done (1);
     }

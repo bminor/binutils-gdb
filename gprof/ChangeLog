@@ -1,3 +1,19 @@
+Wed Apr 22 00:00:22 1998  Tom Tromey  <tromey@scribbles.cygnus.com>
+
+	* gprof.h: Added includes and defines for gettext.
+	* configure.in (ALL_LINGUAS): New macro.
+	Call CY_GNU_GETTEXT.  Create po/Makefile.in and po/Makefile.
+	* acconfig.h (ENABLE_NLS, HAVE_CATGETS, HAVE_GETTEXT, HAVE_STPCPY,
+	HAVE_LC_MESSAGES): Define.
+	* gprof.c (main): Call setlocale, bindtextdomain, textdomain.
+	* Makefile.am (SUBDIRS): New macro.
+	(INCLUDES): Look in intl dirs for headers.  Define LOCALEDIR.
+	(gprof_DEPENDENCIES): Added INTLDEPS.
+	(gprof_LDADD): Added INTLLLIBS.
+	(POTFILES): New macro.
+	(po/POTFILES.in): New target.
+	* Many files: Wrap user-visible strings with gettext invocation.
+
 Tue Apr  7 12:43:37 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	From hjl@lucon.org <H.J. Lu>:
