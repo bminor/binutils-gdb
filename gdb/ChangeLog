@@ -1,3 +1,9 @@
+Mon Jul 12 14:10:48 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* config/h8300/tm-h8300.h (REGISTER_CONVERTIBLE): Change value to 0.
+	(REGISTER_CONVERT_TO_VIRTUAL, REGISTER_CONVERT_TO_RAW): Move def'n to
+	usual spot.
+
 Mon Jul 12 11:29:44 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* c-valprint.c (c_val_print): Fix thinko with unspecified length
