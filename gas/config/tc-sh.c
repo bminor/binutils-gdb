@@ -97,8 +97,10 @@ const pseudo_typeS md_pseudo_table[] =
   {"2byte", s_uacons, 2},
   {"4byte", s_uacons, 4},
   {"8byte", s_uacons, 8},
+#ifdef BFD_ASSEMBLER
   {"file", dwarf2_directive_file, 0 },
   {"loc", dwarf2_directive_loc, 0 },
+#endif
   {0, 0, 0}
 };
 
@@ -1945,7 +1947,9 @@ md_assemble (str)
 	}
     }
 
+#ifdef BFD_ASSEMBLER
   dwarf2_emit_insn (size);
+#endif
 }
 
 /* This routine is called each time a label definition is seen.  It

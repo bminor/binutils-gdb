@@ -1,5 +1,11 @@
 2001-06-13  Nick Clifton  <nickc@cambridge.redhat.com>
 
+	* config/tc-sh.c (md_pseudo_table): Only intercept the .file and
+	.loc pseudos if the dfwarf2 functions are available.
+	(md_assemble): Only call dwarf2_emit_insn if it is available.
+
+2001-06-13  Nick Clifton  <nickc@cambridge.redhat.com>
+
 	Merge from mainline:
 	2001-05-11  Nick Clifton  <nickc@cambridge.redhat.com>
 	* config/tc-arm.c (arm_handle_align): When truncating an aligned
