@@ -1,3 +1,12 @@
+Fri Sep 15 20:01:52 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* configure.host (m88*-*-dgux*): Fix another shell syntax error.
+
+Fri Sep 15 23:28:05 1995  Andrew Cagney  <cagney@highland.com.au>
+
+	* configure.host (NATIVE_LIB_DIRS): fix syntax error.
+        `='.
+
 Thu Sep 12 12:50:49 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* scripttemp/pe.sc:  Allow both spellings of .ctors/.dtors.
