@@ -1,3 +1,7 @@
+2003-09-11  Michael Snyder  <msnyder@redhat.com>
+
+	* frv.cpu: Typographical corrections.
+
 2003-09-09  Dave Brolley  <brolley@redhat.com>
 
 	* frv.cpu (media-dual-complex): Change UNIT to FMALL.

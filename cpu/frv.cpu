@@ -1016,7 +1016,7 @@
   (name PRESERVE-OVF)
   (comment "Preserve value of MSR.OVF")
 )
-; null attribute -- used as a place holder for where an attribue it required.
+; null attribute -- used as a place holder for where an attribue is required.
 (define-attr
   (for insn)
   (type boolean)
@@ -2076,7 +2076,7 @@
 
 (define-hardware
   (name h-fccr)
-  (comment "Integer condition code registers")
+  (comment "Floating point condition code registers")
   (attrs PROFILE)
   (type register UQI (4))
   (indices extern-keyword fccr-names)
