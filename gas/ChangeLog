@@ -1,3 +1,17 @@
+start-sanitize-d30v
+Tue Dec 16 15:26:03 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* config/tc-d30v.c (parallel_ok): Remove non-register bits from
+	used/set flag fields.  Make flag vars unsigned long.  Use
+	FLAG_A{0,1} for accumulators.  Allow any 2 insns to be done in
+	parallel if they use the same conditional flag with reversed
+	meaning.  Allow 2 add/sub insns that set the carry or overflow
+	flags but do not query them to be done in parallel.  Don't allow 2
+	word store operations to be done in parallel with ADDppp or
+	SUBppp.  Don't allow loads to be done in parallel with 16 bit
+	multiplies.
+
+end-sanitize-d30v
 Tue Dec 16 09:20:43 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-arm.c: Prevent use of interworking support for
