@@ -66,6 +66,7 @@
 @V@/gdb/ChangeLog-1999 @V@/gdb/ChangeLog.99
 @V@/gdb/ChangeLog-2000 @V@/gdb/ChangeLog.000
 @V@/gdb/ChangeLog-2001 @V@/gdb/ChangeLog.001
+@V@/gdb/ChangeLog-2002 @V@/gdb/ChangeLog.002
 @V@/gdb/ChangeLog-3.x @V@/gdb/ChangeLog.3-x
 @V@/gdb/alphabsd-nat.c @V@/gdb/alphb-nat.c
 @V@/gdb/alphabsd-tdep.c @V@/gdb/alphb-tdep.c
