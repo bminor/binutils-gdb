@@ -340,6 +340,7 @@ dialog:
 	      dialog.ex = NULL;
 	      dialog.controls = NULL;
 	      sub_res_info = $3;
+	      style = 0;
 	    }
 	    styles BEG controls END
 	  {
@@ -363,6 +364,7 @@ dialog:
 	      memset (dialog.ex, 0, sizeof (struct dialog_ex));
 	      dialog.controls = NULL;
 	      sub_res_info = $3;
+	      style = 0;
 	    }
 	    styles BEG controls END
 	  {
@@ -387,6 +389,7 @@ dialog:
 	      dialog.ex->help = $9;
 	      dialog.controls = NULL;
 	      sub_res_info = $3;
+	      style = 0;
 	    }
 	    styles BEG controls END
 	  {
@@ -416,7 +419,6 @@ styles:
 	    dialog.class = $3;
 	  }
 	| styles STYLE
-	    { style = dialog.style; }
 	    styleexpr
 	  {
 	    dialog.style = style;
@@ -432,12 +434,14 @@ styles:
 	| styles FONT numexpr ',' QUOTEDSTRING
 	  {
 	    dialog.style |= DS_SETFONT;
+	    style |= DS_SETFONT;
 	    dialog.pointsize = $3;
 	    unicode_from_ascii ((int *) NULL, &dialog.font, $5);
 	  }
 	| styles FONT numexpr ',' QUOTEDSTRING cnumexpr cnumexpr
 	  {
 	    dialog.style |= DS_SETFONT;
+	    style |= DS_SETFONT;
 	    dialog.pointsize = $3;
 	    unicode_from_ascii ((int *) NULL, &dialog.font, $5);
 	    if (dialog.ex == NULL)

@@ -131,7 +131,7 @@ static FILE *cpp_pipe;
 
 static char *cpp_temp_file;
 
-/* Input stream is either a file or a pipe. */
+/* Input stream is either a file or a pipe.  */
 
 static enum {ISTREAM_PIPE, ISTREAM_FILE} istream_type;
 
@@ -2052,10 +2052,11 @@ write_rc_dialog (e, dialog)
 {
   const struct dialog_control *control;
 
-  if (dialog->style != 0)
-    fprintf (e, "STYLE 0x%lx\n", dialog->style);
+  fprintf (e, "STYLE 0x%lx\n", dialog->style);
+
   if (dialog->exstyle != 0)
     fprintf (e, "EXSTYLE 0x%lx\n", dialog->exstyle);
+
   if ((dialog->class.named && dialog->class.u.n.length > 0)
       || dialog->class.u.id != 0)
     {
@@ -2063,12 +2064,14 @@ write_rc_dialog (e, dialog)
       res_id_print (e, dialog->class, 1);
       fprintf (e, "\n");
     }
+
   if (dialog->caption != NULL)
     {
       fprintf (e, "CAPTION \"");
       unicode_print (e, dialog->caption, -1);
       fprintf (e, "\"\n");
     }
+
   if ((dialog->menu.named && dialog->menu.u.n.length > 0)
       || dialog->menu.u.id != 0)
     {
@@ -2076,6 +2079,7 @@ write_rc_dialog (e, dialog)
       res_id_print (e, dialog->menu, 0);
       fprintf (e, "\n");
     }
+
   if (dialog->font != NULL)
     {
       fprintf (e, "FONT %d, \"", dialog->pointsize);

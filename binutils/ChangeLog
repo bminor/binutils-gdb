@@ -3,11 +3,14 @@
 	* rcparse.y: CLASS definitions in DIALOG resources 
 	are quoted.
 	Fix typo in BEDIT warning.
+	Don't add default dialog style when explicit style specified.
 
 	* rclex.l: "\xhex" encoding in strings corrected.
 	"\a" escape (used for right justified key definitions in menus) is
 	encodes as binary 8.
 
+	* resrc.c: Print style even if it is 0.
+	
 2002-04-09  Gunnar Degnbol <degnbol@danbbs.dk>
 
 	* resrc.c: print CLASS names in quotes
