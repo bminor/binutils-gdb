@@ -1,4 +1,13 @@
 start-sanitize-sky
+Mon Feb 23 15:55:12 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* config/tc-dvp.c (assemble_dma): Do alignment before parsing insn.
+	(setup_dma_autocount): Renamed from setup_autocount.  New argument
+	inline_p.  All callers changed.  Fix word address of count.
+	(parse_dma_addr_autocount): Fix word address of address.
+
+end-sanitize-sky
+start-sanitize-sky
 Mon Feb 23 17:24:06 1998  Jim Lemke  <jlemke@cygnus.com>
 
 	* config/obj-elf.c: Take Ian's suggestion, leave .bss etc

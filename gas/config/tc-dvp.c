@@ -50,7 +50,7 @@ static char * unique_name PARAMS ((const char *));
 static long eval_expr PARAMS ((int, int, const char *, ...));
 static long parse_dma_addr_autocount ();
 static void inline_dma_data PARAMS ((int, DVP_INSN *));
-static void setup_autocount PARAMS ((const char *, DVP_INSN *));
+static void setup_dma_autocount PARAMS ((const char *, DVP_INSN *, int));
 
 static void insert_operand 
      PARAMS ((dvp_cpu, const dvp_opcode *, const dvp_operand *, int,
@@ -337,11 +337,20 @@ assemble_dma (str)
   int i;
   const dvp_opcode *opcode;
 
-  /* Fill the first two words with VIF NOPs.
-     They may be over-written later if DmaPackPke is on.
-     initialize the remainder with zeros.  */
+  if (output_dma)
+    {
+      /* Do an implicit alignment to a 16 byte boundary.
+	 Do it now so that inline dma data labels are at the right place.  */
+      frag_align (4, 0, 0);
+      record_alignment (now_seg, 4);
+    }
+
+  /* This is the DMA tag.  */
   insn_buf[0] = 0;
   insn_buf[1] = 0;
+  /* These are VIF NOPs.
+     They may be over-written later if DmaPackPke is on.
+     initialize the remainder with zeros.  */
   insn_buf[2] = 0;
   insn_buf[3] = 0;
 
@@ -352,10 +361,6 @@ assemble_dma (str)
     return;
   if (!output_dma)
     return;
-
-  /* Do an implicit alignment to a 16 byte boundary.  */
-  frag_align (4, 0, 0);
-  record_alignment (now_seg, 4);
 
   record_mach (DVP_DMA);
 
@@ -1509,23 +1514,35 @@ unique_name (prefix)
   return result;
 }
 
-/* Compute the auto-count value for a DMA tag.  */
+/* Compute the auto-count value for a DMA tag.
+   INLINE_P is non-zero if the dma data is inline.  */
 
 static void
-setup_autocount (name, insn_buf)
+setup_dma_autocount (name, insn_buf, inline_p)
      const char *name;
      DVP_INSN *insn_buf;
+     int inline_p;
 {
   long count;
 
-  count = eval_expr (dma_operand_count, 12,
-		     "(%s%s - %s) >> 4", END_LABEL_PREFIX, name, name);
-  /* count is in quadwords */
-  count /= 16;
+  if (inline_p)
+    {
+      /* -1: The count is the number of following quadwords, so skip the one
+	 containing the dma tag.  */
+      count = eval_expr (dma_operand_count, 0,
+			 "((%s%s - %s) >> 4) - 1", END_LABEL_PREFIX, name, name);
+    }
+  else
+    {
+      /* We don't want to subtract 1 here as the begin and end labels
+	 properly surround the data we want to compute the length of.  */
+      count = eval_expr (dma_operand_count, 0,
+			 "(%s%s - %s) >> 4", END_LABEL_PREFIX, name, name);
+    }
 
   /* Store the count field. */
-  insn_buf[3] &= 0xffff0000;
-  insn_buf[3] |= count & 0x0000ffff;
+  insn_buf[0] &= 0xffff0000;
+  insn_buf[0] |= count & 0x0000ffff;
 }
 
 /* Record that inline data follows.  */
@@ -1546,7 +1563,7 @@ inline_dma_data (autocount_p, insn_buf)
   if (autocount_p)
     {
       dma_data_name = S_GET_NAME (create_colon_label ("", unique_name (NULL)));
-      setup_autocount (dma_data_name, insn_buf);
+      setup_dma_autocount (dma_data_name, insn_buf, 1);
     }
   else
     dma_data_name = 0;
@@ -1588,9 +1605,9 @@ parse_dma_addr_autocount (opcode, operand, mods, insn_buf, pstr, errmsg)
   label2 = create_label ("_$", name);
   endlabel = create_label (END_LABEL_PREFIX, name);
 
-  retval = eval_expr (dma_operand_addr, 8, name);
+  retval = eval_expr (dma_operand_addr, 4, name);
 
-  setup_autocount (name, insn_buf);
+  setup_dma_autocount (name, insn_buf, 0);
 
   *pstr = end;
   return retval;
@@ -1882,12 +1899,15 @@ s_enddmadata (ignore)
   dma_data_state = 0;
   demand_empty_rest_of_line ();
 
+  /* If count provided, verify it is correct.  */
+  /* ... */
+
   /* "label" points to beginning of block.
      Create a name for the final label like _$<name>.  */
   if (dma_data_name)
     {
       /* Fill the data out to a multiple of 16 bytes.  */
-      /* FIXME: Does the fill contents matter?  */
+      /* FIXME: Are the fill contents right?  */
       frag_align (4, 0, 0);
       create_colon_label (END_LABEL_PREFIX, dma_data_name);
     }
