@@ -1,4 +1,7 @@
-Fri Aug  9 09:12:11 1996  Jeffrey A Law  (law@cygnus.com)
+Fri Aug  9 12:42:49 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* somread.c (som_symtab_read): Handle secondary definition
+	symbols (aka weak symbols).
 
 	* config/tm-hppa.h (EXTRACT_RETURN_VALUE): Fix thinko in
 	last change.
