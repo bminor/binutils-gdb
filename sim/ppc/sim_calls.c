@@ -200,6 +200,10 @@ sim_create_inferior (SIM_DESC sd,
   unsigned_word entry_point;
   TRACE(trace_gdb, ("sim_create_inferior(start_address=0x%x, ...)\n",
 		    entry_point));
+
+  if (simulator == NULL)
+    error ("No program loaded");
+
   if (abfd != NULL)
     entry_point = bfd_get_start_address (abfd);
   else
@@ -369,7 +373,7 @@ sim_io_flush_stdoutput(void)
 {
   switch (CURRENT_STDIO) {
   case DO_USE_STDIO:
-    gdb_flush (gdb_stdout);
+    callbacks->flush_stdout (callbacks);
     break;
   case DONT_USE_STDIO:
     break;
@@ -393,5 +397,5 @@ zalloc(long size)
 
 void zfree(void *data)
 {
-  mfree(NULL, data);
+  free(NULL, data);
 }

@@ -1,3 +1,21 @@
+Fri Oct  3 09:28:00 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Thu Oct  2 19:43:52 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* aclocal.m4 (sim-bitsize): Fix typo, WITH_TARGET_WORD_BITSIZE not
+ 	WITH_TARGET_BITSIZE.
+
+Thu Sep 25 23:20:20 1997  Felix Lee  <flee@yin.cygnus.com>
+
+        * sim-profile.c (profile_print_core): label needs empty statement.
+
+Thu Sep 25 11:20:47 1997  Stu Grossman  <grossman@babylon-5.cygnus.com>
+
+	* sim-break.c (sim_set_breakpoint sim_clear_breakpoint):  Use ZALLOC
+	and zfree instead of xmalloc and free.  Prevents warnings.
+
 Wed Sep 24 17:38:57 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

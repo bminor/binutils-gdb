@@ -1,3 +1,8 @@
+Fri Oct  3 09:28:00 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (SIM_AC_OPTIONS_BITSIZE): Define.
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 Wed Sep 24 17:38:57 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

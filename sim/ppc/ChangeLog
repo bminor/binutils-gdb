@@ -1,3 +1,20 @@
+Mon Sep 29 10:05:01 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim_calls.c (zfree): Use free, not mfree.
+	(sim_io_flush_stdoutput): Replace gdb_flush with callback ->
+ 	flush_stdout.
+
+Fri Sep 26 09:50:29 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ppc-instructions:
+ 	(ldhau): From Johannes Reisinger, update rA after load.
+
+Tue Sep  9 22:13:23 1997  Felix Lee  <flee@cygnus.com>
+
+	* basics.h (CONCAT*): token-pasting macros, if ALMOST_STDC,
+ 	for MSVC.
+	* words.h: __int64 instead of long long for MSVC.
+
 Wed Aug 27 10:24:15 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim_calls.c (sim_create_inferior): Check the simulator was

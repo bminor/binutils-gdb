@@ -59,15 +59,15 @@ RUNTEST_FOR_TARGET = `\
 
 
 AS_FOR_TARGET = `\
-  if [ -x ../../../gas/as.new ]; then \
-    echo ../../../gas/as.new ; \
+  if [ -x ../../../gas/as-new ]; then \
+    echo ../../../gas/as-new ; \
   else \
     echo $(target_alias)-as ; \
   fi`
 
 LD_FOR_TARGET = `\
-  if [ -x ../../../ld/ld.new ]; then \
-    echo ../../../ld/ld.new ; \
+  if [ -x ../../../ld/ld-new ]; then \
+    echo ../../../ld/ld-new ; \
   else \
     echo $(target_alias)-ld ; \
   fi`
