@@ -1,3 +1,8 @@
+Wed Jan  4 14:14:05 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* som.c (som_begin_writing): Don't forget to bump the
+	total_subspaces when writing the unloadable subspaces.
+
 Wed Dec 28 20:54:47 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* som.c (som_write_fixups): Use SEC_HAS_CONTENTS to identify

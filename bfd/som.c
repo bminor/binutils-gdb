@@ -3139,7 +3139,7 @@ som_begin_writing (abfd)
 	      || (subsection->flags & SEC_ALLOC) != 0)
 	    continue;
 
-	  subsection->target_index = total_subspaces;
+	  subsection->target_index = total_subspaces++;
 	  /* This is real data to be loaded from the file.  */
 	  if ((subsection->flags & SEC_LOAD) == 0)
 	    {
