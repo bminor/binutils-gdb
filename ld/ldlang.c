@@ -2635,15 +2635,11 @@ insert_pad (ptr, fill, alignment_needed, output_section, dot)
      bfd_vma dot;
 {
   lang_statement_union_type *pad;
-  size_t ptr_off;
 
-  /* ptr_off is zero, but let's not be too fast and loose with
-     pointers.  */
-  ptr_off = ((char *) &((lang_statement_union_type *) 0)->header.next
-	     - (char *) 0);
+  pad = ((lang_statement_union_type *)
+	 ((char *) ptr - offsetof (lang_statement_union_type *, header.next)));
   if (ptr != &statement_list.head
-      && ((pad = (lang_statement_union_type *) ((char *) ptr - ptr_off))
-	  ->header.type == lang_padding_statement_enum)
+      && pad->header.type == lang_padding_statement_enum)
       && pad->padding_statement.output_section == output_section)
     {
       /* Use the existing pad statement.  The above test on output
@@ -3163,18 +3159,12 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	  break;
 
 	case lang_padding_statement_enum:
-	  if (relax)
-	    {
-	      /* If we are relaxing, and this is not the first pass,
-		 we need to allow padding to shrink.  If padding is
-		 needed on this pass, it will be added back in.  */
-	      s->padding_statement.size = 0;
-	      break;
-	    }
-
-	  dot += s->padding_statement.size / opb;
-	  output_section_statement->bfd_section->_raw_size +=
-	    s->padding_statement.size;
+	  /* If this is the first time lang_size_sections is called,
+	     we won't have any padding statements.  If this is the
+	     second or later passes when relaxing, we should allow
+	     padding to shrink.  If padding is needed on this pass, it
+	     will be added back in.  */
+	  s->padding_statement.size = 0;
 	  break;
 
 	case lang_group_statement_enum:
@@ -3188,8 +3178,7 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	  FAIL ();
 	  break;
 
-	  /* This can only get here when relaxing is turned on.  */
-
+	  /* We can only get here when relaxing is turned on.  */
 	case lang_address_statement_enum:
 	  break;
 	}

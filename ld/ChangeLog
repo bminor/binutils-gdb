@@ -1,5 +1,9 @@
 2001-08-20  Alan Modra  <amodra@bigpond.net.au>
 
+	* ldlang.c (insert_pad): Use offsetof macro.
+	(lang_size_sections): Always neuter padding statements.
+	* emultempl/hppaelf.em (hppaelf_delete_padding_statements): Delete.
+
 	* pe-dll.c (pe_dll_fill_sections): Correct type of "relax" param
 	passed to lang_size_sections.
 	(pe_exe_fill_sections): Likewise.

@@ -29,8 +29,6 @@ cat >>e${EMULATION_NAME}.c <<EOF
 
 static void hppaelf_after_parse PARAMS((void));
 static void hppaelf_create_output_section_statements PARAMS ((void));
-static void hppaelf_delete_padding_statements
-  PARAMS ((lang_statement_list_type *));
 static asection *hppaelf_add_stub_section
   PARAMS ((const char *, asection *));
 static void hppaelf_layaout_sections_again PARAMS ((void));
@@ -86,63 +84,6 @@ hppaelf_create_output_section_statements ()
     }
 
   ldlang_add_file (stub_file);
-}
-
-/* Walk all the lang statements splicing out any padding statements from
-   the list.  */
-
-static void
-hppaelf_delete_padding_statements (list)
-     lang_statement_list_type *list;
-{
-  lang_statement_union_type *s;
-  lang_statement_union_type **ps;
-  for (ps = &list->head; (s = *ps) != NULL; ps = &s->next)
-    {
-      switch (s->header.type)
-	{
-
-	/* We want to recursively walk these sections.  */
-	case lang_constructors_statement_enum:
-	  hppaelf_delete_padding_statements (&constructor_list);
-	  break;
-
-	case lang_output_section_statement_enum:
-	  hppaelf_delete_padding_statements (&s->output_section_statement.children);
-	  break;
-
-	case lang_group_statement_enum:
-	  hppaelf_delete_padding_statements (&s->group_statement.children);
-	  break;
-
-	case lang_wild_statement_enum:
-	  hppaelf_delete_padding_statements (&s->wild_statement.children);
-	  break;
-
-	/* Here's what we are really looking for.  Splice these out of
-	   the list.  */
-	case lang_padding_statement_enum:
-	  *ps = s->next;
-	  if (*ps == NULL)
-	    list->tail = ps;
-	  break;
-
-	/* We don't care about these cases.  */
-	case lang_data_statement_enum:
-	case lang_object_symbols_statement_enum:
-	case lang_output_statement_enum:
-	case lang_target_statement_enum:
-	case lang_input_section_enum:
-	case lang_input_statement_enum:
-	case lang_assignment_statement_enum:
-	case lang_address_statement_enum:
-	  break;
-
-	default:
-	  abort ();
-	  break;
-	}
-    }
 }
 
 
@@ -280,9 +221,6 @@ hppaelf_layaout_sections_again ()
   /* If we have changed sizes of the stub sections, then we need
      to recalculate all the section offsets.  This may mean we need to
      add even more stubs.  */
-
-  /* Delete all the padding statements, they're no longer valid.  */
-  hppaelf_delete_padding_statements (stat_ptr);
 
   /* Resize the sections.  */
   lang_size_sections (stat_ptr->head, abs_output_section,
