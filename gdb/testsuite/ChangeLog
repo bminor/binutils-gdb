@@ -1,5 +1,9 @@
 2004-06-14  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.cp/ref-types.cc: Add copyright notice.
+
+2004-06-14  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* lib/compiler.c: Remove gcc_compiled, hp_cc_compiler,
 	hp_aCC_compiler.
 	* lib/compiler.cc: Likewise.
