@@ -1,5 +1,13 @@
 Mon Oct 20 14:54:06 1997  Klaus K"ampf  <kkaempf@progis.de>
 
+	* makefile.vms: Fix for dec c.
+
+	* config-gas.com: Give explanation for dec c setup in error
+	message.
+
+	* config/tc-alpha.c (s_alpha_comm): Make .comm symbols separate
+	sections on openvms/alpha.
+
 	* config/obj-evax.c: support .weak pseudo-op
 
 Mon Oct 20 10:13:32 1997  Doug Evans  <devans@canuck.cygnus.com>

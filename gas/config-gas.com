@@ -103,7 +103,12 @@ $ if .not.$status
 $ then	type sys$input:
 
 ? could not compile <stdio.h>.
-  Since gcc is not set up correctly, gas configuration cannot proceed.
+
+  If you're compiling with DEC C or VAX C, create config.status as an
+  empty file and start gnu make again.
+
+  If you're compiling with GNU C, there is some setup problem and
+  gas configuration cannot proceed.
 
 $	DELETE tmp-chk-h.c;*
 $	exit %x002C
