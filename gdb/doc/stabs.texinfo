@@ -3624,14 +3624,13 @@ For Solaris 2.3 and later, the linker ignores relocations for the stabs
 section.  The value of a @code{N_FUN} stab is zero and the address of a
 function can be obtained from the ELF (non-stab) symbols.  Sun, in
 reference to bug 1142109, has verified that this is intentional.
-Because looking things up in the ELF symbols is slow and GDB currently
-only has code to do this for functions (which is enough for Solaris
-since read-only variables go in the @code{.rodata} section), it would
-probably be better to use a @code{Ttext.text} symbol for stabs-in-elf on
-non-Solaris machines, and make the address in the @code{N_FUN} relative
-to the @code{Ttext.text} symbol.  In addition to @code{N_FUN} symbols,
-whether the linker relocates stabs also affects some @code{N_ROSYM},
-@code{N_STSYM}, and @code{N_LCSYM} symbols; see @ref{Statics}.
+Because looking things up in the ELF symbols is slow and GDB lacks code
+to do this this, it would probably be better to use a @code{Ttext.text}
+symbol for stabs-in-elf on non-Solaris machines, and make the address in
+the @code{N_FUN} relative to the @code{Ttext.text} symbol.  In addition
+to @code{N_FUN} symbols, whether the linker relocates stabs also affects
+some @code{N_ROSYM}, @code{N_STSYM}, and @code{N_LCSYM} symbols; see
+@ref{Statics}.
 
 @node Symbol Types Index
 @unnumbered Symbol Types Index
