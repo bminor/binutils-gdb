@@ -25,7 +25,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 SECTION
 	Constructors
 
-DESCRIPTION
 	Classes in C++ have 'constructors' and 'destructors'.  These
 	are functions which are called automatically by the language
 	whenever data of a class is created or destroyed.  Class data
@@ -92,8 +91,14 @@ DESCRIPTION
 
 
 /*
-INTERNAL FUNCTION
+INTERNAL_FUNCTION
 	bfd_constructor_entry 
+
+SYNOPSIS
+	void bfd_constructor_entry(bfd *abfd, 
+		asymbol **symbol_ptr_ptr,
+		CONST char*type);
+
 
 DESCRIPTION
 	This function is called with an a symbol describing the
@@ -103,11 +108,6 @@ DESCRIPTION
 	called "CTOR" or "DTOR" or whatever if the bfd doesn't already
 	have one, and grow a relocation table for the entry points as
 	they accumulate.
-
-SYNOPSIS
-	void bfd_constructor_entry(bfd *abfd, 
-		asymbol **symbol_ptr_ptr,
-		CONST char*type);
 
 */
 

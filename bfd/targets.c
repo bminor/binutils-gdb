@@ -28,7 +28,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 SECTION 
 	Targets
 
-DESCRIPTION
 	Each port of BFD to a different machine requries the creation
 	of a target back end. All the back end provides to the root
 	part of BFD is a structure containing pointers to functions
@@ -79,7 +78,6 @@ DESCRIPTION
 SUBSECTION
 	bfd_target
 
-DESCRIPTION
 	This structure contains everything that BFD knows about a
 	target. It includes things like its byte order, name, what
 	routines to call to do various operations, etc.   
@@ -121,6 +119,7 @@ DESCRIPTION
 	FIXME, these names should be rationalised with the names of
 	the entry points which call them. Too bad we can't have one
 	macro to define them both! 
+
 
 .typedef struct bfd_target
 .{
@@ -330,12 +329,12 @@ Special entry points for gas to swap coff parts
 
 */
 
-/* The default is to define a target_vector containing just the
-   DEFAULT_TARGET.  (This is to save space in the executables.)
-   You can override this by giving an explicit target_vector using
-   the SELECT_VECTOR macro.
-   Or define ALL_TARGETS macro to get all of the available targets. */
-   
+/* The default is to define a target_vector containing all the targets.
+   By setting MINIMIZE=1 on the "make" command line, the user can change this
+   to a vector containing just DEFAULT_VECTOR and any required
+   traditional-core-file handler.  (This is to save space in the executables.)
+   The config files can also override the default large vector by giving an
+   explicit SELECT_VECS macro.  */
 
 #if MINIMIZE && defined(DEFAULT_VECTOR) && !defined(SELECT_VECS)
 #ifdef TRAD_CORE
@@ -345,6 +344,8 @@ Special entry points for gas to swap coff parts
 #endif
 #endif
 
+/* All known xvecs.  They are listed a second time below, since
+   we can't intermix extern's and initializers.  */
 extern bfd_target ecoff_little_vec;
 extern bfd_target ecoff_big_vec;
 extern bfd_target sunos_big_vec;
@@ -374,141 +375,15 @@ extern bfd_target DEFAULT_VECTOR;
 #ifdef SELECT_VECS
 
 bfd_target *target_vector[] = {
-SELECT_VECS,
-0
-
+	&icoff_little_vec,
+	0
 };
+
 #else
 
-#ifdef GNU960
-#define ICOFF_LITTLE_VEC        icoff_little_vec
-#define ICOFF_BIG_VEC           icoff_big_vec
-#define B_OUT_VEC_LITTLE_HOST   b_out_vec_little_host
-#define B_OUT_VEC_BIG_HOST      b_out_vec_big_host
-#endif /* GNU960 */
-
-#ifndef RESTRICTED
-#define ECOFF_LITTLE_VEC        ecoff_little_vec
-#define ECOFF_BIG_VEC           ecoff_big_vec
-#define ICOFF_LITTLE_VEC        icoff_little_vec
-#define ICOFF_BIG_VEC           icoff_big_vec
-#define ELF_LITTLE_VEC		elf_little_vec
-#define ELF_BIG_VEC		elf_big_vec
-#define ZB_OUT_VEC_LITTLE_HOST  b_out_vec_little_host
-#define ZB_OUT_VEC_BIG_HOST     b_out_vec_big_host
-#define SUNOS_VEC_BIG_HOST      sunos_big_vec
-#define DEMO_64_VEC             demo_64_vec
-
-/* We have no oasys tools anymore, so we can't test any of this
-   anymore. If you want to test the stuff yourself, go ahead...
-   steve@cygnus.com */
-#if 0
-#define OASYS_VEC               oasys_vec
-#endif
-
-#define IEEE_VEC                ieee_vec
-#define M88KBCS_VEC            m88kbcs_vec
-#define SREC_VEC                srec_vec
-#define M68KCOFF_VEC            m68kcoff_vec
-#define I386COFF_VEC            i386coff_vec
-#define	I386AOUT_VEC		i386aout_vec
-#define A29KCOFF_BIG_VEC	a29kcoff_big_vec
-#define RS6000COFF_VEC		rs6000coff_vec
-#define H8300COFF_VEC           h8300coff_vec
-#endif
-
 bfd_target *target_vector[] = {
-
-#ifdef DEFAULT_VECTOR
-        &DEFAULT_VECTOR,
-#endif
-
-#ifdef  I386COFF_VEC
-        &I386COFF_VEC,
-#endif
-
-#ifdef	I386AOUT_VEC
-	&I386AOUT_VEC,
-#endif
-
-#ifdef ECOFF_LITTLE_VEC
-        &ECOFF_LITTLE_VEC,
-#endif
-
-#ifdef ECOFF_BIG_VEC
-        &ECOFF_BIG_VEC,
-#endif
-
-#ifdef IEEE_VEC
-        &IEEE_VEC,
-#endif
-
-#ifdef OASYS_VEC
-        &OASYS_VEC,
-#endif
-
-#ifdef SUNOS_VEC_BIG_HOST
-        &SUNOS_VEC_BIG_HOST,
-#endif
-
-#ifdef HOST_64_BIT
-#ifdef DEMO_64_VEC
-        &DEMO_64_VEC,
-#endif
-#endif
-
-#ifdef H300COFF_VEC
-	&h8300coff_vec,
-#endif
-#ifdef M88KBCS_VEC
-        &M88KBCS_VEC,
-#endif
-
-#ifdef SREC_VEC
-        &SREC_VEC,
-#endif
-        
-#ifdef ICOFF_LITTLE_VEC
-        &ICOFF_LITTLE_VEC,
-#endif
-
-#ifdef ICOFF_BIG_VEC
-        &ICOFF_BIG_VEC,
-#endif
-
-#ifdef ELF_LITTLE_VEC
-        &ELF_LITTLE_VEC,
-#endif
-
-#ifdef ELF_BIG_VEC
-        &ELF_BIG_VEC,
-#endif
-
-#ifdef B_OUT_VEC_LITTLE_HOST
-        &B_OUT_VEC_LITTLE_HOST,
-#endif
-
-#ifdef B_OUT_VEC_BIG_HOST
-        &B_OUT_VEC_BIG_HOST,
-#endif
-
-#ifdef  M68KCOFF_VEC
-        &M68KCOFF_VEC,
-#endif
-
-#ifdef	A29KCOFF_BIG_VEC
-	&A29KCOFF_BIG_VEC,
-#endif
-
-#ifdef	TRAD_CORE
-	&trad_core_vec,
-#endif
-
-#ifdef  RS6000COFF_VEC
-	&RS6000COFF_VEC,
-#endif
-
-        NULL, /* end of list marker */
+	&icoff_little_vec,
+	NULL, /* end of list marker */
 };
 
 #endif
@@ -518,9 +393,9 @@ bfd_target *target_vector[] = {
 
 bfd_target *default_vector[] = {
 #ifdef DEFAULT_VECTOR
-        &DEFAULT_VECTOR,
+	&DEFAULT_VECTOR,
 #endif
-        0,
+	0,
 };
 
 
