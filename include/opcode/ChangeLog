@@ -1,3 +1,9 @@
+Tue Jun  9 12:16:01 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* i386.h: Change occurences of Data16 to Size16, Data32 to Size32,
+	IgnoreDataSize to IgnoreSize.  Flag address and data size prefixes
+	with Size16|IgnoreSize or Size32|IgnoreSize.
+
 Mon Jun  8 12:15:52 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* i386.h (REPNE): Rename to REPNE_PREFIX_OPCODE.

@@ -24,7 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    we're stuck with it.
 
    eg. `fsub %st(3),%st' results in st <- st - st(3) as expected, but
-   `fusb %st,%st(3)' results in st(3) <- st - st(3), rather than
+   `fsub %st,%st(3)' results in st(3) <- st - st(3), rather than
    the expected st(3) <- st(3) - st !
 
    This happens with all the non-commutative arithmetic floating point
@@ -52,9 +52,9 @@ static const template i386_optab[] = {
 #define wl_Suf (No_bSuf|No_sSuf)
 #define sl_Suf (No_bSuf|No_wSuf)
 #define bwl_Suf No_sSuf
-#define FP (NoSuf|IgnoreDataSize)
-#define l_FP (l_Suf|IgnoreDataSize)
-#define sl_FP (sl_Suf|IgnoreDataSize)
+#define FP (NoSuf|IgnoreSize)
+#define l_FP (l_Suf|IgnoreSize)
+#define sl_FP (sl_Suf|IgnoreSize)
 #if UNIXWARE_COMPAT
 #define FloatDR FloatD
 #else
@@ -73,24 +73,22 @@ static const template i386_optab[] = {
    are set to an implementation defined value (on the Pentium Pro,
    the implementation defined value is zero).  */
 { "mov",   2,	0x8c, X, wl_Suf|Modrm,			{ SReg3|SReg2, WordReg|WordMem, 0 } },
-{ "mov",   2,	0x8e, X, wl_Suf|Modrm|IgnoreDataSize,	{ WordReg|WordMem, SReg3|SReg2, 0 } },
+{ "mov",   2,	0x8e, X, wl_Suf|Modrm|IgnoreSize,	{ WordReg|WordMem, SReg3|SReg2, 0 } },
 /* move to/from control debug registers */
-{ "mov",   2, 0x0f20, X, l_Suf|D|Modrm|IgnoreDataSize,	{ Control, Reg32, 0} },
-{ "mov",   2, 0x0f21, X, l_Suf|D|Modrm|IgnoreDataSize,	{ Debug, Reg32, 0} },
-{ "mov",   2, 0x0f24, X, l_Suf|D|Modrm|IgnoreDataSize,	{ Test, Reg32, 0} },
+{ "mov",   2, 0x0f20, X, l_Suf|D|Modrm|IgnoreSize,	{ Control, Reg32, 0} },
+{ "mov",   2, 0x0f21, X, l_Suf|D|Modrm|IgnoreSize,	{ Debug, Reg32, 0} },
+{ "mov",   2, 0x0f24, X, l_Suf|D|Modrm|IgnoreSize,	{ Test, Reg32, 0} },
 
 /* move with sign extend */
 /* "movsbl" & "movsbw" must not be unified into "movsb" to avoid
-   conflict with the "movs" string move instruction.  Thus,
-   {"movsb", 2, 0x0fbe, X, ReverseModrm, { Reg8|ByteMem, WordReg, 0} },
-   is not kosher; we must seperate the two instructions. */
-{"movsbl", 2, 0x0fbe, X, NoSuf|ReverseModrm|Data32,	{ Reg8|ByteMem, Reg32, 0} },
-{"movsbw", 2, 0x0fbe, X, NoSuf|ReverseModrm|Data16,	{ Reg8|ByteMem, Reg16, 0} },
-{"movswl", 2, 0x0fbf, X, NoSuf|ReverseModrm|Data32,	{ Reg16|ShortMem, Reg32, 0} },
+   conflict with the "movs" string move instruction.  */
+{"movsbl", 2, 0x0fbe, X, NoSuf|ReverseModrm,	{ Reg8|ByteMem, Reg32, 0} },
+{"movsbw", 2, 0x0fbe, X, NoSuf|ReverseModrm,	{ Reg8|ByteMem, Reg16, 0} },
+{"movswl", 2, 0x0fbf, X, NoSuf|ReverseModrm,	{ Reg16|ShortMem, Reg32, 0} },
 
 /* move with zero extend */
-{"movzb",  2, 0x0fb6, X, wl_Suf|ReverseModrm,		{ Reg8|ByteMem, WordReg, 0} },
-{"movzwl", 2, 0x0fb7, X, NoSuf|ReverseModrm|Data32,	{ Reg16|ShortMem, Reg32, 0} },
+{"movzb",  2, 0x0fb6, X, wl_Suf|ReverseModrm,	{ Reg8|ByteMem, WordReg, 0} },
+{"movzwl", 2, 0x0fb7, X, NoSuf|ReverseModrm,	{ Reg16|ShortMem, Reg32, 0} },
 
 /* push instructions */
 {"push",   1,	0x50, X, wl_Suf|ShortForm,	{ WordReg,0,0 } },
@@ -219,15 +217,15 @@ static const template i386_optab[] = {
 
 /* conversion insns */
 /* conversion:	intel naming */
-{"cbw",	   0,	0x98, X, NoSuf|Data16,		{ 0, 0, 0} },
-{"cwde",   0,	0x98, X, NoSuf|Data32,		{ 0, 0, 0} },
-{"cwd",	   0,	0x99, X, NoSuf|Data16,		{ 0, 0, 0} },
-{"cdq",	   0,	0x99, X, NoSuf|Data32,		{ 0, 0, 0} },
+{"cbw",	   0,	0x98, X, NoSuf|Size16,		{ 0, 0, 0} },
+{"cwde",   0,	0x98, X, NoSuf|Size32,		{ 0, 0, 0} },
+{"cwd",	   0,	0x99, X, NoSuf|Size16,		{ 0, 0, 0} },
+{"cdq",	   0,	0x99, X, NoSuf|Size32,		{ 0, 0, 0} },
 /*  att naming */
-{"cbtw",   0,	0x98, X, NoSuf|Data16,		{ 0, 0, 0} },
-{"cwtl",   0,	0x98, X, NoSuf|Data32,		{ 0, 0, 0} },
-{"cwtd",   0,	0x99, X, NoSuf|Data16,		{ 0, 0, 0} },
-{"cltd",   0,	0x99, X, NoSuf|Data32,		{ 0, 0, 0} },
+{"cbtw",   0,	0x98, X, NoSuf|Size16,		{ 0, 0, 0} },
+{"cwtl",   0,	0x98, X, NoSuf|Size32,		{ 0, 0, 0} },
+{"cwtd",   0,	0x99, X, NoSuf|Size16,		{ 0, 0, 0} },
+{"cltd",   0,	0x99, X, NoSuf|Size32,		{ 0, 0, 0} },
 
 /* Warning! the mul/imul (opcode 0xf6) must only have 1 operand!  They are
    expanding 64-bit multiplies, and *cannot* be selected to accomplish
@@ -348,8 +346,8 @@ static const template i386_optab[] = {
 {"jg",	   1,	0x7f, X, NoSuf|Jump,		{ Disp, 0, 0} },
 
 /* jcxz vs. jecxz is chosen on the basis of the address size prefix.  */
-{"jcxz",   1,	0xe3, X, NoSuf|JumpByte|Data16, { Disp, 0, 0} },
-{"jecxz",  1,	0xe3, X, NoSuf|JumpByte|Data32, { Disp, 0, 0} },
+{"jcxz",   1,	0xe3, X, NoSuf|JumpByte|Size16, { Disp, 0, 0} },
+{"jecxz",  1,	0xe3, X, NoSuf|JumpByte|Size32, { Disp, 0, 0} },
 
 /* The loop instructions also use the address size prefix to select
    %cx rather than %ecx for the loop count, so the `w' form of these
@@ -458,23 +456,23 @@ static const template i386_optab[] = {
 {"nop",	   0,	0x90, X, NoSuf,			{ 0, 0, 0} },
 
 /* protection control */
-{"arpl",   2,	0x63, X, NoSuf|Modrm|IgnoreDataSize,	{ Reg16, Reg16|ShortMem, 0} },
+{"arpl",   2,	0x63, X, NoSuf|Modrm|IgnoreSize,{ Reg16, Reg16|ShortMem, 0} },
 {"lar",	   2, 0x0f02, X, wl_Suf|ReverseModrm,	{ WordReg|WordMem, WordReg, 0} },
 {"lgdt",   1, 0x0f01, 2, wl_Suf|Modrm,		{ WordMem, 0, 0} },
 {"lidt",   1, 0x0f01, 3, wl_Suf|Modrm,		{ WordMem, 0, 0} },
-{"lldt",   1, 0x0f00, 2, NoSuf|Modrm|IgnoreDataSize,	{ Reg16|ShortMem, 0, 0} },
-{"lmsw",   1, 0x0f01, 6, NoSuf|Modrm|IgnoreDataSize,	{ Reg16|ShortMem, 0, 0} },
+{"lldt",   1, 0x0f00, 2, NoSuf|Modrm|IgnoreSize,{ Reg16|ShortMem, 0, 0} },
+{"lmsw",   1, 0x0f01, 6, NoSuf|Modrm|IgnoreSize,{ Reg16|ShortMem, 0, 0} },
 {"lsl",	   2, 0x0f03, X, wl_Suf|ReverseModrm,	{ WordReg|WordMem, WordReg, 0} },
-{"ltr",	   1, 0x0f00, 3, NoSuf|Modrm|IgnoreDataSize,	{ Reg16|ShortMem, 0, 0} },
+{"ltr",	   1, 0x0f00, 3, NoSuf|Modrm|IgnoreSize,{ Reg16|ShortMem, 0, 0} },
 
 {"sgdt",   1, 0x0f01, 0, wl_Suf|Modrm,		{ WordMem, 0, 0} },
 {"sidt",   1, 0x0f01, 1, wl_Suf|Modrm,		{ WordMem, 0, 0} },
 {"sldt",   1, 0x0f00, 0, wl_Suf|Modrm,		{ WordReg|WordMem, 0, 0} },
 {"smsw",   1, 0x0f01, 4, wl_Suf|Modrm,		{ WordReg|WordMem, 0, 0} },
-{"str",	   1, 0x0f00, 1, NoSuf|Modrm|IgnoreDataSize,	{ Reg16|ShortMem, 0, 0} },
+{"str",	   1, 0x0f00, 1, NoSuf|Modrm|IgnoreSize,{ Reg16|ShortMem, 0, 0} },
 
-{"verr",   1, 0x0f00, 4, NoSuf|Modrm|IgnoreDataSize,	{ Reg16|ShortMem, 0, 0} },
-{"verw",   1, 0x0f00, 5, NoSuf|Modrm|IgnoreDataSize,	{ Reg16|ShortMem, 0, 0} },
+{"verr",   1, 0x0f00, 4, NoSuf|Modrm|IgnoreSize,{ Reg16|ShortMem, 0, 0} },
+{"verw",   1, 0x0f00, 5, NoSuf|Modrm|IgnoreSize,{ Reg16|ShortMem, 0, 0} },
 
 /* floating point instructions */
 
@@ -705,15 +703,15 @@ static const template i386_optab[] = {
   opcode prefixes; we allow them as seperate insns too
 */
 #define ADDR_PREFIX_OPCODE 0x67
-{"addr16", 0,	0x67, X, NoSuf|IsPrefix,	{ 0, 0, 0} },
-{"addr32", 0,	0x67, X, NoSuf|IsPrefix,	{ 0, 0, 0} },
-{"aword",  0,	0x67, X, NoSuf|IsPrefix,	{ 0, 0, 0} },
-{"adword", 0,	0x67, X, NoSuf|IsPrefix,	{ 0, 0, 0} },
+{"addr16", 0,	0x67, X, NoSuf|IsPrefix|Size16|IgnoreSize,	{ 0, 0, 0} },
+{"addr32", 0,	0x67, X, NoSuf|IsPrefix|Size32|IgnoreSize,	{ 0, 0, 0} },
+{"aword",  0,	0x67, X, NoSuf|IsPrefix|Size16|IgnoreSize,	{ 0, 0, 0} },
+{"adword", 0,	0x67, X, NoSuf|IsPrefix|Size32|IgnoreSize,	{ 0, 0, 0} },
 #define DATA_PREFIX_OPCODE 0x66
-{"data16", 0,	0x66, X, NoSuf|IsPrefix,	{ 0, 0, 0} },
-{"data32", 0,	0x66, X, NoSuf|IsPrefix,	{ 0, 0, 0} },
-{"word",   0,	0x66, X, NoSuf|IsPrefix,	{ 0, 0, 0} },
-{"dword",  0,	0x66, X, NoSuf|IsPrefix,	{ 0, 0, 0} },
+{"data16", 0,	0x66, X, NoSuf|IsPrefix|Size16|IgnoreSize,	{ 0, 0, 0} },
+{"data32", 0,	0x66, X, NoSuf|IsPrefix|Size32|IgnoreSize,	{ 0, 0, 0} },
+{"word",   0,	0x66, X, NoSuf|IsPrefix|Size16|IgnoreSize,	{ 0, 0, 0} },
+{"dword",  0,	0x66, X, NoSuf|IsPrefix|Size32|IgnoreSize,	{ 0, 0, 0} },
 #define LOCK_PREFIX_OPCODE 0xf0
 {"lock",   0,	0xf0, X, NoSuf|IsPrefix,	{ 0, 0, 0} },
 {"wait",   0,   0x9b, X, NoSuf|IsPrefix,	{ 0, 0, 0} },
