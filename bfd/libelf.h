@@ -71,7 +71,7 @@ struct elf_backend_data
   boolean (*elf_backend_section_processing) PARAMS ((bfd *, Elf32_Internal_Shdr *));
   boolean (*elf_backend_section_from_shdr) PARAMS ((bfd *, Elf32_Internal_Shdr *, char *));
   boolean (*elf_backend_fake_sections) PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *));
-  boolean (*elf_backend_section_from_bfd_section) PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *));
+  boolean (*elf_backend_section_from_bfd_section) PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *, int *));
 };
 
 struct elf_sym_extra
@@ -130,6 +130,8 @@ struct elf_obj_tdata
   file_ptr next_file_pos;
   void *prstatus;		/* The raw /proc prstatus structure */
   void *prpsinfo;		/* The raw /proc prpsinfo structure */
+  bfd_vma gp;			/* The gp value (MIPS only, for now) */
+  int gp_size;			/* The gp size (MIPS only, for now) */
 };
 
 #define elf_tdata(bfd)		((bfd) -> tdata.elf_obj_data)
@@ -146,6 +148,8 @@ struct elf_obj_tdata
 #define core_prstatus(bfd)	(elf_tdata(bfd) -> prstatus)
 #define obj_symbols(bfd)	(elf_tdata(bfd) -> symbols)
 #define obj_internal_syms(bfd)	(elf_tdata(bfd) -> internal_syms)
+#define elf_gp(bfd)		(elf_tdata(bfd) -> gp)
+#define elf_gp_size(bfd)	(elf_tdata(bfd) -> gp_size)
 
 extern char * elf_string_from_elf_section PARAMS ((bfd *, unsigned, unsigned));
 extern char * elf_get_str_section PARAMS ((bfd *, unsigned));

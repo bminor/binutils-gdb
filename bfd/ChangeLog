@@ -1,3 +1,25 @@
+Tue Oct 12 17:03:27 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* elf32-mips.c: Extensive additions to do relocations and to
+	handle MIPS specific sections.
+	* libelf.h (elf_backend_data): Pass fourth argument to
+	elf_backend_section_from_bfd_section to permit it to control the
+	section index to use.
+	(elf_obj_tdata): Add gp and gp_size fields.
+	(elf_gp, elf_gp_size): New accessor macros.
+	* elfcode.h: Removed a number of unused local variables.
+	(elf_fake_sections): Clear section header before calling
+	elf_backend_fake_sections, not after.
+	(prep_headers): Return true at end.
+	(elf_section_from_bfd_section): Pass retval argument to
+	elf_backend_section_from_bfd_section.
+	* elf32-hppa.c (elf32_hppa_backend_section_from_bfd_section):
+	Accept and ignore new retval argument.
+	* bfd.c: Include libelf.h.
+	(bfd_set_gp_size): Handle ELF targets.
+	* Makefile.in (bfd.o): Depends upon libelf.h.
+	(elf32-mips.o): Depends upon $(INCDIR)/elf/mips.h.
+
 Mon Oct 11 17:25:18 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ecoff.c (ecoff_mkobject): Check bfd_make_section return value.

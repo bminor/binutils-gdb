@@ -137,13 +137,17 @@ BFD32_BACKENDS = \
 	elf32-sparc.o \
 	elf32.o \
 	hp300hpux.o \
-	hppa.o \
+	som.o \
 	i386aout.o \
 	i386bsd.o \
 	i386linux.o \
 	i386lynx.o \
+	i386lynx-cf.o \
+	netbsd386.o \
 	i386mach3.o \
 	ieee.o \
+	m68klynx.o \
+	m68klynx-cf.o \
 	mipsbsd.o \
 	newsos3.o \
 	nlm.o \
@@ -170,6 +174,8 @@ BFD64_BACKENDS = \
 OPTIONAL_BACKENDS = \
 	aix386-core.o \
 	hpux-core.o \
+	lynx-core.o \
+	osf-core.o \
 	sco-core.o \
 	trad-core.o
 
@@ -209,17 +215,18 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \
 	 coff-a29k.c coff-rs6000.c coffgen.c format.c \
 	 section.c core.c syms.c stab-syms.c reloc.c init.c ctor.c \
 	 seclet.c coff-m88k.c coff-mips.c coff-sh.c trad-core.c newsos3.c \
-	 i386aout.c i386linux.c i386mach3.c bout.c aout-adobe.c coff-we32k.c \
+	 i386aout.c i386linux.c netbsd386.c i386mach3.c bout.c aout-adobe.c coff-we32k.c \
 	 i386bsd.c cpu-h8300.c cpu-i960.c cpu-sparc.c cpu-m68k.c \
 	 cpu-m88k.c cpu-vax.c cpu-mips.c cpu-a29k.c cpu-i386.c \
-	 cpu-rs6000.c coff-h8300.c hppa.c cpu-hppa.c cpu-we32k.c reloc16.c \
+	 cpu-rs6000.c coff-h8300.c som.c cpu-hppa.c cpu-we32k.c reloc16.c \
 	 mipsbsd.c cpu-sh.c \
 	 elf32.c elf32-sparc.c elf32-i386.c elf32-i860.c elf32-m68k.c \
 	 elf32-hppa.c elf32-m88k.c elf32-mips.c elf32-gen.c \
 	 elf64.c elf64-gen.c \
 	 nlm32.c nlm32-gen.c nlm32-i386.c nlm64.c nlm64-gen.c \
 	 coff-alpha.c cpu-alpha.c \
-	 hp300bsd.c hp300hpux.c i386lynx.c
+	 hp300bsd.c hp300hpux.c \
+	 i386lynx.c i386lynx-cf.c m68klynx.c m68klynx-cf.c
 
 STAGESTUFF = $(TARGETLIB) $(OFILES)
 
@@ -444,7 +451,7 @@ bfd.ps:
 libbfd.o : libbfd.c $(BFD_H) $(INCDIR)/obstack.h libbfd.h 
 opncls.o : opncls.c $(BFD_H) $(INCDIR)/obstack.h libbfd.h 
 bfd.o : bfd.c $(BFD_H) $(INCDIR)/obstack.h libbfd.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/sym.h libecoff.h
+  $(INCDIR)/coff/internal.h $(INCDIR)/coff/sym.h libecoff.h libelf.h
 archive.o : archive.c $(BFD_H) $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/aout/ar.h $(INCDIR)/aout/ranlib.h 
 targets.o : targets.c $(BFD_H) $(INCDIR)/obstack.h libbfd.h 
@@ -536,6 +543,7 @@ sco-core.o : sco-core.c $(BFD_H) libbfd.h libcoff.h \
 aix386-core.o : aix386-core.c $(BFD_H) libbfd.h libcoff.h \
   $(INCDIR)/obstack.h $(INCDIR)/coff/i386.h $(INCDIR)/coff/internal.h
 hpux-core.o : hpux-core.c $(BFD_H) libbfd.h libhppa.h
+osf-core.o : osf-core.c $(BFD_H) libbfd.h
 
 newsos3.o : newsos3.c $(BFD_H) $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
@@ -543,7 +551,14 @@ newsos3.o : newsos3.c $(BFD_H) $(INCDIR)/obstack.h libbfd.h \
 i386lynx.o : i386lynx.c $(BFD_H) $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
   $(INCDIR)/aout/ar.h libaout.h 
+i386lynx-cf.o: i386lynx-cf.c coff-i386.c $(BFD_H) $(INCDIR)/obstack.h \
+  libbfd.h $(INCDIR)/coff/i386.h $(INCDIR)/coff/internal.h libcoff.h \
+  coffcode.h coffswap.h seclet.h 
+lynx-core.o : lynx-core.c $(BFD_H) libbfd.h
 i386aout.o : i386aout.c $(BFD_H) $(INCDIR)/obstack.h libbfd.h \
+  $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
+  $(INCDIR)/aout/ar.h libaout.h 
+netbsd386.o : netbsd386.c $(BFD_H) $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
   $(INCDIR)/aout/ar.h libaout.h 
 i386mach3.o : i386mach3.c $(BFD_H) $(INCDIR)/obstack.h libbfd.h \
@@ -563,25 +578,25 @@ elf.o : elf.c libelf.h libbfd.h $(BFD_H) $(INCDIR)/obstack.h
 elf32.o : elf32.c elfcode.h libelf.h libbfd.h $(BFD_H) \
   $(INCDIR)/obstack.h
 elf32-sparc.o : elf32-sparc.c libelf.h libbfd.h $(BFD_H) \
-  $(INCDIR)/obstack.h
+  $(INCDIR)/obstack.h elf32-target.h
 elf32-m68k.o : elf32-m68k.c libelf.h libbfd.h $(BFD_H) \
-  $(INCDIR)/obstack.h
+  $(INCDIR)/obstack.h elf32-target.h
 elf32-i860.o : elf32-i860.c libelf.h libbfd.h $(BFD_H) \
-  $(INCDIR)/obstack.h
+  $(INCDIR)/obstack.h elf32-target.h
 elf32-i386.o : elf32-i386.c libelf.h libbfd.h $(BFD_H) \
-  $(INCDIR)/obstack.h
-elf32-hppa.o : elf32-hppa.c $(srcdir)/elf32-hppa.h libelf.h libbfd.h \
-  $(BFD_H) $(INCDIR)/obstack.h
+  $(INCDIR)/obstack.h elf32-target.h
+elf32-hppa.o : elf32-hppa.c $(srcdir)/elf32-hppa.h $(srcdir)/libhppa.h \
+  libelf.h libbfd.h $(BFD_H) $(INCDIR)/obstack.h elf32-target.h
 elf32-m88k.o : elf32-m88k.c libelf.h libbfd.h \
-  $(BFD_H) $(INCDIR)/obstack.h
+  $(BFD_H) $(INCDIR)/obstack.h elf32-target.h
 elf32-mips.o : elf32-mips.c libelf.h libbfd.h \
-  $(BFD_H) $(INCDIR)/obstack.h
+  $(BFD_H) $(INCDIR)/obstack.h $(INCDIR)/elf/mips.h elf32-target.h
 elf32-gen.o : elf32-gen.c libelf.h libbfd.h \
-  $(BFD_H) $(INCDIR)/obstack.h
+  $(BFD_H) $(INCDIR)/obstack.h elf32-target.h
 elf64.o : elf64.c elfcode.h libelf.h libbfd.h $(BFD_H) \
   $(INCDIR)/obstack.h
 elf64-gen.o : elf64-gen.c libelf.h libbfd.h \
-  $(BFD_H) $(INCDIR)/obstack.h
+  $(BFD_H) $(INCDIR)/obstack.h elf64-target.h
 nlm.o : nlm.c libnlm.h libbfd.h $(BFD_H) $(INCDIR)/obstack.h
 nlm32.o : nlm32.c nlmcode.h libnlm.h libbfd.h $(BFD_H) \
   $(INCDIR)/obstack.h
