@@ -1,3 +1,23 @@
+Fri Apr 10 10:35:35 1998  John Metzler  <jmetzler@cygnus.com>
+
+	*  mips-tdep.c (unpack_mips16): Fixed instruction decoding, lots of
+ 	bit pattern interpretations. mips_fetch_instruction does not work
+ 	for 16 bit instructions. Some confusion remains about sign
+ 	extension in backward branches.
+	(mips32_relative_offset): Sign extension
+	(mips32_next_pc): Major debugging, bit pattern interpretation
+	(print_unpack): debugging printf
+	(fetch_mips_16): new funtion, key on PC low bit, not symbol table
+	(mips16_next_16): Initial major debugging of this function. Lots
+ 	of bit pattern mistakes.
+	(mips_next_pc): key on low bit of PC, not symbol table.
+	* symfile.c(generic_load) : Added a download verification which
+ 	reads back the loade code. Download chunk size is now a defined
+ 	macro. Fixed a bug in which downloading slips into loading one
+ 	byte at a time. Lower level functions in monitor.c can load long
+ 	sequences of bytes and make use of these fixups.  Referencing
+ 	bfd-start_address directly was incorrectly getting zero for start.
+
 Thu Apr  9 19:20:32 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* mips-tdep.c (do_fp_register_row): Use alloca rather than arrays
