@@ -1,3 +1,8 @@
+Thu Nov  2 23:23:36 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* configure.in: Before checking for the existence of various files,
+	use sed to filter out "target-".
+
 Thu Nov  2 13:24:56 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (DO_X): Split rule to decrease command line length
