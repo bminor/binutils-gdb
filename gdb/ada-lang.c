@@ -623,30 +623,51 @@ ada_translate_error_message (const char *string)
     return string;
 }
 
+/* Note: would have used MAX_OF_TYPE and MIN_OF_TYPE macros from
+   gdbtypes.h, but some of the necessary definitions in that file
+   seem to have gone missing. */
+
+/* Maximum value of a SIZE-byte signed integer type. */
 static LONGEST
-MAX_OF_SIZE (int size)
+max_of_size (int size)
 {
   LONGEST top_bit = (LONGEST) 1 << (size * 8 - 2);
   return top_bit | (top_bit - 1);
 }
 
+/* Minimum value of a SIZE-byte signed integer type. */
 static LONGEST
-MIN_OF_SIZE (int size)
+min_of_size (int size)
 {
-  return -MAX_OF_SIZE (size) - 1;
+  return -max_of_size (size) - 1;
 }
 
+/* Maximum value of a SIZE-byte unsigned integer type. */
 static ULONGEST
-UMAX_OF_SIZE (int size)
+umax_of_size (int size)
 {
   ULONGEST top_bit = (ULONGEST) 1 << (size * 8 - 1);
   return top_bit | (top_bit - 1);
 }
 
-static ULONGEST
-UMIN_OF_SIZE (int size)
+/* Maximum value of integral type T, as a signed quantity. */
+static LONGEST
+max_of_type (struct type *t)
 {
-  return 0;
+  if (TYPE_UNSIGNED (t))
+    return (LONGEST) umax_of_size (TYPE_LENGTH (t));
+  else
+    return max_of_size (TYPE_LENGTH (t));
+}
+
+/* Minimum value of integral type T, as a signed quantity. */
+static LONGEST
+min_of_type (struct type *t)
+{
+  if (TYPE_UNSIGNED (t)) 
+    return 0;
+  else
+    return min_of_size (TYPE_LENGTH (t));
 }
 
 /* The largest value in the domain of TYPE, a discrete type, as an integer.  */
@@ -664,7 +685,7 @@ discrete_type_high_bound (struct type *type)
                             TYPE_FIELD_BITPOS (type,
                                                TYPE_NFIELDS (type) - 1));
     case TYPE_CODE_INT:
-      return value_from_longest (type, MAX_OF_TYPE (type));
+      return value_from_longest (type, max_of_type (type));
     default:
       error ("Unexpected type in discrete_type_high_bound.");
     }
@@ -682,7 +703,7 @@ discrete_type_low_bound (struct type *type)
     case TYPE_CODE_ENUM:
       return value_from_longest (type, TYPE_FIELD_BITPOS (type, 0));
     case TYPE_CODE_INT:
-      return value_from_longest (type, MIN_OF_TYPE (type));
+      return value_from_longest (type, min_of_type (type));
     default:
       error ("Unexpected type in discrete_type_low_bound.");
     }
@@ -3444,8 +3465,8 @@ possible_user_operator_p (enum exp_opcode op, struct value *args[])
               || TYPE_CODE (TYPE_TARGET_TYPE (type0)) != TYPE_CODE_ARRAY))
          || (TYPE_CODE (type1) != TYPE_CODE_ARRAY
              && (TYPE_CODE (type1) != TYPE_CODE_PTR
-                 || (TYPE_CODE (TYPE_TARGET_TYPE (type1)) !=
-                     TYPE_CODE_ARRAY))));
+                 || (TYPE_CODE (TYPE_TARGET_TYPE (type1)) 
+		     != TYPE_CODE_ARRAY))));
 
     case BINOP_EXP:
       return (!(numeric_type_p (type0) && integer_type_p (type1)));
@@ -3535,24 +3556,36 @@ ada_simple_renamed_entity (struct symbol *sym)
 static struct value *
 ensure_lval (struct value *val, CORE_ADDR *sp)
 {
-  CORE_ADDR old_sp = *sp;
+  if (! VALUE_LVAL (val))
+    {
+      int len = TYPE_LENGTH (check_typedef (VALUE_TYPE (val)));
 
-  if (VALUE_LVAL (val))
-    return val;
+      /* The following is taken from the structure-return code in
+	 call_function_by_hand. FIXME: Therefore, some refactoring seems 
+	 indicated. */
+      if (INNER_THAN (1, 2))
+	{
+	  /* Stack grows downward.  Align SP and VALUE_ADDRESS (val) after
+	     reserving sufficient space. */
+	  *sp -= len;
+	  if (gdbarch_frame_align_p (current_gdbarch))
+	    *sp = gdbarch_frame_align (current_gdbarch, *sp);
+	  VALUE_ADDRESS (val) = *sp;
+	}
+      else
+	{
+	  /* Stack grows upward.  Align the frame, allocate space, and
+	     then again, re-align the frame. */
+	  if (gdbarch_frame_align_p (current_gdbarch))
+	    *sp = gdbarch_frame_align (current_gdbarch, *sp);
+	  VALUE_ADDRESS (val) = *sp;
+	  *sp += len;
+	  if (gdbarch_frame_align_p (current_gdbarch))
+	    *sp = gdbarch_frame_align (current_gdbarch, *sp);
+	}
 
-  if (DEPRECATED_STACK_ALIGN_P ())
-    *sp = push_bytes (*sp, VALUE_CONTENTS_RAW (val),
-                      DEPRECATED_STACK_ALIGN
-                      (TYPE_LENGTH (check_typedef (VALUE_TYPE (val)))));
-  else
-    *sp = push_bytes (*sp, VALUE_CONTENTS_RAW (val),
-                      TYPE_LENGTH (check_typedef (VALUE_TYPE (val))));
-
-  VALUE_LVAL (val) = lval_memory;
-  if (INNER_THAN (1, 2))
-    VALUE_ADDRESS (val) = *sp;
-  else
-    VALUE_ADDRESS (val) = old_sp;
+      write_memory (VALUE_ADDRESS (val), VALUE_CONTENTS_RAW (val), len);
+    }
 
   return val;
 }
@@ -5620,7 +5653,9 @@ ada_finish_decode_line_1 (char **spec, struct symtab *file_table,
           val.section = SYMBOL_BFD_SECTION (msymbol);
           if (funfirstline)
             {
-              val.pc += DEPRECATED_FUNCTION_START_OFFSET;
+              val.pc = gdbarch_convert_from_func_ptr_addr (current_gdbarch,
+							   val.pc,
+							   &current_target);
               SKIP_PROLOGUE (val.pc);
             }
           selected.sals = (struct symtab_and_line *)
@@ -6735,8 +6770,8 @@ ada_is_variant_part (struct type *type, int field_num)
   struct type *field_type = TYPE_FIELD_TYPE (type, field_num);
   return (TYPE_CODE (field_type) == TYPE_CODE_UNION
           || (is_dynamic_field (type, field_num)
-              && TYPE_CODE (TYPE_TARGET_TYPE (field_type)) ==
-              TYPE_CODE_UNION));
+              && (TYPE_CODE (TYPE_TARGET_TYPE (field_type)) 
+		  == TYPE_CODE_UNION)));
 }
 
 /* Assuming that VAR_TYPE is a variant wrapper (type of the variant part)
@@ -8464,7 +8499,8 @@ ada_enum_name (const char *name)
      but stop searching when we hit an overloading suffix, which is
      of the form "__" followed by digits.  */
 
-  if ((tmp = strrchr (name, '.')) != NULL)
+  tmp = strrchr (name, '.');
+  if (tmp != NULL)
     name = tmp + 1;
   else
     {
@@ -8500,8 +8536,10 @@ ada_enum_name (const char *name)
     }
   else
     {
-      if ((tmp = strstr (name, "__")) != NULL
-          || (tmp = strstr (name, "$")) != NULL)
+      tmp = strstr (name, "__");
+      if (tmp == NULL)
+	tmp = strstr (name, "$");
+      if (tmp != NULL)
         {
           GROW_VECT (result, result_len, tmp - name + 1);
           strncpy (result, name, tmp - name);
@@ -10169,7 +10207,7 @@ const struct language_defn ada_language_defn = {
 };
 
 static void
-build_ada_types (void)
+build_ada_types (struct gdbarch *current_gdbarch)
 {
   builtin_type_ada_int =
     init_type (TYPE_CODE_INT, TARGET_INT_BIT / TARGET_CHAR_BIT,
@@ -10213,17 +10251,17 @@ void
 _initialize_ada_language (void)
 {
 
-  build_ada_types ();
-  deprecated_register_gdbarch_swap (NULL, 0, build_ada_types);
+  build_ada_types (current_gdbarch);
+  gdbarch_data_register_post_init (build_ada_types);
   add_language (&ada_language_defn);
 
   varsize_limit = 65536;
 #ifdef GNAT_GDB
-  add_show_from_set
-    (add_set_cmd ("varsize-limit", class_support, var_uinteger,
-                  (char *) &varsize_limit,
-                  "Set maximum bytes in dynamic-sized object.",
-                  &setlist), &showlist);
+  add_setshow_uinteger_cmd ("varsize-limit", class_support,
+			    &varsize_limit, "\
+Set the maximum number of bytes allowed in a dynamic-sized object.", "\
+Show the maximum number of bytes allowed in a dynamic-sized object.",
+			    NULL, NULL, &setlist, &showlist);
   obstack_init (&cache_space);
 #endif /* GNAT_GDB */
 

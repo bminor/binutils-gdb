@@ -48,9 +48,6 @@ struct ada_val_print_args
   enum val_prettyprint pretty;
 };
 
-extern int inspect_it;
-extern unsigned int repeat_count_threshold;
-
 static void print_record (struct type *, char *, struct ui_file *, int,
 			  int, enum val_prettyprint);
 
@@ -317,21 +314,34 @@ ada_print_floating (char *valaddr, struct type *type, struct ui_file *stream)
   len = strlen (result);
 
   /* Modify for Ada rules.  */
-  if ((s = strstr (result, "inf")) != NULL
-      || (s = strstr (result, "Inf")) != NULL
-      || (s = strstr (result, "INF")) != NULL)
+  
+  s = strstr (result, "inf");
+  if (s == NULL)
+    s = strstr (result, "Inf");
+  if (s == NULL)
+    s = strstr (result, "INF");
+  if (s != NULL)
     strcpy (s, "Inf");
-  else if ((s = strstr (result, "nan")) != NULL
-	   || (s = strstr (result, "NaN")) != NULL
-	   || (s = strstr (result, "Nan")) != NULL)
+
+  if (s == NULL)
     {
-      s[0] = s[2] = 'N';
-      if (result[0] == '-')
-	result += 1;
+      s = strstr (result, "nan");
+      if (s == NULL)
+	s = strstr (result, "NaN");
+      if (s == NULL)
+	s = strstr (result, "Nan");
+      if (s != NULL)
+	{
+	  s[0] = s[2] = 'N';
+	  if (result[0] == '-')
+	    result += 1;
+	}
     }
-  else if (strchr (result, '.') == NULL)
+
+  if (s == NULL && strchr (result, '.') == NULL)
     {
-      if ((s = strchr (result, 'e')) == NULL)
+      s = strchr (result, 'e');
+      if (s == NULL)
 	fprintf_filtered (stream, "%s.0", result);
       else
 	fprintf_filtered (stream, "%.*s.0%s", (int) (s-result), result, s);
@@ -460,9 +470,9 @@ printstr (struct ui_file *stream, char *string, unsigned int length,
 
       rep1 = i + 1;
       reps = 1;
-      while (rep1 < length &&
-	     char_at (string, rep1, type_len) == char_at (string, i,
-							  type_len))
+      while (rep1 < length
+	     && char_at (string, rep1, type_len) == char_at (string, i,
+							     type_len))
 	{
 	  rep1 += 1;
 	  reps += 1;

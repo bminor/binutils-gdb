@@ -644,8 +644,8 @@ write_var_from_sym (struct block *orig_left_context,
 {
   if (orig_left_context == NULL && symbol_read_needs_frame (sym))
     {
-      if (innermost_block == 0 ||
-	  contained_in (block, innermost_block))
+      if (innermost_block == 0
+	  || contained_in (block, innermost_block))
 	innermost_block = block;
     }
 

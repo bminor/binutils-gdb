@@ -1,3 +1,37 @@
+2004-07-09  Paul N. Hilfinger  <Hilfinger@gnat.com>
+
+	Remove ARI problems:
+	
+	* ada-exp.y (write_var_from_sym): Reformat to put operator at
+	beginning of line.
+
+	* ada-lang.c (MAX_OF_SIZE): Rename max_of_size.
+	Add comment.
+	Add comment concerning MAX_OF_TYPE and MIN_OF_TYPE.
+	(MIN_OF_SIZE): Rename min_of_size.  Add comment.
+	(UMAX_OF_SIZE): Renmae umax_of_size.  Add comment.
+	(UMIN_OF_SIZE): Remove.
+	(max_of_type): New function to replace orphan macro in gdbtypes.h
+	(min_of_type): Ditto.
+	(discrete_type_high_bound): Use max_of_type.
+	(discrete_type_low_bound): Use min_of_type.
+	(possible_user_operator_p): Move operator to beginning of line.
+	(ada_is_variant_part): Ditto.
+	(ensure_lval): Rewrite to avoid deprecated operations.
+	(ada_finish_decode_line_1): Use gdbarch_convert_from_func_ptr_addr
+	rather than adding DEPRECATED_FUNCTION_START_OFFSET.
+	(ada_enum_name): Remove assignments in 'if' statements.
+	(build_ada_types): Add gdbarch parameter.
+	(_initialize_ada_language): Replace deprecated_register_gdbarch_swap
+	with gdbarch_data_register_post_init.
+	Use add_setshow_uinteger_cmd rather than add_set_cmd and 
+	add_show_from_set.
+
+	* ada-valprint.c (inspect_it): Remove declaration.
+	(repeat_count_threshold): Remove declaration.
+	(ada_print_floating): Remove assignments in 'if' statements.
+	(print_str): Move operator to beginning of line.
+	
 2004-07-08  Jim Blandy  <jimb@redhat.com>
 
 	* rs6000-tdep.c (registers_powerpc_nofp): Unused; deleted.
