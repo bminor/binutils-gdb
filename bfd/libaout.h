@@ -4,21 +4,21 @@
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #ifndef LIBAOUT_H
 #define LIBAOUT_H
@@ -282,10 +282,10 @@ enum machine_type {
   M_68010 = 1,
   M_68020 = 2,
   M_SPARC = 3,
-  /* skip a bunch so we don't run into any of suns numbers */
-  /* make these up for the ns32k*/
-  M_NS32032 = (64),		/* ns32032 running ? */
-  M_NS32532 = (64 + 5),		/* ns32532 running mach */
+  /* Skip a bunch so we don't run into any of SUN's numbers.  */
+  /* Make these up for the ns32k.  */
+  M_NS32032 = (64),	/* ns32032 running ? */
+  M_NS32532 = (64 + 5),	/* ns32532 running mach */
 
   M_386 = 100,
   M_29K = 101,          /* AMD 29000 */
@@ -377,7 +377,7 @@ struct aoutdata {
   struct internal_exec *hdr;		/* exec file header */
   aout_symbol_type *symbols;		/* symtab for input bfd */
 
-  /* For ease, we do this */
+  /* For ease, we do this.  */
   asection *textsec;
   asection *datasec;
   asection *bsssec;
@@ -387,16 +387,16 @@ struct aoutdata {
   file_ptr sym_filepos;
   file_ptr str_filepos;
 
-  /* Size of a relocation entry in external form */
+  /* Size of a relocation entry in external form.  */
   unsigned reloc_entry_size;
 
-  /* Size of a symbol table entry in external form */
+  /* Size of a symbol table entry in external form.  */
   unsigned symbol_entry_size;
 
-  /* Page size - needed for alignment of demand paged files. */
+  /* Page size - needed for alignment of demand paged files.  */
   unsigned long page_size;
 
-  /* Segment size - needed for alignment of demand paged files. */
+  /* Segment size - needed for alignment of demand paged files.  */
   unsigned long segment_size;
 
   /* Zmagic disk block size - need to align the start of the text
@@ -406,7 +406,7 @@ struct aoutdata {
   unsigned exec_bytes_size;
   unsigned vma_adjusted : 1;
 
-  /* used when a bfd supports several highly similar formats */
+  /* Used when a bfd supports several highly similar formats.  */
   enum
     {
       default_format = 0,
@@ -471,7 +471,7 @@ struct  aout_data_struct {
 #define obj_aout_dynamic_info(bfd) (adata(bfd).dynamic_info)
 
 /* We take the address of the first element of an asymbol to ensure that the
-   macro is only ever applied to an asymbol */
+   macro is only ever applied to an asymbol.  */
 #define aout_symbol(asymbol) ((aout_symbol_type *)(&(asymbol)->the_bfd))
 
 /* Information we keep for each a.out section.  This is currently only
@@ -489,7 +489,7 @@ struct aout_section_data_struct
 #define set_aout_section_data(s,v) \
   ((s)->used_by_bfd = (PTR)&(v)->relocs)
 
-/* Prototype declarations for functions defined in aoutx.h  */
+/* Prototype declarations for functions defined in aoutx.h.  */
 
 extern bfd_boolean NAME(aout,squirt_out_relocs)
   PARAMS ((bfd *, asection *));
@@ -612,7 +612,7 @@ extern bfd_boolean NAME(aout,final_link)
 extern bfd_boolean NAME(aout,bfd_free_cached_info)
   PARAMS ((bfd *));
 
-/* A.out uses the generic versions of these routines... */
+/* A.out uses the generic versions of these routines...  */
 
 #define	aout_16_get_section_contents	_bfd_generic_get_section_contents
 
@@ -648,7 +648,7 @@ extern bfd_boolean NAME(aout,bfd_free_cached_info)
 	    || bfd_bwrite ((PTR) &exec_bytes, (bfd_size_type) EXEC_BYTES_SIZE, \
 			  abfd) != EXEC_BYTES_SIZE)			      \
 	  return FALSE;							      \
-	/* Now write out reloc info, followed by syms and strings */	      \
+	/* Now write out reloc info, followed by syms and strings.  */	      \
   									      \
 	if (bfd_get_outsymbols (abfd) != (asymbol **) NULL		      \
 	    && bfd_get_symcount (abfd) != 0) 				      \
@@ -671,5 +671,24 @@ extern bfd_boolean NAME(aout,bfd_free_cached_info)
 	  return FALSE;						      	      \
       }
 #endif
+
+/* Test if a read-only section can be merged with .text.  This is
+   possible if:
+
+   1. Section has file contents and is read-only.
+   2. The VMA of the section is after the end of .text and before
+      the start of .data.
+   3. The image is demand-pageable (otherwise, a_text in the header
+      will not reflect the gap between .text and .data).  */
+
+#define aout_section_merge_with_text_p(abfd, sec)			\
+  (((sec)->flags & (SEC_HAS_CONTENTS | SEC_READONLY)) ==		\
+      (SEC_HAS_CONTENTS | SEC_READONLY)					\
+   && obj_textsec (abfd) != NULL					\
+   && obj_datasec (abfd) != NULL					\
+   && (sec)->vma >= (obj_textsec (abfd)->vma +				\
+		     obj_textsec (abfd)->_cooked_size)			\
+   && ((sec)->vma + (sec)->_cooked_size) <= obj_datasec (abfd)->vma	\
+   && ((abfd)->flags & D_PAGED) != 0)
 
 #endif /* ! defined (LIBAOUT_H) */

@@ -1,3 +1,13 @@
+2002-12-10  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* aoutx.h (set_section_contents): Allow an otherwise unrepresentable
+	read-only section that lies after .text and before .data to be
+	written into the output file and included in a_text.
+	(translate_to_native_sym_flags): If an otherwise unrepresentable
+	section was merged with .text, convert its symbols to N_TEXT
+	symbols.
+	* libaout.h (aout_section_merge_with_text_p): New macro.
+
 2002-12-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* bfd-in.h: Comment typo fix.  Formatting.
