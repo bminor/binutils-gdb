@@ -2988,6 +2988,14 @@ read_sun_builtin_type (pp, typenums, objfile)
   }
   (*pp)++;
 
+  /* For some odd reason, all forms of char put a c here.  This is strange
+     because no other type has this honor.  We can safely ignore this because
+     we actually determine 'char'acterness by the number of bits specified in
+     the descriptor.  */
+
+  if (**pp == 'c')
+    (*pp)++;
+
   /* The first number appears to be the number of bytes occupied
      by this type, except that unsigned short is 4 instead of 2.
      Since this information is redundant with the third number,

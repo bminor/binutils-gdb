@@ -1,5 +1,9 @@
 Thu Jun 25 15:18:42 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* buildsym.c (read_sun_builtin_type):  Handle new FCS Sun CC
+	compiler feature of putting 'c' into basic type descriptors for
+	all forms of char.
+
 	* procfs.c (child_resume):  Work around Solaris (on Sparc) lossage
 	where there is no place for nPC in prrun struct.
 
