@@ -21,6 +21,8 @@ Tue Jul  6 13:24:55 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 	do_slurp_coff_armap, bfd_construct_extended_name_table):
 	Prototypes.
 	* elfcode.h (elf_string_from_elf_strtab): Prototypes.
+	* libelf.h (elf_string_from_elf_section, elf_get_str_section):
+	Prototypes.
 
 	* Makefile.in (ALL_MACHINES): Renamed from BFD_MACHINES.
 	(ofiles): New target.  Build a list of unique file names, in case
@@ -36,6 +38,8 @@ Tue Jul  6 13:24:55 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 	(elf_symbol_from_bfd_symbol): Allow match if both symbols are
 	section symbols for the same section.
 	(elf_find_nearest_line): Don't print message, just return false.
+
+	* libelf.h (bfd_elf_locate_sh): Declaration deleted.
 
 Mon Jul  5 16:48:11 1993  Doug Evans  (dje@canuck.cygnus.com)
 

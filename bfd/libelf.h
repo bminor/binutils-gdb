@@ -119,6 +119,9 @@ struct elf_backend_data
   PTR global_sym;
 };
 
+extern boolean elf_get_sect_thunk PARAMS ((bfd *, elf_sect_thunk *));
+extern unsigned long elf_hash PARAMS ((CONST unsigned char *));
+
 extern bfd_target *bfd_elf32_object_p PARAMS ((bfd *));
 extern bfd_target *bfd_elf32_core_file_p PARAMS ((bfd *));
 extern boolean bfd_elf_mkobject PARAMS ((bfd *));
@@ -131,7 +134,6 @@ extern boolean bfd_elf32_set_section_contents PARAMS ((bfd *, sec_ptr, PTR,
 						       file_ptr,
 						       bfd_size_type));
 
-extern boolean elf_get_sect_thunk PARAMS ((bfd *, elf_sect_thunk *));
 extern unsigned int bfd_elf32_get_symtab_upper_bound PARAMS ((bfd *));
 extern unsigned int bfd_elf32_get_symtab PARAMS ((bfd *, asymbol **));
 extern unsigned int bfd_elf32_get_reloc_upper_bound PARAMS ((bfd *, sec_ptr));
@@ -152,7 +154,6 @@ extern boolean bfd_elf32_find_nearest_line PARAMS ((bfd *, asection *,
 						    CONST char **,
 						    unsigned int *));
 extern int bfd_elf32_sizeof_headers PARAMS ((bfd *, boolean));
-extern unsigned long elf_hash PARAMS ((CONST unsigned char *));
 extern boolean bfd_elf32_new_section_hook PARAMS ((bfd *, asection *));
 
 /* If the target doesn't have reloc handling written yet:  */
@@ -206,10 +207,6 @@ struct strtab
   int length;
 };
 
-extern struct elf32_internal_shdr *
-bfd_elf_locate_sh PARAMS ((bfd *, struct strtab *,
-			   struct elf32_internal_shdr *, CONST char *));
-
 /* Some private data is stashed away for future use using the tdata pointer
    in the bfd structure.  */
 
@@ -243,8 +240,8 @@ struct elf_obj_tdata
 #define obj_raw_syms(bfd)	((Elf_External_Sym*)(elf_tdata(bfd) -> raw_syms))
 #define obj_internal_syms(bfd)	(elf_tdata(bfd) -> internal_syms)
 
-extern char * elf_string_from_elf_section ();
-extern char * elf_get_str_section ();
+extern char * elf_string_from_elf_section PARAMS ((bfd *, unsigned, unsigned));
+extern char * elf_get_str_section PARAMS ((bfd *, unsigned));
 
 #define bfd_elf32_mkobject	bfd_elf_mkobject
 #define bfd_elf64_mkobject	bfd_elf_mkobject
