@@ -1,3 +1,16 @@
+Thu Sep  9 17:42:19 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* i386.h (i386_optab): Properly bracket initializers.
+
+Wed Aug 25 13:50:56 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* hppa.h (pa_opcode): Use '|' for movb and movib insns.  (From
+	Jeff Law, law@cs.utah.edu).
+
+Mon Aug 23 16:55:03 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* i386.h (lcall): Accept Imm32 operand also.
+
 Mon Aug 23 12:43:11 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* mips.h (M_ABSU): Removed (absolute value of unsigned number??).
