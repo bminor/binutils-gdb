@@ -2,6 +2,7 @@
 
 	* config/tc-mips.c (hilo_interlocks): True for CPU_RM7000.
 	(mips_cpu_info_table): Add rm7000 and rm9000 entries.
+	* doc/c-mips.texi: Document -march=rm9000.
 
 2003-07-15  Alan Modra  <amodra@bigpond.net.au>
 
