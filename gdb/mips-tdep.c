@@ -2259,18 +2259,20 @@ mips_push_arguments (nargs, args, sp, struct_return, struct_addr)
              register are only written to memory. */
 	  while (len > 0)
 	    {
+	      /* Rememer if the argument was written to the stack. */
+	      int stack_used_p = 0;
 	      int partial_len = len < MIPS_SAVED_REGSIZE ? len : MIPS_SAVED_REGSIZE;
 
+	      /* Write this portion of the argument to the stack.  */
 	      if (argreg > MIPS_LAST_ARG_REGNUM
 		  || odd_sized_struct
 		  || fp_register_arg_p (typecode, arg_type))
 		{
-		  /* Write this portion of the argument to the stack.  */
 		  /* Should shorter than int integer values be
 		     promoted to int before being stored? */
-
 		  int longword_offset = 0;
 		  CORE_ADDR addr;
+		  stack_used_p = 1;
 		  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
 		    {
 		      if (MIPS_STACK_ARGSIZE == 8 &&
@@ -2309,6 +2311,8 @@ mips_push_arguments (nargs, args, sp, struct_return, struct_addr)
 	      /* Note!!! This is NOT an else clause.  Odd sized
 	         structs may go thru BOTH paths.  Floating point
 	         arguments will not. */
+	      /* Write this portion of the argument to a general
+                 purpose register. */
 	      if (argreg <= MIPS_LAST_ARG_REGNUM
 		  && !fp_register_arg_p (typecode, arg_type))
 		{
@@ -2352,17 +2356,18 @@ mips_push_arguments (nargs, args, sp, struct_return, struct_addr)
 	      len -= partial_len;
 	      val += partial_len;
 
-	      /* The offset onto the stack at which we will start
-	         copying parameters (after the registers are used up) 
-	         begins at (4 * MIPS_REGSIZE) in the old ABI.  This 
-	         leaves room for the "home" area for register parameters.
+	      /* Compute the the offset into the stack at which we
+		 will copy the next parameter.
 
-	         In the new EABI (and the NABI32), the 8 register parameters 
-	         do not have "home" stack space reserved for them, so the
-	         stack offset does not get incremented until after
-	         we have used up the 8 parameter registers.  */
+		 In older ABIs, the caller reserved space for
+		 registers that contained arguments.  This was loosely
+		 refered to as their "home".  Consequently, space is
+		 always allocated.
 
-	      if (MIPS_REGS_HAVE_HOME_P || argnum >= 8)
+	         In the new EABI (and the NABI32), the stack_offset
+	         only needs to be adjusted when it has been used.. */
+
+	      if (MIPS_REGS_HAVE_HOME_P || stack_used_p)
 		stack_offset += ROUND_UP (partial_len, MIPS_STACK_ARGSIZE);
 	    }
 	}
