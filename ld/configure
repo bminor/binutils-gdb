@@ -50,7 +50,9 @@ symbolic_link='ln -s'
 progname=$0
 
 # clear some things potentially inherited from environment.
+
 ansi=
+clib=
 defaulttargets=
 destdir=
 fatal=
@@ -70,6 +72,9 @@ do
 	case ${arg} in
 	-ansi | +ansi)
 		ansi=true
+		;;
+	-clib | +c*)
+		clib=clib
 		;;
 	-destdir=* | +destdir=* | +destdi=* | +destd=* | +dest=* | +des=* | +de=* | +d=*)
 		destdir=`echo ${arg} | sed 's/[+-]d[a-z]*=//'`
@@ -182,7 +187,7 @@ fi
 # any existing configure script.
 
 configdirs=
-srctrigger=ldversion.c
+srctrigger=ldver.c
 srcname="linker"
 
 ## end of common part.
@@ -540,7 +545,7 @@ for configdir in ${configdirs} ; do
 		if [ -n "${commons}" ] ; then
 			if [ -d ${configdir} ] ; then
 				(cd ${configdir} ;
-					./configure ${commons} ${verbose} ${forcesubdirs} ${removing}) \
+					./configure ${commons} ${verbose} ${forcesubdirs} ${removing} "+destdir=${destdir}") \
 					| sed 's/^/	/'
 			else
 				echo Warning: directory \"${configdir}\" is missing.
@@ -551,7 +556,7 @@ for configdir in ${configdirs} ; do
 			for host in ${specifics} ; do
 				echo Configuring target specific directory ${configdir}.${host}...
 				(cd ${configdir}.${host} ;
-					./configure ${host} ${verbose} ${forcesubdirs} ${removing}) \
+					./configure ${host} ${verbose} ${forcesubdirs} ${removing} "+destdir=${destdir}") \
 					| sed 's/^/	/'
 			done # for host in specifics
 		fi # if there are any specifics
@@ -576,7 +581,7 @@ for configdir in ${configdirs} ; do
 		if [ -n "${commons}" ] ; then
 			if [ -d ${configdir} ] ; then
 				(cd ${configdir} ;
-					./configure ${hosts} ${verbose} ${forcesubdirs} ${removing} ${commons}) \
+					./configure ${hosts} ${verbose} ${forcesubdirs} ${removing} ${commons} "+destdir=${destdir}") \
 					| sed 's/^/	/'
 			else
 				echo Warning: directory \"${configdir}\" is missing.
@@ -587,7 +592,7 @@ for configdir in ${configdirs} ; do
 			for target in ${specifics} ; do
 				echo Configuring target specific directory ${configdir}.${target}...
 				(cd ${configdir}.${target} ;
-					./configure ${hosts} ${verbose} ${forcesubdirs} ${removing} "+target=${target}") \
+					./configure ${hosts} ${verbose} ${forcesubdirs} ${removing} "+target=${target}" "+destdir=${destdir}") \
 					| sed 's/^/	/'
 			done
 		fi # if any specifics
@@ -598,7 +603,19 @@ exit 0
 
 #
 # $Log$
-# Revision 1.12  1991/05/27 20:54:42  rich
+# Revision 1.14  1991/07/15 23:43:20  steve
+# Fixed a few bugs, added 29k coff support.
+#
+# Revision 1.13  1991/06/12  21:24:30  rich
+# correctly propogate destdir
+#
+# Revision 1.17  1991/06/09  20:39:58  rich
+# Added +clib option.
+#
+# Revision 1.16  1991/05/27  21:04:21  rich
+# Removed clib for now.
+#
+# Revision 1.15  1991/05/27  20:54:24  rich
 # fixed a bug in multiple targets
 #
 # Revision 1.14  1991/05/22  01:44:04  rich

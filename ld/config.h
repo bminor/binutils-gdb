@@ -26,6 +26,7 @@
 #define GLDM88KBCS_EMULATION_NAME "gldm88kbcs"
 #define GLD68K_EMULATION_NAME "gld68k"
 #define GLD960_EMULATION_NAME "gld960"
+#define GLD29K_EMULATION_NAME "gld29k"
 #define LNK960_EMULATION_NAME "lnk960"
 /* Otherwise default to this emulation */
 #ifndef DEFAULT_EMULATION
@@ -45,6 +46,7 @@
 #define GLD960_TARGET "b.out.big"
 #define VANILLA_TARGET "a.out-sunos-big"
 #define GLDM88KBCS_TARGET "m88kbcs"
+#define GLD29K_TARGET "coff-a29k-big"
 
 
 

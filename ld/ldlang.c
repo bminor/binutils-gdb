@@ -28,7 +28,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ld.h"
 #include "ldmain.h"
 #include "ldsym.h"
-#include "ldgramtb.h"
+#include "ldgram.h"
 
 #include "ldlang.h"
 #include "ldexp.h"
@@ -431,7 +431,7 @@ DEFUN(lang_output_section_statement_lookup,(name),
 static void
 DEFUN(print_flags, (outfile, ignore_flags),
       FILE *outfile AND
-      lang_section_flags_type *ignore_flags)
+      int  *ignore_flags)
 {
   fprintf(outfile,"(");
 #if 0
@@ -492,7 +492,8 @@ DEFUN(init_os,(s),
 	 s->name);
   }
   s->bfd_section->output_section = s->bfd_section;
-  s->bfd_section->flags = SEC_NO_FLAGS;
+/* s->bfd_section->flags = s->flags;*/
+
   /* We initialize an output sections output offset to minus its own */
   /* vma to allow us to output a section through itself */
   s->bfd_section->output_offset = 0;
@@ -913,6 +914,14 @@ DEFUN(print_output_section_statement,(output_section_statement),
     printf("%s flags", output_section_statement->region->name);
     print_flags(stdout, &output_section_statement->flags);
 #endif
+    if (section->flags & SEC_LOAD)
+      printf("load ");
+    if (section->flags & SEC_ALLOC)
+      printf("alloc ");
+    if (section->flags & SEC_RELOC)
+      printf("reloc ");
+    if (section->flags & SEC_HAS_CONTENTS)
+      printf("contents ");
 
   }
   else {
@@ -1247,9 +1256,12 @@ DEFUN(size_input_section, (this_ptr, output_section_statement, fill,  dot),
     dot =  insert_pad(this_ptr, fill, i->alignment_power,
 		      output_section_statement->bfd_section, dot);
 
-    /* remember the largest size so we can malloc the largest area */
-    /* needed for the output stage */
-    if (i->size > largest_section) {
+    /* remember the largest size so we can malloc the largest area 
+       needed for the output stage. Only remember the size of sections
+       which we will actually allocate  */
+    if (((i->flags & 
+	 (SEC_HAS_CONTENTS | SEC_LOAD)) == (SEC_HAS_CONTENTS | SEC_LOAD))
+	&& (i->size > largest_section)) {
       largest_section = i->size;
     }
 
@@ -1611,55 +1623,53 @@ static void
 DEFUN_VOID(lang_check)
 {
   lang_statement_union_type *file;
-  unsigned long max_machine = bfd_get_machine(output_bfd);
-  unsigned long max_machine_seen = 0;
+
   bfd * input_bfd;
   unsigned long input_machine;
+  enum bfd_architecture input_architecture;
   char *out_arch, *out_arch2;
+
 
   for (file = file_chain.head;
        file != (lang_statement_union_type *)NULL;
        file=file->input_statement.next) 
       {
+	unsigned long ldfile_new_output_machine;
+	enum bfd_architecture ldfile_new_output_architecture;
+
  	input_bfd = file->input_statement.the_bfd;
+
  	input_machine = bfd_get_machine(input_bfd);
-  
- 	if ( input_machine > max_machine_seen ){
- 	  max_machine_seen = input_machine;
- 	}
+	input_architecture = bfd_get_architecture(input_bfd);  
+
  
  	/* Inspect the architecture and ensure we're linking like with like */
- 	if ( (input_machine > max_machine)
-	    ||   !bfd_arch_compatible( input_bfd,
-				      output_bfd,
-				      &ldfile_output_architecture,
-				      NULL)) {
-  	  enum bfd_architecture this_architecture =
-  	    bfd_get_architecture(file->input_statement.the_bfd);
-  	  unsigned long this_machine =
+ 	if (!bfd_arch_compatible(input_bfd,
+				 output_bfd,
+				 &ldfile_new_output_architecture,
+				 &ldfile_new_output_machine)) 
+	    {
 
-	    bfd_get_machine(file->input_statement.the_bfd);
+	      /* Result of bfd_printable_arch_mach is not guaranteed to stick
+		 around after next call, so we have to copy it.  */
+	      out_arch = bfd_printable_arch_mach(ldfile_output_architecture,
+						 ldfile_output_machine);
+	      out_arch2 = ldmalloc (strlen (out_arch)+1);
+	      strcpy (out_arch2, out_arch);
 
-	  /* Result of bfd_printable_arch_mach is not guaranteed to stick
-	     around after next call, so we have to copy it.  */
-	  out_arch = bfd_printable_arch_mach(ldfile_output_architecture,
-					       ldfile_output_machine);
-	  out_arch2 = ldmalloc (strlen (out_arch)+1);
-	  strcpy (out_arch2, out_arch);
+	      info("%P: warning, %s architecture of input file `%B' incompatible with %s output\n",
+		   bfd_printable_arch_mach(input_architecture, input_machine),
+		   input_bfd,
+		   out_arch2);
+	      free (out_arch2);
 
- 	  info("%P: warning, %s architecture of input file `%B' incompatible with %s output\n",
-	       bfd_printable_arch_mach(this_architecture, this_machine),
-	       input_bfd,
-	       out_arch2);
-	  free (out_arch2);
-	  ldfile_output_architecture = this_architecture;
-	  ldfile_output_machine = this_machine;
-	  bfd_set_arch_mach(output_bfd,
-			    ldfile_output_architecture,
-			    ldfile_output_machine);
-	}
+
+	      bfd_set_arch_mach(output_bfd,
+				ldfile_new_output_architecture,
+				ldfile_new_output_machine);
+	    }
       }
-       bfd_set_arch_mach(output_bfd,ldfile_output_architecture,max_machine_seen);
+
 }
 
 
@@ -1816,14 +1826,11 @@ DEFUN_VOID(lang_place_orphans)
 
 void
 DEFUN(lang_set_flags,(ptr, flags),
-      lang_section_flags_type *ptr AND
+      int  *ptr AND
       CONST char *flags)
 {
   boolean state = true;
-  ptr->flag_read = false;
-  ptr->flag_write = false;
-  ptr->flag_executable = false;
-  ptr->flag_loadable= false;
+*ptr= 0;
   while (*flags)
       {
 	if (*flags == '!') {
@@ -1833,17 +1840,17 @@ DEFUN(lang_set_flags,(ptr, flags),
 	else state = true;
 	switch (*flags) {
 	case 'R':
-	  ptr->flag_read = state; 
+/*	  ptr->flag_read = state; */
 	  break;
 	case 'W':
-	  ptr->flag_write = state; 
+/*	  ptr->flag_write = state; */
 	  break;
 	case 'X':
-	  ptr->flag_executable= state;
+/*	  ptr->flag_executable= state;*/
 	  break;
 	case 'L':
 	case 'I':
-	  ptr->flag_loadable= state;
+/*	  ptr->flag_loadable= state;*/
 	  break;
 	default:
 	  info("%P%F illegal syntax in flags\n");
@@ -1918,9 +1925,11 @@ void
 DEFUN(lang_enter_output_section_statement,
       (output_section_statement_name,
        address_exp,
+       flags,
        block_value),
       char *output_section_statement_name AND
       etree_type *address_exp AND
+      int flags AND
       bfd_vma block_value)
 {
   lang_output_section_statement_type *os;
@@ -1939,6 +1948,7 @@ DEFUN(lang_enter_output_section_statement,
     os->addr_tree =
       address_exp;
   }
+  os->flags = flags;
   os->block_value = block_value;
   stat_ptr = & os->children;
 
