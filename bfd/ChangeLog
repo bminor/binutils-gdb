@@ -1,3 +1,13 @@
+Tue Aug  8 10:15:43 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
+
+	* configure.host: Recognize aix4 explicitly.
+	* rs6000-core.c (CORE_DATA_SIZE_FIELD): New macro to get a the size
+	of a core dump's data section.  Provide alternate definition for aix4.
+	(SAVE_FIELD): Similarly for save state field (register info).
+	(STACK_END_ADDR): Provide definition suitable for aix4.
+	* config/{aix4.mh,aix4.mt}: New configuration files.
+	* hosts/aix4.h: Likewise.
+
 Mon Aug  7 23:03:21 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* som.c (som_bfd_copy_private_symbol_data): Cast initializations
