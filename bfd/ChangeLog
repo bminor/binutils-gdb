@@ -1,3 +1,12 @@
+Mon Jan  8 17:00:57 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ieee.c (ieee_write_debug_part): Change return type to boolean.
+	If there is a SEC_DEBUGGING section, get the contents of the debug
+	information part from it.
+	(ieee_set_section_contents): Store the contents of a SEC_DEBUGGING
+	section in memory.
+	(ieee_write_object_contents): Check ieee_write_debug_part return.
+
 Thu Jan  4 17:12:37 1996  Fred Fish  <fnf@cygnus.com>
 
 	* config.bfd (i[345]86-*-freebsd*): Add target.

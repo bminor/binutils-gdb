@@ -44,6 +44,7 @@ static boolean do_as_repeat PARAMS ((bfd *, asection *));
 static boolean do_without_relocs PARAMS ((bfd *, asection *));
 static boolean ieee_write_external_part PARAMS ((bfd *));
 static boolean ieee_write_data_part PARAMS ((bfd *));
+static boolean ieee_write_debug_part PARAMS ((bfd *));
 static boolean ieee_write_me_part PARAMS ((bfd *));
 
 static boolean ieee_slurp_debug PARAMS ((bfd *));
@@ -2905,7 +2906,7 @@ relocate_debug (output, input)
   the debug info in each, and copy it out, relocating it as we go.
 */
 
-static void
+static boolean
 ieee_write_debug_part (abfd)
      bfd *abfd;
 {
@@ -2922,53 +2923,20 @@ ieee_write_debug_part (abfd)
 
   if (chain == (bfd_chain_type *) NULL)
     {
-#if 0
-      /* There is no debug info, so we'll fake some up */
-      CONST static char fake[] =
-      {
-	0xf8, 0xa, 0, 5, 't', 't', 't', 't', 't', 0, 2, 3,
-	'1', '.', '1', 0x82, 1991 >> 8, 1991 & 0xff, 9, 20, 11, 07, 50};
-      ieee->w.r.debug_information_part = 0;
+      asection *s;
 
+      for (s = abfd->sections; s != NULL; s = s->next)
+	if ((s->flags & SEC_DEBUGGING) != 0)
+	  break;
+      if (s == NULL)
+	{
+	  ieee->w.r.debug_information_part = 0;
+	  return true;
+	}
 
-      here;
-
-
-      /*    bfd_write(fake, 1, sizeof(fake), abfd);*/
-      /* Now write a header for each section */
-      {
-	int i = 0;
-	asection *s = abfd->sections;
-	while (s)
-	  {
-	    if (s != abfd->abs_section
-		&& (s->flags & SEC_DEBUGGING) == 0)
-	      {
-
-		if (! ieee_write_byte (abfd, 0xf8)
-		    || ! ieee_write_byte (abfd, 0x0b)
-		    || ! ieee_write_byte (abfd, 0)
-		    || ! ieee_write_byte (abfd, 0)
-		    || ! ieee_write_byte (abfd, 1)
-		    || ! ieee_write_byte (abfd, i + IEEE_SECTION_NUMBER_BASE)
-		    || ! ieee_write_expression (abfd, 0, s->symbol, 0, 0, 0)
-		    || ! ieee_write_byte (abfd, 0)
-		    || ! ieee_write_byte (abfd, 0xf9)
-		    || ! ieee_write_expression (abfd, s->size,
-						bfd_abs_section_ptr->symbol,
-						0, 0, 0))
-		  return false;
-		i++;
-	      }
-
-	    s = s->next;
-
-	  }
-	/* Close the scope */
-	if (! ieee_write_byte (abfd, 0xf9))
-	  return false;
-      }
-#endif
+      ieee->w.r.debug_information_part = here;
+      if (bfd_write (s->contents, 1, s->_raw_size, abfd) != s->_raw_size)
+	return false;
     }
   else
     {
@@ -2981,7 +2949,7 @@ ieee_write_debug_part (abfd)
 	      if (bfd_seek (entry, entry_ieee->w.r.debug_information_part,
 			    SEEK_SET)
 		  != 0)
-		abort ();
+		return false;
 	      relocate_debug (abfd, entry);
 	    }
 
@@ -2995,9 +2963,11 @@ ieee_write_debug_part (abfd)
 	{
 	  ieee->w.r.debug_information_part = 0;
 	}
-    }
-  flush ();
 
+      flush ();
+    }
+
+  return true;
 }
 
 /* Write the data in an ieee way.  */
@@ -3063,6 +3033,20 @@ ieee_set_section_contents (abfd, section, location, offset, count)
      file_ptr offset;
      bfd_size_type count;
 {
+  if ((section->flags & SEC_DEBUGGING) != 0)
+    {
+      if (section->contents == NULL)
+	{
+	  section->contents = bfd_alloc (abfd, section->_raw_size);
+	  if (section->contents == NULL)
+	    return false;
+	}
+      /* bfd_set_section_contents has already checked that everything
+         is within range.  */
+      memcpy (section->contents + offset, location, count);
+      return true;
+    }
+
   if (ieee_per_section (section)->data == (bfd_byte *) NULL)
     {
       if (!init_for_output (abfd))
@@ -3300,7 +3284,8 @@ ieee_write_object_contents (abfd)
 
 
   /* Write any debugs we have been told about.  */
-  ieee_write_debug_part (abfd);
+  if (! ieee_write_debug_part (abfd))
+    return false;
 
   /* Can only write the data once the symbols have been written, since
      the data contains relocation information which points to the
