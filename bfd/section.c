@@ -1001,7 +1001,7 @@ bfd_make_section (bfd *abfd, const char *name)
   if (newsect->name != NULL)
     {
       /* Section already exists.  */
-      return newsect;
+      return NULL;
     }
 
   newsect->name = name;

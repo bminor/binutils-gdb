@@ -1,5 +1,9 @@
 2003-07-04  Alan Modra  <amodra@bigpond.net.au>
 
+	* section.c (bfd_make_section): Return NULL for existing section.
+
+2003-07-04  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf32-ppc.c (ppc_elf_create_dynamic_sections): Don't call
 	ppc_elf_create_got if we've already done so.
 
