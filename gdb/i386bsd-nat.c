@@ -357,9 +357,9 @@ _initialize_i386bsd_nat (void)
 #define SC_REG_OFFSET i386nbsd_sc_reg_offset
 #elif defined (OpenBSD)
 #define SC_REG_OFFSET i386obsd_sc_reg_offset
-#else
-#define SC_REG_OFFSET i386bsd_sc_reg_offset
 #endif
+
+#ifdef SC_REG_OFFSET
 
   /* We only check the program counter, stack pointer and frame
      pointer since these members of `struct sigcontext' are essential
@@ -410,4 +410,6 @@ Please report this to <bug-gdb@gnu.org>.",
     }
 
   SC_FP_OFFSET = offset;
+
+#endif /* SC_REG_OFFSET */
 }
