@@ -1,3 +1,8 @@
+Sat Mar 30 21:45:59 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* sparc-opc.c (sparc_opcodes): rd must be 0 for
+	mov foo,{%y,%psr,%wim,%tbr}.  Support mov foo,%asrX.
+
 Fri Mar 29 13:02:40 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (config.status): Depend upon BFD VERSION file, so
