@@ -1,3 +1,13 @@
+2001-10-08  Aldy Hernandez  <aldyh@redhat.com>
+
+	* gas/arm/arm.exp: Run arm9e tests.
+
+	* gas/arm/maverick.c: New.
+
+	* gas/arm/maverick.d: New.
+
+	* gas/arm/maverick.s: New.
+
 2001-10-04  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* gas/mips/mips-gp64-fp32-pic.d: Use 32bit instructions for addresses.
