@@ -1,3 +1,8 @@
+2004-10-07  Alexandre Oliva  <aoliva@redhat.com>
+
+	* readelf.c (get_machine_flags): Don't fall through into m68k cpu
+	types.
+
 2004-10-01  Paul Brook  <paul@codesourcery.com>
 
 	* readelf.c (get_arm_section_type_name): New function.

@@ -1912,6 +1912,7 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	      strcat (buf, ", tomcat");
 	      break;
 	    }
+	  break;
 
 	case EM_68K:
 	  if (e_flags & EF_CPU32)
