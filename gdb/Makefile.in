@@ -2166,7 +2166,7 @@ m68k-tdep.o: m68k-tdep.c $(defs_h) $(dwarf2_frame_h) $(frame_h) \
 	$(inferior_h) $(regcache_h) $(arch_utils_h) $(osabi_h) $(dis_asm_h) \
 	$(m68k_tdep_h) $(gregset_h)
 m88kbsd-nat.o: m88kbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
-	$(m88k_tdep_h)
+	$(target_h) $(m88k_tdep_h) $(inf_ptrace.h)
 m88k-tdep.o: m88k-tdep.c $(defs_h) $(arch_utils_h) $(dis_asm_h) $(frame_h) \
 	$(frame_base_h) $(frame_unwind_h) $(gdbcore_h) $(gdbtypes_h) \
 	$(regcache_h) $(regset_h) $(symtab_h) $(trad_frame_h) $(value_h) \

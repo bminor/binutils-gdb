@@ -1,3 +1,16 @@
+2004-09-30  Mark Kettenis  <kettenis@gnu.org>
+
+	* m88kbsd-nat.c: Include "target.h" and "inf-ptrace.h".
+	(m88kbsd_fetch_inferior_registers): Rename from
+	fetch_inferior_registers.  Make static.
+	(m88kbsd_store_inferior_registers): Rename from
+	store_inferior_registers.  Make static.
+	(_initialize_m88kbsd_nat): New prototype and function.
+	* config/m88k/obsd.mh (NATDEPFILES): Remove infptrace.o and
+	inftarg.o.  Add inf-child.o and inf-ptrace.o.
+	(NAT_FILE): Remove.
+	* Makefile.in (m88kbsd-nat.o): Update dependencies.
+
 2004-09-30  Andrew Cagney  <cagney@gnu.org>
 
 	* target.c (target_xfer_partial): New function.
