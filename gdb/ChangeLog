@@ -1,3 +1,8 @@
+2003-03-24  Richard Earnshaw  <rearnsha@arm.com>
+
+	* armnbsd-tdep.c (arm_netbsd_aout_init_abi): ARM_FLOAT_SOFT enum
+	value was renamed to ARM_FLOAT_SOFT_FPA.
+
 2003-03-23  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (DEPRECATED_FRAME_CHAIN): Replace FRAME_CHAIN.
