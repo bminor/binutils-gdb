@@ -7,6 +7,6 @@
 RELOCATION RECORDS FOR \[.text\]:
 OFFSET   TYPE              VALUE 
 00000010 32                _xfunc
-00000034 32                *ABS*
-0000007c 32                *ABS*
+00000034 32                .text
+0000007c 32                .text
 0000008c 32                _xfunc
