@@ -1,3 +1,8 @@
+Tue Jun 20 12:00:53 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (pa_build_unwind_subspace): Fix typo in last
+	change.
+
 Mon Jun 19 15:27:17 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c (pa_build_unwind_subspace): Zero out memory
