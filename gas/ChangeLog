@@ -1,5 +1,20 @@
 Sat Oct 28 01:02:05 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-ppc.c (md_pseudo_table): Add "data" and "text".
+	(ppc_csect): Move most of the code to ppc_change_csect, and call
+	it.
+	(ppc_change_csect): New static function, taken from ppc_csect.
+	(ppc_section): New static function.
+	(ppc_saw_abs): New static varable.
+	(ppc_frob_symbol): Create aux entry for absolute symbols.  Warn if
+	a symbol has no csect.
+	(ppc_adjust_symtab): New function.
+	* config/tc-ppc.h (tc_adjust_symtab): Define if OBJ_XCOFF.
+	(ppc_adjust_symtab): Declare if OBJ_XCOFF.
+
+	* write.c (write_object_file): If tc_adjust_symtab is defined,
+	call it just before the call to obj_adjust_symtab.
+
 	* symbols.c (symbol_find_or_make): Change name to be const.
 	* symbols.h (symbol_find_or_make): Update declaration.
 

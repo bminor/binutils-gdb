@@ -60,9 +60,11 @@ static void ppc_eb PARAMS ((int));
 static void ppc_ef PARAMS ((int));
 static void ppc_es PARAMS ((int));
 static void ppc_csect PARAMS ((int));
+static void ppc_change_csect PARAMS ((symbolS *));
 static void ppc_function PARAMS ((int));
 static void ppc_extern PARAMS ((int));
 static void ppc_lglobl PARAMS ((int));
+static void ppc_section PARAMS ((int));
 static void ppc_stabx PARAMS ((int));
 static void ppc_rename PARAMS ((int));
 static void ppc_toc PARAMS ((int));
@@ -129,6 +131,7 @@ const pseudo_typeS md_pseudo_table[] =
   { "bi",	ppc_biei,	0 },
   { "bs",	ppc_bs,		0 },
   { "csect",	ppc_csect,	0 },
+  { "data",	ppc_section,	'd' },
   { "eb",	ppc_eb,		0 },
   { "ef",	ppc_ef,		0 },
   { "ei",	ppc_biei,	1 },
@@ -138,6 +141,7 @@ const pseudo_typeS md_pseudo_table[] =
   { "lglobl",	ppc_lglobl,	0 },
   { "rename",	ppc_rename,	0 },
   { "stabx",	ppc_stabx,	0 },
+  { "text",	ppc_section,	't' },
   { "toc",	ppc_toc,	0 },
 #endif
 
@@ -1943,6 +1947,23 @@ ppc_csect (ignore)
 
   *input_line_pointer = endc;
 
+  ppc_change_csect (sym);
+
+  if (*input_line_pointer == ',')
+    {
+      ++input_line_pointer;
+      sym->sy_tc.align = get_absolute_expression ();
+    }
+
+  demand_empty_rest_of_line ();
+}
+
+/* Change to a different csect.  */
+
+static void
+ppc_change_csect (sym)
+     symbolS *sym;
+{
   if (S_IS_DEFINED (sym))
     subseg_set (S_GET_SEGMENT (sym), sym->sy_tc.subseg);
   else
@@ -2009,13 +2030,30 @@ ppc_csect (ignore)
       symbol_append (sym, list->sy_tc.within, &symbol_rootP, &symbol_lastP);
     }
 
-  if (*input_line_pointer == ',')
-    {
-      ++input_line_pointer;
-      sym->sy_tc.align = get_absolute_expression ();
-    }
-
   ppc_current_csect = sym;
+}
+
+/* This function handles the .text and .data pseudo-ops.  These
+   pseudo-ops aren't really used by XCOFF; we implement them for the
+   convenience of people who aren't used to XCOFF.  */
+
+static void
+ppc_section (type)
+     int type;
+{
+  const char *name;
+  symbolS *sym;
+
+  if (type == 't')
+    name = ".text[PR]";
+  else if (type == 'd')
+    name = ".data[RW]";
+  else
+    abort ();
+
+  sym = symbol_find_or_make (name);
+
+  ppc_change_csect (sym);
 
   demand_empty_rest_of_line ();
 }
@@ -3356,6 +3394,12 @@ ppc_frob_label (sym)
     }
 }
 
+/* This variable is set by ppc_frob_symbol if any absolute symbols are
+   seen.  It tells ppc_adjust_symtab whether it needs to look through
+   the symbols.  */
+
+static boolean ppc_saw_abs;
+
 /* Change the name of a symbol just before writing it out.  Set the
    real name if the .rename pseudo-op was used.  Otherwise, remove any
    class suffix.  Return 1 if the symbol should not be included in the
@@ -3444,9 +3488,8 @@ ppc_frob_symbol (sym)
       && S_GET_SEGMENT (sym) != ppc_coff_debug_section)
     S_SET_STORAGE_CLASS (sym, C_HIDEXT);
 
-  if ((S_GET_STORAGE_CLASS (sym) == C_EXT
-       || S_GET_STORAGE_CLASS (sym) == C_HIDEXT)
-      && S_GET_SEGMENT (sym) != absolute_section)
+  if (S_GET_STORAGE_CLASS (sym) == C_EXT
+      || S_GET_STORAGE_CLASS (sym) == C_HIDEXT)
     {
       int i;
       union internal_auxent *a;
@@ -3487,6 +3530,15 @@ ppc_frob_symbol (sym)
 	    sym->sy_tc.class = XMC_RW;
 	  else
 	    sym->sy_tc.class = XMC_BS;
+	}
+      else if (S_GET_SEGMENT (sym) == absolute_section)
+	{
+	  /* This is an absolute symbol.  The csect will be created by
+             ppc_adjust_symtab.  */
+	  ppc_saw_abs = true;
+	  a->x_csect.x_smtyp = XTY_LD;
+	  if (sym->sy_tc.class == -1)
+	    sym->sy_tc.class = XMC_XO;
 	}
       else if (! S_IS_DEFINED (sym))
 	{
@@ -3539,7 +3591,10 @@ ppc_frob_symbol (sym)
 	  csect = csect->sy_tc.next;
 
 	  if (csect == (symbolS *) NULL)
-	    a->x_csect.x_scnlen.l = 0;
+	    {
+	      as_warn ("warning: symbol %s has no csect", S_GET_NAME (sym));
+	      a->x_csect.x_scnlen.l = 0;
+	    }
 	  else
 	    {
 	      while (csect->sy_tc.next != (symbolS *) NULL)
@@ -3595,6 +3650,52 @@ ppc_frob_symbol (sym)
     }
 
   return 0;
+}
+
+/* Adjust the symbol table.  This creates csect symbols for all
+   absolute symbols.  */
+
+void
+ppc_adjust_symtab ()
+{
+  symbolS *sym;
+
+  if (! ppc_saw_abs)
+    return;
+
+  for (sym = symbol_rootP; sym != NULL; sym = symbol_next (sym))
+    {
+      symbolS *csect;
+      int i;
+      union internal_auxent *a;
+
+      if (S_GET_SEGMENT (sym) != absolute_section)
+	continue;
+
+      csect = symbol_create (".abs[XO]", absolute_section,
+			     S_GET_VALUE (sym), &zero_address_frag);
+      csect->bsym->value = S_GET_VALUE (sym);
+      S_SET_STORAGE_CLASS (csect, C_HIDEXT);
+      i = S_GET_NUMBER_AUXILIARY (csect);
+      S_SET_NUMBER_AUXILIARY (csect, i + 1);
+      a = &coffsymbol (csect->bsym)->native[i + 1].u.auxent;
+      a->x_csect.x_scnlen.l = 0;
+      a->x_csect.x_smtyp = XTY_SD;
+      a->x_csect.x_parmhash = 0;
+      a->x_csect.x_snhash = 0;
+      a->x_csect.x_smclas = XMC_XO;
+      a->x_csect.x_stab = 0;
+      a->x_csect.x_snstab = 0;
+
+      symbol_insert (csect, sym, &symbol_rootP, &symbol_lastP);
+
+      i = S_GET_NUMBER_AUXILIARY (sym);
+      a = &coffsymbol (sym->bsym)->native[i].u.auxent;
+      a->x_csect.x_scnlen.p = coffsymbol (csect->bsym)->native;
+      coffsymbol (sym->bsym)->native[i].fix_scnlen = 1;
+    }
+
+  ppc_saw_abs = false;
 }
 
 /* Set the VMA for a section.  This is called on all the sections in
