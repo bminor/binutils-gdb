@@ -1,3 +1,9 @@
+2003-04-03  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/windres/dialogid.rc: Replace "Static" with
+	"classname" so that compilation will match behaviour of the
+	Windows resource compiler.
+
 2003-03-31  Nick Clifton  <nickc@redhat.com>
 
 	* binutils-all/windres/dialogid.rc: New test source file.
