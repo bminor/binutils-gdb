@@ -1,3 +1,10 @@
+2002-06-19  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* elflink.h (size_dynamic_sections): If the target does not
+	support an ELF style has table, return true, indicating that
+	nothing needed to be done, rather than false, indicating that the
+	section's size could not be computed.
+
 2002-06-18  Dave Brolley  <brolley@redhat.com>
 
 	From Catherine Moore, Michael Meissner, Dave Brolley:

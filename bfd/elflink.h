@@ -3053,7 +3053,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
     return true;
 
   if (! is_elf_hash_table (info))
-    return false;
+    return true;
 
   /* Any syms created from now on start with -1 in
      got.refcount/offset and plt.refcount/offset.  */
