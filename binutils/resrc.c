@@ -67,7 +67,6 @@
 #endif /* defined (_WIN32) && ! defined (__CYGWIN__) */
 #endif /* ! HAVE_SYS_WAIT_H */
 
-#if defined (_WIN32) && ! defined (__CYGWIN32__)
 #ifndef STDOUT_FILENO
 #define STDOUT_FILENO 1
 #endif

@@ -1,3 +1,7 @@
+2000-02-18  Frank Ch. Eigler  <fche@redhat.com>
+
+	* resrc.c: Remove unmatched #if for cygwin.
+
 2000-02-14  Fernando Nasser  <fnasser@totem.to.cygnus.com>
 
 	* binutils.texi: Document the change of flavor name from atpcs-special
