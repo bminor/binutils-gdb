@@ -1,4 +1,9 @@
 start-sanitize-tic80
+Sat Jan 18 15:18:59 1997  Fred Fish  <fnf@cygnus.com>
+
+	* tic80.h (TIC80_NO_R0_DEST): Add for opcodes where r0 cannot
+	be the destination register.
+
 Thu Jan 16 20:48:55 1997  Fred Fish  <fnf@cygnus.com>
 
 	* tic80.h (struct tic80_opcode): Change "format" field to "flags".

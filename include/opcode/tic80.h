@@ -187,6 +187,7 @@ extern const struct tic80_operand tic80_operands[];
 
 /* Flag bits for the struct tic80_opcode flags field. */
 
-#define TIC80_VECTOR		1	/* Is a vector instruction */
+#define TIC80_VECTOR		01	/* Is a vector instruction */
+#define TIC80_NO_R0_DEST	02	/* Register r0 cannot be a destination register */
 
 #endif /* TIC80_H */
