@@ -1,3 +1,8 @@
+Fri May 13 18:00:27 1994  Bill Cox  (bill@rtl.cygnus.com)
+
+	* config/mt-i960-vx (LDFLAGS): Add '-r' option for test links.
+          (CFLAGS): Delete it from here.
+
 Thu May 12 14:06:34 1994  Bill Cox  (bill@rtl.cygnus.com)
 
 	* .Sanitize: Drop the gdb.t30 and gdb.t31 directories

@@ -1,6 +1,6 @@
 # compilers and assemblers
 CC = i960-vxworks-gcc
-CFLAGS = -mca -g -r -I/home/vx960/5.0.3/h -D${target_os} -DCPU_FAMILY=I960 #-nostdlib
+CFLAGS = -mca -g -I/home/vx960/5.0.3/h -D${target_os} -DCPU_FAMILY=I960 #-nostdlib
 C++ = ${CC}
 C++FLAGS = ${CFLAGS}
 CXX = ${CC}
@@ -10,7 +10,7 @@ ASFLAGS =
 FC =
 FCFLAGS = 
 LD = ld
-LDFLAGS = 
+LDFLAGS = -r
 LIBS = -lgcc
 
 # binutils
