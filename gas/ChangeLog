@@ -1,3 +1,8 @@
+2001-04-04  Hans-Peter Nilsson  <hp@axis.com>
+
+	* write.c (write_object_file): Reset broken word state before
+	calling relax_seg.
+
 2001-03-31  Alan Modra  <alan@linuxcare.com.au>
 
 	* listing.c (listing_listing): Enable listing on EDICT_NOLIST_NEXT

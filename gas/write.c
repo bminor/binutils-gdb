@@ -1544,6 +1544,26 @@ write_object_file ()
     {
       int changed;
 
+#ifndef WORKING_DOT_WORD
+      /* We need to reset the markers in the broken word list and
+	 associated frags between calls to relax_segment (via
+	 relax_seg).  Since the broken word list is global, we do it
+	 once per round, rather than locally in relax_segment for each
+	 segment.  */
+      struct broken_word *brokp;
+
+      for (brokp = broken_words;
+	   brokp != (struct broken_word *) NULL;
+	   brokp = brokp->next_broken_word)
+	{
+	  brokp->added = 0;
+
+	  if (brokp->dispfrag != (fragS *) NULL
+	      && brokp->dispfrag->fr_type == rs_broken_word)
+	    brokp->dispfrag->fr_subtype = 0;
+	}
+#endif
+
       changed = 0;
       bfd_map_over_sections (stdoutput, relax_seg, &changed);
       if (!changed)
