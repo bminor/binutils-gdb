@@ -1,3 +1,8 @@
+Tue Jun 16 16:32:08 1998  Mark Alexander  <marka@cygnus.com>
+
+	* mn10200-tdep.c (mn10200_analyze_prologue): Fix null pointer
+	crash when in "start".
+
 Tue Jun 16 14:38:40 1998  Ron Unrau  (runrau@cygnus.com)
 
 	* dbxread.c: reset function_start_offset after a finishing N_FUN 

@@ -123,7 +123,8 @@ mn10200_analyze_prologue (fi, pc)
   /* If we're in start, then give up.  */
   if (strcmp (name, "start") == 0)
     {
-      fi->status = NO_MORE_FRAMES;
+      if (fi)
+        fi->status = NO_MORE_FRAMES;
       return pc;
     }
 
