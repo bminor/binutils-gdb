@@ -1,3 +1,8 @@
+Fri Jul 16 09:59:29 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* mips.h: Reworked the hazard information somewhat, and fixed some
+	bugs in the instruction hazard descriptions.
+
 Thu Jul 15 12:42:01 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* m88k.h: Corrected a couple of opcodes.

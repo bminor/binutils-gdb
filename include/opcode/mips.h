@@ -156,41 +156,41 @@ struct mips_opcode
 
 /* Modifies the general purpose register in OP_*_RD.  */
 #define INSN_WRITE_GPR_D            0x00000001
-/* Modifies the general purpose register in OP_*_RS.  */
+/* Modifies the general purpose register in OP_*_RS (FIXME: not used).  */
 #define INSN_WRITE_GPR_S            0x00000002
 /* Modifies the general purpose register in OP_*_RT.  */
 #define INSN_WRITE_GPR_T            0x00000004
 /* Modifies general purpose register 31.  */
 #define INSN_WRITE_GPR_31           0x00000008
-/* Modifies the floating point register in OP_*_RD.  */
+/* Modifies the floating point register in OP_*_FD.  */
 #define INSN_WRITE_FPR_D            0x00000010
-/* Modifies the floating point register in OP_*_RS.  */
+/* Modifies the floating point register in OP_*_FS (FIXME: not used).  */
 #define INSN_WRITE_FPR_S            0x00000020
-/* Modifies the floating point register in OP_*_RT.  */
+/* Modifies the floating point register in OP_*_FT.  */
 #define INSN_WRITE_FPR_T            0x00000040
-/* Reads the general purpose register in OP_*_RD.  */
+/* Reads the general purpose register in OP_*_RD (FIXME: not used).  */
 #define INSN_READ_GPR_D             0x00000080
 /* Reads the general purpose register in OP_*_RS.  */
 #define INSN_READ_GPR_S             0x00000100
 /* Reads the general purpose register in OP_*_RT.  */
 #define INSN_READ_GPR_T             0x00000200
-/* Reads general purpose register 31 (FIXME: no instruction does this).  */
+/* Reads general purpose register 31 (FIXME: not used).  */
 #define INSN_READ_GPR_31            0x00000400
-/* Reads the floating point register in OP_*_RD.  */
+/* Reads the floating point register in OP_*_FD (FIXME: not used).  */
 #define INSN_READ_FPR_D             0x00000800
-/* Reads the floating point register in OP_*_RS.  */
+/* Reads the floating point register in OP_*_FS.  */
 #define INSN_READ_FPR_S             0x00001000
-/* Reads the floating point register in OP_*_RT.  */
+/* Reads the floating point register in OP_*_FT.  */
 #define INSN_READ_FPR_T             0x00002000
-/* Takes a trap (FIXME: why is this interesting?).  */
-#define INSN_TRAP                   0x00004000
-/* Sets coprocessor condition code.  */
-#define INSN_COND_CODE              0x00008000
+/* Modifies coprocessor condition code.  */
+#define INSN_WRITE_COND_CODE        0x00004000
+/* Reads coprocessor condition code.  */
+#define INSN_READ_COND_CODE         0x00008000
 /* TLB operation.  */
 #define INSN_TLB                    0x00010000
 /* RFE (return from exception) instruction.  */
 #define INSN_RFE                    0x00020000
-/* Coprocessor instruction.  */
+/* Reads coprocessor register other than floating point register.  */
 #define INSN_COP                    0x00040000
 /* Instruction destination requires load delay.  */
 #define INSN_LOAD_DELAY             0x00080000
@@ -198,7 +198,7 @@ struct mips_opcode
 #define INSN_UNCOND_BRANCH_DELAY    0x00100000
 /* Instruction has conditional branch delay slot.  */
 #define INSN_COND_BRANCH_DELAY      0x00200000
-/* Instruction requires coprocessor delay.  */
+/* Writes coprocessor register, requiring delay.  */
 #define INSN_COPROC_DELAY           0x00400000
 /* Reads the HI register.  */
 #define INSN_READ_HI		    0x00800000
@@ -208,6 +208,8 @@ struct mips_opcode
 #define INSN_WRITE_HI		    0x02000000
 /* Modifies the LO register.  */
 #define INSN_WRITE_LO		    0x04000000
+/* Takes a trap (FIXME: why is this interesting?).  */
+#define INSN_TRAP                   0x08000000
 /* R4000 instruction.  */
 #define INSN_R4000	            0x80000000
 
@@ -365,39 +367,30 @@ enum {
 #define UBD     INSN_UNCOND_BRANCH_DELAY
 #define CBD	INSN_COND_BRANCH_DELAY
 #define COD     INSN_COPROC_DELAY
-#define EXD     (INSN_READ_HI|INSN_READ_LO)
 
 /* True if this instruction may require a delay slot.  */
-#define ANY_DELAY (LDD|UBD|CBD|COD|EXD)
+#define ANY_DELAY (LDD|UBD|CBD|COD \
+		   |INSN_READ_HI|INSN_READ_LO \
+		   |INSN_READ_COND_CODE|INSN_WRITE_COND_CODE)
 
 #define WR_d    INSN_WRITE_GPR_D
-#define WR_s    INSN_WRITE_GPR_S
 #define WR_t    INSN_WRITE_GPR_T
 #define WR_31   INSN_WRITE_GPR_31       
 #define WR_D    INSN_WRITE_FPR_D        
-#define WR_S    INSN_WRITE_FPR_S        
-#define WR_T    INSN_WRITE_FPR_T        
-#define RD_d    INSN_READ_GPR_D         
+#define WR_T	INSN_WRITE_FPR_T
 #define RD_s    INSN_READ_GPR_S         
 #define RD_b    INSN_READ_GPR_S         
 #define RD_t    INSN_READ_GPR_T         
-#define ST_t    INSN_READ_GPR_T         
-#define RD_31   INSN_READ_GPR_31        
-#define RD_D    INSN_READ_FPR_D         
 #define RD_S    INSN_READ_FPR_S         
 #define RD_T    INSN_READ_FPR_T         
-#define CC      (INSN_COND_CODE|INSN_COPROC_DELAY)
-#define ST_T    INSN_READ_FPR_T         
-#define ST_C0   INSN_COP
-#define ST_C1   INSN_READ_FPR_T         
-#define ST_C2   INSN_COP
-#define ST_C3   INSN_COP
+#define WR_CC	INSN_WRITE_COND_CODE
+#define RD_CC	INSN_READ_COND_CODE
 #define RD_C0   INSN_COP
-#define RD_C1   INSN_READ_FPR_T         
+#define RD_C1	INSN_COP
 #define RD_C2   INSN_COP
 #define RD_C3   INSN_COP
 #define WR_C0   INSN_COP
-#define WR_C1   INSN_READ_FPR_T         
+#define WR_C1	INSN_COP
 #define WR_C2   INSN_COP
 #define WR_C3   INSN_COP
 #define WR_HI	INSN_WRITE_HI
@@ -445,17 +438,17 @@ static const struct mips_opcode mips_opcodes[] = {
 {"andi",    "t,r,i",	0x30000000, 0xfc000000,	WR_t|RD_s	},
 /* b is at the top of the table.  */
 /* bal is at the top of the table.  */
-{"bc0f",    "p",	0x41000000, 0xffff0000,	CBD		},
-{"bc1f",    "p",	0x45000000, 0xffff0000,	CBD		},
-{"bc2f",    "p",	0x49000000, 0xffff0000,	CBD		},
-{"bc3f",    "p",	0x4d000000, 0xffff0000,	CBD		},
-{"bc0t",    "p",	0x41010000, 0xffff0000,	CBD		},
-{"bc1t",    "p",	0x45010000, 0xffff0000,	CBD		},
-{"bc2t",    "p",	0x49010000, 0xffff0000,	CBD		},
-{"bc3t",    "p",	0x4d010000, 0xffff0000,	CBD		},
+{"bc0f",    "p",	0x41000000, 0xffff0000,	CBD|RD_CC	},
+{"bc1f",    "p",	0x45000000, 0xffff0000,	CBD|RD_CC	},
+{"bc2f",    "p",	0x49000000, 0xffff0000,	CBD|RD_CC	},
+{"bc3f",    "p",	0x4d000000, 0xffff0000,	CBD|RD_CC	},
+{"bc0t",    "p",	0x41010000, 0xffff0000,	CBD|RD_CC	},
+{"bc1t",    "p",	0x45010000, 0xffff0000,	CBD|RD_CC	},
+{"bc2t",    "p",	0x49010000, 0xffff0000,	CBD|RD_CC	},
+{"bc3t",    "p",	0x4d010000, 0xffff0000,	CBD|RD_CC	},
 {"beq",     "s,t,p",	0x10000000, 0xfc000000,	CBD|RD_s|RD_t	},
 {"beq",     "s,I,p",	0,    (int) M_BEQ_I,	INSN_MACRO	},
-{"beqz",    "s,p",	0x10000000, 0xfc000000,	CBD|RD_s|RD_t	},
+{"beqz",    "s,p",	0x10000000, 0xfc1f0000,	CBD|RD_s	},
 {"bge",     "s,t,p",	0,    (int) M_BGE,	INSN_MACRO	},
 {"bge",     "s,I,p",	0,    (int) M_BGE_I,	INSN_MACRO	},
 {"bgeu",    "s,t,p",	0,    (int) M_BGEU,	INSN_MACRO	},
@@ -480,41 +473,41 @@ static const struct mips_opcode mips_opcodes[] = {
 {"bltzal",  "s,p",	0x04100000, 0xfc1f0000,	CBD|RD_s	},
 {"bne",     "s,t,p",	0x14000000, 0xfc000000,	CBD|RD_s|RD_t	},
 {"bne",     "s,I,p",	0,    (int) M_BNE_I,	INSN_MACRO	},
-{"bnez",    "s,p",	0x14000000, 0xfc000000,	CBD|RD_s|RD_t	},
+{"bnez",    "s,p",	0x14000000, 0xfc1f0000,	CBD|RD_s	},
 {"break",   "",		0x0000000d, 0xffffffff,	INSN_TRAP	},
 {"break",   "c",	0x0000000d, 0xfc00003f,	INSN_TRAP	},
-{"c.f.d",   "S,T",	0x46200030, 0xffe003ff,	RD_S|RD_T|CC	},
-{"c.f.s",   "S,T",	0x46000030, 0xffe003ff,	RD_S|RD_T|CC	},
-{"c.un.d",  "S,T",	0x46200031, 0xffe003ff,	RD_S|RD_T|CC	},
-{"c.un.s",  "S,T",	0x46000031, 0xffe003ff,	RD_S|RD_T|CC	},
-{"c.eq.d",  "S,T",	0x46200032, 0xffe003ff,	RD_S|RD_T|CC	},
-{"c.eq.s",  "S,T",	0x46000032, 0xffe003ff,	RD_S|RD_T|CC	},
-{"c.ueq.d", "S,T",	0x46200033, 0xffe003ff,	RD_S|RD_T|CC	},
-{"c.ueq.s", "S,T",	0x46000033, 0xffe003ff,	RD_S|RD_T|CC	},
-{"c.olt.d", "S,T",	0x46200034, 0xffe003ff,	RD_S|RD_T|CC	},
-{"c.olt.s", "S,T",	0x46000034, 0xffe003ff,	RD_S|RD_T|CC	},
-{"c.ult.d", "S,T",	0x46200035, 0xffe003ff,	RD_S|RD_T|CC	},
-{"c.ult.s", "S,T",	0x46000035, 0xffe003ff,	RD_S|RD_T|CC	},
-{"c.ole.d", "S,T",	0x46200036, 0xffe003ff,	RD_S|RD_T|CC	},
-{"c.ole.s", "S,T",	0x46000036, 0xffe003ff,	RD_S|RD_T|CC	},
-{"c.ule.d", "S,T",	0x46200037, 0xffe003ff,	RD_S|RD_T|CC	},
-{"c.ule.s", "S,T",	0x46000037, 0xffe003ff,	RD_S|RD_T|CC	},
-{"c.sf.d",  "S,T",	0x46200038, 0xffe003ff,	RD_S|RD_T|CC	},
-{"c.sf.s",  "S,T",	0x46000038, 0xffe003ff,	RD_S|RD_T|CC	},
-{"c.ngle.d","S,T",	0x46200039, 0xffe003ff,	RD_S|RD_T|CC	},
-{"c.ngle.s","S,T",	0x46000039, 0xffe003ff,	RD_S|RD_T|CC	},
-{"c.seq.d", "S,T",	0x4620003a, 0xffe003ff,	RD_S|RD_T|CC	},
-{"c.seq.s", "S,T",	0x4600003a, 0xffe003ff,	RD_S|RD_T|CC	},
-{"c.ngl.d", "S,T",	0x4620003b, 0xffe003ff,	RD_S|RD_T|CC	},
-{"c.ngl.s", "S,T",	0x4600003b, 0xffe003ff,	RD_S|RD_T|CC	},
-{"c.lt.d",  "S,T",	0x4620003c, 0xffe003ff,	RD_S|RD_T|CC	},
-{"c.lt.s",  "S,T",	0x4600003c, 0xffe003ff,	RD_S|RD_T|CC	},
-{"c.nge.d", "S,T",	0x4620003d, 0xffe003ff,	RD_S|RD_T|CC	},
-{"c.nge.s", "S,T",	0x4600003d, 0xffe003ff,	RD_S|RD_T|CC	},
-{"c.le.d",  "S,T",	0x4620003e, 0xffe003ff,	RD_S|RD_T|CC	},
-{"c.le.s",  "S,T",	0x4600003e, 0xffe003ff,	RD_S|RD_T|CC	},
-{"c.ngt.d", "S,T",	0x4620003f, 0xffe003ff,	RD_S|RD_T|CC	},
-{"c.ngt.s", "S,T",	0x4600003f, 0xffe003ff,	RD_S|RD_T|CC	},
+{"c.f.d",   "S,T",	0x46200030, 0xffe007ff,	RD_S|RD_T|WR_CC	},
+{"c.f.s",   "S,T",	0x46000030, 0xffe007ff,	RD_S|RD_T|WR_CC	},
+{"c.un.d",  "S,T",	0x46200031, 0xffe007ff,	RD_S|RD_T|WR_CC	},
+{"c.un.s",  "S,T",	0x46000031, 0xffe007ff,	RD_S|RD_T|WR_CC	},
+{"c.eq.d",  "S,T",	0x46200032, 0xffe007ff,	RD_S|RD_T|WR_CC	},
+{"c.eq.s",  "S,T",	0x46000032, 0xffe007ff,	RD_S|RD_T|WR_CC	},
+{"c.ueq.d", "S,T",	0x46200033, 0xffe007ff,	RD_S|RD_T|WR_CC	},
+{"c.ueq.s", "S,T",	0x46000033, 0xffe007ff,	RD_S|RD_T|WR_CC	},
+{"c.olt.d", "S,T",	0x46200034, 0xffe007ff,	RD_S|RD_T|WR_CC	},
+{"c.olt.s", "S,T",	0x46000034, 0xffe007ff,	RD_S|RD_T|WR_CC	},
+{"c.ult.d", "S,T",	0x46200035, 0xffe007ff,	RD_S|RD_T|WR_CC	},
+{"c.ult.s", "S,T",	0x46000035, 0xffe007ff,	RD_S|RD_T|WR_CC	},
+{"c.ole.d", "S,T",	0x46200036, 0xffe007ff,	RD_S|RD_T|WR_CC	},
+{"c.ole.s", "S,T",	0x46000036, 0xffe007ff,	RD_S|RD_T|WR_CC	},
+{"c.ule.d", "S,T",	0x46200037, 0xffe007ff,	RD_S|RD_T|WR_CC	},
+{"c.ule.s", "S,T",	0x46000037, 0xffe007ff,	RD_S|RD_T|WR_CC	},
+{"c.sf.d",  "S,T",	0x46200038, 0xffe007ff,	RD_S|RD_T|WR_CC	},
+{"c.sf.s",  "S,T",	0x46000038, 0xffe007ff,	RD_S|RD_T|WR_CC	},
+{"c.ngle.d","S,T",	0x46200039, 0xffe007ff,	RD_S|RD_T|WR_CC	},
+{"c.ngle.s","S,T",	0x46000039, 0xffe007ff,	RD_S|RD_T|WR_CC	},
+{"c.seq.d", "S,T",	0x4620003a, 0xffe007ff,	RD_S|RD_T|WR_CC	},
+{"c.seq.s", "S,T",	0x4600003a, 0xffe007ff,	RD_S|RD_T|WR_CC	},
+{"c.ngl.d", "S,T",	0x4620003b, 0xffe007ff,	RD_S|RD_T|WR_CC	},
+{"c.ngl.s", "S,T",	0x4600003b, 0xffe007ff,	RD_S|RD_T|WR_CC	},
+{"c.lt.d",  "S,T",	0x4620003c, 0xffe007ff,	RD_S|RD_T|WR_CC	},
+{"c.lt.s",  "S,T",	0x4600003c, 0xffe007ff,	RD_S|RD_T|WR_CC	},
+{"c.nge.d", "S,T",	0x4620003d, 0xffe007ff,	RD_S|RD_T|WR_CC	},
+{"c.nge.s", "S,T",	0x4600003d, 0xffe007ff,	RD_S|RD_T|WR_CC	},
+{"c.le.d",  "S,T",	0x4620003e, 0xffe007ff,	RD_S|RD_T|WR_CC	},
+{"c.le.s",  "S,T",	0x4600003e, 0xffe007ff,	RD_S|RD_T|WR_CC	},
+{"c.ngt.d", "S,T",	0x4620003f, 0xffe007ff,	RD_S|RD_T|WR_CC	},
+{"c.ngt.s", "S,T",	0x4600003f, 0xffe007ff,	RD_S|RD_T|WR_CC	},
 #if 0
 /* these are not very safe to use, no bounds checking. */
 {"c0",      "I",	0x42000000, 0xfe000000,	0		},
@@ -522,16 +515,16 @@ static const struct mips_opcode mips_opcodes[] = {
 {"c2",      "I",	0x4a000000, 0xfe000000,	0		},
 {"c3",      "I",	0x4e000000, 0xfe000000,	0		},
 #endif
-{"cfc0",    "t,G",	0x40400000, 0xffe007ff,	COD|RD_d	},
-{"cfc1",    "t,S",	0x44400000, 0xffe007ff,	COD|RD_S	},
-{"cfc1",    "t,G",	0x44400000, 0xffe007ff,	COD|RD_S	},
-{"cfc2",    "t,G",	0x48400000, 0xffe007ff,	COD|RD_d	},
-{"cfc3",    "t,G",	0x4c400000, 0xffe007ff,	COD|RD_d	},
-{"ctc0",    "t,G",	0x40c00000, 0xffe007ff,	COD|RD_t|RD_d	},
-{"ctc1",    "t,S",	0x44c00000, 0xffe007ff,	COD|RD_t	},
-{"ctc1",    "t,G",	0x44c00000, 0xffe007ff,	COD|RD_t	},
-{"ctc2",    "t,G",	0x48c00000, 0xffe007ff,	COD|RD_t|RD_d	},
-{"ctc3",    "t,G",	0x4cc00000, 0xffe007ff,	COD|RD_t|RD_d	},
+{"cfc0",    "t,G",	0x40400000, 0xffe007ff,	LDD|WR_t|RD_C0	},
+{"cfc1",    "t,G",	0x44400000, 0xffe007ff,	LDD|WR_t|RD_C1	},
+{"cfc1",    "t,S",	0x44400000, 0xffe007ff,	LDD|WR_t|RD_C1	},
+{"cfc2",    "t,G",	0x48400000, 0xffe007ff,	LDD|WR_t|RD_C2	},
+{"cfc3",    "t,G",	0x4c400000, 0xffe007ff,	LDD|WR_t|RD_C3	},
+{"ctc0",    "t,G",	0x40c00000, 0xffe007ff,	COD|RD_t|WR_CC	},
+{"ctc1",    "t,G",	0x44c00000, 0xffe007ff,	COD|RD_t|WR_CC	},
+{"ctc1",    "t,S",	0x44c00000, 0xffe007ff,	COD|RD_t|WR_CC	},
+{"ctc2",    "t,G",	0x48c00000, 0xffe007ff,	COD|RD_t|WR_CC	},
+{"ctc3",    "t,G",	0x4cc00000, 0xffe007ff,	COD|RD_t|WR_CC	},
 {"cvt.d.s", "D,S",	0x46000021, 0xffff003f,	WR_D|RD_S	},
 {"cvt.d.w", "D,S",	0x46800021, 0xffff003f,	WR_D|RD_S	},
 {"cvt.s.d", "D,S",	0x46200020, 0xffff003f,	WR_D|RD_S	},
@@ -549,7 +542,7 @@ static const struct mips_opcode mips_opcodes[] = {
 {"jr",      "s",	0x00000008, 0xfc1fffff,	UBD|RD_s	},
 {"j",       "s",	0x00000008, 0xfc1fffff,	UBD|RD_s	},
 {"j",       "a",	0x08000000, 0xfc000000,	UBD		},
-{"jalr",    "s",	0x0000f809, 0xfc1fffff,	UBD|RD_s|WR_31	},
+{"jalr",    "s",	0x0000f809, 0xfc1fffff,	UBD|RD_s|WR_d	},
 {"jalr",    "d,s",	0x00000009, 0xfc1f07ff,	UBD|RD_s|WR_d	},
 {"jal",     "d,s",	0x00000009, 0xfc1f07ff,	UBD|RD_s|WR_d	},/* jalr */
 {"jal",     "s",	0x0000f809, 0xfc1fffff,	UBD|RD_s|WR_d	},/* jalr $ra */
@@ -558,52 +551,52 @@ static const struct mips_opcode mips_opcodes[] = {
 {"l.d",     "T,A(b)",	0,    (int) M_L_DAB,	INSN_MACRO	},
 {"la",      "t,A",	0,    (int) M_LA,	INSN_MACRO	},
 {"la",      "t,A(b)",	0,    (int) M_LA_AB,	INSN_MACRO	},
-{"lb",      "t,o(b)",	0x80000000, 0xfc000000,	LDD|RD_b	},
+{"lb",      "t,o(b)",	0x80000000, 0xfc000000,	LDD|RD_b|WR_t	},
 {"lb",      "t,A(b)",	0,    (int) M_LB_AB,	INSN_MACRO	},
-{"lbu",     "t,o(b)",	0x90000000, 0xfc000000,	LDD|RD_b	},
+{"lbu",     "t,o(b)",	0x90000000, 0xfc000000,	LDD|RD_b|WR_t	},
 {"lbu",     "t,A(b)",	0,    (int) M_LBU_AB,	INSN_MACRO	},
 {"ld",      "t,o(b)",	0,    (int) M_LD_OB,	INSN_MACRO	},
 {"ld",      "t,A(b)",	0,    (int) M_LD_AB,	INSN_MACRO	},
-{"lh",      "t,o(b)",	0x84000000, 0xfc000000,	LDD|RD_b	},
+{"lh",      "t,o(b)",	0x84000000, 0xfc000000,	LDD|RD_b|WR_t	},
 {"lh",      "t,A(b)",	0,    (int) M_LH_AB,	INSN_MACRO	},
-{"lhu",     "t,o(b)",	0x94000000, 0xfc000000,	LDD|RD_b	},
+{"lhu",     "t,o(b)",	0x94000000, 0xfc000000,	LDD|RD_b|WR_t	},
 {"lhu",     "t,A(b)",	0,    (int) M_LHU_AB,	INSN_MACRO	},
 /* li is at the start of the table.  */
 {"li.d",    "t,F",	0,    (int) M_LI_D,	INSN_MACRO	},
 {"li.d",    "S,F",	0,    (int) M_LI_DD,	INSN_MACRO	},
 {"lui",     "t,u",	0x3c000000, 0xffe00000,	WR_t		},
-{"lw",      "t,o(b)",	0x8c000000, 0xfc000000,	LDD|RD_b	},
+{"lw",      "t,o(b)",	0x8c000000, 0xfc000000,	LDD|RD_b|WR_t	},
 {"lw",      "t,A(b)",	0,    (int) M_LW_AB,	INSN_MACRO	},
-{"lwc0",    "E,o(b)",	0xc0000000, 0xfc000000,	COD|RD_b	},
+{"lwc0",    "E,o(b)",	0xc0000000, 0xfc000000,	COD|RD_b|WR_CC	},
 {"lwc0",    "E,A(b)",	0,    (int) M_LWC0_AB,	INSN_MACRO	},
-{"lwc1",    "T,o(b)",	0xc4000000, 0xfc000000,	COD|RD_b	},
-{"lwc1",    "E,o(b)",	0xc4000000, 0xfc000000,	COD|RD_b	},
+{"lwc1",    "T,o(b)",	0xc4000000, 0xfc000000,	COD|RD_b|WR_T	},
+{"lwc1",    "E,o(b)",	0xc4000000, 0xfc000000,	COD|RD_b|WR_T	},
 {"lwc1",    "T,A(b)",	0,    (int) M_LWC1_AB,	INSN_MACRO	},
-{"l.s",     "T,o(b)",	0xc4000000, 0xfc000000,	COD|RD_b	}, /* lwc1 */
+{"l.s",     "T,o(b)",	0xc4000000, 0xfc000000,	COD|RD_b|WR_T	}, /* lwc1 */
 {"l.s",     "T,A(b)",	0,    (int) M_LWC1_AB,	INSN_MACRO	},
-{"lwc2",    "E,o(b)",	0xc8000000, 0xfc000000,	COD|RD_b	},
+{"lwc2",    "E,o(b)",	0xc8000000, 0xfc000000,	COD|RD_b|WR_CC	},
 {"lwc2",    "E,A(b)",	0,    (int) M_LWC2_AB,	INSN_MACRO	},
-{"lwc3",    "E,o(b)",	0xcc000000, 0xfc000000,	COD|RD_b	},
+{"lwc3",    "E,o(b)",	0xcc000000, 0xfc000000,	COD|RD_b|WR_CC	},
 {"lwc3",    "E,A(b)",	0,    (int) M_LWC3_AB,	INSN_MACRO	},
-{"lwl",     "t,o(b)",	0x88000000, 0xfc000000,	LDD|RD_b	},
+{"lwl",     "t,o(b)",	0x88000000, 0xfc000000,	LDD|RD_b|WR_t	},
 {"lwl",     "t,A(b)",	0,    (int) M_LWL_AB,	INSN_MACRO	},
-{"lwr",     "t,o(b)",	0x98000000, 0xfc000000,	LDD|RD_b	},
+{"lwr",     "t,o(b)",	0x98000000, 0xfc000000,	LDD|RD_b|WR_t	},
 {"lwr",     "t,A(b)",	0,    (int) M_LWR_AB,	INSN_MACRO	},
-{"mfc0",    "t,G",	0x40000000, 0xffe007ff,	COD|WR_t|RD_C0	},
-{"mfc1",    "t,S",	0x44000000, 0xffe007ff,	COD|RD_S	},
-{"mfc1",    "t,G",	0x44000000, 0xffe007ff,	COD|RD_C1	},
-{"mfc2",    "t,G",	0x48000000, 0xffe007ff,	COD|WR_t|RD_C2	},
-{"mfc3",    "t,G",	0x4c000000, 0xffe007ff,	COD|WR_t|RD_C3	},
+{"mfc0",    "t,G",	0x40000000, 0xffe007ff,	LDD|WR_t|RD_C0	},
+{"mfc1",    "t,S",	0x44000000, 0xffe007ff,	LDD|WR_t|RD_S	},
+{"mfc1",    "t,G",	0x44000000, 0xffe007ff,	LDD|WR_t|RD_S	},
+{"mfc2",    "t,G",	0x48000000, 0xffe007ff,	LDD|WR_t|RD_C2	},
+{"mfc3",    "t,G",	0x4c000000, 0xffe007ff,	LDD|WR_t|RD_C3	},
 {"mfhi",    "d",	0x00000010, 0xffff07ff,	WR_d|RD_HI	},
 {"mflo",    "d",	0x00000012, 0xffff07ff,	WR_d|RD_LO	},
-{"mov.d",   "D,S",	0x46200006, 0xffff003f,	WR_t|RD_S	},
-{"mov.s",   "D,S",	0x46000006, 0xffff003f,	WR_t|RD_S	},
+{"mov.d",   "D,S",	0x46200006, 0xffff003f,	WR_D|RD_S	},
+{"mov.s",   "D,S",	0x46000006, 0xffff003f,	WR_D|RD_S	},
 /* move is at the top of the table.  */
-{"mtc0",    "t,G",	0x40800000, 0xffe007ff,	COD|RD_t|WR_C0	},
-{"mtc1",    "t,S",	0x44800000, 0xffe007ff,	COD|RD_t	},
-{"mtc1",    "t,G",	0x44800000, 0xffe007ff,	COD|RD_t|WR_C1	},
-{"mtc2",    "t,G",	0x48800000, 0xffe007ff,	COD|RD_t|WR_C2	},
-{"mtc3",    "t,G",	0x4c800000, 0xffe007ff,	COD|RD_t|WR_C3	},
+{"mtc0",    "t,G",	0x40800000, 0xffe007ff,	COD|RD_t|WR_C0|WR_CC	},
+{"mtc1",    "t,S",	0x44800000, 0xffe007ff,	COD|RD_t|WR_D	},
+{"mtc1",    "t,G",	0x44800000, 0xffe007ff,	COD|RD_t|WR_D	},
+{"mtc2",    "t,G",	0x48800000, 0xffe007ff,	COD|RD_t|WR_C2|WR_CC	},
+{"mtc3",    "t,G",	0x4c800000, 0xffe007ff,	COD|RD_t|WR_C3|WR_CC	},
 {"mthi",    "s",	0x00000011, 0xfc1fffff,	RD_s|WR_HI	},
 {"mtlo",    "s",	0x00000013, 0xfc1fffff,	RD_s|WR_LO	},
 {"mul.d",   "D,V,T",	0x46200002, 0xffe0003f,	WR_D|RD_S|RD_T	},
@@ -638,7 +631,7 @@ static const struct mips_opcode mips_opcodes[] = {
 {"ror",     "d,v,I",	0,    (int) M_ROR_I,	INSN_MACRO	},
 {"s.d",     "T,o(b)",	0,    (int) M_S_DOB,	INSN_MACRO	},
 {"s.d",     "T,A(b)",	0,    (int) M_S_DAB,	INSN_MACRO	},
-{"sb",      "t,o(b)",	0xa0000000, 0xfc000000,	ST_t|RD_b	},
+{"sb",      "t,o(b)",	0xa0000000, 0xfc000000,	RD_t|RD_b	},
 {"sb",      "t,A(b)",	0,    (int) M_SB_AB,	INSN_MACRO	},
 {"sd",      "t,o(b)",	0,    (int) M_SD_OB,	INSN_MACRO	},
 {"sd",      "t,A(b)",	0,    (int) M_SD_AB,	INSN_MACRO	},
@@ -652,7 +645,7 @@ static const struct mips_opcode mips_opcodes[] = {
 {"sgt",     "d,v,I",	0,    (int) M_SGT_I,	INSN_MACRO	},
 {"sgtu",    "d,v,t",	0,    (int) M_SGTU,	INSN_MACRO	},
 {"sgtu",    "d,v,I",	0,    (int) M_SGTU_I,	INSN_MACRO	},
-{"sh",      "t,o(b)",	0xa4000000, 0xfc000000,	ST_t|RD_b	},
+{"sh",      "t,o(b)",	0xa4000000, 0xfc000000,	RD_t|RD_b	},
 {"sh",      "t,A(b)",	0,    (int) M_SH_AB,	INSN_MACRO	},
 {"sle",     "d,v,t",	0,    (int) M_SLE,	INSN_MACRO	},
 {"sle",     "d,v,I",	0,    (int) M_SLE_I,	INSN_MACRO	},
@@ -671,7 +664,7 @@ static const struct mips_opcode mips_opcodes[] = {
 {"sne",     "d,v,I",	0,    (int) M_SNE_I,	INSN_MACRO	},
 {"srav",    "d,t,s",	0x00000007, 0xfc0007ff,	WR_d|RD_t|RD_s	},
 {"sra",     "d,w,s",	0x00000007, 0xfc0007ff,	WR_d|RD_t|RD_s	}, /* srav */
-{"sra",     "d,w,<",	0x00000003, 0xffe0003f,	WR_t|RD_d	},
+{"sra",     "d,w,<",	0x00000003, 0xffe0003f,	WR_d|RD_t	},
 {"srlv",    "d,t,s",	0x00000006, 0xfc0007ff,	WR_d|RD_t|RD_s	},
 {"srl",     "d,w,s",	0x00000006, 0xfc0007ff,	WR_d|RD_t|RD_s	}, /* srlv */
 {"srl",     "d,w,<",	0x00000002, 0xffe0003f,	WR_d|RD_t	},
@@ -681,22 +674,22 @@ static const struct mips_opcode mips_opcodes[] = {
 {"sub.s",   "D,V,T",	0x46000001, 0xffe0003f,	WR_D|RD_S|RD_T	},
 {"subu",    "d,v,t",	0x00000023, 0xfc0007ff,	WR_d|RD_s|RD_t	},
 {"subu",    "d,v,I",	0,    (int) M_SUBU_I,	INSN_MACRO	},
-{"sw",      "t,o(b)",	0xac000000, 0xfc000000,	ST_t|RD_b	},
+{"sw",      "t,o(b)",	0xac000000, 0xfc000000,	RD_t|RD_b	},
 {"sw",      "t,A(b)",	0,    (int) M_SW_AB,	INSN_MACRO	},
-{"swc0",    "E,o(b)",	0xe0000000, 0xfc000000,	ST_C0|RD_b	},
+{"swc0",    "E,o(b)",	0xe0000000, 0xfc000000,	RD_C0|RD_b	},
 {"swc0",    "E,A(b)",	0,    (int) M_SWC0_AB,	INSN_MACRO	},
-{"swc1",    "T,o(b)",	0xe4000000, 0xfc000000,	ST_T|RD_b	},
-{"swc1",    "E,o(b)",	0xe4000000, 0xfc000000,	ST_C1|RD_b	},
+{"swc1",    "T,o(b)",	0xe4000000, 0xfc000000,	RD_T|RD_b	},
+{"swc1",    "E,o(b)",	0xe4000000, 0xfc000000,	RD_T|RD_b	},
 {"swc1",    "T,A(b)",	0,    (int) M_SWC1_AB,	INSN_MACRO	},
-{"s.s",     "T,o(b)",	0xe4000000, 0xfc000000,	ST_T|RD_b	}, /* swc1 */
+{"s.s",     "T,o(b)",	0xe4000000, 0xfc000000,	RD_T|RD_b	}, /* swc1 */
 {"s.s",     "T,A(b)",	0,    (int) M_SWC1_AB,	INSN_MACRO	},
-{"swc2",    "E,o(b)",	0xe8000000, 0xfc000000,	ST_C2|RD_b	},
+{"swc2",    "E,o(b)",	0xe8000000, 0xfc000000,	RD_C2|RD_b	},
 {"swc2",    "E,A(b)",	0,    (int) M_SWC2_AB,	INSN_MACRO	},
-{"swc3",    "E,o(b)",	0xec000000, 0xfc000000,	ST_C3|RD_b	},
+{"swc3",    "E,o(b)",	0xec000000, 0xfc000000,	RD_C3|RD_b	},
 {"swc3",    "E,A(b)",	0,    (int) M_SWC3_AB,	INSN_MACRO	},
-{"swl",     "t,o(b)",	0xa8000000, 0xfc000000,	ST_t|RD_b	},
+{"swl",     "t,o(b)",	0xa8000000, 0xfc000000,	RD_t|RD_b	},
 {"swl",     "t,A(b)",	0,    (int) M_SWL_AB,	INSN_MACRO	},
-{"swr",     "t,o(b)",	0xb8000000, 0xfc000000,	ST_t|RD_b	},
+{"swr",     "t,o(b)",	0xb8000000, 0xfc000000,	RD_t|RD_b	},
 {"swr",     "t,A(b)",	0,    (int) M_SWR_AB,	INSN_MACRO	},
 {"syscall", "",		0x0000000c, 0xffffffff,	INSN_TRAP	},
 {"syscall", "B",	0x0000000c, 0xfc00003f,	INSN_TRAP	},
