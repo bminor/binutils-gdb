@@ -61,6 +61,7 @@ extern CORE_ADDR sh_skip_prologue ();
 #define BREAKPOINT {0xc3, 0xff}  /* 0xc3ff is trapa #ff */
 #undef BREAKPOINT
 #define BREAKPOINT {0x00, 0x1b} /* SLEEP */
+#define REMOTE_BREAKPOINT { 0xc3, 0x20}
 
 /* If your kernel resets the pc after the trap happens you may need to
    define this before including this file.  */
@@ -222,3 +223,4 @@ typedef unsigned short INSN_WORD;
 #define NOP   {0x20, 0x0b}
 
 #define REGISTER_SIZE 4
+

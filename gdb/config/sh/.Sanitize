@@ -23,6 +23,7 @@ Things-to-keep:
 
 sh.mt
 tm-sh.h
+stub.c
 
 Things-to-lose:
 
