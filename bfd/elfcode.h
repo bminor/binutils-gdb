@@ -2265,8 +2265,9 @@ elf_sort_hdrs (arg1, arg2)
 	return -1;
       else if (hdr1->sh_addr > hdr2->sh_addr)
 	return 1;
-      else
-	return 0;
+      /* Put !SHT_NOBITS sections before SHT_NOBITS ones.
+         The main loop in map_program_segments assumes this. */
+      return (hdr1->sh_type == SHT_NOBITS) - (hdr2->sh_type == SHT_NOBITS);
     }
   else
     {

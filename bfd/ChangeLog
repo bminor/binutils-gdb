@@ -1,3 +1,7 @@
+Wed Feb  8 09:53:42 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* elfcode.h (elf_sort_hdrs): Put SHT_NOBITS sections after !SHT_NOBITS.
+
 Tue Feb  7 16:27:33 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* som.c (som_bfd_find_nearest_line): Just return false, don't
