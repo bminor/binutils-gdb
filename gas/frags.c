@@ -153,6 +153,12 @@ frag_more (nchars)
 {
   register char *retval;
 
+  if (now_seg == absolute_section)
+    {
+      as_bad ("attempt to allocate data in absolute section");
+      subseg_set (text_section, 0);
+    }
+
   if (mri_common_symbol != NULL)
     {
       as_bad ("attempt to allocate data in common section");
@@ -288,6 +294,8 @@ frag_align_pattern (alignment, fill_pattern, n_fill)
 int
 frag_now_fix ()
 {
+  if (now_seg == absolute_section)
+    return abs_section_offset;
   return (char*)obstack_next_free (&frags) - frag_now->fr_literal;
 }
 
