@@ -1,3 +1,8 @@
+2003-05-05  H.J. Lu <hjl@gnu.org>
+
+	* config/tc-mips.c (tc_gen_reloc): Add addend just once if
+	howto->partial_inplace is false.
+
 2003-05-05  Daniel Jacobowitz  <drow@mvista.com>
 
 	* config/tc-mips.c (mips_need_elf_addend_fixup): Remove

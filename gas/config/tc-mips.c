@@ -13940,7 +13940,15 @@ tc_gen_reloc (section, fixp)
       && (code == BFD_RELOC_GPREL16 || code == BFD_RELOC_MIPS16_GPREL)
       && reloc->addend != 0
       && mips_need_elf_addend_fixup (fixp))
-    reloc->addend += S_GET_VALUE (fixp->fx_addsy);
+    {
+      /* If howto->partial_inplace is false, md_apply_fix3 will only
+	 subtract it once.  */
+      reloc_howto_type *howto;
+
+      howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
+      if (howto->partial_inplace)
+	reloc->addend += S_GET_VALUE (fixp->fx_addsy);
+    }
 #endif
 
   /* To support a PC relative reloc when generating embedded PIC code
