@@ -2,9 +2,9 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright (C) 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+Copyright 1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
 
-This file is part of the GNU Simulators.
+This file is part of the GNU simulators.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -128,11 +128,11 @@ union sem_fields {
   } sfmt_trap;
   struct { /*  */
     IADDR i_disp24;
-    unsigned char out_h_gr_14;
+    unsigned char out_h_gr_SI_14;
   } sfmt_bl24;
   struct { /*  */
     IADDR i_disp8;
-    unsigned char out_h_gr_14;
+    unsigned char out_h_gr_SI_14;
   } sfmt_bl8;
   struct { /*  */
     SI* i_dr;
@@ -150,7 +150,7 @@ union sem_fields {
     SI* i_sr;
     UINT f_r2;
     unsigned char in_sr;
-    unsigned char out_h_gr_14;
+    unsigned char out_h_gr_SI_14;
   } sfmt_jl;
   struct { /*  */
     SI* i_dr;

@@ -2,9 +2,9 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright (C) 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+Copyright 1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
 
-This file is part of the GNU Simulators.
+This file is part of the GNU simulators.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -115,6 +115,7 @@ typedef enum m32rxf_sfmt_type {
  , M32RXF_SFMT_BCL24, M32RXF_SFMT_BRA8, M32RXF_SFMT_BRA24, M32RXF_SFMT_CMP
  , M32RXF_SFMT_CMPI, M32RXF_SFMT_CMPZ, M32RXF_SFMT_DIV, M32RXF_SFMT_JC
  , M32RXF_SFMT_JL, M32RXF_SFMT_JMP, M32RXF_SFMT_LD, M32RXF_SFMT_LD_D
+ , M32RXF_SFMT_LDB, M32RXF_SFMT_LDB_D, M32RXF_SFMT_LDH, M32RXF_SFMT_LDH_D
  , M32RXF_SFMT_LD_PLUS, M32RXF_SFMT_LD24, M32RXF_SFMT_LDI8, M32RXF_SFMT_LDI16
  , M32RXF_SFMT_LOCK, M32RXF_SFMT_MACHI_A, M32RXF_SFMT_MULHI_A, M32RXF_SFMT_MV
  , M32RXF_SFMT_MVFACHI_A, M32RXF_SFMT_MVFC, M32RXF_SFMT_MVTACHI_A, M32RXF_SFMT_MVTC

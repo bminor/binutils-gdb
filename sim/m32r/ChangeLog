@@ -1,3 +1,22 @@
+2001-11-14  Dave Brolley  <brolley@redhat.com>
+
+	* arch.c: Regenerate.
+	* arch.h: Regenerate.
+	* cpu.c: Regenerate.
+	* cpu.h: Regenerate.
+	* cpuall.h: Regenerate.
+	* cpux.c: Regenerate.
+	* cpux.h: Regenerate.
+	* decode.c: Regenerate.
+	* decode.h: Regenerate.
+	* decodex.c: Regenerate.
+	* decodex.h: Regenerate.
+	* model.c: Regenerate.
+	* modelx.c: Regenerate.
+	* sem-switch.c: Regenerate.
+	* sem.c: Regenerate.
+	* semx-switch.c: Regenerate.
+
 2001-07-05  Ben Elliston  <bje@redhat.com>
 
 	* Makefile.in (stamp-arch): Use $(CGEN_CPU_DIR).
@@ -6,22 +25,22 @@
 
 2001-03-05  Dave Brolley  <brolley@redhat.com>
 
-	arch.c: Regenerate.
-	arch.h: Regenerate.
-	cpu.c: Regenerate.
-	cpu.h: Regenerate.
-	cpuall.h: Regenerate.
-	cpux.c: Regenerate.
-	cpux.h: Regenerate.
-	decode.c: Regenerate.
-	decode.h: Regenerate.
-	decodex.c: Regenerate.
-	decodex.h: Regenerate.
-	model.c: Regenerate.
-	modelx.c: Regenerate.
-	sem-switch.c: Regenerate.
-	sem.c: Regenerate.
-	semx-switch.c: Regenerate.
+	* arch.c: Regenerate.
+	* arch.h: Regenerate.
+	* cpu.c: Regenerate.
+	* cpu.h: Regenerate.
+	* cpuall.h: Regenerate.
+	* cpux.c: Regenerate.
+	* cpux.h: Regenerate.
+	* decode.c: Regenerate.
+	* decode.h: Regenerate.
+	* decodex.c: Regenerate.
+	* decodex.h: Regenerate.
+	* model.c: Regenerate.
+	* modelx.c: Regenerate.
+	* sem-switch.c: Regenerate.
+	* sem.c: Regenerate.
+	* semx-switch.c: Regenerate.
 
 2001-01-12  Frank Ch. Eigler  <fche@redhat.com>
 
