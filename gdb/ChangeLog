@@ -1,3 +1,31 @@
+2003-08-21  Mark Kettenis  <kettenis@gnu.org>
+
+	Rewrite FreeBSD/sparc64 native configuration.
+	* sparcbsd-nat.c, sparcbsd-nat.h: New files.
+	* sparc64fbsd-nat.c: New file.
+	* sparc64fbsd-tdep.c: New file.
+	* sparc64-tdep.c sparc64-tdep.h: New files.
+	* Makefile.in (sparcbsd-nat.o, sparc64fbsd-nat.o, sparc64-tdep.o,
+	sparc64fbsd-tdep.o): New dependencies.
+	(SFILES): Add sparcbsd-nat.c, sparc64fbsd-nat.c, sparc64-tdep.c
+	and sparc64fbsd-tdep.c.
+	(sparc64_tdep_h, sparcbsd_nat_h): New variables.
+	* config/sparc/fbsd.mh: Remove copyright notice.
+	(NATDEPFILES): Remove sparc-nat.o, add sparc64fbsd-nat.o and
+	sparcbsd-nat.o.
+	* config/sparc/fbsd.mt: Remove copyright notice.
+	(TDEPFILES): Remove sparc-tdep.o, solib.o solib-svr4.o,
+	solib-legacy.o.  Add sparc64-tdep.o and sparc64fbsd-tdep.o.
+	* config/sparc/nm-fbsd.h: Don't include "elf/common.h".
+	(SVR4_SHARED_LIBS, PTRACE_GETREGS, PTRACE_SETREGS,
+	PTRACE_GETFPREGS, PTRACE_SETFPREGS, GDB_GREGSET_T, GDB_FPREGSET_T,
+	regs, r_g1, r_ps, r_pc, r_npc, r_y, FPU_FSR_TYPE, fp_status, fpu,
+	fpu_regs, fp_fr, fpu_fsr, Fpu_fsr): Remove defines.
+	* config/sparc/tm-fbsd.h: Don't include "solib.h" and
+	"sparc/tm-sp64.h".
+	(SVR4_SHARED_LIBS, START_INFERIOR_TRAPS_EXPECTED): Remove defines.
+	(GDB_MULTI_ARCH): Define to GDB_MULTI_ARCH_TM.
+
 2003-08-21  Michael Chastain  <mec@shout.net>
 
 	* symtab.h: Add doco on the space critical structures and
