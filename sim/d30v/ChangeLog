@@ -1,3 +1,9 @@
+2002-07-13  Andrew Cagney  <ac131313@redhat.com>
+
+	* cpu.h: Mark file obsolete.
+	* sim-main.h,  sim-calls.c, engine.c, cpu.c, alu.h: Ditto.
+	* dc-short, ic-d30v, d30v-insns, Makefile.in: Ditto.
+
 2002-06-16  Andrew Cagney  <ac131313@redhat.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

@@ -1,3 +1,11 @@
+2002-07-13  Andrew Cagney  <ac131313@redhat.com>
+
+	* MAINTAINERS: Note that d30v / d30v-elf has been made obsolete.
+	* configure.tgt: Mark d30v-*-* as obsolete.
+	* d30v-tdep.c: Mark file as obsolete.
+	* config/d30v/d30v.mt: Ditto.
+	* config/d30v/tm-d30v.h: Ditto.
+
 2002-07-13  Aidan Skinner <aidan@velvet.net>
 
 	* ada-tasks.c (add_task_entry): replace calls to

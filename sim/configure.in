@@ -59,11 +59,11 @@ case "${target}" in
 	extra_subdirs="${extra_subdirs} testsuite"
 	;;
   d10v-*-*)		sim_target=d10v ;;
-  d30v-*-*)
-	sim_target=d30v
-	only_if_gcc=yes
-	extra_subdirs="${extra_subdirs} igen"
-	;;
+# OBSOLETE   d30v-*-*)
+# OBSOLETE 	sim_target=d30v
+# OBSOLETE 	only_if_gcc=yes
+# OBSOLETE 	extra_subdirs="${extra_subdirs} igen"
+# OBSOLETE 	;;
   fr30-*-*)		sim_target=fr30 ;;
   h8300*-*-*)		sim_target=h8300 ;;
   h8500-*-*)		sim_target=h8500 ;;

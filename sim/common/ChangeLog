@@ -1,3 +1,8 @@
+2002-07-13  Andrew Cagney  <ac131313@redhat.com>
+
+	* gennltvals.sh (dir): Mark d30v as obsolete.
+	* nltvals.def: Remove d30v.
+
 2002-06-17  Andrew Cagney  <cagney@redhat.com>
 
 	* hw-events.c (hw_event_queue_schedule): Initialize `dummy'.

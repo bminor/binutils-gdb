@@ -78,9 +78,7 @@ maintainer works with the native maintainer when resolving API issues.
 	d10v		--target=d10v-elf ,-Werror
 			Maintenance only
 
-	d30v		--target=d30v-elf ,-Werror
-			Maintenance only
-			OBSOLETE candidate, not multi-arch
+	d30v		(--target=d30v-elf OBSOLETE)
 
 	djgpp		--target=i586-pc-msdosdjgpp ,-Werror
 			(See native and host)
