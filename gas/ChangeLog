@@ -1,3 +1,11 @@
+Thu Jan 30 11:46:59 1997  Fred Fish  <fnf@cygnus.com>
+
+	* config/tc-d10v.c (find_opcode): Remove unused variable "numops".
+start-sanitize-tic80
+	* config/tc-tic80.c: Many additions to previous placeholder file.
+	* config/tc-tic80.h: Ditto.
+end-sanitize-tic80
+
 Thu Jan 30 12:28:18 1997  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* config/tc-i386.c (i386_align_code): Improve the nop patterns.

@@ -1057,11 +1057,11 @@ find_opcode (opcode, myops)
      struct d10v_opcode *opcode;
      expressionS myops[];
 {
-  int i, match, done, numops;
+  int i, match, done;
   struct d10v_opcode *next_opcode;
 
   /* get all the operands and save them as expressions */
-  numops = get_operands (myops);
+  get_operands (myops);
 
   /* now see if the operand is a fake.  If so, find the correct size */
   /* instruction, if possible */
