@@ -6945,7 +6945,7 @@ elf_link_input_bfd (finfo, input_bfd)
 	      Elf_Internal_Rela *irela;
 	      Elf_Internal_Rela *irelaend;
 	      struct elf_link_hash_entry **rel_hash;
-	      Elf_Internal_Shdr *input_rel_hdr;
+	      Elf_Internal_Shdr *input_rel_hdr, *input_rel_hdr2;
 	      unsigned int next_erel;
 	      boolean (*reloc_emitter) PARAMS ((bfd *, asection *,
 						Elf_Internal_Shdr *,
@@ -7115,16 +7115,17 @@ elf_link_input_bfd (finfo, input_bfd)
 	      else
 		reloc_emitter = elf_link_output_relocs;
 
-	      if (! (*reloc_emitter) (output_bfd, o, input_rel_hdr,
-				      internal_relocs))
+	      if (input_rel_hdr->sh_size != 0
+		  && ! (*reloc_emitter) (output_bfd, o, input_rel_hdr,
+					 internal_relocs))
 		return false;
 
-	      input_rel_hdr = elf_section_data (o)->rel_hdr2;
-	      if (input_rel_hdr)
+	      input_rel_hdr2 = elf_section_data (o)->rel_hdr2;
+	      if (input_rel_hdr2 && input_rel_hdr2->sh_size != 0)
 		{
 		  internal_relocs += (NUM_SHDR_ENTRIES (input_rel_hdr)
 				      * bed->s->int_rels_per_ext_rel);
-		  if (! (*reloc_emitter) (output_bfd, o, input_rel_hdr,
+		  if (! (*reloc_emitter) (output_bfd, o, input_rel_hdr2,
 					  internal_relocs))
 		    return false;
 		}

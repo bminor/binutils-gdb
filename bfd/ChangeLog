@@ -1,3 +1,8 @@
+2002-07-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.h (elf_link_input_bfd): Don't call reloc_emitter when
+	reloc section size is zero.  Correct reloc output location.
+
 2002-07-16  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* elf-hppa.h (elf_hppa_reloc_final_type): Use R_PARISC_PCREL16F as
