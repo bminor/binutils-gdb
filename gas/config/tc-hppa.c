@@ -611,6 +611,7 @@ const pseudo_typeS md_pseudo_table[] =
   {"leave", pa_leave, 0},
   {"long", pa_cons, 4},
   {"lsym", pa_lsym, 0},
+  {"nsubspa", pa_subspace, 1},
   {"octa", pa_cons, 16},
   {"org", pa_origin, 0},
   {"origin", pa_origin, 0},
@@ -960,6 +961,9 @@ static const struct selector_entry selector_table[] =
   {"lr", e_lrsel},
   {"ls", e_lssel},
   {"lt", e_ltsel},
+  {"n", e_nsel},
+  {"nl", e_nlsel},
+  {"nlr", e_nlrsel},
   {"p", e_psel},
   {"r", e_rsel},
   {"rd", e_rdsel},
@@ -2107,7 +2111,7 @@ pa_ip (str)
 		      as_bad ("Branch to unaligned address");
 		      break;
 		    }
-		  CHECK_FIELD (num, 8191, -8192, 0);
+		  CHECK_FIELD (num, 8199, -8184, 0);
 		  sign_unext ((num - 8) >> 2, 12, &result);
 		  dis_assemble_12 (result, &w1, &w);
 		  INSERT_FIELD_AND_CONTINUE (opcode, ((w1 << 2) | w), 0);
@@ -2897,10 +2901,13 @@ md_apply_fix (fixP, valp)
 
   hppa_fixP = (struct hppa_fix_struct *) fixP->tc_fix_data;
   /* SOM uses R_HPPA_ENTRY and R_HPPA_EXIT relocations which can
-     never be "applied" (they are just markers).  */
+     never be "applied" (they are just markers).  Likewise for
+     R_HPPA_BEGIN_BRTAB and R_HPPA_END_BRTAB.  */
 #ifdef OBJ_SOM
   if (fixP->fx_r_type == R_HPPA_ENTRY
-      || fixP->fx_r_type == R_HPPA_EXIT)
+      || fixP->fx_r_type == R_HPPA_EXIT
+      || fixP->fx_r_type == R_HPPA_BEGIN_BRTAB
+      || fixP->fx_r_type == R_HPPA_END_BRTAB)
     return;
 #endif
 
@@ -2994,7 +3001,7 @@ md_apply_fix (fixP, valp)
 
 	/* Handle all the opcodes with the 'w' operand type.  */
 	case 12:
-	  CHECK_FIELD (new_val, 8191, -8192, 0)
+	  CHECK_FIELD (new_val, 8199, -8184, 0)
 
 	  /* Mask off 11 bits to be changed.  */
 	    sign_unext ((new_val - 8) >> 2, 12, &result);
@@ -3419,7 +3426,7 @@ pa_chk_field_selector (str)
 {
   int middle, low, high;
   int cmp;
-  char name[3];
+  char name[4];
 
   /* Read past any whitespace.  */
   /* FIXME: should we read past newlines and formfeeds??? */
@@ -3433,6 +3440,13 @@ pa_chk_field_selector (str)
     name[0] = tolower ((*str)[0]),
     name[1] = tolower ((*str)[1]),
     name[2] = 0;
+#ifdef OBJ_SOM
+  else if ((*str)[3] == '\'' || (*str)[3] == '%')
+    name[0] = tolower ((*str)[0]),
+    name[1] = tolower ((*str)[1]),
+    name[2] = tolower ((*str)[2]),
+    name[3] = 0;
+#endif
   else
     return e_fsel;
 
@@ -3450,6 +3464,10 @@ pa_chk_field_selector (str)
       else
 	{
 	  *str += strlen (name) + 1;
+#ifndef OBJ_SOM
+	  if (selector_table[middle].field_selector == e_nsel)
+	    return e_fsel;
+#endif
 	  return selector_table[middle].field_selector;
 	}
     }
@@ -5303,8 +5321,8 @@ log2 (value)
    they're broken up into subroutines.  */
 
 static void
-pa_subspace (unused)
-     int unused;
+pa_subspace (create_new)
+     int create_new;
 {
   char *name, *ss_name, *alias, c;
   char loadable, code_only, common, dup_common, zero, sort;
@@ -5343,7 +5361,10 @@ pa_subspace (unused)
       alias = NULL;
 
       space = current_space;
-      ssd = is_defined_subspace (ss_name);
+      if (create_new)
+	ssd = NULL;
+      else
+	ssd = is_defined_subspace (ss_name);
       /* Allow user to override the builtin attributes of subspaces.  But
          only allow the attributes to be changed once!  */
       if (ssd && SUBSPACE_DEFINED (ssd))
@@ -5480,7 +5501,9 @@ pa_subspace (unused)
          lots of sections.  It might be a problem in the PA ELF
          code, I do not know yet.  For now avoid creating anything
          but the "standard" sections for ELF.  */
-      if (ssd)
+      if (create_new)
+	section = subseg_force_new (ss_name, 0);
+      else if (ssd)
 	section = ssd->ssd_seg;
       else if (alias)
 	section = subseg_new (alias, 0);
@@ -6273,6 +6296,13 @@ hppa_fix_adjustable (fixp)
       fixp->fx_subsy->sy_used_in_reloc = 1;
       return 0;
     }
+
+  /* We can't adjust DP relative relocs that use LR% and RR% field
+     selectors.  That confuses the optimization pass in HP linker.  */
+  if (fixp->fx_r_type == R_DP_RELATIVE
+      && (hppa_fix->fx_r_field == e_lrsel
+	  || hppa_fix->fx_r_field == e_rrsel))
+    return 0;
 #endif
 
   /* Reject reductions of symbols in DLT relative relocs,
@@ -6379,9 +6409,7 @@ hppa_elf_mark_end_of_function ()
 	{
 	  /* symbol value should be the offset of the
 	     last instruction of the function */
-	  symbolP = symbol_new (name, now_seg,
-				(valueT) (obstack_next_free (&frags)
-					  - frag_now->fr_literal - 4),
+	  symbolP = symbol_new (name, now_seg, (valueT) (frag_now_fix () - 4),
 				frag_now);
 
 	  assert (symbolP);

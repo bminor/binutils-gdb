@@ -1,3 +1,9 @@
+Wed Feb 28 11:30:55 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-hppa.c (selector_table): Add "n", "nl", and "nlr" to
+	the selector table.
+	(pa_chk_field_selector): Handle new field selectors for SOM.
+
 Tue Feb 27 14:42:27 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* configure.in (m68k-*-linux*aout*, m68k-*-linux*): New targets.
