@@ -6366,12 +6366,12 @@ tc_x86_regname_to_dw2regnum (const char *regname)
   if (flag_code == CODE_64BIT)
     {
       regnames = regnames_64;
-      regnames_count = sizeof (regnames_64);
+      regnames_count = ARRAY_SIZE (regnames_64);
     }
   else
     {
       regnames = regnames_32;
-      regnames_count = sizeof (regnames_32);
+      regnames_count = ARRAY_SIZE (regnames_32);
     }
 
   for (regnum = 0; regnum < regnames_count; regnum++)

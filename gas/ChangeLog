@@ -1,3 +1,8 @@
+2003-07-04  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-i386.c (tc_x86_regname_to_dw2regnum): Use ARRAY_SIZE
+	macro to compute size of selected register name array.
+
 2003-07-01  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* config/tc-s390.c (md_parse_option): Add cpu type z990.
