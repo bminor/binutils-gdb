@@ -6,6 +6,8 @@ o - nm, objdump
 
 o - See also ../ld/TODO and ../bfd/TODO.
 
+o - ar q is flakey: e.g. doesn't handle long file names properly.
+
 OLD:
 
 o - make the long options more consistent.

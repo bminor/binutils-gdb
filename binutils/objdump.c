@@ -27,6 +27,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "getopt.h"
 #include <stdio.h>
 #include <ctype.h>
+#include "dis-asm.h"
 
 #define	ELF_STAB_DISPLAY	/* This code works, but uses internal
 				   bfd and elf stuff.  Flip this define
@@ -41,7 +42,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 extern Elf_Internal_Shdr *bfd_elf_find_section();
 #endif	/* ELF_STAB_DISPLAY */
 
-char *xmalloc ();
+extern char *xmalloc ();
+extern int fprintf ();
 
 char *default_target = NULL;	/* default at runtime */
 
@@ -304,22 +306,24 @@ disassemble_data (abfd)
   bfd_arch_info_type *info;
   bfd_size_type datasize = 0;
   bfd_size_type i;
-  unsigned int (*print) ()= 0;
-  unsigned int print_insn_m68k ();
+  unsigned int (*print) ()= 0; /* Old style */
+  disassembler_ftype disassemble = 0; /* New style */
   unsigned int print_insn_a29k ();
-  unsigned int print_insn_z8001 ();
-  unsigned int print_insn_z8002 ();
   unsigned int print_insn_i960 ();
   unsigned int print_insn_sparc ();
-  unsigned int print_insn_i386 ();
   unsigned int print_insn_h8300 ();
-  unsigned int print_insn_mips ();
   enum bfd_architecture a;
+  struct disassemble_info disasm_info;
+
+  int prevline;
+  CONST char *prev_function = "";
 
   asection *section;
 
   /* Replace symbol section relative values with abs values */
   boolean done_dot = false;
+
+  INIT_DISASSEMBLE_INFO(disasm_info, stdout);
 
   for (i = 0; i < symcount; i++)
     {
@@ -377,15 +381,15 @@ disassemble_data (abfd)
 	  break;
         case bfd_arch_z8k:
 	  if (bfd_get_mach(abfd) == bfd_mach_z8001)
-	   print = print_insn_z8001;
+	   disassemble = print_insn_z8001;
 	  else 
-	   print = print_insn_z8002;
+	   disassemble = print_insn_z8002;
 	  break;
 	case bfd_arch_i386:
-	  print = print_insn_i386;
+	  disassemble = print_insn_i386;
 	  break;
 	case bfd_arch_m68k:
-	  print = print_insn_m68k;
+	  disassemble = print_insn_m68k;
 	  break;
 	case bfd_arch_a29k:
 	  print = print_insn_a29k;
@@ -394,8 +398,10 @@ disassemble_data (abfd)
 	  print = print_insn_i960;
 	  break;
 	case bfd_arch_mips:
-	  /* MIPS is handled specially, because we need to pass an
-	     additional endianness argument.  */
+	  if (abfd->xvec->byteorder_big_p)
+	    disassemble = print_insn_big_mips;
+	  else
+	    disassemble = print_insn_little_mips;
 	  break;
 	default:
 	  fprintf (stderr, "%s: Can't disassemble for architecture %s\n",
@@ -448,7 +454,6 @@ disassemble_data (abfd)
 		  done_dot = false;
 		  if (with_line_numbers)
 		    {
-		      static prevline;
 		      CONST char *filename;
 		      CONST char *functionname;
 		      unsigned int line;
@@ -459,31 +464,34 @@ disassemble_data (abfd)
 						 section->vma + i,
 						 &filename,
 						 &functionname,
-						 &line)
-			  && filename
-			  && functionname
-			  && line
-			  && line != prevline)
+						 &line))
 			{
-			  printf ("%s:%u\n", filename, line);
-			  prevline = line;
+			  if (functionname && *functionname
+			      && strcmp(functionname, prev_function))
+			    {
+			      printf ("%s():\n", functionname);
+			      prev_function = functionname;
+			    }
+			  if (!filename)
+			    filename = "???";
+			  if (line && line != prevline)
+			    {
+			      printf ("%s:%u\n", filename, line);
+			      prevline = line;
+			    }
 			}
 		    }
 		  print_address (section->vma + i, stdout);
 		  printf (" ");
 
-		  if (a != bfd_arch_mips)
+		  if (disassemble) /* New style */
+		    i += (*disassemble)(section->vma + i,
+					data + i,
+					&disasm_info);
+		  else /* Old style */
 		    i += print (section->vma + i,
 				data + i,
 				stdout);
-		  else
-		    {
-		      /* The endianness of the MIPS can vary.  */
-		      i += print_insn_mips (section->vma + i,
-					    data + i,
-					    stdout,
-					    (int) abfd->xvec->byteorder_big_p);
-		    }
 		  putchar ('\n');
 		}
 	    }

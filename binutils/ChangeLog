@@ -1,5 +1,15 @@
+Thu Mar 18 14:22:17 1993  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* m68k-pinsn.c:  Removed.  Subsumed by ../opcodes/m68k-dis.c.
+	* i386-pinsn.c:  Removed.  Subsumed by ../opcodes/i386-dis.c.
+	* Makefile.in:  Adjust accordingly.
+	* objdump.c:  Support new-style disassemblers (ones that use
+	the interface of ../include/dis-asm.h).
+
 Thu Feb 25 15:57:00 1993  Per Bothner  (bothner@rtl.cygnus.com)
 
+	* Makefile.in:  When making tar file, remove texinfo/*,
+	except for texinfo/texinfo.tex.
 	* ardup.c:  Add extern declaration of strdup.
 	* Makefile.in (testsuite):  Add 'else true' since otherwise
 	Ultrix /bin/sh complains.
