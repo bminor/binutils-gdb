@@ -1,5 +1,8 @@
 Wed Nov  1 11:41:56 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ldgram.y (mri_script_command): Accept ',' as well as '=' in
+	ALIGN and ALIGNMOD statements.
+
 	* emultempl/aix.em: Include ldgram.h.
 	(gld${EMULATION_NAME}_parse_args): Handle -pD and -pT, as used on
 	AIX 4.1.
