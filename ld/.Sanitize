@@ -54,10 +54,10 @@ ldgld68kr.sc
 ldgld960.c
 ldgld960.sc
 ldgldUr.sc
-ldgldm88kbcs.c
-ldgldm88kbcs.sc
-ldgldm88kbcsUr.sc
-ldgldm88kbcsr.sc
+ldm88k.c
+ldm88k.sc
+ldm88kUr.sc
+ldm88kr.sc
 ldglda29k.c
 ldglda29k.sc
 ldglda29kUr.sc
@@ -93,7 +93,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.6  1991/09/03 21:04:00  steve
+# Revision 1.7  1991/09/03 21:14:13  steve
+# *** empty log message ***
+#
+# Revision 1.6  1991/09/03  21:04:00  steve
 # *** empty log message ***
 #
 # Revision 1.5  1991/08/27  00:21:34  steve

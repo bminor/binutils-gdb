@@ -140,9 +140,9 @@ ldgldr.x :ldgldr.sc
 ldlnk960.x :ldlnk960.sc 
 ldlnk960r.x :ldlnk960r.sc 
 ldgld960.x :ldgld960.sc 
-ldgldm88kbcs.x :ldgldm88kbcs.sc 
-ldgldm88kbcsUr.x :ldgldm88kbcsUr.sc 
-ldgldm88kbcsr.x:ldgldm88kbcsr.sc
+ldgldm88k.x :ldgldm88k.sc 
+ldm88kUr.x :ldm88kUr.sc 
+ldm88kr.x:ldm88kr.sc
 ldgld68k.x:ldgld68k.sc
 ldglda29k.x :ldglda29k.sc 
 ldglda29kr.x :ldglda29kr.sc 

@@ -103,15 +103,15 @@ char  *ignore;
 }
 
 static char *gldm88kbcs_script = 
-#include "ldgldm88kbcs.x"
+#include "ldm88k.x"
 ;
 
 static char *gldm88kbcs_script_option_Ur  =  
-#include "ldgldm88kbcsUr.x"
+#include "ldm88kUr.x"
 ;
 
 static char *gldm88kbcs_script_option_r  =  
-#include "ldgldm88kbcsr.x"
+#include "ldm88kr.x"
 ;	     
 			     
 static char *gldm88kbcs_get_script()
