@@ -2,6 +2,9 @@ to do:
 
 remove DONTDEF
 
+fix relocation types for i860, perhaps by adding a ref pointer to
+	fixS?
+
 fucked up on a.out.gnu.h, etc.
 remove the ifdef's from fx_callj tests?
 what are callj tests?
