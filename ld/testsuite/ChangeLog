@@ -1,3 +1,8 @@
+2003-11-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-powerpc/tlsexe32.d: Update for changed symbols from objdump.
+	* ld-powerpc/tlsso32.d: Likewise.
+
 2003-10-27  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* ld-undefined/undefined.exp: Mark as xfail for m6811 and m6812
@@ -71,7 +76,7 @@
 	* ld-sh/sh64/endian.sld: Likewise.
 	* ld-sh/sh64/gotplt.d: Likewise.
 	* ld-sh/sh64/init-cmpct.d: Likewise.
-	* ld-sh/sh64/init-media.d: Likewise. 
+	* ld-sh/sh64/init-media.d: Likewise.
 	* ld-sh/sh64/init.s: Align functions.
 	* ld-sh/sh64/init64.d: Update.
 	* ld-sh/sh64/mix1-noexp.sd: Likewise.
@@ -217,7 +222,7 @@
 	* ld-alpha/tlsbinr.sd: Likewise.
 	* ld-alpha/tlspic.dd: Likewise.
 	* ld-alpha/tlspic.rd: Likewise.
-	* ld-alpha/tlspic.sd: Likewise.	
+	* ld-alpha/tlspic.sd: Likewise.
 
 2003-07-26  Alan Modra  <amodra@bigpond.net.au>
 
