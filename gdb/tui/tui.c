@@ -237,8 +237,8 @@ tui_enable (void)
       setTermWidthTo (COLS);
       def_prog_mode ();
 
-      tuiSetLocatorContent (0);
-      showLayout (SRC_COMMAND);
+      tuiShowFrameInfo (0);
+      tuiSetLayout (SRC_COMMAND, TUI_UNDEFINED_REGS);
       tuiSetWinFocusTo (srcWin);
       keypad (cmdWin->generic.handle, TRUE);
       wrefresh (cmdWin->generic.handle);

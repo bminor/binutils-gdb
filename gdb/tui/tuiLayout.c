@@ -58,7 +58,7 @@
 /*******************************
 ** Static Local Decls
 ********************************/
-
+static void showLayout (TuiLayoutType);
 static void _initGenWinInfo (TuiGenWinInfoPtr, TuiWinType, int, int, int, int);
 static void _initAndMakeWin (Opaque *, TuiWinType, int, int, int, int, int);
 static void _showSourceOrDisassemAndCommand (TuiLayoutType);
@@ -86,20 +86,8 @@ static void _tuiHandleXDBLayout (TuiLayoutDefPtr);
 
 #define LAYOUT_USAGE     "Usage: layout prev | next | <layout_name> \n"
 
-/***************************************
-** Static Local Data
-***************************************/
-static TuiLayoutType lastLayout = UNDEFINED_LAYOUT;
-
-/***************************************
-** PUBLIC FUNCTIONS
-***************************************/
-
-/*
-   ** showLayout().
-   **        Show the screen layout defined
- */
-void
+/* Show the screen layout defined.  */
+static void
 showLayout (TuiLayoutType layout)
 {
   TuiLayoutType curLayout = currentLayout ();
@@ -789,8 +777,6 @@ _showDisassemCommand (void)
 static void
 _showSourceDisassemCommand (void)
 {
-  TuiGenWinInfoPtr locator = locatorWinInfoPtr ();
-
   if (currentLayout () != SRC_DISASSEM_COMMAND)
     {
       int cmdHeight, srcHeight, asmHeight;
@@ -1083,7 +1069,6 @@ _showSourceOrDisassemAndCommand (TuiLayoutType layoutType)
   if (currentLayout () != layoutType)
     {
       TuiWinInfoPtr *winInfoPtr;
-      int areaLeft;
       int srcHeight, cmdHeight;
       TuiGenWinInfoPtr locator = locatorWinInfoPtr ();
 

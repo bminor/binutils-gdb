@@ -1,5 +1,5 @@
 /* TUI layout window management.
-   Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
    Contributed by Hewlett-Packard Company.
 
    This file is part of GDB.
@@ -22,7 +22,6 @@
 #ifndef TUI_LAYOUT_H
 #define TUI_LAYOUT_H
 
-extern void showLayout (TuiLayoutType);
 extern void tuiAddWinToLayout (TuiWinType);
 extern int tuiDefaultWinHeight (TuiWinType, TuiLayoutType);
 extern int tuiDefaultWinViewportHeight (TuiWinType, TuiLayoutType);

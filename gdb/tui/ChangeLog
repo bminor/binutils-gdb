@@ -1,5 +1,15 @@
 2002-08-24  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* tui.c (tui_enable): Use tuiSetLayout instead of showLayout and
+	use tuiShowFrameInfo instead of tuiSetLocatorContent.
+	* tuiLayout.h (showLayout): Remove.
+	* tuiLayout.c (_showSourceOrDisassemAndCommand): Remove unused locals.
+	(_showSourceDisassemCommand): Likewise.
+	(showLayout): Make it static.
+	(lastLayout): Remove.
+
+2002-08-24  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* tuiSourceWin.c (tui_show_source_line): New function.
 	(tuiShowSourceContent): Call it and avoid clearing the window before
 	redrawing it.
