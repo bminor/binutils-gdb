@@ -20,14 +20,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* This file does not define a particular back-end, but it defines routines
    that can be used by other back-ends.  */
-
 #include <sysdep.h>
-
-/* No core file support yet on any iris, so dump all this code.
-   We don't appear to grok foreign core files on any system, since u
-   will have different sizes on different machines anyway. */
-#if (HOST_SYS != IRIX3_SYS) && (HOST_SYS != IRIX4_SYS)
-
 #include "bfd.h"
 #include <stdio.h>
 #include "libbfd.h"
@@ -187,5 +180,3 @@ trad_unix_core_file_matches_executable_p  (core_bfd, exec_bfd)
 {
   return true;		/* FIXME, We have no way of telling at this point */
 }
-
-#endif /* (HOST_SYS != IRIX3_SYS) && (HOST_SYS != IRIX4_SYS) */
