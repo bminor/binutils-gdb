@@ -1,5 +1,5 @@
 /* tc-ppc.h -- Header file for tc-ppc.c.
-   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000
+   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
@@ -56,7 +56,7 @@ extern int target_big_endian;
 
 /* The target BFD format.  */
 #define TARGET_FORMAT (ppc_target_format ())
-extern char* ppc_target_format ();
+extern char* ppc_target_format PARAMS ((void));
 
 /* Permit temporary numeric labels.  */
 #define LOCAL_LABELS_FB 1
@@ -232,17 +232,17 @@ extern int ppc_section_flags PARAMS ((int, int, int));
 extern const char *ppc_comment_chars;
 
 /* Keep relocations relative to the GOT, or non-PC relative.  */
-#define tc_fix_adjustable(FIX)                          		\
-  ((FIX)->fx_r_type != BFD_RELOC_16_GOTOFF              		\
-   && (FIX)->fx_r_type != BFD_RELOC_LO16_GOTOFF         		\
-   && (FIX)->fx_r_type != BFD_RELOC_HI16_GOTOFF         		\
-   && (FIX)->fx_r_type != BFD_RELOC_HI16_S_GOTOFF       		\
-   && (FIX)->fx_r_type != BFD_RELOC_GPREL16             		\
+#define tc_fix_adjustable(FIX)		\
+  ((FIX)->fx_r_type != BFD_RELOC_16_GOTOFF		\
+   && (FIX)->fx_r_type != BFD_RELOC_LO16_GOTOFF		\
+   && (FIX)->fx_r_type != BFD_RELOC_HI16_GOTOFF		\
+   && (FIX)->fx_r_type != BFD_RELOC_HI16_S_GOTOFF		\
+   && (FIX)->fx_r_type != BFD_RELOC_GPREL16		\
    && (FIX)->fx_r_type != BFD_RELOC_VTABLE_INHERIT			\
    && (FIX)->fx_r_type != BFD_RELOC_VTABLE_ENTRY			\
    && ! S_IS_EXTERNAL ((FIX)->fx_addsy)					\
    && ! S_IS_WEAK ((FIX)->fx_addsy)					\
-   && ((FIX)->fx_pcrel				        		\
+   && ((FIX)->fx_pcrel						\
        || ((FIX)->fx_subsy != NULL					\
 	   && (S_GET_SEGMENT ((FIX)->fx_subsy)				\
 	       == S_GET_SEGMENT ((FIX)->fx_addsy)))			\
