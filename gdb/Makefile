@@ -311,7 +311,8 @@ CFLAGS = ${GLOBAL_CFLAGS} ${PROFILE_CFLAGS} ${MALLOC_CFLAGS} ${INCLUDE_CFLAGS}
 LDFLAGS = $(CFLAGS)
 
 # Where is the "-liberty" library, containing getopt and obstack?
-LIBIBERTY =  ${srcdir}/../libiberty${subdir}/libiberty.a
+LIBIBERTY_DIR = ${srcdir}/../libiberty
+LIBIBERTY = ${LIBIBERTY_DIR}${subdir}/libiberty.a
 
 # Flags that describe where you can find the termcap library.
 # You may need to make other arrangements for USG.
@@ -471,17 +472,18 @@ gdb: $(OBS) $(TSOBS) ${ADD_DEPS} ${RL_LIB_DEP} ${CDEPS} init.o
 	${RL_LIB} $(CLIBS)
 
 saber_gdb: $(SFILES) $(DEPFILES) copying.c version.c
-	#setopt load_flags $(CFLAGS) -I$(BFD_DIR)
+	#setopt load_flags $(CFLAGS) -I$(BFD_DIR) -DHOST_SYS=SUN4_SYS
 	#load ./init.c $(SFILES)
-	#unload ${srcdir}/expread.y
+	#unload ${srcdir}/expread.y ${srcdir}/vx-share/*.h
+	#unload ${srcdir}/nindy-share/[A-Z]*
 	#load ${srcdir}/expread.tab.c readline/libreadline.a
 	#load copying.c version.c
 	#load `echo " "$(DEPFILES) | sed -e 's/\.o/.c/g' -e 's, , ../,g'`
-	#load ${LIBIBERTY}/*.c
+	#load ${LIBIBERTY_DIR}/*.c
 	#load ${BFD_DIR}/*.c
 	#load -ltermcap 
 	##void mcheck(a) void (*a)(); { }
-	##void mtrace(a) void (*a)(); { }
+	##void mtrace() { }
 
 
 
