@@ -23,6 +23,7 @@ Do-first:
 
 Things-to-keep:
 
+ChangeLog
 Makefile.in
 br-bra.S
 br-bratnz.S
