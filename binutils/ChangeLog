@@ -1,3 +1,7 @@
+2000-12-05  Nick Clifton  <nickc@redhat.com>
+
+	* MAINTAINERS: Add Jason Merrill as DWARF2 maintainer.
+
 2000-12-04  Jason Merrill  <jason@redhat.com>
 
 	* readelf.c (process_section_headers): Handle linkonce.wi sections.
