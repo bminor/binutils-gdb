@@ -2142,6 +2142,7 @@ build_Mytes (sh_opcode_info *opcode, sh_operand_info *operand)
 	  switch (i)
 	    {
 	    case REG_N:
+	    case REG_N_D:
 	      nbuf[index] = reg_n;
 	      break;
 	    case REG_M:
@@ -2157,6 +2158,9 @@ build_Mytes (sh_opcode_info *opcode, sh_operand_info *operand)
 	      break;
 	    case REG_B:
 	      nbuf[index] = reg_b | 0x08;
+	      break;
+	    case REG_N_B01:
+	      nbuf[index] = reg_n | 0x01;
 	      break;
 	    case IMM0_4BY4:
 	      insert (output + low_byte, BFD_RELOC_SH_IMM4BY4, 0, operand);

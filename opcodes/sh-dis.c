@@ -577,11 +577,20 @@ print_insn_sh (memaddr, info)
 	    case IMM1_8BY4:
 	      imm = ((nibs[2] << 4) | nibs[3]) << 2;
 	      goto ok;
+	    case REG_N_D:
+	      if ((nibs[n] & 1) != 0)
+		goto fail;
+	      /* fall through */
 	    case REG_N:
 	      rn = nibs[n];
 	      break;
 	    case REG_M:
 	      rm = nibs[n];
+	      break;
+	    case REG_N_B01:
+	      if ((nibs[n] & 0x3) != 1 /* binary 01 */)
+		goto fail;
+	      rn = (nibs[n] & 0xc) >> 2;
 	      break;
 	    case REG_NM:
 	      rn = (nibs[n] & 0xc) >> 2;

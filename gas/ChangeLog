@@ -1,3 +1,8 @@
+2004-02-26  Andrew Stubbs <andrew.stubbs@superh.com>
+
+	* config/tc-sh.c (build_Mytes): Add REG_N_D and REG_N_B01
+	nibble types to assembler.
+
 2004-02-25  Fred Fish  <fnf@redhat.com>
 
 	* config/tc-iq2000.c: Add missing \n\ in multiline string literal.

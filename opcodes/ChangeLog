@@ -1,3 +1,16 @@
+2004-02-26  Andrew Stubbs <andrew.stubbs@superh.com>
+
+	* sh-dis.c (print_insn_sh): Add REG_N_D nibble type to
+	ensure that double registers have even numbers.
+	Add REG_N_B01 for nn01 (binary 01) nibble to ensure
+	that reserved instruction 0xfffd does not decode the same
+	as 0xfdfd (ftrv).
+	* sh-opc.h: Add REG_N_D nibble type and use it whereever
+	REG_N refers to a double register.
+	Add REG_N_B01 nibble type and use it instead of REG_NM
+	in ftrv.
+	Adjust the bit patterns in a few comments.
+
 2004-02-25  Aldy Hernandez  <aldyh@redhat.com>
                                                                                 
         * ppc-opc.c (powerpc_opcodes): Change mask for dcbt and dcbtst.
