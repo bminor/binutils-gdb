@@ -1,3 +1,28 @@
+Tue Jul 28 11:19:43 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ld-insn.c (parse_insn_word): For constant conditional strings,
+ 	encode their bit value.
+
+	* ld-insn.c (parse_insn_word, parse_insn_words): Allow conditional
+ 	operands to refer to fields in earlier instruction words.
+
+	* gen.c (sub_val): Replace field argument with val_last_pos.
+	(gen_entry_expand_opcode): Look in previous tables for a value for
+ 	a conditional field as well as the bits from the current table.
+	(insn_list_insert): Add sort key of instructions where
+ 	their operand fields have different conditionals.
+	(insn_field_cmp): New function.
+	
+Sun Apr 26 15:31:55 1998  Tom Tromey  <tromey@creche>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
+Sun Apr 26 15:20:08 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* acconfig.h: New file.
+	* configure.in: Reverted change of Apr 24; use sinclude again.
+
 Fri Apr 24 14:16:40 1998  Tom Tromey  <tromey@creche>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
