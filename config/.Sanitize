@@ -38,6 +38,7 @@ mh-hpux
 mh-hpux8
 mh-irix4
 mh-irix5
+mh-irix6
 mh-linux
 mh-lynxos
 mh-lynxrs6k
