@@ -1,3 +1,7 @@
+2003-10-21  Andrew Cagney  <cagney@redhat.com>
+
+	* target.c (errno): Delete extern declaration.
+
 2003-10-20  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* ia64-tdep.c: Change all occurrences of

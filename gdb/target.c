@@ -37,8 +37,6 @@
 #include <signal.h>
 #include "regcache.h"
 
-extern int errno;
-
 static void target_info (char *, int);
 
 static void maybe_kill_then_create_inferior (char *, char *, char **);
