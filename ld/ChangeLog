@@ -1,5 +1,10 @@
 Fri May 22 13:47:19 1992  Per Bothner  (bothner@cygnus.com)
 
+	* Makefile.in:  Use srcdir instead of VPATH in ldgram/ldlex
+	rules, since these are used when building a distribution.
+	* Makefile.in (ldlex.c):  Don't re-direct output, since that
+	leaves a bogus output files if it fails.
+
 	* config/sparc.mh:  Fix HOSTING_LIBS so it has a chance of working.
 	* ldlex.c:  Fix some unnecessary flex-specific-isms.
 

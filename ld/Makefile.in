@@ -55,7 +55,7 @@ AR_FLAGS = qv
 CFLAGS = -g
 MAKEINFO = makeinfo
 RANLIB = ranlib
-
+HOST_CC=$(CC)
 BISON = `if [ -f ../bison/bison ] ; then echo ../bison/bison -y -L../bison/bison ; else echo bison -y ; fi`
 LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex -S../flex/flex.skel ; else echo flex ; fi`
 
@@ -144,7 +144,7 @@ check: bootstrap
 info: ld.info
 
 ldgram.h ldgram.c: ldgram.y
-	$(BISON) $(BISONFLAGS) -d $(VPATH)/ldgram.y
+	$(BISON) $(BISONFLAGS) -d $(srcdir)/ldgram.y
 	mv -f y.tab.c ldgram.c
 	mv -f y.tab.h ldgram.h
 
@@ -168,11 +168,8 @@ ldemul-list.h:  Makefile
 ldemul.o: ldemul-list.h
 
 ldlex.c: ldlex.l
-#	/lib/cpp -E -P $(INCLUDES)  $(HDEFINES) $(TDEFINES) $(CDEFINES) $(VPATH)/ldlex.l >ldlex.p
-
-	$(LEX) -I -Cem -t $(VPATH)/ldlex.l >ldlex.c
-#	cp ldlex.q ldlex.c
-
+	$(LEX) -I -Cem $(srcdir)/ldlex.l
+	mv lex.yy.c ldlex.c
 
 # These all start with ld__ so 'make clean' can find them.
 
@@ -340,7 +337,7 @@ ld-index.me: ld.me
 ######################################################################
 
 ./mkscript: $(srcdir)/mkscript.c
-	$(CC) $(CFLAGS) $(INCLUDES) $(HDEFINES) $(TDEFINES) $(CDEFINES) $(LDFLAGS) -o mkscript $(srcdir)/mkscript.c $(LOADLIBES)
+	$(HOST_CC)  -o mkscript $(srcdir)/mkscript.c 
 
 ldlex.c: ldlex.l ldgram.h
 ldlex.o: ldlex.c ldgram.h
