@@ -2657,7 +2657,8 @@ mips_load_srec (char *args)
 
 	      bfd_get_section_contents (abfd, s, buffer, i, numbytes);
 
-	      reclen = mips_make_srec (srec, '3', s->vma + i, buffer, numbytes);
+	      reclen = mips_make_srec (srec, '3', s->vma + i, 
+				       buffer, numbytes);
 	      send_srec (srec, reclen, s->vma + i);
 
 	      if (deprecated_ui_load_progress_hook)
@@ -3174,7 +3175,8 @@ pmon_load_fast (char *file)
 		   the line: */
 		for (; ((binamount - binptr) > 0);)
 		  {
-		    pmon_make_fastrec (&bp, binbuf, &binptr, binamount, &reclen, &csum, &zerofill);
+		    pmon_make_fastrec (&bp, binbuf, &binptr, binamount, 
+				       &reclen, &csum, &zerofill);
 		    if (reclen >= (MAXRECSIZE - CHECKSIZE))
 		      {
 			reclen = pmon_checkset (reclen, &bp, &csum);
