@@ -923,15 +923,6 @@ x86_64_skip_prologue (CORE_ADDR pc)
   return pc;
 }
 
-/* Sequence of bytes for breakpoint instruction.  */
-static const unsigned char *
-x86_64_breakpoint_from_pc (CORE_ADDR *pc, int *lenptr)
-{
-  static unsigned char breakpoint[] = { 0xcc };
-  *lenptr = 1;
-  return breakpoint;
-}
-
 static void
 x86_64_save_dummy_frame_tos (CORE_ADDR sp)
 {
