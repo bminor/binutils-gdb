@@ -15,13 +15,6 @@
 
 Do-first:
 
-sky_files=txvu.h
-if ( echo $* | grep keep\-sky > /dev/null ) ; then
-        keep_these_too="${sky_files} ${keep_these_too}"
-else
-        lose_these_too="${sky_files} ${lose_these_too}"
-fi
-
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -133,7 +126,7 @@ else
 	done
 fi
 
-sky_files="ChangeLog common.h"
+sky_files="ChangeLog mips.h"
 if ( echo $* | grep keep\-sky > /dev/null ) ; then
 	for i in $sky_files ; do
 		if test ! -d $i && (grep sanitize-sky $i > /dev/null) ; then

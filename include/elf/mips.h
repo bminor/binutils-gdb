@@ -1,5 +1,5 @@
 /* MIPS ELF support for BFD.
-   Copyright (C) 1993, 1994 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
 
    By Ian Lance Taylor, Cygnus Support, <ian@cygnus.com>, from
    information in the System V Application Binary Interface, MIPS
@@ -38,6 +38,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Code in file uses the standard calling sequence for calling
    position independent code.  */
 #define EF_MIPS_CPIC		0x00000004
+
+/* Code in file uses new ABI (-n32 on Irix 6).  */
+#define EF_MIPS_ABI2		0x00000020
 
 /* Four bit MIPS architecture field.  */
 #define EF_MIPS_ARCH		0xf0000000
@@ -103,14 +106,22 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Section contains register usage information.  */
 #define SHT_MIPS_REGINFO	0x70000006
 
-/* Section contains miscellaneous options (used on Irix).  */
+/* Section contains interface information.  */
+#define SHT_MIPS_IFACE		0x7000000b
+
+/* Section contains description of contents of another section.  */
+#define SHT_MIPS_CONTENT	0x7000000c
+
+/* Section contains miscellaneous options.  */
 #define SHT_MIPS_OPTIONS	0x7000000d
 
-/* DWARF debugging section (used on Irix 6).  */
+/* DWARF debugging section.  */
 #define SHT_MIPS_DWARF		0x7000001e
 
-/* Events section.  This appears on Irix 6.  I don't know what it
-   means.  */
+/* I'm not sure what this is, but it appears on Irix 6.  */
+#define SHT_MIPS_SYMBOL_LIB	0x70000020
+
+/* Events section.  */
 #define SHT_MIPS_EVENTS		0x70000021
 
 /* A section of type SHT_MIPS_LIBLIST contains an array of the
@@ -216,6 +227,24 @@ extern void bfd_mips_elf32_swap_reginfo_out
 
 /* This section must be in the global data area.  */
 #define SHF_MIPS_GPREL		0x10000000
+
+/* This section should be merged.  */
+#define SHF_MIPS_MERGE		0x20000000
+
+/* This section contains 32 bit addresses.  */
+#define SHF_MIPS_ADDR32		0x40000000
+
+/* This section contains 64 bit addresses.  */
+#define SHF_MIPS_ADDR64		0x80000000
+
+/* This section may not be stripped.  */
+#define SHF_MIPS_NOSTRIP	0x08000000
+
+/* This section is local to threads.  */
+#define SHF_MIPS_LOCAL		0x04000000
+
+/* Linker should generate implicit weak names for this section.  */
+#define SHF_MIPS_NAMES		0x02000000
 
 /* Processor specific program header types.  */
 
@@ -297,8 +326,20 @@ extern void bfd_mips_elf32_swap_reginfo_out
 #define STO_INTERNAL		0x01
 #define STO_HIDDEN		0x02
 #define STO_PROTECTED		0x03
+
+/* start-sanitize-sky */
+/* These values are used for the dvp.  */
+#define STO_DVP_DMA		0xe8
+#define STO_DVP_PKE		0xe9
+#define STO_DVP_GPUIF		0xea
+#define STO_DVP_VU		0xeb
+#define MIPS_STO_DVP_P(sto) ((sto) >= STO_DVP_DMA && (sto) <= STO_DVP_VU)
+
+/* end-sanitize-sky */
+/* This value is used for a mips16 .text symbol.  */
+#define STO_MIPS16		0xf0
 
-/* The 64-bit MIPS ELF ABI uses an usual reloc format.  Each
+/* The 64-bit MIPS ELF ABI uses an unusual reloc format.  Each
    relocation entry specifies up to three actual relocations, all at
    the same address.  The first relocation which required a symbol
    uses the symbol in the r_sym field.  The second relocation which
@@ -391,5 +432,87 @@ typedef struct
 
 /* Address of location being relocated.  */
 #define RSS_LOC		3
+
+/* A SHT_MIPS_OPTIONS section contains a series of options, each of
+   which starts with this header.  */
+
+typedef struct
+{
+  /* Type of option.  */
+  unsigned char kind[1];
+  /* Size of option descriptor, including header.  */
+  unsigned char size[1];
+  /* Section index of affected section, or 0 for global option.  */
+  unsigned char section[2];
+  /* Information specific to this kind of option.  */
+  unsigned char info[4];
+} Elf_External_Options;
+
+typedef struct
+{
+  /* Type of option.  */
+  unsigned char kind;
+  /* Size of option descriptor, including header.  */
+  unsigned char size;
+  /* Section index of affected section, or 0 for global option.  */
+  unsigned short section;
+  /* Information specific to this kind of option.  */
+  unsigned long info;
+} Elf_Internal_Options;
+
+/* MIPS ELF option header swapping routines.  */
+extern void bfd_mips_elf_swap_options_in
+  PARAMS ((bfd *, const Elf_External_Options *, Elf_Internal_Options *));
+extern void bfd_mips_elf_swap_options_out
+  PARAMS ((bfd *, const Elf_Internal_Options *, Elf_External_Options *));
+
+/* Values which may appear in the kind field of an Elf_Options
+   structure.  */
+
+/* Undefined.  */
+#define ODK_NULL	0
+
+/* Register usage and GP value.  */
+#define ODK_REGINFO	1
+
+/* Exception processing information.  */
+#define ODK_EXCEPTIONS	2
+
+/* Section padding information.  */
+#define ODK_PAD		3
+
+/* In the 32 bit ABI, an ODK_REGINFO option is just a Elf32_Reginfo
+   structure.  In the 64 bit ABI, it is the following structure.  The
+   info field of the options header is not used.  */
+
+typedef struct
+{
+  /* Mask of general purpose registers used.  */
+  unsigned char ri_gprmask[4];
+  /* Padding.  */
+  unsigned char ri_pad[4];
+  /* Mask of co-processor registers used.  */
+  unsigned char ri_cprmask[4][4];
+  /* GP register value for this object file.  */
+  unsigned char ri_gp_value[8];
+} Elf64_External_RegInfo;
+
+typedef struct
+{
+  /* Mask of general purpose registers used.  */
+  unsigned long ri_gprmask;
+  /* Padding.  */
+  unsigned long ri_pad;
+  /* Mask of co-processor registers used.  */
+  unsigned long ri_cprmask[4];
+  /* GP register value for this object file.  */
+  bfd_vma ri_gp_value;
+} Elf64_Internal_RegInfo;
+
+/* MIPS ELF reginfo swapping routines.  */
+extern void bfd_mips_elf64_swap_reginfo_in
+  PARAMS ((bfd *, const Elf64_External_RegInfo *, Elf64_Internal_RegInfo *));
+extern void bfd_mips_elf64_swap_reginfo_out
+  PARAMS ((bfd *, const Elf64_Internal_RegInfo *, Elf64_External_RegInfo *));
 
 #endif /* _ELF_MIPS_H */
