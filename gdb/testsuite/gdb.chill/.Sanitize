@@ -25,6 +25,8 @@ Things-to-keep:
 
 ChangeLog
 Makefile.in
+builtins.ch
+builtins.exp
 callch.ch
 callch.exp
 chexp.exp

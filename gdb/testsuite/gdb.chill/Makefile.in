@@ -1,8 +1,8 @@
 srcdir = @srcdir@
 VPATH = @srcdir@
 
-PROGS = callch.exe chillvars.exe misc.exe result.exe string.exe \
-	tests1.exe tests2.exe tuples.exe \
+PROGS = builtins.exe callch.exe chillvars.exe misc.exe result.exe \
+	string.exe tests1.exe tests2.exe tuples.exe \
 	pr-4975.exe pr-5016.exe pr-5020.exe pr-5022.exe pr-5646.exe \
 	pr-5984.exe pr-6292.exe pr-6632.exe pr-8136.exe pr-8405.exe
 

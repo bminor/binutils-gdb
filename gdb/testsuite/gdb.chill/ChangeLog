@@ -1,3 +1,7 @@
+Thu Dec  7 05:16:34 1995  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
+
+	* builtins.ch, builtins.exp, Makefile.in: New test case.
+
 Tue Dec  5 01:51:45 1995  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
 
 	* tests2.exp: Add compiling of the test case.
