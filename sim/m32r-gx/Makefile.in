@@ -57,7 +57,7 @@ SIM_OBJS = \
 SIM_EXTRA_DEPS = \
 	arch.h cpuall.h m32r-sim.h cpu-opc.h
 
-SIM_EXTRA_CFLAGS = -DSIM_GX=1
+SIM_EXTRA_CFLAGS = -DSIM_GX=1 -rdynamic
 SIM_EXTRA_ALL = gxtool
 SIM_EXTRA_INSTALL = install-gxtool
 SIM_RUN_OBJS = nrun.o
