@@ -1,5 +1,5 @@
 /* Parameters for target execution on an RS6000, for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
    Contributed by IBM Corporation.
 
 This file is part of GDB.
@@ -583,36 +583,6 @@ extern unsigned int rs6000_struct_return_address;
 
 #define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, using_gcc) \
 	fix_call_dummy(dummyname, pc, fun, nargs, type)
-
-
-/* Signal handler for SIGWINCH `window size changed'. */
-
-#define	SIGWINCH_HANDLER  aix_resizewindow
-extern	void	aix_resizewindow ();
-
-/* `lines_per_page' and `chars_per_line' are local to utils.c. Rectify this. */
-
-#define	SIGWINCH_HANDLER_BODY	\
-									\
-/* Respond to SIGWINCH `window size changed' signal, and reset GDB's	\
-   window settings approproatelt. */					\
-									\
-void 						\
-aix_resizewindow ()				\
-{						\
-  int fd = fileno (stdout);			\
-  if (isatty (fd)) {				\
-    int val;					\
-						\
-    val = atoi (termdef (fd, 'l'));		\
-    if (val > 0)				\
-      lines_per_page = val;			\
-    val = atoi (termdef (fd, 'c'));		\
-    if (val > 0)				\
-      chars_per_line = val;			\
-  }						\
-}
-
 
 /* Flag for machine-specific stuff in shared files.  FIXME */
 #define IBM6000_TARGET

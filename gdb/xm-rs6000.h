@@ -1,5 +1,5 @@
 /* Parameters for hosting on an RS6000, for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
    Contributed by IBM Corporation.
 
 This file is part of GDB.
@@ -41,9 +41,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	USG 1
 #define	HAVE_SIGSETMASK	1
 
-/* AIX declares the mem functions */
+/* AIX declares the mem functions differently than defs.h does.  AIX is
+   right, but defs.h works on more old systems.  For now, override it.  */
 
-#undef MEM_FNS_DECLARED
 #define MEM_FNS_DECLARED 1
 
 /* This system requires that we open a terminal with O_NOCTTY for it to
@@ -82,3 +82,31 @@ extern void free PARAMS ((void *));
 
 /* AIX doesn't have strdup, so we need to declare it for libiberty */
 extern char *strdup PARAMS ((char *));
+
+/* Signal handler for SIGWINCH `window size changed'. */
+
+#define	SIGWINCH_HANDLER  aix_resizewindow
+extern	void	aix_resizewindow ();
+
+/* `lines_per_page' and `chars_per_line' are local to utils.c. Rectify this. */
+
+#define	SIGWINCH_HANDLER_BODY	\
+									\
+/* Respond to SIGWINCH `window size changed' signal, and reset GDB's	\
+   window settings approproatelt. */					\
+									\
+void 						\
+aix_resizewindow ()				\
+{						\
+  int fd = fileno (stdout);			\
+  if (isatty (fd)) {				\
+    int val;					\
+						\
+    val = atoi (termdef (fd, 'l'));		\
+    if (val > 0)				\
+      lines_per_page = val;			\
+    val = atoi (termdef (fd, 'c'));		\
+    if (val > 0)				\
+      chars_per_line = val;			\
+  }						\
+}

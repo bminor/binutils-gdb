@@ -1,5 +1,15 @@
-Mon Feb  1 16:16:59 1993  Stu Grossman  (grossman at cygnus.com)
+Mon Feb  1 17:19:37 1993  John Gilmore  (gnu@cygnus.com)
 
+	* hp300ux-nat.c:  Update copyrights.
+	* mipsread.c (parse_partial_symbols):  Complain about block
+	indexes that go backwards.  Fix from Peter Schauer.
+	* symfile.c (syms_from_objfile, symbol_file_add):  Allow a
+	symbol-file that has no linkage symbols to be read.
+	* tm-rs6000.h, xm-rs6000.h: (SIGWINCH_HANDLER and friends):  Move
+	from tm- file to xm-file, since they're host dependent.
+	* valarith.c (value_binop):  Typo.
+
+Mon Feb  1 16:16:59 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* sparclite/aload.c:  Add copyleft.
 	* sparclite/crt0.s:  Add comment at beginning.

@@ -88,16 +88,6 @@ struct coff_exec {
 	struct external_aouthdr a;
 };
 
-/* These must match the corresponding definition in gcc/config/xm-mips.h.
-   At some point, these should probably go into a shared include file,
-   but currently gcc and gdb do not share any directories. */
-
-#define CODE_MASK 0x8F300
-#define MIPS_IS_STAB(sym) (((sym)->index & 0xFFF00) == CODE_MASK)
-#define MIPS_MARK_STAB(code) ((code)+CODE_MASK)
-#define MIPS_UNMARK_STAB(code) ((code)-CODE_MASK)
-#define STABS_SYMBOL "@stabs"
-
 /* Each partial symbol table entry contains a pointer to private data for the
    read_symtab() function to use when expanding a partial symbol table entry
    to a full symbol table entry.
@@ -131,6 +121,9 @@ struct complaint index_complaint =
 
 struct complaint aux_index_complaint =
 	{"bad proc end in aux found from symbol %s", 0, 0};
+
+struct complaint block_index_complaint =
+	{"bad aux index at block symbol %s", 0, 0};
 
 struct complaint unknown_ext_complaint =
 	{"unknown external symbol %s", 0, 0};
@@ -2105,7 +2098,14 @@ parse_partial_symbols (end_of_text_seg, objfile, section_offsets)
 					    psymtab_language, objfile);
 		    }
 		    /* Skip over the block */
-		    cur_sdx = sh->index;
+		    new_sdx = sh->index;
+		    if (new_sdx <= cur_sdx)
+		      {
+			/* This happens with the Ultrix kernel. */
+			complain (&block_index_complaint, name);
+			new_sdx = cur_sdx + 1;	/* Don't skip backward */
+		      }
+		    cur_sdx = new_sdx;
 		    continue;
 
 		  case stFile:			/* File headers */

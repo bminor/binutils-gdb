@@ -1,5 +1,5 @@
-/* HP/UX interface for HP 300's, for GDB when running under Unix.
-   Copyright (C) 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
+/* HP/UX native interface for HP 300's, for GDB when running under Unix.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
    
 This file is part of GDB.
 
