@@ -21,12 +21,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* FIXME: carlton/2002-09-24: because of namespace_enum, you have to
-   include symtab.h before including this file.  But I'm leaving in
-   opaque declarations as if that weren't true.  (Probably the
-   'namespace' argument to dict_lookup should eventually be moved back
-   into lookup_block_symbol, I think.)  */
-
 /* An opaque type for dictionaries; only dictionary.c should know
    about its innards.  */
 
@@ -37,7 +31,6 @@ struct dictionary;
 struct symbol;
 struct obstack;
 struct pending;
-struct block;
 
 
 /* The creation functions for various implementations of
@@ -73,33 +66,20 @@ extern struct dictionary *dict_create_linear (struct obstack *obstack,
 
 extern struct dictionary *dict_create_linear_expandable (void);
 
-#if 0
-
-/* Create a DICT_BLOCK dictionary pointing BLOCK.  */
-
-extern struct dictionary *
-dict_create_block (struct block *block);
-
-/* Create a DICT_BLOCK_EXPANDABLE dictionary pointing at BLOCK.  */
-
-extern struct dictionary *
-dict_create_block_expandable (struct block *block);
-
-#endif
-
 
 /* The functions providing the interface to dictionaries.  */
 
-/* Search DICT for symbol NAME in NAMESPACE.
+/* Search DICT for symbol whose SYMBOL_BEST_NAME is NAME, as tested
+   using strcmp_iw.  Returns NULL if there is no such symbol.  If
+   there might be multiple such symbols, use dict_iter_name_first and
+   dict_iter_name_next.  */
 
-   If MANGLED_NAME is non-NULL, verify that any symbol we find has this
-   particular mangled name.
-*/
+/* FIXME: carlton/2002-09-26: Given the presence of
+   dict_iter_name_first and dict_iter_name_next, should this function
+   go away?  Currently, it's never called.  */
 
 extern struct symbol *dict_lookup (const struct dictionary *dict,
-				   const char *name,
-				   const char *mangled_name,
-				   const namespace_enum namespace);
+				   const char *name);
 
 /* Free the memory used by a dictionary that's not on an obstack.  (If
    any.)  */
@@ -113,15 +93,6 @@ extern void dict_add_symbol (struct dictionary *dict, struct symbol *sym);
 /* Is the dictionary empty?  */
 
 extern int dict_empty (struct dictionary *dict);
-
-#if 0
-
-/* Special case.  */
-
-extern struct block *dict_add_symbol_block (struct dictionary *dict,
-					    struct symbol *sym);
-
-#endif
 
 /* A type containing data that is used when iterating over all symbols
    in a dictionary.  */
@@ -156,6 +127,26 @@ extern struct symbol *dict_iterator_first (const struct dictionary *dict,
    iteration.  */
 
 extern struct symbol *dict_iterator_next (struct dict_iterator *iterator);
+
+/* Initialize ITERATOR to point at the first symbol in DICT whose
+   SYMBOL_BEST_NAME is NAME (as tested using strcmp_iw), and return
+   that first symbol, or NULL if there are no such symbols.  */
+
+extern struct symbol *dict_iter_name_first (const struct dictionary *dict,
+					    const char *name,
+					    struct dict_iterator *iterator);
+
+/* Advance ITERATOR to point at the next symbol in DICT whose
+   SYMBOL_BEST_NAME is NAME (as tested using strcmp_iw), or NULL if
+   there are no more such symbols.  Don't call this if you've
+   previously received NULL from dict_iterator_first or
+   dict_iterator_next on this iteration.  And don't call it unless
+   ITERATOR was created by a previous call to dict_iter_name_first
+   with the same NAME.  */
+
+extern struct symbol *dict_iter_name_next (const char *name,
+					   struct dict_iterator *iterator);
+
 
 /* Macro to loop through all symbols in a dictionary DICT, in no
    particular order.  ITER is a struct dict_iterator (NOTE: __not__ a

@@ -106,13 +106,6 @@ enum dict_type
     DICT_LINEAR,
     /* Symbols are stored in an expandable array.  */
     DICT_LINEAR_EXPANDABLE,
-#if 0
-    /* Symbols are stored in a fixed-size block.  */
-    DICT_BLOCK,
-    /* Symbols are stored in an expandable block.  */
-    DICT_BLOCK_EXPANDABLE,
-    
-#endif
   };
 
 /* The virtual function table.  */
@@ -126,14 +119,17 @@ struct dict_vtbl
   void (*free) (struct dictionary *dict);
   /* The symbol lookup function.  */
   struct symbol *(*lookup) (const struct dictionary *dict,
-			    const char *name,
-			    const char *mangled_name,
-			    const namespace_enum namespace);
+			    const char *name);
   /* Iterator functions.  */
   struct symbol *(*iterator_first) (const struct dictionary *dict,
 				    struct dict_iterator *iterator);
   struct symbol *(*iterator_next) (struct dict_iterator *iterator);
   void (*add_symbol) (struct dictionary *dict, struct symbol *sym);
+  struct symbol *(*iter_name_first) (const struct dictionary *dict,
+				     const char *name,
+				     struct dict_iterator *iterator);
+  struct symbol *(*iter_name_next) (const char *name,
+				    struct dict_iterator *iterator);
 };
 
 /* Now comes the structs used to store the data for different
@@ -166,19 +162,6 @@ struct dictionary_linear_expandable
   int capacity;
 };
 
-#if 0
-struct dictionary_block
-{
-  struct block *block;
-};
-
-struct dictionary_block_expandable
-{
-  struct block *block;
-  unsigned int capacity;
-};
-#endif
-
 /* And now, the star of our show.  */
 
 struct dictionary
@@ -189,10 +172,6 @@ struct dictionary
     struct dictionary_hashed hashed;
     struct dictionary_linear linear;
     struct dictionary_linear_expandable linear_expandable;
-#if 0
-    struct dictionary_block block;
-    struct dictionary_block_expandable block_expandable;
-#endif
   }
   data;
 };
@@ -214,23 +193,9 @@ struct dictionary
 #define DICT_LINEAR_EXPANDABLE_CAPACITY(d) \
 		(d)->data.linear_expandable.capacity
 
-#if 0
-/* This can be used for DICT_BLOCK_EXPANDABLES, too.  */
-
-#define DICT_BLOCK_BLOCK(d)		(d)->data.block.block
-
-#define DICT_BLOCK_EXPANDABLE_CAPACITY(d) (d)->data.block_expandable.capacity
-
-#endif
 /* The initial size of a DICT_LINEAR_EXPANDABLE dictionary.  */
 
 #define DICT_LINEAR_EXPANDABLE_INITIAL_CAPACITY 10
-
-#if 0
-#define DICT_BLOCK_EXPANDABLE_INITIAL_CAPACITY \
-		DICT_LINEAR_EXPANDABLE_INITIAL_CAPACITY
-
-#endif
 
 /* This calculates the number of buckets we'll use in a hashtable,
    given the number of symbols that it will contain.  */
@@ -255,11 +220,6 @@ struct dictionary
 
 static struct symbol *iterator_hashed_advance (struct dict_iterator *iter);
 
-#if 0
-static struct symbol *iterator_block_hashed_advance (struct dict_iterator
-						     *iter);
-#endif
-
 /* Declarations of functions for vtbls.  */
 
 /* Functions that might work across a range of dictionary types.  */
@@ -272,27 +232,38 @@ static void free_obstack (struct dictionary *dict);
 /* Functions for DICT_HASHED dictionaries.  */
 
 static struct symbol *lookup_hashed (const struct dictionary *dict,
-				     const char *name,
-				     const char *mangled_name,
-				     const namespace_enum namespace);
+				     const char *name);
 
 static struct symbol *iterator_first_hashed (const struct dictionary *dict,
 					     struct dict_iterator *iterator);
 
 static struct symbol *iterator_next_hashed (struct dict_iterator *iterator);
 
+static struct symbol *iter_name_first_hashed (const struct dictionary *dict,
+					      const char *name,
+					      struct dict_iterator *iterator);
+
+static struct symbol *iter_name_next_hashed (const char *name,
+					     struct dict_iterator *iterator);
+
 /* Functions for DICT_LINEAR and DICT_LINEAR_EXPANDABLE
    dictionaries.  */
 
 static struct symbol *lookup_linear (const struct dictionary *dict,
-				     const char *name,
-				     const char *mangled_name,
-				     const namespace_enum namespace);
+				     const char *name);
 
 static struct symbol *iterator_first_linear (const struct dictionary *dict,
 					     struct dict_iterator *iterator);
 
 static struct symbol *iterator_next_linear (struct dict_iterator *iterator);
+
+static struct symbol *iter_name_first_linear (const struct dictionary *dict,
+					      const char *name,
+					      struct dict_iterator *iterator);
+
+static struct symbol *iter_name_next_linear (const char *name,
+					     struct dict_iterator *iterator);
+
 
 /* Functions only for DICT_LINEAR_EXPANDABLE.  */
 
@@ -301,58 +272,29 @@ static void free_linear_expandable (struct dictionary *dict);
 static void add_symbol_linear_expandable (struct dictionary *dict,
 					  struct symbol *sym);
 
-#if 0
-/* Functions for blocks.  */
-
-static struct symbol *lookup_block (const struct dictionary *dict,
-				    const char *name,
-				    const char *mangled_name,
-				    const namespace_enum namespace);
-
-
-static void free_block(struct dictionary *dict);
-
-static struct symbol *iterator_first_block (const struct dictionary *dict,
-					    struct dict_iterator *iterator);
-
-static struct symbol *iterator_next_block (struct dict_iterator *iterator);
-
-#endif
-
 /* Various vtbls that we'll actually use.  */
 
 static const struct dict_vtbl dict_hashed_vtbl =
   {
     DICT_HASHED, free_obstack, lookup_hashed, iterator_first_hashed,
-    iterator_next_hashed, add_symbol_nonexpandable,
+    iterator_next_hashed, add_symbol_nonexpandable, iter_name_first_hashed,
+    iter_name_next_hashed,
   };
 
 static const struct dict_vtbl dict_linear_vtbl =
   {
     DICT_LINEAR, free_obstack, lookup_linear, iterator_first_linear,
-    iterator_next_linear, add_symbol_nonexpandable,
+    iterator_next_linear, add_symbol_nonexpandable, iter_name_first_linear,
+    iter_name_next_linear,
   };
 
 static const struct dict_vtbl dict_linear_expandable_vtbl =
   {
     DICT_LINEAR_EXPANDABLE, free_linear_expandable, lookup_linear,
     iterator_first_linear, iterator_next_linear,
-    add_symbol_linear_expandable,
+    add_symbol_linear_expandable, iter_name_first_linear,
+    iter_name_next_linear,
   };
-
-#if 0
-static const struct dict_vtbl dict_block_vtbl =
-  {
-    DICT_BLOCK, free_block, lookup_block, iterator_first_block,
-    iterator_next_block, add_symbol_nonexpandable,
-  };
-
-static const struct dict_vtbl dict_block_expandable_vtbl =
-  {
-    DICT_BLOCK_EXPANDABLE, free_block, lookup_block, iterator_first_block,
-    iterator_next_block, add_symbol_nonexpandable,
-  };
-#endif
 
 /* The creation functions.  */
 
@@ -394,10 +336,7 @@ dict_create_hashed (struct obstack *obstack,
 	{
 	  struct symbol *sym = list_counter->symbol[i];
 	  unsigned int hash_index;
-	  const char *name = SYMBOL_DEMANGLED_NAME (sym);
-	  if (name == NULL)
-	    name = SYMBOL_NAME (sym);
-	  hash_index = msymbol_hash_iw (name) % nbuckets;
+	  hash_index = msymbol_hash_iw (SYMBOL_BEST_NAME (sym)) % nbuckets;
 	  sym->hash_next = buckets[hash_index];
 	  buckets[hash_index] = sym;
 	}
@@ -479,37 +418,6 @@ dict_create_linear_expandable (void)
   return retval;
 }
 
-#if 0
-/* Allocate a dictionary in which symbol lookup is implemented via
-   BLOCK.  Needs to be freed by dict_free; I won't worry about that,
-   however, since this will go away soon.  */
-
-struct dictionary *
-dict_create_block (struct block *block)
-{
-  struct dictionary *retval = xmalloc (sizeof (struct dictionary));
-
-  DICT_VTBL (retval) = &dict_block_vtbl;
-  DICT_BLOCK_BLOCK (retval) = block;
-
-  return retval;
-}
-
-struct dictionary *
-dict_create_block_expandable (struct block *block)
-{
-  struct dictionary *retval = xmalloc (sizeof (struct dictionary));
-
-  DICT_VTBL (retval) = &dict_block_expandable_vtbl;
-  DICT_BLOCK_BLOCK (retval) = block;
-  /* We'll resize the block the first time we add a symbol to it.  */
-  DICT_BLOCK_EXPANDABLE_CAPACITY (retval) = 0;
-
-  return retval;
-}
-
-#endif
-
 /* The functions providing the dictionary interface.  */
 
 /* Free the memory used by a dictionary that's not on an obstack.  (If
@@ -532,11 +440,9 @@ dict_free (struct dictionary *dict)
 
 struct symbol *
 dict_lookup (const struct dictionary *dict,
-	     const char *name,
-	     const char *mangled_name,
-	     const namespace_enum namespace)
+	     const char *name)
 {
-  return (DICT_VTBL (dict))->lookup (dict, name, mangled_name, namespace);
+  return (DICT_VTBL (dict))->lookup (dict, name);
 }
 
 /* Initialize ITERATOR to point at the first symbol in DICT, and
@@ -563,7 +469,7 @@ dict_iterator_next (struct dict_iterator *iterator)
    it's easy enough to do generically and doesn't get called a
    lot.  */
 
-extern int
+int
 dict_empty (struct dictionary *dict)
 {
   struct dict_iterator iter;
@@ -573,11 +479,27 @@ dict_empty (struct dictionary *dict)
 
 /* Add SYM to DICT.  DICT had better be expandable.  */
 
-extern void
+void
 dict_add_symbol (struct dictionary *dict, struct symbol *sym)
 {
   (DICT_VTBL (dict))->add_symbol (dict, sym);
 }
+
+struct symbol *
+dict_iter_name_first (const struct dictionary *dict,
+		      const char *name,
+		      struct dict_iterator *iterator)
+{
+  return (DICT_VTBL (dict))->iter_name_first (dict, name, iterator);
+}
+
+struct symbol *
+dict_iter_name_next (const char *name, struct dict_iterator *iterator)
+{
+  return (DICT_VTBL (DICT_ITERATOR_DICT (iterator)))
+    ->iter_name_next (name, iterator);
+}
+ 
 
 
 /* The functions implementing the dictionary interface.  */
@@ -601,9 +523,7 @@ add_symbol_nonexpandable (struct dictionary *dict, struct symbol *sym)
 
 static struct symbol *
 lookup_hashed (const struct dictionary *dict,
-	       const char *name,
-	       const char *mangled_name,
-	       const namespace_enum namespace)
+	       const char *name)
 {
   unsigned int hash_index
     = msymbol_hash_iw (name) % DICT_HASHED_NBUCKETS (dict);
@@ -613,10 +533,8 @@ lookup_hashed (const struct dictionary *dict,
        sym;
        sym = sym->hash_next)
     {
-      if (SYMBOL_NAMESPACE (sym) == namespace
-	  && (mangled_name
-	      ? strcmp (SYMBOL_NAME (sym), mangled_name) == 0
-	      : SYMBOL_MATCHES_NAME (sym, name)))
+      /* Warning: the order of arguments to strcmp_iw matters!  */
+      if (strcmp_iw (SYMBOL_BEST_NAME (sym), name) == 0)
 	return sym;
     }
   
@@ -638,8 +556,9 @@ iterator_next_hashed (struct dict_iterator *iterator)
   const struct dictionary *dict = DICT_ITERATOR_DICT (iterator);
   struct symbol *next;
 
-  /* FIXME: carlton/2002-09-23: Should I assert that
-     DICT_ITERATOR_CURRENT (iterator) != NULL?  */
+  /* FIXME: carlton/2002-09-23: Should I gdb_assert that
+     DICT_ITERATOR_CURRENT (iterator) != NULL?  (Ditto for
+     iter_name_next_hashed.)  */
   next = DICT_ITERATOR_CURRENT (iterator)->hash_next;
   
   if (next == NULL)
@@ -673,97 +592,45 @@ iterator_hashed_advance (struct dict_iterator *iterator)
   return NULL;
 }
 
+static struct symbol *
+iter_name_first_hashed (const struct dictionary *dict,
+			const char *name,
+			struct dict_iterator *iterator)
+{
+  DICT_ITERATOR_DICT (iterator) = dict;
+  DICT_ITERATOR_CURRENT (iterator) = lookup_hashed (dict, name);
+
+  return DICT_ITERATOR_CURRENT (iterator);
+}
+
+static struct symbol *
+iter_name_next_hashed (const char *name, struct dict_iterator *iterator)
+{
+  struct symbol *next;
+
+  for (next = DICT_ITERATOR_CURRENT (iterator)->hash_next;
+       next; next = next->hash_next)
+    {
+      if (strcmp_iw (SYMBOL_BEST_NAME (next), name) == 0)
+	break;
+    }
+
+  DICT_ITERATOR_CURRENT (iterator) = next;
+
+  return next;
+}
+
 /* Functions for DICT_LINEAR and DICT_LINEAR_EXPANDABLE.  */
 
 static struct symbol *
-lookup_linear (const struct dictionary *dict,
-	       const char *name,
-	       const char *mangled_name,
-	       const namespace_enum namespace)
+lookup_linear (const struct dictionary *dict, const char *name)
 {
-  /* More or less copied from lookup_block_symbol() in symtab.c,
-     including the comments.  */
+  /* NOTE: carlton/2002-09-26: I don't expect this to get called much,
+     so let's just use iter_name_first_linear.  */
 
-  int i, nsyms = DICT_LINEAR_NSYMS (dict);
-  struct symbol *sym, *sym_found = NULL;
-  
-  for (i = 0; i < nsyms; ++i)
-    {
-      sym = DICT_LINEAR_SYM (dict, i);
+  struct dict_iterator iter;
 
-      /* NOTE: carlton/2002-09-24: I copied the following comment here
-	 from the sorted linear symbol case of lookup_block_symbol.
-	 But Jim Blandy complained, and said it didn't belong in the
-	 non-sorted case.  (Understandable, since it refers to
-	 sorting!)  I wish I understood exactly what its purpose
-	 had been.  */
-
-      /* If there is more than one symbol with the right name and
-	 namespace, we return the first one; I believe it is now
-	 impossible for us to encounter two symbols with the same name
-	 and namespace here, because blocks containing argument
-	 symbols are no longer sorted.  The exception is for C++,
-	 where multiple functions (cloned constructors / destructors,
-	 in particular) can have the same demangled name.  So if we
-	 have a particular mangled name to match, try to do so.  */
-      if (SYMBOL_NAMESPACE (sym) == namespace
-	  && (mangled_name
-	      ? strcmp (SYMBOL_NAME (sym), mangled_name) == 0
-	      : SYMBOL_MATCHES_NAME (sym, name)))
-	{
-
-#if 0
-	  /* FIXME: carlton/2002-09-11: According to
-	     <http://sources.redhat.com/ml/gdb/2002-03/msg00232.html>,
-	     the SYMBOL_ALIASES stuff is unused, and it makes the code
-	     messier, so I'm #if'ing it out here.  */
-
-	  /* If SYM has aliases, then use any alias that is active at
-	     the current PC.  If no alias is active at the current PC,
-	     then use the main symbol.
-	     
-	     ?!? Is checking the current pc correct?  Is this routine
-	     ever called to look up a symbol from another context?
-		   
-	     FIXME: No, it's not correct.  If someone sets a
-	     conditional breakpoint at an address, then the
-	     breakpoint's `struct expression' should refer to the
-	     `struct symbol' appropriate for the breakpoint's address,
-	     which may not be the PC.
-		   
-	     Even if it were never called from another context, it's
-	     totally bizarre for lookup_symbol's behavior to depend on
-	     the value of the inferior's current PC.  We should pass
-	     in the appropriate PC as well as the block.  The
-	     interface to lookup_symbol should change to require the
-	     caller to provide a PC.  */
-
-	  if (SYMBOL_ALIASES (sym))
-	    sym = find_active_alias (sym, read_pc ());
-#endif /* 0 */
-	  /* NOTE: carlton/2002-09-11: I wish I understood exactly the
-	     situations where this next bit is important.  Sigh.  */
-		
-	  /* Note that parameter symbols do not always show up last in
-	     the list; this loop makes sure to take anything else
-	     other than parameter symbols first; it only uses
-	     parameter symbols as a last resort.  Note that this only
-	     takes up extra computation time on a match.  */
-
-	  sym_found = sym;
-	  if (SYMBOL_CLASS (sym) != LOC_ARG &&
-	      SYMBOL_CLASS (sym) != LOC_LOCAL_ARG &&
-	      SYMBOL_CLASS (sym) != LOC_REF_ARG &&
-	      SYMBOL_CLASS (sym) != LOC_REGPARM &&
-	      SYMBOL_CLASS (sym) != LOC_REGPARM_ADDR &&
-	      SYMBOL_CLASS (sym) != LOC_BASEREG_ARG)
-	    {
-	      break;
-	    }
-	}
-    }
-  
-  return (sym_found);		/* Will be NULL if not found. */
+  return iter_name_first_linear (dict, name, &iter);
 }
 
 static struct symbol *
@@ -784,6 +651,39 @@ iterator_next_linear (struct dict_iterator *iterator)
     return NULL;
   else
     return DICT_LINEAR_SYM (dict, DICT_ITERATOR_INDEX (iterator));
+}
+
+static struct symbol *
+iter_name_first_linear (const struct dictionary *dict,
+			const char *name,
+			struct dict_iterator *iterator)
+{
+  DICT_ITERATOR_DICT (iterator) = dict;
+  DICT_ITERATOR_INDEX (iterator) = -1;
+
+  return iter_name_next_linear (name, iterator);
+}
+
+static struct symbol *
+iter_name_next_linear (const char *name, struct dict_iterator *iterator)
+{
+  const struct dictionary *dict = DICT_ITERATOR_DICT (iterator);
+  int i, nsyms = DICT_LINEAR_NSYMS (dict);
+  struct symbol *sym, *retval = NULL;
+
+  for (i = DICT_ITERATOR_INDEX (iterator) + 1; i < nsyms; ++i)
+    {
+      sym = DICT_LINEAR_SYM (dict, i);
+      if (strcmp_iw (SYMBOL_BEST_NAME (sym), name) == 0)
+	{
+	  retval = sym;
+	  break;
+	}
+    }
+
+  DICT_ITERATOR_INDEX (iterator) = i;
+  
+  return retval;
 }
 
 /* Functions only for DICT_LINEAR_EXPANDABLE.  */
@@ -813,220 +713,3 @@ add_symbol_linear_expandable (struct dictionary *dict,
 
   DICT_LINEAR_SYM (dict, nsyms - 1) = sym;
 }
-
-
-#if 0
-
-/* Functions for DICT_BLOCK and DICT_BLOCK_EXPANDABLE.  */
-
-static void
-free_block (struct dictionary *dict)
-{
-  xfree (dict);
-}
-
-static struct symbol *
-lookup_block (const struct dictionary *dict,
-	      const char *name,
-	      const char *mangled_name,
-	      const namespace_enum namespace)
-{
-  struct block *block = DICT_BLOCK_BLOCK (dict);
-  register int bot, top;
-  register struct symbol *sym;
-  register struct symbol *sym_found = NULL;
-
-  if (BLOCK_HASHTABLE (block))
-    {
-      unsigned int hash_index;
-      hash_index = msymbol_hash_iw (name);
-      hash_index = hash_index % BLOCK_BUCKETS (block);
-      for (sym = BLOCK_BUCKET (block, hash_index); sym; sym = sym->hash_next)
-	{
-	  if (SYMBOL_NAMESPACE (sym) == namespace 
-	      && (mangled_name
-		  ? strcmp (SYMBOL_NAME (sym), mangled_name) == 0
-		  : SYMBOL_MATCHES_NAME (sym, name)))
-	    return sym;
-	}
-      return NULL;
-    }
-  else
-    {
-      /* Note that parameter symbols do not always show up last in the
-	 list.  This loop makes sure to take anything else other than
-	 parameter symbols first; it only uses parameter symbols as a
-	 last resort.  Note that this only takes up extra computation
-	 time on a match.  */
-      top = BLOCK_NSYMS (block);
-      bot = 0;
-      while (bot < top)
-	{
-	  sym = BLOCK_SYM (block, bot);
-	  /* If there is more than one symbol with the right name and
-	     namespace, we return the first one; I believe it is now
-	     impossible for us to encounter two symbols with the same
-	     name and namespace here, because blocks containing
-	     argument symbols are no longer sorted.  The exception is
-	     for C++, where multiple functions (cloned constructors /
-	     destructors, in particular) can have the same demangled
-	     name.  So if we have a particular mangled name to match,
-	     try to do so.  */
-	  if (SYMBOL_NAMESPACE (sym) == namespace
-	      && (mangled_name
-		  ? strcmp (SYMBOL_NAME (sym), mangled_name) == 0
-		  : SYMBOL_MATCHES_NAME (sym, name)))
-	    {
-#if 0
-	      /* FIXME: carlton/2002-09-11: According to
-		 <http://sources.redhat.com/ml/gdb/2002-03/msg00232.html>,
-		 the SYMBOL_ALIASES stuff is unused, and it makes
-		 the code messier, so I'm #if'ing it out here.  */
-
-	      /* If SYM has aliases, then use any alias that is active
-	         at the current PC.  If no alias is active at the current
-	         PC, then use the main symbol.
-
-	         ?!? Is checking the current pc correct?  Is this routine
-	         ever called to look up a symbol from another context?
-
-		 FIXME: No, it's not correct.  If someone sets a
-		 conditional breakpoint at an address, then the
-		 breakpoint's `struct expression' should refer to the
-		 `struct symbol' appropriate for the breakpoint's
-		 address, which may not be the PC.
-
-		 Even if it were never called from another context,
-		 it's totally bizarre for lookup_symbol's behavior to
-		 depend on the value of the inferior's current PC.  We
-		 should pass in the appropriate PC as well as the
-		 block.  The interface to lookup_symbol should change
-		 to require the caller to provide a PC.  */
-
-	      if (SYMBOL_ALIASES (sym))
-		sym = find_active_alias (sym, read_pc ());
-#endif /* 0 */
-
-	      sym_found = sym;
-	      if (SYMBOL_CLASS (sym) != LOC_ARG &&
-		  SYMBOL_CLASS (sym) != LOC_LOCAL_ARG &&
-		  SYMBOL_CLASS (sym) != LOC_REF_ARG &&
-		  SYMBOL_CLASS (sym) != LOC_REGPARM &&
-		  SYMBOL_CLASS (sym) != LOC_REGPARM_ADDR &&
-		  SYMBOL_CLASS (sym) != LOC_BASEREG_ARG)
-		{
-		  break;
-		}
-	    }
-	  bot++;
-	}
-      return (sym_found);		/* Will be NULL if not found. */
-    }  
-}
-
-static struct symbol *
-iterator_first_block (const struct dictionary *dict,
-		      struct dict_iterator *iterator)
-{
-  struct block *block = DICT_BLOCK_BLOCK (dict);
-
-  DICT_ITERATOR_DICT (iterator) = dict;
-	
-  if (BLOCK_HASHTABLE (block))
-    {
-      DICT_ITERATOR_INDEX (iterator) = -1;
-      return iterator_block_hashed_advance (iterator);
-    }
-  else
-    {
-      DICT_ITERATOR_INDEX (iterator) = 0;
-      return BLOCK_NSYMS (block) ? BLOCK_SYM (block, 0) : NULL;
-    }
-}
-
-static struct symbol *
-iterator_next_block (struct dict_iterator *iterator)
-{
-  const struct dictionary *dict = DICT_ITERATOR_DICT (iterator);
-  struct block *block = DICT_BLOCK_BLOCK (dict);
-	
-  if (BLOCK_HASHTABLE (block))
-    {
-      struct symbol *next = DICT_ITERATOR_CURRENT (iterator)->hash_next;
-	    
-      if (next == NULL)
-	return iterator_block_hashed_advance (iterator);
-      else
-	{
-	  DICT_ITERATOR_CURRENT (iterator) = next;
-	  return next;
-	}
-    }
-  else
-    {
-      if (++(DICT_ITERATOR_INDEX (iterator)) >= BLOCK_NSYMS (block))
-	return NULL;
-      else
-	return BLOCK_SYM (block, DICT_ITERATOR_INDEX (iterator));
-    }
-}
-
-/* A helper function for iterator_first_block and
-   iterator_first_block_next_block.  Search for the next nonempty
-   bucket; update iterator accordingly, and return it.  */
-
-static struct symbol *
-iterator_block_hashed_advance (struct dict_iterator *iterator)
-{
-  struct block *block =
-    DICT_BLOCK_BLOCK (DICT_ITERATOR_DICT (iterator));
-  int nbuckets = BLOCK_BUCKETS (block);
-  int i;
-
-  for (i = DICT_ITERATOR_INDEX (iterator) + 1; i < nbuckets; ++i)
-    {
-      struct symbol *sym = BLOCK_BUCKET (block, i);
-      
-      if (sym != NULL)
-	{
-	  DICT_ITERATOR_INDEX (iterator) = i;
-	  DICT_ITERATOR_CURRENT (iterator) = sym;
-	  return sym;
-	}
-    }
-
-  return NULL;
-}
-
-/* A special-case function for DICT_BLOCK_EXPANDABLE.  */
-
-/* FIXME: carlton/2002-09-20: But some callers use xmmalloc!!!
-   Crap.  */
-
-struct block *
-dict_add_symbol_block (struct dictionary *dict, struct symbol *sym)
-{
-  gdb_assert ((DICT_VTBL (dict))->type == DICT_BLOCK_EXPANDABLE);
-
-  struct block *block = DICT_BLOCK_BLOCK (dict);
-
-  if (++BLOCK_NSYMS (block) > DICT_BLOCK_EXPANDABLE_CAPACITY (dict))
-    {
-      if (DICT_BLOCK_EXPANDABLE_CAPACITY (dict))
-	DICT_BLOCK_EXPANDABLE_CAPACITY (dict) *= 2;
-      else
-	DICT_BLOCK_EXPANDABLE_CAPACITY (dict)
-	  = DICT_BLOCK_EXPANDABLE_INITIAL_CAPACITY;
-
-      block = xrealloc (block,
-			sizeof (struct block)
-			+ ((DICT_BLOCK_EXPANDABLE_CAPACITY (dict) -1)
-			   * sizeof (struct symbol)));
-      DICT_BLOCK_BLOCK (dict) = block;
-    }
-
-  BLOCK_SYM (block, BLOCK_NSYMS (block) - 1) = sym;
-
-  return block;
-}
-#endif

@@ -175,6 +175,20 @@ extern void symbol_init_demangled_name (struct general_symbol_info *symbol,
      /* OBSOLETE ? SYMBOL_CHILL_DEMANGLED_NAME (symbol) */		\
      NULL)
 
+/* Macro that returns the demangled name of the symbol if if possible
+   and the symbol name if not possible.  This is like
+   SYMBOL_SOURCE_NAME except that it doesn't depend on the value of
+   'demangle' (and is hence more suitable for internal usage).  The
+   result should never be NULL.  */
+
+/* FIXME: carlton/2002-09-26: Probably the situation with this and
+   SYMBOL_SOURCE_NAME should be rethought.  */
+
+#define SYMBOL_BEST_NAME(symbol)					\
+  (SYMBOL_DEMANGLED_NAME (symbol) != NULL				\
+   ? SYMBOL_DEMANGLED_NAME (symbol)					\
+   : SYMBOL_NAME (symbol))
+
 /* OBSOLETE #define SYMBOL_CHILL_DEMANGLED_NAME(symbol) */
 /* OBSOLETE (symbol)->ginfo.language_specific.chill_specific.demangled_name */
 
@@ -183,10 +197,11 @@ extern void symbol_init_demangled_name (struct general_symbol_info *symbol,
    of the name if demangle is off.  In other languages this is just the
    symbol name.  The result should never be NULL. */
 
+/* NOTE: carlton/2002-09-26: For external use only; in many
+   situations, SYMBOL_BEST_NAME is more appropriate.  */
+
 #define SYMBOL_SOURCE_NAME(symbol)					\
-  (demangle && SYMBOL_DEMANGLED_NAME (symbol) != NULL			\
-   ? SYMBOL_DEMANGLED_NAME (symbol)					\
-   : SYMBOL_NAME (symbol))
+  (demangle ? SYMBOL_BEST_NAME (symbol) : SYMBOL_NAME (symbol))
 
 /* Macro that returns the "natural assembly name" of a symbol.  In C++ this is
    the "mangled" form of the name if demangle is off, or if demangle is on and
@@ -195,8 +210,7 @@ extern void symbol_init_demangled_name (struct general_symbol_info *symbol,
    never be NULL. */
 
 #define SYMBOL_LINKAGE_NAME(symbol)					\
-  (demangle && asm_demangle && SYMBOL_DEMANGLED_NAME (symbol) != NULL	\
-   ? SYMBOL_DEMANGLED_NAME (symbol)					\
+  (demangle && asm_demangle ? SYMBOL_BEST_NAME (symbol)			\
    : SYMBOL_NAME (symbol))
 
 /* Macro that tests a symbol for a match against a specified name string.
@@ -205,6 +219,12 @@ extern void symbol_init_demangled_name (struct general_symbol_info *symbol,
    match a C++ encoded name, so that "foo::bar(int,long)" is the same as
    "foo :: bar (int, long)".
    Evaluates to zero if the match fails, or nonzero if it succeeds. */
+
+/* FIXME: carlton/2002-09-26: Should these two be rewritten to always
+   match against SYMBOL_BEST_NAME (symbol) instead?  Or should there
+   be separate SYMBOL_BMATCHES_BEST_NAME and
+   SYMBOL_MATCHES_BEST_REGEXP macros?  I'm worried about false
+   positive matches against mangled names.  */
 
 #define SYMBOL_MATCHES_NAME(symbol, name)				\
   (STREQ (SYMBOL_NAME (symbol), (name))					\

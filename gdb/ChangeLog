@@ -1,3 +1,33 @@
+2002-09-26  David Carlton  <carlton@math.stanford.edu>
+
+	* dictionary.c (dict_iter_name_first): New function.
+	(dict_iter_name_next): New function.
+	Initialize new members of dict_hashed_vtbl, dict_linear_vtbl, and
+	dict_linear_expandable_vtbl.
+	(iter_name_first_hashed): New function.
+	(iter_name_next_hashed): New function.
+	(iter_name_first_linear): New function.
+	(iter_name_next_linear): New function.
+	(lookup_hashed): Rewrite following new declaration/semantics.
+	(lookup_linear): Ditto.
+	(dict_lookup): Ditto.
+	* symtab.c (lookup_block_symbol): Rewrite to use
+	dict_iter_name_first and dict_iter_name_next instead of
+	dict_lookup.
+	* dictionary.c (struct dict_vtbl): Change member 'lookup'; new
+	members 'iter_name_first' and 'iter_name_next'.
+	* dictionary.h: Delete all traces of block stuff.
+	Change declaration for dict_lookup; new declarations
+	dict_iter_name_first and dict_iter_name_next.
+	* dictionary.c: Delete all traces of block stuff.
+	* symtab.h (SYMBOL_BEST_NAME): New macro.
+	(SYMBOL_SOURCE_NAME): Rewrite in terms of SYMBOL_BEST_NAME.
+	(SYMBOL_LINKAGE_NAME): Ditto.
+	Comment questioning SYMBOL_MATCHES_NAME and
+	SYMBOL_MATCHES_REGEXP.
+	* Makefile.in (ns32knbsd-tdep.o): Depend on gdb_string_h.
+	* ns32knbsd-tdep.c: #include "gdb_string.h"
+
 2002-09-25  David Carlton  <carlton@math.stanford.edu>
 
 	* dictionary.c: Commented what needs to be done to add stuff to
