@@ -1875,6 +1875,43 @@ Convert the value of register @var{reg} from its virtual form to its raw
 form.
 @xref{Target Architecture Definition, , Using Different Register and Memory Data Representations}.
 
+@item RETURN_VALUE_ON_STACK(@var{type})
+@findex RETURN_VALUE_ON_STACK
+@cindex returning structures by value
+@cindex structures, returning by value
+
+Return non-zero if values of type TYPE are returned on the stack, using
+the ``struct convention'' (i.e., the caller provides a pointer to a
+buffer in which the callee should store the return value).  This
+controls how the @samp{finish} command finds a function's return value,
+and whether an inferior function call reserves space on the stack for
+the return value.
+
+The full logic @value{GDBN} uses here is kind of odd.  
+@itemize @bullet
+
+@item
+If the type being returned by value is not a structure, union, or array,
+and @code{RETURN_VALUE_ON_STACK} returns zero, then @value{GDBN}
+concludes the value is not returned using the struct convention.
+
+@item
+Otherwise, @value{GDBN} calls @code{USE_STRUCT_CONVENTION} (see below).
+If that returns non-zero, @value{GDBN} assumes the struct convention is
+in use.
+
+@end itemize
+
+In other words, to indicate that a given type is returned by value using
+the struct convention, that type must be either a struct, union, array,
+or something @code{RETURN_VALUE_ON_STACK} likes, @emph{and} something
+that @code{USE_STRUCT_CONVENTION} likes.
+
+Note that, in C and C++, arrays are never returned by value.  In those
+languages, these predicates will always see a pointer type, never an
+array type.  All the references above to arrays being returned by value
+apply only to other languages.
+
 @item SOFTWARE_SINGLE_STEP_P
 Define this as 1 if the target does not have a hardware single-step
 mechanism. The macro @code{SOFTWARE_SINGLE_STEP} must also be defined.
