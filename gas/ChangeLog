@@ -9,7 +9,7 @@
 	symbols.
 	* config/tc-crx.h: Likewise.
 
- 2004-07-26  H.J. Lu  <hongjiu.lu@intel.com>
+2004-07-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-ia64.c (start_unwind_section): Set the linked-to
 	section.
