@@ -73,8 +73,9 @@ send_gdb "break marker1\n" ; gdb_expect -re ".*$gdb_prompt $"
         -re "Break.* marker1 \\(\\) at .*:$decimal.*$gdb_prompt $" {
             send_gdb "up\n"
             gdb_expect {
-                -re ".*$gdb_prompt $" { pass "up from marker1" }
-                timeout { fail "up from marker1" }
+                -re ".*main.*$gdb_prompt $" { pass "up from marker1" }
+                -re ".*$gdb_prompt $" { fail "up from marker1" }
+                timeout { fail "up from marker1 (timeout)" }
             }
         }
         -re "$gdb_prompt $" { fail "continue to marker1"  }

@@ -1,3 +1,15 @@
+2000-12-05  Michael Snyder  <msnyder@mvstp600e.cygnus.com>
+
+	* gdb.base/constvars.exp: Test result of "up" command.
+	* gdb.base/miscexprs.exp: Ditto.
+	* gdb.base/pointers.exp:  Ditto.
+	* gdb.base/scope.exp:     Ditto.
+	* gdb.c++/derivation.exp: Ditto.
+	* gdb.c++/local.exp:      Ditto.
+	* gdb.c++/namespace.exp:  Ditto.
+	* gdb.c++/overload.exp:   Ditto.
+	* gdb.c++/ref-types.exp:  Ditto.
+
 2000-11-22  Michael Chastain  <chastain@redhat.com>
 
 	* mips_pro.exp: Accept either "middle -> top -> main" or
