@@ -831,10 +831,9 @@ in the object file.  Usually if you do this you also tell the linker
 
 By default, a local label is any label beginning with @samp{L}, but each
 target is allowed to redefine the local label prefix.
-@ifclear GENERIC 
-On some targets a local label begins with @samp{.L}; on the HPPA local labels
-begin with @samp{L$}.
-@end ifclear
+@ifset HPPA
+On the HPPA local labels begin with @samp{L$}.
+@end ifset
 
 @node o
 @section Name the Object File: @code{-o}
@@ -2735,7 +2734,7 @@ linked.  @var{length} is an absolute expression.
 
 @ifset HPPA
 The syntax for @code{.comm} differs slightly on the HPPA.  The syntax is
-@code{@var{symbol} .comm, @var{length}}; @var{symbol} is optional.
+@samp{@var{symbol} .comm, @var{length}}; @var{symbol} is optional.
 @end ifset
 
 @node Data
@@ -2880,7 +2879,7 @@ It is synonymous with @samp{.set}; @pxref{Set,,@code{.set}}.
 
 @ifset HPPA
 The syntax for @code{equ} on the HPPA is 
-@code{@var{symbol} .equ @var{expression}}.
+@samp{@var{symbol} .equ @var{expression}}.
 @end ifset
 
 @node Extern
@@ -3106,7 +3105,7 @@ not visible to @code{@value{LD}}.
 
 @ifset HPPA
 The syntax for @code{.lcomm} differs slightly on the HPPA.  The syntax is
-@code{@var{symbol} .lcomm, @var{length}}; @var{symbol} is optional.
+@samp{@var{symbol} .lcomm, @var{length}}; @var{symbol} is optional.
 @end ifset
 
 @node Lflags
@@ -3391,7 +3390,7 @@ file is the last value stored into it.
 
 @ifset HPPA
 The syntax for @code{set} on the HPPA is
-@code{@var{symbol} .set @var{expression}}.
+@samp{@var{symbol} .set @var{expression}}.
 @end ifset
 
 @node Short
@@ -4902,7 +4901,7 @@ mov[:g] sz ea,rd
 
 @node HPPA Notes
 @section Notes
-As a backend for GNU CC @code{@value{AS}} has been throughly tested and should
+As a back end for GNU CC @code{@value{AS}} has been throughly tested and should
 work extremely well.  We have tested it only minimally on hand written assembly
 code and no one has tested it much on the assembly output from the HP
 compilers.
@@ -4921,8 +4920,8 @@ support will be added as it becomes necessary.
 @code{@value{AS}} has no machine-dependent directives for the HPPA.
 
 @cindex HPPA Syntax
-@section HPPA Syntax
 @node HPPA Syntax
+@section Syntax
 The assembler syntax closely follows the HPPA instruction set
 reference manual; assembler directives and general syntax closely follow the
 HPPA assembly language reference manual with a few noteworthy differences.
@@ -4935,7 +4934,7 @@ Some obscure expression parsing problems may affect hand written code which
 uses the @code{spop} instructions, or code which makes significant
 use of the @code{!} line separator.
 
-@code{@value{AS} is much less forgiving about missing arguments and other
+@code{@value{AS}} is much less forgiving about missing arguments and other
 similar oversights.  @code{@value{AS}} will flag missing arguments as
 syntax errors; this is regarded as a feature, not a bug.
 
@@ -7840,8 +7839,8 @@ extensive changes in messages.c, input-file.c, write.c.
 
 K. Richard Pixley maintained GAS for a while, adding various enhancements and
 many bug fixes, including merging support for several processors, breaking GAS
-up to handle multiple object file format backends (including heavy rewrite,
-testing, an integration of the coff and b.out backends), adding configuration
+up to handle multiple object file format back end (including heavy rewrite,
+testing, an integration of the coff and b.out back end), adding configuration
 including heavy testing and verification of cross assemblers and file splits
 and renaming, converted GAS to strictly ansi C including full prototypes, added
 support for m680[34]0 & cpu32, considerable work on i960 including a COFF port
