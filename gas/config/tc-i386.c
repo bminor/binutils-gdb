@@ -117,9 +117,9 @@ struct _i386_insn
 
     /* Relocation type for operand */
 #ifdef BFD_ASSEMBLER
-    enum bfd_reloc_code_real disp_reloc[MAX_OPERANDS];
+    enum bfd_reloc_code_real reloc[MAX_OPERANDS];
 #else
-    int disp_reloc[MAX_OPERANDS];
+    int reloc[MAX_OPERANDS];
 #endif
 
     /* BASE_REG, INDEX_REG, and LOG2_SCALE_FACTOR are used to encode
@@ -1245,7 +1245,7 @@ md_assemble (line)
   /* Initialize globals.  */
   memset (&i, '\0', sizeof (i));
   for (j = 0; j < MAX_OPERANDS; j++)
-    i.disp_reloc[j] = NO_RELOC;
+    i.reloc[j] = NO_RELOC;
   memset (disp_expressions, '\0', sizeof (disp_expressions));
   memset (im_expressions, '\0', sizeof (im_expressions));
   save_stack_p = save_stack;
@@ -1569,9 +1569,9 @@ md_assemble (line)
 	temp_op = i.op[xchg2];
 	i.op[xchg2] = i.op[xchg1];
 	i.op[xchg1] = temp_op;
-	temp_reloc = i.disp_reloc[xchg2];
-	i.disp_reloc[xchg2] = i.disp_reloc[xchg1];
-	i.disp_reloc[xchg1] = temp_reloc;
+	temp_reloc = i.reloc[xchg2];
+	i.reloc[xchg2] = i.reloc[xchg1];
+	i.reloc[xchg1] = temp_reloc;
 
 	if (i.mem_operands == 2)
 	  {
@@ -1691,7 +1691,7 @@ md_assemble (line)
 
 	for (op = i.operands; --op >= 0;)
 	  if ((i.types[op] & Disp)
-	      && i.op[op].imms->X_op == O_constant)
+	      && i.op[op].disps->X_op == O_constant)
 	    {
 	      offsetT disp = i.op[op].disps->X_add_number;
 
@@ -2750,7 +2750,7 @@ md_assemble (line)
 	   Pass reloc in fr_var.  */
 	frag_var (rs_machine_dependent,
 		  1 + 4,
-		  i.disp_reloc[0],
+		  i.reloc[0],
 		  ((unsigned char) *p == JUMP_PC_RELATIVE
 		   ? ENCODE_RELAX_STATE (UNCOND_JUMP, SMALL) | code16
 		   : ((cpu_arch_flags & Cpu386) != 0
@@ -2821,7 +2821,7 @@ md_assemble (line)
 	*p++ = i.tm.base_opcode & 0xff;
 
 	fix_new_exp (frag_now, p - frag_now->fr_literal, size,
-		     i.op[0].disps, 1, reloc (size, 1, 1, i.disp_reloc[0]));
+		     i.op[0].disps, 1, reloc (size, 1, 1, i.reloc[0]));
       }
     else if (i.tm.opcode_modifier & JumpInterSegment)
       {
@@ -2879,7 +2879,7 @@ md_assemble (line)
 	  }
 	else
 	  fix_new_exp (frag_now, p - frag_now->fr_literal, size,
-		       i.op[1].imms, 0, reloc (size, 0, 0, i.disp_reloc[0]));
+		       i.op[1].imms, 0, reloc (size, 0, 0, i.reloc[1]));
 	if (i.op[0].imms->X_op != O_constant)
 	  as_bad (_("can't handle non absolute segment in `%s'"),
 		  i.tm.name);
@@ -3026,7 +3026,7 @@ md_assemble (line)
 			p = frag_more (size);
 			fix_new_exp (frag_now, p - frag_now->fr_literal, size,
 				     i.op[n].disps, pcrel,
-				     reloc (size, pcrel, sign, i.disp_reloc[n]));
+				     reloc (size, pcrel, sign, i.reloc[n]));
 		      }
 		  }
 	      }
@@ -3089,7 +3089,7 @@ md_assemble (line)
 
 			insn_size += size;
 			p = frag_more (size);
-			reloc_type = reloc (size, 0, sign, i.disp_reloc[0]);
+			reloc_type = reloc (size, 0, sign, i.reloc[n]);
 #ifdef BFD_ASSEMBLER
 			if (reloc_type == BFD_RELOC_32
 			    && GOT_symbol
@@ -3176,22 +3176,22 @@ i386_immediate (imm_start)
 	if (strncmp (cp + 1, "PLT", 3) == 0)
 	  {
 	    if (flag_code == CODE_64BIT)
-	      i.disp_reloc[this_operand] = BFD_RELOC_X86_64_PLT32;
+	      i.reloc[this_operand] = BFD_RELOC_X86_64_PLT32;
 	    else
-	      i.disp_reloc[this_operand] = BFD_RELOC_386_PLT32;
+	      i.reloc[this_operand] = BFD_RELOC_386_PLT32;
 	    len = 3;
 	  }
 	else if (strncmp (cp + 1, "GOTOFF", 6) == 0)
 	  {
 	    if (flag_code == CODE_64BIT)
 	      as_bad ("GOTOFF relocations are unsupported in 64bit mode.");
-	    i.disp_reloc[this_operand] = BFD_RELOC_386_GOTOFF;
+	    i.reloc[this_operand] = BFD_RELOC_386_GOTOFF;
 	    len = 6;
 	  }
 	else if (strncmp (cp + 1, "GOTPCREL", 8) == 0)
 	  {
 	    if (flag_code == CODE_64BIT)
-	      i.disp_reloc[this_operand] = BFD_RELOC_X86_64_GOTPCREL;
+	      i.reloc[this_operand] = BFD_RELOC_X86_64_GOTPCREL;
 	    else
 	      as_bad ("GOTPCREL relocations are supported only in 64bit mode.");
 	    len = 8;
@@ -3199,9 +3199,9 @@ i386_immediate (imm_start)
 	else if (strncmp (cp + 1, "GOT", 3) == 0)
 	  {
 	    if (flag_code == CODE_64BIT)
-	      i.disp_reloc[this_operand] = BFD_RELOC_X86_64_GOT32;
+	      i.reloc[this_operand] = BFD_RELOC_X86_64_GOT32;
 	    else
-	      i.disp_reloc[this_operand] = BFD_RELOC_386_GOT32;
+	      i.reloc[this_operand] = BFD_RELOC_386_GOT32;
 	    len = 3;
 	  }
 	else
@@ -3414,31 +3414,31 @@ i386_displacement (disp_start, disp_end)
 	if (strncmp (cp + 1, "PLT", 3) == 0)
 	  {
 	    if (flag_code == CODE_64BIT)
-	      i.disp_reloc[this_operand] = BFD_RELOC_X86_64_PLT32;
+	      i.reloc[this_operand] = BFD_RELOC_X86_64_PLT32;
 	    else
-	      i.disp_reloc[this_operand] = BFD_RELOC_386_PLT32;
+	      i.reloc[this_operand] = BFD_RELOC_386_PLT32;
 	    len = 3;
 	  }
 	else if (strncmp (cp + 1, "GOTOFF", 6) == 0)
 	  {
 	    if (flag_code == CODE_64BIT)
 	      as_bad ("GOTOFF relocation is not supported in 64bit mode.");
-	    i.disp_reloc[this_operand] = BFD_RELOC_386_GOTOFF;
+	    i.reloc[this_operand] = BFD_RELOC_386_GOTOFF;
 	    len = 6;
 	  }
 	else if (strncmp (cp + 1, "GOTPCREL", 8) == 0)
 	  {
 	    if (flag_code != CODE_64BIT)
 	      as_bad ("GOTPCREL relocation is supported only in 64bit mode.");
-	    i.disp_reloc[this_operand] = BFD_RELOC_X86_64_GOTPCREL;
+	    i.reloc[this_operand] = BFD_RELOC_X86_64_GOTPCREL;
 	    len = 8;
 	  }
 	else if (strncmp (cp + 1, "GOT", 3) == 0)
 	  {
 	    if (flag_code == CODE_64BIT)
-	      i.disp_reloc[this_operand] = BFD_RELOC_X86_64_GOT32;
+	      i.reloc[this_operand] = BFD_RELOC_X86_64_GOT32;
 	    else
-	      i.disp_reloc[this_operand] = BFD_RELOC_386_GOT32;
+	      i.reloc[this_operand] = BFD_RELOC_386_GOT32;
 	    len = 3;
 	  }
 	else
@@ -3462,8 +3462,8 @@ i386_displacement (disp_start, disp_end)
   /* We do this to make sure that the section symbol is in
      the symbol table.  We will ultimately change the relocation
      to be relative to the beginning of the section.  */
-  if (i.disp_reloc[this_operand] == BFD_RELOC_386_GOTOFF
-      || i.disp_reloc[this_operand] == BFD_RELOC_X86_64_GOTPCREL)
+  if (i.reloc[this_operand] == BFD_RELOC_386_GOTOFF
+      || i.reloc[this_operand] == BFD_RELOC_X86_64_GOTPCREL)
     {
       if (S_IS_LOCAL (exp->X_add_symbol)
 	  && S_GET_SEGMENT (exp->X_add_symbol) != undefined_section)
@@ -3471,10 +3471,10 @@ i386_displacement (disp_start, disp_end)
       assert (exp->X_op == O_symbol);
       exp->X_op = O_subtract;
       exp->X_op_symbol = GOT_symbol;
-      if (i.disp_reloc[this_operand] == BFD_RELOC_X86_64_GOTPCREL)
-        i.disp_reloc[this_operand] = BFD_RELOC_32_PCREL;
+      if (i.reloc[this_operand] == BFD_RELOC_X86_64_GOTPCREL)
+        i.reloc[this_operand] = BFD_RELOC_32_PCREL;
       else
-        i.disp_reloc[this_operand] = BFD_RELOC_32;
+        i.reloc[this_operand] = BFD_RELOC_32;
     }
 #endif
 

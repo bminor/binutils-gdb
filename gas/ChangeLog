@@ -1,3 +1,11 @@
+2001-03-07  Alan Modra  <alan@linuxcare.com.au>
+
+	* config/tc-i386.c (struct _i386_insn): Rename disp_reloc to reloc.
+	(md_assemble [smallest displacement]): Use correct field of i.op[]
+	union.
+	(md_assemble [JumpInterSegment output]): Use correct i.disp_reloc[].
+	(md_assemble [immediate output]): Likewise.
+
 2001-03-06  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-arm.c (md_apply_fix3): Clear bit zero of offset in
@@ -11,8 +19,8 @@
 
 2001-03-02  Dave Brolley  <brolley@redhat.com>
 
-	* config/tc-m32r.c (expand_debug_syms): Call frag_align_code rather than
-	m32r_do_align.
+	* config/tc-m32r.c (expand_debug_syms): Call frag_align_code rather
+	than m32r_do_align.
 
 2001-03-02  Richard Sandiford  <rsandifo@redhat.com>
 
