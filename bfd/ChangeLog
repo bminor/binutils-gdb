@@ -1,3 +1,55 @@
+Mon Apr 17 19:14:36 2000  David Mosberger  <davidm@hpl.hp.com>
+
+	* Makefile.am (BFD64_BACKENDS): Mention coff-ia64.lo.
+	(BFD64_BACKENDS_CFILES): Mention coff-ia64.c
+	(coff-ia64.lo): Add dependency.
+	* Makefile.in: Regenerate.
+	* coff-ia64.c: New file.
+	* efi-app-ia32.c: Ditto.
+	* efi-app-ia64.c: Ditto.
+	* coffcode.h (coff_set_arch_mach_hook): Handle IA64MAGIC.
+	(coff_set_flags): Ditto.
+	(coff_write_object_contents) [IA64]: Set magic number to ZMAGIC.
+	* config.bfd (i[3456]86-*-linux-gnu*): Mention bfd_efi_app_ia32_vec.
+	* configure.in (elf): Handle bfd_efi_app_ia32 and bfd_efi_app_ia64_vec.
+	* configure: Regenerate.
+	* libpei.h (GET_OPTHDR_IMAGE_BASE): New macro.
+	(PUT_OPTHDR_IMAGE_BASE): Ditto.
+	(GET_OPTHDR_SIZE_OF_STACK_RESERVE): Ditto.
+	(PUT_OPTHDR_SIZE_OF_STACK_RESERVE): Ditto.
+	(GET_OPTHDR_SIZE_OF_STACK_COMMIT): Ditto.
+	(PUT_OPTHDR_SIZE_OF_STACK_COMMIT): Ditto.
+	(GET_OPTHDR_SIZE_OF_HEAP_RESERVE): Ditto.
+	(PUT_OPTHDR_SIZE_OF_HEAP_RESERVE): Ditto.
+	(GET_OPTHDR_SIZE_OF_HEAP_COMMIT): Ditto.
+	(PUT_OPTHDR_SIZE_OF_HEAP_COMMIT): Ditto.
+	(GET_PDATA_ENTRY): Ditto.
+	* peigen.c (_bfd_pei_swap_aouthdr_in) [COFF_WITH_PEP64]: Don't read
+	data_start.  Use above macros to read fields that are 64 bit wide for
+	COFF_WITH_PEP64.  Don't truncate entry and text_start to 32 bits.
+	(_bfd_pei_swap_aouthdr_out) [PEI_FORCE_MINIMUM_ALIGNMENT]: Force
+	FileAlignment and SectionAlignment to minimum alignment if they
+	are zero.
+	(_bfd_pei_swap_aouthdr_out) [PEI_DEFAULT_TARGET_SUBSYSTEM]: Set
+	Subsystem to default PEI_DEFAULT_TARGET_SUBSYSTEM.
+	(_bfd_pei_swap_aouthdr_out) [COFF_WITH_PEP64]: Don't set data_start.
+	Use above macros to write fields that are 64 bit wide for
+	COFF_WITH_PEP64.
+	(pe_print_pdata): Set PDATA_ROW_SIZE to 3*8 for COFF_WITH_PEP64,
+	5*4 otherwise.  This should be right for IA-32 and IA-64, but may
+	be wrong for platforms.  Use PDATA_ROW_SIZE instead of hardcoded
+	value of 20 bytes.  Modify printing for COFF_WITH_PEP64 to print
+	begin address, end address, and unwind info address only.  Use
+	GET_PDATA_ENTRY() to read .pdata entries.  Use fprintf_vma() to
+	print addresses.
+	(tbl): Add SECTION, REL32, RESERVED1, MIPS_JMPADDR16, DIR64, and
+	HIGH3ADJ relocation names.
+	(_bfd_pe_print_private_bfd_data): Print Subsystem name in legible form.
+	* targets.c: Declare bfd_efi_app_ia32_vec and
+	bfd_efi_app_ia64_vec.
+	(bfd_target_vector): Mention bfd_efi_app_ia32_vec and
+	bfd_efi_app_ia64_vec.
+	
 2000-04-17  Timothy Wall  <twall@cygnus.com>
 
 	* bfd-in2.h: Add prototypes for tic54x load page access.

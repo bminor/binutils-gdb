@@ -505,6 +505,8 @@ extern const bfd_target arm_epoc_pei_little_vec;
 extern const bfd_target arm_epoc_pei_big_vec;
 extern const bfd_target b_out_vec_big_host;
 extern const bfd_target b_out_vec_little_host;
+extern const bfd_target bfd_efi_app_ia32_vec;
+extern const bfd_target bfd_efi_app_ia64_vec;
 extern const bfd_target bfd_elf64_alpha_vec;
 extern const bfd_target bfd_elf32_avr_vec;
 extern const bfd_target bfd_elf32_bigarc_vec;
@@ -688,6 +690,11 @@ const bfd_target * const bfd_target_vector[] = {
 	&aout_mips_little_vec,
 	&b_out_vec_big_host,
 	&b_out_vec_little_host,
+
+	&bfd_efi_app_ia32_vec,
+#ifdef BFD64
+	&bfd_efi_app_ia64_vec,
+#endif
 
 	/* This, and other vectors, may not be used in any *.mt configuration.
 	   But that does not mean they are unnecessary.  If configured with

@@ -434,11 +434,14 @@ _bfd_pei_swap_aouthdr_in (abfd, aouthdr_ext1, aouthdr_int1)
     GET_AOUTHDR_ENTRY (abfd, (bfd_byte *) aouthdr_ext->entry);
   aouthdr_int->text_start =
     GET_AOUTHDR_TEXT_START (abfd, (bfd_byte *) aouthdr_ext->text_start);
+#ifndef COFF_WITH_PEP64
+  /* PE32+ does not have data_start member! */
   aouthdr_int->data_start =
     GET_AOUTHDR_DATA_START (abfd, (bfd_byte *) aouthdr_ext->data_start);
+#endif
 
   a = &aouthdr_int->pe;
-  a->ImageBase = bfd_h_get_32 (abfd, (bfd_byte *)src->ImageBase);
+  a->ImageBase = GET_OPTHDR_IMAGE_BASE (abfd, (bfd_byte *)src->ImageBase);
   a->SectionAlignment = bfd_h_get_32 (abfd, (bfd_byte *)src->SectionAlignment);
   a->FileAlignment = bfd_h_get_32 (abfd, (bfd_byte *)src->FileAlignment);
   a->MajorOperatingSystemVersion =
@@ -455,10 +458,10 @@ _bfd_pei_swap_aouthdr_in (abfd, aouthdr_ext1, aouthdr_int1)
   a->CheckSum = bfd_h_get_32 (abfd, (bfd_byte *)src->CheckSum);
   a->Subsystem = bfd_h_get_16 (abfd, (bfd_byte *)src->Subsystem);
   a->DllCharacteristics = bfd_h_get_16 (abfd, (bfd_byte *)src->DllCharacteristics);
-  a->SizeOfStackReserve = bfd_h_get_32 (abfd, (bfd_byte *)src->SizeOfStackReserve);
-  a->SizeOfStackCommit = bfd_h_get_32 (abfd, (bfd_byte *)src->SizeOfStackCommit);
-  a->SizeOfHeapReserve = bfd_h_get_32 (abfd, (bfd_byte *)src->SizeOfHeapReserve);
-  a->SizeOfHeapCommit = bfd_h_get_32 (abfd, (bfd_byte *)src->SizeOfHeapCommit);
+  a->SizeOfStackReserve = GET_OPTHDR_SIZE_OF_STACK_RESERVE (abfd, (bfd_byte *)src->SizeOfStackReserve);
+  a->SizeOfStackCommit = GET_OPTHDR_SIZE_OF_STACK_COMMIT (abfd, (bfd_byte *)src->SizeOfStackCommit);
+  a->SizeOfHeapReserve = GET_OPTHDR_SIZE_OF_HEAP_RESERVE (abfd, (bfd_byte *)src->SizeOfHeapReserve);
+  a->SizeOfHeapCommit = GET_OPTHDR_SIZE_OF_HEAP_COMMIT (abfd, (bfd_byte *)src->SizeOfHeapCommit);
   a->LoaderFlags = bfd_h_get_32 (abfd, (bfd_byte *)src->LoaderFlags);
   a->NumberOfRvaAndSizes = bfd_h_get_32 (abfd, (bfd_byte *)src->NumberOfRvaAndSizes);
 
@@ -476,18 +479,25 @@ _bfd_pei_swap_aouthdr_in (abfd, aouthdr_ext1, aouthdr_int1)
   if (aouthdr_int->entry)
     {
       aouthdr_int->entry += a->ImageBase;
+#ifndef COFF_WITH_PEP64
       aouthdr_int->entry &= 0xffffffff;
+#endif
     }
   if (aouthdr_int->tsize) 
     {
       aouthdr_int->text_start += a->ImageBase;
+#ifndef COFF_WITH_PEP64
       aouthdr_int->text_start &= 0xffffffff;
+#endif
     }
+#ifndef COFF_WITH_PEP64
+  /* PE32+ does not have data_start member! */
   if (aouthdr_int->dsize) 
     {
       aouthdr_int->data_start += a->ImageBase;
       aouthdr_int->data_start &= 0xffffffff;
     }
+#endif
 
 #ifdef POWERPC_LE_PE
   /* These three fields are normally set up by ppc_relocate_section.
@@ -532,10 +542,28 @@ _bfd_pei_swap_aouthdr_out (abfd, in, out)
   struct internal_aouthdr *aouthdr_in = (struct internal_aouthdr *)in;
   struct internal_extra_pe_aouthdr *extra = &pe_data (abfd)->pe_opthdr;
   PEAOUTHDR *aouthdr_out = (PEAOUTHDR *)out;
+  bfd_vma sa, fa, ib;
 
-  bfd_vma sa = extra->SectionAlignment;
-  bfd_vma fa = extra->FileAlignment;
-  bfd_vma ib = extra->ImageBase ;
+  /* The following definitely is required for EFI applications.
+     Perhaps it's needed for other PEI targets as well, but I don't
+     know that for a fact, so we play it safe here and tweak the
+     alignments only if PEI_FORCE_MINIMUM_ALIGNMENT is
+     defined. --davidm */
+#ifdef PEI_FORCE_MINIMUM_ALIGNMENT
+  if (!extra->FileAlignment)
+    extra->FileAlignment = PE_DEF_FILE_ALIGNMENT;
+  if (!extra->SectionAlignment)
+    extra->SectionAlignment = PE_DEF_SECTION_ALIGNMENT;
+#endif
+
+#ifdef PEI_DEFAULT_TARGET_SUBSYSTEM
+  if (extra->Subsystem == IMAGE_SUBSYSTEM_UNKNOWN)
+    extra->Subsystem = PEI_DEFAULT_TARGET_SUBSYSTEM;
+#endif
+
+  sa = extra->SectionAlignment;
+  fa = extra->FileAlignment;
+  ib = extra->ImageBase;
 
   if (aouthdr_in->tsize) 
     {
@@ -633,12 +661,14 @@ _bfd_pei_swap_aouthdr_out (abfd, in, out)
   PUT_AOUTHDR_TEXT_START (abfd, aouthdr_in->text_start,
 			  (bfd_byte *) aouthdr_out->standard.text_start);
 
+#ifndef COFF_WITH_PEP64
+  /* PE32+ does not have data_start member! */
   PUT_AOUTHDR_DATA_START (abfd, aouthdr_in->data_start,
 			  (bfd_byte *) aouthdr_out->standard.data_start);
+#endif
 
-
-  bfd_h_put_32 (abfd, extra->ImageBase,
-		(bfd_byte *) aouthdr_out->ImageBase);
+  PUT_OPTHDR_IMAGE_BASE (abfd, extra->ImageBase,
+			 (bfd_byte *) aouthdr_out->ImageBase);
   bfd_h_put_32 (abfd, extra->SectionAlignment,
 		(bfd_byte *) aouthdr_out->SectionAlignment);
   bfd_h_put_32 (abfd, extra->FileAlignment,
@@ -667,14 +697,14 @@ _bfd_pei_swap_aouthdr_out (abfd, in, out)
 		(bfd_byte *) aouthdr_out->Subsystem);
   bfd_h_put_16 (abfd, extra->DllCharacteristics,
 		(bfd_byte *) aouthdr_out->DllCharacteristics);
-  bfd_h_put_32 (abfd, extra->SizeOfStackReserve,
-		(bfd_byte *) aouthdr_out->SizeOfStackReserve);
-  bfd_h_put_32 (abfd, extra->SizeOfStackCommit,
-		(bfd_byte *) aouthdr_out->SizeOfStackCommit);
-  bfd_h_put_32 (abfd, extra->SizeOfHeapReserve,
-		(bfd_byte *) aouthdr_out->SizeOfHeapReserve);
-  bfd_h_put_32 (abfd, extra->SizeOfHeapCommit,
-		(bfd_byte *) aouthdr_out->SizeOfHeapCommit);
+  PUT_OPTHDR_SIZE_OF_STACK_RESERVE (abfd, extra->SizeOfStackReserve,
+				    (bfd_byte *) aouthdr_out->SizeOfStackReserve);
+  PUT_OPTHDR_SIZE_OF_STACK_COMMIT (abfd, extra->SizeOfStackCommit,
+				   (bfd_byte *) aouthdr_out->SizeOfStackCommit);
+  PUT_OPTHDR_SIZE_OF_HEAP_RESERVE (abfd, extra->SizeOfHeapReserve,
+				   (bfd_byte *) aouthdr_out->SizeOfHeapReserve);
+  PUT_OPTHDR_SIZE_OF_HEAP_COMMIT (abfd, extra->SizeOfHeapCommit,
+				  (bfd_byte *) aouthdr_out->SizeOfHeapCommit);
   bfd_h_put_32 (abfd, extra->LoaderFlags,
 		(bfd_byte *) aouthdr_out->LoaderFlags);
   bfd_h_put_32 (abfd, extra->NumberOfRvaAndSizes,
@@ -1473,18 +1503,27 @@ pe_print_edata (abfd, vfile)
   return true;
 }
 
+/* This really is architecture dependent.  On IA-64, a .pdata entry
+   consists of three dwords containing relative virtual addresses that
+   specify the start and end address of the code range the entry
+   covers and the address of the corresponding unwind info data.  */
 static boolean
 pe_print_pdata (abfd, vfile)
      bfd  *abfd;
      PTR vfile;
 {
+#ifdef COFF_WITH_PEP64
+# define PDATA_ROW_SIZE	(3*8)
+#else
+# define PDATA_ROW_SIZE	(5*4)
+#endif
   FILE *file = (FILE *) vfile;
   bfd_byte *data = 0;
   asection *section = bfd_get_section_by_name (abfd, ".pdata");
   bfd_size_type datasize = 0;
   bfd_size_type i;
   bfd_size_type start, stop;
-  int onaline = 20;
+  int onaline = PDATA_ROW_SIZE;
 
   if (section == NULL
       || coff_section_data (abfd, section) == NULL
@@ -1498,10 +1537,15 @@ pe_print_pdata (abfd, vfile)
 
   fprintf (file,
 	   _("\nThe Function Table (interpreted .pdata section contents)\n"));
+#ifdef COFF_WITH_PEP64
+  fprintf(file,
+	  _(" vma:\t\t\tBegin Address    End Address      Unwind Info\n"));
+#else
   fprintf (file,
 	   _(" vma:\t\tBegin    End      EH       EH       PrologEnd  Exception\n"));
   fprintf (file,
 	   _("     \t\tAddress  Address  Handler  Data     Address    Mask\n"));
+#endif
 
   if (bfd_section_size (abfd, section) == 0)
     return true;
@@ -1527,14 +1571,14 @@ pe_print_pdata (abfd, vfile)
       bfd_vma prolog_end_addr;
       int em_data;
 
-      if (i + 20 > stop)
+      if (i + PDATA_ROW_SIZE > stop)
 	break;
 
-      begin_addr = bfd_get_32(abfd, data+i);
-      end_addr = bfd_get_32(abfd, data+i+4);
-      eh_handler = bfd_get_32(abfd, data+i+8);
-      eh_data = bfd_get_32(abfd, data+i+12);
-      prolog_end_addr = bfd_get_32(abfd, data+i+16);
+      begin_addr = GET_PDATA_ENTRY(abfd, data+i);
+      end_addr = GET_PDATA_ENTRY(abfd, data+i+4);
+      eh_handler = GET_PDATA_ENTRY(abfd, data+i+8);
+      eh_data = GET_PDATA_ENTRY(abfd, data+i+12);
+      prolog_end_addr = GET_PDATA_ENTRY(abfd, data+i+16);
       
       if (begin_addr == 0 && end_addr == 0 && eh_handler == 0
 	  && eh_data == 0 && prolog_end_addr == 0)
@@ -1543,21 +1587,21 @@ pe_print_pdata (abfd, vfile)
 	  break;
 	}
 
-      fprintf (file,
-	       " %08lx\t",
-	       (unsigned long int) (i + section->vma));
-
       em_data = ((eh_handler & 0x1) << 2) | (prolog_end_addr & 0x3);
-      eh_handler &= 0xfffffffc;
-      prolog_end_addr &= 0xfffffffc;
+      eh_handler &= ~ (bfd_vma) 0x3;
+      prolog_end_addr &= ~ (bfd_vma) 0x3;
 
-      fprintf (file, "%08lx %08lx %08lx %08lx %08lx   %x",
-	       begin_addr,
-	       end_addr,
-	       eh_handler,
-	       eh_data,
-	       prolog_end_addr,
-	       em_data);
+      fputc (' ', file);
+      fprintf_vma (file, i + section->vma); fputc ('\t', file);
+      fprintf_vma (file, begin_addr); fputc (' ', file);
+      fprintf_vma (file, end_addr); fputc (' ', file);
+      fprintf_vma (file, eh_handler);
+#ifndef COFF_WITH_PEP64
+      fputc (' ', file);
+      fprintf_vma (file, eh_data); fputc (' ', file);
+      fprintf_vma (file, prolog_end_addr);
+      fprintf (file, "   %x", em_data);
+#endif
 
 #ifdef POWERPC_LE_PE
       if (eh_handler == 0 && eh_data != 0)
@@ -1603,6 +1647,12 @@ static const char * const tbl[] =
 "HIGHLOW",
 "HIGHADJ",
 "MIPS_JMPADDR",
+"SECTION",
+"REL32",
+"RESERVED1",
+"MIPS_JMPADDR16",
+"DIR64",
+"HIGH3ADJ"
 "UNKNOWN",   /* MUST be last */
 };
 
@@ -1707,6 +1757,7 @@ _bfd_pe_print_private_bfd_data_common (abfd, vfile)
   int j;
   pe_data_type *pe = pe_data (abfd);
   struct internal_extra_pe_aouthdr *i = &pe->pe_opthdr;
+  const char *subsystem_name = NULL;
 
   /* The MS dumpbin program reportedly ands with 0xff0f before
      printing the characteristics field.  Not sure why.  No reason to
@@ -1744,8 +1795,40 @@ _bfd_pe_print_private_bfd_data_common (abfd, vfile)
   fprintf (file,"SizeOfImage\t\t%08lx\n", i->SizeOfImage);
   fprintf (file,"SizeOfHeaders\t\t%08lx\n", i->SizeOfHeaders);
   fprintf (file,"CheckSum\t\t%08lx\n", i->CheckSum);
-  fprintf (file,"Subsystem\t\t%08x\n", i->Subsystem);
-  fprintf (file,"DllCharacteristics\t%08x\n", i->DllCharacteristics);
+  switch (i->Subsystem)
+    {
+    case IMAGE_SUBSYSTEM_UNKNOWN:
+      subsystem_name = "unspecified";
+      break;
+    case IMAGE_SUBSYSTEM_NATIVE:
+      subsystem_name = "NT native";
+      break;
+    case IMAGE_SUBSYSTEM_WINDOWS_GUI:
+      subsystem_name = "Windows GUI";
+      break;
+    case IMAGE_SUBSYSTEM_WINDOWS_CUI:
+      subsystem_name = "Windows CUI";
+      break;
+    case IMAGE_SUBSYSTEM_POSIX_CUI:
+      subsystem_name = "POSIX CUI";
+      break;
+    case IMAGE_SUBSYSTEM_WINDOWS_CE_GUI:
+      subsystem_name = "Wince CUI";
+      break;
+    case IMAGE_SUBSYSTEM_EFI_APPLICATION:
+      subsystem_name = "EFI application";
+      break;
+    case IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER:
+      subsystem_name = "EFI boot service driver";
+      break;
+    case IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER:
+      subsystem_name = "EFI runtime driver"; 
+      break;
+    }
+  fprintf (file,"Subsystem\t\t%08x", i->Subsystem);
+  if (subsystem_name)
+    fprintf (file, "\t(%s)", subsystem_name);
+  fprintf (file,"\nDllCharacteristics\t%08x\n", i->DllCharacteristics);
   fprintf (file,"SizeOfStackReserve\t");
   fprintf_vma (file, i->SizeOfStackReserve);
   fprintf (file,"\nSizeOfStackCommit\t");

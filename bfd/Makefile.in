@@ -504,6 +504,7 @@ BFD32_BACKENDS_CFILES = \
 BFD64_BACKENDS = \
 	aout64.lo \
 	coff-alpha.lo \
+	coff-ia64.lo \
 	demo64.lo \
 	elf64-alpha.lo \
 	elf64-gen.lo \
@@ -517,6 +518,7 @@ BFD64_BACKENDS = \
 BFD64_BACKENDS_CFILES = \
 	aout64.c \
 	coff-alpha.c \
+	coff-ia64.c \
 	demo64.c \
 	elf64-alpha.c \
 	elf64-gen.c \
@@ -1621,6 +1623,8 @@ coff-alpha.lo: coff-alpha.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/sym.h $(INCDIR)/coff/symconst.h $(INCDIR)/coff/ecoff.h \
   $(INCDIR)/coff/alpha.h $(INCDIR)/aout/ar.h libcoff.h \
   libecoff.h coffswap.h ecoffswap.h
+coff-ia64.lo: coff-ia64.c $(INCDIR)/coff/ia64.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/pe.h libcoff.h $(INCDIR)/bfdlink.h coffcode.h coffswap.h
 demo64.lo: demo64.c aoutf1.h $(INCDIR)/aout/sun4.h \
   libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h \

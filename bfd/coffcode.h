@@ -1787,6 +1787,12 @@ coff_set_arch_mach_hook (abfd, filehdr)
       machine = 0;
       break;
 #endif
+#ifdef IA64MAGIC
+    case IA64MAGIC:
+      arch = bfd_arch_ia64;
+      machine = 0;
+      break;
+#endif
 #ifdef A29K_MAGIC_BIG
     case A29K_MAGIC_BIG:
     case A29K_MAGIC_LITTLE:
@@ -2554,6 +2560,12 @@ coff_set_flags (abfd, magicp, flagsp)
 #ifdef I860MAGIC
     case bfd_arch_i860:
       *magicp = I860MAGIC;
+      return true;
+      break;
+#endif
+#ifdef IA64MAGIC
+    case bfd_arch_ia64:
+      *magicp = IA64MAGIC;
       return true;
       break;
 #endif
@@ -3634,6 +3646,11 @@ coff_write_object_contents (abfd)
     internal_a.magic = ZMAGIC;
 #endif /* LYNXOS */
 #endif /* I386 */
+
+#if defined(IA64)
+#define __A_MAGIC_SET__
+    internal_a.magic = ZMAGIC;
+#endif /* IA64 */
 
 #if defined(SPARC)
 #define __A_MAGIC_SET__
