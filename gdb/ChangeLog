@@ -1,3 +1,10 @@
+2003-06-12  David Carlton  <carlton@kealia.com>
+
+	* dwarf2read.c (die_specification): New.
+	(determine_prefix): Fix memory management.
+	(read_structure_scope): Set prefix correctly if getting type via
+	specification.
+
 2003-05-28  David Carlton  <carlton@bactrian.org>
 
 	* dwarf2read.c (add_partial_structure): When looking for a

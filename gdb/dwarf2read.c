@@ -776,6 +776,8 @@ static struct attribute *dwarf_attr (struct die_info *, unsigned int);
 
 static int die_is_declaration (struct die_info *);
 
+static struct die_info *die_specification (struct die_info *die);
+
 static void free_line_header (struct line_header *lh);
 
 static struct line_header *(dwarf_decode_line_header
@@ -3003,6 +3005,7 @@ read_structure_scope (struct die_info *die, struct objfile *objfile,
   struct attribute *attr;
   const char *name;
   const char *previous_prefix = processing_current_prefix;
+  struct cleanup *back_to = NULL;
   /* This says whether or not we want to try to update the structure's
      name to include enclosing namespace/class information, if
      any.  */
@@ -3014,6 +3017,18 @@ read_structure_scope (struct die_info *die, struct objfile *objfile,
   name = dwarf2_name (die);
   if (name != NULL)
     {
+      if (cu_language == language_cplus)
+	{
+	  struct die_info *spec_die = die_specification (die);
+
+	  if (spec_die != NULL)
+	    {
+	      char *specification_prefix = determine_prefix (spec_die);
+	      processing_current_prefix = specification_prefix;
+	      back_to = make_cleanup (xfree, specification_prefix);
+	    }
+	}
+
       if (processing_has_namespace_info)
 	{
 	  /* FIXME: carlton/2002-11-26: This variable exists only for
@@ -3022,8 +3037,8 @@ read_structure_scope (struct die_info *die, struct objfile *objfile,
 	     of changes which would have forced decode_line_1 to take
 	     a const char **.  */
 	  char *new_prefix = obconcat (&objfile->type_obstack,
-				       previous_prefix,
-				       previous_prefix[0] == '\0'
+				       processing_current_prefix,
+				       processing_current_prefix[0] == '\0'
 				       ? "" : "::",
 				       name);
 	  TYPE_TAG_NAME (type) = new_prefix;
@@ -3200,6 +3215,8 @@ read_structure_scope (struct die_info *die, struct objfile *objfile,
     }
 
   processing_current_prefix = previous_prefix;
+  if (back_to != NULL)
+    do_cleanups (back_to);
 }
 
 /* Given a pointer to a die which begins an enumeration, process all
@@ -4950,6 +4967,19 @@ die_is_declaration (struct die_info *die)
 	  && ! dwarf_attr (die, DW_AT_specification));
 }
 
+/* Returns the die giving the specification for this one, or NULL if
+   none.  */
+
+static struct die_info *
+die_specification (struct die_info *die)
+{
+  struct attribute *spec_attr = dwarf_attr (die, DW_AT_specification);
+
+  if (spec_attr == NULL)
+    return NULL;
+  else
+    return follow_die_ref (dwarf2_get_ref_die_offset (spec_attr));
+}
 
 /* Free the line_header structure *LH, and any arrays and strings it
    refers to.  */
@@ -6023,15 +6053,17 @@ determine_prefix (struct die_info *die)
   else
     {
       char *parent_prefix = determine_prefix (parent);
+      char *retval;
 
       switch (parent->tag) {
       case DW_TAG_namespace:
 	{
 	  int dummy;
 
-	  return typename_concat (parent_prefix,
-				  namespace_name (parent, &dummy));
+	  retval = typename_concat (parent_prefix,
+				    namespace_name (parent, &dummy));
 	}
+	break;
       case DW_TAG_class_type:
       case DW_TAG_structure_type:
 	{
@@ -6040,19 +6072,25 @@ determine_prefix (struct die_info *die)
 	      const char *parent_name = dwarf2_name (parent);
 
 	      if (parent_name != NULL)
-		return typename_concat (parent_prefix, dwarf2_name (parent));
+		retval = typename_concat (parent_prefix, dwarf2_name (parent));
 	      else
 		/* FIXME: carlton/2003-05-28: I'm not sure what the
 		   best thing to do here is.  */
-		return typename_concat (parent_prefix,
-					"<<anonymous class>>");
+		retval = typename_concat (parent_prefix,
+					  "<<anonymous class>>");
 	    }
 	  else
-	    return class_name (parent);
+	    retval = class_name (parent);
 	}
+	break;
       default:
-	return parent_prefix;
+	retval = parent_prefix;
+	break;
       }
+
+      if (retval != parent_prefix)
+	xfree (parent_prefix);
+      return retval;
     }
 }
 
