@@ -8,9 +8,6 @@ some known bugs in gdb, if you are into bug-hunting.
 
 Update the TODO list with all the lists of gdb bugs lying around on paper.
 
-"share" command should not need to be manually run.  It should be run
-as soon as possible, automatically, both on "run" and on core files.
-
 It should be possible to use symbols from shared libraries before we know
 exactly where the libraries will be loaded.  E.g. "b perror" before running
 the program.  This could maybe be done as an extension of the "breakpoint
@@ -66,9 +63,6 @@ Perhaps "i source" should take an argument like that of "list".
 See if coredep.c's fetch_core_registers can be used on more machines.
 E.g. MIPS (mips-xdep.c).
 
-coredep.c is completely broken.  Needs work just to compile, it uses
-"u" and doesn't declare it, etc.
-
 unpack_double() does not handle IEEE float on the target unless the host
 is also IEEE.  Death on a vax.
 
@@ -104,7 +98,7 @@ Check for storage leaks in GDB, I'm sure there are a lot!
 vtblprint of a vtbl should demangle the names it's printing.
 
 Backtrace should point out what the currently selected frame is, in its
-display, perhaps showing ">3 foo (bar, ...)" rather than "#3 foo (bar, ...)".
+display, perhaps showing "@3 foo (bar, ...)" rather than "#3 foo (bar, ...)".
 
 "i program" should work for core files, and display more info, like what
 actually caused it to die.
