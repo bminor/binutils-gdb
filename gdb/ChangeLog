@@ -1,3 +1,8 @@
+Tue Aug  2 10:58:34 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* defs.h (bfd_read, bfd_seek): Remove declarations.
+	* os9kread.c, rs6000-nat.c (libbfd.h): Don't include.
+
 Tue Aug  2 09:50:50 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
 	* inflow.c (kill_command): Fix a bug which prevented target

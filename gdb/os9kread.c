@@ -53,7 +53,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "command.h"
 #include "target.h"
 #include "gdbcore.h"		/* for bfd stuff */
-#include "libbfd.h"		/* FIXME Secret internal BFD stuff (bfd_read) */
 #include "libaout.h"	 	/* FIXME Secret internal BFD stuff for a.out */
 #include "symfile.h"
 #include "objfiles.h"
