@@ -1114,21 +1114,6 @@ extern const struct floatformat floatformat_unknown;
 #define HOST_LONG_DOUBLE_FORMAT &floatformat_unknown
 #endif
 
-#ifndef TARGET_FLOAT_FORMAT
-#define TARGET_FLOAT_FORMAT (TARGET_BYTE_ORDER == BIG_ENDIAN \
-			     ? &floatformat_ieee_single_big \
-			     : &floatformat_ieee_single_little)
-#endif
-#ifndef TARGET_DOUBLE_FORMAT
-#define TARGET_DOUBLE_FORMAT (TARGET_BYTE_ORDER == BIG_ENDIAN \
-			      ? &floatformat_ieee_double_big \
-			      : &floatformat_ieee_double_little)
-#endif
-
-#ifndef TARGET_LONG_DOUBLE_FORMAT
-#define TARGET_LONG_DOUBLE_FORMAT &floatformat_unknown
-#endif
-
 /* Use `long double' if the host compiler supports it.  (Note that this is not
    necessarily any longer than `double'.  On SunOS/gcc, it's the same as
    double.)  This is necessary because GDB internally converts all floating

@@ -1091,6 +1091,45 @@ extern void set_gdbarch_save_dummy_frame_tos (struct gdbarch *gdbarch, gdbarch_s
 #endif
 #endif
 
+/* Default (value) for non- multi-arch platforms. */
+#if (GDB_MULTI_ARCH == 0) && !defined (TARGET_FLOAT_FORMAT)
+#define TARGET_FLOAT_FORMAT (default_float_format (current_gdbarch))
+#endif
+
+extern const struct floatformat * gdbarch_float_format (struct gdbarch *gdbarch);
+extern void set_gdbarch_float_format (struct gdbarch *gdbarch, const struct floatformat * float_format);
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > 1) || !defined (TARGET_FLOAT_FORMAT)
+#define TARGET_FLOAT_FORMAT (gdbarch_float_format (current_gdbarch))
+#endif
+#endif
+
+/* Default (value) for non- multi-arch platforms. */
+#if (GDB_MULTI_ARCH == 0) && !defined (TARGET_DOUBLE_FORMAT)
+#define TARGET_DOUBLE_FORMAT (default_double_format (current_gdbarch))
+#endif
+
+extern const struct floatformat * gdbarch_double_format (struct gdbarch *gdbarch);
+extern void set_gdbarch_double_format (struct gdbarch *gdbarch, const struct floatformat * double_format);
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > 1) || !defined (TARGET_DOUBLE_FORMAT)
+#define TARGET_DOUBLE_FORMAT (gdbarch_double_format (current_gdbarch))
+#endif
+#endif
+
+/* Default (value) for non- multi-arch platforms. */
+#if (GDB_MULTI_ARCH == 0) && !defined (TARGET_LONG_DOUBLE_FORMAT)
+#define TARGET_LONG_DOUBLE_FORMAT (&floatformat_unknown)
+#endif
+
+extern const struct floatformat * gdbarch_long_double_format (struct gdbarch *gdbarch);
+extern void set_gdbarch_long_double_format (struct gdbarch *gdbarch, const struct floatformat * long_double_format);
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > 1) || !defined (TARGET_LONG_DOUBLE_FORMAT)
+#define TARGET_LONG_DOUBLE_FORMAT (gdbarch_long_double_format (current_gdbarch))
+#endif
+#endif
+
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
 

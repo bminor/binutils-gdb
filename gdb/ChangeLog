@@ -1,3 +1,22 @@
+Tue May 30 13:31:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* defs.h (TARGET_FLOAT_FORMAT, TARGET_DOUBLE_FORMAT,
+ 	TARGET_LONG_DOUBLE_FORMAT): Delete.
+
+	* gdbarch.sh: Add support for parameterized expressions.
+ 	(TARGET_FLOAT_FORMAT, TARGET_DOUBLE_FORMAT,
+ 	TARGET_LONG_DOUBLE_FORMAT): Add.  Include "floatformat.h".
+	* gdbarch.h, gdbarch.c: Regenerate.
+	
+	* arch-utils.c (default_single_format, default_double_format,
+ 	default_long_double_format): New functions. Include
+ 	"floatformat.h"
+	* arch-utils.h: Declare.
+	
+	* d10v-tdep.c (d10v_gdbarch_init): Set floating point format.
+  	Note that long double is 64 bit, the rest are 32 bit.  Include
+ 	"floatformat.h".
+
 2000-06-02  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/alpha/nm-fbsd.h (CANNOT_STEP_BREAKPOINT): Define.

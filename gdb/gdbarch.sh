@@ -1,4 +1,4 @@
-#!/usr/local/bin/bash
+#!/usr/local/bin/bash -u
 
 # Architecture commands for GDB, the GNU debugger.
 # Copyright 1998-2000 Free Software Foundation, Inc.
@@ -34,15 +34,62 @@ compare_new ()
 }
 
 
-# DEFAULT is a valid fallback definition of a MACRO when
-# multi-arch is not enabled.
-default_is_fallback_p ()
-{
-    [ "${predefault}" != "" -a "${invalid_p}" = "0" ]
-}
-
 # Format of the input table
 read="class level macro returntype function formal actual attrib staticdefault predefault postdefault invalid_p fmt print print_p description"
+
+do_read ()
+{
+    if eval read $read
+    then
+	test "${staticdefault}" || staticdefault=0
+	# NOT YET: Breaks BELIEVE_PCC_PROMOTION and confuses non-
+	# multi-arch defaults.
+	# test "${predefault}" || predefault=0
+	test "${fmt}" || fmt="%ld"
+	test "${print}" || print="(long) ${macro}"
+	case "${invalid_p}" in
+	    0 ) valid_p=1 ;;
+	    "" )
+		if [ "${predefault}" ]
+		then
+		    #invalid_p="gdbarch->${function} == ${predefault}"
+		    valid_p="gdbarch->${function} != ${predefault}"
+		else
+		    #invalid_p="gdbarch->${function} == 0"
+		    valid_p="gdbarch->${function} != 0"
+		fi
+		;;
+	    * ) valid_p="!(${invalid_p})"
+	esac
+
+	# PREDEFAULT is a valid fallback definition of MEMBER when
+	# multi-arch is not enabled.  This ensures that the default
+	# value, when multi-arch is the same as the default value when
+	# not multi-arch.  POSTDEFAULT is always a valid definition of
+	# MEMBER as this again ensures consistency.
+	if [ "${postdefault}" != "" ]
+	then
+	    fallbackdefault="${postdefault}"
+	elif [ "${predefault}" != "" ]
+	then
+	    fallbackdefault="${predefault}"
+	else
+	    fallbackdefault=""
+	fi
+	#NOT YET:
+	# See gdbarch.log for basic verification of database
+	:
+    else
+	false
+    fi
+}
+
+
+fallback_default_p ()
+{
+    [ "${postdefault}" != "" -a "${invalid_p}" != "0" ] \
+	|| [ "${predefault}" != "" -a "${invalid_p}" = "0" ]
+}
 
 class_is_variable_p ()
 {
@@ -62,39 +109,6 @@ class_is_predicate_p ()
 class_is_info_p ()
 {
     [ "${class}" = "i" ]
-}
-
-
-do_read ()
-{
-    if eval read $read
-    then
-	test "${staticdefault}" || staticdefault=0
-	test "${fmt}" || fmt="%ld"
-	test "${print}" || print="(long) ${macro}"
-	#FIXME:
-	#Should set PREDEFAULT to zero and force the user to provide
-	#an invalid_p=0
-	#test "${predefault}" || predefault=0 - NO
-	case "${invalid_p}" in
-	    0 ) valid_p=1 ;;
-	    "" )
-		if [ "${predefault}" ]
-		then
-		    valid_p="gdbarch->${function} != ${predefault}"
-		else
-		    valid_p="gdbarch->${function} != 0"
-		fi
-		#NOT_YET
-		#test "${predefault}" && invalid_p="gdbarch->${function} == ${predefault}"
-		;;
-	    * ) valid_p="!(${invalid_p})"
-	esac
-	#NOT YET:
-	:
-    else
-	false
-    fi
 }
 
 
@@ -173,15 +187,20 @@ do
 
 	# If PREDEFAULT is empty, zero is used.
 
-	# Specify a non-empty PREDEFAULT and a zero INVALID_P to
-	# create a fallback value or function for when multi-arch is
-	# disabled.  Specify a zero PREDEFAULT function to make that
-	# fallback call internal_error().
+	# When POSTDEFAULT is empty, a non-empty PREDEFAULT and a zero
+	# INVALID_P will be used as default values when when
+	# multi-arch is disabled.  Specify a zero PREDEFAULT function
+	# to make that fallback call internal_error().
+
+	# Variable declarations can refer to ``gdbarch'' which will
+	# contain the current architecture.  Care should be taken.
 
     postdefault ) : ;;
 
 	# A value to assign to MEMBER of the new gdbarch object should
-	# the target code fail to change the PREDEFAULT value.
+	# the target code fail to change the PREDEFAULT value.  Also
+	# use POSTDEFAULT as the fallback value for the non-
+	# multi-arch case.
 
 	# If POSTDEFAULT is empty, no post update is performed.
 
@@ -189,11 +208,10 @@ do
 	# INVALID_P will be used to determine if MEMBER should be
 	# changed to POSTDEFAULT.
 
-	# FIXME: NOT YET.  Can this be simplified?  Specify a
-	# non-empty POSTDEFAULT and a zero INVALID_P to create a
-	# fallback value or function for when multi-arch is disabled.
-	# Specify a zero POSTDEFAULT function to make that fallback
-	# call internal_error(). This overrides PREDEFAULT.
+	# You cannot specify both a zero INVALID_P and a POSTDEFAULT.
+
+	# Variable declarations can refer to ``gdbarch'' which will
+	# contain the current architecture.  Care should be taken.
 
     invalid_p ) : ;;
 
@@ -207,7 +225,8 @@ do
 	# If INVALID_P is empty, a check that MEMBER is no longer
 	# equal to PREDEFAULT is used.
 
-	# The expression ``0'' disables the INVALID_P check.
+	# The expression ``0'' disables the INVALID_P check making
+	# PREDEFAULT a legitimate value.
 
 	# See also PREDEFAULT and POSTDEFAULT.
 
@@ -305,8 +324,8 @@ v:1:CALL_DUMMY_STACK_ADJUST_P:int:call_dummy_stack_adjust_p::::0:-1:::0x%08lx
 v:2:CALL_DUMMY_STACK_ADJUST:int:call_dummy_stack_adjust::::0:::gdbarch->call_dummy_stack_adjust_p && gdbarch->call_dummy_stack_adjust == 0:0x%08lx::CALL_DUMMY_STACK_ADJUST_P
 f:2:FIX_CALL_DUMMY:void:fix_call_dummy:char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs, struct value **args, struct type *type, int gcc_p:dummy, pc, fun, nargs, args, type, gcc_p:::0
 #
-v:2:BELIEVE_PCC_PROMOTION:int:believe_pcc_promotion::::0:::::
-v:2:BELIEVE_PCC_PROMOTION_TYPE:int:believe_pcc_promotion_type::::0:::::
+v:2:BELIEVE_PCC_PROMOTION:int:believe_pcc_promotion:::::::
+v:2:BELIEVE_PCC_PROMOTION_TYPE:int:believe_pcc_promotion_type:::::::
 f:2:COERCE_FLOAT_TO_DOUBLE:int:coerce_float_to_double:struct type *formal, struct type *actual:formal, actual:::default_coerce_float_to_double::0
 f:1:GET_SAVED_REGISTER:void:get_saved_register:char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lval:raw_buffer, optimized, addrp, frame, regnum, lval::generic_get_saved_register:0
 #
@@ -364,6 +383,10 @@ f:2:FRAME_NUM_ARGS:int:frame_num_args:struct frame_info *frame:frame::0:0
 F:2:STACK_ALIGN:CORE_ADDR:stack_align:CORE_ADDR sp:sp::0:0
 F:2:REG_STRUCT_HAS_ADDR:int:reg_struct_has_addr:int gcc_p, struct type *type:gcc_p, type::0:0
 F:2:SAVE_DUMMY_FRAME_TOS:void:save_dummy_frame_tos:CORE_ADDR sp:sp::0:0
+#
+v:2:TARGET_FLOAT_FORMAT:const struct floatformat *:float_format::::::default_float_format (gdbarch)
+v:2:TARGET_DOUBLE_FORMAT:const struct floatformat *:double_format::::::default_double_format (gdbarch)
+v:2:TARGET_LONG_DOUBLE_FORMAT:const struct floatformat *:long_double_format::::::&floatformat_unknown
 EOF
   grep -v '^#'
 }
@@ -380,7 +403,8 @@ ${class} ${macro}(${actual})
     level=${level}
     staticdefault=${staticdefault}
     predefault=${predefault}
-    postdefault=${predefault}
+    postdefault=${postdefault}
+    fallbackdefault=${fallbackdefault}
     invalid_p=${invalid_p}
     valid_p=${valid_p}
     fmt=${fmt}
@@ -388,9 +412,15 @@ ${class} ${macro}(${actual})
     print_p=${print_p}
     description=${description}
 EOF
-    if class_is_predicate_p && default_is_fallback_p
+    if class_is_predicate_p && fallback_default_p
     then
 	echo "Error: predicate function can not have a non- multi-arch default" 1>&2
+	kill $$
+	exit 1
+    fi
+    if [ "${invalid_p}" = "0" -a "${postdefault}" != "" ]
+    then
+	echo "Error: postdefault is useless when invalid_p=0" 1>&2
 	kill $$
 	exit 1
     fi
@@ -527,12 +557,13 @@ do
     fi
     if class_is_variable_p
     then
-	if default_is_fallback_p || class_is_predicate_p
+	if fallback_default_p || class_is_predicate_p
 	then
 	    echo ""
 	    echo "/* Default (value) for non- multi-arch platforms. */"
 	    echo "#if (GDB_MULTI_ARCH == 0) && !defined (${macro})"
-	    echo "#define ${macro} (${predefault})"
+	    echo "#define ${macro} (${fallbackdefault})" \
+		| sed -e 's/\([^a-z_]\)\(gdbarch[^a-z_]\)/\1current_\2/g'
 	    echo "#endif"
 	fi
 	echo ""
@@ -546,16 +577,18 @@ do
     fi
     if class_is_function_p
     then
-	if default_is_fallback_p || class_is_predicate_p
+	if fallback_default_p || class_is_predicate_p
 	then
 	    echo ""
 	    echo "/* Default (function) for non- multi-arch platforms. */"
 	    echo "#if (GDB_MULTI_ARCH == 0) && !defined (${macro})"
-	    if [ "${predefault}" = "0" ]
+	    if [ "${fallbackdefault}" = "0" ]
 	    then
 		echo "#define ${macro}(${actual}) (internal_error (\"${macro}\"), 0)"
 	    else
-		echo "#define ${macro}(${actual}) (${predefault} (${actual}))"
+		# FIXME: Should be passing current_gdbarch through!
+		echo "#define ${macro}(${actual}) (${fallbackdefault} (${actual}))" \
+		    | sed -e 's/\([^a-z_]\)\(gdbarch[^a-z_]\)/\1current_\2/g'
 	    fi
 	    echo "#endif"
 	fi
@@ -916,6 +949,7 @@ cat <<EOF
 #endif
 #include "symcat.h"
 
+#include "floatformat.h"
 
 /* Static function declarations */
 
@@ -1136,7 +1170,20 @@ do
 	elif class_is_predicate_p
 	then
 	    echo "  /* Skip verify of ${function}, has predicate */"
- 	elif [ "${invalid_p}" ]
+	# FIXME: See do_read for potential simplification
+ 	elif [ "${invalid_p}" -a "${postdefault}" ]
+	then
+	    echo "  if (${invalid_p})"
+	    echo "    gdbarch->${function} = ${postdefault};"
+	elif [ "${predefault}" -a "${postdefault}" ]
+	then
+	    echo "  if (gdbarch->${function} == ${predefault})"
+	    echo "    gdbarch->${function} = ${postdefault};"
+	elif [ "${postdefault}" ]
+	then
+	    echo "  if (gdbarch->${function} == 0)"
+	    echo "    gdbarch->${function} = ${postdefault};"
+	elif [ "${invalid_p}" ]
 	then
 	    echo "  if ((GDB_MULTI_ARCH >= ${level})"
 	    echo "      && (${invalid_p}))"

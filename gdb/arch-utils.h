@@ -63,4 +63,8 @@ extern gdbarch_prologue_frameless_p_ftype generic_prologue_frameless_p;
 extern int core_addr_lessthan (CORE_ADDR lhs, CORE_ADDR rhs);
 extern int core_addr_greaterthan (CORE_ADDR lhs, CORE_ADDR rhs);
 
+/* Floating point values. */
+extern const struct floatformat *default_float_format (struct gdbarch *gdbarch);
+extern const struct floatformat *default_double_format (struct gdbarch *gdbarch);
+
 #endif

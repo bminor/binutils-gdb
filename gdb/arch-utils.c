@@ -41,6 +41,8 @@
 #include "symfile.h"		/* for overlay functions */
 #endif
 
+#include "floatformat.h"
+
 /* Convenience macro for allocting typesafe memory. */
 
 #ifndef XMALLOC
@@ -162,6 +164,47 @@ core_addr_greaterthan (lhs, rhs)
   return (lhs > rhs);
 }
 
+
+/* Helper functions for TARGET_{FLOAT,DOUBLE}_FORMAT */
+
+const struct floatformat *
+default_float_format (struct gdbarch *gdbarch)
+{
+#if GDB_MULTI_ARCH
+  int byte_order = gdbarch_byte_order (gdbarch);
+#else
+  int byte_order = TARGET_BYTE_ORDER;
+#endif
+  switch (byte_order)
+    {
+    case BIG_ENDIAN:
+      return &floatformat_ieee_single_big;
+    case LITTLE_ENDIAN:
+      return &floatformat_ieee_single_little;
+    default:
+      internal_error ("default_float_format: bad byte order");
+    }
+}
+
+
+const struct floatformat *
+default_double_format (struct gdbarch *gdbarch)
+{
+#if GDB_MULTI_ARCH
+  int byte_order = gdbarch_byte_order (gdbarch);
+#else
+  int byte_order = TARGET_BYTE_ORDER;
+#endif
+  switch (byte_order)
+    {
+    case BIG_ENDIAN:
+      return &floatformat_ieee_double_big;
+    case LITTLE_ENDIAN:
+      return &floatformat_ieee_double_little;
+    default:
+      internal_error ("default_double_format: bad byte order");
+    }
+}
 
 /* */
 

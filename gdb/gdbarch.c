@@ -58,6 +58,7 @@
 #endif
 #include "symcat.h"
 
+#include "floatformat.h"
 
 /* Static function declarations */
 
@@ -220,6 +221,9 @@ struct gdbarch
   gdbarch_stack_align_ftype *stack_align;
   gdbarch_reg_struct_has_addr_ftype *reg_struct_has_addr;
   gdbarch_save_dummy_frame_tos_ftype *save_dummy_frame_tos;
+  const struct floatformat * float_format;
+  const struct floatformat * double_format;
+  const struct floatformat * long_double_format;
 };
 
 
@@ -287,6 +291,9 @@ struct gdbarch startup_gdbarch = {
   0,
   0,
   generic_get_saved_register,
+  0,
+  0,
+  0,
   0,
   0,
   0,
@@ -637,6 +644,12 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of stack_align, has predicate */
   /* Skip verify of reg_struct_has_addr, has predicate */
   /* Skip verify of save_dummy_frame_tos, has predicate */
+  if (gdbarch->float_format == 0)
+    gdbarch->float_format = default_float_format (gdbarch);
+  if (gdbarch->double_format == 0)
+    gdbarch->double_format = default_double_format (gdbarch);
+  if (gdbarch->long_double_format == 0)
+    gdbarch->long_double_format = &floatformat_unknown;
 }
 
 
@@ -1184,6 +1197,21 @@ gdbarch_dump (void)
                       "gdbarch_update: SAVE_DUMMY_FRAME_TOS = 0x%08lx\n",
                       (long) current_gdbarch->save_dummy_frame_tos
                       /*SAVE_DUMMY_FRAME_TOS ()*/);
+#endif
+#ifdef TARGET_FLOAT_FORMAT
+  fprintf_unfiltered (gdb_stdlog,
+                      "gdbarch_update: TARGET_FLOAT_FORMAT = %ld\n",
+                      (long) TARGET_FLOAT_FORMAT);
+#endif
+#ifdef TARGET_DOUBLE_FORMAT
+  fprintf_unfiltered (gdb_stdlog,
+                      "gdbarch_update: TARGET_DOUBLE_FORMAT = %ld\n",
+                      (long) TARGET_DOUBLE_FORMAT);
+#endif
+#ifdef TARGET_LONG_DOUBLE_FORMAT
+  fprintf_unfiltered (gdb_stdlog,
+                      "gdbarch_update: TARGET_LONG_DOUBLE_FORMAT = %ld\n",
+                      (long) TARGET_LONG_DOUBLE_FORMAT);
 #endif
   fprintf_unfiltered (gdb_stdlog,
                       "gdbarch_update: GDB_MULTI_ARCH = %d\n",
@@ -2818,6 +2846,51 @@ set_gdbarch_save_dummy_frame_tos (struct gdbarch *gdbarch,
                                   gdbarch_save_dummy_frame_tos_ftype save_dummy_frame_tos)
 {
   gdbarch->save_dummy_frame_tos = save_dummy_frame_tos;
+}
+
+const struct floatformat *
+gdbarch_float_format (struct gdbarch *gdbarch)
+{
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_float_format called\n");
+  return gdbarch->float_format;
+}
+
+void
+set_gdbarch_float_format (struct gdbarch *gdbarch,
+                          const struct floatformat * float_format)
+{
+  gdbarch->float_format = float_format;
+}
+
+const struct floatformat *
+gdbarch_double_format (struct gdbarch *gdbarch)
+{
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_double_format called\n");
+  return gdbarch->double_format;
+}
+
+void
+set_gdbarch_double_format (struct gdbarch *gdbarch,
+                           const struct floatformat * double_format)
+{
+  gdbarch->double_format = double_format;
+}
+
+const struct floatformat *
+gdbarch_long_double_format (struct gdbarch *gdbarch)
+{
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_long_double_format called\n");
+  return gdbarch->long_double_format;
+}
+
+void
+set_gdbarch_long_double_format (struct gdbarch *gdbarch,
+                                const struct floatformat * long_double_format)
+{
+  gdbarch->long_double_format = long_double_format;
 }
 
 
