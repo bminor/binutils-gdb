@@ -1,3 +1,8 @@
+2001-06-07  Jim Blandy  <jimb@redhat.com>
+
+	* gdbarch.sh: Make sure that '[' doesn't interpret interesting
+	variable values as operators.
+
 2001-06-07  Keith Seitz  <keiths@redhat.com>
 
 	* gdb-events.sh: Fix quote escaping which was obsoleted

@@ -85,7 +85,7 @@ EOF
 	    case "${invalid_p}" in
 		0 ) valid_p=1 ;;
 		"" )
-		    if [ "${predefault}" ]
+		    if [ -n "${predefault}" ]
 		    then
 			#invalid_p="gdbarch->${function} == ${predefault}"
 			valid_p="gdbarch->${function} != ${predefault}"
@@ -104,10 +104,10 @@ EOF
 	    # always a valid definition of MEMBER as this again
 	    # ensures consistency.
 
-	    if [ "${postdefault}" != "" ]
+	    if [ -n "${postdefault}" ]
 	    then
 		fallbackdefault="${postdefault}"
-	    elif [ "${predefault}" != "" ]
+	    elif [ -n "${predefault}" ]
 	    then
 		fallbackdefault="${predefault}"
 	    else
@@ -120,7 +120,7 @@ EOF
 	    break
 	fi
     done
-    if [ "${class}" ]
+    if [ -n "${class}" ]
     then
 	true
     else
@@ -131,8 +131,8 @@ EOF
 
 fallback_default_p ()
 {
-    [ "${postdefault}" != "" -a "${invalid_p}" != "0" ] \
-	|| [ "${predefault}" != "" -a "${invalid_p}" = "0" ]
+    [ -n "${postdefault}" -a "x${invalid_p}" != "x0" ] \
+	|| [ -n "${predefault}" -a "x${invalid_p}" = "x0" ]
 }
 
 class_is_variable_p ()
@@ -549,7 +549,7 @@ EOF
 	kill $$
 	exit 1
     fi
-    if [ "${invalid_p}" = "0" -a "${postdefault}" != "" ]
+    if [ "x${invalid_p}" = "x0" -a -n "${postdefault}" ]
     then
 	echo "Error: postdefault is useless when invalid_p=0" 1>&2
 	kill $$
@@ -660,7 +660,7 @@ printf "\n"
 printf "/* The following are initialized by the target dependent code. */\n"
 function_list | while do_read
 do
-    if [ "${comment}" ]
+    if [ -n "${comment}" ]
     then
 	echo "${comment}" | sed \
 	    -e '2 s,#,/*,' \
@@ -725,7 +725,7 @@ do
 	    printf "\n"
 	    printf "/* Default (function) for non- multi-arch platforms. */\n"
 	    printf "#if (!GDB_MULTI_ARCH) && !defined (${macro})\n"
-	    if [ "${fallbackdefault}" = "0" ]
+	    if [ "x${fallbackdefault}" = "x0" ]
 	    then
 		printf "#define ${macro}(${actual}) (internal_error (__FILE__, __LINE__, \"${macro}\"), 0)\n"
 	    else
@@ -736,7 +736,7 @@ do
 	    printf "#endif\n"
 	fi
 	printf "\n"
-	if [ "${formal}" = "void" ] && class_is_multiarch_p
+	if [ "x${formal}" = "xvoid" ] && class_is_multiarch_p
 	then
 	    printf "typedef ${returntype} (gdbarch_${function}_ftype) (struct gdbarch *gdbarch);\n"
 	elif class_is_multiarch_p
@@ -745,7 +745,7 @@ do
 	else
 	    printf "typedef ${returntype} (gdbarch_${function}_ftype) (${formal});\n"
 	fi
-	if [ "${formal}" = "void" ]
+	if [ "x${formal}" = "xvoid" ]
 	then
 	  printf "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch);\n"
 	else
@@ -756,10 +756,10 @@ do
 	else
 	    printf "#if GDB_MULTI_ARCH\n"
 	    printf "#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (${macro})\n"
-	    if [ "${actual}" = "" ]
+	    if [ "x${actual}" = "x" ]
 	    then
 		printf "#define ${macro}() (gdbarch_${function} (current_gdbarch))\n"
-	    elif [ "${actual}" = "-" ]
+	    elif [ "x${actual}" = "x-" ]
 	    then
 		printf "#define ${macro} (gdbarch_${function} (current_gdbarch))\n"
 	    else
@@ -1295,7 +1295,7 @@ function_list | while do_read
 do
     if class_is_function_p || class_is_variable_p
     then
-	if [ "${predefault}" != "" -a "${predefault}" != "0" ]
+	if [ -n "${predefault}" -a "x${predefault}" != "x0" ]
 	then
 	  printf "  gdbarch->${function} = ${predefault};\n"
 	fi
@@ -1352,32 +1352,32 @@ function_list | while do_read
 do
     if class_is_function_p || class_is_variable_p
     then
-	if [ "${invalid_p}" = "0" ]
+	if [ "x${invalid_p}" = "x0" ]
 	then
 	    printf "  /* Skip verify of ${function}, invalid_p == 0 */\n"
 	elif class_is_predicate_p
 	then
 	    printf "  /* Skip verify of ${function}, has predicate */\n"
 	# FIXME: See do_read for potential simplification
- 	elif [ "${invalid_p}" -a "${postdefault}" ]
+ 	elif [ -n "${invalid_p}" -a -n "${postdefault}" ]
 	then
 	    printf "  if (${invalid_p})\n"
 	    printf "    gdbarch->${function} = ${postdefault};\n"
-	elif [ "${predefault}" -a "${postdefault}" ]
+	elif [ -n "${predefault}" -a -n "${postdefault}" ]
 	then
 	    printf "  if (gdbarch->${function} == ${predefault})\n"
 	    printf "    gdbarch->${function} = ${postdefault};\n"
-	elif [ "${postdefault}" ]
+	elif [ -n "${postdefault}" ]
 	then
 	    printf "  if (gdbarch->${function} == 0)\n"
 	    printf "    gdbarch->${function} = ${postdefault};\n"
-	elif [ "${invalid_p}" ]
+	elif [ -n "${invalid_p}" ]
 	then
 	    printf "  if ((GDB_MULTI_ARCH >= ${level})\n"
 	    printf "      && (${invalid_p}))\n"
 	    printf "    internal_error (__FILE__, __LINE__,\n"
 	    printf "                    \"gdbarch: verify_gdbarch: ${function} invalid\");\n"
-	elif [ "${predefault}" ]
+	elif [ -n "${predefault}" ]
 	then
 	    printf "  if ((GDB_MULTI_ARCH >= ${level})\n"
 	    printf "      && (gdbarch->${function} == ${predefault}))\n"
@@ -1413,7 +1413,7 @@ function_list | while do_read
 do
     # multiarch functions don't have macros.
     class_is_multiarch_p && continue
-    if [ "${returntype}" = "void" ]
+    if [ "x${returntype}" = "xvoid" ]
     then
 	printf "#if defined (${macro}) && GDB_MULTI_ARCH\n"
 	printf "  /* Macro might contain \`[{}]' when not multi-arch */\n"
@@ -1444,13 +1444,13 @@ do
 	continue
     fi
     printf "#ifdef ${macro}\n"
-    if [ "${print_p}" = "()" ]
+    if [ "x${print_p}" = "x()" ]
     then
         printf "  gdbarch_dump_${function} (current_gdbarch);\n"
-    elif [ "${print_p}" = "0" ]
+    elif [ "x${print_p}" = "x0" ]
     then
         printf "  /* skip print of ${macro}, print_p == 0. */\n"
-    elif [ "${print_p}" ]
+    elif [ -n "${print_p}" ]
     then
         printf "  if (${print_p})\n"
 	printf "    fprintf_unfiltered (file,\n"
@@ -1497,7 +1497,7 @@ do
 	printf "int\n"
 	printf "gdbarch_${function}_p (struct gdbarch *gdbarch)\n"
 	printf "{\n"
-	if [ "${valid_p}" ]
+	if [ -n "${valid_p}" ]
 	then
 	    printf "  return ${valid_p};\n"
 	else
@@ -1509,7 +1509,7 @@ do
     then
 	printf "\n"
 	printf "${returntype}\n"
-	if [ "${formal}" = "void" ]
+	if [ "x${formal}" = "xvoid" ]
 	then
 	  printf "gdbarch_${function} (struct gdbarch *gdbarch)\n"
 	else
@@ -1521,7 +1521,7 @@ do
 	printf "                    \"gdbarch: gdbarch_${function} invalid\");\n"
 	printf "  if (gdbarch_debug >= 2)\n"
 	printf "    fprintf_unfiltered (gdb_stdlog, \"gdbarch_${function} called\\\\n\");\n"
-	if [ "${actual}" = "-" -o "${actual}" = "" ]
+	if [ "x${actual}" = "x-" -o "x${actual}" = "x" ]
 	then
 	    if class_is_multiarch_p
 	    then
@@ -1537,7 +1537,7 @@ do
 		params="${actual}"
 	    fi
         fi
-       	if [ "${returntype}" = "void" ]
+       	if [ "x${returntype}" = "xvoid" ]
 	then
 	  printf "  gdbarch->${function} (${params});\n"
 	else
@@ -1557,15 +1557,15 @@ do
 	printf "${returntype}\n"
 	printf "gdbarch_${function} (struct gdbarch *gdbarch)\n"
 	printf "{\n"
-	if [ "${invalid_p}" = "0" ]
+	if [ "x${invalid_p}" = "x0" ]
 	then
 	    printf "  /* Skip verify of ${function}, invalid_p == 0 */\n"
-	elif [ "${invalid_p}" ]
+	elif [ -n "${invalid_p}" ]
 	then
 	  printf "  if (${invalid_p})\n"
 	  printf "    internal_error (__FILE__, __LINE__,\n"
 	  printf "                    \"gdbarch: gdbarch_${function} invalid\");\n"
-	elif [ "${predefault}" ]
+	elif [ -n "${predefault}" ]
 	then
 	  printf "  if (gdbarch->${function} == ${predefault})\n"
 	  printf "    internal_error (__FILE__, __LINE__,\n"
