@@ -1,3 +1,8 @@
+2003-07-23  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* ld-srec/srec.exp: For m6811/m6812 use --defsym to define _.z soft
+	register.
+
 2003-06-18  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris/locref1.d, ld-cris/locref1.s, ld-cris/locref2.d,
