@@ -1,5 +1,10 @@
 1999-02-13  Jim Blandy  <jimb@zwingli.cygnus.com>
 
+	* gas/mips/mips.exp: Run the new tests, below.
+	* gas/mips/elf_e_flags1.d, gas/mips/elf_e_flags2.d,
+	gas/mips/elf_e_flags3.d, gas/mips/elf_e_flags4.d: New files.
+	* gas/mips/elf_e_flags.c, gas/mips/elf_e_flags.s: New files.
+
 	* lib/gas-defs.exp (run_dump_test): Document.  It's not
  	really trivial.
 
