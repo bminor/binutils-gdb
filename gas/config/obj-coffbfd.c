@@ -1740,7 +1740,7 @@ extern void DEFUN_VOID(write_object_file)
 
     /* Turn the gas native symbol table shape into a coff symbol table */
     crawl_symbols(&filehdr, abfd);
-#ifndef TC_H8300
+#if !defined(TC_H8300) && !defined(TC_Z8K)
     for (i = SEG_E0; i < SEG_UNKNOWN; i++) 
     {
       fixup_mdeps(segment_info[i].frchainP->frch_root);

@@ -1,3 +1,8 @@
+Tue Sep 29 12:22:52 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* obj-coffbfd.c (write_object_file): don't fixup for the z8k
+	* tc-z8k.c: lots of bug fixes
+
 Tue Sep 29 10:51:55 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* tc-i960.h, tc-i960.c: avoid the ANSI preprocessor addition
