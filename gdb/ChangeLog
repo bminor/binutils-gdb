@@ -1,5 +1,13 @@
 2002-12-05  David Carlton  <carlton@math.stanford.edu>
 
+	* dwarf2read.c (dwarf2_add_field): Treat a field that is a
+	DW_TAG_member as well as a declaration as being a C++ static data
+	member.
+	(read_structure_scope): Combine tests for DW_TAG_member and
+	DW_TAG_variable.
+
+2002-12-05  David Carlton  <carlton@math.stanford.edu>
+
 	* linespec.c (decode_compound): New function.
 	(decode_line_1): Move code into decode_compound.
 

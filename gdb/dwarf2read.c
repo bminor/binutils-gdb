@@ -2146,8 +2146,11 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
     new_field->virtuality = DW_UNSND (attr);
 
   fp = &new_field->field;
-  if (die->tag == DW_TAG_member)
+
+  if (die->tag == DW_TAG_member && ! die_is_declaration (die))
     {
+      /* Data member other than a C++ static data member.  */
+      
       /* Get type of field.  */
       fp->type = die_type (die, objfile, cu_header);
 
@@ -2232,12 +2235,18 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 	  fip->non_public_fields = 1;
 	}
     }
-  else if (die->tag == DW_TAG_variable)
+  else if (die->tag == DW_TAG_member || die->tag == DW_TAG_variable)
     {
+      /* C++ static member.  */
+
+      /* NOTE: carlton/2002-11-05: It should be a DW_TAG_member that
+	 is a declaration, but all versions of G++ as of this writing
+	 (so through at least 3.2.1) incorrectly generate
+	 DW_TAG_variable tags.  */
+      
       char *physname;
 
-      /* C++ static member.
-	 Get name of field.  */
+      /* Get name of field.  */
       attr = dwarf_attr (die, DW_AT_name);
       if (attr && DW_STRING (attr))
 	fieldname = DW_STRING (attr);
@@ -2605,13 +2614,14 @@ read_structure_scope (struct die_info *die, struct objfile *objfile,
 
       while (child_die && child_die->tag)
 	{
-	  if (child_die->tag == DW_TAG_member)
+	  if (child_die->tag == DW_TAG_member
+	      || child_die->tag == DW_TAG_variable)
 	    {
-	      dwarf2_add_field (&fi, child_die, objfile, cu_header);
-	    }
-	  else if (child_die->tag == DW_TAG_variable)
-	    {
-	      /* C++ static member.  */
+	      /* NOTE: carlton/2002-11-05: A C++ static data member
+		 should be a DW_TAG_member that is a declaration, but
+		 all versions of G++ as of this writing (so through at
+		 least 3.2.1) incorrectly generate DW_TAG_variable
+		 tags for them instead.  */
 	      dwarf2_add_field (&fi, child_die, objfile, cu_header);
 	    }
 	  else if (child_die->tag == DW_TAG_subprogram)
