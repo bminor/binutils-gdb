@@ -1,3 +1,7 @@
+2000-08-03  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf32-sh.c (sh_elf_reloc_loop): Warning removal.
+
 2000-07-31  Jason Eckhardt  <jle@cygnus.com>
 
         * reloc.c (BFD_RELOC_860_*): New bfd relocs for i860.

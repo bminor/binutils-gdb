@@ -455,7 +455,7 @@ static reloc_howto_type sh_elf_howto_table[] =
 static bfd_reloc_status_type
 sh_elf_reloc_loop (r_type, input_bfd, input_section, contents, addr,
                    symbol_section, start, end)
-     int r_type;
+     int r_type ATTRIBUTE_UNUSED;
      bfd *input_bfd;
      asection *input_section;
      bfd_byte *contents;
@@ -517,7 +517,7 @@ sh_elf_reloc_loop (r_type, input_bfd, input_section, contents, addr,
       for (last_ptr = ptr, ptr -= 4; ptr >= start_ptr && IS_PPI (ptr);)
 	ptr -= 2;
       ptr += 2;
-      diff = last_ptr - ptr >> 1;
+      diff = (last_ptr - ptr) >> 1;
       cum_diff += diff & 1;
       cum_diff += diff;
     }
@@ -554,7 +554,7 @@ sh_elf_reloc_loop (r_type, input_bfd, input_section, contents, addr,
   if (x < -128 || x > 127)
     return bfd_reloc_overflow;
 
-  x = insn & ~0xff | x & 0xff;
+  x = (insn & ~0xff) | (x & 0xff);
   bfd_put_16 (input_bfd, x, contents + addr);
 
   return bfd_reloc_ok;
