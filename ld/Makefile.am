@@ -439,7 +439,7 @@ eelf32mcore.c: $(srcdir)/emulparams/elf32mcore.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32mcore "$(tdir_mcore)"
 em32relf.c: $(srcdir)/emulparams/m32relf.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m32relf "$(tdir_m32r)"
 eelf32_sparc.c: $(srcdir)/emulparams/elf32_sparc.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}

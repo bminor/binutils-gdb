@@ -476,7 +476,7 @@ deffilep.c ldgram.c ldlex.c
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
 SOURCES = $(ld_new_SOURCES) $(EXTRA_ld_new_SOURCES)
 OBJECTS = $(ld_new_OBJECTS)
@@ -1153,7 +1153,7 @@ eelf32mcore.c: $(srcdir)/emulparams/elf32mcore.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32mcore "$(tdir_mcore)"
 em32relf.c: $(srcdir)/emulparams/m32relf.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m32relf "$(tdir_m32r)"
 eelf32_sparc.c: $(srcdir)/emulparams/elf32_sparc.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
