@@ -57,61 +57,9 @@ sparc-opc.c
 z8k-dis.c
 z8k-opc.h
 z8kgen.c
-alpha-opc.h
-alpha-dis.c
 
 Things-to-lose:
 
-
 Do-last:
 
-if ( echo $* | egrep verbose > /dev/null ) ; then
-	verbose=true
-else
-	verbose=
-fi
-
-if ( echo $* | grep keep\-v9 > /dev/null ) ; then
-	if [ -n "${verbose}" ] ; then
-		echo Keeping v9 in sparc-opc.c
-	fi
-else
-	if [ -n "${verbose}" ] ; then
-		echo Sanitizing v9 in sparc-opc.c
-	fi
-	rm -f new
-	grep -v v9 sparc-opc.c > new
-	if [ -n "${safe}" ] ; then
-		mv sparc-opc.c .Recover
-	else
-		rm sparc-opc.c
-	fi
-	mv new sparc-opc.c
-fi
-
-
-v9dirty="sparc-dis.c"
-
-if ( echo $* | grep keep\-v9 > /dev/null ) ; then
-	if [ -n "${verbose}" ] ; then
-		echo Keeping v9 in ${v9dirty}
-	fi
-else
-	for i in ${v9dirty} ; do
-		if [ -n "${verbose}" ] ; then
-			echo Sanitizing v9 in $i
-		fi
-		rm -f new
-		sed '/^#ifndef[ 	]NO_V9/,/^#endif/d' < $i > new
-		if grep -s -i v9 new ; then
-			echo '***' SANITIZING V9 IN $i FAILED ***** 1>&2
-		fi
-		if [ -n "${safe}" ] ; then
-			mv $i .Recover
-		else
-			rm $i
-		fi
-		mv new $i
-	done
-fi
 # End of file.
