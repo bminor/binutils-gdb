@@ -1,3 +1,8 @@
+2000-05-04  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-linux-nat.c: Define PT_READ_U and PT_WRITE_U if they're not
+	already defined.
+
 2000-05-01  Mark Kettenis  <kettenis@gnu.org>
 
 	* infrun.c (handle_inferior_event): Add missing call to keep_going
