@@ -1,3 +1,12 @@
+Mon Sep  9 14:37:00 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/mips/mips4.s, gas/mips/mips4.d: Use $fccN for condition code
+	registers.
+
+Fri Sep  6 18:23:54 1996  James G. Smith  <jsmith@cygnus.co.uk>
+
+	* gas/mips/dli.{s,d}: More test cases added.
+
 Wed Sep  4 11:47:29 1996  James G. Smith  <jsmith@cygnus.co.uk>
 
 	* gas/mips/mips.exp: Add check for dli macro instruction.
