@@ -1,3 +1,10 @@
+Fri Nov  1 11:56:09 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.base/coremaker.c: Add code to mmap some data so we
+	can check that it ends up in the core file.
+	* gdb.base/corefile.exp: Add test to read mmapped data
+	from core file.
+
 start-sanitize-m32r
 Wed Oct 30 18:19:16 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
