@@ -1,3 +1,7 @@
+2003-09-14  Andrew Cagney  <cagney@redhat.com>
+
+	* history.0: Delete generated file.
+
 2002-02-24  Elena Zannoni  <ezannoni@redhat.com>
 
         * ChangeLog.gdb: Renamed from ChangeLog.
