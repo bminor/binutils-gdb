@@ -1,3 +1,7 @@
+Fri Mar 19 12:59:50 1993  Stu Grossman  (grossman@cygnus.com)
+
+	* vx-share/vxWorks.h:  Remove #def of NULL.
+
 Fri Mar 19 11:28:18 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* tm-rs6000.h: Nuke no-op STAB_REG_TO_REGNUM.

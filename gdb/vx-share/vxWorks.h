@@ -45,10 +45,6 @@ modification history
 #ifndef INCvxWorksh
 #define INCvxWorksh
 
-#if	!defined(NULL) || (NULL!=0)
-#define NULL		0
-#endif	
-
 #if	!defined(EOF) || (EOF!=(-1))
 #define EOF		(-1)
 #endif	
