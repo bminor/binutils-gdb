@@ -1,3 +1,7 @@
+Mon Feb 28 10:59:14 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* ldlang.c (cat): Define using ANSI style if ALMOST_STDC defined.
+
 Sun Feb 27 16:29:38 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* emultempl/hppaelf.em (hppaelf_finish): Update comments.  This

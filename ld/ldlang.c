@@ -154,7 +154,7 @@ boolean delete_output_file_on_failure = false;
 etree_type *base; /* Relocation base - or null */
 
 
-#ifdef __STDC__
+#if defined(__STDC__) || defined(ALMOST_STDC)
 #define cat(a,b) a##b
 #else
 #define cat(a,b) a/**/b
