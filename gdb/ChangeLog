@@ -1,3 +1,7 @@
+Mon Aug  2 11:30:57 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* i386lynx-nat.c, thread.c, thread.h:  Update copyrights.
+
 Mon Aug  2 12:06:00 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* Makefile.in (ALLDEPFILES): Add i386lynx-nat.c.
