@@ -1,3 +1,8 @@
+Mon Oct 25 11:17:58 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+
+	* config/tc-z8k.c (get_specific, built_bytes):  Understand all the
+	aspects of lda.
+
 Mon Oct 25 10:20:31 1993  Ken Raeburn  (raeburn@rover.cygnus.com)
 
 	* doc/Makefile.in (install-info): Use "$<*" so VPATH will find
