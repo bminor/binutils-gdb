@@ -1,3 +1,8 @@
+2001-10-28  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/interrupt.exp: Treat SIGILL similar to SIGSEGV such
+	that we catch the expected failure under Linux/x86.
+
 2001-10-29  Orjan Friberg  <orjanf@axis.com>
 
 	* gdb.base/setvar.exp: Escape curly braces.

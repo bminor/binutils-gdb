@@ -101,7 +101,7 @@ if ![file exists $binfile] then {
 	send_gdb "p func1 ()\n"
 	gdb_expect {
 	    -re " = 4.*$gdb_prompt $" { pass "call function when asleep" }
-	    -re ".*Program received signal SIGSEGV.*$gdb_prompt $" {
+	    -re ".*Program received signal SIG(SEGV|ILL).*$gdb_prompt $" {
 		setup_xfail "i*86-pc-linux*-gnu*"
 		fail "child died when we called func1, skipped rest of tests"
 		return
