@@ -1,5 +1,5 @@
 /* TIc80 Simulator.
-   Copyright (C) 1997 Free Software Foundation, Inc.
+   Copyright (C) 1997, 1998 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.
@@ -137,6 +137,70 @@ tic80_init_trace (void)
   tic80_size_name = max_len + sizeof(":m") - 1 + sizeof (":s") - 1;
 }
 
+/* Given an integer which is the result of a comparison, return a string
+   giving which bits are set.  */
+
+static char *
+tic80_trace_cmp_internal (unsigned32 flag)
+{
+  struct cmp_bits { unsigned32 bit; char *string; };
+  static char buffer[32*8];
+  static struct cmp_bits bits[] =
+  {
+    { BIT32(29), "hs" },
+    { BIT32(28), "lo" },
+    { BIT32(27), "ls" },
+    { BIT32(26), "hi" },
+    { BIT32(25), "ge" },
+    { BIT32(24), "lt" },
+    { BIT32(23), "le" },
+    { BIT32(22), "gt" },
+    { BIT32(21), "ne" },
+    { BIT32(20), "eq" },
+
+    { BIT32(19), "hs.h" },
+    { BIT32(18), "lo.h" },
+    { BIT32(17), "ls.h" },
+    { BIT32(16), "hi.h" },
+    { BIT32(15), "ge.h" },
+    { BIT32(14), "lt.h" },
+    { BIT32(13), "le.h" },
+    { BIT32(12), "gt.h" },
+    { BIT32(11), "ne.h" },
+    { BIT32(10), "eq.h" },
+
+    { BIT32( 9), "hs.b" },
+    { BIT32( 8), "lo.b" },
+    { BIT32( 7), "ls.b" },
+    { BIT32( 6), "hi.b" },
+    { BIT32( 5), "ge.b" },
+    { BIT32( 4), "lt.b" },
+    { BIT32( 3), "le.b" },
+    { BIT32( 2), "gt.b" },
+    { BIT32( 1), "ne.b" },
+    { BIT32( 0), "eq.b" },
+    { 0,	 (char *)0 },
+  };
+
+  int i;
+  char *p = buffer;
+
+  for (i = 0; bits[i].bit != 0; i++)
+    {
+      if ((flag & bits[i].bit) != 0)
+	{
+	  if (p != buffer)
+	    *p++ = ' ';
+
+	  strcpy (p, bits[i].string);
+	  p += strlen (p);
+	}
+    }
+
+  *p = '\0';
+  return buffer;
+}
+
 /* Trace the result of an ALU operation with 2 integer inputs and an integer output */
 char *
 tic80_trace_alu3 (int indx,
@@ -152,6 +216,26 @@ tic80_trace_alu3 (int indx,
 	   SIZE_HEX, input1, SIZE_DECIMAL, (long)(signed32)input1,
 	   SIZE_HEX, input2, SIZE_DECIMAL, (long)(signed32)input2,
 	   SIZE_HEX, result, SIZE_DECIMAL, (long)(signed32)result);
+
+  return tic80_trace_buffer;
+}
+
+/* Trace the result of an ALU operation with 2 integer inputs and an integer output
+   that sets the bits from a compare instruction.  */
+char *
+tic80_trace_cmp (int indx,
+		 unsigned32 result,
+		 unsigned32 input1,
+		 unsigned32 input2)
+{
+  if (!tic80_size_name)
+    tic80_init_trace ();
+
+  sprintf (tic80_trace_buffer, "%-*s 0x%.*lx/%*ld 0x%.*lx/%*ld => 0x%.*lx %s",
+	   tic80_size_name, itable[indx].name,
+	   SIZE_HEX, input1, SIZE_DECIMAL, (long)(signed32)input1,
+	   SIZE_HEX, input2, SIZE_DECIMAL, (long)(signed32)input2,
+	   SIZE_HEX, result, tic80_trace_cmp_internal (result));
 
   return tic80_trace_buffer;
 }
@@ -222,7 +306,7 @@ tic80_trace_shift (int indx,
 	   SIZE_HEX, result, SIZE_DECIMAL, (long)(signed32)result);
 
   return tic80_trace_buffer;
-}    
+}
 
 /* Trace the result of an FPU operation with 2 floating point inputs and a floating point output */
 void
@@ -287,7 +371,7 @@ tic80_trace_fpu1 (SIM_DESC sd,
 		  SIZE_HEX + SIZE_DECIMAL, sim_fpu_2d (&result));
 }
 
-/* Trace the result of an FPU operation with 1 integer input and an integer output */
+/* Trace the result of an FPU operation with 2 floating point inputs and an integer output */
 void
 tic80_trace_fpu2i (SIM_DESC sd,
 		   sim_cpu *cpu,
@@ -307,6 +391,29 @@ tic80_trace_fpu2i (SIM_DESC sd,
 		  SIZE_HEX + SIZE_DECIMAL + 3, sim_fpu_2d (&input1),
 		  SIZE_HEX + SIZE_DECIMAL + 3, sim_fpu_2d (&input2),
 		  SIZE_HEX, result, SIZE_DECIMAL, (long)(signed32)result);
+}
+
+/* Trace the result of an FPU operation with 2 floating point inputs and an integer output
+   that is the result of a comparison.  */
+void
+tic80_trace_fpu2cmp (SIM_DESC sd,
+		     sim_cpu *cpu,
+		     sim_cia cia,
+		     int indx,
+		     unsigned32 result,
+		     sim_fpu input1,
+		     sim_fpu input2)
+{
+  if (!tic80_size_name)
+    tic80_init_trace ();
+
+  trace_one_insn (sd, cpu, cia.ip, 1,
+		  itable[indx].file, itable[indx].line_nr, "fpu",
+		  "%-*s %*f %*f => 0x%.*lx %s",
+		  tic80_size_name, itable[indx].name,
+		  SIZE_HEX + SIZE_DECIMAL + 3, sim_fpu_2d (&input1),
+		  SIZE_HEX + SIZE_DECIMAL + 3, sim_fpu_2d (&input2),
+		  SIZE_HEX, result, tic80_trace_cmp_internal (result));
 }
 
 /* Trace the result of a NOP operation */
@@ -389,7 +496,7 @@ tic80_trace_cond_br (int indx,
 	     SIZE_HEX, target, SIZE_DECIMAL, "",
 	     SIZE_HEX, cond, SIZE_DECIMAL, (long)(signed32)cond);
 
-  return tic80_trace_buffer;	       
+  return tic80_trace_buffer;
 }
 
 /* Trace the result of a unconditional branch operation */
@@ -406,7 +513,7 @@ tic80_trace_ucond_br (int indx,
 	     SIZE_HEX, target, (SIZE_DECIMAL*2) + SIZE_HEX + 4, "",
 	     SIZE_HEX, target);
 
-  return tic80_trace_buffer;	       
+  return tic80_trace_buffer;
 }
 
 /* Trace the result of a load or store operation with 2 integer addresses

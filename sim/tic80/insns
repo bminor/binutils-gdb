@@ -352,7 +352,7 @@
 			   (signed16)source2, (unsigned16)source2) << 10;
 	field |= cmp_vals (_SD, (signed8)source1, (unsigned8)source1,
 			    (signed8)source2, (unsigned8)source2);
-	TRACE_ALU3 (MY_INDEX, field, source1, source2);
+	TRACE_CMP (MY_INDEX, field, source1, source2);
 	*rDest = field;
 31.Dest,26.Source2,21.0b1010000,14.SignedImmediate::::cmp i
 "cmp <SignedImmediate>, r<Source2>, r<Dest>"
@@ -541,7 +541,7 @@ void::function::do_fcmp:unsigned32 *rDest, sim_fpu s1, sim_fpu s2
 	        || sim_fpu_is_ge (&s1, &s2)) result |= BIT32(29);
 	  }
 	*rDest = result;
-	TRACE_FPU2I (result, s1, s2);
+	TRACE_FPU2CMP (result, s1, s2);
 31.Dest,26.Source2,21.0b111110101,12.0,11./,10.0,8.P2,6.P1,4.Source1::f::fcmp r
 "fcmp.%s<PX#P1>%s<PX#P2> r<Source1>, r<Source2>, r<Dest>"
 	do_fcmp (_SD, rDest,

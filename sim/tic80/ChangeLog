@@ -1,3 +1,15 @@
+Wed Jan 28 18:44:33 1998  Michael Meissner  <meissner@cygnus.com>
+
+	* misc.c (tic80_trace_cmp_internal): New function to return
+	compare bits as a string.
+	(tic80_trace_{,fpu2}cmp): New functions for tracing cmp and fcmp.
+
+	* cpu.h (tic80_trace_{,fpu2}cmp): Add declaration.
+	(TRACE_{,FPU2}CMP): New macros for tracing compares.
+
+	* insns (do_{,f}cmp): Use compare specific tracing functions to
+	print out the flag bits.
+
 Mon Jan 19 22:26:29 1998  Doug Evans  <devans@seba>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

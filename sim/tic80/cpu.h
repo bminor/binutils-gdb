@@ -1,5 +1,5 @@
 /* TIc80 Simulator.
-   Copyright (C) 1997 Free Software Foundation, Inc.
+   Copyright (C) 1997, 1998 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.
@@ -162,12 +162,14 @@ struct _sim_cpu {
 
 #if defined(WITH_TRACE)
 extern char *tic80_trace_alu3	  PARAMS ((int, unsigned32, unsigned32, unsigned32));
+extern char *tic80_trace_cmp	  PARAMS ((int, unsigned32, unsigned32, unsigned32));
 extern char *tic80_trace_alu2	  PARAMS ((int, unsigned32, unsigned32));
 extern char *tic80_trace_shift	  PARAMS ((int, unsigned32, unsigned32, int, int, int, int, int));
 extern void tic80_trace_fpu3	  PARAMS ((SIM_DESC, sim_cpu *, sim_cia, int, sim_fpu, sim_fpu, sim_fpu));
 extern void tic80_trace_fpu2	  PARAMS ((SIM_DESC, sim_cpu *, sim_cia, int, sim_fpu, sim_fpu));
 extern void tic80_trace_fpu1	  PARAMS ((SIM_DESC, sim_cpu *, sim_cia, int, sim_fpu));
 extern void tic80_trace_fpu2i	  PARAMS ((SIM_DESC, sim_cpu *, sim_cia, int, unsigned32, sim_fpu, sim_fpu));
+extern void tic80_trace_fpu2cmp	  PARAMS ((SIM_DESC, sim_cpu *, sim_cia, int, unsigned32, sim_fpu, sim_fpu));
 extern char *tic80_trace_nop	  PARAMS ((int));
 extern char *tic80_trace_sink1	  PARAMS ((int, unsigned32));
 extern char *tic80_trace_sink2	  PARAMS ((int, unsigned32, unsigned32));
@@ -182,6 +184,15 @@ do {									\
     trace_one_insn (SD, CPU, cia.ip, 1, itable[indx].file,		\
 		    itable[indx].line_nr, "alu",			\
 		    tic80_trace_alu3 (indx, result, input1, input2));	\
+  }									\
+} while (0)
+
+#define TRACE_CMP(indx, result, input1, input2)				\
+do {									\
+  if (TRACE_ALU_P (CPU)) {						\
+    trace_one_insn (SD, CPU, cia.ip, 1, itable[indx].file,		\
+		    itable[indx].line_nr, "alu",			\
+		    tic80_trace_cmp (indx, result, input1, input2));	\
   }									\
 } while (0)
 
@@ -233,6 +244,14 @@ do {									\
   if (TRACE_FPU_P (CPU)) {						\
     tic80_trace_fpu2i (SD, CPU, cia, MY_INDEX, 				\
 		      result, input1, input2);				\
+  }									\
+} while (0)
+
+#define TRACE_FPU2CMP(result, input1, input2)				\
+do {									\
+  if (TRACE_FPU_P (CPU)) {						\
+    tic80_trace_fpu2cmp (SD, CPU, cia, MY_INDEX,			\
+			 result, input1, input2);			\
   }									\
 } while (0)
 
