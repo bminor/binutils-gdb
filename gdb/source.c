@@ -1197,8 +1197,9 @@ print_source_lines (struct symtab *s, int line, int stopline, int noerror)
 
 /* Print a list of files and line numbers which a user may choose from
    in order to list a function which was specified ambiguously (as with
-   `list classname::overloadedfuncname', for example).  The vector in
-   SALS provides the filenames and line numbers.  */
+   `list classname::overloadedfuncname', or 'list objectiveCSelector:).
+   The vector in SALS provides the filenames and line numbers.
+   NOTE: some of the SALS may have no filename or line information! */
 
 static void
 ambiguous_line_spec (struct symtabs_and_lines *sals)

@@ -1,5 +1,9 @@
 2002-10-13  Adam Fedor  <fedor@gnu.org>
 
+	* source.c (print_source_lines): Update comments.
+
+2002-10-13  Adam Fedor  <fedor@gnu.org>
+
 	* valops.c (value_of_local): New function.
 	(value_of_this): Use it.
 	* value.h (value_of_local): Declared.
