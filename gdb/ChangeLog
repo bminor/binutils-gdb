@@ -1,3 +1,9 @@
+Tue Jun 23 17:32:26 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* rs6000-tdep.c (pop_dummy_frame): use memcpy. 
+	(push_arguments): use memset.
+	(various other places): fix up indentation and long lines.
+
 Tue Jun 23 11:58:35 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 
 	* configure.in: s/lXext/-lXext/ for Jillian's change.

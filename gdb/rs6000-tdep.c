@@ -268,7 +268,8 @@ skip_prologue (pc, fdata)
 	continue;
 
       } else if (((op & 0xfc1f0000) == 0xbc010000) || 	/* stm Rx, NUM(r1) */
-		 ((op & 0xfc1f0000) == 0x90010000 &&	/* st rx,NUM(r1), rx >= r13 */
+		 ((op & 0xfc1f0000) == 0x90010000 &&	/* st rx,NUM(r1), 
+							   rx >= r13 */
 		  (op & 0x03e00000) >= 0x01a00000)) {
 
 	reg = GET_SRC_REG (op);
@@ -278,43 +279,52 @@ skip_prologue (pc, fdata)
 	}
 	continue;
 
-      } else if ((op & 0xffff0000) == 0x3c000000) {	/* addis 0,0,NUM, used for >= 32k frames */
+      } else if ((op & 0xffff0000) == 0x3c000000) {	/* addis 0,0,NUM, used
+							   for >= 32k frames */
 	fdata->offset = (op & 0x0000ffff) << 16;
 	fdata->frameless = 0;
 	continue;
 
-      } else if ((op & 0xffff0000) == 0x60000000) {	/* ori 0,0,NUM, 2nd half of >= 32k frames */
+      } else if ((op & 0xffff0000) == 0x60000000) {	/* ori 0,0,NUM, 2nd ha
+							   lf of >= 32k frames */
 	fdata->offset |= (op & 0x0000ffff);
 	fdata->frameless = 0;
 	continue;
 
-      } else if ((op & 0xffff0000) == lr_reg) {		/* st Rx,NUM(r1) where Rx == lr */
+      } else if ((op & 0xffff0000) == lr_reg) {		/* st Rx,NUM(r1) 
+							   where Rx == lr */
 	fdata->lr_offset = SIGNED_SHORT (op) + offset;
 	fdata->nosavedpc = 0;
 	lr_reg = 0;
 	continue;
 
-      } else if ((op & 0xffff0000) == cr_reg) {		/* st Rx,NUM(r1) where Rx == cr */
+      } else if ((op & 0xffff0000) == cr_reg) {		/* st Rx,NUM(r1) 
+							   where Rx == cr */
 	fdata->cr_offset = SIGNED_SHORT (op) + offset;
 	cr_reg = 0;
 	continue;
 
-      } else if (op == 0x48000005) {			/* bl .+4 used in -mrelocatable */
+      } else if (op == 0x48000005) {			/* bl .+4 used in 
+							   -mrelocatable */
 	continue;
 
       } else if (op == 0x48000004) {			/* b .+4 (xlc) */
 	break;
 
-      } else if (((op & 0xffff0000) == 0x801e0000 ||	/* lwz 0,NUM(r30), used in V.4 -mrelocatable */
-		  op == 0x7fc0f214) &&			/* add r30,r0,r30, used in V.4 -mrelocatable */
+      } else if (((op & 0xffff0000) == 0x801e0000 ||	/* lwz 0,NUM(r30), used
+							   in V.4 -mrelocatable */
+		  op == 0x7fc0f214) &&			/* add r30,r0,r30, used
+							   in V.4 -mrelocatable */
 		 lr_reg == 0x901e0000) {
 	continue;
 
-      } else if ((op & 0xffff0000) == 0x3fc00000 ||	/* addis 30,0,foo@ha, used in V.4 -mminimal-toc */
+      } else if ((op & 0xffff0000) == 0x3fc00000 ||	/* addis 30,0,foo@ha, used
+							   in V.4 -mminimal-toc */
 		 (op & 0xffff0000) == 0x3bde0000) {	/* addi 30,30,foo@l */
 	continue;
 
-      } else if ((op & 0xfc000000) == 0x48000000) {	/* bl foo, to save fprs??? */
+      } else if ((op & 0xfc000000) == 0x48000000) {	/* bl foo, 
+							   to save fprs??? */
 
 	fdata->frameless = 0;
 	/* Don't skip over the subroutine call if it is not within the first
@@ -330,8 +340,8 @@ skip_prologue (pc, fdata)
 	   prologue. */
 
 	if (op == 0x4def7b82 || op == 0)		/* crorc 15, 15, 15 */
-	  break;					/* don't skip over this branch */
-
+	  break;					/* don't skip over 
+							   this branch */
 	continue;
 
       /* update stack pointer */
@@ -482,7 +492,7 @@ push_dummy_frame ()
   pc = read_register(PC_REGNUM);
   store_address (pc_targ, 4, pc);
 
-  (void) skip_prologue (get_pc_function_start (pc) + FUNCTION_START_OFFSET, &fdata);
+  skip_prologue (get_pc_function_start (pc) + FUNCTION_START_OFFSET, &fdata);
 
   dummy_frame_addr [dummy_frame_count++] = sp;
 
@@ -522,7 +532,7 @@ push_dummy_frame ()
 
   for (ii=1; ii <= (LAST_SP_REGNUM-FIRST_SP_REGNUM+1); ++ii) {
     write_memory (sp-384-(ii*4), 
-	       &registers[REGISTER_BYTE (FPLAST_REGNUM + ii)], 4);
+		  &registers[REGISTER_BYTE (FPLAST_REGNUM + ii)], 4);
   }
 
   /* Save sp or so called back chain right here. */
@@ -583,7 +593,7 @@ pop_dummy_frame ()
      order to secure astack space. Thus, saved %sp (or %r1) value, is not the
      one we should restore. Change it with the one we need. */
 
-  *(int*)&registers [REGISTER_BYTE(FP_REGNUM)] = sp;
+  memcpy (&registers [REGISTER_BYTE(FP_REGNUM)], (char *) &sp, sizeof (int));
 
   /* Now we can restore all registers. */
 
@@ -757,8 +767,9 @@ push_arguments (nargs, args, sp, struct_return, struct_addr)
         printf_unfiltered (
 "Fatal Error: a floating point parameter #%d with a size > 8 is found!\n", argno);
 
-      memcpy (&registers[REGISTER_BYTE(FP0_REGNUM + 1 + f_argno)], VALUE_CONTENTS (arg), 
-         len);
+      memcpy (&registers[REGISTER_BYTE(FP0_REGNUM + 1 + f_argno)], 
+	      VALUE_CONTENTS (arg), 
+	      len);
       ++f_argno;
     }
 
@@ -766,11 +777,10 @@ push_arguments (nargs, args, sp, struct_return, struct_addr)
 
       /* Argument takes more than one register. */
       while (argbytes < len) {
-
-	*(int*)&registers[REGISTER_BYTE(ii+3)] = 0;
+	memset (&registers[REGISTER_BYTE(ii+3)], 0, sizeof(int));
 	memcpy (&registers[REGISTER_BYTE(ii+3)], 
-			 ((char*)VALUE_CONTENTS (arg))+argbytes, 
-			(len - argbytes) > 4 ? 4 : len - argbytes);
+		((char*)VALUE_CONTENTS (arg))+argbytes, 
+		(len - argbytes) > 4 ? 4 : len - argbytes);
 	++ii, argbytes += 4;
 
 	if (ii >= 8)
@@ -780,7 +790,7 @@ push_arguments (nargs, args, sp, struct_return, struct_addr)
       --ii;
     }
     else {        /* Argument can fit in one register. No problem. */
-      *(int*)&registers[REGISTER_BYTE(ii+3)] = 0;
+      memset (&registers[REGISTER_BYTE(ii+3)], 0, sizeof(int));
       memcpy (&registers[REGISTER_BYTE(ii+3)], VALUE_CONTENTS (arg), len);
     }
     ++argno;
@@ -827,8 +837,9 @@ ran_out_of_registers_for_arguments:
        completely, push the rest of it into stack. */
 
     if (argbytes) {
-      write_memory (
-        sp+24+(ii*4), ((char*)VALUE_CONTENTS (arg))+argbytes, len - argbytes);
+      write_memory (sp+24+(ii*4), 
+		    ((char*)VALUE_CONTENTS (arg))+argbytes, 
+		    len - argbytes);
       ++argno;
       ii += ((len - argbytes + 3) & -4) / 4;
     }
@@ -848,8 +859,9 @@ ran_out_of_registers_for_arguments:
           printf_unfiltered (
 "Fatal Error: a floating point parameter #%d with a size > 8 is found!\n", argno);
 
-        memcpy (&registers[REGISTER_BYTE(FP0_REGNUM + 1 + f_argno)], VALUE_CONTENTS (arg), 
-           len);
+        memcpy (&registers[REGISTER_BYTE(FP0_REGNUM + 1 + f_argno)], 
+		VALUE_CONTENTS (arg), 
+		len);
         ++f_argno;
       }
 
@@ -892,8 +904,9 @@ extract_return_value (valtype, regbuf, valbuf)
        necessary. */
 
     if (TYPE_LENGTH (valtype) > 4) 		/* this is a double */
-      memcpy (valbuf, &regbuf[REGISTER_BYTE (FP0_REGNUM + 1)],
-						TYPE_LENGTH (valtype));
+      memcpy (valbuf, 
+	      &regbuf[REGISTER_BYTE (FP0_REGNUM + 1)],
+	      TYPE_LENGTH (valtype));
     else {		/* float */
       memcpy (&dd, &regbuf[REGISTER_BYTE (FP0_REGNUM + 1)], 8);
       ff = (float)dd;
@@ -906,7 +919,8 @@ extract_return_value (valtype, regbuf, valbuf)
 	&& TYPE_LENGTH (valtype) < REGISTER_RAW_SIZE (3))
       offset = REGISTER_RAW_SIZE (3) - TYPE_LENGTH (valtype);
 
-    memcpy (valbuf, regbuf + REGISTER_BYTE (3) + offset,
+    memcpy (valbuf, 
+	    regbuf + REGISTER_BYTE (3) + offset,
 	    TYPE_LENGTH (valtype));
   }
 }
