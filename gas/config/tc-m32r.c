@@ -26,7 +26,7 @@
 
 /* Non-null if last insn was a 16 bit insn on a 32 bit boundary
    (i.e. was the first of two 16 bit insns).  */
-static const struct cgen_insn *prev_insn = NULL;
+static const CGEN_INSN *prev_insn = NULL;
 
 /* Non-zero if we've seen a relaxable insn since the last 32 bit
    alignment request.  */
@@ -42,10 +42,12 @@ static int m32r_relax;
    This allows runtime additions to the assembler.  */
 static char *m32r_cpu_desc;
 
+/* start-sanitize-m32rx */
 /* Non-zero if -m32rx has been specified, in which case support for the
    extended M32RX instruction set should be enabled.  */
 /* Indicates the target BFD machine number.  */
 static int enable_m32rx = 0;
+/* end-sanitize-m32rx */
 
 /* stuff for .scomm symbols.  */
 static segT sbss_section;
@@ -86,6 +88,7 @@ static struct m32r_hi_fixup *m32r_hi_fixup_list;
 static void m32r_record_hi16 PARAMS ((int, fixS *, segT seg));
 
 
+/* start-sanitize-m32rx */
 static void
 allow_m32rx (int on)
 {
@@ -94,13 +97,16 @@ allow_m32rx (int on)
   if (stdoutput != NULL)
     bfd_set_arch_mach (stdoutput, TARGET_ARCH, enable_m32rx ? bfd_mach_m32rx : bfd_mach_m32r);
 }
+/* end-sanitize-m32rx */
 
 const char *md_shortopts = "";
 
 struct option md_longopts[] =
 {
+/* start-sanitize-m32rx */
 #define OPTION_M32RX	(OPTION_MD_BASE)
   {"m32rx", no_argument, NULL, OPTION_M32RX},
+/* end-sanitize-m32rx */
 
 #if 0 /* not supported yet */
 #define OPTION_RELAX  (OPTION_MD_BASE + 1)
@@ -120,9 +126,11 @@ md_parse_option (c, arg)
 {
   switch (c)
     {
+/* start-sanitize-m32rx */
     case OPTION_M32RX:
       allow_m32rx (1);
       break;
+/* end-sanitize-m32rx */
       
 #if 0 /* not supported yet */
     case OPTION_RELAX:
@@ -143,8 +151,10 @@ md_show_usage (stream)
   FILE *stream;
 {
   fprintf (stream, "M32R/X options:\n");
+/* start-sanitize-m32rx */
   fprintf (stream, "\
 --m32rx			support the extended m32rx instruction set\n");
+/* end-sanitize-m32rx */
 
 #if 0
   fprintf (stream, "\
@@ -167,8 +177,10 @@ const pseudo_typeS md_pseudo_table[] =
   { "word", cons, 4 },
   { "fillinsn", fill_insn, 0 },
   { "scomm", m32r_scomm, 0 },
+/* start-sanitize-m32rx */
   { "m32r",  allow_m32rx, 0},
   { "m32rx", allow_m32rx, 1},
+/* end-sanitize-m32rx */
   { NULL, NULL, 0 }
 };
 
@@ -325,7 +337,9 @@ md_begin ()
   scom_symbol.name = ".scommon";
   scom_symbol.section = &scom_section;
 
+/* start-sanitize-m32rx */
   allow_m32rx (enable_m32rx);
+/* end-sanitize-m32rx */
 }
 
 void
@@ -337,8 +351,8 @@ md_assemble (str)
 #else
   char buffer[CGEN_MAX_INSN_SIZE];
 #endif
-  struct cgen_fields fields;
-  const struct cgen_insn *insn;
+  CGEN_FIELDS fields;
+  const CGEN_INSN *insn;
   char *errmsg;
 
   /* Initialize GAS's cgen interface for a new instruction.  */
@@ -664,7 +678,7 @@ md_estimate_size_before_relax (fragP, segment)
       frag_wane (fragP);
 #else
       {
-	const struct cgen_insn *insn;
+	const CGEN_INSN *insn;
 	int i;
 
 	/* Update the recorded insn.
@@ -673,8 +687,8 @@ md_estimate_size_before_relax (fragP, segment)
 	   relaxable insn to use.  */
 	for (i = 0, insn = fragP->fr_cgen.insn; i < 4; i++, insn++)
 	  {
-	    if ((strcmp (CGEN_INSN_SYNTAX (insn)->mnemonic,
-			CGEN_INSN_SYNTAX (fragP->fr_cgen.insn)->mnemonic)
+	    if ((strcmp (CGEN_INSN_MNEMONIC (insn),
+			 CGEN_INSN_MNEMONIC (fragP->fr_cgen.insn))
 		 == 0)
 		&& CGEN_INSN_ATTR (insn, CGEN_INSN_RELAX))
 	      break;
@@ -806,8 +820,8 @@ md_pcrel_from_section (fixP, sec)
 
 bfd_reloc_code_real_type
 CGEN_SYM (lookup_reloc) (insn, operand, fixP)
-     const struct cgen_insn *insn;
-     const struct cgen_operand *operand;
+     const CGEN_INSN *insn;
+     const CGEN_OPERAND *operand;
      fixS *fixP;
 {
   switch (CGEN_OPERAND_TYPE (operand))
@@ -834,9 +848,9 @@ fixS *
 m32r_cgen_record_fixup_exp (frag, where, insn, length, operand, opinfo, exp)
      fragS *frag;
      int where;
-     const struct cgen_insn *insn;
+     const CGEN_INSN *insn;
      int length;
-     const struct cgen_operand *operand;
+     const CGEN_OPERAND *operand;
      int opinfo;
      expressionS *exp;
 {
