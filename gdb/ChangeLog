@@ -1,5 +1,8 @@
 Wed Apr 12 16:36:44 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.gdb: New file.
+	* .gdbinit: Move list-objfiles to gdb.gdb.
+
 	* values.c (set_internalvar): Set modifiable flag of newval.
 
 Wed Apr 12 14:34:31 1995  Jim Kingdon  <kingdon@deneb.cygnus.com>
