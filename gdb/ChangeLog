@@ -1,3 +1,8 @@
+Fri Oct 23 00:48:08 1992  John Gilmore  (gnu@cygnus.com)
+
+	* Makefile.in (VERSION):  gdb-4.7 release.
+	* README:  Update for gdb-4.7.
+
 Thu Oct 22 11:24:18 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* sparc-tdep.c:  include nm.h (for now) so that we get USE_PROC_FS
