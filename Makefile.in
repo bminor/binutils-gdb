@@ -1,7 +1,7 @@
 #
 # Makefile for directory with subdirs to build.
 #
-# Last Mod Fri Jun 14 06:34:11 PDT 1991, by rich@cygint.cygnus.com
+# Last Mod Wed Jul 24 18:25:48 PDT 1991, by rich@cygint.cygnus.com
 #
 
 # $Id$
@@ -15,8 +15,11 @@ destdir = /usr/local
 RANLIB = ranlib
 AR = ar
 AR_FLAGS = cqv
+BISONPATH = $(srcdir)/../bison`if [ -d $(srcdir)/bison.$(target) ] ; then echo .$(target) ; fi`
 
-SUBDIRS = libiberty bfd binutils ld gas gcc gnulib
+BISON = $(BISONPATH)$(subdir)/bison -L $(BISONPATH)/
+
+SUBDIRS = libiberty readline bfd gdb binutils ld gas gcc gnulib
 OTHERS = 
 
 #### host and target specific makefile fragments come in here.
@@ -34,7 +37,8 @@ subdir_do: force
 					"against=$(against)" \
 					"AR=$(AR)" \
 					"AR_FLAGS=$(AR_FLAGS)" \
-					"RANLIB=$(RANLIB)" $(DO)) ; then true ; \
+					"RANLIB=$(RANLIB)" \
+					"BISON=$(BISON)" $(DO)) ; then true ; \
 			else exit 1 ; fi ; \
 		else true ; fi ; \
 	done
@@ -103,10 +107,20 @@ clean:
 	rm -rf *.a TEMP errs core *.o *~ \#* TAGS *.E
 	$(MAKE) subdir_do DO=clean "DODIRS=$(SUBDIRS) $(OTHERS)"
 
-install: install-fixed-includes
+install: install-dirs install-fixed-includes
 	$(MAKE) subdir_do DO=install "DODIRS=$(SUBDIRS) $(OTHERS)"
 
-install-fixed-includes:
+install-dirs: force
+	- mkdir $(destdir)
+	- mkdir $(destdir)/bin
+	- mkdir $(destdir)/lib
+	- mkdir $(destdir)/include
+	- mkdir $(destdir)/man
+	- mkdir $(destdir)/man/man1
+	(cd  $(srcdir)/gcc`if [ -d $(srcdir)/gcc.$(target) ] ; \
+                then echo .$(target) ; fi`$(subdir) ; $(MAKE) install-dir)
+
+install-fixed-includes: force
 	(cd gcc ; $(MAKE) install-fixed-includes)
 
 etags tags: TAGS
@@ -139,7 +153,16 @@ Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
 
 #
 # $Log$
-# Revision 1.16  1991/06/14 13:35:40  rich
+# Revision 1.19  1991/07/27 07:46:34  rich
+# Changes to accomodate using the freshly built bison in place.
+#
+# Revision 1.18  1991/07/16  00:01:40  gnu
+# Add back gdb and readline.
+#
+# Revision 1.17  1991/06/18  15:30:55  rich
+# added install-dirs target.
+#
+# Revision 1.16  1991/06/14  13:35:40  rich
 # install fixed include files on install.
 #
 # Revision 1.15  1991/06/09  20:27:01  rich
