@@ -1,5 +1,7 @@
 Fri Jan  3 12:09:24 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* doc/as.texinfo (Set): Change parenthesized @xref to @pxref.
+
 	* config/tc-m68k.h (tc_frob_label): Define to warn about a
  	misaligned text label.  Based on patch from Ronald F. Guilmette
  	<rfg@monkeys.com>.
