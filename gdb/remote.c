@@ -41,6 +41,7 @@
 #include "regcache.h"
 #include "value.h"
 #include "gdb_assert.h"
+#include "observer.h"
 
 #include <ctype.h>
 #include <sys/time.h>
