@@ -81,12 +81,8 @@ void _initialize_command (void);
    of *LIST). */
 
 struct cmd_list_element *
-add_cmd (name, class, fun, doc, list)
-     char *name;
-     enum command_class class;
-     void (*fun) (char *, int);
-     char *doc;
-     struct cmd_list_element **list;
+add_cmd (char *name, enum command_class class, void (*fun) (char *, int),
+	 char *doc, struct cmd_list_element **list)
 {
   register struct cmd_list_element *c
   = (struct cmd_list_element *) xmalloc (sizeof (struct cmd_list_element));
@@ -163,12 +159,8 @@ deprecate_cmd (struct cmd_list_element *cmd, char *replacement)
 #if 0				/* Currently unused */
 
 struct cmd_list_element *
-add_abbrev_cmd (name, class, fun, doc, list)
-     char *name;
-     enum command_class class;
-     void (*fun) (char *, int);
-     char *doc;
-     struct cmd_list_element **list;
+add_abbrev_cmd (char *name, enum command_class class, void (*fun) (char *, int),
+		char *doc, struct cmd_list_element **list)
 {
   register struct cmd_list_element *c
   = add_cmd (name, class, fun, doc, list);
@@ -212,16 +204,10 @@ add_alias_cmd (char *name, char *oldname, enum command_class class,
    of the variable containing that list.  */
 
 struct cmd_list_element *
-add_prefix_cmd (name, class, fun, doc, prefixlist, prefixname,
-		allow_unknown, list)
-     char *name;
-     enum command_class class;
-     void (*fun) (char *, int);
-     char *doc;
-     struct cmd_list_element **prefixlist;
-     char *prefixname;
-     int allow_unknown;
-     struct cmd_list_element **list;
+add_prefix_cmd (char *name, enum command_class class, void (*fun) (char *, int),
+		char *doc, struct cmd_list_element **prefixlist,
+		char *prefixname, int allow_unknown,
+		struct cmd_list_element **list)
 {
   register struct cmd_list_element *c = add_cmd (name, class, fun, doc, list);
   c->prefixlist = prefixlist;
@@ -233,16 +219,10 @@ add_prefix_cmd (name, class, fun, doc, prefixlist, prefixname,
 /* Like add_prefix_cmd but sets the abbrev_flag on the new command. */
 
 struct cmd_list_element *
-add_abbrev_prefix_cmd (name, class, fun, doc, prefixlist, prefixname,
-		       allow_unknown, list)
-     char *name;
-     enum command_class class;
-     void (*fun) (char *, int);
-     char *doc;
-     struct cmd_list_element **prefixlist;
-     char *prefixname;
-     int allow_unknown;
-     struct cmd_list_element **list;
+add_abbrev_prefix_cmd (char *name, enum command_class class,
+		       void (*fun) (char *, int), char *doc,
+		       struct cmd_list_element **prefixlist, char *prefixname,
+		       int allow_unknown, struct cmd_list_element **list)
 {
   register struct cmd_list_element *c = add_cmd (name, class, fun, doc, list);
   c->prefixlist = prefixlist;

@@ -1,3 +1,8 @@
+2000-08-07  Kevin Buettner  <kevinb@redhat.com>
+
+	* command.c (add_cmd, add_abbrev_cmd, add_prefix_cmd, 
+	add_abbrev_prefix_cmd): Protoize.
+
 2000-08-07  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* objfiles.h (SECT_OFF_BSS): Don't detect invalid sect_index_bss
