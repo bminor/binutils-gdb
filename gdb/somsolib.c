@@ -37,9 +37,6 @@ and by Cygnus Support.  */
 
 /* TODO:
 
-   * Access to static (file scoped) variables in shared libraries
-   still doesn't work.
-
    * Most of this code should work for hp300 shared libraries.  Does
    anyone care enough to weed out any SOM-isms.
 
