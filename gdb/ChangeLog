@@ -1,3 +1,7 @@
+Thu Apr 23 16:37:20 1998  Jason Molenda  (crash@bugshack.cygnus.com)
+
+        * README:  Minor changes for 4.17 release.
+
 Thu Apr 23 15:44:39 1998  Per Bothner  <bothner@cygnus.com>
 
 	* symfile.c (deduce_language_from_filename):  .class implies java.
