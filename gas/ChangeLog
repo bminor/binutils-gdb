@@ -1,5 +1,7 @@
 Mon Jun  2 16:25:07 1997  Nick Clifton  <nickc@cygnus.com>
 
+	* doc/all.texi: Add enabling of ARM documentation.
+
 	* doc/as.texinfo: Add ARM documentation from armT-970328-branch.
 
 Mon Jun  2 11:55:12 1997  Gavin Koch  <gavin@cygnus.com>
