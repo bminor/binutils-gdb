@@ -39,11 +39,35 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/file.h>
 #include <sys/stat.h>
 
+/* Get kernel_u_addr using HPUX-style nlist().  */
+CORE_ADDR kernel_u_addr;
+
+struct hpnlist {
+        char *          n_name;
+        long            n_value;
+        unsigned char   n_type;
+        unsigned char   n_length;
+        short           n_almod;
+        short           n_unused;
+};
+static struct hpnlist nl[] = {{ "_u", -1, }, { (char *) 0, }};
+
+/* read the value of the u area from the hp-ux kernel */
+void _initialize_kernel_u_addr ()
+{
+#ifndef HPUX_VERSION_5
+    nlist ("/hp-ux", nl);
+    kernel_u_addr = nl[0].n_value;
+#else /* HPUX version 5.  */
+    kernel_u_addr = (CORE_ADDR) 0x0097900;
+#endif
+}
+
 #define INFERIOR_AR0(u)							\
   ((ptrace								\
     (PT_RUAREA, inferior_pid,						\
-     (PTRACE_ARG3_TYPE) ((char *) &u.u_ar0 - (char *) &u), 0))		\
-   - KERNEL_U_ADDR)
+     (PTRACE_ARG3_TYPE) ((char *) &u.u_ar0 - (char *) &u), 0, 0))		\
+   - kernel_u_addr)
 
 static void
 fetch_inferior_register (regno, regaddr)
@@ -57,9 +81,9 @@ fetch_inferior_register (regno, regaddr)
       int regval;
       
       ps_val.i = (ptrace (PT_RUAREA, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
-			  0));
+			  0, 0));
       regval = ps_val.s[0];
-      supply_register (regno, &regval);
+      supply_register (regno, (char *)&regval);
     }
   else
 #endif /* not HPUX_VERSION_5 */
@@ -70,7 +94,7 @@ fetch_inferior_register (regno, regaddr)
       for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
 	{
 	  *(int *) &buf[i] = ptrace (PT_RUAREA, inferior_pid,
-				     (PTRACE_ARG3_TYPE) regaddr, 0);
+				     (PTRACE_ARG3_TYPE) regaddr, 0, 0);
 	  regaddr += sizeof (int);
 	}
       supply_register (regno, buf);
@@ -79,13 +103,13 @@ fetch_inferior_register (regno, regaddr)
 }
 
 static void
-store_inferior_register_1 (regno, regaddr, value)
+store_inferior_register_1 (regno, regaddr, val)
      int regno;
      unsigned int regaddr;
-     int value;
+     int val;
 {
   errno = 0;
-  ptrace (PT_WUAREA, inferior_pid, (PTRACE_ARG3_TYPE) regaddr, value);
+  ptrace (PT_WUAREA, inferior_pid, (PTRACE_ARG3_TYPE) regaddr, val, 0);
 #if 0
   /* HP-UX randomly sets errno to non-zero for regno == 25.
      However, the value is correctly written, so ignore errno. */
@@ -111,7 +135,7 @@ store_inferior_register (regno, regaddr)
       union { int i; short s[2]; } ps_val;
       
       ps_val.i = (ptrace (PT_RUAREA, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
-			  0));
+			  0, 0));
       ps_val.s[0] = (read_register (regno));
       store_inferior_register_1 (regno, regaddr, ps_val.i);
     }
@@ -199,7 +223,7 @@ store_inferior_registers (regno)
 void
 fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
      char *core_reg_sect;
-     int core_reg_size;
+     unsigned int core_reg_size;
      int which;
      unsigned int reg_addr;	/* Unused in this version */
 {
@@ -214,10 +238,10 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
 		  ((char *) &es.e_offset - (char *) &es.e_regs[R0]))
 	  error ("Not enough registers in core file");
     for (regno = 0; (regno < PS_REGNUM); regno++)
-      supply_register (regno, &es.e_regs[regno + R0]);
+      supply_register (regno, (char *) &es.e_regs[regno + R0]);
     val = es.e_PS;
-    supply_register (regno++, &val);
-    supply_register (regno++, &es.e_PC);
+    supply_register (regno++, (char *) &val);
+    supply_register (regno++, (char *) &es.e_PC);
 
   } else if (which == 2) {
 
@@ -230,4 +254,10 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
 	supply_register (regno, buf);
       }
   }
+}
+
+int
+getpagesize ()
+{
+  return 4096;
 }

@@ -22,8 +22,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "inferior.h"
 #include "target.h"
 
-#include "nm.h"
-
 #ifdef USG
 #include <sys/types.h>
 #endif
@@ -33,11 +31,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <signal.h>
 #include <sys/ioctl.h>
 
+#ifndef NO_PTRACE_H
 #ifdef PTRACE_IN_WRONG_PLACE
 #include <ptrace.h>
 #else
 #include <sys/ptrace.h>
 #endif
+#endif /* NO_PTRACE_H */
 
 #if !defined (PT_KILL)
 #define PT_KILL 8
@@ -63,6 +63,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/file.h>
 #endif
 #include <sys/stat.h>
+
+#if defined (FIVE_ARG_PTRACE
+/* Deal with HPUX 8.0 braindamage.  */
+#define ptrace(a,b,c,d) ptrace(a,b,c,d,0)
+#endif
 
 #if !defined (FETCH_INFERIOR_REGISTERS)
 #include <sys/user.h>		/* Probably need to poke the user structure */
@@ -133,10 +138,6 @@ child_resume (step, signal)
 }
 
 #ifdef ATTACH_DETACH
-/* Nonzero if we are debugging an attached process rather than
-   an inferior.  */
-extern int attach_flag;
-
 /* Start debugging the process whose number is PID.  */
 int
 attach (pid)

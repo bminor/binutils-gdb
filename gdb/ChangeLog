@@ -1,3 +1,18 @@
+Wed Apr 28 06:11:38 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* hp300ux-nat.c: Cast second arg to supply_register calls.
+	(_initialize_kernel_u_addr, getpagesize): New functions.
+	(store_inferior_register_1): Change arg name from value to val.
+	(fetch_core_registers): Make arg core_reg_size unsigned.
+	Pass 5 args to ptrace.
+	* config/m68k/xm-hp300hpux.h: Define FIVE_ARG_PTRACE.
+	Remove KERNEL_U_ADDR stuff.
+	* infptrace.c [FIVE_ARG_PTRACE]: Pass 5th arg to ptrace.
+	* config/m68k/hp300hpux.m{t,h}:
+	Move exec.o from NATDEPFILES to TDEPFILES
+	* config/m68k/hp300hpux.mt: Mention GAS requirement.  Remove
+	hp-include stuff.  Add m68k-tdep.o to TDEPFILES.
+
 Wed Apr 28 13:27:54 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* ch-exp.y (yylex): Don't STREQ with simplename if it is NULL.

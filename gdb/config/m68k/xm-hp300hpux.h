@@ -17,10 +17,15 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* HP/UX is USG, but it does have <ptrace.h>  */
-#include <sys/ptrace.h>
-
 #define HOST_BYTE_ORDER BIG_ENDIAN
+
+/* HPUX 8.0, in its infinite wisdom, has chosen to prototype ptrace
+   with five arguments, so programs written for normal ptrace lose.
+
+   Idiots.
+
+   (They should have just made it varadic).  */
+#define FIVE_ARG_PTRACE
 
 /* Define this to indicate problems with traps after continuing.  */
 #define HP_OS_BUG
@@ -52,16 +57,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* #define SET_STACK_LIMIT_HUGE */
 /* So we'll just have to avoid big alloca's.  */
 #define BROKEN_LARGE_ALLOCA
-
-/* This is the amount to subtract from u.u_ar0
-   to get the offset in the core file of the register values.  */
-
-#ifdef HPUX_VERSION_5
-#define KERNEL_U_ADDR 0x00979000
-#else /* Not HPUX version 5.  */
-/* Use HPUX-style nlist() to get kernel_u_addr.  */
-#define KERNEL_U_ADDR_HPUX
-#endif /* Not HPUX version 5.  */
 
 #define REGISTER_ADDR(u_ar0, regno)					\
   (unsigned int)							\
