@@ -1,3 +1,8 @@
+2000-10-15  Diego Novillo  <dnovillo@cygnus.com>
+
+	* intel.s, intel.d: Add new tests for naked registers using intel
+	syntax.
+
 2000-09-29  Hans-Peter Nilsson  <hp@axis.com>
 
 	* gas/cris/regprefix-err-1.s, gas/cris/rd-regprefix-1.s,

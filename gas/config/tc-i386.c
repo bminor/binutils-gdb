@@ -3026,7 +3026,9 @@ i386_operand_modifier (op_string, got_a_float)
       return XWORD_PTR;
     }
 
-  else if (!strncasecmp (*op_string, "SHORT", 5))
+  /* Compare with space separator to avoid confusing identifier `short_var'
+     with attribute `short'.  */
+  else if (!strncasecmp (*op_string, "SHORT ", 6))
     {
       *op_string += 5;
       return SHORT;
@@ -3038,7 +3040,9 @@ i386_operand_modifier (op_string, got_a_float)
       return OFFSET_FLAT;
     }
 
-  else if (!strncasecmp (*op_string, "FLAT", 4))
+  /* Compare with space separator to avoid confusing identifier `flat_var'
+     with attribute `flat'.  */
+  else if (!strncasecmp (*op_string, "FLAT ", 5))
     {
       *op_string += 4;
       return FLAT;
@@ -4234,6 +4238,12 @@ parse_register (reg_string, end_op)
 	return (const reg_entry *) NULL;
       s++;
     }
+
+  /* For naked regs, make sure that we are not dealing with an identifier.
+     This prevents confusing an identifier like `eax_var' with register
+     `eax'.  */
+  if (allow_naked_reg && identifier_chars[(unsigned char) *s])
+    return (const reg_entry *) NULL;
 
   *end_op = s;
 

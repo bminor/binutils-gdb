@@ -1,3 +1,10 @@
+2000-10-15  Diego Novillo  <dnovillo@cygnus.com>
+
+	* config/tc-i386.c (i386_operand_modifier): Only match
+	modifiers SHORT and FLAT if they are followed by a space.
+	(parse_register): When `allow_naked_reg' is set, do not confuse
+	identifiers that start with a register name with a register.
+
 2000-10-12  Kazu Hirata  <kazu@hxi.com>
 
 	* app.c: Fix formatting.

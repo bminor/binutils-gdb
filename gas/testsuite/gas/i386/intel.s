@@ -566,3 +566,13 @@ foo:
  bsr    dx, 0x90909090[eax]
  movsx  dx, byte ptr 0x90909090[eax]
  xadd   0x90909090[eax], dx
+
+gs_foo:
+ ret
+
+short_foo:
+ ret
+
+bar:
+ call	gs_foo
+ call	short_foo
