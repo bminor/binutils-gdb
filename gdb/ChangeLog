@@ -1,5 +1,9 @@
 Thu Nov  4 08:27:24 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* dbxread.c (unknown_symchar_complaint): Make message refer to
+	"symbol descriptor" not "symbol type character" for consistency
+	with stabs.texinfo terminology.
+
 	* stabsread.c (read_struct_fields): Accept either '$' or '.' as
 	the character which introduces a cpp_abbrev or anonymous type.
 

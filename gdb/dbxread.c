@@ -170,7 +170,7 @@ struct complaint unknown_symtype_complaint =
   {"unknown symbol type %s", 0, 0};
 
 struct complaint unknown_symchar_complaint =
-  {"unknown symbol type character `%c'", 0, 0};
+  {"unknown symbol descriptor `%c'", 0, 0};
 
 struct complaint lbrac_rbrac_complaint =
   {"block start larger than block end", 0, 0};
