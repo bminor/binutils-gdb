@@ -1,3 +1,10 @@
+Thu Oct 07 09:29:11 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* Makefile.in (REGEX, REGEX1):  Always use our own version of
+	regex.c to be consistent across hosts.
+	* source.c (_initialize_source):  Initialize regex to use grep
+	style syntax as an approximation to POSIX basic regex syntax.
+
 Wed Oct  6 12:43:47 1993  Jeffrey A Law  (law@snake.cs.utah.edu)
 			  Jim Kingdon  (kingdon@lioth.cygnus.com)
 

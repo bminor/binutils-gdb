@@ -151,7 +151,11 @@ INTERNAL_CFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) \
 	$(GDB_CFLAGS) $(OPCODES_CFLAGS) $(READLINE_CFLAGS) \
 	$(BFD_CFLAGS) $(MMALLOC_CFLAGS) $(INCLUDE_CFLAGS)
 
-# The config/mh-* file must define REGEX and REGEX1 on USG machines.
+# We are using our own version of REGEX now to be consistent across
+# machines.
+REGEX = regex.o
+REGEX1 = regex.o
+
 # If your system is missing alloca(), or, more likely, it's there but
 # it doesn't work, then refer to libiberty.
 
