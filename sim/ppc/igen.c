@@ -1747,8 +1747,12 @@ gen_icache_h(icache_tree *tree,
   }
   else {
     /* alernativly, since no cache, #define the fields to be
-       extractions from the instruction variable */
+       extractions from the instruction variable.  Emit a dummy
+       definition for idecode_cache to allow model_issue to not
+       be #ifdefed at the call level */
     cache_rules *cache_rule;
+    lf_printf(file, "\n");
+    lf_printf(file, "typedef void idecode_cache;\n");
     lf_printf(file, "\n");
     for (cache_rule = cache_table;
 	 cache_rule != NULL;
@@ -2136,7 +2140,9 @@ lf_print_c_semantic(lf *file,
 			 instruction->file_entry->fields[insn_name],
 			 NULL,
 			 function_name_prefix_itable);
-  lf_printf(file, ", processor, cpu_model(processor), cia);\n");
+  lf_printf(file, ", cpu_model(processor), cia, %s);\n",
+	    ((idecode_cache) ? "cache_entry, 0" : "(idecode_cache *)0, instruction"));
+
   lf_printf(file, "}\n");
   lf_printf(file, "\n");
 
@@ -3050,24 +3056,23 @@ gen_model_h(insn_table *table, lf *file)
 
   if (!model_init_p) {
     lf_printf(file, "INLINE_MODEL void model_init\n");
-    lf_printf(file, "(cpu *processor,\n");
-    lf_printf(file, " model_data *model_ptr);\n");
+    lf_printf(file, "(model_data *model_ptr);\n");
     lf_printf(file, "\n");
   }
 
   if (!model_halt_p) {
     lf_printf(file, "INLINE_MODEL void model_halt\n");
-    lf_printf(file, "(cpu *processor,\n");
-    lf_printf(file, " model_data *model_ptr);\n");
+    lf_printf(file, "(model_data *model_ptr);\n");
     lf_printf(file, "\n");
   }
 
   if (!model_issue_p) {
     lf_printf(file, "INLINE_MODEL void model_issue\n");
     lf_printf(file, "(itable_index index,\n");
-    lf_printf(file, " cpu *processor,\n");
     lf_printf(file, " model_data *model_ptr,\n");
-    lf_printf(file, " unsigned_word cia);\n");
+    lf_printf(file, " unsigned_word cia,\n");
+    lf_printf(file, " idecode_cache *cache_entry,\n");
+    lf_printf(file, " instruction_word instruction);\n");
     lf_printf(file, "\n");
   }
 
@@ -3220,16 +3225,14 @@ gen_model_c(insn_table *table, lf *file)
   }
 
   if (!model_init_p) {
-    lf_printf(file, "INLINE_MODEL void model_init(cpu *processor,\n");
-    lf_printf(file, "                             model_data *model_ptr)\n");
+    lf_printf(file, "INLINE_MODEL void model_init(model_data *model_ptr)\n");
     lf_printf(file, "{\n");
     lf_printf(file, "}\n");
     lf_printf(file, "\n");
   }
 
   if (!model_halt_p) {
-    lf_printf(file, "INLINE_MODEL void model_halt(cpu *processor,\n");
-    lf_printf(file, "                             model_data *model_ptr)\n");
+    lf_printf(file, "INLINE_MODEL void model_halt(model_data *model_ptr)\n");
     lf_printf(file, "{\n");
     lf_printf(file, "}\n");
     lf_printf(file, "\n");
@@ -3237,9 +3240,10 @@ gen_model_c(insn_table *table, lf *file)
 
   if (!model_issue_p) {
     lf_printf(file, "INLINE_MODEL void model_issue(itable_index index,\n");
-    lf_printf(file, "                              cpu *processor,\n");
     lf_printf(file, "                              model_data *model_ptr,\n");
-    lf_printf(file, "                              unsigned_word cia);\n");
+    lf_printf(file, "                              unsigned_word cia,\n");
+    lf_printf(file, "                              idecode_cache *cache_entry,\n");
+    lf_printf(file, "                              instruction_word instruction)\n");
     lf_printf(file, "{\n");
     lf_printf(file, "}\n");
     lf_printf(file, "\n");

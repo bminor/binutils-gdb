@@ -1,3 +1,23 @@
+Fri Nov 17 14:08:08 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* cpu.c (cpu_{create,init,halt}): Check for WITH_MODEL_ISSUE
+	before calling the model functions.
+
+	* debug.c (trace_descriptor): Add trace_model support.
+	* debug.h (trace_options): Ditto.
+
+	* igen.c (gen_icache_h): Create type idecode_cache as void if not
+	caching instructions.
+	(lf_print_c_semantic): Pass idecode_cache and instruction word to
+	model_issue.
+	(gen_model_{c,h}): Model_issue now takes two more arguments.
+
+	* mon.h (count_type): New type for counters.
+	* mon.c: Use count_type instead of unsigned.
+
+	* ppc-instructions: Reorganize so insn dependent routine is called
+	via a function pointer.  Add initial scheduling code.
+
 Thu Nov 16 09:52:26 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* table.c (table_entry_read): Allow the annex to have blank lines.
