@@ -1,4 +1,7 @@
-Tue Apr  9 15:17:53 2002  J"orn Rennecke <joern.rennecke@superh.com>
+Tue Apr  9 16:45:48 2002  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* config/tc-sh.h (TC_FIX_ADJUSTABLE): Disable adjusting if
+	symbol_used_in_reloc_p is true.
 
 	* config/tc-sh.c (md_apply_fix3): Don't zero relocations on big
 	endian hosts.
