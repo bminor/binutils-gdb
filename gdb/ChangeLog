@@ -1,3 +1,8 @@
+2004-03-22  Daniel Jacobowitz  <drow@mvista.com>
+
+	* lin-lwp.c (lin_lwp_wait): Pass the LWP ID to
+	linux_handle_extended_wait.
+
 2004-03-22  Andrew Cagney  <cagney@redhat.com>
 
 	* rs6000-tdep.c (frame_initial_stack_address): Delete unused
