@@ -145,6 +145,7 @@ static struct demangle_component *d_binary (const char *,
 #define yytable	 cpname_yytable
 #define yycheck	 cpname_yycheck
 
+int yyparse (void);
 static int yylex (void);
 static void yyerror (char *);
 
