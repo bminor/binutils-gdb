@@ -2741,7 +2741,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
   struct gdbarch_tdep *tdep;
-  int wordsize, from_xcoff_exec, from_elf_exec, power, i, off;
+  int wordsize, from_xcoff_exec, from_elf_exec, i, off;
   struct reg *regs;
   const struct variant *v;
   enum bfd_architecture arch;
@@ -2840,7 +2840,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
 
   gdbarch = gdbarch_alloc (&info, tdep);
-  power = arch == bfd_arch_rs6000;
 
   /* Initialize the number of real and pseudo registers in each variant.  */
   init_variants ();
@@ -2862,12 +2861,12 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->ppc_xer_regnum = 69;
   if (v->mach == bfd_mach_ppc_601)
     tdep->ppc_mq_regnum = 124;
-  else if (power)
+  else if (arch == bfd_arch_rs6000)
     tdep->ppc_mq_regnum = 70;
   else
     tdep->ppc_mq_regnum = -1;
   tdep->ppc_fp0_regnum = 32;
-  tdep->ppc_fpscr_regnum = power ? 71 : 70;
+  tdep->ppc_fpscr_regnum = (arch == bfd_arch_rs6000) ? 71 : 70;
   tdep->ppc_sr0_regnum = 71;
   tdep->ppc_vr0_regnum = -1;
   tdep->ppc_vrsave_regnum = -1;
@@ -2952,7 +2951,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   gdb_assert (strcmp (tdep->regs[tdep->ppc_gp0_regnum].name, "r0") == 0);
 
   /* Select instruction printer.  */
-  if (arch == power)
+  if (arch == bfd_arch_rs6000)
     set_gdbarch_print_insn (gdbarch, print_insn_rs6000);
   else
     set_gdbarch_print_insn (gdbarch, gdb_print_insn_powerpc);

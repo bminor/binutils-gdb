@@ -1,3 +1,8 @@
+2004-07-20  Jim Blandy  <jimb@redhat.com>
+
+	* rs6000-tdep.c (rs6000_gdbarch_init): Delete variable 'power';
+	replace references with expression used to initialize variable.
+
 2004-07-20  Andrew Cagney  <cagney@gnu.org>
 
 	* breakpoint.c (deprecated_read_memory_nobpt): Rename
