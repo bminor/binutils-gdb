@@ -152,7 +152,7 @@ extern int tc_coff_sizemachdep PARAMS ((fragS *));
 #endif
 
 /* We align most sections to a 16 byte boundary.  */
-#define SUB_SEGMENT_ALIGN(SEG)				\
+#define SUB_SEGMENT_ALIGN(SEG, FRCHAIN)			\
   (strncmp (SEG_NAME (SEG), ".stabstr", 8) == 0		\
    ? 0							\
    : ((strncmp (SEG_NAME (SEG), ".stab", 5) == 0	\

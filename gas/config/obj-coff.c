@@ -3420,6 +3420,19 @@ remove_subsegs ()
 unsigned long machine;
 int coff_flags;
 
+#ifndef SUB_SEGMENT_ALIGN
+#ifdef HANDLE_ALIGN
+/* The last subsegment gets an aligment corresponding to the alignment
+   of the section.  This allows proper nop-filling at the end of
+   code-bearing sections.  */
+#define SUB_SEGMENT_ALIGN(SEG, FRCHAIN)					\
+  (!(FRCHAIN)->frch_next || (FRCHAIN)->frch_next->frch_seg != (SEG)	\
+   ? get_recorded_alignment (SEG) : 0)
+#else
+#define SUB_SEGMENT_ALIGN(SEG, FRCHAIN) 1
+#endif
+#endif
+
 extern void
 write_object_file ()
 {
@@ -3443,28 +3456,27 @@ write_object_file ()
 
   string_byte_count = 4;
 
+  /* Run through all the sub-segments and align them up.  Also
+     close any open frags.  We tack a .fill onto the end of the
+     frag chain so that any .align's size can be worked by looking
+     at the next frag.  */
   for (frchain_ptr = frchain_root;
        frchain_ptr != (struct frchain *) NULL;
        frchain_ptr = frchain_ptr->frch_next)
     {
-      /* Run through all the sub-segments and align them up.  Also
-	 close any open frags.  We tack a .fill onto the end of the
-	 frag chain so that any .align's size can be worked by looking
-	 at the next frag.  */
+      int alignment;
 
       subseg_set (frchain_ptr->frch_seg, frchain_ptr->frch_subseg);
 
-#ifndef SUB_SEGMENT_ALIGN
-#define SUB_SEGMENT_ALIGN(SEG) 1
-#endif
+      alignment = SUB_SEGMENT_ALIGN (now_seg, frchain_ptr)
+
 #ifdef md_do_align
-      md_do_align (SUB_SEGMENT_ALIGN (now_seg), (char *) NULL, 0, 0,
-		   alignment_done);
+      md_do_align (alignment, (char *) NULL, 0, 0, alignment_done);
 #endif
       if (subseg_text_p (now_seg))
-	frag_align_code (SUB_SEGMENT_ALIGN (now_seg), 0);
+	frag_align_code (alignment, 0);
       else
-	frag_align (SUB_SEGMENT_ALIGN (now_seg), 0, 0);
+	frag_align (alignment, 0, 0);
 
 #ifdef md_do_align
     alignment_done:

@@ -678,7 +678,14 @@ size_seg (abfd, sec, xxx)
       while (fragp->fr_next != last)
 	fragp = fragp->fr_next;
       last->fr_address = size;
-      fragp->fr_offset += newsize - size;
+      if ((newsize - size) % fragp->fr_var == 0)
+	fragp->fr_offset += (newsize - size) / fragp->fr_var;
+      else
+	/* If we hit this abort, it's likely due to subsegs_finish not
+	   providing sufficient alignment on the last frag, and the
+	   machine dependent code using alignment frags with fr_var
+	   greater than 1.  */
+	abort ();
     }
 
 #ifdef tc_frob_section
@@ -1418,10 +1425,19 @@ set_segment_vma (abfd, sec, xxx)
    makes calculating their intended length trivial.  */
 
 #ifndef SUB_SEGMENT_ALIGN
-#ifdef BFD_ASSEMBLER
-#define SUB_SEGMENT_ALIGN(SEG) (0)
+#ifdef HANDLE_ALIGN
+/* The last subsegment gets an aligment corresponding to the alignment
+   of the section.  This allows proper nop-filling at the end of
+   code-bearing sections.  */
+#define SUB_SEGMENT_ALIGN(SEG, FRCHAIN)					\
+  (!(FRCHAIN)->frch_next || (FRCHAIN)->frch_next->frch_seg != (SEG)	\
+   ? get_recorded_alignment (SEG) : 0)
 #else
-#define SUB_SEGMENT_ALIGN(SEG) (2)
+#ifdef BFD_ASSEMBLER
+#define SUB_SEGMENT_ALIGN(SEG, FRCHAIN) 0
+#else
+#define SUB_SEGMENT_ALIGN(SEG, FRCHAIN) 2
+#endif
 #endif
 #endif
 
@@ -1432,14 +1448,15 @@ subsegs_finish ()
 
   for (frchainP = frchain_root; frchainP; frchainP = frchainP->frch_next)
     {
-      int alignment;
+      int alignment = 0;
 
       subseg_set (frchainP->frch_seg, frchainP->frch_subseg);
 
       /* This now gets called even if we had errors.  In that case,
          any alignment is meaningless, and, moreover, will look weird
          if we are generating a listing.  */
-      alignment = had_errors () ? 0 : SUB_SEGMENT_ALIGN (now_seg);
+      if (!had_errors ())
+	alignment = SUB_SEGMENT_ALIGN (now_seg, frchainP);
 
       if (subseg_text_p (now_seg))
 	frag_align_code (alignment, 0);

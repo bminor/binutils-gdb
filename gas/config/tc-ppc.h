@@ -198,7 +198,7 @@ extern void ppc_adjust_symtab PARAMS ((void));
 
 /* Niclas Andersson <nican@ida.liu.se> says this is needed.  */
 extern int ppc_subseg_align PARAMS ((void));
-#define SUB_SEGMENT_ALIGN(SEG) ppc_subseg_align()
+#define SUB_SEGMENT_ALIGN(SEG, FRCHAIN) ppc_subseg_align ()
 
 /* We also need to copy, in particular, the class of the symbol,
    over what obj-coff would otherwise have copied.  */

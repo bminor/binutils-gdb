@@ -116,6 +116,8 @@ extern const char *i386_target_format PARAMS ((void));
 extern void i386_elf_emit_arch_note PARAMS ((void));
 #endif
 
+#define SUB_SEGMENT_ALIGN(SEG, FRCHAIN) 0
+
 #else /* ! BFD_ASSEMBLER */
 
 /* COFF STUFF */
@@ -131,7 +133,7 @@ extern int tc_coff_sizemachdep PARAMS ((fragS *frag));
 
 #ifdef TE_GO32
 /* DJGPP now expects some sections to be 2**4 aligned.  */
-#define SUB_SEGMENT_ALIGN(SEG)						\
+#define SUB_SEGMENT_ALIGN(SEG, FRCHAIN)					\
   ((strcmp (obj_segment_name (SEG), ".text") == 0			\
     || strcmp (obj_segment_name (SEG), ".data") == 0			\
     || strcmp (obj_segment_name (SEG), ".bss") == 0			\
@@ -141,7 +143,7 @@ extern int tc_coff_sizemachdep PARAMS ((fragS *frag));
    ? 4									\
    : 2)
 #else
-#define SUB_SEGMENT_ALIGN(SEG) 2
+#define SUB_SEGMENT_ALIGN(SEG, FRCHAIN) 2
 #endif
 
 #define TC_RVA_RELOC 7

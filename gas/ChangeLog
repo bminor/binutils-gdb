@@ -1,3 +1,19 @@
+2002-05-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* write.c (size_seg): Check adjustment to last frag.
+	(SUB_SEGMENT_ALIGN): If HANDLE_ALIGN defined, pad out last frag to
+	section alignment.
+	* config/obj-coff.c (SUB_SEGMENT_ALIGN): Likewise.
+	* config/obj-ieee.c (SUB_SEGMENT_ALIGN): Likewise.
+	(write_object_file): Invoke md_do_align if available, and use
+	frag_align_code on text sections.
+	* config/obj-vms.h (SUB_SEGMENT_ALIGN): Now two args.
+	* config/tc-m88k.h (SUB_SEGMENT_ALIGN): Likewise.
+	* config/tc-ppc.h (SUB_SEGMENT_ALIGN): Likewise.
+	* config/tc-sh.h (SUB_SEGMENT_ALIGN): Likewise.
+	* config/tc-i386.h (SUB_SEGMENT_ALIGN): Likewise.  Define for
+	BFD_ASSEMBLER too.
+
 2002-05-22  H.J. Lu <hjl@gnu.org>
 
 	* dwarf2dbg.c (dwarf2_directive_loc): Call listing_source_file
