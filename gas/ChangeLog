@@ -1,5 +1,7 @@
 Thu Jul 22 12:09:41 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* write.c (fix_new_exp): Handle a O_uminus expression.
+
 	* expr.c (expr): Don't let absolute_section override
 	undefined_section for the return value.
 
