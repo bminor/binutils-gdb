@@ -276,9 +276,11 @@ extern CORE_ADDR alpha_frame_saved_pc (struct frame_info *);
 
 #define ALPHA_NUM_ARG_REGS	6
 
-#define FRAME_ARGS_ADDRESS(fi)	((fi)->frame - (ALPHA_NUM_ARG_REGS * 8))
+#define FRAME_ARGS_ADDRESS(fi) alpha_frame_args_address ((fi))
+extern CORE_ADDR alpha_frame_args_address (struct frame_info *);
 
-#define FRAME_LOCALS_ADDRESS(fi) ((fi)->frame - (fi)->localoff)
+#define FRAME_LOCALS_ADDRESS(fi) alpha_frame_locals_address ((fi))
+extern CORE_ADDR alpha_frame_locals_address (struct frame_info *);
 
 /* Return number of args passed to a frame.
    Can return -1, meaning no way to tell.  */
@@ -295,14 +297,9 @@ extern CORE_ADDR alpha_frame_saved_pc (struct frame_info *);
    ways in the stack frame.  sp is even more special:
    the address we return for it IS the sp for the next frame.  */
 
-extern void alpha_find_saved_regs (struct frame_info *);
-
 #define FRAME_INIT_SAVED_REGS(frame_info) \
-  do { \
-    if ((frame_info)->saved_regs == NULL) \
-      alpha_find_saved_regs (frame_info); \
-    (frame_info)->saved_regs[SP_REGNUM] = (frame_info)->frame; \
-  } while (0)
+  alpha_frame_init_saved_regs (frame_info)
+extern void alpha_frame_init_saved_regs (struct frame_info *);
 
 
 /* Things needed for making the inferior call functions.  */
@@ -391,21 +388,14 @@ typedef struct alpha_extra_func_info
 #define mips_extra_func_info alpha_extra_func_info
 #define mips_extra_func_info_t alpha_extra_func_info_t
 
-#define EXTRA_FRAME_INFO \
-  int localoff; \
-  int pc_reg; \
-  alpha_extra_func_info_t proc_desc;
 
-#define INIT_EXTRA_FRAME_INFO(fromleaf, fci) init_extra_frame_info(fci)
-extern void init_extra_frame_info (struct frame_info *);
+#define INIT_EXTRA_FRAME_INFO(fromleaf, fci) \
+  alpha_init_extra_frame_info(fromleaf, fci)
+extern void alpha_init_extra_frame_info (int, struct frame_info *);
 
-#define	PRINT_EXTRA_FRAME_INFO(fi) \
-  { \
-    if (fi && fi->proc_desc && fi->proc_desc->pdr.framereg < NUM_REGS) \
-      printf_filtered (" frame pointer is at %s+%ld\n", \
-                       REGISTER_NAME (fi->proc_desc->pdr.framereg), \
-                                 fi->proc_desc->pdr.frameoffset); \
-  }
+#define PRINT_EXTRA_FRAME_INFO(fi) alpha_print_extra_frame_info ((fi))
+extern void alpha_print_extra_frame_info (struct frame_info *);
+
 
 /* It takes two values to specify a frame on the ALPHA.  Sigh.
 

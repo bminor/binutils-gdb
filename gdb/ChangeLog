@@ -1,5 +1,29 @@
 2002-01-18  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* alpha-tdep.c (frame_extra_info): New.  
+	(alpha_find_saved_regs): Make static.  Use 
+	frame->extra_info.
+	(alpha_frame_init_saved_regs): New function.
+	(alpha_frame_saved_pc): Use frame->extra_info. 
+	(temp_saved_regs): Don't declare as struct frame_saved_regs. 
+	(heuristic_proc_desc): Adjust for temp_saved_regs changes. 
+	(init_extra_frame_info): Rename to...
+	(alpha_init_extra_frame_info): ...this.  Use frame->extra_info.
+	(alpha_print_extra_frame_info): New function. 
+	(alpha_frame_locals_address): Ditto.
+	(alpha_frame_args_address): Ditto.
+	(alpha_pop_frame): Use frame->extra_info. 
+	* config/alpha/tm-alpha.h (FRAME_ARGS_ADDRESS): Use
+	alpha_frame_args_address.
+	(FRAME_LOCALS_ADDRESS): Use alpha_frame_locals_address. 
+	(alpha_find_saved_regs): Remove prototype.
+	(FRAME_INIT_SAVED_REGS): Use alpha_frame_init_saved_regs. 
+	(EXTRA_FRAME_INFO): Remove. 
+	(INIT_EXTRA_FRAME_INFO): Use alpha_init_extra_frame_info.
+	(PRINT_EXTRA_FRAME_INFO): Use alpha_print_extra_frame_info.
+
+2002-01-18  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* alpha-tdep.c (alpha_osf_in_sigtramp): New function.
 	(alpha_cannot_fetch_register): Ditto.
 	(alpha_cannot_store_register): Ditto.

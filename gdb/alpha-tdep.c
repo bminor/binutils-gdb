@@ -34,9 +34,18 @@
 #include "regcache.h"
 #include "doublest.h"
 
+struct frame_extra_info
+  {
+    alpha_extra_func_info_t proc_desc;
+    int localoff;
+    int pc_reg;
+  };
+
 /* FIXME: Some of this code should perhaps be merged with mips-tdep.c.  */
 
 /* Prototypes for local functions. */
+
+static void alpha_find_saved_regs (struct frame_info *);
 
 static alpha_extra_func_info_t push_sigtramp_desc (CORE_ADDR low_addr);
 
@@ -311,7 +320,7 @@ alpha_register_convertible (int regno)
 /* Guaranteed to set frame->saved_regs to some values (it never leaves it
    NULL).  */
 
-void
+static void
 alpha_find_saved_regs (struct frame_info *frame)
 {
   int ireg;
@@ -351,7 +360,7 @@ alpha_find_saved_regs (struct frame_info *frame)
       return;
     }
 
-  proc_desc = frame->proc_desc;
+  proc_desc = frame->extra_info->proc_desc;
   if (proc_desc == NULL)
     /* I'm not sure how/whether this can happen.  Normally when we can't
        find a proc_desc, we "synthesize" one using heuristic_proc_desc
@@ -399,6 +408,14 @@ alpha_find_saved_regs (struct frame_info *frame)
   frame->saved_regs[PC_REGNUM] = frame->saved_regs[returnreg];
 }
 
+void
+alpha_frame_init_saved_regs (struct frame_info *fi)
+{
+  if (fi->saved_regs == NULL)
+    alpha_find_saved_regs (fi);
+  fi->saved_regs[SP_REGNUM] = fi->frame;
+}
+
 static CORE_ADDR
 read_next_frame_reg (struct frame_info *fi, int regno)
 {
@@ -422,10 +439,11 @@ read_next_frame_reg (struct frame_info *fi, int regno)
 CORE_ADDR
 alpha_frame_saved_pc (struct frame_info *frame)
 {
-  alpha_extra_func_info_t proc_desc = frame->proc_desc;
+  alpha_extra_func_info_t proc_desc = frame->extra_info->proc_desc;
   /* We have to get the saved pc from the sigcontext
      if it is a signal handler frame.  */
-  int pcreg = frame->signal_handler_caller ? PC_REGNUM : frame->pc_reg;
+  int pcreg = frame->signal_handler_caller ? PC_REGNUM
+                                           : frame->extra_info->pc_reg;
 
   if (proc_desc && PROC_DESC_IS_DUMMY (proc_desc))
     return read_memory_integer (frame->frame - 8, 8);
@@ -457,7 +475,7 @@ alpha_saved_pc_after_call (struct frame_info *frame)
 
 
 static struct alpha_extra_func_info temp_proc_desc;
-static struct frame_saved_regs temp_saved_regs;
+static CORE_ADDR temp_saved_regs[NUM_REGS];
 
 /* Nonzero if instruction at PC is a return instruction.  "ret
    $zero,($ra),1" on alpha. */
@@ -541,7 +559,7 @@ heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
   if (start_pc == 0)
     return NULL;
   memset (&temp_proc_desc, '\0', sizeof (temp_proc_desc));
-  memset (&temp_saved_regs, '\0', sizeof (struct frame_saved_regs));
+  memset (&temp_saved_regs, '\0', SIZEOF_FRAME_SAVED_REGS);
   PROC_LOW_ADDR (&temp_proc_desc) = start_pc;
 
   if (start_pc + 200 < limit_pc)
@@ -573,7 +591,7 @@ heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
 	{
 	  int reg = (word & 0x03e00000) >> 21;
 	  reg_mask |= 1 << reg;
-	  temp_saved_regs.regs[reg] = sp + (short) word;
+	  temp_saved_regs[reg] = sp + (short) word;
 
 	  /* Starting with OSF/1-3.2C, the system libraries are shipped
 	     without local symbols, but they still contain procedure
@@ -859,23 +877,38 @@ alpha_frame_chain (struct frame_info *frame)
 }
 
 void
-init_extra_frame_info (struct frame_info *frame)
+alpha_print_extra_frame_info (struct frame_info *fi)
+{
+  if (fi
+      && fi->extra_info
+      && fi->extra_info->proc_desc
+      && fi->extra_info->proc_desc->pdr.framereg < NUM_REGS)
+    printf_filtered (" frame pointer is at %s+%s\n",
+		     REGISTER_NAME (fi->extra_info->proc_desc->pdr.framereg),
+		     paddr_d (fi->extra_info->proc_desc->pdr.frameoffset));
+}
+
+void
+alpha_init_extra_frame_info (int fromleaf, struct frame_info *frame)
 {
   /* Use proc_desc calculated in frame_chain */
   alpha_extra_func_info_t proc_desc =
   frame->next ? cached_proc_desc : find_proc_desc (frame->pc, frame->next);
 
+  frame->extra_info = (struct frame_extra_info *)
+    frame_obstack_alloc (sizeof (struct frame_extra_info));
+
   frame->saved_regs = NULL;
-  frame->localoff = 0;
-  frame->pc_reg = RA_REGNUM;
-  frame->proc_desc = proc_desc == &temp_proc_desc ? 0 : proc_desc;
+  frame->extra_info->localoff = 0;
+  frame->extra_info->pc_reg = RA_REGNUM;
+  frame->extra_info->proc_desc = proc_desc == &temp_proc_desc ? 0 : proc_desc;
   if (proc_desc)
     {
       /* Get the locals offset and the saved pc register from the
          procedure descriptor, they are valid even if we are in the
          middle of the prologue.  */
-      frame->localoff = PROC_LOCALOFF (proc_desc);
-      frame->pc_reg = PROC_PC_REG (proc_desc);
+      frame->extra_info->localoff = PROC_LOCALOFF (proc_desc);
+      frame->extra_info->pc_reg = PROC_PC_REG (proc_desc);
 
       /* Fixup frame-pointer - only needed for top frame */
 
@@ -907,12 +940,25 @@ init_extra_frame_info (struct frame_info *frame)
 	    {
 	      frame->saved_regs = (CORE_ADDR *)
 		frame_obstack_alloc (SIZEOF_FRAME_SAVED_REGS);
-	      memcpy (frame->saved_regs, temp_saved_regs.regs, SIZEOF_FRAME_SAVED_REGS);
+	      memcpy (frame->saved_regs, temp_saved_regs,
+	              SIZEOF_FRAME_SAVED_REGS);
 	      frame->saved_regs[PC_REGNUM]
 		= frame->saved_regs[RA_REGNUM];
 	    }
 	}
     }
+}
+
+CORE_ADDR
+alpha_frame_locals_address (struct frame_info *fi)
+{
+  return (fi->frame - fi->extra_info->localoff);
+}
+
+CORE_ADDR
+alpha_frame_args_address (struct frame_info *fi)
+{
+  return (fi->frame - (ALPHA_NUM_ARG_REGS * 8));
 }
 
 /* ALPHA stack frames are almost impenetrable.  When execution stops,
@@ -1154,7 +1200,7 @@ alpha_pop_frame (void)
   struct frame_info *frame = get_current_frame ();
   CORE_ADDR new_sp = frame->frame;
 
-  alpha_extra_func_info_t proc_desc = frame->proc_desc;
+  alpha_extra_func_info_t proc_desc = frame->extra_info->proc_desc;
 
   /* we need proc_desc to know how to restore the registers;
      if it is NULL, construct (a temporary) one */
