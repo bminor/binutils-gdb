@@ -1,3 +1,27 @@
+2003-06-05  Nick Clifton  <nickc@redhat.com>
+
+	* frv.cpu (FRintieven): New operand.  An even-numbered only
+	version of the FRinti operand.
+	(FRintjeven): Likewise for FRintj.
+	(FRintkeven): Likewise for FRintk.
+	(mdcutssi, media-dual-word-rotate-r-r, mqsaths,
+	media-quad-arith-sat-semantics, media-quad-arith-sat,
+	conditional-media-quad-arith-sat, mdunpackh,
+	media-quad-multiply-semantics, media-quad-multiply,
+	conditional-media-quad-multiply, media-quad-complex-i,
+	media-quad-multiply-acc-semantics, media-quad-multiply-acc,
+	conditional-media-quad-multiply-acc, munpackh,
+	media-quad-multiply-cross-acc-semantics, mdpackh,
+	media-quad-multiply-cross-acc, mbtoh-semantics,
+	media-quad-cross-multiply-cross-acc-semantics,
+	media-quad-cross-multiply-cross-acc, mbtoh, mhtob-semantics,
+	media-quad-cross-multiply-acc-semantics, cmbtoh,
+	media-quad-cross-multiply-acc, media-quad-complex, mhtob,
+	media-expand-halfword-to-double-semantics, mexpdhd, cmexpdhd,
+	cmhtob): Use new operands.
+	* frv.opc (CGEN_VERBOSE_ASSEMBLER_ERRORS): Define.
+        (parse_even_register): New function.
+
 2003-06-03  Nick Clifton  <nickc@redhat.com>
 
 	* frv.cpu (media-dual-word-rotate-r-r): Use a signed 6-bit

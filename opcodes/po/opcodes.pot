@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2003-06-03 14:31+0100\n"
+"POT-Creation-Date: 2003-06-05 11:34+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -87,69 +87,69 @@ msgstr ""
 msgid "Address 0x%x is out of bounds.\n"
 msgstr ""
 
-#: fr30-asm.c:323 frv-asm.c:595 ip2k-asm.c:574 iq2000-asm.c:460 m32r-asm.c:325
+#: fr30-asm.c:323 frv-asm.c:626 ip2k-asm.c:574 iq2000-asm.c:460 m32r-asm.c:325
 #: openrisc-asm.c:244 xstormy16-asm.c:284
 #, c-format
 msgid "Unrecognized field %d while parsing.\n"
 msgstr ""
 
-#: fr30-asm.c:373 frv-asm.c:645 ip2k-asm.c:624 iq2000-asm.c:513 m32r-asm.c:375
+#: fr30-asm.c:373 frv-asm.c:676 ip2k-asm.c:624 iq2000-asm.c:510 m32r-asm.c:375
 #: openrisc-asm.c:294 xstormy16-asm.c:334
 msgid "missing mnemonic in syntax string"
 msgstr ""
 
 #. We couldn't parse it.
-#: fr30-asm.c:509 fr30-asm.c:513 fr30-asm.c:600 fr30-asm.c:702 frv-asm.c:781
-#: frv-asm.c:785 frv-asm.c:872 frv-asm.c:974 ip2k-asm.c:760 ip2k-asm.c:764
-#: ip2k-asm.c:851 ip2k-asm.c:953 iq2000-asm.c:649 iq2000-asm.c:653
-#: iq2000-asm.c:740 iq2000-asm.c:842 m32r-asm.c:511 m32r-asm.c:515
+#: fr30-asm.c:509 fr30-asm.c:513 fr30-asm.c:600 fr30-asm.c:702 frv-asm.c:812
+#: frv-asm.c:816 frv-asm.c:903 frv-asm.c:1005 ip2k-asm.c:760 ip2k-asm.c:764
+#: ip2k-asm.c:851 ip2k-asm.c:953 iq2000-asm.c:646 iq2000-asm.c:650
+#: iq2000-asm.c:737 iq2000-asm.c:839 m32r-asm.c:511 m32r-asm.c:515
 #: m32r-asm.c:602 m32r-asm.c:704 openrisc-asm.c:430 openrisc-asm.c:434
 #: openrisc-asm.c:521 openrisc-asm.c:623 xstormy16-asm.c:470
 #: xstormy16-asm.c:474 xstormy16-asm.c:561 xstormy16-asm.c:663
 msgid "unrecognized instruction"
 msgstr ""
 
-#: fr30-asm.c:556 frv-asm.c:828 ip2k-asm.c:807 iq2000-asm.c:696 m32r-asm.c:558
+#: fr30-asm.c:556 frv-asm.c:859 ip2k-asm.c:807 iq2000-asm.c:693 m32r-asm.c:558
 #: openrisc-asm.c:477 xstormy16-asm.c:517
 #, c-format
 msgid "syntax error (expected char `%c', found `%c')"
 msgstr ""
 
-#: fr30-asm.c:566 frv-asm.c:838 ip2k-asm.c:817 iq2000-asm.c:706 m32r-asm.c:568
+#: fr30-asm.c:566 frv-asm.c:869 ip2k-asm.c:817 iq2000-asm.c:703 m32r-asm.c:568
 #: openrisc-asm.c:487 xstormy16-asm.c:527
 #, c-format
 msgid "syntax error (expected char `%c', found end of instruction)"
 msgstr ""
 
-#: fr30-asm.c:594 frv-asm.c:866 ip2k-asm.c:845 iq2000-asm.c:734 m32r-asm.c:596
+#: fr30-asm.c:594 frv-asm.c:897 ip2k-asm.c:845 iq2000-asm.c:731 m32r-asm.c:596
 #: openrisc-asm.c:515 xstormy16-asm.c:555
 msgid "junk at end of line"
 msgstr ""
 
-#: fr30-asm.c:701 frv-asm.c:973 ip2k-asm.c:952 iq2000-asm.c:841 m32r-asm.c:703
-#: openrisc-asm.c:622 xstormy16-asm.c:662
+#: fr30-asm.c:701 frv-asm.c:1004 ip2k-asm.c:952 iq2000-asm.c:838
+#: m32r-asm.c:703 openrisc-asm.c:622 xstormy16-asm.c:662
 msgid "unrecognized form of instruction"
 msgstr ""
 
-#: fr30-asm.c:713 frv-asm.c:985 ip2k-asm.c:964 iq2000-asm.c:853 m32r-asm.c:715
-#: openrisc-asm.c:634 xstormy16-asm.c:674
+#: fr30-asm.c:713 frv-asm.c:1016 ip2k-asm.c:964 iq2000-asm.c:850
+#: m32r-asm.c:715 openrisc-asm.c:634 xstormy16-asm.c:674
 #, c-format
 msgid "bad instruction `%.50s...'"
 msgstr ""
 
-#: fr30-asm.c:716 frv-asm.c:988 ip2k-asm.c:967 iq2000-asm.c:856 m32r-asm.c:718
-#: openrisc-asm.c:637 xstormy16-asm.c:677
+#: fr30-asm.c:716 frv-asm.c:1019 ip2k-asm.c:967 iq2000-asm.c:853
+#: m32r-asm.c:718 openrisc-asm.c:637 xstormy16-asm.c:677
 #, c-format
 msgid "bad instruction `%.50s'"
 msgstr ""
 
 #. Default text to print if an instruction isn't recognized.
-#: fr30-dis.c:41 frv-dis.c:41 ip2k-dis.c:41 iq2000-dis.c:39 m32r-dis.c:41
+#: fr30-dis.c:41 frv-dis.c:41 ip2k-dis.c:41 iq2000-dis.c:41 m32r-dis.c:41
 #: mmix-dis.c:284 openrisc-dis.c:41 xstormy16-dis.c:41
 msgid "*unknown*"
 msgstr ""
 
-#: fr30-dis.c:320 frv-dis.c:362 ip2k-dis.c:329 iq2000-dis.c:190 m32r-dis.c:251
+#: fr30-dis.c:320 frv-dis.c:371 ip2k-dis.c:329 iq2000-dis.c:192 m32r-dis.c:251
 #: openrisc-dis.c:138 xstormy16-dis.c:171
 #, c-format
 msgid "Unrecognized field %d while printing insn.\n"
@@ -167,50 +167,54 @@ msgstr ""
 msgid "operand out of range (%lu not between 0 and %lu)"
 msgstr ""
 
-#: fr30-ibld.c:730 frv-ibld.c:820 ip2k-ibld.c:607 iq2000-ibld.c:713
+#: fr30-ibld.c:730 frv-ibld.c:829 ip2k-ibld.c:607 iq2000-ibld.c:713
 #: m32r-ibld.c:659 openrisc-ibld.c:633 xstormy16-ibld.c:678
 #, c-format
 msgid "Unrecognized field %d while building insn.\n"
 msgstr ""
 
-#: fr30-ibld.c:937 frv-ibld.c:1103 ip2k-ibld.c:684 iq2000-ibld.c:890
+#: fr30-ibld.c:937 frv-ibld.c:1121 ip2k-ibld.c:684 iq2000-ibld.c:890
 #: m32r-ibld.c:792 openrisc-ibld.c:735 xstormy16-ibld.c:826
 #, c-format
 msgid "Unrecognized field %d while decoding insn.\n"
 msgstr ""
 
-#: fr30-ibld.c:1086 frv-ibld.c:1348 ip2k-ibld.c:761 iq2000-ibld.c:1024
+#: fr30-ibld.c:1086 frv-ibld.c:1375 ip2k-ibld.c:761 iq2000-ibld.c:1024
 #: m32r-ibld.c:902 openrisc-ibld.c:815 xstormy16-ibld.c:939
 #, c-format
 msgid "Unrecognized field %d while getting int operand.\n"
 msgstr ""
 
-#: fr30-ibld.c:1215 frv-ibld.c:1573 ip2k-ibld.c:818 iq2000-ibld.c:1138
+#: fr30-ibld.c:1215 frv-ibld.c:1609 ip2k-ibld.c:818 iq2000-ibld.c:1138
 #: m32r-ibld.c:992 openrisc-ibld.c:875 xstormy16-ibld.c:1032
 #, c-format
 msgid "Unrecognized field %d while getting vma operand.\n"
 msgstr ""
 
-#: fr30-ibld.c:1349 frv-ibld.c:1807 ip2k-ibld.c:880 iq2000-ibld.c:1261
+#: fr30-ibld.c:1349 frv-ibld.c:1852 ip2k-ibld.c:880 iq2000-ibld.c:1261
 #: m32r-ibld.c:1090 openrisc-ibld.c:944 xstormy16-ibld.c:1134
 #, c-format
 msgid "Unrecognized field %d while setting int operand.\n"
 msgstr ""
 
-#: fr30-ibld.c:1471 frv-ibld.c:2029 ip2k-ibld.c:930 iq2000-ibld.c:1372
+#: fr30-ibld.c:1471 frv-ibld.c:2083 ip2k-ibld.c:930 iq2000-ibld.c:1372
 #: m32r-ibld.c:1176 openrisc-ibld.c:1001 xstormy16-ibld.c:1224
 #, c-format
 msgid "Unrecognized field %d while setting vma operand.\n"
 msgstr ""
 
-#: h8300-dis.c:407
-#, c-format
-msgid "Hmmmm %x"
+#: frv-asm.c:365
+msgid "register number must be even"
 msgstr ""
 
-#: h8300-dis.c:418
+#: h8300-dis.c:377
 #, c-format
-msgid "Don't understand %x \n"
+msgid "Hmmmm 0x%x"
+msgstr ""
+
+#: h8300-dis.c:760
+#, c-format
+msgid "Don't understand 0x%x \n"
 msgstr ""
 
 #: h8500-dis.c:143

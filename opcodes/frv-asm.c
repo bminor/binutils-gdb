@@ -64,6 +64,8 @@ static const char * parse_s12
   PARAMS ((CGEN_CPU_DESC, const char **, int, long *));
 static const char * parse_u12
   PARAMS ((CGEN_CPU_DESC, const char **, int, long *));
+static const char * parse_even_register
+  PARAMS ((CGEN_CPU_DESC, const char **, CGEN_KEYWORD *, long *));
 
 static const char *
 parse_ulo16 (cd, strp, opindex, valuep)
@@ -346,6 +348,26 @@ parse_u12 (cd, strp, opindex, valuep)
     }
 }
 
+static const char *
+parse_even_register (cd, strP, tableP, valueP)
+     CGEN_CPU_DESC  cd;
+     const char **  strP;
+     CGEN_KEYWORD * tableP;
+     long *         valueP;
+{
+  const char * errmsg;
+  const char * saved_star_strP = * strP;
+
+  errmsg = cgen_parse_keyword (cd, strP, tableP, valueP);
+
+  if (errmsg == NULL && ((* valueP) & 1))
+    {
+      errmsg = _("register number must be even");
+      * strP = saved_star_strP;
+    }
+
+  return errmsg;
+}
 /* -- */
 
 const char * frv_cgen_parse_operand
@@ -455,11 +477,20 @@ frv_cgen_parse_operand (cd, opindex, strp, fields)
     case FRV_OPERAND_FRINTI :
       errmsg = cgen_parse_keyword (cd, strp, & frv_cgen_opval_fr_names, & fields->f_FRi);
       break;
+    case FRV_OPERAND_FRINTIEVEN :
+      errmsg = parse_even_register (cd, strp, & frv_cgen_opval_fr_names, & fields->f_FRi);
+      break;
     case FRV_OPERAND_FRINTJ :
       errmsg = cgen_parse_keyword (cd, strp, & frv_cgen_opval_fr_names, & fields->f_FRj);
       break;
+    case FRV_OPERAND_FRINTJEVEN :
+      errmsg = parse_even_register (cd, strp, & frv_cgen_opval_fr_names, & fields->f_FRj);
+      break;
     case FRV_OPERAND_FRINTK :
       errmsg = cgen_parse_keyword (cd, strp, & frv_cgen_opval_fr_names, & fields->f_FRk);
+      break;
+    case FRV_OPERAND_FRINTKEVEN :
+      errmsg = parse_even_register (cd, strp, & frv_cgen_opval_fr_names, & fields->f_FRk);
       break;
     case FRV_OPERAND_FRJ :
       errmsg = cgen_parse_keyword (cd, strp, & frv_cgen_opval_fr_names, & fields->f_FRj);

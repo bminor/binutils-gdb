@@ -2159,9 +2159,9 @@
 (dnmop CPRdoublek "destination register"   ((MACH frv)) h-cpr_double f-CPRk DI)
 
 ; floating point operands
-(dnmop FRinti    "source register 1"      () h-fr_int        f-FRi SI)
-(dnmop FRintj    "source register 2"      () h-fr_int        f-FRj SI)
-(dnmop FRintk    "target register"        () h-fr_int        f-FRk SI)
+(dnmop FRinti    "source register 1"      () h-fr_int    f-FRi SI)
+(dnmop FRintj    "source register 2"      () h-fr_int    f-FRj SI)
+(dnmop FRintk    "target register"        () h-fr_int    f-FRk SI)
 (dnmop FRi       "source register 1"      () h-fr        f-FRi SF)
 (dnmop FRj       "source register 2"      () h-fr        f-FRj SF)
 (dnmop FRk       "destination register"   () h-fr        f-FRk SF)
@@ -2208,6 +2208,36 @@
 
 (dnop label16  "18 bit pc relative address" () h-iaddr f-label16)
 (dnop label24  "26 bit pc relative address" () h-iaddr f-label24)
+
+(define-operand
+  (name FRintieven)
+  (comment "(even) source register 1")
+  (attrs)
+  (type h-fr_int)
+  (index f-FRi)
+  (mode SI)
+  (handlers (parse "even_register"))
+)
+
+(define-operand
+  (name FRintjeven)
+  (comment "(even) source register 2")
+  (attrs)
+  (type h-fr_int)
+  (index f-FRj)
+  (mode SI)
+  (handlers (parse "even_register"))
+)
+
+(define-operand
+  (name FRintkeven)
+  (comment "(even) target register")
+  (attrs)
+  (type h-fr_int)
+  (index f-FRk)
+  (mode SI)
+  (handlers (parse "even_register"))
+)
 
 (define-operand
   (name d12)
@@ -6594,18 +6624,19 @@
 (dni mdcutssi
      "Media dual cut with signed saturation"
      ((UNIT FM0) (MACH fr400) (FR400-MAJOR M-2))
-     "mdcutssi$pack $ACC40Si,$s6,$FRintk"
-     (+ pack FRintk OP_78 ACC40Si OPE1_0E s6)
+     "mdcutssi$pack $ACC40Si,$s6,$FRintkeven"
+     (+ pack FRintkeven OP_78 ACC40Si OPE1_0E s6)
      (if (register-unaligned ACC40Si 2)
 	 (c-call VOID "@cpu@_media_acc_not_aligned")
-	 (if (register-unaligned FRintk 2)
+	 (if (register-unaligned FRintkeven 2)
 	     (c-call VOID "@cpu@_media_register_not_aligned")
 	     (sequence ()
-		       (set FRintk (c-call SI "@cpu@_media_cut_ss" ACC40Si s6))
-		       (set (nextreg h-fr_int FRintk 1)
+		       (set FRintkeven (c-call SI "@cpu@_media_cut_ss" ACC40Si s6))
+		       (set (nextreg h-fr_int FRintkeven 1)
 			    (c-call SI "@cpu@_media_cut_ss"
 				    (nextreg h-acc40S ACC40Si 1) s6)))))
-     ((fr400 (unit u-media-4-acc-dual)))
+     ((fr400 (unit u-media-4-acc-dual
+		   (out FRintk FRintkeven))))
 )
 
 ; The (add (xxxx) (mul arg 0)) is a hack to get a reference to arg generated
@@ -6660,17 +6691,19 @@
   (dni name
        (comment)
        ((UNIT FM0) (MACH fr400) (FR400-MAJOR M-2))
-       (.str name "$pack $FRinti,$s6,$FRintk")
-       (+ pack FRintk op FRinti ope s6)
-       (if (orif (register-unaligned FRinti 2)
-		 (register-unaligned FRintk 2))
+       (.str name "$pack $FRintieven,$s6,$FRintkeven")
+       (+ pack FRintkeven op FRintieven ope s6)
+       (if (orif (register-unaligned FRintieven 2)
+		 (register-unaligned FRintkeven 2))
 	   (c-call VOID "@cpu@_media_register_not_aligned")
 	   (sequence ()
-		     (set FRintk (operation FRinti (and s6 #x1f)))
-		     (set (nextreg h-fr_int FRintk 1)
-			  (operation (nextreg h-fr_int FRinti 1)
+		     (set FRintkeven (operation FRintieven (and s6 #x1f)))
+		     (set (nextreg h-fr_int FRintkeven 1)
+			  (operation (nextreg h-fr_int FRintieven 1)
 				     (and s6 #x1f)))))
-       ((fr400 (unit u-media-3-quad)))
+       ((fr400 (unit u-media-3-quad
+		     (in  FRinti FRintieven)
+		     (out FRintk FRintkeven))))
   )
 )
 
@@ -6738,22 +6771,25 @@
 (dni mqsaths
      "Media quad saturation signed"
      ((UNIT FM01) (MACH fr400) (FR400-MAJOR M-1))
-     "mqsaths$pack $FRinti,$FRintj,$FRintk"
-     (+ pack FRintk OP_78 FRinti OPE1_0F FRintj)
-     (if (orif (register-unaligned FRinti 2)
-	       (orif (register-unaligned FRintj 2)
-		     (register-unaligned FRintk 2)))
+     "mqsaths$pack $FRintieven,$FRintjeven,$FRintkeven"
+     (+ pack FRintkeven OP_78 FRintieven OPE1_0F FRintjeven)
+     (if (orif (register-unaligned FRintieven 2)
+	       (orif (register-unaligned FRintjeven 2)
+		     (register-unaligned FRintkeven 2)))
 	 (c-call VOID "@cpu@_media_register_not_aligned")
 	 (sequence ((HI argihi) (HI argilo) (HI argjhi) (HI argjlo))
-		   ; hack to get FRintk referenced as a target for profiling
-		   (set FRintk (c-raw-call SI "frv_ref_SI" FRintk))
-		   (extract-hilo FRinti 0 FRintj 0 argihi argilo argjhi argjlo)
-		   (saturate argihi argjhi (inv argjhi) (halfword hi FRintk 0))
-		   (saturate argilo argjlo (inv argjlo) (halfword lo FRintk 0))
-		   (extract-hilo FRinti 1 FRintj 1 argihi argilo argjhi argjlo)
-		   (saturate argihi argjhi (inv argjhi) (halfword hi FRintk 1))
-		   (saturate argilo argjlo (inv argjlo) (halfword lo FRintk 1))))
-     ((fr400 (unit u-media-1-quad)))
+		   ; hack to get FRintkeven referenced as a target for profiling
+		   (set FRintkeven (c-raw-call SI "frv_ref_SI" FRintkeven))
+		   (extract-hilo FRintieven 0 FRintjeven 0 argihi argilo argjhi argjlo)
+		   (saturate argihi argjhi (inv argjhi) (halfword hi FRintkeven 0))
+		   (saturate argilo argjlo (inv argjlo) (halfword lo FRintkeven 0))
+		   (extract-hilo FRintieven 1 FRintjeven 1 argihi argilo argjhi argjlo)
+		   (saturate argihi argjhi (inv argjhi) (halfword hi FRintkeven 1))
+		   (saturate argilo argjlo (inv argjlo) (halfword lo FRintkeven 1))))
+     ((fr400 (unit u-media-1-quad
+		   (in  FRinti FRintieven)
+		   (in  FRintj FRintjeven)
+		   (out FRintk FRintkeven))))
 )
 
 (define-pmacro (saturate-unsigned arg max result)
@@ -6894,29 +6930,29 @@
 (conditional-media-dual-arith-sat cmsubhus sub UHI 65535      0 OP_71 OPE4_3 "Conditional Media dual sub unsigned with saturation")
 
 (define-pmacro (media-quad-arith-sat-semantics cond operation mode max min)
-  (if (orif (register-unaligned FRinti 2)
-	    (orif (register-unaligned FRintj 2)
-		  (register-unaligned FRintk 2)))
+  (if (orif (register-unaligned FRintieven 2)
+	    (orif (register-unaligned FRintjeven 2)
+		  (register-unaligned FRintkeven 2)))
       (c-call VOID "@cpu@_media_register_not_aligned")
       (if cond
 	  (sequence ((mode argihi) (mode argilo) (mode argjhi) (mode argjlo))
-		    ; hack to get FRintk referenced as a target for profiling
-		    (set FRintk (c-raw-call SI "frv_ref_SI" FRintk))
-		    (extract-hilo FRinti 0 FRintj 0
+		    ; hack to get FRintkeven referenced as a target for profiling
+		    (set FRintkeven (c-raw-call SI "frv_ref_SI" FRintkeven))
+		    (extract-hilo FRintieven 0 FRintjeven 0
 				  argihi argilo argjhi argjlo)
 		    (media-arith-sat-semantics operation argihi argjhi
-					       (halfword hi FRintk 0) mode
+					       (halfword hi FRintkeven 0) mode
 					       max min (msr-sie-fri-hi))
 		    (media-arith-sat-semantics operation argilo argjlo
-					       (halfword lo FRintk 0) mode
+					       (halfword lo FRintkeven 0) mode
 					       max min (msr-sie-fri-lo))
-		    (extract-hilo FRinti 1 FRintj 1
+		    (extract-hilo FRintieven 1 FRintjeven 1
 				  argihi argilo argjhi argjlo)
 		    (media-arith-sat-semantics operation argihi argjhi
-					       (halfword hi FRintk 1) mode
+					       (halfword hi FRintkeven 1) mode
 					       max min	(msr-sie-fri-1-hi))
 		    (media-arith-sat-semantics operation argilo argjlo
-					       (halfword lo FRintk 1) mode
+					       (halfword lo FRintkeven 1) mode
 					       max min (msr-sie-fri-1-lo)))))
 )
 
@@ -6924,11 +6960,17 @@
   (dni name
        (comment)
        ((UNIT FM01) (FR500-MAJOR M-1) (FR400-MAJOR M-2))
-       (.str name "$pack $FRinti,$FRintj,$FRintk")
-       (+ pack FRintk op FRinti ope FRintj)
+       (.str name "$pack $FRintieven,$FRintjeven,$FRintkeven")
+       (+ pack FRintkeven op FRintieven ope FRintjeven)
        (media-quad-arith-sat-semantics 1 operation mode max min)
-       ((fr400 (unit u-media-1-quad))
-	(fr500 (unit u-media-quad-arith)))
+       ((fr400 (unit u-media-1-quad
+		     (in  FRinti FRintieven)
+		     (in  FRintj FRintjeven)
+		     (out FRintk Frintkeven)))
+	(fr500 (unit u-media-quad-arith
+		     (in  FRinti FRintieven)
+		     (in  FRintj FRintjeven)
+		     (out FRintk Frintkeven))))
   )
 )
 
@@ -6943,12 +6985,18 @@
   (dni name
        (comment)
        ((UNIT FM01) (FR500-MAJOR M-1) (FR400-MAJOR M-2) CONDITIONAL)
-       (.str name "$pack $FRinti,$FRintj,$FRintk,$CCi,$cond")
-       (+ pack FRintk op FRinti CCi cond ope FRintj)
+       (.str name "$pack $FRintieven,$FRintjeven,$FRintkeven,$CCi,$cond")
+       (+ pack FRintkeven op FRintieven CCi cond ope FRintjeven)
        (media-quad-arith-sat-semantics (eq CCi (or cond 2))
 				       operation mode max min)
-       ((fr400 (unit u-media-1-quad))
-	(fr500 (unit u-media-quad-arith)))
+       ((fr400 (unit u-media-1-quad
+		     (in  FRinti FRintieven)
+		     (in  FRintj FRintjeven)
+		     (out FRintk Frintkeven)))
+	(fr500 (unit u-media-quad-arith
+		     (in  FRinti FRintieven)
+		     (in  FRintj FRintjeven)
+		     (out FRintk Frintkeven))))
   )
 )
 
@@ -7131,18 +7179,18 @@
 (define-pmacro (media-quad-multiply-semantics cond mode conv rhs1 rhs2)
   (if (register-unaligned ACC40Sk 4)
       (c-call VOID "@cpu@_media_acc_not_aligned")
-      (if (orif (register-unaligned FRinti 2)
-		(register-unaligned FRintj 2))
+      (if (orif (register-unaligned FRintieven 2)
+		(register-unaligned FRintjeven 2))
 	  (c-call VOID "@cpu@_media_register_not_aligned")
 	  (if cond
 	      (sequence ((mode argihi) (mode argilo)
 			 (mode argjhi) (mode argjlo))
-			(extract-hilo FRinti 0 FRintj 0
+			(extract-hilo FRintieven 0 FRintjeven 0
 				      argihi argilo argjhi argjlo)
 			(media-multiply-semantics conv argihi rhs1 ACC40Sk)
 			(media-multiply-semantics conv argilo rhs2
 						  (nextreg h-acc40S ACC40Sk 1))
-			(extract-hilo FRinti 1 FRintj 1
+			(extract-hilo FRintieven 1 FRintjeven 1
 				      argihi argilo argjhi argjlo)
 			(media-multiply-semantics conv argihi rhs1
 						  (nextreg h-acc40S ACC40Sk 2))
@@ -7154,11 +7202,15 @@
   (dni name
        (comment)
        ((UNIT FM01) (FR500-MAJOR M-4) (FR400-MAJOR M-2) PRESERVE-OVF)
-       (.str name "$pack $FRinti,$FRintj,$ACC40Sk")
-       (+ pack ACC40Sk op FRinti ope FRintj)
+       (.str name "$pack $FRintieven,$FRintjeven,$ACC40Sk")
+       (+ pack ACC40Sk op FRintieven ope FRintjeven)
        (media-quad-multiply-semantics 1 mode conv rhs1 rhs2) 
-       ((fr400 (unit u-media-2-quad))
-	(fr500 (unit u-media-quad-mul)))
+       ((fr400 (unit u-media-2-quad
+		     (in  FRinti FRintieven)
+		     (in  FRintj FRintjeven)))
+	(fr500 (unit u-media-quad-mul
+		     (in  FRinti FRintieven)
+		     (in  FRintj FRintjeven))))
   )
 )
 
@@ -7174,11 +7226,15 @@
        (comment)
        ((UNIT FM01) (FR500-MAJOR M-4) (FR400-MAJOR M-2)
 	PRESERVE-OVF CONDITIONAL)
-       (.str name "$pack $FRinti,$FRintj,$ACC40Sk,$CCi,$cond")
-       (+ pack ACC40Sk op FRinti CCi cond ope FRintj)
+       (.str name "$pack $FRintieven,$FRintjeven,$ACC40Sk,$CCi,$cond")
+       (+ pack ACC40Sk op FRintieven CCi cond ope FRintjeven)
        (media-quad-multiply-semantics (eq CCi (or cond 2)) mode conv rhs1 rhs2)
-       ((fr400 (unit u-media-2-quad))
-	(fr500 (unit u-media-quad-mul)))
+       ((fr400 (unit u-media-2-quad
+		     (in  FRinti FRintieven)
+		     (in  FRintj FRintjeven)))
+	(fr500 (unit u-media-quad-mul
+		     (in  FRinti FRintieven)
+		     (in  FRintj FRintjeven))))	     
   )
 )
 
@@ -7269,13 +7325,13 @@
 		cond mode conv addop rhw res max min)
   (if (register-unaligned res 4)
       (c-call VOID "@cpu@_media_acc_not_aligned")
-      (if (orif (register-unaligned FRinti 2)
-		(register-unaligned FRintj 2))
+      (if (orif (register-unaligned FRintieven 2)
+		(register-unaligned FRintjeven 2))
 	  (c-call VOID "@cpu@_media_register_not_aligned")
 	  (if cond
 	      (sequence ((mode argihi) (mode argilo)
 			 (mode argjhi) (mode argjlo))
-			(extract-hilo FRinti 0 FRintj 0
+			(extract-hilo FRintieven 0 FRintjeven 0
 				      argihi argilo argjhi argjlo)
 			(media-multiply-acc-semantics conv argihi addop argjhi
 						      res
@@ -7283,7 +7339,7 @@
 			(media-multiply-acc-semantics conv argilo addop argjlo
 						      (nextreg rhw res 1)
 						      max min (msr-sie-acci-1))
-			(extract-hilo FRinti 1 FRintj 1
+			(extract-hilo FRintieven 1 FRintjeven 1
 				      argihi argilo argjhi argjlo)
 			(media-multiply-acc-semantics conv argihi addop argjhi
 						      (nextreg rhw res 2)
@@ -7299,11 +7355,15 @@
   (dni name
        (comment)
        ((UNIT FM01) (FR500-MAJOR M-4) (FR400-MAJOR M-2))
-       (.str name "$pack $FRinti,$FRintj,$" res)
-       (+ pack res op FRinti ope FRintj)
+       (.str name "$pack $FRintieven,$FRintjeven,$" res)
+       (+ pack res op FRintieven ope FRintjeven)
        (media-quad-multiply-acc-semantics 1 mode conv addop rhw res max min)
-       ((fr400 (unit u-media-2-quad))
-	(fr500 (unit u-media-quad-mul)))
+       ((fr400 (unit u-media-2-quad
+		     (in  FRinti FRintieven)
+		     (in  FRintj FRintjeven)))
+	(fr500 (unit u-media-quad-mul
+		     (in  FRinti FRintieven)
+		     (in  FRintj FRintjeven))))
   )
 )
 
@@ -7322,12 +7382,16 @@
   (dni name
        (comment)
        ((UNIT FM01) (FR500-MAJOR M-4) (FR400-MAJOR M-2) CONDITIONAL)
-       (.str name "$pack $FRinti,$FRintj,$" res ",$CCi,$cond")
-       (+ pack res op FRinti CCi cond ope FRintj)
+       (.str name "$pack $FRintieven,$FRintjeven,$" res ",$CCi,$cond")
+       (+ pack res op FRintieven CCi cond ope FRintjeven)
        (media-quad-multiply-acc-semantics (eq CCi (or cond 2))
 					  mode conv addop rhw res max min)
-       ((fr400 (unit u-media-2-quad))
-	(fr500 (unit u-media-quad-mul)))
+       ((fr400 (unit u-media-2-quad
+		     (in  FRinti FRintieven)
+		     (in  FRintj FRintjeven)))
+	(fr500 (unit u-media-quad-mul
+		     (in  FRinti FRintieven)
+		     (in  FRintj FRintjeven))))
   )
 )
 
@@ -7345,13 +7409,13 @@
 		cond mode conv addop rhw res max min)
   (if (register-unaligned res 4)
       (c-call VOID "@cpu@_media_acc_not_aligned")
-      (if (orif (register-unaligned FRinti 2)
-		(register-unaligned FRintj 2))
+      (if (orif (register-unaligned FRintieven 2)
+		(register-unaligned FRintjeven 2))
 	  (c-call VOID "@cpu@_media_register_not_aligned")
 	  (if cond
 	      (sequence ((mode argihi) (mode argilo)
 			 (mode argjhi) (mode argjlo))
-			(extract-hilo FRinti 0 FRintj 0
+			(extract-hilo FRintieven 0 FRintjeven 0
 				      argihi argilo argjhi argjlo)
 			(media-multiply-acc-semantics conv argihi addop argjhi
 						      (nextreg rhw res 2)
@@ -7359,7 +7423,7 @@
 			(media-multiply-acc-semantics conv argilo addop argjlo
 						      (nextreg rhw res 3)
 						      max min (msr-sie-acci-3))
-			(extract-hilo FRinti 1 FRintj 1
+			(extract-hilo FRintieven 1 FRintjeven 1
 				      argihi argilo argjhi argjlo)
 			(media-multiply-acc-semantics conv argihi addop argjhi
 						      res
@@ -7375,11 +7439,13 @@
   (dni name
        (comment)
        ((UNIT FM0) (MACH fr400) (FR400-MAJOR M-2))
-       (.str name "$pack $FRinti,$FRintj,$" res)
-       (+ pack res op FRinti ope FRintj)
+       (.str name "$pack $FRintieven,$FRintjeven,$" res)
+       (+ pack res op FRintieven ope FRintjeven)
        (media-quad-multiply-cross-acc-semantics 1 mode conv addop rhw res
 						max min)
-       ((fr400 (unit u-media-2-quad)))
+       ((fr400 (unit u-media-2-quad
+		     (in  FRinti FRintieven)
+		     (in  FRintj FRintjeven))))
   )
 )
 
@@ -7392,13 +7458,13 @@
 		cond mode conv addop rhw res max min)
   (if (register-unaligned res 4)
       (c-call VOID "@cpu@_media_acc_not_aligned")
-      (if (orif (register-unaligned FRinti 2)
-		(register-unaligned FRintj 2))
+      (if (orif (register-unaligned FRintieven 2)
+		(register-unaligned FRintjeven 2))
 	  (c-call VOID "@cpu@_media_register_not_aligned")
 	  (if cond
 	      (sequence ((mode argihi) (mode argilo)
 			 (mode argjhi) (mode argjlo))
-			(extract-hilo FRinti 0 FRintj 0
+			(extract-hilo FRintieven 0 FRintjeven 0
 				      argihi argilo argjhi argjlo)
 			(media-multiply-acc-semantics conv argihi addop argjlo
 						      (nextreg rhw res 2)
@@ -7406,7 +7472,7 @@
 			(media-multiply-acc-semantics conv argilo addop argjhi
 						      (nextreg rhw res 3)
 						      max min (msr-sie-acci-3))
-			(extract-hilo FRinti 1 FRintj 1
+			(extract-hilo FRintieven 1 FRintjeven 1
 				      argihi argilo argjhi argjlo)
 			(media-multiply-acc-semantics conv argihi addop argjlo
 						      res
@@ -7422,11 +7488,13 @@
   (dni name
        (comment)
        ((UNIT FM0) (MACH fr400) (FR400-MAJOR M-2))
-       (.str name "$pack $FRinti,$FRintj,$" res)
-       (+ pack res op FRinti ope FRintj)
+       (.str name "$pack $FRintieven,$FRintjeven,$" res)
+       (+ pack res op FRintieven ope FRintjeven)
        (media-quad-cross-multiply-cross-acc-semantics 1 mode conv addop rhw res
 						      max min)
-       ((fr400 (unit u-media-2-quad)))
+       ((fr400 (unit u-media-2-quad
+		     (in  FRinti FRintieven)
+		     (in  FRintj FRintjeven))))
   )
 )
 
@@ -7439,13 +7507,13 @@
 		cond mode conv addop rhw res max min)
   (if (register-unaligned res 4)
       (c-call VOID "@cpu@_media_acc_not_aligned")
-      (if (orif (register-unaligned FRinti 2)
-		(register-unaligned FRintj 2))
+      (if (orif (register-unaligned FRintieven 2)
+		(register-unaligned FRintjeven 2))
 	  (c-call VOID "@cpu@_media_register_not_aligned")
 	  (if cond
 	      (sequence ((mode argihi) (mode argilo)
 			 (mode argjhi) (mode argjlo))
-			(extract-hilo FRinti 0 FRintj 0
+			(extract-hilo FRintieven 0 FRintjeven 0
 				      argihi argilo argjhi argjlo)
 			(media-multiply-acc-semantics conv argihi addop argjlo
 						      res
@@ -7453,7 +7521,7 @@
 			(media-multiply-acc-semantics conv argilo addop argjhi
 						      (nextreg rhw res 1)
 						      max min (msr-sie-acci-1))
-			(extract-hilo FRinti 1 FRintj 1
+			(extract-hilo FRintieven 1 FRintjeven 1
 				      argihi argilo argjhi argjlo)
 			(media-multiply-acc-semantics conv argihi addop argjlo
 						      (nextreg rhw res 2)
@@ -7469,11 +7537,13 @@
   (dni name
        (comment)
        ((UNIT FM0) (MACH fr400) (FR400-MAJOR M-2))
-       (.str name "$pack $FRinti,$FRintj,$" res)
-       (+ pack res op FRinti ope FRintj)
+       (.str name "$pack $FRintieven,$FRintjeven,$" res)
+       (+ pack res op FRintieven ope FRintjeven)
        (media-quad-cross-multiply-acc-semantics 1 mode conv addop rhw res
 						max min)
-       ((fr400 (unit u-media-2-quad)))
+       ((fr400 (unit u-media-2-quad
+		     (in FRinti FRintieven)
+		     (in FRintj FRintjeven))))
   )
 )
 
@@ -7613,27 +7683,31 @@
   (dni name
        (comment)
        ((UNIT FM01) (FR500-MAJOR M-4) (FR400-MAJOR M-2))
-       (.str name "$pack $FRinti,$FRintj,$ACC40Sk")
-       (+ pack ACC40Sk op FRinti ope FRintj)
+       (.str name "$pack $FRintieven,$FRintjeven,$ACC40Sk")
+       (+ pack ACC40Sk op FRintieven ope FRintjeven)
        (if (register-unaligned ACC40Sk 2)
 	   (c-call VOID "@cpu@_media_acc_not_aligned")
-	   (if (orif (register-unaligned FRinti 2)
-		     (register-unaligned FRintj 2))
+	   (if (orif (register-unaligned FRintieven 2)
+		     (register-unaligned FRintjeven 2))
 	       (c-call VOID "@cpu@_media_register_not_aligned")
 	       (sequence ((mode argihi) (mode argilo)
 			  (mode argjhi) (mode argjlo))
-			 (extract-hilo FRinti 0 FRintj 0
+			 (extract-hilo FRintieven 0 FRintjeven 0
 				       argihi argilo argjhi argjlo)
 			 (media-complex-semantics conv argihi rhs1 argilo rhs2
 						  ACC40Sk
 						  max min (msr-sie-acci))
-			 (extract-hilo FRinti 1 FRintj 1
+			 (extract-hilo FRintieven 1 FRintjeven 1
 				       argihi argilo argjhi argjlo)
 			 (media-complex-semantics conv argihi rhs1 argilo rhs2
 						  (nextreg h-acc40S ACC40Sk 1)
 						  max min (msr-sie-acci-1)))))
-       ((fr400 (unit u-media-2-quad))
-	(fr500 (unit u-media-quad-complex)))
+       ((fr400 (unit u-media-2-quad
+		     (in FRinti FRintieven)
+		     (in FRintj FRintjeven)))
+	(fr500 (unit u-media-quad-complex
+		     (in FRinti FRintieven)
+		     (in FRintj FRintjeven))))
   )
 )
 
@@ -7642,27 +7716,31 @@
   (dni name
        (comment)
        ((UNIT FM01) (FR500-MAJOR M-4) (FR400-MAJOR M-2))
-       (.str name "$pack $FRinti,$FRintj,$ACC40Sk")
-       (+ pack ACC40Sk op FRinti ope FRintj)
+       (.str name "$pack $FRintieven,$FRintjeven,$ACC40Sk")
+       (+ pack ACC40Sk op FRintieven ope FRintjeven)
        (if (register-unaligned ACC40Sk 2)
 	   (c-call VOID "@cpu@_media_acc_not_aligned")
-	   (if (orif (register-unaligned FRinti 2)
-		     (register-unaligned FRintj 2))
+	   (if (orif (register-unaligned FRintieven 2)
+		     (register-unaligned FRintjeven 2))
 	       (c-call VOID "@cpu@_media_register_not_aligned")
 	       (sequence ((mode argihi) (mode argilo)
 			  (mode argjhi) (mode argjlo))
-			 (extract-hilo FRinti 0 FRintj 0
+			 (extract-hilo FRintieven 0 FRintjeven 0
 				       argihi argilo argjhi argjlo)
 			 (media-complex-semantics-i conv argihi rhs1 argilo rhs2
 						  ACC40Sk
 						  max min (msr-sie-acci))
-			 (extract-hilo FRinti 1 FRintj 1
+			 (extract-hilo FRintieven 1 FRintjeven 1
 				       argihi argilo argjhi argjlo)
 			 (media-complex-semantics-i conv argihi rhs1 argilo rhs2
 						  (nextreg h-acc40S ACC40Sk 1)
 						  max min (msr-sie-acci-1)))))
-       ((fr400 (unit u-media-2-quad))
-	(fr500 (unit u-media-quad-complex)))
+       ((fr400 (unit u-media-2-quad
+		     (in FRinti FRintieven)
+		     (in FRintj FRintjeven)))
+	(fr500 (unit u-media-quad-complex
+		     (in FRinti FRintieven)
+		     (in FRintj FRintjeven))))
   )
 )
 
@@ -7723,39 +7801,43 @@
 )
 
 (define-pmacro (media-expand-halfword-to-double-semantics cond)
-  (if (register-unaligned FRintk 2)
+  (if (register-unaligned FRintkeven 2)
       (c-call VOID "@cpu@_media_register_not_aligned")
       (if cond
 	  (sequence ((UHI tmp))
-		    ; a hack to get FRintk referenced for profiling
-		    (set FRintk (c-raw-call SI "frv_ref_SI" FRintk))
+		    ; a hack to get FRintkeven referenced for profiling
+		    (set FRintkeven (c-raw-call SI "frv_ref_SI" FRintkeven))
 		    (if (and u6 1)
 			(set tmp (halfword lo FRinti 0))
 			(set tmp (halfword hi FRinti 0)))
-		    (set (halfword hi FRintk 0) tmp)
-		    (set (halfword lo FRintk 0) tmp)
-		    (set (halfword hi FRintk 1) tmp)
-		    (set (halfword lo FRintk 1) tmp))))
+		    (set (halfword hi FRintkeven 0) tmp)
+		    (set (halfword lo FRintkeven 0) tmp)
+		    (set (halfword hi FRintkeven 1) tmp)
+		    (set (halfword lo FRintkeven 1) tmp))))
 )
 
 (dni mexpdhd
      "Media expand halfword to double"
      ((UNIT FM01) (FR500-MAJOR M-2) (FR400-MAJOR M-2))
-     "mexpdhd$pack $FRinti,$u6,$FRintk"
-     (+ pack FRintk OP_7B FRinti OPE1_33 u6)
+     "mexpdhd$pack $FRinti,$u6,$FRintkeven"
+     (+ pack FRintkeven OP_7B FRinti OPE1_33 u6)
      (media-expand-halfword-to-double-semantics 1)
-     ((fr400 (unit u-media-dual-expand))
-      (fr500 (unit u-media-dual-expand)))
+     ((fr400 (unit u-media-dual-expand
+		     (out FRintk FRintkeven)))
+      (fr500 (unit u-media-dual-expand
+		     (out FRintk FRintkeven))))
 )
 
 (dni cmexpdhd
      "Conditional media expand halfword to double"
      ((UNIT FM01) (FR500-MAJOR M-2) (FR400-MAJOR M-2) CONDITIONAL)
-     "cmexpdhd$pack $FRinti,$u6,$FRintk,$CCi,$cond"
-     (+ pack FRintk OP_76 FRinti CCi cond OPE4_3 u6)
+     "cmexpdhd$pack $FRinti,$u6,$FRintkeven,$CCi,$cond"
+     (+ pack FRintkeven OP_76 FRinti CCi cond OPE4_3 u6)
      (media-expand-halfword-to-double-semantics (eq CCi (or cond 2)))
-     ((fr400 (unit u-media-dual-expand))
-      (fr500 (unit u-media-dual-expand)))
+     ((fr400 (unit u-media-dual-expand
+		   (out FRintk FRintkeven)))
+      (fr500 (unit u-media-dual-expand
+		   (out FRintk FRintkeven))))
 )
 
 (dni mpackh
@@ -7771,21 +7853,27 @@
 (dni mdpackh
      "Media dual pack"
      ((UNIT FM01) (FR500-MAJOR M-5) (FR400-MAJOR M-2))
-     "mdpackh$pack $FRinti,$FRintj,$FRintk"
-     (+ pack FRintk OP_7B FRinti OPE1_36 FRintj)
-     (if (orif (register-unaligned FRinti 2)
-	       (orif (register-unaligned FRintj 2)
-		     (register-unaligned FRintk 2)))
+     "mdpackh$pack $FRintieven,$FRintjeven,$FRintkeven"
+     (+ pack FRintkeven OP_7B FRintieven OPE1_36 FRintjeven)
+     (if (orif (register-unaligned FRintieven 2)
+	       (orif (register-unaligned FRintjeven 2)
+		     (register-unaligned FRintkeven 2)))
 	 (c-call VOID "@cpu@_media_register_not_aligned")
 	 (sequence ()
 		   ; hack to get these referenced for profiling
-		   (set FRinti (c-raw-call SI "frv_ref_SI" FRinti))
-		   (set FRintj (c-raw-call SI "frv_ref_SI" FRintj))
-		   (set FRintk (c-raw-call SI "frv_ref_SI" FRintk))
-		   (media-pack FRinti FRintj FRintk 0)
-		   (media-pack FRinti FRintj FRintk 1)))
-     ((fr400 (unit u-media-3-quad))
-      (fr500 (unit u-media-quad-arith)))
+		   (set FRintieven (c-raw-call SI "frv_ref_SI" FRintieven))
+		   (set FRintjeven (c-raw-call SI "frv_ref_SI" FRintjeven))
+		   (set FRintkeven (c-raw-call SI "frv_ref_SI" FRintkeven))
+		   (media-pack FRintieven FRintjeven FRintkeven 0)
+		   (media-pack FRintieven FRintjeven FRintkeven 1)))
+     ((fr400 (unit u-media-3-quad
+		   (in  FRinti FRintieven)
+		   (in  FRintj FRintjeven)
+		   (out FRintk FRintkeven)))
+      (fr500 (unit u-media-quad-arith
+		   (in  FRinti FRintieven)
+		   (in  FRintj FRintjeven)
+		   (out FRintk FRintkeven))))
 )
 
 (define-pmacro (media-unpack src soff targ toff)
@@ -7799,110 +7887,121 @@
 (dni munpackh
      "Media halfword unpack"
      ((UNIT FM01) (FR500-MAJOR M-2) (FR400-MAJOR M-2))
-     "munpackh$pack $FRinti,$FRintk"
-     (+ pack FRintk OP_7B FRinti OPE1_35 (FRj-null))
-     (if (register-unaligned FRintk 2)
+     "munpackh$pack $FRinti,$FRintkeven"
+     (+ pack FRintkeven OP_7B FRinti OPE1_35 (FRj-null))
+     (if (register-unaligned FRintkeven 2)
 	 (c-call VOID "@cpu@_media_register_not_aligned")
 	 (sequence ()
 		   ; hack to get these referenced for profiling
 		   (set FRinti (c-raw-call SI "frv_ref_SI" FRinti))
-		   (set FRintk (c-raw-call SI "frv_ref_SI" FRintk))
-		   (media-unpack FRinti 0 FRintk 0)))
-     ((fr400 (unit u-media-dual-expand))
-      (fr500 (unit u-media-dual-expand)))
+		   (set FRintkeven (c-raw-call SI "frv_ref_SI" FRintkeven))
+		   (media-unpack FRinti 0 FRintkeven 0)))
+     ((fr400 (unit u-media-dual-expand
+		   (out FRintk FRintkeven)))
+      (fr500 (unit u-media-dual-expand
+		   (out FRintk FRintkeven))))
 )
 
 (dni mdunpackh
      "Media dual unpack"
      ((UNIT FM01) (FR500-MAJOR M-7) (MACH simple,tomcat,frv))
-     "mdunpackh$pack $FRinti,$FRintk"
-     (+ pack FRintk OP_7B FRinti OPE1_37 (FRj-null))
-     (if (orif (register-unaligned FRinti 2) (register-unaligned FRintk 4))
+     "mdunpackh$pack $FRintieven,$FRintk"
+     (+ pack FRintk OP_7B FRintieven OPE1_37 (FRj-null))
+     (if (orif (register-unaligned FRintieven 2) (register-unaligned FRintk 4))
 	 (c-call VOID "@cpu@_media_register_not_aligned")
 	 (sequence ()
 		   ; hack to get these referenced for profiling
-		   (set FRinti (c-raw-call SI "frv_ref_SI" FRinti))
+		   (set FRintieven (c-raw-call SI "frv_ref_SI" FRintieven))
 		   (set FRintk (c-raw-call SI "frv_ref_SI" FRintk))
-		   (media-unpack FRinti 0 FRintk 0)
-		   (media-unpack FRinti 1 FRintk 2)))
-     ((fr500 (unit u-media-dual-unpack)))
+		   (media-unpack FRintieven 0 FRintk 0)
+		   (media-unpack FRintieven 1 FRintk 2)))
+     ((fr500 (unit u-media-dual-unpack
+		   (in FRinti FRintieven))))
 )
 
 (define-pmacro (ubyte num arg offset)
   (reg (.sym h-fr_ num) (add (index-of arg) offset)))
 
 (define-pmacro (mbtoh-semantics cond)
-  (if (register-unaligned FRintk 2)
+  (if (register-unaligned FRintkeven 2)
       (c-call VOID "@cpu@_media_register_not_aligned")
       (if cond
 	  (sequence ()
-		    (set (halfword hi FRintk 0) (ubyte 3 FRintj 0))
-		    (set (halfword lo FRintk 0) (ubyte 2 FRintj 0))
-		    (set (halfword hi FRintk 1) (ubyte 1 FRintj 0))
-		    (set (halfword lo FRintk 1) (ubyte 0 FRintj 0)))))
+		    (set (halfword hi FRintkeven 0) (ubyte 3 FRintj 0))
+		    (set (halfword lo FRintkeven 0) (ubyte 2 FRintj 0))
+		    (set (halfword hi FRintkeven 1) (ubyte 1 FRintj 0))
+		    (set (halfword lo FRintkeven 1) (ubyte 0 FRintj 0)))))
 )
 
 (dni mbtoh
      "Media convert byte to halfword"
      ((UNIT FM01) (FR500-MAJOR M-2) (FR400-MAJOR M-2))
-     "mbtoh$pack $FRintj,$FRintk"
-     (+ pack FRintk OP_7B (FRi-null) OPE1_38 FRintj)
+     "mbtoh$pack $FRintj,$FRintkeven"
+     (+ pack FRintkeven OP_7B (FRi-null) OPE1_38 FRintj)
      (sequence ()
 	       ; hack to get these referenced for profiling
 	       (set FRintj (c-raw-call SI "frv_ref_SI" FRintj))
-	       (set FRintk (c-raw-call SI "frv_ref_SI" FRintk))
+	       (set FRintkeven (c-raw-call SI "frv_ref_SI" FRintkeven))
 	       (mbtoh-semantics 1))
-     ((fr400 (unit u-media-dual-expand))
-      (fr500 (unit u-media-dual-btoh)))
+     ((fr400 (unit u-media-dual-expand
+		   (in FRinti FRintieven)))
+      (fr500 (unit u-media-dual-btoh
+		   (in FRinti FRintieven))))
 )
 
 (dni cmbtoh
      "Conditional media convert byte to halfword"
      ((UNIT FM01) (FR500-MAJOR M-2) (FR400-MAJOR M-2) CONDITIONAL)
-     "cmbtoh$pack $FRintj,$FRintk,$CCi,$cond"
-     (+ pack FRintk OP_77 (FRi-null) CCi cond OPE4_0 FRintj)
+     "cmbtoh$pack $FRintj,$FRintkeven,$CCi,$cond"
+     (+ pack FRintkeven OP_77 (FRi-null) CCi cond OPE4_0 FRintj)
      (mbtoh-semantics (eq CCi (or cond 2)))
-     ((fr400 (unit u-media-dual-expand))
-      (fr500 (unit u-media-dual-btoh)))
+     ((fr400 (unit u-media-dual-expand
+		   (out FRintk FRintkeven)))
+      (fr500 (unit u-media-dual-btoh
+		   (out FRintk FRintkeven))))
 )
 
 (define-pmacro (mhtob-semantics cond)
-  (if (register-unaligned FRintj 2)
+  (if (register-unaligned FRintjeven 2)
       (c-call VOID "@cpu@_media_register_not_aligned")
       (if cond
 	  (sequence ()
-		    (set (ubyte 3 FRintk 0) (halfword hi FRintj 0))
-		    (set (ubyte 2 FRintk 0) (halfword lo FRintj 0))
-		    (set (ubyte 1 FRintk 0) (halfword hi FRintj 1))
-		    (set (ubyte 0 FRintk 0) (halfword lo FRintj 1)))))
+		    (set (ubyte 3 FRintk 0) (halfword hi FRintjeven 0))
+		    (set (ubyte 2 FRintk 0) (halfword lo FRintjeven 0))
+		    (set (ubyte 1 FRintk 0) (halfword hi FRintjeven 1))
+		    (set (ubyte 0 FRintk 0) (halfword lo FRintjeven 1)))))
 )
 
 (dni mhtob
      "Media convert halfword to byte"
      ((UNIT FM01) (FR500-MAJOR M-2) (FR400-MAJOR M-2))
-     "mhtob$pack $FRintj,$FRintk"
-     (+ pack FRintk OP_7B (FRi-null) OPE1_39 FRintj)
+     "mhtob$pack $FRintjeven,$FRintk"
+     (+ pack FRintk OP_7B (FRi-null) OPE1_39 FRintjeven)
      (sequence ()
 	       ; hack to get these referenced for profiling
-	       (set FRintj (c-raw-call SI "frv_ref_SI" FRintj))
+	       (set FRintjeven (c-raw-call SI "frv_ref_SI" FRintjeven))
 	       (set FRintk (c-raw-call SI "frv_ref_SI" FRintk))
 	       (mhtob-semantics 1))
-     ((fr400 (unit u-media-dual-htob))
-      (fr500 (unit u-media-dual-htob)))
+     ((fr400 (unit u-media-dual-htob
+		   (in FRintj FRintjeven)))
+      (fr500 (unit u-media-dual-htob
+		   (in FRintj FRintjeven))))
 )
 
 (dni cmhtob
      "Conditional media convert halfword to byte"
      ((UNIT FM01) (FR500-MAJOR M-2) (FR400-MAJOR M-2) CONDITIONAL)
-     "cmhtob$pack $FRintj,$FRintk,$CCi,$cond"
-     (+ pack FRintk OP_77 (FRi-null) CCi cond OPE4_1 FRintj)
+     "cmhtob$pack $FRintjeven,$FRintk,$CCi,$cond"
+     (+ pack FRintk OP_77 (FRi-null) CCi cond OPE4_1 FRintjeven)
      (sequence ()
 	       ; hack to get these referenced for profiling
-	       (set FRintj (c-raw-call SI "frv_ref_SI" FRintj))
+	       (set FRintjeven (c-raw-call SI "frv_ref_SI" FRintjeven))
 	       (set FRintk (c-raw-call SI "frv_ref_SI" FRintk))
 	       (mhtob-semantics (eq CCi (or cond 2))))
-     ((fr400 (unit u-media-dual-htob))
-      (fr500 (unit u-media-dual-htob)))
+     ((fr400 (unit u-media-dual-htob
+		   (in FRintj FRintjeven)))
+      (fr500 (unit u-media-dual-htob
+		   (in FRintj FRintjeven))))
 )
 
 (define-pmacro (mbtohe-semantics cond)

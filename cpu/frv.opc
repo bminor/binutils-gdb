@@ -40,10 +40,13 @@
 
 /* -- opc.h */
 
-#undef CGEN_DIS_HASH_SIZE
+#undef  CGEN_DIS_HASH_SIZE
 #define CGEN_DIS_HASH_SIZE 128
-#undef CGEN_DIS_HASH
+#undef  CGEN_DIS_HASH
 #define CGEN_DIS_HASH(buffer, value) (((value) >> 18) & 127)
+
+/* Allows reason codes to be output when assembler errors occur.  */
+#define CGEN_VERBOSE_ASSEMBLER_ERRORS
 
 /* Vliw support.  */
 #define FRV_VLIW_SIZE 4 /* fr500 has largest vliw size of 4.  */
@@ -601,6 +604,8 @@ static const char * parse_s12
   PARAMS ((CGEN_CPU_DESC, const char **, int, long *));
 static const char * parse_u12
   PARAMS ((CGEN_CPU_DESC, const char **, int, long *));
+static const char * parse_even_register
+  PARAMS ((CGEN_CPU_DESC, const char **, CGEN_KEYWORD *, long *));
 
 static const char *
 parse_ulo16 (cd, strp, opindex, valuep)
@@ -883,6 +888,26 @@ parse_u12 (cd, strp, opindex, valuep)
     }
 }
 
+static const char *
+parse_even_register (cd, strP, tableP, valueP)
+     CGEN_CPU_DESC  cd;
+     const char **  strP;
+     CGEN_KEYWORD * tableP;
+     long *         valueP;
+{
+  const char * errmsg;
+  const char * saved_star_strP = * strP;
+
+  errmsg = cgen_parse_keyword (cd, strP, tableP, valueP);
+
+  if (errmsg == NULL && ((* valueP) & 1))
+    {
+      errmsg = _("register number must be even");
+      * strP = saved_star_strP;
+    }
+
+  return errmsg;
+}
 /* -- */
 
 /* -- dis.c */

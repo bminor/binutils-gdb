@@ -1033,8 +1033,16 @@ static const CGEN_IFMT ifmt_mcuti = {
   32, 32, 0x1fc0fc0, { { F (F_PACK) }, { F (F_FRK) }, { F (F_OP) }, { F (F_ACC40SI) }, { F (F_OPE1) }, { F (F_S6) }, { 0 } }
 };
 
+static const CGEN_IFMT ifmt_mdcutssi = {
+  32, 32, 0x1fc0fc0, { { F (F_PACK) }, { F (F_FRK) }, { F (F_OP) }, { F (F_ACC40SI) }, { F (F_OPE1) }, { F (F_S6) }, { 0 } }
+};
+
 static const CGEN_IFMT ifmt_mdrotli = {
   32, 32, 0x1fc0fc0, { { F (F_PACK) }, { F (F_FRK) }, { F (F_OP) }, { F (F_FRI) }, { F (F_OPE1) }, { F (F_S6) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_mqsaths = {
+  32, 32, 0x1fc0fc0, { { F (F_PACK) }, { F (F_FRK) }, { F (F_OP) }, { F (F_FRI) }, { F (F_OPE1) }, { F (F_FRJ) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_mcmpsh = {
@@ -1043,6 +1051,10 @@ static const CGEN_IFMT ifmt_mcmpsh = {
 
 static const CGEN_IFMT ifmt_mabshs = {
   32, 32, 0x1ffffc0, { { F (F_PACK) }, { F (F_FRK) }, { F (F_OP) }, { F (F_FRI_NULL) }, { F (F_OPE1) }, { F (F_FRJ) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cmqaddhss = {
+  32, 32, 0x1fc00c0, { { F (F_PACK) }, { F (F_FRK) }, { F (F_OP) }, { F (F_FRI) }, { F (F_CCI) }, { F (F_COND) }, { F (F_OPE4) }, { F (F_FRJ) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_maddaccs = {
@@ -1057,6 +1069,14 @@ static const CGEN_IFMT ifmt_cmmulhs = {
   32, 32, 0x1fc00c0, { { F (F_PACK) }, { F (F_ACC40SK) }, { F (F_OP) }, { F (F_FRI) }, { F (F_CCI) }, { F (F_COND) }, { F (F_OPE4) }, { F (F_FRJ) }, { 0 } }
 };
 
+static const CGEN_IFMT ifmt_mqmulhs = {
+  32, 32, 0x1fc0fc0, { { F (F_PACK) }, { F (F_ACC40SK) }, { F (F_OP) }, { F (F_FRI) }, { F (F_OPE1) }, { F (F_FRJ) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cmqmulhs = {
+  32, 32, 0x1fc00c0, { { F (F_PACK) }, { F (F_ACC40SK) }, { F (F_OP) }, { F (F_FRI) }, { F (F_CCI) }, { F (F_COND) }, { F (F_OPE4) }, { F (F_FRJ) }, { 0 } }
+};
+
 static const CGEN_IFMT ifmt_mmachu = {
   32, 32, 0x1fc0fc0, { { F (F_PACK) }, { F (F_ACC40UK) }, { F (F_OP) }, { F (F_FRI) }, { F (F_OPE1) }, { F (F_FRJ) }, { 0 } }
 };
@@ -1065,7 +1085,23 @@ static const CGEN_IFMT ifmt_cmmachu = {
   32, 32, 0x1fc00c0, { { F (F_PACK) }, { F (F_ACC40UK) }, { F (F_OP) }, { F (F_FRI) }, { F (F_CCI) }, { F (F_COND) }, { F (F_OPE4) }, { F (F_FRJ) }, { 0 } }
 };
 
+static const CGEN_IFMT ifmt_mqmachu = {
+  32, 32, 0x1fc0fc0, { { F (F_PACK) }, { F (F_ACC40UK) }, { F (F_OP) }, { F (F_FRI) }, { F (F_OPE1) }, { F (F_FRJ) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cmqmachu = {
+  32, 32, 0x1fc00c0, { { F (F_PACK) }, { F (F_ACC40UK) }, { F (F_OP) }, { F (F_FRI) }, { F (F_CCI) }, { F (F_COND) }, { F (F_OPE4) }, { F (F_FRJ) }, { 0 } }
+};
+
 static const CGEN_IFMT ifmt_cmexpdhw = {
+  32, 32, 0x1fc00c0, { { F (F_PACK) }, { F (F_FRK) }, { F (F_OP) }, { F (F_FRI) }, { F (F_CCI) }, { F (F_COND) }, { F (F_OPE4) }, { F (F_U6) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_mexpdhd = {
+  32, 32, 0x1fc0fc0, { { F (F_PACK) }, { F (F_FRK) }, { F (F_OP) }, { F (F_FRI) }, { F (F_OPE1) }, { F (F_U6) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cmexpdhd = {
   32, 32, 0x1fc00c0, { { F (F_PACK) }, { F (F_FRK) }, { F (F_OP) }, { F (F_FRI) }, { F (F_CCI) }, { F (F_COND) }, { F (F_OPE4) }, { F (F_U6) }, { 0 } }
 };
 
@@ -1073,7 +1109,27 @@ static const CGEN_IFMT ifmt_munpackh = {
   32, 32, 0x1fc0fff, { { F (F_PACK) }, { F (F_FRK) }, { F (F_OP) }, { F (F_FRI) }, { F (F_OPE1) }, { F (F_FRJ_NULL) }, { 0 } }
 };
 
+static const CGEN_IFMT ifmt_mdunpackh = {
+  32, 32, 0x1fc0fff, { { F (F_PACK) }, { F (F_FRK) }, { F (F_OP) }, { F (F_FRI) }, { F (F_OPE1) }, { F (F_FRJ_NULL) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_mbtoh = {
+  32, 32, 0x1ffffc0, { { F (F_PACK) }, { F (F_FRK) }, { F (F_OP) }, { F (F_FRI_NULL) }, { F (F_OPE1) }, { F (F_FRJ) }, { 0 } }
+};
+
 static const CGEN_IFMT ifmt_cmbtoh = {
+  32, 32, 0x1fff0c0, { { F (F_PACK) }, { F (F_FRK) }, { F (F_OP) }, { F (F_FRI_NULL) }, { F (F_CCI) }, { F (F_COND) }, { F (F_OPE4) }, { F (F_FRJ) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_mhtob = {
+  32, 32, 0x1ffffc0, { { F (F_PACK) }, { F (F_FRK) }, { F (F_OP) }, { F (F_FRI_NULL) }, { F (F_OPE1) }, { F (F_FRJ) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cmhtob = {
+  32, 32, 0x1fff0c0, { { F (F_PACK) }, { F (F_FRK) }, { F (F_OP) }, { F (F_FRI_NULL) }, { F (F_CCI) }, { F (F_COND) }, { F (F_OPE4) }, { F (F_FRJ) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cmbtohe = {
   32, 32, 0x1fff0c0, { { F (F_PACK) }, { F (F_FRK) }, { F (F_OP) }, { F (F_FRI_NULL) }, { F (F_CCI) }, { F (F_COND) }, { F (F_OPE4) }, { F (F_FRJ) }, { 0 } }
 };
 
@@ -4982,11 +5038,11 @@ static const CGEN_OPCODE frv_cgen_insn_opcode_table[MAX_INSNS] =
     { { MNEM, OP (PACK), ' ', OP (ACC40SI), ',', OP (S6), ',', OP (FRINTK), 0 } },
     & ifmt_mcuti, { 0x1ec0bc0 }
   },
-/* mdcutssi$pack $ACC40Si,$s6,$FRintk */
+/* mdcutssi$pack $ACC40Si,$s6,$FRintkeven */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (ACC40SI), ',', OP (S6), ',', OP (FRINTK), 0 } },
-    & ifmt_mcuti, { 0x1e00380 }
+    { { MNEM, OP (PACK), ' ', OP (ACC40SI), ',', OP (S6), ',', OP (FRINTKEVEN), 0 } },
+    & ifmt_mdcutssi, { 0x1e00380 }
   },
 /* maveh$pack $FRinti,$FRintj,$FRintk */
   {
@@ -5012,10 +5068,10 @@ static const CGEN_OPCODE frv_cgen_insn_opcode_table[MAX_INSNS] =
     { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (U6), ',', OP (FRINTK), 0 } },
     & ifmt_mrotli, { 0x1ec02c0 }
   },
-/* mdrotli$pack $FRinti,$s6,$FRintk */
+/* mdrotli$pack $FRintieven,$s6,$FRintkeven */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (S6), ',', OP (FRINTK), 0 } },
+    { { MNEM, OP (PACK), ' ', OP (FRINTIEVEN), ',', OP (S6), ',', OP (FRINTKEVEN), 0 } },
     & ifmt_mdrotli, { 0x1e002c0 }
   },
 /* mcplhi$pack $FRinti,$u6,$FRintk */
@@ -5036,11 +5092,11 @@ static const CGEN_OPCODE frv_cgen_insn_opcode_table[MAX_INSNS] =
     { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (FRINTJ), ',', OP (FRINTK), 0 } },
     & ifmt_mand, { 0x1ec0300 }
   },
-/* mqsaths$pack $FRinti,$FRintj,$FRintk */
+/* mqsaths$pack $FRintieven,$FRintjeven,$FRintkeven */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (FRINTJ), ',', OP (FRINTK), 0 } },
-    & ifmt_mand, { 0x1e003c0 }
+    { { MNEM, OP (PACK), ' ', OP (FRINTIEVEN), ',', OP (FRINTJEVEN), ',', OP (FRINTKEVEN), 0 } },
+    & ifmt_mqsaths, { 0x1e003c0 }
   },
 /* msathu$pack $FRinti,$FRintj,$FRintk */
   {
@@ -5114,53 +5170,53 @@ static const CGEN_OPCODE frv_cgen_insn_opcode_table[MAX_INSNS] =
     { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (FRINTJ), ',', OP (FRINTK), ',', OP (CCI), ',', OP (COND), 0 } },
     & ifmt_cmand, { 0x1c400c0 }
   },
-/* mqaddhss$pack $FRinti,$FRintj,$FRintk */
+/* mqaddhss$pack $FRintieven,$FRintjeven,$FRintkeven */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (FRINTJ), ',', OP (FRINTK), 0 } },
-    & ifmt_mand, { 0x1ec0600 }
+    { { MNEM, OP (PACK), ' ', OP (FRINTIEVEN), ',', OP (FRINTJEVEN), ',', OP (FRINTKEVEN), 0 } },
+    & ifmt_mqsaths, { 0x1ec0600 }
   },
-/* mqaddhus$pack $FRinti,$FRintj,$FRintk */
+/* mqaddhus$pack $FRintieven,$FRintjeven,$FRintkeven */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (FRINTJ), ',', OP (FRINTK), 0 } },
-    & ifmt_mand, { 0x1ec0640 }
+    { { MNEM, OP (PACK), ' ', OP (FRINTIEVEN), ',', OP (FRINTJEVEN), ',', OP (FRINTKEVEN), 0 } },
+    & ifmt_mqsaths, { 0x1ec0640 }
   },
-/* mqsubhss$pack $FRinti,$FRintj,$FRintk */
+/* mqsubhss$pack $FRintieven,$FRintjeven,$FRintkeven */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (FRINTJ), ',', OP (FRINTK), 0 } },
-    & ifmt_mand, { 0x1ec0680 }
+    { { MNEM, OP (PACK), ' ', OP (FRINTIEVEN), ',', OP (FRINTJEVEN), ',', OP (FRINTKEVEN), 0 } },
+    & ifmt_mqsaths, { 0x1ec0680 }
   },
-/* mqsubhus$pack $FRinti,$FRintj,$FRintk */
+/* mqsubhus$pack $FRintieven,$FRintjeven,$FRintkeven */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (FRINTJ), ',', OP (FRINTK), 0 } },
-    & ifmt_mand, { 0x1ec06c0 }
+    { { MNEM, OP (PACK), ' ', OP (FRINTIEVEN), ',', OP (FRINTJEVEN), ',', OP (FRINTKEVEN), 0 } },
+    & ifmt_mqsaths, { 0x1ec06c0 }
   },
-/* cmqaddhss$pack $FRinti,$FRintj,$FRintk,$CCi,$cond */
+/* cmqaddhss$pack $FRintieven,$FRintjeven,$FRintkeven,$CCi,$cond */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (FRINTJ), ',', OP (FRINTK), ',', OP (CCI), ',', OP (COND), 0 } },
-    & ifmt_cmand, { 0x1cc0000 }
+    { { MNEM, OP (PACK), ' ', OP (FRINTIEVEN), ',', OP (FRINTJEVEN), ',', OP (FRINTKEVEN), ',', OP (CCI), ',', OP (COND), 0 } },
+    & ifmt_cmqaddhss, { 0x1cc0000 }
   },
-/* cmqaddhus$pack $FRinti,$FRintj,$FRintk,$CCi,$cond */
+/* cmqaddhus$pack $FRintieven,$FRintjeven,$FRintkeven,$CCi,$cond */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (FRINTJ), ',', OP (FRINTK), ',', OP (CCI), ',', OP (COND), 0 } },
-    & ifmt_cmand, { 0x1cc0040 }
+    { { MNEM, OP (PACK), ' ', OP (FRINTIEVEN), ',', OP (FRINTJEVEN), ',', OP (FRINTKEVEN), ',', OP (CCI), ',', OP (COND), 0 } },
+    & ifmt_cmqaddhss, { 0x1cc0040 }
   },
-/* cmqsubhss$pack $FRinti,$FRintj,$FRintk,$CCi,$cond */
+/* cmqsubhss$pack $FRintieven,$FRintjeven,$FRintkeven,$CCi,$cond */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (FRINTJ), ',', OP (FRINTK), ',', OP (CCI), ',', OP (COND), 0 } },
-    & ifmt_cmand, { 0x1cc0080 }
+    { { MNEM, OP (PACK), ' ', OP (FRINTIEVEN), ',', OP (FRINTJEVEN), ',', OP (FRINTKEVEN), ',', OP (CCI), ',', OP (COND), 0 } },
+    & ifmt_cmqaddhss, { 0x1cc0080 }
   },
-/* cmqsubhus$pack $FRinti,$FRintj,$FRintk,$CCi,$cond */
+/* cmqsubhus$pack $FRintieven,$FRintjeven,$FRintkeven,$CCi,$cond */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (FRINTJ), ',', OP (FRINTK), ',', OP (CCI), ',', OP (COND), 0 } },
-    & ifmt_cmand, { 0x1cc00c0 }
+    { { MNEM, OP (PACK), ' ', OP (FRINTIEVEN), ',', OP (FRINTJEVEN), ',', OP (FRINTKEVEN), ',', OP (CCI), ',', OP (COND), 0 } },
+    & ifmt_cmqaddhss, { 0x1cc00c0 }
   },
 /* maddaccs$pack $ACC40Si,$ACC40Sk */
   {
@@ -5234,41 +5290,41 @@ static const CGEN_OPCODE frv_cgen_insn_opcode_table[MAX_INSNS] =
     { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (FRINTJ), ',', OP (ACC40SK), ',', OP (CCI), ',', OP (COND), 0 } },
     & ifmt_cmmulhs, { 0x1c80040 }
   },
-/* mqmulhs$pack $FRinti,$FRintj,$ACC40Sk */
+/* mqmulhs$pack $FRintieven,$FRintjeven,$ACC40Sk */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (FRINTJ), ',', OP (ACC40SK), 0 } },
-    & ifmt_mmulhs, { 0x1ec0700 }
+    { { MNEM, OP (PACK), ' ', OP (FRINTIEVEN), ',', OP (FRINTJEVEN), ',', OP (ACC40SK), 0 } },
+    & ifmt_mqmulhs, { 0x1ec0700 }
   },
-/* mqmulhu$pack $FRinti,$FRintj,$ACC40Sk */
+/* mqmulhu$pack $FRintieven,$FRintjeven,$ACC40Sk */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (FRINTJ), ',', OP (ACC40SK), 0 } },
-    & ifmt_mmulhs, { 0x1ec0740 }
+    { { MNEM, OP (PACK), ' ', OP (FRINTIEVEN), ',', OP (FRINTJEVEN), ',', OP (ACC40SK), 0 } },
+    & ifmt_mqmulhs, { 0x1ec0740 }
   },
-/* mqmulxhs$pack $FRinti,$FRintj,$ACC40Sk */
+/* mqmulxhs$pack $FRintieven,$FRintjeven,$ACC40Sk */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (FRINTJ), ',', OP (ACC40SK), 0 } },
-    & ifmt_mmulhs, { 0x1ec0a80 }
+    { { MNEM, OP (PACK), ' ', OP (FRINTIEVEN), ',', OP (FRINTJEVEN), ',', OP (ACC40SK), 0 } },
+    & ifmt_mqmulhs, { 0x1ec0a80 }
   },
-/* mqmulxhu$pack $FRinti,$FRintj,$ACC40Sk */
+/* mqmulxhu$pack $FRintieven,$FRintjeven,$ACC40Sk */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (FRINTJ), ',', OP (ACC40SK), 0 } },
-    & ifmt_mmulhs, { 0x1ec0ac0 }
+    { { MNEM, OP (PACK), ' ', OP (FRINTIEVEN), ',', OP (FRINTJEVEN), ',', OP (ACC40SK), 0 } },
+    & ifmt_mqmulhs, { 0x1ec0ac0 }
   },
-/* cmqmulhs$pack $FRinti,$FRintj,$ACC40Sk,$CCi,$cond */
+/* cmqmulhs$pack $FRintieven,$FRintjeven,$ACC40Sk,$CCi,$cond */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (FRINTJ), ',', OP (ACC40SK), ',', OP (CCI), ',', OP (COND), 0 } },
-    & ifmt_cmmulhs, { 0x1d00000 }
+    { { MNEM, OP (PACK), ' ', OP (FRINTIEVEN), ',', OP (FRINTJEVEN), ',', OP (ACC40SK), ',', OP (CCI), ',', OP (COND), 0 } },
+    & ifmt_cmqmulhs, { 0x1d00000 }
   },
-/* cmqmulhu$pack $FRinti,$FRintj,$ACC40Sk,$CCi,$cond */
+/* cmqmulhu$pack $FRintieven,$FRintjeven,$ACC40Sk,$CCi,$cond */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (FRINTJ), ',', OP (ACC40SK), ',', OP (CCI), ',', OP (COND), 0 } },
-    & ifmt_cmmulhs, { 0x1d00040 }
+    { { MNEM, OP (PACK), ' ', OP (FRINTIEVEN), ',', OP (FRINTJEVEN), ',', OP (ACC40SK), ',', OP (CCI), ',', OP (COND), 0 } },
+    & ifmt_cmqmulhs, { 0x1d00040 }
   },
 /* mmachs$pack $FRinti,$FRintj,$ACC40Sk */
   {
@@ -5306,47 +5362,47 @@ static const CGEN_OPCODE frv_cgen_insn_opcode_table[MAX_INSNS] =
     { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (FRINTJ), ',', OP (ACC40UK), ',', OP (CCI), ',', OP (COND), 0 } },
     & ifmt_cmmachu, { 0x1c800c0 }
   },
-/* mqmachs$pack $FRinti,$FRintj,$ACC40Sk */
+/* mqmachs$pack $FRintieven,$FRintjeven,$ACC40Sk */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (FRINTJ), ',', OP (ACC40SK), 0 } },
-    & ifmt_mmulhs, { 0x1ec0780 }
+    { { MNEM, OP (PACK), ' ', OP (FRINTIEVEN), ',', OP (FRINTJEVEN), ',', OP (ACC40SK), 0 } },
+    & ifmt_mqmulhs, { 0x1ec0780 }
   },
-/* mqmachu$pack $FRinti,$FRintj,$ACC40Uk */
+/* mqmachu$pack $FRintieven,$FRintjeven,$ACC40Uk */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (FRINTJ), ',', OP (ACC40UK), 0 } },
-    & ifmt_mmachu, { 0x1ec07c0 }
+    { { MNEM, OP (PACK), ' ', OP (FRINTIEVEN), ',', OP (FRINTJEVEN), ',', OP (ACC40UK), 0 } },
+    & ifmt_mqmachu, { 0x1ec07c0 }
   },
-/* cmqmachs$pack $FRinti,$FRintj,$ACC40Sk,$CCi,$cond */
+/* cmqmachs$pack $FRintieven,$FRintjeven,$ACC40Sk,$CCi,$cond */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (FRINTJ), ',', OP (ACC40SK), ',', OP (CCI), ',', OP (COND), 0 } },
-    & ifmt_cmmulhs, { 0x1d00080 }
+    { { MNEM, OP (PACK), ' ', OP (FRINTIEVEN), ',', OP (FRINTJEVEN), ',', OP (ACC40SK), ',', OP (CCI), ',', OP (COND), 0 } },
+    & ifmt_cmqmulhs, { 0x1d00080 }
   },
-/* cmqmachu$pack $FRinti,$FRintj,$ACC40Uk,$CCi,$cond */
+/* cmqmachu$pack $FRintieven,$FRintjeven,$ACC40Uk,$CCi,$cond */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (FRINTJ), ',', OP (ACC40UK), ',', OP (CCI), ',', OP (COND), 0 } },
-    & ifmt_cmmachu, { 0x1d000c0 }
+    { { MNEM, OP (PACK), ' ', OP (FRINTIEVEN), ',', OP (FRINTJEVEN), ',', OP (ACC40UK), ',', OP (CCI), ',', OP (COND), 0 } },
+    & ifmt_cmqmachu, { 0x1d000c0 }
   },
-/* mqxmachs$pack $FRinti,$FRintj,$ACC40Sk */
+/* mqxmachs$pack $FRintieven,$FRintjeven,$ACC40Sk */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (FRINTJ), ',', OP (ACC40SK), 0 } },
-    & ifmt_mmulhs, { 0x1e00000 }
+    { { MNEM, OP (PACK), ' ', OP (FRINTIEVEN), ',', OP (FRINTJEVEN), ',', OP (ACC40SK), 0 } },
+    & ifmt_mqmulhs, { 0x1e00000 }
   },
-/* mqxmacxhs$pack $FRinti,$FRintj,$ACC40Sk */
+/* mqxmacxhs$pack $FRintieven,$FRintjeven,$ACC40Sk */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (FRINTJ), ',', OP (ACC40SK), 0 } },
-    & ifmt_mmulhs, { 0x1e00040 }
+    { { MNEM, OP (PACK), ' ', OP (FRINTIEVEN), ',', OP (FRINTJEVEN), ',', OP (ACC40SK), 0 } },
+    & ifmt_mqmulhs, { 0x1e00040 }
   },
-/* mqmacxhs$pack $FRinti,$FRintj,$ACC40Sk */
+/* mqmacxhs$pack $FRintieven,$FRintjeven,$ACC40Sk */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (FRINTJ), ',', OP (ACC40SK), 0 } },
-    & ifmt_mmulhs, { 0x1e00080 }
+    { { MNEM, OP (PACK), ' ', OP (FRINTIEVEN), ',', OP (FRINTJEVEN), ',', OP (ACC40SK), 0 } },
+    & ifmt_mqmulhs, { 0x1e00080 }
   },
 /* mcpxrs$pack $FRinti,$FRintj,$ACC40Sk */
   {
@@ -5396,29 +5452,29 @@ static const CGEN_OPCODE frv_cgen_insn_opcode_table[MAX_INSNS] =
     { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (FRINTJ), ',', OP (ACC40SK), ',', OP (CCI), ',', OP (COND), 0 } },
     & ifmt_cmmulhs, { 0x1d400c0 }
   },
-/* mqcpxrs$pack $FRinti,$FRintj,$ACC40Sk */
+/* mqcpxrs$pack $FRintieven,$FRintjeven,$ACC40Sk */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (FRINTJ), ',', OP (ACC40SK), 0 } },
-    & ifmt_mmulhs, { 0x1ec0900 }
+    { { MNEM, OP (PACK), ' ', OP (FRINTIEVEN), ',', OP (FRINTJEVEN), ',', OP (ACC40SK), 0 } },
+    & ifmt_mqmulhs, { 0x1ec0900 }
   },
-/* mqcpxru$pack $FRinti,$FRintj,$ACC40Sk */
+/* mqcpxru$pack $FRintieven,$FRintjeven,$ACC40Sk */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (FRINTJ), ',', OP (ACC40SK), 0 } },
-    & ifmt_mmulhs, { 0x1ec0940 }
+    { { MNEM, OP (PACK), ' ', OP (FRINTIEVEN), ',', OP (FRINTJEVEN), ',', OP (ACC40SK), 0 } },
+    & ifmt_mqmulhs, { 0x1ec0940 }
   },
-/* mqcpxis$pack $FRinti,$FRintj,$ACC40Sk */
+/* mqcpxis$pack $FRintieven,$FRintjeven,$ACC40Sk */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (FRINTJ), ',', OP (ACC40SK), 0 } },
-    & ifmt_mmulhs, { 0x1ec0980 }
+    { { MNEM, OP (PACK), ' ', OP (FRINTIEVEN), ',', OP (FRINTJEVEN), ',', OP (ACC40SK), 0 } },
+    & ifmt_mqmulhs, { 0x1ec0980 }
   },
-/* mqcpxiu$pack $FRinti,$FRintj,$ACC40Sk */
+/* mqcpxiu$pack $FRintieven,$FRintjeven,$ACC40Sk */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (FRINTJ), ',', OP (ACC40SK), 0 } },
-    & ifmt_mmulhs, { 0x1ec09c0 }
+    { { MNEM, OP (PACK), ' ', OP (FRINTIEVEN), ',', OP (FRINTJEVEN), ',', OP (ACC40SK), 0 } },
+    & ifmt_mqmulhs, { 0x1ec09c0 }
   },
 /* mexpdhw$pack $FRinti,$u6,$FRintk */
   {
@@ -5432,17 +5488,17 @@ static const CGEN_OPCODE frv_cgen_insn_opcode_table[MAX_INSNS] =
     { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (U6), ',', OP (FRINTK), ',', OP (CCI), ',', OP (COND), 0 } },
     & ifmt_cmexpdhw, { 0x1d80080 }
   },
-/* mexpdhd$pack $FRinti,$u6,$FRintk */
+/* mexpdhd$pack $FRinti,$u6,$FRintkeven */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (U6), ',', OP (FRINTK), 0 } },
-    & ifmt_mrotli, { 0x1ec0cc0 }
+    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (U6), ',', OP (FRINTKEVEN), 0 } },
+    & ifmt_mexpdhd, { 0x1ec0cc0 }
   },
-/* cmexpdhd$pack $FRinti,$u6,$FRintk,$CCi,$cond */
+/* cmexpdhd$pack $FRinti,$u6,$FRintkeven,$CCi,$cond */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (U6), ',', OP (FRINTK), ',', OP (CCI), ',', OP (COND), 0 } },
-    & ifmt_cmexpdhw, { 0x1d800c0 }
+    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (U6), ',', OP (FRINTKEVEN), ',', OP (CCI), ',', OP (COND), 0 } },
+    & ifmt_cmexpdhd, { 0x1d800c0 }
   },
 /* mpackh$pack $FRinti,$FRintj,$FRintk */
   {
@@ -5450,47 +5506,47 @@ static const CGEN_OPCODE frv_cgen_insn_opcode_table[MAX_INSNS] =
     { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (FRINTJ), ',', OP (FRINTK), 0 } },
     & ifmt_mand, { 0x1ec0d00 }
   },
-/* mdpackh$pack $FRinti,$FRintj,$FRintk */
+/* mdpackh$pack $FRintieven,$FRintjeven,$FRintkeven */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (FRINTJ), ',', OP (FRINTK), 0 } },
-    & ifmt_mand, { 0x1ec0d80 }
+    { { MNEM, OP (PACK), ' ', OP (FRINTIEVEN), ',', OP (FRINTJEVEN), ',', OP (FRINTKEVEN), 0 } },
+    & ifmt_mqsaths, { 0x1ec0d80 }
   },
-/* munpackh$pack $FRinti,$FRintk */
+/* munpackh$pack $FRinti,$FRintkeven */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (FRINTK), 0 } },
+    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (FRINTKEVEN), 0 } },
     & ifmt_munpackh, { 0x1ec0d40 }
   },
-/* mdunpackh$pack $FRinti,$FRintk */
+/* mdunpackh$pack $FRintieven,$FRintk */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTI), ',', OP (FRINTK), 0 } },
-    & ifmt_munpackh, { 0x1ec0dc0 }
+    { { MNEM, OP (PACK), ' ', OP (FRINTIEVEN), ',', OP (FRINTK), 0 } },
+    & ifmt_mdunpackh, { 0x1ec0dc0 }
   },
-/* mbtoh$pack $FRintj,$FRintk */
+/* mbtoh$pack $FRintj,$FRintkeven */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTJ), ',', OP (FRINTK), 0 } },
-    & ifmt_mabshs, { 0x1ec0e00 }
+    { { MNEM, OP (PACK), ' ', OP (FRINTJ), ',', OP (FRINTKEVEN), 0 } },
+    & ifmt_mbtoh, { 0x1ec0e00 }
   },
-/* cmbtoh$pack $FRintj,$FRintk,$CCi,$cond */
+/* cmbtoh$pack $FRintj,$FRintkeven,$CCi,$cond */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTJ), ',', OP (FRINTK), ',', OP (CCI), ',', OP (COND), 0 } },
+    { { MNEM, OP (PACK), ' ', OP (FRINTJ), ',', OP (FRINTKEVEN), ',', OP (CCI), ',', OP (COND), 0 } },
     & ifmt_cmbtoh, { 0x1dc0000 }
   },
-/* mhtob$pack $FRintj,$FRintk */
+/* mhtob$pack $FRintjeven,$FRintk */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTJ), ',', OP (FRINTK), 0 } },
-    & ifmt_mabshs, { 0x1ec0e40 }
+    { { MNEM, OP (PACK), ' ', OP (FRINTJEVEN), ',', OP (FRINTK), 0 } },
+    & ifmt_mhtob, { 0x1ec0e40 }
   },
-/* cmhtob$pack $FRintj,$FRintk,$CCi,$cond */
+/* cmhtob$pack $FRintjeven,$FRintk,$CCi,$cond */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (PACK), ' ', OP (FRINTJ), ',', OP (FRINTK), ',', OP (CCI), ',', OP (COND), 0 } },
-    & ifmt_cmbtoh, { 0x1dc0040 }
+    { { MNEM, OP (PACK), ' ', OP (FRINTJEVEN), ',', OP (FRINTK), ',', OP (CCI), ',', OP (COND), 0 } },
+    & ifmt_cmhtob, { 0x1dc0040 }
   },
 /* mbtohe$pack $FRintj,$FRintk */
   {
@@ -5502,7 +5558,7 @@ static const CGEN_OPCODE frv_cgen_insn_opcode_table[MAX_INSNS] =
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (PACK), ' ', OP (FRINTJ), ',', OP (FRINTK), ',', OP (CCI), ',', OP (COND), 0 } },
-    & ifmt_cmbtoh, { 0x1dc0080 }
+    & ifmt_cmbtohe, { 0x1dc0080 }
   },
 /* mclracc$pack $ACC40Sk,$A */
   {

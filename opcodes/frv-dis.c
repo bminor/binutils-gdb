@@ -230,10 +230,19 @@ frv_cgen_print_operand (cd, opindex, xinfo, fields, attrs, pc, length)
     case FRV_OPERAND_FRINTI :
       print_keyword (cd, info, & frv_cgen_opval_fr_names, fields->f_FRi, 0);
       break;
+    case FRV_OPERAND_FRINTIEVEN :
+      print_keyword (cd, info, & frv_cgen_opval_fr_names, fields->f_FRi, 0);
+      break;
     case FRV_OPERAND_FRINTJ :
       print_keyword (cd, info, & frv_cgen_opval_fr_names, fields->f_FRj, 0);
       break;
+    case FRV_OPERAND_FRINTJEVEN :
+      print_keyword (cd, info, & frv_cgen_opval_fr_names, fields->f_FRj, 0);
+      break;
     case FRV_OPERAND_FRINTK :
+      print_keyword (cd, info, & frv_cgen_opval_fr_names, fields->f_FRk, 0);
+      break;
+    case FRV_OPERAND_FRINTKEVEN :
       print_keyword (cd, info, & frv_cgen_opval_fr_names, fields->f_FRk, 0);
       break;
     case FRV_OPERAND_FRJ :
