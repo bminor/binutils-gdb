@@ -1,5 +1,22 @@
 2001-01-26  Jeff Holcomb  <jeffh@redhat.com>
 
+	* remote-udi.c (udi_open): Change strdup to xstrdup.
+	* thread.c (thread_apply_all_command): Change strdup to xstrdup.
+	Update copyright message.
+	* varobj.c (delete_variable_1): Likewise.
+
+	* gdb_string.h: Remove declaration of strdup.  Update copyright
+	message.
+	* config/xm-mpw.h: Likewise.
+	* config/i386/xm-i386mach.h: Likewise.
+	* config/m68k/xm-apollo68b.h: Likewise.
+	* config/m68k/xm-hp300bsd.h: Likewise.
+	* config/rs6000/xm-rs6000.h: Likewise.
+	* config/vax/xm-vaxult.h: Remove declaration of strdup.
+	* config/vax/xm-vaxult2.h: Likewise.
+
+2001-01-26  Jeff Holcomb  <jeffh@redhat.com>
+
 	* MAINTAINERS: Add Jeff Holcomb to Write After Approval list.
 
 2001-01-25  J.T. Conklin  <jtc@redback.com>

@@ -1,5 +1,5 @@
 /* Multi-process/thread control for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1988, 1993, 1998, 1999, 2000
+   Copyright 1986, 1987, 1988, 1993, 1998, 1999, 2000, 2001
 
    Contributed by Lynx Real-Time Systems, Inc.  Los Gatos, CA.
    Free Software Foundation, Inc.
@@ -531,7 +531,7 @@ thread_apply_all_command (char *cmd, int from_tty)
 
   /* Save a copy of the command in case it is clobbered by
      execute_command */
-  saved_cmd = strdup (cmd);
+  saved_cmd = xstrdup (cmd);
   saved_cmd_cleanup_chain = make_cleanup (xfree, (void *) saved_cmd);
   for (tp = thread_list; tp; tp = tp->next)
     if (thread_alive (tp))
@@ -574,7 +574,7 @@ thread_apply_command (char *tidlist, int from_tty)
 
   /* Save a copy of the command in case it is clobbered by
      execute_command */
-  saved_cmd = strdup (cmd);
+  saved_cmd = xstrdup (cmd);
   saved_cmd_cleanup_chain = make_cleanup (xfree, (void *) saved_cmd);
   while (tidlist < cmd)
     {

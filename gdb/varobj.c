@@ -1,5 +1,5 @@
 /* Implementation of the GDB variable objects API.
-   Copyright 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -1072,7 +1072,7 @@ delete_variable_1 (struct cpstack **resultp, int *delcountp, struct varobj *var,
      yet been installed, don't report it, it belongs to the caller... */
   if (var->obj_name != NULL)
     {
-      cppush (resultp, strdup (var->obj_name));
+      cppush (resultp, xstrdup (var->obj_name));
       *delcountp = *delcountp + 1;
     }
 

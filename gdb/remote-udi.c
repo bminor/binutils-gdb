@@ -234,7 +234,7 @@ udi_open (char *name, int from_tty)
   if (!name)
     error ("Usage: target udi config_id, where config_id appears in udi_soc file");
 
-  udi_config_id = strdup (strtok (name, " \t"));
+  udi_config_id = xstrdup (strtok (name, " \t"));
 
   if (UDIConnect (udi_config_id, &udi_session_id))
     /* FIXME: Should set udi_session_id to -1 here.  */

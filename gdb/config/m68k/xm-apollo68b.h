@@ -1,5 +1,5 @@
 /* Macro definitions for an Apollo m68k in BSD mode
-   Copyright (C) 1992 Free Software Foundation, Inc.
+   Copyright (C) 1992, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,5 +21,3 @@
 #define HOST_BYTE_ORDER BIG_ENDIAN
 
 #define ALIGN_STACK_ON_STARTUP
-
-extern char *strdup ();

@@ -1,5 +1,5 @@
 /* Macro definitions for running GDB on Apple Macintoshes.
-   Copyright (C) 1994, 1995 Free Software Foundation, Inc.
+   Copyright (C) 1994, 1995, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -41,10 +41,6 @@
 #define fgetc hacked_fgetc
 
 #define POSIX_UTIME
-
-/* No declaration of strdup in MPW's string.h, oddly enough. */
-
-char *strdup (char *s1);
 
 /* '.' indicates drivers on the Mac, so we need a different filename. */
 
