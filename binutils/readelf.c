@@ -2202,49 +2202,53 @@ parse_args (argc, argv)
 	    do_debugging = 1;
 	  else
 	    {
+	      unsigned int index = 0;
+	      
 	      do_debugging = 0;
-	      switch (optarg[0])
-		{
-		case 'i':
-		case 'I':
-		  do_debug_info = 1;
-		  break;
 
-		case 'a':
-		case 'A':
-		  do_debug_abbrevs = 1;
-		  break;
+	      while (optarg[index])
+		switch (optarg[index++])
+		  {
+		  case 'i':
+		  case 'I':
+		    do_debug_info = 1;
+		    break;
 
-		case 'l':
-		case 'L':
-		  do_debug_lines = 1;
-		  break;
+		  case 'a':
+		  case 'A':
+		    do_debug_abbrevs = 1;
+		    break;
 
-		case 'p':
-		case 'P':
-		  do_debug_pubnames = 1;
-		  break;
+		  case 'l':
+		  case 'L':
+		    do_debug_lines = 1;
+		    break;
 
-		case 'r':
-		case 'R':
-		  do_debug_aranges = 1;
-		  break;
+		  case 'p':
+		  case 'P':
+		    do_debug_pubnames = 1;
+		    break;
 
-		case 'F':
-		  do_debug_frames_interp = 1;
-		case 'f':
-		  do_debug_frames = 1;
-		  break;
+		  case 'r':
+		  case 'R':
+		    do_debug_aranges = 1;
+		    break;
 
-		case 'm':
-		case 'M':
-		  do_debug_macinfo = 1;
-		  break;
+		  case 'F':
+		    do_debug_frames_interp = 1;
+		  case 'f':
+		    do_debug_frames = 1;
+		    break;
 
-		default:
-		  warn (_("Unrecognised debug option '%s'\n"), optarg);
-		  break;
-		}
+		  case 'm':
+		  case 'M':
+		    do_debug_macinfo = 1;
+		    break;
+
+		  default:
+		    warn (_("Unrecognised debug option '%s'\n"), optarg);
+		    break;
+		  }
 	    }
 	  break;
 #ifdef SUPPORT_DISASSEMBLY
@@ -7046,7 +7050,7 @@ read_and_display_attr (attribute, form, data, cu_offset, pointer_size)
 	  /* DWARF 2.1 values.  */
 	case DW_LANG_C99:            printf ("(ANSI C99)"); break;
 	case DW_LANG_Ada95:          printf ("(ADA 95)"); break;
-	case DW_LANG_Fortran95:       printf ("(Fortran 95)"); break;
+	case DW_LANG_Fortran95:      printf ("(Fortran 95)"); break;
 	  /* MIPS extension.  */
 	case DW_LANG_Mips_Assembler: printf ("(MIPS assembler)"); break;
 	default:                     printf ("(Unknown: %lx)", uvalue); break;

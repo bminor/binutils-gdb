@@ -1,3 +1,8 @@
+2001-10-13  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* readelf.c (parse_args): Handle multiple options to the -w
+	switch.
+
 2001-10-12  Jakub Jelinek  <jakub@redhat.com>
 
 	* readelf.c (get_section_type_name): Don't print SHT_ prefix for
