@@ -140,8 +140,8 @@ alloc_dwarf1_unit (stash)
   struct dwarf1_debug* stash;
 {
   struct dwarf1_unit* x = 
-    (struct dwarf1_unit*) bfd_alloc (stash->abfd, 
-				       sizeof (struct dwarf1_unit));
+    (struct dwarf1_unit*) bfd_zalloc (stash->abfd, 
+				      sizeof (struct dwarf1_unit));
   x->prev = stash->lastUnit;
   stash->lastUnit = x;
 
@@ -157,8 +157,8 @@ alloc_dwarf1_func (stash, aUnit)
      struct dwarf1_unit* aUnit;
 {
   struct dwarf1_func* x = 
-    (struct dwarf1_func*) bfd_alloc (stash->abfd, 
-				  sizeof (struct dwarf1_func));
+    (struct dwarf1_func*) bfd_zalloc (stash->abfd, 
+				      sizeof (struct dwarf1_func));
   x->prev = aUnit->func_list;
   aUnit->func_list = x;
   

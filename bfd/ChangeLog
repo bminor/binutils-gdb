@@ -1,3 +1,8 @@
+Thu Jun 17 21:24:43 1999  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+	* dwarf1.c (alloc_dwarf1_unit): Allocate using bfd_zalloc.
+	* (alloc_dwarf1_func): Likewise.
+
 Wed Jun 16 03:09:57 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* libhppa.h: Fix various formatting errors.
