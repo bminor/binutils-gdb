@@ -75,12 +75,18 @@ INSTALL_TARGET = install.all
 
 all:	$(ALL)
 
-info: force
+info: doc.info
 	$(MAKE) subdir_do DO=info "DODIRS=$(SUBDIRS)"
 
-install-info: dir.info install-info-dirs force
+doc.info: doc.texi
+	$(MAKEINFO) -o doc.info $(srcdir)/doc.texi
+
+install-info: install-info-dirs force
 	$(MAKE) subdir_do DO=install-info "DODIRS=$(SUBDIRS)"
-#	$(MAKE) install-dir.info
+	$(MAKE) dir.info install-dir.info
+
+install-dir.info:
+	$(INSTALL_DATA) dir.info $(infodir)/dir.info
 
 # clib prms
 all.normal: all-texinfo all-bison all-byacc all-ld all-gnulib all-gdb all-make \
@@ -1425,10 +1431,9 @@ MAKEINFODIRS= \
 	$(infodir)
 
 install-info-dirs: force
-	for i in $(MAKEINFODIRS) ; do \
-		echo Making $$i... ; \
-		if [ -d $$i ] ; then true ; else mkdir $$i ; fi ; \
-	done
+	if [ -d $(prefix) ] ; then true ; else mkdir $(prefix) ; fi
+	if [ -d $(datadir) ] ; then true ; else mkdir $(datadir) ; fi
+	if [ -d $(infodir) ] ; then true ; else mkdir $(infodir) ; fi
 
 dir.info: force
 	$(srcdir)/texinfo/gen-info-dir $(infodir) > dir.info.new

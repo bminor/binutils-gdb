@@ -1,9 +1,15 @@
+Wed Dec 11 22:25:20 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
+
+	* Makefile.in: revised install for dir.info.
+
 Tue Dec 10 00:04:35 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
 
 	* configure.in: add decstation host makefile frag.
 
 	* Makefile.in: BISON now bison -y again.  also install-gcc on
 	  install.  clean-gdbm on clean.  infodir belongs in datadir.
+	  Make directories for info install.  Build dir.info here then
+	  install it.
 
 Mon Dec  9 16:48:33 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
 
