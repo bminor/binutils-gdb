@@ -169,7 +169,8 @@ DIST=gdb
 LINT=/usr/5bin/lint
 LINTFLAGS= -I${BFD_DIR}
 
-DGFLAGS=
+RUNTEST=runtest
+RUNTESTFLAGS=
 
 # Host and target-dependent makefile fragments come in here.
 ####
@@ -195,6 +196,8 @@ $(end-sanitize-chill)\
 	"INSTALL=$(INSTALL)" \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
+	"RUNTEST=$(RUNTEST)" \
+	"RUNTESTFLAGS=$(RUNTESTFLAGS)" \
 	"BISON=$(BISON)"
 
 # Flags that we pass when building the testsuite.
@@ -261,6 +264,8 @@ $(end-sanitize-chill)\
 	"INSTALL=$(INSTALL)" \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
+	"RUNTEST=$(RUNTEST)" \
+	"RUNTESTFLAGS=$(RUNTESTFLAGS)" \
 	"BISON=$(BISON)"
 
 # Source files in the main directory.
@@ -408,10 +413,9 @@ YYOBJ = c-exp.tab.o m2-exp.tab.o ch-exp.tab.o
 
 all: gdb
 	$(MAKE) $(FLAGS_TO_PASS) DO=all "DODIRS=`echo $(SUBDIRS) | sed 's/testsuite//'`" subdir_do
-	rootme=`pwd`; export rootme; $(MAKE) $(TARGET_FLAGS_TO_PASS) DO=all DODIRS=testsuite subdir_do
-check:
-	../dejagnu/runtest -to gdb $(DGFLAGS)
 
+check: force
+	rootme=`pwd`; export rootme; $(MAKE) $(TARGET_FLAGS_TO_PASS) DO=check DODIRS=testsuite subdir_do
 info: force
 	$(MAKE) $(FLAGS_TO_PASS) DO=info "DODIRS=$(SUBDIRS)" subdir_do
 install-info: force
