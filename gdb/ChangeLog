@@ -1,3 +1,15 @@
+Tue Sep 24 18:05:30 1991  John Gilmore  (gnu at cygnus.com)
+
+	* infrun.c (IN_SIGTRAMP):  Not parenthesized properly.
+	Bugfix from Paul Eggert <eggert@twinsun.com>.
+	* tm-ultra3.h (IN_SIGTRAMP):  Ditto.
+
+Mon Sep 23 15:50:07 1991  John Gilmore  (gnu at cygnus.com)
+
+	* Makefile.in:  Roll VERSION to 4.1.1.
+	* source.c (line_info):  Peter Schauer fixes a bug I introduced in
+	hex conversion.
+
 Fri Sep 20 16:10:52 1991  John Gilmore  (gnu at cygnus.com)
 
 	GDB-4.1 release!
@@ -10,6 +22,11 @@ Fri Sep 20 16:10:52 1991  John Gilmore  (gnu at cygnus.com)
 	* main.c (main):  Avoid any output before (gdb) prompt when -q.
 	* language.c (set_language_command):  Handle errors by restoring
 	the language string to its current state (fix from A. Beers).
+	* doc/gdbint.texinfo:  Roll in information from README.  Rearrange
+	"how to install" and "how to print the doc" stuff so it drops
+	easier into README.
+	* configure.in:  Rename rtpc CPU to romp to match config.sub.
+	* README, WHATS.NEW, TODO:  Update for gdb-4.1.
 
 Fri Sep 20 17:39:14 1991  Roland H. Pesch  (pesch at cygnus.com)
 
@@ -88,7 +105,7 @@ Thu Sep 19 17:04:12 1991  Per Bothner  (bothner at cygnus.com)
 	* mipsread.c (parse_partial_symbols): Enter the name of all
 	structs/unions... into the psymtab so we can access them if the
 	symtab is not read in.
-	* mips-tdep.c:  Remove some unneded (?) #includes.
+	* mips-tdep.c:  Remove some unneeded #includes.
 	* xconfig/dec3100: Add HAVE_STRSTR.
 
 Thu Sep 19 15:14:23 1991  John Gilmore  (gnu at cygnus.com)
@@ -162,7 +179,6 @@ Wed Sep 18 15:55:51 1991  John Gilmore  (gnu at cygnus.com)
 	(lookup_unsigned_typename):  Call above.
 	(create_array_type):  Set up range type for array index.
 	(list_symbols):  Call typedef_print to print typedefs.
-	   (Currently #ifndef FIXME'd out awaiting integration.)
 
 	* values.c (unpack_long, value_from_longest):  Handle
 	TYPE_CODE_BOOL and TYPE_CODE_CHAR.
@@ -204,7 +220,9 @@ Wed Sep 18 15:55:51 1991  John Gilmore  (gnu at cygnus.com)
 Tue Sep 17 08:37:41 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	Add Andrew Beers' changes for Modula-2 support.  His ChangeLog
-	entries are enclosed herein:
+	entries are enclosed herein.  Not all of these changes
+	have been merged into the master GDB sources -- check the
+	ChangeLog above here for the merge log.
 
 Mon Jun  3 17:05:45 EDT 1991
 

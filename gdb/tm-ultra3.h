@@ -177,7 +177,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
  */
 #if !defined(KERNEL_DEBUGGING)
 #ifdef SYM1
-# define IN_SIGTRAMP(pc, name) name && !strcmp ("sigtramp", name)
+# define IN_SIGTRAMP(pc, name) (name && !strcmp ("sigtramp", name))
 #else
         Need to define IN_SIGTRAMP() for sym2.
 #endif

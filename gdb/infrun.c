@@ -166,7 +166,7 @@ extern struct target_ops child_ops;	/* In inftarg.c */
    no name, assume we are not in sigtramp).  */
 #if !defined (IN_SIGTRAMP)
 #define IN_SIGTRAMP(pc, name) \
-  name && !strcmp ("_sigtramp", name)
+  (name && !strcmp ("_sigtramp", name))
 #endif
 
 #ifdef TDESC
@@ -528,7 +528,7 @@ child_create_inferior (exec_file, allargs, env)
 #ifdef TIOCGPGRP
       /* Run inferior in a separate process group.  */
       debug_setpgrp = setpgrp (getpid (), getpid ());
-      if (0 != debug_setpgrp)
+      if (debug_setpgrp == -1)
 	 perror("setpgrp failed in child");
 #endif /* TIOCGPGRP */
 
