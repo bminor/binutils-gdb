@@ -255,8 +255,7 @@ struct type
     } *fields;
 
   /* For types with virtual functions, VPTR_BASETYPE is the base class which
-     defined the virtual function table pointer.  VPTR_FIELDNO is
-     the field number of that pointer in the structure.
+     defined the virtual function table pointer.  
 
      For types that are pointer to member types, VPTR_BASETYPE
      is the type that this pointer is a member of.
@@ -264,6 +263,13 @@ struct type
      Unused otherwise.  */
 
   struct type *vptr_basetype;
+
+  /* Field number of the virtual function table pointer in
+     VPTR_BASETYPE.  If -1, we were unable to find the virtual
+     function table pointer in initial symbol reading, and
+     fill_in_vptr_fieldno should be called to find it if possible.
+
+     Unused if this type does not have virtual functions.  */
 
   int vptr_fieldno;
 

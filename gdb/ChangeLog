@@ -1,3 +1,8 @@
+Mon Aug  2 12:06:00 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdbtypes.c (fill_in_vptr_fieldno): Call check_stub_type.
+	* gdbtypes.{c,h}: Improve comments on vptr_fieldno.
+
 Mon Aug  2 11:58:52 1993  Fred Fish  (fnf@deneb.cygnus.com)
 
 	* README:  Elaborate on gdb C++ support and cfront support.

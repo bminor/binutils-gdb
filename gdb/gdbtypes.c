@@ -749,13 +749,19 @@ lookup_struct_elt_type (type, name, noerr)
   return (struct type *)-1;	/* For lint */
 }
 
-/* This function is really horrible, but to avoid it, there would need
-   to be more filling in of forward references.  */
+/* If possible, make the vptr_fieldno and vptr_basetype fields of TYPE
+   valid.  Callers should be aware that in some cases (for example,
+   the type or one of its baseclasses is a stub type and we are
+   debugging a .o file), this function will not be able to find the virtual
+   function table pointer, and vptr_fieldno will remain -1 and vptr_basetype
+   will remain NULL.  */
 
 void
 fill_in_vptr_fieldno (type)
      struct type *type;
 {
+  check_stub_type (type);
+
   if (TYPE_VPTR_FIELDNO (type) < 0)
     {
       int i;
