@@ -1,3 +1,10 @@
+2002-09-19  Nathan Tallent  <eraxxon@alumni.rice.edu>
+
+	* ecoffswap.h (ecoff_swap_pdr_in) <isym, iline>: Update to
+	correctly sign-extend 32-bit ECOFF null values (0xffffffff, -1)
+	on 64 bit machines.
+	(ecoff_swap_sym_in) <iss>: Likewise.
+
 2002-09-19  Daniel Jacobowitz  <drow@mvista.com>
 
 	* elf32-arm.h (elf32_arm_adjust_dynamic_symbol): Update
