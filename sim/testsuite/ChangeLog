@@ -1,3 +1,29 @@
+start-sanitize-sky
+Wed Sep  9 14:42:24 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* sim/sky/pr17191.s: New file.
+	* sim/sky/pr17191.brn: New file.
+	* sim/sky/t-macros.inc: New file.
+
+Tue Aug 18 17:27:10 1998 Jillian Ye <jillian@cygnus.com>
+     
+        * sim/sky/fast_gs/sce2_test11.gsout: added file.
+
+Tue Aug 11 13:57:50 1998 Jillian Ye <jillian@cygnus.com>
+
+        * sim/sky/sky_sce_accurate.exp: increase the timeout value
+        from 2000 to 3000
+
+end-sanitize-sky
+start-sanitize-m32rx
+Tue Jul 28 10:04:09 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* sim/m32r/mulwhi-a.cgs: New testcase.
+	* sim/m32r/mulwlo-a.cgs: New testcase.
+	* sim/m32r/macwhi-a.cgs: New testcase.
+	* sim/m32r/macwlo-a.cgs: New testcase.
+
+end-sanitize-m32rx
 Fri Jul 24 09:40:34 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* Makefile.in (clean,mostlyclean): Change leading spaces to a tab.
