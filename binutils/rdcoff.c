@@ -661,7 +661,8 @@ parse_coff_symbol (abfd, types, sym, coff_symno, psyment, dhandle, type,
 /* Determine if a symbol has external visibility.  */
 
 static boolean
-external_coff_symbol_p (int sym_class)
+external_coff_symbol_p (sym_class)
+     int sym_class;
 {
   switch (sym_class)
     {

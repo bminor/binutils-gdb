@@ -1,3 +1,7 @@
+2000-07-23  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+
+	* rdcoff.c (external_coff_symbol_p): K&R-ise.
+
 2000-07-20  H.J. Lu  <hjl@gnu.org>
 
 	* binutils/binutils.texi: Put back "@end table" deleted by
