@@ -1227,6 +1227,12 @@ m68k_ip (instring)
 		      || opP->mode == AREG
 		      || opP->mode == REGLST)
 		    losing++;
+		  /* We should accept immediate operands, but they
+                     supposedly have to be quad word, and we don't
+                     handle that.  I would like to see what a Motorola
+                     assembler does before doing something here.  */
+		  if (opP->mode == IMMED)
+		    losing++;
 		  break;
 
 		case 'f':
@@ -1235,13 +1241,21 @@ m68k_ip (instring)
 		    losing++;
 		  break;
 
-		case 'P':
+		case '0':
+		  if (opP->mode != CONTROL || opP->reg != TC)
+		    losing++;
+		  break;
+
+		case '1':
+		  if (opP->mode != CONTROL || opP->reg != AC)
+		    losing++;
+		  break;
+
+		case '2':
 		  if (opP->mode != CONTROL
-		      || (opP->reg != TC
-			  && opP->reg != CAL
+		      || (opP->reg != CAL
 			  && opP->reg != VAL
-			  && opP->reg != SCC
-			  && opP->reg != AC))
+			  && opP->reg != SCC))
 		    losing++;
 		  break;
 
@@ -2258,7 +2272,9 @@ m68k_ip (instring)
 	  install_operand (s[1], tmpreg);
 	  break;
 
-	case 'P':
+	case '0':
+	case '1':
+	case '2':
 	  switch (opP->reg)
 	    {
 	    case TC:

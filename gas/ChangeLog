@@ -1,5 +1,8 @@
 Tue Sep 19 11:31:31 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-m68k.c (m68k_ip): Reject immediate operands for '|'.
+	Replace 'P' with '0', '1', and '2'.
+
 	* config/tc-m68k.c (parse_mri_control_operand): Change leftstop
 	and rightstop to not be const.
 	(parse_mri_control_expression): Likewise.
