@@ -29,17 +29,19 @@
 const char comment_chars[] = "#;";
 const char line_comment_chars[] = "#";
 const char line_separator_chars[] = "";
-const char *md_shortopts = "";
+const char *md_shortopts = "O";
 const char EXP_CHARS[] = "eE";
 const char FLT_CHARS[] = "dD";
 
+int Optimizing = 0;
 
 /* fixups */
 #define MAX_INSN_FIXUPS (5)
 struct d10v_fixup
 {
   expressionS exp;
-  bfd_reloc_code_real_type reloc;
+  int operand;
+  int pcrel;
 };
 
 typedef struct _fixups
@@ -59,6 +61,7 @@ static int check_range PARAMS ((unsigned long num, int bits, int flags));
 static int postfix PARAMS ((char *p));
 static bfd_reloc_code_real_type get_reloc PARAMS ((struct d10v_operand *op));
 static int get_operands PARAMS ((expressionS exp[]));
+static struct d10v_opcode *find_opcode PARAMS ((struct d10v_opcode *opcode, expressionS ops[]));
 static unsigned long build_insn PARAMS ((struct d10v_opcode *opcode, expressionS *opers, unsigned long insn));
 static void write_long PARAMS ((struct d10v_opcode *opcode, unsigned long insn, Fixups *fx));
 static void write_1_short PARAMS ((struct d10v_opcode *opcode, unsigned long insn, Fixups *fx));
@@ -67,6 +70,8 @@ static int write_2_short PARAMS ((struct d10v_opcode *opcode1, unsigned long ins
 static unsigned long do_assemble PARAMS ((char *str, struct d10v_opcode **opcode));
 static unsigned long d10v_insert_operand PARAMS (( unsigned long insn, int op_type,
 						   offsetT value, int left));
+static int parallel_ok PARAMS ((struct d10v_opcode *opcode1, unsigned long insn1, 
+				  struct d10v_opcode *opcode2, unsigned long insn2));
 
 
 struct option md_longopts[] = {
@@ -192,7 +197,7 @@ md_show_usage (stream)
   FILE *stream;
 {
   fprintf(stream, "D10V options:\n\
-none yet\n");
+-O                      optimize.  Will do some operations in parallel.\n");
 } 
 
 int
@@ -200,7 +205,16 @@ md_parse_option (c, arg)
      int c;
      char *arg;
 {
-  return 0;
+  switch (c)
+    {
+    case 'O':
+      /* Optimize. Will attempt to parallelize operations */
+      Optimizing = 1;
+      break;
+    default:
+      return 0;
+    }
+  return 1;
 }
 
 symbolS *
@@ -210,13 +224,46 @@ md_undefined_symbol (name)
   return 0;
 }
 
+/* Turn a string in input_line_pointer into a floating point constant of type
+   type, and store the appropriate bytes in *litP.  The number of LITTLENUMS
+   emitted is stored in *sizeP .  An error message is returned, or NULL on OK.
+ */
 char *
-md_atof (type, litp, sizep)
-  int type;
-char *litp;
-int *sizep;
+md_atof (type, litP, sizeP)
+     int type;
+     char *litP;
+     int *sizeP;
 {
-  return "";
+  int prec;
+  LITTLENUM_TYPE words[4];
+  char *t;
+  int i;
+  
+  switch (type)
+    {
+    case 'f':
+      prec = 2;
+      break;
+    case 'd':
+      prec = 4;
+      break;
+    default:
+      *sizeP = 0;
+      return "bad call to md_atof";
+    }
+
+  t = atof_ieee (input_line_pointer, type, words);
+  if (t)
+    input_line_pointer = t;
+  
+  *sizeP = prec * 2;
+  
+  for (i = 0; i < prec; i++)
+    {
+      md_number_to_chars (litP, (valueT) words[i], 2);
+	  litP += 2;
+    }
+  return NULL;
 }
 
 void
@@ -466,16 +513,14 @@ build_insn (opcode, opers, insn)
 	  /*
 	  printf("need a fixup: ");
 	  print_expr_1(stdout,&opers[i]);
-	  printf("\n");ddd
+	  printf("\n");
 	  */
 
 	  if (fixups->fc >= MAX_INSN_FIXUPS)
 	    as_fatal ("too many fixups");
 	  fixups->fix[fixups->fc].exp = opers[i];
-
-	  /* put the operand number here for now.  We can look up
-	     the reloc type and/or fixup the instruction in md_apply_fix() */
-	  fixups->fix[fixups->fc].reloc = opcode->operands[i];
+	  fixups->fix[fixups->fc].operand = opcode->operands[i];
+	  fixups->fix[fixups->fc].pcrel = (flags & OPERAND_ADDR) ? true : false;
 	  (fixups->fc)++;
 	}
 
@@ -511,7 +556,7 @@ write_long (opcode, insn, fx)
 
   for (i=0; i < fx->fc; i++) 
     {
-      if (get_reloc((struct d10v_operand *)&d10v_operands[fx->fix[i].reloc]))
+      if (get_reloc((struct d10v_operand *)&d10v_operands[fx->fix[i].operand]))
 	{ 
 	  /*
 	  printf("fix_new_exp: where:%x size:4\n    ",f - frag_now->fr_literal);
@@ -523,8 +568,8 @@ write_long (opcode, insn, fx)
 		       f - frag_now->fr_literal, 
 		       4,
 		       &(fx->fix[i].exp),
-		       1,
-		       fx->fix[i].reloc|2048);
+		       fx->fix[i].pcrel,
+		       fx->fix[i].operand|2048);
 	}
     }
   fx->fc = 0;
@@ -541,7 +586,7 @@ write_1_short (opcode, insn, fx)
   char *f = frag_more(4);
   int i;
 
-  if (opcode->exec_type == PARONLY)
+  if (opcode->exec_type & PARONLY)
     as_fatal ("Instruction must be executed in parallel with another instruction.");
 
   /* the other container needs to be NOP */
@@ -557,7 +602,7 @@ write_1_short (opcode, insn, fx)
   for (i=0; i < fx->fc; i++) 
     {
       bfd_reloc_code_real_type reloc;
-      reloc = get_reloc((struct d10v_operand *)&d10v_operands[fx->fix[i].reloc]);
+      reloc = get_reloc((struct d10v_operand *)&d10v_operands[fx->fix[i].operand]);
       if (reloc)
 	{ 
 	  /*
@@ -568,14 +613,14 @@ write_1_short (opcode, insn, fx)
 
 	  /* if it's an R reloc, we may have to switch it to L */
 	  if ( (reloc == BFD_RELOC_D10V_10_PCREL_R) && (opcode->unit != IU) )
-	    fx->fix[i].reloc |= 1024;
+	    fx->fix[i].operand |= 1024;
 
 	  fix_new_exp (frag_now,
 		       f - frag_now->fr_literal, 
 		       4,
 		       &(fx->fix[i].exp),
-		       1,
-		       fx->fix[i].reloc|2048);
+		       fx->fix[i].pcrel,
+		       fx->fix[i].operand|2048);
 	}
     }
   fx->fc = 0;
@@ -594,14 +639,14 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
   char *f;
   int i,j;
 
-  if ( (exec_type != 1) && ((opcode1->exec_type == PARONLY)
-	                || (opcode2->exec_type == PARONLY)))
+  if ( (exec_type != 1) && ((opcode1->exec_type & PARONLY)
+	                || (opcode2->exec_type & PARONLY)))
     as_fatal("Instruction must be executed in parallel");
   
   if ( (opcode1->format & LONG_OPCODE) || (opcode2->format & LONG_OPCODE))
     as_fatal ("Long instructions may not be combined.");
 
-  if(opcode1->exec_type == BRANCH_LINK)
+  if(opcode1->exec_type & BRANCH_LINK)
     {
       /* subroutines must be called from 32-bit boundaries */
       /* so the return address will be correct */
@@ -611,20 +656,34 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 
   switch (exec_type) 
     {
-    case 0:
-      if (opcode1->unit == IU) 
+    case 0:	/* order not specified */
+      if ( Optimizing && parallel_ok (opcode1, insn1, opcode2, insn2))
+	{
+	  /* parallel */
+	  if (opcode1->unit == IU)
+	    insn = FM00 | (insn2 << 15) | insn1;
+	  else if (opcode2->unit == MU)
+	    insn = FM00 | (insn2 << 15) | insn1;
+	  else
+	    {
+	      insn = FM00 | (insn1 << 15) | insn2;  
+	      fx = fx->next;
+	    }
+	}
+      else if (opcode1->unit == IU) 
 	{
 	  /* reverse sequential */
 	  insn = FM10 | (insn2 << 15) | insn1;
 	}
       else
 	{
+	  /* sequential */
 	  insn = FM01 | (insn1 << 15) | insn2;
 	  fx = fx->next;  
 	}
       break;
     case 1:	/* parallel */
-      if (opcode1->exec_type == SEQ || opcode2->exec_type == SEQ)
+      if (opcode1->exec_type & SEQ || opcode2->exec_type & SEQ)
 	as_fatal ("One of these instructions may not be executed in parallel.");
 
       if (opcode1->unit == IU)
@@ -633,7 +692,6 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 	    as_fatal ("Two IU instructions may not be executed in parallel");
 	  as_warn ("Swapping instruction order");
  	  insn = FM00 | (insn2 << 15) | insn1;
-	  fx = fx->next;
 	}
       else if (opcode2->unit == MU)
 	{
@@ -641,11 +699,12 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 	    as_fatal ("Two MU instructions may not be executed in parallel");
 	  as_warn ("Swapping instruction order");
 	  insn = FM00 | (insn2 << 15) | insn1;
-	  fx = fx->next;
 	}
       else
-	insn = FM00 | (insn1 << 15) | insn2;  
-      fx = fx->next;
+	{
+	  insn = FM00 | (insn1 << 15) | insn2;  
+	  fx = fx->next;
+	}
       break;
     case 2:	/* sequential */
       if (opcode1->unit == IU)
@@ -657,6 +716,7 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
       if (opcode2->unit == MU)
 	as_fatal ("MU instruction may not be in the right container");
       insn = FM10 | (insn1 << 15) | insn2;  
+      fx = fx->next;
       break;
     default:
       as_fatal("unknown execution type passed to write_2_short()");
@@ -666,35 +726,129 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
   f = frag_more(4);
   number_to_chars_bigendian (f, insn, 4);
 
-for (j=0; j<2; j++) 
-  {
-    bfd_reloc_code_real_type reloc;
-    for (i=0; i < fx->fc; i++) 
-      {
-	reloc = get_reloc((struct d10v_operand *)&d10v_operands[fx->fix[i].reloc]);
-	if (reloc)
-	  {
-	    if ( (reloc == BFD_RELOC_D10V_10_PCREL_R) && (j == 0) )
-	      fx->fix[i].reloc |= 1024;
-	    
-	    /*
-	    printf("fix_new_exp: where:%x reloc:%d\n    ",f - frag_now->fr_literal,fx->fix[i].reloc);
-	    print_expr_1(stdout,&(fx->fix[i].exp));
-	    printf("\n");
-	    */
-	    fix_new_exp (frag_now,
-			 f - frag_now->fr_literal, 
-			 4,
-			 &(fx->fix[i].exp),
-			 1,
-			 fx->fix[i].reloc|2048);
-	  }
-      }
-    fx->fc = 0;
-    fx = fx->next;
-  }
-
+  for (j=0; j<2; j++) 
+    {
+      bfd_reloc_code_real_type reloc;
+      for (i=0; i < fx->fc; i++) 
+	{
+	  reloc = get_reloc((struct d10v_operand *)&d10v_operands[fx->fix[i].operand]);
+	  if (reloc)
+	    {
+	      if ( (reloc == BFD_RELOC_D10V_10_PCREL_R) && (j == 0) )
+		fx->fix[i].operand |= 1024;
+	      
+	      /*
+		printf("fix_new_exp: where:%x reloc:%d\n    ",f - frag_now->fr_literal,fx->fix[i].operand);
+		print_expr_1(stdout,&(fx->fix[i].exp));
+		printf("\n");
+		*/
+	      fix_new_exp (frag_now,
+			   f - frag_now->fr_literal, 
+			   4,
+			   &(fx->fix[i].exp),
+			   fx->fix[i].pcrel,
+			   fx->fix[i].operand|2048);
+	    }
+	}
+      fx->fc = 0;
+      fx = fx->next;
+    }
   return (0);
+}
+
+
+/* Check 2 instructions and determine if they can be safely */
+/* executed in parallel.  Returns 1 if they can be.         */
+static int
+parallel_ok (op1, insn1, op2, insn2) 
+     struct d10v_opcode *op1, *op2;
+     unsigned long insn1, insn2;
+{
+  int i, j, flags, mask, shift, regno;
+  unsigned long ins, mod[2], used[2];
+  struct d10v_opcode *op;
+
+  if (op1->exec_type & SEQ || op2->exec_type & SEQ)
+    return 0;
+
+  /* The idea here is to create two sets of bitmasks (mod and used) */
+  /* which indicate which registers are modified or used by each instruction. */
+  /* The operation can only be done in parallel if instruction 1 and instruction 2 */
+  /* modify different registers, and neither instruction modifies any registers */
+  /* the other is using.  Accesses to control registers, PSW, and memory are treated */
+  /* as accesses to a single register.  So if both instructions write memory or one */
+  /* instruction writes memory and the other reads, then they cannot be done in parallel. */
+  /* Likewise, if one instruction mucks with the psw and the other reads the PSW */
+  /* (which includes C, F0, and F1), then they cannot operate safely in parallel. */
+
+  /* the bitmasks (mod and used) look like this (bit 31 = MSB) */
+  /* r0-r15	  0-15  */
+  /* a0-a1	  16-17 */
+  /* cr (not psw) 18    */
+  /* psw	  19    */
+  /* mem	  20    */
+
+  for (j=0;j<2;j++)
+    {
+      if (j == 0)
+	{
+	  op = op1;
+	  ins = insn1;
+	}
+      else
+	{
+	  op = op2;
+	  ins = insn2;
+	}
+      mod[j] = used[j] = 0;
+      for (i = 0; op1->operands[i]; i++)
+	{
+	  flags = d10v_operands[op->operands[i]].flags;
+	  shift = d10v_operands[op->operands[i]].shift;
+	  mask = 0x7FFFFFFF >> (31 - d10v_operands[op->operands[i]].bits);
+	  if (flags & OPERAND_REG)
+	    {
+	      regno = (ins >> shift) & mask;
+	      if (flags & OPERAND_ACC)     
+		regno += 16;
+	      else if (flags & OPERAND_CONTROL)	/* mvtc or mvfc */
+		{ 
+		  if (regno == 0)
+		    regno = 19;
+		  else
+		    regno = 18; 
+		}
+	      else if (flags & OPERAND_FLAG)  
+		regno = 19;
+	      
+	      if ( flags & OPERAND_DEST )
+		{
+		  mod[j] |= 1 << regno;
+		  if (flags & OPERAND_EVEN)
+		    mod[j] |= 1 << (regno + 1);
+		}
+	      else
+		{
+		  used[j] |= 1 << regno ;
+		  if (flags & OPERAND_EVEN)
+		    used[j] |= 1 << (regno + 1);
+		}
+	    }
+	  else if (op->exec_type & RMEM)
+	    used[j] |= 1 << 20;
+	  else if (op->exec_type & WMEM)
+	    mod[j] |= 1 << 20;
+	  else if (op->exec_type & RF0)
+	    used[j] |= 1 << 19;
+	  else if (op->exec_type & WF0)
+	    mod[j] |= 1 << 19;
+	  else if (op->exec_type & WCAR)
+	    mod[j] |= 1 << 19;
+	} 
+    }
+  if ((mod[0] & mod[1]) == 0 && (mod[0] & used[1]) == 0 && (mod[1] & used[0]) == 0)
+    return 1;
+  return 0;
 }
 
 
@@ -817,11 +971,10 @@ do_assemble (str, opcode)
      char *str;
      struct d10v_opcode **opcode;
 {
-  struct d10v_opcode *next_opcode;
   unsigned char *op_start, *save;
   unsigned char *op_end;
   char name[20];
-  int nlen = 0, i, match, numops;
+  int nlen = 0;
   expressionS myops[6];
   unsigned long insn;
 
@@ -853,52 +1006,75 @@ do_assemble (str, opcode)
 
   save = input_line_pointer;
   input_line_pointer = op_end;
+  *opcode = find_opcode (*opcode, myops);
+  if (*opcode == 0)
+    return -1;
+  input_line_pointer = save;
+
+  insn = build_insn ((*opcode), myops, 0); 
+  /* printf("sub-insn = %lx\n",insn); */
+  return (insn);
+}
+
+/* find_opcode() gets a pointer to an entry in the opcode table.       */
+/* It must look at all opcodes with the same name and use the operands */
+/* to choose the correct opcode. */
+
+static struct d10v_opcode *
+find_opcode (opcode, myops)
+     struct d10v_opcode *opcode;
+     expressionS myops[];
+{
+  int i, match, done, numops;
+  struct d10v_opcode *next_opcode;
 
   /* get all the operands and save them as expressions */
   numops = get_operands (myops);
 
   /* now see if the operand is a fake.  If so, find the correct size */
   /* instruction, if possible */
-  match = 0;
-  if ((*opcode)->format == OPCODE_FAKE)
+  if (opcode->format == OPCODE_FAKE)
     {
-      int opnum = (*opcode)->operands[0];
-      if (myops[opnum].X_op == O_constant)
+      int opnum = opcode->operands[0];
+
+      if (myops[opnum].X_op == O_register)
 	{
-	  next_opcode=(*opcode)+1;
-	  for (i=0; (*opcode)->operands[i+1]; i++)
+	  myops[opnum].X_op = O_symbol;
+	  myops[opnum].X_add_symbol = symbol_find_or_make ((char *)myops[opnum].X_op_symbol);
+	  myops[opnum].X_add_number = 0;
+	  myops[opnum].X_op_symbol = NULL;
+	}
+
+      if (myops[opnum].X_op == O_constant || S_IS_DEFINED(myops[opnum].X_add_symbol))
+	{
+	  next_opcode=opcode+1;
+	  for (i=0; opcode->operands[i+1]; i++)
 	    {
 	      int bits = d10v_operands[next_opcode->operands[opnum]].bits;
 	      int flags = d10v_operands[next_opcode->operands[opnum]].flags;
 	      if (!check_range (myops[opnum].X_add_number, bits, flags))
-		{
-		  match = 1;
-		  break;
-		}
+		  return next_opcode;
 	      next_opcode++;
 	    }
+	  as_fatal ("value out of range");
 	}
       else
 	{
-	  /* not a constant, so use a long instruction */
-	  next_opcode = (*opcode)+2;
-	  match = 1;
+	  /* not a constant, so use a long instruction */	    
+	  return opcode+2;
 	}
-      if (match)
-	*opcode = next_opcode;
-      else
-	as_fatal ("value out of range");
     }
   else
     {
+      match = 0;
       /* now search the opcode table table for one with operands */
       /* that matches what we've got */
       while (!match)
 	{
 	  match = 1;
-	  for (i = 0; (*opcode)->operands[i]; i++) 
+	  for (i = 0; opcode->operands[i]; i++) 
 	    {
-	      int flags = d10v_operands[(*opcode)->operands[i]].flags;
+	      int flags = d10v_operands[opcode->operands[i]].flags;
 	      int X_op = myops[i].X_op;
 	      int num = myops[i].X_add_number;
 	      
@@ -928,21 +1104,20 @@ do_assemble (str, opcode)
 		{
 		  match=0;
 		  break;
-		}
-	      
+		}	      
 	    }
 	  
-	  /* we're only done if the operands matched AND there
+	  /* we're only done if the operands matched so far AND there
 	     are no more to check */
 	  if (match && myops[i].X_op==0) 
 	    break;
 	  
-	  next_opcode = (*opcode)+1;
+	  next_opcode = opcode+1;
 	  if (next_opcode->opcode == 0) 
 	    break;
-	  if (strcmp(next_opcode->name, (*opcode)->name))
+	  if (strcmp(next_opcode->name, opcode->name))
 	    break;
-	  (*opcode) = next_opcode;
+	  opcode = next_opcode;
 	}
     }
 
@@ -955,14 +1130,14 @@ do_assemble (str, opcode)
   /* Check that all registers that are required to be even are. */
   /* Also, if any operands were marked as registers, but were really symbols */
   /* fix that here. */
-  for (i=0; (*opcode)->operands[i]; i++) 
+  for (i=0; opcode->operands[i]; i++) 
     {
-      if ((d10v_operands[(*opcode)->operands[i]].flags & OPERAND_EVEN) &&
+      if ((d10v_operands[opcode->operands[i]].flags & OPERAND_EVEN) &&
 	  (myops[i].X_add_number & 1)) 
 	as_fatal("Register number must be EVEN");
       if (myops[i].X_op == O_register)
 	{
-	  if (!(d10v_operands[(*opcode)->operands[i]].flags & OPERAND_REG)) 
+	  if (!(d10v_operands[opcode->operands[i]].flags & OPERAND_REG)) 
 	    {
 	      myops[i].X_op = O_symbol;
 	      myops[i].X_add_symbol = symbol_find_or_make ((char *)myops[i].X_op_symbol);
@@ -971,17 +1146,8 @@ do_assemble (str, opcode)
 	    }
 	}
     }
-  
-  input_line_pointer = save;
-
-  /* at this point, we have "opcode" pointing to the opcode entry in the
-     d10v opcode table, with myops filled out with the operands. */
-  insn = build_insn ((*opcode), myops, 0); 
-  /* printf("sub-insn = %lx\n",insn); */
-
-  return (insn);
+  return opcode;
 }
-
 
 /* if while processing a fixup, a reloc really needs to be created */
 /* then it is done here */
@@ -1021,8 +1187,10 @@ md_pcrel_from_section (fixp, sec)
      fixS *fixp;
      segT sec;
 {
+  if (fixp->fx_addsy != (symbolS *)NULL && !S_IS_DEFINED (fixp->fx_addsy))
     return 0;
-    /*  return fixp->fx_frag->fr_address + fixp->fx_where; */
+  /* printf("pcrel_from_section: %x\n", fixp->fx_frag->fr_address + fixp->fx_where); */
+  return fixp->fx_frag->fr_address + fixp->fx_where;
 }
 
 int
@@ -1086,10 +1254,7 @@ md_apply_fix3 (fixp, valuep, seg)
     case BFD_RELOC_D10V_10_PCREL_L:
     case BFD_RELOC_D10V_10_PCREL_R:
     case BFD_RELOC_D10V_18_PCREL:
-      /* instruction addresses are always right-shifted by 2 
-         and pc-relative */
-      if (!fixp->fx_pcrel)
-	value -= fixp->fx_where;
+      /* instruction addresses are always right-shifted by 2 */
       value >>= 2;
       break;
     case BFD_RELOC_32:
