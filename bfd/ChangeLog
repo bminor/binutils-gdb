@@ -1,3 +1,23 @@
+1999-12-10  Nick Clifton  <nickc@cygnus.com>
+
+	* elflink.h: Revert previous patch.
+	* targets.c: Revert previous patch.
+	* libbfd-in2.h: Revert previous patch.
+	* libbfd.h: Revert previous patch.
+	* elfxx-target.h: Revert previous patch.
+	* archive.c: Revert previous patch.
+	* aout-target.h: Revert previous patch.
+	* aout-tic30.h: Revert previous patch.
+	* bfd.c: Revert previous patch.
+	* coff-alpha.c: Revert previous patch.
+	* coff-rs6000.c: Revert previous patch.
+	* elf64-mips.c: Revert previous patch.
+	* ieee.c: Revert previous patch.
+	* libecoff.h: Revert previous patch.
+	* oasys.c: Revert previous patch.
+	* som.c: Revert previous patch.
+	* vms.c: Revert previous patch.
+
 1999-12-09  Nick Clifton  <nickc@cygnus.com>
 
 	* elflink.h (elf_link_add_archive_symbols): Add an archive

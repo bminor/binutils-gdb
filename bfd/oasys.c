@@ -1458,7 +1458,6 @@ oasys_sizeof_headers (abfd, exec)
 #define oasys_read_ar_hdr bfd_nullvoidptr
 #define oasys_get_elt_at_index _bfd_generic_get_elt_at_index
 #define oasys_update_armap_timestamp bfd_true
-#define oasys_allow_commons_in_armap bfd_true
 
 #define oasys_bfd_is_local_label_name bfd_generic_is_local_label_name
 #define oasys_get_lineno _bfd_nosymbols_get_lineno

@@ -1804,19 +1804,16 @@ _bfd_compute_and_write_armap (arch, elength)
 		{
 		  flagword flags = (syms[src_count])->flags;
 		  asection *sec = syms[src_count]->section;
-		  size_t namelen;
-		  struct orl *new_map;
 
-		  if (bfd_is_und_section (sec))
-		    continue;
-		  else if (bfd_is_com_section (sec))
+		  if ((flags & BSF_GLOBAL ||
+		       flags & BSF_WEAK ||
+		       flags & BSF_INDIRECT ||
+		       bfd_is_com_section (sec))
+		      && ! bfd_is_und_section (sec))
 		    {
-		      if (! bfd_allow_commons_in_armap (arch))
-			continue;
-		    }
-		  else if ((flags & (BSF_GLOBAL | BSF_WEAK | BSF_INDIRECT)) == 0)
-		    continue;
-		  
+		      size_t namelen;
+		      struct orl *new_map;
+
 		      /* This symbol will go into the archive header */
 		      if (orl_count == orl_max)
 			{
@@ -1845,6 +1842,7 @@ _bfd_compute_and_write_armap (arch, elength)
 
 		      stridx += namelen + 1;
 		      ++orl_count;
+		    }
 		}
 	    }
 

@@ -2713,9 +2713,6 @@ bfd_set_private_flags PARAMS ((bfd *abfd, flagword flags));
 #define bfd_update_armap_timestamp(abfd) \
         BFD_SEND (abfd, _bfd_update_armap_timestamp, (abfd))
 
-#define bfd_allow_commons_in_armap(abfd) \
-        BFD_SEND (abfd, _bfd_allow_commons_in_armap, (abfd))
-
 #define bfd_set_arch_mach(abfd, arch, mach)\
         BFD_SEND ( abfd, _bfd_set_arch_mach, (abfd, arch, mach))
 
@@ -2923,8 +2920,7 @@ CAT(NAME,_read_ar_hdr),\
 CAT(NAME,_openr_next_archived_file),\
 CAT(NAME,_get_elt_at_index),\
 CAT(NAME,_generic_stat_arch_elt),\
-CAT(NAME,_update_armap_timestamp), \
-CAT(NAME,_allow_commons_in_armap)
+CAT(NAME,_update_armap_timestamp)
   boolean  (*_bfd_slurp_armap) PARAMS ((bfd *));
   boolean  (*_bfd_slurp_extended_name_table) PARAMS ((bfd *));
   boolean  (*_bfd_construct_extended_name_table)
@@ -2935,14 +2931,13 @@ CAT(NAME,_allow_commons_in_armap)
                               struct orl *map,
                               unsigned int orl_count, 
                               int stridx));
-  PTR      (*_bfd_read_ar_hdr_fn) PARAMS ((bfd *));
+  PTR (*_bfd_read_ar_hdr_fn) PARAMS ((bfd *));
   bfd *    (*openr_next_archived_file) PARAMS ((bfd *arch, bfd *prev));
 #define bfd_get_elt_at_index(b,i) BFD_SEND(b, _bfd_get_elt_at_index, (b,i))
   bfd *    (*_bfd_get_elt_at_index) PARAMS ((bfd *, symindex));
   int      (*_bfd_stat_arch_elt) PARAMS ((bfd *, struct stat *));
   boolean  (*_bfd_update_armap_timestamp) PARAMS ((bfd *));
-  boolean  (*_bfd_allow_commons_in_armap) PARAMS ((bfd *));
-	     
+
    /* Entry points used for symbols.  */
 #define BFD_JUMP_TABLE_SYMBOLS(NAME)\
 CAT(NAME,_get_symtab_upper_bound),\

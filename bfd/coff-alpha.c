@@ -2036,8 +2036,6 @@ alpha_adjust_headers (abfd, fhdr, ahdr)
 #define alpha_ecoff_write_armap _bfd_ecoff_write_armap
 #define alpha_ecoff_generic_stat_arch_elt _bfd_ecoff_generic_stat_arch_elt
 #define alpha_ecoff_update_armap_timestamp _bfd_ecoff_update_armap_timestamp
-#define alpha_ecoff_allow_commons_in_armap _bfd_true
-
 
 /* A compressed file uses this instead of ARFMAG.  */
 

@@ -3900,7 +3900,6 @@ ieee_bfd_debug_info_accumulate (abfd, section)
    bfd_true)
 #define ieee_read_ar_hdr bfd_nullvoidptr
 #define ieee_update_armap_timestamp bfd_true
-#define ieee_allow_commons_in_armap bfd_true
 #define ieee_get_elt_at_index _bfd_generic_get_elt_at_index
 
 #define ieee_bfd_is_local_label_name bfd_generic_is_local_label_name

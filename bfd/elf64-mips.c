@@ -2186,6 +2186,5 @@ const struct elf_size_info mips_elf64_size_info =
 					_bfd_archive_coff_generic_stat_arch_elt
 #define bfd_elf64_archive_update_armap_timestamp \
 				_bfd_archive_coff_update_armap_timestamp
-#define _bfd_elf64_allow_commons_in_armap bfd_false
 
 #include "elf64-target.h"
