@@ -1382,14 +1382,14 @@ usage (file, status)
   fprintf (file, "\t --output-lib <outname> Generate input library.\n");
   fprintf (file, "\t -l <outname>");
   fprintf (file, "\t --dllname <name>       Name of input dll to put into output lib.\n");
-  fprintf (file, "\t -d <deffile>           Name input .def file\n");
-  fprintf (file, "\t --def <deffile> \n");
+  fprintf (file, "\t --def <deffile>            Name input .def file\n");
   fprintf (file, "\t --base-file <basefile> Read linker generated base file\n");
   fprintf (file, "\t -b <basefile> \n");
   fprintf (file, "\t -v                     Verbose\n");
   fprintf (file, "\t -u                     Remove leading underscore from .lib\n");
   fprintf (file, "\t -k                     Kill @<n> from exported names\n");
   fprintf (file, "\t --rva <value>          Set the RVA from the default of 0x400000\n");
+  fprintf (file, "\t -image-base <value>        ..ditto..\n");
   fprintf (file, "\t -r <value>\n");
   fprintf (file, "\t --nodelete             Keep temp files.\n");
   fprintf (file, "\t -n	\n");
@@ -1408,6 +1408,7 @@ static struct option long_options[] =
   {"help", no_argument, NULL, 'h'},
   {"machine", required_argument, NULL, 'm'},
   {"rva", required_argument, NULL, 'r'},
+  {"image-base", required_argument, NULL, 'r'},
   {"base-file", required_argument, NULL, 'b'},
   0
 };

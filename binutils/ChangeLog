@@ -1,3 +1,7 @@
+Mon Aug 21 18:41:28 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* dlltool.c (options): image-base is a synonym for rva.
+
 Sun Aug 20 09:59:00 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	Modified to generate archives and objects rather than .s files.
