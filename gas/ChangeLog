@@ -1,3 +1,53 @@
+1999-11-28  Michael Meissner  <meissner@cygnus.com>
+
+	* config/tc-alpha.c (toplevel): Include struc-symbol.h.
+	(alpha_macro_arg): Add MACRO_{LITERAL,BASE,BYTOFF,JSR} cases.
+	(O_...): Add new machine dependent expressions if we are handling
+	explicit relocations.
+	(alpha_reloc_op): New static table holding the explicit relocation
+	information.
+	(alpha_literal_hash): New static to hold the hash table for
+	explicit relocations.
+	(alpha_macros): Add support for explicit relocations.
+	(md_begin): If explicit relocations, initialize hash table.
+	(md_assemble): Don't print a second error if tokenize_arguments
+	already printed an error message.
+	(md_apply_fix): Add support for explicit relocations.
+	(alpha_force_relocation): Ditto.
+	(alpha_fix_adjustable): Ditto.
+	(alpha_adjust_symtab): New function to support explicit
+	relocations.
+	(alpha_adjust_symtab_relocs): Ditto.
+	(debug_exp): Debug stub compiled if DEBUG_ALPHA is defined.
+	(tokenize_arguments): Add debug code if DEBUG_ALPHA is defined.
+	Add support for explicit relocations.  Return -2 if an error
+	message was already printed.
+	(find_macro_match): Add support for explicit relocations.  Comment
+	each of the cases.
+	(emit_insn): Add support for explicit relocations.
+	(assemble_tokens): Ditto.
+	(emit_ldgp): Ditto.
+	(load_expression): Ditto.
+	(emit_lda): Ditto.
+	(emit_ldah): Ditto.
+	(emit_ir_load): Ditto.
+	(emit_loadstore): Ditto.
+	(emit_ldXu): Ditto.
+	(emit_ldil): Ditto.
+	(emit_sextX): Ditto.
+	(emit_division): Ditto.
+	(emit_jsrjmp): Ditto.
+	(emit_retjcr): Ditto.
+
+	* config/tc-alpha.h (RELOC_OP_P): Enable explicit relocations if
+	ELF object format.
+	(tc_adjust_symtab): If explicit relocations, call the function
+	alpha_adjust_symtab.
+	(TC_FIX_TYPE): Add fields to be able to move explicit lituse
+	relocations next to the literal relocation they reference.
+	(TC_INIT_FIX_DATA): Initialize the new fields.
+	(TC_FIX_DATA_PRINT): Print the new fields if DEBUG5 is defined.
+
 Wed Nov 24 20:27:58 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-hppa.c (pa_ip): Handle PA2.0 unit completers.  Handle
