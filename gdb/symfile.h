@@ -315,7 +315,7 @@ extern void dwarf_build_psymtabs (struct objfile *, int, file_ptr,
 
 /* From dwarf2read.c */
 
-extern int dwarf2_has_info (bfd *abfd);
+extern int dwarf2_has_info (struct objfile *);
 
 extern void dwarf2_build_psymtabs (struct objfile *, int);
 extern void dwarf2_build_frame_info (struct objfile *);

@@ -132,19 +132,56 @@ typedef struct statement_prologue
   }
 _STATEMENT_PROLOGUE;
 
-/* offsets and sizes of debugging sections */
+static const struct objfile_data *dwarf2_per_objfile_data;
 
-static unsigned int dwarf_info_size;
-static unsigned int dwarf_abbrev_size;
-static unsigned int dwarf_line_size;
-static unsigned int dwarf_pubnames_size;
-static unsigned int dwarf_aranges_size;
-static unsigned int dwarf_loc_size;
-static unsigned int dwarf_macinfo_size;
-static unsigned int dwarf_str_size;
-static unsigned int dwarf_ranges_size;
-unsigned int dwarf_frame_size;
-unsigned int dwarf_eh_frame_size;
+struct dwarf2_per_objfile_data
+{
+  /* Sizes of debugging sections.  */
+  unsigned int dwarf_info_size;
+  unsigned int dwarf_abbrev_size;
+  unsigned int dwarf_line_size;
+  unsigned int dwarf_pubnames_size;
+  unsigned int dwarf_aranges_size;
+  unsigned int dwarf_loc_size;
+  unsigned int dwarf_macinfo_size;
+  unsigned int dwarf_str_size;
+  unsigned int dwarf_ranges_size;
+  unsigned int dwarf_frame_size;
+  unsigned int dwarf_eh_frame_size;
+
+  /* Loaded data from the sections.  */
+  char *dwarf_info_buffer;
+  char *dwarf_abbrev_buffer;
+  char *dwarf_line_buffer;
+  char *dwarf_str_buffer;
+  char *dwarf_macinfo_buffer;
+  char *dwarf_ranges_buffer;
+  char *dwarf_loc_buffer;
+
+  splay_tree cu_tree;
+};
+
+#define dwarf_info_size		dwarf2_per_objfile->dwarf_info_size
+#define dwarf_abbrev_size	dwarf2_per_objfile->dwarf_abbrev_size
+#define dwarf_line_size		dwarf2_per_objfile->dwarf_line_size
+#define dwarf_pubnames_size	dwarf2_per_objfile->dwarf_pubnames_size
+#define dwarf_aranges_size	dwarf2_per_objfile->dwarf_aranges_size
+#define dwarf_loc_size		dwarf2_per_objfile->dwarf_loc_size
+#define dwarf_macinfo_size	dwarf2_per_objfile->dwarf_macinfo_size
+#define dwarf_str_size		dwarf2_per_objfile->dwarf_str_size
+#define dwarf_ranges_size	dwarf2_per_objfile->dwarf_ranges_size
+#define dwarf_frame_size	dwarf2_per_objfile->dwarf_frame_size
+#define dwarf_eh_frame_size	dwarf2_per_objfile->dwarf_eh_frame_size
+
+#define dwarf_info_buffer	dwarf2_per_objfile->dwarf_info_buffer
+#define dwarf_abbrev_buffer	dwarf2_per_objfile->dwarf_abbrev_buffer
+#define dwarf_line_buffer	dwarf2_per_objfile->dwarf_line_buffer
+#define dwarf_loc_buffer	dwarf2_per_objfile->dwarf_loc_buffer
+#define dwarf_macinfo_buffer	dwarf2_per_objfile->dwarf_macinfo_buffer
+#define dwarf_str_buffer	dwarf2_per_objfile->dwarf_str_buffer
+#define dwarf_ranges_buffer	dwarf2_per_objfile->dwarf_ranges_buffer
+
+static struct dwarf2_per_objfile_data *dwarf2_per_objfile;
 
 static asection *dwarf_info_section;
 static asection *dwarf_abbrev_section;
@@ -290,8 +327,6 @@ struct dwarf2_cu
   /* A hash table of die offsets for following references.  */
   struct die_info *die_ref_table[REF_HASH_SIZE];
 };
-
-static const struct objfile_data *dwarf2_cu_tree;
 
 struct dwarf2_per_cu_data
 {
@@ -462,15 +497,6 @@ static struct obstack dwarf2_tmp_obstack;
 #define DW_FIELD_ALLOC_CHUNK 4
 #endif
 
-/* Actually data from the sections.  */
-static char *dwarf_info_buffer;
-static char *dwarf_abbrev_buffer;
-static char *dwarf_line_buffer;
-static char *dwarf_str_buffer;
-static char *dwarf_macinfo_buffer;
-static char *dwarf_ranges_buffer;
-static char *dwarf_loc_buffer;
-
 /* A zeroed version of a partial die for initialization purposes.  */
 static struct partial_die_info zeroed_partial_die;
 
@@ -501,82 +527,10 @@ struct dwarf2_pinfo
     /* Offset in dwarf_info_buffer for this compilation unit. */
 
     unsigned long dwarf_info_offset;
-
-    /* FIXME: All the rest is actually per-objfile.  */
-
-    /* Pointer to start of dwarf info buffer for the objfile.  */
-
-    char *dwarf_info_buffer;
-
-    /* Size of dwarf info section for the objfile.  */
-
-    unsigned int dwarf_info_size;
-
-    /* Pointer to start of dwarf abbreviation buffer for the objfile.  */
-
-    char *dwarf_abbrev_buffer;
-
-    /* Size of dwarf abbreviation section for the objfile.  */
-
-    unsigned int dwarf_abbrev_size;
-
-    /* Pointer to start of dwarf line buffer for the objfile.  */
-
-    char *dwarf_line_buffer;
-
-    /* Size of dwarf_line_buffer, in bytes.  */
-    
-    unsigned int dwarf_line_size;
-
-    /* Pointer to start of dwarf string buffer for the objfile.  */
-
-    char *dwarf_str_buffer;
-
-    /* Size of dwarf string section for the objfile.  */
-
-    unsigned int dwarf_str_size;
-
-    /* Pointer to start of dwarf macro buffer for the objfile.  */
-
-    char *dwarf_macinfo_buffer;
-
-    /* Size of dwarf macinfo section for the objfile.  */
-    
-    unsigned int dwarf_macinfo_size;
-
-    /* Pointer to start of dwarf ranges buffer for the objfile.  */
-
-    char *dwarf_ranges_buffer;
-
-    /* Size of dwarf ranges buffer for the objfile.  */
-
-    unsigned int dwarf_ranges_size;
-
-    /* Pointer to start of dwarf locations buffer for the objfile.  */
-
-    char *dwarf_loc_buffer;
-
-    /* Size of dwarf locations buffer for the objfile.  */
-
-    unsigned int dwarf_loc_size;
   };
 
 #define PST_PRIVATE(p) ((struct dwarf2_pinfo *)(p)->read_symtab_private)
-#define DWARF_INFO_BUFFER(p) (PST_PRIVATE(p)->dwarf_info_buffer)
-#define DWARF_INFO_SIZE(p)   (PST_PRIVATE(p)->dwarf_info_size)
 #define DWARF_INFO_OFFSET(p) (PST_PRIVATE(p)->dwarf_info_offset)
-#define DWARF_ABBREV_BUFFER(p) (PST_PRIVATE(p)->dwarf_abbrev_buffer)
-#define DWARF_ABBREV_SIZE(p) (PST_PRIVATE(p)->dwarf_abbrev_size)
-#define DWARF_LINE_BUFFER(p) (PST_PRIVATE(p)->dwarf_line_buffer)
-#define DWARF_LINE_SIZE(p)   (PST_PRIVATE(p)->dwarf_line_size)
-#define DWARF_STR_BUFFER(p)  (PST_PRIVATE(p)->dwarf_str_buffer)
-#define DWARF_STR_SIZE(p)    (PST_PRIVATE(p)->dwarf_str_size)
-#define DWARF_MACINFO_BUFFER(p) (PST_PRIVATE(p)->dwarf_macinfo_buffer)
-#define DWARF_MACINFO_SIZE(p)   (PST_PRIVATE(p)->dwarf_macinfo_size)
-#define DWARF_RANGES_BUFFER(p)  (PST_PRIVATE(p)->dwarf_ranges_buffer)
-#define DWARF_RANGES_SIZE(p)    (PST_PRIVATE(p)->dwarf_ranges_size)
-#define DWARF_LOC_BUFFER(p)     (PST_PRIVATE(p)->dwarf_loc_buffer)
-#define DWARF_LOC_SIZE(p)       (PST_PRIVATE(p)->dwarf_loc_size)
 
 /* FIXME: We might want to set this from BFD via bfd_arch_bits_per_byte,
    but this would require a corresponding change in unpack_field_as_long
@@ -1057,8 +1011,16 @@ partial_die_eq (const void *item_lhs, const void *item_rhs)
    information and return true if we have enough to do something.  */
 
 int
-dwarf2_has_info (bfd *abfd)
+dwarf2_has_info (struct objfile *objfile)
 {
+  struct dwarf2_per_objfile_data *data;
+
+  /* Initialize per-objfile state.  */
+  data = obstack_alloc (&objfile->objfile_obstack, sizeof (*data));
+  memset (data, 0, sizeof (*data));
+  set_objfile_data (objfile, dwarf2_per_objfile_data, data);
+  dwarf2_per_objfile = data;
+
   dwarf_info_section = 0;
   dwarf_abbrev_section = 0;
   dwarf_line_section = 0;
@@ -1069,7 +1031,7 @@ dwarf2_has_info (bfd *abfd)
   dwarf_ranges_section = 0;
   dwarf_loc_section = 0;
   
-  bfd_map_over_sections (abfd, dwarf2_locate_sections, NULL);
+  bfd_map_over_sections (objfile->obfd, dwarf2_locate_sections, NULL);
   return (dwarf_info_section != NULL && dwarf_abbrev_section != NULL);
 }
 
@@ -1146,7 +1108,6 @@ dwarf2_locate_sections (bfd *ignore_abfd, asection *sectp, void *ignore_ptr)
 void
 dwarf2_build_psymtabs (struct objfile *objfile, int mainline)
 {
-
   /* We definitely need the .debug_info and .debug_abbrev sections */
 
   dwarf_info_buffer = dwarf2_read_section (objfile, dwarf_info_section);
@@ -1411,20 +1372,6 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
       pst->read_symtab_private = (char *)
 	obstack_alloc (&objfile->objfile_obstack, sizeof (struct dwarf2_pinfo));
       DWARF_INFO_OFFSET (pst) = beg_of_comp_unit - dwarf_info_buffer;
-      DWARF_INFO_BUFFER (pst) = dwarf_info_buffer;
-      DWARF_INFO_SIZE (pst) = dwarf_info_size;
-      DWARF_ABBREV_BUFFER (pst) = dwarf_abbrev_buffer;
-      DWARF_ABBREV_SIZE (pst) = dwarf_abbrev_size;
-      DWARF_LINE_BUFFER (pst) = dwarf_line_buffer;
-      DWARF_LINE_SIZE (pst) = dwarf_line_size;
-      DWARF_STR_BUFFER (pst) = dwarf_str_buffer;
-      DWARF_STR_SIZE (pst) = dwarf_str_size;
-      DWARF_MACINFO_BUFFER (pst) = dwarf_macinfo_buffer;
-      DWARF_MACINFO_SIZE (pst) = dwarf_macinfo_size;
-      DWARF_RANGES_BUFFER (pst) = dwarf_ranges_buffer;
-      DWARF_RANGES_SIZE (pst) = dwarf_ranges_size;
-      DWARF_LOC_BUFFER (pst) = dwarf_loc_buffer;
-      DWARF_LOC_SIZE (pst) = dwarf_loc_size;
       PST_PRIVATE (pst)->type_hash = NULL;
       baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
@@ -1432,7 +1379,7 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
       pst->read_symtab = dwarf2_psymtab_to_symtab;
 
       if (cu_tree == NULL)
-	cu_tree = objfile_data (objfile, dwarf2_cu_tree);
+	cu_tree = dwarf2_per_objfile->cu_tree;
 
       if (cu_tree != NULL)
 	{
@@ -1607,7 +1554,7 @@ create_comp_unit_tree (struct dwarf2_cu *cu)
 					   splay_tree_obstack_allocate,
 					   splay_tree_obstack_deallocate,
 					   &objfile->objfile_obstack);
-  set_objfile_data (objfile, dwarf2_cu_tree, cu_tree);
+  dwarf2_per_objfile->cu_tree = cu_tree;
 
   while (info_ptr < dwarf_info_buffer + dwarf_info_size)
     {
@@ -2301,22 +2248,11 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
   struct attribute *attr;
   CORE_ADDR baseaddr;
 
+  dwarf2_per_objfile = objfile_data (pst->objfile, dwarf2_per_objfile_data);
+
   /* Set local variables from the partial symbol table info.  */
   offset = DWARF_INFO_OFFSET (pst);
-  dwarf_info_buffer = DWARF_INFO_BUFFER (pst);
-  dwarf_info_size = DWARF_INFO_SIZE (pst);
-  dwarf_abbrev_buffer = DWARF_ABBREV_BUFFER (pst);
-  dwarf_abbrev_size = DWARF_ABBREV_SIZE (pst);
-  dwarf_line_buffer = DWARF_LINE_BUFFER (pst);
-  dwarf_line_size = DWARF_LINE_SIZE (pst);
-  dwarf_str_buffer = DWARF_STR_BUFFER (pst);
-  dwarf_str_size = DWARF_STR_SIZE (pst);
-  dwarf_macinfo_buffer = DWARF_MACINFO_BUFFER (pst);
-  dwarf_macinfo_size = DWARF_MACINFO_SIZE (pst);
-  dwarf_ranges_buffer = DWARF_RANGES_BUFFER (pst);
-  dwarf_ranges_size = DWARF_RANGES_SIZE (pst);
-  dwarf_loc_buffer = DWARF_LOC_BUFFER (pst);
-  dwarf_loc_size = DWARF_LOC_SIZE (pst);
+
   info_ptr = dwarf_info_buffer + offset;
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
@@ -8922,7 +8858,7 @@ dwarf2_find_containing_comp_unit (unsigned long offset,
   splay_tree cu_tree;
   splay_tree_node node;
 
-  cu_tree = objfile_data (objfile, dwarf2_cu_tree);
+  cu_tree = dwarf2_per_objfile->cu_tree;
   if (cu_tree == NULL)
     cu_tree = create_comp_unit_tree (cu);
   
@@ -9083,5 +9019,5 @@ void _initialize_dwarf2_read (void);
 void
 _initialize_dwarf2_read (void)
 {
-  dwarf2_cu_tree = register_objfile_data ();
+  dwarf2_per_objfile_data = register_objfile_data ();
 }

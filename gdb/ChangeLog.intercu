@@ -1,5 +1,40 @@
 2004-02-23  Daniel Jacobowitz  <drow@mvista.com>
 
+	* dwarf2read.c (dwarf2_per_objfile_data): New.
+	(struct dwarf2_per_objfile_data): New.
+	(dwarf2_per_objfile): New.
+	(dwarf_info_size, dwarf_abbrev_size, dwarf_line_size)
+	(dwarf_pubnames_size, dwarf_aranges_size, dwarf_loc_size)
+	(dwarf_macinfo_size, dwarf_str_size, dwarf_ranges_size)
+	(dwarf_frame_size, dwarf_eh_frame_size, dwarf_info_buffer)
+	(dwarf_abbrev_buffer, dwarf_line_buffer, dwarf_str_buffer)
+	(dwarf_macinfo_buffer, dwarf_ranges_buffer, dwarf_loc_buffer):
+	Replace with macros.
+	(dwarf2_cu_tree): Remove.
+	(struct dwarf2_pinfo): Remove per-objfile members.
+	(DWARF_INFO_SIZE, DWARF_ABBREV_SIZE, DWARF_LINE_SIZE)
+	(DWARF_LOC_SIZE, DWARF_MACINFO_SIZE, DWARF_STR_SIZE)
+	(DWARF_RANGES_SIZE, DWARF_INFO_BUFFER)
+	(DWARF_ABBREV_BUFFER, DWARF_LINE_BUFFER, DWARF_STR_BUFFER)
+	(DWARF_MACINFO_BUFFER, DWARF_RANGES_BUFFER, DWARF_LOC_BUFFER):
+	Remove macros.
+	(dwarf2_has_info): Take an objfile argument.  Allocate per-objfile
+	data.
+	(dwarf2_build_psymtabs_hard): Remove use of removed macros.  Fetch
+	cu_tree from dwarf2_per_objfile.
+	(create_comp_unit_tree): Save cu_tree in dwarf2_per_objfile.
+	(psymtab_to_symtab_1): Restore per-objfile data pointer.  Remove use
+	of removed macros.
+	(dwarf2_find_containing_comp_unit): Fetch cu_tree from
+	dwarf2_per_objfile.
+	(_initialize_dwarf2_read): Register dwarf2_per_objfile_data instead
+	of dwarf2_cu_tree.
+	* symfile.h (dwarf2_has_info): Update prototype.
+	* coffread.c (coff_symfile_read): Update call to dwarf2_has_info.
+	* elfread.c (elf_symfile_read): Likewise.
+
+2004-02-23  Daniel Jacobowitz  <drow@mvista.com>
+
 	* dwarf2read.c (struct dwarf2_per_cu_data): Add psymtab member.
 	(struct dwarf2_pinfo): Add dwarf_info_size and type_hash.
 	Rearrange and update comments.
