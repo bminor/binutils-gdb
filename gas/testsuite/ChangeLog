@@ -1,3 +1,26 @@
+2003-07-09  Alexandre Oliva  <aoliva@redhat.com>
+
+	2002-02-20  Alexandre Oliva  <aoliva@redhat.com>
+	* gas/mn10300/am33-2.c (d8pcsec): PC-relative relocations within
+	text sections don't decay to section+offset.
+	* gas/mn10300/am33-2.d: Rebuilt.
+	2000-08-15  Eric Christopher  <echristo@cygnus.com>
+	* gas/mn10300/am33-2.c (d8pcsec): New Function
+	(condjmp): Adjust testcase for TC_LINKRELAX_FIXUP
+	functionality.
+	* gas/mn10300/am33-2.d: Regenerate
+	2000-05-24  Alexandre Oliva  <aoliva@cygnus.com>
+	* gas/mn10300/am33-2.c (d8pcoff): Likewise.
+	* gas/mn10300/am33-2.d: Rebuilt.
+	2000-04-01  Alexandre Oliva  <aoliva@cygnus.com>
+	* gas/mn10300/am33-2.c (main): Changed `.am332' to `.am33_2'.
+	Replaced `AM33 2.0' with `AM33/2.0'.
+	* gas/mn10300/am33-2.d, gas/mn10300/am33-2.s: Rebuilt.
+	2000-03-31  Alexandre Oliva  <aoliva@cygnus.com>
+	* gas/mn10300/am33-2.c: New file, that generated...
+	* gas/mn10300/am33-2.s, gas/mn10300/am33-2.d: New files.
+	* gas/mn10300/basic.exp: Test am33-2.
+
 2003-07-08  Chris Demetriou  <cgd@broadcom.com>
 
 	* gas/testsuite/gas/mips/mips.exp: Make sure that branch-misc-2 is

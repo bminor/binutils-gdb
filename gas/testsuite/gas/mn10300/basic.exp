@@ -1780,4 +1780,6 @@ if [istarget mn10300*-*-*] then {
     do_am33_8
 
     run_list_test "movpc" ""
+
+    run_dump_test "am33-2"
 }
