@@ -1,3 +1,10 @@
+Mon Apr 14 11:52:39 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	From Thomas Graichen <graichen@rzpd.de>:
+	* Makefile.in: Always use $(SHELL) when running move-if-change.
+	* configure.in: Use ${CONFIG_SHELL} when running $ac_config_sub.
+	* configure: Rebuild.
+
 Fri Apr  4 13:28:02 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Add AC_FUNC_ALLOCA.
