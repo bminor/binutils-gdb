@@ -1,3 +1,17 @@
+1999-07-12  Mark Mitchell  <mark@codesourcery.com>
+
+	* dwarf2.c (read_attribute): Support DW_FORM_ref8.
+	* elf32-mips.c (mips_elf_link_hash_entry): Change mips_32_relocs
+	to possibly_dynamic_relocs.  Adjust usage throughout code.
+	(elf_mips_howto_table): Handle R_MIPS_64 correctly.
+	(elf_mips_ctor64_howto): Likewise.
+	(mips_elf_calculate_relocation): Handle R_MIPS_64 like R_MIPS_32.
+	Adjust indentation.
+	(mips_elf_relocate_section): Handle R_MIPS_64 in 32-bit mode.
+	(_bfd_mips_elf_check_relocs): Handle R_MIPS_64 like R_MIPS_32.
+	Use MIPS_ELF_GOT_SIZE to calculate the size of GOT entries.
+	* elf64-mips.c (elf_backend_may_use_rel_p): Define.
+
 1999-07-12  Ian Lance Taylor  <ian@zembu.com>
 
 	* Makefile.am: Rebuild dependencies.

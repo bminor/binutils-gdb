@@ -67,8 +67,9 @@ struct mips_elf_link_hash_entry
   /* External symbol information.  */
   EXTR esym;
 
-  /* Number of MIPS_32 or MIPS_REL32 relocs against this symbol.  */
-  unsigned int mips_32_relocs;
+  /* Number of R_MIPS_32, R_MIPS_REL32, or R_MIPS_64 relocs against
+     this symbol.  */ 
+  unsigned int possibly_dynamic_relocs;
 
   /* The index of the first dynamic relocation (in the .rel.dyn
      section) against this symbol.  */
@@ -678,22 +679,19 @@ static reloc_howto_type elf_mips_howto_table[] =
 	 0x000007c4,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
-  /* A 64 bit relocation.  This is used in 32 bit ELF when addresses
-     are 64 bits long; the upper 32 bits are simply a sign extension.
-     The fields of the howto should be the same as for R_MIPS_32,
-     other than the type, name, and special_function.  */
+  /* A 64 bit relocation.  */
   HOWTO (R_MIPS_64,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 32,			/* bitsize */
+	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 mips32_64bit_reloc,	/* special_function */
 	 "R_MIPS_64",		/* name */
 	 true,			/* partial_inplace */
-	 0xffffffff,		/* src_mask */
-	 0xffffffff,		/* dst_mask */
+	 MINUS_ONE,		/* src_mask */
+	 MINUS_ONE,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
   /* Displacement in the global offset table.  */
@@ -3766,7 +3764,7 @@ mips_elf_link_hash_newfunc (entry, table, string)
       /* We use -2 as a marker to indicate that the information has
 	 not been set.  -1 means there is no associated ifd.  */
       ret->esym.ifd = -2;
-      ret->mips_32_relocs = 0;
+      ret->possibly_dynamic_relocs = 0;
       ret->min_dyn_reloc_index = 0;
       ret->fn_stub = NULL;
       ret->need_fn_stub = false;
@@ -5850,6 +5848,7 @@ mips_elf_calculate_relocation (abfd,
 
     case R_MIPS_32:
     case R_MIPS_REL32:
+    case R_MIPS_64:
       /* If we're creating a shared library, or this relocation is
 	 against a symbol in a shared library, then we can't know
 	 where the symbol will end up.  So, we create a relocation
@@ -5862,11 +5861,11 @@ mips_elf_calculate_relocation (abfd,
 	  BFD_ASSERT (h != NULL);
 	  reloc_index 
 	    = mips_elf_create_dynamic_relocation (abfd, 
-						   info, 
-						   relocation,
-						   h->root.dynindx,
-						   addend,
-						   input_section);
+						  info, 
+						  relocation,
+						  h->root.dynindx,
+						  addend,
+						  input_section);
 	  if (h->min_dyn_reloc_index == 0
 	      || reloc_index < h->min_dyn_reloc_index)
 	    h->min_dyn_reloc_index = reloc_index;
@@ -5874,7 +5873,7 @@ mips_elf_calculate_relocation (abfd,
 	}
       else
 	{
-	  if (r_type == R_MIPS_32)
+	  if (r_type != R_MIPS_REL32)
 	    value = symbol + addend;
 	  else
 	    value = addend;
@@ -5973,10 +5972,6 @@ mips_elf_calculate_relocation (abfd,
     case R_MIPS_GOT_LO16:
     case R_MIPS_CALL_LO16:
       value = g & howto->dst_mask;
-      break;
-
-    case R_MIPS_64:
-      value = (symbol + addend) & howto->dst_mask;
       break;
 
     case R_MIPS_GOT_PAGE:
@@ -6178,7 +6173,17 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       reloc_howto_type *howto;
 
       /* Find the relocation howto for this relocation.  */
-      howto = elf_mips_howto_table + ELF32_R_TYPE (rel->r_info);
+      if (ELF32_R_TYPE (rel->r_info) == R_MIPS_64
+	  && !ABI_64_P (output_bfd))
+	/* Some 32-bit code uses R_MIPS_64.  In particular, people use
+	   64-bit code, but make sure all their addresses are in the 
+	   lowermost or uppermost 32-bit section of the 64-bit address
+	   space.  Thus, when they use an R_MIPS_64 they mean what is
+	   usually meant by R_MIPS_32, with the exception that the
+	   stored value is sign-extended to 64 bits.  */
+	howto = elf_mips_howto_table + R_MIPS_32;
+      else
+	howto = elf_mips_howto_table + ELF32_R_TYPE (rel->r_info);
 
       if (!use_saved_addend_p)
 	{
@@ -6301,6 +6306,56 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	{
 	  addend = value;
 	  continue;
+	}
+
+      if (ELF32_R_TYPE (rel->r_info) == R_MIPS_64
+	  && !ABI_64_P (output_bfd))
+	/* See the comment above about using R_MIPS_64 in the 32-bit
+	   ABI.  Until now, we've been using the HOWTO for R_MIPS_32;
+	   that calculated the right value.  Now, however, we
+	   sign-extend the 32-bit result to 64-bits, and store it as a
+	   64-bit value.  We are especially generous here in that we
+	   go to extreme lengths to support this usage on systems with
+	   only a 32-bit VMA.  */
+	{
+#ifdef BFD64
+	  /* Just sign-extend the value, and then fall through to the
+	     normal case, using the R_MIPS_64 howto.  That will store
+	     the 64-bit value into a 64-bit area.  */
+	  value = mips_elf_sign_extend (value, 64);
+	  howto = elf_mips_howto_table + R_MIPS_64;
+#else /* !BFD64 */
+	  /* In the 32-bit VMA case, we must handle sign-extension and
+	     endianness manually.  */
+	  bfd_vma sign_bits;
+	  bfd_vma low_bits;
+	  bfd_vma high_bits;
+
+	  if (value & 0x80000000)
+	    sign_bits = 0xffffffff;
+	  else
+	    sign_bits = 0;
+
+	  /* If only a 32-bit VMA is available do two separate
+	     stores.  */
+	  if (bfd_big_endian (input_bfd))
+	    {
+	      /* Store the sign-bits (which are most significant)
+		 first.  */
+	      low_bits = sign_bits;
+	      high_bits = value;
+	    }
+	  else
+	    {
+	      low_bits = value;
+	      high_bits = sign_bits;
+	    }
+	  bfd_put_32 (input_bfd, low_bits, 
+		      contents + rel->r_offset);
+	  bfd_put_32 (input_bfd, high_bits, 
+		      contents + rel->r_offset + 4);
+	  continue;
+#endif /* !BFD64 */
 	}
 
       /* Actually perform the relocation.  */
@@ -6891,6 +6946,7 @@ _bfd_mips_elf_check_relocs (abfd, info, sec, relocs)
 
 	    case R_MIPS_32:
 	    case R_MIPS_REL32:
+	    case R_MIPS_64:
 	      if (dynobj == NULL
 		  && (info->shared || h != NULL)
 		  && (sec->flags & SEC_ALLOC) != 0)
@@ -6918,7 +6974,7 @@ _bfd_mips_elf_check_relocs (abfd, info, sec, relocs)
 	     conservative, we could actually build the GOT here,
 	     rather than in relocate_section.  */
 	  g->local_gotno++;
-	  sgot->_raw_size += 4;
+	  sgot->_raw_size += MIPS_ELF_GOT_SIZE (dynobj);
 	}
 
       switch (r_type)
@@ -6959,6 +7015,7 @@ _bfd_mips_elf_check_relocs (abfd, info, sec, relocs)
 
 	case R_MIPS_32:
 	case R_MIPS_REL32:
+	case R_MIPS_64:
 	  if ((info->shared || h != NULL)
 	      && (sec->flags & SEC_ALLOC) != 0)
 	    {
@@ -6996,7 +7053,7 @@ _bfd_mips_elf_check_relocs (abfd, info, sec, relocs)
 		  /* We only need to copy this reloc if the symbol is
                      defined in a dynamic object.  */
 		  hmips = (struct mips_elf_link_hash_entry *) h;
-		  ++hmips->mips_32_relocs;
+		  ++hmips->possibly_dynamic_relocs;
 		}
 	     
 	      /* Even though we don't directly need a GOT entry for
@@ -7189,9 +7246,10 @@ _bfd_mips_elf_adjust_dynamic_symbol (info, h)
      file.  */
   hmips = (struct mips_elf_link_hash_entry *) h;
   if (! info->relocateable
-      && hmips->mips_32_relocs != 0
+      && hmips->possibly_dynamic_relocs != 0
       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
-    mips_elf_allocate_dynamic_relocations (dynobj, hmips->mips_32_relocs);
+    mips_elf_allocate_dynamic_relocations (dynobj, 
+					   hmips->possibly_dynamic_relocs);
 
   /* For a function, create a stub, if needed. */
   if (h->type == STT_FUNC
