@@ -1,4 +1,4 @@
-2001-06-06  H.J. Lu  <hjl@gnu.org>
+2001-06-07  H.J. Lu  <hjl@gnu.org>
 
 	* gas/mips/empic.d: Support stabs.
 	* gas/mips/mips16-e.d: Likewise.

@@ -1,6 +1,6 @@
 2001-06-07  H.J. Lu  <hjl@gnu.org>
 
-	* readelf.ss-mips: Support stabs.
+	* binutils-all/readelf.ss-mips: Support stabs.
 	* binutils-all/readelf.ss-tmips: Likewise.
 
 2001-05-25  H.J. Lu  <hjl@gnu.org>
