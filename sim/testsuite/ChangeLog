@@ -1,3 +1,8 @@
+2003-09-19  Michael Snyder  <msnyder@redhat.com>
+
+	* sim/frv/nldqi.cgs: Remove.  This insn was never implemented
+	by Fujitsu.
+
 2003-09-19  Dave Brolley  <brolley@redhat.com>
 
 	* sim/frv/rstqf.cgs: Use nldq instead of nldqi.
