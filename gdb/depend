@@ -140,8 +140,8 @@ m68k-pinsn.o : m68k-pinsn.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.s
   ${srcdir}/../include/bfd.h 
 m68k-tdep.o : m68k-tdep.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status tm.h config.status \
   ieee-float.h frame.h symtab.h ${srcdir}/../include/obstack.h 
-m88k-pinsn.o : m88k-pinsn.c ${srcdir}/../include/opcode/m88k.h defs.h \
-  ${srcdir}/../include/ansidecl.h xm.h config.status tm.h config.status symtab.h ${srcdir}/../include/obstack.h 
+m88k-pinsn.o : m88k-pinsn.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status tm.h config.status \
+  ${srcdir}/../include/opcode/m88k.h symtab.h ${srcdir}/../include/obstack.h 
 m88k-tdep.o : m88k-tdep.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status tm.h config.status frame.h \
   inferior.h symtab.h ${srcdir}/../include/obstack.h breakpoint.h value.h gdbtypes.h \
   expression.h gdbcore.h ${srcdir}/../include/bfd.h /usr/include/setjmp.h 
@@ -167,11 +167,11 @@ mips-tdep.o : mips-tdep.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.sta
 mips-xdep.o : mips-xdep.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status tm.h config.status frame.h \
   inferior.h symtab.h ${srcdir}/../include/obstack.h breakpoint.h value.h gdbtypes.h \
   expression.h gdbcore.h ${srcdir}/../include/bfd.h 
-mipsread.o : mipsread.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status tm.h config.status symtab.h \
-  ${srcdir}/../include/obstack.h gdbtypes.h gdbcore.h ${srcdir}/../include/bfd.h symfile.h \
-  buildsym.h ${srcdir}/../include/coff/mips.h ${srcdir}/../bfd/libaout.h \
-  ${srcdir}/../include/aout/aout64.h ${srcdir}/../include/aout/stab_gnu.h \
-  ${srcdir}/../include/aout/stab.def partial-stab.h 
+mipsread.o : mipsread.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status tm-mips.h \
+  symtab.h ${srcdir}/../include/obstack.h gdbtypes.h gdbcore.h ${srcdir}/../include/bfd.h \
+  symfile.h buildsym.h symconst.h sym.h ${srcdir}/../include/coff/mips.h \
+  ${srcdir}/../bfd/libaout.h ${srcdir}/../include/aout/aout64.h ${srcdir}/../include/aout/stab_gnu.h \
+  ${srcdir}/../include/aout/stab.def ${srcdir}/../include/coff/ecoff-ext.h partial-stab.h 
 mmap-alloc.o : mmap-alloc.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status tm.h config.status 
 mmap-sbrk.o : mmap-sbrk.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status tm.h config.status 
 news-xdep.o : news-xdep.c 
@@ -323,6 +323,4 @@ xcoffexec.o : xcoffexec.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.sta
   expression.h target.h ${srcdir}/../include/bfd.h gdbcmd.h command.h gdbcore.h \
   symfile.h ${srcdir}/../bfd/libbfd.h 
 xcoffread.o : xcoffread.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status tm.h config.status \
-  ${srcdir}/../include/bfd.h ${srcdir}/../include/obstack.h symtab.h gdbtypes.h symfile.h \
-  buildsym.h ${srcdir}/../include/coff/internal.h ${srcdir}/../bfd/libcoff.h \
-  ${srcdir}/../include/coff/rs6000.h 
+  ${srcdir}/../include/bfd.h ${srcdir}/../include/obstack.h 

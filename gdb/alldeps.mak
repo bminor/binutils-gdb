@@ -134,6 +134,7 @@ xm-i386v.h\
 xm-i386v32.h\
 xm-i386v4.h\
 xm-irix3.h\
+xm-irix4.h\
 xm-isi.h\
 xm-m88k.h\
 xm-merlin.h\
@@ -180,6 +181,7 @@ ALLCONFIG=\
 ./config/mh-i386v32-g\
 ./config/mh-i386v4\
 ./config/mh-irix3\
+./config/mh-irix4\
 ./config/mh-isi\
 ./config/mh-littlemips\
 ./config/mh-m88k\
