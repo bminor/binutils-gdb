@@ -1,3 +1,8 @@
+2001-05-18  Hans-Peter Nilsson  <hp@axis.com>
+
+	* cris-opc.c (cris_spec_regs): Add missing initializer field for
+	last element.
+
 2001-05-15  Frank Ch. Eigler  <fche@redhat.com>
 
 	* cgen-dis.in (extract_normal): Complete support for min<base case.
