@@ -1,3 +1,9 @@
+Mon Feb 22 07:54:03 1993  Mike Werner  (mtw@poseidon.cygnus.com)
+
+        * gdb/testsuite: made modifications to testcases, etc., to allow
+        them to work properly  given the reorganization of deja-gnu and the
+        relocation of the testcases from deja-gnu to a "tool" subdirectory.
+
 Sun Feb 21 10:55:55 1993  Mike Werner  (mtw@poseidon.cygnus.com)
 
 	* gdb/testsuite: Initial creation of gdb/testsuite.

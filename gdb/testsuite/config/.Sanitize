@@ -1,0 +1,77 @@
+# .Sanitize for deja-gnu.
+
+# Each directory to survive it's way into a release will need a file
+# like this one called "./.Sanitize".  All keyword lines must exist,
+# and must exist in the order specified by this file.  Each directory
+# in the tree will be processed, top down, in the following order.
+
+# Hash started lines like this one are comments and will be deleted
+# before anything else is done.  Blank lines will also be squashed
+# out.
+
+# The lines between the "Do-first:" line and the "Things-to-keep:"
+# line are executed as a /bin/sh shell script before anything else is
+# done in this directory.
+
+Do-first:
+
+if ( echo $* | grep keep\-chill > /dev/null ) ; then
+	keep_these_too=""
+fi
+
+# All files listed between the "Things-to-keep:" line and the
+# "Do-last:" line will be kept.  All other files will be removed.
+# Directories listed in this section will have their own Sanitize
+# called.  Directories not listed will be removed in their entirety
+# with rm -rf.
+
+Things-to-keep:
+
+aout-gdb.exp
+coff-gdb.exp
+udi-gdb.exp
+unix-gdb.exp
+vx-gdb.exp
+
+# The lines between the "Do-last:" line and the end of the file
+# are executed as a /bin/sh shell script after everything else is
+# done.
+
+Do-last:
+echo Thawing away the \"chill\"...
+
+# Don't try to clean directories here, as the 'mv' command will fail.
+# Also, grep fails on NFS mounted directories.
+if ( echo $* | grep keep\-chill > /dev/null ) ; then
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-chill $i > /dev/null) ; then
+			echo Keeping chill stuff in $i
+		fi
+	done
+else
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-chill $i > /dev/null) ; then
+			echo Thawing the \"chill\" out of $i...
+			cp $i new
+			sed '/start\-sanitize\-chill/,/end-\sanitize\-chill/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				echo Caching $i in .Recover...
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+	echo Thawing the \"chill\" out of mt-unix...
+	cp mt-unix new
+	sed -e '
+	  /CHILL =/d
+	  /CHILLFLAGS =/d
+	' < mt-unix > new
+	if [ -n "${safe}" -a ! -f .Recover/mt-unix ] ; then
+		echo Caching mt-unix in .Recover...
+		mv mt-unix .Recover
+	fi
+	mv new mt-unix
+fi
+
+# eof

@@ -1,0 +1,66 @@
+# This file is a shell script fragment that supplies the information
+# necessary to tailor a template configure script into the configure
+# script appropriate for this directory.  For more information, check
+# any existing configure script.
+
+srctrigger="gdb.t00"
+srcname="DejaGnu"
+
+configdirs="gdb.t00 gdb.t01 gdb.t02 gdb.t03 gdb.t04 gdb.t05 gdb.t06 \
+	gdb.t07 gdb.t08 gdb.t09 gdb.t10 gdb.t11 gdb.t12 gdb.t13 gdb.t15 \
+	gdb.t16 gdb.t20 gdb.t21 gdb.t22 gddb.t23 gdb.t30 gdb.t31"
+
+# per-host:
+
+# per-target:
+
+	# everything defaults to unix for a target
+target_abbrev=unix
+target_makefile_frag=config/mt-unix
+
+	# this section is for all targets
+case "${target}" in
+i386-*-aout)		target_abbrev=aout ; 
+				target_makefile_frag=config/mt-i386-aout ;;
+m68*-abug-aout)		target_abbrev=abug ; 
+				target_makefile_frag=config/mt-m68k-abug-aout ;;
+m68*-abug-coff)		target_abbrev=abug ; 
+				target_makefile_frag=config/mt-m68k-abug-coff ;;
+m68*-*-abug)		target_abbrev=abug ; 
+				target_makefile_frag=config/mt-m68k-abug-aout ;;
+m68k-*-coff)		target_abbrev=coff ; 
+				target_makefile_frag=config/mt-m68k-coff ;;
+m68k-*-aout)		target_abbrev=aout ; 
+				target_makefile_frag=config/mt-m68k-aout ;;
+i960-*-nindy)		target_abbrev=nind ; 
+				target_makefile_frag=config/mt-i960-nindy ;;
+m68k-*-vxworks)		target_abbrev=vx ; 
+				target_makefile_frag=config/mt-m68k-vx ;;
+i960-*-vxworks)		target_abbrev=vx ; 
+				target_makefile_frag=config/mt-i960-vx ;;
+a29k-*-udi)		target_abbrev=udi ; 
+				target_makefile_frag=config/mt-a29k-udi ;;
+a29k-isstip-*)		target_abbrev=itip ; 
+				target_makefile_frag=config/mt-a29k-isstip ;;
+esac
+
+	# link in the lib directory if needed
+if [ ! -d lib ] ; then
+    files="lib"
+    links="lib"
+fi
+
+	# make list of files and links based on tool name
+tool_list="${tool_list} gdb"
+for i in ${tool_list};
+do
+    if [ -f ${srcdir}/config/${target_abbrev}-$i.exp ] ; then
+    files="$files config/${target_abbrev}-$i.exp"
+    links="$links $i-init.exp"
+    fi
+done
+
+# post-target:
+
+	# make local configuration file, using MAKE if one is specified.
+if [ ! -n "$MAKE" ]; then MAKE=make; fi
