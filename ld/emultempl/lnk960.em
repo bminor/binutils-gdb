@@ -2,7 +2,7 @@
 # It does some substitutions.
 cat >e${EMULATION_NAME}.c <<EOF
 /* intel coff loader emulation specific stuff
-   Copyright 1991, 1992, 1994, 1995, 1996, 1999, 2000
+   Copyright 1991, 1992, 1994, 1995, 1996, 1999, 2000, 2001
    Free Software Foundation, Inc.
    Written by Steve Chamberlain steve@cygnus.com
 
@@ -46,6 +46,18 @@ static lib_list_type **hll_list_tail = &hll_list;
 
 static lib_list_type *syslib_list;
 static lib_list_type **syslib_list_tail = &syslib_list;
+
+static void append PARAMS ((lib_list_type ***, char *));
+static void lnk960_hll PARAMS ((char *));
+static void lnk960_syslib PARAMS ((char *));
+static void lnk960_before_parse PARAMS ((void));
+static void add_on PARAMS ((lib_list_type *, lang_input_file_enum_type));
+static void lnk960_after_parse PARAMS ((void));
+static void lnk960_before_allocation PARAMS ((void));
+static void lnk960_after_allocation PARAMS ((void));
+static void lnk960_set_output_arch PARAMS ((void));
+static char *lnk960_choose_target PARAMS ((void));
+static char *lnk960_get_script PARAMS ((int *));
 
 
 static void

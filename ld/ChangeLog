@@ -1,3 +1,17 @@
+2001-09-02  Andreas Jaeger  <aj@suse.de>
+
+	* emultempl/aix.em: Add missing prototype.
+	* emultempl/lnk960.em: Likewise.
+	* emultempl/vanilla.em: Likewise.
+	* emultempl/armcoff.em: Likewise.
+	* emultempl/armelf_oabi.em: Likewise.
+	* emultempl/beos.em: Likewise.
+	* emultempl/gld960c.em: Likewise.
+	* emultempl/gld960.em: Likewise.
+
+	* emulparams/elf64alpha.sh (PARSE_AND_LIST_PROLOGUE): Add parameter
+	for prototype declaration.
+
 2001-08-31  Eric Christopher  <echristo@redhat.com>
 	    Jason Eckhardt  <jle@redhat.com>
 

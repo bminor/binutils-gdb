@@ -69,6 +69,11 @@ static lang_statement_union_type **sort_sections_1
 	   int (*)()));
 static void sort_sections PARAMS ((lang_statement_union_type *));
 
+static void set_pe_name PARAMS ((char *, long int));
+static void set_pe_subsystem PARAMS ((void));
+static void set_pe_value PARAMS ((char *));
+static void set_pe_stack_heap PARAMS ((char *, char *));
+
 static struct internal_extra_pe_aouthdr pe;
 static int dll;
 

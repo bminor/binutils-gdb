@@ -65,6 +65,8 @@ static void gld${EMULATION_NAME}_find_relocs
   PARAMS ((lang_statement_union_type *));
 static void gld${EMULATION_NAME}_find_exp_assignment PARAMS ((etree_type *));
 static char *gld${EMULATION_NAME}_get_script PARAMS ((int *isfile));
+static boolean gld${EMULATION_NAME}_unrecognized_file
+  PARAMS ((lang_input_statement_type *));
 
 /* The file alignment required for each section.  */
 static unsigned long file_align;

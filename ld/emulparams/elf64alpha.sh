@@ -24,7 +24,7 @@ PARSE_AND_LIST_PROLOGUE='
 static int elf64alpha_32bit = 0;
 
 struct ld_emulation_xfer_struct ld_elf64alpha_emulation;
-static void gld_elf64alpha_finish ();
+static void gld_elf64alpha_finish PARAMS ((void));
 '
 
 PARSE_AND_LIST_LONGOPTS='
