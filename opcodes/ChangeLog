@@ -1,3 +1,11 @@
+start-sanitize-tic80
+Tue Dec 16 15:22:53 1997  Fred Fish  <fnf@cygnus.com>
+
+	* tic80-opc.c (tic80_opcodes): Revert change that put the 32 bit
+	PC relative offset forms before the 15 bit forms.  An assembler command
+	line option now chooses the default.
+
+end-sanitize-tic80
 start-sanitize-r5900
 Tue Dec 16 13:24:22 1997  Jeffrey A Law  (law@cygnus.com)
 
