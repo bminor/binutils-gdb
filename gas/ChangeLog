@@ -1,3 +1,8 @@
+Fri Jun 17 18:05:06 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* Makefile.in (config-stamp): Make sure there is at least one
+	element in the for loop.
+
 Fri Jun 17 11:01:04 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c: Misc trivial changes to make gcc -Wall happy.
@@ -7313,5 +7318,8 @@ Mon Feb 17 07:51:06 1992  K. Richard Pixley  (rich at cygnus.com)
 
 
 Local Variables:
+mode: indented-text
+left-margin: 8
+fill-column: 74
 version-control: never
 End:
