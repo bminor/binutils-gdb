@@ -1,5 +1,24 @@
 2004-01-17  Andrew Cagney  <cagney@redhat.com>
 
+	* mcore-tdep.c: Update copyright.
+	(mcore_extract_struct_value_address): Delete function.  Update
+	comments.
+	(mcore_gdbarch_init): Update.
+	* mn10300-tdep.c: Update copyright.
+	(mn10300_extract_struct_value_address): Delete function.
+	(mn10300_gdbarch_init): Update.
+	* v850-tdep.c: Update copyright.
+	(v850_extract_struct_value_address): Delete.
+	(v850_gdbarch_init): Update.
+	* ns32k-tdep.c: Update copyright.
+	(ns32k_extract_struct_value_address): Delete.
+	(ns32k_gdbarch_init): Update.
+	* hppa-tdep.c (hppa_extract_struct_value_address): Delete.
+	(hppa_gdbarch_init): Update.
+	* vax-tdep.c: Update copyright.
+	(vax_extract_struct_value_address): Delete.
+	(vax_gdbarch_init): Update.
+
 	* gdbarch.sh (DEPRECATED_NPC_REGNUM): Delete.
 	* gdbarch.h, gdbarch.c: Re-generate.
 	* procfs.c (procfs_fetch_registers): Delete reference to

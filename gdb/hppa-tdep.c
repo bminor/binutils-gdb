@@ -194,7 +194,6 @@ int hppa32_use_struct_convention (int gcc_p, struct type *type);
 int hppa64_use_struct_convention (int gcc_p, struct type *type);
 void hppa32_store_return_value (struct type *type, char *valbuf);
 void hppa64_store_return_value (struct type *type, char *valbuf);
-CORE_ADDR hppa_extract_struct_value_address (char *regbuf);
 int hppa_cannot_store_register (int regnum);
 void hppa_init_extra_frame_info (int fromleaf, struct frame_info *frame);
 CORE_ADDR hppa_frame_chain (struct frame_info *frame);
@@ -5009,26 +5008,6 @@ hppa_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 {
   write_register (28, addr);
 }
-
-CORE_ADDR
-hppa_extract_struct_value_address (char *regbuf)
-{
-  /* Extract from an array REGBUF containing the (raw) register state
-     the address in which a function should return its structure value,
-     as a CORE_ADDR (or an expression that can be used as one).  */
-  /* FIXME: brobecker 2002-12-26.
-     The current implementation is historical, but we should eventually
-     implement it in a more robust manner as it relies on the fact that
-     the address size is equal to the size of an int* _on the host_...
-     One possible implementation that crossed my mind is to use
-     extract_address.  */
-  /* FIXME: cagney/2003-09-27: This function can probably go.  ELZ
-     writes: We cannot assume on the pa that r28 still contains the
-     address of the returned structure. Usually this will be
-     overwritten by the callee.  */
-  return (*(int *)(regbuf + DEPRECATED_REGISTER_BYTE (28)));
-}
-
 /* Return True if REGNUM is not a register available to the user
    through ptrace().  */
 
@@ -5208,8 +5187,6 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, tdep->bytes_per_address);
   set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 8);
   set_gdbarch_deprecated_store_struct_return (gdbarch, hppa_store_struct_return);
-  set_gdbarch_deprecated_extract_struct_value_address
-    (gdbarch, hppa_extract_struct_value_address);
   set_gdbarch_cannot_store_register (gdbarch, hppa_cannot_store_register);
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, hppa_init_extra_frame_info);
   set_gdbarch_deprecated_frame_chain (gdbarch, hppa_frame_chain);

@@ -1,6 +1,7 @@
 /* Target dependent code for the NS32000, for GDB.
-   Copyright 1986, 1988, 1991, 1992, 1994, 1995, 1998, 1999, 2000, 2001,
-   2002, 2003 Free Software Foundation, Inc.
+
+   Copyright 1986, 1988, 1991, 1992, 1994, 1995, 1998, 1999, 2000,
+   2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -495,12 +496,6 @@ ns32k_store_return_value (struct type *valtype, char *valbuf)
 				   TYPE_LENGTH (valtype));
 }
 
-static CORE_ADDR
-ns32k_extract_struct_value_address (char *regbuf)
-{
-  return (extract_unsigned_integer (regbuf + DEPRECATED_REGISTER_BYTE (0), DEPRECATED_REGISTER_RAW_SIZE (0)));
-}
-
 void
 ns32k_gdbarch_init_32082 (struct gdbarch *gdbarch)
 {
@@ -582,8 +577,6 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_store_struct_return (gdbarch, ns32k_store_struct_return);
   set_gdbarch_deprecated_extract_return_value (gdbarch, ns32k_extract_return_value);
   set_gdbarch_deprecated_store_return_value (gdbarch, ns32k_store_return_value);
-  set_gdbarch_deprecated_extract_struct_value_address (gdbarch,
-                                            ns32k_extract_struct_value_address);
 
   /* Call dummy info */
   set_gdbarch_deprecated_push_dummy_frame (gdbarch, ns32k_push_dummy_frame);
