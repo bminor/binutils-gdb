@@ -1,5 +1,9 @@
 Fri Jul 23 09:57:25 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
+	* exec.c, corelow.c (target_ops struct): Don't allow
+	{insert,remove}_breakpoints to be defaulted to
+	memory_{insert_remove}_breakpoint.
+
 	* demangle.c: Make it so `help set dem' tells you how to get the
 	list of demangling styles.
 
