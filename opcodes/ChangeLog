@@ -1,3 +1,7 @@
+2001-10-24  Richard Henderson  <rth@redhat.com>
+
+	* ia64-asmtab.c: Regenerate.
+
 2001-10-09  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* sh-opc.h: Fix encoding of least significant nibble of the
