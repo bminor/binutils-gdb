@@ -1,3 +1,41 @@
+Thu Dec  3 16:54:58 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* hosts/i386linux.h: Include unistd.h.
+
+	* aoutx.h (print_symbol): aout_stab_name returns a constant
+	string.
+	* libaout.h (aout_stab_name): Fix prototype.
+	* stab-syms.c (aout_stab_names): Array is now const.
+	(aout_stab_name): Return value is now pointer to const.
+
+	* aoutx.h, archive.c, archures.c, coffcode.h, ctor.c, reloc.c,
+	syms.c: Doc fixes.
+
+	* syms.c (asymbol): Added new field "app_data", for data
+	particular to the application.  Some of the linker flags ought to
+	get moved to this field someday.
+
+	* archures.c (bfd_default_scan): Recognize a few more numbers:
+	80486, 80960, and 960.
+
+	* bfd-in.h (COFF_SWAP_TABLE): New is just address of
+	bfd_coff_std_swap_table, cast to PTR.
+	* bfd.c (bfd_coff_swap_*): Deleted macros.
+	* targets.c (struct bfd_target): Deleted COFF-specific swapping
+	routine pointers.
+	* coffcode.h (type bfd_coff_backend_data): New structure type,
+	contains pointers to the COFF-specific swapping routines.
+	(bfd_coff_std_swap_table): New data structure, to be used when
+	NO_COFF_SYMBOLS and NO_COFF_LINENOS are not defined.
+	(bfd_coff_swap_*): New macros.
+	* coff-mips.c (mips_coff_swap_table): New data structure.
+	(ecoff_big_vec): Use it.
+	* All COFF targets: Moved COFF_SWAP_TABLE to target-specific data.
+	* All other targets: Deleted coff-specific vector entries.
+
+	* trad-core.c: Fixed some `PARAMS' uses that were missing
+	parentheses.
+
 Sun Nov 29 08:37:13 1992  Fred Fish  (fnf@cygnus.com)
 
 	* aoutx.h (some_aout_object_p):  Protect arg prototype in

@@ -29,6 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define obj_relocbase(bfd)	(coff_data(bfd)->relocbase)
 #define obj_raw_syments(bfd)	(coff_data(bfd)->raw_syments)
 #define obj_convert(bfd)	(coff_data(bfd)->conversion_table)
+#define obj_conv_table_size(bfd) (coff_data(bfd)->conv_table_size)
 #if CFILE_STUFF
 #define obj_symbol_slew(bfd)	(coff_data(bfd)->symbol_index_slew)
 #else
@@ -42,6 +43,7 @@ typedef struct coff_tdata
 {
   struct   coff_symbol_struct *symbols;	/* symtab for input bfd */
   unsigned int *conversion_table;
+  int conv_table_size;
   file_ptr sym_filepos;
 
   long symbol_index_slew;	/* used during read to mark whether a
@@ -104,13 +106,106 @@ union {
 
 typedef struct coff_symbol_struct
 {
-  /* The actual symbol which the rest of BFD works with */
-  asymbol symbol;
+    /* The actual symbol which the rest of BFD works with */
+asymbol symbol;
 
-  /* A pointer to the hidden information for this symbol */
-  combined_entry_type *native;
+    /* A pointer to the hidden information for this symbol */
+combined_entry_type *native;
 
-  /* A pointer to the linenumber information for this symbol */
-  struct lineno_cache_entry *lineno;
-  boolean done_lineno;
+    /* A pointer to the linenumber information for this symbol */
+struct lineno_cache_entry *lineno;
+
+    /* Have the line numbers been relocated yet ? */
+boolean done_lineno;
 } coff_symbol_type;
+typedef struct {
+  void (*_bfd_coff_swap_aux_in) PARAMS ((
+       bfd            *abfd ,
+       PTR             ext,
+       int             type,
+       int             class ,
+       PTR             in));
+
+  void (*_bfd_coff_swap_sym_in) PARAMS ((
+       bfd            *abfd ,
+       PTR             ext,
+       PTR             in));
+
+  void (*_bfd_coff_swap_lineno_in) PARAMS ((
+       bfd            *abfd,
+       PTR            ext,
+       PTR             in));
+
+ unsigned int (*_bfd_coff_swap_aux_out) PARAMS ((
+       bfd   	*abfd,
+       PTR	in,
+       int    	type,
+       int    	class,
+       PTR    	ext));
+
+ unsigned int (*_bfd_coff_swap_sym_out) PARAMS ((
+      bfd      *abfd,
+      PTR	in,
+      PTR	ext));
+
+ unsigned int (*_bfd_coff_swap_lineno_out) PARAMS ((
+      	bfd   	*abfd,
+      	PTR	in,
+	PTR	ext));
+
+ unsigned int (*_bfd_coff_swap_reloc_out) PARAMS ((
+      	bfd     *abfd,
+     	PTR	src,
+	PTR	dst));
+
+ unsigned int (*_bfd_coff_swap_filehdr_out) PARAMS ((
+      	bfd  	*abfd,
+	PTR 	in,
+	PTR 	out));
+
+ unsigned int (*_bfd_coff_swap_aouthdr_out) PARAMS ((
+      	bfd 	*abfd,
+	PTR 	in,
+	PTR	out));
+
+ unsigned int (*_bfd_coff_swap_scnhdr_out) PARAMS ((
+      	bfd  	*abfd,
+      	PTR	in,
+	PTR	out));
+
+} bfd_coff_backend_data;
+
+extern bfd_coff_backend_data bfd_coff_std_swap_table;
+
+#define coff_backend_info(abfd) ((bfd_coff_backend_data *) (abfd)->xvec->backend_data)
+
+#define bfd_coff_swap_aux_in(a,e,t,c,i) \
+        ((coff_backend_info (a)->_bfd_coff_swap_aux_in) (a,e,t,c,i))
+
+#define bfd_coff_swap_sym_in(a,e,i) \
+        ((coff_backend_info (a)->_bfd_coff_swap_sym_in) (a,e,i))
+
+#define bfd_coff_swap_lineno_in(a,e,i) \
+        ((coff_backend_info ( a)->_bfd_coff_swap_lineno_in) (a,e,i))
+
+#define bfd_coff_swap_reloc_out(abfd, i, o) \
+        ((coff_backend_info (abfd)->_bfd_coff_swap_reloc_out) (abfd, i, o))
+
+#define bfd_coff_swap_lineno_out(abfd, i, o) \
+        ((coff_backend_info (abfd)->_bfd_coff_swap_lineno_out) (abfd, i, o))
+
+#define bfd_coff_swap_aux_out(abfd, i, t,c,o) \
+        ((coff_backend_info (abfd)->_bfd_coff_swap_aux_out) (abfd, i,t,c, o))
+
+#define bfd_coff_swap_sym_out(abfd, i,o) \
+        ((coff_backend_info (abfd)->_bfd_coff_swap_sym_out) (abfd, i, o))
+
+#define bfd_coff_swap_scnhdr_out(abfd, i,o) \
+        ((coff_backend_info (abfd)->_bfd_coff_swap_scnhdr_out) (abfd, i, o))
+
+#define bfd_coff_swap_filehdr_out(abfd, i,o) \
+        ((coff_backend_info (abfd)->_bfd_coff_swap_filehdr_out) (abfd, i, o))
+
+#define bfd_coff_swap_aouthdr_out(abfd, i,o) \
+        ((coff_backend_info (abfd)->_bfd_coff_swap_aouthdr_out) (abfd, i, o))
+

@@ -85,7 +85,7 @@ SUBSUBSECTION
 	Each flavour of coff supported in BFD has its own header file
 	descibing the external layout of the structures. There is also
 	an internal description of the coff layout (in
-	@code{internalcoff.h}) file (@code{}). A major function of the
+	@code{internalcoff.h}). A major function of the
 	coff backend is swapping the bytes and twiddling the bits to
 	translate the external form of the structures into the normal
 	internal form. This is all performed in the
@@ -452,6 +452,109 @@ Here are all the routines for swapping the structures seen in the
 outside world into the internal forms.
 */
 
+/*
+INTERNAL_DEFINITION
+	bfd_coff_backend_data
+
+CODE_FRAGMENT
+
+.typedef struct {
+Special entry points for gdb to swap in coff symbol table parts
+
+.  void (*_bfd_coff_swap_aux_in) PARAMS ((
+.       bfd            *abfd ,
+.       PTR             ext,
+.       int             type,
+.       int             class ,
+.       PTR             in));
+.
+.  void (*_bfd_coff_swap_sym_in) PARAMS ((
+.       bfd            *abfd ,
+.       PTR             ext,
+.       PTR             in));
+.
+.  void (*_bfd_coff_swap_lineno_in) PARAMS ((
+.       bfd            *abfd,
+.       PTR            ext,
+.       PTR             in));
+.
+
+Special entry points for gas to swap coff parts
+
+. unsigned int (*_bfd_coff_swap_aux_out) PARAMS ((
+.       bfd   	*abfd,
+.       PTR	in,
+.       int    	type,
+.       int    	class,
+.       PTR    	ext));
+.
+. unsigned int (*_bfd_coff_swap_sym_out) PARAMS ((
+.      bfd      *abfd,
+.      PTR	in,
+.      PTR	ext));
+.
+. unsigned int (*_bfd_coff_swap_lineno_out) PARAMS ((
+.      	bfd   	*abfd,
+.      	PTR	in,
+.	PTR	ext));
+.
+. unsigned int (*_bfd_coff_swap_reloc_out) PARAMS ((
+.      	bfd     *abfd,
+.     	PTR	src,
+.	PTR	dst));
+.
+. unsigned int (*_bfd_coff_swap_filehdr_out) PARAMS ((
+.      	bfd  	*abfd,
+.	PTR 	in,
+.	PTR 	out));
+.
+. unsigned int (*_bfd_coff_swap_aouthdr_out) PARAMS ((
+.      	bfd 	*abfd,
+.	PTR 	in,
+.	PTR	out));
+.
+. unsigned int (*_bfd_coff_swap_scnhdr_out) PARAMS ((
+.      	bfd  	*abfd,
+.      	PTR	in,
+.	PTR	out));
+.
+.} bfd_coff_backend_data;
+.
+.extern bfd_coff_backend_data bfd_coff_std_swap_table;
+.
+.#define coff_backend_info(abfd) ((bfd_coff_backend_data *) (abfd)->xvec->backend_data)
+.
+.#define bfd_coff_swap_aux_in(a,e,t,c,i) \
+.        ((coff_backend_info (a)->_bfd_coff_swap_aux_in) (a,e,t,c,i))
+.
+.#define bfd_coff_swap_sym_in(a,e,i) \
+.        ((coff_backend_info (a)->_bfd_coff_swap_sym_in) (a,e,i))
+.
+.#define bfd_coff_swap_lineno_in(a,e,i) \
+.        ((coff_backend_info ( a)->_bfd_coff_swap_lineno_in) (a,e,i))
+.
+.#define bfd_coff_swap_reloc_out(abfd, i, o) \
+.        ((coff_backend_info (abfd)->_bfd_coff_swap_reloc_out) (abfd, i, o))
+.
+.#define bfd_coff_swap_lineno_out(abfd, i, o) \
+.        ((coff_backend_info (abfd)->_bfd_coff_swap_lineno_out) (abfd, i, o))
+.
+.#define bfd_coff_swap_aux_out(abfd, i, t,c,o) \
+.        ((coff_backend_info (abfd)->_bfd_coff_swap_aux_out) (abfd, i,t,c, o))
+.
+.#define bfd_coff_swap_sym_out(abfd, i,o) \
+.        ((coff_backend_info (abfd)->_bfd_coff_swap_sym_out) (abfd, i, o))
+.
+.#define bfd_coff_swap_scnhdr_out(abfd, i,o) \
+.        ((coff_backend_info (abfd)->_bfd_coff_swap_scnhdr_out) (abfd, i, o))
+.
+.#define bfd_coff_swap_filehdr_out(abfd, i,o) \
+.        ((coff_backend_info (abfd)->_bfd_coff_swap_filehdr_out) (abfd, i, o))
+.
+.#define bfd_coff_swap_aouthdr_out(abfd, i,o) \
+.        ((coff_backend_info (abfd)->_bfd_coff_swap_aouthdr_out) (abfd, i, o))
+.
+*/
 
 static void
 DEFUN(bfd_swap_reloc_in,(abfd, reloc_src, reloc_dst),
@@ -4222,6 +4325,15 @@ DEFUN(bfd_coff_get_relocated_section_contents,(in_abfd, seclet, data),
   
 }
 
+#if !defined (NO_COFF_SYMBOLS) && !defined (NO_COFF_LINENOS)
+bfd_coff_backend_data bfd_coff_std_swap_table = {
+ coff_swap_aux_in, coff_swap_sym_in, coff_swap_lineno_in,
+ coff_swap_aux_out, coff_swap_sym_out,
+ coff_swap_lineno_out, coff_swap_reloc_out,
+ coff_swap_filehdr_out, coff_swap_aouthdr_out,
+ coff_swap_scnhdr_out,
+};
+#endif
 
 #define coff_core_file_failing_command	_bfd_dummy_core_file_failing_command
 #define coff_core_file_failing_signal	_bfd_dummy_core_file_failing_signal

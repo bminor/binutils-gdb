@@ -103,7 +103,7 @@ SYNOPSIS
 DESCRIPTION
 	This function is called with an a symbol describing the
 	function to be called, an string which descibes the xtor type,
-	eg something like "CTOR" or "DTOR" would be fine. And the bfd
+	e.g., something like "CTOR" or "DTOR" would be fine. And the bfd
 	which owns the function. Its duty is to create a section
 	called "CTOR" or "DTOR" or whatever if the bfd doesn't already
 	have one, and grow a relocation table for the entry points as

@@ -334,6 +334,6 @@ bfd_target a29kcoff_big_vec =
   },
 
   JUMP_TABLE(coff),
+     0, 0,
   COFF_SWAP_TABLE
  };
-
