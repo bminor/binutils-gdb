@@ -1,3 +1,8 @@
+2003-06-26  Michael Chastain  <mec@shout.net>
+
+	* config/djgpp/fnchange.lst: Add gdb/testsuite/gdb.c++/pr-1210.cc,
+	gdb/testsuite/gdb.c++/pr-1210.exp.
+
 2003-06-26  Elena Zannoni  <ezannoni@redhat.com>
 
 	* dwarf2read.c (dwarf2_locate_sections): Ignore empty .eh_frame
