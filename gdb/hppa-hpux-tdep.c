@@ -1407,11 +1407,9 @@ hppa_hpux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   if (tdep->bytes_per_address == 4)
-    set_gdbarch_in_solib_call_trampoline (gdbarch, 
-					  hppa32_hpux_in_solib_call_trampoline);
+    tdep->in_solib_call_trampoline = hppa32_hpux_in_solib_call_trampoline;
   else
-    set_gdbarch_in_solib_call_trampoline (gdbarch, 
-					  hppa64_hpux_in_solib_call_trampoline);
+    tdep->in_solib_call_trampoline = hppa64_hpux_in_solib_call_trampoline;
 
   set_gdbarch_in_solib_return_trampoline (gdbarch,
 					  hppa_hpux_in_solib_return_trampoline);

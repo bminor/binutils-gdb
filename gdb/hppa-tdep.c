@@ -2096,9 +2096,12 @@ static const struct frame_unwind *
 hppa_stub_unwind_sniffer (struct frame_info *next_frame)
 {
   CORE_ADDR pc = frame_pc_unwind (next_frame);
+  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   if (pc == 0
-      || IN_SOLIB_CALL_TRAMPOLINE (pc, NULL)
+      || (tdep->in_solib_call_trampoline != NULL
+	  && tdep->in_solib_call_trampoline (pc, NULL))
       || IN_SOLIB_RETURN_TRAMPOLINE (pc, NULL))
     return &hppa_stub_frame_unwind;
   return NULL;

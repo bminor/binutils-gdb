@@ -1,3 +1,11 @@
+2004-10-31  Andrew Cagney  <cagney@gnu.org>
+
+	* hppa-tdep.c (hppa_stub_unwind_sniffer): Replace
+	IN_SOLIB_CALL_TRAMPOLINE with tdep.in_solib_call_trampoline.
+	* hppa-tdep.h (struct gdbarch_tdep): Add in_solib_call_trampoline.
+	* hppa-hpux-tdep.c (hppa_hpux_init_abi): Set same.
+	* hppa-linux-tdep.c (hppa_linux_init_abi): Ditto.
+
 2004-10-31  Mark Kettenis  <kettenis@gnu.org>
 
 	* mipsnbsd-nat.c: Include "target.h" and "inf-ptrace.h".

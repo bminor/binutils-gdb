@@ -82,6 +82,12 @@ struct gdbarch_tdep
   /* Given a function address, try to find the global pointer for the 
      corresponding shared object.  */
   CORE_ADDR (*find_global_pointer) (struct value *);
+
+  /* For shared libraries, each call goes through a small piece of
+     trampoline code in the ".plt", or equivalent, section.
+     IN_SOLIB_CALL_TRAMPOLINE evaluates to nonzero if we are currently
+     stopped in one of these.  */
+  int (*in_solib_call_trampoline) (CORE_ADDR pc, char *name);
 };
 
 /*
