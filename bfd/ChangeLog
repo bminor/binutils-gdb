@@ -1,3 +1,8 @@
+2001-02-11  H.J. Lu  <hjl@gnu.org>
+
+	* elflink.h (elf_bfd_final_link): Use file_align for STMTAB
+	alignment.
+
 2001-02-11  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
 
 	* elf32-mips.c (mips_elf_create_dynamic_relocation): Undo patch
