@@ -13,6 +13,7 @@ AM_INIT_AUTOMAKE(ld, ${BFD_VERSION})
 
 AM_PROG_LIBTOOL
 
+AC_ARG_WITH(lib-path, [  --with-lib-path=dir1:dir2...  set default LIB_PATH],LIB_PATH=$withval)
 AC_ARG_ENABLE(targets,
 [  --enable-targets        alternative target configurations],
 [case "${enableval}" in
@@ -31,7 +32,7 @@ esac],[want64=false])dnl
 
 build_warnings="-W -Wall -Wstrict-prototypes -Wmissing-prototypes"
 AC_ARG_ENABLE(build-warnings,
-[  --enable-build-warnings Enable build-time compiler warnings if gcc is used],
+[  --enable-build-warnings enable build-time compiler warnings if gcc is used],
 [case "${enableval}" in
   yes)	;;
   no)	build_warnings="-w";;
@@ -202,6 +203,7 @@ else
 fi
 AC_SUBST(EMULATION_OFILES)
 AC_SUBST(EMUL_EXTRA_OFILES)
+AC_SUBST(LIB_PATH)
 
 EMULATION_LIBPATH=$all_libpath
 AC_SUBST(EMULATION_LIBPATH)

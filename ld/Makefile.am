@@ -30,8 +30,9 @@ EMUL_EXTRA_OFILES = @EMUL_EXTRA_OFILES@
 # (The default is usually /lib:/usr/lib:/usr/local/lib, unless building
 # a cross-linker, in which case the default is empty.  See genscripts.sh.)
 # Otherwise, they are replaced with the ones given in LIB_PATH,
-# which may have the form: LIB_PATH=/lib:/usr/local/lib
-LIB_PATH =
+# which may have the form: LIB_PATH=/lib:/usr/local/lib.  This can be set
+# when the linker is configured via the --with-lib-path configure switch.
+LIB_PATH = @LIB_PATH@
 
 BASEDIR = $(srcdir)/..
 BFDDIR = $(BASEDIR)/bfd
@@ -371,7 +372,7 @@ stringify.sed: ${srcdir}/emultempl/$(STRINGIFY)
 
 # These all start with e so 'make clean' can find them.
 
-GENSCRIPTS = $(SHELL) $(srcdir)/genscripts.sh ${srcdir} ${libdir} "${exec_prefix}" @host@ @target@ @target_alias@ "@EMULATION_LIBPATH@" "@NATIVE_LIB_DIRS@"
+GENSCRIPTS = LIB_PATH='${LIB_PATH}' $(SHELL) $(srcdir)/genscripts.sh ${srcdir} ${libdir} "${exec_prefix}" @host@ @target@ @target_alias@ "@EMULATION_LIBPATH@" "@NATIVE_LIB_DIRS@"
 GEN_DEPENDS = $(srcdir)/genscripts.sh stringify.sed
 @TDIRS@
 

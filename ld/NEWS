@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Added --with-lib-path configure switch to specify default value for
+  LIB_PATH.
+
 * ARM port to QNX operating system added by Graeme Peterson.
 
 * IP2K support added by Denis Chertykov.
