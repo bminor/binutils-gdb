@@ -23,7 +23,7 @@ srcdir = .
 
 RANLIB = ranlib
 AR = 
-INCDIR = $(srcdir)/../include-cygnus
+INCDIR = $(srcdir)/../include-cygnus 
 CSEARCH = -I$(INCDIR)
 
 #### host and target dependent Makefile fragments come in here.
@@ -84,7 +84,7 @@ de-stage3: force
 tags etags: TAGS
 
 TAGS: force
-	etags $(INCDIR)/*.h *.h *.c
+	etags $(INCDIR)/*.h $(srcdir)/*.h $(srcdir)/*.c
 
 clean:
 	rm -f *.[oa] *~ core *.E
@@ -111,6 +111,11 @@ saber:
 	#suppress 590 on abfd 
 	#setopt load_flags $(CFLAGS)
 	#load $(CFILES)
+obstack.o : obstack.c
+m88k-bcs.o : m88k-bcs.c
+ieee.o : ieee.c
+srec.o : srec.c
+oasys.o : oasys.c
 
 archive.o : archive.c libbfd.h $(BFD_H) $(SYSDEP_H)  
 archures.o : archures.c $(BFD_H) $(SYSDEP_H) archures.h 
