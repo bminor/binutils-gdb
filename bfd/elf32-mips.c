@@ -5,6 +5,8 @@
    <ian@cygnus.com>.
    N32/64 ABI support added by Mark Mitchell, CodeSourcery, LLC.
    <mark@codesourcery.com>
+   Traditional MIPS targets support added by Koundinya.K, Dansk Data
+   Elektronik & Operations Research Group. <kk@ddeorg.soft.net>
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -198,6 +200,8 @@ static boolean mips_elf_stub_section_p
 static int sort_dynamic_relocs
   PARAMS ((const void *, const void *));
 
+extern const bfd_target bfd_elf32_tradbigmips_vec;
+
 /* The level of IRIX compatibility we're striving for.  */
 
 typedef enum {
@@ -219,12 +223,12 @@ static bfd *reldyn_sorting_bfd;
 #define ABI_64_P(abfd) \
   ((elf_elfheader (abfd)->e_ident[EI_CLASS] == ELFCLASS64) != 0)
 
-/* What version of Irix we are trying to be compatible with.  FIXME:
-   At the moment, we never generate "normal" MIPS ELF ABI executables;
-   we always use some version of Irix.  */
+/* Depending on the target vector we generate some version of Irix
+   executables or "normal" MIPS ELF ABI executables. */
 
 #define IRIX_COMPAT(abfd) \
-  ((ABI_N32_P (abfd) || ABI_64_P (abfd)) ? ict_irix6 : ict_irix5)
+  (abfd->xvec == &bfd_elf32_tradbigmips_vec ? ict_none : \
+  ((ABI_N32_P (abfd) || ABI_64_P (abfd)) ? ict_irix6 : ict_irix5))
 
 /* Whether we are trying to be compatible with IRIX at all.  */
 
@@ -302,10 +306,12 @@ static bfd *reldyn_sorting_bfd;
    ? (ABI_64_P (abfd)  						\
       ? 0xdf998010		/* ld t9,0x8010(gp) */		\
       : 0x8f998010)             /* lw t9,0x8010(gp) */		\
-   : 0x8f998000)		/* lw t9,0x8000(gp) */
-#define STUB_MOVE 0x03e07825	/* move t7,ra */
-#define STUB_JALR 0x0320f809	/* jal t9 */
-#define STUB_LI16 0x34180000	/* ori t8,zero,0 */
+   : 0x8f998010)		/* lw t9,0x8000(gp) */
+#define STUB_MOVE(abfd)                                         \
+  (SGI_COMPAT (abfd) ? 0x03e07825 : 0x03e07821)         /* move t7,ra */
+#define STUB_JALR 0x0320f809				/* jal t9 */
+#define STUB_LI16(abfd)                                         \
+  (SGI_COMPAT (abfd) ? 0x34180000 : 0x24180000)         /* ori t8,zero,0 */
 #define MIPS_FUNCTION_STUB_SIZE (16)
 
 #if 0
@@ -2875,17 +2881,23 @@ _bfd_mips_elf_fake_sections (abfd, hdr, sec)
       hdr->sh_type = SHT_MIPS_REGINFO;
       /* In a shared object on Irix 5.3, the .reginfo section has an
          entsize of 0x18.  FIXME: Does this matter?  */
-      if (SGI_COMPAT (abfd) && (abfd->flags & DYNAMIC) != 0)
-	hdr->sh_entsize = sizeof (Elf32_External_RegInfo);
+      if (SGI_COMPAT (abfd))
+        {
+          if ((abfd->flags & DYNAMIC) != 0)
+            hdr->sh_entsize = sizeof (Elf32_External_RegInfo);
+          else
+            hdr->sh_entsize = 1;
+        }
       else
-	hdr->sh_entsize = 1;
+        hdr->sh_entsize = sizeof (Elf32_External_RegInfo);
     }
   else if (SGI_COMPAT (abfd)
 	   && (strcmp (name, ".hash") == 0
 	       || strcmp (name, ".dynamic") == 0
 	       || strcmp (name, ".dynstr") == 0))
     {
-      hdr->sh_entsize = 0;
+      if ( SGI_COMPAT(abfd))
+        hdr->sh_entsize = 0;
 #if 0
       /* This isn't how the Irix 6 linker behaves.  */
       hdr->sh_info = SIZEOF_MIPS_DYNSYM_SECNAMES;
@@ -3258,9 +3270,6 @@ _bfd_mips_elf_additional_program_headers (abfd)
   asection *s;
   int ret = 0;
 
-  if (!SGI_COMPAT (abfd))
-    return 0;
-
   /* See if we need a PT_MIPS_REGINFO segment.  */
   s = bfd_get_section_by_name (abfd, ".reginfo");
   if (s && (s->flags & SEC_LOAD))
@@ -3289,9 +3298,6 @@ _bfd_mips_elf_modify_segment_map (abfd)
 {
   asection *s;
   struct elf_segment_map *m, **pm;
-
-  if (! SGI_COMPAT (abfd))
-    return true;
 
   /* If there is a .reginfo section, we need a PT_MIPS_REGINFO
      segment.  */
@@ -3362,58 +3368,72 @@ _bfd_mips_elf_modify_segment_map (abfd)
     }
   else
     {
-      /* If there are .dynamic and .mdebug sections, we make a room
-	 for the RTPROC header.  FIXME: Rewrite without section names.  */
-      if (bfd_get_section_by_name (abfd, ".interp") == NULL
-	  && bfd_get_section_by_name (abfd, ".dynamic") != NULL
-	  && bfd_get_section_by_name (abfd, ".mdebug") != NULL)
+      if (IRIX_COMPAT (abfd) == ict_irix5)
 	{
-	  for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
-	    if (m->p_type == PT_MIPS_RTPROC)
-	      break;
-	  if (m == NULL)
+	  /* If there are .dynamic and .mdebug sections, we make a room
+	     for the RTPROC header.  FIXME: Rewrite without section names.  */
+	  if (bfd_get_section_by_name (abfd, ".interp") == NULL
+	      && bfd_get_section_by_name (abfd, ".dynamic") != NULL
+	      && bfd_get_section_by_name (abfd, ".mdebug") != NULL)
 	    {
-	      m = (struct elf_segment_map *) bfd_zalloc (abfd, sizeof *m);
+	      for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
+		if (m->p_type == PT_MIPS_RTPROC)
+		  break;
 	      if (m == NULL)
-		return false;
-
-	      m->p_type = PT_MIPS_RTPROC;
-
-	      s = bfd_get_section_by_name (abfd, ".rtproc");
-	      if (s == NULL)
 		{
-		  m->count = 0;
-		  m->p_flags = 0;
-		  m->p_flags_valid = 1;
-		}
-	      else
-		{
-		  m->count = 1;
-		  m->sections[0] = s;
-		}
+		  m = (struct elf_segment_map *) bfd_zalloc (abfd, sizeof *m);
+		  if (m == NULL)
+		    return false;
 
-	      /* We want to put it after the DYNAMIC segment.  */
-	      pm = &elf_tdata (abfd)->segment_map;
-	      while (*pm != NULL && (*pm)->p_type != PT_DYNAMIC)
-		pm = &(*pm)->next;
-	      if (*pm != NULL)
-		pm = &(*pm)->next;
+		  m->p_type = PT_MIPS_RTPROC;
 
-	      m->next = *pm;
-	      *pm = m;
+		  s = bfd_get_section_by_name (abfd, ".rtproc");
+		  if (s == NULL)
+		    {
+		      m->count = 0;
+		      m->p_flags = 0;
+		      m->p_flags_valid = 1;
+		    }
+		  else
+		    {
+		      m->count = 1;
+		      m->sections[0] = s;
+		    }
+
+		  /* We want to put it after the DYNAMIC segment.  */
+		  pm = &elf_tdata (abfd)->segment_map;
+		  while (*pm != NULL && (*pm)->p_type != PT_DYNAMIC)
+		    pm = &(*pm)->next;
+		  if (*pm != NULL)
+		    pm = &(*pm)->next;
+
+		  m->next = *pm;
+		  *pm = m;
+		}
 	    }
 	}
-
       /* On Irix 5, the PT_DYNAMIC segment includes the .dynamic,
 	 .dynstr, .dynsym, and .hash sections, and everything in
 	 between.  */
-      for (pm = &elf_tdata (abfd)->segment_map; *pm != NULL; pm = &(*pm)->next)
+      for (pm = &elf_tdata (abfd)->segment_map; *pm != NULL;
+	   pm = &(*pm)->next)
 	if ((*pm)->p_type == PT_DYNAMIC)
 	  break;
       m = *pm;
+      if (IRIX_COMPAT (abfd) == ict_none)
+	{
+	  /* For a normal mips executable the permissions for the PT_DYNAMIC
+	     segment are read, write and execute. We do that here since
+	     the code in elf.c sets only the read permission. This matters
+	     sometimes for the dynamic linker. */
+	  if (bfd_get_section_by_name (abfd, ".dynamic") != NULL)
+	    {
+	      m->p_flags = PF_R | PF_W | PF_X;
+	      m->p_flags_valid = 1;
+	    }
+	}
       if (m != NULL
-	  && m->count == 1
-	  && strcmp (m->sections[0]->name, ".dynamic") == 0)
+	  && m->count == 1 && strcmp (m->sections[0]->name, ".dynamic") == 0)
 	{
 	  static const char *sec_names[] =
 	  { ".dynamic", ".dynstr", ".dynsym", ".hash" };
@@ -3445,8 +3465,8 @@ _bfd_mips_elf_modify_segment_map (abfd)
 	    if ((s->flags & SEC_LOAD) != 0
 		&& s->vma >= low
 		&& ((s->vma
-		     + (s->_cooked_size != 0 ? s->_cooked_size : s->_raw_size))
-		    <= high))
+		     + (s->_cooked_size !=
+			0 ? s->_cooked_size : s->_raw_size)) <= high))
 	      ++c;
 
 	  n = ((struct elf_segment_map *)
@@ -3463,8 +3483,7 @@ _bfd_mips_elf_modify_segment_map (abfd)
 		  && s->vma >= low
 		  && ((s->vma
 		       + (s->_cooked_size != 0 ?
-			  s->_cooked_size : s->_raw_size))
-		      <= high))
+			  s->_cooked_size : s->_raw_size)) <= high))
 		{
 		  n->sections[i] = s;
 		  ++i;
@@ -4145,9 +4164,8 @@ mips_elf_output_extsym (h, data)
       h->esym.asym.value = 0;
       h->esym.asym.st = stGlobal;
 
-      if (SGI_COMPAT (einfo->abfd)
-	  && (h->root.root.type == bfd_link_hash_undefined
-	      || h->root.root.type == bfd_link_hash_undefweak))
+      if (h->root.root.type == bfd_link_hash_undefined
+	      || h->root.root.type == bfd_link_hash_undefweak)
 	{
 	  const char *name;
 
@@ -4457,6 +4475,15 @@ _bfd_mips_elf_final_link (abfd, info)
     = get_elf_backend_data (abfd)->elf_backend_ecoff_debug_swap;
   HDRR *symhdr = &debug.symbolic_header;
   PTR mdebug_handle = NULL;
+  asection *s;
+  EXTR esym;
+  bfd_vma last;
+  unsigned int i;
+  static const char * const name[] =
+      { ".text", ".init", ".fini", ".data",
+          ".rodata", ".sdata", ".sbss", ".bss" };
+  static const int sc[] = { scText, scInit, scFini, scData,
+                          scRData, scSData, scSBss, scBss };
 
   /* If all the things we linked together were PIC, but we're
      producing an executable (rather than a shared object), then the
@@ -4505,7 +4532,7 @@ _bfd_mips_elf_final_link (abfd, info)
      include it, even though we don't process it quite right.  (Some
      entries are supposed to be merged.)  Empirically, we seem to be
      better off including it then not.  */
-  if (IRIX_COMPAT (abfd) == ict_irix5)
+  if (IRIX_COMPAT (abfd) == ict_irix5 || IRIX_COMPAT (abfd) == ict_none)
     for (secpp = &abfd->sections; *secpp != NULL; secpp = &(*secpp)->next)
       {
 	if (strcmp ((*secpp)->name, MIPS_ELF_OPTIONS_SECTION_NAME (abfd)) == 0)
@@ -4667,45 +4694,31 @@ _bfd_mips_elf_final_link (abfd, info)
 	  if (mdebug_handle == (PTR) NULL)
 	    return false;
 
-	  if (SGI_COMPAT (abfd))
-	    {
-	      asection *s;
-	      EXTR esym;
-	      bfd_vma last;
-	      unsigned int i;
-	      static const char * const name[] =
-		{ ".text", ".init", ".fini", ".data",
-		    ".rodata", ".sdata", ".sbss", ".bss" };
-	      static const int sc[] = { scText, scInit, scFini, scData,
-					  scRData, scSData, scSBss, scBss };
-
-	      esym.jmptbl = 0;
-	      esym.cobol_main = 0;
-	      esym.weakext = 0;
-	      esym.reserved = 0;
-	      esym.ifd = ifdNil;
-	      esym.asym.iss = issNil;
-	      esym.asym.st = stLocal;
-	      esym.asym.reserved = 0;
-	      esym.asym.index = indexNil;
-	      last = 0;
-	      for (i = 0; i < 8; i++)
-		{
-		  esym.asym.sc = sc[i];
-		  s = bfd_get_section_by_name (abfd, name[i]);
-		  if (s != NULL)
-		    {
-		      esym.asym.value = s->vma;
-		      last = s->vma + s->_raw_size;
-		    }
-		  else
-		    esym.asym.value = last;
-
-		  if (! bfd_ecoff_debug_one_external (abfd, &debug, swap,
-						      name[i], &esym))
-		    return false;
-		}
-	    }
+          esym.jmptbl = 0;
+          esym.cobol_main = 0;
+          esym.weakext = 0;
+          esym.reserved = 0;
+          esym.ifd = ifdNil;
+          esym.asym.iss = issNil;
+          esym.asym.st = stLocal;
+          esym.asym.reserved = 0;
+          esym.asym.index = indexNil;
+          last = 0;
+          for (i = 0; i < 8; i++)
+            {
+              esym.asym.sc = sc[i];
+              s = bfd_get_section_by_name (abfd, name[i]);
+              if (s != NULL)
+                {
+                  esym.asym.value = s->vma;
+                  last = s->vma + s->_raw_size;
+                }
+              else
+                esym.asym.value = last;
+              if (!bfd_ecoff_debug_one_external (abfd, &debug, swap,
+                                                 name[i], &esym))
+                return false;
+            }
 
 	  for (p = o->link_order_head;
 	       p != (struct bfd_link_order *) NULL;
@@ -6011,10 +6024,12 @@ mips_elf_calculate_relocation (abfd,
       else if (info->shared && !info->symbolic && !info->no_undefined
 	       && ELF_ST_VISIBILITY (h->root.other) == STV_DEFAULT)
 	symbol = 0;
-      else if (strcmp (h->root.root.root.string, "_DYNAMIC_LINK") == 0)
+      else if (strcmp (h->root.root.root.string, "_DYNAMIC_LINK") == 0 ||
+              strcmp (h->root.root.root.string, "_DYNAMIC_LINKING") == 0)
 	{
 	  /* If this is a dynamic link, we should have created a
-	     _DYNAMIC_LINK symbol in mips_elf_create_dynamic_sections.
+	     _DYNAMIC_LINK symbol or _DYNAMIC_LINKING(for normal mips) symbol 
+	     in in mips_elf_create_dynamic_sections.
 	     Otherwise, we should define the symbol with a value of 0.
 	     FIXME: It should probably get into the symbol table
 	     somehow as well.  */
@@ -7084,7 +7099,7 @@ _bfd_mips_elf_create_dynamic_sections (abfd, info)
 	return false;
     }
 
-  if (IRIX_COMPAT (abfd) == ict_irix5
+  if (IRIX_COMPAT (abfd) == ict_irix5 || IRIX_COMPAT (abfd) == ict_none
       && !info->shared
       && bfd_get_section_by_name (abfd, ".rld_map") == NULL)
     {
@@ -7120,8 +7135,11 @@ _bfd_mips_elf_create_dynamic_sections (abfd, info)
 	}
 
       /* We need to create a .compact_rel section.  */
-      if (! mips_elf_create_compact_rel_section (abfd, info))
-	return false;
+      if (SGI_COMPAT (abfd))
+        {
+          if (!mips_elf_create_compact_rel_section (abfd, info))
+	    return false;
+        }
 
       /* Change aligments of some sections.  */
       s = bfd_get_section_by_name (abfd, ".hash");
@@ -7144,12 +7162,25 @@ _bfd_mips_elf_create_dynamic_sections (abfd, info)
   if (!info->shared)
     {
       h = NULL;
-      if (! (_bfd_generic_link_add_one_symbol
+      if (SGI_COMPAT (abfd))
+        {
+          if (!(_bfd_generic_link_add_one_symbol
 	     (info, abfd, "_DYNAMIC_LINK", BSF_GLOBAL, bfd_abs_section_ptr,
 	      (bfd_vma) 0, (const char *) NULL, false,
 	      get_elf_backend_data (abfd)->collect,
 	      (struct bfd_link_hash_entry **) &h)))
-	return false;
+	    return false;
+        }
+      else
+        {
+          /* For normal mips it is _DYNAMIC_LINKING. */
+          if (!(_bfd_generic_link_add_one_symbol
+                (info, abfd, "_DYNAMIC_LINKING", BSF_GLOBAL, 
+                 bfd_abs_section_ptr, (bfd_vma) 0, (const char *) NULL, false,
+                 get_elf_backend_data (abfd)->collect,
+                 (struct bfd_link_hash_entry **) &h)))
+            return false;
+        }
       h->elf_link_hash_flags &=~ ELF_LINK_NON_ELF;
       h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
       h->type = STT_SECTION;
@@ -7167,12 +7198,25 @@ _bfd_mips_elf_create_dynamic_sections (abfd, info)
 	  BFD_ASSERT (s != NULL);
 
 	  h = NULL;
-	  if (! (_bfd_generic_link_add_one_symbol
+          if (SGI_COMPAT (abfd))
+            {
+              if (!(_bfd_generic_link_add_one_symbol
 		 (info, abfd, "__rld_map", BSF_GLOBAL, s,
 		  (bfd_vma) 0, (const char *) NULL, false,
 		  get_elf_backend_data (abfd)->collect,
 		  (struct bfd_link_hash_entry **) &h)))
-	    return false;
+	        return false;
+            }
+          else
+            {
+              /* For normal mips the symbol is __RLD_MAP. */
+              if (!(_bfd_generic_link_add_one_symbol
+                    (info, abfd, "__RLD_MAP", BSF_GLOBAL, s,
+                     (bfd_vma) 0, (const char *) NULL, false,
+                     get_elf_backend_data (abfd)->collect,
+                     (struct bfd_link_hash_entry **) &h)))
+                return false;
+            }
 	  h->elf_link_hash_flags &=~ ELF_LINK_NON_ELF;
 	  h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
 	  h->type = STT_OBJECT;
@@ -7914,8 +7958,7 @@ _bfd_mips_elf_adjust_dynamic_symbol (info, h)
 					   hmips->possibly_dynamic_relocs);
 
   /* For a function, create a stub, if needed. */
-  if (h->type == STT_FUNC
-      || (h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0)
+  if ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0)
     {
       if (! elf_hash_table (info)->dynamic_sections_created)
 	return true;
@@ -7944,6 +7987,14 @@ _bfd_mips_elf_adjust_dynamic_symbol (info, h)
 	     of this symbol in .dynsym section.  */
 	  return true;
 	}
+    }
+  else if ((h->type == STT_FUNC)
+           && (h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) == 0)
+    {
+      /* This will set the entry for this symbol in the GOT to 0, and
+         the dynamic linker will take care of this. */
+      h->root.u.def.value = 0;
+      return true;
     }
 
   /* If this is a weak symbol, and there is a real definition, the
@@ -8245,19 +8296,26 @@ _bfd_mips_elf_size_dynamic_sections (output_bfd, info)
 	 dynamic linker and used by the debugger.  */
       if (! info->shared)
 	{
-	  if (SGI_COMPAT (output_bfd))
-	    {
-	      /* SGI object has the equivalence of DT_DEBUG in the
-		 DT_MIPS_RLD_MAP entry.  */
-	      if (! MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_MIPS_RLD_MAP, 0))
-		return false;
-	    }
-	  else
-	    if (! MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_DEBUG, 0))
-	      return false;
-	}
-
-      if (reltext)
+          /* SGI object has the equivalence of DT_DEBUG in the
+             DT_MIPS_RLD_MAP entry.  */
+          if (!MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_MIPS_RLD_MAP, 0))
+            return false;
+          if (!SGI_COMPAT (output_bfd))
+            {
+              if (!MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_DEBUG, 0))
+                return false;
+            }
+        }
+      else
+        {
+          /* Shared libraries on traditional mips have DT_DEBUG. */
+          if (!SGI_COMPAT (output_bfd))
+            {
+              if (!MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_DEBUG, 0))
+                return false;
+            }
+        }
+      if (reltext && SGI_COMPAT(output_bfd))
 	{
 	  if (! MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_TEXTREL, 0))
 	    return false;
@@ -8279,11 +8337,17 @@ _bfd_mips_elf_size_dynamic_sections (output_bfd, info)
 	    return false;
 	}
 
-      if (! MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_MIPS_CONFLICTNO, 0))
-	return false;
+      if (SGI_COMPAT (output_bfd))
+        {
+          if (!MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_MIPS_CONFLICTNO, 0))
+	    return false;
+        }
 
-      if (! MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_MIPS_LIBLISTNO, 0))
-	return false;
+      if (SGI_COMPAT (output_bfd))
+        {
+          if (!MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_MIPS_LIBLISTNO, 0))
+	    return false;
+        }
 
       if (bfd_get_section_by_name (dynobj, ".conflict") != NULL)
 	{
@@ -8444,7 +8508,7 @@ _bfd_mips_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
       p = stub;
       bfd_put_32 (output_bfd, STUB_LW(output_bfd), p);
       p += 4;
-      bfd_put_32 (output_bfd, STUB_MOVE, p);
+      bfd_put_32 (output_bfd, STUB_MOVE(output_bfd), p);
       p += 4;
 
       /* FIXME: Can h->dynindex be more than 64K?  */
@@ -8453,7 +8517,7 @@ _bfd_mips_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 
       bfd_put_32 (output_bfd, STUB_JALR, p);
       p += 4;
-      bfd_put_32 (output_bfd, STUB_LI16 + h->dynindx, p);
+      bfd_put_32 (output_bfd, STUB_LI16(output_bfd) + h->dynindx, p);
 
       BFD_ASSERT (h->plt.offset <= s->_raw_size);
       memcpy (s->contents + h->plt.offset, stub, MIPS_FUNCTION_STUB_SIZE);
@@ -8489,13 +8553,18 @@ _bfd_mips_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
       if (sym->st_value)
 	value = sym->st_value;
       else
-	/* For an entity defined in a shared object, this will be
-	   NULL.  (For functions in shared objects for
-	   which we have created stubs, ST_VALUE will be non-NULL.
-	   That's because such the functions are now no longer defined
-	   in a shared object.)  */
-	value = h->root.u.def.value;
+        {
+          /* For an entity defined in a shared object, this will be
+             NULL.  (For functions in shared objects for
+             which we have created stubs, ST_VALUE will be non-NULL.
+             That's because such the functions are now no longer defined
+             in a shared object.)  */
 
+          if (info->shared && h->root.type == bfd_link_hash_undefined)
+            value = 0;
+          else
+            value = h->root.u.def.value;
+        }
       offset = mips_elf_global_got_index (dynobj, h);
       MIPS_ELF_PUT_WORD (output_bfd, value, sgot->contents + offset);
     }
@@ -8521,21 +8590,22 @@ _bfd_mips_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
   if (strcmp (name, "_DYNAMIC") == 0
       || strcmp (name, "_GLOBAL_OFFSET_TABLE_") == 0)
     sym->st_shndx = SHN_ABS;
-  else if (strcmp (name, "_DYNAMIC_LINK") == 0)
+  else if (strcmp (name, "_DYNAMIC_LINK") == 0
+           || strcmp (name, "_DYNAMIC_LINKING") == 0)
     {
       sym->st_shndx = SHN_ABS;
       sym->st_info = ELF_ST_INFO (STB_GLOBAL, STT_SECTION);
       sym->st_value = 1;
     }
+  else if (strcmp (name, "_gp_disp") == 0)
+    {
+      sym->st_shndx = SHN_ABS;
+      sym->st_info = ELF_ST_INFO (STB_GLOBAL, STT_SECTION);
+      sym->st_value = elf_gp (output_bfd);
+    }
   else if (SGI_COMPAT (output_bfd))
     {
-      if (strcmp (name, "_gp_disp") == 0)
-	{
-	  sym->st_shndx = SHN_ABS;
-	  sym->st_info = ELF_ST_INFO (STB_GLOBAL, STT_SECTION);
-	  sym->st_value = elf_gp (output_bfd);
-	}
-      else if (strcmp (name, mips_elf_dynsym_rtproc_names[0]) == 0
+      if (strcmp (name, mips_elf_dynsym_rtproc_names[0]) == 0
 	       || strcmp (name, mips_elf_dynsym_rtproc_names[1]) == 0)
 	{
 	  sym->st_info = ELF_ST_INFO (STB_GLOBAL, STT_SECTION);
@@ -8563,11 +8633,10 @@ _bfd_mips_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
   if (IRIX_COMPAT (output_bfd) == ict_irix6)
     mips_elf_irix6_finish_dynamic_symbol (output_bfd, name, sym);
 
-  if (SGI_COMPAT (output_bfd)
-      && ! info->shared)
+  if (! info->shared)
     {
       if (! mips_elf_hash_table (info)->use_rld_obj_head
-	  && strcmp (name, "__rld_map") == 0)
+	  && strcmp (name, "__rld_map") == 0 || strcmp (name, "__RLD_MAP") == 0)
 	{
 	  asection *s = bfd_get_section_by_name (dynobj, ".rld_map");
 	  BFD_ASSERT (s != NULL);
@@ -8580,7 +8649,8 @@ _bfd_mips_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 	       && strcmp (name, "__rld_obj_head") == 0)
 	{
 	  /* IRIX6 does not use a .rld_map section.  */
-	  if (IRIX_COMPAT (output_bfd) == ict_irix5)
+	  if (IRIX_COMPAT (output_bfd) == ict_irix5
+              || IRIX_COMPAT (output_bfd) == ict_none)
 	    BFD_ASSERT (bfd_get_section_by_name (dynobj, ".rld_map") 
 			!= NULL);
 	  mips_elf_hash_table (info)->rld_value = sym->st_value;

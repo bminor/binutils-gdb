@@ -1,3 +1,33 @@
+2000-07-17  Koundinya K  <kk@ddeorg.soft.net>
+
+	Enable the support for Traditional MIPS. 
+	* elf32-mips.c (IRIX_COMPAT): Recognize bfd_elf32_tradbigmips_vecand
+	return ict_none appropriately for traditional mips targets.
+	(STUB_LW): Change 0x8f998000 to 0x8f998010 for traditional mips.
+	(STUB_MOVE): Conditionalize for traditonal mips.
+	(STUB_LI16): Likewise.
+	(_bfd_mips_elf_modify_segment_map): Conditionalize to avoid making
+	room for RTPROC header.
+	(_bfd_mips_elf_modify_segment_map): For a normal mips executable set
+	the permission for the PT_DYNAMIC as read, write and execute.
+	(mips_elf_calculate_relocation): Check for the symbol _DYNAMIC_LINKING
+	for traditonal mips.
+	(_bfd_mips_elf_create_dynamic_sections): Add the symbol
+	_DYNAMIC_LINKING for traditonal mips.
+	(_bfd_mips_elf_create_dynamic_sections): Add the symbol __RLD_MAP
+	in case of traditonal mips.
+	(_bfd_mips_elf_adjust_dynamic_symbol): Create a stub only if a PLT
+	entry is required. For a function if PLT is not required then set the
+	corresponding hash table entry to 0.
+	(_bfd_mips_elf_size_dynamic_sections): Add DT_DEBUG entry for 
+	traditonal mips.
+	(_bfd_mips_elf_finish_dynamic_symbol): for a undefined symbol in a 
+	shared object set the value to 0.
+	(_bfd_mips_elf_finish_dynamic_symbol): Check for the symbol 
+	_DYNAMIC_LINKING for traditonal mips.
+	(_bfd_mips_elf_finish_dynamic_symbol): Check for the symbol __RLD_MAP
+	for traditonal mips.
+	
 2000-07-15  H.J. Lu  <hjl@gnu.org>
 
 	* aoutx.h (translate_to_native_sym_flags): Handle BSF_LOCAL.
