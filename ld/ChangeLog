@@ -1,3 +1,10 @@
+start-sanitize-arc
+Tue Mar  7 21:10:28 1995  Doug Evans  <dje@chestnut.cygnus.com>
+
+	* emulparams/arcelf.sh (OUTPUT_FORMAT): Change to elf32-littlearc.
+	(LITTLE_OUTPUT_FORMAT, BIG_OUTPUT_FORMAT): Define.
+end-sanitize-arc
+
 Tue Mar  7 00:53:08 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldemul.c (ldemul_choose_mode): If emulation not recognized, list
