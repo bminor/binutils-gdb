@@ -29,7 +29,7 @@
 #define GLD29K_EMULATION_NAME "gld29k"
 #define GLDNEWS_EMULATION_NAME "gldnews"
 #define LNK960_EMULATION_NAME "lnk960"
-#define H8300HDS_EMULATION_NAME "h8300hds"
+#define H8300HMS_EMULATION_NAME "h8300hms"
 #define EBMON29K_EMULATION_NAME "ebmon29k"
 #define GLDI386AOUT_EMULATION_NAME "gldi386aout"
 /* Otherwise default to this emulation */
@@ -57,7 +57,7 @@
 #define GLD29K_TARGET "coff-a29k-big"
 #define GLDI386AOUT_TARGET "a.out-i386"
 #define GLDNEWS_TARGET "a.out-newsos3"
-#define H8300HDS_TARGET "coff-h8300"
+#define H8300HMS_TARGET "coff-h8300"
 #define EBMON29K_TARGET "coff-a29k-big"
 
 
