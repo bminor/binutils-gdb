@@ -502,6 +502,7 @@ ALL_MODULES = \
 	all-textutils \
 	all-tgas \
 	all-time \
+	all-tix \
 	all-uudecode \
 	$(start-sanitize-ide) \
 	all-vmake \
@@ -573,6 +574,7 @@ CROSS_CHECK_MODULES = \
 	check-textutils \
 	check-tgas \
 	check-time \
+	check-tix \
 	check-uudecode \
 	$(start-sanitize-ide) \
 	check-vmake \
@@ -645,6 +647,7 @@ INSTALL_MODULES = \
 	install-textutils \
 	install-tgas \
 	install-time \
+	install-tix \
 	install-uudecode \
 	$(start-sanitize-ide) \
 	install-vmake \
@@ -797,6 +800,7 @@ CLEAN_MODULES = \
 	clean-textutils \
 	clean-tgas \
 	clean-time \
+	clean-tix \
 	clean-uudecode \
 	$(start-sanitize-ide) \
 	clean-vmake \
@@ -1447,6 +1451,7 @@ all-texinfo: all-libiberty
 all-textutils:
 all-tgas: all-libiberty all-bfd all-opcodes
 all-time:
+all-tix: all-tcl all-tk
 # start-sanitize-ide
 all-vmake: all-tcl all-tk all-itcl all-libide
 # end-sanitize-ide

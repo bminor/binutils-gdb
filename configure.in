@@ -41,7 +41,7 @@
 
 # these libraries are used by various programs built for the host environment
 #
-host_libs="mmalloc libiberty opcodes bfd readline gash db tcl tk tclX itcl"
+host_libs="mmalloc libiberty opcodes bfd readline gash db tcl tk tclX itcl tix"
 # start-sanitize-ide
 host_libs="${host_libs} libide"
 # end-sanitize-ide
@@ -386,13 +386,13 @@ noconfigdirs=""
 
 case "${host}" in
   i[3456]86-*-vsta)
-    noconfigdirs="tcl expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff guile perl apache inet itcl db sn gnuserv"
+    noconfigdirs="tcl expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff guile perl apache inet itcl tix db sn gnuserv"
 # start-sanitize-ide
     noconfigdirs="$noconfigdirs libide vmake"
 # end-sanitize-ide
     ;;
   i[3456]86-*-go32)
-    noconfigdirs="tcl tk expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff guile perl apache inet itcl db sn gnuserv"
+    noconfigdirs="tcl tk expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff guile perl apache inet itcl tix db sn gnuserv"
 # start-sanitize-ide
     noconfigdirs="$noconfigdirs libide vmake"
 # end-sanitize-ide
@@ -407,7 +407,7 @@ case "${host}" in
      target_configdirs=
     ;;
   ppc*-*-pe)
-     noconfigdirs="patch diff make tk tcl expect dejagnu cvs autoconf automake texinfo bison send-pr gprof rcs guile perl apache inet itcl db sn gnuserv"
+     noconfigdirs="patch diff make tk tcl expect dejagnu cvs autoconf automake texinfo bison send-pr gprof rcs guile perl apache inet itcl tix db sn gnuserv"
 # start-sanitize-ide
      noconfigdirs="$noconfigdirs libide vmake"
 # end-sanitize-ide
@@ -454,7 +454,7 @@ case "${target}" in
     ;;
 # start-sanitize-d30v
   d30v-*-*)
-    noconfigdirs="$noconfigdirs tcl tk expect gcc gdb newlib target-librx target-libg++ target-libstdc++ target-libio target-libgloss itcl db sn gnuserv target-libiberty target-newlib target-examples"
+    noconfigdirs="$noconfigdirs tcl tk expect gcc gdb newlib target-librx target-libg++ target-libstdc++ target-libio target-libgloss itcl tix db sn gnuserv target-libiberty target-newlib target-examples"
 # start-sanitize-ide
     noconfigdirs="$noconfigdirs libide vmake"
 # end-sanitize-ide
@@ -492,7 +492,7 @@ case "${target}" in
     # Can't build gdb for cygwin32 if not native.
     case "${host}" in
       *-*-cygwin32) ;; # keep gdb tcl tk expect etc.
-      *) noconfigdirs="$noconfigdirs gdb tcl tk expect itcl db sn gnuserv"
+      *) noconfigdirs="$noconfigdirs gdb tcl tk expect itcl tix db sn gnuserv"
 # start-sanitize-ide
          noconfigdirs="$noconfigdirs libide vmake"
 # end-sanitize-ide
@@ -539,7 +539,7 @@ case "${target}" in
     ;;
   powerpc*-*-winnt* | powerpc*-*-pe* | ppc*-*-pe)
     target_configdirs="$target_configdirs target-winsup"
-    noconfigdirs="$noconfigdirs gdb tcl tk make expect target-libgloss itcl db sn gnuserv"
+    noconfigdirs="$noconfigdirs gdb tcl tk make expect target-libgloss itcl tix db sn gnuserv"
 # start-sanitize-ide
     noconfigdirs="$noconfigdirs libide vmake"
 # end-sanitize-ide
@@ -548,7 +548,7 @@ case "${target}" in
     ;;
     # This is temporary until we can link against shared libraries
   powerpcle-*-solaris*)
-    noconfigdirs="$noconfigdirs gdb sim make tcl tk expect itcl db sn gnuserv"
+    noconfigdirs="$noconfigdirs gdb sim make tcl tk expect itcl tix db sn gnuserv"
 # start-sanitize-ide
     noconfigdirs="$noconfigdirs libide vmake"
 # end-sanitize-ide
