@@ -1007,17 +1007,21 @@ handle either one.  Symbol type @samp{C_RPSYM} is used with @samp{R} and
 @samp{N_RSYM} is used with @samp{P}.
 
 There is another case similar to an argument in a register, which is an
-argument which is actually stored as a local variable.  The only case I
-know of where this happens is when the argument was passed in a register
-and then the compiler stores it as a local variable.  In this case the
-compiler would probably be much better off claiming that it's in a
-register, but at least in one case this isn't done.  Some compilers are
-said to use the pair of symbols approach described above ("arg:p"
-followed by "arg:"), but I don't which if any.  GCC, at least on the
-960, uses a @samp{p} symbol descriptor for this case but uses
-@samp{N_LSYM} instead of @samp{N_PSYM} to distinguish it.  In this case
-the value of the symbol is an offset relative to the local variables for
-that function, not relative to the arguments.
+argument which is actually stored as a local variable.  Sometimes this
+happens when the argument was passed in a register and then the compiler
+stores it as a local variable.  If possible, the compiler should claim
+that it's in a register, but this isn't always done.  Some compilers use
+the pair of symbols approach described above ("arg:p" followed by
+"arg:"); this includes gcc1 (not gcc2) on the sparc when passing a small
+structure and gcc2 when the argument type is float and it is passed as a
+double and converted to float by the prologue (in the latter case the
+type of the "arg:p" symbol is double and the type of the "arg:" symbol
+is float).  GCC, at least on the 960, uses a single @samp{p} symbol
+descriptor for an argument which is stored as a local variable but uses
+@samp{N_LSYM} instead of @samp{N_PSYM}.  In this case the value of the
+symbol is an offset relative to the local variables for that function,
+not relative to the arguments (on some machines those are the same
+thing, but not on all).
 
 As a simple example, the code
 
