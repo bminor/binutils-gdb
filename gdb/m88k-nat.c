@@ -264,7 +264,7 @@ fill_gregset (gregsetp, regno)
     if ((regno == -1) || (regno == SNIP_REGNUM))
 	*(regp + R_NIP) = *(int *) &registers[REGISTER_BYTE(SNIP_REGNUM)];
     if ((regno == -1) || (regno == SFIP_REGNUM))
-	*(regp + R_SFIP) = *(int *) &registers[REGISTER_BYTE(SFIP_REGNUM)];
+	*(regp + R_FIP) = *(int *) &registers[REGISTER_BYTE(SFIP_REGNUM)];
     if ((regno == -1) || (regno == PSR_REGNUM))
 	*(regp + R_PSR) = *(int *) &registers[REGISTER_BYTE(PSR_REGNUM)];
     if ((regno == -1) || (regno == FPSR_REGNUM))

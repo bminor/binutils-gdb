@@ -1,5 +1,10 @@
 Thu Sep 30 11:30:56 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* m88k-nat.c (fill_gregset): Fix typo (R_SFIP -> R_FIP).
+
+	* c-typeprint.c (c_type_print_base, TYPE_FN_FIELD_STUB code):
+	If demangled name lacks a colon, don't dump core.
+
 	* blockframe.c (find_pc_partial_function): If pst->readin is
 	set, don't try to get symbols from pst.
 
