@@ -1,3 +1,17 @@
+Mon Aug 30 18:29:10 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* Makefile.in (gcc-no-fixedincludes): touch stmp-fixproto as well
+	as stmp-fixinc
+
+Wed Aug 25 16:35:59 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* config.sub: recognize m88110-bug-coff.
+
+Tue Aug 24 10:23:24 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* Makefile.in (all-libio): all dependencies on the toolchain used
+	to build this (gcc, gas, ld, etc)
+
 Fri Aug 20 17:24:24 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config.guess: Deal with OSF/1 1.3 on alpha.
