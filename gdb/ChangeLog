@@ -1,5 +1,11 @@
 2001-07-12  Mark Kettenis  <kettenis@gnu.org>
 
+	* lin-lwp.c (stop_wait_callback): Add support for flushing
+	signals.  Use that in favour of the old code to get rid of
+	superfluous SIGINTs.
+	(lin_lwp_wait): Use the new support in stop_wait_callback to
+	flush all but one SIGINT.
+
 	* i386-tdep.c (i386_extract_return_value): Undo 2001-07-11 changes
 	to comment.
 	(i386_store_return_value): Improve comments about storing

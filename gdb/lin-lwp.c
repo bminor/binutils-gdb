@@ -595,11 +595,14 @@ stop_callback (struct lwp_info *lp, void *data)
   return 0;
 }
 
-/* Wait until LP is stopped.  */
+/* Wait until LP is stopped.  If DATA is non-null it is interpreted as
+   a pointer to a set of signals to be flushed immediately.  */
 
 static int
 stop_wait_callback (struct lwp_info *lp, void *data)
 {
+  sigset_t *flush_mask = data;
+
   if (! lp->stopped && lp->signalled)
     {
       pid_t pid;
@@ -639,6 +642,13 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 
       gdb_assert (WIFSTOPPED (status));
 
+      /* Ignore any signals in FLUSH_MASK.  */
+      if (flush_mask && sigismember (flush_mask, WSTOPSIG (status)))
+	{
+	  ptrace (PTRACE_CONT, GET_LWP (lp->ptid), 0, 0);
+	  return stop_wait_callback (lp, flush_mask);
+	}
+
       if (WSTOPSIG (status) != SIGSTOP)
 	{
 	  if (WSTOPSIG (status) == SIGTRAP)
@@ -672,18 +682,6 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 	      /* Save the sigtrap event. */
 	      lp->status = status;
 	      return 0;
-	    }
-	  else if (WSTOPSIG (status) == SIGINT &&
-		   signal_pass_state (SIGINT) == 0)
-	    {
-	      /* Since SIGINT gets forwarded to the entire process group
-		 (in the case where ^C/BREAK is typed at the tty/console),
-		 just ignore all SIGINT events from all lwp's except for
-		 the one that was caught by lin_lwp_wait.  */
-
-	      /* Now resume this LWP and get the SIGSTOP event. */
-	      ptrace (PTRACE_CONT, GET_LWP (lp->ptid), 0, 0);
-	      return stop_wait_callback (lp, data);
 	    }
 	  else
 	    {
@@ -897,6 +895,9 @@ lin_lwp_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
   int options = 0;
   int status = 0;
   pid_t pid = PIDGET (ptid);
+  sigset_t flush_mask;
+
+  sigemptyset (&flush_mask);
 
   /* Make sure SIGCHLD is blocked.  */
   if (! sigismember (&blocked_mask, SIGCHLD))
@@ -1113,6 +1114,16 @@ lin_lwp_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	  status = 0;
 	  goto retry;
 	}
+
+      if (signo == TARGET_SIGNAL_INT
+	  && signal_pass_state (signo) == 0)
+	{
+	  /* If ^C/BREAK is typed at the tty/console, SIGINT gets
+             forwarded to the entire process group, that is, all LWP's
+             will receive it.  Since we only want to report it once,
+             we try to flush it from all LWPs except this one.  */
+	  sigaddset (&flush_mask, SIGINT);
+	}
     }
 
   /* This LWP is stopped now.  */
@@ -1127,7 +1138,7 @@ lin_lwp_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 
   /* ... and wait until all of them have reported back that they're no
      longer running.  */
-  iterate_over_lwps (stop_wait_callback, NULL);
+  iterate_over_lwps (stop_wait_callback, &flush_mask);
 
   /* If we're not waiting for a specific LWP, choose an event LWP from
      among those that have had events.  Giving equal priority to all
