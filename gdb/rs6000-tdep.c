@@ -99,6 +99,9 @@ struct reg
     unsigned char sz64;		/* size on 64-bit arch, 0 if nonextant */
     unsigned char fpr;		/* whether register is floating-point */
     unsigned char pseudo;       /* whether register is pseudo */
+    int spr_num;                /* PowerPC SPR number, or -1 if not an SPR.
+                                   This is an ISA SPR number, not a GDB
+                                   register number.  */
   };
 
 /* Breakpoint shadows for the single step instructions will be kept here. */
@@ -2054,37 +2057,53 @@ rs6000_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
 
 /* Return a struct reg defining register NAME that's 32 bits on 32-bit systems
    and 64 bits on 64-bit systems.  */
-#define R(name)		{ STR(name), 4, 8, 0, 0 }
+#define R(name)		{ STR(name), 4, 8, 0, 0, -1 }
 
 /* Return a struct reg defining register NAME that's 32 bits on all
    systems.  */
-#define R4(name)	{ STR(name), 4, 4, 0, 0 }
+#define R4(name)	{ STR(name), 4, 4, 0, 0, -1 }
 
 /* Return a struct reg defining register NAME that's 64 bits on all
    systems.  */
-#define R8(name)	{ STR(name), 8, 8, 0, 0 }
+#define R8(name)	{ STR(name), 8, 8, 0, 0, -1 }
 
 /* Return a struct reg defining register NAME that's 128 bits on all
    systems.  */
-#define R16(name)       { STR(name), 16, 16, 0, 0 }
+#define R16(name)       { STR(name), 16, 16, 0, 0, -1 }
 
 /* Return a struct reg defining floating-point register NAME.  */
-#define F(name)		{ STR(name), 8, 8, 1, 0 }
+#define F(name)		{ STR(name), 8, 8, 1, 0, -1 }
 
 /* Return a struct reg defining a pseudo register NAME.  */
-#define P(name)		{ STR(name), 4, 8, 0, 1}
+#define P(name)		{ STR(name), 4, 8, 0, 1, -1 }
 
 /* Return a struct reg defining register NAME that's 32 bits on 32-bit
    systems and that doesn't exist on 64-bit systems.  */
-#define R32(name)	{ STR(name), 4, 0, 0, 0 }
+#define R32(name)	{ STR(name), 4, 0, 0, 0, -1 }
 
 /* Return a struct reg defining register NAME that's 64 bits on 64-bit
    systems and that doesn't exist on 32-bit systems.  */
-#define R64(name)	{ STR(name), 0, 8, 0, 0 }
+#define R64(name)	{ STR(name), 0, 8, 0, 0, -1 }
 
 /* Return a struct reg placeholder for a register that doesn't exist.  */
-#define R0		{ 0, 0, 0, 0, 0 }
+#define R0		{ 0, 0, 0, 0, 0, -1 }
 
+/* Return a struct reg defining an SPR named NAME that is 32 bits on
+   32-bit systems and 64 bits on 64-bit systems.  */
+#define S(name)         { STR(name), 4, 8, 0, 0, ppc_spr_ ## name }
+  
+/* Return a struct reg defining an SPR named NAME that is 32 bits on
+   all systems.  */
+#define S4(name)        { STR(name), 4, 4, 0, 0, ppc_spr_ ## name }
+  
+/* Return a struct reg defining an SPR named NAME that is 32 bits on
+   all systems, and whose SPR number is NUMBER.  */
+#define SN4(name, number) { STR(name), 4, 4, 0, 0, (number) }
+  
+/* Return a struct reg defining an SPR named NAME that's 64 bits on
+   64-bit systems and that doesn't exist on 32-bit systems.  */
+#define S64(name)       { STR(name), 0, 8, 0, 0, ppc_spr_ ## name }
+  
 /* UISA registers common across all architectures, including POWER.  */
 
 #define COMMON_UISA_REGS \
@@ -2100,11 +2119,11 @@ rs6000_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
 
 /* UISA-level SPRs for PowerPC.  */
 #define PPC_UISA_SPRS \
-  /* 66 */ R4(cr),  R(lr), R(ctr), R4(xer), R4(fpscr)
+  /* 66 */ R4(cr),  S(lr), S(ctr), S4(xer), R4(fpscr)
 
 /* UISA-level SPRs for PowerPC without floating point support.  */
 #define PPC_UISA_NOFP_SPRS \
-  /* 66 */ R4(cr),  R(lr), R(ctr), R4(xer), R0
+  /* 66 */ R4(cr),  S(lr), S(ctr), S4(xer), R0
 
 /* Segment registers, for PowerPC.  */
 #define PPC_SEGMENT_REGS \
@@ -2115,15 +2134,15 @@ rs6000_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
 
 /* OEA SPRs for PowerPC.  */
 #define PPC_OEA_SPRS \
-  /*  87 */ R4(pvr), \
-  /*  88 */ R(ibat0u), R(ibat0l), R(ibat1u), R(ibat1l), \
-  /*  92 */ R(ibat2u), R(ibat2l), R(ibat3u), R(ibat3l), \
-  /*  96 */ R(dbat0u), R(dbat0l), R(dbat1u), R(dbat1l), \
-  /* 100 */ R(dbat2u), R(dbat2l), R(dbat3u), R(dbat3l), \
-  /* 104 */ R(sdr1),   R64(asr),  R(dar),    R4(dsisr), \
-  /* 108 */ R(sprg0),  R(sprg1),  R(sprg2),  R(sprg3),  \
-  /* 112 */ R(srr0),   R(srr1),   R(tbl),    R(tbu),    \
-  /* 116 */ R4(dec),   R(dabr),   R4(ear)
+  /*  87 */ S4(pvr), \
+  /*  88 */ S(ibat0u), S(ibat0l), S(ibat1u), S(ibat1l), \
+  /*  92 */ S(ibat2u), S(ibat2l), S(ibat3u), S(ibat3l), \
+  /*  96 */ S(dbat0u), S(dbat0l), S(dbat1u), S(dbat1l), \
+  /* 100 */ S(dbat2u), S(dbat2l), S(dbat3u), S(dbat3l), \
+  /* 104 */ S(sdr1),   S64(asr),  S(dar),    S4(dsisr), \
+  /* 108 */ S(sprg0),  S(sprg1),  S(sprg2),  S(sprg3),  \
+  /* 112 */ S(srr0),   S(srr1),   S(tbl),    S(tbu),    \
+  /* 116 */ S4(dec),   S(dabr),   S4(ear)
 
 /* AltiVec registers.  */
 #define PPC_ALTIVEC_REGS \
@@ -2152,7 +2171,7 @@ rs6000_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
 static const struct reg registers_power[] =
 {
   COMMON_UISA_REGS,
-  /* 66 */ R4(cnd), R(lr), R(cnt), R4(xer), R4(mq),
+  /* 66 */ R4(cnd), S(lr), S(cnt), S4(xer), S4(mq),
   /* 71 */ R4(fpscr)
 };
 
@@ -2165,36 +2184,49 @@ static const struct reg registers_powerpc[] =
   PPC_ALTIVEC_REGS
 };
 
-/* IBM PowerPC 403.  */
+/* IBM PowerPC 403.
+
+   Some notes about the "tcr" special-purpose register:
+   - On the 403 and 403GC, SPR 986 is named "tcr", and it controls the
+     403's programmable interval timer, fixed interval timer, and
+     watchdog timer.
+   - On the 602, SPR 984 is named "tcr", and it controls the 602's
+     watchdog timer, and nothing else.
+
+   Some of the fields are similar between the two, but they're not
+   compatible with each other.  Since the two variants have different
+   registers, with different numbers, but the same name, we can't
+   splice the register name to get the SPR number.  */
 static const struct reg registers_403[] =
 {
   COMMON_UISA_REGS,
   PPC_UISA_SPRS,
   PPC_SEGMENT_REGS,
   PPC_OEA_SPRS,
-  /* 119 */ R(icdbdr), R(esr),  R(dear), R(evpr),
-  /* 123 */ R(cdbcr),  R(tsr),  R(tcr),  R(pit),
-  /* 127 */ R(tbhi),   R(tblo), R(srr2), R(srr3),
-  /* 131 */ R(dbsr),   R(dbcr), R(iac1), R(iac2),
-  /* 135 */ R(dac1),   R(dac2), R(dccr), R(iccr),
-  /* 139 */ R(pbl1),   R(pbu1), R(pbl2), R(pbu2)
+  /* 119 */ S(icdbdr), S(esr),  S(dear), S(evpr),
+  /* 123 */ S(cdbcr),  S(tsr),  SN4(tcr, ppc_spr_403_tcr), S(pit),
+  /* 127 */ S(tbhi),   S(tblo), S(srr2), S(srr3),
+  /* 131 */ S(dbsr),   S(dbcr), S(iac1), S(iac2),
+  /* 135 */ S(dac1),   S(dac2), S(dccr), S(iccr),
+  /* 139 */ S(pbl1),   S(pbu1), S(pbl2), S(pbu2)
 };
 
-/* IBM PowerPC 403GC.  */
+/* IBM PowerPC 403GC.
+   See the comments about 'tcr' for the 403, above.  */
 static const struct reg registers_403GC[] =
 {
   COMMON_UISA_REGS,
   PPC_UISA_SPRS,
   PPC_SEGMENT_REGS,
   PPC_OEA_SPRS,
-  /* 119 */ R(icdbdr), R(esr),  R(dear), R(evpr),
-  /* 123 */ R(cdbcr),  R(tsr),  R(tcr),  R(pit),
-  /* 127 */ R(tbhi),   R(tblo), R(srr2), R(srr3),
-  /* 131 */ R(dbsr),   R(dbcr), R(iac1), R(iac2),
-  /* 135 */ R(dac1),   R(dac2), R(dccr), R(iccr),
-  /* 139 */ R(pbl1),   R(pbu1), R(pbl2), R(pbu2),
-  /* 143 */ R(zpr),    R(pid),  R(sgr),  R(dcwr),
-  /* 147 */ R(tbhu),   R(tblu)
+  /* 119 */ S(icdbdr), S(esr),  S(dear), S(evpr),
+  /* 123 */ S(cdbcr),  S(tsr),  SN4(tcr, ppc_spr_403_tcr), S(pit),
+  /* 127 */ S(tbhi),   S(tblo), S(srr2), S(srr3),
+  /* 131 */ S(dbsr),   S(dbcr), S(iac1), S(iac2),
+  /* 135 */ S(dac1),   S(dac2), S(dccr), S(iccr),
+  /* 139 */ S(pbl1),   S(pbu1), S(pbl2), S(pbu2),
+  /* 143 */ S(zpr),    S(pid),  S(sgr),  S(dcwr),
+  /* 147 */ S(tbhu),   S(tblu)
 };
 
 /* Motorola PowerPC 505.  */
@@ -2204,7 +2236,7 @@ static const struct reg registers_505[] =
   PPC_UISA_SPRS,
   PPC_SEGMENT_REGS,
   PPC_OEA_SPRS,
-  /* 119 */ R(eie), R(eid), R(nri)
+  /* 119 */ S(eie), S(eid), S(nri)
 };
 
 /* Motorola PowerPC 860 or 850.  */
@@ -2214,18 +2246,18 @@ static const struct reg registers_860[] =
   PPC_UISA_SPRS,
   PPC_SEGMENT_REGS,
   PPC_OEA_SPRS,
-  /* 119 */ R(eie), R(eid), R(nri), R(cmpa),
-  /* 123 */ R(cmpb), R(cmpc), R(cmpd), R(icr),
-  /* 127 */ R(der), R(counta), R(countb), R(cmpe),
-  /* 131 */ R(cmpf), R(cmpg), R(cmph), R(lctrl1),
-  /* 135 */ R(lctrl2), R(ictrl), R(bar), R(ic_cst),
-  /* 139 */ R(ic_adr), R(ic_dat), R(dc_cst), R(dc_adr),
-  /* 143 */ R(dc_dat), R(dpdr), R(dpir), R(immr),
-  /* 147 */ R(mi_ctr), R(mi_ap), R(mi_epn), R(mi_twc),
-  /* 151 */ R(mi_rpn), R(md_ctr), R(m_casid), R(md_ap),
-  /* 155 */ R(md_epn), R(m_twb), R(md_twc), R(md_rpn),
-  /* 159 */ R(m_tw), R(mi_dbcam), R(mi_dbram0), R(mi_dbram1),
-  /* 163 */ R(md_dbcam), R(md_dbram0), R(md_dbram1)
+  /* 119 */ S(eie), S(eid), S(nri), S(cmpa),
+  /* 123 */ S(cmpb), S(cmpc), S(cmpd), S(icr),
+  /* 127 */ S(der), S(counta), S(countb), S(cmpe),
+  /* 131 */ S(cmpf), S(cmpg), S(cmph), S(lctrl1),
+  /* 135 */ S(lctrl2), S(ictrl), S(bar), S(ic_cst),
+  /* 139 */ S(ic_adr), S(ic_dat), S(dc_cst), S(dc_adr),
+  /* 143 */ S(dc_dat), S(dpdr), S(dpir), S(immr),
+  /* 147 */ S(mi_ctr), S(mi_ap), S(mi_epn), S(mi_twc),
+  /* 151 */ S(mi_rpn), S(md_ctr), S(m_casid), S(md_ap),
+  /* 155 */ S(md_epn), S(m_twb), S(md_twc), S(md_rpn),
+  /* 159 */ S(m_tw), S(mi_dbcam), S(mi_dbram0), S(mi_dbram1),
+  /* 163 */ S(md_dbcam), S(md_dbram0), S(md_dbram1)
 };
 
 /* Motorola PowerPC 601.  Note that the 601 has different register numbers
@@ -2237,20 +2269,21 @@ static const struct reg registers_601[] =
   PPC_UISA_SPRS,
   PPC_SEGMENT_REGS,
   PPC_OEA_SPRS,
-  /* 119 */ R(hid0), R(hid1), R(iabr), R(dabr),
-  /* 123 */ R(pir), R(mq), R(rtcu), R(rtcl)
+  /* 119 */ S(hid0), S(hid1), S(iabr), S(dabr),
+  /* 123 */ S(pir), S(mq), S(rtcu), S(rtcl)
 };
 
-/* Motorola PowerPC 602.  */
+/* Motorola PowerPC 602.
+   See the notes under the 403 about 'tcr'.  */
 static const struct reg registers_602[] =
 {
   COMMON_UISA_REGS,
   PPC_UISA_SPRS,
   PPC_SEGMENT_REGS,
   PPC_OEA_SPRS,
-  /* 119 */ R(hid0), R(hid1), R(iabr), R0,
-  /* 123 */ R0, R(tcr), R(ibr), R(esasrr),
-  /* 127 */ R(sebr), R(ser), R(sp), R(lt)
+  /* 119 */ S(hid0), S(hid1), S(iabr), R0,
+  /* 123 */ R0, SN4(tcr, ppc_spr_602_tcr), S(ibr), S(esasrr),
+  /* 127 */ S(sebr), S(ser), S(sp), S(lt)
 };
 
 /* Motorola/IBM PowerPC 603 or 603e.  */
@@ -2260,9 +2293,9 @@ static const struct reg registers_603[] =
   PPC_UISA_SPRS,
   PPC_SEGMENT_REGS,
   PPC_OEA_SPRS,
-  /* 119 */ R(hid0), R(hid1), R(iabr), R0,
-  /* 123 */ R0, R(dmiss), R(dcmp), R(hash1),
-  /* 127 */ R(hash2), R(imiss), R(icmp), R(rpa)
+  /* 119 */ S(hid0), S(hid1), S(iabr), R0,
+  /* 123 */ R0, S(dmiss), S(dcmp), S(hash1),
+  /* 127 */ S(hash2), S(imiss), S(icmp), S(rpa)
 };
 
 /* Motorola PowerPC 604 or 604e.  */
@@ -2272,9 +2305,9 @@ static const struct reg registers_604[] =
   PPC_UISA_SPRS,
   PPC_SEGMENT_REGS,
   PPC_OEA_SPRS,
-  /* 119 */ R(hid0), R(hid1), R(iabr), R(dabr),
-  /* 123 */ R(pir), R(mmcr0), R(pmc1), R(pmc2),
-  /* 127 */ R(sia), R(sda)
+  /* 119 */ S(hid0), S(hid1), S(iabr), S(dabr),
+  /* 123 */ S(pir), S(mmcr0), S(pmc1), S(pmc2),
+  /* 127 */ S(sia), S(sda)
 };
 
 /* Motorola/IBM PowerPC 750 or 740.  */
@@ -2284,12 +2317,12 @@ static const struct reg registers_750[] =
   PPC_UISA_SPRS,
   PPC_SEGMENT_REGS,
   PPC_OEA_SPRS,
-  /* 119 */ R(hid0), R(hid1), R(iabr), R(dabr),
-  /* 123 */ R0, R(ummcr0), R(upmc1), R(upmc2),
-  /* 127 */ R(usia), R(ummcr1), R(upmc3), R(upmc4),
-  /* 131 */ R(mmcr0), R(pmc1), R(pmc2), R(sia),
-  /* 135 */ R(mmcr1), R(pmc3), R(pmc4), R(l2cr),
-  /* 139 */ R(ictc), R(thrm1), R(thrm2), R(thrm3)
+  /* 119 */ S(hid0), S(hid1), S(iabr), S(dabr),
+  /* 123 */ R0, S(ummcr0), S(upmc1), S(upmc2),
+  /* 127 */ S(usia), S(ummcr1), S(upmc3), S(upmc4),
+  /* 131 */ S(mmcr0), S(pmc1), S(pmc2), S(sia),
+  /* 135 */ S(mmcr1), S(pmc3), S(pmc4), S(l2cr),
+  /* 139 */ S(ictc), S(thrm1), S(thrm2), S(thrm3)
 };
 
 
@@ -2316,7 +2349,7 @@ static const struct reg registers_e500[] =
   PPC_UISA_NOFP_SPRS,
   /* 7...38 */
   PPC_EV_REGS,
-  R8(acc), R(spefscr),
+  R8(acc), S4(spefscr),
   /* NOTE: Add new registers here the end of the raw register
      list and just before the first pseudo register.  */
   /* 41...72 */

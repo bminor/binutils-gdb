@@ -1,5 +1,16 @@
 2004-07-20  Jim Blandy  <jimb@redhat.com>
 
+	Include PowerPC SPR numbers for special-purpose registers.
+	* rs6000-tdep.c (struct reg): Add new member, 'spr_num'.
+	(R, R4, R8, R16, F, P, R32, R64, R0): Include value for
+	new member in initializer.
+	(S, S4, SN4, S64): New macros for defining special-purpose
+	registers.
+	(PPC_UISA_SPRS, PPC_UISA_NOFP_SPRS, PPC_OEA_SPRS, registers_power,
+	registers_403, registers_403GC, registers_505, registers_860,
+	registers_601, registers_602, registers_603, registers_604,
+	registers_750, registers_e500): Use them.
+
 	* rs6000-tdep.c (rs6000_gdbarch_init): Delete variable 'power';
 	replace references with expression used to initialize variable.
 
