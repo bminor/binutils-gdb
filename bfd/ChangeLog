@@ -1,3 +1,10 @@
+Sun Sep 20 00:48:07 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* elf32-m68k.c: Include "elf/m68k.h".  Remove definition of enum
+	reloc_type.  Rename R_68K__max to R_68K_max.
+	(howto_table): Use _bfd_elf_rel_vtable_reloc_fn for a VTENTRY
+	reloc.
+
 Sun Sep 20 00:09:25 1998  Chris Torek  <torek@bsdi.com>
 
 	* libbfd.c (bfd_getb32): Rewrite expression to get better code.
