@@ -1,4 +1,11 @@
 start-sanitize-tic80
+Wed Jan 22 15:40:28 1997  Fred Fish  <fnf@cygnus.com>
+
+	* coff-tic80.c (tic80coff_vec): Use correct data put/get
+	routines for little endian data.
+	* coffcode.h (coff_write_object_contents): Set magic to
+ 	TIC80_ARCH_MAGIC for TIc80.
+
 Tue Jan 21 12:32:43 1997  Fred Fish  <fnf@cygnus.com>
 
 	* coff-tic80.c (tic80coff_vec): Change to little endian data
