@@ -1,5 +1,8 @@
 Fri Feb  7 09:31:21 1997  Jeffrey A Law  (law@cygnus.com)
 
+	* gdb.c++/virtfunc.exp: Expect failure for virtual function
+	call tests if the target doesn't support inferior function calls.
+
 	* gdb.base/printcmds.exp: Allow minor deviation in FP values
 	in printf tests.
 
