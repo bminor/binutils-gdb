@@ -1,3 +1,13 @@
+Wed May  6 15:28:51 1998  Klaus Kaempf  <kkaempf@progis.de>
+
+	* makefile.vms: Run dec c with /nodebug.  Pass CC value when
+	calling make.
+
+Tue May  5 15:19:00 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* configure: Build dlltool for thumb-pe target.
+	* configure.in: Build dlltool for thumb-pe target.
+
 Sun May  3 22:04:49 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am (EXTRA_PROGRAMS): Change $(SRCONV_PROG) to sysconf
