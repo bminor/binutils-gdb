@@ -1,3 +1,8 @@
+Fri Aug 28 13:13:33 1992  John Gilmore  (gnu@cygnus.com)
+
+	* vx-share/README, nindy-share/README:  New files describing
+	how these directories' code is shared, and with whom.
+
 Thu Aug 27 20:04:56 1992  John Gilmore  (gnu@cygnus.com)
 
 	* configure.in (target configurations):  Reformat into table.
