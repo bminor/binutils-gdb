@@ -420,24 +420,17 @@ AC_CHECK_HEADERS(term.h, [], [],
 # unconditionally, so what's the point in checking these?
 AC_CHECK_HEADERS(ctype.h time.h)
 
-dnl Check for struct stat with an st_blocks member
-AC_MSG_CHECKING(for member st_blocks in struct stat)
-AC_CACHE_VAL(gdb_cv_have_struct_stat_with_st_blocks_member,
-  [AC_TRY_COMPILE([#include <sys/types.h>
-#include <sys/stat.h>],
-                  [struct stat st; (void) st.st_blocks;],
-                  gdb_cv_have_struct_stat_with_st_blocks_member=yes,
-                  gdb_cv_have_struct_stat_with_st_blocks_member=no)])
-AC_MSG_RESULT($gdb_cv_have_struct_stat_with_st_blocks_member)
-if test $gdb_cv_have_struct_stat_with_st_blocks_member = yes; then
-  AC_DEFINE(HAVE_STRUCT_STAT_ST_BLOCKS)
-fi
-
 # ------------------------- #
 # Checks for declarations.  #
 # ------------------------- #
 
 gcc_AC_CHECK_DECLS(getopt)
+
+# ----------------------- #
+# Checks for structures.  #
+# ----------------------- #
+
+AC_CHECK_MEMBERS([struct stat.st_blocks])
 
 # ------------------ #
 # Checks for types.  #

@@ -1,5 +1,13 @@
 2005-01-21  Mark Kettenis  <kettenis@gnu.org>
 
+	* configure.ac (targ_archs): Use standard autoconf check for
+	"struct stat.st_blocks" instead of rolling our own.
+	* configure: Regenerated.
+	* acconfig.h (HAVE_STRUCT_STAT_ST_BLOCKS): Remove undef.
+	* config.in: Regenerated.
+
+2005-01-21  Mark Kettenis  <kettenis@gnu.org>
+
 	* configure.ac: Modernize checks for `long long' and `long double'
 	support.
 	* configure: Regenerated.
