@@ -371,7 +371,8 @@ proc gdb_continue_to_breakpoint {name} {
 
 
 
-# gdb_test COMMAND PATTERN MESSAGE -- send a command to gdb; test the result.
+# gdb_test COMMAND PATTERN MESSAGE QUESTION RESPONSE
+# Send a command to gdb; test the result.
 #
 # COMMAND is the command to execute, send to GDB with send_gdb.  If
 #   this is the null string no command is sent.
@@ -381,6 +382,9 @@ proc gdb_continue_to_breakpoint {name} {
 #   omitted, then the pass/fail messages use the command string as the
 #   message.  (If this is the empty string, then sometimes we don't
 #   call pass or fail at all; I don't understand this at all.)
+# QUESTION is a question GDB may ask in response to COMMAND, like
+#   "are you sure?"
+# RESPONSE is the response to send if QUESTION appears.
 #
 # Returns:
 #    1 if the test failed,

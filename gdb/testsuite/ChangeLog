@@ -1,3 +1,7 @@
+2001-06-13  Jim Blandy  <jimb@redhat.com>
+
+	* lib/gdb.exp (gdb_test): Doc fix.
+
 2001-06-10  Michael Chastain  <chastain@redhat.com>
 
 	* gdb.base/exprs.exp: Remove a duplicate test.
