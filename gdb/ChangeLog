@@ -1,3 +1,7 @@
+Sat Oct  7 22:52:42 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* ch-exp.y (yylex): Fix typo.
+
 Fri Oct  6 11:56:49 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 
 	* remote-sim.c (gdbsim_open): Put callback initializations here.
