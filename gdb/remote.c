@@ -182,7 +182,7 @@ static int timeout = 2;
 int icache;
 #endif
 
-/* Descriptor for I/O to remote machine.  Initialize it to -1 so that
+/* Descriptor for I/O to remote machine.  Initialize it to NULL so that
    remote_open knows that we don't have a file open when the program
    starts.  */
 serial_t remote_desc = NULL;
