@@ -1,3 +1,9 @@
+Wed Sep  1 13:34:29 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* elf-hppa.h (elf_hppa_add_symbol_hook): New function.
+	(elf_hppa_final_link, elf_hppa_relocate_section): Likewise.
+	(elf_hppa_final_link_relocate, elf_hppa_relocate_insn): Likewise.
+
 1999-08-31  Alexandre Petit-Bianco  <apbianco@cygnus.com>
 
 	* elflink.h (record_link_assignment): When possible, keep the

@@ -19,14 +19,49 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define ELF_HOWTO_TABLE_SIZE       R_PARISC_UNIMPLEMENTED + 1
 
+/* This file is included by multiple PA ELF BFD backends with different
+   sizes.
+
+   Most of the routines are written to be size independent, but sometimes
+   external constraints require 32 or 64 bit specific code.  We remap
+   the definitions/functions as necessary here.  */
 #if ARCH_SIZE == 64
 #define ELF_R_TYPE(X)   ELF64_R_TYPE(X)
+#define ELF_R_SYM(X)   ELF64_R_SYM(X)
 #define _bfd_elf_hppa_gen_reloc_type _bfd_elf64_hppa_gen_reloc_type
+#define elf_hppa_relocate_section elf64_hppa_relocate_section
+#define bfd_elf_bfd_final_link bfd_elf64_bfd_final_link
+#define elf_hppa_final_link elf64_hppa_final_link
 #endif
 #if ARCH_SIZE == 32
 #define ELF_R_TYPE(X)   ELF32_R_TYPE(X)
+#define ELF_R_SYM(X)   ELF32_R_SYM(X)
 #define _bfd_elf_hppa_gen_reloc_type _bfd_elf32_hppa_gen_reloc_type
+#define elf_hppa_relocate_section elf32_hppa_relocate_section
+#define bfd_elf_bfd_final_link bfd_elf32_bfd_final_link
+#define elf_hppa_final_link elf32_hppa_final_link
 #endif
+
+static boolean
+elf_hppa_relocate_section
+  PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *,
+           bfd_byte *, Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
+
+static bfd_reloc_status_type elf_hppa_final_link_relocate
+  PARAMS ((reloc_howto_type *, bfd *, bfd *, asection *,
+           bfd_byte *, bfd_vma, bfd_vma, bfd_vma, struct bfd_link_info *,
+           asection *, const char *, int));
+
+static unsigned long elf_hppa_relocate_insn
+  PARAMS ((bfd *, asection *, unsigned long, unsigned long, long,
+           long, unsigned long, unsigned long, unsigned long));
+
+static boolean elf_hppa_add_symbol_hook
+  PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym,
+	   const char **, flagword *, asection **, bfd_vma *));
+
+static boolean elf_hppa_final_link
+  PARAMS ((bfd *, struct bfd_link_info *));
 
 /* ELF/PA relocation howto entries.  */
 
@@ -667,3 +702,508 @@ elf_hppa_fake_sections (abfd, hdr, sec)
   return true;
 }
 
+/* Hook called by the linker routine which adds symbols from an object
+   file.  HP's libraries define symbols with HP specific section
+   indices, which we have to handle.  */
+
+static boolean
+elf_hppa_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
+     bfd *abfd;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+     const Elf_Internal_Sym *sym;
+     const char **namep ATTRIBUTE_UNUSED;
+     flagword *flagsp ATTRIBUTE_UNUSED;
+     asection **secp;
+     bfd_vma *valp;
+{
+  int index = sym->st_shndx;
+  
+  switch (index)
+    {
+    case SHN_PARISC_ANSI_COMMON:
+      *secp = bfd_make_section_old_way (abfd, ".PARISC.ansi.common");
+      (*secp)->flags |= SEC_IS_COMMON;
+      *valp = sym->st_size;
+      break;
+      
+    case SHN_PARISC_HUGE_COMMON:
+      *secp = bfd_make_section_old_way (abfd, ".PARISC.huge.common");
+      (*secp)->flags |= SEC_IS_COMMON;
+      *valp = sym->st_size;
+      break;
+    }
+
+  return true;
+}
+
+/* Called after we have seen all the input files/sections, but before
+   final symbol resolution and section placement has been determined.
+
+   We use this hook to (possibly) provide a value for __gp, then we
+   fall back to the generic ELF final link routine.  */
+
+static boolean
+elf_hppa_final_link (abfd, info)
+     bfd *abfd;
+     struct bfd_link_info *info;
+{
+  /* Make sure we've got ourselves a suitable __gp value.  */
+  if (!info->relocateable)
+    {
+      bfd_vma min_short_vma = (bfd_vma -1), max_short_vma = 0;
+      struct elf_link_hash_entry *gp;
+      bfd_vma gp_val = 0;
+      asection *os;
+
+      /* Find the min and max vma of all short sections.  */
+      for (os = abfd->sections; os ; os = os->next)
+	{
+	  bfd_vma lo, hi;
+
+	  if ((os->flags & SEC_ALLOC) == 0)
+	    continue;
+
+	  lo = os->vma;
+	  hi = os->vma + os->_raw_size;
+	  if (hi < lo)
+	    hi = (bfd_vma) -1;
+
+	  /* This would be cleaner if we marked sections with an attribute
+	     indicating they are short sections.  */
+	  if (strcmp (os->name, ".sbss") == 0
+	      || strcmp (os->name, ".sdata") == 0)
+	    {
+	      if (min_short_vma > lo)
+		min_short_vma = lo;
+	      if (max_short_vma < hi)
+		max_short_vma = hi;
+	    }
+	}
+
+      /* See if the user wants to force a value.  */
+      gp = elf_link_hash_lookup (elf_hash_table (info), "__gp", false,
+				 false, false);
+
+      if (gp
+	  && (gp->root.type == bfd_link_hash_defined
+	      || gp->root.type == bfd_link_hash_defweak))
+	{
+	  asection *gp_sec = gp->root.u.def.section;
+	  gp_val = (gp->root.u.def.value
+		    + gp_sec->output_section->vma
+		    + gp_sec->output_offset);
+	}
+      else if (max_short_vma != 0)
+	{
+	  /* Pick a sensible value.  */
+	  gp_val = min_short_vma;
+
+	  /* If we don't cover all the short data, adjust.  */
+	  if (max_short_vma - gp_val >= 0x2000)
+	    gp_val = min_short_vma + 0x2000;
+
+	  /* If we're addressing stuff past the end, adjust back.  */
+	  if (gp_val > max_vma)
+	    gp_val = max_vma - 0x2000 + 8;
+
+	  /* If there was no __gp symbol, create one.  */
+	  if (!gp)
+	    gp = elf_link_hash_lookup (elf_hash_table (info), "__gp", true,
+				       true, false);
+
+	  /* We now know the value for the global pointer, figure out which
+	     section to shove it into and mark it as defined in the hash
+	     table.  */
+	  for (os = abfd->sections; os ; os = os->next)
+	    {
+	      bfd_vma low = os->output_offset + os->output_section->vma;
+	      bfd_vma high = low + os->_raw_size;
+
+	      if (gp_val >= low && gp_val <= high)
+		{
+		  gp->root.type = bfd_link_hash_defined;
+		  gp->root.u.def.section = os;
+		  gp->root.u.def.value = gp_val - low;
+		  break;
+		}
+	    }
+	}
+
+      /* Validate whether all short sections are within
+	 range of the chosen GP.  */
+
+      if (max_short_vma != 0)
+	{
+	  if (max_short_vma - min_short_vma >= 0x4000)
+	    {
+	      (*_bfd_error_handler)
+		(_("%s: short data segment overflowed (0x%lx >= 0x4000)"),
+		 bfd_get_filename (abfd),
+		 (unsigned long)(max_short_vma - min_short_vma));
+	      return false;
+	    }
+	  else if ((gp_val > min_short_vma
+		    && gp_val - min_short_vma > 0x2000)
+		   || (gp_val < max_short_vma
+		       && max_short_vma - gp_val >= 0x2000))
+	    {
+	      (*_bfd_error_handler)
+		(_("%s: __gp does not cover short data segment"),
+		 bfd_get_filename (abfd));
+	      return false;
+	    }
+	}
+
+      _bfd_set_gp_value (abfd, gp_val);
+    }
+
+  /* Invoke the regular ELF backend linker to do all the work.  */
+  return bfd_elf_bfd_final_link (abfd, info);
+}
+
+/* Relocate an HPPA ELF section.  */
+
+static boolean
+elf_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
+			   contents, relocs, local_syms, local_sections)
+     bfd *output_bfd;
+     struct bfd_link_info *info;
+     bfd *input_bfd;
+     asection *input_section;
+     bfd_byte *contents;
+     Elf_Internal_Rela *relocs;
+     Elf_Internal_Sym *local_syms;
+     asection **local_sections;
+{
+  Elf_Internal_Shdr *symtab_hdr;
+  Elf_Internal_Rela *rel;
+  Elf_Internal_Rela *relend;
+
+  symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
+
+  rel = relocs;
+  relend = relocs + input_section->reloc_count;
+  for (; rel < relend; rel++)
+    {
+      int r_type;
+      reloc_howto_type *howto;
+      unsigned long r_symndx;
+      struct elf_link_hash_entry *h;
+      Elf_Internal_Sym *sym;
+      asection *sym_sec;
+      bfd_vma relocation;
+      bfd_reloc_status_type r;
+      const char *sym_name;
+
+      r_type = ELF_R_TYPE (rel->r_info);
+      if (r_type < 0 || r_type >= (int) R_PARISC_UNIMPLEMENTED)
+	{
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
+	}
+      howto = elf_hppa_howto_table + r_type;
+
+      r_symndx = ELF_R_SYM (rel->r_info);
+
+      if (info->relocateable)
+	{
+	  /* This is a relocateable link.  We don't have to change
+	     anything, unless the reloc is against a section symbol,
+	     in which case we have to adjust according to where the
+	     section symbol winds up in the output section.  */
+	  if (r_symndx < symtab_hdr->sh_info)
+	    {
+	      sym = local_syms + r_symndx;
+	      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
+		{
+		  sym_sec = local_sections[r_symndx];
+		  rel->r_addend += sym_sec->output_offset;
+		}
+	    }
+
+	  continue;
+	}
+
+      /* This is a final link.  */
+      h = NULL;
+      sym = NULL;
+      sym_sec = NULL;
+      if (r_symndx < symtab_hdr->sh_info)
+	{
+	  sym = local_syms + r_symndx;
+	  sym_sec = local_sections[r_symndx];
+	  relocation = ((ELF_ST_TYPE (sym->st_info) == STT_SECTION
+			   ? 0 : sym->st_value)
+			 + sym_sec->output_offset
+			 + sym_sec->output_section->vma);
+	}
+      else
+	{
+	  long indx;
+
+	  indx = r_symndx - symtab_hdr->sh_info;
+	  h = elf_sym_hashes (input_bfd)[indx];
+	  while (h->root.type == bfd_link_hash_indirect
+		 || h->root.type == bfd_link_hash_warning)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	  if (h->root.type == bfd_link_hash_defined
+	      || h->root.type == bfd_link_hash_defweak)
+	    {
+	      sym_sec = h->root.u.def.section;
+	      relocation = (h->root.u.def.value
+			    + sym_sec->output_offset
+			    + sym_sec->output_section->vma);
+	    }
+	  else if (h->root.type == bfd_link_hash_undefweak)
+	    relocation = 0;
+	  else
+	    {
+	      if (!((*info->callbacks->undefined_symbol)
+		    (info, h->root.root.string, input_bfd,
+		     input_section, rel->r_offset)))
+		return false;
+	      break;
+	    }
+	}
+
+      if (h != NULL)
+	sym_name = h->root.root.string;
+      else
+	{
+	  sym_name = bfd_elf_string_from_elf_section (input_bfd,
+						      symtab_hdr->sh_link,
+						      sym->st_name);
+	  if (sym_name == NULL)
+	    return false;
+	  if (*sym_name == '\0')
+	    sym_name = bfd_section_name (input_bfd, sym_sec);
+	}
+
+      r = elf_hppa_final_link_relocate (howto, input_bfd, output_bfd,
+					input_section, contents,
+					rel->r_offset, relocation,
+					rel->r_addend, info, sym_sec,
+					sym_name, h == NULL);
+
+      if (r != bfd_reloc_ok)
+	{
+	  switch (r)
+	    {
+	    default:
+	      abort ();
+	    case bfd_reloc_overflow:
+	      {
+		if (!((*info->callbacks->reloc_overflow)
+		      (info, sym_name, howto->name, (bfd_vma) 0,
+			input_bfd, input_section, rel->r_offset)))
+		  return false;
+	      }
+	      break;
+	    }
+	}
+    }
+  return true;
+}
+
+
+/* Actually perform a relocation as part of a final link.  */
+
+static bfd_reloc_status_type
+elf_hppa_final_link_relocate (howto, input_bfd, output_bfd,
+			      input_section, contents, offset, value,
+			      addend, info, sym_sec, sym_name, is_local)
+     reloc_howto_type *howto;
+     bfd *input_bfd;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
+     asection *input_section;
+     bfd_byte *contents;
+     bfd_vma offset;
+     bfd_vma value;
+     bfd_vma addend;
+     struct bfd_link_info *info;
+     asection *sym_sec;
+     const char *sym_name;
+     int is_local;
+{
+  unsigned long insn;
+  unsigned long r_type = howto->type;
+  unsigned long r_format = howto->bitsize;
+  unsigned long r_field = e_fsel;
+  bfd_byte *hit_data = contents + offset;
+  boolean r_pcrel = howto->pc_relative;
+
+  insn = bfd_get_32 (input_bfd, hit_data);
+
+/* For reference here a quick summary of the relocations found in the
+   HPUX 11.00 PA64 .o and .a files, but not yet implemented.  This is mostly
+   a guide to help prioritize what relocation support is worked on first.
+   The list will be deleted eventually.
+
+   27210 R_PARISC_SEGREL32
+   8458 R_PARISC_DLTREL14R
+   8284 R_PARISC_DLTIND21L
+   8218 R_PARISC_DLTIND14DR
+   6675 R_PARISC_FPTR64
+   6561 R_PARISC_DLTREL21L
+   3974 R_PARISC_DIR64
+   3715 R_PARISC_DLTREL14DR
+   1584 R_PARISC_LTOFF_FPTR14DR
+   1565 R_PARISC_LTOFF_FPTR21L
+   1120 R_PARISC_PCREL64
+   1096 R_PARISC_LTOFF_TP14DR
+   982 R_PARISC_LTOFF_TP21L
+   791 R_PARISC_GPREL64
+   772 R_PARISC_PLTOFF14DR
+   386 R_PARISC_PLTOFF21L
+   77 R_PARISC_DLTREL14WR
+   6 R_PARISC_LTOFF64
+   5 R_PARISC_SEGREL64
+   1 R_PARISC_DLTIND14R
+   1 R_PARISC_PCREL21L
+   1 R_PARISC_PCREL14R */
+
+  switch (r_type)
+    {
+    case R_PARISC_NONE:
+      break;
+
+    case R_PARISC_PCREL22F:
+    case R_PARISC_PCREL17F:
+      {
+	bfd_vma location;
+	r_field = e_fsel;
+
+	/* Find out where we are and where we're going.  */
+	location = (offset +
+		    input_section->output_offset +
+		    input_section->output_section->vma);
+
+	insn = elf_hppa_relocate_insn (input_bfd, input_section, insn,
+				       offset, value, addend, r_format,
+				       r_field, r_pcrel);
+	break;
+      }
+
+    /* Something we don't know how to handle.  */
+    default:
+      /* ?!? This is temporary as we flesh out basic linker support, once
+	 the basic support is functional we will return the not_supported
+	 error conditional appropriately.  */
+#if 0
+      return bfd_reloc_not_supported;
+#else
+      return bfd_reloc_ok;
+#endif
+    }
+
+  /* Update the instruction word.  */
+  bfd_put_32 (input_bfd, insn, hit_data);
+  return (bfd_reloc_ok);
+}
+
+/* Relocate the given INSN given the various input parameters.  */
+
+static unsigned long
+elf_hppa_relocate_insn (abfd, input_sect, insn, address, sym_value,
+			r_addend, r_format, r_field, pcrel)
+     bfd *abfd;
+     asection *input_sect;
+     unsigned long insn;
+     unsigned long address;
+     long sym_value;
+     long r_addend;
+     unsigned long r_format;
+     unsigned long r_field;
+     unsigned long pcrel;
+{
+  unsigned char opcode = get_opcode (insn);
+  long constant_value;
+
+  switch (opcode)
+    {
+    /* This is any 17 or 22bit PC-relative branch.  In PA2.0 syntax it
+       corresponds to the "B" instruction.  */
+    case BL:
+      /* Turn SYM_VALUE into a proper PC relative address.  */
+      sym_value -= (address + input_sect->output_offset
+		    + input_sect->output_section->vma);
+
+      /* Adjust for any field selectors.  */
+      sym_value = hppa_field_adjust (sym_value, -8, r_field);
+
+      /* All PC relative branches are implicitly shifted by 2 places.  */
+      sym_value >>= 2;
+
+      /* Now determine if this is a 17 or 22 bit branch and take
+	 appropriate action.  */
+      if (((insn >> 13) & 0x7) == 0x4
+	  || ((insn >> 13) & 0x7) == 0x5)
+	{
+	  unsigned int w3, w2, w1, w;
+
+	  /* These are 22 bit branches.  Mask off bits we do not care
+	     about.  */
+	  sym_value &= 0x3fffff;
+
+	  /* Now extract the W1, W2, W3 and W fields from the value.  */
+	  dis_assemble_22 (sym_value, &w3, &w1, &w2, &w);
+
+	  /* Mask out bits for the value in the instruction.  */
+	  insn &= 0xfc00e002;
+
+	  /* Insert the bits for the W1, W2 and W fields into the
+	     instruction.  */
+	  insn |= (w3 << 21) | (w2 << 2) | (w1 << 16) | w;
+	  return insn;
+	}
+      else
+	{
+	  unsigned int w2, w1, w;
+	  /* These are 17 bit branches.  Mask off bits we do not care
+	     about.  */
+	  sym_value &= 0x1ffff;
+
+	  /* Now extract the W1, W2 and W fields from the value.  */
+	  dis_assemble_17 (sym_value, &w1, &w2, &w);
+
+	  /* Mask out bits for the value in the instruction.  */
+	  insn &= 0xffe0e002;
+
+	  /* Insert the bits for the W1, W2 and W fields into the
+	     instruction.  */
+	  insn |= (w2 << 2) | (w1 << 16) | w;
+	  return insn;
+	}
+
+    /* This corresponds to any 17 bit absolute branch.  */
+    case BE:
+    case BLE:
+      {
+	unsigned int w2, w1, w;
+
+	/* Adjust for any field selectors.  */
+	sym_value = hppa_field_adjust (sym_value, 0, r_field);
+
+	/* All absolute branches are implicitly shifted by 2 places.  */
+	sym_value >>= 2;
+
+	/* These are 17 bit branches.  Mask off bits we do not care
+	   about.  */
+	sym_value &= 0x1ffff;
+
+	/* Now extract the W1, W2 and W fields from the value.  */
+	dis_assemble_17 (sym_value, &w1, &w2, &w);
+
+	/* Mask out bits for the value in the instruction.  */
+	insn &= 0xffe0e002;
+
+	/* Insert the bits for the W1, W2 and W fields into the
+	   instruction.  */
+	insn |= (w2 << 2) | (w1 << 16) | w;
+	return insn;
+      }
+
+    default:
+      return insn;
+    }
+}
