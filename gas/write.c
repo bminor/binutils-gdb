@@ -718,7 +718,8 @@ write_contents (abfd, sec, xxx)
   fragS *f;
 
   /* Write out the frags.  */
-  if (! (bfd_get_section_flags (abfd, sec) & SEC_HAS_CONTENTS))
+  if (seginfo == NULL
+      || ! (bfd_get_section_flags (abfd, sec) & SEC_HAS_CONTENTS))
     return;
 
   for (f = seginfo->frchainP->frch_root;

@@ -4605,15 +4605,32 @@ ecoff_frob_file ()
 
 #undef SET
 
+  /* Fill in the register masks.  */
+  {
+    asection *regsec;
+    struct ecoff_reginfo s;
+
+    regsec = bfd_make_section (stdoutput, REGINFO);
+    know (regsec != NULL);
+
+    if (bfd_get_section_contents (stdoutput, regsec, (PTR) &s,
+				  (file_ptr) 0, sizeof s) == false)
+      as_fatal ("Can't read REGINFO section");
+
 #ifdef TC_MIPS
-  /* Get the MIPS register masks.  It's probably not worth setting up
-     a generic interface for this.  */
-  ecoff_data (stdoutput)->gprmask = mips_gprmask;
-  ecoff_data (stdoutput)->cprmask[0] = mips_cprmask[0];
-  ecoff_data (stdoutput)->cprmask[1] = mips_cprmask[1];
-  ecoff_data (stdoutput)->cprmask[2] = mips_cprmask[2];
-  ecoff_data (stdoutput)->cprmask[3] = mips_cprmask[3];
+    /* Fill in the MIPS register masks.  It's probably not worth
+       setting up a generic interface for this.  */
+    s.gprmask = mips_gprmask;
+    s.cprmask[0] = mips_cprmask[0];
+    s.cprmask[1] = mips_cprmask[1];
+    s.cprmask[2] = mips_cprmask[2];
+    s.cprmask[3] = mips_cprmask[3];
 #endif
+
+    if (bfd_set_section_contents (stdoutput, regsec, (PTR) &s,
+				  (file_ptr) 0, sizeof s) == false)
+      as_fatal ("Can't write REGINFO section");
+  }
 
   ecoff_data (stdoutput)->raw_size = offset;
   ecoff_data (stdoutput)->raw_syments = buf;

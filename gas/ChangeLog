@@ -1,3 +1,11 @@
+Mon Oct 11 17:18:51 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* write.c (write_contents): Don't crash if seginfo is NULL.
+
+	* config/obj-ecoff.c (ecoff_frob_file): Write out register masks
+	by modifying .reginfo section, not by directly modifying BFD
+	backend data.
+
 Mon Oct 11 14:11:32 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
 
 	* config/ho-sunos.h: remove extern time declaration
