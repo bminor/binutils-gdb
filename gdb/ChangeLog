@@ -1,9 +1,25 @@
+Wed Nov  6 17:21:59 1991  John Gilmore  (gnu at cygnus.com)
+
+	* coffread.c:  Eliminate c_nsyms in favor of c_naux.
+	Complain if no auxents on .bf and .ef FCN symbols, and assume
+	lots of line numbers.
+	(init_linenos, enter_linenos):  Use a sentinel at the end of the
+	read-in linenos, to make for a fast, safe loop-end test.
+
+Wed Nov  6 02:54:08 1991  Steve Chamberlain  (sac at cygnus.com)
+
+	* coffread.c (read_coff_symtab): coffread used to rely on the
+	x_sym.x_misc.x_lnsz.x_lnno field giving the # of linnos in a
+	function. Two of the formats I'm using (29k and 88k) don't seem to
+	set it. Ths patch to fcn_last_line and (enter_linenos) is an
+	attempt to use the actual size of the linno table in the file to set
+	the number of linenos to process.
+
 Tue Nov  5 22:47:46 1991  Steve Chamberlain  (sac at cygnus.com)
 
 	* Makefile.in: put a - infront of the mv y.tab.c c-exp.tab.c and
 	mv y.tab.c m2-exp.tab.c, so that if bison is used, and the files
 	are created in place, so the mv fails, then the make continues.
-
 
 Tue Nov  5 16:47:47 1991  Per Bothner  (bothner at cygnus.com)
 

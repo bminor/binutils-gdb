@@ -240,6 +240,9 @@ extern CORE_ADDR startup_file_end;	/* From blockframe.c */
 struct complaint ef_complaint = 
   {"Unmatched .ef symbol(s) ignored starting at symnum %d", 0, 0};
 
+struct complaint no_aux_complaint =
+  {"symbol %d without one aux entry", 0, 0};
+
 struct complaint lineno_complaint =
   {"Line number pointer %d lower than start of line numbers", 0, 0};
 
@@ -830,7 +833,7 @@ coff_new_init ()
 struct coff_symbol {
   char *c_name;
   int c_symnum;		/* symbol number of this entry */
-  int c_nsyms;		/* 1 if syment only, 2 if syment + auxent, etc */
+  int c_naux;		/* 0 if syment only, 1 if syment + auxent, etc */
   long c_value;
   int c_sclass;
   int c_secnum;
@@ -1030,6 +1033,8 @@ read_coff_symtab (desc, nsyms)
 		/* value contains address of first non-init type code */
 		/* main_aux.x_sym.x_misc.x_lnsz.x_lnno
 			    contains line number of '{' } */
+		if (cs->c_naux != 1)
+		  complain (no_aux_complaint, cs->c_symnum);
 		fcn_first_line = main_aux.x_sym.x_misc.x_lnsz.x_lnno;
 
 		new = (struct context_stack *)
@@ -1058,7 +1063,12 @@ read_coff_symtab (desc, nsyms)
 		    within_function = 0;
 		    break;
 		  }
-		fcn_last_line = main_aux.x_sym.x_misc.x_lnsz.x_lnno;
+		if (cs->c_naux != 1) {
+		  complain (no_aux_complaint, cs->c_symnum);
+		  fcn_last_line = 0x7FFFFFFF;
+		} else {
+		  fcn_last_line = main_aux.x_sym.x_misc.x_lnsz.x_lnno;
+		}
 		enter_linenos (fcn_line_ptr, fcn_first_line, fcn_last_line);
 
 		finish_block (new->name, &local_symbols, new->old_blocks,
@@ -1228,15 +1238,15 @@ read_one_sym (cs, sym, aux)
   cs->c_symnum = symnum;
   fread (temp_sym, local_symesz, 1, nlist_stream_global);
   bfd_coff_swap_sym_in (symfile_bfd, temp_sym, (char *)sym);
-  cs->c_nsyms = (sym->n_numaux & 0xff) + 1;
-  if (cs->c_nsyms >= 2)
+  cs->c_naux = sym->n_numaux & 0xff;
+  if (cs->c_naux >= 1)
     {
     fread (temp_aux, local_auxesz, 1, nlist_stream_global);
     bfd_coff_swap_aux_in (symfile_bfd, temp_aux, sym->n_type, sym->n_sclass,
 			  (char *)aux);
     /* If more than one aux entry, read past it (only the first aux
        is important). */
-    for (i = 2; i < cs->c_nsyms; i++)
+    for (i = 1; i < cs->c_naux; i++)
       fread (temp_aux, local_auxesz, 1, nlist_stream_global);
     }
   cs->c_name = getsymname (sym);
@@ -1247,7 +1257,7 @@ read_one_sym (cs, sym, aux)
   if (!SDB_TYPE (cs->c_type))
     cs->c_type = 0;
 
-  symnum += cs->c_nsyms;
+  symnum += 1 + cs->c_naux;
 }
 
 /* Support for string table handling */
@@ -1384,11 +1394,15 @@ init_lineno (chan, offset, size)
   if (lseek (chan, offset, 0) < 0)
     return -1;
   
-  linetab = (char *) xmalloc (size);
+  /* Allocate the desired table, plus a sentinel */
+  linetab = (char *) xmalloc (size + local_linesz);
 
   val = myread (chan, linetab, size);
   if (val != size)
     return -1;
+
+  /* Terminate it with an all-zero sentinel record */
+  bzero (linetab + size, local_linesz);
 
   make_cleanup (free, linetab);		/* Be sure it gets de-allocated. */
   return 0;
@@ -1425,6 +1439,7 @@ enter_linenos (file_offset, first_line, last_line)
   for (;;) {
     bfd_coff_swap_lineno_in (symfile_bfd, rawptr, &lptr);
     rawptr += local_linesz;
+    /* The next function, or the sentinel, will have L_LNNO32 zero; we exit. */
     if (L_LNNO32 (&lptr) && L_LNNO32 (&lptr) <= last_line)
       record_line (first_line + L_LNNO32 (&lptr), lptr.l_addr.l_paddr);
     else
@@ -1754,7 +1769,7 @@ decode_type (cs, c_type, aux)
 	  /* Define an array type.  */
 	  /* auxent refers to array, not base type */
 	  if (aux->x_sym.x_tagndx.l == 0)
-	    cs->c_nsyms = 1;
+	    cs->c_naux = 0;
 
 	  /* shift the indices down */
 	  dim = &aux->x_sym.x_fcnary.x_ary.x_dimen[0];
@@ -1778,7 +1793,7 @@ decode_type (cs, c_type, aux)
     }
 
   /* Reference to existing type */
-  if (cs->c_nsyms > 1 && aux->x_sym.x_tagndx.l != 0)
+  if (cs->c_naux > 0 && aux->x_sym.x_tagndx.l != 0)
     {
       type = coff_alloc_type (aux->x_sym.x_tagndx.l);
       return type;
@@ -1798,7 +1813,7 @@ decode_function_type (cs, c_type, aux)
      register union internal_auxent *aux;
 {
   if (aux->x_sym.x_tagndx.l == 0)
-    cs->c_nsyms = 1;	/* auxent refers to function, not base type */
+    cs->c_naux = 0;	/* auxent refers to function, not base type */
 
   return decode_type (cs, DECREF (c_type), aux);
 }
@@ -1854,7 +1869,7 @@ decode_base_type (cs, c_type, aux)
 	return builtin_type_double;
 
       case T_STRUCT:
-	if (cs->c_nsyms != 2)
+	if (cs->c_naux != 1)
 	  {
 	    /* anonymous structure type */
 	    type = coff_alloc_type (cs->c_symnum);
@@ -1873,7 +1888,7 @@ decode_base_type (cs, c_type, aux)
 	return type;
 
       case T_UNION:
-	if (cs->c_nsyms != 2)
+	if (cs->c_naux != 1)
 	  {
 	    /* anonymous union type */
 	    type = coff_alloc_type (cs->c_symnum);
