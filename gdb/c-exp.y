@@ -546,7 +546,8 @@ block	:	BLOCKNAME
 block	:	block COLONCOLON name
 			{ struct symbol *tem
 			    = lookup_symbol (copy_name ($3), $1,
-					     VAR_NAMESPACE, 0, NULL);
+					     VAR_NAMESPACE, (int *) NULL,
+					     (struct symtab **) NULL);
 			  if (!tem || SYMBOL_CLASS (tem) != LOC_BLOCK)
 			    error ("No function \"%s\" in specified context.",
 				   copy_name ($3));
@@ -556,7 +557,8 @@ block	:	block COLONCOLON name
 variable:	block COLONCOLON name
 			{ struct symbol *sym;
 			  sym = lookup_symbol (copy_name ($3), $1,
-					       VAR_NAMESPACE, 0, NULL);
+					       VAR_NAMESPACE, (int *) NULL,
+					       (struct symtab **) NULL);
 			  if (sym == 0)
 			    error ("No symbol \"%s\" in specified context.",
 				   copy_name ($3));
@@ -612,7 +614,9 @@ variable:	qualified_name
 			  struct minimal_symbol *msymbol;
 
 			  sym =
-			    lookup_symbol (name, 0, VAR_NAMESPACE, 0, NULL);
+			    lookup_symbol (name, (const struct block *) NULL,
+					   VAR_NAMESPACE, (int *) NULL,
+					   (struct symtab **) NULL);
 			  if (sym)
 			    {
 			      write_exp_elt_opcode (OP_VAR_VALUE);
@@ -1478,7 +1482,8 @@ yylex ()
 				 { CPLUS_MARKER, 't', 'h', 'i', 's', '\0' };
 
 	  if (lookup_symbol (this_name, expression_context_block,
-			     VAR_NAMESPACE, 0, NULL))
+			     VAR_NAMESPACE, (int *) NULL,
+			     (struct symtab **) NULL))
 	    return THIS;
 	}
       break;
@@ -1515,8 +1520,8 @@ yylex ()
     sym = lookup_symbol (tmp, expression_context_block,
 			 VAR_NAMESPACE,
 			 current_language->la_language == language_cplus
-			 ? &is_a_field_of_this : NULL,
-			 NULL);
+			 ? &is_a_field_of_this : (int *) NULL,
+			 (struct symtab **) NULL);
     if ((sym && SYMBOL_CLASS (sym) == LOC_BLOCK) ||
         lookup_partial_symtab (tmp))
       {
@@ -1570,7 +1575,8 @@ yylex ()
 		      memcpy (tmp, namestart, p - namestart);
 		      tmp[p - namestart] = '\0';
 		      cur_sym = lookup_symbol (tmp, expression_context_block,
-					       VAR_NAMESPACE, NULL);
+					       VAR_NAMESPACE, (int *) NULL,
+					       (struct symtab **) NULL);
 		      if (cur_sym)
 			{
 			  if (SYMBOL_CLASS (cur_sym) == LOC_TYPEDEF)
