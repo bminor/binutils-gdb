@@ -5897,6 +5897,9 @@ You can give several consecutive @code{collect} commands, each one
 with a single argument, or one @code{collect} command with several
 arguments separated by commas: the effect is the same.
 
+The command @code{info scope} (@pxref{Symbols, info scope}) is
+particularly useful for figuring out what data to collect.
+
 @kindex while-stepping @r{(tracepoints)}
 @item while-stepping @var{n}
 Perform @var{n} single-step traces after the tracepoint, collecting
@@ -8245,6 +8248,11 @@ Symbol p1 is a local variable in register $ebx, length 4.
 Symbol nline is a local variable in register $edx, length 4.
 Symbol repeat is a local variable at frame offset -8, length 4.
 @end smallexample
+
+@noindent
+This command is especially useful for determining what data to collect
+during a @dfn{trace experiment}, see @ref{Tracepoint Actions,
+collect}.
 
 @kindex info source
 @item info source

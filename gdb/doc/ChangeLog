@@ -1,3 +1,9 @@
+2001-04-02  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* gdb.texinfo (Tracepoint Actions): Mention the "info scope"
+	command and provide a cross-reference to its description.
+	(Symbols): Note that "info scope" is useful for trace experiments.
+
 2001-04-01  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* gdb.texinfo (Symbols): Document "info scope".
