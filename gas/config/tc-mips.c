@@ -317,7 +317,7 @@ static int mips_trap;
    by a assembling two single width halves into two single width floating
    point registers which just happen to alias the double width destination
    register.  On some architectures this aliasing can be disabled by a bit
-   in the status register, and the settin gof this bit cannot be determined
+   in the status register, and the setting of this bit cannot be determined
    automatically at assemble time.  */
 static int mips_disable_float_construction;
 
