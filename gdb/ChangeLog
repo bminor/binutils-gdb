@@ -25,6 +25,10 @@ Sun Jan 15 14:36:19 1995  Steve Chamberlain  <sac@splat>
 	in same way as __GO32__.
 	* value.h (c_typedef_print): Rename 'new' argument.
 
+	* w65-tdep.c, config/tm-w65.h, config/w65.mt: New files.
+	* configure.in: Suppprt for w65,
+
+
 Sat Jan 14 11:18:11 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>
 
 	* infcmd.c (signal_command): For "signal 0", pass (CORE_ADDR)-1,
