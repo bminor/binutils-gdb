@@ -1,3 +1,9 @@
+Wed Aug 11 17:54:24 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* remote-{monitor,bug}.c: Make bug_ops not static (forward declaration
+	of statics doesn't work with SunOS4 /bin/cc).
+	Rename the occurrence in remote-monitor.c to monitor_bug_ops.
+
 Tue Aug 10 13:07:14 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* blockframe.c (find_pc_partial_function),

@@ -59,7 +59,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 struct monitor_ops *current_monitor;
 extern struct target_ops rom68k_ops;		/* Forward declaration */
 extern struct target_ops mon68_ops;		/* Forward declaration */
-static struct target_ops bug_ops;		/* Forward declaration */
+extern struct target_ops monitor_bug_ops;	/* Forward declaration */
 extern struct monitor_ops rom68k_cmds;		/* Forward declaration */
 extern struct monitor_ops mon68_cmds;		/* Forward declaration */
 extern struct monitor_ops bug_cmds;		/* Forward declaration */
@@ -394,7 +394,7 @@ bug_open(args, from_tty)
      char *args;
      int from_tty;
 {
-  push_target(&bug_ops);
+  push_target(&monitor_bug_ops);
   push_monitor (&bug_cmds);
 
   general_open (args, "bug", from_tty);
@@ -1092,7 +1092,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
   OPS_MAGIC,			/* Always the last thing */
 };
 
-static struct target_ops bug_ops = {
+struct target_ops monitor_bug_ops = {
   "bug",
   "Motorola's BUG remote serial debug monitor",
   "Use a remote computer running Motorola's BUG debug monitor.\n\
@@ -1205,5 +1205,5 @@ Use <CR>~. or <CR>~^D to break out.");
 
   add_target (&rom68k_ops);
 /*  add_target (&mon68_ops); */
-  add_target (&bug_ops);
+  add_target (&monitor_bug_ops);
 }

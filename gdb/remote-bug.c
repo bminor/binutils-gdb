@@ -39,7 +39,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 extern int stop_soon_quietly;	/* for wait_for_inferior */
 
 /* Forward data declarations */
-static struct target_ops bug_ops;	/* Forward declaration */
+extern struct target_ops bug_ops;	/* Forward declaration */
 
 /* Forward function declarations */
 static void bug_fetch_registers ();
@@ -1436,7 +1436,7 @@ bug_speed (s)
 }
 #endif /* 0 */
 
-static struct target_ops bug_ops =
+struct target_ops bug_ops =
 {
   "bug", "Remote BUG monitor",
   "Use the mvme187 board running the BUG monitor connected\n\
