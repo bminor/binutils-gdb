@@ -1043,7 +1043,7 @@ all-mmalloc:
 configure-target-newlib: $(ALL_GCC)
 all-target-newlib: configure-target-newlib all-binutils all-gas all-gcc
 all-opcodes: all-bfd
-all-patch:
+all-patch: all-libiberty
 all-prms: all-libiberty
 all-rcs:
 all-readline:

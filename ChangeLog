@@ -1,3 +1,7 @@
+Wed Nov  1 15:18:35 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
+
+	* Makefile.in (all-patch): depend on all-libiberty.
+
 Wed Nov  1 12:23:20 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: If the only directory in target_configdirs which
