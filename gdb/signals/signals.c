@@ -1,6 +1,6 @@
 /* Target signal translation functions for GDB.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001 Free Software Foundation, Inc.
+   2000, 2001, 2002 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
    This file is part of GDB.
@@ -20,8 +20,13 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+#ifdef GDBSERVER
+#include "server.h"
+#else
 #include "defs.h"
 #include "target.h"
+#endif
+
 #include <signal.h>
 
 /* This table must match in order and size the signals in enum target_signal
@@ -234,7 +239,7 @@ target_signal_from_name (char *name)
   for (sig = TARGET_SIGNAL_HUP;
        signals[sig].name != NULL;
        sig = (enum target_signal) ((int) sig + 1))
-    if (STREQ (name, signals[sig].name))
+    if (strcmp (name, signals[sig].name) == 0)
       return sig;
   return TARGET_SIGNAL_UNKNOWN;
 }
@@ -829,9 +834,11 @@ target_signal_from_command (int num)
 Use \"info signals\" for a list of symbolic signals.");
 }
 
+#ifndef GDBSERVER
 void
 _initialize_signals (void)
 {
-  if (!STREQ (signals[TARGET_SIGNAL_LAST].string, "TARGET_SIGNAL_MAGIC"))
+  if (strcmp (signals[TARGET_SIGNAL_LAST].string, "TARGET_SIGNAL_MAGIC") != 0)
     internal_error (__FILE__, __LINE__, "failed internal consistency check");
 }
+#endif
