@@ -696,6 +696,23 @@ child_wait (pid, ourstatus)
     }
 }
 
+/* Return nonzero if the given thread is still alive.  */
+int
+child_thread_alive (pid)
+     int pid;
+{
+  /* Arggh.  Apparently pthread_kill only works for threads within
+     the process that calls pthread_kill.
+
+     We want to avoid the lynx signal extensions as they simply don't
+     map well to the generic gdb interface we want to keep.
+
+     All we want to do is determine if a particular thread is alive;
+     it appears as if we can just make a harmless thread specific
+     ptrace call to do that.  */
+  return (ptrace (PTRACE_THREADUSER, pid, 0, 0) != -1);
+}
+
 /* Resume execution of the inferior process.
    If STEP is nonzero, single-step it.
    If SIGNAL is nonzero, give it that signal.  */
