@@ -254,6 +254,52 @@ bfd_fdopenr (filename, target, fd)
 
   return nbfd;
 }
+
+/*
+FUNCTION
+	bfd_openstreamr
+
+SYNOPSIS
+	bfd *bfd_openstreamr();
+
+DESCRIPTION
+
+	Open a BFD for read access on an existing stdio stream.  When
+	the BFD is passed to <<bfd_close>>, the stream will be closed.
+*/
+
+bfd *
+bfd_openstreamr (filename, target, stream)
+     const char *filename;
+     const char *target;
+     FILE *stream;
+{
+  bfd *nbfd;
+  const bfd_target *target_vec;
+
+  nbfd = _bfd_new_bfd ();
+  if (nbfd == NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return NULL;
+    }
+
+  target_vec = bfd_find_target (target, nbfd);
+  if (target_vec == NULL)
+    {
+      bfd_set_error (bfd_error_invalid_target);
+      return NULL;
+    }
+
+  nbfd->iostream = (char *) stream;
+  nbfd->filename = filename;
+  nbfd->direction = read_direction;
+				
+  if (! bfd_cache_init (nbfd))
+    return NULL;
+
+  return nbfd;
+}
 
 /** bfd_openw -- open for writing.
   Returns a pointer to a freshly-allocated BFD on success, or NULL.

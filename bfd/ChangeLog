@@ -1,3 +1,7 @@
+Mon Jan 23 13:33:18 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* opncls.c (bfd_openstreamr): Call bfd_cache_init.
+
 Fri Jan 20 11:44:45 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* sunos.c (sunos_add_one_symbol): Only set the sunos specific
