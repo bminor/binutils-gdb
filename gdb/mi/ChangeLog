@@ -1,5 +1,9 @@
 2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
 
+	* mi-interp.c (mi_interpreter_do_one_event): Remove.
+
+2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
+
 	* mi-cmd-break.c (mi_cmd_break_insert): Initialize old_hooks.
 	(mi_cmd_break_insert, mi_cmd_break_watch, mi_cmd_break_insert):
 	Increment MI version number.

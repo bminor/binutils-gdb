@@ -1,5 +1,16 @@
 2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
 
+	* interps.h (struct gdb_interpreter_procs): Remove do_one_event_proc.
+	(interp_do_one_event_ftype): Delete.
+	* interps.c (gdb_new_interpreter): Remove setup of do_one_event
+	procedure.
+	(interpreter_do_one_event): Delete.
+	* event-loop.c (start_event_loop): Remove no-op call to
+	interpreter_do_one_event.
+	* cli/cli-interps.c: (cli_interpreter_do_one_event): Delete.
+	
+2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
+
         * Makefile.in (mi-main.o, mi-cmd-break.o, event-loop.o): Update
         dependencies on interps.h.
 

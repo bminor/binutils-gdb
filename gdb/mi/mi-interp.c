@@ -46,7 +46,6 @@ struct gdb_interpreter *mi_interp;
 /* These are the interpreter setup, etc. functions for the MI interpreter */
 static int mi_interpreter_init (void *data);
 static int mi_interpreter_resume (void *data);
-static int mi_interpreter_do_one_event (void *data);
 static int mi_interpreter_suspend (void *data);
 static int mi_interpreter_delete (void *data);
 static int mi_interpreter_exec (void *data, char *command);
@@ -183,12 +182,6 @@ mi_interpreter_exec (void *data, char *command)
 
 static int
 mi_interpreter_prompt (void *data, char *new_prompt)
-{
-  return 1;
-}
-
-static int
-mi_do_one_event (void *data)
 {
   return 1;
 }
@@ -430,7 +423,6 @@ _initialize_mi_interp (void)
     {
       mi_interpreter_init,	/* init_proc */
       mi_interpreter_resume,	/* resume_proc */
-      NULL,			/* do_one_event_proc */
       mi_interpreter_suspend,	/* suspend_proc */
       mi_interpreter_delete,	/* delete_proc */
       mi_interpreter_exec,	/* exec_proc */

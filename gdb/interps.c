@@ -28,14 +28,6 @@
    I did this because it seems to me many interpreters won't want to use
    the readline command interface, and it is probably simpler to just let
    them take over the input in their resume proc.  
-
-   2) The event loop insertion is probably wrong.  I just inserted a 
-   do_one_event alongside gdb's do_one_event.  This probably will lead
-   to one or the other event loop getting starved.  It would be better
-   to provide conversion functions for the gdb file handlers, and when
-   an interpreter starts up, it grabs all the gdb created file handlers
-   and inserts them into its select.  This is more complicated, however,
-   and I have run out of time for now.
 */
 
 #include "defs.h"
@@ -107,7 +99,6 @@ gdb_new_interpreter (char *name,
   new_interp->quiet_p = 0;
   new_interp->procs.init_proc = procs->init_proc;
   new_interp->procs.resume_proc = procs->resume_proc;
-  new_interp->procs.do_one_event_proc = procs->do_one_event_proc;
   new_interp->procs.suspend_proc = procs->suspend_proc;
   new_interp->procs.delete_proc = procs->delete_proc;
   new_interp->procs.exec_proc = procs->exec_proc;
@@ -430,16 +421,6 @@ gdb_interpreter_get_data (struct gdb_interpreter *interp)
     return interp->data;
 
   return current_interpreter->data;
-}
-
-int
-interpreter_do_one_event ()
-{
-  if (current_interpreter->procs.do_one_event_proc == NULL)
-    return 0;
-
-  return current_interpreter->procs.do_one_event_proc (current_interpreter->
-						       data);
 }
 
 /* A convenience routine that nulls out all the

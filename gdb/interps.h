@@ -24,7 +24,6 @@
 
 typedef int (*interp_init_ftype) (void *data);
 typedef int (*interp_resume_ftype) (void *data);
-typedef int (*interp_do_one_event_ftype) (void *data);
 typedef int (*interp_suspend_ftype) (void *data);
 typedef int (*interp_delete_ftype) (void *data);
 typedef int (*interp_prompt_ftype) (void *data, char *new_prompt);
@@ -37,7 +36,6 @@ struct gdb_interpreter_procs
 {
   interp_init_ftype init_proc;
   interp_resume_ftype resume_proc;
-  interp_do_one_event_ftype do_one_event_proc;
   interp_suspend_ftype suspend_proc;
   interp_delete_ftype delete_proc;
   interp_exec_ftype exec_proc;
@@ -64,7 +62,6 @@ extern struct gdb_interpreter_procs *gdb_interpreter_get_procs (struct
 								gdb_interpreter
 								*interp);
 extern void *gdb_interpreter_get_data (struct gdb_interpreter *interp);
-extern int interpreter_do_one_event ();
 
 void clear_interpreter_hooks ();
 

@@ -29,7 +29,6 @@
 
 static int cli_interpreter_init (void *data);
 static int cli_interpreter_resume (void *data);
-static int cli_interpreter_do_one_event (void *data);
 static int cli_interpreter_suspend (void *data);
 static int cli_interpreter_delete (void *data);
 static int cli_interpreter_exec (void *data, char *command_str);
@@ -62,12 +61,6 @@ cli_interpreter_resume (void *data)
 {
   /*sync_execution = 1;*/
   gdb_setup_readline ();
-  return 1;
-}
-
-static int
-cli_interpreter_do_one_event (void *data)
-{
   return 1;
 }
 
@@ -141,7 +134,6 @@ _initialize_cli_interp (void)
   struct gdb_interpreter_procs procs = {
     cli_interpreter_init,	/* init_proc */
     cli_interpreter_resume,	/* resume_proc */
-    cli_interpreter_do_one_event, /* do_one_event_proc */
     cli_interpreter_suspend,	/* suspend_proc */
     cli_interpreter_delete,	/* delete_proc */
     cli_interpreter_exec,	/* exec_proc */
