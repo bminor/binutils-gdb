@@ -1337,11 +1337,12 @@ NAME(bfd_elf,record_link_assignment) (output_bfd, info, name, provide)
    based on the number of symbols there are.  If there are fewer than
    3 symbols we use 1 bucket, fewer than 17 symbols we use 3 buckets,
    fewer than 37 we use 17 buckets, and so forth.  We never use more
-   than 521 buckets.  */
+   than 32771 buckets.  */
 
 static const size_t elf_buckets[] =
 {
-  1, 3, 17, 37, 67, 97, 131, 197, 263, 521, 0
+  1, 3, 17, 37, 67, 97, 131, 197, 263, 521, 1031, 2053, 4099, 8209,
+  16411, 32771, 0
 };
 
 /* Set up the sizes and contents of the ELF dynamic sections.  This is
