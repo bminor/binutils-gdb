@@ -1,3 +1,9 @@
+Wed Apr 15 16:08:46 1998  Richard Henderson  <rth@cygnus.com>
+
+	* elf.c (prep_headers): Use new EM_SPARCV9 symbol.
+	* elf64-sparc.c (ELF_MACHINE_CODE): Likewise.
+	(ELF_MACHINE_ALT1): New.  Set to EM_OLD_SPARC64.
+
 Wed Apr 15 11:34:33 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Add -lkernel32 to WIN32LIBADD on cygwin32.

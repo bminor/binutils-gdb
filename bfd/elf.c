@@ -2855,7 +2855,7 @@ prep_headers (abfd)
       break;
     case bfd_arch_sparc:
       if (bed->s->arch_size == 64)
-	i_ehdrp->e_machine = EM_SPARC64;
+	i_ehdrp->e_machine = EM_SPARCV9;
       else
 	i_ehdrp->e_machine = EM_SPARC;
       break;
@@ -3274,10 +3274,12 @@ _bfd_elf_copy_private_section_data (ibfd, isec, obfd, osec)
     {
       asection *s;
 
-      /* Only set up the segments when all the sections have been set
-         up.  */
-      for (s = ibfd->sections; s != NULL; s = s->next)
-	if (s->output_section == NULL)
+      /* Only set up the segments if there are no more SEC_ALLOC
+         sections.  FIXME: This won't do the right thing if objcopy is
+         used to remove the last SEC_ALLOC section, since objcopy
+         won't call this routine in that case.  */
+      for (s = isec->next; s != NULL; s = s->next)
+	if ((s->flags & SEC_ALLOC) != 0)
 	  break;
       if (s == NULL)
 	{
