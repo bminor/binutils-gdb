@@ -3122,7 +3122,8 @@ ecoff_directive_ent (ignore)
       ++input_line_pointer;
       SKIP_WHITESPACE ();
     }
-  if (isdigit (*input_line_pointer) || *input_line_pointer == '-')
+  if (isdigit ((unsigned char) *input_line_pointer)
+      || *input_line_pointer == '-')
     (void) get_absolute_expression ();
 
   demand_empty_rest_of_line ();
@@ -3565,7 +3566,7 @@ ecoff_stab (sec, what, string, type, other, desc)
 	listing_source_file (string);
 #endif
 
-      if (isdigit (*input_line_pointer)
+      if (isdigit ((unsigned char) *input_line_pointer)
 	  || *input_line_pointer == '-'
 	  || *input_line_pointer == '+')
 	{

@@ -375,7 +375,7 @@ listing_newline (ps)
 	      
 	      while (--len)
 		{
-		  char c = * src ++;
+		  unsigned char c = * src ++;
 
 		  /* Omit control characters in the listing.  */
 		  if (isascii (c) && ! iscntrl (c))

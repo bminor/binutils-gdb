@@ -1,3 +1,15 @@
+Mon May 24 13:36:55 1999  Doug Evans  <devans@canuck.cygnus.com>
+
+	-Wchar-subscripts cleanup
+	* listing.c (listing_newline): Use unsigned char variable, so
+ 	calls to isascii,iscntrl are correct.
+	* atof-generic.c (atof_generic): Cast arg to isdigit, et. al. with
+	(unsigned char).
+	* ecoff.c (ecoff_directive_ent,ecoff_stab): Ditto.
+	* config/obj-elf.c (obj_elf_vtable_inherit): Ditto.
+	* config/tc-mips.c (mips_ip,mips16_ip): Ditto.
+	(my_getSmallExpression,get_number,s_mips_ent): Ditto.
+
 1999-05-28  Torbjorn Granlund  <tege@matematik.su.se>
 
 	* config/tc-m68k.c (m68k_ip): Check for disallowed index register

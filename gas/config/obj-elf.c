@@ -1037,7 +1037,7 @@ obj_elf_vtable_inherit (ignore)
 
   if (input_line_pointer[0] == '0'
       && (input_line_pointer[1] == '\0'
-	  || isspace(input_line_pointer[1])))
+	  || isspace ((unsigned char) input_line_pointer[1])))
     {
       psym = section_symbol (absolute_section);
       ++input_line_pointer;
