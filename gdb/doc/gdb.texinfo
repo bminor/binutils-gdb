@@ -3928,8 +3928,13 @@ may be any register name valid on the machine you are using, with
 or without the initial @samp{$}.
 @end table
 
-The register names @code{$pc} and @code{$sp} are used on most machines
-for the program counter register and the stack pointer.  For example,
+_GDBN__ has four ``standard'' register names that are available (in
+expressions) on most machines---whenever they don't conflict with an
+architecture's canonical mnemonics for registers.  The register names
+@code{$pc} and @code{$sp} are used for the program counter register and
+the stack pointer.  @code{$fp} is used for a register that contains a
+pointer to the current stack frame, and @code{$ps} is used for a
+register that contains the processor status.  For example,
 you could print the program counter in hex with
 @example
 p/x $pc
@@ -3942,24 +3947,20 @@ x/i $pc
 @end example
 
 @noindent
-or add four to the stack pointer with
+or add four to the stack pointer @footnote{This is a way of removing one
+word from the stack, on machines where stacks grow downward in memory
+(most machines, nowadays).  This assumes that the innermost stack frame
+is selected; setting @code{$sp} is not allowed when other stack frames
+are selected.  To pop entire frames off the stack, regardless of
+machine architecture, use @code{return}; @pxref{Returning}.} with
 @example
 set $sp += 4
 @end example
 
-@noindent
-The last is a way of removing one word from the stack, on machines where
-stacks grow downward in memory (most machines, nowadays).  This assumes
-that the innermost stack frame is selected; setting @code{$sp} is
-not allowed when other stack frames are selected.  (To pop entire frames
-off the stack, regardless of machine architecture, use @code{return};
-@pxref{Returning}.)
-
-Often @code{$fp} is used for a register that contains a pointer to the
-current stack frame, and @code{$ps} is sometimes used for a register
-that contains the processor status.  These standard register names may
-be available on your machine even though the @code{info registers}
-command shows other names.  For example, on the SPARC, @code{info
+Whenever possible, these four standard register names are available on
+your machine even though the machine has different canonical mnemonics,
+so long as there is no conflict.  The @code{info registers} command
+shows the canonical names.  For example, on the SPARC, @code{info
 registers} displays the processor status register as @code{$psr} but you
 can also refer to it as @code{$ps}.
 
