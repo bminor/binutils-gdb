@@ -1,3 +1,9 @@
+2002-11-07  Casper S. Hornstrup  <chorns@users.sourceforge.net>
+
+	* gas/all/gas.exp: Run fastcall label handling test.
+	* gas/all/fastcall.s: New file for testing handling of fastcall
+	labels.
+
 2002-11-01  H.J. Lu <hjl@gnu.org>
 
 	* gas/i386/i386.exp: Add "sub".

@@ -1,3 +1,11 @@
+2002-11-07  Casper S. Hornstrup  <chorns@users.sourceforge.net>
+
+	* ld-fastcall: New directory for testing fastcall support.
+	* ld-fastcall/export.s: New file for testing fastcall symbol
+	handling.
+	* ld-fastcall/import.s: Likewise.
+	* ld-fastcall/fastcall.exp: Likewise.
+
 2002-11-03  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* ld-sh/rd-sh.exp: Add -isa=SHcompact to ASFLAGS for SH-5.

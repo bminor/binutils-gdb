@@ -1,4 +1,4 @@
-#   Copyright 1993, 1994, 1995, 1997, 1999, 2001
+#   Copyright 1993, 1994, 1995, 1997, 1999, 2001, 2002
 #   Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -29,48 +29,44 @@ if ![info exists NM] then {
 if ![info exists NMFLAGS] then {
     set NMFLAGS ""
 }
-
 if ![info exists SIZE] then {
     set SIZE [findfile $base_dir/size]
 }
 if ![info exists SIZEFLAGS] then {
     set SIZEFLAGS ""
 }
-
 if ![info exists OBJDUMP] then {
     set OBJDUMP [findfile $base_dir/objdump]
 }
 if ![info exists OBJDUMPFLAGS] then {
     set OBJDUMPFLAGS ""
 }
-
 if ![info exists OBJCOPY] then {
     set OBJCOPY [findfile $base_dir/objcopy]
 }
 if ![info exists OBJCOPYFLAGS] then {
     set OBJCOPYFLAGS ""
 }
-
 if ![info exists AR] then {
     set AR [findfile $base_dir/ar]
 }
-
 if ![info exists STRIP] then {
     set STRIP [findfile $base_dir/strip-new $base_dir/strip-new [transform strip]]
 }
 if ![info exists STRIPFLAGS] then {
     set STRIPFLAGS ""
 }
-
 if ![info exists READELF] then {
     set READELF [findfile $base_dir/readelf]
 }
 if ![info exists READELFFLAGS] then {
     set READELFFLAGS ""
 }
-
 if ![info exists WINDRES] then {
     set WINDRES [findfile $base_dir/windres]
+}
+if ![info exists DLLTOOL] then {
+    set DLLTOOL [findfile $base_dir/dlltool]
 }
 
 if ![file isdirectory tmpdir] {catch "exec mkdir tmpdir" status}

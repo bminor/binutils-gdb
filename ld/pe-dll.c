@@ -618,7 +618,8 @@ process_def_file (abfd, info)
 	      /* This will preserve internal_name, which may have been
 	         pointing to the same memory as name, or might not
 	         have.  */
-	      char *tmp = xstrdup (pe_def_file->exports[i].name);
+	      int lead_at = (*pe_def_file->exports[i].name =='@');
+	      char *tmp = xstrdup (pe_def_file->exports[i].name + lead_at);
 
 	      *(strchr (tmp, '@')) = 0;
 	      pe_def_file->exports[i].name = tmp;
@@ -632,7 +633,8 @@ process_def_file (abfd, info)
 	{
 	  if (strchr (pe_def_file->exports[i].name, '@'))
 	    {
-	      char *tmp = xstrdup (pe_def_file->exports[i].name);
+	      int lead_at = (*pe_def_file->exports[i].name == '@' ) ;
+	      char *tmp = xstrdup (pe_def_file->exports[i].name + lead_at);
 
 	      *(strchr (tmp, '@')) = 0;
 	      if (auto_export (NULL, pe_def_file, tmp))
@@ -701,7 +703,8 @@ process_def_file (abfd, info)
     {
       char *name = (char *) xmalloc (strlen (pe_def_file->exports[i].internal_name) + 2);
 
-      if (pe_details->underscored)
+      if (pe_details->underscored
+ 	  && (*pe_def_file->exports[i].internal_name != '@'))
 	{
 	  *name = '_';
 	  strcpy (name + 1, pe_def_file->exports[i].internal_name);
@@ -915,7 +918,8 @@ fill_exported_offsets (abfd, info)
     {
       char *name = (char *) xmalloc (strlen (pe_def_file->exports[i].internal_name) + 2);
 
-      if (pe_details->underscored)
+      if (pe_details->underscored
+ 	  && (*pe_def_file->exports[i].internal_name != '@'))
 	{
 	  *name = '_';
 	  strcpy (name + 1, pe_def_file->exports[i].internal_name);
@@ -1811,15 +1815,27 @@ make_one (exp, parent)
   id5 = quick_section (abfd, ".idata$5", SEC_HAS_CONTENTS, 2);
   id4 = quick_section (abfd, ".idata$4", SEC_HAS_CONTENTS, 2);
   id6 = quick_section (abfd, ".idata$6", SEC_HAS_CONTENTS, 2);
-  if (! exp->flag_data)
-    quick_symbol (abfd, U (""), exp->internal_name, "", tx, BSF_GLOBAL, 0);
-  quick_symbol (abfd, U ("_head_"), dll_symname, "", UNDSEC, BSF_GLOBAL, 0);
-  quick_symbol (abfd, U ("_imp__"), exp->internal_name, "", id5, BSF_GLOBAL, 0);
-  /* Symbol to reference ord/name of imported
-     data symbol, used to implement auto-import.  */
-  if (exp->flag_data)
-    quick_symbol (abfd, U("_nm__"), exp->internal_name, "", id6,
-		  BSF_GLOBAL,0);
+ 
+  if  (*exp->internal_name == '@')
+    {
+      if (! exp->flag_data)
+	quick_symbol (abfd, "", exp->internal_name, "", tx, BSF_GLOBAL, 0);
+      quick_symbol (abfd, U ("_head_"), dll_symname, "", UNDSEC, BSF_GLOBAL, 0);
+      quick_symbol (abfd, U ("_imp_"), exp->internal_name, "", id5, BSF_GLOBAL, 0);
+      /* Fastcall applies only to functions,
+	 so no need for auto-import symbol.  */
+    }
+  else
+    {
+      if (! exp->flag_data)
+        quick_symbol (abfd, U (""), exp->internal_name, "", tx, BSF_GLOBAL, 0);
+      quick_symbol (abfd, U ("_head_"), dll_symname, "", UNDSEC, BSF_GLOBAL, 0);
+      quick_symbol (abfd, U ("_imp__"), exp->internal_name, "", id5, BSF_GLOBAL, 0);
+      /* Symbol to reference ord/name of imported
+         data symbol, used to implement auto-import.  */
+      if (exp->flag_data)
+        quick_symbol (abfd, U("_nm__"), exp->internal_name, "", id6, BSF_GLOBAL,0);
+    }
   if (pe_dll_compat_implib)
     quick_symbol (abfd, U ("__imp_"), exp->internal_name, "",
 		  id5, BSF_GLOBAL, 0);
@@ -2231,20 +2247,32 @@ pe_process_import_defs (output_bfd, link_info)
 	  {
 	    def_file_export exp;
 	    struct bfd_link_hash_entry *blhe;
-
+	    int lead_at = (*pe_def_file->imports[i].internal_name == '@');  
 	    /* See if we need this import.  */
 	    char *name = (char *) xmalloc (strlen (pe_def_file->imports[i].internal_name) + 2 + 6);
-	    sprintf (name, "%s%s", U (""), pe_def_file->imports[i].internal_name);
+
+ 	    if (lead_at)
+              sprintf (name, "%s%s", "", pe_def_file->imports[i].internal_name);
+	    else
+	      sprintf (name, "%s%s",U (""), pe_def_file->imports[i].internal_name);
+
 	    blhe = bfd_link_hash_lookup (link_info->hash, name,
 					 false, false, false);
+
 	    if (!blhe || (blhe && blhe->type != bfd_link_hash_undefined))
 	      {
-		sprintf (name, "%s%s", U ("_imp__"),
-			 pe_def_file->imports[i].internal_name);
+		if (lead_at)
+		  sprintf (name, "%s%s", U ("_imp_"),
+			   pe_def_file->imports[i].internal_name);
+		else
+		  sprintf (name, "%s%s", U ("_imp__"),
+			   pe_def_file->imports[i].internal_name);
+
 		blhe = bfd_link_hash_lookup (link_info->hash, name,
 					     false, false, false);
 	      }
 	    free (name);
+
 	    if (blhe && blhe->type == bfd_link_hash_undefined)
 	      {
 		bfd *one;

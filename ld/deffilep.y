@@ -1,6 +1,6 @@
 %{ /* deffilep.y - parser for .def files */
 
-/*   Copyright 1995, 1997, 1998, 1999, 2000, 2001
+/*   Copyright 1995, 1997, 1998, 1999, 2000, 2001, 2002
      Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
@@ -966,9 +966,27 @@ def_lex ()
       return NUMBER;
     }
 
-  if (ISALPHA (c) || strchr ("$:-_?", c))
+  if (ISALPHA (c) || strchr ("$:-_?@", c))
     {
       bufptr = 0;
+      q = c;
+      put_buf (c);
+      c = def_getc ();
+
+      if (q == '@')
+	{
+          if (ISBLANK (c) ) /* '@' followed by whitespace.  */
+	    return (q);
+          else if (ISDIGIT (c)) /* '@' followed by digit.  */
+            {
+	      def_ungetc (c);
+              return (q);
+	    }
+#if TRACE
+	  printf ("lex: @ returns itself\n");
+#endif
+	}
+
       while (c != EOF && (ISALNUM (c) || strchr ("$:-_?/@", c)))
 	{
 	  put_buf (c);
@@ -976,14 +994,17 @@ def_lex ()
 	}
       if (c != EOF)
 	def_ungetc (c);
-      for (i = 0; tokens[i].name; i++)
-	if (strcmp (tokens[i].name, buffer) == 0)
-	  {
+      if (ISALPHA (q)) /* Check for tokens.  */
+	{
+          for (i = 0; tokens[i].name; i++)
+	    if (strcmp (tokens[i].name, buffer) == 0)
+	      {
 #if TRACE
-	    printf ("lex: `%s' is a string token\n", buffer);
+	        printf ("lex: `%s' is a string token\n", buffer);
 #endif
-	    return tokens[i].token;
-	  }
+	        return tokens[i].token;
+	      }
+	}
 #if TRACE
       printf ("lex: `%s' returns ID\n", buffer);
 #endif
@@ -1008,7 +1029,7 @@ def_lex ()
       return ID;
     }
 
-  if (c == '=' || c == '.' || c == '@' || c == ',')
+  if (c == '=' || c == '.' || c == ',')
     {
 #if TRACE
       printf ("lex: `%c' returns itself\n", c);

@@ -1,3 +1,8 @@
+2002-11-07  Eric Kohl  <ekohl@rz-online.de> 
+
+	* config/te-pe.h (LEX_AT): Accept at-sign (@) as first character
+	of a label.
+
 2002-11-05  H.J. Lu <hjl@gnu.org>
 
 	* config/tc-mips.c (support_64bit_objects): Check *l before it

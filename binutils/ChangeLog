@@ -1,3 +1,23 @@
+2002-11-07  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* dlltool.c (add_excludes): Don't prefix excluded fastcall
+	symbols	with underscore.
+	(xlate): Ignore add_underscore for decorated fastcall symbols.
+
+2002-11-07  Eric Kohl  <ekohl@rz-online.de>
+
+	* deflex.l: Accept '@' as first character of an ID.
+	* dlltool.c (gen_exp_file): Use existing '@' prefix rather than
+	ASM_PREFIX for fastcall symbols.
+	(scan_drectve_symbols): Handle fastcall symbols when generating
+	undecorated aliases for symbols in drectve section.
+	(scan_filtered_symbols): Likewise, with export-all.
+	(xlate): Likewise, with --kill-at.
+	(make_imp_label): New function to handle fastcall symbols
+	correctly.
+	(make_one_lib_file): Use make_imp_label instead of make_label
+	for imp	symbols.
+
 2002-11-06  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
 	* MAINTAINERS: Add self as TIC4X maintainer.

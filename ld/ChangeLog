@@ -1,3 +1,20 @@
+2002-11-07  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* deffilep.y (def_lex): Handle '@' as first character of an ID.
+	* pe-dll.c (auto-export): Filter on "_imp_" prefix, not "_imp__".
+	(make_one): Don't prefix decorated fastcall symbols with '_'.
+	(pe_process_import_defs): Likewise.
+	* emultempl/pe.em (pe_fixup_stdcalls): Don't fixup fastcall
+	symbols to cdecl names or vise-versa.
+
+2002-10-13  Eric Kohl  <ekohl@rz-online.de> 
+
+	* pe-dll.c (process_def_file): Handle fastcall symbols when
+	generating undecorated aliases.  Don't prefix decorated fastcall
+	symbols with '_'.
+	(fill_exported_offsets): Don't prefix decorated fastcall symbols
+	with '_'.
+
 2002-10-29  Daniel Jacobowitz  <drow@mvista.com>
 
 	* emultempl/aix.em: Use include <> for generated headers.

@@ -1,3 +1,10 @@
+2002-11-07  Casper S. Hornstrup  <chorns@users.sourceforge.net>
+
+	* binutils-all/dlltool.exp: New file for testing dlltool.
+	* binutils-all/fastcall.def: New file for testing fastcall
+	exports.
+	* config/default.exp: Set DLLTOOL variable.
+
 2002-08-27  Alan Modra  <amodra@bigpond.net.au>
 
 	* binutils-all/objcopy.exp: Revert last change.
