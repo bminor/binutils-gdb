@@ -1,3 +1,31 @@
+2002-07-31  Ian Dall  <ian@sibyl.beware.dropbear.id.au>
+
+	* config/tc-ns32k.h (md_pcrel_adjust): Supply prototype.
+	* config/tc-ns32k.c (convert_iif, md_parse_option, md_show_usage):
+	Allow default displacement size to be an option	"--disp-size-default".
+	(md_number_to_disp): Make error messages include value. Use %d to
+	print integers, not %s.
+	(fix_new_ns32k): Conditionally set fx_no_overflow so we don't
+	get duplicate messages sometimes.
+	(convert_iif): Grow frag to max possible instruction size. Avoid
+	creating unnecessary fixes.
+	(md_number_to_field) Add prototype.
+	(encode_operand, parse, convert_iif, md_fix_pcrel_adjust): Add
+	prototypes and make static.
+	(struct addr_mode): Make mode and scaled_mode explicitly signed.
+	(evaluate_expr): Use resultP argument instead of exprP global.
+	(get_addr_mode): Quiten compiler warnings.
+	(encode_operand): eliminate unused variables. Quiten compiler
+	warnings. Eliminate nul character in format strings.
+	(parse): argc is unsigned.
+	(reloc): Type cast index to quieten compiler.
+	(md_pcrel_adjust, md_apply_fix3): Remove unused variable.
+	(md_convert_frag): Note unused parameters. Remove unused
+	variables.
+	(md_create_long_jump, md_create_short_jump,
+	md_undefined_symbol_name, md_section_align, tc_gen_reloc): Note
+	unused parameters.
+	
 2002-07-31  Nick Clifton  <nickc@redhat.com>
 
 	* NEWS: Retroactively add entry for Lars Brinkhoff's contribution

@@ -5,6 +5,22 @@
 
 2002-07-31  Ian Dall  <ian@sibyl.beware.dropbear.id.au>
 
+	* cpu-ns32k.c (_bfd_ns32k_put_immdeiate, _bfd_ns32k_get_immediate):
+	There is no 8 byte relocation type for this architecture.
+	(do_ns32k_reloc): Use bfd_vma instead of native types.
+	(bfd_ns32k_put_immediate, _bfd_ns32k_relocate_contents) put_data
+	returns void.
+	(_bfd_ns32k_put_displacement): Don't check for overflow. We can
+	rely on generic code to do that.
+	* aout-ns32k.c (howto_table): Add appropriate overflow detection
+	to all table entries.
+	(_bfd_ns32k_relocate_contents): put_data returns void.
+	* ns32k.h: (_bfd_ns32k_put_displacement, _bfd_ns32k_put_immediate)
+	(_bfd_do_ns32k_reloc_contents): Fix prototypes. put data functions
+	return void.
+
+2002-07-31  Ian Dall  <ian@sibyl.beware.dropbear.id.au>
+
 	* aoutx.h (aout_link_check_ar_symbols): Whether to include an
 	archive object is target dependant.
 
