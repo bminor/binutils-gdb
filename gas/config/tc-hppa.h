@@ -49,8 +49,13 @@
 /* FIXME.  The lack of a place to put things which are both target cpu
    and target format dependent makes hacks like this necessary.  */
 #ifdef OBJ_ELF
+#ifdef BFD64
+#include "bfd/elf64-hppa.h"
+#define TARGET_FORMAT "elf64-hppa"
+#else
 #include "bfd/elf32-hppa.h"
 #define TARGET_FORMAT "elf32-hppa"
+#endif
 #endif
 
 #ifdef OBJ_SOM

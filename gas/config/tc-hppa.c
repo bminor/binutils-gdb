@@ -43,13 +43,17 @@ error only one of OBJ_ELF and OBJ_SOM can be defined
    not need to be seen outside of tc-hppa.c.  */
 #ifdef OBJ_ELF
 /* Object file formats specify relocation types.  */
-typedef elf32_hppa_reloc_type reloc_type;
+typedef elf_hppa_reloc_type reloc_type;
 
 /* Object file formats specify BFD symbol types.  */
 typedef elf_symbol_type obj_symbol_type;
 
+#ifdef BFD64
 /* How to generate a relocation.  */
-#define hppa_gen_reloc_type hppa_elf_gen_reloc_type
+#define hppa_gen_reloc_type _bfd_elf64_hppa_gen_reloc_type
+#else
+#define hppa_gen_reloc_type _bfd_elf32_hppa_gen_reloc_type
+#endif
 
 /* ELF objects can have versions, but apparently do not have anywhere
    to store a copyright string.  */
@@ -2778,7 +2782,6 @@ tc_gen_reloc (section, fixp)
   relocs[n_relocs] = NULL;
 
 #ifdef OBJ_ELF
-#if 0
   switch (fixp->fx_r_type)
     {
     default:
@@ -2830,7 +2833,6 @@ tc_gen_reloc (section, fixp)
 	}
       break;
     }
-#endif
 #else /* OBJ_SOM */
 
   /* Walk over reach relocation returned by the BFD backend.  */
