@@ -1,16 +1,12 @@
 # Makefile fragment for GAS.
 
-VERSION = cygnus-2.3.1
-
-gC = gC1
-
 s = "{srcdir}"
 
 o = :
 
 CROSS = -d CROSS_COMPILE
 
-ALL_CFLAGS = {CFLAGS} {CROSS} -d HAVE_STDARG_H -d TARGET_BYTES_BIG_ENDIAN -d BFD_ASSEMBLER -i "{topsrcdir}"include: -i "{topsrcdir}"bfd:,"{srcdir}",::libiberty:,::bfd:,::extra-include,"{srcroot}"include:mpw:
+ALL_CFLAGS = {CFLAGS} {CROSS} {TDEFINES} -i "{topsrcdir}"include: -i "{topsrcdir}"bfd:,"{srcdir}",::libiberty:,::bfd:,::extra-include,"{srcroot}"include:mpw:
 # debug options: -mbg on -sym on
 
 "{o}" \Option-f : "{s}"
@@ -19,9 +15,6 @@ ALL_CFLAGS = {CFLAGS} {CROSS} -d HAVE_STDARG_H -d TARGET_BYTES_BIG_ENDIAN -d BFD
 
 .c.o  \Option-f .c
    {CC}  {DepDir}{Default}.c {ALL_CFLAGS} -s gas_{Default} -o {TargDir}{Default}.c.o
-
-.gc.o  \Option-f .c
-   {gC}  {DepDir}{Default}.c {ALL_CFLAGS} -s gas_{Default} -o {TargDir}{Default}.gc.o
 
 prefix = usr:local:
 
@@ -65,7 +58,7 @@ INCLUDES =
 
 CLIBS = ::libiberty:libiberty.o	::bfd:libbfd.o ::opcodes:libopcodes.o
 
-all \Option-f as.new
+all \Option-f "{o}"config.h as.new
 
 as.new \Option-f\Option-f {OBJECTS} {TARG_OBJECTS} {CLIBS}
 	Link {LDFLAGS} -o as.new {OBJECTS} {TARG_OBJECTS} {CLIBS} {EXTRALIBS}
@@ -80,9 +73,6 @@ as.new \Option-f\Option-f {OBJECTS} {TARG_OBJECTS} {CLIBS}
 	Echo '#define TARGET_CPU       "{target_cpu}"'       >> "{o}"config.new
 	Echo '#define TARGET_ALIAS     "{target_alias}"'     >> "{o}"config.new
 	Echo '#define TARGET_CANONICAL "{target_canonical}"' >> "{o}"config.new
-	Echo '#ifndef MPW'				>> "{o}"config.new
-	Echo '#define MPW'				>> "{o}"config.new
-	Echo '#endif'					>> "{o}"config.new
 	Echo '#define bzero(a,b) memset(a,0,b)'		>> "{o}"config.new
 	Echo '#define bcopy(a,b,c) memcpy(b,a,c)'	>> "{o}"config.new
 	Echo '#define bcmp(a,b,c) memcmp(a,b,c)'	>> "{o}"config.new
@@ -90,6 +80,7 @@ as.new \Option-f\Option-f {OBJECTS} {TARG_OBJECTS} {CLIBS}
 	Echo '#include <stdlib.h>'			>> "{o}"config.new
 	Echo '#include <string.h>'			>> "{o}"config.new
 	Echo '#include <memory.h>'			>> "{o}"config.new
+	Echo '#include <spin.h>'			>> "{o}"config.new
 	Echo 'char *strdup();'				>> "{o}"config.new
 	Echo '#ifdef MPW_C'				>> "{o}"config.new
 	Echo '#undef  __PTR_TO_INT'			>> "{o}"config.new
@@ -106,14 +97,15 @@ as.new \Option-f\Option-f {OBJECTS} {TARG_OBJECTS} {CLIBS}
 	Echo '#define fseek mpw_fseek'			>> "{o}"config.new
 	Echo '#define abort mpw_abort'			>> "{o}"config.new
 	Echo '#define TRUE_FALSE_ALREADY_DEFINED'	>> "{o}"config.new
-	Echo '/* <cr> is an end-of-line marker. */'	>> "{o}"config.new
 	Echo '#define CR_EOL'				>> "{o}"config.new
 	Echo '#define ABORT_ON_ERROR'			>> "{o}"config.new
 	Echo '#define LOSING_COMPILER'			>> "{o}"config.new
 	Echo '#define HOST_SPECIAL_INIT(argc,argv)  mpw_special_init ((argv)[0]);' >> "{o}"config.new
 	Echo '#define WANT_FOPEN_BIN'			>> "{o}"config.new
 	Echo '#define HAVE_ERRNO_H'			>> "{o}"config.new
-	Echo '#endif /* GAS_VERSION */'			>> "{o}"config.new
+	Echo '#define HAVE_STDARG_H'			>> "{o}"config.new
+	Echo '#define BFD_ASSEMBLER'			>> "{o}"config.new
+    Echo '#endif /* GAS_VERSION */'			>> "{o}"config.new
 	MoveIfChange "{o}"config.new "{o}"config.h
 	Echo ' ' >"{o}"config-stamp
 

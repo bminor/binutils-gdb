@@ -2,19 +2,33 @@
 
 Set target_arch `echo {target_canonical} | sed -e 's/-.*-.*//'`
 
-# (should canonicalize arch name) */
+# The following works for many configurations ...
 
-Set target_format `echo {target_canonical} | sed -e 's/.*-.*-//'`
+Set obj_format `echo {target_canonical} | sed -e 's/.*-.*-//'`
+
+# ... but not all.
+
+If "{target_canonical}" =~ /m68k-apple-macos/
+	Set obj_format "coff"
+Else If "{target_canonical}" =~ /ppc-apple-macos/
+	Set obj_format "xcoff"
+Else If "{target_canonical}" =~ /sh-hitachi-hms/
+	Set obj_format "coff"
+Else If "{target_canonical}" =~ /mips-idt-ecoff/
+	Set TDEFINES '-d TARGET_BYTES_BIG_ENDIAN'
+End If
 
 forward-include "{srcdir}"config:tc-{target_arch}.c targ-cpu.c
 forward-include "{srcdir}"config:tc-{target_arch}.h targ-cpu.h
 
-forward-include "{srcdir}"config:obj-{target_format}.c obj-format.c
-forward-include "{srcdir}"config:obj-{target_format}.h obj-format.h
+forward-include "{srcdir}"config:obj-{obj_format}.c obj-format.c
+forward-include "{srcdir}"config:obj-{obj_format}.h obj-format.h
 
 # Default emulation.
 
 forward-include "{srcdir}"config:te-generic.h targ-env.h
+
+# Special cases for float handling.
 
 If "{target_arch}" =~ /ns32k/
 	forward-include "{srcdir}"config:atof-ns32k.c atof-targ.c
@@ -26,3 +40,9 @@ Else
 	# Use IEEE by default.
 	forward-include "{srcdir}"config:atof-ieee.c atof-targ.c
 End If
+
+Echo '# From mpw-config.in'       > "{o}"mk.tmp
+
+Echo 'VERSION = ' `Search 'VERSION=' "{srcdir}"Makefile.in | sed -e 's/.*VERSION=\(.*\)/\1/'` >> "{o}"mk.tmp
+
+Echo '# End from mpw-config.in'  >> "{o}"mk.tmp
