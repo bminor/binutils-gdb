@@ -1,3 +1,11 @@
+Mon Aug 23 1993  Sean Fagan  (sef@cygnus.com)
+		 and Jim Kingdon  (kingdon@cygnus.com)
+
+	Add NetBSD support:
+	* netbsd386.c: New file.
+	* Makefile.in, aout-target.h, config.bfd, configure.host, configure.in,
+	libaout.h, targets.c: Other changes.
+
 Fri Aug 20 17:04:59 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/m88k-elf.mt: New file.

@@ -33,7 +33,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define MACHTYPE_OK(mtype) ((mtype) == M_386 || (mtype) == M_I386 || (mtype) == M_UNKNOWN)
 
 #define MY(OP) CAT(netbsd386_,OP)
-#define TARGETNAME "netbsd-386"
+/* This needs to start with a.out so GDB knows it is an a.out variant.  */
+#define TARGETNAME "a.out-netbsd-386"
 
 #define N_MAGIC(ex) \
     ( (((ex).a_info)&0xffff0000) ? (ntohl(((ex).a_info))&0xffff) : ((ex).a_info))
