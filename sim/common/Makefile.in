@@ -71,17 +71,14 @@ MAKEOVERRIDES=
 
 all:
 
-# Generate TARG_VALS_H for newlib/libgloss using devo and build tree.
+# Generate nltvals.def for newlib/libgloss using devo and build tree.
 # This file is shipped with distributions so we build in the source dir.
-# This is built in srcdir so putting dependencies here is risky.
 # Use `make headers' to rebuild.
-headers: nltvals.def
+# Note: If gdb releases begin to contain target header files (not a good idea,
+# but if they did ...), targ-vals.def coud be generated at build time.
+# An alternative is to slurp in the tables at runtime.
 .PHONY: headers
-
-# Note: If gdb releases begin to contain target header files, generate
-# targ-vals.def at build time.
-
-nltvals.def: Makefile gennltvals.sh gentvals.sh
+headers:
 	rootme=`pwd` ; \
 	cd $(srcdir) ; \
 	rm -f nltvals.new ; \

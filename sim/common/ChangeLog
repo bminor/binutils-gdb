@@ -1,3 +1,8 @@
+Thu Jul 27 21:56:08 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From 2000-06-23 Doug Evans <dje@casey.transmeta.com>:
+	* Makefile.in (headers,nltvals.def): Merge.
+
 Thu Jul 27 20:37:47 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	From 2000-06-25 Stephane Carrez <Stephane.Carrez@worldnet.fr>:
