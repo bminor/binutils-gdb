@@ -1,3 +1,7 @@
+Fri Jan 20 17:07:31 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* hash.c (hash_code): Undo last change.
+
 Thu Jan 19 14:49:47 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* config/tc-alpha.c (alpha_ip): Initialize local variables to keep
@@ -16,6 +20,8 @@ Thu Jan 19 14:49:47 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 	* flonum-konst.c (dummy1): Return void.
 	* config/tc-vax.c (md_assemble): Remove two comparisons of
 	unsigned numbers versus zero.
+	* as.h (bcopy): If neither memcpy nor bcopy is defined as a macro,
+	define to use memcpy.
 
 	* config/tc-alpha.c, config/alpha-opcode.h: Revert 2 June changes.
 	Turns out we never got the assignment done after all.

@@ -738,7 +738,9 @@ hash_code (handle, string)
      struct hash_control *handle;
      const char *string;
 {
-#if 0
+#if 1 /* There seems to be some interesting property of this function
+	 that prevents the bfd version below from being an adequate
+	 substitute.  @@ Figure out what this property is!  */
   long h;		/* hash code built here */
   long c;		/* each character lands here */
   int n;		/* Amount to shift h by */
@@ -752,6 +754,7 @@ hash_code (handle, string)
     }
   return (h & handle->hash_mask);
 #else
+  /* from bfd */
   unsigned long h = 0;
   unsigned int len = 0;
   unsigned int c;
