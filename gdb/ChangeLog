@@ -1,3 +1,8 @@
+2005-02-23  Andrew Cagney  <cagney@gnu.org>
+
+	* cli/cli-dump.c (dump_bfd_file): Replace magic constant with
+	SEC_XXX flags.
+
 2005-02-22  Andrew Cagney  <cagney@gnu.org>
 
 	* configure.ac: Only enaable insight when itcl is present.

@@ -218,7 +218,9 @@ dump_bfd_file (const char *filename, const char *mode,
   bfd_set_section_size (obfd, osection, len);
   bfd_set_section_vma (obfd, osection, vaddr);
   bfd_set_section_alignment (obfd, osection, 0);
-  bfd_set_section_flags (obfd, osection, 0x203);
+  bfd_set_section_flags (obfd, osection, (SEC_HAS_CONTENTS
+					  | SEC_ALLOC
+					  | SEC_LOAD));
   osection->entsize = 0;
   bfd_set_section_contents (obfd, osection, buf, 0, len);
 }
