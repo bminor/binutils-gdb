@@ -25,12 +25,10 @@
 /* Needed by opcode/dvp.h.  */
 #include "dis-asm.h"
 #include "opcode/dvp.h"
-#include "elf/dvp.h"
-
-enum cputype { CPU_DMA, CPU_PKE, CPU_GPUIF, CPU_VUUP, CPU_VULO };
+#include "elf/mips.h"
 
 static DVP_INSN dvp_insert_operand
-     PARAMS ((DVP_INSN, enum cputype, const dvp_operand *,
+     PARAMS ((DVP_INSN, dvp_cpu, const dvp_operand *,
 	      int, offsetT, char *, unsigned int));
 
 const char comment_chars[] = ";";
@@ -140,23 +138,25 @@ static struct dvp_fixup fixups[MAX_FIXUPS];
 
 /* Given a cpu type and operand number, return a temporary reloc type
    for use in generating the fixup that encodes the cpu type and operand.  */
-static int encode_fixup_reloc_type PARAMS ((enum cputype, int));
+static int encode_fixup_reloc_type PARAMS ((dvp_cpu, int));
 /* Given an encoded fixup reloc type, decode it into cpu and operand.  */
-static void decode_fixup_reloc_type PARAMS ((int, enum cputype *,
+static void decode_fixup_reloc_type PARAMS ((int, dvp_cpu *,
 					     const dvp_operand **));
 
 static void assemble_dma PARAMS ((char *));
 static void assemble_gpuif PARAMS ((char *));
 static void assemble_pke PARAMS ((char *));
 static void assemble_vu PARAMS ((char *));
-static char * assemble_vu_insn PARAMS ((enum cputype,
-					const dvp_opcode *,
-					const dvp_operand *,
-					char *, char *));
-static char * assemble_one_insn PARAMS ((enum cputype,
-					 const dvp_opcode *,
-					 const dvp_operand *,
-					 char *, DVP_INSN *));
+static const dvp_opcode * assemble_vu_insn PARAMS ((dvp_cpu,
+						    const dvp_opcode *,
+						    const dvp_operand *,
+						    char **, char *));
+static const dvp_opcode * assemble_one_insn PARAMS ((dvp_cpu,
+						     const dvp_opcode *,
+						     const dvp_operand *,
+						     char **, DVP_INSN *));
+
+/* Main entry point for assembling an instruction.  */
 
 void
 md_assemble (str)
@@ -186,11 +186,12 @@ assemble_dma (str)
      char *str;
 {
   DVP_INSN insn_buf[4];
+  const dvp_opcode *opcode;
 
-  str = assemble_one_insn (CPU_DMA,
-			   dma_opcode_lookup_asm (str), dma_operands,
-			   str, insn_buf);
-  if (str == NULL)
+  opcode = assemble_one_insn (DVP_DMA,
+			      dma_opcode_lookup_asm (str), dma_operands,
+			      &str, insn_buf);
+  if (opcode == NULL)
     return;
 }
 
@@ -206,32 +207,33 @@ assemble_pke (str)
   DVP_INSN insn_buf[5];
   /* Insn's length, in 32 bit words.  */
   int len;
-  /* Non-zero if this is a variable length insn.  */
-  int varlen_p;
   /* Pointer to allocated frag.  */
   char *f;
   int i;
+  const dvp_opcode *opcode;
 
-  str = assemble_one_insn (CPU_PKE,
-			   pke_opcode_lookup_asm (str), pke_operands,
-			   str, insn_buf);
-  if (str == NULL)
+  opcode = assemble_one_insn (DVP_PKE,
+			      pke_opcode_lookup_asm (str), pke_operands,
+			      &str, insn_buf);
+  if (opcode == NULL)
     return;
 
-  /* Call back into the parser's state to get the insn's length.
-     This is just the length of the insn, not of any following data.
-     The result 0 if the length is unknown.  */
-  varlen_p = pke_varlen_p ();
-  len = pke_len ();
-
-  if (varlen_p)
+  if (opcode->flags & PKE_OPCODE_LENVAR)
     {
+      /* Call back into the parser's state to get the insn's length.
+	 This is just the length of the insn, not of any following data.
+	 The result 0 if the length is unknown.  */
+      len = pke_len ();
       /* FIXME: not done yet */
     }
+  else if (opcode->flags & PKE_OPCODE_LEN2)
+    len = 2;
+  else if (opcode->flags & PKE_OPCODE_LEN5)
+    len = 5;
   else
-    {
-      f = frag_more (len * 4);
-    }
+    len = 1;
+
+  f = frag_more (len * 4);
 
   /* Write out the instruction.
      Reminder: it is important to fetch enough space in one call to
@@ -256,7 +258,7 @@ assemble_pke (str)
 	 feature.  We pick a BFD reloc type in md_apply_fix.  */
 
       op_type = fixups[i].opindex;
-      reloc_type = encode_fixup_reloc_type (CPU_PKE, op_type);
+      reloc_type = encode_fixup_reloc_type (DVP_PKE, op_type);
       operand = &pke_operands[op_type];
       fix_new_exp (frag_now, f - frag_now->fr_literal, 4,
 		   &fixups[i].exp,
@@ -272,11 +274,12 @@ assemble_gpuif (str)
      char *str;
 {
   DVP_INSN insn_buf[4];
+  const dvp_opcode *opcode;
 
-  str = assemble_one_insn (CPU_GPUIF,
-			   gpuif_opcode_lookup_asm (str), gpuif_operands,
-			   str, insn_buf);
-  if (str == NULL)
+  opcode = assemble_one_insn (DVP_GPUIF,
+			      gpuif_opcode_lookup_asm (str), gpuif_operands,
+			      &str, insn_buf);
+  if (opcode == NULL)
     return;
 }
 
@@ -290,6 +293,7 @@ assemble_vu (str)
      Handle this by grabbing 8 bytes now, and then filling each word
      as appropriate.  */
   char *f = frag_more (8);
+  const dvp_opcode *opcode;
 
 #ifdef VERTICAL_BAR_SEPARATOR
   char *p = strchr (str, '|');
@@ -301,38 +305,41 @@ assemble_vu (str)
     }
 
   *p = 0;
-  assemble_vu_insn (CPU_VUUP,
-		    vu_upper_opcode_lookup_asm (str), vu_operands,
-		    str, f + 4);
+  opcode = assemble_vu_insn (DVP_VUUP,
+			     vu_upper_opcode_lookup_asm (str), vu_operands,
+			     &str, f + 4);
   *p = '|';
-  assemble_vu_insn (CPU_VULO,
+  if (opcode == NULL)
+    return;
+  str = p + 1;
+  assemble_vu_insn (DVP_VULO,
 		    vu_lower_opcode_lookup_asm (str), vu_operands,
-		    p + 1, f);
+		    &str, f);
 #else
-  str = assemble_vu_insn (CPU_VUUP,
-			  vu_upper_opcode_lookup_asm (str), vu_operands,
-			  str, f + 4);
+  opcode = assemble_vu_insn (DVP_VUUP,
+			     vu_upper_opcode_lookup_asm (str), vu_operands,
+			     &str, f + 4);
   /* Don't assemble next one if we couldn't assemble the first.  */
-  if (str)
-    assemble_vu_insn (CPU_VULO,
+  if (opcode)
+    assemble_vu_insn (DVP_VULO,
 		      vu_lower_opcode_lookup_asm (str), vu_operands,
-		      str, f);
+		      &str, f);
 #endif
 }
 
-static char *
-assemble_vu_insn (cpu, opcode, operand_table, str, buf)
-     enum cputype cpu;
+static const dvp_opcode *
+assemble_vu_insn (cpu, opcode, operand_table, pstr, buf)
+     dvp_cpu cpu;
      const dvp_opcode *opcode;
      const dvp_operand *operand_table;
-     char *str;
+     char **pstr;
      char *buf;
 {
   int i;
   DVP_INSN insn;
 
-  str = assemble_one_insn (cpu, opcode, operand_table, str, &insn);
-  if (str == NULL)
+  opcode = assemble_one_insn (cpu, opcode, operand_table, pstr, &insn);
+  if (opcode == NULL)
     return NULL;
 
   /* Write out the instruction.
@@ -364,31 +371,35 @@ assemble_vu_insn (cpu, opcode, operand_table, str, buf)
     }
 
   /* All done.  */
-  return str;
+  return opcode;
 }
 
-/* Assemble one instruction.
+/* Assemble one instruction at *PSTR.
    CPU indicates what component we're assembling for.
    The assembled instruction is stored in INSN_BUF.
+   OPCODE is a pointer to the head of the hash chain.
 
-   The result is a pointer to beyond the end of the scanned insn
-   or NULL if an error occured.  This is to handle the VU where two
-   instructions appear on one line.  If this is the upper insn, the caller
-   can pass back to result to us parse the lower insn.  */
+   *PSTR is updated to point passed the parsed instruction.
 
-static char *
-assemble_one_insn (cpu, opcode, operand_table, str, insn_buf)
-     enum cputype cpu;
+   If the insn is successfully parsed the result is a pointer to the opcode
+   entry that successfully matched and *PSTR is updated to point passed
+   the parsed insn.  If an error occurs the result is NULL and *PSTR is left
+   at some random point in the string (??? may wish to leave it pointing where
+   the error occured).  */
+
+static const dvp_opcode *
+assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
+     dvp_cpu cpu;
      const dvp_opcode *opcode;
      const dvp_operand *operand_table;
-     char *str;
+     char **pstr;
      DVP_INSN *insn_buf;
 {
-  char *start;
+  char *start, *str;
 
   /* Keep looking until we find a match.  */
 
-  start = str;
+  start = str = *pstr;
   for ( ; opcode != NULL; opcode = DVP_OPCODE_NEXT_ASM (opcode))
     {
       int past_opcode_p, num_suffixes, num_operands;
@@ -607,7 +618,6 @@ assemble_one_insn (cpu, opcode, operand_table, str, insn_buf)
 	}
 
       /* If we're at the end of the syntax string, we're done.  */
-      /* FIXME: try to move this to a separate function.  */
       if (*syn == '\0')
 	{
 	  int i;
@@ -622,14 +632,15 @@ assemble_one_insn (cpu, opcode, operand_table, str, insn_buf)
 
 	  if (*str != '\0'
 #ifndef VERTICAL_BAR_SEPARATOR
-	      && cpu != CPU_VUUP
+	      && cpu != DVP_VUUP
 #endif
 	      )
 	    as_bad ("junk at end of line: `%s'", str);
 
 	  /* It's now up to the caller to emit the instruction and any
 	     relocations.  */
-	  return str;
+	  *pstr = str;
+	  return opcode;
 	}
 
       /* Try the next entry.  */
@@ -673,7 +684,7 @@ md_undefined_symbol (name)
 
 static int
 encode_fixup_reloc_type (cpu, opnum)
-     enum cputype cpu;
+     dvp_cpu cpu;
      int opnum;
 {
   return (int) BFD_RELOC_UNUSED + ((int) cpu * RELOC_SPACING) + opnum;
@@ -684,20 +695,20 @@ encode_fixup_reloc_type (cpu, opnum)
 static void
 decode_fixup_reloc_type (fixup_reloc, cpuP, operandP)
      int fixup_reloc;
-     enum cputype *cpuP;
+     dvp_cpu *cpuP;
      const dvp_operand **operandP;
 {
-  enum cputype cpu = (fixup_reloc - (int) BFD_RELOC_UNUSED) / RELOC_SPACING;
+  dvp_cpu cpu = (fixup_reloc - (int) BFD_RELOC_UNUSED) / RELOC_SPACING;
   int opnum = (fixup_reloc - (int) BFD_RELOC_UNUSED) % RELOC_SPACING;
 
   *cpuP = cpu;
   switch (cpu)
     {
-    case CPU_VUUP : *operandP = &vu_operands[opnum]; break;
-    case CPU_VULO : *operandP = &vu_operands[opnum]; break;
-    case CPU_DMA : *operandP = &dma_operands[opnum]; break;
-    case CPU_PKE : *operandP = &pke_operands[opnum]; break;
-    case CPU_GPUIF : *operandP = &gpuif_operands[opnum]; break;
+    case DVP_VUUP : *operandP = &vu_operands[opnum]; break;
+    case DVP_VULO : *operandP = &vu_operands[opnum]; break;
+    case DVP_DMA : *operandP = &dma_operands[opnum]; break;
+    case DVP_PKE : *operandP = &pke_operands[opnum]; break;
+    case DVP_GPUIF : *operandP = &gpuif_operands[opnum]; break;
     default : as_fatal ("bad fixup encoding");
     }
 }
@@ -781,7 +792,7 @@ md_apply_fix3 (fixP, valueP, seg)
 
   if ((int) fixP->fx_r_type >= (int) BFD_RELOC_UNUSED)
     {
-      enum cputype cpu;
+      dvp_cpu cpu;
       const dvp_operand *operand;
       DVP_INSN insn;
 
@@ -809,7 +820,7 @@ md_apply_fix3 (fixP, valueP, seg)
 	  assert ((operand->flags & DVP_OPERAND_RELATIVE_BRANCH) != 0
 		  && operand->bits == 11
 		  && operand->shift == 0);
-	  fixP->fx_r_type = BFD_RELOC_DVP_11_PCREL;
+	  fixP->fx_r_type = BFD_RELOC_MIPS_DVP_11_PCREL;
 	}
       else
 	{
@@ -959,7 +970,7 @@ md_atof (type, litP, sizeP)
 static DVP_INSN
 dvp_insert_operand (insn, cpu, operand, mods, val, file, line)
      DVP_INSN insn;
-     enum cputype cpu;
+     dvp_cpu cpu;
      const dvp_operand *operand;
      int mods;
      offsetT val;
@@ -1162,13 +1173,14 @@ s_vu (enable_p)
 
 /* Parse a DMA data spec which can be either of '*' or a quad word count.  */
 
-static void
+static int
 parse_dma_count( pstr, errmsg)
     char **pstr;
     const char **errmsg;
 {
     char *str = *pstr;
-    long count;
+    long count, value;
+    expressionS exp;
 
     if( *str == '*' )
     {
@@ -1178,11 +1190,10 @@ parse_dma_count( pstr, errmsg)
 	return -1;
     }
 
-    expressionS exp;
     expression( &exp);
     if( exp.X_op == O_illegal
 	|| exp.X_op == O_absent )
-	break;
+	;
     else if( exp.X_op == O_constant )
 	value = exp.X_add_number;
     else if( exp.X_op == O_register )
@@ -1193,12 +1204,12 @@ parse_dma_count( pstr, errmsg)
 	if( fixup_count >= MAX_FIXUPS )
 	    as_fatal( "too many fixups");
 	fixups[fixup_count].exp = exp;
-	fixups[fixup_count].opindex = index;
+	fixups[fixup_count].opindex = 0 /*FIXME*/;
 	++fixup_count;
 	value = 0;
     }
 
-    if( isdigit( *str) )       ????????needs to accept an expression
+    if( isdigit( *str) ) /*      ????????needs to accept an expression*/
     {
 	char *start = str;
 	while( *str && *str != ',' )
