@@ -28,10 +28,11 @@ echo Sanitizing `pwd`...
 Things-to-keep:
 
 3b1
-altos
-altosgas
 a29k
 a29k-kern
+altos
+altosgas
+amix
 arm
 bigmips
 convex
