@@ -1,3 +1,18 @@
+2002-09-13  Andrew Cagney  <cagney@redhat.com>
+
+	* i386-tdep.c (i386_add_reggroups): Add save_reggroup and
+	restore_reggroup.
+	(i386_register_reggroup_p): Rewrite.  Use
+	default_register_reggroup_p.
+
+	* reggroups.h (save_reggroup, restore_reggroup): Declare.
+	* reggroups.c (save_reggroup, restore_reggroup): Define.
+	(_initialize_reggroup): Add save_reggroup and restore_reggroup to
+	default_groups.
+	* regcache.c (regcache_restore): Restore the registers in
+	restore_reggroup.
+	(regcache_save): Save registers in save_reggroup.
+
 2002-08-28  Andrew Cagney  <cagney@redhat.com>
 
 	* osabi.c (gdbarch_init_osabi): Allow a NULL abfd.

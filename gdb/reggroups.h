@@ -27,12 +27,16 @@
 struct gdbarch;
 struct reggroup;
 
-/* Pre-defined register groups.  */
+/* Pre-defined, user visible, register groups.  */
 extern struct reggroup *const general_reggroup;
 extern struct reggroup *const float_reggroup;
 extern struct reggroup *const system_reggroup;
 extern struct reggroup *const vector_reggroup;
 extern struct reggroup *const all_reggroup;
+
+/* Pre-defined, internal, register groups.  */
+extern struct reggroup *const save_reggroup;
+extern struct reggroup *const restore_reggroup;
 
 /* Create a new local register group.  */
 extern struct reggroup *reggroup_new (const char *name);

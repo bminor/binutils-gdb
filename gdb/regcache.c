@@ -337,14 +337,15 @@ regcache_save (struct regcache *dst, struct regcache *src)
   memset (dst->registers, 0, dst->descr->sizeof_registers);
   memset (dst->register_valid_p, 0, dst->descr->sizeof_register_valid_p);
   /* Copy over any relevant registers.  */
-  for (regnum = gdbarch_next_cooked_register_to_save (gdbarch, -1);
-       regnum >= 0;
-       regnum = gdbarch_next_cooked_register_to_save (gdbarch, regnum))
+  for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
     {
-      regcache_cooked_read (src, regnum, buf);
-      memcpy (dst->registers + dst->descr->register_offset[regnum],
-	      buf, dst->descr->sizeof_register[regnum]);
-      dst->register_valid_p[regnum] = 1;
+      if (gdbarch_register_reggroup_p (gdbarch, regnum, save_reggroup))
+	{
+	  regcache_cooked_read (src, regnum, buf);
+	  memcpy (dst->registers + dst->descr->register_offset[regnum],
+		  buf, dst->descr->sizeof_register[regnum]);
+	  dst->register_valid_p[regnum] = 1;
+	}
     }
 }
 
@@ -357,13 +358,14 @@ regcache_restore (struct regcache *dst, struct regcache *src)
   gdb_assert (src->descr->gdbarch == dst->descr->gdbarch);
   gdb_assert (!dst->readonly_p);
   /* Copy over any relevant registers.  */
-  for (regnum = gdbarch_next_cooked_register_to_restore (gdbarch, -1);
-       regnum >= 0;
-       regnum = gdbarch_next_cooked_register_to_restore (gdbarch, regnum))
+  for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
     {
-      memcpy (buf, src->registers + src->descr->register_offset[regnum],
-	      src->descr->sizeof_register[regnum]);
-      regcache_cooked_write (dst, regnum, buf);
+      if (gdbarch_register_reggroup_p (gdbarch, regnum, restore_reggroup))
+	{
+	  memcpy (buf, src->registers + src->descr->register_offset[regnum],
+		  src->descr->sizeof_register[regnum]);
+	  regcache_cooked_write (dst, regnum, buf);
+	}
     }
 }
 

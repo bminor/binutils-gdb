@@ -1435,6 +1435,8 @@ i386_add_reggroups (struct gdbarch *gdbarch)
   reggroup_add (gdbarch, general_reggroup);
   reggroup_add (gdbarch, float_reggroup);
   reggroup_add (gdbarch, all_reggroup);
+  reggroup_add (gdbarch, save_reggroup);
+  reggroup_add (gdbarch, restore_reggroup);
   reggroup_add (gdbarch, vector_reggroup);
   reggroup_add (gdbarch, system_reggroup);
 }
@@ -1443,17 +1445,21 @@ int
 i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 			  struct reggroup *group)
 {
-  if (group == all_reggroup)
-    return 1;
-  if (mmx_regnum_p (regnum))
-    return (group == i368_mmx_reggroup || group == vector_reggroup);
-  if (FP_REGNUM_P (regnum) || FPC_REGNUM_P (regnum))
-    return (group == float_reggroup || group == all_reggroup);
-  if (SSE_REGNUM_P (regnum) || regnum == MXCSR_REGNUM)
-    return (group == i368_sse_reggroup || group == vector_reggroup);
+  int sse_regnum_p = SSE_REGNUM_P (regnum) || regnum == MXCSR_REGNUM;
+  int fp_regnum_p = FP_REGNUM_P (regnum) || FPC_REGNUM_P (regnum);
+  if (group == i368_mmx_reggroup)
+    return mmx_regnum_p (regnum);
+  if (group == i368_sse_reggroup)
+    return sse_regnum_p;
+  if (group == vector_reggroup)
+    return (mmx_regnum_p (regnum) || sse_regnum_p);
+  if (group == float_reggroup)
+    return (FP_REGNUM_P (regnum) || FPC_REGNUM_P (regnum));
   if (group == general_reggroup)
     return 1;
-  return 0;
+  if (group == save_reggroup || group == restore_reggroup)
+    return (regnum < NUM_REGS);
+  return default_register_reggroup_p (gdbarch, regnum, group);
 }
 
 

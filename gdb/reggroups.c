@@ -131,6 +131,7 @@ default_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 {
   int vector_p;
   int float_p;
+  int raw_p;
   if (REGISTER_NAME (regnum) == NULL
       || *REGISTER_NAME (regnum) == '\0')
     return 0;
@@ -138,12 +139,15 @@ default_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
     return 1;
   vector_p = TYPE_VECTOR (register_type (gdbarch, regnum));
   float_p = TYPE_CODE (register_type (gdbarch, regnum)) == TYPE_CODE_FLT;
+  raw_p = regnum < gdbarch_num_regs (gdbarch);
   if (group == float_reggroup)
     return float_p;
   if (group == vector_reggroup)
     return vector_p;
   if (group == general_reggroup)
     return (!vector_p && !float_p);
+  if (group == save_reggroup || group == restore_reggroup)
+    return raw_p;
   return 0;   
 }
 
@@ -156,26 +160,21 @@ struct reggroup float_group = { "float" };
 struct reggroup system_group = { "system" };
 struct reggroup vector_group = { "vector" };
 struct reggroup all_group = { "all" };
+struct reggroup save_group = { "save" };
+struct reggroup restore_group = { "restore" };
 
 struct reggroup *const general_reggroup = &general_group;
 struct reggroup *const float_reggroup = &float_group;
 struct reggroup *const system_reggroup = &system_group;
 struct reggroup *const vector_reggroup = &vector_group;
 struct reggroup *const all_reggroup = &all_group;
+struct reggroup *const save_reggroup = &save_group;
+struct reggroup *const restore_reggroup = &restore_group;
 
 void
 _initialize_reggroup (void)
 {
   reggroups_data = register_gdbarch_data (reggroups_init, reggroups_free);
-
-#if 0
-  /* The pre-defined groups.  */
-  general_reggroup = reggroup_new ("general");
-  float_reggroup = reggroup_new ("float");
-  system_reggroup = reggroup_new ("system");
-  vector_reggroup = reggroup_new ("vector");
-  all_reggroup = reggroup_new ("all");
-#endif
 
   /* The pre-defined list of groups.  */
   default_groups = reggroups_init (NULL);
@@ -184,4 +183,6 @@ _initialize_reggroup (void)
   add_group (default_groups, system_reggroup);
   add_group (default_groups, vector_reggroup);
   add_group (default_groups, all_reggroup);
+  add_group (default_groups, save_reggroup);
+  add_group (default_groups, restore_reggroup);
 }
