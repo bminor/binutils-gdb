@@ -1,3 +1,8 @@
+2004-07-13  Ben Elliston  <bje@au.ibm.com>
+
+	* gprof.c (main): For line-by-line profiling, there is no need to
+	specially exclude the default function set from the flat profile.
+
 2004-06-28  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* Makefile.in: Regenerate to clean up breakage.

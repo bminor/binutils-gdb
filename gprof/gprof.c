@@ -502,14 +502,6 @@ This program is free software.  This program has absolutely no warranty.\n"));
       sym_id_add (*sp, EXCL_FLAT);
     }
 
-  /*
-   * For line-by-line profiling, also want to keep those
-   * functions off the flat profile:
-   */
-  if (line_granularity)
-    for (sp = &default_excluded_list[0]; *sp; sp++)
-      sym_id_add (*sp, EXCL_FLAT);
-
   /* Read symbol table from core file.  */
   core_init (a_out_name);
 
