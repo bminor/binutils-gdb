@@ -3406,7 +3406,8 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 		   unless it has been done already.  */
 		if ((sec->flags & SEC_MERGE)
 		    && ELF_ST_TYPE (sym->st_info) == STT_SECTION
-		    && elf_section_data (sec)->merge_info
+		    && (elf_section_data (sec)->sec_info_type
+			== ELF_INFO_TYPE_MERGE)
 		    && (gotent->flags & ALPHA_ELF_GOT_ENTRY_RELOCS_XLATED) == 0)
 		  {
 		    struct alpha_elf_got_entry *ent;
@@ -3421,7 +3422,7 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 			ent->addend =
 			  _bfd_merged_section_offset (output_bfd, &msec,
 						      elf_section_data (sec)->
-						      merge_info,
+						      sec_info,
 						      sym->st_value
 						      + ent->addend,
 						      (bfd_vma) 0);

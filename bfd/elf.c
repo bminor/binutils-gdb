@@ -812,6 +812,7 @@ _bfd_elf_print_private_bfd_data (abfd, farg)
 	    case PT_NOTE: pt = "NOTE"; break;
 	    case PT_SHLIB: pt = "SHLIB"; break;
 	    case PT_PHDR: pt = "PHDR"; break;
+	    case PT_GNU_EH_FRAME: pt = "EH_FRAME"; break;
 	    default: sprintf (buf, "0x%lx", p->p_type); pt = buf; break;
 	    }
 	  fprintf (f, "%8s off    0x", pt);
@@ -2794,7 +2795,7 @@ map_sections_to_segments (abfd)
   asection **hdrpp;
   boolean phdr_in_segment = true;
   boolean writable;
-  asection *dynsec;
+  asection *dynsec, *eh_frame_hdr;
   bfd_size_type amt;
 
   if (elf_tdata (abfd)->segment_map != NULL)
@@ -3032,6 +3033,24 @@ map_sections_to_segments (abfd)
 	  *pm = m;
 	  pm = &m->next;
 	}
+    }
+
+  /* If there is a .eh_frame_hdr section, throw in a PT_GNU_EH_FRAME
+     segment.  */
+  eh_frame_hdr = bfd_get_section_by_name (abfd, ".eh_frame_hdr");
+  if (eh_frame_hdr != NULL && (eh_frame_hdr->flags & SEC_LOAD))
+    {
+      amt = sizeof (struct elf_segment_map);
+      m = (struct elf_segment_map *) bfd_zalloc (abfd, amt);
+      if (m == NULL)
+	goto error_return;
+      m->next = NULL;
+      m->p_type = PT_GNU_EH_FRAME;
+      m->count = 1;
+      m->sections[0] = eh_frame_hdr;
+
+      *pm = m;
+      pm = &m->next;
     }
 
   free (sections);
@@ -3545,6 +3564,13 @@ get_program_header_size (abfd)
   if (bfd_get_section_by_name (abfd, ".dynamic") != NULL)
     {
       /* We need a PT_DYNAMIC segment.  */
+      ++segs;
+    }
+
+  if (elf_tdata (abfd)->eh_frame_hdr
+      && bfd_get_section_by_name (abfd, ".eh_frame_hdr") != NULL)
+    {
+      /* We need a PT_GNU_EH_FRAME segment.  */
       ++segs;
     }
 
@@ -6392,14 +6418,14 @@ _bfd_elf_rela_local_sym (abfd, sym, sec, rel)
 		+ sym->st_value);
   if ((sec->flags & SEC_MERGE)
       && ELF_ST_TYPE (sym->st_info) == STT_SECTION
-      && elf_section_data (sec)->merge_info)
+      && elf_section_data (sec)->sec_info_type == ELF_INFO_TYPE_MERGE)
     {
       asection *msec;
 
       msec = sec;
       rel->r_addend =
 	_bfd_merged_section_offset (abfd, &msec,
-				    elf_section_data (sec)->merge_info,
+				    elf_section_data (sec)->sec_info,
 				    sym->st_value + rel->r_addend,
 				    (bfd_vma) 0)
 	- relocation;
@@ -6417,11 +6443,11 @@ _bfd_elf_rel_local_sym (abfd, sym, psec, addend)
 {     
   asection *sec = *psec;
 
-  if (elf_section_data (sec)->merge_info == NULL)
+  if (elf_section_data (sec)->sec_info_type != ELF_INFO_TYPE_MERGE)
     return sym->st_value + addend;
 
   return _bfd_merged_section_offset (abfd, psec,
-				     elf_section_data (sec)->merge_info,
+				     elf_section_data (sec)->sec_info,
 				     sym->st_value + addend, (bfd_vma) 0);
 }
 
@@ -6435,9 +6461,15 @@ _bfd_elf_section_offset (abfd, info, sec, offset)
   struct bfd_elf_section_data *sec_data;
 
   sec_data = elf_section_data (sec);
-  if (sec_data->stab_info != NULL)
-    return _bfd_stab_section_offset
-	   (abfd, &elf_hash_table (info)->stab_info,
-	    sec, &sec_data->stab_info, offset);
-  return offset;
+  switch (sec_data->sec_info_type)
+    {
+    case ELF_INFO_TYPE_STABS:
+      return _bfd_stab_section_offset
+	(abfd, &elf_hash_table (info)->merge_info, sec, &sec_data->sec_info,
+	 offset);
+    case ELF_INFO_TYPE_EH_FRAME:
+      return _bfd_elf_eh_frame_section_offset (abfd, sec, offset);
+    default:
+      return offset;
+    }
 }

@@ -1329,7 +1329,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
 static void
 gld${EMULATION_NAME}_finish ()
 {
-  if (bfd_elf${ELFSIZE}_discard_info (&link_info))
+  if (bfd_elf${ELFSIZE}_discard_info (output_bfd, &link_info))
     {
       /* Resize the sections.  */
       lang_size_sections (stat_ptr->head, abs_output_section,
@@ -1431,6 +1431,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
 #define OPTION_DISABLE_NEW_DTAGS	(400)
 #define OPTION_ENABLE_NEW_DTAGS		(OPTION_DISABLE_NEW_DTAGS + 1)
 #define OPTION_GROUP			(OPTION_ENABLE_NEW_DTAGS + 1)
+#define OPTION_EH_FRAME_HDR		(OPTION_GROUP + 1)
 
 static struct option longopts[] =
 {
@@ -1444,6 +1445,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
   {"disable-new-dtags", no_argument, NULL, OPTION_DISABLE_NEW_DTAGS},
   {"enable-new-dtags", no_argument, NULL, OPTION_ENABLE_NEW_DTAGS},
   {"enable-new-dtags", no_argument, NULL, OPTION_ENABLE_NEW_DTAGS},
+  {"eh-frame-hdr", no_argument, NULL, OPTION_EH_FRAME_HDR},
   {"Bgroup", no_argument, NULL, OPTION_GROUP},
   {"Bgroup", no_argument, NULL, OPTION_GROUP},
 EOF
@@ -1502,6 +1504,10 @@ cat >>e${EMULATION_NAME}.c <<EOF
 
     case OPTION_ENABLE_NEW_DTAGS:
       link_info.new_dtags = true;
+      break;
+
+    case OPTION_EH_FRAME_HDR:
+      link_info.eh_frame_hdr = true;
       break;
 
     case OPTION_GROUP:
@@ -1579,6 +1585,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
   fprintf (file, _("  -Bgroup\t\tSelects group name lookup rules for DSO\n"));
   fprintf (file, _("  --disable-new-dtags\tDisable new dynamic tags\n"));
   fprintf (file, _("  --enable-new-dtags\tEnable new dynamic tags\n"));
+  fprintf (file, _("  --eh-frame-hdr\tCreate .eh_frame_hdr section\n"));
   fprintf (file, _("  -z combreloc\t\tMerge dynamic relocs into one section and sort\n"));
   fprintf (file, _("  -z defs\t\tDisallows undefined symbols\n"));
   fprintf (file, _("  -z initfirst\t\tMark DSO to be initialized first at runtime\n"));

@@ -1,3 +1,50 @@
+2001-12-13  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf-bfd.h (enum elf_link_info_type): New.
+	(struct bfd_elf_section_data): Remove stab_info and merge_info
+	fields, add sec_info and sec_info_type.
+	(struct elf_obj_tdata): Add eh_frame_hdr field.
+	(_bfd_elf_discard_section_eh_frame): New prototype.
+	(_bfd_elf_discard_section_eh_frame_hdr): Likewise.
+	(_bfd_elf_eh_frame_section_offset): Likewise.
+	(_bfd_elf_write_section_eh_frame): Likewise.
+	(_bfd_elf_write_section_eh_frame_hdr): Likewise.
+	* Makefile.am (BFD32_BACKENDS): Add elf-eh-frame.lo.
+	(BFD32_BACKENDS_CFILES): Add elf-eh-frame.c.
+	(elf-eh-frame.lo): New.
+	* Makefile.in: Rebuilt.
+	* configure.in (elf): Add elf-eh-frame.lo.
+	* configure: Rebuilt.
+	* elf.c (_bfd_elf_print_private_bfd_data): Support PT_GNU_EH_FRAME.
+	(map_sections_to_segments): Create PT_GNU_EH_FRAME if requested.
+	(get_program_header_size): Take into account PT_GNU_EH_FRAME
+	segment.
+	(_bfd_elf_rela_local_sym): Use sec_info_type and sec_info.
+	(_bfd_elf_rel_local_sym): Likewise.
+	(_bfd_elf_section_offset): Likewise.  Call
+	_bfd_elf_eh_frame_section_offset too.
+	* elfxx-ia64.c (elfNN_ia64_relocate_section): Use sec_info_type and
+	sec_info.
+	* elf64-alpha.c (elf64_alpha_relocate_section): Likewise.
+	* elf-eh-frame.c: New file.
+	* elflink.h (elf_link_add_object_symbols): Don't optimize SHF_MERGE
+	.stab sections.  Set sec_info_type, use sec_info instead
+	of merge_info and stab_info.
+	(elf_link_create_dynamic_sections): Create .eh_frame_hdr section
+	if --eh-frame-hdr.
+	(elf_bfd_final_link): Write .eh_frame_hdr section.
+	(elf_link_sec_merge_syms): Use sec_info_type and sec_info.
+	(elf_link_input_bfd): Likewise.
+	Call _bfd_elf_write_section_eh_frame to write .eh_frame sections.
+	(elf_bfd_discard_info): Add output_bfd argument.
+	Call _bfd_elf_discard_section_eh_frame and
+	_bfd_elf_discard_section_eh_frame_hdr.
+	(elf_section_ignore_discarded_relocs): Use sec_info_type, not section
+	names.
+	* bfd-in.h (bfd_elf32_discard_info, bfd_elf64_discard_info): Adjust
+	prototypes.
+	* bfd-in2.h (bfd_elf32_discard_info, bfd_elf64_discard_info): Likewise.
+
 2001-12-12  Richard Henderson  <rth@redhat.com>
 
 	* syms.c (_bfd_generic_read_minisymbols): Early return for

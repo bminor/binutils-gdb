@@ -1827,6 +1827,9 @@ get_segment_type (p_type)
     case PT_SHLIB:      return "SHLIB";
     case PT_PHDR:       return "PHDR";
 
+    case PT_GNU_EH_FRAME:
+			return "GNU_EH_FRAME";
+
     default:
       if ((p_type >= PT_LOPROC) && (p_type <= PT_HIPROC))
 	{

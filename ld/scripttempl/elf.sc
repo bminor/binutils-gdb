@@ -265,6 +265,7 @@ cat <<EOF
   ${CREATE_SHLIB-${SDATA2}}
   ${CREATE_SHLIB-${SBSS2}}
   ${OTHER_READONLY_SECTIONS}
+  .eh_frame_hdr : { *(.eh_frame_hdr) }
 
   /* Adjust the address for the data segment.  We want to adjust up to
      the same address within the page on the next page up.  */

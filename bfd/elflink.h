@@ -2214,7 +2214,7 @@ elf_link_add_object_symbols (abfd, info)
       asection *stab, *stabstr;
 
       stab = bfd_get_section_by_name (abfd, ".stab");
-      if (stab != NULL)
+      if (stab != NULL && !(stab->flags & SEC_MERGE))
 	{
 	  stabstr = bfd_get_section_by_name (abfd, ".stabstr");
 
@@ -2226,8 +2226,10 @@ elf_link_add_object_symbols (abfd, info)
 	      if (! _bfd_link_section_stabs (abfd,
 					     & hash_table->stab_info,
 					     stab, stabstr,
-					     &secdata->stab_info))
+					     &secdata->sec_info))
 		goto error_return;
+	      if (secdata->sec_info)
+		secdata->sec_info_type = ELF_INFO_TYPE_STABS;
 	    }
 	}
     }
@@ -2238,10 +2240,18 @@ elf_link_add_object_symbols (abfd, info)
       asection *s;
 
       for (s = abfd->sections; s != NULL; s = s->next)
-	if ((s->flags & SEC_MERGE)
-	    && ! _bfd_merge_section (abfd, & hash_table->merge_info, s,
-				     & elf_section_data (s)->merge_info))
-	  goto error_return;
+	if (s->flags & SEC_MERGE)
+	  {
+	    struct bfd_elf_section_data *secdata;
+
+	    secdata = elf_section_data (s);
+	    if (! _bfd_merge_section (abfd,
+				      & hash_table->merge_info,
+				      s, &secdata->sec_info))
+	      goto error_return;
+	    else if (secdata->sec_info)
+	      secdata->sec_info_type = ELF_INFO_TYPE_MERGE;
+	  }
     }
 
   return true;
@@ -2297,6 +2307,16 @@ elf_link_create_dynamic_sections (abfd, info)
       s = bfd_make_section (abfd, ".interp");
       if (s == NULL
 	  || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY))
+	return false;
+    }
+
+  if (! info->traditional_format
+      && info->hash->creator->flavour == bfd_target_elf_flavour)
+    {
+      s = bfd_make_section (abfd, ".eh_frame_hdr");
+      if (s == NULL
+	  || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
+	  || ! bfd_set_section_alignment (abfd, s, 2))
 	return false;
     }
 
@@ -5522,6 +5542,19 @@ elf_bfd_final_link (abfd, info)
 	goto error_return;
     }
 
+  if (info->eh_frame_hdr)
+    {
+      o = bfd_get_section_by_name (elf_hash_table (info)->dynobj,
+				   ".eh_frame_hdr");
+      if (o
+	  && (elf_section_data (o)->sec_info_type
+	      == ELF_INFO_TYPE_EH_FRAME_HDR))
+	{
+	  if (! _bfd_elf_write_section_eh_frame_hdr (abfd, o))
+	    goto error_return;
+	}
+    }
+
   if (finfo.symstrtab != NULL)
     _bfd_stringtab_free (finfo.symstrtab);
   if (finfo.contents != NULL)
@@ -5671,14 +5704,14 @@ elf_link_sec_merge_syms (h, data)
   if ((h->root.type == bfd_link_hash_defined
        || h->root.type == bfd_link_hash_defweak)
       && ((sec = h->root.u.def.section)->flags & SEC_MERGE)
-      && elf_section_data (sec)->merge_info)
+      && elf_section_data (sec)->sec_info_type == ELF_INFO_TYPE_MERGE)
     {
       bfd *output_bfd = (bfd *) data;
 
       h->root.u.def.value =
 	_bfd_merged_section_offset (output_bfd,
 				    &h->root.u.def.section,
-				    elf_section_data (sec)->merge_info,
+				    elf_section_data (sec)->sec_info,
 				    h->root.u.def.value, (bfd_vma) 0);
     }
 
@@ -6170,11 +6203,12 @@ elf_link_input_bfd (finfo, input_bfd)
       else if (isym->st_shndx > 0 && isym->st_shndx < SHN_LORESERVE)
 	{
 	  isec = section_from_elf_index (input_bfd, isym->st_shndx);
-	  if (isec && elf_section_data (isec)->merge_info
+	  if (isec
+	      && elf_section_data (isec)->sec_info_type == ELF_INFO_TYPE_MERGE
 	      && ELF_ST_TYPE (isym->st_info) != STT_SECTION)
 	    isym->st_value =
 	      _bfd_merged_section_offset (output_bfd, &isec,
-					  elf_section_data (isec)->merge_info,
+					  elf_section_data (isec)->sec_info,
 					  isym->st_value, (bfd_vma) 0);
 	}
       else if (isym->st_shndx == SHN_ABS)
@@ -6358,8 +6392,8 @@ elf_link_input_bfd (finfo, input_bfd)
 			  && ! bfd_is_abs_section (h->root.u.def.section)
 			  && bfd_is_abs_section (h->root.u.def.section
 						 ->output_section)
-			  && elf_section_data (h->root.u.def.section)->merge_info
-			     == NULL)
+			  && (elf_section_data (h->root.u.def.section)
+			      ->sec_info_type != ELF_INFO_TYPE_MERGE))
 			{
 #if BFD_VERSION_DATE < 20031005
 			  if ((o->flags & SEC_DEBUGGING) != 0)
@@ -6391,7 +6425,8 @@ elf_link_input_bfd (finfo, input_bfd)
 		      if (sec != NULL
 			  && ! bfd_is_abs_section (sec)
 			  && bfd_is_abs_section (sec->output_section)
-			  && elf_section_data (sec)->merge_info == NULL)
+			  && (elf_section_data (sec)->sec_info_type
+			      != ELF_INFO_TYPE_MERGE))
 			{
 #if BFD_VERSION_DATE < 20031005
 			  if ((o->flags & SEC_DEBUGGING) != 0
@@ -6640,30 +6675,45 @@ elf_link_input_bfd (finfo, input_bfd)
 	{
 	  /* Section written out.  */
 	}
-      else if (elf_section_data (o)->stab_info)
+      else switch (elf_section_data (o)->sec_info_type)
 	{
+	case ELF_INFO_TYPE_STABS:
 	  if (! (_bfd_write_section_stabs
-		 (output_bfd, &elf_hash_table (finfo->info)->stab_info,
-		  o, &elf_section_data (o)->stab_info, contents)))
+		 (output_bfd,
+		  &elf_hash_table (finfo->info)->stab_info,
+		  o, &elf_section_data (o)->sec_info, contents)))
 	    return false;
-	}
-      else if (elf_section_data (o)->merge_info)
-	{
+	  break;
+	case ELF_INFO_TYPE_MERGE:
 	  if (! (_bfd_write_merged_section
-		 (output_bfd, o, elf_section_data (o)->merge_info)))
+		 (output_bfd, o, elf_section_data (o)->sec_info)))
 	    return false;
-	}
-      else
-	{
-	  bfd_size_type sec_size;
+	  break;
+	case ELF_INFO_TYPE_EH_FRAME:
+	  {
+	    asection *ehdrsec;
 
-	  sec_size = (o->_cooked_size != 0 ? o->_cooked_size : o->_raw_size);
-	  if (! (o->flags & SEC_EXCLUDE)
-	      && ! bfd_set_section_contents (output_bfd, o->output_section,
-					     contents,
-					     (file_ptr) o->output_offset,
-					     sec_size))
-	    return false;
+	    ehdrsec
+	      = bfd_get_section_by_name (elf_hash_table (finfo->info)->dynobj,
+					 ".eh_frame_hdr");
+	    if (! (_bfd_elf_write_section_eh_frame (output_bfd, o, ehdrsec,
+						    contents)))
+	      return false;
+	  }
+	  break;
+	default:
+	  {
+	    bfd_size_type sec_size;
+
+	    sec_size = (o->_cooked_size != 0 ? o->_cooked_size : o->_raw_size);
+	    if (! (o->flags & SEC_EXCLUDE)
+		&& ! bfd_set_section_contents (output_bfd, o->output_section,
+					       contents,
+					       (file_ptr) o->output_offset,
+					       sec_size))
+	      return false;
+	  }
+	  break;
 	}
     }
 
@@ -7881,24 +7931,28 @@ elf_reloc_symbol_deleted_p (offset, cookie)
    which is true for all known assemblers.  */
 
 boolean
-elf_bfd_discard_info (info)
+elf_bfd_discard_info (output_bfd, info)
+     bfd *output_bfd;
      struct bfd_link_info *info;
 {
   struct elf_reloc_cookie cookie;
-  asection *o;
+  asection *stab, *eh, *ehdr;
   Elf_Internal_Shdr *symtab_hdr;
   Elf_External_Sym *freesyms;
   struct elf_backend_data *bed;
   bfd *abfd;
   boolean ret = false;
+  boolean strip = info->strip == strip_all || info->strip == strip_debugger;
 
   if (info->relocateable
       || info->traditional_format
       || info->hash->creator->flavour != bfd_target_elf_flavour
-      || ! is_elf_hash_table (info)
-      || info->strip == strip_all
-      || info->strip == strip_debugger)
+      || ! is_elf_hash_table (info))
     return false;
+
+  ehdr = bfd_get_section_by_name (elf_hash_table (info)->dynobj,
+				  ".eh_frame_hdr");
+
   for (abfd = info->input_bfds; abfd != NULL; abfd = abfd->link_next)
     {
       if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
@@ -7909,8 +7963,18 @@ elf_bfd_discard_info (info)
       if ((abfd->flags & DYNAMIC) != 0)
 	continue;
 
-      o = bfd_get_section_by_name (abfd, ".stab");
-      if (! o && ! bed->elf_backend_discard_info)
+      eh = NULL;
+      if (ehdr)
+	{
+	  eh = bfd_get_section_by_name (abfd, ".eh_frame");
+	  if (eh && eh->_raw_size == 0)
+	    eh = NULL;
+	}
+
+      stab = strip ? NULL : bfd_get_section_by_name (abfd, ".stab");
+      if ((! stab || elf_section_data(stab)->sec_info_type != ELF_INFO_TYPE_STABS)
+	  && ! eh
+	  && (strip || ! bed->elf_backend_discard_info))
 	continue;
 
       symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
@@ -7955,25 +8019,49 @@ elf_bfd_discard_info (info)
 	    }
         }
 
-      if (o)
+      if (stab)
 	{
 	  cookie.rels = (NAME(_bfd_elf,link_read_relocs)
-			 (abfd, o, (PTR) NULL,
+			 (abfd, stab, (PTR) NULL,
 			  (Elf_Internal_Rela *) NULL,
 			  info->keep_memory));
 	  if (cookie.rels)
 	    {
 	      cookie.rel = cookie.rels;
 	      cookie.relend =
-		cookie.rels + o->reloc_count * bed->s->int_rels_per_ext_rel;
-	      if (_bfd_discard_section_stabs (abfd, o,
-					      elf_section_data (o)->stab_info,
+		cookie.rels + stab->reloc_count * bed->s->int_rels_per_ext_rel;
+	      if (_bfd_discard_section_stabs (abfd, stab,
+					      elf_section_data (stab)->sec_info,
 					      elf_reloc_symbol_deleted_p,
 					      &cookie))
 		ret = true;
 	      if (! info->keep_memory)
 		free (cookie.rels);
 	    }
+	}
+
+      if (eh)
+	{
+	  cookie.rels = NULL;
+	  cookie.rel = NULL;
+	  cookie.relend = NULL;
+	  if (eh->reloc_count)
+	    cookie.rels = (NAME(_bfd_elf,link_read_relocs)
+			   (abfd, eh, (PTR) NULL,
+			    (Elf_Internal_Rela *) NULL,
+			    info->keep_memory));
+	  if (cookie.rels)
+	    {
+	      cookie.rel = cookie.rels;
+	      cookie.relend =
+		cookie.rels + eh->reloc_count * bed->s->int_rels_per_ext_rel;
+	    }
+	  if (_bfd_elf_discard_section_eh_frame (abfd, info, eh, ehdr,
+						 elf_reloc_symbol_deleted_p,
+						 &cookie))
+	    ret = true;
+	  if (! info->keep_memory)
+	    free (cookie.rels);
 	}
 
       if (bed->elf_backend_discard_info)
@@ -7985,6 +8073,11 @@ elf_bfd_discard_info (info)
       if (freesyms)
 	free (freesyms);
     }
+
+  if (ehdr
+      && _bfd_elf_discard_section_eh_frame_hdr (output_bfd,
+						info, ehdr))
+    ret = true;
   return ret;
 }
 
@@ -7992,13 +8085,19 @@ static boolean
 elf_section_ignore_discarded_relocs (sec)
      asection *sec;
 {
-  if (strcmp (sec->name, ".stab") == 0)
+  switch (elf_section_data (sec)->sec_info_type)
+    {
+    case ELF_INFO_TYPE_STABS:
+    case ELF_INFO_TYPE_EH_FRAME:
+      return true;
+    default:
+      break;
+    }
+  if ((get_elf_backend_data (sec->owner)->elf_backend_ignore_discarded_relocs
+       != NULL)
+      && (*get_elf_backend_data (sec->owner)
+	   ->elf_backend_ignore_discarded_relocs) (sec))
     return true;
-  else if ((get_elf_backend_data (sec->owner)
-	    ->elf_backend_ignore_discarded_relocs != NULL)
-	   && (*get_elf_backend_data (sec->owner)
-	       ->elf_backend_ignore_discarded_relocs) (sec))
-    return true;
-  else
-    return false;
+
+  return false;
 }

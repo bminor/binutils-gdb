@@ -223,6 +223,16 @@ struct elf_link_local_dynamic_entry
   Elf_Internal_Sym isym;
 };
 
+enum elf_link_info_type
+{
+  ELF_INFO_TYPE_NONE,
+  ELF_INFO_TYPE_STABS,
+  ELF_INFO_TYPE_MERGE,
+  ELF_INFO_TYPE_EH_FRAME,
+  ELF_INFO_TYPE_EH_FRAME_HDR,
+  ELF_INFO_TYPE_LAST
+};
+
 /* ELF linker hash table.  */
 
 struct elf_link_hash_table
@@ -848,11 +858,11 @@ struct bfd_elf_section_data
      no dynamic symbol for this section.  */
   long dynindx;
 
-  /* A pointer used for .stab linking optimizations.  */
-  PTR stab_info;
+  /* A pointer used for various section optimizations.  */
+  PTR sec_info;
 
-  /* A pointer used for SEC_MERGE optimizations.  */
-  PTR merge_info;
+  /* Type of that information.  */
+  enum elf_link_info_type sec_info_type;
 
   /* Group name, if this section is part of a group.  */
   const char *group_name;
@@ -1042,6 +1052,10 @@ struct elf_obj_tdata
 
   /* Used to determine if the e_flags field has been initialized */
   boolean flags_init;
+
+  /* Used to determine if PT_GNU_EH_FRAME segment header should be
+     created.  */
+  boolean eh_frame_hdr;
 
   /* Number of symbol version definitions we are about to emit.  */
   unsigned int cverdefs;
@@ -1270,6 +1284,18 @@ extern boolean _bfd_elf_strtab_emit
   PARAMS ((bfd *, struct elf_strtab_hash *));
 extern void _bfd_elf_strtab_finalize
   PARAMS ((struct elf_strtab_hash *));
+
+extern boolean _bfd_elf_discard_section_eh_frame
+  PARAMS ((bfd *, struct bfd_link_info *, asection *, asection *,
+	   boolean (*) (bfd_vma, PTR), struct elf_reloc_cookie *));
+extern boolean _bfd_elf_discard_section_eh_frame_hdr
+  PARAMS ((bfd *, struct bfd_link_info *, asection *));
+extern bfd_vma _bfd_elf_eh_frame_section_offset
+  PARAMS ((bfd *, asection *, bfd_vma));
+extern boolean _bfd_elf_write_section_eh_frame
+  PARAMS ((bfd *, asection *, asection *, bfd_byte *));
+extern boolean _bfd_elf_write_section_eh_frame_hdr
+  PARAMS ((bfd *, asection *));
 
 extern boolean _bfd_elf_link_record_dynamic_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));

@@ -254,7 +254,7 @@ gld${EMULATION_NAME}_finish ()
      ie. doesn't affect any code, so we can delay resizing the
      sections.  It's likely we'll resize everything in the process of
      adding stubs.  */
-  if (bfd_elf${ELFSIZE}_discard_info (&link_info))
+  if (bfd_elf${ELFSIZE}_discard_info (output_bfd, &link_info))
     need_laying_out = 1;
 
   /* Call into the BFD backend to do the real work.  */

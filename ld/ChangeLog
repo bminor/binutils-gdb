@@ -1,3 +1,15 @@
+2001-12-13  Jakub Jelinek  <jakub@redhat.com>
+
+	* emultempl/elf32.em (finish): Supply output_bfd
+	to bfd_elf*_discard_info.
+	(OPTION_EH_FRAME_HDR): Define.
+	(longopts): Add --eh-frame-hdr.
+	(parse_args): Handle it.
+	(list_options): Add --eh-frame-hdr to help.
+	* emultempl/hppaelf.em (finish): Supply output_bfd
+	to bfd_elf*_discard_info.
+	* scripttempl/elf.sc (.eh_frame_hdr): Add.
+
 2001-12-13  Alan Modra  <amodra@bigpond.net.au>
 
 	* lexsup.c (parse_args): Don't pass shortopts to second call to
