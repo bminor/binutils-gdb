@@ -1,3 +1,7 @@
+Wed Feb  2 13:55:08 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* Makefile.in:  Avoid bug in losing hpux sed.
+
 Wed Feb  2 11:40:11 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-mips.c (file_mips_isa): New static variable.
