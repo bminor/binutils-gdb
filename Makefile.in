@@ -480,6 +480,7 @@ GCC_FLAGS_TO_PASS = $(BASE_FLAGS_TO_PASS) $(EXTRA_GCC_FLAGS)
 # using $(FLAGS_TO_PASS).
 ALL_MODULES = \
 	all-apache \
+	all-ash \
 	all-autoconf \
 	all-automake \
 	all-bash \
@@ -565,6 +566,7 @@ NATIVE_CHECK_MODULES = \
 
 CROSS_CHECK_MODULES = \
 	check-apache \
+	check-ash \
 	check-autoconf \
 	check-automake \
 	check-bash \
@@ -642,6 +644,7 @@ CHECK_MODULES=$(NATIVE_CHECK_MODULES) $(CROSS_CHECK_MODULES)
 # program on installation which uses the Tcl libraries.
 INSTALL_MODULES = \
 	install-apache \
+	install-ash \
 	install-autoconf \
 	install-automake \
 	install-bash \
@@ -807,6 +810,7 @@ INSTALL_TARGET_MODULES = \
 # This is a list of the targets for which we can do a clean-{target}.
 CLEAN_MODULES = \
 	clean-apache \
+	clean-ash \
 	clean-autoconf \
 	clean-automake \
 	clean-bash \
@@ -1462,6 +1466,7 @@ install-dosrel-fake:
 
 # This is a list of inter-dependencies among modules.
 all-apache:
+all-ash:
 all-autoconf: all-m4 all-texinfo
 all-automake:
 all-bash:
@@ -1637,7 +1642,7 @@ SUPPORT_FILES = list-of-support-files-for-tool-in-question
 
 taz: $(DEVO_SUPPORT) $(SUPPORT_FILES) \
   texinfo/texinfo.tex texinfo/gpl.texinfo texinfo/lgpl.texinfo
-	# Take out texinfo from a few places; make simple BISON=bison line.
+	# Take out texinfo from a few places.
 	sed -e '/^all\.normal: /s/\all-texinfo //' \
 	    -e '/^	install-texinfo /d' \
 	<Makefile.in >tmp
