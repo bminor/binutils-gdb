@@ -735,8 +735,10 @@ i386_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT
       && TYPE_NFIELDS (type) == 1)
-    return i386_extract_return_value (TYPE_FIELD_TYPE (type, 0),
-				      regbuf, valbuf);
+    {
+      i386_extract_return_value (TYPE_FIELD_TYPE (type, 0), regbuf, valbuf);
+      return;
+    }
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
@@ -798,7 +800,10 @@ i386_store_return_value (struct type *type, char *valbuf)
 
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT
       && TYPE_NFIELDS (type) == 1)
-    return i386_store_return_value (TYPE_FIELD_TYPE (type, 0), valbuf);
+    {
+      i386_store_return_value (TYPE_FIELD_TYPE (type, 0), valbuf);
+      return;
+    }
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
