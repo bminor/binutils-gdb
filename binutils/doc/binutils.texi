@@ -2378,7 +2378,7 @@ takes parameters of different types).  All C++ and Java function names
 are encoded into a low-level assembly label (this process is known as
 @dfn{mangling}). The @command{c++filt}
 @footnote{MS-DOS does not allow @kbd{+} characters in file names, so on
-MS-DOS this program is named @command{cxxfilt}.}
+MS-DOS this program is named @command{CXXFILT}.}
 program does the inverse mapping: it decodes (@dfn{demangles}) low-level
 names into user-level names so that the linker can keep these overloaded
 functions from clashing.

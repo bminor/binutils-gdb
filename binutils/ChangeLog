@@ -1,3 +1,10 @@
+2005-01-11  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/637
+	* doc/binutils.texi (c++filt): Use uppercase CXXFILT in the
+	footnote in order to prevent the sed script in the Makefile from
+	converting it into c++filt.
+
 2005-01-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	BZ 635
