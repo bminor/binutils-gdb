@@ -961,7 +961,7 @@ copy_archive (ibfd, obfd, output_target)
   list = NULL;
 
   this_element = bfd_openr_next_archived_file (ibfd, NULL);
-  while (this_element != (bfd *) NULL)
+  while (!status && this_element != (bfd *) NULL)
     {
       /* Create an output file for this member.  */
       char *output_name = concat (dir, "/", bfd_get_filename(this_element),
@@ -983,7 +983,12 @@ copy_archive (ibfd, obfd, output_target)
       if (bfd_check_format (this_element, bfd_object) == true)
 	copy_object (this_element, output_bfd);
 
-      bfd_close (output_bfd);
+      if (!bfd_close (output_bfd))
+	{
+	  bfd_nonfatal (bfd_get_filename (output_bfd));
+	  /* Error in new object file. Don't change archive. */
+	  status = 1;
+	}
 
       /* Open the newly output file and attach to our list.  */
       output_bfd = bfd_openr (output_name, output_target);
@@ -1097,6 +1102,7 @@ setup_section (ibfd, isection, obfdarg)
   bfd *obfd = (bfd *) obfdarg;
   struct section_list *p;
   sec_ptr osection;
+  bfd_size_type size;
   bfd_vma vma;
   bfd_vma lma;
   flagword flags;
@@ -1124,9 +1130,10 @@ setup_section (ibfd, isection, obfdarg)
       goto loser;
     }
 
-  if (!bfd_set_section_size (obfd,
-			     osection,
-			     bfd_section_size (ibfd, isection)))
+  size = bfd_section_size (ibfd, isection);
+  if (copy_byte >= 0)
+    size = (size + interleave - 1) / interleave;
+  if (! bfd_set_section_size (obfd, osection, size))
     {
       err = "size";
       goto loser;
@@ -1284,12 +1291,7 @@ copy_section (ibfd, isection, obfdarg)
 	RETURN_NONFATAL (bfd_get_filename (ibfd));
 
       if (copy_byte >= 0) 
-        {
-	  filter_bytes (memhunk, &size);
-              /* The section has gotten smaller. */
-          if (!bfd_set_section_size (obfd, osection, size))
-            RETURN_NONFATAL (bfd_get_filename (obfd));
-        }
+	filter_bytes (memhunk, &size);
 
       if (!bfd_set_section_contents (obfd, osection, memhunk, (file_ptr) 0,
 				     size))
@@ -1742,7 +1744,8 @@ strip_main (argc, argv)
   /* Default is to strip all symbols.  */
   if (strip_symbols == STRIP_UNDEF
       && discard_locals == LOCALS_UNDEF
-      && strip_specific_list == NULL)
+      && strip_specific_list == NULL
+      && keep_specific_list == NULL)
     strip_symbols = STRIP_ALL;
 
   if (output_target == (char *) NULL)

@@ -1,3 +1,10 @@
+1998-06-26  Vladimir N. Makarov  <vmakarov@cygnus.com>
+
+	* objcopy.c (strip_main): keep_specific_list == NULL as additional
+	condition to set up strip all symbols by default.
+	(copy_archive): don't change archive when error in object files of
+	the archive.
+
 Wed Jun 24 17:53:47 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* stabs.c (parse_number): Sign extend negative values correctly if
