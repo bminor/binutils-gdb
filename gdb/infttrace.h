@@ -1,9 +1,6 @@
-/* Parameters for hosting on an HPPA-RISC machine running HPUX, for GDB.
-   Copyright 1991, 1992, 1993, 1995, 1996, 2000
-   Free Software Foundation, Inc.
+/* Low level Unix child interface to ttrace, for GDB when running under HP-UX.
 
-   Contributed by the Center for Software Science at the
-   University of Utah (pa-gdb-bugs@cs.utah.edu).
+   Copyright 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,6 +19,10 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#define USG
+#ifndef INFTTRACE_H
+#define INFTTRACE_H
 
-#define HAVE_TERMIOS
+extern int parent_attach_all (int, PTRACE_ARG3_TYPE, int);
+extern pid_t hppa_switched_threads (pid_t gdb_pid);
+
+#endif

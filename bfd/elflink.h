@@ -1940,7 +1940,7 @@ elf_link_add_object_symbols (abfd, info)
 	     might be needed here.  */
 	  if (isym->st_other != 0)
 	    {
-	      unsigned char hvis, symvis, other;
+	      unsigned char hvis, symvis, other, nvis;
 
 	      /* Take the balance of OTHER from the definition.  */
 	      other = (definition ? isym->st_other : h->other);
@@ -1949,8 +1949,14 @@ elf_link_add_object_symbols (abfd, info)
 	      /* Combine visibilities, using the most constraining one.  */
 	      hvis   = ELF_ST_VISIBILITY (h->other);
 	      symvis = ELF_ST_VISIBILITY (isym->st_other);
+	      if (! hvis)
+		nvis = symvis;
+	      else if (! symvis)
+		nvis = hvis;
+	      else
+		nvis = hvis < symvis ? hvis : symvis;
 
-	      h->other = other | (hvis > symvis ? hvis : symvis);
+	      h->other = other | nvis;
 	    }
 
 	  /* Set a flag in the hash table entry indicating the type of

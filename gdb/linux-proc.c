@@ -21,17 +21,17 @@
 
 #include "defs.h"
 #include "inferior.h"
-#include <sys/param.h>	/* for MAXPATHLEN */
-#include <sys/procfs.h>	/* for elf_gregset etc. */
-#include "gdb_stat.h"	/* for struct stat */
-#include <ctype.h>	/* for isdigit */
-#include <unistd.h>	/* for open, pread64 */
-#include <fcntl.h>	/* for O_RDONLY */
-#include "regcache.h"	/* for registers_changed */
-#include "gregset.h"	/* for gregset */
-#include "gdbcore.h"	/* for get_exec_file */
-#include "gdbthread.h"	/* for struct thread_info etc. */
-#include "elf-bfd.h"	/* for elfcore_write_* */
+#include <sys/param.h>		/* for MAXPATHLEN */
+#include <sys/procfs.h>		/* for elf_gregset etc. */
+#include "gdb_stat.h"		/* for struct stat */
+#include <ctype.h>		/* for isdigit */
+#include <unistd.h>		/* for open, pread64 */
+#include <fcntl.h>		/* for O_RDONLY */
+#include "regcache.h"		/* for registers_changed */
+#include "gregset.h"		/* for gregset */
+#include "gdbcore.h"		/* for get_exec_file */
+#include "gdbthread.h"		/* for struct thread_info etc. */
+#include "elf-bfd.h"		/* for elfcore_write_* */
 #include "cli/cli-decode.h"	/* for add_info */
 #include "gdb_string.h"
 
@@ -69,28 +69,26 @@ child_pid_to_exec_file (int pid)
  * Service function for corefiles and info proc.
  */
 
-static int 
-read_mapping (FILE *mapfile, 
-	      long long *addr, 
-	      long long *endaddr, 
-	      char *permissions, 
-	      long long *offset, 
-	      char *device, 
-	      long long *inode, 
-	      char *filename)
+static int
+read_mapping (FILE *mapfile,
+	      long long *addr,
+	      long long *endaddr,
+	      char *permissions,
+	      long long *offset,
+	      char *device, long long *inode, char *filename)
 {
-  int ret = fscanf (mapfile,  "%llx-%llx %s %llx %s %llx", 
+  int ret = fscanf (mapfile, "%llx-%llx %s %llx %s %llx",
 		    addr, endaddr, permissions, offset, device, inode);
 
   if (ret > 0 && ret != EOF && *inode != 0)
     {
       /* Eat everything up to EOL for the filename.  This will prevent
-       weird filenames (such as one with embedded whitespace) from
-       confusing this code.  It also makes this code more robust
-       in respect to annotations the kernel may add after the
-       filename.
+         weird filenames (such as one with embedded whitespace) from
+         confusing this code.  It also makes this code more robust
+         in respect to annotations the kernel may add after the
+         filename.
 
-       Note the filename is used for informational purposes only.  */
+         Note the filename is used for informational purposes only.  */
       ret += fscanf (mapfile, "%[^\n]\n", filename);
     }
   else
@@ -108,11 +106,9 @@ read_mapping (FILE *mapfile,
  */
 
 static int
-linux_find_memory_regions (int (*func) (CORE_ADDR, 
+linux_find_memory_regions (int (*func) (CORE_ADDR,
 					unsigned long,
-					int, int, int,
-					void *), 
-			   void *obfd)
+					int, int, int, void *), void *obfd)
 {
   long long pid = PIDGET (inferior_ptid);
   char mapsfilename[MAXPATHLEN];
@@ -128,31 +124,29 @@ linux_find_memory_regions (int (*func) (CORE_ADDR,
     error ("Could not open %s\n", mapsfilename);
 
   if (info_verbose)
-    fprintf_filtered (gdb_stdout, 
+    fprintf_filtered (gdb_stdout,
 		      "Reading memory regions from %s\n", mapsfilename);
 
   /* Now iterate until end-of-file. */
-  while (read_mapping (mapsfile, &addr, &endaddr, &permissions[0], 
+  while (read_mapping (mapsfile, &addr, &endaddr, &permissions[0],
 		       &offset, &device[0], &inode, &filename[0]))
     {
       size = endaddr - addr;
 
       /* Get the segment's permissions.  */
-      read  = (strchr (permissions, 'r') != 0);
+      read = (strchr (permissions, 'r') != 0);
       write = (strchr (permissions, 'w') != 0);
-      exec  = (strchr (permissions, 'x') != 0);
+      exec = (strchr (permissions, 'x') != 0);
 
       if (info_verbose)
 	{
-	  fprintf_filtered (gdb_stdout, 
-			    "Save segment, %lld bytes at 0x%s (%c%c%c)", 
-			    size, paddr_nz (addr), 
-			    read  ? 'r' : ' ', 
-			    write ? 'w' : ' ',
-			    exec  ? 'x' : ' ');
+	  fprintf_filtered (gdb_stdout,
+			    "Save segment, %lld bytes at 0x%s (%c%c%c)",
+			    size, paddr_nz (addr),
+			    read ? 'r' : ' ',
+			    write ? 'w' : ' ', exec ? 'x' : ' ');
 	  if (filename && filename[0])
-	    fprintf_filtered (gdb_stdout, 
-			      " for %s", filename);
+	    fprintf_filtered (gdb_stdout, " for %s", filename);
 	  fprintf_filtered (gdb_stdout, "\n");
 	}
 
@@ -169,7 +163,7 @@ linux_find_memory_regions (int (*func) (CORE_ADDR,
  */
 
 static char *
-linux_do_thread_registers (bfd *obfd, ptid_t ptid, 
+linux_do_thread_registers (bfd *obfd, ptid_t ptid,
 			   char *note_data, int *note_size)
 {
   gdb_gregset_t gregs;
@@ -180,26 +174,23 @@ linux_do_thread_registers (bfd *obfd, ptid_t ptid,
   unsigned long merged_pid = ptid_get_tid (ptid) << 16 | ptid_get_pid (ptid);
 
   fill_gregset (&gregs, -1);
-  note_data = (char *) elfcore_write_prstatus (obfd, 
-					       note_data, 
-					       note_size, 
-					       merged_pid, 
-					       stop_signal, 
-					       &gregs);
+  note_data = (char *) elfcore_write_prstatus (obfd,
+					       note_data,
+					       note_size,
+					       merged_pid,
+					       stop_signal, &gregs);
 
   fill_fpregset (&fpregs, -1);
-  note_data = (char *) elfcore_write_prfpreg (obfd, 
-					      note_data, 
-					      note_size, 
-					      &fpregs, 
-					      sizeof (fpregs));
+  note_data = (char *) elfcore_write_prfpreg (obfd,
+					      note_data,
+					      note_size,
+					      &fpregs, sizeof (fpregs));
 #ifdef FILL_FPXREGSET
   fill_fpxregset (&fpxregs, -1);
-  note_data = (char *) elfcore_write_prxfpreg (obfd, 
-					       note_data, 
-					       note_size, 
-					       &fpxregs, 
-					       sizeof (fpxregs));
+  note_data = (char *) elfcore_write_prxfpreg (obfd,
+					       note_data,
+					       note_size,
+					       &fpxregs, sizeof (fpxregs));
 #endif
   return note_data;
 }
@@ -228,9 +219,9 @@ linux_corefile_thread_callback (struct thread_info *ti, void *data)
   registers_changed ();
   target_fetch_registers (-1);	/* FIXME should not be necessary; 
 				   fill_gregset should do it automatically. */
-  args->note_data = linux_do_thread_registers (args->obfd, 
-					       ti->ptid, 
-					       args->note_data, 
+  args->note_data = linux_do_thread_registers (args->obfd,
+					       ti->ptid,
+					       args->note_data,
 					       args->note_size);
   args->num_notes++;
   inferior_ptid = saved_ptid;
@@ -252,28 +243,24 @@ linux_make_note_section (bfd *obfd, int *note_size)
 {
   struct linux_corefile_thread_data thread_args;
   struct cleanup *old_chain;
-  char fname[16] = {'\0'};
-  char psargs[80] = {'\0'};
+  char fname[16] = { '\0' };
+  char psargs[80] = { '\0' };
   char *note_data = NULL;
   ptid_t current_ptid = inferior_ptid;
 
   if (get_exec_file (0))
     {
       strncpy (fname, strrchr (get_exec_file (0), '/') + 1, sizeof (fname));
-      strncpy (psargs, get_exec_file (0), 
-	       sizeof (psargs));
+      strncpy (psargs, get_exec_file (0), sizeof (psargs));
       if (get_inferior_args ())
 	{
-	  strncat (psargs, " ", 
-		   sizeof (psargs) - strlen (psargs));
-	  strncat (psargs, get_inferior_args (), 
+	  strncat (psargs, " ", sizeof (psargs) - strlen (psargs));
+	  strncat (psargs, get_inferior_args (),
 		   sizeof (psargs) - strlen (psargs));
 	}
-      note_data = (char *) elfcore_write_prpsinfo (obfd, 
-						   note_data, 
-						   note_size, 
-						   fname, 
-						   psargs);
+      note_data = (char *) elfcore_write_prpsinfo (obfd,
+						   note_data,
+						   note_size, fname, psargs);
     }
 
   /* Dump information for threads.  */
@@ -285,8 +272,8 @@ linux_make_note_section (bfd *obfd, int *note_size)
   if (thread_args.num_notes == 0)
     {
       /* iterate_over_threads didn't come up with any threads;
-	 just use inferior_ptid.  */
-      note_data = linux_do_thread_registers (obfd, inferior_ptid, 
+         just use inferior_ptid.  */
+      note_data = linux_do_thread_registers (obfd, inferior_ptid,
 					     note_data, note_size);
     }
   else
@@ -420,33 +407,30 @@ linux_info_proc_cmd (char *args, int from_tty)
 	  if (TARGET_ADDR_BIT == 32)
 	    {
 	      header_fmt_string = "\t%10s %10s %10s %10s %7s\n";
-	      data_fmt_string   = "\t%#10lx %#10lx %#10x %#10x %7s\n";
+	      data_fmt_string = "\t%#10lx %#10lx %#10x %#10x %7s\n";
 	    }
 	  else
 	    {
 	      header_fmt_string = "  %18s %18s %10s %10s %7s\n";
-	      data_fmt_string   = "  %#18lx %#18lx %#10x %#10x %7s\n";
+	      data_fmt_string = "  %#18lx %#18lx %#10x %#10x %7s\n";
 	    }
 
 	  printf_filtered ("Mapped address spaces:\n\n");
-	  printf_filtered (header_fmt_string, 
+	  printf_filtered (header_fmt_string,
 			   "Start Addr",
 			   "  End Addr",
-			   "      Size",
-			   "    Offset",
-			   "objfile");
-	  
-	  while (read_mapping (procfile, &addr, &endaddr, &permissions[0], 
+			   "      Size", "    Offset", "objfile");
+
+	  while (read_mapping (procfile, &addr, &endaddr, &permissions[0],
 			       &offset, &device[0], &inode, &filename[0]))
 	    {
 	      size = endaddr - addr;
-	      printf_filtered (data_fmt_string, 
-			       (unsigned long) addr, /* FIXME: pr_addr */
-			       (unsigned long) endaddr, 
-			       (int) size, 
-			       (unsigned int) offset, 
+	      printf_filtered (data_fmt_string, (unsigned long) addr,	/* FIXME: pr_addr */
+			       (unsigned long) endaddr,
+			       (int) size,
+			       (unsigned int) offset,
 			       filename[0] ? filename : "");
-	      
+
 	    }
 
 	  fclose (procfile);
@@ -463,7 +447,7 @@ linux_info_proc_cmd (char *args, int from_tty)
 	    printf_filtered (buffer);
 	  fclose (procfile);
 	}
-      else 
+      else
 	warning ("unable to open /proc file '%s'", fname1);
     }
   if (stat_f || all)
@@ -493,16 +477,16 @@ linux_info_proc_cmd (char *args, int from_tty)
 	  if (fscanf (procfile, "%u ", &itmp) > 0)
 	    printf_filtered ("Flags: 0x%x\n", itmp);
 	  if (fscanf (procfile, "%u ", &itmp) > 0)
-	    printf_filtered ("Minor faults (no memory page): %u\n", 
+	    printf_filtered ("Minor faults (no memory page): %u\n",
 			     (unsigned int) itmp);
 	  if (fscanf (procfile, "%u ", &itmp) > 0)
-	    printf_filtered ("Minor faults, children: %u\n", 
+	    printf_filtered ("Minor faults, children: %u\n",
 			     (unsigned int) itmp);
 	  if (fscanf (procfile, "%u ", &itmp) > 0)
-	    printf_filtered ("Major faults (memory page faults): %u\n", 
+	    printf_filtered ("Major faults (memory page faults): %u\n",
 			     (unsigned int) itmp);
 	  if (fscanf (procfile, "%u ", &itmp) > 0)
-	    printf_filtered ("Major faults, children: %u\n", 
+	    printf_filtered ("Major faults, children: %u\n",
 			     (unsigned int) itmp);
 	  if (fscanf (procfile, "%d ", &itmp) > 0)
 	    printf_filtered ("utime: %d\n", itmp);
@@ -513,36 +497,34 @@ linux_info_proc_cmd (char *args, int from_tty)
 	  if (fscanf (procfile, "%d ", &itmp) > 0)
 	    printf_filtered ("stime, children: %d\n", itmp);
 	  if (fscanf (procfile, "%d ", &itmp) > 0)
-	    printf_filtered ("jiffies remaining in current time slice: %d\n", 
+	    printf_filtered ("jiffies remaining in current time slice: %d\n",
 			     itmp);
 	  if (fscanf (procfile, "%d ", &itmp) > 0)
 	    printf_filtered ("'nice' value: %d\n", itmp);
 	  if (fscanf (procfile, "%u ", &itmp) > 0)
-	    printf_filtered ("jiffies until next timeout: %u\n", 
+	    printf_filtered ("jiffies until next timeout: %u\n",
 			     (unsigned int) itmp);
 	  if (fscanf (procfile, "%u ", &itmp) > 0)
-	    printf_filtered ("jiffies until next SIGALRM: %u\n", 
+	    printf_filtered ("jiffies until next SIGALRM: %u\n",
 			     (unsigned int) itmp);
 	  if (fscanf (procfile, "%d ", &itmp) > 0)
-	    printf_filtered ("start time (jiffies since system boot): %d\n", 
+	    printf_filtered ("start time (jiffies since system boot): %d\n",
 			     itmp);
 	  if (fscanf (procfile, "%u ", &itmp) > 0)
-	    printf_filtered ("Virtual memory size: %u\n", 
+	    printf_filtered ("Virtual memory size: %u\n",
 			     (unsigned int) itmp);
 	  if (fscanf (procfile, "%u ", &itmp) > 0)
-	    printf_filtered ("Resident set size: %u\n", 
-			     (unsigned int) itmp);
+	    printf_filtered ("Resident set size: %u\n", (unsigned int) itmp);
 	  if (fscanf (procfile, "%u ", &itmp) > 0)
-	    printf_filtered ("rlim: %u\n", 
-			     (unsigned int) itmp);
+	    printf_filtered ("rlim: %u\n", (unsigned int) itmp);
 	  if (fscanf (procfile, "%u ", &itmp) > 0)
 	    printf_filtered ("Start of text: 0x%x\n", itmp);
 	  if (fscanf (procfile, "%u ", &itmp) > 0)
 	    printf_filtered ("End of text: 0x%x\n", itmp);
 	  if (fscanf (procfile, "%u ", &itmp) > 0)
 	    printf_filtered ("Start of stack: 0x%x\n", itmp);
-#if 0	/* Don't know how architecture-dependent the rest is... 
-	   Anyway the signal bitmap info is available from "status".  */
+#if 0				/* Don't know how architecture-dependent the rest is... 
+				   Anyway the signal bitmap info is available from "status".  */
 	  if (fscanf (procfile, "%u ", &itmp) > 0)	/* FIXME arch? */
 	    printf_filtered ("Kernel stack pointer: 0x%x\n", itmp);
 	  if (fscanf (procfile, "%u ", &itmp) > 0)	/* FIXME arch? */
@@ -574,7 +556,7 @@ _initialize_linux_proc (void)
   inftarg_set_find_memory_regions (linux_find_memory_regions);
   inftarg_set_make_corefile_notes (linux_make_note_section);
 
-  add_info ("proc", linux_info_proc_cmd, 
+  add_info ("proc", linux_info_proc_cmd,
 	    "Show /proc process information about any running process.\n\
 Specify any process id, or use the program being debugged by default.\n\
 Specify any of the following keywords for detailed info:\n\
@@ -584,9 +566,9 @@ Specify any of the following keywords for detailed info:\n\
   all      -- list all available /proc info.");
 }
 
-int linux_proc_xfer_memory (CORE_ADDR addr, char *myaddr, int len, int write,
-			    struct mem_attrib *attrib,
-			    struct target_ops *target)
+int
+linux_proc_xfer_memory (CORE_ADDR addr, char *myaddr, int len, int write,
+			struct mem_attrib *attrib, struct target_ops *target)
 {
   int fd, ret;
   char filename[64];
@@ -616,8 +598,7 @@ int linux_proc_xfer_memory (CORE_ADDR addr, char *myaddr, int len, int write,
 #ifdef HAVE_PREAD64
   if (pread64 (fd, myaddr, len, addr) != len)
 #else
-  if (lseek (fd, addr, SEEK_SET) == -1
-      || read (fd, myaddr, len) != len)
+  if (lseek (fd, addr, SEEK_SET) == -1 || read (fd, myaddr, len) != len)
 #endif
     ret = 0;
   else

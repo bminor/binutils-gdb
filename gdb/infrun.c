@@ -1153,6 +1153,11 @@ void
 handle_inferior_event (struct execution_control_state *ecs)
 {
   CORE_ADDR real_stop_pc;
+  /* NOTE: cagney/2003-03-28: If you're looking at this code and
+     thinking that the variable stepped_after_stopped_by_watchpoint
+     isn't used, then you're wrong!  The macro STOPPED_BY_WATCHPOINT,
+     defined in the file "config/pa/nm-hppah.h", accesses the variable
+     indirectly.  Mutter something rude about the HP merge.  */
   int stepped_after_stopped_by_watchpoint;
   int sw_single_step_trap_p = 0;
 
@@ -1165,7 +1170,15 @@ handle_inferior_event (struct execution_control_state *ecs)
     case infwait_thread_hop_state:
       /* Cancel the waiton_ptid. */
       ecs->waiton_ptid = pid_to_ptid (-1);
-      /* Fall thru to the normal_state case. */
+      /* See comments where a TARGET_WAITKIND_SYSCALL_RETURN event
+         is serviced in this loop, below. */
+      if (ecs->enable_hw_watchpoints_after_wait)
+	{
+	  TARGET_ENABLE_HW_WATCHPOINTS (PIDGET (inferior_ptid));
+	  ecs->enable_hw_watchpoints_after_wait = 0;
+	}
+      stepped_after_stopped_by_watchpoint = 0;
+      break;
 
     case infwait_normal_state:
       /* See comments where a TARGET_WAITKIND_SYSCALL_RETURN event
@@ -1179,6 +1192,7 @@ handle_inferior_event (struct execution_control_state *ecs)
       break;
 
     case infwait_nullified_state:
+      stepped_after_stopped_by_watchpoint = 0;
       break;
 
     case infwait_nonstep_watch_state:
@@ -1189,6 +1203,9 @@ handle_inferior_event (struct execution_control_state *ecs)
          in combination correctly?  */
       stepped_after_stopped_by_watchpoint = 1;
       break;
+
+    default:
+      internal_error (__FILE__, __LINE__, "bad switch");
     }
   ecs->infwait_state = infwait_normal_state;
 

@@ -5806,7 +5806,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   switch (mips_abi)
     {
     case MIPS_ABI_O32:
-      set_gdbarch_push_arguments (gdbarch, mips_o32_push_arguments);
+      set_gdbarch_deprecated_push_arguments (gdbarch, mips_o32_push_arguments);
       set_gdbarch_deprecated_store_return_value (gdbarch, mips_o32_store_return_value);
       set_gdbarch_extract_return_value (gdbarch, mips_o32_extract_return_value);
       tdep->mips_default_saved_regsize = 4;
@@ -5825,7 +5825,7 @@ mips_gdbarch_init (struct gdbarch_info info,
 					 mips_o32_use_struct_convention);
       break;
     case MIPS_ABI_O64:
-      set_gdbarch_push_arguments (gdbarch, mips_o64_push_arguments);
+      set_gdbarch_deprecated_push_arguments (gdbarch, mips_o64_push_arguments);
       set_gdbarch_deprecated_store_return_value (gdbarch, mips_o64_store_return_value);
       set_gdbarch_deprecated_extract_return_value (gdbarch, mips_o64_extract_return_value);
       tdep->mips_default_saved_regsize = 8;
@@ -5844,7 +5844,7 @@ mips_gdbarch_init (struct gdbarch_info info,
 					 mips_o32_use_struct_convention);
       break;
     case MIPS_ABI_EABI32:
-      set_gdbarch_push_arguments (gdbarch, mips_eabi_push_arguments);
+      set_gdbarch_deprecated_push_arguments (gdbarch, mips_eabi_push_arguments);
       set_gdbarch_deprecated_store_return_value (gdbarch, mips_eabi_store_return_value);
       set_gdbarch_deprecated_extract_return_value (gdbarch, mips_eabi_extract_return_value);
       tdep->mips_default_saved_regsize = 4;
@@ -5863,7 +5863,7 @@ mips_gdbarch_init (struct gdbarch_info info,
 					 mips_eabi_use_struct_convention);
       break;
     case MIPS_ABI_EABI64:
-      set_gdbarch_push_arguments (gdbarch, mips_eabi_push_arguments);
+      set_gdbarch_deprecated_push_arguments (gdbarch, mips_eabi_push_arguments);
       set_gdbarch_deprecated_store_return_value (gdbarch, mips_eabi_store_return_value);
       set_gdbarch_deprecated_extract_return_value (gdbarch, mips_eabi_extract_return_value);
       tdep->mips_default_saved_regsize = 8;
@@ -5882,7 +5882,7 @@ mips_gdbarch_init (struct gdbarch_info info,
 					 mips_eabi_use_struct_convention);
       break;
     case MIPS_ABI_N32:
-      set_gdbarch_push_arguments (gdbarch, mips_n32n64_push_arguments);
+      set_gdbarch_deprecated_push_arguments (gdbarch, mips_n32n64_push_arguments);
       set_gdbarch_deprecated_store_return_value (gdbarch, mips_n32n64_store_return_value);
       set_gdbarch_extract_return_value (gdbarch, mips_n32n64_extract_return_value);
       tdep->mips_default_saved_regsize = 8;
@@ -5913,7 +5913,7 @@ mips_gdbarch_init (struct gdbarch_info info,
 				       mips_n32n64_reg_struct_has_addr);
       break;
     case MIPS_ABI_N64:
-      set_gdbarch_push_arguments (gdbarch, mips_n32n64_push_arguments);
+      set_gdbarch_deprecated_push_arguments (gdbarch, mips_n32n64_push_arguments);
       set_gdbarch_deprecated_store_return_value (gdbarch, mips_n32n64_store_return_value);
       set_gdbarch_extract_return_value (gdbarch, mips_n32n64_extract_return_value);
       tdep->mips_default_saved_regsize = 8;
@@ -6003,7 +6003,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
   set_gdbarch_read_fp (gdbarch, mips_read_sp); /* Draft FRAME base.  */
   set_gdbarch_read_sp (gdbarch, mips_read_sp);
-  set_gdbarch_write_sp (gdbarch, generic_target_write_sp);
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
 
   /* Add/remove bits from an address.  The MIPS needs be careful to
      ensure that all 32 bit addresses are sign extended to 64 bits.  */
@@ -6028,7 +6028,7 @@ mips_gdbarch_init (struct gdbarch_info info,
 
   set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_address (gdbarch, mips_call_dummy_address);
-  set_gdbarch_push_return_address (gdbarch, mips_push_return_address);
+  set_gdbarch_deprecated_push_return_address (gdbarch, mips_push_return_address);
   set_gdbarch_deprecated_pop_frame (gdbarch, mips_pop_frame);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
@@ -6037,7 +6037,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_fix_call_dummy (gdbarch, mips_fix_call_dummy);
   set_gdbarch_call_dummy_words (gdbarch, mips_call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (mips_call_dummy_words));
-  set_gdbarch_push_return_address (gdbarch, mips_push_return_address);
+  set_gdbarch_deprecated_push_return_address (gdbarch, mips_push_return_address);
   set_gdbarch_frame_align (gdbarch, mips_frame_align);
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
   set_gdbarch_register_convertible (gdbarch, mips_register_convertible);

@@ -19,6 +19,7 @@
 #include "armos.h"
 #include "armemu.h"
 #include "ansidecl.h"
+#include "iwmmxt.h"
 
 /* Dummy Co-processors.  */
 
@@ -1363,6 +1364,15 @@ ARMul_CoProInit (ARMul_State * state)
     {
       ARMul_CoProAttach (state, 15, MMUInit, NULL, NULL, NULL,
 			 MMUMRC, MMUMCR, NULL, MMURead, MMUWrite);
+    }
+
+  if (state->is_iWMMXt)
+    {
+      ARMul_CoProAttach (state, 0, NULL, NULL, IwmmxtLDC, IwmmxtSTC,
+			 NULL, NULL, IwmmxtCDP, NULL, NULL);
+
+      ARMul_CoProAttach (state, 1, NULL, NULL, NULL, NULL,
+			 IwmmxtMRC, IwmmxtMCR, IwmmxtCDP, NULL, NULL);
     }
 
   /* No handlers below here.  */

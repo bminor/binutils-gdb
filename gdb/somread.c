@@ -37,6 +37,8 @@
 
 /* Various things we might complain about... */
 
+static int init_import_symbols (struct objfile *objfile);
+
 static void som_symfile_init (struct objfile *);
 
 static void som_new_init (struct objfile *);
@@ -466,7 +468,7 @@ som_symfile_offsets (struct objfile *objfile, struct section_addr_info *addrs)
    not defined there.  (Variables that are imported are dealt
    with as "loc_indirect" vars.)
    Return value = number of import symbols read in. */
-int
+static int
 init_import_symbols (struct objfile *objfile)
 {
   unsigned int import_list;

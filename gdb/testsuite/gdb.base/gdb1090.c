@@ -1,11 +1,7 @@
-/* Parameters for hosting on an HPPA-RISC machine running HPUX, for GDB.
-   Copyright 1991, 1992, 1993, 1995, 1996, 2000
-   Free Software Foundation, Inc.
+/* Test program for multi-register variable.
+   Copyright 2003 Free Software Foundation, Inc.
 
-   Contributed by the Center for Software Science at the
-   University of Utah (pa-gdb-bugs@cs.utah.edu).
-
-   This file is part of GDB.
+   This file is part of the gdb testsuite.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -20,8 +16,33 @@
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+   Boston, MA 02111-1307, USA.
+ 
+   This file was written by Michael Elizabeth Chastain (mec@shout.net).  */
 
-#define USG
+struct s_2_by_4
+{
+  int field_0;
+  int field_1;
+};
 
-#define HAVE_TERMIOS
+void marker (struct s_2_by_4 s_whatever)
+{
+  s_whatever = s_whatever;
+  return;
+}
+
+void foo ()
+{
+  /* I want this variable in a register but I can't really force it */
+  register struct s_2_by_4 s24;
+  s24.field_0 = 1170;
+  s24.field_1 = 64701;
+  marker (s24);
+  return;
+}
+
+int main ()
+{
+  foo ();
+}

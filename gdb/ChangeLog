@@ -1,3 +1,237 @@
+2003-03-30  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_store_struct_return): Removed.
+	(i386_gdbarch_init): Don't set deprecated_store_struct_return.
+
+2003-03-30  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (DEPRECATED_DUMMY_WRITE_SP): Replace TARGET_WRITE_SP.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* v850-tdep.c (v850_gdbarch_init): Set deprecated_dummy_write_sp.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Ditto.
+	* mcore-tdep.c (mcore_gdbarch_init): Ditto.
+	* m68k-tdep.c (m68k_gdbarch_init): Ditto.
+	* i386-tdep.c (i386_gdbarch_init): Ditto.
+	* h8300-tdep.c (h8300_gdbarch_init): Ditto.
+	* cris-tdep.c (cris_gdbarch_init): Ditto.
+	* vax-tdep.c (vax_gdbarch_init): Ditto.
+	* s390-tdep.c (s390_gdbarch_init): Ditto.
+	* ns32k-tdep.c (ns32k_gdbarch_init): Ditto.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Ditto.
+	* alpha-tdep.c (alpha_gdbarch_init): Ditto.
+	* sparc-tdep.c (sparc_push_dummy_frame, sparc_pop_frame): Update.
+	* config/sparc/tm-sp64.h (DEPRECATED_DUMMY_WRITE_SP): Update.
+	* config/pa/tm-hppa.h (DEPRECATED_DUMMY_WRITE_SP): Define.
+	* sparc-tdep.c (sparc_gdbarch_init): Update.
+	* sh-tdep.c (sh_gdbarch_init): Update.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Update.
+	* mips-tdep.c (mips_gdbarch_init): Update.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Update.
+	* ia64-tdep.c (ia64_gdbarch_init): Update.
+	* frv-tdep.c (frv_gdbarch_init): Update.
+	* avr-tdep.c (avr_gdbarch_init): Update.
+	* valops.c (hand_function_call): Replace TARGET_WRITE_SP with
+	DEPRECATED_DUMMY_WRITE_SP.  Call when the method is available,
+	instead of when push_dummy_call is not available.
+	
+2003-03-30  Andrew Cagney  <cagney@redhat.com>
+
+	* infttrace.c: Include "gdbthread.h".
+	(parent_attach_all): Fix function signature.
+	(call_ptrace): Update call.
+	* Makefile.in (infttrace.o): Update dependencies.
+
+2003-03-30  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (DEPRECATED_PUSH_RETURN_ADDRESS): Replace
+	PUSH_RETURN_ADDRESS.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Update.
+	* x86-64-tdep.c (x86_64_init_abi): Update.
+	* v850-tdep.c (v850_gdbarch_init): Update.
+	* sparc-tdep.c (sparc_gdbarch_init): Update.
+	* sh-tdep.c (sh_gdbarch_init): Update.
+	* s390-tdep.c (s390_gdbarch_init): Update.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Update.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Update.
+	* mips-tdep.c (mips_gdbarch_init): Update.
+	* mcore-tdep.c (mcore_gdbarch_init): Update.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Update.
+	* ia64-tdep.c (ia64_gdbarch_init): Update.
+	* i386-tdep.c (i386_gdbarch_init): Update.
+	* h8300-tdep.c (h8300_gdbarch_init): Update.
+	* frv-tdep.c (frv_gdbarch_init): Update.
+	* cris-tdep.c (cris_gdbarch_init): Update.
+	* avr-tdep.c (avr_gdbarch_init): Update.
+	* arm-tdep.c (arm_gdbarch_init): Update.
+	* valops.c (hand_function_call): Update.
+
+2003-03-29  Andrew Cagney  <cagney@redhat.com>
+
+	* d10v-tdep.c (d10v_gdbarch_init): Do not set call_dummy_words or
+	sizeof_call_dummy_words.
+	* gdbarch.sh (CALL_DUMMY_WORDS, SIZEOF_CALL_DUMMY_WORDS): Always
+	define.
+	* gdbarch.h: Regenerate.
+	
+2003-03-29  Andrew Cagney  <cagney@redhat.com>
+
+	* infttrace.h: New file.
+	* hpread.c: Include "gdb_assert.h" and "somsolib.h".
+	(hpread_get_textlow): Detect an uninitialized dn_bufp.
+	(hpread_read_doc_function_type): Detect an initialized type1.
+	(hpread_quick_traverse): Initialize mod_name_string.
+	* somsolib.h: Add #ifdef SOMSOLIB_H wrapper.
+	(som_solib_get_solib_by_pc): Declare.
+	(so_lib_thread_start_addr): Declare.
+	(no_shared_libraries): Declare.
+	* somread.c (init_import_symbols): Make static.  Add forward
+	declaration.
+	* config/pa/nm-hppah.h: Include "infttrace.h" for
+	parent_attach_all.
+	(hppa_insert_hw_watchpoint): Declare.
+	(hppa_can_use_hw_watchpoint, hppa_remove_hw_watchpoint): Declare.
+	* hppah-nat.c: Include "gdb_string.h".
+	(parent_attach_all): Delete extern declaration, moved to
+	"infttrace.h".
+	(hppa_can_use_hw_watchpoint): Change type of "type" parameter to
+	int.
+	(hppa_remove_hw_watchpoint, hppa_insert_hw_watchpoint): Ditto.
+	* Makefile.in (infttrace_h): Define.
+	(hpread.o): Update dependencies.
+	(hppah-nat.o, hppa-hpux-tdep.o, hppa-tdep.o): Ditto.
+	* hppa-hpux-tdep.c: Include "gdb_string.h".
+	* hppa-tdep.c (hppa_frame_saved_pc): Initialize "old_pc".
+	* infrun.c (handle_inferior_event): Always initialize
+	stepped_after_stopped_by_watchpoint.  Add default and remove
+	fallthrough in switch statement.
+	* infttrace.c (hppa_can_use_hw_watchpoint): Change type of "type"
+	parameter to int.
+	(hppa_remove_hw_watchpoint): Ditto.
+
+2003-03-29  Andrew Cagney  <cagney@redhat.com>
+
+	* ns32k-tdep.c (ns32k_gdbarch_init): Set the call dummy breakpoint
+	offset.
+
+2003-03-29  Richard Earnshaw  <rearnsha@arm.com>
+
+	* arm-tdep.c (arm_push_arguments): Delete.
+	(struct stack_item): New type.
+	(push_stack_item, pop_stack_item, arm_push_dummy_call): New functions.
+	(arm_store_struct_return): Delte.
+	(arm_gdbarch_init): Register arm_push_dummy_call.  Don't register
+	arm_push_arguments or arm_store_struct_return.
+
+2003-03-28  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in (d10v-tdep.o): Update dependencies.
+	* remote.h (target_resume_hook, target_wait_loop_hook): Declare.
+	* d10v-tdep.c: Include "remote.h".
+	(target_resume_hook): Delete extern declaration.
+	(target_wait_loop_hook): Ditto.
+	(tdisassemble_command): Eliminate assignment in "if" conditional.
+	(d10v_ts2_register_sim_regno): Eliminate call to
+	legacy_register_sim_regno.
+	(d10v_ts3_register_sim_regno): Ditto.
+
+2003-03-28  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* thread.c: Reindented.
+	* lin-lwp.c: Ditto.
+	* linux-proc.c: Ditto.
+
+2003-03-28  Bob Rossi  <bob_rossi@cox.net>
+
+        * MAINTAINERS (write after approval): Add myself.
+
+2003-03-27  Theodore A. Roth  <troth@openavr.org>
+
+	* objc-exp.y: Add missing semi-colons.
+
+2003-03-27  Andrew Cagney  <cagney@redhat.com>
+
+	* regcache.c (write_sp): Delete function and references.
+	* inferior.h (write_sp): Delete declaration.
+	* valops.c (hand_function_call): Replace write_sp with
+	TARGET_WRITE_SP.
+	* sparc-tdep.c (sparc_push_dummy_frame): Ditto.
+	(sparc_pop_frame): Ditto.
+	
+2003-03-27  Andrew Cagney  <cagney@redhat.com>
+
+	* NEWS: Mention removal of support for hppa*-*-bsd* and
+	hppa*-*-osf* natives, and hppa*-*-pro* target.
+	* config/pa/xm-hppah.h: Do not include "pa/xm-pa.h".
+	* config/pa/xm-pa.h: Obsolete file.
+	* config/pa/xm-hppab.h: Obsolete file.
+	* config/pa/nm-hppab.h: Obsolete file.
+	* config/pa/tm-hppab.h: Obsolete file.
+	* config/pa/tm-hppao.h: Obsolete file.
+	* config/pa/nm-hppao.h: Obsolete file.
+	* config/pa/tm-pro.h: Obsolete file.
+	* config/pa/hppaosf.mt: Obsolete file.
+	* config/pa/hppaosf.mh: Obsolete file.
+	* config/pa/hppapro.mt: Obsolete file.
+	* config/pa/hppabsd.mt: Obsolete file.
+	* config/pa/hppabsd.mh: Obsolete file.
+	* configure.host: Disable hppa*-*-bsd* and hppa*-*-osf*.
+	* configure.tgt: Disable hppa*-*-bsd*, hppa*-*-pro* and
+	hppa*-*-osf*.
+
+2003-03-27  Andrew Cagney  <cagney@redhat.com>
+
+	* d10v-tdep.c (d10v_gdbarch_init): Set push_dummy_call instead of
+	push_arguments.  Don't set push_return_address or write_sp.
+	(d10v_push_dummy_call): Replace d10v_push_arguments.
+	(d10v_push_return_address, d10v_write_sp): Delete function,
+	handled by push_dummy_call.
+
+2003-03-26  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (DEPRECATED_PUSH_ARGUMENTS): Rename PUSH_ARGUMENTS.
+	(push_dummy_call): New pure multi-arch replacement with gdbarch,
+	regcache and dummy_addr parameters.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* valops.c (hand_function_call): Use gdbarch_push_dummy_call when
+	available; assume it will handle stack alignment and return
+	address issues.  Fall back to DEPRECATED_PUSH_ARGUMENTS and
+	legacy_push_arguments.
+	(legacy_push_arguments): Rename default_push_arguments.
+	* value.h (legacy_push_arguments): Rename default_push_arguments.
+	* i386-tdep.c (i386_push_arguments): Call legacy_push_arguments.
+	* config/sparc/tm-sparc.h (DEPRECATED_PUSH_ARGUMENTS): Update.
+	* config/sparc/tm-sp64.h (DEPRECATED_PUSH_ARGUMENTS): Update.
+	* config/pa/tm-hppa.h (DEPRECATED_PUSH_ARGUMENTS): Update.
+	* config/i386/tm-symmetry.h: Update.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Update.
+	* x86-64-tdep.c (x86_64_init_abi): Update.
+	* v850-tdep.c (v850_gdbarch_init): Update.
+	* sparc-tdep.c (sparc_gdbarch_init): Update.
+	* sh-tdep.c (sh_gdbarch_init): Update.
+	* s390-tdep.c (s390_gdbarch_init): Update.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Update.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Update.
+	* mips-tdep.c (mips_gdbarch_init): Update.
+	* mcore-tdep.c (mcore_gdbarch_init): Update.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Update.
+	* ia64-tdep.c (ia64_gdbarch_init): Update.
+	* i386-tdep.c (i386_gdbarch_init): Update.
+	* hppa-tdep.c (hppa_gdbarch_init): Update.
+	* h8300-tdep.c (h8300_gdbarch_init): Update.
+	* frv-tdep.c (frv_gdbarch_init): Update.
+	* d10v-tdep.c (d10v_gdbarch_init): Update.
+	* cris-tdep.c (cris_gdbarch_init): Update.
+	* avr-tdep.c (avr_gdbarch_init): Update.
+	* arm-tdep.c (arm_gdbarch_init): Update.
+	* arm-linux-tdep.c (arm_linux_init_abi): Update.
+	* alpha-tdep.c (alpha_gdbarch_init): Update.
+
+2003-03-26  Daniel Jacobowitz  <drow@mvista.com>
+
+	* signals/signals.c (do_target_signal_to_host): Correct realtime
+	signal range test.
+
 2003-03-26  Daniel Jacobowitz  <drow@mvista.com>
 
 	* breakpoint.c (handle_gnu_4_16_catch_command, get_catch_sals)
@@ -40,7 +274,7 @@
 	* objc-lang.c (objc_skip_trampoline): New function.
 	(objc_language_defn): Add objc_skip_trampoline.
 
-I2003-03-25  Andrew Cagney  <cagney@redhat.com>
+2003-03-25  Andrew Cagney  <cagney@redhat.com>
 
 	* frame.c (get_prev_frame): Delay validating a frame's ID -
 	non-NULL, didn't go backwards - until an attempt to unwind it to
