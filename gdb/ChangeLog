@@ -1,3 +1,7 @@
+2003-08-21  Michael Chastain  <mec@shout.net>
+
+	* gdbtypes.h: Change array bound type from an int to enum.
+
 2003-08-21  Andrew Cagney  <cagney@redhat.com>
 
 	* config/sparc/tm-sp64.h: Delete #if !GDB_MULTI_ARCH and #if 0 code.

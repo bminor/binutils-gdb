@@ -272,6 +272,17 @@ enum type_code
 #define TYPE_ADDRESS_CLASS_ALL(t) (TYPE_INSTANCE_FLAGS(t) \
 				   & TYPE_FLAG_ADDRESS_CLASS_ALL)
 
+/*  Array bound type.  */
+enum array_bound_type
+{
+  BOUND_SIMPLE = 0,
+  BOUND_BY_VALUE_IN_REG,
+  BOUND_BY_REF_IN_REG,
+  BOUND_BY_VALUE_ON_STACK,
+  BOUND_BY_REF_ON_STACK,
+  BOUND_CANNOT_BE_DETERMINED
+};
+
 /* This structure is space-critical.
    Its layout has been tweaked to reduce the space used.  */
 
@@ -281,17 +292,11 @@ struct main_type
 
   ENUM_BITFIELD(type_code) code : 8;
 
-  /* These fields appear at this location because they pack nicely here.  */
-  /* FIXME, these should probably be restricted to a Fortran-specific
-     field in some fashion.  */
-#define BOUND_CANNOT_BE_DETERMINED   5
-#define BOUND_BY_REF_ON_STACK        4
-#define BOUND_BY_VALUE_ON_STACK      3
-#define BOUND_BY_REF_IN_REG          2
-#define BOUND_BY_VALUE_IN_REG        1
-#define BOUND_SIMPLE                 0
-  int upper_bound_type : 4;
-  int lower_bound_type : 4;
+  /* Array bounds.  These fields appear at this location because
+     they pack nicely here.  */
+
+  ENUM_BITFIELD(array_bound_type) upper_bound_type : 4;
+  ENUM_BITFIELD(array_bound_type) lower_bound_type : 4;
 
   /* Name of this type, or NULL if none.
 
