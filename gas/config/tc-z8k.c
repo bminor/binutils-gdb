@@ -52,15 +52,15 @@ s_segm (segm)
 {
   if (segm)
     {
-  segmented_mode = 1;
-  machine = bfd_mach_z8001;
-  coff_flags = F_Z8001;
+      segmented_mode = 1;
+      machine = bfd_mach_z8001;
+      coff_flags = F_Z8001;
     }
   else
     {
-  segmented_mode = 0;
-  machine = bfd_mach_z8002;
-  coff_flags = F_Z8002;
+      segmented_mode = 0;
+      machine = bfd_mach_z8002;
+      coff_flags = F_Z8002;
     }
 }
 
@@ -597,23 +597,31 @@ struct cc_names table[] = {
   { 0x1, "lt" },
   { 0x2, "le" },
   { 0x3, "ule" },
+  { 0x4, "ov/pe" },
   { 0x4, "ov" },
+  { 0x4, "pe/ov" },
   { 0x4, "pe" },
   { 0x5, "mi" },
   { 0x6, "eq" },
   { 0x6, "z" },
+  { 0x7, "c/ult" },
   { 0x7, "c" },
+  { 0x7, "ult/c" },
   { 0x7, "ult" },
   { 0x8, "t" },
   { 0x9, "ge" },
   { 0xa, "gt" },
   { 0xb, "ugt" },
+  { 0xc, "nov/po" },
   { 0xc, "nov" },
+  { 0xc, "po/nov" },
   { 0xc, "po" },
   { 0xd, "pl" },
   { 0xe, "ne" },
   { 0xe, "nz" },
+  { 0xf, "nc/uge" },
   { 0xf, "nc" },
+  { 0xf, "uge/nc" },
   { 0xf, "uge" },
   { 0  ,  0 }
 };
@@ -625,7 +633,7 @@ get_cc_operand (ptr, mode, dst)
      unsigned int dst ATTRIBUTE_UNUSED;
 {
   char *src = *ptr;
-  int i;
+  int i, l;
 
   while (*src == ' ')
     src++;
@@ -633,20 +641,17 @@ get_cc_operand (ptr, mode, dst)
   mode->mode = CLASS_CC;
   for (i = 0; table[i].name; i++)
     {
-      int j;
-
-      for (j = 0; table[i].name[j]; j++)
-	{
-	  if (table[i].name[j] != src[j])
-	    goto fail;
-	}
-      the_cc = table[i].value;
-      *ptr = src + j;
-      return;
-    fail:
-      ;
+      l = strlen (table[i].name);
+      if (! strncasecmp (table[i].name, src, l))
+        {
+          the_cc = table[i].value;
+          if (*(src + l) && *(src + l) != ',')
+            break;
+          *ptr = src + l;  /* Valid cc found: "consume" it.  */
+          return;
+        }
     }
-  the_cc = 0x8;
+  the_cc = 0x8;  /* Not recognizing the cc defaults to t.  (Assuming no cc present.)  */
 }
 
 static void
@@ -763,17 +768,28 @@ get_operands (opcode, op_end, operand)
   char *ptr = op_end;
   char *savptr;
 
-  ptr++;
   switch (opcode->noperands)
     {
     case 0:
       operand[0].mode = 0;
       operand[1].mode = 0;
+      while (*ptr == ' ')
+        ptr++;
       break;
 
     case 1:
       if (opcode->arg_info[0] == CLASS_CC)
-	get_cc_operand (&ptr, operand + 0, 0);
+        {
+          get_cc_operand (&ptr, operand + 0, 0);
+          while (*ptr == ' ')
+            ptr++;
+          if (*ptr && ! is_end_of_line[(unsigned char) *ptr])
+            {
+              as_bad (_("invalid condition code '%s'"), ptr);
+              while (*ptr && ! is_end_of_line[(unsigned char) *ptr])
+                ptr++;   /* Consume rest of line.  */
+            }
+        }
 
       else if (opcode->arg_info[0] == CLASS_FLAGS)
 	get_flags_operand (&ptr, operand + 0, 0);
@@ -790,7 +806,20 @@ get_operands (opcode, op_end, operand)
     case 2:
       savptr = ptr;
       if (opcode->arg_info[0] == CLASS_CC)
-	get_cc_operand (&ptr, operand + 0, 0);
+        {
+          get_cc_operand (&ptr, operand + 0, 0);
+          while (*ptr == ' ')
+            ptr++;
+          if (*ptr != ',' && strchr (ptr + 1, ','))
+            {
+              savptr = ptr;
+              while (*ptr != ',')
+                ptr++;
+              *ptr = 0;
+              ptr++;
+              as_bad (_("invalid condition code '%s'"), savptr);
+            }
+        }
 
       else if (opcode->arg_info[0] == CLASS_CTRL)
 	{
@@ -949,32 +978,6 @@ get_specific (opcode, operands)
   else
     return 0;
 }
-
-#if 0 /* Not used.  */
-static void
-check_operand (operand, width, string)
-     struct z8k_op *operand;
-     unsigned int width;
-     char *string;
-{
-  if (operand->exp.X_add_symbol == 0
-      && operand->exp.X_op_symbol == 0)
-    {
-
-      /* No symbol involved, let's look at offset, it's dangerous if
-	 any of the high bits are not 0 or ff's, find out by oring or
-	 anding with the width and seeing if the answer is 0 or all
-	 fs.  */
-      if ((operand->exp.X_add_number & ~width) != 0 &&
-	  (operand->exp.X_add_number | width) != (~0))
-	{
-	  as_warn (_("operand %s0x%x out of range"),
-		   string, operand->exp.X_add_number);
-	}
-    }
-
-}
-#endif
 
 static char buffer[20];
 
@@ -1230,7 +1233,6 @@ md_assemble (str)
   char *op_end;
   struct z8k_op operand[3];
   opcode_entry_type *opcode;
-  opcode_entry_type *prev_opcode;
 
   /* Drop leading whitespace.  */
   while (*str == ' ')
@@ -1238,7 +1240,7 @@ md_assemble (str)
 
   /* Find the op code end.  */
   for (op_start = op_end = str;
-       *op_end != 0 && *op_end != ' ';
+       *op_end != 0 && *op_end != ' ' && ! is_end_of_line[(unsigned char) *op_end];
        op_end++)
     ;
 
@@ -1248,7 +1250,7 @@ md_assemble (str)
     }
   c = *op_end;
 
-  *op_end = 0;
+  *op_end = 0;  /* Zero-terminate op code string for hash_find() call.  */
 
   opcode = (opcode_entry_type *) hash_find (opcode_hash_control, op_start);
 
@@ -1258,12 +1260,13 @@ md_assemble (str)
       return;
     }
 
+  *op_end = c;  /* Restore original string.  */
+
   if (opcode->opcode == 250)
     {
       pseudo_typeS *p;
       char oc;
       char *old = input_line_pointer;
-      *op_end = c;
 
       /* Was really a pseudo op.  */
 
@@ -1286,7 +1289,6 @@ md_assemble (str)
       new_input_line_pointer = get_operands (opcode, op_end, operand);
       if (new_input_line_pointer)
         input_line_pointer = new_input_line_pointer;
-      prev_opcode = opcode; /* XXX is this used ?? */
 
       opcode = get_specific (opcode, operand);
 
@@ -1509,13 +1511,13 @@ md_apply_fix3 (fixP, valP, segment)
         }
       else
         {
-      if (val & 1)
-        as_bad (_("cannot branch to odd address"));
-      val /= 2;
+          if (val & 1)
+            as_bad (_("cannot branch to odd address"));
+          val /= 2;
           if (val > 0 || val < -127)
-        as_bad (_("relative jump out of range"));
+            as_bad (_("relative jump out of range"));
           *buf = (*buf & 0x80) | (-val & 0x7f);
-      fixP->fx_no_overflow = 1;
+          fixP->fx_no_overflow = 1;
           fixP->fx_done = 1;
         }
       break;
@@ -1531,11 +1533,11 @@ md_apply_fix3 (fixP, valP, segment)
           if (val & 1)
             as_bad (_("cannot branch to odd address"));
           if (val > 4096 || val < -4095)
-        as_bad (_("relative call out of range"));
+            as_bad (_("relative call out of range"));
           val = -val / 2;
-      *buf = (*buf & 0xf0) | ((val >> 8) & 0xf);
-      buf++;
-      *buf++ = val & 0xff;
+          *buf = (*buf & 0xf0) | ((val >> 8) & 0xf);
+          buf++;
+          *buf++ = val & 0xff;
           fixP->fx_no_overflow = 1;
           fixP->fx_done = 1;
         }
