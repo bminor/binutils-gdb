@@ -212,6 +212,7 @@ check_thread_local "third"
 
 gdb_test "continue" ".*Breakpoint 3.*still alive.*" "continue to synch point"
 
+set no_of_threads 0
 send_gdb "info thread\n"
 gdb_expect {
 	-re "^info thread\[ \t\r\n\]+(\[0-9\]+) Thread.*$gdb_prompt $" {

@@ -89,26 +89,28 @@ void *spin( vp )
     fprintf (stderr, "th %d post on tell main\n", me);
 #endif
 
-    do
+    while (1)
       {
-        errno = 0;
 #ifdef START_DEBUG
         fprintf (stderr, "th %d start wait on tell_thread\n", me);
 #endif
-        if (sem_wait (&tell_thread) == -1)
-         {
-            if (errno != EINTR)
-             {  
-               fprintf (stderr, "th %d wait on sem tell_thread failed\n", me);
-               print_error ();
-               return;
-             }
+        if (sem_wait (&tell_thread) == 0)
+          break;
+
+        if (errno == EINTR)
+          {
 #ifdef START_DEBUG
-           fprintf (stderr, "th %d wait tell_thread got EINTR, rewaiting\n", me);
+            fprintf (stderr, "th %d wait tell_thread got EINTR, rewaiting\n", me);
 #endif
+            continue;
+          }
+        else
+          {  
+            fprintf (stderr, "th %d wait on sem tell_thread failed\n", me);
+            print_error ();
+            return;
          }
       }
-      while (errno == EINTR);
 
 #ifdef START_DEBUG
       fprintf (stderr, "th %d Wait on tell_thread\n", me);
@@ -151,33 +153,30 @@ do_pass()
      }
 
     for( i = 0; i < N_THREADS; i++ )
-     {
-       do
-         {
-           errno = 0;
+      {
+        while (1)
+          {
+#ifdef START_DEBUG
+            fprintf (stderr, "main %d start wait on tell_main\n", i);
+#endif
+            if (sem_wait (&tell_main) == 0)
+              break;
 
+            if (errno == EINTR)
+              {
 #ifdef START_DEBUG
-           fprintf (stderr, "main %d start wait on tell_main\n", i);
+                fprintf (stderr, "main %d wait tell_main got EINTR, rewaiting\n", i);
 #endif
-           if (sem_wait (&tell_main) == -1)
-            {
-              if (errno != EINTR)
-               {
-                 fprintf (stderr, "main %d wait on sem tell_main failed\n", i);
-                 print_error ();
-                 return;
-               }
-#ifdef START_DEBUG
-              fprintf (stderr, "main %d wait tell_main got EINTR, rewaiting\n", i);
-#endif
+                continue;
+              }
+            else
+              {
+                fprintf (stderr, "main %d wait on sem tell_main failed\n", i);
+                print_error ();
+                return;
+              }
             }
-         }
-         while (errno == EINTR);
-
-#ifdef START_DEBUG
-      fprintf (stderr, "main %d wait on tell_main\n",i);
-#endif
-     }
+       }
 
 #ifdef START_DEBUG
     fprintf (stderr, "main done waiting on tell_main\n");

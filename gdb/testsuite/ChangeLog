@@ -1,3 +1,10 @@
+2003-07-29  Michael Chastain  <mec@shout.net>
+
+	* gdb.threads/tls.c (spin): Check errno only if sem_wait
+	actually failed.
+	(do_pass): Likewise.
+	* gdb.threads/tls.exp: Always initialize no_of_threads.
+
 2003-07-27  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.threads/print-threads.exp (test_all_threads): Loosen KFAIL
