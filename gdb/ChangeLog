@@ -1,3 +1,8 @@
+2002-06-30  Aidan Skinner  <aidan@velvet.net>
+
+	* ada-exp.tab.c: remove as it's a generated file
+	* ada-lex.c: remove as it's a generated file
+		
 2002-06-30  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/i386/tm-i386.h (struct frame_info, struct
