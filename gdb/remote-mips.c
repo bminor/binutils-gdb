@@ -104,9 +104,6 @@ static void
 mips_files_info PARAMS ((struct target_ops *ignore));
 
 static void
-mips_load PARAMS ((char *args, int from_tty));
-
-static void
 mips_create_inferior PARAMS ((char *execfile, char *args, char **env));
 
 static void
