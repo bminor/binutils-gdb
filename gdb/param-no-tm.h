@@ -36,13 +36,15 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
    debugging symbols and such.  Conceptually, it's quite separate
    from byte/word byte order.  */
 
+#if !defined (BITS_BIG_ENDIAN)
 #if TARGET_BYTE_ORDER == BIG_ENDIAN
 #define BITS_BIG_ENDIAN 1
-#endif
+#endif /* Big endian.  */
 
 #if TARGET_BYTE_ORDER == LITTLE_ENDIAN
-/*#define BITS_BIG_ENDIAN */
-#endif
+#define BITS_BIG_ENDIAN 0
+#endif /* Little endian.  */
+#endif /* BITS_BIG_ENDIAN not defined.  */
 
 /* Swap LEN bytes at BUFFER between target and host byte-order.  */
 #if TARGET_BYTE_ORDER == HOST_BYTE_ORDER

@@ -1277,7 +1277,7 @@ unpack_field_as_long (type, valaddr, fieldno)
   SWAP_TARGET_AND_HOST (&val, sizeof val);
 
   /* Extracting bits depends on endianness of the machine.  */
-#ifdef BITS_BIG_ENDIAN
+#if BITS_BIG_ENDIAN
   val = val >> (sizeof val * 8 - bitpos % 8 - bitsize);
 #else
   val = val >> (bitpos % 8);
@@ -1309,7 +1309,7 @@ modify_field (addr, fieldval, bitpos, bitsize)
   SWAP_TARGET_AND_HOST (&oword, sizeof oword);		/* To host format */
 
   /* Shifting for bit field depends on endianness of the target machine.  */
-#ifdef BITS_BIG_ENDIAN
+#if BITS_BIG_ENDIAN
   bitpos = sizeof (oword) * 8 - bitpos - bitsize;
 #endif
 

@@ -21,7 +21,7 @@ You should have received a copy of the GNU General Public License
 along with GDB; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#ifdef BITS_BIG_ENDIAN
+#if BITS_BIG_ENDIAN
 #define BIT_FIELDS_2(a,b) a;b;
 #define BIT_FIELDS_4(a,b,c,d) a;b;c;d;
 #define BIT_FIELDS_6(a,b,c,d,e,f) a;b;c;d;e;f;
