@@ -1098,7 +1098,7 @@ _bfd_xcoff_slurp_armap (abfd)
   size_t namlen;
   bfd_size_type sz;
   bfd_byte *contents, *cend;
-  unsigned int c, i;
+  bfd_vma c, i;
   carsym *arsym;
   bfd_byte *p;
 
@@ -1133,6 +1133,33 @@ _bfd_xcoff_slurp_armap (abfd)
 	return false;
 
       sz = strtol (hdr.size, (char **) NULL, 10);
+
+      /* Read in the entire symbol table.  */
+      contents = (bfd_byte *) bfd_alloc (abfd, sz);
+      if (contents == NULL)
+	return false;
+      if (bfd_read ((PTR) contents, 1, sz, abfd) != sz)
+	return false;
+
+      /* The symbol table starts with a four byte count.  */
+      c = bfd_h_get_32 (abfd, contents);
+      
+      if (c * 4 >= sz)
+	{
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
+	}
+      
+      bfd_ardata (abfd)->symdefs = ((carsym *)
+				    bfd_alloc (abfd, c * sizeof (carsym)));
+      if (bfd_ardata (abfd)->symdefs == NULL)
+	return false;
+      
+      /* After the count comes a list of four byte file offsets.  */
+      for (i = 0, arsym = bfd_ardata (abfd)->symdefs, p = contents + 4;
+	   i < c;
+	   ++i, ++arsym, p += 4)
+	arsym->file_offset = bfd_h_get_32 (abfd, p);
     }
   else
     {
@@ -1163,34 +1190,34 @@ _bfd_xcoff_slurp_armap (abfd)
 	 machines) since the field width is 20 and there numbers with more
 	 than 32 bits can be represented.  */
       sz = strtol (hdr.size, (char **) NULL, 10);
+
+      /* Read in the entire symbol table.  */
+      contents = (bfd_byte *) bfd_alloc (abfd, sz);
+      if (contents == NULL)
+	return false;
+      if (bfd_read ((PTR) contents, 1, sz, abfd) != sz)
+	return false;
+
+      /* The symbol table starts with an eight byte count.  */
+      c = bfd_h_get_64 (abfd, contents);
+
+      if (c * 8 >= sz)
+	{
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
+	}
+      
+      bfd_ardata (abfd)->symdefs = ((carsym *)
+				    bfd_alloc (abfd, c * sizeof (carsym)));
+      if (bfd_ardata (abfd)->symdefs == NULL)
+	return false;
+      
+      /* After the count comes a list of eight byte file offsets.  */
+      for (i = 0, arsym = bfd_ardata (abfd)->symdefs, p = contents + 8;
+	   i < c;
+	   ++i, ++arsym, p += 8)
+	arsym->file_offset = bfd_h_get_64 (abfd, p);
     }
-
-  /* Read in the entire symbol table.  */
-  contents = (bfd_byte *) bfd_alloc (abfd, sz);
-  if (contents == NULL)
-    return false;
-  if (bfd_read ((PTR) contents, 1, sz, abfd) != sz)
-    return false;
-
-  /* The symbol table starts with a four byte count.  */
-  c = bfd_h_get_32 (abfd, contents);
-
-  if (c * 4 >= sz)
-    {
-      bfd_set_error (bfd_error_bad_value);
-      return false;
-    }
-
-  bfd_ardata (abfd)->symdefs = ((carsym *)
-				bfd_alloc (abfd, c * sizeof (carsym)));
-  if (bfd_ardata (abfd)->symdefs == NULL)
-    return false;
-
-  /* After the count comes a list of four byte file offsets.  */
-  for (i = 0, arsym = bfd_ardata (abfd)->symdefs, p = contents + 4;
-       i < c;
-       ++i, ++arsym, p += 4)
-    arsym->file_offset = bfd_h_get_32 (abfd, p);
 
   /* After the file offsets come null terminated symbol names.  */
   cend = contents + sz;

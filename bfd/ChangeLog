@@ -1,3 +1,12 @@
+2000-08-15  Geoffrey Keating  <geoffk@cygnus.com>
+
+	* xcofflink.c (_bfd_ppc_xcoff_relocate_section): Add ori r0,r0,0
+	to the list of NOPs we recognize after a branch-and-link.
+	Use the ori NOP when one is needed.
+
+	* coff-rs6000.c (_bfd_xcoff_slurp_armap): Finish implementation
+	for large archives.
+
 2000-08-14  Jim Wilson  <wilson@cygnus.com>
 
 	* elf64-ia64.c (elf64_ia64_merge_private_bfd_data): Handle

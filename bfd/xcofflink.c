@@ -6577,13 +6577,14 @@ _bfd_ppc_xcoff_relocate_section (output_bfd, info, input_bfd,
 	      || strcmp (h->root.root.string, "._ptrgl") == 0)
 	    {
 	      if (next == 0x4def7b82		/* cror 15,15,15 */
-		  || next == 0x4ffffb82)	/* cror 31,31,31 */
+		  || next == 0x4ffffb82		/* cror 31,31,31 */
+		  || next == 0x60000000)	/* ori r0,r0,0 */
 		bfd_put_32 (input_bfd, 0x80410014, pnext); /* lwz r1,20(r1) */
 	    }
 	  else
 	    {
 	      if (next == 0x80410014)		/* lwz r1,20(r1) */
-		bfd_put_32 (input_bfd, 0x4ffffb82, pnext); /* cror 31,31,31 */
+		bfd_put_32 (input_bfd, 0x60000000, pnext); /* ori r0,r0,0 */
 	    }
 	}
 
