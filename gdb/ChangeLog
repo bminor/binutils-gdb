@@ -1,3 +1,22 @@
+Tue Aug  5 13:37:14 1997  Per Bothner  <bothner@cygnus.com>
+
+	* gdbtypes.h:  Re-interpret struct field.  Suppport address of static.
+	Add a bunch of macros.
+	* coffread.c, dwarf2read.c, dwarfread.c, mdebugread.c, stabsread.c:
+	Update to use new macros.
+	* coffread.c, hpread.c, stabsread.c:  Remove bugus TYPE_FIELD_VALUE.
+	* value.h, values.c (value_static_field):  New function.
+	* cp-valprint.c, valops.c:  Modify to use value_static_field.
+
+Sun Aug  3 08:18:09 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* c-valprint.c (c_val_print):  Use extract_address to retrieve
+	the address of the virtual function.
+	From Peter Bloecher (Peter.Bloecher@eedn.ericsson.se).
+
+	* eval.c (evaluate_subexp_standard), valarith.c (value_x_unop):
+	Handle C++ operator *.
+
 Fri Aug  1 15:21:44 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gdbtk.c (Tcl_Alloc): Don't provide our own version of this if

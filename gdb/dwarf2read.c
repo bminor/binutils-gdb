@@ -1710,22 +1710,22 @@ dwarf2_add_field (fip, die, objfile)
       attr = dwarf_attr (die, DW_AT_bit_size);
       if (attr)
 	{
-	  fp->bitsize = DW_UNSND (attr);
+	  FIELD_BITSIZE (*fp) = DW_UNSND (attr);
 	}
       else
 	{
-	  fp->bitsize = 0;
+	  FIELD_BITSIZE (*fp) = 0;
 	}
 
       /* Get bit offset of field.  */
       attr = dwarf_attr (die, DW_AT_data_member_location);
       if (attr)
 	{
-	  fp->bitpos =
+	  FIELD_BITPOS (*fp) =
 	    decode_locdesc (DW_BLOCK (attr), objfile) * bits_per_byte;
 	}
       else
-	fp->bitpos = 0;
+	FIELD_BITPOS (*fp) = 0;
       attr = dwarf_attr (die, DW_AT_bit_offset);
       if (attr)
 	{
@@ -1736,7 +1736,7 @@ dwarf2_add_field (fip, die, objfile)
 		 anonymous object to the MSB of the field.  We don't
 		 have to do anything special since we don't need to
 		 know the size of the anonymous object.  */
-	      fp->bitpos += DW_UNSND (attr);
+	      FIELD_BITPOS (*fp) += DW_UNSND (attr);
 	    }
 	  else
 	    {
@@ -1765,8 +1765,8 @@ dwarf2_add_field (fip, die, objfile)
 		     bit field.  */
 		  anonymous_size = TYPE_LENGTH (fp->type);
 		}
-	      fp->bitpos +=
-		anonymous_size * bits_per_byte - bit_offset - fp->bitsize;
+	      FIELD_BITPOS (*fp) += anonymous_size * bits_per_byte
+		- bit_offset - FIELD_BITSIZE (*fp);
 	    }
 	}
 
@@ -1806,11 +1806,10 @@ dwarf2_add_field (fip, die, objfile)
 	  complain (&dwarf2_bad_static_member_name, physname);
 	}
 
-      fp->bitpos = -1;
-      fp->bitsize = (long) obsavestring (physname, strlen (physname),
-					 &objfile->type_obstack);
-      fp->type = die_type (die, objfile);
-      fp->name = obsavestring (fieldname, strlen (fieldname),
+      SET_FIELD_PHYSNAME (*fp, obsavestring (physname, strlen (physname),
+					    &objfile->type_obstack));
+      FIELD_TYPE (*fp) = die_type (die, objfile);
+      FIELD_NAME (*fp) = obsavestring (fieldname, strlen (fieldname),
 			       &objfile->type_obstack);
     }
   else if (die->tag == DW_TAG_inheritance)
@@ -1818,10 +1817,10 @@ dwarf2_add_field (fip, die, objfile)
       /* C++ base class field.  */
       attr = dwarf_attr (die, DW_AT_data_member_location);
       if (attr)
-	fp->bitpos = decode_locdesc (DW_BLOCK (attr), objfile) * bits_per_byte;
-      fp->bitsize = 0;
-      fp->type = die_type (die, objfile);
-      fp->name = type_name_no_tag (fp->type);
+	FIELD_BITPOS (*fp) = decode_locdesc (DW_BLOCK (attr), objfile) * bits_per_byte;
+      FIELD_BITSIZE (*fp) = 0;
+      FIELD_TYPE (*fp) = die_type (die, objfile);
+      FIELD_NAME (*fp) = type_name_no_tag (fp->type);
       fip->nbaseclasses++;
     }
 }
@@ -2379,10 +2378,10 @@ read_enumeration (die, objfile)
 				    * sizeof (struct field));
 		    }
 
-		  fields[num_fields].name = SYMBOL_NAME (sym);
-		  fields[num_fields].type = NULL;
-		  fields[num_fields].bitpos = SYMBOL_VALUE (sym);
-		  fields[num_fields].bitsize = 0;
+		  FIELD_NAME (fields[num_fields]) = SYMBOL_NAME (sym);
+		  FIELD_TYPE (fields[num_fields]) = NULL;
+		  FIELD_BITPOS (fields[num_fields]) = SYMBOL_VALUE (sym);
+		  FIELD_BITSIZE (fields[num_fields]) = 0;
 
 		  num_fields++;
 		}

@@ -1086,10 +1086,10 @@ struct_type (dip, thisdie, enddie, objfile)
 	  list -> field.name =
 	      obsavestring (mbr.at_name, strlen (mbr.at_name),
 			    &objfile -> type_obstack);
-	  list -> field.type = decode_die_type (&mbr);
-	  list -> field.bitpos = 8 * locval (&mbr);
+	  FIELD_TYPE (list->field) = decode_die_type (&mbr);
+	  FIELD_BITPOS (list->field) = 8 * locval (&mbr);
 	  /* Handle bit fields. */
-	  list -> field.bitsize = mbr.at_bit_size;
+	  FIELD_BITSIZE (list->field) = mbr.at_bit_size;
 	  if (BITS_BIG_ENDIAN)
 	    {
 	      /* For big endian bits, the at_bit_offset gives the
@@ -1097,7 +1097,7 @@ struct_type (dip, thisdie, enddie, objfile)
 		 anonymous object to the MSB of the field.  We don't
 		 have to do anything special since we don't need to
 		 know the size of the anonymous object. */
-	      list -> field.bitpos += mbr.at_bit_offset;
+	      FIELD_BITPOS (list->field) += mbr.at_bit_offset;
 	    }
 	  else
 	    {
@@ -1127,7 +1127,7 @@ struct_type (dip, thisdie, enddie, objfile)
 			 a debug information size optimization. */
 		      anonymous_size = TYPE_LENGTH (list -> field.type);
 		    }
-		  list -> field.bitpos +=
+		  FIELD_BITPOS (list->field) +=
 		    anonymous_size * 8 - mbr.at_bit_offset - mbr.at_bit_size;
 		}
 	    }
@@ -1771,9 +1771,9 @@ enum_type (dip, objfile)
 	  new = (struct nextfield *) alloca (sizeof (struct nextfield));
 	  new -> next = list;
 	  list = new;
-	  list -> field.type = NULL;
-	  list -> field.bitsize = 0;
-	  list -> field.bitpos =
+	  FIELD_TYPE (list->field) = NULL;
+	  FIELD_BITSIZE (list->field) = 0;
+	  FIELD_BITPOS (list->field) =
 	    target_to_host (scan, TARGET_FT_LONG_SIZE (objfile), GET_SIGNED,
 			    objfile);
 	  scan += TARGET_FT_LONG_SIZE (objfile);
@@ -1791,7 +1791,7 @@ enum_type (dip, objfile)
 	  SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
 	  SYMBOL_CLASS (sym) = LOC_CONST;
 	  SYMBOL_TYPE (sym) = type;
-	  SYMBOL_VALUE (sym) = list -> field.bitpos;
+	  SYMBOL_VALUE (sym) = FIELD_BITPOS (list->field);
 	  if (SYMBOL_VALUE (sym) < 0)
 	    unsigned_enum = 0;
 	  add_symbol_to_list (sym, list_in_scope);

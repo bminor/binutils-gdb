@@ -655,7 +655,7 @@ read_cfront_baseclasses (fip, pp, type, objfile)
       memset (new, 0, sizeof (struct nextfield));
       new -> next = fip -> list;
       fip -> list = new;
-      new -> field.bitsize = 0; /* this should be an unpacked field! */
+      FIELD_BITSIZE (new->field) = 0; /* this should be an unpacked field! */
 
       STABS_CONTINUE (pp, objfile);
 
@@ -703,7 +703,7 @@ read_cfront_baseclasses (fip, pp, type, objfile)
 	   Assuming no multiple inheritance for now FIXME! */
 	/* We may have read this in the structure definition;
 	   now we should fixup the members to be the actual base classes */
-        new -> field.bitpos = 0;
+        FIELD_BITPOS (new->field) = 0;
 
 	/* Get the base class name and type */
 	  {
@@ -2832,12 +2832,12 @@ read_cpp_abbrev (fip, pp, type, objfile)
 
       {
 	int nbits;
-	fip->list->field.bitpos = read_huge_number (pp, ';', &nbits);
+	FIELD_BITPOS (fip->list->field) = read_huge_number (pp, ';', &nbits);
 	if (nbits != 0)
 	  return 0;
       }
       /* This field is unpacked.  */
-      fip->list->field.bitsize = 0;
+      FIELD_BITSIZE (fip->list->field) = 0;
       fip->list->visibility = VISIBILITY_PRIVATE;
     }
   else
@@ -2875,12 +2875,12 @@ read_one_struct_field (fip, pp, p, type, objfile)
           dem_p = strrchr (dem, ':');
           if (dem_p != 0 && *(dem_p-1)==':')
             dem_p++;
-          fip->list->field.name =
+          FIELD_NAME (fip->list->field) =
             obsavestring (dem_p, strlen(dem_p), &objfile -> type_obstack);
         }
       else
         {
-          fip->list->field.name =
+          FIELD_NAME (fip->list->field) =
             obsavestring (*pp, p - *pp, &objfile -> type_obstack);
         }
       *p = save_p;
@@ -2915,17 +2915,14 @@ read_one_struct_field (fip, pp, p, type, objfile)
 	  fip -> list -> field.bitpos = (long)-2; /* nested type */
 	  p = ++(*pp);
 	}
-      else
+      else ...;
 #endif
-	{
-	  /* Static class member.  */
-	  fip -> list -> field.bitpos = (long) -1;
-	}
       while (*p != ';') 
 	{
 	  p++;
 	}
-      fip -> list -> field.bitsize = (long) savestring (*pp, p - *pp);
+      /* Static class member.  */
+      SET_FIELD_PHYSNAME (fip->list->field, savestring (*pp, p - *pp));
       *pp = p + 1;
       return;
     }
@@ -2940,13 +2937,13 @@ read_one_struct_field (fip, pp, p, type, objfile)
 
   {
     int nbits;
-    fip -> list -> field.bitpos = read_huge_number (pp, ',', &nbits);
+    FIELD_BITPOS (fip->list->field) = read_huge_number (pp, ',', &nbits);
     if (nbits != 0)
       {
 	complain (&stabs_general_complaint, "bad structure-type format");
 	return;
       }
-    fip -> list -> field.bitsize = read_huge_number (pp, ';', &nbits);
+    FIELD_BITSIZE (fip->list->field) = read_huge_number (pp, ';', &nbits);
     if (nbits != 0)
       {
 	complain (&stabs_general_complaint, "bad structure-type format");
@@ -2954,7 +2951,8 @@ read_one_struct_field (fip, pp, p, type, objfile)
       }
   }
 
-  if (fip -> list -> field.bitpos == 0 && fip -> list -> field.bitsize == 0)
+  if (FIELD_BITPOS (fip->list->field) == 0
+      && FIELD_BITSIZE (fip->list->field) == 0)
     {
       /* This can happen in two cases: (1) at least for gcc 2.4.5 or so,
 	 it is a field which has been optimized out.  The correct stab for
@@ -2980,23 +2978,21 @@ read_one_struct_field (fip, pp, p, type, objfile)
 	 Note that forward refs cannot be packed,
 	 and treat enums as if they had the width of ints.  */
 
-      if (TYPE_CODE (fip -> list -> field.type) != TYPE_CODE_INT
-	  && TYPE_CODE (fip -> list -> field.type) != TYPE_CODE_BOOL
-	  && TYPE_CODE (fip -> list -> field.type) != TYPE_CODE_ENUM)
+      if (TYPE_CODE (FIELD_TYPE (fip->list->field)) != TYPE_CODE_INT
+	  && TYPE_CODE (FIELD_TYPE (fip->list->field)) != TYPE_CODE_BOOL
+	  && TYPE_CODE (FIELD_TYPE (fip->list->field)) != TYPE_CODE_ENUM)
 	{
-	  fip -> list -> field.bitsize = 0;
+	  FIELD_BITSIZE (fip->list->field) = 0;
 	}
-      if ((fip -> list -> field.bitsize 
-	   == TARGET_CHAR_BIT * TYPE_LENGTH (fip -> list -> field.type)
-	   || (TYPE_CODE (fip -> list -> field.type) == TYPE_CODE_ENUM
-	       && (fip -> list -> field.bitsize
-		   == TARGET_INT_BIT)
-	       )
+      if ((FIELD_BITSIZE (fip->list->field) 
+	   == TARGET_CHAR_BIT * TYPE_LENGTH (FIELD_TYPE (fip->list->field))
+	   || (TYPE_CODE (FIELD_TYPE (fip->list->field)) == TYPE_CODE_ENUM
+	       && FIELD_BITSIZE (fip->list->field) == TARGET_INT_BIT )
 	   )
 	  &&
-	  fip -> list -> field.bitpos % 8 == 0)
+	  FIELD_BITPOS (fip->list->field) % 8 == 0)
 	{
-	  fip -> list -> field.bitsize = 0;
+	  FIELD_BITSIZE (fip->list->field) = 0;
 	}
     }
 }
@@ -3170,7 +3166,7 @@ read_baseclasses (fip, pp, type, objfile)
       memset (new, 0, sizeof (struct nextfield));
       new -> next = fip -> list;
       fip -> list = new;
-      new -> field.bitsize = 0;	/* this should be an unpacked field! */
+      FIELD_BITSIZE (new->field) = 0;	/* this should be an unpacked field! */
 
       STABS_CONTINUE (pp, objfile);
       switch (**pp)
@@ -3216,7 +3212,7 @@ read_baseclasses (fip, pp, type, objfile)
 	   corresponding to this baseclass.  Always zero in the absence of
 	   multiple inheritance.  */
 
-	new -> field.bitpos = read_huge_number (pp, ',', &nbits);
+	FIELD_BITPOS (new->field) = read_huge_number (pp, ',', &nbits);
 	if (nbits != 0)
 	  return 0;
       }
@@ -3403,9 +3399,7 @@ read_cfront_static_fields(fip, pp, type, objfile)
       fip -> list -> field.type = stype; 
 
       /* set bitpos & bitsize */
-      fip -> list -> field.bitpos = (long) -1;	/* -1 signifies a static member */
-      /* YUK!  what a hack!  bitsize used for physname when field is static */
-      fip -> list -> field.bitsize = (long) savestring (sname, strlen(sname));
+      SET_FIELD_PHYSNAME (fip->list->field, savestring (sname, strlen(sname)));
 
       /* set name field */
       /* The following is code to work around cfront generated stabs.
@@ -3817,7 +3811,6 @@ read_enum_type (pp, type, objfile)
 	  struct symbol *xsym = syms->symbol[j];
 	  SYMBOL_TYPE (xsym) = type;
 	  TYPE_FIELD_NAME (type, n) = SYMBOL_NAME (xsym);
-	  TYPE_FIELD_VALUE (type, n) = 0;
 	  TYPE_FIELD_BITPOS (type, n) = SYMBOL_VALUE (xsym);
 	  TYPE_FIELD_BITSIZE (type, n) = 0;
 	}

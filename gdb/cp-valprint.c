@@ -333,21 +333,13 @@ cp_print_value_fields (type, valaddr, address, stream, format, recurse, pretty,
 		}
 	      else if (TYPE_FIELD_STATIC (type, i))
 		{
-		  value_ptr v;
-		  char *phys_name = TYPE_FIELD_STATIC_PHYSNAME (type, i);
-		  struct symbol *sym =
-		      lookup_symbol (phys_name, 0, VAR_NAMESPACE, 0, NULL);
-		  if (sym == NULL)
+		  value_ptr v = value_static_field (type, i);
+		  if (v == NULL)
 		    fputs_filtered ("<optimized out>", stream);
 		  else
-		    {
-		      v = value_at (TYPE_FIELD_TYPE (type, i),
-				    SYMBOL_VALUE_ADDRESS (sym),
-				    NULL);
-		      cp_print_static_field (TYPE_FIELD_TYPE (type, i), v,
-					     stream, format, recurse + 1,
-					     pretty);
-		    }
+		    cp_print_static_field (TYPE_FIELD_TYPE (type, i), v,
+					   stream, format, recurse + 1,
+					   pretty);
 		}
 	      else
 		{

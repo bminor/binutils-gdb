@@ -714,12 +714,37 @@ unpack_pointer (type, valaddr)
   return unpack_long (type, valaddr);
 }
 
+/* Get the value of the FIELDN'th field (which must be static) of TYPE. */
+
+value_ptr
+value_static_field (type, fieldno)
+     struct type *type;
+     int fieldno;
+{
+  CORE_ADDR addr;
+  asection *sect;
+  if (TYPE_FIELD_STATIC_HAS_ADDR (type, fieldno))
+    {
+      addr = TYPE_FIELD_STATIC_PHYSADDR (type, fieldno);
+      sect = NULL;
+    }
+  else
+    {
+      char *phys_name = TYPE_FIELD_STATIC_PHYSNAME (type, fieldno);
+      struct symbol *sym = lookup_symbol (phys_name, 0, VAR_NAMESPACE, 0, NULL);
+      if (sym == NULL)
+	return NULL;
+      addr = SYMBOL_VALUE_ADDRESS (sym);
+      sect = SYMBOL_BFD_SECTION (sym);
+      SET_FIELD_PHYSADDR (TYPE_FIELD (type, fieldno), addr);
+    }
+  return value_at (TYPE_FIELD_TYPE (type, fieldno), addr, sect);
+}
+
 /* Given a value ARG1 (offset by OFFSET bytes)
    of a struct or union type ARG_TYPE,
-   extract and return the value of one of its fields.
-   FIELDNO says which field.
-
-   For C++, must also be able to return values from static fields */
+   extract and return the value of one of its (non-static) fields.
+   FIELDNO says which field. */
 
 value_ptr
 value_primitive_field (arg1, offset, fieldno, arg_type)
@@ -764,10 +789,8 @@ value_primitive_field (arg1, offset, fieldno, arg_type)
 }
 
 /* Given a value ARG1 of a struct or union type,
-   extract and return the value of one of its fields.
-   FIELDNO says which field.
-
-   For C++, must also be able to return values from static fields */
+   extract and return the value of one of its (non-static) fields.
+   FIELDNO says which field. */
 
 value_ptr
 value_field (arg1, fieldno)

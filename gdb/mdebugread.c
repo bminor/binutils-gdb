@@ -1124,10 +1124,10 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
 		if (tsym.st != stMember)
 		  break;
 
-		f->bitpos = tsym.value;
-		f->type = t;
-		f->name = debug_info->ss + cur_fdr->issBase + tsym.iss;
-		f->bitsize = 0;
+		FIELD_BITPOS (*f) = tsym.value;
+		FIELD_TYPE (*f) = t;
+		FIELD_NAME (*f) = debug_info->ss + cur_fdr->issBase + tsym.iss;
+		FIELD_BITSIZE (*f) = 0;
 
 		enum_sym = ((struct symbol *)
 			    obstack_alloc (&current_objfile->symbol_obstack,
@@ -1314,11 +1314,11 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
 
     case stMember:		/* member of struct or union */
       f = &TYPE_FIELDS (top_stack->cur_type)[top_stack->cur_field++];
-      f->name = name;
-      f->bitpos = sh->value;
+      FIELD_NAME (*f) = name;
+      FIELD_BITPOS (*f) = sh->value;
       bitsize = 0;
-      f->type = parse_type (cur_fd, ax, sh->index, &bitsize, bigend, name);
-      f->bitsize = bitsize;
+      FIELD_TYPE (*f) = parse_type (cur_fd, ax, sh->index, &bitsize, bigend, name);
+      FIELD_BITSIZE (*f) = bitsize;
       break;
 
     case stIndirect:		/* forward declaration on Irix5 */
