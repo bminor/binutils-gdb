@@ -119,6 +119,15 @@ fi
 
 LIB_SEARCH_DIRS=`echo ${LIB_PATH} | sed -e 's/:/ /g' -e 's/\([^ ][^ ]*\)/SEARCH_DIR(\\"\1\\");/g'`
 
+# We need it for testsuite.
+case " $EMULATION_LIBPATH " in
+  *" ${EMULATION_NAME} "*)
+    test -d tmpdir || mkdir tmpdir
+    rm -f tmpdir/libpath
+    echo "set libpath \"${LIB_PATH}\"" | sed -e 's/:/ /g' > tmpdir/libpath.exp
+    ;;
+esac
+
 # Generate 5 or 6 script files from a master script template in
 # ${srcdir}/scripttempl/${SCRIPT_NAME}.sh.  Which one of the 5 or 6
 # script files is actually used depends on command line options given

@@ -69,6 +69,13 @@ if {![file isdirectory tmpdir/ld]} then {
 }
 set gcc_ld_flag "-B[pwd]/tmpdir/ld/"
 
+# load the linker path
+load_lib tmpdir/libpath.exp
+
+foreach dir $libpath {
+    set gcc_ld_flag "$gcc_ld_flag -L$dir"
+}
+
 # The mips64-*-linux-gnu compiler defaults to the N32 ABI after
 # installed, but to the O32 ABI in the build tree, because of some
 # specs-file hacks.  Make sure we use an ABI that is compatible with
