@@ -1,3 +1,7 @@
+Mon Sep 13 12:50:52 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* m88k.h (BOFLAG): rewrite to avoid nested comment.
+
 Mon Sep 13 15:46:06 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* m68k.h (two): Protect second argument with parentheses.
