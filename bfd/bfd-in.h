@@ -120,6 +120,8 @@ typedef unsigned HOST_64_BIT uint64_type;
 #if !defined (uint64_type) && defined (__GNUC__)
 #define uint64_type unsigned long long
 #define int64_type long long
+#endif
+#ifndef uint64_typeLOW
 #define uint64_typeLOW(x) ((unsigned long)(((x) & 0xffffffff)))
 #define uint64_typeHIGH(x) ((unsigned long)(((x) >> 32) & 0xffffffff))
 #endif
@@ -128,10 +130,12 @@ typedef unsigned HOST_64_BIT bfd_vma;
 typedef HOST_64_BIT bfd_signed_vma;
 typedef unsigned HOST_64_BIT bfd_size_type;
 typedef unsigned HOST_64_BIT symvalue;
+#ifndef fprintf_vma
 #define fprintf_vma(s,x) \
 		fprintf(s,"%08lx%08lx", uint64_typeHIGH(x), uint64_typeLOW(x))
 #define sprintf_vma(s,x) \
 		sprintf(s,"%08lx%08lx", uint64_typeHIGH(x), uint64_typeLOW(x))
+#endif
 #else /* not BFD64  */
 
 /* Represent a target address.  Also used as a generic unsigned type
@@ -547,16 +551,26 @@ struct ecoff_debug_info;
 struct ecoff_debug_swap;
 struct ecoff_extr;
 struct symbol_cache_entry;
+struct bfd_link_info;
 #endif
-extern boolean bfd_ecoff_debug_accumulate
+extern PTR bfd_ecoff_debug_init
   PARAMS ((bfd *output_bfd, struct ecoff_debug_info *output_debug,
+	   const struct ecoff_debug_swap *output_swap,
+	   struct bfd_link_info *));
+extern void bfd_ecoff_debug_free
+  PARAMS ((PTR handle, bfd *output_bfd, struct ecoff_debug_info *output_debug,
+	   const struct ecoff_debug_swap *output_swap,
+	   struct bfd_link_info *));
+extern boolean bfd_ecoff_debug_accumulate
+  PARAMS ((PTR handle, bfd *output_bfd, struct ecoff_debug_info *output_debug,
 	   const struct ecoff_debug_swap *output_swap,
 	   bfd *input_bfd, struct ecoff_debug_info *input_debug,
 	   const struct ecoff_debug_swap *input_swap,
-	   boolean relocateable));
-extern boolean bfd_ecoff_debug_link_other
-  PARAMS ((bfd *output_bfd, struct ecoff_debug_info *output_debug,
-	   const struct ecoff_debug_swap *output_swap, bfd *input_bfd));
+	   struct bfd_link_info *));
+extern boolean bfd_ecoff_debug_accumulate_other
+  PARAMS ((PTR handle, bfd *output_bfd, struct ecoff_debug_info *output_debug,
+	   const struct ecoff_debug_swap *output_swap, bfd *input_bfd,
+	   struct bfd_link_info *));
 extern boolean bfd_ecoff_debug_externals
   PARAMS ((bfd *abfd, struct ecoff_debug_info *debug,
 	   const struct ecoff_debug_swap *swap,
@@ -575,5 +589,9 @@ extern bfd_size_type bfd_ecoff_debug_size
 extern boolean bfd_ecoff_write_debug
   PARAMS ((bfd *abfd, struct ecoff_debug_info *debug,
 	   const struct ecoff_debug_swap *swap, file_ptr where));
+extern boolean bfd_ecoff_write_accumulated_debug
+  PARAMS ((PTR handle, bfd *abfd, struct ecoff_debug_info *debug,
+	   const struct ecoff_debug_swap *swap,
+	   struct bfd_link_info *info, file_ptr where));
 
 /* And more from the source.  */
