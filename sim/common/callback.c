@@ -21,6 +21,9 @@
 /* This file provides a standard way for targets to talk to the host OS
    level.  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 #include "ansidecl.h"
 #ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
@@ -36,6 +39,12 @@
 #include <time.h>
 #include "callback.h"
 #include "targ-vals.h"
+
+#ifndef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
+extern int system PARAMS ((const char *));
 
 static int os_init PARAMS ((host_callback *));
 static int os_shutdown PARAMS ((host_callback *));
@@ -334,7 +343,7 @@ os_error (p, va_alist)
   fprintf (stderr, "\n");
 
   va_end (args);
-  exit (EXIT_FAILURE);
+  exit (1);
 }
 
 host_callback default_callback =
