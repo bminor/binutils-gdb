@@ -1,3 +1,22 @@
+Wed Oct 22 16:08:45 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coff-sh.c (coff_small_object_p): New static function.
+	(coff_small_new_section_hook): New static function.
+	(bfd_coff_small_swap_table): New static const structure.
+	(coff_small_close_and_cleanup): Define.
+	(coff_small_bfd_free_cached_info): Define.
+	(coff_small_get_section_contents): Define.
+	(coff_small_get_section_contents_in_window): Define.
+	(shcoff_small_vec): New static structure.
+	(shlcoff_small_vec): New static structure.
+	* targets.c (bfd_target_vector): Add shcoff_small_vec and
+	shlcoff_small_vec.
+	* config.bfd (sh-*-elf*): Add shcoff_small_vec and
+	shlcoff_small_vec to targ_selvecs.
+	(sh-*-*): Likewise.
+	* configure.in: Add shcoff_small_vec and shlcoff_small_vec cases.
+	* configure: Rebuild.
+
 Mon Oct 20 15:01:27 1997  Klaus K"ampf  <kkaempf@progis.de>
 
 	* evax-egsd.c: Weak symbols are global.

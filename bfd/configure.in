@@ -375,7 +375,7 @@ selarchs="$f"
 # Target backend .o files.
 tb=
 
-elf="elf.lo elflink.lo"
+elf="elflink.lo"
 
 for vec in $selvecs
 do
@@ -497,6 +497,8 @@ do
     ppcboot_vec)		tb="$tb ppcboot.lo" ;;
     shcoff_vec)			tb="$tb coff-sh.lo cofflink.lo" ;;
     shlcoff_vec)		tb="$tb coff-sh.lo cofflink.lo" ;;
+    shcoff_small_vec)		tb="$tb coff-sh.lo cofflink.lo" ;;
+    shlcoff_small_vec)		tb="$tb coff-sh.lo cofflink.lo" ;;
     som_vec)			tb="$tb som.lo" ;;
     sparcle_aout_vec)		tb="$tb aout-sparcle.lo aout32.lo" ;;
     sparclinux_vec)		tb="$tb sparclinux.lo aout32.lo stab-syms.lo" ;;
