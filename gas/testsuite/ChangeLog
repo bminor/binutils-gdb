@@ -1,3 +1,23 @@
+2001-08-27  Staffan Ulfberg  <staffanu@swox.se>
+	    Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/macros/macros.exp: xfail powerpc-*-aix.
+	* gas/ppc/astest64.s: New.
+	* gas/ppc/astest64.d: New.
+	* gas/ppc/astest2_64.s: New.
+	* gas/ppc/astest2_64.d: New.
+	* gas/ppc/test1elf.asm: New.
+	* gas/ppc/test1xcoff.asm: New.
+	* gas/ppc/generate.sh: New. Generate new files below from above .asm
+	* gas/ppc/test1elf32.s: New.
+	* gas/ppc/test1elf32.d: New.
+	* gas/ppc/test1elf64.s: New.
+	* gas/ppc/test1elf64.d: New.
+	* gas/ppc/test1xcoff32.s: New.
+	* gas/ppc/test1xcoff32.d: New.
+	* gas/ppc/ppc.exp: Run new tests.
+	* gas/ppc/simpshft.s: Tweak align now that we get nops.
+
 2001-08-24  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* binutils-all/readelf.exp: Don't regard mips*el-*-* as traditional
