@@ -28,19 +28,6 @@
 
 #include "alpha-tdep.h"
 
-/* Under OSF/1, the __sigtramp routine is frameless and has a frame
-   size of zero, but we are able to backtrace through it.  */
-static CORE_ADDR
-alpha_osf1_skip_sigtramp_frame (struct frame_info *frame, CORE_ADDR pc)
-{
-  char *name;
-
-  find_pc_partial_function (pc, &name, (CORE_ADDR *) NULL, (CORE_ADDR *) NULL);
-  if (PC_IN_SIGTRAMP (pc, name))
-    return frame->frame;
-  return 0;
-}
-
 static int
 alpha_osf1_pc_in_sigtramp (CORE_ADDR pc, char *func_name)
 {
@@ -95,7 +82,6 @@ alpha_osf1_init_abi (struct gdbarch_info info,
      argument handling and bp_call_dummy takes care of stopping the dummy.  */
   set_gdbarch_call_dummy_address (gdbarch, alpha_call_dummy_address);
 
-  tdep->skip_sigtramp_frame = alpha_osf1_skip_sigtramp_frame;
   tdep->sigcontext_addr = alpha_osf1_sigcontext_addr;
 
   tdep->jb_pc = 2;

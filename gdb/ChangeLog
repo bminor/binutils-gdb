@@ -1,3 +1,9 @@
+2003-06-03  J. Brobecker  <brobecker@gnat.com>
+
+	* alpha-osf1-tdep.c (alpha_osf1_skip_sigtramp_frame): Delete.
+	(alpha_osf1_init_abi): Do not set skip_sigtramp_frame in tdep
+	structure, field no longer exists.
+
 2003-06-03  Theodore A. Roth  <troth@openavr.org>
 
 	* remote.c (init_remote_state): Compute sizeof_g_packet by 
