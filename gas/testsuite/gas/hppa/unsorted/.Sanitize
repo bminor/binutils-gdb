@@ -27,6 +27,7 @@ Do-first:
 Things-to-keep:
 
 align3.s
+align4.s
 fragbug.s
 globalbug.s
 importbug.s

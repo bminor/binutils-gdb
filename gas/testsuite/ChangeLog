@@ -1,5 +1,8 @@
 Tue Nov 15 11:09:57 1994  Jeff Law  (law@snake.cs.utah.edu)
 
+	* gas/hppa/unsorted/align4.s: New test.
+	* gas/hppa/unsorted/unsorted.exp: Run it.
+
 	* gas/hppa/unsorted/unsorted.exp (importbug): Tweak to match
 	current expected PA ELF output.
 	* gas/hppa/reloc/reloc.exp (do_r_no_reloc): Likewise.
