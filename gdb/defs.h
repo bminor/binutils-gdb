@@ -492,7 +492,7 @@ local_hex_string_custom PARAMS ((int, char *));	/* language.c */
 #if !defined (longest_to_int)
 #if defined (LONG_LONG)
 #define longest_to_int(x) (((x) > INT_MAX || (x) < INT_MIN) \
-			   ? error ("Value out of range.") : (int) (x))
+			   ? (error ("Value out of range."),0) : (int) (x))
 #else /* No LONG_LONG.  */
 /* Assume sizeof (int) == sizeof (long).  */
 #define longest_to_int(x) ((int) (x))

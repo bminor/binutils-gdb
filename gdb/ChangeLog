@@ -1,3 +1,9 @@
+Thu Jun 11 12:31:50 1992  John Gilmore  (gnu at cygnus.com)
+
+	Two `long long' fixes from Robert R. Henry (rrh@dino.tera.com):
+	* defs.h (longest_to_int):  Avoid void arm of ?: in error case.
+	* expprint.c (print_subexp):  Fix printing of register names.
+
 Thu Jun 11 01:33:40 1992  John Gilmore  (gnu at cygnus.com)
 
 	* inferior.h (register_valid):  Declare.
