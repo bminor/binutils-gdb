@@ -2608,8 +2608,8 @@ decode_shift (str, unrestrict)
 	     about this though.  */
 	  if (num == 0)
 	    {
-	      as_tsktsk (_("Shift of 0 ignored."));
-	      shift = shift_names;
+	      as_warn (_("Shift of 0 ignored."));
+	      shift = & shift_names[0];
 	      assert (shift->properties->index == SHIFT_LSL);
 	    }
 	  else
