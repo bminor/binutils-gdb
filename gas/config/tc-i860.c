@@ -1462,3 +1462,36 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED,
     }
   return reloc;
 }
+
+/* This is called from HANDLE_ALIGN in write.c.  Fill in the contents
+   of an rs_align_code fragment.  */
+
+void
+i860_handle_align (fragS *fragp)
+{
+  /* Instructions are always stored little-endian on the i860.  */
+  static const unsigned char le_nop[] = { 0x00, 0x00, 0x00, 0xA0 };
+
+  int bytes;
+  char *p;
+
+  if (fragp->fr_type != rs_align_code)
+    return;
+
+  bytes = fragp->fr_next->fr_address - fragp->fr_address - fragp->fr_fix;
+  p = fragp->fr_literal + fragp->fr_fix;
+
+  /* Make sure we are on a 4-byte boundary, in case someone has been
+     putting data into a text section.  */
+  if (bytes & 3)
+    {
+      int fix = bytes & 3;
+      memset (p, 0, fix);
+      p += fix;
+      fragp->fr_fix += fix;
+    }
+
+  memcpy (p, le_nop, 4);
+  fragp->fr_var = 4;
+}
+

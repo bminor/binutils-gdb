@@ -17,6 +17,7 @@ if [istarget i860-*-*] {
     run_dump_test "bitwise"
     run_dump_test "branch"
     run_dump_test "bte"
+    run_dump_test "dir-align01"
     run_dump_test "dir-intel01"
     run_dump_test "dir-intel02"
     run_list_test "dir-intel03-err" ""
