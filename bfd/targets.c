@@ -397,9 +397,11 @@ extern bfd_target symbolsrec_vec;
 extern bfd_target aix386_core_vec;
 extern bfd_target hpux_core_vec;
 extern bfd_target hppabsd_core_vec;
+extern bfd_target irix_core_vec;
 extern bfd_target osf_core_vec;
 extern bfd_target sco_core_vec;
 extern bfd_target trad_core_vec;
+extern bfd_target ptrace_core_vec;
 
 bfd_target *target_vector[] = {
 
@@ -535,11 +537,18 @@ bfd_target *target_vector[] = {
 #ifdef HPPABSD_CORE
 	&hppabsd_core_vec,
 #endif
+#ifdef IRIX_CORE
+	&irix_core_vec,
+#endif
 #ifdef OSF_CORE
 	&osf_core_vec,
 #endif
 #ifdef	TRAD_CORE
 	&trad_core_vec,
+#endif
+
+#ifdef	PTRACE_CORE
+	&ptrace_core_vec,
 #endif
 
 	NULL /* end of list marker */
