@@ -1,5 +1,20 @@
 2000-09-17  Kevin Buettner  <kevinb@redhat.com>
 
+	* ppc-linux-nat.c (fill_gregset, fill_fpregset): New functions.
+	* config/powerpc/linux.mh (NATDEPFILES): Remove linux-thread.o.
+	Add proc-service.o, thread-db.o, and lin-lwp.o.
+	(LOADLIBES): Define.
+	* config/powerpc/nm-linux.h (ATTACH_DETACH, SVR4_SHARED_LIBS):
+	Remove defines which are already present in ../nm-linux.h.
+	(solib.h): Don't include this file; it's already included by
+	../nm-linux.h.
+	(PREPARE_TO_PROCEED, GET_THREAD_SIGNALS, ATTACH_LWP): Define
+	to use the following lin-lwp.c functions...
+	(lin_lwp_prepare_to_proceed, lin_thread_get_thread_signals,
+	lin_lwp_attach_lwp): Declare.
+
+2000-09-17  Kevin Buettner  <kevinb@redhat.com>
+
 	* m88k-nat.c (fetch_inferior_registers): Protoize.
 	* m88k-tdep.c (m88k_skip_prologue): Protoize.
 

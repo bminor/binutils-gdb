@@ -71,11 +71,56 @@ supply_gregset (gregset_t * gregsetp)
 }
 
 void
+fill_gregset (gregset_t *gregsetp, int regno)
+{
+  int regi;
+  greg_t *regp = (greg_t *) gregsetp;
+
+#define COPY_REG(_idx_,_regi_) \
+  if ((regno == -1) || regno == _regi_) \
+    memcpy (regp + _idx_, &registers[REGISTER_BYTE (_regi_)], \
+	    REGISTER_RAW_SIZE (_regi_))
+
+  for (regi = 0; regi < 32; regi++)
+    {
+      COPY_REG (regmap[regi], regi);
+    }
+
+  for (regi = FIRST_UISA_SP_REGNUM; regi <= LAST_UISA_SP_REGNUM; regi++)
+    {
+      COPY_REG (regmap[regi], regi);
+    }
+}
+
+void
 supply_fpregset (fpregset_t * fpregsetp)
 {
   int regi;
   for (regi = 0; regi < 32; regi++)
     {
       supply_register (FP0_REGNUM + regi, (char *) (*fpregsetp + regi));
+    }
+}
+
+/*  Given a pointer to a floating point register set in /proc format
+   (fpregset_t *), update the register specified by REGNO from gdb's idea
+   of the current floating point register set.  If REGNO is -1, update
+   them all. */
+
+void
+fill_fpregset (fpregset_t *fpregsetp, int regno)
+{
+  int regi;
+  char *to;
+  char *from;
+  
+  for (regi = 0; regi < 32; regi++)
+    {
+      if ((regno == -1) || (regno == FP0_REGNUM + regi))
+        {
+	  from = (char *) &registers[REGISTER_BYTE (FP0_REGNUM + regi)];
+	  to = (char *) (*fpregsetp + regi);
+	  memcpy (to, from, REGISTER_RAW_SIZE (FP0_REGNUM + regi));
+        }
     }
 }
