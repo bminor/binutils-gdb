@@ -198,6 +198,7 @@ static const struct reg_name system_registers[] =
 static const struct reg_name cc_names[] =
 {
   { "c", 0x1 },
+  { "e", 0x2 },
   { "ge", 0xe },
   { "gt", 0xf },
   { "h", 0xb },
@@ -206,6 +207,7 @@ static const struct reg_name cc_names[] =
   { "lt", 0x6 },
   { "n", 0x4 },
   { "nc", 0x9 },
+  { "ne", 0xa },
   { "nh", 0x3 },
   { "nl", 0x9 },
   { "ns", 0xc },
@@ -275,25 +277,28 @@ register_name (expressionP)
   start = name = input_line_pointer;
 
   c = get_symbol_end ();
+  
   reg_number = reg_name_search (pre_defined_registers, REG_NAME_CNT, name);
 
+  * input_line_pointer = c;	/* put back the delimiting char */
+  
   /* look to see if it's in the register table */
   if (reg_number >= 0) 
     {
-      expressionP->X_op = O_register;
+      expressionP->X_op         = O_register;
       expressionP->X_add_number = reg_number;
 
       /* make the rest nice */
       expressionP->X_add_symbol = NULL;
-      expressionP->X_op_symbol = NULL;
-      *input_line_pointer = c;	/* put back the delimiting char */
+      expressionP->X_op_symbol  = NULL;
+      
       return true;
     }
   else
     {
       /* reset the line as if we had not done anything */
-      *input_line_pointer = c;   /* put back the delimiting char */
-      input_line_pointer = start; /* reset input_line pointer */
+      input_line_pointer = start;
+      
       return false;
     }
 }
@@ -324,13 +329,15 @@ system_register_name (expressionP, accept_numbers)
   c = get_symbol_end ();
   reg_number = reg_name_search (system_registers, SYSREG_NAME_CNT, name);
 
+  * input_line_pointer = c;   /* put back the delimiting char */
+  
   if (reg_number < 0
       && accept_numbers)
     {
-      * input_line_pointer = c;   /* put back the delimiting char */
       input_line_pointer   = start; /* reset input_line pointer */
-      
-      reg_number = strtol (input_line_pointer, & input_line_pointer, 10);
+
+      if (isdigit (* input_line_pointer))
+	reg_number = strtol (input_line_pointer, & input_line_pointer, 10);
 
       /* Make sure that the register number is allowable. */
       if (   reg_number < 0
@@ -343,29 +350,25 @@ system_register_name (expressionP, accept_numbers)
 	{
 	  reg_number = -1;
 	}
-      else
-	{
-	  c = * input_line_pointer;
-	}
     }
       
   /* look to see if it's in the register table */
   if (reg_number >= 0) 
     {
-      expressionP->X_op = O_register;
+      expressionP->X_op         = O_register;
       expressionP->X_add_number = reg_number;
 
       /* make the rest nice */
       expressionP->X_add_symbol = NULL;
-      expressionP->X_op_symbol = NULL;
-      *input_line_pointer = c;	/* put back the delimiting char */
+      expressionP->X_op_symbol  = NULL;
+
       return true;
     }
   else
     {
       /* reset the line as if we had not done anything */
-      *input_line_pointer = c;   /* put back the delimiting char */
-      input_line_pointer = start; /* reset input_line pointer */
+      input_line_pointer = start;
+      
       return false;
     }
 }
@@ -395,25 +398,35 @@ cc_name (expressionP)
   c = get_symbol_end ();
   reg_number = reg_name_search (cc_names, CC_NAME_CNT, name);
 
+  * input_line_pointer = c;   /* put back the delimiting char */
+  
   /* look to see if it's in the register table */
   if (reg_number >= 0) 
     {
-      expressionP->X_op = O_constant;
+      expressionP->X_op         = O_constant;
       expressionP->X_add_number = reg_number;
 
       /* make the rest nice */
       expressionP->X_add_symbol = NULL;
-      expressionP->X_op_symbol = NULL;
-      *input_line_pointer = c;	/* put back the delimiting char */
+      expressionP->X_op_symbol  = NULL;
+
       return true;
     }
   else
     {
       /* reset the line as if we had not done anything */
-      *input_line_pointer = c;   /* put back the delimiting char */
-      input_line_pointer = start; /* reset input_line pointer */
+      input_line_pointer = start;
+      
       return false;
     }
+}
+
+static void
+skip_white_space (void)
+{
+  while (   * input_line_pointer == ' '
+	 || * input_line_pointer == '\t')
+    ++ input_line_pointer;
 }
 
 /* start-sanitize-v850e */
@@ -450,18 +463,29 @@ parse_register_list
     case 0xfff8001f: regs = type3_regs; break;
 /* end-sanitize-v850eq */
     default:
-      fprintf (stderr, "unknown operand shift: %x\n", operand->shift );		    
+      as_bad ("unknown operand shift: %x\n", operand->shift );		    
       return false;
     }
 
-  /* Parse the register list until a terminator (comma or new-line) is found.  */
+  skip_white_space();
+
+  if (* input_line_pointer != '{')
+    {
+      as_bad ("no opening curly brace at start of register list\n");
+      return false;
+    }
+
+  input_line_pointer ++;
+
+  /* Parse the register list until a terminator (closing curly brace or new-line) is found.  */
   for (;;)
     {
       expressionS exp;
-      int         i;
 
       if (register_name (& exp))
 	{
+	  int  i;
+	  
 	  /* Locate the given register in the list, and if it is there, insert the corresponding bit into the instruction.  */
 	  for (i = 0; i < 32; i++)
 	    {
@@ -474,7 +498,7 @@ parse_register_list
 
 	  if (i == 32)
 	    {
-	      as_bad( "unable to insert register r%d into list\n", exp.X_add_number );
+	      as_bad( "it is illegal to include register r%d in list\n", exp.X_add_number );
 	      return false;
 	    }
 	}
@@ -495,12 +519,60 @@ parse_register_list
 	  else
 	    * insn |= 0x80000;
 	}
-      else
-	break;
+      else if (* input_line_pointer == '}')
+	{
+	  input_line_pointer ++;
+	  break;
+	}
+      else if (* input_line_pointer == ',')
+	{
+	  input_line_pointer ++;
+	  continue;
+	}
+      else if (* input_line_pointer == '-')
+	{
+	  /* We have encountered a range of registers: rX - rY */
+	  int         j;
+	  expressionS exp2;
 
-      /* Skip white space.  */
-      while (* input_line_pointer == ' ' || * input_line_pointer == '\t')
-	++ input_line_pointer;
+	  /* Skip the dash.  */
+	  ++ input_line_pointer;
+
+	  /* Get the second register in the range.  */
+	  if (! register_name (& exp2))
+	    {
+	      as_bad ("second register should follow dash in register list\n");
+	      exp2.X_add_number = exp.X_add_number;
+	    }
+
+	  /* Add the rest of the registers in the range.  */
+	  for (j = exp.X_add_number + 1; j <= exp2.X_add_number; j++)
+	    {
+	      int  i;
+	  
+	      /* Locate the given register in the list, and if it is there, insert the corresponding bit into the instruction.  */
+	      for (i = 0; i < 32; i++)
+		{
+		  if (regs[ i ] == j)
+		    {
+		      * insn |= (1 << i);
+		      break;
+		    }
+		}
+
+	      if (i == 32)
+		{
+		  as_bad( "it is illegal to include register r%d in list\n", j );
+		  return false;
+		}
+	    }
+	}
+      else
+	{
+	  break;
+	}
+
+      skip_white_space();
     }
 
   return true;
@@ -793,11 +865,11 @@ md_assemble (str)
 
 	  if (next_opindex == 0)
 	    {
-	      operand = &v850_operands[*opindex_ptr];
+	      operand = & v850_operands[ * opindex_ptr ];
 	    }
 	  else
 	    {
-	      operand = &v850_operands[next_opindex];
+	      operand      = & v850_operands[ next_opindex ];
 	      next_opindex = 0;
 	    }
 
@@ -880,6 +952,12 @@ md_assemble (str)
 		  if (!register_name (& ex))
 		    {
 		      errmsg = "invalid register name";
+		    }
+
+		  if ((operand->flags & V850_NOT_R0)
+		      && ex.X_add_number == 0)
+		    {
+		      errmsg = "register r0 cannot be used here";
 		    }
 		}
 	      else if ((operand->flags & V850_OPERAND_SRG) != 0) 
@@ -1047,7 +1125,7 @@ md_assemble (str)
       if (match == 0)
         {
 	  next_opcode = opcode + 1;
-	  if (next_opcode->opcode != 0 && !strcmp(next_opcode->name, opcode->name))
+	  if (next_opcode->opcode != 0 && !strcmp (next_opcode->name, opcode->name))
 	    {
 	      opcode = next_opcode;
 	      continue;

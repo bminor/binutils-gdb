@@ -1,3 +1,11 @@
+start-sanitize-v850
+Fri Aug 22 10:45:33 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-v850.c (parse_register_list): Add support for curly
+	brace syntax.
+	(cc_names): Add "e" and "ne" conditions.
+end-sanitize-v850
+
 Thu Aug 21 11:00:36 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* app.c (do_scrub_chars): Support a double dash as starting a
