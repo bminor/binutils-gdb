@@ -296,7 +296,10 @@ coff_locate_sections PARAMS ((bfd *, asection *, PTR));
    if it is something we are interested in processing, and
    if so, stash away some access information for the section.
 
-   FIXME:  The section names should not be hardwired strings. */
+   FIXME: The section names should not be hardwired strings (what
+   should they be?  I don't think most debug formats have enough
+   special section flags to specify what kind of debug section it is
+   -kingdon). */
 
 static void
 coff_locate_sections (ignore_abfd, sectp, csip)
@@ -371,6 +374,9 @@ coff_alloc_type (index)
   return type;
 }
 
+/* Record a line number entry for line LINE at address PC.
+   FIXME:  Use record_line instead.  */
+
 static void
 coff_record_line (line, pc)
      int line;
@@ -668,7 +674,8 @@ coff_symfile_read (objfile, section_offsets, mainline)
 
   if (info->stabsect)
     {
-      /* dubious */
+      /* FIXME: dubious.  Why can't we use something normal like
+	 bfd_get_section_contents?  */
       fseek ((FILE *) abfd->iostream, abfd->where, 0);
 
       stabsize = bfd_section_size (abfd, info->stabsect);
