@@ -52,11 +52,12 @@
 #define ARM_HALFWORD    0x00000020	/* allow half word loads */
 #define ARM_THUMB       0x00000040	/* allow BX instruction  */
 #define ARM_EXT_V5	0x00000080	/* allow CLZ etc	 */
+#define ARM_EXT_V5E     0x00000200	/* "El Segundo" 	 */
 
 /* Architectures are the sum of the base and extensions */
 #define ARM_ARCH_V4	(ARM_7 | ARM_LONGMUL | ARM_HALFWORD)
 #define ARM_ARCH_V4T	(ARM_ARCH_V4 | ARM_THUMB)
-#define ARM_ARCH_V5	(ARM_ARCH_V4 | ARM_EXT_V5)
+#define ARM_ARCH_V5	(ARM_ARCH_V4 | ARM_EXT_V5 )
 #define ARM_ARCH_V5T	(ARM_ARCH_V5 | ARM_THUMB)
 
 /* Some useful combinations:  */
@@ -439,6 +440,7 @@ static void do_mrs		PARAMS ((char *, unsigned long));
 static void do_mull		PARAMS ((char *, unsigned long));
 /* ARM THUMB */				       		      
 static void do_bx               PARAMS ((char *, unsigned long));
+
 					       		      
 /* Coprocessor Instructions */		       		      
 static void do_cdp		PARAMS ((char *, unsigned long));
@@ -504,11 +506,16 @@ static bfd_reloc_code_real_type	arm_parse_reloc PARAMS ((void));
 
 #define LONGEST_INST 5
 
+
 struct asm_opcode 
 {
   CONST char *           template;	/* Basic string to match */
   unsigned long          value;		/* Basic instruction code */
-  CONST char *           comp_suffix;	/* Compulsory suffix that must follow conds */
+
+  /* Compulsory suffix that must follow conds. If "", then the
+     instruction is not conditional and must have no suffix. */
+  CONST char *           comp_suffix;	
+
   CONST struct asm_flg * flags;	        /* Bits to toggle if flag 'n' set */
   unsigned long          variants;	/* Which CPU variants this exists for */
   /* Function to call to parse args */
@@ -876,8 +883,10 @@ static CONST struct reg_entry reg_table[] =
   {NULL, 0}
 };
 
-#define BAD_ARGS 	_("Bad arguments to instruction");
-#define BAD_PC 		_("r15 not allowed here");
+#define BAD_ARGS 	_("Bad arguments to instruction")
+#define BAD_PC 		_("r15 not allowed here")
+#define BAD_FLAGS 	_("Instruction should not have flags")
+#define BAD_COND 	_("Instruction is not conditional")
 
 static struct hash_control * arm_ops_hsh = NULL;
 static struct hash_control * arm_tops_hsh = NULL;
@@ -1360,7 +1369,7 @@ s_thumb_set (equiv)
   
   THUMB_SET_FUNC (symbolP, 1);
   ARM_SET_THUMB (symbolP, 1);
-#if defined OBJ_COFF || defined OBJ_ELF
+#if defined OBJ_ELF || defined OBJ_COFF
   ARM_SET_INTERWORK (symbolP, support_interwork);
 #endif
 }
@@ -3320,13 +3329,15 @@ do_bx (str, flags)
   skip_whitespace (str);
 
   if ((reg = reg_required_here (&str, 0)) == FAIL)
-    return;
+    {
+      inst.error = BAD_ARGS;
+      return;
+    }
 
   if (reg == REG_PC)
-    as_tsktsk (_("Use of r15 in bx has undefined behaviour"));
+    inst.error = BAD_PC;
 
   end_of_line (str);
-  return;
 }
 
 static void
@@ -3486,6 +3497,10 @@ do_co_reg (str, flags)
 	    inst.error = BAD_ARGS;
 	  return;
 	}
+    }
+  if (flags)
+    {
+      inst.error = BAD_COND;
     }
 
   end_of_line (str);
@@ -4502,15 +4517,12 @@ do_t_arit (str)
 
   skip_whitespace (str);
 
-  if ((Rd = thumb_reg (&str, THUMB_REG_LO)) == FAIL)
-    return;
-
-  if (skip_past_comma (&str) == FAIL
+  if ((Rd = thumb_reg (&str, THUMB_REG_LO)) == FAIL
+      || skip_past_comma (&str) == FAIL
       || (Rs = thumb_reg (&str, THUMB_REG_LO)) == FAIL)
     {
-      if (! inst.error)
-	inst.error = BAD_ARGS;
-      return;
+    	inst.error = BAD_ARGS;
+      	return;
     }
 
   if (skip_past_comma (&str) != FAIL)
@@ -5326,7 +5338,8 @@ md_apply_fix3 (fixP, val, seg)
 	  && S_GET_SEGMENT (fixP->fx_addsy) != seg)
 	{
 	  if (target_oabi
-	      && fixP->fx_r_type == BFD_RELOC_ARM_PCREL_BRANCH)
+	      && (fixP->fx_r_type == BFD_RELOC_ARM_PCREL_BRANCH
+		))
 	    value = 0;
 	  else
 	    value += md_pcrel_from (fixP);
@@ -5523,6 +5536,7 @@ md_apply_fix3 (fixP, val, seg)
       newval = value | (newval & 0xff000000);
       md_number_to_chars (buf, newval, INSN_SIZE);
       break;
+
 
     case BFD_RELOC_THUMB_PCREL_BRANCH9: /* conditional branch */
       newval = md_chars_to_number (buf, THUMB_SIZE);
@@ -6053,6 +6067,13 @@ md_assemble (str)
       
       if (opcode)
 	{
+	  /* Check that this instruction is supported for this CPU.  */
+	  if ((opcode->variants & cpu_variant) == 0)
+	     {
+	    	as_bad (_("selected processor does not support this opcode"));
+		return;
+	     }
+
 	  inst.instruction = opcode->value;
 	  inst.size = opcode->size;
 	  (*opcode->parms)(p);
@@ -6063,6 +6084,7 @@ md_assemble (str)
   else
     {
       CONST struct asm_opcode * opcode;
+      unsigned long cond_code;
 
       inst.size = INSN_SIZE;
       /* p now points to the end of the opcode, probably white space, but we
@@ -6089,11 +6111,18 @@ md_assemble (str)
 	      inst.instruction = opcode->value;
 	      if (q == p)		/* Just a simple opcode.  */
 		{
-		  if (opcode->comp_suffix != 0)
-		    as_bad (_("Opcode `%s' must have suffix from <%s>\n"), str,
-			    opcode->comp_suffix);
+		  if (opcode->comp_suffix)
+		    {
+		       if (*opcode->comp_suffix != '\0')
+		    	 as_bad (_("Opcode `%s' must have suffix from <%s>\n"),
+			     str, opcode->comp_suffix);
+		       else
+			 /* Not a conditional instruction. */
+		         (*opcode->parms)(q, 0);
+		    }
 		  else
 		    {
+		      /* A conditional instruction with default condition. */
 		      inst.instruction |= COND_ALWAYS;
 		      (*opcode->parms)(q, 0);
 		    }
@@ -6101,7 +6130,7 @@ md_assemble (str)
 		  return;
 		}
 
-	      /* Now check for a conditional.  */
+	      /* Not just a simple opcode.  Check if extra is a conditional. */
 	      r = q;
 	      if (p - r >= 2)
 		{
@@ -6117,18 +6146,34 @@ md_assemble (str)
 			as_tsktsk (
 _("Warning: Use of the 'nv' conditional is deprecated\n"));
 
-		      inst.instruction |= cond->value;
+		      cond_code = cond->value;
 		      r += 2;
 		    }
 		  else
-		    inst.instruction |= COND_ALWAYS;
+		    cond_code = COND_ALWAYS;
 		}
 	      else
-		inst.instruction |= COND_ALWAYS;
+		cond_code = COND_ALWAYS;
+
+
+	      /* Apply the conditional, or complain it's not allowed. */
+	      if (opcode->comp_suffix && *opcode->comp_suffix == '\0')
+		{
+		   /* Instruction isn't conditional */
+		   if (cond_code != COND_ALWAYS)
+		     {
+		       as_bad (_("Opcode `%s' is unconditional\n"), str);
+		       return;
+		     }
+		}
+	      else
+		/* Instruction is conditional: set the condition into it. */
+		inst.instruction |= cond_code;	     
+
 
 	      /* If there is a compulsory suffix, it should come here, before
 		 any optional flags.  */
-	      if (opcode->comp_suffix)
+	      if (opcode->comp_suffix && *opcode->comp_suffix != '\0')
 		{
 		  CONST char *s = opcode->comp_suffix;
 
@@ -6228,7 +6273,7 @@ _("Warning: Use of the 'nv' conditional is deprecated\n"));
 	      if (regnum != FAIL)
 		insert_reg_alias (str, regnum);
 	      else
-		as_warn (_("register '%s' does not exist"), q);
+		as_warn (_("register '%s' does not exist\n"), q);
 	    }
 	  else if (regnum != FAIL)
 	    {
@@ -6265,7 +6310,7 @@ _("Warning: Use of the 'nv' conditional is deprecated\n"));
  *            -m[arm]8[10]            Arm 8 processors
  *            -m[arm]9[20][tdmi]      Arm 9 processors
  *            -mstrongarm[110[0]]     StrongARM processors
- *            -m[arm]v[2345]	      Arm architecures
+ *            -m[arm]v[2345]	      Arm architectures
  *            -mall                   All (except the ARM1)
  *    FP variants:
  *            -mfpa10, -mfpa11        FPA10 and 11 co-processor instructions
@@ -6532,6 +6577,7 @@ md_parse_option (c, arg)
 	      else
 		goto bad;
 	      break;
+
 	      
 	    case 's':
 	      if (streq (str, "strongarm")
@@ -6576,17 +6622,18 @@ md_parse_option (c, arg)
 		    default:  as_bad (_("Invalid architecture variant -m%s"), arg); break;
 		    }
 		  break;
-		  
+
 		case '5':
 		  cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_ARCH_V5;
-		  
 		  switch (*++str)
 		    {
 		    case 't': cpu_variant |= ARM_THUMB; break;
+		    case 'e': cpu_variant |= ARM_EXT_V5E; break;
 		    case 0:   break;
 		    default:  as_bad (_("Invalid architecture variant -m%s"), arg); break;
 		    }
 		  break;
+
 		  
 		default:
 		  as_bad (_("Invalid architecture variant -m%s"), arg);
