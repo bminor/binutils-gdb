@@ -95,6 +95,11 @@ int getrusage();
 #include <sys/syscall.h> /* FIXME - should not be including this one */
 #include <sys/sysctl.h>
 extern int getdirentries(int fd, char *buf, int nbytes, long *basep);
+#else
+
+/* If this is not netbsd, don't allow fstatfs or getdirentries at this time */
+#undef HAVE_FSTATFS
+#undef HAVE_GETDIRENTRIES
 #endif
 
 #if (BSD < 199306) /* here BSD as just a bug */
@@ -140,7 +145,6 @@ write_stat(unsigned_word addr,
   H2T(buf.st_nlink);
   H2T(buf.st_uid);
   H2T(buf.st_gid);
-  H2T(buf.st_rdev);
   H2T(buf.st_size);
   H2T(buf.st_atime);
   /* H2T(buf.st_spare1); */
@@ -148,8 +152,15 @@ write_stat(unsigned_word addr,
   /* H2T(buf.st_spare2); */
   H2T(buf.st_ctime);
   /* H2T(buf.st_spare3); */
+#ifdef AC_STRUCT_ST_RDEV
+  H2T(buf.st_rdev);
+#endif
+#ifdef AC_STRUCT_ST_BLKSIZE
   H2T(buf.st_blksize);
+#endif
+#ifdef AC_STRUCT_ST_BLOCKS
   H2T(buf.st_blocks);
+#endif
 #if WITH_NetBSD_HOST
   H2T(buf.st_flags);
   H2T(buf.st_gen);
@@ -158,7 +169,7 @@ write_stat(unsigned_word addr,
 }
 
   
-#if NetBSD
+#ifdef HAVE_FSTATFS
 STATIC_INLINE_EMUL_NETBSD void
 write_statfs(unsigned_word addr,
 	     struct statfs buf,
@@ -210,7 +221,7 @@ write_timezone(unsigned_word addr,
 }
 
   
-#if WITH_NetBSD_HOST
+#ifdef HAVE_GETDIRENTRIES
 STATIC_INLINE_EMUL_NETBSD void
 write_direntries(unsigned_word addr,
 		 char *buf,
@@ -428,6 +439,9 @@ do_break(os_emul_data *emul,
 }
 
 
+#ifndef HAVE_GETPID
+#define do_getpid 0
+#else
 static void
 do_getpid(os_emul_data *emul,
 	  unsigned call,
@@ -438,8 +452,11 @@ do_getpid(os_emul_data *emul,
   SYS(getpid);
   emul_write_status(processor, (int)getpid(), 0);
 }
+#endif
 
-
+#ifndef HAVE_GETUID
+#define do_getuid 0
+#else
 static void
 do_getuid(os_emul_data *emul,
 	  unsigned call,
@@ -450,8 +467,11 @@ do_getuid(os_emul_data *emul,
   SYS(getuid);
   emul_write_status(processor, (int)getuid(), 0);
 }
+#endif
 
-
+#ifndef HAVE_GETEUID
+#define do_geteuid 0
+#else
 static void
 do_geteuid(os_emul_data *emul,
 	   unsigned call,
@@ -462,8 +482,11 @@ do_geteuid(os_emul_data *emul,
   SYS(geteuid);
   emul_write_status(processor, (int)geteuid(), 0);
 }
+#endif
 
-
+#ifndef HAVE_KILL
+#define do_kill 0
+#else
 static void
 do_kill(os_emul_data *emul,
 	unsigned call,
@@ -482,8 +505,11 @@ do_kill(os_emul_data *emul,
 		  (long)cia);
   cpu_halt(processor, cia, was_signalled, sig);
 }
+#endif
 
-
+#ifndef HAVE_DUP
+#define do_dup 0
+#else
 static void
 do_dup(os_emul_data *emul,
        unsigned call,
@@ -501,8 +527,11 @@ do_dup(os_emul_data *emul,
   SYS(dup);
   emul_write_status(processor, status, err);
 }
+#endif
 
-
+#ifndef HAVE_GETEGID
+#define do_getegid 0
+#else
 static void
 do_getegid(os_emul_data *emul,
 	   unsigned call,
@@ -513,8 +542,11 @@ do_getegid(os_emul_data *emul,
   SYS(getegid);
   emul_write_status(processor, (int)getegid(), 0);
 }
+#endif
 
-
+#ifndef HAVE_GETGID
+#define do_getgid 0
+#else
 static void
 do_getgid(os_emul_data *emul,
 	  unsigned call,
@@ -525,8 +557,11 @@ do_getgid(os_emul_data *emul,
   SYS(getgid);
   emul_write_status(processor, (int)getgid(), 0);
 }
+#endif
 
-
+#ifndef HAVE_SIGPROCMASK
+#define do_sigprocmask 0
+#else
 static void
 do_sigprocmask(os_emul_data *emul,
 	       unsigned call,
@@ -545,8 +580,11 @@ do_sigprocmask(os_emul_data *emul,
   emul_write_status(processor, 0, 0);
   cpu_registers(processor)->gpr[4] = set;
 }
+#endif
 
-
+#ifndef HAVE_IOCTL
+#define do_ioctl 0
+#else
 static void
 do_ioctl(os_emul_data *emul,
 	 unsigned call,
@@ -576,8 +614,11 @@ do_ioctl(os_emul_data *emul,
   if (WITH_TRACE && ppc_trace[trace_os_emul])
     printf_filtered ("%d, 0x%x, 0x%lx", d, request, (long)argp_addr);
 }
+#endif
 
-
+#ifndef HAVE_UMASK
+#define do_umask 0
+#else
 static void
 do_umask(os_emul_data *emul,
 	 unsigned call,
@@ -593,8 +634,11 @@ do_umask(os_emul_data *emul,
   SYS(umask);
   emul_write_status(processor, umask(mask), 0);
 }
+#endif
 
-
+#ifndef HAVE_DUP2
+#define do_dup2 0
+#else
 static void
 do_dup2(os_emul_data *emul,
 	unsigned call,
@@ -613,8 +657,11 @@ do_dup2(os_emul_data *emul,
   SYS(dup2);
   emul_write_status(processor, status, err);
 }
+#endif
 
-
+#ifndef HAVE_FCNTL
+#define do_fcntl 0
+#else
 static void
 do_fcntl(os_emul_data *emul,
 	 unsigned call,
@@ -634,8 +681,11 @@ do_fcntl(os_emul_data *emul,
   status = fcntl(fd, cmd, arg);
   emul_write_status(processor, status, errno);
 }
+#endif
 
-
+#ifndef HAVE_GETTIMEOFDAY
+#define do_gettimeofday 0
+#else
 static void
 do_gettimeofday(os_emul_data *emul,
 		unsigned call,
@@ -663,7 +713,7 @@ do_gettimeofday(os_emul_data *emul,
       write_timezone(tz_addr, tz, processor, cia);
   }
 }
-
+#endif
 
 #ifndef HAVE_GETRUSAGE
 #define do_getrusage 0
@@ -694,7 +744,7 @@ do_getrusage(os_emul_data *emul,
 #endif
 
 
-#if !WITH_NetBSD_HOST
+#ifndef HAVE_FSTATFS
 #define do_fstatfs 0
 #else
 static void
@@ -722,7 +772,9 @@ do_fstatfs(os_emul_data *emul,
 }
 #endif
 
-
+#ifndef HAVE_STAT
+#define do_stat 0
+#else
 static void
 do_stat(os_emul_data *emul,
 	unsigned call,
@@ -742,8 +794,11 @@ do_stat(os_emul_data *emul,
   if (status == 0)
     write_stat(stat_buf_addr, buf, processor, cia);
 }
+#endif
 
-
+#ifndef HAVE_FSTAT
+#define do_fstat 0
+#else
 static void
 do_fstat(os_emul_data *emul,
 	 unsigned call,
@@ -758,8 +813,11 @@ do_fstat(os_emul_data *emul,
   emul_write_status(processor, fstat(fd, &buf), errno);
   write_stat(stat_buf_addr, buf, processor, cia);
 }
+#endif
 
-
+#ifndef HAVE_LSTAT
+#define do_lstat 0
+#else
 static void
 do_lstat(os_emul_data *emul,
 	 unsigned call,
@@ -776,9 +834,9 @@ do_lstat(os_emul_data *emul,
   emul_write_status(processor, stat(path, &buf), errno);
   write_stat(stat_buf_addr, buf, processor, cia);
 }
+#endif
 
-
-#if !WITH_NetBSD_HOST
+#ifndef HAVE_GETDIRENTRIES
 #define do_getdirentries 0
 #else
 static void
@@ -831,7 +889,9 @@ do___syscall(os_emul_data *emul,
 		      cia);
 }
 
-
+#ifndef HAVE_LSEEK
+#define do_lseek 0
+#else
 static void
 do_lseek(os_emul_data *emul,
 	 unsigned call,
@@ -852,7 +912,7 @@ do_lseek(os_emul_data *emul,
     emul_write_gpr64(processor, 3, status);
   }
 }
-
+#endif
 
 static void
 do___sysctl(os_emul_data *emul,

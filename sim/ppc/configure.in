@@ -438,7 +438,12 @@ AC_SUBST(sim_default_model)
 AC_SUBST(sim_model_issue)
 AC_SUBST(sim_stdio)
 
-AC_CHECK_FUNCS(getrusage)
+AC_STRUCT_ST_BLKSIZE
+AC_STRUCT_ST_BLOCKS
+AC_STRUCT_ST_RDEV
+AC_STRUCT_TIMEZONE
+
+AC_CHECK_FUNCS(dup dup2 fcntl fstat fstatfs getdirentries getegid geteuid getgid getpid getrusage gettimeofday getuid ioctl kill lseek lstat sigprocmask stat umask)
 
 AC_CHECK_HEADERS(string.h strings.h stdlib.h time.h sys/mount.h sys/types.h sys/time.h sys/times.h unistd.h sys/resource.h sys/ioctl.h)
 AC_HEADER_DIRENT

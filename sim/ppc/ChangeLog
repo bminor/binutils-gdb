@@ -1,5 +1,15 @@
 Fri May 24 10:08:10 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
+	* configure.in (AC_STRUCT_ST_{BLKSIZE,BLOCKS,RDEV}): Use these
+	macros to determine whether or not the appropriate st_<xxx> fields
+	exist in the stat structure.
+	(AC_CHECK_FUNCS): Check for all unix system calls used, except for
+	the real basic ones like open, read, write, etc.
+	* config{.in,ure}: Regenerate.
+
+	* emul_netbsd.c: Add support for missing system calls, and/or
+	missing stat fields.
+
 	* hw_pal.c (WITH_STDIO): Redefine if O_NDELAY, F_GETFL, or F_SETFL
 	are not defined.
 	(scan_hw_pal): Do not cause syntax error if O_NDELAY, F_GETFL, or
