@@ -1,3 +1,14 @@
+Wed Nov  7 20:38:14 2001  Andrew Cagney  <cagney@redhat.com>
+
+	* i386-tdep.c: Include "i386-tdep.h".
+	(XMALLOC): Define.
+	(i386_gdbarch_init): New function.
+	(_initialize_i386_tdep): Register bfd_arch_i386.
+	* config/i386/tm-i386.h (GDB_MULTI_ARCH): Define as
+ 	GDB_MULTI_ARCH_PARTIAL.
+	* i386-tdep.h: When partially multi-arch, conditionally define
+ 	all macros.
+
 Wed Nov  7 20:45:32 2001  Andrew Cagney  <cagney@redhat.com>
 
 	* i386-tdep.c (set_disassembly_flavor): Delete function.

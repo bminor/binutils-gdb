@@ -22,6 +22,8 @@
 #ifndef TM_I386_H
 #define TM_I386_H 1
 
+#define GDB_MULTI_ARCH GDB_MULTI_ARCH_PARTIAL
+
 #include "regcache.h"
 
 /* Forward declarations for prototypes.  */

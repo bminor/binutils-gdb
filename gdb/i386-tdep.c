@@ -34,8 +34,11 @@
 #include "regcache.h"
 #include "doublest.h"
 #include "value.h"
-
+#include "i386-tdep.h"
 #include "gdb_assert.h"
+
+#undef XMALLOC
+#define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
 
 /* Names of the registers.  The first 10 registers match the register
    numbering scheme used by GCC for stabs and DWARF.  */
@@ -1195,12 +1198,48 @@ gdb_print_insn_i386 (bfd_vma memaddr, disassemble_info *info)
 
 
 
+struct gdbarch *
+i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
+{
+  struct gdbarch_tdep *tdep
+  struct gdbarch *gdbarch;
+
+  /* For the moment there is only one i386 architecture.  */
+  if (arches != NULL)
+    return arches->gdbarch;
+
+  /* Allocate space for the new architecture.  */
+  tdep = XMALLOC (struct gdbarch_tdep);
+  gdbarch = gdbarch_alloc (&info, tdep);
+
+  set_gdbarch_use_generic_dummy_frames (gdbarch, 0);
+
+  /* Call dummy code.  */
+  set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
+  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 5);
+  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
+  set_gdbarch_call_dummy_p (gdbarch, 1);
+  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
+
+  set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
+  set_gdbarch_push_arguments (gdbarch, i386_push_arguments);
+
+  set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_on_stack);
+
+  /* NOTE: tm-i386nw.h and tm-i386v4.h override this.  */
+  set_gdbarch_frame_chain_valid (gdbarch, file_frame_chain_valid);
+
+  return gdbarch;
+}
+
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 void _initialize_i386_tdep (void);
 
 void
 _initialize_i386_tdep (void)
 {
+  register_gdbarch_init (bfd_arch_i386, i386_gdbarch_init);
+
   /* Initialize the table saying where each register starts in the
      register file.  */
   {
