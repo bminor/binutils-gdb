@@ -549,7 +549,7 @@ set_intel_syntax (syntax_flag)
       else if (strcmp(string, "noprefix") == 0)
 	ask_naked_reg = -1;
       else
-	as_bad (_("Bad argument to syntax directive."));
+	as_bad (_("bad argument to syntax directive."));
       *input_line_pointer = e;
     }
   demand_empty_rest_of_line ();
@@ -911,7 +911,7 @@ reloc (size, pcrel, other)
 	case 2: return BFD_RELOC_16_PCREL;
 	case 4: return BFD_RELOC_32_PCREL;
 	}
-      as_bad (_("Can not do %d byte pc-relative relocation"), size);
+      as_bad (_("can not do %d byte pc-relative relocation"), size);
     }
   else
     {
@@ -921,7 +921,7 @@ reloc (size, pcrel, other)
 	case 2: return BFD_RELOC_16;
 	case 4: return BFD_RELOC_32;
 	}
-      as_bad (_("Can not do %d byte relocation"), size);
+      as_bad (_("can not do %d byte relocation"), size);
     }
 
   return BFD_RELOC_NONE;
@@ -1466,7 +1466,7 @@ md_assemble (line)
     if (!intel_syntax
 	&& (i.types[0] & JumpAbsolute) != (t->operand_types[0] & JumpAbsolute))
       {
-	as_warn (_("Indirect %s without `*'"), t->name);
+	as_warn (_("indirect %s without `*'"), t->name);
       }
 
     if ((t->opcode_modifier & (IsPrefix|IgnoreSize)) == (IsPrefix|IgnoreSize))
@@ -1490,8 +1490,8 @@ md_assemble (line)
 	i.tm.operand_types[1] = t->operand_types[0];
       }
 
-    /* Undo UNIXWARE_COMPAT brokenness when in Intel mode.  See i386.h  */
-     if (UNIXWARE_COMPAT
+    /* Undo SYSV386_COMPAT brokenness when in Intel mode.  See i386.h  */
+     if (SYSV386_COMPAT
 	 && intel_syntax
 	 && (i.tm.base_opcode & 0xfffffde0) == 0xdce0)
        i.tm.base_opcode ^= FloatR;
@@ -2496,7 +2496,7 @@ i386_immediate (imm_start)
 
   if (i.imm_operands == MAX_IMMEDIATE_OPERANDS)
     {
-      as_bad (_("Only 1 or 2 immediate operands are allowed"));
+      as_bad (_("only 1 or 2 immediate operands are allowed"));
       return 0;
     }
 
@@ -2549,7 +2549,7 @@ i386_immediate (imm_start)
 	    len = 3;
 	  }
 	else
-	  as_bad (_("Bad reloc specifier in expression"));
+	  as_bad (_("bad reloc specifier in expression"));
 
 	/* Replace the relocation token with ' ', so that errors like
 	   foo@GOTOFF1 will be detected.  */
@@ -2567,14 +2567,14 @@ i386_immediate (imm_start)
 
   SKIP_WHITESPACE ();
   if (*input_line_pointer)
-    as_bad (_("Ignoring junk `%s' after expression"), input_line_pointer);
+    as_bad (_("ignoring junk `%s' after expression"), input_line_pointer);
 
   input_line_pointer = save_input_line_pointer;
 
   if (exp->X_op == O_absent || exp->X_op == O_big)
     {
       /* missing or bad expr becomes absolute 0 */
-      as_bad (_("Missing or invalid immediate expression `%s' taken as 0"),
+      as_bad (_("missing or invalid immediate expression `%s' taken as 0"),
 	      imm_start);
       exp->X_op = O_constant;
       exp->X_add_number = 0;
@@ -2604,9 +2604,9 @@ i386_immediate (imm_start)
 	   )
     {
 #ifdef BFD_ASSEMBLER
-      as_bad (_("Unimplemented segment %s in operand"), exp_seg->name);
+      as_bad (_("unimplemented segment %s in operand"), exp_seg->name);
 #else
-      as_bad (_("Unimplemented segment type %d in operand"), exp_seg);
+      as_bad (_("unimplemented segment type %d in operand"), exp_seg);
 #endif
       return 0;
     }
@@ -2773,7 +2773,7 @@ i386_displacement (disp_start, disp_end)
 	    len = 3;
 	  }
 	else
-	  as_bad (_("Bad reloc specifier in expression"));
+	  as_bad (_("bad reloc specifier in expression"));
 
 	/* Replace the relocation token with ' ', so that errors like
 	   foo@GOTOFF1 will be detected.  */
@@ -2807,7 +2807,7 @@ i386_displacement (disp_start, disp_end)
 
   SKIP_WHITESPACE ();
   if (*input_line_pointer)
-    as_bad (_("Ignoring junk `%s' after expression"),
+    as_bad (_("ignoring junk `%s' after expression"),
 	    input_line_pointer);
 #if GCC_ASM_O_HACK
   RESTORE_END_STRING (disp_end + 1);
@@ -2818,7 +2818,7 @@ i386_displacement (disp_start, disp_end)
   if (exp->X_op == O_absent || exp->X_op == O_big)
     {
       /* missing or bad expr becomes absolute 0 */
-      as_bad (_("Missing or invalid displacement expression `%s' taken as 0"),
+      as_bad (_("missing or invalid displacement expression `%s' taken as 0"),
 	      disp_start);
       exp->X_op = O_constant;
       exp->X_add_number = 0;
@@ -2850,9 +2850,9 @@ i386_displacement (disp_start, disp_end)
 	   && exp_seg != undefined_section)
     {
 #ifdef BFD_ASSEMBLER
-      as_bad (_("Unimplemented segment %s in operand"), exp_seg->name);
+      as_bad (_("unimplemented segment %s in operand"), exp_seg->name);
 #else
-      as_bad (_("Unimplemented segment type %d in operand"), exp_seg);
+      as_bad (_("unimplemented segment type %d in operand"), exp_seg);
 #endif
       return 0;
     }
@@ -3069,24 +3069,24 @@ i386_index_check (operand_string)
 
  tryprefix:
 #endif
-  if (flag_16bit_code ^ (i.prefix[ADDR_PREFIX] != 0) ?
+  if (flag_16bit_code ^ (i.prefix[ADDR_PREFIX] != 0)
       /* 16 bit mode checks */
-      ((i.base_reg
-	&& ((i.base_reg->reg_type & (Reg16|BaseIndex))
-	    != (Reg16|BaseIndex)))
-       || (i.index_reg
-	   && (((i.index_reg->reg_type & (Reg16|BaseIndex))
-		!= (Reg16|BaseIndex))
-	       || ! (i.base_reg
-		     && i.base_reg->reg_num < 6
-		     && i.index_reg->reg_num >= 6
-		     && i.log2_scale_factor == 0)))) :
+      ? ((i.base_reg
+	  && ((i.base_reg->reg_type & (Reg16|BaseIndex))
+	      != (Reg16|BaseIndex)))
+	 || (i.index_reg
+	     && (((i.index_reg->reg_type & (Reg16|BaseIndex))
+		  != (Reg16|BaseIndex))
+		 || ! (i.base_reg
+		       && i.base_reg->reg_num < 6
+		       && i.index_reg->reg_num >= 6
+		       && i.log2_scale_factor == 0))))
       /* 32 bit mode checks */
-      ((i.base_reg
-	&& (i.base_reg->reg_type & Reg32) == 0)
-       || (i.index_reg
-	   && ((i.index_reg->reg_type & (Reg32|BaseIndex))
-	       != (Reg32|BaseIndex)))))
+      : ((i.base_reg
+	  && (i.base_reg->reg_type & Reg32) == 0)
+	 || (i.index_reg
+	     && ((i.index_reg->reg_type & (Reg32|BaseIndex))
+		 != (Reg32|BaseIndex)))))
     {
 #if INFER_ADDR_PREFIX
       if (i.prefix[ADDR_PREFIX] == 0 && stackop_size != '\0')
@@ -3445,7 +3445,7 @@ i386_operand (operand_string)
 	}
       if (*op_string)
 	{
-	  as_bad (_("Junk `%s' after register"), op_string);
+	  as_bad (_("junk `%s' after register"), op_string);
 	  return 0;
 	}
       i.types[this_operand] |= r->reg_type & ~BaseIndex;
@@ -3462,7 +3462,7 @@ i386_operand (operand_string)
       ++op_string;
       if (i.types[this_operand] & JumpAbsolute)
 	{
-	  as_bad (_("Immediate operand illegal with absolute jump"));
+	  as_bad (_("immediate operand illegal with absolute jump"));
 	  return 0;
 	}
       if (!i386_immediate (op_string))
@@ -4404,7 +4404,7 @@ tc_gen_reloc (section, fixp)
 	  switch (fixp->fx_size)
 	    {
 	    default:
-	      as_bad (_("Can not do %d byte pc-relative relocation"),
+	      as_bad (_("can not do %d byte pc-relative relocation"),
 		      fixp->fx_size);
 	      code = BFD_RELOC_32_PCREL;
 	      break;
@@ -4418,7 +4418,7 @@ tc_gen_reloc (section, fixp)
 	  switch (fixp->fx_size)
 	    {
 	    default:
-	      as_bad (_("Can not do %d byte relocation"), fixp->fx_size);
+	      as_bad (_("can not do %d byte relocation"), fixp->fx_size);
 	      code = BFD_RELOC_32;
 	      break;
 	    case 1: code = BFD_RELOC_8;  break;
@@ -4453,7 +4453,7 @@ tc_gen_reloc (section, fixp)
   if (rel->howto == NULL)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
-		    _("Cannot represent relocation type %s"),
+		    _("cannot represent relocation type %s"),
 		    bfd_get_reloc_code_name (code));
       /* Set howto to a garbage value so that we can keep going.  */
       rel->howto = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_32);
