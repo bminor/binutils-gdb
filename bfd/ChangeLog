@@ -1,3 +1,8 @@
+2000-06-26  Kazu Hirata  <kazu@hxi.com>
+
+	* coff-h8300.c: Fix formatting.
+	* cpu-h8300.c: Likewise.
+
 2000-06-24  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elf32-arm.h (elf32_arm_final_link_relocate): Print `(local)'
