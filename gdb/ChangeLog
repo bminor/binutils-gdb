@@ -1,5 +1,8 @@
 2004-08-15  Mark Kettenis  <kettenis@gnu.org>
 
+	* infptrace.c (child_xfer_memory): Replace PTRACE_XFER_TYPE with
+	PTRACE_TYPE_RET.
+
 	* proc-why.c (proc_prettyfprint_why): Fix format string.
 
 	* solib-osf.c (osf_current_sos): Remove unsused label.

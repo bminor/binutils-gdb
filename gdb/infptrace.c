@@ -488,12 +488,12 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 {
   int i;
   /* Round starting address down to longword boundary.  */
-  CORE_ADDR addr = memaddr & -(CORE_ADDR) sizeof (PTRACE_XFER_TYPE);
+  CORE_ADDR addr = memaddr & -(CORE_ADDR) sizeof (PTRACE_TYPE_RET);
   /* Round ending address up; get number of longwords that makes.  */
-  int count = ((((memaddr + len) - addr) + sizeof (PTRACE_XFER_TYPE) - 1)
-	       / sizeof (PTRACE_XFER_TYPE));
-  int alloc = count * sizeof (PTRACE_XFER_TYPE);
-  PTRACE_XFER_TYPE *buffer;
+  int count = ((((memaddr + len) - addr) + sizeof (PTRACE_TYPE_RET) - 1)
+	       / sizeof (PTRACE_TYPE_RET));
+  int alloc = count * sizeof (PTRACE_TYPE_RET);
+  PTRACE_TYPE_RET *buffer;
   struct cleanup *old_chain = NULL;
 
 #ifdef PT_IO
@@ -530,11 +530,11 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
   /* Allocate buffer of that many longwords.  */
   if (len < GDB_MAX_ALLOCA)
     {
-      buffer = (PTRACE_XFER_TYPE *) alloca (alloc);
+      buffer = (PTRACE_TYPE_RET *) alloca (alloc);
     }
   else
     {
-      buffer = (PTRACE_XFER_TYPE *) xmalloc (alloc);
+      buffer = (PTRACE_TYPE_RET *) xmalloc (alloc);
       old_chain = make_cleanup (xfree, buffer);
     }
 
@@ -542,7 +542,7 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
     {
       /* Fill start and end extra bytes of buffer with existing memory
          data.  */
-      if (addr != memaddr || len < (int) sizeof (PTRACE_XFER_TYPE))
+      if (addr != memaddr || len < (int) sizeof (PTRACE_TYPE_RET))
 	{
 	  /* Need part of initial word -- fetch it.  */
 	  buffer[0] = ptrace (PT_READ_I, PIDGET (inferior_ptid), 
@@ -554,15 +554,15 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 	  buffer[count - 1] =
 	    ptrace (PT_READ_I, PIDGET (inferior_ptid),
 		    ((PTRACE_TYPE_ARG3)
-		     (addr + (count - 1) * sizeof (PTRACE_XFER_TYPE))), 0);
+		     (addr + (count - 1) * sizeof (PTRACE_TYPE_RET))), 0);
 	}
 
       /* Copy data to be written over corresponding part of buffer.  */
-      memcpy ((char *) buffer + (memaddr & (sizeof (PTRACE_XFER_TYPE) - 1)),
+      memcpy ((char *) buffer + (memaddr & (sizeof (PTRACE_TYPE_RET) - 1)),
 	      myaddr, len);
 
       /* Write the entire buffer.  */
-      for (i = 0; i < count; i++, addr += sizeof (PTRACE_XFER_TYPE))
+      for (i = 0; i < count; i++, addr += sizeof (PTRACE_TYPE_RET))
 	{
 	  errno = 0;
 	  ptrace (PT_WRITE_D, PIDGET (inferior_ptid), 
@@ -582,7 +582,7 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
   else
     {
       /* Read all the longwords.  */
-      for (i = 0; i < count; i++, addr += sizeof (PTRACE_XFER_TYPE))
+      for (i = 0; i < count; i++, addr += sizeof (PTRACE_TYPE_RET))
 	{
 	  errno = 0;
 	  buffer[i] = ptrace (PT_READ_I, PIDGET (inferior_ptid),
@@ -594,7 +594,7 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 
       /* Copy appropriate bytes out of the buffer.  */
       memcpy (myaddr,
-	      (char *) buffer + (memaddr & (sizeof (PTRACE_XFER_TYPE) - 1)),
+	      (char *) buffer + (memaddr & (sizeof (PTRACE_TYPE_RET) - 1)),
 	      len);
     }
 
