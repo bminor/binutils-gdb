@@ -1,3 +1,12 @@
+2003-03-04  Nick Clifton  <nickc@redhat.com>
+
+	* nm.c (main): Print a warning message if --size-sort and
+	--undefined-only are used together.
+
+2003-03-04  Elias Athanasopoulos  <elathan@phys.uoa.gr>
+
+	* nm.c (print_symbol): Remove check for undefined_only.
+	
 2003-03-03  Nick Clifton  <nickc@redhat.com>
 
 	* po/da.po: Installed latest translation.

@@ -509,6 +509,13 @@ main (argc, argv)
   if (show_version)
     print_version ("nm");
 
+  if (sort_by_size && undefined_only)
+    {
+      non_fatal (_("Using the --size-sort and --undefined-only options together"));
+      non_fatal (_("will produce no output, since undefined symbols have no size."));
+      return 0;
+    }
+
   /* OK, all options now parsed.  If no filename specified, do a.out.  */
   if (optind == argc)
     return !display_file ("a.out");
@@ -1214,29 +1221,21 @@ print_symbol (abfd, sym, ssize, archive_bfd)
      bfd_vma ssize;
      bfd *archive_bfd;
 {
+  symbol_info syminfo;
+  struct extended_symbol_info info;
+   
   PROGRESS (1);
 
   (*format->print_symbol_filename) (archive_bfd, abfd);
 
-  if (undefined_only)
-    {
-      if (bfd_is_und_section (bfd_get_section (sym)))
-	print_symname ("%s", bfd_asymbol_name (sym), abfd);
-    }
+  bfd_get_symbol_info (abfd, sym, &syminfo);
+  info.sinfo = &syminfo;
+  info.ssize = ssize;
+  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
+    info.elfinfo = (elf_symbol_type *) sym;
   else
-    {
-      symbol_info syminfo;
-      struct extended_symbol_info info;
-
-      bfd_get_symbol_info (abfd, sym, &syminfo);
-      info.sinfo = &syminfo;
-      info.ssize = ssize;
-      if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
-	info.elfinfo = (elf_symbol_type *) sym;
-      else
-	info.elfinfo = NULL;
-      (*format->print_symbol_info) (&info, abfd);
-    }
+    info.elfinfo = NULL;
+  (*format->print_symbol_info) (&info, abfd);
 
   if (line_numbers)
     {
@@ -1585,9 +1584,9 @@ print_symbol_info_sysv (info, abfd)
   if (SYM_TYPE (info) == '-')
     {
       /* A stab.  */
-      printf ("%18s|  ", SYM_STAB_NAME (info));		/* (C) Type */
-      printf (desc_format, SYM_STAB_DESC (info));	/* Size */
-      printf ("|     |");				/* Line, Section */
+      printf ("%18s|  ", SYM_STAB_NAME (info));		/* (C) Type.  */
+      printf (desc_format, SYM_STAB_DESC (info));	/* Size.  */
+      printf ("|     |");				/* Line, Section.  */
     }
   else
     {
