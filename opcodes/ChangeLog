@@ -1,3 +1,12 @@
+Wed Jun 17 17:49:23 1998  Jeffrey A Law  (law@cygnus.com)
+
+start-sanitize-am33
+	* m10300-opc.c (USP, SSP, MSP, PC, IMM4, EPSW, RN0, RM1): New
+	operands for the am33.
+	(mn10300_opcodes): Add new instructions from the am33.
+end-sanitize-am33
+	* m10300-opc.c (mn10300_opcodes): Change opcode for "syscall".
+
 Tue Jun 16 13:10:51 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* i386-dis.c (index16): Add '%' to register names.  Use ','
