@@ -1,3 +1,11 @@
+Thu Sep  2 12:34:03 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	Only build nlmconv if configured for a NetWare target.
+	* configure.in: If we have some *-*-netware* target, or are using
+	all targets, set BUILD_NLMCONV to $(NLMCONV_PROG) in Makefile.
+	* Makefile.in (PROGS): Use $(BUILD_NLMCONV) rather than
+	$(NLMCONV_PROG).
+
 Tue Aug 31 14:13:35 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* objdump.c (ARCH_all): Define ARCH_hppa too.
