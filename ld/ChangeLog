@@ -1,5 +1,7 @@
 Wed Jun 29 16:50:00 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* config/solaris2.mh (NATIVE_LIB_DIRS): Define as /usr/ccs/lib.
+
 	* lexsup.c (parse_args): Accept -Bstatic and -Bdynamic.  Do not
 	accept plain -B.
 	* ld.texinfo: -Bstatic is not ignored.
