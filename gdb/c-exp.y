@@ -120,7 +120,7 @@ static int
 parse_number PARAMS ((char *, int, int, YYSTYPE *));
 %}
 
-%type <voidval> exp exp1 type_exp start variable
+%type <voidval> exp exp1 type_exp start variable qualified_name
 %type <tval> type typebase
 %type <tvec> nonempty_typelist
 /* %type <bval> block */
@@ -257,6 +257,13 @@ exp	:	exp ARROW name
 			  write_exp_elt_opcode (STRUCTOP_PTR); }
 	;
 
+exp	:	exp ARROW qualified_name
+			{ /* exp->type::name becomes exp->*(&type::name) */
+			  /* Note: this doesn't work if name is a
+			     static member!  FIXME */
+			  write_exp_elt_opcode (UNOP_ADDR);
+			  write_exp_elt_opcode (STRUCTOP_MPTR); }
+	;
 exp	:	exp ARROW '*' exp
 			{ write_exp_elt_opcode (STRUCTOP_MPTR); }
 	;
@@ -265,6 +272,14 @@ exp	:	exp '.' name
 			{ write_exp_elt_opcode (STRUCTOP_STRUCT);
 			  write_exp_string ($3);
 			  write_exp_elt_opcode (STRUCTOP_STRUCT); }
+	;
+
+exp	:	exp '.' qualified_name
+			{ /* exp.type::name becomes exp.*(&type::name) */
+			  /* Note: this doesn't work if name is a
+			     static member!  FIXME */
+			  write_exp_elt_opcode (UNOP_ADDR);
+			  write_exp_elt_opcode (STRUCTOP_MEMBER); }
 	;
 
 exp	:	exp '.' '*' exp
@@ -549,7 +564,7 @@ variable:	block COLONCOLON name
 			  write_exp_elt_opcode (OP_VAR_VALUE); }
 	;
 
-variable:	typebase COLONCOLON name
+qualified_name:	typebase COLONCOLON name
 			{
 			  struct type *type = $1;
 			  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
@@ -565,6 +580,7 @@ variable:	typebase COLONCOLON name
 	|	typebase COLONCOLON '~' name
 			{
 			  struct type *type = $1;
+			  struct stoken tmp_token;
 			  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
 			      && TYPE_CODE (type) != TYPE_CODE_UNION)
 			    error ("`%s' is not defined as an aggregate type.",
@@ -574,12 +590,19 @@ variable:	typebase COLONCOLON name
 			    error ("invalid destructor `%s::~%s'",
 				   type_name_no_tag (type), $4.ptr);
 
+			  tmp_token.ptr = (char*) alloca ($4.length + 2);
+			  tmp_token.length = $4.length + 1;
+			  tmp_token.ptr[0] = '~';
+			  memcpy (tmp_token.ptr+1, $4.ptr, $4.length);
+			  tmp_token.ptr[tmp_token.length] = 0;
 			  write_exp_elt_opcode (OP_SCOPE);
 			  write_exp_elt_type (type);
-			  write_exp_string ($4);
+			  write_exp_string (tmp_token);
 			  write_exp_elt_opcode (OP_SCOPE);
-			  write_exp_elt_opcode (UNOP_LOGNOT);
 			}
+	;
+
+variable:	qualified_name
 	|	COLONCOLON name
 			{
 			  char *name = copy_name ($2);

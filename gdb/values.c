@@ -1101,81 +1101,6 @@ value_from_vtable_info (arg, type)
   return value_headof (arg, 0, type);
 }
 
-/* The value of a static class member does not depend
-   on its instance, only on its type.  If FIELDNO >= 0,
-   then fieldno is a valid field number and is used directly.
-   Otherwise, FIELDNAME is the name of the field we are
-   searching for.  If it is not a static field name, an
-   error is signaled.  TYPE is the type in which we look for the
-   static field member.
-
-   Return zero if we couldn't find anything; the caller may signal
-   an error in that case.  */
-
-value
-value_static_field (type, fieldname, fieldno)
-     register struct type *type;
-     char *fieldname;
-     register int fieldno;
-{
-  register value v;
-  struct symbol *sym;
-  char *phys_name;
-
-  if (fieldno < 0)
-    {
-      char **physnames;
-      struct symbol **sym_arr;
-      /* Look for static field.  */
-      int i;
-      for (i = TYPE_NFIELDS (type) - 1; i >= TYPE_N_BASECLASSES (type); i--)
-	if (! strcmp (TYPE_FIELD_NAME (type, i), fieldname))
-	  {
-	    if (TYPE_FIELD_STATIC (type, i))
-	      {
-		fieldno = i;
-		goto found;
-	      }
-	    else
-	      error ("field `%s' is not static", fieldname);
-	  }
-      for (; i > 0; i--)
-	{
-	  v = value_static_field (TYPE_BASECLASS (type, i), fieldname, -1);
-	  if (v != 0)
-	    return v;
-	}
-
-      sym_arr = (struct symbol **)
-	  alloca(TYPE_NFN_FIELDS_TOTAL (type) * sizeof(struct symbol*));
-      physnames = (char **)
-	  alloca (TYPE_NFN_FIELDS_TOTAL (type) * sizeof(char*));
-      /* Note: This does duplicate work, since find_methods does a
-	 recursive search *and* so does value_static_field.  FIXME */
-      i = find_methods (type, fieldname, physnames, sym_arr);
-      if (i > 1)
-	error ("Cannot get value of overloaded method \"%s\"", fieldname);
-      else if (i)
-	{
-	  struct symbol *sym = sym_arr[0];
-	  value val = read_var_value (sym, (FRAME) 0);
-	  if (val == 0)
-	     error ("Address of method \"%s\" is unknown (possibly inlined).",
-		    fieldname);
-	  return val;
-        }
-      error("there is no field named %s", fieldname);
-    }
-
- found:
-  phys_name = TYPE_FIELD_STATIC_PHYSNAME (type, fieldno);
-  sym = lookup_symbol (phys_name, 0, VAR_NAMESPACE, 0, NULL);
-  if (! sym) error ("Internal error: could not find physical static variable named %s", phys_name);
-
-  type = TYPE_FIELD_TYPE (type, fieldno);
-  return value_at (type, (CORE_ADDR)SYMBOL_BLOCK_VALUE (sym));
-}
-
 /* Compute the address of the baseclass which is
    the INDEXth baseclass of class TYPE.  The TYPE base
    of the object is at VALADDR.
@@ -1343,7 +1268,8 @@ value_from_longest (type, num)
   /* FIXME, we assume that pointers have the same form and byte order as
      integers, and that all pointers have the same form.  */
   if (code == TYPE_CODE_INT  || code == TYPE_CODE_ENUM || 
-      code == TYPE_CODE_CHAR || code == TYPE_CODE_PTR)
+      code == TYPE_CODE_CHAR || code == TYPE_CODE_PTR ||
+      code == TYPE_CODE_REF)
     {
       if (len == sizeof (char))
 	* (char *) VALUE_CONTENTS_RAW (val) = num;

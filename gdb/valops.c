@@ -17,9 +17,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#include <stdio.h>
 #include "defs.h"
 #include "symtab.h"
+#include "gdbtypes.h"
 #include "value.h"
 #include "frame.h"
 #include "inferior.h"
@@ -29,7 +29,26 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <errno.h>
 
 /* Local functions.  */
-static value search_struct_field ();
+
+static CORE_ADDR
+find_function_addr PARAMS ((value, struct type **));
+
+static CORE_ADDR
+value_push PARAMS ((CORE_ADDR, value));
+
+static CORE_ADDR
+value_arg_push PARAMS ((CORE_ADDR, value));
+
+static value
+search_struct_field PARAMS ((char *, value, int, struct type *, int));
+
+static value
+search_struct_method PARAMS ((char *, value, value *, int, int *,
+			      struct type *));
+
+static int
+check_field_in PARAMS ((struct type *, const char *));
+
 
 /* Cast value ARG2 to type TYPE and return as a value.
    More general than a C cast: accepts any two types of the same length,
@@ -238,7 +257,7 @@ value_assign (toval, fromval)
 	{
 	  int v;		/* FIXME, this won't work for large bitfields */
 	  read_memory (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
-		       &v, sizeof v);
+		       (char *) &v, sizeof v);
 	  modify_field ((char *) &v, (int) value_as_long (fromval),
 			VALUE_BITPOS (toval), VALUE_BITSIZE (toval));
 	  write_memory (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
@@ -450,7 +469,6 @@ value
 value_addr (arg1)
      value arg1;
 {
-  extern value value_copy ();
   struct type *type = VALUE_TYPE (arg1);
   if (TYPE_CODE (type) == TYPE_CODE_REF)
     {
@@ -543,7 +561,7 @@ push_bytes (sp, buffer, len)
 
 /* Push onto the stack the specified value VALUE.  */
 
-CORE_ADDR
+static CORE_ADDR
 value_push (sp, arg)
      register CORE_ADDR sp;
      value arg;
@@ -588,7 +606,7 @@ value_arg_coerce (arg)
 /* Push the value ARG, first coercing it as an argument
    to a C function.  */
 
-CORE_ADDR
+static CORE_ADDR
 value_arg_push (sp, arg)
      register CORE_ADDR sp;
      value arg;
@@ -599,7 +617,7 @@ value_arg_push (sp, arg)
 /* Determine a function's address and its return type from its value. 
    Calls error() if the function is not valid for calling.  */
 
-CORE_ADDR
+static CORE_ADDR
 find_function_addr (function, retval_type)
      value function;
      struct type **retval_type;
@@ -941,13 +959,13 @@ value_string (ptr, len)
     }
   else
     {
-      register int j;
-      j = lookup_misc_func ("malloc");
-      if (j >= 0)
-	val = value_from_longest (
-		lookup_pointer_type (lookup_function_type (
-		  		      lookup_pointer_type (builtin_type_char))),
-			       (LONGEST) misc_function_vector[j].address);
+      struct minimal_symbol *msymbol;
+      msymbol = lookup_minimal_symbol ("malloc", (struct objfile *) NULL);
+      if (msymbol != NULL)
+	val =
+	  value_from_longest (lookup_pointer_type (lookup_function_type (
+				lookup_pointer_type (builtin_type_char))),
+			      (LONGEST) msymbol -> address);
       else
 	error ("String constants require the program to have a function \"malloc\".");
     }
@@ -988,9 +1006,20 @@ search_struct_field (name, arg1, offset, type, looking_for_baseclass)
 
 	if (t_field_name && !strcmp (t_field_name, name))
 	  {
-	    value v = (TYPE_FIELD_STATIC (type, i)
-		       ? value_static_field (type, name, i)
-		       : value_primitive_field (arg1, offset, i, type));
+	    value v;
+	    if (TYPE_FIELD_STATIC (type, i))
+	      {
+		char *phys_name = TYPE_FIELD_STATIC_PHYSNAME (type, i);
+		struct symbol *sym =
+		  lookup_symbol (phys_name, 0, VAR_NAMESPACE, 0, NULL);
+		if (! sym) error (
+	  "Internal error: could not find physical static variable named %s",
+				  phys_name);
+		v = value_at (TYPE_FIELD_TYPE (type, i),
+			      (CORE_ADDR)SYMBOL_BLOCK_VALUE (sym));
+	      }
+	    else
+	      v = value_primitive_field (arg1, offset, i, type);
 	    if (v == 0)
 	      error("there is no field named %s", name);
 	    return v;
@@ -1016,10 +1045,8 @@ search_struct_field (name, arg1, offset, type, looking_for_baseclass)
 	    return v2;
 	  v = search_struct_field (name, v2, 0, TYPE_BASECLASS (type, i),
 				   looking_for_baseclass);
-	  if (v) return v;
-	  else continue;
 	}
-      if (found_baseclass)
+      else if (found_baseclass)
 	v = value_primitive_field (arg1, offset, i, type);
       else
 	v = search_struct_field (name, arg1,
@@ -1076,23 +1103,23 @@ search_struct_method (name, arg1, args, offset, static_memfuncp, type)
 
   for (i = TYPE_N_BASECLASSES (type) - 1; i >= 0; i--)
     {
-      value v;
+      value v, v2;
+      int base_offset;
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
-	  value v2;
 	  baseclass_addr (type, i, VALUE_CONTENTS (arg1) + offset,
 			  &v2, (int *)NULL);
 	  if (v2 == 0)
 	    error ("virtual baseclass botch");
-	  v = search_struct_method (name, v2, args, 0,
-				    static_memfuncp, TYPE_BASECLASS (type, i));
-	  if (v) return v;
-	  else continue;
+	  base_offset = 0;
 	}
-
-      v = search_struct_method (name, arg1, args,
-				TYPE_BASECLASS_BITPOS (type, i) / 8,
+      else
+	{
+	  v2 = arg1;
+	  base_offset = TYPE_BASECLASS_BITPOS (type, i) / 8;
+        }
+      v = search_struct_method (name, v2, args, base_offset,
 				static_memfuncp, TYPE_BASECLASS (type, i));
       if (v) return v;
     }
@@ -1234,7 +1261,7 @@ destructor_name_p (name, type)
 static int
 check_field_in (type, name)
      register struct type *type;
-     char *name;
+     const char *name;
 {
   register int i;
 
@@ -1272,7 +1299,7 @@ check_field_in (type, name)
 
 int
 check_field (arg1, name)
-     register const value arg1;
+     register value arg1;
      const char *name;
 {
   register struct type *t;
@@ -1296,70 +1323,56 @@ check_field (arg1, name)
   return check_field_in (t, name);
 }
 
-/* C++: Given an aggregate type DOMAIN, and a member name NAME,
+/* C++: Given an aggregate type CURTYPE, and a member name NAME,
    return the address of this member as a "pointer to member"
    type.  If INTYPE is non-null, then it will be the type
    of the member we are looking for.  This will help us resolve
-   "pointers to member functions".  This function is only used
-   to resolve user expressions of the form "&class::member".  */
+   "pointers to member functions".  This function is used
+   to resolve user expressions of the form "DOMAIN::NAME".  */
 
 value
-value_struct_elt_for_address (domain, intype, name)
-     struct type *domain, *intype;
+value_struct_elt_for_reference (domain, curtype, name, intype)
+     struct type *domain, *curtype, *intype;
      char *name;
 {
-  register struct type *t = domain;
+  register struct type *t = curtype;
   register int i;
   value v;
 
-  struct type *baseclass;
-
   if (   TYPE_CODE (t) != TYPE_CODE_STRUCT
       && TYPE_CODE (t) != TYPE_CODE_UNION)
-    error ("Internal error: non-aggregate type to value_struct_elt_for_address");
+    error ("Internal error: non-aggregate type to value_struct_elt_for_reference");
 
-  baseclass = t;
-
-  while (t)
+  for (i = TYPE_NFIELDS (t) - 1; i >= TYPE_N_BASECLASSES (t); i--)
     {
-      for (i = TYPE_NFIELDS (t) - 1; i >= TYPE_N_BASECLASSES (t); i--)
+      char *t_field_name = TYPE_FIELD_NAME (t, i);
+      
+      if (t_field_name && !strcmp (t_field_name, name))
 	{
-	  char *t_field_name = TYPE_FIELD_NAME (t, i);
-
-	  if (t_field_name && !strcmp (t_field_name, name))
+	  if (TYPE_FIELD_STATIC (t, i))
 	    {
-	      if (TYPE_FIELD_STATIC (t, i))
-		{
-		  char *phys_name = TYPE_FIELD_STATIC_PHYSNAME (t, i);
-		  struct symbol *sym =
-		      lookup_symbol (phys_name, 0, VAR_NAMESPACE, 0, NULL);
-		  if (! sym)
-		    error (
-	"Internal error: could not find physical static variable named %s",
-			   phys_name);
-		  return value_from_longest (
-			lookup_pointer_type (TYPE_FIELD_TYPE (t, i)),
-				      (LONGEST)SYMBOL_BLOCK_VALUE (sym));
-	        }
-	      if (TYPE_FIELD_PACKED (t, i))
-		error ("pointers to bitfield members not allowed");
-
-	      return value_from_longest (
-		    lookup_pointer_type (
-		      lookup_member_type (TYPE_FIELD_TYPE (t, i), baseclass)),
-				   (LONGEST) (TYPE_FIELD_BITPOS (t, i) >> 3));
+	      char *phys_name = TYPE_FIELD_STATIC_PHYSNAME (t, i);
+	      struct symbol *sym =
+		lookup_symbol (phys_name, 0, VAR_NAMESPACE, 0, NULL);
+	      if (! sym)
+		error (
+	    "Internal error: could not find physical static variable named %s",
+		       phys_name);
+	      return value_at (SYMBOL_TYPE (sym),
+			       (CORE_ADDR)SYMBOL_BLOCK_VALUE (sym));
 	    }
+	  if (TYPE_FIELD_PACKED (t, i))
+	    error ("pointers to bitfield members not allowed");
+	  
+	  return value_from_longest
+	    (lookup_reference_type (lookup_member_type (TYPE_FIELD_TYPE (t, i),
+							domain)),
+	     (LONGEST) (TYPE_FIELD_BITPOS (t, i) >> 3));
 	}
-
-      if (TYPE_N_BASECLASSES (t) == 0)
-	break;
-
-      t = TYPE_BASECLASS (t, 0);
     }
 
   /* C++: If it was not found as a data field, then try to
      return it as a pointer to a method.  */
-  t = baseclass;
 
   /* Destructors are a special case.  */
   if (destructor_name_p (name, t))
@@ -1371,55 +1384,59 @@ value_struct_elt_for_address (domain, intype, name)
   while (intype && TYPE_CODE (intype) == TYPE_CODE_PTR)
     intype = TYPE_TARGET_TYPE (intype);
 
-  while (t)
+  for (i = TYPE_NFN_FIELDS (t) - 1; i >= 0; --i)
     {
-      for (i = TYPE_NFN_FIELDS (t) - 1; i >= 0; --i)
+      if (!strcmp (TYPE_FN_FIELDLIST_NAME (t, i), name))
 	{
-	  if (!strcmp (TYPE_FN_FIELDLIST_NAME (t, i), name))
+	  int j = TYPE_FN_FIELDLIST_LENGTH (t, i);
+	  struct fn_field *f = TYPE_FN_FIELDLIST1 (t, i);
+	  
+	  if (intype == 0 && j > 1)
+	    error ("non-unique member `%s' requires type instantiation", name);
+	  if (intype)
 	    {
-	      int j = TYPE_FN_FIELDLIST_LENGTH (t, i);
-	      struct fn_field *f = TYPE_FN_FIELDLIST1 (t, i);
-
-	      if (intype == 0 && j > 1)
-		error ("non-unique member `%s' requires type instantiation", name);
-	      if (intype)
-		{
-		  while (j--)
-		    if (TYPE_FN_FIELD_TYPE (f, j) == intype)
-		      break;
-		  if (j < 0)
-		    error ("no member function matches that type instantiation");
-		}
-	      else
-		j = 0;
-
-	      if (TYPE_FN_FIELD_STUB (f, j))
-	        check_stub_method (t, i, j);
-	      if (TYPE_FN_FIELD_VIRTUAL_P (f, j))
-		{
-		  return value_from_longest (
-	                lookup_pointer_type (
-			  lookup_member_type (TYPE_FN_FIELD_TYPE (f, j),
-					      baseclass)),
-				       (LONGEST) TYPE_FN_FIELD_VOFFSET (f, j));
-		}
-	      else
-		{
-		  struct symbol *s = lookup_symbol (TYPE_FN_FIELD_PHYSNAME (f, j),
-						    0, VAR_NAMESPACE, 0, NULL);
-		  v = locate_var_value (s, 0);
-	          VALUE_TYPE (v) = lookup_pointer_type (
-			lookup_member_type (TYPE_FN_FIELD_TYPE (f, j),
-					    baseclass));
-	          return v;
+	      while (j--)
+		if (TYPE_FN_FIELD_TYPE (f, j) == intype)
+		  break;
+	      if (j < 0)
+		error ("no member function matches that type instantiation");
+	    }
+	  else
+	    j = 0;
+	  
+	  if (TYPE_FN_FIELD_STUB (f, j))
+	    check_stub_method (t, i, j);
+	  if (TYPE_FN_FIELD_VIRTUAL_P (f, j))
+	    {
+	      return value_from_longest
+		(lookup_reference_type
+		 (lookup_member_type (TYPE_FN_FIELD_TYPE (f, j),
+				      domain)),
+		 (LONGEST) TYPE_FN_FIELD_VOFFSET (f, j));
+	    }
+	  else
+	    {
+	      struct symbol *s = lookup_symbol (TYPE_FN_FIELD_PHYSNAME (f, j),
+						0, VAR_NAMESPACE, 0, NULL);
+	      v = read_var_value (s, 0);
+#if 0
+	      VALUE_TYPE (v) = lookup_reference_type
+		(lookup_member_type (TYPE_FN_FIELD_TYPE (f, j),
+				     domain));
+#endif
+	      return v;
 		}
 	    }
 	}
 
-      if (TYPE_N_BASECLASSES (t) == 0)
-	break;
-
-      t = TYPE_BASECLASS (t, 0);
+  for (i = TYPE_N_BASECLASSES (t) - 1; i >= 0; i--)
+    {
+      v = value_struct_elt_for_reference (domain,
+					  TYPE_BASECLASS (t, i),
+					  name,
+					  intype);
+      if (v)
+	return v;
     }
   return 0;
 }

@@ -17,15 +17,45 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#include <stdio.h>
 #include "defs.h"
 #include "symtab.h"
+#include "gdbtypes.h"
 #include "value.h"
 #include "expression.h"
 #include "target.h"
 #include "frame.h"
 
-#define	NULL_TYPE	((struct type *)0)
+/* Values of NOSIDE argument to eval_subexp.  */
+enum noside
+{ EVAL_NORMAL,
+  EVAL_SKIP,			/* Only effect is to increment pos.  */
+  EVAL_AVOID_SIDE_EFFECTS	/* Don't modify any variables or
+				   call any functions.  The value
+				   returned will have the correct
+				   type, and will have an
+				   approximately correct lvalue
+				   type (inaccuracy: anything that is
+				   listed as being in a register in
+				   the function in which it was
+				   declared will be lval_register).  */
+};
+
+/* Prototypes for local functions. */
+
+static value
+evaluate_subexp_for_sizeof PARAMS ((struct expression *, int *));
+
+static value
+evaluate_subexp_with_coercion PARAMS ((struct expression *, int *,
+				       enum noside));
+
+static value
+evaluate_subexp_for_address PARAMS ((struct expression *, int *,
+				     enum noside));
+
+static value
+evaluate_subexp PARAMS ((struct type *, struct expression *, int *,
+			 enum noside));
 
 
 /* Parse the string EXP as a C expression, evaluate it,
@@ -37,8 +67,8 @@ parse_and_eval_address (exp)
 {
   struct expression *expr = parse_expression (exp);
   register CORE_ADDR addr;
-  register struct cleanup *old_chain
-    = make_cleanup (free_current_contents, &expr);
+  register struct cleanup *old_chain = 
+      make_cleanup (free_current_contents, &expr);
 
   addr = value_as_pointer (evaluate_expression (expr));
   do_cleanups (old_chain);
@@ -54,8 +84,8 @@ parse_and_eval_address_1 (expptr)
 {
   struct expression *expr = parse_exp_1 (expptr, (struct block *)0, 0);
   register CORE_ADDR addr;
-  register struct cleanup *old_chain
-    = make_cleanup (free_current_contents, &expr);
+  register struct cleanup *old_chain =
+      make_cleanup (free_current_contents, &expr);
 
   addr = value_as_pointer (evaluate_expression (expr));
   do_cleanups (old_chain);
@@ -104,21 +134,6 @@ static value evaluate_subexp_for_address ();
 static value evaluate_subexp_for_sizeof ();
 static value evaluate_subexp_with_coercion ();
 
-/* Values of NOSIDE argument to eval_subexp.  */
-enum noside
-{ EVAL_NORMAL,
-  EVAL_SKIP,			/* Only effect is to increment pos.  */
-  EVAL_AVOID_SIDE_EFFECTS	/* Don't modify any variables or
-				   call any functions.  The value
-				   returned will have the correct
-				   type, and will have an
-				   approximately correct lvalue
-				   type (inaccuracy: anything that is
-				   listed as being in a register in
-				   the function in which it was
-				   declared will be lval_register).  */
-};
-
 value
 evaluate_expression (exp)
      struct expression *exp;
@@ -149,6 +164,7 @@ evaluate_subexp (expect_type, exp, pos, noside)
   int tem;
   register int pc, pc2, oldpos;
   register value arg1, arg2, arg3;
+  struct type *type;
   int nargs;
   value *argvec;
 
@@ -161,8 +177,10 @@ evaluate_subexp (expect_type, exp, pos, noside)
       tem = strlen (&exp->elts[pc + 2].string);
       (*pos) += 3 + ((tem + sizeof (union exp_element))
 		     / sizeof (union exp_element));
-      arg1 = value_static_field (exp->elts[pc + 1].type,
-				 &exp->elts[pc + 2].string, -1);
+      arg1 = value_struct_elt_for_reference (exp->elts[pc + 1].type,
+					     exp->elts[pc + 1].type,
+					     &exp->elts[pc + 2].string,
+					     expect_type);
       if (arg1 == NULL)
 	error ("There is no field named %s", &exp->elts[pc + 2].string);
       return arg1;
@@ -448,35 +466,28 @@ evaluate_subexp (expect_type, exp, pos, noside)
 
     case STRUCTOP_MEMBER:
       arg1 = evaluate_subexp_for_address (exp, pos, noside);
-      arg2 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
-      if (noside == EVAL_SKIP)
-	goto nosideret;
-      /* Now, convert these values to an address.  */
-      if (TYPE_CODE (VALUE_TYPE (arg2)) != TYPE_CODE_PTR
-	  || ((TYPE_CODE (TYPE_TARGET_TYPE (VALUE_TYPE (arg2)))
-	       != TYPE_CODE_MEMBER)
-	      && (TYPE_CODE (TYPE_TARGET_TYPE (VALUE_TYPE (arg2)))
-		  != TYPE_CODE_METHOD)))
-	error ("non-pointer-to-member value used in pointer-to-member construct");
-      arg3 = value_from_longest (
-	lookup_pointer_type (TYPE_TARGET_TYPE (TYPE_TARGET_TYPE (VALUE_TYPE (arg2)))),
-			      value_as_long (arg1) + value_as_long (arg2));
-      return value_ind (arg3);
-
+      goto handle_pointer_to_member;
     case STRUCTOP_MPTR:
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+    handle_pointer_to_member:
       arg2 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
+      if (TYPE_CODE (VALUE_TYPE (arg2)) != TYPE_CODE_PTR)
+	goto bad_pointer_to_member;
+      type = TYPE_TARGET_TYPE (VALUE_TYPE (arg2));
+      if (TYPE_CODE (type) == TYPE_CODE_METHOD)
+	error ("not implemented: pointer-to-method in pointer-to-member construct");
+      if (TYPE_CODE (type) != TYPE_CODE_MEMBER)
+	goto bad_pointer_to_member;
       /* Now, convert these values to an address.  */
-      if (TYPE_CODE (VALUE_TYPE (arg2)) != TYPE_CODE_PTR
-	  || (TYPE_CODE (TYPE_TARGET_TYPE (VALUE_TYPE (arg2))) != TYPE_CODE_MEMBER
-	      && TYPE_CODE (TYPE_TARGET_TYPE (VALUE_TYPE (arg2))) != TYPE_CODE_METHOD))
-	error ("non-pointer-to-member value used in pointer-to-member construct");
-      arg3 = value_from_longest (
-	lookup_pointer_type (TYPE_TARGET_TYPE (TYPE_TARGET_TYPE (VALUE_TYPE (arg2)))),
-			      value_as_long (arg1) + value_as_long (arg2));
+      arg1 = value_cast (lookup_pointer_type (TYPE_DOMAIN_TYPE (type)),
+			 arg1);
+      arg3 = value_from_longest (lookup_pointer_type (TYPE_TARGET_TYPE (type)),
+				 value_as_long (arg1) + value_as_long (arg2));
       return value_ind (arg3);
+    bad_pointer_to_member:
+      error("non-pointer-to-member value used in pointer-to-member construct");
 
     case BINOP_ASSIGN:
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
@@ -732,10 +743,6 @@ evaluate_subexp (expect_type, exp, pos, noside)
       /* C++: check for and handle destructor names.  */
       op = exp->elts[*pos].opcode;
 
-      /* FIXME-tiemann: this is a cop-out.  */
-      if (op == OP_SCOPE)
-	error ("destructor in eval");
-
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
@@ -795,19 +802,7 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	  goto nosideret;
 	}
 
-      if (op == OP_SCOPE)
-	{
-	  char *name = &exp->elts[pc+3].string;
-	  int temm = strlen (name);
-	  struct type *domain = exp->elts[pc+2].type;
-	  (*pos) += 2 + (temm + sizeof (union exp_element)) / sizeof (union exp_element);
-	  arg1 = value_struct_elt_for_address (domain, expect_type, name);
-	  if (arg1)
-	    return arg1;
-	  error ("no field `%s' in structure", name);
-	}
-      else
-	return evaluate_subexp_for_address (exp, pos, noside);
+      return evaluate_subexp_for_address (exp, pos, noside);
 
     case UNOP_SIZEOF:
       if (noside == EVAL_SKIP)

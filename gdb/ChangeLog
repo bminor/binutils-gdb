@@ -1,3 +1,35 @@
+Thu Mar 19 18:49:45 1992  Per Bothner  (bothner@cygnus.com)
+
+	More C++ improvements (pointers to members, qualified names).
+	* c-exp.y:  Support exp.type::name and exp->type::name
+	syntaxes.  (Unfortunately, doesn't work for static members.)
+	* c-exp.y, eval.c:   Make type::~type work better.
+	* eval.c (evaluate_subexp: OP_SCOPE):  Replace use of
+	value_static_field by value_struct_elt_for_reference.
+	* eval.c (evaluate_subexp):  Merge code for STRUCTOP_MEMBER
+	and STRUCTOP_MPTR; cast arg1 to domain-type of arg2.
+	* eval.c (evaluate_subexp):  Remove special case for UNOP_ADDR
+	for OP_SCOPE operand; no point in it now that we use lazy
+	reading of values, and use "reference to member" objects.
+	* gdbtypes.h:  Clarify comment.
+	* valops.c:  Change value_struct_elt_for_address to return
+	a reference (or variable), rather than a pointer.  Change
+	the name to value_struct_elt_for_reference to reflect this.
+	Returning a reference instead of a address provides a
+	generalization, since we can use the routine for both
+	class::name as well as &class::name.
+	Also, recurse to handle multiple inheritance properly.
+	* valprint.c:  Moved code to print pointer-to-members
+	to new function point_class_member.  This allows a
+	"reference-to-member" to be printed using the same code.
+	* valprint.c (type_print_varspec_prefix):  Avoid printing
+	"struct " for domains of class-member types.
+	* valops.c (search_struct_field):  Inline code for simplified
+	version of value_static_field (which can then be deleted).
+	* value.h:  Rename value_struct_elt_for_address to
+	value_struct_elt_for_reference.  Delete value_static_field.
+	* values.c:  Remove no longer used function value_static_field.
+
 Thu Mar 19 13:54:11 1992  Fred Fish  (fnf@cygnus.com)
 
 	* coffread.c, mipsread.c, xcoffread.c, coffread.c, dbxread.c,
