@@ -95,7 +95,7 @@ chill_printstr (stream, string, length, force_ellipses)
 
   if (length == 0)
     {
-      chill_printchar ('\0', stream);
+      fputs_filtered ("\"\"", stream);
       return;
     }
 

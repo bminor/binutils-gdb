@@ -1,3 +1,8 @@
+Fri Jan 21 19:10:44 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* ch-exp.y (match_string_literal):  Allow a zero-length string.
+	* ch-lang.c (chill_printstr):  Don't print zero-length string funny.
+
 Sat Jan 22 17:08:48 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* i386aix-nat.c (i386_float_info): Reverse order of registers before

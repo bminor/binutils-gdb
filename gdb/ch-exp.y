@@ -1335,7 +1335,7 @@ match_float_literal ()
   return (0);
 }
 
-/* Recognize a string literal.  A string literal is a nonzero sequence
+/* Recognize a string literal.  A string literal is a sequence
    of characters enclosed in matching single or double quotes, except that
    a single character inside single quotes is a character literal, which
    we reject as a string literal.  To embed the terminator character inside
@@ -1363,7 +1363,6 @@ match_string_literal ()
       tempbuf[tempbufindex++] = *tokptr;
     }
   if (*tokptr == '\0'					/* no terminator */
-      || tempbufindex == 0				/* no string */
       || (tempbufindex == 1 && *tokptr == '\''))	/* char literal */
     {
       return (0);
@@ -1806,7 +1805,7 @@ yylex ()
       {
 	case '\'':
 	case '\"':
-	  /* First try to match a string literal, which is any nonzero
+	  /* First try to match a string literal, which is any
 	     sequence of characters enclosed in matching single or double
 	     quotes, except that a single character inside single quotes
 	     is a character literal, so we have to catch that case also. */
