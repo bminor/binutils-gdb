@@ -1,5 +1,7 @@
 Fri Aug 30 10:33:49 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* simops.c: Fix "not1" and "set1".
+
 	* simops.c: Don't forget to initialize temp for
 	"ld.h" and "ld.w"
 

@@ -1320,7 +1320,7 @@ OP_7C0 ()
   State.sregs[5] &= ~PSW_Z;
   if ((temp & (1 << op1)) == 0)
     State.sregs[5] |= PSW_Z;
-  temp |= ~(1 << op1);
+  temp |= (1 << op1);
   put_byte (State.mem + op0 + op2, temp);
 }
 
@@ -1340,7 +1340,7 @@ OP_47C0 ()
   State.sregs[5] &= ~PSW_Z;
   if ((temp & (1 << op1)) == 0)
     State.sregs[5] |= PSW_Z;
-  temp ^= ~(1 << op1);
+  temp ^= (1 << op1);
   put_byte (State.mem + op0 + op2, temp);
 }
 
