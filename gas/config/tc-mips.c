@@ -1771,6 +1771,26 @@ reg_needs_delay (unsigned int reg)
   return 0;
 }
 
+/* Move all labels in insn_labels to the current insertion point.  */
+
+static void
+mips_move_labels (void)
+{
+  struct insn_label_list *l;
+  valueT val;
+
+  for (l = insn_labels; l != NULL; l = l->next)
+    {
+      assert (S_GET_SEGMENT (l->label) == now_seg);
+      symbol_set_frag (l->label, frag_now);
+      val = (valueT) frag_now_fix ();
+      /* mips16 text labels are stored as odd.  */
+      if (mips_opts.mips16)
+	++val;
+      S_SET_VALUE (l->label, val);
+    }
+}
+
 /* Mark instruction labels in mips16 mode.  This permits the linker to
    handle them specially, such as generating jalx instructions when
    needed.  We also make them odd for the duration of the assembly, in
@@ -2098,7 +2118,6 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	  fragS *old_frag;
 	  unsigned long old_frag_offset;
 	  int i;
-	  struct insn_label_list *l;
 
 	  old_frag = frag_now;
 	  old_frag_offset = frag_now_fix ();
@@ -2120,18 +2139,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	      frag_grow (40);
 	    }
 
-	  for (l = insn_labels; l != NULL; l = l->next)
-	    {
-	      valueT val;
-
-	      assert (S_GET_SEGMENT (l->label) == now_seg);
-	      symbol_set_frag (l->label, frag_now);
-	      val = (valueT) frag_now_fix ();
-	      /* mips16 text labels are stored as odd.  */
-	      if (mips_opts.mips16)
-		++val;
-	      S_SET_VALUE (l->label, val);
-	    }
+	  mips_move_labels ();
 
 #ifndef NO_ECOFF_DEBUGGING
 	  if (ECOFF_DEBUGGING)
@@ -2719,8 +2727,6 @@ mips_emit_delays (bfd_boolean insns)
       int nops = nops_for_insn (history, NULL);
       if (nops > 0)
 	{
-	  struct insn_label_list *l;
-
 	  if (insns && mips_optimize != 0)
 	    {
 	      /* Record the frag which holds the nop instructions, so
@@ -2743,18 +2749,7 @@ mips_emit_delays (bfd_boolean insns)
 	      frag_new (0);
 	    }
 
-	  for (l = insn_labels; l != NULL; l = l->next)
-	    {
-	      valueT val;
-
-	      assert (S_GET_SEGMENT (l->label) == now_seg);
-	      symbol_set_frag (l->label, frag_now);
-	      val = (valueT) frag_now_fix ();
-	      /* mips16 text labels are stored as odd.  */
-	      if (mips_opts.mips16)
-		++val;
-	      S_SET_VALUE (l->label, val);
-	    }
+	  mips_move_labels ();
 	}
     }
 
