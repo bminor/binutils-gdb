@@ -1,3 +1,8 @@
+2002-05-13  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* config.bfd (shle-*-netbsdelf*): Add target which includes
+	sh64 support.
+
 2002-05-13  David Edelsohn  <edelsohn@gnu.org>
 
 	* configure.in: Revert 2002-04-07.  Instead, auto-configure
