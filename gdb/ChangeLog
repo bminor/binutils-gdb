@@ -1,3 +1,15 @@
+2002-10-02  Elena Zannoni  <ezannoni@redhat.com>
+ 
+	* inferior.h (registers_info, stepi_command, nexti_command,
+	continue_command, interrupt_target_command): Export from infcmd.c.
+	* frame.h (args_info, selected_frame_level_changed_hook,
+	return_command): Export from stack.c.
+	* v850ice.c (stepi_command, nexti_command, continue_command): use
+	prototypes from inferior.h.
+	* tracepoint.c (registers_info, args_info, locals_info): Use
+	prototypes from frame.h and inferior.h.
+	* Makefile.in (mi-main.o): Add dependency on frame.h.
+
 2002-10-02  Andrew Cagney  <ac131313@redhat.com>
 
 	* rs6000-tdep.c (rs6000_store_struct_return): Store struct_return

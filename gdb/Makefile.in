@@ -2493,7 +2493,7 @@ mi-main.o: $(srcdir)/mi/mi-main.c $(defs_h) $(target_h) $(inferior_h) \
 	$(gdb_string_h) $(top_h) $(gdbthread_h) $(mi_cmds_h) $(mi_parse_h) \
 	$(mi_getopt_h) $(mi_console_h) $(ui_out_h) $(mi_out_h) \
 	$(event_loop_h) $(event_top_h) $(gdbcore_h) $(value_h) $(regcache_h) \
-	$(gdb_h)
+	$(gdb_h) $(frame_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-main.c
 mi-out.o: $(srcdir)/mi/mi-out.c $(defs_h) $(ui_out_h) $(mi_out_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-out.c

@@ -39,6 +39,8 @@
 #include "value.h"		/* for write_register_bytes() */
 #include "regcache.h"
 #include "gdb.h"
+#include "frame.h"
+
 #include <ctype.h>
 #include <sys/time.h>
 
@@ -98,12 +100,6 @@ static void mi_load_progress (const char *section_name,
 			      unsigned long total_section,
 			      unsigned long total_sent,
 			      unsigned long grand_total);
-
-/* FIXME: these should go in some .h file, but infcmd.c doesn't have a
-   corresponding .h file. These wrappers will be obsolete anyway, once
-   we pull the plug on the sanitization. */
-extern void interrupt_target_command_wrapper (char *, int);
-extern void return_command_wrapper (char *, int);
 
 /* Command implementations. FIXME: Is this libgdb? No.  This is the MI
    layer that calls libgdb.  Any operation used in the below should be
@@ -179,11 +175,11 @@ mi_cmd_exec_return (char *args, int from_tty)
   if (*args)
     /* Call return_command with from_tty argument equal to 0 so as to
        avoid being queried. */
-    return_command_wrapper (args, 0);
+    return_command (args, 0);
   else
     /* Call return_command with from_tty argument equal to 0 so as to
        avoid being queried. */
-    return_command_wrapper (NULL, 0);
+    return_command (NULL, 0);
 
   /* Because we have called return_command with from_tty = 0, we need
      to print the frame here. */
@@ -215,7 +211,7 @@ mi_cmd_exec_interrupt (char *args, int from_tty)
 		 "mi_cmd_exec_interrupt: Inferior not executing.");
       return MI_CMD_ERROR;
     }
-  interrupt_target_command_wrapper (args, from_tty);
+  interrupt_target_command (args, from_tty);
   if (last_async_command)
     fputs_unfiltered (last_async_command, raw_stdout);
   fputs_unfiltered ("^done", raw_stdout);

@@ -1,3 +1,14 @@
+2002-10-02  Elena Zannoni  <ezannoni@redhat.com>
+
+	* mi-main.c (mi_cmd_exec_return): Don't use
+	return_command_wrapper, use return_command instead.
+	(mi_cmd_exec_interrupt): Don't use
+	interrupt_target_command_wrapper, use interrupt_target_command
+	instead.
+	(return_command_wrapper, interrupt_target_command_wrapper):
+	Delete.
+	Include frame.h.
+
 2002-10-01  Andrew Cagney  <ac131313@redhat.com>
 
 	* mi-main.c (mi2_command_loop): New function.

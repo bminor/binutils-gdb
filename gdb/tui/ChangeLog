@@ -1,3 +1,8 @@
+2002-10-02  Elena Zannoni  <ezannoni@redhat.com>
+
+	* tui-hooks.c (selected_frame_level_changed_hook): Use the one
+	exported from frame.h.
+
 2002-09-29  Elena Zannoni  <ezannoni@redhat.com>
 
 	* tui.c (tui_show_source): Don't access current_source_symtab, use
