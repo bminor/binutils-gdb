@@ -157,18 +157,20 @@ _bfd_elf_create_dynamic_sections (abfd, info)
   if (! _bfd_elf_create_got_section (abfd, info))
     return false;
 
-  /* The .dynbss section is a place to put symbols which are defined
-     by dynamic objects, are referenced by regular objects, and are
-     not functions.  We must allocate space for them in the process
-     image and use a R_*_COPY reloc to tell the dynamic linker to
-     initialize them at run time.  The linker script puts the .dynbss
-     section into the .bss section of the final image.  */
-  s = bfd_make_section (abfd, ".dynbss");
-  if (s == NULL
-      || ! bfd_set_section_flags (abfd, s, SEC_ALLOC))
-    return false;
+  if (bed->want_dynbss)
+    {
+      /* The .dynbss section is a place to put symbols which are defined
+	 by dynamic objects, are referenced by regular objects, and are
+	 not functions.  We must allocate space for them in the process
+	 image and use a R_*_COPY reloc to tell the dynamic linker to
+	 initialize them at run time.  The linker script puts the .dynbss
+	 section into the .bss section of the final image.  */
+      s = bfd_make_section (abfd, ".dynbss");
+      if (s == NULL
+	  || ! bfd_set_section_flags (abfd, s, SEC_ALLOC))
+	return false;
 
-  /* The .rel[a].bss section holds copy relocs.  This section is not
+      /* The .rel[a].bss section holds copy relocs.  This section is not
      normally needed.  We need to create it here, though, so that the
      linker will map it to an output section.  We can't just create it
      only if we need it, because we will not know whether we need it
@@ -179,15 +181,16 @@ _bfd_elf_create_dynamic_sections (abfd, info)
      be needed, we can discard it later.  We will never need this
      section when generating a shared object, since they do not use
      copy relocs.  */
-  if (! info->shared)
-    {
-      s = bfd_make_section (abfd, 
-			    (bed->default_use_rela_p 
-			     ? ".rela.bss" : ".rel.bss")); 
-      if (s == NULL
-	  || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
-	  || ! bfd_set_section_alignment (abfd, s, ptralign))
-	return false;
+      if (! info->shared)
+	{
+	  s = bfd_make_section (abfd, 
+				(bed->default_use_rela_p 
+				 ? ".rela.bss" : ".rel.bss")); 
+	  if (s == NULL
+	      || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
+	      || ! bfd_set_section_alignment (abfd, s, ptralign))
+	    return false;
+	}
     }
 
   return true;

@@ -1,6 +1,15 @@
 1999-07-13  Richard Henderson  <rth@cygnus.com>
 
+	* elf-bfd.h (struct elf_backend_data): Add want_dynbss.
+	* elflink.c (_bfd_elf_create_dynamic_sections): Only create
+	.dynbss and .rel[a].bss if want_dynbss.
+	* elfxx-target.h (elf_backend_want_dynbss): Provide default.
+
+1999-07-13  Richard Henderson  <rth@cygnus.com>
+
 	* elf.c (assign_file_positions_for_segments): Don't overwrite p_flags.
+
+1999-07-13  Richard Henderson  <rth@cygnus.com>
 
 	* elf-bfd.h (struct elf_link_local_dynamic_entry): New.
 	(struct elf_link_hash_table): Add dynlocal.

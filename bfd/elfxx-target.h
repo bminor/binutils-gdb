@@ -80,6 +80,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef elf_backend_plt_alignment
 #define elf_backend_plt_alignment 2
 #endif
+#ifndef elf_backend_want_dynbss
+#define elf_backend_want_dynbss 1
+#endif
 
 #define bfd_elfNN_bfd_debug_info_start	bfd_void
 #define bfd_elfNN_bfd_debug_info_end	bfd_void
