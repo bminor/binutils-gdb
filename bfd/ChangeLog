@@ -1,3 +1,8 @@
+1999-07-12  Andreas Schwab  <schwab@suse.de>
+
+	* elf32-m68k.c: Add some ATTRIBUTE_UNUSED.
+	* m68klinux.c: Likewise.
+
 1999-07-12  Ian Lance Taylor  <ian@zembu.com>
 
 	* Many files: Changes to avoid gcc warnings: Remove unused local

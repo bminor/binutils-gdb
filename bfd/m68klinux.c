@@ -301,7 +301,7 @@ new_fixup (info, h, value, builtin)
 static boolean
 linux_link_create_dynamic_sections (abfd, info)
      bfd *abfd;
-     struct bfd_link_info *info;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
 {
   flagword flags;
   register asection *s;

@@ -121,7 +121,7 @@ static reloc_howto_type howto_table[] = {
 
 static void
 rtype_to_howto (abfd, cache_ptr, dst)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr;
      Elf_Internal_Rela *dst;
 {
@@ -166,7 +166,7 @@ static const struct
 
 static reloc_howto_type *
 reloc_type_lookup (abfd, code)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
   unsigned int i;
@@ -791,7 +791,7 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
 static asection *
 elf_m68k_gc_mark_hook (abfd, info, rel, h, sym)
      bfd *abfd;
-     struct bfd_link_info *info;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
      Elf_Internal_Rela *rel;
      struct elf_link_hash_entry *h;
      Elf_Internal_Sym *sym;
@@ -1370,7 +1370,7 @@ elf_m68k_adjust_dynindx (h, cparg)
 static boolean
 elf_m68k_discard_copies (h, ignore)
      struct elf_m68k_link_hash_entry *h;
-     PTR ignore;
+     PTR ignore ATTRIBUTE_UNUSED;
 {
   struct elf_m68k_pcrel_relocs_copied *s;
 
