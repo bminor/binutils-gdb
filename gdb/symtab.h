@@ -26,10 +26,20 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define obstack_chunk_alloc xmalloc
 #define obstack_chunk_free free
 
+/* GNU C supports enums that are bitfields.  Some old compilers don't. */
+#if defined(__GNUC__) && !defined(BYTE_BITFIELD)
+#define	BYTE_BITFIELD	:8;
+#else
+#define	BYTE_BITFIELD	/*nothing*/
+#endif
+
 /* Define a structure for the information that is common to all symbol types,
    including minimal symbols, partial symbols, and full symbols.  In a
    multilanguage environment, some language specific information may need to
-   be recorded along with each symbol. */
+   be recorded along with each symbol.
+
+   These fields are ordered to encourage good packing, since we frequently
+   have tens or hundreds of thousands of these.  */
 
 struct general_symbol_info
 {
@@ -61,12 +71,6 @@ struct general_symbol_info
     }
   value;
 
-  /* Record the source code language that applies to this symbol.
-     This is used to select one of the fields from the language specific
-     union below. */
-
-  enum language language;
-
   /* Since one and only one language can apply, wrap the language specific
      information inside a union. */
 
@@ -82,6 +86,12 @@ struct general_symbol_info
 	} chill_specific;
     } language_specific;
 
+  /* Record the source code language that applies to this symbol.
+     This is used to select one of the fields from the language specific
+     union above. */
+
+  enum language language BYTE_BITFIELD;
+
   /* Which section is this symbol in?  This is an index into
      section_offsets for this objfile.  Negative means that the symbol
      does not get relocated relative to a section.
@@ -89,7 +99,7 @@ struct general_symbol_info
      expect all symbol-reading code to set it correctly (the ELF code
      also tries to set it correctly).  */
 
-  int section;
+  unsigned short section;
 };
 
 #define SYMBOL_NAME(symbol)		(symbol)->ginfo.name
@@ -294,7 +304,7 @@ struct minimal_symbol
       mst_file_text,		/* Static version of mst_text */
       mst_file_data,		/* Static version of mst_data */
       mst_file_bss		/* Static version of mst_bss */
-    } type;
+    } type BYTE_BITFIELD;
 
 };
 
@@ -548,17 +558,17 @@ struct symbol
 
   struct general_symbol_info ginfo;
 
-  /* Name space code.  */
-
-  enum namespace namespace;
-
-  /* Address class */
-
-  enum address_class class;
-
   /* Data type of value */
 
   struct type *type;
+
+  /* Name space code.  */
+
+  enum namespace namespace BYTE_BITFIELD;
+
+  /* Address class */
+
+  enum address_class class BYTE_BITFIELD;
 
   /* Line number of definition.  FIXME:  Should we really make the assumption
      that nobody will try to debug files longer than 64K lines?  What about
@@ -575,7 +585,6 @@ struct symbol
       short basereg;
     }
   aux_value;
-
 };
 
 #define SYMBOL_NAMESPACE(symbol)	(symbol)->namespace
@@ -600,11 +609,11 @@ struct partial_symbol
 
   /* Name space code.  */
 
-  enum namespace namespace;
+  enum namespace namespace BYTE_BITFIELD;
 
   /* Address class (for info_symbols) */
 
-  enum address_class class;
+  enum address_class class BYTE_BITFIELD;
 
 };
 
@@ -991,14 +1000,15 @@ reread_symbols PARAMS ((void));
 /* Functions for dealing with the minimal symbol table, really a misc
    address<->symbol mapping for things we don't have debug symbols for.  */
 
-extern void
-prim_record_minimal_symbol PARAMS ((const char *, CORE_ADDR,
-				    enum minimal_symbol_type));
+extern void prim_record_minimal_symbol PARAMS ((const char *, CORE_ADDR,
+						enum minimal_symbol_type,
+						struct objfile *));
 
-extern void
-prim_record_minimal_symbol_and_info PARAMS ((const char *, CORE_ADDR,
-					     enum minimal_symbol_type,
-					     char *info, int section));
+extern void prim_record_minimal_symbol_and_info
+  PARAMS ((const char *, CORE_ADDR,
+	   enum minimal_symbol_type,
+	   char *info, int section,
+	   struct objfile *));
 
 extern struct minimal_symbol *
 lookup_minimal_symbol PARAMS ((const char *, struct objfile *));

@@ -1,3 +1,12 @@
+Wed Jan 12 01:44:25 1994  John Gilmore  (gnu@cygnus.com)
+
+	* symtab.h (struct symbol, general_symbol_info, minimal_symbol,
+	partial_symbol):  Shrink the storage sizes of symbols, by making
+	enums into 1-byte bitfields when compiled __GNUC__, moving all the
+	enums and small ints to the end of each struct to improve
+	alignment, and switching the section number from int to unsigned
+	short.
+
 Wed Jan 12 00:16:26 1994  John Gilmore  (gnu@cygnus.com)
 
 	* symtab.c (find_addr_symbol):  New routine that will find the nearest
