@@ -1,5 +1,10 @@
 2004-01-17  Andrew Cagney  <cagney@redhat.com>
 
+	* hppa-tdep.c: Update copyright year.
+	(hppa_target_write_pc): Use PCOQ_TAIL_REGNUM instead of
+	NPC_REGNUM.
+	(hppa_gdbarch_init): Do not set deprecated_npc_regnum.
+
 	* mips-tdep.c (mips_write_pc): New function.
 	(mips_gdbarch_init): Set "write_pc" to "mips_write_pc".
 	(mips_read_pc): Use mips_regnum instead of PC_REGNUM.

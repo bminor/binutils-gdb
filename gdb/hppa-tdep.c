@@ -1,7 +1,8 @@
 /* Target-dependent code for the HP PA architecture, for GDB.
 
    Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
+   Foundation, Inc.
 
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).
@@ -2609,7 +2610,7 @@ hppa_target_write_pc (CORE_ADDR v, ptid_t ptid)
     write_register_pid (31, v | 0x3, ptid);
 
   write_register_pid (PC_REGNUM, v, ptid);
-  write_register_pid (DEPRECATED_NPC_REGNUM, v + 4, ptid);
+  write_register_pid (PCOQ_TAIL_REGNUM, v + 4, ptid);
 }
 
 /* return the alignment of a type in bytes. Structures have the maximum
@@ -5201,7 +5202,6 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_sp_regnum (gdbarch, 30);
   set_gdbarch_fp0_regnum (gdbarch, 64);
   set_gdbarch_pc_regnum (gdbarch, PCOQ_HEAD_REGNUM);
-  set_gdbarch_deprecated_npc_regnum (gdbarch, PCOQ_TAIL_REGNUM);
   set_gdbarch_deprecated_register_raw_size (gdbarch, hppa_register_raw_size);
   set_gdbarch_deprecated_register_byte (gdbarch, hppa_register_byte);
   set_gdbarch_deprecated_register_virtual_size (gdbarch, hppa_register_raw_size);
