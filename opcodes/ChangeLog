@@ -1,3 +1,11 @@
+Wed Aug 30 13:52:28 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* sparc-opc.c (sparc_opcodes, prefetcha insn): Fix.
+	(lookup_{name,value}): New functions.
+	(prefetch_table): New static local.
+	(sparc_{encode,decode}_prefetch): New functions.
+	* sparc-dis.c (print_insn): Handle '*' arg (prefetch function).
+
 start-sanitize-sh3e
 Wed Aug 30 11:11:58 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 
