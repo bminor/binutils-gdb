@@ -449,41 +449,8 @@ GDB.*Copyright \[0-9\]+ Free Software Foundation, Inc..*$prompt $"\
 	    fail "$description (timeout)"
 	}
     }
-    
-    # force GDB to dump core.  On Solaris expect seems to not see the
-    # final message, even if gdb did dump core, so we check for the
-    # core dump explicitly if we time out.
-    #
-    # Some systems append "core" to the name of the program; others 
-    # append the name of the program to "core".
-    system rm -f core core.gdb gdb.core
-    send "maint dump-me\n"
-    expect {
-	-re "maint dump-me.*Should GDB dump core.*y or n. $" {
-	    send "y\n"
-	    expect {
-		-re "Quit.*core dumped.*"    { pass "GDB dumped core" }
-		-re "Program received signal SIGQUIT.*$prompt $" {
-		    pass "GDB dumped core"
-		    # This means we just told xgdb, not gdb, to dump core.
-		    # Get out of gdb so that removing xgdb doesn't get
-		    # test busy errors.
-		    gdb_exit
-		}
-		-re "$prompt $" { fail "GDB dumped core" }
-		default { 
-		    if {[file exists core] || [file exists core.gdb] || [file exists gdb.core]} then {
-			pass "GDB dumped core"
-		    } else {
-			fail "GDB dumped core"
-		    }
-		}
-	    }
-	}
-	-re ".*$prompt $"       { fail "GDB dumped core" }
-	timeout	            { fail "(timeout) GDB dumped core" }
-    }
-    system rm -f core core.gdb gdb.core
+
+    gdb_exit
 
     # Set the timeout back to the value it had when we were called.
     set timeout $oldtimeout

@@ -1,3 +1,15 @@
+Wed Jan 11 14:37:04 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>
+
+	* gdb.base/a1-selftest.exp: Don't test "maint dump-me".  That test
+	was a vestige of the manual TESTSTRATEGY, and the purpose of it
+	was to make sure that gdb can read a core file.  But (a) the "read
+	the corefile" part didn't make it to a1-selftest.exp, we just
+	delete the corefile after creating it, and (b) we test reading
+	corefiles in corefile.exp anyway.  Also, this test left around a
+	xgdb process on Solaris.
+
+	* gdb.base/corefile.exp: Also test backtrace.
+
 Wed Jan 11 00:14:40 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* gdb.base/commands.exp: Test a simple user defined command with
