@@ -1,3 +1,8 @@
+Fri Mar  1 10:24:59 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_find_exp_assignment):
+	Search trinary.cond rather than searching trinary.lhs twice.
+
 Tue Feb 27 15:08:43 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-make.sed: Edit out shared library support.
