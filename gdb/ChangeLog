@@ -1,3 +1,8 @@
+2001-04-17  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-linux-tdep.c (i386_linux_saved_pc_after_call): Use
+	read_memory_unsigned_integer instead of read_memory_integer.
+
 2001-04-16  Kevin Buettner  <kevinb@redhat.com>
 
 	* solib-aix5.c (map_index_vs_section_name_okay): New function.

@@ -340,7 +340,7 @@ i386_linux_saved_pc_after_call (struct frame_info *frame)
   if (frame->signal_handler_caller)
     return i386_linux_sigtramp_saved_pc (frame);
 
-  return read_memory_integer (read_register (SP_REGNUM), 4);
+  return read_memory_unsigned_integer (read_register (SP_REGNUM), 4);
 }
 
 
