@@ -1,3 +1,10 @@
+Thu Oct 14 19:16:56 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t24/demangle.exp: Clean up spacing (2 strings), inclusion of
+	constructor name (2 string), name of _GLOBAL_ demangling (2 strings),
+	name of __st* demangling (2 strings).  Did Kung really get the
+	more than 95 others right without testing them?
+
 Thu Oct 14 16:27:08 1993  Kung Hsu  (kung@cirdan.cygnus.com)
 
 	* gdb.t24/demangle.exp: clean up XFAILS, more than 100
