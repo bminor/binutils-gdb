@@ -1,3 +1,8 @@
+2005-02-14  Eric Botcazou  <ebotcazou@libertysurf.fr>
+
+	* ld-sparc/sparc.exp: Enable on Solaris.  Disable 32-bit tests
+	on sparc64-elf.
+
 2005-02-13  Jan Beulich  <jbeulich@novell.com>
 
 	* ld-elfvers/vers.exp (as_options): New. Set to -x for ia64.
