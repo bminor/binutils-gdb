@@ -1,5 +1,9 @@
 Thu Feb  9 12:02:35 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* i386linux.c (NEEDS_SHRLIB): Define.
+	(linux_tally_symbols): Crash if a NEEDS_SHRLIB symbol is
+	undefined.  From hjl@nynexst.com (H.J. Lu).
+
 	* elfcode.h (elf_bfd_final_link): Add assertion to make sure that
 	dynamic and dynobj are in synch.
 

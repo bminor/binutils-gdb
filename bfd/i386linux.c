@@ -94,6 +94,12 @@ i386linux_write_object_contents (abfd)
 #define IS_PLT_SYM(name) \
   (strncmp (name, PLT_REF_PREFIX, sizeof PLT_REF_PREFIX - 1) == 0)
 
+/* This string is used to generate specialized error messages.  */
+
+#ifndef NEEDS_SHRLIB
+#define NEEDS_SHRLIB "__NEEDS_SHRLIB_"
+#endif
+
 /* This special symbol is a set vector that contains a list of
    pointers to fixup tables.  It will be present in any dynamicly
    linked file.  The linker generated fixup table should also be added
@@ -421,6 +427,36 @@ linux_tally_symbols (h, data)
   int is_plt;
   struct linux_link_hash_entry *h1, *h2;
   boolean exists;
+
+  if (h->root.root.type == bfd_link_hash_undefined
+      && strncmp (h->root.root.root.string, NEEDS_SHRLIB,
+		  sizeof NEEDS_SHRLIB - 1) == 0)
+    {
+      const char *name;
+      char *p;
+      char *alloc = NULL;
+
+      name = h->root.root.root.string + sizeof NEEDS_SHRLIB - 1;
+      p = strrchr (name, '_');
+      if (p != NULL)
+	alloc = (char *) malloc (strlen (name) + 1);
+
+      /* FIXME!  BFD should not call printf!  */
+      if (p == NULL || alloc == NULL)
+	fprintf (stderr, "Output file requires shared library `%s'\n", name);
+      else
+	{
+	  strcpy (alloc, name);
+	  p = strrchr (alloc, '_');
+	  *p++ = '\0';
+	  fprintf (stderr,
+		   "Output file requires shared library `%s.so.%s'\n",
+		   alloc, p);
+	  free (alloc);
+	}
+
+      abort ();
+    }
 
   /* If this symbol is not a PLT/GOT, we do not even need to look at it */
   is_plt = IS_PLT_SYM (h->root.root.root.string);
