@@ -1,3 +1,10 @@
+2001-12-19  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): If new_size
+	is 0, temporarily grow it to minimal CIE size.
+	(_bfd_elf_write_section_eh_frame): If input .eh_frame section would
+	end up empty, build a fake minimal CIE.
+
 2001-12-19  Steve Ellcey  <sje@cup.hp.com>
 
 	* config.bfd (bfd_elf32_ia64_hpux_big_vec): New vector for

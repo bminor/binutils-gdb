@@ -701,8 +701,12 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec, ehdrsec,
       hdr_info->last_cie_offset = sec_info->entry[last_cie_ndx].new_offset;
     }
 
+  /* FIXME: Currently it is not possible to shrink sections to zero size at
+     this point, so build a fake minimal CIE.  */
+  if (new_size == 0)
+    new_size = 16;
+
   /* Shrink the sec as needed.  */
-  
   sec->_cooked_size = new_size;
   if (sec->_cooked_size == 0)
     sec->flags |= SEC_EXCLUDE;
@@ -1067,6 +1071,18 @@ _bfd_elf_write_section_eh_frame (abfd, sec, ehdrsec, contents)
       memmove (p, contents + sec_info->entry[i].offset,
 	       sec_info->entry[i].size);
       p += sec_info->entry[i].size;
+    }
+
+  /* FIXME: Once _bfd_elf_discard_section_eh_frame will be able to
+     shrink sections to zero size, this won't be needed any more.  */
+  if (p == contents && sec->_cooked_size == 16)
+    {
+      bfd_put_32 (abfd, 12, p);		/* Fake CIE length */
+      bfd_put_32 (abfd, 0, p + 4);	/* Fake CIE id */
+      p[8] = 1;				/* Fake CIE version */
+      memset (p + 9, 0, 7);		/* Fake CIE augmentation, 3xleb128
+					   and 3xDW_CFA_nop as pad  */
+      p += 16;
     }
 
   BFD_ASSERT ((bfd_size_type) (p - contents) == sec->_cooked_size);
