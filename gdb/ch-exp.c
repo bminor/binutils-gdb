@@ -579,6 +579,11 @@ parse_tuple (mode)
   write_exp_elt_opcode (OP_ARRAY);
   if (mode)
     {
+      struct type *type = check_typedef (mode);
+      if (TYPE_CODE (type) != TYPE_CODE_ARRAY
+	  && TYPE_CODE (type) != TYPE_CODE_STRUCT
+	  && TYPE_CODE (type) != TYPE_CODE_SET)
+	error ("invalid tuple mode");
       write_exp_elt_opcode (UNOP_CAST);
       write_exp_elt_type (mode);
       write_exp_elt_opcode (UNOP_CAST);
