@@ -1,5 +1,5 @@
 /* Symbol table definitions for GDB.
-   Copyright 1986, 89, 91, 92, 93, 94, 95, 96, 1998
+   Copyright 1986, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 2001
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -26,7 +26,7 @@
 
 #include "obstack.h"
 #define obstack_chunk_alloc xmalloc
-#define obstack_chunk_free free
+#define obstack_chunk_free xfree
 #include "bcache.h"
 
 /* Don't do this; it means that if some .o's are compiled with GNU C
@@ -182,7 +182,7 @@ extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, asection *);
 	    SYMBOL_LANGUAGE (symbol) = language_cplus;			\
 	    SYMBOL_CPLUS_DEMANGLED_NAME (symbol) = 			\
 	      obsavestring (demangled, strlen (demangled), (obstack));	\
-	    free (demangled);						\
+	    xfree (demangled);						\
 	  }								\
 	else								\
 	  {								\
@@ -199,7 +199,7 @@ extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, asection *);
 	    SYMBOL_LANGUAGE (symbol) = language_java;			\
 	    SYMBOL_CPLUS_DEMANGLED_NAME (symbol) = 			\
 	      obsavestring (demangled, strlen (demangled), (obstack));	\
-	    free (demangled);						\
+	    xfree (demangled);						\
 	  }								\
 	else								\
 	  {								\
@@ -217,7 +217,7 @@ extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, asection *);
 	    SYMBOL_LANGUAGE (symbol) = language_chill;			\
 	    SYMBOL_CHILL_DEMANGLED_NAME (symbol) = 			\
 	      obsavestring (demangled, strlen (demangled), (obstack));	\
-	    free (demangled);						\
+	    xfree (demangled);						\
 	  }								\
 	else								\
 	  {								\

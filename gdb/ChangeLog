@@ -1,7 +1,16 @@
 2001-02-02  John Moore  <jmoore@redhat.com>
 
+	* remote-utils.h (sr_set_device): Changed free() to xfree() where 
+	appropriate.  Also changed Copyright to include 2001.
+	* symtab.h (obstack_chunk_free, SYMBOL_INIT_DEMANGLED_NAME): Likewise.
+	* value.h (value_free): Likewise.
+	* gdbarch.sh (gdbarch_free): Likewise.
+	* gdbarch.c, gdbarch.h: Regenerated.
+
+2001-02-02  John Moore  <jmoore@redhat.com>
+
         * cli/cli-cmds.c (apropos_command): Changed occurance of free() to 
-	xfree(). Also changed Copyright to include 2001.
+	xfree().  Also changed Copyright to include 2001.
 
 2001-02-02  J.T. Conklin  <jtc@redback.com>
 

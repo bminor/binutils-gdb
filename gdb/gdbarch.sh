@@ -1,7 +1,7 @@
 #!/bin/sh -u
 
 # Architecture commands for GDB, the GNU debugger.
-# Copyright 1998-2000 Free Software Foundation, Inc.
+# Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
 #
 # This file is part of GDB.
 #
@@ -531,7 +531,7 @@ cat <<EOF
 /* *INDENT-OFF* */ /* THIS FILE IS GENERATED */
 
 /* Dynamic architecture support for GDB, the GNU debugger.
-   Copyright 1998-1999, Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1239,7 +1239,7 @@ void
 gdbarch_free (struct gdbarch *arch)
 {
   /* At the moment, this is trivial.  */
-  free (arch);
+  xfree (arch);
 }
 EOF
 

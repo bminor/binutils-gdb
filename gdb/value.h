@@ -1,5 +1,6 @@
 /* Definitions for values of C expressions, for GDB.
-   Copyright 1986, 1987, 1989, 1992-1996, 2000 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1992, 1993, 1994, 1995, 1996, 2000, 2001
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -456,7 +457,7 @@ extern int unop_user_defined_p (enum exp_opcode op, value_ptr arg1);
 
 extern int destructor_name_p (const char *name, const struct type *type);
 
-#define value_free(val) free ((PTR)val)
+#define value_free(val) xfree (val)
 
 extern void free_all_values (void);
 

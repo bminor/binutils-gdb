@@ -1,6 +1,6 @@
 /* Generic support for remote debugging interfaces.
 
-   Copyright 1993 Free Software Foundation, Inc.
+   Copyright 1993, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -53,7 +53,7 @@ extern struct _sr_settings sr_settings;
 #define sr_get_device()			(sr_settings.device)
 #define sr_set_device(newval) \
 { \
-    if (sr_settings.device) free(sr_settings.device); \
+    if (sr_settings.device) xfree (sr_settings.device); \
     sr_settings.device = (newval); \
 }
 
