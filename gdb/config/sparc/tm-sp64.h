@@ -335,14 +335,6 @@ struct value;
 #undef  FRAME_SPECIFICATION_DYADIC
 #define FRAME_SPECIFICATION_DYADIC
 
-/* To print every pair of float registers as a double, we use this hook.
-   We also print the condition code registers in a readable format
-   (FIXME: can expand this to all control regs).  */
-
-#undef 	PRINT_REGISTER_HOOK
-#define	PRINT_REGISTER_HOOK(regno)	\
-  sparc_print_register_hook (regno)
-
 /* Offsets into jmp_buf.
    FIXME: This was borrowed from the v8 stuff and will probably have to change
    for v9.  */

@@ -542,19 +542,15 @@ void sparc_fix_call_dummy PARAMS ((char *dummy, CORE_ADDR pc, CORE_ADDR fun,
 #define SETUP_ARBITRARY_FRAME(argc, argv) setup_arbitrary_frame (argc, argv)
 extern struct frame_info *setup_arbitrary_frame PARAMS ((int, CORE_ADDR *));
 
-/* To print every pair of float registers as a double, we use this hook.  */
+/* To print every pair of float registers as a double, we use this hook.
+   We also print the condition code registers in a readable format
+   (FIXME: can expand this to all control regs).  */
 
+#undef 	PRINT_REGISTER_HOOK
 #define	PRINT_REGISTER_HOOK(regno)	\
-  if (((regno) >= FP0_REGNUM)		\
-   && ((regno) <  FP0_REGNUM + 32)	\
-   && (0 == ((regno) & 1))) {		\
-    char doublereg[8];		/* two float regs */	\
-    if (!read_relative_register_raw_bytes ((regno)  , doublereg  )	\
-     && !read_relative_register_raw_bytes ((regno)+1, doublereg+4)) {	\
-      printf("\t");			\
-      print_floating (doublereg, builtin_type_double, stdout);	\
-    }					\
-  }
+  sparc_print_register_hook (regno)
+extern void sparc_print_register_hook PARAMS ((int regno));
+
 
 /* Optimization for storing registers to the inferior.  The hook
    DO_DEFERRED_STORES

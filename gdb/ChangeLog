@@ -1,3 +1,14 @@
+Tue Jun  2 02:01:56 1998  Mark Alexander  <marka@cygnus.com>
+
+	* sparc-tdep.c (sparc_target_architecture_hook): New function to
+	set endianness based on machine type.
+	(_initialize_sparc_tdep): Initialize target_architecture_hook.
+	(sparc_print_register_hook): Print PSR and FPSR in fancy format
+	on 32-bit machines.
+	* config/sparc/tm-sparc.h (PRINT_REGISTER_HOOK): Redefine to
+	call sparc_print_register_hook instead of using inline code.
+	* config/sparc/tm-sp64.h (PRINT_REGISTER_HOOK): Remove.
+
 Thu May 28 17:19:14 1998  Keith Seitz  <keiths@cygnus.com>
 
 	* main.c (main): Check for NULL from getenv on CYGWIN32.
