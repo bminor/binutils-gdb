@@ -189,7 +189,6 @@ gnuv2_value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
   struct type *rtti_type;
   CORE_ADDR coreptr;
   struct value *vp;
-  int using_enclosing = 0;
   long top_offset = 0;
   char rtti_type_name[256];
   CORE_ADDR vtbl;
@@ -244,25 +243,7 @@ gnuv2_value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
   if (VALUE_ADDRESS (value_field (v, TYPE_VPTR_FIELDNO (known_type))) == 0)
     return NULL;
 
-  /*
-    If we are enclosed by something that isn't us, adjust the
-    address properly and set using_enclosing.
-  */
-  if (VALUE_ENCLOSING_TYPE(v) != VALUE_TYPE(v))
-    {
-      struct value *tempval;
-      int bitpos = TYPE_BASECLASS_BITPOS (known_type,
-                                          TYPE_VPTR_FIELDNO (known_type));
-      tempval=value_field (v, TYPE_VPTR_FIELDNO(known_type));
-      VALUE_ADDRESS(tempval) += bitpos / 8;
-      vtbl=value_as_address (tempval);
-      using_enclosing=1;
-    }
-  else
-    {
-      vtbl=value_as_address(value_field(v,TYPE_VPTR_FIELDNO(known_type)));
-      using_enclosing=0;
-    }
+  vtbl=value_as_address(value_field(v,TYPE_VPTR_FIELDNO(known_type)));
 
   /* Try to find a symbol that is the vtable */
   minsym=lookup_minimal_symbol_by_pc(vtbl);
@@ -304,8 +285,6 @@ gnuv2_value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
       if (full)
         *full=1;
     }
-  if (using_enc)
-    *using_enc=using_enclosing;
 
   return rtti_type;
 }

@@ -1,5 +1,7 @@
 2002-08-19  David Carlton  <carlton@math.stanford.edu>
 
+	* gnu-v2-abi.c (gnuv2_value_rtti_type): Eliminate test for being
+	enclosed.  Fix PR gdb/574.
 	* MAINTAINERS: Add self to Write After Approval list.
 
 2002-08-19  Andrew Cagney  <ac131313@redhat.com>
