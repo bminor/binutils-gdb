@@ -1,3 +1,14 @@
+Wed Jul  7 12:17:48 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/tc-sparc.h (ENV64): Define for v9.
+
+	* config/tc-sparc.c (s_xword): For numbers, call big_cons.
+	(sparc_ip, md_apply_fix, tc_gen_reloc): Handle some sparc64
+	relocation types.
+	(md_number_to_chars): Handle 8-byte value.
+
+	* config/obj-elf.h (elf_symbol): For v9, use 64-bit symbol type.
+
 Wed Jun 30 06:21:27 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* config/tc-sparc.c (md_begin): If sparcv9 is defined, reset

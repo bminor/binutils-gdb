@@ -1,3 +1,51 @@
+Wed Jul  7 08:33:30 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* as.h (valueT): Typedef moved here.
+	* struc-symbol.h (valueT): ...from here.
+	* write.c (write_object_file): Locals from_addr, to_addr,
+	table_addr are now addressT.  Supply prototype for bfd_alloc for
+	now.
+	(fixup_segment): Local add_number is now valueT.  Correct some
+	range-checking bugs.
+	(relax_align): Type `int' should be sufficient for the exponent.
+	(fix_new): Argument offset is type offsetT.  Locals size and
+	newsize are type valueT.
+	* write.h (struct fix): Fields fx_offset and fx_addnumber are now
+	type valueT.
+	(fix_new): Fix prototype.
+	* symbols.c (symbol_new): Symbol value is type valueT.
+	(S_SET_VALUE, S_GET_VALUE): Likewise.
+	(S_IS_*): Specify int return type explicitly.
+	* symbols.h (symbol_new, S_GET_VALUE, S_SET_VALUE): Fixed
+	prototypes.
+	* read.c (s_comm): Values read are type valueT.
+	* expr.h (expressionS): Field X_add_number is an offsetT.
+	* tc.h (md_create_long_jump, md_create_short_jump,
+	md_section_align): Addresses are now type addressT.
+	(md_number_to_chars, md_apply_fix): Pass value as valueT.
+	* config/tc-i386.c (md_create_short_jump, md_create_long_jump,
+	md_number_to_chars, md_section_align): Adjusted.
+	* config/tc-sparc.c (sparc_ip): Initialize `len' variable to make
+	gcc shut up.
+	(md_create_short_jump, md_create_long_jump, md_number_to_chars,
+	md_section_align): Adjusted.
+
+	* config/tc-sparc.c (s_reserve): Permit use for other than a.out
+	format.
+	(s_common): Handle Solaris-2 version.
+
+	* config/ho-generic.h (free): Returns void if __STDC__.
+
+	* config/obj-elf.h (obj_elf_frob_symbol, elf_frob_file,
+	elf_file_symbol): Declare.
+
+	* expr.c (floating_constant, integer_constant): Now return void.
+
+Thu Jul  1 12:13:43 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* configure.in: Match on sparc*-fujitsu-none rather than
+	sparclite*-fujitsu-none.
+
 Wed Jun 30 11:12:02 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* read.c (cons): Conditionalize parsing of expression.  Move
@@ -55,6 +103,12 @@ Wed Jun 30 06:21:27 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 	keep it quiet.
 
 	* write.c (remove_subsegs): Don't define for BFD_ASSEMBLER.
+
+Fri Jun 25 14:42:53 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* Makefile.in (all, dvi, info, install-info, clean-info): do not
+	  echo recursion lines.
+	  (install-info, clean-info): collapse into the dvi and info rule.
 
 Fri Jun 25 03:43:06 1993  Ken Raeburn  (raeburn@poseidon.cygnus.com)
 
