@@ -128,7 +128,7 @@ case ${generic_target} in
 
   alpha-*-osf*)		obj_format=ecoff dev=yes ;;
 
-  hppa-*-osf)		obj_format=elf emulation=hppa dev=yes ;;
+  hppa-*-osf)		obj_format=elf emulation=hppa ;;
   hppa-*-hpux*)		obj_format=som emulation=hppa ;;
   hppa-*-bsd*)		obj_format=som emulation=hppa ;;
 
@@ -137,6 +137,8 @@ case ${generic_target} in
   i386-ibm-aix*)	obj_format=coffbfd gas_target=i386coff
 			 emulation=i386aix ;;
   i386-*-bsd*)		obj_format=aout emulation=386bsd ;;
+  i386-*-netbsd0.8)	obj_format=aout emulation=netbsd ;;
+  i386-*-netbsd*)	obj_format=aout emulation=netbsd ;;
   i386-*-linux*elf*)	obj_format=elf  emulation=linux ;;
   i386-*-linux*coff*)	obj_format=coffbfd emulation=linux
 			 gas_target=i386coff ;;
@@ -147,6 +149,7 @@ case ${generic_target} in
 			obj_format=elf ;;
   i386-*-coff | i386-*-sysv* | i386-*-sco* | i386-*-isc*)
 			obj_format=coffbfd gas_target=i386coff ;;
+  i386-*-vsta)		obj_format=aout ;;
   i386-*-go32)		obj_format=aout ;;
 
   i960-wrs-vxworks | i960-*-nindy*)
@@ -284,7 +287,7 @@ case ${with_bfd_assembler}-${bfd_gas} in
     ;;
 esac
 
-reject_dev_configs=yes
+reject_dev_configs=no
 
 case ${reject_dev_configs}-${dev} in
   yes-yes) # Oops.
@@ -303,8 +306,8 @@ links="host.h targ-cpu.c targ-cpu.h targ-env.h obj-format.h obj-format.c atof-ta
 # post-target:
 
 case ${bfd_gas} in
-  yes)	bfddef="BFDDEF=-DBFD_ASSEMBLER" need_bfd=yes	;;
-  *)    bfddef=""					;;
+  yes)	bfddef="BFDDEF=define" need_bfd=yes		;;
+  *)    bfddef="BFDDEF=undef"				;;
 esac
 
 case ${need_bfd} in

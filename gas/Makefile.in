@@ -242,8 +242,7 @@ dvi info install-info clean-info:
 # Now figure out from those variables how to compile and link.
 
 # This is the variable actually used when we compile.
-ALL_CFLAGS = $(INTERNAL_CFLAGS) $(CROSS) $(CFLAGS) $(HDEFINES) $(TDEFINES) \
-	$(BFDDEF)
+ALL_CFLAGS = $(INTERNAL_CFLAGS) $(CROSS) $(CFLAGS) $(HDEFINES) $(TDEFINES)
 
 # How to link with both our special library facilities
 # and the system's installed libraries.
@@ -286,10 +285,13 @@ config.status:
 config.h: config-stamp ; @true
 config-stamp: Makefile
 	-rm -f config.new config-stamp
-	echo '#define TARGET_CPU       "$(target_cpu)"'        > config.new
+	echo '#ifndef TARGET_CPU'			       > config.new
+	echo '#define TARGET_CPU       "$(target_cpu)"'       >> config.new
 	echo '#define TARGET_ALIAS     "$(target_alias)"'     >> config.new
 	echo '#define TARGET_CANONICAL "$(target_canonical)"' >> config.new
 	echo '#define GAS_VERSION      "$(VERSION)"'          >> config.new
+	echo '#$(BFDDEF) BFD_ASSEMBLER'			      >> config.new
+	echo '#endif /* TARGET_CPU */'			      >> config.new
 	$(srcdir)/../move-if-change config.new config.h
 	touch config-stamp
 
@@ -345,7 +347,7 @@ input-scrub.o : input-scrub.c /usr/include/errno.h /usr/include/sys/errno.h \
   input-file.h 
 listing.o : listing.c as.h host.h targ-env.h flonum.h bignum.h \
   listing.h obj-format.h targ-cpu.h struc-symbol.h write.h expr.h \
-  frags.h hash.h read.h symbols.h tc.h obj.h input-file.h
+  frags.h hash.h read.h symbols.h tc.h obj.h input-file.h subsegs.h
 messages.o : messages.c as.h host.h targ-env.h obj-format.h \
   targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h
