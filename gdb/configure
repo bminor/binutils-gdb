@@ -5475,7 +5475,7 @@ if test "${with_sim_gpu2+set}" = set; then
   mips*-sky-*)
     if test -d "${withval}"
     then
-      LIBS="${LIBS} -L${withval}/lib -lgpu2 -L${x_libraries} -lX11"
+      LIBS="${LIBS} -L${withval}/lib -lgpu2 -L${x_libraries} -lX11 -lXext"
     else
       echo "configure: warning: Directory ${withval} does not exist." 1>&2
     fi ;;

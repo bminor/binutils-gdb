@@ -261,7 +261,7 @@ AC_ARG_WITH(sim-gpu2,
 [if test -d "${withval}"
 then
   SIM_SUBTARGET="${SIM_SUBTARGET} -DSKY_GPU2 -I${withval}/include"
-  mips_extra_libs="-L${withval}/lib -lgpu2 -L${x_libraries} -lX11"
+  mips_extra_libs="-L${withval}/lib -lgpu2 -L${x_libraries} -lX11 -lXext"
 else
   AC_MSG_ERROR("Directory ${withval} does not exist.");
 fi])dnl

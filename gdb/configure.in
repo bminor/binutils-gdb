@@ -453,7 +453,7 @@ AC_ARG_WITH(sim-gpu2,
   mips*-sky-*)
     if test -d "${withval}"
     then
-      LIBS="${LIBS} -L${withval}/lib -lgpu2 -L${x_libraries} -lX11"
+      LIBS="${LIBS} -L${withval}/lib -lgpu2 -L${x_libraries} -lX11 lXext"
     else
       AC_MSG_WARN([Directory ${withval} does not exist.])
     fi ;;

@@ -1,3 +1,21 @@
+Tue Jun 23 12:29:53 1998  Jillian Ye  <jillian@cygnus.com>
+
+        * configure.in: Add -lXext to mips_extra_libs
+   
+Sun Jun 21 09:31:12 1998  Ron Unrau  (runrau@cygnus.com)
+
+	* symtab.c (find_line_pc): assumed that a PC of 0 is illegal.
+	  Changed to pass PC as arg and return 1 if valid (0 otherwise).
+	  symtab.h: change prototype to match
+	  symtab.c (find_line_pc_range): use new interface
+	  breakpoint.c (resolve_sal_pc): ditto
+	  gdbtk.c (gdb_set_bp): ditto
+
+Wed Jun 17 15:50:00 1998  Ron Unrau  (runrau@cygnus.com)
+
+	* parse.c (target_map_name_to_register): Check target specific 
+	  aliases *first* so that it can over-ride architectural names
+	
 Wed Jun 17 17:13:38 1998  Said Ziouani  (saidz@park-street.cygnus.com)
 
 	* remote-sds.c (sds_start_remote): Fix printf call.
