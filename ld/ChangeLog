@@ -1,3 +1,11 @@
+2000-11-30  Jan Hubicka  <jh@suse.cz>
+
+	* Makefile.am (ALL_EMULATIONS): Add eelf_x86_64.o
+	(eelf_x86_64.c): New.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Add support for x86_64-*-linux-gnu*.
+	* emulparams/elf_x86_64.sh: New.
+
 2000-11-30  Hans-Peter Nilsson  <hp@axis.com>
 
 	* emulparams/crislinux.sh (ENTRY): Change back to _start.

@@ -120,13 +120,11 @@ static void print_statement_list
   PARAMS ((lang_statement_union_type *, lang_output_section_statement_type *));
 static void print_statements PARAMS ((void));
 static bfd_vma insert_pad
-  PARAMS ((lang_statement_union_type **this_ptr, fill_type fill,
-	   unsigned int power, asection *output_section_statement,
-	   bfd_vma dot));
+  PARAMS ((lang_statement_union_type **, fill_type,
+	   unsigned int, asection *, bfd_vma));
 static bfd_vma size_input_section
-  PARAMS ((lang_statement_union_type **this_ptr,
-	   lang_output_section_statement_type *output_section_statement,
-	   fill_type fill, bfd_vma dot, boolean relax));
+  PARAMS ((lang_statement_union_type **, lang_output_section_statement_type *,
+	   fill_type, bfd_vma, boolean));
 static void lang_finish PARAMS ((void));
 static void ignore_bfd_errors PARAMS ((const char *, ...));
 static void lang_check PARAMS ((void));
@@ -197,11 +195,11 @@ etree_type *base; /* Relocation base - or null */
 #define cat(a,b) a/**/b
 #endif
 
-#define new_stat(x,y) (cat(x,_type)*) new_statement(cat(x,_enum), sizeof(cat(x,_type)),y)
+#define new_stat(x, y) (cat (x, _type)*) new_statement (cat (x, _enum), sizeof (cat (x, _type)), y)
 
 #define outside_section_address(q) ((q)->output_offset + (q)->output_section->vma)
 
-#define outside_symbol_address(q) ((q)->value + outside_section_address(q->section))
+#define outside_symbol_address(q) ((q)->value + outside_section_address (q->section))
 
 #define SECTION_NAME_MAP_LENGTH (16)
 

@@ -351,6 +351,7 @@ ALL_EMULATIONS = \
 
 ALL_64_EMULATIONS = \
 	eelf64_ia64.o \
+	eelf_x86_64.o \
 	eelf64_sparc.o \
 	eelf64alpha.o \
 	eelf64bmip.o \
@@ -1213,6 +1214,9 @@ eelf64bmip.c: $(srcdir)/emulparams/elf64bmip.sh \
 eelf_i386.c: $(srcdir)/emulparams/elf_i386.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf_i386 "$(tdir_elf_i386)"
+eelf_x86_64.c: $(srcdir)/emulparams/elf_x86_64.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf_x86_64 "$(tdir_elf_x86_64)"
 eelf_i386_be.c: $(srcdir)/emulparams/elf_i386_be.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf_i386_be "$(tdir_elf_i386_be)"
