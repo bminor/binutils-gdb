@@ -1,3 +1,9 @@
+Wed May 28 10:48:14 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-hppa.c (tc_fix_adjustable): Reject absolute calls/jumps.
+	(hppa_force_relocation): Force a relocation for an absolute
+	call/jump.
+
 Mon May 26 13:24:25 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* doc/as.texinfo: Don't use @value in section names or index
