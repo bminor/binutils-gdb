@@ -240,23 +240,23 @@ fetch_inferior_registers (int ignored)
   RF (14, inferior_registers.r_fs);
   RF (15, inferior_registers.r_gs);
 
-  RF (FP0_REGNUM,     inferior_fpregisters.regs[0]);
-  RF (FP0_REGNUM + 1, inferior_fpregisters.regs[1]);
-  RF (FP0_REGNUM + 2, inferior_fpregisters.regs[2]);
-  RF (FP0_REGNUM + 3, inferior_fpregisters.regs[3]);
-  RF (FP0_REGNUM + 4, inferior_fpregisters.regs[4]);
-  RF (FP0_REGNUM + 5, inferior_fpregisters.regs[5]);
-  RF (FP0_REGNUM + 6, inferior_fpregisters.regs[6]);
-  RF (FP0_REGNUM + 7, inferior_fpregisters.regs[7]);
+  RF (FP0_REGNUM,     inferior_fp_registers.regs[0]);
+  RF (FP0_REGNUM + 1, inferior_fp_registers.regs[1]);
+  RF (FP0_REGNUM + 2, inferior_fp_registers.regs[2]);
+  RF (FP0_REGNUM + 3, inferior_fp_registers.regs[3]);
+  RF (FP0_REGNUM + 4, inferior_fp_registers.regs[4]);
+  RF (FP0_REGNUM + 5, inferior_fp_registers.regs[5]);
+  RF (FP0_REGNUM + 6, inferior_fp_registers.regs[6]);
+  RF (FP0_REGNUM + 7, inferior_fp_registers.regs[7]);
   
-  RF (FCTRL_REGNUM,   inferior_fpregisters.control);
-  RF (FSTAT_REGNUM,   inferior_fpregisters.status);
-  RF (FTAG_REGNUM,    inferior_fpregisters.tag);
-  RF (FCS_REGNUM,     inferior_fpregisters.code_seg);
-  RF (FCOFF_REGNUM,   inferior_fpregisters.eip);
-  RF (FDS_REGNUM,     inferior_fpregisters.operand_seg);
-  RF (FDOFF_REGNUM,   inferior_fpregisters.operand);
-  RF (FOP_REGNUM,     inferior_fpregisters.opcode);
+  RF (FCTRL_REGNUM,   inferior_fp_registers.control);
+  RF (FSTAT_REGNUM,   inferior_fp_registers.status);
+  RF (FTAG_REGNUM,    inferior_fp_registers.tag);
+  RF (FCS_REGNUM,     inferior_fp_registers.code_seg);
+  RF (FCOFF_REGNUM,   inferior_fp_registers.eip);
+  RF (FDS_REGNUM,     inferior_fp_registers.operand_seg);
+  RF (FDOFF_REGNUM,   inferior_fp_registers.operand);
+  RF (FOP_REGNUM,     inferior_fp_registers.opcode);
 }
 
 /* Store our register values back into the inferior.
@@ -286,23 +286,23 @@ store_inferior_registers (int ignored)
   RS (14, inferior_registers.r_fs);
   RS (15, inferior_registers.r_gs);
 
-  RS (FP0_REGNUM,     inferior_fpregisters.regs[0]);
-  RS (FP0_REGNUM + 1, inferior_fpregisters.regs[1]);
-  RS (FP0_REGNUM + 2, inferior_fpregisters.regs[2]);
-  RS (FP0_REGNUM + 3, inferior_fpregisters.regs[3]);
-  RS (FP0_REGNUM + 4, inferior_fpregisters.regs[4]);
-  RS (FP0_REGNUM + 5, inferior_fpregisters.regs[5]);
-  RS (FP0_REGNUM + 6, inferior_fpregisters.regs[6]);
-  RS (FP0_REGNUM + 7, inferior_fpregisters.regs[7]);
+  RS (FP0_REGNUM,     inferior_fp_registers.regs[0]);
+  RS (FP0_REGNUM + 1, inferior_fp_registers.regs[1]);
+  RS (FP0_REGNUM + 2, inferior_fp_registers.regs[2]);
+  RS (FP0_REGNUM + 3, inferior_fp_registers.regs[3]);
+  RS (FP0_REGNUM + 4, inferior_fp_registers.regs[4]);
+  RS (FP0_REGNUM + 5, inferior_fp_registers.regs[5]);
+  RS (FP0_REGNUM + 6, inferior_fp_registers.regs[6]);
+  RS (FP0_REGNUM + 7, inferior_fp_registers.regs[7]);
   
-  RS (FCTRL_REGNUM,   inferior_fpregisters.control);
-  RS (FSTAT_REGNUM,   inferior_fpregisters.status);
-  RS (FTAG_REGNUM,    inferior_fpregisters.tag);
-  RS (FCS_REGNUM,     inferior_fpregisters.code_seg);
-  RS (FCOFF_REGNUM,   inferior_fpregisters.eip);
-  RS (FDS_REGNUM,     inferior_fpregisters.operand_seg);
-  RS (FDOFF_REGNUM,   inferior_fpregisters.operand);
-  RS (FOP_REGNUM,     inferior_fpregisters.opcode);
+  RS (FCTRL_REGNUM,   inferior_fp_registers.control);
+  RS (FSTAT_REGNUM,   inferior_fp_registers.status);
+  RS (FTAG_REGNUM,    inferior_fp_registers.tag);
+  RS (FCS_REGNUM,     inferior_fp_registers.code_seg);
+  RS (FCOFF_REGNUM,   inferior_fp_registers.eip);
+  RS (FDS_REGNUM,     inferior_fp_registers.operand_seg);
+  RS (FDOFF_REGNUM,   inferior_fp_registers.operand);
+  RS (FOP_REGNUM,     inferior_fp_registers.opcode);
 
   ptrace (PT_SETREGS, inferior_pid,
 	  (PTRACE_ARG3_TYPE) &inferior_registers, 0);

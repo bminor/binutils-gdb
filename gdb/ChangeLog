@@ -1,3 +1,7 @@
+2000-11-20  J.T. Conklin  <jtc@redback.com>
+
+	* gdbserver/low-nbsd.c: Fix typos.
+
 2000-11-20  Jeffrey A Law  (law@cygnus.com)
 
         * pa64solib.c (add_to_solib): Pass TARGET to pa64_solib_load_symbols.
