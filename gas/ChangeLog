@@ -1,3 +1,7 @@
+Fri Feb  2 14:09:25 1996  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* Makefile.in (INSTALL_XFORM): Remove -e.
+
 Fri Feb  2 12:32:15 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* write.c (write_relocs): Use S_IS_DEFINED and S_IS_COMMON rather
