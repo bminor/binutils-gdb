@@ -47,7 +47,7 @@ mh-aix386
 mh-aix43
 mh-apollo68
 mh-cxux
-mh-cygwin32
+mh-cygwin
 mh-decstation
 mh-delta88
 mh-dgux
