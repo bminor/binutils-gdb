@@ -1,3 +1,7 @@
+2004-04-23  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdb.threads/manythreads.c: Add copyright notice.
+
 2004-04-23  Andrew Cagney  <cagney@redhat.com>
 
 	* gdb.base/siginfo.exp: Better handle step out of signal.
