@@ -2339,6 +2339,7 @@ mips_push_arguments (int nargs,
   int argnum;
   int len = 0;
   int stack_offset = 0;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
   /* Macros to round N up or down to the next A boundary; A must be
      a power of two. */
@@ -2515,7 +2516,7 @@ mips_push_arguments (int nargs,
 				  (len % MIPS_SAVED_REGSIZE != 0));
 	  /* Structures should be aligned to eight bytes (even arg registers)
 	     on MIPS_ABI_O32 if their first member has double precision. */
-	  if (gdbarch_tdep (current_gdbarch)->mips_abi == MIPS_ABI_O32
+	  if (tdep->mips_abi == MIPS_ABI_O32
 	      && mips_type_needs_double_align (arg_type))
 	    {
 	      if ((argreg & 1))
