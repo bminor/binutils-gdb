@@ -1,3 +1,10 @@
+Wed Apr 22 09:55:42 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* symtab.c (lookup_symbol):  Need to check if msymbol->name is
+	NULL, as ALL_MSYMBOLS will never return a NULL msymbol pointer.
+	This prevents a crash when trying to lookup the value of a
+	non-existent symbol.
+
 Wed Apr 22 09:42:15 1992  Fred Fish  (fnf@cygnus.com)
 
 	* signame.c, signame.h:  Remove, replaced by strsignal.c in
@@ -141,6 +148,12 @@ Tue Apr 14 22:33:55 1992  Fred Fish  (fnf@cygnus.com)
 	* valprint.c (_initialize_valprint):  Remove initializations
 	for now removed unsigned_type_table, signed_type_table, and
 	float_type_table.
+
+Tue Apr 14 14:30:46 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* remote-vx.c, vx-share/xdr_ptrace.c, vx-share/xdr_ptrace.h,
+	vx-share/xdr_rdb.h:  Update for new remote protocol under VxWorks
+	5.0.2.
 
 Mon Apr 13 20:59:21 1992  Fred Fish  (fnf@cygnus.com)
 

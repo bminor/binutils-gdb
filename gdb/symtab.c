@@ -1,5 +1,6 @@
 /* Symbol table lookup for the GNU debugger, GDB.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992
+   Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -25,7 +26,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "target.h"
 #include "value.h"
 #include "symfile.h"
+#include "objfiles.h"
 #include "gdbcmd.h"
+#include "call-cmds.h"
 #include "regex.h"
 #include "expression.h"
 #include "language.h"
@@ -51,22 +54,22 @@ static struct symtabs_and_lines
 decode_line_2 PARAMS ((struct symbol *[], int, int));
 
 static void
-rbreak_command PARAMS ((char *));
+rbreak_command PARAMS ((char *, int));
 
 static void
-types_info PARAMS ((char *));
+types_info PARAMS ((char *, int));
 
 static void
-functions_info PARAMS ((char *));
+functions_info PARAMS ((char *, int));
 
 static void
-variables_info PARAMS ((char *));
+variables_info PARAMS ((char *, int));
+
+static void
+sources_info PARAMS ((char *, int));
 
 static void
 list_symbols PARAMS ((char *, int, int));
-
-static void
-sources_info PARAMS ((void));
 
 static void
 output_source_filename PARAMS ((char *, int *));
@@ -114,66 +117,60 @@ lookup_symtab_1 (name)
 {
   register struct symtab *s;
   register struct partial_symtab *ps;
-  register char *slash = strchr (name, '/');
-  register int len = strlen (name);
+  register char *slash;
+  register int len;
   register struct objfile *objfile;
 
-
-  for (objfile = object_files; objfile != NULL; objfile = objfile -> next)
+  ALL_SYMTABS (objfile, s)
     {
-      for (s = objfile -> symtabs; s != NULL; s = s -> next)
+      if (strcmp (name, s->filename) == 0)
 	{
-	  if (strcmp (name, s->filename) == 0)
+	  return (s);
+	}
+    }
+
+  ALL_PSYMTABS (objfile, ps)
+    {
+      if (strcmp (name, ps -> filename) == 0)
+	{
+	  if (ps -> readin)
+	    {
+	      error ("Internal: readin pst for `%s' found when no symtab found.", name);
+	    }
+	  return (PSYMTAB_TO_SYMTAB (ps));
+	}
+    }
+
+  slash = strchr (name, '/');
+  len = strlen (name);
+
+  if (!slash)
+    {
+      ALL_SYMTABS (objfile, s)
+	{
+	  int l = strlen (s->filename);
+	  
+	  if (l > len
+	      && s->filename[l - len -1] == '/'
+	      && (strcmp (s->filename + l - len, name) == 0))
 	    {
 	      return (s);
 	    }
 	}
-    }
-  for (objfile = object_files; objfile != NULL; objfile = objfile -> next)
-    {
-      for (ps = objfile -> psymtabs; ps != NULL; ps = ps->next)
+
+      ALL_PSYMTABS (objfile, ps)
 	{
-	  if (strcmp (name, ps -> filename) == 0)
+	  int l = strlen (ps -> filename);
+
+	  if (l > len
+	      && ps -> filename[l - len - 1] == '/'
+	      && (strcmp (ps->filename + l - len, name) == 0))
 	    {
 	      if (ps -> readin)
 		{
 		  error ("Internal: readin pst for `%s' found when no symtab found.", name);
 		}
 	      return (PSYMTAB_TO_SYMTAB (ps));
-	    }
-	}
-    }
-  if (!slash)
-    {
-      for (objfile = object_files; objfile != NULL; objfile = objfile -> next)
-	{
-	  for (s = objfile -> symtabs; s != NULL; s = s -> next)
-	    {
-	      int l = strlen (s->filename);
-	      
-	      if (s->filename[l - len -1] == '/'
-		  && (strcmp (s->filename + l - len, name) == 0))
-		{
-		  return (s);
-		}
-	    }
-	}
-
-      for (objfile = object_files; objfile != NULL; objfile = objfile -> next)
-	{
-	  for (ps = objfile -> psymtabs; ps != NULL; ps = ps -> next)
-	    {
-	      int l = strlen (ps -> filename);
-
-	      if (ps -> filename[l - len - 1] == '/'
-		  && (strcmp (ps->filename + l - len, name) == 0))
-		{
-		  if (ps -> readin)
-		    {
-		      error ("Internal: readin pst for `%s' found when no symtab found.", name);
-		    }
-		  return (PSYMTAB_TO_SYMTAB (ps));
-		}
 	    }
 	}
     }
@@ -216,16 +213,13 @@ char *name;
   register struct partial_symtab *pst;
   register struct objfile *objfile;
   
-  for (objfile = object_files; objfile != NULL; objfile = objfile -> next)
+  ALL_PSYMTABS (objfile, pst)
     {
-      for (pst = objfile -> psymtabs; pst != NULL; pst = pst -> next)
+      if (strcmp (name, pst -> filename) == 0)
 	{
-	  if (strcmp (name, pst -> filename) == 0)
-	    {
-	      return (pst);
-	    }
+	  return (pst);
 	}
-    }  
+    }
   return (NULL);
 }
 
@@ -294,14 +288,11 @@ find_pc_psymtab (pc)
   register struct partial_symtab *pst;
   register struct objfile *objfile;
 
-  for (objfile = object_files; objfile != NULL; objfile = objfile -> next)
+  ALL_PSYMTABS (objfile, pst)
     {
-      for (pst = objfile -> psymtabs; pst != NULL; pst = pst -> next)
+      if (pc >= pst -> textlow && pc < pst -> texthigh)
 	{
-	  if (pc >= pst -> textlow && pc < pst -> texthigh)
-	    {
-	      return (pst);
-	    }
+	  return (pst);
 	}
     }
   return (NULL);
@@ -342,40 +333,6 @@ find_pc_psymbol (psymtab, pc)
 }
 
 
-/* Function called via iterate_over_msymbols() that tests a minimal symbol
-   to see if the minimal symbol's name is a C++ mangled name that matches
-   a user visible name.  The user visible name (pname) is passed as arg1
-   and the number of leading characters that must match in both the mangled
-   name and the user name (matchcount) is passed as arg2.  Returns a pointer
-   to the minimal symbol if it matches, NULL otherwise. */
-
-static PTR
-cplus_mangled_symbol (objfile, msymbol, arg1, arg2, arg3)
-  struct objfile *objfile;
-  struct minimal_symbol *msymbol;
-  PTR arg1;
-  PTR arg2;
-  PTR arg3;
-{
-  char *pname = (char *) arg1;
-  int matchcount = (int) arg2;
-  char *demangled;
-  struct minimal_symbol *foundit = NULL;
-
-  if (strncmp (msymbol -> name, pname, matchcount) == 0)
-    {
-      if ((demangled = cplus_demangle (msymbol -> name, -1)) != NULL)
-	{
-	  if (strcmp (demangled, pname) == 0)
-	    {
-	      foundit = msymbol;
-	    }
-	  free (demangled);
-	}
-    }
-  return ((PTR) foundit);
-}
-
 /* Find the definition for a specified symbol name NAME
    in namespace NAMESPACE, visible from lexical block BLOCK.
    Returns the struct symbol pointer, or zero if no symbol is found.
@@ -401,7 +358,6 @@ lookup_symbol (name, block, namespace, is_a_field_of_this, symtab)
   struct blockvector *bv;
   register struct objfile *objfile;
   register struct block *b;
-  register int found;
   register struct minimal_symbol *msymbol;
 
   /* Search specified block and its superiors.  */
@@ -416,22 +372,15 @@ lookup_symbol (name, block, namespace, is_a_field_of_this, symtab)
 	    {
 	      /* Search the list of symtabs for one which contains the
 		 address of the start of this block.  */
-	      for (found = 0, objfile = object_files;
-		   !found && objfile != NULL;
-		   objfile = objfile -> next)
+	      ALL_SYMTABS (objfile, s)
 		{
-		  for (s = objfile -> symtabs; s != NULL; s = s -> next)
-		    {
-		      bv = BLOCKVECTOR (s);
-		      b = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-		      if (BLOCK_START (b) <= BLOCK_START (block)
-			  && BLOCK_END (b) > BLOCK_START (block))
-			{
-			  found++;
-			  break;
-			}
-		    }
+		  bv = BLOCKVECTOR (s);
+		  b = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
+		  if (BLOCK_START (b) <= BLOCK_START (block)
+		      && BLOCK_END (b) > BLOCK_START (block))
+		    goto found;
 		}
+found:
 	      *symtab = s;
 	    }
 
@@ -451,23 +400,20 @@ lookup_symbol (name, block, namespace, is_a_field_of_this, symtab)
     {
       struct block *b;
       /* Find the right symtab.  */
-      for (objfile = object_files; objfile != NULL; objfile = objfile -> next)
+      ALL_SYMTABS (objfile, s)
 	{
-	  for (s = objfile -> symtabs; s != NULL; s = s -> next)
+	  bv = BLOCKVECTOR (s);
+	  b = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
+	  if (BLOCK_START (b) <= BLOCK_START (block)
+	      && BLOCK_END (b) > BLOCK_START (block))
 	    {
-	      bv = BLOCKVECTOR (s);
-	      b = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-	      if (BLOCK_START (b) <= BLOCK_START (block)
-		  && BLOCK_END (b) > BLOCK_START (block))
+	      sym = lookup_demangled_block_symbol (b, name);
+	      if (sym)
 		{
-		  sym = lookup_demangled_block_symbol (b, name);
-		  if (sym)
-		    {
-		      block_found = b;
-		      if (symtab != NULL)
-			*symtab = s;
-		      return sym;
-		    }
+		  block_found = b;
+		  if (symtab != NULL)
+		    *symtab = s;
+		  return sym;
 		}
 	    }
 	}
@@ -493,20 +439,17 @@ lookup_symbol (name, block, namespace, is_a_field_of_this, symtab)
   /* Now search all global blocks.  Do the symtab's first, then
      check the psymtab's */
   
-  for (objfile = object_files; objfile != NULL; objfile = objfile -> next)
+  ALL_SYMTABS (objfile, s)
     {
-      for (s = objfile -> symtabs; s != NULL; s = s -> next)
+      bv = BLOCKVECTOR (s);
+      block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
+      sym = lookup_block_symbol (block, name, namespace);
+      if (sym) 
 	{
-	  bv = BLOCKVECTOR (s);
-	  block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-	  sym = lookup_block_symbol (block, name, namespace);
-	  if (sym) 
-	    {
-	      block_found = block;
-	      if (symtab != NULL)
-		*symtab = s;
-	      return sym;
-	    }
+	  block_found = block;
+	  if (symtab != NULL)
+	    *symtab = s;
+	  return sym;
 	}
     }
 
@@ -517,14 +460,35 @@ lookup_symbol (name, block, namespace, is_a_field_of_this, symtab)
   if (namespace == VAR_NAMESPACE)
     {
       msymbol = lookup_minimal_symbol (name, (struct objfile *) NULL);
+
       if (msymbol == NULL)
 	{
-	  /* Look for a mangled C++ name for NAME. */
-	  msymbol = (struct minimal_symbol *)
-	    iterate_over_msymbols (cplus_mangled_symbol, (PTR) name,
-				   (PTR) strlen (name), (PTR) NULL);
+	  /* Test each minimal symbol to see if the minimal symbol's name
+	     is a C++ mangled name that matches a user visible name.  */
+
+          int matchcount = strlen (name);
+	  char *demangled;
+
+	  ALL_MSYMBOLS (objfile, msymbol)
+	    {
+	      if (strncmp (msymbol -> name, name, matchcount) == 0)
+		{
+		  demangled = cplus_demangle (msymbol -> name, -1);
+		  if (demangled != NULL)
+		    {
+		      if (strcmp (demangled, name) == 0)
+			{
+			  free (demangled);
+			  goto found_msym;
+			}
+		      free (demangled);
+		    }
+		}
+	    }
         }
-      if (msymbol != NULL)
+
+found_msym:
+      if (msymbol != NULL && msymbol -> name != NULL)
 	{
 	  s = find_pc_symtab (msymbol -> address);
 	  /* If S is NULL, there are no debug symbols for this file.
@@ -562,22 +526,19 @@ lookup_symbol (name, block, namespace, is_a_field_of_this, symtab)
 	}
     }
       
-  for (objfile = object_files; objfile != NULL; objfile = objfile -> next)
+  ALL_PSYMTABS (objfile, ps)
     {
-      for (ps = objfile -> psymtabs; ps != NULL; ps = ps->next)
+      if (!ps->readin && lookup_partial_symbol (ps, name, 1, namespace))
 	{
-	  if (!ps->readin && lookup_partial_symbol (ps, name, 1, namespace))
-	    {
-	      s = PSYMTAB_TO_SYMTAB(ps);
-	      bv = BLOCKVECTOR (s);
-	      block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-	      sym = lookup_block_symbol (block, name, namespace);
-	      if (!sym)
-		error ("Internal: global symbol `%s' found in psymtab but not in symtab", name);
-	      if (symtab != NULL)
-		*symtab = s;
-	      return sym;
-	    }
+	  s = PSYMTAB_TO_SYMTAB(ps);
+	  bv = BLOCKVECTOR (s);
+	  block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
+	  sym = lookup_block_symbol (block, name, namespace);
+	  if (!sym)
+	    error ("Internal: global symbol `%s' found in psymtab but not in symtab", name);
+	  if (symtab != NULL)
+	    *symtab = s;
+	  return sym;
 	}
     }
 
@@ -585,39 +546,33 @@ lookup_symbol (name, block, namespace, is_a_field_of_this, symtab)
      Not strictly correct, but more useful than an error.
      Do the symtabs first, then check the psymtabs */
 
-  for (objfile = object_files; objfile != NULL; objfile = objfile -> next)
+  ALL_SYMTABS (objfile, s)
     {
-      for (s = objfile -> symtabs; s != NULL; s = s -> next)
+      bv = BLOCKVECTOR (s);
+      block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
+      sym = lookup_block_symbol (block, name, namespace);
+      if (sym) 
 	{
-	  bv = BLOCKVECTOR (s);
-	  block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-	  sym = lookup_block_symbol (block, name, namespace);
-	  if (sym) 
-	    {
-	      block_found = block;
-	      if (symtab != NULL)
-		*symtab = s;
-	      return sym;
-	    }
+	  block_found = block;
+	  if (symtab != NULL)
+	    *symtab = s;
+	  return sym;
 	}
     }
 
-  for (objfile = object_files; objfile != NULL; objfile = objfile -> next)
+  ALL_PSYMTABS (objfile, ps)
     {
-      for (ps = objfile -> psymtabs; ps != NULL; ps = ps -> next)
+      if (!ps->readin && lookup_partial_symbol (ps, name, 0, namespace))
 	{
-	  if (!ps->readin && lookup_partial_symbol (ps, name, 0, namespace))
-	    {
-	      s = PSYMTAB_TO_SYMTAB(ps);
-	      bv = BLOCKVECTOR (s);
-	      block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-	      sym = lookup_block_symbol (block, name, namespace);
-	      if (!sym)
-		error ("Internal: static symbol `%s' found in psymtab but not in symtab", name);
-	      if (symtab != NULL)
-		*symtab = s;
-	      return sym;
-	    }
+	  s = PSYMTAB_TO_SYMTAB(ps);
+	  bv = BLOCKVECTOR (s);
+	  block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
+	  sym = lookup_block_symbol (block, name, namespace);
+	  if (!sym)
+	    error ("Internal: static symbol `%s' found in psymtab but not in symtab", name);
+	  if (symtab != NULL)
+	    *symtab = s;
+	  return sym;
 	}
     }
 
@@ -626,39 +581,33 @@ lookup_symbol (name, block, namespace, is_a_field_of_this, symtab)
 
   if (namespace == VAR_NAMESPACE)
     {
-      for (objfile = object_files; objfile != NULL; objfile = objfile -> next)
+      ALL_SYMTABS (objfile, s)
 	{
-	  for (s = objfile -> symtabs; s != NULL; s = s -> next)
+	  bv = BLOCKVECTOR (s);
+	  block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
+	  sym = lookup_demangled_block_symbol (block, name);
+	  if (sym) 
 	    {
-	      bv = BLOCKVECTOR (s);
-	      block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-	      sym = lookup_demangled_block_symbol (block, name);
-	      if (sym) 
-		{
-		  block_found = block;
-		  if (symtab != NULL)
-		    *symtab = s;
-		  return sym;
-		}
+	      block_found = block;
+	      if (symtab != NULL)
+		*symtab = s;
+	      return sym;
 	    }
 	}
 
-      for (objfile = object_files; objfile != NULL; objfile = objfile -> next)
+      ALL_PSYMTABS (objfile, ps)
 	{
-	  for (ps = objfile -> psymtabs; ps != NULL; ps = ps -> next)
+	  if (!ps->readin && lookup_demangled_partial_symbol (ps, name))
 	    {
-	      if (!ps->readin && lookup_demangled_partial_symbol (ps, name))
-		{
-		  s = PSYMTAB_TO_SYMTAB(ps);
-		  bv = BLOCKVECTOR (s);
-		  block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-		  sym = lookup_demangled_block_symbol (block, name);
-		  if (!sym)
-		    error ("Internal: mangled static symbol `%s' found in psymtab but not in symtab", name);
-		  if (symtab != NULL)
-		    *symtab = s;
-		  return sym;
-		}
+	      s = PSYMTAB_TO_SYMTAB(ps);
+	      bv = BLOCKVECTOR (s);
+	      block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
+	      sym = lookup_demangled_block_symbol (block, name);
+	      if (!sym)
+		error ("Internal: mangled static symbol `%s' found in psymtab but not in symtab", name);
+	      if (symtab != NULL)
+		*symtab = s;
+	      return sym;
 	    }
 	}
     }
@@ -808,14 +757,11 @@ find_main_psymtab ()
   register struct partial_symtab *pst;
   register struct objfile *objfile;
 
-  for (objfile = object_files; objfile != NULL; objfile = objfile -> next)
+  ALL_PSYMTABS (objfile, pst)
     {
-      for (pst = objfile -> psymtabs; pst; pst = pst->next)
+      if (lookup_partial_symbol (pst, "main", 1, VAR_NAMESPACE))
 	{
-	  if (lookup_partial_symbol (pst, "main", 1, VAR_NAMESPACE))
-	    {
-	      return (pst);
-	    }
+	  return (pst);
 	}
     }
   return (NULL);
@@ -940,25 +886,16 @@ find_pc_symtab (pc)
   register struct symtab *s = 0;
   register struct partial_symtab *ps;
   register struct objfile *objfile;
-  register int found;
 
   /* Search all symtabs for one whose file contains our pc */
 
-  for (found = 0, objfile = object_files;
-       !found && objfile != NULL;
-       objfile = objfile -> next)
+  ALL_SYMTABS (objfile, s)
     {
-      for (s = objfile -> symtabs; s != NULL; s = s -> next)
-	{
-	  bv = BLOCKVECTOR (s);
-	  b = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-	  if (BLOCK_START (b) <= pc
-	      && BLOCK_END (b) > pc)
-	    {
-	      found++;
-	      break;
-	    }
-	}
+      bv = BLOCKVECTOR (s);
+      b = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
+      if (BLOCK_START (b) <= pc
+	  && BLOCK_END (b) > pc)
+	goto found;
     }
 
   if (!s)
@@ -974,6 +911,7 @@ find_pc_symtab (pc)
 	}
     }
 
+found:
   return (s);
 }
 
@@ -2009,7 +1947,9 @@ output_source_filename (name, first)
 }  
 
 static void
-sources_info ()
+sources_info (ignore, from_tty)
+     char *ignore;
+     int from_tty;
 {
   register struct symtab *s;
   register struct partial_symtab *ps;
@@ -2024,26 +1964,20 @@ sources_info ()
   printf_filtered ("Source files for which symbols have been read in:\n\n");
 
   first = 1;
-  for (objfile = object_files; objfile != NULL; objfile = objfile -> next)
+  ALL_SYMTABS (objfile, s)
     {
-      for (s = objfile -> symtabs; s != NULL; s = s -> next)
-	{
-	  output_source_filename (s -> filename, &first);
-	}
+      output_source_filename (s -> filename, &first);
     }
   printf_filtered ("\n\n");
   
   printf_filtered ("Source files for which symbols will be read in on demand:\n\n");
 
   first = 1;
-  for (objfile = object_files; objfile != NULL; objfile = objfile -> next)
+  ALL_PSYMTABS (objfile, ps)
     {
-      for (ps = objfile -> psymtabs; ps != NULL; ps = ps -> next)
+      if (!ps->readin)
 	{
-	  if (!ps->readin)
-	    {
-	      output_source_filename (ps -> filename, &first);
-	    }
+	  output_source_filename (ps -> filename, &first);
 	}
     }
   printf_filtered ("\n");
@@ -2089,8 +2023,7 @@ list_symbols (regexp, class, bpt)
   struct partial_symbol *psym;
   struct objfile *objfile;
   struct minimal_symbol *msymbol;
-  char *val, *q2;
-/*  char *mangled;*/
+  char *val;
   static char *classnames[]
     = {"variable", "function", "type", "method"};
   int found_in_file = 0;
@@ -2101,7 +2034,6 @@ list_symbols (regexp, class, bpt)
     = {mst_bss,  mst_text, mst_abs, mst_unknown};
   enum minimal_symbol_type ourtype = types[class];
   enum minimal_symbol_type ourtype2 = types2[class];
-
 
   if (regexp)
     {
@@ -2143,54 +2075,51 @@ list_symbols (regexp, class, bpt)
      matching the regexp.  That way we don't have to reproduce all of
      the machinery below. */
 
-  for (objfile = object_files; objfile != NULL; objfile = objfile -> next)
+  ALL_PSYMTABS (objfile, ps)
     {
-      for (ps = objfile -> psymtabs; ps != NULL; ps = ps -> next)
+      struct partial_symbol *bound, *gbound, *sbound;
+      int keep_going = 1;
+      
+      if (ps->readin) continue;
+      
+      gbound = objfile->global_psymbols.list + ps->globals_offset + ps->n_global_syms;
+      sbound = objfile->static_psymbols.list + ps->statics_offset + ps->n_static_syms;
+      bound = gbound;
+      
+      /* Go through all of the symbols stored in a partial
+	 symtab in one loop. */
+      psym = objfile->global_psymbols.list + ps->globals_offset;
+      while (keep_going)
 	{
-	  struct partial_symbol *bound, *gbound, *sbound;
-	  int keep_going = 1;
-	  
-	  if (ps->readin) continue;
-	  
-	  gbound = objfile->global_psymbols.list + ps->globals_offset + ps->n_global_syms;
-	  sbound = objfile->static_psymbols.list + ps->statics_offset + ps->n_static_syms;
-	  bound = gbound;
-	  
-	  /* Go through all of the symbols stored in a partial
-	     symtab in one loop. */
-	  psym = objfile->global_psymbols.list + ps->globals_offset;
-	  while (keep_going)
+	  if (psym >= bound)
 	    {
-	      if (psym >= bound)
+	      if (bound == gbound && ps->n_static_syms != 0)
 		{
-		  if (bound == gbound && ps->n_static_syms != 0)
-		    {
-		      psym = objfile->static_psymbols.list + ps->statics_offset;
-		      bound = sbound;
-		    }
-		  else
-		    keep_going = 0;
-		  continue;
+		  psym = objfile->static_psymbols.list + ps->statics_offset;
+		  bound = sbound;
 		}
 	      else
-		{
-		  QUIT;
-
-		  /* If it would match (logic taken from loop below)
-		     load the file and go on to the next one */
-		  if ((regexp == 0 || NAME_MATCH (SYMBOL_NAME (psym)))
-		      && ((class == 0 && SYMBOL_CLASS (psym) != LOC_TYPEDEF
-			   && SYMBOL_CLASS (psym) != LOC_BLOCK)
-			  || (class == 1 && SYMBOL_CLASS (psym) == LOC_BLOCK)
-			  || (class == 2 && SYMBOL_CLASS (psym) == LOC_TYPEDEF)
-			  || (class == 3 && SYMBOL_CLASS (psym) == LOC_BLOCK)))
-		    {
-		      (void) PSYMTAB_TO_SYMTAB(ps);
-		      keep_going = 0;
-		    }
-		}
-	      psym++;
+		keep_going = 0;
+	      continue;
 	    }
+	  else
+	    {
+	      QUIT;
+
+	      /* If it would match (logic taken from loop below)
+		 load the file and go on to the next one */
+	      if ((regexp == 0 || NAME_MATCH (SYMBOL_NAME (psym)))
+		  && ((class == 0 && SYMBOL_CLASS (psym) != LOC_TYPEDEF
+		       && SYMBOL_CLASS (psym) != LOC_BLOCK)
+		      || (class == 1 && SYMBOL_CLASS (psym) == LOC_BLOCK)
+		      || (class == 2 && SYMBOL_CLASS (psym) == LOC_TYPEDEF)
+		      || (class == 3 && SYMBOL_CLASS (psym) == LOC_BLOCK)))
+		{
+		  (void) PSYMTAB_TO_SYMTAB(ps);
+		  keep_going = 0;
+		}
+	    }
+	  psym++;
 	}
     }
 
@@ -2202,19 +2131,15 @@ list_symbols (regexp, class, bpt)
 
   if (class == 1)
     {
-      for (objfile = object_files; objfile != NULL; objfile = objfile -> next)
+      ALL_MSYMBOLS (objfile, msymbol)
 	{
-	  for (msymbol = objfile -> msymbols;
-	       msymbol -> name != NULL; msymbol++)
+	  if (msymbol -> type == ourtype || msymbol -> type == ourtype2)
 	    {
-	      if (msymbol -> type == ourtype || msymbol -> type == ourtype2)
+	      if (regexp == 0 || NAME_MATCH (msymbol -> name))
 		{
-		  if (regexp == 0 || NAME_MATCH (msymbol -> name))
+		  if (0 == find_pc_symtab (msymbol -> address))
 		    {
-		      if (0 == find_pc_symtab (msymbol -> address))
-			{
-			  found_misc = 1;
-			}
+		      found_misc = 1;
 		    }
 		}
 	    }
@@ -2230,83 +2155,81 @@ list_symbols (regexp, class, bpt)
 	  classnames[class],
 	  regexp);
 
-  for (objfile = object_files; objfile != NULL; objfile = objfile -> next)
+  ALL_SYMTABS (objfile, s)
     {
-      for (s = objfile -> symtabs; s != NULL; s = s -> next)
-	{
-	  found_in_file = 0;
-	  bv = BLOCKVECTOR (s);
-	  /* Often many files share a blockvector.
-	     Scan each blockvector only once so that
-	     we don't get every symbol many times.
-	     It happens that the first symtab in the list
-	     for any given blockvector is the main file.  */
-	  if (bv != prev_bv)
-	    for (i = GLOBAL_BLOCK; i <= STATIC_BLOCK; i++)
+      found_in_file = 0;
+      bv = BLOCKVECTOR (s);
+      /* Often many files share a blockvector.
+	 Scan each blockvector only once so that
+	 we don't get every symbol many times.
+	 It happens that the first symtab in the list
+	 for any given blockvector is the main file.  */
+      if (bv != prev_bv)
+	for (i = GLOBAL_BLOCK; i <= STATIC_BLOCK; i++)
+	  {
+	    b = BLOCKVECTOR_BLOCK (bv, i);
+	    /* Skip the sort if this block is always sorted.  */
+	    if (!BLOCK_SHOULD_SORT (b))
+	      sort_block_syms (b);
+	    for (j = 0; j < BLOCK_NSYMS (b); j++)
 	      {
-		b = BLOCKVECTOR_BLOCK (bv, i);
-		/* Skip the sort if this block is always sorted.  */
-		if (!BLOCK_SHOULD_SORT (b))
-		  sort_block_syms (b);
-		for (j = 0; j < BLOCK_NSYMS (b); j++)
+		QUIT;
+		sym = BLOCK_SYM (b, j);
+		if ((regexp == 0 || NAME_MATCH (SYMBOL_NAME (sym)))
+		    && ((class == 0 && SYMBOL_CLASS (sym) != LOC_TYPEDEF
+			 && SYMBOL_CLASS (sym) != LOC_BLOCK)
+			|| (class == 1 && SYMBOL_CLASS (sym) == LOC_BLOCK)
+			|| (class == 2 && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
+			|| (class == 3 && SYMBOL_CLASS (sym) == LOC_BLOCK)))
 		  {
-		    QUIT;
-		    sym = BLOCK_SYM (b, j);
-		    if ((regexp == 0 || NAME_MATCH (SYMBOL_NAME (sym)))
-			&& ((class == 0 && SYMBOL_CLASS (sym) != LOC_TYPEDEF
-			     && SYMBOL_CLASS (sym) != LOC_BLOCK)
-			    || (class == 1 && SYMBOL_CLASS (sym) == LOC_BLOCK)
-			    || (class == 2 && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
-			    || (class == 3 && SYMBOL_CLASS (sym) == LOC_BLOCK)))
+		    if (bpt)
 		      {
-			if (bpt)
-			  {
-			    /* Set a breakpoint here, if it's a function */
-			    if (class == 1)
-			      break_command (SYMBOL_NAME(sym), 0);
-			  }
-			else if (!found_in_file)
-			  {
-			    fputs_filtered ("\nFile ", stdout);
-			    fputs_filtered (s->filename, stdout);
-			    fputs_filtered (":\n", stdout);
-			  }
-			found_in_file = 1;
+			/* Set a breakpoint here, if it's a function */
+			if (class == 1)
+			  break_command (SYMBOL_NAME(sym), 0);
+		      }
+		    else if (!found_in_file)
+		      {
+			fputs_filtered ("\nFile ", stdout);
+			fputs_filtered (s->filename, stdout);
+			fputs_filtered (":\n", stdout);
+		      }
+		    found_in_file = 1;
+		    
+		    if (class != 2 && i == STATIC_BLOCK)
+		      printf_filtered ("static ");
+		    
+		    /* Typedef that is not a C++ class */
+		    if (class == 2
+			&& SYMBOL_NAMESPACE (sym) != STRUCT_NAMESPACE)
+		      typedef_print (SYMBOL_TYPE(sym), sym, stdout);
+		    /* variable, func, or typedef-that-is-c++-class */
+		    else if (class < 2 || 
+			     (class == 2 && 
+			      SYMBOL_NAMESPACE(sym) == STRUCT_NAMESPACE))
+		      {
+			type_print (SYMBOL_TYPE (sym),
+				    (SYMBOL_CLASS (sym) == LOC_TYPEDEF
+				     ? "" : SYMBOL_NAME (sym)),
+				    stdout, 0);
 			
-			if (class != 2 && i == STATIC_BLOCK)
-			  printf_filtered ("static ");
-			
-			/* Typedef that is not a C++ class */
-			if (class == 2
-			    && SYMBOL_NAMESPACE (sym) != STRUCT_NAMESPACE)
-			  typedef_print (SYMBOL_TYPE(sym), sym, stdout);
-			/* variable, func, or typedef-that-is-c++-class */
-			else if (class < 2 || 
-				 (class == 2 && 
-				  SYMBOL_NAMESPACE(sym) == STRUCT_NAMESPACE))
-			  {
-			    type_print (SYMBOL_TYPE (sym),
-					(SYMBOL_CLASS (sym) == LOC_TYPEDEF
-					 ? "" : SYMBOL_NAME (sym)),
-					stdout, 0);
-			    
-			    printf_filtered (";\n");
-			  }
-			else
-			  {
+			printf_filtered (";\n");
+		      }
+		    else
+		      {
 # if 0
-			    char buf[1024];
-			    type_print_base (TYPE_FN_FIELD_TYPE(t, i), stdout, 0, 0); 
-			    type_print_varspec_prefix (TYPE_FN_FIELD_TYPE(t, i), stdout, 0); 
-			    sprintf (buf, " %s::", type_name_no_tag (t));
-			    type_print_method_args (TYPE_FN_FIELD_ARGS (t, i), buf, name, stdout);
+/* FIXME, why is this zapped out? */
+			char buf[1024];
+			type_print_base (TYPE_FN_FIELD_TYPE(t, i), stdout, 0, 0); 
+			type_print_varspec_prefix (TYPE_FN_FIELD_TYPE(t, i), stdout, 0); 
+			sprintf (buf, " %s::", type_name_no_tag (t));
+			type_print_method_args (TYPE_FN_FIELD_ARGS (t, i), buf, name, stdout);
 # endif
-			  }
 		      }
 		  }
 	      }
-	  prev_bv = bv;
-	}
+	  }
+      prev_bv = bv;
     }
 
   /* If there are no eyes, avoid all contact.  I mean, if there are
@@ -2315,33 +2238,29 @@ list_symbols (regexp, class, bpt)
   if (found_misc || class != 1)
     {
       found_in_file = 0;
-      for (objfile = object_files; objfile != NULL; objfile = objfile -> next)
+      ALL_MSYMBOLS (objfile, msymbol)
 	{
-	  for (msymbol = objfile -> msymbols;
-	       msymbol -> name != NULL; msymbol++)
+	  if (msymbol -> type == ourtype || msymbol -> type == ourtype2)
 	    {
-	      if (msymbol -> type == ourtype || msymbol -> type == ourtype2)
+	      if (regexp == 0 || NAME_MATCH (msymbol -> name))
 		{
-		  if (regexp == 0 || NAME_MATCH (msymbol -> name))
+		  /* Functions:  Look up by address. */
+		  if (class != 1 &&
+		      (find_pc_symtab (msymbol -> address) != NULL))
 		    {
-		      /* Functions:  Look up by address. */
-		      if (class != 1 &&
-			  (find_pc_symtab (msymbol -> address) != NULL))
+		      /* Variables/Absolutes:  Look up by name */
+		      if (lookup_symbol (msymbol -> name, 
+					 (struct block *) 0, VAR_NAMESPACE, 0,
+					 (struct symtab **) 0) == NULL)
 			{
-			  /* Variables/Absolutes:  Look up by name */
-			  if (lookup_symbol (msymbol -> name, 
-					     (struct block *) 0, VAR_NAMESPACE, 0,
-					     (struct symtab **) 0) == NULL)
+			  if (!found_in_file)
 			    {
-			      if (!found_in_file)
-				{
-				  printf_filtered ("\nNon-debugging symbols:\n");
-				  found_in_file = 1;
-				}
-			      printf_filtered ("	%08x  %s\n",
-					       msymbol -> address,
-					       msymbol -> name);
+			      printf_filtered ("\nNon-debugging symbols:\n");
+			      found_in_file = 1;
 			    }
+			  printf_filtered ("	%08x  %s\n",
+					   msymbol -> address,
+					   msymbol -> name);
 			}
 		    }
 		}
@@ -2351,22 +2270,25 @@ list_symbols (regexp, class, bpt)
 }
 
 static void
-variables_info (regexp)
+variables_info (regexp, from_tty)
      char *regexp;
+     int from_tty;
 {
   list_symbols (regexp, 0, 0);
 }
 
 static void
-functions_info (regexp)
+functions_info (regexp, from_tty)
      char *regexp;
+     int from_tty;
 {
   list_symbols (regexp, 1, 0);
 }
 
 static void
-types_info (regexp)
+types_info (regexp, from_tty)
      char *regexp;
+     int from_tty;
 {
   list_symbols (regexp, 2, 0);
 }
@@ -2383,8 +2305,9 @@ methods_info (regexp)
 
 /* Breakpoint all functions matching regular expression. */
 static void
-rbreak_command (regexp)
+rbreak_command (regexp, from_tty)
      char *regexp;
+     int from_tty;
 {
   list_symbols (regexp, 1, 1);
 }
@@ -2455,33 +2378,30 @@ make_symbol_completion_list (text)
   /* Look through the partial symtabs for all symbols which begin
      by matching TEXT.  Add each one that you find to the list.  */
 
-  for (objfile = object_files; objfile != NULL; objfile = objfile -> next)
+  ALL_PSYMTABS (objfile, ps)
     {
-      for (ps = objfile -> psymtabs; ps != NULL; ps = ps -> next)
+      /* If the psymtab's been read in we'll get it when we search
+	 through the blockvector.  */
+      if (ps->readin) continue;
+      
+      for (psym = objfile->global_psymbols.list + ps->globals_offset;
+	   psym < (objfile->global_psymbols.list + ps->globals_offset
+		   + ps->n_global_syms);
+	   psym++)
 	{
-	  /* If the psymtab's been read in we'll get it when we search
-	     through the blockvector.  */
-	  if (ps->readin) continue;
-	  
-	  for (psym = objfile->global_psymbols.list + ps->globals_offset;
-	       psym < (objfile->global_psymbols.list + ps->globals_offset
-		       + ps->n_global_syms);
-	       psym++)
-	    {
-	      QUIT;			/* If interrupted, then quit. */
-	      if ((strncmp (SYMBOL_NAME (psym), text, text_len) == 0))
-		completion_list_add_symbol (SYMBOL_NAME (psym));
-	    }
-	  
-	  for (psym = objfile->static_psymbols.list + ps->statics_offset;
-	       psym < (objfile->static_psymbols.list + ps->statics_offset
-		       + ps->n_static_syms);
-	       psym++)
-	    {
-	      QUIT;
-	      if ((strncmp (SYMBOL_NAME (psym), text, text_len) == 0))
-		completion_list_add_symbol (SYMBOL_NAME (psym));
-	    }
+	  QUIT;			/* If interrupted, then quit. */
+	  if ((strncmp (SYMBOL_NAME (psym), text, text_len) == 0))
+	    completion_list_add_symbol (SYMBOL_NAME (psym));
+	}
+      
+      for (psym = objfile->static_psymbols.list + ps->statics_offset;
+	   psym < (objfile->static_psymbols.list + ps->statics_offset
+		   + ps->n_static_syms);
+	   psym++)
+	{
+	  QUIT;
+	  if ((strncmp (SYMBOL_NAME (psym), text, text_len) == 0))
+	    completion_list_add_symbol (SYMBOL_NAME (psym));
 	}
     }
 
@@ -2490,15 +2410,11 @@ make_symbol_completion_list (text)
      anything that isn't a text symbol (everything else will be
      handled by the psymtab code above).  */
 
-  for (objfile = object_files; objfile != NULL; objfile = objfile -> next)
+  ALL_MSYMBOLS (objfile, msymbol)
     {
-      for (msymbol = objfile -> msymbols;
-	   msymbol ->name != NULL; msymbol++)
+      if (strncmp (text, msymbol -> name, text_len) == 0)
 	{
-	  if (strncmp (text, msymbol -> name, text_len) == 0)
-	    {
-	      completion_list_add_symbol (msymbol -> name);
-	    }
+	  completion_list_add_symbol (msymbol -> name);
 	}
     }
 
@@ -2536,31 +2452,25 @@ make_symbol_completion_list (text)
   /* Go through the symtabs and check the externs and statics for
      symbols which match.  */
 
-  for (objfile = object_files; objfile != NULL; objfile = objfile -> next)
+  ALL_SYMTABS (objfile, s)
     {
-      for (s = objfile ->symtabs; s != NULL; s = s -> next)
-	{
-	  b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
-	  
-	  for (i = 0; i < BLOCK_NSYMS (b); i++)
-	    if (!strncmp (SYMBOL_NAME (BLOCK_SYM (b, i)), text, text_len))
-	      completion_list_add_symbol (SYMBOL_NAME (BLOCK_SYM (b, i)));
-	}
+      b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
+      
+      for (i = 0; i < BLOCK_NSYMS (b); i++)
+	if (!strncmp (SYMBOL_NAME (BLOCK_SYM (b, i)), text, text_len))
+	  completion_list_add_symbol (SYMBOL_NAME (BLOCK_SYM (b, i)));
     }
 
-  for (objfile = object_files; objfile != NULL; objfile = objfile -> next)
+  ALL_SYMTABS (objfile, s)
     {
-      for (s = objfile -> symtabs; s != NULL; s = s -> next)
-	{
-	  b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK);
-	  
-	  /* Don't do this block twice.  */
-	  if (b == surrounding_static_block) continue;
-	  
-	  for (i = 0; i < BLOCK_NSYMS (b); i++)
-	    if (!strncmp (SYMBOL_NAME (BLOCK_SYM (b, i)), text, text_len))
-	      completion_list_add_symbol (SYMBOL_NAME (BLOCK_SYM (b, i)));
-	}
+      b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK);
+      
+      /* Don't do this block twice.  */
+      if (b == surrounding_static_block) continue;
+      
+      for (i = 0; i < BLOCK_NSYMS (b); i++)
+	if (!strncmp (SYMBOL_NAME (BLOCK_SYM (b, i)), text, text_len))
+	  completion_list_add_symbol (SYMBOL_NAME (BLOCK_SYM (b, i)));
     }
 
   return (return_val);
