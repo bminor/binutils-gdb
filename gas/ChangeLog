@@ -1,3 +1,11 @@
+2004-07-03  Richard Sandiford  <rsandifo@redhat.com>
+
+	* config/tc-mips.c (HAVE_IN_PLACE_ADDENDS): New macro.
+	(reloc_needs_lo_p): Only return true if HAVE_IN_PLACE_ADDENDS.
+	(mips_frob_file): Rework so that only a single pass through the
+	relocs is needed.  Allow %lo()s to have higher offsets than their
+	corresponding %hi()s or %got()s.
+
 2004-07-02  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-arm.c (md_apply_fix3:BFD_RELOC_ARM_IMMEDIATE): Do not

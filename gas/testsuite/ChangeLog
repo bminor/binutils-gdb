@@ -1,3 +1,18 @@
+2004-07-03  Richard Sandiford  <rsandifo@redhat.com>
+
+	* config/tc-mips.c (HAVE_IN_PLACE_ADDENDS): New macro.
+	(reloc_needs_lo_p): Only return true if HAVE_IN_PLACE_ADDENDS.
+	(mips_frob_file): Rework so that only a single pass through the
+	relocs is needed.  Allow %lo()s to have higher offsets than their
+	corresponding %hi()s or %got()s.
+
+testsuite/
+	* gas/mips/elf{,el}-rel.d: Adjust so that the earliest %hi() matches
+	the earliest %lo().
+	* gas/mips/elf-rel11.d: Don't expect the relocs to be reordered.
+	* gas/mips/elf-rel20.[sd]: New test.
+	* gas/mips/mips.exp: Run it.
+
 2004-07-03  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* gas/mips/elf-rel9.[sd]: Fix typo in %lo() expression.
