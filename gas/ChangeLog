@@ -1,3 +1,25 @@
+Wed May  5 13:14:01 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* config/obj-ecoff.c (init_file): Set fMerge to 0 since dbx seems
+	to want it that way.
+	(ecoff_build_symbols): Turn local st_Proc symbols into
+	st_StaticProc symbols.  Set index field of external st_Proc and
+	st_staticProc symbols correctly.
+	* config/tc-mips.h (NO_LISTING): Don't define.  People might want
+	listings.
+
+Mon May  3 15:59:32 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* config/tc-sparc.c (sparc_ip): Allow any abs expression as an
+	address space number.
+
+Wed Apr 28 19:11:22 1993  Ken Raeburn  (raeburn@deneb.cygnus.com)
+
+	* config/obj-aout.h (TARGET_DEFAULT): Don't default this at all.
+
+	* config/tc-a29k.c: Include ctype.h.
+	(define_some_regs): Added special-purpose registers for 29050.
+
 Wed Apr 28 13:40:29 1993  Ian Lance Taylor  (ian@rtl.cygnus.com)
 
 	* config/obj-ecoff.c (obj_symbol_new_hook): Make up a .file if one
