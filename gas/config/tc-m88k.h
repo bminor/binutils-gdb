@@ -29,6 +29,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif
 
 #define NEED_FX_R_TYPE
+#define TC_KEEP_FX_OFFSET
 #define TC_CONS_RELOC RELOC_32
 
 /* different type of relocation available in the m88k */
