@@ -1,3 +1,8 @@
+2004-08-24  Andrew Cagney  <cagney@gnu.org>
+
+	* gdbint.texinfo (Target Architecture Definition): Add missing
+	comma.
+
 2004-08-20  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* (Using the Testsuite): build != host is supported,

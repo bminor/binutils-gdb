@@ -3816,7 +3816,7 @@ Number of bits in a short integer; defaults to @code{2 * TARGET_CHAR_BIT}.
 @findex read_sp
 @findex read_fp
 @anchor{TARGET_READ_SP} These change the behavior of @code{read_pc},
-@code{write_pc} and @code{read_sp}.  For most targets, these may be
+@code{write_pc}, and @code{read_sp}.  For most targets, these may be
 left undefined.  @value{GDBN} will call the read and write register
 functions with the relevant @code{_REGNUM} argument.
 
