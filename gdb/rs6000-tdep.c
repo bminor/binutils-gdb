@@ -2163,8 +2163,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   osabi = get_elfosabi (info.abfd);
 
-  /* Check word size.  If INFO is from a binary file, infer it from that,
-     else use the previously-inferred size. */
+  /* Check word size.  If INFO is from a binary file, infer it from
+     that, else choose a likely default. */
   if (from_xcoff_exec)
     {
       if (xcoff_data (info.abfd)->xcoff64)
@@ -2181,11 +2181,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
   else
     {
-      tdep = TDEP;
-      if (tdep)
-	wordsize = tdep->wordsize;
-      else
-	wordsize = 4;
+      wordsize = 4;
     }
 
   /* Find a candidate among extant architectures. */

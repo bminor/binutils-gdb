@@ -1,3 +1,9 @@
+2001-09-29  Andrew Cagney  <ac131313@redhat.com>
+
+	* rs6000-tdep.c (rs6000_gdbarch_init): Don't use the previous
+	architecture to infer the wordsize.  Previous architecture may not
+	be a PowerPC.
+
 2001-09-27  J. Brobecker <brobecker@gnat.com>
 
 	* infttrace.c (kill_inferior): Issue a TT_PROC_EXIT request rather
