@@ -179,12 +179,12 @@ case "${targ}" in
   hppa*-*-*elf* | hppa*-*-lites* | hppa*-*-sysv4* | hppa*-*-rtems*)
     targ_defvec=bfd_elf32_hppa_vec
     ;;
-#if defined (HOST_HPPAHPUX) || defined (HOST_HPPABSD) || defined (HOST_HPPAOSF)
+#if defined (HOST_HPPAHPUX) || defined (HOST_HPPABSD) || defined (HOST_HPPAOSF) || defined (HOST_HPPAMPEIX)
   hppa*-*-bsd*)
     targ_defvec=som_vec
     targ_selvecs=bfd_elf32_hppa_vec
     ;;
-  hppa*-*-hpux* | hppa*-*-hiux*)
+  hppa*-*-hpux* | hppa*-*-hiux* | hppa*-*-mpeix*)
     targ_defvec=som_vec
     ;;
   hppa*-*-osf*)

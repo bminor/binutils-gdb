@@ -1,4 +1,37 @@
+Tue Dec  8 19:38:42 1998  Mark Klein  <mklein@dis.com>
+
+	* config.bfd (hppa*-*-mpeix*): New target.
+	* configure.in: Add AC_HEADER_DIRENT.
+	(hppa*-*-mpeix*): New target.
+	* configure.host (hppa*-*-mpeix*): New host.
+	* hpux-core.c: Check HOST_HPPAMPEIX.  Use HAVE_DIRENT_H and
+	friends rather than just including <sys/dir.h>.
+	* som.h (struct som_symbol): Add hppa_priv_level and apto
+	tc_data.  Change all users.
+	(struct somdata): Add comp_unit field.
+	(obj_som_compilation_unit): Define.
+	(bfd_som_attach_compilation_unix): Declare.
+	* som.c: Check HOST_HPPAMPEIX.
+	(struct som_misc_symbol_info): Add new field priv_level.
+	(som_object_setup): Add current_offset parameter.  Change all
+	callers.
+	(setup_sections): Likewise.
+	(som_object_p): For EXECLIBMAGIC, read the lst header.
+	(som_write_symbol_strings): Add compilation_unit parameter.
+	Change all callers.
+	(som_finish_writing): Write out compilation_unit.
+	(som_bfd_derive_misc_symbol_info): Set priv_level.
+	(som_build_and_write_symbol_table): Set xleast field to 3.
+	(som_slurp_symbol_table): Set symbol priv_level.
+	(bfd_som_attach_compilation_unit): New function.
+	(som_bfd_ar_write_symbol_stuff): Set xleast field to 3.  Set
+	priv_level into symbol_value.
+	* configure, config.in: Rebuild.
+
 Tue Dec  8 16:21:35 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* hpux-core.c (hpux_core_core_file_p): Change call to nonexistent
+	warning function to call _bfd_error_handler instead.
 
 	* libbfd.c (COERCE32): Cast through unsigned long and long to
 	avoid bug in old version of gcc.

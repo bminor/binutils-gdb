@@ -98,6 +98,7 @@ BFD_CC_FOR_BUILD
 AC_CHECK_HEADERS(stddef.h string.h strings.h stdlib.h time.h unistd.h)
 AC_CHECK_HEADERS(fcntl.h sys/file.h sys/time.h)
 AC_HEADER_TIME
+AC_HEADER_DIRENT
 AC_CHECK_FUNCS(fcntl getpagesize setitimer sysconf fdopen)
 
 BFD_BINARY_FOPEN
@@ -122,6 +123,7 @@ if test "${target}" = "${host}"; then
   arm-*-riscix)		COREFILE=trad-core.lo ;;
   hppa*-*-hpux*)	COREFILE=hpux-core.lo ;;
   hppa*-*-hiux*)	COREFILE=hpux-core.lo ;;
+  hppa*-*-mpeix*)	COREFILE=hpux-core.lo ;;
   hppa*-*-bsd*)		COREFILE="hpux-core.lo hppabsd-core.lo"
 			COREFLAG="-DHPUX_CORE -DHPPABSD_CORE" ;;
 changequote(,)dnl
@@ -467,8 +469,6 @@ do
 				target64=true ;;
     go32coff_vec)		tb="$tb coff-go32.lo cofflink.lo" ;;
     go32stubbedcoff_vec)	tb="$tb coff-stgo32.lo cofflink.lo" ;;
-    evax_alpha_vec)		tb="$tb evax-alpha.lo evax-emh.lo evax-egsd.lo evax-etir.lo evax-misc.lo"
- 				target64=true ;;
     h8300coff_vec)		tb="$tb coff-h8300.lo reloc16.lo" ;;
     h8500coff_vec)		tb="$tb coff-h8500.lo reloc16.lo" ;;
     host_aout_vec)		tb="$tb host-aout.lo aout32.lo" ;;
@@ -538,10 +538,13 @@ do
 # start-sanitize-tic80
     tic80coff_vec)		tb="$tb coff-tic80.lo cofflink.lo" ;;
 # end-sanitize-tic80
+    versados_vec)		tb="$tb versados.lo" ;;
+    vms_alpha_vec)		tb="$tb vms.lo vms-hdr.lo vms-gsd.lo vms-tir.lo vms-misc.lo"
+ 				target64=true ;;
+    vms_vax_vec)		tb="$tb vms.lo vms-hdr.lo vms-gsd.lo vms-tir.lo vms-misc.lo" ;;
+    w65_vec)			tb="$tb coff-w65.lo reloc16.lo" ;;
     we32kcoff_vec)		tb="$tb coff-we32k.lo" ;;
     z8kcoff_vec)		tb="$tb coff-z8k.lo reloc16.lo" ;;
-    w65_vec)			tb="$tb coff-w65.lo reloc16.lo" ;;
-    versados_vec)		tb="$tb versados.lo" ;;
 
     "")			;;
     *) AC_MSG_ERROR(*** unknown target vector $vec) ;;
