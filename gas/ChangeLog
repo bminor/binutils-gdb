@@ -1,5 +1,10 @@
 2003-11-19  Kazu Hirata  <kazu@cs.umass.edu>
 
+	* config/obj-ieee.c: Remove duplicate prototypes.
+	* config/tc-h8300.c: Likewise.
+
+2003-11-19  Kazu Hirata  <kazu@cs.umass.edu>
+
 	* config/tc-h8300.c: Convert to ISO-C.
 	* config/tc-h8300.h: Likewise.
 

@@ -467,10 +467,6 @@ ok:
   input_line_pointer = p;
 }
 
-void cons ();
-void s_ignore ();
-
-void s_globl ();
 const pseudo_typeS obj_pseudo_table[] =
 {
   {"section", obj_ieee_section, 0},
