@@ -1050,7 +1050,7 @@ nlm_slurp_reloc_fixups (abfd)
   count = nlm_fixed_header (abfd)->numberOfRelocationFixups;
   rels = (arelent *) bfd_alloc (abfd, count * sizeof (arelent));
   secs = (asection **) bfd_alloc (abfd, count * sizeof (asection *));
-  if (rels == NULL || secs == NULL)
+  if ((rels == NULL || secs == NULL) && count != 0)
     {
       bfd_set_error (bfd_error_no_memory);
       return false;
@@ -1136,8 +1136,6 @@ nlm_canonicalize_reloc (abfd, sec, relptr, symbols)
       if (nlm_slurp_reloc_fixups (abfd) == false)
 	return -1;
       rels = nlm_relocation_fixups (abfd);
-      if (rels == NULL)
-	return -1;
     }
   secs = nlm_relocation_fixup_secs (abfd);
 

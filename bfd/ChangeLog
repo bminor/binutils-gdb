@@ -1,3 +1,22 @@
+Tue Apr  5 11:22:38 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* aoutx.h (NAME(aout,canonicalize_reloc)): Don't error out if
+	section->relocation is NULL; malloc might have returned NULL when
+	given a zero size if there were no relocations.
+	* bout.c (b_out_canonicalize_reloc): Likewise.
+	* coffcode.h (coff_canonicalize_reloc): Likewise.
+	* ecoff.c (ecoff_canonicalize_reloc): Likewise.
+	* elfcode.h (elf_canonicalize_reloc): Likewise.
+	* mipsbsd.c (MY(canonicalize_reloc)): Likewise.
+	* i386lynx.c (NAME(lynx,canonicalize_reloc)): Likewise.
+	* nlmcode.h (nlm_canonicalize_reloc): Likewise.
+	* som.c (som_canonicalize_reloc): Likewise.
+	* hp300hpux.c (MY(slurp_reloc_table)): Likewise.  Also, if malloc
+	returns NULL, don't report an error if we asked for zero bytes.
+	* i386lynx.c (NAME(lynx,slurp_reloc_table)): If malloc returns
+	NULL, don't report an error if we asked for zero bytes.
+	* nlmcode.h (nlm_slurp_reloc_fixups): Likewise.
+
 Mon Apr  4 15:30:49 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* aoutx.h (NAME(aout,bfd_free_cached_info)): Don't free anything

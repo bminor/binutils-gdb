@@ -4221,8 +4221,6 @@ som_canonicalize_reloc (abfd, section, relptr, symbols)
 
   count = section->reloc_count;
   tblptr = section->relocation;
-  if (tblptr == (arelent *) NULL)
-    return -1;
 
   while (count--)
     *relptr++ = tblptr++;

@@ -1944,8 +1944,6 @@ ecoff_canonicalize_reloc (abfd, section, relptr, symbols)
 	return -1;
 
       tblptr = section->relocation;
-      if (tblptr == (arelent *) NULL)
-	return -1;
 
       for (count = 0; count < section->reloc_count; count++)
 	*relptr++ = tblptr++;

@@ -303,8 +303,6 @@ MY(canonicalize_reloc)(abfd, section, relptr, symbols)
   if (!NAME(aout,slurp_reloc_table)(abfd, section, symbols))
     return -1;
   tblptr = section->relocation;
-  if (!tblptr)
-    return -1;
 
   /* fix up howto entries */
   for (count = 0; count++ < section->reloc_count;) 

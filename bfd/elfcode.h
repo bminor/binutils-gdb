@@ -3077,8 +3077,6 @@ elf_canonicalize_reloc (abfd, section, relptr, symbols)
     }
 
   tblptr = section->relocation;
-  if (!tblptr)
-    return -1;
 
   for (; count++ < section->reloc_count;)
     *relptr++ = tblptr++;

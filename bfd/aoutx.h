@@ -2603,7 +2603,6 @@ NAME(aout,canonicalize_reloc) (abfd, section, relptr, symbols)
   }
   else {
     tblptr = section->relocation;
-    if (!tblptr) return 0;
 
     for (count = 0; count++ < section->reloc_count;)
       {

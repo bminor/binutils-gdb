@@ -427,7 +427,7 @@ doit:
   memset (reloc_cache, 0, count * sizeof (arelent));
 
   relocs = (PTR) bfd_alloc (abfd, reloc_size);
-  if (!relocs)
+  if (!relocs && reloc_size != 0)
     {
       free (reloc_cache);
       goto nomem;
@@ -536,7 +536,7 @@ NAME(lynx,canonicalize_reloc) (abfd, section, relptr, symbols)
   arelent *tblptr = section->relocation;
   unsigned int count;
 
-  if (!(tblptr || NAME (lynx, slurp_reloc_table) (abfd, section, symbols)))
+  if (!(tblptr || NAME(lynx,slurp_reloc_table) (abfd, section, symbols)))
     return -1;
 
   if (section->flags & SEC_CONSTRUCTOR)
@@ -551,8 +551,6 @@ NAME(lynx,canonicalize_reloc) (abfd, section, relptr, symbols)
   else
     {
       tblptr = section->relocation;
-      if (!tblptr)
-	return -1;
 
       for (count = 0; count++ < section->reloc_count;)
 	{

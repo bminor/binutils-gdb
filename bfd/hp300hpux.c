@@ -750,7 +750,7 @@ doit:
 
   reloc_cache = (arelent *) bfd_zalloc (abfd, (size_t) (count * sizeof
 							(arelent)));
-  if (!reloc_cache)
+  if (!reloc_cache && count != 0)
     {
     nomem:
       bfd_set_error (bfd_error_no_memory);
@@ -758,7 +758,7 @@ doit:
     }
 
   relocs = (PTR) bfd_alloc (abfd, reloc_size);
-  if (!relocs)
+  if (!relocs && reloc_size != 0)
     {
       bfd_release (abfd, reloc_cache);
       goto nomem;
@@ -863,8 +863,6 @@ MY (canonicalize_reloc) (abfd, section, relptr, symbols)
   else
     {
       tblptr = section->relocation;
-      if (!tblptr)
-	return -1;
 
       for (count = 0; count++ < section->reloc_count;)
 	{

@@ -2423,8 +2423,6 @@ coff_canonicalize_reloc (abfd, section, relptr, symbols)
 	return -1;
 
       tblptr = section->relocation;
-      if (!tblptr)
-	return -1;
 
       for (; count++ < section->reloc_count;)
 	*relptr++ = tblptr++;

@@ -818,11 +818,9 @@ b_out_canonicalize_reloc (abfd, section, relptr, symbols)
   arelent *tblptr = section->relocation;
   unsigned int count = 0;
 
- if (!(tblptr || b_out_slurp_reloc_table (abfd, section, symbols)))
-   return -1;
+  if (!(tblptr || b_out_slurp_reloc_table (abfd, section, symbols)))
+    return -1;
   tblptr = section->relocation;
- if (!tblptr)
-   return -1;
 
   for (; count++ < section->reloc_count;)
     *relptr++ = tblptr++;
