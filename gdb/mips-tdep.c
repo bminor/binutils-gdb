@@ -574,7 +574,7 @@ mips_eabi_use_struct_convention (int gcc_p, struct type *type)
 int
 mips_n32n64_use_struct_convention (int gcc_p, struct type *type)
 {
-  return 1;	/* Structures are returned by ref in extra arg0.  */
+  return (TYPE_LENGTH (type) > 2 * MIPS_SAVED_REGSIZE);
 }
 
 int
