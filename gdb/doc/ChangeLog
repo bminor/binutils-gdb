@@ -1,3 +1,7 @@
+Mon Dec  9 12:23:32 1996  Roland Pesch  <roland@wrs.com>
+
+	* gdb.texinfo, refcard.tex: Restore author credit
+
 Wed Oct  2 22:01:36 1996  Fred Fish  <fnf@fishfood.ninemoons.com>
 
 	* gdbint.texinfo (SIGTRAMP_START, SIGTRAMP_END): Update

@@ -93,7 +93,7 @@ into another language, under the above conditions for modified versions.
 @sp 1
 @subtitle Edition @value{EDITION}, for @value{GDBN} version @value{GDBVN}
 @subtitle @value{DATE}
-@author Richard M. Stallman and Cygnus Support
+@author Richard M. Stallman and Roland H. Pesch
 @page
 @tex
 {\parskip=0pt
