@@ -41,7 +41,7 @@ extern struct block *expression_context_block;
    the block that we want to evaluate expressions at.  When debugging
    C or C++ code, we use this to find the exact line we're at, and
    then look up the macro definitions active at that point.  */
-CORE_ADDR expression_context_pc;
+extern CORE_ADDR expression_context_pc;
 
 /* The innermost context required by the stack and register variables
    we've encountered so far. */
