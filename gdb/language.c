@@ -100,7 +100,6 @@ static int unk_lang_value_print (struct value *, struct ui_file *, int, enum val
 
 /* Forward declaration */
 extern const struct language_defn unknown_language_defn;
-extern char *warning_pre_print;
 
 /* The current (default at startup) state of type and range checking.
    (If the modes are set to "auto", though, these are changed based
@@ -1234,47 +1233,63 @@ op_error (char *fmt, enum exp_opcode op, int fatal)
     }
 }
 
-/* These are called when a language fails a type- or range-check.
-   The first argument should be a printf()-style format string, and
-   the rest of the arguments should be its arguments.  If
-   [type|range]_check is [type|range]_check_on, then return_to_top_level()
-   is called in the style of error ().  Otherwise, the message is prefixed
-   by the value of warning_pre_print and we do not return to the top level. */
+/* These are called when a language fails a type- or range-check.  The
+   first argument should be a printf()-style format string, and the
+   rest of the arguments should be its arguments.  If
+   [type|range]_check is [type|range]_check_on, an error is printed;
+   if [type|range]_check_warn, a warning; otherwise just the
+   message. */
 
 void
-type_error (char *string,...)
+type_error (const char *string,...)
 {
   va_list args;
   va_start (args, string);
 
-  if (type_check == type_check_warn)
-    fprintf_filtered (gdb_stderr, warning_pre_print);
-  else
-    error_begin ();
-
-  vfprintf_filtered (gdb_stderr, string, args);
-  fprintf_filtered (gdb_stderr, "\n");
+  switch (type_check)
+    {
+    case type_check_warn:
+      vwarning (string, args);
+      break;
+    case type_check_on:
+      verror (string, args);
+      break;
+    case type_check_off:
+      /* FIXME: cagney/2002-01-30: Should this function print anything
+         when type error is off?  */
+      vfprintf_filtered (gdb_stderr, string, args);
+      fprintf_filtered (gdb_stderr, "\n");
+      break;
+    default:
+      internal_error (__FILE__, __LINE__, "bad switch");
+    }
   va_end (args);
-  if (type_check == type_check_on)
-    return_to_top_level (RETURN_ERROR);
 }
 
 void
-range_error (char *string,...)
+range_error (const char *string,...)
 {
   va_list args;
   va_start (args, string);
 
-  if (range_check == range_check_warn)
-    fprintf_filtered (gdb_stderr, warning_pre_print);
-  else
-    error_begin ();
-
-  vfprintf_filtered (gdb_stderr, string, args);
-  fprintf_filtered (gdb_stderr, "\n");
+  switch (range_check)
+    {
+    case range_check_warn:
+      vwarning (string, args);
+      break;
+    case range_check_on:
+      verror (string, args);
+      break;
+    case range_check_off:
+      /* FIXME: cagney/2002-01-30: Should this function print anything
+         when range error is off?  */
+      vfprintf_filtered (gdb_stderr, string, args);
+      fprintf_filtered (gdb_stderr, "\n");
+      break;
+    default:
+      internal_error (__FILE__, __LINE__, "bad switch");
+    }
   va_end (args);
-  if (range_check == range_check_on)
-    return_to_top_level (RETURN_ERROR);
 }
 
 

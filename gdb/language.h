@@ -440,11 +440,9 @@ extern void op_error (char *fmt, enum exp_opcode, int);
 #define range_op_error(f,o) \
    op_error((f),(o),range_check==range_check_on ? 1 : 0)
 
-extern void type_error (char *, ...) ATTR_FORMAT (printf, 1, 2);
+extern void type_error (const char *, ...) ATTR_FORMAT (printf, 1, 2);
 
-void
-range_error (char *, ...)
-ATTR_FORMAT (printf, 1, 2);
+extern void range_error (const char *, ...) ATTR_FORMAT (printf, 1, 2);
 
 /* Data:  Does this value represent "truth" to the current language?  */
 

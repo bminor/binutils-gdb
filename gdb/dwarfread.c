@@ -239,10 +239,6 @@ typedef unsigned int DIE_REF;	/* Reference to a DIE */
 
 #define	AT_short_element_list	 (0x00f0|FORM_BLOCK2)
 
-/* External variables referenced. */
-
-extern char *warning_pre_print;	/* From utils.c */
-
 /* The DWARF debugging information consists of two major pieces,
    one is a block of DWARF Information Entries (DIE's) and the other
    is a line number table.  The "struct dieinfo" structure contains
