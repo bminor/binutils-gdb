@@ -1,5 +1,19 @@
 2003-05-04  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbthread.h (save_infrun_state): Drop prev_func_name parameter.
+	(load_infrun_state): Ditto.
+	(struct thread_info): Drop "prev_func_name" field.
+	* thread.c (load_infrun_state): Update.
+	(save_infrun_state): Update.
+	* infrun.c (prev_func_name): Delete variable.
+	(init_wait_for_inferior): Do not clear prev_func_name.
+	(stop_stepping, keep_going, context_switch): Do not swap
+	prev_func_name.
+	(handle_inferior_event, check_sigtramp2): Use pc_in_sigtramp
+	instead of PC_IN_SIGTRAMP.
+
+2003-05-04  Andrew Cagney  <cagney@redhat.com>
+
 	* sentinel-frame.c (sentinel_frame_prev_register): Replace
 	REGISTER_BYTE with register_offset_hack.
 	* regcache.c (init_regcache_descr): When REGISTER_BYTE_P, check
