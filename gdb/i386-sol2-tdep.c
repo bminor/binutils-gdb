@@ -23,6 +23,8 @@
 #include "value.h"
 #include "osabi.h"
 
+#include "gdb_string.h"
+
 #include "i386-tdep.h"
 #include "solib-svr4.h"
 
@@ -47,14 +49,18 @@ static int i386_sol2_gregset_reg_offset[] =
   0 * 4				/* %gs */
 };
 
+/* Return whether the frame preceding NEXT_FRAME corresponds to a
+   Solaris sigtramp routine.  */
+
 static int
 i386_sol2_sigtramp_p (struct frame_info *next_frame)
 {
   CORE_ADDR pc = frame_pc_unwind (next_frame);
+  char *name;
 
-  /* Signal handler frames under Solaris 2 are recognized by a return
-     address of 0xffffffff.  */
-  return (pc == 0xffffffff);
+  find_pc_partial_function (pc, &name, NULL, NULL);
+  return (name && (strcmp ("sigacthandler", name) == 0
+		   || strcmp (name, "ucbsigvechandler") == 0));
 }
 
 /* Solaris doesn't have a `struct sigcontext', but it does have a

@@ -1,5 +1,12 @@
 2004-04-10  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-sol2-tdep.c: Include "gdb_string.h".
+	(i386_sol2_sigtramp_p): Recognize signal trampoline based on its
+	name.
+	* Makefile.in (i386-sol2-tdep.o): Update dependencies.
+
+2004-04-10  Mark Kettenis  <kettenis@gnu.org>
+
 	* i386-sol2-tdep.c: Include "solib-svr4.h".
 	(i386_sol2_init_abi): Set solib_svr4_fetch_link_map_offsets.
 	* Makefile.in (i386-sol2-tdep.o): Update dependencies.
