@@ -969,7 +969,7 @@ coff_symtab_read (symtab_offset, nsyms, objfile)
 		    || cs->c_sclass == C_THUMBEXT)
 		  tmpaddr += ANOFFSET (objfile->section_offsets, sec);
 
-		if (sec == SECT_OFF_TEXT (objfile) || sec == SECT_OFF_RODATA (objfile))
+		if (sec == SECT_OFF_TEXT (objfile))
 		  {
 		    ms_type =
 		      cs->c_sclass == C_EXT || cs->c_sclass == C_THUMBEXTFUNC
