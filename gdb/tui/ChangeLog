@@ -1,3 +1,25 @@
+2002-10-26  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tuiIO.c (tui_prep_terminal): Save the prompt registered in readline.
+	(tui_redisplay_readline): Use the last saved prompt.
+	(tui_rl_saved_prompt): New.
+
+2002-10-25  Stephane Carrez  <stcarrez@nerim.fr>
+
+	Fix PR gdb/787
+	* tuiWin.c (ACS_LRCORNER, ACS_LLCORNER, ACS_ULCORNER, ACS_URCORNER,
+	ACS_HLINE, ACS_VLINE): Define if they don't exist.
+
+2002-10-25  Stephane Carrez  <stcarrez@nerim.fr>
+
+	Fix PR gdb/478
+	* tuiIO.c (tui_initialize_io): Use setvbuf since this is portable.
+
+2002-10-02  Elena Zannoni  <ezannoni@redhat.com>
+
+	* tui-hooks.c (selected_frame_level_changed_hook): Use the one
+	exported from frame.h.
+
 2002-09-29  Elena Zannoni  <ezannoni@redhat.com>
 
 	* tui.c (tui_show_source): Don't access current_source_symtab, use

@@ -96,6 +96,25 @@ static void _parseScrollingArgs (char *, TuiWinInfoPtr *, int *);
 ** PUBLIC FUNCTIONS
 ***************************************/
 
+#ifndef ACS_LRCORNER
+#  define ACS_LRCORNER '+'
+#endif
+#ifndef ACS_LLCORNER
+#  define ACS_LLCORNER '+'
+#endif
+#ifndef ACS_ULCORNER
+#  define ACS_ULCORNER '+'
+#endif
+#ifndef ACS_URCORNER
+#  define ACS_URCORNER '+'
+#endif
+#ifndef ACS_HLINE
+#  define ACS_HLINE '-'
+#endif
+#ifndef ACS_VLINE
+#  define ACS_VLINE '|'
+#endif
+
 /* Possible values for tui-border-kind variable.  */
 static const char *tui_border_kind_enums[] = {
   "space",
