@@ -1,3 +1,8 @@
+2005-01-25  Mark Mitchell  <mark@codesourcery.com>
+
+	* elf32-arm.c (elf_backend_default_use_rela_p): Define to zero for
+	SymbianOS. 
+
 2005-01-25  Alexandre Oliva  <aoliva@redhat.com>
 
 	2004-12-10  Alexandre Oliva  <aoliva@redhat.com>

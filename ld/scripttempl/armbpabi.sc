@@ -137,7 +137,10 @@ ${RELOCATING- /* For some reason, the Solaris linker makes bad executables
 SECTIONS
 {
   /* Read-only sections, merged into text segment: */
-  ${CREATE_SHLIB-${CREATE_PIE-${RELOCATING+PROVIDE (__executable_start = ${TEXT_START_ADDR}); . = ${TEXT_BASE_ADDRESS};}}}
+  ${CREATE_SHLIB-${CREATE_PIE-${RELOCATING+PROVIDE (__executable_start = ${TEXT_START_ADDR});}}}
+  /* SymbianOS uses this symbol.  */
+  ${CREATE_SHLIB-${CREATE_PIE-${RELOCATING+PROVIDE (Image\$\$ER_RO\$\$Base = ${TEXT_START_ADDR});}}} 
+  ${CREATE_SHLIB-${CREATE_PIE-${RELOCATING+ . = ${TEXT_BASE_ADDRESS};}}}
   ${CREATE_SHLIB+${RELOCATING+. = ${SHLIB_BASE_ADDRESS};}}
   ${CREATE_PIE+${RELOCATING+. = ${SHLIB_BASE_ADDRESS};}}
   ${INITIAL_READONLY_SECTIONS}
@@ -150,8 +153,6 @@ cat <<EOF
     KEEP (*(.init))
     ${RELOCATING+${INIT_END}}
   } =${NOP-0}
-
-  ${DATA_PLT-${BSS_PLT-${PLT}}}
   .text         ${RELOCATING-0} :
   {
     ${RELOCATING+${TEXT_START_SYMBOLS}}
@@ -167,13 +168,44 @@ cat <<EOF
     KEEP (*(.fini))
     ${RELOCATING+${FINI_END}}
   } =${NOP-0}
+  /* The SymbianOS kernel requires that the PLT go at the end of the
+     text section.  */
+  ${DATA_PLT-${BSS_PLT-${PLT}}}
   ${RELOCATING+PROVIDE (__etext = .);}
   ${RELOCATING+PROVIDE (_etext = .);}
   ${RELOCATING+PROVIDE (etext = .);}
+  /* SymbianOS uses this symbol.  */
+  ${RELOCATING+PROVIDE (Image\$\$ER_RO\$\$Limit = .);}
   ${WRITABLE_RODATA-${RODATA}}
   .rodata1      ${RELOCATING-0} : { *(.rodata1) }
   ${CREATE_SHLIB-${SDATA2}}
   ${CREATE_SHLIB-${SBSS2}}
+
+  /* On SymbianOS, put  .init_array and friends in the read-only
+     segment; there is no runtime relocation applied to these
+     arrays.  */
+
+  /* Ensure the __preinit_array_start label is properly aligned.  We
+     could instead move the label definition inside the section, but
+     the linker would then create the section even if it turns out to
+     be empty, which isn't pretty.  */
+  ${RELOCATING+. = ALIGN(${ALIGNMENT});}
+  ${RELOCATING+${CREATE_SHLIB-PROVIDE (__preinit_array_start = .);}}
+  .preinit_array   ${RELOCATING-0} : { *(.preinit_array) }
+  ${RELOCATING+${CREATE_SHLIB-PROVIDE (__preinit_array_end = .);}}
+
+  ${RELOCATING+${CREATE_SHLIB-PROVIDE (__init_array_start = .);}}
+  /* SymbianOS uses this symbol.  */
+  ${RELOCATING+${CREATE_SHLIB-PROVIDE (SHT\$\$INIT_ARRAY\$\$Base = .);}}
+  .init_array   ${RELOCATING-0} : { *(.init_array) }
+  /* SymbianOS uses this symbol.  */
+  ${RELOCATING+${CREATE_SHLIB-PROVIDE (SHT\$\$INIT_ARRAY\$\$Limit = .);}}
+  ${RELOCATING+${CREATE_SHLIB-PROVIDE (__init_array_end = .);}}
+
+  ${RELOCATING+${CREATE_SHLIB-PROVIDE (__fini_array_start = .);}}
+  .fini_array   ${RELOCATING-0} : { *(.fini_array) }
+  ${RELOCATING+${CREATE_SHLIB-PROVIDE (__fini_array_end = .);}}
+
   ${OTHER_READONLY_SECTIONS}
   .eh_frame_hdr : { *(.eh_frame_hdr) }
   .eh_frame     ${RELOCATING-0} : ONLY_IF_RO { KEEP (*(.eh_frame)) }
@@ -192,23 +224,6 @@ cat <<EOF
   /* Thread Local Storage sections  */
   .tdata	${RELOCATING-0} : { *(.tdata${RELOCATING+ .tdata.* .gnu.linkonce.td.*}) }
   .tbss		${RELOCATING-0} : { *(.tbss${RELOCATING+ .tbss.* .gnu.linkonce.tb.*})${RELOCATING+ *(.tcommon)} }
-
-  /* Ensure the __preinit_array_start label is properly aligned.  We
-     could instead move the label definition inside the section, but
-     the linker would then create the section even if it turns out to
-     be empty, which isn't pretty.  */
-  ${RELOCATING+. = ALIGN(${ALIGNMENT});}
-  ${RELOCATING+${CREATE_SHLIB-PROVIDE (__preinit_array_start = .);}}
-  .preinit_array   ${RELOCATING-0} : { *(.preinit_array) }
-  ${RELOCATING+${CREATE_SHLIB-PROVIDE (__preinit_array_end = .);}}
-
-  ${RELOCATING+${CREATE_SHLIB-PROVIDE (__init_array_start = .);}}
-  .init_array   ${RELOCATING-0} : { *(.init_array) }
-  ${RELOCATING+${CREATE_SHLIB-PROVIDE (__init_array_end = .);}}
-
-  ${RELOCATING+${CREATE_SHLIB-PROVIDE (__fini_array_start = .);}}
-  .fini_array   ${RELOCATING-0} : { *(.fini_array) }
-  ${RELOCATING+${CREATE_SHLIB-PROVIDE (__fini_array_end = .);}}
 
   ${RELOCATING+${CTOR}}
   ${RELOCATING+${DTOR}}

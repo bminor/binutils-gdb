@@ -1,3 +1,12 @@
+2005-01-25  Mark Mitchell  <mark@codesourcery.com>
+
+	* emulparams/armsymbian.sh (OTHER_READONLY_SECTIONS): Define, so
+	as to include .ARM.exidx$${Base,Limit}.
+	* ld/scripttempl/armbpabi.sc: Move .plt to end of text segment.
+	Define IMAGE$$ER_RO$${Base,Limit} and SHT$$INIT_ARRAY$${Base,Limit}.
+	Put .init_array, .fini_array, etc. into the read-only data
+	segment. 
+	
 2005-01-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_try_needed): Formatting.

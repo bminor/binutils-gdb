@@ -5917,7 +5917,7 @@ elf32_arm_symbian_modify_segment_map (bfd *abfd,
 #undef elf_backend_may_use_rela_p
 #define elf_backend_may_use_rela_p  0
 #undef elf_backend_default_use_rela_p
-#define elf_backend_default_use_rela_p 1
+#define elf_backend_default_use_rela_p 0
 #undef elf_backend_rela_normal
 #define elf_backend_rela_normal     0
 
