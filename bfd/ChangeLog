@@ -1,3 +1,13 @@
+Fri Aug 23 13:51:06 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* configure.in:  Tix typo.
+	* ecoff.c:  If compiling for DEC3100, use trad_unix core files,
+	else dummy out the core file support.
+	* trad-core.c (trad_unix_core_file_p):  If HOST_DATA_START_ADDR is
+	specified, use it to locate the data section.
+	* coffcode.h (coff_write_symbols):  Declare buffer as bfd_bytes
+	rather than as chars (lint).
+
 Thu Aug 22 22:20:19 1991  Stu Grossman  (grossman at cygint.cygnus.com)
 
 	* aoutx.h, coffcode.h:  saberized.
