@@ -648,13 +648,13 @@ commands, you can disable this ``feature'':
 @table @code
 @kindex set stupidity
 @cindex flinching
-@cindex verifying commands with serious side effects
+@cindex stupid questions
 @item set stupidity off
 Disables stupid questions.
 
 @item set stupidity on
 Enables stupid questions (the default).
-
+@end table
 
 @node Files, Compilation, User Interface, Top
 @chapter Specifying GDB's Files
@@ -2153,12 +2153,10 @@ GNU C++ raises an exception by calling a library function named
 @end example
 
 @noindent
-By setting a breakpoint on @code{__raise_exception}
-(@xref{Breakpoints}), all exceptions that a program raises will be
-first caught by the debugger before any stack unwinding has taken
-place.  If you set a breakpoint in an exception handler instead of at
-the point of the raise, you will likely not easily have the
-information needed to know from where the exception was raised.
+You can make the debugger catch all exceptions @emph{before} any stack
+unwinding takes place: set a breakpoint on @code{__raise_exception}
+(@pxref{Breakpoints}).  If you set a breakpoint in an exception handler
+instead, it may not be easy to find out where the exception was raised.
 
 By using a conditional breakpoint (@xref{Conditions}), you can cause
 the debugger to stop only when a specific exception is raised.
@@ -2623,9 +2621,11 @@ $1 = @{
 Cause GDB to print structures in a compact format, like this:
 
 @example
-$1 = @{next = 0x0, flags = @{sweet = 1, sour = 1@}, meat = 0x54 "Pork"@}
+$1 = @{next = 0x0, flags = @{sweet = 1, sour = 1@}, meat \
+= 0x54 "Pork"@}
 @end example
 
+@noindent
 This is the default format.
 
 @item set unionprint on
@@ -3491,12 +3491,12 @@ it would from the terminal.
 
 @cindex init file
 @cindex @file{.gdbinit}
-When GDB starts, it automatically executes its @dfn{init files}, command
-files named @file{.gdbinit}.  GDB reads the init file (if any) in your home
-directory and then the init file (if any) in the current working
-directory.  (The init files are not executed if the @samp{-nx} option
-is given.)  You can also request the execution of a command file with the
-@samp{source} command:
+When GDB starts, it first executes commands from its @dfn{init files}.
+These are files named @file{.gdbinit}.  GDB reads the init file (if any)
+in your home directory and then the init file (if any) in the current
+working directory.  (The init files are not executed if the @samp{-nx}
+option is given.)  You can also request the execution of a command file
+with the @samp{source} command:
 
 @table @code
 @item source @var{filename}
@@ -3749,6 +3749,9 @@ communicates with Emacs in terms of line numbers.  If you add or
 delete lines from the text, the line numbers that GDB knows will cease
 to correspond properly to the code.
 
+@comment The following dropped because Epoch is nonstandard.  Reactivate
+@comment if/when v19 does something similar. ---pesch@cygnus.com 19dec1990
+@ignore
 @kindex emacs epoch environment  
 @kindex epoch
 @kindex inspect
@@ -3757,6 +3760,7 @@ Version 18 of Emacs has a built-in window system called the @samp{epoch}
 environment.  Users of this environment can use a new command,
 @samp{inspect} which performs identically to @samp{print} except that
 each value is printed in its own window.
+@end ignore
 
 @node Remote, Commands, Emacs, Top
 @chapter Remote Kernel Debugging
