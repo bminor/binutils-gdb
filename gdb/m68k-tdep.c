@@ -978,12 +978,12 @@ fill_gregset (gregset_t *gregsetp, int regno)
   for (regi = 0; regi < R_PC; regi++)
     {
       if (regno == -1 || regno == regi)
-	regcache_collect (regi, regp + regi);
+	regcache_raw_collect (current_regcache, regi, regp + regi);
     }
   if (regno == -1 || regno == PS_REGNUM)
-    regcache_collect (PS_REGNUM, regp + R_PS);
+    regcache_raw_collect (current_regcache, PS_REGNUM, regp + R_PS);
   if (regno == -1 || regno == PC_REGNUM)
-    regcache_collect (PC_REGNUM, regp + R_PC);
+    regcache_raw_collect (current_regcache, PC_REGNUM, regp + R_PC);
 }
 
 #if defined (FP0_REGNUM)
@@ -1024,14 +1024,18 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
   for (regi = FP0_REGNUM; regi < M68K_FPC_REGNUM; regi++)
     {
       if (regno == -1 || regno == regi)
-	regcache_collect (regi, &fpregsetp->f_fpregs[regi - FP0_REGNUM][0]);
+	regcache_raw_collect (current_regcache, regi,
+			      &fpregsetp->f_fpregs[regi - FP0_REGNUM][0]);
     }
   if (regno == -1 || regno == M68K_FPC_REGNUM)
-    regcache_collect (M68K_FPC_REGNUM, &fpregsetp->f_pcr);
+    regcache_raw_collect (current_regcache, M68K_FPC_REGNUM,
+			  &fpregsetp->f_pcr);
   if (regno == -1 || regno == M68K_FPS_REGNUM)
-    regcache_collect (M68K_FPS_REGNUM, &fpregsetp->f_psr);
+    regcache_raw_collect (current_regcache, M68K_FPS_REGNUM,
+			  &fpregsetp->f_psr);
   if (regno == -1 || regno == M68K_FPI_REGNUM)
-    regcache_collect (M68K_FPI_REGNUM, &fpregsetp->f_fpiaddr);
+    regcache_raw_collect (current_regcache, M68K_FPI_REGNUM,
+			  &fpregsetp->f_fpiaddr);
 }
 
 #endif /* defined (FP0_REGNUM) */

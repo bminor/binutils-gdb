@@ -283,7 +283,7 @@ store_register (int regno)
   int nr, isfloat;
 
   /* Fetch the register's value from the register cache.  */
-  regcache_collect (regno, addr);
+  regcache_raw_collect (current_regcache, regno, addr);
 
   /* -1 can be a successful return value, so infer errors from errno. */
   errno = 0;

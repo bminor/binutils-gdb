@@ -60,7 +60,8 @@ mipsnbsd_fill_reg (char *regs, int regno)
 
   for (i = 0; i <= PC_REGNUM; i++)
     if ((regno == i || regno == -1) && ! CANNOT_STORE_REGISTER (i))
-      regcache_collect (i, regs + (i * mips_isa_regsize (current_gdbarch)));
+      regcache_raw_collect (current_regcache, i,
+			    regs + (i * mips_isa_regsize (current_gdbarch)));
 }
 
 void
@@ -91,7 +92,8 @@ mipsnbsd_fill_fpreg (char *fpregs, int regno)
   for (i = FP0_REGNUM; i <= mips_regnum (current_gdbarch)->fp_control_status;
        i++)
     if ((regno == i || regno == -1) && ! CANNOT_STORE_REGISTER (i))
-      regcache_collect (i, fpregs + ((i - FP0_REGNUM) * mips_isa_regsize (current_gdbarch)));
+      regcache_raw_collect (current_regcache, i,
+			    fpregs + ((i - FP0_REGNUM) * mips_isa_regsize (current_gdbarch)));
 }
 
 static void

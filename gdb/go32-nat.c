@@ -492,7 +492,8 @@ static void
 store_register (int regno)
 {
   if (regno < FP0_REGNUM)
-    regcache_collect (regno, (char *) &a_tss + regno_mapping[regno].tss_ofs);
+    regcache_raw_collect (current_regcache, regno,
+			  (char *) &a_tss + regno_mapping[regno].tss_ofs);
   else if (i386_fp_regnum_p (regno) || i386_fpc_regnum_p (regno))
     i387_fill_fsave ((char *) &npx, regno);
   else

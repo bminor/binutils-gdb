@@ -176,7 +176,7 @@ i386nto_regset_fill (int regset, char *data)
 	{
 	  int offset = nto_reg_offset (regno);
 	  if (offset != -1)
-	    regcache_collect (regno, data + offset);
+	    regcache_raw_collect (current_regcache, regno, data + offset);
 	}
     }
   else if (regset == NTO_REG_FLOAT)

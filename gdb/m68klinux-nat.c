@@ -218,7 +218,7 @@ store_register (int regno)
   regaddr = register_addr (regno, offset);
 
   /* Put the contents of regno into a local buffer */
-  regcache_collect (regno, buf);
+  regcache_raw_collect (current_regcache, regno, buf);
 
   /* Store the local buffer into the inferior a chunk at the time. */
   for (i = 0; i < register_size (current_gdbarch, regno);
@@ -298,7 +298,7 @@ fill_gregset (elf_gregset_t *gregsetp, int regno)
 
   for (i = 0; i < NUM_GREGS; i++)
     if (regno == -1 || regno == i)
-      regcache_collect (i, regp + regmap[i]);
+      regcache_raw_collect (current_regcache, i, regp + regmap[i]);
 }
 
 #ifdef HAVE_PTRACE_GETREGS
@@ -388,12 +388,14 @@ fill_fpregset (elf_fpregset_t *fpregsetp, int regno)
   /* Fill in the floating-point registers.  */
   for (i = FP0_REGNUM; i < FP0_REGNUM + 8; i++)
     if (regno == -1 || regno == i)
-      regcache_collect (i, FPREG_ADDR (fpregsetp, i - FP0_REGNUM));
+      regcache_raw_collect (current_regcache, i,
+			    FPREG_ADDR (fpregsetp, i - FP0_REGNUM));
 
   /* Fill in the floating-point control registers.  */
   for (i = M68K_FPC_REGNUM; i <= M68K_FPI_REGNUM; i++)
     if (regno == -1 || regno == i)
-      regcache_collect (i, (char *) &fpregsetp->fpcntl[i - M68K_FPC_REGNUM]);
+      regcache_raw_collect (current_regcache, i,
+			    (char *) &fpregsetp->fpcntl[i - M68K_FPC_REGNUM]);
 }
 
 #ifdef HAVE_PTRACE_GETREGS

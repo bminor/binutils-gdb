@@ -1,3 +1,36 @@
+2004-07-23  Andrew Cagney  <cagney@gnu.org>
+
+	Use regcache_raw_collect instead of regcache_collect.
+	* regcache.h (regcache_collect): Delete declaration.
+	* regcache.c (regcache_colect): Delete function.
+	* win32-nat.c (do_child_store_inferior_registers): Update.
+	* sol-thread.c (sol_thread_store_registers): Update.
+	* shnbsd-tdep.c (shnbsd_fill_reg): Update.
+	* rs6000-nat.c (store_register): Update.
+	* remote.c (store_register_using_P, remote_store_registers): Update.
+	* ppcnbsd-tdep.c (ppcnbsd_fill_reg): Update.
+	* ppc-linux-nat.c (store_altivec_register, store_spe_register) 
+	(fill_vrregset, store_spe_registers, fill_gregset)
+	(fill_gregset): Update.
+	* nto-procfs.c (procfs_store_registers): Update.
+	* mipsnbsd-tdep.c (mipsnbsd_fill_reg): Update.
+	* mips-linux-tdep.c (fill_gregset, mips64_fill_gregset): Update.
+	* m68klinux-nat.c (store_register, fill_gregset): Update.
+	* m68k-tdep.c (fill_gregset): Update.
+	* infptrace.c (store_register): Update.
+	* i386-nto-tdep.c (i386nto_regset_fill): Update.
+	* i386-linux-nat.c (store_register, fill_gregset): Update.
+	* hppa-linux-nat.c (fill_gregset): Update.
+	* go32-nat.c (store_register): Update.
+	* armnbsd-nat.c (store_register, store_regs, store_fp_register)
+	(store_fp_regs): Update.
+	* arm-linux-nat.c (store_nwfpe_single, store_nwfpe_double) 
+	(store_nwfpe_extended, store_fpregister, store_fpregs) 
+	(store_register, store_regs, fill_gregset, fill_fpregset): Update.
+	* alpha-tdep.c (alpha_fill_int_regs, alpha_fill_fp_regs): Update.
+	* aix-thread.c (fill_gprs64, fill_fprs, fill_sprs64, fill_sprs32)
+	(store_regs_user_thread, store_regs_kernel_thread): Update.
+
 2004-07-24  Mark Kettenis  <kettenis@gnu.org>
 
 	* dwarf2-frame.c (struct dwarf2_cie): Delete `addr_size' member.

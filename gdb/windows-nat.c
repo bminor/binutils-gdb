@@ -392,7 +392,8 @@ do_child_store_inferior_registers (int r)
   if (!current_thread)
     /* Windows sometimes uses a non-existent thread id in its events */;
   else if (r >= 0)
-    regcache_collect (r, ((char *) &current_thread->context) + mappings[r]);
+    regcache_raw_collect (current_regcache, r,
+			  ((char *) &current_thread->context) + mappings[r]);
   else
     {
       for (r = 0; r < NUM_REGS; r++)

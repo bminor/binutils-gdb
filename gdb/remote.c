@@ -3297,7 +3297,7 @@ store_register_using_P (int regnum)
 
   sprintf (buf, "P%s=", phex_nz (reg->pnum, 0));
   p = buf + strlen (buf);
-  regcache_collect (reg->regnum, regp);
+  regcache_raw_collect (current_regcache, reg->regnum, regp);
   bin2hex (regp, p, DEPRECATED_REGISTER_RAW_SIZE (reg->regnum));
   remote_send (buf, rs->remote_packet_size);
 
@@ -3358,7 +3358,7 @@ remote_store_registers (int regnum)
       {
 	struct packet_reg *r = &rs->regs[i];
 	if (r->in_g_packet)
-	  regcache_collect (r->regnum, regs + r->offset);
+	  regcache_raw_collect (current_regcache, r->regnum, regs + r->offset);
       }
   }
 

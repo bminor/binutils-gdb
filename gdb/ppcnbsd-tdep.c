@@ -92,24 +92,28 @@ ppcnbsd_fill_reg (char *regs, int regno)
   for (i = 0; i < ppc_num_gprs; i++)
     {
       if (regno == tdep->ppc_gp0_regnum + i || regno == -1)
-	regcache_collect (tdep->ppc_gp0_regnum + i,
-                          regs + REG_FIXREG_OFFSET (i));
+	regcache_raw_collect (current_regcache, tdep->ppc_gp0_regnum + i,
+			      regs + REG_FIXREG_OFFSET (i));
     }
 
   if (regno == tdep->ppc_lr_regnum || regno == -1)
-    regcache_collect (tdep->ppc_lr_regnum, regs + REG_LR_OFFSET);
+    regcache_raw_collect (current_regcache, tdep->ppc_lr_regnum,
+			  regs + REG_LR_OFFSET);
 
   if (regno == tdep->ppc_cr_regnum || regno == -1)
-    regcache_collect (tdep->ppc_cr_regnum, regs + REG_CR_OFFSET);
+    regcache_raw_collect (current_regcache, tdep->ppc_cr_regnum,
+			  regs + REG_CR_OFFSET);
 
   if (regno == tdep->ppc_xer_regnum || regno == -1)
-    regcache_collect (tdep->ppc_xer_regnum, regs + REG_XER_OFFSET);
+    regcache_raw_collect (current_regcache, tdep->ppc_xer_regnum,
+			  regs + REG_XER_OFFSET);
 
   if (regno == tdep->ppc_ctr_regnum || regno == -1)
-    regcache_collect (tdep->ppc_ctr_regnum, regs + REG_CTR_OFFSET);
+    regcache_raw_collect (current_regcache, tdep->ppc_ctr_regnum,
+			  regs + REG_CTR_OFFSET);
 
   if (regno == PC_REGNUM || regno == -1)
-    regcache_collect (PC_REGNUM, regs + REG_PC_OFFSET);
+    regcache_raw_collect (current_regcache, PC_REGNUM, regs + REG_PC_OFFSET);
 }
 
 void
@@ -163,12 +167,13 @@ ppcnbsd_fill_fpreg (char *fpregs, int regno)
   for (i = 0; i < ppc_num_fprs; i++)
     {
       if (regno == tdep->ppc_fp0_regnum + i || regno == -1)
-	regcache_collect (tdep->ppc_fp0_regnum + i,
-                          fpregs + FPREG_FPR_OFFSET (i));
+	regcache_raw_collect (current_regcache, tdep->ppc_fp0_regnum + i,
+			      fpregs + FPREG_FPR_OFFSET (i));
     }
 
   if (regno == tdep->ppc_fpscr_regnum || regno == -1)
-    regcache_collect (tdep->ppc_fpscr_regnum, fpregs + FPREG_FPSCR_OFFSET);
+    regcache_raw_collect (current_regcache, tdep->ppc_fpscr_regnum,
+			  fpregs + FPREG_FPSCR_OFFSET);
 }
 
 static void

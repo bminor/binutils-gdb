@@ -1322,13 +1322,13 @@ alpha_fill_int_regs (int regno, void *r0_r30, void *pc, void *unique)
 
   for (i = 0; i < 31; ++i)
     if (regno == i || regno == -1)
-      regcache_collect (i, (char *)r0_r30 + i*8);
+      regcache_raw_collect (current_regcache, i, (char *)r0_r30 + i*8);
 
   if (regno == ALPHA_PC_REGNUM || regno == -1)
-    regcache_collect (ALPHA_PC_REGNUM, pc);
+    regcache_raw_collect (current_regcache, ALPHA_PC_REGNUM, pc);
 
   if (unique && (regno == ALPHA_UNIQUE_REGNUM || regno == -1))
-    regcache_collect (ALPHA_UNIQUE_REGNUM, unique);
+    regcache_raw_collect (current_regcache, ALPHA_UNIQUE_REGNUM, unique);
 }
 
 void
@@ -1352,10 +1352,11 @@ alpha_fill_fp_regs (int regno, void *f0_f30, void *fpcr)
 
   for (i = ALPHA_FP0_REGNUM; i < ALPHA_FP0_REGNUM + 31; ++i)
     if (regno == i || regno == -1)
-      regcache_collect (i, (char *)f0_f30 + (i - ALPHA_FP0_REGNUM) * 8);
+      regcache_raw_collect (current_regcache, i,
+			    (char *)f0_f30 + (i - ALPHA_FP0_REGNUM) * 8);
 
   if (regno == ALPHA_FPCR_REGNUM || regno == -1)
-    regcache_collect (ALPHA_FPCR_REGNUM, fpcr);
+    regcache_raw_collect (current_regcache, ALPHA_FPCR_REGNUM, fpcr);
 }
 
 

@@ -215,7 +215,7 @@ store_register (int regno)
     tid = PIDGET (inferior_ptid); /* Not a threaded program.  */
 
   errno = 0;
-  regcache_collect (regno, &val);
+  regcache_raw_collect (current_regcache, regno, &val);
   ptrace (PTRACE_POKEUSER, tid, register_addr (regno, 0), val);
   if (errno != 0)
     error ("Couldn't write register %s (#%d): %s.", REGISTER_NAME (regno),
@@ -255,11 +255,12 @@ fill_gregset (elf_gregset_t *gregsetp, int regno)
 
   for (i = 0; i < I386_NUM_GREGS; i++)
     if (regno == -1 || regno == i)
-      regcache_collect (i, regp + regmap[i]);
+      regcache_raw_collect (current_regcache, i, regp + regmap[i]);
 
   if ((regno == -1 || regno == I386_LINUX_ORIG_EAX_REGNUM)
       && I386_LINUX_ORIG_EAX_REGNUM < NUM_REGS)
-    regcache_collect (I386_LINUX_ORIG_EAX_REGNUM, regp + ORIG_EAX);
+    regcache_raw_collect (current_regcache, I386_LINUX_ORIG_EAX_REGNUM,
+			  regp + ORIG_EAX);
 }
 
 #ifdef HAVE_PTRACE_GETREGS

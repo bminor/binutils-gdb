@@ -1189,7 +1189,7 @@ procfs_store_registers (int regno)
       if (len < 1)
 	return;
 
-      regcache_collect (regno, (char *) &reg + off);
+      regcache_raw_collect (current_regcache, regno, (char *) &reg + off);
 
       err = devctl (ctl_fd, dev_set, &reg, regsize, 0);
       if (err != EOK)

@@ -90,25 +90,26 @@ shnbsd_fill_reg (char *regs, int regno)
   int i;
 
   if (regno == PC_REGNUM || regno == -1)
-    regcache_collect (PC_REGNUM, regs + (0 * 4));
+    regcache_raw_collect (current_regcache, PC_REGNUM, regs + (0 * 4));
 
   if (regno == SR_REGNUM || regno == -1)
-    regcache_collect (SR_REGNUM, regs + (1 * 4));
+    regcache_raw_collect (current_regcache, SR_REGNUM, regs + (1 * 4));
 
   if (regno == PR_REGNUM || regno == -1)
-    regcache_collect (PR_REGNUM, regs + (2 * 4));
+    regcache_raw_collect (current_regcache, PR_REGNUM, regs + (2 * 4));
 
   if (regno == MACH_REGNUM || regno == -1)
-    regcache_collect (MACH_REGNUM, regs + (3 * 4));
+    regcache_raw_collect (current_regcache, MACH_REGNUM, regs + (3 * 4));
 
   if (regno == MACL_REGNUM || regno == -1)
-    regcache_collect (MACL_REGNUM, regs + (4 * 4));
+    regcache_raw_collect (current_regcache, MACL_REGNUM, regs + (4 * 4));
 
   if ((regno >= R0_REGNUM && regno <= (R0_REGNUM + 15)) || regno == -1)
     {
       for (i = R0_REGNUM; i <= (R0_REGNUM + 15); i++)
 	if (regno == i || regno == -1)
-          regcache_collect (i, regs + regmap[i - R0_REGNUM]);
+          regcache_raw_collect (current_regcache, i,
+				regs + regmap[i - R0_REGNUM]);
     }
 }
 

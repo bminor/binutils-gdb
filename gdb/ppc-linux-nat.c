@@ -618,8 +618,8 @@ store_altivec_register (int tid, int regno)
   if (regno == (tdep->ppc_vrsave_regnum - 1))
     offset = vrregsize - DEPRECATED_REGISTER_RAW_SIZE (tdep->ppc_vrsave_regnum);
 
-  regcache_collect (regno,
-                    regs + (regno - tdep->ppc_vr0_regnum) * vrregsize + offset);
+  regcache_raw_collect (current_regcache, regno,
+			regs + (regno - tdep->ppc_vr0_regnum) * vrregsize + offset);
 
   ret = ptrace (PTRACE_SETVRREGS, tid, 0, &regs);
   if (ret < 0)
@@ -732,7 +732,7 @@ store_spe_register (int tid, int regno)
       && tdep->ppc_ev0_regnum <= regno && regno <= tdep->ppc_ev31_regnum)
     {
       char buf[MAX_REGISTER_SIZE];
-      regcache_collect (regno, buf);
+      regcache_raw_collect (current_regcache, regno, buf);
       write_spliced_spe_reg (tid, regno, &evrregs, buf);
     }
   else if (tdep->ppc_acc_regnum >= 0
@@ -740,14 +740,14 @@ store_spe_register (int tid, int regno)
     {
       gdb_assert (sizeof (evrregs.acc)
                   == register_size (current_gdbarch, regno));
-      regcache_collect (regno, &evrregs.acc);
+      regcache_raw_collect (current_regcache, regno, &evrregs.acc);
     }
   else if (tdep->ppc_spefscr_regnum >= 0
            && regno == tdep->ppc_spefscr_regnum)
     {
       gdb_assert (sizeof (evrregs.spefscr)
                   == register_size (current_gdbarch, regno));
-      regcache_collect (regno, &evrregs.spefscr);
+      regcache_raw_collect (current_regcache, regno, &evrregs.spefscr);
     }
   else
     gdb_assert (0);
@@ -843,10 +843,11 @@ fill_vrregset (gdb_vrregset_t *vrregsetp)
       /* The last 2 registers of this set are only 32 bit long, not
          128, but only VSCR is fetched as a 16 bytes quantity.  */
       if (i == (num_of_vrregs - 2))
-        regcache_collect (tdep->ppc_vr0_regnum + i,
-                          *vrregsetp + i * vrregsize + offset);
+        regcache_raw_collect (current_regcache, tdep->ppc_vr0_regnum + i,
+			      *vrregsetp + i * vrregsize + offset);
       else
-        regcache_collect (tdep->ppc_vr0_regnum + i, *vrregsetp + i * vrregsize);
+        regcache_raw_collect (current_regcache, tdep->ppc_vr0_regnum + i,
+			      *vrregsetp + i * vrregsize);
     }
 }
 
@@ -889,16 +890,16 @@ store_spe_registers (int tid)
     {
       char buf[MAX_REGISTER_SIZE];
 
-      regcache_collect (tdep->ppc_ev0_regnum + i, buf);
+      regcache_raw_collect (current_regcache, tdep->ppc_ev0_regnum + i, buf);
       write_spliced_spe_reg (tid, tdep->ppc_ev0_regnum + i, &evrregs, buf);
     }
 
   gdb_assert (sizeof (evrregs.acc)
               == register_size (current_gdbarch, tdep->ppc_acc_regnum));
-  regcache_collect (tdep->ppc_acc_regnum, &evrregs.acc);
+  regcache_raw_collect (current_regcache, tdep->ppc_acc_regnum, &evrregs.acc);
   gdb_assert (sizeof (evrregs.spefscr)
               == register_size (current_gdbarch, tdep->ppc_spefscr_regnum));
-  regcache_collect (tdep->ppc_acc_regnum, &evrregs.spefscr);
+  regcache_raw_collect (current_regcache, tdep->ppc_acc_regnum, &evrregs.spefscr);
 
   set_spe_registers (tid, &evrregs);
 }
@@ -999,9 +1000,11 @@ fill_gregset (gdb_gregset_t *gregsetp, int regno)
   if ((regno == -1) || regno == tdep->ppc_lr_regnum)
     right_fill_reg (tdep->ppc_lr_regnum, regp + PT_LNK);
   if ((regno == -1) || regno == tdep->ppc_cr_regnum)
-    regcache_collect (tdep->ppc_cr_regnum, regp + PT_CCR);
+    regcache_raw_collect (current_regcache, tdep->ppc_cr_regnum,
+			  regp + PT_CCR);
   if ((regno == -1) || regno == tdep->ppc_xer_regnum)
-    regcache_collect (tdep->ppc_xer_regnum, regp + PT_XER);
+    regcache_raw_collect (current_regcache, tdep->ppc_xer_regnum,
+			  regp + PT_XER);
   if ((regno == -1) || regno == tdep->ppc_ctr_regnum)
     right_fill_reg (tdep->ppc_ctr_regnum, regp + PT_CTR);
 #ifdef PT_MQ
@@ -1036,7 +1039,8 @@ fill_fpregset (gdb_fpregset_t *fpregsetp, int regno)
       for (regi = 0; regi < ppc_num_fprs; regi++)
         {
           if ((regno == -1) || (regno == tdep->ppc_fp0_regnum + regi))
-            regcache_collect (tdep->ppc_fp0_regnum + regi, fpp + 8 * regi);
+            regcache_raw_collect (current_regcache, tdep->ppc_fp0_regnum + regi,
+				  fpp + 8 * regi);
         }
       if (regno == -1 || regno == tdep->ppc_fpscr_regnum)
         right_fill_reg (tdep->ppc_fpscr_regnum, (fpp + 8 * 32));

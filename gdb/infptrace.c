@@ -450,7 +450,7 @@ store_register (int regno)
   regaddr = register_addr (regno, offset);
 
   /* Put the contents of regno into a local buffer */
-  regcache_collect (regno, buf);
+  regcache_raw_collect (current_regcache, regno, buf);
 
   /* Store the local buffer into the inferior a chunk at the time. */
   for (i = 0; i < DEPRECATED_REGISTER_RAW_SIZE (regno); i += sizeof (PTRACE_XFER_TYPE))

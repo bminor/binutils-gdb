@@ -161,7 +161,7 @@ fill_gregset (elf_gregset_t *gregsetp, int regno)
   if (regno < 32)
     {
       dst = regp + regno + EF_REG0;
-      regcache_collect (regno, dst);
+      regcache_raw_collect (current_regcache, regno, dst);
       return;
     }
 
@@ -183,7 +183,7 @@ fill_gregset (elf_gregset_t *gregsetp, int regno)
   if (regaddr != -1)
     {
       dst = regp + regaddr;
-      regcache_collect (regno, dst);
+      regcache_raw_collect (current_regcache, regno, dst);
     }
 }
 
@@ -440,7 +440,7 @@ mips64_fill_gregset (mips64_elf_gregset_t *gregsetp, int regno)
   if (regno < 32)
     {
       dst = regp + regno + MIPS64_EF_REG0;
-      regcache_collect (regno, dst);
+      regcache_raw_collect (current_regcache, regno, dst);
       return;
     }
 
@@ -462,7 +462,7 @@ mips64_fill_gregset (mips64_elf_gregset_t *gregsetp, int regno)
   if (regaddr != -1)
     {
       dst = regp + regaddr;
-      regcache_collect (regno, dst);
+      regcache_raw_collect (current_regcache, regno, dst);
     }
 }
 

@@ -330,7 +330,7 @@ fill_gregset (gdb_gregset_t *gregsetp, int regno)
 
       if (regno == -1 || regno == mregno)
 	{
-          regcache_collect(mregno, &(*gregsetp)[i]);
+          regcache_raw_collect(current_regcache, mregno, &(*gregsetp)[i]);
 	}
     }
 }
@@ -371,6 +371,6 @@ fill_fpregset (gdb_fpregset_t *fpregsetp, int regno)
       char *to = (char *) &((*fpregsetp)[(i - HPPA_FP0_REGNUM) / 2]);
       if ((i - HPPA_FP0_REGNUM) & 1)
 	to += 4;
-      regcache_collect (i, to);
+      regcache_raw_collect (current_regcache, i, to);
    }
 }

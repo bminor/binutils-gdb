@@ -585,7 +585,7 @@ sol_thread_store_registers (int regnum)
       char old_value[MAX_REGISTER_SIZE];
 
       /* Save new register value.  */
-      regcache_collect (regnum, old_value);
+      regcache_raw_collect (current_regcache, regnum, old_value);
 
       val = p_td_thr_getgregs (&thandle, gregset);
       if (val != TD_OK)

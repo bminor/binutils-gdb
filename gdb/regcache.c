@@ -1218,12 +1218,6 @@ write_register_pid (int regnum, CORE_ADDR val, ptid_t ptid)
   inferior_ptid = save_ptid;
 }
 
-void
-regcache_collect (int regnum, void *buf)
-{
-  regcache_raw_collect (current_regcache, regnum, buf);
-}
-
 /* Supply register REGNUM, whose contents are stored in BUF, to REGCACHE.  */
 
 void

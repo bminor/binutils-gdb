@@ -96,7 +96,6 @@ void regcache_cooked_write_part (struct regcache *regcache, int regnum,
    target.  These functions are called by the target in response to a
    target_fetch_registers() or target_store_registers().  */
 
-extern void regcache_collect (int regnum, void *buf);
 extern void regcache_raw_supply (struct regcache *regcache,
 				 int regnum, const void *buf);
 extern void regcache_raw_collect (const struct regcache *regcache,
