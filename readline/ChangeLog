@@ -1,3 +1,8 @@
+Wed Sep 29 11:02:58 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* readline.c (parser_if): Free tname when done with it (change
+	imported from from bash	1.12 readline).
+
 Tue Sep  7 17:15:37 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* configure.in (m88k-*-sysvr4*): Comment out previous change.
