@@ -147,7 +147,7 @@ typedef union
       int profile;
       unsigned short *profile_hist;
       unsigned char *memory;
-      
+
     }
   asregs;
   int asints[28];
@@ -181,43 +181,45 @@ now_persec ()
 
 static FILE *profile_file;
 
-static void swap(b,n)
+static void 
+swap (b, n)
      unsigned char *b;
-     int n;
-{           
-  b[0] = n>>24;  
-  b[1] = n>>16;  
-  b[2] = n>>8;  
-  b[3] = n>>0;  
-}
-static void swap16(b,n)
-     unsigned char *b;
-     int n;
-{           
-  b[0] = n>>8;  
-  b[1] = n>>0;  
-}
-
-static void
-swapout(n)
      int n;
 {
-  if (profile_file) 
-    {
-      char b[4];
-      swap(b,n);
-      fwrite(b, 4, 1, profile_file);
-    }
-}  
+  b[0] = n >> 24;
+  b[1] = n >> 16;
+  b[2] = n >> 8;
+  b[3] = n >> 0;
+}
+static void 
+swap16 (b, n)
+     unsigned char *b;
+     int n;
+{
+  b[0] = n >> 8;
+  b[1] = n >> 0;
+}
 
 static void
-swapout16(n)
+swapout (n)
+     int n;
+{
+  if (profile_file)
+    {
+      char b[4];
+      swap (b, n);
+      fwrite (b, 4, 1, profile_file);
+    }
+}
+
+static void
+swapout16 (n)
      int n;
 {
   char b[4];
-  swap16(b,n);
-  fwrite(b, 2, 1, profile_file);
-}  
+  swap16 (b, n);
+  fwrite (b, 2, 1, profile_file);
+}
 
 
 /* Turn a pointer in a register into a pointer into real memory. */
@@ -226,7 +228,7 @@ static char *
 ptr (x)
      int x;
 {
-  return (char *)(x + saved_state.asregs.memory);
+  return (char *) (x + saved_state.asregs.memory);
 }
 
 /* Simulate a monitor trap.  */
@@ -293,7 +295,7 @@ control_c (sig, code, scp, addr)
 }
 
 
-static int 
+static int
 div1 (R, iRn2, iRn1, T)
      int *R;
      int iRn1;
@@ -310,43 +312,43 @@ div1 (R, iRn2, iRn1, T)
 
   switch (old_q)
     {
-    case 0:	
+    case 0:
       switch (M)
-      {
-      case 0:	
-	tmp0 = R[iRn1];
-	R[iRn1] -= R[iRn2];
-	tmp1 = (R[iRn1] > tmp0);
-	switch (Q)
-	  {
-	  case 0:
-	    Q = tmp1;
-	    break;
-	  case 1:	
-	    Q = (unsigned char) (tmp1 == 0);
-	    break;						
-	  }
-	break;
-      case 1:	
-	tmp0 = R[iRn1];
-	R[iRn1] += R[iRn2];
-	tmp1 = (R[iRn1] < tmp0);
-	switch (Q)
-	  {
-	  case 0:
-	    Q = (unsigned char) (tmp1 == 0);
-	    break;
-	  case 1:
-	    Q = tmp1;
-	    break;
-	  }
-	break;			
-      }
+	{
+	case 0:
+	  tmp0 = R[iRn1];
+	  R[iRn1] -= R[iRn2];
+	  tmp1 = (R[iRn1] > tmp0);
+	  switch (Q)
+	    {
+	    case 0:
+	      Q = tmp1;
+	      break;
+	    case 1:
+	      Q = (unsigned char) (tmp1 == 0);
+	      break;
+	    }
+	  break;
+	case 1:
+	  tmp0 = R[iRn1];
+	  R[iRn1] += R[iRn2];
+	  tmp1 = (R[iRn1] < tmp0);
+	  switch (Q)
+	    {
+	    case 0:
+	      Q = (unsigned char) (tmp1 == 0);
+	      break;
+	    case 1:
+	      Q = tmp1;
+	      break;
+	    }
+	  break;
+	}
       break;
     case 1:
       switch (M)
 	{
-	case 0:	
+	case 0:
 	  tmp0 = R[iRn1];
 	  R[iRn1] += R[iRn2];
 	  tmp1 = (R[iRn1] < tmp0);
@@ -357,10 +359,10 @@ div1 (R, iRn2, iRn1, T)
 	      break;
 	    case 1:
 	      Q = (unsigned char) (tmp1 == 0);
-	      break;			
+	      break;
 	    }
 	  break;
-	case 1:	
+	case 1:
 	  tmp0 = R[iRn1];
 	  R[iRn1] -= R[iRn2];
 	  tmp1 = (R[iRn1] > tmp0);
@@ -381,76 +383,52 @@ div1 (R, iRn2, iRn1, T)
   return T;
 }
 
-#if 0
 
-  old_q = Q;
-  Q = (R[n]&0x80000000) != 0;
-
-  R[n] <<= 1;
-  R[n] |= T;
-  
-  tmp0 = R[n];
-
-  if (M==old_q)
-    {
-      R[n] -= R[m];
-      tmp1 = (R[n] > tmp0) != Q;
-      T = 1;
-    }
-  else   
-    {
-      R[n] += R[m];
-      tmp1 = (R[n] < tmp0) == Q;
-      T = 0;
-    }
-  return T;
-}
-#endif
-
-static void dmul(sign, rml, rnl)
+static void 
+dmul (sign, rm, rn)
      int sign;
-unsigned     int rml;
-unsigned     int rnl;
+     unsigned int rm;
+     unsigned int rn;
 {
-  unsigned int rmh;
-  unsigned int rnh;
+  unsigned long RnL, RnH;
+  unsigned long RmL, RmH;
+  unsigned long temp0, temp1, temp2, temp3;
+  unsigned long Res2, Res1, Res0;
 
-  unsigned int t0,t1,t2,t3;  
-  unsigned int res0,res1,res2;  
-  /* Sign extend input if signed multiply */  
-  if (sign)
+
+  if (!sign)
     {
-      rmh = (rml & 0x80000000) ? ~0 : 0;
-      rnh = (rnl & 0x80000000) ? ~0 : 0;
+
+      RnL = rn & 0xffff;
+      RnH = (rn >> 16) & 0xffff;
+      RmL = rm & 0xffff;
+      RmH = (rm >> 16) & 0xffff;
+      temp0 = RmL * RnL;
+      temp1 = RmH * RnL;
+      temp2 = RmL * RnH;
+      temp3 = RmH * RnH;
+      Res2 = 0;
+      Res1 = temp1 + temp2;
+      if (Res1 < temp1)
+	Res2 += 0x00010000;
+      temp1 = (Res1 << 16) & 0xffff0000;
+      Res0 = temp0 + temp1;
+      if (Res0 < temp0)
+	Res2 += 1;
+      Res2 += ((Res1 >> 16) & 0xffff) + temp3;
+      MACH = Res2;
+      MACL = Res0;
+
     }
-  else 
+
+  else
     {
-      rmh = 0;
-      rnh = 0;
+      abort ();
     }
-  t0 = rml *rnl;
-  t1 = rmh *rnl;
-  t2 = rml*rnh;
-  t3 = rmh*rnh;
-  res2 = 0;
-  res1 = t1+t2;
 
-  if (res1 < t1)
-    res2 += 0x00010000;
-
-  t1 = ((res1 << 16) & 0xffff0000);
-  res0 = t0 + t1;
-
-  if (res0 < t0) res2++;
-  
-  res2 = res2 + ((res1 >> 16) & 0xffff) + t3;
-
-  MACH = res2;
-  MACL = res0;
-  
 }
 
-     
+
 /* Set the memory size to the power of two provided. */
 
 void
@@ -460,7 +438,7 @@ sim_size (power)
 {
   saved_state.asregs.msize = 1 << power;
 
-  sim_memory_size = power;  
+  sim_memory_size = power;
 
 
   if (saved_state.asregs.memory)
@@ -478,13 +456,13 @@ sim_size (power)
 	       saved_state.asregs.msize);
 
       saved_state.asregs.msize = 1;
-      saved_state.asregs.memory = (unsigned char *)calloc(1,1);
+      saved_state.asregs.memory = (unsigned char *) calloc (1, 1);
     }
 }
 
 
 
-static 
+static
 void
 init_pointers ()
 {
@@ -495,56 +473,57 @@ init_pointers ()
 
   if (saved_state.asregs.profile && !profile_file)
     {
-      profile_file = fopen("gmon.out","wb");
+      profile_file = fopen ("gmon.out", "wb");
       /* Seek to where to put the call arc data */
-      nsamples = (1<<sim_profile_size);
+      nsamples = (1 << sim_profile_size);
 
-      fseek (profile_file, nsamples * 2  +12, 0);
-      
-      if (!profile_file) 
+      fseek (profile_file, nsamples * 2 + 12, 0);
+
+      if (!profile_file)
 	{
-	  fprintf(stderr,"Can't open gmon.out\n");
+	  fprintf (stderr, "Can't open gmon.out\n");
 	}
-      else 
+      else
 	{
 	  saved_state.asregs.profile_hist =
-	    (unsigned short *) calloc(64, (nsamples * sizeof(short) / 64));
+	    (unsigned short *) calloc (64, (nsamples * sizeof (short) / 64));
 	}
     }
 }
 
 static void
-dump_profile()
+dump_profile ()
 {
-  unsigned int minpc ;
+  unsigned int minpc;
   unsigned int maxpc;
   unsigned short *p;
 
   int thisshift;
-  
+
   unsigned short *first;
 
   int i;
   p = saved_state.asregs.profile_hist;
-  minpc =0;
-  maxpc = (1<<sim_profile_size) ;
-  
-  fseek(profile_file, 0L, 0);
-  swapout(minpc<<PROFILE_SHIFT);
-  swapout(maxpc<<PROFILE_SHIFT);
-  swapout(nsamples * 2 + 12);
-  for (i = 0; i < nsamples ; i++)
-    swapout16(saved_state.asregs.profile_hist[i]);
-  
+  minpc = 0;
+  maxpc = (1 << sim_profile_size);
+
+  fseek (profile_file, 0L, 0);
+  swapout (minpc << PROFILE_SHIFT);
+  swapout (maxpc << PROFILE_SHIFT);
+  swapout (nsamples * 2 + 12);
+  for (i = 0; i < nsamples; i++)
+    swapout16 (saved_state.asregs.profile_hist[i]);
+
 }
 
-static int gotcall(from, to)
+static int 
+gotcall (from, to)
      int from;
      int to;
 {
-  swapout(from);  
-  swapout(to);  
-  swapout(1);  
+  swapout (from);
+  swapout (to);
+  swapout (1);
 }
 
 #define MMASKB ((saved_state.asregs.msize -1) & ~0)
@@ -552,13 +531,13 @@ void
 sim_resume (step)
      int step;
 {
-  register unsigned   int pc;
+  register unsigned int pc;
   register int cycles = 0;
   register int stalls = 0;
   register int insts = 0;
   register int prevlock;
-  register int thislock ;
-  register unsigned int doprofile  ;
+  register int thislock;
+  register unsigned int doprofile;
 
   int tick_start = get_now ();
   void (*prev) ();
@@ -578,8 +557,8 @@ sim_resume (step)
 
   prev = signal (SIGINT, control_c);
 
-  init_pointers();
-  
+  init_pointers ();
+
   if (step)
     {
       saved_state.asregs.exception = SIGTRAP;
@@ -598,13 +577,13 @@ sim_resume (step)
 
   /* If profiling not enabled, disable it by asking for
      profiles infrequently. */
-  if (doprofile==0)
+  if (doprofile == 0)
     doprofile = ~0;
-  
+
   do
     {
-      register      unsigned int iword = RUWAT (pc);
-      register      unsigned int ult;
+      register unsigned int iword = RUWAT (pc);
+      register unsigned int ult;
 
       insts++;
     top:
@@ -621,16 +600,16 @@ sim_resume (step)
 	{
 	  saved_state.asregs.cycles += doprofile;
 	  cycles -= doprofile;
-	  if (saved_state.asregs.profile_hist) 
+	  if (saved_state.asregs.profile_hist)
 	    {
 	      int n = pc >> PROFILE_SHIFT;
-	      if (n < nsamples) 
+	      if (n < nsamples)
 		{
 		  int i = saved_state.asregs.profile_hist[n];
 		  if (i < 65000)
-		    saved_state.asregs.profile_hist[n] = i+1;
+		    saved_state.asregs.profile_hist[n] = i + 1;
 		}
-	      
+
 	    }
 	}
     }
@@ -655,9 +634,9 @@ sim_resume (step)
 
   if (profile_file)
     {
-      dump_profile();
+      dump_profile ();
     }
-  
+
   signal (SIGINT, prev);
 }
 
@@ -711,7 +690,7 @@ sim_fetch_register (rn, buf)
 {
   int value = ((int *) (&saved_state))[rn];
 
-  swap(buf, value);
+  swap (buf, value);
 }
 
 
@@ -742,15 +721,15 @@ sim_info ()
   double virttime = saved_state.asregs.cycles / 36.0e6;
 
   printf ("\n\n# instructions executed  %10d\n", saved_state.asregs.insts);
-  printf ("# cycles                 %10d\n",  saved_state.asregs.cycles);
+  printf ("# cycles                 %10d\n", saved_state.asregs.cycles);
   printf ("# pipeline stalls        %10d\n", saved_state.asregs.stalls);
   printf ("# real time taken        %10.4f\n", timetaken);
   printf ("# virtual time taked     %10.4f\n", virttime);
   printf ("# profiling size         %10d\n", sim_profile_size);
-  printf( "# profiling frequency    %10d\n", saved_state.asregs.profile);
-  printf( "# profile maxpc          %10x\n", (1<<sim_profile_size) << PROFILE_SHIFT);
-  
-  if (timetaken != 0) 
+  printf ("# profiling frequency    %10d\n", saved_state.asregs.profile);
+  printf ("# profile maxpc          %10x\n", (1 << sim_profile_size) << PROFILE_SHIFT);
+
+  if (timetaken != 0)
     {
       printf ("# cycles/second          %10d\n", (int) (saved_state.asregs.cycles / timetaken));
       printf ("# simulation ratio       %10.4f\n", virttime / timetaken);
@@ -759,13 +738,13 @@ sim_info ()
 
 
 void
-sim_set_profile(n)
+sim_set_profile (n)
 {
   saved_state.asregs.profile = n;
 }
 
 void
-  sim_set_profile_size(n)
+sim_set_profile_size (n)
 {
   sim_profile_size = n;
 }
