@@ -1,3 +1,7 @@
+Mon Apr 25 16:19:17 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* doc/Makefile.in (clean, distclean): Remove asconfig.texi.
+
 Sun Apr 24 00:13:08 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c (pa_ip): 13 bit immediate constant (for break
