@@ -1,3 +1,8 @@
+2004-08-27  Nathan J. Williams  <nathanw@wasabisystems.com>
+
+	* target.c (target_resize_to_sections): Check
+	current_target.to_sections for an old value when updating.
+
 2004-08-27  Joel Brobecker  <brobecker@gnat.com>
 
 	* procfs.c (dbx_link_bpt_addr): New static global variable.
