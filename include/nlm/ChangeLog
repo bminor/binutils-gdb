@@ -1,3 +1,20 @@
+Wed Apr 20 14:27:43 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* internal.h (struct nlm_internal_custom_header): Remove
+	debugRecOffset and debugRecLength fields.  Add data field.
+	* external.h (struct nlmNAME(external_custom_header)): Remove
+	debugRecOffset and debugRecLength fields.
+
+Mon Feb  7 08:28:40 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* internal.h: Change HOST_64_BIT to BFD_HOST_64_BIT.
+
+Thu Dec  2 14:14:48 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* alpha-ext.h: New file describing formats of information in Alpha
+	NetWare files.
+	* common.h: Define some non-external Alpha information.
+
 Wed Nov 17 17:38:58 1993  Sean Eric Fagan  (sef@cygnus.com)
 
 	* external.h: Don't define external_fixed_header here.
@@ -36,3 +53,8 @@ Mon Jul 19 22:12:40 1993  Fred Fish  (fnf@deneb.cygnus.com)
 
 	* (common.h, external.h, internal.h):  New files for NLM/NetWare
 	support.
+
+
+Local Variables:
+version-control: never
+End:
