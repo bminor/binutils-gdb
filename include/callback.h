@@ -68,6 +68,9 @@ typedef struct {
 
 #define MAX_CALLBACK_FDS 10
 
+/* Forward decl for stat/fstat.  */
+struct stat;
+
 typedef struct host_callback_struct host_callback;
 
 struct host_callback_struct 
@@ -88,9 +91,8 @@ struct host_callback_struct
   void (*flush_stdout) PARAMS ((host_callback *));
   int (*write_stderr) PARAMS ((host_callback *, const char *, int));
   void (*flush_stderr) PARAMS ((host_callback *));
-  /* PTR is not `struct stat' because the target's value is stored.  */
-  int (*stat) PARAMS ((host_callback *, const char *, PTR));
-  int (*fstat) PARAMS ((host_callback *, int, PTR));
+  int (*stat) PARAMS ((host_callback *, const char *, struct stat *));
+  int (*fstat) PARAMS ((host_callback *, int, struct stat *));
 
   /* When present, call to the client to give it the oportunity to
      poll any io devices for a request to quit (indicated by a nonzero
@@ -150,8 +152,11 @@ extern host_callback default_callback;
 
 /* Canonical versions of system call numbers.
    It's not intended to willy-nilly throw every system call ever heard
-   of in here.  Only include those that have an important use.  */
+   of in here.  Only include those that have an important use.
+   ??? One can certainly start a discussion over the ones that are currently
+   here, but that will always be true.  */
 
+/* These are used by the ANSI C support of libc.  */
 #define	CB_SYS_exit	1
 #define	CB_SYS_open	2
 #define	CB_SYS_close	3
@@ -161,7 +166,7 @@ extern host_callback default_callback;
 #define	CB_SYS_unlink	7
 #define	CB_SYS_getpid	8
 #define	CB_SYS_kill	9
-#define CB_SYS_fstat       10
+#define CB_SYS_fstat    10
 /*#define CB_SYS_sbrk	11 - not currently a system call, but reserved.  */
 
 /* ARGV support.  */
@@ -169,11 +174,11 @@ extern host_callback default_callback;
 #define CB_SYS_argv	13
 
 /* These are extras added for one reason or another.  */
-#define CB_SYS_chdir	20
-#define CB_SYS_stat	21
-#define CB_SYS_chmod 	22
-#define CB_SYS_utime 	23
-#define CB_SYS_time 	24
+#define CB_SYS_chdir	14
+#define CB_SYS_stat	15
+#define CB_SYS_chmod 	16
+#define CB_SYS_utime 	17
+#define CB_SYS_time 	18
 
 /* Struct use to pass and return information necessary to perform a
    system call.  */
@@ -194,6 +199,8 @@ typedef struct cb_syscall {
   int errcode;
 
   /* Working space to be used by memory read/write callbacks.  */
+  PTR p1;
+  PTR p2;
   long x1,x2;
 
   /* Callbacks for reading/writing memory (e.g. for read/write syscalls).  */
@@ -230,10 +237,10 @@ int cb_target_to_host_signal PARAMS ((host_callback *, int));
 /* Translate host signal number to target.  */
 int cb_host_to_target_signal PARAMS ((host_callback *, int));
 
-/* Translate host stat struct to target.  */
-struct stat; /* forward decl */
-int cb_host_to_target_stat PARAMS ((host_callback *, const struct stat *,
-				    PTR, int));
+/* Translate host stat struct to target.
+   If stat struct ptr is NULL, just compute target stat struct size.
+   Result is size of target stat struct or 0 if error.  */
+int cb_host_to_target_stat PARAMS ((host_callback *, const struct stat *, PTR));
 
 /* Perform a system call.  */
 CB_RC cb_syscall PARAMS ((host_callback *, CB_SYSCALL *));

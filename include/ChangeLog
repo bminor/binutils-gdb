@@ -1,3 +1,16 @@
+Tue Nov 25 01:35:52 1997  Doug Evans  <devans@seba.cygnus.com>
+
+	* callback.h (struct stat): Move forward decl up.
+	(host_callback): Pass stat struct pointer to stat,fstat.
+	(CB_SYS_nnn): Reorganize.
+	(CB_SYSCALL): New members p1,p2.
+	(cb_host_to_target_stat): Delete fourth arg.
+
+Sat Nov 22 23:34:15 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote-sim.h (sim_stop_reason): Clarify sim_signalled SIGRC
+ 	argument.
+
 Mon Nov 17 14:00:51 1997  Doug Evans  <devans@seba.cygnus.com>
 
 	* callback.h (CB_TARGET_DEFS_MAP): Renamed from target_defs_map.
