@@ -46,6 +46,7 @@ enum strata {
 	dummy_stratum,		/* The lowest of the low */
 	file_stratum,		/* Executable files, etc */
 	core_stratum,		/* Core dump files */
+	download_stratum,	/* Downloading of remote targets */
 	process_stratum		/* Executing processes */
 };
 
@@ -144,6 +145,38 @@ enum target_signal {
   TARGET_SIGNAL_MSG = 41,
   TARGET_SIGNAL_SOUND = 42,
   TARGET_SIGNAL_SAK = 43,
+  TARGET_SIGNAL_PRIO = 44,
+  TARGET_SIGNAL_REALTIME_33 = 45,
+  TARGET_SIGNAL_REALTIME_34 = 46,
+  TARGET_SIGNAL_REALTIME_35 = 47,
+  TARGET_SIGNAL_REALTIME_36 = 48,
+  TARGET_SIGNAL_REALTIME_37 = 49,
+  TARGET_SIGNAL_REALTIME_38 = 50,
+  TARGET_SIGNAL_REALTIME_39 = 51,
+  TARGET_SIGNAL_REALTIME_40 = 52,
+  TARGET_SIGNAL_REALTIME_41 = 53,
+  TARGET_SIGNAL_REALTIME_42 = 54,
+  TARGET_SIGNAL_REALTIME_43 = 55,
+  TARGET_SIGNAL_REALTIME_44 = 56,
+  TARGET_SIGNAL_REALTIME_45 = 57,
+  TARGET_SIGNAL_REALTIME_46 = 58,
+  TARGET_SIGNAL_REALTIME_47 = 59,
+  TARGET_SIGNAL_REALTIME_48 = 60,
+  TARGET_SIGNAL_REALTIME_49 = 61,
+  TARGET_SIGNAL_REALTIME_50 = 62,
+  TARGET_SIGNAL_REALTIME_51 = 63,
+  TARGET_SIGNAL_REALTIME_52 = 64,
+  TARGET_SIGNAL_REALTIME_53 = 65,
+  TARGET_SIGNAL_REALTIME_54 = 66,
+  TARGET_SIGNAL_REALTIME_55 = 67,
+  TARGET_SIGNAL_REALTIME_56 = 68,
+  TARGET_SIGNAL_REALTIME_57 = 69,
+  TARGET_SIGNAL_REALTIME_58 = 70,
+  TARGET_SIGNAL_REALTIME_59 = 71,
+  TARGET_SIGNAL_REALTIME_60 = 72,
+  TARGET_SIGNAL_REALTIME_61 = 73,
+  TARGET_SIGNAL_REALTIME_62 = 74,
+  TARGET_SIGNAL_REALTIME_63 = 75,
 
   /* Some signal we don't know about.  */
   TARGET_SIGNAL_UNKNOWN,
@@ -174,6 +207,14 @@ extern char *target_signal_to_name PARAMS ((enum target_signal));
 
 /* Given a name (SIGHUP, etc.), return its signal.  */
 enum target_signal target_signal_from_name PARAMS ((char *));
+
+/* If certain kinds of activity happen, target_wait should perform
+   callbacks.  */
+/* Right now we just call (*TARGET_ACTIVITY_FUNCTION) if I/O is possible
+   on TARGET_ACTIVITY_FD.   */
+extern int target_activity_fd;
+/* Returns zero to leave the inferior alone, one to interrupt it.  */
+extern int (*target_activity_function) PARAMS ((void));
 
 struct target_ops
 {
@@ -231,7 +272,7 @@ struct target_ops
 			     CORE_ADDR *addr_found, char *data_found));
 
 #define	target_search(len, data, mask, startaddr, increment, lorange, hirange, addr_found, data_found)	\
-  (*current_target->to_search) (len, data, mask, startaddr, increment, \
+  (*current_target.to_search) (len, data, mask, startaddr, increment, \
 				lorange, hirange, addr_found, data_found)
 #endif /* 0 */
 
@@ -250,9 +291,10 @@ struct target_ops
   void 	      (*to_mourn_inferior) PARAMS ((void));
   int	      (*to_can_run) PARAMS ((void));
   void	      (*to_notice_signals) PARAMS ((int pid));
+  void	      (*to_stop) PARAMS ((void));
   enum strata   to_stratum;
   struct target_ops
-    	       *to_next;
+		*DONT_USE;	/* formerly to_next */
   int		to_has_all_memory;
   int		to_has_memory;
   int		to_has_stack;
@@ -275,18 +317,30 @@ struct target_ops
 /* The ops structure for our "current" target process.  This should
    never be NULL.  If there is no target, it points to the dummy_target.  */
 
-extern struct target_ops	*current_target;
+extern struct target_ops	current_target;
+
+/* An item on the target stack.  */
+
+struct target_stack_item
+{
+  struct target_stack_item *next;
+  struct target_ops *target_ops;
+};
+
+/* The target stack.  */
+
+extern struct target_stack_item *target_stack;
 
 /* Define easy words for doing these operations on our current target.  */
 
-#define	target_shortname	(current_target->to_shortname)
-#define	target_longname		(current_target->to_longname)
+#define	target_shortname	(current_target.to_shortname)
+#define	target_longname		(current_target.to_longname)
 
 /* The open routine takes the rest of the parameters from the command,
    and (if successful) pushes a new target onto the stack.
    Targets should supply this routine, if only to provide an error message.  */
 #define	target_open(name, from_tty)	\
-	(*current_target->to_open) (name, from_tty)
+	(*current_target.to_open) (name, from_tty)
 
 /* Does whatever cleanup is required for a target that we are no longer
    going to be calling.  Argument says whether we are quitting gdb and
@@ -297,7 +351,7 @@ extern struct target_ops	*current_target;
    do.  */
 
 #define	target_close(quitting)	\
-	(*current_target->to_close) (quitting)
+	(*current_target.to_close) (quitting)
 
 /* Attaches to a process on the target side.  Arguments are as passed
    to the `attach' command by the user.  This routine can be called
@@ -308,7 +362,7 @@ extern struct target_ops	*current_target;
    (without waiting) to an upcoming target_wait call.  */
 
 #define	target_attach(args, from_tty)	\
-	(*current_target->to_attach) (args, from_tty)
+	(*current_target.to_attach) (args, from_tty)
 
 /* Takes a program previously attached to and detaches it.
    The program may resume execution (some targets do, some don't) and will
@@ -326,7 +380,7 @@ target_detach PARAMS ((char *, int));
    pass TARGET_SIGNAL_DEFAULT.  */
 
 #define	target_resume(pid, step, siggnal)	\
-	(*current_target->to_resume) (pid, step, siggnal)
+	(*current_target.to_resume) (pid, step, siggnal)
 
 /* Wait for process pid to do something.  Pid = -1 to wait for any pid
    to do something.  Return pid of child, or -1 in case of error;
@@ -337,19 +391,19 @@ target_detach PARAMS ((char *, int));
    stop_pc, etc., set up.  */
 
 #define	target_wait(pid, status)		\
-	(*current_target->to_wait) (pid, status)
+	(*current_target.to_wait) (pid, status)
 
 /* Fetch register REGNO, or all regs if regno == -1.  No result.  */
 
 #define	target_fetch_registers(regno)	\
-	(*current_target->to_fetch_registers) (regno)
+	(*current_target.to_fetch_registers) (regno)
 
 /* Store at least register REGNO, or all regs if REGNO == -1.
    It can store as many registers as it wants to, so target_prepare_to_store
    must have been previously called.  Calls error() if there are problems.  */
 
 #define	target_store_registers(regs)	\
-	(*current_target->to_store_registers) (regs)
+	(*current_target.to_store_registers) (regs)
 
 /* Get ready to modify the registers array.  On machines which store
    individual registers, this doesn't need to do anything.  On machines
@@ -358,7 +412,7 @@ target_detach PARAMS ((char *, int));
    debugged.  */
 
 #define	target_prepare_to_store()	\
-	(*current_target->to_prepare_to_store) ()
+	(*current_target.to_prepare_to_store) ()
 
 extern int target_read_string PARAMS ((CORE_ADDR, char **, int, int *));
 
@@ -393,7 +447,7 @@ print_section_info PARAMS ((struct target_ops *, bfd *));
 /* Print a line about the current target.  */
 
 #define	target_files_info()	\
-	(*current_target->to_files_info) (current_target)
+	(*current_target.to_files_info) (&current_target)
 
 /* Insert a breakpoint at address ADDR in the target machine.
    SAVE is a pointer to memory allocated for saving the
@@ -402,7 +456,7 @@ print_section_info PARAMS ((struct target_ops *, bfd *));
    an errno value.  */
 
 #define	target_insert_breakpoint(addr, save)	\
-	(*current_target->to_insert_breakpoint) (addr, save)
+	(*current_target.to_insert_breakpoint) (addr, save)
 
 /* Remove a breakpoint at address ADDR in the target machine.
    SAVE is a pointer to the same save area 
@@ -410,19 +464,19 @@ print_section_info PARAMS ((struct target_ops *, bfd *));
    Result is 0 for success, or an errno value.  */
 
 #define	target_remove_breakpoint(addr, save)	\
-	(*current_target->to_remove_breakpoint) (addr, save)
+	(*current_target.to_remove_breakpoint) (addr, save)
 
 /* Initialize the terminal settings we record for the inferior,
    before we actually run the inferior.  */
 
 #define target_terminal_init() \
-	(*current_target->to_terminal_init) ()
+	(*current_target.to_terminal_init) ()
 
 /* Put the inferior's terminal settings into effect.
    This is preparation for starting or resuming the inferior.  */
 
 #define target_terminal_inferior() \
-	(*current_target->to_terminal_inferior) ()
+	(*current_target.to_terminal_inferior) ()
 
 /* Put some of our terminal settings into effect,
    enough to get proper results from our output,
@@ -433,32 +487,32 @@ print_section_info PARAMS ((struct target_ops *, bfd *));
    should be called to get back to a normal state of affairs.  */
 
 #define target_terminal_ours_for_output() \
-	(*current_target->to_terminal_ours_for_output) ()
+	(*current_target.to_terminal_ours_for_output) ()
 
 /* Put our terminal settings into effect.
    First record the inferior's terminal settings
    so they can be restored properly later.  */
 
 #define target_terminal_ours() \
-	(*current_target->to_terminal_ours) ()
+	(*current_target.to_terminal_ours) ()
 
 /* Print useful information about our terminal status, if such a thing
    exists.  */
 
 #define target_terminal_info(arg, from_tty) \
-	(*current_target->to_terminal_info) (arg, from_tty)
+	(*current_target.to_terminal_info) (arg, from_tty)
 
 /* Kill the inferior process.   Make it go away.  */
 
 #define target_kill() \
-	(*current_target->to_kill) ()
+	(*current_target.to_kill) ()
 
 /* Load an executable file into the target process.  This is expected to
    not only bring new code into the target process, but also to update
    GDB's symbol tables to match.  */
 
 #define target_load(arg, from_tty) \
-	(*current_target->to_load) (arg, from_tty)
+	(*current_target.to_load) (arg, from_tty)
 
 /* Look up a symbol in the target's symbol table.  NAME is the symbol
    name.  ADDRP is a CORE_ADDR * pointing to where the value of the symbol
@@ -469,7 +523,7 @@ print_section_info PARAMS ((struct target_ops *, bfd *));
    doing a complain().  */
 
 #define target_lookup_symbol(name, addrp) 	\
-  (*current_target->to_lookup_symbol) (name, addrp)
+  (*current_target.to_lookup_symbol) (name, addrp)
 
 /* Start an inferior process and set inferior_pid to its pid.
    EXEC_FILE is the file to run.
@@ -478,12 +532,12 @@ print_section_info PARAMS ((struct target_ops *, bfd *));
    On VxWorks and various standalone systems, we ignore exec_file.  */
  
 #define	target_create_inferior(exec_file, args, env)	\
-	(*current_target->to_create_inferior) (exec_file, args, env)
+	(*current_target.to_create_inferior) (exec_file, args, env)
 
 /* The inferior process has died.  Do what is right.  */
 
 #define	target_mourn_inferior()	\
-	(*current_target->to_mourn_inferior) ()
+	(*current_target.to_mourn_inferior) ()
 
 /* Does target have enough data to do a run or attach command? */
 
@@ -493,35 +547,41 @@ print_section_info PARAMS ((struct target_ops *, bfd *));
 /* post process changes to signal handling in the inferior.  */
 
 #define target_notice_signals(pid) \
-  	(*current_target->to_notice_signals) (pid)
+  	(*current_target.to_notice_signals) (pid)
+
+/* Make target stop in a continuable fashion.  (For instance, under Unix, this
+   should act like SIGSTOP).  This function is normally used by GUIs to
+   implement a stop button.  */
+
+#define target_stop() current_target.to_stop ()
 
 /* Pointer to next target in the chain, e.g. a core file and an exec file.  */
 
 #define	target_next \
-	(current_target->to_next)
+	(current_target.to_next)
 
 /* Does the target include all of memory, or only part of it?  This
    determines whether we look up the target chain for other parts of
    memory if this target can't satisfy a request.  */
 
 #define	target_has_all_memory	\
-	(current_target->to_has_all_memory)
+	(current_target.to_has_all_memory)
 
 /* Does the target include memory?  (Dummy targets don't.)  */
 
 #define	target_has_memory	\
-	(current_target->to_has_memory)
+	(current_target.to_has_memory)
 
 /* Does the target have a stack?  (Exec files don't, VxWorks doesn't, until
    we start a process.)  */
    
 #define	target_has_stack	\
-	(current_target->to_has_stack)
+	(current_target.to_has_stack)
 
 /* Does the target have registers?  (Exec files don't.)  */
 
 #define	target_has_registers	\
-	(current_target->to_has_registers)
+	(current_target.to_has_registers)
 
 /* Does the target have execution?  Can we make it jump (through
    hoops), or pop its stack a few times?  FIXME: If this is to work that
@@ -531,7 +591,7 @@ print_section_info PARAMS ((struct target_ops *, bfd *));
    this just tells us whether this target is *capable* of execution.  */
 
 #define	target_has_execution	\
-	(current_target->to_has_execution)
+	(current_target.to_has_execution)
 
 extern void target_link PARAMS ((char *, CORE_ADDR *));
 
@@ -543,6 +603,15 @@ extern void target_link PARAMS ((char *, CORE_ADDR *));
 #define target_pid_to_str(PID) \
 	normal_pid_to_str (PID)
 extern char *normal_pid_to_str PARAMS ((int pid));
+#endif
+
+/* Hardware watchpoint interfaces.  */
+
+/* Returns non-zero if we were stopped by a hardware watchpoint (memory read or
+   write).  */
+
+#ifndef STOPPED_BY_WATCHPOINT
+#define STOPPED_BY_WATCHPOINT(w) 0
 #endif
 
 /* Routines for maintenance of the target structures...
@@ -634,5 +703,8 @@ extern void store_waitstatus PARAMS ((struct target_waitstatus *, int));
 /* Convert between host signal numbers and enum target_signal's.  */
 extern enum target_signal target_signal_from_host PARAMS ((int));
 extern int target_signal_to_host PARAMS ((enum target_signal));
+
+/* Convert from a number used in a GDB command to an enum target_signal.  */
+extern enum target_signal target_signal_from_command PARAMS ((int));
 
 #endif	/* !defined (TARGET_H) */

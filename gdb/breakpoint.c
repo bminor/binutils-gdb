@@ -1,5 +1,5 @@
 /* Everything about breakpoints, for GDB.
-   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994
+   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995
              Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -59,13 +59,7 @@ static void
 disable_command PARAMS ((char *, int));
 
 static void
-disable_breakpoint PARAMS ((struct breakpoint *));
-
-static void
 enable_command PARAMS ((char *, int));
-
-static void
-enable_breakpoint PARAMS ((struct breakpoint *));
 
 static void
 map_breakpoint_numbers PARAMS ((char *,	void (*)(struct breakpoint *)));
@@ -158,9 +152,21 @@ static int executing_breakpoint_commands;
 	     b? (tmp=b->next, 1): 0;	\
 	     b = tmp)
 
-/* By default no support for hardware watchpoints is assumed.  */
+/* Provide defaults for systems that don't support hardware watchpoints. */
+
 #ifndef TARGET_CAN_USE_HARDWARE_WATCHPOINT
+
+/* Returns non-zero if we can set a hardware watchpoint of type TYPE.  TYPE is
+   one of bp_hardware_watchpoint, bp_read_watchpoint, bp_write_watchpoint, or
+   bp_hardware_breakpoint.  CNT is the number of such watchpoints used so far
+   (including this one?).  OTHERTYPE is who knows what...  */
+
 #define TARGET_CAN_USE_HARDWARE_WATCHPOINT(TYPE,CNT,OTHERTYPE) 0
+
+/* Set/clear a hardware watchpoint starting at ADDR, for LEN bytes.  TYPE is 1
+   for read and 2 for read/write accesses.  Returns 0 for success, non-zero for
+   failure.  */
+
 #define target_remove_watchpoint(ADDR,LEN,TYPE) -1
 #define target_insert_watchpoint(ADDR,LEN,TYPE) -1
 #endif
@@ -180,7 +186,7 @@ int show_breakpoint_hit_counts = 1;
 
 /* Chain of all breakpoints defined.  */
 
-static struct breakpoint *breakpoint_chain;
+struct breakpoint *breakpoint_chain;
 
 /* Number of last breakpoint made.  */
 
@@ -935,6 +941,7 @@ bpstat_do_actions (bsp)
 {
   bpstat bs;
   struct cleanup *old_chain;
+  struct command_line *cmd;
 
   executing_breakpoint_commands = 1;
   old_chain = make_cleanup (cleanup_executing_breakpoints, 0);
@@ -945,18 +952,20 @@ top:
   breakpoint_proceeded = 0;
   for (; bs != NULL; bs = bs->next)
     {
-      while (bs->commands)
+      cmd = bs->commands;
+      while (cmd != NULL)
 	{
-	  struct command_line *cmd = bs->commands;
-	  bs->commands = bs->commands->next;
 	  execute_control_command (cmd);
-	  /* If the inferior is proceeded by the command, bomb out now.
-	     The bpstat chain has been blown away by wait_for_inferior.
-	     But since execution has stopped again, there is a new bpstat
-	     to look at, so start over.  */
-	  if (breakpoint_proceeded)
-	    goto top;
+	  cmd = cmd->next;
 	}
+      if (breakpoint_proceeded)
+	/* The inferior is proceeded by the command; bomb out now.
+	   The bpstat chain has been blown away by wait_for_inferior.
+	   But since execution has stopped again, there is a new bpstat
+	   to look at, so start over.  */
+	goto top;
+      else
+	bs->commands = NULL;
     }
 
   executing_breakpoint_commands = 0;
@@ -1094,6 +1103,9 @@ bpstat_alloc (b, cbs)
 /* The value has not changed.  */
 #define WP_VALUE_NOT_CHANGED 3
 
+#define BP_TEMPFLAG 1
+#define BP_HARDWAREFLAG 2
+
 /* Check watchpoint condition.  */
 
 static int
@@ -1223,7 +1235,7 @@ bpstat_stop_status (pc, not_a_breakpoint)
   int real_breakpoint = 0;
 #endif
   /* Root of the chain of bpstat's */
-  struct bpstat root_bs[1];
+  struct bpstats root_bs[1];
   /* Pointer to the last thing in the chain currently.  */
   bpstat bs = root_bs;
   static char message1[] =
@@ -1246,9 +1258,14 @@ bpstat_stop_status (pc, not_a_breakpoint)
 	  && b->address != bp_addr)
 	continue;
 
+/* If defined, then we need to decr pc by this much after a hardware break-
+   point.  Presumably should override DECR_PC_AFTER_BREAK, though it doesn't
+   now...  */
+
 #ifndef DECR_PC_AFTER_HW_BREAK
 #define DECR_PC_AFTER_HW_BREAK 0
 #endif
+
       if (b->type == bp_hardware_breakpoint
 	  && b->address != (bp_addr - DECR_PC_AFTER_HW_BREAK))
 	continue;
@@ -1983,7 +2000,7 @@ create_longjmp_breakpoint(func_name)
     {
       struct minimal_symbol *m;
 
-      m = lookup_minimal_symbol(func_name, (struct objfile *)NULL);
+      m = lookup_minimal_symbol_text (func_name, NULL, (struct objfile *)NULL);
       if (m)
 	sal.pc = SYMBOL_VALUE_ADDRESS (m);
       else
@@ -2270,8 +2287,8 @@ break_command_1 (arg, flag, from_tty)
   int i;
   int thread;
 
-  hardwareflag = flag & 2;
-  tempflag = flag & 1;
+  hardwareflag = flag & BP_HARDWAREFLAG;
+  tempflag = flag & BP_TEMPFLAG;
 
   sals.sals = NULL;
   sals.nelts = 0;
@@ -2422,7 +2439,7 @@ break_command_1 (arg, flag, from_tty)
 	b->cond_string = savestring (cond_start, cond_end - cond_start);
 				     
       b->enable = enabled;
-      b->disposition = tempflag ? delete : donttouch;
+      b->disposition = tempflag ? del : donttouch;
 
       mention (b);
     }
@@ -2453,8 +2470,6 @@ resolve_sal_pc (sal)
     }
 }
 
-#define BP_TEMPFLAG 1
-#define BP_HARDWAREFLAG 2
 void
 break_command (arg, from_tty)
      char *arg;
@@ -2615,7 +2630,7 @@ watch_command_1 (arg, accessflag, from_tty)
 	  scope_breakpoint->enable = enabled;
 
 	  /* Automatically delete the breakpoint when it hits.  */
-	  scope_breakpoint->disposition = delete;
+	  scope_breakpoint->disposition = del;
 
 	  /* Only break in the proper frame (help with recursion).  */
 	  scope_breakpoint->frame = prev_frame->frame;
@@ -3019,7 +3034,7 @@ catch_command_1 (arg, tempflag, from_tty)
       b->type = bp_breakpoint;
       b->cond = cond;
       b->enable = enabled;
-      b->disposition = tempflag ? delete : donttouch;
+      b->disposition = tempflag ? del : donttouch;
 
       mention (b);
     }
@@ -3030,6 +3045,22 @@ catch_command_1 (arg, tempflag, from_tty)
       printf_unfiltered ("Use the \"delete\" command to delete unwanted breakpoints.\n");
     }
   free ((PTR)sals.sals);
+}
+
+/* Used by the gui, could be made a worker for other things. */
+
+struct breakpoint *
+set_breakpoint_sal (sal)
+struct symtab_and_line sal;
+{
+  struct breakpoint *b;
+  b = set_raw_breakpoint (sal);
+  set_breakpoint_count (breakpoint_count + 1);
+  b->number = breakpoint_count;
+  b->type = bp_breakpoint;
+  b->cond = 0;
+  b->thread = -1;
+  return b;
 }
 
 #if 0
@@ -3166,7 +3197,7 @@ breakpoint_auto_delete (bs)
      bpstat bs;
 {
   for (; bs; bs = bs->next)
-    if (bs->breakpoint_at && bs->breakpoint_at->disposition == delete
+    if (bs->breakpoint_at && bs->breakpoint_at->disposition == del 
 	&& bs->stop)
       delete_breakpoint (bs->breakpoint_at);
 }
@@ -3253,7 +3284,7 @@ delete_command (arg, from_tty)
     {
       /* Ask user only if there are some breakpoints to delete.  */
       if (!from_tty
-	  || (breakpoint_chain && query ("Delete all breakpoints? ", 0, 0)))
+	  || (breakpoint_chain && query ("Delete all breakpoints? ")))
 	{
 	  /* No arg; clear all breakpoints.  */
 	  while (breakpoint_chain)
@@ -3538,7 +3569,7 @@ map_breakpoint_numbers (args, function)
     }
 }
 
-static void
+void
 enable_breakpoint (bpt)
      struct breakpoint *bpt;
 {
@@ -3547,9 +3578,6 @@ enable_breakpoint (bpt)
   int target_resources_ok, other_type_used;
   struct value *mark;
   
-  if (enable_breakpoint_hook)
-    enable_breakpoint_hook (bpt);
-
   if (bpt->type == bp_hardware_breakpoint)
     {
       int i;
@@ -3618,6 +3646,9 @@ have been allocated for other watchpoints.\n", bpt->number);
 	select_frame (save_selected_frame, save_selected_frame_level);
       value_free_to_mark (mark);
     }
+
+  if (modify_breakpoint_hook)
+    modify_breakpoint_hook (bpt);
 }
 
 /* ARGSUSED */
@@ -3645,7 +3676,7 @@ enable_command (args, from_tty)
     map_breakpoint_numbers (args, enable_breakpoint);
 }
 
-static void
+void
 disable_breakpoint (bpt)
      struct breakpoint *bpt;
 {
@@ -3655,12 +3686,12 @@ disable_breakpoint (bpt)
   if (bpt->type == bp_watchpoint_scope)
     return;
 
-  if (disable_breakpoint_hook)
-    disable_breakpoint_hook (bpt);
-
   bpt->enable = disabled;
 
   check_duplicates (bpt->address);
+
+  if (modify_breakpoint_hook)
+    modify_breakpoint_hook (bpt);
 }
 
 /* ARGSUSED */
@@ -3782,7 +3813,7 @@ enable_delete_breakpoint (bpt)
      struct breakpoint *bpt;
 {
   bpt->enable = enabled;
-  bpt->disposition = delete;
+  bpt->disposition = del;
 
   check_duplicates (bpt->address);
   breakpoints_changed ();
@@ -4026,39 +4057,3 @@ an expression is either read or written.");
 	    "Synonym for ``info breakpoints''.");
 
 }
-
-/* OK, when we call objfile_relocate, we need to relocate breakpoints
-   too.  breakpoint_re_set is not a good choice--for example, if
-   addr_string contains just a line number without a file name the
-   breakpoint might get set in a different file.  In general, there is
-   no need to go all the way back to the user's string (though this might
-   work if some effort were made to canonicalize it), since symtabs and
-   everything except addresses are still valid.
-
-   Probably the best way to solve this is to have each breakpoint save
-   the objfile and the section number that was used to set it (if set
-   by "*addr", probably it is best to use find_pc_line to get a symtab
-   and use the objfile and block_line_section for that symtab).  Then
-   objfile_relocate can call fixup_breakpoints with the objfile and
-   the new_offsets, and it can relocate only the appropriate breakpoints.  */
-
-#ifdef IBM6000_TARGET
-/* But for now, just kludge it based on the concept that before an
-   objfile is relocated the breakpoint is below 0x10000000, and afterwards
-   it is higher, so that way we only relocate each breakpoint once.  */
-
-void
-fixup_breakpoints (low, high, delta)
-  CORE_ADDR low;
-  CORE_ADDR high;
-  CORE_ADDR delta;
-{
-  struct breakpoint *b;
-
-  ALL_BREAKPOINTS (b)
-    {
-     if (b->address >= low && b->address <= high)
-       b->address += delta;
-    }
-}
-#endif
