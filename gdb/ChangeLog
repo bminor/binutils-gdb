@@ -1,3 +1,35 @@
+2001-07-11  Elena Zannoni  <ezannoni@redhat.com>
+
+	* config/sh/tm-sh.h (struct gdbarch_tdep): Add
+	FLOAT_ARGLAST_REGNUM, RETURN_REGNUM, ARG0_REGNUM, ARGLAST_REGNUM,
+	PR_REGNUM fields.
+
+	* sh-tdep.c (sh_skip_prologue_hard_way): Rename from
+	skip_prologue_hard_way().
+	(skip_prologue_hard_way): Make it a function pointer.
+        (sh_print_register): Use function pointer do_pseudo_register,
+	instead of sh_do_pseudo_register.
+        (sh_do_registers_info): Ditto.
+        (sh_gdbarch_init): Initialize do_pseudo_register.
+	(IS_MOV_TO_R14): Rename from IS_MOV_R14.
+	(skip_prologue_hard_way): Update.
+	(sh_gdbarch_init): Move setting of frame_chain,
+	get_saved_register, init_extra_frame_info, push_arguments,
+	extract_return_value, pop_frame, store_struct_return,
+	extract_struct_value_address, use_struct_convention,
+	init_extra_frame_info to before target specific settings.
+	(sh_gdbarch_init): Initialize new tdep fields
+	FLOAT_ARGLAST_REGNUM, RETURN_REGNUM, ARG0_REGNUM, ARGLAST_REGNUM,
+	PR_REGNUM.
+	(sh_push_arguments): Use new gdbarch_tdep fields
+	{ARG0,ARGLAST}_REGNUM.
+	(sh_saved_pc_after_call, sh_nofp_frame_init_saved_regs,
+	sh_init_extra_frame_info, sh_push_return_address,
+	sh_generic_show_regs, sh3_show_regs, sh3e_show_regs,
+	sh3_dsp_show_regs, sh4_show_regs, sh_dsp_show_regs): Update to use
+	gdbarch_tdep->PR_REGNUM.
+	(dr_reg_base_num, fv_reg_base_num): Move to earlier in the file.
+	
 2001-07-11  Daniel Jacobowitz  <drow@mvista.com>
 
 	* config/mips/tm-linux.h: Include "tm-linux.h" instead of copying

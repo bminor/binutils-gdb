@@ -1,5 +1,5 @@
 /* Target-specific definition for a Hitachi Super-H.
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -24,8 +24,10 @@
 #define GDB_MULTI_ARCH 1
 
 /* Information that is dependent on the processor variant. */
+
 struct gdbarch_tdep
   {
+    int PR_REGNUM;
     int FPUL_REGNUM;  /*                       sh3e, sh4 */
     int FPSCR_REGNUM; /*                       sh3e, sh4 */
     int SR_REGNUM;    /* sh-dsp, sh3, sh3-dsp, sh3e, sh4 */
@@ -50,6 +52,10 @@ struct gdbarch_tdep
     int DR_LAST_REGNUM; /*                           sh4 */
     int FV0_REGNUM;   /*                             sh4 */
     int FV_LAST_REGNUM; /*                           sh4 */
+    int ARG0_REGNUM;
+    int ARGLAST_REGNUM;
+    int FLOAT_ARGLAST_REGNUM;
+    int RETURN_REGNUM;
   };
 
 /* Registers common to all the SH variants. */
@@ -57,9 +63,9 @@ enum
   {
     R0_REGNUM = 0,
     STRUCT_RETURN_REGNUM = 2,
-    ARG0_REGNUM = 4,
-    ARGLAST_REGNUM = 7,
-    PR_REGNUM = 17,
+    ARG0_REGNUM = 4, /* Used in h8300-tdep.c */
+    ARGLAST_REGNUM = 7, /* Used in h8300-tdep.c */
+    PR_REGNUM = 17, /* used in sh3-rom.c */
     GBR_REGNUM = 18,
     VBR_REGNUM = 19,
     MACH_REGNUM = 20,
