@@ -151,8 +151,11 @@ frv_cgen_print_operand (cd, opindex, xinfo, fields, attrs, pc, length)
 
   switch (opindex)
     {
-    case FRV_OPERAND_A :
-      print_normal (cd, info, fields->f_A, 0|(1<<CGEN_OPERAND_HASH_PREFIX), pc, length);
+    case FRV_OPERAND_A0 :
+      print_normal (cd, info, fields->f_A, 0, pc, length);
+      break;
+    case FRV_OPERAND_A1 :
+      print_normal (cd, info, fields->f_A, 0, pc, length);
       break;
     case FRV_OPERAND_ACC40SI :
       print_keyword (cd, info, & frv_cgen_opval_acc_names, fields->f_ACC40Si, 0);

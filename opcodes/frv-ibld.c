@@ -571,7 +571,10 @@ frv_cgen_insert_operand (cd, opindex, fields, buffer, pc)
 
   switch (opindex)
     {
-    case FRV_OPERAND_A :
+    case FRV_OPERAND_A0 :
+      errmsg = insert_normal (cd, fields->f_A, 0, 0, 17, 1, 32, total_length, buffer);
+      break;
+    case FRV_OPERAND_A1 :
       errmsg = insert_normal (cd, fields->f_A, 0, 0, 17, 1, 32, total_length, buffer);
       break;
     case FRV_OPERAND_ACC40SI :
@@ -870,7 +873,10 @@ frv_cgen_extract_operand (cd, opindex, ex_info, insn_value, fields, pc)
 
   switch (opindex)
     {
-    case FRV_OPERAND_A :
+    case FRV_OPERAND_A0 :
+      length = extract_normal (cd, ex_info, insn_value, 0, 0, 17, 1, 32, total_length, pc, & fields->f_A);
+      break;
+    case FRV_OPERAND_A1 :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 17, 1, 32, total_length, pc, & fields->f_A);
       break;
     case FRV_OPERAND_ACC40SI :
@@ -1158,7 +1164,10 @@ frv_cgen_get_int_operand (cd, opindex, fields)
 
   switch (opindex)
     {
-    case FRV_OPERAND_A :
+    case FRV_OPERAND_A0 :
+      value = fields->f_A;
+      break;
+    case FRV_OPERAND_A1 :
       value = fields->f_A;
       break;
     case FRV_OPERAND_ACC40SI :
@@ -1392,7 +1401,10 @@ frv_cgen_get_vma_operand (cd, opindex, fields)
 
   switch (opindex)
     {
-    case FRV_OPERAND_A :
+    case FRV_OPERAND_A0 :
+      value = fields->f_A;
+      break;
+    case FRV_OPERAND_A1 :
       value = fields->f_A;
       break;
     case FRV_OPERAND_ACC40SI :
@@ -1635,7 +1647,10 @@ frv_cgen_set_int_operand (cd, opindex, fields, value)
 {
   switch (opindex)
     {
-    case FRV_OPERAND_A :
+    case FRV_OPERAND_A0 :
+      fields->f_A = value;
+      break;
+    case FRV_OPERAND_A1 :
       fields->f_A = value;
       break;
     case FRV_OPERAND_ACC40SI :
@@ -1866,7 +1881,10 @@ frv_cgen_set_vma_operand (cd, opindex, fields, value)
 {
   switch (opindex)
     {
-    case FRV_OPERAND_A :
+    case FRV_OPERAND_A0 :
+      fields->f_A = value;
+      break;
+    case FRV_OPERAND_A1 :
       fields->f_A = value;
       break;
     case FRV_OPERAND_ACC40SI :

@@ -66,6 +66,12 @@ static const char * parse_u12
   PARAMS ((CGEN_CPU_DESC, const char **, int, long *));
 static const char * parse_even_register
   PARAMS ((CGEN_CPU_DESC, const char **, CGEN_KEYWORD *, long *));
+static const char * parse_A0
+  PARAMS ((CGEN_CPU_DESC, const char **, int, long *));
+static const char * parse_A1
+  PARAMS ((CGEN_CPU_DESC, const char **, int, long *));
+static const char * parse_A
+  PARAMS ((CGEN_CPU_DESC, const char **, int, long *, long));
 
 static const char *
 parse_ulo16 (cd, strp, opindex, valuep)
@@ -349,6 +355,49 @@ parse_u12 (cd, strp, opindex, valuep)
 }
 
 static const char *
+parse_A (cd, strp, opindex, valuep, A)
+     CGEN_CPU_DESC cd;
+     const char **strp;
+     int opindex;
+     long *valuep;
+     long A;
+{
+  const char *errmsg;
+ 
+  if (**strp == '#')
+    ++*strp;
+
+  errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, valuep);
+  if (errmsg)
+    return errmsg;
+
+  if (*valuep != A)
+    return "Value of A operand must be 0 or 1";
+
+  return NULL;
+}
+
+static const char *
+parse_A0 (cd, strp, opindex, valuep)
+     CGEN_CPU_DESC cd;
+     const char **strp;
+     int opindex;
+     long *valuep;
+{
+  return parse_A (cd, strp, opindex, valuep, 0);
+}
+
+static const char *
+parse_A1 (cd, strp, opindex, valuep)
+     CGEN_CPU_DESC cd;
+     const char **strp;
+     int opindex;
+     long *valuep;
+{
+  return parse_A (cd, strp, opindex, valuep, 1);
+}
+
+static const char *
 parse_even_register (cd, strP, tableP, valueP)
      CGEN_CPU_DESC  cd;
      const char **  strP;
@@ -399,8 +448,11 @@ frv_cgen_parse_operand (cd, opindex, strp, fields)
 
   switch (opindex)
     {
-    case FRV_OPERAND_A :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, FRV_OPERAND_A, &fields->f_A);
+    case FRV_OPERAND_A0 :
+      errmsg = parse_A0 (cd, strp, FRV_OPERAND_A0, &fields->f_A);
+      break;
+    case FRV_OPERAND_A1 :
+      errmsg = parse_A1 (cd, strp, FRV_OPERAND_A1, &fields->f_A);
       break;
     case FRV_OPERAND_ACC40SI :
       errmsg = cgen_parse_keyword (cd, strp, & frv_cgen_opval_acc_names, & fields->f_ACC40Si);
