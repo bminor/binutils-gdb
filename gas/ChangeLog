@@ -1,3 +1,8 @@
+2002-02-13  Andreas Schwab  <schwab@suse.de>
+
+	* config/tc-i386.c (tc_i386_fix_adjustable): Don't adjust
+	pc-relative relocations to merge sections in 64-bit mode.
+
 2002-02-12  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-mn10300.c (other_registers): Added `epsw'.  Mark `pc'

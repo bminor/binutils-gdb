@@ -1,6 +1,6 @@
 /* i386.c -- Assemble code for the Intel 80386
    Copyright 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001
+   2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -1178,7 +1178,12 @@ tc_i386_fix_adjustable (fixP)
   /* Prevent all adjustments to global symbols, or else dynamic
      linking will not work correctly.  */
   if (S_IS_EXTERNAL (fixP->fx_addsy)
-      || S_IS_WEAK (fixP->fx_addsy))
+      || S_IS_WEAK (fixP->fx_addsy)
+      /* Don't adjust pc-relative references to merge sections in 64-bit
+	 mode.  */
+      || (use_rela_relocations
+	  && (S_GET_SEGMENT (fixP->fx_addsy)->flags & SEC_MERGE) != 0
+	  && fixP->fx_pcrel))
     return 0;
 #endif
   /* adjust_reloc_syms doesn't know about the GOT.  */
