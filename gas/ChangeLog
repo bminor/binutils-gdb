@@ -1,3 +1,13 @@
+Mon Aug 19 14:41:36 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/obj-coff.c (fixup_segment): Adjust PC relative reloc by
+	section address for the i960 as is done for the i386.
+
+Thu Aug 15 16:37:59 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-config.in: Add wildcards for config matching, add mips-*-*
+	case, forward-include bfd/elf-bfd.h.
+
 start-sanitize-d10v
 Thu Aug 15 13:24:30 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
