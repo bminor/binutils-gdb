@@ -1,3 +1,8 @@
+2002-08-13  Michael Snyder  <msnyder@redhat.com>
+
+	* mips-tdep.c (mips_pop_frame): Read saved values of floating
+	point registers without sign extension.
+
 2002-09-17  Andrew Cagney  <cagney@redhat.com>
 
 	* blockframe.c (deprecated_read_register_dummy): Rename

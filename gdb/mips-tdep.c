@@ -3782,13 +3782,21 @@ mips_pop_frame (void)
   if (frame->saved_regs == NULL)
     FRAME_INIT_SAVED_REGS (frame);
   for (regnum = 0; regnum < NUM_REGS; regnum++)
-    {
-      if (regnum != SP_REGNUM && regnum != PC_REGNUM
-	  && frame->saved_regs[regnum])
-	write_register (regnum,
-			read_memory_integer (frame->saved_regs[regnum],
-					     MIPS_SAVED_REGSIZE));
-    }
+    if (regnum != SP_REGNUM && regnum != PC_REGNUM
+	&& frame->saved_regs[regnum])
+      {
+	/* Floating point registers must not be sign extended, 
+	   in case MIPS_SAVED_REGSIZE = 4 but sizeof (FP0_REGNUM) == 8.  */
+
+	if (FP0_REGNUM <= regnum && regnum < FP0_REGNUM + 32)
+	  write_register (regnum,
+			  read_memory_unsigned_integer (frame->saved_regs[regnum],
+							MIPS_SAVED_REGSIZE));
+	else
+	  write_register (regnum,
+			  read_memory_integer (frame->saved_regs[regnum],
+					       MIPS_SAVED_REGSIZE));
+      }
 
   write_register (SP_REGNUM, new_sp);
   flush_cached_frames ();
