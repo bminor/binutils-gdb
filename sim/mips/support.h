@@ -33,8 +33,8 @@
 #if defined(__GNUC__) || defined(_WIN32)
 
 #ifdef _WIN32
-#define SIGTRAP 5
-#define SIGQUIT 3
+#define SIGQUIT 5
+#define SIGTRAP 6
 typedef signed __int64 word64;
 typedef unsigned __int64 uword64;
 #else

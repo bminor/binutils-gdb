@@ -1,3 +1,8 @@
+Sun Dec 29 09:18:32 1996  Mark Alexander  <marka@cygnus.com>
+
+	* support.h: Make definitions of SIGTRAP and SIGQUIT consistent
+	with gdb/config/i386/xm-windows.h.
+
 Fri Dec 27 22:48:51 1996  Mark Alexander  <marka@cygnus.com>
 
 	* gencode.c (build_instruction): Work around MSVC++ code gen bug
