@@ -1,3 +1,16 @@
+Wed May 24 07:10:10 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.base/setvar.exp: Make test names consistent between pass and
+	fail cases.  Use gdb_test more.
+
+Fri May 19 07:22:58 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* lib/gdb.exp (gdb_load): Add "upvar timeout timeout".
+
+Mon May 15 23:50:51 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.base/help.exp:  Fix expected help string for `show commands'.
+
 Thu May 11 07:55:11 1995  Jim Kingdon  <kingdon@deneb.cygnus.com>
 
 	* gdb.stabs/xcoff.sed: Change N_LSYM to C_DECL not C_LSYM.
