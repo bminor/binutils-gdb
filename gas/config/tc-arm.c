@@ -9538,28 +9538,24 @@ md_parse_option (c, arg)
 
 	    case '8':
 	      if (streq (str, "8") || streq (str, "810"))
-		cpu_variant = (cpu_variant & ~ARM_ANY)
-		  | ARM_8 | ARM_ARCH_V4;
+		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_8;
 	      else
 		goto bad;
 	      break;
 
 	    case '9':
 	      if (streq (str, "9"))
-		cpu_variant = (cpu_variant & ~ARM_ANY)
-		  | ARM_9 | ARM_ARCH_V4T;
+		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_9;
 	      else if (streq (str, "920"))
-		cpu_variant = (cpu_variant & ~ARM_ANY)
-		  | ARM_9 | ARM_ARCH_V4;
+		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_9;
 	      else if (streq (str, "920t"))
-		cpu_variant = (cpu_variant & ~ARM_ANY)
-		  | ARM_9 | ARM_ARCH_V4T;
+		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_9;
 	      else if (streq (str, "9tdmi"))
-		cpu_variant = (cpu_variant & ~ARM_ANY)
-		  | ARM_9 | ARM_ARCH_V4T;
+		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_9;
 	      else if (streq (str, "9e"))
+		/* XXX This is bogus: arm9e != maverick.  */
 		cpu_variant = (cpu_variant & ~ARM_ANY)
-		  | ARM_9 | ARM_ARCH_V4T | ARM_EXT_MAVERICK;
+		  | ARM_9 | ARM_EXT_MAVERICK;
 	      else
 		goto bad;
 	      break;
@@ -9568,16 +9564,14 @@ md_parse_option (c, arg)
 	      if (streq (str, "strongarm")
 		  || streq (str, "strongarm110")
 		  || streq (str, "strongarm1100"))
-		cpu_variant = (cpu_variant & ~ARM_ANY)
-		  | ARM_8 | ARM_ARCH_V4;
+		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_STRONG;
 	      else
 		goto bad;
 	      break;
 
             case 'x':
  	      if (streq (str, "xscale"))
- 		cpu_variant = (cpu_variant & ~ARM_ANY)
-		  | ARM_9 | ARM_ARCH_XSCALE;
+ 		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_ARCH_XSCALE;
  	      else
  		goto bad;
       	      break;
@@ -9591,10 +9585,10 @@ md_parse_option (c, arg)
 		  switch (*++str)
 		    {
 		    case 'a':
-		      cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_3;
+		      cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_ARCH_V2S;
 		      break;
 		    case 0:
-		      cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_2;
+		      cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_ARCH_V2;
 		      break;
 		    default:
 		      as_bad (_("invalid architecture variant -m%s"), arg);
@@ -9603,7 +9597,7 @@ md_parse_option (c, arg)
 		  break;
 
 		case '3':
-		  cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_7;
+		  cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_ARCH_V3;
 
 		  switch (*++str)
 		    {
@@ -9616,7 +9610,7 @@ md_parse_option (c, arg)
 		  break;
 
 		case '4':
-		  cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_7 | ARM_ARCH_V4;
+		  cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_ARCH_V4;
 
 		  switch (*++str)
 		    {
@@ -9629,10 +9623,10 @@ md_parse_option (c, arg)
 		  break;
 
 		case '5':
-		  cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_9 | ARM_ARCH_V5;
+		  cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_ARCH_V5;
 		  switch (*++str)
 		    {
-		    case 't': cpu_variant |= ARM_EXT_V4T; break;
+		    case 't': cpu_variant |= ARM_EXT_V4T | ARM_EXT_V5T; break;
 		    case 'e': cpu_variant |= ARM_EXT_V5E; break;
 		    case 0:   break;
 		    default:

@@ -1,3 +1,8 @@
+2002-01-15  Richard Earnshaw  <rearnsha@arm.com>
+
+	* tc-arm.c (md_parse_option): Tidy up setting of cpu_variant for 
+	various command line options.
+
 2002-01-15  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* config/tc-xstormy16.c: (xstormy16_fix_adjustable): Do not fix
