@@ -1,3 +1,29 @@
+2005-03-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/i386.exp: Run segment and inval-seg for i386. Run
+	x86-64-segment and x86-64-inval-seg for x86-64.
+
+	* gas/i386/intel.d: Expect movw for moving between memory and
+	segment register.
+	* gas/i386/naked.d: Likewise.
+	* gas/i386/opcode.d: Likewise.
+	* gas/i386/x86-64-opcode.d: Likewise.
+
+	* gas/i386/opcode.s: Use movw for moving between memory and
+	segment register.
+	* gas/i386/x86-64-opcode.s: Likewise.
+
+	* : Likewise.
+
+	* gas/i386/inval-seg.l: New.
+	* gas/i386/inval-seg.s: New.
+	* gas/i386/segment.l: New.
+	* gas/i386/segment.s: New.
+	* gas/i386/x86-64-inval-seg.l: New.
+	* gas/i386/x86-64-inval-seg.s: New.
+	* gas/i386/x86-64-segment.l: New.
+	* gas/i386/x86-64-segment.s: New.
+
 2005-03-29  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gas/arm/tls.s, gas/arm/tls.d: New files.

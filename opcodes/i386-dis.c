@@ -97,6 +97,7 @@ static void SIMD_Fixup (int, int);
 static void PNI_Fixup (int, int);
 static void INVLPG_Fixup (int, int);
 static void BadOp (void);
+static void SEG_Fixup (int, int);
 
 struct dis_private {
   /* Points to first byte not fetched.  */
@@ -221,6 +222,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define Cm OP_C, m_mode
 #define Dm OP_D, m_mode
 #define Td OP_T, d_mode
+#define Sv SEG_Fixup, v_mode
 
 #define RMeAX OP_REG, eAX_reg
 #define RMeBX OP_REG, eBX_reg
@@ -642,9 +644,9 @@ static const struct dis386 dis386[] = {
   { "movS",		Ev, Gv, XX },
   { "movB",		Gb, Eb, XX },
   { "movS",		Gv, Ev, XX },
-  { "movQ",		Ev, Sw, XX },
+  { "movQ",		Sv, Sw, XX },
   { "leaS",		Gv, M, XX },
-  { "movQ",		Sw, Ev, XX },
+  { "movQ",		Sw, Sv, XX },
   { "popU",		Ev, XX, XX },
   /* 90 */
   { "nop",		NOP_Fixup, 0, XX, XX },
@@ -4410,4 +4412,53 @@ BadOp (void)
   /* Throw away prefixes and 1st. opcode byte.  */
   codep = insn_codep + 1;
   oappend ("(bad)");
+}
+
+static void
+SEG_Fixup (int extrachar, int sizeflag)
+{
+  if (mod == 3)
+    {
+      /* We need to add a proper suffix with
+
+		movw %ds,%ax
+		movl %ds,%eax
+		movq %ds,%rax
+		movw %ax,%ds
+		movl %eax,%ds
+		movq %rax,%ds
+       */
+      const char *suffix;
+
+      if (prefixes & PREFIX_DATA)
+	suffix = "w";
+      else
+	{
+	  USED_REX (REX_MODE64);
+	  if (rex & REX_MODE64)
+	    suffix = "q";
+	  else
+	    suffix = "l";
+	}
+      strcat (obuf, suffix);
+    }
+  else
+    {
+      /* We need to fix the suffix for
+
+		movw %ds,(%eax)
+		movw %ds,(%rax)
+		movw (%eax),%ds
+		movw (%rax),%ds
+
+	 Override "mov[l|q]".  */
+      char *p = obuf + strlen (obuf) - 1;
+
+      /* We might not have a suffix.  */
+      if (*p == 'v')
+	++p;
+      *p = 'w';
+    }
+
+  OP_E (extrachar, sizeflag);
 }

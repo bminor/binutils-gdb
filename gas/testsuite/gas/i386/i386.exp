@@ -42,6 +42,8 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
     run_list_test "float" "-al"
     run_list_test "general" "-al --listing-lhs-width=2"
     run_list_test "inval" "-al"
+    run_list_test "segment" "-al"
+    run_list_test "inval-seg" "-al"
     run_list_test "modrm" "-al --listing-lhs-width=2"
     run_dump_test "naked"
     run_dump_test "opcode"
@@ -120,6 +122,8 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
     run_dump_test "x86-64-opcode"
     run_dump_test "x86-64-rip"
     run_list_test "x86-64-inval" "-al"
+    run_list_test "x86-64-segment" "-al"
+    run_list_test "x86-64-inval-seg" "-al"
 
     # For ELF targets verify that @unwind works.
     if { ([istarget "*-*-elf*"] || [istarget "*-*-linux*"]

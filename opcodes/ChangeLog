@@ -1,3 +1,9 @@
+2005-03-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (SEG_Fixup): New.
+	(Sv): New.
+	(dis386): Use "Sv" for 0x8c and 0x8e.
+
 2005-03-21  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
 	    Nick Clifton  <nickc@redhat.com>
 	    
