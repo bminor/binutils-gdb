@@ -1,3 +1,9 @@
+Sun Oct  4 23:29:34 1998  David Edelsohn  <edelsohn@mhpcc.edu>
+
+	* rs6000-core.c (rs6000coff_core_file_matches_executable_p):
+	Declare size as bfd_size_type.
+	(rs6000coff_get_section_contents): Declare count as bfd_size_type. 
+
 Sun Oct  4 20:38:29 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* cpu-hppa.c (bfd_hppa20_arch): Define.  Link it into the bfd_hppa_arch
