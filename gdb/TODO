@@ -275,3 +275,143 @@ solution).
 xcoffexec.c should be eliminated, contents going into either exec.c
 or rs6000-nat.c.
 
+investigate "x/s 0" (right now stops early) (I think maybe GDB is
+using a 0 address for bad purposes internally).
+
+Play with RS/6000 shared libraries (using shared library tests
+listed in testsuite/TODO as a guide).  (Schauer has done shared
+library stuff on most other platforms but has not touched the
+RS/6000).
+
+Make "info path" and path_comma work again (but independent of the
+environment either of gdb or that we'll pass to the inferior).
+
+Make GDB understand the GCC feature for putting octal constants in
+enums.  Make it so overflow on an enum constant does not error_type
+the whole type.  Allow arbitrarily large enums with type attributes.
+Put all this stuff in the testsuite.
+
+Make TYPE_CODE_ERROR with a non-zero TYPE_LENGTH more useful (print
+the value in hex; process type attributes).  Add this to the
+testsuite.  This way future compilers can add new types and old
+versions of GDB can do something halfway reasonable.
+
+Clean up formatting of "info registers" on MIPS and 88k.  See if it
+is possible to do this generically across all target architectures.
+
+GDB gets bfd/core.c and gdb/core.c confused (this should be easy to
+repeat even with something more recent than GDB 4.9).
+
+Check that unmatched RBRAC doesn't abort().
+
+Fix mdebugread.c:parse_type to do fundamental types right (see
+rs6000_builtin_type in stabsread.c for what "right" is--the point is
+that the debug format fixes the sizes of these things and it shouldn't
+depend on stuff like TARGET_PTR_BIT and so on.  For mdebug, there seem
+to be separate bt* codes for 64 bit and 32 bit things, and GDB should
+be aware of that).  Also use a switch statement for clarity and speed.
+
+Investigate adding symbols in target_load--some targets do, some
+don't.
+
+Put dirname in psymtabs and change lookup*symtab to use dirname (so
+/foo/bar.c works whether compiled by cc /foo/bar.c, or cd /foo; cc
+bar.c).
+
+merge xcoffexec.c and exec.c (might need a simple hook or two in
+exec.c, but that's no excuse to duplicate the whole thing).  Merge
+xcoffread.c and coffread.c.  Use breakpoint_re_set instead of
+fixup_breakpoints.
+
+Fix byte order and int size sins in tm-a29k.h
+(EXTRACT_RETURN_VALUE).  Perhaps should reproduce bug and verify fix
+(or perhaps should just fix it...).
+
+Make a watchpoint on a constant expression an error (or warning
+perhaps)
+
+Make a watchpoint which contains a function call an error (it is
+broken now, making it work is probably not worth the effort).
+
+Make SIGINT handling independent of the debugging target.  Do this
+by adding a new target_send_signal which sends a signal to a running
+process.  (This is to replace the calls to signal() in remote.c).
+
+New test case based on weird.exp but in which type numbers are not
+renumbered (thus multiply defining a type).  This currently causes an
+infinite loop on "p v_comb".
+
+Nuke baseclass_addr.
+
+Nuke USG define.
+
+"source file more recent" loses on re-read
+
+Fix 386 floating point so that floating point registers are real
+registers (but code can deal at run-time if they are missing, like
+mips and 68k).  This would clean up "info float" and related stuff.
+
+Look at Solaris bug in interrupt.exp.  Can get out of syscall with
+PRSABORT (syscall will return EINTR) but merely doing that leads to a
+"can't read memory" error.
+
+gcc -g -c enummask.c then gdb enummask.o, then "p v".  GDB complains
+about not being able to access memory location 0.
+
+-------------------- enummask.c
+enum mask
+{
+  ANIMAL = 0,
+  VEGETABLE = 1,
+  MINERAL = 2,
+  BASIC_CATEGORY = 3,
+
+  WHITE = 0,
+  BLUE = 4,
+  GREEN = 8,
+  BLACK = 0xc,
+  COLOR = 0xc,
+
+  ALIVE = 0x10,
+
+  LARGE = 0x20
+} v;
+
+If try to modify value in file with "set write off" should give
+appropriate error not "cannot access memory at address 0x65e0".
+
+What the hell is no_std_regs in tm-z8k.h???
+This fixes the case where a target defines no standard reg names,
+and the parsing of $pc gets confused when it should be an invalid expr.
+
+Make DEBUG_EXPRESSIONS a maintenance command, dependent on
+MAINTENANCE_COMMANDS.
+
+Allow core file without exec file on RS/6000.
+
+Make sure "shell" with no arguments works right on DOS.
+
+Make gdb.ini (as well as .gdbinit) be checked on all platforms, so
+the same directory can be NFS-mounted on unix or DOS, and work the
+same way.
+
+cd ~/tmp/<M-?> causes infinite loop (where ~/tmp is a directory).
+
+Get SECT_OFF_TEXT stuff out of objfile_relocate (might be needed to
+get RS/6000 to work right, might not be immediately relevant).
+
+Clean up add_toc_to_loadinfo
+
+Think about attached processes and sharing terminal.
+
+John sez in reference to ignoring errors from tcsegpgrp if attach_flag:
+set_tty_state should not have any trouble with attached processes.
+Instead, the tty handling should leave the pgrp of the tty alone when
+attaching to processes (perhaps pass terminal_init_inferior a flag
+saying whether we're attaching).
+
+PAGE_SIZE redefined warnings on AIX.  Probably should be using
+BFD_PAGE_SIZE throughout BFD.
+
+
+

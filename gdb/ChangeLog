@@ -1,3 +1,8 @@
+Tue Sep 20 15:42:02 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* TODO: Add more items.
+	* tests: Remove the directory and all of its (obsolete) contents.
+
 Tue Sep 20 11:34:27 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* coffread.c (init_stringtab): When copying length to stringtab,
@@ -59,9 +64,10 @@ Fri Sep 16 17:18:44 1994  Stan Shebs  (shebs@andros.cygnus.com)
 	delta68.mh, dpx2.mh, hp300bsd.mh, hp300hpux.mh, m68klynx.mh,
 	m68kv4.mh}, config/m88k/{delta88.mh, delta88v4.mh},
 	config/mips/riscos.mh, config/pa/hppahpux.mh,
-	config/sparc/{sparclynx.mh, sun4sol2.mh}, config/tahoe/tahoe.mh,
-	config/vax/{vaxbsd.mh, vaxult.mh, vaxult2.mh} (REGEX, REGEX1,
-	SYSV_DEFINE): No longer define.
+	config/rs6000/rs6000lynx.mh, config/sparc/{sparclynx.mh,
+	sun4sol2.mh}, config/tahoe/tahoe.mh, config/vax/{vaxbsd.mh,
+	vaxult.mh, vaxult2.mh} (REGEX, REGEX1, SYSV_DEFINE): No longer
+	define.
 	* config/i386/i386sco4.mh (MUNCH_DEFINE): No longer define.
 
 Fri Sep 16 15:40:34 1994  Stu Grossman  (grossman@cygnus.com)
