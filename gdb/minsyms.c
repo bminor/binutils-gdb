@@ -322,6 +322,12 @@ lookup_minimal_symbol_by_pc (pc)
   register struct minimal_symbol *msymbol;
   register struct minimal_symbol *best_symbol = NULL;
 
+  /* pc has to be in a known section. This ensures that anything beyond
+     the end of the last segment doesn't appear to be part of the last
+     function in the last segment.  */
+  if (find_pc_section (pc) == NULL)
+    return NULL;
+
   for (objfile = object_files;
        objfile != NULL;
        objfile = objfile -> next)

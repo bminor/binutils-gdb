@@ -1,3 +1,12 @@
+Sat May 18 02:43:58 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* blockframe.c (frameless_look_for_prologue):
+	Add FUNCTION_START_OFFSET only if func_start is non-zero.
+	* minsyms.c (lookup_minimal_symbol_by_pc):  Return NULL if
+	pc is not in a known section.
+	* stack.c (print_frame_info):  Remove check for fi->pc in known
+	section, now handled by lookup_minimal_symbol_by_pc.
+
 start-sanitize-gdbtk
 Fri May 17 13:54:34 1996  Fred Fish  <fnf@cygnus.com>
 
