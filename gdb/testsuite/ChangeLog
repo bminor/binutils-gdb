@@ -1,3 +1,11 @@
+Fri Sep 18 14:07:44 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* gdb.trace/*.exp: remove "remote_download" command.
+
+Wed Sep 16 11:38:21 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* gdb.trace/*.exp: remove -gdwarf from compile.
+
 Wed Sep 16 01:23:11 1998  Felix Lee  <flee@cygnus.com>
 
 	* gdb.trace/configure.in(AC_INIT): typo
