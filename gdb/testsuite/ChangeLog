@@ -8,6 +8,11 @@ Sat Feb  5 09:11:56 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 Sat Feb  5 10:19:09 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* gdb.disasm/hppa.s (comib_tests): Add missing instruction.
+	(comib_nullified_tests): Fix typo.
+	* gdb.disasm/hppa.exp (all comb tests): Fix thinkos in expect
+	strings.  No longer expected to fail.
+
 	* gdb.disasm/hppa.s (addib_tests): Fix typo.
 	* gdb.disasm/hppa.exp (all addb tests): Fix thinkos in expect
 	strings.  No longer expected to fail.
