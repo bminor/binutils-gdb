@@ -123,7 +123,7 @@ AC_CHECK_HEADERS(ctype.h endian.h link.h thread_db.h proc_service.h \
 	string.h sys/procfs.h sys/ptrace.h sys/reg.h stdint.h \
 	term.h termio.h termios.h unistd.h wait.h sys/wait.h \
 	wchar.h wctype.h asm/debugreg.h sys/debugreg.h sys/select.h \
-	time.h sys/file.h sys/ioctl.h sys/user.h \
+	time.h sys/file.h sys/ioctl.h sys/user.h sys/fault.h sys/syscall.h \
 	dirent.h sys/ndir.h sys/dir.h ndir.h \
 	curses.h ncurses.h \
 	poll.h sys/poll.h)
@@ -216,6 +216,9 @@ if test "${target}" = "${host}"; then
 	AC_DEFINE(START_INFERIOR_TRAPS_EXPECTED,2)
 	AC_DEFINE(sys_quotactl)
 	;;
+  ia64-*-aix*)
+      AC_DEFINE(NEW_PROC_API)
+      ;;
   *-*-unixware* | *-*-sysv4.2* | *-*-sysv5*)
       AC_DEFINE(NEW_PROC_API)
       ;;
@@ -236,6 +239,10 @@ if test "$ac_cv_header_sys_procfs_h" = yes; then
   BFD_HAVE_SYS_PROCFS_TYPE(prfpregset32_t)
   BFD_HAVE_SYS_PROCFS_TYPE(lwpid_t)
   BFD_HAVE_SYS_PROCFS_TYPE(psaddr_t)
+  BFD_HAVE_SYS_PROCFS_TYPE(prsysent_t)
+  BFD_HAVE_SYS_PROCFS_TYPE(pr_sigset_t)
+  BFD_HAVE_SYS_PROCFS_TYPE(pr_sigaction64_t)
+  BFD_HAVE_SYS_PROCFS_TYPE(pr_siginfo64_t)
 
   dnl Check for struct link_map32 type, which allows a 64-bit Solaris
   dnl debugger to debug a 32-bit Solaris app with 32-bit shared libraries.

@@ -1,3 +1,19 @@
+2001-03-05  Kevin Buettner  <kevinb@redhat.com>
+
+	* acconfig.h (HAVE_PRSYSENT_T, HAVE_PR_SIGSET_T,
+	HAVE_PR_SIGACTION64_T, HAVE_PR_SIGINFO64_T): New configure
+	macros.
+	* configure.in (prsysent_t, pr_sigset_t, pr_sigaction64_t,
+	pr_siginfo64_t): Test for these typedefs in <sys/procfs.h>.
+	(sys/fault.h, sys/select.h): Test for presence of these
+	header files.
+	(ia64-*-aix*): Define NEW_PROC_API for this host.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
+	* configure.host (ia64-*-aix*): New host.
+	* configure.tgt (ia64-*-aix*): New target.
+	
 2001-03-05  Andrew Cagney  <ac131313@redhat.com>
 
 	* TODO (GDB 5.1 Known Problems): Document z8k as broken.

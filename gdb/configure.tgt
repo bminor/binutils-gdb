@@ -132,6 +132,7 @@ i960-*-elf*)		gdb_target=mon960 ;;
 i960-*-nindy*)		gdb_target=nindy960 ;;
 i960-*-vxworks*)	gdb_target=vxworks960 ;;
 
+ia64-*-aix*)		gdb_target=aix ;;
 ia64-*-linux*)		gdb_target=linux ;;
 
 m32r-*-elf*)		gdb_target=m32r ;;

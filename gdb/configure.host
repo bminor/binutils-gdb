@@ -80,6 +80,7 @@ i[3456]86-*-sysv*)	gdb_host=i386v ;;
 i[3456]86-*-isc*)	gdb_host=i386v32 ;;
 i[3456]86-*-cygwin*)	gdb_host=cygwin ;;
 
+ia64-*-aix*)		gdb_host=aix ;;
 ia64-*-linux*)		gdb_host=linux ;;
 
 m680[01]0-sun-sunos3*)	gdb_host=sun2os3 ;;

@@ -37,6 +37,18 @@
 /* Define if <sys/procfs.h> has prfpregset32_t. */
 #undef HAVE_PRFPREGSET32_T
 
+/* Define if <sys/procfs.h> has prsysent_t */
+#undef HAVE_PRSYSENT_T
+
+/* Define if <sys/procfs.h> has pr_sigset_t */
+#undef HAVE_PR_SIGSET_T
+
+/* Define if <sys/procfs.h> has pr_sigaction64_t */
+#undef HAVE_PR_SIGACTION64_T
+
+/* Define if <sys/procfs.h> has pr_siginfo64_t */
+#undef HAVE_PR_SIGINFO64_T
+
 /* Define if <sys/link.h> has struct link_map32 */
 #undef HAVE_STRUCT_LINK_MAP32
 

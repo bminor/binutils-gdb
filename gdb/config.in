@@ -309,6 +309,9 @@
 /* Define if you have the <sys/dir.h> header file.  */
 #undef HAVE_SYS_DIR_H
 
+/* Define if you have the <sys/fault.h> header file.  */
+#undef HAVE_SYS_FAULT_H
+
 /* Define if you have the <sys/file.h> header file.  */
 #undef HAVE_SYS_FILE_H
 
@@ -335,6 +338,9 @@
 
 /* Define if you have the <sys/select.h> header file.  */
 #undef HAVE_SYS_SELECT_H
+
+/* Define if you have the <sys/syscall.h> header file.  */
+#undef HAVE_SYS_SYSCALL_H
 
 /* Define if you have the <sys/user.h> header file.  */
 #undef HAVE_SYS_USER_H
@@ -443,4 +449,16 @@
 
 /* Define if <sys/procfs.h> has psaddr_t. */
 #undef HAVE_PSADDR_T
+
+/* Define if <sys/procfs.h> has prsysent_t. */
+#undef HAVE_PRSYSENT_T
+
+/* Define if <sys/procfs.h> has pr_sigset_t. */
+#undef HAVE_PR_SIGSET_T
+
+/* Define if <sys/procfs.h> has pr_sigaction64_t. */
+#undef HAVE_PR_SIGACTION64_T
+
+/* Define if <sys/procfs.h> has pr_siginfo64_t. */
+#undef HAVE_PR_SIGINFO64_T
 
