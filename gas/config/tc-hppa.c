@@ -233,8 +233,8 @@ const pseudo_typeS
   {"LONG", pa_cons, 4},
   {"lsym", pa_lsym, 0},
   {"LSYM", pa_lsym, 0},
-  {"octa", pa_big_cons, 16},
-  {"OCTA", pa_big_cons, 16},
+  {"octa", pa_cons, 16},
+  {"OCTA", pa_cons, 16},
   {"org", pa_origin, 0},
   {"ORG", pa_origin, 0},
   {"origin", pa_origin, 0},
@@ -245,8 +245,8 @@ const pseudo_typeS
   {"PROC", pa_proc, 0},
   {"procend", pa_procend, 0},
   {"PROCEND", pa_procend, 0},
-  {"quad", pa_big_cons, 8},
-  {"QUAD", pa_big_cons, 8},
+  {"quad", pa_cons, 8},
+  {"QUAD", pa_cons, 8},
   {"reg", pa_equ, 1},		/* very similar to .equ */
   {"REG", pa_equ, 1},		/* very similar to .equ */
   {"short", pa_cons, 2},
@@ -732,7 +732,7 @@ md_begin ()
     {
       const char *name = pa_opcodes[i].name;
       retval = hash_insert (op_hash, name, &pa_opcodes[i]);
-      if (retval != NULL && *retval != '\0')
+      if (retval != NULL)
 	{
 	  as_fatal ("Internal error: can't hash `%s': %s\n",
 		    pa_opcodes[i].name, retval);
@@ -4291,13 +4291,13 @@ s_seg ()
   if (strncmp (input_line_pointer, "\"text\"", 6) == 0)
     {
       input_line_pointer += 6;
-      s_text ();
+      s_text (0);
       return;
     }
   if (strncmp (input_line_pointer, "\"data\"", 6) == 0)
     {
       input_line_pointer += 6;
-      s_data ();
+      s_data (0);
       return;
     }
   if (strncmp (input_line_pointer, "\"data1\"", 7) == 0)
@@ -4317,22 +4317,14 @@ s_private ()
   register int temp;
 
   temp = get_absolute_expression ();
-#ifdef OBJ_SOM
-  subseg_new (SEG_DATA, (subsegT) temp);
-#else
-  subseg_new (".data", (subsegT) temp);
-#endif
+  subseg_set (data_section, (subsegT) temp);
   demand_empty_rest_of_line ();
 }
 
 void 
 s_data1 ()
 {
-#ifdef OBJ_SOM
-  subseg_new (SEG_DATA, 1);
-#else
-  subseg_new (".data", 1);
-#endif
+  subseg_set (data_section, 1);
   demand_empty_rest_of_line ();
   return;
 }
@@ -4498,7 +4490,7 @@ pa_build_unwind_subspace (call_info)
 
   save_seg = now_seg;
   save_subseg = now_subseg;
-  subseg_new ((char *) seg->name, subseg);
+  subseg_set (seg, subseg);
   unwindP = (char *) &call_info->ci_unwind;
 
   p = frag_more (4);
@@ -4567,7 +4559,7 @@ pa_build_unwind_subspace (call_info)
       }
     }
 
-  subseg_new ((char *) save_seg->name, save_subseg);
+  subseg_set (save_seg, save_subseg);
 }
 
 #else
@@ -4625,7 +4617,7 @@ pa_build_unwind_subspace (call_info)
 
   save_seg = now_seg;
   save_subseg = now_subseg;
-  subseg_new (seg, subseg);
+  subseg_set (seg, subseg);
   unwindP = (char *) &call_info->ci_unwind;
 
   p = frag_more (4);
@@ -4710,7 +4702,7 @@ pa_build_unwind_subspace (call_info)
       }
     }
 
-  subseg_new (save_seg, save_subseg);
+  subseg_set (save_seg, save_subseg);
 
 }
 
@@ -4834,13 +4826,8 @@ pa_code ()
     }
 
   SPACE_DEFINED (sdchain) = 1;
-#ifdef OBJ_SOM
 
-  subseg_new (SEG_TEXT, SUBSEG_CODE);
-#else
-
-  subseg_new (".text", SUBSEG_CODE);
-#endif
+  subseg_set (text_section, SUBSEG_CODE);
 
   demand_empty_rest_of_line ();
   return;
@@ -5210,7 +5197,7 @@ void
 			 seg,
 			 SEC_HAS_CONTENTS | SEC_READONLY | SEC_ALLOC | SEC_LOAD);
 
-  subseg_new(save_seg->name, save_subseg);
+  subseg_set(save_seg, save_subseg);
   
 }
 #endif
@@ -5520,7 +5507,7 @@ pa_leave ()
 void 
 pa_origin ()
 {
-  s_org ();			/* ORG actually allows another argument
+  s_org (0);			/* ORG actually allows another argument
 				   (the fill value) but maybe this is OK? */
   pa_undefine_label ();
   return;
@@ -5787,11 +5774,7 @@ pa_parse_space_stmt (space_name, create_flag)
 
 void 
 pa_align_subseg (seg, subseg)
-#ifdef OBJ_SOM
      segT seg;
-#else
-     asection *seg;
-#endif
      subsegT subseg;
 {
   subspace_dict_chainS *now_subspace;
@@ -5841,22 +5824,12 @@ pa_space ()
 	  current_space = sd_chain;
 	  SPACE_DEFINED (current_space) = 1;
 	  current_space->sd_defined = 1;
-#ifdef OBJ_SOM
-	  if (now_seg != SEG_TEXT)	/* no need to align if we are already there */
-#else
 	  if (now_seg != text_section)	/* no need to align if we are already there */
-#endif
 	    pa_align_subseg (now_seg, now_subseg);
 
-#ifdef OBJ_SOM
-	  subseg_new (SEG_TEXT, sd_chain->sd_last_subseg);
-	  current_subspace = pa_subsegment_to_subspace (SEG_TEXT,
-						  sd_chain->sd_last_subseg);
-#else
-	  subseg_new ((char *) text_section->name, sd_chain->sd_last_subseg);
+	  subseg_set (text_section, sd_chain->sd_last_subseg);
 	  current_subspace = pa_subsegment_to_subspace (text_section,
 						  sd_chain->sd_last_subseg);
-#endif
 	  demand_empty_rest_of_line ();
 	  return;
 	}
@@ -5872,21 +5845,11 @@ pa_space ()
 	  current_space = sd_chain;
 	  SPACE_DEFINED (current_space) = 1;
 	  current_space->sd_defined = 1;
-#ifdef OBJ_SOM
-	  if (now_seg != SEG_DATA)	/* no need to align if we are already there */
-#else
 	  if (now_seg != data_section)	/* no need to align if we are already there */
-#endif
 	    pa_align_subseg (now_seg, now_subseg);
-#ifdef OBJ_SOM
-	  subseg_new (SEG_DATA, sd_chain->sd_last_subseg);
-	  current_subspace = pa_subsegment_to_subspace (SEG_DATA,
-						  sd_chain->sd_last_subseg);
-#else
-	  subseg_new ((char *) data_section->name, sd_chain->sd_last_subseg);
+	  subseg_set (data_section, sd_chain->sd_last_subseg);
 	  current_subspace = pa_subsegment_to_subspace (data_section,
 						  sd_chain->sd_last_subseg);
-#endif
 	  demand_empty_rest_of_line ();
 	  return;
 	}
@@ -5903,19 +5866,22 @@ pa_space ()
 	  current_space = sd_chain;
 	  SPACE_DEFINED (current_space) = 1;
 	  current_space->sd_defined = 1;
+
 #ifdef OBJ_SOM
-	  if (now_seg != SEG_GDB)	/* no need to align if we are already there */
+	  if (now_seg != SEG_GDB)  /* no need to align if we are already there */
+
 	    pa_align_subseg (now_seg, now_subseg);
-	  subseg_new (SEG_GDB, sd_chain->sd_last_subseg);
+	  subseg_set (SEG_GDB, sd_chain->sd_last_subseg);
 	  current_subspace = pa_subsegment_to_subspace (SEG_GDB,
 						  sd_chain->sd_last_subseg);
 #else
 	  {
-	    asection *gdb_section
-	      = bfd_make_section_old_way (stdoutput, GDB_DEBUG_SPACE_NAME);
-	    if (now_seg != gdb_section)	/* no need to align if we are already there */
+	    segT gdb_section;
+	    /* no need to align if we are already there */
+	    if (strcmp (segment_name (now_seg), GDB_DEBUG_SPACE_NAME) != 0)
 	      pa_align_subseg (now_seg, now_subseg);
-	    subseg_new ((char *) gdb_section->name, sd_chain->sd_last_subseg);
+	    gdb_section = subseg_new (GDB_DEBUG_SPACE_NAME,
+				      sd_chain->sd_last_subseg);
 	    current_subspace = pa_subsegment_to_subspace (gdb_section,
 							  sd_chain->sd_last_subseg);
 	  }
@@ -5935,11 +5901,7 @@ pa_space ()
 	      current_space->sd_defined = 1;
 	      if (now_seg != sd_chain->sd_seg)	/* don't align if we're already there */
 		pa_align_subseg (now_seg, now_subseg);
-#ifdef OBJ_SOM
-	      subseg_new (sd_chain->sd_seg, sd_chain->sd_last_subseg);
-#else
-	      subseg_new ((char *) sd_chain->sd_seg->name, sd_chain->sd_last_subseg);
-#endif
+	      subseg_set (sd_chain->sd_seg, sd_chain->sd_last_subseg);
 	      current_subspace = pa_subsegment_to_subspace (sd_chain->sd_seg,
 						  sd_chain->sd_last_subseg);
 	      demand_empty_rest_of_line ();
@@ -5961,11 +5923,7 @@ pa_space ()
       current_space->sd_defined = 1;
       if (now_seg != sd_chain->sd_seg)	/* don't align if we're already there */
 	pa_align_subseg (now_seg, now_subseg);
-#ifdef OBJ_SOM
-      subseg_new (sd_chain->sd_seg, sd_chain->sd_last_subseg);
-#else
-      subseg_new ((char *) sd_chain->sd_seg->name, sd_chain->sd_last_subseg);
-#endif
+      subseg_set (sd_chain->sd_seg, sd_chain->sd_last_subseg);
       current_subspace = pa_subsegment_to_subspace (sd_chain->sd_seg,
 						  sd_chain->sd_last_subseg);
       demand_empty_rest_of_line ();
@@ -6068,7 +6026,7 @@ pa_subspace ()
 	  if (ssd->ssd_defined)
 	    {
 #ifdef OBJ_SOM
-	      subseg_new (now_seg, ssd->ssd_subseg);
+	      subseg_set (now_seg, ssd->ssd_subseg);
 #else
 	      /* subseg_new(now_seg->name,ssd->ssd_subseg); */
 	      subseg_new ((char *) ssd->ssd_seg->name, ssd->ssd_subseg);
@@ -6202,11 +6160,7 @@ pa_subspace ()
       SUBSPACE_SUBSPACE_START (current_subspace) = pa_subspace_start (space, quadrant);
 
       demand_empty_rest_of_line ();
-#ifdef OBJ_SOM
-      subseg_new (current_subspace->ssd_seg, current_subspace->ssd_subseg);
-#else
-      subseg_new ((char *) current_subspace->ssd_seg->name, current_subspace->ssd_subseg);
-#endif
+      subseg_set (current_subspace->ssd_seg, current_subspace->ssd_subseg);
     }
   return;
 }
@@ -6887,7 +6841,7 @@ pa_cons (nbytes)
 void
 pa_data ()
 {
-  s_data ();
+  s_data (0);
   pa_undefine_label ();
 }
 
@@ -6912,7 +6866,7 @@ pa_float_cons (float_type)
 void
 pa_fill ()
 {
-  s_fill ();
+  s_fill (0);
   pa_undefine_label ();
 }
 
@@ -6929,22 +6883,14 @@ pa_lcomm (needs_align)
 void
 pa_lsym ()
 {
-  s_lsym ();
-  pa_undefine_label ();
-}
-
-void
-pa_big_cons (nbytes)
-     register int nbytes;
-{
-  big_cons (nbytes);
+  s_lsym (0);
   pa_undefine_label ();
 }
 
 void
 pa_text ()
 {
-  s_text ();
+  s_text (0);
   pa_undefine_label ();
 }
 
@@ -7043,7 +6989,7 @@ bfd * abfd;
 
   /* now, switch back to the original segment */
 
-  subseg_new(save_seg->name, save_subseg);
+  subseg_set(save_seg, save_subseg);
 
   return;
 }
@@ -7073,6 +7019,6 @@ hppa_tc_make_symextn_section()
       bfd_set_section_size (stdoutput, symextn_sec, size);
 
       /* now, switch back to the original segment */
-      subseg_new(save_seg->name, save_subseg);
+      subseg_set(save_seg, save_subseg);
     }
 }

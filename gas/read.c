@@ -133,12 +133,6 @@ char is_end_of_line[256] =
 static char *buffer;	/* 1st char of each buffer of lines is here. */
 static char *buffer_limit;	/*->1 + last char in buffer. */
 
-static char *bignum_low;	/* Lowest char of bignum. */
-static char *bignum_limit;	/* 1st illegal address of bignum. */
-static char *bignum_high;	/* Highest char of bignum. */
-/* May point to (bignum_start-1). */
-/* Never >= bignum_limit. */
-
 int target_big_endian;
 
 static char *old_buffer;	/* JF a hack */
@@ -161,10 +155,7 @@ static char *demand_copy_string PARAMS ((int *lenP));
 int is_it_end_of_statement PARAMS ((void));
 static segT get_segmented_expression PARAMS ((expressionS *expP));
 static segT get_known_segmented_expression PARAMS ((expressionS * expP));
-static void grow_bignum PARAMS ((void));
 static void pobegin PARAMS ((void));
-
-extern int listing;
 
 
 void
@@ -179,10 +170,6 @@ read_begin ()
      The debugging malloc I'm using has 24 bytes of overhead.  */
   obstack_begin (&notes, 5090);
   obstack_begin (&cond_obstack, 990);
-
-#define BIGNUM_BEGIN_SIZE (16)
-  bignum_low = xmalloc ((long) BIGNUM_BEGIN_SIZE);
-  bignum_limit = bignum_low + BIGNUM_BEGIN_SIZE;
 
   /* Use machine dependent syntax */
   for (p = line_separator_chars; *p; p++)
@@ -241,11 +228,11 @@ static const pseudo_typeS potable[] =
   {"long", cons, 4},
   {"lsym", s_lsym, 0},
   {"nolist", listing_list, 0},	/* Turn listing off */
-  {"octa", big_cons, 16},
+  {"octa", cons, 16},
   {"org", s_org, 0},
   {"psize", listing_psize, 0},	/* set paper size */
 /* print */
-  {"quad", big_cons, 8},
+  {"quad", cons, 8},
   {"sbttl", listing_title, 1},	/* Subtitle of listing */
 /* scl */
 /* sect */
@@ -281,7 +268,7 @@ pobegin ()
   for (pop = md_pseudo_table; pop->poc_name; pop++)
     {
       errtxt = hash_insert (po_hash, pop->poc_name, (char *) pop);
-      if (errtxt && *errtxt)
+      if (errtxt)
 	{
 	  as_fatal ("error constructing md pseudo-op table");
 	}			/* on error */
@@ -291,7 +278,7 @@ pobegin ()
   for (pop = obj_pseudo_table; pop->poc_name; pop++)
     {
       errtxt = hash_insert (po_hash, pop->poc_name, (char *) pop);
-      if (errtxt && *errtxt)
+      if (errtxt)
 	{
 	  if (!strcmp (errtxt, "exists"))
 	    {
@@ -311,7 +298,7 @@ pobegin ()
   for (pop = potable; pop->poc_name; pop++)
     {
       errtxt = hash_insert (po_hash, pop->poc_name, (char *) pop);
-      if (errtxt && *errtxt)
+      if (errtxt)
 	{
 	  if (!strcmp (errtxt, "exists"))
 	    {
@@ -1529,7 +1516,7 @@ pseudo_set (symbolP)
  *
  * CONStruct more frag of .bytes, or .words etc.
  * Should need_pass_2 be 1 then emit no frag(s).
- * This understands EXPRESSIONS, as opposed to big_cons().
+ * This understands EXPRESSIONS.
  *
  * Bug (?)
  *
@@ -1608,6 +1595,7 @@ emit_expr (exp, nbytes)
 {
   operatorT op;
   register char *p;
+  valueT extra_digit = 0;
 
   /* Don't do anything if we are going to make another pass.  */
   if (need_pass_2)
@@ -1615,16 +1603,46 @@ emit_expr (exp, nbytes)
 
   op = exp->X_op;
 
+  /* Handle a negative bignum.  */
+  if (op == O_uminus
+      && exp->X_add_number == 0
+      && exp->X_add_symbol->sy_value.X_op == O_big
+      && exp->X_add_symbol->sy_value.X_add_number > 0)
+    {
+      int i;
+      unsigned long carry;
+
+      exp = &exp->X_add_symbol->sy_value;
+
+      /* Negate the bignum: one's complement each digit and add 1.  */
+      carry = 1;
+      for (i = 0; i < exp->X_add_number; i++)
+	{
+	  unsigned long next;
+
+	  next = (((~ (generic_bignum[i] & LITTLENUM_MASK))
+		   & LITTLENUM_MASK)
+		  + carry);
+	  generic_bignum[i] = next & LITTLENUM_MASK;
+	  carry = next >> LITTLENUM_NUMBER_OF_BITS;
+	}
+
+      /* We can ignore any carry out, because it will be handled by
+	 extra_digit if it is needed.  */
+
+      extra_digit = (valueT) -1;
+      op = O_big;
+    }
+
   if (op == O_absent || op == O_illegal)
     {
       as_warn ("zero assumed for missing expression");
       exp->X_add_number = 0;
       op = O_constant;
     }
-  else if (op == O_big)
+  else if (op == O_big && exp->X_add_number <= 0)
     {
-      as_bad ("%s number invalid; zero assumed",
-	      exp->X_add_number > 0 ? "bignum" : "floating point");
+      as_bad ("floating point number invalid; zero assumed");
       exp->X_add_number = 0;
       op = O_constant;
     }
@@ -1658,6 +1676,28 @@ emit_expr (exp, nbytes)
     }
 #endif
 
+  /* If we have an integer, but the number of bytes is too large to
+     pass to md_number_to_chars, handle it as a bignum.  */
+  if (op == O_constant && nbytes > sizeof (valueT))
+    {
+      valueT val;
+      int gencnt;
+
+      if (! exp->X_unsigned && exp->X_add_number < 0)
+	extra_digit = (valueT) -1;
+      val = (valueT) exp->X_add_number;
+      gencnt = 0;
+      do
+	{
+	  generic_bignum[gencnt] = val & LITTLENUM_MASK;
+	  val >>= LITTLENUM_NUMBER_OF_BITS;
+	  ++gencnt;
+	}
+      while (val != 0);
+      op = exp->X_op = O_big;
+      exp->X_add_number = gencnt;
+    }
+
   if (op == O_constant)
     {
       register long get;
@@ -1687,6 +1727,58 @@ emit_expr (exp, nbytes)
 	}
       /* put bytes in right order. */
       md_number_to_chars (p, (valueT) use, (int) nbytes);
+    }
+  else if (op == O_big)
+    {
+      int size;
+      LITTLENUM_TYPE *nums;
+
+      know (nbytes % CHARS_PER_LITTLENUM == 0);
+
+      size = exp->X_add_number * CHARS_PER_LITTLENUM;
+      if (nbytes < size)
+	{
+	  as_warn ("Bignum truncated to %d bytes", nbytes);
+	  size = nbytes;
+	}
+
+      if (target_big_endian)
+	{
+	  while (nbytes > size)
+	    {
+	      md_number_to_chars (p, extra_digit, CHARS_PER_LITTLENUM);
+	      nbytes -= CHARS_PER_LITTLENUM;
+	      p += CHARS_PER_LITTLENUM;
+	    }
+
+	  nums = generic_bignum + size / CHARS_PER_LITTLENUM;
+	  while (size > 0)
+	    {
+	      --nums;
+	      md_number_to_chars (p, (valueT) *nums, CHARS_PER_LITTLENUM);
+	      size -= CHARS_PER_LITTLENUM;
+	      p += CHARS_PER_LITTLENUM;
+	    }
+	}
+      else
+	{
+	  nums = generic_bignum;
+	  while (size > 0)
+	    {
+	      md_number_to_chars (p, (valueT) *nums, CHARS_PER_LITTLENUM);
+	      ++nums;
+	      size -= CHARS_PER_LITTLENUM;
+	      p += CHARS_PER_LITTLENUM;
+	      nbytes -= CHARS_PER_LITTLENUM;
+	    }
+
+	  while (nbytes > 0)
+	    {
+	      md_number_to_chars (p, extra_digit, CHARS_PER_LITTLENUM);
+	      nbytes -= CHARS_PER_LITTLENUM;
+	      p += CHARS_PER_LITTLENUM;
+	    }
+	}
     }
   else
     {
@@ -1725,7 +1817,7 @@ emit_expr (exp, nbytes)
 #define TC_CONS_RELOC 0
 #endif
 #endif
-      fix_new_exp (frag_now, p - frag_now->fr_literal, nbytes, exp, 0,
+      fix_new_exp (frag_now, p - frag_now->fr_literal, (int) nbytes, exp, 0,
 		   TC_CONS_RELOC);
 #endif /* TC_CONS_FIX_NEW */
 #endif /* BFD_ASSEMBLER */
@@ -1808,7 +1900,7 @@ parse_bitfield_cons (exp, nbytes)
 
 	  if ((width = exp->X_add_number) > (BITS_PER_CHAR * nbytes))
 	    {
-	      as_warn ("field width %d too big to fit in %d bytes: truncated to %d bits",
+	      as_warn ("field width %lu too big to fit in %d bytes: truncated to %d bits",
 		       width, nbytes, (BITS_PER_CHAR * nbytes));
 	      width = BITS_PER_CHAR * nbytes;
 	    }			/* too big */
@@ -1851,6 +1943,7 @@ parse_bitfield_cons (exp, nbytes)
 
       exp->X_add_number = value;
       exp->X_op = O_constant;
+      exp->X_unsigned = 1;
     }				/* if looks like a bitfield */
 }				/* parse_bitfield_cons() */
 
@@ -1953,164 +2046,6 @@ parse_repeat_cons (exp, nbytes)
 #endif /* REPEAT_CONS_EXPRESSIONS */
 
 /*
- *			big_cons()
- *
- * CONStruct more frag(s) of .quads, or .octa etc.
- * Makes 0 or more new frags.
- * If need_pass_2 == 1, generate no frag.
- * This understands only bignums, not expressions. Cons() understands
- * expressions.
- *
- * Constants recognised are '0...'(octal) '0x...'(hex) '...'(decimal).
- *
- * This creates objects with struct obstack_control objs, destroying
- * any context objs held about a partially completed object. Beware!
- *
- *
- * I think it sucks to have 2 different types of integers, with 2
- * routines to read them, store them etc.
- * It would be nicer to permit bignums in expressions and only
- * complain if the result overflowed. However, due to "efficiency"...
- */
-/* Worker to do .quad etc statements.  Clobbers input_line_pointer, checks
-   end-of-line.  8=.quad 16=.octa ... */
-
-void 
-big_cons (nbytes)
-     register int nbytes;
-{
-  register char c;		/* input_line_pointer->c. */
-  register int radix;
-  register long length;		/* Number of chars in an object. */
-  register int digit;		/* Value of 1 digit. */
-  register int carry;		/* For multi-precision arithmetic. */
-  register int work;		/* For multi-precision arithmetic. */
-  register char *p;		/* For multi-precision arithmetic. */
-
-  extern const char hex_value[];	/* In hex_value.c. */
-
-  /*
-   * The following awkward logic is to parse ZERO or more strings,
-   * comma seperated. Recall an expression includes its leading &
-   * trailing blanks. We fake a leading ',' if there is (supposed to
-   * be) a 1st expression, and keep demanding 1 expression for each ','.
-   */
-  if (is_it_end_of_statement ())
-    {
-      c = 0;			/* Skip loop. */
-    }
-  else
-    {
-      c = ',';			/* Do loop. */
-      --input_line_pointer;
-    }
-  while (c == ',')
-    {
-      ++input_line_pointer;
-      SKIP_WHITESPACE ();
-      c = *input_line_pointer;
-      /* C contains 1st non-blank character of what we hope is a number. */
-      if (c == '0')
-	{
-	  c = *++input_line_pointer;
-	  if (c == 'x' || c == 'X')
-	    {
-	      c = *++input_line_pointer;
-	      radix = 16;
-	    }
-	  else
-	    {
-	      radix = 8;
-	    }
-	}
-      else
-	{
-	  radix = 10;
-	}
-      /*
-       * This feature (?) is here to stop people worrying about
-       * mysterious zero constants: which is what they get when
-       * they completely omit digits.
-       */
-      if (hex_value[(unsigned char) c] >= radix)
-	{
-	  as_bad ("Missing digits. 0 assumed.");
-	}
-      bignum_high = bignum_low - 1;	/* Start constant with 0 chars. */
-      for (;
-	   (digit = hex_value[(unsigned char) c]) < radix;
-	   c = *++input_line_pointer)
-	{
-	  /* Multiply existing number by radix, then add digit. */
-	  carry = digit;
-	  for (p = bignum_low; p <= bignum_high; p++)
-	    {
-	      work = (*p & MASK_CHAR) * radix + carry;
-	      *p = work & MASK_CHAR;
-	      carry = work >> BITS_PER_CHAR;
-	    }
-	  if (carry)
-	    {
-	      grow_bignum ();
-	      *bignum_high = carry & MASK_CHAR;
-	      know ((carry & ~MASK_CHAR) == 0);
-	    }
-	}
-      length = bignum_high - bignum_low + 1;
-      if (length > nbytes)
-	{
-	  as_warn ("Most significant bits truncated in integer constant.");
-	}
-      else
-	{
-	  register long leading_zeroes;
-
-	  for (leading_zeroes = nbytes - length;
-	       leading_zeroes;
-	       leading_zeroes--)
-	    {
-	      grow_bignum ();
-	      *bignum_high = 0;
-	    }
-	}
-      if (!need_pass_2)
-	{
-	  char *src = bignum_low;
-	  p = frag_more (nbytes);
-	  if (target_big_endian)
-	    {
-	      int i;
-	      for (i = nbytes - 1; i >= 0; i--)
-		p[i] = *src++;
-	    }
-	  else
-	    memcpy (p, bignum_low, (unsigned int) nbytes);
-	}
-      /* C contains character after number. */
-      SKIP_WHITESPACE ();
-      c = *input_line_pointer;
-      /* C contains 1st non-blank character after number. */
-    }
-  demand_empty_rest_of_line ();
-}				/* big_cons() */
-
-/* Extend bignum by 1 char. */
-static void 
-grow_bignum ()
-{
-  register unsigned long length;
-
-  bignum_high++;
-  if (bignum_high >= bignum_limit)
-    {
-      length = bignum_limit - bignum_low;
-      bignum_low = xrealloc (bignum_low, length + length);
-      bignum_high = bignum_low + length;
-      bignum_limit = bignum_low + length + length;
-    }
-}				/* grow_bignum(); */
-
-/*
  *			float_cons()
  *
  * CONStruct some more frag chars of .floats .ffloats etc.
@@ -2162,7 +2097,7 @@ float_cons (float_type)
       err = md_atof (float_type, temp, &length);
       know (length <= MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT);
       know (length > 0);
-      if (err && *err)
+      if (err)
 	{
 	  as_bad ("Bad floating literal: %s", err);
 	  ignore_rest_of_line ();
@@ -2639,7 +2574,7 @@ s_ignore (arg)
 
   return;
 }				/* s_ignore() */
-
+
 /*
  * Handle .stabX directives, which used to be open-coded.
  * So much creeping featurism overloaded the semantics that we decided
@@ -2655,34 +2590,6 @@ s_ignore (arg)
  * don't need and invent information they need that you didn't supply.
  */
 
-void
-change_to_section (name, len, exp)
-       char *name;
-       unsigned int len;
-       unsigned int exp;
-{
-#ifndef BFD_ASSEMBLER
-#ifdef MANY_SEGMENTS
-  unsigned int i;
-  extern segment_info_type segment_info[];
-
-  /* Find out if we've already got a section of this name etc */
-  for (i = SEG_E0; i < SEG_E9 && segment_info[i].scnhdr.s_name[0]; i++)
-    {
-      if (strncmp (segment_info[i].scnhdr.s_name, name, len) == 0)
-	{
-	  subseg_set (i, exp);
-	  return;
-	}
-    }
-  /* No section, add one */
-  strncpy (segment_info[i].scnhdr.s_name, name, 8);
-  segment_info[i].scnhdr.s_flags = 0 /* STYP_NOLOAD */;
-  subseg_set (i, exp);
-#endif
-#endif
-}
-
 /*
  * Build a string dictionary entry for a .stabX symbol.
  * The symbol is added to the .<secname>str section.
@@ -2690,73 +2597,60 @@ change_to_section (name, len, exp)
 
 #ifdef SEPARATE_STAB_SECTIONS
 
-static unsigned int
+unsigned int
 get_stab_string_offset (string, secname)
-     char *string, *secname;
+     const char *string;
+     const char *secname;
 {
-  segT save_seg;
-  segT seg;
-  subsegT save_subseg;
   unsigned int length;
-  unsigned int old_gdb_string_index;
-  char *clengthP;
-  int i;
-  char c;
-  /* @@FIXME -- there should be no static data here!
-     This also has the effect of making all stab string tables large enough
-     to contain all the contents written to any of them.  This only matters
-     with the Solaris native compiler for the moment, but it should be fixed
-     anyways.  */
-  static unsigned int gdb_string_index = 0;
+  unsigned int retval;
 
-  old_gdb_string_index = 0;
+  retval = 0;
   length = strlen (string);
-  clengthP = (char *) &length;
   if (length > 0)
     {				/* Ordinary case. */
+      segT save_seg;
+      subsegT save_subseg;
+      char *newsecname;
+      segT seg;
+      int aligned;
+      char *p;
+
       save_seg = now_seg;
       save_subseg = now_subseg;
 
-      /* Create the stabstr sections, if they are not already created. */
-      {
-	char *newsecname = xmalloc (strlen (secname) + 4);
-	strcpy (newsecname, secname);
-	strcat (newsecname, "str");
+      /* Create the stab string section.  */
+      newsecname = xmalloc ((unsigned long) (strlen (secname) + 4));
+      strcpy (newsecname, secname);
+      strcat (newsecname, "str");
+
+      seg = subseg_new (newsecname, 0);
+
+      retval = seg_info (seg)->stabu.stab_string_size;
+      if (retval > 0)
+	free (newsecname);
+      else
+	{
+	  /* Make sure the first string is empty.  */
+	  p = frag_more (1);
+	  *p = 0;
+	  retval = seg_info (seg)->stabu.stab_string_size = 1;
 #ifdef BFD_ASSEMBLER
-	seg = bfd_get_section_by_name (stdoutput, newsecname);
-	if (seg == 0)
-	  {
-	    seg = bfd_make_section_old_way (stdoutput, newsecname);
-	    bfd_set_section_flags (stdoutput, seg, SEC_READONLY | SEC_ALLOC);
-	  }
+	  bfd_set_section_flags (stdoutput, seg, SEC_READONLY);
 #else
-	subseg_new (newsecname, 0);
+	  free (newsecname);
 #endif
-/*	free (newsecname);*/
-      }
-      subseg_set (seg, save_subseg);
-      old_gdb_string_index = gdb_string_index;
-      i = 0;
-      while ((c = *string++))
-	{
-	  i++;
-	  gdb_string_index++;
-	  FRAG_APPEND_1_CHAR (c);
 	}
-      {
-	FRAG_APPEND_1_CHAR ((char) 0);
-	i++;
-	gdb_string_index++;
-      }
-      while (i % 4 != 0)
-	{
-	  FRAG_APPEND_1_CHAR ((char) 0);
-	  i++;
-	  gdb_string_index++;
-	}
+
+      p = frag_more (length + 1);
+      strcpy (p, string);
+
+      seg_info (seg)->stabu.stab_string_size += length + 1;
+
       subseg_set (save_seg, save_subseg);
     }
-  return old_gdb_string_index;
+
+  return retval;
 }
 
 #endif /* SEPARATE_STAB_SECTIONS */
@@ -2769,227 +2663,187 @@ s_stab_generic (what, secname)
      int what;
      char *secname;
 {
-  extern int listing;
-
-  symbolS *symbol;
-  char *string;
-  int saved_type = 0;
-  int length;
-  int goof = 0;
   long longint;
-  segT saved_seg = now_seg;
-  segT seg;
-  subsegT saved_subseg = now_subseg;
-  subsegT subseg;
-  valueT valu;
-#ifdef SEPARATE_STAB_SECTIONS
-  int seg_is_new = 0;
-#endif
+  char *string;
+  int type;
+  int other;
+  int desc;
 
-  valu = ((char *) obstack_next_free (&frags)) - frag_now->fr_literal;
+  /* The general format is:
+     .stabs "STRING",TYPE,OTHER,DESC,VALUE
+     .stabn TYPE,OTHER,DESC,VALUE
+     .stabd TYPE,OTHER,DESC
+     At this point input_line_pointer points after the pseudo-op and
+     any trailing whitespace.  The argument what is one of 's', 'n' or
+     'd' indicating which type of .stab this is.  */
 
-#ifdef SEPARATE_STAB_SECTIONS
-#ifdef BFD_ASSEMBLER
-  seg = bfd_get_section_by_name (stdoutput, secname);
-  if (seg == 0)
+  if (what != 's')
+    string = "";
+  else
     {
-      seg = subseg_new (secname, 0);
-      bfd_set_section_flags (stdoutput, seg,
-			     SEC_READONLY | SEC_ALLOC | SEC_RELOC);
-      subseg_set (saved_seg, subseg);
-      seg_is_new = 1;
-    }
-#else
-  subseg_new (secname, 0);
-#endif
-#endif /* SEPARATE_STAB_SECTIONS */
+      int length;
 
-  /*
-   * Enter with input_line_pointer pointing past .stabX and any following
-   * whitespace.
-   */
-  if (what == 's')
-    {
       string = demand_copy_C_string (&length);
       SKIP_WHITESPACE ();
       if (*input_line_pointer == ',')
 	input_line_pointer++;
       else
 	{
-	  as_bad ("I need a comma after symbol's name");
-	  goof = 1;
-	}
-    }
-  else
-    string = "";
-
-  /*
-   * Input_line_pointer->after ','.  String->symbol name.
-   */
-  if (!goof)
-    {
-#ifdef MAKE_STAB_SYMBOL
-      MAKE_STAB_SYMBOL(symbol, string, secname);
-#else
-      symbol = symbol_new (string, undefined_section, 0, (struct frag *) 0);
-#endif
-      /* Make sure that the rest of this is going to work. */
-      if (symbol == NULL)
-	as_fatal ("no stab symbol created");
-
-      switch (what)
-	{
-	case 'd':
-	  S_SET_NAME (symbol, NULL);	/* .stabd feature. */
-#ifdef STAB_SYMBOL_SET_VALUE
-	  STAB_SYMBOL_SET_VALUE (symbol, valu);
-#else
-	  S_SET_VALUE (symbol, valu);
-#endif
-#if STAB_SYMBOL_SET_SEGMENT
-#else
-	  S_SET_SEGMENT (symbol, now_seg);
-#endif
-	  symbol->sy_frag = frag_now;
-	  break;
-
-	case 'n':
-	  symbol->sy_frag = &zero_address_frag;
-	  break;
-
-	case 's':
-	  symbol->sy_frag = &zero_address_frag;
-	  break;
-
-	default:
-	  BAD_CASE (what);
-	  break;
-	}
-
-      if (get_absolute_expression_and_terminator (&longint) == ',')
-	{
-	  saved_type = longint;
-	  S_SET_TYPE (symbol, saved_type);
-	}
-      else
-	{
-	  as_bad ("I want a comma after the n_type expression");
-	  goof = 1;
-	  input_line_pointer--;	/* Backup over a non-',' char. */
+	  as_warn (".stabs: Missing comma");
+	  ignore_rest_of_line ();
+	  return;
 	}
     }
 
-  if (!goof)
+  if (get_absolute_expression_and_terminator (&longint) != ',')
     {
-      if (get_absolute_expression_and_terminator (&longint) == ',')
-	S_SET_OTHER (symbol, longint);
-      else
-	{
-	  as_bad ("I want a comma after the n_other expression");
-	  goof = 1;
-	  input_line_pointer--;	/* Backup over a non-',' char. */
-	}
-    }
-
-  if (!goof)
-    {
-      S_SET_DESC (symbol, get_absolute_expression ());
-      if (what == 's' || what == 'n')
-	{
-	  if (*input_line_pointer != ',')
-	    {
-	      as_bad ("I want a comma after the n_desc expression");
-	      goof = 1;
-	    }
-	  else
-	    {
-	      input_line_pointer++;
-	    }
-	}
-    }
-
-  /* Line is messed up - ignore it and get out of here. */
-  if (goof)
-    {
+      as_warn (".stab%c: Missing comma", what);
       ignore_rest_of_line ();
-      subseg_set (saved_seg, saved_subseg);
       return;
     }
+  type = longint;
 
-  subseg_set (seg, subseg);
+  if (get_absolute_expression_and_terminator (&longint) != ',')
+    {
+      as_warn (".stab%c: Missing comma", what);
+      ignore_rest_of_line ();
+      return;
+    }
+  other = longint;
 
-#if 0  /* needed for elf only? */
-  if (seg_is_new)
-    /* allocate and discard -- filled in later */
-    (void) frag_more (12);
-#endif
+  desc = get_absolute_expression ();
+  if (what == 's' || what == 'n')
+    {
+      if (*input_line_pointer != ',')
+	{
+	  as_warn (".stab%c: Missing comma", what);
+	  ignore_rest_of_line ();
+	  return;
+	}
+      input_line_pointer++;
+      SKIP_WHITESPACE ();
+    }
+
+  /* We have not gathered the type, other, and desc information.  For
+     .stabs or .stabn, input_line_pointer is now pointing at the
+     value.  */
 
 #ifdef SEPARATE_STAB_SECTIONS
+  /* Output the stab information in a separate section.  This is used
+     at least for COFF and ELF.  */
   {
-    char *toP;
+    segT saved_seg = now_seg;
+    subsegT saved_subseg = now_subseg;
+    fragS *saved_frag = frag_now;
+    valueT dot;
+    segT seg;
+    unsigned int stroff;
+    char *p;
+    
+    dot = frag_now_fix ();
 
-    subseg_new (secname, 0);
-    toP = frag_more (8);
-    /* the string index portion of the stab */
-    md_number_to_chars (toP, (valueT) S_GET_OFFSET_2(symbol), 4);
-    md_number_to_chars (toP + 4, (valueT) S_GET_TYPE(symbol), 1);
-    md_number_to_chars (toP + 5, (valueT) S_GET_OTHER(symbol), 1);
-    md_number_to_chars (toP + 6, (valueT) S_GET_DESC(symbol), 2);
-  }
+    seg = subseg_new (secname, 0);
+
+    if (! seg_info (seg)->hadone)
+      {
+#ifdef BFD_ASSEMBLER
+	bfd_set_section_flags (stdoutput, seg, SEC_READONLY | SEC_RELOC);
 #endif
+#ifdef INIT_STAB_SECTION
+	INIT_STAB_SECTION (seg);
+#endif
+	seg_info (seg)->hadone = 1;
+      }
 
-#ifdef SEPARATE_STAB_SECTIONS
-  if (what == 's' || what == 'n')
-    {
-      cons (4);
-      input_line_pointer--;
-    }
-  else
-    {
-      char *p = frag_more (4);
-      md_number_to_chars (p, 0, 4);
-    }
-  subseg_set (saved_seg, subseg);
+    stroff = get_stab_string_offset (string, secname);
+
+    /* At least for now, stabs in a special stab section are always
+       output as 12 byte blocks of information.  */
+    p = frag_more (8);
+    md_number_to_chars (p, (valueT) stroff, 4);
+    md_number_to_chars (p + 4, (valueT) type, 1);
+    md_number_to_chars (p + 5, (valueT) other, 1);
+    md_number_to_chars (p + 6, (valueT) desc, 2);
+
+    if (what == 's' || what == 'n')
+      {
+	/* Pick up the value from the input line.  */
+	cons (4);
+	input_line_pointer--;
+      }
+    else
+      {
+	const char *fake;
+	symbolS *symbol;
+	expressionS exp;
+
+	/* Arrange for a value representing the current location.  */
+#ifdef DOT_LABEL_PREFIX
+	fake = ".L0\001";
 #else
-  if (what == 's' || what == 'n')
-    {
-      pseudo_set (symbol);
-      S_SET_TYPE (symbol, saved_type);
-    }
+	fake = "L0\001";
+#endif
+	symbol = symbol_new (fake, saved_seg, dot, saved_frag);
+
+	exp.X_op = O_symbol;
+	exp.X_add_symbol = symbol;
+	exp.X_add_number = 0;
+
+	emit_expr (&exp, 4);
+      }
+
+#ifdef OBJ_PROCESS_STAB
+    OBJ_PROCESS_STAB (seg, string, stroff, type, other, desc);
 #endif
 
-#if 0  /* for elf only? */
-  if (what == 's' && S_GET_TYPE (symbol) == N_SO)
-    {
-      fragS *fragp = seg_info (seg)->frchainP->frch_root;
-      while (fragp
-	     && fragp->fr_address + fragp->fr_fix < 12)
-	fragp = fragp->fr_next;
-      assert (fragp != 0);
-      assert (fragp->fr_type == rs_fill);
-      assert (fragp->fr_address == 0 && fragp->fr_fix >= 12);
-      md_number_to_chars (fragp->fr_literal, (valueT) symbol->sy_name_offset,
-			  4);
-    }
-#endif
+    subseg_set (saved_seg, saved_subseg);
+  }
+#else /* ! SEPARATE_STAB_SECTIONS */
+#ifdef OBJ_PROCESS_STAB
+  OBJ_PROCESS_STAB (what, string, type, other, desc);
+#else
+  /* Put the stab information in the symbol table.  */
+  {
+    symbolS *symbol;
+
+    symbol = symbol_new (string, undefined_section, 0,
+			 (struct frag *) NULL);
+    if (what == 's' || what == 'n')
+      {
+	/* Pick up the value from the input line.  */
+	symbol->sy_frag = &zero_address_frag;
+	pseudo_set (symbol);
+      }
+    else
+      {
+	/* .stabd sets the name to NULL.  Why?  */
+	S_SET_NAME (symbol, NULL);
+	symbol->sy_frag = frag_now;
+	S_SET_VALUE (symbol, (valueT) frag_now_fix ());
+      }
+
+    S_SET_TYPE (symbol, type);
+    S_SET_OTHER (symbol, other);
+    S_SET_DESC (symbol, desc);
+  }
+#endif /* ! OBJ_PROCESS_STAB */
+#endif /* ! SEPARATE_STAB_SECTIONS */
 
 #ifndef NO_LISTING
   if (listing)
-    switch (S_GET_TYPE (symbol))
-      {
-      case N_SLINE:
-	listing_source_line ((unsigned int) S_GET_DESC (symbol));
-	break;
-      case N_SO:
-      case N_SOL:
-	listing_source_file (string);
-	break;
-      }
-#endif /* !NO_LISTING */
-
-#ifdef SEPARATE_STAB_SECTIONS
-  subseg_set (saved_seg, saved_subseg);
-#endif
+    {
+      switch (type)
+	{
+	case N_SLINE:
+	  listing_source_line ((unsigned int) desc);
+	  break;
+	case N_SO:
+	case N_SOL:
+	  listing_source_file (string);
+	  break;
+	}
+    }
+#endif /* ! NO_LISTING */
 
   demand_empty_rest_of_line ();
 }

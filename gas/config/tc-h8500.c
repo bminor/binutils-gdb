@@ -421,6 +421,7 @@ parse_reglist (src, op)
   op->exp.X_op_symbol = 0;
   op->exp.X_add_number = mask;
   op->exp.X_op = O_constant;
+  op->exp.X_unsigned = 1;
   op->type = IMM8;
   return idx;
 

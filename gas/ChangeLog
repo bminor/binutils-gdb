@@ -1,3 +1,37 @@
+Wed Oct  6 13:01:34 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	Changes to let cons handle bignums like general expressions.
+	* expr.h (expressionS): New field X_unsigned.
+	* expr.c (operand): Initialize X_unsigned to 1.  Set it to 0 for
+	unary minus case.
+	(expr) Fix typo resultP to right if missing operand.  Set
+	X_unsigned to 1 when building new expression.
+	* read.c (potable): Make "octa" and "quad" call cons, not
+	big_cons.
+	(cons): Handle bignums.  If given an O_constant (small integer) to
+	fill a big space, turn it into a bignum.
+	(parse_bitfield_cons): Set X_unsigned field.
+	(bignum_low, bignum_limit, bignum_high, grow_bignum, big_cons):
+	Removed.
+	* read.h (big_cons): Remove prototype.
+	* symbols.c (resolve_symbol_value): Don't give a warning if a
+	symbol in expr_section can not be resolved.
+	(S_SET_VALUE): Clear X_unsigned.
+	* write.c (write_object_file): If resolve_symbol_value failed on a
+	symbol we are writing out, give a warning.
+	* config/tc-h8500.c (parse_reglist): Set X_unsigned.
+	* config/tc-hppa.c (md_pseudo_table): Change "octa" and "quad" to
+	call pa_cons, not pa_big_cons.
+	(pa_big_cons): Remove.
+	* config/tc-hppa.h (pa_big_cons): Remove declaration.
+	* config/tc-i960.c (md_pseudo_table): Change "quad" to call cons,
+	not big_cons.
+
+Tue Oct  5 10:53:36 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* doc/as.texinfo (Copying): new node, to handle the recent changes
+	in the texinfo/gpl.texinfo file
+
 Mon Oct  4 17:10:15 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* read.c (big_cons): Handle "0" correctly.

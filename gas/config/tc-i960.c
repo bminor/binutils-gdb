@@ -201,7 +201,7 @@ const pseudo_typeS md_pseudo_table[] =
   {"sysproc", parse_po, S_SYSPROC},
 
   {"word", cons, 4},
-  {"quad", big_cons, 16},
+  {"quad", cons, 16},
 
   {0, 0, 0}
 };
@@ -508,41 +508,31 @@ md_begin ()
 {
   int i;			/* Loop counter */
   const struct i960_opcode *oP;	/* Pointer into opcode table */
-  char *retval;			/* Value returned by hash functions */
+  const char *retval;		/* Value returned by hash functions */
 
   if (((op_hash = hash_new ()) == 0)
       || ((reg_hash = hash_new ()) == 0)
       || ((areg_hash = hash_new ()) == 0))
-    {
-      as_fatal ("virtual memory exceeded");
-    }
+    as_fatal ("virtual memory exceeded");
 
   /* For some reason, the base assembler uses an empty string for "no
      error message", instead of a NULL pointer.  */
   retval = "";
 
-  for (oP = i960_opcodes; oP->name && !*retval; oP++)
-    {
-      retval = hash_insert (op_hash, oP->name, oP);
-    }
+  for (oP = i960_opcodes; oP->name && !retval; oP++)
+    retval = hash_insert (op_hash, oP->name, (PTR) oP);
 
-  for (i = 0; regnames[i].reg_name && !*retval; i++)
-    {
-      retval = hash_insert (reg_hash, regnames[i].reg_name,
-			    &regnames[i].reg_num);
-    }
+  for (i = 0; regnames[i].reg_name && !retval; i++)
+    retval = hash_insert (reg_hash, regnames[i].reg_name,
+			  &regnames[i].reg_num);
 
-  for (i = 0; aregs[i].areg_name && !*retval; i++)
-    {
-      retval = hash_insert (areg_hash, aregs[i].areg_name,
-			    &aregs[i].areg_num);
-    }
+  for (i = 0; aregs[i].areg_name && !retval; i++)
+    retval = hash_insert (areg_hash, aregs[i].areg_name,
+			  &aregs[i].areg_num);
 
-  if (*retval)
-    {
-      as_fatal ("Hashing returned \"%s\".", retval);
-    }
-}				/* md_begin() */
+  if (retval)
+    as_fatal ("Hashing returned \"%s\".", retval);
+}
 
 /*****************************************************************************
  * md_end:  One-time final cleanup
@@ -577,7 +567,6 @@ md_assemble (textP)
   char *args[4];
 
   int n_ops;			/* Number of instruction operands */
-  int callx;
   /* Pointer to instruction description */
   struct i960_opcode *oP;
   /* TRUE iff opcode mnemonic included branch-prediction
@@ -896,7 +885,7 @@ md_number_to_field (instrP, val, bfixP)
   if (((val < 0) && (sign != -1))
       || ((val > 0) && (sign != 0)))
     {
-      as_bad ("Fixup of %d too large for field width of %d",
+      as_bad ("Fixup of %ld too large for field width of %d",
 	      val, numbits);
     }
   else
@@ -964,14 +953,14 @@ md_parse_option (argP, cntP, vecP)
     };
   static struct tabentry arch_tab[] =
   {
-    "KA", ARCH_KA,
-    "KB", ARCH_KB,
-    "SA", ARCH_KA,		/* Synonym for KA */
-    "SB", ARCH_KB,		/* Synonym for KB */
-    "KC", ARCH_MC,		/* Synonym for MC */
-    "MC", ARCH_MC,
-    "CA", ARCH_CA,
-    NULL, 0
+    { "KA", ARCH_KA },
+    { "KB", ARCH_KB },
+    { "SA", ARCH_KA },		/* Synonym for KA */
+    { "SB", ARCH_KB },		/* Synonym for KB */
+    { "KC", ARCH_MC },		/* Synonym for MC */
+    { "MC", ARCH_MC },
+    { "CA", ARCH_CA },
+    { NULL, 0 }
   };
   struct tabentry *tp;
   if (!strcmp (*argP, "linkrelax"))
@@ -2220,7 +2209,7 @@ parse_po (po_num)
 
   /* Advance input pointer to end of line. */
   p = input_line_pointer;
-  while (!is_end_of_line[*input_line_pointer])
+  while (!is_end_of_line[(unsigned char) *input_line_pointer])
     {
       input_line_pointer++;
     }
@@ -2458,22 +2447,22 @@ struct
 
 coj[] =
 {				/* COBR OPCODE: */
-  CHKBIT, BNO,			/*	0x30 - bbc */
-  CMPO, BG,			/*	0x31 - cmpobg */
-  CMPO, BE,			/*	0x32 - cmpobe */
-  CMPO, BGE,			/*	0x33 - cmpobge */
-  CMPO, BL,			/*	0x34 - cmpobl */
-  CMPO, BNE,			/*	0x35 - cmpobne */
-  CMPO, BLE,			/*	0x36 - cmpoble */
-  CHKBIT, BO,			/*	0x37 - bbs */
-  CMPI, BNO,			/*	0x38 - cmpibno */
-  CMPI, BG,			/*	0x39 - cmpibg */
-  CMPI, BE,			/*	0x3a - cmpibe */
-  CMPI, BGE,			/*	0x3b - cmpibge */
-  CMPI, BL,			/*	0x3c - cmpibl */
-  CMPI, BNE,			/*	0x3d - cmpibne */
-  CMPI, BLE,			/*	0x3e - cmpible */
-  CMPI, BO,			/*	0x3f - cmpibo */
+  { CHKBIT, BNO },		/*	0x30 - bbc */
+  { CMPO, BG },			/*	0x31 - cmpobg */
+  { CMPO, BE },			/*	0x32 - cmpobe */
+  { CMPO, BGE },		/*	0x33 - cmpobge */
+  { CMPO, BL },			/*	0x34 - cmpobl */
+  { CMPO, BNE },		/*	0x35 - cmpobne */
+  { CMPO, BLE },		/*	0x36 - cmpoble */
+  { CHKBIT, BO },		/*	0x37 - bbs */
+  { CMPI, BNO },		/*	0x38 - cmpibno */
+  { CMPI, BG },			/*	0x39 - cmpibg */
+  { CMPI, BE },			/*	0x3a - cmpibe */
+  { CMPI, BGE },		/*	0x3b - cmpibge */
+  { CMPI, BL },			/*	0x3c - cmpibl */
+  { CMPI, BNE },		/*	0x3d - cmpibne */
+  { CMPI, BLE },		/*	0x3e - cmpible */
+  { CMPI, BO },			/*	0x3f - cmpibo */
 };
 
 static
@@ -3174,10 +3163,6 @@ i960_handle_align (fragp)
      fragS *fragp;
 {
   fixS *fixp;
-  segT old_seg = now_seg, this_seg;
-  int old_subseg = now_subseg;
-  int pad_size;
-  extern struct frag *text_last_frag, *data_last_frag;
 
   if (!linkrelax)
     return;
