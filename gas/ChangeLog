@@ -1,3 +1,11 @@
+2001-07-21  Andreas Schwab  <schwab@suse.de>
+
+	* config/tc-m68k.c (md_pseudo_table) [OBJ_ELF]: Add .file and
+	.loc.
+	(md_assemble) [OBJ_ELF]: Call dwarf2_emit_insn before emitting
+	insn.
+	* config/tc-m68k.h (DWARF2_LINE_MIN_INSN_LENGTH): Define.
+
 2001-07-14  matthew green  <mrg@eterna.com.au>
 
 	* configure.in (i386-*-netbsdelf*): New target.

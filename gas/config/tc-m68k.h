@@ -233,3 +233,5 @@ extern struct relax_type md_relax_table[];
   if (aim==0 && this_state== 4) { /* hard encoded from tc-m68k.c */ \
     aim=this_type->rlx_forward+1; /* Force relaxation into word mode */ \
   }
+
+#define DWARF2_LINE_MIN_INSN_LENGTH 2
