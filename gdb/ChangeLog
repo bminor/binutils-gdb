@@ -1,3 +1,8 @@
+2003-02-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.in: Fix typo.
+	* configure: Regenerated.
+
 2003-01-31  David Carlton  <carlton@math.stanford.edu>
 
 	* dwarf2read.c (dwarf2_locate_sections): Set

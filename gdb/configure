@@ -1155,7 +1155,7 @@ test "$host_alias" != "$target_alias" &&
 # doesn't support cross-compilation, but the one from Autoconf 2.5x
 # does.  Override RANLIB here (i.e. before running AC_PROG_RANLIB) to
 # deal with the lossage.  Note that CY_GNU_GETTEXT currently calls
-# AC_PROG_RANLIB.  This can be removed when we switch to # Autoconf
+# AC_PROG_RANLIB.  This can be removed when we switch to Autoconf
 # 2.5x.
 if test $host != $build; then
   ac_tool_prefix=${host_alias}-
@@ -10165,7 +10165,7 @@ else
   if { (eval echo configure:10166: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
     for file in conftest.*; do
       case $file in
-      *.c | *.o | *.obj | *.ilk | *.pdb) ;;
+      *.c | *.C | *.o | *.obj | *.ilk | *.pdb) ;;
       *) ac_cv_exeext=`echo $file | sed -e s/conftest//` ;;
       esac
     done
