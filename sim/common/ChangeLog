@@ -1,3 +1,8 @@
+2002-01-20  Ben Elliston  <bje@redhat.com>
+
+	* sim-fpu.h (SIM_FPU_IS_QNAN): Replace "Quite" with "Quiet" in
+	the comment for this enumerator.
+
 2002-01-14  Ben Elliston  <bje@redhat.com>
 
 	* sim-fpu.h: Fix comment about sim_fpu_* constants.

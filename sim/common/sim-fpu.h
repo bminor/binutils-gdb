@@ -354,7 +354,7 @@ INLINE_SIM_FPU (int) sim_fpu_is_gt (const sim_fpu *l, const sim_fpu *r);
 #ifndef SIM_FPU_IS_SNAN
 enum {
   SIM_FPU_IS_SNAN = 1, /* Noisy not-a-number */
-  SIM_FPU_IS_QNAN = 2, /* Quite not-a-number */
+  SIM_FPU_IS_QNAN = 2, /* Quiet not-a-number */
   SIM_FPU_IS_NINF = 3, /* -infinity */
   SIM_FPU_IS_PINF = 4, /* +infinity */
   SIM_FPU_IS_NNUMBER = 5, /* -number - [ -MAX .. -MIN ] */
