@@ -1,3 +1,7 @@
+Wed Mar  8 10:29:33 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.base/signals.exp (signal_tests_1): xfail for irix.
+
 Mon Mar  6 10:44:06 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* gdb.disasm/hppa.exp: Delete redundant ".*" at the beginning of
@@ -16,7 +20,7 @@ Thu Mar  2 05:31:34 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	* gdb.base/Makefile.in: Try compiling callfuncs.c, if that fails try
 	-DNO_PROTOTYPES.
 	* gdb.base/callfuncs.c: Control use of prototypes based on
-	NO_PROTOTYPES, not __STDC.
+	NO_PROTOTYPES, not __STDC__.
 	* gdb.base/callfuncs.exp (do_function_calls): xfail one of the
 	t_float_values2 tests if prototypes in use.
 
