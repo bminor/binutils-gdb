@@ -981,11 +981,7 @@ msp430_srcoperand (op, l, bin, imm_op)
 	  else if (x == 4)
 	    {
 #ifdef PUSH_1X_WORKAROUND
-	      if (bin == 0x1200
-		  && (msp430_mcu->isa == MSP430_ISA_11
-		      || msp430_mcu->isa == MSP430_ISA_12
-		      || msp430_mcu->isa == MSP430_ISA_13
-		      || msp430_mcu->isa == MSP430_ISA_14))
+	      if (bin == 0x1200)
 		{
 		  /* Remove warning as confusing.
 		     as_warn(_("Hardware push bug workaround")); */
@@ -1002,11 +998,7 @@ msp430_srcoperand (op, l, bin, imm_op)
 	  else if (x == 8)
 	    {
 #ifdef PUSH_1X_WORKAROUND
-	      if (bin == 0x1200
-		  && (msp430_mcu->isa == MSP430_ISA_11
-		      || msp430_mcu->isa == MSP430_ISA_12
-		      || msp430_mcu->isa == MSP430_ISA_13
-		      || msp430_mcu->isa == MSP430_ISA_14))
+	      if (bin == 0x1200)
 		{
 		  /* Remove warning as confusing.
 		     as_warn(_("Hardware push bug workaround")); */

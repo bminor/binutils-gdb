@@ -1,3 +1,8 @@
+2003-08-01  Dmitry Diky  <diwil@mail.ru>
+
+	* config/tc-msp430.c (msp430_srcoperand): Extend 'push' bug workaround
+	to all arches.
+
 2003-07-30  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* config/tc-sh.c (md_assemble): For branches, check & update
