@@ -15,7 +15,7 @@ man1dir = $(mandir)/man1
 infodir	= $(prefix)/info
 datadir = $(prefix)/lib
 
-INSTALL 	= install -c
+INSTALL 	= $(srcdir)/../install -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA 	= $(INSTALL)
 MAKEINFO	= makeinfo
@@ -72,25 +72,16 @@ dvi: gprof.dvi
 check:
 installcheck:
 
-install-info: info
-	-parent=`echo $(infodir)|sed -e 's@/[^/]*$$@@'`; \
-	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
-	-if [ -d $(infodir) ] ; then true ; else mkdir $(infodir) ; fi
+install-info: 
 	for i in *.info* ; do \
 		$(INSTALL_DATA) $$i $(infodir)/$$i ; \
 	done
 
-install: all
-	-parent=`echo $(man1dir)|sed -e 's@/[^/]*$$@@'`; \
-	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
-	-if [ -d $(man1dir) ] ; then true ; else mkdir $(man1dir) ; fi
-	-parent=`echo $(bindir)|sed -e 's@/[^/]*$$@@'`; \
-	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
-	-if [ -d $(bindir) ] ; then true ; else mkdir $(bindir) ; fi
-	$(INSTALL_PROGRAM) $(PROG) $(bindir)/$(PROG)
+install: 
+	$(INSTALL_PROGRAM) gprof $(bindir)/gprof
 	$(INSTALL_DATA) $(srcdir)/gprof.1 $(man1dir)/gprof.1
 
-$(PROG):	$(OBJS)
+gprof:	$(OBJS)
 	$(CC) -o $(PROG) $(LDFLAGS) $(OBJS) $(LIBS)
 
 mostlyclean:
