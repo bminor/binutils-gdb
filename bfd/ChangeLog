@@ -1,3 +1,11 @@
+Mon Dec 29 18:02:28 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	From Jonathan Stone <jonathan@DSG.Stanford.EDU>:
+	* config.bfd (mips-dec-netbsd*): Add ECOFF vectors to
+	targ_selvecs.
+	(mips*el-*-netbsd*): Like mips-dec-netbsd*.
+	(mips*-*-netbsd*): New target.
+
 Mon Dec 29 17:13:28 1997  H.J. Lu  (hjl@gnu.org)
 
 	* elflink.h (elf_link_assign_sym_version): Change error message
