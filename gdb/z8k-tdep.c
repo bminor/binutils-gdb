@@ -325,25 +325,26 @@ z8k_print_register_hook (int regno)
 {
   if ((regno & 1) == 0 && regno < 16)
     {
-      unsigned short l[2];
+      unsigned char l[4];
 
-      frame_register_read (selected_frame, regno, (char *) (l + 0));
-      frame_register_read (selected_frame, regno + 1, (char *) (l + 1));
+      frame_register_read (selected_frame, regno, l + 0);
+      frame_register_read (selected_frame, regno + 1, l + 2);
       printf_unfiltered ("\t");
-      printf_unfiltered ("%04x%04x", l[0], l[1]);
+      printf_unfiltered ("0x%02x%02x%02x%02x", l[0], l[1], l[2], l[3]);
     }
 
   if ((regno & 3) == 0 && regno < 16)
     {
-      unsigned short l[4];
+      unsigned char l[8];
 
-      frame_register_read (selected_frame, regno, (char *) (l + 0));
-      frame_register_read (selected_frame, regno + 1, (char *) (l + 1));
-      frame_register_read (selected_frame, regno + 2, (char *) (l + 2));
-      frame_register_read (selected_frame, regno + 3, (char *) (l + 3));
+      frame_register_read (selected_frame, regno, l + 0);
+      frame_register_read (selected_frame, regno + 1, l + 2);
+      frame_register_read (selected_frame, regno + 2, l + 4);
+      frame_register_read (selected_frame, regno + 3, l + 6);
 
       printf_unfiltered ("\t");
-      printf_unfiltered ("%04x%04x%04x%04x", l[0], l[1], l[2], l[3]);
+      printf_unfiltered ("0x%02x%02x%02x%02x%02x%02x%02x%02x",
+                         l[0], l[1], l[2], l[3], l[4], l[5], l[6], l[7]);
     }
   if (regno == 15)
     {
