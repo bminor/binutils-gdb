@@ -220,8 +220,6 @@ np1)			gdb_target_cpu=gould ;;
 powerpc*)		gdb_target_cpu=powerpc ;;
 pn)			gdb_target_cpu=gould ;;
 pyramid)		gdb_target_cpu=pyr ;;
-sparclite*)		gdb_target_cpu=sparc
-		configdirs="${configdirs} sparclite" ;;
 sparc*)			gdb_target_cpu=sparc ;;
 *)			gdb_target_cpu=$target_cpu ;;
 

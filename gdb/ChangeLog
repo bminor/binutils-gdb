@@ -1,3 +1,11 @@
+Sat Jul 29 14:43:35 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* sparclite: Removed subdirectory.  aload and eload are now in
+	utils/sparclite, low-level library is in libgloss.
+	* configure.in (sparclite*): Don't configure sparclite subdir.
+	* configure: Update.
+	* Makefile.in (TARDIRS): Remove, no longer used.
+
 Sat Jul 29 01:45:56 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* procfs.c (unconditionally_kill_inferior):  Clear current signal
