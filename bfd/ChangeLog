@@ -1,3 +1,13 @@
+Mon Feb  8 11:18:14 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* elf32-m68k.c (reloc_map): Use the correct types for the struct
+	fields instead of unsigned char.
+
+Fri Feb  5 00:22:36 1999  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am: Rebuild dependencies.
+	* Makefile.in: Rebuild.
+
 Thu Feb  4 22:30:13 1999  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Change AC_PREREQ to 2.13.  Remove AM_CYGWIN32.
