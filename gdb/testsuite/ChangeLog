@@ -1,3 +1,10 @@
+2003-03-17  Andrew Cagney  <cagney@redhat.com>
+
+	From Elena Zannoni <ezannoni@redhat.com>.  Test e500 abi and
+	vector registes.
+	* gdb.arch/e500-regs.c, gdb.arch/e500-regs.exp: New files.
+	* gdb.arch/e500-abi.c, gdb.arch/e500-abi.exp: New files.
+
 2003-03-17  David Carlton  <carlton@math.stanford.edu>
 
 	* gdb.base/watchpoint.exp (test_watchpoint_and_breakpoint): New
