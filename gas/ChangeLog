@@ -1,3 +1,5 @@
+Wed Aug  6 00:30:30 1997  Ian Lance Taylor  <ian@cygnus.com>
+
 Tue Aug  5 12:32:07 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am: New file, based on old Makefile.in.
@@ -14,7 +16,8 @@ Tue Aug  5 12:32:07 1997  Ian Lance Taylor  <ian@cygnus.com>
 	* as.c (print_version_id): Change GAS_VERSION to VERSION.
 	(parse_args): Likewise.
 	* config/obj-vms.c: (Write_VMS_MHD_Records): Likewise.
-	* Makefile.in: Now built with automake.
+	* doc/Makefile.am: New file, based on old doc/Makefile.in.
+	* Makefile.in, doc/Makefile.in: Now built with automake.
 	* aclocal.m4: Now built with aclocal.
 	* configure: Rebuild.
 
