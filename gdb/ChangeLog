@@ -1,6 +1,18 @@
 Wed Sep  8 13:01:10 1993  K. Richard Pixley  (rich@cygnus.com)
 
 	Gcc lint.
+	* printcmd.c (do_examine): initialize val_type.
+	  (print_frame_args): initialize b.
+	* ser-tcp.c (tcp_restore): comment out declaration.  Appears
+	  unused.
+	* ser-unix.c (hardwire_restore): comment out declaration.  Appears
+	  unused.
+	  (hardwire_send_break): moved variable status into ifdef
+	  HAVE_SGTTY.
+	  (wait_for): moved variable numfds into ifdef HAVE_SGTTY.
+	* serial.h: comment change only.
+	* stabsread.c (rs6000_builtin_type): initialize rettype.
+	  (read_range_type): initialize nbits.
 	* stack.c (print_frame_info): remove unused variable numargs.
 	  (parse_frame_specification): remove unused variables arg1, arg2,
 	  arg3.

@@ -132,8 +132,8 @@ serial_t serial_fdopen PARAMS ((int fd));
 
 #define SERIAL_SETBAUDRATE(SERIAL_T, RATE) ((SERIAL_T)->ops->setbaudrate((SERIAL_T), RATE))
 
-/* Write LEN chars from STRING to the port SERIAL_T.  Returns 0 for success,
-   -1 for failure.  */
+/* Write LEN chars from STRING to the port SERIAL_T.  Returns 0 for
+   success, non-zero for failure.  */
 
 #define SERIAL_WRITE(SERIAL_T, STRING, LEN) ((SERIAL_T)->ops->write((SERIAL_T), STRING, LEN))
 

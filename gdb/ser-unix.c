@@ -82,7 +82,7 @@ static int hardwire_readchar PARAMS ((serial_t scb, int timeout));
 static int rate_to_code PARAMS ((int rate));
 static int hardwire_setbaudrate PARAMS ((serial_t scb, int rate));
 static int hardwire_write PARAMS ((serial_t scb, const char *str, int len));
-static void hardwire_restore PARAMS ((serial_t scb));
+/* FIXME: static void hardwire_restore PARAMS ((serial_t scb)); */
 static void hardwire_close PARAMS ((serial_t scb));
 static int get_tty_state PARAMS ((serial_t scb, struct hardwire_ttystate *state));
 static int set_tty_state PARAMS ((serial_t scb, struct hardwire_ttystate *state));
@@ -358,8 +358,6 @@ static int
 hardwire_send_break (scb)
      serial_t scb;
 {
-  int status;
-
 #ifdef HAVE_TERMIOS
   return tcsendbreak (scb->fd, 0);
 #endif
@@ -370,6 +368,7 @@ hardwire_send_break (scb)
 
 #ifdef HAVE_SGTTY
   {
+    int status;
     struct timeval timeout;
 
     status = ioctl (scb->fd, TIOCSBRK, 0);
@@ -438,8 +437,6 @@ wait_for(scb, timeout)
      serial_t scb;
      int timeout;
 {
-  int numfds;
-
 #ifdef HAVE_SGTTY
   struct timeval tv;
   fd_set readfds;
@@ -453,6 +450,8 @@ wait_for(scb, timeout)
 
   while (1)
     {
+      int numfds;
+
       if (timeout >= 0)
 	numfds = select(scb->fd+1, &readfds, 0, 0, &tv);
       else

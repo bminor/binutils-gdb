@@ -39,7 +39,7 @@ static int wait_for PARAMS ((serial_t scb, int timeout));
 static int tcp_readchar PARAMS ((serial_t scb, int timeout));
 static int tcp_setbaudrate PARAMS ((serial_t scb, int rate));
 static int tcp_write PARAMS ((serial_t scb, const char *str, int len));
-static void tcp_restore PARAMS ((serial_t scb));
+/* FIXME: static void tcp_restore PARAMS ((serial_t scb)); */
 static void tcp_close PARAMS ((serial_t scb));
 static serial_ttystate tcp_get_tty_state PARAMS ((serial_t scb));
 static int tcp_set_tty_state PARAMS ((serial_t scb, serial_ttystate state));
