@@ -1,3 +1,9 @@
+Fri Feb 11 21:47:24 1994  Steve Chamberlain  (sac@sphagnum.cygnus.com)
+
+	* remote-hms.c (readchar, hms_open, hms_fetch_register): Made more robust.
+	(remove_commands, add_commands): Add/remove hms-drain when target
+	is connected.
+
 Fri Feb 11 16:11:38 1994  Stu Grossman  (grossman at cygnus.com)
 
 	* configure.in:  Add Lynx/rs6000 support.
