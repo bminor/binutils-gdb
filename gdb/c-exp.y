@@ -1177,6 +1177,8 @@ yylex ()
       c = *lexptr++;
       if (c == '\\')
 	c = parse_escape (&lexptr);
+      else if (c == '\'')
+	error ("Empty character constant.");
 
       yylval.typed_val.val = c;
       yylval.typed_val.type = builtin_type_char;

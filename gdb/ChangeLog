@@ -1,3 +1,7 @@
+Wed Mar 15 10:58:26 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* c-exp.y (yylex): Make an empty character constant an error.
+
 Tue Mar 14 15:00:54 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* valops.c (value_arg_coerce):  Do possible value_coerce_array
