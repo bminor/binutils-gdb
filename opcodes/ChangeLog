@@ -1,3 +1,35 @@
+start-sanitize-sh3e
+Mon Aug  7 02:21:40 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* sh-dis.c (print_insn_shx): Handle new operand types F_REG_N,
+	F_REG_M, FPSCR_M, FPSCR_N, FPUL_M and FPUL_N.
+	* sh-opc.h (sh_arg_type): Add new operand types.
+	(sh_table): Add new opcodes from SH3E Floating Point ISA.
+
+end-sanitize-sh3e
+Sat Aug  5 16:50:14 1995  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (distclean): Remove generated file config.h.
+
+Sat Aug  5 16:50:14 1995  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (distclean): Remove generated file config.h.
+
+Wed Aug  2 18:33:40 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* m68k-opc.c: New file, holding tables from include/opcode/m68k.h.
+	Clean up tables.
+	* m68k-dis.c: Remove BREAK_UP_BIG_DECL stuff.
+	(opcode): Remove.
+	(print_insn_m68k): Change d to be const.  Use m68k_numopcodes
+	rather than numopcodes.  Use m68k_opcodes rather than removed
+	opcode function.  Don't check F_ALIAS.
+	(print_insn_arg): Change first parameter to be const char *.
+	* Makefile.in (ALL_MACHINES): Add m68k-opc.o.
+	(m68k-opc.o): New target.
+	* configure.in: Build m68k-opc.o for bfd_m68k_arch.
+	* configure: Rebuild.
+
 Wed Aug  2 08:23:38 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* sparc-dis.c (HASH_SIZE, HASH_INSN): Define.
