@@ -64,6 +64,7 @@ convx-opcode.h
 copying.awk
 copying.c
 core.c
+corelow.c
 coredep.c
 createtags
 dbxread.c
