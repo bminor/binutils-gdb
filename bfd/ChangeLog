@@ -1,5 +1,8 @@
 Tue Aug 17 15:19:41 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* coff-rs6000.c (dummy_reloc, RTYPE2HOWTO): Set howto field to a
+	dummy value, rather than leaving it NULL.
+
 	* archures.c (bfd_default_set_arch_mach): Set bfd_error on
 	failure.
 	* aoutx.h (NAME(aout,set_arch_mach)): Check return value of
