@@ -159,7 +159,7 @@ const struct v850_opcode v850_opcodes[] = {
 { "divh",	OP(0x02),		OP_MASK,	IF1, 2 },
 { "cmp",	OP(0x0f),		OP_MASK,	IF1, 2 },
 { "cmp",	OP(0x13),		OP_MASK,	IF2, 2 },
-{ "setf",	two(0x0000,0x0000),	two(0x0000,0xffff), {CCCC,R2}, 4 },
+{ "setf",	two(0x07e0,0x0000),	two(0x07f0,0xffff), {CCCC,R2}, 4 },
 
 /* saturated operation instructions */
 { "satadd",	OP(0x06),		OP_MASK,	IF1, 2 },
