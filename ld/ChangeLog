@@ -1,3 +1,10 @@
+2000-08-10  Geoff Keating  <geoffk@cygnus.com>
+
+	* scripttempl/elf.sc: Add a comment giving the correspondence
+	between sections, per-datum sections, and linkonce sections.  Make
+	the comment true even for .bss, .sdata, .sdata2, .sbss, and
+	.sbss2.
+
 2000-08-10  Jason Eckhardt  <jle@cygnus.com>
 
 	* emulparams/elf32_i860.sh: New file.
