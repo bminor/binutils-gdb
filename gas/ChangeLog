@@ -1,3 +1,12 @@
+Tue Sep 13 16:45:08 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* config/obj-coff.c (do_relocs_for):  If TC_KEEP_FX_OFFSET
+	is defined, put the tx_offset into the r_offset.
+	* config/tc-sh.c (line_comment_chars): Add #
+	(tc_reloc_mangle): Deleted.
+	* config/tc-sh.h (TC_KEEP_FX_OFFSET): Define.
+	(TC_RELOC_MANGLE): Delete.
+
 Tue Sep 13 16:20:36 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* config/tc-sparc.c (sparc_ip): Replace as_bad/exit sequence with
