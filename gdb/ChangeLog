@@ -1,3 +1,10 @@
+2003-05-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* dwarf2loc.c (find_location_expression): Change type of second
+	argument to `size_t *'.
+	(loclist_read_variable, loclist_tracepoint_var_ref): Use size_t
+	for size variable.
+
 2003-05-18  David Carlton  <carlton@bactrian.org>
 
 	* symtab.c (lookup_symbol_aux): Rename 'mangled_name' argument to

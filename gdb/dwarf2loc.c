@@ -50,7 +50,7 @@
 
 static char *
 find_location_expression (struct dwarf2_loclist_baton *baton,
-			  int *locexpr_length, CORE_ADDR pc)
+			  size_t *locexpr_length, CORE_ADDR pc)
 {
   CORE_ADDR base_address = baton->base_address;
   CORE_ADDR low, high;
@@ -448,7 +448,7 @@ loclist_read_variable (struct symbol *symbol, struct frame_info *frame)
   struct dwarf2_loclist_baton *dlbaton = SYMBOL_LOCATION_BATON (symbol);
   struct value *val;
   unsigned char *data;
-  int size;
+  size_t size;
 
   data = find_location_expression (dlbaton, &size,
 				   frame ? get_frame_pc (frame) : 0);
@@ -490,7 +490,7 @@ loclist_tracepoint_var_ref (struct symbol * symbol, struct agent_expr * ax,
 {
   struct dwarf2_loclist_baton *dlbaton = SYMBOL_LOCATION_BATON (symbol);
   unsigned char *data;
-  int size;
+  size_t size;
 
   data = find_location_expression (dlbaton, &size, ax->scope);
   if (data == NULL)
