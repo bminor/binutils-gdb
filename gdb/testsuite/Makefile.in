@@ -144,7 +144,7 @@ uninstall: force
 #	-rm -f $(datadir)/*.exp
 	-rm -fr $(targetdir)
 
-check:
+check: all
 	$(RUNTEST) $(RUNTESTFLAGS) --tool gdb GDB=$(GDB)
 
 subdir_do: force
