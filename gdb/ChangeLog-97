@@ -629,7 +629,6 @@ start-sanitize-tx19
 end-sanitize-tx19
 
 Fri Sep 26 12:40:51 1997  Jeffrey A Law  (law@cygnus.com)
-                          Michael Snyder  (msnyder@cleaver.cygnus.com)
 
 start-sanitize-r5900
 	* configure.tgt: Set gdb_target to r5900.
@@ -1332,7 +1331,6 @@ Fri Jul 25 15:37:15 1997  Stu Grossman  <grossman@cygnus.com>
 
 	* v850ice.c:  Include <windows.h>.  Support new v850 DLL interface.
 	* Add defs for target status.
-
 
 Tue Jul 22 12:11:48 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
 
