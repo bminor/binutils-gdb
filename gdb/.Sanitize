@@ -212,6 +212,7 @@ tm-sun4os4.h
 tm-sunos.h
 tm-symmetry.h
 tm-tahoe.h
+tm-ultra3.h
 tm-umax.h
 tm-vax.h
 tm-vx68.h
