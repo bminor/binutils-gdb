@@ -1,3 +1,8 @@
+Sat Nov 13 22:50:29 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.stabs: Re-write weird.def and configuration to use sed
+	instead of cpp.  sed is portable and POSIX; cpp is neither.
+
 Fri Nov 12 15:26:36 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.t06/signals.exp: Remove one sun3 XFAIL which has been fixed.

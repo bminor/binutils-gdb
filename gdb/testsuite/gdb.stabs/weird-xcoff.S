@@ -1,27 +1,17 @@
-#define N_GSYM 128
-#define N_LSYM 129
-
-/* If we try to use .stabx for common blocks, the AIX assembler (bogusly)
-   complains about the lack of a colon in the stabstring.  */
-#define BEGIN_COMMON(name) .bc name
-#define END_COMMON(name) .ec
-
-#define VAR(name) \
-	.globl name; \
-	.align 1; \
-name:; \
-	.long 42;
-#define STAB(string,type,value) .stabx string,value,type,0
-
-/* Put everything in this csect, which seems to make things work.
-   The compiler actually puts the stabs in .csect [PR], but that didn't
-   work here (I guess because there is no text section).  */
+# Put everything in this csect, which seems to make things work.
+# The compiler actually puts the stabs in .csect [PR], but that didn't
+# work here (I guess because there is no text section).
+1i\
 	.csect .data[RW]
-#include "weird.def"
-
-/* Stuff with backslashes needs to go here, since the aix assembler treats
-   them differently.  */
-
-STAB("sym92:\ !#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~",N_LSYM,0)
-STAB("type92:t92=\ !#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~",N_LSYM,0)
-STAB("attr92:G392=@\ !#$%&'()*+,-./0123456789:<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~;1",N_GSYM, 0)
+# .stabs string,type,0,0,value  ->  .stabx string,value,type,0
+s/^[ 	]*\.stabs[ 	]*\("[^"]*"\),[ 	]*\([^,]*\),[ 	]*0,0,[ 	]*\(.*\)$/.stabx \1,\3,\2,0/
+s/N_GSYM/128/
+s/N_LSYM/129/
+s/\.begin_common/.bc/
+# The AIX assembler doesn't want the name in a .ec directive
+s/\.end_common.*/.ec/
+s/\.align_it/.align 1/
+/^#/d
+/.if alpha/,/.endif alpha/d
+/.if/d
+/.endif/d
