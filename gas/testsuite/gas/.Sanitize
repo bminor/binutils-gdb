@@ -43,6 +43,7 @@ m68k-coff
 macros
 mips
 mri
+sh
 sparc
 sparc-solaris
 sun4
@@ -50,7 +51,6 @@ template
 vax
 
 Things-to-lose:
-sh
 
 Do-last:
 
