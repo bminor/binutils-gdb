@@ -5106,7 +5106,7 @@ Tue Jan  2 13:41:14 1996  Stan Shebs  <shebs@andros.cygnus.com>
 	* config/mips/irix5.mh (NAT_FILE): Use nm-irix5.h.
 	* config/mips/irix[345].mh (MUNCH_DEFINE): Remove.
 
-For older changes see ChangeLog-95
+For older changes see ChangeLog-1995
 
 Local Variables:
 mode: change-log

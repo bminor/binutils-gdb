@@ -6275,7 +6275,7 @@ Wed Jan  1 04:29:00 1992  Fred Fish  (fnf at cygnus.com)
 
 	* xcoffread.c:  Undefine next_symbol_text before redefining it.
 
-For older changes see ChangeLog-9091
+For older changes see ChangeLog-1991
 
 Local Variables:
 mode: indented-text

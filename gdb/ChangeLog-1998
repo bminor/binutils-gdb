@@ -7210,7 +7210,7 @@ Fri Jan  2 17:06:05 1998  Michael Snyder  (msnyder@cleaver.cygnus.com)
 	since list elements may be deleted during loop.
 	(read_actions): add actions to history list.
 
-For older changes see ChangeLog-97
+For older changes see ChangeLog-1997
 
 Local Variables:
 mode: change-log

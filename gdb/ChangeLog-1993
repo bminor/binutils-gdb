@@ -7587,7 +7587,7 @@ Fri Jan  1 11:56:23 1993  Fred Fish  (fnf@cygnus.com)
 	* defs.h (chill_demangle):  Add prototype.
 	* symtab.h (language_dependent_info):  Add struct for Chill.	
 
-For older changes see ChangeLog-92
+For older changes see ChangeLog-1992
 
 Local Variables:
 mode: indented-text

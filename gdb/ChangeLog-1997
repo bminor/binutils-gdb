@@ -2899,7 +2899,7 @@ Fri Jan  3 14:20:05 1997  Geoffrey Noer  <noer@cygnus.com>
 	arch.), redefined SAVED_PC_AFTER_CALL, EXTRACT_RETURN_VALUE,
 	EXTRACT_STRUCT_VALUE_ADDRESS, STORE_RETURN_VALUE.
 
-For older changes see ChangeLog-96
+For older changes see ChangeLog-1996
 
 Local Variables:
 mode: indented-text
