@@ -4,9 +4,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: opcodes 2.11\n"
+"Project-Id-Version: opcodes 2.12-pre020121\n"
 "POT-Creation-Date: 2002-01-17 13:58+0000\n"
-"PO-Revision-Date: 2001-10-19 12:00-0500\n"
+"PO-Revision-Date: 2002-01-25 08:00-0500\n"
 "Last-Translator: Michel Robitaille <robitail@IRO.UMontreal.CA>\n"
 "Language-Team: French <traduc@traduc.org>\n"
 "MIME-Version: 1.0\n"
@@ -95,7 +95,7 @@ msgstr "Champ non reconnu %d lors de l'analyse.\n"
 
 #: fr30-asm.c:374 m32r-asm.c:376 openrisc-asm.c:295
 msgid "missing mnemonic in syntax string"
-msgstr ""
+msgstr "mnémonique manquante dans la syntaxe de la chaîne"
 
 #. We couldn't parse it.
 #: fr30-asm.c:510 fr30-asm.c:514 fr30-asm.c:601 fr30-asm.c:703 m32r-asm.c:512
@@ -110,18 +110,17 @@ msgid "syntax error (expected char `%c', found `%c')"
 msgstr "erreur de syntaxe (caractère `%c' attendu,  `%c' obtenu)"
 
 #: fr30-asm.c:567 m32r-asm.c:569 openrisc-asm.c:488
-#, fuzzy, c-format
+#, c-format
 msgid "syntax error (expected char `%c', found end of instruction)"
-msgstr "erreur de syntaxe (caractère `%c' attendu,  `%c' obtenu)"
+msgstr "erreur de syntaxe (caractère `%c' attendu, fin de l'instruction obtenue)"
 
 #: fr30-asm.c:595 m32r-asm.c:597 openrisc-asm.c:516
 msgid "junk at end of line"
 msgstr "rebut à la fin de la ligne"
 
 #: fr30-asm.c:702 m32r-asm.c:704 openrisc-asm.c:623
-#, fuzzy
 msgid "unrecognized form of instruction"
-msgstr "instruction non reconnue"
+msgstr "forme d'instruction non reconnue"
 
 #: fr30-asm.c:714 m32r-asm.c:716 openrisc-asm.c:635
 #, c-format
@@ -144,9 +143,9 @@ msgid "Unrecognized field %d while printing insn.\n"
 msgstr "Champ non reconnu %d lors de l'impression insn.\n"
 
 #: fr30-ibld.c:166 m32r-ibld.c:166 openrisc-ibld.c:166
-#, fuzzy, c-format
+#, c-format
 msgid "operand out of range (%ld not between %ld and %lu)"
-msgstr "opérande hors gamme (%ld n'est pas entre %ld et %ld)"
+msgstr "opérande hors gamme (%ld n'est pas entre %ld et %lu)"
 
 #: fr30-ibld.c:179 m32r-ibld.c:179 openrisc-ibld.c:179
 #, c-format
@@ -245,29 +244,28 @@ msgid "# internal error, undefined modifier(%c)"
 msgstr "# erreur interne, modificateur non défini(%c)"
 
 #: mips-dis.c:1154
-#, fuzzy, c-format
+#, c-format
 msgid "# internal disassembler error, unrecognised modifier (%c)"
-msgstr "# erreur interne, modificateur non défini(%c)"
+msgstr "# erreur interne du déssassembleur, modificateur non reconnu(%c)"
 
 #: mmix-dis.c:34
 #, c-format
 msgid "Bad case %d (%s) in %s:%d\n"
-msgstr ""
+msgstr "Case erroné %d (%s) dans %s:%d\n"
 
 #: mmix-dis.c:44
 #, c-format
 msgid "Internal: Non-debugged code (test-case missing): %s:%d"
-msgstr ""
+msgstr "Interne: code qui n'est pas au point (case de test manquant): %s:%d"
 
 #: mmix-dis.c:53
-#, fuzzy
 msgid "(unknown)"
-msgstr "inconnu"
+msgstr "(inconnu)"
 
 #: mmix-dis.c:517
-#, fuzzy, c-format
+#, c-format
 msgid "*unknown operands type: %d*"
-msgstr "décalage d'opérande inconnu: %x\n"
+msgstr "*type d'opérande inconnue: %d*"
 
 #. I and Z are output operands and can`t be immediate
 #. * A is an address and we can`t have the address of
@@ -285,27 +283,23 @@ msgstr "option conditionnelle invalide"
 
 #: ppc-opc.c:800
 msgid "attempt to set y bit when using + or - modifier"
-msgstr ""
-"tentative d'initialisation du bit y lorsque le modificateur + ou - a été "
-"utilisé"
+msgstr "tentative d'initialisation du bit y lorsque le modificateur + ou - a été utilisé"
 
 #: ppc-opc.c:832 ppc-opc.c:884
 msgid "offset not a multiple of 4"
-msgstr ""
+msgstr "décalage n'est pas un multiple de 4"
 
 #: ppc-opc.c:857
 msgid "offset not between -2048 and 2047"
-msgstr ""
+msgstr "décalage n'est pas entre -2048 et 2047"
 
 #: ppc-opc.c:882
 msgid "offset not between -8192 and 8191"
-msgstr ""
+msgstr "décalage n'est pas entre -8192 et 8191"
 
 #: ppc-opc.c:910
 msgid "ignoring least significant bits in branch offset"
-msgstr ""
-"Les derniers bits les moins significatifs sont ignorés dans le décalage de "
-"branchement"
+msgstr "Les derniers bits les moins significatifs sont ignorés dans le décalage de branchement"
 
 #: ppc-opc.c:944 ppc-opc.c:981
 msgid "illegal bitmask"
