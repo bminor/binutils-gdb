@@ -1,3 +1,14 @@
+2000-03-22  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/tm-i386aix.h (I386_AIX_TARGET): Remove.
+	* config/i386/tm-linux.h (LOW_RETURN_REGNUM, HIGH_RETURN_REGNUM):
+	Remove
+	* i386-tdep.c (LOW_RETURN_REGNUM, HIGH_RETURN_REGNUM): New defines.
+	(i386_extract_return_value): Rewritten.  Correctly support all
+	floating-point types and large integer types on targets that use
+	the standard i386 GDB register layout and return floating-point
+	values in the FPU.
+
 Wed Mar 22 15:09:34 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (CONFIG_INITS): Do not append remote-nrom.c

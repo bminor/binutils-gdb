@@ -30,14 +30,6 @@
 #define I386 1
 #endif
 
-/* FIXME: kettenis/2000-03-02: This is used in
-   i386-tdep.c:i386_extract_return_value(), and will be remove once
-   I've fixed that.  Meanwhile don't use it for any other purpose
-   please!  */
-#ifndef I386_AIX_TARGET
-#define I386_AIX_TARGET 1
-#endif
-
 /* AIX/i386 has FPU support.  However, the native configuration (which
    is the only supported configuration) doesn't make the FPU control
    registers available.  Override the appropriate symbols such that

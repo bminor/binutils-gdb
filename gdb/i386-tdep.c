@@ -698,56 +698,66 @@ get_longjmp_target (pc)
 
 #endif /* GET_LONGJMP_TARGET */
 
+/* These registers are used for returning integers (and on some
+   targets also for returning `struct' and `union' values when their
+   size and alignment match an integer type.  */
+#define LOW_RETURN_REGNUM 0	/* %eax */
+#define HIGH_RETURN_REGNUM 2	/* %edx */
+
+/* Extract from an array REGBUF containing the (raw) register state, a
+   function return value of TYPE, and copy that, in virtual format,
+   into VALBUF.  */
+
 void
-i386_extract_return_value (type, regbuf, valbuf)
-     struct type *type;
-     char regbuf[REGISTER_BYTES];
-     char *valbuf;
+i386_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 {
-  /* On AIX, i386 GNU/Linux and DJGPP, floating point values are
-     returned in floating point registers.  */
-  /* FIXME: cagney/2000-02-29: This function needs to be rewritten
-     using multi-arch. Please don't keep adding to this #ifdef
-     spaghetti. */
-#if defined(I386_AIX_TARGET) || defined(I386_GNULINUX_TARGET) || defined(I386_DJGPP_TARGET)
+  int len = TYPE_LENGTH (type);
+
   if (TYPE_CODE_FLT == TYPE_CODE (type))
     {
-      double d;
-      /* 387 %st(0), gcc uses this */
-      floatformat_to_double (&floatformat_i387_ext,
-#if defined(FPDATA_REGNUM)
-			     &regbuf[REGISTER_BYTE (FPDATA_REGNUM)],
-#else /* !FPDATA_REGNUM */
-			     &regbuf[REGISTER_BYTE (FP0_REGNUM)],
-#endif /* FPDATA_REGNUM */
+      if (NUM_FREGS == 0)
+	{
+	  warning ("Cannot find floating-point return value.");
+	  memset (valbuf, 0, len);
+	}
 
-			     &d);
-      store_floating (valbuf, TYPE_LENGTH (type), d);
+      /* Floating-point return values can be found in %st(0).  */
+      if (len == TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT
+	  && TARGET_LONG_DOUBLE_FORMAT == &floatformat_i387_ext)
+	{
+	  /* Copy straight over, but take care of the padding.  */
+	  memcpy (valbuf, &regbuf[REGISTER_BYTE (FP0_REGNUM)],
+		  FPU_REG_RAW_SIZE);
+	  memset (valbuf + FPU_REG_RAW_SIZE, 0, len - FPU_REG_RAW_SIZE);
+	}
+      else
+	{
+	  /* Convert the extended floating-point number found in
+             %st(0) to the desired type.  This is probably not exactly
+             how it would happen on the target itself, but it is the
+             best we can do.  */
+	  DOUBLEST val;
+	  floatformat_to_doublest (&floatformat_i387_ext,
+				   &regbuf[REGISTER_BYTE (FP0_REGNUM)], &val);
+	  store_floating (valbuf, TYPE_LENGTH (type), val);
+	}
     }
   else
-#endif /* I386_AIX_TARGET || I386_GNULINUX_TARGET || I386_DJGPP_TARGET */
     {
-#if defined(LOW_RETURN_REGNUM)
-      int len = TYPE_LENGTH (type);
       int low_size = REGISTER_RAW_SIZE (LOW_RETURN_REGNUM);
       int high_size = REGISTER_RAW_SIZE (HIGH_RETURN_REGNUM);
 
       if (len <= low_size)
-	memcpy (valbuf, regbuf + REGISTER_BYTE (LOW_RETURN_REGNUM), len);
+	memcpy (valbuf, &regbuf[REGISTER_BYTE (LOW_RETURN_REGNUM)], len);
       else if (len <= (low_size + high_size))
 	{
 	  memcpy (valbuf,
-		  regbuf + REGISTER_BYTE (LOW_RETURN_REGNUM),
-		  low_size);
+		  &regbuf[REGISTER_BYTE (LOW_RETURN_REGNUM)], low_size);
 	  memcpy (valbuf + low_size,
-		  regbuf + REGISTER_BYTE (HIGH_RETURN_REGNUM),
-		  len - low_size);
+		  &regbuf[REGISTER_BYTE (HIGH_RETURN_REGNUM)], len - low_size);
 	}
       else
-	error ("GDB bug: i386-tdep.c (i386_extract_return_value): Don't know how to find a return value %d bytes long", len);
-#else /* !LOW_RETURN_REGNUM */
-      memcpy (valbuf, regbuf, TYPE_LENGTH (type));
-#endif /* LOW_RETURN_REGNUM */
+	internal_error ("Cannot extract return value of %d bytes long.", len);
     }
 }
 

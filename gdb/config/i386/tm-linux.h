@@ -30,9 +30,6 @@
 #include "i386/tm-i386.h"
 #include "tm-linux.h"
 
-#define LOW_RETURN_REGNUM 0	/* holds low four bytes of result */
-#define HIGH_RETURN_REGNUM 2	/* holds high four bytes of result */
-
 /* This should probably move to tm-i386.h.  */
 #define TARGET_LONG_DOUBLE_BIT 80
 
