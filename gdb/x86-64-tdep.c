@@ -787,7 +787,7 @@ x86_64_push_dummy_call (struct gdbarch *gdbarch, struct regcache *regcache,
 
 
 /* The maximum number of saved registers.  This should include %rip.  */
-#define X86_64_NUM_SAVED_REGS	17
+#define X86_64_NUM_SAVED_REGS	X86_64_NUM_GREGS
 
 struct x86_64_frame_cache
 {
@@ -1035,6 +1035,7 @@ x86_64_sigtramp_frame_cache (struct frame_info *next_frame, void **this_cache)
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   CORE_ADDR addr;
   char buf[8];
+  int i;
 
   if (*this_cache)
     return *this_cache;
@@ -1045,8 +1046,11 @@ x86_64_sigtramp_frame_cache (struct frame_info *next_frame, void **this_cache)
   cache->base = extract_unsigned_integer (buf, 8) - 8;
 
   addr = tdep->sigcontext_addr (next_frame);
-  cache->saved_regs[X86_64_RIP_REGNUM] = addr + tdep->sc_pc_offset;
-  cache->saved_regs[X86_64_RSP_REGNUM] = addr + tdep->sc_sp_offset;
+  gdb_assert (tdep->sc_reg_offset);
+  gdb_assert (tdep->sc_num_regs <= X86_64_NUM_SAVED_REGS);
+  for (i = 0; i < tdep->sc_num_regs; i++)
+    if (tdep->sc_reg_offset[i] != -1)
+      cache->saved_regs[i] = addr + tdep->sc_reg_offset[i];
 
   *this_cache = cache;
   return cache;

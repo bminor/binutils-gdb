@@ -123,6 +123,38 @@ x86_64_linux_sigcontext_addr (struct frame_info *next_frame)
 }
 
 
+/* From <asm/sigcontext.h>.  */
+static int x86_64_linux_sc_reg_offset[X86_64_NUM_GREGS] =
+{
+  13 * 8,			/* %rax */
+  11 * 8,			/* %rbx */
+  14 * 8,			/* %rcx */
+  12 * 8,			/* %rdx */
+  9 * 8,			/* %rsi */
+  8 * 8,			/* %rdi */
+  10 * 8,			/* %rbp */
+  15 * 8,			/* %rsp */
+  0 * 8,			/* %r8 */
+  1 * 8,			/* %r9 */
+  2 * 8,			/* %r10 */
+  3 * 8,			/* %r11 */
+  4 * 8,			/* %r12 */
+  5 * 8,			/* %r13 */
+  6 * 8,			/* %r14 */
+  7 * 8,			/* %r15 */
+  16 * 8,			/* %rip */
+  17 * 8,			/* %eflags */
+  -1,				/* %ds */
+  -1,				/* %es */
+
+  /* FIXME: kettenis/2002030531: The registers %fs and %gs are
+     available in `struct sigcontext'.  However, they only occupy two
+     bytes instead of four, which makes using them here rather
+     difficult.  Leave them out for now.  */
+  -1,				/* %fs */
+  -1				/* %gs */
+};
+
 static void
 x86_64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -132,8 +164,8 @@ x86_64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_pc_in_sigtramp (gdbarch, x86_64_linux_pc_in_sigtramp);
 
   tdep->sigcontext_addr = x86_64_linux_sigcontext_addr;
-  tdep->sc_pc_offset = 16 * 8;	/* From <asm/sigcontext.h>.  */
-  tdep->sc_sp_offset = 15 * 8;
+  tdep->sc_reg_offset = x86_64_linux_sc_reg_offset;
+  tdep->sc_num_regs = X86_64_NUM_GREGS;
 }
 
 

@@ -1,5 +1,14 @@
 2003-05-31  Mark Kettenis  <kettenis@gnu.org>
 
+	* x86-64-tdep.c (X86_64_NUM_SAVED_REGS): Set to X86_64_NUM_GREGS.
+	(x86_64_sigtramp_frame_cache): Use `sc_reg_offset' to find saved
+	registers.
+
+	* x86-64-linux-tdep.c (x86_64_linux_sc_reg_offset): New variable.
+	(x86_64_linux_init_abi): Initialize TDEP->sc_reg_offset and
+	TDEP->sc_num_regs instead of TDEP->sc_pc_offset and
+	TDEP->sc_sp_offset.
+
 	From Michal Ludvig  <mludvig@suse.cz>:
 	* i386-tdep.h (struct gdbarch_tdep): Add members `sc_reg_offset'
 	and `sc_num_regs'.
