@@ -1,3 +1,7 @@
+Mon Apr 28 18:39:45 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* config.guess: improve algorithm for recognizing Gnu Hurd x86.
+
 Thu Apr 24 19:30:07 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (DEVO_SUPPORT): Add mpw-install.
