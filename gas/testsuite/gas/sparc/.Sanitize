@@ -25,6 +25,8 @@ Things-to-keep:
 
 asi.d
 asi.s
+membar.d
+membar.s
 sparc.exp
 
 Things-to-lose:
