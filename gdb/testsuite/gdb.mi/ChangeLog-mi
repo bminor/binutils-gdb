@@ -1,5 +1,16 @@
 2000-03-06  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
+	* mi-disassemble.exp: Don't assume numbers for the offset
+ 	values. They can be different depending on the architecture.
+
+	* mi-watch.exp (test_watchpoint_triggering): In same cases the
+ 	type can be 'hw wathcpoint' not just 'watchpoint'. Adjust for that.
+
+	* basics.c (callee4): Make the function return something,
+ 	otherwise the return value is undefined.
+
+2000-03-06  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
 	* mi-basics.exp: Comment out test for a still unimplemented operation.
 
 	* mi-disassemble.exp: Rewrite most of the tests to conform to new

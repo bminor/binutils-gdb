@@ -3,15 +3,15 @@
  *      on function calls.  Useful to test printing frames, stepping, etc.
  */
 
-callee4 (void)
+int callee4 (void)
 {
   int A=1;
   int B=2;
   int C;
 
   C = A + B;
+  return 0;
 }
-
 callee3 (char *strarg)
 {
   callee4 ();
