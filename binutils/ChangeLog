@@ -1,3 +1,8 @@
+Tue Jul 23 13:59:54 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* dlltool.c (secdata): In non DLLTOOL_PPC case, change alignment
+	of .text section to 2.
+
 Mon Jul 22 08:46:15 1996  Stu Grossman  (grossman@lisa.cygnus.com)
 
 	* objdump.c (dump_section_stabs):  Fix test for stabs sections
