@@ -1,3 +1,9 @@
+Mon Jul 19 18:14:06 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* gdb.t17/interrupt.exp: Before sending ^C, give the inferior time
+	to get back into the read system call.
+	Accept leading newline in case where we woke it up.
+
 Sun Jul 18 08:40:45 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.stabs/{ecoff.mt,wierd-ecoff.S,wierd-ecoff.sed}:  New files
