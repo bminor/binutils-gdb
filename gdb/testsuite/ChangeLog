@@ -1,3 +1,7 @@
+2004-02-09  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.base/pending.exp: Remove extra \n from gdb_test calls.
+
 2004-02-08  Daniel Jacobowitz  <drow@mvista.com>
 
 	* lib/gdb.exp (gdb_breakpoint): Fail on unexpected pending

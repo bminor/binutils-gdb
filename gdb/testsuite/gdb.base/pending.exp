@@ -151,7 +151,7 @@ gdb_test_multiple "break pendfunc2" "Don't set pending breakpoint" {
 # Add condition to pending breakpoint 
 #
 
-gdb_test "condition 1 k == 1\n" ""
+gdb_test "condition 1 k == 1" ""
 
 gdb_test "info break" \
     "Num Type\[ \]+Disp Enb Address\[ \]+What.*
@@ -164,7 +164,7 @@ gdb_test "info break" \
 # Disable pending breakpoint
 #
 
-gdb_test "disable 1\n" ""
+gdb_test "disable 1" ""
 
 gdb_test "info break" \
     "Num Type\[ \]+Disp Enb Address\[ \]+What.*
