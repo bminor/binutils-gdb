@@ -118,6 +118,7 @@
 @format
 START-INFO-DIR-ENTRY
 * As: (as).                     The GNU assembler.
+* Gas: (as).                    The GNU assembler.
 END-INFO-DIR-ENTRY
 @end format
 @end ifinfo

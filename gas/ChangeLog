@@ -1,3 +1,8 @@
+2002-02-15  Ben Elliston  <bje@redhat.com>
+
+	* doc/as.texinfo: Add duplicate directory entry so that "info gas"
+	works as expected.
+
 Fri Feb 15 15:18:51 CET 2002  Jan Hubicka  <jh@suse.cz>
 
 	* i386.c (md_assemble): Support 32bit address prefix.
