@@ -31,7 +31,8 @@ host_libs="mmalloc libiberty opcodes bfd readline glob tcl tk"
 host_tools="texinfo byacc flex bison binutils ld gas gcc gdb make patch
 	    send_pr gprof gdbtest tgas etc expect deja-gnu sim
             m4 autoconf ispell grep diff rcs cvs fileutils shellutils
-	    textutils wdiff find emacs uudecode"
+	    textutils wdiff find emacs uudecode hello tar gzip indent
+	    recode"
 
 
 # these libraries are built for the target environment, and are built after

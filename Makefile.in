@@ -359,7 +359,8 @@ all.normal: all-m4 all-autoconf all-libiberty all-mmalloc all-texinfo \
 	$(end-sanitize-chill) \
 	all-gprof all-send_pr all-libm all-deja-gnu \
 	all-fileutils all-find all-gawk all-sed all-shellutils \
-	all-textutils all-time all-wdiff all-uudecode 
+	all-textutils all-time all-wdiff all-uudecode \
+	all-hello all-tar all-gzip all-indent all-recode
 
 
 all.cross: all-libiberty all-mmalloc all-gas all-byacc all-flex all-ld \
@@ -404,43 +405,56 @@ install-no-fixedincludes: install-dirs gcc-no-fixedincludes \
 	install-autoconf \
 	install-bfd \
 	install-binutils \
-	install-opcodes \
 	install-byacc \
+	$(start-sanitize-chill) \
+	install-chillrt \
+	$(end-sanitize-chill) \
 	install-cvs \
-	install-diff \
 	install-deja-gnu \
+	install-diff \
 	install-emacs \
 	install-etc \
 	install-expect \
+	install-fileutils \
+	install-find \
 	install-flex \
 	install-gas \
+	install-gawk \
 	install-gdb \
 	install-glob \
 	install-gprof \
 	install-grep \
+	install-gzip \
+	install-hello \
+	install-indent \
 	install-ispell \
 	install-ld \
 	install-libg++ \
 	install-libiberty \
 	install-libm \
+	install-m4 \
 	install-make \
 	install-mmalloc \
 	install-newlib \
-	$(start-sanitize-chill) \
-	install-chillrt \
-	$(end-sanitize-chill) \
+	install-opcodes \
 	install-patch \
 	install-rcs \
 	install-readline \
+	install-recode \	
+	install-sed \
 	install-send_pr \
+	install-shellutils \
+	install-sim \
+	install-tar \
 	install-tcl \
 	install-texinfo \
-	install-tk  \
-	install-sim \
-	install-fileutils install-find install-gawk install-m4 install-sed install-shellutils \
-	install-textutils install-time install-wdiff install-uudecode
+	install-textutils \
+	install-time \
+	install-tk \
+	install-uudecode \
+	install-wdiff 
 
-#
+# 
 # Install the gcc headers files, but not the fixed include files,
 # which we are not allowed to distribute.  This rule is very dependent
 # on the workings of the gcc Makefile.in.
@@ -469,6 +483,92 @@ install.cross: install-dirs install-libiberty install-mmalloc \
 	install-chillrt \
 	$(end-sanitize-chill) \
 	install-gcc install-etc install-deja-gnu
+
+### gzip
+all-gzip: all-libiberty
+	@if [ -f ./gzip/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./gzip; $(MAKE) $(FLAGS_TO_PASS) all) ; \
+	else \
+		true ; \
+	fi
+
+install-gzip: force
+	@if [ -f ./gzip/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./gzip; $(MAKE) $(FLAGS_TO_PASS) install) ; \
+	else \
+		true ; \
+	fi
+
+### hello
+all-hello: all-libiberty
+	@if [ -f ./hello/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./hello; $(MAKE) $(FLAGS_TO_PASS) all) ; \
+	else \
+		true ; \
+	fi
+
+install-hello: force
+	@if [ -f ./hello/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./hello; $(MAKE) $(FLAGS_TO_PASS) install) ; \
+	else \
+		true ; \
+	fi
+
+### recode
+all-recode: all-libiberty
+	@if [ -f ./recode/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./recode; $(MAKE) $(FLAGS_TO_PASS) all) ; \
+	else \
+		true ; \
+	fi
+
+install-recode: force
+	@if [ -f ./recode/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./recode; $(MAKE) $(FLAGS_TO_PASS) install) ; \
+	else \
+		true ; \
+	fi
+
+### indent
+all-indent: force
+	@if [ -f ./indent/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./indent; $(MAKE) $(FLAGS_TO_PASS) all) ; \
+	else \
+		true ; \
+	fi
+
+install-indent: force
+	@if [ -f ./indent/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./indent; $(MAKE) $(FLAGS_TO_PASS) install) ; \
+	else \
+		true ; \
+	fi
+
+### tar
+all-tar: all-libiberty
+	@if [ -f ./tar/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./tar; $(MAKE) $(FLAGS_TO_PASS) all) ; \
+	else \
+		true ; \
+	fi
+
+install-tar: force
+	@if [ -f ./tar/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./tar; $(MAKE) $(FLAGS_TO_PASS) install) ; \
+	else \
+		true ; \
+	fi
+
 
 ### deja-gnu
 all-deja-gnu: force

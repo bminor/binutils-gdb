@@ -1,3 +1,7 @@
+Tue Feb 16 05:57:15 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* configure.in, Makefile.in: add hello, tar, gzip, recode, indent
+
 Tue Feb 16 00:58:20 1993  John Gilmore  (gnu@cygnus.com)
 
 	* Makefile.in (DEVO_SUPPORT):  Remove etc directory
