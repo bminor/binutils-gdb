@@ -1,3 +1,9 @@
+2004-12-07  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.texinfo (General Query Packets): Specify that thread ID's in
+	the 'qC' and 'qThreadInfo' packets are unsigned hexidecimal
+	numbers.
+
 2004-12-07  Andreas Schwab  <schwab@suse.de>
 
 	* gdb.texinfo (Mode Options): Document -l option.

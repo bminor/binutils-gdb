@@ -20834,7 +20834,7 @@ Return the current thread id.
 Reply:
 @table @samp
 @item @code{QC}@var{pid}
-Where @var{pid} is a HEX encoded 16 bit process id.
+Where @var{pid} is an unsigned hexidecimal process id.
 @item *
 Any other reply implies the old pid.
 @end table
@@ -20863,10 +20863,10 @@ a comma-separated list of thread ids
 @end table
 
 In response to each query, the target will reply with a list of one or
-more thread ids, in big-endian hex, separated by commas.  @value{GDBN}
-will respond to each reply with a request for more thread ids (using the
-@code{qs} form of the query), until the target responds with @code{l}
-(lower-case el, for @code{'last'}).
+more thread ids, in big-endian unsigned hex, separated by commas.
+@value{GDBN} will respond to each reply with a request for more thread
+ids (using the @code{qs} form of the query), until the target responds
+with @code{l} (lower-case el, for @code{'last'}).
 
 @item @code{q}@code{ThreadExtraInfo}@code{,}@var{id} --- extra thread info
 
