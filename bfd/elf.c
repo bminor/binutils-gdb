@@ -6594,7 +6594,7 @@ elfcore_write_prstatus (abfd, buf, bufsiz, pid, cursig, gregs)
   memset (&prstat, 0, sizeof (prstat));
   prstat.pr_pid = pid;
   prstat.pr_cursig = cursig;
-  memcpy (prstat.pr_reg, gregs, sizeof (prstat.pr_reg));
+  memcpy (&prstat.pr_reg, gregs, sizeof (prstat.pr_reg));
   return elfcore_write_note (abfd, buf, bufsiz, 
 			     note_name, NT_PRSTATUS, &prstat, sizeof (prstat));
 }

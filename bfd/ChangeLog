@@ -1,3 +1,8 @@
+2002-01-19  Mark Kettenis  <kettenis@gnu.org>
+
+	* elf.c (elfcore_write_prstatus): Make sure we pass the address of
+	prstat.pr_reg even if it is a struct.
+
 2002-01-22  Steve Ellcey <sje@cup.hp.com>
 
 	* bfd/elfxx-ia64.c: Reset AIX vector function overrides for HP-UX.
