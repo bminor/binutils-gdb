@@ -470,11 +470,32 @@ f:2:REGISTER_NAME:const char *:register_name:int regnr:regnr:::legacy_register_n
 v:2:REGISTER_SIZE:int:register_size::::0:-1
 v:2:REGISTER_BYTES:int:register_bytes::::0:-1
 f:2:REGISTER_BYTE:int:register_byte:int reg_nr:reg_nr::generic_register_byte:generic_register_byte::0
+# The methods REGISTER_VIRTUAL_TYPE, MAX_REGISTER_RAW_SIZE,
+# MAX_REGISTER_VIRTUAL_SIZE, MAX_REGISTER_RAW_SIZE,
+# REGISTER_VIRTUAL_SIZE and REGISTER_RAW_SIZE are all being replaced
+# by REGISTER_TYPE.
 f:2:REGISTER_RAW_SIZE:int:register_raw_size:int reg_nr:reg_nr::generic_register_size:generic_register_size::0
+# The methods REGISTER_VIRTUAL_TYPE, MAX_REGISTER_RAW_SIZE,
+# MAX_REGISTER_VIRTUAL_SIZE, MAX_REGISTER_RAW_SIZE,
+# REGISTER_VIRTUAL_SIZE and REGISTER_RAW_SIZE are all being replaced
+# by REGISTER_TYPE.
 v:2:MAX_REGISTER_RAW_SIZE:int:max_register_raw_size::::0:-1
+# The methods REGISTER_VIRTUAL_TYPE, MAX_REGISTER_RAW_SIZE,
+# MAX_REGISTER_VIRTUAL_SIZE, MAX_REGISTER_RAW_SIZE,
+# REGISTER_VIRTUAL_SIZE and REGISTER_RAW_SIZE are all being replaced
+# by REGISTER_TYPE.
 f:2:REGISTER_VIRTUAL_SIZE:int:register_virtual_size:int reg_nr:reg_nr::generic_register_size:generic_register_size::0
+# The methods REGISTER_VIRTUAL_TYPE, MAX_REGISTER_RAW_SIZE,
+# MAX_REGISTER_VIRTUAL_SIZE, MAX_REGISTER_RAW_SIZE,
+# REGISTER_VIRTUAL_SIZE and REGISTER_RAW_SIZE are all being replaced
+# by REGISTER_TYPE.
 v:2:MAX_REGISTER_VIRTUAL_SIZE:int:max_register_virtual_size::::0:-1
-f:2:REGISTER_VIRTUAL_TYPE:struct type *:register_virtual_type:int reg_nr:reg_nr::0:0
+# The methods REGISTER_VIRTUAL_TYPE, MAX_REGISTER_RAW_SIZE,
+# MAX_REGISTER_VIRTUAL_SIZE, MAX_REGISTER_RAW_SIZE,
+# REGISTER_VIRTUAL_SIZE and REGISTER_RAW_SIZE have all being replaced
+# by REGISTER_TYPE.
+F:2:REGISTER_VIRTUAL_TYPE:struct type *:register_virtual_type:int reg_nr:reg_nr::0:0
+M:2:REGISTER_TYPE:struct type *:register_type:int reg_nr:reg_nr::0:
 #
 F:2:DEPRECATED_DO_REGISTERS_INFO:void:deprecated_do_registers_info:int reg_nr, int fpregs:reg_nr, fpregs
 m:2:PRINT_REGISTERS_INFO:void:print_registers_info:struct ui_file *file, struct frame_info *frame, int regnum, int all:file, frame, regnum, all:::default_print_registers_info::0

@@ -348,7 +348,7 @@ d10v_register_raw_size (int reg_nr)
    of data in register N.  */
 
 static struct type *
-d10v_register_virtual_type (int reg_nr)
+d10v_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
   if (reg_nr == PC_REGNUM)
     return builtin_type_void_func_ptr;
@@ -1652,7 +1652,7 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_max_register_raw_size (gdbarch, 8);
   set_gdbarch_register_virtual_size (gdbarch, generic_register_size);
   set_gdbarch_max_register_virtual_size (gdbarch, 8);
-  set_gdbarch_register_virtual_type (gdbarch, d10v_register_virtual_type);
+  set_gdbarch_register_type (gdbarch, d10v_register_type);
 
   set_gdbarch_ptr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
   set_gdbarch_addr_bit (gdbarch, 32);

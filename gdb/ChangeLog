@@ -1,5 +1,22 @@
 2003-03-01  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (register_type): New function with predicate.
+	(REGISTER_VIRTUAL_TYPE): Change to function with predicate.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* arch-utils.c (generic_register_byte): Use generic_register_size.
+	(generic_register_size): When available, use
+	gdbarch_register_type.
+	* regcache.c (init_regcache_descr): When available, initialize the
+	register type array using gdbarch_register_type.  If the
+	architecture supplies gdbarch_register_type, do not use the legacy
+	regcache layout.
+	* d10v-tdep.c (d10v_register_type): Replace
+	d10v_register_virtual_type.
+	(d10v_gdbarch_init): Set register_type instead of
+	register_virtual_type.
+
+2003-03-01  Andrew Cagney  <cagney@redhat.com>
+
 	* Makefile.in (ax-gdb.o): Update dependencies.
 	* ax-gdb.c: Include "regcache.h".
 	(gen_expr): Use register_type instead of REGISTER_VIRTUAL_TYPE.

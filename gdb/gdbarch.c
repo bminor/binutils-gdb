@@ -174,6 +174,7 @@ struct gdbarch
   gdbarch_register_virtual_size_ftype *register_virtual_size;
   int max_register_virtual_size;
   gdbarch_register_virtual_type_ftype *register_virtual_type;
+  gdbarch_register_type_ftype *register_type;
   gdbarch_deprecated_do_registers_info_ftype *deprecated_do_registers_info;
   gdbarch_print_registers_info_ftype *print_registers_info;
   gdbarch_print_float_info_ftype *print_float_info;
@@ -336,6 +337,7 @@ struct gdbarch startup_gdbarch =
   generic_register_size,
   0,
   generic_register_size,
+  0,
   0,
   0,
   0,
@@ -666,9 +668,8 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->max_register_virtual_size == -1))
     fprintf_unfiltered (log, "\n\tmax_register_virtual_size");
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->register_virtual_type == 0))
-    fprintf_unfiltered (log, "\n\tregister_virtual_type");
+  /* Skip verify of register_virtual_type, has predicate */
+  /* Skip verify of register_type, has predicate */
   /* Skip verify of deprecated_do_registers_info, has predicate */
   /* Skip verify of print_registers_info, invalid_p == 0 */
   /* Skip verify of print_float_info, has predicate */
@@ -2031,6 +2032,14 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->register_to_value
                         /*REGISTER_TO_VALUE ()*/);
 #endif
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: gdbarch_register_type_p() = %d\n",
+                        gdbarch_register_type_p (current_gdbarch));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: register_type = 0x%08lx\n",
+                        (long) current_gdbarch->register_type);
 #ifdef REGISTER_VIRTUAL_SIZE
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -2041,6 +2050,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: REGISTER_VIRTUAL_SIZE = <0x%08lx>\n",
                         (long) current_gdbarch->register_virtual_size
                         /*REGISTER_VIRTUAL_SIZE ()*/);
+#endif
+#ifdef REGISTER_VIRTUAL_TYPE_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "REGISTER_VIRTUAL_TYPE_P()",
+                      XSTRING (REGISTER_VIRTUAL_TYPE_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: REGISTER_VIRTUAL_TYPE_P() = %d\n",
+                      REGISTER_VIRTUAL_TYPE_P ());
 #endif
 #ifdef REGISTER_VIRTUAL_TYPE
   fprintf_unfiltered (file,
@@ -3344,6 +3362,13 @@ set_gdbarch_max_register_virtual_size (struct gdbarch *gdbarch,
   gdbarch->max_register_virtual_size = max_register_virtual_size;
 }
 
+int
+gdbarch_register_virtual_type_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->register_virtual_type != 0;
+}
+
 struct type *
 gdbarch_register_virtual_type (struct gdbarch *gdbarch, int reg_nr)
 {
@@ -3361,6 +3386,32 @@ set_gdbarch_register_virtual_type (struct gdbarch *gdbarch,
                                    gdbarch_register_virtual_type_ftype register_virtual_type)
 {
   gdbarch->register_virtual_type = register_virtual_type;
+}
+
+int
+gdbarch_register_type_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->register_type != 0;
+}
+
+struct type *
+gdbarch_register_type (struct gdbarch *gdbarch, int reg_nr)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->register_type == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_register_type invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_register_type called\n");
+  return gdbarch->register_type (gdbarch, reg_nr);
+}
+
+void
+set_gdbarch_register_type (struct gdbarch *gdbarch,
+                           gdbarch_register_type_ftype register_type)
+{
+  gdbarch->register_type = register_type;
 }
 
 int

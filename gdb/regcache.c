@@ -172,13 +172,20 @@ init_regcache_descr (struct gdbarch *gdbarch)
 				  struct type *);
   for (i = 0; i < descr->nr_cooked_registers; i++)
     {
-      descr->register_type[i] = REGISTER_VIRTUAL_TYPE (i);
+      if (gdbarch_register_type_p (gdbarch))
+	{
+	  gdb_assert (!REGISTER_VIRTUAL_TYPE_P ()); /* OK */
+	  descr->register_type[i] = gdbarch_register_type (gdbarch, i);
+	}
+      else
+	descr->register_type[i] = REGISTER_VIRTUAL_TYPE (i); /* OK */
     }
 
   /* If an old style architecture, fill in the remainder of the
      register cache descriptor using the register macros.  */
   if (!gdbarch_pseudo_register_read_p (gdbarch)
-      && !gdbarch_pseudo_register_write_p (gdbarch))
+      && !gdbarch_pseudo_register_write_p (gdbarch)
+      && !gdbarch_register_type_p (gdbarch))
     {
       descr->legacy_p = 1;
       init_legacy_regcache_descr (gdbarch, descr);

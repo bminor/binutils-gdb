@@ -721,6 +721,11 @@ extern void set_gdbarch_register_byte (struct gdbarch *gdbarch, gdbarch_register
 #endif
 #endif
 
+/* The methods REGISTER_VIRTUAL_TYPE, MAX_REGISTER_RAW_SIZE,
+   MAX_REGISTER_VIRTUAL_SIZE, MAX_REGISTER_RAW_SIZE,
+   REGISTER_VIRTUAL_SIZE and REGISTER_RAW_SIZE are all being replaced
+   by REGISTER_TYPE. */
+
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (REGISTER_RAW_SIZE)
 #define REGISTER_RAW_SIZE(reg_nr) (generic_register_size (reg_nr))
@@ -738,6 +743,11 @@ extern void set_gdbarch_register_raw_size (struct gdbarch *gdbarch, gdbarch_regi
 #endif
 #endif
 
+/* The methods REGISTER_VIRTUAL_TYPE, MAX_REGISTER_RAW_SIZE,
+   MAX_REGISTER_VIRTUAL_SIZE, MAX_REGISTER_RAW_SIZE,
+   REGISTER_VIRTUAL_SIZE and REGISTER_RAW_SIZE are all being replaced
+   by REGISTER_TYPE. */
+
 extern int gdbarch_max_register_raw_size (struct gdbarch *gdbarch);
 extern void set_gdbarch_max_register_raw_size (struct gdbarch *gdbarch, int max_register_raw_size);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (MAX_REGISTER_RAW_SIZE)
@@ -748,6 +758,11 @@ extern void set_gdbarch_max_register_raw_size (struct gdbarch *gdbarch, int max_
 #define MAX_REGISTER_RAW_SIZE (gdbarch_max_register_raw_size (current_gdbarch))
 #endif
 #endif
+
+/* The methods REGISTER_VIRTUAL_TYPE, MAX_REGISTER_RAW_SIZE,
+   MAX_REGISTER_VIRTUAL_SIZE, MAX_REGISTER_RAW_SIZE,
+   REGISTER_VIRTUAL_SIZE and REGISTER_RAW_SIZE are all being replaced
+   by REGISTER_TYPE. */
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (REGISTER_VIRTUAL_SIZE)
@@ -766,6 +781,11 @@ extern void set_gdbarch_register_virtual_size (struct gdbarch *gdbarch, gdbarch_
 #endif
 #endif
 
+/* The methods REGISTER_VIRTUAL_TYPE, MAX_REGISTER_RAW_SIZE,
+   MAX_REGISTER_VIRTUAL_SIZE, MAX_REGISTER_RAW_SIZE,
+   REGISTER_VIRTUAL_SIZE and REGISTER_RAW_SIZE are all being replaced
+   by REGISTER_TYPE. */
+
 extern int gdbarch_max_register_virtual_size (struct gdbarch *gdbarch);
 extern void set_gdbarch_max_register_virtual_size (struct gdbarch *gdbarch, int max_register_virtual_size);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (MAX_REGISTER_VIRTUAL_SIZE)
@@ -775,6 +795,36 @@ extern void set_gdbarch_max_register_virtual_size (struct gdbarch *gdbarch, int 
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (MAX_REGISTER_VIRTUAL_SIZE)
 #define MAX_REGISTER_VIRTUAL_SIZE (gdbarch_max_register_virtual_size (current_gdbarch))
 #endif
+#endif
+
+/* The methods REGISTER_VIRTUAL_TYPE, MAX_REGISTER_RAW_SIZE,
+   MAX_REGISTER_VIRTUAL_SIZE, MAX_REGISTER_RAW_SIZE,
+   REGISTER_VIRTUAL_SIZE and REGISTER_RAW_SIZE have all being replaced
+   by REGISTER_TYPE. */
+
+#if defined (REGISTER_VIRTUAL_TYPE)
+/* Legacy for systems yet to multi-arch REGISTER_VIRTUAL_TYPE */
+#if !defined (REGISTER_VIRTUAL_TYPE_P)
+#define REGISTER_VIRTUAL_TYPE_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (REGISTER_VIRTUAL_TYPE_P)
+#define REGISTER_VIRTUAL_TYPE_P() (0)
+#endif
+
+extern int gdbarch_register_virtual_type_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_VIRTUAL_TYPE_P)
+#error "Non multi-arch definition of REGISTER_VIRTUAL_TYPE"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REGISTER_VIRTUAL_TYPE_P)
+#define REGISTER_VIRTUAL_TYPE_P() (gdbarch_register_virtual_type_p (current_gdbarch))
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (REGISTER_VIRTUAL_TYPE)
+#define REGISTER_VIRTUAL_TYPE(reg_nr) (internal_error (__FILE__, __LINE__, "REGISTER_VIRTUAL_TYPE"), 0)
 #endif
 
 typedef struct type * (gdbarch_register_virtual_type_ftype) (int reg_nr);
@@ -788,6 +838,12 @@ extern void set_gdbarch_register_virtual_type (struct gdbarch *gdbarch, gdbarch_
 #define REGISTER_VIRTUAL_TYPE(reg_nr) (gdbarch_register_virtual_type (current_gdbarch, reg_nr))
 #endif
 #endif
+
+extern int gdbarch_register_type_p (struct gdbarch *gdbarch);
+
+typedef struct type * (gdbarch_register_type_ftype) (struct gdbarch *gdbarch, int reg_nr);
+extern struct type * gdbarch_register_type (struct gdbarch *gdbarch, int reg_nr);
+extern void set_gdbarch_register_type (struct gdbarch *gdbarch, gdbarch_register_type_ftype *register_type);
 
 #if defined (DEPRECATED_DO_REGISTERS_INFO)
 /* Legacy for systems yet to multi-arch DEPRECATED_DO_REGISTERS_INFO */
