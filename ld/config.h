@@ -28,9 +28,6 @@
 #define GLD960_EMULATION_NAME "gld960"
 #define GLD29K_EMULATION_NAME "gld29k"
 #define LNK960_EMULATION_NAME "lnk960"
-#define i386v_EMULATION_NAME "i386v"
-#define m68kv_EMULATION_NAME "m68kv"
-
 /* Otherwise default to this emulation */
 #ifndef DEFAULT_EMULATION
 #ifdef GNU960
@@ -50,8 +47,6 @@
 #define VANILLA_TARGET "a.out-sunos-big"
 #define GLDM88KBCS_TARGET "m88kbcs"
 #define GLD29K_TARGET "coff-a29k-big"
-#define GLDi386v_TARGET "i386coff"
-#define GLDm68kv_TARGET "m68kcoff"
 
 
 

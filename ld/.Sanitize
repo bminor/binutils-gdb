@@ -28,104 +28,121 @@ echo Sanitizing `pwd`...
 Things-to-keep:
 
 Makefile.in
+README
+README.configure
+bison
+bfd
+binutils
 config
-config.h
+config.sub
 configure
 configure.in
-config.sub
-ld.h
-ld.texinfo
-ldemul.c
-ldemul.h
-ldexp.c
-ldexp.h
-ldfile.c
-ldwarn.c
-ldwarn.h
-ldindr.c
-ldindr.h
-ldfile.h
-ldgld.c
-ldgld.sc
-ldgldi386v.sc
-ldgldi386vUr.sc
-ldgldi386vr.sc
-ldgldm68kv.sc
-ldgldm68kvUr.sc
-ldgldm68kvr.sc
-ldgldm88kbcs.sc
-ldgldi386v.c
-ldgldm68kv.c
-ldgld68k.c
-ldgld68k.sc
-ldgld68kUr.sc
-ldgld68kr.sc
-ldgld960.c
-ldgld960.sc
-ldgldUr.sc
-ldm88k.c
-ldm88k.sc
-ldm88kUr.sc
-ldm88kr.sc
-ldglda29k.c
-ldglda29k.sc
-ldglda29kUr.sc
-ldglda29kr.sc
-ldgldr.sc
-ldgram.y
-ldlang.c
-ldlang.h
-ldlex.h
-ldlex.l
-ldlnk960.c
-ldlnk960.sc
-ldlnk960r.sc
-ldmain.c
-ldmain.h
-ldmisc.c
-ldmisc.h
-ldsym.c
-ldsym.h
-ldvanilla.c
-ldver.c
-ldver.h
-ldwarn.h
-ldwrite.c
-ldwrite.h
-mkscript.c
+cvs
+diff
+emacs
+gas
+gcc
+gdb
+gdbm
+gnulib
+grep
+include
+ld
+libiberty
+make
+prms
+rcs
+readline
+texinfo
 
 Do-last:
+
+echo Looking for signs of \"v9\"...
+
+# Don't try to clean directories here, as the 'mv' command will fail.
+# Also, grep fails on NFS mounted directories.
+if ( echo $* | grep keep\-v9 > /dev/null ) ; then
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-v9 $i > /dev/null) ; then
+			echo Keeping v9 stuff in $i
+		fi
+	done
+else
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-v9 $i > /dev/null) ; then
+			echo Cleaning the \"v9\" out of $i...
+			sed '/start\-sanitize\-v9/,/end-\sanitize\-v9/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
+echo 'Propagating sanitized top-level ./configure and ./config.sub through tree.'
+
+./configure -v -template=./configure
 
 echo Done in `pwd`.
 
 #
 #
 # $Log$
-# Revision 1.9  1991/09/19 21:04:07  steve
-# Modifications from James Tsillas for 386 and 68k machines
+# Revision 1.10  1991/09/20 21:47:46  steve
+# Removed all the stuff I added yesterday.
 #
-# Revision 1.8  1991/09/04  04:21:09  rich
-# Don't keep ldgram.h.  Isn't even checked in.
+# Revision 1.16  1991/09/13  03:59:44  gnu
+# Third time's a charm.
 #
-# Revision 1.7  1991/09/03  21:14:13  steve
+# Revision 1.15  1991/09/13  03:20:18  gnu
+# One more try at top-level sanity on config.sub
+#
+# Revision 1.14  1991/09/13  03:11:27  gnu
+# Clean out "v9" stuff from here, and propagate configure and config.sub
+# to all lower directories after sanity sets in.
+#
+# Revision 1.13  1991/09/12  00:33:59  rich
+# add gdbm.
+#
+# Revision 1.12  1991/09/02  22:19:49  rich
+# Updated list of Sanitizable directories.
+#
+# Revision 1.11  1991/09/02  01:12:42  rich
+# dump the obsolete INSTALL.
+#
+# Revision 1.10  1991/08/25  23:40:20  rich
+# rcs enters the soup.
+#
+# Revision 1.9  1991/08/25  21:48:37  rich
+# Adding diff to the fray.
+#
+# Revision 1.8  1991/08/23  07:15:55  gnu
+# Make README stick...
+#
+# Revision 1.7  1991/08/22  07:30:50  gnu
+# New config.sub.
+#
+# Revision 1.6  1991/07/31  05:15:37  gnu
+# Add texinfo
+#
+# Revision 1.5  1991/07/25  16:11:27  tiemann
+# Don't eliminate libg++.  Jimmy Hoffa disappeared before libg++ was
+# even conceived.
+#
+# Revision 1.4  1991/07/24  22:25:50  steve
 # *** empty log message ***
 #
-# Revision 1.6  1991/09/03  21:04:00  steve
-# *** empty log message ***
+# Revision 1.3  1991/05/23  22:21:19  rich
+# added bfd, binutils, ld, gdb, gcc.
 #
-# Revision 1.5  1991/08/27  00:21:34  steve
-# Added config.sub
+# Revision 1.2  1991/05/23  21:15:10  rich
+# Added bfd.
 #
-# Revision 1.4  1991/08/06  21:28:21  steve
-# Patches to fix bugs reported by roland McGrath
+# Revision 1.1  1991/05/23  17:32:34  rich
+# Initial revision
 #
-# Revision 1.3  1991/08/01  23:59:06  steve
-# *** empty log message ***
-#
-# Revision 1.2  1991/07/16  00:31:15  steve
-# *** empty log message ***
-#
-# Revision 1.1  1991/05/23  21:45:12  rich
+# Revision 1.1  1991/05/23  17:18:12  rich
 # Initial revision
 #
 #
