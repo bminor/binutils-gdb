@@ -2,16 +2,16 @@
 
  *  New Facilities
 
-Wide output is wrapped at good places to make the output more
-readable.
+Wide output is wrapped at good places to make the output more readable.
 
 Gdb now supports cross-debugging from a host machine of one type to a
 target machine of another type.  Communication with the target system
 is over serial lines.  The ``target'' command handles connecting to the
 remote system; the ``load'' command will download a program into the
-remote system.  It also supports debugging of realtime processes
-running under VxWorks, using SunRPC Remote Procedure Calls over TCP/IP
-to talk to a debugger stub on the target system.
+remote system.  Serial stubs for the m68k and i386 are provided.  Gdb
+also supports debugging of realtime processes running under VxWorks,
+using SunRPC Remote Procedure Calls over TCP/IP to talk to a debugger
+stub on the target system.
 
 New CPUs supported include the AMD 29000 and Intel 960.
 
