@@ -316,7 +316,7 @@ done
 # Configure extra directories which are host specific
 
 case "${host}" in
-  i[345]86-*-go32*)
+  i[345]86-*-go32*|i[345]86-*-win32*)
 	  configdirs="$configdirs dosrel" ;;
 esac
 

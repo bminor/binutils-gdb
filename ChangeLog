@@ -1,3 +1,15 @@
+Wed Aug 30 21:06:50 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
+
+	* configure.in: treat i386-win32 canadian cross the same as
+	i386-go32 canadian cross.
+
+Thu Aug 24 14:53:20 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* cfg-ml-com.in (powerpc*-*-eabisim): Add support for PowerPC
+	running under the simulator to build a reduced set of libraries.
+	(powerpc-*-eabiaix): Add fine grained multilib support added to
+	other powerpc targets yesterday.
+
 Wed Aug 23 09:41:56 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* cfg-ml-com.in (powerpc*): Add support for -disable-biendian,
