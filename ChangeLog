@@ -1,3 +1,7 @@
+Tue Oct 29 16:41:31 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Makefile.in (all-target-winsup): Depend on all-target-librx.
+
 Mon Oct 28 17:32:46 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* configure.in:  Exclude mmalloc from i386-windows.
