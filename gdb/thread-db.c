@@ -31,11 +31,15 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "target.h"
+#include "command.h"
+#include "gdbcmd.h"
 #include "regcache.h"
 
 #ifndef LIBTHREAD_DB_SO
 #define LIBTHREAD_DB_SO "libthread_db.so.1"
 #endif
+
+int debug_linux_threads = 0;	/* Set non-zero for debugging output. */
 
 /* If we're running on Linux, we must explicitly attach to any new threads.  */
 
@@ -51,7 +55,7 @@ static struct target_ops thread_db_ops;
 static struct target_ops *target_beneath;
 
 /* Pointer to the next function on the objfile event chain.  */
-static void (*target_new_objfile_chain) (struct objfile *objfile);
+static void (*new_objfile_event_chain) (struct objfile *objfile);
 
 /* Non-zero if we're using this module's target vector.  */
 static int using_thread_db;
@@ -588,8 +592,8 @@ thread_db_new_objfile (struct objfile *objfile)
     }
 
  quit:
-  if (target_new_objfile_chain)
-    target_new_objfile_chain (objfile);
+  if (new_objfile_event_chain)
+    new_objfile_event_chain (objfile);
 }
 
 static void
@@ -697,11 +701,10 @@ check_event (int pid)
 	error ("Thread creation event doesn't match breakpoint.");
 #endif
 
-      /* We may already know about this thread, for instance when the
-         user has issued the `info threads' command before the SIGTRAP
-         for hitting the thread creation breakpoint was reported.  */
-      if (! in_thread_list (pid))
-	attach_thread (pid, msg.th_p, &ti, 1);
+      if (in_thread_list (pid))
+	error ("Spurious thread creation event.");
+
+      attach_thread (pid, msg.th_p, &ti, 1);
       return;
 
     case TD_DEATH:
@@ -1023,7 +1026,12 @@ _initialize_thread_db (void)
       add_target (&thread_db_ops);
 
       /* Add ourselves to objfile event chain.  */
-      target_new_objfile_chain = target_new_objfile_hook;
+      new_objfile_event_chain = target_new_objfile_hook;
       target_new_objfile_hook = thread_db_new_objfile;
     }
+  add_show_from_set (add_set_cmd ("debug-linux-threads", class_support, 
+				  var_boolean, (char *) &debug_linux_threads,
+				  "Set debug output for linux-threads \
+on or off.\nUse \"on\" to enable, \"off\" to disable.", &setlist),
+		     &showlist);
 }

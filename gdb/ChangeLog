@@ -1,5 +1,9 @@
 2001-04-26  Michael Snyder  <msnyder@redhat.com>
 
+	* thread-db.c (_initialize_thread_db): Add set/show command
+	"debug-linux-threads" for debugging output.
+	* lin-lwp.c (various): Use global "debug_linux_threads to 
+	turn on extra debugging output.
 	* lin-lwp.c: Minor cleanups in comments.
 	* target.c (normal_pid_to_str): Get rid of an ancient hack.
 	* remote.c (remote_pid_to_str): New function for remote target.
