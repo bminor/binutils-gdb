@@ -1,3 +1,11 @@
+2005-01-20  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.am (ALL_EMULATIONS): Add earmelfb_linux_eabi.o.
+	(earmelfb_linux_eabi.c): New target.
+	* Makefile.in: Regenerated.
+	* configure.tgt (arm*b-*-linux-gnueabi): New target.
+	* emulparams/armelfb_linux_eabi.sh: New file.
+
 2005-01-20  Nick Hudson  <skrll@netbsd.org>
 
 	PR ld/676

@@ -123,6 +123,7 @@ ALL_EMULATIONS = \
 	earmelf_linux.o \
 	earmelf_linux_eabi.o \
 	earmelfb_linux.o \
+	earmelfb_linux_eabi.o \
 	earmelf_nbsd.o \
 	earmelfb_nbsd.o \
 	earmelf_vxworks.o \
@@ -508,6 +509,12 @@ earmelfb_linux.c: $(srcdir)/emulparams/armelfb_linux.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/armelf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} armelfb_linux "$(tdir_armelfb_linux)"
+earmelfb_linux_eabi.c: $(srcdir)/emulparams/armelfb_linux_eabi.sh \
+  $(srcdir)/emulparams/armelf_linux_eabi.sh \
+  $(srcdir)/emulparams/armelf_linux.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/armelf.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} armelfb_linux_eabi "$(tdir_armelfb_linux_abi)"
 earmelf_nbsd.c: $(srcdir)/emulparams/armelf_nbsd.sh \
   $(srcdir)/emulparams/armelf.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/armelf.em \
