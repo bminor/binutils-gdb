@@ -355,12 +355,15 @@ insn_list_insert (insn_list **cur_insn_ptr,
       switch (duplicate_action)
 	{
 	case report_duplicate_insns:
-	  /* two instructions with the same constant field
-	     values across all words and bits */
+	  /* It would appear that we have two instructions with the
+	     same constant field values across all words and bits.
+	     This error can also occure when insn_field_cmp() is
+	     failing to differentiate between two instructions that
+	     differ only in their conditional fields. */
 	  warning (insn->line,
 		   "Two instructions with identical constant fields\n");
 	  error ((*cur_insn_ptr)->insn->line,
-		 "Location of second (duplicated?) instruction\n");
+		 "Location of duplicate instruction\n");
 	case merge_duplicate_insns:
 	  /* Add the opcode path to the instructions list */
 	  if (opcodes != NULL)
