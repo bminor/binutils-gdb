@@ -1,5 +1,13 @@
 2001-11-15  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-i386.h (md_end): Define.
+	(i386_elf_emit_arch_note): Declare.
+	(CpuUnknown): Delete.
+	* config/tc-i386.c (default_arch): Constify.
+	(smallest_imm_type): Remove CpuUnknown test.
+	(md_assemble): Don't bother checking cpu_arch_flags non-zero.
+	(i386_elf_emit_arch_note): New function.
+
 	* po/POTFILES.in: Regenerate.
 
 2001-11-15  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>

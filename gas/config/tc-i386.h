@@ -111,6 +111,11 @@ extern const char *i386_target_format PARAMS ((void));
 #endif
 #endif
 
+#if (defined (OBJ_MAYBE_ELF) || defined (OBJ_ELF))
+#define md_end i386_elf_emit_arch_note
+extern void i386_elf_emit_arch_note PARAMS ((void));
+#endif
+
 #else /* ! BFD_ASSEMBLER */
 
 /* COFF STUFF */
@@ -293,7 +298,6 @@ typedef struct
 #define CpuSSE	       0x1000	/* Streaming SIMD extensions required */
 #define CpuSSE2	       0x2000	/* Streaming SIMD extensions 2 required */
 #define Cpu3dnow       0x4000	/* 3dnow! support required */
-#define CpuUnknown     0x8000	/* The CPU is unknown,  be on the safe side.  */
 
   /* These flags are set by gas depending on the flag_code.  */
 #define Cpu64	     0x4000000   /* 64bit support required  */

@@ -77,7 +77,7 @@ static bfd_reloc_code_real_type reloc
 #ifndef DEFAULT_ARCH
 #define DEFAULT_ARCH "i386"
 #endif
-static char *default_arch = DEFAULT_ARCH;
+static const char *default_arch = DEFAULT_ARCH;
 
 /* 'md_assemble ()' gathers together information and puts it into a
    i386_insn.  */
@@ -539,8 +539,7 @@ static int
 smallest_imm_type (num)
      offsetT num;
 {
-  if (cpu_arch_flags != (Cpu086 | Cpu186 | Cpu286 | Cpu386 | Cpu486 | CpuNo64)
-      && !(cpu_arch_flags & (CpuUnknown)))
+  if (cpu_arch_flags != (Cpu086 | Cpu186 | Cpu286 | Cpu386 | Cpu486 | CpuNo64))
     {
       /* This code is disabled on the 486 because all the Imm1 forms
 	 in the opcode table are slower on the i486.  They're the
@@ -1393,18 +1392,15 @@ md_assemble (line)
       }
 
     /* Check if instruction is supported on specified architecture.  */
-    if (cpu_arch_flags != 0)
+    if ((current_templates->start->cpu_flags & ~(Cpu64 | CpuNo64))
+	& ~(cpu_arch_flags & ~(Cpu64 | CpuNo64)))
       {
-	if ((current_templates->start->cpu_flags & ~(Cpu64 | CpuNo64))
-	    & ~(cpu_arch_flags & ~(Cpu64 | CpuNo64)))
-	  {
-	    as_warn (_("`%s' is not supported on `%s'"),
-		     current_templates->start->name, cpu_arch_name);
-	  }
-	else if ((Cpu386 & ~cpu_arch_flags) && (flag_code != CODE_16BIT))
-	  {
-	    as_warn (_("use .code16 to ensure correct addressing mode"));
-	  }
+	as_warn (_("`%s' is not supported on `%s'"),
+		 current_templates->start->name, cpu_arch_name);
+      }
+    else if ((Cpu386 & ~cpu_arch_flags) && (flag_code != CODE_16BIT))
+      {
+	as_warn (_("use .code16 to ensure correct addressing mode"));
       }
 
     /* Check for rep/repne without a string instruction.  */
@@ -4661,6 +4657,48 @@ i386_target_format ()
 }
 
 #endif /* OBJ_MAYBE_ more than one  */
+
+#if (defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF))
+void i386_elf_emit_arch_note ()
+{
+  if (OUTPUT_FLAVOR == bfd_target_elf_flavour
+      && cpu_arch_name != NULL)
+    {
+      char *p;
+      asection *seg = now_seg;
+      subsegT subseg = now_subseg;
+      Elf_Internal_Note i_note;
+      Elf_External_Note e_note;
+      asection *note_secp;
+      int len;
+
+      /* Create the .note section.  */
+      note_secp = subseg_new (".note", 0);
+      bfd_set_section_flags (stdoutput,
+			     note_secp,
+			     SEC_HAS_CONTENTS | SEC_READONLY);
+
+      /* Process the arch string.  */
+      len = strlen (cpu_arch_name);
+
+      i_note.namesz = len + 1;
+      i_note.descsz = 0;
+      i_note.type = NT_ARCH;
+      p = frag_more (sizeof (e_note.namesz));
+      md_number_to_chars (p, (valueT) i_note.namesz, sizeof (e_note.namesz));
+      p = frag_more (sizeof (e_note.descsz));
+      md_number_to_chars (p, (valueT) i_note.descsz, sizeof (e_note.descsz));
+      p = frag_more (sizeof (e_note.type));
+      md_number_to_chars (p, (valueT) i_note.type, sizeof (e_note.type));
+      p = frag_more (len + 1);
+      strcpy (p, cpu_arch_name);
+
+      frag_align (2, 0, 0);
+
+      subseg_set (seg, subseg);
+    }
+}
+#endif
 #endif /* BFD_ASSEMBLER  */
 
 symbolS *
