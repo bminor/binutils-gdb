@@ -372,10 +372,13 @@ parse_flags (s)
   else if (strncasecmp (fname, s, len) == 0) ret |= fval
       PARSE_FLAG ("alloc", SEC_ALLOC);
       PARSE_FLAG ("load", SEC_LOAD);
+      PARSE_FLAG ("noload", SEC_NEVER_LOAD);
       PARSE_FLAG ("readonly", SEC_READONLY);
+      PARSE_FLAG ("debug", SEC_DEBUGGING);
       PARSE_FLAG ("code", SEC_CODE);
       PARSE_FLAG ("data", SEC_DATA);
       PARSE_FLAG ("rom", SEC_ROM);
+      PARSE_FLAG ("share", SEC_SHARED);
       PARSE_FLAG ("contents", SEC_HAS_CONTENTS);
 #undef PARSE_FLAG
       else
@@ -386,7 +389,7 @@ parse_flags (s)
 	  strncpy (copy, s, len);
 	  copy[len] = '\0';
 	  non_fatal (_("unrecognized section flag `%s'"), copy);
-	  fatal (_("supported flags: alloc, load, readonly, code, data, rom, contents"));
+	  fatal (_("supported flags: alloc, load, noload, readonly, debug, code, data, rom, share, contents"));
 	}
 
       s = snext;

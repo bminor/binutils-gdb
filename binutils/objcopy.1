@@ -1,6 +1,6 @@
 .\" Copyright (c) 1991, 93, 94, 95, 96, 97, 98, 1999 Free Software Foundation
 .\" See section COPYING for conditions for redistribution
-.TH objcopy 1 "October 1994" "cygnus support" "GNU Development Tools"
+.TH objcopy 1 "1999" "Cygnus Solutions" "GNU Development Tools"
 .de BP
 .sp
 .ti \-.2i
@@ -249,9 +249,9 @@ if the named section does not exist.
 .B \fB\-\-set\-section\-flags=\fIsection=flags
 Set the flags for the named section.  The \fIflags\fP argument is a
 comma separated string of flag names.  The recognized names are
-\fIalloc\fP, \fIload\fP, \fIreadonly\fP, \fIcode\fP, \fIdata\fP, and
-\fIrom\fP.  Not all flags are meaningful for all object file
-formats.
+\fIalloc\fP, \fIcontents\fP, \fIload\fP, \fInoload\fP, \fIreadonly\fP,
+\fIcode\fP, \fIdata\fP, \fIrom\fP, \fIshare\fP, and \fIdebug\fP.  Not
+all flags are meaningful for all object file formats.
 .TP
 .B \fB\-\-add\-section=\fIsectionname=filename
 Add a new section named \fIsectionname\fR while copying the file.  The

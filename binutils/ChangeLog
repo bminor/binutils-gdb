@@ -1,5 +1,8 @@
 1999-09-12  Donn Terry  <donn@interix.com>
 
+	* objcopy.c (parse_flags): Handle "noload", "debug", and "share".
+	* binutils.texi, objcopy.1: Document new flags.
+
 	* ar.c (counted_name_mode): New static variable.
 	(counted_name_counter): New static variable.
 	(map_over_members): Handle counted mode.
