@@ -1,3 +1,12 @@
+Wed May 22 18:18:24 1991  Roland H. Pesch  (pesch at fowanton.cygnus.com)
+
+	* Makefile.dist, doc/gdb.texinfo, doc/*-m4.texinfo: split up GDB
+	docn into separate sections---basically chapters, plus two loose
+	pieces that can be configured to go in different places.  This
+	allows GNU m4 to preprocess the manual without coredumping.
+
+	* Makefile.dist: tell TeX where to find texinfo.
+
 Mon May 20 12:15:04 1991  Roland H. Pesch  (pesch at fowanton.cygnus.com)
 
 	* Makefile.dist, doc/gdb.texinfo: respectively create, and use,

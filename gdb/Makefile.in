@@ -46,9 +46,15 @@ YACC=bison -y
 # YACC=yacc
 SHELL=/bin/sh
 MAKE=make
-# We need either GNU m4 or SysV m4; Berkeley/Sun don't have quite enough.
-#M4=gm4
-M4=/usr/5bin/m4
+
+# Documentation (gdb.dvi) needs either GNU m4 or SysV m4; 
+# Berkeley/Sun don't have quite enough. 
+#M4=/usr/5bin/m4
+M4=gm4
+# where to find texinfo; if you have PostScript fonts you may want to try 
+# the Cygnus mods (which also have different header/footer layout)
+#TEXIDIR=${srcdir}/../texinfo/cygnus
+TEXIDIR=${srcdir}/../texinfo/fsf
 
 # Set this up with gcc if you have gnu ld and the loader will print out
 # line numbers for undefinded refs.
@@ -165,6 +171,36 @@ SFILES = $(SFILES_MAINDIR) $(SFILES_SUBDIR)
 
 # All source files that lint should look at
 LINTFILES = $(SFILES) expread.tab.c init.c
+
+# Documentation source files
+SFILES_DOCDIR = \
+	${srcdir}/doc/gdb.texinfo    \
+	${srcdir}/doc/pretex.m4      \
+	${srcdir}/doc/none.m4        \
+	${srcdir}/doc/all.m4         \
+	${srcdir}/doc/gdb.alter-m4   \
+	${srcdir}/doc/gdb.bugs-m4    \
+	${srcdir}/doc/gdb.canned-m4  \
+	${srcdir}/doc/gdb.cmds-m4    \
+	${srcdir}/doc/gdb.ctl-m4     \
+	${srcdir}/doc/gdb.data-m4    \
+	${srcdir}/doc/gdb.emacs-m4   \
+	${srcdir}/doc/gdb.files-m4   \
+	${srcdir}/doc/gdb.gpl-m4     \
+	${srcdir}/doc/gdb.install-m4 \
+	${srcdir}/doc/gdb.inv.m-m4   \
+	${srcdir}/doc/gdb.inv.s-m4   \
+	${srcdir}/doc/gdb.invoc-m4   \
+	${srcdir}/doc/gdb.rdln-m4    \
+	${srcdir}/doc/gdb.rename-m4  \
+	${srcdir}/doc/gdb.run-m4     \
+	${srcdir}/doc/gdb.sample-m4  \
+	${srcdir}/doc/gdb.src-m4     \
+	${srcdir}/doc/gdb.stack-m4   \
+	${srcdir}/doc/gdb.stop-m4    \
+	${srcdir}/doc/gdb.symb-m4    \
+	${srcdir}/doc/gdb.tgts-m4    \
+	${srcdir}/doc/gdb.top-m4     
 
 # Any additional files specified on these lines should also be added to
 # the OTHERS = definition below, so they go in the tar files.
@@ -449,13 +485,14 @@ rdl-apps.texinfo: ${READLINE_DIR}/inc-readline.texinfo \
 	echo "@include ${READLINE_DIR}/inc-readline.texinfo" >rdl-apps.texinfo
 	echo "@include ${READLINE_DIR}/inc-history.texinfo" >>rdl-apps.texinfo
 
-gdb-all.texinfo: ${srcdir}/doc/gdb.texinfo
-	${M4} $(srcdir)/doc/pretex.m4 $(srcdir)/doc/none.m4 $(srcdir)/doc/all.m4 $(srcdir)/doc/gdb.texinfo >gdb-all.texinfo
+gdb-all.texinfo: ${SFILES_DOCDIR}
+	( cd $(srcdir)/doc; \
+		${M4} pretex.m4 none.m4 all.m4 gdb.texinfo ) >gdb-all.texinfo
 
 gdb.dvi : gdb-all.texinfo rdl-apps.texinfo
-	tex gdb-all.texinfo
+	TEXINPUTS=${TEXIDIR}:$$TEXINPUTS tex gdb-all.texinfo
 	texindex gdb-all.??
-	tex gdb-all.texinfo
+	TEXINPUTS=${TEXIDIR}:$$TEXINPUTS tex gdb-all.texinfo
 	mv gdb-all.dvi gdb.dvi
 	rm -f gdb-all.?? gdb-all.???
 
