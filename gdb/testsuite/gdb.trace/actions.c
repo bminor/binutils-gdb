@@ -53,15 +53,15 @@ unsigned long   gdb_c_test( unsigned long *parm )
 
 {
    char *p = "gdb_c_test";
-   char *rediculously_long_variable_name_with_equally_long_string_assignment;
+   char *ridiculously_long_variable_name_with_equally_long_string_assignment;
    register long local_reg = 7;
    static unsigned long local_static, local_static_sizeof;
    long local_long;
    unsigned long *stack_ptr;
    unsigned long end_of_stack;
 
-   rediculously_long_variable_name_with_equally_long_string_assignment = 
-     "rediculously long variable name with equally long string assignment";
+   ridiculously_long_variable_name_with_equally_long_string_assignment = 
+     "ridiculously long variable name with equally long string assignment";
    local_static = 9;
    local_static_sizeof = sizeof (struct GDB_STRUCT_TEST);
    local_long = local_reg + 1;

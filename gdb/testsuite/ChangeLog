@@ -1,3 +1,7 @@
+2001-06-06  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.trace/gdb_c_test.c, actions.c: Fix misspellings.
+
 2001-06-04  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.base/help.exp: Update pattern to exclude `print-load-map'
