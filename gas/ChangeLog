@@ -1,5 +1,12 @@
 Tue Aug  8 13:07:05 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-m68k.c (archs): Add 68ec000, 68hc000, 68hc001,
+	68ec020, 68ec030, 68ec040, and 68330.
+	(md_pseudo_table): Add chip and comline.
+	(m68k_init_after_args): Use strcasecmp when comparing default_cpu
+	against architectures.
+	(mri_chip, s_chip): New static functions.
+
 	* struc-symbol.h (struct symbol): Add sy_mri_common bit.
 	* read.h (mri_comon_symbol): Declare.
 	(s_mri_common): Declare.

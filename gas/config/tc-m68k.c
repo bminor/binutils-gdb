@@ -274,6 +274,8 @@ static void s_data1 PARAMS ((int));
 static void s_data2 PARAMS ((int));
 static void s_even PARAMS ((int));
 static void s_proc PARAMS ((int));
+static void mri_chip PARAMS ((void));
+static void s_chip PARAMS ((int));
 
 static int current_architecture;
 
@@ -297,6 +299,13 @@ static const struct m68k_cpu archs[] = {
   { m68020, "68k" },
   { m68000, "68302" },
   { m68000, "68008" },
+  { m68000, "68ec000" },
+  { m68000, "68hc000" },
+  { m68000, "68hc001" },
+  { m68020, "68ec020" },
+  { m68030, "68ec030" },
+  { m68040, "68ec040" },
+  { cpu32,  "68330" },
   { cpu32,  "68331" },
   { cpu32,  "68332" },
   { cpu32,  "68333" },
@@ -391,6 +400,11 @@ CONST pseudo_typeS md_pseudo_table[] =
 #ifdef OBJ_ELF
   {"swbeg", s_ignore, 0},
 #endif
+
+  /* The following pseudo-ops are supported for MRI compatibility.  */
+  {"chip", s_chip, 0},
+  {"comline", s_space, 1},
+
   {0, 0, 0}
 };
 
@@ -2937,7 +2951,7 @@ m68k_init_after_args ()
       if (*default_cpu == 'm')
 	default_cpu++;
       for (i = 0; i < n_archs; i++)
-	if (!strcmp (default_cpu, archs[i].name))
+	if (strcasecmp (default_cpu, archs[i].name) == 0)
 	  break;
       if (i == n_archs)
 	{
@@ -3966,9 +3980,60 @@ s_proc (ignore)
 {
   demand_empty_rest_of_line ();
 }
+
+/* Pseudo-ops handled for MRI compatibility.  */
 
-/* s_space is defined in read.c .skip is simply an alias to it. */
+/* Handle an MRI style chip specification.  */
 
+static void
+mri_chip ()
+{
+  char *s;
+  char c;
+  int i;
+
+  s = input_line_pointer;
+  c = get_symbol_end ();
+  for (i = 0; i < n_archs; i++)
+    if (strcasecmp (s, archs[i].name) == 0)
+      break;
+  if (i >= n_archs)
+    {
+      as_bad ("%s: unrecognized processor name", s);
+      *input_line_pointer = c;
+      ignore_rest_of_line ();
+      return;
+    }
+  *input_line_pointer = c;
+
+  if (*input_line_pointer == '/')
+    current_architecture = 0;
+  else
+    current_architecture &= m68881 | m68851;
+  current_architecture |= archs[i].arch;
+
+  while (*input_line_pointer == '/')
+    {
+      ++input_line_pointer;
+      s = input_line_pointer;
+      c = get_symbol_end ();
+      if (strcmp (s, "68881") == 0)
+	current_architecture |= m68881;
+      else if (strcmp (s, "68851") == 0)
+	current_architecture |= m68851;
+      *input_line_pointer = c;
+    }
+}
+
+/* The MRI CHIP pseudo-op.  */
+
+static void
+s_chip (ignore)
+     int ignore;
+{
+  mri_chip ();
+  demand_empty_rest_of_line ();
+}
 
 /*
  * md_parse_option
