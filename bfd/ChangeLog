@@ -1,15 +1,4 @@
-2002-11-06  David O'Brien  <obrien@FreeBSD.org>
-	    Alan Modra  <amodra@bigpond.net.au>
-
-	* elf64-sparc.c (sparc64_elf_relocate_section): Adjust addend of
-	dynamic relocs against section symbols for the output section vma.
-
-2002-11-05  Alan Modra  <amodra@bigpond.net.au>
-
-	* elf32-arm.h (t2a1_push_insn, t2a2_ldr_insn, t2a3_mov_insn,
-	t2a4_bx_insn, t2a5_pop_insn, t2a6_bx_insn): Remove.
-
-2002-11-05  Graeme Peterson  <gp@qnx.com>
+2002-11-06  Graeme Peterson  <gp@qnx.com>
 
 	* Makefile.am: Remove entries for elf32-qnx.[ch].
 	* Makefile.in: Regenerate.
@@ -34,6 +23,17 @@
 	(elf_backend_is_contained_by_filepos): Remove.
 	(elf_backend_copy_private_bfd_data_p): Remove.
 	* po/SRC-POTFILES.in: Regenerate.
+
+2002-11-06  David O'Brien  <obrien@FreeBSD.org>
+	    Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-sparc.c (sparc64_elf_relocate_section): Adjust addend of
+	dynamic relocs against section symbols for the output section vma.
+
+2002-11-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-arm.h (t2a1_push_insn, t2a2_ldr_insn, t2a3_mov_insn,
+	t2a4_bx_insn, t2a5_pop_insn, t2a6_bx_insn): Remove.
 
 2002-11-05  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 	    Alan Modra  <amodra@bigpond.net.au>

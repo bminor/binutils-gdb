@@ -152,8 +152,6 @@ elf32-openrisc.c
 elf32-or32.c
 elf32-pj.c
 elf32-ppc.c
-elf32-qnx.c
-elf32-qnx.h
 elf32-s390.c
 elf32-sh.c
 elf32-sh64-com.c

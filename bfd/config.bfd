@@ -139,8 +139,8 @@ case "${targ}" in
     targ_underscore=yes
     ;;
   arm-*-nto* | nto*arm*)
-    targ_defvec=bfd_elf32_littlearmqnx_vec
-    targ_selvecs=bfd_elf32_bigarmqnx_vec
+    targ_defvec=bfd_elf32_littlearm_vec
+    targ_selvecs=bfd_elf32_bigarm_vec
     ;;
   arm-*-riscix*)
     targ_defvec=riscix_vec
@@ -370,8 +370,8 @@ case "${targ}" in
     targ_defvec=bfd_elf32_i386_vec
     targ_selvecs=i386coff_vec
     ;;
-  i[3456]86-*-nto-qnx*)
-    targ_defvec=bfd_elf32_i386qnx_vec
+  i[3456]86-*-nto*)
+    targ_defvec=bfd_elf32_i386_vec
     targ_selvecs=i386coff_vec
     ;;
   i[3456]86-*-chorus*)
@@ -893,12 +893,12 @@ case "${targ}" in
     targ_selvecs="nlm32_powerpc_vec rs6000coff_vec"
     ;;
   powerpc-*-nto*)
-    targ_defvec=bfd_elf32_powerpcqnx_vec
-    targ_selvecs="rs6000coff_vec bfd_elf32_powerpcleqnx_vec ppcboot_vec"
+    targ_defvec=bfd_elf32_powerpc_vec
+    targ_selvecs="rs6000coff_vec bfd_elf32_powerpcle_vec ppcboot_vec"
     ;;
   powerpcle-*-nto*)
-    targ_defvec=bfd_elf32_powerpcleqnx_vec
-    targ_selvecs="rs6000coff_vec bfd_elf32_powerpcqnx_vec ppcboot_vec"
+    targ_defvec=bfd_elf32_powerpcle_vec
+    targ_selvecs="rs6000coff_vec bfd_elf32_powerpc_vec ppcboot_vec"
     ;;
   powerpcle-*-elf* | powerpcle-*-sysv4* | powerpcle-*-eabi* | \
   powerpcle-*-solaris2* | powerpcle-*-linux-gnu* | powerpcle-*-vxworks* |\
@@ -1021,8 +1021,8 @@ case "${targ}" in
     targ_underscore=yes
     ;;
   sh-*-nto*)
-    targ_defvec=bfd_elf32_shqnx_vec
-    targ_selvecs="bfd_elf32_shlqnx_vec shcoff_vec shlcoff_vec shcoff_small_vec shlcoff_small_vec"
+    targ_defvec=bfd_elf32_sh_vec
+    targ_selvecs="bfd_elf32_shl_vec shcoff_vec shlcoff_vec shcoff_small_vec shlcoff_small_vec"
     targ_underscore=yes
     ;;
   sh-*-pe)

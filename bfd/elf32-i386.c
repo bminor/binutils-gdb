@@ -3429,20 +3429,3 @@ elf_i386_post_process_headers (abfd, link_info)
 
 #undef	elf_backend_post_process_headers
 #undef	elf32_bed
-
-/* QNX support.  */
-#include "elf32-qnx.h"
-
-#undef	TARGET_LITTLE_SYM
-#define	TARGET_LITTLE_SYM		bfd_elf32_i386qnx_vec
-#undef	TARGET_LITTLE_NAME
-#define	TARGET_LITTLE_NAME		"elf32-i386-nto"
-
-#define	elf32_bed			elf32_i386_qnx_bed
-
-#include "elf32-target.h"
-
-#undef	elf_backend_set_nonloadable_filepos
-#undef	elf_backend_is_contained_by_filepos
-#undef	elf_backend_copy_private_bfd_data_p
-#undef	elf32_bed

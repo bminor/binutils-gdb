@@ -7449,29 +7449,6 @@ elf32_shlin_grok_psinfo (abfd, note)
 
 #include "elf32-target.h"
 
-/* QNX support.  */
-#include "elf32-qnx.h"
-
-#undef	TARGET_LITTLE_SYM 
-#define	TARGET_LITTLE_SYM		bfd_elf32_shlqnx_vec
-#undef	TARGET_LITTLE_NAME
-#define	TARGET_LITTLE_NAME		"elf32-shl-nto"
-#undef	TARGET_BIG_SYM
-#define	TARGET_BIG_SYM			bfd_elf32_shqnx_vec
-#undef	TARGET_BIG_NAME
-#define	TARGET_BIG_NAME			"elf32-sh-nto"
-#undef	ELF_MAXPAGESIZE
-#define	ELF_MAXPAGESIZE			0x1000
-
-#define	elf32_bed			elf32_sh_qnx_bed
-
-#include "elf32-target.h"
-
-#undef	elf_backend_set_nonloadable_filepos
-#undef	elf_backend_is_contained_by_filepos
-#undef	elf_backend_copy_private_bfd_data_p
-#undef	elf32_bed
-
 /* NetBSD support.  */
 #undef	TARGET_BIG_SYM
 #define	TARGET_BIG_SYM			bfd_elf32_shnbsd_vec
