@@ -239,6 +239,15 @@ set_variant_abi_fdpic (struct gdbarch_tdep *var)
   var->register_names[fdpic_loadmap_interp_regnum] = xstrdup ("loadmap_interp");
 }
 
+static void
+set_variant_scratch_registers (struct gdbarch_tdep *var)
+{
+  var->register_names[scr0_regnum] = xstrdup ("scr0");
+  var->register_names[scr1_regnum] = xstrdup ("scr1");
+  var->register_names[scr2_regnum] = xstrdup ("scr2");
+  var->register_names[scr3_regnum] = xstrdup ("scr3");
+}
+
 static const char *
 frv_register_name (int reg)
 {
@@ -1362,6 +1371,7 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
 
     case bfd_mach_fr400:
+    case bfd_mach_fr450:
       set_variant_num_gprs (var, 32);
       set_variant_num_fprs (var, 32);
       break;
@@ -1377,6 +1387,9 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   if (elf_flags & EF_FRV_FDPIC)
     set_variant_abi_fdpic (var);
+
+  if (elf_flags & EF_FRV_CPU_FR450)
+    set_variant_scratch_registers (var);
 
   gdbarch = gdbarch_alloc (&info, var);
 
@@ -1448,6 +1461,7 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
 
     case bfd_mach_fr400:
+    case bfd_mach_fr450:
       /* fr400-style hardware debugging support.  */
       var->num_hw_watchpoints = 2;
       var->num_hw_breakpoints = 4;
