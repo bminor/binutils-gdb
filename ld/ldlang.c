@@ -1101,10 +1101,6 @@ lang_add_section (lang_statement_list_type *ptr,
 	  flags &= ~ (SEC_MERGE | SEC_STRINGS);
 	}
 
-      /* For now make .tbss normal section.  */
-      if ((flags & SEC_THREAD_LOCAL) && ! link_info.relocatable)
-	flags |= SEC_LOAD;
-
       section->output_section->flags |= flags;
 
       if (flags & SEC_MERGE)
@@ -2770,8 +2766,11 @@ size_input_section (lang_statement_union_type **this_ptr,
 }
 
 #define IGNORE_SECTION(bfd, s) \
-  (((bfd_get_section_flags (bfd, s) & (SEC_ALLOC | SEC_NEVER_LOAD))	\
-    != SEC_ALLOC)							\
+  (((bfd_get_section_flags (bfd, s) & SEC_THREAD_LOCAL)			\
+    ? ((bfd_get_section_flags (bfd, s) & (SEC_LOAD | SEC_NEVER_LOAD))	\
+       != SEC_LOAD)							\
+    :  ((bfd_get_section_flags (bfd, s) & (SEC_ALLOC | SEC_NEVER_LOAD)) \
+	!= SEC_ALLOC))							\
    || bfd_section_size (bfd, s) == 0)
 
 /* Check to see if any allocated sections overlap with other allocated
@@ -3021,15 +3020,17 @@ lang_size_sections_1
 
 	    if (bfd_is_abs_section (os->bfd_section))
 	      ASSERT (after == os->bfd_section->vma);
-	    else if ((os->bfd_section->flags & SEC_HAS_CONTENTS) == 0
-		     && (os->bfd_section->flags & SEC_THREAD_LOCAL)
-		     && ! link_info.relocatable)
-	      os->bfd_section->_raw_size = 0;
 	    else
 	      os->bfd_section->_raw_size
 		= TO_SIZE (after - os->bfd_section->vma);
 
-	    dot = os->bfd_section->vma + TO_ADDR (os->bfd_section->_raw_size);
+	    dot = os->bfd_section->vma;
+	    /* .tbss sections effectively have zero size.  */
+	    if ((os->bfd_section->flags & SEC_HAS_CONTENTS) != 0
+		|| (os->bfd_section->flags & SEC_THREAD_LOCAL) == 0
+		|| link_info.relocatable)
+	      dot += TO_ADDR (os->bfd_section->_raw_size);
+
 	    os->processed = 1;
 
 	    if (os->update_dot_tree != 0)

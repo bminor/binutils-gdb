@@ -1,3 +1,10 @@
+2004-03-05  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ldlang.c (lang_add_section): Don't force SEC_LOAD on
+	SEC_THREAD_LOCAL.
+	(IGNORE_SECTION): Ignore .tbss sections too.
+	(lang_size_sections_1): .tbss sections do not advance dot.
+
 2004-02-23  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ldlang.h (struct lang_output_section_state): Change processed
