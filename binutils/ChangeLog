@@ -1,5 +1,8 @@
 1999-06-12  Ian Lance Taylor  <ian@zembu.com>
 
+	* rename.c (O_BINARY): Define as 0 if not defined.
+	(simple_copy): Open files with O_BINARY.
+
 	Based on patch from H. Peter Anvin <hpa@transmeta.com>:
 	* objcopy.c (struct section_list): Add copy field.
 	(sections_copied): New static variable.

@@ -31,6 +31,12 @@
 #endif /* HAVE_UTIMES */
 #endif /* ! HAVE_GOOD_UTIME_H */
 
+/* We need to open the file in binary modes on system where that makes
+   a difference.  */
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
+
 static int simple_copy PARAMS ((const char *, const char *));
 
 /* The number of bytes to copy at once.  */
@@ -48,10 +54,14 @@ simple_copy (from, to)
   int saved;
   char buf[COPY_BUF];
 
-  fromfd = open (from, O_RDONLY);
+  fromfd = open (from, O_RDONLY | O_BINARY);
   if (fromfd < 0)
     return -1;
+#ifdef O_CREAT
+  tofd = open (to, O_CREAT | O_WRONLY | O_TRUNC | O_BINARY, 0777);
+#else
   tofd = creat (to, 0777);
+#endif
   if (tofd < 0)
     {
       saved = errno;
