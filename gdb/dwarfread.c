@@ -2614,6 +2614,20 @@ DESCRIPTION
 	add to a partial symbol table, finish filling in the die info
 	and then add a partial symbol table entry for it.
 
+	Also record the symbol in the minimal symbol table.  Note that
+	DWARF does not directly distinquish between data and bss symbols,
+	so we use mst_data/mst_file_data for both of them.  One way we
+	could make the distinction is checking the address of the symbol
+	and then checking the flags on the ELF section that contains
+	that address to look for SHT_PROGBITS (data) or SHT_NOBITS (bss),
+	but it probably isn't worth the effort.  A side effect of leaving
+	things as they are is that the minimal symbol created from the DWARF
+	info, containing the wrong minimal_symbol_type, overrides the minimal
+	symbol created from processing the canonical bfd symbols, which
+	did have the right minimal_symbol_type.  This is probably a side
+	effect of the way the table is sorted and duplicates are discarded.
+	(FIXME?)
+
 NOTES
 
 	The caller must ensure that the DIE has a valid name attribute.
@@ -2628,7 +2642,7 @@ add_partial_symbol (dip, objfile)
     {
     case TAG_global_subroutine:
       record_minimal_symbol (dip -> at_name, dip -> at_low_pc, mst_text,
-			    objfile);
+			     objfile);
       ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
 			   VAR_NAMESPACE, LOC_BLOCK,
 			   objfile -> global_psymbols,
@@ -2636,19 +2650,23 @@ add_partial_symbol (dip, objfile)
       break;
     case TAG_global_variable:
       record_minimal_symbol (dip -> at_name, locval (dip -> at_location),
-			    mst_data, objfile);
+			     mst_data, objfile);
       ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
 			   VAR_NAMESPACE, LOC_STATIC,
 			   objfile -> global_psymbols,
 			   0, cu_language, objfile);
       break;
     case TAG_subroutine:
+      record_minimal_symbol (dip -> at_name, dip -> at_low_pc, mst_file_text,
+			     objfile);
       ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
 			   VAR_NAMESPACE, LOC_BLOCK,
 			   objfile -> static_psymbols,
 			   dip -> at_low_pc, cu_language, objfile);
       break;
     case TAG_local_variable:
+      record_minimal_symbol (dip -> at_name, locval (dip -> at_location),
+			     mst_file_data, objfile);
       ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
 			   VAR_NAMESPACE, LOC_STATIC,
 			   objfile -> static_psymbols,

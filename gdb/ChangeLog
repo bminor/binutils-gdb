@@ -1,3 +1,13 @@
+Sat Aug  7 10:59:03 1993  Fred Fish  (fnf@deneb.cygnus.com)
+
+	* elfread.c (elf_symtab_read):  Properly sort out the bss symbols
+	from the data symbols and give them the correct minimal_symbol_type.
+	Add file static symbols to the minimal symbol table, not just
+	global symbols.  Ignore symbols that are section names and file names.
+	* dwarfread.c (add_partial_symbol):  Add comment about limitations
+	of DWARF symbols for distinquishing data from bss when adding
+	minimal symbols.  Add file local symbols to minimal symbols.
+
 Thu Aug  5 08:58:58 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* ser-go32.c: Define job_control variable.

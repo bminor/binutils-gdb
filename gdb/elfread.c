@@ -235,10 +235,17 @@ elf_symtab_read (abfd, addr, objfile)
       for (i = 0; i < number_of_symbols; i++)
 	{
 	  sym = symbol_table[i];
-	  /* Select global/weak symbols that are defined in a specific section.
-	     Note that bfd now puts abs symbols in their own section, so
-	     all symbols we are interested in will have a section. */
-	  if ((sym -> flags & (BSF_GLOBAL | BSF_WEAK))
+	  /* Bfd flags ELF symbol table STT_SECTION and STT_FILE symbols with
+	     BSF_DEBUGGING.  We don't want these in the minimal symbols, so
+	     skip over them. */
+	  if (sym -> flags & BSF_DEBUGGING)
+	    {
+	      continue;
+	    }
+	  /* Select global/local/weak symbols that are defined in a specific
+	     section.  Note that bfd puts abs symbols in their own section,
+	     so all symbols we are interested in will have a section. */
+	  if ((sym -> flags & (BSF_GLOBAL | BSF_LOCAL | BSF_WEAK))
 	      && (sym -> section != NULL))
 	    {
 	      /* Bfd symbols are section relative. */
@@ -252,18 +259,46 @@ elf_symtab_read (abfd, addr, objfile)
 		 no way of figuring this out for absolute symbols. */
 	      if (sym -> section -> flags & SEC_CODE)
 		{
-		  ms_type = mst_text;
+		  if (sym -> flags & BSF_GLOBAL)
+		    {
+		      ms_type = mst_text;
+		    }
+		  else
+		    {
+		      ms_type = mst_file_text;
+		    }
 		}
 	      else if (sym -> section -> flags & SEC_DATA)
 		{
-		  ms_type = mst_data;
+		  if (sym -> flags & BSF_GLOBAL)
+		    {
+		      if (sym -> section -> flags & SEC_HAS_CONTENTS)
+			{
+			  ms_type = mst_data;
+			}
+		      else
+			{
+			  ms_type = mst_bss;
+			}
+		    }
+		  else
+		    {
+		      if (sym -> section -> flags & SEC_HAS_CONTENTS)
+			{
+			  ms_type = mst_file_data;
+			}
+		      else
+			{
+			  ms_type = mst_file_bss;
+			}
+		    }
 		}
 	      else
 		{
 		  /* FIXME:  Solaris2 shared libraries include lots of
 		     odd "absolute" and "undefined" symbols, that play 
 		     hob with actions like finding what function the PC
-		     is in.  Ignore them if they aren't text or data.  */
+		     is in.  Ignore them if they aren't text, data, or bss.  */
 		  /* ms_type = mst_unknown; */
 		  continue;		/* Skip this symbol. */
 		}
