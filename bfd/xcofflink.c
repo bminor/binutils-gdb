@@ -2328,63 +2328,67 @@ xcoff_mark (info, sec)
 
       /* Look through the section relocs.  */
 
-      rel = xcoff_read_internal_relocs (sec->owner, sec, true,
-					(bfd_byte *) NULL, false,
-					(struct internal_reloc *) NULL);
-      if (rel == NULL)
-	return false;
-      relend = rel + sec->reloc_count;
-      for (; rel < relend; rel++)
+      if ((sec->flags & SEC_RELOC) != 0
+	  && sec->reloc_count > 0)
 	{
-	  asection *rsec;
-	  struct xcoff_link_hash_entry *h;
-
-	  if ((unsigned int) rel->r_symndx
-	      > obj_raw_syment_count (sec->owner))
-	    continue;
-
-	  h = obj_xcoff_sym_hashes (sec->owner)[rel->r_symndx];
-	  if (h != NULL
-	      && (h->flags & XCOFF_MARK) == 0)
+	  rel = xcoff_read_internal_relocs (sec->owner, sec, true,
+					    (bfd_byte *) NULL, false,
+					    (struct internal_reloc *) NULL);
+	  if (rel == NULL)
+	    return false;
+	  relend = rel + sec->reloc_count;
+	  for (; rel < relend; rel++)
 	    {
-	      h->flags |= XCOFF_MARK;
-	      if (h->root.type == bfd_link_hash_defined
-		  || h->root.type == bfd_link_hash_defweak)
-		{
-		  asection *hsec;
+	      asection *rsec;
+	      struct xcoff_link_hash_entry *h;
 
-		  hsec = h->root.u.def.section;
-		  if ((hsec->flags & SEC_MARK) == 0)
+	      if ((unsigned int) rel->r_symndx
+		  > obj_raw_syment_count (sec->owner))
+		continue;
+
+	      h = obj_xcoff_sym_hashes (sec->owner)[rel->r_symndx];
+	      if (h != NULL
+		  && (h->flags & XCOFF_MARK) == 0)
+		{
+		  h->flags |= XCOFF_MARK;
+		  if (h->root.type == bfd_link_hash_defined
+		      || h->root.type == bfd_link_hash_defweak)
 		    {
-		      if (! xcoff_mark (info, hsec))
+		      asection *hsec;
+
+		      hsec = h->root.u.def.section;
+		      if ((hsec->flags & SEC_MARK) == 0)
+			{
+			  if (! xcoff_mark (info, hsec))
+			    return false;
+			}
+		    }
+
+		  if (h->toc_section != NULL
+		      && (h->toc_section->flags & SEC_MARK) == 0)
+		    {
+		      if (! xcoff_mark (info, h->toc_section))
 			return false;
 		    }
 		}
 
-	      if (h->toc_section != NULL
-		  && (h->toc_section->flags & SEC_MARK) == 0)
+	      rsec = xcoff_data (sec->owner)->csects[rel->r_symndx];
+	      if (rsec != NULL
+		  && (rsec->flags & SEC_MARK) == 0)
 		{
-		  if (! xcoff_mark (info, h->toc_section))
+		  if (! xcoff_mark (info, rsec))
 		    return false;
 		}
 	    }
 
-	  rsec = xcoff_data (sec->owner)->csects[rel->r_symndx];
-	  if (rsec != NULL
-	      && (rsec->flags & SEC_MARK) == 0)
+	  if (! info->keep_memory
+	      && coff_section_data (sec->owner, sec) != NULL
+	      && coff_section_data (sec->owner, sec)->relocs != NULL
+	      && ! coff_section_data (sec->owner, sec)->keep_relocs)
 	    {
-	      if (! xcoff_mark (info, rsec))
-		return false;
+	      free (coff_section_data (sec->owner, sec)->relocs);
+	      coff_section_data (sec->owner, sec)->relocs = NULL;
 	    }
-	}
-
-      if (! info->keep_memory
-	  && coff_section_data (sec->owner, sec) != NULL
-	  && coff_section_data (sec->owner, sec)->relocs != NULL
-	  && ! coff_section_data (sec->owner, sec)->keep_relocs)
-	{
-	  free (coff_section_data (sec->owner, sec)->relocs);
-	  coff_section_data (sec->owner, sec)->relocs = NULL;
 	}
     }
 
