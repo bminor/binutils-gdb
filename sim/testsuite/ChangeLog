@@ -1,3 +1,16 @@
+start-sanitize-sky
+Thu Dec 17 13:28:06 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* sim/sky/sce_test58.vuasm: Update syntax of MTIR insn.
+
+end-sanitize-sky
+Tue Dec 15 17:47:13 1998  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/fr30/div.cgs (int): Add signed division scenario.
+	* sim/fr30/int.cgs (int): Complete testcase.
+	* sim/fr30/testutils.inc (_start): Initialize tbr.
+	(test_s_user,test_s_system,set_i,test_i): New macros.
+
 1998-12-14  Doug Evans  <devans@casey.cygnus.com>
 
 	* lib/sim-defs.exp (run_sim_test): New option xerror, for expected
