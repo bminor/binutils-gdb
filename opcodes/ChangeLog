@@ -1,3 +1,8 @@
+2001-11-01  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* m68hc11-dis.c (print_insn): Fix disassembly of movb with a
+	constant as source.
+
 2001-10-24  Richard Henderson  <rth@redhat.com>
 
 	* ia64-asmtab.c: Regenerate.
