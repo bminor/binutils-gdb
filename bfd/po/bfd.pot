@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2001-04-24 17:11+0100\n"
+"POT-Creation-Date: 2001-04-25 20:38+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1551,7 +1551,7 @@ msgstr ""
 msgid "Attempt to do relocateable link with %s input and %s output"
 msgstr ""
 
-#: merge.c:548
+#: merge.c:566
 #, c-format
 msgid "%s: access beyond end of merged section (%ld + %ld)"
 msgstr ""

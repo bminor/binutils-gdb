@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2001-04-24 17:11+0100\n"
+"POT-Creation-Date: 2001-04-25 20:59+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -556,7 +556,7 @@ msgstr ""
 msgid "unsupported section attribute '%c'"
 msgstr ""
 
-#: config/obj-coff.c:1453 config/obj-coff.c:3727 config/tc-ppc.c:3925
+#: config/obj-coff.c:1453 config/obj-coff.c:3728 config/tc-ppc.c:3925
 #, c-format
 msgid "unknown section attribute '%c'"
 msgstr ""
@@ -588,55 +588,55 @@ msgstr ""
 msgid "`.bf' symbol without preceding function\n"
 msgstr ""
 
-#: config/obj-coff.c:3423 config/obj-ieee.c:507 output-file.c:52
+#: config/obj-coff.c:3424 config/obj-ieee.c:507 output-file.c:52
 #: output-file.c:119
 #, c-format
 msgid "FATAL: Can't create %s"
 msgstr ""
 
-#: config/obj-coff.c:3601
+#: config/obj-coff.c:3602
 #, c-format
 msgid "Can't close %s: %s"
 msgstr ""
 
-#: config/obj-coff.c:3635
+#: config/obj-coff.c:3636
 #, c-format
 msgid "Too many new sections; can't add \"%s\""
 msgstr ""
 
-#: config/obj-coff.c:4042 config/tc-m88k.c:1258 config/tc-sparc.c:3532
+#: config/obj-coff.c:4043 config/tc-m88k.c:1258 config/tc-sparc.c:3532
 msgid "Expected comma after name"
 msgstr ""
 
-#: config/obj-coff.c:4048 read.c:1956
+#: config/obj-coff.c:4049 read.c:1956
 msgid "Missing size expression"
 msgstr ""
 
-#: config/obj-coff.c:4054
+#: config/obj-coff.c:4055
 #, c-format
 msgid "lcomm length (%d.) <0! Ignored."
 msgstr ""
 
-#: config/obj-coff.c:4082 read.c:2190
+#: config/obj-coff.c:4083 read.c:2190
 #, c-format
 msgid "Symbol %s already defined"
 msgstr ""
 
-#: config/obj-coff.c:4177 config/tc-i960.c:3215
+#: config/obj-coff.c:4178 config/tc-i960.c:3215
 #, c-format
 msgid "No 'bal' entry point for leafproc %s"
 msgstr ""
 
-#: config/obj-coff.c:4256 write.c:2639
+#: config/obj-coff.c:4257 write.c:2639
 #, c-format
 msgid "Negative of non-absolute symbol %s"
 msgstr ""
 
-#: config/obj-coff.c:4277 write.c:2653
+#: config/obj-coff.c:4278 write.c:2653
 msgid "callj to difference of 2 symbols"
 msgstr ""
 
-#: config/obj-coff.c:4323
+#: config/obj-coff.c:4324
 #, c-format
 msgid "Can't emit reloc {- %s-seg symbol \"%s\"} @ file address %ld."
 msgstr ""
@@ -644,16 +644,16 @@ msgstr ""
 #. This is a COBR instruction.  They have only a 13-bit
 #. displacement and are only to be used for local branches:
 #. flag as error, don't generate relocation.
-#: config/obj-coff.c:4412 config/tc-i960.c:3235 write.c:2797
+#: config/obj-coff.c:4413 config/tc-i960.c:3235 write.c:2797
 msgid "can't use COBR format with external label"
 msgstr ""
 
-#: config/obj-coff.c:4491
+#: config/obj-coff.c:4492
 #, c-format
 msgid "Value of %ld too large for field of %d bytes at 0x%lx"
 msgstr ""
 
-#: config/obj-coff.c:4505 write.c:2887
+#: config/obj-coff.c:4506 write.c:2887
 #, c-format
 msgid "Signed .word overflow; switch may be too large; %ld at 0x%lx"
 msgstr ""
