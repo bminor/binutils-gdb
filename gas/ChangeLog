@@ -1,5 +1,14 @@
 Thu Jul 18 15:54:54 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-sparc.c (md_pseudo_table): Change uahalf, uaword, and
+	uaxword to use s_uacons.
+	(sparc_no_align_cons): New static variable.
+	(s_uacons): New static function.
+	(sparc_cons_align): If sparc_no_align_cons is set, just clear it
+	and return.
+
+	* config/tc-sparc.c (s_common): Remove unused label allocate_bss.
+
 	* configure.in: Add mips-*-irix6* target.  Handle Irix 6 like Irix
 	5 with regard to shared libraries.
 	* configure: Rebuild.

@@ -13,9 +13,10 @@
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+   You should have received a copy of the GNU General Public
+   License along with GAS; see the file COPYING.  If not, write
+   to the Free Software Foundation, 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA. */
 
 #include <stdio.h>
 #include <ctype.h>
@@ -65,11 +66,14 @@ static void s_seg PARAMS ((int));
 static void s_proc PARAMS ((int));
 static void s_reserve PARAMS ((int));
 static void s_common PARAMS ((int));
+static void s_empty PARAMS ((int));
+static void s_uacons PARAMS ((int));
 
 const pseudo_typeS md_pseudo_table[] =
 {
   {"align", s_align_bytes, 0},	/* Defaulting is invalid (0) */
   {"common", s_common, 0},
+  {"empty", s_empty, 0},
   {"global", s_globl, 0},
   {"half", cons, 2},
   {"optim", s_ignore, 0},
@@ -80,14 +84,12 @@ const pseudo_typeS md_pseudo_table[] =
   {"word", cons, 4},
   {"xword", cons, 8},
 #ifdef OBJ_ELF
-  {"uaxword", cons, 8},
-#endif
-#ifdef OBJ_ELF
   /* these are specific to sparc/svr4 */
   {"pushsection", obj_elf_section, 0},
   {"popsection", obj_elf_previous, 0},
-  {"uaword", cons, 4},
-  {"uahalf", cons, 2},
+  {"uahalf", s_uacons, 2},
+  {"uaword", s_uacons, 4},
+  {"uaxword", s_uacons, 8},
 #endif
   {NULL, 0, 0},
 };
@@ -138,6 +140,8 @@ struct sparc_it
 
 struct sparc_it the_insn, set_insn;
 
+/* Return non-zero if VAL is in the range -(MAX+1) to MAX.  */
+
 static INLINE int
 in_signed_range (val, max)
      bfd_signed_vma val, max;
@@ -147,6 +151,22 @@ in_signed_range (val, max)
   if (val > max)
     return 0;
   if (val < ~max)
+    return 0;
+  return 1;
+}
+
+/* Return non-zero if VAL is in the range -(MAX/2+1) to MAX.
+   (e.g. -15 to +31).  */
+
+static INLINE int
+in_bitfield_range (val, max)
+     bfd_signed_vma val, max;
+{
+  if (max <= 0)
+    abort ();
+  if (val > max)
+    return 0;
+  if (val < ~(max >> 1))
     return 0;
   return 1;
 }
@@ -411,7 +431,6 @@ s_common (ignore)
 	  char *p;
 	  int align;
 
-	allocate_bss:
 	  old_sec = now_seg;
 	  old_subsec = now_subseg;
 	  align = temp;
@@ -479,6 +498,18 @@ s_common (ignore)
   }
 }
 
+/* Handle the .empty pseudo-op.  This supresses the warnings about
+   invalid delay slot usage.  */
+
+static void
+s_empty (ignore)
+     int ignore;
+{
+  /* The easy way to implement is to just forget about the last
+     instruction.  */
+  last_insn = NULL;
+}
+
 static void
 s_seg (ignore)
      int ignore;
@@ -531,6 +562,76 @@ s_proc (ignore)
       ++input_line_pointer;
     }
   ++input_line_pointer;
+}
+
+/* This static variable is set by s_uacons to tell sparc_cons_align
+   that the expession does not need to be aligned.  */
+
+static int sparc_no_align_cons = 0;
+
+/* This handles the unaligned space allocation pseudo-ops, such as
+   .uaword.  .uaword is just like .word, but the value does not need
+   to be aligned.  */
+
+static void
+s_uacons (bytes)
+     int bytes;
+{
+  /* Tell sparc_cons_align not to align this value.  */
+  sparc_no_align_cons = 1;
+  cons (bytes);
+}
+
+/* We require .word, et. al., to be aligned correctly.  We do it by
+   setting up an rs_align_code frag, and checking in HANDLE_ALIGN to
+   make sure that no unexpected alignment was introduced.  */
+
+void
+sparc_cons_align (nbytes)
+     int nbytes;
+{
+  int nalign;
+  char *p;
+
+  if (sparc_no_align_cons)
+    {
+      /* This is an unaligned pseudo-op.  */
+      sparc_no_align_cons = 0;
+      return;
+    }
+
+  nalign = 0;
+  while ((nbytes & 1) == 0)
+    {
+      ++nalign;
+      nbytes >>= 1;
+    }
+
+  if (nalign == 0)
+    return;
+
+  if (now_seg == absolute_section)
+    {
+      if ((abs_section_offset & ((1 << nalign) - 1)) != 0)
+	as_bad ("misaligned data");
+      return;
+    }
+
+  p = frag_var (rs_align_code, 1, 1, (relax_substateT) 0,
+		(symbolS *) NULL, (long) nalign, (char *) NULL);
+
+  record_alignment (now_seg, nalign);
+}
+
+/* This is where we do the unexpected alignment check.  */
+
+void
+sparc_handle_align (fragp)
+     fragS *fragp;
+{
+  if (fragp->fr_type == rs_align_code
+      && fragp->fr_next->fr_address - fragp->fr_address - fragp->fr_fix != 0)
+    as_bad_where (fragp->fr_file, fragp->fr_line, "misaligned data");
 }
 
 /* sparc64 priviledged registers */
@@ -1083,6 +1184,28 @@ sparc_ip (str, pinsn)
 	      immediate_max = 0x01FF;
 	      goto immediate;
 
+	    case 'X':
+	      /* V8 systems don't understand BFD_RELOC_SPARC_5.  */
+	      if (SPARC_OPCODE_ARCH_V9_P (max_architecture))
+		the_insn.reloc = BFD_RELOC_SPARC_5;
+	      else
+		the_insn.reloc = BFD_RELOC_SPARC13;
+	      /* These fields are unsigned, but for upward compatibility,
+		 allow negative values as well.  */
+	      immediate_max = 0x1f;
+	      goto immediate;
+
+	    case 'Y':
+	      /* V8 systems don't understand BFD_RELOC_SPARC_6.  */
+	      if (SPARC_OPCODE_ARCH_V9_P (max_architecture))
+		the_insn.reloc = BFD_RELOC_SPARC_6;
+	      else
+		the_insn.reloc = BFD_RELOC_SPARC13;
+	      /* These fields are unsigned, but for upward compatibility,
+		 allow negative values as well.  */
+	      immediate_max = 0x3f;
+	      goto immediate;
+
 	    case 'k':
 	      the_insn.reloc = /* RELOC_WDISP2_14 */ BFD_RELOC_SPARC_WDISP16;
 	      the_insn.pcrel = 1;
@@ -1439,7 +1562,7 @@ sparc_ip (str, pinsn)
 
 		    if (mask >= 64)
 		      {
-			if (max_architecture >= SPARC_OPCODE_ARCH_V9)
+			if (SPARC_OPCODE_ARCH_V9_P (max_architecture))
 			  error_message = ": There are only 64 f registers; [0-63]";
 			else
 			  error_message = ": There are only 32 f registers; [0-31]";
@@ -1447,7 +1570,7 @@ sparc_ip (str, pinsn)
 		      }	/* on error */
 		    else if (mask >= 32)
 		      {
-			if (max_architecture >= SPARC_OPCODE_ARCH_V9)
+			if (SPARC_OPCODE_ARCH_V9_P (max_architecture))
 			  {
 			    v9_arg_p = 1;
 			    mask -= 31;	/* wrap high bit */
@@ -2097,13 +2220,15 @@ md_apply_fix (fixP, value)
       break;
 
     case BFD_RELOC_32_PCREL_S2:
-      val = (val >>= 2);
+      val = val >> 2;
+      /* FIXME: This increment-by-one deserves a comment of why it's
+	 being done!  */
       if (! sparc_pic_code
 	  || fixP->fx_addsy == NULL
 	  || (fixP->fx_addsy->bsym->flags & BSF_SECTION_SYM) != 0)
 	++val;
       buf[0] |= (val >> 24) & 0x3f;
-      buf[1] = (val >> 16);
+      buf[1] = val >> 16;
       buf[2] = val >> 8;
       buf[3] = val;
       break;
@@ -2123,51 +2248,63 @@ md_apply_fix (fixP, value)
       break;
 
     case BFD_RELOC_SPARC_11:
-      if (((val > 0) && (val & ~0x7ff))
-	  || ((val < 0) && (~(val - 1) & ~0x7ff)))
-	{
-	  as_bad ("relocation overflow.");
-	}			/* on overflow */
+      if (! in_signed_range (val, 0x7ff))
+	as_bad ("relocation overflow.");
 
       buf[2] |= (val >> 8) & 0x7;
-      buf[3] = val & 0xff;
+      buf[3] = val;
       break;
 
     case BFD_RELOC_SPARC_10:
-      if (((val > 0) && (val & ~0x3ff))
-	  || ((val < 0) && (~(val - 1) & ~0x3ff)))
-	{
-	  as_bad ("relocation overflow.");
-	}			/* on overflow */
+      if (! in_signed_range (val, 0x3ff))
+	as_bad ("relocation overflow.");
 
       buf[2] |= (val >> 8) & 0x3;
-      buf[3] = val & 0xff;
+      buf[3] = val;
+      break;
+
+    case BFD_RELOC_SPARC_6:
+      if (! in_bitfield_range (val, 0x3f))
+	as_bad ("relocation overflow.");
+
+      buf[3] |= val & 0x3f;
+      break;
+
+    case BFD_RELOC_SPARC_5:
+      if (! in_bitfield_range (val, 0x1f))
+	as_bad ("relocation overflow.");
+
+      buf[3] |= val & 0x1f;
       break;
 
     case BFD_RELOC_SPARC_WDISP16:
+      /* FIXME: simplify */
       if (((val > 0) && (val & ~0x3fffc))
 	  || ((val < 0) && (~(val - 1) & ~0x3fffc)))
 	{
 	  as_bad ("relocation overflow.");
-	}			/* on overflow */
+	}
 
-      val = (val >>= 2) + 1;
+      /* FIXME: The +1 deserves a comment.  */
+      val = (val >> 2) + 1;
       buf[1] |= ((val >> 14) & 0x3) << 4;
       buf[2] |= (val >> 8) & 0x3f;
-      buf[3] = val & 0xff;
+      buf[3] = val;
       break;
 
     case BFD_RELOC_SPARC_WDISP19:
+      /* FIXME: simplify */
       if (((val > 0) && (val & ~0x1ffffc))
 	  || ((val < 0) && (~(val - 1) & ~0x1ffffc)))
 	{
 	  as_bad ("relocation overflow.");
-	}			/* on overflow */
+	}
 
-      val = (val >>= 2) + 1;
+      /* FIXME: The +1 deserves a comment.  */
+      val = (val >> 2) + 1;
       buf[1] |= (val >> 16) & 0x7;
       buf[2] = (val >> 8) & 0xff;
-      buf[3] = val & 0xff;
+      buf[3] = val;
       break;
 
     case BFD_RELOC_SPARC_HH22:
@@ -2196,7 +2333,7 @@ md_apply_fix (fixP, value)
 	}			/* on overflow */
       buf[1] |= (val >> 16) & 0x3f;
       buf[2] = val >> 8;
-      buf[3] = val & 0xff;
+      buf[3] = val;
       break;
 
     case BFD_RELOC_SPARC_HM10:
@@ -2272,6 +2409,8 @@ tc_gen_reloc (section, fixp)
     case BFD_RELOC_SPARC_WDISP19:
     case BFD_RELOC_SPARC_WDISP22:
     case BFD_RELOC_64:
+    case BFD_RELOC_SPARC_5:
+    case BFD_RELOC_SPARC_6:
     case BFD_RELOC_SPARC_10:
     case BFD_RELOC_SPARC_11:
     case BFD_RELOC_SPARC_HH22:
