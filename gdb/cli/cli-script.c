@@ -1166,8 +1166,8 @@ define_command (char *comname, int from_tty)
           newc->hookee_pre = hookc; /* We are marked as hooking target cmd. */
           break;
         case CMD_POST_HOOK:
-          hookc->hook_pre  = newc;  /* Target gets hooked.  */
-          newc->hookee_pre = hookc; /* We are marked as hooking target cmd. */
+          hookc->hook_post  = newc;  /* Target gets hooked.  */
+          newc->hookee_post = hookc; /* We are marked as hooking target cmd. */
           break;
         default:
           /* Should never come here as hookc would be 0. */
