@@ -1,3 +1,14 @@
+2003-02-21  Ian Wienand  <ianw@gelato.unsw.edu.au>
+
+	* readelf.c (get_ia64_dynamic_type): New function.
+	(dynamic_segment_ia64_val): New function.
+	(get_dynamic_type): If machine type is EM_IA_64 call
+	get_ia64_dynamic_val.
+	(get_ia64_section_type_name): Handle sections with types in the
+	SHT_IA_64_LOPSREG to SHT_IA_64_HIPSREG range.
+	(get_dynamic_flags): If machine type is EM_IA_64 call
+	dynamic_segment_ia64_val.
+
 2003-02-21  Bob Wilson  <bob.wilson@acm.org>
 
 	* doc/binutils.texi: Fix typos and obvious texinfo mistakes.  Make

@@ -179,6 +179,8 @@ static const char *get_ppc64_dynamic_type
   PARAMS ((unsigned long));
 static const char *get_parisc_dynamic_type
   PARAMS ((unsigned long));
+static const char *get_ia64_dynamic_type
+  PARAMS ((unsigned long));
 static const char *get_dynamic_type
   PARAMS ((unsigned long));
 static int slurp_rela_relocs
@@ -239,6 +241,8 @@ static int process_unwind
 static void dynamic_segment_mips_val
   PARAMS ((Elf_Internal_Dyn *));
 static void dynamic_segment_parisc_val
+  PARAMS ((Elf_Internal_Dyn *));
+static void dynamic_segment_ia64_val
   PARAMS ((Elf_Internal_Dyn *));
 static int process_dynamic_segment
   PARAMS ((FILE *));
@@ -1480,6 +1484,18 @@ get_parisc_dynamic_type (type)
 }
 
 static const char *
+get_ia64_dynamic_type (type)
+     unsigned long type;
+{
+  switch (type)
+    {
+    case DT_IA_64_PLT_RESERVE: return "IA_64_PLT_RESERVE";
+    default:
+      return NULL;
+    }
+}
+
+static const char *
 get_dynamic_type (type)
      unsigned long type;
 {
@@ -1575,6 +1591,9 @@ get_dynamic_type (type)
 	      break;
 	    case EM_PPC64:
 	      result = get_ppc64_dynamic_type (type);
+	      break;
+	    case EM_IA_64:
+	      result = get_ia64_dynamic_type (type);
 	      break;
 	    default:
 	      result = NULL;
@@ -2331,10 +2350,15 @@ static const char *
 get_ia64_section_type_name (sh_type)
      unsigned int sh_type;
 {
+  /* If the top 8 bits are 0x78 the next 8 are the os/abi ID. */
+  if ((sh_type & 0xFF000000) == SHT_IA_64_LOPSREG)
+    return get_osabi_name ((sh_type & 0x00FF0000) >> 16);
+      
   switch (sh_type)
     {
-    case SHT_IA_64_EXT:		return "IA_64_EXT";
-    case SHT_IA_64_UNWIND:	return "IA_64_UNWIND";
+    case SHT_IA_64_EXT:		  return "IA_64_EXT";
+    case SHT_IA_64_UNWIND:	  return "IA_64_UNWIND";
+    case SHT_IA_64_PRIORITY_INIT: return "IA_64_PRIORITY_INIT";
     default:
       break;
     }
@@ -4472,6 +4496,21 @@ dynamic_segment_parisc_val (entry)
   putchar ('\n');
 }
 
+static void
+dynamic_segment_ia64_val (entry)
+     Elf_Internal_Dyn *entry;
+{
+  switch (entry->d_tag)
+    {
+    case DT_IA_64_PLT_RESERVE: 
+      /* First 3 bytes reserved.  */
+      print_vma (entry->d_un.d_ptr, PREFIX_HEX);
+      printf (" -- ");
+      print_vma (entry->d_un.d_ptr + (3 * 8), PREFIX_HEX);
+      printf ("\n");
+    }
+}
+
 static int
 get_32bit_dynamic_segment (file)
      FILE *file;
@@ -5120,6 +5159,9 @@ process_dynamic_segment (file)
 		  break;
 		case EM_PARISC:
 		  dynamic_segment_parisc_val (entry);
+		  break;
+		case EM_IA_64:
+		  dynamic_segment_ia64_val (entry);
 		  break;
 		default:
 		  print_vma (entry->d_un.d_val, PREFIX_HEX);
