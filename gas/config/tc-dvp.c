@@ -468,8 +468,11 @@ assemble_vu (str)
 			     vu_lower_opcode_lookup_asm (str), vu_operands,
 			     &str, f);
   /* If this was the "loi" pseudo-insn, we need to set the `i' bit.  */
-  if (strcmp (opcode->mnemonic, "loi") == 0)
-    f[7] |= 0x80;
+  if (opcode != NULL)
+    {
+      if (strcmp (opcode->mnemonic, "loi") == 0)
+	f[7] |= 0x80;
+    }
 }
 
 static const dvp_opcode *
