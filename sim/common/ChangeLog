@@ -1,3 +1,11 @@
+2005-02-28  Jim Blandy  <jimb@redhat.com>
+
+	* aclocal.m4 (SIM_AC_OPTION_WARNINGS): Don't include
+	-Wuninitialized in the default list of build warnings if CFLAGS is
+	set, and doesn't include -O.  (Using -Wuninitialized without
+	optimization produces a warning, which interferes with compilation
+	with -Werror.)
+	
 2005-02-21  Jim Blandy  <jimb@redhat.com>
 
 	* callback.c (os_fstat): Don't declare 't' unless it's used.

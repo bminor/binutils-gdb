@@ -1,3 +1,9 @@
+2005-02-28  Jim Blandy  <jimb@redhat.com>
+
+	* d10v/configure.ac, igen/configure.ac, m68hc11/configure.ac,
+	mips/configure.ac, mn10300/configure.ac, v850/configure.ac:
+	Regenerated, after change to common/aclocal.m4.
+
 2005-02-18  Corinna Vinschen  <vinschen@redhat.com>
 
 	* iq2000: New target subdirectory.

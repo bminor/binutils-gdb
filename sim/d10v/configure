@@ -7033,7 +7033,18 @@ sim_link_links="${sim_link_links} targ-vals.def"
 # NOTE: If you add to this list, remember to update
 # gdb/doc/gdbint.texinfo.
 build_warnings="-Wimplicit -Wreturn-type -Wcomment -Wtrigraphs \
--Wformat -Wparentheses -Wpointer-arith -Wuninitialized"
+-Wformat -Wparentheses -Wpointer-arith"
+# GCC supports -Wuninitialized only with -O or -On, n != 0.
+if test x${CFLAGS+set} = xset; then
+  case "${CFLAGS}" in
+    *"-O0"* ) ;;
+    *"-O"* )
+      build_warnings="${build_warnings} -Wuninitialized"
+    ;;
+  esac
+else
+  build_warnings="${build_warnings} -Wuninitialized"
+fi
 # Up for debate: -Wswitch -Wcomment -trigraphs -Wtrigraphs
 # -Wunused-function -Wunused-label -Wunused-variable -Wunused-value
 # -Wchar-subscripts -Wtraditional -Wshadow -Wcast-qual
