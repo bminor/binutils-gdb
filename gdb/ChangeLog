@@ -1,3 +1,12 @@
+2002-01-11  Petr Sorfa  <petrs@caldera.com>
+
+	* MAINTAINERS (write-after-approval): Add myself.
+	* dwarf2read.c (read_tag_string_type): Handling of
+	DW_AT_byte_size.
+	(read_tag_string_type): FORTRAN fix to prevent propagation of
+	first string size.
+	(set_cu_language): Handling of DW_LANG_Fortran95
+
 2002-01-11  Richard Earnshaw  <rearnsha@arm.com>
 
 	* armnbsd-nat.c (fetch_inferior_registers): Change inferior_pid ->

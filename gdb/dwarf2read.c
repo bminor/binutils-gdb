@@ -2786,12 +2786,30 @@ read_tag_string_type (struct die_info *die, struct objfile *objfile)
     }
   else
     {
-      length = 1;
+      /* check for the DW_AT_byte_size attribute */
+      attr = dwarf_attr (die, DW_AT_byte_size);
+      if (attr)
+        {
+          length = DW_UNSND (attr);
+        }
+      else
+        {
+          length = 1;
+        }
     }
   index_type = dwarf2_fundamental_type (objfile, FT_INTEGER);
   range_type = create_range_type (NULL, index_type, 1, length);
-  char_type = dwarf2_fundamental_type (objfile, FT_CHAR);
-  type = create_string_type (char_type, range_type);
+  if (cu_language == language_fortran)
+    {
+      /* Need to create a unique string type for bounds
+         information */
+      type = create_string_type (0, range_type);
+    }
+  else
+    {
+      char_type = dwarf2_fundamental_type (objfile, FT_CHAR);
+      type = create_string_type (char_type, range_type);
+    }
   die->type = type;
 }
 
@@ -3797,6 +3815,7 @@ set_cu_language (unsigned int lang)
       break;
     case DW_LANG_Fortran77:
     case DW_LANG_Fortran90:
+    case DW_LANG_Fortran95:
       cu_language = language_fortran;
       break;
     case DW_LANG_Mips_Assembler:
