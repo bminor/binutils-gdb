@@ -1,7 +1,7 @@
 %{
 
-/* Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
-   Free Software Foundation, Inc.
+/* Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
+   2000, 2001, 2002  Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
 
@@ -595,7 +595,7 @@ yy_input (buf, result, max_size)
     {
       if (yyin)
 	{
-	  *result = read (fileno (yyin), (char *) buf, max_size);
+	  *result = fread ((char *) buf, 1, max_size, yyin);
 	  if (*result < 0) 
 	    einfo ("%F%P: read in flex scanner failed\n");
 	}
