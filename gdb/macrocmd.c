@@ -135,14 +135,14 @@ show_pp_source_pos (struct ui_file *stream,
 
 
 static void
-show_macro_command (char *name, int from_tty)
+info_macro_command (char *name, int from_tty)
 {
   struct macro_scope *ms = NULL;
   struct cleanup *cleanup_chain = make_cleanup (free_current_contents, &ms);
   struct macro_definition *d;
   
   if (! name || ! *name)
-    error ("You must follow the `show macro' command with the name"
+    error ("You must follow the `info macro' command with the name"
            " of the macro\n"
            "whose definition you want to see.");
 
@@ -257,9 +257,9 @@ _initialize_macrocmd (void)
   add_alias_cmd ("exp1", "expand-once", no_class, 1, &macrolist);
 
   add_cmd
-    ("macro", no_class, show_macro_command,
+    ("macro", no_class, info_macro_command,
      "Show the definition of MACRO, and its source location.",
-     &showlist);
+     &infolist);
 
   add_cmd
     ("define", no_class, macro_define_command,

@@ -1,3 +1,8 @@
+2002-06-11  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.texinfo (Macros): Call the command `info macro', not
+	`show macro'.
+
 2002-06-09  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbint.texinfo (Coding): Add section ``Per-architecture module

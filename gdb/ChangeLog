@@ -1,3 +1,11 @@
+2002-06-11  Jim Blandy  <jimb@redhat.com>
+
+	Call the command `info macro', not `show macro'.
+	* macrocmd.c (info_macro_command): Renamed from `show_macro_command'.
+	Fix error message.
+	(_initialize_macrocmd): Register `info_macro_command' in
+	`infolist', not `showlist'.
+
 2002-06-11  Daniel Jacobowitz  <drow@mvista.com>
 
 	* mips-tdep.c (MIPS_FPU_TYPE, FP_REGISTER_DOUBLE, MIPS_EABI)

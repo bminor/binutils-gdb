@@ -5843,10 +5843,10 @@ expansions.  Since @value{GDBN} simply expands macros, but does not
 parse the result, @var{expression} need not be a valid expression; it
 can be any string of tokens.
 
-@kindex show macro
+@kindex info macro
 @cindex macro definition, showing
 @cindex definition, showing a macro's
-@item show macro @var{macro}
+@item info macro @var{macro}
 Show the definition of the macro named @var{macro}, and describe the
 source location where that definition was established.
 
@@ -5941,10 +5941,10 @@ to decide which macro definitions are in scope:
 10        printf ("Hello, world!\n");
 11      #undef N
 12        printf ("We're so creative.\n");
-(gdb) show macro ADD
+(gdb) info macro ADD
 Defined at /home/jimb/gdb/macros/play/sample.c:5
 #define ADD(x) (M + x)
-(gdb) show macro Q
+(gdb) info macro Q
 Defined at /home/jimb/gdb/macros/play/sample.h:1
   included at /home/jimb/gdb/macros/play/sample.c:2
 #define Q <
@@ -5977,7 +5977,7 @@ Breakpoint 1, main () at sample.c:10
 At line 10, the definition of the macro @code{N} at line 9 is in force:
 
 @smallexample
-(gdb) show macro N
+(gdb) info macro N
 Defined at /home/jimb/gdb/macros/play/sample.c:9
 #define N 28
 (gdb) macro expand N Q M
@@ -5995,13 +5995,13 @@ thereof) in force at each point:
 (gdb) next
 Hello, world!
 12        printf ("We're so creative.\n");
-(gdb) show macro N
+(gdb) info macro N
 The symbol `N' has no definition as a C/C++ preprocessor macro
 at /home/jimb/gdb/macros/play/sample.c:12
 (gdb) next
 We're so creative.
 14        printf ("Goodbye, world!\n");
-(gdb) show macro N
+(gdb) info macro N
 Defined at /home/jimb/gdb/macros/play/sample.c:13
 #define N 1729
 (gdb) macro expand N Q M
