@@ -23,6 +23,7 @@ sparclite*-fujitsu-*)	targ_emul=sparcaout ;;
 sparc*-*-aout)		targ_emul=sparcaout ;;
 sparc*-*-coff)		targ_emul=coff_sparc ;;
 sparc*-*-elf)		targ_emul=elf32_sparc ;;
+sparc*-*-sysv4*)	targ_emul=elf32_sparc ;;
 sparc*-*-lynxos*)	targ_emul=sparclynx ;;
 sparc*-*-netbsd*)	targ_emul=sparcnbsd ;;
 sparc*-*-solaris2*)	targ_emul=elf32_sparc ;;

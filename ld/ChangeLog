@@ -1,5 +1,8 @@
 Thu Jul 18 16:25:39 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.tgt (sparc*-*-sysv4*): New target.  From Andrew Gierth
+	<ANDREWG@microlise.co.uk>.
+
 	* configure.host: Change irix5 to irix[56]*.
 	* configure.tgt: Likewise.
 
