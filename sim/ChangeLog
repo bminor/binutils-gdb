@@ -1,3 +1,9 @@
+2003-08-09  Andrew Cagney  <cagney@redhat.com>
+
+	* MAINTAINERS: Andrew Cagney (mips) and Geoff Keating (ppc) drop
+	maintenance.  List igen and sh maintainers.  Mention that target
+	and global maintainers pick up the slack.
+
 2003-01-23  Nick Clifton  <nickc@redhat.com>
 
 	* Add sh2e support:
