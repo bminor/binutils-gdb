@@ -1,3 +1,41 @@
+Wed Dec  3 17:56:02 1997  Doug Evans  <devans@canuck.cygnus.com>
+
+	* Make-common.in (SIM_ENVIRONMENT): New variable.
+	(CONFIG_CFLAGS): Add it.
+	* aclocal.m4 (SIM_AC_OPTION_ENVIRONMENT): Handle
+	--enable-sim-environment option.
+	* configure: Regenerated.
+	* sim-config.h (environment support): Rewrite.
+	* sim-config.c (current_environment): Define as enum, unconditionally.
+	(current_alignment): Define unconditionally.
+	(config_environment_to_a): Update.
+	(config_alignment_to_a): Fix type of argument.  Define unconditionally.
+	(sim_config): Handle environment and alignment determination
+	unconditionally.  Delete sanity checks of current_environment,
+	unnecessary.
+	(print_sim_config): Update.
+	* sim-options.c (STANDARD_OPTIONS enum): Add OPTION_ENVIRONMENT.
+	(standard_options): Add --environment.
+	(standard_option_handler): Likewise.
+
+Fri Nov 28 12:21:25 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-alu.h: Add notes on carry vs borrow for subtraction.
+	(ALU{,8,16,32,64}ADD): Redefine ADD macro as add overflowing.
+	(ALU{,8,16,32,64}ADDC): Define - add carrying.
+	(ALU{,8,16,32,64}SUB): Redefine SUB macro as subtract overflowing.
+	(ALU{,8,16,32,64}SUBB): Define - subtract borrowing.
+	(ALU{,8,16,32,64}SUBC): Define - tract carrying.
+	(ALU{,8,16,32,64}ADD_CA, ALU{,8,16,32,64}ADDC_C): Replace single
+ 	argument ADD_CA macro with two argument ADDC_C - add carrying with
+ 	carry in.
+	(ALU{,8,16,32,64}SUB_CA, ALU{,8,16,32,64}SUBC_X): Replace single
+ 	argument SUB_CA macro with two argument SUBC_X - subtract
+ 	carrying, extended.
+	(ALU{,8,16,32,64}SUBB_B): Define - subtract borrowing with
+ 	borrow-in.
+	(ALU{,8,16,32,64}NEGC, ALU{,8,16,32,64}NEGB): Define.
+
 Sun Nov 30 17:40:57 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* sim-io.c (sim_io_{syscalls,getstring}): Delete.  No longer used.

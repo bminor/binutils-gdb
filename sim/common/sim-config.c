@@ -28,13 +28,14 @@ int current_host_byte_order;
 int current_target_byte_order;
 int current_stdio;
 
-#if defined (WITH_ENVIRONMENT)
-int current_environment;
-#endif
+/* The currently selected environment.
+   This isn't used unless the choice is runtime selectable.
+   The proper way to determine the currently selected environment
+   is with the CURRENT_ENVIRONMENT macro.
+   This is set to ALL_ENVIRONMENT to indicate none has been selected yet.  */
+enum sim_environment current_environment = ALL_ENVIRONMENT;
 
-#if defined (WITH_ALIGNMENT)
 enum sim_alignments current_alignment;
-#endif
 
 #if defined (WITH_FLOATING_POINT)
 int current_floating_point;
@@ -76,28 +77,26 @@ config_stdio_to_a (int stdio)
 }
 
 
-#if defined (WITH_ENVIRONMENT)
 static const char *
-config_environment_to_a (int environment)
+config_environment_to_a (enum sim_environment environment)
 {
   switch (environment)
     {
+    case ALL_ENVIRONMENT:
+      return "ALL_ENVIRONMENT";
     case USER_ENVIRONMENT:
       return "USER_ENVIRONMENT";
     case VIRTUAL_ENVIRONMENT:
       return "VIRTUAL_ENVIRONMENT";
     case OPERATING_ENVIRONMENT:
       return "OPERATING_ENVIRONMENT";
-    case 0:
-      return "0";
     }
   return "UNKNOWN";
 }
-#endif
 
 
 static const char *
-config_alignment_to_a (int alignment)
+config_alignment_to_a (enum sim_alignments alignment)
 {
   switch (alignment)
     {
@@ -227,11 +226,9 @@ sim_config (SIM_DESC sd)
     }
   
   
-#if defined (WITH_ENVIRONMENT)
-  
   /* set the environment */
 #if (WITH_DEVICES)
-  if (current_environment == 0)
+  if (current_environment == ALL_ENVIRONMENT)
     {
       const char *env =
 	tree_find_string_property(root, "/openprom/options/env");
@@ -244,29 +241,12 @@ sim_config (SIM_DESC sd)
 			     : (strcmp(env, "operating") == 0
 				|| strcmp(env, "oea") == 0)
 			     ? OPERATING_ENVIRONMENT
-			     : 0);
+			     : ALL_ENVIRONMENT);
     }
 #endif
-  if (current_environment == 0)
-    current_environment = WITH_ENVIRONMENT;
+  if (current_environment == ALL_ENVIRONMENT)
+    current_environment = DEFAULT_ENVIRONMENT;
   
-  /* verify the environment */
-  if (CURRENT_ENVIRONMENT == 0)
-    {
-      sim_io_eprintf (sd, "Target environment unspecified\n");
-      return SIM_RC_FAIL;
-    }
-  if (CURRENT_ENVIRONMENT != current_environment)
-    {
-      sim_io_eprintf (sd, "Target (%s) and configured (%s) environment in conflict\n",
-		      config_environment_to_a (CURRENT_ENVIRONMENT),
-		      config_environment_to_a (current_environment));
-      return SIM_RC_FAIL;
-    }
-#endif
-  
-  
-#if defined (WITH_ALIGNMENT)
   
   /* set the alignment */
 #if defined (WITH_DEVICES)
@@ -278,6 +258,8 @@ sim_config (SIM_DESC sd)
 #endif
   if (current_alignment == 0)
     current_alignment = WITH_ALIGNMENT;
+  if (current_alignment == 0)
+    current_alignment = WITH_DEFAULT_ALIGNMENT;
   
   /* verify the alignment */
   if (CURRENT_ALIGNMENT == 0)
@@ -292,10 +274,8 @@ sim_config (SIM_DESC sd)
 		      config_alignment_to_a (current_alignment));
       return SIM_RC_FAIL;
     }
-#endif
   
-  
-#if defined (WITH_FLOAING_POINT)
+#if defined (WITH_FLOATING_POINT)
   
   /* set the floating point */
   if (current_floating_point == 0)
@@ -348,18 +328,19 @@ print_sim_config (SIM_DESC sd)
   sim_io_printf (sd, "WITH_TARGET_WORD_MSB     = %d\n",
                WITH_TARGET_WORD_MSB);
 
-#if defined (WITH_XOR_ENDIAN)
-  sim_io_printf (sd, "WITH_XOR_ENDIAN = %d\n", WITH_XOR_ENDIAN);
-#endif
-
-#if defined (WITH_ENVIRONMENT)
   sim_io_printf (sd, "WITH_ENVIRONMENT = %s\n",
 		 config_environment_to_a (WITH_ENVIRONMENT));
-#endif
 
-#if defined (WITH_ALIGNMENT)
   sim_io_printf (sd, "WITH_ALIGNMENT = %s\n",
 		 config_alignment_to_a (WITH_ALIGNMENT));
+
+#if defined (WITH_DEFAULT_ALIGNMENT)
+  sim_io_printf (sd, "WITH_DEFAULT_ALIGNMENT = %s\n",
+		 config_alignment_to_a (WITH_DEFAULT_ALIGNMENT));
+#endif
+
+#if defined (WITH_XOR_ENDIAN)
+  sim_io_printf (sd, "WITH_XOR_ENDIAN = %d\n", WITH_XOR_ENDIAN);
 #endif
 
 #if defined (WITH_FLOATING_POINT)
@@ -373,6 +354,10 @@ print_sim_config (SIM_DESC sd)
 
 #if defined (WITH_RESERVED_BITS)
   sim_io_printf (sd, "WITH_RESERVED_BITS = %d\n", WITH_RESERVED_BITS);
+#endif
+		 
+#if defined (WITH_PROFILE)
+  sim_io_printf (sd, "WITH_PROFILE = %d\n", WITH_PROFILE);
 #endif
 		 
 }

@@ -77,6 +77,7 @@ SIM_ALIGNMENT = @sim_alignment@
 SIM_BITSIZE = @sim_bitsize@
 SIM_DEFAULT_MODEL = @sim_default_model@
 SIM_ENDIAN = @sim_endian@
+SIM_ENVIRONMENT = @sim_environment@
 SIM_FLOAT = @sim_float@
 SIM_HARDWARE = @sim_hardware@
 SIM_HOSTENDIAN = @sim_hostendian@
@@ -168,6 +169,7 @@ CONFIG_CFLAGS = @DEFS@ \
 	$(SIM_ALIGNMENT) \
 	$(SIM_BITSIZE) \
 	$(SIM_ENDIAN) \
+	$(SIM_ENVIRONMENT) \
 	$(SIM_FLOAT) \
 	$(SIM_HARDWARE) \
 	$(SIM_HOSTENDIAN) \
@@ -202,7 +204,7 @@ EXTRA_LIBS = $(BFD_LIB) $(OPCODES_LIB) $(LIBIBERTY_LIB) \
 
 LIB_OBJS = callback.o syscall.o targ-map.o $(SIM_OBJS)
 
-all: $(SIM_EXTRA_ALL) libsim.a run
+all: $(SIM_EXTRA_ALL) libsim.a run .gdbinit
 
 libsim.a: $(LIB_OBJS)
 	rm -f libsim.a
@@ -214,7 +216,7 @@ run: $(SIM_RUN_OBJS) libsim.a $(LIBDEPS)
 	  $(SIM_RUN_OBJS) libsim.a $(EXTRA_LIBS)
 
 run.o: $(srccom)/run.c config.h tconfig.h \
-	  $(srcroot)/include/callback.h
+	  $(srcroot)/include/remote-sim.h $(srcroot)/include/callback.h
 	$(CC) -c $(srccom)/run.c $(ALL_CFLAGS)
 
 # FIXME: Ideally, callback.o and friends live in a library outside of
@@ -321,10 +323,12 @@ sim-fpu.o: $(srccom)/sim-fpu.c $(sim-fpu_h) \
 	$(CC) -c $(srccom)/sim-fpu.c $(ALL_CFLAGS)
 
 sim-hload.o: $(srccom)/sim-hload.c $(sim-assert_h) \
+	  $(srcroot)/include/remote-sim.h \
 	  $(SIM_EXTRA_DEPS)
 	$(CC) -c $(srccom)/sim-hload.c $(ALL_CFLAGS)
 
-sim-hrw.o: $(srccom)/sim-hrw.c $(sim-assert_h) \
+sim-hrw.o: $(srccom)/sim-hrw.c $(sim-assert_h) $(sim_core_h) \
+	  $(srcroot)/include/remote-sim.h \
 	  $(SIM_EXTRA_DEPS)
 	$(CC) -c $(srccom)/sim-hrw.c $(ALL_CFLAGS)
 
@@ -334,7 +338,8 @@ sim-inline.c: $(srccom)/sim-inline.c
 	cat $(srccom)/$@ >> tmp-$@
 	$(srcdir)/../../move-if-change tmp-$@ $@
 
-sim-io.o: $(srccom)/sim-io.c $(sim_main_headers) $(sim-io_h)
+sim-io.o: $(srccom)/sim-io.c $(sim_main_headers) $(sim-io_h) \
+	  $(srcroot)/include/remote-sim.h
 	$(CC) -c $(srccom)/sim-io.c $(ALL_CFLAGS)
 
 sim-memopt.o: $(srccom)/sim-memopt.c $(sim_main_headers) \
@@ -349,10 +354,12 @@ sim-options.o: $(srccom)/sim-options.c $(sim_main_headers) \
 	  $(sim-options_h) $(sim-io_h)
 	$(CC) -c $(srccom)/sim-options.c $(ALL_CFLAGS)
 
-sim-reason.o: $(srccom)/sim-reason.c $(sim_main_headers)
+sim-reason.o: $(srccom)/sim-reason.c $(sim_main_headers) \
+	  $(srcroot)/include/remote-sim.h
 	$(CC) -c $(srccom)/sim-reason.c $(ALL_CFLAGS)
 
-sim-resume.o: $(srccom)/sim-resume.c $(sim_main_headers)
+sim-resume.o: $(srccom)/sim-resume.c $(sim_main_headers) \
+	  $(srcroot)/include/remote-sim.h
 	$(CC) -c $(srccom)/sim-resume.c $(ALL_CFLAGS)
 
 sim-run.o: $(srccom)/sim-run.c $(sim_main_headers)
@@ -390,7 +397,8 @@ sim-break.o: $(srccom)/sim-break.c $(sim_main_headers) \
 	$(CC) -c $(srccom)/sim-break.c $(ALL_CFLAGS)
 
 nrun.o: $(srccom)/nrun.c config.h tconfig.h \
-	  $(srcroot)/include/callback.h $(sim_main_headers)
+	  $(srcroot)/include/remote-sim.h $(srcroot)/include/callback.h \
+	  $(sim_main_headers)
 	$(CC) -c $(srccom)/nrun.c $(ALL_CFLAGS)
 
 # CGEN support.

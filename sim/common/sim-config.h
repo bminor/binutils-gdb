@@ -319,24 +319,45 @@ extern int current_target_byte_order;
    expect to see (VEA includes things like coherency and the time
    base) while OEA is what an operating system expects to see.  By
    setting these to specific values, the build process is able to
-   eliminate non relevent environment code
+   eliminate non relevent environment code.
 
    CURRENT_ENVIRONMENT specifies which of vea or oea is required for
-   the current runtime. */
+   the current runtime.
 
-#if defined (WITH_ENVIRONMENT)
+   ALL_ENVIRONMENT is used during configuration as a value for
+   WITH_ENVIRONMENT to indicate the choice is runtime selectable.
+   The default is then USER_ENVIRONMENT [since allowing the user to choose
+   the default at configure time seems like featuritis and since people using
+   OPERATING_ENVIRONMENT have more to worry about than selecting the default].
+   ALL_ENVIRONMENT is also used to set `current_environment' to the
+   "unknown" state.  */
 
-#define USER_ENVIRONMENT		1
-#define VIRTUAL_ENVIRONMENT		2
-#define OPERATING_ENVIRONMENT		3
+enum sim_environment {
+  ALL_ENVIRONMENT,
+  USER_ENVIRONMENT,
+  VIRTUAL_ENVIRONMENT,
+  OPERATING_ENVIRONMENT
+};
 
-extern int current_environment;
-#define CURRENT_ENVIRONMENT (WITH_ENVIRONMENT \
-			     ? WITH_ENVIRONMENT \
-			     : current_environment)
-
+/* If the simulator specified SIM_AC_OPTION_ENVIRONMENT, indicate so.  */
+#ifdef WITH_ENVIRONMENT
+#define SIM_HAVE_ENVIRONMENT
 #endif
 
+/* If the simulator doesn't specify SIM_AC_OPTION_ENVIRONMENT in its
+   configure.in, the only supported environment is the user environment.  */
+#ifndef WITH_ENVIRONMENT
+#define WITH_ENVIRONMENT USER_ENVIRONMENT
+#endif
+
+#define DEFAULT_ENVIRONMENT (WITH_ENVIRONMENT != ALL_ENVIRONMENT \
+			     ? WITH_ENVIRONMENT \
+			     : USER_ENVIRONMENT)
+
+extern enum sim_environment current_environment;
+#define CURRENT_ENVIRONMENT (WITH_ENVIRONMENT != ALL_ENVIRONMENT \
+			     ? WITH_ENVIRONMENT \
+			     : current_environment)
 
 
 /* Callback & Modulo Memory.
@@ -394,7 +415,7 @@ enum sim_alignments {
 extern enum sim_alignments current_alignment;
 
 #if !defined (WITH_ALIGNMENT)
-#define WITH_ALIGNMENT NONSTRICT_ALIGNMENT
+#define WITH_ALIGNMENT 0
 #endif
 
 #if !defined (WITH_DEFAULT_ALIGNMENT)

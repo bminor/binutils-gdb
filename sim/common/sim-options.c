@@ -31,7 +31,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 #include <ctype.h>
 #include "libiberty.h"
-#include "../libiberty/alloca-conf.h"
 #include "sim-options.h"
 #include "sim-io.h"
 #include "sim-assert.h"
@@ -83,23 +82,47 @@ static DECLARE_OPTION_HANDLER (standard_option_handler);
    If you decide to conditionally compile them out as well, delete this
    comment and add a comment saying that that is the rule.  */
 
-#define OPTION_DEBUG_INSN	(OPTION_START + 0)
-#define OPTION_DEBUG_FILE	(OPTION_START + 1)
-#define OPTION_DO_COMMAND	(OPTION_START + 2)
-#define OPTION_ARCHITECTURE     (OPTION_START + 3)
-#define OPTION_TARGET           (OPTION_START + 4)
-#define OPTION_ARCHITECTURE_INFO (OPTION_START + 5)
-#define OPTION_ALIGNMENT        (OPTION_START + 6)
+typedef enum {
+  OPTION_DEBUG_INSN = OPTION_START,
+  OPTION_DEBUG_FILE,
+  OPTION_DO_COMMAND,
+  OPTION_ARCHITECTURE,
+  OPTION_TARGET,
+  OPTION_ARCHITECTURE_INFO,
+  OPTION_ENVIRONMENT,
+  OPTION_ALIGNMENT,
+  OPTION_VERBOSE,
+#if defined (SIM_HAVE_BIENDIAN)
+  OPTION_ENDIAN,
+#endif
+  OPTION_DEBUG,
+#ifdef SIM_HAVE_FLATMEM
+  OPTION_MEM_SIZE,
+#endif
+  OPTION_HELP,
+#ifdef SIM_H8300 /* FIXME: Should be movable to h8300 dir.  */
+  OPTION_H8300,
+#endif
+} STANDARD_OPTIONS;
 
 static const OPTION standard_options[] =
 {
-  { {"verbose", no_argument, NULL, 'v'},
+  { {"verbose", no_argument, NULL, OPTION_VERBOSE},
       'v', NULL, "Verbose output",
       standard_option_handler },
 
 #if defined (SIM_HAVE_BIENDIAN) /* ??? && WITH_TARGET_BYTE_ORDER == 0 */
-  { {"endian", required_argument, NULL, 'E'},
+  { {"endian", required_argument, NULL, OPTION_ENDIAN},
       'E', "big|little", "Set endianness",
+      standard_option_handler },
+#endif
+
+#ifdef SIM_HAVE_ENVIRONMENT
+  /* This option isn't supported unless all choices are supported in keeping
+     with the goal of not printing in --help output things the simulator can't
+     do [as opposed to things that just haven't been configured in].  */
+  { {"environment", required_argument, NULL, OPTION_ENVIRONMENT},
+      '\0', "user|virtual|operating", "Set running environment",
       standard_option_handler },
 #endif
 
@@ -107,7 +130,7 @@ static const OPTION standard_options[] =
       '\0', "strict|nonstrict|forced", "Set memory access alignment",
       standard_option_handler },
 
-  { {"debug", no_argument, NULL, 'D'},
+  { {"debug", no_argument, NULL, OPTION_DEBUG},
       'D', NULL, "Print debugging messages",
       standard_option_handler },
   { {"debug-insn", no_argument, NULL, OPTION_DEBUG_INSN},
@@ -118,13 +141,13 @@ static const OPTION standard_options[] =
       standard_option_handler },
 
 #ifdef SIM_H8300 /* FIXME: Should be movable to h8300 dir.  */
-  { {"h8300h", no_argument, NULL, 'h'},
+  { {"h8300h", no_argument, NULL, OPTION_H8300},
       'h', NULL, "Indicate the CPU is h8/300h or h8/300s",
       standard_option_handler },
 #endif
 
 #ifdef SIM_HAVE_FLATMEM
-  { {"mem-size", required_argument, NULL, 'm'},
+  { {"mem-size", required_argument, NULL, OPTION_MEM_SIZE},
       'm', "MEMORY SIZE", "Specify memory size",
       standard_option_handler },
 #endif
@@ -133,7 +156,7 @@ static const OPTION standard_options[] =
       '\0', "COMMAND", ""/*undocumented*/,
       standard_option_handler },
 
-  { {"help", no_argument, NULL, 'H'},
+  { {"help", no_argument, NULL, OPTION_HELP},
       'H', NULL, "Print help information",
       standard_option_handler },
 
@@ -163,14 +186,14 @@ standard_option_handler (sd, opt, arg, is_command)
 {
   int i,n;
 
-  switch (opt)
+  switch ((STANDARD_OPTIONS) opt)
     {
-    case 'v' :
+    case OPTION_VERBOSE:
       STATE_VERBOSE_P (sd) = 1;
       break;
 
 #ifdef SIM_HAVE_BIENDIAN
-    case 'E' :
+    case OPTION_ENDIAN:
       if (strcmp (arg, "big") == 0)
 	{
 	  if (WITH_TARGET_BYTE_ORDER == LITTLE_ENDIAN)
@@ -198,6 +221,34 @@ standard_option_handler (sd, opt, arg, is_command)
 	}
       break;
 #endif
+
+    case OPTION_ENVIRONMENT:
+      if (strcmp (arg, "user") == 0)
+	current_environment = USER_ENVIRONMENT;
+      else if (strcmp (arg, "virtual") == 0)
+	current_environment = VIRTUAL_ENVIRONMENT;
+      else if (strcmp (arg, "operating") == 0)
+	current_environment = OPERATING_ENVIRONMENT;
+      else
+	{
+	  sim_io_eprintf (sd, "Invalid environment specification `%s'\n", arg);
+	  return SIM_RC_FAIL;
+	}
+      if (WITH_ENVIRONMENT != ALL_ENVIRONMENT
+	  && WITH_ENVIRONMENT != current_environment)
+	{
+	  char *type;
+	  switch (WITH_ENVIRONMENT)
+	    {
+	    case USER_ENVIRONMENT: type = "user"; break;
+	    case VIRTUAL_ENVIRONMENT: type = "virtual"; break;
+	    case OPERATING_ENVIRONMENT: type = "operating"; break;
+	    }
+	  sim_io_eprintf (sd, "Simulator compiled for the %s environment only.\n",
+			  type);
+	  return SIM_RC_FAIL;
+	}
+      break;
 
     case OPTION_ALIGNMENT:
       if (strcmp (arg, "strict") == 0)
@@ -235,7 +286,7 @@ standard_option_handler (sd, opt, arg, is_command)
 	  sim_io_eprintf (sd, "Simulator compiled for strict alignment only.\n");
 	  break;
 	case NONSTRICT_ALIGNMENT:
-	  sim_io_eprintf (sd, "Simulator compiled for nonsitrct alignment only.\n");
+	  sim_io_eprintf (sd, "Simulator compiled for nonstrict alignment only.\n");
 	  break;
 	case FORCED_ALIGNMENT:
 	  sim_io_eprintf (sd, "Simulator compiled for forced alignment only.\n");
@@ -243,7 +294,7 @@ standard_option_handler (sd, opt, arg, is_command)
 	}
       return SIM_RC_FAIL;
 
-    case 'D' :
+    case OPTION_DEBUG:
       if (! WITH_DEBUG)
 	sim_io_eprintf (sd, "Debugging not compiled in, `-D' ignored\n");
       else
@@ -282,13 +333,13 @@ standard_option_handler (sd, opt, arg, is_command)
       break;
 
 #ifdef SIM_H8300 /* FIXME: Can be moved to h8300 dir.  */
-    case 'h' :
+    case OPTION_H8300:
       set_h8300h (1);
       break;
 #endif
 
 #ifdef SIM_HAVE_FLATMEM
-    case 'm':
+    case OPTION_MEM_SIZE:
       {
 	unsigned long ul = strtol (arg, NULL, 0);
 	/* 16384: some minimal amount */
@@ -338,7 +389,7 @@ standard_option_handler (sd, opt, arg, is_command)
 	break;
       }
 
-    case 'H':
+    case OPTION_HELP:
       sim_print_help (sd, is_command);
       if (STATE_OPEN_KIND (sd) == SIM_OPEN_STANDALONE)
 	exit (0);
@@ -407,7 +458,7 @@ sim_parse_args (sd, argv)
   /* The `val' option struct entry is dynamically assigned for options that
      only come in the long form.  ORIG_VAL is used to get the original value
      back.  */
-  unsigned char *orig_val;
+  int *orig_val;
   struct option *lp, *long_options;
   const struct option_list *ol;
   const OPTION *opt;
@@ -420,28 +471,26 @@ sim_parse_args (sd, argv)
   /* Count the number of options.  */
   num_opts = 0;
   for (ol = STATE_OPTIONS (sd); ol != NULL; ol = ol->next)
-    for (opt = ol->options; opt->opt.name != NULL; ++opt)
+    for (opt = ol->options; OPTION_VALID_P (opt); ++opt)
       ++num_opts;
 
   /* Initialize duplicate argument checker.  */
   (void) dup_arg_p (NULL);
 
   /* Build the option table for getopt.  */
-  long_options = (struct option *) alloca ((num_opts + 1) * sizeof (struct option));
+  long_options = NZALLOC (struct option, num_opts + 1);
   lp = long_options;
-  short_options = (char *) alloca (num_opts * 3 + 1);
+  short_options = NZALLOC (char, num_opts * 3 + 1);
   p = short_options;
-#if 0 /* ??? necessary anymore? */
-  /* Set '+' as first char so argument permutation isn't done.  This is done
-     to workaround a problem with invoking getopt_long in run.c.: optind gets
-     decremented when the program name is reached.  */
+  handlers = NZALLOC (OPTION_HANDLER *, OPTION_START + num_opts);
+  orig_val = NZALLOC (int, OPTION_START + num_opts);
+  /* Set '+' as first char so argument permutation isn't done.  This
+     is done to stop getopt_long returning options that appear after
+     the target program.  Such options should be passed unchanged into
+     the program image. */
   *p++ = '+';
-#endif
-  handlers = (OPTION_HANDLER **) alloca (256 * sizeof (OPTION_HANDLER *));
-  memset (handlers, 0, 256 * sizeof (OPTION_HANDLER *));
-  orig_val = (unsigned char *) alloca (256);
   for (i = OPTION_START, ol = STATE_OPTIONS (sd); ol != NULL; ol = ol->next)
-    for (opt = ol->options; opt->opt.name != NULL; ++opt)
+    for (opt = ol->options; OPTION_VALID_P (opt); ++opt)
       {
 	if (dup_arg_p (opt->opt.name))
 	  continue;
@@ -452,15 +501,21 @@ sim_parse_args (sd, argv)
 	      *p++ = ':';
 	    else if (opt->opt.has_arg == optional_argument)
 	      { *p++ = ':'; *p++ = ':'; }
+	    handlers[(unsigned char) opt->shortopt] = opt->handler;
+	    if (opt->opt.val != 0)
+	      orig_val[(unsigned char) opt->shortopt] = opt->opt.val;
+	    else
+	      orig_val[(unsigned char) opt->shortopt] = opt->shortopt;
 	  }
-	*lp = opt->opt;
-	/* Dynamically assign `val' numbers for long options that don't have
-	   a short option equivalent.  */
-	if (OPTION_LONG_ONLY_P (opt->opt.val))
-	  lp->val = i++;
-	handlers[(unsigned char) lp->val] = opt->handler;
-	orig_val[(unsigned char) lp->val] = opt->opt.val;
-	++lp;
+	if (opt->opt.name != NULL)
+	  {
+	    *lp = opt->opt;
+	    /* Dynamically assign `val' numbers for long options. */
+	    lp->val = i++;
+	    handlers[lp->val] = opt->handler;
+	    orig_val[lp->val] = opt->opt.val;
+	    ++lp;
+	  }
       }
   *p = 0;
   lp->name = NULL;
@@ -511,7 +566,7 @@ sim_print_help (sd, is_command)
     sim_io_printf (sd, "Commands:\n");
 
   for (ol = STATE_OPTIONS (sd); ol != NULL; ol = ol->next)
-    for (opt = ol->options; opt->opt.name != NULL; ++opt)
+    for (opt = ol->options; OPTION_VALID_P (opt); ++opt)
       {
 	const int indent = 30;
 	int comma, len;
@@ -531,6 +586,7 @@ sim_print_help (sd, is_command)
 	comma = 0;
 	len = 2;
 
+	/* list any short options (aliases) for the current OPT */
 	if (!is_command)
 	  {
 	    o = opt;
@@ -557,9 +613,10 @@ sim_print_help (sd, is_command)
 		  }
 		++o;
 	      }
-	    while (o->opt.name != NULL && o->doc == NULL);
+	    while (OPTION_VALID_P (o) && o->doc == NULL);
 	  }
 	
+	/* list any long options (aliases) for the current OPT */
 	o = opt;
 	do
 	  {
@@ -594,7 +651,7 @@ sim_print_help (sd, is_command)
 	      }
 	    ++o;
 	  }
-	while (o->opt.name != NULL && o->doc == NULL);
+	while (OPTION_VALID_P (o) && o->doc == NULL);
 
 	if (len >= indent)
 	  {
@@ -603,6 +660,7 @@ sim_print_help (sd, is_command)
 	else
 	  sim_io_printf (sd, "%*s", indent - len, "");
 
+	/* print the description, word wrap long lines */
 	{
 	  const char *chp = opt->doc;
 	  unsigned doc_width = 80 - indent;
@@ -666,10 +724,12 @@ sim_args_command (sd, cmd)
       int matching_argi = -1;
       if (argv [0] != NULL)
 	for (ol = STATE_OPTIONS (sd); ol != NULL; ol = ol->next)
-	  for (opt = ol->options; opt->opt.name != NULL; ++opt)
+	  for (opt = ol->options; OPTION_VALID_P (opt); ++opt)
 	    {
 	      int argi = 0;
 	      const char *name = opt->opt.name;
+	      if (name == NULL)
+		continue;
 	      while (strncmp (name, argv [argi], strlen (argv [argi])) == 0)
 		{
 		  name = &name [strlen (argv[argi])];
