@@ -1,3 +1,7 @@
+2000-02-08 Mark Elbrecht <snowball3@bigfoot.com>
+	
+	* coff-go32.c: Update comment. Update copyright.
+ 
 2000-01-27  Thomas de Lellis  <tdel@windriver.com>
 
         * syms.c (bfd_decode_symclass)
