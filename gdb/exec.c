@@ -545,6 +545,7 @@ void
 print_section_info (struct target_ops *t, bfd *abfd)
 {
   struct section_table *p;
+  char *fmt = TARGET_ADDR_BIT <= 32 ? "08l" : "016l";
 
   printf_filtered ("\t`%s', ", bfd_get_filename (abfd));
   wrap_here ("        ");
@@ -558,11 +559,11 @@ print_section_info (struct target_ops *t, bfd *abfd)
   for (p = t->to_sections; p < t->to_sections_end; p++)
     {
       /* FIXME-32x64 need a print_address_numeric with field width */
-      printf_filtered ("\t%s", local_hex_string_custom ((unsigned long) p->addr, "08l"));
-      printf_filtered (" - %s", local_hex_string_custom ((unsigned long) p->endaddr, "08l"));
+      printf_filtered ("\t%s", local_hex_string_custom (p->addr, fmt));
+      printf_filtered (" - %s", local_hex_string_custom (p->endaddr, fmt));
       if (info_verbose)
 	printf_filtered (" @ %s",
-			 local_hex_string_custom ((unsigned long) p->the_bfd_section->filepos, "08l"));
+			 local_hex_string_custom (p->the_bfd_section->filepos, "08l"));
       printf_filtered (" is %s", bfd_section_name (p->bfd, p->the_bfd_section));
       if (p->bfd != abfd)
 	{

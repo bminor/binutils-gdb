@@ -1,3 +1,8 @@
+2002-12-19  Kevin Buettner  <kevinb@redhat.com>
+
+	* exec.c (print_section_info): Select a format string to use with
+	local_hex_string_custom() based upon the value of TARGET_ADDR_BIT.
+
 2002-12-18  Andrew Cagney  <ac131313@redhat.com>
 
 	* frame.c (deprecated_update_current_frame_pc_hack): Replace 
