@@ -1,3 +1,8 @@
+Fri Jun 12 13:07:10 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* sim-engine.c (sim_engine_get_run_state): New function.
+	* sim-engine.h (sim_engine_get_run_state): Declare it.
+
 Thu Jun 11 00:50:03 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* sim-core.h (SIM_CORE_SIGNAL_FN): New typedef.
