@@ -78,7 +78,7 @@
 
 /* The default preprocessor.  */
 
-#define DEFAULT_PREPROCESSOR "gcc -E -xc-header -DRC_INVOKED"
+#define DEFAULT_PREPROCESSOR "gcc -E -xc -DRC_INVOKED"
 
 /* We read the directory entries in a cursor or icon file into
    instances of this structure.  */
