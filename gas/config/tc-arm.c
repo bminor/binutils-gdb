@@ -4877,7 +4877,7 @@ do_umaal (str)
       || skip_past_comma (& str) == FAIL
       || (rm = reg_required_here (& str, 0)) == FAIL
       || skip_past_comma (& str) == FAIL
-      || (rm = reg_required_here (& str, 8)) == FAIL)
+      || (rs = reg_required_here (& str, 8)) == FAIL)
     {
       inst.error = BAD_ARGS;
       return;      
