@@ -1,3 +1,8 @@
+2001-12-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/obj-elf.c (obj_elf_init_stab_section): References are
+	kept to section name strings.  Don't alloca them!
+
 2001-12-12  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-d10v.c (get_operands): Mark OPERAND_PLUS after
