@@ -964,3 +964,50 @@ proc gdb_init { args } {
 proc gdb_finish { } {
     gdb_exit;
 }
+
+global debug_format
+
+# Run the gdb command "info source" and extract the debugging format information
+# from the output and save it in debug_format.
+
+proc get_debug_format { } {
+    global gdb_prompt
+    global verbose
+    global expect_out
+    global debug_format
+
+    set debug_format "unknown"
+    send_gdb "info source\n"
+    gdb_expect {
+	-re ".*Compiled with (.*) debugging format.\r\n$gdb_prompt $" {
+	    set debug_format $expect_out(1,string)
+	    verbose "debug format is $debug_format"
+	    return 1;
+	}
+	-re ".*No current source file.\r\n$gdb_prompt $" {
+	    perror "get_debug_format used when no current source file"
+	    return 0;
+	}
+	timeout {
+	    perror "couldn't check debug format (timed out)."
+	    return 0;
+	}
+    }
+}
+
+# Like setup_xfail, but takes the name of a debug format (DWARF 1, COFF, stabs, etc).
+# If that format matches the format that the current test was compiled with, then
+# the next test is expected to fail for any target.  Returns 1 if the next test or
+# set of tests is expected to fail, 0 otherwise (or if it is unknown).  Must
+# have previously called get_debug_format.
+
+proc setup_xfail_format { format } {
+    global debug_format
+
+    if [string match $debug_format $format] then {
+	setup_xfail "*-*-*"
+	return 1;
+    }
+    return 0
+}    
+

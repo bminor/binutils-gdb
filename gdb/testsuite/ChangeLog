@@ -1,3 +1,18 @@
+Fri Jun 27 07:44:25 1997  Fred Fish  <fnf@cygnus.com>
+
+	* lib/gdb.exp (setup_xfail_format): New function.
+	(get_debug_format): New function to get debug format.
+	(debug_format): New global variable to hold last value set
+	by get_debug_format.
+	* gdb.base/list.exp: Call get_debug_format and expect some
+ 	tests to fail for DWARF 1 and COFF formats.
+	* gdb.c++/ptype.exp: Ditto.
+	* gdb.c++/classes.exp: Ditto.
+	* gdb.c++/cplusfuncs.exp: Ditto.
+	* gdb.c++/inherit.exp: Ditto.
+	* gdb.c++/templates.exp: Ditto.
+	* gdb.c++/virtfunc.exp: Ditto.
+	
 Wed Jun 25 09:08:51 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* lib/gdb.exp(default_gdb_exit): Don't give an error if the remote

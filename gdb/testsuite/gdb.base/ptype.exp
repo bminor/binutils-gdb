@@ -1,4 +1,4 @@
-#   Copyright (C) 1988, 1990, 1991, 1992, 1994 Free Software Foundation, Inc.
+#   Copyright (C) 1988, 1990, 1991, 1992, 1994, 1997 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
 
 # Please email any bugs, comments, and/or additions to this file to:
 # bug-gdb@prep.ai.mit.edu
@@ -54,7 +54,7 @@ gdb_load ${binfile}
 # pre-2.4.5 versions of gcc and most non-gcc compilers).
 
 send_gdb "ptype red1\n"
-expect {
+gdb_expect {
     -re "type = enum primary1_tag \{red1, green1, blue1\}.*$gdb_prompt $"\
 	{
 	    # The workaround is in effect.  As this is a compiler, not GDB,
@@ -121,7 +121,7 @@ gdb_test "ptype enum colors" "type = enum colors \{yellow, purple, pink\}.*" "pt
 gdb_test "ptype boolean" "type = enum \{FALSE, TRUE\}.*" "ptype unnamed typedef'd enumeration" 
 
 # And check that whatis shows the name, not "enum {...}".
-
+# This probably fails for all DWARF 1 cases, so assume so for now. -fnf
 # The problem with xlc is that the stabs look like
 #   :t51=eFALSE:0,TRUE:1,;
 #   boolean:t55=51
@@ -130,6 +130,7 @@ gdb_test "ptype boolean" "type = enum \{FALSE, TRUE\}.*" "ptype unnamed typedef'
 # as (51) doesn't have a name.  Only 55 has a name.
 
 if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" "i*86-*-sysv4*" }
+setup_xfail_format "DWARF 1"
 gdb_test "whatis v_boolean" "type = boolean" \
   "whatis unnamed typedef'd enum (compiler bug in IBM's xlc)"
 
@@ -167,7 +168,7 @@ gdb_test "ptype red" "type = enum \{red, green, blue\}.*" "ptype unnamed enumera
 #setup_xfail "i960-*-*" 1821
 #setup_xfail "mips-idt-*" "mips-sgi-*" "a29k-*-*"
 #send "ptype v_char\n"
-#expect {
+#gdb_expect {
 #    -re "type = char.*$gdb_prompt $"	{ pass "ptype char" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype char" }
 #    timeout		{ fail "(timeout) ptype char" }
@@ -176,7 +177,7 @@ gdb_test "ptype red" "type = enum \{red, green, blue\}.*" "ptype unnamed enumera
 #
 #setup_xfail "mips-*-*" "a29k-*-*"
 #send "ptype v_signed_char\n"
-#expect {
+#gdb_expect {
 #    -re "type = signed char.*$gdb_prompt $"	{ pass "ptype signed char" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype signed char" }
 #    timeout		{ fail "(timeout) ptype signed char" }
@@ -184,7 +185,7 @@ gdb_test "ptype red" "type = enum \{red, green, blue\}.*" "ptype unnamed enumera
 #
 #
 #send "ptype v_unsigned_char\n"
-#expect {
+#gdb_expect {
 #    -re "type = unsigned char.*$gdb_prompt $"	{ pass "ptype unsigned char" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype unsigned char" }
 #    timeout		{ fail "(timeout) ptype unsigned char" }
@@ -193,7 +194,7 @@ gdb_test "ptype red" "type = enum \{red, green, blue\}.*" "ptype unnamed enumera
 gdb_test "ptype v_short" "type = short(| int).*" "ptype short" 
 
 #send "ptype v_signed_short\n"
-#expect {
+#gdb_expect {
 #    -re "type = short.*$gdb_prompt $"	{ pass "ptype signed short" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype signed short" }
 #    timeout		{ fail "(timeout) ptype signed short" }
@@ -201,7 +202,7 @@ gdb_test "ptype v_short" "type = short(| int).*" "ptype short"
 #
 #
 #send "ptype v_unsigned_short\n"
-#expect {
+#gdb_expect {
 #    -re "type = unsigned short.*$gdb_prompt $"	{ pass "ptype unsigned short" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype unsigned short" }
 #    timeout		{ fail "(timeout) ptype unsigned short" }
@@ -211,7 +212,7 @@ gdb_test "ptype v_short" "type = short(| int).*" "ptype short"
 gdb_test "ptype v_int" "type = int.*" "ptype int" 
 
 #send "ptype v_signed_int\n"
-#expect {
+#gdb_expect {
 #    -re "type = int.*$gdb_prompt $"	{ pass "ptype signed int" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype signed int" }
 #    timeout		{ fail "(timeout) ptype signed int" }
@@ -219,7 +220,7 @@ gdb_test "ptype v_int" "type = int.*" "ptype int"
 #
 #
 #send "ptype v_unsigned_int\n"
-#expect {
+#gdb_expect {
 #    -re "type = unsigned int.*$gdb_prompt $"	{ pass "ptype unsigned int" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype unsigned int" }
 #    timeout		{ fail "(timeout) ptype unsigned int" }
@@ -227,7 +228,7 @@ gdb_test "ptype v_int" "type = int.*" "ptype int"
 #
 #
 #send "ptype v_long\n"
-#expect {
+#gdb_expect {
 #    -re "type = long.*$gdb_prompt $"	{ pass "ptype long" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype long" }
 #    timeout		{ fail "(timeout) ptype long" }
@@ -235,7 +236,7 @@ gdb_test "ptype v_int" "type = int.*" "ptype int"
 #
 #
 #send "ptype v_signed_long\n"
-#expect {
+#gdb_expect {
 #    -re "type = long.*$gdb_prompt $"	{ pass "ptype signed long" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype signed long" }
 #    timeout		{ fail "(timeout) ptype signed long" }
@@ -243,7 +244,7 @@ gdb_test "ptype v_int" "type = int.*" "ptype int"
 #
 #
 #send "ptype v_unsigned_long\n"
-#expect {
+#gdb_expect {
 #    -re "type = unsigned long.*$gdb_prompt $"	{ pass "ptype unsigned long" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype unsigned long" }
 #    timeout		{ fail "(timeout) ptype unsigned long" }
@@ -251,7 +252,7 @@ gdb_test "ptype v_int" "type = int.*" "ptype int"
 #
 #
 #send "ptype v_float\n"
-#expect {
+#gdb_expect {
 #    -re "type = float.*$gdb_prompt $"	{ pass "ptype float" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype float" }
 #    timeout		{ fail "(timeout) ptype float" }
@@ -259,7 +260,7 @@ gdb_test "ptype v_int" "type = int.*" "ptype int"
 #
 #
 #send "ptype v_double\n"
-#expect {
+#gdb_expect {
 #    -re "type = double.*$gdb_prompt $"	{ pass "ptype double" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype double" }
 #    timeout		{ fail "(timeout) ptype double" }
@@ -272,7 +273,7 @@ gdb_test "ptype v_int" "type = int.*" "ptype int"
 #setup_xfail "i960-*-*" 1821
 #setup_xfail "mips-idt-*" "mips-sgi-*" "a29k-*-*"
 #send "ptype v_char_array\n"
-#expect {
+#gdb_expect {
 #    -re "type = char .2..*$gdb_prompt $"	{ pass "ptype char array" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype char array" }
 #    timeout		{ fail "(timeout) ptype char array" }
@@ -281,7 +282,7 @@ gdb_test "ptype v_int" "type = int.*" "ptype int"
 #
 #setup_xfail "mips-*-*" "a29k-*-*"
 #send "ptype v_signed_char_array\n"
-#expect {
+#gdb_expect {
 #    -re "type = (|signed )char .2..*$gdb_prompt $"	{ pass "ptype signed char array" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype signed char array" }
 #    timeout		{ fail "(timeout) ptype signed char array" }
@@ -289,7 +290,7 @@ gdb_test "ptype v_int" "type = int.*" "ptype int"
 #
 #
 #send "ptype v_unsigned_char_array\n"
-#expect {
+#gdb_expect {
 #    -re "type = unsigned char .2..*$gdb_prompt $"	{ pass "ptype unsigned char array" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype unsigned char array" }
 #    timeout		{ fail "(timeout) ptype unsigned char array" }
@@ -298,7 +299,7 @@ gdb_test "ptype v_int" "type = int.*" "ptype int"
 #
 #
 #send "ptype v_int_array\n"
-#expect {
+#gdb_expect {
 #    -re "type = int .2..*$gdb_prompt $"	{ pass "ptype int array" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype int array" }
 #    timeout		{ fail "(timeout) ptype int array" }
@@ -306,7 +307,7 @@ gdb_test "ptype v_int" "type = int.*" "ptype int"
 #
 #
 #send "ptype v_signed_int_array\n"
-#expect {
+#gdb_expect {
 #    -re "type = int .2..*$gdb_prompt $"	{ pass "ptype signed int array" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype signed int array" }
 #    timeout		{ fail "(timeout) ptype signed int array" }
@@ -314,7 +315,7 @@ gdb_test "ptype v_int" "type = int.*" "ptype int"
 #
 #
 #send "ptype v_unsigned_int_array\n"
-#expect {
+#gdb_expect {
 #    -re "type = unsigned int .2..*$gdb_prompt $"	{ pass "ptype unsigned int array" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype unsigned int array" }
 #    timeout		{ fail "(timeout) ptype unsigned int array" }
@@ -322,7 +323,7 @@ gdb_test "ptype v_int" "type = int.*" "ptype int"
 #
 #
 #send "ptype v_long_array\n"
-#expect {
+#gdb_expect {
 #    -re "type = (long|int|long int) .2..*$gdb_prompt $"	{ 
 #	pass "ptype long array" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype long array" }
@@ -331,7 +332,7 @@ gdb_test "ptype v_int" "type = int.*" "ptype int"
 #
 #
 #send "ptype v_signed_long_array\n"
-#expect {
+#gdb_expect {
 #    -re "type = (long|int|long int) .2..*$gdb_prompt $"	{ 
 #	pass "ptype signed long array" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype signed long array" }
@@ -340,7 +341,7 @@ gdb_test "ptype v_int" "type = int.*" "ptype int"
 #
 #
 #send "ptype v_unsigned_long_array\n"
-#expect {
+#gdb_expect {
 #    -re "type = unsigned long .2..*$gdb_prompt $"	{ pass "ptype unsigned long array" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype unsigned long array" }
 #    timeout		{ fail "(timeout) ptype unsigned long array" }
@@ -348,7 +349,7 @@ gdb_test "ptype v_int" "type = int.*" "ptype int"
 #
 #
 #send "ptype v_float_array\n"
-#expect {
+#gdb_expect {
 #    -re "type = float .2..*$gdb_prompt $"	{ pass "ptype float array" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype float array" }
 #    timeout		{ fail "(timeout) ptype float array" }
@@ -356,7 +357,7 @@ gdb_test "ptype v_int" "type = int.*" "ptype int"
 #
 #
 #send "ptype v_double_array\n"
-#expect {
+#gdb_expect {
 #    -re "type = double .2..*$gdb_prompt $"	{ pass "ptype double array" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype double array" }
 #    timeout		{ fail "(timeout) ptype double array" }
@@ -364,6 +365,7 @@ gdb_test "ptype v_int" "type = int.*" "ptype int"
 #
 
 if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" "i*86-*-sysv4*" }
+setup_xfail_format "DWARF 1"
 gdb_test "ptype t_char_array" "type = (|unsigned )char \\\[0?\\\]"
 
 #
@@ -373,7 +375,7 @@ gdb_test "ptype t_char_array" "type = (|unsigned )char \\\[0?\\\]"
 #setup_xfail "i960-*-*" 1821
 #setup_xfail "mips-idt-*" "mips-sgi-*" "a29k-*-*"
 #send "ptype v_char_pointer\n"
-#expect {
+#gdb_expect {
 #    -re "type = char \*.*$gdb_prompt $"	{ pass "ptype char pointer" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype char pointer" }
 #    timeout		{ fail "(timeout) ptype char pointer" }
@@ -382,7 +384,7 @@ gdb_test "ptype t_char_array" "type = (|unsigned )char \\\[0?\\\]"
 #
 #setup_xfail "mips-*-*" "a29k-*-*"
 #send "ptype v_signed_char_pointer\n"
-#expect {
+#gdb_expect {
 #    -re "type = (|signed )char \*.*$gdb_prompt $"
 #	{ pass "ptype signed char pointer" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype signed char pointer" }
@@ -391,7 +393,7 @@ gdb_test "ptype t_char_array" "type = (|unsigned )char \\\[0?\\\]"
 #
 #
 #send "ptype v_unsigned_char_pointer\n"
-#expect {
+#gdb_expect {
 #    -re "type = unsigned char \*.*$gdb_prompt $"	{ pass "ptype unsigned char pointer" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype unsigned char pointer" }
 #    timeout		{ fail "(timeout) ptype unsigned char pointer" }
@@ -399,7 +401,7 @@ gdb_test "ptype t_char_array" "type = (|unsigned )char \\\[0?\\\]"
 #
 #
 #send "ptype v_short_pointer\n"
-#expect {
+#gdb_expect {
 #    -re "type = (short|short int) \*.*$gdb_prompt $"	{ pass "ptype short pointer" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype short pointer" }
 #    timeout		{ fail "(timeout) ptype short pointer" }
@@ -407,7 +409,7 @@ gdb_test "ptype t_char_array" "type = (|unsigned )char \\\[0?\\\]"
 #
 #
 #send "ptype v_signed_short_pointer\n"
-#expect {
+#gdb_expect {
 #    -re "type = short \*.*$gdb_prompt $"	{ pass "ptype signed short pointer" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype signed short pointer" }
 #    timeout		{ fail "(timeout) ptype signed short pointer" }
@@ -415,7 +417,7 @@ gdb_test "ptype t_char_array" "type = (|unsigned )char \\\[0?\\\]"
 #
 #
 #send "ptype v_unsigned_short_pointer\n"
-#expect {
+#gdb_expect {
 #    -re "type = unsigned short \*.*$gdb_prompt $"	{ pass "ptype unsigned short pointer" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype unsigned short pointer" }
 #    timeout		{ fail "(timeout) ptype unsigned short pointer" }
@@ -423,7 +425,7 @@ gdb_test "ptype t_char_array" "type = (|unsigned )char \\\[0?\\\]"
 #
 #
 #send "ptype v_int_pointer\n"
-#expect {
+#gdb_expect {
 #    -re "type = int \*.*$gdb_prompt $"	{ pass "ptype int pointer" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype int pointer" }
 #    timeout		{ fail "(timeout) ptype int pointer" }
@@ -431,7 +433,7 @@ gdb_test "ptype t_char_array" "type = (|unsigned )char \\\[0?\\\]"
 #
 #
 #send "ptype v_signed_int_pointer\n"
-#expect {
+#gdb_expect {
 #    -re "type = int \*.*$gdb_prompt $"	{ pass "ptype signed int pointer" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype signed int pointer" }
 #    timeout		{ fail "(timeout) ptype signed int pointer" }
@@ -439,7 +441,7 @@ gdb_test "ptype t_char_array" "type = (|unsigned )char \\\[0?\\\]"
 #
 #
 #send "ptype v_unsigned_int_pointer\n"
-#expect {
+#gdb_expect {
 #    -re "type = unsigned int \*.*$gdb_prompt $"	{ pass "ptype unsigned int pointer" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype unsigned int pointer" }
 #    timeout		{ fail "(timeout) ptype unsigned int pointer" }
@@ -447,7 +449,7 @@ gdb_test "ptype t_char_array" "type = (|unsigned )char \\\[0?\\\]"
 #
 #
 #send "ptype v_long_pointer\n"
-#expect {
+#gdb_expect {
 #    -re "type = long \*.*$gdb_prompt $"	{ pass "ptype long pointer" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype long pointer" }
 #    timeout		{ fail "(timeout) ptype long pointer" }
@@ -455,7 +457,7 @@ gdb_test "ptype t_char_array" "type = (|unsigned )char \\\[0?\\\]"
 #
 #
 #send "ptype v_signed_long_pointer\n"
-#expect {
+#gdb_expect {
 #    -re "type = long \*.*$gdb_prompt $"	{ pass "ptype signed long pointer" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype signed long pointer" }
 #    timeout		{ fail "(timeout) ptype signed long pointer" }
@@ -463,7 +465,7 @@ gdb_test "ptype t_char_array" "type = (|unsigned )char \\\[0?\\\]"
 #
 #
 #send "ptype v_unsigned_long_pointer\n"
-#expect {
+#gdb_expect {
 #    -re "type = unsigned long \*.*$gdb_prompt $"	{ pass "ptype unsigned long pointer" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype unsigned long pointer" }
 #    timeout		{ fail "(timeout) ptype unsigned long pointer" }
@@ -471,7 +473,7 @@ gdb_test "ptype t_char_array" "type = (|unsigned )char \\\[0?\\\]"
 #
 #
 #send "ptype v_float_pointer\n"
-#expect {
+#gdb_expect {
 #    -re "type = float \*.*$gdb_prompt $"	{ pass "ptype float pointer" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype float pointer" }
 #    timeout		{ fail "(timeout) ptype float pointer" }
@@ -479,7 +481,7 @@ gdb_test "ptype t_char_array" "type = (|unsigned )char \\\[0?\\\]"
 #
 #
 #send "ptype v_double_pointer\n"
-#expect {
+#gdb_expect {
 #    -re "type = double \*.*$gdb_prompt $"	{ pass "ptype double pointer" }
 #    -re ".*$gdb_prompt $"	{ fail "ptype double pointer" }
 #    timeout		{ fail "(timeout) ptype double pointer" }
@@ -513,6 +515,7 @@ gdb_test "ptype nested_su.inner_union_instance" "type = union inner_union \{.*\[
 
 if [runto_main] then {
 
+  get_debug_format
   if [target_info exists gdb,cannot_call_functions] {
     setup_xfail "*-*-*" 2416
     fail "This target can not call functions"
