@@ -5,6 +5,7 @@
 	(eh8300sxn.c, eh8300sxnelf.c): New rules.
 	* Makefile.in: Regenerate.
 	* emulparams/h8300sxnelf.sh, emulparams/h8300sxn.sh: New files.
+	* scripttempl/h8300sxn.sc: New file.
 
 2003-06-10  Alan Modra  <amodra@bigpond.net.au>
 
