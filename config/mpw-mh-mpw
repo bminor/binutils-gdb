@@ -1,12 +1,12 @@
 # This is an MPW makefile fragment.
 
-CC = C -d MPW_C
-#CC = gC
+CC = C -d MPW_C -d ALMOST_STDC
 
-#CFLAGS = -d MPW -d ALMOST_STDC -w -mc68020 -mc68881 -model far -b
-CFLAGS = -d MPW -d ALMOST_STDC -w -mc68020 -mc68881 -model far -b
+#GCC = gC1
 
-LDFLAGS =  -d -model far -c 'MPS ' -t MPST
+CFLAGS = -d MPW -w -mc68020 -model far -b
+
+LDFLAGS =  -w -d -model far -c 'MPS ' -t MPST
 
 EXTRALIBS = \Option-d
 	"{CLibraries}"StdClib.o \Option-d
