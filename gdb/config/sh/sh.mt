@@ -1,5 +1,5 @@
 # Target: Hitachi Super-H ICE and simulator
-TDEPFILES= exec.o sh-tdep.o remote-sim.o interp.o table.o remote-e7000.o 
+TDEPFILES= exec.o sh-tdep.o remote-sim.o interp.o table.o remote-e7000.o  ser-e7kpc.o
 
 over: all
 interp.o:
