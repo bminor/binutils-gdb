@@ -1,7 +1,7 @@
 Mon Oct 25 11:08:59 1993  Stu Grossman  (grossman at cygnus.com)
 
-	* infrun.c (wait_for_inferior):  Fix PC out of subroutine bounds
-	check to use prev_func_start/end instead of stop_func_start/end.
+	* infrun.c (wait_for_inferior):  Fix PC out of objfile bounds
+	check to just use stop_func_name == 0.
 	* remote-udi.c (store_register):  Invalidate NPC/PC_REGNUM after
 	changing PC.
 
