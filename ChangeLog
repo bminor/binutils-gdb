@@ -1,3 +1,12 @@
+Wed Nov 15 11:45:23 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure: Handle LD and LD_FOR_TARGET when configuring a
+	Canadian Cross.
+
+Tue Nov 14 15:03:12 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
+
+	* config/mh-i386win32: add LD_FOR_TARGET.
+
 Tue Nov 14 14:56:11 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
 
 	* configure.in (target_libs): add target-winsup.
