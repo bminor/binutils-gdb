@@ -1,3 +1,11 @@
+Mon Dec 11 14:14:08 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* read.c (read_a_source_file): If tc_unrecognized_line is defined,
+	call it.
+	* config/tc-a29k.h (tc_unrecognized_line): Define.
+	* config/tc-a29k.c (a29k_unrecognized_line): New function.
+	(md_operand): Handle a29k style local dollar labels.
+
 Wed Dec  6 17:52:52 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/obj-multi.h: If OBJ_MAYBE_ELF, define OBJ_SYMFIELD_TYPE.
