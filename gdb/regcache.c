@@ -269,6 +269,18 @@ regcache_xfree (struct regcache *regcache)
 }
 
 void
+do_regcache_xfree (void *data)
+{
+  regcache_xfree (data);
+}
+
+struct cleanup *
+make_cleanup_regcache_xfree (struct regcache *regcache)
+{
+  return make_cleanup (do_regcache_xfree, regcache);
+}
+
+void
 regcache_cpy (struct regcache *dst, struct regcache *src)
 {
   int i;

@@ -23,6 +23,8 @@
 #if !defined (VALUE_H)
 #define VALUE_H 1
 
+struct regcache;
+
 #include "doublest.h"
 
 /*
@@ -406,7 +408,8 @@ extern struct value *value_repeat (struct value *arg1, int count);
 extern struct value *value_subscript (struct value *array, struct value *idx);
 
 extern struct value *value_being_returned (struct type *valtype,
-					   char *retbuf, int struct_return);
+					   struct regcache *retbuf,
+					   int struct_return);
 
 extern struct value *value_in (struct value *element, struct value *set);
 

@@ -1316,7 +1316,7 @@ hand_function_call (struct value *function, int nargs, struct value **args)
   struct type *value_type;
   unsigned char struct_return;
   CORE_ADDR struct_addr = 0;
-  char *retbuf;
+  struct regcache *retbuf;
   struct cleanup *retbuf_cleanup;
   struct inferior_status *inf_status;
   struct cleanup *inf_status_cleanup;
@@ -1339,8 +1339,8 @@ hand_function_call (struct value *function, int nargs, struct value **args)
      containing the register values).  This chain is create BEFORE the
      inf_status chain so that the inferior status can cleaned up
      (restored or discarded) without having the retbuf freed.  */
-  retbuf = xmalloc (REGISTER_BYTES);
-  retbuf_cleanup = make_cleanup (xfree, retbuf);
+  retbuf = regcache_xmalloc (current_gdbarch);
+  retbuf_cleanup = make_cleanup_regcache_xfree (retbuf);
 
   /* A cleanup for the inferior status.  Create this AFTER the retbuf
      so that this can be discarded or applied without interfering with

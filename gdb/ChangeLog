@@ -1,3 +1,28 @@
+2002-07-03  Andrew Cagney  <ac131313@redhat.com>
+
+	* infcmd.c (print_return_value): Remove compatibility code calling
+	deprecated_grub_regcache_for_registers.
+	
+	* values.c: Include "regcache.h".
+	(value_being_returned): Update.  Use
+	deprecated_grub_regcache_for_registers to extract the register
+	buffer address.  
+	* value.h (value_being_returned): Change ``retbuf'' parameter to a
+	``struct regcache''.
+	* Makefile.in (values.o): Add dependency on $(regcache_h).
+
+	* inferior.h (run_stack_dummy): Change type of second parameter to
+	a ``struct regcache''.
+	* valops.c (hand_function_call): Change type of retbuf to ``struct
+	regcache''.  Allocate using regcache_xmalloc, clean using
+	make_cleanup_regcache_xfree.
+	* infcmd.c (run_stack_dummy): Update.  Use
+	regcache_cpu_no_passthrough instead of memcpy to copy the buffer.
+
+	* regcache.c (do_regcache_xfree): New function.
+	(make_cleanup_regcache_xfree): New function.
+	* regcache.h (make_cleanup_regcache_xfree): Declare.
+
 2002-07-03  Martin M. Hunt  <hunt@redhat.com>
 
 	* event-top.c (command_line_handler): Don't read past

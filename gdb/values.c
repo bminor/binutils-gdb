@@ -34,6 +34,7 @@
 #include "demangle.h"
 #include "doublest.h"
 #include "gdb_assert.h"
+#include "regcache.h"
 
 /* Prototypes for exported functions. */
 
@@ -1224,8 +1225,10 @@ value_from_double (struct type *type, DOUBLEST num)
 
 /* ARGSUSED */
 struct value *
-value_being_returned (struct type *valtype, char *retbuf, int struct_return)
+value_being_returned (struct type *valtype, struct regcache *buf,
+		      int struct_return)
 {
+  char *retbuf = deprecated_grub_regcache_for_registers (buf);
   struct value *val;
   CORE_ADDR addr;
 

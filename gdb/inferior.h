@@ -154,7 +154,7 @@ extern void generic_mourn_inferior (void);
 
 extern void terminal_ours (void);
 
-extern int run_stack_dummy (CORE_ADDR, char *);
+extern int run_stack_dummy (CORE_ADDR , struct regcache *);
 
 extern CORE_ADDR read_pc (void);
 

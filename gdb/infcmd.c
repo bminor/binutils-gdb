@@ -40,8 +40,7 @@
 #include "ui-out.h"
 #include "event-top.h"
 #include "parser-defs.h"
-
-#include "regcache.h"	/* for deprecated_grub_regcache_for_registers().  */
+#include "regcache.h"
 
 /* Functions exported for general use: */
 
@@ -971,7 +970,7 @@ breakpoint_auto_delete_contents (PTR arg)
    will eventually be popped when we do hit the dummy end breakpoint).  */
 
 int
-run_stack_dummy (CORE_ADDR addr, char *buffer)
+run_stack_dummy (CORE_ADDR addr, struct regcache *buffer)
 {
   struct cleanup *old_cleanups = make_cleanup (null_cleanup, 0);
   int saved_async = 0;
@@ -1044,9 +1043,7 @@ run_stack_dummy (CORE_ADDR addr, char *buffer)
     return 2;
 
   /* On normal return, the stack dummy has been popped already.  */
-
-  memcpy (buffer, deprecated_grub_regcache_for_registers (stop_registers),
-	  REGISTER_BYTES);
+  regcache_cpy_no_passthrough (buffer, stop_registers);
   return 0;
 }
 
@@ -1146,15 +1143,7 @@ print_return_value (int structure_return, struct type *value_type)
 
   if (!structure_return)
     {
-#if 0
       value = value_being_returned (value_type, stop_registers, structure_return);
-#else
-      /* FIXME: cagney/2002-06-22: Function value_being_returned()
-         should take a regcache as a parameter.  */
-      value = value_being_returned
-	(value_type, deprecated_grub_regcache_for_registers (stop_registers),
-	 structure_return);
-#endif
       stb = ui_out_stream_new (uiout);
       ui_out_text (uiout, "Value returned is ");
       ui_out_field_fmt (uiout, "gdb-result-var", "$%d", record_latest_value (value));
@@ -1175,15 +1164,7 @@ print_return_value (int structure_return, struct type *value_type)
       ui_out_text (uiout, ".");
       ui_out_text (uiout, " Cannot determine contents\n");
 #else
-#if 0
       value = value_being_returned (value_type, stop_registers, structure_return);
-#else
-      /* FIXME: cagney/2002-06-22: Function value_being_returned()
-         should take a regcache as a parameter.  */
-      value = value_being_returned
-	(value_type, deprecated_grub_regcache_for_registers (stop_registers),
-	 structure_return);
-#endif
       stb = ui_out_stream_new (uiout);
       ui_out_text (uiout, "Value returned is ");
       ui_out_field_fmt (uiout, "gdb-result-var", "$%d", record_latest_value (value));
