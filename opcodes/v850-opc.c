@@ -555,8 +555,10 @@ const struct v850_opcode v850_opcodes[] =
 /* end-sanitize-v850eq */
 { "sld.b",	one (0x0300),		one (0x0780),	      	{D7,   EP,   R2},	1 },
 { "sld.h",	one (0x0400),		one (0x0780),	      	{D8_7, EP,   R2}, 	1 },
+/* start-sanitize-v850e */
 { "sld.bu",     one (0x0060),		one (0x07f0),         	{D4,   EP,   R2_NOTR0},	1 },
 { "sld.hu",     one (0x0070),		one (0x07f0),         	{D5_4, EP,   R2_NOTR0},	1 },
+/* end-sanitize-v850e */
 /* start-sanitize-v850eq */
 #endif
 /* end-sanitize-v850eq */
@@ -570,7 +572,7 @@ const struct v850_opcode v850_opcodes[] =
 { "pushmh",	two (0x07e0, 0x0003),	two (0xfff0, 0x0007), 	{LIST18_H}, 		0 },
 { "popml",	two (0x07f0, 0x0001),	two (0xfff0, 0x0007), 	{LIST18_L}, 		0 },
 { "popmh",	two (0x07f0, 0x0003),	two (0xfff0, 0x0007), 	{LIST18_H}, 		0 },
-/* end-sanitize-v850e */
+/* end-sanitize-v850eq */
   
 /* start-sanitize-v850e */  
 { "prepare",    two (0x0780, 0x0003),	two (0xffc0, 0x001f), 	{LIST12, IMM5, SP}, 	0 },
@@ -615,14 +617,14 @@ const struct v850_opcode v850_opcodes[] =
 { "cmov",	two (0x07e0, 0x0320),	two (0x07e0, 0x07e1), 	{MOVCC, R2, R1, R3}, 	0 },
 { "cmov",	two (0x07e0, 0x0300),	two (0x07e0, 0x07e1), 	{MOVCC, I5, R2, R3}, 	0 },
 /* end-sanitize-v850e */
+/* start-sanitize-v850e */
 { "mul",	two (0x07e0, 0x0220),	two (0x07e0, 0x07ff), 	{R1, R2, R3}, 		0 },
-/* start-sanitize-v850e */
 { "mul",	two (0x07e0, 0x0240),	two (0x07e0, 0x07c3), 	{I9, R2, R3}, 		0 },
-/* end-sanitize-v850e */
 { "mulu",	two (0x07e0, 0x0222),	two (0x07e0, 0x07ff), 	{R1, R2, R3}, 		0 },
-  
-/* start-sanitize-v850e */
 { "mulu",	two (0x07e0, 0x0242),	two (0x07e0, 0x07c3), 	{U9, R2, R3}, 		0 },
+/* end-sanitize-v850e */
+/* start-sanitize-v850e */
+
 { "div",	two (0x07e0, 0x02c0),	two (0x07e0, 0x07ff), 	{R1, R2, R3}, 		0 },
 { "divu",	two (0x07e0, 0x02c2),	two (0x07e0, 0x07ff), 	{R1, R2, R3}, 		0 },
 { "divhu",	two (0x07e0, 0x0282),   two (0x07e0, 0x07ff), 	{R1, R2, R3}, 		0 },
