@@ -48,6 +48,7 @@ static char * parse_exp    PARAMS ((char *, expressionS *));
 static char * parse_rt     PARAMS ((char *, char **, int, expressionS *));
 static char * parse_imm    PARAMS ((char *, unsigned *, unsigned, unsigned));
 static char * parse_mem    PARAMS ((char *, unsigned *, unsigned *, unsigned));
+static char * parse_psrmod PARAMS ((char *, unsigned *));
 static void   make_name PARAMS ((char *, char *, int));
 static int    enter_literal PARAMS ((expressionS *, int));
 static void   dump_literals PARAMS ((int));
@@ -64,8 +65,8 @@ static void   mcore_s_comm    PARAMS ((int));
    object. They should use MCORE_INST_XXX macros to get the opcodes
    and then use these two macros to crack the MCORE_INST value into
    the appropriate byte values.  */
-#define	INST_BYTE0(x)  (((x) >> 8) & 0xFF)
-#define	INST_BYTE1(x)  ((x) & 0xFF)
+#define	INST_BYTE0(x)  (target_big_endian ? (((x) >> 8) & 0xFF) : ((x) & 0xFF))
+#define	INST_BYTE1(x)  (target_big_endian ? ((x) & 0xFF) : (((x) >> 8) & 0xFF))
 
 const char comment_chars[] = "#/";
 const char line_separator_chars[] = ";";
@@ -103,6 +104,14 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
 #define U12_LEN	        2
 #define U32_LEN	        8	/* allow for align */
 
+typedef enum
+{
+  M210,
+  M340
+}
+cpu_type;
+
+cpu_type cpu = M340;
 
 /* Initialize the relax table */
 const relax_typeS md_relax_table[] =
@@ -587,6 +596,46 @@ parse_creg (s, reg)
 }
 
 static char *
+parse_psrmod (s, reg)
+  char *     s;
+  unsigned * reg;
+{
+  int  i;
+  char buf[10];
+  static struct psrmods
+  {
+    char *       name;
+    unsigned int value;
+  }
+  psrmods[] =
+  {
+    { "ie", 1 },
+    { "fe", 2 },
+    { "ee", 4 },
+    { "af", 8 }	/* Really 0 and non-combinable.  */
+  };
+  
+  for (i = 0; i < 2; i++)
+    buf[i] = isascii (s[i]) ? tolower (s[i]) : 0;
+  
+  for (i = sizeof (psrmods) / sizeof (psrmods[0]); i--;)
+    {
+      if (! strncmp (psrmods[i].name, buf, 2))
+	{
+          * reg = psrmods[i].value;
+	  
+          return s + 2;
+	}
+    }
+  
+  as_bad (_("bad/missing psr specifier"));
+  
+  * reg = 0;
+  
+  return s;
+}
+
+static char *
 parse_exp (s, e)
      char * s;
      expressionS * e;
@@ -1032,6 +1081,13 @@ md_assemble (str)
       output = frag_more (2);
       break;
 
+    case MULSH:
+      if (cpu == M210)
+	{
+	  as_bad (_("M340 specific opcode used when assembling for M210"));
+	  break;
+	}
+      /* drop through... */
     case O2:
       op_end = parse_reg (op_end + 1, & reg);
       inst |= reg;
@@ -1601,6 +1657,35 @@ md_assemble (str)
       output = frag_more (2);
       break;
 
+    case OPSR:
+      if (cpu == M210)
+	{
+	  as_bad (_("M340 specific opcode used when assembling for M210"));
+	  break;
+	}
+      
+      op_end = parse_psrmod (op_end + 1, & reg);
+      
+      /* Look for further selectors.  */
+      while (* op_end == ',')
+	{
+	  unsigned value;
+	    
+	  op_end = parse_psrmod (op_end + 1, & value);
+	  
+	  if (value & reg)
+	    as_bad (_("duplicated psr bit specifier"));
+	  
+	  reg |= value;
+	}
+      
+      if (reg > 8)
+	as_bad (_("`af' must appear alone"));
+	
+      inst |= (reg & 0x7);
+      output = frag_more (2);
+      break;
+ 
     default:
       as_bad (_("unimplemented opcode \"%s\""), name);
     }
@@ -1690,6 +1775,16 @@ md_atof (type, litP, sizeP)
 
   *sizeP = prec * sizeof (LITTLENUM_TYPE);
   
+  if (! target_big_endian)
+    {
+      for (i = prec - 1; i >= 0; i--)
+	{
+	  md_number_to_chars (litP, (valueT) words[i],
+			      sizeof (LITTLENUM_TYPE));
+	  litP += sizeof (LITTLENUM_TYPE);
+	}
+    }
+  else
     for (i = 0; i < prec; i++)
       {
 	md_number_to_chars (litP, (valueT) words[i],
@@ -1706,6 +1801,9 @@ CONST char * md_shortopts = "";
 #define OPTION_JSRI2BSR_OFF	(OPTION_MD_BASE + 1)
 #define OPTION_SIFILTER_ON	(OPTION_MD_BASE + 2)
 #define OPTION_SIFILTER_OFF	(OPTION_MD_BASE + 3)
+#define OPTION_CPU		(OPTION_MD_BASE + 4)
+#define OPTION_EB		(OPTION_MD_BASE + 5)
+#define OPTION_EL		(OPTION_MD_BASE + 6)
 
 struct option md_longopts[] =
 {
@@ -1713,6 +1811,9 @@ struct option md_longopts[] =
   { "jsri2bsr",    no_argument, NULL, OPTION_JSRI2BSR_ON},
   { "sifilter",    no_argument, NULL, OPTION_SIFILTER_ON},
   { "no-sifilter", no_argument, NULL, OPTION_SIFILTER_OFF},
+  { "cpu",         required_argument, NULL, OPTION_CPU},
+  { "EB",          no_argument, NULL, OPTION_EB},
+  { "EL",          no_argument, NULL, OPTION_EL},
   { NULL,          no_argument, NULL, 0}
 };
 
@@ -1728,7 +1829,20 @@ md_parse_option (c, arg)
 
   switch (c)
     {
+    case OPTION_CPU:
+      if (streq (arg, "210"))
+	{
+	  cpu = M210;
+	  target_big_endian = 1;
+	}
+      else if (streq (arg, "340"))
+	cpu = M340;
+      else
+        as_warn (_("unrecognised cpu type '%s'"), arg);
+      break;
       
+    case OPTION_EB: target_big_endian = 1; break;
+    case OPTION_EL: target_big_endian = 0; cpu = M340; break;
     case OPTION_JSRI2BSR_ON:  do_jsri2bsr = 1;   break;
     case OPTION_JSRI2BSR_OFF: do_jsri2bsr = 0;   break;
     case OPTION_SIFILTER_ON:  sifilter_mode = 1; break;
@@ -1746,7 +1860,10 @@ md_show_usage (stream)
   fprintf (stream, _("\
 MCORE specific options:\n\
   -{no-}jsri2bsr	  {dis}able jsri to bsr transformation (def: dis)\n\
-  -{no-}sifilter	  {dis}able silicon filter behavior (def: dis)"));
+  -{no-}sifilter	  {dis}able silicon filter behavior (def: dis)\n\
+  -cpu=[210|340]          select CPU type\n\
+  -EB                     assemble for a big endian system (default)\n\
+  -EL                     assemble for a little endian system\n"));
 }
 
 int md_short_jump_size;
@@ -1800,6 +1917,16 @@ md_convert_frag (abfd, sec, fragP)
 	  as_bad (_("odd displacement at %x"), next_inst - 2);
 	
 	disp >>= 1;
+	
+	if (! target_big_endian)
+	  {
+	    t0 = buffer[1] & 0xF8;
+	
+	    md_number_to_chars (buffer, disp, 2);
+	
+	    buffer[1] = (buffer[1] & 0x07) | t0;
+	  }
+	else
 	  {
 	    t0 = buffer[0] & 0xF8;
 	
@@ -1829,6 +1956,9 @@ md_convert_frag (abfd, sec, fragP)
 	int first_inst = fragP->fr_fix + fragP->fr_address;
 	int needpad = (first_inst & 3);
 
+	if (! target_big_endian)
+	  buffer[1] ^= 0x08;
+	else
 	  buffer[0] ^= 0x08;	/* Toggle T/F bit */
 
 	buffer[2] = INST_BYTE0 (MCORE_INST_JMPI);	/* Build jmpi */
@@ -1836,6 +1966,12 @@ md_convert_frag (abfd, sec, fragP)
  
 	if (needpad)
 	  {
+	    if (! target_big_endian)
+	      {
+		buffer[0] = 4;	/* branch over jmpi, pad, and ptr */
+		buffer[2] = 1;	/* jmpi offset of 1 gets the pointer */
+	      }
+	    else
 	      {
 		buffer[1] = 4;	/* branch over jmpi, pad, and ptr */
 		buffer[3] = 1;	/* jmpi offset of 1 gets the pointer */
@@ -1860,6 +1996,12 @@ md_convert_frag (abfd, sec, fragP)
 	       shrinking the fragment. '3' is the amount of code that
 	       we inserted here, but '4' is right for the space we reserved
 	       for this fragment. */
+	    if (! target_big_endian)
+	      {
+		buffer[0] = 3;	/* branch over jmpi, and ptr */
+		buffer[2] = 0;	/* jmpi offset of 0 gets the pointer */
+	      }
+	    else
 	      {
 		buffer[1] = 3;	/* branch over jmpi, and ptr */
 		buffer[3] = 0;	/* jmpi offset of 0 gets the pointer */
@@ -1880,6 +2022,9 @@ md_convert_frag (abfd, sec, fragP)
 	       the branch displacement so that it goes beyond the 
 	       full length of the fragment, not just what we actually
 	       filled in.  */
+	    if (! target_big_endian)
+	      buffer[0] = 4;	/* jmpi, ptr, and the 'tail pad' */
+	    else
 	      buffer[1] = 4;	/* jmpi, ptr, and the 'tail pad' */
 	  }
 	
@@ -1905,6 +2050,9 @@ md_convert_frag (abfd, sec, fragP)
 
 	if (needpad)
 	  {
+	    if (! target_big_endian)
+	      buffer[0] = 1;	/* jmpi offset of 1 since padded */
+	    else
 	      buffer[1] = 1;	/* jmpi offset of 1 since padded */
 	    buffer[2] = 0;	/* alignment */
 	    buffer[3] = 0;
@@ -1921,6 +2069,9 @@ md_convert_frag (abfd, sec, fragP)
 	  }
 	else
 	  {
+	    if (! target_big_endian)
+	      buffer[0] = 0;	/* jmpi offset of 0 if no pad */
+	    else
 	      buffer[1] = 0;	/* jmpi offset of 0 if no pad */
 	    buffer[2] = 0;	/* space for 32 bit address */
 	    buffer[3] = 0;
@@ -1988,8 +2139,16 @@ md_apply_fix3 (fixP, valp, segment)
 	as_bad_where (file, fixP->fx_line,
 		      _("pcrel for branch to %s too far (0x%x)"),
 		      symname, val);
+      if (target_big_endian)
+	{
 	  buf[0] |= ((val >> 8) & 0x7);
 	  buf[1] |= (val & 0xff);
+	}
+      else
+	{
+	  buf[0] |= ((val >> 8) & 0x7);
+	  buf[1] |= (val & 0xff);
+	}
       break;
 
     case BFD_RELOC_MCORE_PCREL_IMM8BY4:	/* lower 8 bits of 2 byte opcode */
@@ -1999,6 +2158,8 @@ md_apply_fix3 (fixP, valp, segment)
 	as_bad_where (file, fixP->fx_line,
 		      _("pcrel for lrw/jmpi/jsri to %s too far (0x%x)"),
 		      symname, val);
+      else if (! target_big_endian)
+	buf[0] |= (val & 0xff);
       else
 	buf[1] |= (val & 0xff);
       break;
@@ -2008,6 +2169,9 @@ md_apply_fix3 (fixP, valp, segment)
 	as_bad_where (file, fixP->fx_line,
 		      _("pcrel for loopt too far (0x%x)"), val);
       val /= 2;
+      if (! target_big_endian)
+	buf[0] |= (val & 0xf);
+      else
 	buf[1] |= (val & 0xf);
       break;
 
@@ -2144,6 +2308,16 @@ md_number_to_chars (ptr, use, nbytes)
      valueT use;
      int nbytes;
 {
+  if (! target_big_endian)
+    switch (nbytes)
+      {
+      case 4: ptr[3] = (use >> 24) & 0xff; /* fall through */
+      case 3: ptr[2] = (use >> 16) & 0xff; /* fall through */
+      case 2: ptr[1] = (use >>  8) & 0xff; /* fall through */
+      case 1: ptr[0] = (use >>  0) & 0xff;    break;
+      default: abort ();
+      }
+  else
     switch (nbytes)
       {
       case 4: *ptr++ = (use >> 24) & 0xff; /* fall through */

@@ -1,3 +1,21 @@
+2000-02-10  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-mcore.c (INST_BYTE0): Redefine to handle big and
+        little endian targets.
+	(INST_BYTE1): Redefine to handle big and little endian
+        targets.
+	(cpu_type): New type: Select between M340 and M210.
+	(parse_psrmod): New function: Parse the PSRCLR and PSRSET
+        instructions of the M340.
+	(md_assemble): Add support for the MULSH and OPSR classes of
+        instructions.
+	(md_atof): Add support for little endian targets.
+	(md_parse_option): Add support for -EL, -EB and -mcpu command
+        line switches.
+	(md_convert_frag): Add support for little endian targets.
+	(md_apply_fix3): Add support for little endian targets.
+	(md_number_to_chars): Add support for little endian targets.
+
 2000-02-10  Timothy Wall  <twall@redhat.com>
 
 	* read.c (read_a_source_file): If TC_START_LABEL_WITHOUT_COLON is
