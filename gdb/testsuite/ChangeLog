@@ -1,3 +1,12 @@
+2005-02-09  Corinna Vinschen  <vinschen@redhat.com>
+
+	* maint.exp: Raise timeout to give Cygwin targeted GDBs more time
+	for printing symbols and statistics.
+	Add test for using relative pathnames in "maint print msymbols" test.
+	Mark "maint info sections DATA" XFAIL on Cygwin.
+	Remove Cygwin XFAIL mark on "help maint dump-me" and "maint dump-me"
+	tests.
+
 2005-02-09  Andreas Schwab  <schwab@suse.de>
 
 	Committed by Andrew Cagney  <cagney@gnu.org>

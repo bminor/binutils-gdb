@@ -187,6 +187,13 @@ gdb_expect  {
         timeout         { fail "(timeout) maint demangle" }
         }
 
+# The timeout value is raised, because printing all the symbols and
+# statistical information about Cygwin and Windows libraries takes a lot
+# of time.
+if [istarget "*-*-cygwin*"] {
+	set oldtimeout $timeout
+	set timeout [expr $timeout + 500]
+}
 
 send_gdb "maint print statistics\n"
 gdb_expect  {
@@ -316,6 +323,42 @@ gdb_expect  {
         timeout         { fail "(timeout) maint print msymbols" }
         }
 
+# Check that maint print msymbols allows relative pathnames
+set mydir [pwd]
+gdb_test "cd ${objdir}" "Working directory ${objdir}\..*"
+gdb_test_multiple "maint print msymbols msymbols_output2 ${subdir}/${testfile}" "maint print msymbols" {
+    -re "^maint print msymbols msymbols_output2 \[^\n\]*\r\n$gdb_prompt $" {
+    	gdb_test_multiple "shell ls msymbols_output2" "maint print msymbols" {
+	    -re "msymbols_output2\r\n$gdb_prompt $" {
+	    	gdb_test_multiple "shell grep factorial msymbols_output2" "maint print msymbols" {
+		    -re "\\\[ *$decimal\\\] T\[ \t\]+$hex factorial.*$gdb_prompt $" {
+		    	pass "maint print msymbols"
+		    }
+		    -re ".*$gdb_prompt $" {
+		        fail "maint print msymbols"
+		    }
+		    timeout {
+		        fail "(timeout) maint print msymbols"
+		    }
+		}
+		gdb_test "shell rm -f msymbols_output2" ""
+	    }
+	    -re ".*$gdb_prompt $" {
+		fail "maint print msymbols"
+	    }
+	    timeout {
+	    	fail "(timeout) maint print msymbols"
+	    }
+	}
+    }
+    -re ".*$gdb_prompt $" {
+	fail "maint print msymbols"
+    }
+    timeout {
+	fail "(timeout) maint print msymbols"
+    }
+}
+gdb_test "cd ${mydir}" "Working directory ${mydir}\..*"
 
 send_gdb "maint print symbols\n"
 gdb_expect  {
@@ -421,6 +464,10 @@ gdb_expect {
 
 # Test for new option: DATA section flag
 # If your text section is tagged DATA, xfail this test.
+#
+# The "maint info sections DATA" test is marked for XFAIL on Cygwin,
+# because Windows has text sections marked DATA.
+setup_xfail "*-*-*cygwin*"
 send_gdb "maint info sections DATA\n"
 gdb_expect {
     -re ".* .text .*$gdb_prompt $" { fail "maint info sections DATA" }
@@ -511,10 +558,6 @@ gdb_expect  {
         timeout         { fail "(timeout) help maint demangle" }
         }
 
-# dump-me is disabled ifdef _WIN32.
-if [ishost *cygwin*] {
-    setup_xfail "*-*-*"
-}
 send_gdb "help maint dump-me\n"
 gdb_expect  {
         -re "Get fatal error; make debugger dump its core\\.\r\nGDB sets its handling of SIGQUIT back to SIG_DFL and then sends\r\nitself a SIGQUIT signal\\..*$gdb_prompt $"\
@@ -652,9 +695,6 @@ gdb_expect  {
 #set oldtimeout $timeout
 #set timeout [expr $timeout + 300]
 
-if [ishost *cygwin*] {
-    setup_xfail "*-*-*"
-}
 send_gdb "maint dump-me\n"
 gdb_expect  {
         -re "Should GDB dump core.*\\(y or n\\) $"\
