@@ -373,7 +373,7 @@ parse_lit8 (cd, strp, opindex, valuep)
 				   & result_type, & value);
       if ((errmsg == NULL) &&
 	  (result_type != CGEN_PARSE_OPERAND_RESULT_QUEUED))
-	errmsg = _("%operator operand is not a symbol");
+	errmsg = _("percent-operator operand is not a symbol");
 
       *valuep = value;
     }
