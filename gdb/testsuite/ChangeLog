@@ -1,3 +1,8 @@
+2002-06-24  Keith Seitz  <keiths@redhat.com>
+
+	* lib/mi-support.exp (mi_gdb_test): Move expected pattern higher
+	in the list of expect statements.
+
 2002-06-19  Keith Seitz  <keiths@redhat.com>
 
 	* lib/mi-support.exp (mi_run_to_main): Use MIFLAGS to figure
