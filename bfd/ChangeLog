@@ -1,3 +1,7 @@
+2003-08-21  Nick Clifton  <nickc@redhat.com>
+
+	* cofflink.c: Update to IISO C90.
+
 2003-08-21  Randolph Chung  <tausq@debian.org>
 
 	* elf32-hppa.c (elf32_hppa_object_p): For elf32-hppa-linux, objects
