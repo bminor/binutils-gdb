@@ -1,5 +1,11 @@
 2002-05-16  Corinna Vinschen  <vinschen@redhat.com>
 
+	* configure.tgt: Mark v850 as multi-arched.
+	* config/v850/tm-v850.h: Remove file.
+	* config/v850/v850.mt: Eliminate TM_FILE.
+
+2002-05-16  Corinna Vinschen  <vinschen@redhat.com>
+
 	* v850-tdep.c: Full multi-arch.
 	* config/v850/tm-v850.h: Eliminate or move to v850-tdep.c everything.
 	Define GDB_MULTI_ARCH to 2.
