@@ -1,5 +1,5 @@
 /* Object file "section" support for the BFD library.
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Copyright (C) 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -220,15 +220,13 @@ CODE_FRAGMENT
 .        {* The section is a constuctor, and should be placed at the
 .          end of the . *}
 .
-.
 .#define SEC_CONSTRUCTOR_TEXT 0x1100
 .
 .#define SEC_CONSTRUCTOR_DATA 0x2100
 .
 .#define SEC_CONSTRUCTOR_BSS  0x3100
 .
-.
-.        {* The section has contents - a bss section could be
+.        {* The section has contents - a data section could be
 .           <<SEC_ALLOC>> | <<SEC_HAS_CONTENTS>>, a debug section could be
 .           <<SEC_HAS_CONTENTS>> *}
 .
@@ -240,7 +238,19 @@ CODE_FRAGMENT
 .
 .#define SEC_NEVER_LOAD 0x400
 .
+.        {* The section is a shared library section.  The linker must leave
+.           these completely alone, as the vma and size are used when
+.           the executable is loaded. *}
 .
+.#define SEC_SHARED_LIBRARY 0x800
+.
+.        {* The section is a common section (symbols may be defined
+.           multiple times, the value of a symbol is the amount of
+.           space it requires, and the largest symbol value is the one
+.           used).  Most targets have exactly one of these (.bss), but
+.           ECOFF has two. *}
+.
+.#define SEC_IS_COMMON 0x8000
 .       
 .   bfd_vma vma;
 .   boolean user_set_vma;
@@ -348,6 +358,7 @@ CODE_FRAGMENT
 .#define BFD_ABS_SECTION_NAME "*ABS*"
 .#define BFD_UND_SECTION_NAME "*UND*"
 .#define BFD_COM_SECTION_NAME "*COM*"
+.#define BFD_IND_SECTION_NAME "*IND*"
 .
 .    {* the absolute section *}
 . extern   asection bfd_abs_section;
@@ -355,10 +366,13 @@ CODE_FRAGMENT
 . extern   asection bfd_und_section;
 .    {* Pointer to the common section *}
 . extern asection bfd_com_section;
+.    {* Pointer to the indirect section *}
+. extern asection bfd_ind_section;
 .
 . extern struct symbol_cache_entry *bfd_abs_symbol;
 . extern struct symbol_cache_entry *bfd_com_symbol;
 . extern struct symbol_cache_entry *bfd_und_symbol;
+. extern struct symbol_cache_entry *bfd_ind_symbol;
 .#define bfd_get_section_size_before_reloc(section) \
 .     (section->reloc_done ? (abort(),1): (section)->_raw_size)
 .#define bfd_get_section_size_after_reloc(section) \
@@ -368,21 +382,23 @@ CODE_FRAGMENT
 /* These symbols are global, not specific to any BFD.  Therefore, anything
    that tries to change them is broken, and should be repaired.  */
 static CONST asymbol global_syms[] = {
-  /* bfd, name, value, attr, section [, udata] */
+  /* the_bfd, name, value, attr, section [, udata] */
   { 0, BFD_COM_SECTION_NAME, 0, BSF_SECTION_SYM, &bfd_com_section },
   { 0, BFD_UND_SECTION_NAME, 0, BSF_SECTION_SYM, &bfd_und_section },
   { 0, BFD_ABS_SECTION_NAME, 0, BSF_SECTION_SYM, &bfd_abs_section },
+  { 0, BFD_IND_SECTION_NAME, 0, BSF_SECTION_SYM, &bfd_ind_section },
 };
 
-#define STD_SECTION(SEC,SYM,NAME, IDX)	\
+#define STD_SECTION(SEC, FLAGS, SYM, NAME, IDX)	\
   asymbol *SYM = (asymbol *) &global_syms[IDX]; \
-  asection SEC = { NAME, 0, 0, 0, 0, (boolean) 0, 0, 0, 0, &SEC,\
+  asection SEC = { NAME, 0, 0, FLAGS, 0, (boolean) 0, 0, 0, 0, &SEC,\
 		    0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, (boolean) 0, \
 		     (asymbol *) &global_syms[IDX], &SYM, }
 
-STD_SECTION (bfd_com_section, bfd_com_symbol, BFD_COM_SECTION_NAME, 0);
-STD_SECTION (bfd_und_section, bfd_und_symbol, BFD_UND_SECTION_NAME, 1);
-STD_SECTION (bfd_abs_section, bfd_abs_symbol, BFD_ABS_SECTION_NAME, 2);
+STD_SECTION (bfd_com_section, SEC_IS_COMMON, bfd_com_symbol, BFD_COM_SECTION_NAME, 0);
+STD_SECTION (bfd_und_section, 0, bfd_und_symbol, BFD_UND_SECTION_NAME, 1);
+STD_SECTION (bfd_abs_section, 0, bfd_abs_symbol, BFD_ABS_SECTION_NAME, 2);
+STD_SECTION (bfd_ind_section, 0, bfd_ind_symbol, BFD_IND_SECTION_NAME, 3);
 #undef STD_SECTION
 
 /*
@@ -509,6 +525,11 @@ DEFUN(bfd_make_section,(abfd, name),
   if (strcmp(name, BFD_UND_SECTION_NAME) == 0) 
   {
     return &bfd_und_section;
+  }
+
+  if (strcmp(name, BFD_IND_SECTION_NAME) == 0) 
+  {
+    return &bfd_ind_section;
   }
   
   while (sect) {
@@ -730,7 +751,7 @@ DEFUN(bfd_set_section_contents,(abfd, section, location, offset, count),
 {
   bfd_size_type sz;
 
-  if (!(bfd_get_section_flags(abfd, section) & SEC_HAS_CONTENTS)) 
+  if (!bfd_get_section_flags(abfd, section) & SEC_HAS_CONTENTS) 
       {
         bfd_error = no_contents;
         return(false);

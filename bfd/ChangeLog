@@ -1,3 +1,24 @@
+Tue Mar 30 09:33:16 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* aoutx.h (translate_from_native_sym_flags): Now handles indirect
+	symbols in a better way. (translate_to_native_sym_flag): Set the
+	N_INDR bit when necessary. (aout<>slurp_symbol_table): Maintain
+	indirect state.
+	* section.c: Added BFD_IND_SECTION_NAME and bfd_ind_section.
+	(bfd_make_section): Cope with new builtin section.
+	* syms.c (bfd_decode_symclass): Can now print indirect section
+	info.
+
+Wed Mar 24 13:36:33 1993  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* aout-target.h (MY(object_p)):  Fail if MACHTYPE_OK is
+	defined, and yields false.
+	* aout-mipsbsd.c, i386bsd.c:  Define MACHTYPE_OK appropriately.
+
+	* archive.c (snarf_ar_hdr):  Add support for reading (only,
+	so far) BSD-4.4-style extended headers.
+	* archive.c:  Some more comments.
+
 Wed Mar 24 02:05:10 1993  david d `zoo' zuhn  (zoo at poseidon.cygnus.com)
 
 	* Makefile.in: fix rule for dvi and info, so that the recursive
