@@ -5103,7 +5103,7 @@ the loaded file\n");
 
 static LONGEST
 remote_xfer_partial (struct target_ops *ops, enum target_object object,
-		     const char *annex, const void *writebuf, void *readbuf,
+		     const char *annex, void *readbuf, const void *writebuf,
 		     ULONGEST offset, LONGEST len)
 {
   struct remote_state *rs = get_remote_state ();

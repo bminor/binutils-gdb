@@ -71,8 +71,8 @@ build_target_sections_from_bfd (struct target_ops *targ, struct bfd *abfd)
 LONGEST
 target_bfd_xfer_partial (struct target_ops *ops,
 			 enum target_object object,
-			 const char *annex, const void *writebuf, 
-			 void *readbuf, ULONGEST offset, LONGEST len)
+			 const char *annex, void *readbuf,
+			 const void *writebuf, ULONGEST offset, LONGEST len)
 {
   switch (object)
     {

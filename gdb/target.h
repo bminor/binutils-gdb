@@ -410,9 +410,9 @@ struct target_ops
        and target_write_partial for details of each variant.  One, and
        only one, of readbuf or writebuf must be non-NULL.  */
     LONGEST (*to_xfer_partial) (struct target_ops *ops,
-				enum target_object object,
-				const char *annex, const void *writebuf,
-				void *readbuf, ULONGEST offset, LONGEST len);
+				enum target_object object, const char *annex,
+				void *readbuf, const void *writebuf, 
+				ULONGEST offset, LONGEST len);
 
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?

@@ -75,9 +75,9 @@ static void normal_target_post_startup_inferior (ptid_t ptid);
 
 static LONGEST default_xfer_partial (struct target_ops *ops,
 				     enum target_object object,
-				     const char *annex, const void *writebuf,
-				     void *readbuf, ULONGEST offset,
-				     LONGEST len);
+				     const char *annex, void *readbuf,
+				     const void *writebuf,
+				     ULONGEST offset, LONGEST len);
 
 /* Transfer LEN bytes between target address MEMADDR and GDB address
    MYADDR.  Returns 0 for success, errno code for failure (which
@@ -1074,10 +1074,9 @@ target_write_memory_partial (CORE_ADDR memaddr, char *buf, int len, int *err)
 /* More generic transfers.  */
 
 static LONGEST
-default_xfer_partial (struct target_ops *ops,
-		      enum target_object object,
-		      const char *annex, const void *writebuf,
-		      void *readbuf, ULONGEST offset, LONGEST len)
+default_xfer_partial (struct target_ops *ops, enum target_object object,
+		      const char *annex, void *readbuf, 
+		      const void *writebuf, ULONGEST offset, LONGEST len)
 {
   if (object == TARGET_OBJECT_MEMORY
       && ops->to_xfer_memory != NULL)
@@ -1109,7 +1108,7 @@ default_xfer_partial (struct target_ops *ops,
     }
   else if (ops->beneath != NULL)
     return ops->beneath->to_xfer_partial (ops->beneath, object, annex,
-					  writebuf, readbuf, offset, len);
+					  readbuf, writebuf, offset, len);
   else
     return -1;
 }
@@ -1127,7 +1126,7 @@ target_read_partial (struct target_ops *ops,
 		     ULONGEST offset, LONGEST len)
 {
   gdb_assert (ops->to_xfer_partial != NULL);
-  return ops->to_xfer_partial (ops, object, annex, NULL, buf, offset, len);
+  return ops->to_xfer_partial (ops, object, annex, buf, NULL, offset, len);
 }
 
 LONGEST
@@ -1137,7 +1136,7 @@ target_write_partial (struct target_ops *ops,
 		      ULONGEST offset, LONGEST len)
 {
   gdb_assert (ops->to_xfer_partial != NULL);
-  return ops->to_xfer_partial (ops, object, annex, buf, NULL, offset, len);
+  return ops->to_xfer_partial (ops, object, annex, NULL, buf, offset, len);
 }
 
 /* Wrappers to perform the full transfer.  */
@@ -2289,20 +2288,19 @@ debug_to_stop (void)
 }
 
 static LONGEST
-debug_to_xfer_partial (struct target_ops *ops,
-		       enum target_object object,
-		       const char *annex, const void *writebuf,
-		       void *readbuf, ULONGEST offset, LONGEST len)
+debug_to_xfer_partial (struct target_ops *ops, enum target_object object,
+		       const char *annex, void *readbuf, const void *writebuf,
+		       ULONGEST offset, LONGEST len)
 {
   LONGEST retval;
 
   retval = debug_target.to_xfer_partial (&debug_target, object, annex,
-					 writebuf, readbuf, offset, len);
+					 readbuf, writebuf, offset, len);
 
   fprintf_unfiltered (gdb_stdlog,
 		      "target_xfer_partial (%d, %s, 0x%lx,  0x%lx,  0x%s, %s) = %s\n",
 		      (int) object, (annex ? annex : "(null)"),
-		      (long) writebuf, (long) readbuf, paddr_nz (offset),
+		      (long) readbuf, (long) writebuf, paddr_nz (offset),
 		      paddr_d (len), paddr_d (retval));
 
   return retval;

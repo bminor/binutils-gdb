@@ -556,10 +556,9 @@ child_core_file_to_sym_file (char *core)
    memory transfers, fall back to the old memory xfer functions.  */
 
 static LONGEST
-child_xfer_partial (struct target_ops *ops,
-		    enum target_object object,
-		    const char *annex, const void *writebuf,
-		    void *readbuf, ULONGEST offset, LONGEST len)
+child_xfer_partial (struct target_ops *ops, enum target_object object,
+		    const char *annex, void *readbuf,
+		    const void *writebuf, ULONGEST offset, LONGEST len)
 {
   switch (object)
     {
@@ -577,13 +576,13 @@ child_xfer_partial (struct target_ops *ops,
 #ifndef NATIVE_XFER_UNWIND_TABLE
 #define NATIVE_XFER_UNWIND_TABLE(OPS,OBJECT,ANNEX,WRITEBUF,READBUF,OFFSET,LEN) (-1)
 #endif
-      return NATIVE_XFER_UNWIND_TABLE (ops, object, annex, writebuf,
-				       readbuf, offset, len);
+      return NATIVE_XFER_UNWIND_TABLE (ops, object, annex, readbuf, writebuf,
+				       offset, len);
 #endif
 
 #if 0
     case TARGET_OBJECT_AUXV:
-      return native_xfer_auxv (PIDGET (inferior_ptid), writebuf, readbuf,
+      return native_xfer_auxv (PIDGET (inferior_ptid), readbuf, writebuf,
 			       offset, len);
 #endif
 
