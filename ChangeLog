@@ -1,3 +1,8 @@
+Wed Feb  4 16:53:58 1998  Geoffrey Noer  <noer@cygnus.com>
+
+        * configure.in: add target-gperf to noconfigdirs for Cygwin32.
+	Fix typo in ming config comment.
+
 Wed Feb  4 18:56:13 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ltconfig, ltmain.sh: Update from libtool 1.0h.

@@ -604,7 +604,7 @@ case "${target}" in
     target_configdirs="$target_configdirs target-mingw"
     noconfigdirs="$noconfigdirs expect target-libgloss"
 
-    # Can't build gdb for cygwin32 if not native.
+    # Can't build gdb for mingw32 if not native.
     case "${host}" in
       i[3456]86-*-mingw32) ;; # keep gdb tcl tk expect etc.
       *) noconfigdirs="$noconfigdirs gdb tcl tk expect itcl tix db sn gnuserv"
@@ -613,7 +613,7 @@ case "${target}" in
     ;;    
   *-*-cygwin32)
     target_configdirs="$target_configdirs target-winsup"
-    noconfigdirs="$noconfigdirs target-libgloss"
+    noconfigdirs="$noconfigdirs target-gperf target-libgloss"
     # always build newlib.
     skipdirs=`echo " ${skipdirs} " | sed -e 's/ target-newlib / /'`
 
