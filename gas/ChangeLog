@@ -1,3 +1,12 @@
+2004-09-21  James E Wilson  <wilson@specifixinc.com>
+
+	* config/tc-ia64.c (ENCODED_PSP_OFFSET): New.
+	(output_rp_psprel, output_pfs_psprel, output_preds_psprel,
+	output_spill_base, output_unat_psprel, output_lc_psprel,
+	output_fpsr_psprel, output_priunat_psprel, output_bsp_psprel,
+	output_bsprestore_psprel, output_rnat_psprel, output_spill_psprel,
+	output_spill_psprel_p): Use it.
+
 2004-09-20  Tomer Levi  <Tomer.Levi@nsc.com>
 
         * config/tc-crx.c (handle_LoadStor): New function. 

@@ -698,6 +698,12 @@ static struct
   struct label_prologue_count * saved_prologue_counts;
 } unwind;
 
+/* The input value is a negated offset from psp, and specifies an address
+   psp - offset.  The encoded value is psp + 16 - (4 * offset).  Thus we
+   must add 16 and divide by 4 to get the encoded value.  */
+
+#define ENCODED_PSP_OFFSET(OFFSET) (((OFFSET) + 16) / 4)
+
 typedef void (*vbyte_func) PARAMS ((int, char *, char *));
 
 /* Forward declarations:  */
@@ -1810,7 +1816,7 @@ output_rp_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (rp_psprel);
-  ptr->r.record.p.pspoff = offset / 4;
+  ptr->r.record.p.pspoff = ENCODED_PSP_OFFSET (offset);
   return ptr;
 }
 
@@ -1844,7 +1850,7 @@ output_pfs_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (pfs_psprel);
-  ptr->r.record.p.pspoff = offset / 4;
+  ptr->r.record.p.pspoff = ENCODED_PSP_OFFSET (offset);
   return ptr;
 }
 
@@ -1878,7 +1884,7 @@ output_preds_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (preds_psprel);
-  ptr->r.record.p.pspoff = offset / 4;
+  ptr->r.record.p.pspoff = ENCODED_PSP_OFFSET (offset);
   return ptr;
 }
 
@@ -1955,7 +1961,7 @@ output_spill_base (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (spill_base);
-  ptr->r.record.p.pspoff = offset / 4;
+  ptr->r.record.p.pspoff = ENCODED_PSP_OFFSET (offset);
   return ptr;
 }
 
@@ -1980,7 +1986,7 @@ output_unat_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (unat_psprel);
-  ptr->r.record.p.pspoff = offset / 4;
+  ptr->r.record.p.pspoff = ENCODED_PSP_OFFSET (offset);
   return ptr;
 }
 
@@ -2014,7 +2020,7 @@ output_lc_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (lc_psprel);
-  ptr->r.record.p.pspoff = offset / 4;
+  ptr->r.record.p.pspoff = ENCODED_PSP_OFFSET (offset);
   return ptr;
 }
 
@@ -2048,7 +2054,7 @@ output_fpsr_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (fpsr_psprel);
-  ptr->r.record.p.pspoff = offset / 4;
+  ptr->r.record.p.pspoff = ENCODED_PSP_OFFSET (offset);
   return ptr;
 }
 
@@ -2089,7 +2095,7 @@ output_priunat_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (priunat_psprel);
-  ptr->r.record.p.pspoff = offset / 4;
+  ptr->r.record.p.pspoff = ENCODED_PSP_OFFSET (offset);
   return ptr;
 }
 
@@ -2123,7 +2129,7 @@ output_bsp_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (bsp_psprel);
-  ptr->r.record.p.pspoff = offset / 4;
+  ptr->r.record.p.pspoff = ENCODED_PSP_OFFSET (offset);
   return ptr;
 }
 
@@ -2157,7 +2163,7 @@ output_bspstore_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (bspstore_psprel);
-  ptr->r.record.p.pspoff = offset / 4;
+  ptr->r.record.p.pspoff = ENCODED_PSP_OFFSET (offset);
   return ptr;
 }
 
@@ -2191,7 +2197,7 @@ output_rnat_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (rnat_psprel);
-  ptr->r.record.p.pspoff = offset / 4;
+  ptr->r.record.p.pspoff = ENCODED_PSP_OFFSET (offset);
   return ptr;
 }
 
@@ -2248,7 +2254,7 @@ output_spill_psprel (ab, reg, offset)
   unw_rec_list *ptr = alloc_record (spill_psprel);
   ptr->r.record.x.ab = ab;
   ptr->r.record.x.reg = reg;
-  ptr->r.record.x.pspoff = offset / 4;
+  ptr->r.record.x.pspoff = ENCODED_PSP_OFFSET (offset);
   return ptr;
 }
 
@@ -2275,7 +2281,7 @@ output_spill_psprel_p (ab, reg, offset, predicate)
   unw_rec_list *ptr = alloc_record (spill_psprel_p);
   ptr->r.record.x.ab = ab;
   ptr->r.record.x.reg = reg;
-  ptr->r.record.x.pspoff = offset / 4;
+  ptr->r.record.x.pspoff = ENCODED_PSP_OFFSET (offset);
   ptr->r.record.x.qp = predicate;
   return ptr;
 }
