@@ -80,7 +80,7 @@ CPU_TYPES = \
 	z8k
 
 # Object format types.  This is only used for dependency information.
-# We deliberately omit some, since it does not work as a cross assembler.
+# We deliberately omit SOM, since it does not work as a cross assembler.
 
 OBJ_FORMATS = \
 	aout \
