@@ -1,7 +1,6 @@
 Thu Jul 15 12:23:55 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
-	* m88k.h (OMAGIC): Define.
-	(union external_auxent): Move x_fcn back inside x_fcnary.
+	* m88k.h (union external_auxent): Move x_fcn back inside x_fcnary.
 	({GET,PUT}_FCN_{LNNOPTR,ENDNDX}): Adjust accordingly.
 
 Sun Jul 11 18:00:18 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
