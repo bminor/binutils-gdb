@@ -1,3 +1,8 @@
+2002-03-06  Fred Fish  <fnf@redhat.com>
+
+	* gdb.base/funcargs.c:  Remove extraneous ';' character.
+	* gdb.trace/gdb_c_test.c: Remove extraneous ';' character.
+
 2002-03-04  Michael Chastain  <mec@shout.net>
 
 	* gdb.mi/mi-var-cmd.exp: In test "create local variable func",

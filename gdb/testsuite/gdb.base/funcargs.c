@@ -747,7 +747,7 @@ int main ()
   call2f (f, l, d, c, f, s, d, i);
   call2g (l, d, c, f, s, d, i, f);
   call2h (d, c, f, s, d, i, f, l);
-  call2i (c, f, c, c, d, c, c, c, f, s, c, d);;
+  call2i (c, f, c, c, d, c, c, c, f, s, c, d);
 
   /* Test dereferencing pointers to various integral and floating types */
 
