@@ -116,9 +116,13 @@ const pseudo_typeS md_pseudo_table[] =
 
 /* Local variables.  */
 
-/* The type of processor we are assembling for.  This is one of the
-   PPC_OPCODE flags defined in opcode/ppc.h.  */
+/* The type of processor we are assembling for.  This is one or more
+   of the PPC_OPCODE flags defined in opcode/ppc.h.  */
 static int ppc_cpu = 0;
+
+/* The size of the processor we are assembling for.  This is either
+   PPC_OPCODE_32 or PPC_OPCODE_64.  */
+static int ppc_size = PPC_OPCODE_32;
 
 /* The endianness we are using.  */
 static int ppc_big_endian = PPC_BIG_ENDIAN;
@@ -284,10 +288,10 @@ ppc_arch ()
 {
   ppc_set_cpu ();
 
-  if ((ppc_cpu & PPC_OPCODE_POWER) != 0)
-    return bfd_arch_rs6000;
-  else if ((ppc_cpu & PPC_OPCODE_PPC) != 0)
+  if ((ppc_cpu & PPC_OPCODE_PPC) != 0)
     return bfd_arch_powerpc;
+  else if ((ppc_cpu & PPC_OPCODE_POWER) != 0)
+    return bfd_arch_rs6000;
   else
     abort ();
 }
@@ -314,7 +318,9 @@ md_begin ()
     {
       know ((op->opcode & op->mask) == op->opcode);
 
-      if ((op->flags & ppc_cpu) != 0)
+      if ((op->flags & ppc_cpu) != 0
+	  && ((op->flags & (PPC_OPCODE_32 | PPC_OPCODE_64)) == 0
+	      || (op->flags & (PPC_OPCODE_32 | PPC_OPCODE_64)) == ppc_size))
 	{
 	  const char *retval;
 

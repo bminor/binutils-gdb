@@ -1,3 +1,10 @@
+Mon Apr  4 12:39:23 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-ppc.c (ppc_size): New static variable.
+	(ppc_arch): Check for PPC_OPCODE_PPC before PPC_OPCODE_POWER.
+	(md_begin): If an instruction has a size specific flag set, only
+	add it if we are assembling that size.
+
 Thu Mar 31 16:51:16 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-sparc.c (tc_gen_reloc): Add a gruesome hack to get
