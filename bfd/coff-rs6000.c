@@ -1033,7 +1033,7 @@ xcoff_write_archive_contents (abfd)
 	  if (stat (bfd_get_filename (sub), &s) != 0)
 	    {
 	      bfd_set_error (bfd_error_system_call);
-	      return NULL;
+	      return false;
 	    }
 
 	  sprintf (ahdrp->size, "%ld", (long) s.st_size);
