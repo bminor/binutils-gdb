@@ -2442,14 +2442,11 @@ out:
 }
 
 
-/* Return 0 on failure, number of bytes handled otherwise.  */
+/* Return 0 on failure, number of bytes handled otherwise.  TARGET
+   is ignored. */
 static int
-gnu_xfer_memory (memaddr, myaddr, len, write, target)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int write;
-     struct target_ops *target;	/* IGNORED */
+gnu_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+		 struct target_ops *target)
 {
   task_t task = (current_inferior
 		 ? (current_inferior->task

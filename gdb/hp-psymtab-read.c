@@ -488,20 +488,23 @@ find_next_module_isym (int index, quick_module_entry *qMD, int curr_md,
    pointed to by CURR_PD_P, and between code addresses START_ADR and END_ADR.
    Other parameters are explained in comments below. */
 
-/* This used to be inline in hpread_quick_traverse, but now that we do essentially the
-   same thing for two different cases (modules and module-less files), it's better
-   organized in a separate routine, although it does take lots of arguments. pai/1997-10-08 */
+/* This used to be inline in hpread_quick_traverse, but now that we do
+   essentially the same thing for two different cases (modules and
+   module-less files), it's better organized in a separate routine,
+   although it does take lots of arguments.  pai/1997-10-08
+   
+   CURR_PD_P is the pointer to the current proc index. QPD is the
+   procedure quick lookup table.  MAX_PROCS is the number of entries
+   in the proc. table.  START_ADR is the beginning of the code range
+   for the current psymtab.  end_adr is the end of the code range for
+   the current psymtab.  PST is the current psymtab.  VT_bits is
+   a pointer to the strings table of SOM debug space.  OBJFILE is
+   the current object file. */
 
 static int
-scan_procs (curr_pd_p, qPD, max_procs, start_adr, end_adr, pst, vt_bits, objfile)
-     int *curr_pd_p;		/* pointer to current proc index */
-     quick_procedure_entry *qPD;	/* the procedure quick lookup table */
-     int max_procs;		/* number of entries in proc. table */
-     CORE_ADDR start_adr;	/* beginning of code range for current psymtab */
-     CORE_ADDR end_adr;		/* end of code range for current psymtab */
-     struct partial_symtab *pst;	/* current psymtab */
-     char *vt_bits;		/* strings table of SOM debug space */
-     struct objfile *objfile;	/* current object file */
+scan_procs (int *curr_pd_p, quick_procedure_entry *qPD, int max_procs,
+	    CORE_ADDR start_adr, CORE_ADDR end_adr, struct partial_symtab *pst,
+	    char *vt_bits, struct objfile *objfile)
 {
   union dnttentry *dn_bufp;
   int symbol_count = 0;		/* Total number of symbols in this psymtab */
@@ -623,11 +626,8 @@ scan_procs (curr_pd_p, qPD, max_procs, start_adr, end_adr, pst, vt_bits, objfile
    entry for it, so in such cases we create a psymtab for the file.  */
 
 int
-hpread_quick_traverse (objfile, gntt_bits, vt_bits, pxdb_header_p)
-     struct objfile *objfile;	/* The object file descriptor */
-     char *gntt_bits;		/* GNTT entries, loaded in from the file */
-     char *vt_bits;		/* VT (string) entries ditto. */
-     PXDB_header_ptr pxdb_header_p;	/* Pointer to pxdb header ditto */
+hpread_quick_traverse (struct objfile *objfile, char *gntt_bits,
+		       char *vt_bits, PXDB_header_ptr pxdb_header_p)
 {
   struct partial_symtab *pst;
 
