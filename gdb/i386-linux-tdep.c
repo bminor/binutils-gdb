@@ -115,12 +115,13 @@ static const unsigned char linux_sigtramp_code[] =
 
 #define LINUX_SIGTRAMP_LEN (sizeof linux_sigtramp_code)
 
-/* If PC is in a sigtramp routine, return the address of the start of
-   the routine.  Otherwise, return 0.  */
+/* If NEXT_FRAME unwinds into a sigtramp routine, return the address
+   of the start of the routine.  Otherwise, return 0.  */
 
 static CORE_ADDR
-i386_linux_sigtramp_start (CORE_ADDR pc)
+i386_linux_sigtramp_start (struct frame_info *next_frame)
 {
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
   unsigned char buf[LINUX_SIGTRAMP_LEN];
 
   /* We only recognize a signal trampoline if PC is at the start of
@@ -130,7 +131,7 @@ i386_linux_sigtramp_start (CORE_ADDR pc)
      PC is not at the start of the instruction sequence, there will be
      a few trailing readable bytes on the stack.  */
 
-  if (deprecated_read_memory_nobpt (pc, (char *) buf, LINUX_SIGTRAMP_LEN) != 0)
+  if (!safe_frame_unwind_memory (next_frame, pc, buf, LINUX_SIGTRAMP_LEN))
     return 0;
 
   if (buf[0] != LINUX_SIGTRAMP_INSN0)
@@ -151,7 +152,7 @@ i386_linux_sigtramp_start (CORE_ADDR pc)
 
       pc -= adjust;
 
-      if (deprecated_read_memory_nobpt (pc, (char *) buf, LINUX_SIGTRAMP_LEN) != 0)
+      if (!safe_frame_unwind_memory (next_frame, pc, buf, LINUX_SIGTRAMP_LEN))
 	return 0;
     }
 
@@ -182,12 +183,13 @@ static const unsigned char linux_rt_sigtramp_code[] =
 
 #define LINUX_RT_SIGTRAMP_LEN (sizeof linux_rt_sigtramp_code)
 
-/* If PC is in a RT sigtramp routine, return the address of the start
-   of the routine.  Otherwise, return 0.  */
+/* If NEXT_FRAME unwinds into an RT sigtramp routine, return the
+   address of the start of the routine.  Otherwise, return 0.  */
 
 static CORE_ADDR
-i386_linux_rt_sigtramp_start (CORE_ADDR pc)
+i386_linux_rt_sigtramp_start (struct frame_info *next_frame)
 {
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
   unsigned char buf[LINUX_RT_SIGTRAMP_LEN];
 
   /* We only recognize a signal trampoline if PC is at the start of
@@ -197,7 +199,7 @@ i386_linux_rt_sigtramp_start (CORE_ADDR pc)
      PC is not at the start of the instruction sequence, there will be
      a few trailing readable bytes on the stack.  */
 
-  if (deprecated_read_memory_nobpt (pc, (char *) buf, LINUX_RT_SIGTRAMP_LEN) != 0)
+  if (!safe_frame_unwind_memory (next_frame, pc, buf, LINUX_RT_SIGTRAMP_LEN))
     return 0;
 
   if (buf[0] != LINUX_RT_SIGTRAMP_INSN0)
@@ -207,7 +209,8 @@ i386_linux_rt_sigtramp_start (CORE_ADDR pc)
 
       pc -= LINUX_RT_SIGTRAMP_OFFSET1;
 
-      if (deprecated_read_memory_nobpt (pc, (char *) buf, LINUX_RT_SIGTRAMP_LEN) != 0)
+      if (!safe_frame_unwind_memory (next_frame, pc, buf,
+				     LINUX_RT_SIGTRAMP_LEN))
 	return 0;
     }
 
@@ -234,8 +237,8 @@ i386_linux_sigtramp_p (struct frame_info *next_frame)
      be part of the preceding function.  This should always be sigaction,
      __sigaction, or __libc_sigaction (all aliases to the same function).  */
   if (name == NULL || strstr (name, "sigaction") != NULL)
-    return (i386_linux_sigtramp_start (pc) != 0
-	    || i386_linux_rt_sigtramp_start (pc) != 0);
+    return (i386_linux_sigtramp_start (next_frame) != 0
+	    || i386_linux_rt_sigtramp_start (next_frame) != 0);
 
   return (strcmp ("__restore", name) == 0
 	  || strcmp ("__restore_rt", name) == 0);
@@ -257,7 +260,7 @@ i386_linux_sigcontext_addr (struct frame_info *next_frame)
   frame_unwind_register (next_frame, I386_ESP_REGNUM, buf);
   sp = extract_unsigned_integer (buf, 4);
 
-  pc = i386_linux_sigtramp_start (frame_pc_unwind (next_frame));
+  pc = i386_linux_sigtramp_start (next_frame);
   if (pc)
     {
       /* The sigcontext structure lives on the stack, right after
@@ -271,7 +274,7 @@ i386_linux_sigcontext_addr (struct frame_info *next_frame)
       return sp;
     }
 
-  pc = i386_linux_rt_sigtramp_start (frame_pc_unwind (next_frame));
+  pc = i386_linux_rt_sigtramp_start (next_frame);
   if (pc)
     {
       CORE_ADDR ucontext_addr;

@@ -1,5 +1,13 @@
 2004-08-05  Mark Kettenis  <kettenis@chello.nl>
 
+	* i386-linux-tdep.c (i386_linux_sigtramp_start)
+	(i386_linux_rt_sigtramp_start): Change argument from CORE_ADDR to
+	struct frame_info *.  Use safe_frame_unwind_memory instead of
+	deprecated_read_memory_nobpt.
+	(i386_linux_sigtramp_p, i386_linux_sigcontext_addr): Adjust for
+	changed signature of i386_linux_sigtramp_start and
+	i386_linux_rt_sigtramp_start.
+
 	* i386nbsd-tdep.c (i386nbsd_sigtramp_offset): Change argument from
 	CORE_ADDR to struct frame_info *.  Use safe_frame_unwind_memory
 	instead of deprecated_read_memory_nobpt.
