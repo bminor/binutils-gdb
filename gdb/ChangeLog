@@ -1,3 +1,32 @@
+Wed Nov 18 14:27:47 1992  Fred Fish  (fnf@cygnus.com)
+
+	* language.h (language_format_info):  New structure to bundle
+	local formatting information.
+	* language.h (language_defn):  Replace individual format info
+	with language_format_info structs.
+	* language.h (local_*_format, local_*_format_prefix,
+	local_*_format_specifier, local_*_format_suffix):  New macros
+	for binary/octal/decimal/hex formats to access info elements.
+	* c-exp.y (c_language_defn):  Update for new format handling.
+	* m2-exp.y (m2_language_defn):  Update for new format handling.
+	* dbxread.c (language.h):  Include for partial-stab.h use.
+	* defs.h (local_hex_format, local_hex_format_custom,
+	local_hex_string, local_hex_string_custom):  Move to language.h.
+	* language.c (local_hex_format_custom, local_hex_string,
+	local_hex_string_custom, local_octal_format_custom):  Use new
+	format handling.
+	* language.c (unknown_language_defn, auto_language_defn,
+	local_language_defn):  Update for new format handling.
+	* printcmd.c (print_scalar_formatted):  Use new macros
+	to access decimal and binary format info for printing.
+	**** start-sanitize-chill ****
+	* c-exp.y (chill_language_defn):  Update for new format handling.
+	* ch-exp.y (CHARACTER_LITERAL):  Add support to yylex.
+	* ch-exp.y (match_integer_literal):  Add function.
+	* ch-exp.y (builtin_type_chill_char):  Add definition.
+	* gdbtypes.h (builtin_type_chill_char):  Add declaration.
+	**** end-sanitize-chill ****
+
 Tue Nov 17 11:17:06 1992  Ian Lance Taylor  (ian@cygnus.com)
 
  	* tm-rs6000.h (BELIEVE_PCC_PROMOTION): Define, since AIX cc gets

@@ -64,6 +64,37 @@ extern enum type_mode {type_mode_auto, type_mode_manual} type_mode;
 extern enum type_check
   {type_check_off, type_check_warn, type_check_on} type_check;
 
+/* Information for doing language dependent formatting of printed values. */
+
+struct language_format_info
+{
+  /* The format that can be passed directly to standard C printf functions
+     to generate a completely formatted value in the format appropriate for
+     the language. */
+
+  char *la_format;
+
+  /* The prefix to be used when directly printing a value, or constructing
+     a standard C printf format.  This generally is everything up to the
+     conversion specification (the part introduced by the '%' character
+     and terminated by the conversion specifier character). */
+
+  char *la_format_prefix;
+
+  /* The conversion specifier.  This is generally everything after the
+     field width and precision, typically only a single character such
+     as 'o' for octal format or 'x' for hexadecimal format. */
+
+  char *la_format_specifier;
+
+  /* The suffix to be used when directly printing a value, or constructing
+     a standard C printf format.  This generally is everything after the
+     conversion specification (the part introduced by the '%' character
+     and terminated by the conversion specifier character). */
+
+  char *la_format_suffix;		/* Suffix for custom format string */
+};
+
 /* Structure tying together assorted information about a language.  */
 
 struct language_defn {
@@ -78,13 +109,15 @@ struct language_defn {
   struct type	 **la_longest_int;	/* Longest signed integral type */
   struct type	 **la_longest_unsigned_int; /* Longest uns integral type */
   struct type	 **la_longest_float;	/* Longest floating point type */
-  char		  *la_hex_format;	/* Hexadecimal printf format str */
-  char		  *la_hex_format_pre;	/* Prefix for custom format string */
-  char		  *la_hex_format_suf;	/* Suffix for custom format string */
-  char		  *la_octal_format;	/* Octal printf format str */
-  char		  *la_octal_format_pre;	/* Prefix for custom format string */
-  char		  *la_octal_format_suf;	/* Suffix for custom format string */
-const struct op_print
+  struct language_format_info
+		   la_binary_format;	/* Base 2 (binary) formats. */
+  struct language_format_info
+    		   la_octal_format;	/* Base 8 (octal) formats. */
+  struct language_format_info
+    		   la_decimal_format;	/* Base 10 (decimal) formats */
+  struct language_format_info
+    		   la_hex_format;	/* Base 16 (hexadecimal) formats */
+  const struct op_print
 		  *la_op_print_tab;	/* Table for printing expressions */
 /* Add fields above this point, so the magic number is always last. */
   long 		   la_magic;		/* Magic number for compat checking */
@@ -141,18 +174,73 @@ set_language PARAMS ((enum language));
 #define	longest_unsigned_int()	(*current_language->la_longest_unsigned_int)
 #define	longest_float()		(*current_language->la_longest_float)
 
-/* Hexadecimal number formatting is in defs.h because it is so common
-   throughout GDB.  */
+/* Return a format string for printf that will print a number in one of
+   the local (language-specific) formats.  Result is static and is
+   overwritten by the next call.  Takes printf options like "08" or "l"
+   (to produce e.g. %08x or %lx).  */
 
-/* Return a format string for printf that will print a number in the local
-   (language-specific) octal format.  Result is static and is
-   overwritten by the next call.  local_octal_format_custom takes printf
-   options like "08" or "l" (to produce e.g. %08x or %lx).  */
+#define local_binary_format() \
+  (current_language->la_binary_format.la_format)
+#define local_binary_format_prefix() \
+  (current_language->la_binary_format.la_format_prefix)
+#define local_binary_format_specifier() \
+  (current_language->la_binary_format.la_format_specifier)
+#define local_binary_format_suffix() \
+  (current_language->la_binary_format.la_format_suffix)
 
-#define local_octal_format() (current_language->la_octal_format)
+#define local_octal_format() \
+  (current_language->la_octal_format.la_format)
+#define local_octal_format_prefix() \
+  (current_language->la_octal_format.la_format_prefix)
+#define local_octal_format_specifier() \
+  (current_language->la_octal_format.la_format_specifier)
+#define local_octal_format_suffix() \
+  (current_language->la_octal_format.la_format_suffix)
+
+#define local_decimal_format() \
+  (current_language->la_decimal_format.la_format)
+#define local_decimal_format_prefix() \
+  (current_language->la_decimal_format.la_format_prefix)
+#define local_decimal_format_specifier() \
+  (current_language->la_decimal_format.la_format_specifier)
+#define local_decimal_format_suffix() \
+  (current_language->la_decimal_format.la_format_suffix)
+
+#define local_hex_format() \
+  (current_language->la_hex_format.la_format)
+#define local_hex_format_prefix() \
+  (current_language->la_hex_format.la_format_prefix)
+#define local_hex_format_specifier() \
+  (current_language->la_hex_format.la_format_specifier)
+#define local_hex_format_suffix() \
+  (current_language->la_hex_format.la_format_suffix)
+
+/* Return a format string for printf that will print a number in one of
+   the local (language-specific) formats.  Result is static and is
+   overwritten by the next call.  Takes printf options like "08" or "l"
+   (to produce e.g. %08x or %lx).  */
 
 extern char *
-local_octal_format_custom PARAMS ((char *));
+local_octal_format_custom PARAMS ((char *));	/* language.c */
+
+extern char *
+local_hex_format_custom PARAMS ((char *));	/* language.c */
+
+/* Return a string that contains a number formatted in one of the local
+   (language-specific) formats.  Result is static and is overwritten by
+   the next call.  Takes printf options like "08" or "l".  */
+
+extern char *
+local_octal_string PARAMS ((int));		/* language.c */
+
+extern char *
+local_octal_string_custom PARAMS ((int, char *));/* language.c */
+
+extern char *
+local_hex_string PARAMS ((int));		/* language.c */
+
+extern char *
+local_hex_string_custom PARAMS ((int, char *));	/* language.c */
 
 /* Type predicates */
 

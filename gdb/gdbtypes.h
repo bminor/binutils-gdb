@@ -493,6 +493,7 @@ extern struct type *builtin_type_m2_bool;
 /* Chill types */
 
 extern struct type *builtin_type_chill_bool;
+extern struct type *builtin_type_chill_char;
 extern struct type *builtin_type_chill_long;
 extern struct type *builtin_type_chill_ulong;
 extern struct type *builtin_type_chill_real;

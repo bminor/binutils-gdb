@@ -1228,10 +1228,12 @@ const struct language_defn m2_language_defn = {
   m2_parse,			/* parser */
   m2_error,			/* parser error function */
   &builtin_type_m2_int,		/* longest signed   integral type */
-  &builtin_type_m2_card,		/* longest unsigned integral type */
-  &builtin_type_m2_real,		/* longest floating point type */
-  "0%XH", "0%", "XH",		/* Hex   format string, prefix, suffix */
-  "%oB",  "%",  "oB",		/* Octal format string, prefix, suffix */
+  &builtin_type_m2_card,	/* longest unsigned integral type */
+  &builtin_type_m2_real,	/* longest floating point type */
+  {"",      "",   "",   ""},	/* Binary format info */
+  {"%oB",   "",   "o",  "B"},	/* Octal format info */
+  {"%d",    "",   "d",  ""},	/* Decimal format info */
+  {"0%XH",  "0",  "X",  "H"},	/* Hex format info */
   m2_op_print_tab,		/* expression operators for printing */
   LANG_MAGIC
 };

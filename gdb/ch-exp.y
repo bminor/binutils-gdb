@@ -150,7 +150,7 @@ static int parse_number PARAMS ((void));
 
 %token <typed_val>	INTEGER_LITERAL
 %token <ulval>		BOOLEAN_LITERAL
-%token <voidval>	CHARACTER_LITERAL
+%token <typed_val>	CHARACTER_LITERAL
 %token <voidval>	SET_LITERAL
 %token <voidval>	EMPTINESS_LITERAL
 %token <voidval>	CHARACTER_STRING_LITERAL
@@ -262,17 +262,17 @@ static int parse_number PARAMS ((void));
 
 value		:	expression
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		|	undefined_value
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		;
 
 undefined_value	:	FIXME
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		;
 
@@ -280,7 +280,7 @@ undefined_value	:	FIXME
 
 location	:	FIXME
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		;
 
@@ -288,63 +288,63 @@ location	:	FIXME
 
 primitive_value	:	location_contents
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
                 |	value_name
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
                 |	literal
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
                 |	tuple
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
                 |	value_string_element
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
                 |	value_string_slice
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
                 |	value_array_element
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
                 |	value_array_slice
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
                 |	value_structure_field
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
                 |	expression_conversion
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
                 |	value_procedure_call
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
                 |	value_built_in_routine_call
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
                 |	start_expression
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
                 |	zero_adic_operator
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
                 |	parenthesised_expression
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		;
 
@@ -352,7 +352,7 @@ primitive_value	:	location_contents
 
 location_contents:	location
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		;
 
@@ -360,23 +360,23 @@ location_contents:	location
 
 value_name	:	synonym_name
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		|	value_enumeration_name
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		|	value_do_with_name
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		|	value_receive_name
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		|	general_procedure_name
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		;
 
@@ -384,36 +384,39 @@ value_name	:	synonym_name
 
 literal		:	INTEGER_LITERAL
 			{
-			    write_exp_elt_opcode (OP_LONG);
-			    write_exp_elt_type ($1.type);
-			    write_exp_elt_longcst ((LONGEST) ($1.val));
-			    write_exp_elt_opcode (OP_LONG);
+			  write_exp_elt_opcode (OP_LONG);
+			  write_exp_elt_type ($1.type);
+			  write_exp_elt_longcst ((LONGEST) ($1.val));
+			  write_exp_elt_opcode (OP_LONG);
 			}
 		|	BOOLEAN_LITERAL
 			{
-			    write_exp_elt_opcode (OP_BOOL);
-			    write_exp_elt_longcst ((LONGEST) $1);
-			    write_exp_elt_opcode (OP_BOOL);
+			  write_exp_elt_opcode (OP_BOOL);
+			  write_exp_elt_longcst ((LONGEST) $1);
+			  write_exp_elt_opcode (OP_BOOL);
 			}
 		|	CHARACTER_LITERAL
 			{
-			    $$ = 0;	/* FIXME */
+			  write_exp_elt_opcode (OP_LONG);
+			  write_exp_elt_type ($1.type);
+			  write_exp_elt_longcst ((LONGEST) ($1.val));
+			  write_exp_elt_opcode (OP_LONG);
 			}
 		|	SET_LITERAL
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		|	EMPTINESS_LITERAL
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		|	CHARACTER_STRING_LITERAL
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		|	BIT_STRING_LITERAL
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		;
 
@@ -421,7 +424,7 @@ literal		:	INTEGER_LITERAL
 
 tuple		:	FIXME
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		;
 
@@ -430,7 +433,7 @@ tuple		:	FIXME
 
 value_string_element:	string_primitive_value '(' start_element ')'
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		;
 
@@ -438,11 +441,11 @@ value_string_element:	string_primitive_value '(' start_element ')'
 
 value_string_slice:	string_primitive_value '(' left_element ':' right_element ')'
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		|	string_primitive_value '(' start_element UP slice_size ')'
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		;
 
@@ -450,7 +453,7 @@ value_string_slice:	string_primitive_value '(' left_element ':' right_element ')
 
 value_array_element:	array_primitive_value '(' expression_list ')'
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		;
 
@@ -458,11 +461,11 @@ value_array_element:	array_primitive_value '(' expression_list ')'
 
 value_array_slice:	array_primitive_value '(' lower_element ':' upper_element ')'
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		|	array_primitive_value '(' first_element UP slice_size '('
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		;
 
@@ -470,7 +473,7 @@ value_array_slice:	array_primitive_value '(' lower_element ':' upper_element ')'
 
 value_structure_field:	structure_primitive_value '.' field_name
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		;
 
@@ -478,7 +481,7 @@ value_structure_field:	structure_primitive_value '.' field_name
 
 expression_conversion:	mode_name '(' expression ')'
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		;
 
@@ -486,7 +489,7 @@ expression_conversion:	mode_name '(' expression ')'
 
 value_procedure_call:	FIXME
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		;
 
@@ -494,7 +497,7 @@ value_procedure_call:	FIXME
 
 value_built_in_routine_call:	FIXME
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		;
 
@@ -502,7 +505,7 @@ value_built_in_routine_call:	FIXME
 
 start_expression:	FIXME
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}	/* Not in GNU-Chill */
 		;
 
@@ -510,7 +513,7 @@ start_expression:	FIXME
 
 zero_adic_operator:	FIXME
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		;
 
@@ -518,7 +521,7 @@ zero_adic_operator:	FIXME
 
 parenthesised_expression:	'(' expression ')'
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		;
 
@@ -526,49 +529,49 @@ parenthesised_expression:	'(' expression ')'
 
 expression	:	operand_0
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		|	conditional_expression
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		;
 
 conditional_expression : IF boolean_expression then_alternative else_alternative FI
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		|	CASE case_selector_list OF value_case_alternative '[' ELSE sub_expression ']' ESAC
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		;
 
 then_alternative:	THEN subexpression
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		;
 
 else_alternative:	ELSE subexpression
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		|	ELSIF boolean_expression then_alternative else_alternative
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		;
 
 sub_expression	:	expression
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		;
 
 value_case_alternative:	case_label_specification ':' sub_expression ';'
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		;
 
@@ -576,19 +579,19 @@ value_case_alternative:	case_label_specification ':' sub_expression ';'
 
 operand_0	:	operand_1
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		|	operand_0 LOGIOR operand_1
 			{
-			    write_exp_elt_opcode (BINOP_BITWISE_IOR);
+			  write_exp_elt_opcode (BINOP_BITWISE_IOR);
 			}
 		|	operand_0 ORIF operand_1
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		|	operand_0 LOGXOR operand_1
 			{
-			    write_exp_elt_opcode (BINOP_BITWISE_XOR);
+			  write_exp_elt_opcode (BINOP_BITWISE_XOR);
 			}
 		;
 
@@ -596,15 +599,15 @@ operand_0	:	operand_1
 
 operand_1	:	operand_2
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		|	operand_1 LOGAND operand_2
 			{
-			    write_exp_elt_opcode (BINOP_BITWISE_AND);
+			  write_exp_elt_opcode (BINOP_BITWISE_AND);
 			}
 		|	operand_1 ANDIF operand_2
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		;
 
@@ -612,35 +615,35 @@ operand_1	:	operand_2
 
 operand_2	:	operand_3
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		|	operand_2 '=' operand_3
 			{
-			    write_exp_elt_opcode (BINOP_EQUAL);
+			  write_exp_elt_opcode (BINOP_EQUAL);
 			}
 		|	operand_2 NOTEQUAL operand_3
 			{
-			    write_exp_elt_opcode (BINOP_NOTEQUAL);
+			  write_exp_elt_opcode (BINOP_NOTEQUAL);
 			}
 		|	operand_2 '>' operand_3
 			{
-			    write_exp_elt_opcode (BINOP_GTR);
+			  write_exp_elt_opcode (BINOP_GTR);
 			}
 		|	operand_2 GTR operand_3
 			{
-			    write_exp_elt_opcode (BINOP_GEQ);
+			  write_exp_elt_opcode (BINOP_GEQ);
 			}
 		|	operand_2 '<' operand_3
 			{
-			    write_exp_elt_opcode (BINOP_LESS);
+			  write_exp_elt_opcode (BINOP_LESS);
 			}
 		|	operand_2 LEQ operand_3
 			{
-			    write_exp_elt_opcode (BINOP_LEQ);
+			  write_exp_elt_opcode (BINOP_LEQ);
 			}
 		|	operand_2 IN operand_3
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		;
 
@@ -649,19 +652,19 @@ operand_2	:	operand_3
 
 operand_3	:	operand_4
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		|	operand_3 '+' operand_4
 			{
-			    write_exp_elt_opcode (BINOP_ADD);
+			  write_exp_elt_opcode (BINOP_ADD);
 			}
 		|	operand_3 '-' operand_4
 			{
-			    write_exp_elt_opcode (BINOP_SUB);
+			  write_exp_elt_opcode (BINOP_SUB);
 			}
 		|	operand_3 SLASH_SLASH operand_4
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		;
 
@@ -669,23 +672,23 @@ operand_3	:	operand_4
 
 operand_4	:	operand_5
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		|	operand_4 '*' operand_5
 			{
-			    write_exp_elt_opcode (BINOP_MUL);
+			  write_exp_elt_opcode (BINOP_MUL);
 			}
 		|	operand_4 '/' operand_5
 			{
-			    write_exp_elt_opcode (BINOP_DIV);
+			  write_exp_elt_opcode (BINOP_DIV);
 			}
 		|	operand_4 MOD operand_5
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		|	operand_4 REM operand_5
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		;
 
@@ -693,19 +696,19 @@ operand_4	:	operand_5
 
 operand_5	:	operand_6
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		|	'-' operand_6
 			{
-			    write_exp_elt_opcode (UNOP_NEG);
+			  write_exp_elt_opcode (UNOP_NEG);
 			}
 		|	NOT operand_6
 			{
-			    write_exp_elt_opcode (UNOP_LOGICAL_NOT);
+			  write_exp_elt_opcode (UNOP_LOGICAL_NOT);
 			}
 		|	'(' integer_literal_expression ')' operand_6
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		;
 
@@ -713,15 +716,15 @@ operand_5	:	operand_6
 
 operand_6	:	POINTER location
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		|	RECEIVE buffer_location
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		|	primitive_value
 			{
-			    $$ = 0;	/* FIXME */
+			  $$ = 0;	/* FIXME */
 			}
 		;
 
@@ -732,7 +735,7 @@ operand_6	:	POINTER location
 integer_literal_expression:
 			INTEGER_LITERAL
 			{
-			    $$ = 0;
+			  $$ = 0;
 			}
 
 /* Things which still need productions... */
@@ -762,36 +765,179 @@ buffer_location 	:	FIXME { $$ = 0; }
 
 %%
 
-/* Recognize a character literal. */
+static int
+decode_integer_literal (valptr, tokptrptr)
+int *valptr;
+char **tokptrptr;
+{
+  char *tokptr = *tokptrptr;
+  int base = 0;
+  int ival = 0;
+  int digits = 0;
+  int temp;
+  int explicit_base = 0;
+  
+  /* Look for an explicit base specifier, which is optional. */
+  
+  switch (*tokptr)
+    {
+    case 'd':
+    case 'D':
+      explicit_base++;
+      base = 10;
+      tokptr++;
+      break;
+    case 'b':
+    case 'B':
+      explicit_base++;
+      base = 2;
+      tokptr++;
+      break;
+    case 'h':
+    case 'H':
+      explicit_base++;
+      base = 16;
+      tokptr++;
+      break;
+    case 'o':
+    case 'O':
+      explicit_base++;
+      base = 8;
+      tokptr++;
+      break;
+    default:
+      base = 10;
+      break;
+    }
+  
+  /* If we found an explicit base ensure that the character after the
+     explicit base is a single quote. */
+  
+  if (explicit_base && (*tokptr++ != '\''))
+    {
+      return (0);
+    }
+  
+  /* Start looking for a value composed of valid digits as set by the base
+     in use.  Note that '_' characters are valid anywhere, in any quantity,
+     and are simply ignored.  Since we must find at least one valid digit,
+     or reject this token as an integer literal, we keep track of how many
+     digits we have encountered. */
+  
+  while (*tokptr != '\0')
+    {
+      temp = tolower (*tokptr);
+      tokptr++;
+      switch (temp)
+	{
+	case '_':
+	  continue;
+	case '0':  case '1':  case '2':  case '3':  case '4':
+	case '5':  case '6':  case '7':  case '8':  case '9':
+	  temp -= '0';
+	  break;
+	case 'a':  case 'b':  case 'c':  case 'd':  case 'e': case 'f':
+	  temp -= 'a';
+	  temp += 10;
+	  break;
+	default:
+	  temp = base;
+	  break;
+	}
+      if (temp < base)
+	{
+	  digits++;
+	  ival *= base;
+	  ival += temp;
+	}
+      else
+	{
+	  /* Found something not in domain for current base. */
+	  tokptr--;	/* Unconsume what gave us indigestion. */
+	  break;
+	}
+    }
+  
+  /* If we didn't find any digits, then we don't have a valid integer
+     literal, so reject the entire token.  Also, if we have an explicit
+     base, then the next character must not be a single quote, or we
+     have a bitstring literal, so reject the entire token in this case
+     as well.  Otherwise, update the lexical scan pointer, and return
+     non-zero for success. */
+  
+  if (digits == 0)
+    {
+      return (0);
+    }
+  else if (explicit_base && (*tokptr == '\''))
+    {
+      return (0);
+    }
+  else
+    {
+      *valptr = ival;
+      *tokptrptr = tokptr;
+      return (1);
+    }
+}
+
+/* Recognize a character literal.  A character literal is single character
+   or a control sequence, enclosed in single quotes.  A control sequence
+   is a comma separated list of one or more integer literals, enclosed
+   in parenthesis and introduced with a circumflex character.
+
+   EX:  'a'  '^(7)'  '^(7,8)'
+
+   Returns CHARACTER_LITERAL if a match is found.
+   */
 
 static int
-decode_character_literal ()
+match_character_literal ()
 {
-    char *tokptr = lexptr;
-    int ival = 0;
+  char *tokptr = lexptr;
+  int ival = 0;
+  
+  /* All character literals must start with a single quote.  If we don't
+     find it, don't bother looking any further. */
 
-    if (*tokptr++ != '\'')
-	{
-	    return (0);
-	}
+  if (*tokptr++ != '\'')
+    {
+      return (0);
+    }
 
-    if (*tokptr != '\\')
+  /* Determine which form we have, either a control sequence or the
+     single character form. */
+
+  if ((*tokptr == '^') && (*(tokptr + 1) == '('))
+    {
+      /* Match and decode a control sequence.  Return zero if we don't
+	 find a valid integer literal, or if the next unconsumed character
+	 after the integer literal is not the trailing ')'.
+	 FIXME:  We currently don't handle the multiple integer literal
+	 form. */
+      tokptr += 2;
+      if (!decode_integer_literal (&ival, &tokptr) || (*tokptr++ != ')'))
 	{
-	    ival = *++tokptr;
-	    tokptr++;
+	  return (0);
 	}
-    else
-	{
-	    
-	}
-    if (*++tokptr != '\'')
-	{
-	    return (0);
-	}
-    yylval.typed_val.val = ival;
-    yylval.typed_val.type = builtin_type_int;
-    lexptr = tokptr;
-    return (CHARACTER_LITERAL);
+    }
+  else
+    {
+      ival = *tokptr++;
+    }
+
+  /* The trailing quote has not yet been consumed.  If we don't find
+     it, then we have no match. */
+
+  if (*tokptr++ != '\'')
+    {
+      return (0);
+    }
+  
+  yylval.typed_val.val = ival;
+  yylval.typed_val.type = builtin_type_chill_char;
+  lexptr = tokptr;
+  return (CHARACTER_LITERAL);
 }
 
 /* Recognize an integer literal, as specified in Z.200 sec 5.2.4.2.
@@ -800,112 +946,111 @@ decode_character_literal ()
    in any integer literal. */
 
 static int
-decode_integer_literal ()
+match_integer_literal ()
 {
-    char *tokptr = lexptr;
-    int ival = 0;
-    int base = 0;
-    int digits = 0;
-    int temp;
-
-    /* Look for an explicit base specifier, which is optional. */
-
-    switch (*tokptr)
+  char *tokptr = lexptr;
+  int ival = 0;
+  int base = 0;
+  int digits = 0;
+  int temp;
+  
+  /* Look for an explicit base specifier, which is optional. */
+  
+  switch (*tokptr)
+    {
+    case 'd':
+    case 'D':
+      base = 10;
+      tokptr++;
+      break;
+    case 'b':
+    case 'B':
+      base = 2;
+      tokptr++;
+      break;
+    case 'h':
+    case 'H':
+      base = 16;
+      tokptr++;
+      break;
+    case 'o':
+    case 'O':
+      base = 8;
+      tokptr++;
+      break;
+    }
+  
+  /* If we found no explicit base then default to 10, otherwise ensure
+     that the character after the explicit base is a single quote. */
+  
+  if (base == 0)
+    {
+      base = 10;
+    }
+  else
+    {
+      if (*tokptr++ != '\'')
 	{
-	    case 'd':
-	    case 'D':
-	        base = 10;
-		tokptr++;
-		break;
-	    case 'b':
-	    case 'B':
-	        base = 2;
-		tokptr++;
-		break;
-	    case 'h':
-	    case 'H':
-	        base = 16;
-		tokptr++;
-		break;
-	    case 'o':
-	    case 'O':
-	        base = 8;
-		tokptr++;
-		break;
+	  return (0);
 	}
-
-    /* If we found no explicit base then default to 10, otherwise ensure
-       that the character after the explicit base is a single quote. */
-       
-    if (base == 0)
+    }
+  
+  /* Start looking for a value composed of valid digits as set by the base
+     in use.  Note that '_' characters are valid anywhere, in any quantity,
+     and are simply ignored.  Since we must find at least one valid digit,
+     or reject this token as an integer literal, we keep track of how many
+     digits we have encountered. */
+  
+  while (*tokptr != '\0')
+    {
+      temp = tolower (*tokptr);
+      tokptr++;
+      switch (temp)
 	{
-	    base = 10;
+	case '_':
+	  continue;
+	case '0':  case '1':  case '2':  case '3':  case '4':
+	case '5':  case '6':  case '7':  case '8':  case '9':
+	  temp -= '0';
+	  break;
+	case 'a':  case 'b':  case 'c':  case 'd':  case 'e': case 'f':
+	  temp -= 'a';
+	  temp += 10;
+	  break;
+	default:
+	  temp = base;
+	  break;
 	}
-    else
+      if (temp < base)
 	{
-	    if (*tokptr++ != '\'')
-		{
-		    return (0);
-		}
+	  digits++;
+	  ival *= base;
+	  ival += temp;
 	}
-
-    /* Start looking for a value composed of valid digits as set by the base
-       in use.  Note that '_' characters are valid anywhere, in any quantity,
-       and are simply ignored.  Since we must find at least one valid digit,
-       or reject this token as an integer literal, we keep track of how many
-       digits we have encountered. */
-
-    while (*tokptr != '\0')
+      else
 	{
-	    temp = tolower (*tokptr);
-	    tokptr++;
-	    switch (temp)
-		{
-		    case '_':
-			continue;
-		    case '0':  case '1':  case '2':  case '3':  case '4':
-		    case '5':  case '6':  case '7':  case '8':  case '9':
-		        temp -= '0';
-			break;
-		    case 'a':  case 'b':  case 'c':  case 'd':  case 'e':
-		    case 'f':
-			temp -= 'a';
-			temp += 10;
-			break;
-		    default:
-			temp = base;
-			break;
-		}
-	    if (temp < base)
-		{
-		    digits++;
-		    ival *= base;
-		    ival += temp;
-		}
-	    else
-		{
-		    /* Found something not in domain for current base. */
-		    tokptr--;	/* Unconsume what gave us indigestion. */
-		    break;
-		}
+	  /* Found something not in domain for current base. */
+	  tokptr--;	/* Unconsume what gave us indigestion. */
+	  break;
 	}
-
-    /* If we didn't find any digits, then we don't have a valid integer
-       literal, so reject the entire token.  Otherwise, set up the parser
-       variables, advance the current lexical scan pointer, and return the
-       INTEGER_LITERAL token. */
-
-    if (digits == 0)
-	{
-	    return (0);
-	}
-    else
-	{
-	    yylval.typed_val.val = ival;
-	    yylval.typed_val.type = builtin_type_int;
-	    lexptr = tokptr;
-	    return (INTEGER_LITERAL);
-	}
+    }
+  
+  /* If we didn't find any digits, then we don't have a valid integer
+     literal, so reject the entire token.  Otherwise, set up the parser
+     variables, advance the current lexical scan pointer, and return the
+     INTEGER_LITERAL token. */
+  
+  if (digits == 0)
+    {
+      return (0);
+    }
+  else
+    {
+      yylval.typed_val.val = ival;
+      yylval.typed_val.type = builtin_type_int;
+      lexptr = tokptr;
+      return (INTEGER_LITERAL);
+    }
 }
 
 static void convert_float ()
@@ -1027,14 +1172,16 @@ yylex ()
     /* Look for characters which start a particular kind of multicharacter
        token, such as a character literal. */
     switch (*lexptr)
-	{
-	    case '\'':
-	        if ((token = decode_character_literal ()) != 0)
-		    {
-			return (token);
-		    }
-	    break;
-	}
+      {
+	case '^':
+	case '\'':
+	  token = match_character_literal ();
+	  if (token != 0)
+	    {
+	      return (token);
+	    }
+	  break;
+      }
     /* See if it is a special token of length 5.  */
     for (i = 0; i < sizeof (tokentab5) / sizeof (tokentab5[0]); i++)
 	{
@@ -1094,7 +1241,8 @@ yylex ()
 	    lexptr += 5;
 	    return (BOOLEAN_LITERAL);
 	}
-    if ((token = decode_integer_literal ()) != 0)
+    token = match_integer_literal ();
+    if (token != 0);
 	{
 	    return (token);
 	}
@@ -1143,6 +1291,7 @@ const static struct op_print chill_op_print_tab[] = {
 /* The built-in types of Chill.  */
 
 struct type *builtin_type_chill_bool;
+struct type *builtin_type_chill_char;
 struct type *builtin_type_chill_long;
 struct type *builtin_type_chill_ulong;
 struct type *builtin_type_chill_real;
@@ -1150,6 +1299,7 @@ struct type *builtin_type_chill_real;
 struct type ** const (chill_builtin_types[]) = 
 {
   &builtin_type_chill_bool,
+  &builtin_type_chill_char,
   &builtin_type_chill_long,
   &builtin_type_chill_ulong,
   &builtin_type_chill_real,
@@ -1167,8 +1317,10 @@ const struct language_defn chill_language_defn = {
   &BUILTIN_TYPE_LONGEST,	/* longest signed   integral type */
   &BUILTIN_TYPE_UNSIGNED_LONGEST,/* longest unsigned integral type */
   &builtin_type_chill_real,	/* longest floating point type */
-  "0x%x", "0x%", "x",		/* Hex   format, prefix, suffix */
-  "0%o",  "0%",  "o",		/* Octal format, prefix, suffix */
+  {"",      "B'",  "",   ""},	/* Binary format info */
+  {"O'%o",  "O'",  "o",  ""},	/* Octal format info */
+  {"D'%d",  "D'",  "d",  ""},	/* Decimal format info */
+  {"H'%x",  "H'",  "x",  ""},	/* Hex format info */
   chill_op_print_tab,		/* expression operators for printing */
   LANG_MAGIC
 };
@@ -1182,6 +1334,10 @@ _initialize_chill_exp ()
     init_type (TYPE_CODE_BOOL, TARGET_INT_BIT / TARGET_CHAR_BIT,
 	       TYPE_FLAG_UNSIGNED,
 	       "BOOL", (struct objfile *) NULL);
+  builtin_type_chill_char =
+    init_type (TYPE_CODE_CHAR, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
+	       TYPE_FLAG_UNSIGNED,
+	       "CHAR", (struct objfile *) NULL);
   builtin_type_chill_long =
     init_type (TYPE_CODE_INT, TARGET_LONG_BIT / TARGET_CHAR_BIT,
 	       0,

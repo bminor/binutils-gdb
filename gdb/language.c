@@ -483,9 +483,11 @@ local_hex_format_custom(pre)
 {
    static char form[50];
 
-   strcpy (form, current_language->la_hex_format_pre);
+   strcpy (form, local_hex_format_prefix ());
+   strcat (form, "%");
    strcat (form, pre);
-   strcat (form, current_language->la_hex_format_suf);
+   strcat (form, local_hex_format_specifier ());
+   strcat (form, local_hex_format_suffix ());
    return form;
 }
 
@@ -497,7 +499,7 @@ local_hex_string (num)
 {
    static char res[50];
 
-   sprintf (res, current_language->la_hex_format, num);
+   sprintf (res, local_hex_format(), num);
    return res;
 }
 
@@ -522,9 +524,11 @@ local_octal_format_custom(pre)
 {
    static char form[50];
 
-   strcpy (form, current_language->la_octal_format_pre);
+   strcpy (form, local_octal_format_prefix ());
+   strcat (form, "%");
    strcat (form, pre);
-   strcat (form, current_language->la_octal_format_suf);
+   strcat (form, local_octal_format_specifier ());
+   strcat (form, local_octal_format_suffix ());
    return form;
 }
 
@@ -563,7 +567,10 @@ simple_type(type)
   }
 }
 
-/* Returns non-zero if its argument is of an ordered type. */
+/* Returns non-zero if its argument is of an ordered type.
+   An ordered type is one in which the elements can be tested for the
+   properties of "greater than", "less than", etc, or for which the
+   operations "increment" or "decrement" make sense. */
 int
 ordered_type (type)
    struct type *type;
@@ -643,6 +650,9 @@ character_type (type)
 {
    switch(current_language->la_language)
    {
+    /* start-sanitize-chill */
+   case language_chill:
+    /* end-sanitize-chill */
    case language_m2:
       return TYPE_CODE(type) != TYPE_CODE_CHAR ? 0 : 1;
 
@@ -651,10 +661,6 @@ character_type (type)
       return (TYPE_CODE(type) == TYPE_CODE_INT) &&
 	 TYPE_LENGTH(type) == sizeof(char)
 	 ? 1 : 0;
-    /* start-sanitize-chill */
-   case language_chill:
-      error ("Missing Chill support in function character_type.");  /*FIXME*/
-    /* end-sanitize-chill */
    default:
       return (0);
    }
@@ -1106,8 +1112,10 @@ const struct language_defn unknown_language_defn = {
   &builtin_type_error,		/* longest signed   integral type */
   &builtin_type_error,		/* longest unsigned integral type */
   &builtin_type_error,		/* longest floating point type */
-  "0x%x", "0x%", "x",		/* Hex   format, prefix, suffix */
-  "0%o",  "0%",  "o",		/* Octal format, prefix, suffix */
+  {"",      "",    "",   ""},	/* Binary format info */
+  {"0%o",   "0",   "o",  ""},	/* Octal format info */
+  {"%d",    "",    "d",  ""},	/* Decimal format info */
+  {"0x%x",  "0x",  "x",  ""},	/* Hex format info */
   unk_op_print_tab,		/* expression operators for printing */
   LANG_MAGIC
 };
@@ -1124,8 +1132,10 @@ const struct language_defn auto_language_defn = {
   &builtin_type_error,		/* longest signed   integral type */
   &builtin_type_error,		/* longest unsigned integral type */
   &builtin_type_error,		/* longest floating point type */
-  "0x%x", "0x%", "x",		/* Hex   format, prefix, suffix */
-  "0%o",  "0%",  "o",		/* Octal format, prefix, suffix */
+  {"",      "",    "",   ""},	/* Binary format info */
+  {"0%o",   "0",   "o",  ""},	/* Octal format info */
+  {"%d",    "",    "d",  ""},	/* Decimal format info */
+  {"0x%x",  "0x",  "x",  ""},	/* Hex format info */
   unk_op_print_tab,		/* expression operators for printing */
   LANG_MAGIC
 };
@@ -1141,8 +1151,10 @@ const struct language_defn local_language_defn = {
   &builtin_type_error,		/* longest signed   integral type */
   &builtin_type_error,		/* longest unsigned integral type */
   &builtin_type_error,		/* longest floating point type */
-  "0x%x", "0x%", "x",		/* Hex   format, prefix, suffix */
-  "0%o",  "0%",  "o",		/* Octal format, prefix, suffix */
+  {"",      "",    "",   ""},	/* Binary format info */
+  {"0%o",   "0",   "o",  ""},	/* Octal format info */
+  {"%d",    "",    "d",  ""},	/* Decimal format info */
+  {"0x%x",  "0x",  "x",  ""},	/* Hex format info */
   unk_op_print_tab,		/* expression operators for printing */
   LANG_MAGIC
 };
