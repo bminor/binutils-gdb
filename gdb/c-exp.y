@@ -1369,7 +1369,8 @@ yylex ()
 	return SIZEOF;
       break;
     case 5:
-      if (!strncmp (tokstart, "class", 5))
+      if (current_language->la_language == language_cplus
+	  && !strncmp (tokstart, "class", 5))
 	return CLASS;
       if (!strncmp (tokstart, "union", 5))
 	return UNION;
