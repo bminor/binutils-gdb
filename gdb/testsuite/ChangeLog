@@ -1,3 +1,8 @@
+Mon Jul 24 23:11:55 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gdb.base/watchpoint.exp: Handle more cases of gdb echoing more
+	than one cr-lf	after each command.
+
 Sun Jul 23 23:33:18 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* configure.in:  Reinstate setting of stabsdirs variable, fix
