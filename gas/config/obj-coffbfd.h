@@ -122,27 +122,9 @@ typedef struct
   union internal_auxent ost_auxent[OBJ_COFF_MAX_AUXENTRIES];	/* Auxiliary entry. */
 
   unsigned int ost_flags;	/* obj_coff internal use only flags */
-
-  /* For stabs-in-coff. */
-  unsigned long n_strx;			/* index into string table of name */
-  unsigned char n_type;			/* type of symbol */
-  unsigned char n_other;		/* misc info (usually empty) */
-  unsigned short n_desc;		/* description field */
-  bfd_vma n_value;			/* value of symbol */
-
 }
 
 obj_symbol_type;
-
-#define S_SET_OFFSET_2(S,V) ((S)->sy_symbol.n_strx = (V))
-#define S_SET_OTHER(S,V) ((S)->sy_symbol.n_other = (V))
-#define S_SET_TYPE(S,T) ((S)->sy_symbol.n_type = (T))
-#define S_SET_DESC(S,D) ((S)->sy_symbol.n_desc = (D))
-#define S_GET_OFFSET_2(S) ((S)->sy_symbol.n_strx)
-#define S_GET_OTHER(S) ((S)->sy_symbol.n_other)
-#define S_GET_TYPE(S) ((S)->sy_symbol.n_type)
-#define S_GET_DESC(S) ((S)->sy_symbol.n_desc)
-
 
 #ifndef DO_NOT_STRIP
 #define DO_NOT_STRIP	0
@@ -549,11 +531,5 @@ extern SCNHDR text_section_header;
    : 0)
 
 #define SEPARATE_STAB_SECTIONS
-
-#define MAKE_STAB_SYMBOL(SYM, STR, SEC) \
- { extern symbolS current_stab_symbol; \
-  (SYM) = &current_stab_symbol; \
-  (SYM)->sy_symbol.n_strx = get_stab_string_offset(STR, SEC);  \
- }
 
 /* end of obj-coffbfd.h */

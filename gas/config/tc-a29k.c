@@ -201,12 +201,14 @@ insert_sreg (regname, regnum)
   char buf[80];
   int i;
 
-  symbol_table_insert (symbol_new (regname, SEG_REGISTER, regnum, &zero_address_frag));
+  symbol_table_insert (symbol_new (regname, SEG_REGISTER, (valueT) regnum,
+				   &zero_address_frag));
   for (i = 0; regname[i]; i++)
     buf[i] = islower (regname[i]) ? toupper (regname[i]) : regname[i];
   buf[i] = '\0';
 
-  symbol_table_insert (symbol_new (buf, SEG_REGISTER, regnum, &zero_address_frag));
+  symbol_table_insert (symbol_new (buf, SEG_REGISTER, (valueT) regnum,
+				   &zero_address_frag));
 }				/* insert_sreg() */
 
 /* Install symbol definitions for assorted special registers.
@@ -770,7 +772,7 @@ md_atof (type, litP, sizeP)
   *sizeP = prec * sizeof (LITTLENUM_TYPE);
   for (wordP = words; prec--;)
     {
-      md_number_to_chars (litP, (long) (*wordP++), sizeof (LITTLENUM_TYPE));
+      md_number_to_chars (litP, (valueT) (*wordP++), sizeof (LITTLENUM_TYPE));
       litP += sizeof (LITTLENUM_TYPE);
     }
   return "";			/* Someone should teach Dean about null pointers */
@@ -1112,7 +1114,8 @@ md_undefined_symbol (name)
 	  /* We have a wiener!  Define and return a new symbol for it.  */
 	  if (name[0] == 'l' || name[0] == 'L')
 	    regnum += 128;
-	  return (symbol_new (name, SEG_REGISTER, regnum, &zero_address_frag));
+	  return (symbol_new (name, SEG_REGISTER, (valueT) regnum,
+			      &zero_address_frag));
 	}
     }
 

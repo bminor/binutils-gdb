@@ -19,7 +19,6 @@
 
 #include "as.h"
 #include "obstack.h"
-#include "aout/stab_gnu.h"
 const short			/* in: segT   out: N_TYPE bits */
   seg_N_TYPE[] =
 {
@@ -55,24 +54,11 @@ const segT N_TYPE_seg[N_TYPE + 2] =
   SEG_GOOF,
 };
 
-#if __STDC__ == 1
-static void obj_bout_stab (int what);
-static void obj_bout_line (void);
-static void obj_bout_desc (void);
-#else /* not __STDC__ */
-static void obj_bout_desc ();
-static void obj_bout_stab ();
-static void obj_bout_line ();
-#endif /* not __STDC__ */
+static void obj_bout_line PARAMS ((int));
 
 const pseudo_typeS obj_pseudo_table[] =
 {
-/* stabs (aka a.out aka b.out directives for debug symbols) */
-  {"desc", obj_bout_desc, 0},	/* def */
   {"line", obj_bout_line, 0},	/* source code line number */
-  {"stabd", obj_bout_stab, 'd'},/* stabs */
-  {"stabn", obj_bout_stab, 'n'},/* stabs */
-  {"stabs", obj_bout_stab, 's'},/* stabs */
 
 /* coff debugging directives.  Currently ignored silently */
   {"def", s_ignore, 0},
@@ -226,7 +212,8 @@ obj_symbol_new_hook (symbolP)
 }				/* obj_symbol_new_hook() */
 
 static void
-obj_bout_line ()
+obj_bout_line (ignore)
+     int ignore;
 {
   /* Assume delimiter is part of expression. */
   /* BSD4.2 as fails with delightful bug, so we */
@@ -234,190 +221,6 @@ obj_bout_line ()
   new_logical_line ((char *) NULL, (int) (get_absolute_expression ()));
   demand_empty_rest_of_line ();
 }				/* obj_bout_line() */
-
-/*
- *			stab()
- *
- * Handle .stabX directives, which used to be open-coded.
- * So much creeping featurism overloaded the semantics that we decided
- * to put all .stabX thinking in one place. Here.
- *
- * We try to make any .stabX directive legal. Other people's AS will often
- * do assembly-time consistency checks: eg assigning meaning to n_type bits
- * and "protecting" you from setting them to certain values. (They also zero
- * certain bits before emitting symbols. Tut tut.)
- *
- * If an expression is not absolute we either gripe or use the relocation
- * information. Other people's assemblers silently forget information they
- * don't need and invent information they need that you didn't supply.
- *
- * .stabX directives always make a symbol table entry. It may be junk if
- * the rest of your .stabX directive is malformed.
- */
-static void
-obj_bout_stab (what)
-     int what;
-{
-  register symbolS *symbolP = 0;
-  register char *string;
-  int saved_type = 0;
-  int length;
-  int goof;			/* TRUE if we have aborted. */
-  long longint;
-
-  /*
-	 * Enter with input_line_pointer pointing past .stabX and any following
-	 * whitespace.
-	 */
-  goof = 0;			/* JF who forgot this?? */
-  if (what == 's')
-    {
-      string = demand_copy_C_string (&length);
-      SKIP_WHITESPACE ();
-      if (*input_line_pointer == ',')
-	input_line_pointer++;
-      else
-	{
-	  as_bad ("I need a comma after symbol's name");
-	  goof = 1;
-	}
-    }
-  else
-    string = "";
-
-  /*
-	 * Input_line_pointer->after ','.  String->symbol name.
-	 */
-  if (!goof)
-    {
-      symbolP = symbol_new (string,
-			    SEG_UNKNOWN,
-			    0,
-			    (struct frag *) 0);
-      switch (what)
-	{
-	case 'd':
-	  S_SET_NAME (symbolP, NULL);	/* .stabd feature. */
-	  S_SET_VALUE (symbolP, obstack_next_free (&frags) -
-		       frag_now->fr_literal);
-	  symbolP->sy_frag = frag_now;
-	  break;
-
-	case 'n':
-	  symbolP->sy_frag = &zero_address_frag;
-	  break;
-
-	case 's':
-	  symbolP->sy_frag = &zero_address_frag;
-	  break;
-
-	default:
-	  BAD_CASE (what);
-	  break;
-	}
-      if (get_absolute_expression_and_terminator (&longint) == ',')
-	symbolP->sy_symbol.n_type = saved_type = longint;
-      else
-	{
-	  as_bad ("I want a comma after the n_type expression");
-	  goof = 1;
-	  input_line_pointer--;	/* Backup over a non-',' char. */
-	}
-    }
-  if (!goof)
-    {
-      if (get_absolute_expression_and_terminator (&longint) == ',')
-	S_SET_OTHER (symbolP, longint);
-      else
-	{
-	  as_bad ("I want a comma after the n_other expression");
-	  goof = 1;
-	  input_line_pointer--;	/* Backup over a non-',' char. */
-	}
-    }
-  if (!goof)
-    {
-      S_SET_DESC (symbolP, get_absolute_expression ());
-      if (what == 's' || what == 'n')
-	{
-	  if (*input_line_pointer != ',')
-	    {
-	      as_bad ("I want a comma after the n_desc expression");
-	      goof = 1;
-	    }
-	  else
-	    {
-	      input_line_pointer++;
-	    }
-	}
-    }
-  if ((!goof) && (what == 's' || what == 'n'))
-    {
-      pseudo_set (symbolP);
-      symbolP->sy_symbol.n_type = saved_type;
-    }
-#ifndef NO_LISTING
-  {
-    extern int listing;
-
-    if (listing && !goof)
-      {
-	if (symbolP->sy_symbol.n_type == N_SLINE)
-	  {
-
-	    listing_source_line (symbolP->sy_symbol.n_desc);
-	  }
-	else if (symbolP->sy_symbol.n_type == N_SO
-		 || symbolP->sy_symbol.n_type == N_SOL)
-	  {
-	    listing_source_file (string);
-	  }
-      }
-  }
-
-#endif
-
-  if (goof)
-    ignore_rest_of_line ();
-  else
-    demand_empty_rest_of_line ();
-}				/* obj_bout_stab() */
-
-static void
-obj_bout_desc ()
-{
-  register char *name;
-  register char c;
-  register char *p;
-  register symbolS *symbolP;
-  register int temp;
-
-  /*
-	 * Frob invented at RMS' request. Set the n_desc of a symbol.
-	 */
-  name = input_line_pointer;
-  c = get_symbol_end ();
-  p = input_line_pointer;
-  *p = c;
-  SKIP_WHITESPACE ();
-  if (*input_line_pointer != ',')
-    {
-      *p = 0;
-      as_bad ("Expected comma after name \"%s\"", name);
-      *p = c;
-      ignore_rest_of_line ();
-    }
-  else
-    {
-      input_line_pointer++;
-      temp = get_absolute_expression ();
-      *p = 0;
-      symbolP = symbol_find_or_make (name);
-      *p = c;
-      S_SET_DESC (symbolP, temp);
-    }
-  demand_empty_rest_of_line ();
-}				/* obj_bout_desc() */
 
 void
 obj_read_begin_hook ()
@@ -446,19 +249,19 @@ obj_crawl_symbol_chain (headers)
       resolve_symbol_value (symbolP);
 
       /* OK, here is how we decide which symbols go out into the
-		   brave new symtab.  Symbols that do are:
+	 brave new symtab.  Symbols that do are:
 		
-		   * symbols with no name (stabd's?)
-		   * symbols with debug info in their N_TYPE
+	 * symbols with no name (stabd's?)
+	 * symbols with debug info in their N_TYPE
 		
-		   Symbols that don't are:
-		   * symbols that are registers
-		   * symbols with \1 as their 3rd character (numeric labels)
-		   * "local labels" as defined by S_LOCAL_NAME(name)
-		   if the -L switch was passed to gas.
+	 Symbols that don't are:
+	 * symbols that are registers
+	 * symbols with \1 as their 3rd character (numeric labels)
+	 * "local labels" as defined by S_LOCAL_NAME(name)
+	 if the -L switch was passed to gas.
 		
-		   All other symbols are output.  We complain if a deleted
-		   symbol was marked external. */
+	 All other symbols are output.  We complain if a deleted
+	 symbol was marked external. */
 
 
       if (1

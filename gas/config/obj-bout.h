@@ -228,6 +228,8 @@ struct relocation_info
 #define S_SET_OTHER(s,v)	((s)->sy_symbol.n_other = (v))
 /* Set the n_desc expression value */
 #define S_SET_DESC(s,v)		((s)->sy_symbol.n_desc = (v))
+/* Set the n_type value */
+#define S_SET_TYPE(s,v)		((s)->sy_symbol.n_type = (v))
 
 /* File header macro and type definition */
 
@@ -294,9 +296,12 @@ object_headers;
 
 #if __STDC__
 struct fix;
-void tc_aout_fix_to_chars (char *where, struct fix *fixP, relax_addressT segment_address);
-#else /* not __STDC__ */
-void tc_aout_fix_to_chars ();
-#endif /* not __STDC__ */
+#endif
+extern void tc_aout_fix_to_chars PARAMS ((char *where,
+					  struct fix *fixP,
+					  relax_addressT segment_address));
+extern void tc_bout_fix_to_chars PARAMS ((char *where,
+					  struct fix *fixP,
+					  relax_addressT segment_address));
 
 /* end of obj-bout.h */

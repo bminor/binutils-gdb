@@ -80,13 +80,6 @@ const short seg_N_TYPE[] =
 int function_lineoff = -1;	/* Offset in line#s where the last function
 				   started (the odd entry for line #0) */
 
-/* This is used along with macros in the .h file to fake the .stabX
-   directive reader into thinking it's working on a real symbol, when
-   it's actually only a temporary that will get converted into a
-   stab-section symbol later. */
-
-symbolS current_stab_symbol;
-
 static symbolS *last_line_symbol;
 
 /* Add 4 to the real value to get the index and compensate the
@@ -554,7 +547,7 @@ DEFUN (fill_section, (abfd, h, file_cursor),
 		    {
 		      memcpy (buffer + frag->fr_address,
 			      frag->fr_literal,
-			      frag->fr_fix);
+			      (unsigned int) frag->fr_fix);
 		      offset += frag->fr_fix;
 		    }
 
@@ -566,7 +559,7 @@ DEFUN (fill_section, (abfd, h, file_cursor),
 		    {
 		      memcpy (buffer + frag->fr_address,
 			      frag->fr_literal,
-			      frag->fr_fix);
+			      (unsigned int) frag->fr_fix);
 		      offset += frag->fr_fix;
 		    }
 
@@ -828,7 +821,7 @@ obj_coff_ln (appline)
       {
 	if (! appline)
 	  l += line_base - 1;
-	listing_source_line (l);
+	listing_source_line ((unsigned int) l);
       }
 
   }
@@ -895,7 +888,7 @@ DEFUN (obj_coff_def, (what),
   S_SET_NAME (def_symbol_in_progress, symbol_name_copy);
 #endif /* STRIP_UNDERSCORE */
   /* free(symbol_name_copy); */
-  def_symbol_in_progress->sy_name_offset = ~0;
+  def_symbol_in_progress->sy_name_offset = (unsigned long) ~0;
   def_symbol_in_progress->sy_number = ~0;
   def_symbol_in_progress->sy_frag = &zero_address_frag;
   S_SET_VALUE (def_symbol_in_progress, 0);
@@ -1147,7 +1140,7 @@ obj_coff_line (ignore)
     extern int listing;
     if (listing && 0)
       {
-	listing_source_line (line_base);
+	listing_source_line ((unsigned int) line_base);
       }
   }
 #endif
@@ -1266,7 +1259,7 @@ obj_coff_val (ignore)
       if (!strcmp (symbol_name, "."))
 	{
 	  def_symbol_in_progress->sy_frag = frag_now;
-	  S_SET_VALUE (def_symbol_in_progress, obstack_next_free (&frags) - frag_now->fr_literal);
+	  S_SET_VALUE (def_symbol_in_progress, (valueT) frag_now_fix ());
 	  /* If the .val is != from the .def (e.g. statics) */
 	}
       else if (strcmp (S_GET_NAME (def_symbol_in_progress), symbol_name))
@@ -1300,7 +1293,8 @@ obj_coff_val (ignore)
     }
   else
     {
-      S_SET_VALUE (def_symbol_in_progress, get_absolute_expression ());
+      S_SET_VALUE (def_symbol_in_progress,
+		   (valueT) get_absolute_expression ());
     }				/* if symbol based */
 
   demand_empty_rest_of_line ();
@@ -1706,7 +1700,7 @@ DEFUN (w_strings, (where),
   symbolS *symbolP;
 
   /* Gotta do md_ byte-ordering stuff for string_byte_count first - KWK */
-  md_number_to_chars (where, string_byte_count, 4);
+  md_number_to_chars (where, (valueT) string_byte_count, 4);
   where += 4;
   for (symbolP = symbol_rootP;
        symbolP;
@@ -1811,7 +1805,7 @@ DEFUN_VOID (remove_subsegs)
     }
 }
 
-int machine;
+unsigned long machine;
 int coff_flags;
 extern void
 DEFUN_VOID (write_object_file)
@@ -1881,7 +1875,7 @@ DEFUN_VOID (write_object_file)
 				    H_GET_NUMBER_OF_SECTIONS (&headers) + 1);
 	}
 
-      size = size_section (abfd, i);
+      size = size_section (abfd, (unsigned int) i);
       addr += size;
 
       if (i == SEG_E0)
@@ -1910,7 +1904,7 @@ DEFUN_VOID (write_object_file)
 
   file_cursor = H_GET_TEXT_FILE_OFFSET (&headers);
 
-  bfd_seek (abfd, file_cursor, 0);
+  bfd_seek (abfd, (file_ptr) file_cursor, 0);
 
   /* Plant the data */
 
@@ -2072,7 +2066,7 @@ obj_coff_section (ignore)
 	}
     }
 
-  subseg_new (section_name, exp);
+  subseg_new (section_name, (subsegT) exp);
 
   segment_info[now_seg].scnhdr.s_flags |= flags;
 
@@ -2134,7 +2128,9 @@ c_symbol_merge (debug, normal)
 
   if (S_GET_NUMBER_AUXILIARY (debug) > 0)
     {
-      memcpy ((char *) &normal->sy_symbol.ost_auxent[0], (char *) &debug->sy_symbol.ost_auxent[0], S_GET_NUMBER_AUXILIARY (debug) * AUXESZ);
+      memcpy ((char *) &normal->sy_symbol.ost_auxent[0],
+	      (char *) &debug->sy_symbol.ost_auxent[0],
+	      (unsigned int) (S_GET_NUMBER_AUXILIARY (debug) * AUXESZ));
     }				/* Move all the auxiliary information */
 
   /* Move the debug flags. */
@@ -2206,7 +2202,7 @@ c_dot_file_symbol (filename)
 
 #endif
   SF_SET_DEBUG (symbolP);
-  S_SET_VALUE (symbolP, (long) previous_file_symbol);
+  S_SET_VALUE (symbolP, (valueT) previous_file_symbol);
 
   previous_file_symbol = symbolP;
 

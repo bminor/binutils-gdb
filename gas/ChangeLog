@@ -1,3 +1,61 @@
+Tue Sep 14 13:31:04 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* read.c (change_to_section): Removed.  This is now done by
+	subseg_new.
+	(get_stab_string_offset): Rearranged somewhat.  Create the section
+	using subseg_new.  Store the string index in seg_info, rather than
+	in a static variable.  Force the first string to be empty.  Use
+	frag_more rather than FRAG_APPEND_1_CHAR.
+	(s_stab_generic): Rewrote.
+	* subsegs.h (segment_info_type): Added stabu union.
+	* subsegs.c (subseg_new): Initialize stab_string_size to 0.
+	* config/obj-aout.c: Don't include aout/stab_gnu.h.
+	(obj_aout_stab, obj_aout_desc): Removed.
+	(obj_pseudo_table): Removed desc and stabX entries.
+	* config/obj-bout.c: Same changes as config/obj-aout.c.
+	* config/obj-bout.h (S_SET_TYPE): Define.
+	(tc_bout_fix_to_chars): Declare.
+	* config/obj-coff.c (obj_coff_stab): Removed.
+	(obj_pseudo_table): Removed desc and stabX entries.
+	* config/obj-coff.h (SEPARATE_STAB_SECTIONS): Define.
+	* config/obj-coffbfd.c (current_stab_symbol): Removed.
+	* config/obj-coffbfd.h (obj_symbol_type): Removed n_strx, n_type,
+	n_other, n_desc and n_value fields.
+	(S_{S,G}ET_{OFFSET,OTHER,TYPE,DESC}): Removed.
+	(MAKE_STAB_SYMBOL): Removed.
+	* config/obj-ecoff.c (obj_ecoff_stab): Renamed to ecoff_stab.
+	Changed arguments and removed parsing code.
+	(obj_pseudo_table): Removed stabX entries.
+	* config/obj-ecoff.h (ecoff_stab): Declare.
+	(OBJ_PROCESS_STAB): Define.
+	* config/obj-elf.c: Don't include aout/stab_gnu.h.
+	(obj_elf_stab, obj_elf_xstab, obj_elf_desc,
+	elf_stab_symbol_string, elf_stab_symbol, obj_elf_stab_generic):
+	Removed.
+	(obj_pseudo_table): Removed desc, stabX and xstabs entries.
+	(obj_elf_version): Use subseg_new, not bfd_make_section.  Don't
+	set SEC_LOAD for .note section.
+	(adjust_stab_sections): Get frag pointer from seg_info, rather
+	than looking through frags.
+	* config/obj-elf.h (S_{S,G}ET_{OTHER,TYPE,DESC}): Removed.
+	(SEPARATE_STAB_SECTIONS, INIT_STAB_SECTION, OBJ_PROCESS_STAB):
+	Define.
+	* config/obj-vms.c (obj_aout_stab): Removed.
+	(obj_pseudo_table): Removed stabX entries.
+	* config/obj-vms.h (S_SET_TYPE): Define.
+
+	* as.h: Declare listing.
+	* read.c: Don't declare listing.
+	(emit_expr): Cast fix_new_exp argument.
+	(parse_bitfield_cons): Correct printf format.
+	* symbols.c (symbol_new): Add cast to avoid warning.
+	* write.h: Declare text_last_frag and data_last_frag.
+	* config/obj-bout.c (obj_bout_line): Added dummy argument.
+	* config/obj-coffbfd.c: Add some casts to avoid warnings.
+	* config/tc-a29k.c: Likewise.
+	* config/tc-i960.c: Likewise.  Also fully bracket structure
+	initializations, fix printf formats, and remove unused variables.
+
 Mon Sep 13 16:48:38 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* read.c (s_desc): Only compile and use if S_SET_DESC is defined.

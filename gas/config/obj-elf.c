@@ -19,15 +19,11 @@
 
 #include "as.h"
 #include "subsegs.h"
-#include "aout/stab_gnu.h"
 #include "obstack.h"
 
 static int obj_elf_write_symbol_p PARAMS ((symbolS *sym));
 
-static void obj_elf_stab PARAMS ((int what));
-static void obj_elf_xstab PARAMS ((int what));
 static void obj_elf_line PARAMS ((int));
-void obj_elf_desc PARAMS ((int));
 void obj_elf_version PARAMS ((int));
 static void obj_elf_size PARAMS ((int));
 static void obj_elf_type PARAMS ((int));
@@ -49,13 +45,7 @@ const pseudo_typeS obj_pseudo_table[] =
   {"weak", obj_elf_weak, 0},
 
 /* These are used for stabs-in-elf configurations.  */
-  {"desc", obj_elf_desc, 0},
   {"line", obj_elf_line, 0},
-  {"stabd", obj_elf_stab, 'd'},
-  {"stabn", obj_elf_stab, 'n'},
-  {"stabs", obj_elf_stab, 's'},
-/* This is used on Solaris 2.x on SPARC, but not supported yet.  */
-  {"xstabs", obj_elf_xstab, 's'},
 
   /* These are used for dwarf. */
   {"2byte", cons, 2},
@@ -491,379 +481,6 @@ obj_elf_line (ignore)
   demand_empty_rest_of_line ();
 }
 
-/*
- *			stab()
- *
- * Handle .stabX directives, which used to be open-coded.
- * So much creeping featurism overloaded the semantics that we decided
- * to put all .stabX thinking in one place. Here.
- *
- * We try to make any .stabX directive legal. Other people's AS will often
- * do assembly-time consistency checks: eg assigning meaning to n_type bits
- * and "protecting" you from setting them to certain values. (They also zero
- * certain bits before emitting symbols. Tut tut.)
- *
- * If an expression is not absolute we either gripe or use the relocation
- * information. Other people's assemblers silently forget information they
- * don't need and invent information they need that you didn't supply.
- *
- * .stabX directives always make a symbol table entry. It may be junk if
- * the rest of your .stabX directive is malformed.
- */
-
-/*
- *                      elf_stab_symbol_string()
- *
- * Build a string dictionary entry for a .stabX symbol.
- * The symbol is added to the .stabstr section.
- *
- */
-
-static unsigned int
-elf_stab_symbol_string (string, secname)
-     char *string, *secname;
-{
-  asection *save_seg;
-  asection *seg;
-  subsegT save_subseg;
-  unsigned int length;
-  unsigned int old_gdb_string_index;
-  char *clengthP;
-  int i;
-  char c;
-  /* @@FIXME -- there should be no static data here!
-     This also has the effect of making all stab string tables large enough
-     to contain all the contents written to any of them.  This only matters
-     with the Solaris native compiler for the moment, but it should be fixed
-     anyways.  */
-  static unsigned int gdb_string_index = 0;
-
-  old_gdb_string_index = 0;
-  length = strlen (string);
-  clengthP = (char *) &length;
-  if (length > 0)
-    {				/* Ordinary case. */
-      save_seg = now_seg;
-      save_subseg = now_subseg;
-
-      /* Create the stab sections, if they are not already created. */
-      {
-	char *newsecname = xmalloc ((unsigned long) (strlen (secname) + 4));
-	strcpy (newsecname, secname);
-	strcat (newsecname, "str");
-	seg = bfd_get_section_by_name (stdoutput, newsecname);
-	if (seg == 0)
-	  {
-	    seg = bfd_make_section_old_way (stdoutput, newsecname);
-	    bfd_set_section_flags (stdoutput, seg,
-				   SEC_LOAD | SEC_READONLY | SEC_ALLOC);
-	  }
-/*	free (newsecname);*/
-      }
-      subseg_new ((char *) seg->name, save_subseg);
-      old_gdb_string_index = gdb_string_index;
-      i = 0;
-      while ((c = *string++))
-	{
-	  i++;
-	  gdb_string_index++;
-	  FRAG_APPEND_1_CHAR (c);
-	}
-      {
-	FRAG_APPEND_1_CHAR ((char) 0);
-	i++;
-	gdb_string_index++;
-      }
-      while (i % 4 != 0)
-	{
-	  FRAG_APPEND_1_CHAR ((char) 0);
-	  i++;
-	  gdb_string_index++;
-	}
-      subseg_new ((char *) save_seg->name, save_subseg);
-    }
-
-  return old_gdb_string_index;
-}
-
-static void
-DEFUN (elf_stab_symbol, (symbolP, stab_type),
-       symbolS *symbolP AND
-       int stab_type)
-{
-  char *toP;
-
-  toP = frag_more (8);
-  /* the string index portion of the stab */
-  md_number_to_chars (toP, (valueT) symbolP->sy_name_offset, 4);
-  md_number_to_chars (toP + 4, (valueT) S_GET_TYPE (symbolP), 1);
-  md_number_to_chars (toP + 5, (valueT) S_GET_OTHER (symbolP), 1);
-  md_number_to_chars (toP + 6, (valueT) S_GET_DESC (symbolP), 2);
-  /* The n_value field doesn't get written here, it gets done below.  It
-     may be an expression needing relocating.  */
-}
-
-static void 
-obj_elf_stab_generic (what, secname)
-     int what;
-     char *secname;
-{
-  extern int listing;
-
-  symbolS *symbolP = 0;
-  char *string;
-  int saved_type = 0;
-  int length;
-  int goof = 0;
-  int seg_is_new = 0;
-  long longint;
-  asection *saved_seg = now_seg;
-  asection *seg;
-  subsegT subseg = now_subseg;
-
-#if 0
-  /* This function doesn't work yet.
-
-     Actually, this function is okay, but some finalizations are
-     needed before writing the object file; that's not done yet, and
-     the Solaris linker chokes without it.
-
-     In any case, this should effectively disable it for now.  */
-  if (what == 's')
-    demand_copy_C_string (&length);
-  s_ignore (69);
-  return;
-#endif
-
-  seg = bfd_get_section_by_name (stdoutput, secname);
-  if (seg == 0)
-    {
-      seg = subseg_new (secname, 0);
-      bfd_set_section_flags (stdoutput, seg,
-			     SEC_LOAD | SEC_READONLY | SEC_ALLOC | SEC_RELOC);
-      subseg_set (saved_seg, subseg);
-      seg_is_new = 1;
-    }
-
-  /*
-   * Enter with input_line_pointer pointing past .stabX and any following
-   * whitespace.
-   */
-  if (what == 's')
-    {
-      string = demand_copy_C_string (&length);
-      SKIP_WHITESPACE ();
-      if (*input_line_pointer == ',')
-	input_line_pointer++;
-      else
-	{
-	  as_bad ("I need a comma after symbol's name");
-	  goof = 1;
-	}
-    }
-  else
-    string = "";
-
-  /*
-   * Input_line_pointer->after ','.  String->symbol name.
-   */
-  if (!goof)
-    {
-      symbolP = symbol_new (string, &bfd_und_section, (valueT) 0, (struct frag *) 0);
-
-      /* enter the string in the .stab string table (section .stabstr) */
-      symbolP->sy_name_offset = elf_stab_symbol_string (string, secname);
-
-      switch (what)
-	{
-	case 'd':
-	  S_SET_NAME (symbolP, NULL);	/* .stabd feature. */
-	  S_SET_VALUE (symbolP,
-		       (valueT) ((char*) obstack_next_free (&frags) - frag_now->fr_literal));
-	  S_SET_SEGMENT (symbolP, now_seg);
-	  symbolP->sy_frag = frag_now;
-	  break;
-
-	case 'n':
-	  symbolP->sy_frag = &zero_address_frag;
-	  break;
-
-	case 's':
-	  symbolP->sy_frag = &zero_address_frag;
-	  break;
-
-	default:
-	  BAD_CASE (what);
-	  break;
-	}
-
-      if (get_absolute_expression_and_terminator (&longint) == ',')
-	{
-	  saved_type = longint;
-	  S_SET_TYPE (symbolP, saved_type);
-	}
-      else
-	{
-	  as_bad ("I want a comma after the n_type expression");
-	  goof = 1;
-	  input_line_pointer--;	/* Backup over a non-',' char. */
-	}
-    }
-
-  if (!goof)
-    {
-      if (get_absolute_expression_and_terminator (&longint) == ',')
-	S_SET_OTHER (symbolP, longint);
-      else
-	{
-	  as_bad ("I want a comma after the n_other expression");
-	  goof = 1;
-	  input_line_pointer--;	/* Backup over a non-',' char. */
-	}
-    }
-
-  if (!goof)
-    {
-      S_SET_DESC (symbolP, get_absolute_expression ());
-      if (what == 's' || what == 'n')
-	{
-	  if (*input_line_pointer != ',')
-	    {
-	      as_bad ("I want a comma after the n_desc expression");
-	      goof = 1;
-	    }
-	  else
-	    {
-	      input_line_pointer++;
-	    }
-	}
-    }
-
-  if (goof)
-    {
-      ignore_rest_of_line ();
-      return;
-    }
-
-  subseg_set (seg, subseg);
-
-  if (seg_is_new)
-    /* allocate and discard -- filled in later */
-    (void) frag_more (12);
-
-  /* Emit the stab symbol. */
-  elf_stab_symbol (symbolP, what);
-
-  if (what == 's' || what == 'n')
-    {
-      cons (4);
-      input_line_pointer--;
-    }
-  else
-    {
-      char *p = frag_more (4);
-      md_number_to_chars (p, 0, 4);
-    }
-
-  subseg_set (saved_seg, subseg);
-
-  if ((what == 's' || what == 'n')
-      && symbolP->sy_value.X_op == O_constant)
-    {
-      /* symbol is not needed in the regular symbol table */
-      symbol_remove (symbolP, &symbol_rootP, &symbol_lastP);
-    }
-
-  if (what == 's' && S_GET_TYPE (symbolP) == N_SO)
-    {
-      fragS *fragp = seg_info (seg)->frchainP->frch_root;
-      while (fragp
-	     && fragp->fr_address + fragp->fr_fix < 12)
-	fragp = fragp->fr_next;
-      assert (fragp != 0);
-      assert (fragp->fr_type == rs_fill);
-      assert (fragp->fr_address == 0 && fragp->fr_fix >= 12);
-      md_number_to_chars (fragp->fr_literal, (valueT) symbolP->sy_name_offset,
-			  4);
-    }
-
-  if (listing)
-    switch (S_GET_TYPE (symbolP))
-      {
-      case N_SLINE:
-	listing_source_line ((unsigned int) S_GET_DESC (symbolP));
-	break;
-      case N_SO:
-      case N_SOL:
-	listing_source_file (string);
-	break;
-      }
-
-  demand_empty_rest_of_line ();
-}
-
-static void
-obj_elf_stab (what)
-     int what;
-{
-  obj_elf_stab_generic (what, ".stab");
-}
-
-static void
-obj_elf_xstab (what)
-     int what;
-{
-  int length;
-  char *secname;
-
-  secname = demand_copy_C_string (&length);
-  SKIP_WHITESPACE ();
-  if (*input_line_pointer == ',')
-    input_line_pointer++;
-  else
-    {
-      as_bad ("comma missing in .xstabs");
-      ignore_rest_of_line ();
-      return;
-    }
-  obj_elf_stab_generic (what, secname);
-}
-
-void 
-obj_elf_desc (ignore)
-     int ignore;
-{
-  char *name;
-  char c;
-  char *p;
-  symbolS *symbolP;
-  int temp;
-
-  /* Frob invented at RMS' request. Set the n_desc of a symbol.  */
-  name = input_line_pointer;
-  c = get_symbol_end ();
-  p = input_line_pointer;
-  *p = c;
-  SKIP_WHITESPACE ();
-  if (*input_line_pointer != ',')
-    {
-      *p = 0;
-      as_bad ("Expected comma after name \"%s\"", name);
-      *p = c;
-      ignore_rest_of_line ();
-    }
-  else
-    {
-      input_line_pointer++;
-      temp = get_absolute_expression ();
-      *p = 0;
-      symbolP = symbol_find_or_make (name);
-      *p = c;
-      S_SET_DESC (symbolP, temp);
-    }
-  demand_empty_rest_of_line ();
-}				/* obj_elf_desc() */
-
 void 
 obj_read_begin_hook ()
 {
@@ -913,20 +530,15 @@ obj_elf_version (ignore)
       *(input_line_pointer - 1) = '\0';
       *input_line_pointer = c;
 
-      /* create the .note section if this is the first version string */
+      /* create the .note section */
 
-      note_secp = bfd_get_section_by_name (stdoutput, ".note");
-      if (note_secp == (asection *) NULL)
-	{
-	  note_secp = bfd_make_section_old_way (stdoutput, ".note");
-	  bfd_set_section_flags (stdoutput,
-				 note_secp,
-				 SEC_LOAD | SEC_HAS_CONTENTS | SEC_READONLY);
-	}
+      note_secp = subseg_new (".note", 0);
+      bfd_set_section_flags (stdoutput,
+			     note_secp,
+			     SEC_HAS_CONTENTS | SEC_READONLY);
 
       /* process the version string */
 
-      subseg_set (note_secp, 0);
       len = strlen (name);
 
       i_note.namesz = ((len + 1) + 3) & ~3; /* round this to word boundary */
@@ -1083,7 +695,7 @@ adjust_stab_sections (abfd, sec, xxx)
 {
   char *name;
   asection *strsec;
-  fragS *fragp;
+  char *p;
   int strsz, nsyms;
 
   if (strncmp (".stab", sec->name, 5))
@@ -1101,16 +713,11 @@ adjust_stab_sections (abfd, sec, xxx)
     strsz = 0;
   nsyms = bfd_section_size (abfd, sec) / 12 - 1;
 
-  fragp = seg_info (sec)->frchainP->frch_root;
-  while (fragp
-	 && fragp->fr_address + fragp->fr_fix < 12)
-    fragp = fragp->fr_next;
-  assert (fragp != 0);
-  assert (fragp->fr_type == rs_fill);
-  assert (fragp->fr_address == 0 && fragp->fr_fix >= 12);
+  p = seg_info (sec)->stabu.p;
+  assert (p != 0);
 
-  bfd_h_put_16 (abfd, (bfd_vma) nsyms, fragp->fr_literal + 6);
-  bfd_h_put_32 (abfd, (bfd_vma) strsz, fragp->fr_literal + 8);
+  bfd_h_put_16 (abfd, (bfd_vma) nsyms, p + 6);
+  bfd_h_put_32 (abfd, (bfd_vma) strsz, p + 8);
 }
 
 void 

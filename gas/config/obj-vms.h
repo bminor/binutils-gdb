@@ -196,6 +196,8 @@ typedef struct nlist obj_symbol_type;	/* Symbol table entry */
 #define S_SET_OTHER(s,v)	((s)->sy_symbol.n_other = (v))
 /* Set the n_desc expression value */
 #define S_SET_DESC(s,v)		((s)->sy_symbol.n_desc = (v))
+/* Set the n_type expression value */
+#define S_SET_TYPE(s,v)		((s)->sy_symbol.n_type = (v))
 
 
 /* File header macro and type definition */
