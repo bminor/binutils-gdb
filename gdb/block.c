@@ -44,7 +44,7 @@ static void block_initialize_namespace (struct block *block,
    Return zero otherwise. */
 
 int
-contained_in (struct block *a, struct block *b)
+contained_in (const struct block *a, const struct block *b)
 {
   if (!a || !b)
     return 0;
@@ -57,7 +57,7 @@ contained_in (struct block *a, struct block *b)
    lexical block, described by a struct block BL.  */
 
 struct symbol *
-block_function (struct block *bl)
+block_function (const struct block *bl)
 {
   while (BLOCK_FUNCTION (bl) == 0 && BLOCK_SUPERBLOCK (bl) != 0)
     bl = BLOCK_SUPERBLOCK (bl);

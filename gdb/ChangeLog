@@ -1,5 +1,12 @@
 2003-06-02  David Carlton  <carlton@math.stanford.edu>
 
+	* block.c (contained_in): Add 'const' to arguments.
+	(block_function): Ditto.
+	* block.h: Update declarations for block_function and
+	contained_in.
+
+2003-06-02  David Carlton  <carlton@math.stanford.edu>
+
 	* objc-lang.c (find_imps): Delete unneeded variable 'sym_symtab'.
 	* c-valprint.c (c_val_print): Delete unneeded variable 's'.
 	* p-valprint.c (pascal_val_print): Ditto.

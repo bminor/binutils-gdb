@@ -187,9 +187,9 @@ struct blockvector
 #define	STATIC_BLOCK		1
 #define	FIRST_LOCAL_BLOCK	2
 
-extern struct symbol *block_function (struct block *);
+extern struct symbol *block_function (const struct block *);
 
-extern int contained_in (struct block *, struct block *);
+extern int contained_in (const struct block *, const struct block *);
 
 extern struct blockvector *blockvector_for_pc (CORE_ADDR, int *);
 
