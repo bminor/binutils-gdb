@@ -1,3 +1,10 @@
+2003-05-27  Richard Henderson  <rth@redhat.com>
+
+	* gas/cfi/cfi-i386.d: Update for dw2gencfi rewrite.
+	* gas/cfi/cfi-x86_64.d: Likewise.
+	* gas/cfi/cfi-i386-2.d: New.
+	* gas/cfi/cfi-i386-2.s: New.
+
 2003-05-23  Jason Eckhardt  <jle@rice.edu>
 
 	* gas/i860/xp.s: New file.

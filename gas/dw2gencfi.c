@@ -19,812 +19,782 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-#include <errno.h>
 #include "as.h"
 #include "dw2gencfi.h"
 
+
+/* We re-use DWARF2_LINE_MIN_INSN_LENGTH for the code alignment field
+   of the CIE.  Default to 1 if not otherwise specified.  */
+#ifndef DWARF2_LINE_MIN_INSN_LENGTH
+# define DWARF2_LINE_MIN_INSN_LENGTH 1
+#endif
+
+/* If TARGET_USE_CFIPOP is defined, it is required that the target
+   provide the following definitions.  Otherwise provide them to 
+   allow compilation to continue.  */
+#ifndef TARGET_USE_CFIPOP
+# ifndef DWARF2_DEFAULT_RETURN_COLUMN
+#  define DWARF2_DEFAULT_RETURN_COLUMN 0
+# endif
+# ifndef DWARF2_CIE_DATA_ALIGNMENT
+#  define DWARF2_CIE_DATA_ALIGNMENT 1
+# endif
+#endif
+
+#ifndef tc_cfi_frame_initial_instructions
+# define tc_cfi_frame_initial_instructions() ((void)0)
+#endif
+
+
+struct cfi_insn_data
+{
+  struct cfi_insn_data *next;
+  int insn;
+  union {
+    struct {
+      unsigned reg;
+      offsetT offset;
+    } ri;
+
+    struct {
+      unsigned reg1;
+      unsigned reg2;
+    } rr;
+
+    unsigned r;
+    offsetT i;
+
+    struct {
+      symbolS *lab1;
+      symbolS *lab2;
+    } ll;
+  } u;
+};
+
+struct fde_entry
+{
+  struct fde_entry *next;
+  symbolS *start_address;
+  symbolS *end_address;
+  struct cfi_insn_data *data;
+  struct cfi_insn_data **last;
+  unsigned int return_column;
+};
+
 struct cie_entry
 {
-  unsigned long offset;
-  size_t size;
-  void *data;
   struct cie_entry *next;
+  symbolS *start_address;
+  unsigned int return_column;
+  struct cfi_insn_data *first, *last;
 };
 
-struct cfi_data
-{
-  enum cfi_insn insn;
-  long param[2];
-  struct cfi_data *next;
-};
 
-struct cfi_info
-{
-  addressT start_address;
-  addressT end_address;
-  addressT last_address;
-  const char *labelname;
-  struct cfi_data *data;
-  struct cfi_info *next;
-};
+/* Current open FDE entry.  */
+static struct fde_entry *cur_fde_data;
+static symbolS *last_address;
+static offsetT cur_cfa_offset;
 
-/* Current open CFI entry.  */
-static struct cfi_info *cfi_info;
+/* List of FDE entries.  */
+static struct fde_entry *all_fde_data;
+static struct fde_entry **last_fde_data = &all_fde_data;
 
 /* List of CIEs so that they could be reused.  */
 static struct cie_entry *cie_root;
 
-/* Current target config.  */
-static struct cfi_config current_config;
+
+/* Construct a new FDE structure and add it to the end of the fde list.  */
 
-/* This is the main entry point to the CFI machinery.  */
-static void dot_cfi (int arg);
+static struct fde_entry *
+alloc_fde_entry (void)
+{
+  struct fde_entry *fde = xcalloc (1, sizeof (struct fde_entry));
+
+  cur_fde_data = fde;
+  *last_fde_data = fde;
+  last_fde_data = &fde->next;
+
+  fde->last = &fde->data;
+  fde->return_column = DWARF2_DEFAULT_RETURN_COLUMN;
+
+  return fde;
+}
+
+/* The following functions are available for a backend to construct its
+   own unwind information, usually from legacy unwind directives.  */
+
+/* Construct a new INSN structure and add it to the end of the insn list
+   for the currently active FDE.  */
+
+static struct cfi_insn_data *
+alloc_cfi_insn_data (void)
+{
+  struct cfi_insn_data *insn = xcalloc (1, sizeof (struct cfi_insn_data));
+
+  *cur_fde_data->last = insn;
+  cur_fde_data->last = &insn->next;
+
+  return insn;
+}
+
+/* Construct a new FDE structure that begins at LABEL.  */
+
+void 
+cfi_new_fde (symbolS *label)
+{
+  struct fde_entry *fde = alloc_fde_entry ();
+  fde->start_address = label;
+  last_address = label;
+}
+
+/* End the currently open FDE.  */
+
+void 
+cfi_end_fde (symbolS *label)
+{
+  cur_fde_data->end_address = label;
+  cur_fde_data = NULL;
+}
+
+/* Set the return column for the current FDE.  */
+
+void
+cfi_set_return_column (unsigned regno)
+{
+  cur_fde_data->return_column = regno;
+}
+
+/* Add a CFI insn to advance the PC from the last address to LABEL.  */
+
+void
+cfi_add_advance_loc (symbolS *label)
+{
+  struct cfi_insn_data *insn = alloc_cfi_insn_data ();
+
+  insn->insn = DW_CFA_advance_loc;
+  insn->u.ll.lab1 = last_address;
+  insn->u.ll.lab2 = label;
+
+  last_address = label;
+}
+
+/* Add a DW_CFA_offset record to the CFI data.  */
+
+void
+cfi_add_CFA_offset (unsigned regno, offsetT offset)
+{
+  struct cfi_insn_data *insn = alloc_cfi_insn_data ();
+  
+  insn->insn = DW_CFA_offset;
+  insn->u.ri.reg = regno;
+  insn->u.ri.offset = offset;
+}
+
+/* Add a DW_CFA_def_cfa record to the CFI data.  */
+
+void
+cfi_add_CFA_def_cfa (unsigned regno, offsetT offset)
+{
+  struct cfi_insn_data *insn = alloc_cfi_insn_data ();
+  
+  insn->insn = DW_CFA_def_cfa;
+  insn->u.ri.reg = regno;
+  insn->u.ri.offset = offset;
+
+  cur_cfa_offset = offset;
+}
+
+/* Add a DW_CFA_register record to the CFI data.  */
+
+void
+cfi_add_CFA_register (unsigned reg1, unsigned reg2)
+{
+  struct cfi_insn_data *insn = alloc_cfi_insn_data ();
+  
+  insn->insn = DW_CFA_register;
+  insn->u.rr.reg1 = reg1;
+  insn->u.rr.reg2 = reg2;
+}
+
+/* Add a DW_CFA_def_cfa_register record to the CFI data.  */
+
+void
+cfi_add_CFA_def_cfa_register (unsigned regno)
+{
+  struct cfi_insn_data *insn = alloc_cfi_insn_data ();
+  
+  insn->insn = DW_CFA_def_cfa_register;
+  insn->u.r = regno;
+}
+
+/* Add a DW_CFA_def_cfa_offset record to the CFI data.  */
+
+void
+cfi_add_CFA_def_cfa_offset (offsetT offset)
+{
+  struct cfi_insn_data *insn = alloc_cfi_insn_data ();
+  
+  insn->insn = DW_CFA_def_cfa_offset;
+  insn->u.i = offset;
+
+  cur_cfa_offset = offset;
+}
+
+
+/* Parse CFI assembler directives.  */
+
+static void dot_cfi (int);
+static void dot_cfi_startproc (int);
+static void dot_cfi_endproc (int);
+
+/* Fake CFI type; outside the byte range of any real CFI insn.  */
+#define CFI_adjust_cfa_offset 0x100
 
 const pseudo_typeS cfi_pseudo_table[] =
   {
-    { "cfi_verbose", dot_cfi, CFI_verbose },
-    { "cfi_startproc", dot_cfi, CFI_startproc },
-    { "cfi_endproc", dot_cfi, CFI_endproc },
-    { "cfi_def_cfa", dot_cfi, CFA_def_cfa },
-    { "cfi_def_cfa_register", dot_cfi, CFA_def_cfa_register },
-    { "cfi_def_cfa_offset", dot_cfi, CFA_def_cfa_offset },
+    { "cfi_startproc", dot_cfi_startproc, 0 },
+    { "cfi_endproc", dot_cfi_endproc, 0 },
+    { "cfi_def_cfa", dot_cfi, DW_CFA_def_cfa },
+    { "cfi_def_cfa_register", dot_cfi, DW_CFA_def_cfa_register },
+    { "cfi_def_cfa_offset", dot_cfi, DW_CFA_def_cfa_offset },
     { "cfi_adjust_cfa_offset", dot_cfi, CFI_adjust_cfa_offset },
-    { "cfi_offset", dot_cfi, CFA_offset },
-    { "cfi_register", dot_cfi, CFA_register },
+    { "cfi_offset", dot_cfi, DW_CFA_offset },
+    { "cfi_register", dot_cfi, DW_CFA_register },
     { NULL, NULL, 0 }
   };
 
-static const char *
-cfi_insn_str (enum cfi_insn insn)
+static void
+cfi_parse_separator (void)
 {
-  switch (insn)
-    {
-    case CFA_nop:
-      return "CFA_nop";
-    case CFA_set_loc:
-      return "CFA_set_loc";
-    case CFA_advance_loc1:
-      return "CFA_advance_loc1";
-    case CFA_advance_loc2:
-      return "CFA_advance_loc2";
-    case CFA_advance_loc4:
-      return "CFA_advance_loc4";
-    case CFA_offset_extended:
-      return "CFA_offset_extended";
-    case CFA_resotre_extended:
-      return "CFA_resotre_extended";
-    case CFA_undefined:
-      return "CFA_undefined";
-    case CFA_same_value:
-      return "CFA_same_value";
-    case CFA_register:
-      return "CFA_register";
-    case CFA_remember_state:
-      return "CFA_remember_state";
-    case CFA_restore_state:
-      return "CFA_restore_state";
-    case CFA_def_cfa:
-      return "CFA_def_cfa";
-    case CFA_def_cfa_register:
-      return "CFA_def_cfa_register";
-    case CFA_def_cfa_offset:
-      return "CFA_def_cfa_offset";
-    case CFA_advance_loc:
-      return "CFA_advance_loc";
-    case CFA_offset:
-      return "CFA_offset";
-    case CFA_restore:
-      return "CFA_restore";
-    default:
-      break;
-    }
-
-  return "CFA_unknown";
-}
-
-static struct cfi_data *
-alloc_cfi_data (void)
-{
-  return (struct cfi_data *) xcalloc (sizeof (struct cfi_info), 1);
-}
-
-static struct cfi_info *
-alloc_cfi_info (void)
-{
-  return (struct cfi_info *) xcalloc (sizeof (struct cfi_info), 1);
-}
-
-/* Parse arguments.  */
-static int
-cfi_parse_arg (long *param, int resolvereg)
-{
-  long value;
-  int retval = -1;
-  int nchars;
-
-  assert (param != NULL);
   SKIP_WHITESPACE ();
+  if (*input_line_pointer == ',')
+    input_line_pointer++;
+  else
+    as_bad (_("missing separator"));
+}
 
-  if (sscanf (input_line_pointer, "%li%n", &value, &nchars) >= 1)
-    {
-      input_line_pointer += nchars;
-      retval = 1;
-    }
+static unsigned
+cfi_parse_reg (void)
+{
+  int regno;
+  expressionS exp;
+
 #ifdef tc_regname_to_dw2regnum
-  else if (resolvereg && ((is_name_beginner (*input_line_pointer))
-			   || (*input_line_pointer == '%'
-			       && is_name_beginner (*(++input_line_pointer)))))
+  SKIP_WHITESPACE ();
+  if (is_name_beginner (*input_line_pointer)
+      || (*input_line_pointer == '%'
+	  && is_name_beginner (*++input_line_pointer)))
     {
-      char *name, c, *p;
+      char *name, c;
 
       name = input_line_pointer;
       c = get_symbol_end ();
-      p = input_line_pointer;
 
-      if ((value = tc_regname_to_dw2regnum (name)) >= 0)
-	retval = 1;
+      if ((regno = tc_regname_to_dw2regnum (name)) < 0)
+	{
+	  as_bad (_("bad register expression"));
+	  regno = 0;
+	}
 
-      *p = c;
+      *input_line_pointer = c;
+      return regno;
     }
 #endif
-  else
-    as_bad (resolvereg ?
-	    _("can't convert argument to a register number") :
-	    _("can't convert argument to an integer"));
 
-  if (retval > 0)
-    *param = value;
-
-  SKIP_WHITESPACE ();
-  if (*input_line_pointer == ',')
+  expression (&exp);
+  switch (exp.X_op)
     {
-      input_line_pointer++;
-      SKIP_WHITESPACE ();
+    case O_register:
+    case O_constant:
+      regno = exp.X_add_number;
+      break;
+
+    default:
+      as_bad (_("bad register expression"));
+      regno = 0;
+      break;
     }
 
-  return retval;
+  return regno;
 }
 
-static int
-cfi_parse_reg (long *param)
+static offsetT
+cfi_parse_const (void)
 {
-  return cfi_parse_arg (param, 1);
-}
-
-static int
-cfi_parse_const (long *param)
-{
-  return cfi_parse_arg (param, 0);
-}
-
-void
-cfi_add_insn (enum cfi_insn insn, long param0, long param1)
-{
-  struct cfi_data *data_ptr;
-
-  if (!cfi_info->data)
-    {
-      cfi_info->data = alloc_cfi_data ();
-      data_ptr = cfi_info->data;
-    }
-  else
-    {
-      data_ptr = cfi_info->data;
-
-      while (data_ptr && data_ptr->next)
-	data_ptr = data_ptr->next;
-
-      data_ptr->next = alloc_cfi_data ();
-
-      data_ptr = data_ptr->next;
-    }
-
-  data_ptr->insn = insn;
-  data_ptr->param[0] = param0;
-  data_ptr->param[1] = param1;
+  return get_absolute_expression ();
 }
 
 static void
-cfi_advance_loc (void)
+dot_cfi (int arg)
 {
-  addressT curr_address = frag_now_fix ();
-  if (cfi_info->last_address == curr_address)
-    return;
-  cfi_add_insn (CFA_advance_loc,
-		(long) (curr_address - cfi_info->last_address), 0);
-  cfi_info->last_address = curr_address;
-}
+  offsetT offset;
+  unsigned reg1, reg2;
 
-static long
-get_current_offset (struct cfi_info *info)
-{
-  long current_offset = 0;
-  struct cfi_data *data = info->data;
-
-  current_offset = 0;
-  while (data)
-    {
-      if (data->insn == CFA_def_cfa)
-	current_offset = data->param[1];
-      else if (data->insn == CFA_def_cfa_offset)
-	current_offset = data->param[0];
-      data = data->next;
-    }
-
-  return current_offset;
-}
-
-static void
-cfi_make_insn (int arg)
-{
-  long param[2] = { 0, 0 };
-
-  if (!cfi_info)
+  if (!cur_fde_data)
     {
       as_bad (_("CFI instruction used without previous .cfi_startproc"));
       return;
     }
 
-  cfi_advance_loc ();
+  /* If the last address was not at the current PC, advance to current.  */
+  if (symbol_get_frag (last_address) != frag_now
+      || S_GET_VALUE (last_address) != frag_now_fix ())
+    cfi_add_advance_loc (symbol_temp_new_now ());
 
   switch (arg)
     {
       /* Instructions that take two arguments (register, integer). */
-    case CFA_offset:
-    case CFA_def_cfa:
-      if (cfi_parse_reg (&param[0]) < 0)
-	{
-	  as_bad (_("first argument to %s is not a register"),
-		  cfi_insn_str (arg));
-	  return;
-	}
-      if (cfi_parse_const (&param[1]) < 0)
-	{
-	  as_bad (_("second argument to %s is not a number"),
-		  cfi_insn_str (arg));
-	  return;
-	}
+    case DW_CFA_offset:
+    case DW_CFA_def_cfa:
+      reg1 = cfi_parse_reg ();
+      cfi_parse_separator ();
+      offset = cfi_parse_const ();
+
+      if (arg == DW_CFA_def_cfa)
+	cfi_add_CFA_def_cfa (reg1, offset);
+      else
+	cfi_add_CFA_offset (reg1, offset);
       break;
 
-    case CFA_register:
-      if (cfi_parse_reg (&param[0]) < 0)
-	{
-	  as_bad (_("first argument to %s is not a register"),
-		  cfi_insn_str (arg));
-	  return;
-	}
-      if (cfi_parse_reg (&param[1]) < 0)
-	{
-	  as_bad (_("second argument to %s is not a register"),
-		  cfi_insn_str (arg));
-	  return;
-	}
+      /* Instructions that take two arguments (register, register). */
+    case DW_CFA_register:
+      reg1 = cfi_parse_reg ();
+      cfi_parse_separator ();
+      reg2 = cfi_parse_reg ();
+
+      cfi_add_CFA_register (reg1, reg2);
       break;
 
       /* Instructions that take one register argument.  */
-    case CFA_def_cfa_register:
-      if (cfi_parse_reg (&param[0]) < 0)
-	{
-	  as_bad (_("argument to %s is not a register"), cfi_insn_str (arg));
-	  return;
-	}
+    case DW_CFA_def_cfa_register:
+      reg1 = cfi_parse_reg ();
+      cfi_add_CFA_def_cfa_register (reg1);
       break;
 
       /* Instructions that take one integer argument.  */
-    case CFA_def_cfa_offset:
-      if (cfi_parse_const (&param[0]) < 0)
-	{
-	  as_bad (_("argument to %s is not a number"), cfi_insn_str (arg));
-	  return;
-	}
+    case DW_CFA_def_cfa_offset:
+      offset = cfi_parse_const ();
+      cfi_add_CFA_def_cfa_offset (offset);
       break;
 
       /* Special handling for pseudo-instruction.  */
     case CFI_adjust_cfa_offset:
-      if (cfi_parse_const (&param[0]) < 0)
-	{
-	  as_bad (_("argument to %s is not a number"),
-		    ".cfi_adjust_cfa_offset");
-	  return;
-	}
-      param[0] += get_current_offset (cfi_info);
-      arg = CFA_def_cfa_offset;
+      offset = cfi_parse_const ();
+      cfi_add_CFA_def_cfa_offset (cur_cfa_offset + offset);
       break;
 
     default:
-      as_bad (_("unknown CFI instruction %d (%s)"), arg, cfi_insn_str (arg));
-      return;
+      abort ();
     }
-  cfi_add_insn (arg, param[0], param[1]);
-}
 
-static symbolS *
-cfi_get_label (void)
-{
-  char symname[40], *symbase=".Llbl_cfi";
-  symbolS *symbolP;
-  unsigned int i = 0;
-
-  snprintf (symname, sizeof (symname), "%s_0x%lx",
-	    symbase, (long) frag_now_fix ());
-  while ((symbolP = symbol_find (symname)))
-    {
-      if ((S_GET_VALUE (symbolP) == frag_now_fix ())
-	  && (S_GET_SEGMENT (symbolP) == now_seg))
-	return symbolP;
-
-      snprintf (symname, sizeof (symname), "%s_0x%lx_%u",
-		symbase, (long) frag_now_fix (), i++);
-    }
-#ifdef BFD_ASSEMBLER
-  symbolP = (symbolS *) local_symbol_make (symname, now_seg,
-					   (valueT) frag_now_fix (),
-					   frag_now);
-#else
-  symbolP = symbol_make (symname);
-#endif
-  return symbolP;
+  demand_empty_rest_of_line ();
 }
 
 static void
-dot_cfi_startproc (void)
+dot_cfi_startproc (int ignored ATTRIBUTE_UNUSED)
 {
-#ifdef tc_cfi_frame_initial_instructions
-  const char *simple = "simple";
-#endif
+  int simple = 0;
 
-  if (cfi_info)
+  if (cur_fde_data)
     {
       as_bad (_("previous CFI entry not closed (missing .cfi_endproc)"));
       return;
     }
 
-#if defined(TARGET_USE_CFIPOP)
-  /* Because this file is linked even for architectures that 
-     don't use CFI, we must wrap this call.  */
-  if (current_config.addr_length == 0)
-    tc_cfi_init ();
-#endif
-
-  cfi_info = alloc_cfi_info ();
-
-  cfi_info->start_address = frag_now_fix ();
-  cfi_info->last_address = cfi_info->start_address;
-  cfi_info->labelname = S_GET_NAME (cfi_get_label ());
+  cfi_new_fde (symbol_temp_new_now ());
 
   SKIP_WHITESPACE ();
-#ifdef tc_cfi_frame_initial_instructions
-  if (strncmp (simple, input_line_pointer, strlen (simple)) != 0)
+  if (is_name_beginner (*input_line_pointer))
+    {
+      char *name, c;
+
+      name = input_line_pointer;
+      c = get_symbol_end ();
+
+      if (strcmp (name, "simple") == 0)
+	{
+	  simple = 1;
+	  *input_line_pointer = c;
+	}
+      else
+	input_line_pointer = name;
+    }
+  demand_empty_rest_of_line ();
+
+  if (!simple)
     tc_cfi_frame_initial_instructions ();
-  else
-    input_line_pointer += strlen (simple);
-#endif
-}
-
-#define cfi_is_advance_insn(insn)				\
-  ((insn >= CFA_set_loc && insn <= CFA_advance_loc4)		\
-   || insn == CFA_advance_loc)
-
-/* Output CFI instructions to the file.  */
-
-enum data_types
-  {
-    t_ascii = 0,
-    t_byte = 1,
-    t_half = 2,
-    t_long = 4,
-    t_quad = 8,
-    t_uleb128 = 0x10,
-    t_sleb128 = 0x11
-  };
-
-static int
-output_data (char **p, unsigned long *size, enum data_types type, long value)
-{
-  char *ptr = *p;
-  unsigned int ret_size;
-
-  switch (type)
-    {
-    case t_byte:
-      ret_size = 1;
-      break;
-    case t_half:
-      ret_size = 2;
-      break;
-    case t_long:
-      ret_size = 4;
-      break;
-    case t_quad:
-    case t_uleb128:
-    case t_sleb128:
-      ret_size = 8;
-      break;
-    default:
-      /* This should never happen - throw an internal error.  */
-      as_fatal (_("unknown type %d"), type);
-      return 0;
-    }
-
-  if (*size < ret_size)
-    {
-      as_bad (_("output_data buffer is too small"));
-      return 0;
-    }
-
-  switch (type)
-    {
-    case t_byte:
-      *ptr = (char) value;
-      if (verbose)
-	printf ("\t.byte\t0x%x\n", (unsigned char) *ptr);
-      break;
-    case t_half:
-      *(short *) ptr = (short) value & 0xFFFF;
-      if (verbose)
-	printf ("\t.half\t0x%x\n", (unsigned short) *ptr);
-      break;
-    case t_long:
-      *(int *) ptr = (int) value & 0xFFFFFFFF;
-      if (verbose)
-	printf ("\t.long\t0x%x\n", (unsigned int) *ptr);
-      break;
-    case t_quad:
-      *(long long *) ptr = (long long) value & 0xFFFFFFFF;
-      if (verbose)
-	printf ("\t.quad\t0x%x\n", (unsigned int) *ptr);
-      break;
-    case t_uleb128:
-    case t_sleb128:
-      ret_size = output_leb128 (ptr, value, type == t_sleb128);
-      if (verbose)
-	printf ("\t.%s\t0x%lx\n",
-		type == t_sleb128 ? "sleb128" : "uleb128",
-		value);
-      break;
-    default:
-      as_fatal (_("unknown type %d"), type);
-      return 0;
-    }
-
-  *size -= ret_size;
-  *p += ret_size;
-
-  return ret_size;
-}
-
-static int
-cfi_output_insn (struct cfi_data *data, char **buf, unsigned long *buf_size)
-{
-  char **pbuf = buf, *orig_buf = *buf;
-  unsigned long size;
-
-  if (!data || !buf)
-    as_fatal (_("cfi_output_insn called with NULL pointer"));
-
-  switch (data->insn)
-    {
-    case CFA_advance_loc:
-      if (verbose)
-	printf ("\t# %s(%ld)\n", cfi_insn_str (data->insn),
-		data->param[0]);
-      if (data->param[0] <= 0x3F)
-	{
-	  output_data (pbuf, buf_size, t_byte, CFA_advance_loc +
-		       (data->param[0] / current_config.code_align));
-	}
-      else if (data->param[0] <= 0xFF)
-	{
-	  output_data (pbuf, buf_size, t_byte, CFA_advance_loc1);
-	  output_data (pbuf, buf_size, t_byte,
-		       data->param[0] / current_config.code_align);
-	}
-      else if (data->param[0] <= 0xFFFF)
-	{
-	  output_data (pbuf, buf_size, t_byte, CFA_advance_loc2);
-	  output_data (pbuf, buf_size, t_half,
-		       data->param[0] / current_config.code_align);
-	}
-      else
-	{
-	  output_data (pbuf, buf_size, t_byte, CFA_advance_loc4);
-	  output_data (pbuf, buf_size, t_long,
-		       data->param[0] / current_config.code_align);
-	}
-      break;
-
-    case CFA_def_cfa:
-      if (verbose)
-	printf ("\t# CFA_def_cfa(%ld,%ld)\n",
-		data->param[0], data->param[1]);
-      output_data (pbuf, buf_size, t_byte, CFA_def_cfa);
-      output_data (pbuf, buf_size, t_uleb128, data->param[0]);
-      output_data (pbuf, buf_size, t_uleb128, data->param[1]);
-      break;
-
-    case CFA_def_cfa_register:
-    case CFA_def_cfa_offset:
-      if (verbose)
-	printf ("\t# %s(%ld)\n", cfi_insn_str (data->insn),
-		data->param[0]);
-      output_data (pbuf, buf_size, t_byte, data->insn);
-      output_data (pbuf, buf_size, t_uleb128, data->param[0]);
-      break;
-
-    case CFA_offset:
-      if (verbose)
-	printf ("\t# %s(%ld,%ld)\n", cfi_insn_str (data->insn),
-		data->param[0], data->param[1]);
-
-      /* Check whether to use CFA_offset or CFA_offset_extended.  */
-      if (data->param[0] <= 0x3F)
-	output_data (pbuf, buf_size, t_byte, CFA_offset + data->param[0]);
-      else
-	{
-	  output_data (pbuf, buf_size, t_byte, CFA_offset_extended);
-	  output_data (pbuf, buf_size, t_uleb128, data->param[0]);
-	}
-      output_data (pbuf, buf_size, t_uleb128,
-		   data->param[1] / current_config.data_align);
-      break;
-
-    case CFA_register:
-      if (verbose)
-	printf ("\t# %s(%ld,%ld)\n", cfi_insn_str (data->insn),
-		data->param[0], data->param[1]);
-      output_data (pbuf, buf_size, t_byte, CFA_register);
-      output_data (pbuf, buf_size, t_uleb128, data->param[0]);
-      output_data (pbuf, buf_size, t_uleb128, data->param[1]);
-      break;
-
-    case CFA_nop:
-      if (verbose)
-	printf ("\t# CFA_nop\n");
-      output_data (pbuf, buf_size, t_byte, CFA_nop);
-      break;
-
-    default:
-      as_warn ("CFA_unknown[%d](%ld,%ld)", data->insn,
-	       data->param[0], data->param[1]);
-    }
-  size = *pbuf - orig_buf;
-  *buf = *pbuf;
-  *buf_size -= size;
-  return size;
 }
 
 static void
-dot_cfi_endproc (void)
+dot_cfi_endproc (int ignored ATTRIBUTE_UNUSED)
 {
-  struct cfi_data *data_ptr;
-  struct cie_entry *cie_ptr;
-  char *cie_buf, *fde_buf, *pbuf, *where;
-  unsigned long buf_size, cie_size, fde_size, last_cie_offset;
-  unsigned long fde_initloc_offset, fde_len_offset, fde_offset;
-  segT saved_seg, cfi_seg;
-  expressionS exp;
-
-  if (! cfi_info)
+  if (! cur_fde_data)
     {
       as_bad (_(".cfi_endproc without corresponding .cfi_startproc"));
       return;
     }
-  cfi_info->end_address = frag_now_fix ();
+
+  cfi_end_fde (symbol_temp_new_now ());
+}
+
+
+/* Emit a single byte into the current segment.  */
+
+static inline void
+out_one (int byte)
+{
+  FRAG_APPEND_1_CHAR (byte);
+}
+
+/* Emit a two-byte word into the current segment.  */
+
+static inline void
+out_two (int data)
+{
+  md_number_to_chars (frag_more (2), data, 2);
+}
+
+/* Emit a four byte word into the current segment.  */
+
+static inline void
+out_four (int data)
+{
+  md_number_to_chars (frag_more (4), data, 4);
+}
+
+/* Emit an unsigned "little-endian base 128" number.  */
+
+static void
+out_uleb128 (addressT value)
+{
+  output_leb128 (frag_more (sizeof_leb128 (value, 0)), value, 0);
+}
+
+/* Emit an unsigned "little-endian base 128" number.  */
+
+static void
+out_sleb128 (offsetT value)
+{
+  output_leb128 (frag_more (sizeof_leb128 (value, 1)), value, 1);
+}
+
+static void
+output_cfi_insn (struct cfi_insn_data *insn)
+{
+  offsetT offset;
+  unsigned int regno;
+
+  switch (insn->insn)
+    {
+    case DW_CFA_advance_loc:
+      {
+	symbolS *from = insn->u.ll.lab1;
+	symbolS *to = insn->u.ll.lab2;
+
+	if (symbol_get_frag (to) == symbol_get_frag (from))
+	  {
+	    addressT delta = S_GET_VALUE (to) - S_GET_VALUE (from);
+	    addressT scaled = delta / DWARF2_LINE_MIN_INSN_LENGTH;
+
+	    if (scaled <= 0x3F)
+	      out_one (DW_CFA_advance_loc + scaled);
+	    else if (delta <= 0xFF)
+	      {
+	        out_one (DW_CFA_advance_loc1);
+	        out_one (delta);
+	      }
+	    else if (delta <= 0xFFFF)
+	      {
+	        out_one (DW_CFA_advance_loc2);
+	        out_two (delta);
+	      }
+	    else
+	      {
+	        out_one (DW_CFA_advance_loc4);
+	        out_four (delta);
+	      }
+	  }
+	else
+	  {
+	    expressionS exp;
+
+	    exp.X_op = O_subtract;
+	    exp.X_add_symbol = to;
+	    exp.X_op_symbol = from;
+	    exp.X_add_number = 0;
+
+	    /* The code in ehopt.c expects that one byte of the encoding
+	       is already allocated to the frag.  This comes from the way
+	       that it scans the .eh_frame section looking first for the
+	       .byte DW_CFA_advance_loc4.  */
+	    frag_more (1);
+
+	    frag_var (rs_cfa, 4, 0, DWARF2_LINE_MIN_INSN_LENGTH << 3,
+		      make_expr_symbol (&exp), frag_now_fix () - 1,
+		      (char *) frag_now);
+	  }
+      }
+      break;
+
+    case DW_CFA_def_cfa:
+      offset = insn->u.ri.offset;
+      if (offset < 0)
+	{
+	  out_one (DW_CFA_def_cfa_sf);
+	  out_uleb128 (insn->u.ri.reg);
+	  out_uleb128 (offset);
+	}
+      else
+	{
+	  out_one (DW_CFA_def_cfa);
+	  out_uleb128 (insn->u.ri.reg);
+	  out_uleb128 (offset);
+	}
+      break;
+
+    case DW_CFA_def_cfa_register:
+      out_one (DW_CFA_def_cfa_register);
+      out_uleb128 (insn->u.i);
+      break;
+
+    case DW_CFA_def_cfa_offset:
+      offset = insn->u.i;
+      if (offset < 0)
+	{
+	  out_one (DW_CFA_def_cfa_offset_sf);
+	  out_sleb128 (offset);
+	}
+      else
+	{
+	  out_one (DW_CFA_def_cfa_offset);
+	  out_uleb128 (offset);
+	}
+      break;
+
+    case DW_CFA_offset:
+      regno = insn->u.ri.reg;
+      offset = insn->u.ri.offset / DWARF2_CIE_DATA_ALIGNMENT;
+      if (offset < 0)
+	{
+	  out_one (DW_CFA_offset_extended);
+	  out_uleb128 (regno);
+	  out_sleb128 (offset);
+	}
+      else if (regno <= 0x3F)
+	{
+	  out_one (DW_CFA_offset + regno);
+	  out_uleb128 (offset);
+	}
+      else
+	{
+	  out_one (DW_CFA_offset_extended);
+	  out_uleb128 (regno);
+	  out_uleb128 (offset);
+	}
+      break;
+
+    case DW_CFA_register:
+      out_one (DW_CFA_register);
+      out_uleb128 (insn->u.rr.reg1);
+      out_uleb128 (insn->u.rr.reg2);
+      break;
+
+    case DW_CFA_nop:
+      out_one (DW_CFA_nop);
+      break;
+
+    default:
+      abort ();
+    }
+}
+
+static void
+output_cie (struct cie_entry *cie)
+{
+  symbolS *after_size_address, *end_address;
+  expressionS exp;
+  struct cfi_insn_data *i;
+
+  cie->start_address = symbol_temp_new_now ();
+  after_size_address = symbol_temp_make ();
+  end_address = symbol_temp_make ();
+
+  exp.X_op = O_subtract;
+  exp.X_add_symbol = end_address;
+  exp.X_op_symbol = after_size_address;
+  exp.X_add_number = 0;
+
+  emit_expr (&exp, 4);				/* Length */
+  symbol_set_value_now (after_size_address);
+  out_four (0);					/* CIE id */
+  out_one (DW_CIE_VERSION);			/* Version */
+  out_one ('z');				/* Augmentation */
+  out_one ('R');
+  out_one (0);
+  out_uleb128 (DWARF2_LINE_MIN_INSN_LENGTH);	/* Code alignment */
+  out_sleb128 (DWARF2_CIE_DATA_ALIGNMENT);	/* Data alignment */
+  out_one (cie->return_column);			/* Return column */
+  out_uleb128 (1);				/* Augmentation size */
+  out_one (DW_EH_PE_pcrel | DW_EH_PE_sdata4);
+
+  if (cie->first)
+    for (i = cie->first; i != cie->last; i = i->next)
+      output_cfi_insn (i);
+
+  frag_align (2, 0, 0);
+  symbol_set_value_now (end_address);
+}
+
+static void
+output_fde (struct fde_entry *fde, struct cie_entry *cie,
+	    struct cfi_insn_data *first)
+{
+  symbolS *after_size_address, *end_address;
+  expressionS exp;
+
+  after_size_address = symbol_temp_make ();
+  end_address = symbol_temp_make ();
+
+  exp.X_op = O_subtract;
+  exp.X_add_symbol = end_address;
+  exp.X_op_symbol = after_size_address;
+  exp.X_add_number = 0;
+  emit_expr (&exp, 4);				/* Length */
+  symbol_set_value_now (after_size_address);
+
+  exp.X_add_symbol = after_size_address;
+  exp.X_op_symbol = cie->start_address;
+  emit_expr (&exp, 4);				/* CIE offset */
+  
+  exp.X_add_symbol = fde->start_address;
+  exp.X_op_symbol = symbol_temp_new_now ();
+  emit_expr (&exp, 4);				/* Code offset */
+
+  exp.X_add_symbol = fde->end_address;
+  exp.X_op_symbol = fde->start_address;		/* Code length */
+  emit_expr (&exp, 4);
+
+  out_uleb128 (0);				/* Augmentation size */
+
+  for (; first; first = first->next)
+    output_cfi_insn (first);
+
+  frag_align (2, 0, 0);
+  symbol_set_value_now (end_address);
+}
+
+static struct cie_entry *
+select_cie_for_fde (struct fde_entry *fde, struct cfi_insn_data **pfirst)
+{
+  struct cfi_insn_data *i, *j;
+  struct cie_entry *cie;
+
+  for (cie = cie_root; cie; cie = cie->next)
+    {
+      if (cie->return_column != fde->return_column)
+	continue;
+      for (i = cie->first, j = fde->data;
+	   i != cie->last && j != NULL;
+	   i = i->next, j = j->next)
+	{
+	  if (i->insn != j->insn)
+	    goto fail;
+	  switch (i->insn)
+	    {
+	    case DW_CFA_advance_loc:
+	      /* We reached the first advance in the FDE, but did not
+		 reach the end of the CIE list.  */
+	      goto fail;
+
+	    case DW_CFA_offset:
+	    case DW_CFA_def_cfa:
+	      if (i->u.ri.reg != j->u.ri.reg)
+		goto fail;
+	      if (i->u.ri.offset != j->u.ri.offset)
+		goto fail;
+	      break;
+
+	    case DW_CFA_register:
+	      if (i->u.rr.reg1 != j->u.rr.reg1)
+		goto fail;
+	      if (i->u.rr.reg2 != j->u.rr.reg2)
+		goto fail;
+	      break;
+
+	    case DW_CFA_def_cfa_register:
+	      if (i->u.r != j->u.r)
+		goto fail;
+	      break;
+
+	    case DW_CFA_def_cfa_offset:
+	      if (i->u.i != j->u.i)
+		goto fail;
+	      break;
+
+	    default:
+	      abort ();
+	    }
+	}
+
+      /* Success if we reached the end of the CIE list, and we've either
+	 run out of FDE entries or we've encountered an advance.  */
+      if (i == cie->last && (!j || j->insn == DW_CFA_advance_loc))
+	{
+	  *pfirst = j;
+	  return cie;
+	}
+
+    fail:;
+    }
+
+  cie = xmalloc (sizeof (struct cie_entry));
+  cie->next = cie_root;
+  cie_root = cie;
+  cie->return_column = fde->return_column;
+  cie->first = fde->data;
+
+  for (i = cie->first; i ; i = i->next)
+    if (i->insn == DW_CFA_advance_loc)
+      break;
+
+  cie->last = i;
+  *pfirst = i;
+   
+  output_cie (cie);
+
+  return cie;
+}
+
+void
+cfi_finish (void)
+{
+  segT cfi_seg;
+  struct fde_entry *fde;
+
+  if (cur_fde_data)
+    {
+      as_bad (_("open CFI at the end of file; missing .cfi_endproc directive"));
+      cur_fde_data->end_address = cur_fde_data->start_address;
+    }
+
+  if (all_fde_data == 0)
+    return;
 
   /* Open .eh_frame section.  */
-  saved_seg = now_seg;
   cfi_seg = subseg_new (".eh_frame", 0);
 #ifdef BFD_ASSEMBLER
   bfd_set_section_flags (stdoutput, cfi_seg,
 			 SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA);
 #endif
   subseg_set (cfi_seg, 0);
+  record_alignment (cfi_seg, 2);
 
-  /* Build CIE.  */
-  cie_buf = xcalloc (1024, 1);
-  /* Skip space for CIE length.  */
-  pbuf = cie_buf + 4;
-  buf_size = 1020;
-
-  if (verbose)
-    printf ("# CIE *****\n");
-
-  /* CIE id.  */
-  output_data (&pbuf, &buf_size, t_long, 0x0);
-  /* Version.  */
-  output_data (&pbuf, &buf_size, t_byte, 1);
-  /* Augmentation.  */
-  output_data (&pbuf, &buf_size, t_byte, 0);
-  /* Code alignment.  */
-  output_data (&pbuf, &buf_size, t_uleb128, current_config.code_align);
-  /* Data alignment.  */
-  output_data (&pbuf, &buf_size, t_sleb128, current_config.data_align);
-  /* Return address column.  */
-  output_data (&pbuf, &buf_size, t_byte, current_config.ra_column);
-
-  /* Build CFI instructions.  */
-  data_ptr = cfi_info->data;
-  while (data_ptr && !cfi_is_advance_insn (data_ptr->insn))
+  for (fde = all_fde_data; fde ; fde = fde->next)
     {
-      cfi_output_insn (data_ptr, &pbuf, &buf_size);
-      data_ptr = data_ptr->next;
+      struct cfi_insn_data *first;
+      struct cie_entry *cie;
+
+      cie = select_cie_for_fde (fde, &first);
+      output_fde (fde, cie, first);
     }
-
-  /* Align the whole data to current_config.eh_align.  */
-  cie_size = pbuf - cie_buf;
-  cie_size += current_config.eh_align - cie_size % current_config.eh_align;
-
-  /* CIE length.  */
-  pbuf = cie_buf;
-  output_data (&pbuf, &buf_size, t_long, cie_size - 4);
-
-  /* OK, we built the CIE. Let's write it to the file...  */
-  last_cie_offset = frag_now_fix ();
-
-  /* Check if we have already emitted the exactly same CIE. 
-     If yes then use its offset instead and don't put out 
-     the new one.  */
-  cie_ptr = cie_root;
-  while (cie_ptr)
-    {
-      if (cie_ptr->size == cie_size - 4
-	  && memcmp (cie_ptr->data, cie_buf + 4, cie_ptr->size) == 0)
-	break;
-      cie_ptr = cie_ptr->next;
-    }
-
-  /* If we have found the same CIE, use it...  */
-  if (cie_ptr)
-    {
-      if (verbose)
-	printf ("# Duplicate CIE found. Previous is at offset %lu\n",
-		cie_ptr->offset);
-      last_cie_offset = cie_ptr->offset;
-    }
-  else
-    {
-      /* Otherwise join this CIE to the list.  */
-      where = (unsigned char *) frag_more (cie_size);
-      memcpy (where, cie_buf, cie_size);
-      if (cie_root)
-	{
-	  cie_ptr = cie_root;
-	  while (cie_ptr->next)
-	    cie_ptr = cie_ptr->next;
-	  cie_ptr->next = calloc (sizeof (struct cie_entry), 1);
-	  cie_ptr = cie_ptr->next;
-	}
-      else
-	{
-	  cie_root = calloc (sizeof (struct cie_entry), 1);
-	  cie_ptr = cie_root;
-	}
-
-      cie_ptr->size = cie_size - 4;
-      cie_ptr->data = calloc (cie_ptr->size, 1);
-      cie_ptr->offset = last_cie_offset;
-      memcpy (cie_ptr->data, cie_buf + 4, cie_ptr->size);
-    }
-
-  /* Clean up.  */
-  free (cie_buf);
-
-  /* Build the FDE...  */
-  fde_buf = xcalloc (1024, 1);
-  pbuf = fde_buf;
-  buf_size = 1024;
-
-  /* Offset of this FDE in current fragment.  */
-  fde_offset = frag_now_fix ();
-
-  if (verbose)
-    {
-      printf ("# FDE: start=0x%lx, end=0x%lx, delta=%d\n",
-	      (long) cfi_info->start_address,
-	      (long) cfi_info->end_address,
-	      (int) (cfi_info->end_address - cfi_info->start_address));
-    }
-
-  /* FDE length (t_long, 4 bytes) - will be set later.  */
-  fde_len_offset = pbuf - fde_buf;
-  pbuf += 4;
-  buf_size -= 4;
-
-  /* CIE pointer - offset from here.  */
-  output_data (&pbuf, &buf_size, t_long, fde_offset - last_cie_offset + 4);
-
-  /* FDE initial location - this must be set relocatable!  */
-  fde_initloc_offset = pbuf - fde_buf + fde_offset;
-  output_data (&pbuf, &buf_size, current_config.addr_length,
-	       cfi_info->start_address);
-
-  /* FDE address range.  */
-  output_data (&pbuf, &buf_size, current_config.addr_length,
-	       cfi_info->end_address - cfi_info->start_address);
-
-  while (data_ptr)
-    {
-      cfi_output_insn (data_ptr, &pbuf, &buf_size);
-      data_ptr = data_ptr->next;
-    }
-
-  fde_size = pbuf - fde_buf;
-  fde_size += current_config.eh_align - fde_size % current_config.eh_align;
-
-  /* Now we can set FDE length.  */
-  pbuf = fde_buf + fde_len_offset;
-  buf_size = 4;
-  output_data (&pbuf, &buf_size, t_long, fde_size - 4);
-
-  /* Copy FDE to objfile.  */
-  where = (unsigned char *) frag_more (fde_size);
-  memcpy (where, fde_buf, fde_size);
-
-  /* Set relocation for initial address.  */
-  buf_size = current_config.addr_length;
-  memset (&exp, 0, sizeof (exp));
-  exp.X_op = O_symbol;
-  exp.X_add_symbol = symbol_find (cfi_info->labelname);
-  fix_new_exp (frag_now, fde_initloc_offset,
-	       current_config.addr_length,
-	       &exp, 0, current_config.reloc_type);
-
-  /* Clean up.  */
-  free (fde_buf);
-
-  free (cfi_info);
-  cfi_info = NULL;
-
-  /* Restore previous segment.  */
-  subseg_set (saved_seg, 0);
-}
-
-void
-dot_cfi (int arg)
-{
-  long param;
-
-  switch (arg)
-    {
-    case CFI_startproc:
-      dot_cfi_startproc ();
-      break;
-    case CFI_endproc:
-      dot_cfi_endproc ();
-      break;
-    case CFA_def_cfa:
-    case CFA_def_cfa_register:
-    case CFA_def_cfa_offset:
-    case CFA_offset:
-    case CFA_register:
-    case CFI_adjust_cfa_offset:
-      cfi_make_insn (arg);
-      break;
-    case CFI_verbose:
-      if (cfi_parse_const (&param) >= 0)
-	verbose = (int) param;
-      else
-	verbose = 1;
-      break;
-    default:
-      as_bad (_("unknown CFI code 0x%x (%s)"), arg, cfi_insn_str (arg));
-      break;
-    }
-  ignore_rest_of_line ();
-}
-
-void
-cfi_set_config (struct cfi_config *cfg)
-{
-  assert (cfg != NULL);
-  assert (cfg->addr_length > 0);
-
-  current_config = *cfg;
-}
-
-void
-cfi_finish (void)
-{
-  if (cfi_info)
-    as_bad (_("open CFI at the end of file; missing .cfi_endproc directive"));
 }

@@ -911,9 +911,9 @@ main (argc, argv)
      assembly debugging or on behalf of the compiler, emit it now.  */
   dwarf2_finish ();
 
-#ifdef TARGET_USE_CFIPOP
+  /* If we constructed dwarf2 .eh_frame info, either via .cfi 
+     directives from the user or by the backend, emit it now.  */
   cfi_finish ();
-#endif
 
   if (seen_at_least_1_file ()
       && (flag_always_generate_output || had_errors () == 0))

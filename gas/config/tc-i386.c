@@ -319,6 +319,12 @@ static unsigned int no_cond_jump_promotion = 0;
 /* Pre-defined "_GLOBAL_OFFSET_TABLE_".  */
 symbolS *GOT_symbol;
 
+/* The dwarf2 return column, adjusted for 32 or 64 bit.  */
+unsigned int x86_dwarf2_return_column;
+
+/* The dwarf2 data alignment, adjusted for 32 or 64 bit.  */
+int x86_cie_data_alignment;
+
 /* Interface to relax_segment.
    There are 3 major relax states for 386 jump insns because the
    different types of jumps add different sizes to frags when we're
@@ -987,6 +993,17 @@ md_begin ()
       record_alignment (bss_section, 2);
     }
 #endif
+
+  if (flag_code == CODE_64BIT)
+    {
+      x86_dwarf2_return_column = 16;
+      x86_cie_data_alignment = -8;
+    }
+  else
+    {
+      x86_dwarf2_return_column = 8;
+      x86_cie_data_alignment = -4;
+    }
 }
 
 void
@@ -6301,42 +6318,15 @@ intel_putback_token ()
   prev_token.str = NULL;
 }
 
-void
-tc_x86_cfi_init (void)
-{
-  struct cfi_config cfi_config;
-
-  if (flag_code == CODE_64BIT)
-    {
-      cfi_config.addr_length = 8;
-      cfi_config.eh_align = 8;
-      cfi_config.code_align = 1;
-      cfi_config.data_align = -8;
-      cfi_config.ra_column = 0x10;
-      cfi_config.reloc_type = BFD_RELOC_64;
-    }
-  else
-    {
-      cfi_config.addr_length = 4;
-      cfi_config.eh_align = 4;
-      cfi_config.code_align = 1;
-      cfi_config.data_align = -4;
-      cfi_config.ra_column = 0x08;
-      cfi_config.reloc_type = BFD_RELOC_32;
-    }
-
-  cfi_set_config (&cfi_config);
-}
-
-unsigned long
+int
 tc_x86_regname_to_dw2regnum (const char *regname)
 {
   unsigned int regnum;
   unsigned int regnames_count;
   char *regnames_32[] =
     {
-      "eax", "ebx", "ecx", "edx",
-      "edi", "esi", "ebp", "esp",
+      "eax", "ecx", "edx", "ebx",
+      "esp", "ebp", "esi", "edi",
       "eip"
     };
   char *regnames_64[] =
@@ -6364,21 +6354,18 @@ tc_x86_regname_to_dw2regnum (const char *regname)
     if (strcmp (regname, regnames[regnum]) == 0)
       return regnum;
 
-  as_bad (_("unknown register name '%s'"), regname);
   return -1;
 }
 
 void
 tc_x86_frame_initial_instructions (void)
 {
-  if (flag_code == CODE_64BIT)
-    {
-      cfi_add_insn (CFA_def_cfa, tc_x86_regname_to_dw2regnum ("rsp"), 8);
-      cfi_add_insn (CFA_offset, tc_x86_regname_to_dw2regnum ("rip"), -8);
-    }
-  else
-    {
-      cfi_add_insn (CFA_def_cfa, tc_x86_regname_to_dw2regnum ("esp"), 4);
-      cfi_add_insn (CFA_offset, tc_x86_regname_to_dw2regnum ("eip"), -4);
-    }
+  static unsigned int sp_regno;
+
+  if (!sp_regno)
+    sp_regno = tc_x86_regname_to_dw2regnum (flag_code == CODE_64BIT
+					    ? "rsp" : "esp");
+
+  cfi_add_CFA_def_cfa (sp_regno, -x86_cie_data_alignment);
+  cfi_add_CFA_offset (x86_dwarf2_return_column, x86_cie_data_alignment);
 }

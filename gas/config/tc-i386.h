@@ -546,18 +546,18 @@ extern void sco_id PARAMS ((void));
 #endif
 
 /* We want .cfi_* pseudo-ops for generating unwind info.  */
-#define TARGET_USE_CFIPOP
-#ifdef TARGET_USE_CFIPOP
+#define TARGET_USE_CFIPOP 1
 
-#define tc_cfi_init() tc_x86_cfi_init ()
-extern void tc_x86_cfi_init PARAMS ((void));
+extern unsigned int x86_dwarf2_return_column;
+#define DWARF2_DEFAULT_RETURN_COLUMN x86_dwarf2_return_column
+
+extern int x86_cie_data_alignment;
+#define DWARF2_CIE_DATA_ALIGNMENT x86_cie_data_alignment
 
 #define tc_regname_to_dw2regnum tc_x86_regname_to_dw2regnum
-extern unsigned long tc_x86_regname_to_dw2regnum PARAMS ((const char *regname));
+extern int tc_x86_regname_to_dw2regnum PARAMS ((const char *regname));
 
 #define tc_cfi_frame_initial_instructions tc_x86_frame_initial_instructions
 extern void tc_x86_frame_initial_instructions PARAMS ((void));
-
-#endif /* TARGET_USE_CFIPOP */
 
 #endif /* TC_I386 */

@@ -1,5 +1,21 @@
 2003-05-27  Richard Henderson  <rth@redhat.com>
 
+	* dw2gencfi.c, dw2gencfi.h: Rewrite from scratch.
+	* as.c (main): Always call cfi_finish.
+	* config/tc-i386.c (x86_dwarf2_return_column): New.
+	(x86_cie_data_alignment): New.
+	(md_begin): Set them.
+	(tc_x86_cfi_init): Remove.
+	(tc_x86_regname_to_dw2regnum): Fix 32-bit register numbers;
+	return int, not unsigned long; don't as_bad here.
+	(tc_x86_frame_initial_instructions): Streamline; use
+	updated api.
+	* config/tc-i386.h (tc_cfi_init): Remove.
+	(DWARF2_DEFAULT_RETURN_COLUMN): New.
+	(DWARF2_CIE_DATA_ALIGNMENT): New.
+
+2003-05-27  Richard Henderson  <rth@redhat.com>
+
 	* symbols.c (temp_label_name): New.
 	(symbol_temp_new, symbol_temp_new_now, symbol_temp_make): New.
 	(symbol_set_value_now): New.
