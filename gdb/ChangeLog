@@ -1,3 +1,9 @@
+2004-01-13  Andrew Cagney  <cagney@redhat.com>
+
+	* configure.in: Update copyright year.
+	(build_warnings): Add -Wunused-label.
+	* configure: Re-generate.
+
 2004-01-12  Andrew Cagney  <cagney@redhat.com>
 
 	* exec.h (exec_ops): Make "extern".

@@ -8,7 +8,7 @@
 
 @ifinfo
 This file documents the internals of the GNU debugger @value{GDBN}.
-Copyright 1990,1991,1992,1993,1994,1996,1998,1999,2000,2001,2002,2003
+Copyright 1990,1991,1992,1993,1994,1996,1998,1999,2000,2001,2002,2003,2004
    Free Software Foundation, Inc.
 Contributed by Cygnus Solutions.  Written by John Gilmore.
 Second Edition by Stan Shebs.
@@ -48,7 +48,7 @@ Free Documentation License''.
 
 @vskip 0pt plus 1filll
 Copyright @copyright{} 1990,1991,1992,1993,1994,1996,1998,1999,2000,2001,
-   2002, 2003  Free Software Foundation, Inc.
+   2002, 2003, 2004  Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1 or
@@ -5132,6 +5132,23 @@ This warning includes uses of the assignment operator within an
 @item -Wpointer-arith
 
 @item -Wuninitialized
+
+@item -Wunused-label
+This warning has the additional benefit of detecting the absence of the
+@code{case} reserved word in a switch statement:
+@smallexample
+enum @{ FD_SCHEDULED, NOTHING_SCHEDULED @} sched;
+@dots{}
+switch (sched)
+  @{
+  case FD_SCHEDULED:
+    @dots{};
+    break;
+  NOTHING_SCHEDULED:
+    @dots{};
+    break;
+  @}
+@end smallexample
 @end table
 
 @emph{Pragmatics: Due to the way that @value{GDBN} is implemented most
