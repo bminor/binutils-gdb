@@ -369,91 +369,118 @@ extern const char *entry_section;
 extern bfd_boolean entry_from_cmdline;
 extern lang_statement_list_type file_chain;
 
-extern void lang_init PARAMS ((void));
+extern void lang_init
+  PARAMS ((void));
 extern struct memory_region_struct *lang_memory_region_lookup
   PARAMS ((const char *const));
 extern struct memory_region_struct *lang_memory_region_default
   PARAMS ((asection *));
-extern void lang_map PARAMS ((void));
-extern void lang_set_flags PARAMS ((lang_memory_region_type *, const char *,
-				    int));
-extern void lang_add_output PARAMS ((const char *, int from_script));
+extern void lang_map
+  PARAMS ((void));
+extern void lang_set_flags
+  PARAMS ((lang_memory_region_type *, const char *, int));
+extern void lang_add_output
+  PARAMS ((const char *, int from_script));
 extern lang_output_section_statement_type *lang_enter_output_section_statement
   PARAMS ((const char *output_section_statement_name,
-	   etree_type * address_exp,
+	   etree_type *address_exp,
 	   enum section_type sectype,
 	   bfd_vma block_value,
 	   etree_type *align,
 	   etree_type *subalign,
 	   etree_type *));
-extern void lang_final PARAMS ((void));
-extern void lang_process PARAMS ((void));
-extern void lang_section_start PARAMS ((const char *, union etree_union *));
-extern void lang_add_entry PARAMS ((const char *, bfd_boolean));
-extern void lang_add_target PARAMS ((const char *));
+extern void lang_final
+  PARAMS ((void));
+extern void lang_process
+  PARAMS ((void));
+extern void lang_section_start
+  PARAMS ((const char *, union etree_union *));
+extern void lang_add_entry
+  PARAMS ((const char *, bfd_boolean));
+extern void lang_add_target
+  PARAMS ((const char *));
 extern void lang_add_wild
   PARAMS ((struct wildcard_spec *, struct wildcard_list *, bfd_boolean));
-extern void lang_add_map PARAMS ((const char *));
-extern void lang_add_fill PARAMS ((fill_type *));
-extern lang_assignment_statement_type * lang_add_assignment PARAMS ((union etree_union *));
-extern void lang_add_attribute PARAMS ((enum statement_enum));
-extern void lang_startup PARAMS ((const char *));
-extern void lang_float PARAMS ((bfd_boolean));
+extern void lang_add_map
+  PARAMS ((const char *));
+extern void lang_add_fill
+  PARAMS ((fill_type *));
+extern lang_assignment_statement_type * lang_add_assignment
+  PARAMS ((union etree_union *));
+extern void lang_add_attribute
+  PARAMS ((enum statement_enum));
+extern void lang_startup
+  PARAMS ((const char *));
+extern void lang_float
+  PARAMS ((bfd_boolean));
 extern void lang_leave_output_section_statement
   PARAMS ((fill_type *, const char *, struct lang_output_section_phdr_list *,
            const char *));
-extern void lang_abs_symbol_at_end_of PARAMS ((const char *, const char *));
-extern void lang_abs_symbol_at_beginning_of PARAMS ((const char *,
-						     const char *));
-extern void lang_statement_append PARAMS ((struct statement_list *,
-					   union lang_statement_union *,
-					   union lang_statement_union **));
+extern void lang_abs_symbol_at_end_of
+  PARAMS ((const char *, const char *));
+extern void lang_abs_symbol_at_beginning_of
+  PARAMS ((const char *, const char *));
+extern void lang_statement_append
+  PARAMS ((struct statement_list *, union lang_statement_union *,
+	   union lang_statement_union **));
 extern void lang_for_each_input_file
   PARAMS ((void (*dothis) (lang_input_statement_type *)));
 extern void lang_for_each_file
   PARAMS ((void (*dothis) (lang_input_statement_type *)));
-extern void lang_reset_memory_regions PARAMS ((void));
+extern void lang_reset_memory_regions
+  PARAMS ((void));
 extern bfd_vma lang_do_assignments
   PARAMS ((lang_statement_union_type * s,
 	   lang_output_section_statement_type *output_section_statement,
 	   fill_type *fill,
 	   bfd_vma dot));
 
-#define LANG_FOR_EACH_INPUT_STATEMENT(statement)		\
-  lang_input_statement_type *statement;				\
-  for (statement = (lang_input_statement_type *)file_chain.head;\
-       statement != (lang_input_statement_type *)NULL;		\
-       statement = (lang_input_statement_type *)statement->next)\
+#define LANG_FOR_EACH_INPUT_STATEMENT(statement)			\
+  lang_input_statement_type *statement;					\
+  for (statement = (lang_input_statement_type *) file_chain.head;	\
+       statement != (lang_input_statement_type *) NULL;			\
+       statement = (lang_input_statement_type *) statement->next)	\
 
-extern void lang_process PARAMS ((void));
-extern void ldlang_add_file PARAMS ((lang_input_statement_type *));
+extern void lang_process
+  PARAMS ((void));
+extern void ldlang_add_file
+  PARAMS ((lang_input_statement_type *));
 extern lang_output_section_statement_type *lang_output_section_find
   PARAMS ((const char * const));
 extern lang_input_statement_type *lang_add_input_file
   PARAMS ((const char *name, lang_input_file_enum_type file_type,
 	   const char *target));
-extern void lang_add_keepsyms_file PARAMS ((const char *filename));
+extern void lang_add_keepsyms_file
+  PARAMS ((const char *filename));
 extern lang_output_section_statement_type *
-  lang_output_section_statement_lookup PARAMS ((const char * const name));
-extern void ldlang_add_undef PARAMS ((const char *const name));
-extern void lang_add_output_format PARAMS ((const char *, const char *,
-					    const char *, int from_script));
-extern void lang_list_init PARAMS ((lang_statement_list_type*));
-extern void lang_add_data PARAMS ((int type, union etree_union *));
+  lang_output_section_statement_lookup
+  PARAMS ((const char * const name));
+extern void ldlang_add_undef
+  PARAMS ((const char *const name));
+extern void lang_add_output_format
+  PARAMS ((const char *, const char *, const char *, int from_script));
+extern void lang_list_init
+  PARAMS ((lang_statement_list_type*));
+extern void lang_add_data
+  PARAMS ((int type, union etree_union *));
 extern void lang_add_reloc
   PARAMS ((bfd_reloc_code_real_type reloc, reloc_howto_type *howto,
 	   asection *section, const char *name, union etree_union *addend));
 extern void lang_for_each_statement
   PARAMS ((void (*func) (lang_statement_union_type *)));
-extern PTR stat_alloc PARAMS ((size_t size));
-extern void dprint_statement PARAMS ((lang_statement_union_type *, int));
+extern PTR stat_alloc
+  PARAMS ((size_t size));
+extern void dprint_statement
+  PARAMS ((lang_statement_union_type *, int));
 extern bfd_vma lang_size_sections
   PARAMS ((lang_statement_union_type *s,
 	   lang_output_section_statement_type *output_section_statement,
 	   lang_statement_union_type **prev, fill_type *fill,
 	   bfd_vma dot, bfd_boolean *relax));
-extern void lang_enter_group PARAMS ((void));
-extern void lang_leave_group PARAMS ((void));
+extern void lang_enter_group
+  PARAMS ((void));
+extern void lang_leave_group
+  PARAMS ((void));
 extern void lang_add_section
   PARAMS ((lang_statement_list_type *ptr, asection *section,
 	   lang_output_section_statement_type *output,
@@ -461,9 +488,12 @@ extern void lang_add_section
 extern void lang_new_phdr
   PARAMS ((const char *, etree_type *, bfd_boolean, bfd_boolean, etree_type *,
 	   etree_type *));
-extern void lang_add_nocrossref PARAMS ((struct lang_nocrossref *));
-extern void lang_enter_overlay PARAMS ((etree_type *));
-extern void lang_enter_overlay_section PARAMS ((const char *));
+extern void lang_add_nocrossref
+  PARAMS ((struct lang_nocrossref *));
+extern void lang_enter_overlay
+  PARAMS ((etree_type *));
+extern void lang_enter_overlay_section
+  PARAMS ((const char *));
 extern void lang_leave_overlay_section
   PARAMS ((fill_type *, struct lang_output_section_phdr_list *));
 extern void lang_leave_overlay
@@ -481,8 +511,11 @@ extern struct bfd_elf_version_deps *lang_add_vers_depend
 extern void lang_register_vers_node
   PARAMS ((const char *, struct bfd_elf_version_tree *,
 	   struct bfd_elf_version_deps *));
-bfd_boolean unique_section_p PARAMS ((const char *));
-extern void lang_add_unique PARAMS ((const char *));
-extern const char *lang_get_output_target PARAMS ((void));
+bfd_boolean unique_section_p
+  PARAMS ((const char *));
+extern void lang_add_unique
+  PARAMS ((const char *));
+extern const char *lang_get_output_target
+  PARAMS ((void));
 
 #endif

@@ -1,3 +1,7 @@
+2002-12-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.h: Formatting.
+
 2002-12-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (init_os): Ensure sections mentioned in load_base
