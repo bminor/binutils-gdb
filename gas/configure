@@ -2578,10 +2578,10 @@ EOF
 			    esac ;;
       sh*-*-netbsdelf*)     fmt=elf em=nbsd ;;
       sh-*-elf*)	    fmt=elf ;;
-      sh-*-coff*)           fmt=coff bfd_gas=yes;;
+      sh-*-coff*)           fmt=coff ;;
       sh-*-pe*)             fmt=coff em=pe bfd_gas=yes endian=little ;;
       sh-*-rtemself*)       fmt=elf ;;
-      sh-*-rtems*)	    fmt=coff bfd_gas=yes;;
+      sh-*-rtems*)	    fmt=coff ;;
 
       sh64-*-elf*)	    fmt=elf ;;
       ns32k-pc532-mach* | ns32k-pc532-ux*)    fmt=aout em=pc532mach ;;
