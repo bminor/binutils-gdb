@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GNU binutils 2.14rel030712\n"
 "POT-Creation-Date: 2003-07-11 13:56+0930\n"
-"PO-Revision-Date: 2003-07-24 08:00-0500\n"
+"PO-Revision-Date: 2003-08-06 08:00-0500\n"
 "Last-Translator: Michel Robitaille <robitail@IRO.UMontreal.CA>\n"
 "Language-Team: French <traduc@traduc.org>\n"
 "MIME-Version: 1.0\n"
@@ -3881,7 +3881,7 @@ msgstr " <%d><%lx>: Numéro d'abréviation: %lu (%s)\n"
 
 #: readelf.c:8691
 msgid "Only DWARF 2 and 3 aranges are currently supported.\n"
-msgstr "Seule la gamme aranges DWARF de version 2 et 3 est couramment supportée.\n"
+msgstr "Seuls les aranges DWARF de version 2 et 3 sont couramment supportés.\n"
 
 #: readelf.c:8695
 #, c-format
@@ -4361,7 +4361,7 @@ msgstr "ne peutlire la section ressource"
 #: rescoff.c:178
 #, c-format
 msgid "%s: %s: address out of bounds"
-msgstr "%s: %s: adresse est hors bornes"
+msgstr "%s: %s: adresse est hors limite"
 
 #: rescoff.c:197
 msgid "directory"
@@ -4649,12 +4649,12 @@ msgstr "N_EXCL indéfini"
 #: stabs.c:3369
 #, c-format
 msgid "Type file number %d out of range\n"
-msgstr "Nombre de type de fichier %d hors gamme\n"
+msgstr "Nombre de type de fichier %d hors limite\n"
 
 #: stabs.c:3374
 #, c-format
 msgid "Type index number %d out of range\n"
-msgstr "Nombre de type index %d hors gamme\n"
+msgstr "Nombre de type index %d hors limite\n"
 
 #: stabs.c:3461
 #, c-format
