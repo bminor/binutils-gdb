@@ -31,8 +31,8 @@
 # This emulation assumes config 7.
 
 case $OUTPUT_ARCH in
-  c3x) OUTPUT_ARCHNAME="TMS320C3x" ;;
-  c4x) OUTPUT_ARCHNAME="TMS320C4x" ;;
+  tic3x) OUTPUT_ARCHNAME="TMS320C3x" ;;
+  tic4x) OUTPUT_ARCHNAME="TMS320C4x" ;;
 esac
 
 case $ONCHIP in

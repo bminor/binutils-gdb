@@ -1,6 +1,7 @@
 /* BFD back-end for TMS320C4X coff binaries.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2002
+   Copyright 1996, 1997, 1998, 1999, 2000, 2002, 2003
    Free Software Foundation, Inc.
+
    Contributed by Michael Hayes (m.hayes@elec.canterbury.ac.nz)
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -365,7 +366,7 @@ static const bfd_coff_backend_data ticoff1_swap_table =
 /* TI COFF v0, DOS tools (little-endian headers).  */
 const bfd_target tic4x_coff0_vec =
 {
-  "coff0-c4x",			/* Name.  */
+  "coff0-tic4x",		/* Name.  */
   bfd_target_coff_flavour,
   BFD_ENDIAN_LITTLE,		/* Data byte order is little.  */
   BFD_ENDIAN_LITTLE,		/* Header byte order is little (DOS tools).  */
@@ -409,7 +410,7 @@ const bfd_target tic4x_coff0_vec =
 /* TI COFF v0, SPARC tools (big-endian headers).  */
 const bfd_target tic4x_coff0_beh_vec =
 {
-  "coff0-beh-c4x",		/* Name.  */
+  "coff0-beh-tic4x",		/* Name.  */
   bfd_target_coff_flavour,
   BFD_ENDIAN_LITTLE,		/* Data byte order is little.  */
   BFD_ENDIAN_BIG,		/* Header byte order is big.  */
@@ -454,7 +455,7 @@ const bfd_target tic4x_coff0_beh_vec =
 /* TI COFF v1, DOS tools (little-endian headers).  */
 const bfd_target tic4x_coff1_vec =
 {
-  "coff1-c4x",			/* Name.  */
+  "coff1-tic4x",		/* Name.  */
   bfd_target_coff_flavour,
   BFD_ENDIAN_LITTLE,		/* Data byte order is little.  */
   BFD_ENDIAN_LITTLE,		/* Header byte order is little (DOS tools).  */
@@ -499,7 +500,7 @@ const bfd_target tic4x_coff1_vec =
 /* TI COFF v1, SPARC tools (big-endian headers).  */
 const bfd_target tic4x_coff1_beh_vec =
 {
-  "coff1-beh-c4x",		/* Name.  */
+  "coff1-beh-tic4x",		/* Name.  */
   bfd_target_coff_flavour,
   BFD_ENDIAN_LITTLE,		/* Data byte order is little.  */
   BFD_ENDIAN_BIG,		/* Header byte order is big.  */
@@ -544,7 +545,7 @@ const bfd_target tic4x_coff1_beh_vec =
 /* TI COFF v2, TI DOS tools output (little-endian headers).  */
 const bfd_target tic4x_coff2_vec =
 {
-  "coff2-c4x",			/* Name.  */
+  "coff2-tic4x",		/* Name.  */
   bfd_target_coff_flavour,
   BFD_ENDIAN_LITTLE,		/* Data byte order is little.  */
   BFD_ENDIAN_LITTLE,		/* Header byte order is little (DOS tools).  */
@@ -589,7 +590,7 @@ const bfd_target tic4x_coff2_vec =
 /* TI COFF v2, TI SPARC tools output (big-endian headers).  */
 const bfd_target tic4x_coff2_beh_vec =
 {
-  "coff2-beh-c4x",		/* Name.  */
+  "coff2-beh-tic4x",		/* Name.  */
   bfd_target_coff_flavour,
   BFD_ENDIAN_LITTLE,		/* Data byte order is little.  */
   BFD_ENDIAN_BIG,		/* Header byte order is big.  */

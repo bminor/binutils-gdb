@@ -1,3 +1,11 @@
+2003-04-04  Svein E. Seldal  <Svein.Seldal@solidas.com>
+
+	* emulparams/tic3xcoff.sh (SCRIPT_NAME): Namespace
+	cleanup. Replace s/c4x/tic4x and s/c3x/tic3x/
+	* emulparams/tic3xcoff_onchip.sh: Ditto
+	* emulparams/tic4xcoff.sh: Ditto
+	* scripttempl/tic4xcoff.sc: Ditto
+
 2003-04-03  Nick Clifton  <nickc@redhat.com>
 
 	* NEWS: Mention support for Xtensa architecture.

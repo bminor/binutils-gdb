@@ -1,3 +1,11 @@
+2003-04-04  Svein E. Seldal  <Svein.Seldal@solidas.com>
+
+	* config/obj-coff.h (TARGET_FORMAT): Namespace cleanup, changed
+	default tic4x target format to 'coff2-tic4x'.
+	* config/tc-tic4x.c: Namespace cleanup. Replace s/c4x/tic4x/ and
+	s/c3x/tic3x/
+	* config/tc-tic4x.h: Ditto
+
 2003-04-03  Nick Clifton  <nickc@redhat.com>
 
 	* NEWS: Mention support for Xtensa architecture.

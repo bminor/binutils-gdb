@@ -1,3 +1,11 @@
+2003-04-04  Svein E. Seldal  <Svein.Seldal@solidas.com>
+
+	* archures.c: Namespace cleanup. Rename bfd_mach_c3x to
+	bfd_mach_tic3x and bfd_mach_c4x to bfd_mach_tic4x
+	* bfd-in2.h: Regenerate
+	* coff-tic4x.c: Namespace cleanup. Replace s/c4x/tic4x/
+	* cpu-tic4x.c: Ditto
+
 2003-04-03  Nick Clifton  <nickc@redhat.com>
 
 	* peXXigen.c (_bfd_XXi_swap_scnhdr_out): Compute ps and ss

@@ -159,7 +159,7 @@
 
 #ifdef TC_TIC4X
 #include "coff/tic4x.h"
-#define TARGET_FORMAT "coff2-c4x"
+#define TARGET_FORMAT "coff2-tic4x"
 #endif
 
 #ifdef TC_TIC54X

@@ -1707,8 +1707,8 @@ enum bfd_architecture
   bfd_arch_w65,       /* WDC 65816 */
   bfd_arch_tic30,     /* Texas Instruments TMS320C30 */
   bfd_arch_tic4x,     /* Texas Instruments TMS320C3X/4X */
-#define bfd_mach_c3x           30
-#define bfd_mach_c4x           40
+#define bfd_mach_tic3x         30
+#define bfd_mach_tic4x         40
   bfd_arch_tic54x,    /* Texas Instruments TMS320C54X */
   bfd_arch_tic80,     /* TI TMS320c80 (MVP) */
   bfd_arch_v850,      /* NEC V850 */
