@@ -1,5 +1,9 @@
 2004-08-20  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* Makefile.in: Add gdb.fortran.
+
+2004-08-20  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.base/call-sc.exp (test_scalar_returns):
 	Fix cut-and-paste glitch in "Make fun return now".
 
