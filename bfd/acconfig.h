@@ -9,3 +9,6 @@
 
 /* Name of host specific header file to include in trad-core.c.  */
 #undef TRAD_HEADER
+
+/* Define only if <sys/procfs.h> is available *and* it defines prstatus_t.  */
+#undef HAVE_SYS_PROCFS_H
