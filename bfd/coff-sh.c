@@ -1,5 +1,5 @@
 /* BFD back-end for Hitachi Super-H COFF binaries.
-   Copyright 1993, 94, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
+   Copyright 1993, 94, 95, 96, 97, 98, 1999, 2000 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
    Written by Steve Chamberlain, <sac@cygnus.com>.
    Relaxing code written by Ian Lance Taylor, <ian@cygnus.com>.
@@ -1384,10 +1384,12 @@ struct sh_opcode
 /* This instruction uses the value in the register in the field at
    mask 0x0f00 of the instruction.  */
 #define USES1 (0x10)
+#define USES1_REG(x) ((x & 0x0f00) >> 8)
 
 /* This instruction uses the value in the register in the field at
    mask 0x00f0 of the instruction.  */
 #define USES2 (0x20)
+#define USES2_REG(x) ((x & 0x00f0) >> 4)
 
 /* This instruction uses the value in register 0.  */
 #define USESR0 (0x40)
@@ -1395,10 +1397,12 @@ struct sh_opcode
 /* This instruction sets the value in the register in the field at
    mask 0x0f00 of the instruction.  */
 #define SETS1 (0x80)
+#define SETS1_REG(x) ((x & 0x0f00) >> 8)
 
 /* This instruction sets the value in the register in the field at
    mask 0x00f0 of the instruction.  */
 #define SETS2 (0x100)
+#define SETS2_REG(x) ((x & 0x00f0) >> 4)
 
 /* This instruction sets register 0.  */
 #define SETSR0 (0x200)
@@ -1412,10 +1416,12 @@ struct sh_opcode
 /* This instruction uses the floating point register in the field at
    mask 0x0f00 of the instruction.  */
 #define USESF1 (0x1000)
+#define USESF1_REG(x) ((x & 0x0f00) >> 8)
 
 /* This instruction uses the floating point register in the field at
    mask 0x00f0 of the instruction.  */
 #define USESF2 (0x2000)
+#define USESF2_REG(x) ((x & 0x00f0) >> 4)
 
 /* This instruction uses floating point register 0.  */
 #define USESF0 (0x4000)
@@ -1423,10 +1429,19 @@ struct sh_opcode
 /* This instruction sets the floating point register in the field at
    mask 0x0f00 of the instruction.  */
 #define SETSF1 (0x8000)
+#define SETSF1_REG(x) ((x & 0x0f00) >> 8)
 
 static boolean sh_insn_uses_reg
   PARAMS ((unsigned int, const struct sh_opcode *, unsigned int));
+static boolean sh_insn_sets_reg
+  PARAMS ((unsigned int, const struct sh_opcode *, unsigned int));
+static boolean sh_insn_uses_or_sets_reg
+  PARAMS ((unsigned int, const struct sh_opcode *, unsigned int));
 static boolean sh_insn_uses_freg
+  PARAMS ((unsigned int, const struct sh_opcode *, unsigned int));
+static boolean sh_insn_sets_freg
+  PARAMS ((unsigned int, const struct sh_opcode *, unsigned int));
+static boolean sh_insn_uses_or_sets_freg
   PARAMS ((unsigned int, const struct sh_opcode *, unsigned int));
 static boolean sh_insns_conflict
   PARAMS ((unsigned int, const struct sh_opcode *, unsigned int,
@@ -1860,6 +1875,20 @@ sh_insn_info (insn)
   return NULL;  
 }
 
+/* See whether an instruction uses or sets a general purpose register */
+
+static boolean
+sh_insn_uses_or_sets_reg (insn, op, reg)
+     unsigned int insn;
+     const struct sh_opcode *op;
+     unsigned int reg;
+{
+  if (sh_insn_uses_reg (insn, op, reg))
+    return true;
+
+  return sh_insn_sets_reg (insn, op, reg);
+}
+
 /* See whether an instruction uses a general purpose register.  */
 
 static boolean
@@ -1873,16 +1902,54 @@ sh_insn_uses_reg (insn, op, reg)
   f = op->flags;
 
   if ((f & USES1) != 0
-      && ((insn & 0x0f00) >> 8) == reg)
+      && USES1_REG (insn) == reg)
     return true;
   if ((f & USES2) != 0
-      && ((insn & 0x00f0) >> 4) == reg)
+      && USES2_REG (insn) == reg)
     return true;
   if ((f & USESR0) != 0
       && reg == 0)
     return true;
 
   return false;
+}
+/* See whether an instruction sets a general purpose register.  */
+
+static boolean
+sh_insn_sets_reg (insn, op, reg)
+     unsigned int insn;
+     const struct sh_opcode *op;
+     unsigned int reg;
+{
+  unsigned int f;
+
+  f = op->flags;
+
+  if ((f & SETS1) != 0
+      && SETS1_REG (insn) == reg)
+    return true;
+  if ((f & SETS2) != 0
+      && SETS2_REG (insn) == reg)
+    return true;
+  if ((f & SETSR0) != 0
+      && reg == 0)
+    return true;
+
+  return false;
+}
+
+/* See whether an instruction uses or sets a floating point register */
+
+static boolean
+sh_insn_uses_or_sets_freg (insn, op, reg)
+     unsigned int insn;
+     const struct sh_opcode *op;
+     unsigned int reg;
+{
+  if (sh_insn_uses_freg (insn, op, reg))
+    return true;
+
+  return sh_insn_sets_freg (insn, op, reg);
 }
 
 /* See whether an instruction uses a floating point register.  */
@@ -1907,13 +1974,41 @@ sh_insn_uses_freg (insn, op, freg)
      bit of the register number.  */
      
   if ((f & USESF1) != 0
-      && ((insn & 0x0e00) >> 8) == (freg & 0xe))
+      && (USESF1_REG (insn) & 0xe) == (freg & 0xe))
     return true;
   if ((f & USESF2) != 0
-      && ((insn & 0x00e0) >> 4) == (freg & 0xe))
+      && (USESF2_REG (insn) & 0xe) == (freg & 0xe))
     return true;
   if ((f & USESF0) != 0
       && freg == 0)
+    return true;
+
+  return false;
+}
+
+/* See whether an instruction sets a floating point register.  */
+
+static boolean
+sh_insn_sets_freg (insn, op, freg)
+     unsigned int insn;
+     const struct sh_opcode *op;
+     unsigned int freg;
+{
+  unsigned int f;
+
+  f = op->flags;
+
+  /* We can't tell if this is a double-precision insn, so just play safe
+     and assume that it might be.  So not only have we test FREG against
+     itself, but also even FREG against FREG+1 - if the using insn uses
+     just the low part of a double precision value - but also an odd
+     FREG against FREG-1 -  if the setting insn sets just the low part
+     of a double precision value.
+     So what this all boils down to is that we have to ignore the lowest
+     bit of the register number.  */
+     
+  if ((f & SETSF1) != 0
+      && (SETSF1_REG (insn) & 0xe) == (freg & 0xe))
     return true;
 
   return false;
@@ -1946,35 +2041,35 @@ sh_insns_conflict (i1, op1, i2, op2)
       || (f2 & (BRANCH | DELAY)) != 0)
     return true;
 
-  if ((f1 & SETSSP) != 0 && (f2 & USESSP) != 0)
-    return true;
-  if ((f2 & SETSSP) != 0 && (f1 & USESSP) != 0)
+  if (((f1 | f2) & SETSSP)
+      && (f1 & (SETSSP | USESSP))
+      && (f2 & (SETSSP | USESSP)))
     return true;
 
   if ((f1 & SETS1) != 0
-      && sh_insn_uses_reg (i2, op2, (i1 & 0x0f00) >> 8))
+      && sh_insn_uses_or_sets_reg (i2, op2, SETS1_REG (i1)))
     return true;
   if ((f1 & SETS2) != 0
-      && sh_insn_uses_reg (i2, op2, (i1 & 0x00f0) >> 4))
+      && sh_insn_uses_or_sets_reg (i2, op2, SETS2_REG (i1)))
     return true;
   if ((f1 & SETSR0) != 0
-      && sh_insn_uses_reg (i2, op2, 0))
+      && sh_insn_uses_or_sets_reg (i2, op2, 0))
     return true;
   if ((f1 & SETSF1) != 0
-      && sh_insn_uses_freg (i2, op2, (i1 & 0x0f00) >> 8))
+      && sh_insn_uses_or_sets_freg (i2, op2, SETSF1_REG (i1)))
     return true;
 
   if ((f2 & SETS1) != 0
-      && sh_insn_uses_reg (i1, op1, (i2 & 0x0f00) >> 8))
+      && sh_insn_uses_or_sets_reg (i1, op1, SETS1_REG (i2)))
     return true;
   if ((f2 & SETS2) != 0
-      && sh_insn_uses_reg (i1, op1, (i2 & 0x00f0) >> 4))
+      && sh_insn_uses_or_sets_reg (i1, op1, SETS2_REG (i2)))
     return true;
   if ((f2 & SETSR0) != 0
-      && sh_insn_uses_reg (i1, op1, 0))
+      && sh_insn_uses_or_sets_reg (i1, op1, 0))
     return true;
   if ((f2 & SETSF1) != 0
-      && sh_insn_uses_freg (i1, op1, (i2 & 0x0f00) >> 8))
+      && sh_insn_uses_or_sets_freg (i1, op1, SETSF1_REG (i2)))
     return true;
 
   /* The instructions do not conflict.  */

@@ -1,3 +1,15 @@
+Thu Feb 10 20:07:50 GMT 2000  Toshiyasu Morita (toshi.morita@sega.com)
+
+	* coff-sh.c (USES1_REG, USES2_REG, SETS1_REG, SETS2_REG,
+	USESF1_REG, USESF2_REG, SETSF1_REG, SETSF2_REG): New macros.
+	* (sh_insn_sets_reg, sh_insn_sets_freg): New prototypes.
+	* (sh_insn_sets_reg, sh_insn_uses_or_sets_reg, sh_insns_sets_freg,
+	sh_insns_uses_or_sets_freg): New functions.
+	* (sh_insn_uses_reg, sh_insn_uses_freg): Use new macros.
+	* (sh_insns_conflict): Use new functions and new macros to 
+	detect conflicts when two instructions both set same integer registers,
+	both set same fp register, and both set special register.
+
 2000-02-09  Timothy Wall  <twall@cygnus.com>
 
 	* coffgen.c (coff_real_object_p): Set arch/mach info prior to
