@@ -269,24 +269,19 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
 		      int which, CORE_ADDR reg_addr)
 {
   nto_regset_t regset;
-
-  if (which == NTO_REG_GENERAL)
+  
+/* See corelow.c:get_core_registers for values of WHICH.  */
+  if (which == 0)
     {
       memcpy ((char *) &regset, core_reg_sect,
 	      min (core_reg_size, sizeof (regset)));
       nto_supply_gregset ((char *) &regset);
     }
-  else if (which == NTO_REG_FLOAT)
+  else if (which == 2)
     {
       memcpy ((char *) &regset, core_reg_sect,
 	      min (core_reg_size, sizeof (regset)));
       nto_supply_fpregset ((char *) &regset);
-    }
-  else if (which == NTO_REG_ALT)
-    {
-      memcpy ((char *) &regset, core_reg_sect,
-	      min (core_reg_size, sizeof (regset)));
-      nto_supply_altregset ((char *) &regset);
     }
 }
 
