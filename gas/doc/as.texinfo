@@ -2090,7 +2090,7 @@ is considered a comment and is ignored.  The line comment character is
 @samp{;} for picoJava;
 @end ifset
 @ifset PPC
-@samp{;} for Motorola PowerPC;
+@samp{#} for Motorola PowerPC;
 @end ifset
 @ifset SH
 @samp{!} for the Renesas / SuperH SH;
