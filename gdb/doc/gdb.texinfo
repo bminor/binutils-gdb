@@ -8531,10 +8531,10 @@ unset                     &&\rm(No longer an alias for delete)\cr
 @cindex GDB reference card
 @cindex reference card
 The GDB 4 release includes an already-formatted reference card, ready
-for printing with PostScript or GhostScript, in the @file{gdb}
+for printing with PostScript or Ghostscript, in the @file{gdb}
 subdirectory of the main source directory@footnote{In
 @file{gdb-@value{GDBVN}/gdb/refcard.ps} of the version @value{GDBVN}
-release.}.  If you can use PostScript or GhostScript with your printer,
+release.}.  If you can use PostScript or Ghostscript with your printer,
 you can print the reference card immediately with @file{refcard.ps}.
 
 The release also includes the source for the reference card.  You
