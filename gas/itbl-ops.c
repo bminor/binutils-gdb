@@ -329,7 +329,6 @@ append_insns_as_macros (void)
   struct itbl_entry *e, **es;
   int n, id, size, new_size, new_num_opcodes;
 
-  ASSERT (itbl_num_opcodes > 0);
   if (!itbl_num_opcodes)	/* no new instructions to add! */
     {
       return;

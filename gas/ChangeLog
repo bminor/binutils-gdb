@@ -1,3 +1,10 @@
+Sun Feb 23 18:13:19 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (DISTSTUFF): Remove itbl-parse.y, itbl-lex.l, and
+	itbl-ops.c.  Add itbl-parse.c and itbl-lex.c.
+	(LEX, LEXFLAGS): Define.
+	* itbl-ops.c (append_insns_as_macros): Remove bogus ASSERT.
+
 Sat Feb 22 21:25:00 1997  Dawn Perchik  <dawn@cygnus.com>
 
 	* itbl-parse.y: Fix indentation mistakes from indent program.

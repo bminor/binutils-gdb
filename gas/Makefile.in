@@ -1,5 +1,5 @@
 # Makefile for GNU Assembler
-#   Copyright (C) 1987, 88, 89, 90, 91, 92, 93, 94, 95, 1996
+#   Copyright (C) 1987, 88, 89, 90, 91, 92, 93, 94, 95, 96, 1997
 #   Free Software Foundation, Inc.
 
 # This file is part of GNU GAS.
@@ -15,8 +15,9 @@
 # GNU General Public License for more details.
 
 # You should have received a copy of the GNU General Public License
-# along with GNU GAS; see the file COPYING.  If not, write to
-# the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+# along with GNU GAS; see the file COPYING.  If not, write to the Free
+# Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+# 02111-1307, USA.
 
 # The targets for external use include:
 # all, doc, proto, install, uninstall, includes, TAGS,
@@ -62,12 +63,14 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
 INSTALL_XFORM1= $(INSTALL_XFORM) -b=.1
 
-DISTSTUFF= make-gas.com m68k-parse.c itbl-parse.y itbl-lex.l itbl-ops.c
+DISTSTUFF= make-gas.com m68k-parse.c itbl-parse.c itbl-lex.c
 
 AR = ar
 AR_FLAGS = qv
 BISON = `if [ -f ../bison/bison ] ; then echo ../bison/bison -y -L../bison/bison ; else echo bison -y ; fi`
 BISONFLAGS =
+LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex ;  else echo flex ; fi`
+LEXFLAGS =
 MAKEINFO = makeinfo
 TEXI2DVI = texi2dvi
 RANLIB = ranlib
