@@ -1,3 +1,10 @@
+Tue Feb 28 12:42:56 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in (i[345]86-*-linuxelf*): New target.  Use i386-lelf.
+	(i[345]86-*-gnuelf*): New target.  Use i386-gelf.
+	* config/i386-lelf.mt: New file.
+	* config/i386-gelf.mt: New file.
+
 Tue Feb 28 10:27:54 1995  Rob Savoye  <rob@darkstar.cygnus.com>
 
 	* configure.in: Match on mips-ecoff, and default to the IDT
