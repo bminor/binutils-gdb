@@ -1,3 +1,7 @@
+2003-06-16  Andrew Cagney  <cagney@redhat.com>
+
+	* regcache.c (do_cooked_read): Do not use register_valid_p.
+
 2003-06-15  Theodore A. Roth  <troth@openavr.org>
 
 	* avr-tdep.c (avr_register_type): Remove a blank line.
