@@ -180,10 +180,10 @@ v850_scan_prologue (pc, pi)
 	pi->frameoffset += ((insn & 0x1f) ^ 0x10) - 0x10;
       else if (insn == ((SP_REGNUM << 11) | 0x0600 | SP_REGNUM))	/* addi <imm>,sp,sp */
 	pi->frameoffset += read_memory_integer (current_pc + 2, 2);
-      else if (insn == ((FP_REGNUM << 11) | 0x0000 | SP_REGNUM))	/* mov sp,fp */
+      else if (insn == ((FP_RAW_REGNUM << 11) | 0x0000 | SP_REGNUM))	/* mov sp,fp */
 	{
 	  fp_used = 1;
-	  pi->framereg = FP_REGNUM;
+	  pi->framereg = FP_RAW_REGNUM;
 	}
 
       else if (insn == ((R12_REGNUM << 11) | 0x0640 | R0_REGNUM))	/* movhi hi(const),r0,r12 */
@@ -198,7 +198,7 @@ v850_scan_prologue (pc, pi)
 	ep_used = 0;
       else if (((insn & 0x07ff) == (0x0760 | SP_REGNUM)			/* st.w <reg>,<offset>[sp] */
 		|| (fp_used
-		    && (insn & 0x07ff) == (0x0760 | FP_REGNUM)))	/* st.w <reg>,<offset>[fp] */
+		    && (insn & 0x07ff) == (0x0760 | FP_RAW_REGNUM)))	/* st.w <reg>,<offset>[fp] */
 	       && pifsr
 	       && (((reg = (insn >> 11) & 0x1f) >= SAVE1_START_REGNUM && reg <= SAVE1_END_REGNUM)
 		   || (reg >= SAVE2_START_REGNUM && reg <= SAVE2_END_REGNUM)
@@ -324,7 +324,7 @@ v850_frame_chain (fi)
   /* First, find out who called us */
   callers_pc = FRAME_SAVED_PC (fi);
   /* If caller is a call-dummy, then our FP bears no relation to his FP! */
-  fp = v850_find_callers_reg (fi, FP_REGNUM);
+  fp = v850_find_callers_reg (fi, FP_RAW_REGNUM);
   if (PC_IN_CALL_DUMMY(callers_pc, fp, fp))
     return fp;	/* caller is call-dummy: return oldest value of FP */
 
@@ -337,7 +337,7 @@ v850_frame_chain (fi)
   if (pi.start_function)
     return 0;			/* Don't chain beyond the start function */
 
-  if (pi.framereg == FP_REGNUM)
+  if (pi.framereg == FP_RAW_REGNUM)
     return v850_find_callers_reg (fi, pi.framereg);
 
   return fi->frame - pi.frameoffset;

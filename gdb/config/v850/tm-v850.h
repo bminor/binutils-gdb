@@ -20,7 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define TARGET_BYTE_ORDER LITTLE_ENDIAN
 
-#define NUM_REGS 65
+#define NUM_REGS 66
 
 #define REGISTER_NAMES \
 { "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", \
@@ -32,7 +32,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
   "sr8", "sr9", "sr10", "sr11", "sr12", "sr13", "sr14", "sr15", \
   "sr16", "sr17", "sr18", "sr19", "sr20", "sr21", "sr22", "sr23", \
   "sr24", "sr25", "sr26", "sr27", "sr28", "sr29", "sr30", "sr31", \
-  "pc" }
+    \
+  "pc", "fp" }
 
 #define REGISTER_BYTES (NUM_REGS * 4)
 
@@ -51,13 +52,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define R12_REGNUM 12
 #define SAVE2_START_REGNUM 20
 #define SAVE2_END_REGNUM 29
-#define FP_REGNUM 29
 #define EP_REGNUM 30
 #define SAVE3_START_REGNUM 31
 #define SAVE3_END_REGNUM 31
 #define RP_REGNUM 31
 #define PS_REGNUM 37
 #define PC_REGNUM 64
+#define FP_REGNUM 65
+#define FP_RAW_REGNUM 29
+
+#define TARGET_READ_FP() read_register (FP_RAW_REGNUM)
+#define TARGET_WRITE_FP(VAL) write_register (FP_REGNUM, (VAL))
 
 #define REGISTER_VIRTUAL_TYPE(REG) builtin_type_int
 

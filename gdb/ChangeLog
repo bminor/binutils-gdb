@@ -1,3 +1,17 @@
+Mon Apr 27 14:37:49 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/v850/tm-v850.h (REGISTER_BYTE): FP_REGNUM and
+ 	FP_RAW_REGNUM use the same register location.
+
+	* v850-tdep.c (v850_scan_prologue): Use FP_RAW_REGNUM instead of
+ 	FP_REGNUM.
+	(v850_frame_chain): Ditto.
+
+	* config/v850/tm-v850.h (REGISTER_NAMES): Add "fp".
+	(NUM_REGS): Update.
+	(FP_REGNUM): Update.
+	(FP_RAW_REGNUM): Define.
+
 Mon May 25 13:31:27 1998  Keith Seitz  <keiths@cygnus.com>
 
 	* remote.c (remote_open_1): If an error occurs starting the remote, 
