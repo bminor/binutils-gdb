@@ -45,11 +45,9 @@ includedir = @includedir@
 
 SHELL = /bin/sh
 
-INSTALL = `cd $(srcdir)/..;pwd`/install.sh -c
+INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA = @INSTALL_DATA@
-INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
-INSTALL_XFORM1 = $(INSTALL_XFORM) -b=.1 -m 644
 
 AR = ar
 AR_FLAGS = rc
@@ -542,19 +540,22 @@ etags tags: TAGS
 TAGS: force
 	etags $(INCDIR)/*.h $(srcdir)/*.[hc] 
 
-install: all
+.PHONY: install installdirs
+
+install: all installdirs
 	for i in $(PROGS) ; do \
-	  $(INSTALL_XFORM) $$i $(bindir)/`echo $$i | sed -e 's/.new//'` ; \
+	  n=`echo $$i | sed -e 's/.new//' | sed '$(program_transform_name)'`; \
+	  $(INSTALL_PROGRAM) $$i $(bindir)/$$n; \
 	done
 	for i in $(MANPAGES) ; do \
-	  $(INSTALL_XFORM1) $(srcdir)/$$i.1 $(man1dir)/$$i.1 ; \
+	  n=`echo $$i | sed '$(program_transform_name)'`; \
+	  $(INSTALL_DATA) $(srcdir)/$$i.1 $(man1dir)/$$n.1; \
 	done
 	if [ x$(DEMANGLER_PROG) != x ]; then \
-	  $(INSTALL_XFORM1) $(DEMANGLER_PROG).1 $(man1dir)/$(DEMANGLER_PROG).1; \
+	  n=`echo $(DEMANGLER_PROG) | sed '$(program_transform_name)'`; \
+	  $(INSTALL_DATA) $(DEMANGLER_PROG).1 $(man1dir)/$$n.1; \
 	fi
-	test -d $(tooldir) || mkdir $(tooldir)
-	test -d $(tooldir)/bin || mkdir $(tooldir)/bin
-	for i in $(TOOL_PROGS) ; do \
+	for i in $(TOOL_PROGS); do \
 	  if [ -f $$i ]; then \
 	    j=`echo $$i | sed -e 's/.new//'`; \
 	    rm -f $(tooldir)/bin/$$j; \
@@ -565,10 +566,14 @@ install: all
 	  fi; \
 	done
 
+installdirs:
+	$(SHELL) $(srcdir)/../mkinstalldirs $(bindir) $(man1dir) $(tooldir)/bin
+
 # This little path search is required because in the FSF net releases,
 # the info files are included in the source tree, and that may not be
 # the same as the build directory.
 install-info: binutils.info
+	$(SHELL) $(srcdir)/../mkinstalldirs $(infodir)
 	if [ -r binutils.info ]; then \
 	  dir=. ; \
 	else \
