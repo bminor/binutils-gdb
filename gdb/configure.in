@@ -75,6 +75,7 @@ mips-little-*)		gdb_host=littlemips ;;
 mips-sgi-irix3)		gdb_host=irix3 ;;
 mips-sgi-irix4*)	gdb_host=irix4 ;;
 mips-sony-*)		gdb_host=news-mips ;;
+mips-*-sysv*)		gdb_host=riscos ;;
 
 none-*-*)		gdb_host=none ;;
 
@@ -227,6 +228,7 @@ mips-idt-ecoff*)	gdb_target=idt ;;
 mips-little-*)		gdb_target=littlemips ;;
 mips-sgi-*)		gdb_target=irix3 ;;
 mips-sony-*)		gdb_target=bigmips ;;
+mips-*-sysv*)		gdb_target=bigmips ;;
 
 none-*-*)		gdb_target=none ;;
 

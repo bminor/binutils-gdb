@@ -1,5 +1,8 @@
 Fri Jun 18 12:37:36 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* config/mips/{{x,n}m-riscos.h,riscos.mh}: New files.
+	* configure.in (mips-*-sysv*): Use riscos for host, bigmips for target.
+
 	* config/mips/{{x,n}m-news-mips.h,news-mips.mh}: New files.
 	* config/mips/{bigmips.mh,xm-bigmips.h}: Remove.
 	* configure.in (mips-sony-*): Use news-mips for host.
