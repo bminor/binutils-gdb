@@ -1,3 +1,46 @@
+2001-06-11  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* completer.c (gdb_completer_loc_break_characters): New variable.
+	(line_completion_function): If we are completing on locations,
+	back up the start of word pointer past all characters which can
+	appear in a location spec.
+	(location_completer): New function.
+
+	* completer.h: Add prototype for location_completer.
+
+	* symtab.c (make_source_files_completion_list)
+	(add_filename_to_list, not_interesting_fname): New functions.
+	(filename_seen): New function, body extracted from
+	output_source_filename.
+	(output_source_filename): Call filename_seen to check if the file
+	was already printed.
+	(make_symbol_completion_list): If TEXT includes a
+	double-quoted string, return an empty list, not NULL.
+	(make_file_symbol_completion_list): New function, similar to
+	make_symbol_completion_list but with an additional argument
+	SRCFILE.
+
+	* symtab.h (make_file_symbol_completion_list)
+	(make_source_files_completion_list): Add prototypes.
+
+	* breakpoint.c (_initialize_breakpoint): Make location_completer
+	be the completion function for all commands which set breakpoints
+	and watchpoints.
+	(top-level): #include "completer.h".
+
+	* tracepoint.c (_initialize_tracepoint): Make location_completer
+	be the completion function for the "trace" command.
+	(top-level): #include "completer.h".
+
+	* printcmd.c (_initialize_printcmd): Make location_completer be
+	the completion function for the "print", "inspect", "call", and
+	"disassemble" commands.
+	(top-level): #include "completer.h".
+
+	* infcmd.c (_initialize_infcmd): Make location_completer be the
+	completion function for the "go", "jump", and "until" commands.
+	(top-level): #include "completer.h".
+
 2001-06-10 Christopher Faylor <cgf@redhat.com>
 
 	* gnu-regex.c: Eliminate obsolete check for _MSC_VER.

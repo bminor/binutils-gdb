@@ -33,6 +33,7 @@
 #include "remote.h"
 #include "linespec.h"
 #include "regcache.h"
+#include "completer.h"
 #include "gdb-events.h"
 
 #include "ax.h"
@@ -2799,12 +2800,13 @@ Arguments are tracepoint numbers, separated by spaces.\n\
 No argument means enable all tracepoints.",
 	   &enablelist);
 
-  add_com ("trace", class_trace, trace_command,
-	   "Set a tracepoint at a specified line or function or address.\n\
+  c = add_com ("trace", class_trace, trace_command,
+	       "Set a tracepoint at a specified line or function or address.\n\
 Argument may be a line number, function name, or '*' plus an address.\n\
 For a line number or function, trace at the start of its code.\n\
 If an address is specified, trace at that exact address.\n\n\
 Do \"help tracepoints\" for info on other tracepoint commands.");
+  c->completer = location_completer;
 
   add_com_alias ("tp", "trace", class_alias, 0);
   add_com_alias ("tr", "trace", class_alias, 1);

@@ -36,6 +36,7 @@
 #include "language.h"
 #include "symfile.h"
 #include "objfiles.h"
+#include "completer.h"
 #ifdef UI_OUT
 #include "ui-out.h"
 #endif
@@ -1794,8 +1795,8 @@ _initialize_infcmd (void)
 {
   struct cmd_list_element *c;
 
-  c= add_com ("tty", class_run, tty_command,
-	      "Set terminal for future runs of program being debugged.");
+  c = add_com ("tty", class_run, tty_command,
+	       "Set terminal for future runs of program being debugged.");
   c->completer = filename_completer;
 
   c = add_set_cmd ("args", class_run, var_string_noescape,
@@ -1899,25 +1900,30 @@ Argument N means do this N times (or till program stops for another reason).");
 Argument N means do this N times (or till program stops for another reason).");
   add_com_alias ("s", "step", class_run, 1);
 
-  add_com ("until", class_run, until_command,
-	   "Execute until the program reaches a source line greater than the current\n\
+  c = add_com ("until", class_run, until_command,
+	       "Execute until the program reaches a source line greater than the current\n\
 or a specified line or address or function (same args as break command).\n\
 Execution will also stop upon exit from the current stack frame.");
+  c->completer = location_completer;
   add_com_alias ("u", "until", class_run, 1);
 
-  add_com ("jump", class_run, jump_command,
-	   "Continue program being debugged at specified line or address.\n\
+  c = add_com ("jump", class_run, jump_command,
+	       "Continue program being debugged at specified line or address.\n\
 Give as argument either LINENUM or *ADDR, where ADDR is an expression\n\
 for an address to start at.");
+  c->completer = location_completer;
 
   if (xdb_commands)
-    add_com ("go", class_run, go_command,
-	     "Usage: go <location>\n\
+    {
+      c = add_com ("go", class_run, go_command,
+		   "Usage: go <location>\n\
 Continue program being debugged, stopping at specified line or \n\
 address.\n\
 Give as argument either LINENUM or *ADDR, where ADDR is an \n\
 expression for an address to start at.\n\
 This command is a combination of tbreak and jump.");
+      c->completer = location_completer;
+    }
 
   if (xdb_commands)
     add_com_alias ("g", "go", class_run, 1);

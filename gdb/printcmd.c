@@ -37,6 +37,7 @@
 #include "annotate.h"
 #include "symfile.h"		/* for overlay functions */
 #include "objfiles.h"		/* ditto */
+#include "completer.h"		/* for completion functions */
 #ifdef UI_OUT
 #include "ui-out.h"
 #endif
@@ -2451,6 +2452,8 @@ print_insn (CORE_ADDR memaddr, struct ui_file *stream)
 void
 _initialize_printcmd (void)
 {
+  struct cmd_list_element *c;
+
   current_display_number = -1;
 
   add_info ("address", address_info,
@@ -2473,11 +2476,12 @@ Defaults for format and size letters are those previously used.\n\
 Default count is 1.  Default address is following last thing printed\n\
 with this command or \"print\".", NULL));
 
-  add_com ("disassemble", class_vars, disassemble_command,
-	   "Disassemble a specified section of memory.\n\
+  c = add_com ("disassemble", class_vars, disassemble_command,
+	       "Disassemble a specified section of memory.\n\
 Default is the function surrounding the pc of the selected frame.\n\
 With a single argument, the function surrounding that address is dumped.\n\
 Two arguments are taken as a range of memory to dump.");
+  c->completer = location_completer;
   if (xdb_commands)
     add_com_alias ("va", "disassemble", class_xdb, 0);
 
@@ -2555,11 +2559,12 @@ variable in the program being debugged.  EXP is any valid expression.\n",
 You can see these environment settings with the \"show\" command.", NULL));
 
   /* "call" is the same as "set", but handy for dbx users to call fns. */
-  add_com ("call", class_vars, call_command,
-	   "Call a function in the program.\n\
+  c = add_com ("call", class_vars, call_command,
+	       "Call a function in the program.\n\
 The argument is the function name and arguments, in the notation of the\n\
 current working language.  The result is printed and saved in the value\n\
 history, if it is not void.");
+  c->completer = location_completer;
 
   add_cmd ("variable", class_vars, set_command,
 	   "Evaluate expression EXP and assign result to variable VAR, using assignment\n\
@@ -2570,7 +2575,7 @@ variable in the program being debugged.  EXP is any valid expression.\n\
 This may usually be abbreviated to simply \"set\".",
 	   &setlist);
 
-  add_com ("print", class_vars, print_command,
+  c = add_com ("print", class_vars, print_command,
 	   concat ("Print value of expression EXP.\n\
 Variables accessible are those of the lexical environment of the selected\n\
 stack frame, plus all those whose scope is global or an entire file.\n\
@@ -2592,11 +2597,13 @@ resides in memory.\n",
 		   "\n\
 EXP may be preceded with /FMT, where FMT is a format letter\n\
 but no count or size letter (see \"x\" command).", NULL));
+  c->completer = location_completer;
   add_com_alias ("p", "print", class_vars, 1);
 
-  add_com ("inspect", class_vars, inspect_command,
+  c = add_com ("inspect", class_vars, inspect_command,
 	   "Same as \"print\" command, except that if you are running in the epoch\n\
 environment, the value is printed in its own window.");
+  c->completer = location_completer;
 
   add_show_from_set (
 		 add_set_cmd ("max-symbolic-offset", no_class, var_uinteger,

@@ -22,12 +22,14 @@
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "expression.h"
+#include "filenames.h"		/* for DOSish file names */
 
 /* FIXME: This is needed because of lookup_cmd_1().
    We should be calling a hook instead so we eliminate the CLI dependency. */
 #include "gdbcmd.h"
 
-/* Needed for rl_completer_word_break_characters() */
+/* Needed for rl_completer_word_break_characters() and for
+   filename_completion_function.  */
 #include <readline/readline.h>
 
 /* readline defines this.  */
@@ -72,6 +74,10 @@ static char *gdb_completer_file_name_break_characters = " \t\n*|\"';?><@";
 static char *gdb_completer_file_name_break_characters = " \t\n*|\"';:?><";
 #endif
 
+/* These are used when completing on locations, which can mix file
+   names and symbol names separated by a colon.  */
+static char *gdb_completer_loc_break_characters = " \t\n*|\"';:?><,";
+
 /* Characters that can be used to quote completion strings.  Note that we
    can't include '"' because the gdb C parser treats such quoted sequences
    as strings. */
@@ -95,8 +101,6 @@ get_gdb_completer_quote_characters (void)
 char **
 filename_completer (char *text, char *word)
 {
-  /* From readline.  */
-extern char *filename_completion_function (char *, int);
   int subsequent_name;
   char **return_val;
   int return_val_used;
@@ -168,6 +172,153 @@ extern char *filename_completion_function (char *, int);
   rl_completer_word_break_characters = "";
 #endif
   return return_val;
+}
+
+/* Complete on locations, which might be of two possible forms:
+
+       file:line
+   or
+       symbol+offset
+
+   This is intended to be used in commands that set breakpoints etc.  */
+char **
+location_completer (char *text, char *word)
+{
+  int n_syms = 0, n_files = 0;
+  char ** fn_list = NULL;
+  char ** list = NULL;
+  char *p;
+  int quote_found = 0;
+  int quoted = *text == '\'' || *text == '"';
+  int quote_char = '\0';
+  char *colon = NULL;
+  char *file_to_match = NULL;
+  char *symbol_start = text;
+  char *orig_text = text;
+  size_t text_len;
+
+  /* Do we have an unquoted colon, as in "break foo.c::bar"?  */
+  for (p = text; *p != '\0'; ++p)
+    {
+      if (*p == '\\' && p[1] == '\'')
+	p++;
+      else if (*p == '\'' || *p == '"')
+	{
+	  quote_found = *p;
+	  quote_char = *p++;
+	  while (*p != '\0' && *p != quote_found)
+	    {
+	      if (*p == '\\' && p[1] == quote_found)
+		p++;
+	      p++;
+	    }
+
+	  if (*p == quote_found)
+	    quote_found = 0;
+	  else
+	    break;		/* hit the end of text */
+	}
+#if HAVE_DOS_BASED_FILE_SYSTEM
+      /* If we have a DOS-style absolute file name at the beginning of
+	 TEXT, and the colon after the drive letter is the only colon
+	 we found, pretend the colon is not there.  */
+      else if (p < text + 3 && *p == ':' && p == text + 1 + quoted)
+	;
+#endif
+      else if (*p == ':' && !colon)
+	{
+	  colon = p;
+	  symbol_start = p + 1;
+	}
+      else if (strchr (gdb_completer_word_break_characters, *p))
+	symbol_start = p + 1;
+    }
+
+  if (quoted)
+    text++;
+  text_len = strlen (text);
+
+  /* Where is the file name?  */
+  if (colon)
+    {
+      char *s;
+
+      file_to_match = (char *) xmalloc (colon - text + 1);
+      strncpy (file_to_match, text, colon - text + 1);
+      /* Remove trailing colons and quotes from the file name.  */
+      for (s = file_to_match + (colon - text);
+	   s > file_to_match;
+	   s--)
+	if (*s == ':' || *s == quote_char)
+	  *s = '\0';
+    }
+  /* If the text includes a colon, they want completion only on a
+     symbol name after the colon.  Otherwise, we need to complete on
+     symbols as well as on files.  */
+  if (colon)
+    {
+      list = make_file_symbol_completion_list (symbol_start, word,
+					       file_to_match);
+      xfree (file_to_match);
+    }
+  else
+    {
+      list = make_symbol_completion_list (symbol_start, word);
+      /* If text includes characters which cannot appear in a file
+	 name, they cannot be asking for completion on files.  */
+      if (strcspn (text, gdb_completer_file_name_break_characters) == text_len)
+	fn_list = make_source_files_completion_list (text, text);
+    }
+
+  /* How many completions do we have in both lists?  */
+  if (fn_list)
+    for ( ; fn_list[n_files]; n_files++)
+      ;
+  if (list)
+    for ( ; list[n_syms]; n_syms++)
+      ;
+
+  /* Make list[] large enough to hold both lists, then catenate
+     fn_list[] onto the end of list[].  */
+  if (n_syms && n_files)
+    {
+      list = xrealloc (list, (n_syms + n_files + 1) * sizeof (char *));
+      memcpy (list + n_syms, fn_list, (n_files + 1) * sizeof (char *));
+      xfree (fn_list);
+    }
+  else if (n_files)
+    {
+      /* If we only have file names as possible completion, we should
+	 bring them in sync with what rl_complete expects.  The
+	 problem is that if the user types "break /foo/b TAB", and the
+	 possible completions are "/foo/bar" and "/foo/baz"
+	 rl_complete expects us to return "bar" and "baz", without the
+	 leading directories, as possible completions, because `word'
+	 starts at the "b".  But we ignore the value of `word' when we
+	 call make_source_files_completion_list above (because that
+	 would not DTRT when the completion results in both symbols
+	 and file names), so make_source_files_completion_list returns
+	 the full "/foo/bar" and "/foo/baz" strings.  This produces
+	 wrong results when, e.g., there's only one possible
+	 completion, because rl_complete will prepend "/foo/" to each
+	 candidate completion.  The loop below removes that leading
+	 part.  */
+      for (n_files = 0; fn_list[n_files]; n_files++)
+	{
+	  memmove (fn_list[n_files], fn_list[n_files] + (word - text),
+		   strlen (fn_list[n_files]) + 1 - (word - text));
+	}
+      /* Return just the file-name list as the result.  */
+      list = fn_list;
+    }
+  else if (!n_syms)
+    {
+      /* No completions at all.  As the final resort, try completing
+	 on the entire text as a symbol.  */
+      list = make_symbol_completion_list (orig_text, word);
+    }
+
+  return list;
 }
 
 /* Here are some useful test cases for completion.  FIXME: These should
@@ -362,7 +513,7 @@ line_completion_function (char *text, int matches, char *line_buffer, int point)
 			     to complete the entire text after the
 			     command, just the last word.  To this
 			     end, we need to find the beginning of the
-			     file name starting at `word' and going
+			     file name by starting at `word' and going
 			     backwards.  */
 			  for (p = word;
 			       p > tmp_command
@@ -371,6 +522,16 @@ line_completion_function (char *text, int matches, char *line_buffer, int point)
 			    ;
 			  rl_completer_word_break_characters =
 			    gdb_completer_file_name_break_characters;
+			}
+		      else if (c->completer == location_completer)
+			{
+			  /* Commands which complete on locations want to
+			     see the entire argument.  */
+			  for (p = word;
+			       p > tmp_command
+				 && p[-1] != ' ' && p[-1] != '\t';
+			       p--)
+			    ;
 			}
 		      list = (*c->completer) (p, word);
 		    }
@@ -429,6 +590,14 @@ line_completion_function (char *text, int matches, char *line_buffer, int point)
 			;
 		      rl_completer_word_break_characters =
 			gdb_completer_file_name_break_characters;
+		    }
+		  else if (c->completer == location_completer)
+		    {
+		      for (p = word;
+			   p > tmp_command
+			     && p[-1] != ' ' && p[-1] != '\t';
+			   p--)
+			;
 		    }
 		  list = (*c->completer) (p, word);
 		}
