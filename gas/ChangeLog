@@ -1,3 +1,13 @@
+start-sanitize-m32rx
+Tue Jan 20 17:08:53 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-m32r.c (md_assemble): Add code to swap explicitly
+	parallel instructions so that they are in the correct order.
+	(reads_from_src_reg, get_src_reg, can_make_parallel,
+	make_parallel): New functions to support opportunistic
+	parallelisation of adjacent instructions.
+
+end-sanitize-m32rx
 Fri Jan 16 14:51:48 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* read.c (dwarf_file_string): New file static variable.

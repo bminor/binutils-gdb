@@ -27,6 +27,7 @@
 /* Non-null if last insn was a 16 bit insn on a 32 bit boundary
    (i.e. was the first of two 16 bit insns).  */
 static const CGEN_INSN * prev_insn = NULL;
+static CGEN_FIELDS       prev_fields;
 
 /* Non-zero if we've seen a relaxable insn since the last 32 bit
    alignment request.  */
@@ -203,7 +204,7 @@ m32r_do_align (n, fill, len, max)
       /* Only do this special handling if aligning to at least a
 	 4 byte boundary.  */
       && n > 1
-      /* Only do this special handling if we're allowed to emit at
+     /* Only do this special handling if we're allowed to emit at
 	 least two bytes.  */
       && (max == 0 || max > 1))
     {
@@ -365,15 +366,155 @@ writes_to_dest_reg (insn)
   return c;
 }
 
-/* Returns an integer representing the destination register of
-   the given insn, or -1 if the insn has no destination.  */
+/* Returns non zero if the given instruction reads from a source register.
+   Syntax characters equal to 'ignore' are skipped as they have already been
+   processed.  (This works provided that no potential parallel instruction
+   can have more than 2 input registers).  */
 static int
-get_dest_reg (insn)
+reads_from_src_reg (insn, ignore)
      const CGEN_INSN * insn;
+     unsigned char     ignore;
 {
-  /* XXX to be done.  */
-  return -1;
+  unsigned char * syntax = CGEN_SYNTAX_STRING (CGEN_INSN_SYNTAX (insn));
+  unsigned char   c;
+  
+  /* Scan the syntax string looking for a source register.  */
+  while ((c = (* syntax ++)) != 0)
+    {
+      if (c == ignore)
+	continue;
+      
+      if (   c == 128 + M32R_OPERAND_SR
+	  || c == 128 + M32R_OPERAND_SRC1
+	  || c == 128 + M32R_OPERAND_SRC2)
+	break;
+    }
+
+  return c;
 }
+
+/* Returns the integer value of the destination register held in the fields. */
+#define get_dest_reg(fields) fields->f_r1
+
+/* Returns an integer representing the source register of the given type.  */
+static int
+get_src_reg (syntax, fields)
+     unsigned char syntax;
+     CGEN_FIELDS * fields;
+{
+  switch (syntax)
+    {
+    case 128 + M32R_OPERAND_SR:    return fields->f_r2;
+      /* Relies upon the fact that no instruction with a $src1 operand
+	 also has a $dr operand.  */
+    case 128 + M32R_OPERAND_SRC1:  return fields->f_r1;
+    case 128 + M32R_OPERAND_SRC2:  return fields->f_r2;
+    default:                       abort(); return -1;
+    }
+}
+
+/* start-sanitize-m32rx */
+/* Returns NULL if the two 16 bit insns can be executed in parallel,
+   otherwise it returns a pointer to an error message explaining why not.  */
+static const char *
+can_make_parallel (a, a_fields, b, b_fields, test_a_inputs, test_b_inputs)
+     const CGEN_INSN * a;
+     CGEN_FIELDS *     a_fields;
+     const CGEN_INSN * b;
+     CGEN_FIELDS *     b_fields;
+     int               test_a_inputs;
+     int               test_b_inputs;
+{
+  PIPE_ATTR a_pipe;
+  PIPE_ATTR b_pipe;
+
+  /* Make sure the instructions are the right length.  */
+  if (   CGEN_FIELDS_BITSIZE (a_fields) != 16
+      || CGEN_FIELDS_BITSIZE (b_fields) != 16)
+    abort();
+  
+  a_pipe = CGEN_INSN_ATTR (a, CGEN_INSN_PIPE);
+  b_pipe = CGEN_INSN_ATTR (b, CGEN_INSN_PIPE);
+
+  if (   a_pipe == PIPE_NONE
+      || b_pipe == PIPE_NONE)
+    return "Instructions do not use parallel execution pipelines.";
+  
+  if (   a_pipe == PIPE_S
+      || b_pipe == PIPE_O)
+    return "Instructions share the same execution pipeline";
+
+  if (   writes_to_dest_reg (a)
+      && writes_to_dest_reg (b)
+      && (get_dest_reg (a_fields) == get_dest_reg (b_fields)))
+    return "Instructions write to the same destination register.";
+
+  /* If requested, make sure that the first instruction does not
+     overwrite the inputs of the second instruction.  */
+  if (test_b_inputs && writes_to_dest_reg (a))
+    {
+      unsigned char skip = 1;
+      
+      while (skip = reads_from_src_reg (b, skip))
+	{
+	  if (get_src_reg (skip, b_fields) == get_dest_reg (a_fields))
+	    return "First instruction writes to register read by the second instruction";
+	}
+    }
+  
+  /* Similarly, if requested, make sure that the second instruction
+     does not overwrite the inputs of the first instruction.  */
+  if (test_a_inputs && writes_to_dest_reg (b))
+    {
+      unsigned char skip = 1;
+      
+      while (skip = reads_from_src_reg (a, skip))
+	{
+	  if (get_src_reg (skip, a_fields) == get_dest_reg (b_fields))
+	    return "Second instruction writes to register read by the first instruction";
+	}
+    }
+  
+  return NULL;
+}
+/* end-sanitize-m32rx */
+
+
+#ifdef CGEN_INT_INSN
+static void
+make_parallel (insn, buffer)
+     const CGEN_INSN * insn;
+     cgen_insn_t *     buffer;
+{
+  /* Force the top bit of the second insn to be set.  */
+
+  bfd_vma value;
+      
+  if (CGEN_CURRENT_ENDIAN == CGEN_ENDIAN_BIG)
+    {
+      value = bfd_getb16 ((bfd_byte *) buffer);
+      value |= 0x8000;
+      bfd_putb16 (value, (char *) buffer);
+    }
+  else
+    {
+      value = bfd_getl16 ((bfd_byte *) buffer);
+      value |= 0x8000;
+      bfd_putl16 (value, (char *) buffer);
+    }
+}
+#else
+static void
+make_parallel (insn, buffer)
+     const CGEN_INSN * insn;
+     char *            buffer;
+{
+  /* Force the top bit of the second insn to be set.  */
+
+  buffer [CGEN_CURRENT_ENDIAN == CGEN_ENDIAN_BIG ? 0 : 1] |= 0x80;
+}
+#endif
+
 
 void
 md_assemble (str)
@@ -387,7 +528,6 @@ md_assemble (str)
   char                     prev_buffer [CGEN_MAX_INSN_SIZE];
 #endif
   CGEN_FIELDS              fields;
-  CGEN_FIELDS              prev_fields;
   const CGEN_INSN *        insn;
   char *                   errmsg;
   char *                   str2 = NULL;
@@ -403,13 +543,15 @@ md_assemble (str)
       
       * str2 = 0; /* Seperate the two instructions.  */
 
-      /* If there was a previous 16 bit insn, then fill the following 16 bit slot,
-	 so that the parallel instruction will start on a 32 bit boundary.  */
+      /* If there was a previous 16 bit insn, then fill the following 16 bit
+	 slot, so that the parallel instruction will start on a 32 bit
+	 boundary.  */
       if (prev_insn)
 	fill_insn (0);
 
       /* Assemble the first instruction.  */
-      prev_insn = CGEN_SYM (assemble_insn) (str, & prev_fields, prev_buffer, & errmsg);
+      prev_insn = CGEN_SYM (assemble_insn) (str, & prev_fields, prev_buffer,
+					    & errmsg);
       if (! prev_insn)
 	{
 	  as_bad (errmsg);
@@ -450,8 +592,7 @@ md_assemble (str)
     }
 
 /* start-sanitize-m32rx */
-  if (! enable_m32rx
-      && CGEN_INSN_ATTR (insn, CGEN_INSN_MACH) == (1 << MACH_M32RX))
+  if (! enable_m32rx && CGEN_INSN_ATTR (insn, CGEN_INSN_MACH) == (1 << MACH_M32RX))
     {
       as_bad ("instruction '%s' is for the M32RX only", str);
       return;
@@ -460,6 +601,8 @@ md_assemble (str)
   
   if (is_parallel)
     {
+      int swap = false;
+      
 /* start-sanitize-m32rx */
       if (! enable_m32rx)
 	{
@@ -470,70 +613,50 @@ md_assemble (str)
 	      return;
 	    }
 	}
-      /* Check to see if this is an allowable parallel insn.  */
-      if (CGEN_INSN_ATTR (insn, CGEN_INSN_PIPE) == PIPE_NONE)
-	{
-	  as_bad ("instruction '%s', cannot be executed in parallel.", str);
-	  return;
-	}
 
-      /* Check to see that the two instructions can be placed in parallel. */
-      if ((CGEN_INSN_ATTR (insn, CGEN_INSN_PIPE) == CGEN_INSN_ATTR (prev_insn, CGEN_INSN_PIPE))
-	  && (CGEN_INSN_ATTR (insn, CGEN_INSN_PIPE) != PIPE_OS))
+      /* We assume that if the first instruction writes to a register that is
+	 read by the second instruction it is because the programmer intended
+	 this to happen, (after all they have explicitly requested that these
+	 two instructions be executed in parallel).  So we do not generate an
+	 error if this happens.  */
+      if (can_make_parallel (prev_insn, & prev_fields, insn,
+			     & fields, false, false) != NULL)
 	{
-	  as_bad ("'%s': both instructions use the same execution pipeline", str2);
-	  return;
-	}
-/* end-sanitize-m32rx */
-
-#if 0
-      /* Check that the instructions do not write to the same destination register.  */
-      if (writes_to_dest_reg (insn)
-	  && writes_to_dest_reg (prev_insn) /* This test is actually redundant.  */
-	  && get_dest_reg (insn) == get_dest_reg (prev_insn))
-	{
-	  as_bad ("'%s': both instructions write to the same destination register", str2);
-	  return;
-	}
-#endif
-      
-      /* Force the top bit of the second insn to be set.  */
-#if 0 /*def CGEN_INT_INSN*/
-#define MAKE_PARALLEL(insn)	((insn) |= 0x8000)
-      switch (CGEN_FIELDS_BITSIZE (& fields))
-	{
-	  bfd_vma value;
-	  
-	case 16:
-	  if (CGEN_CURRENT_ENDIAN == CGEN_ENDIAN_BIG)
+	  if ((errmsg = (char *) can_make_parallel (insn, & fields, prev_insn,
+						    & prev_fields, false, false)) == NULL)
 	    {
-	      value = bfd_getb16 ((bfd_vma) * buffer);
-	      MAKE_PARALLEL (value);
-	      bfd_putb16 (value, buffer);
+	      /* swap the two insns.  */
+	      swap = true;
 	    }
 	  else
 	    {
-	      value = bfd_getl16 ((bfd_vma) * buffer);
-	      MAKE_PARALLEL (value);
-	      bfd_putl16 (value, buffer);
+	      as_bad ("'%s': %s", str2, errmsg);
+	      return;
 	    }
-	  break;
-	default:
-	  abort ();
 	}
-#else
-#define MAKE_PARALLEL(insn)	((insn) |= 0x80)
-      MAKE_PARALLEL (buffer [CGEN_CURRENT_ENDIAN == CGEN_ENDIAN_BIG ? 0 : 1]);
-#endif
+/* end-sanitize-m32rx */
       
       /* Generate the parallel instructions */
-      cgen_asm_finish_insn (prev_insn, prev_buffer, CGEN_FIELDS_BITSIZE (& prev_fields));
-      cgen_asm_finish_insn (insn, buffer, CGEN_FIELDS_BITSIZE (& fields));
+      if (swap)
+	{
+	  cgen_asm_finish_insn (insn, buffer, CGEN_FIELDS_BITSIZE (& fields));
+	  
+	  /* Force the top bit of the second insn to be set.  */
+	  make_parallel (prev_insn, prev_buffer);
 
-      /* If prev_ins is relaxable (and insn is not), then swap them, so that the test
-	 after the end of this if-then-else section will work.  */
-      if (CGEN_INSN_ATTR (prev_insn, CGEN_INSN_RELAXABLE))
-	insn = prev_insn;
+	  cgen_asm_finish_insn (prev_insn, prev_buffer,
+				CGEN_FIELDS_BITSIZE (& prev_fields));
+	}
+      else
+	{
+	  cgen_asm_finish_insn (prev_insn, prev_buffer,
+				CGEN_FIELDS_BITSIZE (& prev_fields));
+
+	  /* Force the top bit of the second insn to be set.  */
+	  make_parallel (insn, buffer);
+      
+	  cgen_asm_finish_insn (insn, buffer, CGEN_FIELDS_BITSIZE (& fields));
+	}
       
       /* Clear the prev_insn variable, since it only used if the insn was the first
 	 16 bit insn in a 32 bit word.  */
@@ -556,9 +679,24 @@ md_assemble (str)
       /* Keep track of whether we've seen a pair of 16 bit insns.
 	 PREV_INSN is NULL when we're on a 32 bit boundary.  */
       if (prev_insn)
-	prev_insn = NULL;
+	{
+/* start-sanitize-m32rx */
+	  if (can_make_parallel (prev_insn, & prev_fields, insn, & fields, false, true) == NULL)
+	    make_parallel (insn, buffer);
+	  else if (can_make_parallel (insn, & fields, prev_insn, & prev_fields, true, false) == NULL)
+	    {
+	      /* Swap instructions and make parallel.  */
+	      /* XXX TODO .... */
+	    }
+/* end-sanitize-m32rx */
+	  
+	  prev_insn = NULL;
+	}
       else
-	prev_insn = insn;
+	{
+	  prev_insn   = insn;
+	  prev_fields = fields;
+	}
       
       cgen_asm_finish_insn (insn, buffer, CGEN_FIELDS_BITSIZE (& fields));
 
@@ -567,13 +705,13 @@ md_assemble (str)
       if (prev_insn
 	  && CGEN_INSN_ATTR (insn, CGEN_INSN_FILL_SLOT) != 0)
 	fill_insn (0);
-    }
 
-  /* If this is a relaxable insn (can be replaced with a larger version)
-     mark the fact so that we can emit an alignment directive for a following
-     32 bit insn if we see one.   */
-  if (CGEN_INSN_ATTR (insn, CGEN_INSN_RELAXABLE) != 0)
-    seen_relaxable_p = 1;
+      /* If this is a relaxable insn (can be replaced with a larger version)
+	 mark the fact so that we can emit an alignment directive for a following
+	 32 bit insn if we see one.   */
+      if (CGEN_INSN_ATTR (insn, CGEN_INSN_RELAXABLE) != 0)
+	seen_relaxable_p = 1;
+    }
 
   /* Set these so m32r_fill_insn can use them.  */
   prev_seg    = now_seg;
@@ -710,10 +848,13 @@ m32r_scomm (ignore)
 
       record_alignment (sbss_section, align2);
       subseg_set (sbss_section, 0);
+      
       if (align2)
 	frag_align (align2, 0, 0);
+      
       if (S_GET_SEGMENT (symbolP) == sbss_section)
 	symbolP->sy_frag->fr_symbol = 0;
+      
       symbolP->sy_frag = frag_now;
       pfrag = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP, size,
 			(char *) 0);
@@ -891,9 +1032,9 @@ md_estimate_size_before_relax (fragP, segment)
 
 void
 md_convert_frag (abfd, sec, fragP)
-  bfd *abfd;
-  segT sec;
-  fragS *fragP;
+  bfd *   abfd;
+  segT    sec;
+  fragS * fragP;
 {
   char * opcode;
   char * displacement;
