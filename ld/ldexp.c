@@ -1115,7 +1115,7 @@ exp_get_fill (etree_type *tree,
       fill = xmalloc ((len + 1) / 2 + sizeof (*fill) - 1);
       fill->size = (len + 1) / 2;
       dst = fill->data;
-      s = r.str;
+      s = (unsigned char *) r.str;
       val = 0;
       do
 	{

@@ -1017,8 +1017,8 @@ if test x"$LDEMUL_BEFORE_ALLOCATION" != xgld"$EMULATION_NAME"_before_allocation;
     ELF_INTERPRETER_SET_DEFAULT="
   if (sinterp != NULL)
     {
-      sinterp->contents = ${ELF_INTERPRETER_NAME};
-      sinterp->size = strlen (sinterp->contents) + 1;
+      sinterp->contents = (unsigned char *) ${ELF_INTERPRETER_NAME};
+      sinterp->size = strlen ((char *) sinterp->contents) + 1;
     }
 
 "
