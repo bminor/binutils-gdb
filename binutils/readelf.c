@@ -101,6 +101,7 @@ int                     do_debug_info;
 int                     do_debug_abbrevs;
 int                     do_debug_lines;
 int                     do_debug_pubnames;
+int                     do_debug_aranges;
 int			binary_class;
 
 static unsigned long (* byte_get) PARAMS ((unsigned char *, int));
@@ -153,6 +154,7 @@ static int                display_debug_info          PARAMS ((Elf32_Internal_Sh
 static int                display_debug_not_supported PARAMS ((Elf32_Internal_Shdr *, unsigned char *, FILE *));
 static int                display_debug_lines         PARAMS ((Elf32_Internal_Shdr *, unsigned char *, FILE *));
 static int                display_debug_abbrev        PARAMS ((Elf32_Internal_Shdr *, unsigned char *, FILE *));
+static int                display_debug_aranges       PARAMS ((Elf32_Internal_Shdr *, unsigned char *, FILE *));
 static unsigned char *    process_abbrev_section      PARAMS ((unsigned char *, unsigned char *));
 static unsigned long      read_leb128                 PARAMS ((unsigned char *, int *, int));
 static int                process_extended_line_op    PARAMS ((unsigned char *, long *));
@@ -1070,7 +1072,7 @@ usage ()
   fprintf (stdout, _("  -D or --use-dynamic       Use the dynamic section info when displaying symbols\n"));
   fprintf (stdout, _("  -x <number> or --hex-dump=<number>\n"));
   fprintf (stdout, _("                            Dump the contents of section <number>\n"));
-  fprintf (stdout, _("  -w[liap] or --debug-dump[=line,=info,=abbrev,=pubnames]\n"));
+  fprintf (stdout, _("  -w[liapr] or --debug-dump[=line,=info,=abbrev,=pubnames,=ranges]\n"));
   fprintf (stdout, _("                            Display the contents of DWARF2 debug sections\n"));
 #ifdef SUPPORT_DISASSEMBLY
   fprintf (stdout, _("  -i <number> or --instruction-dump=<number>\n"));
@@ -1181,6 +1183,11 @@ parse_args (argc, argv)
 		case 'p':
 		case 'P':
 		  do_debug_pubnames = 1;
+		  break;
+		  
+		case 'r':
+		case 'R':
+		  do_debug_aranges = 1;
 		  break;
 		  
 		default:
@@ -1614,7 +1621,7 @@ process_section_headers (file)
 			  dynamic_strings, char *, "dynamic strings");
 	}
       else if ((do_debugging || do_debug_info || do_debug_abbrevs
-		|| do_debug_lines || do_debug_pubnames)
+		|| do_debug_lines || do_debug_pubnames || do_debug_aranges)
 	       && strncmp (name, ".debug_", 7) == 0)
 	{
 	  name += 7;
@@ -1624,6 +1631,7 @@ process_section_headers (file)
 	      || (do_debug_abbrevs  && (strcmp (name, "abbrev") == 0))
 	      || (do_debug_lines    && (strcmp (name, "line") == 0))
 	      || (do_debug_pubnames && (strcmp (name, "pubnames") == 0))
+	      || (do_debug_aranges  && (strcmp (name, "aranges") == 0))
 	      )
 	    dump_sects [i] |= DEBUG_DUMP;
 	}
@@ -3639,6 +3647,7 @@ display_debug_lines (section, start, file)
 	}
     }
   
+  printf ("\n");
   return 1;
 }
 
@@ -3702,6 +3711,7 @@ display_debug_pubnames (section, start, file)
       while (offset != 0);
     }
 	  
+  printf ("\n");
   return 1;
 }
 
@@ -4397,9 +4407,73 @@ display_debug_info (section, start, file)
 					  compunit.cu_pointer_size);
 	}
     }
+
+  printf ("\n");
   
   return 1;
 }
+
+static int
+display_debug_aranges (section, start, file)
+     Elf32_Internal_Shdr * section;
+     unsigned char *       start;
+     FILE *                file;
+{
+  unsigned char * end = start + section->sh_size;
+
+  printf (_("The section %s contains:\n\n"), SECTION_NAME (section));
+
+  while (start < end)
+    {
+      DWARF2_External_ARange * external;
+      DWARF2_Internal_ARange   arange;
+      unsigned char *          ranges;
+      int                      i;
+      unsigned long            length;
+      unsigned long            address;
+      
+      external = (DWARF2_External_ARange *) start;
+
+      arange.ar_length       = BYTE_GET (external->ar_length);
+      arange.ar_version      = BYTE_GET (external->ar_version);
+      arange.ar_info_offset  = BYTE_GET (external->ar_info_offset);
+      arange.ar_pointer_size = BYTE_GET (external->ar_pointer_size);
+      arange.ar_segment_size = BYTE_GET (external->ar_segment_size);
+
+      printf (_("  Length:                   %d\n"), arange.ar_length);
+      printf (_("  Version:                  %d\n"), arange.ar_version);
+      printf (_("  Offset into .debug_info:  %x\n"), arange.ar_info_offset);
+      printf (_("  Pointer Size:             %d\n"), arange.ar_pointer_size);
+      printf (_("  Segment Size:             %d\n"), arange.ar_segment_size);
+
+      printf (_("\n    Address  Length\n"));
+      
+      ranges = start + sizeof (* external);
+      
+      for (;;)
+	{
+	  address = byte_get (ranges, arange.ar_pointer_size);
+
+	  if (address == 0)
+	    break;
+	  
+	  ranges += arange.ar_pointer_size;
+	  
+	  length  = byte_get (ranges, arange.ar_pointer_size);
+
+	  ranges += arange.ar_pointer_size;
+	  
+	  printf ("    %8.8x %d\n", address, length);
+	}
+
+      start += arange.ar_length + sizeof (external->ar_length);
+    }
+
+  printf ("\n");
+  
+  return 1;
+}
+
 
 static int
 display_debug_not_supported (section, start, file)
@@ -4425,7 +4499,7 @@ debug_displays[] =
   { ".debug_info",     display_debug_info },
   { ".debug_abbrev",   display_debug_abbrev },
   { ".debug_line",     display_debug_lines },
-  { ".debug_aranges",  display_debug_not_supported },
+  { ".debug_aranges",  display_debug_aranges },
   { ".debug_pubnames", display_debug_pubnames },
   { ".debug_macinfo",  display_debug_not_supported },
   { ".debug_frame",    display_debug_not_supported },

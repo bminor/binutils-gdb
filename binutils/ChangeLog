@@ -2,8 +2,10 @@
 
 	* readelf.c (read_and_display_attr): Add display of basic type
 	encodings. 
+	(display_debug_aranges): New function: Display the contents of a
+	.debug_aranges section.
 
-	* binutils.texi: Fixed bug in readefl documentation.
+	* binutils.texi: Fixed bug in readelf documentation.
 
 Mon Feb  1 12:38:01 1999  Catherine Moore  <clm@cygnus.com>
     

@@ -2321,7 +2321,7 @@ readelf [ -a | --all ]
         [ -V | --version-info]
         [ -D | --use-dynamic]
         [ -x <number> | --hex-dump=<number>]
-        [ -w[liap] | --debug-dump[=info,=line,=abbrev,=pubnames]]
+        [ -w[liapr] | --debug-dump[=info,=line,=abbrev,=pubnames,=ranges]]
         [      --histogram]
         [ -v | --version]
         [ -H | --help]
@@ -2403,8 +2403,8 @@ symbols section.
 @itemx --hex-dump=<number>
 Displays the contents of the indicated section as a hexadecimal dump.
 
-@item -w[lia]
-@itemx --debug-dump[=line,=info,=abbrev]
+@item -w[liapr]
+@itemx --debug-dump[=line,=info,=abbrev,=pubnames,=ranges]
 Displays the contents of the debug sections in the file, if any are
 present.  If one of the optional letters or words follows the switch
 then only data found in those specific sections will be dumped.
