@@ -31,7 +31,7 @@ _include__(gdbVN.m4)
 @c
 @syncodeindex ky cp
 @c FOR UPDATES LEADING TO THIS DRAFT, GDB CHANGELOG CONSULTED BETWEEN:
-@c Fri Sep 20 16:10:52 1991  John Gilmore  (gnu at cygnus.com)
+@c Fri Oct 11 23:27:06 1991  John Gilmore  (gnu at cygnus.com)
 @c Sat Dec 22 02:51:40 1990  John Gilmore  (gnu at cygint)
 @ifinfo
 This file documents the GNU debugger _GDBN__.
@@ -412,10 +412,10 @@ omitted from this list, we would like to add your names!
 
 So that they may not regard their long labor as thankless, we
 particularly thank those who shepherded GDB through major releases: John
-Gilmore (releases _GDB_VN__, 4.0); Jim Kingdon (releases 3.9, 3.5, 3.4, 3.3);
-and Randy Smith (releases 3.2, 3.1, 3.0).  As major maintainer of GDB
-for some period, each contributed significantly to the structure,
-stability, and capabilities of the entire debugger.
+Gilmore (releases _GDB_VN__, 4.1, 4.0); Jim Kingdon (releases 3.9, 3.5,
+3.4, 3.3); and Randy Smith (releases 3.2, 3.1, 3.0).  As major
+maintainer of GDB for some period, each contributed significantly to the
+structure, stability, and capabilities of the entire debugger.
 
 Richard Stallman, assisted at various times by Pete TerMaat, Chris
 Hanson, and Richard Mlynarik, handled releases through 2.8.
@@ -600,8 +600,8 @@ Let's use _GDBN__ to try to see what's going on.
 @smallexample
 $ @i{_GDBP__ m4}
 GDB is free software and you are welcome to distribute copies of it
- under certain conditions; type "info copying" to see the conditions.
-There is absolutely no warranty for GDB; type "info warranty" for details.
+ under certain conditions; type "show copying" to see the conditions.
+There is absolutely no warranty for GDB; type "show warranty" for details.
 GDB _GDB_VN__, Copyright 1991 Free Software Foundation, Inc...
 (_GDBP__) 
 @end smallexample
@@ -5314,14 +5314,23 @@ which match the regular-expression @var{regexp}.
 @end ignore
 
 @item printsyms @var{filename}
+@itemx printpsyms @var{filename}
 @kindex printsyms
-Write a dump of debugging symbol data into the file
-@var{filename}.  Only symbols with debugging data are included.  _GDBN__
-includes all the symbols it already knows about: that is, @var{filename}
-reflects symbols for only those files whose symbols _GDBN__ has read.
-You can find out which files these are using the command @code{info
-files}.  The description of @code{symbol-file} describes how _GDBN__
-reads symbols; both commands are described under @ref{Files}.
+@cindex symbol dump
+@kindex printsyms
+@cindex partial symbol dump
+Write a dump of debugging symbol data into the file @var{filename}.
+Only symbols with debugging data are included.  If you use
+@code{printsyms}, _GDBN__ includes all the symbols for which it has
+already collected full details: that is, @var{filename} reflects symbols
+for only those files whose symbols _GDBN__ has read.  You can find out
+which files these are using the command @code{info files}.  On the other
+hand, if you use @code{printpsyms}, the dump also shows information
+about symbols that _GDBN__ only knows partially---that is, symbols
+defined in files that _GDBN__ has not yet read.  The description of
+@code{symbol-file} describes how _GDBN__ reads symbols; both commands
+are described under @ref{Files}.
+
 @end table
 
 @node Altering, _GDBN__ Files, Symbols, Top
@@ -5834,18 +5843,15 @@ examine @code{*bufp} to see the symbol.
 @item stub type has NULL name
 _GDBN__ could not find the full definition for a struct or class. 
 
-@ignore
-@c this is #if 0'd in dbxread.c as of (at least!) 17 may 1991
-@item const/volatile indicator missing, got '@var{X}'
+@item const/volatile indicator missing (ok if using g++ v1.x), got@dots{}
 
 The symbol information for a C++ member function is missing some
-information that the compiler should have output for it.
-@end ignore
+information that recent versions of the compiler should have output
+for it.
 
-@item C++ type mismatch between compiler and debugger
+@item info mismatch between compiler and debugger
 
-_GDBN__ could not parse a type specification output by the compiler
-for some C++ object.
+_GDBN__ could not parse a type specification output by the compiler.
 
 @end table
 
