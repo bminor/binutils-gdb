@@ -22,21 +22,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define	DEFAULT_PROMPT		"(vxgdb) "
 
-/* Kludge... */
-#include "tm-sun3.h"
+#define HAVE_68881
+
+/* We have more complex, useful breakpoints on the target.  */
+#define	DECR_PC_AFTER_BREAK	0
+
+#include "tm-68k.h"
 
 /* Define this if the C compiler puts an underscore at the front
    of external names before giving them to the linker.  */
 
 #define NAMES_HAVE_UNDERSCORE
-
-#undef SAVED_PC_AFTER_CALL
-#define SAVED_PC_AFTER_CALL(frame) \
-	read_memory_integer (read_register (SP_REGNUM), 4)
-
-/* We have more complex, useful breakpoints on the target.  */
-#undef DECR_PC_AFTER_BREAK
-#define	DECR_PC_AFTER_BREAK	0
 
 /* We are guaranteed to have a zero frame pointer at bottom of stack, too. */
 #undef	FRAME_CHAIN
@@ -55,3 +51,33 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    never fetched anything), we are at the top of the stack.  */
 
 #define FRAME_CHAIN_VALID(chain, thisframe) (chain != 0)
+
+/* FIXME, Longjmp information stolen from Sun-3 config.  Dunno if right.  */
+/* Offsets (in target ints) into jmp_buf.  Not defined by Sun, but at least
+   documented in a comment in <machine/setjmp.h>! */
+
+#define JB_ELEMENT_SIZE 4
+
+#define JB_ONSSTACK 0
+#define JB_SIGMASK 1
+#define JB_SP 2
+#define JB_PC 3
+#define JB_PSL 4
+#define JB_D2 5
+#define JB_D3 6
+#define JB_D4 7
+#define JB_D5 8
+#define JB_D6 9
+#define JB_D7 10
+#define JB_A2 11
+#define JB_A3 12
+#define JB_A4 13
+#define JB_A5 14
+#define JB_A6 15
+
+/* Figure out where the longjmp will land.  Slurp the args out of the stack.
+   We expect the first arg to be a pointer to the jmp_buf structure from which
+   we extract the pc (JB_PC) that we will land at.  The pc is copied into ADDR.
+   This routine returns true on success */
+
+#define GET_LONGJMP_TARGET(ADDR) get_longjmp_target(ADDR)

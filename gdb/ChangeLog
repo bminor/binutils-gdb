@@ -1,6 +1,15 @@
+Wed Sep  2 13:45:27 1992  John Gilmore  (gnu@cygnus.com)
+
+	* tm-vx68.h, tm-es1800.h:  Use tm-68k.h rather than tm-sun3.h.
+	* tm-sun3.h:  Remove STACK_END_ADDR, no longer used.
+	* tm-sun3os4.h:  Update comments.
+	* xm-delta88.h:  Remove STACK_END_ADDR.
+
 Wed Sep  2 01:18:31 1992  John Gilmore  (gnu@cygnus.com)
 
 	* Makefile.in (VERSION):  Roll to 4.6.5.
+
+	* infrun.c:  Lint for recent `handle' changes.
 
 	* ser-termios.c, ser-go32.c:  Remove DEFUN crap, clean up.
 	* serial.h (EXFUN):  Remove all uses, convert to PARAMS.

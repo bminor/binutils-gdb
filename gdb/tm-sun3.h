@@ -24,13 +24,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define GDB_TARGET_IS_SUN3 1
 
-/* Address of the end of stack space.  We get this from the system
-   include files. */
-
-#include <sys/types.h>
-#include <machine/vmparam.h>
-#define STACK_END_ADDR USRSTACK
-
 #include "tm-68k.h"
 
 /* Offsets (in target ints) into jmp_buf.  Not defined by Sun, but at least
