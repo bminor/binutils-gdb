@@ -34,7 +34,7 @@
 
 
 #include "defs.h"
-#include "gdbarch-utils.h"
+#include "arch-utils.h"
 
 #if GDB_MULTI_ARCH
 #include "gdbcmd.h"

@@ -1,3 +1,11 @@
+Mon Apr 10 00:21:09 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch-utils.h, gdbarch-utils.c: Delete.
+	* arch-utils.h, arch-utils.c: New files.  Avoid 14 character file
+ 	name problems.
+	* Makefile.in: Update.
+	* gdbarch.c: Update.
+
 Sun Apr  9 23:42:16 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	From 2000-04-07 Jonathan Larmour <jlarmour@redhat.co.uk>:
