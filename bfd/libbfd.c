@@ -50,11 +50,11 @@ bfd_true (ignore)
   return true;
 }
 
-void *
+PTR
 bfd_nullvoidptr(ignore)
 bfd *ignore;
 {
-  return (void *)NULL;
+  return (PTR)NULL;
 }
 
 int 

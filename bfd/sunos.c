@@ -1273,7 +1273,9 @@ swap_std_reloc_out (abfd, g, natptr)
   else {
     r_extern = 0;
     if (g->section == NULL) {
-      BFD_ASSERT(0);
+      /* It is possible to have a reloc with nothing, we generate an
+	 abs + 0 */
+      r_addend = 0;
       r_index = N_ABS | N_EXT;
     }
     else  if(g->section->output_section == obj_textsec(abfd)) {

@@ -23,26 +23,24 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define UNDERSCORE_HACK 1
 #define offsetof(type, identifier) (size_t) &(((type *) 0)->identifier) 
-
 #include <ansidecl.h>
+
 #include "sysdep.h"
 #include "bfd.h"
 #include "libbfd.h"
-#include "obstack.h"
 #include "oasys.h"
 #include "liboasys.h"
-
 static void 
 DEFUN(oasys_read_record,(abfd, record),
       bfd *CONST abfd AND 
       oasys_record_union_type *record)
 {
 
-  bfd_read(record, 1, sizeof(record->header), abfd);
+  bfd_read((PTR)record, 1, sizeof(record->header), abfd);
 
   if ((size_t) record->header.length <= (size_t) sizeof (record->header))
     return;
-  bfd_read(((char *)record )+ sizeof(record->header),
+  bfd_read((PTR)(((char *)record )+ sizeof(record->header)),
 	   1, record->header.length - sizeof(record->header),
 	   abfd);
 }
@@ -77,7 +75,6 @@ DEFUN(oasys_slurp_symbol_table,(abfd),
   oasys_record_union_type record;
   oasys_data_type *data = oasys_data(abfd);
   boolean loop = true;
-  asymbol *dest_undefined;
   asymbol *dest_defined;
   asymbol *dest;
   char *string_ptr;
@@ -92,12 +89,12 @@ DEFUN(oasys_slurp_symbol_table,(abfd),
 #ifdef UNDERSCORE_HACK
   /* buy 1 more char for each symbol to keep the underscore in*/
   data->strings = bfd_alloc(abfd, data->symbol_string_length +
-			       abfd->symcount);
+			    abfd->symcount);
 #else
   data->strings = bfd_alloc(abfd, data->symbol_string_length);
 #endif
 
-  dest_undefined = data->symbols;
+
   dest_defined = data->symbols + abfd->symcount -1;
 
   string_ptr = data->strings;
@@ -137,7 +134,7 @@ DEFUN(oasys_slurp_symbol_table,(abfd),
 	    }
 	    break;
 	  case RELOCATION_TYPE_UND:
-	    dest = data->symbols + bfd_h_getshort(abfd, &record.symbol.refno[0]);
+	    dest = data->symbols + bfd_h_getshort(abfd, (bfd_byte *)&record.symbol.refno[0]);
 	    dest->section = (asection *)NULL;
 	    dest->flags = BSF_UNDEFINED;
 	    break;
@@ -176,7 +173,7 @@ DEFUN(oasys_slurp_symbol_table,(abfd),
 
 }
 
-static size_t
+static unsigned int
 DEFUN(oasys_get_symtab_upper_bound,(abfd),
      bfd *CONST abfd)
 {
@@ -222,7 +219,7 @@ DEFUN(oasys_archive_p,(abfd),
   bfd_seek(abfd, (file_ptr) 0, false);
 
   
-  bfd_read(&header, 1, sizeof(header), abfd);
+  bfd_read((PTR)&header, 1, sizeof(header), abfd);
 
   
   swap(header.version);
@@ -266,8 +263,7 @@ DEFUN(oasys_archive_p,(abfd),
 
     bfd_seek(abfd , header.mod_tbl_offset, SEEK_SET);
     for (i = 0; i < header.mod_count; i++) {
-
-      bfd_read(&record, 1, sizeof(record), abfd);
+      bfd_read((PTR)&record, 1, sizeof(record), abfd);
       swap(record.mod_size);
       swap(record.file_offset);
       swap(record.mod_name_length);
@@ -304,6 +300,7 @@ DEFUN(oasys_object_p,(abfd),
       bfd *abfd)
 {
   oasys_data_type *oasys;
+  oasys_data_type *save = oasys_data(abfd);
   boolean loop = true;
   boolean had_usefull = false;
 
@@ -393,6 +390,7 @@ DEFUN(oasys_object_p,(abfd),
 
  fail:
   (void)  bfd_release(abfd, oasys);
+  oasys_data(abfd) = save;
   return (bfd_target *)NULL;
 }
 
@@ -852,6 +850,7 @@ DEFUN(oasys_write_end,(abfd),
       bfd *CONST abfd)
 {
   oasys_end_record_type end;
+  uint8e_type null = 0;
   end.relb = RELOCATION_TYPE_ABS;
   bfd_h_putlong(abfd, abfd->start_address, end.entry); 
   bfd_h_putshort(abfd, 0, end.fill);
@@ -860,6 +859,7 @@ DEFUN(oasys_write_end,(abfd),
 		     oasys_record_is_end_enum,
 		     (oasys_record_union_type *)&end,
 		     sizeof(end));
+  bfd_write((PTR)&null, 1, 1, abfd);
 }
 
 static int 
@@ -1081,7 +1081,6 @@ DEFUN(oasys_make_empty_symbol,(abfd),
 
 
 
-/* Obsbolete procedural interface; better to look at the cache directly */
 
 /* User should have checked the file flags; perhaps we should return
 BFD_NO_MORE_SYMBOLS if there are none? */
@@ -1185,20 +1184,22 @@ DEFUN(oasys_generic_stat_arch_elt,(abfd, buf),
 }
 
 static int 
-DEFUN(oasys_sizeof_headers,(abfd),
-      bfd *abfd)
+DEFUN(oasys_sizeof_headers,(abfd, exec),
+      bfd *abfd AND
+      boolean exec)
 {
 return 0;
 }
 
-#define oasys_core_file_failing_command bfd_false
-#define oasys_core_file_failing_signal bfd_false
-#define oasys_core_file_matches_executable_p bfd_false
-#define oasys_slurp_armap bfd_false
-#define oasys_slurp_extended_name_table bfd_false
-#define oasys_truncate_arname bfd_false
-#define oasys_write_armap bfd_false
-#define oasys_get_lineno bfd_false
+#define oasys_core_file_failing_command (char *(*)())(bfd_nullvoidptr)
+#define oasys_core_file_failing_signal (int (*)())bfd_0
+#define oasys_core_file_matches_executable_p  0 /*(PROTO(boolean, (*),(bfd*, bfd*)))bfd_false*/
+#define oasys_slurp_armap bfd_true
+#define oasys_slurp_extended_name_table bfd_true
+#define oasys_truncate_arname (void (*)())bfd_nullvoidptr
+#define oasys_write_armap 0 /* (PROTO( boolean, (*),(bfd *, unsigned int, struct orl *, int, int))) bfd_nullvoidptr*/
+#define oasys_get_lineno (struct lineno_cache_entry *(*)())bfd_nullvoidptr
+
 
 
 
@@ -1223,7 +1224,7 @@ bfd_target oasys_vec =
   {_bfd_dummy_target,
      oasys_object_p,		/* bfd_check_format */
      oasys_archive_p,
-     bfd_false
+ _bfd_dummy_target,
      },
   {
     bfd_false,

@@ -168,7 +168,7 @@ ecoff_object_p (abfd)
   bfd_error = no_error;
 
   /* figure out how much to read */
-  if (bfd_read (short_bytes, 1, SHORT_SIZE, abfd) != SHORT_SIZE)
+  if (bfd_read ((PTR)short_bytes, 1, SHORT_SIZE, abfd) != SHORT_SIZE)
     return 0;
 
   magic = bfd_h_getshort (abfd, short_bytes);
@@ -176,13 +176,13 @@ ecoff_object_p (abfd)
     bfd_error = wrong_format;
     return 0;
   }
-  if (bfd_read (short_bytes, 1, SHORT_SIZE, abfd) != SHORT_SIZE)
+  if (bfd_read ((PTR)short_bytes, 1, SHORT_SIZE, abfd) != SHORT_SIZE)
     return 0;
   nscns = bfd_h_getshort (abfd, short_bytes);
 
   if (bfd_seek (abfd,(file_ptr) ((sizeof (long)) * 3), true) < 0) 
     return 0;
-  if (bfd_read (short_bytes, 1, SHORT_SIZE, abfd) != SHORT_SIZE)
+  if (bfd_read ((PTR)short_bytes, 1, SHORT_SIZE, abfd) != SHORT_SIZE)
     return 0;
   opthdr = bfd_h_getshort (abfd, short_bytes);
 

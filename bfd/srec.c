@@ -42,7 +42,11 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$
  * $Log$
- * Revision 1.6  1991/04/25 04:06:21  gnu
+ * Revision 1.7  1991/05/08 19:21:47  steve
+ * Various portability lints.
+ * Fixed reloc bug in ieee and oasys.
+ *
+ * Revision 1.6  1991/04/25  04:06:21  gnu
  * Fix minor pointer type problems that "cc" complains about.
  *
  * Revision 1.5  1991/04/23  22:44:14  steve
@@ -213,7 +217,7 @@ asection *section;
 
       bytes_on_line = HEX(&buffer.size);
     
-      bfd_read(buffer.u.data, 1 , bytes_on_line * 2, abfd);
+      bfd_read((PTR)buffer.u.data, 1 , bytes_on_line * 2, abfd);
 
       switch (buffer.type) {
       case '6':
@@ -380,7 +384,7 @@ int bytes_to_do;
     data++;
 
     * ( (char *)(data)) = '\n';
-    bfd_write(&buffer, 1, (char *)data - (char *)&buffer + 1 , abfd);
+    bfd_write((PTR)&buffer, 1, (char *)data - (char *)&buffer + 1 , abfd);
 
     bytes_written += bytes_this_chunk;
     location += bytes_this_chunk;
@@ -427,13 +431,7 @@ return 0;
 }
 
 /*SUPPRESS 460 */
-#define srec_core_file_failing_command bfd_false
-#define srec_core_file_failing_signal bfd_false
-#define srec_core_file_matches_executable_p bfd_false
-#define srec_slurp_armap bfd_false
-#define srec_slurp_extended_name_table bfd_false
-#define srec_truncate_arname bfd_false
-#define srec_write_armap bfd_false
+
 #define srec_new_section_hook bfd_false
 #define srec_get_symtab_upper_bound bfd_false
 #define srec_get_symtab bfd_false
@@ -441,10 +439,21 @@ return 0;
 #define srec_canonicalize_reloc bfd_false
 #define srec_make_empty_symbol bfd_false
 #define srec_print_symbol bfd_false
-#define srec_get_lineno bfd_false
+
 #define srec_openr_next_archived_file bfd_false
 #define srec_find_nearest_line bfd_false
 #define srec_generic_stat_arch_elt bfd_false
+
+
+#define srec_core_file_failing_command (char *(*)())(bfd_nullvoidptr)
+#define srec_core_file_failing_signal (int (*)())bfd_0
+#define srec_core_file_matches_executable_p (PROTO(boolean, (*),(bfd*, bfd*)))bfd_false
+#define srec_slurp_armap bfd_true
+#define srec_slurp_extended_name_table bfd_true
+#define srec_truncate_arname (void (*)())bfd_nullvoidptr
+#define srec_write_armap  (PROTO( boolean, (*),(bfd *, unsigned int, struct orl *, int, int))) bfd_nullvoidptr
+#define srec_get_lineno (struct lineno_cache_entry *(*)())bfd_nullvoidptr
+
 
 bfd_target srec_vec =
 {

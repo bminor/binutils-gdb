@@ -1144,7 +1144,7 @@ bsd_write_armap (arch, elength, map, orl_count, stridx)
   /* now write the strings themselves */
   /* FIXME, this needs to be byte-swapped! */
   temp = stridx + 4;
-  bfd_write (&temp, 1, sizeof (temp), arch);
+  bfd_write ((PTR)&temp, 1, sizeof (temp), arch);
   for (count = 0; count < orl_count; count++)
     bfd_write (*((map[count]).name), 1, strlen (*((map[count]).name))+1, arch);
 
@@ -1211,9 +1211,9 @@ coff_write_armap (arch, elength, map, orl_count, stridx)
 
     /* Write the ar header for this item and the number of symbols */
 
-    bfd_write ((char *)&hdr, 1, sizeof (struct ar_hdr), arch);
+    bfd_write ((PTR)&hdr, 1, sizeof (struct ar_hdr), arch);
     /* FIXME, this needs to be byte-swapped */
-    bfd_write (&orl_count, 1, sizeof (orl_count), arch);
+    bfd_write ((PTR)&orl_count, 1, sizeof (orl_count), arch);
 
     /* Two passes, first write the file offsets for each symbol -
        remembering that each offset is on a two byte boundary
@@ -1230,7 +1230,7 @@ coff_write_armap (arch, elength, map, orl_count, stridx)
 	    last_eltno++;
 	}
 	/* FIXME, this needs to be byte-swapped */
-	bfd_write (&archive_member_file_ptr,
+	bfd_write ((PTR)&archive_member_file_ptr,
 		   1,
 		   sizeof (archive_member_file_ptr),
 		   arch);
@@ -1238,7 +1238,7 @@ coff_write_armap (arch, elength, map, orl_count, stridx)
 
     /* now write the strings themselves */
     for (count = 0; count < orl_count; count++) {
-	bfd_write (*((map[count]).name),
+	bfd_write ((PTR)*((map[count]).name),
 		   1,
 		   strlen (*((map[count]).name))+1, arch);
 
