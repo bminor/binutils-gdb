@@ -1,5 +1,10 @@
 2002-06-12  Chris Demetriou  <cgd@broadcom.com>
 
+	* mips.igen: Fix formatting of function calls in
+	many FP operations.
+
+2002-06-12  Chris Demetriou  <cgd@broadcom.com>
+
 	* mips.igen (MOVN, MOVZ): Trace result.
 	(TNEI): Print "tnei" as the opcode name in traces.
 	(CEIL.W): Add disassembly string for traces.

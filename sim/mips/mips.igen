@@ -3659,7 +3659,7 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt_p (SD_, fmt, instruction_0);
-  StoreFPR(FD,fmt,AbsoluteValue(ValueFPR(FS,fmt),fmt));
+  StoreFPR (FD, fmt, AbsoluteValue (ValueFPR (FS, fmt), fmt));
 }
 
 
@@ -3680,7 +3680,7 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt_p (SD_, fmt, instruction_0);
-  StoreFPR(FD,fmt,Add(ValueFPR(FS,fmt),ValueFPR(FT,fmt),fmt));
+  StoreFPR (FD, fmt, Add (ValueFPR (FS, fmt), ValueFPR (FT, fmt), fmt));
 }
 
 
@@ -3788,7 +3788,8 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt (SD_, fmt, instruction_0);
-  StoreFPR(FD,fmt_long,Convert(FP_RM_TOPINF,ValueFPR(FS,fmt),fmt,fmt_long));
+  StoreFPR (FD, fmt_long, Convert (FP_RM_TOPINF, ValueFPR (FS, fmt), fmt,
+	    fmt_long));
 }
 
 
@@ -3807,7 +3808,8 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt (SD_, fmt, instruction_0);
-  StoreFPR(FD,fmt_word,Convert(FP_RM_TOPINF,ValueFPR(FS,fmt),fmt,fmt_word));
+  StoreFPR (FD, fmt_word, Convert (FP_RM_TOPINF, ValueFPR (FS, fmt), fmt,
+	    fmt_word));
 }
 
 
@@ -3918,12 +3920,10 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  {
-    if ((fmt == fmt_double) | 0)
-      SignalException (ReservedInstruction, instruction_0);
-    else
-      StoreFPR(FD,fmt_double,Convert(GETRM(),ValueFPR(FS,fmt),fmt,fmt_double));
-  }
+  if ((fmt == fmt_double) | 0)
+    SignalException (ReservedInstruction, instruction_0);
+  StoreFPR (FD, fmt_double, Convert (GETRM (), ValueFPR (FS, fmt), fmt,
+	    fmt_double));
 }
 
 
@@ -3939,12 +3939,10 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  {
-    if ((fmt == fmt_long) | ((fmt == fmt_long) || (fmt == fmt_word)))
-      SignalException (ReservedInstruction, instruction_0);
-    else
-      StoreFPR(FD,fmt_long,Convert(GETRM(),ValueFPR(FS,fmt),fmt,fmt_long));
-  }
+  if ((fmt == fmt_long) | ((fmt == fmt_long) || (fmt == fmt_word)))
+    SignalException (ReservedInstruction, instruction_0);
+  StoreFPR (FD, fmt_long, Convert (GETRM (), ValueFPR (FS, fmt), fmt,
+	    fmt_long));
 }
 
 
@@ -3966,12 +3964,10 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  {
-    if ((fmt == fmt_single) | 0)
-      SignalException (ReservedInstruction, instruction_0);
-    else
-      StoreFPR(FD,fmt_single,Convert(GETRM(),ValueFPR(FS,fmt),fmt,fmt_single));
-  }
+  if ((fmt == fmt_single) | 0)
+    SignalException (ReservedInstruction, instruction_0);
+  StoreFPR (FD, fmt_single, Convert (GETRM (), ValueFPR (FS, fmt), fmt,
+	    fmt_single));
 }
 
 
@@ -3990,12 +3986,10 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  {
-    if ((fmt == fmt_word) | ((fmt == fmt_long) || (fmt == fmt_word)))
-      SignalException (ReservedInstruction, instruction_0);
-    else
-      StoreFPR(FD,fmt_word,Convert(GETRM(),ValueFPR(FS,fmt),fmt,fmt_word));
-  }
+  if ((fmt == fmt_word) | ((fmt == fmt_long) || (fmt == fmt_word)))
+    SignalException (ReservedInstruction, instruction_0);
+  StoreFPR (FD, fmt_word, Convert (GETRM (), ValueFPR (FS, fmt), fmt,
+	    fmt_word));
 }
 
 
@@ -4015,7 +4009,7 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt (SD_, fmt, instruction_0);
-  StoreFPR(FD,fmt,Divide(ValueFPR(FS,fmt),ValueFPR(FT,fmt),fmt));
+  StoreFPR (FD, fmt, Divide (ValueFPR (FS, fmt), ValueFPR (FT, fmt), fmt));
 }
 
 
@@ -4109,7 +4103,8 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt (SD_, fmt, instruction_0);
-  StoreFPR(FD,fmt_long,Convert(FP_RM_TOMINF,ValueFPR(FS,fmt),fmt,fmt_long));
+  StoreFPR (FD, fmt_long, Convert (FP_RM_TOMINF, ValueFPR (FS, fmt), fmt,
+	    fmt_long));
 }
 
 
@@ -4128,7 +4123,8 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt (SD_, fmt, instruction_0);
-  StoreFPR(FD,fmt_word,Convert(FP_RM_TOMINF,ValueFPR(FS,fmt),fmt,fmt_word));
+  StoreFPR (FD, fmt_word, Convert (FP_RM_TOMINF, ValueFPR (FS, fmt), fmt,
+	    fmt_word));
 }
 
 
@@ -4256,7 +4252,7 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt_p (SD_, fmt, instruction_0);
-  StoreFPR(FD,fmt,ValueFPR(FS,fmt));
+  StoreFPR (FD, fmt, ValueFPR (FS, fmt));
 }
 
 
@@ -4397,7 +4393,7 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt_p (SD_, fmt, instruction_0);
-  StoreFPR(FD,fmt,Multiply(ValueFPR(FS,fmt),ValueFPR(FT,fmt),fmt));
+  StoreFPR (FD, fmt, Multiply (ValueFPR (FS, fmt), ValueFPR (FT, fmt), fmt));
 }
 
 
@@ -4417,7 +4413,7 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt_p (SD_, fmt, instruction_0);
-  StoreFPR(FD,fmt,Negate(ValueFPR(FS,fmt),fmt));
+  StoreFPR (FD, fmt, Negate (ValueFPR (FS, fmt), fmt));
 }
 
 
@@ -4481,7 +4477,7 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt (SD_, fmt, instruction_0);
-  StoreFPR(FD,fmt,Recip(ValueFPR(FS,fmt),fmt));
+  StoreFPR (FD, fmt, Recip (ValueFPR (FS, fmt), fmt));
 }
 
 
@@ -4498,7 +4494,8 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt (SD_, fmt, instruction_0);
-  StoreFPR(FD,fmt_long,Convert(FP_RM_NEAREST,ValueFPR(FS,fmt),fmt,fmt_long));
+  StoreFPR (FD, fmt_long, Convert (FP_RM_NEAREST, ValueFPR (FS, fmt), fmt,
+	    fmt_long));
 }
 
 
@@ -4517,7 +4514,8 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt (SD_, fmt, instruction_0);
-  StoreFPR(FD,fmt_word,Convert(FP_RM_NEAREST,ValueFPR(FS,fmt),fmt,fmt_word));
+  StoreFPR (FD, fmt_word, Convert (FP_RM_NEAREST, ValueFPR (FS, fmt), fmt,
+	    fmt_word));
 }
 
 
@@ -4580,7 +4578,7 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt (SD_, fmt, instruction_0);
-  StoreFPR(FD,fmt,(SquareRoot(ValueFPR(FS,fmt),fmt)));
+  StoreFPR (FD, fmt,  (SquareRoot (ValueFPR (FS, fmt), fmt)));
 }
 
 
@@ -4600,7 +4598,7 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt_p (SD_, fmt, instruction_0);
-  StoreFPR(FD,fmt,Sub(ValueFPR(FS,fmt),ValueFPR(FT,fmt),fmt));
+  StoreFPR (FD, fmt, Sub (ValueFPR (FS, fmt), ValueFPR (FT, fmt), fmt));
 }
 
 
@@ -4702,7 +4700,8 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt (SD_, fmt, instruction_0);
-  StoreFPR(FD,fmt_long,Convert(FP_RM_TOZERO,ValueFPR(FS,fmt),fmt,fmt_long));
+  StoreFPR (FD, fmt_long, Convert (FP_RM_TOZERO, ValueFPR (FS, fmt), fmt,
+	    fmt_long));
 }
 
 
@@ -4721,7 +4720,8 @@
   int fmt = FMT;
   check_fpu (SD_);
   check_fmt (SD_, fmt, instruction_0);
-  StoreFPR(FD,fmt_word,Convert(FP_RM_TOZERO,ValueFPR(FS,fmt),fmt,fmt_word));
+  StoreFPR (FD, fmt_word, Convert (FP_RM_TOZERO, ValueFPR (FS, fmt), fmt,
+	    fmt_word));
 }
 
 
