@@ -388,30 +388,23 @@ if (!target_is_m88110) \
 
 extern const struct ext_format ext_format_m88110;
 
-/* Convert data from raw format for register REGNUM
-   to virtual format for register REGNUM.  */
+/* Convert data from raw format for register REGNUM in buffer FROM
+   to virtual format with type TYPE in buffer TO.  */
 
-/* FIXME: Use store_floating like tm-m68k.h.  */
-
-#define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,FROM,TO) \
+#define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,TYPE,FROM,TO) \
 { \
-  if ((REGNUM) < XFP_REGNUM) \
-    memcpy ((TO), (FROM), REGISTER_RAW_SIZE (REGNUM)); \
-      else ieee_extended_to_double(&ext_format_m88110, \
-				   (FROM), (double *)(TO)); \
+  double val; \
+  ieee_extended_to_double (&ext_format_m88110, (FROM), &val); \
+  store_floating ((TO), TYPE_LENGTH (TYPE), val); \
 }
 
-/* Convert data from virtual format for register REGNUM
-   to raw format for register REGNUM.  */
+/* Convert data from virtual format with type TYPE in buffer FROM
+   to raw format for register REGNUM in buffer TO.  */
 
-/* FIXME: Use extract_floating like tm-m68k.h.  */
-
-#define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO) \
+#define REGISTER_CONVERT_TO_RAW(TYPE,REGNUM,FROM,TO)	\
 { \
-    if ((REGNUM) < XFP_REGNUM) \
-      memcpy ((TO), (FROM), REGISTER_RAW_SIZE (REGNUM)); \
-	else double_to_ieee_extended (&ext_format_m88110, \
-				      (double *)(FROM), (TO)); \
+  double val = extract_floating ((FROM), TYPE_LENGTH (TYPE)); \
+  double_to_ieee_extended (&ext_format_m88110, &val, (TO)); \
 }
 
 /* Return the GDB type object for the "standard" data type

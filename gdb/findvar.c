@@ -168,6 +168,91 @@ store_address (addr, len, val)
   store_unsigned_integer (addr, len, (LONGEST)val);
 }
 
+/* Swap LEN bytes at BUFFER between target and host byte-order.  This is
+   the wrong way to do byte-swapping because it assumes that you have a way
+   to have a host variable of exactly the right size.  Once extract_floating
+   and store_floating have been fixed, this can go away.  */
+#if TARGET_BYTE_ORDER == HOST_BYTE_ORDER
+#define SWAP_TARGET_AND_HOST(buffer,len)
+#else /* Target and host byte order differ.  */
+#define SWAP_TARGET_AND_HOST(buffer,len) \
+  {	       	       	       	       	       	       	       	       	 \
+    char tmp;								 \
+    char *p = (char *)(buffer);						 \
+    char *q = ((char *)(buffer)) + len - 1;		   		 \
+    for (; p < q; p++, q--)				 		 \
+      {									 \
+        tmp = *q;							 \
+        *q = *p;							 \
+        *p = tmp;							 \
+      }									 \
+  }
+#endif /* Target and host byte order differ.  */
+
+/* There are many problems with floating point cross-debugging.
+
+   1.  These routines only handle byte-swapping, not conversion of
+   formats.  So if host is IEEE floating and target is VAX floating,
+   or vice-versa, it loses.  This means that we can't (yet) use these
+   routines for extendeds.  Extendeds are handled by
+   REGISTER_CONVERTIBLE.  What we want is a fixed version of
+   ieee-float.c (the current version can't deal with single or double,
+   and I suspect it is probably broken for some extendeds too).
+
+   2.  We can't deal with it if there is more than one floating point
+   format in use.  This has to be fixed at the unpack_double level.
+
+   3.  We probably should have a LONGEST_DOUBLE or DOUBLEST or whatever
+   we want to call it which is long double where available.  */
+
+double
+extract_floating (addr, len)
+     PTR addr;
+     int len;
+{
+  if (len == sizeof (float))
+    {
+      float retval;
+      memcpy (&retval, addr, sizeof (retval));
+      SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
+      return retval;
+    }
+  else if (len == sizeof (double))
+    {
+      double retval;
+      memcpy (&retval, addr, sizeof (retval));
+      SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
+      return retval;
+    }
+  else
+    {
+      error ("Can't deal with a floating point number of %d bytes.", len);
+    }
+}
+
+void
+store_floating (addr, len, val)
+     PTR addr;
+     int len;
+     double val;
+{
+  if (len == sizeof (float))
+    {
+      float floatval = val;
+      SWAP_TARGET_AND_HOST (&floatval, sizeof (floatval));
+      memcpy (addr, &floatval, sizeof (floatval));
+    }
+  else if (len == sizeof (double))
+    {
+      SWAP_TARGET_AND_HOST (&val, sizeof (val));
+      memcpy (addr, &val, sizeof (val));
+    }
+  else
+    {
+      error ("Can't deal with a floating point number of %d bytes.", len);
+    }
+}
+
 #if !defined (GET_SAVED_REGISTER)
 
 /* Return the address in which frame FRAME's value of register REGNUM
@@ -340,16 +425,25 @@ value_of_register (regnum)
   int optim;
   register value val;
   char raw_buffer[MAX_REGISTER_RAW_SIZE];
-  char virtual_buffer[MAX_REGISTER_VIRTUAL_SIZE];
   enum lval_type lval;
 
   get_saved_register (raw_buffer, &optim, &addr,
 		      selected_frame, regnum, &lval);
 
-  REGISTER_CONVERT_TO_VIRTUAL (regnum, raw_buffer, virtual_buffer);
   val = allocate_value (REGISTER_VIRTUAL_TYPE (regnum));
-  memcpy (VALUE_CONTENTS_RAW (val), virtual_buffer,
-	  REGISTER_VIRTUAL_SIZE (regnum));
+
+  /* Convert raw data to virtual format if necessary.  */
+
+#ifdef REGISTER_CONVERTIBLE
+  if (REGISTER_CONVERTIBLE (regnum))
+    {
+      REGISTER_CONVERT_TO_VIRTUAL (regnum, REGISTER_VIRTUAL_TYPE (regnum),
+				   raw_buffer, VALUE_CONTENTS_RAW (val));
+    }
+  else
+#endif
+    memcpy (VALUE_CONTENTS_RAW (val), raw_buffer,
+	    REGISTER_RAW_SIZE (regnum));
   VALUE_LVAL (val) = lval;
   VALUE_ADDRESS (val) = addr;
   VALUE_REGNO (val) = regnum;
@@ -710,7 +804,6 @@ value_from_register (type, regnum, frame)
      FRAME frame;
 {
   char raw_buffer [MAX_REGISTER_RAW_SIZE];
-  char virtual_buffer[MAX_REGISTER_VIRTUAL_SIZE];
   CORE_ADDR addr;
   int optim;
   value v = allocate_value (type);
@@ -879,36 +972,17 @@ value_from_register (type, regnum, frame)
   VALUE_OPTIMIZED_OUT (v) = optim;
   VALUE_LVAL (v) = lval;
   VALUE_ADDRESS (v) = addr;
+
+  /* Convert raw data to virtual format if necessary.  */
   
-  /* Convert the raw contents to virtual contents.
-     (Just copy them if the formats are the same.)  */
-  
-  REGISTER_CONVERT_TO_VIRTUAL (regnum, raw_buffer, virtual_buffer);
-  
+#ifdef REGISTER_CONVERTIBLE
   if (REGISTER_CONVERTIBLE (regnum))
     {
-      /* When the raw and virtual formats differ, the virtual format
-	 corresponds to a specific data type.  If we want that type,
-	 copy the data into the value.
-	 Otherwise, do a type-conversion.  */
-      
-      if (type != REGISTER_VIRTUAL_TYPE (regnum))
-	{
-	  /* eg a variable of type `float' in a 68881 register
-	     with raw type `extended' and virtual type `double'.
-	     Fetch it as a `double' and then convert to `float'.  */
-	  /* FIXME: This value will be not_lval, which means we can't assign
-	     to it.  Probably the right fix is to do the cast on a temporary
-	     value, and just copy the VALUE_CONTENTS over.  */
-	  v = allocate_value (REGISTER_VIRTUAL_TYPE (regnum));
-	  memcpy (VALUE_CONTENTS_RAW (v), virtual_buffer,
-		  REGISTER_VIRTUAL_SIZE (regnum));
-	  v = value_cast (type, v);
-	}
-      else
-	memcpy (VALUE_CONTENTS_RAW (v), virtual_buffer, len);
+      REGISTER_CONVERT_TO_VIRTUAL (regnum, type,
+				   raw_buffer, VALUE_CONTENTS_RAW (v));
     }
   else
+#endif
     {
       /* Raw and virtual formats are the same for this register.  */
 
@@ -920,7 +994,7 @@ value_from_register (type, regnum, frame)
 	}
 #endif
 
-      memcpy (VALUE_CONTENTS_RAW (v), virtual_buffer + VALUE_OFFSET (v), len);
+      memcpy (VALUE_CONTENTS_RAW (v), raw_buffer + VALUE_OFFSET (v), len);
     }
   
   return v;

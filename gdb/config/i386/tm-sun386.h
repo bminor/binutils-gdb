@@ -167,27 +167,26 @@ i386_skip_prologue PARAMS ((int));
 
 #define REGISTER_CONVERTIBLE(N) (((unsigned)((N) - FP0_REGNUM)) < 8)
 
-/* Convert data from raw format for register REGNUM
-   to virtual format for register REGNUM.  */
+/* Convert data from raw format for register REGNUM in buffer FROM
+   to virtual format with type TYPE in buffer TO.  */
 
-#define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,FROM,TO) 	\
-{ if ((REGNUM) >= FP0_REGNUM && (REGNUM) < FPC_REGNUM)	\
-    i387_to_double ((FROM), (TO));			\
-  else							\
-    memcpy ((TO), (FROM), 4); }
-
+#define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,TYPE,FROM,TO) \
+{ \
+  double val; \
+  i387_to_double ((FROM), (char *)&val); \
+  store_floating ((TO), TYPE_LENGTH (TYPE), val); \
+}
 extern void
 i387_to_double PARAMS ((char *, char *));
 
-/* Convert data from virtual format for register REGNUM
-   to raw format for register REGNUM.  */
+/* Convert data from virtual format with type TYPE in buffer FROM
+   to raw format for register REGNUM in buffer TO.  */
 
-#define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO) 	\
-{ if ((REGNUM) >= FP0_REGNUM && (REGNUM) < FPC_REGNUM)	\
-    double_to_i387 ((FROM), (TO));	\
-  else					\
-    memcpy ((TO), (FROM), 4); }
-
+#define REGISTER_CONVERT_TO_RAW(TYPE,REGNUM,FROM,TO) \
+{ \
+  double val = extract_floating ((FROM), TYPE_LENGTH (TYPE)); \
+  double_to_i387((char *)&val, (TO)))
+}
 extern void
 double_to_i387 PARAMS ((char *, char *));
 

@@ -882,6 +882,73 @@ alpha_in_lenient_prologue (startaddr, pc)
   return pc >= startaddr && pc < end_prologue;
 }
 
+/* The alpha needs a conversion between register and memory format if
+   the register is a floating point register and
+      memory format is float, as the register format must be double
+   or
+      memory format is an integer with 4 bytes or less, as the representation
+      of integers in floating point registers is different. */
+void
+alpha_register_convert_to_virtual (regnum, valtype, raw_buffer, virtual_buffer)
+    int regnum;
+    struct type *valtype;
+    char *raw_buffer;
+    char *virtual_buffer;
+{
+  if (TYPE_LENGTH (valtype) >= REGISTER_RAW_SIZE (regnum))
+    {
+      memcpy (virtual_buffer, raw_buffer, REGISTER_VIRTUAL_SIZE (regnum));
+      return;
+    }
+
+  if (TYPE_CODE (valtype) == TYPE_CODE_FLT)
+    {
+      double d = extract_floating (raw_buffer, REGISTER_RAW_SIZE (regnum));
+      store_floating (virtual_buffer, TYPE_LENGTH (valtype), d);
+    }
+  else if (TYPE_CODE (valtype) == TYPE_CODE_INT && TYPE_LENGTH (valtype) <= 4)
+    {
+      unsigned LONGEST l;
+      l = extract_unsigned_integer (raw_buffer, REGISTER_RAW_SIZE (regnum));
+      l = ((l >> 32) & 0xc0000000) | ((l >> 29) & 0x3fffffff);
+      store_unsigned_integer (virtual_buffer, TYPE_LENGTH (valtype), l);
+    }
+  else
+    error ("Cannot retrieve value from floating point register");
+}
+
+void
+alpha_register_convert_to_raw (valtype, regnum, virtual_buffer, raw_buffer)
+    struct type *valtype;
+    int regnum;
+    char *virtual_buffer;
+    char *raw_buffer;
+{
+  if (TYPE_LENGTH (valtype) >= REGISTER_RAW_SIZE (regnum))
+    {
+      memcpy (raw_buffer, virtual_buffer, REGISTER_RAW_SIZE (regnum));
+      return;
+    }
+
+  if (TYPE_CODE (valtype) == TYPE_CODE_FLT)
+    {
+      double d = extract_floating (virtual_buffer, TYPE_LENGTH (valtype));
+      store_floating (raw_buffer, REGISTER_RAW_SIZE (regnum), d);
+    }
+  else if (TYPE_CODE (valtype) == TYPE_CODE_INT && TYPE_LENGTH (valtype) <= 4)
+    {
+      unsigned LONGEST l;
+      if (TYPE_UNSIGNED (valtype))
+	l = extract_unsigned_integer (virtual_buffer, TYPE_LENGTH (valtype));
+      else
+	l = extract_signed_integer (virtual_buffer, TYPE_LENGTH (valtype));
+      l = ((l & 0xc0000000) << 32) | ((l & 0x3fffffff) << 29);
+      store_unsigned_integer (raw_buffer, REGISTER_RAW_SIZE (regnum), l);
+    }
+  else
+    error ("Cannot store value in floating point register");
+}
+
 /* Given a return value in `regbuf' with a type `valtype', 
    extract and copy its value into `valbuf'.  */
 void

@@ -1,3 +1,38 @@
+Tue Nov  2 13:42:30 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* findvar.c (value_of_register, value_from_register),
+	hppa-tdep.c (pa_print_fp_reg), infcmd.c (do_registers_info),
+	valops.c (value_assign):   Use REGISTER_CONVERT_TO_* only if
+	REGISTER_CONVERTIBLE is defined, otherwise just copy the content.
+	Pass desired type to REGISTER_CONVERT_TO_*.
+
+	* config/m68k/tm-m68k.h, config/i960/tm-i960.h (REGISTER_CONVERT_*):
+	Pass length of desired type to store/extract_floating.
+	* config/i386/tm-arm.h, config/i386/tm-i386aix.h, 
+	config/i386/tm-sun386.h, config/i386/tm-symmetry.h, 
+	config/m88k/tm-m88k.h config/rs6000/tm-rs6000.h (REGISTER_CONVERT_*):
+	Use extract_floating and store_floating with length of desired type.
+	* config/m68k/tm-news.h (STORE,EXTRACT_RETURN_VALUE):  Add type
+	parameter to REGISTER_CONVERT_*.
+
+	* config/a29k/tm-a29k.h, config/convex/tm-convex.h,
+	config/gould/tm-np1.h, config/gould/tm-pn.h, config/h8300/tm-h8300.h,
+	config/h8500/tm-h8500.h, config/i386/tm-i386v.h,
+	config/mips/tm-mips.h, config/ns32k/tm-merlin.h,
+	config/ns32k/tm-umax.h, config/pa/tm-hppa.h, config/pyr/tm-pyr.h,
+	config/sh/tm-sh.h, config/sparc/tm-sparc.h, config/tahoe/tm-tahoe.h,
+	config/vax/tm-vax.h, config/z8k/tm-z8k.h (REGISTER_CONVERTIBLE,
+	REGISTER_CONVERT_TO_RAW, REGISTER_CONVERT_TO_VIRTUAL):  Remove
+	versions for which REGISTER_CONVERTIBLE is always false.
+	* z8k-tdep.c (register_convert_to_virtual, register_convert_to_raw):
+	Remove, no longer used.
+
+	* alpha-tdep.c (alpha_register_convert_to_raw,
+	alpha_register_convert_to_virtual):  New routines to handle
+	the different raw formats in alpha floating point registers.
+	* config/alpha/tm-alpha.h (REGISTER_CONVERTIBLE,
+	REGISTER_CONVERT_TO_VIRTUAL, REGISTER_CONVERT_TO_RAW):  Use them.
+
 Mon Nov  1 09:40:21 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* symtab.c, symtab.h, source.c: Change find_line_pc_range to take

@@ -238,23 +238,6 @@ extern CORE_ADDR sparc_pc_adjust();
 
 #define MAX_REGISTER_VIRTUAL_SIZE 8
 
-/* Nonzero if register N requires conversion
-   from raw format to virtual format.  */
-
-#define REGISTER_CONVERTIBLE(N) (0)
-
-/* Convert data from raw format for register REGNUM
-   to virtual format for register REGNUM.  */
-
-#define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,FROM,TO) \
-{ memcpy ((TO), (FROM), REGISTER_RAW_SIZE (REGNUM)); }
-
-/* Convert data from virtual format for register REGNUM
-   to raw format for register REGNUM.  */
-
-#define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO)	\
-{ memcpy ((TO), (FROM), REGISTER_RAW_SIZE (REGNUM)); }
-
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
 

@@ -1097,9 +1097,20 @@ pa_print_fp_reg (i)
   unsigned char virtual_buffer[MAX_REGISTER_VIRTUAL_SIZE];
   REGISTER_TYPE val;
 
-  /* Get the data in raw format, then convert also to virtual format.  */
+  /* Get the data in raw format.  */
   read_relative_register_raw_bytes (i, raw_buffer);
-  REGISTER_CONVERT_TO_VIRTUAL (i, raw_buffer, virtual_buffer);
+
+  /* Convert raw data to virtual format if necessary.  */
+#ifdef REGISTER_CONVERTIBLE
+  if (REGISTER_CONVERTIBLE (i))
+    {
+      REGISTER_CONVERT_TO_VIRTUAL (i, REGISTER_VIRTUAL_TYPE (i),
+				   raw_buffer, virtual_buffer);
+    }
+  else
+#endif
+    memcpy (virtual_buffer, raw_buffer,
+	    REGISTER_VIRTUAL_SIZE (i));
 
   fputs_filtered (reg_names[i], gdb_stdout);
   print_spaces_filtered (15 - strlen (reg_names[i]), gdb_stdout);

@@ -385,28 +385,6 @@ print_register_hook (regno)
 }
 
 void
-register_convert_to_virtual (regnum, from, to)
-     unsigned char *from;
-     unsigned char *to;
-{
-  to[0] = from[0];
-  to[1] = from[1];
-  to[2] = from[2];
-  to[3] = from[3];
-}
-
-void
-register_convert_to_raw (regnum, to, from)
-     char *to;
-     char *from;
-{
-  to[0] = from[0];
-  to[1] = from[1];
-  to[2] = from[2];
-  to[3] = from[3];
-}
-
-void
 z8k_pop_frame ()
 {
 }

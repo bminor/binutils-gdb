@@ -286,7 +286,6 @@ value_assign (toval, fromval)
   register struct type *type = VALUE_TYPE (toval);
   register value val;
   char raw_buffer[MAX_REGISTER_RAW_SIZE];
-  char virtual_buffer[MAX_REGISTER_VIRTUAL_SIZE];
   int use_buffer = 0;
 
   COERCE_ARRAY (fromval);
@@ -300,17 +299,19 @@ value_assign (toval, fromval)
      convert FROMVAL's contents now, with result in `raw_buffer',
      and set USE_BUFFER to the number of bytes to write.  */
 
+#ifdef REGISTER_CONVERTIBLE
   if (VALUE_REGNO (toval) >= 0
       && REGISTER_CONVERTIBLE (VALUE_REGNO (toval)))
     {
       int regno = VALUE_REGNO (toval);
-      if (VALUE_TYPE (fromval) != REGISTER_VIRTUAL_TYPE (regno))
-	fromval = value_cast (REGISTER_VIRTUAL_TYPE (regno), fromval);
-      memcpy (virtual_buffer, VALUE_CONTENTS (fromval),
-	     REGISTER_VIRTUAL_SIZE (regno));
-      REGISTER_CONVERT_TO_RAW (regno, virtual_buffer, raw_buffer);
-      use_buffer = REGISTER_RAW_SIZE (regno);
+      if (REGISTER_CONVERTIBLE (regno))
+	{
+	  REGISTER_CONVERT_TO_RAW (VALUE_TYPE (fromval), regno,
+				   VALUE_CONTENTS (fromval), raw_buffer);
+	  use_buffer = REGISTER_RAW_SIZE (regno);
+	}
     }
+#endif
 
   switch (VALUE_LVAL (toval))
     {
@@ -336,10 +337,10 @@ value_assign (toval, fromval)
 		     + VALUE_BITSIZE (toval)
 		     + HOST_CHAR_BIT - 1)
 		    / HOST_CHAR_BIT;
-	  /* If bigger than a LONGEST, we don't handle it correctly,
-	     but at least avoid corrupting memory.  */
+
 	  if (len > sizeof (LONGEST))
-	    len = sizeof (LONGEST);
+	    error ("Can't handle bitfields which don't fit in a %d bit word.",
+		   sizeof (LONGEST) * HOST_CHAR_BIT);
 
 	  read_memory (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
 		       buffer, len);
@@ -359,8 +360,20 @@ value_assign (toval, fromval)
     case lval_register:
       if (VALUE_BITSIZE (toval))
 	{
-	  char buffer[MAX_REGISTER_RAW_SIZE];
+	  char buffer[sizeof (LONGEST)];
           int len = REGISTER_RAW_SIZE (VALUE_REGNO (toval));
+
+	  if (len > sizeof (LONGEST))
+	    error ("Can't handle bitfields in registers larger than %d bits.",
+		   sizeof (LONGEST) * HOST_CHAR_BIT);
+
+	  if (VALUE_BITPOS (toval) + VALUE_BITSIZE (toval)
+	      > len * HOST_CHAR_BIT)
+	    /* Getting this right would involve being very careful about
+	       byte order.  */
+	    error ("\
+Can't handle bitfield which doesn't fit in a single register.");
+
           read_register_bytes (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
                                buffer, len);
           modify_field (buffer, value_as_long (fromval),
@@ -485,9 +498,6 @@ value_assign (toval, fromval)
       type = VALUE_TYPE (fromval);
     }
 
-  /* FIXME: This loses if fromval is a different size than toval, for
-     example because fromval got cast in the REGISTER_CONVERTIBLE case
-     above.  */
   val = allocate_value (type);
   memcpy (val, toval, VALUE_CONTENTS_RAW (val) - (char *) val);
   memcpy (VALUE_CONTENTS_RAW (val), VALUE_CONTENTS (fromval),
