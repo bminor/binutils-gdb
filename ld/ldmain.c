@@ -1,5 +1,5 @@
 /* Main program of GNU linker.
-   Copyright (C) 1991, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
+   Copyright (C) 1991, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
    Written by Steve Chamberlain steve@cygnus.com
 
 This file is part of GLD, the Gnu Linker.
@@ -45,6 +45,12 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #endif
 
 #include <string.h>
+
+#ifdef HAVE_SBRK
+#ifdef NEED_DECLARATION_SBRK
+extern PTR sbrk ();
+#endif
+#endif
 
 static char *get_emulation PARAMS ((int, char **));
 static void set_scripts_dir PARAMS ((void));
@@ -183,8 +189,6 @@ main (argc, argv)
   link_info.traditional_format = false;
   link_info.strip = strip_none;
   link_info.discard = discard_none;
-  link_info.lprefix_len = 1;
-  link_info.lprefix = "L";
   link_info.keep_memory = true;
   link_info.input_bfds = NULL;
   link_info.create_object_symbols_section = NULL;
@@ -427,7 +431,7 @@ get_emulation (argc, argv)
   char *emulation;
   int i;
 
-  emulation = (char *) getenv (EMULATION_ENVIRON);
+  emulation = getenv (EMULATION_ENVIRON);
   if (emulation == NULL)
     emulation = DEFAULT_EMULATION;
 
@@ -450,7 +454,8 @@ get_emulation (argc, argv)
 	    }
 	  else if (strcmp (argv[i], "-mips1") == 0
 		   || strcmp (argv[i], "-mips2") == 0
-		   || strcmp (argv[i], "-mips3") == 0)
+		   || strcmp (argv[i], "-mips3") == 0
+		   || strcmp (argv[i], "-mips4") == 0)
 	    {
 	      /* FIXME: The arguments -mips1, -mips2 and -mips3 are
 		 passed to the linker by some MIPS compilers.  They
