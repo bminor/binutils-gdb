@@ -1,3 +1,17 @@
+Wed Jul  6 00:48:57 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* dbxread.c, elfread.c, mipsread.c, nlmread.c, os9kread.c:
+	Move "no debugging symbols found" test to symfile.c.
+	* symfile.c (syms_from_objfile, reread_symbols):  Add
+	"no debugging symbols found" test.
+	* coffread.c (init_stringtab):  Handle stripped files with a
+	stringtab offset of zero gracefully.
+	* osfsolib.c (solib_create_inferior_hook):  Use DYNAMIC flag from
+	BFD instead of stop_pc heuristic to determine if it is a dynamically
+	linked object file.
+	* procfs.c (wait_fd):  Handle ENOENT error return from PIOCWSTOP
+	ioctl, it indicates that the process has exited.
+
 Mon Jul  4 19:28:56 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* hppa-tdep.c (read_unwind_info): ELF unwind information is in the

@@ -1,5 +1,5 @@
 /* Handle OSF/1 shared libraries for GDB, the GNU Debugger.
-   Copyright 1993 Free Software Foundation, Inc.
+   Copyright 1993, 1994 Free Software Foundation, Inc.
    
 This file is part of GDB.
 
@@ -732,7 +732,9 @@ solib_create_inferior_hook()
 
   /* Nothing to do for statically bound executables.  */
 
-  if (symfile_objfile == 0 || symfile_objfile->ei.entry_file_lowpc == stop_pc)
+  if (symfile_objfile == NULL
+      || symfile_objfile->obfd == NULL
+      || ((bfd_get_file_flags (symfile_objfile->obfd) & DYNAMIC) == 0))
     return;
 
   /* Now run the target.  It will eventually get a SIGTRAP, at
@@ -754,8 +756,8 @@ solib_create_inferior_hook()
       But we are stopped in the runtime loader and we do not have symbols
       for the runtime loader. So heuristic_proc_start will be called
       and will put out an annoying warning.
-      Resetting stop_soon_quietly after symbol loading suppresses
-      the warning.  */
+      Delaying the resetting of stop_soon_quietly until after symbol loading
+      suppresses the warning.  */
   solib_add ((char *) 0, 0, (struct target_ops *) 0);
   stop_soon_quietly = 0;
 }

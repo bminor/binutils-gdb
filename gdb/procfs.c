@@ -1,5 +1,5 @@
 /* Machine independent support for SVR4 /proc (process file system) for GDB.
-   Copyright 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support.
 
 This file is part of GDB.
@@ -582,7 +582,13 @@ wait_fd ()
 
   while (ioctl (pi->fd, PIOCWSTOP, &pi->prstatus) < 0)
     {
-      if (errno != EINTR)
+      if (errno == ENOENT)
+	{
+	  /* Process exited.  */
+	  pi->prstatus.pr_flags = 0;
+	  break;
+	}
+      else if (errno != EINTR)
 	{
 	  print_sys_errmsg (pi->pathname, errno);
 	  error ("PIOCWSTOP failed");

@@ -236,13 +236,6 @@ nlm_symfile_read (objfile, section_offsets, mainline)
   /* FIXME:  We could locate and read the optional native debugging format
      here and add the symbols to the minimal symbol table. */
 
-  if (!have_partial_symbols ())
-    {
-      wrap_here ("");
-      printf_filtered ("(no debugging symbols found)...");
-      wrap_here ("");
-    }
-
   /* Install any minimal symbols that have been collected as the current
      minimal symbols for this objfile. */
 

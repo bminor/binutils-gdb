@@ -1,5 +1,5 @@
 /* C language support routines for GDB, the GNU debugger.
-   Copyright 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 1994 Free Software Foundation, Inc.
 
 This file is part of GDB.
 

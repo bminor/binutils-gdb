@@ -611,13 +611,6 @@ elf_symfile_read (objfile, section_offsets, mainline)
 				  section_offsets);
     }
 
-  if (!have_partial_symbols ())
-    {
-      wrap_here ("");
-      printf_filtered ("(no debugging symbols found)...");
-      wrap_here ("");
-    }
-
   /* Install any minimal symbols that have been collected as the current
      minimal symbols for this objfile. */
 

@@ -1,5 +1,5 @@
 /* Read os9/os9k symbol tables and convert to internal format, for GDB.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -354,12 +354,6 @@ os9k_symfile_read (objfile, section_offsets, mainline)
   read_os9k_psymtab (section_offsets, objfile,
 		   bfd_section_vma  (sym_bfd, DBX_TEXT_SECT (objfile)),
 		   bfd_section_size (sym_bfd, DBX_TEXT_SECT (objfile)));
-
-  if (!have_partial_symbols ()) {
-    wrap_here ("");
-    printf_filtered ("(no debugging symbols found)...");
-    wrap_here ("");
-  }
 
   do_cleanups (back_to);
 }
