@@ -1,5 +1,11 @@
 Thu Aug 26 17:50:28 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.t20/classes.exp: For "ptype class Base1", continue to accept
+	old form.
+
+	* gdb.t22/virtfunc.exp: If it prints `struct' (not `class') with a
+	name (e.g. devo gdb with gcc 2.4.5), it is still a pass.
+
 	* gdb.t10/crossload.exp: Skip whole file (for now, until we fix it).
 
 	* config/unix-gdb.exp: Remove this version of gdb_exit
