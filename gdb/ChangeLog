@@ -1,3 +1,45 @@
+2003-12-22  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc-tdep.h (struct sparc_frame_cache): Rename from `struct
+	sparc32_frame_cache'.
+	(sparc_analyze_prologue, sparc_frame_cache): New prototypes.
+	(sparc32_frame_cache): Adjust prototype.
+	* sparc-tdep.c (sparc_alloc_frame_cache): Rename from
+	sparc32_alloc_frame_cache.  Use `struct sparc_frame_cache' instead
+	of `struct sparc32_frame_cache'.
+	(sparc_analyze_prologue): Rename from sparc32_analyze_prologue.
+	Use `struct sparc_frame_cache' instead of `struct
+	sparc32_frame_cache'.
+	(sparc32_skip_prologue): Use `struct sparc_frame_cache' instead of
+	`struct sparc32_frame_cache'.  Call sparc_analyze_prologue instead
+	of sparc32_analyze_prologue.
+	(sparc_frame_cache): New function with generic code from...
+	(sparc32_frame_cache): ...here.
+	(sparc32_frame_this_id, sparc32_frame_prev_register)
+	(sparc32_frame_base_address): Use `struct sparc_frame_cache'
+	instead of `struct sparc32_frame_cache'.
+	* sparc-sol2-tdep.c (sparc32_sol2_sigtramp_frame_cache)
+	(sparc32_sol2_sigtramp_frame_this_id)
+	(sparc32_sol2_sigtramp_frame_prev_register): Change return type to
+	`struct sparc_frame_cache *'.
+	* sparc-linux-tdep.c (sparc32_linux_sigtramp_frame_cache)
+	(sparc32_linux_sigtramp_frame_this_id)
+	(sparc32_linux_sigtramp_frame_prev_register): Change return type
+	to `struct sparc_frame_cache *'.
+	* sparc64-tdep.c (X_OP, X_RD, X_A, X_COND, X_OP2, X_IMM22, X_OP3)
+	(X_I, X_DISP22, X_DISP19): Remove macros.
+	(struct sparc64_frame_cache): Remove.
+	(sparc64_alloc_frame_cache, sparc64_analyze_prologue): Remove
+	functions.
+	(sparc64_skip_prologue): Use `struct sparc_frame_cache' instead of
+	`struct sparc64_frame_cache.  Call sparc_analyze_prologue instead
+	of sparc64_analuze_prologue.
+	(sparc64_frame_this_id, sparc64_frame_prev_register,
+	sparc64_frame_base_address): Use `struct sparc_frame_cache'
+	instead of `struct sparc64_frame_cache.
+	(sparc64_frame_cache): Change return type to `struct
+	sparc_frame_cache *'.  Simply call sparc_frame_cache.
+
 2003-12-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc-tdep.c (sparc32_frame_cache): Use

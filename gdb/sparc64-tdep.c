@@ -495,91 +495,6 @@ sparc64_pseudo_register_write (struct gdbarch *gdbarch,
 }
 
 
-struct sparc64_frame_cache
-{
-  /* Base address.  */
-  CORE_ADDR base;
-  CORE_ADDR pc;
-
-  /* Do we have a frame?  */
-  int frameless_p;
-};
-
-/* Allocate and initialize a frame cache.  */
-
-static struct sparc64_frame_cache *
-sparc64_alloc_frame_cache (void)
-{
-  struct sparc64_frame_cache *cache;
-  int i;
-
-  cache = FRAME_OBSTACK_ZALLOC (struct sparc64_frame_cache);
-
-  /* Base address.  */
-  cache->base = 0;
-  cache->pc = 0;
-
-  /* Frameless until proven otherwise.  */
-  cache->frameless_p = 1;
-
-  return cache;
-}
-
-static CORE_ADDR
-sparc64_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
-			  struct sparc64_frame_cache *cache)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-  unsigned long insn;
-  int offset = 0;
-  int dest = -1;
-
-  if (current_pc <= pc)
-    return current_pc;
-
-  /* We have to handle to "Procedure Linkage Table" (PLT) special.  On
-     SPARC the linker usually defines a symbol (typically
-     _PROCEDURE_LINKAGE_TABLE_) at the start of the .plt section.
-     This symbol makes us end up here with PC pointing at the start of
-     the PLT and CURRENT_PC probably pointing at a PLT entry.  If we
-     would do our normal prologue analysis, we would probably conclude
-     that we've got a frame when in reality we don't, since the
-     dynamic linker patches up the first PLT with some code that
-     starts with a SAVE instruction.  Patch up PC such that it points
-     at the start of our PLT entry.  */
-  if (tdep->plt_entry_size > 0 && in_plt_section (current_pc, NULL))
-    pc = current_pc - ((current_pc - pc) % tdep->plt_entry_size);
-
-  insn = sparc_fetch_instruction (pc);
-
-  /* Recognize a SETHI insn and record its destination.  */
-  if (X_OP (insn) == 0 && X_OP2 (insn) == 0x04)
-    {
-      dest = X_RD (insn);
-      offset += 4;
-
-      insn = sparc_fetch_instruction (pc + 4);
-    }
-
-  /* Allow for an arithmetic operation on DEST or %g1.  */
-  if (X_OP (insn) == 2 && X_I (insn)
-      && (X_RD (insn) == 1 || X_RD (insn) == dest))
-    {
-      offset += 4;
-
-      insn = sparc_fetch_instruction (pc + 8);
-    }
-
-  /* Check for the SAVE instruction that sets up the frame.  */
-  if (X_OP (insn) == 2 && X_OP3 (insn) == 0x3c)
-    {
-      cache->frameless_p = 0;
-      return pc + offset + 4;
-    }
-
-  return pc;
-}
-
 /* Return PC of first real instruction of the function starting at
    START_PC.  */
 
@@ -588,7 +503,7 @@ sparc64_skip_prologue (CORE_ADDR start_pc)
 {
   struct symtab_and_line sal;
   CORE_ADDR func_start, func_end;
-  struct sparc64_frame_cache cache;
+  struct sparc_frame_cache cache;
 
   /* This is the preferred method, find the end of the prologue by
      using the debugging information.  */
@@ -601,53 +516,22 @@ sparc64_skip_prologue (CORE_ADDR start_pc)
 	return sal.end;
     }
 
-  return sparc64_analyze_prologue (start_pc, 0xffffffffffffffffUL, &cache);
+  return sparc_analyze_prologue (start_pc, 0xffffffffffffffffUL, &cache);
 }
 
 /* Normal frames.  */
 
-static struct sparc64_frame_cache *
+static struct sparc_frame_cache *
 sparc64_frame_cache (struct frame_info *next_frame, void **this_cache)
 {
-  struct sparc64_frame_cache *cache;
-
-  if (*this_cache)
-    return *this_cache;
-
-  cache = sparc64_alloc_frame_cache ();
-  *this_cache = cache;
-
-  /* In priciple, for normal frames, %fp (%i6) holds the frame
-     pointer, which holds the base address for the current stack
-     frame.  */
-
-  cache->base = frame_unwind_register_unsigned (next_frame, SPARC_FP_REGNUM);
-  if (cache->base == 0)
-    return cache;
-
-  cache->pc = frame_func_unwind (next_frame);
-  if (cache->pc != 0)
-    {
-      CORE_ADDR addr_in_block = frame_unwind_address_in_block (next_frame);
-      sparc64_analyze_prologue (cache->pc, addr_in_block, cache);
-    }
-
-  if (cache->frameless_p)
-    {
-      /* We didn't find a valid frame, which means that CACHE->base
-	 currently holds the frame pointer for our calling frame.  */
-      cache->base = frame_unwind_register_unsigned (next_frame,
-						    SPARC_SP_REGNUM);
-    }
-
-  return cache;
+  return sparc_frame_cache (next_frame, this_cache);
 }
 
 static void
 sparc64_frame_this_id (struct frame_info *next_frame, void **this_cache,
 		       struct frame_id *this_id)
 {
-  struct sparc64_frame_cache *cache =
+  struct sparc_frame_cache *cache =
     sparc64_frame_cache (next_frame, this_cache);
 
   /* This marks the outermost frame.  */
@@ -663,7 +547,7 @@ sparc64_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 			     enum lval_type *lvalp, CORE_ADDR *addrp,
 			     int *realnump, void *valuep)
 {
-  struct sparc64_frame_cache *cache =
+  struct sparc_frame_cache *cache =
     sparc64_frame_cache (next_frame, this_cache);
 
   if (regnum == SPARC64_PC_REGNUM || regnum == SPARC64_NPC_REGNUM)
@@ -729,7 +613,7 @@ sparc64_frame_sniffer (struct frame_info *next_frame)
 static CORE_ADDR
 sparc64_frame_base_address (struct frame_info *next_frame, void **this_cache)
 {
-  struct sparc64_frame_cache *cache =
+  struct sparc_frame_cache *cache =
     sparc64_frame_cache (next_frame, this_cache);
 
   /* ??? Should we take BIAS into account here?  */

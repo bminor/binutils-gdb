@@ -149,11 +149,11 @@ sparc32_linux_pc_in_sigtramp (CORE_ADDR pc, char *name)
 	  || strcmp ("__restore_rt", name) == 0);
 }
 
-static struct sparc32_frame_cache *
+static struct sparc_frame_cache *
 sparc32_linux_sigtramp_frame_cache (struct frame_info *next_frame,
 				    void **this_cache)
 {
-  struct sparc32_frame_cache *cache;
+  struct sparc_frame_cache *cache;
   CORE_ADDR sigcontext_addr, addr;
   int regnum;
 
@@ -208,7 +208,7 @@ sparc32_linux_sigtramp_frame_this_id (struct frame_info *next_frame,
 				      void **this_cache,
 				      struct frame_id *this_id)
 {
-  struct sparc32_frame_cache *cache =
+  struct sparc_frame_cache *cache =
     sparc32_linux_sigtramp_frame_cache (next_frame, this_cache);
 
   (*this_id) = frame_id_build (cache->base, cache->pc);
@@ -222,7 +222,7 @@ sparc32_linux_sigtramp_frame_prev_register (struct frame_info *next_frame,
 					    CORE_ADDR *addrp,
 					    int *realnump, void *valuep)
 {
-  struct sparc32_frame_cache *cache =
+  struct sparc_frame_cache *cache =
     sparc32_linux_sigtramp_frame_cache (next_frame, this_cache);
 
   trad_frame_prev_register (next_frame, cache->saved_regs, regnum,

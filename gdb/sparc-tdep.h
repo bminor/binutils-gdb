@@ -120,7 +120,7 @@ enum sparc32_regnum
 };
 
 
-struct sparc32_frame_cache
+struct sparc_frame_cache
 {
   /* Base address.  */
   CORE_ADDR base;
@@ -136,7 +136,13 @@ struct sparc32_frame_cache
   struct trad_frame_saved_reg *saved_regs;
 };
 
-extern struct sparc32_frame_cache *
+extern CORE_ADDR sparc_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
+					 struct sparc_frame_cache *cache);
+
+extern struct sparc_frame_cache *
+  sparc_frame_cache (struct frame_info *next_frame, void **this_cache);
+
+extern struct sparc_frame_cache *
   sparc32_frame_cache (struct frame_info *next_frame, void **this_cache);
 
 

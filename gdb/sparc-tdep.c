@@ -437,13 +437,13 @@ sparc_breakpoint_from_pc (CORE_ADDR *pc, int *len)
 
 /* Allocate and initialize a frame cache.  */
 
-static struct sparc32_frame_cache *
-sparc32_alloc_frame_cache (void)
+static struct sparc_frame_cache *
+sparc_alloc_frame_cache (void)
 {
-  struct sparc32_frame_cache *cache;
+  struct sparc_frame_cache *cache;
   int i;
 
-  cache = FRAME_OBSTACK_ZALLOC (struct sparc32_frame_cache);
+  cache = FRAME_OBSTACK_ZALLOC (struct sparc_frame_cache);
 
   /* Base address.  */
   cache->base = 0;
@@ -457,9 +457,9 @@ sparc32_alloc_frame_cache (void)
   return cache;
 }
 
-static CORE_ADDR
-sparc32_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
-			  struct sparc32_frame_cache *cache)
+CORE_ADDR
+sparc_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
+			struct sparc_frame_cache *cache)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   unsigned long insn;
@@ -527,7 +527,7 @@ sparc32_skip_prologue (CORE_ADDR start_pc)
 {
   struct symtab_and_line sal;
   CORE_ADDR func_start, func_end;
-  struct sparc32_frame_cache cache;
+  struct sparc_frame_cache cache;
 
   /* This is the preferred method, find the end of the prologue by
      using the debugging information.  */
@@ -540,21 +540,20 @@ sparc32_skip_prologue (CORE_ADDR start_pc)
 	return sal.end;
     }
 
-  return sparc32_analyze_prologue (start_pc, 0xffffffffUL, &cache);
+  return sparc_analyze_prologue (start_pc, 0xffffffffUL, &cache);
 }
 
 /* Normal frames.  */
 
-struct sparc32_frame_cache *
-sparc32_frame_cache (struct frame_info *next_frame, void **this_cache)
+struct sparc_frame_cache *
+sparc_frame_cache (struct frame_info *next_frame, void **this_cache)
 {
-  struct sparc32_frame_cache *cache;
-  struct symbol *sym;
+  struct sparc_frame_cache *cache;
 
   if (*this_cache)
     return *this_cache;
 
-  cache = sparc32_alloc_frame_cache ();
+  cache = sparc_alloc_frame_cache ();
   *this_cache = cache;
 
   /* In priciple, for normal frames, %fp (%i6) holds the frame
@@ -569,7 +568,7 @@ sparc32_frame_cache (struct frame_info *next_frame, void **this_cache)
   if (cache->pc != 0)
     {
       CORE_ADDR addr_in_block = frame_unwind_address_in_block (next_frame);
-      sparc32_analyze_prologue (cache->pc, addr_in_block, cache);
+      sparc_analyze_prologue (cache->pc, addr_in_block, cache);
     }
 
   if (cache->frameless_p)
@@ -579,6 +578,20 @@ sparc32_frame_cache (struct frame_info *next_frame, void **this_cache)
       cache->base = frame_unwind_register_unsigned (next_frame,
 						    SPARC_SP_REGNUM);
     }
+
+  return cache;
+}
+
+struct sparc_frame_cache *
+sparc32_frame_cache (struct frame_info *next_frame, void **this_cache)
+{
+  struct sparc_frame_cache *cache;
+  struct symbol *sym;
+
+  if (*this_cache)
+    return *this_cache;
+
+  cache = sparc_frame_cache (next_frame, this_cache);
 
   sym = find_pc_function (cache->pc);
   if (sym)
@@ -602,7 +615,7 @@ static void
 sparc32_frame_this_id (struct frame_info *next_frame, void **this_cache,
 		       struct frame_id *this_id)
 {
-  struct sparc32_frame_cache *cache =
+  struct sparc_frame_cache *cache =
     sparc32_frame_cache (next_frame, this_cache);
 
   /* This marks the outermost frame.  */
@@ -618,7 +631,7 @@ sparc32_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 			     enum lval_type *lvalp, CORE_ADDR *addrp,
 			     int *realnump, void *valuep)
 {
-  struct sparc32_frame_cache *cache =
+  struct sparc_frame_cache *cache =
     sparc32_frame_cache (next_frame, this_cache);
 
   if (regnum == SPARC32_PC_REGNUM || regnum == SPARC32_NPC_REGNUM)
@@ -690,7 +703,7 @@ sparc32_frame_sniffer (struct frame_info *next_frame)
 static CORE_ADDR
 sparc32_frame_base_address (struct frame_info *next_frame, void **this_cache)
 {
-  struct sparc32_frame_cache *cache =
+  struct sparc_frame_cache *cache =
     sparc32_frame_cache (next_frame, this_cache);
 
   return cache->base;
