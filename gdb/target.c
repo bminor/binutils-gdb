@@ -995,7 +995,7 @@ xfer_using_stratum (enum target_object object, const char *annex,
    deal with partial reads should call target_read_memory_partial. */
 
 int
-target_read_memory (CORE_ADDR memaddr, char *myaddr, int len)
+target_read_memory (CORE_ADDR memaddr, bfd_byte *myaddr, int len)
 {
   if (target_xfer_partial_p ())
     return xfer_using_stratum (TARGET_OBJECT_MEMORY, NULL,
@@ -1005,13 +1005,15 @@ target_read_memory (CORE_ADDR memaddr, char *myaddr, int len)
 }
 
 int
-target_write_memory (CORE_ADDR memaddr, char *myaddr, int len)
+target_write_memory (CORE_ADDR memaddr, const bfd_byte *myaddr, int len)
 {
+  bfd_byte *bytes = alloca (len);
+  memcpy (bytes, myaddr, len);
   if (target_xfer_partial_p ())
     return xfer_using_stratum (TARGET_OBJECT_MEMORY, NULL,
-			       memaddr, len, NULL, myaddr);
+			       memaddr, len, NULL, bytes);
   else
-    return target_xfer_memory (memaddr, myaddr, len, 1);
+    return target_xfer_memory (memaddr, bytes, len, 1);
 }
 
 #ifndef target_stopped_data_address_p

@@ -1,5 +1,18 @@
 2005-01-27  Andrew Cagney  <cagney@gnu.org>
 
+	* corefile.c (write_memory): Update, make a copy of the read-only
+	buffer.
+	* target.c (target_read_memory): Update.
+	(target_write_memory): Update, make a copy of the read-only
+	buffer.
+	* gdbcore.h (write_memory): Change buffer type to bfd_byte, make
+	const.
+	* target.h (target_read_memory, target_write_memory): Change
+	buffer type to bfd_byte; for write_memory, make it const.
+	* symfile-mem.c (do_target_read_memory): New function.
+	(symbol_file_add_from_memory): Pass do_target_read_memory to
+	bfd_elf_bfd_from_remote_memory.
+
 	* value.h: Indent using gdb_indent.sh.
 
 	* configure: Regenerate to track ../gettext.m4 change.

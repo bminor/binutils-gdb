@@ -58,6 +58,15 @@
 #include "elf/common.h"
 
 
+/* FIXME: cagney/2005-01-27: Should be a function with the signature:
+   int (void *object, const bfd_byte *myaddr, int len).  */
+
+static int
+do_target_read_memory (bfd_vma vma, char *myaddr, int len)
+{
+  return target_read_memory (vma, myaddr, len);
+}
+
 /* Read inferior memory at ADDR to find the header of a loaded object file
    and read its in-core symbols out of inferior memory.  TEMPL is a bfd
    representing the target's format.  NAME is the name to use for this
@@ -78,7 +87,7 @@ symbol_file_add_from_memory (struct bfd *templ, CORE_ADDR addr, char *name,
     error ("add-symbol-file-from-memory not supported for this target");
 
   nbfd = bfd_elf_bfd_from_remote_memory (templ, addr, &loadbase,
-					 target_read_memory);
+					 do_target_read_memory);
   if (nbfd == NULL)
     error ("Failed to read a valid object file image from memory.");
 

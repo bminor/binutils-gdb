@@ -537,9 +537,10 @@ extern int do_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 
 extern int target_read_string (CORE_ADDR, char **, int, int *);
 
-extern int target_read_memory (CORE_ADDR memaddr, char *myaddr, int len);
+extern int target_read_memory (CORE_ADDR memaddr, bfd_byte *myaddr, int len);
 
-extern int target_write_memory (CORE_ADDR memaddr, char *myaddr, int len);
+extern int target_write_memory (CORE_ADDR memaddr, const bfd_byte *myaddr,
+				int len);
 
 extern int xfer_memory (CORE_ADDR, char *, int, int,
 			struct mem_attrib *, struct target_ops *);
