@@ -37,7 +37,7 @@ Introduction
 ************
 
 This brief manual contains documentation for the GNU binary utilities
-(collectively version 2.14.92):
+(collectively version 2.15):
 
    This document is distributed under the terms of the GNU Free
 Documentation License.  A copy of the license is included in the
@@ -3555,30 +3555,30 @@ Index
 
 Tag Table:
 Node: Top1675
-Node: ar3160
-Node: ar cmdline5334
-Node: ar scripts13469
-Node: nm19149
-Node: objcopy26800
-Node: objdump48204
-Node: ranlib62062
-Node: size62813
-Node: strings65676
-Node: strip68022
-Node: c++filt73228
-Ref: c++filt-Footnote-176539
-Node: addr2line76645
-Node: nlmconv79239
-Node: windres81839
-Node: dlltool87566
-Node: readelf97263
-Node: Selecting The Target System101629
-Node: Target Selection102548
-Node: Architecture Selection104520
-Node: Reporting Bugs105338
-Node: Bug Criteria106111
-Node: Bug Reporting106654
-Node: GNU Free Documentation License113738
-Node: Index133441
+Node: ar3157
+Node: ar cmdline5331
+Node: ar scripts13466
+Node: nm19146
+Node: objcopy26797
+Node: objdump48201
+Node: ranlib62059
+Node: size62810
+Node: strings65673
+Node: strip68019
+Node: c++filt73225
+Ref: c++filt-Footnote-176536
+Node: addr2line76642
+Node: nlmconv79236
+Node: windres81836
+Node: dlltool87563
+Node: readelf97260
+Node: Selecting The Target System101626
+Node: Target Selection102545
+Node: Architecture Selection104517
+Node: Reporting Bugs105335
+Node: Bug Criteria106108
+Node: Bug Reporting106651
+Node: GNU Free Documentation License113735
+Node: Index133438
 
 End Tag Table
