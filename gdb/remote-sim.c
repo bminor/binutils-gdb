@@ -217,10 +217,11 @@ gdbsim_open (args, from_tty)
 {
   if (sr_get_debug ())
     printf_filtered ("gdbsim_open: args \"%s\"\n", args ? args : "(null)");
-  sim_open (args);
 
   sim_set_callbacks (&default_callback);
   default_callback.init (&default_callback);
+
+  sim_open (args);
 
   push_target (&gdbsim_ops);
   target_fetch_registers (-1);
