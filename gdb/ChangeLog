@@ -1,3 +1,15 @@
+Tue Feb 24 03:32:59 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote-sim.c (gdbsim_fetch_register): Don't abort when the
+ 	register size is wrong.
+
+start-sanitize-r5900
+Tue Feb 24 02:53:41 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/mips/tm-r5900.h (REGISTER_VIRTUAL_SIZE,
+ 	REGISTE_RAW_SIZE): Re-define.
+
+end-sanitize-r5900
 Thu Feb 19 16:49:48 1998 John Metzler  <jmetzler@cygnus.com>
 
 	* target.c - tracing 64 bit targets crashed long long printfs

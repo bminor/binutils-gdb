@@ -339,6 +339,7 @@ static void
 gdbsim_fetch_register (regno)
      int regno;
 {
+  static int warn_user = 1;
   if (regno == -1) 
     {
       for (regno = 0; regno < NUM_REGS; regno++)
@@ -351,8 +352,14 @@ gdbsim_fetch_register (regno)
       if (nr_bytes == 0)
 	/* register not applicable, supply zero's */
 	memset (buf, 0, MAX_REGISTER_RAW_SIZE);
-      else if (nr_bytes > 0 && nr_bytes != REGISTER_RAW_SIZE (regno))
-	fatal ("Register size different to expected");
+      else if (nr_bytes > 0 && nr_bytes != REGISTER_RAW_SIZE (regno)
+	       && warn_user)
+	{
+	  printf_unfiltered ("Size of register %s (%d) incorrect (%d instead of %d))",
+			     reg_names [regno], regno,
+			     nr_bytes, REGISTER_RAW_SIZE (regno));
+	  warn_user = 0;
+	}
       supply_register (regno, buf);
       if (sr_get_debug ())
 	{
