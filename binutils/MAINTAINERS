@@ -70,6 +70,7 @@ responsibility among the other maintainers.
   FR30		   Dave Brolley <brolley@redhat.com>
   FRV		   Dave Brolley <brolley@redhat.com>
   FRV		   Alexandre Oliva <aoliva@redhat.com>
+  H8300		   Anil Paranjpe <anilp1@kpitcummins.com> 
   HPPA		   Dave Anglin <dave.anglin@nrc.ca>
   HPPA elf32	   Alan Modra <amodra@bigpond.net.au>
   HPPA elf64	   Jeff Law <law@redhat.com> [Basic maintainance only]

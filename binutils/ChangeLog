@@ -1,3 +1,7 @@
+2005-03-29  Anil Paranjpe  <anilp1@kpitcummins.com>
+
+	* MAINTAINERS: Add myself as H8300 maintainer.
+
 2005-03-28  Aaron W. LaFramboise  <aaron98wiridge9@aaronwl.com>
 
 	* objdump.c (disassemble_bytes): Remove cast.
