@@ -1,3 +1,8 @@
+2003-12-07  Richard Sandiford  <rsandifo@redhat.com>
+
+	* elf32-mips.c, elfn32-mips.c, elf64-mips.c: Convert prototypes.
+	Remove casts that were only needed for K&R compatibility.
+
 2003-12-05  Dmitry Semyonov  <Dmitry.Semyonov@oktet.ru>
 
 	* coff-arm.c (aoutarm_std_reloc_howto [ARM_WINCE]): Set

@@ -48,48 +48,47 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "ecoffswap.h"
 
 static bfd_reloc_status_type mips_elf_generic_reloc
-  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+  (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static bfd_reloc_status_type mips_elf_hi16_reloc
-  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+  (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static bfd_reloc_status_type mips_elf_lo16_reloc
-  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+  (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static bfd_reloc_status_type mips_elf_got16_reloc
-  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+  (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static bfd_reloc_status_type gprel32_with_gp
-  PARAMS ((bfd *, asymbol *, arelent *, asection *, bfd_boolean, PTR,
-	   bfd_vma));
+  (bfd *, asymbol *, arelent *, asection *, bfd_boolean, void *, bfd_vma);
 static bfd_reloc_status_type mips_elf_gprel32_reloc
-  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+  (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static bfd_reloc_status_type mips32_64bit_reloc
-  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+  (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static reloc_howto_type *bfd_elf32_bfd_reloc_type_lookup
-  PARAMS ((bfd *, bfd_reloc_code_real_type));
+  (bfd *, bfd_reloc_code_real_type);
 static reloc_howto_type *mips_elf32_rtype_to_howto
-  PARAMS ((unsigned int, bfd_boolean));
+  (unsigned int, bfd_boolean);
 static void mips_info_to_howto_rel
-  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
+  (bfd *, arelent *, Elf_Internal_Rela *);
 static void mips_info_to_howto_rela
-  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
+  (bfd *, arelent *, Elf_Internal_Rela *);
 static bfd_boolean mips_elf_sym_is_global
-  PARAMS ((bfd *, asymbol *));
+  (bfd *, asymbol *);
 static bfd_boolean mips_elf32_object_p
-  PARAMS ((bfd *));
+  (bfd *);
 static bfd_boolean mips_elf_is_local_label_name
-  PARAMS ((bfd *, const char *));
+  (bfd *, const char *);
 static bfd_reloc_status_type mips16_jump_reloc
-  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+  (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static bfd_reloc_status_type mips16_gprel_reloc
-  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+  (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static bfd_reloc_status_type mips_elf_final_gp
-  PARAMS ((bfd *, asymbol *, bfd_boolean, char **, bfd_vma *));
+  (bfd *, asymbol *, bfd_boolean, char **, bfd_vma *);
 static bfd_boolean mips_elf_assign_gp
-  PARAMS ((bfd *, bfd_vma *));
+  (bfd *, bfd_vma *);
 static bfd_boolean elf32_mips_grok_prstatus
-  PARAMS ((bfd *, Elf_Internal_Note *));
+  (bfd *, Elf_Internal_Note *);
 static bfd_boolean elf32_mips_grok_psinfo
-  PARAMS ((bfd *, Elf_Internal_Note *));
+  (bfd *, Elf_Internal_Note *);
 static irix_compat_t elf32_mips_irix_compat
-  PARAMS ((bfd *));
+  (bfd *);
 
 extern const bfd_target bfd_elf32_bigmips_vec;
 extern const bfd_target bfd_elf32_littlemips_vec;
@@ -724,19 +723,14 @@ static reloc_howto_type elf_mips_gnu_vtentry_howto =
 /* We use this instead of bfd_elf_generic_reloc because the latter
    gets the handling of zero addends wrong. */
 static bfd_reloc_status_type
-mips_elf_generic_reloc (abfd, reloc_entry, symbol, data, input_section,
-			output_bfd, error_message)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data ATTRIBUTE_UNUSED;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message ATTRIBUTE_UNUSED;
+mips_elf_generic_reloc (bfd *abfd ATTRIBUTE_UNUSED, arelent *reloc_entry,
+			asymbol *symbol, void *data ATTRIBUTE_UNUSED,
+			asection *input_section, bfd *output_bfd,
+			char **error_message ATTRIBUTE_UNUSED)
 {
   /* If we're relocating, and this is an external symbol, we don't want
      to change anything.  */
-  if (output_bfd != (bfd *) NULL
+  if (output_bfd != NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
       && (symbol->flags & BSF_LOCAL) != 0)
     {
@@ -775,15 +769,9 @@ struct mips_hi16
 static struct mips_hi16 *mips_hi16_list;
 
 static bfd_reloc_status_type
-mips_elf_hi16_reloc (abfd, reloc_entry, symbol, data, input_section,
-		     output_bfd, error_message)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message;
+mips_elf_hi16_reloc (bfd *abfd ATTRIBUTE_UNUSED, arelent *reloc_entry,
+		     asymbol *symbol, void *data, asection *input_section,
+		     bfd *output_bfd, char **error_message)
 {
   bfd_reloc_status_type ret;
   bfd_vma relocation;
@@ -791,7 +779,7 @@ mips_elf_hi16_reloc (abfd, reloc_entry, symbol, data, input_section,
 
   /* If we're relocating, and this is an external symbol, we don't want
      to change anything.  */
-  if (output_bfd != (bfd *) NULL
+  if (output_bfd != NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
       && (symbol->flags & BSF_LOCAL) != 0)
     {
@@ -826,8 +814,7 @@ mips_elf_hi16_reloc (abfd, reloc_entry, symbol, data, input_section,
     }
   else
     {
-      if (bfd_is_und_section (symbol->section)
-	  && output_bfd == (bfd *) NULL)
+      if (bfd_is_und_section (symbol->section) && output_bfd == NULL)
 	ret = bfd_reloc_undefined;
 
       if (bfd_is_com_section (symbol->section))
@@ -844,7 +831,7 @@ mips_elf_hi16_reloc (abfd, reloc_entry, symbol, data, input_section,
     return bfd_reloc_outofrange;
 
   /* Save the information, and let LO16 do the actual relocation.  */
-  n = (struct mips_hi16 *) bfd_malloc ((bfd_size_type) sizeof *n);
+  n = bfd_malloc (sizeof *n);
   if (n == NULL)
     return bfd_reloc_outofrange;
   n->addr = (bfd_byte *) data + reloc_entry->address;
@@ -852,7 +839,7 @@ mips_elf_hi16_reloc (abfd, reloc_entry, symbol, data, input_section,
   n->next = mips_hi16_list;
   mips_hi16_list = n;
 
-  if (output_bfd != (bfd *) NULL)
+  if (output_bfd != NULL)
     reloc_entry->address += input_section->output_offset;
 
   return ret;
@@ -863,15 +850,9 @@ mips_elf_hi16_reloc (abfd, reloc_entry, symbol, data, input_section,
    R_MIPS_HI16 relocation described above.  */
 
 static bfd_reloc_status_type
-mips_elf_lo16_reloc (abfd, reloc_entry, symbol, data, input_section,
-		     output_bfd, error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message;
+mips_elf_lo16_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
+		     void *data, asection *input_section, bfd *output_bfd,
+		     char **error_message)
 {
   arelent gp_disp_relent;
 
@@ -921,7 +902,7 @@ mips_elf_lo16_reloc (abfd, reloc_entry, symbol, data, input_section,
 
 	      insn &= ~ (bfd_vma) 0xffff;
 	      insn |= val;
-	      bfd_put_32 (abfd, (bfd_vma) insn, l->addr);
+	      bfd_put_32 (abfd, insn, l->addr);
 	    }
 
 	  next = l->next;
@@ -975,19 +956,13 @@ mips_elf_lo16_reloc (abfd, reloc_entry, symbol, data, input_section,
    not yet know how to create global offset tables.  */
 
 static bfd_reloc_status_type
-mips_elf_got16_reloc (abfd, reloc_entry, symbol, data, input_section,
-		      output_bfd, error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message;
+mips_elf_got16_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
+		      void *data, asection *input_section, bfd *output_bfd,
+		      char **error_message)
 {
   /* If we're relocating, and this is an external symbol, we don't want
      to change anything.  */
-  if (output_bfd != (bfd *) NULL
+  if (output_bfd != NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
       && (symbol->flags & BSF_LOCAL) != 0)
     {
@@ -1003,9 +978,7 @@ mips_elf_got16_reloc (abfd, reloc_entry, symbol, data, input_section,
    dangerous relocation.  */
 
 static bfd_boolean
-mips_elf_assign_gp (output_bfd, pgp)
-     bfd *output_bfd;
-     bfd_vma *pgp;
+mips_elf_assign_gp (bfd *output_bfd, bfd_vma *pgp)
 {
   unsigned int count;
   asymbol **sym;
@@ -1021,7 +994,7 @@ mips_elf_assign_gp (output_bfd, pgp)
 
   /* The linker script will have created a symbol named `_gp' with the
      appropriate value.  */
-  if (sym == (asymbol **) NULL)
+  if (sym == NULL)
     i = count;
   else
     {
@@ -1057,12 +1030,8 @@ mips_elf_assign_gp (output_bfd, pgp)
    external symbol if we are producing relocatable output.  */
 
 static bfd_reloc_status_type
-mips_elf_final_gp (output_bfd, symbol, relocatable, error_message, pgp)
-     bfd *output_bfd;
-     asymbol *symbol;
-     bfd_boolean relocatable;
-     char **error_message;
-     bfd_vma *pgp;
+mips_elf_final_gp (bfd *output_bfd, asymbol *symbol, bfd_boolean relocatable,
+		   char **error_message, bfd_vma *pgp)
 {
   if (bfd_is_und_section (symbol->section)
       && ! relocatable)
@@ -1100,15 +1069,10 @@ mips_elf_final_gp (output_bfd, symbol, relocatable, error_message, pgp)
    merged.  */
 
 bfd_reloc_status_type
-_bfd_mips_elf32_gprel16_reloc (abfd, reloc_entry, symbol, data, input_section,
-			       output_bfd, error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message;
+_bfd_mips_elf32_gprel16_reloc (bfd *abfd, arelent *reloc_entry,
+			       asymbol *symbol, void *data,
+			       asection *input_section, bfd *output_bfd,
+			       char **error_message)
 {
   bfd_boolean relocatable;
   bfd_reloc_status_type ret;
@@ -1116,7 +1080,7 @@ _bfd_mips_elf32_gprel16_reloc (abfd, reloc_entry, symbol, data, input_section,
 
   /* If we're relocating, and this is an external symbol, we don't want
      to change anything.  */
-  if (output_bfd != (bfd *) NULL
+  if (output_bfd != NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
       && (symbol->flags & BSF_LOCAL) != 0)
     {
@@ -1124,7 +1088,7 @@ _bfd_mips_elf32_gprel16_reloc (abfd, reloc_entry, symbol, data, input_section,
       return bfd_reloc_ok;
     }
 
-  if (output_bfd != (bfd *) NULL)
+  if (output_bfd != NULL)
     relocatable = TRUE;
   else
     {
@@ -1146,15 +1110,9 @@ _bfd_mips_elf32_gprel16_reloc (abfd, reloc_entry, symbol, data, input_section,
    become the offset from the gp register.  */
 
 static bfd_reloc_status_type
-mips_elf_gprel32_reloc (abfd, reloc_entry, symbol, data, input_section,
-			output_bfd, error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message;
+mips_elf_gprel32_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
+			void *data, asection *input_section, bfd *output_bfd,
+			char **error_message)
 {
   bfd_boolean relocatable;
   bfd_reloc_status_type ret;
@@ -1162,7 +1120,7 @@ mips_elf_gprel32_reloc (abfd, reloc_entry, symbol, data, input_section,
 
   /* If we're relocating, and this is an external symbol, we don't want
      to change anything.  */
-  if (output_bfd != (bfd *) NULL
+  if (output_bfd != NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
       && (symbol->flags & BSF_LOCAL) != 0)
     {
@@ -1171,7 +1129,7 @@ mips_elf_gprel32_reloc (abfd, reloc_entry, symbol, data, input_section,
       return bfd_reloc_outofrange;
     }
 
-  if (output_bfd != (bfd *) NULL)
+  if (output_bfd != NULL)
     relocatable = TRUE;
   else
     {
@@ -1189,15 +1147,9 @@ mips_elf_gprel32_reloc (abfd, reloc_entry, symbol, data, input_section,
 }
 
 static bfd_reloc_status_type
-gprel32_with_gp (abfd, symbol, reloc_entry, input_section, relocatable, data,
-		 gp)
-     bfd *abfd;
-     asymbol *symbol;
-     arelent *reloc_entry;
-     asection *input_section;
-     bfd_boolean relocatable;
-     PTR data;
-     bfd_vma gp;
+gprel32_with_gp (bfd *abfd, asymbol *symbol, arelent *reloc_entry,
+		 asection *input_section, bfd_boolean relocatable,
+		 void *data, bfd_vma gp)
 {
   bfd_vma relocation;
   bfd_vma val;
@@ -1242,15 +1194,9 @@ gprel32_with_gp (abfd, symbol, reloc_entry, input_section, relocatable, data,
    sign extension.  */
 
 static bfd_reloc_status_type
-mips32_64bit_reloc (abfd, reloc_entry, symbol, data, input_section,
-		    output_bfd, error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message;
+mips32_64bit_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
+		    void *data, asection *input_section, bfd *output_bfd,
+		    char **error_message)
 {
   bfd_reloc_status_type r;
   arelent reloc32;
@@ -1279,7 +1225,7 @@ mips32_64bit_reloc (abfd, reloc_entry, symbol, data, input_section,
   addr = reloc_entry->address;
   if (bfd_little_endian (abfd))
     addr += 4;
-  bfd_put_32 (abfd, (bfd_vma) val, (bfd_byte *) data + addr);
+  bfd_put_32 (abfd, val, (bfd_byte *) data + addr);
 
   return r;
 }
@@ -1287,17 +1233,12 @@ mips32_64bit_reloc (abfd, reloc_entry, symbol, data, input_section,
 /* Handle a mips16 jump.  */
 
 static bfd_reloc_status_type
-mips16_jump_reloc (abfd, reloc_entry, symbol, data, input_section,
-		   output_bfd, error_message)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data ATTRIBUTE_UNUSED;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message ATTRIBUTE_UNUSED;
+mips16_jump_reloc (bfd *abfd ATTRIBUTE_UNUSED, arelent *reloc_entry,
+		   asymbol *symbol, void *data ATTRIBUTE_UNUSED,
+		   asection *input_section, bfd *output_bfd,
+		   char **error_message ATTRIBUTE_UNUSED)
 {
-  if (output_bfd != (bfd *) NULL
+  if (output_bfd != NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
       && reloc_entry->addend == 0)
     {
@@ -1322,15 +1263,9 @@ mips16_jump_reloc (abfd, reloc_entry, symbol, data, input_section,
 /* Handle a mips16 GP relative reloc.  */
 
 static bfd_reloc_status_type
-mips16_gprel_reloc (abfd, reloc_entry, symbol, data, input_section,
-		    output_bfd, error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message;
+mips16_gprel_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
+		    void *data, asection *input_section, bfd *output_bfd,
+		    char **error_message)
 {
   bfd_boolean relocatable;
   bfd_reloc_status_type ret;
@@ -1397,13 +1332,10 @@ mips16_gprel_reloc (abfd, reloc_entry, symbol, data, input_section,
   if (reloc_entry->howto->partial_inplace)
     {
       bfd_put_16 (abfd,
-		  (bfd_vma) ((extend & 0xf800)
-			     | ((val >> 11) & 0x1f)
-			     | (val & 0x7e0)),
+		  (extend & 0xf800) | ((val >> 11) & 0x1f) | (val & 0x7e0),
 		  (bfd_byte *) data + reloc_entry->address);
       bfd_put_16 (abfd,
-		  (bfd_vma) ((insn & 0xffe0)
-			     | (val & 0x1f)),
+		  (insn & 0xffe0) | (val & 0x1f),
 		  (bfd_byte *) data + reloc_entry->address + 2);
     }
   else
@@ -1453,9 +1385,7 @@ static const struct elf_reloc_map mips_reloc_map[] =
 /* Given a BFD reloc type, return a howto structure.  */
 
 static reloc_howto_type *
-bfd_elf32_bfd_reloc_type_lookup (abfd, code)
-     bfd *abfd;
-     bfd_reloc_code_real_type code;
+bfd_elf32_bfd_reloc_type_lookup (bfd *abfd, bfd_reloc_code_real_type code)
 {
   unsigned int i;
   reloc_howto_type *howto_table = elf_mips_howto_table_rel;
@@ -1507,9 +1437,8 @@ bfd_elf32_bfd_reloc_type_lookup (abfd, code)
 /* Given a MIPS Elf_Internal_Rel, fill in an arelent structure.  */
 
 static reloc_howto_type *
-mips_elf32_rtype_to_howto (r_type, rela_p)
-     unsigned int r_type;
-     bfd_boolean rela_p ATTRIBUTE_UNUSED;
+mips_elf32_rtype_to_howto (unsigned int r_type,
+			   bfd_boolean rela_p ATTRIBUTE_UNUSED)
 {
   switch (r_type)
     {
@@ -1540,10 +1469,7 @@ mips_elf32_rtype_to_howto (r_type, rela_p)
 /* Given a MIPS Elf_Internal_Rel, fill in an arelent structure.  */
 
 static void
-mips_info_to_howto_rel (abfd, cache_ptr, dst)
-     bfd *abfd;
-     arelent *cache_ptr;
-     Elf_Internal_Rela *dst;
+mips_info_to_howto_rel (bfd *abfd, arelent *cache_ptr, Elf_Internal_Rela *dst)
 {
   unsigned int r_type;
 
@@ -1563,10 +1489,7 @@ mips_info_to_howto_rel (abfd, cache_ptr, dst)
 /* Given a MIPS Elf_Internal_Rela, fill in an arelent structure.  */
 
 static void
-mips_info_to_howto_rela (abfd, cache_ptr, dst)
-     bfd *abfd;
-     arelent *cache_ptr;
-     Elf_Internal_Rela *dst;
+mips_info_to_howto_rela (bfd *abfd, arelent *cache_ptr, Elf_Internal_Rela *dst)
 {
   mips_info_to_howto_rel (abfd, cache_ptr, dst);
 
@@ -1581,9 +1504,7 @@ mips_info_to_howto_rela (abfd, cache_ptr, dst)
    and externally visible symbols.  */
 
 static bfd_boolean
-mips_elf_sym_is_global (abfd, sym)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     asymbol *sym;
+mips_elf_sym_is_global (bfd *abfd ATTRIBUTE_UNUSED, asymbol *sym)
 {
   if (SGI_COMPAT (abfd))
     return (sym->flags & BSF_SECTION_SYM) == 0;
@@ -1596,8 +1517,7 @@ mips_elf_sym_is_global (abfd, sym)
 /* Set the right machine number for a MIPS ELF file.  */
 
 static bfd_boolean
-mips_elf32_object_p (abfd)
-     bfd *abfd;
+mips_elf32_object_p (bfd *abfd)
 {
   unsigned long mach;
 
@@ -1619,9 +1539,7 @@ mips_elf32_object_p (abfd)
 /* MIPS ELF local labels start with '$', not 'L'.  */
 
 static bfd_boolean
-mips_elf_is_local_label_name (abfd, name)
-     bfd *abfd;
-     const char *name;
+mips_elf_is_local_label_name (bfd *abfd, const char *name)
 {
   if (name[0] == '$')
     return TRUE;
@@ -1633,9 +1551,7 @@ mips_elf_is_local_label_name (abfd, name)
 
 /* Support for core dump NOTE sections.  */
 static bfd_boolean
-elf32_mips_grok_prstatus (abfd, note)
-     bfd *abfd;
-     Elf_Internal_Note *note;
+elf32_mips_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 {
   int offset;
   unsigned int raw_size;
@@ -1665,9 +1581,7 @@ elf32_mips_grok_prstatus (abfd, note)
 }
 
 static bfd_boolean
-elf32_mips_grok_psinfo (abfd, note)
-     bfd *abfd;
-     Elf_Internal_Note *note;
+elf32_mips_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 {
   switch (note->descsz)
     {
@@ -1699,8 +1613,7 @@ elf32_mips_grok_psinfo (abfd, note)
 /* Depending on the target vector we generate some version of Irix
    executables or "normal" MIPS ELF ABI executables.  */
 static irix_compat_t
-elf32_mips_irix_compat (abfd)
-     bfd *abfd;
+elf32_mips_irix_compat (bfd *abfd)
 {
   if ((abfd->xvec == &bfd_elf32_bigmips_vec)
       || (abfd->xvec == &bfd_elf32_littlemips_vec))
@@ -1717,12 +1630,9 @@ elf32_mips_irix_compat (abfd)
    objects, and before the final_link entry point is called.  */
 
 bfd_boolean
-bfd_mips_elf32_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
-     bfd *abfd;
-     struct bfd_link_info *info;
-     asection *datasec;
-     asection *relsec;
-     char **errmsg;
+bfd_mips_elf32_create_embedded_relocs (bfd *abfd, struct bfd_link_info *info,
+				       asection *datasec, asection *relsec,
+				       char **errmsg)
 {
   Elf_Internal_Shdr *symtab_hdr;
   Elf_Internal_Sym *isymbuf = NULL;
@@ -1752,13 +1662,12 @@ bfd_mips_elf32_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
     }
 
   /* Get a copy of the native relocations.  */
-  internal_relocs = (_bfd_elf_link_read_relocs
-		     (abfd, datasec, (PTR) NULL, (Elf_Internal_Rela *) NULL,
-		      info->keep_memory));
+  internal_relocs = _bfd_elf_link_read_relocs (abfd, datasec, NULL, NULL,
+					       info->keep_memory);
   if (internal_relocs == NULL)
     goto error_return;
 
-  relsec->contents = (bfd_byte *) bfd_alloc (abfd, datasec->reloc_count * 12);
+  relsec->contents = bfd_alloc (abfd, datasec->reloc_count * 12);
   if (relsec->contents == NULL)
     goto error_return;
 
