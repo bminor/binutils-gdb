@@ -1,3 +1,9 @@
+2003-02-04  Andrew Cagney  <ac131313@redhat.com>
+
+	From Keith Seitz <keiths@redhat.com>:
+	* gdbmi.texinfo (GDB/MI Miscellaneous Commands): Document the
+	interpreter-exec command.
+
 2003-02-02  Andrew Cagney  <ac131313@redhat.com>
 
 	From 2002-11-10 Jason Molenda (jason-cl@molenda.com):
