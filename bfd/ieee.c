@@ -1,16 +1,26 @@
-/*
-   
- bfd backend for ieee objects.
+/* bfd backend for ieee-695 objects.
 
+   IEEE 695 format is a stream of records, which we parse using a simple one
+   token (which is one byte in this lexicon) lookahead recursive decent
+   parser.  */
 
+/* Copyright (C) 1990, 1991 Free Software Foundation, Inc.
 
- IEEE 695 format is a stream of records, which we parse using a simple one
- token (which is one byte in this lexicon) lookahead recursive decent
- parser.
+This file is part of BFD, the Binary File Diddler.
 
+BFD is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
 
- */
+BFD is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
+You should have received a copy of the GNU General Public License
+along with BFD; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "sysdep.h"
 #include "bfd.h"
@@ -830,7 +840,7 @@ DEFUN(ieee_archive_p,(abfd),
   /* This must be an IEEE archive, so we'll buy some space to do
      things */
   ar = (ieee_ar_data_type *) malloc(sizeof(ieee_ar_data_type));
-  ieee_ar_data(abfd) = ar;
+  set_tdata (abfd, ar);
   ar->element_count = 0;
   ar->element_index = 0;
   obstack_init(&ar->element_obstack);
@@ -883,10 +893,10 @@ DEFUN(ieee_mkobject,(abfd),
 {
   struct obstack tmp_obstack;
   ieee_data_type *ieee;
+
   obstack_init(&tmp_obstack);
   BFD_ASSERT(ieee_data(abfd) == 0);
-  ieee_data(abfd) =
-    (ieee_data_type*)obstack_alloc(&tmp_obstack,sizeof(ieee_data_type));
+  set_tdata (abfd, obstack_alloc(&tmp_obstack,sizeof(ieee_data_type)));
   ieee = ieee_data(abfd);
   ieee->ieee_obstack = tmp_obstack;
   return true;
@@ -901,7 +911,7 @@ DEFUN(ieee_object_p,(abfd),
   ieee_data_type *ieee;
   char buffer[300];
 
-  ieee_data(abfd) = 0;
+  set_tdata (abfd, 0);
   ieee_mkobject(abfd);
   ieee = ieee_data(abfd);
   
