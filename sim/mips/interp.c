@@ -289,9 +289,9 @@ Re-compile simulator with \"-DTRACE\" to enable this option.\n");
     case OPTION_GS_ENABLE:
       /* Enable GS libraries.  */
       if ( arg && strcmp (arg, "on") == 0 )
-        gif_options (&gif_full,GIF_OPT_GS_ENABLE,1,0,0);
+        gif_options (&GIF_full,GIF_OPT_GS_ENABLE,1,0,0);
       else if ( arg && strcmp (arg, "off") == 0 )
-        gif_options (&gif_full,GIF_OPT_GS_ENABLE,0,0,0);
+        gif_options (&GIF_full,GIF_OPT_GS_ENABLE,0,0,0);
       else
         {
           fprintf (stderr, "Unrecognized enable-gs option `%s'\n", arg);
@@ -312,7 +312,7 @@ Re-compile simulator with \"-DTRACE\" to enable this option.\n");
              ( sscanf (arg,"%lx%c%Lx%c%lx%c%Lx", &address[0],&c[0],&value[0],
                       &c[1],&address[1],&c[2],&value[1]) == 7 ))
           {
-            gif_options (&gif_full, ( opt == OPTION_GS_REFRESH1 ) ?
+            gif_options (&GIF_full, ( opt == OPTION_GS_REFRESH1 ) ?
                          GIF_OPT_GS_REFRESH1:GIF_OPT_GS_REFRESH2,
                          0,&address[0],&value[0]);
           }
