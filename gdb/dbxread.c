@@ -138,6 +138,12 @@ static unsigned string_table_offset;
    offset for the current and next .o files. */
 static unsigned int file_string_table_offset;
 static unsigned int next_file_string_table_offset;
+
+/* .o and NLM files contain unrelocated addresses which are based at 0.  When
+   non-zero, this flag disables some of the special cases for Solaris elf+stab
+   text addresses at location 0. */
+
+static int symfile_relocatable = 0;
 
 /* This is the lowest text address we have yet encountered.  */
 static CORE_ADDR lowest_text_address;
@@ -407,20 +413,37 @@ record_minimal_symbol (name, address, type, objfile)
      struct objfile *objfile;
 {
   enum minimal_symbol_type ms_type;
+  int section;
 
   switch (type)
     {
-    case N_TEXT | N_EXT:  ms_type = mst_text; break;
-    case N_DATA | N_EXT:  ms_type = mst_data; break;
-    case N_BSS | N_EXT:   ms_type = mst_bss;  break;
-    case N_ABS | N_EXT:   ms_type = mst_abs;  break;
+    case N_TEXT | N_EXT:
+      ms_type = mst_text;
+      section = SECT_OFF_TEXT;
+      break;
+    case N_DATA | N_EXT:
+      ms_type = mst_data;
+      section = SECT_OFF_DATA;
+      break;
+    case N_BSS | N_EXT:
+      ms_type = mst_bss;
+      section = SECT_OFF_BSS;
+      break;
+    case N_ABS | N_EXT:
+      ms_type = mst_abs;
+      section = -1;
+      break;
 #ifdef N_SETV
-    case N_SETV | N_EXT:  ms_type = mst_data; break;
+    case N_SETV | N_EXT:
+      ms_type = mst_data;
+      section = SECT_OFF_DATA;
+      break;
     case N_SETV:
       /* I don't think this type actually exists; since a N_SETV is the result
 	 of going over many .o files, it doesn't make sense to have one
 	 file local.  */
       ms_type = mst_file_data;
+      section = SECT_OFF_DATA;
       break;
 #endif
     case N_TEXT:
@@ -428,8 +451,8 @@ record_minimal_symbol (name, address, type, objfile)
     case N_FN:
     case N_FN_SEQ:
       ms_type = mst_file_text;
+      section = SECT_OFF_TEXT;
       break;
-
     case N_DATA:
       ms_type = mst_file_data;
 
@@ -448,23 +471,28 @@ record_minimal_symbol (name, address, type, objfile)
 	if (VTBL_PREFIX_P ((tempstring)))
 	  ms_type = mst_data;
       }
+      section = SECT_OFF_DATA;
       break;
-
     case N_BSS:
       ms_type = mst_file_bss;
+      section = SECT_OFF_BSS;
       break;
-
-    default:      ms_type = mst_unknown; break;
+    default:
+      ms_type = mst_unknown;
+      section = -1;
+      break;
   }
 
   if (ms_type == mst_file_text || ms_type == mst_text
       && address < lowest_text_address)
     lowest_text_address = address;
 
-  prim_record_minimal_symbol
+  prim_record_minimal_symbol_and_info
     (obsavestring (name, strlen (name), &objfile -> symbol_obstack),
      address,
      ms_type,
+     NULL,
+     section,
      objfile);
 }
 
@@ -487,6 +515,18 @@ dbx_symfile_read (objfile, section_offsets, mainline)
   bfd *sym_bfd;
   int val;
   struct cleanup *back_to;
+
+  val = strlen (objfile->name);
+
+  /* .o and .nlm files are relocatables with text, data and bss segs based at
+     0.  This flag disables special (Solaris stabs-in-elf only) fixups for
+     symbols with a value of 0.  XXX - This is a Krock.  Solaris stabs-in-elf
+     should be fixed to determine pst->textlow without using this text seg of
+     0 fixup crap. */
+
+  if (strcmp (&objfile->name[val-2], ".o") == 0
+      || strcmp (&objfile->name[val-4], ".nlm") == 0)
+    symfile_relocatable = 1;
 
   sym_bfd = objfile->obfd;
   val = bfd_seek (objfile->obfd, DBX_SYMTAB_OFFSET (objfile), SEEK_SET);
@@ -1691,7 +1731,8 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
   block_address_function_relative =
     ((0 == strncmp (bfd_get_target (objfile->obfd), "elf", 3))
      || (0 == strncmp (bfd_get_target (objfile->obfd), "som", 3))
-     || (0 == strncmp (bfd_get_target (objfile->obfd), "coff", 4)));
+     || (0 == strncmp (bfd_get_target (objfile->obfd), "coff", 4))
+     || (0 == strncmp (bfd_get_target (objfile->obfd), "nlm", 3)));
 
   if (!block_address_function_relative)
     /* N_LBRAC, N_RBRAC and N_SLINE entries are not relative to the
@@ -1926,21 +1967,30 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 	call level, which we really don't want to do).  */
       {
 	char *p;
-	p = strchr (name, ':');
-	if (p != 0 && p[1] == 'S')
+
+	/* .o files and NLMs have non-zero text seg offsets, but don't need
+	   their static syms offset in this fashion.  XXX - This is really a
+	   crock that should be fixed in the solib handling code so that I
+	   don't have to work around it here. */
+
+	if (!symfile_relocatable)
 	  {
-	    /* The linker relocated it.  We don't want to add an
-	       elfstab_offset_sections-type offset, but we *do* want
-	       to add whatever solib.c passed to symbol_file_add as
-	       addr (this is known to affect SunOS4, and I suspect ELF
-	       too).  Since elfstab_offset_sections currently does not
-	       muck with the text offset (there is no Ttext.text
-	       symbol), we can get addr from the text offset.  If
-	       elfstab_offset_sections ever starts dealing with the
-	       text offset, and we still need to do this, we need to
-	       invent a SECT_OFF_ADDR_KLUDGE or something.  */
-	    valu += ANOFFSET (section_offsets, SECT_OFF_TEXT);
-	    goto define_a_symbol;
+	    p = strchr (name, ':');
+	    if (p != 0 && p[1] == 'S')
+	      {
+		/* The linker relocated it.  We don't want to add an
+		   elfstab_offset_sections-type offset, but we *do* want
+		   to add whatever solib.c passed to symbol_file_add as
+		   addr (this is known to affect SunOS4, and I suspect ELF
+		   too).  Since elfstab_offset_sections currently does not
+		   muck with the text offset (there is no Ttext.text
+		   symbol), we can get addr from the text offset.  If
+		   elfstab_offset_sections ever starts dealing with the
+		   text offset, and we still need to do this, we need to
+		   invent a SECT_OFF_ADDR_KLUDGE or something.  */
+		valu += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+		goto define_a_symbol;
+	      }
 	  }
 	/* Since it's not the kludge case, re-dispatch to the right handler. */
 	switch (type) {
@@ -2284,6 +2334,89 @@ elfstab_build_psymtabs (objfile, section_offsets, mainline,
   /* In an elf file, we've already installed the minimal symbols that came
      from the elf (non-stab) symbol table, so always act like an
      incremental load here. */
+  dbx_symfile_read (objfile, section_offsets, 0);
+}
+
+/* Scan and build partial symbols for a file with special sections for stabs
+   and stabstrings.  The file has already been processed to get its minimal
+   symbols, and any other symbols that might be necessary to resolve GSYMs.
+
+   This routine is the equivalent of dbx_symfile_init and dbx_symfile_read
+   rolled into one.
+
+   OBJFILE is the object file we are reading symbols from.
+   ADDR is the address relative to which the symbols are (e.g. the base address
+	of the text segment).
+   MAINLINE is true if we are reading the main symbol table (as opposed to a
+	    shared lib or dynamically loaded file).
+   STAB_NAME is the name of the section that contains the stabs.
+   STABSTR_NAME is the name of the section that contains the stab strings.
+
+   This routine is mostly copied from dbx_symfile_init and dbx_symfile_read. */
+
+void
+stabsect_build_psymtabs (objfile, section_offsets, mainline, stab_name,
+			 stabstr_name)
+     struct objfile *objfile;
+     struct section_offsets *section_offsets;
+     int mainline;
+     char *stab_name;
+     char *stabstr_name;
+{
+  int val;
+  bfd *sym_bfd = objfile->obfd;
+  char *name = bfd_get_filename (sym_bfd);
+  asection *stabsect;
+  asection *stabstrsect;
+
+  stabsect = bfd_get_section_by_name (sym_bfd, stab_name);
+  stabstrsect = bfd_get_section_by_name (sym_bfd, stabstr_name);
+
+  if (!stabsect)
+    return;
+
+  if (!stabstrsect)
+    error ("stabsect_build_psymtabs:  Found stabs (%s), but not string section (%s)",
+	   stab_name, stabstr_name);
+
+  DBX_SYMFILE_INFO (objfile) = (PTR) xmalloc (sizeof (struct dbx_symfile_info));
+  memset (DBX_SYMFILE_INFO (objfile), 0, sizeof (struct dbx_symfile_info));
+
+  DBX_TEXT_SECT (objfile) = bfd_get_section_by_name (sym_bfd, ".text");
+  if (!DBX_TEXT_SECT (objfile))
+    error ("Can't find .text section in symbol file");
+
+  DBX_SYMBOL_SIZE    (objfile) = sizeof (struct external_nlist);
+  DBX_SYMCOUNT       (objfile) = bfd_section_size (sym_bfd, stabsect)
+    / DBX_SYMBOL_SIZE (objfile);
+  DBX_STRINGTAB_SIZE (objfile) = bfd_section_size (sym_bfd, stabstrsect);
+  DBX_SYMTAB_OFFSET  (objfile) = stabsect->filepos; /* XXX - FIXME: POKING INSIDE BFD DATA STRUCTURES */
+  
+  if (DBX_STRINGTAB_SIZE (objfile) > bfd_get_size (sym_bfd))
+    error ("ridiculous string table size: %d bytes", DBX_STRINGTAB_SIZE (objfile));
+  DBX_STRINGTAB (objfile) = (char *)
+    obstack_alloc (&objfile->psymbol_obstack, DBX_STRINGTAB_SIZE (objfile) + 1);
+
+  /* Now read in the string table in one big gulp.  */
+
+  val = bfd_get_section_contents (sym_bfd, /* bfd */
+				  stabstrsect, /* bfd section */
+				  DBX_STRINGTAB (objfile), /* input buffer */
+				  0, /* offset into section */
+				  DBX_STRINGTAB_SIZE (objfile)); /* amount to read */
+
+  if (!val)
+    perror_with_name (name);
+
+  stabsread_new_init ();
+  buildsym_new_init ();
+  free_header_files ();
+  init_header_files ();
+  install_minimal_symbols (objfile);
+
+  /* Now, do an incremental load */
+
+  processing_acc_compilation = 1;
   dbx_symfile_read (objfile, section_offsets, 0);
 }
 

@@ -500,7 +500,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifdef DBXREAD_ONLY
 	      /* Kludges for ELF/STABS with Sun ACC */
 	      last_function_name = namestring;
-	      if (pst && pst->textlow == 0)
+	      /* Do not fix textlow==0 for .o or NLM files, as 0 is a legit
+		 value for the bottom of the text seg in those cases. */
+	      if (pst && pst->textlow == 0 && !symfile_relocatable)
 		pst->textlow = CUR_SYMBOL_VALUE;
 #if 0
 	      if (startup_file_end == 0)
@@ -522,7 +524,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifdef DBXREAD_ONLY
 	      /* Kludges for ELF/STABS with Sun ACC */
 	      last_function_name = namestring;
-	      if (pst && pst->textlow == 0)
+	      /* Do not fix textlow==0 for .o or NLM files, as 0 is a legit
+		 value for the bottom of the text seg in those cases. */
+	      if (pst && pst->textlow == 0 && !symfile_relocatable)
 		pst->textlow = CUR_SYMBOL_VALUE;
 #if 0
 	      if (startup_file_end == 0)

@@ -144,7 +144,7 @@ nlm_symtab_read (abfd, addr, objfile)
       for (i = 0; i < number_of_symbols; i++)
 	{
 	  sym = symbol_table[i];
-	  if (sym -> flags & BSF_GLOBAL)
+	  if (/*sym -> flags & BSF_GLOBAL*/ 1)
 	    {
 	      /* Bfd symbols are section relative. */
 	      symaddr = sym -> value + sym -> section -> vma;
@@ -226,6 +226,9 @@ nlm_symfile_read (objfile, section_offsets, mainline)
      table. */
 
   nlm_symtab_read (abfd, offset, objfile);
+
+  stabsect_build_psymtabs (objfile, section_offsets, mainline, ".stab",
+			   ".stabstr");
 
   /* FIXME:  We could locate and read the optional native debugging format
      here and add the symbols to the minimal symbol table. */

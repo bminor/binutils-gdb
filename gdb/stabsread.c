@@ -33,6 +33,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symfile.h"
 #include "objfiles.h"
 #include "aout/stab_gnu.h"	/* We always use GNU stabs, not native */
+#include "libaout.h"
+#include "aout/aout64.h"
+#include "gdb-stabs.h"
 #include "buildsym.h"
 #include "complaints.h"
 #include "demangle.h"
@@ -539,6 +542,19 @@ define_symbol (valu, string, desc, type, objfile)
   sym = (struct symbol *) 
     obstack_alloc (&objfile -> symbol_obstack, sizeof (struct symbol));
   memset (sym, 0, sizeof (struct symbol));
+
+  switch (type & N_TYPE)
+    {
+    case N_TEXT:
+      SYMBOL_SECTION(sym) = SECT_OFF_TEXT;
+      break;
+    case N_DATA:
+      SYMBOL_SECTION(sym) = SECT_OFF_DATA;
+      break;
+    case N_BSS:
+      SYMBOL_SECTION(sym) = SECT_OFF_BSS;
+      break;
+    }
 
   if (processing_gcc_compilation)
     {
@@ -3826,6 +3842,8 @@ scan_file_globals (objfile)
 		{
 		  SYMBOL_VALUE_ADDRESS (sym) = SYMBOL_VALUE_ADDRESS (msymbol);
 		}
+
+	      SYMBOL_SECTION (sym) = SYMBOL_SECTION (msymbol);
 	      
 	      if (prev)
 		{
