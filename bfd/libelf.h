@@ -587,7 +587,6 @@ extern boolean bfd_elf32_find_nearest_line PARAMS ((bfd *, asection *,
 						    CONST char **,
 						    unsigned int *));
 extern int bfd_elf32_sizeof_headers PARAMS ((bfd *, boolean));
-extern void bfd_elf32__write_relocs PARAMS ((bfd *, asection *, PTR));
 extern boolean bfd_elf32_new_section_hook PARAMS ((bfd *, asection *));
 extern boolean bfd_elf32_bfd_link_add_symbols
   PARAMS ((bfd *, struct bfd_link_info *));
@@ -650,7 +649,6 @@ extern boolean bfd_elf64_find_nearest_line PARAMS ((bfd *, asection *,
 						    CONST char **,
 						    unsigned int *));
 extern int bfd_elf64_sizeof_headers PARAMS ((bfd *, boolean));
-extern void bfd_elf64__write_relocs PARAMS ((bfd *, asection *, PTR));
 extern boolean bfd_elf64_new_section_hook PARAMS ((bfd *, asection *));
 extern boolean bfd_elf64_bfd_link_add_symbols
   PARAMS ((bfd *, struct bfd_link_info *));
