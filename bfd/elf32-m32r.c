@@ -578,7 +578,7 @@ m32r_elf_generic_reloc (input_bfd, reloc_entry, symbol, data,
      PTR data;
      asection *input_section;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   bfd_reloc_status_type ret;
   bfd_vma relocation;
@@ -624,7 +624,7 @@ m32r_elf_generic_reloc (input_bfd, reloc_entry, symbol, data,
     }
 
   relocation += reloc_entry->addend;
-  inplace_address = data + reloc_entry->address;
+  inplace_address = (bfd_byte *) data + reloc_entry->address;
 
 #define DOIT(x) 					\
   x = ( (x & ~reloc_entry->howto->dst_mask) | 		\

@@ -137,7 +137,7 @@ static asection_ptr       pe_ILF_make_a_section   PARAMS ((pe_ILF_vars *, const 
 static void               pe_ILF_make_a_reloc     PARAMS ((pe_ILF_vars *, bfd_vma, bfd_reloc_code_real_type, asection_ptr));
 static void               pe_ILF_make_a_symbol    PARAMS ((pe_ILF_vars *, const char *, const char *, asection_ptr, flagword));
 static void               pe_ILF_save_relocs      PARAMS ((pe_ILF_vars *, asection_ptr));
-static void		  pe_ILF_make_a_symbol_reloc  PARAMS ((pe_ILF_vars *, bfd_vma, bfd_reloc_code_real_type,	   struct symbol_cache_entry **, unsigned int));
+static void		  pe_ILF_make_a_symbol_reloc  PARAMS ((pe_ILF_vars *, bfd_vma, bfd_reloc_code_real_type, struct symbol_cache_entry **, unsigned int));
 static boolean            pe_ILF_build_a_bfd      PARAMS ((bfd *, unsigned short, bfd_byte *, bfd_byte *, unsigned int, unsigned int));
 static const bfd_target * pe_ILF_object_p         PARAMS ((bfd *));
 static const bfd_target * pe_bfd_object_p 	  PARAMS ((bfd *));
@@ -989,10 +989,10 @@ pe_ILF_build_a_bfd (bfd *           abfd,
       if (magic == MIPS_ARCH_MAGIC_WINCE)
 	{
 	  pe_ILF_make_a_symbol_reloc (& vars, 0, BFD_RELOC_HI16_S,
-				      (asection **) imp_sym, imp_index);
+				      (struct symbol_cache_entry **) imp_sym, imp_index);
 	  pe_ILF_make_a_reloc (& vars, 0, BFD_RELOC_LO16, text);
 	  pe_ILF_make_a_symbol_reloc (& vars, 4, BFD_RELOC_LO16,
-				      (asection **) imp_sym, imp_index);
+				      (struct symbol_cache_entry **) imp_sym, imp_index);
 	}
       else
 #endif
@@ -1169,7 +1169,7 @@ pe_ILF_object_p (bfd * abfd)
     case IMAGE_FILE_MACHINE_THUMB:
 #ifdef THUMBPEMAGIC
       {
-	extern bfd_target TARGET_LITTLE_SYM;
+	extern const bfd_target TARGET_LITTLE_SYM;
 	
 	if (abfd->xvec == & TARGET_LITTLE_SYM)
 	  magic = THUMBPEMAGIC;

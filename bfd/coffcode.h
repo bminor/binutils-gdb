@@ -1017,7 +1017,9 @@ styp_to_sec_flags (abfd, hdr, name, section)
 
 	      esym += (isym.n_numaux + 1) * bfd_coff_symesz (abfd);
 	    }
-	  breakloop:
+	breakloop:
+	  /* SunOS requires a statement after any label.  */
+	  ;
 	}
     }
 

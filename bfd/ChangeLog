@@ -1,3 +1,16 @@
+2000-12-21  Santeri Paavolainen <santtu@ssh.com>
+
+	* vms-hdr.c: Include alloca.h if HAVE_ALLOCA_H is defined.
+
+	* peicode.h (pe_ILF_object_p): Add const to import of TARGET_LITTLE_SYM.
+
+	* elf32-m32r.c (m32r_elf_generic_reloc): Add cast to avoid (void *)
+	arithmetic.
+
+	* elf32-fr30.c: Add casts to avoid (void *) arithmetic.
+
+	* coffcode.h (styp_to_sec_flags): Add empty statement after label.
+
 2000-12-21  Richard Sandiford  <rsandifo@redhat.com>
 
 	* libbfd.c (bfd_get_bits): Added

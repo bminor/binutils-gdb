@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-12-21 10:12-0800\n"
+"POT-Creation-Date: 2000-12-21 10:38-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -326,37 +326,37 @@ msgstr ""
 msgid "Warning: Clearing the interworking flag of %s due to outside request"
 msgstr ""
 
-#: coffcode.h:2134
+#: coffcode.h:2136
 #, c-format
 msgid "Unrecognized TI COFF target id '0x%x'"
 msgstr ""
 
-#: coffcode.h:4192
+#: coffcode.h:4194
 #, c-format
 msgid "%s: warning: illegal symbol index %ld in line numbers"
 msgstr ""
 
-#: coffcode.h:4206
+#: coffcode.h:4208
 #, c-format
 msgid "%s: warning: duplicate line number information for `%s'"
 msgstr ""
 
-#: coffcode.h:4566
+#: coffcode.h:4568
 #, c-format
 msgid "%s: Unrecognized storage class %d for %s symbol `%s'"
 msgstr ""
 
-#: coffcode.h:4697
+#: coffcode.h:4699
 #, c-format
 msgid "warning: %s: local symbol `%s' has no section"
 msgstr ""
 
-#: coff-tic54x.c:376 coffcode.h:4808
+#: coff-tic54x.c:376 coffcode.h:4810
 #, c-format
 msgid "%s: warning: illegal symbol index %ld in relocs"
 msgstr ""
 
-#: coffcode.h:4846
+#: coffcode.h:4848
 #, c-format
 msgid "%s: illegal relocation type %d at address 0x%lx"
 msgstr ""
@@ -1893,7 +1893,7 @@ msgstr ""
 msgid "unknown gsd/egsd subtype %d"
 msgstr ""
 
-#: vms-hdr.c:405
+#: vms-hdr.c:408
 msgid "Object module NOT error-free !\n"
 msgstr ""
 

@@ -278,9 +278,9 @@ fr30_elf_i20_reloc (abfd, reloc_entry, symbol, data,
   if (relocation > (((bfd_vma) 1 << 20) - 1))
     return bfd_reloc_overflow;
 
-  x = bfd_get_32 (abfd, data + reloc_entry->address);
+  x = bfd_get_32 (abfd, (char *) data + reloc_entry->address);
   x = (x & 0xff0f0000) | (relocation & 0x0000ffff) | ((relocation & 0x000f0000) << 4);
-  bfd_put_32 (abfd, x, data + reloc_entry->address);
+  bfd_put_32 (abfd, x, (char *) data + reloc_entry->address);
 
   return bfd_reloc_ok;
 }
@@ -321,7 +321,7 @@ fr30_elf_i32_reloc (abfd, reloc_entry, symbol, data,
     + symbol->section->output_offset
     + reloc_entry->addend;
 
-  bfd_put_32 (abfd, relocation, data + reloc_entry->address + 2);
+  bfd_put_32 (abfd, relocation, (char *) data + reloc_entry->address + 2);
 
   return bfd_reloc_ok;
 }

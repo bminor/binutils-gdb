@@ -1643,9 +1643,9 @@ xcoff_write_one_armap_big (abfd, map, orl_count, orl_ccount, stridx, bits64,
   struct xcoff_ar_hdr_big hdr;
   char *p;
   unsigned char buf[4];
+  const bfd_arch_info_type *arch_info = NULL;
   bfd *sub;
   file_ptr fileoff;
-  const bfd_arch_info_type *arch_info;
   bfd *object_bfd;
   unsigned int i;
 
@@ -1657,7 +1657,7 @@ xcoff_write_one_armap_big (abfd, map, orl_count, orl_ccount, stridx, bits64,
   if (bits64)
     sprintf (hdr.nextoff, "%d", 0);
   else
-    sprintf (hdr.nextoff, "%d", (strtol (prevoff, (char **) NULL, 10)
+    sprintf (hdr.nextoff, "%ld", (strtol (prevoff, (char **) NULL, 10)
 				 + 4 + orl_ccount * 4 + stridx));
   memcpy (hdr.prevoff, prevoff, sizeof (hdr.prevoff));
   sprintf (hdr.date, "%d", 0);
@@ -1719,7 +1719,8 @@ xcoff_write_one_armap_big (abfd, map, orl_count, orl_ccount, stridx, bits64,
 
       if (ob != object_bfd)
 	arch_info = bfd_get_arch_info (ob);
-      if ((arch_info->bits_per_address == 64) != bits64)
+
+      if (arch_info && (arch_info->bits_per_address == 64) != bits64)
 	continue;
 
       name = *map[i].name;
@@ -1751,7 +1752,7 @@ xcoff_write_armap_big (abfd, elength, map, orl_count, stridx)
   unsigned int i;
   unsigned int orl_count_32, orl_count_64;
   unsigned int stridx_32, stridx_64;
-  const bfd_arch_info_type *arch_info;
+  const bfd_arch_info_type *arch_info = NULL;
   bfd *object_bfd;
 
   /* First, we look through the symbols and work out which are
@@ -1768,7 +1769,7 @@ xcoff_write_armap_big (abfd, elength, map, orl_count, stridx)
       if (ob != object_bfd)
 	arch_info = bfd_get_arch_info (ob);
       len = strlen (*map[i].name) + 1;
-      if (arch_info->bits_per_address == 64)
+      if (arch_info && arch_info->bits_per_address == 64)
 	{
 	  orl_count_64++;
 	  stridx_64 += len;
