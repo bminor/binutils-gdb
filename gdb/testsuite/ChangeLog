@@ -1,5 +1,7 @@
 Tue Jul 25 01:03:52 1995  Jeff Law  (law@snake.cs.utah.edu)
 
+	* gdb.base/sigall.exp: Avoid losing in SIGPRIO test on lynx.
+
 	* gdb.base/signals.exp: Disable whole file for lynx until
 	further notice.
 
