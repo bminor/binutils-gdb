@@ -42,34 +42,33 @@ static int serial_flag;
 static int udp_fd = -1;
 #endif
 
-static serial_t open_tty PARAMS ((char *name));
-static int send_resp PARAMS ((serial_t desc, char c));
+static serial_t open_tty (char *name);
+static int send_resp (serial_t desc, char c);
 static void close_tty (void * ignore);
 #ifdef HAVE_SOCKETS
-static int recv_udp_buf PARAMS ((int fd, unsigned char *buf, int len, int timeout));
-static int send_udp_buf PARAMS ((int fd, unsigned char *buf, int len));
+static int recv_udp_buf (int fd, unsigned char *buf, int len, int timeout);
+static int send_udp_buf (int fd, unsigned char *buf, int len);
 #endif
-static void sparclite_open PARAMS ((char *name, int from_tty));
-static void sparclite_close PARAMS ((int quitting));
-static void download PARAMS ((char *target_name, char *args, int from_tty,
-			      void (*write_routine) (bfd * from_bfd,
-						     asection * from_sec,
-						     file_ptr from_addr,
-						  bfd_vma to_addr, int len),
-			      void (*start_routine) (bfd_vma entry)));
-static void sparclite_serial_start PARAMS ((bfd_vma entry));
-static void sparclite_serial_write PARAMS ((bfd * from_bfd, asection * from_sec,
-					    file_ptr from_addr,
-					    bfd_vma to_addr, int len));
+static void sparclite_open (char *name, int from_tty);
+static void sparclite_close (int quitting);
+static void download (char *target_name, char *args, int from_tty,
+		      void (*write_routine) (bfd * from_bfd,
+					     asection * from_sec,
+					     file_ptr from_addr,
+					     bfd_vma to_addr, int len),
+		      void (*start_routine) (bfd_vma entry));
+static void sparclite_serial_start (bfd_vma entry);
+static void sparclite_serial_write (bfd * from_bfd, asection * from_sec,
+				    file_ptr from_addr,
+				    bfd_vma to_addr, int len);
 #ifdef HAVE_SOCKETS
-static unsigned short calc_checksum PARAMS ((unsigned char *buffer,
-					     int count));
-static void sparclite_udp_start PARAMS ((bfd_vma entry));
-static void sparclite_udp_write PARAMS ((bfd * from_bfd, asection * from_sec,
-					 file_ptr from_addr, bfd_vma to_addr,
-					 int len));
+static unsigned short calc_checksum (unsigned char *buffer, int count);
+static void sparclite_udp_start (bfd_vma entry);
+static void sparclite_udp_write (bfd * from_bfd, asection * from_sec,
+				 file_ptr from_addr, bfd_vma to_addr,
+				 int len);
 #endif
-static void sparclite_download PARAMS ((char *filename, int from_tty));
+static void sparclite_download (char *filename, int from_tty);
 
 #define DDA2_SUP_ASI		0xb000000
 #define DDA1_SUP_ASI		0xb0000

@@ -42,12 +42,12 @@ const struct floatformat floatformat_unknown;
 #define CANNOT_STORE_REGISTER(regno) 0
 #endif
 
-void write_register_gen PARAMS ((int, char *));
+void write_register_gen (int, char *);
 
-static int 
-read_relative_register_raw_bytes_for_frame PARAMS ((int regnum, 
-						    char *myaddr, 
-						    struct frame_info *frame));
+static int
+read_relative_register_raw_bytes_for_frame (int regnum,
+					    char *myaddr,
+					    struct frame_info *frame);
 
 /* Basic byte-swapping routines.  GDB has needed these for a long time...
    All extract a target-format integer at ADDR which is LEN bytes long.  */
@@ -1774,7 +1774,7 @@ locate_var_value (var, frame)
 }
 
 
-static void build_findvar PARAMS ((void));
+static void build_findvar (void);
 static void
 build_findvar ()
 {
@@ -1788,7 +1788,7 @@ build_findvar ()
   memset (register_valid, 0, sizeof_register_valid);
 }
 
-void _initialize_findvar PARAMS ((void));
+void _initialize_findvar (void);
 void
 _initialize_findvar ()
 {

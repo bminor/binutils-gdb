@@ -85,17 +85,18 @@ enum
 
 /* Local functions */
 
-extern void _initialize_d10v_tdep PARAMS ((void));
+extern void _initialize_d10v_tdep (void);
 
-static void d10v_eva_prepare_to_trace PARAMS ((void));
+static void d10v_eva_prepare_to_trace (void);
 
-static void d10v_eva_get_trace_data PARAMS ((void));
+static void d10v_eva_get_trace_data (void);
 
-static int prologue_find_regs PARAMS ((unsigned short op, struct frame_info * fi, CORE_ADDR addr));
+static int prologue_find_regs (unsigned short op, struct frame_info *fi,
+			       CORE_ADDR addr);
 
-extern void d10v_frame_init_saved_regs PARAMS ((struct frame_info *));
+extern void d10v_frame_init_saved_regs (struct frame_info *);
 
-static void do_d10v_pop_frame PARAMS ((struct frame_info * fi));
+static void do_d10v_pop_frame (struct frame_info *fi);
 
 int
 d10v_frame_chain_valid (chain, frame)
@@ -1022,7 +1023,8 @@ struct stack_item
   void *data;
 };
 
-static struct stack_item *push_stack_item PARAMS ((struct stack_item * prev, void *contents, int len));
+static struct stack_item *push_stack_item (struct stack_item *prev,
+					   void *contents, int len);
 static struct stack_item *
 push_stack_item (prev, contents, len)
      struct stack_item *prev;
@@ -1038,7 +1040,7 @@ push_stack_item (prev, contents, len)
   return si;
 }
 
-static struct stack_item *pop_stack_item PARAMS ((struct stack_item * si));
+static struct stack_item *pop_stack_item (struct stack_item *si);
 static struct stack_item *
 pop_stack_item (si)
      struct stack_item *si;
@@ -1247,15 +1249,15 @@ remote_d10v_translate_xfer_address (CORE_ADDR memaddr, int nr_bytes,
 
 #define TRACE_BUFFER_BASE (0xf40000)
 
-static void trace_command PARAMS ((char *, int));
+static void trace_command (char *, int);
 
-static void untrace_command PARAMS ((char *, int));
+static void untrace_command (char *, int);
 
-static void trace_info PARAMS ((char *, int));
+static void trace_info (char *, int);
 
-static void tdisassemble_command PARAMS ((char *, int));
+static void tdisassemble_command (char *, int);
 
-static void display_trace PARAMS ((int, int));
+static void display_trace (int, int);
 
 /* True when instruction traces are being collected.  */
 

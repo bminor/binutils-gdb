@@ -26,7 +26,7 @@
 #define KERNEL			/* To get floating point reg definitions */
 #include <machine/reg.h>
 
-static void fetch_core_registers PARAMS ((char *, unsigned, int, CORE_ADDR));
+static void fetch_core_registers (char *, unsigned, int, CORE_ADDR);
 
 void
 fetch_inferior_registers (regno)

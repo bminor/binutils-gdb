@@ -54,9 +54,9 @@
 
 /* target-specific dummy_frame stuff */
 
-extern struct frame_info *rs6000_pop_frame PARAMS ((struct frame_info * frame));
+extern struct frame_info *rs6000_pop_frame (struct frame_info *frame);
 
-extern CORE_ADDR ppc_push_return_address PARAMS ((CORE_ADDR, CORE_ADDR));
+extern CORE_ADDR ppc_push_return_address (CORE_ADDR, CORE_ADDR);
 
 #undef PUSH_DUMMY_FRAME
 #define PUSH_DUMMY_FRAME             generic_push_dummy_frame ()

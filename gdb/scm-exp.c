@@ -31,12 +31,12 @@
 
 #define USE_EXPRSTRING 0
 
-static void scm_lreadparen PARAMS ((int));
-static int scm_skip_ws PARAMS ((void));
-static void scm_read_token PARAMS ((int, int));
-static LONGEST scm_istring2number PARAMS ((char *, int, int));
-static LONGEST scm_istr2int PARAMS ((char *, int, int));
-static void scm_lreadr PARAMS ((int));
+static void scm_lreadparen (int);
+static int scm_skip_ws (void);
+static void scm_read_token (int, int);
+static LONGEST scm_istring2number (char *, int, int);
+static LONGEST scm_istr2int (char *, int, int);
+static void scm_lreadr (int);
 
 static LONGEST
 scm_istr2int (str, len, radix)

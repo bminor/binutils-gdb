@@ -96,73 +96,72 @@ struct complaint unknown_option_complaint =
 
 extern int info_verbose;
 
-extern void report_transfer_performance PARAMS ((unsigned long,
-						 time_t, time_t));
+extern void report_transfer_performance (unsigned long, time_t, time_t);
 
 /* Functions this file defines */
 
 #if 0
-static int simple_read_overlay_region_table PARAMS ((void));
-static void simple_free_overlay_region_table PARAMS ((void));
+static int simple_read_overlay_region_table (void);
+static void simple_free_overlay_region_table (void);
 #endif
 
-static void set_initial_language PARAMS ((void));
+static void set_initial_language (void);
 
-static void load_command PARAMS ((char *, int));
+static void load_command (char *, int);
 
-static void add_symbol_file_command PARAMS ((char *, int));
+static void add_symbol_file_command (char *, int);
 
-static void add_shared_symbol_files_command PARAMS ((char *, int));
+static void add_shared_symbol_files_command (char *, int);
 
-static void cashier_psymtab PARAMS ((struct partial_symtab *));
+static void cashier_psymtab (struct partial_symtab *);
 
-static int compare_psymbols PARAMS ((const void *, const void *));
+static int compare_psymbols (const void *, const void *);
 
-static int compare_symbols PARAMS ((const void *, const void *));
+static int compare_symbols (const void *, const void *);
 
-bfd *symfile_bfd_open PARAMS ((char *));
+bfd *symfile_bfd_open (char *);
 
-static void find_sym_fns PARAMS ((struct objfile *));
+static void find_sym_fns (struct objfile *);
 
-static void decrement_reading_symtab PARAMS ((void *));
+static void decrement_reading_symtab (void *);
 
-static void overlay_invalidate_all PARAMS ((void));
+static void overlay_invalidate_all (void);
 
-static int overlay_is_mapped PARAMS ((struct obj_section *));
+static int overlay_is_mapped (struct obj_section *);
 
-void list_overlays_command PARAMS ((char *, int));
+void list_overlays_command (char *, int);
 
-void map_overlay_command PARAMS ((char *, int));
+void map_overlay_command (char *, int);
 
-void unmap_overlay_command PARAMS ((char *, int));
+void unmap_overlay_command (char *, int);
 
-static void overlay_auto_command PARAMS ((char *, int));
+static void overlay_auto_command (char *, int);
 
-static void overlay_manual_command PARAMS ((char *, int));
+static void overlay_manual_command (char *, int);
 
-static void overlay_off_command PARAMS ((char *, int));
+static void overlay_off_command (char *, int);
 
-static void overlay_load_command PARAMS ((char *, int));
+static void overlay_load_command (char *, int);
 
-static void overlay_command PARAMS ((char *, int));
+static void overlay_command (char *, int);
 
-static void simple_free_overlay_table PARAMS ((void));
+static void simple_free_overlay_table (void);
 
-static void read_target_long_array PARAMS ((CORE_ADDR, unsigned int *, int));
+static void read_target_long_array (CORE_ADDR, unsigned int *, int);
 
-static int simple_read_overlay_table PARAMS ((void));
+static int simple_read_overlay_table (void);
 
-static int simple_overlay_update_1 PARAMS ((struct obj_section *));
+static int simple_overlay_update_1 (struct obj_section *);
 
-static void add_filename_language PARAMS ((char *ext, enum language lang));
+static void add_filename_language (char *ext, enum language lang);
 
-static void set_ext_lang_command PARAMS ((char *args, int from_tty));
+static void set_ext_lang_command (char *args, int from_tty);
 
-static void info_ext_lang_command PARAMS ((char *args, int from_tty));
+static void info_ext_lang_command (char *args, int from_tty);
 
-static void init_filename_language_table PARAMS ((void));
+static void init_filename_language_table (void);
 
-void _initialize_symfile PARAMS ((void));
+void _initialize_symfile (void);
 
 /* List of all available sym_fns.  On gdb startup, each object file reader
    calls add_symtab_fns() to register information on each format it is
@@ -2123,8 +2122,7 @@ clear_symtab_users_cleanup (void *ignore)
 #if 0
 /* FIXME:  As free_named_symtabs is currently a big noop this function
    is no longer needed.  */
-static void
-clear_symtab_users_once PARAMS ((void));
+static void clear_symtab_users_once (void);
 
 static int clear_symtab_users_queued;
 static int clear_symtab_users_done;
@@ -2555,7 +2553,7 @@ int overlay_debugging = 0;	/* 0 == off, 1 == manual, -1 == auto */
 int overlay_cache_invalid = 0;	/* True if need to refresh mapped state */
 
 /* Target vector for refreshing overlay mapped state */
-static void simple_overlay_update PARAMS ((struct obj_section *));
+static void simple_overlay_update (struct obj_section *);
 void (*target_overlay_update) PARAMS ((struct obj_section *))
 = simple_overlay_update;
 

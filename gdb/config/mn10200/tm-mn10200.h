@@ -99,20 +99,20 @@ struct value;
 
 #define EXTRA_FRAME_INFO struct frame_saved_regs fsr; int status; int stack_size;
 
-extern void mn10200_init_extra_frame_info PARAMS ((struct frame_info *));
+extern void mn10200_init_extra_frame_info (struct frame_info *);
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fi) mn10200_init_extra_frame_info (fi)
 #define INIT_FRAME_PC(x,y)
 
-extern void mn10200_frame_find_saved_regs PARAMS ((struct frame_info *,
-						struct frame_saved_regs *));
+extern void mn10200_frame_find_saved_regs (struct frame_info *,
+					   struct frame_saved_regs *);
 #define FRAME_FIND_SAVED_REGS(fi, regaddr) regaddr = fi->fsr
 
-extern CORE_ADDR mn10200_frame_chain PARAMS ((struct frame_info *));
+extern CORE_ADDR mn10200_frame_chain (struct frame_info *);
 #define FRAME_CHAIN(fi) mn10200_frame_chain (fi)
 #define FRAME_CHAIN_VALID(FP, FI)	generic_file_frame_chain_valid (FP, FI)
 
-extern CORE_ADDR mn10200_find_callers_reg PARAMS ((struct frame_info *, int));
-extern CORE_ADDR mn10200_frame_saved_pc PARAMS ((struct frame_info *));
+extern CORE_ADDR mn10200_find_callers_reg (struct frame_info *, int);
+extern CORE_ADDR mn10200_frame_saved_pc (struct frame_info *);
 #define FRAME_SAVED_PC(FI) (mn10200_frame_saved_pc (FI))
 
 /* Extract from an array REGBUF containing the (raw) register state
@@ -166,7 +166,7 @@ extern CORE_ADDR mn10200_store_struct_return (CORE_ADDR addr, CORE_ADDR sp);
 #define STORE_STRUCT_RETURN(STRUCT_ADDR, SP) \
   (SP) = mn10200_store_struct_return (STRUCT_ADDR, SP)
 
-extern CORE_ADDR mn10200_skip_prologue PARAMS ((CORE_ADDR));
+extern CORE_ADDR mn10200_skip_prologue (CORE_ADDR);
 #define SKIP_PROLOGUE(pc) (mn10200_skip_prologue (pc))
 
 #define FRAME_ARGS_SKIP 0
@@ -175,7 +175,7 @@ extern CORE_ADDR mn10200_skip_prologue PARAMS ((CORE_ADDR));
 #define FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)
 #define FRAME_NUM_ARGS(fi) (-1)
 
-extern void mn10200_pop_frame PARAMS ((struct frame_info *));
+extern void mn10200_pop_frame (struct frame_info *);
 #define POP_FRAME mn10200_pop_frame (get_current_frame ())
 
 #define USE_GENERIC_DUMMY_FRAMES 1
@@ -186,14 +186,14 @@ extern void mn10200_pop_frame PARAMS ((struct frame_info *));
 #define FIX_CALL_DUMMY(DUMMY, START, FUNADDR, NARGS, ARGS, TYPE, GCCP)
 #define CALL_DUMMY_ADDRESS()         entry_point_address ()
 
-extern CORE_ADDR mn10200_push_return_address PARAMS ((CORE_ADDR, CORE_ADDR));
+extern CORE_ADDR mn10200_push_return_address (CORE_ADDR, CORE_ADDR);
 #define PUSH_RETURN_ADDRESS(PC, SP)  mn10200_push_return_address (PC, SP)
 
 #define PUSH_DUMMY_FRAME	generic_push_dummy_frame ()
 
 extern CORE_ADDR
-  mn10200_push_arguments PARAMS ((int, struct value **, CORE_ADDR,
-				  unsigned char, CORE_ADDR));
+mn10200_push_arguments (int, struct value **, CORE_ADDR,
+			unsigned char, CORE_ADDR);
 #define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
   (mn10200_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR))
 

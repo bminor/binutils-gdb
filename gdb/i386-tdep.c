@@ -30,21 +30,21 @@
 #include "gdbcmd.h"
 #include "command.h"
 
-static long i386_get_frame_setup PARAMS ((CORE_ADDR));
+static long i386_get_frame_setup (CORE_ADDR);
 
-static void i386_follow_jump PARAMS ((void));
+static void i386_follow_jump (void);
 
-static void codestream_read PARAMS ((unsigned char *, int));
+static void codestream_read (unsigned char *, int);
 
-static void codestream_seek PARAMS ((CORE_ADDR));
+static void codestream_seek (CORE_ADDR);
 
-static unsigned char codestream_fill PARAMS ((int));
+static unsigned char codestream_fill (int);
 
-CORE_ADDR skip_trampoline_code PARAMS ((CORE_ADDR, char *));
+CORE_ADDR skip_trampoline_code (CORE_ADDR, char *);
 
 static int gdb_print_insn_i386 (bfd_vma, disassemble_info *);
 
-void _initialize_i386_tdep PARAMS ((void));
+void _initialize_i386_tdep (void);
 
 /* i386_register_byte[i] is the offset into the register file of the
    start of register number i.  We initialize this from
@@ -84,11 +84,12 @@ static char *valid_flavors[] =
 };
 static char *disassembly_flavor = att_flavor;
 
-static void i386_print_register PARAMS ((char *, int, int));
+static void i386_print_register (char *, int, int);
 
 /* This is used to keep the bfd arch_info in sync with the disassembly flavor.  */
-static void set_disassembly_flavor_sfunc PARAMS ((char *, int, struct cmd_list_element *));
-static void set_disassembly_flavor PARAMS ((void));
+static void set_disassembly_flavor_sfunc (char *, int,
+					  struct cmd_list_element *);
+static void set_disassembly_flavor (void);
 
 /* Stdio style buffering was used to minimize calls to ptrace, but this
    buffering did not take into account that the code section being accessed

@@ -42,17 +42,17 @@ struct gdb_wrapper_arguments
       } args[10];
   };
 
-static int wrap_parse_exp_1 PARAMS ((char *));
+static int wrap_parse_exp_1 (char *);
 
-static int wrap_evaluate_expression PARAMS ((char *));
+static int wrap_evaluate_expression (char *);
 
-static int wrap_value_fetch_lazy PARAMS ((char *));
+static int wrap_value_fetch_lazy (char *);
 
-static int wrap_value_equal PARAMS ((char *));
+static int wrap_value_equal (char *);
 
-static int wrap_value_subscript PARAMS ((char *));
+static int wrap_value_subscript (char *);
 
-static int wrap_value_ind PARAMS ((char *opaque_arg));
+static int wrap_value_ind (char *opaque_arg);
 
 static int wrap_parse_and_eval_type (char *);
 

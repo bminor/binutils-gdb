@@ -72,17 +72,14 @@ static void vfprintf_maybe_filtered (struct ui_file *, const char *,
 static void fputs_maybe_filtered (const char *, struct ui_file *, int);
 
 #if defined (USE_MMALLOC) && !defined (NO_MMCHECK)
-static void malloc_botch PARAMS ((void));
+static void malloc_botch (void);
 #endif
 
-static void
-prompt_for_continue PARAMS ((void));
+static void prompt_for_continue (void);
 
-static void
-set_width_command PARAMS ((char *, int, struct cmd_list_element *));
+static void set_width_command (char *, int, struct cmd_list_element *);
 
-static void
-set_width PARAMS ((void));
+static void set_width (void);
 
 /* Chain of cleanup actions established with make_cleanup,
    to be executed if an error happens.  */
@@ -2339,7 +2336,7 @@ subset_compare (string_to_compare, template_string)
 }
 
 
-static void pagination_on_command PARAMS ((char *arg, int from_tty));
+static void pagination_on_command (char *arg, int from_tty);
 static void
 pagination_on_command (arg, from_tty)
      char *arg;
@@ -2348,7 +2345,7 @@ pagination_on_command (arg, from_tty)
   pagination_enabled = 1;
 }
 
-static void pagination_on_command PARAMS ((char *arg, int from_tty));
+static void pagination_on_command (char *arg, int from_tty);
 static void
 pagination_off_command (arg, from_tty)
      char *arg;
@@ -2440,11 +2437,9 @@ SIGWINCH_HANDLER_BODY
    a system header, what we do if not, etc.  */
 #define FLOATFORMAT_CHAR_BIT 8
 
-static unsigned long get_field PARAMS ((unsigned char *,
-					enum floatformat_byteorders,
-					unsigned int,
-					unsigned int,
-					unsigned int));
+static unsigned long get_field (unsigned char *,
+				enum floatformat_byteorders,
+				unsigned int, unsigned int, unsigned int);
 
 /* Extract a field which starts at START and is LEN bytes long.  DATA and
    TOTAL_LEN are the thing we are extracting it from, in byteorder ORDER.  */
@@ -2620,11 +2615,9 @@ floatformat_to_doublest (fmt, from, to)
   *to = dto;
 }
 
-static void put_field PARAMS ((unsigned char *, enum floatformat_byteorders,
-			       unsigned int,
-			       unsigned int,
-			       unsigned int,
-			       unsigned long));
+static void put_field (unsigned char *, enum floatformat_byteorders,
+		       unsigned int,
+		       unsigned int, unsigned int, unsigned long);
 
 /* Set a field which starts at START and is LEN bytes long.  DATA and
    TOTAL_LEN are the thing we are extracting it from, in byteorder ORDER.  */
@@ -2695,7 +2688,7 @@ put_field (data, order, total_len, start, len, stuff_to_put)
    The range of the returned value is >= 0.5 and < 1.0.  This is equivalent to
    frexp, but operates on the long double data type.  */
 
-static long double ldfrexp PARAMS ((long double value, int *eptr));
+static long double ldfrexp (long double value, int *eptr);
 
 static long double
 ldfrexp (value, eptr)

@@ -77,7 +77,7 @@
 #endif /* sgtty */
 #endif
 
-extern void new_tty PARAMS ((void));
+extern void new_tty (void);
 
 /* Do we have job control?  Can be assumed to always be the same within
    a given run of GDB.  In inflow.c.  */
@@ -85,6 +85,6 @@ extern int job_control;
 
 /* Set the process group of the caller to its own pid, or do nothing if
    we lack job control.  */
-extern int gdb_setpgid PARAMS ((void));
+extern int gdb_setpgid (void);
 
 #endif /* !defined (TERMINAL_H) */

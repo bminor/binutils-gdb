@@ -15,11 +15,11 @@
 ** PUBLIC FUNCTION EXTERNAL DECLS        **
 ******************************************/
 
-extern unsigned int tuiDispatchCtrlChar PARAMS ((unsigned int));
-extern int tuiIncrCommandCharCountBy PARAMS ((int));
-extern int tuiDecrCommandCharCountBy PARAMS ((int));
-extern int tuiSetCommandCharCountTo PARAMS ((int));
-extern int tuiClearCommandCharCount PARAMS ((void));
+extern unsigned int tuiDispatchCtrlChar (unsigned int);
+extern int tuiIncrCommandCharCountBy (int);
+extern int tuiDecrCommandCharCountBy (int);
+extern int tuiSetCommandCharCountTo (int);
+extern int tuiClearCommandCharCount (void);
 
 #endif
 /*_TUI_COMMAND_H*/

@@ -149,24 +149,21 @@ struct dcache_struct
     int cache_has_stuff;
   };
 
-static int dcache_poke_byte PARAMS ((DCACHE * dcache, CORE_ADDR addr,
-				     char *ptr));
+static int dcache_poke_byte (DCACHE * dcache, CORE_ADDR addr, char *ptr);
 
-static int dcache_peek_byte PARAMS ((DCACHE * dcache, CORE_ADDR addr,
-				     char *ptr));
+static int dcache_peek_byte (DCACHE * dcache, CORE_ADDR addr, char *ptr);
 
-static struct dcache_block *dcache_hit PARAMS ((DCACHE * dcache,
-						CORE_ADDR addr));
+static struct dcache_block *dcache_hit (DCACHE * dcache, CORE_ADDR addr);
 
-static int dcache_write_line PARAMS ((DCACHE * dcache, struct dcache_block * db));
+static int dcache_write_line (DCACHE * dcache, struct dcache_block *db);
 
-static struct dcache_block *dcache_alloc PARAMS ((DCACHE * dcache));
+static struct dcache_block *dcache_alloc (DCACHE * dcache);
 
-static int dcache_writeback PARAMS ((DCACHE * dcache));
+static int dcache_writeback (DCACHE * dcache);
 
-static void dcache_info PARAMS ((char *exp, int tty));
+static void dcache_info (char *exp, int tty);
 
-void _initialize_dcache PARAMS ((void));
+void _initialize_dcache (void);
 
 static int dcache_enabled_p = 0;
 

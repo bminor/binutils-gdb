@@ -28,13 +28,13 @@
 
 #include "value.h"
 
-static void grow_expr PARAMS ((struct agent_expr * x, int n));
+static void grow_expr (struct agent_expr *x, int n);
 
-static void append_const PARAMS ((struct agent_expr * x, LONGEST val, int n));
+static void append_const (struct agent_expr *x, LONGEST val, int n);
 
-static LONGEST read_const PARAMS ((struct agent_expr * x, int o, int n));
+static LONGEST read_const (struct agent_expr *x, int o, int n);
 
-static void generic_ext PARAMS ((struct agent_expr * x, enum agent_op op, int n));
+static void generic_ext (struct agent_expr *x, enum agent_op op, int n);
 
 /* Functions for building expressions.  */
 

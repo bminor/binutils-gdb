@@ -99,21 +99,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define	YYDEBUG	0		/* Default to no yydebug support */
 #endif
 
-int
-yyparse PARAMS ((void));
+int yyparse (void);
 
-static int
-yylex PARAMS ((void));
+static int yylex (void);
 
-void
-yyerror PARAMS ((char *));
+void yyerror (char *);
 
-static struct type * java_type_from_name PARAMS ((struct stoken));
-static void push_expression_name PARAMS ((struct stoken));
-static void push_fieldnames PARAMS ((struct stoken));
+static struct type *java_type_from_name (struct stoken);
+static void push_expression_name (struct stoken);
+static void push_fieldnames (struct stoken);
 
-static struct expression *copy_exp PARAMS ((struct expression *, int));
-static void insert_exp PARAMS ((int, struct expression *));
+static struct expression *copy_exp (struct expression *, int);
+static void insert_exp (int, struct expression *);
 
 %}
 
@@ -145,8 +142,7 @@ static void insert_exp PARAMS ((int, struct expression *));
 
 %{
 /* YYSTYPE gets defined by %union */
-static int
-parse_number PARAMS ((char *, int, int, YYSTYPE *));
+static int parse_number (char *, int, int, YYSTYPE *);
 %}
 
 %type <lval> rcurly Dims Dims_opt

@@ -42,41 +42,41 @@
 
 /* Prototypes for exported functions. */
 
-void args_info PARAMS ((char *, int));
+void args_info (char *, int);
 
-void locals_info PARAMS ((char *, int));
+void locals_info (char *, int);
 
 void (*selected_frame_level_changed_hook) PARAMS ((int));
 
-void _initialize_stack PARAMS ((void));
+void _initialize_stack (void);
 
 /* Prototypes for local functions. */
 
-static void return_command PARAMS ((char *, int));
+static void return_command (char *, int);
 
-static void down_command PARAMS ((char *, int));
+static void down_command (char *, int);
 
-static void down_silently_base PARAMS ((char *));
+static void down_silently_base (char *);
 
-static void down_silently_command PARAMS ((char *, int));
+static void down_silently_command (char *, int);
 
-static void up_command PARAMS ((char *, int));
+static void up_command (char *, int);
 
-static void up_silently_base PARAMS ((char *));
+static void up_silently_base (char *);
 
-static void up_silently_command PARAMS ((char *, int));
+static void up_silently_command (char *, int);
 
-void frame_command PARAMS ((char *, int));
+void frame_command (char *, int);
 
-static void current_frame_command PARAMS ((char *, int));
+static void current_frame_command (char *, int);
 
-static void select_frame_command PARAMS ((char *, int));
+static void select_frame_command (char *, int);
 
 static void print_frame_arg_vars (struct frame_info *, struct ui_file *);
 
-static void catch_info PARAMS ((char *, int));
+static void catch_info (char *, int);
 
-static void args_plus_locals_info PARAMS ((char *, int));
+static void args_plus_locals_info (char *, int);
 
 static void print_frame_label_vars (struct frame_info *, int,
 				    struct ui_file *);
@@ -98,15 +98,15 @@ static void print_frame (struct frame_info *fi,
 			 int args, 
 			 struct symtab_and_line sal);
 
-static void print_frame_info_base PARAMS ((struct frame_info *, int, int, int));
+static void print_frame_info_base (struct frame_info *, int, int, int);
 
-static void print_stack_frame_base PARAMS ((struct frame_info *, int, int));
+static void print_stack_frame_base (struct frame_info *, int, int);
 
-static void backtrace_command PARAMS ((char *, int));
+static void backtrace_command (char *, int);
 
-struct frame_info *parse_frame_specification PARAMS ((char *));
+struct frame_info *parse_frame_specification (char *);
 
-static void frame_info PARAMS ((char *, int));
+static void frame_info (char *, int);
 
 extern int addressprint;	/* Print addresses, or stay symbolic only? */
 extern int info_verbose;	/* Verbosity of symbol reading msgs */
@@ -140,11 +140,11 @@ struct print_stack_frame_args
     int args;
   };
 
-static int print_stack_frame_base_stub PARAMS ((char *));
+static int print_stack_frame_base_stub (char *);
 
 /* Show and print the frame arguments.
    Pass the args the way catch_errors wants them.  */
-static int show_and_print_stack_frame_stub PARAMS ((void *args));
+static int show_and_print_stack_frame_stub (void *args);
 static int
 show_and_print_stack_frame_stub (args)
      void *args;
@@ -163,7 +163,7 @@ show_and_print_stack_frame_stub (args)
 
 /* Show or print the frame arguments.
    Pass the args the way catch_errors wants them.  */
-static int print_stack_frame_stub PARAMS ((void *args));
+static int print_stack_frame_stub (void *args);
 static int
 print_stack_frame_stub (args)
      void *args;
@@ -194,7 +194,7 @@ print_stack_frame_base_stub (args)
 
 /* print the frame arguments to the terminal.  
    Pass the args the way catch_errors wants them.  */
-static int print_only_stack_frame_stub PARAMS ((void *));
+static int print_only_stack_frame_stub (void *);
 static int
 print_only_stack_frame_stub (args)
      void *args;
@@ -317,7 +317,7 @@ struct print_args_args
   struct ui_file *stream;
 };
 
-static int print_args_stub PARAMS ((PTR));
+static int print_args_stub (PTR);
 
 /* Pass the args the way catch_errors wants them.  */
 
@@ -1090,7 +1090,8 @@ backtrace_limit_info (arg, from_tty)
 
 /* Print briefly all stack frames or just the innermost COUNT frames.  */
 
-static void backtrace_command_1 PARAMS ((char *count_exp, int show_locals, int from_tty));
+static void backtrace_command_1 (char *count_exp, int show_locals,
+				 int from_tty);
 static void
 backtrace_command_1 (count_exp, show_locals, from_tty)
      char *count_exp;
@@ -1258,7 +1259,7 @@ backtrace_command (arg, from_tty)
     do_cleanups (old_chain);
 }
 
-static void backtrace_full_command PARAMS ((char *arg, int from_tty));
+static void backtrace_full_command (char *arg, int from_tty);
 static void
 backtrace_full_command (arg, from_tty)
      char *arg;
@@ -1995,7 +1996,7 @@ struct function_bounds
   CORE_ADDR low, high;
 };
 
-static void func_command PARAMS ((char *arg, int from_tty));
+static void func_command (char *arg, int from_tty);
 static void
 func_command (arg, from_tty)
      char *arg;

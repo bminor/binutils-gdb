@@ -57,7 +57,7 @@
 extern struct target_ops exec_ops;
 
 /* This lives in hppa-tdep.c. */
-extern struct unwind_table_entry *find_unwind_entry PARAMS ((CORE_ADDR pc));
+extern struct unwind_table_entry *find_unwind_entry (CORE_ADDR pc);
 
 /* These ought to be defined in some public interface, but aren't.  They
    define the meaning of the various bits in the distinguished __dld_flags
@@ -203,9 +203,9 @@ dld_cache;
 
 
 
-static void som_sharedlibrary_info_command PARAMS ((char *, int));
+static void som_sharedlibrary_info_command (char *, int);
 
-static void som_solib_sharedlibrary_command PARAMS ((char *, int));
+static void som_solib_sharedlibrary_command (char *, int);
 
 static LONGEST
 som_solib_sizeof_symbol_table (filename)

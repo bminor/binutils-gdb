@@ -349,7 +349,7 @@ captured_main (void *data)
 #ifdef GDBTK
 	  case 'z':
 	    {
-	      extern int gdbtk_test PARAMS ((char *));
+extern int gdbtk_test (char *);
 	      if (!gdbtk_test (optarg))
 		{
 		  fprintf_unfiltered (gdb_stderr, "%s: unable to load tclcommand file \"%s\"",

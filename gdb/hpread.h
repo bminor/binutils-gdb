@@ -139,13 +139,10 @@ extern struct complaint string_table_offset_complaint;
 extern struct complaint lbrac_unmatched_complaint;
 extern struct complaint lbrac_mismatch_complaint;
 
-extern union sltentry *hpread_get_slt
-  PARAMS ((int, struct objfile *));
+extern union sltentry *hpread_get_slt (int, struct objfile *);
 
-extern union dnttentry *hpread_get_lntt
-  PARAMS ((int, struct objfile *));
+extern union dnttentry *hpread_get_lntt (int, struct objfile *);
 
-int hpread_has_name
-  PARAMS ((enum dntt_entry_type));
+int hpread_has_name (enum dntt_entry_type);
 
 /* end of hpread.h */

@@ -85,7 +85,7 @@ skip_adjust (pc, size)
   return pc;
 }
 
-static CORE_ADDR examine_frame PARAMS ((CORE_ADDR, CORE_ADDR * regs, CORE_ADDR));
+static CORE_ADDR examine_frame (CORE_ADDR, CORE_ADDR * regs, CORE_ADDR);
 static CORE_ADDR
 examine_frame (pc, regs, sp)
      CORE_ADDR pc;

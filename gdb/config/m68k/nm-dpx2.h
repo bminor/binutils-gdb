@@ -23,8 +23,7 @@
 #define REGISTER_U_ADDR(addr, blockend, regno) \
 	(addr) = dpx2_register_u_addr ((blockend),(regno));
 
-extern int
-dpx2_register_u_addr PARAMS ((int, int));
+extern int dpx2_register_u_addr (int, int);
 
 /* Kernel is a bit tenacious about sharing text segments, disallowing bpts.  */
 #define	ONE_PROCESS_WRITETEXT

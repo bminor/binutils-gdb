@@ -134,12 +134,10 @@ static int debug_control_mirror;
 static CORE_ADDR address_lookup[DR_LASTADDR - DR_FIRSTADDR + 1];
 
 static int
-i386_insert_aligned_watchpoint PARAMS ((int, CORE_ADDR, CORE_ADDR, int,
-					int));
+i386_insert_aligned_watchpoint (int, CORE_ADDR, CORE_ADDR, int, int);
 
 static int
-i386_insert_nonaligned_watchpoint PARAMS ((int, CORE_ADDR, CORE_ADDR, int,
-					   int));
+i386_insert_nonaligned_watchpoint (int, CORE_ADDR, CORE_ADDR, int, int);
 
 /* Insert a watchpoint.  */
 

@@ -29,21 +29,21 @@ extern void init_page_info ();
 /*******************************
 ** Static Local Decls
 ********************************/
-static void _makeVisibleWithNewHeight PARAMS ((TuiWinInfoPtr));
-static void _makeInvisibleAndSetNewHeight PARAMS ((TuiWinInfoPtr, int));
-static TuiStatus _tuiAdjustWinHeights PARAMS ((TuiWinInfoPtr, int));
-static int _newHeightOk PARAMS ((TuiWinInfoPtr, int));
-static void _tuiSetTabWidth_command PARAMS ((char *, int));
-static void _tuiRefreshAll_command PARAMS ((char *, int));
-static void _tuiSetWinHeight_command PARAMS ((char *, int));
-static void _tuiXDBsetWinHeight_command PARAMS ((char *, int));
-static void _tuiAllWindowsInfo PARAMS ((char *, int));
-static void _tuiSetFocus_command PARAMS ((char *, int));
-static void _tuiScrollForward_command PARAMS ((char *, int));
-static void _tuiScrollBackward_command PARAMS ((char *, int));
-static void _tuiScrollLeft_command PARAMS ((char *, int));
-static void _tuiScrollRight_command PARAMS ((char *, int));
-static void _parseScrollingArgs PARAMS ((char *, TuiWinInfoPtr *, int *));
+static void _makeVisibleWithNewHeight (TuiWinInfoPtr);
+static void _makeInvisibleAndSetNewHeight (TuiWinInfoPtr, int);
+static TuiStatus _tuiAdjustWinHeights (TuiWinInfoPtr, int);
+static int _newHeightOk (TuiWinInfoPtr, int);
+static void _tuiSetTabWidth_command (char *, int);
+static void _tuiRefreshAll_command (char *, int);
+static void _tuiSetWinHeight_command (char *, int);
+static void _tuiXDBsetWinHeight_command (char *, int);
+static void _tuiAllWindowsInfo (char *, int);
+static void _tuiSetFocus_command (char *, int);
+static void _tuiScrollForward_command (char *, int);
+static void _tuiScrollBackward_command (char *, int);
+static void _tuiScrollLeft_command (char *, int);
+static void _tuiScrollRight_command (char *, int);
+static void _parseScrollingArgs (char *, TuiWinInfoPtr *, int *);
 
 
 /***************************************

@@ -30,8 +30,8 @@
 /* FIXME: Eliminate the next two functions when we have the time to
    change all the callers.  */
 
-void i387_to_double PARAMS ((char *from, char *to));
-void double_to_i387 PARAMS ((char *from, char *to));
+void i387_to_double (char *from, char *to);
+void double_to_i387 (char *from, char *to);
 
 void
 i387_to_double (from, to)
@@ -56,8 +56,8 @@ double_to_i387 (from, to)
    use the generic implementation based on the new register file
    layout.  */
 
-static void print_387_control_bits PARAMS ((unsigned int control));
-static void print_387_status_bits PARAMS ((unsigned int status));
+static void print_387_control_bits (unsigned int control);
+static void print_387_status_bits (unsigned int status);
 
 static void
 print_387_control_bits (control)

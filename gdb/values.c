@@ -35,18 +35,17 @@
 
 /* Prototypes for exported functions. */
 
-void _initialize_values PARAMS ((void));
+void _initialize_values (void);
 
 /* Prototypes for local functions. */
 
-static value_ptr value_headof PARAMS ((value_ptr, struct type *,
-				       struct type *));
+static value_ptr value_headof (value_ptr, struct type *, struct type *);
 
-static void show_values PARAMS ((char *, int));
+static void show_values (char *, int);
 
-static void show_convenience PARAMS ((char *, int));
+static void show_convenience (char *, int);
 
-static int vb_match PARAMS ((struct type *, int, struct type *));
+static int vb_match (struct type *, int, struct type *);
 
 /* The value-history records all the values printed
    by print commands during this session.  Each chunk

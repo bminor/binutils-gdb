@@ -42,7 +42,7 @@
 /* Return number of args passed to a frame.
    Can return -1, meaning no way to tell.  */
 
-extern int isi_frame_num_args PARAMS ((struct frame_info * fi));
+extern int isi_frame_num_args (struct frame_info *fi);
 #define FRAME_NUM_ARGS(fi) (isi_frame_num_args ((fi)))
 
 /* Put here the code to store, into a struct frame_saved_regs,
@@ -122,7 +122,7 @@ retry:									\
 /* The only reason this is here is the tm-isi.h reference below.  It
    was moved back here from tm-m68k.h.  FIXME? */
 
-extern CORE_ADDR isi_skip_prologue PARAMS ((CORE_ADDR));
+extern CORE_ADDR isi_skip_prologue (CORE_ADDR);
 #define SKIP_PROLOGUE(pc) (isi_skip_prologue (pc))
 
 #include "m68k/tm-m68k.h"

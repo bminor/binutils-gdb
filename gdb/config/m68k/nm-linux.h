@@ -26,14 +26,13 @@
 /* Return sizeof user struct to callers in less machine dependent routines */
 
 #define KERNEL_U_SIZE kernel_u_size()
-extern int kernel_u_size PARAMS ((void));
+extern int kernel_u_size (void);
 
 #define U_REGS_OFFSET 0
 
 #define REGISTER_U_ADDR(addr, blockend, regno) \
 	(addr) = m68k_linux_register_u_addr ((blockend),(regno));
 
-extern int
-m68k_linux_register_u_addr PARAMS ((int, int));
+extern int m68k_linux_register_u_addr (int, int);
 
 #endif /* #ifndef NM_LINUX_H */

@@ -59,7 +59,7 @@ struct symbol;
    to reach some "real" code.  */
 
 #define SKIP_PROLOGUE(pc)	(alpha_skip_prologue(pc, 0))
-extern CORE_ADDR alpha_skip_prologue PARAMS ((CORE_ADDR addr, int lenient));
+extern CORE_ADDR alpha_skip_prologue (CORE_ADDR addr, int lenient);
 
 /* Immediately after a function call, return the saved pc.
    Can't always go through the frames for this because on some machines
@@ -67,8 +67,7 @@ extern CORE_ADDR alpha_skip_prologue PARAMS ((CORE_ADDR addr, int lenient));
    some instructions.  */
 
 #define SAVED_PC_AFTER_CALL(frame)	alpha_saved_pc_after_call(frame)
-extern CORE_ADDR
-  alpha_saved_pc_after_call PARAMS ((struct frame_info *));
+extern CORE_ADDR alpha_saved_pc_after_call (struct frame_info *);
 
 /* Are we currently handling a signal ?  */
 
@@ -184,7 +183,7 @@ extern CORE_ADDR
 #define REGISTER_CONVERT_TO_VIRTUAL(REGNUM, TYPE, FROM, TO) \
   alpha_register_convert_to_virtual (REGNUM, TYPE, FROM, TO)
 extern void
-alpha_register_convert_to_virtual PARAMS ((int, struct type *, char *, char *));
+alpha_register_convert_to_virtual (int, struct type *, char *, char *);
 
 /* Convert data from virtual format with type TYPE in buffer FROM
    to raw format for register REGNUM in buffer TO.  */
@@ -192,7 +191,7 @@ alpha_register_convert_to_virtual PARAMS ((int, struct type *, char *, char *));
 #define REGISTER_CONVERT_TO_RAW(TYPE, REGNUM, FROM, TO)	\
   alpha_register_convert_to_raw (TYPE, REGNUM, FROM, TO)
 extern void
-alpha_register_convert_to_raw PARAMS ((struct type *, int, char *, char *));
+alpha_register_convert_to_raw (struct type *, int, char *, char *);
 
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
@@ -213,16 +212,14 @@ alpha_register_convert_to_raw PARAMS ((struct type *, int, char *, char *));
 
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
   alpha_extract_return_value(TYPE, REGBUF, VALBUF)
-extern void
-alpha_extract_return_value PARAMS ((struct type *, char *, char *));
+extern void alpha_extract_return_value (struct type *, char *, char *);
 
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format.  */
 
 #define STORE_RETURN_VALUE(TYPE,VALBUF) \
   alpha_store_return_value(TYPE, VALBUF)
-extern void
-alpha_store_return_value PARAMS ((struct type *, char *));
+extern void alpha_store_return_value (struct type *, char *);
 
 /* Extract from an array REGBUF containing the (raw) register state
    the address in which a function should return its structure value,
@@ -247,7 +244,7 @@ alpha_store_return_value PARAMS ((struct type *, char *));
    and produces the frame's chain-pointer. */
 
 #define FRAME_CHAIN(thisframe) (CORE_ADDR) alpha_frame_chain (thisframe)
-extern CORE_ADDR alpha_frame_chain PARAMS ((struct frame_info *));
+extern CORE_ADDR alpha_frame_chain (struct frame_info *);
 
 /* Define other aspects of the stack frame.  */
 
@@ -261,8 +258,7 @@ extern CORE_ADDR alpha_frame_chain PARAMS ((struct frame_info *));
 /* Saved Pc.  */
 
 #define FRAME_SAVED_PC(FRAME)	(alpha_frame_saved_pc(FRAME))
-extern CORE_ADDR
-  alpha_frame_saved_pc PARAMS ((struct frame_info *));
+extern CORE_ADDR alpha_frame_saved_pc (struct frame_info *);
 
 /* The alpha has two different virtual pointers for arguments and locals.
 
@@ -298,7 +294,7 @@ extern CORE_ADDR
    ways in the stack frame.  sp is even more special:
    the address we return for it IS the sp for the next frame.  */
 
-extern void alpha_find_saved_regs PARAMS ((struct frame_info *));
+extern void alpha_find_saved_regs (struct frame_info *);
 
 #define FRAME_INIT_SAVED_REGS(frame_info) \
   do { \
@@ -313,19 +309,17 @@ extern void alpha_find_saved_regs PARAMS ((struct frame_info *));
 #define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
   (alpha_push_arguments((nargs), (args), (sp), (struct_return), (struct_addr)))
 extern CORE_ADDR
-  alpha_push_arguments PARAMS ((int, struct value **, CORE_ADDR, int, CORE_ADDR));
+alpha_push_arguments (int, struct value **, CORE_ADDR, int, CORE_ADDR);
 
 /* Push an empty stack frame, to record the current PC, etc.  */
 
 #define PUSH_DUMMY_FRAME 	alpha_push_dummy_frame()
-extern void
-alpha_push_dummy_frame PARAMS ((void));
+extern void alpha_push_dummy_frame (void);
 
 /* Discard from the stack the innermost frame, restoring all registers.  */
 
 #define POP_FRAME		alpha_pop_frame()
-extern void
-alpha_pop_frame PARAMS ((void));
+extern void alpha_pop_frame (void);
 
 /* Alpha OSF/1 inhibits execution of code on the stack.
    But there is no need for a dummy on the alpha. PUSH_ARGUMENTS
@@ -346,7 +340,7 @@ alpha_pop_frame PARAMS ((void));
 
 #define CALL_DUMMY_BREAKPOINT_OFFSET (0)
 
-extern CORE_ADDR alpha_call_dummy_address PARAMS ((void));
+extern CORE_ADDR alpha_call_dummy_address (void);
 #define CALL_DUMMY_ADDRESS() alpha_call_dummy_address()
 
 /* Insert the specified number of args and function address
@@ -376,7 +370,7 @@ extern CORE_ADDR alpha_call_dummy_address PARAMS ((void));
    alpha_extra_func_info_t's off of this.  */
 
 #define MIPS_EFI_SYMBOL_NAME "__GDB_EFI_INFO__"
-extern void ecoff_relocate_efi PARAMS ((struct symbol *, CORE_ADDR));
+extern void ecoff_relocate_efi (struct symbol *, CORE_ADDR);
 
 /* Specific information about a procedure.
    This overlays the ALPHA's PDR records, 
@@ -402,8 +396,7 @@ typedef struct alpha_extra_func_info
   alpha_extra_func_info_t proc_desc;
 
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fci) init_extra_frame_info(fci)
-extern void
-init_extra_frame_info PARAMS ((struct frame_info *));
+extern void init_extra_frame_info (struct frame_info *);
 
 #define	PRINT_EXTRA_FRAME_INFO(fi) \
   { \
@@ -424,7 +417,7 @@ init_extra_frame_info PARAMS ((struct frame_info *));
    multiple functions with the same SP that are at different stack levels. */
 
 #define SETUP_ARBITRARY_FRAME(argc, argv) setup_arbitrary_frame (argc, argv)
-extern struct frame_info *setup_arbitrary_frame PARAMS ((int, CORE_ADDR *));
+extern struct frame_info *setup_arbitrary_frame (int, CORE_ADDR *);
 
 /* This is used by heuristic_proc_start.  It should be shot it the head.  */
 #ifndef VM_MIN_ADDRESS
@@ -476,6 +469,7 @@ extern struct frame_info *setup_arbitrary_frame PARAMS ((int, CORE_ADDR *));
 
 #define FRAME_PAST_SIGTRAMP_FRAME(frame, pc) \
   (alpha_osf_skip_sigtramp_frame (frame, pc))
-extern CORE_ADDR alpha_osf_skip_sigtramp_frame PARAMS ((struct frame_info *, CORE_ADDR));
+extern CORE_ADDR alpha_osf_skip_sigtramp_frame (struct frame_info *,
+						CORE_ADDR);
 
 #endif /* TM_ALPHA_H */

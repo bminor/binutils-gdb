@@ -20,9 +20,9 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-extern int f_parse PARAMS ((void));
+extern int f_parse (void);
 
-extern void f_error PARAMS ((char *));	/* Defined in f-exp.y */
+extern void f_error (char *);	/* Defined in f-exp.y */
 
 extern void f_print_type (struct type *, char *, struct ui_file *, int,
 			  int);
@@ -60,7 +60,7 @@ extern SAVED_F77_COMMON_PTR head_common_list;	/* Ptr to 1st saved COMMON  */
 extern SAVED_F77_COMMON_PTR tail_common_list;	/* Ptr to last saved COMMON  */
 extern SAVED_F77_COMMON_PTR current_common;	/* Ptr to current COMMON */
 
-extern SAVED_F77_COMMON_PTR find_common_for_function PARAMS ((char *, char *));
+extern SAVED_F77_COMMON_PTR find_common_for_function (char *, char *);
 
 #define UNINITIALIZED_SECNUM -1
 #define COMMON_NEEDS_PATCHING(blk) ((blk)->secnum == UNINITIALIZED_SECNUM)
@@ -83,13 +83,13 @@ extern SAVED_F77_COMMON_PTR find_common_for_function PARAMS ((char *, char *));
 extern char *real_main_name;	/* Name of main function */
 extern int real_main_c_value;	/* C_value field of main function */
 
-extern int f77_get_dynamic_upperbound PARAMS ((struct type *, int *));
+extern int f77_get_dynamic_upperbound (struct type *, int *);
 
-extern int f77_get_dynamic_lowerbound PARAMS ((struct type *, int *));
+extern int f77_get_dynamic_lowerbound (struct type *, int *);
 
-extern void f77_get_dynamic_array_length PARAMS ((struct type *));
+extern void f77_get_dynamic_array_length (struct type *);
 
-extern int calc_f77_array_dims PARAMS ((struct type *));
+extern int calc_f77_array_dims (struct type *);
 
 #define DEFAULT_DOTMAIN_NAME_IN_MF77            ".MAIN_"
 #define DEFAULT_MAIN_NAME_IN_MF77               "MAIN_"

@@ -34,7 +34,7 @@
 
 static struct target_ops mon960_ops;
 
-static void mon960_open PARAMS ((char *args, int from_tty));
+static void mon960_open (char *args, int from_tty);
 
 #ifdef USE_GENERIC_LOAD
 

@@ -47,16 +47,16 @@ struct type *java_void_type;
 
 /* Local functions */
 
-extern void _initialize_java_language PARAMS ((void));
+extern void _initialize_java_language (void);
 
-static int java_demangled_signature_length PARAMS ((char *));
-static void java_demangled_signature_copy PARAMS ((char *, char *));
+static int java_demangled_signature_length (char *);
+static void java_demangled_signature_copy (char *, char *);
 
-static struct symtab *get_java_class_symtab PARAMS ((void));
-static char *get_java_utf8_name PARAMS ((struct obstack * obstack, value_ptr name));
-static int java_class_is_primitive PARAMS ((value_ptr clas));
-static struct type *java_lookup_type PARAMS ((char *signature));
-static value_ptr java_value_string PARAMS ((char *ptr, int len));
+static struct symtab *get_java_class_symtab (void);
+static char *get_java_utf8_name (struct obstack *obstack, value_ptr name);
+static int java_class_is_primitive (value_ptr clas);
+static struct type *java_lookup_type (char *signature);
+static value_ptr java_value_string (char *ptr, int len);
 
 static void java_emit_char (int c, struct ui_file * stream, int quoter);
 
@@ -66,7 +66,7 @@ static void java_emit_char (int c, struct ui_file * stream, int quoter);
 
 static struct objfile *dynamics_objfile = NULL;
 
-static struct type *java_link_class_type PARAMS ((struct type *, value_ptr));
+static struct type *java_link_class_type (struct type *, value_ptr);
 
 static struct objfile *
 get_dynamics_objfile ()
@@ -149,7 +149,7 @@ add_class_symtab_symbol (sym)
   BLOCK_NSYMS (bl) = BLOCK_NSYMS (bl) + 1;
 }
 
-static struct symbol *add_class_symbol PARAMS ((struct type * type, CORE_ADDR addr));
+static struct symbol *add_class_symbol (struct type *type, CORE_ADDR addr);
 
 static struct symbol *
 add_class_symbol (type, addr)
@@ -1107,7 +1107,7 @@ _initialize_java_language ()
    We should use make_run_cleanup to have this be called.
    But will that mess up values in value histry?  FIXME */
 
-extern void java_rerun_cleanup PARAMS ((void));
+extern void java_rerun_cleanup (void);
 void
 java_rerun_cleanup ()
 {

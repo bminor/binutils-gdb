@@ -43,7 +43,7 @@
 /* Prototypes for supply_gregset etc. */
 #include "gregset.h"
 
-static void fetch_core_registers PARAMS ((char *, unsigned, int, CORE_ADDR));
+static void fetch_core_registers (char *, unsigned, int, CORE_ADDR);
 
 static void
 fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)

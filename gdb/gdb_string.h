@@ -31,15 +31,15 @@
 #endif
 
 #ifndef strchr
-extern char *strchr PARAMS ((const char *, int));	/* X3.159-1989  4.11.5.2 */
+extern char *strchr (const char *, int);	/* X3.159-1989  4.11.5.2 */
 #endif
 
 #ifndef strrchr
-extern char *strrchr PARAMS ((const char *, int));	/* X3.159-1989  4.11.5.5 */
+extern char *strrchr (const char *, int);	/* X3.159-1989  4.11.5.5 */
 #endif
 
 #ifndef strtok
-extern char *strtok PARAMS ((char *, const char *));	/* X3.159-1989  4.11.5.8 */
+extern char *strtok (char *, const char *);	/* X3.159-1989  4.11.5.8 */
 #endif
 
 #ifdef HAVE_MEMORY_H
@@ -54,7 +54,7 @@ extern int memcmp ();
 
 #ifdef NEED_DECLARATION_STRERROR
 #ifndef strerror
-extern char *strerror PARAMS ((int));	/* X3.159-1989  4.11.6.2 */
+extern char *strerror (int);	/* X3.159-1989  4.11.6.2 */
 #endif
 #endif
 
@@ -64,7 +64,7 @@ extern char *strdup ();		/* full prototype collides w/ some OSes (AIX 3.2.5) */
 
 #ifdef NEED_DECLARATION_STRSTR
 #ifndef strstr
-extern char *strstr PARAMS ((const char *, const char *));	/* X3.159-1989  4.11.5.7 */
+extern char *strstr (const char *, const char *);	/* X3.159-1989  4.11.5.7 */
 #endif
 #endif
 

@@ -61,7 +61,7 @@
 #include "os9k.h"
 #include "stabsread.h"
 
-extern void _initialize_os9kread PARAMS ((void));
+extern void _initialize_os9kread (void);
 
 /* Each partial symbol table entry contains a pointer to private data for the
    read_symtab() function to use when expanding a partial symbol table entry
@@ -126,51 +126,41 @@ static struct complaint lbrac_mismatch_complaint =
 
 /* Local function prototypes */
 
-static void
-read_minimal_symbols PARAMS ((struct objfile *));
+static void read_minimal_symbols (struct objfile *);
+
+static void os9k_read_ofile_symtab (struct partial_symtab *);
+
+static void os9k_psymtab_to_symtab (struct partial_symtab *);
+
+static void os9k_psymtab_to_symtab_1 (struct partial_symtab *);
+
+static void read_os9k_psymtab (struct objfile *, CORE_ADDR, int);
+
+static int fill_sym (FILE *, bfd *);
+
+static void os9k_symfile_init (struct objfile *);
+
+static void os9k_new_init (struct objfile *);
+
+static void os9k_symfile_read (struct objfile *, int);
+
+static void os9k_symfile_finish (struct objfile *);
 
 static void
-os9k_read_ofile_symtab PARAMS ((struct partial_symtab *));
+os9k_process_one_symbol (int, int, CORE_ADDR, char *,
+			 struct section_offsets *, struct objfile *);
 
-static void
-os9k_psymtab_to_symtab PARAMS ((struct partial_symtab *));
+static struct partial_symtab *os9k_start_psymtab (struct objfile *, char *,
+						  CORE_ADDR, int, int,
+						  struct partial_symbol **,
+						  struct partial_symbol **);
 
-static void
-os9k_psymtab_to_symtab_1 PARAMS ((struct partial_symtab *));
+static struct partial_symtab *os9k_end_psymtab (struct partial_symtab *,
+						char **, int, int, CORE_ADDR,
+						struct partial_symtab **,
+						int);
 
-static void
-read_os9k_psymtab PARAMS ((struct objfile *, CORE_ADDR, int));
-
-static int
-fill_sym PARAMS ((FILE *, bfd *));
-
-static void
-os9k_symfile_init PARAMS ((struct objfile *));
-
-static void
-os9k_new_init PARAMS ((struct objfile *));
-
-static void
-os9k_symfile_read PARAMS ((struct objfile *, int));
-
-static void
-os9k_symfile_finish PARAMS ((struct objfile *));
-
-static void
-os9k_process_one_symbol PARAMS ((int, int, CORE_ADDR, char *,
-			       struct section_offsets *, struct objfile *));
-
-static struct partial_symtab *
-  os9k_start_psymtab PARAMS ((struct objfile *, char *,
-			      CORE_ADDR, int, int, struct partial_symbol **,
-			      struct partial_symbol **));
-
-static struct partial_symtab *
-  os9k_end_psymtab PARAMS ((struct partial_symtab *, char **, int, int, CORE_ADDR,
-			    struct partial_symtab **, int));
-
-static void
-record_minimal_symbol PARAMS ((char *, CORE_ADDR, int, struct objfile *));
+static void record_minimal_symbol (char *, CORE_ADDR, int, struct objfile *);
 
 #define HANDLE_RBRAC(val) \
   if ((val) > pst->texthigh) pst->texthigh = (val);

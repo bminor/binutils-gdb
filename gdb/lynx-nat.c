@@ -28,8 +28,8 @@
 #include <sys/wait.h>
 #include <sys/fpp.h>
 
-static unsigned long registers_addr PARAMS ((int pid));
-static void fetch_core_registers PARAMS ((char *, unsigned, int, CORE_ADDR));
+static unsigned long registers_addr (int pid);
+static void fetch_core_registers (char *, unsigned, int, CORE_ADDR);
 
 #define X(ENTRY)(offsetof(struct econtext, ENTRY))
 

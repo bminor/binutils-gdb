@@ -131,8 +131,8 @@ static int remote_add_host = 0;
 /* Forward declaration */
 extern struct target_ops child_ops;
 
-static int win32_child_thread_alive PARAMS ((int));
-void child_kill_inferior PARAMS ((void));
+static int win32_child_thread_alive (int);
+void child_kill_inferior (void);
 
 static int last_sig = 0;	/* Set if a signal was received from the
 				   debugged process */

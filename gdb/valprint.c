@@ -43,23 +43,23 @@ static int partial_memory_read (CORE_ADDR memaddr, char *myaddr,
 static void print_hex_chars (struct ui_file *, unsigned char *,
 			     unsigned int);
 
-static void show_print PARAMS ((char *, int));
+static void show_print (char *, int);
 
-static void set_print PARAMS ((char *, int));
+static void set_print (char *, int);
 
-static void set_radix PARAMS ((char *, int));
+static void set_radix (char *, int);
 
-static void show_radix PARAMS ((char *, int));
+static void show_radix (char *, int);
 
-static void set_input_radix PARAMS ((char *, int, struct cmd_list_element *));
+static void set_input_radix (char *, int, struct cmd_list_element *);
 
-static void set_input_radix_1 PARAMS ((int, unsigned));
+static void set_input_radix_1 (int, unsigned);
 
-static void set_output_radix PARAMS ((char *, int, struct cmd_list_element *));
+static void set_output_radix (char *, int, struct cmd_list_element *);
 
-static void set_output_radix_1 PARAMS ((int, unsigned));
+static void set_output_radix_1 (int, unsigned);
 
-void _initialize_valprint PARAMS ((void));
+void _initialize_valprint (void);
 
 /* Maximum number of chars to print for a string pointer value or vector
    contents, or UINT_MAX for no limit.  Note that "set print elements 0"

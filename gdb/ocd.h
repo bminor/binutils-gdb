@@ -86,57 +86,52 @@ enum ocd_target_type
     OCD_TARGET_IBM_PPC = 0x3
   };				/* IBM PPC 4xx */
 
-void ocd_open PARAMS ((char *name, int from_tty, enum ocd_target_type,
-		       struct target_ops * ops));
+void ocd_open (char *name, int from_tty, enum ocd_target_type,
+	       struct target_ops *ops);
 
-void ocd_close PARAMS ((int quitting));
+void ocd_close (int quitting);
 
-void ocd_detach PARAMS ((char *args, int from_tty));
+void ocd_detach (char *args, int from_tty);
 
-void ocd_resume PARAMS ((int pid, int step, enum target_signal siggnal));
+void ocd_resume (int pid, int step, enum target_signal siggnal);
 
-void ocd_prepare_to_store PARAMS ((void));
+void ocd_prepare_to_store (void);
 
-void ocd_stop PARAMS ((void));
+void ocd_stop (void);
 
-void ocd_files_info PARAMS ((struct target_ops * ignore));
+void ocd_files_info (struct target_ops *ignore);
 
 
-int ocd_xfer_memory PARAMS ((CORE_ADDR memaddr, char *myaddr,
-			     int len, int should_write,
-			     struct target_ops * target));
+int ocd_xfer_memory (CORE_ADDR memaddr, char *myaddr,
+		     int len, int should_write, struct target_ops *target);
 
-void ocd_mourn PARAMS ((void));
+void ocd_mourn (void);
 
-void ocd_create_inferior PARAMS ((char *exec_file,
-				  char *args,
-				  char **env));
+void ocd_create_inferior (char *exec_file, char *args, char **env);
 
-int ocd_thread_alive PARAMS ((int th));
+int ocd_thread_alive (int th);
 
-void ocd_error PARAMS ((char *s, int error_code));
+void ocd_error (char *s, int error_code);
 
-void ocd_kill PARAMS ((void));
+void ocd_kill (void);
 
-void ocd_load PARAMS ((char *args, int from_tty));
+void ocd_load (char *args, int from_tty);
 
-unsigned char *ocd_read_bdm_registers PARAMS ((int first_bdm_regno,
-					       int last_bdm_regno,
-					       int *reglen));
+unsigned char *ocd_read_bdm_registers (int first_bdm_regno,
+				       int last_bdm_regno, int *reglen);
 
-CORE_ADDR ocd_read_bdm_register PARAMS ((int bdm_regno));
+CORE_ADDR ocd_read_bdm_register (int bdm_regno);
 
-void ocd_write_bdm_registers PARAMS ((int first_bdm_regno,
-				      unsigned char *regptr,
-				      int reglen));
+void ocd_write_bdm_registers (int first_bdm_regno,
+			      unsigned char *regptr, int reglen);
 
-void ocd_write_bdm_register PARAMS ((int bdm_regno, CORE_ADDR reg));
+void ocd_write_bdm_register (int bdm_regno, CORE_ADDR reg);
 
-int ocd_wait PARAMS ((void));
+int ocd_wait (void);
 
-int ocd_insert_breakpoint PARAMS ((CORE_ADDR addr, char *contents_cache));
-int ocd_remove_breakpoint PARAMS ((CORE_ADDR addr, char *contents_cache));
+int ocd_insert_breakpoint (CORE_ADDR addr, char *contents_cache);
+int ocd_remove_breakpoint (CORE_ADDR addr, char *contents_cache);
 
-int ocd_write_bytes PARAMS ((CORE_ADDR memaddr, char *myaddr, int len));
+int ocd_write_bytes (CORE_ADDR memaddr, char *myaddr, int len);
 
 #endif /* OCD_H */

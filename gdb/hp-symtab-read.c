@@ -83,85 +83,73 @@ static struct complaint hpread_unhandled_blockdata_complaint =
 
 /* Forward procedure declarations */
 
-static unsigned long hpread_get_scope_start
-  PARAMS ((sltpointer, struct objfile *));
+static unsigned long hpread_get_scope_start (sltpointer, struct objfile *);
 
-static unsigned long hpread_get_line
-  PARAMS ((sltpointer, struct objfile *));
+static unsigned long hpread_get_line (sltpointer, struct objfile *);
 
-static CORE_ADDR hpread_get_location
-  PARAMS ((sltpointer, struct objfile *));
+static CORE_ADDR hpread_get_location (sltpointer, struct objfile *);
 
-static void hpread_psymtab_to_symtab_1
-  PARAMS ((struct partial_symtab *));
+static void hpread_psymtab_to_symtab_1 (struct partial_symtab *);
 
-void hpread_psymtab_to_symtab
-  PARAMS ((struct partial_symtab *));
+void hpread_psymtab_to_symtab (struct partial_symtab *);
 
 static struct symtab *hpread_expand_symtab
-  PARAMS ((struct objfile *, int, int, CORE_ADDR, int,
-	   struct section_offsets *, char *));
+  (struct objfile *, int, int, CORE_ADDR, int,
+   struct section_offsets *, char *);
 
-static int hpread_type_translate
-  PARAMS ((dnttpointer));
+static int hpread_type_translate (dnttpointer);
 
-static struct type **hpread_lookup_type
-  PARAMS ((dnttpointer, struct objfile *));
+static struct type **hpread_lookup_type (dnttpointer, struct objfile *);
 
-static struct type *hpread_alloc_type
-  PARAMS ((dnttpointer, struct objfile *));
+static struct type *hpread_alloc_type (dnttpointer, struct objfile *);
 
 static struct type *hpread_read_enum_type
-  PARAMS ((dnttpointer, union dnttentry *, struct objfile *));
+  (dnttpointer, union dnttentry *, struct objfile *);
 
 static struct type *hpread_read_function_type
-  PARAMS ((dnttpointer, union dnttentry *, struct objfile *, int));
+  (dnttpointer, union dnttentry *, struct objfile *, int);
 
 static struct type *hpread_read_doc_function_type
-  PARAMS ((dnttpointer, union dnttentry *, struct objfile *, int));
+  (dnttpointer, union dnttentry *, struct objfile *, int);
 
 static struct type *hpread_read_struct_type
-  PARAMS ((dnttpointer, union dnttentry *, struct objfile *));
+  (dnttpointer, union dnttentry *, struct objfile *);
 
-static struct type *hpread_get_nth_template_arg
-  PARAMS ((struct objfile *, int));
+static struct type *hpread_get_nth_template_arg (struct objfile *, int);
 
 static struct type *hpread_read_templ_arg_type
-  PARAMS ((dnttpointer, union dnttentry *, struct objfile *, char *));
+  (dnttpointer, union dnttentry *, struct objfile *, char *);
 
 static struct type *hpread_read_set_type
-  PARAMS ((dnttpointer, union dnttentry *, struct objfile *));
+  (dnttpointer, union dnttentry *, struct objfile *);
 
 static struct type *hpread_read_array_type
-  PARAMS ((dnttpointer, union dnttentry * dn_bufp, struct objfile * objfile));
+  (dnttpointer, union dnttentry *dn_bufp, struct objfile *objfile);
 
 static struct type *hpread_read_subrange_type
-  PARAMS ((dnttpointer, union dnttentry *, struct objfile *));
+  (dnttpointer, union dnttentry *, struct objfile *);
 
-static struct type *hpread_type_lookup
-  PARAMS ((dnttpointer, struct objfile *));
+static struct type *hpread_type_lookup (dnttpointer, struct objfile *);
 
 static sltpointer hpread_record_lines
-  PARAMS ((struct subfile *, sltpointer, sltpointer,
-	   struct objfile *, CORE_ADDR));
+  (struct subfile *, sltpointer, sltpointer, struct objfile *, CORE_ADDR);
 
 static void hpread_process_one_debug_symbol
-  PARAMS ((union dnttentry *, char *, struct section_offsets *,
-	   struct objfile *, CORE_ADDR, int, char *, int, int *));
+  (union dnttentry *, char *, struct section_offsets *,
+   struct objfile *, CORE_ADDR, int, char *, int, int *);
 
-static int hpread_get_scope_depth
-  PARAMS ((union dnttentry *, struct objfile *, int));
+static int hpread_get_scope_depth (union dnttentry *, struct objfile *, int);
 
 static void fix_static_member_physnames
-  PARAMS ((struct type *, char *, struct objfile *));
+  (struct type *, char *, struct objfile *);
 
 static void fixup_class_method_type
-  PARAMS ((struct type *, struct type *, struct objfile *));
+  (struct type *, struct type *, struct objfile *);
 
-static void hpread_adjust_bitoffsets PARAMS ((struct type *, int));
+static void hpread_adjust_bitoffsets (struct type *, int);
 
 static dnttpointer hpread_get_next_skip_over_anon_unions
-  PARAMS ((int, dnttpointer, union dnttentry **, struct objfile *));
+  (int, dnttpointer, union dnttentry **, struct objfile *);
 
 /* Global to indicate presence of HP-compiled objects,
    in particular, SOM executable file with SOM debug info 

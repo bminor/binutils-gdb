@@ -38,15 +38,12 @@
 struct objfile;
 
 /* Hook to look at new objfiles (shared libraries) */
-extern void
-linuxthreads_new_objfile PARAMS ((struct objfile *objfile));
+extern void linuxthreads_new_objfile (struct objfile *objfile);
 
 /* Method to print a human-readable thread description */
-extern char *
-linuxthreads_pid_to_str PARAMS ((int pid));
+extern char *linuxthreads_pid_to_str (int pid);
 
-extern int
-linuxthreads_prepare_to_proceed PARAMS ((int step));
+extern int linuxthreads_prepare_to_proceed (int step);
 #define PREPARE_TO_PROCEED(select_it) linuxthreads_prepare_to_proceed (1)
 
 /* Defined to make stepping-over-breakpoints be thread-atomic.  */

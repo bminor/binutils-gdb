@@ -29,11 +29,11 @@
 #include "symfile.h"		/* for generic_load */
 #include <time.h>
 
-extern void report_transfer_performance PARAMS ((unsigned long, time_t, time_t));
+extern void report_transfer_performance (unsigned long, time_t, time_t);
 
 static struct target_ops sparclet_ops;
 
-static void sparclet_open PARAMS ((char *args, int from_tty));
+static void sparclet_open (char *args, int from_tty);
 
 /* This array of registers need to match the indexes used by GDB.
    This exists because the various ROM monitors use different strings

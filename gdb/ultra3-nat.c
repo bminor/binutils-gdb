@@ -37,7 +37,7 @@
 #include <sys/file.h>
 #include "gdb_stat.h"
 
-static void fetch_core_registers PARAMS ((char *, unsigned, int, CORE_ADDR));
+static void fetch_core_registers (char *, unsigned, int, CORE_ADDR);
 
 /* Assumes support for AMD's Binary Compatibility Standard
    for ptrace().  If you define ULTRA3, the ultra3 extensions to

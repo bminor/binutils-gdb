@@ -24,7 +24,7 @@
 #include "monitor.h"
 #include "serial.h"
 
-static void rom68k_open PARAMS ((char *args, int from_tty));
+static void rom68k_open (char *args, int from_tty);
 
 static void
 rom68k_supply_register (regname, regnamelen, val, vallen)

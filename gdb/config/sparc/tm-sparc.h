@@ -270,7 +270,7 @@ extern int sparc_intreg_size (void);
 
 #define STORE_RETURN_VALUE(TYPE, VALBUF) \
      sparc_store_return_value (TYPE, VALBUF)
-extern void sparc_store_return_value PARAMS ((struct type *, char *));
+extern void sparc_store_return_value (struct type *, char *);
 
 /* Extract from an array REGBUF containing the (raw) register state
    the address in which a function should return its structure value,
@@ -279,8 +279,7 @@ extern void sparc_store_return_value PARAMS ((struct type *, char *));
 #define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
      sparc_extract_struct_value_address (REGBUF)
 
-extern CORE_ADDR
-sparc_extract_struct_value_address PARAMS ((char *));
+extern CORE_ADDR sparc_extract_struct_value_address (char *);
 
 /* If the current gcc for for this target does not produce correct
    debugging information for float parameters, both prototyped and
@@ -334,7 +333,7 @@ extern int sparc_y_regnum (void);
    a fake insn, step past it.  */
 
 #define PC_ADJUST(PC) sparc_pc_adjust (PC)
-extern CORE_ADDR sparc_pc_adjust PARAMS ((CORE_ADDR));
+extern CORE_ADDR sparc_pc_adjust (CORE_ADDR);
 
 /* Advance PC across any function entry prologue instructions to reach
    some "real" code.  SKIP_PROLOGUE_FRAMELESS_P advances the PC past
@@ -343,7 +342,7 @@ extern CORE_ADDR sparc_pc_adjust PARAMS ((CORE_ADDR));
    function is frameless, unequal otherwise.  */
 
 #define SKIP_PROLOGUE_FRAMELESS_P(PC) sparc_skip_prologue (PC, 1)
-extern CORE_ADDR sparc_skip_prologue PARAMS ((CORE_ADDR, int));
+extern CORE_ADDR sparc_skip_prologue (CORE_ADDR, int);
 
 /* If an argument is declared "register", Sun cc will keep it in a register,
    never saving it onto the stack.  So we better not believe the "p" symbol
@@ -475,12 +474,11 @@ extern CORE_ADDR sparc_skip_prologue PARAMS ((CORE_ADDR, int));
    outs change into ins in different frames.  HAVE_REGISTER_WINDOWS can't
    deal with this case and also handle flat frames at the same time.  */
 
-void sparc_get_saved_register PARAMS ((char *raw_buffer, 
-				       int *optimized, 
-				       CORE_ADDR * addrp, 
-				       struct frame_info * frame, 
-				       int regnum, 
-				       enum lval_type * lvalp));
+void sparc_get_saved_register (char *raw_buffer,
+			       int *optimized,
+			       CORE_ADDR * addrp,
+			       struct frame_info *frame,
+			       int regnum, enum lval_type *lvalp);
 
 #define GET_SAVED_REGISTER(RAW_BUFFER, OPTIMIZED, ADDRP, FRAME, REGNUM, LVAL) \
      sparc_get_saved_register (RAW_BUFFER, OPTIMIZED, ADDRP, \
@@ -490,10 +488,10 @@ void sparc_get_saved_register PARAMS ((char *raw_buffer,
 
 #define INIT_EXTRA_FRAME_INFO(FROMLEAF, FCI) \
      sparc_init_extra_frame_info (FROMLEAF, FCI)
-extern void sparc_init_extra_frame_info PARAMS ((int, struct frame_info *));
+extern void sparc_init_extra_frame_info (int, struct frame_info *);
 
 #define FRAME_CHAIN(THISFRAME) (sparc_frame_chain (THISFRAME))
-extern CORE_ADDR sparc_frame_chain PARAMS ((struct frame_info *));
+extern CORE_ADDR sparc_frame_chain (struct frame_info *);
 
 /* A macro that tells us whether the function invocation represented
    by FI does not have a frame on the stack associated with it.  If it
@@ -505,7 +503,7 @@ extern CORE_ADDR sparc_frame_chain PARAMS ((struct frame_info *));
 /* Where is the PC for a specific frame */
 
 #define FRAME_SAVED_PC(FRAME) sparc_frame_saved_pc (FRAME)
-extern CORE_ADDR sparc_frame_saved_pc PARAMS ((struct frame_info *));
+extern CORE_ADDR sparc_frame_saved_pc (struct frame_info *);
 
 /* If the argument is on the stack, it will be here.  */
 #define FRAME_ARGS_ADDRESS(FI) ((FI)->frame)
@@ -689,8 +687,8 @@ extern void sparc_print_extra_frame_info (struct frame_info *);
 
 #define FIX_CALL_DUMMY(DUMMYNAME, PC, FUN, NARGS, ARGS, TYPE, GCC_P) \
      sparc_fix_call_dummy (DUMMYNAME, PC, FUN, TYPE, GCC_P)
-void sparc_fix_call_dummy PARAMS ((char *dummy, CORE_ADDR pc, CORE_ADDR fun,
-				   struct type * value_type, int using_gcc));
+void sparc_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
+			   struct type *value_type, int using_gcc);
 
 /* Arguments smaller than an int must be promoted to ints when
    synthesizing function calls.  */
@@ -700,18 +698,14 @@ void sparc_fix_call_dummy PARAMS ((char *dummy, CORE_ADDR pc, CORE_ADDR fun,
 #define PUSH_DUMMY_FRAME	sparc_push_dummy_frame ()
 #define POP_FRAME		sparc_pop_frame ()
 
-void sparc_push_dummy_frame PARAMS ((void));
-void sparc_pop_frame PARAMS ((void));
+void sparc_push_dummy_frame (void);
+void sparc_pop_frame (void);
 
 #define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
      sparc32_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR)
 
 extern CORE_ADDR
-sparc32_push_arguments PARAMS ((int, 
-				struct value **, 
-				CORE_ADDR, 
-				int, 
-				CORE_ADDR));
+sparc32_push_arguments (int, struct value **, CORE_ADDR, int, CORE_ADDR);
 
 /* Store the address of the place in which to copy the structure the
    subroutine will return.  This is called from call_function_by_hand. 
@@ -735,8 +729,7 @@ sparc32_push_arguments PARAMS ((int,
 
 #define EXTRACT_RETURN_VALUE(TYPE, REGBUF, VALBUF) \
      sparc32_extract_return_value (TYPE, REGBUF, VALBUF)
-extern void
-sparc32_extract_return_value PARAMS ((struct type *, char[], char *));
+extern void sparc32_extract_return_value (struct type *, char[], char *);
 
 #endif /* GDB_MULTI_ARCH */
 
@@ -744,14 +737,14 @@ sparc32_extract_return_value PARAMS ((struct type *, char[], char *));
 /* Sparc has no reliable single step ptrace call */
 
 #define SOFTWARE_SINGLE_STEP_P 1
-extern void sparc_software_single_step PARAMS ((unsigned int, int));
+extern void sparc_software_single_step (unsigned int, int);
 #define SOFTWARE_SINGLE_STEP(sig,bp_p) sparc_software_single_step (sig,bp_p)
 
 /* We need more arguments in a frame specification for the
    "frame" or "info frame" command.  */
 
 #define SETUP_ARBITRARY_FRAME(argc, argv) setup_arbitrary_frame (argc, argv)
-extern struct frame_info *setup_arbitrary_frame PARAMS ((int, CORE_ADDR *));
+extern struct frame_info *setup_arbitrary_frame (int, CORE_ADDR *);
 
 /* To print every pair of float registers as a double, we use this hook.
    We also print the condition code registers in a readable format
@@ -760,7 +753,7 @@ extern struct frame_info *setup_arbitrary_frame PARAMS ((int, CORE_ADDR *));
 #undef 	PRINT_REGISTER_HOOK
 #define	PRINT_REGISTER_HOOK(regno)	\
   sparc_print_register_hook (regno)
-extern void sparc_print_register_hook PARAMS ((int regno));
+extern void sparc_print_register_hook (int regno);
 
 /* Optimization for storing registers to the inferior.  The hook
    DO_DEFERRED_STORES

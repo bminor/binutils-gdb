@@ -45,29 +45,29 @@
 
 #include "xcoffsolib.h"
 
-struct vmap *map_vmap PARAMS ((bfd *, bfd *));
+struct vmap *map_vmap (bfd *, bfd *);
 
 void (*file_changed_hook) PARAMS ((char *));
 
 /* Prototypes for local functions */
 
-static void add_to_section_table PARAMS ((bfd *, sec_ptr, PTR));
+static void add_to_section_table (bfd *, sec_ptr, PTR);
 
-static void exec_close PARAMS ((int));
+static void exec_close (int);
 
-static void file_command PARAMS ((char *, int));
+static void file_command (char *, int);
 
-static void set_section_command PARAMS ((char *, int));
+static void set_section_command (char *, int);
 
-static void exec_files_info PARAMS ((struct target_ops *));
+static void exec_files_info (struct target_ops *);
 
-static void bfdsec_to_vmap PARAMS ((bfd *, sec_ptr, PTR));
+static void bfdsec_to_vmap (bfd *, sec_ptr, PTR);
 
-static int ignore PARAMS ((CORE_ADDR, char *));
+static int ignore (CORE_ADDR, char *);
 
-static void init_exec_ops PARAMS ((void));
+static void init_exec_ops (void);
 
-void _initialize_exec PARAMS ((void));
+void _initialize_exec (void);
 
 extern int info_verbose;
 

@@ -51,15 +51,15 @@ CORE_ADDR (*find_toc_address_hook) PARAMS ((CORE_ADDR)) = NULL;
 
 /* Static function prototypes */
 
-     static CORE_ADDR branch_dest PARAMS ((int opcode, int instr, CORE_ADDR pc,
-					   CORE_ADDR safety));
+static CORE_ADDR branch_dest (int opcode, int instr, CORE_ADDR pc,
+			      CORE_ADDR safety);
 
-     static void frame_get_saved_regs PARAMS ((struct frame_info * fi,
-					 struct rs6000_framedata * fdatap));
+static void frame_get_saved_regs (struct frame_info *fi,
+				  struct rs6000_framedata *fdatap);
 
-     static void pop_dummy_frame PARAMS ((void));
+static void pop_dummy_frame (void);
 
-     static CORE_ADDR frame_initial_stack_address PARAMS ((struct frame_info *));
+static CORE_ADDR frame_initial_stack_address (struct frame_info *);
 
 CORE_ADDR
 rs6000_skip_prologue (pc)

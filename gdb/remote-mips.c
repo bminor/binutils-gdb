@@ -58,105 +58,99 @@ enum break_type
 
 /* Prototypes for local functions.  */
 
-static int mips_readchar PARAMS ((int timeout));
+static int mips_readchar (int timeout);
 
-static int mips_receive_header PARAMS ((unsigned char *hdr, int *pgarbage,
-					int ch, int timeout));
+static int mips_receive_header (unsigned char *hdr, int *pgarbage,
+				int ch, int timeout);
 
-static int mips_receive_trailer PARAMS ((unsigned char *trlr, int *pgarbage,
-					 int *pch, int timeout));
+static int mips_receive_trailer (unsigned char *trlr, int *pgarbage,
+				 int *pch, int timeout);
 
-static int mips_cksum PARAMS ((const unsigned char *hdr,
-			       const unsigned char *data,
-			       int len));
+static int mips_cksum (const unsigned char *hdr,
+		       const unsigned char *data, int len);
 
-static void mips_send_packet PARAMS ((const char *s, int get_ack));
+static void mips_send_packet (const char *s, int get_ack);
 
-static void mips_send_command PARAMS ((const char *cmd, int prompt));
+static void mips_send_command (const char *cmd, int prompt);
 
-static int mips_receive_packet PARAMS ((char *buff, int throw_error,
-					int timeout));
+static int mips_receive_packet (char *buff, int throw_error, int timeout);
 
-static CORE_ADDR mips_request PARAMS ((int cmd, CORE_ADDR addr,
-				     CORE_ADDR data, int *perr, int timeout,
-				       char *buff));
+static CORE_ADDR mips_request (int cmd, CORE_ADDR addr,
+			       CORE_ADDR data, int *perr, int timeout,
+			       char *buff);
 
-static void mips_initialize PARAMS ((void));
+static void mips_initialize (void);
 
-static void mips_open PARAMS ((char *name, int from_tty));
+static void mips_open (char *name, int from_tty);
 
-static void pmon_open PARAMS ((char *name, int from_tty));
+static void pmon_open (char *name, int from_tty);
 
-static void ddb_open PARAMS ((char *name, int from_tty));
+static void ddb_open (char *name, int from_tty);
 
-static void lsi_open PARAMS ((char *name, int from_tty));
+static void lsi_open (char *name, int from_tty);
 
-static void mips_close PARAMS ((int quitting));
+static void mips_close (int quitting);
 
-static void mips_detach PARAMS ((char *args, int from_tty));
+static void mips_detach (char *args, int from_tty);
 
-static void mips_resume PARAMS ((int pid, int step,
-				 enum target_signal siggnal));
+static void mips_resume (int pid, int step, enum target_signal siggnal);
 
-static int mips_wait PARAMS ((int pid, struct target_waitstatus * status));
+static int mips_wait (int pid, struct target_waitstatus *status);
 
-static int mips_map_regno PARAMS ((int regno));
+static int mips_map_regno (int regno);
 
-static void mips_fetch_registers PARAMS ((int regno));
+static void mips_fetch_registers (int regno);
 
-static void mips_prepare_to_store PARAMS ((void));
+static void mips_prepare_to_store (void);
 
-static void mips_store_registers PARAMS ((int regno));
+static void mips_store_registers (int regno);
 
-static unsigned int mips_fetch_word PARAMS ((CORE_ADDR addr));
+static unsigned int mips_fetch_word (CORE_ADDR addr);
 
-static int mips_store_word PARAMS ((CORE_ADDR addr, unsigned int value,
-				    char *old_contents));
+static int mips_store_word (CORE_ADDR addr, unsigned int value,
+			    char *old_contents);
 
-static int mips_xfer_memory PARAMS ((CORE_ADDR memaddr, char *myaddr, int len,
-				     int write, struct target_ops * ignore));
+static int mips_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
+			     int write, struct target_ops *ignore);
 
-static void mips_files_info PARAMS ((struct target_ops * ignore));
+static void mips_files_info (struct target_ops *ignore);
 
-static void mips_create_inferior PARAMS ((char *execfile, char *args,
-					  char **env));
+static void mips_create_inferior (char *execfile, char *args, char **env);
 
-static void mips_mourn_inferior PARAMS ((void));
+static void mips_mourn_inferior (void);
 
-static int pmon_makeb64 PARAMS ((unsigned long v, char *p, int n, int *chksum));
+static int pmon_makeb64 (unsigned long v, char *p, int n, int *chksum);
 
-static int pmon_zeroset PARAMS ((int recsize, char **buff, int *amount,
-				 unsigned int *chksum));
+static int pmon_zeroset (int recsize, char **buff, int *amount,
+			 unsigned int *chksum);
 
-static int pmon_checkset PARAMS ((int recsize, char **buff, int *value));
+static int pmon_checkset (int recsize, char **buff, int *value);
 
-static void pmon_make_fastrec PARAMS ((char **outbuf, unsigned char *inbuf,
-				     int *inptr, int inamount, int *recsize,
-			       unsigned int *csum, unsigned int *zerofill));
+static void pmon_make_fastrec (char **outbuf, unsigned char *inbuf,
+			       int *inptr, int inamount, int *recsize,
+			       unsigned int *csum, unsigned int *zerofill);
 
-static int pmon_check_ack PARAMS ((char *mesg));
+static int pmon_check_ack (char *mesg);
 
-static void pmon_start_download PARAMS ((void));
+static void pmon_start_download (void);
 
-static void pmon_end_download PARAMS ((int final, int bintotal));
+static void pmon_end_download (int final, int bintotal);
 
-static void pmon_download PARAMS ((char *buffer, int length));
+static void pmon_download (char *buffer, int length);
 
-static void pmon_load_fast PARAMS ((char *file));
+static void pmon_load_fast (char *file);
 
-static void mips_load PARAMS ((char *file, int from_tty));
+static void mips_load (char *file, int from_tty);
 
-static int mips_make_srec PARAMS ((char *buffer, int type, CORE_ADDR memaddr,
-				   unsigned char *myaddr, int len));
+static int mips_make_srec (char *buffer, int type, CORE_ADDR memaddr,
+			   unsigned char *myaddr, int len);
 
-static int set_breakpoint PARAMS ((CORE_ADDR addr, int len,
-				   enum break_type type));
+static int set_breakpoint (CORE_ADDR addr, int len, enum break_type type);
 
-static int clear_breakpoint PARAMS ((CORE_ADDR addr, int len,
-				     enum break_type type));
+static int clear_breakpoint (CORE_ADDR addr, int len, enum break_type type);
 
-static int common_breakpoint PARAMS ((int set, CORE_ADDR addr, int len,
-				      enum break_type type));
+static int common_breakpoint (int set, CORE_ADDR addr, int len,
+			      enum break_type type);
 
 /* Forward declarations.  */
 extern struct target_ops mips_ops;

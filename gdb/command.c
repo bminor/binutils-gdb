@@ -35,25 +35,25 @@
 
 /* Prototypes for local functions */
 
-static void undef_cmd_error PARAMS ((char *, char *));
+static void undef_cmd_error (char *, char *);
 
-static void show_user PARAMS ((char *, int));
+static void show_user (char *, int);
 
 static void show_user_1 (struct cmd_list_element *, struct ui_file *);
 
-static void make_command PARAMS ((char *, int));
+static void make_command (char *, int);
 
-static void shell_escape PARAMS ((char *, int));
+static void shell_escape (char *, int);
 
-static int parse_binary_operation PARAMS ((char *));
+static int parse_binary_operation (char *);
 
 static void print_doc_line (struct ui_file *, char *);
 
-static struct cmd_list_element *find_cmd PARAMS ((char *command,
-						  int len,
-					    struct cmd_list_element * clist,
-						  int ignore_help_classes,
-						  int *nfound));
+static struct cmd_list_element *find_cmd (char *command,
+					  int len,
+					  struct cmd_list_element *clist,
+					  int ignore_help_classes,
+					  int *nfound);
 static void apropos_cmd_helper (struct ui_file *, struct cmd_list_element *, 
 		    		struct re_pattern_buffer *, char *);
 
@@ -61,7 +61,7 @@ static void help_all (struct ui_file *stream);
 
 void apropos_command (char *, int);
 
-void _initialize_command PARAMS ((void));
+void _initialize_command (void);
 
 /* Add element named NAME.
    CLASS is the top level category into which commands are broken down
@@ -267,7 +267,7 @@ not_just_help_class_command (args, from_tty)
 }
 
 /* This is an empty "sfunc".  */
-static void empty_sfunc PARAMS ((char *, int, struct cmd_list_element *));
+static void empty_sfunc (char *, int, struct cmd_list_element *);
 
 static void
 empty_sfunc (args, from_tty, c)

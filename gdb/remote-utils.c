@@ -52,7 +52,7 @@
 #include "remote-utils.h"
 
 
-void _initialize_sr_support PARAMS ((void));
+void _initialize_sr_support (void);
 
 struct _sr_settings sr_settings =
 {
@@ -74,8 +74,8 @@ struct _sr_settings sr_settings =
 
 struct gr_settings *gr_settings = NULL;
 
-static void usage PARAMS ((char *, char *));
-static void sr_com PARAMS ((char *, int));
+static void usage (char *, char *);
+static void sr_com (char *, int);
 
 static void
 usage (proto, junk)

@@ -29,7 +29,7 @@
 
 #ifdef _SEQUENT_
 #define CHILD_WAIT
-extern int child_wait PARAMS ((int, struct target_waitstatus *));
+extern int child_wait (int, struct target_waitstatus *);
 #endif
 
 /* This is the amount to subtract from u.u_ar0

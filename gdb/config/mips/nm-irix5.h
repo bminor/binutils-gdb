@@ -32,7 +32,7 @@
 
 #define STOPPED_BY_WATCHPOINT(W) \
      procfs_stopped_by_watchpoint(inferior_pid)
-extern int procfs_stopped_by_watchpoint PARAMS ((int));
+extern int procfs_stopped_by_watchpoint (int);
 
 #define HAVE_NONSTEPPABLE_WATCHPOINT
 
@@ -42,6 +42,6 @@ extern int procfs_stopped_by_watchpoint PARAMS ((int));
      procfs_set_watchpoint (inferior_pid, ADDR, LEN, TYPE, 0)
 #define target_remove_watchpoint(ADDR, LEN, TYPE) \
      procfs_set_watchpoint (inferior_pid, ADDR, 0, 0, 0)
-extern int procfs_set_watchpoint PARAMS ((int, CORE_ADDR, int, int, int));
+extern int procfs_set_watchpoint (int, CORE_ADDR, int, int, int);
 
 #define TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT(SIZE) 1

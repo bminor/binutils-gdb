@@ -172,8 +172,8 @@ sparc_at_entry_store_struct_return (CORE_ADDR addr, CORE_ADDR sp);
 #undef  FIX_CALL_DUMMY
 #define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p) \
  sparc_fix_call_dummy (dummyname, pc, fun, type, gcc_p)
-void sparc_fix_call_dummy PARAMS ((char *dummy, CORE_ADDR pc, CORE_ADDR fun,
-                                   struct type * value_type, int using_gcc));
+void sparc_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
+			   struct type *value_type, int using_gcc);
 
 
 /* The remainder of these will accept the default definition.  */
@@ -202,11 +202,8 @@ void sparc_fix_call_dummy PARAMS ((char *dummy, CORE_ADDR pc, CORE_ADDR fun,
 #undef  USE_STRUCT_CONVENTION
 #define USE_STRUCT_CONVENTION(gcc_p, type) (TYPE_LENGTH (type) > 32)
 
-CORE_ADDR sparc64_push_arguments PARAMS ((int, 
-					  struct value **, 
-					  CORE_ADDR, 
-					  int,
-					  CORE_ADDR));
+CORE_ADDR sparc64_push_arguments (int,
+				  struct value **, CORE_ADDR, int, CORE_ADDR);
 #undef PUSH_ARGUMENTS
 #define PUSH_ARGUMENTS(A,B,C,D,E) \
      (sparc64_push_arguments ((A), (B), (C), (D), (E)))
@@ -269,8 +266,8 @@ CORE_ADDR sparc64_push_arguments PARAMS ((int,
 
 extern CORE_ADDR sparc64_read_sp ();
 extern CORE_ADDR sparc64_read_fp ();
-extern void sparc64_write_sp PARAMS ((CORE_ADDR));
-extern void sparc64_write_fp PARAMS ((CORE_ADDR));
+extern void sparc64_write_sp (CORE_ADDR);
+extern void sparc64_write_fp (CORE_ADDR);
 
 #define TARGET_READ_SP() (sparc64_read_sp ())
 #define TARGET_READ_FP() (sparc64_read_fp ())
@@ -280,8 +277,7 @@ extern void sparc64_write_fp PARAMS ((CORE_ADDR));
 #undef EXTRACT_RETURN_VALUE
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
      sp64_extract_return_value(TYPE, REGBUF, VALBUF, 0)
-extern void
-sp64_extract_return_value PARAMS ((struct type *, char[], char *, int));
+extern void sp64_extract_return_value (struct type *, char[], char *, int);
 
 /* Register numbers of various important registers.
    Note that some of these values are "real" register numbers,
@@ -463,8 +459,7 @@ sp64_extract_return_value PARAMS ((struct type *, char[], char *, int));
    land at.  The pc is copied into ADDR.  This routine returns true on
    success */
 
-extern int
-get_longjmp_target PARAMS ((CORE_ADDR *));
+extern int get_longjmp_target (CORE_ADDR *);
 
 #define GET_LONGJMP_TARGET(ADDR) get_longjmp_target(ADDR)
 

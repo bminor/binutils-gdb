@@ -190,7 +190,7 @@ extern CORE_ADDR w65_skip_prologue ();
 
 typedef unsigned short INSN_WORD;
 
-extern CORE_ADDR w65_addr_bits_remove PARAMS ((CORE_ADDR));
+extern CORE_ADDR w65_addr_bits_remove (CORE_ADDR);
 #define ADDR_BITS_REMOVE(addr) w65_addr_bits_remove (addr)
 
 #define CALL_DUMMY_LENGTH 10

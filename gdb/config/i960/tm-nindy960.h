@@ -89,7 +89,7 @@ extern void
    since it differs between NINDY and VxWorks, the two currently supported
    targets types.  */
 
-extern int nindy_frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *));
+extern int nindy_frame_chain_valid (CORE_ADDR, struct frame_info *);
 #define	FRAME_CHAIN_VALID(chain, thisframe) nindy_frame_chain_valid (chain, thisframe)
 
 extern int

@@ -33,7 +33,7 @@
 #include "complaints.h"
 #include "demangle.h"
 
-extern void _initialize_elfread PARAMS ((void));
+extern void _initialize_elfread (void);
 
 /* The struct elfinfo is available only during ELF symbol table and
    psymtab reading.  It is destroyed at the completion of psymtab-reading.
@@ -64,32 +64,29 @@ struct complaint stab_info_mismatch_complaint =
 struct complaint stab_info_questionable_complaint =
 {"elf/stab section information questionable for %s", 0, 0};
 
-static void
-elf_symfile_init PARAMS ((struct objfile *));
+static void elf_symfile_init (struct objfile *);
 
-static void
-elf_new_init PARAMS ((struct objfile *));
+static void elf_new_init (struct objfile *);
 
-static void
-elf_symfile_read PARAMS ((struct objfile *, int));
+static void elf_symfile_read (struct objfile *, int);
 
-static void
-elf_symfile_finish PARAMS ((struct objfile *));
+static void elf_symfile_finish (struct objfile *);
 
-static void
-elf_symtab_read PARAMS ((struct objfile *, int));
+static void elf_symtab_read (struct objfile *, int);
 
-static void
-free_elfinfo PARAMS ((void *));
+static void free_elfinfo (void *);
 
-static struct minimal_symbol *
-  record_minimal_symbol_and_info PARAMS ((char *, CORE_ADDR,
-					  enum minimal_symbol_type, char *,
-					  asection * bfd_section,
-					  struct objfile *));
+static struct minimal_symbol *record_minimal_symbol_and_info (char *,
+							      CORE_ADDR,
+							      enum
+							      minimal_symbol_type,
+							      char *,
+							      asection *
+							      bfd_section,
+							      struct objfile
+							      *);
 
-static void
-elf_locate_sections PARAMS ((bfd *, asection *, void *));
+static void elf_locate_sections (bfd *, asection *, void *);
 
 /* We are called once per section from elf_symfile_read.  We
    need to examine each section we are passed, check to see

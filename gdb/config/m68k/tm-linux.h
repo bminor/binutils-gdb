@@ -104,7 +104,7 @@
     ? sigtramp_saved_pc (FRAME) \
     : read_memory_integer ((FRAME)->frame + 4, 4)))
 
-extern CORE_ADDR sigtramp_saved_pc PARAMS ((struct frame_info *));
+extern CORE_ADDR sigtramp_saved_pc (struct frame_info *);
 
 #define IN_SIGTRAMP(pc,name) in_sigtramp (pc)
-extern int in_sigtramp PARAMS ((CORE_ADDR pc));
+extern int in_sigtramp (CORE_ADDR pc);

@@ -89,8 +89,7 @@ struct prologue_info
     struct pifsr *pifsrs;
   };
 
-static CORE_ADDR v850_scan_prologue PARAMS ((CORE_ADDR pc,
-					     struct prologue_info * fs));
+static CORE_ADDR v850_scan_prologue (CORE_ADDR pc, struct prologue_info *fs);
 
 
 /* Should call_function allocate stack space for a struct return?  */

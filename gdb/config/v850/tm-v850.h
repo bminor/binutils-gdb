@@ -99,19 +99,20 @@ struct value;
 
 #define EXTRA_FRAME_INFO struct frame_saved_regs fsr;
 
-extern void v850_init_extra_frame_info PARAMS ((struct frame_info * fi));
+extern void v850_init_extra_frame_info (struct frame_info *fi);
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fi) v850_init_extra_frame_info (fi)
 #define INIT_FRAME_PC		/* Not necessary */
 
-extern void v850_frame_find_saved_regs PARAMS ((struct frame_info * fi, struct frame_saved_regs * regaddr));
+extern void v850_frame_find_saved_regs (struct frame_info *fi,
+					struct frame_saved_regs *regaddr);
 #define FRAME_FIND_SAVED_REGS(fi, regaddr) regaddr = fi->fsr
 
-extern CORE_ADDR v850_frame_chain PARAMS ((struct frame_info * fi));
+extern CORE_ADDR v850_frame_chain (struct frame_info *fi);
 #define FRAME_CHAIN(fi) v850_frame_chain (fi)
 #define FRAME_CHAIN_VALID(FP, FI)	generic_file_frame_chain_valid (FP, FI)
 
-extern CORE_ADDR v850_find_callers_reg PARAMS ((struct frame_info * fi, int regnum));
-extern CORE_ADDR v850_frame_saved_pc PARAMS ((struct frame_info *));
+extern CORE_ADDR v850_find_callers_reg (struct frame_info *fi, int regnum);
+extern CORE_ADDR v850_frame_saved_pc (struct frame_info *);
 #define FRAME_SAVED_PC(FI) (v850_frame_saved_pc (FI))
 
 #define EXTRACT_RETURN_VALUE(TYPE, REGBUF, VALBUF) \
@@ -124,7 +125,7 @@ extern CORE_ADDR v850_frame_saved_pc PARAMS ((struct frame_info *));
 #define STORE_RETURN_VALUE(TYPE, VALBUF) \
   write_register_bytes(REGISTER_BYTE (V0_REGNUM), VALBUF, TYPE_LENGTH (TYPE));
 
-extern CORE_ADDR v850_skip_prologue PARAMS ((CORE_ADDR pc));
+extern CORE_ADDR v850_skip_prologue (CORE_ADDR pc);
 #define SKIP_PROLOGUE(pc) (v850_skip_prologue (pc))
 
 #define FRAME_ARGS_SKIP 0
@@ -133,7 +134,7 @@ extern CORE_ADDR v850_skip_prologue PARAMS ((CORE_ADDR pc));
 #define FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)
 #define FRAME_NUM_ARGS(fi) (-1)
 
-extern void v850_pop_frame PARAMS ((struct frame_info * frame));
+extern void v850_pop_frame (struct frame_info *frame);
 #define POP_FRAME v850_pop_frame (get_current_frame ())
 
 #define USE_GENERIC_DUMMY_FRAMES 1
@@ -143,16 +144,15 @@ extern void v850_pop_frame PARAMS ((struct frame_info * frame));
 #define CALL_DUMMY_LOCATION          AT_ENTRY_POINT
 #define FIX_CALL_DUMMY(DUMMY, START, FUNADDR, NARGS, ARGS, TYPE, GCCP)
 #define CALL_DUMMY_ADDRESS()         entry_point_address ()
-extern CORE_ADDR v850_push_return_address PARAMS ((CORE_ADDR, CORE_ADDR));
+extern CORE_ADDR v850_push_return_address (CORE_ADDR, CORE_ADDR);
 #define PUSH_RETURN_ADDRESS(PC, SP)  v850_push_return_address (PC, SP)
 
 
 #define PUSH_DUMMY_FRAME	generic_push_dummy_frame ()
 
 extern CORE_ADDR
-  v850_push_arguments PARAMS ((int nargs, struct value ** args, CORE_ADDR sp,
-			       unsigned char struct_return,
-			       CORE_ADDR struct_addr));
+v850_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
+		     unsigned char struct_return, CORE_ADDR struct_addr);
 #define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
   (v850_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR))
 

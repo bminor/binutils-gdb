@@ -51,7 +51,7 @@
 #include "stabsread.h"		/* Our own declarations */
 #undef	EXTERN
 
-extern void _initialize_stabsread PARAMS ((void));
+extern void _initialize_stabsread (void);
 
 /* The routines that read and process a complete stabs for a C struct or 
    C++ class pass lists of data member fields and lists of member function
@@ -82,119 +82,103 @@ struct field_info
   };
 
 static void
-read_one_struct_field PARAMS ((struct field_info *, char **, char *,
-			       struct type *, struct objfile *));
+read_one_struct_field (struct field_info *, char **, char *,
+		       struct type *, struct objfile *);
 
-static char *
-  get_substring PARAMS ((char **, int));
+static char *get_substring (char **, int);
 
-static struct type *
-  dbx_alloc_type PARAMS ((int[2], struct objfile *));
+static struct type *dbx_alloc_type (int[2], struct objfile *);
 
-static long read_huge_number PARAMS ((char **, int, int *));
+static long read_huge_number (char **, int, int *);
 
-static struct type *error_type PARAMS ((char **, struct objfile *));
+static struct type *error_type (char **, struct objfile *);
 
 static void
-patch_block_stabs PARAMS ((struct pending *, struct pending_stabs *,
-			   struct objfile *));
+patch_block_stabs (struct pending *, struct pending_stabs *,
+		   struct objfile *);
 
-static void
-fix_common_block PARAMS ((struct symbol *, int));
+static void fix_common_block (struct symbol *, int);
 
-static int
-read_type_number PARAMS ((char **, int *));
+static int read_type_number (char **, int *);
 
-static struct type *
-  read_range_type PARAMS ((char **, int[2], struct objfile *));
+static struct type *read_range_type (char **, int[2], struct objfile *);
 
-static struct type *
-  read_sun_builtin_type PARAMS ((char **, int[2], struct objfile *));
+static struct type *read_sun_builtin_type (char **, int[2], struct objfile *);
 
-static struct type *
-  read_sun_floating_type PARAMS ((char **, int[2], struct objfile *));
+static struct type *read_sun_floating_type (char **, int[2],
+					    struct objfile *);
 
-static struct type *
-  read_enum_type PARAMS ((char **, struct type *, struct objfile *));
+static struct type *read_enum_type (char **, struct type *, struct objfile *);
 
-static struct type *
-  rs6000_builtin_type PARAMS ((int));
+static struct type *rs6000_builtin_type (int);
 
 static int
-read_member_functions PARAMS ((struct field_info *, char **, struct type *,
-			       struct objfile *));
+read_member_functions (struct field_info *, char **, struct type *,
+		       struct objfile *);
 
 static int
-read_struct_fields PARAMS ((struct field_info *, char **, struct type *,
-			    struct objfile *));
+read_struct_fields (struct field_info *, char **, struct type *,
+		    struct objfile *);
 
 static int
-read_baseclasses PARAMS ((struct field_info *, char **, struct type *,
-			  struct objfile *));
+read_baseclasses (struct field_info *, char **, struct type *,
+		  struct objfile *);
 
 static int
-read_tilde_fields PARAMS ((struct field_info *, char **, struct type *,
-			   struct objfile *));
+read_tilde_fields (struct field_info *, char **, struct type *,
+		   struct objfile *);
+
+static int attach_fn_fields_to_type (struct field_info *, struct type *);
 
 static int
-attach_fn_fields_to_type PARAMS ((struct field_info *, struct type *));
+attach_fields_to_type (struct field_info *, struct type *, struct objfile *);
+
+static struct type *read_struct_type (char **, struct type *,
+				      struct objfile *);
+
+static struct type *read_array_type (char **, struct type *,
+				     struct objfile *);
+
+static struct type **read_args (char **, int, struct objfile *);
 
 static int
-attach_fields_to_type PARAMS ((struct field_info *, struct type *,
-			       struct objfile *));
-
-static struct type *
-  read_struct_type PARAMS ((char **, struct type *, struct objfile *));
-
-static struct type *
-  read_array_type PARAMS ((char **, struct type *, struct objfile *));
-
-static struct type **
-  read_args PARAMS ((char **, int, struct objfile *));
-
-static int
-read_cpp_abbrev PARAMS ((struct field_info *, char **, struct type *,
-			 struct objfile *));
+read_cpp_abbrev (struct field_info *, char **, struct type *,
+		 struct objfile *);
 
 /* new functions added for cfront support */
 
 static int
-copy_cfront_struct_fields PARAMS ((struct field_info *, struct type *,
-				   struct objfile *));
+copy_cfront_struct_fields (struct field_info *, struct type *,
+			   struct objfile *);
 
-static char *
-  get_cfront_method_physname PARAMS ((char *));
-
-static int
-read_cfront_baseclasses PARAMS ((struct field_info *, char **,
-				 struct type *, struct objfile *));
+static char *get_cfront_method_physname (char *);
 
 static int
-read_cfront_static_fields PARAMS ((struct field_info *, char **,
-				   struct type *, struct objfile *));
+read_cfront_baseclasses (struct field_info *, char **,
+			 struct type *, struct objfile *);
+
 static int
-read_cfront_member_functions PARAMS ((struct field_info *, char **,
-				      struct type *, struct objfile *));
+read_cfront_static_fields (struct field_info *, char **,
+			   struct type *, struct objfile *);
+static int
+read_cfront_member_functions (struct field_info *, char **,
+			      struct type *, struct objfile *);
 
 /* end new functions added for cfront support */
 
 static void
-add_live_range PARAMS ((struct objfile *, struct symbol *,
-			CORE_ADDR, CORE_ADDR));
+add_live_range (struct objfile *, struct symbol *, CORE_ADDR, CORE_ADDR);
+
+static int resolve_live_range (struct objfile *, struct symbol *, char *);
+
+static int process_reference (char **string);
+
+static CORE_ADDR ref_search_value (int refnum);
 
 static int
-resolve_live_range PARAMS ((struct objfile *, struct symbol *, char *));
+resolve_symbol_reference (struct objfile *, struct symbol *, char *);
 
-static int
-process_reference PARAMS ((char **string));
-
-static CORE_ADDR
-  ref_search_value PARAMS ((int refnum));
-
-static int
-resolve_symbol_reference PARAMS ((struct objfile *, struct symbol *, char *));
-
-void stabsread_clear_cache PARAMS ((void));
+void stabsread_clear_cache (void);
 
 static const char vptr_name[] =
 {'_', 'v', 'p', 't', 'r', CPLUS_MARKER, '\0'};
@@ -288,7 +272,7 @@ static struct type **os9k_type_vector[] =
   &builtin_type_long_double
 };
 
-static void os9k_init_type_vector PARAMS ((struct type **));
+static void os9k_init_type_vector (struct type **);
 
 static void
 os9k_init_type_vector (tv)

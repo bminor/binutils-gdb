@@ -84,16 +84,16 @@ struct extra
     int len;
   };				/* maximum extention is 128! FIXME */
 
-static void add_name PARAMS ((struct extra *, char *));
-static void add_mangled_type PARAMS ((struct extra *, struct type *));
+static void add_name (struct extra *, char *);
+static void add_mangled_type (struct extra *, struct type *);
 #if 0
-static void cfront_mangle_name PARAMS ((struct type *, int, int));
+static void cfront_mangle_name (struct type *, int, int);
 #endif
-static void print_bit_vector PARAMS ((B_TYPE *, int));
-static void print_arg_types PARAMS ((struct type **, int));
-static void dump_fn_fieldlists PARAMS ((struct type *, int));
-static void print_cplus_stuff PARAMS ((struct type *, int));
-static void virtual_base_list_aux PARAMS ((struct type * dclass));
+static void print_bit_vector (B_TYPE *, int);
+static void print_arg_types (struct type **, int);
+static void dump_fn_fieldlists (struct type *, int);
+static void print_cplus_stuff (struct type *, int);
+static void virtual_base_list_aux (struct type *dclass);
 
 
 /* Alloc a new type structure and fill it with some defaults.  If
@@ -2885,7 +2885,7 @@ recursive_dump_type (type, spaces)
     obstack_free (&dont_print_type_obstack, NULL);
 }
 
-static void build_gdbtypes PARAMS ((void));
+static void build_gdbtypes (void);
 static void
 build_gdbtypes ()
 {
@@ -3045,7 +3045,7 @@ build_gdbtypes ()
 }
 
 
-extern void _initialize_gdbtypes PARAMS ((void));
+extern void _initialize_gdbtypes (void);
 void
 _initialize_gdbtypes ()
 {

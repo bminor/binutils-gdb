@@ -38,15 +38,17 @@
 
 struct inferior_status;
 
-extern struct inferior_status *save_inferior_status PARAMS ((int));
+extern struct inferior_status *save_inferior_status (int);
 
-extern void restore_inferior_status PARAMS ((struct inferior_status *));
+extern void restore_inferior_status (struct inferior_status *);
 
 extern struct cleanup *make_cleanup_restore_inferior_status (struct inferior_status *);
 
-extern void discard_inferior_status PARAMS ((struct inferior_status *));
+extern void discard_inferior_status (struct inferior_status *);
 
-extern void write_inferior_status_register PARAMS ((struct inferior_status * inf_status, int regno, LONGEST val));
+extern void write_inferior_status_register (struct inferior_status
+					    *inf_status, int regno,
+					    LONGEST val);
 
 /* This macro gives the number of registers actually in use by the
    inferior.  This may be less than the total number of registers,
@@ -56,13 +58,13 @@ extern void write_inferior_status_register PARAMS ((struct inferior_status * inf
 #define ARCH_NUM_REGS NUM_REGS
 #endif
 
-extern void set_sigint_trap PARAMS ((void));
+extern void set_sigint_trap (void);
 
-extern void clear_sigint_trap PARAMS ((void));
+extern void clear_sigint_trap (void);
 
-extern void set_sigio_trap PARAMS ((void));
+extern void set_sigio_trap (void);
 
-extern void clear_sigio_trap PARAMS ((void));
+extern void clear_sigio_trap (void);
 
 /* File name for default use for standard in/out in the inferior.  */
 
@@ -118,89 +120,89 @@ extern char *registers;
 
 extern signed char *register_valid;
 
-extern void clear_proceed_status PARAMS ((void));
+extern void clear_proceed_status (void);
 
-extern void proceed PARAMS ((CORE_ADDR, enum target_signal, int));
+extern void proceed (CORE_ADDR, enum target_signal, int);
 
-extern void kill_inferior PARAMS ((void));
+extern void kill_inferior (void);
 
-extern void generic_mourn_inferior PARAMS ((void));
+extern void generic_mourn_inferior (void);
 
-extern void terminal_ours PARAMS ((void));
+extern void terminal_ours (void);
 
-extern int run_stack_dummy PARAMS ((CORE_ADDR, char *));
+extern int run_stack_dummy (CORE_ADDR, char *);
 
-extern CORE_ADDR read_pc PARAMS ((void));
+extern CORE_ADDR read_pc (void);
 
-extern CORE_ADDR read_pc_pid PARAMS ((int));
+extern CORE_ADDR read_pc_pid (int);
 
-extern CORE_ADDR generic_target_read_pc PARAMS ((int));
+extern CORE_ADDR generic_target_read_pc (int);
 
-extern void write_pc PARAMS ((CORE_ADDR));
+extern void write_pc (CORE_ADDR);
 
-extern void write_pc_pid PARAMS ((CORE_ADDR, int));
+extern void write_pc_pid (CORE_ADDR, int);
 
-extern void generic_target_write_pc PARAMS ((CORE_ADDR, int));
+extern void generic_target_write_pc (CORE_ADDR, int);
 
-extern CORE_ADDR read_sp PARAMS ((void));
+extern CORE_ADDR read_sp (void);
 
-extern CORE_ADDR generic_target_read_sp PARAMS ((void));
+extern CORE_ADDR generic_target_read_sp (void);
 
-extern void write_sp PARAMS ((CORE_ADDR));
+extern void write_sp (CORE_ADDR);
 
-extern void generic_target_write_sp PARAMS ((CORE_ADDR));
+extern void generic_target_write_sp (CORE_ADDR);
 
-extern CORE_ADDR read_fp PARAMS ((void));
+extern CORE_ADDR read_fp (void);
 
-extern CORE_ADDR generic_target_read_fp PARAMS ((void));
+extern CORE_ADDR generic_target_read_fp (void);
 
-extern void write_fp PARAMS ((CORE_ADDR));
+extern void write_fp (CORE_ADDR);
 
-extern void generic_target_write_fp PARAMS ((CORE_ADDR));
+extern void generic_target_write_fp (CORE_ADDR);
 
 extern CORE_ADDR generic_pointer_to_address (struct type *type, char *buf);
 
 extern void generic_address_to_pointer (struct type *type, char *buf,
 					CORE_ADDR addr);
 
-extern void wait_for_inferior PARAMS ((void));
+extern void wait_for_inferior (void);
 
-extern void fetch_inferior_event PARAMS ((void *));
+extern void fetch_inferior_event (void *);
 
-extern void init_wait_for_inferior PARAMS ((void));
+extern void init_wait_for_inferior (void);
 
-extern void close_exec_file PARAMS ((void));
+extern void close_exec_file (void);
 
-extern void reopen_exec_file PARAMS ((void));
+extern void reopen_exec_file (void);
 
 /* The `resume' routine should only be called in special circumstances.
    Normally, use `proceed', which handles a lot of bookkeeping.  */
 
-extern void resume PARAMS ((int, enum target_signal));
+extern void resume (int, enum target_signal);
 
 /* From misc files */
 
-extern void store_inferior_registers PARAMS ((int));
+extern void store_inferior_registers (int);
 
-extern void fetch_inferior_registers PARAMS ((int));
+extern void fetch_inferior_registers (int);
 
-extern void solib_create_inferior_hook PARAMS ((void));
+extern void solib_create_inferior_hook (void);
 
-extern void child_terminal_info PARAMS ((char *, int));
+extern void child_terminal_info (char *, int);
 
-extern void term_info PARAMS ((char *, int));
+extern void term_info (char *, int);
 
-extern void terminal_ours_for_output PARAMS ((void));
+extern void terminal_ours_for_output (void);
 
-extern void terminal_inferior PARAMS ((void));
+extern void terminal_inferior (void);
 
-extern void terminal_init_inferior PARAMS ((void));
+extern void terminal_init_inferior (void);
 
-extern void terminal_init_inferior_with_pgrp PARAMS ((int pgrp));
+extern void terminal_init_inferior_with_pgrp (int pgrp);
 
 /* From infptrace.c or infttrace.c */
 
-extern int attach PARAMS ((int));
+extern int attach (int);
 
 #if !defined(REQUIRE_ATTACH)
 #define REQUIRE_ATTACH attach
@@ -210,70 +212,67 @@ extern int attach PARAMS ((int));
 #define REQUIRE_DETACH(pid,siggnal) detach (siggnal)
 #endif
 
-extern void detach PARAMS ((int));
+extern void detach (int);
 
 /* PTRACE method of waiting for inferior process.  */
-int ptrace_wait PARAMS ((int, int *));
+int ptrace_wait (int, int *);
 
-extern void child_resume PARAMS ((int, int, enum target_signal));
+extern void child_resume (int, int, enum target_signal);
 
 #ifndef PTRACE_ARG3_TYPE
 #define PTRACE_ARG3_TYPE int	/* Correct definition for most systems. */
 #endif
 
-extern int call_ptrace PARAMS ((int, int, PTRACE_ARG3_TYPE, int));
+extern int call_ptrace (int, int, PTRACE_ARG3_TYPE, int);
 
-extern void pre_fork_inferior PARAMS ((void));
+extern void pre_fork_inferior (void);
 
 /* From procfs.c */
 
-extern int proc_iterate_over_mappings PARAMS ((int (*)(int, CORE_ADDR)));
+extern int proc_iterate_over_mappings (int (*)(int, CORE_ADDR));
 
-extern int procfs_first_available PARAMS ((void));
+extern int procfs_first_available (void);
 
 /* From fork-child.c */
 
-extern void fork_inferior PARAMS ((char *, char *, char **,
-				   void (*)(void),
-				   void (*)(int),
-				   void (*)(void),
-				   char *));
+extern void fork_inferior (char *, char *, char **,
+			   void (*)(void),
+			   void (*)(int), void (*)(void), char *);
 
 
-extern void
-clone_and_follow_inferior PARAMS ((int, int *));
+extern void clone_and_follow_inferior (int, int *);
 
-extern void startup_inferior PARAMS ((int));
+extern void startup_inferior (int);
 
 /* From inflow.c */
 
-extern void new_tty_prefork PARAMS ((char *));
+extern void new_tty_prefork (char *);
 
-extern int gdb_has_a_terminal PARAMS ((void));
+extern int gdb_has_a_terminal (void);
 
 /* From infrun.c */
 
-extern void start_remote PARAMS ((void));
+extern void start_remote (void);
 
-extern void normal_stop PARAMS ((void));
+extern void normal_stop (void);
 
-extern int signal_stop_state PARAMS ((int));
+extern int signal_stop_state (int);
 
-extern int signal_print_state PARAMS ((int));
+extern int signal_print_state (int);
 
-extern int signal_pass_state PARAMS ((int));
+extern int signal_pass_state (int);
 
-extern int signal_stop_update PARAMS ((int, int));
+extern int signal_stop_update (int, int);
 
-extern int signal_print_update PARAMS ((int, int));
+extern int signal_print_update (int, int);
 
-extern int signal_pass_update PARAMS ((int, int));
+extern int signal_pass_update (int, int);
 
 /* From infcmd.c */
 
-extern void tty_command PARAMS ((char *, int));
+extern void tty_command (char *, int);
 
-extern void attach_command PARAMS ((char *, int));
+extern void attach_command (char *, int);
 
 /* Last signal that the inferior received (why it stopped).  */
 
@@ -454,28 +453,32 @@ extern int attach_flag;
 
 /* Are we in a call dummy? */
 
-extern int pc_in_call_dummy_before_text_end PARAMS ((CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address));
+extern int pc_in_call_dummy_before_text_end (CORE_ADDR pc, CORE_ADDR sp,
+					     CORE_ADDR frame_address);
 #if !GDB_MULTI_ARCH
 #if !defined (PC_IN_CALL_DUMMY) && CALL_DUMMY_LOCATION == BEFORE_TEXT_END
 #define PC_IN_CALL_DUMMY(pc, sp, frame_address) pc_in_call_dummy_before_text_end (pc, sp, frame_address)
 #endif /* Before text_end.  */
 #endif
 
-extern int pc_in_call_dummy_after_text_end PARAMS ((CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address));
+extern int pc_in_call_dummy_after_text_end (CORE_ADDR pc, CORE_ADDR sp,
+					    CORE_ADDR frame_address);
 #if !GDB_MULTI_ARCH
 #if !defined (PC_IN_CALL_DUMMY) && CALL_DUMMY_LOCATION == AFTER_TEXT_END
 #define PC_IN_CALL_DUMMY(pc, sp, frame_address) pc_in_call_dummy_after_text_end (pc, sp, frame_address)
 #endif
 #endif
 
-extern int pc_in_call_dummy_on_stack PARAMS ((CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address));
+extern int pc_in_call_dummy_on_stack (CORE_ADDR pc, CORE_ADDR sp,
+				      CORE_ADDR frame_address);
 #if !GDB_MULTI_ARCH
 #if !defined (PC_IN_CALL_DUMMY) && CALL_DUMMY_LOCATION == ON_STACK
 #define PC_IN_CALL_DUMMY(pc, sp, frame_address) pc_in_call_dummy_on_stack (pc, sp, frame_address)
 #endif
 #endif
 
-extern int pc_in_call_dummy_at_entry_point PARAMS ((CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address));
+extern int pc_in_call_dummy_at_entry_point (CORE_ADDR pc, CORE_ADDR sp,
+					    CORE_ADDR frame_address);
 #if !GDB_MULTI_ARCH
 #if !defined (PC_IN_CALL_DUMMY) && CALL_DUMMY_LOCATION == AT_ENTRY_POINT
 #define PC_IN_CALL_DUMMY(pc, sp, frame_address) pc_in_call_dummy_at_entry_point (pc, sp, frame_address)

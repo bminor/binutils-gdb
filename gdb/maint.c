@@ -35,27 +35,27 @@
 #include "objfiles.h"
 #include "value.h"
 
-extern void _initialize_maint_cmds PARAMS ((void));
+extern void _initialize_maint_cmds (void);
 
-static void maintenance_command PARAMS ((char *, int));
+static void maintenance_command (char *, int);
 
-static void maintenance_dump_me PARAMS ((char *, int));
+static void maintenance_dump_me (char *, int);
 
-static void maintenance_internal_error PARAMS ((char *args, int from_tty));
+static void maintenance_internal_error (char *args, int from_tty);
 
-static void maintenance_demangle PARAMS ((char *, int));
+static void maintenance_demangle (char *, int);
 
-static void maintenance_time_display PARAMS ((char *, int));
+static void maintenance_time_display (char *, int);
 
-static void maintenance_space_display PARAMS ((char *, int));
+static void maintenance_space_display (char *, int);
 
-static void maintenance_info_command PARAMS ((char *, int));
+static void maintenance_info_command (char *, int);
 
-static void print_section_table PARAMS ((bfd *, asection *, PTR));
+static void print_section_table (bfd *, asection *, PTR);
 
-static void maintenance_info_sections PARAMS ((char *, int));
+static void maintenance_info_sections (char *, int);
 
-static void maintenance_print_command PARAMS ((char *, int));
+static void maintenance_print_command (char *, int);
 
 static void maintenance_do_deprecate (char *, int);
 

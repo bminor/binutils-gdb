@@ -41,30 +41,34 @@ extern int hp_som_som_object_present;
 extern int overload_debug;
 /* Local functions.  */
 
-static int typecmp PARAMS ((int staticp, struct type * t1[], value_ptr t2[]));
+static int typecmp (int staticp, struct type *t1[], value_ptr t2[]);
 
-static CORE_ADDR find_function_addr PARAMS ((value_ptr, struct type **));
-static value_ptr value_arg_coerce PARAMS ((value_ptr, struct type *, int));
+static CORE_ADDR find_function_addr (value_ptr, struct type **);
+static value_ptr value_arg_coerce (value_ptr, struct type *, int);
 
 
-static CORE_ADDR value_push PARAMS ((CORE_ADDR, value_ptr));
+static CORE_ADDR value_push (CORE_ADDR, value_ptr);
 
-static value_ptr search_struct_field PARAMS ((char *, value_ptr, int,
-					      struct type *, int));
+static value_ptr search_struct_field (char *, value_ptr, int,
+				      struct type *, int);
 
-static value_ptr search_struct_method PARAMS ((char *, value_ptr *,
-					       value_ptr *,
-					       int, int *, struct type *));
+static value_ptr search_struct_method (char *, value_ptr *,
+				       value_ptr *,
+				       int, int *, struct type *);
 
-static int check_field_in PARAMS ((struct type *, const char *));
+static int check_field_in (struct type *, const char *);
 
-static CORE_ADDR allocate_space_in_inferior PARAMS ((int));
+static CORE_ADDR allocate_space_in_inferior (int);
 
-static value_ptr cast_into_complex PARAMS ((struct type *, value_ptr));
+static value_ptr cast_into_complex (struct type *, value_ptr);
 
-static struct fn_field *find_method_list PARAMS ((value_ptr * argp, char *method, int offset, int *static_memfuncp, struct type * type, int *num_fns, struct type ** basetype, int *boffset));
+static struct fn_field *find_method_list (value_ptr * argp, char *method,
+					  int offset, int *static_memfuncp,
+					  struct type *type, int *num_fns,
+					  struct type **basetype,
+					  int *boffset);
 
-void _initialize_valops PARAMS ((void));
+void _initialize_valops (void);
 
 #define VALUE_SUBSTRING_START(VAL) VALUE_FRAME(VAL)
 
@@ -1315,7 +1319,8 @@ find_function_addr (function, retval_type)
 
    ARGS is modified to contain coerced values. */
 
-static value_ptr hand_function_call PARAMS ((value_ptr function, int nargs, value_ptr * args));
+static value_ptr hand_function_call (value_ptr function, int nargs,
+				     value_ptr * args);
 static value_ptr
 hand_function_call (function, nargs, args)
      value_ptr function;

@@ -35,12 +35,12 @@
 #include "command.h"
 
 #if 0
-static int there_is_a_visible_common_named PARAMS ((char *));
+static int there_is_a_visible_common_named (char *);
 #endif
 
-extern void _initialize_f_valprint PARAMS ((void));
-static void info_common_command PARAMS ((char *, int));
-static void list_all_visible_commons PARAMS ((char *));
+extern void _initialize_f_valprint (void);
+static void info_common_command (char *, int);
+static void list_all_visible_commons (char *);
 static void f77_print_array (struct type *, char *, CORE_ADDR,
 			     struct ui_file *, int, int, int,
 			     enum val_prettyprint);
@@ -49,7 +49,7 @@ static void f77_print_array_1 (int, int, struct type *, char *,
 			       enum val_prettyprint);
 static void f77_create_arrayprint_offset_tbl (struct type *,
 					      struct ui_file *);
-static void f77_get_dynamic_length_of_aggregate PARAMS ((struct type *));
+static void f77_get_dynamic_length_of_aggregate (struct type *);
 
 int f77_array_offset_tbl[MAX_FORTRAN_DIMS + 1][2];
 

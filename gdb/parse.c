@@ -79,13 +79,12 @@ extern int hp_som_som_object_present;
 
 static void free_funcalls (void *ignore);
 
-static void
-prefixify_expression PARAMS ((struct expression *));
+static void prefixify_expression (struct expression *);
 
 static void
-prefixify_subexp PARAMS ((struct expression *, struct expression *, int, int));
+prefixify_subexp (struct expression *, struct expression *, int, int);
 
-void _initialize_parse PARAMS ((void));
+void _initialize_parse (void);
 
 /* Data structure for saving values of arglist_len for function calls whose
    arguments contain other function calls.  */
@@ -1314,7 +1313,7 @@ follow_types (follow_type)
   return follow_type;
 }
 
-static void build_parse PARAMS ((void));
+static void build_parse (void);
 static void
 build_parse ()
 {

@@ -130,8 +130,7 @@
   i387_to_double ((FROM), (char *)&val); \
   store_floating ((TO), TYPE_LENGTH (TYPE), val); \
 }
-extern void
-i387_to_double PARAMS ((char *, char *));
+extern void i387_to_double (char *, char *);
 
 /* Convert data from virtual format with type TYPE in buffer FROM
    to raw format for register REGNUM in buffer TO.  */
@@ -142,8 +141,7 @@ i387_to_double PARAMS ((char *, char *));
   double val = extract_floating ((FROM), TYPE_LENGTH (TYPE)); \
   double_to_i387((char *)&val, (TO)); \
 }
-extern void
-double_to_i387 PARAMS ((char *, char *));
+extern void double_to_i387 (char *, char *);
 
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */

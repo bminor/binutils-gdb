@@ -39,8 +39,7 @@
 
 typedef unsigned int greg_t;	/* why isn't this defined? */
 
-static void
-fetch_core_registers PARAMS ((char *, unsigned int, int, CORE_ADDR));
+static void fetch_core_registers (char *, unsigned int, int, CORE_ADDR);
 
 /*
  * See the comment in m68k-tdep.c regarding the utility of these functions.

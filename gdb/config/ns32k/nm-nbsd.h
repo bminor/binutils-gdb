@@ -31,7 +31,6 @@
 #define REGISTER_U_ADDR(addr, blockend, regno) \
 	(addr) = ns32k_register_u_addr ((blockend),(regno));
 
-extern int
-ns32k_register_u_addr PARAMS ((int, int));
+extern int ns32k_register_u_addr (int, int);
 
 #endif /* NM_NBSD_H */

@@ -29,34 +29,35 @@ extern char gdbinit[];
 
 extern void print_gdb_version (struct ui_file *);
 
-extern void source_command PARAMS ((char *, int));
-extern void cd_command PARAMS ((char *, int));
-extern void read_command_file PARAMS ((FILE *));
-extern void init_history PARAMS ((void));
-extern void command_loop PARAMS ((void));
-extern void simplified_command_loop PARAMS ((char *(*read_input_func) (char *),
-			       void (*execute_command_func) (char *, int)));
-extern int quit_confirm PARAMS ((void));
-extern void quit_force PARAMS ((char *, int));
-extern void quit_command PARAMS ((char *, int));
+extern void source_command (char *, int);
+extern void cd_command (char *, int);
+extern void read_command_file (FILE *);
+extern void init_history (void);
+extern void command_loop (void);
+extern void simplified_command_loop (char *(*read_input_func) (char *),
+				     void (*execute_command_func) (char *,
+								   int));
+extern int quit_confirm (void);
+extern void quit_force (char *, int);
+extern void quit_command (char *, int);
 extern void command_loop_marker (void *);
-extern int quit_cover PARAMS ((PTR));
-extern void execute_command PARAMS ((char *, int));
+extern int quit_cover (PTR);
+extern void execute_command (char *, int);
 
 /* This function returns a pointer to the string that is used
    by gdb for its command prompt. */
-extern char *get_prompt PARAMS ((void));
+extern char *get_prompt (void);
 
 /* This function copies the specified string into the string that
    is used by gdb for its command prompt. */
-extern void set_prompt PARAMS ((char *));
+extern void set_prompt (char *);
 
 /* From random places.  */
 extern int mapped_symbol_files;
 extern int readnow_symbol_files;
 
 /* Perform _initialize initialization */
-extern void gdb_init PARAMS ((char *));
+extern void gdb_init (char *);
 
 /* For use by event-top.c */
 /* Variables from top.c. */

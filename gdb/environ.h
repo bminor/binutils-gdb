@@ -34,26 +34,18 @@ struct environ
     char **vector;
   };
 
-extern struct environ *
-  make_environ PARAMS ((void));
+extern struct environ *make_environ (void);
 
-extern void
-free_environ PARAMS ((struct environ *));
+extern void free_environ (struct environ *);
 
-extern void
-init_environ PARAMS ((struct environ *));
+extern void init_environ (struct environ *);
 
-extern char *
-  get_in_environ PARAMS ((const struct environ *, const char *));
+extern char *get_in_environ (const struct environ *, const char *);
 
-extern void
-set_in_environ PARAMS ((struct environ *, const char *,
-			const char *));
+extern void set_in_environ (struct environ *, const char *, const char *);
 
-extern void
-unset_in_environ PARAMS ((struct environ *, char *));
+extern void unset_in_environ (struct environ *, char *);
 
-extern char **
-  environ_vector PARAMS ((struct environ *));
+extern char **environ_vector (struct environ *);
 
 #endif /* defined (ENVIRON_H) */

@@ -140,7 +140,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    of variables on the stack.  Ugh.  jimb: why? */
 #define HPREAD_ADJUST_STACK_ADDRESS(ADDR) hpread_adjust_stack_address(ADDR)
 
-extern int hpread_adjust_stack_address PARAMS ((CORE_ADDR));
+extern int hpread_adjust_stack_address (CORE_ADDR);
 
 
 /* jimb: omitted dynamic linking stuff here */

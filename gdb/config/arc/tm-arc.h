@@ -40,7 +40,7 @@
 
 #define SKIP_PROLOGUE(pc) (arc_skip_prologue (pc, 0))
 #define SKIP_PROLOGUE_FRAMELESS_P(pc) (arc_skip_prologue (pc, 1))
-extern CORE_ADDR arc_skip_prologue PARAMS ((CORE_ADDR, int));
+extern CORE_ADDR arc_skip_prologue (CORE_ADDR, int);
 
 /* Sequence of bytes for breakpoint instruction.
    ??? The current value is "sr -1,[-1]" and is for the simulator only.
@@ -62,7 +62,7 @@ extern CORE_ADDR arc_skip_prologue PARAMS ((CORE_ADDR, int));
 /* We don't have a reliable single step facility.
    ??? We do have a cycle single step facility, but that won't work.  */
 #define SOFTWARE_SINGLE_STEP_P 1
-extern void arc_software_single_step PARAMS ((unsigned int, int));
+extern void arc_software_single_step (unsigned int, int);
 #define SOFTWARE_SINGLE_STEP(sig,bp_p) arc_software_single_step (sig, bp_p)
 
 /* FIXME: Need to set STEP_SKIPS_DELAY.  */
@@ -277,7 +277,7 @@ extern void arc_software_single_step PARAMS ((unsigned int, int));
 
 #define FRAME_SAVED_PC(frame) (arc_frame_saved_pc (frame))
 struct frame_info;		/* in case frame.h not included yet */
-CORE_ADDR arc_frame_saved_pc PARAMS ((struct frame_info *));
+CORE_ADDR arc_frame_saved_pc (struct frame_info *);
 
 /* If the argument is on the stack, it will be here.
    We cache this value in the frame info if we've already looked it up.  */

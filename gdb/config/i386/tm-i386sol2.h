@@ -45,7 +45,7 @@
    and for SunPRO 3.0, N_FUN symbols too.  */
 #define SOFUN_ADDRESS_MAYBE_MISSING
 
-extern char *sunpro_static_transform_name PARAMS ((char *));
+extern char *sunpro_static_transform_name (char *);
 #define STATIC_TRANSFORM_NAME(x) sunpro_static_transform_name (x)
 #define IS_STATIC_TRANSFORM_NAME(name) ((name)[0] == '.')
 

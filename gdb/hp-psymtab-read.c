@@ -38,31 +38,25 @@
 
 /* Forward procedure declarations */
 
-void hpread_symfile_init
-  PARAMS ((struct objfile *));
+void hpread_symfile_init (struct objfile *);
 
-void
-do_pxdb PARAMS ((bfd *));
+void do_pxdb (bfd *);
 
-void hpread_build_psymtabs
-  PARAMS ((struct objfile *, int));
+void hpread_build_psymtabs (struct objfile *, int);
 
-void hpread_symfile_finish
-  PARAMS ((struct objfile *));
+void hpread_symfile_finish (struct objfile *);
 
-static union dnttentry *hpread_get_gntt
-  PARAMS ((int, struct objfile *));
+static union dnttentry *hpread_get_gntt (int, struct objfile *);
 
-static unsigned long hpread_get_textlow
-  PARAMS ((int, int, struct objfile *, int));
+static unsigned long hpread_get_textlow (int, int, struct objfile *, int);
 
 static struct partial_symtab *hpread_start_psymtab
-  PARAMS ((struct objfile *, char *, CORE_ADDR, int,
-	   struct partial_symbol **, struct partial_symbol **));
+  (struct objfile *, char *, CORE_ADDR, int,
+   struct partial_symbol **, struct partial_symbol **);
 
 static struct partial_symtab *hpread_end_psymtab
-  PARAMS ((struct partial_symtab *, char **, int, int, CORE_ADDR,
-	   struct partial_symtab **, int));
+  (struct partial_symtab *, char **, int, int, CORE_ADDR,
+   struct partial_symtab **, int);
 
 /* End of forward routine declarations */
 

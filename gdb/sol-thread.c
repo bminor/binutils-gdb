@@ -70,7 +70,7 @@ struct target_ops sol_core_ops;
 extern int procfs_suppress_run;
 extern struct target_ops procfs_ops;	/* target vector for procfs.c */
 extern struct target_ops core_ops;	/* target vector for corelow.c */
-extern char *procfs_pid_to_str PARAMS ((int pid));
+extern char *procfs_pid_to_str (int pid);
 
 /* Prototypes for supply_gregset etc. */
 #include "gregset.h"
@@ -94,19 +94,18 @@ static struct ps_prochandle main_ph;
 static td_thragent_t *main_ta;
 static int sol_thread_active = 0;
 
-static struct cleanup *save_inferior_pid PARAMS ((void));
-static void restore_inferior_pid PARAMS ((void *pid));
-static char *td_err_string PARAMS ((td_err_e errcode));
-static char *td_state_string PARAMS ((td_thr_state_e statecode));
-static int thread_to_lwp PARAMS ((int thread_id, int default_lwp));
-static void sol_thread_resume PARAMS ((int pid, int step,
-				       enum target_signal signo));
-static int lwp_to_thread PARAMS ((int lwp));
-static int sol_thread_alive PARAMS ((int pid));
-static void sol_core_close PARAMS ((int quitting));
+static struct cleanup *save_inferior_pid (void);
+static void restore_inferior_pid (void *pid);
+static char *td_err_string (td_err_e errcode);
+static char *td_state_string (td_thr_state_e statecode);
+static int thread_to_lwp (int thread_id, int default_lwp);
+static void sol_thread_resume (int pid, int step, enum target_signal signo);
+static int lwp_to_thread (int lwp);
+static int sol_thread_alive (int pid);
+static void sol_core_close (int quitting);
 
-static void init_sol_thread_ops PARAMS ((void));
-static void init_sol_core_ops PARAMS ((void));
+static void init_sol_thread_ops (void);
+static void init_sol_core_ops (void);
 
 /* Default definitions: These must be defined in tm.h 
    if they are to be shared with a process module such as procfs.  */

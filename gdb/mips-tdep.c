@@ -209,32 +209,31 @@ mips_stack_argsize (void)
 #define VM_MIN_ADDRESS (CORE_ADDR)0x400000
 
 #if 0
-static int mips_in_lenient_prologue PARAMS ((CORE_ADDR, CORE_ADDR));
+static int mips_in_lenient_prologue (CORE_ADDR, CORE_ADDR);
 #endif
 
-int gdb_print_insn_mips PARAMS ((bfd_vma, disassemble_info *));
+int gdb_print_insn_mips (bfd_vma, disassemble_info *);
 
-static void mips_print_register PARAMS ((int, int));
-
-static mips_extra_func_info_t
-  heuristic_proc_desc PARAMS ((CORE_ADDR, CORE_ADDR, struct frame_info *));
-
-static CORE_ADDR heuristic_proc_start PARAMS ((CORE_ADDR));
-
-static CORE_ADDR read_next_frame_reg PARAMS ((struct frame_info *, int));
-
-int mips_set_processor_type PARAMS ((char *));
-
-static void mips_show_processor_type_command PARAMS ((char *, int));
-
-static void reinit_frame_cache_sfunc PARAMS ((char *, int,
-					      struct cmd_list_element *));
+static void mips_print_register (int, int);
 
 static mips_extra_func_info_t
-  find_proc_desc PARAMS ((CORE_ADDR pc, struct frame_info * next_frame));
+heuristic_proc_desc (CORE_ADDR, CORE_ADDR, struct frame_info *);
 
-static CORE_ADDR after_prologue PARAMS ((CORE_ADDR pc,
-					 mips_extra_func_info_t proc_desc));
+static CORE_ADDR heuristic_proc_start (CORE_ADDR);
+
+static CORE_ADDR read_next_frame_reg (struct frame_info *, int);
+
+int mips_set_processor_type (char *);
+
+static void mips_show_processor_type_command (char *, int);
+
+static void reinit_frame_cache_sfunc (char *, int, struct cmd_list_element *);
+
+static mips_extra_func_info_t
+find_proc_desc (CORE_ADDR pc, struct frame_info *next_frame);
+
+static CORE_ADDR after_prologue (CORE_ADDR pc,
+				 mips_extra_func_info_t proc_desc);
 
 /* This value is the model of MIPS in use.  It is derived from the value
    of the PrID register.  */
@@ -2694,7 +2693,7 @@ mips_frame_num_args (frame)
 
 /* Is this a branch with a delay slot?  */
 
-static int is_delayed PARAMS ((unsigned long));
+static int is_delayed (unsigned long);
 
 static int
 is_delayed (insn)
@@ -2993,7 +2992,8 @@ struct return_value_word
   int buf_offset;
 };
 
-static void return_value_location PARAMS ((struct type *, struct return_value_word *, struct return_value_word *));
+static void return_value_location (struct type *, struct return_value_word *,
+				   struct return_value_word *);
 
 static void
 return_value_location (valtype, hi, lo)
@@ -3219,7 +3219,7 @@ in_sigtramp (pc, ignore)
 /* Root of all "set mips "/"show mips " commands. This will eventually be
    used for all MIPS-specific commands.  */
 
-static void show_mips_command PARAMS ((char *, int));
+static void show_mips_command (char *, int);
 static void
 show_mips_command (args, from_tty)
      char *args;
@@ -3228,7 +3228,7 @@ show_mips_command (args, from_tty)
   help_list (showmipscmdlist, "show mips ", all_commands, gdb_stdout);
 }
 
-static void set_mips_command PARAMS ((char *, int));
+static void set_mips_command (char *, int);
 static void
 set_mips_command (args, from_tty)
      char *args;
@@ -3240,7 +3240,7 @@ set_mips_command (args, from_tty)
 
 /* Commands to show/set the MIPS FPU type.  */
 
-static void show_mipsfpu_command PARAMS ((char *, int));
+static void show_mipsfpu_command (char *, int);
 static void
 show_mipsfpu_command (args, from_tty)
      char *args;
@@ -3269,7 +3269,7 @@ show_mipsfpu_command (args, from_tty)
 }
 
 
-static void set_mipsfpu_command PARAMS ((char *, int));
+static void set_mipsfpu_command (char *, int);
 static void
 set_mipsfpu_command (args, from_tty)
      char *args;
@@ -3279,7 +3279,7 @@ set_mipsfpu_command (args, from_tty)
   show_mipsfpu_command (args, from_tty);
 }
 
-static void set_mipsfpu_single_command PARAMS ((char *, int));
+static void set_mipsfpu_single_command (char *, int);
 static void
 set_mipsfpu_single_command (args, from_tty)
      char *args;
@@ -3293,7 +3293,7 @@ set_mipsfpu_single_command (args, from_tty)
     }
 }
 
-static void set_mipsfpu_double_command PARAMS ((char *, int));
+static void set_mipsfpu_double_command (char *, int);
 static void
 set_mipsfpu_double_command (args, from_tty)
      char *args;
@@ -3307,7 +3307,7 @@ set_mipsfpu_double_command (args, from_tty)
     }
 }
 
-static void set_mipsfpu_none_command PARAMS ((char *, int));
+static void set_mipsfpu_none_command (char *, int);
 static void
 set_mipsfpu_none_command (args, from_tty)
      char *args;
@@ -3321,7 +3321,7 @@ set_mipsfpu_none_command (args, from_tty)
     }
 }
 
-static void set_mipsfpu_auto_command PARAMS ((char *, int));
+static void set_mipsfpu_auto_command (char *, int);
 static void
 set_mipsfpu_auto_command (args, from_tty)
      char *args;

@@ -36,7 +36,7 @@
 #if !defined(SKIP_PROLOGUE)
 #define SKIP_PROLOGUE(ip) (m68k_skip_prologue (ip))
 #endif
-extern CORE_ADDR m68k_skip_prologue PARAMS ((CORE_ADDR ip));
+extern CORE_ADDR m68k_skip_prologue (CORE_ADDR ip);
 
 /* Immediately after a function call, return the saved pc.
    Can't always go through the frames for this because on some machines
@@ -46,8 +46,9 @@ extern CORE_ADDR m68k_skip_prologue PARAMS ((CORE_ADDR ip));
 struct frame_info;
 struct frame_saved_regs;
 
-extern CORE_ADDR m68k_saved_pc_after_call PARAMS ((struct frame_info *));
-extern void m68k_find_saved_regs PARAMS ((struct frame_info *, struct frame_saved_regs *));
+extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
+extern void m68k_find_saved_regs (struct frame_info *,
+				  struct frame_saved_regs *);
 
 #define SAVED_PC_AFTER_CALL(frame) \
   m68k_saved_pc_after_call(frame)
@@ -372,9 +373,9 @@ do									\
 
 #define PUSH_DUMMY_FRAME	{ m68k_push_dummy_frame (); }
 
-extern void m68k_push_dummy_frame PARAMS ((void));
+extern void m68k_push_dummy_frame (void);
 
-extern void m68k_pop_frame PARAMS ((void));
+extern void m68k_pop_frame (void);
 
 /* Discard from the stack the innermost frame, restoring all registers.  */
 

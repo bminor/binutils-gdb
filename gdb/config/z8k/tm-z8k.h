@@ -42,7 +42,7 @@
    to reach some "real" code.  */
 
 #define SKIP_PROLOGUE(ip)   (z8k_skip_prologue (ip))
-extern CORE_ADDR z8k_skip_prologue PARAMS ((CORE_ADDR ip));
+extern CORE_ADDR z8k_skip_prologue (CORE_ADDR ip);
 
 
 /* Immediately after a function call, return the saved pc.
@@ -203,7 +203,7 @@ extern CORE_ADDR z8k_frame_saved_pc (struct frame_info *frame);
 #define FRAME_ARGS_SKIP 8
 
 struct frame_info;
-extern void z8k_frame_init_saved_regs PARAMS ((struct frame_info *));
+extern void z8k_frame_init_saved_regs (struct frame_info *);
 #define FRAME_INIT_SAVED_REGS(fi) z8k_frame_init_saved_regs (fi)
 
 
@@ -259,9 +259,9 @@ extern void z8k_frame_init_saved_regs PARAMS ((struct frame_info *));
 
 #define PUSH_DUMMY_FRAME	{ z8k_push_dummy_frame (); }
 
-extern void z8k_push_dummy_frame PARAMS ((void));
+extern void z8k_push_dummy_frame (void);
 
-extern void z8k_pop_frame PARAMS ((void));
+extern void z8k_pop_frame (void);
 
 /* Discard from the stack the innermost frame, restoring all registers.  */
 
@@ -271,7 +271,7 @@ extern void z8k_pop_frame PARAMS ((void));
 
 #define SP_ARG0 (1 * 4)
 
-extern CORE_ADDR z8k_addr_bits_remove PARAMS ((CORE_ADDR));
+extern CORE_ADDR z8k_addr_bits_remove (CORE_ADDR);
 #define ADDR_BITS_REMOVE(addr) z8k_addr_bits_remove (addr)
 int sim_z8001_mode;
 #define BIG (sim_z8001_mode)

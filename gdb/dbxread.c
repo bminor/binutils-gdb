@@ -265,77 +265,56 @@ static int bincls_allocated;
 
 /* Local function prototypes */
 
-extern void _initialize_dbxread PARAMS ((void));
+extern void _initialize_dbxread (void);
 
-static void
-process_now PARAMS ((struct objfile *));
+static void process_now (struct objfile *);
 
-static void
-free_header_files PARAMS ((void));
+static void free_header_files (void);
 
-static void
-init_header_files PARAMS ((void));
+static void init_header_files (void);
 
-static void
-read_ofile_symtab PARAMS ((struct partial_symtab *));
+static void read_ofile_symtab (struct partial_symtab *);
 
-static void
-dbx_psymtab_to_symtab PARAMS ((struct partial_symtab *));
+static void dbx_psymtab_to_symtab (struct partial_symtab *);
 
-static void
-dbx_psymtab_to_symtab_1 PARAMS ((struct partial_symtab *));
+static void dbx_psymtab_to_symtab_1 (struct partial_symtab *);
 
-static void
-read_dbx_dynamic_symtab PARAMS ((struct objfile * objfile));
+static void read_dbx_dynamic_symtab (struct objfile *objfile);
 
-static void
-read_dbx_symtab PARAMS ((struct objfile *));
+static void read_dbx_symtab (struct objfile *);
 
-static void
-free_bincl_list PARAMS ((struct objfile *));
+static void free_bincl_list (struct objfile *);
 
-static struct partial_symtab *
-  find_corresponding_bincl_psymtab PARAMS ((char *, int));
+static struct partial_symtab *find_corresponding_bincl_psymtab (char *, int);
 
-static void
-add_bincl_to_list PARAMS ((struct partial_symtab *, char *, int));
+static void add_bincl_to_list (struct partial_symtab *, char *, int);
 
-static void
-init_bincl_list PARAMS ((int, struct objfile *));
+static void init_bincl_list (int, struct objfile *);
 
-static char *
-  dbx_next_symbol_text PARAMS ((struct objfile *));
+static char *dbx_next_symbol_text (struct objfile *);
 
-static void
-fill_symbuf PARAMS ((bfd *));
+static void fill_symbuf (bfd *);
 
-static void
-dbx_symfile_init PARAMS ((struct objfile *));
+static void dbx_symfile_init (struct objfile *);
 
-static void
-dbx_new_init PARAMS ((struct objfile *));
+static void dbx_new_init (struct objfile *);
 
-static void
-dbx_symfile_read PARAMS ((struct objfile *, int));
+static void dbx_symfile_read (struct objfile *, int);
 
-static void
-dbx_symfile_finish PARAMS ((struct objfile *));
+static void dbx_symfile_finish (struct objfile *);
 
-static void
-record_minimal_symbol PARAMS ((char *, CORE_ADDR, int, struct objfile *));
+static void record_minimal_symbol (char *, CORE_ADDR, int, struct objfile *);
 
-static void
-add_new_header_file PARAMS ((char *, int));
+static void add_new_header_file (char *, int);
 
-static void
-add_old_header_file PARAMS ((char *, int));
+static void add_old_header_file (char *, int);
 
-static void
-add_this_object_header_file PARAMS ((int));
+static void add_this_object_header_file (int);
 
-static struct partial_symtab *
-start_psymtab PARAMS ((struct objfile *, char *, CORE_ADDR, int,
-		       struct partial_symbol **, struct partial_symbol **));
+static struct partial_symtab *start_psymtab (struct objfile *, char *,
+					     CORE_ADDR, int,
+					     struct partial_symbol **,
+					     struct partial_symbol **);
 
 /* Free up old header file tables */
 

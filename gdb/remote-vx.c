@@ -651,8 +651,7 @@ vx_mourn_inferior ()
 }
 
 
-static void vx_add_symbols PARAMS ((char *, int, CORE_ADDR, CORE_ADDR,
-				    CORE_ADDR));
+static void vx_add_symbols (char *, int, CORE_ADDR, CORE_ADDR, CORE_ADDR);
 
 struct find_sect_args
   {
@@ -661,7 +660,7 @@ struct find_sect_args
     CORE_ADDR bss_start;
   };
 
-static void find_sect PARAMS ((bfd *, asection *, void *));
+static void find_sect (bfd *, asection *, void *);
 
 static void
 find_sect (abfd, sect, obj)

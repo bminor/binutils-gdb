@@ -18,10 +18,10 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-int xmodem_init_xfer PARAMS ((serial_t desc));
-void send_xmodem_packet PARAMS ((serial_t desc, unsigned char *packet, int len,
-				 int hashmark));
-void xmodem_finish_xfer PARAMS ((serial_t desc));
+int xmodem_init_xfer (serial_t desc);
+void send_xmodem_packet (serial_t desc, unsigned char *packet, int len,
+			 int hashmark);
+void xmodem_finish_xfer (serial_t desc);
 
 #define XMODEM_DATASIZE	128	/* The data size is ALWAYS 128 */
 #define XMODEM_1KDATASIZE 1024	/* Unless it's 1024!!! */

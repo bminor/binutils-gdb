@@ -61,16 +61,16 @@ extern int info_verbose;
 extern void (*readline_begin_hook) PARAMS ((char *,...));
 extern char *(*readline_hook) PARAMS ((char *));
 extern void (*readline_end_hook) PARAMS ((void));
-extern void x_command PARAMS ((char *, int));
+extern void x_command (char *, int);
 extern int addressprint;	/* Print machine addresses? */
 
 /* GDB commands implemented in other modules:
  */  
 
-extern void output_command PARAMS ((char *, int));
-extern void registers_info PARAMS ((char *, int));
-extern void args_info      PARAMS ((char *, int));
-extern void locals_info    PARAMS ((char *, int));
+extern void output_command (char *, int);
+extern void registers_info (char *, int);
+extern void args_info (char *, int);
+extern void locals_info (char *, int);
 
 
 /* If this definition isn't overridden by the header files, assume
@@ -129,38 +129,38 @@ static struct symtab_and_line traceframe_sal;
 static struct cmd_list_element *tfindlist;
 
 /* ======= Important command functions: ======= */
-static void trace_command PARAMS ((char *, int));
-static void tracepoints_info PARAMS ((char *, int));
-static void delete_trace_command PARAMS ((char *, int));
-static void enable_trace_command PARAMS ((char *, int));
-static void disable_trace_command PARAMS ((char *, int));
-static void trace_pass_command PARAMS ((char *, int));
-static void trace_actions_command PARAMS ((char *, int));
-static void trace_start_command PARAMS ((char *, int));
-static void trace_stop_command PARAMS ((char *, int));
-static void trace_status_command PARAMS ((char *, int));
-static void trace_find_command PARAMS ((char *, int));
-static void trace_find_pc_command PARAMS ((char *, int));
-static void trace_find_tracepoint_command PARAMS ((char *, int));
-static void trace_find_line_command PARAMS ((char *, int));
-static void trace_find_range_command PARAMS ((char *, int));
-static void trace_find_outside_command PARAMS ((char *, int));
-static void tracepoint_save_command PARAMS ((char *, int));
-static void trace_dump_command PARAMS ((char *, int));
+static void trace_command (char *, int);
+static void tracepoints_info (char *, int);
+static void delete_trace_command (char *, int);
+static void enable_trace_command (char *, int);
+static void disable_trace_command (char *, int);
+static void trace_pass_command (char *, int);
+static void trace_actions_command (char *, int);
+static void trace_start_command (char *, int);
+static void trace_stop_command (char *, int);
+static void trace_status_command (char *, int);
+static void trace_find_command (char *, int);
+static void trace_find_pc_command (char *, int);
+static void trace_find_tracepoint_command (char *, int);
+static void trace_find_line_command (char *, int);
+static void trace_find_range_command (char *, int);
+static void trace_find_outside_command (char *, int);
+static void tracepoint_save_command (char *, int);
+static void trace_dump_command (char *, int);
 
 /* support routines */
-static void trace_mention PARAMS ((struct tracepoint *));
+static void trace_mention (struct tracepoint *);
 
 struct collection_list;
-static void add_aexpr PARAMS ((struct collection_list *, struct agent_expr *));
+static void add_aexpr (struct collection_list *, struct agent_expr *);
 static unsigned char *mem2hex (unsigned char *, unsigned char *, int);
-static void add_register PARAMS ((struct collection_list * collection, 
-				  unsigned int regno));
+static void add_register (struct collection_list *collection,
+			  unsigned int regno);
 static struct cleanup *make_cleanup_free_actions (struct tracepoint *t);
-static void free_actions_list PARAMS ((char **actions_list));
-static void free_actions_list_cleanup_wrapper PARAMS ((void *));
+static void free_actions_list (char **actions_list);
+static void free_actions_list_cleanup_wrapper (void *);
 
-extern void _initialize_tracepoint PARAMS ((void));
+extern void _initialize_tracepoint (void);
 
 /* Utility: returns true if "target remote" */
 static int
@@ -760,7 +760,7 @@ trace_pass_command (args, from_tty)
 /* ACTIONS functions: */
 
 /* Prototypes for action-parsing utility commands  */
-static void read_actions PARAMS ((struct tracepoint *));
+static void read_actions (struct tracepoint *);
 
 /* The three functions:
    collect_pseudocommand, 
@@ -1098,7 +1098,7 @@ tracepoint_list, stepping_list;
 
 /* MEMRANGE functions: */
 
-static int memrange_cmp PARAMS ((const void *, const void *));
+static int memrange_cmp (const void *, const void *);
 
 /* compare memranges for qsort */
 static int

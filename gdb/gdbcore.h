@@ -29,53 +29,52 @@
    ERR nonzero means get error if there is none specified;
    otherwise return 0 in that case.  */
 
-extern char *get_exec_file PARAMS ((int err));
+extern char *get_exec_file (int err);
 
 /* Nonzero if there is a core file.  */
 
-extern int have_core_file_p PARAMS ((void));
+extern int have_core_file_p (void);
 
 /* Read "memory data" from whatever target or inferior we have.
    Returns zero if successful, errno value if not.  EIO is used for
    address out of bounds.  If breakpoints are inserted, returns shadow
    contents, not the breakpoints themselves.  From breakpoint.c.  */
 
-extern int read_memory_nobpt PARAMS ((CORE_ADDR memaddr, char *myaddr,
-				      unsigned len));
+extern int read_memory_nobpt (CORE_ADDR memaddr, char *myaddr, unsigned len);
 
 /* Report a memory error with error().  */
 
-extern void memory_error PARAMS ((int status, CORE_ADDR memaddr));
+extern void memory_error (int status, CORE_ADDR memaddr);
 
 /* Like target_read_memory, but report an error if can't read.  */
 
-extern void read_memory PARAMS ((CORE_ADDR memaddr, char *myaddr, int len));
+extern void read_memory (CORE_ADDR memaddr, char *myaddr, int len);
 
 /* Read an integer from debugged memory, given address and number of
    bytes.  */
 
-extern LONGEST read_memory_integer PARAMS ((CORE_ADDR memaddr, int len));
+extern LONGEST read_memory_integer (CORE_ADDR memaddr, int len);
 
 /* Read an unsigned integer from debugged memory, given address and
    number of bytes.  */
 
-extern ULONGEST read_memory_unsigned_integer PARAMS ((CORE_ADDR memaddr, int len));
+extern ULONGEST read_memory_unsigned_integer (CORE_ADDR memaddr, int len);
 
 /* Read a null-terminated string from the debuggee's memory, given address,
  * a buffer into which to place the string, and the maximum available space */
-extern void read_memory_string PARAMS ((CORE_ADDR, char *, int));
+extern void read_memory_string (CORE_ADDR, char *, int);
 
 /* This takes a char *, not void *.  This is probably right, because
    passing in an int * or whatever is wrong with respect to
    byteswapping, alignment, different sizes for host vs. target types,
    etc.  */
 
-extern void write_memory PARAMS ((CORE_ADDR memaddr, char *myaddr, int len));
+extern void write_memory (CORE_ADDR memaddr, char *myaddr, int len);
 
-extern void generic_search PARAMS ((int len, char *data, char *mask,
-				    CORE_ADDR startaddr, int increment,
-				    CORE_ADDR lorange, CORE_ADDR hirange,
-				 CORE_ADDR * addr_found, char *data_found));
+extern void generic_search (int len, char *data, char *mask,
+			    CORE_ADDR startaddr, int increment,
+			    CORE_ADDR lorange, CORE_ADDR hirange,
+			    CORE_ADDR * addr_found, char *data_found);
 
 /* Hook for `exec_file_command' command to call.  */
 
@@ -86,7 +85,7 @@ extern void (*exec_file_display_hook) PARAMS ((char *filename));
 
 extern void (*file_changed_hook) PARAMS ((char *filename));
 
-extern void specify_exec_file_hook PARAMS ((void (*hook) (char *filename)));
+extern void specify_exec_file_hook (void (*hook) (char *filename));
 
 /* Binary File Diddlers for the exec and core files */
 
@@ -97,17 +96,17 @@ extern bfd *exec_bfd;
 
 extern int write_files;
 
-extern void core_file_command PARAMS ((char *filename, int from_tty));
+extern void core_file_command (char *filename, int from_tty);
 
-extern void exec_file_attach PARAMS ((char *filename, int from_tty));
+extern void exec_file_attach (char *filename, int from_tty);
 
-extern void exec_file_command PARAMS ((char *filename, int from_tty));
+extern void exec_file_command (char *filename, int from_tty);
 
-extern void validate_files PARAMS ((void));
+extern void validate_files (void);
 
-extern CORE_ADDR register_addr PARAMS ((int regno, CORE_ADDR blockend));
+extern CORE_ADDR register_addr (int regno, CORE_ADDR blockend);
 
-extern void registers_fetched PARAMS ((void));
+extern void registers_fetched (void);
 
 #if !defined (KERNEL_U_ADDR)
 extern CORE_ADDR kernel_u_addr;
@@ -122,7 +121,7 @@ extern struct target_ops core_ops;
 
 extern char *gnutarget;
 
-extern void set_gnutarget PARAMS ((char *));
+extern void set_gnutarget (char *);
 
 /* Structure to keep track of core register reading functions for
    various core file types.  */
@@ -185,8 +184,8 @@ struct core_fns
 
   };
 
-extern void add_core_fns PARAMS ((struct core_fns * cf));
-extern int default_core_sniffer PARAMS ((struct core_fns *cf, bfd *abfd));
-extern int default_check_format PARAMS ((bfd *abfd));
+extern void add_core_fns (struct core_fns *cf);
+extern int default_core_sniffer (struct core_fns *cf, bfd * abfd);
+extern int default_check_format (bfd * abfd);
 
 #endif /* !defined (GDBCORE_H) */

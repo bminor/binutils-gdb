@@ -56,101 +56,81 @@
    struct agent_expr * --- agent expression buffer to generate code into
    struct axs_value * --- describes value left on top of stack  */
 
-static struct value *const_var_ref PARAMS ((struct symbol * var));
-static struct value *const_expr PARAMS ((union exp_element ** pc));
-static struct value *maybe_const_expr PARAMS ((union exp_element ** pc));
+static struct value *const_var_ref (struct symbol *var);
+static struct value *const_expr (union exp_element **pc);
+static struct value *maybe_const_expr (union exp_element **pc);
 
-static void gen_traced_pop PARAMS ((struct agent_expr *, struct axs_value *));
+static void gen_traced_pop (struct agent_expr *, struct axs_value *);
 
-static void gen_sign_extend PARAMS ((struct agent_expr *, struct type *));
-static void gen_extend PARAMS ((struct agent_expr *, struct type *));
-static void gen_fetch PARAMS ((struct agent_expr *, struct type *));
-static void gen_left_shift PARAMS ((struct agent_expr *, int));
-
-
-static void gen_frame_args_address PARAMS ((struct agent_expr *));
-static void gen_frame_locals_address PARAMS ((struct agent_expr *));
-static void gen_offset PARAMS ((struct agent_expr * ax, int offset));
-static void gen_sym_offset PARAMS ((struct agent_expr *, struct symbol *));
-static void gen_var_ref PARAMS ((struct agent_expr * ax,
-				 struct axs_value * value,
-				 struct symbol * var));
+static void gen_sign_extend (struct agent_expr *, struct type *);
+static void gen_extend (struct agent_expr *, struct type *);
+static void gen_fetch (struct agent_expr *, struct type *);
+static void gen_left_shift (struct agent_expr *, int);
 
 
-static void gen_int_literal PARAMS ((struct agent_expr * ax,
-				     struct axs_value * value,
-				     LONGEST k, struct type * type));
+static void gen_frame_args_address (struct agent_expr *);
+static void gen_frame_locals_address (struct agent_expr *);
+static void gen_offset (struct agent_expr *ax, int offset);
+static void gen_sym_offset (struct agent_expr *, struct symbol *);
+static void gen_var_ref (struct agent_expr *ax,
+			 struct axs_value *value, struct symbol *var);
 
 
-static void require_rvalue PARAMS ((struct agent_expr * ax,
-				    struct axs_value * value));
-static void gen_usual_unary PARAMS ((struct agent_expr * ax,
-				     struct axs_value * value));
-static int type_wider_than PARAMS ((struct type * type1,
-				    struct type * type2));
-static struct type *max_type PARAMS ((struct type * type1,
-				      struct type * type2));
-static void gen_conversion PARAMS ((struct agent_expr * ax,
-				    struct type * from,
-				    struct type * to));
-static int is_nontrivial_conversion PARAMS ((struct type * from,
-					     struct type * to));
-static void gen_usual_arithmetic PARAMS ((struct agent_expr * ax,
-					  struct axs_value * value1,
-					  struct axs_value * value2));
-static void gen_integral_promotions PARAMS ((struct agent_expr * ax,
-					     struct axs_value * value));
-static void gen_cast PARAMS ((struct agent_expr * ax,
-			      struct axs_value * value,
-			      struct type * type));
-static void gen_scale PARAMS ((struct agent_expr * ax,
-			       enum agent_op op,
-			       struct type * type));
-static void gen_add PARAMS ((struct agent_expr * ax,
-			     struct axs_value * value,
-			     struct axs_value * value1,
-			     struct axs_value * value2,
-			     char *name));
-static void gen_sub PARAMS ((struct agent_expr * ax,
-			     struct axs_value * value,
-			     struct axs_value * value1,
-			     struct axs_value * value2));
-static void gen_binop PARAMS ((struct agent_expr * ax,
-			       struct axs_value * value,
-			       struct axs_value * value1,
-			       struct axs_value * value2,
-			       enum agent_op op,
-			       enum agent_op op_unsigned,
-			       int may_carry,
-			       char *name));
-static void gen_logical_not PARAMS ((struct agent_expr * ax,
-				     struct axs_value * value));
-static void gen_complement PARAMS ((struct agent_expr * ax,
-				    struct axs_value * value));
-static void gen_deref PARAMS ((struct agent_expr *, struct axs_value *));
-static void gen_address_of PARAMS ((struct agent_expr *, struct axs_value *));
-static int find_field PARAMS ((struct type * type, char *name));
-static void gen_bitfield_ref PARAMS ((struct agent_expr * ax,
-				      struct axs_value * value,
-				      struct type * type,
-				      int start, int end));
-static void gen_struct_ref PARAMS ((struct agent_expr * ax,
-				    struct axs_value * value,
-				    char *field,
-				    char *operator_name,
-				    char *operand_name));
-static void gen_repeat PARAMS ((union exp_element ** pc,
-				struct agent_expr * ax,
-				struct axs_value * value));
-static void gen_sizeof PARAMS ((union exp_element ** pc,
-				struct agent_expr * ax,
-				struct axs_value * value));
-static void gen_expr PARAMS ((union exp_element ** pc,
-			      struct agent_expr * ax,
-			      struct axs_value * value));
+static void gen_int_literal (struct agent_expr *ax,
+			     struct axs_value *value,
+			     LONGEST k, struct type *type);
+
+
+static void require_rvalue (struct agent_expr *ax, struct axs_value *value);
+static void gen_usual_unary (struct agent_expr *ax, struct axs_value *value);
+static int type_wider_than (struct type *type1, struct type *type2);
+static struct type *max_type (struct type *type1, struct type *type2);
+static void gen_conversion (struct agent_expr *ax,
+			    struct type *from, struct type *to);
+static int is_nontrivial_conversion (struct type *from, struct type *to);
+static void gen_usual_arithmetic (struct agent_expr *ax,
+				  struct axs_value *value1,
+				  struct axs_value *value2);
+static void gen_integral_promotions (struct agent_expr *ax,
+				     struct axs_value *value);
+static void gen_cast (struct agent_expr *ax,
+		      struct axs_value *value, struct type *type);
+static void gen_scale (struct agent_expr *ax,
+		       enum agent_op op, struct type *type);
+static void gen_add (struct agent_expr *ax,
+		     struct axs_value *value,
+		     struct axs_value *value1,
+		     struct axs_value *value2, char *name);
+static void gen_sub (struct agent_expr *ax,
+		     struct axs_value *value,
+		     struct axs_value *value1, struct axs_value *value2);
+static void gen_binop (struct agent_expr *ax,
+		       struct axs_value *value,
+		       struct axs_value *value1,
+		       struct axs_value *value2,
+		       enum agent_op op,
+		       enum agent_op op_unsigned, int may_carry, char *name);
+static void gen_logical_not (struct agent_expr *ax, struct axs_value *value);
+static void gen_complement (struct agent_expr *ax, struct axs_value *value);
+static void gen_deref (struct agent_expr *, struct axs_value *);
+static void gen_address_of (struct agent_expr *, struct axs_value *);
+static int find_field (struct type *type, char *name);
+static void gen_bitfield_ref (struct agent_expr *ax,
+			      struct axs_value *value,
+			      struct type *type, int start, int end);
+static void gen_struct_ref (struct agent_expr *ax,
+			    struct axs_value *value,
+			    char *field,
+			    char *operator_name, char *operand_name);
+static void gen_repeat (union exp_element **pc,
+			struct agent_expr *ax, struct axs_value *value);
+static void gen_sizeof (union exp_element **pc,
+			struct agent_expr *ax, struct axs_value *value);
+static void gen_expr (union exp_element **pc,
+		      struct agent_expr *ax, struct axs_value *value);
 
 static void print_axs_value (struct ui_file *f, struct axs_value * value);
-static void agent_command PARAMS ((char *exp, int from_tty));
+static void agent_command (char *exp, int from_tty);
 
 
 /* Detecting constant expressions.  */
@@ -1938,7 +1918,7 @@ agent_command (exp, from_tty)
 
 /* Initialization code.  */
 
-void _initialize_ax_gdb PARAMS ((void));
+void _initialize_ax_gdb (void);
 void
 _initialize_ax_gdb ()
 {

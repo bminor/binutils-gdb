@@ -46,72 +46,71 @@
 #include <signal.h>
 #include "serial.h"
 
-extern void _initialize_remote_sds PARAMS ((void));
+extern void _initialize_remote_sds (void);
 
 /* Declarations of local functions. */
 
-static int sds_write_bytes PARAMS ((CORE_ADDR, char *, int));
+static int sds_write_bytes (CORE_ADDR, char *, int);
 
-static int sds_read_bytes PARAMS ((CORE_ADDR, char *, int));
+static int sds_read_bytes (CORE_ADDR, char *, int);
 
-static void sds_files_info PARAMS ((struct target_ops * ignore));
+static void sds_files_info (struct target_ops *ignore);
 
-static int sds_xfer_memory PARAMS ((CORE_ADDR, char *,
-				    int, int, struct target_ops *));
+static int sds_xfer_memory (CORE_ADDR, char *, int, int, struct target_ops *);
 
-static void sds_prepare_to_store PARAMS ((void));
+static void sds_prepare_to_store (void);
 
-static void sds_fetch_registers PARAMS ((int));
+static void sds_fetch_registers (int);
 
-static void sds_resume PARAMS ((int, int, enum target_signal));
+static void sds_resume (int, int, enum target_signal);
 
-static int sds_start_remote PARAMS ((PTR));
+static int sds_start_remote (PTR);
 
-static void sds_open PARAMS ((char *, int));
+static void sds_open (char *, int);
 
-static void sds_close PARAMS ((int));
+static void sds_close (int);
 
-static void sds_store_registers PARAMS ((int));
+static void sds_store_registers (int);
 
-static void sds_mourn PARAMS ((void));
+static void sds_mourn (void);
 
-static void sds_create_inferior PARAMS ((char *, char *, char **));
+static void sds_create_inferior (char *, char *, char **);
 
-static void sds_load PARAMS ((char *, int));
+static void sds_load (char *, int);
 
-static int getmessage PARAMS ((unsigned char *, int));
+static int getmessage (unsigned char *, int);
 
-static int putmessage PARAMS ((unsigned char *, int));
+static int putmessage (unsigned char *, int);
 
-static int sds_send PARAMS ((unsigned char *, int));
+static int sds_send (unsigned char *, int);
 
-static int readchar PARAMS ((int));
+static int readchar (int);
 
-static int sds_wait PARAMS ((int, struct target_waitstatus *));
+static int sds_wait (int, struct target_waitstatus *);
 
-static void sds_kill PARAMS ((void));
+static void sds_kill (void);
 
-static int tohex PARAMS ((int));
+static int tohex (int);
 
-static int fromhex PARAMS ((int));
+static int fromhex (int);
 
-static void sds_detach PARAMS ((char *, int));
+static void sds_detach (char *, int);
 
-static void sds_interrupt PARAMS ((int));
+static void sds_interrupt (int);
 
-static void sds_interrupt_twice PARAMS ((int));
+static void sds_interrupt_twice (int);
 
-static void interrupt_query PARAMS ((void));
+static void interrupt_query (void);
 
-static int read_frame PARAMS ((char *));
+static int read_frame (char *);
 
-static int sds_insert_breakpoint PARAMS ((CORE_ADDR, char *));
+static int sds_insert_breakpoint (CORE_ADDR, char *);
 
-static int sds_remove_breakpoint PARAMS ((CORE_ADDR, char *));
+static int sds_remove_breakpoint (CORE_ADDR, char *);
 
-static void init_sds_ops PARAMS ((void));
+static void init_sds_ops (void);
 
-static void sds_command PARAMS ((char *args, int from_tty));
+static void sds_command (char *args, int from_tty);
 
 /* Define the target operations vector. */
 

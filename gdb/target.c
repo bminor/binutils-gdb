@@ -35,57 +35,41 @@
 
 extern int errno;
 
-static void
-target_info PARAMS ((char *, int));
+static void target_info (char *, int);
 
-static void
-cleanup_target PARAMS ((struct target_ops *));
+static void cleanup_target (struct target_ops *);
 
-static void
-maybe_kill_then_create_inferior PARAMS ((char *, char *, char **));
+static void maybe_kill_then_create_inferior (char *, char *, char **);
 
-static void
-default_clone_and_follow_inferior PARAMS ((int, int *));
+static void default_clone_and_follow_inferior (int, int *);
 
-static void
-maybe_kill_then_attach PARAMS ((char *, int));
+static void maybe_kill_then_attach (char *, int);
 
-static void
-kill_or_be_killed PARAMS ((int));
+static void kill_or_be_killed (int);
 
-static void
-default_terminal_info PARAMS ((char *, int));
+static void default_terminal_info (char *, int);
 
-static int
-nosymbol PARAMS ((char *, CORE_ADDR *));
+static int nosymbol (char *, CORE_ADDR *);
 
-static void
-tcomplain PARAMS ((void));
+static void tcomplain (void);
 
-static int
-nomemory PARAMS ((CORE_ADDR, char *, int, int, struct target_ops *));
+static int nomemory (CORE_ADDR, char *, int, int, struct target_ops *);
 
-static int
-return_zero PARAMS ((void));
+static int return_zero (void);
 
-static int
-return_one PARAMS ((void));
+static int return_one (void);
 
-void
-target_ignore PARAMS ((void));
+void target_ignore (void);
 
-static void
-target_command PARAMS ((char *, int));
+static void target_command (char *, int);
 
-static struct target_ops *
-find_default_run_target PARAMS ((char *));
+static struct target_ops *find_default_run_target (char *);
 
-static void
-update_current_target PARAMS ((void));
+static void update_current_target (void);
 
-static void nosupport_runtime PARAMS ((void));
+static void nosupport_runtime (void);
 
-static void normal_target_post_startup_inferior PARAMS ((int pid));
+static void normal_target_post_startup_inferior (int pid);
 
 /* Transfer LEN bytes between target address MEMADDR and GDB address
    MYADDR.  Returns 0 for success, errno code for failure (which
@@ -94,93 +78,66 @@ static void normal_target_post_startup_inferior PARAMS ((int pid));
    target_write_memory_partial).  */
 
 static int
-target_xfer_memory PARAMS ((CORE_ADDR memaddr, char *myaddr, int len,
-			    int write));
+target_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write);
 
-static void init_dummy_target PARAMS ((void));
+static void init_dummy_target (void);
 
-static void
-debug_to_open PARAMS ((char *, int));
+static void debug_to_open (char *, int);
 
-static void
-debug_to_close PARAMS ((int));
+static void debug_to_close (int);
 
-static void
-debug_to_attach PARAMS ((char *, int));
+static void debug_to_attach (char *, int);
 
-static void
-debug_to_detach PARAMS ((char *, int));
+static void debug_to_detach (char *, int);
 
-static void
-debug_to_resume PARAMS ((int, int, enum target_signal));
+static void debug_to_resume (int, int, enum target_signal);
 
-static int
-debug_to_wait PARAMS ((int, struct target_waitstatus *));
+static int debug_to_wait (int, struct target_waitstatus *);
 
-static void
-debug_to_fetch_registers PARAMS ((int));
+static void debug_to_fetch_registers (int);
 
-static void
-debug_to_store_registers PARAMS ((int));
+static void debug_to_store_registers (int);
 
-static void
-debug_to_prepare_to_store PARAMS ((void));
+static void debug_to_prepare_to_store (void);
 
 static int
-debug_to_xfer_memory PARAMS ((CORE_ADDR, char *, int, int, struct target_ops *));
+debug_to_xfer_memory (CORE_ADDR, char *, int, int, struct target_ops *);
 
-static void
-debug_to_files_info PARAMS ((struct target_ops *));
+static void debug_to_files_info (struct target_ops *);
 
-static int
-debug_to_insert_breakpoint PARAMS ((CORE_ADDR, char *));
+static int debug_to_insert_breakpoint (CORE_ADDR, char *);
 
-static int
-debug_to_remove_breakpoint PARAMS ((CORE_ADDR, char *));
+static int debug_to_remove_breakpoint (CORE_ADDR, char *);
 
-static void
-debug_to_terminal_init PARAMS ((void));
+static void debug_to_terminal_init (void);
 
-static void
-debug_to_terminal_inferior PARAMS ((void));
+static void debug_to_terminal_inferior (void);
 
-static void
-debug_to_terminal_ours_for_output PARAMS ((void));
+static void debug_to_terminal_ours_for_output (void);
 
-static void
-debug_to_terminal_ours PARAMS ((void));
+static void debug_to_terminal_ours (void);
 
-static void
-debug_to_terminal_info PARAMS ((char *, int));
+static void debug_to_terminal_info (char *, int);
 
-static void
-debug_to_kill PARAMS ((void));
+static void debug_to_kill (void);
 
-static void
-debug_to_load PARAMS ((char *, int));
+static void debug_to_load (char *, int);
 
-static int
-debug_to_lookup_symbol PARAMS ((char *, CORE_ADDR *));
+static int debug_to_lookup_symbol (char *, CORE_ADDR *);
 
-static void
-debug_to_create_inferior PARAMS ((char *, char *, char **));
+static void debug_to_create_inferior (char *, char *, char **);
 
-static void
-debug_to_mourn_inferior PARAMS ((void));
+static void debug_to_mourn_inferior (void);
 
-static int
-debug_to_can_run PARAMS ((void));
+static int debug_to_can_run (void);
 
-static void
-debug_to_notice_signals PARAMS ((int));
+static void debug_to_notice_signals (int);
 
-static int
-debug_to_thread_alive PARAMS ((int));
+static int debug_to_thread_alive (int);
 
-static void
-debug_to_stop PARAMS ((void));
+static void debug_to_stop (void);
 
-static int debug_to_query PARAMS ((int /*char */ , char *, char *, int *));
+static int debug_to_query (int /*char */ , char *, char *, int *);
 
 /* Pointer to array of target architecture structures; the size of the
    array; the current index into the array; the allocated size of the 
@@ -218,7 +175,7 @@ int attach_flag;
 
 static int targetdebug = 0;
 
-static void setup_target_debug PARAMS ((void));
+static void setup_target_debug (void);
 
 /* The user just typed 'target' without the name of a target.  */
 

@@ -45,7 +45,7 @@ int static_field_print;		/* Controls printing of static fields. */
 static struct obstack dont_print_vb_obstack;
 static struct obstack dont_print_statmem_obstack;
 
-extern void _initialize_cp_valprint PARAMS ((void));
+extern void _initialize_cp_valprint (void);
 
 static void cp_print_static_field (struct type *, value_ptr,
 				   struct ui_file *, int, int,

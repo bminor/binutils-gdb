@@ -28,25 +28,25 @@ static void _showSourceOrDisassemAndCommand PARAMS
   ((TuiLayoutType));
 static void _makeSourceOrDisassemWindow PARAMS
   ((TuiWinInfoPtr *, TuiWinType, int, int));
-static void _makeCommandWindow PARAMS ((TuiWinInfoPtr *, int, int));
-static void _makeSourceWindow PARAMS ((TuiWinInfoPtr *, int, int));
+static void _makeCommandWindow (TuiWinInfoPtr *, int, int);
+static void _makeSourceWindow (TuiWinInfoPtr *, int, int);
 static void _makeDisassemWindow PARAMS
   ((TuiWinInfoPtr *, int, int));
-static void _makeDataWindow PARAMS ((TuiWinInfoPtr *, int, int));
-static void _showSourceCommand PARAMS ((void));
-static void _showDisassemCommand PARAMS ((void));
-static void _showSourceDisassemCommand PARAMS ((void));
-static void _showData PARAMS ((TuiLayoutType));
-static TuiLayoutType _nextLayout PARAMS ((void));
-static TuiLayoutType _prevLayout PARAMS ((void));
-static void _tuiLayout_command PARAMS ((char *, int));
-static void _tuiToggleLayout_command PARAMS ((char *, int));
-static void _tui_vToggleLayout_command PARAMS ((va_list));
-static void _tuiToggleSplitLayout_command PARAMS ((char *, int));
-static void _tui_vToggleSplitLayout_command PARAMS ((va_list));
-static Opaque _extractDisplayStartAddr PARAMS ((void));
-static void _tuiHandleXDBLayout PARAMS ((TuiLayoutDefPtr));
-static TuiStatus _tuiSetLayoutTo PARAMS ((char *));
+static void _makeDataWindow (TuiWinInfoPtr *, int, int);
+static void _showSourceCommand (void);
+static void _showDisassemCommand (void);
+static void _showSourceDisassemCommand (void);
+static void _showData (TuiLayoutType);
+static TuiLayoutType _nextLayout (void);
+static TuiLayoutType _prevLayout (void);
+static void _tuiLayout_command (char *, int);
+static void _tuiToggleLayout_command (char *, int);
+static void _tui_vToggleLayout_command (va_list);
+static void _tuiToggleSplitLayout_command (char *, int);
+static void _tui_vToggleSplitLayout_command (va_list);
+static Opaque _extractDisplayStartAddr (void);
+static void _tuiHandleXDBLayout (TuiLayoutDefPtr);
+static TuiStatus _tuiSetLayoutTo (char *);
 
 
 /***************************************

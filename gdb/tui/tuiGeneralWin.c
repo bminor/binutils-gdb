@@ -12,7 +12,7 @@
 /*
    ** local support functions
  */
-static void _winResize PARAMS ((void));
+static void _winResize (void);
 
 
 /***********************

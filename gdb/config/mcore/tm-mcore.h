@@ -124,13 +124,13 @@ extern void mcore_pop_frame (struct frame_info *fi);
 #define SIZEOF_CALL_DUMMY_WORDS      0
 #define SAVE_DUMMY_FRAME_TOS(SP)     generic_save_dummy_frame_tos (SP)
 
-extern CORE_ADDR mcore_push_return_address PARAMS ((CORE_ADDR, CORE_ADDR));
+extern CORE_ADDR mcore_push_return_address (CORE_ADDR, CORE_ADDR);
 #define PUSH_RETURN_ADDRESS(PC, SP)  mcore_push_return_address (PC, SP)
 
 #define PUSH_DUMMY_FRAME	generic_push_dummy_frame ()
 
-extern CORE_ADDR mcore_push_arguments PARAMS ((int, struct value **, CORE_ADDR,
-					       unsigned char, CORE_ADDR));
+extern CORE_ADDR mcore_push_arguments (int, struct value **, CORE_ADDR,
+				       unsigned char, CORE_ADDR);
 #define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
   (SP) = mcore_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR)
 
@@ -149,7 +149,7 @@ extern use_struct_convention_fn mcore_use_struct_convention;
     generic_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
 
 /* Cons up virtual frame pointer for trace */
-extern void mcore_virtual_frame_pointer PARAMS ((CORE_ADDR, long *, long *));
+extern void mcore_virtual_frame_pointer (CORE_ADDR, long *, long *);
 #define TARGET_VIRTUAL_FRAME_POINTER(PC, REGP, OFFP) \
 	mcore_virtual_frame_pointer ((PC), (REGP), (OFFP))
 

@@ -121,60 +121,61 @@ static int display_number;
 
 /* Prototypes for exported functions. */
 
-void output_command PARAMS ((char *, int));
+void output_command (char *, int);
 
-void _initialize_printcmd PARAMS ((void));
+void _initialize_printcmd (void);
 
 /* Prototypes for local functions. */
 
-static void delete_display PARAMS ((int));
+static void delete_display (int);
 
-static void enable_display PARAMS ((char *, int));
+static void enable_display (char *, int);
 
-static void disable_display_command PARAMS ((char *, int));
+static void disable_display_command (char *, int);
 
-static void disassemble_command PARAMS ((char *, int));
+static void disassemble_command (char *, int);
 
-static void printf_command PARAMS ((char *, int));
+static void printf_command (char *, int);
 
 static void print_frame_nameless_args (struct frame_info *, long,
 				       int, int, struct ui_file *);
 
-static void display_info PARAMS ((char *, int));
+static void display_info (char *, int);
 
-static void do_one_display PARAMS ((struct display *));
+static void do_one_display (struct display *);
 
-static void undisplay_command PARAMS ((char *, int));
+static void undisplay_command (char *, int);
 
-static void free_display PARAMS ((struct display *));
+static void free_display (struct display *);
 
-static void display_command PARAMS ((char *, int));
+static void display_command (char *, int);
 
-void x_command PARAMS ((char *, int));
+void x_command (char *, int);
 
-static void address_info PARAMS ((char *, int));
+static void address_info (char *, int);
 
-static void set_command PARAMS ((char *, int));
+static void set_command (char *, int);
 
-static void call_command PARAMS ((char *, int));
+static void call_command (char *, int);
 
-static void inspect_command PARAMS ((char *, int));
+static void inspect_command (char *, int);
 
-static void print_command PARAMS ((char *, int));
+static void print_command (char *, int);
 
-static void print_command_1 PARAMS ((char *, int, int));
+static void print_command_1 (char *, int, int);
 
-static void validate_format PARAMS ((struct format_data, char *));
+static void validate_format (struct format_data, char *);
 
-static void do_examine PARAMS ((struct format_data, CORE_ADDR addr, asection * section));
+static void do_examine (struct format_data, CORE_ADDR addr,
+			asection * section);
 
 static void print_formatted (value_ptr, int, int, struct ui_file *);
 
-static struct format_data decode_format PARAMS ((char **, int, int));
+static struct format_data decode_format (char **, int, int);
 
 static int print_insn (CORE_ADDR, struct ui_file *);
 
-static void sym_info PARAMS ((char *, int));
+static void sym_info (char *, int);
 
 
 /* Decode a format specification.  *STRING_PTR should point to it.

@@ -18,9 +18,9 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-void load_srec PARAMS ((serial_t desc, const char *file, bfd_vma load_offset,
-			int maxrecsize, int flags, int hashmark,
-			int (*waitack) (void)));
+void load_srec (serial_t desc, const char *file, bfd_vma load_offset,
+		int maxrecsize, int flags, int hashmark,
+		int (*waitack) (void));
 
 /* S-record capability flags */
 

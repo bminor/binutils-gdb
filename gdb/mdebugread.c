@@ -57,7 +57,7 @@
 
 #ifndef MIPS_EFI_SYMBOL_NAME
 #define MIPS_EFI_SYMBOL_NAME "__GDB_EFI_INFO__"
-extern void ecoff_relocate_efi PARAMS ((struct symbol *, CORE_ADDR));
+extern void ecoff_relocate_efi (struct symbol *, CORE_ADDR);
 #include "coff/sym.h"
 #include "coff/symconst.h"
 typedef struct mips_extra_func_info
@@ -91,7 +91,7 @@ typedef struct mips_extra_func_info
 #include "expression.h"
 #include "language.h"		/* Needed inside partial-stab.h */
 
-extern void _initialize_mdebugread PARAMS ((void));
+extern void _initialize_mdebugread (void);
 
 /* Provide a default mapping from a ecoff register number to a gdb REGNUM.  */
 #ifndef ECOFF_REG_TO_REGNUM
@@ -331,103 +331,77 @@ static int found_ecoff_debugging_info;
 
 /* Forward declarations */
 
-static void
-add_pending PARAMS ((FDR *, char *, struct type *));
+static void add_pending (FDR *, char *, struct type *);
 
-static struct mdebug_pending *
-  is_pending_symbol PARAMS ((FDR *, char *));
+static struct mdebug_pending *is_pending_symbol (FDR *, char *);
 
-static void
-pop_parse_stack PARAMS ((void));
+static void pop_parse_stack (void);
 
-static void
-push_parse_stack PARAMS ((void));
+static void push_parse_stack (void);
 
-static char *
-  fdr_name PARAMS ((FDR *));
+static char *fdr_name (FDR *);
 
-static void
-mdebug_psymtab_to_symtab PARAMS ((struct partial_symtab *));
+static void mdebug_psymtab_to_symtab (struct partial_symtab *);
 
 static int
-upgrade_type PARAMS ((int, struct type **, int, union aux_ext *, int, char *));
+upgrade_type (int, struct type **, int, union aux_ext *, int, char *);
 
-static void
-parse_partial_symbols PARAMS ((struct objfile *));
+static void parse_partial_symbols (struct objfile *);
 
-static FDR
-* get_rfd PARAMS ((int, int));
+static FDR * get_rfd (int, int);
 
-static int
-has_opaque_xref PARAMS ((FDR *, SYMR *));
+static int has_opaque_xref (FDR *, SYMR *);
 
 static int
-cross_ref PARAMS ((int, union aux_ext *, struct type **, enum type_code,
-		   char **, int, char *));
+cross_ref (int, union aux_ext *, struct type **, enum type_code,
+	   char **, int, char *);
 
-static struct symbol *
-  new_symbol PARAMS ((char *));
+static struct symbol *new_symbol (char *);
 
-static struct type *
-  new_type PARAMS ((char *));
+static struct type *new_type (char *);
 
-static struct block *
-  new_block PARAMS ((int));
+static struct block *new_block (int);
 
-static struct symtab *
-  new_symtab PARAMS ((char *, int, int, struct objfile *));
+static struct symtab *new_symtab (char *, int, int, struct objfile *);
 
-static struct linetable *
-  new_linetable PARAMS ((int));
+static struct linetable *new_linetable (int);
 
-static struct blockvector *
-  new_bvect PARAMS ((int));
+static struct blockvector *new_bvect (int);
 
 static int
-parse_symbol PARAMS ((SYMR *, union aux_ext *, char *, int, struct section_offsets *, struct objfile *));
+parse_symbol (SYMR *, union aux_ext *, char *, int, struct section_offsets *,
+	      struct objfile *);
 
-static struct type *
-  parse_type PARAMS ((int, union aux_ext *, unsigned int, int *, int, char *));
+static struct type *parse_type (int, union aux_ext *, unsigned int, int *,
+				int, char *);
 
-static struct symbol *
-  mylookup_symbol PARAMS ((char *, struct block *, namespace_enum,
-			   enum address_class));
+static struct symbol *mylookup_symbol (char *, struct block *, namespace_enum,
+				       enum address_class);
 
-static struct block *
-  shrink_block PARAMS ((struct block *, struct symtab *));
+static struct block *shrink_block (struct block *, struct symtab *);
 
-static PTR
-  xzalloc PARAMS ((unsigned int));
+static PTR xzalloc (unsigned int);
 
-static void
-sort_blocks PARAMS ((struct symtab *));
+static void sort_blocks (struct symtab *);
 
-static int
-compare_blocks PARAMS ((const void *, const void *));
+static int compare_blocks (const void *, const void *);
 
-static struct partial_symtab *
-  new_psymtab PARAMS ((char *, struct objfile *));
+static struct partial_symtab *new_psymtab (char *, struct objfile *);
 
-static void
-psymtab_to_symtab_1 PARAMS ((struct partial_symtab *, char *));
+static void psymtab_to_symtab_1 (struct partial_symtab *, char *);
 
-static void
-add_block PARAMS ((struct block *, struct symtab *));
+static void add_block (struct block *, struct symtab *);
 
-static void
-add_symbol PARAMS ((struct symbol *, struct block *));
+static void add_symbol (struct symbol *, struct block *);
 
-static int
-add_line PARAMS ((struct linetable *, int, CORE_ADDR, int));
+static int add_line (struct linetable *, int, CORE_ADDR, int);
 
-static struct linetable *
-  shrink_linetable PARAMS ((struct linetable *));
+static struct linetable *shrink_linetable (struct linetable *);
 
 static void
-handle_psymbol_enumerators PARAMS ((struct objfile *, FDR *, int, CORE_ADDR));
+handle_psymbol_enumerators (struct objfile *, FDR *, int, CORE_ADDR);
 
-static char *
-  mdebug_next_symbol_text PARAMS ((struct objfile *));
+static char *mdebug_next_symbol_text (struct objfile *);
 
 /* Address bounds for the signal trampoline in inferior, if any */
 
@@ -1926,8 +1900,7 @@ upgrade_type (fd, tpp, tq, ax, bigend, sym_name)
    to look for the function which contains the MIPS_EFI_SYMBOL_NAME symbol
    in question, or NULL to use top_stack->cur_block.  */
 
-static void parse_procedure PARAMS ((PDR *, struct symtab *,
-				     struct partial_symtab *));
+static void parse_procedure (PDR *, struct symtab *, struct partial_symtab *);
 
 static void
 parse_procedure (pr, search_symtab, pst)
@@ -2103,7 +2076,8 @@ ecoff_relocate_efi (sym, delta)
 
    This routine clobbers top_stack->cur_block and ->cur_st. */
 
-static void parse_external PARAMS ((EXTR *, int, struct section_offsets *, struct objfile *));
+static void parse_external (EXTR *, int, struct section_offsets *,
+			    struct objfile *);
 
 static void
 parse_external (es, bigend, section_offsets, objfile)
@@ -2198,8 +2172,8 @@ parse_external (es, bigend, section_offsets, objfile)
    numbers can go back and forth, apparently we can live
    with that and do not need to reorder our linetables */
 
-static void parse_lines PARAMS ((FDR *, PDR *, struct linetable *, int,
-				 struct partial_symtab *, CORE_ADDR));
+static void parse_lines (FDR *, PDR *, struct linetable *, int,
+			 struct partial_symtab *, CORE_ADDR);
 
 static void
 parse_lines (fh, pr, lt, maxlines, pst, lowest_pdr_addr)

@@ -62,7 +62,7 @@ struct type;
 
 #define SKIP_PROLOGUE(frompc)   (i386_skip_prologue (frompc))
 
-extern int i386_skip_prologue PARAMS ((int));
+extern int i386_skip_prologue (int);
 
 /* Immediately after a function call, return the saved pc.  Can't always go
    through the frames for this because on some machines the new frame is not
@@ -344,7 +344,7 @@ extern void i386_extract_return_value (struct type *type, char *regbuf,
     : read_memory_integer ((FRAME)->frame + 4, 4)) \
    )
 
-extern CORE_ADDR sigtramp_saved_pc PARAMS ((struct frame_info *));
+extern CORE_ADDR sigtramp_saved_pc (struct frame_info *);
 
 #define FRAME_ARGS_ADDRESS(fi) ((fi)->frame)
 
@@ -355,7 +355,7 @@ extern CORE_ADDR sigtramp_saved_pc PARAMS ((struct frame_info *));
 
 #define FRAME_NUM_ARGS(fi) (i386_frame_num_args(fi))
 
-extern int i386_frame_num_args PARAMS ((struct frame_info *));
+extern int i386_frame_num_args (struct frame_info *);
 
 /* Return number of bytes at start of arglist that are not really args.  */
 
@@ -367,7 +367,7 @@ extern int i386_frame_num_args PARAMS ((struct frame_info *));
    ways in the stack frame.  sp is even more special:
    the address we return for it IS the sp for the next frame.  */
 
-extern void i386_frame_init_saved_regs PARAMS ((struct frame_info *));
+extern void i386_frame_init_saved_regs (struct frame_info *);
 #define FRAME_INIT_SAVED_REGS(FI) i386_frame_init_saved_regs (FI)
 
 
@@ -383,13 +383,13 @@ extern void i386_frame_init_saved_regs PARAMS ((struct frame_info *));
 
 #define PUSH_DUMMY_FRAME { i386_push_dummy_frame (); }
 
-extern void i386_push_dummy_frame PARAMS ((void));
+extern void i386_push_dummy_frame (void);
 
 /* Discard from the stack the innermost frame, restoring all registers.  */
 
 #define POP_FRAME  { i386_pop_frame (); }
 
-extern void i386_pop_frame PARAMS ((void));
+extern void i386_pop_frame (void);
 
 
 /* this is 
@@ -421,8 +421,8 @@ extern void i386_pop_frame PARAMS ((void));
 	*((char *)(dummyname) + 4) = ((delta >> 24) & 0xff); \
 }
 
-extern void print_387_control_word PARAMS ((unsigned int));
-extern void print_387_status_word PARAMS ((unsigned int));
+extern void print_387_control_word (unsigned int);
+extern void print_387_status_word (unsigned int);
 
 /* Offset from SP to first arg on stack at first instruction of a function */
 

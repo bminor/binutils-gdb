@@ -76,7 +76,7 @@
 /* Return number of args passed to a frame.
    Can return -1, meaning no way to tell.  */
 
-extern int delta68_frame_num_args PARAMS ((struct frame_info * fi));
+extern int delta68_frame_num_args (struct frame_info *fi);
 #define FRAME_NUM_ARGS(fi) (delta68_frame_num_args ((fi)))
 
 /* On M68040 versions of sysV68 R3V7.1, ptrace(PT_WRITE_I) does not clear
@@ -93,13 +93,13 @@ extern int delta68_frame_num_args PARAMS ((struct frame_info * fi));
 #define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF)\
 	(*(CORE_ADDR *)((char*)(REGBUF) + 8 * 4))
 
-extern int delta68_in_sigtramp PARAMS ((CORE_ADDR pc, char * name));
+extern int delta68_in_sigtramp (CORE_ADDR pc, char *name);
 #define IN_SIGTRAMP(pc,name) delta68_in_sigtramp (pc, name)
 
-extern CORE_ADDR delta68_frame_saved_pc PARAMS ((struct frame_info * fi));
+extern CORE_ADDR delta68_frame_saved_pc (struct frame_info *fi);
 #undef FRAME_SAVED_PC
 #define FRAME_SAVED_PC(fi) delta68_frame_saved_pc (fi)
 
-extern CORE_ADDR delta68_frame_args_address PARAMS ((struct frame_info * fi));
+extern CORE_ADDR delta68_frame_args_address (struct frame_info *fi);
 #undef FRAME_ARGS_ADDRESS
 #define FRAME_ARGS_ADDRESS(fi) delta68_frame_args_address (fi)

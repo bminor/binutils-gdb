@@ -67,88 +67,85 @@ struct ui_stream
 
 /* Prototypes for ui-out API. */
 
-extern void ui_out_table_begin PARAMS ((struct ui_out * uiout, int nbrofcols,
-					char *tblid));
+extern void ui_out_table_begin (struct ui_out *uiout, int nbrofcols,
+				char *tblid);
 
-extern void ui_out_table_header PARAMS ((struct ui_out * uiout, int width,
-					 enum ui_align align, char *colhdr));
+extern void ui_out_table_header (struct ui_out *uiout, int width,
+				 enum ui_align align, char *colhdr);
 
-extern void ui_out_table_body PARAMS ((struct ui_out * uiout));
+extern void ui_out_table_body (struct ui_out *uiout);
 
-extern void ui_out_table_end PARAMS ((struct ui_out * uiout));
+extern void ui_out_table_end (struct ui_out *uiout);
 
-extern void ui_out_list_begin PARAMS ((struct ui_out * uiout, char *lstid));
+extern void ui_out_list_begin (struct ui_out *uiout, char *lstid);
 
-extern void ui_out_list_end PARAMS ((struct ui_out * uiout));
+extern void ui_out_list_end (struct ui_out *uiout);
 
-extern void ui_out_field_int PARAMS ((struct ui_out * uiout, char *fldname,
-				      int value));
+extern void ui_out_field_int (struct ui_out *uiout, char *fldname, int value);
 
-extern void ui_out_field_core_addr PARAMS ((struct ui_out * uiout, char *fldname,
-					    CORE_ADDR address));
+extern void ui_out_field_core_addr (struct ui_out *uiout, char *fldname,
+				    CORE_ADDR address);
 
 extern void ui_out_field_string (struct ui_out * uiout, char *fldname,
 				 const char *string);
 
-extern void ui_out_field_stream PARAMS ((struct ui_out * uiout, char *fldname,
-					 struct ui_stream * buf));
+extern void ui_out_field_stream (struct ui_out *uiout, char *fldname,
+				 struct ui_stream *buf);
 
-extern void ui_out_field_fmt PARAMS ((struct ui_out * uiout, char *fldname,
-				      char *format,...));
+extern void ui_out_field_fmt (struct ui_out *uiout, char *fldname,
+			      char *format, ...);
 
-extern void ui_out_field_skip PARAMS ((struct ui_out * uiout, char *fldname));
+extern void ui_out_field_skip (struct ui_out *uiout, char *fldname);
 
-extern void ui_out_spaces PARAMS ((struct ui_out * uiout, int numspaces));
+extern void ui_out_spaces (struct ui_out *uiout, int numspaces);
 
-extern void ui_out_text PARAMS ((struct ui_out * uiout, char *string));
+extern void ui_out_text (struct ui_out *uiout, char *string);
 
-extern void ui_out_message PARAMS ((struct ui_out * uiout, int verbosity,
-				    char *format,...));
+extern void ui_out_message (struct ui_out *uiout, int verbosity,
+			    char *format, ...);
 
-extern struct ui_stream *ui_out_stream_new PARAMS ((struct ui_out * uiout));
+extern struct ui_stream *ui_out_stream_new (struct ui_out *uiout);
 
-extern void ui_out_stream_delete PARAMS ((struct ui_stream * buf));
+extern void ui_out_stream_delete (struct ui_stream *buf);
 
 struct cleanup *make_cleanup_ui_out_stream_delete (struct ui_stream *buf);
 
-extern void ui_out_wrap_hint PARAMS ((struct ui_out * uiout, char *identstring));
+extern void ui_out_wrap_hint (struct ui_out *uiout, char *identstring);
 
-extern void ui_out_flush PARAMS ((struct ui_out * uiout));
+extern void ui_out_flush (struct ui_out *uiout);
 
-extern void ui_out_get_field_separator PARAMS ((struct ui_out * uiout));
+extern void ui_out_get_field_separator (struct ui_out *uiout);
 
-extern int ui_out_set_flags PARAMS ((struct ui_out * uiout, int mask));
+extern int ui_out_set_flags (struct ui_out *uiout, int mask);
 
-extern int ui_out_clear_flags PARAMS ((struct ui_out * uiout, int mask));
+extern int ui_out_clear_flags (struct ui_out *uiout, int mask);
 
-extern int ui_out_get_verblvl PARAMS ((struct ui_out * uiout));
+extern int ui_out_get_verblvl (struct ui_out *uiout);
 
 extern int ui_out_test_flags (struct ui_out *uiout, int mask);
 
 #if 0
-extern void ui_out_result_begin PARAMS ((struct ui_out * uiout, char *class));
+extern void ui_out_result_begin (struct ui_out *uiout, char *class);
 
-extern void ui_out_result_end PARAMS ((struct ui_out * uiout));
+extern void ui_out_result_end (struct ui_out *uiout);
 
-extern void ui_out_info_begin PARAMS ((struct ui_out * uiout, char *class));
+extern void ui_out_info_begin (struct ui_out *uiout, char *class);
 
-extern void ui_out_info_end PARAMS ((struct ui_out * uiout));
+extern void ui_out_info_end (struct ui_out *uiout);
 
-extern void ui_out_notify_begin PARAMS ((struct ui_out * uiout, char *class));
+extern void ui_out_notify_begin (struct ui_out *uiout, char *class);
 
-extern void ui_out_notify_end PARAMS ((struct ui_out * uiout));
+extern void ui_out_notify_end (struct ui_out *uiout);
 
-extern void ui_out_error_begin PARAMS ((struct ui_out * uiout, char *class));
+extern void ui_out_error_begin (struct ui_out *uiout, char *class);
 
-extern void ui_out_error_end PARAMS ((struct ui_out * uiout));
+extern void ui_out_error_end (struct ui_out *uiout);
 #endif
 
 #if 0
-extern void gdb_error PARAMS ((struct ui_out * uiout, int severity,
-			       char *format,...));
+extern void gdb_error (struct ui_out *uiout, int severity, char *format, ...);
 
-extern void gdb_query PARAMS ((struct ui_out * uiout,
-			       int qflags, char *qprompt));
+extern void gdb_query (struct ui_out *uiout, int qflags, char *qprompt);
 #endif
 
 /* From here on we have things that are only needed by implementation

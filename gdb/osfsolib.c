@@ -113,7 +113,7 @@ static ldr_process_t fake_ldr_process;
 
 /* Called by ldr_* routines to read memory from the current target.  */
 
-static int ldr_read_memory PARAMS ((CORE_ADDR, char *, int, int));
+static int ldr_read_memory (CORE_ADDR, char *, int, int);
 
 static int
 ldr_read_memory (memaddr, myaddr, len, readstring)
@@ -173,34 +173,25 @@ struct so_list
 
 static struct so_list *so_list_head;	/* List of known shared objects */
 
-extern int
-fdmatch PARAMS ((int, int));	/* In libiberty */
+extern int fdmatch (int, int);	/* In libiberty */
 
 /* Local function prototypes */
 
-static void
-sharedlibrary_command PARAMS ((char *, int));
+static void sharedlibrary_command (char *, int);
 
-static void
-info_sharedlibrary_command PARAMS ((char *, int));
+static void info_sharedlibrary_command (char *, int);
 
-static int
-symbol_add_stub PARAMS ((char *));
+static int symbol_add_stub (char *);
 
-static struct so_list *
-  find_solib PARAMS ((struct so_list *));
+static struct so_list *find_solib (struct so_list *);
 
-static struct link_map *
-  first_link_map_member PARAMS ((void));
+static struct link_map *first_link_map_member (void);
 
-static struct link_map *
-  next_link_map_member PARAMS ((struct so_list *));
+static struct link_map *next_link_map_member (struct so_list *);
 
-static void
-xfer_link_map_member PARAMS ((struct so_list *, struct link_map *));
+static void xfer_link_map_member (struct so_list *, struct link_map *);
 
-static int
-solib_map_sections PARAMS ((char *));
+static int solib_map_sections (char *);
 
 /*
 

@@ -102,14 +102,11 @@ extern int hp_som_som_object_present;
 #define	YYDEBUG	0		/* Default to no yydebug support */
 #endif
 
-int
-yyparse PARAMS ((void));
+int yyparse (void);
 
-static int
-yylex PARAMS ((void));
+static int yylex (void);
 
-void
-yyerror PARAMS ((char *));
+void yyerror (char *);
 
 %}
 
@@ -144,8 +141,7 @@ yyerror PARAMS ((char *));
 
 %{
 /* YYSTYPE gets defined by %union */
-static int
-parse_number PARAMS ((char *, int, int, YYSTYPE *));
+static int parse_number (char *, int, int, YYSTYPE *);
 %}
 
 %type <voidval> exp exp1 type_exp start variable qualified_name lcurly

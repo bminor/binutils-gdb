@@ -155,129 +155,128 @@ struct vlist
 
 /* Helper functions for the above subcommands. */
 
-static int delete_variable PARAMS ((struct cpstack **, struct varobj *, int));
+static int delete_variable (struct cpstack **, struct varobj *, int);
 
-static void delete_variable_1 PARAMS ((struct cpstack **, int *,
-				       struct varobj *, int, int));
+static void delete_variable_1 (struct cpstack **, int *,
+			       struct varobj *, int, int);
 
-static int install_variable PARAMS ((struct varobj *));
+static int install_variable (struct varobj *);
 
-static void uninstall_variable PARAMS ((struct varobj *));
+static void uninstall_variable (struct varobj *);
 
-static struct varobj *child_exists PARAMS ((struct varobj *, char *));
+static struct varobj *child_exists (struct varobj *, char *);
 
-static struct varobj *create_child PARAMS ((struct varobj *, int, char *));
+static struct varobj *create_child (struct varobj *, int, char *);
 
-static void save_child_in_parent PARAMS ((struct varobj *, struct varobj *));
+static void save_child_in_parent (struct varobj *, struct varobj *);
 
-static void remove_child_from_parent PARAMS ((struct varobj *, struct varobj *));
+static void remove_child_from_parent (struct varobj *, struct varobj *);
 
 /* Utility routines */
 
-static struct varobj *new_variable PARAMS ((void));
+static struct varobj *new_variable (void);
 
-static struct varobj *new_root_variable PARAMS ((void));
+static struct varobj *new_root_variable (void);
 
-static void free_variable PARAMS ((struct varobj * var));
+static void free_variable (struct varobj *var);
 
 static struct cleanup *make_cleanup_free_variable (struct varobj *var);
 
-static struct type *get_type PARAMS ((struct varobj * var));
+static struct type *get_type (struct varobj *var);
 
-static struct type *get_type_deref PARAMS ((struct varobj * var));
+static struct type *get_type_deref (struct varobj *var);
 
-static struct type *get_target_type PARAMS ((struct type *));
+static struct type *get_target_type (struct type *);
 
-static enum varobj_display_formats variable_default_display PARAMS ((struct varobj *));
+static enum varobj_display_formats variable_default_display (struct varobj *);
 
-static int my_value_equal PARAMS ((value_ptr, value_ptr, int *));
+static int my_value_equal (value_ptr, value_ptr, int *);
 
-static void vpush PARAMS ((struct vstack ** pstack, struct varobj * var));
+static void vpush (struct vstack **pstack, struct varobj *var);
 
-static struct varobj *vpop PARAMS ((struct vstack ** pstack));
+static struct varobj *vpop (struct vstack **pstack);
 
-static void cppush PARAMS ((struct cpstack ** pstack, char *name));
+static void cppush (struct cpstack **pstack, char *name);
 
-static char *cppop PARAMS ((struct cpstack ** pstack));
+static char *cppop (struct cpstack **pstack);
 
 /* Language-specific routines. */
 
-static enum varobj_languages variable_language PARAMS ((struct varobj * var));
+static enum varobj_languages variable_language (struct varobj *var);
 
-static int number_of_children PARAMS ((struct varobj *));
+static int number_of_children (struct varobj *);
 
-static char *name_of_variable PARAMS ((struct varobj *));
+static char *name_of_variable (struct varobj *);
 
-static char *name_of_child PARAMS ((struct varobj *, int));
+static char *name_of_child (struct varobj *, int);
 
-static value_ptr value_of_root PARAMS ((struct varobj ** var_handle,
-					int *));
+static value_ptr value_of_root (struct varobj **var_handle, int *);
 
-static value_ptr value_of_child PARAMS ((struct varobj * parent, int index));
+static value_ptr value_of_child (struct varobj *parent, int index);
 
-static struct type *type_of_child PARAMS ((struct varobj * var));
+static struct type *type_of_child (struct varobj *var);
 
-static int variable_editable PARAMS ((struct varobj * var));
+static int variable_editable (struct varobj *var);
 
-static char *my_value_of_variable PARAMS ((struct varobj * var));
+static char *my_value_of_variable (struct varobj *var);
 
-static int type_changeable PARAMS ((struct varobj * var));
+static int type_changeable (struct varobj *var);
 
 /* C implementation */
 
-static int c_number_of_children PARAMS ((struct varobj * var));
+static int c_number_of_children (struct varobj *var);
 
-static char *c_name_of_variable PARAMS ((struct varobj * parent));
+static char *c_name_of_variable (struct varobj *parent);
 
-static char *c_name_of_child PARAMS ((struct varobj * parent, int index));
+static char *c_name_of_child (struct varobj *parent, int index);
 
-static value_ptr c_value_of_root PARAMS ((struct varobj ** var_handle));
+static value_ptr c_value_of_root (struct varobj **var_handle);
 
-static value_ptr c_value_of_child PARAMS ((struct varobj * parent, int index));
+static value_ptr c_value_of_child (struct varobj *parent, int index);
 
-static struct type *c_type_of_child PARAMS ((struct varobj * parent, int index));
+static struct type *c_type_of_child (struct varobj *parent, int index);
 
-static int c_variable_editable PARAMS ((struct varobj * var));
+static int c_variable_editable (struct varobj *var);
 
-static char *c_value_of_variable PARAMS ((struct varobj * var));
+static char *c_value_of_variable (struct varobj *var);
 
 /* C++ implementation */
 
-static int cplus_number_of_children PARAMS ((struct varobj * var));
+static int cplus_number_of_children (struct varobj *var);
 
-static void cplus_class_num_children PARAMS ((struct type * type, int children[3]));
+static void cplus_class_num_children (struct type *type, int children[3]);
 
-static char *cplus_name_of_variable PARAMS ((struct varobj * parent));
+static char *cplus_name_of_variable (struct varobj *parent);
 
-static char *cplus_name_of_child PARAMS ((struct varobj * parent, int index));
+static char *cplus_name_of_child (struct varobj *parent, int index);
 
-static value_ptr cplus_value_of_root PARAMS ((struct varobj ** var_handle));
+static value_ptr cplus_value_of_root (struct varobj **var_handle);
 
-static value_ptr cplus_value_of_child PARAMS ((struct varobj * parent, int index));
+static value_ptr cplus_value_of_child (struct varobj *parent, int index);
 
-static struct type *cplus_type_of_child PARAMS ((struct varobj * parent, int index));
+static struct type *cplus_type_of_child (struct varobj *parent, int index);
 
-static int cplus_variable_editable PARAMS ((struct varobj * var));
+static int cplus_variable_editable (struct varobj *var);
 
-static char *cplus_value_of_variable PARAMS ((struct varobj * var));
+static char *cplus_value_of_variable (struct varobj *var);
 
 /* Java implementation */
 
-static int java_number_of_children PARAMS ((struct varobj * var));
+static int java_number_of_children (struct varobj *var);
 
-static char *java_name_of_variable PARAMS ((struct varobj * parent));
+static char *java_name_of_variable (struct varobj *parent);
 
-static char *java_name_of_child PARAMS ((struct varobj * parent, int index));
+static char *java_name_of_child (struct varobj *parent, int index);
 
-static value_ptr java_value_of_root PARAMS ((struct varobj ** var_handle));
+static value_ptr java_value_of_root (struct varobj **var_handle);
 
-static value_ptr java_value_of_child PARAMS ((struct varobj * parent, int index));
+static value_ptr java_value_of_child (struct varobj *parent, int index);
 
-static struct type *java_type_of_child PARAMS ((struct varobj * parent, int index));
+static struct type *java_type_of_child (struct varobj *parent, int index);
 
-static int java_variable_editable PARAMS ((struct varobj * var));
+static int java_variable_editable (struct varobj *var);
 
-static char *java_value_of_variable PARAMS ((struct varobj * var));
+static char *java_value_of_variable (struct varobj *var);
 
 /* The language specific vector */
 

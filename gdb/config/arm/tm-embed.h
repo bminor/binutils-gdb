@@ -50,15 +50,15 @@
 /* Functions for dealing with Thumb call thunks.  */
 #define IN_SOLIB_CALL_TRAMPOLINE(pc, name)	arm_in_call_stub (pc, name)
 #define SKIP_TRAMPOLINE_CODE(pc)		arm_skip_stub (pc)
-extern int arm_in_call_stub PARAMS ((CORE_ADDR pc, char *name));
-extern CORE_ADDR arm_skip_stub PARAMS ((CORE_ADDR pc));
+extern int arm_in_call_stub (CORE_ADDR pc, char *name);
+extern CORE_ADDR arm_skip_stub (CORE_ADDR pc);
 
 /* Function to determine whether MEMADDR is in a Thumb function.  */
-extern int arm_pc_is_thumb PARAMS ((bfd_vma memaddr));
+extern int arm_pc_is_thumb (bfd_vma memaddr);
 
 /* Function to determine whether MEMADDR is in a call dummy called from
    a Thumb function.  */
-extern int arm_pc_is_thumb_dummy PARAMS ((bfd_vma memaddr));
+extern int arm_pc_is_thumb_dummy (bfd_vma memaddr);
 
 
 #undef  IN_SIGTRAMP

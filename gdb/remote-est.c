@@ -28,7 +28,7 @@
 #include "monitor.h"
 #include "serial.h"
 
-static void est_open PARAMS ((char *args, int from_tty));
+static void est_open (char *args, int from_tty);
 
 static void
 est_supply_register (regname, regnamelen, val, vallen)

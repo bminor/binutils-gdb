@@ -62,7 +62,7 @@ static ui_file_isatty_ftype tui_file_isatty;
 static ui_file_rewind_ftype tui_file_rewind;
 static ui_file_put_ftype tui_file_put;
 static ui_file_delete_ftype tui_file_delete;
-static struct ui_file *tui_file_new PARAMS ((void));
+static struct ui_file *tui_file_new (void);
 static int tui_file_magic;
 
 static struct ui_file *

@@ -99,29 +99,27 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
  */
 
 static void procfs_open              PARAMS((char *, int));
-static void procfs_attach            PARAMS ((char *, int));
-static void procfs_detach            PARAMS ((char *, int));
-static void procfs_resume            PARAMS ((int, int, enum target_signal));
-static int  procfs_can_run           PARAMS ((void));
-static void procfs_stop              PARAMS ((void));
-static void procfs_files_info        PARAMS ((struct target_ops *));
-static void procfs_fetch_registers   PARAMS ((int));
-static void procfs_store_registers   PARAMS ((int));
-static void procfs_notice_signals    PARAMS ((int));
-static void procfs_prepare_to_store  PARAMS ((void));
-static void procfs_kill_inferior     PARAMS ((void));
-static void procfs_mourn_inferior    PARAMS ((void));
-static void procfs_create_inferior   PARAMS ((char *, char *, char **));
-static int  procfs_wait              PARAMS ((int, 
-					       struct target_waitstatus *));
-static int  procfs_xfer_memory       PARAMS ((CORE_ADDR, 
-					       char *, int, int, 
-					       struct target_ops *));
+static void procfs_attach (char *, int);
+static void procfs_detach (char *, int);
+static void procfs_resume (int, int, enum target_signal);
+static int procfs_can_run (void);
+static void procfs_stop (void);
+static void procfs_files_info (struct target_ops *);
+static void procfs_fetch_registers (int);
+static void procfs_store_registers (int);
+static void procfs_notice_signals (int);
+static void procfs_prepare_to_store (void);
+static void procfs_kill_inferior (void);
+static void procfs_mourn_inferior (void);
+static void procfs_create_inferior (char *, char *, char **);
+static int procfs_wait (int, struct target_waitstatus *);
+static int procfs_xfer_memory (CORE_ADDR,
+			       char *, int, int, struct target_ops *);
 
-static int  procfs_thread_alive      PARAMS ((int));
+static int procfs_thread_alive (int);
 
-void procfs_find_new_threads         PARAMS ((void));
-char *procfs_pid_to_str              PARAMS ((int));
+void procfs_find_new_threads (void);
+char *procfs_pid_to_str (int);
 
 struct target_ops procfs_ops;		/* the target vector */
 
@@ -309,15 +307,14 @@ static char errmsg[128];	/* shared error msg buffer */
 
 /* Function prototypes for procinfo module: */
 
-static procinfo *find_procinfo_or_die PARAMS ((int pid, int tid));
-static procinfo *find_procinfo        PARAMS ((int pid, int tid));
-static procinfo *create_procinfo      PARAMS ((int pid, int tid));
-static void      destroy_procinfo     PARAMS ((procinfo *p));
+static procinfo *find_procinfo_or_die (int pid, int tid);
+static procinfo *find_procinfo (int pid, int tid);
+static procinfo *create_procinfo (int pid, int tid);
+static void destroy_procinfo (procinfo * p);
 static void do_destroy_procinfo_cleanup (void *);
-static void      dead_procinfo        PARAMS ((procinfo *p, 
-					       char *msg, int killp));
-static int       open_procinfo_files  PARAMS ((procinfo *p, int which));
-static void      close_procinfo_files PARAMS ((procinfo *p));
+static void dead_procinfo (procinfo * p, char *msg, int killp);
+static int open_procinfo_files (procinfo * p, int which);
+static void close_procinfo_files (procinfo * p);
 
 /* The head of the procinfo list: */
 static procinfo * procinfo_list;
@@ -725,56 +722,55 @@ dead_procinfo (pi, msg, kill_p)
  * functions, we do our best to hide them all in here.
  */
 
-int proc_get_status PARAMS ((procinfo *pi));
-long proc_flags     PARAMS ((procinfo *pi));
-int proc_why        PARAMS ((procinfo *pi));
-int proc_what       PARAMS ((procinfo *pi));
-int proc_set_run_on_last_close   PARAMS ((procinfo *pi));
-int proc_unset_run_on_last_close PARAMS ((procinfo *pi));
-int proc_set_inherit_on_fork     PARAMS ((procinfo *pi));
-int proc_unset_inherit_on_fork   PARAMS ((procinfo *pi));
-int proc_set_async            PARAMS ((procinfo *pi));
-int proc_unset_async          PARAMS ((procinfo *pi));
-int proc_stop_process         PARAMS ((procinfo *pi));
-int proc_trace_signal         PARAMS ((procinfo *pi, int signo));
-int proc_ignore_signal        PARAMS ((procinfo *pi, int signo));
-int proc_clear_current_fault  PARAMS ((procinfo *pi));
-int proc_set_current_signal   PARAMS ((procinfo *pi, int signo));
-int proc_clear_current_signal PARAMS ((procinfo *pi));
-int proc_set_gregs            PARAMS ((procinfo *pi));
-int proc_set_fpregs           PARAMS ((procinfo *pi));
-int proc_wait_for_stop        PARAMS ((procinfo *pi));
-int proc_run_process          PARAMS ((procinfo *pi, int step, int signo));
-int proc_kill                 PARAMS ((procinfo *pi, int signo));
-int proc_parent_pid           PARAMS ((procinfo *pi));
-int proc_get_nthreads         PARAMS ((procinfo *pi));
-int proc_get_current_thread   PARAMS ((procinfo *pi));
-int proc_set_held_signals     PARAMS ((procinfo *pi, sigset_t *sighold));
-int proc_set_traced_sysexit   PARAMS ((procinfo *pi, sysset_t *sysset));
-int proc_set_traced_sysentry  PARAMS ((procinfo *pi, sysset_t *sysset));
-int proc_set_traced_faults    PARAMS ((procinfo *pi, fltset_t *fltset));
-int proc_set_traced_signals   PARAMS ((procinfo *pi, sigset_t *sigset));
+int proc_get_status (procinfo * pi);
+long proc_flags (procinfo * pi);
+int proc_why (procinfo * pi);
+int proc_what (procinfo * pi);
+int proc_set_run_on_last_close (procinfo * pi);
+int proc_unset_run_on_last_close (procinfo * pi);
+int proc_set_inherit_on_fork (procinfo * pi);
+int proc_unset_inherit_on_fork (procinfo * pi);
+int proc_set_async (procinfo * pi);
+int proc_unset_async (procinfo * pi);
+int proc_stop_process (procinfo * pi);
+int proc_trace_signal (procinfo * pi, int signo);
+int proc_ignore_signal (procinfo * pi, int signo);
+int proc_clear_current_fault (procinfo * pi);
+int proc_set_current_signal (procinfo * pi, int signo);
+int proc_clear_current_signal (procinfo * pi);
+int proc_set_gregs (procinfo * pi);
+int proc_set_fpregs (procinfo * pi);
+int proc_wait_for_stop (procinfo * pi);
+int proc_run_process (procinfo * pi, int step, int signo);
+int proc_kill (procinfo * pi, int signo);
+int proc_parent_pid (procinfo * pi);
+int proc_get_nthreads (procinfo * pi);
+int proc_get_current_thread (procinfo * pi);
+int proc_set_held_signals (procinfo * pi, sigset_t * sighold);
+int proc_set_traced_sysexit (procinfo * pi, sysset_t * sysset);
+int proc_set_traced_sysentry (procinfo * pi, sysset_t * sysset);
+int proc_set_traced_faults (procinfo * pi, fltset_t * fltset);
+int proc_set_traced_signals (procinfo * pi, sigset_t * sigset);
 
-int proc_update_threads       PARAMS ((procinfo *pi));
-int proc_iterate_over_threads PARAMS ((procinfo *pi,
-				       int     (*func) PARAMS ((procinfo *, 
-								procinfo *, 
-								void *)),
-				       void     *ptr));
+int proc_update_threads (procinfo * pi);
+int proc_iterate_over_threads (procinfo * pi,
+			       int (*func) PARAMS ((procinfo *,
+						    procinfo *,
+						    void *)), void *ptr);
 
-gdb_gregset_t   *proc_get_gregs     PARAMS ((procinfo *pi));
-gdb_fpregset_t  *proc_get_fpregs    PARAMS ((procinfo *pi));
-sysset_t *proc_get_traced_sysexit   PARAMS ((procinfo *pi, sysset_t *save));
-sysset_t *proc_get_traced_sysentry  PARAMS ((procinfo *pi, sysset_t *save));
-fltset_t *proc_get_traced_faults    PARAMS ((procinfo *pi, fltset_t *save));
-sigset_t *proc_get_traced_signals   PARAMS ((procinfo *pi, sigset_t *save));
-sigset_t *proc_get_held_signals     PARAMS ((procinfo *pi, sigset_t *save));
-sigset_t *proc_get_pending_signals  PARAMS ((procinfo *pi, sigset_t *save));
-struct sigaction *proc_get_signal_actions PARAMS ((procinfo *pi, 
-						   struct sigaction *save));
+gdb_gregset_t *proc_get_gregs (procinfo * pi);
+gdb_fpregset_t *proc_get_fpregs (procinfo * pi);
+sysset_t *proc_get_traced_sysexit (procinfo * pi, sysset_t * save);
+sysset_t *proc_get_traced_sysentry (procinfo * pi, sysset_t * save);
+fltset_t *proc_get_traced_faults (procinfo * pi, fltset_t * save);
+sigset_t *proc_get_traced_signals (procinfo * pi, sigset_t * save);
+sigset_t *proc_get_held_signals (procinfo * pi, sigset_t * save);
+sigset_t *proc_get_pending_signals (procinfo * pi, sigset_t * save);
+struct sigaction *proc_get_signal_actions (procinfo * pi,
+					   struct sigaction *save);
 
-void proc_warn  PARAMS ((procinfo *pi, char *func, int line));
-void proc_error PARAMS ((procinfo *pi, char *func, int line));
+void proc_warn (procinfo * pi, char *func, int line);
+void proc_error (procinfo * pi, char *func, int line);
 
 void
 proc_warn (pi, func, line)
@@ -3180,9 +3176,9 @@ proc_iterate_over_threads (pi, func, ptr)
  * Here are all of the gdb target vector functions and their friends.
  */
 
-static int  do_attach PARAMS ((int pid));
-static void do_detach PARAMS ((int signo));
-static int register_gdb_signals PARAMS ((procinfo *, sigset_t *));
+static int do_attach (int pid);
+static void do_detach (int signo);
+static int register_gdb_signals (procinfo *, sigset_t *);
 
 /*
  * Function: procfs_debug_inferior

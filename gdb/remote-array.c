@@ -62,7 +62,7 @@ extern int baud_rate;
     }									\
   while (0)
 
-static void debuglogs PARAMS ((int, char *,...));
+static void debuglogs (int, char *, ...);
 static void array_open ();
 static void array_close ();
 static void array_detach ();

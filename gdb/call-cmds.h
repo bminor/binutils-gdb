@@ -16,14 +16,10 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-extern void
-initialize_all_files PARAMS ((void));
+extern void initialize_all_files (void);
 
-extern void
-exec_file_command PARAMS ((char *, int));
+extern void exec_file_command (char *, int);
 
-extern void
-core_file_command PARAMS ((char *, int));
+extern void core_file_command (char *, int);
 
-extern void
-break_command PARAMS ((char *, int));
+extern void break_command (char *, int);

@@ -31,23 +31,24 @@ typedef struct dcache_struct DCACHE;
 
 /* Using the data cache DCACHE return the contents of the word at
    address ADDR in the remote machine.  */
-int dcache_fetch PARAMS ((DCACHE * dcache, CORE_ADDR addr));
+int dcache_fetch (DCACHE * dcache, CORE_ADDR addr);
 
 /* Flush DCACHE. */
-void dcache_flush PARAMS ((DCACHE * dcache));
+void dcache_flush (DCACHE * dcache);
 
 /* Initialize DCACHE. */
-DCACHE *dcache_init PARAMS ((memxferfunc reading, memxferfunc writing));
+DCACHE *dcache_init (memxferfunc reading, memxferfunc writing);
 
 /* Write the word at ADDR both in the data cache and in the remote machine.  */
-int dcache_poke PARAMS ((DCACHE * dcache, CORE_ADDR addr, int data));
+int dcache_poke (DCACHE * dcache, CORE_ADDR addr, int data);
 
 /* Simple to call from <remote>_xfer_memory */
 
-int dcache_xfer_memory PARAMS ((DCACHE * cache, CORE_ADDR mem, char *my, int len, int should_write));
+int dcache_xfer_memory (DCACHE * cache, CORE_ADDR mem, char *my, int len,
+			int should_write);
 
 /* Write the bytes at ADDR into the data cache and the remote machine. */
-int dcache_poke_block PARAMS ((DCACHE * cache, CORE_ADDR mem, char *my, int len));
+int dcache_poke_block (DCACHE * cache, CORE_ADDR mem, char *my, int len);
 
 /* Turn dcache state on or off */
 void set_dcache_state (int);

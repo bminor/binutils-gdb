@@ -5,11 +5,11 @@
 #include "command.h"
 #include "gdbcmd.h"
 
-static void show_copying_command PARAMS ((char *, int));
+static void show_copying_command (char *, int);
 
-static void show_warranty_command PARAMS ((char *, int));
+static void show_warranty_command (char *, int);
 
-void _initialize_copying PARAMS ((void));
+void _initialize_copying (void);
 
 extern int immediate_quit;
 static void

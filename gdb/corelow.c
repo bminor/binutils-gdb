@@ -44,37 +44,37 @@ static struct core_fns *core_file_fns = NULL;
 
 static struct core_fns *core_vec = NULL;
 
-static void core_files_info PARAMS ((struct target_ops *));
+static void core_files_info (struct target_ops *);
 
 #ifdef SOLIB_ADD
-static int solib_add_stub PARAMS ((PTR));
+static int solib_add_stub (PTR);
 #endif
 
-static struct core_fns *sniff_core_bfd PARAMS ((bfd *));
+static struct core_fns *sniff_core_bfd (bfd *);
 
-static boolean gdb_check_format PARAMS ((bfd *));
+static boolean gdb_check_format (bfd *);
 
-static void core_open PARAMS ((char *, int));
+static void core_open (char *, int);
 
-static void core_detach PARAMS ((char *, int));
+static void core_detach (char *, int);
 
-static void core_close PARAMS ((int));
+static void core_close (int);
 
 static void core_close_cleanup (void *ignore);
 
-static void get_core_registers PARAMS ((int));
+static void get_core_registers (int);
 
-static void add_to_thread_list PARAMS ((bfd *, asection *, PTR));
+static void add_to_thread_list (bfd *, asection *, PTR);
 
-static int ignore PARAMS ((CORE_ADDR, char *));
+static int ignore (CORE_ADDR, char *);
 
-static char *core_file_to_sym_file PARAMS ((char *));
+static char *core_file_to_sym_file (char *);
 
-static int core_file_thread_alive PARAMS ((int tid));
+static int core_file_thread_alive (int tid);
 
-static void init_core_ops PARAMS ((void));
+static void init_core_ops (void);
 
-void _initialize_corelow PARAMS ((void));
+void _initialize_corelow (void);
 
 struct target_ops core_ops;
 

@@ -26,7 +26,7 @@
 
 #undef SKIP_TRAMPOLINE_CODE
 #define SKIP_TRAMPOLINE_CODE(pc)  sunos4_skip_trampoline_code (pc)
-extern CORE_ADDR sunos4_skip_trampoline_code PARAMS ((CORE_ADDR));
+extern CORE_ADDR sunos4_skip_trampoline_code (CORE_ADDR);
 
 /* Offsets into jmp_buf.  Not defined by Sun, but at least documented in a
    comment in <machine/setjmp.h>! */
@@ -49,11 +49,10 @@ extern CORE_ADDR sunos4_skip_trampoline_code PARAMS ((CORE_ADDR));
    extract the pc (JB_PC) that we will land at.  The pc is copied into ADDR.
    This routine returns true on success */
 
-extern int
-get_longjmp_target PARAMS ((CORE_ADDR *));
+extern int get_longjmp_target (CORE_ADDR *);
 
 #define GET_LONGJMP_TARGET(ADDR) get_longjmp_target(ADDR)
 
-extern char *sunpro_static_transform_name PARAMS ((char *));
+extern char *sunpro_static_transform_name (char *);
 #define STATIC_TRANSFORM_NAME(x) sunpro_static_transform_name (x)
 #define IS_STATIC_TRANSFORM_NAME(name) ((name)[0] == '$')

@@ -36,8 +36,7 @@
 /* Prototypes for supply_gregset etc. */
 #include "gregset.h"
 
-static void
-fetch_core_registers PARAMS ((char *, unsigned int, int, CORE_ADDR));
+static void fetch_core_registers (char *, unsigned int, int, CORE_ADDR);
 
 /* Size of elements in jmpbuf */
 
@@ -345,38 +344,27 @@ static CORE_ADDR breakpoint_addr;	/* Address where end bkpt is set */
 
 /* Local function prototypes */
 
-static void
-sharedlibrary_command PARAMS ((char *, int));
+static void sharedlibrary_command (char *, int);
 
-static int
-enable_break PARAMS ((void));
+static int enable_break (void);
 
-static int
-disable_break PARAMS ((void));
+static int disable_break (void);
 
-static void
-info_sharedlibrary_command PARAMS ((char *, int));
+static void info_sharedlibrary_command (char *, int);
 
-static int
-symbol_add_stub PARAMS ((char *));
+static int symbol_add_stub (char *);
 
-static struct so_list *
-  find_solib PARAMS ((struct so_list *));
+static struct so_list *find_solib (struct so_list *);
 
-static struct link_map *
-  first_link_map_member PARAMS ((void));
+static struct link_map *first_link_map_member (void);
 
-static struct link_map *
-  next_link_map_member PARAMS ((struct so_list *));
+static struct link_map *next_link_map_member (struct so_list *);
 
-static void
-xfer_link_map_member PARAMS ((struct so_list *, struct link_map *));
+static void xfer_link_map_member (struct so_list *, struct link_map *);
 
-static CORE_ADDR
-  locate_base PARAMS ((void));
+static CORE_ADDR locate_base (void);
 
-static int
-solib_map_sections PARAMS ((char *));
+static int solib_map_sections (char *);
 
 /*
 

@@ -36,38 +36,29 @@
 
 /* Various things we might complain about... */
 
-static void
-som_symfile_init PARAMS ((struct objfile *));
+static void som_symfile_init (struct objfile *);
+
+static void som_new_init (struct objfile *);
+
+static void som_symfile_read (struct objfile *, int);
+
+static void som_symfile_finish (struct objfile *);
 
 static void
-som_new_init PARAMS ((struct objfile *));
+som_symtab_read (bfd *, struct objfile *, struct section_offsets *);
 
 static void
-som_symfile_read PARAMS ((struct objfile *, int));
-
-static void
-som_symfile_finish PARAMS ((struct objfile *));
-
-static void
-som_symtab_read PARAMS ((bfd *, struct objfile *,
-			 struct section_offsets *));
-
-static void
-som_symfile_offsets PARAMS ((struct objfile *, struct section_addr_info *));
+som_symfile_offsets (struct objfile *, struct section_addr_info *);
 
 /* FIXME: These should really be in a common header somewhere */
 
-extern void
-hpread_build_psymtabs PARAMS ((struct objfile *, int));
+extern void hpread_build_psymtabs (struct objfile *, int);
 
-extern void
-hpread_symfile_finish PARAMS ((struct objfile *));
+extern void hpread_symfile_finish (struct objfile *);
 
-extern void
-hpread_symfile_init PARAMS ((struct objfile *));
+extern void hpread_symfile_init (struct objfile *);
 
-extern void
-do_pxdb PARAMS ((bfd *));
+extern void do_pxdb (bfd *);
 
 /*
 

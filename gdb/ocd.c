@@ -39,32 +39,31 @@
 
 /* Prototypes for local functions */
 
-static int ocd_read_bytes PARAMS ((CORE_ADDR memaddr,
-				   char *myaddr, int len));
+static int ocd_read_bytes (CORE_ADDR memaddr, char *myaddr, int len);
 
-static int ocd_start_remote PARAMS ((PTR dummy));
+static int ocd_start_remote (PTR dummy);
 
-static int readchar PARAMS ((int timeout));
+static int readchar (int timeout);
 
-static void reset_packet PARAMS ((void));
+static void reset_packet (void);
 
-static void output_packet PARAMS ((void));
+static void output_packet (void);
 
-static int get_quoted_char PARAMS ((int timeout));
+static int get_quoted_char (int timeout);
 
-static void put_quoted_char PARAMS ((int c));
+static void put_quoted_char (int c);
 
-static void ocd_interrupt PARAMS ((int signo));
+static void ocd_interrupt (int signo);
 
-static void ocd_interrupt_twice PARAMS ((int signo));
+static void ocd_interrupt_twice (int signo);
 
-static void interrupt_query PARAMS ((void));
+static void interrupt_query (void);
 
-static unsigned char *ocd_do_command PARAMS ((int cmd, int *statusp, int *lenp));
+static unsigned char *ocd_do_command (int cmd, int *statusp, int *lenp);
 
-static void ocd_put_packet PARAMS ((unsigned char *packet, int pktlen));
+static void ocd_put_packet (unsigned char *packet, int pktlen);
 
-static unsigned char *ocd_get_packet PARAMS ((int cmd, int *pktlen, int timeout));
+static unsigned char *ocd_get_packet (int cmd, int *pktlen, int timeout);
 
 static struct target_ops *current_ops = NULL;
 

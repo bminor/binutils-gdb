@@ -33,10 +33,8 @@
 
 /* Prototypes for local functions. */
 
-static void fetch_osf_core_registers PARAMS ((char *,
-					      unsigned, int, CORE_ADDR));
-static void fetch_elf_core_registers PARAMS ((char *,
-					      unsigned, int, CORE_ADDR));
+static void fetch_osf_core_registers (char *, unsigned, int, CORE_ADDR);
+static void fetch_elf_core_registers (char *, unsigned, int, CORE_ADDR);
 
 /* Size of elements in jmpbuf */
 

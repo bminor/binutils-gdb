@@ -120,7 +120,7 @@ struct general_symbol_info
     asection *bfd_section;
   };
 
-extern CORE_ADDR symbol_overlayed_address PARAMS ((CORE_ADDR, asection *));
+extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, asection *);
 
 #define SYMBOL_NAME(symbol)		(symbol)->ginfo.name
 #define SYMBOL_VALUE(symbol)		(symbol)->ginfo.value.ivalue
@@ -1097,110 +1097,91 @@ extern int asm_demangle;
 
 /* lookup a symbol table by source file name */
 
-extern struct symtab *
-  lookup_symtab PARAMS ((char *));
+extern struct symtab *lookup_symtab (char *);
 
 /* lookup a symbol by name (optional block, optional symtab) */
 
-extern struct symbol *
-  lookup_symbol PARAMS ((const char *, const struct block *,
-			 const namespace_enum, int *, struct symtab **));
+extern struct symbol *lookup_symbol (const char *, const struct block *,
+				     const namespace_enum, int *,
+				     struct symtab **);
 
 /* lookup a symbol by name, within a specified block */
 
-extern struct symbol *
-  lookup_block_symbol PARAMS ((const struct block *, const char *,
-			       const namespace_enum));
+extern struct symbol *lookup_block_symbol (const struct block *, const char *,
+					   const namespace_enum);
 
 /* lookup a [struct, union, enum] by name, within a specified block */
 
-extern struct type *
-  lookup_struct PARAMS ((char *, struct block *));
+extern struct type *lookup_struct (char *, struct block *);
 
-extern struct type *
-  lookup_union PARAMS ((char *, struct block *));
+extern struct type *lookup_union (char *, struct block *);
 
-extern struct type *
-  lookup_enum PARAMS ((char *, struct block *));
+extern struct type *lookup_enum (char *, struct block *);
 
 /* lookup the function corresponding to the block */
 
-extern struct symbol *
-  block_function PARAMS ((struct block *));
+extern struct symbol *block_function (struct block *);
 
 /* from blockframe.c: */
 
 /* lookup the function symbol corresponding to the address */
 
-extern struct symbol *
-  find_pc_function PARAMS ((CORE_ADDR));
+extern struct symbol *find_pc_function (CORE_ADDR);
 
 /* lookup the function corresponding to the address and section */
 
-extern struct symbol *
-  find_pc_sect_function PARAMS ((CORE_ADDR, asection *));
+extern struct symbol *find_pc_sect_function (CORE_ADDR, asection *);
 
 /* lookup function from address, return name, start addr and end addr */
 
 extern int
-find_pc_partial_function PARAMS ((CORE_ADDR, char **,
-				  CORE_ADDR *, CORE_ADDR *));
+find_pc_partial_function (CORE_ADDR, char **, CORE_ADDR *, CORE_ADDR *);
 
-extern void
-clear_pc_function_cache PARAMS ((void));
+extern void clear_pc_function_cache (void);
 
 extern int
-find_pc_sect_partial_function PARAMS ((CORE_ADDR, asection *,
-				       char **, CORE_ADDR *, CORE_ADDR *));
+find_pc_sect_partial_function (CORE_ADDR, asection *,
+			       char **, CORE_ADDR *, CORE_ADDR *);
 
 /* from symtab.c: */
 
 /* lookup partial symbol table by filename */
 
-extern struct partial_symtab *
-  lookup_partial_symtab PARAMS ((char *));
+extern struct partial_symtab *lookup_partial_symtab (char *);
 
 /* lookup partial symbol table by address */
 
-extern struct partial_symtab *
-  find_pc_psymtab PARAMS ((CORE_ADDR));
+extern struct partial_symtab *find_pc_psymtab (CORE_ADDR);
 
 /* lookup partial symbol table by address and section */
 
-extern struct partial_symtab *
-  find_pc_sect_psymtab PARAMS ((CORE_ADDR, asection *));
+extern struct partial_symtab *find_pc_sect_psymtab (CORE_ADDR, asection *);
 
 /* lookup full symbol table by address */
 
-extern struct symtab *
-  find_pc_symtab PARAMS ((CORE_ADDR));
+extern struct symtab *find_pc_symtab (CORE_ADDR);
 
 /* lookup full symbol table by address and section */
 
-extern struct symtab *
-  find_pc_sect_symtab PARAMS ((CORE_ADDR, asection *));
+extern struct symtab *find_pc_sect_symtab (CORE_ADDR, asection *);
 
 /* lookup partial symbol by address */
 
-extern struct partial_symbol *
-  find_pc_psymbol PARAMS ((struct partial_symtab *, CORE_ADDR));
+extern struct partial_symbol *find_pc_psymbol (struct partial_symtab *,
+					       CORE_ADDR);
 
 /* lookup partial symbol by address and section */
 
-extern struct partial_symbol *
-  find_pc_sect_psymbol PARAMS ((struct partial_symtab *, CORE_ADDR, asection *));
+extern struct partial_symbol *find_pc_sect_psymbol (struct partial_symtab *,
+						    CORE_ADDR, asection *);
 
-extern int
-find_pc_line_pc_range PARAMS ((CORE_ADDR, CORE_ADDR *, CORE_ADDR *));
+extern int find_pc_line_pc_range (CORE_ADDR, CORE_ADDR *, CORE_ADDR *);
 
-extern int
-contained_in PARAMS ((struct block *, struct block *));
+extern int contained_in (struct block *, struct block *);
 
-extern void
-reread_symbols PARAMS ((void));
+extern void reread_symbols (void);
 
-extern struct type *
-  lookup_transparent_type PARAMS ((const char *));
+extern struct type *lookup_transparent_type (const char *);
 
 
 /* Macro for name of symbol to indicate a file compiled with gcc. */
@@ -1216,65 +1197,60 @@ extern struct type *
 /* Functions for dealing with the minimal symbol table, really a misc
    address<->symbol mapping for things we don't have debug symbols for.  */
 
-extern void prim_record_minimal_symbol PARAMS ((const char *, CORE_ADDR,
-						enum minimal_symbol_type,
-						struct objfile *));
+extern void prim_record_minimal_symbol (const char *, CORE_ADDR,
+					enum minimal_symbol_type,
+					struct objfile *);
 
 extern struct minimal_symbol *prim_record_minimal_symbol_and_info
-  PARAMS ((const char *, CORE_ADDR,
-	   enum minimal_symbol_type,
-	   char *info, int section,
-	   asection * bfd_section,
-	   struct objfile *));
+  (const char *, CORE_ADDR,
+   enum minimal_symbol_type,
+   char *info, int section, asection * bfd_section, struct objfile *);
 
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
-extern CORE_ADDR find_stab_function_addr PARAMS ((char *,
-						  char *,
-						  struct objfile *));
+extern CORE_ADDR find_stab_function_addr (char *, char *, struct objfile *);
 #endif
 
-extern unsigned int msymbol_hash_iw PARAMS ((const char *));
+extern unsigned int msymbol_hash_iw (const char *);
 
-extern unsigned int msymbol_hash PARAMS ((const char *));
+extern unsigned int msymbol_hash (const char *);
 
 extern void
 add_minsym_to_hash_table (struct minimal_symbol *sym,
 			  struct minimal_symbol **table);
 
-extern struct minimal_symbol *
-  lookup_minimal_symbol PARAMS ((const char *, const char *, struct objfile *));
+extern struct minimal_symbol *lookup_minimal_symbol (const char *,
+						     const char *,
+						     struct objfile *);
 
-extern struct minimal_symbol *
-  lookup_minimal_symbol_text PARAMS ((const char *, const char *, struct objfile *));
+extern struct minimal_symbol *lookup_minimal_symbol_text (const char *,
+							  const char *,
+							  struct objfile *);
 
-struct minimal_symbol *
-  lookup_minimal_symbol_solib_trampoline PARAMS ((const char *,
-						  const char *,
-						  struct objfile *));
+struct minimal_symbol *lookup_minimal_symbol_solib_trampoline (const char *,
+							       const char *,
+							       struct objfile
+							       *);
 
-extern struct minimal_symbol *
-  lookup_minimal_symbol_by_pc PARAMS ((CORE_ADDR));
+extern struct minimal_symbol *lookup_minimal_symbol_by_pc (CORE_ADDR);
 
-extern struct minimal_symbol *
-  lookup_minimal_symbol_by_pc_section PARAMS ((CORE_ADDR, asection *));
+extern struct minimal_symbol *lookup_minimal_symbol_by_pc_section (CORE_ADDR,
+								   asection
+								   *);
 
-extern struct minimal_symbol *
-  lookup_solib_trampoline_symbol_by_pc PARAMS ((CORE_ADDR));
+extern struct minimal_symbol
+  *lookup_solib_trampoline_symbol_by_pc (CORE_ADDR);
 
-extern CORE_ADDR
-  find_solib_trampoline_target PARAMS ((CORE_ADDR));
+extern CORE_ADDR find_solib_trampoline_target (CORE_ADDR);
 
-extern void
-init_minimal_symbol_collection PARAMS ((void));
+extern void init_minimal_symbol_collection (void);
 
 extern struct cleanup *make_cleanup_discard_minimal_symbols (void);
 
-extern void
-install_minimal_symbols PARAMS ((struct objfile *));
+extern void install_minimal_symbols (struct objfile *);
 
 /* Sort all the minimal symbols in OBJFILE.  */
 
-extern void msymbols_sort PARAMS ((struct objfile * objfile));
+extern void msymbols_sort (struct objfile *objfile);
 
 struct symtab_and_line
   {
@@ -1343,126 +1319,99 @@ struct exception_event_record
 /* Given a pc value, return line number it is in.  Second arg nonzero means
    if pc is on the boundary use the previous statement's line number.  */
 
-extern struct symtab_and_line
-find_pc_line PARAMS ((CORE_ADDR, int));
+extern struct symtab_and_line find_pc_line (CORE_ADDR, int);
 
 /* Same function, but specify a section as well as an address */
 
-extern struct symtab_and_line
-find_pc_sect_line PARAMS ((CORE_ADDR, asection *, int));
+extern struct symtab_and_line find_pc_sect_line (CORE_ADDR, asection *, int);
 
 /* Given an address, return the nearest symbol at or below it in memory.
    Optionally return the symtab it's from through 2nd arg, and the
    address in inferior memory of the symbol through 3rd arg.  */
 
-extern struct symbol *
-  find_addr_symbol PARAMS ((CORE_ADDR, struct symtab **, CORE_ADDR *));
+extern struct symbol *find_addr_symbol (CORE_ADDR, struct symtab **,
+					CORE_ADDR *);
 
 /* Given a symtab and line number, return the pc there.  */
 
-extern int
-find_line_pc PARAMS ((struct symtab *, int, CORE_ADDR *));
+extern int find_line_pc (struct symtab *, int, CORE_ADDR *);
 
 extern int
-find_line_pc_range PARAMS ((struct symtab_and_line,
-			    CORE_ADDR *, CORE_ADDR *));
+find_line_pc_range (struct symtab_and_line, CORE_ADDR *, CORE_ADDR *);
 
-extern void
-resolve_sal_pc PARAMS ((struct symtab_and_line *));
+extern void resolve_sal_pc (struct symtab_and_line *);
 
 /* Given a string, return the line specified by it.  For commands like "list"
    and "breakpoint".  */
 
-extern struct symtabs_and_lines
-decode_line_spec PARAMS ((char *, int));
+extern struct symtabs_and_lines decode_line_spec (char *, int);
+
+extern struct symtabs_and_lines decode_line_spec_1 (char *, int);
 
 extern struct symtabs_and_lines
-decode_line_spec_1 PARAMS ((char *, int));
-
-extern struct symtabs_and_lines
-decode_line_1 PARAMS ((char **, int, struct symtab *, int, char ***));
+decode_line_1 (char **, int, struct symtab *, int, char ***);
 
 /* Symmisc.c */
 
-void
-maintenance_print_symbols PARAMS ((char *, int));
+void maintenance_print_symbols (char *, int);
 
-void
-maintenance_print_psymbols PARAMS ((char *, int));
+void maintenance_print_psymbols (char *, int);
 
-void
-maintenance_print_msymbols PARAMS ((char *, int));
+void maintenance_print_msymbols (char *, int);
 
-void
-maintenance_print_objfiles PARAMS ((char *, int));
+void maintenance_print_objfiles (char *, int);
 
-void
-maintenance_check_symtabs PARAMS ((char *, int));
+void maintenance_check_symtabs (char *, int);
 
 /* maint.c */
 
-void
-maintenance_print_statistics PARAMS ((char *, int));
+void maintenance_print_statistics (char *, int);
 
-extern void
-free_symtab PARAMS ((struct symtab *));
+extern void free_symtab (struct symtab *);
 
 /* Symbol-reading stuff in symfile.c and solib.c.  */
 
-extern struct symtab *
-  psymtab_to_symtab PARAMS ((struct partial_symtab *));
+extern struct symtab *psymtab_to_symtab (struct partial_symtab *);
 
-extern void
-clear_solib PARAMS ((void));
+extern void clear_solib (void);
 
 /* source.c */
 
-extern int
-identify_source_line PARAMS ((struct symtab *, int, int, CORE_ADDR));
+extern int identify_source_line (struct symtab *, int, int, CORE_ADDR);
 
-extern void
-print_source_lines PARAMS ((struct symtab *, int, int, int));
+extern void print_source_lines (struct symtab *, int, int, int);
 
-extern void
-forget_cached_source_info PARAMS ((void));
+extern void forget_cached_source_info (void);
 
-extern void
-select_source_symtab PARAMS ((struct symtab *));
+extern void select_source_symtab (struct symtab *);
 
-extern char **make_symbol_completion_list PARAMS ((char *, char *));
+extern char **make_symbol_completion_list (char *, char *);
 
-extern struct symbol **
-  make_symbol_overload_list PARAMS ((struct symbol *));
+extern struct symbol **make_symbol_overload_list (struct symbol *);
 
 /* symtab.c */
 
-extern struct partial_symtab *
-  find_main_psymtab PARAMS ((void));
+extern struct partial_symtab *find_main_psymtab (void);
 
 /* blockframe.c */
 
-extern struct blockvector *
-  blockvector_for_pc PARAMS ((CORE_ADDR, int *));
+extern struct blockvector *blockvector_for_pc (CORE_ADDR, int *);
 
-extern struct blockvector *
-  blockvector_for_pc_sect PARAMS ((CORE_ADDR, asection *, int *,
-				   struct symtab *));
+extern struct blockvector *blockvector_for_pc_sect (CORE_ADDR, asection *,
+						    int *, struct symtab *);
 
 /* symfile.c */
 
-extern void
-clear_symtab_users PARAMS ((void));
+extern void clear_symtab_users (void);
 
-extern enum language
-deduce_language_from_filename PARAMS ((char *));
+extern enum language deduce_language_from_filename (char *);
 
 /* symtab.c */
 
-extern int
-in_prologue PARAMS ((CORE_ADDR pc, CORE_ADDR func_start));
+extern int in_prologue (CORE_ADDR pc, CORE_ADDR func_start);
 
-extern struct symbol *
-  fixup_symbol_section PARAMS ((struct symbol *, struct objfile *));
+extern struct symbol *fixup_symbol_section (struct symbol *,
+					    struct objfile *);
 
 /* Symbol searching */
 
@@ -1489,7 +1438,8 @@ struct symbol_search
     struct symbol_search *next;
   };
 
-extern void search_symbols PARAMS ((char *, namespace_enum, int, char **, struct symbol_search **));
-extern void free_search_symbols PARAMS ((struct symbol_search *));
+extern void search_symbols (char *, namespace_enum, int, char **,
+			    struct symbol_search **);
+extern void free_search_symbols (struct symbol_search *);
 
 #endif /* !defined(SYMTAB_H) */

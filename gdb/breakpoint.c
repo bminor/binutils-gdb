@@ -49,105 +49,75 @@
 
 static void until_break_command_continuation (struct continuation_arg *arg);
 
-static void
-catch_command_1 PARAMS ((char *, int, int));
+static void catch_command_1 (char *, int, int);
 
-static void
-enable_delete_command PARAMS ((char *, int));
+static void enable_delete_command (char *, int);
 
-static void
-enable_delete_breakpoint PARAMS ((struct breakpoint *));
+static void enable_delete_breakpoint (struct breakpoint *);
 
-static void
-enable_once_command PARAMS ((char *, int));
+static void enable_once_command (char *, int);
 
-static void
-enable_once_breakpoint PARAMS ((struct breakpoint *));
+static void enable_once_breakpoint (struct breakpoint *);
 
-static void
-disable_command PARAMS ((char *, int));
+static void disable_command (char *, int);
 
-static void
-enable_command PARAMS ((char *, int));
+static void enable_command (char *, int);
 
-static void
-map_breakpoint_numbers PARAMS ((char *, void (*)(struct breakpoint *)));
+static void map_breakpoint_numbers (char *, void (*)(struct breakpoint *));
 
-static void
-ignore_command PARAMS ((char *, int));
+static void ignore_command (char *, int);
 
-static int breakpoint_re_set_one PARAMS ((PTR));
+static int breakpoint_re_set_one (PTR);
 
-static void
-clear_command PARAMS ((char *, int));
+static void clear_command (char *, int);
 
-static void
-catch_command PARAMS ((char *, int));
+static void catch_command (char *, int);
 
-static void
-handle_gnu_4_16_catch_command PARAMS ((char *, int, int));
+static void handle_gnu_4_16_catch_command (char *, int, int);
 
-static struct symtabs_and_lines
-get_catch_sals PARAMS ((int));
+static struct symtabs_and_lines get_catch_sals (int);
 
-static void
-watch_command PARAMS ((char *, int));
+static void watch_command (char *, int);
 
-static int
-can_use_hardware_watchpoint PARAMS ((struct value *));
+static int can_use_hardware_watchpoint (struct value *);
 
-static void break_at_finish_command PARAMS ((char *, int));
-static void break_at_finish_at_depth_command PARAMS ((char *, int));
+static void break_at_finish_command (char *, int);
+static void break_at_finish_at_depth_command (char *, int);
 
-void
-tbreak_command PARAMS ((char *, int));
+void tbreak_command (char *, int);
 
-static void tbreak_at_finish_command PARAMS ((char *, int));
+static void tbreak_at_finish_command (char *, int);
 
-static void
-break_command_1 PARAMS ((char *, int, int));
+static void break_command_1 (char *, int, int);
 
-static void
-mention PARAMS ((struct breakpoint *));
+static void mention (struct breakpoint *);
 
-struct breakpoint *
-  set_raw_breakpoint PARAMS ((struct symtab_and_line));
+struct breakpoint *set_raw_breakpoint (struct symtab_and_line);
 
-static void
-check_duplicates PARAMS ((CORE_ADDR, asection *));
+static void check_duplicates (CORE_ADDR, asection *);
 
-static void
-describe_other_breakpoints PARAMS ((CORE_ADDR, asection *));
+static void describe_other_breakpoints (CORE_ADDR, asection *);
 
-static void
-breakpoints_info PARAMS ((char *, int));
+static void breakpoints_info (char *, int);
 
-static void
-breakpoint_1 PARAMS ((int, int));
+static void breakpoint_1 (int, int);
 
-static bpstat
-  bpstat_alloc PARAMS ((struct breakpoint *, bpstat));
+static bpstat bpstat_alloc (struct breakpoint *, bpstat);
 
-static int breakpoint_cond_eval PARAMS ((PTR));
+static int breakpoint_cond_eval (PTR);
 
-static void
-cleanup_executing_breakpoints PARAMS ((PTR));
+static void cleanup_executing_breakpoints (PTR);
 
-static void
-commands_command PARAMS ((char *, int));
+static void commands_command (char *, int);
 
-static void
-condition_command PARAMS ((char *, int));
+static void condition_command (char *, int);
 
-static int
-get_number_trailer PARAMS ((char **, int));
+static int get_number_trailer (char **, int);
 
-void
-set_breakpoint_count PARAMS ((int));
+void set_breakpoint_count (int);
 
 #if 0
-static struct breakpoint *
-  create_temp_exception_breakpoint PARAMS ((CORE_ADDR));
+static struct breakpoint *create_temp_exception_breakpoint (CORE_ADDR);
 #endif
 
 typedef enum
@@ -157,10 +127,9 @@ typedef enum
   }
 insertion_state_t;
 
-static int
-remove_breakpoint PARAMS ((struct breakpoint *, insertion_state_t));
+static int remove_breakpoint (struct breakpoint *, insertion_state_t);
 
-static enum print_stop_action print_it_typical PARAMS ((bpstat));
+static enum print_stop_action print_it_typical (bpstat);
 
 static enum print_stop_action print_bp_stop_message (bpstat bs);
 
@@ -171,95 +140,86 @@ typedef struct
   }
 args_for_catchpoint_enable;
 
-static int watchpoint_check PARAMS ((PTR));
+static int watchpoint_check (PTR);
 
-static int cover_target_enable_exception_callback PARAMS ((PTR));
+static int cover_target_enable_exception_callback (PTR);
 
-static void maintenance_info_breakpoints PARAMS ((char *, int));
+static void maintenance_info_breakpoints (char *, int);
 
 #ifdef GET_LONGJMP_TARGET
-static void create_longjmp_breakpoint PARAMS ((char *));
+static void create_longjmp_breakpoint (char *);
 #endif
 
-static int hw_breakpoint_used_count PARAMS ((void));
+static int hw_breakpoint_used_count (void);
 
-static int hw_watchpoint_used_count PARAMS ((enum bptype, int *));
+static int hw_watchpoint_used_count (enum bptype, int *);
 
-static void hbreak_command PARAMS ((char *, int));
+static void hbreak_command (char *, int);
 
-static void thbreak_command PARAMS ((char *, int));
+static void thbreak_command (char *, int);
 
-static void watch_command_1 PARAMS ((char *, int, int));
+static void watch_command_1 (char *, int, int);
 
-static void rwatch_command PARAMS ((char *, int));
+static void rwatch_command (char *, int);
 
-static void awatch_command PARAMS ((char *, int));
+static void awatch_command (char *, int);
 
-static void do_enable_breakpoint PARAMS ((struct breakpoint *, enum bpdisp));
+static void do_enable_breakpoint (struct breakpoint *, enum bpdisp);
 
-static void solib_load_unload_1 PARAMS ((char *hookname,
-					 int tempflag,
-					 char *dll_pathname,
-					 char *cond_string,
-					 enum bptype bp_kind));
+static void solib_load_unload_1 (char *hookname,
+				 int tempflag,
+				 char *dll_pathname,
+				 char *cond_string, enum bptype bp_kind);
 
-static void create_fork_vfork_event_catchpoint PARAMS ((int tempflag, 
-							char *cond_string,
-							enum bptype bp_kind));
+static void create_fork_vfork_event_catchpoint (int tempflag,
+						char *cond_string,
+						enum bptype bp_kind);
 
-static void break_at_finish_at_depth_command_1 PARAMS ((char *arg, 
-							int flag, 
-							int from_tty));
+static void break_at_finish_at_depth_command_1 (char *arg,
+						int flag, int from_tty);
 
-static void break_at_finish_command_1 PARAMS ((char *arg, 
-					       int flag, 
-					       int from_tty));
+static void break_at_finish_command_1 (char *arg, int flag, int from_tty);
 
-static void stop_command PARAMS ((char *arg, int from_tty));
+static void stop_command (char *arg, int from_tty);
 
-static void stopin_command PARAMS ((char *arg, int from_tty));
+static void stopin_command (char *arg, int from_tty);
 
-static void stopat_command PARAMS ((char *arg, int from_tty));
+static void stopat_command (char *arg, int from_tty);
 
-static char *ep_find_event_name_end PARAMS ((char *arg));
+static char *ep_find_event_name_end (char *arg);
 
-static char *ep_parse_optional_if_clause PARAMS ((char **arg));
+static char *ep_parse_optional_if_clause (char **arg);
 
-static char *ep_parse_optional_filename PARAMS ((char **arg));
+static char *ep_parse_optional_filename (char **arg);
 
 #if defined(CHILD_INSERT_EXEC_CATCHPOINT)
-static void catch_exec_command_1 PARAMS ((char *arg, int tempflag, 
-					  int from_tty));
+static void catch_exec_command_1 (char *arg, int tempflag, int from_tty);
 #endif
 
-static void create_exception_catchpoint 
-  PARAMS ((int tempflag, char *cond_string,
-	   enum exception_event_kind ex_event,
-	   struct symtab_and_line * sal));
+static void create_exception_catchpoint
+  (int tempflag, char *cond_string,
+   enum exception_event_kind ex_event, struct symtab_and_line *sal);
 
-static void catch_exception_command_1 
-  PARAMS ((enum exception_event_kind ex_event,
-	   char *arg, int tempflag, int from_tty));
+static void catch_exception_command_1
+  (enum exception_event_kind ex_event, char *arg, int tempflag, int from_tty);
 
-static void tcatch_command PARAMS ((char *arg, int from_tty));
+static void tcatch_command (char *arg, int from_tty);
 
-static void ep_skip_leading_whitespace PARAMS ((char **s));
+static void ep_skip_leading_whitespace (char **s);
 
 /* Prototypes for exported functions. */
 
-static void
-awatch_command PARAMS ((char *, int));
+static void awatch_command (char *, int);
 
-static void
-do_enable_breakpoint PARAMS ((struct breakpoint *, enum bpdisp));
+static void do_enable_breakpoint (struct breakpoint *, enum bpdisp);
 
 /* If FALSE, gdb will not use hardware support for watchpoints, even
    if such is available. */
 static int can_use_hw_watchpoints;
 
-void _initialize_breakpoint PARAMS ((void));
+void _initialize_breakpoint (void);
 
-void set_breakpoint_count PARAMS ((int));
+void set_breakpoint_count (int);
 
 extern int addressprint;	/* Print machine addresses? */
 
@@ -6129,10 +6089,8 @@ typedef enum
 catch_fork_kind;
 
 #if defined(CHILD_INSERT_FORK_CATCHPOINT) || defined(CHILD_INSERT_VFORK_CATCHPOINT)
-static void catch_fork_command_1 PARAMS ((catch_fork_kind fork_kind, 
-					  char *arg, 
-					  int tempflag, 
-					  int from_tty));
+static void catch_fork_command_1 (catch_fork_kind fork_kind,
+				  char *arg, int tempflag, int from_tty);
 
 static void
 catch_fork_command_1 (fork_kind, arg, tempflag, from_tty)

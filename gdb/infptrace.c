@@ -100,12 +100,12 @@
 #endif /* !FETCH_INFERIOR_REGISTERS */
 
 #if !defined (CHILD_XFER_MEMORY)
-static void udot_info PARAMS ((char *, int));
+static void udot_info (char *, int);
 #endif
 
 #if !defined (FETCH_INFERIOR_REGISTERS)
-static void fetch_register PARAMS ((int));
-static void store_register PARAMS ((int));
+static void fetch_register (int);
+static void store_register (int);
 #endif
 
 /*
@@ -124,8 +124,8 @@ static void store_register PARAMS ((int));
 #define TIDGET(PID)	0
 #endif
 
-void _initialize_kernel_u_addr PARAMS ((void));
-void _initialize_infptrace PARAMS ((void));
+void _initialize_kernel_u_addr (void);
+void _initialize_infptrace (void);
 
 
 /* This function simply calls ptrace with the given arguments.  

@@ -22,18 +22,18 @@
 /* Use this struct to pass arguments to wrapper routines. */
 struct gdb_wrapper_arguments;
 
-extern int gdb_parse_exp_1 PARAMS ((char **, struct block *, 
-			     int, struct expression **));
+extern int gdb_parse_exp_1 (char **, struct block *,
+			    int, struct expression **);
 
-extern int gdb_evaluate_expression PARAMS ((struct expression *, value_ptr *));
+extern int gdb_evaluate_expression (struct expression *, value_ptr *);
 
-extern int gdb_value_fetch_lazy PARAMS ((value_ptr));
+extern int gdb_value_fetch_lazy (value_ptr);
 
-extern int gdb_value_equal PARAMS ((value_ptr, value_ptr, int *));
+extern int gdb_value_equal (value_ptr, value_ptr, int *);
 
-extern int gdb_value_subscript PARAMS ((value_ptr, value_ptr, value_ptr *));
+extern int gdb_value_subscript (value_ptr, value_ptr, value_ptr *);
 
-extern int gdb_value_ind PARAMS ((value_ptr val, value_ptr * rval));
+extern int gdb_value_ind (value_ptr val, value_ptr * rval);
 
 extern int gdb_parse_and_eval_type (char *, int, struct type **);
 

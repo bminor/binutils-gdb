@@ -31,7 +31,7 @@
 /* Kernel is a bit tenacious about sharing text segments, disallowing bpts.  */
 #define	ONE_PROCESS_WRITETEXT
 
-extern char *strdup PARAMS ((const char *));
+extern char *strdup (const char *);
 
 /* Interface definitions for kernel debugger KDB.  */
 

@@ -26,6 +26,6 @@
 
 #define IN_SOLIB_CALL_TRAMPOLINE(pc, name) skip_trampoline_code (pc, name)
 #define SKIP_TRAMPOLINE_CODE(pc)           skip_trampoline_code (pc, 0)
-extern CORE_ADDR skip_trampoline_code PARAMS ((CORE_ADDR pc, char *name));
+extern CORE_ADDR skip_trampoline_code (CORE_ADDR pc, char *name);
 
-extern char *cygwin_pid_to_str PARAMS ((int pid));
+extern char *cygwin_pid_to_str (int pid);

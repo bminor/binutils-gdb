@@ -167,11 +167,10 @@ static int timeout = 2;
 static char *commandline = NULL;
 
 static int
-remote_rdp_xfer_inferior_memory PARAMS ((CORE_ADDR memaddr,
-					 char *myaddr,
-					 int len,
-					 int write,
-					 struct target_ops * target));
+remote_rdp_xfer_inferior_memory (CORE_ADDR memaddr,
+				 char *myaddr,
+				 int len,
+				 int write, struct target_ops *target);
 
 
 /* Stuff for talking to the serial layer. */

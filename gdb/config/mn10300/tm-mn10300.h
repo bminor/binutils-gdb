@@ -38,7 +38,7 @@
 
 #define REGISTER_BYTES (NUM_REGS * REGISTER_SIZE)
 
-extern char *mn10300_register_name PARAMS ((int regnr));
+extern char *mn10300_register_name (int regnr);
 #define REGISTER_NAME(i) (mn10300_register_name (i))
 
 #define D2_REGNUM 2
@@ -67,7 +67,7 @@ extern breakpoint_from_pc_fn mn10300_breakpoint_from_pc;
 
 #define INNER_THAN(lhs,rhs) ((lhs) < (rhs))
 
-extern CORE_ADDR mn10300_saved_pc_after_call PARAMS ((struct frame_info * frame));
+extern CORE_ADDR mn10300_saved_pc_after_call (struct frame_info *frame);
 #define SAVED_PC_AFTER_CALL(frame) \
   mn10300_saved_pc_after_call (frame)
 
@@ -75,33 +75,34 @@ struct frame_info;
 struct type;
 struct value;
 
-extern void mn10300_init_extra_frame_info PARAMS ((struct frame_info *));
+extern void mn10300_init_extra_frame_info (struct frame_info *);
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fi) mn10300_init_extra_frame_info (fi)
 #define INIT_FRAME_PC		/* Not necessary */
 
 #define FRAME_INIT_SAVED_REGS(fi)	/* handled by init_extra_frame_info */
 
-extern CORE_ADDR mn10300_frame_chain PARAMS ((struct frame_info *));
+extern CORE_ADDR mn10300_frame_chain (struct frame_info *);
 #define FRAME_CHAIN(fi) mn10300_frame_chain (fi)
 #define FRAME_CHAIN_VALID(FP, FI)	generic_file_frame_chain_valid (FP, FI)
 
-extern CORE_ADDR mn10300_find_callers_reg PARAMS ((struct frame_info *, int));
-extern CORE_ADDR mn10300_frame_saved_pc PARAMS ((struct frame_info *));
+extern CORE_ADDR mn10300_find_callers_reg (struct frame_info *, int);
+extern CORE_ADDR mn10300_frame_saved_pc (struct frame_info *);
 #define FRAME_SAVED_PC(FI) (mn10300_frame_saved_pc (FI))
 
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF. */
 
-extern void mn10300_extract_return_value PARAMS ((struct type * type, char *regbuf, char *valbuf));
+extern void mn10300_extract_return_value (struct type *type, char *regbuf,
+					  char *valbuf);
 #define EXTRACT_RETURN_VALUE(TYPE, REGBUF, VALBUF) \
   mn10300_extract_return_value (TYPE, REGBUF, VALBUF)
 
-CORE_ADDR mn10300_extract_struct_value_address PARAMS ((char *regbuf));
+CORE_ADDR mn10300_extract_struct_value_address (char *regbuf);
 #define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
   mn10300_extract_struct_value_address (REGBUF)
 
-void mn10300_store_return_value PARAMS ((struct type * type, char *valbuf));
+void mn10300_store_return_value (struct type *type, char *valbuf);
 #define STORE_RETURN_VALUE(TYPE, VALBUF) \
   mn10300_store_return_value (TYPE, VALBUF)
 
@@ -110,7 +111,7 @@ extern CORE_ADDR mn10300_store_struct_return (CORE_ADDR addr, CORE_ADDR sp);
 #define STORE_STRUCT_RETURN(STRUCT_ADDR, SP) \
   (mn10300_store_struct_return (STRUCT_ADDR, SP))
 
-extern CORE_ADDR mn10300_skip_prologue PARAMS ((CORE_ADDR));
+extern CORE_ADDR mn10300_skip_prologue (CORE_ADDR);
 #define SKIP_PROLOGUE(pc) (mn10300_skip_prologue (pc))
 
 #define FRAME_ARGS_SKIP 0
@@ -119,7 +120,7 @@ extern CORE_ADDR mn10300_skip_prologue PARAMS ((CORE_ADDR));
 #define FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)
 #define FRAME_NUM_ARGS(fi) (-1)
 
-extern void mn10300_pop_frame PARAMS ((struct frame_info *));
+extern void mn10300_pop_frame (struct frame_info *);
 #define POP_FRAME mn10300_pop_frame (get_current_frame ())
 
 #define USE_GENERIC_DUMMY_FRAMES 1
@@ -132,15 +133,15 @@ extern void mn10300_pop_frame PARAMS ((struct frame_info *));
 
 #define TARGET_READ_FP() read_sp ()
 
-extern CORE_ADDR mn10300_push_return_address PARAMS ((CORE_ADDR, CORE_ADDR));
+extern CORE_ADDR mn10300_push_return_address (CORE_ADDR, CORE_ADDR);
 #define PUSH_RETURN_ADDRESS(PC, SP)  mn10300_push_return_address (PC, SP)
 
 #define PUSH_DUMMY_FRAME	generic_push_dummy_frame ()
 #define SAVE_DUMMY_FRAME_TOS(SP) generic_save_dummy_frame_tos (SP)
 
 extern CORE_ADDR
-  mn10300_push_arguments PARAMS ((int, struct value **, CORE_ADDR,
-				  unsigned char, CORE_ADDR));
+mn10300_push_arguments (int, struct value **, CORE_ADDR,
+			unsigned char, CORE_ADDR);
 #define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
   (mn10300_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR))
 
@@ -158,6 +159,6 @@ extern use_struct_convention_fn mn10300_use_struct_convention;
     generic_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
 
 /* Cons up virtual frame pointer for trace */
-extern void mn10300_virtual_frame_pointer PARAMS ((CORE_ADDR, long *, long *));
+extern void mn10300_virtual_frame_pointer (CORE_ADDR, long *, long *);
 #define TARGET_VIRTUAL_FRAME_POINTER(PC, REGP, OFFP) \
 	mn10300_virtual_frame_pointer ((PC), (REGP), (OFFP))

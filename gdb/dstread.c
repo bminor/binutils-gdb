@@ -52,38 +52,27 @@ static int prev_line_number;
 
 static int line_vector_length;
 
-static int
-init_dst_sections PARAMS ((int));
+static int init_dst_sections (int);
 
-static void
-read_dst_symtab PARAMS ((struct objfile *));
+static void read_dst_symtab (struct objfile *);
 
-static void
-find_dst_sections PARAMS ((bfd *, sec_ptr, PTR));
+static void find_dst_sections (bfd *, sec_ptr, PTR);
 
-static void
-dst_symfile_init PARAMS ((struct objfile *));
+static void dst_symfile_init (struct objfile *);
 
-static void
-dst_new_init PARAMS ((struct objfile *));
+static void dst_new_init (struct objfile *);
 
-static void
-dst_symfile_read PARAMS ((struct objfile *, int));
+static void dst_symfile_read (struct objfile *, int);
 
-static void
-dst_symfile_finish PARAMS ((struct objfile *));
+static void dst_symfile_finish (struct objfile *);
 
-static void
-dst_end_symtab PARAMS ((struct objfile *));
+static void dst_end_symtab (struct objfile *);
 
-static void
-complete_symtab PARAMS ((char *, CORE_ADDR, unsigned int));
+static void complete_symtab (char *, CORE_ADDR, unsigned int);
 
-static void
-dst_start_symtab PARAMS ((void));
+static void dst_start_symtab (void);
 
-static void
-dst_record_line PARAMS ((int, CORE_ADDR));
+static void dst_record_line (int, CORE_ADDR);
 
 /* Manage the vector of line numbers.  */
 /* FIXME: Use record_line instead.  */
@@ -769,8 +758,7 @@ create_new_symbol (objfile, name)
   return sym;
 };
 
-static struct type *
-  decode_dst_type PARAMS ((struct objfile *, dst_rec_ptr_t));
+static struct type *decode_dst_type (struct objfile *, dst_rec_ptr_t);
 
 static struct type *
 decode_type_desc (objfile, type_desc, base)

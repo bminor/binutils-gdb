@@ -104,24 +104,21 @@ extern struct cmd_list_element *setchecklist;
 
 extern struct cmd_list_element *showchecklist;
 
-extern void
-execute_user_command PARAMS ((struct cmd_list_element *, char *));
+extern void execute_user_command (struct cmd_list_element *, char *);
 
-extern void
-execute_command PARAMS ((char *, int));
+extern void execute_command (char *, int);
 
-enum command_control_type
-execute_control_command PARAMS ((struct command_line *));
+enum command_control_type execute_control_command (struct command_line *);
 
 extern void print_command_line (struct command_line *, unsigned int,
 				struct ui_file *);
 #ifdef UI_OUT
-extern void print_command_lines PARAMS ((struct ui_out *,
-				      struct command_line *, unsigned int));
+extern void print_command_lines (struct ui_out *,
+				 struct command_line *, unsigned int);
 #endif
 
-extern char **noop_completer PARAMS ((char *, char *));
+extern char **noop_completer (char *, char *);
 
-extern char **filename_completer PARAMS ((char *, char *));
+extern char **filename_completer (char *, char *);
 
 #endif /* !defined (GDBCMD_H) */

@@ -40,69 +40,68 @@
 
 /* Prototypes */
 
-extern void _initialize_remote_sim PARAMS ((void));
+extern void _initialize_remote_sim (void);
 
 extern int (*ui_loop_hook) PARAMS ((int signo));
 
-static void dump_mem PARAMS ((char *buf, int len));
+static void dump_mem (char *buf, int len);
 
-static void init_callbacks PARAMS ((void));
+static void init_callbacks (void);
 
-static void end_callbacks PARAMS ((void));
+static void end_callbacks (void);
 
-static int gdb_os_write_stdout PARAMS ((host_callback *, const char *, int));
+static int gdb_os_write_stdout (host_callback *, const char *, int);
 
-static void gdb_os_flush_stdout PARAMS ((host_callback *));
+static void gdb_os_flush_stdout (host_callback *);
 
-static int gdb_os_write_stderr PARAMS ((host_callback *, const char *, int));
+static int gdb_os_write_stderr (host_callback *, const char *, int);
 
-static void gdb_os_flush_stderr PARAMS ((host_callback *));
+static void gdb_os_flush_stderr (host_callback *);
 
-static int gdb_os_poll_quit PARAMS ((host_callback *));
+static int gdb_os_poll_quit (host_callback *);
 
 /* printf_filtered is depreciated */
-static void gdb_os_printf_filtered PARAMS ((host_callback *, const char *,...));
+static void gdb_os_printf_filtered (host_callback *, const char *, ...);
 
-static void gdb_os_vprintf_filtered PARAMS ((host_callback *, const char *, va_list));
+static void gdb_os_vprintf_filtered (host_callback *, const char *, va_list);
 
-static void gdb_os_evprintf_filtered PARAMS ((host_callback *, const char *, va_list));
+static void gdb_os_evprintf_filtered (host_callback *, const char *, va_list);
 
-static void gdb_os_error PARAMS ((host_callback *, const char *,...));
+static void gdb_os_error (host_callback *, const char *, ...);
 
-static void gdbsim_fetch_register PARAMS ((int regno));
+static void gdbsim_fetch_register (int regno);
 
-static void gdbsim_store_register PARAMS ((int regno));
+static void gdbsim_store_register (int regno);
 
-static void gdbsim_kill PARAMS ((void));
+static void gdbsim_kill (void);
 
-static void gdbsim_load PARAMS ((char *prog, int fromtty));
+static void gdbsim_load (char *prog, int fromtty);
 
-static void gdbsim_create_inferior PARAMS ((char *exec_file, char *args, char **env));
+static void gdbsim_create_inferior (char *exec_file, char *args, char **env);
 
-static void gdbsim_open PARAMS ((char *args, int from_tty));
+static void gdbsim_open (char *args, int from_tty);
 
-static void gdbsim_close PARAMS ((int quitting));
+static void gdbsim_close (int quitting);
 
-static void gdbsim_detach PARAMS ((char *args, int from_tty));
+static void gdbsim_detach (char *args, int from_tty);
 
-static void gdbsim_resume PARAMS ((int pid, int step, enum target_signal siggnal));
+static void gdbsim_resume (int pid, int step, enum target_signal siggnal);
 
-static int gdbsim_wait PARAMS ((int pid, struct target_waitstatus * status));
+static int gdbsim_wait (int pid, struct target_waitstatus *status);
 
-static void gdbsim_prepare_to_store PARAMS ((void));
+static void gdbsim_prepare_to_store (void);
 
-static int gdbsim_xfer_inferior_memory PARAMS ((CORE_ADDR memaddr,
-						char *myaddr, int len,
-						int write,
-						struct target_ops * target));
+static int gdbsim_xfer_inferior_memory (CORE_ADDR memaddr,
+					char *myaddr, int len,
+					int write, struct target_ops *target);
 
-static void gdbsim_files_info PARAMS ((struct target_ops * target));
+static void gdbsim_files_info (struct target_ops *target);
 
-static void gdbsim_mourn_inferior PARAMS ((void));
+static void gdbsim_mourn_inferior (void);
 
-static void gdbsim_stop PARAMS ((void));
+static void gdbsim_stop (void);
 
-void simulator_command PARAMS ((char *args, int from_tty));
+void simulator_command (char *args, int from_tty);
 
 /* Naming convention:
 

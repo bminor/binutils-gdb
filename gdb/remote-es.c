@@ -112,132 +112,93 @@
 
 /* Prototypes for local functions */
 
-static void
-es1800_child_detach PARAMS ((char *, int));
+static void es1800_child_detach (char *, int);
 
-static void
-es1800_child_open PARAMS ((char *, int));
+static void es1800_child_open (char *, int);
 
-static void
-es1800_transparent PARAMS ((char *, int));
+static void es1800_transparent (char *, int);
 
-static void
-es1800_create_inferior PARAMS ((char *, char *, char **));
+static void es1800_create_inferior (char *, char *, char **);
 
-static void
-es1800_load PARAMS ((char *, int));
+static void es1800_load (char *, int);
 
-static void
-es1800_kill PARAMS ((void));
+static void es1800_kill (void);
 
-static int
-verify_break PARAMS ((int));
+static int verify_break (int);
 
-static int
-es1800_remove_breakpoint PARAMS ((CORE_ADDR, char *));
+static int es1800_remove_breakpoint (CORE_ADDR, char *);
+
+static int es1800_insert_breakpoint (CORE_ADDR, char *);
+
+static void es1800_files_info (struct target_ops *);
 
 static int
-es1800_insert_breakpoint PARAMS ((CORE_ADDR, char *));
+es1800_xfer_inferior_memory (CORE_ADDR, char *, int, int,
+			     struct target_ops *);
 
-static void
-es1800_files_info PARAMS ((struct target_ops *));
+static void es1800_prepare_to_store (void);
 
-static int
-es1800_xfer_inferior_memory PARAMS ((CORE_ADDR, char *, int, int,
-				     struct target_ops *));
+static int es1800_wait (int, struct target_waitstatus *);
 
-static void
-es1800_prepare_to_store PARAMS ((void));
+static void es1800_resume (int, int, enum target_signal);
 
-static int es1800_wait PARAMS ((int, struct target_waitstatus *));
+static void es1800_detach (char *, int);
 
-static void es1800_resume PARAMS ((int, int, enum target_signal));
+static void es1800_attach (char *, int);
 
-static void
-es1800_detach PARAMS ((char *, int));
+static int damn_b (char *);
 
-static void
-es1800_attach PARAMS ((char *, int));
+static void es1800_open (char *, int);
 
-static int
-damn_b PARAMS ((char *));
+static void es1800_timer (void);
 
-static void
-es1800_open PARAMS ((char *, int));
+static void es1800_reset (char *);
 
-static void
-es1800_timer PARAMS ((void));
+static void es1800_request_quit (void);
 
-static void
-es1800_reset PARAMS ((char *));
+static int readchar (void);
 
-static void
-es1800_request_quit PARAMS ((void));
+static void expect (char *, int);
 
-static int
-readchar PARAMS ((void));
+static void expect_prompt (void);
 
-static void
-expect PARAMS ((char *, int));
-
-static void
-expect_prompt PARAMS ((void));
-
-static void
-download PARAMS ((FILE *, int, int));
+static void download (FILE *, int, int);
 
 #if 0
-static void
-bfd_copy PARAMS ((bfd *, bfd *));
+static void bfd_copy (bfd *, bfd *);
 #endif
 
-static void
-get_break_addr PARAMS ((int, CORE_ADDR *));
+static void get_break_addr (int, CORE_ADDR *);
 
-static int
-fromhex PARAMS ((int));
+static int fromhex (int);
 
-static int
-tohex PARAMS ((int));
+static int tohex (int);
 
-static void
-es1800_close PARAMS ((int));
+static void es1800_close (int);
 
-static void
-es1800_fetch_registers PARAMS ((void));
+static void es1800_fetch_registers (void);
 
-static void
-es1800_fetch_register PARAMS ((int));
+static void es1800_fetch_register (int);
 
-static void
-es1800_store_register PARAMS ((int));
+static void es1800_store_register (int);
 
-static void
-es1800_read_bytes PARAMS ((CORE_ADDR, char *, int));
+static void es1800_read_bytes (CORE_ADDR, char *, int);
 
-static void
-es1800_write_bytes PARAMS ((CORE_ADDR, char *, int));
+static void es1800_write_bytes (CORE_ADDR, char *, int);
 
-static void
-send_with_reply PARAMS ((char *, char *, int));
+static void send_with_reply (char *, char *, int);
 
-static void
-send_command PARAMS ((char *));
+static void send_command (char *);
 
-static void
-send PARAMS ((char *));
+static void send (char *);
 
-static void
-getmessage PARAMS ((char *, int));
+static void getmessage (char *, int);
 
-static void
-es1800_mourn_inferior PARAMS ((void));
+static void es1800_mourn_inferior (void);
 
-static void
-es1800_create_break_insn PARAMS ((char *, int));
+static void es1800_create_break_insn (char *, int);
 
-static void
-es1800_init_break PARAMS ((char *, int));
+static void es1800_init_break (char *, int);
 
 /* Local variables */
 

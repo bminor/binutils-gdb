@@ -57,20 +57,16 @@
 #endif
 
 #if defined (SIGIO) && defined (FASYNC) && defined (FD_SET) && defined (F_SETOWN)
-static void
-handle_sigio PARAMS ((int));
+static void handle_sigio (int);
 #endif
 
-extern void _initialize_inflow PARAMS ((void));
+extern void _initialize_inflow (void);
 
-static void
-pass_signal PARAMS ((int));
+static void pass_signal (int);
 
-static void
-kill_command PARAMS ((char *, int));
+static void kill_command (char *, int);
 
-static void
-terminal_ours_1 PARAMS ((int));
+static void terminal_ours_1 (int);
 
 /* Record terminal status separately for debugger and inferior.  */
 
@@ -176,7 +172,7 @@ gdb_has_a_terminal ()
     fprintf_unfiltered(gdb_stderr, "[%s failed in terminal_inferior: %s]\n", \
 	    what, strerror (errno))
 
-static void terminal_ours_1 PARAMS ((int));
+static void terminal_ours_1 (int);
 
 /* Initialize the terminal settings we record for the inferior,
    before we actually run the inferior.  */

@@ -39,19 +39,15 @@
 extern int objectprint;		/* Controls looking up an object's derived type
 				   using what we find in its vtables.  */
 
-extern void _initialize_typeprint PARAMS ((void));
+extern void _initialize_typeprint (void);
 
-static void
-ptype_command PARAMS ((char *, int));
+static void ptype_command (char *, int);
 
-static struct type *
-  ptype_eval PARAMS ((struct expression *));
+static struct type *ptype_eval (struct expression *);
 
-static void
-whatis_command PARAMS ((char *, int));
+static void whatis_command (char *, int);
 
-static void
-whatis_exp PARAMS ((char *, int));
+static void whatis_exp (char *, int);
 
 /* Print a description of a type TYPE in the form of a declaration of a
    variable named VARSTRING.  (VARSTRING is demangled if necessary.)

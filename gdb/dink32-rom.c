@@ -27,7 +27,7 @@
 #include "symfile.h" /* For generic_load() */
 #include "inferior.h" /* For write_pc() */
 
-static void dink32_open PARAMS ((char *args, int from_tty));
+static void dink32_open (char *args, int from_tty);
 
 static void
 dink32_supply_register (regname, regnamelen, val, vallen)

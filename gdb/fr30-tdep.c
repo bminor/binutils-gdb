@@ -242,7 +242,7 @@ fr30_push_arguments (nargs, args, sp, struct_return, struct_addr)
   return sp;
 }
 
-void _initialize_fr30_tdep PARAMS ((void));
+void _initialize_fr30_tdep (void);
 
 void
 _initialize_fr30_tdep ()

@@ -132,58 +132,50 @@ struct sym_fns
    do anything special.  */
 
 extern void
-default_symfile_offsets PARAMS ((struct objfile * objfile, struct section_addr_info *));
+default_symfile_offsets (struct objfile *objfile, struct section_addr_info *);
 
 
 extern void
-extend_psymbol_list PARAMS ((struct psymbol_allocation_list *,
-			     struct objfile *));
+extend_psymbol_list (struct psymbol_allocation_list *, struct objfile *);
 
 /* Add any kind of symbol to a psymbol_allocation_list. */
 
 /* #include "demangle.h" */
 
 extern void
-add_psymbol_to_list PARAMS ((char *, int, namespace_enum, enum address_class,
-			  struct psymbol_allocation_list *, long, CORE_ADDR,
-			     enum language, struct objfile *));
+add_psymbol_to_list (char *, int, namespace_enum, enum address_class,
+		     struct psymbol_allocation_list *, long, CORE_ADDR,
+		     enum language, struct objfile *);
 
 extern void
-add_psymbol_with_dem_name_to_list PARAMS ((char *, int, char *, int, namespace_enum,
-					   enum address_class,
-					   struct psymbol_allocation_list *,
-					   long, CORE_ADDR,
-					   enum language, struct objfile *));
+add_psymbol_with_dem_name_to_list (char *, int, char *, int, namespace_enum,
+				   enum address_class,
+				   struct psymbol_allocation_list *,
+				   long, CORE_ADDR,
+				   enum language, struct objfile *);
 
 
-extern void init_psymbol_list PARAMS ((struct objfile *, int));
+extern void init_psymbol_list (struct objfile *, int);
 
-extern void
-sort_pst_symbols PARAMS ((struct partial_symtab *));
+extern void sort_pst_symbols (struct partial_symtab *);
 
-extern struct symtab *
-  allocate_symtab PARAMS ((char *, struct objfile *));
+extern struct symtab *allocate_symtab (char *, struct objfile *);
 
-extern int
-free_named_symtabs PARAMS ((char *));
+extern int free_named_symtabs (char *);
 
-extern void
-fill_in_vptr_fieldno PARAMS ((struct type *));
+extern void fill_in_vptr_fieldno (struct type *);
 
-extern void
-add_symtab_fns PARAMS ((struct sym_fns *));
+extern void add_symtab_fns (struct sym_fns *);
+
+extern void init_entry_point_info (struct objfile *);
 
 extern void
-init_entry_point_info PARAMS ((struct objfile *));
+syms_from_objfile (struct objfile *, struct section_addr_info *, int, int);
 
-extern void
-syms_from_objfile PARAMS ((struct objfile *, struct section_addr_info *, int, int));
+extern void new_symfile_objfile (struct objfile *, int, int);
 
-extern void
-new_symfile_objfile PARAMS ((struct objfile *, int, int));
-
-extern struct objfile *
-symbol_file_add PARAMS ((char *, int, struct section_addr_info *, int, int));
+extern struct objfile *symbol_file_add (char *, int,
+					struct section_addr_info *, int, int);
 
 /* Build (allocate and populate) a section_addr_info struct from
    an existing section table. */
@@ -199,33 +191,29 @@ extern void
 free_section_addr_info (struct section_addr_info *);
 
 
-extern struct partial_symtab *
-  start_psymtab_common PARAMS ((struct objfile *, struct section_offsets *,
-				char *, CORE_ADDR,
-				struct partial_symbol **,
-				struct partial_symbol **));
+extern struct partial_symtab *start_psymtab_common (struct objfile *,
+						    struct section_offsets *,
+						    char *, CORE_ADDR,
+						    struct partial_symbol **,
+						    struct partial_symbol **);
 
 /* Sorting your symbols for fast lookup or alphabetical printing.  */
 
-extern void
-sort_block_syms PARAMS ((struct block *));
+extern void sort_block_syms (struct block *);
 
-extern void
-sort_symtab_syms PARAMS ((struct symtab *));
+extern void sort_symtab_syms (struct symtab *);
 
 /* Make a copy of the string at PTR with SIZE characters in the symbol obstack
    (and add a null character at the end in the copy).
    Returns the address of the copy.  */
 
-extern char *
-  obsavestring PARAMS ((char *, int, struct obstack *));
+extern char *obsavestring (char *, int, struct obstack *);
 
 /* Concatenate strings S1, S2 and S3; return the new string.
    Space is found in the symbol_obstack.  */
 
-extern char *
-  obconcat PARAMS ((struct obstack * obstackp, const char *, const char *,
-		    const char *));
+extern char *obconcat (struct obstack *obstackp, const char *, const char *,
+		       const char *);
 
 			/*   Variables   */
 
@@ -244,70 +232,58 @@ extern int auto_solib_add;
 
 /* From symfile.c */
 
-extern CORE_ADDR
-  entry_point_address PARAMS ((void));
+extern CORE_ADDR entry_point_address (void);
 
-extern struct partial_symtab *
-  allocate_psymtab PARAMS ((char *, struct objfile *));
+extern struct partial_symtab *allocate_psymtab (char *, struct objfile *);
 
-extern void
-discard_psymtab PARAMS ((struct partial_symtab *));
+extern void discard_psymtab (struct partial_symtab *);
 
-extern void find_lowest_section PARAMS ((bfd *, asection *, PTR));
+extern void find_lowest_section (bfd *, asection *, PTR);
 
-extern bfd *symfile_bfd_open PARAMS ((char *));
+extern bfd *symfile_bfd_open (char *);
 
 /* Utility functions for overlay sections: */
 extern int overlay_debugging;
 extern int overlay_cache_invalid;
 
 /* return the "mapped" overlay section  containing the PC */
-extern asection *
-  find_pc_mapped_section PARAMS ((CORE_ADDR));
+extern asection *find_pc_mapped_section (CORE_ADDR);
 
 /* return any overlay section containing the PC (even in its LMA region) */
-extern asection *
-  find_pc_overlay PARAMS ((CORE_ADDR));
+extern asection *find_pc_overlay (CORE_ADDR);
 
 /* return true if the section is an overlay */
-extern int
-section_is_overlay PARAMS ((asection *));
+extern int section_is_overlay (asection *);
 
 /* return true if the overlay section is currently "mapped" */
-extern int
-section_is_mapped PARAMS ((asection *));
+extern int section_is_mapped (asection *);
 
 /* return true if pc belongs to section's VMA */
-extern CORE_ADDR
-  pc_in_mapped_range PARAMS ((CORE_ADDR, asection *));
+extern CORE_ADDR pc_in_mapped_range (CORE_ADDR, asection *);
 
 /* return true if pc belongs to section's LMA */
-extern CORE_ADDR
-  pc_in_unmapped_range PARAMS ((CORE_ADDR, asection *));
+extern CORE_ADDR pc_in_unmapped_range (CORE_ADDR, asection *);
 
 /* map an address from a section's LMA to its VMA */
-extern CORE_ADDR
-  overlay_mapped_address PARAMS ((CORE_ADDR, asection *));
+extern CORE_ADDR overlay_mapped_address (CORE_ADDR, asection *);
 
 /* map an address from a section's VMA to its LMA */
-extern CORE_ADDR
-  overlay_unmapped_address PARAMS ((CORE_ADDR, asection *));
+extern CORE_ADDR overlay_unmapped_address (CORE_ADDR, asection *);
 
 /* convert an address in an overlay section (force into VMA range) */
-extern CORE_ADDR
-  symbol_overlayed_address PARAMS ((CORE_ADDR, asection *));
+extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, asection *);
 
 /* From dwarfread.c */
 
 extern void
-dwarf_build_psymtabs PARAMS ((struct objfile *, int, file_ptr, unsigned int,
-			      file_ptr, unsigned int));
+dwarf_build_psymtabs (struct objfile *, int, file_ptr, unsigned int,
+		      file_ptr, unsigned int);
 
 /* From dwarf2read.c */
 
-extern int dwarf2_has_info PARAMS ((bfd * abfd));
+extern int dwarf2_has_info (bfd * abfd);
 
-extern void dwarf2_build_psymtabs PARAMS ((struct objfile *, int));
+extern void dwarf2_build_psymtabs (struct objfile *, int);
 
 /* From mdebugread.c */
 
@@ -318,13 +294,12 @@ struct ecoff_debug_hack
     struct ecoff_debug_info *b;
   };
 extern void
-mdebug_build_psymtabs PARAMS ((struct objfile *,
-			       const struct ecoff_debug_swap *,
-			       struct ecoff_debug_info *));
+mdebug_build_psymtabs (struct objfile *,
+		       const struct ecoff_debug_swap *,
+		       struct ecoff_debug_info *);
 
 extern void
-elfmdebug_build_psymtabs PARAMS ((struct objfile *,
-				  const struct ecoff_debug_swap *,
-				  asection *));
+elfmdebug_build_psymtabs (struct objfile *,
+			  const struct ecoff_debug_swap *, asection *);
 
 #endif /* !defined(SYMFILE_H) */

@@ -88,7 +88,7 @@ struct ui_out_impl mi_ui_out_impl =
 
 /* Prototypes for local functions */
 
-extern void _initialize_mi_out PARAMS ((void));
+extern void _initialize_mi_out (void);
 static void field_separator (struct ui_out *uiout);
 static void list_open (struct ui_out *uiout);
 static void list_close (struct ui_out *uiout);

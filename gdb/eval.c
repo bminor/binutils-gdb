@@ -43,24 +43,23 @@ extern int objectprint;
 
 /* Prototypes for local functions. */
 
-static value_ptr evaluate_subexp_for_sizeof PARAMS ((struct expression *,
-						     int *));
+static value_ptr evaluate_subexp_for_sizeof (struct expression *, int *);
 
-static value_ptr evaluate_subexp_for_address PARAMS ((struct expression *,
-						      int *, enum noside));
+static value_ptr evaluate_subexp_for_address (struct expression *,
+					      int *, enum noside);
 
-static value_ptr evaluate_subexp PARAMS ((struct type *, struct expression *,
-					  int *, enum noside));
+static value_ptr evaluate_subexp (struct type *, struct expression *,
+				  int *, enum noside);
 
-static char *get_label PARAMS ((struct expression *, int *));
+static char *get_label (struct expression *, int *);
 
 static value_ptr
-  evaluate_struct_tuple PARAMS ((value_ptr, struct expression *, int *,
-				 enum noside, int));
+evaluate_struct_tuple (value_ptr, struct expression *, int *,
+		       enum noside, int);
 
 static LONGEST
-  init_array_element PARAMS ((value_ptr, value_ptr, struct expression *,
-			      int *, enum noside, LONGEST, LONGEST));
+init_array_element (value_ptr, value_ptr, struct expression *,
+		    int *, enum noside, LONGEST, LONGEST);
 
 #if defined (__GNUC__) && !__STDC__
 inline

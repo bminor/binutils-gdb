@@ -57,181 +57,179 @@ static void cleanup_sigint_signal_handler (void *dummy);
 static void initialize_sigint_signal_handler (void);
 static int getpkt_sane (char *buf, long sizeof_buf, int forever);
 
-static void handle_remote_sigint PARAMS ((int));
-static void handle_remote_sigint_twice PARAMS ((int));
-static void async_remote_interrupt PARAMS ((gdb_client_data));
-void async_remote_interrupt_twice PARAMS ((gdb_client_data));
+static void handle_remote_sigint (int);
+static void handle_remote_sigint_twice (int);
+static void async_remote_interrupt (gdb_client_data);
+void async_remote_interrupt_twice (gdb_client_data);
 
-static void build_remote_gdbarch_data PARAMS ((void));
+static void build_remote_gdbarch_data (void);
 
 static int remote_write_bytes (CORE_ADDR memaddr, char *myaddr, int len);
 
-static int remote_read_bytes PARAMS ((CORE_ADDR memaddr,
-				      char *myaddr, int len));
+static int remote_read_bytes (CORE_ADDR memaddr, char *myaddr, int len);
 
-static void remote_files_info PARAMS ((struct target_ops * ignore));
+static void remote_files_info (struct target_ops *ignore);
 
-static int remote_xfer_memory PARAMS ((CORE_ADDR memaddr, char *myaddr,
-				       int len, int should_write,
-				       struct target_ops * target));
+static int remote_xfer_memory (CORE_ADDR memaddr, char *myaddr,
+			       int len, int should_write,
+			       struct target_ops *target);
 
-static void remote_prepare_to_store PARAMS ((void));
+static void remote_prepare_to_store (void);
 
-static void remote_fetch_registers PARAMS ((int regno));
+static void remote_fetch_registers (int regno);
 
-static void remote_resume PARAMS ((int pid, int step,
-				   enum target_signal siggnal));
-static void remote_async_resume PARAMS ((int pid, int step,
-					 enum target_signal siggnal));
-static int remote_start_remote PARAMS ((PTR));
+static void remote_resume (int pid, int step, enum target_signal siggnal);
+static void remote_async_resume (int pid, int step,
+				 enum target_signal siggnal);
+static int remote_start_remote (PTR);
 
-static void remote_open PARAMS ((char *name, int from_tty));
-static void remote_async_open PARAMS ((char *name, int from_tty));
+static void remote_open (char *name, int from_tty);
+static void remote_async_open (char *name, int from_tty);
 
-static void extended_remote_open PARAMS ((char *name, int from_tty));
-static void extended_remote_async_open PARAMS ((char *name, int from_tty));
+static void extended_remote_open (char *name, int from_tty);
+static void extended_remote_async_open (char *name, int from_tty);
 
-static void remote_open_1 PARAMS ((char *, int, struct target_ops *,
-				   int extended_p));
-static void remote_async_open_1 PARAMS ((char *, int, struct target_ops *,
-					 int extended_p));
+static void remote_open_1 (char *, int, struct target_ops *, int extended_p);
+static void remote_async_open_1 (char *, int, struct target_ops *,
+				 int extended_p);
 
-static void remote_close PARAMS ((int quitting));
+static void remote_close (int quitting);
 
-static void remote_store_registers PARAMS ((int regno));
+static void remote_store_registers (int regno);
 
-static void remote_mourn PARAMS ((void));
-static void remote_async_mourn PARAMS ((void));
+static void remote_mourn (void);
+static void remote_async_mourn (void);
 
-static void extended_remote_restart PARAMS ((void));
+static void extended_remote_restart (void);
 
-static void extended_remote_mourn PARAMS ((void));
+static void extended_remote_mourn (void);
 
-static void extended_remote_create_inferior PARAMS ((char *, char *, char **));
-static void extended_remote_async_create_inferior PARAMS ((char *, char *, char **));
+static void extended_remote_create_inferior (char *, char *, char **);
+static void extended_remote_async_create_inferior (char *, char *, char **);
 
-static void remote_mourn_1 PARAMS ((struct target_ops *));
+static void remote_mourn_1 (struct target_ops *);
 
 static void remote_send (char *buf, long sizeof_buf);
 
-static int readchar PARAMS ((int timeout));
+static int readchar (int timeout);
 
-static int remote_wait PARAMS ((int pid, struct target_waitstatus * status));
-static int remote_async_wait PARAMS ((int pid, struct target_waitstatus * status));
+static int remote_wait (int pid, struct target_waitstatus *status);
+static int remote_async_wait (int pid, struct target_waitstatus *status);
 
-static void remote_kill PARAMS ((void));
-static void remote_async_kill PARAMS ((void));
+static void remote_kill (void);
+static void remote_async_kill (void);
 
-static int tohex PARAMS ((int nib));
+static int tohex (int nib);
 
-static void remote_detach PARAMS ((char *args, int from_tty));
-static void remote_async_detach PARAMS ((char *args, int from_tty));
+static void remote_detach (char *args, int from_tty);
+static void remote_async_detach (char *args, int from_tty);
 
-static void remote_interrupt PARAMS ((int signo));
+static void remote_interrupt (int signo);
 
-static void remote_interrupt_twice PARAMS ((int signo));
+static void remote_interrupt_twice (int signo);
 
-static void interrupt_query PARAMS ((void));
+static void interrupt_query (void);
 
-static void set_thread PARAMS ((int, int));
+static void set_thread (int, int);
 
-static int remote_thread_alive PARAMS ((int));
+static int remote_thread_alive (int);
 
-static void get_offsets PARAMS ((void));
+static void get_offsets (void);
 
 static long read_frame (char *buf, long sizeof_buf);
 
-static int remote_insert_breakpoint PARAMS ((CORE_ADDR, char *));
+static int remote_insert_breakpoint (CORE_ADDR, char *);
 
-static int remote_remove_breakpoint PARAMS ((CORE_ADDR, char *));
+static int remote_remove_breakpoint (CORE_ADDR, char *);
 
-static int hexnumlen PARAMS ((ULONGEST num));
+static int hexnumlen (ULONGEST num);
 
-static void init_remote_ops PARAMS ((void));
+static void init_remote_ops (void);
 
-static void init_extended_remote_ops PARAMS ((void));
+static void init_extended_remote_ops (void);
 
-static void init_remote_cisco_ops PARAMS ((void));
+static void init_remote_cisco_ops (void);
 
 static struct target_ops remote_cisco_ops;
 
-static void remote_stop PARAMS ((void));
+static void remote_stop (void);
 
-static int ishex PARAMS ((int ch, int *val));
+static int ishex (int ch, int *val);
 
-static int stubhex PARAMS ((int ch));
+static int stubhex (int ch);
 
-static int remote_query PARAMS ((int /*char */ , char *, char *, int *));
+static int remote_query (int /*char */ , char *, char *, int *);
 
-static int hexnumstr PARAMS ((char *, ULONGEST));
+static int hexnumstr (char *, ULONGEST);
 
-static int hexnumnstr PARAMS ((char *, ULONGEST, int));
+static int hexnumnstr (char *, ULONGEST, int);
 
-static CORE_ADDR remote_address_masked PARAMS ((CORE_ADDR));
+static CORE_ADDR remote_address_masked (CORE_ADDR);
 
-static void print_packet PARAMS ((char *));
+static void print_packet (char *);
 
-static unsigned long crc32 PARAMS ((unsigned char *, int, unsigned int));
+static unsigned long crc32 (unsigned char *, int, unsigned int);
 
-static void compare_sections_command PARAMS ((char *, int));
+static void compare_sections_command (char *, int);
 
-static void packet_command PARAMS ((char *, int));
+static void packet_command (char *, int);
 
-static int stub_unpack_int PARAMS ((char *buff, int fieldlength));
+static int stub_unpack_int (char *buff, int fieldlength);
 
-static int remote_current_thread PARAMS ((int oldpid));
+static int remote_current_thread (int oldpid);
 
-static void remote_find_new_threads PARAMS ((void));
+static void remote_find_new_threads (void);
 
-static void record_currthread PARAMS ((int currthread));
+static void record_currthread (int currthread);
 
 /* exported functions */
 
-extern int fromhex PARAMS ((int a));
+extern int fromhex (int a);
 
-static int putpkt_binary PARAMS ((char *buf, int cnt));
+static int putpkt_binary (char *buf, int cnt);
 
-static void check_binary_download PARAMS ((CORE_ADDR addr));
+static void check_binary_download (CORE_ADDR addr);
 
 struct packet_config;
 
-static void show_packet_config_cmd PARAMS ((struct packet_config * config));
+static void show_packet_config_cmd (struct packet_config *config);
 
-static void set_packet_config_cmd PARAMS ((struct packet_config * config,
-					      struct cmd_list_element * c));
+static void set_packet_config_cmd (struct packet_config *config,
+				   struct cmd_list_element *c);
 
-static void add_packet_config_cmd PARAMS ((struct packet_config * config,
-					   char *name,
-					   char *title,
-   void (*set_func) (char *args, int from_tty, struct cmd_list_element * c),
-			       void (*show_func) (char *name, int from_tty),
-					   struct cmd_list_element **setlist,
-					   struct cmd_list_element **showlist));
+static void add_packet_config_cmd (struct packet_config *config,
+				   char *name,
+				   char *title,
+				   void (*set_func) (char *args, int from_tty,
+						     struct cmd_list_element *
+						     c),
+				   void (*show_func) (char *name,
+						      int from_tty),
+				   struct cmd_list_element **setlist,
+				   struct cmd_list_element **showlist);
 
-static void init_packet_config PARAMS ((struct packet_config * config));
+static void init_packet_config (struct packet_config *config);
 
-static void set_remote_protocol_P_packet_cmd PARAMS ((char *args,
-						      int from_tty,
-					      struct cmd_list_element * c));
+static void set_remote_protocol_P_packet_cmd (char *args,
+					      int from_tty,
+					      struct cmd_list_element *c);
 
-static void show_remote_protocol_P_packet_cmd PARAMS ((char *args,
-						       int from_tty));
+static void show_remote_protocol_P_packet_cmd (char *args, int from_tty);
 
-static void set_remote_protocol_Z_packet_cmd PARAMS ((char *args,
-						      int from_tty,
-					      struct cmd_list_element * c));
+static void set_remote_protocol_Z_packet_cmd (char *args,
+					      int from_tty,
+					      struct cmd_list_element *c);
 
-static void show_remote_protocol_Z_packet_cmd PARAMS ((char *args,
-						       int from_tty));
+static void show_remote_protocol_Z_packet_cmd (char *args, int from_tty);
 
 
 
 
 /* Define the target subroutine names */
 
-void open_remote_target PARAMS ((char *, int, struct target_ops *, int));
+void open_remote_target (char *, int, struct target_ops *, int);
 
-void _initialize_remote PARAMS ((void));
+void _initialize_remote (void);
 
 /* */
 
@@ -865,73 +863,70 @@ struct gdb_ext_thread_info
 
 #define BUF_THREAD_ID_SIZE (OPAQUETHREADBYTES*2)
 
-char *unpack_varlen_hex PARAMS ((char *buff, int *result));
+char *unpack_varlen_hex (char *buff, int *result);
 
-static char *unpack_nibble PARAMS ((char *buf, int *val));
+static char *unpack_nibble (char *buf, int *val);
 
-static char *pack_nibble PARAMS ((char *buf, int nibble));
+static char *pack_nibble (char *buf, int nibble);
 
-static char *pack_hex_byte PARAMS ((char *pkt, int /*unsigned char */ byte));
+static char *pack_hex_byte (char *pkt, int /*unsigned char */ byte);
 
-static char *unpack_byte PARAMS ((char *buf, int *value));
+static char *unpack_byte (char *buf, int *value);
 
-static char *pack_int PARAMS ((char *buf, int value));
+static char *pack_int (char *buf, int value);
 
-static char *unpack_int PARAMS ((char *buf, int *value));
+static char *unpack_int (char *buf, int *value);
 
-static char *unpack_string PARAMS ((char *src, char *dest, int length));
+static char *unpack_string (char *src, char *dest, int length);
 
-static char *pack_threadid PARAMS ((char *pkt, threadref * id));
+static char *pack_threadid (char *pkt, threadref * id);
 
-static char *unpack_threadid PARAMS ((char *inbuf, threadref * id));
+static char *unpack_threadid (char *inbuf, threadref * id);
 
-void int_to_threadref PARAMS ((threadref * id, int value));
+void int_to_threadref (threadref * id, int value);
 
-static int threadref_to_int PARAMS ((threadref * ref));
+static int threadref_to_int (threadref * ref);
 
-static void copy_threadref PARAMS ((threadref * dest, threadref * src));
+static void copy_threadref (threadref * dest, threadref * src);
 
-static int threadmatch PARAMS ((threadref * dest, threadref * src));
+static int threadmatch (threadref * dest, threadref * src);
 
-static char *pack_threadinfo_request PARAMS ((char *pkt, int mode,
-					      threadref * id));
+static char *pack_threadinfo_request (char *pkt, int mode, threadref * id);
 
-static int remote_unpack_thread_info_response PARAMS ((char *pkt,
-						    threadref * expectedref,
-					struct gdb_ext_thread_info * info));
+static int remote_unpack_thread_info_response (char *pkt,
+					       threadref * expectedref,
+					       struct gdb_ext_thread_info
+					       *info);
 
 
-static int remote_get_threadinfo PARAMS ((threadref * threadid,
-					  int fieldset,		/*TAG mask */
-					struct gdb_ext_thread_info * info));
+static int remote_get_threadinfo (threadref * threadid, int fieldset,	/*TAG mask */
+				  struct gdb_ext_thread_info *info);
 
-static int adapt_remote_get_threadinfo PARAMS ((gdb_threadref * ref,
-						int selection,
-					struct gdb_ext_thread_info * info));
+static int adapt_remote_get_threadinfo (gdb_threadref * ref,
+					int selection,
+					struct gdb_ext_thread_info *info);
 
-static char *pack_threadlist_request PARAMS ((char *pkt, int startflag,
-					      int threadcount,
-					      threadref * nextthread));
+static char *pack_threadlist_request (char *pkt, int startflag,
+				      int threadcount,
+				      threadref * nextthread);
 
-static int parse_threadlist_response PARAMS ((char *pkt,
-					      int result_limit,
-					      threadref * original_echo,
-					      threadref * resultlist,
-					      int *doneflag));
+static int parse_threadlist_response (char *pkt,
+				      int result_limit,
+				      threadref * original_echo,
+				      threadref * resultlist, int *doneflag);
 
-static int remote_get_threadlist PARAMS ((int startflag,
-					  threadref * nextthread,
-					  int result_limit,
-					  int *done,
-					  int *result_count,
-					  threadref * threadlist));
+static int remote_get_threadlist (int startflag,
+				  threadref * nextthread,
+				  int result_limit,
+				  int *done,
+				  int *result_count, threadref * threadlist);
 
 typedef int (*rmt_thread_action) (threadref * ref, void *context);
 
-static int remote_threadlist_iterator PARAMS ((rmt_thread_action stepfunction,
-					     void *context, int looplimit));
+static int remote_threadlist_iterator (rmt_thread_action stepfunction,
+				       void *context, int looplimit);
 
-static int remote_newthread_step PARAMS ((threadref * ref, void *context));
+static int remote_newthread_step (threadref * ref, void *context);
 
 /* encode 64 bits in 16 chars of hex */
 
@@ -1069,7 +1064,7 @@ unpack_int (buf, value)
 }
 
 #if 0				/* currently unused, uncomment when needed */
-static char *pack_string PARAMS ((char *pkt, char *string));
+static char *pack_string (char *pkt, char *string);
 
 static char *
 pack_string (pkt, string)
@@ -4816,23 +4811,23 @@ packet_command (args, from_tty)
 #if 0
 /* --------- UNIT_TEST for THREAD oriented PACKETS ------------------------- */
 
-static void display_thread_info PARAMS ((struct gdb_ext_thread_info * info));
+static void display_thread_info (struct gdb_ext_thread_info *info);
 
-static void threadset_test_cmd PARAMS ((char *cmd, int tty));
+static void threadset_test_cmd (char *cmd, int tty);
 
-static void threadalive_test PARAMS ((char *cmd, int tty));
+static void threadalive_test (char *cmd, int tty);
 
-static void threadlist_test_cmd PARAMS ((char *cmd, int tty));
+static void threadlist_test_cmd (char *cmd, int tty);
 
-int get_and_display_threadinfo PARAMS ((threadref * ref));
+int get_and_display_threadinfo (threadref * ref);
 
-static void threadinfo_test_cmd PARAMS ((char *cmd, int tty));
+static void threadinfo_test_cmd (char *cmd, int tty);
 
-static int thread_display_step PARAMS ((threadref * ref, void *context));
+static int thread_display_step (threadref * ref, void *context);
 
-static void threadlist_update_test_cmd PARAMS ((char *cmd, int tty));
+static void threadlist_update_test_cmd (char *cmd, int tty);
 
-static void init_remote_threadtests PARAMS ((void));
+static void init_remote_threadtests (void);
 
 #define SAMPLE_THREAD  0x05060708	/* Truncated 64 bit threadid */
 
@@ -4861,7 +4856,7 @@ threadalive_test (cmd, tty)
     printf_filtered ("FAIL: Thread alive test\n");
 }
 
-void output_threadid PARAMS ((char *title, threadref * ref));
+void output_threadid (char *title, threadref * ref);
 
 void
 output_threadid (title, ref)

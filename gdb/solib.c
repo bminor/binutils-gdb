@@ -184,61 +184,49 @@ static CORE_ADDR breakpoint_addr;	/* Address where end bkpt is set */
 
 static int solib_cleanup_queued = 0;	/* make_run_cleanup called */
 
-extern int
-fdmatch PARAMS ((int, int));	/* In libiberty */
+extern int fdmatch (int, int);	/* In libiberty */
 
 /* Local function prototypes */
 
-static void
-do_clear_solib PARAMS ((PTR));
+static void do_clear_solib (PTR);
 
-static int
-match_main PARAMS ((char *));
+static int match_main (char *);
 
-static void
-special_symbol_handling PARAMS ((void));
+static void special_symbol_handling (void);
 
-static void
-sharedlibrary_command PARAMS ((char *, int));
+static void sharedlibrary_command (char *, int);
 
-static int
-enable_break PARAMS ((void));
+static int enable_break (void);
 
-static void
-info_sharedlibrary_command PARAMS ((char *, int));
+static void info_sharedlibrary_command (char *, int);
 
-static int symbol_add_stub PARAMS ((PTR));
+static int symbol_add_stub (PTR);
 
-static CORE_ADDR
-  first_link_map_member PARAMS ((void));
+static CORE_ADDR first_link_map_member (void);
 
-static CORE_ADDR
-  locate_base PARAMS ((void));
+static CORE_ADDR locate_base (void);
 
-static int solib_map_sections PARAMS ((PTR));
+static int solib_map_sections (PTR);
 
 #ifdef SVR4_SHARED_LIBS
 
-static CORE_ADDR
-  elf_locate_base PARAMS ((void));
+static CORE_ADDR elf_locate_base (void);
 
 #else
 
 static struct so_list *current_sos (void);
 static void free_so (struct so_list *node);
 
-static int
-disable_break PARAMS ((void));
+static int disable_break (void);
 
-static void
-allocate_rt_common_objfile PARAMS ((void));
+static void allocate_rt_common_objfile (void);
 
 static void
 solib_add_common_symbols (CORE_ADDR);
 
 #endif
 
-void _initialize_solib PARAMS ((void));
+void _initialize_solib (void);
 
 /* If non-zero, this is a prefix that will be added to the front of the name
    shared libraries with an absolute filename for loading.  */
@@ -488,8 +476,7 @@ solib_add_common_symbols (rtc_symp)
 
 #ifdef SVR4_SHARED_LIBS
 
-static CORE_ADDR
-  bfd_lookup_symbol PARAMS ((bfd *, char *));
+static CORE_ADDR bfd_lookup_symbol (bfd *, char *);
 
 /*
 
@@ -574,8 +561,7 @@ static char *debug_base_symbols[] =
   NULL
 };
 
-static int
-look_for_base PARAMS ((int, CORE_ADDR));
+static int look_for_base (int, CORE_ADDR);
 
 /*
 

@@ -269,64 +269,59 @@ extern int tui_version;
 #define cmdWin            winList[CMD_WIN]
 
 /* Data Manipulation Functions */
-extern void initializeStaticData PARAMS ((void));
-extern TuiGenWinInfoPtr allocGenericWinInfo PARAMS ((void));
-extern TuiWinInfoPtr allocWinInfo PARAMS ((TuiWinType));
-extern void initGenericPart PARAMS ((TuiGenWinInfoPtr));
-extern void initWinInfo PARAMS ((TuiWinInfoPtr));
-extern TuiWinContent allocContent PARAMS ((int, TuiWinType));
-extern int addContentElements
-  PARAMS ((TuiGenWinInfoPtr, int));
-extern void initContentElement
-  PARAMS ((TuiWinElementPtr, TuiWinType));
-extern void freeWindow PARAMS ((TuiWinInfoPtr));
-extern void freeAllWindows PARAMS ((void));
-extern void freeWinContent PARAMS ((TuiGenWinInfoPtr));
-extern void freeDataContent PARAMS ((TuiWinContent, int));
-extern void freeAllSourceWinsContent PARAMS ((void));
-extern void tuiDelWindow PARAMS ((TuiWinInfoPtr));
-extern void tuiDelDataWindows PARAMS ((TuiWinContent, int));
-extern TuiWinInfoPtr winByName PARAMS ((char *));
-extern TuiWinInfoPtr partialWinByName PARAMS ((char *));
-extern char *winName PARAMS ((TuiGenWinInfoPtr));
-extern char *displayableWinContentOf
-  PARAMS ((TuiGenWinInfoPtr, TuiWinElementPtr));
-extern char *displayableWinContentAt
-  PARAMS ((TuiGenWinInfoPtr, int));
-extern int winElementHeight
-  PARAMS ((TuiGenWinInfoPtr, TuiWinElementPtr));
-extern TuiLayoutType currentLayout PARAMS ((void));
-extern void setCurrentLayoutTo PARAMS ((TuiLayoutType));
-extern int termHeight PARAMS ((void));
-extern void setTermHeight PARAMS ((int));
-extern int termWidth PARAMS ((void));
-extern void setTermWidth PARAMS ((int));
-extern int historyLimit PARAMS ((void));
-extern void setHistoryLimit PARAMS ((int));
-extern void setGenWinOrigin PARAMS ((TuiGenWinInfoPtr, int, int));
-extern TuiGenWinInfoPtr locatorWinInfoPtr PARAMS ((void));
-extern TuiGenWinInfoPtr sourceExecInfoWinPtr PARAMS ((void));
-extern TuiGenWinInfoPtr disassemExecInfoWinPtr PARAMS ((void));
-extern char *nullStr PARAMS ((void));
-extern char *blankStr PARAMS ((void));
-extern char *locationStr PARAMS ((void));
-extern char *breakStr PARAMS ((void));
-extern char *breakLocationStr PARAMS ((void));
-extern TuiListPtr sourceWindows PARAMS ((void));
-extern void clearSourceWindows PARAMS ((void));
-extern void clearSourceWindowsDetail PARAMS ((void));
-extern void clearWinDetail PARAMS ((TuiWinInfoPtr winInfo));
-extern void tuiAddToSourceWindows PARAMS ((TuiWinInfoPtr));
-extern int tuiDefaultTabLen PARAMS ((void));
-extern void tuiSetDefaultTabLen PARAMS ((int));
-extern TuiWinInfoPtr tuiWinWithFocus PARAMS ((void));
-extern void tuiSetWinWithFocus PARAMS ((TuiWinInfoPtr));
-extern TuiLayoutDefPtr tuiLayoutDef PARAMS ((void));
-extern int tuiWinResized PARAMS ((void));
-extern void tuiSetWinResizedTo PARAMS ((int));
+extern void initializeStaticData (void);
+extern TuiGenWinInfoPtr allocGenericWinInfo (void);
+extern TuiWinInfoPtr allocWinInfo (TuiWinType);
+extern void initGenericPart (TuiGenWinInfoPtr);
+extern void initWinInfo (TuiWinInfoPtr);
+extern TuiWinContent allocContent (int, TuiWinType);
+extern int addContentElements (TuiGenWinInfoPtr, int);
+extern void initContentElement (TuiWinElementPtr, TuiWinType);
+extern void freeWindow (TuiWinInfoPtr);
+extern void freeAllWindows (void);
+extern void freeWinContent (TuiGenWinInfoPtr);
+extern void freeDataContent (TuiWinContent, int);
+extern void freeAllSourceWinsContent (void);
+extern void tuiDelWindow (TuiWinInfoPtr);
+extern void tuiDelDataWindows (TuiWinContent, int);
+extern TuiWinInfoPtr winByName (char *);
+extern TuiWinInfoPtr partialWinByName (char *);
+extern char *winName (TuiGenWinInfoPtr);
+extern char *displayableWinContentOf (TuiGenWinInfoPtr, TuiWinElementPtr);
+extern char *displayableWinContentAt (TuiGenWinInfoPtr, int);
+extern int winElementHeight (TuiGenWinInfoPtr, TuiWinElementPtr);
+extern TuiLayoutType currentLayout (void);
+extern void setCurrentLayoutTo (TuiLayoutType);
+extern int termHeight (void);
+extern void setTermHeight (int);
+extern int termWidth (void);
+extern void setTermWidth (int);
+extern int historyLimit (void);
+extern void setHistoryLimit (int);
+extern void setGenWinOrigin (TuiGenWinInfoPtr, int, int);
+extern TuiGenWinInfoPtr locatorWinInfoPtr (void);
+extern TuiGenWinInfoPtr sourceExecInfoWinPtr (void);
+extern TuiGenWinInfoPtr disassemExecInfoWinPtr (void);
+extern char *nullStr (void);
+extern char *blankStr (void);
+extern char *locationStr (void);
+extern char *breakStr (void);
+extern char *breakLocationStr (void);
+extern TuiListPtr sourceWindows (void);
+extern void clearSourceWindows (void);
+extern void clearSourceWindowsDetail (void);
+extern void clearWinDetail (TuiWinInfoPtr winInfo);
+extern void tuiAddToSourceWindows (TuiWinInfoPtr);
+extern int tuiDefaultTabLen (void);
+extern void tuiSetDefaultTabLen (int);
+extern TuiWinInfoPtr tuiWinWithFocus (void);
+extern void tuiSetWinWithFocus (TuiWinInfoPtr);
+extern TuiLayoutDefPtr tuiLayoutDef (void);
+extern int tuiWinResized (void);
+extern void tuiSetWinResizedTo (int);
 
-extern TuiWinInfoPtr tuiNextWin PARAMS ((TuiWinInfoPtr));
-extern TuiWinInfoPtr tuiPrevWin PARAMS ((TuiWinInfoPtr));
+extern TuiWinInfoPtr tuiNextWin (TuiWinInfoPtr);
+extern TuiWinInfoPtr tuiPrevWin (TuiWinInfoPtr);
 
 
 #endif /* TUI_DATA_H */

@@ -23,13 +23,13 @@
 #include "srec.h"
 #include <time.h>
 
-extern void report_transfer_performance PARAMS ((unsigned long, time_t, time_t));
+extern void report_transfer_performance (unsigned long, time_t, time_t);
 
 extern int remote_debug;
 
-static int make_srec PARAMS ((char *srec, CORE_ADDR targ_addr, bfd * abfd,
-			      asection * sect, int sectoff, int *maxrecsize,
-			      int flags));
+static int make_srec (char *srec, CORE_ADDR targ_addr, bfd * abfd,
+		      asection * sect, int sectoff, int *maxrecsize,
+		      int flags);
 
 /* Download an executable by converting it to S records.  DESC is a
    serial_t to send the data to.  FILE is the name of the file to be

@@ -61,37 +61,35 @@
 #define ACK  0x06
 #define CTRLZ 0x1a
 
-extern void notice_quit PARAMS ((void));
+extern void notice_quit (void);
 
-extern void report_transfer_performance PARAMS ((unsigned long,
-						 time_t, time_t));
+extern void report_transfer_performance (unsigned long, time_t, time_t);
 
 extern char *sh_processor_type;
 
 /* Local function declarations.  */
 
-static void e7000_close PARAMS ((int));
+static void e7000_close (int);
 
-static void e7000_fetch_register PARAMS ((int));
+static void e7000_fetch_register (int);
 
-static void e7000_store_register PARAMS ((int));
+static void e7000_store_register (int);
 
-static void e7000_command PARAMS ((char *, int));
+static void e7000_command (char *, int);
 
-static void e7000_login_command PARAMS ((char *, int));
+static void e7000_login_command (char *, int);
 
-static void e7000_ftp_command PARAMS ((char *, int));
+static void e7000_ftp_command (char *, int);
 
-static void e7000_drain_command PARAMS ((char *, int));
+static void e7000_drain_command (char *, int);
 
-static void expect PARAMS ((char *));
+static void expect (char *);
 
-static void expect_full_prompt PARAMS ((void));
+static void expect_full_prompt (void);
 
-static void expect_prompt PARAMS ((void));
+static void expect_prompt (void);
 
-static int e7000_parse_device PARAMS ((char *args, char *dev_name,
-				       int baudrate));
+static int e7000_parse_device (char *args, char *dev_name, int baudrate);
 /* Variables. */
 
 static serial_t e7000_desc;

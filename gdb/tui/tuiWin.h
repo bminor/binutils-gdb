@@ -13,17 +13,17 @@
 /*****************************************
 ** PUBLIC FUNCTION EXTERNAL DECLS        **
 ******************************************/
-extern void tuiScrollForward PARAMS ((TuiWinInfoPtr, int));
-extern void tuiScrollBackward PARAMS ((TuiWinInfoPtr, int));
-extern void tuiScrollLeft PARAMS ((TuiWinInfoPtr, int));
-extern void tuiScrollRight PARAMS ((TuiWinInfoPtr, int));
-extern void tui_vScroll PARAMS ((va_list));
-extern void tuiSetWinFocusTo PARAMS ((TuiWinInfoPtr));
-extern void tuiClearWinFocusFrom PARAMS ((TuiWinInfoPtr));
-extern void tuiClearWinFocus PARAMS ((void));
-extern void tuiResizeAll PARAMS ((void));
-extern void tuiRefreshAll PARAMS ((void));
-extern void tuiSigwinchHandler PARAMS ((int));
+extern void tuiScrollForward (TuiWinInfoPtr, int);
+extern void tuiScrollBackward (TuiWinInfoPtr, int);
+extern void tuiScrollLeft (TuiWinInfoPtr, int);
+extern void tuiScrollRight (TuiWinInfoPtr, int);
+extern void tui_vScroll (va_list);
+extern void tuiSetWinFocusTo (TuiWinInfoPtr);
+extern void tuiClearWinFocusFrom (TuiWinInfoPtr);
+extern void tuiClearWinFocus (void);
+extern void tuiResizeAll (void);
+extern void tuiRefreshAll (void);
+extern void tuiSigwinchHandler (int);
 
 #endif
 /*_TUI_WIN_H*/

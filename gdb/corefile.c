@@ -40,8 +40,8 @@
 
 /* Local function declarations.  */
 
-extern void _initialize_core PARAMS ((void));
-static void call_extra_exec_file_hooks PARAMS ((char *filename));
+extern void _initialize_core (void);
+static void call_extra_exec_file_hooks (char *filename);
 
 /* You can have any number of hooks for `exec_file_command' command to call.
    If there's only one hook, it is set in exec_file_display hook.
@@ -416,8 +416,7 @@ char *gnutarget;
 /* Same thing, except it is "auto" not NULL for the default case.  */
 static char *gnutarget_string;
 
-static void set_gnutarget_command
-  PARAMS ((char *, int, struct cmd_list_element *));
+static void set_gnutarget_command (char *, int, struct cmd_list_element *);
 
 static void
 set_gnutarget_command (ignore, from_tty, c)

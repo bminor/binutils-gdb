@@ -44,14 +44,14 @@
    It will *NOT* be necessary for GDB to step over the watchpoint. */
 #define HAVE_CONTINUABLE_WATCHPOINT
 
-extern int procfs_stopped_by_watchpoint PARAMS ((int));
+extern int procfs_stopped_by_watchpoint (int);
 #define STOPPED_BY_WATCHPOINT(W) \
   procfs_stopped_by_watchpoint(inferior_pid)
 
 /* Use these macros for watchpoint insertion/deletion.  */
 /* type can be 0: write watch, 1: read watch, 2: access watch (read/write) */
 
-extern int procfs_set_watchpoint PARAMS ((int, CORE_ADDR, int, int, int));
+extern int procfs_set_watchpoint (int, CORE_ADDR, int, int, int);
 #define target_insert_watchpoint(ADDR, LEN, TYPE) \
         procfs_set_watchpoint (inferior_pid, ADDR, LEN, TYPE, 1)
 #define target_remove_watchpoint(ADDR, LEN, TYPE) \

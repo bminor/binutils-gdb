@@ -37,9 +37,9 @@
 #define TRUNCATION_TOWARDS_ZERO ((-5 / 2) == -2)
 #endif
 
-static value_ptr value_subscripted_rvalue PARAMS ((value_ptr, value_ptr, int));
+static value_ptr value_subscripted_rvalue (value_ptr, value_ptr, int);
 
-void _initialize_valarith PARAMS ((void));
+void _initialize_valarith (void);
 
 
 value_ptr

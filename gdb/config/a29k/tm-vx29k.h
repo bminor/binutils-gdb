@@ -177,7 +177,7 @@
    This routine returns true on success */
 
 #define GET_LONGJMP_TARGET(ADDR) get_longjmp_target(ADDR)
-extern int get_longjmp_target PARAMS ((CORE_ADDR *));
+extern int get_longjmp_target (CORE_ADDR *);
 
 /* VxWorks adjusts the PC after a breakpoint has been hit.  */
 
@@ -207,7 +207,7 @@ extern int get_longjmp_target PARAMS ((CORE_ADDR *));
         val = value_cast (builtin_type_int, val);                       \
   } while (0)
 
-extern int vx29k_frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *));
+extern int vx29k_frame_chain_valid (CORE_ADDR, struct frame_info *);
 #define FRAME_CHAIN_VALID(chain, thisframe) vx29k_frame_chain_valid (chain, thisframe)
 
 extern CORE_ADDR frame_saved_call_site ();

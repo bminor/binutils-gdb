@@ -301,13 +301,13 @@ enum inferior_event_type
   };
 
 /* Return the string for a signal.  */
-extern char *target_signal_to_string PARAMS ((enum target_signal));
+extern char *target_signal_to_string (enum target_signal);
 
 /* Return the name (SIGHUP, etc.) for a signal.  */
-extern char *target_signal_to_name PARAMS ((enum target_signal));
+extern char *target_signal_to_name (enum target_signal);
 
 /* Given a name (SIGHUP, etc.), return its signal.  */
-enum target_signal target_signal_from_name PARAMS ((char *));
+enum target_signal target_signal_from_name (char *);
 
 
 /* If certain kinds of activity happen, target_wait should perform
@@ -537,8 +537,7 @@ extern struct target_stack_item *target_stack;
    typed by the user (e.g. a signal to send the process).  FROM_TTY
    says whether to be verbose or not.  */
 
-extern void
-target_detach PARAMS ((char *, int));
+extern void target_detach (char *, int);
 
 /* Detaches from a process on the target side, if not already dettached.
    (If already detached, takes no action.)
@@ -608,20 +607,16 @@ target_detach PARAMS ((char *, int));
 #define	target_prepare_to_store()	\
      (*current_target.to_prepare_to_store) ()
 
-extern int 
-target_read_string PARAMS ((CORE_ADDR, char **, int, int *));
+extern int target_read_string (CORE_ADDR, char **, int, int *);
+
+extern int target_read_memory (CORE_ADDR memaddr, char *myaddr, int len);
+
+extern int target_write_memory (CORE_ADDR, char *, int);
+
+extern int xfer_memory (CORE_ADDR, char *, int, int, struct target_ops *);
 
 extern int
-target_read_memory PARAMS ((CORE_ADDR memaddr, char *myaddr, int len));
-
-extern int
-target_write_memory PARAMS ((CORE_ADDR, char *, int));
-
-extern int
-xfer_memory PARAMS ((CORE_ADDR, char *, int, int, struct target_ops *));
-
-extern int
-child_xfer_memory PARAMS ((CORE_ADDR, char *, int, int, struct target_ops *));
+child_xfer_memory (CORE_ADDR, char *, int, int, struct target_ops *);
 
 /* Make a single attempt at transfering LEN bytes.  On a successful
    transfer, the number of bytes actually transfered is returned and
@@ -635,84 +630,59 @@ target_read_memory_partial (CORE_ADDR addr, char *buf, int len, int *err);
 extern int 
 target_write_memory_partial (CORE_ADDR addr, char *buf, int len, int *err);
 
-extern char *
-child_pid_to_exec_file PARAMS ((int));
+extern char *child_pid_to_exec_file (int);
 
-extern char *
-child_core_file_to_sym_file PARAMS ((char *));
+extern char *child_core_file_to_sym_file (char *);
 
 #if defined(CHILD_POST_ATTACH)
-extern void
-child_post_attach PARAMS ((int));
+extern void child_post_attach (int);
 #endif
 
-extern void
-child_post_wait PARAMS ((int, int));
+extern void child_post_wait (int, int);
 
-extern void
-child_post_startup_inferior PARAMS ((int));
+extern void child_post_startup_inferior (int);
 
-extern void
-child_acknowledge_created_inferior PARAMS ((int));
+extern void child_acknowledge_created_inferior (int);
 
-extern void
-child_clone_and_follow_inferior PARAMS ((int, int *));
+extern void child_clone_and_follow_inferior (int, int *);
 
-extern void
-child_post_follow_inferior_by_clone PARAMS ((void));
+extern void child_post_follow_inferior_by_clone (void);
 
-extern int
-child_insert_fork_catchpoint PARAMS ((int));
+extern int child_insert_fork_catchpoint (int);
 
-extern int
-child_remove_fork_catchpoint PARAMS ((int));
+extern int child_remove_fork_catchpoint (int);
 
-extern int
-child_insert_vfork_catchpoint PARAMS ((int));
+extern int child_insert_vfork_catchpoint (int);
 
-extern int
-child_remove_vfork_catchpoint PARAMS ((int));
+extern int child_remove_vfork_catchpoint (int);
 
-extern int
-child_has_forked PARAMS ((int, int *));
+extern int child_has_forked (int, int *);
 
-extern int
-child_has_vforked PARAMS ((int, int *));
+extern int child_has_vforked (int, int *);
 
-extern void
-child_acknowledge_created_inferior PARAMS ((int));
+extern void child_acknowledge_created_inferior (int);
 
-extern int
-child_can_follow_vfork_prior_to_exec PARAMS ((void));
+extern int child_can_follow_vfork_prior_to_exec (void);
 
-extern void
-child_post_follow_vfork PARAMS ((int, int, int, int));
+extern void child_post_follow_vfork (int, int, int, int);
 
-extern int
-child_insert_exec_catchpoint PARAMS ((int));
+extern int child_insert_exec_catchpoint (int);
 
-extern int
-child_remove_exec_catchpoint PARAMS ((int));
+extern int child_remove_exec_catchpoint (int);
 
-extern int
-child_has_execd PARAMS ((int, char **));
+extern int child_has_execd (int, char **);
 
-extern int
-child_reported_exec_events_per_exec_call PARAMS ((void));
+extern int child_reported_exec_events_per_exec_call (void);
 
-extern int
-child_has_syscall_event PARAMS ((int, enum target_waitkind *, int *));
+extern int child_has_syscall_event (int, enum target_waitkind *, int *);
 
-extern int
-child_has_exited PARAMS ((int, int, int *));
+extern int child_has_exited (int, int, int *);
 
-extern int
-child_thread_alive PARAMS ((int));
+extern int child_thread_alive (int);
 
 /* From exec.c */
 
-extern void
-print_section_info PARAMS ((struct target_ops *, bfd *));
+extern void print_section_info (struct target_ops *, bfd *);
 
 /* Print a line about the current target.  */
 
@@ -1086,7 +1056,7 @@ extern void target_load (char *arg, int from_tty);
 
 extern int target_async_mask (int mask);     
 
-extern void target_link PARAMS ((char *, CORE_ADDR *));
+extern void target_link (char *, CORE_ADDR *);
 
 /* Converts a process id to a string.  Usually, the string just contains
    `process xyz', but on some systems it may contain
@@ -1098,7 +1068,7 @@ extern void target_link PARAMS ((char *, CORE_ADDR *));
 #ifndef target_tid_to_str
 #define target_tid_to_str(PID) \
      target_pid_to_str (PID)
-extern char *normal_pid_to_str PARAMS ((int pid));
+extern char *normal_pid_to_str (int pid);
 #endif
 
 /* Return a short string describing extra information about PID,
@@ -1286,20 +1256,15 @@ extern void (*target_new_objfile_hook) PARAMS ((struct objfile *));
 
    pop_target:   Remove the top thing on the stack of current targets.  */
 
-extern void
-add_target PARAMS ((struct target_ops *));
+extern void add_target (struct target_ops *);
 
-extern int
-push_target PARAMS ((struct target_ops *));
+extern int push_target (struct target_ops *);
 
-extern int
-unpush_target PARAMS ((struct target_ops *));
+extern int unpush_target (struct target_ops *);
 
-extern void
-target_preopen PARAMS ((int));
+extern void target_preopen (int);
 
-extern void
-pop_target PARAMS ((void));
+extern void pop_target (void);
 
 /* Struct section_table maps address ranges to file sections.  It is
    mostly used with BFD files, but can be used without (e.g. for handling
@@ -1319,56 +1284,45 @@ struct section_table
    Returns 0 if OK, 1 on error.  */
 
 extern int
-build_section_table PARAMS ((bfd *, struct section_table **,
-			     struct section_table **));
+build_section_table (bfd *, struct section_table **, struct section_table **);
 
 /* From mem-break.c */
 
-extern int memory_remove_breakpoint PARAMS ((CORE_ADDR, char *));
+extern int memory_remove_breakpoint (CORE_ADDR, char *);
 
-extern int memory_insert_breakpoint PARAMS ((CORE_ADDR, char *));
+extern int memory_insert_breakpoint (CORE_ADDR, char *);
 
-extern int default_memory_remove_breakpoint PARAMS ((CORE_ADDR, char *));
+extern int default_memory_remove_breakpoint (CORE_ADDR, char *);
 
-extern int default_memory_insert_breakpoint PARAMS ((CORE_ADDR, char *));
+extern int default_memory_insert_breakpoint (CORE_ADDR, char *);
 
 extern breakpoint_from_pc_fn memory_breakpoint_from_pc;
 
 
 /* From target.c */
 
-extern void
-initialize_targets PARAMS ((void));
+extern void initialize_targets (void);
 
-extern void
-noprocess PARAMS ((void));
+extern void noprocess (void);
 
-extern void
-find_default_attach PARAMS ((char *, int));
+extern void find_default_attach (char *, int);
 
-extern void
-find_default_require_attach PARAMS ((char *, int));
+extern void find_default_require_attach (char *, int);
 
-extern void
-find_default_require_detach PARAMS ((int, char *, int));
+extern void find_default_require_detach (int, char *, int);
 
-extern void
-find_default_create_inferior PARAMS ((char *, char *, char **));
+extern void find_default_create_inferior (char *, char *, char **);
 
-extern void
-find_default_clone_and_follow_inferior PARAMS ((int, int *));
+extern void find_default_clone_and_follow_inferior (int, int *);
 
-extern struct target_ops *
-find_run_target PARAMS ((void));
+extern struct target_ops *find_run_target (void);
 
-extern struct target_ops *
-find_core_target PARAMS ((void));
+extern struct target_ops *find_core_target (void);
 
-extern struct target_ops *
-find_target_beneath PARAMS ((struct target_ops *));
+extern struct target_ops *find_target_beneath (struct target_ops *);
 
 extern int
-target_resize_to_sections PARAMS ((struct target_ops *target, int num_added));
+target_resize_to_sections (struct target_ops *target, int num_added);
 
 extern void remove_target_sections (bfd *abfd);
 
@@ -1388,7 +1342,7 @@ extern int remote_timeout;
 /* Functions for helping to write a native target.  */
 
 /* This is for native targets which use a unix/POSIX-style waitstatus.  */
-extern void store_waitstatus PARAMS ((struct target_waitstatus *, int));
+extern void store_waitstatus (struct target_waitstatus *, int);
 
 /* Predicate to target_signal_to_host(). Return non-zero if the enum
    targ_signal SIGNO has an equivalent ``host'' representation.  */
@@ -1409,14 +1363,14 @@ extern int target_signal_to_host_p (enum target_signal signo);
    gdb_signal'' would probably be better as it is refering to GDB's
    internal representation of a target operating system's signal.  */
 
-extern enum target_signal target_signal_from_host PARAMS ((int));
-extern int target_signal_to_host PARAMS ((enum target_signal));
+extern enum target_signal target_signal_from_host (int);
+extern int target_signal_to_host (enum target_signal);
 
 /* Convert from a number used in a GDB command to an enum target_signal.  */
-extern enum target_signal target_signal_from_command PARAMS ((int));
+extern enum target_signal target_signal_from_command (int);
 
 /* Any target can call this to switch to remote protocol (in remote.c). */
-extern void push_remote_target PARAMS ((char *name, int from_tty));
+extern void push_remote_target (char *name, int from_tty);
 
 /* Imported from machine dependent code */
 
@@ -1427,7 +1381,7 @@ extern void push_remote_target PARAMS ((char *name, int from_tty));
 #endif /* SOFTWARE_SINGLE_STEP_P */
 
 /* Blank target vector entries are initialized to target_ignore. */
-void target_ignore PARAMS ((void));
+void target_ignore (void);
 
 /* Macro for getting target's idea of a frame pointer.
    FIXME: GDB's whole scheme for dealing with "frames" and

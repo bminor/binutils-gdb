@@ -165,7 +165,7 @@ pc_load_segment_name (addr)
   return "(unknown load module)";
 }
 
-static void solib_info PARAMS ((char *, int));
+static void solib_info (char *, int);
 
 static void
 solib_info (args, from_tty)

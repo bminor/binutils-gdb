@@ -75,7 +75,7 @@
    This routine returns true on success */
 
 #define GET_LONGJMP_TARGET(ADDR) get_longjmp_target(ADDR)
-extern int get_longjmp_target PARAMS ((CORE_ADDR *));
+extern int get_longjmp_target (CORE_ADDR *);
 
 /* If sun3 pcc says that a parameter is a short, it's a short.  */
 #define BELIEVE_PCC_PROMOTION_TYPE

@@ -43,7 +43,7 @@
 #include "complaints.h"
 #include "target.h"
 
-extern void _initialize_coffread PARAMS ((void));
+extern void _initialize_coffread (void);
 
 struct coff_symfile_info
   {
@@ -176,80 +176,78 @@ struct coff_symbol
     unsigned int c_type;
   };
 
-extern void stabsread_clear_cache PARAMS ((void));
+extern void stabsread_clear_cache (void);
 
-static struct type *coff_read_struct_type PARAMS ((int, int, int));
+static struct type *coff_read_struct_type (int, int, int);
 
-static struct type *decode_base_type PARAMS ((struct coff_symbol *,
-					      unsigned int,
-					      union internal_auxent *));
+static struct type *decode_base_type (struct coff_symbol *,
+				      unsigned int, union internal_auxent *);
 
-static struct type *decode_type PARAMS ((struct coff_symbol *, unsigned int,
-					 union internal_auxent *));
+static struct type *decode_type (struct coff_symbol *, unsigned int,
+				 union internal_auxent *);
 
-static struct type *decode_function_type PARAMS ((struct coff_symbol *,
-						  unsigned int,
-						  union internal_auxent *));
+static struct type *decode_function_type (struct coff_symbol *,
+					  unsigned int,
+					  union internal_auxent *);
 
-static struct type *coff_read_enum_type PARAMS ((int, int, int));
+static struct type *coff_read_enum_type (int, int, int);
 
-static struct symbol *process_coff_symbol PARAMS ((struct coff_symbol *,
-						   union internal_auxent *,
-						   struct objfile *));
+static struct symbol *process_coff_symbol (struct coff_symbol *,
+					   union internal_auxent *,
+					   struct objfile *);
 
-static void patch_opaque_types PARAMS ((struct symtab *));
+static void patch_opaque_types (struct symtab *);
 
-static void patch_type PARAMS ((struct type *, struct type *));
+static void patch_type (struct type *, struct type *);
 
-static void enter_linenos PARAMS ((long, int, int, struct objfile *));
+static void enter_linenos (long, int, int, struct objfile *);
 
-static void free_linetab PARAMS ((void));
+static void free_linetab (void);
 
 static void free_linetab_cleanup (void *ignore);
 
-static int init_lineno PARAMS ((bfd *, long, int));
+static int init_lineno (bfd *, long, int);
 
-static char *getsymname PARAMS ((struct internal_syment *));
+static char *getsymname (struct internal_syment *);
 
-static char *coff_getfilename PARAMS ((union internal_auxent *));
+static char *coff_getfilename (union internal_auxent *);
 
-static void free_stringtab PARAMS ((void));
+static void free_stringtab (void);
 
 static void free_stringtab_cleanup (void *ignore);
 
-static int init_stringtab PARAMS ((bfd *, long));
+static int init_stringtab (bfd *, long);
 
-static void read_one_sym PARAMS ((struct coff_symbol *,
-				  struct internal_syment *,
-				  union internal_auxent *));
+static void read_one_sym (struct coff_symbol *,
+			  struct internal_syment *, union internal_auxent *);
 
-static void coff_symtab_read PARAMS ((long, unsigned int, struct objfile *));
+static void coff_symtab_read (long, unsigned int, struct objfile *);
 
-static void find_linenos PARAMS ((bfd *, sec_ptr, PTR));
+static void find_linenos (bfd *, sec_ptr, PTR);
 
-static void coff_symfile_init PARAMS ((struct objfile *));
+static void coff_symfile_init (struct objfile *);
 
-static void coff_new_init PARAMS ((struct objfile *));
+static void coff_new_init (struct objfile *);
 
-static void coff_symfile_read PARAMS ((struct objfile *, int));
+static void coff_symfile_read (struct objfile *, int);
 
-static void coff_symfile_finish PARAMS ((struct objfile *));
+static void coff_symfile_finish (struct objfile *);
 
-static void record_minimal_symbol PARAMS ((char *, CORE_ADDR,
-					   enum minimal_symbol_type,
-					   struct objfile *));
+static void record_minimal_symbol (char *, CORE_ADDR,
+				   enum minimal_symbol_type,
+				   struct objfile *);
 
-static void coff_end_symtab PARAMS ((struct objfile *));
+static void coff_end_symtab (struct objfile *);
 
-static void complete_symtab PARAMS ((char *, CORE_ADDR, unsigned int));
+static void complete_symtab (char *, CORE_ADDR, unsigned int);
 
-static void coff_start_symtab PARAMS ((char *));
+static void coff_start_symtab (char *);
 
-static struct type *coff_alloc_type PARAMS ((int));
+static struct type *coff_alloc_type (int);
 
-static struct type **coff_lookup_type PARAMS ((int));
+static struct type **coff_lookup_type (int);
 
-static void coff_locate_sections PARAMS ((bfd *, asection *, PTR));
+static void coff_locate_sections (bfd *, asection *, PTR);
 
 /* We are called once per section from coff_symfile_read.  We
    need to examine each section we are passed, check to see
@@ -315,7 +313,7 @@ coff_locate_sections (abfd, sectp, csip)
 }
 
 /* Return the section_offsets* that CS points to.  */
-static int cs_to_section PARAMS ((struct coff_symbol *, struct objfile *));
+static int cs_to_section (struct coff_symbol *, struct objfile *);
 
 struct find_targ_sec_arg
   {
@@ -323,7 +321,7 @@ struct find_targ_sec_arg
     asection **resultp;
   };
 
-static void find_targ_sec PARAMS ((bfd *, asection *, void *));
+static void find_targ_sec (bfd *, asection *, void *);
 
 static void
 find_targ_sec (abfd, sect, obj)
@@ -364,7 +362,7 @@ cs_to_section (cs, objfile)
 
 /* Return the address of the section of a COFF symbol.  */
 
-static CORE_ADDR cs_section_address PARAMS ((struct coff_symbol *, bfd *));
+static CORE_ADDR cs_section_address (struct coff_symbol *, bfd *);
 
 static CORE_ADDR
 cs_section_address (cs, abfd)

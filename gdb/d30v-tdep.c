@@ -36,13 +36,13 @@
 
 #include "language.h" /* For local_hex_string() */
 
-void d30v_frame_find_saved_regs PARAMS ((struct frame_info * fi,
-					 struct frame_saved_regs * fsr));
-void d30v_frame_find_saved_regs_offsets PARAMS ((struct frame_info * fi,
-					    struct frame_saved_regs * fsr));
-static void d30v_pop_dummy_frame PARAMS ((struct frame_info * fi));
-static void d30v_print_flags PARAMS ((void));
-static void print_flags_command PARAMS ((char *, int));
+void d30v_frame_find_saved_regs (struct frame_info *fi,
+				 struct frame_saved_regs *fsr);
+void d30v_frame_find_saved_regs_offsets (struct frame_info *fi,
+					 struct frame_saved_regs *fsr);
+static void d30v_pop_dummy_frame (struct frame_info *fi);
+static void d30v_print_flags (void);
+static void print_flags_command (char *, int);
 
 /* the following defines assume:
    fp is r61, lr is r62, sp is r63, and ?? is r22
@@ -719,7 +719,7 @@ d30v_init_frame_pc (fromleaf, prev)
 	      prev->next ? FRAME_SAVED_PC (prev->next) : read_pc ());
 }
 
-static void d30v_print_register PARAMS ((int regnum, int tabular));
+static void d30v_print_register (int regnum, int tabular);
 
 static void
 d30v_print_register (regnum, tabular)
@@ -1091,15 +1091,15 @@ d30v_extract_return_value (valtype, regbuf, valbuf)
 
 #define TRACE_BUFFER_BASE (0xf40000)
 
-static void trace_command PARAMS ((char *, int));
+static void trace_command (char *, int);
 
-static void untrace_command PARAMS ((char *, int));
+static void untrace_command (char *, int);
 
-static void trace_info PARAMS ((char *, int));
+static void trace_info (char *, int);
 
-static void tdisassemble_command PARAMS ((char *, int));
+static void tdisassemble_command (char *, int);
 
-static void display_trace PARAMS ((int, int));
+static void display_trace (int, int);
 
 /* True when instruction traces are being collected.  */
 

@@ -60,7 +60,7 @@
 /* Return number of args passed to a frame.
    Can return -1, meaning no way to tell.  */
 
-extern int news_frame_num_args PARAMS ((struct frame_info * fi));
+extern int news_frame_num_args (struct frame_info *fi);
 #define FRAME_NUM_ARGS(fi) (news_frame_num_args ((fi)))
 
 #include "m68k/tm-m68k.h"

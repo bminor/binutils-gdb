@@ -42,19 +42,15 @@
 
 #if defined(USE_MMALLOC) && defined(HAVE_MMAP)
 
-static int
-open_existing_mapped_file PARAMS ((char *, long, int));
+static int open_existing_mapped_file (char *, long, int);
 
-static int
-open_mapped_file PARAMS ((char *filename, long mtime, int flags));
+static int open_mapped_file (char *filename, long mtime, int flags);
 
-static PTR
-  map_to_file PARAMS ((int));
+static PTR map_to_file (int);
 
 #endif /* defined(USE_MMALLOC) && defined(HAVE_MMAP) */
 
-static void
-add_to_objfile_sections PARAMS ((bfd *, sec_ptr, PTR));
+static void add_to_objfile_sections (bfd *, sec_ptr, PTR);
 
 /* Externally visible variables that are owned by this module.
    See declarations in objfile.h for more info. */

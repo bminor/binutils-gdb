@@ -32,7 +32,7 @@ struct value;
 /* Load segment of a given pc value. */
 
 #define	PC_LOAD_SEGMENT(PC)	pc_load_segment_name(PC)
-extern char *pc_load_segment_name PARAMS ((CORE_ADDR));
+extern char *pc_load_segment_name (CORE_ADDR);
 
 /* AIX cc seems to get this right.  */
 
@@ -100,17 +100,17 @@ struct rs6000_framedata
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 
-extern CORE_ADDR rs6000_skip_prologue PARAMS ((CORE_ADDR));
+extern CORE_ADDR rs6000_skip_prologue (CORE_ADDR);
 #define SKIP_PROLOGUE(pc) (rs6000_skip_prologue (pc))
 
-extern CORE_ADDR skip_prologue PARAMS ((CORE_ADDR, struct rs6000_framedata *));
+extern CORE_ADDR skip_prologue (CORE_ADDR, struct rs6000_framedata *);
 
 
 /* If PC is in some function-call trampoline code, return the PC
    where the function itself actually starts.  If not, return NULL.  */
 
 #define	SKIP_TRAMPOLINE_CODE(pc)	skip_trampoline_code (pc)
-extern CORE_ADDR skip_trampoline_code PARAMS ((CORE_ADDR));
+extern CORE_ADDR skip_trampoline_code (CORE_ADDR);
 
 /* Number of trap signals we need to skip over, once the inferior process
    starts running. */
@@ -136,7 +136,7 @@ extern CORE_ADDR skip_trampoline_code PARAMS ((CORE_ADDR));
    once, when we are closing the current symbol table in end_symtab(). */
 
 #define	PROCESS_LINENUMBER_HOOK()	aix_process_linenos ()
-extern void aix_process_linenos PARAMS ((void));
+extern void aix_process_linenos (void);
 
 /* Immediately after a function call, return the saved pc.
    Can't go through the frames for this because on some machines
@@ -160,7 +160,8 @@ extern void aix_process_linenos PARAMS ((void));
 
 #define	PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
   (rs6000_push_arguments((nargs), (args), (sp), (struct_return), (struct_addr)))
-extern CORE_ADDR rs6000_push_arguments PARAMS ((int, struct value **, CORE_ADDR, int, CORE_ADDR));
+extern CORE_ADDR rs6000_push_arguments (int, struct value **, CORE_ADDR, int,
+					CORE_ADDR);
 
 /* BREAKPOINT_FROM_PC uses the program counter value to determine the
    breakpoint that should be used */
@@ -334,7 +335,7 @@ extern CORE_ADDR rs6000_struct_return_address;
 
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
   extract_return_value(TYPE,REGBUF,VALBUF)
-extern void extract_return_value PARAMS ((struct type *, char[], char *));
+extern void extract_return_value (struct type *, char[], char *);
 
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format.  */
@@ -372,7 +373,7 @@ extern void extract_return_value PARAMS ((struct type *, char[], char *));
    is the address of a 4-byte word containing the calling frame's address.  */
 
 #define FRAME_CHAIN(thisframe) rs6000_frame_chain (thisframe)
-CORE_ADDR rs6000_frame_chain PARAMS ((struct frame_info *));
+CORE_ADDR rs6000_frame_chain (struct frame_info *);
 
 /* Define other aspects of the stack frame.  */
 
@@ -410,7 +411,7 @@ extern void rs6000_init_extra_frame_info (int fromleaf, struct frame_info *);
 
 extern unsigned long rs6000_frame_saved_pc (struct frame_info *);
 
-extern CORE_ADDR rs6000_frame_args_address PARAMS ((struct frame_info *));
+extern CORE_ADDR rs6000_frame_args_address (struct frame_info *);
 #define FRAME_ARGS_ADDRESS(FI) rs6000_frame_args_address (FI)
 
 #define FRAME_LOCALS_ADDRESS(FI)	FRAME_ARGS_ADDRESS(FI)
@@ -437,7 +438,7 @@ extern CORE_ADDR rs6000_frame_args_address PARAMS ((struct frame_info *));
    not sure if it will be needed. The following macro takes care of gpr's
    and fpr's only. */
 
-extern void rs6000_frame_init_saved_regs PARAMS ((struct frame_info *));
+extern void rs6000_frame_init_saved_regs (struct frame_info *);
 #define FRAME_INIT_SAVED_REGS(FI) rs6000_frame_init_saved_regs (FI)
 
 /* Things needed for making the inferior call functions.  */
@@ -446,13 +447,13 @@ extern void rs6000_frame_init_saved_regs PARAMS ((struct frame_info *));
 /* Change these names into rs6k_{push, pop}_frame(). FIXMEmgo. */
 
 #define PUSH_DUMMY_FRAME	push_dummy_frame ()
-extern void push_dummy_frame PARAMS ((void));
+extern void push_dummy_frame (void);
 
 /* Discard from the stack the innermost frame, 
    restoring all saved registers.  */
 
 #define POP_FRAME	pop_frame ()
-extern void pop_frame PARAMS ((void));
+extern void pop_frame (void);
 
 /* This sequence of words is the instructions:
 
@@ -505,9 +506,8 @@ extern void pop_frame PARAMS ((void));
 
 #define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p) \
   rs6000_fix_call_dummy (dummyname, pc, fun, nargs, args, type, gcc_p)
-extern void rs6000_fix_call_dummy PARAMS ((char *, CORE_ADDR, CORE_ADDR,
-					   int, struct value **,
-					   struct type *, int));
+extern void rs6000_fix_call_dummy (char *, CORE_ADDR, CORE_ADDR,
+				   int, struct value **, struct type *, int);
 
 /* Hook in rs6000-tdep.c for determining the TOC address when
    calling functions in the inferior.  */
@@ -520,7 +520,7 @@ CORE_ADDR (*find_toc_address_hook) PARAMS ((CORE_ADDR));
    TOC address when calling functions in the inferior.  */
 
 struct objfile;
-extern CORE_ADDR get_toc_offset PARAMS ((struct objfile *));
+extern CORE_ADDR get_toc_offset (struct objfile *);
 
 /* Usually a function pointer's representation is simply the address
    of the function. On the RS/6000 however, a function pointer is
@@ -538,7 +538,7 @@ extern CORE_ADDR get_toc_offset PARAMS ((struct objfile *));
 
 #define CONVERT_FROM_FUNC_PTR_ADDR(ADDR) \
   (is_magic_function_pointer (ADDR) ? read_memory_integer (ADDR, 4) : (ADDR))
-     extern int is_magic_function_pointer PARAMS ((CORE_ADDR));
+extern int is_magic_function_pointer (CORE_ADDR);
 
 /* Flag for machine-specific stuff in shared files.  FIXME */
 #define IBM6000_TARGET
@@ -546,7 +546,7 @@ extern CORE_ADDR get_toc_offset PARAMS ((struct objfile *));
 /* RS6000/AIX does not support PT_STEP.  Has to be simulated.  */
 
 #define SOFTWARE_SINGLE_STEP_P 1
-     extern void rs6000_software_single_step PARAMS ((unsigned int, int));
+extern void rs6000_software_single_step (unsigned int, int);
 #define SOFTWARE_SINGLE_STEP(sig,bp_p) rs6000_software_single_step (sig, bp_p)
 
 /* If the current gcc for for this target does not produce correct debugging

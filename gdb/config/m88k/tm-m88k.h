@@ -53,7 +53,7 @@ extern void init_extra_frame_info ();
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 
-extern CORE_ADDR m88k_skip_prologue PARAMS ((CORE_ADDR));
+extern CORE_ADDR m88k_skip_prologue (CORE_ADDR);
 #define SKIP_PROLOGUE(frompc) (m88k_skip_prologue (frompc))
 
 /* The m88k kernel aligns all instructions on 4-byte boundaries.  The
@@ -63,7 +63,7 @@ extern CORE_ADDR m88k_skip_prologue PARAMS ((CORE_ADDR));
    to realize that those two bits are not really a part of the address
    of an instruction.  Shrug.  */
 
-extern CORE_ADDR m88k_addr_bits_remove PARAMS ((CORE_ADDR));
+extern CORE_ADDR m88k_addr_bits_remove (CORE_ADDR);
 #define ADDR_BITS_REMOVE(addr) m88k_addr_bits_remove (addr)
 
 /* Immediately after a function call, return the saved pc.
@@ -508,8 +508,8 @@ extern CORE_ADDR frame_locals_address ();
 struct frame_saved_regs;
 struct frame_info;
 
-void frame_find_saved_regs PARAMS ((struct frame_info * fi,
-				    struct frame_saved_regs * fsr));
+void frame_find_saved_regs (struct frame_info *fi,
+			    struct frame_saved_regs *fsr);
 
 #define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs) \
         frame_find_saved_regs (frame_info, &frame_saved_regs)

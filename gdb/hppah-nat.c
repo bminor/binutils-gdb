@@ -33,7 +33,7 @@
 
 extern CORE_ADDR text_end;
 
-static void fetch_register PARAMS ((int));
+static void fetch_register (int);
 
 void
 fetch_inferior_registers (regno)
@@ -492,7 +492,7 @@ startup_semaphore_t;
 
 static startup_semaphore_t startup_semaphore;
 
-extern int parent_attach_all PARAMS ((int, PTRACE_ARG3_TYPE, int));
+extern int parent_attach_all (int, PTRACE_ARG3_TYPE, int);
 
 #ifdef PT_SETTRC
 /* This function causes the caller's process to be traced by its

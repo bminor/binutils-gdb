@@ -135,77 +135,69 @@ extern struct complaint lbrac_unmatched_complaint;
 extern struct complaint lbrac_mismatch_complaint;
 
 
-void hpread_symfile_init PARAMS ((struct objfile *));
+void hpread_symfile_init (struct objfile *);
 
-static struct type *
-  hpread_read_array_type PARAMS ((dnttpointer, union dnttentry *, struct objfile *));
+static struct type *hpread_read_array_type (dnttpointer, union dnttentry *,
+					    struct objfile *);
 
-static struct type *hpread_alloc_type
-  PARAMS ((dnttpointer, struct objfile *));
+static struct type *hpread_alloc_type (dnttpointer, struct objfile *);
 
-static struct type **hpread_lookup_type
-  PARAMS ((dnttpointer, struct objfile *));
+static struct type **hpread_lookup_type (dnttpointer, struct objfile *);
 
 static struct type *hpread_read_enum_type
-  PARAMS ((dnttpointer, union dnttentry *, struct objfile *));
+  (dnttpointer, union dnttentry *, struct objfile *);
 
 static struct type *hpread_read_set_type
-  PARAMS ((dnttpointer, union dnttentry *, struct objfile *));
+  (dnttpointer, union dnttentry *, struct objfile *);
 
 static struct type *hpread_read_subrange_type
-  PARAMS ((dnttpointer, union dnttentry *, struct objfile *));
+  (dnttpointer, union dnttentry *, struct objfile *);
 
 static struct type *hpread_read_struct_type
-  PARAMS ((dnttpointer, union dnttentry *, struct objfile *));
+  (dnttpointer, union dnttentry *, struct objfile *);
 
-void hpread_build_psymtabs
-  PARAMS ((struct objfile *, int));
+void hpread_build_psymtabs (struct objfile *, int);
 
-void hpread_symfile_finish PARAMS ((struct objfile *));
+void hpread_symfile_finish (struct objfile *);
 
 static struct partial_symtab *hpread_start_psymtab
-  PARAMS ((struct objfile *, char *, CORE_ADDR, int,
-	   struct partial_symbol **, struct partial_symbol **));
+  (struct objfile *, char *, CORE_ADDR, int,
+   struct partial_symbol **, struct partial_symbol **);
 
 static struct partial_symtab *hpread_end_psymtab
-  PARAMS ((struct partial_symtab *, char **, int, int, CORE_ADDR,
-	   struct partial_symtab **, int));
+  (struct partial_symtab *, char **, int, int, CORE_ADDR,
+   struct partial_symtab **, int);
 
 static struct symtab *hpread_expand_symtab
-  PARAMS ((struct objfile *, int, int, CORE_ADDR, int,
-	   struct section_offsets *, char *));
+  (struct objfile *, int, int, CORE_ADDR, int,
+   struct section_offsets *, char *);
 
 static void hpread_process_one_debug_symbol
-  PARAMS ((union dnttentry *, char *, struct section_offsets *,
-	   struct objfile *, CORE_ADDR, int, char *, int));
+  (union dnttentry *, char *, struct section_offsets *,
+   struct objfile *, CORE_ADDR, int, char *, int);
 
 static sltpointer hpread_record_lines
-  PARAMS ((struct subfile *, sltpointer, sltpointer,
-	   struct objfile *, CORE_ADDR));
+  (struct subfile *, sltpointer, sltpointer, struct objfile *, CORE_ADDR);
 
 static struct type *hpread_read_function_type
-  PARAMS ((dnttpointer, union dnttentry *, struct objfile *));
+  (dnttpointer, union dnttentry *, struct objfile *);
 
-static struct type *hpread_type_lookup
-  PARAMS ((dnttpointer, struct objfile *));
+static struct type *hpread_type_lookup (dnttpointer, struct objfile *);
 
-static unsigned long hpread_get_depth
-  PARAMS ((sltpointer, struct objfile *));
+static unsigned long hpread_get_depth (sltpointer, struct objfile *);
 
-static unsigned long hpread_get_line
-  PARAMS ((sltpointer, struct objfile *));
+static unsigned long hpread_get_line (sltpointer, struct objfile *);
 
-static CORE_ADDR hpread_get_location
-  PARAMS ((sltpointer, struct objfile *));
+static CORE_ADDR hpread_get_location (sltpointer, struct objfile *);
 
-static int hpread_type_translate PARAMS ((dnttpointer));
-static unsigned long hpread_get_textlow PARAMS ((int, int, struct objfile *));
-static union dnttentry *hpread_get_gntt PARAMS ((int, struct objfile *));
-static union dnttentry *hpread_get_lntt PARAMS ((int, struct objfile *));
-static union sltentry *hpread_get_slt PARAMS ((int, struct objfile *));
-static void hpread_psymtab_to_symtab PARAMS ((struct partial_symtab *));
-static void hpread_psymtab_to_symtab_1 PARAMS ((struct partial_symtab *));
-static int hpread_has_name PARAMS ((enum dntt_entry_type));
+static int hpread_type_translate (dnttpointer);
+static unsigned long hpread_get_textlow (int, int, struct objfile *);
+static union dnttentry *hpread_get_gntt (int, struct objfile *);
+static union dnttentry *hpread_get_lntt (int, struct objfile *);
+static union sltentry *hpread_get_slt (int, struct objfile *);
+static void hpread_psymtab_to_symtab (struct partial_symtab *);
+static void hpread_psymtab_to_symtab_1 (struct partial_symtab *);
+static int hpread_has_name (enum dntt_entry_type);
 
 
 /* Initialization for reading native HP C debug symbols from OBJFILE.

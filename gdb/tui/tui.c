@@ -44,10 +44,10 @@ extern char *tgoto ();
 /*****************************
 ** Local static forward decls
 ******************************/
-static void _tuiReset PARAMS ((void));
-static void _toggle_command PARAMS ((char *, int));
-static void _tui_vToggle_command PARAMS ((va_list));
-static Opaque _tui_vDo PARAMS ((TuiOpaqueFuncPtr, va_list));
+static void _tuiReset (void);
+static void _toggle_command (char *, int);
+static void _tui_vToggle_command (va_list);
+static Opaque _tui_vDo (TuiOpaqueFuncPtr, va_list);
 
 
 
@@ -67,7 +67,7 @@ tuiInit (argv0)
 #endif
 {
   extern void init_page_info ();
-  extern void initialize_tui_files PARAMS ((void));
+extern void initialize_tui_files (void);
 
   initialize_tui_files ();
   initializeStaticData ();

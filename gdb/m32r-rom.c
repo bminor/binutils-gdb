@@ -38,7 +38,7 @@
 #include "inferior.h"		/* for write_pc() */
 #include <ctype.h>
 
-extern void report_transfer_performance PARAMS ((unsigned long, time_t, time_t));
+extern void report_transfer_performance (unsigned long, time_t, time_t);
 
 #ifndef _MSC_VER
 /*
@@ -189,8 +189,8 @@ m32r_load_gen (filename, from_tty)
   generic_load (filename, from_tty);
 }
 
-static void m32r_open PARAMS ((char *args, int from_tty));
-static void mon2000_open PARAMS ((char *args, int from_tty));
+static void m32r_open (char *args, int from_tty);
+static void mon2000_open (char *args, int from_tty);
 
 /* This array of registers needs to match the indexes used by GDB. The
    whole reason this exists is because the various ROM monitors use

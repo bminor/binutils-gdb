@@ -31,11 +31,11 @@
 #include "gdb_string.h"
 #include "gdbcore.h"
 
-extern void _initialize_scheme_language PARAMS ((void));
-static value_ptr evaluate_subexp_scm PARAMS ((struct type *, struct expression *,
-					      int *, enum noside));
-static value_ptr scm_lookup_name PARAMS ((char *));
-static int in_eval_c PARAMS ((void));
+extern void _initialize_scheme_language (void);
+static value_ptr evaluate_subexp_scm (struct type *, struct expression *,
+				      int *, enum noside);
+static value_ptr scm_lookup_name (char *);
+static int in_eval_c (void);
 static void scm_printstr (struct ui_file * stream, char *string,
 			  unsigned int length, int width,
 			  int force_ellipses);

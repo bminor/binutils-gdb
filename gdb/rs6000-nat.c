@@ -48,33 +48,26 @@
 
 extern int errno;
 
-extern struct vmap *map_vmap PARAMS ((bfd * bf, bfd * arch));
+extern struct vmap *map_vmap (bfd * bf, bfd * arch);
 
 extern struct target_ops exec_ops;
 
-static void
-vmap_exec PARAMS ((void));
+static void vmap_exec (void);
 
-static void
-vmap_ldinfo PARAMS ((struct ld_info *));
+static void vmap_ldinfo (struct ld_info *);
 
-static struct vmap *
-  add_vmap PARAMS ((struct ld_info *));
+static struct vmap *add_vmap (struct ld_info *);
 
-static int
-objfile_symbol_add PARAMS ((char *));
+static int objfile_symbol_add (char *);
 
-static void
-vmap_symtab PARAMS ((struct vmap *));
+static void vmap_symtab (struct vmap *);
 
-static void
-fetch_core_registers PARAMS ((char *, unsigned int, int, CORE_ADDR));
+static void fetch_core_registers (char *, unsigned int, int, CORE_ADDR);
 
-static void
-exec_one_dummy_insn PARAMS ((void));
+static void exec_one_dummy_insn (void);
 
 extern void
-fixup_breakpoints PARAMS ((CORE_ADDR low, CORE_ADDR high, CORE_ADDR delta));
+fixup_breakpoints (CORE_ADDR low, CORE_ADDR high, CORE_ADDR delta);
 
 /* Conversion from gdb-to-system special purpose register numbers.. */
 

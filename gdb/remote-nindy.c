@@ -151,11 +151,9 @@ static int regs_changed = 0;	/* 1 iff regs were modified since last read */
 
 extern char *exists ();
 
-static void
-nindy_fetch_registers PARAMS ((int));
+static void nindy_fetch_registers (int);
 
-static void
-nindy_store_registers PARAMS ((int));
+static void nindy_store_registers (int);
 
 static char *savename;
 

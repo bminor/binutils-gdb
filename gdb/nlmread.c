@@ -29,22 +29,17 @@
 #include "buildsym.h"
 #include "stabsread.h"
 
-extern void _initialize_nlmread PARAMS ((void));
+extern void _initialize_nlmread (void);
 
-static void
-nlm_new_init PARAMS ((struct objfile *));
+static void nlm_new_init (struct objfile *);
 
-static void
-nlm_symfile_init PARAMS ((struct objfile *));
+static void nlm_symfile_init (struct objfile *);
 
-static void
-nlm_symfile_read PARAMS ((struct objfile *, int));
+static void nlm_symfile_read (struct objfile *, int);
 
-static void
-nlm_symfile_finish PARAMS ((struct objfile *));
+static void nlm_symfile_finish (struct objfile *);
 
-static void
-nlm_symtab_read PARAMS ((bfd *, CORE_ADDR, struct objfile *));
+static void nlm_symtab_read (bfd *, CORE_ADDR, struct objfile *);
 
 /* Initialize anything that needs initializing when a completely new symbol
    file is specified (not just adding some symbols from another file, e.g. a

@@ -50,8 +50,8 @@ static int _winResized = FALSE;
 /*********************************
 ** Static function forward decls
 **********************************/
-static void freeContent PARAMS ((TuiWinContent, int, TuiWinType));
-static void freeContentElements PARAMS ((TuiWinContent, int, TuiWinType));
+static void freeContent (TuiWinContent, int, TuiWinType);
+static void freeContentElements (TuiWinContent, int, TuiWinType);
 
 
 

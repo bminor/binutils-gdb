@@ -21,11 +21,9 @@
 /* Forward decls for prototypes */
 struct value;
 
-extern int
-chill_parse PARAMS ((void));	/* Defined in ch-exp.y */
+extern int chill_parse (void);	/* Defined in ch-exp.y */
 
-extern void
-chill_error PARAMS ((char *));	/* Defined in ch-exp.y */
+extern void chill_error (char *);	/* Defined in ch-exp.y */
 
 /* Defined in ch-typeprint.c */
 extern void chill_print_type (struct type *, char *, struct ui_file *, int,
@@ -39,4 +37,4 @@ extern int chill_value_print (struct value *, struct ui_file *,
 			      int, enum val_prettyprint);
 
 extern LONGEST
-  type_lower_upper PARAMS ((enum exp_opcode, struct type *, struct type **));
+type_lower_upper (enum exp_opcode, struct type *, struct type **);

@@ -92,13 +92,13 @@ static int regmap[] =
 
 /* Prototypes for local functions */
 
-void fill_gregset PARAMS ((gregset_t *, int));
+void fill_gregset (gregset_t *, int);
 
-void supply_gregset PARAMS ((gregset_t *));
+void supply_gregset (gregset_t *);
 
-void supply_fpregset PARAMS ((fpregset_t *));
+void supply_fpregset (fpregset_t *);
 
-void fill_fpregset PARAMS ((fpregset_t *, int));
+void fill_fpregset (fpregset_t *, int);
 
 
 /*  FIXME:  These routine absolutely depends upon (NUM_REGS - NUM_FREGS)

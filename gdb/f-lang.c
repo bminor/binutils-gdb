@@ -68,23 +68,23 @@ typedef struct saved_bf_symnum SAVED_BF, *SAVED_BF_PTR;
 
 /* Local functions */
 
-extern void _initialize_f_language PARAMS ((void));
+extern void _initialize_f_language (void);
 #if 0
-static void clear_function_list PARAMS ((void));
-static long get_bf_for_fcn PARAMS ((long));
-static void clear_bf_list PARAMS ((void));
-static void patch_all_commons_by_name PARAMS ((char *, CORE_ADDR, int));
-static SAVED_F77_COMMON_PTR find_first_common_named PARAMS ((char *));
-static void add_common_entry PARAMS ((struct symbol *));
-static void add_common_block PARAMS ((char *, CORE_ADDR, int, char *));
-static SAVED_FUNCTION *allocate_saved_function_node PARAMS ((void));
-static SAVED_BF_PTR allocate_saved_bf_node PARAMS ((void));
-static COMMON_ENTRY_PTR allocate_common_entry_node PARAMS ((void));
-static SAVED_F77_COMMON_PTR allocate_saved_f77_common_node PARAMS ((void));
-static void patch_common_entries PARAMS ((SAVED_F77_COMMON_PTR, CORE_ADDR, int));
+static void clear_function_list (void);
+static long get_bf_for_fcn (long);
+static void clear_bf_list (void);
+static void patch_all_commons_by_name (char *, CORE_ADDR, int);
+static SAVED_F77_COMMON_PTR find_first_common_named (char *);
+static void add_common_entry (struct symbol *);
+static void add_common_block (char *, CORE_ADDR, int, char *);
+static SAVED_FUNCTION *allocate_saved_function_node (void);
+static SAVED_BF_PTR allocate_saved_bf_node (void);
+static COMMON_ENTRY_PTR allocate_common_entry_node (void);
+static SAVED_F77_COMMON_PTR allocate_saved_f77_common_node (void);
+static void patch_common_entries (SAVED_F77_COMMON_PTR, CORE_ADDR, int);
 #endif
 
-static struct type *f_create_fundamental_type PARAMS ((struct objfile *, int));
+static struct type *f_create_fundamental_type (struct objfile *, int);
 static void f_printstr (struct ui_file * stream, char *string,
 			unsigned int length, int width,
 			int force_ellipses);

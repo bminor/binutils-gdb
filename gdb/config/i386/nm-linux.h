@@ -28,7 +28,7 @@
 /* Return sizeof user struct to callers in less machine dependent routines */
 
 #define KERNEL_U_SIZE kernel_u_size()
-extern int kernel_u_size PARAMS ((void));
+extern int kernel_u_size (void);
 
 #define U_REGS_OFFSET 0
 
@@ -75,11 +75,8 @@ extern int kernel_u_size PARAMS ((void));
 /* Override child_resume in `infptrace.c'.  */
 #define CHILD_RESUME
 
-extern CORE_ADDR
-  i386_stopped_by_watchpoint PARAMS ((int));
-extern int
-i386_insert_watchpoint PARAMS ((int pid, CORE_ADDR addr, int len, int rw));
-extern int
-i386_remove_watchpoint PARAMS ((int pid, CORE_ADDR addr, int len));
+extern CORE_ADDR i386_stopped_by_watchpoint (int);
+extern int i386_insert_watchpoint (int pid, CORE_ADDR addr, int len, int rw);
+extern int i386_remove_watchpoint (int pid, CORE_ADDR addr, int len);
 
 #endif /* #ifndef NM_LINUX_H */

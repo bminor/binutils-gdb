@@ -47,72 +47,68 @@
 /* Prototype for one function in parser-defs.h,
    instead of including that entire file. */
 
-extern char *find_template_name_end PARAMS ((char *));
+extern char *find_template_name_end (char *);
 
 /* Prototypes for local functions */
 
-static int find_methods PARAMS ((struct type *, char *, struct symbol **));
+static int find_methods (struct type *, char *, struct symbol **);
 
-static void completion_list_add_name PARAMS ((char *, char *, int, char *,
-					      char *));
+static void completion_list_add_name (char *, char *, int, char *, char *);
 
-static void build_canonical_line_spec PARAMS ((struct symtab_and_line *,
-					       char *, char ***));
+static void build_canonical_line_spec (struct symtab_and_line *,
+				       char *, char ***);
 
-static struct symtabs_and_lines decode_line_2 PARAMS ((struct symbol *[],
-						       int, int, char ***));
+static struct symtabs_and_lines decode_line_2 (struct symbol *[],
+					       int, int, char ***);
 
-static void rbreak_command PARAMS ((char *, int));
+static void rbreak_command (char *, int);
 
-static void types_info PARAMS ((char *, int));
+static void types_info (char *, int);
 
-static void functions_info PARAMS ((char *, int));
+static void functions_info (char *, int);
 
-static void variables_info PARAMS ((char *, int));
+static void variables_info (char *, int);
 
-static void sources_info PARAMS ((char *, int));
+static void sources_info (char *, int);
 
-static void output_source_filename PARAMS ((char *, int *));
+static void output_source_filename (char *, int *);
 
-char *operator_chars PARAMS ((char *, char **));
+char *operator_chars (char *, char **);
 
-static int find_line_common PARAMS ((struct linetable *, int, int *));
+static int find_line_common (struct linetable *, int, int *);
 
 static struct partial_symbol *lookup_partial_symbol PARAMS
   ((struct partial_symtab *, const char *,
     int, namespace_enum));
 
-static struct partial_symbol *fixup_psymbol_section PARAMS ((struct
-				       partial_symbol *, struct objfile *));
+static struct partial_symbol *fixup_psymbol_section (struct
+						     partial_symbol *,
+						     struct objfile *);
 
-static struct symtab *lookup_symtab_1 PARAMS ((char *));
+static struct symtab *lookup_symtab_1 (char *);
 
-static void cplusplus_hint PARAMS ((char *));
+static void cplusplus_hint (char *);
 
-static struct symbol *find_active_alias PARAMS ((struct symbol * sym,
-						 CORE_ADDR addr));
+static struct symbol *find_active_alias (struct symbol *sym, CORE_ADDR addr);
 
 /* This flag is used in hppa-tdep.c, and set in hp-symtab-read.c */
 /* Signals the presence of objects compiled by HP compilers */
 int hp_som_som_object_present = 0;
 
-static void fixup_section PARAMS ((struct general_symbol_info *,
-				   struct objfile *));
+static void fixup_section (struct general_symbol_info *, struct objfile *);
 
-static int file_matches PARAMS ((char *, char **, int));
+static int file_matches (char *, char **, int);
 
-static void print_symbol_info PARAMS ((namespace_enum,
-				       struct symtab *, struct symbol *,
-				       int, char *));
+static void print_symbol_info (namespace_enum,
+			       struct symtab *, struct symbol *, int, char *);
 
-static void print_msymbol_info PARAMS ((struct minimal_symbol *));
+static void print_msymbol_info (struct minimal_symbol *);
 
-static void symtab_symbol_info PARAMS ((char *, namespace_enum, int));
+static void symtab_symbol_info (char *, namespace_enum, int);
 
-static void overload_list_add_symbol PARAMS ((struct symbol * sym,
-					      char *oload_name));
+static void overload_list_add_symbol (struct symbol *sym, char *oload_name);
 
-void _initialize_symtab PARAMS ((void));
+void _initialize_symtab (void);
 
 /* */
 
@@ -1844,8 +1840,7 @@ find_pc_line (pc, notcurrent)
 }
 
 
-static struct symtab *find_line_symtab PARAMS ((struct symtab *, int,
-						int *, int *));
+static struct symtab *find_line_symtab (struct symtab *, int, int *, int *);
 
 /* Find line number LINE in any symtab whose name is the same as
    SYMTAB.
@@ -2077,7 +2072,7 @@ find_pc_line_pc_range (pc, startptr, endptr)
    of real code inside the function.  */
 
 static struct symtab_and_line
-find_function_start_sal PARAMS ((struct symbol * sym, int));
+find_function_start_sal (struct symbol *sym, int);
 
 static struct symtab_and_line
 find_function_start_sal (sym, funfirstline)
@@ -2217,7 +2212,7 @@ operator_chars (p, end)
    reader because the type of the baseclass might still be stubbed
    when the definition of the derived class is parsed.  */
 
-static int total_number_of_methods PARAMS ((struct type * type));
+static int total_number_of_methods (struct type *type);
 
 static int
 total_number_of_methods (type)

@@ -38,11 +38,11 @@ Opaque (*OpaqueFuncPtr) PARAMS ((va_list));
  */
      typedef OpaqueFuncPtr TuiOpaqueFuncPtr;
 
-     extern Opaque vcatch_errors PARAMS ((OpaqueFuncPtr,...));
-     extern Opaque va_catch_errors PARAMS ((OpaqueFuncPtr, va_list));
+extern Opaque vcatch_errors (OpaqueFuncPtr, ...);
+extern Opaque va_catch_errors (OpaqueFuncPtr, va_list);
 
-     extern void strcat_to_buf PARAMS ((char *, int, char *));
-     extern void strcat_to_buf_with_fmt PARAMS ((char *, int, char *,...));
+extern void strcat_to_buf (char *, int, char *);
+extern void strcat_to_buf_with_fmt (char *, int, char *, ...);
 
 /* Types of error returns */
      typedef enum
@@ -97,37 +97,37 @@ TuiGenWinInfo, *TuiGenWinInfoPtr;
 
 /* GENERAL TUI FUNCTIONS */
 /* tui.c */
-     extern void tuiInit PARAMS ((char *argv0));
-     extern void tuiInitWindows PARAMS ((void));
-     extern void tuiResetScreen PARAMS ((void));
-     extern void tuiCleanUp PARAMS ((void));
-     extern void tuiError PARAMS ((char *, int));
-     extern void tui_vError PARAMS ((va_list));
-     extern void tuiFree PARAMS ((char *));
-     extern Opaque tuiDo PARAMS ((TuiOpaqueFuncPtr,...));
-     extern Opaque tuiDoAndReturnToTop PARAMS ((TuiOpaqueFuncPtr,...));
-     extern Opaque tuiGetLowDisassemblyAddress PARAMS ((Opaque, Opaque));
-     extern Opaque tui_vGetLowDisassemblyAddress PARAMS ((va_list));
-     extern void tui_vSelectSourceSymtab PARAMS ((va_list));
+extern void tuiInit (char *argv0);
+extern void tuiInitWindows (void);
+extern void tuiResetScreen (void);
+extern void tuiCleanUp (void);
+extern void tuiError (char *, int);
+extern void tui_vError (va_list);
+extern void tuiFree (char *);
+extern Opaque tuiDo (TuiOpaqueFuncPtr, ...);
+extern Opaque tuiDoAndReturnToTop (TuiOpaqueFuncPtr, ...);
+extern Opaque tuiGetLowDisassemblyAddress (Opaque, Opaque);
+extern Opaque tui_vGetLowDisassemblyAddress (va_list);
+extern void tui_vSelectSourceSymtab (va_list);
 
 /* tuiDataWin.c */
-     extern void tui_vCheckDataValues PARAMS ((va_list));
+extern void tui_vCheckDataValues (va_list);
 
 /* tuiIO.c */
-     extern void tui_vStartNewLines PARAMS ((va_list));
+extern void tui_vStartNewLines (va_list);
 
 /* tuiLayout.c */
-     extern void tui_vAddWinToLayout PARAMS ((va_list));
-     extern TuiStatus tui_vSetLayoutTo PARAMS ((va_list));
+extern void tui_vAddWinToLayout (va_list);
+extern TuiStatus tui_vSetLayoutTo (va_list);
 
 /* tuiSourceWin.c */
-     extern void tuiDisplayMainFunction PARAMS ((void));
-     extern void tuiUpdateAllExecInfos PARAMS ((void));
-     extern void tuiUpdateOnEnd PARAMS ((void));
-     extern void tui_vAllSetHasBreakAt PARAMS ((va_list));
-     extern void tui_vUpdateSourceWindowsWithAddr PARAMS ((va_list));
+extern void tuiDisplayMainFunction (void);
+extern void tuiUpdateAllExecInfos (void);
+extern void tuiUpdateOnEnd (void);
+extern void tui_vAllSetHasBreakAt (va_list);
+extern void tui_vUpdateSourceWindowsWithAddr (va_list);
 
 /* tuiStack.c */
-     extern void tui_vShowFrameInfo PARAMS ((va_list));
-     extern void tui_vUpdateLocatorFilename PARAMS ((va_list));
+extern void tui_vShowFrameInfo (va_list);
+extern void tui_vUpdateLocatorFilename (va_list);
 #endif /* TUI_H */

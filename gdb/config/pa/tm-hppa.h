@@ -70,24 +70,24 @@ struct inferior_status;
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 
-extern CORE_ADDR hppa_skip_prologue PARAMS ((CORE_ADDR));
+extern CORE_ADDR hppa_skip_prologue (CORE_ADDR);
 #define SKIP_PROLOGUE(pc) (hppa_skip_prologue (pc))
 
 /* If PC is in some function-call trampoline code, return the PC
    where the function itself actually starts.  If not, return NULL.  */
 
 #define	SKIP_TRAMPOLINE_CODE(pc) skip_trampoline_code (pc, NULL)
-extern CORE_ADDR skip_trampoline_code PARAMS ((CORE_ADDR, char *));
+extern CORE_ADDR skip_trampoline_code (CORE_ADDR, char *);
 
 /* Return non-zero if we are in an appropriate trampoline. */
 
 #define IN_SOLIB_CALL_TRAMPOLINE(pc, name) \
    in_solib_call_trampoline (pc, name)
-extern int in_solib_call_trampoline PARAMS ((CORE_ADDR, char *));
+extern int in_solib_call_trampoline (CORE_ADDR, char *);
 
 #define IN_SOLIB_RETURN_TRAMPOLINE(pc, name) \
   in_solib_return_trampoline (pc, name)
-extern int in_solib_return_trampoline PARAMS ((CORE_ADDR, char *));
+extern int in_solib_return_trampoline (CORE_ADDR, char *);
 
 /* Immediately after a function call, return the saved pc.
    Can't go through the frames for this because on some machines
@@ -96,7 +96,7 @@ extern int in_solib_return_trampoline PARAMS ((CORE_ADDR, char *));
 
 #undef	SAVED_PC_AFTER_CALL
 #define SAVED_PC_AFTER_CALL(frame) saved_pc_after_call (frame)
-extern CORE_ADDR saved_pc_after_call PARAMS ((struct frame_info *));
+extern CORE_ADDR saved_pc_after_call (struct frame_info *);
 
 /* Stack grows upward */
 #define INNER_THAN(lhs,rhs) ((lhs) > (rhs))
@@ -258,7 +258,7 @@ extern CORE_ADDR saved_pc_after_call PARAMS ((struct frame_info *));
    of register dumps. */
 
 #define DO_REGISTERS_INFO(_regnum, fp) pa_do_registers_info (_regnum, fp)
-extern void pa_do_registers_info PARAMS ((int, int));
+extern void pa_do_registers_info (int, int);
 
 #if 0
 #define STRCAT_REGISTER(regnum, fpregs, stream, precision) pa_do_strcat_registers_info (regnum, fpregs, stream, precision)
@@ -403,7 +403,7 @@ extern use_struct_convention_fn hppa_use_struct_convention;
                    ((regno) > IPSW_REGNUM && (regno) < FP4_REGNUM)
 
 #define INIT_EXTRA_FRAME_INFO(fromleaf, frame) init_extra_frame_info (fromleaf, frame)
-extern void init_extra_frame_info PARAMS ((int, struct frame_info *));
+extern void init_extra_frame_info (int, struct frame_info *);
 
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
@@ -423,9 +423,9 @@ extern void init_extra_frame_info PARAMS ((int, struct frame_info *));
    address (previous FP).  */
 
 #define FRAME_CHAIN(thisframe) frame_chain (thisframe)
-extern CORE_ADDR frame_chain PARAMS ((struct frame_info *));
+extern CORE_ADDR frame_chain (struct frame_info *);
 
-extern int hppa_frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *));
+extern int hppa_frame_chain_valid (CORE_ADDR, struct frame_info *);
 #define FRAME_CHAIN_VALID(chain, thisframe) hppa_frame_chain_valid (chain, thisframe)
 
 #define FRAME_CHAIN_COMBINE(chain, thisframe) (chain)
@@ -437,9 +437,9 @@ extern int hppa_frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *));
    does not, FRAMELESS is set to 1, else 0.  */
 #define FRAMELESS_FUNCTION_INVOCATION(FI) \
   (frameless_function_invocation (FI))
-extern int frameless_function_invocation PARAMS ((struct frame_info *));
+extern int frameless_function_invocation (struct frame_info *);
 
-extern CORE_ADDR hppa_frame_saved_pc PARAMS ((struct frame_info * frame));
+extern CORE_ADDR hppa_frame_saved_pc (struct frame_info *frame);
 #define FRAME_SAVED_PC(FRAME) hppa_frame_saved_pc (FRAME)
 
 #define FRAME_ARGS_ADDRESS(fi) ((fi)->frame)
@@ -459,8 +459,7 @@ extern CORE_ADDR hppa_frame_saved_pc PARAMS ((struct frame_info * frame));
 #define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs) \
   hppa_frame_find_saved_regs (frame_info, &frame_saved_regs)
 extern void
-hppa_frame_find_saved_regs PARAMS ((struct frame_info *,
-				    struct frame_saved_regs *));
+hppa_frame_find_saved_regs (struct frame_info *, struct frame_saved_regs *);
 
 
 /* Things needed for making the inferior call functions.  */
@@ -468,12 +467,12 @@ hppa_frame_find_saved_regs PARAMS ((struct frame_info *,
 /* Push an empty stack frame, to record the current PC, etc. */
 
 #define PUSH_DUMMY_FRAME push_dummy_frame (inf_status)
-extern void push_dummy_frame PARAMS ((struct inferior_status *));
+extern void push_dummy_frame (struct inferior_status *);
 
 /* Discard from the stack the innermost frame, 
    restoring all saved registers.  */
 #define POP_FRAME  hppa_pop_frame ()
-extern void hppa_pop_frame PARAMS ((void));
+extern void hppa_pop_frame (void);
 
 #define INSTRUCTION_SIZE 4
 
@@ -619,14 +618,13 @@ extern void hppa_pop_frame PARAMS ((void));
 #define FIX_CALL_DUMMY hppa_fix_call_dummy
 
 extern CORE_ADDR
-  hppa_fix_call_dummy PARAMS ((char *, CORE_ADDR, CORE_ADDR, int,
-			       struct value **, struct type *, int));
+hppa_fix_call_dummy (char *, CORE_ADDR, CORE_ADDR, int,
+		     struct value **, struct type *, int);
 
 #define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
   (hppa_push_arguments((nargs), (args), (sp), (struct_return), (struct_addr)))
 extern CORE_ADDR
-  hppa_push_arguments PARAMS ((int, struct value **, CORE_ADDR, int,
-			       CORE_ADDR));
+hppa_push_arguments (int, struct value **, CORE_ADDR, int, CORE_ADDR);
 
 /* The low two bits of the PC on the PA contain the privilege level.  Some
    genius implementing a (non-GCC) compiler apparently decided this means
@@ -760,26 +758,25 @@ typedef struct obj_private_struct
 obj_private_data_t;
 
 #if 0
-extern void target_write_pc
-PARAMS ((CORE_ADDR, int))
-     extern CORE_ADDR target_read_pc PARAMS ((int));
-     extern CORE_ADDR skip_trampoline_code PARAMS ((CORE_ADDR, char *));
+extern void target_write_pc (CORE_ADDR, int);
+extern CORE_ADDR target_read_pc (int);
+extern CORE_ADDR skip_trampoline_code (CORE_ADDR, char *);
 #endif
 
 #define TARGET_READ_PC(pid) target_read_pc (pid)
-     extern CORE_ADDR target_read_pc PARAMS ((int));
+extern CORE_ADDR target_read_pc (int);
 
 #define TARGET_WRITE_PC(v,pid) target_write_pc (v,pid)
-     extern void target_write_pc PARAMS ((CORE_ADDR, int));
+extern void target_write_pc (CORE_ADDR, int);
 
 #define TARGET_READ_FP() target_read_fp (inferior_pid)
-     extern CORE_ADDR target_read_fp PARAMS ((int));
+extern CORE_ADDR target_read_fp (int);
 
 /* For a number of horrible reasons we may have to adjust the location
    of variables on the stack.  Ugh.  */
 #define HPREAD_ADJUST_STACK_ADDRESS(ADDR) hpread_adjust_stack_address(ADDR)
 
-     extern int hpread_adjust_stack_address PARAMS ((CORE_ADDR));
+extern int hpread_adjust_stack_address (CORE_ADDR);
 
 /* If the current gcc for for this target does not produce correct debugging
    information for float parameters, both prototyped and unprototyped, then

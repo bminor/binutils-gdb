@@ -654,8 +654,7 @@ struct badness_vector
 
 extern const struct cplus_struct_type cplus_struct_default;
 
-extern void
-allocate_cplus_struct_type PARAMS ((struct type *));
+extern void allocate_cplus_struct_type (struct type *);
 
 #define INIT_CPLUS_SPECIFIC(type) \
   (TYPE_CPLUS_SPECIFIC(type)=(struct cplus_struct_type*)&cplus_struct_default)
@@ -946,132 +945,99 @@ extern struct type *builtin_type_f_void;
     ? obstack_alloc (&TYPE_OBJFILE (t) -> type_obstack, size) \
     : xmalloc (size))
 
-extern struct type *
-  alloc_type PARAMS ((struct objfile *));
+extern struct type *alloc_type (struct objfile *);
 
-extern struct type *
-  init_type PARAMS ((enum type_code, int, int, char *, struct objfile *));
+extern struct type *init_type (enum type_code, int, int, char *,
+			       struct objfile *);
 
-extern struct type *
-  lookup_reference_type PARAMS ((struct type *));
+extern struct type *lookup_reference_type (struct type *);
 
-extern struct type *
-  make_reference_type PARAMS ((struct type *, struct type **));
+extern struct type *make_reference_type (struct type *, struct type **);
 
-extern struct type *
-  make_cv_type PARAMS ((int, int, struct type *, struct type **));
+extern struct type *make_cv_type (int, int, struct type *, struct type **);
 
-extern struct type *
-  lookup_member_type PARAMS ((struct type *, struct type *));
+extern struct type *lookup_member_type (struct type *, struct type *);
 
 extern void
-smash_to_method_type PARAMS ((struct type *, struct type *, struct type *,
-			      struct type **));
+smash_to_method_type (struct type *, struct type *, struct type *,
+		      struct type **);
 
 extern void
-smash_to_member_type PARAMS ((struct type *, struct type *, struct type *));
+smash_to_member_type (struct type *, struct type *, struct type *);
 
-extern struct type *
-  allocate_stub_method PARAMS ((struct type *));
+extern struct type *allocate_stub_method (struct type *);
 
-extern char *
-  type_name_no_tag PARAMS ((const struct type *));
+extern char *type_name_no_tag (const struct type *);
 
-extern struct type *
-  lookup_struct_elt_type PARAMS ((struct type *, char *, int));
+extern struct type *lookup_struct_elt_type (struct type *, char *, int);
 
-extern struct type *
-  make_pointer_type PARAMS ((struct type *, struct type **));
+extern struct type *make_pointer_type (struct type *, struct type **);
 
-extern struct type *
-  lookup_pointer_type PARAMS ((struct type *));
+extern struct type *lookup_pointer_type (struct type *);
 
-extern struct type *
-  make_function_type PARAMS ((struct type *, struct type **));
+extern struct type *make_function_type (struct type *, struct type **);
 
-extern struct type *
-  lookup_function_type PARAMS ((struct type *));
+extern struct type *lookup_function_type (struct type *);
 
-extern struct type *
-  create_range_type PARAMS ((struct type *, struct type *, int, int));
+extern struct type *create_range_type (struct type *, struct type *, int,
+				       int);
 
-extern struct type *
-  create_array_type PARAMS ((struct type *, struct type *, struct type *));
+extern struct type *create_array_type (struct type *, struct type *,
+				       struct type *);
 
-extern struct type *
-  create_string_type PARAMS ((struct type *, struct type *));
+extern struct type *create_string_type (struct type *, struct type *);
 
-extern struct type *create_set_type PARAMS ((struct type *, struct type *));
+extern struct type *create_set_type (struct type *, struct type *);
 
-extern int chill_varying_type PARAMS ((struct type *));
+extern int chill_varying_type (struct type *);
 
-extern struct type *
-  lookup_unsigned_typename PARAMS ((char *));
+extern struct type *lookup_unsigned_typename (char *);
 
-extern struct type *
-  lookup_signed_typename PARAMS ((char *));
+extern struct type *lookup_signed_typename (char *);
 
-extern struct type *
-  check_typedef PARAMS ((struct type *));
+extern struct type *check_typedef (struct type *);
 
 #define CHECK_TYPEDEF(TYPE) (TYPE) = check_typedef (TYPE)
 
-extern void
-check_stub_method PARAMS ((struct type *, int, int));
+extern void check_stub_method (struct type *, int, int);
 
-extern struct type *
-  lookup_primitive_typename PARAMS ((char *));
+extern struct type *lookup_primitive_typename (char *);
 
-extern char *
-  gdb_mangle_name PARAMS ((struct type *, int, int));
+extern char *gdb_mangle_name (struct type *, int, int);
 
-extern struct type *
-  builtin_type PARAMS ((char **));
+extern struct type *builtin_type (char **);
 
-extern struct type *
-  lookup_typename PARAMS ((char *, struct block *, int));
+extern struct type *lookup_typename (char *, struct block *, int);
 
-extern struct type *
-  lookup_template_type PARAMS ((char *, struct type *, struct block *));
+extern struct type *lookup_template_type (char *, struct type *,
+					  struct block *);
 
-extern struct type *
-  lookup_fundamental_type PARAMS ((struct objfile *, int));
+extern struct type *lookup_fundamental_type (struct objfile *, int);
 
-extern void
-fill_in_vptr_fieldno PARAMS ((struct type *));
+extern void fill_in_vptr_fieldno (struct type *);
 
-extern int get_destructor_fn_field PARAMS ((struct type *, int *, int *));
+extern int get_destructor_fn_field (struct type *, int *, int *);
 
-extern int get_discrete_bounds PARAMS ((struct type *, LONGEST *, LONGEST *));
+extern int get_discrete_bounds (struct type *, LONGEST *, LONGEST *);
 
-extern int
-is_ancestor PARAMS ((struct type *, struct type *));
+extern int is_ancestor (struct type *, struct type *);
 
-extern int
-has_vtable PARAMS ((struct type *));
+extern int has_vtable (struct type *);
 
-extern struct type *
-  primary_base_class PARAMS ((struct type *));
+extern struct type *primary_base_class (struct type *);
 
-extern struct type **
-  virtual_base_list PARAMS ((struct type *));
+extern struct type **virtual_base_list (struct type *);
 
-extern int
-virtual_base_list_length PARAMS ((struct type *));
-extern int
-virtual_base_list_length_skip_primaries PARAMS ((struct type *));
+extern int virtual_base_list_length (struct type *);
+extern int virtual_base_list_length_skip_primaries (struct type *);
 
-extern int
-virtual_base_index PARAMS ((struct type *, struct type *));
-extern int
-virtual_base_index_skip_primaries PARAMS ((struct type *, struct type *));
+extern int virtual_base_index (struct type *, struct type *);
+extern int virtual_base_index_skip_primaries (struct type *, struct type *);
 
 
-extern int
-class_index_in_primary_list PARAMS ((struct type *));
+extern int class_index_in_primary_list (struct type *);
 
-extern int
-count_virtual_fns PARAMS ((struct type *));
+extern int count_virtual_fns (struct type *);
 
 /* Constants for HP/Taligent ANSI C++ runtime model */
 
@@ -1139,27 +1105,25 @@ count_virtual_fns PARAMS ((struct type *));
 #define NS_POINTER_CONVERSION_BADNESS 10
 
 
-extern int
-compare_badness PARAMS ((struct badness_vector *, struct badness_vector *));
+extern int compare_badness (struct badness_vector *, struct badness_vector *);
 
-extern struct badness_vector *
-  rank_function PARAMS ((struct type **, int, struct type **, int));
+extern struct badness_vector *rank_function (struct type **, int,
+					     struct type **, int);
 
-extern int
-rank_one_type PARAMS ((struct type *, struct type *));
+extern int rank_one_type (struct type *, struct type *);
 
-extern void recursive_dump_type PARAMS ((struct type *, int));
+extern void recursive_dump_type (struct type *, int);
 
 /* printcmd.c */
 
 extern void print_scalar_formatted (char *, struct type *, int, int,
 				    struct ui_file *);
 
-extern int can_dereference PARAMS ((struct type *));
+extern int can_dereference (struct type *);
 
-extern int is_integral_type PARAMS ((struct type *));
+extern int is_integral_type (struct type *);
 
-extern void maintenance_print_type PARAMS ((char *, int));
+extern void maintenance_print_type (char *, int);
 
 /* typeprint.c */
 

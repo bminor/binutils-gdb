@@ -75,9 +75,9 @@ extern int (*ui_loop_hook) PARAMS ((int signo));
 /* Forward declaration */
 extern struct target_ops child_ops;
 
-static void child_stop PARAMS ((void));
-static int win32_child_thread_alive PARAMS ((int));
-void child_kill_inferior PARAMS ((void));
+static void child_stop (void);
+static int win32_child_thread_alive (int);
+void child_kill_inferior (void);
 
 static int last_sig = 0;	/* Set if a signal was received from the
 				   debugged process */

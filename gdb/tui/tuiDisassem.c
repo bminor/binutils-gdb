@@ -20,7 +20,7 @@
 ** STATIC LOCAL FUNCTIONS FORWARD DECLS    **
 ******************************************/
 
-static struct breakpoint *_hasBreak PARAMS ((CORE_ADDR));
+static struct breakpoint *_hasBreak (CORE_ADDR);
 
 
 /*****************************************
@@ -56,8 +56,8 @@ tuiSetDisassemContent (s, startAddr)
 	  CORE_ADDR newpc, pc;
 	  disassemble_info asmInfo;
 	  TuiGenWinInfoPtr locator = locatorWinInfoPtr ();
-	  extern void strcat_address PARAMS ((CORE_ADDR, char *, int));
-	  extern void strcat_address_numeric PARAMS ((CORE_ADDR, int, char *, int));
+extern void strcat_address (CORE_ADDR, char *, int);
+extern void strcat_address_numeric (CORE_ADDR, int, char *, int);
 	  int curLen = 0;
 	  int tab_len = tuiDefaultTabLen ();
 

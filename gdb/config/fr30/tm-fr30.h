@@ -94,7 +94,7 @@
 /* Largest value REGISTER_VIRTUAL_SIZE can have.  */
 #define MAX_REGISTER_VIRTUAL_SIZE FR30_REGSIZE
 
-extern void fr30_pop_frame PARAMS ((void));
+extern void fr30_pop_frame (void);
 #define POP_FRAME fr30_pop_frame()
 
 #define USE_GENERIC_DUMMY_FRAMES 1
@@ -150,22 +150,22 @@ struct value;
   int frameoffset;		\
   int framereg;
 
-extern CORE_ADDR fr30_frame_chain PARAMS ((struct frame_info * fi));
+extern CORE_ADDR fr30_frame_chain (struct frame_info *fi);
 #define FRAME_CHAIN(fi) fr30_frame_chain (fi)
 
-extern CORE_ADDR fr30_frame_saved_pc PARAMS ((struct frame_info *));
+extern CORE_ADDR fr30_frame_saved_pc (struct frame_info *);
 #define FRAME_SAVED_PC(fi) (fr30_frame_saved_pc (fi))
 
 #define SAVED_PC_AFTER_CALL(fi) read_register (RP_REGNUM)
 
-extern CORE_ADDR fr30_skip_prologue PARAMS ((CORE_ADDR pc));
+extern CORE_ADDR fr30_skip_prologue (CORE_ADDR pc);
 #define SKIP_PROLOGUE(pc) (fr30_skip_prologue (pc))
 
 /* Write into appropriate registers a function return value of type
    TYPE, given in virtual format.  VALBUF is in the target byte order;
    it's typically the VALUE_CONTENTS of some struct value, and those
    are in the target's byte order.  */
-extern void fr30_store_return_value PARAMS ((struct type * type, char *valbuf));
+extern void fr30_store_return_value (struct type *type, char *valbuf);
 
 #define STORE_RETURN_VALUE(TYPE,VALBUF) \
   (fr30_store_return_value ((TYPE), (VALBUF)))
@@ -192,18 +192,17 @@ extern void fr30_store_return_value PARAMS ((struct type * type, char *valbuf));
 
 /* An expression that tells us whether the function invocation represented
    by FI does not have a frame on the stack associated with it.  */
-extern int fr30_frameless_function_invocation PARAMS ((struct frame_info * frame));
+extern int fr30_frameless_function_invocation (struct frame_info *frame);
 #define FRAMELESS_FUNCTION_INVOCATION(FI) (fr30_frameless_function_invocation (FI));
 
-extern void fr30_init_extra_frame_info PARAMS ((struct frame_info * fi));
+extern void fr30_init_extra_frame_info (struct frame_info *fi);
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fi) fr30_init_extra_frame_info (fi)
 
 #define FRAME_CHAIN_VALID(FP, FI)	generic_file_frame_chain_valid (FP, FI)
 
 extern CORE_ADDR
-  fr30_push_arguments PARAMS ((int nargs, struct value ** args, CORE_ADDR sp,
-			       int struct_return,
-			       CORE_ADDR struct_addr));
+fr30_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
+		     int struct_return, CORE_ADDR struct_addr);
 #define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
   (fr30_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR))
 

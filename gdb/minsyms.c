@@ -75,12 +75,10 @@ static int msym_count;
 
 /* Prototypes for local functions. */
 
-static int
-compare_minimal_symbols PARAMS ((const void *, const void *));
+static int compare_minimal_symbols (const void *, const void *);
 
 static int
-compact_minimal_symbols PARAMS ((struct minimal_symbol *, int,
-				 struct objfile *));
+compact_minimal_symbols (struct minimal_symbol *, int, struct objfile *);
 
 static void add_minsym_to_demangled_hash_table (struct minimal_symbol *sym,
 						struct minimal_symbol **table);
@@ -570,7 +568,7 @@ find_stab_function_addr (namestring, filename, objfile)
 /* Return leading symbol character for a BFD. If BFD is NULL,
    return the leading symbol character from the main objfile.  */
 
-static int get_symbol_leading_char PARAMS ((bfd *));
+static int get_symbol_leading_char (bfd *);
 
 static int
 get_symbol_leading_char (abfd)

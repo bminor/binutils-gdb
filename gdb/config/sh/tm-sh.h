@@ -42,7 +42,7 @@ struct type;
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 
-extern CORE_ADDR sh_skip_prologue PARAMS ((CORE_ADDR));
+extern CORE_ADDR sh_skip_prologue (CORE_ADDR);
 #define SKIP_PROLOGUE(ip) (sh_skip_prologue (ip))
 
 /* Immediately after a function call, return the saved pc.
@@ -176,7 +176,7 @@ extern use_struct_convention_fn sh_use_struct_convention;
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  */
 
-extern void sh_extract_return_value PARAMS ((struct type *, void *, void *));
+extern void sh_extract_return_value (struct type *, void *, void *);
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
 	sh_extract_return_value (TYPE, REGBUF, VALBUF)
 
@@ -207,7 +207,7 @@ extern void sh_extract_return_value PARAMS ((struct type *, void *, void *));
 
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fi) \
     sh_init_extra_frame_info(fromleaf, fi)
-extern void sh_init_extra_frame_info PARAMS ((int, struct frame_info *));
+extern void sh_init_extra_frame_info (int, struct frame_info *);
 
 /* A macro that tells us whether the function invocation represented
    by FI does not have a frame on the stack associated with it.  If it
@@ -231,8 +231,8 @@ extern void sh_init_extra_frame_info PARAMS ((int, struct frame_info *));
 
 #define FRAME_ARGS_SKIP 0
 
-extern void sh_frame_find_saved_regs PARAMS ((struct frame_info * fi,
-					    struct frame_saved_regs * fsr));
+extern void sh_frame_find_saved_regs (struct frame_info *fi,
+				      struct frame_saved_regs *fsr);
 
 /* Put here the code to store, into a struct frame_saved_regs,
    the addresses of the saved registers of frame described by FRAME_INFO.
@@ -245,11 +245,11 @@ extern void sh_frame_find_saved_regs PARAMS ((struct frame_info * fi,
 
 typedef unsigned short INSN_WORD;
 
-extern CORE_ADDR sh_push_arguments PARAMS ((int nargs,
-					    struct value ** args,
-					    CORE_ADDR sp,
-					    unsigned char struct_return,
-					    CORE_ADDR struct_addr));
+extern CORE_ADDR sh_push_arguments (int nargs,
+				    struct value **args,
+				    CORE_ADDR sp,
+				    unsigned char struct_return,
+				    CORE_ADDR struct_addr);
 
 #define USE_GENERIC_DUMMY_FRAMES 1
 #define CALL_DUMMY                   {0}
@@ -259,11 +259,11 @@ extern CORE_ADDR sh_push_arguments PARAMS ((int nargs,
 #define FIX_CALL_DUMMY(DUMMY, STARTADDR, FUNADDR, NARGS, ARGS, TYPE, GCCP)
 #define CALL_DUMMY_LOCATION          AT_ENTRY_POINT
 #define CALL_DUMMY_ADDRESS()         entry_point_address ()
-extern CORE_ADDR sh_push_return_address PARAMS ((CORE_ADDR, CORE_ADDR));
+extern CORE_ADDR sh_push_return_address (CORE_ADDR, CORE_ADDR);
 #define PUSH_RETURN_ADDRESS(PC, SP)  sh_push_return_address (PC, SP)
 
 
-extern CORE_ADDR sh_frame_chain PARAMS ((struct frame_info *));
+extern CORE_ADDR sh_frame_chain (struct frame_info *);
 #define FRAME_CHAIN(FRAME)           sh_frame_chain(FRAME)
 #define PUSH_DUMMY_FRAME             generic_push_dummy_frame ()
 #define FRAME_CHAIN_VALID(FP, FRAME) generic_file_frame_chain_valid (FP, FRAME)
@@ -279,7 +279,7 @@ extern CORE_ADDR sh_frame_chain PARAMS ((struct frame_info *));
 /* Discard from the stack the innermost frame, restoring all saved
    registers.  */
 
-extern void sh_pop_frame PARAMS ((void));
+extern void sh_pop_frame (void);
 #define POP_FRAME sh_pop_frame();
 
 #define NOP   {0x20, 0x0b}

@@ -29,8 +29,8 @@ int insert_mode = 0;
 /********************************************
 **       LOCAL STATIC FORWARD DECLS        **
 ********************************************/
-static void _updateCommandInfo PARAMS ((int));
-static unsigned int _tuiHandleResizeDuringIO PARAMS ((unsigned int));
+static void _updateCommandInfo (int);
+static unsigned int _tuiHandleResizeDuringIO (unsigned int);
 
 
 /*********************************************************************************

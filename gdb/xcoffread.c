@@ -195,80 +195,61 @@ static struct complaint ef_complaint =
 static struct complaint eb_complaint =
 {"Mismatched .eb symbol ignored starting at symnum %d", 0, 0};
 
-static void
-xcoff_initial_scan PARAMS ((struct objfile *, int));
+static void xcoff_initial_scan (struct objfile *, int);
+
+static void scan_xcoff_symtab (struct objfile *);
+
+static char *xcoff_next_symbol_text (struct objfile *);
+
+static void record_include_begin (struct coff_symbol *);
 
 static void
-scan_xcoff_symtab PARAMS ((struct objfile *));
+enter_line_range (struct subfile *, unsigned, unsigned,
+		  CORE_ADDR, CORE_ADDR, unsigned *);
 
-static char *
-  xcoff_next_symbol_text PARAMS ((struct objfile *));
+static void init_stringtab (bfd *, file_ptr, struct objfile *);
 
-static void
-record_include_begin PARAMS ((struct coff_symbol *));
+static void xcoff_symfile_init (struct objfile *);
 
-static void
-enter_line_range PARAMS ((struct subfile *, unsigned, unsigned,
-			  CORE_ADDR, CORE_ADDR, unsigned *));
+static void xcoff_new_init (struct objfile *);
 
-static void
-init_stringtab PARAMS ((bfd *, file_ptr, struct objfile *));
+static void xcoff_symfile_finish (struct objfile *);
 
 static void
-xcoff_symfile_init PARAMS ((struct objfile *));
+xcoff_symfile_offsets (struct objfile *, struct section_addr_info *addrs);
 
-static void
-xcoff_new_init PARAMS ((struct objfile *));
+static void find_linenos (bfd *, sec_ptr, PTR);
 
-static void
-xcoff_symfile_finish PARAMS ((struct objfile *));
+static char *coff_getfilename (union internal_auxent *, struct objfile *);
 
-static void
-  xcoff_symfile_offsets PARAMS ((struct objfile *, struct section_addr_info *addrs));
+static void read_symbol (struct internal_syment *, int);
 
-static void
-find_linenos PARAMS ((bfd *, sec_ptr, PTR));
+static int read_symbol_lineno (int);
 
-static char *
-  coff_getfilename PARAMS ((union internal_auxent *, struct objfile *));
+static int read_symbol_nvalue (int);
 
-static void
-read_symbol PARAMS ((struct internal_syment *, int));
+static struct symbol *process_xcoff_symbol (struct coff_symbol *,
+					    struct objfile *);
 
-static int
-read_symbol_lineno PARAMS ((int));
-
-static int
-read_symbol_nvalue PARAMS ((int));
-
-static struct symbol *
-  process_xcoff_symbol PARAMS ((struct coff_symbol *, struct objfile *));
-
-static void
-read_xcoff_symtab PARAMS ((struct partial_symtab *));
+static void read_xcoff_symtab (struct partial_symtab *);
 
 #if 0
-static void
-add_stab_to_list PARAMS ((char *, struct pending_stabs **));
+static void add_stab_to_list (char *, struct pending_stabs **);
 #endif
 
-static int
-compare_lte PARAMS ((const void *, const void *));
+static int compare_lte (const void *, const void *);
 
-static struct linetable *
-  arrange_linetable PARAMS ((struct linetable *));
+static struct linetable *arrange_linetable (struct linetable *);
 
-static void
-record_include_end PARAMS ((struct coff_symbol *));
+static void record_include_end (struct coff_symbol *);
 
-static void
-process_linenos PARAMS ((CORE_ADDR, CORE_ADDR));
+static void process_linenos (CORE_ADDR, CORE_ADDR);
 
 
 /* Translate from a COFF section number (target_index) to a SECT_OFF_*
    code.  */
-static int secnum_to_section PARAMS ((int, struct objfile *));
-static asection *secnum_to_bfd_section PARAMS ((int, struct objfile *));
+static int secnum_to_section (int, struct objfile *);
+static asection *secnum_to_bfd_section (int, struct objfile *);
 
 struct find_targ_sec_arg
   {
@@ -278,7 +259,7 @@ struct find_targ_sec_arg
     struct objfile *objfile;
   };
 
-static void find_targ_sec PARAMS ((bfd *, asection *, void *));
+static void find_targ_sec (bfd *, asection *, void *);
 
 static void
 find_targ_sec (abfd, sect, obj)
@@ -533,7 +514,7 @@ static int inclIndx;		/* last entry to table */
 static int inclLength;		/* table length */
 static int inclDepth;		/* nested include depth */
 
-static void allocate_include_entry PARAMS ((void));
+static void allocate_include_entry (void);
 
 static void
 record_include_begin (cs)
@@ -1787,7 +1768,7 @@ find_linenos (abfd, asect, vpinfo)
     info->max_lineno_offset = maxoff;
 }
 
-static void xcoff_psymtab_to_symtab_1 PARAMS ((struct partial_symtab *));
+static void xcoff_psymtab_to_symtab_1 (struct partial_symtab *);
 
 static void
 xcoff_psymtab_to_symtab_1 (pst)
@@ -1841,7 +1822,7 @@ xcoff_psymtab_to_symtab_1 (pst)
   pst->readin = 1;
 }
 
-static void xcoff_psymtab_to_symtab PARAMS ((struct partial_symtab *));
+static void xcoff_psymtab_to_symtab (struct partial_symtab *);
 
 /* Read in all of the symbols for a given psymtab for real.
    Be verbose about it if the user wants that.  */
@@ -2000,8 +1981,8 @@ init_stringtab (abfd, offset, objfile)
 static unsigned int first_fun_line_offset;
 
 static struct partial_symtab *xcoff_start_psymtab
-  PARAMS ((struct objfile *, char *, int,
-	   struct partial_symbol **, struct partial_symbol **));
+  (struct objfile *, char *, int,
+   struct partial_symbol **, struct partial_symbol **);
 
 /* Allocate and partially fill a partial symtab.  It will be
    completely filled at the end of the symbol list.
@@ -2038,8 +2019,8 @@ xcoff_start_psymtab (objfile, filename, first_symnum, global_syms,
 }
 
 static struct partial_symtab *xcoff_end_psymtab
-  PARAMS ((struct partial_symtab *, char **, int, int,
-	   struct partial_symtab **, int, int));
+  (struct partial_symtab *, char **, int, int,
+   struct partial_symtab **, int, int);
 
 /* Close off the current usage of PST.  
    Returns PST, or NULL if the partial symtab was empty and thrown away.
@@ -2144,10 +2125,9 @@ xcoff_end_psymtab (pst, include_list, num_includes, capping_symbol_number,
   return pst;
 }
 
-static void swap_sym PARAMS ((struct internal_syment *,
-			      union internal_auxent *, char **, char **,
-			      unsigned int *,
-			      struct objfile *));
+static void swap_sym (struct internal_syment *,
+		      union internal_auxent *, char **, char **,
+		      unsigned int *, struct objfile *);
 
 /* Swap raw symbol at *RAW and put the name in *NAME, the symbol in
    *SYMBOL, the first auxent in *AUX.  Advance *RAW and *SYMNUMP over

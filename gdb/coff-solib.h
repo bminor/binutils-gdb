@@ -27,8 +27,7 @@ struct target_ops;
 #if 0
 #define CLEAR_SOLIB			coff_clear_solib
 
-extern void
-coff_clear_solib PARAMS ((void));
+extern void coff_clear_solib (void);
 #endif
 
 /* Called to add symbols from a shared library to gdb's symbol table. */
@@ -36,8 +35,7 @@ coff_clear_solib PARAMS ((void));
 #define SOLIB_ADD(filename, from_tty, targ) \
     coff_solib_add (filename, from_tty, targ)
 
-extern void
-coff_solib_add PARAMS ((char *, int, struct target_ops *));
+extern void coff_solib_add (char *, int, struct target_ops *);
 
 /* Function to be called when the inferior starts up, to discover the names
    of shared libraries that are dynamically linked, the base addresses to
@@ -46,8 +44,7 @@ coff_solib_add PARAMS ((char *, int, struct target_ops *));
 
 #define SOLIB_CREATE_INFERIOR_HOOK(PID)	coff_solib_create_inferior_hook()
 
-extern void
-coff_solib_create_inferior_hook PARAMS ((void));	/* solib.c */
+extern void coff_solib_create_inferior_hook (void);	/* solib.c */
 
 /* Function to be called to remove the connection between debugger and
    dynamic linker that was established by SOLIB_CREATE_INFERIOR_HOOK.
@@ -185,6 +182,5 @@ coff_solib_create_inferior_hook PARAMS ((void));	/* solib.c */
 #if 0
 #define DISABLE_UNSETTABLE_BREAK(addr)	coff_solib_address(addr)
 
-extern int
-solib_address PARAMS ((CORE_ADDR));	/* solib.c */
+extern int solib_address (CORE_ADDR);	/* solib.c */
 #endif

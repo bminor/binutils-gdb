@@ -57,51 +57,49 @@
 static char *dev_name;
 static struct target_ops *targ_ops;
 
-static void monitor_vsprintf PARAMS ((char *sndbuf, char *pattern, va_list args));
+static void monitor_vsprintf (char *sndbuf, char *pattern, va_list args);
 
-static int readchar PARAMS ((int timeout));
+static int readchar (int timeout);
 
-static void monitor_fetch_register PARAMS ((int regno));
-static void monitor_store_register PARAMS ((int regno));
+static void monitor_fetch_register (int regno);
+static void monitor_store_register (int regno);
 
 static void monitor_printable_string (char *newstr, char *oldstr, int len);
 static void monitor_error (char *function, char *message, CORE_ADDR memaddr, int len, char *string, int final_char);
-static void monitor_detach PARAMS ((char *args, int from_tty));
-static void monitor_resume PARAMS ((int pid, int step, enum target_signal sig));
-static void monitor_interrupt PARAMS ((int signo));
-static void monitor_interrupt_twice PARAMS ((int signo));
-static void monitor_interrupt_query PARAMS ((void));
-static void monitor_wait_cleanup PARAMS ((void *old_timeout));
+static void monitor_detach (char *args, int from_tty);
+static void monitor_resume (int pid, int step, enum target_signal sig);
+static void monitor_interrupt (int signo);
+static void monitor_interrupt_twice (int signo);
+static void monitor_interrupt_query (void);
+static void monitor_wait_cleanup (void *old_timeout);
 
-static int monitor_wait PARAMS ((int pid, struct target_waitstatus * status));
-static void monitor_fetch_registers PARAMS ((int regno));
-static void monitor_store_registers PARAMS ((int regno));
-static void monitor_prepare_to_store PARAMS ((void));
-static int monitor_xfer_memory PARAMS ((CORE_ADDR memaddr, char *myaddr, int len, int write, struct target_ops * target));
-static void monitor_files_info PARAMS ((struct target_ops * ops));
-static int monitor_insert_breakpoint PARAMS ((CORE_ADDR addr, char *shadow));
-static int monitor_remove_breakpoint PARAMS ((CORE_ADDR addr, char *shadow));
-static void monitor_kill PARAMS ((void));
-static void monitor_load PARAMS ((char *file, int from_tty));
-static void monitor_mourn_inferior PARAMS ((void));
-static void monitor_stop PARAMS ((void));
+static int monitor_wait (int pid, struct target_waitstatus *status);
+static void monitor_fetch_registers (int regno);
+static void monitor_store_registers (int regno);
+static void monitor_prepare_to_store (void);
+static int monitor_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
+				int write, struct target_ops *target);
+static void monitor_files_info (struct target_ops *ops);
+static int monitor_insert_breakpoint (CORE_ADDR addr, char *shadow);
+static int monitor_remove_breakpoint (CORE_ADDR addr, char *shadow);
+static void monitor_kill (void);
+static void monitor_load (char *file, int from_tty);
+static void monitor_mourn_inferior (void);
+static void monitor_stop (void);
 
-static int monitor_read_memory PARAMS ((CORE_ADDR addr, char *myaddr, int len));
-static int monitor_write_memory PARAMS ((CORE_ADDR addr, char *myaddr, int len));
-static int monitor_write_memory_bytes PARAMS ((CORE_ADDR addr,
-					       char *myaddr, int len));
-static int monitor_write_memory_block PARAMS ((
-						CORE_ADDR memaddr,
-						char *myaddr,
-						int len));
-static int monitor_expect_regexp PARAMS ((struct re_pattern_buffer * pat,
-					  char *buf, int buflen));
-static void monitor_dump_regs PARAMS ((void));
+static int monitor_read_memory (CORE_ADDR addr, char *myaddr, int len);
+static int monitor_write_memory (CORE_ADDR addr, char *myaddr, int len);
+static int monitor_write_memory_bytes (CORE_ADDR addr, char *myaddr, int len);
+static int monitor_write_memory_block (CORE_ADDR memaddr,
+				       char *myaddr, int len);
+static int monitor_expect_regexp (struct re_pattern_buffer *pat,
+				  char *buf, int buflen);
+static void monitor_dump_regs (void);
 #if 0
-static int from_hex PARAMS ((int a));
-static unsigned long get_hex_word PARAMS ((void));
+static int from_hex (int a);
+static unsigned long get_hex_word (void);
 #endif
-static void parse_register_dump PARAMS ((char *, int));
+static void parse_register_dump (char *, int);
 
 static struct monitor_ops *current_monitor;
 

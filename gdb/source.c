@@ -64,25 +64,25 @@
 
 /* Prototypes for exported functions. */
 
-void _initialize_source PARAMS ((void));
+void _initialize_source (void);
 
 /* Prototypes for local functions. */
 
-static int get_filename_and_charpos PARAMS ((struct symtab *, char **));
+static int get_filename_and_charpos (struct symtab *, char **);
 
-static void reverse_search_command PARAMS ((char *, int));
+static void reverse_search_command (char *, int);
 
-static void forward_search_command PARAMS ((char *, int));
+static void forward_search_command (char *, int);
 
-static void line_info PARAMS ((char *, int));
+static void line_info (char *, int);
 
-static void list_command PARAMS ((char *, int));
+static void list_command (char *, int);
 
-static void ambiguous_line_spec PARAMS ((struct symtabs_and_lines *));
+static void ambiguous_line_spec (struct symtabs_and_lines *);
 
-static void source_info PARAMS ((char *, int));
+static void source_info (char *, int);
 
-static void show_directories PARAMS ((char *, int));
+static void show_directories (char *, int);
 
 /* Path of directories to search for source files.
    Same format as the PATH environment variable's value.  */
@@ -996,7 +996,8 @@ identify_source_line (s, line, mid_statement, pc)
 /* Print source lines from the file of symtab S,
    starting with line number LINE and stopping before line number STOPLINE. */
 
-static void print_source_lines_base PARAMS ((struct symtab * s, int line, int stopline, int noerror));
+static void print_source_lines_base (struct symtab *s, int line, int stopline,
+				     int noerror);
 static void
 print_source_lines_base (s, line, stopline, noerror)
      struct symtab *s;
@@ -1167,8 +1168,8 @@ print_source_lines (s, line, stopline, noerror)
   else
     {
       TuiGenWinInfoPtr locator = locatorWinInfoPtr ();
-      extern void tui_vAddWinToLayout PARAMS ((va_list));
-      extern void tui_vUpdateSourceWindowsWithLine PARAMS ((va_list));
+extern void tui_vAddWinToLayout (va_list);
+extern void tui_vUpdateSourceWindowsWithLine (va_list);
 
       /* Regardless of whether we can open the file,
          set current_source_symtab. */
