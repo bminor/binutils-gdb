@@ -186,7 +186,7 @@ UNIX MAKE and GNU MAKE
 When you build gdb in the same directory as the source, you should be able
 to use any available "make" that has traditional UNIX make functionality.
 If you build gdb in a separate directory tree from the source, using the
-configure "--subdir" option, then only GNU make is fully supported, although
+configure "--srcdir" option, then only GNU make is fully supported, although
 other makes with complete VPATH support should work (SunOS make for example).
 
 
