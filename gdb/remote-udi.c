@@ -561,6 +561,38 @@ udi_wait (pid, status)
   return inferior_pid;
 }
 
+#if 0
+/* Handy for debugging */
+udi_pc()
+{
+  UDIResource	From;
+  UDIUInt32	*To;
+  UDICount	Count;
+  UDISizeT	Size = 4;
+  UDICount	CountDone;
+  UDIBool	HostEndian = 0;
+  UDIError	err;
+  int pc[2];
+
+  From.Space = UDI29KPC;
+  From.Offset = 0;
+  To = (UDIUInt32 *)pc;
+  Count = 2;
+
+  err = UDIRead(From, To, Count, Size, &CountDone, HostEndian);
+
+  printf ("err = %d, CountDone = %d, pc[0] = 0x%x, pc[1] = 0x%x\n",
+	  err, CountDone, pc[0], pc[1]);
+
+  udi_fetch_registers(-1);
+
+  printf("other pc1 = 0x%x, pc0 = 0x%x\n", *(int *)&registers[4 * PC_REGNUM],
+	  *(int *)&registers[4 * NPC_REGNUM]);
+
+  return pc[0];
+}
+#endif
+
 /********************************************************** UDI_FETCH_REGISTERS
  * Read a remote register 'regno'. 
  * If regno==-1 then read all the registers.
@@ -773,6 +805,15 @@ int regno;
     To.Offset = 10;				/* PC0 */
   if(UDIWrite(From, To, Count, Size, &CountDone, HostEndian))
     error("UDIWrite() failed in udi_store_regisetrs");
+
+/* PC1 via UDI29KPC */
+
+  From = (UDIUInt32 *)&registers[4 * PC_REGNUM];
+  To.Space = UDI29KPC;
+  To.Offset = 0;				/* PC1 */
+  Count = 1;
+  if (UDIWrite (From, To, Count, Size, &CountDone, HostEndian))
+    error ("UDIWrite() failed in udi_store_regisetrs");
 
   /* LRU and MMU */
 
@@ -1355,49 +1396,59 @@ store_register (regno)
     printf("Storing register %s = 0x%x\n", reg_names[regno], From);
 
   if (regno == GR1_REGNUM)
-  { To.Space = UDI29KGlobalRegs;
-    To.Offset = 1;
-    result = UDIWrite(&From, To, Count, Size, &CountDone, HostEndian);
-    /* Setting GR1 changes the numbers of all the locals, so invalidate the 
-     * register cache.  Do this *after* calling read_register, because we want 
-     * read_register to return the value that write_register has just stuffed 
-     * into the registers array, not the value of the register fetched from 
-     * the inferior.  
-     */
-    registers_changed ();
-  }
+    {
+      To.Space = UDI29KGlobalRegs;
+      To.Offset = 1;
+      result = UDIWrite(&From, To, Count, Size, &CountDone, HostEndian);
+      /* Setting GR1 changes the numbers of all the locals, so invalidate the 
+       * register cache.  Do this *after* calling read_register, because we want 
+       * read_register to return the value that write_register has just stuffed 
+       * into the registers array, not the value of the register fetched from 
+       * the inferior.  
+       */
+      registers_changed ();
+    }
 #if defined(GR64_REGNUM)
   else if (regno >= GR64_REGNUM && regno < GR64_REGNUM + 32 )
-  { To.Space = UDI29KGlobalRegs;
-    To.Offset = (regno - GR64_REGNUM) + 64;
-    result = UDIWrite(&From, To, Count, Size, &CountDone, HostEndian);
-  }
+    {
+      To.Space = UDI29KGlobalRegs;
+      To.Offset = (regno - GR64_REGNUM) + 64;
+      result = UDIWrite(&From, To, Count, Size, &CountDone, HostEndian);
+    }
 #endif	/* GR64_REGNUM */
   else if (regno >= GR96_REGNUM && regno < GR96_REGNUM + 32)
-  { To.Space = UDI29KGlobalRegs;
-    To.Offset = (regno - GR96_REGNUM) + 96;
-    result = UDIWrite(&From, To, Count, Size, &CountDone, HostEndian);
-  }
+    {
+      To.Space = UDI29KGlobalRegs;
+      To.Offset = (regno - GR96_REGNUM) + 96;
+      result = UDIWrite(&From, To, Count, Size, &CountDone, HostEndian);
+    }
   else if (regno >= LR0_REGNUM && regno < LR0_REGNUM + 128)
-  { To.Space = UDI29KLocalRegs;
-    To.Offset = (regno - LR0_REGNUM);
-    result = UDIWrite(&From, To, Count, Size, &CountDone, HostEndian);
-  }
-  else if (regno>=FPE_REGNUM && regno<=EXO_REGNUM)  
-  { 
+    {
+      To.Space = UDI29KLocalRegs;
+      To.Offset = (regno - LR0_REGNUM);
+      result = UDIWrite(&From, To, Count, Size, &CountDone, HostEndian);
+    }
+  else if (regno >= FPE_REGNUM && regno <= EXO_REGNUM)  
     return 0;		/* Pretend Success */
-  }
-  else 	/* An unprotected or protected special register */
-  { To.Space = UDI29KSpecialRegs;
-    To.Offset = regnum_to_srnum(regno); 
-    result = UDIWrite(&From, To, Count, Size, &CountDone, HostEndian);
-  }
+  else if (regno == PC_REGNUM)
+    {    
+      /* PC1 via UDI29KPC */
 
-  if(result)
-  { result = -1;
+      To.Space = UDI29KPC;
+      To.Offset = 0;		/* PC1 */
+      result = UDIWrite (&From, To, Count, Size, &CountDone, HostEndian);
+    }
+  else 	/* An unprotected or protected special register */
+    {
+      To.Space = UDI29KSpecialRegs;
+      To.Offset = regnum_to_srnum(regno); 
+      result = UDIWrite(&From, To, Count, Size, &CountDone, HostEndian);
+    }
+
+  if (result != 0)
     error("UDIWrite() failed in store_registers");
-  }
-  return result;
+
+  return 0;
 }
 /********************************************************** REGNUM_TO_SRNUM */
 /* 

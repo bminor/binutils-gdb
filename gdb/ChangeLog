@@ -1,3 +1,9 @@
+Thu Oct 21 02:59:07 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* remote-udi.c (udi_store_registers, store_register):  Use
+	UDI29KPC address space when modifying PC.  It seems that you can't
+	modify the PC directly (at least in the isstip simulator).
+
 Wed Oct 20 11:35:43 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* target.h: Put remote_debug declaration back here.  Add baud_rate.
