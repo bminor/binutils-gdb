@@ -954,6 +954,7 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{--keep-global-symbols=}@var{filename}]
         [@option{--localize-symbols=}@var{filename}]
         [@option{--weaken-symbols=}@var{filename}]
+        [@option{--alt-machine-code=@var{index}}]
         [@option{-v}|@option{--verbose}]
         [@option{-V}|@option{--version}]  
         [@option{--help}]
@@ -1305,6 +1306,13 @@ Apply @option{--weaken-symbol} option to each symbol listed in the file
 @var{filename}.  @var{filename} is simply a flat file, with one symbol
 name per line.  Line comments may be introduced by the hash character.
 This option may be given more than once.
+
+@item --alt-machine-code=@var{index}
+If the output architecture has alternate machine codes, use the
+@var{index}th code instead of the default one.  This is useful in case
+a machine is assigned an official code and the tool-chain adopts the 
+new code, but other applications still depend on the original code
+being used.
 
 @item -V
 @itemx --version

@@ -11,6 +11,10 @@
 
 * Support for OpenRISC by Johan Rydberg.
 
+* New command line switch to objcopy --alt-machine-code which creates a binary
+  with an alternate machine code if one is defined in the architecture
+  description.  Only supported for ELF targets.  By Alexandre Oliva.
+
 * New command line switch to objcopy -B (or --binary-architecture) which sets
   the architecture of the output file to the given argument.  This option only
   makes sense, if the input target is binary.  Otherwise it is ignored.

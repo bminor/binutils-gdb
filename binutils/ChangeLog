@@ -1,3 +1,13 @@
+2001-08-24  Alexandre Oliva  <aoliva@redhat.com>
+
+	* objcopy.c (use_alt_mach_code): New variable.
+	(OPTION_ALT_MACH_CODE): Define.
+	(copy_options): Added --alt-machine-code.
+	(copy_main): Handle it.
+	(copy_object): Switch to alternate machine code if requested.
+	* doc/binutils.texi: Document new option.
+	* NEWS: Likewise.
+
 2001-08-22  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* readelf.c (get_machine_flags): Add detection of EF_MIPS_UCODE.

@@ -171,6 +171,9 @@ static bfd_byte gap_fill = 0;
 static boolean pad_to_set = false;
 static bfd_vma pad_to;
 
+/* Use alternate machine code?  */
+static int use_alt_mach_code = 0;
+
 /* List of sections to add.  */
 struct section_add
 {
@@ -240,6 +243,7 @@ static boolean weaken = false;
 #define OPTION_KEEPGLOBAL_SYMBOLS (OPTION_LOCALIZE_SYMBOLS + 1)
 #define OPTION_WEAKEN_SYMBOLS (OPTION_KEEPGLOBAL_SYMBOLS + 1)
 #define OPTION_RENAME_SECTION (OPTION_WEAKEN_SYMBOLS + 1)
+#define OPTION_ALT_MACH_CODE (OPTION_RENAME_SECTION + 1)
 
 /* Options to handle if running as "strip".  */
 
@@ -326,6 +330,7 @@ static struct option copy_options[] =
   {"keep-global-symbols", required_argument, 0, OPTION_KEEPGLOBAL_SYMBOLS},
   {"localize-symbols", required_argument, 0, OPTION_LOCALIZE_SYMBOLS},
   {"weaken-symbols", required_argument, 0, OPTION_WEAKEN_SYMBOLS},
+  {"alt-machine-code", required_argument, 0, OPTION_ALT_MACH_CODE},
   {0, no_argument, 0, 0}
 };
 
@@ -408,6 +413,7 @@ copy_usage (stream, exit_status)
      --localize-symbols <file>     -L for all symbols listed in <file>\n\
      --keep-global-symbols <file>  -G for all symbols listed in <file>\n\
      --weaken-symbols <file>       -W for all symbols listed in <file>\n\
+     --alt-machine-code <index>    Use alternate machine code for output\n\
   -v --verbose                     List all object files modified\n\
   -V --version                     Display this program's version number\n\
   -h --help                        Display this output\n\
@@ -1243,6 +1249,15 @@ copy_object (ibfd, obfd)
 		 bfd_errmsg (bfd_get_error ()));
       status = 1;
       return;
+    }
+
+  /* Switch to the alternate machine code.  We have to do this at the
+     very end, because we only initialize the header when we create
+     the first section.  */
+  if (use_alt_mach_code != 0)
+    {
+      if (!bfd_alt_mach_code (obfd, use_alt_mach_code))
+	non_fatal (_("unknown alternate machine code, ignored"));
     }
 }
 
@@ -2460,6 +2475,12 @@ copy_main (argc, argv)
 
 	case OPTION_WEAKEN_SYMBOLS:
 	  add_specific_symbols (optarg, &weaken_specific_list);
+	  break;
+
+	case OPTION_ALT_MACH_CODE:
+	  use_alt_mach_code = atoi (optarg);
+	  if (use_alt_mach_code <= 0)
+	    fatal (_("alternate machine code index must be positive"));
 	  break;
 
 	case 0:
