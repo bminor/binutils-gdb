@@ -1,3 +1,15 @@
+start-sanitize-d30v
+Tue Feb 18 17:40:36 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* common.h (EM_CYGNUS_D30V): Define.
+
+end-sanitize-d30v
+start-sanitize-m32r
+Mon Jan 27 11:54:44 1997  Doug Evans  <dje@seba.cygnus.com>
+
+	* m32r.h (enum reloc_type): Add R_M32R_HI16_[SU]LO,R_M32R_LO16.
+
+end-sanitize-m32r
 start-sanitize-v850 
 Fri Jan  3 11:32:51 1997  Michael Meissner  <meissner@tiktok.cygnus.com>
 
@@ -5,6 +17,8 @@ Fri Jan  3 11:32:51 1997  Michael Meissner  <meissner@tiktok.cygnus.com>
 	field.
 	(SHN_V850_*): Remove v850 specific section indexes, which are not
 	needed.
+	(enum reloc_type): Move the v850 relocations here from
+	elf32-v850.c
 
 Thu Jan  2 19:30:23 1997  Michael Meissner  <meissner@tiktok.cygnus.com>
 

@@ -124,13 +124,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define EM_CYGNUS_D10V	0x7650
 /* end-sanitize-d10v */
 
+/* start-sanitize-d30v */
+/* D30V backend magic number.  Written in the absence of an ABI.  */
+#define EM_CYGNUS_D30V	0x7676
+/* end-sanitize-d30v */
+
 /* start-sanitize-v850 */
 /* V850 backend magic number.  Written in the absense of an ABI.  */
 #define EM_CYGNUS_V850	0x9080
 /* end-sanitize-v850 */
 
-/* V850 backend magic number.  Written in the absense of an ABI.  */
-#define EM_CYGNUS_MN10x00	0xdead
+/* mn10200 and mn10300 backend magic numbers.
+   Written in the absense of an ABI.  */
+#define EM_CYGNUS_MN10200	0xdead
+#define EM_CYGNUS_MN10300	0xbeef
 
 /* See the above comment before you add a new EM_* value here.  */
 
@@ -268,5 +275,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define DT_JMPREL	23
 #define DT_LOPROC	0x70000000
 #define DT_HIPROC	0x7fffffff
+
+/* These section tags are used on Solaris.  We support them
+   everywhere, and hope they do not conflict.  */
+
+#define DT_AUXILIARY	0x7ffffffd
+#define DT_FILTER	0x7fffffff
 
 #endif /* _ELF_COMMON_H */
