@@ -1653,13 +1653,12 @@ elfNN_ia64_dynamic_symbol_p (h, info)
       || h->root.type == bfd_link_hash_defweak)
     return TRUE;
 
-  if ((!info->executable && (!info->symbolic || info->allow_shlib_undefined))
-      || ((h->elf_link_hash_flags
-	   & (ELF_LINK_HASH_DEF_DYNAMIC | ELF_LINK_HASH_REF_REGULAR))
-	  == (ELF_LINK_HASH_DEF_DYNAMIC | ELF_LINK_HASH_REF_REGULAR)))
+  /* If it isn't defined locally, then clearly it's dynamic.  */
+  if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
     return TRUE;
 
-  return FALSE;
+  /* Identify the cases where name binding rules say it resolves local.  */
+  return !(info->executable || info->symbolic);
 }
 
 static bfd_boolean

@@ -1,3 +1,8 @@
+2003-07-16  Richard Henderson  <rth@redhat.com>
+
+	* elfxx-ia64.c (elfNN_ia64_dynamic_symbol_p): Properly return false
+	for symbols defined locally plus -Bsymbolic.  Tidy logic.
+
 2003-07-15  Richard Sandiford  <rsandifo@redhat.com>
 
 	* archures.c (bfd_mach_mips7000): New.
