@@ -1379,6 +1379,7 @@ hppa_pop_frame ()
       old_chain = make_cleanup (delete_breakpoint, breakpoint);
 
       /* Start up the inferior.  */
+      clear_proceed_status ();
       proceed_to_finish = 1;
       proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
 

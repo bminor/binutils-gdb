@@ -1,3 +1,8 @@
+Mon Apr  1 08:32:23 1996  Fred Fish  <fnf@cygnus.com>
+
+	* hppa-tdep.c (hppa_pop_frame): Call clear_proceed_status before
+	proceeding.
+
 Sun Mar 31 16:15:43 1996  Fred Fish  <fnf@.cygnus.com>
 
 	* hppah-nat.c (store_inferior_registers, store_inferior_registers,
