@@ -2887,6 +2887,12 @@ elf_get_dynamic_symtab_upper_bound (abfd)
   long symtab_size;
   Elf_Internal_Shdr *hdr = &elf_tdata (abfd)->dynsymtab_hdr;
 
+  if (elf_dynsymtab (abfd) == 0)
+    {
+      bfd_set_error (bfd_error_invalid_operation);
+      return -1;
+    }
+
   symcount = hdr->sh_size / sizeof (Elf_External_Sym);
   symtab_size = (symcount - 1 + 1) * (sizeof (asymbol *));
 
@@ -4657,8 +4663,9 @@ static const size_t elf_buckets[] =
    addresses of the various sections.  */
 
 boolean
-NAME(bfd_elf,size_dynamic_sections) (output_bfd, info, sinterpptr)
+NAME(bfd_elf,size_dynamic_sections) (output_bfd, rpath, info, sinterpptr)
      bfd *output_bfd;
+     const char *rpath;
      struct bfd_link_info *info;
      asection **sinterpptr;
 {
@@ -4731,6 +4738,16 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, info, sinterpptr)
   put_word (output_bfd, dynsymcount, s->contents + (ARCH_SIZE / 8));
 
   elf_hash_table (info)->bucketcount = bucketcount;
+
+  if (rpath != NULL)
+    {
+      unsigned long indx;
+
+      indx = bfd_add_to_strtab (dynobj, elf_hash_table (info)->dynstr, rpath);
+      if (indx == (unsigned long) -1
+	  || ! elf_add_dynamic_entry (info, DT_RPATH, indx))
+	return false;
+    }
 
   s = bfd_get_section_by_name (dynobj, ".dynstr");
   BFD_ASSERT (s != NULL);

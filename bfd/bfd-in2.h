@@ -532,9 +532,9 @@ extern boolean bfd_elf32_record_link_assignment
 extern boolean bfd_elf64_record_link_assignment
   PARAMS ((bfd *, struct bfd_link_info *, const char *));
 extern boolean bfd_elf32_size_dynamic_sections
-  PARAMS ((bfd *, struct bfd_link_info *, struct sec **));
+  PARAMS ((bfd *, const char *, struct bfd_link_info *, struct sec **));
 extern boolean bfd_elf64_size_dynamic_sections
-  PARAMS ((bfd *, struct bfd_link_info *, struct sec **));
+  PARAMS ((bfd *, const char *, struct bfd_link_info *, struct sec **));
 extern void bfd_elf_set_dt_needed_name PARAMS ((bfd *, const char *));
 
 /* SunOS shared library support routines for the linker.  */
@@ -1143,6 +1143,7 @@ enum complain_overflow
 };
 
 typedef unsigned char bfd_byte;
+typedef struct reloc_howto_struct reloc_howto_type;
 
 struct reloc_howto_struct
 {
@@ -1236,7 +1237,6 @@ struct reloc_howto_struct
   boolean pcrel_offset;
 
 };
-typedef struct reloc_howto_struct reloc_howto_type;
 #define HOWTO(C, R,S,B, P, BI, O, SF, NAME, INPLACE, MASKSRC, MASKDST, PC) \
   {(unsigned)C,R,S,B, P, BI, O,SF, 0,NAME,INPLACE,MASKSRC,MASKDST,PC}
 #define HOWTO2(C, R,S,B, P, BI, O, SF, SF1,NAME, INPLACE, MASKSRC, MASKDST, PC) \
