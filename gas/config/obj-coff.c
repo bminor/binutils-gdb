@@ -1607,7 +1607,7 @@ obj_coff_section (ignore)
 		case 'b': flags |= SEC_ALLOC; flags &=~ SEC_LOAD; break;
 		case 'n': flags &=~ SEC_LOAD; flags |= SEC_NEVER_LOAD; break;
 
-		case 's': flags |= SEC_SHARED; /* fall through */
+		case 's': flags |= SEC_COFF_SHARED; /* fall through */
 		case 'd': flags |= SEC_DATA | SEC_LOAD; /* fall through */
 		case 'w': flags &=~ SEC_READONLY; break;
 
@@ -1662,7 +1662,7 @@ obj_coff_section (ignore)
       /* This section's attributes have already been set. Warn if the
          attributes don't match.  */
       flagword matchflags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE
-			     | SEC_DATA | SEC_SHARED | SEC_NEVER_LOAD);
+			     | SEC_DATA | SEC_COFF_SHARED | SEC_NEVER_LOAD);
       if ((flags ^ oldflags) & matchflags)
 	as_warn (_("Ignoring changed section attributes for %s"), name);
     }

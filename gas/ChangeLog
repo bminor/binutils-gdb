@@ -1,3 +1,14 @@
+2005-02-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/obj-coff.c (obj_coff_section): Replace SEC_SHARED with
+	SEC_COFF_SHARED.
+
+	* config/tc-tic54x.c (tic54x_bss): Replace SEC_BLOCK with
+	SEC_TIC54X_BLOCK.
+	(demand_empty_rest_of_line): Likewise.
+	(tic54x_sblock): Likewise.
+	(tic54x_clink): Replace with SEC_CLINK with SEC_TIC54X_CLINK.
+
 2005-02-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* read.c (address_bytes): New function.

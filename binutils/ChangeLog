@@ -1,3 +1,12 @@
+2005-02-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* objcopy.c (parse_flags): Replace SEC_SHARED with
+	SEC_COFF_SHARED.
+
+	* objdump.c (dump_section_header): Dump SEC_TIC54X_BLOCK and
+	SEC_TIC54X_CLINK for TI c54x only. Remove SEC_ARCH_BIT_0. Dump
+	SEC_COFF_SHARED for COFF only.
+
 2005-02-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am"

@@ -494,12 +494,12 @@ sec_to_styp_flags (sec_name, sec_flags)
     }
 
 #ifdef STYP_CLINK
-  if (sec_flags & SEC_CLINK)
+  if (sec_flags & SEC_TIC54X_CLINK)
     styp_flags |= STYP_CLINK;
 #endif
 
 #ifdef STYP_BLOCK
-  if (sec_flags & SEC_BLOCK)
+  if (sec_flags & SEC_TIC54X_BLOCK)
     styp_flags |= STYP_BLOCK;
 #endif
 
@@ -579,7 +579,7 @@ sec_to_styp_flags (sec_name, sec_flags)
     styp_flags |= IMAGE_SCN_MEM_WRITE;    /* Invert READONLY for write.  */
   if (sec_flags & SEC_CODE)
     styp_flags |= IMAGE_SCN_MEM_EXECUTE;  /* CODE->EXECUTE.  */
-  if (sec_flags & SEC_SHARED)
+  if (sec_flags & SEC_COFF_SHARED)
     styp_flags |= IMAGE_SCN_MEM_SHARED;   /* Shared remains meaningful.  */
 
   return styp_flags;
@@ -608,12 +608,12 @@ styp_to_sec_flags (abfd, hdr, name, section, flags_ptr)
 
 #ifdef STYP_BLOCK
   if (styp_flags & STYP_BLOCK)
-    sec_flags |= SEC_BLOCK;
+    sec_flags |= SEC_TIC54X_BLOCK;
 #endif
 
 #ifdef STYP_CLINK
   if (styp_flags & STYP_CLINK)
-    sec_flags |= SEC_CLINK;
+    sec_flags |= SEC_TIC54X_CLINK;
 #endif
 
 #ifdef STYP_NOLOAD
@@ -1086,7 +1086,7 @@ styp_to_sec_flags (abfd, hdr, name, section, flags_ptr)
 	    sec_flags |= SEC_DEBUGGING;
 	  break;
 	case IMAGE_SCN_MEM_SHARED:
-	  sec_flags |= SEC_SHARED;
+	  sec_flags |= SEC_COFF_SHARED;
 	  break;
 	case IMAGE_SCN_LNK_REMOVE:
 	  sec_flags |= SEC_EXCLUDE;

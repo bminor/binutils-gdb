@@ -547,7 +547,7 @@ parse_flags (const char *s)
       PARSE_FLAG ("code", SEC_CODE);
       PARSE_FLAG ("data", SEC_DATA);
       PARSE_FLAG ("rom", SEC_ROM);
-      PARSE_FLAG ("share", SEC_SHARED);
+      PARSE_FLAG ("share", SEC_COFF_SHARED);
       PARSE_FLAG ("contents", SEC_HAS_CONTENTS);
 #undef PARSE_FLAG
       else

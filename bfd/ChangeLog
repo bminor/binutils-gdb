@@ -1,3 +1,27 @@
+2005-02-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* coffcode.h (sec_to_styp_flags): Replaced SEC_CLINK with
+	SEC_TIC54X_CLINK. Replace SEC_BLOCK with SEC_TIC54X_BLOCK.
+	Replace SEC_SHARED with SEC_COFF_SHARED.
+	(styp_to_sec_flags): Likewise.
+
+	* elfxx-target.h (TARGET_BIG_SYM): Remove SEC_ARCH_BIT_0.
+	(TARGET_LITTLE_SYM): Likewise.
+
+	* section.c (SEC_ARCH_BIT_0): Removed.
+	(SEC_LINK_DUPLICATES_SAME_CONTENTS): Defined with
+	SEC_LINK_DUPLICATES_ONE_ONLY and SEC_LINK_DUPLICATES_SAME_SIZE.
+	(SEC_SHARED): Renamed to ...
+	(SEC_COFF_SHARED): This.
+	(SEC_BLOCK): Renamed to ...
+	(SEC_TIC54X_BLOCK): This.
+	(SEC_CLINK): Renamed to ...
+	(SEC_TIC54X_CLINK): This.
+	(SEC_XXX): Rearranged. Move SEC_COFF_SHARED_LIBRARY,
+	SEC_COFF_SHARED, SEC_TIC54X_BLOCK and SEC_TIC54X_CLINK to the
+	end.
+	* bfd-in2.h: Regenerated.
+
 2005-02-21  Fred Fish  <fnf@specifixinc.com>
 
 	* dwarf2.c (find_abstract_instance_name): Call recursively

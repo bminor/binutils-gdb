@@ -641,7 +641,7 @@ const bfd_target TARGET_BIG_SYM =
   /* section_flags: mask of all section flags */
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_READONLY
    | SEC_CODE | SEC_DATA | SEC_DEBUGGING | SEC_EXCLUDE | SEC_SORT_ENTRIES
-   | SEC_ARCH_BIT_0 | SEC_SMALL_DATA | SEC_MERGE | SEC_STRINGS | SEC_GROUP),
+   | SEC_SMALL_DATA | SEC_MERGE | SEC_STRINGS | SEC_GROUP),
 
    /* leading_symbol_char: is the first char of a user symbol
       predictable, and if so what is it */
@@ -737,7 +737,7 @@ const bfd_target TARGET_LITTLE_SYM =
   /* section_flags: mask of all section flags */
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_READONLY
    | SEC_CODE | SEC_DATA | SEC_DEBUGGING | SEC_EXCLUDE | SEC_SORT_ENTRIES
-   | SEC_ARCH_BIT_0 | SEC_SMALL_DATA | SEC_MERGE | SEC_STRINGS | SEC_GROUP),
+   | SEC_SMALL_DATA | SEC_MERGE | SEC_STRINGS | SEC_GROUP),
 
    /* leading_symbol_char: is the first char of a user symbol
       predictable, and if so what is it */

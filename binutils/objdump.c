@@ -290,7 +290,7 @@ nonfatal (const char *msg)
 }
 
 static void
-dump_section_header (bfd *abfd ATTRIBUTE_UNUSED, asection *section,
+dump_section_header (bfd *abfd, asection *section,
 		     void *ignored ATTRIBUTE_UNUSED)
 {
   char *comma = "";
@@ -324,11 +324,14 @@ dump_section_header (bfd *abfd ATTRIBUTE_UNUSED, asection *section,
   PF (SEC_NEVER_LOAD, "NEVER_LOAD");
   PF (SEC_EXCLUDE, "EXCLUDE");
   PF (SEC_SORT_ENTRIES, "SORT_ENTRIES");
-  PF (SEC_BLOCK, "BLOCK");
-  PF (SEC_CLINK, "CLINK");
+  if (bfd_get_arch (abfd) == bfd_arch_tic54x)
+    {
+      PF (SEC_TIC54X_BLOCK, "BLOCK");
+      PF (SEC_TIC54X_CLINK, "CLINK");
+    }
   PF (SEC_SMALL_DATA, "SMALL_DATA");
-  PF (SEC_SHARED, "SHARED");
-  PF (SEC_ARCH_BIT_0, "ARCH_BIT_0");
+  if (bfd_get_flavour (abfd) == bfd_target_coff_flavour)
+    PF (SEC_COFF_SHARED, "SHARED");
   PF (SEC_THREAD_LOCAL, "THREAD_LOCAL");
 
   if ((section->flags & SEC_LINK_ONCE) != 0)

@@ -1,3 +1,10 @@
+2005-02-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ldlang.c (lang_add_section): Check SEC_TIC54X_BLOCK for TI
+	tic54x input only.
+	(lang_size_sections_1): Check SEC_COFF_SHARED_LIBRARY for COFF
+	and ECOFF output only.
+
 2005-02-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* config.in: Regenerate.

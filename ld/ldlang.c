@@ -1413,9 +1413,10 @@ lang_add_section (lang_statement_list_type *ptr,
       if (output->section_alignment != -1)
 	output->bfd_section->alignment_power = output->section_alignment;
 
-      if (section->flags & SEC_BLOCK)
+      if (bfd_get_arch (section->owner) == bfd_arch_tic54x
+	  && (section->flags & SEC_TIC54X_BLOCK) != 0)
 	{
-	  output->bfd_section->flags |= SEC_BLOCK;
+	  output->bfd_section->flags |= SEC_TIC54X_BLOCK;
 	  /* FIXME: This value should really be obtained from the bfd...  */
 	  output->block_value = 128;
 	}
@@ -3424,7 +3425,9 @@ lang_size_sections_1
 	       address from the input section.  FIXME: This is COFF
 	       specific; it would be cleaner if there were some other way
 	       to do this, but nothing simple comes to mind.  */
-	    if ((os->bfd_section->flags & SEC_COFF_SHARED_LIBRARY) != 0)
+	    if ((bfd_get_flavour (output_bfd) == bfd_target_ecoff_flavour
+		 || bfd_get_flavour (output_bfd) == bfd_target_coff_flavour)
+		&& (os->bfd_section->flags & SEC_COFF_SHARED_LIBRARY) != 0)
 	      {
 		asection *input;
 

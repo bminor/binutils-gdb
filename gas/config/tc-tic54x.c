@@ -661,7 +661,7 @@ tic54x_bss (x)
     }
 
   if (block)
-    bss_section->flags |= SEC_BLOCK;
+    bss_section->flags |= SEC_TIC54X_BLOCK;
 
   subseg_set (current_seg, current_subseg);	/* Restore current seg.  */
   demand_empty_rest_of_line ();
@@ -1574,7 +1574,7 @@ tic54x_usect (x)
   *p = 0;
 
   if (blocking_flag)
-    flags |= SEC_BLOCK;
+    flags |= SEC_TIC54X_BLOCK;
 
   if (!bfd_set_section_flags (stdoutput, seg, flags))
     as_warn ("Error setting flags for \"%s\": %s", name,
@@ -2014,7 +2014,7 @@ tic54x_clink (ignored)
 	}
     }
 
-  seg->flags |= SEC_CLINK;
+  seg->flags |= SEC_TIC54X_CLINK;
 
   demand_empty_rest_of_line ();
 }
@@ -2325,7 +2325,7 @@ tic54x_sblock (ignore)
 	  ignore_rest_of_line ();
 	  return;
 	}
-      seg->flags |= SEC_BLOCK;
+      seg->flags |= SEC_TIC54X_BLOCK;
 
       c = *input_line_pointer;
       if (!is_end_of_line[(int) c])
