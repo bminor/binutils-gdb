@@ -33,12 +33,6 @@ struct symbol;
 struct type;
 struct value;
 
-/* Return non-zero if PC points to an instruction which will cause a step
-   to execute both the instruction at PC and an instruction at PC+4.  */
-extern int mips_step_skips_delay (CORE_ADDR);
-#define STEP_SKIPS_DELAY_P (1)
-#define STEP_SKIPS_DELAY(pc) (mips_step_skips_delay (pc))
-
 /* Special symbol found in blocks associated with routines.  We can
    hang mdebug_extra_func_info's off of this.  */
 

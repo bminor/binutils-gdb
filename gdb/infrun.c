@@ -714,24 +714,17 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
 
   if (addr == (CORE_ADDR) -1)
     {
-      /* If there is a breakpoint at the address we will resume at,
-         step one instruction before inserting breakpoints
-         so that we do not stop right away (and report a second
-         hit at this breakpoint).  */
-
       if (read_pc () == stop_pc && breakpoint_here_p (read_pc ()))
+	/* There is a breakpoint at the address we will resume at,
+	   step one instruction before inserting breakpoints so that
+	   we do not stop right away (and report a second hit at this
+	   breakpoint).  */
 	oneproc = 1;
-
-#ifndef STEP_SKIPS_DELAY
-#define STEP_SKIPS_DELAY(pc) (0)
-#define STEP_SKIPS_DELAY_P (0)
-#endif
-      /* Check breakpoint_here_p first, because breakpoint_here_p is fast
-         (it just checks internal GDB data structures) and STEP_SKIPS_DELAY
-         is slow (it needs to read memory from the target).  */
-      if (STEP_SKIPS_DELAY_P
-	  && breakpoint_here_p (read_pc () + 4)
-	  && STEP_SKIPS_DELAY (read_pc ()))
+      else if (gdbarch_single_step_through_delay_p (current_gdbarch)
+              && gdbarch_single_step_through_delay (current_gdbarch,
+                                                    get_current_frame ()))
+	/* We stepped onto an instruction that needs to be stepped
+	   again before re-inserting the breakpoint, do so.  */
 	oneproc = 1;
     }
   else
@@ -1780,6 +1773,39 @@ handle_inferior_event (struct execution_control_state *ecs)
   ecs->random_signal = 0;
   stopped_by_random_signal = 0;
   breakpoints_failed = 0;
+
+  if (stop_signal == TARGET_SIGNAL_TRAP
+      && trap_expected
+      && gdbarch_single_step_through_delay_p (current_gdbarch)
+      && currently_stepping (ecs))
+    {
+      /* We're trying to step of a breakpoint.  Turns out that we're
+	 also on an instruction that needs to be stepped multiple
+	 times before it's been fully executing. E.g., architectures
+	 with a delay slot.  It needs to be stepped twice, once for
+	 the instruction and once for the delay slot.  */
+      int step_through_delay
+	= gdbarch_single_step_through_delay (current_gdbarch,
+					     get_current_frame ());
+      if (step_range_end == 0 && step_through_delay)
+	{
+	  /* The user issued a continue when stopped at a breakpoint.
+	     Set up for another trap and get out of here.  */
+         ecs->another_trap = 1;
+         keep_going (ecs);
+         return;
+	}
+      else if (step_through_delay)
+	{
+	  /* The user issued a step when stopped at a breakpoint.
+	     Maybe we should stop, maybe we should not - the delay
+	     slot *might* correspond to a line of source.  In any
+	     case, don't decide that here, just set ecs->another_trap,
+	     making sure we single-step again before breakpoints are
+	     re-inserted.  */
+	  ecs->another_trap = 1;
+	}
+    }
 
   /* Look at the cause of the stop, and decide what to do.
      The alternatives are:

@@ -1,3 +1,15 @@
+2004-10-31  Orjan Friberg <organ.friberg@axis.com>
+	    Andrew Cagney  <cagney@gnu.org>
+
+	* gdbarch.sh (single_step_through_delay): Add.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* config/mips/tm-mips.h (STEP_SKIPS_DELAY_P, STEP_SKIPS_DELAY)
+	(mips_step_skips_delay): Delete.
+	* mips-tdep.c (mips_single_step_through_delay): Replace
+	mips_step_skips_delay.
+	(mips_gdbarch_init): Set single_step_through_delay.
+	(mips_dump_tdep): Do not print STEP_SKIPS_DELAY.
+	
 2004-10-31  Mark Kettenis  <kettenis@gnu.org>
 
 	* tramp-frame.c (tramp_frame_prepend_unwinder): Set unwinder type

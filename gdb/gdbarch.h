@@ -1218,6 +1218,15 @@ extern void set_gdbarch_software_single_step (struct gdbarch *gdbarch, gdbarch_s
 #define SOFTWARE_SINGLE_STEP(sig, insert_breakpoints_p) (gdbarch_software_single_step (current_gdbarch, sig, insert_breakpoints_p))
 #endif
 
+/* Return non-zero if the processor is executing a delay slot and a
+   further single-step is needed before the instruction finishes. */
+
+extern int gdbarch_single_step_through_delay_p (struct gdbarch *gdbarch);
+
+typedef int (gdbarch_single_step_through_delay_ftype) (struct gdbarch *gdbarch, struct frame_info *frame);
+extern int gdbarch_single_step_through_delay (struct gdbarch *gdbarch, struct frame_info *frame);
+extern void set_gdbarch_single_step_through_delay (struct gdbarch *gdbarch, gdbarch_single_step_through_delay_ftype *single_step_through_delay);
+
 /* FIXME: cagney/2003-08-28: Need to find a better way of selecting the
    disassembler.  Perhaps objdump can handle it? */
 

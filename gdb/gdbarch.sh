@@ -611,6 +611,9 @@ f:=:CORE_ADDR:smash_text_address:CORE_ADDR addr:addr::core_addr_identity::0
 # FIXME/cagney/2001-01-18: The logic is backwards.  It should be asking if the target can
 # single step.  If not, then implement single step using breakpoints.
 F:=:void:software_single_step:enum target_signal sig, int insert_breakpoints_p:sig, insert_breakpoints_p
+# Return non-zero if the processor is executing a delay slot and a
+# further single-step is needed before the instruction finishes.
+M::int:single_step_through_delay:struct frame_info *frame:frame
 # FIXME: cagney/2003-08-28: Need to find a better way of selecting the
 # disassembler.  Perhaps objdump can handle it?
 f:TARGET_PRINT_INSN:int:print_insn:bfd_vma vma, struct disassemble_info *info:vma, info::0:

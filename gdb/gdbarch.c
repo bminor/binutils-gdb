@@ -211,6 +211,7 @@ struct gdbarch
   gdbarch_addr_bits_remove_ftype *addr_bits_remove;
   gdbarch_smash_text_address_ftype *smash_text_address;
   gdbarch_software_single_step_ftype *software_single_step;
+  gdbarch_single_step_through_delay_ftype *single_step_through_delay;
   gdbarch_print_insn_ftype *print_insn;
   gdbarch_skip_trampoline_code_ftype *skip_trampoline_code;
   gdbarch_skip_solib_resolver_ftype *skip_solib_resolver;
@@ -337,6 +338,7 @@ struct gdbarch startup_gdbarch =
   0,  /* addr_bits_remove */
   0,  /* smash_text_address */
   0,  /* software_single_step */
+  0,  /* single_step_through_delay */
   0,  /* print_insn */
   0,  /* skip_trampoline_code */
   generic_skip_solib_resolver,  /* skip_solib_resolver */
@@ -591,6 +593,7 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of addr_bits_remove, invalid_p == 0 */
   /* Skip verify of smash_text_address, invalid_p == 0 */
   /* Skip verify of software_single_step, has predicate */
+  /* Skip verify of single_step_through_delay, has predicate */
   if (current_gdbarch->print_insn == 0)
     fprintf_unfiltered (log, "\n\tprint_insn");
   /* Skip verify of skip_trampoline_code, invalid_p == 0 */
@@ -1516,6 +1519,12 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: short_bit = %s\n",
                       paddr_d (current_gdbarch->short_bit));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_single_step_through_delay_p() = %d\n",
+                      gdbarch_single_step_through_delay_p (current_gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: single_step_through_delay = <0x%lx>\n",
+                      (long) current_gdbarch->single_step_through_delay);
 #ifdef SKIP_PROLOGUE
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -3343,6 +3352,30 @@ set_gdbarch_software_single_step (struct gdbarch *gdbarch,
                                   gdbarch_software_single_step_ftype software_single_step)
 {
   gdbarch->software_single_step = software_single_step;
+}
+
+int
+gdbarch_single_step_through_delay_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->single_step_through_delay != NULL;
+}
+
+int
+gdbarch_single_step_through_delay (struct gdbarch *gdbarch, struct frame_info *frame)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->single_step_through_delay != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_single_step_through_delay called\n");
+  return gdbarch->single_step_through_delay (gdbarch, frame);
+}
+
+void
+set_gdbarch_single_step_through_delay (struct gdbarch *gdbarch,
+                                       gdbarch_single_step_through_delay_ftype single_step_through_delay)
+{
+  gdbarch->single_step_through_delay = single_step_through_delay;
 }
 
 int

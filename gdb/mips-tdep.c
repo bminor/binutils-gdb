@@ -4142,16 +4142,19 @@ is_delayed (unsigned long insn)
 }
 
 int
-mips_step_skips_delay (CORE_ADDR pc)
+mips_single_step_through_delay (struct gdbarch *gdbarch,
+				struct frame_info *frame)
 {
+  CORE_ADDR pc = get_frame_pc (frame);
   char buf[MIPS_INSN32_SIZE];
 
   /* There is no branch delay slot on MIPS16.  */
   if (mips_pc_is_mips16 (pc))
     return 0;
 
-  if (target_read_memory (pc, buf, sizeof buf) != 0)
-    /* If error reading memory, guess that it is not a delayed branch.  */
+  if (!safe_frame_unwind_memory (frame, pc, buf, sizeof buf))
+    /* If error reading memory, guess that it is not a delayed
+       branch.  */
     return 0;
   return is_delayed (extract_unsigned_integer (buf, sizeof buf));
 }
@@ -5097,6 +5100,8 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_in_solib_return_trampoline (gdbarch, mips_in_solib_return_trampoline);
     }
 
+  set_gdbarch_single_step_through_delay (gdbarch, mips_single_step_through_delay);
+
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
 
@@ -5304,9 +5309,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: STEP_SKIPS_DELAY # %s\n",
 		      XSTRING (STEP_SKIPS_DELAY (PC)));
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: STEP_SKIPS_DELAY_P = %d\n",
-		      STEP_SKIPS_DELAY_P);
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: STOPPED_BY_WATCHPOINT # %s\n",
 		      XSTRING (STOPPED_BY_WATCHPOINT (WS)));
