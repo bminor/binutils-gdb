@@ -3393,7 +3393,10 @@ prep_headers (abfd)
       i_ehdrp->e_machine = EM_PARISC;
       break;
     case bfd_arch_powerpc:
-      i_ehdrp->e_machine = EM_PPC;
+      if (bed->s->arch_size == 64)
+	i_ehdrp->e_machine = EM_PPC64;
+      else
+	i_ehdrp->e_machine = EM_PPC;
       break;
     case bfd_arch_alpha:
       i_ehdrp->e_machine = EM_ALPHA;

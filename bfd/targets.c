@@ -571,6 +571,8 @@ extern const bfd_target bfd_elf64_little_generic_vec;
 extern const bfd_target bfd_elf64_littlemips_vec;
 extern const bfd_target bfd_elf64_tradbigmips_vec;
 extern const bfd_target bfd_elf64_tradlittlemips_vec;
+extern const bfd_target bfd_elf64_powerpc_vec;
+extern const bfd_target bfd_elf64_powerpcle_vec;
 extern const bfd_target bfd_elf64_s390_vec;
 extern const bfd_target bfd_elf64_sparc_vec;
 extern const bfd_target bfd_elf64_x86_64_vec;
@@ -782,6 +784,10 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&bfd_elf32_pjl_vec,
 	&bfd_elf32_powerpc_vec,
 	&bfd_elf32_powerpcle_vec,
+#ifdef BFD64
+	&bfd_elf64_powerpc_vec,
+	&bfd_elf64_powerpcle_vec,
+#endif
 	&bfd_elf32_sparc_vec,
 	&bfd_elf32_v850_vec,
 	&bfd_elf32_fr30_vec,

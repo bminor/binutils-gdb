@@ -426,6 +426,7 @@ BFD64_BACKENDS = \
 	elf64-ia64.lo \
 	elf64-gen.lo \
 	elf64-mips.lo \
+	elf64-ppc.lo \
 	elf64-s390.lo \
 	elf64-sparc.lo \
 	elf64.lo \
@@ -444,6 +445,7 @@ BFD64_BACKENDS_CFILES = \
 	elf64-hppa.c \
 	elf64-gen.c \
 	elf64-mips.c \
+	elf64-ppc.c \
 	elf64-s390.c \
 	elf64-sparc.c \
 	elf64.c \
@@ -919,9 +921,9 @@ coff-rs6000.lo: coff-rs6000.c $(INCDIR)/filenames.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/coff/internal.h $(INCDIR)/coff/xcoff.h \
   $(INCDIR)/coff/rs6000.h libcoff.h libxcoff.h coffcode.h \
   coffswap.h
-coff-sh.lo: coff-sh.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/coff/sh.h $(INCDIR)/coff/external.h $(INCDIR)/coff/internal.h \
-  libcoff.h coffcode.h coffswap.h
+coff-sh.lo: coff-sh.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/bfdlink.h $(INCDIR)/coff/sh.h $(INCDIR)/coff/external.h \
+  $(INCDIR)/coff/internal.h libcoff.h coffcode.h coffswap.h
 coff-sparc.lo: coff-sparc.c $(INCDIR)/filenames.h $(INCDIR)/coff/sparc.h \
   $(INCDIR)/coff/external.h $(INCDIR)/coff/internal.h \
   libcoff.h $(INCDIR)/bfdlink.h coffcode.h coffswap.h
@@ -1097,7 +1099,7 @@ elf32-sparc.lo: elf32-sparc.c $(INCDIR)/filenames.h \
 elf32-v850.lo: elf32-v850.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/v850.h $(INCDIR)/elf/reloc-macros.h \
-  elf32-target.h
+  $(INCDIR)/libiberty.h elf32-target.h
 elf32.lo: elf32.c elfcode.h $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
   $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h elfcore.h \
@@ -1230,14 +1232,15 @@ pei-ppc.lo: pei-ppc.c $(INCDIR)/filenames.h coff-ppc.c \
   $(INCDIR)/coff/powerpc.h $(INCDIR)/coff/external.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
   $(INCDIR)/bfdlink.h coffcode.h peicode.h libpei.h
-pe-sh.lo: pe-sh.c $(INCDIR)/filenames.h coff-sh.c $(INCDIR)/bfdlink.h \
-  $(INCDIR)/coff/sh.h $(INCDIR)/coff/external.h $(INCDIR)/coff/internal.h \
-  $(INCDIR)/coff/pe.h libcoff.h coffcode.h peicode.h \
-  libpei.h
-pei-sh.lo: pei-sh.c $(INCDIR)/filenames.h coff-sh.c \
+pe-sh.lo: pe-sh.c $(INCDIR)/filenames.h coff-sh.c $(INCDIR)/libiberty.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/coff/sh.h $(INCDIR)/coff/external.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
   coffcode.h peicode.h libpei.h
+pei-sh.lo: pei-sh.c $(INCDIR)/filenames.h coff-sh.c \
+  $(INCDIR)/libiberty.h $(INCDIR)/bfdlink.h $(INCDIR)/coff/sh.h \
+  $(INCDIR)/coff/external.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/pe.h libcoff.h coffcode.h peicode.h \
+  libpei.h
 pe-mips.lo: pe-mips.c $(INCDIR)/filenames.h $(INCDIR)/coff/mipspe.h \
   $(INCDIR)/coff/external.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/pe.h libcoff.h $(INCDIR)/bfdlink.h coffcode.h \
@@ -1327,6 +1330,10 @@ elf64-mips.lo: elf64-mips.c $(INCDIR)/filenames.h $(INCDIR)/aout/ar.h \
   $(INCDIR)/elf/reloc-macros.h $(INCDIR)/coff/sym.h $(INCDIR)/coff/symconst.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/ecoff.h $(INCDIR)/coff/alpha.h \
   ecoffswap.h elf64-target.h
+elf64-ppc.lo: elf64-ppc.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
+  elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/elf/ppc.h $(INCDIR)/elf/reloc-macros.h \
+  elf64-target.h
 elf64-s390.lo: elf64-s390.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/s390.h $(INCDIR)/elf/reloc-macros.h \

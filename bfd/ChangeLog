@@ -1,3 +1,24 @@
+2001-08-27  Linus Nordberg  <linus@swox.se>
+	    Torbjorn Granlund  <tege@swox.com>
+	    Staffan Ulfberg  <staffanu@swox.se>
+	    Alan Modra  <amodra@bigpond.net.au>
+
+	* config.bfd: Add powerpc64 target.  Add powerpc64 vectors to
+	targ64_selvecs for 32 bit powerpc targets.
+	* Makefile.am (BFD64_BACKENDS): Add elf64-ppc.lo.
+	(BFD64_BACKENDS_CFILES): Add elf64-ppc.c.
+	Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* configure.in: Add elf64_powerpc vecs.
+	* configure: Regenerate.
+	* cpu-powerpc.c: Default to bfd_mach_ppc_620 entry for 64 bit.
+	* elf.c (prep_headers): EM_PPC64 for 64 bit ppc elf target.
+	* targets.c: Add bfd_elf64_powerpc_vec and bfd_elf64_powerpcle_vec.
+	* elf64-ppc.c: New file.
+	* reloc.c: Add powerpc64 relocs.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+
 2001-08-27  Andreas Schwab  <schwab@suse.de>
 
 	* elf32-m68k.c (elf32_m68k_check_relocs): Set DF_TEXTREL if the
