@@ -1,3 +1,8 @@
+2004-03-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (_bfd_elf_merge_symbol): Reinstate code to handle
+	strong syms in one shared object overriding weak syms in another.
+
 2004-03-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-bfd.h (struct elf_obj_tdata): Delete dt_soname field.  Add

@@ -1153,6 +1153,30 @@ _bfd_elf_merge_symbol (bfd *abfd,
 	}
     }
 
+  /* Handle the special case of a weak definition in one shared object
+     followed by a non-weak definition in another.  We are covering for
+     a deficiency of _bfd_generic_link_add_one_symbol here.  A new
+     strong definition of an indirect symbol is treated as a multiple
+     definition even when the indirect symbol points to a weak sym.  */
+  if (olddef
+      && oldweak
+      && olddyn
+      && newdef
+      && !newweak
+      && newdyn)
+    {
+      /* To make this work we have to frob the flags so that the rest
+	 of the code does not think we are using the old definition.  */
+      h->elf_link_hash_flags |= ELF_LINK_HASH_REF_DYNAMIC;
+      h->elf_link_hash_flags &= ~ELF_LINK_HASH_DEF_DYNAMIC;
+
+      /* If H is the target of an indirection, we want the caller to
+	 use H rather than the indirect symbol.  Otherwise if we are
+	 defining a new indirect symbol we will wind up attaching it
+	 to the entry we are overriding.  */
+      *sym_hash = h;
+    }
+
   return TRUE;
 }
 
