@@ -28,7 +28,7 @@
 #include "xcoffsolib.h"
 #include "symfile.h"
 #include "objfiles.h"
-#include "libbfd.h"		/* For bfd_cache_lookup (FIXME) */
+#include "libbfd.h"		/* For bfd_default_set_arch_mach (FIXME) */
 #include "bfd.h"
 #include "gdb-stabs.h"
 #include "regcache.h"
