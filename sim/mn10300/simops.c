@@ -2531,7 +2531,7 @@ void OP_DC000000 (insn, extension)
 void OP_CD000000 (insn, extension)
      unsigned long insn, extension;
 {
-  unsigned int next_pc, sp, adjust;
+  unsigned int next_pc, sp;
   unsigned long mask;
 
   sp = State.regs[REG_SP];
@@ -2543,52 +2543,51 @@ void OP_CD000000 (insn, extension)
 
   mask = insn & 0xff;
 
-  adjust = 0;
   if (mask & 0x80)
     {
-      adjust -= 4;
-      State.regs[REG_D0 + 2] = load_word (sp + adjust);
+      sp -= 4;
+      store_word (sp, State.regs[REG_D0 + 2]);
     }
 
   if (mask & 0x40)
     {
-      adjust -= 4;
-      State.regs[REG_D0 + 3] = load_word (sp + adjust);
+      sp -= 4;
+      store_word (sp, State.regs[REG_D0 + 3]);
     }
 
   if (mask & 0x20)
     {
-      adjust -= 4;
-      State.regs[REG_A0 + 2] = load_word (sp + adjust);
+      sp -= 4;
+      store_word (sp, State.regs[REG_A0 + 2]);
     }
 
   if (mask & 0x10)
     {
-      adjust -= 4;
-      State.regs[REG_A0 + 3] = load_word (sp + adjust);
+      sp -= 4;
+      store_word (sp, State.regs[REG_A0 + 3]);
     }
 
   if (mask & 0x8)
     {
-      adjust -= 4;
-      State.regs[REG_D0] = load_word (sp + adjust);
-      adjust -= 4;
-      State.regs[REG_D0 + 1] = load_word (sp + adjust);
-      adjust -= 4;
-      State.regs[REG_A0] = load_word (sp + adjust);
-      adjust -= 4;
-      State.regs[REG_A0 + 1] = load_word (sp + adjust);
-      adjust -= 4;
-      State.regs[REG_MDR] = load_word (sp + adjust);
-      adjust -= 4;
-      State.regs[REG_LIR] = load_word (sp + adjust);
-      adjust -= 4;
-      State.regs[REG_LAR] = load_word (sp + adjust);
-      adjust -= 4;
+      sp -= 4;
+      store_word (sp, State.regs[REG_D0]);
+      sp -= 4;
+      store_word (sp, State.regs[REG_D0 + 1]);
+      sp -= 4;
+      store_word (sp, State.regs[REG_A0]);
+      sp -= 4;
+      store_word (sp, State.regs[REG_A0 + 1]);
+      sp -= 4;
+      store_word (sp, State.regs[REG_MDR]);
+      sp -= 4;
+      store_word (sp, State.regs[REG_LIR]);
+      sp -= 4;
+      store_word (sp, State.regs[REG_LAR]);
+      sp -= 4;
     }
 
-  /* And make sure to update the stack pointer.  */
-  State.regs[REG_SP] -= extension;
+  /* Update the stack pointer.  */
+  State.regs[REG_SP] = sp - extension;
   State.regs[REG_MDR] = next_pc;
   State.regs[REG_PC] += SEXT16 ((insn & 0xffff00) >> 8) - 5;
 }
@@ -2609,52 +2608,51 @@ void OP_DD000000 (insn, extension)
 
   mask = (extension & 0xff00) >> 8;
 
-  adjust = 0;
   if (mask & 0x80)
     {
-      adjust -= 4;
-      State.regs[REG_D0 + 2] = load_word (sp + adjust);
+      sp -= 4;
+      store_word (sp, State.regs[REG_D0 + 2]);
     }
 
   if (mask & 0x40)
     {
-      adjust -= 4;
-      State.regs[REG_D0 + 3] = load_word (sp + adjust);
+      sp -= 4;
+      store_word (sp, State.regs[REG_D0 + 3]);
     }
 
   if (mask & 0x20)
     {
-      adjust -= 4;
-      State.regs[REG_A0 + 2] = load_word (sp + adjust);
+      sp -= 4;
+      store_word (sp, State.regs[REG_A0 + 2]);
     }
 
   if (mask & 0x10)
     {
-      adjust -= 4;
-      State.regs[REG_A0 + 3] = load_word (sp + adjust);
+      sp -= 4;
+      store_word (sp, State.regs[REG_A0 + 3]);
     }
 
   if (mask & 0x8)
     {
-      adjust -= 4;
-      State.regs[REG_D0] = load_word (sp + adjust);
-      adjust -= 4;
-      State.regs[REG_D0 + 1] = load_word (sp + adjust);
-      adjust -= 4;
-      State.regs[REG_A0] = load_word (sp + adjust);
-      adjust -= 4;
-      State.regs[REG_A0 + 1] = load_word (sp + adjust);
-      adjust -= 4;
-      State.regs[REG_MDR] = load_word (sp + adjust);
-      adjust -= 4;
-      State.regs[REG_LIR] = load_word (sp + adjust);
-      adjust -= 4;
-      State.regs[REG_LAR] = load_word (sp + adjust);
-      adjust -= 4;
+      sp -= 4;
+      store_word (sp, State.regs[REG_D0]);
+      sp -= 4;
+      store_word (sp, State.regs[REG_D0 + 1]);
+      sp -= 4;
+      store_word (sp, State.regs[REG_A0]);
+      sp -= 4;
+      store_word (sp, State.regs[REG_A0 + 1]);
+      sp -= 4;
+      store_word (sp, State.regs[REG_MDR]);
+      sp -= 4;
+      store_word (sp, State.regs[REG_LIR]);
+      sp -= 4;
+      store_word (sp, State.regs[REG_LAR]);
+      sp -= 4;
     }
 
-  /* And make sure to update the stack pointer.  */
-  State.regs[REG_SP] -= (extension & 0xff);
+  /* Update the stack pointer.  */
+  State.regs[REG_SP] = sp - extension;
   State.regs[REG_MDR] = next_pc;
   State.regs[REG_PC] += (((insn & 0xffffff) << 8) | ((extension & 0xff0000) >> 16)) - 7;
 }

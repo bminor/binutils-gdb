@@ -1,5 +1,9 @@
 Tue Jun 10 12:31:32 1997  Jeffrey A Law  (law@cygnus.com)
 
+	* simops.c: "call" stores the callee saved registers into the
+	stack!  Update the stack pointer properly when done with
+	register saves.
+
 	* simops.c: Fix return address computation for "call" instructions.
 
 Thu May 22 01:43:11 1997  Jeffrey A Law  (law@cygnus.com)
