@@ -1,3 +1,7 @@
+2003-11-24  Daniel Jacobowitz  <drow@mvista.com>
+
+	* NEWS: Mention improved location expression support.
+
 2003-11-23  Andrew Cagney  <cagney@redhat.com>
 
 	* Makefile.in (infrun.o): Update dependencies.

@@ -3,6 +3,12 @@
 
 *** Changes since GDB 6.0:
 
+* DWARF 2 Location Expressions
+
+GDB support for location expressions has been extended to support function
+arguments and frame bases.  Older versions of GDB could crash when they
+encountered these.
+
 * New native configurations
 
 NetBSD/amd64					x86_64-*-netbsd*
