@@ -1021,7 +1021,7 @@ lookup_primitive_typename (char *name)
 
   for (p = current_language->la_builtin_type_vector; *p != NULL; p++)
     {
-      if (STREQ (TYPE_NAME (**p), name))
+      if (strcmp (TYPE_NAME (**p), name) == 0)
 	{
 	  return (**p);
 	}
@@ -1228,7 +1228,7 @@ lookup_struct_elt_type (struct type *type, char *name, int noerr)
     char *typename;
 
     typename = type_name_no_tag (type);
-    if (typename != NULL && STREQ (typename, name))
+    if (typename != NULL && strcmp (typename, name) == 0)
       return type;
   }
 #endif

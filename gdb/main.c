@@ -173,7 +173,7 @@ captured_main (void *data)
 #endif /* MPW */
 
   /* This needs to happen before the first use of malloc.  */
-  init_malloc ((PTR) NULL);
+  init_malloc (NULL);
 
 #if defined (ALIGN_STACK_ON_STARTUP)
   i = (int) &count & 0x3;

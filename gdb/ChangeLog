@@ -1,5 +1,13 @@
 2003-01-17  Andrew Cagney  <ac131313@redhat.com>
 
+	* main.c (captured_main): Don't use PTR.
+	* cp-valprint.c (cp_print_class_method): Replace STREQ with strcmp.
+	* gdbtypes.c (lookup_primitive_typename): Ditto.
+	(lookup_struct_elt_type): Ditto.
+	* f-valprint.c (info_common_command): Ditto.
+	(list_all_visible_commons): Ditto.
+	* jv-typeprint.c (java_type_print_base): Ditto.
+
 	* config/djgpp/fnchange.lst: Rename mi1-var-block.exp,
 	mi1-var-child.exp, mi1-var-cmd.exp and mi1-var-display.exp.
 	Rename opcodes/iq2000-desc.c and opcodes/iq2000-dis.c.  Rename
