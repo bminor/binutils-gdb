@@ -1,5 +1,7 @@
 Wed Nov  3 09:20:18 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* remote.c (putpkt, getpkt): Don't call interrupt_query.
+
 	* findvar.c (value_of_register): Rename val to reg_val to avoid
 	name conflict with some (e.g. tm-m68k.h) REGISTER_CONVERT_TO_VIRTUAL.
 
