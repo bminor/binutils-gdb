@@ -1,3 +1,9 @@
+2002-02-20  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdbserver/configure.in: Remove AM_PROC_CC_STDC.  Change
+	AC_STDC_HEADERS to AC_HEADER_STDC.
+	* gdbserver/configure: Regenerated.
+
 2002-02-20  Richard Earnshaw  <rearnsha@arm.com>
 
 	* arc-tdep.c (get_longjmp_target): Only compile this function if JB_PC
