@@ -249,8 +249,6 @@ z8k-tdep.c
 # energize.c		- Part of Lucid support.
 # energize.h		- Part of Lucid support.
 # infrun.hacked.c	- Beats me...
-# monitor.h		- ?
-# remote-monitor.c	- ?
 # remote-sa.sparc.c	- ?
 # state.c		- Not used at the moment, keep for reference (fnf)
 # state.h		- Not used at the moment, keep for reference (fnf)
