@@ -6668,6 +6668,10 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  Elf_Internal_Sym *sym;
 	  unsigned long r_symndx;
 
+	  if (r_type == R_MIPS_64 && !ABI_64_P (output_bfd)
+	      && bfd_big_endian (input_bfd))
+	    rel->r_offset -= 4;
+
 	  /* Since we're just relocating, all we need to do is copy
 	     the relocations back out to the object file, unless
 	     they're against a section symbol, in which case we need
@@ -6724,6 +6728,43 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		 writing will be source of the addend in the final
 		 link.  */
 	      addend &= howto->src_mask;
+
+	      if (r_type == R_MIPS_64 && !ABI_64_P (output_bfd))
+		/* See the comment above about using R_MIPS_64 in the 32-bit
+		   ABI.  Here, we need to update the addend.  It would be
+		   possible to get away with just using the R_MIPS_32 reloc
+		   but for endianness.  */
+		{
+		  bfd_vma sign_bits;
+		  bfd_vma low_bits;
+		  bfd_vma high_bits;
+		  
+		  if (addend & 0x80000000u)
+		    sign_bits = 0xffffffffu;
+		  else
+		    sign_bits = 0;
+		  
+		  /* If we don't know that we have a 64-bit type,
+		     do two separate stores.  */
+		  if (bfd_big_endian (input_bfd))
+		    {
+		      /* Store the sign-bits (which are most significant)
+			 first.  */
+		      low_bits = sign_bits;
+		      high_bits = addend;
+		    }
+		  else
+		    {
+		      low_bits = addend;
+		      high_bits = sign_bits;
+		    }
+		  bfd_put_32 (input_bfd, low_bits, 
+			      contents + rel->r_offset);
+		  bfd_put_32 (input_bfd, high_bits, 
+			      contents + rel->r_offset + 4);
+		  continue;
+		}
+
 	      if (!mips_elf_perform_relocation (info, howto, rel, addend,
 						input_bfd,  input_section, 
 						contents, false))
@@ -6818,13 +6859,13 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  bfd_vma low_bits;
 	  bfd_vma high_bits;
 
-	  if (value & 0x80000000)
-	    sign_bits = 0xffffffff;
+	  if (value & 0x80000000u)
+	    sign_bits = 0xffffffffu;
 	  else
 	    sign_bits = 0;
 
-	  /* If only a 32-bit VMA is available do two separate
-	     stores.  */
+	  /* If we don't know that we have a 64-bit type,
+	     do two separate stores.  */
 	  if (bfd_big_endian (input_bfd))
 	    {
 	      /* Undo what we did above.  */
