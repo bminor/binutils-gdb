@@ -1,3 +1,8 @@
+Wed Oct  6 13:54:21 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* configure.in: Remove alpha-dec-osf*, no longer necessary now that
+	gdb knows how to handle OSF/1 shared libraries.
+
 Tue Oct  5 11:55:04 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* configure.in: Recognize hppa*-*-hiux* (currently synonym for hpux).
