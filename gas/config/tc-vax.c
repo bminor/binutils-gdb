@@ -3256,12 +3256,16 @@ md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
 
 #ifdef OBJ_VMS
 const char *md_shortopts = "d:STt:V+1h:Hv::";
-#elif defined(OBJ_ELC)
+#elif defined(OBJ_ELF)
 const char *md_shortopts = "d:STt:VkK";
 #else
 const char *md_shortopts = "d:STt:V";
 #endif
 struct option md_longopts[] = {
+#ifdef OBJ_ELF
+#define OPTION_PIC (OPTION_MD_BASE)
+  {"pic", no_argument, NULL, OPTION_PIC},
+#endif
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof (md_longopts);
@@ -3325,7 +3329,7 @@ md_parse_option (c, arg)
 #endif
 
 #ifdef OBJ_ELF
-    case 'K':
+    case OPTION_PIC:
     case 'k':
       flag_want_pic = 1;
       break;			/* -pic, Position Independent Code */

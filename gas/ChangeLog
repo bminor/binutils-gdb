@@ -1,3 +1,10 @@
+2003-09-26  Matt Thomas  <matt@3am-software.com>
+
+	* config/tc-vax.c (md_shortopts): Fix a typo.  Remove 'K'.
+	(OPTION_PIC): Define.
+	(md_longopts): Add "pic" option.
+	(md_parse_option): Change 'K' to OPTION_PIC.
+
 2003-09-23  Alan Modra  <alan@modra.org>
 
 	* config/obj-elf.c (obj_elf_change_section): Adjust for
