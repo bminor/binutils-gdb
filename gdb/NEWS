@@ -3,6 +3,10 @@
 
 *** Changes since GDB 5.2:
 
+* Changes in FreeBSD/i386 native debugging.
+
+Support for the "generate-core-file" has been added.
+
 * New commands "dump", "append", and "restore".
 
 These commands allow data to be copied from target memory
