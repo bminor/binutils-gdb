@@ -36,6 +36,7 @@
 #include "breakpoint.h"
 #include "completer.h"
 #include "regcache.h"
+#include "arm-tdep.h"
 
 #ifdef USG
 #include <sys/types.h>
@@ -470,7 +471,7 @@ arm_rdi_resume (ptid_t ptid, int step, enum target_signal siggnal)
 
       if (step)
 	{
-	  pc = read_register (PC_REGNUM);
+	  pc = read_register (ARM_PC_REGNUM);
 	  pc = arm_get_next_pc (pc);
 	  arm_rdi_insert_breakpoint (pc, handle);
 	}
@@ -551,14 +552,14 @@ arm_rdi_fetch_registers (int regno)
 	  supply_register (regno, (char *) cookedreg);
 	}
       store_unsigned_integer (cookedreg, 4, rawregs[15]);
-      supply_register (PS_REGNUM, (char *) cookedreg);
-      arm_rdi_fetch_registers (PC_REGNUM);
+      supply_register (ARM_PS_REGNUM, (char *) cookedreg);
+      arm_rdi_fetch_registers (ARM_PC_REGNUM);
     }
   else
     {
-      if (regno == PC_REGNUM)
+      if (regno == ARM_PC_REGNUM)
 	rdi_regmask = RDIReg_PC;
-      else if (regno == PS_REGNUM)
+      else if (regno == ARM_PS_REGNUM)
 	rdi_regmask = RDIReg_CPSR;
       else if (regno < 0 || regno > 15)
 	{
@@ -607,9 +608,9 @@ arm_rdi_store_registers (int regno)
       /* RDI manipulates data in host byte order, so convert now. */
       store_unsigned_integer (rawerreg, 4, rawreg[0]);
 
-      if (regno == PC_REGNUM)
+      if (regno == ARM_PC_REGNUM)
 	rdi_regmask = RDIReg_PC;
-      else if (regno == PS_REGNUM)
+      else if (regno == ARM_PS_REGNUM)
 	rdi_regmask = RDIReg_CPSR;
       else if (regno < 0 || regno > 15)
 	return;

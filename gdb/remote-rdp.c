@@ -52,6 +52,8 @@
 #include "regcache.h"
 #include "serial.h"
 
+#include "arm-tdep.h"
+
 #ifdef HAVE_TIME_H
 #include <time.h>
 #endif
@@ -613,14 +615,14 @@ remote_rdp_fetch_register (int regno)
       char buf[MAX_REGISTER_RAW_SIZE];
       if (regno < 15)
 	rdp_fetch_one_register (1 << regno, buf);
-      else if (regno == PC_REGNUM)
+      else if (regno == ARM_PC_REGNUM)
 	rdp_fetch_one_register (RDP_CPU_READWRITE_MASK_PC, buf);
-      else if (regno == PS_REGNUM)
+      else if (regno == ARM_PS_REGNUM)
 	rdp_fetch_one_register (RDP_CPU_READWRITE_MASK_CPSR, buf);
-      else if (regno == FPS_REGNUM)
+      else if (regno == ARM_FPS_REGNUM)
 	rdp_fetch_one_fpu_register (RDP_FPU_READWRITE_MASK_FPS, buf);
-      else if (regno >= F0_REGNUM && regno <= F7_REGNUM)
-	rdp_fetch_one_fpu_register (1 << (regno - F0_REGNUM), buf);
+      else if (regno >= ARM_F0_REGNUM && regno <= ARM_F7_REGNUM)
+	rdp_fetch_one_fpu_register (1 << (regno - ARM_F0_REGNUM), buf);
       else
 	{
 	  printf ("Help me with fetch reg %d\n", regno);
@@ -644,12 +646,12 @@ remote_rdp_store_register (int regno)
       read_register_gen (regno, tmp);
       if (regno < 15)
 	rdp_store_one_register (1 << regno, tmp);
-      else if (regno == PC_REGNUM)
+      else if (regno == ARM_PC_REGNUM)
 	rdp_store_one_register (RDP_CPU_READWRITE_MASK_PC, tmp);
-      else if (regno == PS_REGNUM)
+      else if (regno == ARM_PS_REGNUM)
 	rdp_store_one_register (RDP_CPU_READWRITE_MASK_CPSR, tmp);
-      else if (regno >= F0_REGNUM && regno <= F7_REGNUM)
-	rdp_store_one_fpu_register (1 << (regno - F0_REGNUM), tmp);
+      else if (regno >= ARM_F0_REGNUM && regno <= ARM_F7_REGNUM)
+	rdp_store_one_fpu_register (1 << (regno - ARM_F0_REGNUM), tmp);
       else
 	{
 	  printf ("Help me with reg %d\n", regno);
@@ -1092,7 +1094,7 @@ rdp_step (void)
   else
     {
       char handle[4];
-      CORE_ADDR pc = read_register (PC_REGNUM);
+      CORE_ADDR pc = read_register (ARM_PC_REGNUM);
       pc = arm_get_next_pc (pc);
       remote_rdp_insert_breakpoint (pc, handle);
       rdp_execute ();
