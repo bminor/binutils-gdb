@@ -1,3 +1,79 @@
+Fri Aug 27 16:43:35 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* section.c (struct sec): Move position of user_set_vma, and
+	document it.
+	(SEC_BALIGN): Disable for now.  I don't think it's currently used.
+
+	* elf32-hppa.c (elf_hppa_howto_table): Now static.
+	(symext_rootP, symext_lastP, global_value, GOT_value,
+	global_symbol, global_sym_defined, symextn_contents,
+	symextn_contents_real_size, elf_hppa_stub_rootP,
+	elf32_hppa_symextn_map, elf32_hppa_symextn_map_size): Rely on
+	default initialization.
+	(hppa_elf_gen_reloc_type): Macro "UNDEFINED" doesn't need a
+	trailing semicolon.
+	(hppa_look_for_stubs_in_section): Introduce temporaries to make
+	code more readable in 80 columns.
+
+	* libhppa.h (all functions): Now inline under GNU C.
+
+	More patches from Jeff Law:
+
+	* elf32-hppa.c (AR_WARN): Give argument which caused the
+	invalid argument relocation.
+	(AR_UNIMP): Delete unused macro.
+	(hppa_elf_set_section_contents): Always return a value.
+	(elf32_hppa_backend_table_processing): Likewise.
+	(elf32_hppa_backend_section_processing: Likewise.
+
+	* som.c: New file containing SOM specific code extracted
+	from hppa.c
+
+	* som.h: New file containing SOM specific code extracted
+	from libhppa.h
+
+	* hppa.c: Deleted.
+
+	* libhppa.h: Delete SOM specific code.  Add generic PA
+	code which can be shared by both SOM and ELF backends.
+
+	* Makefile.in: Replace hppa.c with som.c.  elf32-hppa.o
+	depends on libhppa.h now.
+
+	* configure.in (hppa_vec): Needs som.o module instead of 
+	hppa.o.
+
+	* elf32-hppa.c: Include libhppa.h.  Do not define
+	BYTES_IN_WORD.
+
+	* elf32-hppa.h (hppa_reloc_field_selector_type): Delete
+	now lives in libhppa.h.
+	(hppa_reloc_field_selector_type_alt): Likewise.
+
+	* hosts/hppabsd.h: Include <stdlib.h> and <unistd.h>.  Do not
+	define malloc or free.
+
+	* config/hppa-elf.mt (SELECT_ARCHITECTURES): Don't define
+	SELECT_VECS.
+
+	* elf32-hppa.c (hppa_elf_relocate_unwind_table): Delete unused 
+	variables.
+	(elf_hppa_reloc_type_lookup): Likewise.
+	(elf_hppa_tc_make_sections): Likewise.
+	(hppa_elf_arg_reloc_needed_p): Likewise.
+	(hppa_elf_build_long_branch_stub): Likewise.
+	(elf_reloc_map): Delete, no longer used.
+	(elf_hppa_reloc_map): Likewise.
+	(elf32_hppa_symextn_map_max_size): Likewise.
+	(elf32_hppa_get_sym_extn): Abort if type is bogus.
+
+	* elf32-hppa.c (elf32_hppa_backend_fake_sections): Add processing
+	of the .hppa_unwind section.
+
+Wed Aug 25 16:13:49 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* config.bfd: recognize m88110.
+
 Tue Aug 24 16:32:35 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	Merged changes from Jeff Law and Pete Hoogenboom at Utah:
