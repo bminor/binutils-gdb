@@ -205,7 +205,7 @@ process_def_file (abfd, info)
 
   /* Now, maybe export everything else the default way */
 
-  if (pe_dll_export_everything)
+  if (pe_dll_export_everything || pe_def_file->num_exports == 0)
     {
       for (b = info->input_bfds; b; b = b->link_next)
 	{

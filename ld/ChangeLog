@@ -13,6 +13,8 @@ Mon Nov  9 16:41:30 1998  DJ Delorie  <dj@cygnus.com>
 	* Makefile.am: add new files and target-specific extra files
 	* emultempl/pe.em (gld_i386_list_options): list dll-specific
 	options.
+	* pe-dll.c (process_def_file): auto-export everything if
+	nothing is otherwise exported.
 	
 Wed Nov  4 16:39:18 1998  Nick Clifton  <nickc@cygnus.com>
 
