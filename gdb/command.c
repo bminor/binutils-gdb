@@ -535,7 +535,7 @@ lookup_cmd_1 (text, clist, result_list, ignore_help_classes)
   for (tmp = 0; tmp < len; tmp++)
     {
       char x = (*text)[tmp];
-      command[tmp] = (x >= 'A' && x <= 'Z') ? x - 'A' + 'a' : x;
+      command[tmp] = isupper(x) ? tolower(x) : x;
     }
   command[len] = '\0';
 
@@ -784,10 +784,7 @@ lookup_cmd (line, list, cmdtype, allow_unknown)
   /* Find end of command name.  */
 
   p = *line;
-  while (*p == '-'
-	 || (*p >= 'a' && *p <= 'z')
-	 || (*p >= 'A' && *p <= 'Z')
-	 || (*p >= '0' && *p <= '9'))
+  while (*p == '-' || isalnum(*p))
     p++;
 
   /* Look up the command name.
@@ -812,8 +809,8 @@ lookup_cmd (line, list, cmdtype, allow_unknown)
   for (cmd_len = 0; cmd_len < p - *line; cmd_len++)
     {
       char x = (*line)[cmd_len];
-      if (x >= 'A' && x <= 'Z')
-	processed_cmd[cmd_len] = x - 'A' + 'a';
+      if (isupper(x))
+	processed_cmd[cmd_len] = tolower(x);
       else
 	processed_cmd[cmd_len] = x;
     }

@@ -1,3 +1,14 @@
+Wed Mar 25 14:55:48 1992  Per Bothner  (bothner@cygnus.com)
+
+	* command.c, main.c (various places):  Use ctype.h macros
+	(such as isupper(x)),  instead of hard-wiring in ASCII-isms
+	(such as (x >= 'A' && x <= 'Z')).
+	(There are still more of these in other files.)
+	* main.c (defined_command):  Lower-case the user's
+	new command before entering it.  Needed because
+	command lookup is case-insensitive (and also lower-cases).
+	(Based on Metin's earlier patch.)
+
 Tue Mar 24 23:27:01 1992  K. Richard Pixley  (rich@cygnus.com)
 
 	* config/irix4.mh: new file.
