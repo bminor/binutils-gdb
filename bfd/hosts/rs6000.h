@@ -1,3 +1,5 @@
+/* This file is *really* for an RS6000 running AIX... */
+
 #include <stddef.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -8,6 +10,9 @@
 #include <string.h>
 #include <sys/file.h>
 #include <stdlib.h>		/* for malloc() */
+
+/* Defining this variable turns on AIX core file and archive support.  */
+#define HOST_AIX
 
 #ifndef	O_ACCMODE
 #define O_ACCMODE (O_RDONLY | O_WRONLY | O_RDWR)
