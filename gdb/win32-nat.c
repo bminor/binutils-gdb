@@ -1334,7 +1334,7 @@ static BOOL WINAPI (*DebugSetProcessKillOnExit)(BOOL);
 static BOOL WINAPI (*DebugActiveProcessStop)(DWORD);
 
 static int
-has_detach_ability ()
+has_detach_ability (void)
 {
   static HMODULE kernel32 = NULL;
 

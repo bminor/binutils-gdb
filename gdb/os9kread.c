@@ -144,9 +144,9 @@ static void os9k_symfile_read (struct objfile *, int);
 
 static void os9k_symfile_finish (struct objfile *);
 
-static void
-os9k_process_one_symbol (int, int, CORE_ADDR, char *,
-			 struct section_offsets *, struct objfile *);
+static void os9k_process_one_symbol (int, int, CORE_ADDR, char *,
+				     struct section_offsets *,
+				     struct objfile *);
 
 static struct partial_symtab *os9k_start_psymtab (struct objfile *, char *,
 						  CORE_ADDR, int, int,

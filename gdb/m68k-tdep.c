@@ -120,7 +120,7 @@ m68k_local_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 
 
 static int
-m68k_register_bytes_ok (numbytes)
+m68k_register_bytes_ok (long numbytes)
 {
   return ((numbytes == REGISTER_BYTES_FP)
 	  || (numbytes == REGISTER_BYTES_NOFP));

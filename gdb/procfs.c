@@ -5431,8 +5431,7 @@ proc_find_memory_regions (int (*func) (CORE_ADDR,
  */
 
 static char *
-mappingflags (flags)
-     long flags;
+mappingflags (long flags)
 {
   static char asciiflags[8];
 

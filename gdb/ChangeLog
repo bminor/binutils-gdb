@@ -1,5 +1,44 @@
 2002-07-10  Andrew Cagney  <ac131313@redhat.com>
 
+	* win32-nat.c (has_detach_ability): Convert to strict ISO C
+	prototype.
+	* top.c (gdb_rl_operate_and_get_next_completion): Ditto.
+	* s390-tdep.c (s390_fp_regnum): Ditto.
+	(s390_read_fp): Ditto.
+	(s390_pop_frame): Ditto.
+	(_initialize_s390_tdep): Ditto.
+	* remote.c (get_remote_state): Ditto.
+	* procfs.c (mappingflags): Ditto.
+	* memattr.c (_initialize_mem): Ditto.
+	* mcore-tdep.c (mcore_pop_frame): Ditto.
+	* m68klinux-nat.c (_initialize_m68k_linux_nat): Ditto.
+	* m68k-tdep.c (m68k_register_bytes_ok): Ditto.
+	* language.c (set_case_str): Ditto.
+	* gnu-v3-abi.c (vtable_address_point_offset): Ditto.
+	* frv-tdep.c (new_variant): Ditto.
+	(frv_stopped_data_address): Ditto.
+	* dwarf2cfi.c (fde_chunks_need_space): Ditto.
+	(context_alloc): Ditto.
+	(frame_state_alloc): Ditto.
+	(unwind_tmp_obstack_init): Ditto.
+	(unwind_tmp_obstack_free): Ditto.
+	(cfi_read_fp): Ditto.
+	* cris-tdep.c (cris_saved_pc_after_call): Ditto.
+	(cris_pop_frame): Ditto.
+	* c-lang.c (scanning_macro_expansion): Ditto.
+	(finished_macro_expansion): Ditto.
+	(c_preprocess_and_parse): Ditto.
+	* gdbarch.sh: Ditto.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* config/mn10200/tm-mn10200.h: Adjust indentation.
+	* target.c: Adjust indentation.
+	* symtab.h: Adjust indentation.
+	* stabsread.h: Adjust indentation.
+	* remote-es.c: Adjust indentation.
+	* os9kread.c: Adjust indentation.
+
+2002-07-10  Andrew Cagney  <ac131313@redhat.com>
+	
 	* wince.c (_initialize_wince): Rename _initialize_inftarg.
 	* win32-nat.c (_initialize_win32_nat): Rename _initialize_inftarg.
 

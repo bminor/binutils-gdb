@@ -704,7 +704,7 @@ static struct core_fns linux_elf_core_fns =
 };
 
 void
-_initialize_m68k_linux_nat ()
+_initialize_m68k_linux_nat (void)
 {
   add_core_fns (&linux_elf_core_fns);
 }

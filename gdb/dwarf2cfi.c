@@ -273,7 +273,7 @@ cie_unit_alloc (void)
 }
 
 static void
-fde_chunks_need_space ()
+fde_chunks_need_space (void)
 {
   if (fde_chunks.elems < fde_chunks.array_size)
     return;
@@ -286,7 +286,7 @@ fde_chunks_need_space ()
 
 /* Alocate a new `struct context' on temporary obstack.  */
 static struct context *
-context_alloc ()
+context_alloc (void)
 {
   struct context *context;
 
@@ -303,7 +303,7 @@ context_alloc ()
 
 /* Alocate a new `struct frame_state' on temporary obstack.  */
 static struct frame_state *
-frame_state_alloc ()
+frame_state_alloc (void)
 {
   struct frame_state *fs;
 
@@ -319,13 +319,13 @@ frame_state_alloc ()
 }
 
 static void
-unwind_tmp_obstack_init ()
+unwind_tmp_obstack_init (void)
 {
   obstack_init (&unwind_tmp_obstack);
 }
 
 static void
-unwind_tmp_obstack_free ()
+unwind_tmp_obstack_free (void)
 {
   obstack_free (&unwind_tmp_obstack, NULL);
   unwind_tmp_obstack_init ();
@@ -1691,7 +1691,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
 
 /* Return the frame address.  */
 CORE_ADDR
-cfi_read_fp ()
+cfi_read_fp (void)
 {
   struct context *context;
   struct frame_state *fs;

@@ -484,7 +484,7 @@ set_range_str (void)
 }
 
 static void
-set_case_str()
+set_case_str (void)
 {
    char *tmp = NULL, *prefix = "";
 

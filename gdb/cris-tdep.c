@@ -775,7 +775,7 @@ cris_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
    the content of the register PC after a function call.  */
 
 CORE_ADDR
-cris_saved_pc_after_call ()
+cris_saved_pc_after_call (void)
 {
   return read_register (SRP_REGNUM);
 }
@@ -1520,7 +1520,7 @@ cris_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
    all saved registers.  */
 
 void 
-cris_pop_frame ()
+cris_pop_frame (void)
 {
   register struct frame_info *fi = get_current_frame ();
   register int regno;

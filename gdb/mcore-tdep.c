@@ -783,7 +783,7 @@ mcore_frame_saved_pc (struct frame_info * fi)
    command, or the call dummy breakpoint gets hit. */
 
 void
-mcore_pop_frame ()
+mcore_pop_frame (void)
 {
   int rn;
   struct frame_info *fi = get_current_frame ();

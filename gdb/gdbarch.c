@@ -422,7 +422,7 @@ struct gdbarch *current_gdbarch = &startup_gdbarch;
 /* Do any initialization needed for a non-multiarch configuration
    after the _initialize_MODULE functions have been run.  */
 void
-initialize_non_multiarch ()
+initialize_non_multiarch (void)
 {
   alloc_gdbarch_data (&startup_gdbarch);
   /* Ensure that all swap areas are zeroed so that they again think

@@ -173,7 +173,7 @@ build_gdb_vtable_type (struct gdbarch *arch)
    gdb_gnu_v3_abi_vtable' object to the vtable's "address point"
    (i.e., where objects' virtual table pointers point).  */
 static int
-vtable_address_point_offset ()
+vtable_address_point_offset (void)
 {
   struct type *vtable_type = gdbarch_data (current_gdbarch,
 					   vtable_type_gdbarch_data);

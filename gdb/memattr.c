@@ -507,7 +507,7 @@ mem_delete_command (char *args, int from_tty)
 }
 
 void
-_initialize_mem ()
+_initialize_mem (void)
 {
   add_com ("mem", class_vars, mem_command,
 	   "Define attributes for memory region.\n\

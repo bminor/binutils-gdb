@@ -182,15 +182,14 @@ extern struct partial_symtab *end_psymtab (struct partial_symtab *pst,
 					   int number_dependencies,
 					   int textlow_not_set);
 
-extern void
-process_one_symbol (int, int, CORE_ADDR, char *,
-		    struct section_offsets *, struct objfile *);
+extern void process_one_symbol (int, int, CORE_ADDR, char *,
+				struct section_offsets *, struct objfile *);
 
-extern void elfstab_build_psymtabs
-  (struct objfile *objfile,
-   int mainline,
-   file_ptr staboff, unsigned int stabsize,
-   file_ptr stabstroffset, unsigned int stabstrsize);
+extern void elfstab_build_psymtabs (struct objfile *objfile,
+				    int mainline,
+				    file_ptr staboff, unsigned int stabsize,
+				    file_ptr stabstroffset,
+				    unsigned int stabstrsize);
 
 extern void coffstab_build_psymtabs
   (struct objfile *objfile,

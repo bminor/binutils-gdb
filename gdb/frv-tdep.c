@@ -147,7 +147,7 @@ struct gdbarch_tdep
 /* Allocate a new variant structure, and set up default values for all
    the fields.  */
 static struct gdbarch_tdep *
-new_variant ()
+new_variant (void)
 {
   struct gdbarch_tdep *var;
   int r;
@@ -987,7 +987,7 @@ frv_check_watch_resources (int type, int cnt, int ot)
 
 
 CORE_ADDR
-frv_stopped_data_address ()
+frv_stopped_data_address (void)
 {
   CORE_ADDR brr, dbar0, dbar1, dbar2, dbar3;
 

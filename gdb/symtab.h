@@ -1076,9 +1076,8 @@ find_pc_partial_function (CORE_ADDR, char **, CORE_ADDR *, CORE_ADDR *);
 
 extern void clear_pc_function_cache (void);
 
-extern int
-find_pc_sect_partial_function (CORE_ADDR, asection *,
-			       char **, CORE_ADDR *, CORE_ADDR *);
+extern int find_pc_sect_partial_function (CORE_ADDR, asection *,
+					  char **, CORE_ADDR *, CORE_ADDR *);
 
 /* from symtab.c: */
 

@@ -1187,7 +1187,7 @@ extern void initialize_current_architecture (void);
 /* For non-multiarched targets, do any initialization of the default
    gdbarch object necessary after the _initialize_MODULE functions
    have run.  */
-extern void initialize_non_multiarch ();
+extern void initialize_non_multiarch (void);
 
 /* gdbarch trace variable */
 extern int gdbarch_debug;
@@ -1371,7 +1371,7 @@ struct gdbarch *current_gdbarch = &startup_gdbarch;
 /* Do any initialization needed for a non-multiarch configuration
    after the _initialize_MODULE functions have been run.  */
 void
-initialize_non_multiarch ()
+initialize_non_multiarch (void)
 {
   alloc_gdbarch_data (&startup_gdbarch);
   /* Ensure that all swap areas are zeroed so that they again think

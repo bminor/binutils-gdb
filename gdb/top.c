@@ -1037,7 +1037,7 @@ static int operate_saved_history = -1;
 /* This is put on the appropriate hook and helps operate-and-get-next
    do its work.  */
 void
-gdb_rl_operate_and_get_next_completion ()
+gdb_rl_operate_and_get_next_completion (void)
 {
   int delta = where_history () - operate_saved_history;
   /* The `key' argument to rl_get_previous_history is ignored.  */
