@@ -1,3 +1,22 @@
+start-sanitize-sh3e
+Mon Aug  7 03:01:32 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gas/sh/*: New tests for the hitachi-sh.
+
+end-sanitize-sh3e
+Tue Aug  1 18:02:47 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/mri/*: New tests for MRI mode.
+
+	* lib/gas-defs.exp (run_dump_test): Support using objcopy.  Dump
+	program executions to the log file before running them.  Use the
+	simple program name, rather than the path to the binary being run,
+	in pass/fail messages.
+	(regexp_diff): If the regexp file has the special comment #pass,
+	stop checking at that point.
+	* config/default.exp: Set NM, NMFLAGS, OBJCOPY, and OBJCOPYFLAGS,
+	if they are not already set.
+
 Tue Aug  1 11:41:30 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* Makefile.in: Remove superfluous runtest gasp.
