@@ -5733,6 +5733,12 @@ md_apply_fix3 (fixP, valP, seg)
 	  }
 	  break;
 
+	case BFD_RELOC_PPC_B16_BRTAKEN:
+	case BFD_RELOC_PPC_B16_BRNTAKEN:
+	case BFD_RELOC_PPC_BA16_BRTAKEN:
+	case BFD_RELOC_PPC_BA16_BRNTAKEN:
+	  break;
+
 	case BFD_RELOC_PPC_TLS:
 	case BFD_RELOC_PPC_DTPMOD:
 	case BFD_RELOC_PPC_TPREL16:
