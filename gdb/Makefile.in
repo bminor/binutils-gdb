@@ -1279,7 +1279,8 @@ core-regset.o: core-regset.c $(command_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h gdb_string.h
 
 corefile.o: corefile.c $(dis-asm_h) $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
-	$(inferior_h) target.h language.h gdb_string.h completer.h
+	$(inferior_h) target.h language.h gdb_string.h completer.h \
+	symfile.h
 
 corelow.o: corelow.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 	target.h gdbthread.h gdb_string.h
@@ -1376,7 +1377,7 @@ install-gdbtk:
 		$(datadir)/gdbtcl/help/images \
 		$(datadir)/gdbtcl/help/trace ; \
 	cd $(srcdir)/gdbtk/library ; \
-	for i in *.tcl *.ith *.itb images/*.gif images2/*.gif images/icons.txt images2/icons.txt tclIndex help/*.html  help/trace/*.html help/trace/index.toc help/images/*.gif; \
+	for i in *.tcl *.itcl *.ith *.itb images/*.gif images2/*.gif images/icons.txt images2/icons.txt tclIndex help/*.html  help/trace/*.html help/trace/index.toc help/images/*.gif; \
 	  do \
 		$(INSTALL_DATA) $$i $(datadir)/gdbtcl/$$i ; \
 	  done ;
@@ -1514,7 +1515,7 @@ ia64-tdep.o: ia64-tdep.c $(defs_h) $(inferior_h) symfile.h $(gdbcore_h) \
 	$(arch_utils_h) $(floatformat_h) objfiles.h $(INCLUDE_DIR)/elf/common.h
 
 infcmd.o: infcmd.c $(defs_h) environ.h $(gdbcmd_h) $(gdbcore_h) \
-	$(inferior_h) target.h language.h gdb_string.h
+	$(inferior_h) target.h language.h symfile.h gdb_string.h
 
 inflow.o: inflow.c $(bfd_h) $(command_h) $(defs_h) $(inferior_h) \
 	signals.h target.h terminal.h gdbthread.h gdb_string.h
@@ -1596,7 +1597,8 @@ m88k-tdep.o: m88k-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 
 mac-nat.o: mac-nat.c $(defs_h) gdb_string.h
 
-main.o: main.c top.h $(defs_h) gdb_string.h $(event_loop_h) $(srcdir)/tui/tui-file.h
+main.o: main.c top.h $(defs_h) gdb_string.h $(event_loop_h) \
+	symfile.h  $(gdbcore_h) $(srcdir)/tui/tui-file.h
 
 maint.o: maint.c $(defs_h) $(gdbcmd_h) $(gdbtypes_h) $(symtab_h) language.h \
 	$(expression_h) objfiles.h symfile.h
@@ -1780,7 +1782,8 @@ remote-eb.o: remote-eb.c gdb_wait.h $(srcdir)/config/a29k/tm-a29k.h \
 	gdb_string.h
 
 remote-es.o: remote-es.c $(bfd_h) gdb_wait.h $(command_h) $(defs_h) \
-	$(inferior_h) $(remote_utils_h) terminal.h gdb_string.h
+	$(inferior_h) $(remote_utils_h) terminal.h gdb_string.h \
+	symfile.h
 
 remote-hms.o: remote-hms.c gdb_wait.h $(defs_h) $(gdbcore_h) \
 	$(inferior_h) serial.h target.h terminal.h gdb_string.h

@@ -1,3 +1,8 @@
+2001-01-08  Fernando Nasser  <fnasser@redhat.com>
+
+	* Makefile.in (install-gdbtk): Add .itcl files to the list of files
+	to be installed.
+
 2001-01-04  Michael Snyder  <msnyder@mvstp600e.cygnus.com>
 
 	* mips-tdep.c (mips_coerce_float_to_double): Fix typo in comment.
