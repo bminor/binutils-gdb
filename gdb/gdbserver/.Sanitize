@@ -26,6 +26,7 @@ Things-to-keep:
 Makefile.in
 README
 configure.in
+gdbreplay.c
 gdbserver.1
 low-hppabsd.c
 low-linux.c
