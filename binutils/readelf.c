@@ -55,6 +55,7 @@
 #include "elf/mn10300.h"
 #include "elf/hppa.h"
 #include "elf/arc.h"
+#include "elf/fr30.h"
 
 #include "bucomm.h"
 #include "getopt.h"
@@ -349,6 +350,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, strtab)
     case EM_CYGNUS_D30V:
     case EM_CYGNUS_MN10200:
     case EM_CYGNUS_MN10300:
+    case EM_CYGNUS_FR30:
     case EM_SH:
     case EM_ALPHA:
       {
@@ -383,10 +385,10 @@ dump_relocations (file, rel_offset, rel_size, symtab, strtab)
 
   if (is_rela)
     printf
-      (_("  Offset    Value Type            Symbol's Value  Symbol's Name          Addend\n"));
+      (_("  Offset    Info  Type            Symbol's Value  Symbol's Name          Addend\n"));
   else
     printf
-      (_("  Offset    Value Type            Symbol's Value  Symbol's Name\n"));
+      (_("  Offset    Info  Type            Symbol's Value  Symbol's Name\n"));
 
   for (i = 0; i < rel_size; i++)
     {
@@ -453,6 +455,10 @@ dump_relocations (file, rel_offset, rel_size, symtab, strtab)
 
 	case EM_CYGNUS_MN10200:
 	  rtype = elf_mn10200_reloc_type (ELF32_R_TYPE (info));
+	  break;
+
+	case EM_CYGNUS_FR30:
+	  rtype = elf_fr30_reloc_type (ELF32_R_TYPE (info));
 	  break;
 
 	case EM_PPC:
@@ -706,6 +712,7 @@ get_machine_name (e_machine)
     case EM_CYGNUS_V850:	return "v850";
     case EM_CYGNUS_MN10300:	return "mn10300";
     case EM_CYGNUS_MN10200:	return "mn10200";
+    case EM_CYGNUS_FR30:	return "FR30";
 
     default:
       sprintf (buff, _("<unknown>: %x"), e_machine);
@@ -869,84 +876,45 @@ get_mips_section_type_name (sh_type)
 {
   switch (sh_type)
     {
-    case SHT_MIPS_LIBLIST:
-      return "MIPS_LIBLIST";
-    case SHT_MIPS_MSYM:
-      return "MIPS_MSYM";
-    case SHT_MIPS_CONFLICT:
-      return "MIPS_CONFLICT";
-    case SHT_MIPS_GPTAB:
-      return "MIPS_GPTAB";
-    case SHT_MIPS_UCODE:
-      return "MIPS_UCODE";
-    case SHT_MIPS_DEBUG:
-      return "MIPS_DEBUG";
-    case SHT_MIPS_REGINFO:
-      return "MIPS_REGINFO";
-    case SHT_MIPS_PACKAGE:
-      return "MIPS_PACKAGE";
-    case SHT_MIPS_PACKSYM:
-      return "MIPS_PACKSYM";
-    case SHT_MIPS_RELD:
-      return "MIPS_RELD";
-    case SHT_MIPS_IFACE:
-      return "MIPS_IFACE";
-    case SHT_MIPS_CONTENT:
-      return "MIPS_CONTENT";
-    case SHT_MIPS_OPTIONS:
-      return "MIPS_OPTIONS";
-    case SHT_MIPS_SHDR:
-      return "MIPS_SHDR";
-    case SHT_MIPS_FDESC:
-      return "MIPS_FDESC";
-    case SHT_MIPS_EXTSYM:
-      return "MIPS_EXTSYM";
-    case SHT_MIPS_DENSE:
-      return "MIPS_DENSE";
-    case SHT_MIPS_PDESC:
-      return "MIPS_PDESC";
-    case SHT_MIPS_LOCSYM:
-      return "MIPS_LOCSYM";
-    case SHT_MIPS_AUXSYM:
-      return "MIPS_AUXSYM";
-    case SHT_MIPS_OPTSYM:
-      return "MIPS_OPTSYM";
-    case SHT_MIPS_LOCSTR:
-      return "MIPS_LOCSTR";
-    case SHT_MIPS_LINE:
-      return "MIPS_LINE";
-    case SHT_MIPS_RFDESC:
-      return "MIPS_RFDESC";
-    case SHT_MIPS_DELTASYM:
-      return "MIPS_DELTASYM";
-    case SHT_MIPS_DELTAINST:
-      return "MIPS_DELTAINST";
-    case SHT_MIPS_DELTACLASS:
-      return "MIPS_DELTACLASS";
-    case SHT_MIPS_DWARF:
-      return "MIPS_DWARF";
-    case SHT_MIPS_DELTADECL:
-      return "MIPS_DELTADECL";
-    case SHT_MIPS_SYMBOL_LIB:
-      return "MIPS_SYMBOL_LIB";
-    case SHT_MIPS_EVENTS:
-      return "MIPS_EVENTS";
-    case SHT_MIPS_TRANSLATE:
-      return "MIPS_TRANSLATE";
-    case SHT_MIPS_PIXIE:
-      return "MIPS_PIXIE";
-    case SHT_MIPS_XLATE:
-      return "MIPS_XLATE";
-    case SHT_MIPS_XLATE_DEBUG:
-      return "MIPS_XLATE_DEBUG";
-    case SHT_MIPS_WHIRL:
-      return "MIPS_WHIRL";
-    case SHT_MIPS_EH_REGION:
-      return "MIPS_EH_REGION";
-    case SHT_MIPS_XLATE_OLD:
-      return "MIPS_XLATE_OLD";
-    case SHT_MIPS_PDR_EXCEPTION:
-      return "MIPS_PDR_EXCEPTION";
+    case SHT_MIPS_LIBLIST:       return "MIPS_LIBLIST";
+    case SHT_MIPS_MSYM:          return "MIPS_MSYM";
+    case SHT_MIPS_CONFLICT:      return "MIPS_CONFLICT";
+    case SHT_MIPS_GPTAB:         return "MIPS_GPTAB";
+    case SHT_MIPS_UCODE:         return "MIPS_UCODE";
+    case SHT_MIPS_DEBUG:         return "MIPS_DEBUG";
+    case SHT_MIPS_REGINFO:       return "MIPS_REGINFO";
+    case SHT_MIPS_PACKAGE:       return "MIPS_PACKAGE";
+    case SHT_MIPS_PACKSYM:       return "MIPS_PACKSYM";
+    case SHT_MIPS_RELD:          return "MIPS_RELD";
+    case SHT_MIPS_IFACE:         return "MIPS_IFACE";
+    case SHT_MIPS_CONTENT:       return "MIPS_CONTENT";
+    case SHT_MIPS_OPTIONS:       return "MIPS_OPTIONS";
+    case SHT_MIPS_SHDR:          return "MIPS_SHDR";
+    case SHT_MIPS_FDESC:         return "MIPS_FDESC";
+    case SHT_MIPS_EXTSYM:        return "MIPS_EXTSYM";
+    case SHT_MIPS_DENSE:         return "MIPS_DENSE";
+    case SHT_MIPS_PDESC:         return "MIPS_PDESC";
+    case SHT_MIPS_LOCSYM:        return "MIPS_LOCSYM";
+    case SHT_MIPS_AUXSYM:        return "MIPS_AUXSYM";
+    case SHT_MIPS_OPTSYM:        return "MIPS_OPTSYM";
+    case SHT_MIPS_LOCSTR:        return "MIPS_LOCSTR";
+    case SHT_MIPS_LINE:          return "MIPS_LINE";
+    case SHT_MIPS_RFDESC:        return "MIPS_RFDESC";
+    case SHT_MIPS_DELTASYM:      return "MIPS_DELTASYM";
+    case SHT_MIPS_DELTAINST:     return "MIPS_DELTAINST";
+    case SHT_MIPS_DELTACLASS:    return "MIPS_DELTACLASS";
+    case SHT_MIPS_DWARF:         return "MIPS_DWARF";
+    case SHT_MIPS_DELTADECL:     return "MIPS_DELTADECL";
+    case SHT_MIPS_SYMBOL_LIB:    return "MIPS_SYMBOL_LIB";
+    case SHT_MIPS_EVENTS:        return "MIPS_EVENTS";
+    case SHT_MIPS_TRANSLATE:     return "MIPS_TRANSLATE";
+    case SHT_MIPS_PIXIE:         return "MIPS_PIXIE";
+    case SHT_MIPS_XLATE:         return "MIPS_XLATE";
+    case SHT_MIPS_XLATE_DEBUG:   return "MIPS_XLATE_DEBUG";
+    case SHT_MIPS_WHIRL:         return "MIPS_WHIRL";
+    case SHT_MIPS_EH_REGION:     return "MIPS_EH_REGION";
+    case SHT_MIPS_XLATE_OLD:     return "MIPS_XLATE_OLD";
+    case SHT_MIPS_PDR_EXCEPTION: return "MIPS_PDR_EXCEPTION";
     default:
       break;
     }
@@ -3059,10 +3027,12 @@ process_symbol_table (file)
       int hn;
       int si;
       int maxlength = 0;
+      int nzero_counts = 0;
+      int nsyms = 0;
 
       printf (_("\nHistogram for bucket list length (total of %d buckets):\n"),
 	      nbuckets);
-      printf (_(" Length  Number\n"));
+      printf (_(" Length  Number     %% of total  Coverage\n"));
 
       lengths = (int *) calloc (nbuckets, sizeof (int));
       if (lengths == NULL)
@@ -3076,8 +3046,11 @@ process_symbol_table (file)
 	    continue;
 
 	  for (si = buckets[hn]; si; si = chains[si])
-	    if (maxlength < ++lengths[hn])
-	      maxlength = lengths[hn];
+	    {
+	      ++nsyms;
+	      if (maxlength < ++lengths[hn])
+		++maxlength;
+	    }
 	}
 
       counts = (int *) calloc (maxlength + 1, sizeof (int));
@@ -3090,9 +3063,15 @@ process_symbol_table (file)
       for (hn = 0; hn < nbuckets; ++hn)
 	++counts[lengths[hn]];
 
-      for (si = 0; si <= maxlength; ++si)
-	printf ("%7d  %-10d (%5.1f%%)\n",
-		si, counts[si], (counts[si] * 100.0) / nbuckets);
+      printf ("      0  %-10d (%5.1f%%)\n",
+	      counts[0], (counts[0] * 100.0) / nbuckets);
+      for (si = 1; si <= maxlength; ++si)
+	{
+	  nzero_counts += counts[si] * si;
+	  printf ("%7d  %-10d (%5.1f%%)    %5.1f%%\n",
+		  si, counts[si], (counts[si] * 100.0) / nbuckets,
+		  (nzero_counts * 100.0) / nsyms);
+	}
 
       free (counts);
       free (lengths);
@@ -3358,9 +3337,43 @@ process_mips_specific (file)
 
 	  strftime (timebuf, 20, "%Y-%m-%dT%H:%M:%S", gmtime (&time));
 
-	  printf ("%3d: %-20s %s %#10lx %-7ld %#lx\n", cnt,
+	  printf ("%3d: %-20s %s %#10lx %-7ld", cnt,
 		  dynamic_strings + liblist.l_name, timebuf,
-		  liblist.l_checksum, liblist.l_version, liblist.l_flags);
+		  liblist.l_checksum, liblist.l_version);
+
+	  if (liblist.l_flags == 0)
+	    puts (" NONE");
+	  else
+	    {
+	      static const struct
+	      {
+		const char *name;
+		int bit;
+	      } l_flags_vals[] =
+		{
+		  { " EXACT_MATCH", LL_EXACT_MATCH },
+		  { " IGNORE_INT_VER", LL_IGNORE_INT_VER },
+		  { " REQUIRE_MINOR", LL_REQUIRE_MINOR },
+		  { " EXPORTS", LL_EXPORTS },
+		  { " DELAY_LOAD", LL_DELAY_LOAD },
+		  { " DELTA", LL_DELTA }
+		};
+	      int flags = liblist.l_flags;
+	      int fcnt;
+
+	      for (fcnt = 0;
+		   fcnt < sizeof (l_flags_vals) / sizeof (l_flags_vals[0]);
+		   ++fcnt)
+		if ((flags & l_flags_vals[fcnt].bit) != 0)
+		  {
+		    fputs (l_flags_vals[fcnt].name, stdout);
+		    flags ^= l_flags_vals[fcnt].bit;
+		  }
+	      if (flags != 0)
+		printf (" %#lx", flags);
+
+	      puts ("");
+	    }
 	}
 
       free (elib);
