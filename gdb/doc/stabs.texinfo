@@ -985,8 +985,11 @@ In a.out files, @code{N_STSYM} means the data segment (although gcc
 find the variables), @code{N_FUN} means the text segment, and
 @code{N_LCSYM} means the bss segment.
 
-In xcoff files, each symbol has a section number, so the symbol type
+In xcoff files, each symbol has a section number, so the stab type
 need not indicate the segment.
+
+In ecoff files, the storage class is used to specify the section, so the
+stab type need not indicate the segment.
 
 @c In ELF files, it apparently is a big mess.  See kludge in dbxread.c
 @c in GDB.  FIXME: Investigate where this kludge comes from.
