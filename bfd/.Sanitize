@@ -140,6 +140,7 @@ newsos3.c
 nlm-target.h
 nlm.c
 nlm32-gen.c
+nlm32-i386.c
 nlm32.c
 nlm64-gen.c
 nlm64.c
