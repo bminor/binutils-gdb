@@ -1,3 +1,16 @@
+Fri Apr  2 14:33:52 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* ldlang.c (lang_output_section_statement_lookup): Initialize all
+	fields of newly created structure.
+
+Wed Mar 31 18:19:15 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* ldmain.c (g_switch_value): New variable.
+	* ldgram.y (OPTION_G, OPTION_Gval): New tokens.
+	(command_line_option): Accept -G and set g_switch_value.
+	* ldlex.l (COMMAND): Accept -G.
+	* ldlang.c (open_output): Call bfd_set_gp_size on new BFD.
+
 Tue Mar 30 09:40:25 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	Support for linking and loading at different places:

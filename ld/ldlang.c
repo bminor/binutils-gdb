@@ -94,6 +94,7 @@ extern args_type command_line;
 extern ld_config_type config;
 extern boolean had_script;
 extern boolean write_map;
+extern int g_switch_value;
 
 
 etree_type *base; /* Relocation base - or null */
@@ -476,6 +477,12 @@ DEFUN (lang_output_section_statement_lookup, (name),
       lookup->addr_tree = (etree_type *) NULL;
       lang_list_init (&lookup->children);
 
+      lookup->memspec = (CONST char *) NULL;
+      lookup->flags = 0;
+      lookup->subsection_alignment = -1;
+      lookup->section_alignment = -1;
+      lookup->load_base = (union etree_union *) NULL;
+
       lang_statement_append (&lang_output_section_statement,
 			     (lang_statement_union_type *) lookup,
 			     &lookup->next);
@@ -798,6 +805,7 @@ DEFUN (open_output, (name),
   bfd_set_arch_mach (output,
 		     ldfile_output_architecture,
 		     ldfile_output_machine);
+  bfd_set_gp_size (output, g_switch_value);
   return output;
 }
 
