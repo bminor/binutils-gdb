@@ -1,5 +1,7 @@
 Fri Nov 22 08:27:40 1991  John Gilmore  (gnu at cygnus.com)
 
+	* Roll VERSION to 4.2.95.
+
 	* buildsym.c, coredep.c, mem-break.c, xcoffread.c:  Put <stdio.h>
 	first, before defs.h.
 	* config/mh-i386sco: Override compiler to gcc, print warning.
