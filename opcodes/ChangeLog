@@ -1,3 +1,7 @@
+2004-01-13  Michael Snyder  <msnyder@redhat.com>
+
+	* sh-dis.c (print_insn_sh): Allocate 4 bytes for insn.
+
 2004-01-09  Paul Brook  <paul@codesourcery.com>
 
 	* arm-opc.h (arm_opcodes): Move generic mcrr after known

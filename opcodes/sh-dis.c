@@ -397,7 +397,7 @@ print_insn_sh (memaddr, info)
 {
   fprintf_ftype fprintf_fn = info->fprintf_func;
   void *stream = info->stream;
-  unsigned char insn[2];
+  unsigned char insn[4];
   unsigned char nibs[4];
   int status;
   bfd_vma relmask = ~(bfd_vma) 0;
