@@ -1,3 +1,7 @@
+Tue Mar 23 00:10:53 1993  John Gilmore  (gnu@cygnus.com)
+
+	* symtab.h (struct linetable_entry):  Remove confusing comment.
+
 Tue Mar 23 00:01:23 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* Makefile.in: add installcheck target

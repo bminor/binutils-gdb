@@ -84,13 +84,20 @@ struct general_symbol_info
       /* Since one and only one language can apply, wrap the information inside
 	 a union. */
 
-      union
+      union lang_specific
 	{
 	  /* For C++ */
-	  struct
+	  struct cplus_specific
 	    {
 	      char *demangled_name;
 	    } cplus_specific;
+	  /* start-sanitize-chill */
+	  /* For Chill */
+	  struct chill_specific
+	    {
+	      char *demangled_name;
+	    } chill_specific;
+	  /* end-sanitize-chill */
 	} lang_u;
     } lang_specific;
 };
@@ -102,30 +109,137 @@ struct general_symbol_info
 #define SYMBOL_BLOCK_VALUE(symbol)	(symbol)->ginfo.value.block
 #define SYMBOL_VALUE_CHAIN(symbol)	(symbol)->ginfo.value.chain
 #define SYMBOL_LANGUAGE(symbol)		(symbol)->ginfo.lang_specific.language
-#define SYMBOL_DEMANGLED_NAME(symbol)	\
+
+#define SYMBOL_CPLUS_DEMANGLED_NAME(symbol)	\
   (symbol)->ginfo.lang_specific.lang_u.cplus_specific.demangled_name
 
+
 extern int demangle;	/* We reference it, so go ahead and declare it. */
+
+/* Macro that initializes the language dependent portion of a symbol
+   depending upon the language for the symbol. */
+
+#define SYMBOL_INIT_LANGUAGE_SPECIFIC(symbol,language)			\
+  do {									\
+    SYMBOL_LANGUAGE (symbol) = language;				\
+    if (SYMBOL_LANGUAGE (symbol) == language_cplus)			\
+      {									\
+	SYMBOL_CPLUS_DEMANGLED_NAME (symbol) = NULL;			\
+      }									\
+    /* start-sanitize-chill */						\
+    else if (SYMBOL_LANGUAGE (symbol) == language_chill)		\
+      {									\
+	SYMBOL_CHILL_DEMANGLED_NAME (symbol) = NULL;			\
+      }									\
+    /* end-sanitize-chill */						\
+    else								\
+      {									\
+	memset (&(symbol)->ginfo.lang_specific.lang_u, 0,		\
+		sizeof ((symbol)->ginfo.lang_specific.lang_u));		\
+      }									\
+  } while (0)
+
+/* Macro that attempts to initialize the demangled name for a symbol,
+   based on the language of that symbol.  If the language is set to
+   language_auto, it will attempt to find any demangling algorithm
+   that works and then set the language appropriately.  If no demangling
+   of any kind is found, the language is set back to language_unknown,
+   so we can avoid doing this work again the next time we encounter
+   the symbol.  Any required space to store the name is obtained from the
+   specified obstack. */
+
+#define SYMBOL_INIT_DEMANGLED_NAME(symbol,obstack)			\
+  do {									\
+    char *demangled = NULL;						\
+    if (SYMBOL_LANGUAGE (symbol) == language_cplus			\
+	|| SYMBOL_LANGUAGE (symbol) == language_auto)			\
+      {									\
+	demangled =							\
+	  cplus_demangle (SYMBOL_NAME (symbol), DMGL_PARAMS | DMGL_ANSI);\
+	if (demangled != NULL)						\
+	  {								\
+	    SYMBOL_LANGUAGE (symbol) = language_cplus;			\
+	    SYMBOL_CPLUS_DEMANGLED_NAME (symbol) = 			\
+	      obsavestring (demangled, strlen (demangled), (obstack));	\
+	    free (demangled);						\
+	  }								\
+	else								\
+	  {								\
+	    SYMBOL_CPLUS_DEMANGLED_NAME (symbol) = NULL;		\
+	  }								\
+      }									\
+    /* start-sanitize-chill */						\
+    if (demangled == NULL						\
+	&& (SYMBOL_LANGUAGE (symbol) == language_chill			\
+	    || SYMBOL_LANGUAGE (symbol) == language_auto))		\
+      {									\
+	demangled =							\
+	  chill_demangle (SYMBOL_NAME (symbol));			\
+	if (demangled != NULL)						\
+	  {								\
+	    SYMBOL_LANGUAGE (symbol) = language_chill;			\
+	    SYMBOL_CHILL_DEMANGLED_NAME (symbol) = 			\
+	      obsavestring (demangled, strlen (demangled), (obstack));	\
+	    free (demangled);						\
+	  }								\
+	else								\
+	  {								\
+	    SYMBOL_CHILL_DEMANGLED_NAME (symbol) = NULL;		\
+	  }								\
+      }									\
+    /* end-sanitize-chill */						\
+    if (SYMBOL_LANGUAGE (symbol) == language_auto)			\
+      {									\
+	SYMBOL_LANGUAGE (symbol) = language_unknown;			\
+      }									\
+  } while (0)
+
+/* Macro that returns the demangled name for a symbol based on the language
+   for that symbol.  If no demangled name exists, returns NULL. */
+
+#define SYMBOL_DEMANGLED_NAME(symbol)					\
+  (SYMBOL_LANGUAGE (symbol) == language_cplus				\
+   ? SYMBOL_CPLUS_DEMANGLED_NAME (symbol)				\
+   : NULL)
+
+/* start-sanitize-chill */
+
+#define SYMBOL_CHILL_DEMANGLED_NAME(symbol)				\
+  (symbol)->ginfo.lang_specific.lang_u.chill_specific.demangled_name
+
+/* Redefine SYMBOL_DEMANGLED_NAME.  This is simplier than trying to
+   devise a macro for which part of it can be cleanly sanitized away. */
+
+#undef SYMBOL_DEMANGLED_NAME
+#define SYMBOL_DEMANGLED_NAME(symbol)					\
+  (SYMBOL_LANGUAGE (symbol) == language_cplus				\
+   ? SYMBOL_CPLUS_DEMANGLED_NAME (symbol)				\
+   : (SYMBOL_LANGUAGE (symbol) == language_chill			\
+      ? SYMBOL_CHILL_DEMANGLED_NAME (symbol)				\
+      : NULL))
+
+/* end-sanitize-chill */
 
 /* Macro that returns the "natural source name" of a symbol.  In C++ this is
    the "demangled" form of the name if demangle is on and the "mangled" form
    of the name if demangle is off.  In other languages this is just the
-   symbol name. */
+   symbol name.  The result should never be NULL. */
 
-#define SYMBOL_SOURCE_NAME(symbol) \
-  ((demangle && (SYMBOL_LANGUAGE(symbol) == language_cplus) && \
-    (SYMBOL_DEMANGLED_NAME(symbol) != NULL)) ? \
-   SYMBOL_DEMANGLED_NAME (symbol) : SYMBOL_NAME (symbol))
+#define SYMBOL_SOURCE_NAME(symbol)					\
+  (demangle && SYMBOL_DEMANGLED_NAME (symbol) != NULL			\
+   ? SYMBOL_DEMANGLED_NAME (symbol)					\
+   : SYMBOL_NAME (symbol))
 
 /* Macro that returns the "natural assembly name" of a symbol.  In C++ this is
    the "mangled" form of the name if demangle is off, or if demangle is on and
    asm_demangle is off.  Otherwise if asm_demangle is on it is the "demangled"
-   form.  In other languages this is just the symbol name. */
+   form.  In other languages this is just the symbol name.  The result should
+   never be NULL. */
 
-#define SYMBOL_LINKAGE_NAME(symbol) \
-  ((demangle && asm_demangle && (SYMBOL_LANGUAGE(symbol) == language_cplus) &&\
-    (SYMBOL_DEMANGLED_NAME(symbol) != NULL)) ? \
-   SYMBOL_DEMANGLED_NAME (symbol) : SYMBOL_NAME (symbol))
+#define SYMBOL_LINKAGE_NAME(symbol)					\
+  (demangle && asm_demangle && SYMBOL_DEMANGLED_NAME (symbol) != NULL	\
+   ? SYMBOL_DEMANGLED_NAME (symbol)					\
+   : SYMBOL_NAME (symbol))
 
 /* Macro that tests a symbol for a match against a specified name string.
    First test the unencoded name, then looks for and test a C++ encoded
@@ -134,22 +248,20 @@ extern int demangle;	/* We reference it, so go ahead and declare it. */
    "foo :: bar (int, long)".
    Evaluates to zero if the match fails, or nonzero if it succeeds. */
 
-#define SYMBOL_MATCHES_NAME(symbol, name) \
-  (STREQ (SYMBOL_NAME (symbol), (name)) || \
-   (SYMBOL_LANGUAGE (symbol) == language_cplus && \
-    SYMBOL_DEMANGLED_NAME (symbol) != NULL && \
-    strcmp_iw (SYMBOL_DEMANGLED_NAME (symbol), (name)) == 0))
+#define SYMBOL_MATCHES_NAME(symbol, name)				\
+  (STREQ (SYMBOL_NAME (symbol), (name))					\
+   || (SYMBOL_DEMANGLED_NAME (symbol) != NULL				\
+       && strcmp_iw (SYMBOL_DEMANGLED_NAME (symbol), (name)) == 0))
    
 /* Macro that tests a symbol for an re-match against the last compiled regular
    expression.  First test the unencoded name, then look for and test a C++
    encoded name if it exists.
    Evaluates to zero if the match fails, or nonzero if it succeeds. */
 
-#define SYMBOL_MATCHES_REGEXP(symbol) \
-  (re_exec (SYMBOL_NAME (symbol)) != 0 || \
-   (SYMBOL_LANGUAGE (symbol) == language_cplus && \
-    SYMBOL_DEMANGLED_NAME (symbol) != NULL && \
-    re_exec (SYMBOL_DEMANGLED_NAME (symbol)) != 0))
+#define SYMBOL_MATCHES_REGEXP(symbol)					\
+  (re_exec (SYMBOL_NAME (symbol)) != 0					\
+   || (SYMBOL_DEMANGLED_NAME (symbol) != NULL				\
+       && re_exec (SYMBOL_DEMANGLED_NAME (symbol)) != 0))
    
 /* Define a simple structure used to hold some very basic information about
    all defined global symbols (text, data, bss, abs, etc).  The only required
@@ -509,12 +621,7 @@ struct sourcevector
 /* Each item represents a line-->pc (or the reverse) mapping.  This is
    somewhat more wasteful of space than one might wish, but since only
    the files which are actually debugged are read in to core, we don't
-   waste much space.
-
-   Each item used to be an int; either minus a line number, or a
-   program counter.  If it represents a line number, that is the line
-   described by the next program counter value.  If it is positive, it
-   is the program counter at which the code for the next line starts.  */
+   waste much space.  */
 
 struct linetable_entry
 {
