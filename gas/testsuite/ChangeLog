@@ -1,3 +1,8 @@
+2002-02-18  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gas/sh/basic.exp: Don't run PIC tests for targets that don't
+	support it.
+
 2002-02-14  Tom Rix  <trix@redhat.com>
 
 	* gas/ppc/ppc.exp: Add xcoff altivec tests.
