@@ -1,3 +1,8 @@
+2000-07-26  Nick Clifton  <nickc@cygnus.com>
+
+	* bb_exit_func.c: Assign copyright to FSF.  Note that David 
+	Mosberger-Tang <David.Mosberger@acm.org> continuted this code.
+
 2000-07-24  Nick Clifton  <nickc@cygnus.com>
 
 	* basic_blocks.c: Add copyright notice.
