@@ -1,3 +1,9 @@
+1999-07-21  Ian Lance Taylor  <ian@zembu.com>
+
+	From Mark Elbrecht:
+	* configure.bat: Remove; obsolete.
+	* config/go32.cfg: Likewise.
+
 1999-07-21  Brad M. Garcia  <bgarcia@fore.com>
 
 	* configure.in (i386-*-vxworks*): New target.
