@@ -1,7 +1,7 @@
-/* Machine-dependent hooks for the unix child process stratum.  This
-   code is for the HP PA-RISC cpu.
+/* Machine-dependent hooks for the unix child process stratum, for HPUX PA-RISC.
 
-   Copyright 1986, 1987, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993
+   Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).
@@ -27,8 +27,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "inferior.h"
 #include "target.h"
 #include <sys/ptrace.h>
-#include <sys/param.h>
-#include <sys/user.h>
 
 extern CORE_ADDR text_end;
 
@@ -178,42 +176,6 @@ store_inferior_registers (regno)
   return;
 }
 
-/* KERNEL_U_ADDR is the amount to subtract from u.u_ar0
-   to get the offset in the core file of the register values.  */
-
-/* Get kernel_u_addr using HPUX-style nlist().  */
-CORE_ADDR kernel_u_addr;
-
-struct hpnlist {      
-        char *          n_name;
-        long            n_value;  
-        unsigned char   n_type;   
-        unsigned char   n_length;  
-        short           n_almod;   
-        short           n_unused;
-};
-static struct hpnlist nl[] = {{ "_u", -1, }, { (char *) 0, }};
-
-/* read the value of the u area from the hp-ux kernel */
-void _initialize_kernel_u_addr ()
-{
-    struct user u;
-    nlist ("/hp-ux", &nl);
-    kernel_u_addr = nl[0].n_value;
-}
-
-#if !defined (offsetof)
-#define offsetof(TYPE, MEMBER) ((unsigned long) &((TYPE *)0)->MEMBER)
-#endif
-
-/* U_REGS_OFFSET is the offset of the registers within the u area.  */
-#if !defined (U_REGS_OFFSET)
-#define U_REGS_OFFSET \
-  ptrace (PT_READ_U, inferior_pid, \
-          (PTRACE_ARG3_TYPE) (offsetof (struct user, u_ar0)), 0, 0) \
-    - KERNEL_U_ADDR
-#endif
-
 /* Fetch one register.  */
 
 static void
@@ -271,12 +233,6 @@ child_resume (step, signal)
   if (errno)
     perror_with_name ("ptrace");
 }
-
-/* NOTE! I tried using PTRACE_READDATA, etc., to read and write memory
-   in the NEW_SUN_PTRACE case.
-   It ought to be straightforward.  But it appears that writing did
-   not write the data that I specified.  I cannot understand where
-   it got the data that it actually did write.  */
 
 /* Copy LEN bytes to or from inferior's memory starting at MEMADDR
    to debugger memory starting at MYADDR.   Copy to inferior if

@@ -1,5 +1,8 @@
 Sat Jan 30 19:55:52 1993  John Gilmore  (gnu@cygnus.com)
 
+	* hppah-nat.c:  Eliminate <sys/user.h> and other unnecessary stuff,
+	to avoid "too much defining" error from native C compiler (!).
+
 	* Makefile.in (HFILES):  Add typeprint.h.
 	* typeprint.[ch]:  Update copyrights.
 
