@@ -112,7 +112,7 @@ maintainer works with the native maintainer when resolving API issues.
 			Not multi-arch
 
 	m68hc11		--target=m68hc11-elf ,-Werror
-			Stephane Carrez		Stephane.Carrez@worldnet.fr
+			Stephane Carrez		stcarrez@nerim.fr
 
 	m68k		--target=m68k-elf ,-Werror
 			Maintenance only

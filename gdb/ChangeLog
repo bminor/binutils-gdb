@@ -1,3 +1,7 @@
+2002-05-16  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* MAINTAINERS: Update my email address.
+
 2002-05-15  Richard Earnshaw  <rearnsha@arm.com>
 
 	* config/arm/nm-nbsd.h: Use "config/nm-nbsd.h" to include generic
