@@ -2069,6 +2069,8 @@ md_assemble (str)
       if ((operand->flags & PPC_OPERAND_OPTIONAL) != 0)
 	{
 	  unsigned int opcount;
+	  unsigned int num_operands_expected;
+	  unsigned int i;
 
 	  /* There is an optional operand.  Count the number of
 	     commas in the input line.  */
@@ -2085,10 +2087,16 @@ md_assemble (str)
 		}
 	    }
 
+	  /* Compute the number of expected operands.
+	     Do not count fake operands.  */
+	  for (num_operands_expected = 0, i = 0; opcode->operands[i]; i ++)
+	    if ((powerpc_operands [opcode->operands[i]].flags & PPC_OPERAND_FAKE) == 0)
+	      ++ num_operands_expected;
+
 	  /* If there are fewer operands in the line then are called
 	     for by the instruction, we want to skip the optional
 	     operand.  */
-	  if (opcount < strlen (opcode->operands))
+	  if (opcount < num_operands_expected)
 	    skip_optional = 1;
 
 	  break;
