@@ -259,7 +259,7 @@ if [ x"${host}" = x"${target}" ] ; then
 	case "${host}" in
           # We need multilib support for irix6, to get libiberty built
 	  #  properly for o32 and n32.
-          mips-sgi-irix6*) enable_multilib=yes ; target_subdir=${host} ;;
+          mips-sgi-irix6*) target_subdir=${host} ;;
 	esac
 else
 	# similarly, don't build the targets in the 'native only' 

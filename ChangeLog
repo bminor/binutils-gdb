@@ -1,7 +1,12 @@
+Thu Jun 19 14:16:42 1997  Brendan Kehoe  <brendan@lisa.cygnus.com>
+
+	* configure.in: Don't set ENABLE_MULTILIB, so we'll be passing
+	--enable-multilib down to subdirs; setting TARGET_SUBDIR was enough.
+
 Tue Jun 17 15:31:20 1997  Brendan Kehoe  <brendan@lisa.cygnus.com>
 
-	* configure.in (is_cross_compiler): If we're building
-	mips-sgi-irix6* native, turn on ENABLE_MULTILIB and set TARGET_SUBDIR.
+	* configure.in: If we're building mips-sgi-irix6* native, turn on
+	ENABLE_MULTILIB and set TARGET_SUBDIR.
 
 Tue Jun 17 12:20:59 1997  Tom Tromey  <tromey@cygnus.com>
 
