@@ -43,6 +43,8 @@ config
 config.h
 configure.bat
 configure.in
+emulparams
+emultempl
 genscripts.sh
 h8-doc.texi
 ld.1
@@ -84,6 +86,7 @@ mri.c
 mri.h
 relax.c
 relax.h
+scripttempl
 
 Things-to-lose:
 

@@ -1,3 +1,7 @@
+Mon Jun 21 16:38:35 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* .Sanitize (Things-to-keep): Add emulparams, emultempl, scripttempl.
+
 Thu Jun 17 16:53:56 1993  david d `zoo' zuhn (zoo@cygnus.com)
 	
 	* Makefile.in: canonicalize install.sh; for use within
