@@ -1,3 +1,8 @@
+2001-04-04  Alan Modra  <alan@linuxcare.com.au>
+
+	* elflink.h (elf_fix_symbol_flags): Call elf_backend_hide_symbol
+	when -Bsymbolic causes a symbol to no longer need a .plt entry.
+
 2001-04-03  David Mosberger  <davidm@hpl.hp.com>
 
 	* efi-app-ia32.c (ALIGN_SECTIONS_IN_FILE): Deleted.

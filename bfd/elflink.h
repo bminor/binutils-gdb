@@ -2957,14 +2957,13 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	    }
 	}
 
+      eif.info = info;
+      eif.failed = false;
+
       /* If we are supposed to export all symbols into the dynamic symbol
          table (this is not the normal case), then do so.  */
       if (export_dynamic)
 	{
-	  struct elf_info_failed eif;
-
-	  eif.failed = false;
-	  eif.info = info;
 	  elf_link_hash_traverse (elf_hash_table (info), elf_export_symbol,
 			          (PTR) &eif);
 	  if (eif.failed)
@@ -2986,8 +2985,6 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 
       /* Find all symbols which were defined in a dynamic object and make
 	 the backend pick a reasonable value for them.  */
-      eif.failed = false;
-      eif.info = info;
       elf_link_hash_traverse (elf_hash_table (info),
 			      elf_adjust_dynamic_symbol,
 			      (PTR) &eif);
@@ -3526,8 +3523,9 @@ elf_fix_symbol_flags (h, eif)
       && (eif->info->symbolic || ELF_ST_VISIBILITY (h->other))
       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0)
     {
-      h->elf_link_hash_flags &=~ ELF_LINK_HASH_NEEDS_PLT;
-      h->plt.offset = (bfd_vma) -1;
+      struct elf_backend_data *bed;
+      bed = get_elf_backend_data (elf_hash_table (eif->info)->dynobj);
+      (*bed->elf_backend_hide_symbol) (eif->info, h);
     }
 
   /* If this is a weak defined symbol in a dynamic object, and we know
