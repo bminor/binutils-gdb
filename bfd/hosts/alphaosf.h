@@ -16,10 +16,6 @@
 #define sprintf_vma(s,x) sprintf (s, "%016lx", x) /* HOST_64_BIT */
 #define fprintf_vma(f,x) fprintf (f, "%016lx", x) /* HOST_64_BIT */
 
-typedef unsigned  long uint64e_type;
-typedef unsigned  long uint64_type;
-typedef  long int64_type;
-
 #define BYTES_IN_PRINTF_INT 4
 
 /* These must have type unsigned long because they are used as
