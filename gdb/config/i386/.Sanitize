@@ -15,6 +15,23 @@
 
 Do-first:
 
+# WinGDB files are not really ready to be part of FSF releases, but
+# keep them for progressives and such.
+
+mswin_files="windows.mh"
+
+if ( echo $* | grep lose\-mswin > /dev/null ) ; then
+	lose_these_too="${mswin_files} ${lose_these_too}"
+	if [ -n "${verbose}" ] ; then
+		echo Deleting ${mswin_files}
+	fi
+else
+	keep_these_too="${mswin_files} ${keep_these_too}"
+	if [ -n "${verbose}" ] ; then
+		echo Keeping ${mswin_files}
+	fi
+fi
+
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -110,7 +127,6 @@ tm-ptx.h
 tm-ptx4.h
 tm-sun386.h
 tm-symmetry.h
-windows.mh
 xm-cygwin32.h
 xm-go32.h
 xm-i386aix.h

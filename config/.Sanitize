@@ -21,6 +21,12 @@ else
         lose_these_too="${lose_these_too} mt-r5900"
 fi
 
+if ( echo $* | grep keep\-mswin > /dev/null ) ; then
+	keep_these_too="${keep_these_too} mh-windows"
+else
+        lose_these_too="${lose_these_too} mh-windows"
+fi
+
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -64,7 +70,6 @@ mh-sun3
 mh-sysv
 mh-sysv4
 mh-vaxult2
-mh-windows
 mh-x86pic
 mpw
 mpw-mh-mpw
