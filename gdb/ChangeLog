@@ -1,3 +1,8 @@
+Sun Jun 27 08:54:55 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* valprint.c (val_print_type_code_int):  Fix off by one error with
+	eliminating leading zeroes for large little endian integers.
+
 Sun Jun 27 08:58:56 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/mips/riscos.mh (CC): Use -systype sysv.
