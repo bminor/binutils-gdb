@@ -1,24 +1,24 @@
 /* tc-z8k.c -- Assemble code for the Zilog Z800N
    Copyright (C) 1992 Free Software Foundation.
-   
+
    This file is part of GAS, the GNU Assembler.
-   
+
    GAS is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 2, or (at your option)
    any later version.
-   
+
    GAS is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 
-/* 
+/*
   Written By Steve Chamberlain
   sac@cygnus.com
   */
@@ -33,14 +33,21 @@
 #include <ctype.h>
 #include "listing.h"
 
+<<<<<<< tc-z8k.c
+char comment_chars[]=
+{'!', 0};
+char line_separator_chars[]=
+{';', 0};
+=======
 const char  comment_chars[]  = { '!',0 };
 const char line_separator_chars[] = { ';' ,0};
 const char line_comment_chars[] = "";
+>>>>>>> 1.5
 
-extern int machine;
+extern int machine  ;
 extern int coff_flags;
 int segmented_mode;
-int  md_reloc_size ;
+int md_reloc_size;
 
 /* This table describes all the machine specific pseudo-ops the assembler
    has to support.  The fields are:
@@ -49,45 +56,51 @@ int  md_reloc_size ;
    Integer arg to pass to the function
    */
 
-void cons();
+void cons ();
 
 
-void s_segm()
+void 
+s_segm ()
 {
   segmented_mode = 1;
   machine = bfd_mach_z8001;
   coff_flags = F_Z8001;
 }
 
-void s_unseg()
+void 
+s_unseg ()
 {
   segmented_mode = 0;
   machine = bfd_mach_z8002;
   coff_flags = F_Z8002;
 }
-const pseudo_typeS md_pseudo_table[] = 
+const pseudo_typeS md_pseudo_table[]=
 {
-{ "int",	cons,		2	},
-{ "data.b",     cons, 		1      },
-{ "data.w",     cons,		 2      },
-{ "data.l",     cons, 		4      },
-{ "form",     	listing_psize,	0      },
-{ "heading", 	listing_title,	0},
-{ "import", 	s_ignore, 	0},
-{ "page", 	listing_eject,	0},
-{ "program", 	s_ignore,	0},
-{ "z8001",       s_segm,         0},
-{ "z8002",       s_unseg,         0},
-{ 0,0,0 }
+  {"int", cons, 2},
+  {"data.b", cons, 1},
+  {"data.w", cons, 2},
+  {"data.l", cons, 4},
+  {"form", listing_psize, 0},
+  {"heading", listing_title, 0},
+  {"import", s_ignore, 0},
+  {"page", listing_eject, 0},
+  {"program", s_ignore, 0},
+  {"z8001", s_segm, 0},
+  {"z8002", s_unseg, 0},
+  {0, 0, 0}
 };
 
 
-const char EXP_CHARS[] = "eE";
+const char EXP_CHARS[]= "eE";
 
 /* Chars that mean this number is a floating point constant */
 /* As in 0f12.456 */
 /* or    0d1.2345e12 */
+<<<<<<< tc-z8k.c
+char FLT_CHARS[]= "rRsSfFdDxXpP";
+=======
 const char FLT_CHARS[] = "rRsSfFdDxXpP";
+>>>>>>> 1.5
 
 
 const relax_typeS md_relax_table[1];
@@ -97,47 +110,51 @@ static struct hash_control *opcode_hash_control;	/* Opcode mnemonics */
 
 
 
-void md_begin () 
+void 
+md_begin ()
 {
   opcode_entry_type *opcode;
-  char *prev_name= "";
+  char *prev_name = "";
   int idx = 0;
-	
-  opcode_hash_control = hash_new();
 
-	
-  for (opcode = z8k_table; opcode->name; opcode++) 
-  {
-    /* Only enter unique codes into the table */
-    char *src= opcode->name;
+  opcode_hash_control = hash_new ();
 
-    if (strcmp(opcode->name, prev_name)) 
+
+  for (opcode = z8k_table; opcode->name; opcode++)
     {
-      hash_insert(opcode_hash_control, opcode->name, (char *)opcode);
-      idx++;
+      /* Only enter unique codes into the table */
+      char *src = opcode->name;
+
+      if (strcmp (opcode->name, prev_name))
+	{
+	  hash_insert (opcode_hash_control, opcode->name, (char *) opcode);
+	  idx++;
+	}
+      opcode->idx = idx;
+      prev_name = opcode->name;
     }
-    opcode->idx = idx;
-    prev_name = opcode->name;
-  }
-	
+
+/* default to z8002 */
+s_unseg();
 }
 
 
-struct z8k_exp {
-	char *e_beg;
-	char *e_end;
-	expressionS e_exp;
-};
-typedef struct z8k_op 
+struct z8k_exp
 {
-  char regsize;   /* 'b','w','r','q' */
-  unsigned int reg; /* 0..15 */
+  char *e_beg;
+  char *e_end;
+  expressionS e_exp;
+};
+typedef struct z8k_op
+{
+  char regsize;			/* 'b','w','r','q' */
+  unsigned int reg;		/* 0..15 */
 
   int mode;
 
-  unsigned int x_reg;/* any other register associated with the mode */
-  expressionS exp; /* any expression */
-} op_type;
+  unsigned int x_reg;		/* any other register associated with the mode */
+  expressionS exp;		/* any expression */
+}      op_type;
 
 
 
@@ -148,26 +165,25 @@ static expressionS *imm_operand;
 int reg[16];
 int the_cc;
 
-char * 
-DEFUN(whatreg,(reg, src),
-      int *reg AND
-      char *src)
+char *
+DEFUN (whatreg, (reg, src),
+       int *reg AND
+       char *src)
 {
-  if (isdigit(src[1])) 
-  {
-    *reg = (src[0] - '0') * 10 +src[1] - '0';
-    return src+2;
-  }
+  if (isdigit (src[1]))
+    {
+      *reg = (src[0] - '0') * 10 + src[1] - '0';
+      return src + 2;
+    }
   else
-  {
-    *reg = (src[0] - '0');
-    return src+1;
-  }
-return 0;
+    {
+      *reg = (src[0] - '0');
+      return src + 1;
+    }
 }
 
 /*
-  parse operands	
+  parse operands
 
   rh0-rh7, rl0-rl7
   r0-r15
@@ -179,371 +195,403 @@ return 0;
   @WREG+
   @-WREG
   #const
-  
+
   */
 
 
 /* try and parse a reg name, returns number of chars consumed */
-char*
-DEFUN(parse_reg,(src, mode, reg),
-      char *src AND
-      int * mode AND
-      unsigned int *reg)
+char *
+DEFUN (parse_reg, (src, mode, reg),
+       char *src AND
+       int *mode AND
+       unsigned int *reg)
 {
   char *res = 0;
-  if (src[0] == 'r') 
-  {
-    if (src[1] == 'r')
+
+  if (src[0] == 'r')
     {
-      *mode = CLASS_REG_LONG;
-      res =   whatreg(reg, src+2);
+      if (src[1] == 'r')
+	{
+	  *mode = CLASS_REG_LONG;
+	  res = whatreg (reg, src + 2);
+	}
+      else if (src[1] == 'h')
+	{
+	  *mode = CLASS_REG_BYTE;
+	  res = whatreg (reg, src + 2);
+	}
+      else if (src[1] == 'l')
+	{
+	  *mode = CLASS_REG_BYTE;
+	  res = whatreg (reg, src + 2) ;
+	  *reg += 8;
+	}
+      else if (src[1] == 'q')
+	{
+	  *mode = CLASS_REG_QUAD;
+	  res = whatreg (reg, src + 2);
+	}
+      else
+	{
+	  *mode = CLASS_REG_WORD;
+	  res = whatreg (reg, src + 1);
+	}
     }
-    else  if (src[1] == 'h')
-    {
-      *mode = CLASS_REG_BYTE;
-      res = whatreg(reg, src+2);
-    }
-    else if (src[1] == 'l')
-    {
-      *mode = CLASS_REG_BYTE;
-      res = whatreg(reg, src+2);
-    }
-    else if (src[1] == 'q')
-    {
-    * mode = CLASS_REG_QUAD;
-      res = whatreg(reg, src+2);
-    }
-    else 
-    {
-      *mode = CLASS_REG_WORD;
-      res = whatreg(reg, src+1);
-    }
-  }
   return res;
 
 
 }
 
 char *
-DEFUN(parse_exp,(s, op),
-      char *s AND
-      expressionS *op)
+DEFUN (parse_exp, (s, op),
+       char *s AND
+       expressionS * op)
 {
-	char *save = input_line_pointer;
-	char *new;
-	segT seg;
-	input_line_pointer = s;
-	seg = expr(0,op);
-	new = input_line_pointer;
-	input_line_pointer = save;
-	if (SEG_NORMAL(seg)) 
-	    return new;
-	switch (seg) {
-	case SEG_ABSOLUTE:
-	case SEG_UNKNOWN:
-	case SEG_DIFFERENCE:
-	case SEG_BIG:
-	case SEG_REGISTER:
-		return new;
-	case SEG_ABSENT:
-		as_bad("Missing operand");
-		return new;
-	default:
-		as_bad("Don't understand operand of type %s", segment_name (seg));
-		return new;
-	}
+  char *save = input_line_pointer;
+  char *new;
+  segT seg;
+
+  input_line_pointer = s;
+  seg = expr (0, op);
+  new = input_line_pointer;
+  input_line_pointer = save;
+  if (SEG_NORMAL (seg))
+    return new;
+  switch (seg)
+    {
+    case SEG_ABSOLUTE:
+    case SEG_UNKNOWN:
+    case SEG_DIFFERENCE:
+    case SEG_BIG:
+    case SEG_REGISTER:
+      return new;
+    case SEG_ABSENT:
+      as_bad ("Missing operand");
+      return new;
+    default:
+      as_bad ("Don't understand operand of type %s", segment_name (seg));
+      return new;
+    }
 }
 
-
 /* The many forms of operand:
-   
+
    <rb>
    <r>
    <rr>
    <rq>
    @r
-   #exp	
+   #exp
    exp
    exp(r)
    r(#exp)
    r(r)
 
 
-   
+
    */
 
 static
 char *
-DEFUN(checkfor,(ptr, what),
-      char *ptr AND
-      char what)
+DEFUN (checkfor, (ptr, what),
+       char *ptr AND
+       char what)
 {
-if (*ptr == what) ptr++;
-else {
-as_bad("expected %c", what);
-}
-return ptr;
+  if (*ptr == what)
+    ptr++;
+  else
+    {
+      as_bad ("expected %c", what);
+    }
+  return ptr;
 }
 
 /* Make sure the mode supplied is the size of a word */
-static void 
-DEFUN(regword,(mode, string),
-      int mode AND 
-      char *string)
+static void
+DEFUN (regword, (mode, string),
+       int mode AND
+       char *string)
 {
   int ok;
+
   ok = CLASS_REG_WORD;
-  if (ok != mode) 
-  {  
-    as_bad("register is wrong size for a word %s", string);
-  }
+  if (ok != mode)
+    {
+      as_bad ("register is wrong size for a word %s", string);
+    }
 }
 
 /* Make sure the mode supplied is the size of an address */
-static void 
-DEFUN(regaddr,(mode, string),
-      int mode AND
-      char *string)
+static void
+DEFUN (regaddr, (mode, string),
+       int mode AND
+       char *string)
 {
   int ok;
+
   ok = segmented_mode ? CLASS_REG_LONG : CLASS_REG_WORD;
-  if (ok != mode) 
-  {  
-    as_bad("register is wrong size for address %s", string);
-  }
+  if (ok != mode)
+    {
+      as_bad ("register is wrong size for address %s", string);
+    }
 }
 
-struct cc_names {
-int value;
-char *name;
+struct cc_names
+{
+  int value;
+  char *name;
 
 
 };
 
-struct cc_names table[] = 
+struct cc_names table[]=
 {
-  0x0,"f",
-  0x1,"lt",
-  0x2,"le",
-  0x3,"ule",
-  0x4,"ov",
-  0x4,"pe",
-  0x5,"mi",
-  0x6,"eq",
-  0x6,"z",
-  0x7,"c",
-  0x7,"ult",
-  0x8,"t",
-  0x9,"ge",
-  0xa,"gt",
-  0xb,"ugt",
-  0xc,"nov",
-  0xc,"po",
-  0xd,"pl",
-  0xe,"ne",
-  0xe,"nz",
-  0xf,"nc",
-  0xf,"uge",
-  0,0
- };
+  0x0, "f",
+  0x1, "lt",
+  0x2, "le",
+  0x3, "ule",
+  0x4, "ov",
+  0x4, "pe",
+  0x5, "mi",
+  0x6, "eq",
+  0x6, "z",
+  0x7, "c",
+  0x7, "ult",
+  0x8, "t",
+  0x9, "ge",
+  0xa, "gt",
+  0xb, "ugt",
+  0xc, "nov",
+  0xc, "po",
+  0xd, "pl",
+  0xe, "ne",
+  0xe, "nz",
+  0xf, "nc",
+  0xf, "uge",
+  0, 0
+};
 
 static void
-DEFUN(get_cc_operand,(ptr, mode, dst),
-      char **ptr AND 
-      struct z8k_op *mode AND 
-      unsigned int dst)
+DEFUN (get_cc_operand, (ptr, mode, dst),
+       char **ptr AND
+       struct z8k_op *mode AND
+       unsigned int dst)
 {
   char *src = *ptr;
   int r;
   int i;
-  while (*src== ' ')
-   src++;
+
+  while (*src == ' ')
+    src++;
 
   mode->mode = CLASS_CC;
   for (i = 0; table[i].name; i++)
-  {
-    int j;
-    for (j = 0; table[i].name[j]; j++) 
     {
-      if (table[i].name[j] != src[j])
-       goto fail;
+      int j;
+
+      for (j = 0; table[i].name[j]; j++)
+	{
+	  if (table[i].name[j] != src[j])
+	    goto fail;
+	}
+      the_cc = table[i].value;
+      *ptr = src + j;
+      return;
+    fail:;
     }
-    the_cc = table[i].value;
-    *ptr = src + j;
-    return;
-   fail:;
-  }
   the_cc = 0x8;
-  return ;
+  return;
 }
 
-static void 
-DEFUN(get_operand,(ptr, mode, dst),
-      char **ptr AND 
-      struct z8k_op *mode AND 
-      unsigned int dst)
+static void
+DEFUN (get_operand, (ptr, mode, dst),
+       char **ptr AND
+       struct z8k_op *mode AND
+       unsigned int dst)
 {
   char *src = *ptr;
   char *end;
-  unsigned   int num;
-  unsigned  int len;
+  unsigned int num;
+  unsigned int len;
   unsigned int size;
+
   mode->mode = 0;
 
 
   while (*src == ' ')
-   src++;
-  if (*src == '#') 
-  {
-    mode->mode = CLASS_IMM;
-    imm_operand = &(mode->exp);
-    src = parse_exp(src+1, &(mode->exp));
-  }	
-  else if (*src == '@') {
-    int d;
-    mode->mode = CLASS_IR;
-    src= parse_reg(src+1, &d, &mode->reg);
-  }
-  else 
-  {
-    int regn;
-    end = parse_reg(src, &mode->mode, &regn);
-
-    if (end)
+    src++;
+  if (*src == '#')
     {
-      int nw, nr;
-      src = end;
-      if (*src == '(') 
-      {
-	src++;
-	end = parse_reg(src, &nw, &nr);
-	if (end) 
+      mode->mode = CLASS_IMM;
+      imm_operand = &(mode->exp);
+      src = parse_exp (src + 1, &(mode->exp));
+    }
+  else if (*src == '@')
+    {
+      int d;
+
+      mode->mode = CLASS_IR;
+      src = parse_reg (src + 1, &d, &mode->reg);
+    }
+  else
+    {
+      int regn;
+
+      end = parse_reg (src, &mode->mode, &regn);
+
+      if (end)
 	{
-	  /* Got Ra(Rb) */
+	  int nw, nr;
+
 	  src = end;
+	  if (*src == '(')
+	    {
+	      src++;
+	      end = parse_reg (src, &nw, &nr);
+	      if (end)
+		{
+		  /* Got Ra(Rb) */
+		  src = end;
 
-	  if (*src != ')')
-	  {
-	    as_bad("Missing ) in ra(rb)");
-	  }
+		  if (*src != ')')
+		    {
+		      as_bad ("Missing ) in ra(rb)");
+		    }
+		  else
+		    {
+		      src++;
+		    }
+
+		  regaddr (mode->mode, "ra(rb) ra");
+		  regword (mode->mode, "ra(rb) rb");
+		  mode->mode = CLASS_BX;
+		  mode->reg = regn;
+		  mode->x_reg = nr;
+		  reg[ARG_RX] = nr;
+		}
+	      else
+		{
+		  /* Got Ra(disp) */
+		  if (*src == '#')
+		    src++;
+		  src = parse_exp (src, &(mode->exp));
+		  src = checkfor (src, ')');
+		  mode->mode = CLASS_BA;
+		  mode->reg = regn;
+		  mode->x_reg = 0;
+		  imm_operand = &(mode->exp);
+		}
+	    }
 	  else
-	  {
-	    src++;
-	  }
-	  
-	  regaddr(mode->mode,"ra(rb) ra");
-	  regword(mode->mode,"ra(rb) rb");
-	  mode->mode = CLASS_BX;
-	  mode->reg = regn;
-	  mode->x_reg = nr;
-	  reg[ARG_RX] = nr;
+	    {
+	      mode->reg = regn;
+	      mode->x_reg = 0;
+	    }
 	}
-	else 
-	{
-	  /* Got Ra(disp) */
-	  if (*src == '#')
-	   src++;
-	  src = parse_exp(src, &(mode->exp));
-	  src = checkfor(src, ')');
-	  mode->mode = CLASS_BA;
-	  mode->reg = regn;
-	  mode->x_reg = 0;
-	  da_operand = &(mode->exp);
-	}
-      }
       else
-      {
-	mode->reg = regn;
-	mode->x_reg = 0;
-      }
+	{
+	  /* No initial reg */
+	  src = parse_exp (src, &(mode->exp));
+	  if (*src == '(')
+	    {
+	      src++;
+	      end = parse_reg (src, &(mode->mode), &regn);
+	      regword (mode->mode, "addr(Ra) ra");
+	      mode->mode = CLASS_X;
+	      mode->reg = regn;
+	      mode->x_reg = 0;
+	      da_operand = &(mode->exp);
+	      src = checkfor (end, ')');
+	    }
+	  else
+	    {
+	      /* Just an address */
+	      mode->mode = CLASS_DA;
+	      mode->reg = 0;
+	      mode->x_reg = 0;
+	      da_operand = &(mode->exp);
+	    }
+	}
     }
-    else 
-    {
-      /* No initial reg */
-      src = parse_exp(src, &(mode->exp));
-      if (*src == '(') 
-      {
-	src++;
-	end = parse_reg(src, &(mode->mode), &regn);
-	regword(mode->mode,"addr(Ra) ra");
-	mode->mode = CLASS_X;
-	mode->reg = regn;
-	mode->x_reg =0;
-	da_operand = &(mode->exp);
-	src = checkfor(end, ')');
-      }
-      else 
-      {
-	/* Just an address */
-	mode->mode = CLASS_DA;
-	mode->reg = 0;
-	mode->x_reg = 0;
-	da_operand = &(mode->exp);
-      }
-    }
-  }
   *ptr = src;
 }
 
 static
 char *
-DEFUN(get_operands,(opcode, op_end, operand),
-      opcode_entry_type *opcode AND
-      char *op_end AND
-      op_type *operand) 
+DEFUN (get_operands, (opcode, op_end, operand),
+       opcode_entry_type * opcode AND
+       char *op_end AND
+       op_type * operand)
 {
   char *ptr = op_end;
-  switch (opcode->noperands) 
+
+  switch (opcode->noperands)
   {
    case 0:
     operand[0].mode = 0;
     operand[1].mode = 0;
     break;
-		    
+
    case 1:
     ptr++;
     if (opcode->arg_info[0] == CLASS_CC)
     {
-      get_cc_operand(&ptr, operand+0,0);
-    }
-    else 
-    {
-
-      get_operand(& ptr, operand +0,0);
-    }
-    operand[1].mode =0;
-    break;
-		    
-   case 2:
-    ptr++;
-    if (opcode->arg_info[0] == CLASS_CC) 
-    {
-      get_cc_operand(&ptr, operand+0,0);
+      get_cc_operand (&ptr, operand + 0, 0);
     }
     else
     {
 
-      get_operand(& ptr, operand +0,0);
+      get_operand (&ptr, operand + 0, 0);
     }
-    if (*ptr == ',') ptr++;
-    get_operand(& ptr, operand +1, 1);
+    operand[1].mode = 0;
+    break;
+
+   case 2:
+    ptr++;
+    if (opcode->arg_info[0] == CLASS_CC)
+    {
+      get_cc_operand (&ptr, operand + 0, 0);
+    }
+    else
+    {
+
+      get_operand (&ptr, operand + 0, 0);
+    }
+    if (*ptr == ',')
+     ptr++;
+    get_operand (&ptr, operand + 1, 1);
     break;
 
    case 3:
     ptr++;
-    get_operand(& ptr, operand +0,0);
-    if (*ptr == ',') ptr++;
-    get_operand(& ptr, operand +1, 1);
-    if (*ptr == ',') ptr++;
-    get_operand(& ptr, operand +2, 2);
+    get_operand (&ptr, operand + 0, 0);
+    if (*ptr == ',')
+     ptr++;
+    get_operand (&ptr, operand + 1, 1);
+    if (*ptr == ',')
+     ptr++;
+    get_operand (&ptr, operand + 2, 2);
     break;
-		    
+
+   case 4:
+    ptr++;
+    get_operand (&ptr, operand + 0, 0);
+    if (*ptr == ',')
+     ptr++;
+    get_operand (&ptr, operand + 1, 1);
+    if (*ptr == ',')
+     ptr++;
+    get_operand (&ptr, operand + 2, 2);
+    if (*ptr == ',')
+     ptr++;
+    get_cc_operand (&ptr, operand + 3, 3);
+    break;
    default:
-    abort();    
+    abort ();
   }
-	
-	
-  return ptr;    
+
+
+  return ptr;
 }
 
 /* Passed a pointer to a list of opcodes which use different
@@ -556,45 +604,48 @@ DEFUN(get_operands,(opcode, op_end, operand),
 
 static
 opcode_entry_type *
-DEFUN(get_specific,(opcode,  operands),
-      opcode_entry_type *opcode AND
-      op_type *operands)
+DEFUN (get_specific, (opcode, operands),
+       opcode_entry_type * opcode AND
+       op_type * operands)
 
 {
-  opcode_entry_type *this_try = opcode ;
+  opcode_entry_type *this_try = opcode;
   int found = 0;
   unsigned int noperands = opcode->noperands;
-	
+
   unsigned int dispreg;
   unsigned int this_index = opcode->idx;
 
-  while (this_index == opcode->idx && !found) 
+  while (this_index == opcode->idx && !found)
   {
     unsigned int i;
-		    
-    this_try  = opcode ++;
-    for (i = 0; i < noperands; i++) 
+
+    this_try = opcode++;
+    for (i = 0; i < noperands; i++)
     {
       int mode = operands[i].mode;
 
-      if ((mode&CLASS_MASK) != (this_try->arg_info[i] & CLASS_MASK))
+      if ((mode & CLASS_MASK) != (this_try->arg_info[i] & CLASS_MASK))
       {
-	/* it could be an pc rel operand, if this is a da mode and 
+	/* it could be an pc rel operand, if this is a da mode and
 	   we like disps, then insert it */
-	 
+
 	if (mode == CLASS_DA && this_try->arg_info[i] == CLASS_DISP)
 	{
 	  /* This is the case */
 	  operands[i].mode = CLASS_DISP;
 	}
-	else {
+	else if (mode == CLASS_BA && this_try->arg_info[i])
+	{
 	  /* Can't think of a way to turn what we've been given into
 	     something that's ok */
 	  goto fail;
 	}
+	else goto fail;
       }
-      switch (mode & CLASS_MASK) {
-       default:
+      switch (mode & CLASS_MASK)
+      {
+       default: 
 	break;
        case CLASS_X:
        case CLASS_IR:
@@ -602,72 +653,112 @@ DEFUN(get_specific,(opcode,  operands),
        case CLASS_BX:
        case CLASS_DISP:
        case CLASS_REG:
+       case CLASS_REG_WORD:
+       case CLASS_REG_BYTE:
+       case CLASS_REG_QUAD:
+       case CLASS_REG_LONG:
+       case CLASS_REGN0:
 	reg[this_try->arg_info[i] & ARG_MASK] = operands[i].reg;
 	break;
       }
     }
-
-    found =1;
-   fail: ;
+	     
+    found = 1;
+   fail:;
   }
-  if (found) 
+  if (found)
    return this_try;
-  else 
+  else
    return 0;
 }
-
+	     
 static void
-DEFUN(check_operand,(operand, width, string),
-	  struct z8k_op *operand AND
-	  unsigned int width AND
-	  char *string)
+DEFUN (check_operand, (operand, width, string),
+    struct z8k_op *operand AND
+	     unsigned int width AND
+    char *string)
 {
-  if (operand->exp.X_add_symbol == 0 
+  if (operand->exp.X_add_symbol == 0
       && operand->exp.X_subtract_symbol == 0)
   {
-		    
+	     
     /* No symbol involved, let's look at offset, it's dangerous if any of
        the high bits are not 0 or ff's, find out by oring or anding with
        the width and seeing if the answer is 0 or all fs*/
     if ((operand->exp.X_add_number & ~width) != 0 &&
-	(operand->exp.X_add_number | width)!= (~0))
+	(operand->exp.X_add_number | width) != (~0))
     {
-      as_warn("operand %s0x%x out of range.", string, operand->exp.X_add_number);
+      as_warn ("operand %s0x%x out of range.", string, operand->exp.X_add_number);
     }
   }
-	
+
 }
 
-static void 
-DEFUN(newfix,(ptr, type, operand),
-      int ptr AND
-      int type AND
-      expressionS *operand)
+static char buffer[20];
+
+static void
+DEFUN (newfix, (ptr, type, operand),
+       int ptr AND
+       int type AND
+       expressionS * operand)
 {
   if (operand->X_add_symbol
       || operand->X_subtract_symbol
-      || operand->X_add_number) {
-    fix_new(frag_now,
-	    ptr,
-	    1,
-	    operand->X_add_symbol,
-	    operand->X_subtract_symbol,
-	    operand->X_add_number,
-	    0,
-	    type);
+      || operand->X_add_number)
+    {
+      fix_new (frag_now,
+	       ptr,
+	       1,
+	       operand->X_add_symbol,
+	       operand->X_subtract_symbol,
+	       operand->X_add_number,
+	       0,
+	       type);
+    }
+}
+
+static char *
+DEFUN (apply_fix,(ptr, type, operand, size),
+       char* ptr AND
+       int type AND
+       expressionS *operand AND
+       int size)
+{
+  int n = operand->X_add_number;
+  operand->X_add_number = n;
+  newfix((ptr - buffer)/2, type, operand);
+#if 1
+  switch (size) {
+   case 8:			/* 8 nibbles == 32 bits */
+    *ptr++ = n>> 28;
+    *ptr++ = n>> 24;
+    *ptr++ = n>> 20;
+    *ptr++ = n>> 16;
+   case 4:			/* 4 niblles == 16 bits */
+    *ptr++ = n >> 12;
+    *ptr++ = n >> 8;
+   case 2:
+    *ptr++ = n >> 4;
+   case 1:
+    *ptr++ =   n >> 0;
+    break;
   }
+#endif
+  return ptr;  
+
 }
 
 
 /* Now we know what sort of opcodes it is, lets build the bytes -
  */
-static void 
-    DEFUN (build_bytes,(this_try, operand),
-	   opcode_entry_type *this_try AND
-	   struct z8k_op *operand)
+#define INSERT(x,y) *x++ = y>>24; *x++ = y>> 16; *x++=y>>8; *x++ =y;
+static void
+DEFUN (build_bytes, (this_try, operand),
+       opcode_entry_type * this_try AND
+       struct z8k_op *operand)
 {
   unsigned int i;
-  char buffer[20];
+
   int length;
   char *output;
   char *output_ptr = buffer;
@@ -677,46 +768,38 @@ static void
   int nib;
   int nibble;
   unsigned short *class_ptr;
-  memset(buffer, 20, 0);  
+   frag_wane (frag_now);
+   frag_new (0);
+
+  memset (buffer, 20, 0);
   class_ptr = this_try->byte_info;
- top: ;
+ top:;
 
   for (nibble = 0; c = *class_ptr++; nibble++)
   {
 
-    switch (c & CLASS_MASK) 
+    switch (c & CLASS_MASK)
     {
      default:
 
-      abort();
+      abort ();
      case CLASS_ADDRESS:
       /* Direct address, we don't cope with the SS mode right now */
-      if (segmented_mode) {
-	newfix((output_ptr-buffer)/2, R_DA | R_SEG, da_operand);
-	*output_ptr++ = 0;
-	*output_ptr++ = 0;
-	*output_ptr++ = 0;
-	*output_ptr++ = 0;
-	*output_ptr++ = 0;
-	*output_ptr++ = 0;
-	*output_ptr++ = 0;
-	*output_ptr++ = 0;
+      if (segmented_mode)
+      {
+	output_ptr = apply_fix (output_ptr , R_DA | R_SEG, da_operand, 8);
       }
-      else {
-	newfix((output_ptr-buffer)/2, R_DA, da_operand);
-	*output_ptr++ = 0;
-	*output_ptr++ = 0;
-	*output_ptr++ = 0;
-	*output_ptr++ = 0;
+      else
+      {
+	output_ptr = apply_fix(output_ptr, R_DA, da_operand, 4);
       }
       da_operand = 0;
       break;
      case CLASS_DISP8:
       /* pc rel 8 bit */
-      newfix((output_ptr-buffer)/2, R_JR, da_operand);
+output_ptr =       apply_fix (output_ptr, R_JR, da_operand, 2);
       da_operand = 0;
-      *output_ptr++ = 0;
-      *output_ptr++ = 0;
+
       break;
 
      case CLASS_CC:
@@ -726,9 +809,9 @@ static void
       *output_ptr++ = c & 0xf;
       break;
      case CLASS_REGN0:
-      if (reg[c&0xf] == 0) 
+      if (reg[c & 0xf] == 0)
       {
-	as_bad("can't use R0 here");
+	as_bad ("can't use R0 here");
       }
      case CLASS_REG:
      case CLASS_REG_BYTE:
@@ -737,12 +820,11 @@ static void
      case CLASS_REG_QUAD:
       /* Insert bit mattern of
 	 right reg */
-      *output_ptr++ =  reg[c & 0xf];
+      *output_ptr++ = reg[c & 0xf];
       break;
      case CLASS_DISP:
-      newfix((output_ptr-buffer)/2, R_DA, da_operand);
-      da_operand= 0;
-      output_ptr += 4;
+      output_ptr =  apply_fix (output_ptr,  R_DA, da_operand, 4);
+      da_operand = 0;
       break;
      case CLASS_IMM:
      {
@@ -750,60 +832,33 @@ static void
        switch (c & ARG_MASK)
        {
 	case ARG_IMM4:
-	 *output_ptr ++ = imm_operand->X_add_number;
-	 imm_operand->X_add_number = 0;
-	 newfix((output_ptr-buffer)/2, R_IMM4L, imm_operand);
+	 output_ptr = apply_fix (output_ptr, R_IMM4L, imm_operand, 1);
+	 break;
+	case ARG_IMM4M1:
+	 imm_operand->X_add_number--;
+	 output_ptr = apply_fix (output_ptr, R_IMM4L, imm_operand, 1);
 	 break;
 	case ARG_IMMNMINUS1:
-	 imm_operand->X_add_number --;
-	 newfix((output_ptr-buffer)/2, R_IMM4L, imm_operand);
-	 *output_ptr++ = 0;
+	 imm_operand->X_add_number--;
+	 output_ptr = apply_fix (output_ptr, R_IMM4L, imm_operand,1);
 	 break;
-	case   ARG_IMM8:  
-	 newfix((output_ptr-buffer)/2, R_IMM8, imm_operand);
-	 *output_ptr++ = 0;
-	 *output_ptr++ = 0;
-
-	case ARG_NIM16:
-	 imm_operand->X_add_number = - imm_operand->X_add_number;
-	 newfix((output_ptr-buffer)/2, R_DA, imm_operand);
-	 *output_ptr++ = 0;
-	 *output_ptr++ = 0;
-	 *output_ptr++ = 0;
-	 *output_ptr++ = 0;
+	case ARG_NIM8:
+	 imm_operand->X_add_number = -imm_operand->X_add_number;
+	case ARG_IMM8:
+	 output_ptr = apply_fix (output_ptr , R_IMM8, imm_operand, 2);
 	 break;
 
-	case   ARG_IMM16:  
-	{
-	  int n = imm_operand->X_add_number ;
-	  imm_operand->X_add_number = 0;
-	 newfix((output_ptr-buffer)/2, R_DA, imm_operand);
-	 *output_ptr++ = n>>24;
-	 *output_ptr++ = n>>16;
-	 *output_ptr++ = n>>8;
-	 *output_ptr++ = n;
-       }
 
+	case ARG_IMM16:
+	 output_ptr= apply_fix(output_ptr, R_DA, 	imm_operand, 4);
 	 break;
 
-	case   ARG_IMM32:  
-	 newfix((output_ptr-buffer)/2, R_IMM32, imm_operand);
-	 *output_ptr++ = 0;
-	 *output_ptr++ = 0;
-	 *output_ptr++ = 0;
-	 *output_ptr++ = 0;
-
-	 *output_ptr++ = 0;
-	 *output_ptr++ = 0;
-	 *output_ptr++ = 0;
-	 *output_ptr++ = 0;
-
+	case ARG_IMM32:
+	 output_ptr = apply_fix (output_ptr, R_IMM32, imm_operand, 8);
 	 break;
 
 	default:
-	 abort();
-
-
+	 abort ();
        }
      }
     }
@@ -812,19 +867,18 @@ static void
   /* Copy from the nibble buffer into the frag */
 
  {
-   int  length = (output_ptr - buffer) / 2 ;
+   int length = (output_ptr - buffer) / 2;
    char *src = buffer;
-   char *fragp = frag_more(length);
-   frag_wane(frag_now);
-   frag_new(0);
-   while (src < output_ptr) 
+   char *fragp = frag_more (length);
+
+   while (src < output_ptr)
    {
      *fragp = (src[0] << 4) | src[1];
-     src+=2;
+     src += 2;
      fragp++;
    }
 
-	
+
  }
 
 }
@@ -836,93 +890,96 @@ static void
 
 
 
-void 
-    DEFUN(md_assemble,(str),
-	  char *str)
+void
+DEFUN (md_assemble, (str),
+       char *str)
 {
   char *op_start;
   char *op_end;
   unsigned int i;
-  struct       z8k_op operand[3];  
+  struct z8k_op operand[3];
   opcode_entry_type *opcode;
-  opcode_entry_type * prev_opcode;
-	
+  opcode_entry_type *prev_opcode;
+
   char *dot = 0;
-  char c;    
+  char c;
+
   /* Drop leading whitespace */
   while (*str == ' ')
-   str++;
-	
+    str++;
+
   /* find the op code end */
   for (op_start = op_end = str;
        *op_end != 0 && *op_end != ' ';
-       op_end ++) 
-  {
-  }
-	
-  ;
-	
-  if (op_end == op_start) 
-  {
-    as_bad("can't find opcode ");
-  }
-  c = *op_end;
-	
-  *op_end = 0;
-	
-  opcode = (opcode_entry_type *) hash_find(opcode_hash_control,
-					   op_start);
-	
-  if (opcode == NULL) 
-  {
-    as_bad("unknown opcode");
-    return;
-  }
-	
+       op_end++)
+    {
+    }
 
-  input_line_pointer =   get_operands(opcode, op_end,
-				      operand);
+  ;
+
+  if (op_end == op_start)
+    {
+      as_bad ("can't find opcode ");
+    }
+  c = *op_end;
+
+  *op_end = 0;
+
+  opcode = (opcode_entry_type *) hash_find (opcode_hash_control,
+					    op_start);
+
+  if (opcode == NULL)
+    {
+      as_bad ("unknown opcode");
+      return;
+    }
+
+
+  input_line_pointer = get_operands (opcode, op_end,
+				     operand);
   *op_end = c;
   prev_opcode = opcode;
-	
-  opcode = get_specific(opcode,  operand);
-	
-  if (opcode == 0)  
-  {
-    /* Couldn't find an opcode which matched the operands */
-    char *where =frag_more(2);
-    where[0] = 0x0;
-    where[1] = 0x0;
 
-    as_bad("Can't find opcode to match operands");
-    return;
-  }
-	
-  build_bytes(opcode, operand);
-}	
+  opcode = get_specific (opcode, operand);
 
+  if (opcode == 0)
+    {
+      /* Couldn't find an opcode which matched the operands */
+      char *where = frag_more (2);
 
-void 
-    DEFUN(tc_crawl_symbol_chain, (headers),
-	  object_headers *headers)
-{
-	printf("call to tc_crawl_symbol_chain \n");
+      where[0] = 0x0;
+      where[1] = 0x0;
+
+      as_bad ("Can't find opcode to match operands");
+      return;
+    }
+
+  build_bytes (opcode, operand);
 }
 
-symbolS *DEFUN(md_undefined_symbol,(name),
-	       char *name)
-{
-	return 0;
-}
-
-void 
-    DEFUN(tc_headers_hook,(headers),
-	  object_headers *headers)
-{
-	printf("call to tc_headers_hook \n"); 
-}
 void
-    DEFUN_VOID(md_end) 
+DEFUN (tc_crawl_symbol_chain, (headers),
+       object_headers * headers)
+{
+  printf ("call to tc_crawl_symbol_chain \n");
+}
+
+symbolS *
+DEFUN (md_undefined_symbol, (name),
+       char *name)
+{
+  return 0;
+}
+
+void
+DEFUN (tc_headers_hook, (headers),
+       object_headers * headers)
+{
+  printf ("call to tc_headers_hook \n");
+}
+
+void
+DEFUN_VOID (md_end)
 {
 }
 
@@ -935,230 +992,260 @@ void
    emitted is stored in *sizeP .  An error message is returned, or NULL on OK.
    */
 char *
-    md_atof(type,litP,sizeP)
-char type;
-char *litP;
-int *sizeP;
+md_atof (type, litP, sizeP)
+     char type;
+     char *litP;
+     int *sizeP;
 {
-	int	prec;
-	LITTLENUM_TYPE words[MAX_LITTLENUMS];
-	LITTLENUM_TYPE *wordP;
-	char	*t;
-	char	*atof_ieee();
-	
-	switch(type) {
-	case 'f':
-	case 'F':
-	case 's':
-	case 'S':
-		prec = 2;
-		break;
-		
-	case 'd':
-	case 'D':
-	case 'r':
-	case 'R':
-		prec = 4;
-		break;
-		
-	case 'x':
-	case 'X':
-		prec = 6;
-		break;
-		
-	case 'p':
-	case 'P':
-		prec = 6;
-		break;
-		
-	default:
-		*sizeP=0;
-		return "Bad call to MD_ATOF()";
-	}
-	t=atof_ieee(input_line_pointer,type,words);
-	if(t)
-	    input_line_pointer=t;
-	
-	*sizeP=prec * sizeof(LITTLENUM_TYPE);
-	for(wordP=words;prec--;) {
-		md_number_to_chars(litP,(long)(*wordP++),sizeof(LITTLENUM_TYPE));
-		litP+=sizeof(LITTLENUM_TYPE);
-	}
-	return "";	/* Someone should teach Dean about null pointers */
+  int prec;
+  LITTLENUM_TYPE words[MAX_LITTLENUMS];
+  LITTLENUM_TYPE *wordP;
+  char *t;
+  char *atof_ieee ();
+
+  switch (type)
+    {
+    case 'f':
+    case 'F':
+    case 's':
+    case 'S':
+      prec = 2;
+      break;
+
+    case 'd':
+    case 'D':
+    case 'r':
+    case 'R':
+      prec = 4;
+      break;
+
+    case 'x':
+    case 'X':
+      prec = 6;
+      break;
+
+    case 'p':
+    case 'P':
+      prec = 6;
+      break;
+
+    default:
+      *sizeP = 0;
+      return "Bad call to MD_ATOF()";
+    }
+  t = atof_ieee (input_line_pointer, type, words);
+  if (t)
+    input_line_pointer = t;
+
+  *sizeP = prec * sizeof (LITTLENUM_TYPE);
+  for (wordP = words; prec--;)
+    {
+      md_number_to_chars (litP, (long) (*wordP++), sizeof (LITTLENUM_TYPE));
+      litP += sizeof (LITTLENUM_TYPE);
+    }
+  return "";			/* Someone should teach Dean about null pointers */
 }
 
 int
-    md_parse_option(argP, cntP, vecP)
-char **argP;
-int *cntP;
-char ***vecP;
+md_parse_option (argP, cntP, vecP)
+     char **argP;
+     int *cntP;
+     char ***vecP;
 
 {
-	return 0;
-	
+  return 0;
+
 }
 
 int md_short_jump_size;
 
-void tc_aout_fix_to_chars () { printf("call to tc_aout_fix_to_chars \n");
-			       abort(); }
-void md_create_short_jump(ptr, from_addr, to_addr, frag, to_symbol)
-char *ptr;
-long from_addr;
-long to_addr;
-fragS *frag;
-symbolS *to_symbol;
+void 
+tc_aout_fix_to_chars ()
 {
-	as_fatal("failed sanity check.");
+  printf ("call to tc_aout_fix_to_chars \n");
+  abort ();
+}
+
+void 
+md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
+     char *ptr;
+     long from_addr;
+     long to_addr;
+     fragS *frag;
+     symbolS *to_symbol;
+{
+  as_fatal ("failed sanity check.");
 }
 
 void
-    md_create_long_jump(ptr,from_addr,to_addr,frag,to_symbol)
-char *ptr;
-long from_addr, to_addr;
-fragS *frag;
-symbolS *to_symbol;
+md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
+     char *ptr;
+     long from_addr, to_addr;
+     fragS *frag;
+     symbolS *to_symbol;
 {
-	as_fatal("failed sanity check.");
+  as_fatal ("failed sanity check.");
 }
 
 void
-    md_convert_frag(headers, fragP)
-object_headers *headers;
-fragS * fragP;
+md_convert_frag (headers, fragP)
+     object_headers *headers;
+     fragS *fragP;
 
-{ printf("call to md_convert_frag \n"); abort(); }
+{
+  printf ("call to md_convert_frag \n");
+  abort ();
+}
 
 long
-    DEFUN(md_section_align,(seg, size),
-	  segT seg AND
-	  long size)
+DEFUN (md_section_align, (seg, size),
+       segT seg AND
+       long size)
 {
-	return((size + (1 << section_alignment[(int) seg]) - 1) & (-1 << section_alignment[(int) seg]));
-	
+  return ((size + (1 << section_alignment[(int) seg]) - 1) & (-1 << section_alignment[(int) seg]));
+
 }
 
 void
-    md_apply_fix(fixP, val)
-fixS *fixP;
-long val;
+md_apply_fix (fixP, val)
+     fixS *fixP;
+     long val;
 {
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
-	
-  switch(fixP->fx_r_type) {
-   case R_IMM4L:
-    buf[0] = (buf[0] & 0xf0) | ((buf[0] + val) & 0xf);
-    break;
 
-   case R_JR:
+  switch (fixP->fx_r_type)
+    {
+    case R_IMM4L:
+      buf[0] = (buf[0] & 0xf0) | ((buf[0] + val) & 0xf);
+      break;
 
-   *buf++=  val;
+    case R_JR:
+
+      *buf++ = val;
 /*    if (val != 0) abort();*/
-    break;
+      break;
 
 
-   case R_IMM8:
-    buf[0] += val;
-    break;
-    break;
-   case R_DA:
-    *buf++=(val>>8);
-    *buf++=val;
-    break;
-   case R_IMM32:
-    *buf++=(val>>24);
-    *buf++=(val>>16);
-    *buf++=(val>>8);
-    *buf++=val;
-    break;
-   case R_DA | R_SEG:
-    *buf++ = (val>>16);
-    *buf++ = 0x00;
-    *buf++ = (val>>8);
-    *buf++ = val;
-    break;
-   default:
-    abort();
-		
-  }
+    case R_IMM8:
+      buf[0] += val;
+      break;
+      break;
+    case R_DA:
+      *buf++ = (val >> 8);
+      *buf++ = val;
+      break;
+    case R_IMM32:
+      *buf++ = (val >> 24);
+      *buf++ = (val >> 16);
+      *buf++ = (val >> 8);
+      *buf++ = val;
+      break;
+    case R_DA | R_SEG:
+      *buf++ = (val >> 16);
+      *buf++ = 0x00;
+      *buf++ = (val >> 8);
+      *buf++ = val;
+      break;
+    default:
+      abort ();
+
+    }
 }
 
-void DEFUN(md_operand, (expressionP),expressionS *expressionP) 
-{ }
+void 
+DEFUN (md_operand, (expressionP), expressionS * expressionP)
+{
+}
 
-int  md_long_jump_size;
+int md_long_jump_size;
 int
-    md_estimate_size_before_relax(fragP, segment_type)
-register fragS *fragP;
-register segT segment_type;
-{ 
-	printf("call tomd_estimate_size_before_relax \n"); abort(); }
+md_estimate_size_before_relax (fragP, segment_type)
+     register fragS *fragP;
+     register segT segment_type;
+{
+  printf ("call tomd_estimate_size_before_relax \n");
+  abort ();
+}
+
 /* Put number into target byte order */
 
-void DEFUN(md_number_to_chars,(ptr, use, nbytes),
-	   char *ptr AND
-	   long use AND
-	   int nbytes)
+void 
+DEFUN (md_number_to_chars, (ptr, use, nbytes),
+       char *ptr AND
+       long use AND
+       int nbytes)
 {
-	switch (nbytes) {
-	case 4: *ptr++ = (use >> 24) & 0xff;
-	case 3: *ptr++ = (use >> 16) & 0xff;
-	case 2: *ptr++ = (use >> 8) & 0xff;
-	case 1: *ptr++ = (use >> 0) & 0xff;
-		break;
-	default:
-		abort();
-	}
+  switch (nbytes)
+    {
+      case 4:*ptr++ = (use >> 24) & 0xff;
+    case 3:
+      *ptr++ = (use >> 16) & 0xff;
+    case 2:
+      *ptr++ = (use >> 8) & 0xff;
+    case 1:
+      *ptr++ = (use >> 0) & 0xff;
+      break;
+    default:
+      abort ();
+    }
 }
-long md_pcrel_from(fixP) 
-fixS *fixP; { abort(); }
+long 
+md_pcrel_from (fixP)
+     fixS *fixP;
+{
+  abort ();
+}
 
-void tc_coff_symbol_emit_hook() { }
+void 
+tc_coff_symbol_emit_hook ()
+{
+}
 
 
-void tc_reloc_mangle(fix_ptr, intr, base)
-fixS *fix_ptr;
-struct internal_reloc *intr;
-bfd_vma base;
+void 
+tc_reloc_mangle (fix_ptr, intr, base)
+     fixS *fix_ptr;
+     struct internal_reloc *intr;
+     bfd_vma base;
 
 {
   symbolS *symbol_ptr;
-	
+
   symbol_ptr = fix_ptr->fx_addsy;
-	
+
   /* If this relocation is attached to a symbol then it's ok
      to output it */
-  if (fix_ptr->fx_r_type == RELOC_32) {
-    /* cons likes to create reloc32's whatever the size of the reloc..
-     */
-    switch (fix_ptr->fx_size) 
+  if (fix_ptr->fx_r_type == 0)
     {
-			    
-     case 2:
-      intr->r_type = R_DA;
-      break;
-     case 1:
-      intr->r_type = R_IMM8;
-      break;
-     default:
-      abort();
-			    
+      /* cons likes to create reloc32's whatever the size of the reloc..
+       */
+      switch (fix_ptr->fx_size)
+	{
+
+	case 2:
+	  intr->r_type = R_DA;
+	  break;
+	case 1:
+	  intr->r_type = R_IMM8;
+	  break;
+	default:
+	  abort ();
+
+	}
+
     }
-		
-  }
-  else {  
-    intr->r_type = fix_ptr->fx_r_type;
-  }
-	
-  intr->r_vaddr = fix_ptr->fx_frag->fr_address +  fix_ptr->fx_where  +base;
-  intr->r_offset = fix_ptr->fx_offset;
-	
-  if (symbol_ptr)
-   intr->r_symndx = symbol_ptr->sy_number;
   else
-   intr->r_symndx = -1;
-	
-	
+    {
+      intr->r_type = fix_ptr->fx_r_type;
+    }
+
+  intr->r_vaddr = fix_ptr->fx_frag->fr_address + fix_ptr->fx_where + base;
+  intr->r_offset = fix_ptr->fx_offset;
+
+  if (symbol_ptr)
+    intr->r_symndx = symbol_ptr->sy_number;
+  else
+    intr->r_symndx = -1;
+
+
 }
-
-
