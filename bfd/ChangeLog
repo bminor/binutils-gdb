@@ -1,3 +1,27 @@
+Fri Aug 15 04:58:02 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* config.bfd (arc-*-elf*): Add.
+	* configure.in (bfd_elf32_{little,big}arc_vec): Add.
+	* configure: Rebuild.
+	* Makefile.am (ALL_MACHINES): Add cpu-arc.lo.
+	(BFD32_BACKENDS): Add elf32-arc.lo.
+	(cpu-arc.lo,elf32-arc.lo): Add rules for.
+	* Makefile.in: Rebuild.
+	* archures.c (architecture list): Add bfd_arch_arc.
+	(bfd_archures_list): Add bfd_arc_arch.
+	(bfd_mach_arc_base): Define.
+	* reloc.c (BFD_RELOC_ARC_B22_PCREL,BFD_RELOC_ARC_B26): Add.
+	* targets.c (bfd_elf32_{little,big}arc_vec): Declare.
+	(bfd_target_vect): Add them.
+	* bfd-in2.h, libbfd.h: Rebuild.
+	* cpu-arc.c, elf32-arc.c: New files.
+	* elf.c (pre_headers): Recognize bfd_arch_arc.
+
+Tue Aug 12 11:45:18 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* aoutx.h (NAME(aout,final_link)): If no symbols, make sure the
+	data section is correctly rounded to a page in the file.
+
 Mon Aug 11 12:45:43 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* aoutx.h (NAME(aout,final_link)): Don't emit the string table if

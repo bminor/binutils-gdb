@@ -740,15 +740,11 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_SH_CODE",
   "BFD_RELOC_SH_DATA",
   "BFD_RELOC_SH_LABEL",
-/* start-sanitize-arc */
-  "BFD_RELOC_ARC_B22_PCREL",
-  "BFD_RELOC_ARC_B26",
-/* end-sanitize-arc */
-
   "BFD_RELOC_THUMB_PCREL_BRANCH9",
   "BFD_RELOC_THUMB_PCREL_BRANCH12",
   "BFD_RELOC_THUMB_PCREL_BRANCH23",
-							 
+  "BFD_RELOC_ARC_B22_PCREL",
+  "BFD_RELOC_ARC_B26",
   "BFD_RELOC_D10V_10_PCREL_R",
   "BFD_RELOC_D10V_10_PCREL_L",
   "BFD_RELOC_D10V_18",

@@ -2221,8 +2221,16 @@ ENUMX
 ENUMDOC
   Hitachi SH relocs.  Not all of these appear in object files.
 
-COMMENT
-{* start-sanitize-arc *}
+ENUM
+  BFD_RELOC_THUMB_PCREL_BRANCH9
+ENUMX
+  BFD_RELOC_THUMB_PCREL_BRANCH12
+ENUMX
+  BFD_RELOC_THUMB_PCREL_BRANCH23
+ENUMDOC
+  Thumb 23-, 12- and 9-bit pc-relative branches.  The lowest bit must
+  be zero and is not stored in the instruction.
+
 ENUM
   BFD_RELOC_ARC_B22_PCREL
 ENUMDOC
@@ -2236,8 +2244,6 @@ ENUMDOC
   ARC 26 bit absolute branch.  The lowest two bits must be zero and are not
   stored in the instruction.  The high 24 bits are installed in bits 23
   through 0.
-COMMENT
-{* end-sanitize-arc *}
 
 COMMENT
 ENUM
@@ -2306,8 +2312,6 @@ ENUMDOC
 COMMENT
 {* end-sanitize-d30v *}
 
-COMMENT
-{* start-sanitize-m32r *}
 ENUM
   BFD_RELOC_M32R_24
 ENUMDOC
@@ -2339,8 +2343,11 @@ ENUM
   BFD_RELOC_M32R_LO16
 ENUMDOC
   This is a 16-bit reloc containing the lower 16 bits of an address.
-COMMENT
-{* end-sanitize-m32r *}
+ENUM
+  BFD_RELOC_M32R_SDA16
+ENUMDOC
+  This is a 16-bit reloc containing the small data area offset for use in
+  add3, load, and store instructions.
 
 COMMENT
 {* start-sanitize-v850 *}

@@ -2118,7 +2118,7 @@ map_sections_to_segments (abfd)
 	  new_segment = true;
 	}
       else if (BFD_ALIGN (last_hdr->lma + last_hdr->_raw_size, maxpagesize)
-	       < hdr->lma)
+	       < BFD_ALIGN (hdr->lma, maxpagesize))
 	{
 	  /* If putting this section in this segment would force us to
              skip a page in the segment, then we need a new segment.  */
@@ -2875,11 +2875,9 @@ prep_headers (abfd)
       i_ehdrp->e_machine = EM_CYGNUS_V850;
       break;
 /* end-sanitize-v850 */
-/* start-sanitize-arc */
     case bfd_arch_arc:
       i_ehdrp->e_machine = EM_CYGNUS_ARC;
       break;
-/* end-sanitize-arc */
     case bfd_arch_m32r:
       i_ehdrp->e_machine = EM_CYGNUS_M32R;
       break;

@@ -15,14 +15,6 @@
 
 Do-first:
 
-arc_files="cpu-arc.c elf32-arc.c"
-
-if ( echo $* | grep keep\-arc > /dev/null ) ; then
-	keep_these_too="${arc_files} ${keep_these_too}"
-else
-	lose_these_too="${arc_files} ${lose_these_too}"
-fi
-
 d30v_files="cpu-d30v.c elf32-d30v.c"
 
 if ( echo $* | grep keep\-d30v > /dev/null ) ; then
@@ -130,6 +122,7 @@ configure.in
 corefile.c
 cpu-a29k.c
 cpu-alpha.c
+cpu-arc.c
 cpu-arm.c
 cpu-d10v.c
 cpu-h8300.c
@@ -161,6 +154,7 @@ ecofflink.c
 ecoffswap.h
 elf-bfd.h
 elf.c
+elf32-arc.c
 elf32-d10v.c
 elf32-gen.c
 elf32-hppa.c
@@ -300,34 +294,6 @@ Things-to-lose:
 
 
 Do-last:
-
-arc_files="ChangeLog ChangeLog.2 Makefile.in Makefile.am archures.c reloc.c targets.c config.bfd configure.in configure bfd-in2.h elf.c libbfd.h"
-if ( echo $* | grep keep\-arc > /dev/null ) ; then
-	for i in $arc_files ; do
-		if test ! -d $i && (grep sanitize-arc $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping arc stuff in $i
-			fi
-		fi
-	done
-else
-	for i in $arc_files ; do
-		if test ! -d $i && (grep sanitize-arc $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"arc\" from $i...
-			fi
-			cp $i new
-			sed '/start\-sanitize\-arc/,/end-\sanitize\-arc/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				if [ -n "${verbose}" ] ; then
-					echo Caching $i in .Recover...
-				fi
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
 
 d30v_files="ChangeLog ChangeLog.2 Makefile.in Makefile.am archures.c reloc.c targets.c config.bfd configure.in configure bfd-in2.h elf.c libbfd.h"
 if ( echo $* | grep keep\-d30v > /dev/null ) ; then

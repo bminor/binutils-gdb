@@ -1238,13 +1238,8 @@ enum bfd_architecture
   /* start-sanitize-v850 */
   bfd_arch_v850,       /* NEC V850 */
   /* end-sanitize-v850 */
-  /* start-sanitize-arc */
   bfd_arch_arc,        /* Argonaut RISC Core */
 #define bfd_mach_arc_base 0
-#define bfd_mach_arc_host 1
-#define bfd_mach_arc_graphics 2
-#define bfd_mach_arc_audio 3
-  /* end-sanitize-arc */
   bfd_arch_m32r,       /* Mitsubishi M32R/D */
   bfd_arch_mn10200,    /* Matsushita MN10200 */
   bfd_arch_mn10300,    /* Matsushita MN10300 */
@@ -1832,7 +1827,12 @@ not stored in the instruction. */
   BFD_RELOC_SH_CODE,
   BFD_RELOC_SH_DATA,
   BFD_RELOC_SH_LABEL,
-/* start-sanitize-arc */
+
+/* Thumb 23-, 12- and 9-bit pc-relative branches.  The lowest bit must
+be zero and is not stored in the instruction. */
+  BFD_RELOC_THUMB_PCREL_BRANCH9,
+  BFD_RELOC_THUMB_PCREL_BRANCH12,
+  BFD_RELOC_THUMB_PCREL_BRANCH23,
 
 /* Argonaut RISC Core (ARC) relocs.
 ARC 22 bit pc-relative branch.  The lowest two bits must be zero and are
@@ -1844,13 +1844,6 @@ through 7 of the instruction. */
 stored in the instruction.  The high 24 bits are installed in bits 23
 through 0. */
   BFD_RELOC_ARC_B26,
-/* end-sanitize-arc */
-
-/* Thumb 23-, 12- and 9-bit pc-relative branches.  The lowest bit must
-   be zero and is not stored in the instruction. */
-  BFD_RELOC_THUMB_PCREL_BRANCH9,
-  BFD_RELOC_THUMB_PCREL_BRANCH12,
-  BFD_RELOC_THUMB_PCREL_BRANCH23,
 
 /* Mitsubishi D10V relocs.
 This is a 10-bit reloc with the right 2 bits

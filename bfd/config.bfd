@@ -69,12 +69,11 @@ case "${targ}" in
     ;;
 #endif /* BFD64 */
 
-# start-sanitize-arc
   arc-*-elf*)
     targ_defvec=bfd_elf32_littlearc_vec
     targ_selvecs=bfd_elf32_bigarc_vec
     ;;
-# end-sanitize-arc
+
   arm-*-riscix*)
     targ_defvec=riscix_vec
     ;;
@@ -151,8 +150,12 @@ case "${targ}" in
     targ_defvec=bfd_elf32_i386_vec
     targ_selvecs=i386coff_vec
     ;;
+  i[3456]86-*-msdosdjgpp* | i[3456]*-*-go32*)
+    targ_defvec=go32coff_vec
+    targ_selvecs="go32stubbedcoff_vec i386aout_vec"
+    ;;
   i[3456]86-*-sysv* | i[3456]86-*-isc* | i[3456]86-*-sco* | i[3456]86-*-coff | \
-  i[3456]86-*-aix* | i[3456]86-*-go32* | i[3456]86*-*-rtems*)
+  i[3456]86-*-aix* | i[3456]86*-*-rtems*)
     targ_defvec=i386coff_vec
     ;;
   i[3456]86-sequent-bsd*)
@@ -538,6 +541,7 @@ case "${targ}" in
 # start-sanitize-tic80
   tic80*-*-*)
     targ_defvec=tic80coff_vec
+    targ_underscore=yes
     ;;
 
 # end-sanitize-tic80

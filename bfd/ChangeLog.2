@@ -783,11 +783,6 @@ Mon Jul  3 11:30:45 1995  Ian Lance Taylor  <ian@cygnus.com>
 	* Makefile.in: Rebuild dependencies.
 	(BFD32_BACKENDS): Add versados.o.
 	(CFILES): Add pe-i386.c, pei-i386.c, and versados.c.
-start-sanitize-arc
-	(elf32-arc.o): New target.  This target should be removed when
-	elf32-arc.c can be added to CFILES, after which the automatic
-	dependency building will handle it.
-end-sanitize-arc
 
 Sun Jul  2 17:49:32 1995  Ian Lance Taylor  <ian@cygnus.com>
 
@@ -1378,13 +1373,6 @@ Mon Mar 13 13:48:49 1995  Ian Lance Taylor  <ian@cygnus.com>
 	* archive.c (bsd_write_armap): Cast getuid and getgid results to
 	long, and print with %ld.
 
-start-sanitize-arc
-Sun Mar 12 05:22:10 1995  Doug Evans  <dje@chestnut.cygnus.com>
-
-	* elf32-arc.c (elf_arc_howto_table): Relocs with implicit addends
-	don't work too well with zero src_masks.  Correct values.
-end-sanitize-arc
-
 Fri Mar 10 16:41:05 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* aoutx.h (translate_to_native_sym_flags): Always use the output
@@ -1475,17 +1463,6 @@ Wed Mar  8 00:53:54 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elfcode.h (swap_out_syms): Mark an undefined BSF_WEAK symbol as
 	STB_WEAK rather than STB_GLOBAL.
-
-start-sanitize-arc
-Tue Mar  7 20:34:43 1995  Doug Evans  <dje@chestnut.cygnus.com>
-
-	* configure.in (SELECT_VECS): Split bfd_elf32_arc_vec into big/little.
-	* targets.c (bfd_target_vector): Likewise.
-	* elf32-arc.c (TARGET_BIG_SYM): Define.
-	(TARGET_BIG_NAME): Define.
-	* config/arc-elf.mt (DEFAULT_VECTOR): Set to bfd_elf32_littlearc_vec.
-	(SELECT_VECS): Add bfd_elf32_bigarc_vec.
-end-sanitize-arc
 
 Tue Mar  7 12:23:47 1995  Ian Lance Taylor  <ian@cygnus.com>
 
@@ -1706,28 +1683,6 @@ Mon Feb 13 23:25:38 1995  Ian Lance Taylor  <ian@cygnus.com>
 	* aoutx.h (NAME(aout,swap_ext_reloc_in)): Don't return a pointer
 	to garbage if the symbol index is out of range.
 	(NAME(aout,swap_std_reloc_in)): Likewise.
-
-start-sanitize-arc
-Mon Feb 13 09:35:30 1995  Doug Evans  <dje@canuck.cygnus.com>
-
-	* elf32-arc.c (reloc_type): New type R_ARC_B26.
-	(elf_arc_howto_table): Likewise.
-	* reloc.c (BFD_RELOC_ARC_B26): Likewise.
-
-Thu Feb  9 17:31:40 1995  Doug Evans  <dje@canuck.cygnus.com>
-
-	* archures (bfd_mach_arc_base): #define.
-	(bfd_mach_arc_host, bfd_mach_arc_graphics, bfd_mach_arc_audio): Ditto.
-	* cpu-arc.c (arch_info_struct): Define entries for each cpu variant.
-	(bfd_arc_arch): Link each one in.
-	(arc_get_mach): New function.
-	* elf32-arc.c (arc_info_to_howto_rel): Renamed from arc_info_to_howto.
-	(elf_info_to_howto_rel): Update.
-	(arc_elf_object_p, arc_elf_final_write_processing): New functions.
-	(elf_backend_object_p): Define.
-	(elf_backend_final_write_processing): Define.
-	(USE_REL): Define.
-end-sanitize-arc
 
 Thu Feb  9 18:36:52 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
@@ -2066,11 +2021,6 @@ Thu Jan 12 16:30:47 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* archures.c (archures_init_table): Now const.
 	(bfd_arch_init): Adjusted type of local var `ptable'.
-start-sanitize-arc
-
-	* Makefile.in (ALL_MACHINES): Include cpu-arc.o.
-	(BFD32_BACKENDS): Include elf32-arc.o.
-end-sanitize-arc
 
 Thu Jan 12 09:33:24 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
@@ -2088,9 +2038,6 @@ Wed Jan 11 21:31:41 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 	elfcode.h, libbfd-in.h, linker.c, mipsbsd.c, nlm32-ppc.c, oasys.c,
 	reloc.c, som.c: Don't use `const' in combination with
 	`reloc_howto_type'.
-start-sanitize-arc
-	* elf32-arc.c: Ditto.
-end-sanitize-arc
 	* bfd-in2.h, libbfd.h: Regenerated.
 
 	* ecoff.c (ecoff_type_to_string): Local variable `buffer1' doesn't
@@ -2167,13 +2114,6 @@ Tue Dec 20 13:58:01 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 	list of cases for which relocation need not be computed.
 	* elf32-sparc.c (elf32_sparc_relocate_section): Likewise.
 
-start-sanitize-arc
-Tue Dec 20 09:01:01 1994  Doug Evans  <dje@canuck.cygnus.com>
-
-	* elf32-arc.c (elf_arc_howto_table, R_ARC_B22_PCREL): Value is
-	right-shifted 2 bits.  Fix dst_mask.
-end-sanitize-arc
-
 Mon Dec 19 23:09:16 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* elf32-hppa.c (elf32_hppa_read_symext_info): Delete do_locals and
@@ -2233,16 +2173,6 @@ Fri Dec  2 13:56:49 1994  Ian Lance Taylor  <ian@rtl.cygnus.com>
 Wed Nov 30 14:12:55 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* coff-sh.c: Use _bfd_dummy_target instead of no_archive.
-
-start-sanitize-arc
-Tue Nov 29 17:14:21 1994  Doug Evans  <dje@canuck.cygnus.com>
-
-	* archures.c: Initial support for the ARC.
-	* reloc.c, targets.c, config.bfd, configure.in, elfcode.h: Likewise.
-	* bfd-in2.h: Regenerated.
-	* libbfd.h: Likewise.
-	* config/arc-elf.mt: New file.
-end-sanitize-arc
 
 Tue Nov 29 14:00:19 1994  J.T. Conklin  <jtc@.rtl.cygnus.com>
 
