@@ -1,3 +1,26 @@
+Wed Oct 16 11:11:05 1991  John Gilmore  (gnu at cygnus.com)
+
+	* configure.in:  Allow i386-sco-sysv.
+	* bout.c:  Remove unused i960_align; lint dummy core file handlers.
+	* cpu-h8300.c:  lint.
+
+	* host-aout.c:  New strategy.  We use common code, include files,
+	and data structures to handle the file, but set a few parameters
+	from the host's config file (page size, text start addr, etc).
+	* libaout.h:  Define HP BSD machine types.
+	* aoutf1.h:  Handle reading a.outs with these types.
+
+	* trad-core.c:  Pass the u.u_ar0 value as the negative of the
+	virtual-memory-address of the .reg section.  We can't just make a
+	section for "all the regs and nothing else" because only GDB knows
+	exactly where the regs are (scattered around the upage and stack).
+	Clean up memory allocation.  Remove big- and little-endian
+	vectors, replace with single vector; this only runs on the host,
+	in host byte order.  Replace byteswap routines with aborts in case
+	anyone calls them.
+	* targets.c:  There's only one trad_core_vec now.
+	* aoutf1.h (sunos_core_file_p):  VMA of .reg* now needs to be 0.
+
 Tue Oct 15 08:29:03 1991  John Gilmore  (gnu at cygnus.com)
 
 	* hosts/h-amix.h (free):  Fix prototype.
