@@ -64,6 +64,7 @@ sun3os4.mh
 sun4.mh
 sun4os3.mh
 sun4os4.mh
+sun4os5.mh
 symmetry.mh
 tahoe.mh
 ultra3.mh
@@ -116,6 +117,7 @@ sun3os4.mt
 sun4.mt
 sun4os3.mt
 sun4os4.mt
+sun4os5.mt
 symmetry.mt
 tahoe.mt
 ultra3.mt
