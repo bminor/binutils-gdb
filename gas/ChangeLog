@@ -1,5 +1,8 @@
 Wed Jun 15 12:32:55 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* config/obj-coff.c (coff_frob_symbol): Use C_STAT for the .text
+	section symbol, not C_LABEL.
+
 	* config/tc-mips.c (mips_ip): Permit a modifier in 'o' case, and
 	permit non constant expressions in 'u' case.  Lets ``lui
 	$8,%hi(foo); lw $8,%lo(foo)($8)'' work correctly.
