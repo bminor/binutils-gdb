@@ -1,3 +1,25 @@
+2002-07-24  Andrew Cagney  <cagney@redhat.com>
+
+	* regcache.h (regcache_raw_read, regcache_raw_write): Replace
+	regcache_read and regcache_write.
+	(regcache_raw_read_as_address): Replace regcache_read_as_address.
+	* regcache.c: Update.
+	* sh-tdep.c (sh64_push_arguments): Update comment.
+	(sh_pseudo_register_read): Update.
+	(sh_pseudo_register_write): Update.
+	(sh4_register_read): Update.
+	(sh4_register_write): Update.
+	(sh64_pseudo_register_read): Update.
+	(sh64_pseudo_register_write): Update.
+	(sh64_register_read): Update.
+	(sh64_register_write): Update.
+	* i386-tdep.c (i386_extract_return_value): Update.
+	(i386_extract_struct_value_address): Update.
+	(i386_extract_return_value): Update.
+	* blockframe.c (generic_read_register_dummy): Update.
+	(generic_call_dummy_register_unwind): Update
+	* infrun.c (write_inferior_status_register): Update.
+
 2002-07-23  Jim Blandy  <jimb@redhat.com>
 
 	* parser-defs.h (expression_context_pc): Make this extern.

@@ -962,7 +962,7 @@ i386_extract_return_value (struct type *type, struct regcache *regcache,
 	 its contents to the desired type.  This is probably not
 	 exactly how it would happen on the target itself, but it is
 	 the best we can do.  */
-      regcache_read (regcache, FP0_REGNUM, buf);
+      regcache_raw_read (regcache, FP0_REGNUM, buf);
       convert_typed_floating (buf, builtin_type_i387_ext, valbuf, type);
     }
   else
@@ -972,14 +972,14 @@ i386_extract_return_value (struct type *type, struct regcache *regcache,
 
       if (len <= low_size)
 	{
-	  regcache_read (regcache, LOW_RETURN_REGNUM, buf);
+	  regcache_raw_read (regcache, LOW_RETURN_REGNUM, buf);
 	  memcpy (valbuf, buf, len);
 	}
       else if (len <= (low_size + high_size))
 	{
-	  regcache_read (regcache, LOW_RETURN_REGNUM, buf);
+	  regcache_raw_read (regcache, LOW_RETURN_REGNUM, buf);
 	  memcpy (valbuf, buf, low_size);
-	  regcache_read (regcache, HIGH_RETURN_REGNUM, buf);
+	  regcache_raw_read (regcache, HIGH_RETURN_REGNUM, buf);
 	  memcpy (valbuf + low_size, buf, len - low_size);
 	}
       else
@@ -1066,7 +1066,7 @@ i386_store_return_value (struct type *type, char *valbuf)
 static CORE_ADDR
 i386_extract_struct_value_address (struct regcache *regcache)
 {
-  return regcache_read_as_address (regcache, LOW_RETURN_REGNUM);
+  return regcache_raw_read_as_address (regcache, LOW_RETURN_REGNUM);
 }
 
 

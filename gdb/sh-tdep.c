@@ -2251,11 +2251,12 @@ sh64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		      }
 #endif
 		    /* Note: must use write_register_gen here instead
-		       of regcache_write, because regcache_write works
-		       only for real registers, not pseudo.
-		       write_register_gen will call the gdbarch
-		       function to do register writes, and that will
-		       properly know how to deal with pseudoregs. */
+		       of regcache_raw_write, because
+		       regcache_raw_write works only for real
+		       registers, not pseudo.  write_register_gen will
+		       call the gdbarch function to do register
+		       writes, and that will properly know how to deal
+		       with pseudoregs. */
 		    write_register_gen (regnum, val);
 		    fp_args[double_arg_index] = 1;
 		    fp_args[double_arg_index + 1] = 1;
@@ -3385,9 +3386,9 @@ sh_pseudo_register_read (int reg_nr, char *buffer)
       /* Build the value in the provided buffer. */ 
       /* Read the real regs for which this one is an alias.  */
       for (portion = 0; portion < 2; portion++)
-	regcache_read (current_regcache, base_regnum + portion, 
-		       (temp_buffer
-			+ REGISTER_RAW_SIZE (base_regnum) * portion));
+	regcache_raw_read (current_regcache, base_regnum + portion, 
+			   (temp_buffer
+			    + REGISTER_RAW_SIZE (base_regnum) * portion));
       /* We must pay attention to the endiannes. */
       sh_sh4_register_convert_to_virtual (reg_nr,
 					  REGISTER_VIRTUAL_TYPE (reg_nr),
@@ -3400,8 +3401,8 @@ sh_pseudo_register_read (int reg_nr, char *buffer)
 
       /* Read the real regs for which this one is an alias.  */
       for (portion = 0; portion < 4; portion++)
-	regcache_read (current_regcache, base_regnum + portion, 
-		       buffer + REGISTER_RAW_SIZE (base_regnum) * portion);
+	regcache_raw_read (current_regcache, base_regnum + portion, 
+			   buffer + REGISTER_RAW_SIZE (base_regnum) * portion);
     }
 }
 
@@ -3410,7 +3411,7 @@ sh4_register_read (struct gdbarch *gdbarch, int reg_nr, char *buffer)
 {
   if (reg_nr >= 0 && reg_nr < gdbarch_tdep (current_gdbarch)->DR0_REGNUM)
     /* It is a regular register. */
-    regcache_read (current_regcache, reg_nr, buffer);
+    regcache_raw_read (current_regcache, reg_nr, buffer);
   else
     /* It is a pseudo register and we need to construct its value */
     sh_pseudo_register_read (reg_nr, buffer);
@@ -3434,9 +3435,9 @@ sh64_pseudo_register_read (int reg_nr, char *buffer)
       /* DR regs are double precision registers obtained by
 	 concatenating 2 single precision floating point registers. */
       for (portion = 0; portion < 2; portion++)
-	regcache_read (current_regcache, base_regnum + portion, 
-		       (temp_buffer
-			+ REGISTER_RAW_SIZE (base_regnum) * portion));
+	regcache_raw_read (current_regcache, base_regnum + portion, 
+			   (temp_buffer
+			    + REGISTER_RAW_SIZE (base_regnum) * portion));
 
       /* We must pay attention to the endiannes. */
       sh_sh64_register_convert_to_virtual (reg_nr, REGISTER_VIRTUAL_TYPE (reg_nr),
@@ -3453,8 +3454,9 @@ sh64_pseudo_register_read (int reg_nr, char *buffer)
       /* FPP regs are pairs of single precision registers obtained by
 	 concatenating 2 single precision floating point registers. */
       for (portion = 0; portion < 2; portion++)
-	regcache_read (current_regcache, base_regnum + portion, 
-		       buffer + REGISTER_RAW_SIZE (base_regnum) * portion);
+	regcache_raw_read (current_regcache, base_regnum + portion, 
+			   (buffer
+			    + REGISTER_RAW_SIZE (base_regnum) * portion));
     }
 
   else if (reg_nr >= tdep->FV0_REGNUM 
@@ -3466,8 +3468,9 @@ sh64_pseudo_register_read (int reg_nr, char *buffer)
       /* FV regs are vectors of single precision registers obtained by
 	 concatenating 4 single precision floating point registers. */
       for (portion = 0; portion < 4; portion++)
-	regcache_read (current_regcache, base_regnum + portion, 
-		       buffer + REGISTER_RAW_SIZE (base_regnum) * portion);
+	regcache_raw_read (current_regcache, base_regnum + portion, 
+			   (buffer
+			    + REGISTER_RAW_SIZE (base_regnum) * portion));
     }
 
   /* sh compact pseudo registers. 1-to-1 with a shmedia register */
@@ -3477,7 +3480,7 @@ sh64_pseudo_register_read (int reg_nr, char *buffer)
       base_regnum = sh64_compact_reg_base_num (reg_nr);
 
       /* Build the value in the provided buffer. */ 
-      regcache_read (current_regcache, base_regnum, temp_buffer);
+      regcache_raw_read (current_regcache, base_regnum, temp_buffer);
       if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 	offset = 4;
       memcpy (buffer, temp_buffer + offset, 4); /* get LOWER 32 bits only????*/
@@ -3491,7 +3494,7 @@ sh64_pseudo_register_read (int reg_nr, char *buffer)
       /* Build the value in the provided buffer. */ 
       /* Floating point registers map 1-1 to the media fp regs,
 	 they have the same size and endienness. */
-      regcache_read (current_regcache, base_regnum, buffer);
+      regcache_raw_read (current_regcache, base_regnum, buffer);
     }
 
   else if (reg_nr >= tdep->DR0_C_REGNUM 
@@ -3502,9 +3505,9 @@ sh64_pseudo_register_read (int reg_nr, char *buffer)
       /* DR_C regs are double precision registers obtained by
 	 concatenating 2 single precision floating point registers. */
       for (portion = 0; portion < 2; portion++)
-	regcache_read (current_regcache, base_regnum + portion, 
-		       (temp_buffer
-			+ REGISTER_RAW_SIZE (base_regnum) * portion));
+	regcache_raw_read (current_regcache, base_regnum + portion, 
+			   (temp_buffer
+			    + REGISTER_RAW_SIZE (base_regnum) * portion));
 
       /* We must pay attention to the endiannes. */
       sh_sh64_register_convert_to_virtual (reg_nr, REGISTER_VIRTUAL_TYPE (reg_nr),
@@ -3520,8 +3523,9 @@ sh64_pseudo_register_read (int reg_nr, char *buffer)
       /* FV_C regs are vectors of single precision registers obtained by
 	 concatenating 4 single precision floating point registers. */
       for (portion = 0; portion < 4; portion++)
-	regcache_read (current_regcache, base_regnum + portion, 
-		       buffer + REGISTER_RAW_SIZE (base_regnum) * portion);
+	regcache_raw_read (current_regcache, base_regnum + portion, 
+			   (buffer
+			    + REGISTER_RAW_SIZE (base_regnum) * portion));
     }
 
   else if (reg_nr == tdep->FPSCR_C_REGNUM)
@@ -3552,11 +3556,11 @@ sh64_pseudo_register_read (int reg_nr, char *buffer)
        */
       /* *INDENT-ON* */
       /* Get FPSCR into a local buffer */
-      regcache_read (current_regcache, fpscr_base_regnum, temp_buffer);
+      regcache_raw_read (current_regcache, fpscr_base_regnum, temp_buffer);
       /* Get value as an int. */
       fpscr_value = extract_unsigned_integer (temp_buffer, 4);
       /* Get SR into a local buffer */
-      regcache_read (current_regcache, sr_base_regnum, temp_buffer);
+      regcache_raw_read (current_regcache, sr_base_regnum, temp_buffer);
       /* Get value as an int. */
       sr_value = extract_unsigned_integer (temp_buffer, 4);
       /* Build the new value. */
@@ -3574,7 +3578,7 @@ sh64_pseudo_register_read (int reg_nr, char *buffer)
 
       /* FPUL_C register is floating point register 32,
 	 same size, same endianness. */
-      regcache_read (current_regcache, base_regnum, buffer);
+      regcache_raw_read (current_regcache, base_regnum, buffer);
     }
 }
 
@@ -3584,7 +3588,7 @@ sh64_register_read (struct gdbarch *gdbarch, int reg_nr, char *buffer)
 
   if (reg_nr >= 0 && reg_nr < gdbarch_tdep (current_gdbarch)->DR0_REGNUM)
     /* It is a regular register. */
-    regcache_read (current_regcache, reg_nr, buffer);
+    regcache_raw_read (current_regcache, reg_nr, buffer);
   else
     /* It is a pseudo register and we need to construct its value */
     sh64_pseudo_register_read (reg_nr, buffer);
@@ -3608,9 +3612,9 @@ sh_pseudo_register_write (int reg_nr, char *buffer)
 
       /* Write the real regs for which this one is an alias.  */
       for (portion = 0; portion < 2; portion++)
-	regcache_write (current_regcache, base_regnum + portion, 
-			(temp_buffer
-			 + REGISTER_RAW_SIZE (base_regnum) * portion));
+	regcache_raw_write (current_regcache, base_regnum + portion, 
+			    (temp_buffer
+			     + REGISTER_RAW_SIZE (base_regnum) * portion));
     }
   else if (reg_nr >= tdep->FV0_REGNUM
 	   && reg_nr <= tdep->FV_LAST_REGNUM)
@@ -3619,8 +3623,9 @@ sh_pseudo_register_write (int reg_nr, char *buffer)
 
       /* Write the real regs for which this one is an alias.  */
       for (portion = 0; portion < 4; portion++)
-	regcache_write (current_regcache, base_regnum + portion,
-			buffer + REGISTER_RAW_SIZE (base_regnum) * portion);
+	regcache_raw_write (current_regcache, base_regnum + portion,
+			    (buffer
+			     + REGISTER_RAW_SIZE (base_regnum) * portion));
     }
 }
 
@@ -3629,7 +3634,7 @@ sh4_register_write (struct gdbarch *gdbarch, int reg_nr, char *buffer)
 {
   if (reg_nr >= 0 && reg_nr < gdbarch_tdep (current_gdbarch)->DR0_REGNUM)
     /* It is a regular register. */
-    regcache_write (current_regcache, reg_nr, buffer);
+    regcache_raw_write (current_regcache, reg_nr, buffer);
   else
     /* It is a pseudo register and we need to construct its value */
     sh_pseudo_register_write (reg_nr, buffer);
@@ -3654,9 +3659,9 @@ sh64_pseudo_register_write (int reg_nr, char *buffer)
 
       /* Write the real regs for which this one is an alias.  */
       for (portion = 0; portion < 2; portion++)
-	regcache_write (current_regcache, base_regnum + portion, 
-			(temp_buffer
-			 + REGISTER_RAW_SIZE (base_regnum) * portion));
+	regcache_raw_write (current_regcache, base_regnum + portion, 
+			    (temp_buffer
+			     + REGISTER_RAW_SIZE (base_regnum) * portion));
     }
 
   else if (reg_nr >= tdep->FPP0_REGNUM 
@@ -3666,8 +3671,9 @@ sh64_pseudo_register_write (int reg_nr, char *buffer)
 
       /* Write the real regs for which this one is an alias.  */
       for (portion = 0; portion < 2; portion++)
-	regcache_write (current_regcache, base_regnum + portion,
-			buffer + REGISTER_RAW_SIZE (base_regnum) * portion);
+	regcache_raw_write (current_regcache, base_regnum + portion,
+			    (buffer
+			     + REGISTER_RAW_SIZE (base_regnum) * portion));
     }
 
   else if (reg_nr >= tdep->FV0_REGNUM
@@ -3677,8 +3683,9 @@ sh64_pseudo_register_write (int reg_nr, char *buffer)
 
       /* Write the real regs for which this one is an alias.  */
       for (portion = 0; portion < 4; portion++)
-	regcache_write (current_regcache, base_regnum + portion,
-			buffer + REGISTER_RAW_SIZE (base_regnum) * portion);
+	regcache_raw_write (current_regcache, base_regnum + portion,
+			    (buffer
+			     + REGISTER_RAW_SIZE (base_regnum) * portion));
     }
 
   /* sh compact general pseudo registers. 1-to-1 with a shmedia
@@ -3695,10 +3702,10 @@ sh64_pseudo_register_write (int reg_nr, char *buffer)
       /* Let's read the value of the base register into a temporary
 	 buffer, so that overwriting the last four bytes with the new
 	 value of the pseudo will leave the upper 4 bytes unchanged. */
-      regcache_read (current_regcache, base_regnum, temp_buffer);
+      regcache_raw_read (current_regcache, base_regnum, temp_buffer);
       /* Write as an 8 byte quantity */
       memcpy (temp_buffer + offset, buffer, 4);
-      regcache_write (current_regcache, base_regnum, temp_buffer);
+      regcache_raw_write (current_regcache, base_regnum, temp_buffer);
     }
 
   /* sh floating point compact pseudo registers. 1-to-1 with a shmedia
@@ -3707,7 +3714,7 @@ sh64_pseudo_register_write (int reg_nr, char *buffer)
 	       && reg_nr <= tdep->FP_LAST_C_REGNUM)
     {
       base_regnum = sh64_compact_reg_base_num (reg_nr);
-      regcache_write (current_regcache, base_regnum, buffer);
+      regcache_raw_write (current_regcache, base_regnum, buffer);
     }
 
   else if (reg_nr >= tdep->DR0_C_REGNUM 
@@ -3720,9 +3727,9 @@ sh64_pseudo_register_write (int reg_nr, char *buffer)
 	  sh_sh64_register_convert_to_raw (REGISTER_VIRTUAL_TYPE (reg_nr), reg_nr,
 					   buffer, temp_buffer);
 
-	  regcache_write (current_regcache, base_regnum + portion,
-			  (temp_buffer
-			   + REGISTER_RAW_SIZE (base_regnum) * portion));
+	  regcache_raw_write (current_regcache, base_regnum + portion,
+			      (temp_buffer
+			       + REGISTER_RAW_SIZE (base_regnum) * portion));
 	}
     }
 
@@ -3733,8 +3740,9 @@ sh64_pseudo_register_write (int reg_nr, char *buffer)
      
       for (portion = 0; portion < 4; portion++)
 	{
-	  regcache_write (current_regcache, base_regnum + portion,
-			  buffer + REGISTER_RAW_SIZE (base_regnum) * portion);
+	  regcache_raw_write (current_regcache, base_regnum + portion,
+			      (buffer
+			       + REGISTER_RAW_SIZE (base_regnum) * portion));
 	}
     }
 
@@ -3776,25 +3784,25 @@ sh64_pseudo_register_write (int reg_nr, char *buffer)
       fpscr_value = fpscr_c_value & fpscr_mask;
       sr_value = (fpscr_value & sr_mask) >> 6;
       
-      regcache_read (current_regcache, fpscr_base_regnum, temp_buffer);
+      regcache_raw_read (current_regcache, fpscr_base_regnum, temp_buffer);
       old_fpscr_value = extract_unsigned_integer (temp_buffer, 4);
       old_fpscr_value &= 0xfffc0002;
       fpscr_value |= old_fpscr_value;
       store_unsigned_integer (temp_buffer, 4, fpscr_value);
-      regcache_write (current_regcache, fpscr_base_regnum, temp_buffer);
+      regcache_raw_write (current_regcache, fpscr_base_regnum, temp_buffer);
       
-      regcache_read (current_regcache, sr_base_regnum, temp_buffer);
+      regcache_raw_read (current_regcache, sr_base_regnum, temp_buffer);
       old_sr_value = extract_unsigned_integer (temp_buffer, 4);
       old_sr_value &= 0xffff8fff;
       sr_value |= old_sr_value;
       store_unsigned_integer (temp_buffer, 4, sr_value);
-      regcache_write (current_regcache, sr_base_regnum, temp_buffer);
+      regcache_raw_write (current_regcache, sr_base_regnum, temp_buffer);
     }
 
   else if (reg_nr == tdep->FPUL_C_REGNUM)
     {
       base_regnum = sh64_compact_reg_base_num (reg_nr);
-      regcache_write (current_regcache, base_regnum, buffer);
+      regcache_raw_write (current_regcache, base_regnum, buffer);
     }
 }
 
@@ -3803,7 +3811,7 @@ sh64_register_write (struct gdbarch *gdbarch, int reg_nr, char *buffer)
 {
   if (reg_nr >= 0 && reg_nr < gdbarch_tdep (current_gdbarch)->DR0_REGNUM)
     /* It is a regular register. */
-    regcache_write (current_regcache, reg_nr, buffer);
+    regcache_raw_write (current_regcache, reg_nr, buffer);
   else
     /* It is a pseudo register and we need to construct its value */
     sh64_pseudo_register_write (reg_nr, buffer);

@@ -35,10 +35,10 @@ struct regcache *regcache_xmalloc (struct gdbarch *gdbarch);
 /* Transfer a raw register [0..NUM_REGS) between core-gdb and the
    regcache. */
 
-void regcache_read (struct regcache *regcache, int rawnum, char *buf);
-void regcache_write (struct regcache *regcache, int rawnum, char *buf);
+void regcache_raw_read (struct regcache *regcache, int rawnum, char *buf);
+void regcache_raw_write (struct regcache *regcache, int rawnum, char *buf);
 int regcache_valid_p (struct regcache *regcache, int regnum);
-CORE_ADDR regcache_read_as_address (struct regcache *regcache, int rawnum);
+CORE_ADDR regcache_raw_read_as_address (struct regcache *regcache, int rawnum);
 
 /* Transfer a raw register [0..NUM_REGS) between the regcache and the
    target.  These functions are called by the target in response to a

@@ -312,8 +312,8 @@ regcache_cpy (struct regcache *dst, struct regcache *src)
   for (i = 0; i < src->descr->nr_raw_registers; i++)
     {
       /* Should we worry about the valid bit here?  */
-      regcache_read (src, i, buf);
-      regcache_write (dst, i, buf);
+      regcache_raw_read (src, i, buf);
+      regcache_raw_write (dst, i, buf);
     }
 }
 
@@ -362,13 +362,13 @@ regcache_valid_p (struct regcache *regcache, int regnum)
 }
 
 CORE_ADDR
-regcache_read_as_address (struct regcache *regcache, int regnum)
+regcache_raw_read_as_address (struct regcache *regcache, int regnum)
 {
   char *buf;
   gdb_assert (regcache != NULL);
   gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_raw_registers);
   buf = alloca (regcache->descr->sizeof_register[regnum]);
-  regcache_read (regcache, regnum, buf);
+  regcache_raw_read (regcache, regnum, buf);
   return extract_address (buf, regcache->descr->sizeof_register[regnum]);
 }
 
@@ -671,7 +671,7 @@ legacy_read_register_gen (int regnum, char *myaddr)
 }
 
 void
-regcache_read (struct regcache *regcache, int regnum, char *buf)
+regcache_raw_read (struct regcache *regcache, int regnum, char *buf)
 {
   gdb_assert (regcache != NULL && buf != NULL);
   gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_raw_registers);
@@ -761,7 +761,7 @@ legacy_write_register_gen (int regnum, char *myaddr)
 }
 
 void
-regcache_write (struct regcache *regcache, int regnum, char *buf)
+regcache_raw_write (struct regcache *regcache, int regnum, char *buf)
 {
   gdb_assert (regcache != NULL && buf != NULL);
   gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_raw_registers);

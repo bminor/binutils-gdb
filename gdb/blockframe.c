@@ -1215,7 +1215,7 @@ generic_read_register_dummy (CORE_ADDR pc, CORE_ADDR fp, int regno)
   struct regcache *dummy_regs = generic_find_dummy_frame (pc, fp);
 
   if (dummy_regs)
-    return regcache_read_as_address (dummy_regs, regno);
+    return regcache_raw_read_as_address (dummy_regs, regno);
   else
     return 0;
 }
@@ -1393,7 +1393,7 @@ generic_call_dummy_register_unwind (struct frame_info *frame, void **cache,
          gdbarch_register_read() method so that it, on the fly,
          constructs either a raw or pseudo register from the raw
          register cache.  */
-      regcache_read (registers, regnum, bufferp);
+      regcache_raw_read (registers, regnum, bufferp);
     }
 }
 
@@ -1543,8 +1543,9 @@ generic_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 	       gdbarch_register_read() method so that it, on the fly,
 	       constructs either a raw or pseudo register from the raw
 	       register cache.  */
-	    regcache_read (generic_find_dummy_frame (frame->pc, frame->frame),
-			   regnum, raw_buffer);
+	    regcache_raw_read (generic_find_dummy_frame (frame->pc,
+							 frame->frame),
+			       regnum, raw_buffer);
 	  return;
 	}
 
