@@ -1,6 +1,28 @@
-2002-05-17  Andrew Cagney  <ac131313@redhat.com>
+2002-05-23  Andrew Cagney  <ac131313@redhat.com>
 
-*** FIXME: the regcache_desc should contain max_register_size.
+	* regcache.c (register_buffer): Add regcache parameter.  Update
+	callers.
+	(struct regcache_descr): Add nr_raw_registers and
+	max_register_size.  Add legacy_p.  Change registers to
+	raw_registers, register_valid_p to raw_register_valid_p.  Update
+	all callers.
+	(legacy_regcache_descr): New function handle legacy case.
+	(regcache_descr): Use legacy function.  For non-legacy case,
+	restrict the register cache to just NUM_REGS.
+	(regcache_read, regcache_write): When non-legacy case, implement
+	regcache read and write directly.
+	(regcache_write): Use regcache_valid_p.
+
+	* regcache.h (deprecated_grub_regcache_for_registers): Rename
+	grub_around_regcache_for_registers
+	(deprecated_grub_regcache_for_register_valid): Rename
+	grub_around_regcache_for_register_valid.
+	* regcache.c (deprecated_grub_around_regcache_for_registers)
+	(deprecated_grub_regcache_for_register_valid): Rename.
+	* rs6000-tdep.c (rs6000_extract_return_value): Update.
+	* regcache.c (build_regcache): Update.
+
+2002-05-17  Andrew Cagney  <ac131313@redhat.com>
 
 	* regcache.c (regcache_move): New function.
 	(regcache_save): Rewrite, handle pre and post

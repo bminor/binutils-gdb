@@ -1150,7 +1150,7 @@ rs6000_extract_return_value (struct type *valtype, struct regcache *regs,
 {
   int offset = 0;
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-  char *regbuf = grub_around_regcache_for_registers (regs);
+  char *regbuf = deprecated_grub_regcache_for_registers (regs);
 
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT)
     {

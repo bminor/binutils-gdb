@@ -73,8 +73,8 @@ extern struct regcache *regcache_dup_no_passthrough (struct regcache *regcache);
 extern void regcache_cpy (struct regcache *dest, struct regcache *src);
 extern void regcache_cpy_no_passthrough (struct regcache *dest, struct regcache *src);
 
-extern char *grub_around_regcache_for_registers (struct regcache *);
-extern char *grub_around_regcache_for_register_valid (struct regcache *);
+extern char *deprecated_grub_regcache_for_registers (struct regcache *);
+extern char *deprecated_grub_regcache_for_register_valid (struct regcache *);
 
 extern int register_cached (int regnum);
 
