@@ -23,6 +23,7 @@ Do-first:
 
 Things-to-keep:
 
+est.exp
 mips-gdb.exp
 mt-a29k-udi
 mt-hpux
@@ -38,7 +39,9 @@ mt-unix
 mt-vxworks
 netware.exp
 nind-gdb.exp
+rom68k.exp
 sim-gdb.exp
+slite-gdb.exp
 udi-gdb.exp
 unix-gdb.exp
 unknown.exp
