@@ -3,6 +3,23 @@ Wed Jan 13 19:33:16 1999  David Taylor  <taylor@texas.cygnus.com>
 	* breakpoint.c (insert_breakpoints): insert cast to eliminate
 	warning.
 
+Wed Jan 13 14:59:02 1999  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* infrun.c (set/show scheduler-locking) New command.  Set a
+	  mode bit that will control how GDB attempts to control thread
+	  scheduling for step, continue, etc.  (resume): make use of
+	  the schedule-locking mode.
+	* target.h (struct target_ops): new field to_has_thread_control.
+	* sol-thread.c: initialize target_ops to_has_thread_control.
+	* procfs.c: ditto.
+	* target.c: ditto.
+	* m3-nat.c: ditto.
+	* remote.c: ditto.
+	* hpux-thread.c: ditto.
+	* thread.c: cull duplicate prototypes.  Move prototypes to top.
+	* serial.c: indentation cleanup.
+	* breakpoint.c: add casts to eliminate compiler warnings.
+	
 Tue Jan 12 17:00:00 1999  Edith Epstein  <eepstein@sophia.cygnus.com>
 
 	* inftarg.c (child_create_inferior): fixed HPUXHPPA specific
