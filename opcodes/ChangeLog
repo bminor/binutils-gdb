@@ -1,3 +1,15 @@
+2000-07-29  Marek Michalkiewicz  <marekm@linux.org.pl>
+
+	* avr-dis.c (avr_operand): Use PARAMS macro in declaration.
+	Change return type from void to int.  Check the combination
+	of operands, return 1 if valid.  Fix to avoid BUF overflow.
+	Report undefined combinations of operands in COMMENT.
+	Report internal errors to stderr.  Output the adiw/sbiw
+	constant operand in both decimal and hex.
+	(print_insn_avr): Disassemble ldd/std with displacement of 0
+	as ld/st.  Check avr_operand () return value, handle invalid
+	combinations of operands like unknown opcodes.
+
 2000-08-04  Ben Elliston  <bje@redhat.com>
 
 	* cgen-dis.in, cgen-asm.in, cgen-ibld.in: New files.
