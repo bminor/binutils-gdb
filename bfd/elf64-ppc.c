@@ -1794,13 +1794,39 @@ ppc64_elf_copy_indirect_symbol (dir, ind)
   edir = (struct ppc_link_hash_entry *) dir;
   eind = (struct ppc_link_hash_entry *) ind;
 
-  if (edir->dyn_relocs == NULL)
+  if (eind->dyn_relocs != NULL)
     {
+      if (edir->dyn_relocs != NULL)
+	{
+	  struct ppc_dyn_relocs **pp;
+	  struct ppc_dyn_relocs *p;
+
+	  if (dir != ind->weakdef)
+	    abort ();
+
+	  /* Add reloc counts against the weak sym to the strong sym
+	     list.  Merge any entries against the same section.  */
+	  for (pp = &eind->dyn_relocs; (p = *pp) != NULL; )
+	    {
+	      struct ppc_dyn_relocs *q;
+
+	      for (q = edir->dyn_relocs; q != NULL; q = q->next)
+		if (q->sec == p->sec)
+		  {
+		    q->pc_count += p->pc_count;
+		    q->count += p->count;
+		    *pp = p->next;
+		    break;
+		  }
+	      if (q == NULL)
+		pp = &p->next;
+	    }
+	  *pp = edir->dyn_relocs;
+	}
+
       edir->dyn_relocs = eind->dyn_relocs;
       eind->dyn_relocs = NULL;
     }
-  else if (eind->dyn_relocs != NULL)
-    abort ();
 
   _bfd_elf_link_hash_copy_indirect (dir, ind);
 }
@@ -2366,6 +2392,8 @@ ppc64_elf_adjust_dynamic_symbol (info, h)
 	}
       return true;
     }
+  else
+    h->plt.offset = (bfd_vma) -1;
 
   /* If this is a weak symbol, and there is a real definition, the
      processor independent code will have arranged for us to see the

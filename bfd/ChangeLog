@@ -1,3 +1,21 @@
+2001-10-15  Alan Modra  <amodra@bigpond.net.au>
+	    H.J. Lu  <hjl@gnu.org>
+
+	* elf32-hppa.c (elf32_hppa_copy_indirect_symbol): Merge dyn_reloc
+	counts for aliases instead of aborting.
+	* elf32-i386.c (elf_i386_copy_indirect_symbol): Likewise.
+	* elf64-ppc.c (ppc64_elf_copy_indirect_symbol): Likewise.
+
+	* elf32-hppa.c (elf32_hppa_adjust_dynamic_symbol): Set plt.offset
+	to -1 for non-function symbols.
+	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Likewise.
+	* elf32-s390.c (elf_s390_adjust_dynamic_symbol): Likewise.
+	* elf64-ppc.c (ppc64_elf_adjust_dynamic_symbol): Likewise.
+	* elf64-s390.c (elf_s390_adjust_dynamic_symbol): Likewise.
+	* elf64-x86-64.c (elf64_x86_64_adjust_dynamic_symbol): Likewise.
+	* elf32-i386.c (elf_i386_adjust_dynamic_symbol): Refer to
+	plt.offset instead of plt.refcount when setting to -1.
+
 2001-10-12  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* elf32-arm.h (elf32_arm_relocate_section): Treat R_ARM_THM_PC22
@@ -84,7 +102,7 @@
 
 2001-10-08  Aldy Hernandez  <aldyh@redhat.com>
 
-        * bfd/config.bfd (targ_cpu): Add arm9e-*-elf.
+	* bfd/config.bfd (targ_cpu): Add arm9e-*-elf.
 
 2001-10-06  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
@@ -129,7 +147,7 @@
 	* elf-bfd.h (struct elf_link_hash_entry): Reorganise for better
 	packing.
 
-	* elf32-mips.c (mips_elf_record_global_got_symbol): Set got.offset 
+	* elf32-mips.c (mips_elf_record_global_got_symbol): Set got.offset
 	to 1 rather than 0 to avoid confusing copy_indirect_symbol.
 	(mips_elf_sort_hash_table_f): Compare got.offset against 1.
 
@@ -170,7 +188,7 @@
 	* elfxx-ia64.c (elfNN_ia64_hash_copy_indirect): Likewise.
 	(elfNN_ia64_aix_add_symbol_hook): Use elf_link_hash_lookup rather
 	than bfd_link_hash_lookup.
-	* elf32-i386 (elf_i386_adjust_dynamic_symbol): Don't do copy
+	* elf32-i386.c (elf_i386_adjust_dynamic_symbol): Don't do copy
 	reloc processing for weakdefs.
 	* elf32-hppa.c (elf32_hppa_adjust_dynamic_symbol): Likewise.
 	* elf64-ppc.c (ppc64_elf_adjust_dynamic_symbol): Likewise.
@@ -251,7 +269,7 @@
 	* libcoff.h: Likewise.
 
 2001-09-30  kaz Kojima  <kkojima@rr.iij4u.or.jp>
-            Hans-Peter Nilsson  <hp@bitrange.com>
+	    Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* elf32-sh.c (sh_elf_howto_table, R_SH_REL32): Make
 	partial_inplace, matching assembler output.  Set src_mask to

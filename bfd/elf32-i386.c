@@ -637,13 +637,39 @@ elf_i386_copy_indirect_symbol (dir, ind)
   edir = (struct elf_i386_link_hash_entry *) dir;
   eind = (struct elf_i386_link_hash_entry *) ind;
 
-  if (edir->dyn_relocs == NULL)
+  if (eind->dyn_relocs != NULL)
     {
+      if (edir->dyn_relocs != NULL)
+	{
+	  struct elf_i386_dyn_relocs **pp;
+	  struct elf_i386_dyn_relocs *p;
+
+	  if (dir != ind->weakdef)
+	    abort ();
+
+	  /* Add reloc counts against the weak sym to the strong sym
+	     list.  Merge any entries against the same section.  */
+	  for (pp = &eind->dyn_relocs; (p = *pp) != NULL; )
+	    {
+	      struct elf_i386_dyn_relocs *q;
+
+	      for (q = edir->dyn_relocs; q != NULL; q = q->next)
+		if (q->sec == p->sec)
+		  {
+		    q->pc_count += p->pc_count;
+		    q->count += p->count;
+		    *pp = p->next;
+		    break;
+		  }
+	      if (q == NULL)
+		pp = &p->next;
+	    }
+	  *pp = edir->dyn_relocs;
+	}
+
       edir->dyn_relocs = eind->dyn_relocs;
       eind->dyn_relocs = NULL;
     }
-  else if (eind->dyn_relocs != NULL)
-    abort ();
 
   _bfd_elf_link_hash_copy_indirect (dir, ind);
 }
@@ -1086,7 +1112,7 @@ elf_i386_adjust_dynamic_symbol (info, h)
 	     object, or if all references were garbage collected.  In
 	     such a case, we don't actually need to build a procedure
 	     linkage table, and we can just do a PC32 reloc instead.  */
-	  h->plt.refcount = -1;
+	  h->plt.offset = (bfd_vma) -1;
 	  h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
 	}
 
@@ -1098,7 +1124,7 @@ elf_i386_adjust_dynamic_symbol (info, h)
        check_relocs.  We can't decide accurately between function and
        non-function syms in check-relocs;  Objects loaded later in
        the link may change h->type.  So fix it now.  */
-    h->plt.refcount = -1;
+    h->plt.offset = (bfd_vma) -1;
 
   /* If this is a weak symbol, and there is a real definition, the
      processor independent code will have arranged for us to see the

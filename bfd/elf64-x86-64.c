@@ -854,6 +854,8 @@ elf64_x86_64_adjust_dynamic_symbol (info, h)
 
       return true;
     }
+  else
+    h->plt.offset = (bfd_vma) -1;
 
   /* If this is a weak symbol, and there is a real definition, the
      processor independent code will have arranged for us to see the
