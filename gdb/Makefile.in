@@ -281,7 +281,7 @@ SFILES = blockframe.c breakpoint.c buildsym.c c-exp.y c-lang.c c-typeprint.c \
 	m2-valprint.c main.c maint.c mem-break.c minsyms.c mipsread.c \
 	objfiles.c parse.c printcmd.c remote.c source.c stabsread.c stack.c \
 	symfile.c symmisc.c symtab.c target.c typeprint.c utils.c valarith.c \
-	valops.c valprint.c values.c
+	valops.c valprint.c values.c serial.c ser-hardwire.c
 
 # Files that are not source code, but need to go into gdb-$(VERSION).tar.Z.
 NONSRC = Makefile.in depend alldeps.mak createtags munch configure.in \
@@ -354,7 +354,8 @@ OBS = version.o main.o blockframe.o breakpoint.o findvar.o stack.o source.o \
     dbxread.o coffread.o elfread.o dwarfread.o mipsread.o \
     stabsread.o core.o c-lang.o ch-lang.o m2-lang.o complaints.o \
     typeprint.o c-typeprint.o ch-typeprint.o m2-typeprint.o \
-    c-valprint.o cp-valprint.o ch-valprint.o m2-valprint.o
+    c-valprint.o cp-valprint.o ch-valprint.o m2-valprint.o \
+    serial.o ser-hardwire.o
 
 RAPP_OBS = rgdb.o rudp.o rserial.o serial.o udp.o $(XDEPFILES)
 
@@ -658,23 +659,23 @@ make-proto-gdb-1: ${TARFILES} ${TARDIRS} gdb.info
 	chmod og=u `find . -print`
 
 clean:
+	@$(MAKE) $(FLAGS_TO_PASS) DO=clean "DODIRS=$(SUBDIRS)" subdir_do 
 	rm -f *.o ${ADD_FILES} *~
 	rm -f init.c version.c
 	rm -f gdb core make.log
 	rm -f gdb[0-9]
-	@$(MAKE) $(FLAGS_TO_PASS) DO=clean "DODIRS=$(SUBDIRS)" subdir_do 
 
 distclean: clean c-exp.tab.c m2-exp.tab.c ch-exp.tab.c TAGS
+	@$(MAKE) $(FLAGS_TO_PASS) DO=distclean "DODIRS=$(SUBDIRS)" subdir_do 
 	rm -f tm.h xm.h config.status
 	rm -f y.output yacc.acts yacc.tmp
 	rm -f ${TESTS} Makefile depend
-	@$(MAKE) $(FLAGS_TO_PASS) DO=distclean "DODIRS=$(SUBDIRS)" subdir_do 
 
 realclean: clean
+	@$(MAKE) $(FLAGS_TO_PASS) DO=realclean "DODIRS=$(SUBDIRS)" subdir_do
 	rm -f c-exp.tab.c m2-exp.tab.c ch-exp.tab.c TAGS
 	rm -f tm.h xm.h config.status
 	rm -f Makefile depend
-	@$(MAKE) $(FLAGS_TO_PASS) DO=realclean "DODIRS=$(SUBDIRS)" subdir_do
 
 STAGESTUFF=${OBS} ${TSOBS} ${NTSOBS} ${ADD_FILES} init.c init.o version.c gdb
 

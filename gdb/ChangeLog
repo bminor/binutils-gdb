@@ -1,3 +1,23 @@
+Mon Apr  5 22:29:43 1993  Stu Grossman  (grossman@cygnus.com)
+
+	* Makefile.in (SFILES OBS):  Add serial.[co] & ser-hardwire.[co].
+	These implement a new serial line interface for talking to remote
+	targets.
+	* configure.in:  Link ser-hardwire.c to ser-unix.c for all hosts,
+	EXCEPT go32, which gets ser-go32.c.
+	* remote.c:  Use new serial interface.  More remote-xxx's to be
+	converted later.
+	* ser-bsd.c, ser-termios.c:  Removed.
+	* serial.c:  New.  Implements common operations for all serial
+	types.
+	* ser-unix.c:  New.  Unix specific serial operations for various
+	flavors of Unix (Posix, SysV, BSD).
+	* serial.h:  Generic serial interface defs.
+	* config/i386/go32.mh, config/i386/i386bsd.h,
+	config/m68k/apollo68b.mh, config/sparc/sun4os4.mh:  Remove
+	ser-bsd.o from XDEPFILES.  All the magic is now handled in
+	configure.in.
+
 Mon Apr  5 20:48:54 1993  Stu Grossman  (grossman@cygnus.com)
 
 	* config/h8500/tm-h8500.h:  Clean up brain damage found by GCC.

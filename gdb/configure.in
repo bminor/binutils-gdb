@@ -1,6 +1,7 @@
 configdirs="doc testsuite"
 srcname="GDB"
 srctrigger=main.c
+gdb_serial_driver=ser-unix.c
 
 # per-host:
 
@@ -36,7 +37,9 @@ i[34]86-ncr-*)		gdb_host=ncr3000 ;;
 i[34]86-sequent-*)	gdb_host=symmetry ;;
 
 i[34]86-*-bsd*)		gdb_host=i386bsd ;;
-i[34]86-*-go32)		gdb_host=go32 ;;
+i[34]86-*-go32)		gdb_host=go32
+			gdb_serial_driver=ser-go32.c
+			;;
 i[34]86-*-linux)	gdb_host=linux ;;
 i[34]86-*-mach)		gdb_host=i386mach ;;
 i[34]86-*-sco3.2v4*)	gdb_host=i386sco4 ;;
@@ -267,6 +270,7 @@ target_makefile_frag=config/${gdb_target_cpu}/${gdb_target}.mt
 files=
 links=
 rm -f xm.h
+rm -f ser-hardwire.c
 if [ "${hostfile}" != "" ]; then
 	if [ -f ${srcdir}/config/${hostfile} ]; then
 		files="${files} config/${hostfile}"
@@ -274,6 +278,9 @@ if [ "${hostfile}" != "" ]; then
 		files="${files} config/${gdb_host_cpu}/${hostfile}"
 	fi
 	links="${links} xm.h"
+
+	files="${files} ${gdb_serial_driver}"
+	links="${links} ser-hardwire.c"
 fi
 rm -f tm.h
 if [ "${targetfile}" != "" ]; then

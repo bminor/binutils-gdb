@@ -17,75 +17,70 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#ifdef __GO32__
+/* Terminal state pointer.  This is specific to each type of interface. */
 
-/* Then you use the asynctsr */
+typedef PTR ttystate;
 
-struct ttystate {
-	/* No members */
-};
-
-#else
-#ifdef HAVE_TERMIO
-
-#include <termios.h>
-#include <unistd.h>
-
-struct ttystate
+struct _serial_t
 {
-  int flags;			/* Flags from fcntl F_GETFL */
-  struct termios termios;	/* old tty driver settings */
+  int fd;
+  struct serial_ops *ops;
+  ttystate ttystate;
+  int bufcnt;
+  unsigned char *bufp;
+  unsigned char buf[BUFSIZ];
 };
 
-#else /* not HAVE_TERMIO */
+typedef struct _serial_t *serial_t;
 
-#include <sgtty.h>
-
-struct ttystate {
-  int flags;			/* Flags from fcntl F_GETFL */
-  struct sgttyb sgttyb;		/* old tty driver settings */
+struct serial_ops {
+  char *name;
+  struct serial_ops *next;
+  int (*open) PARAMS ((serial_t, const char *name));
+  void (*close) PARAMS ((serial_t));
+  int (*readchar) PARAMS ((serial_t, int timeout));
+  int (*write) PARAMS ((serial_t, const char *str, int len));
+  void (*go_raw) PARAMS ((serial_t));
+  void (*restore) PARAMS ((serial_t));
+  int (*setbaudrate) PARAMS ((serial_t, int rate));
 };
 
-#endif /* not HAVE_TERMIO */
-#endif
-/* Return a sensible default name for a serial device, something which
-   can be used as an argument to serial_open.  */
-   
-const char *serial_default_name PARAMS ((void));
+/* Add a new serial interface to the interface list */
 
-/* Try to open the serial device "name", return 1 if ok, 0 if not.  */
+void serial_add_interface PARAMS ((struct serial_ops *optable));
 
-int serial_open PARAMS ((const char *name));
+/* Try to open the serial device "name", returns a serial_t if ok, NULL if not.
+ */
+
+serial_t serial_open PARAMS ((const char *name));
+
+/* Internal open routine for specific I/O interface */
+
+#define SERIAL_OPEN(SERIAL_T, NAME) (SERIAL_T)->ops->open((SERIAL_T), NAME)
 
 /* Turn the port into raw mode.  */
 
-void serial_raw PARAMS ((int fd, struct ttystate *oldstate));
-
-/* Turn the port into normal mode.  */
-
-void serial_normal PARAMS ((void));
+#define SERIAL_RAW(SERIAL_T) (SERIAL_T)->ops->go_raw((SERIAL_T))
 
 /* Read one char from the serial device with <TO>-second timeout.
    Returns char if ok, else EOF, -2 for timeout, -3 for anything else  */
 
-int serial_readchar PARAMS ((int to));
+#define SERIAL_READCHAR(SERIAL_T, TIMEOUT) ((SERIAL_T)->ops->readchar((SERIAL_T), TIMEOUT))
 
-/* Set the baudrate to the decimal value supplied, and return 1, or fail and
-   return 0.  */
+/* Set the baudrate to the decimal value supplied.  Return 1 on failure,
+   0 otherwise.  */
 
-int serial_setbaudrate PARAMS ((int rate));
-
-/* Return the next rate in the sequence, or return 0 for failure.  */
+#define SERIAL_SETBAUDRATE(SERIAL_T, RATE) ((SERIAL_T)->ops->setbaudrate((SERIAL_T), RATE))
 
 /* Write some chars to the device, returns 0 for failure.  See errno for
    details. */
 
-int serial_write PARAMS ((const char *str, int len));
+#define SERIAL_WRITE(SERIAL_T, STRING, LEN) ((SERIAL_T)->ops->write((SERIAL_T), STRING, LEN))
 
 /* Close the serial port */
 
-void serial_close PARAMS ((void));
+#define SERIAL_CLOSE(SERIAL_T) (SERIAL_T)->ops->close((SERIAL_T))
 
 /* Restore the serial port to the state saved in oldstate */
 
-void serial_restore PARAMS ((int desc, struct ttystate *oldstate));
+#define SERIAL_RESTORE(SERIAL_T) (SERIAL_T)->ops->restore((SERIAL_T))
