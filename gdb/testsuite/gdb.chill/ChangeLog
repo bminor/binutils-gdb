@@ -1,3 +1,7 @@
+Tue Apr  9 01:18:04 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
+
+	* gch981.{ch,exp}, gch1041.{ch,exp}: New test cases.
+
 Wed Mar  6 00:29:35 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
 
 	* powerset.exp: Add test.
