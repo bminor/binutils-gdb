@@ -2748,7 +2748,7 @@ static const bfd_coff_backend_data bfd_coff_small_swap_table =
   coff_swap_lineno_out, coff_swap_reloc_out,
   coff_swap_filehdr_out, coff_swap_aouthdr_out,
   coff_swap_scnhdr_out,
-  FILHSZ, AOUTSZ, SCNHSZ, SYMESZ, AUXESZ, RELSZ, LINESZ,
+  FILHSZ, AOUTSZ, SCNHSZ, SYMESZ, AUXESZ, RELSZ, LINESZ, FILNMLEN,
 #ifdef COFF_LONG_FILENAMES
   true,
 #else

@@ -811,14 +811,18 @@ coff_fix_symbol_name (abfd, symbol, native, string_size_p,
   if (native->u.syment.n_sclass == C_FILE
       && native->u.syment.n_numaux > 0)
     {
+      unsigned int filnmlen;
+
       strncpy (native->u.syment._n._n_name, ".file", SYMNMLEN);
       auxent = &(native + 1)->u.auxent;
 
+      filnmlen = bfd_coff_filnmlen (abfd);
+
       if (bfd_coff_long_filenames (abfd))
 	{
-	  if (name_length <= FILNMLEN)
+	  if (name_length <= filnmlen)
 	    {
-	      strncpy (auxent->x_file.x_fname, name, FILNMLEN);
+	      strncpy (auxent->x_file.x_fname, name, filnmlen);
 	    }
 	  else
 	    {
@@ -829,11 +833,9 @@ coff_fix_symbol_name (abfd, symbol, native, string_size_p,
 	}
       else
 	{
-	  strncpy (auxent->x_file.x_fname, name, FILNMLEN);
-	  if (name_length > FILNMLEN)
-	    {
-	      name[FILNMLEN] = '\0';
-	    }
+	  strncpy (auxent->x_file.x_fname, name, filnmlen);
+	  if (name_length > filnmlen)
+	    name[filnmlen] = '\0';
 	}
     }
   else
@@ -1247,7 +1249,7 @@ coff_write_symbols (abfd)
 	    }
 	  else if (c_symbol->native->u.syment.n_sclass == C_FILE
 		   && c_symbol->native->u.syment.n_numaux > 0)
-	    maxlen = FILNMLEN;
+	    maxlen = bfd_coff_filnmlen (abfd);
 	  else
 	    maxlen = SYMNMLEN;
 
@@ -1765,7 +1767,7 @@ coff_get_normalized_symtab (abfd)
 		    ((long)
 		     copy_name (abfd,
 				(internal_ptr + 1)->u.auxent.x_file.x_fname,
-				FILNMLEN));
+				bfd_coff_filnmlen (abfd)));
 		}
 	    }
 	}

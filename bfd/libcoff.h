@@ -709,6 +709,7 @@ typedef struct
  unsigned int _bfd_auxesz;
  unsigned int _bfd_relsz;
  unsigned int _bfd_linesz;
+ unsigned int _bfd_filnmlen;
  boolean _bfd_coff_long_filenames;
  boolean _bfd_coff_long_section_names;
  unsigned int _bfd_coff_default_section_alignment_power;
@@ -870,6 +871,7 @@ typedef struct
 #define bfd_coff_auxesz(abfd) (coff_backend_info (abfd)->_bfd_auxesz)
 #define bfd_coff_relsz(abfd)  (coff_backend_info (abfd)->_bfd_relsz)
 #define bfd_coff_linesz(abfd) (coff_backend_info (abfd)->_bfd_linesz)
+#define bfd_coff_filnmlen(abfd) (coff_backend_info (abfd)->_bfd_filnmlen)
 #define bfd_coff_long_filenames(abfd) (coff_backend_info (abfd)->_bfd_coff_long_filenames)
 #define bfd_coff_long_section_names(abfd) \
         (coff_backend_info (abfd)->_bfd_coff_long_section_names)

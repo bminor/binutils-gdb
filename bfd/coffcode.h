@@ -1014,6 +1014,7 @@ dependent COFF routines:
 . unsigned int _bfd_auxesz;
 . unsigned int _bfd_relsz;
 . unsigned int _bfd_linesz;
+. unsigned int _bfd_filnmlen;
 . boolean _bfd_coff_long_filenames;
 . boolean _bfd_coff_long_section_names;
 . unsigned int _bfd_coff_default_section_alignment_power;
@@ -1175,6 +1176,7 @@ dependent COFF routines:
 .#define bfd_coff_auxesz(abfd) (coff_backend_info (abfd)->_bfd_auxesz)
 .#define bfd_coff_relsz(abfd)  (coff_backend_info (abfd)->_bfd_relsz)
 .#define bfd_coff_linesz(abfd) (coff_backend_info (abfd)->_bfd_linesz)
+.#define bfd_coff_filnmlen(abfd) (coff_backend_info (abfd)->_bfd_filnmlen)
 .#define bfd_coff_long_filenames(abfd) (coff_backend_info (abfd)->_bfd_coff_long_filenames)
 .#define bfd_coff_long_section_names(abfd) \
 .        (coff_backend_info (abfd)->_bfd_coff_long_section_names)
@@ -4713,16 +4715,14 @@ coff_final_link_postscript (abfd, pfinfo)
 #define coff_SWAP_scnhdr_in coff_swap_scnhdr_in
 #endif
 
-
-
-static CONST bfd_coff_backend_data bfd_coff_std_swap_table =
+static const bfd_coff_backend_data bfd_coff_std_swap_table =
 {
   coff_SWAP_aux_in, coff_SWAP_sym_in, coff_SWAP_lineno_in,
   coff_SWAP_aux_out, coff_SWAP_sym_out,
   coff_SWAP_lineno_out, coff_SWAP_reloc_out,
   coff_SWAP_filehdr_out, coff_SWAP_aouthdr_out,
   coff_SWAP_scnhdr_out,
-  FILHSZ, AOUTSZ, SCNHSZ, SYMESZ, AUXESZ, RELSZ, LINESZ,
+  FILHSZ, AOUTSZ, SCNHSZ, SYMESZ, AUXESZ, RELSZ, LINESZ, FILNMLEN,
 #ifdef COFF_LONG_FILENAMES
   true,
 #else
