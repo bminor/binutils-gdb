@@ -1,3 +1,8 @@
+2001-01-29  Michael Chastain  <chastain@redhat.com>
+
+	* symtab.c (block_lookup_symbol): Use 'namespace' parameter in
+	symbol comparisons in binary search.
+
 2000-01-27  Christopher Faylor  <cgf@cygnus.com>
 
 	* win32-nat.c (child_xfer_memory): Add missing argument required by

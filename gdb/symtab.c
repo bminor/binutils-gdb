@@ -1259,8 +1259,11 @@ lookup_block_symbol (register const struct block *block, const char *name,
       while (bot < top)
 	{
 	  sym = BLOCK_SYM (block, bot);
-	  if (SYMBOL_MATCHES_NAME (sym, name))
-	    return sym;
+	  if (SYMBOL_NAMESPACE (sym) == namespace &&
+	      SYMBOL_MATCHES_NAME (sym, name))
+	    {
+	      return sym;
+	    }
 	  bot++;
 	}
     }
