@@ -106,14 +106,17 @@ extern int md_cris_force_relocation PARAMS ((struct fix *));
 
 /* This is really a workaround for a bug in write.c that resolves relocs
    for weak symbols - it should be postponed to the link stage or later.
-   Also don't adjust fixups for global symbols for ELF.  */
-#define tc_fix_adjustable(X)				\
- (((X)->fx_addsy == NULL 				\
-   || (! S_IS_WEAK ((X)->fx_addsy)			\
-       && ! (OUTPUT_FLAVOR == bfd_target_elf_flavour	\
-	     && S_IS_EXTERNAL ((X)->fx_addsy))))	\
-  && (X)->fx_r_type != BFD_RELOC_VTABLE_INHERIT		\
-  && (X)->fx_r_type != BFD_RELOC_VTABLE_ENTRY)
+   Also don't adjust fixups for global symbols for ELF, and no relocs
+   where the original symbol name must be kept.  */
+#define tc_fix_adjustable(X)					\
+ (((X)->fx_addsy == NULL					\
+   || (! S_IS_WEAK ((X)->fx_addsy)				\
+       && ! (OUTPUT_FLAVOR == bfd_target_elf_flavour		\
+	     && S_IS_EXTERNAL ((X)->fx_addsy))))		\
+  && (X)->fx_r_type != BFD_RELOC_VTABLE_INHERIT			\
+  && (X)->fx_r_type != BFD_RELOC_VTABLE_ENTRY			\
+  && (! IS_CRIS_PIC_RELOC ((X)->fx_r_type)			\
+      || (X)->fx_r_type == BFD_RELOC_CRIS_32_GOTREL))
 
 /* When we have fixups against constant expressions, we get a GAS-specific
    section symbol at no extra charge for obscure reasons in

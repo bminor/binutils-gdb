@@ -1,3 +1,10 @@
+2001-03-29  Hans-Peter Nilsson  <hp@axis.com>
+
+	* config/tc-cris.h (tc_fix_adjustable): Allow only
+	BFD_RELOC_CRIS_32_GOTREL of the PIC relocs.
+	* config/tc-cris.c (cris_get_pic_suffix): Correct reloc used in
+	example to valid.
+
 2001-03-28  H.J. Lu  <hjl@gnu.org>
 
 	* read.c (equals): Set to local for COFF only if it hasn't been
