@@ -1745,7 +1745,7 @@ map_program_segments (abfd, off, first, phdr_size)
   unsigned int last_type;
   Elf_Internal_Ehdr *i_ehdrp;
 
-  BFD_ASSERT ((abfd->flags & EXEC_P) != 0);
+  BFD_ASSERT ((abfd->flags & (EXEC_P | DYNAMIC)) != 0);
   BFD_ASSERT (phdr_size / sizeof (Elf_Internal_Phdr)
 	      <= sizeof phdrs / sizeof (phdrs[0]));
 
@@ -1976,7 +1976,7 @@ assign_file_positions_except_relocs (abfd, dosyms)
   /* Start after the ELF header.  */
   off = i_ehdrp->e_ehsize;
 
-  if ((abfd->flags & EXEC_P) == 0)
+  if ((abfd->flags & (EXEC_P | DYNAMIC)) == 0)
     {
       Elf_Internal_Shdr **hdrpp;
       unsigned int i;
