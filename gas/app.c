@@ -1,5 +1,5 @@
 /* This is the Assembler Pre-Processor
-   Copyright (C) 1987, 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright (C) 1987, 1990, 1991, 1992, 1994 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -27,8 +27,10 @@
 #include <stdio.h>
 #include "as.h"			/* For BAD_CASE() only */
 
-#if (__STDC__ != 1) && !defined(const)
-#define const			/* Nothing */
+#if (__STDC__ != 1)
+#ifndef const
+#define const  /* empty */
+#endif
 #endif
 
 static char lex[256];
@@ -447,6 +449,10 @@ recycle:
 	  not_cpp_line = 1;
 	  goto recycle;
 	}
+#ifdef MRI
+      (*unget) (ch);		/* Put back */
+      return ' ';		/* Always return one space at start of line */
+#endif
 
       /* If we're in state 2, we've seen a non-white
 	 character followed by whitespace.  If the next
@@ -457,29 +463,6 @@ recycle:
 	  state = 0;
 	  return ch;
 	}
-
-#if defined (LABELS_WITHOUT_COLONS) || defined (MRI)
-      /* Like above, but handles case where labels are not
-	 required to have colons (and therefore must be identified
-	 by their *position* in the input stream.)  For a testcase
-	 see hppa/more.parse/labelbug.s.
-
-	 This also has the effect of sometimes leaving a whitespace
-	 before a newline.  Instead of trying to rework this horribly
-	 broken and hairy code I'm just going to zap the extra space here.  */
-      if (state == 2 && lex[ch] == LEX_IS_SYMBOL_COMPONENT)
-	{
-	  (*unget) (ch);
-	  return ' ';
-	}
-
-      /* Don't emit a space before a newline.  */
-      if (state == 2 && lex[ch] == LEX_IS_NEWLINE)
-	{
-	  state = 0;
-	  return ch;
-	}
-#endif
 
       switch (state)
 	{

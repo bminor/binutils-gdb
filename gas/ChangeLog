@@ -1,3 +1,15 @@
+Tue Jan  4 15:12:43 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* Makefile.in (INCLUDES): Add $(srcdir)/.. to places to search.
+	* config/obj-ecoff.c: Include files as "bfd/" instead of "../bfd/".
+	* app.c, flonum.h, hex-value.c (const): Change #if to be more
+	portable.
+
+Thu Dec 30 15:27:16 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* write.c (write_relocs): bfd_perform_relocation now takes an
+	additional argument, to return an error string (which we ignore).
+
 Wed Dec 29 14:37:26 1993  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* write.h (struct fix): Field tc_fix_data should be type PTR, not

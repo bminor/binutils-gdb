@@ -1,5 +1,5 @@
 /* ECOFF object file format.
-   Copyright (C) 1993 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
    This file was put together by Ian Lance Taylor <ian@cygnus.com>.
 
@@ -21,8 +21,8 @@
 
 #include "as.h"
 #include "coff/internal.h"
-#include "../bfd/libcoff.h"
-#include "../bfd/libecoff.h"
+#include "bfd/libcoff.h"
+#include "bfd/libecoff.h"
 
 /* Almost all of the ECOFF support is actually in ecoff.c in the main
    gas directory.  This file mostly just arranges to call that one at
@@ -156,9 +156,6 @@ ecoff_frob_file ()
 				  (file_ptr) 0, sizeof s) == false)
       as_fatal ("Can't write REGINFO section");
   }
-
-  bfd_set_symtab (stdoutput, bfd_get_outsymbols (stdoutput),
-		  (unsigned int) (hdr->isymMax + hdr->iextMax));
 }
 
 /* This is called by the ECOFF code to set the external information

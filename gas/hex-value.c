@@ -1,5 +1,5 @@
 /* hex_value.c - char=>radix-value -
-   Copyright (C) 1987, 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright (C) 1987, 1990, 1991, 1992, 1994 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -25,9 +25,12 @@
 #define __ (42)			/* blatently illegal digit value */
 /* exceeds any normal radix */
 
-#if (__STDC__ != 1) && !defined(const)
-#define const			/* empty */
+#if (__STDC__ != 1)
+#ifndef const
+#define const  /* empty */
 #endif
+#endif
+
 const char
   hex_value[256] =
 {				/* for fast ASCII -> binary */

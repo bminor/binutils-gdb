@@ -124,12 +124,14 @@ FLAGS_TO_PASS = \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)"
 
+RUNTEST=runtest
 CHECKFLAGS= \
 	"AS_FOR_TARGET=$(AS_FOR_TARGET)" \
 	"CC_FOR_TARGET=$(CC_FOR_TARGET)" \
 	"NM_FOR_TARGET=$(NM_FOR_TARGET)" \
 	"OBJDUMP_FOR_TARGET=$(OBJDUMP_FOR_TARGET)" \
-	"RUNTEST_FLAGS=$(RUNTEST_FLAGS)"
+	"RUNTEST_FLAGS=$(RUNTEST_FLAGS)" \
+	"RUNTEST=$(RUNTEST)"
 
 # Lists of files for various purposes.
 
@@ -251,7 +253,7 @@ LIBS = ../opcodes/libopcodes.a $(BFDLIB) $(LOCAL_LOADLIBES) \
 # Both . and srcdir are used, in that order,
 # so that tm.h and config.h will be found in the compilation
 # subdirectory rather than in the source directory.
-INCLUDES = -I. -I$(srcdir) -I../bfd -I$(srcdir)/config -I$(srcdir)/../include
+INCLUDES = -I. -I$(srcdir) -I../bfd -I$(srcdir)/config -I$(srcdir)/../include -I$(srcdir)/..
 SUBDIR_INCLUDES = -I.. -I$(srcdir) -I$(srcdir)/config
 
 # Always use -I$(srcdir)/config when compiling.
@@ -398,7 +400,7 @@ $(srcdir)/as.info: $(srcdir)/doc/as.texinfo
 clean-here:
 	-rm -f $(STAGESTUFF) core
 
-clean:
+clean: clean-here
 	@cd doc ; $(MAKE) $(FLAGS_TO_PASS) clean
 	@if [ -d testsuite ] ; then \
 	  cd testsuite ; $(MAKE) $(FLAGS_TO_PASS) clean ; \
