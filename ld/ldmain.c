@@ -318,6 +318,9 @@ main (argc, argv)
 
   ldwrite ();
 
+  if (config.map_file != NULL)
+    lang_map ();
+
   /* Even if we're producing relocateable output, some non-fatal errors should
      be reported in the exit status.  (What non-fatal errors, if any, do we
      want to ignore for relocateable output?)  */

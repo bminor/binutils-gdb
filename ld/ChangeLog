@@ -1,3 +1,38 @@
+Mon Apr 29 17:05:13 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldlang.c (longest_section_name): Remove.
+	(SECTION_NAME_MAP_LENGTH): Define.
+	(print_size, print_alignment, print_fill, print_section): Remove.
+	(print_flags): Remove.
+	(lang_map): Rewrite.
+	(print_output_section_statement): Rewrite.
+	(print_assignment): Rewrite.
+	(print_one_symbol): Rewrite.
+	(print_input_section): Rewrite.
+	(print_fill_statement): Rewrite.
+	(print_data_statement): Rewrite.
+	(print_address_statement): New static function.
+	(print_reloc_statement): Rewrite.
+	(print_padding_statement): Rewrite.
+	(print_wild_statement): Rewrite.
+	(print_statement_list): Clean up.
+	(print_statement): Clean up.  Some minor output changes.
+	(print_statements): Clean up.
+	(load_symbols): Put another - before -whole-archive.
+	* ldexp.c (exp_print_tree): Change etree_value and etree_rel to
+	print 0x and to omit leading zeroes.  For etree_rel, use %B to
+	print the BFD.  For etree_assign, remove the space after the
+	destination name.
+	* ldwrite.c: Include "libiberty.h".
+	(clone_section): Call xstrdup, not strdup.
+	(ldwrite): Don't print any map information.
+	(print_symbol_table, print_file_stuff, print_symbol): Remove.
+	* ldmain.c (main): Call lang_map when appropriate.
+	* ldmisc.c (vfinfo): Add support for %W.
+	(print_address): Remove.
+	* ldmisc.h (print_address): Don't declare.
+	* Makefile.in: Rebuild dependencies.
+
 Mon Apr 29 10:29:07 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* configure.host (m68*-*-linux*): Add -dynamic-linker to
