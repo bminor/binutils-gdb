@@ -1,3 +1,7 @@
+2003-02-19  Jie Zhang  <zhangjie@magima.com.cn>
+
+	* app.c (do_scrub_chars): Handle '||' in two states.
+
 2003-02-13  Alan Modra  <amodra@bigpond.net.au>
 
 	* write.c (TC_FORCE_RELOCATION_SUB_SAME): Revert last change.

@@ -1,6 +1,6 @@
 /* This is the Assembler Pre-Processor
    Copyright 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2002
+   1999, 2000, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -189,7 +189,7 @@ do_scrub_begin (m68k_mri)
       lex[';'] = LEX_IS_COMMENT_START;
       lex['*'] = LEX_IS_LINE_COMMENT_START;
       /* The MRI documentation says '!' is LEX_IS_COMMENT_START, but
-         then it can't be used in an expression.  */
+	 then it can't be used in an expression.  */
       lex['!'] = LEX_IS_LINE_COMMENT_START;
     }
 #endif
@@ -377,10 +377,12 @@ do_scrub_chars (get, tostart, tolen)
 	 -1: output string in out_string and go to the state in old_state
 	 -2: flush text until a '*' '/' is seen, then go to state old_state
 #ifdef TC_V850
-         12: After seeing a dash, looking for a second dash as a start of comment.
+	 12: After seeing a dash, looking for a second dash as a start
+	     of comment.
 #endif
 #ifdef DOUBLEBAR_PARALLEL
-	 13: After seeing a vertical bar, looking for a second vertical bar as a parallel expression seperator.
+	 13: After seeing a vertical bar, looking for a second
+	     vertical bar as a parallel expression separator.
 #endif
 	  */
 
@@ -450,8 +452,8 @@ do_scrub_chars (get, tostart, tolen)
   while (1)
     {
       /* The cases in this switch end with continue, in order to
-         branch back to the top of this while loop and generate the
-         next output character in the appropriate state.  */
+	 branch back to the top of this while loop and generate the
+	 next output character in the appropriate state.  */
       switch (state)
 	{
 	case -1:
@@ -534,9 +536,9 @@ do_scrub_chars (get, tostart, tolen)
 
 	case 5:
 	  /* We are going to copy everything up to a quote character,
-             with special handling for a backslash.  We try to
-             optimize the copying in the simple case without using the
-             GET and PUT macros.  */
+	     with special handling for a backslash.  We try to
+	     optimize the copying in the simple case without using the
+	     GET and PUT macros.  */
 	  {
 	    char *s;
 	    int len;
@@ -545,7 +547,7 @@ do_scrub_chars (get, tostart, tolen)
 	      {
 		ch = *s;
 		/* This condition must be changed if the type of any
-                   other character can be LEX_IS_STRINGQUOTE.  */
+		   other character can be LEX_IS_STRINGQUOTE.  */
 		if (ch == '\\'
 		    || ch == '"'
 		    || ch == '\''
@@ -663,6 +665,19 @@ do_scrub_chars (get, tostart, tolen)
 	  state = 0;
 	  PUT (ch);
 	  continue;
+
+#ifdef DOUBLEBAR_PARALLEL
+	case 13:
+	  ch = GET ();
+	  if (ch != '|')
+	    abort ();
+
+	  /* Reset back to state 1 and pretend that we are parsing a
+	     line from just after the first white space.  */
+	  state = 1;
+	  PUT ('|');
+	  continue;
+#endif
 	}
 
       /* OK, we are somewhere in states 0 through 4 or 9 through 11 */
@@ -703,9 +718,9 @@ do_scrub_chars (get, tostart, tolen)
 
 #ifdef TC_M68K
       /* We want to have pseudo-ops which control whether we are in
-         MRI mode or not.  Unfortunately, since m68k MRI mode affects
-         the scrubber, that means that we need a special purpose
-         recognizer here.  */
+	 MRI mode or not.  Unfortunately, since m68k MRI mode affects
+	 the scrubber, that means that we need a special purpose
+	 recognizer here.  */
       if (mri_state == NULL)
 	{
 	  if ((state == 0 || state == 1)
@@ -742,14 +757,14 @@ do_scrub_chars (get, tostart, tolen)
 	  else
 	    {
 	      /* We've read the entire pseudo-op.  mips_last_ch is
-                 either '0' or '1' indicating whether to enter or
-                 leave MRI mode.  */
+		 either '0' or '1' indicating whether to enter or
+		 leave MRI mode.  */
 	      do_scrub_begin (mri_last_ch == '1');
 	      mri_state = NULL;
 
 	      /* We continue handling the character as usual.  The
-                 main gas reader must also handle the .mri pseudo-op
-                 to control expression parsing and the like.  */
+		 main gas reader must also handle the .mri pseudo-op
+		 to control expression parsing and the like.  */
 	    }
 	}
 #endif
@@ -790,7 +805,7 @@ do_scrub_chars (get, tostart, tolen)
 	  if (lex[ch] == LEX_IS_COLON)
 	    {
 	      /* Only keep this white if there's no white *after* the
-                 colon.  */
+		 colon.  */
 	      ch2 = GET ();
 	      UNGET (ch2);
 	      if (!IS_WHITESPACE (ch2))
@@ -878,9 +893,9 @@ do_scrub_chars (get, tostart, tolen)
 	      else
 		{
 		  /* We know that ch is not ':', since we tested that
-                     case above.  Therefore this is not a label, so it
-                     must be the opcode, and we've just seen the
-                     whitespace after it.  */
+		     case above.  Therefore this is not a label, so it
+		     must be the opcode, and we've just seen the
+		     whitespace after it.  */
 		  state = 3;
 		}
 	      UNGET (ch);
@@ -912,7 +927,7 @@ do_scrub_chars (get, tostart, tolen)
 		    break;
 
 		  /* This UNGET will ensure that we count newlines
-                     correctly.  */
+		     correctly.  */
 		  UNGET (ch2);
 		}
 
@@ -956,7 +971,7 @@ do_scrub_chars (get, tostart, tolen)
 	      PUT (' ');
 
 	      /* PUT didn't jump out.  We could just break, but we
-                 know what will happen, so optimize a bit.  */
+		 know what will happen, so optimize a bit.  */
 	      ch = GET ();
 	      old_state = 3;
 	    }
@@ -1078,15 +1093,15 @@ do_scrub_chars (get, tostart, tolen)
 #ifdef DOUBLEBAR_PARALLEL
 	case LEX_IS_DOUBLEBAR_1ST:
 	  ch2 = GET ();
+	  UNGET (ch2);
 	  if (ch2 != '|')
 	    {
-	      UNGET (ch2);
 	      goto de_fault;
 	    }
-	  /* Reset back to state 1 and pretend that we are parsing a line from
-	     just after the first white space.  */
-	  state = 1;
-	  PUT ('|');
+	  /* Handle '||' in two states as invoking PUT twice might
+	     result in the first one jumping out of this loop.  We'd
+	     then lose track of the state and one '|' char.  */
+	  state = 13;
 	  PUT ('|');
 	  break;
 #endif
@@ -1219,7 +1234,7 @@ do_scrub_chars (get, tostart, tolen)
 	    state = 9;
 
 	  /* This is a common case.  Quickly copy CH and all the
-             following symbol component or normal characters.  */
+	     following symbol component or normal characters.  */
 	  if (to + 1 < toend
 	      && mri_state == NULL
 #if defined TC_ARM && defined OBJ_ELF
@@ -1243,7 +1258,7 @@ do_scrub_chars (get, tostart, tolen)
 	      if (s > from)
 		{
 		  /* Handle the last character normally, for
-                     simplicity.  */
+		     simplicity.  */
 		  --s;
 		}
 	      len = s - from;
