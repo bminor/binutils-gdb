@@ -1,9 +1,27 @@
 2002-06-21  Grace Sainsbury  <graces@redhat.com>
 
+	* config/m68k/tm-m68k.h (REGISTER_BYTE, REGISTER_RAW_SIZE)
+	(REGISTER_VIRTUAL_SIZE, MAX_REGISTER_RAW_SIZE)
+	(REGISTER_VIRTUAL_TYPE, REGISTER_NAMES, TARGET_LONG_DOUBLE_FORMAT)
+	(FUNCTION_START_OFFSET, SKIP_PROLOGUE, SAVED_PC_AFTER_CALL)
+	(INNER_THAN, STACK_ALIGN, REGISTER_SIZE): Remove macros.
+
+	* m68k-tdep.c: Include arch-utils.h
+	(m68k_register_raw_size): Add.
+	(m68k_register_virtual_size): Add.
+	(m68k_register_virtual_type): Add.
+	(m68k_register_name): Add.
+	(m68k_stack_align): Add.
+	(m68k_register_byte): Add.
+	(m68k_gdbarch_init): Add set_gdbarch calls for macros removed in
+	tm-m68k.h.
+
+2002-06-21  Grace Sainsbury  <graces@redhat.com>
+
 	* m68k-tdep.c (m68k_frame_init_saved_regs): Replace
         m68k_find_saved_regs.
         (m68k_pop_frame): Removed saved_regs structure, and replaced
-        references to it with frasme->saved_regs.
+        references to it with frame->saved_regs.
         (m68k_gdbarch_init): Added function calls to initialize the
         gdbarch structure.
 	(m68k_fix_call_dummy): Add. 

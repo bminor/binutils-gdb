@@ -25,6 +25,7 @@
 
 /* Generic 68000 stuff, to be included by other tm-*.h files.  */
 
+#if !GDB_MULTI_ARCH
 #define TARGET_LONG_DOUBLE_FORMAT &floatformat_m68881_ext
 
 #define TARGET_LONG_DOUBLE_BIT 96
@@ -40,7 +41,9 @@
 #if !defined(SKIP_PROLOGUE)
 #define SKIP_PROLOGUE(ip) (m68k_skip_prologue (ip))
 #endif
+#endif
 extern CORE_ADDR m68k_skip_prologue (CORE_ADDR ip);
+
 
 /* Immediately after a function call, return the saved pc.
    Can't always go through the frames for this because on some machines
@@ -49,18 +52,22 @@ extern CORE_ADDR m68k_skip_prologue (CORE_ADDR ip);
 
 struct frame_info;
 
+#if !GDB_MULTI_ARCH
 extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
 
 #define SAVED_PC_AFTER_CALL(frame) \
   m68k_saved_pc_after_call(frame)
+#endif
 
 /* Stack grows downward.  */
 
+#if !GDB_MULTI_ARCH
 #define INNER_THAN(lhs,rhs) ((lhs) < (rhs))
 
 /* Stack must be kept short aligned when doing function calls.  */
 
 #define STACK_ALIGN(ADDR) (((ADDR) + 1) & ~1)
+#endif
 
 /* Sequence of bytes for breakpoint instruction.
    This is a TRAP instruction.  The last 4 bits (0xf below) is the
@@ -96,7 +103,9 @@ extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
    used in push_word and a few other places; REGISTER_RAW_SIZE is the
    real way to know how big a register is.  */
 
+#if !GDB_MULTI_ARCH
 #define REGISTER_SIZE 4
+#endif
 
 #define REGISTER_BYTES_FP (16*4 + 8 + 8*12 + 3*4)
 #define REGISTER_BYTES_NOFP (16*4 + 8)
@@ -120,17 +129,19 @@ extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
 /* Index within `registers' of the first byte of the space for
    register N.  */
 
+#if !GDB_MULTI_ARCH
 #define REGISTER_BYTE(N)  \
  ((N) >= FPC_REGNUM ? (((N) - FPC_REGNUM) * 4) + 168	\
   : (N) >= FP0_REGNUM ? (((N) - FP0_REGNUM) * 12) + 72	\
   : (N) * 4)
+#endif
 
 /* Number of bytes of storage in the actual machine representation
    for register N.  On the 68000, all regs are 4 bytes
    except the floating point regs which are 12 bytes.  */
 /* Note that the unsigned cast here forces the result of the
    subtraction to very high positive values if N < FP0_REGNUM */
-
+#if !GDB_MULTI_ARCH
 #define REGISTER_RAW_SIZE(N) (((unsigned)(N) - FP0_REGNUM) < 8 ? 12 : 4)
 
 /* Number of bytes of storage in the program's representation
@@ -146,29 +157,31 @@ extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
 /* Largest value REGISTER_VIRTUAL_SIZE can have.  */
 
 #define MAX_REGISTER_VIRTUAL_SIZE 12
-
+#endif
 /* Return the GDB type object for the "standard" data type of data 
    in register N.  This should be int for D0-D7, long double for FP0-FP7,
    and void pointer for all others (A0-A7, PC, SR, FPCONTROL etc).
    Note, for registers which contain addresses return pointer to void, 
    not pointer to char, because we don't want to attempt to print 
    the string after printing the address.  */
-
+#if !GDB_MULTI_ARCH
 #define REGISTER_VIRTUAL_TYPE(N) \
   ((unsigned) (N) >= FPC_REGNUM ? lookup_pointer_type (builtin_type_void) : \
    (unsigned) (N) >= FP0_REGNUM ? builtin_type_long_double :                \
    (unsigned) (N) >=  A0_REGNUM ? lookup_pointer_type (builtin_type_void) : \
    builtin_type_int)
-
+#endif
 /* Initializer for an array of names of registers.
    Entries beyond the first NUM_REGS are ignored.  */
 
+#if !GDB_MULTI_ARCH
 #define REGISTER_NAMES  \
  {"d0", "d1", "d2", "d3", "d4", "d5", "d6", "d7", \
   "a0", "a1", "a2", "a3", "a4", "a5", "fp", "sp", \
   "ps", "pc",  \
   "fp0", "fp1", "fp2", "fp3", "fp4", "fp5", "fp6", "fp7", \
   "fpcontrol", "fpstatus", "fpiaddr", "fpcode", "fpflags" }
+#endif
 
 /* Register numbers of various important registers.
    Note that some of these values are "real" register numbers,
@@ -188,6 +201,7 @@ extern CORE_ADDR m68k_saved_pc_after_call (struct frame_info *);
 #define FPC_REGNUM 26		/* 68881 control register */
 #define FPS_REGNUM 27		/* 68881 status register */
 #define FPI_REGNUM 28		/* 68881 iaddr register */
+
 
 /* Store the address of the place in which to copy the structure the
    subroutine will return.  This is called from call_function. */
