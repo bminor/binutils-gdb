@@ -1,3 +1,15 @@
+2003-10-08  Dave Brolley  <brolley@redhat.com>
+
+	* config/tc-frv.c (fr550_check_insn_acc_range): New function.
+	(fr550_check_acc_range): New function.
+	(md_assemble): Call fr550_check_acc_range.
+
+2003-10-08  Dave Brolley  <brolley@redhat.com>
+
+	* config/tc-frv.c: Handle DEFAULT_CPU_FR550.
+	(md_parse_option): Handle OPTION_CPU==fr550.
+	(md_show_usage): Document fr550.
+
 2003-10-08  Philippe De Muyter  <phdm@macqel.be>
 
 	* as.c (use_gnu_debug_info_extensions) : New variable. 

@@ -148,8 +148,14 @@ static FRV_VLIW vliw;
 #define DEFAULT_FLAGS	EF_FRV_CPU_FR400
 
 #else
+#ifdef  DEFAULT_CPU_FR550
+#define DEFAULT_MACHINE	bfd_mach_fr550
+#define DEFAULT_FLAGS	EF_FRV_CPU_FR550
+
+#else
 #define DEFAULT_MACHINE	bfd_mach_fr500
 #define DEFAULT_FLAGS	EF_FRV_CPU_FR500
+#endif
 #endif
 #endif
 #endif
@@ -340,6 +346,12 @@ md_parse_option (c, arg)
 	    frv_mach = bfd_mach_fr500;
 	  }
 
+	else if (strcmp (p, "fr550") == 0)
+	  {
+	    cpu_flags = EF_FRV_CPU_FR550;
+	    frv_mach = bfd_mach_fr550;
+	  }
+
 	else if (strcmp (p, "fr400") == 0)
 	  {
 	    cpu_flags = EF_FRV_CPU_FR400;
@@ -427,7 +439,7 @@ md_show_usage (stream)
   fprintf (stream, _("-mpic        Note small position independent code\n"));
   fprintf (stream, _("-mPIC        Note large position independent code\n"));
   fprintf (stream, _("-mlibrary-pic Compile library for large position indepedent code\n"));
-  fprintf (stream, _("-mcpu={fr500|fr400|fr300|frv|simple|tomcat}\n"));
+  fprintf (stream, _("-mcpu={fr500|fr550|fr400|fr300|frv|simple|tomcat}\n"));
   fprintf (stream, _("             Record the cpu type\n"));
   fprintf (stream, _("-mtomcat-stats Print out stats for tomcat workarounds\n"));
   fprintf (stream, _("-mtomcat-debug Debug tomcat workarounds\n"));
@@ -936,6 +948,93 @@ frv_tomcat_workaround ()
     }
 }
 
+static int
+fr550_check_insn_acc_range (frv_insn *insn, int low, int hi)
+{
+  int acc;
+  switch (CGEN_INSN_NUM (insn->insn))
+    {
+    case FRV_INSN_MADDACCS:
+    case FRV_INSN_MSUBACCS:
+    case FRV_INSN_MDADDACCS:
+    case FRV_INSN_MDSUBACCS:
+    case FRV_INSN_MASACCS:
+    case FRV_INSN_MDASACCS:
+      acc = insn->fields.f_ACC40Si;
+      if (acc < low || acc > hi)
+	return 1; /* out of range */
+      acc = insn->fields.f_ACC40Sk;
+      if (acc < low || acc > hi)
+	return 1; /* out of range */
+      break;
+    case FRV_INSN_MMULHS:
+    case FRV_INSN_MMULHU:
+    case FRV_INSN_MMULXHS:
+    case FRV_INSN_MMULXHU:
+    case FRV_INSN_CMMULHS:
+    case FRV_INSN_CMMULHU:
+    case FRV_INSN_MQMULHS:
+    case FRV_INSN_MQMULHU:
+    case FRV_INSN_MQMULXHS:
+    case FRV_INSN_MQMULXHU:
+    case FRV_INSN_CMQMULHS:
+    case FRV_INSN_CMQMULHU:
+    case FRV_INSN_MMACHS:
+    case FRV_INSN_MMRDHS:
+    case FRV_INSN_CMMACHS: 
+    case FRV_INSN_MQMACHS:
+    case FRV_INSN_CMQMACHS:
+    case FRV_INSN_MQXMACHS:
+    case FRV_INSN_MQXMACXHS:
+    case FRV_INSN_MQMACXHS:
+    case FRV_INSN_MCPXRS:
+    case FRV_INSN_MCPXIS:
+    case FRV_INSN_CMCPXRS:
+    case FRV_INSN_CMCPXIS:
+    case FRV_INSN_MQCPXRS:
+    case FRV_INSN_MQCPXIS:
+     acc = insn->fields.f_ACC40Sk;
+      if (acc < low || acc > hi)
+	return 1; /* out of range */
+      break;
+    case FRV_INSN_MMACHU:
+    case FRV_INSN_MMRDHU:
+    case FRV_INSN_CMMACHU:
+    case FRV_INSN_MQMACHU:
+    case FRV_INSN_CMQMACHU:
+    case FRV_INSN_MCPXRU:
+    case FRV_INSN_MCPXIU:
+    case FRV_INSN_CMCPXRU:
+    case FRV_INSN_CMCPXIU:
+    case FRV_INSN_MQCPXRU:
+    case FRV_INSN_MQCPXIU:
+      acc = insn->fields.f_ACC40Uk;
+      if (acc < low || acc > hi)
+	return 1; /* out of range */
+      break;
+    default:
+      break;
+    }
+  return 0; /* all is ok */
+}
+
+static int
+fr550_check_acc_range (FRV_VLIW *vliw, frv_insn *insn)
+{
+  switch ((*vliw->current_vliw)[vliw->next_slot - 1])
+    {
+    case UNIT_FM0:
+    case UNIT_FM2:
+      return fr550_check_insn_acc_range (insn, 0, 3);
+    case UNIT_FM1:
+    case UNIT_FM3:
+      return fr550_check_insn_acc_range (insn, 4, 7);
+    default:
+      break;
+    }
+  return 0; /* all is ok */
+}
+
 void
 md_assemble (str)
      char * str;
@@ -1018,6 +1117,8 @@ md_assemble (str)
   else if (frv_mach != bfd_mach_frv)
     {
       packing_constraint = frv_vliw_add_insn (& vliw, insn.insn);
+      if (frv_mach == bfd_mach_fr550 && ! packing_constraint)
+	packing_constraint = fr550_check_acc_range (& vliw, & insn);
       if (insn.fields.f_pack)
 	frv_vliw_reset (& vliw, frv_mach, frv_flags);
       if (packing_constraint)
