@@ -1,3 +1,16 @@
+Fri Jun 12 22:21:57 1992  John Gilmore  (gnu at cygnus.com)
+
+	* config.sub:  Add sun4sol2 => sparc-sun-solaris2.
+
+Tue Jun  9 17:18:11 1992  Fred Fish  (fnf at cygnus.com)
+
+	* config/{mh-ncr3000, mh-sysv4}:  Add INSTALL.
+
+Thu Jun  4 12:07:32 1992  Mark Eichin  (eichin@cygnus.com)
+
+	* Makefile.in: make gprof rules similar to byacc rules (instead of
+	vestigal $(unsubdir) that didn't work...)
+
 Thu Jun  4 00:37:05 1992  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* config.sub:  Add support for Linux.
