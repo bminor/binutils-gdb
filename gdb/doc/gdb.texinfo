@@ -10513,11 +10513,111 @@ is supported other than to try it.
 @chapter Debugging remote programs
 
 @menu
+* Connecting::                  Connecting to a remote target
 * Server::	                Using the gdbserver program
 * NetWare::                     Using the gdbserve.nlm program
 * Remote configuration::        Remote configuration
 * remote stub::                 Implementing a remote stub
 @end menu
+
+@node Connecting
+@section Connecting to a remote target
+
+On the @value{GDBN} host machine, you will need an unstripped copy of
+your program, since @value{GDBN} needs symobl and debugging information.
+Start up @value{GDBN} as usual, using the name of the local copy of your
+program as the first argument.
+
+@cindex serial line, @code{target remote}
+If you're using a serial line, you may want to give @value{GDBN} the
+@w{@samp{--baud}} option, or use the @code{set remotebaud} command
+before the @code{target} command.
+
+After that, use @code{target remote} to establish communications with
+the target machine.  Its argument specifies how to communicate---either
+via a devicename attached to a direct serial line, or a TCP or UDP port
+(possibly to a terminal server which in turn has a serial line to the
+target).  For example, to use a serial line connected to the device
+named @file{/dev/ttyb}:
+
+@smallexample
+target remote /dev/ttyb
+@end smallexample
+
+@cindex TCP port, @code{target remote}
+To use a TCP connection, use an argument of the form
+@code{@var{host}:@var{port}} or @code{tcp:@var{host}:@var{port}}.
+For example, to connect to port 2828 on a
+terminal server named @code{manyfarms}:
+
+@smallexample
+target remote manyfarms:2828
+@end smallexample
+
+If your remote target is actually running on the same machine as
+your debugger session (e.g.@: a simulator of your target running on
+the same host), you can omit the hostname.  For example, to connect
+to port 1234 on your local machine:
+
+@smallexample
+target remote :1234
+@end smallexample
+@noindent
+
+Note that the colon is still required here.
+
+@cindex UDP port, @code{target remote}
+To use a UDP connection, use an argument of the form
+@code{udp:@var{host}:@var{port}}.  For example, to connect to UDP port 2828
+on a terminal server named @code{manyfarms}:
+
+@smallexample
+target remote udp:manyfarms:2828
+@end smallexample
+
+When using a UDP connection for remote debugging, you should keep in mind
+that the `U' stands for ``Unreliable''.  UDP can silently drop packets on
+busy or unreliable networks, which will cause havoc with your debugging
+session.
+
+Now you can use all the usual commands to examine and change data and to
+step and continue the remote program.
+
+@cindex interrupting remote programs
+@cindex remote programs, interrupting
+Whenever @value{GDBN} is waiting for the remote program, if you type the
+interrupt character (often @key{C-C}), @value{GDBN} attempts to stop the
+program.  This may or may not succeed, depending in part on the hardware
+and the serial drivers the remote system uses.  If you type the
+interrupt character once again, @value{GDBN} displays this prompt:
+
+@smallexample
+Interrupted while waiting for the program.
+Give up (and stop debugging it)?  (y or n)
+@end smallexample
+
+If you type @kbd{y}, @value{GDBN} abandons the remote debugging session.
+(If you decide you want to try again later, you can use @samp{target
+remote} again to connect once more.)  If you type @kbd{n}, @value{GDBN}
+goes back to waiting.
+
+@table @code
+@kindex detach (remote)
+@item detach
+When you have finished debugging the remote program, you can use the
+@code{detach} command to release it from @value{GDBN} control.
+Detaching from the target normally resumes its execution, but the results
+will depend on your particular remote stub.  After the @code{detach}
+command, @value{GDBN} is free to connect to another target.
+
+@kindex disconnect
+@item disconnect
+The @code{disconnect} command behaves like @code{detach}, except that
+the target is generally not resumed.  It will wait for @value{GDBN}
+(this instance or another one) to connect and continue debugging.  After
+the @code{disconnect} command, @value{GDBN} is again free to connect to
+another target.
+@end table
 
 @node Server
 @section Using the @code{gdbserver} program
@@ -10601,34 +10701,15 @@ target> gdbserver @var{comm} --attach @var{pid}
 @var{pid} is the process ID of a currently running process.  It isn't necessary
 to point @code{gdbserver} at a binary for the running process.
 
-@item On the @value{GDBN} host machine,
-you need an unstripped copy of your program, since @value{GDBN} needs
-symbols and debugging information.  Start up @value{GDBN} as usual,
-using the name of the local copy of your program as the first argument.
-(You may also need the @w{@samp{--baud}} option if the serial line is
-running at anything other than 9600@dmn{bps}.)  After that, use @code{target
-remote} to establish communications with @code{gdbserver}.  Its argument
-is either a device name (usually a serial device, like
-@file{/dev/ttyb}), or a TCP port descriptor in the form
-@code{@var{host}:@var{PORT}}.  For example:
-
-@smallexample
-(@value{GDBP}) target remote /dev/ttyb
-@end smallexample
-
-@noindent
-communicates with the server via serial line @file{/dev/ttyb}, and
-
-@smallexample
-(@value{GDBP}) target remote the-target:2345
-@end smallexample
-
-@noindent
-communicates via a TCP connection to port 2345 on host @w{@file{the-target}}.
+@item On the host machine,
+connect to your target (@pxref{Connecting,,Connecting to a remote target}).
 For TCP connections, you must start up @code{gdbserver} prior to using
 the @code{target remote} command.  Otherwise you may get an error whose
 text depends on the host system, but which usually looks something like
-@samp{Connection refused}.
+@samp{Connection refused}.  You don't need to use the @code{load}
+command in @value{GDBN} when using gdbserver, since the program is
+already on the target.
+
 @end table
 
 @node NetWare
@@ -10670,22 +10751,10 @@ using a 19200@dmn{bps} connection:
 load gdbserve BOARD=1 PORT=2 BAUD=19200 emacs foo.txt
 @end smallexample
 
-@item On the @value{GDBN} host machine,
-you need an unstripped copy of your program, since @value{GDBN} needs
-symbols and debugging information.  Start up @value{GDBN} as usual,
-using the name of the local copy of your program as the first argument.
-(You may also need the @w{@samp{--baud}} option if the serial line is
-running at anything other than 9600@dmn{bps}.  After that, use @code{target
-remote} to establish communications with @code{gdbserve.nlm}.  Its
-argument is a device name (usually a serial device, like
-@file{/dev/ttyb}).  For example:
+@item
+On the @value{GDBN} host machine, connect to your target (@pxref{Connecting,,
+Connecting to a remote target}).
 
-@smallexample
-(@value{GDBP}) target remote /dev/ttyb
-@end smallexample
-
-@noindent
-communications with the server via serial line @file{/dev/ttyb}.
 @end table
 
 @node Remote configuration
@@ -11007,86 +11076,10 @@ Download your program to your target machine (or get it there by
 whatever means the manufacturer provides), and start it.
 
 @item
-To start remote debugging, run @value{GDBN} on the host machine, and specify
-as an executable file the program that is running in the remote machine.
-This tells @value{GDBN} how to find your program's symbols and the contents
-of its pure text.
-
-@item
-@cindex serial line, @code{target remote}
-Establish communication using the @code{target remote} command.
-Its argument specifies how to communicate with the target
-machine---either via a devicename attached to a direct serial line, or a
-TCP or UDP port (usually to a terminal server which in turn has a serial line
-to the target).  For example, to use a serial line connected to the
-device named @file{/dev/ttyb}:
-
-@smallexample
-target remote /dev/ttyb
-@end smallexample
-
-@cindex TCP port, @code{target remote}
-To use a TCP connection, use an argument of the form
-@code{@var{host}:@var{port}} or @code{tcp:@var{host}:@var{port}}.
-For example, to connect to port 2828 on a
-terminal server named @code{manyfarms}:
-
-@smallexample
-target remote manyfarms:2828
-@end smallexample
-
-If your remote target is actually running on the same machine as
-your debugger session (e.g.@: a simulator of your target running on
-the same host), you can omit the hostname.  For example, to connect
-to port 1234 on your local machine:
-
-@smallexample
-target remote :1234
-@end smallexample
-@noindent
-
-Note that the colon is still required here.
-
-@cindex UDP port, @code{target remote}
-To use a UDP connection, use an argument of the form
-@code{udp:@var{host}:@var{port}}.  For example, to connect to UDP port 2828
-on a terminal server named @code{manyfarms}:
-
-@smallexample
-target remote udp:manyfarms:2828
-@end smallexample
-
-When using a UDP connection for remote debugging, you should keep in mind
-that the `U' stands for ``Unreliable''.  UDP can silently drop packets on
-busy or unreliable networks, which will cause havoc with your debugging
-session.
+Start @value{GDBN} on the host, and connect to the target
+(@pxref{Connecting,,Connecting to a remote target}).
 
 @end enumerate
-
-Now you can use all the usual commands to examine and change data and to
-step and continue the remote program.
-
-To resume the remote program and stop debugging it, use the @code{detach}
-command.
-
-@cindex interrupting remote programs
-@cindex remote programs, interrupting
-Whenever @value{GDBN} is waiting for the remote program, if you type the
-interrupt character (often @key{C-C}), @value{GDBN} attempts to stop the
-program.  This may or may not succeed, depending in part on the hardware
-and the serial drivers the remote system uses.  If you type the
-interrupt character once again, @value{GDBN} displays this prompt:
-
-@smallexample
-Interrupted while waiting for the program.
-Give up (and stop debugging it)?  (y or n)
-@end smallexample
-
-If you type @kbd{y}, @value{GDBN} abandons the remote debugging session.
-(If you decide you want to try again later, you can use @samp{target
-remote} again to connect once more.)  If you type @kbd{n}, @value{GDBN}
-goes back to waiting.
-
 
 @node Configurations
 @chapter Configuration-Specific Information
@@ -17392,6 +17385,31 @@ The corresponding @value{GDBN} command is @samp{detach}.
 @end smallexample
 
 
+@subheading The @code{-target-disconnect} Command
+@findex -target-disconnect
+
+@subsubheading Synopsis
+
+@example
+ -target-disconnect
+@end example
+
+Disconnect from the remote target.  There's no output.
+
+@subsubheading @value{GDBN} command
+
+The corresponding @value{GDBN} command is @samp{disconnect}.
+
+@subsubheading Example
+
+@smallexample
+(@value{GDBP})
+-target-disconnect
+^done
+(@value{GDBP})
+@end smallexample
+
+
 @subheading The @code{-target-download} Command
 @findex -target-download
 
@@ -19775,7 +19793,7 @@ Toggle debug flag.
 @cindex @code{D} packet
 
 Detach @value{GDBN} from the remote system.  Sent to the remote target
-before @value{GDBN} disconnects.
+before @value{GDBN} disconnects via the @code{detach} command.
 
 Reply:
 @table @samp

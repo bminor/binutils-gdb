@@ -1,3 +1,11 @@
+2003-06-18  Daniel Jacobowitz  <drow@mvista.com>
+
+        * gdb.texinfo (Remote Debugging): New section "Connecting to a
+	remote target".  Document the "detach" and "disconnect" commands.
+	(Server, Netware, Debug Session): Reference "Connecting to a
+	remote target".
+	(GDB/MI Target Manipulation): Document "-target-disconnect".
+
 2003-06-13  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Deprecate
