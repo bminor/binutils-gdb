@@ -632,12 +632,12 @@ md_show_usage (stream)
 	continue;
       if (arch != &sparc_arch_table[0])
 	fprintf (stream, " | ");
-      if (column + strlen(arch->name) > 70)
+      if (column + strlen (arch->name) > 70)
 	{
 	  column = 0;
 	  fputc ('\n', stream);
 	}
-      column += 5 + 2 + strlen(arch->name);
+      column += 5 + 2 + strlen (arch->name);
       fprintf (stream, "-A%s", arch->name);
     }
   for (arch = &sparc_arch_table[0]; arch->name; arch++)
@@ -645,12 +645,12 @@ md_show_usage (stream)
       if (!arch->user_option_p)
 	continue;
       fprintf (stream, " | ");
-      if (column + strlen(arch->name) > 65)
+      if (column + strlen (arch->name) > 65)
 	{
 	  column = 0;
 	  fputc ('\n', stream);
 	}
-      column += 5 + 7 + strlen(arch->name);
+      column += 5 + 7 + strlen (arch->name);
       fprintf (stream, "-xarch=%s", arch->name);
     }
   fprintf (stream, _("\n\

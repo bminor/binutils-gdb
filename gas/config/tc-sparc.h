@@ -54,7 +54,7 @@ extern const char *sparc_target_format PARAMS ((void));
 #define md_convert_frag(b,s,f) \
   as_fatal (_("sparc convert_frag\n"))
 #define md_estimate_size_before_relax(f,s) \
-  (as_fatal(_("estimate_size_before_relax called")), 1)
+  (as_fatal (_("estimate_size_before_relax called")), 1)
 
 #define LISTING_HEADER "SPARC GAS "
 

@@ -555,7 +555,7 @@ md_begin ()
 
   allow_m32rx (enable_m32rx);
 
-  gas_cgen_initialize_saved_fixups_array();
+  gas_cgen_initialize_saved_fixups_array ();
 }
 
 #define OPERAND_IS_COND_BIT(operand, indices, index) \

@@ -64,7 +64,7 @@ extern valueT alpha_gp_value;
 
 #define md_convert_frag(b,s,f)		as_fatal ("alpha convert_frag\n")
 #define md_estimate_size_before_relax(f,s) \
-			(as_fatal("estimate_size_before_relax called"),1)
+			(as_fatal ("estimate_size_before_relax called"),1)
 #define md_operand(x)
 
 #ifdef OBJ_EVAX

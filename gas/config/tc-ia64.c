@@ -876,8 +876,8 @@ static int generate_unwind_image PARAMS ((const char *));
       }									   \
     _prefix_len = strlen (_prefix), _suffix_len = strlen (_suffix);	   \
     _result = alloca (_prefix_len + _suffix_len + 1);		   	   \
-    memcpy(_result, _prefix, _prefix_len);				   \
-    memcpy(_result + _prefix_len, _suffix, _suffix_len);		   \
+    memcpy (_result, _prefix, _prefix_len);				   \
+    memcpy (_result + _prefix_len, _suffix, _suffix_len);		   \
     _result[_prefix_len + _suffix_len] = '\0';				   \
     result = _result;							   \
   }									   \
@@ -2769,7 +2769,7 @@ fixup_unw_records (list)
    info.  */
 
 static int
-setup_unwind_header(int size, unsigned char **mem)
+setup_unwind_header (int size, unsigned char **mem)
 {
   int x, extra = 0;
 
@@ -2816,7 +2816,7 @@ output_unw_records (list, ptr)
   if (size > 0 || unwind.force_unwind_entry)
     {
       unwind.force_unwind_entry = 0;
-      extra = setup_unwind_header(size, &mem);
+      extra = setup_unwind_header (size, &mem);
 
       vbyte_mem_ptr = mem + 8;
       process_unw_records (list, output_vbyte_mem);
@@ -7719,8 +7719,8 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 	    {
 	      int p1 = CURR_SLOT.opnd[0].X_add_number - REG_P;
 	      int p2 = CURR_SLOT.opnd[1].X_add_number - REG_P;
-	      int or_andcm = strstr(idesc->name, "or.andcm") != NULL;
-	      int and_orcm = strstr(idesc->name, "and.orcm") != NULL;
+	      int or_andcm = strstr (idesc->name, "or.andcm") != NULL;
+	      int and_orcm = strstr (idesc->name, "and.orcm") != NULL;
 
 	      if ((idesc->operands[0] == IA64_OPND_P1
 		   || idesc->operands[0] == IA64_OPND_P2)
@@ -7841,8 +7841,8 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 	    {
 	      int p1 = CURR_SLOT.opnd[0].X_add_number - REG_P;
 	      int p2 = CURR_SLOT.opnd[1].X_add_number - REG_P;
-	      int or_andcm = strstr(idesc->name, "or.andcm") != NULL;
-	      int and_orcm = strstr(idesc->name, "and.orcm") != NULL;
+	      int or_andcm = strstr (idesc->name, "or.andcm") != NULL;
+	      int and_orcm = strstr (idesc->name, "and.orcm") != NULL;
 
 	      if ((idesc->operands[0] == IA64_OPND_P1
 		   || idesc->operands[0] == IA64_OPND_P2)
@@ -8304,8 +8304,8 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 	    {
               int p1 = CURR_SLOT.opnd[0].X_add_number - REG_P;
               int p2 = CURR_SLOT.opnd[1].X_add_number - REG_P;
-	      int or_andcm = strstr(idesc->name, "or.andcm") != NULL;
-	      int and_orcm = strstr(idesc->name, "and.orcm") != NULL;
+	      int or_andcm = strstr (idesc->name, "or.andcm") != NULL;
+	      int and_orcm = strstr (idesc->name, "and.orcm") != NULL;
 
 	      if (p1 == 63
 		  && (idesc->operands[0] == IA64_OPND_P1

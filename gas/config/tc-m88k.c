@@ -884,7 +884,7 @@ get_o6 (param, valp)
 
   *valp = val;
 
-  return(param);
+  return (param);
 }
 
 #define hexval(z) \

@@ -22,10 +22,10 @@
 #include "opcode/tic80.h"
 
 #define internal_error(what) \
-  as_fatal(_("internal error:%s:%d: %s\n"), __FILE__, __LINE__, what)
+  as_fatal (_("internal error:%s:%d: %s\n"), __FILE__, __LINE__, what)
 
 #define internal_error_a(what,arg) \
-  as_fatal(_("internal error:%s:%d: %s %d\n"), __FILE__, __LINE__, what, arg)
+  as_fatal (_("internal error:%s:%d: %s %d\n"), __FILE__, __LINE__, what, arg)
 
 /* Generic assembler global variables which must be defined by all
    targets.  */

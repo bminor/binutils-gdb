@@ -1299,7 +1299,7 @@ convert_iif ()
 	    case 3:
 	    case 4:
 	      /* The final size in objectmemory is known.  */
-	      memP = frag_more(size);
+	      memP = frag_more (size);
 	      j = iif.iifP[i].bit_fixP;
 
 	      switch (type)
@@ -1449,7 +1449,7 @@ convert_iif ()
 		    /* Size is unknown until link time so have to
                        allow 4 bytes.  */
 		    size = 4;
-		    memP = frag_more(size);
+		    memP = frag_more (size);
 		    fix_new_ns32k_exp (frag_now,
 				       (long) (memP - frag_now->fr_literal),
 				       size,
@@ -1474,7 +1474,7 @@ convert_iif ()
 		      {
 			/* Size is not important.  This gets fixed by
 			   relax, but we assume 0 in what follows.  */
-			memP = frag_more(4); /* Max size.  */
+			memP = frag_more (4); /* Max size.  */
 			size = 0;
 
 			{

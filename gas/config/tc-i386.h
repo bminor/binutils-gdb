@@ -121,7 +121,7 @@ extern const char *i386_target_format PARAMS ((void));
 #define TC_COUNT_RELOC(x) ((x)->fx_addsy || (x)->fx_r_type==7)
 #define TC_COFF_FIX2RTYPE(fixP) tc_coff_fix2rtype(fixP)
 extern short tc_coff_fix2rtype PARAMS ((struct fix *));
-#define TC_COFF_SIZEMACHDEP(frag) tc_coff_sizemachdep(frag)
+#define TC_COFF_SIZEMACHDEP(frag) tc_coff_sizemachdep (frag)
 extern int tc_coff_sizemachdep PARAMS ((fragS *frag));
 
 #ifdef TE_GO32

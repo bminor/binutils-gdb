@@ -99,9 +99,9 @@ extern void ia64_handle_align PARAMS ((fragS *f));
 #define TC_FORCE_RELOCATION(f)		ia64_force_relocation (f)
 #define tc_fix_adjustable(f)		ia64_fix_adjustable (f)
 #define md_convert_frag(b,s,f)		as_fatal ("ia64_convert_frag")
-#define md_create_long_jump(p,f,t,fr,s)	as_fatal("ia64_create_long_jump")
+#define md_create_long_jump(p,f,t,fr,s)	as_fatal ("ia64_create_long_jump")
 #define md_create_short_jump(p,f,t,fr,s) \
-					as_fatal("ia64_create_short_jump")
+					as_fatal ("ia64_create_short_jump")
 #define md_estimate_size_before_relax(f,s) \
 			(as_fatal ("ia64_estimate_size_before_relax"), 1)
 #define md_elf_section_flags		ia64_elf_section_flags

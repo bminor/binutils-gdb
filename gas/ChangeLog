@@ -1,3 +1,26 @@
+2001-07-23  Kazu Hirata  <kazu@hxi.com>
+
+	* config/tc-alpha.h: Fix formatting.
+	* config/tc-arc.c: Likewise.
+	* config/tc-d10v.h: Likewise.
+	* config/tc-hppa.c: Likewise.
+	* config/tc-i370.c: Likewise.
+	* config/tc-i386.h: Likewise.
+	* config/tc-i960.h: Likewise.
+	* config/tc-ia64.c: Likewise.
+	* config/tc-ia64.h: Likewise.
+	* config/tc-m32r.c: Likewise.
+	* config/tc-m68k.c: Likewise.
+	* config/tc-m88k.c: Likewise.
+	* config/tc-ns32k.c: Likewise.
+	* config/tc-pdp11.c: Likewise.
+	* config/tc-pj.h: Likewise.
+	* config/tc-s390.c: Likewise.
+	* config/tc-sparc.c: Likewise.
+	* config/tc-sparc.h: Likewise.
+	* config/tc-tic80.c: Likewise.
+	* config/tc-w65.h: Likewise.
+
 2001-07-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* symbols.c (S_GET_VALUE): Don't treat O_constant and local

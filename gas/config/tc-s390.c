@@ -196,7 +196,7 @@ static const struct pd_reg pre_defined_registers[] =
 
 };
 
-#define REG_NAME_CNT (sizeof(pre_defined_registers) / sizeof(struct pd_reg))
+#define REG_NAME_CNT (sizeof (pre_defined_registers) / sizeof (struct pd_reg))
 
 /* Given NAME, find the register number associated with that name, return
    the integer value associated with the given name or -1 on failure.  */
@@ -304,7 +304,7 @@ CONST char *md_shortopts = "A:m:kVQ:";
 struct option md_longopts[] = {
   {NULL, no_argument, NULL, 0}
 };
-size_t md_longopts_size = sizeof(md_longopts);
+size_t md_longopts_size = sizeof (md_longopts);
 
 /* Initialize the default opcode arch and word size from the default
    architecture name.  */
@@ -314,12 +314,12 @@ init_default_arch ()
   if (current_arch_requested)
     return;
 
-  if (strcmp(default_arch, "s390") == 0)
+  if (strcmp (default_arch, "s390") == 0)
     {
       s390_arch_size = 32;
       current_architecture = S390_OPCODE_ESA;
     }
-  else if (strcmp(default_arch, "s390x") == 0)
+  else if (strcmp (default_arch, "s390x") == 0)
     {
       s390_arch_size = 64;
       current_architecture = S390_OPCODE_ESAME;
@@ -484,7 +484,7 @@ s390_align_code (fragP, count)
   /* We use nop pattern 0x0707.  */
   if (count > 0)
     {
-      memset(fragP->fr_literal + fragP->fr_fix, 0x07, count);
+      memset (fragP->fr_literal + fragP->fr_fix, 0x07, count);
       fragP->fr_var = count;
     }
 }
@@ -618,13 +618,13 @@ s390_elf_suffix (str_p, exp_p)
     return ELF_SUFFIX_NONE;
 
   ident = str;
-  while (isalnum(*str))
+  while (isalnum (*str))
     str++;
   len = str - ident;
 
   for (ptr = &mapping[0]; ptr->length > 0; ptr++)
     if (len == ptr->length &&
-	strncasecmp(ident, ptr->string, ptr->length) == 0)
+	strncasecmp (ident, ptr->string, ptr->length) == 0)
       {
 	if (exp_p->X_add_number != 0)
 	  as_warn (_("identifier+constant@%s means identifier@%s+constant"),
@@ -710,7 +710,7 @@ s390_exp_compare(exp1, exp2)
       return exp1->X_add_number == exp2->X_add_number;
 
     case O_big:
-      as_bad(_("Can't handle O_big in s390_exp_compare")); 
+      as_bad (_("Can't handle O_big in s390_exp_compare")); 
 
     case O_symbol:     /* X_add_symbol & X_add_number must be equal.  */
     case O_symbol_rva:
@@ -767,10 +767,10 @@ s390_lit_suffix (str_p, exp_p, suffix)
  
   /* We look for a suffix of the form "@lit1", "@lit2", "@lit4" or "@lit8".  */
   ident = str;
-  while (isalnum(*str))
+  while (isalnum (*str))
     str++;
   len = str - ident;
-  if (len != 4 || strncasecmp(ident, "lit", 3) != 0 ||
+  if (len != 4 || strncasecmp (ident, "lit", 3) != 0 ||
       (ident[3]!='1' && ident[3]!='2' && ident[3]!='4' && ident[3]!='8'))
     return suffix;      /* no modification */
   nbytes = ident[3] - '0';
@@ -838,7 +838,7 @@ s390_lit_suffix (str_p, exp_p, suffix)
 	}
       else
 	{
-	  lpe = (struct s390_lpe *) xmalloc(sizeof(struct s390_lpe));
+	  lpe = (struct s390_lpe *) xmalloc(sizeof (struct s390_lpe));
 	}
 
       lpe->ex = *exp_p;
@@ -849,7 +849,7 @@ s390_lit_suffix (str_p, exp_p, suffix)
 	    lpe->floatnum = generic_floating_point_number;
 	  else if (exp_p->X_add_number <= 4)
 	    memcpy (lpe->bignum, generic_bignum,
-		    exp_p->X_add_number*sizeof(LITTLENUM_TYPE));
+		    exp_p->X_add_number*sizeof (LITTLENUM_TYPE));
 	  else
 	    as_bad (_("Big number is too big"));
 	}
@@ -859,12 +859,12 @@ s390_lit_suffix (str_p, exp_p, suffix)
       /* Literal pool name defined ?  */
       if (lp_sym == NULL)
 	{
-	  sprintf(tmp_name, ".L\001%i", lp_count);
+	  sprintf (tmp_name, ".L\001%i", lp_count);
 	  lp_sym = symbol_make(tmp_name);
 	}
 
       /* Make name for literal pool entry.  */
-      sprintf(tmp_name, ".L\001%i\002%i", lp_count, lpe_count);
+      sprintf (tmp_name, ".L\001%i\002%i", lp_count, lpe_count);
       lpe_count++;
       lpe->sym = symbol_make(tmp_name);
 
@@ -941,7 +941,7 @@ s390_elf_cons (nbytes)
 	      if (size > nbytes)
 		as_bad (_("%s relocations do not fit in %d bytes"),
 			reloc_howto->name, nbytes);
-	      where = frag_more(nbytes);
+	      where = frag_more (nbytes);
 	      md_number_to_chars (where, 0, size);
 	      fix_new_exp (frag_now, where - frag_now->fr_literal, 
 			   size, &exp, reloc_howto->pc_relative, reloc);
@@ -1046,9 +1046,9 @@ md_gather_operands (str, insn, opcode)
 	  else
 	    {
 	      if ((operand->flags & S390_OPERAND_INDEX) && ex.X_add_number == 0)
-		as_warn("index register specified but zero");
+		as_warn ("index register specified but zero");
 	      if ((operand->flags & S390_OPERAND_BASE) && ex.X_add_number == 0)
-		as_warn("base register specified but zero");
+		as_warn ("base register specified but zero");
 	      s390_insert_operand (insn, operand, ex.X_add_number, NULL, 0);
 	    }
 	}
@@ -1119,7 +1119,7 @@ md_gather_operands (str, insn, opcode)
 	      if (opindex_ptr[1] != '\0')
 		{
 		  if (*str++ != ',')
-		    as_bad(_("syntax error; expected ,"));
+		    as_bad (_("syntax error; expected ,"));
 		}
 	    }
 	  else
@@ -1171,7 +1171,7 @@ md_gather_operands (str, insn, opcode)
 	  if (opindex_ptr[1] != '\0')
 	    {
 	      if (*str++ != ',')
-		as_bad(_("syntax error; expected ,"));
+		as_bad (_("syntax error; expected ,"));
 	    }
 	}
     }
@@ -1183,7 +1183,7 @@ md_gather_operands (str, insn, opcode)
     {
       char *linefeed;
 
-      if ((linefeed = strchr(str, '\n')) != NULL)
+      if ((linefeed = strchr (str, '\n')) != NULL)
 	*linefeed = '\0';
       as_bad (_("junk at end of line: `%s'"), str);
       if (linefeed != NULL)
@@ -1264,11 +1264,11 @@ md_assemble (str)
     }
   else if (!(opcode->architecture & current_arch_mask))
     {
-      as_bad("Opcode %s not available in this architecture", str);
+      as_bad ("Opcode %s not available in this architecture", str);
       return;
     }
 
-  memcpy (insn, opcode->opcode, sizeof(insn));
+  memcpy (insn, opcode->opcode, sizeof (insn));
   md_gather_operands (s, insn, opcode);
 }
 
@@ -1309,7 +1309,7 @@ s390_bss (ignore)
 /* Pseudo-op handling.  */
 
 void
-s390_insn(ignore)
+s390_insn (ignore)
      int ignore ATTRIBUTE_UNUSED;
 {
   expressionS exp;
@@ -1341,7 +1341,7 @@ s390_insn(ignore)
 	  (opformat->oplen == 2 && exp.X_op < 0x10000))
 	md_number_to_chars (insn, exp.X_add_number, opformat->oplen);
       else
-	as_bad(_("Invalid .insn format\n"));
+	as_bad (_("Invalid .insn format\n"));
     }
   else if (exp.X_op == O_big)
     {
@@ -1354,14 +1354,14 @@ s390_insn(ignore)
 	  md_number_to_chars (&insn[4], generic_bignum[0], 2);
 	}
       else
-	as_bad(_("Invalid .insn format\n"));
+	as_bad (_("Invalid .insn format\n"));
     }
   else
     as_bad (_("second operand of .insn not a constant\n"));
   if (*input_line_pointer++ != ',')
     as_bad (_("missing comma after insn constant\n"));
 
-  if ((s = strchr(input_line_pointer, '\n')) != NULL)
+  if ((s = strchr (input_line_pointer, '\n')) != NULL)
     *s = '\0';
   input_line_pointer = md_gather_operands (input_line_pointer, insn, opformat);
   if (s != NULL)
@@ -1441,7 +1441,7 @@ s390_literals (ignore)
 	  if (size > lpe->nbytes)
 	    as_bad (_("%s relocations do not fit in %d bytes"),
 		    reloc_howto->name, lpe->nbytes);
-	  where = frag_more(lpe->nbytes);
+	  where = frag_more (lpe->nbytes);
 	  md_number_to_chars (where, 0, size);
 	  fix_new_exp (frag_now, where - frag_now->fr_literal,
 		       size, &lpe->ex, reloc_howto->pc_relative, lpe->reloc);
@@ -1454,7 +1454,7 @@ s390_literals (ignore)
 		generic_floating_point_number = lpe->floatnum;
 	      else
 		memcpy (generic_bignum, lpe->bignum,
-			lpe->ex.X_add_number*sizeof(LITTLENUM_TYPE));
+			lpe->ex.X_add_number*sizeof (LITTLENUM_TYPE));
 	    }
 	  emit_expr (&lpe->ex, lpe->nbytes);
 	}
@@ -1553,12 +1553,12 @@ md_undefined_symbol (name)
      char *name;
 {
   if (*name == '_' && *(name+1) == 'G'
-      && strcmp(name, "_GLOBAL_OFFSET_TABLE_") == 0)
+      && strcmp (name, "_GLOBAL_OFFSET_TABLE_") == 0)
    {
-     if(!GOT_symbol)
+     if (!GOT_symbol)
       {
-        if(symbol_find(name))
-          as_bad(_("GOT already in symbol table"));
+        if (symbol_find (name))
+          as_bad (_("GOT already in symbol table"));
         GOT_symbol = symbol_new (name, undefined_section,
                                  (valueT) 0, &zero_address_frag);
       }
@@ -1809,7 +1809,7 @@ md_apply_fix3 (fixp, valuep, seg)
 
 	case BFD_RELOC_32_GOTOFF:
 	  if (fixp->fx_done)
-	    md_number_to_chars (where, value, sizeof(int));
+	    md_number_to_chars (where, value, sizeof (int));
 	  break;
 
 	case BFD_RELOC_390_GOT64:

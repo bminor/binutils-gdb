@@ -347,7 +347,7 @@ register_name (expressionP)
   /* if its alpha, look to see if it's in the register table */
   if (!isalpha (name[0]))
     {
-      reg_number = get_single_number();
+      reg_number = get_single_number ();
       c = get_symbol_end ();
     }
   else
@@ -1117,7 +1117,7 @@ i370_elf_rdata (sect)
 
 /* Pseudo op to make file scope bss items */
 static void
-i370_elf_lcomm(unused)
+i370_elf_lcomm (unused)
      int unused;
 {
   register char *name;
@@ -1326,13 +1326,13 @@ add_to_lit_pool (expressionS *exx, char *name, int sz)
 
   /* start a new pool, if necessary */
   if (8 == sz && NULL == longlong_poolP)
-    longlong_poolP = symbol_make_empty();
+    longlong_poolP = symbol_make_empty ();
   else if (4 == sz && NULL == word_poolP)
-    word_poolP = symbol_make_empty();
+    word_poolP = symbol_make_empty ();
   else if (2 == sz && NULL == short_poolP)
-    short_poolP = symbol_make_empty();
+    short_poolP = symbol_make_empty ();
   else if (1 == sz && NULL == byte_poolP)
-    byte_poolP = symbol_make_empty();
+    byte_poolP = symbol_make_empty ();
 
   /* Check if this literal value is already in the pool: */
   /* hack alert -- we should probably be checking expressions
@@ -1361,7 +1361,7 @@ add_to_lit_pool (expressionS *exx, char *name, int sz)
     {
       if (next_literal_pool_place > MAX_LITERAL_POOL_SIZE)
         {
-          as_bad("Literal Pool Overflow");
+          as_bad ("Literal Pool Overflow");
         }
 
       literals[next_literal_pool_place].exp = *exx;
@@ -1435,7 +1435,7 @@ symbol_locate (symbolP, name, segment, valu, frag)
 
   S_SET_SEGMENT (symbolP, segment);
   S_SET_VALUE (symbolP, valu);
-  symbol_clear_list_pointers(symbolP);
+  symbol_clear_list_pointers (symbolP);
 
   symbol_set_frag (symbolP, frag);
 
@@ -1489,11 +1489,11 @@ i370_addr_offset (expressionS *exx)
   lab = input_line_pointer;
   while (*lab && (',' != *lab) && ('(' != *lab))
     {
-      if (isdigit(*lab))
+      if (isdigit (*lab))
 	{
 	  all_digits = 1;
 	}
-      else if (isalpha(*lab))
+      else if (isalpha (*lab))
 	{
 	  if (!all_digits)
 	    {
@@ -1652,7 +1652,7 @@ i370_addr_cons (expressionS *exp)
 	      save = input_line_pointer;
 	      while (*save)
 		{
-		  if (isxdigit(*save))
+		  if (isxdigit (*save))
 		    hex_len++;
 		  save++;
 		}
@@ -1797,7 +1797,7 @@ i370_ltorg (ignore)
 	       */
 	      if (literals[lit_count].sym_name)
 		{
-		  symbolS * symP = symbol_make_empty();
+		  symbolS * symP = symbol_make_empty ();
 		  symbol_locate (symP, literals[lit_count].sym_name, now_seg,
 				 (valueT) frag_now_fix (), frag_now);
 		  symbol_table_insert (symP);
@@ -2917,7 +2917,7 @@ md_apply_fix3 (fixp, valuep, seg)
         default:
           fprintf (stderr,
         	  "Gas failure, reloc value %d\n", fixp->fx_r_type);
-          fflush(stderr);
+          fflush (stderr);
           abort ();
         }
     }

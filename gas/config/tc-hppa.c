@@ -1689,12 +1689,12 @@ pa_ip (str)
 	      while (*s == ' ' || *s == '\t')
 		s = s + 1;
 
-	      if (!strncasecmp(s, "%sar", 4))
+	      if (!strncasecmp (s, "%sar", 4))
 	        {
 		  s += 4;
 		  continue;
 		}
-	      else if (!strncasecmp(s, "%cr11", 5))
+	      else if (!strncasecmp (s, "%cr11", 5))
 	        {
 		  s += 5;
 		  continue;
@@ -1949,7 +1949,7 @@ pa_ip (str)
 		/* Handle load cache hint completer.  */
 		case 'c':
 		  cmpltr = 0;
-		  if (!strncmp(s, ",sl", 3))
+		  if (!strncmp (s, ",sl", 3))
 		    {
 		      s += 3;
 		      cmpltr = 2;
@@ -1959,12 +1959,12 @@ pa_ip (str)
 		/* Handle store cache hint completer.  */
 		case 'C':
 		  cmpltr = 0;
-		  if (!strncmp(s, ",sl", 3))
+		  if (!strncmp (s, ",sl", 3))
 		    {
 		      s += 3;
 		      cmpltr = 2;
 		    }
-		  else if (!strncmp(s, ",bc", 3))
+		  else if (!strncmp (s, ",bc", 3))
 		    {
 		      s += 3;
 		      cmpltr = 1;
@@ -1974,7 +1974,7 @@ pa_ip (str)
 		/* Handle load and clear cache hint completer.  */
 		case 'd':
 		  cmpltr = 0;
-		  if (!strncmp(s, ",co", 3))
+		  if (!strncmp (s, ",co", 3))
 		    {
 		      s += 3;
 		      cmpltr = 1;
@@ -1983,7 +1983,7 @@ pa_ip (str)
 
 		/* Handle load ordering completer.  */
 		case 'o':
-		  if (strncmp(s, ",o", 2) != 0)
+		  if (strncmp (s, ",o", 2) != 0)
 		    break;
 		  s += 2;
 		  continue;
@@ -2252,13 +2252,13 @@ pa_ip (str)
 		      else if (*s == 'l')
 			lr = 0;
 		      else
-			as_bad(_("Invalid left/right combination completer"));
+			as_bad (_("Invalid left/right combination completer"));
 
 		      s++;
 		      INSERT_FIELD_AND_CONTINUE (opcode, lr, 13);
 		    }
 		  else
-		    as_bad(_("Invalid left/right combination completer"));
+		    as_bad (_("Invalid left/right combination completer"));
 		  break;
 
 		/* Handle saturation at 24:25.  */
@@ -2307,14 +2307,14 @@ pa_ip (str)
 			      perm = 3;
 			      break;
 			    default:
-			      as_bad(_("Invalid permutation completer"));
+			      as_bad (_("Invalid permutation completer"));
 			    }
 			  opcode |= perm << permloc[i];
 			}
 		      continue;
 		    }
 		  else
-		    as_bad(_("Invalid permutation completer"));
+		    as_bad (_("Invalid permutation completer"));
 		  break;
 
 		default:

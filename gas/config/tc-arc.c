@@ -1703,7 +1703,7 @@ md_operand (expressionP)
 	while (ext_oper)
 	  {
 	    l = strlen (ext_oper->operand.name);
-	    if (!strncmp (p, ext_oper->operand.name, l) && !isalnum(*(p + l)))
+	    if (!strncmp (p, ext_oper->operand.name, l) && !isalnum (*(p + l)))
 	      {
 		input_line_pointer += l + 1;
 		expressionP->X_op = O_register;

@@ -257,9 +257,9 @@ insop (w, opcode)
      const struct m68k_incant *opcode;
 {
   int z;
-  for(z=the_ins.numo;z>opcode->m_codenum;--z)
+  for (z = the_ins.numo; z > opcode->m_codenum; --z)
     the_ins.opcode[z]=the_ins.opcode[z-1];
-  for(z=0;z<the_ins.nrel;z++)
+  for (z = 0;z < the_ins.nrel; z++)
     the_ins.reloc[z].n+=2;
   for (z = 0; z < the_ins.nfrag; z++)
     the_ins.fragb[z].fragoff++;
@@ -5912,7 +5912,7 @@ build_mri_control_operand (qual, cc, leftstart, leftstop, rightstart,
       *s++ = 'm';
       *s++ = 'p';
       if (qual != '\0')
-	*s++ = tolower(qual);
+	*s++ = tolower (qual);
       *s++ = ' ';
       memcpy (s, leftstart, leftstop - leftstart);
       s += leftstop - leftstart;
@@ -5930,7 +5930,7 @@ build_mri_control_operand (qual, cc, leftstart, leftstop, rightstart,
   *s++ = cc >> 8;
   *s++ = cc & 0xff;
   if (extent != '\0')
-    *s++ = tolower(extent);
+    *s++ = tolower (extent);
   *s++ = ' ';
   strcpy (s, truelab);
   mri_assemble (buf);
@@ -6180,7 +6180,7 @@ s_mri_else (qual)
   mri_control_stack->else_seen = 1;
 
   buf = (char *) xmalloc (20 + strlen (mri_control_stack->bottom));
-  q[0] = tolower(qual);
+  q[0] = tolower (qual);
   q[1] = '\0';
   sprintf (buf, "bra%s %s", q, mri_control_stack->bottom);
   mri_assemble (buf);
@@ -6253,7 +6253,7 @@ s_mri_break (extent)
     }
 
   buf = (char *) xmalloc (20 + strlen (n->bottom));
-  ex[0] = tolower(extent);
+  ex[0] = tolower (extent);
   ex[1] = '\0';
   sprintf (buf, "bra%s %s", ex, n->bottom);
   mri_assemble (buf);
@@ -6292,7 +6292,7 @@ s_mri_next (extent)
     }
 
   buf = (char *) xmalloc (20 + strlen (n->next));
-  ex[0] = tolower(extent);
+  ex[0] = tolower (extent);
   ex[1] = '\0';
   sprintf (buf, "bra%s %s", ex, n->next);
   mri_assemble (buf);
@@ -6476,7 +6476,7 @@ s_mri_for (qual)
   *s++ = 'v';
   *s++ = 'e';
   if (qual != '\0')
-    *s++ = tolower(qual);
+    *s++ = tolower (qual);
   *s++ = ' ';
   memcpy (s, initstart, initstop - initstart);
   s += initstop - initstart;
@@ -6494,7 +6494,7 @@ s_mri_for (qual)
   *s++ = 'm';
   *s++ = 'p';
   if (qual != '\0')
-    *s++ = tolower(qual);
+    *s++ = tolower (qual);
   *s++ = ' ';
   memcpy (s, endstart, endstop - endstart);
   s += endstop - endstart;
@@ -6505,7 +6505,7 @@ s_mri_for (qual)
   mri_assemble (buf);
 
   /* bcc bottom */
-  ex[0] = tolower(extent);
+  ex[0] = tolower (extent);
   ex[1] = '\0';
   if (up)
     sprintf (buf, "blt%s %s", ex, n->bottom);
@@ -6521,7 +6521,7 @@ s_mri_for (qual)
     strcpy (s, "sub");
   s += 3;
   if (qual != '\0')
-    *s++ = tolower(qual);
+    *s++ = tolower (qual);
   *s++ = ' ';
   memcpy (s, bystart, bystop - bystart);
   s += bystop - bystart;
