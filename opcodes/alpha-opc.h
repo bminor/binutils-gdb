@@ -26,12 +26,13 @@
 #define RB(x) (((x)>>16)& 0x1f)
 #define RC(x) (((x)>>0) & 0x1f)
 #define DISP(x) ((((x) & 0xffff) ^ 0x8000)-0x8000)
-#define BDISP(x) ((((x) & 0x1fffff) ^ 0x10000)-0x10000)
+#define BDISP(x) ((((x) & 0x1fffff) ^ 0x100000)-0x100000)
 #define OPCODE(x) (((x) >>26)&0x3f)
 #define JUMP_OPTYPE(x) (((x)>>14) & 0xf)
 #define JUMP_HINT(x) ((x) & 0x3fff)
+#define JDISP(x) ((((x) & 0x3fff) ^ 0x2000)-0x2000)
 #define OP_OPTYPE(x) (((x)>>5)&0x7f)
-#define OP_IS_CONSTANT(x) ((x) & (1<<13))
+#define OP_IS_CONSTANT(x) ((x) & (1<<12))
 #define LITERAL(x) (((x)>>13) & 0xff)
 
 
