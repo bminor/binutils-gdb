@@ -16,6 +16,7 @@
    59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "ansidecl.h"
+#include "sysdep.h"
 #include "dis-asm.h"
 #include "opcode/txvu.h"
 
@@ -1283,7 +1284,7 @@ const struct txvu_operand pke_operands[] =
 
   /* The IMR bits of the unpack insn.  */
 #define PKE_IMRBITS (PKE_VARLENDATA + 1)
-  { 0, 0, 0, parse_pke_imrbits, 0, 0, print_pke_imrbits },
+  { 0, 0, TXVU_OPERAND_SUFFIX, parse_pke_imrbits, 0, 0, print_pke_imrbits },
 
   /* The type of the unpack insn.  */
 #define PKE_UNPACKTYPE (PKE_IMRBITS + 1)
@@ -1326,8 +1327,8 @@ struct txvu_opcode pke_opcodes[] =
   { "stmask", { PKE_IBIT, SP, PKE_UIMM32 }, MPKECMD, VPKECMD (32), PKE_OPCODE_LEN2 },
 
   /* 5 word instructions */
-  { "strow", { PKE_IBIT, SP, PKE_UIMM32, PKE_UIMM32, PKE_UIMM32, PKE_UIMM32 }, MPKECMD, VPKECMD (48), PKE_OPCODE_LEN5 },
-  { "stcol", { PKE_IBIT, SP, PKE_UIMM32, PKE_UIMM32, PKE_UIMM32, PKE_UIMM32 }, MPKECMD, VPKECMD (49), PKE_OPCODE_LEN5 },
+  { "strow", { PKE_IBIT, SP, PKE_UIMM32, C, PKE_UIMM32, C, PKE_UIMM32, C, PKE_UIMM32 }, MPKECMD, VPKECMD (48), PKE_OPCODE_LEN5 },
+  { "stcol", { PKE_IBIT, SP, PKE_UIMM32, C, PKE_UIMM32, C, PKE_UIMM32, C, PKE_UIMM32 }, MPKECMD, VPKECMD (49), PKE_OPCODE_LEN5 },
 
   /* variable length instructions */
   { "mpg", { PKE_IBIT, SP, PKE_MPGADDR, PKE_VARLENDATA }, MPKECMD, VPKECMD (0x4a), PKE_OPCODE_LENVAR + PKE_OPCODE_MPG },
@@ -1344,6 +1345,23 @@ parse_pke_ibit (pstr, errmsg)
      char **pstr;
      const char **errmsg;
 {
+  char *str = *pstr;
+  int flags = 0;
+
+  if (*str != '[')
+    return 0;
+
+  for (str = str + 1; *str != ']'; ++str)
+    {
+      switch (tolower (*str))
+	{
+	case 'i' : flags = 1; break;
+	default : *errmsg = "unknown flag"; return 0;
+	}
+    }
+
+  *pstr = str + 1;
+  return flags;
 }
 
 static void
@@ -1355,11 +1373,36 @@ print_pke_ibit (info, insn, value)
   (*info->fprintf_func) (info->stream, "???");
 }
 
+static const keyword stmod_modes[] = {
+  { PKE_MODE_DIRECT, "direct" },
+  { PKE_MODE_ADD,    "add" },
+  { PKE_MODE_ADDROW, "addrow" },
+  { 0, 0 }
+};
+
 static long
 parse_pke_mode (pstr, errmsg)
      char **pstr;
      const char **errmsg;
 {
+  int mode;
+  char *str = *pstr;
+  char *start;
+  char c;
+
+  start = str;
+  str = scan_symbol (str);
+  c = *str;
+  *str = 0;
+  mode = lookup_keyword_value (stmod_modes, start, 0);
+  *str = c;
+  if (mode != -1)
+    {
+      *pstr = str;
+      return mode;
+    }
+  *errmsg = "invalid mode";
+  return 0;
 }
 
 static void
@@ -1376,6 +1419,20 @@ parse_pke_ability (pstr, errmsg)
      char **pstr;
      const char **errmsg;
 {
+  char *str = *pstr;
+
+  if (strncasecmp (str, "disable", 7) == 0)
+    {
+      *pstr += 7;
+      return 0;
+    }
+  else if (strncasecmp (str, "enable", 6) == 0)
+    {
+      *pstr += 6;
+      return 1;
+    }
+  *errmsg = "invalid ability";
+  return 0;
 }
 
 static void
@@ -1392,15 +1449,53 @@ parse_pke_mpgaddr (pstr, errmsg)
      char **pstr;
      const char **errmsg;
 {
+  char *str = *pstr;
+  char *start;
+
+  if (*str == '*')
+    {
+      ++*pstr;
+      return 0; /* FIXME:indicate * somehow */
+    }
+
+  start = str;
+  str = strchr (str, ',');
+  if (! str)
+    {
+      *errmsg = "invalid mpg address";
+      return 0;
+    }
+
+  /* FIXME: call back to expression() to parse address.  */
+
+  *pstr = str;
+  return 0;
 }
+
+/* The result here is either the length specified,
+   or PKE_VARLENDATA_FILE or PKE_VARLENDATA_UNKNOWN.  */
 
 static long
 parse_pke_varlendata (pstr, errmsg)
      char **pstr;
      const char **errmsg;
 {
-  /* The result here is either the length specified,
-     or PKE_VARLENDATA_FILE or PKE_VARLENDATA_UNKNOWN.  */
+  char *str = *pstr;
+  char *start;
+
+  if (*str == '*')
+    {
+      ++*pstr;
+      return 0; /* FIXME:indicate * somehow */
+    }
+
+  start = str;
+
+  /* FIXME: call back to expression() to parse address,
+     and pick out filename if such.  */
+
+  *pstr = str + strlen (str);
+  return 0;
 }
 
 static long
@@ -1408,6 +1503,25 @@ parse_pke_imrbits (pstr, errmsg)
      char **pstr;
      const char **errmsg;
 {
+  char *str = *pstr;
+  int flags = 0;
+
+  if (*str != '[')
+    return 0;
+
+  for (str = str + 1; *str != ']'; ++str)
+    {
+      switch (tolower (*str))
+	{
+	case 'i' : flags |= PKE_FLAG_I; break;
+	case 'm' : flags |= PKE_FLAG_M; break;
+	case 'r' : flags |= PKE_FLAG_R; break;
+	default : *errmsg = "unknown pke flag"; return 0;
+	}
+    }
+
+  *pstr = str + 1;
+  return flags;
 }
 
 static void
@@ -1419,11 +1533,46 @@ print_pke_imrbits (info, insn, value)
   (*info->fprintf_func) (info->stream, "???");
 }
 
+static const keyword unpack_types[] = {
+  { PKE_UNPACK_S_32, "s_32" },
+  { PKE_UNPACK_S_16, "s_16" },
+  { PKE_UNPACK_S_8, "s_8" },
+  { PKE_UNPACK_V2_32, "v2_32" },
+  { PKE_UNPACK_V2_16, "v2_16" },
+  { PKE_UNPACK_V2_8, "v2_8" },
+  { PKE_UNPACK_V3_32, "v3_32" },
+  { PKE_UNPACK_V3_16, "v3_16" },
+  { PKE_UNPACK_V3_8, "v3_8" },
+  { PKE_UNPACK_V4_32, "v4_32" },
+  { PKE_UNPACK_V4_16, "v4_16" },
+  { PKE_UNPACK_V4_8, "v4_8" },
+  { PKE_UNPACK_V4_5, "v4_5" },
+  { 0, 0 }
+};
+
 static long
 parse_pke_unpacktype (pstr, errmsg)
      char **pstr;
      const char **errmsg;
 {
+  int type;
+  char *str = *pstr;
+  char *start;
+  char c;
+
+  start = str;
+  str = scan_symbol (str);
+  c = *str;
+  *str = 0;
+  type = lookup_keyword_value (unpack_types, start, 0);
+  *str = c;
+  if (type != -1)
+    {
+      *pstr = str;
+      return type;
+    }
+  *errmsg = "invalid unpack type";
+  return 0;
 }
 
 static void
@@ -1470,12 +1619,12 @@ const struct txvu_operand dma_operands[] =
   { 0, 0, TXVU_OPERAND_SUFFIX,
       parse_dma_flags, insert_dma_flags, extract_dma_flags, print_dma_flags },
 
-  /* dma tag flag bits */
+  /* dma data spec */
 #define DMA_DATA (DMA_FLAGS + 1)
   { 0, 0, 0,
       parse_dma_data, insert_dma_data, extract_dma_data, print_dma_data },
 
-  /* dma tag flag bits */
+  /* dma next tag spec */
 #define DMA_NEXT (DMA_DATA + 1)
   { 0, 0, 0,
       parse_dma_next, insert_dma_next, extract_dma_next, print_dma_next },
