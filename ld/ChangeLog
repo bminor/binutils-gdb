@@ -1,3 +1,8 @@
+001-02-18  David O'Brien  <obrien@FreeBSD.org>
+
+	* configure.tgt: Add FreeBSD/Alpha, FreeBSD/x86-64, FreeBSD/ia64,
+	FreeBSD/PowerPC, FreeBSD/arm, and FreeBSD/sparc64 entries.
+
 2001-02-17  David O'Brien  <obrien@FreeBSD.org>
 
 	* configure.host: Add a generic FreeBSD configuration entry such that
