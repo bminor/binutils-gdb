@@ -4600,7 +4600,8 @@ elf_link_create_dynamic_sections (abfd, info)
 	  (struct bfd_link_hash_entry **) &h)))
     return false;
   h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
-		 
+  h->type = STT_OBJECT;
+
   if (info->shared
       && ! elf_link_record_dynamic_symbol (info, h))
     return false;
@@ -4787,17 +4788,12 @@ NAME(bfd_elf,record_link_assignment) (output_bfd, info, name)
 {
   struct elf_link_hash_entry *h;
 
-  /* This is called after we have examined all the input objects.  If
-     we are generating a shared library, we always output these
-     symbols.  Otherwise, if the symbol does not exist, it merely
-     means that no object refers to it, and we can just ignore it at
-     this point.  */
-  h = elf_link_hash_lookup (elf_hash_table (info), name,
-			    info->shared, info->shared, false);
+  h = elf_link_hash_lookup (elf_hash_table (info), name, true, true, false);
   if (h == NULL)
-    return ! info->shared;
+    return false;
 
   h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
+  h->type = STT_OBJECT;
 
   if (((h->elf_link_hash_flags & (ELF_LINK_HASH_DEF_DYNAMIC
 				  | ELF_LINK_HASH_REF_DYNAMIC)) != 0
@@ -5813,7 +5809,10 @@ elf_link_output_extsym (h, data)
   sym.st_size = h->size;
   sym.st_other = 0;
   if (h->root.type == bfd_link_hash_weak
-      || (h->elf_link_hash_flags & ELF_LINK_HASH_DEFINED_WEAK) != 0)
+      || ((h->elf_link_hash_flags & ELF_LINK_HASH_DEFINED_WEAK) != 0
+	  && ((h->elf_link_hash_flags & (ELF_LINK_HASH_REF_REGULAR
+					 | ELF_LINK_HASH_REF_DYNAMIC))
+	      == 0)))
     sym.st_info = ELF_ST_INFO (STB_WEAK, h->type);
   else
     sym.st_info = ELF_ST_INFO (STB_GLOBAL, h->type);

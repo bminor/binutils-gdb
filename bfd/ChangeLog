@@ -5,6 +5,18 @@ Mon Aug  1 17:55:53 1994  Fred Fish  (fnf@cygnus.com)
 
 Mon Aug  1 12:04:40 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	ELF linker patches from Eric Youngdale <ericy@cais.cais.com>.
+	* elfcode.h (elf_link_create_dynamic_sections): Set type of
+	_DYNAMIC to STT_OBJECT.
+	(NAME(bfd_elf,record_link_assignment)): Always create hash table
+	entry.  Set type to STT_OBJECT.
+	(elf_link_output_extsym): Don't set type of weak defined symbol to
+	STB_WEAK if symbol was referenced.
+	* elf32-i386.c (elf_i386_create_dynamic_sections): Set type of
+	_GLOBAL_OFFSET_TABLE to STT_OBJECT.
+	(elf_i386_check_relocs): Ignore local PLT32 relocs.
+	(elf_i386_relocate_section): Treat local PLT32 relocs as PC32.
+
 	* elfcode.h (elf_adjust_dynamic_symbol): Correct weak symbol
 	handling again.
 
