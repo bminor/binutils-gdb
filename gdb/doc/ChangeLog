@@ -1,6 +1,9 @@
 2004-05-08  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Delete
+	description of DEPRECATED_PUSH_DUMMY_FRAME.
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
 	reference to DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET.
 
 2004-05-07  Andrew Cagney  <cagney@redhat.com>

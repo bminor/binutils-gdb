@@ -3705,10 +3705,6 @@ This method replaces @code{DEPRECATED_CALL_DUMMY_WORDS},
 @code{CALL_DUMMY_LOCATION}, @code{DEPRECATED_REGISTER_SIZE}, and
 @code{DEPRECATED_FIX_CALL_DUMMY}.
 
-@item DEPRECATED_PUSH_DUMMY_FRAME
-@findex DEPRECATED_PUSH_DUMMY_FRAME
-Used in @samp{call_function_by_hand} to create an artificial stack frame.
-
 @item DEPRECATED_REGISTER_BYTES
 @findex DEPRECATED_REGISTER_BYTES
 The total amount of space needed to store @value{GDBN}'s copy of the

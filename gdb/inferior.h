@@ -443,10 +443,6 @@ extern int attach_flag;
 /* FIXME: cagney/2000-04-17: gdbarch should manage this.  The default
    shouldn't be necessary. */
 
-#if !defined PUSH_DUMMY_FRAME
-#define PUSH_DUMMY_FRAME (internal_error (__FILE__, __LINE__, "PUSH_DUMMY_FRAME"), 0)
-#endif
-
 #if !defined STORE_STRUCT_RETURN
 #define STORE_STRUCT_RETURN(a1,a2) (internal_error (__FILE__, __LINE__, "STORE_STRUCT_RETURN"), 0)
 #endif

@@ -885,33 +885,6 @@ typedef CORE_ADDR (gdbarch_push_dummy_code_ftype) (struct gdbarch *gdbarch, CORE
 extern CORE_ADDR gdbarch_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp, CORE_ADDR funaddr, int using_gcc, struct value **args, int nargs, struct type *value_type, CORE_ADDR *real_pc, CORE_ADDR *bp_addr);
 extern void set_gdbarch_push_dummy_code (struct gdbarch *gdbarch, gdbarch_push_dummy_code_ftype *push_dummy_code);
 
-/* Implement PUSH_DUMMY_CALL, then delete DEPRECATED_PUSH_DUMMY_FRAME. */
-
-#if defined (DEPRECATED_PUSH_DUMMY_FRAME)
-/* Legacy for systems yet to multi-arch DEPRECATED_PUSH_DUMMY_FRAME */
-#if !defined (DEPRECATED_PUSH_DUMMY_FRAME_P)
-#define DEPRECATED_PUSH_DUMMY_FRAME_P() (1)
-#endif
-#endif
-
-extern int gdbarch_deprecated_push_dummy_frame_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_PUSH_DUMMY_FRAME_P)
-#error "Non multi-arch definition of DEPRECATED_PUSH_DUMMY_FRAME"
-#endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_PUSH_DUMMY_FRAME_P)
-#define DEPRECATED_PUSH_DUMMY_FRAME_P() (gdbarch_deprecated_push_dummy_frame_p (current_gdbarch))
-#endif
-
-typedef void (gdbarch_deprecated_push_dummy_frame_ftype) (void);
-extern void gdbarch_deprecated_push_dummy_frame (struct gdbarch *gdbarch);
-extern void set_gdbarch_deprecated_push_dummy_frame (struct gdbarch *gdbarch, gdbarch_deprecated_push_dummy_frame_ftype *deprecated_push_dummy_frame);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_PUSH_DUMMY_FRAME)
-#error "Non multi-arch definition of DEPRECATED_PUSH_DUMMY_FRAME"
-#endif
-#if !defined (DEPRECATED_PUSH_DUMMY_FRAME)
-#define DEPRECATED_PUSH_DUMMY_FRAME (gdbarch_deprecated_push_dummy_frame (current_gdbarch))
-#endif
-
 #if defined (DEPRECATED_DO_REGISTERS_INFO)
 /* Legacy for systems yet to multi-arch DEPRECATED_DO_REGISTERS_INFO */
 #if !defined (DEPRECATED_DO_REGISTERS_INFO_P)

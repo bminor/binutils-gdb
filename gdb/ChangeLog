@@ -1,5 +1,14 @@
 2004-05-08  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (DEPRECATED_PUSH_DUMMY_FRAME): Delete.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* inferior.h (PUSH_DUMMY_FRAME): Delete macro.
+	* infcall.c (call_function_by_hand): Eliminate call to
+	DEPRECATED_PUSH_DUMMY_FRAME.
+	* ns32k-tdep.c (ns32k_gdbarch_init): Do not set deprecated
+	push_dummy_frame.
+	(ns32k_push_dummy_frame): Delete function.
+
 	* ns32k-tdep.c (ns32k_gdbarch_init): Do not set
 	deprecated_call_dummy_breakpoint_offset or
 	deprecated_call_dummy_start_offset.

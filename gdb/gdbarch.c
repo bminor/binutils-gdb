@@ -166,7 +166,6 @@ struct gdbarch
   int deprecated_sizeof_call_dummy_words;
   gdbarch_deprecated_fix_call_dummy_ftype *deprecated_fix_call_dummy;
   gdbarch_push_dummy_code_ftype *push_dummy_code;
-  gdbarch_deprecated_push_dummy_frame_ftype *deprecated_push_dummy_frame;
   gdbarch_deprecated_do_registers_info_ftype *deprecated_do_registers_info;
   gdbarch_print_registers_info_ftype *print_registers_info;
   gdbarch_print_float_info_ftype *print_float_info;
@@ -323,7 +322,6 @@ struct gdbarch startup_gdbarch =
   0,  /* deprecated_sizeof_call_dummy_words */
   0,  /* deprecated_fix_call_dummy */
   0,  /* push_dummy_code */
-  0,  /* deprecated_push_dummy_frame */
   0,  /* deprecated_do_registers_info */
   default_print_registers_info,  /* print_registers_info */
   0,  /* print_float_info */
@@ -617,7 +615,6 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of deprecated_sizeof_call_dummy_words, invalid_p == 0 */
   /* Skip verify of deprecated_fix_call_dummy, has predicate */
   /* Skip verify of push_dummy_code, has predicate */
-  /* Skip verify of deprecated_push_dummy_frame, has predicate */
   /* Skip verify of deprecated_do_registers_info, has predicate */
   /* Skip verify of print_registers_info, invalid_p == 0 */
   /* Skip verify of print_float_info, has predicate */
@@ -1299,25 +1296,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
                       "gdbarch_dump: DEPRECATED_PUSH_ARGUMENTS = <0x%08lx>\n",
                       (long) current_gdbarch->deprecated_push_arguments
                       /*DEPRECATED_PUSH_ARGUMENTS ()*/);
-#endif
-#ifdef DEPRECATED_PUSH_DUMMY_FRAME_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "DEPRECATED_PUSH_DUMMY_FRAME_P()",
-                      XSTRING (DEPRECATED_PUSH_DUMMY_FRAME_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_PUSH_DUMMY_FRAME_P() = %d\n",
-                      DEPRECATED_PUSH_DUMMY_FRAME_P ());
-#endif
-#ifdef DEPRECATED_PUSH_DUMMY_FRAME
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "DEPRECATED_PUSH_DUMMY_FRAME(-)",
-                      XSTRING (DEPRECATED_PUSH_DUMMY_FRAME (-)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_PUSH_DUMMY_FRAME = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_push_dummy_frame
-                      /*DEPRECATED_PUSH_DUMMY_FRAME ()*/);
 #endif
 #ifdef DEPRECATED_PUSH_RETURN_ADDRESS_P
   fprintf_unfiltered (file,
@@ -3342,30 +3320,6 @@ set_gdbarch_push_dummy_code (struct gdbarch *gdbarch,
                              gdbarch_push_dummy_code_ftype push_dummy_code)
 {
   gdbarch->push_dummy_code = push_dummy_code;
-}
-
-int
-gdbarch_deprecated_push_dummy_frame_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  return gdbarch->deprecated_push_dummy_frame != NULL;
-}
-
-void
-gdbarch_deprecated_push_dummy_frame (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->deprecated_push_dummy_frame != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_push_dummy_frame called\n");
-  gdbarch->deprecated_push_dummy_frame ();
-}
-
-void
-set_gdbarch_deprecated_push_dummy_frame (struct gdbarch *gdbarch,
-                                         gdbarch_deprecated_push_dummy_frame_ftype deprecated_push_dummy_frame)
-{
-  gdbarch->deprecated_push_dummy_frame = deprecated_push_dummy_frame;
 }
 
 int

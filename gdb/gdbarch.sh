@@ -534,8 +534,6 @@ v::DEPRECATED_SIZEOF_CALL_DUMMY_WORDS:int:deprecated_sizeof_call_dummy_words::::
 F::DEPRECATED_FIX_CALL_DUMMY:void:deprecated_fix_call_dummy:char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs, struct value **args, struct type *type, int gcc_p:dummy, pc, fun, nargs, args, type, gcc_p
 # This is a replacement for DEPRECATED_FIX_CALL_DUMMY et.al.
 M::PUSH_DUMMY_CODE:CORE_ADDR:push_dummy_code:CORE_ADDR sp, CORE_ADDR funaddr, int using_gcc, struct value **args, int nargs, struct type *value_type, CORE_ADDR *real_pc, CORE_ADDR *bp_addr:sp, funaddr, using_gcc, args, nargs, value_type, real_pc, bp_addr
-# Implement PUSH_DUMMY_CALL, then delete DEPRECATED_PUSH_DUMMY_FRAME.
-F:2:DEPRECATED_PUSH_DUMMY_FRAME:void:deprecated_push_dummy_frame:void:-
 
 F:2:DEPRECATED_DO_REGISTERS_INFO:void:deprecated_do_registers_info:int reg_nr, int fpregs:reg_nr, fpregs
 m:2:PRINT_REGISTERS_INFO:void:print_registers_info:struct ui_file *file, struct frame_info *frame, int regnum, int all:file, frame, regnum, all:::default_print_registers_info::0

@@ -324,34 +324,23 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   inf_status = save_inferior_status (1);
   inf_status_cleanup = make_cleanup_restore_inferior_status (inf_status);
 
-  if (DEPRECATED_PUSH_DUMMY_FRAME_P ())
-    {
-      /* DEPRECATED_PUSH_DUMMY_FRAME is responsible for saving the
-	 inferior registers (and frame_pop() for restoring them).  (At
-	 least on most machines) they are saved on the stack in the
-	 inferior.  */
-      DEPRECATED_PUSH_DUMMY_FRAME;
-    }
-  else
-    {
-      /* FIXME: cagney/2003-02-26: Step zero of this little tinker is
-      to extract the generic dummy frame code from the architecture
-      vector.  Hence this direct call.
+  /* FIXME: cagney/2003-02-26: Step zero of this little tinker is to
+     extract the generic dummy frame code from the architecture
+     vector.  Hence this direct call.
 
-      A follow-on change is to modify this interface so that it takes
-      thread OR frame OR ptid as a parameter, and returns a dummy
-      frame handle.  The handle can then be used further down as a
-      parameter to generic_save_dummy_frame_tos().  Hmm, thinking
-      about it, since everything is ment to be using generic dummy
-      frames, why not even use some of the dummy frame code to here -
-      do a regcache dup and then pass the duped regcache, along with
-      all the other stuff, at one single point.
+     A follow-on change is to modify this interface so that it takes
+     thread OR frame OR ptid as a parameter, and returns a dummy frame
+     handle.  The handle can then be used further down as a parameter
+     to generic_save_dummy_frame_tos().  Hmm, thinking about it, since
+     everything is ment to be using generic dummy frames, why not even
+     use some of the dummy frame code to here - do a regcache dup and
+     then pass the duped regcache, along with all the other stuff, at
+     one single point.
 
-      In fact, you can even save the structure's return address in the
-      dummy frame and fix one of those nasty lost struct return edge
-      conditions.  */
-      generic_push_dummy_frame ();
-    }
+     In fact, you can even save the structure's return address in the
+     dummy frame and fix one of those nasty lost struct return edge
+     conditions.  */
+  generic_push_dummy_frame ();
 
   /* Ensure that the initial SP is correctly aligned.  */
   {

@@ -399,22 +399,6 @@ ns32k_frame_init_saved_regs (struct frame_info *frame)
 }
 
 static void
-ns32k_push_dummy_frame (void)
-{
-  CORE_ADDR sp = read_register (SP_REGNUM);
-  int regnum;
-
-  sp = push_word (sp, read_register (PC_REGNUM));
-  sp = push_word (sp, read_register (DEPRECATED_FP_REGNUM));
-  write_register (DEPRECATED_FP_REGNUM, sp);
-
-  for (regnum = 0; regnum < 8; regnum++)
-    sp = push_word (sp, read_register (regnum));
-
-  write_register (SP_REGNUM, sp);
-}
-
-static void
 ns32k_pop_frame (void)
 {
   struct frame_info *frame = get_current_frame ();
@@ -574,7 +558,6 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_store_return_value (gdbarch, ns32k_store_return_value);
 
   /* Call dummy info */
-  set_gdbarch_deprecated_push_dummy_frame (gdbarch, ns32k_push_dummy_frame);
   set_gdbarch_deprecated_pop_frame (gdbarch, ns32k_pop_frame);
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
   set_gdbarch_deprecated_call_dummy_words (gdbarch, ns32k_call_dummy_words);
