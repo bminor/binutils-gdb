@@ -1,3 +1,7 @@
+2004-04-23  Joel Brobecker  <brobecker@gnat.com>
+
+	* ChangeLog-2002: Fix year in one of the ChangeLog entries.
+
 2004-04-23  Jerome Guitton  <guitton@gnat.fr>
 
 	* rs6000-tdep.c (rs6000_extract_return_value): When extracting a float,
