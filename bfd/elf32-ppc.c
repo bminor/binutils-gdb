@@ -1723,6 +1723,7 @@ ppc_elf_relax_section (bfd *abfd,
       bfd_vma max_branch_offset, val;
       bfd_byte *hit_addr;
       unsigned long t0;
+      unsigned char sym_type;
 
       switch (r_type)
 	{
@@ -1770,6 +1771,7 @@ ppc_elf_relax_section (bfd *abfd,
 	    tsec = bfd_section_from_elf_index (abfd, isym->st_shndx);
 
 	  toff = isym->st_value;
+	  sym_type = ELF_ST_TYPE (isym->st_info);
 	}
       else
 	{
@@ -1799,6 +1801,8 @@ ppc_elf_relax_section (bfd *abfd,
 	    }
 	  else
 	    continue;
+
+	  sym_type = h->type;
 	}
 
       /* If the branch and target are in the same section, you have
@@ -1807,11 +1811,41 @@ ppc_elf_relax_section (bfd *abfd,
       if (tsec == isec)
 	continue;
 
-      toff += irel->r_addend;
-      if (tsec->sec_info_type == ELF_INFO_TYPE_MERGE)
-	toff = _bfd_merged_section_offset (abfd, &tsec,
-					   elf_section_data (tsec)->sec_info,
-					   toff);
+      /* There probably isn't any reason to handle symbols in
+	 SEC_MERGE sections;  SEC_MERGE doesn't seem a likely
+	 attribute for a code section, and we are only looking at
+	 branches.  However, implement it correctly here as a
+	 reference for other target relax_section functions.  */
+      if (0 && tsec->sec_info_type == ELF_INFO_TYPE_MERGE)
+	{
+	  /* At this stage in linking, no SEC_MERGE symbol has been
+	     adjusted, so all references to such symbols need to be
+	     passed through _bfd_merged_section_offset.  (Later, in
+	     relocate_section, all SEC_MERGE symbols *except* for
+	     section symbols have been adjusted.)
+
+	     gas may reduce relocations against symbols in SEC_MERGE
+	     sections to a relocation against the section symbol when
+	     the original addend was zero.  When the reloc is against
+	     a section symbol we should include the addend in the
+	     offset passed to _bfd_merged_section_offset, since the
+	     location of interest is the original symbol.  On the
+	     other hand, an access to "sym+addend" where "sym" is not
+	     a section symbol should not include the addend;  Such an
+	     access is presumed to be an offset from "sym";  The
+	     location of interest is just "sym".  */
+	  if (sym_type == STT_SECTION)
+	    toff += irel->r_addend;
+
+	  toff = _bfd_merged_section_offset (abfd, &tsec,
+					     elf_section_data (tsec)->sec_info,
+					     toff);
+
+	  if (sym_type != STT_SECTION)
+	    toff += irel->r_addend;
+	}
+      else
+	toff += irel->r_addend;
 
       symaddr = tsec->output_section->vma + tsec->output_offset + toff;
 

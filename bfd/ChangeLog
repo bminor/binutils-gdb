@@ -1,3 +1,8 @@
+2004-06-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (ppc_elf_relax_section): Implement reference code
+	for handling SEC_MERGE symbols in relax_section.
+
 2004-06-21  Alexandre Oliva  <aoliva@redhat.com>
 
 	2003-05-15  Richard Sandiford  <rsandifo@redhat.com>
