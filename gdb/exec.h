@@ -28,7 +28,7 @@ struct section_table;
 struct target_ops;
 struct bfd;
 
-struct target_ops exec_ops;
+extern struct target_ops exec_ops;
 
 /* Builds a section table, given args BFD, SECTABLE_PTR, SECEND_PTR.
    Returns 0 if OK, 1 on error.  */

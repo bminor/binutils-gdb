@@ -1,5 +1,7 @@
 2004-01-12  Andrew Cagney  <cagney@redhat.com>
 
+	* exec.h (exec_ops): Make "extern".
+
 	* mips-tdep.c (mips_pseudo_register_read): Don't return a value,
 	the function is void.
 	(mips_pseudo_register_write): Ditto.
