@@ -1,4 +1,5 @@
-/* System-dependent stuff, for Sony NEwS systems */
+/* System-dependent stuff, for Sony NEwS, Mach, and other systems 
+   in the "old BSD Unix" tradition.  */
 
 #ifdef __GNUC__
 #define alloca __builtin_alloca

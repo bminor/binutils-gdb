@@ -1,5 +1,8 @@
 Fri Nov 22 09:02:32 1991  John Gilmore  (gnu at cygnus.com)
 
+	* sysdep-oldbsd.h:  Rename from sysdep-newsos.h.
+	* configure.in:  Use sysdep-oldbsd for Mach as well as NEWs.
+
 	* sysdep-norm.h, sysdep-aix.h:  Add <sys/types.h>, which POSIX
 	requires to make <dirent.h> work.  Improve Sun alloca decl.
 

@@ -34,8 +34,8 @@ irix*)
 	files=sysdep-irix.h
 	;;
 
-newsos*)
-	files=sysdep-newsos.h
+newsos* | mach*)
+	files=sysdep-oldbsd.h
 	;;
 esac
 
