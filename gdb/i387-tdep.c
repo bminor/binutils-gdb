@@ -67,7 +67,7 @@ void
 print_387_control_word (control)
 unsigned short control;
 {
-  printf ("control %s: ", hex_to_string(control));
+  printf ("control %s: ", local_hex_string(control));
   printf ("compute to ");
   switch ((control >> 8) & 3) 
     {
@@ -97,14 +97,14 @@ unsigned short control;
     }
   printf ("\n");
   if (control & 0xe080) printf ("warning: reserved bits on: %s\n",
-				hex_to_string(control & 0xe080));
+				local_hex_string(control & 0xe080));
 }
 
 void
 print_387_status_word (status)
      unsigned short status;
 {
-  printf ("status %s: ", hex_to_string (status));
+  printf ("status %s: ", local_hex_string (status));
   if (status & 0xff) 
     {
       printf ("exceptions:");

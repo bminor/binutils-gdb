@@ -25,7 +25,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* FIXME: Can a MIPS porter/tester determine which of these include
    files we still need?   -- gnu@cygnus.com */
 #include <stdio.h>
+#ifdef sgi
+#include <sys/inst.h>
+#else
 #include <mips/inst.h>
+#endif
 #include "defs.h"
 #include "param.h"
 #include "frame.h"
@@ -536,7 +540,8 @@ mips_pop_frame()
   set_current_frame (create_new_frame (new_sp, read_pc ()));
 }
 
-static mips_print_register(regnum, all)
+static
+mips_print_register(regnum, all)
      int regnum, all;
 {
       unsigned char raw_buffer[8];
@@ -574,13 +579,13 @@ static mips_print_register(regnum, all)
 	  if (val == 0)
 	    printf_filtered ("0");
 	  else if (all)
-	    printf_filtered ("0x%x", val);
+	    printf_filtered (local_hex_format(), val);
 	  else
-	    printf_filtered ("0x%x=%d", val, val);
+	    printf_filtered ("%s=%d", local_hex_string(val), val);
 	}
 }
 
-/* Replacement for generic do_registers_info.  fpregs is currently ignored. */
+/* Replacement for generic do_registers_info.  */
 mips_do_registers_info (regnum, fpregs)
      int regnum;
      int fpregs;
@@ -591,6 +596,10 @@ mips_do_registers_info (regnum, fpregs)
   }
   else {
       for (regnum = 0; regnum < NUM_REGS; ) {
+	  if ((!fpregs) && regnum >= FP0_REGNUM && regnum <= FCRIR_REGNUM) {
+	    regnum++;
+	    continue;
+	  }
 	  mips_print_register (regnum, 1);
 	  regnum++;
 	  if ((regnum & 3) == 0 || regnum == NUM_REGS)
