@@ -1,0 +1,11 @@
+# m32r testcase for cmpi $src2,#$simm16
+# mach(): m32r m32rx
+
+	.include "testutils.inc"
+
+	start
+
+	.global cmpi
+cmpi:
+
+	pass

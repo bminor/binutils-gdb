@@ -1,0 +1,11 @@
+# m32r testcase for blez $src2,$disp16
+# mach(): m32r m32rx
+
+	.include "testutils.inc"
+
+	start
+
+	.global blez
+blez:
+
+	pass

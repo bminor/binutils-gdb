@@ -1,0 +1,11 @@
+# m32r testcase for rac $accd,$accs
+# mach(): m32r m32rx
+
+	.include "testutils.inc"
+
+	start
+
+	.global rac_ds
+rac_ds:
+
+	pass

@@ -1,0 +1,11 @@
+# m32r testcase for cmpui $src2,#$uimm16
+# mach(): m32r m32rx
+
+	.include "testutils.inc"
+
+	start
+
+	.global cmpui
+cmpui:
+
+	pass

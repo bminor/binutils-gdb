@@ -1,0 +1,11 @@
+# m32r testcase for seth $dr,#$hi16
+# mach(): m32r m32rx
+
+	.include "testutils.inc"
+
+	start
+
+	.global seth
+seth:
+
+	pass

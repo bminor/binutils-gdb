@@ -1,0 +1,11 @@
+# m32r testcase for sth $src1,@$src2
+# mach(): m32r m32rx
+
+	.include "testutils.inc"
+
+	start
+
+	.global sth
+sth:
+
+	pass

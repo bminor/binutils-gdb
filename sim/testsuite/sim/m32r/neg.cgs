@@ -1,0 +1,11 @@
+# m32r testcase for neg $dr,$sr
+# mach(): m32r m32rx
+
+	.include "testutils.inc"
+
+	start
+
+	.global neg
+neg:
+
+	pass

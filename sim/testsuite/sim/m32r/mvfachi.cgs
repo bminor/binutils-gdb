@@ -1,0 +1,11 @@
+# m32r testcase for mvfachi $dr
+# mach(): m32r m32rx
+
+	.include "testutils.inc"
+
+	start
+
+	.global mvfachi
+mvfachi:
+
+	pass
