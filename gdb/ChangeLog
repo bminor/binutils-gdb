@@ -1,3 +1,11 @@
+2002-03-27  Elena Zannoni  <ezannoni@redhat.com>
+
+	* rs6000-tdep.c (struct rs6000_framedata): Add fields for AltiVec
+	vector registers handling.
+	(skip_prologue): Handle new AltiVec instructions.  Fill in new
+	fields of frame data.
+	(frame_get_saved_regs): Fill in information for AltiVec registers.
+
 2002-03-27  Jim Blandy  <jimb@redhat.com>
 
 	* symtab.h (SYMBOL_INIT_MANGLED_NAME): Turn this macro's body into
