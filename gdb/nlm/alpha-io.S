@@ -65,8 +65,7 @@ LEAF_ENTRY(flush_i_cache)
 	 *   va<42:41> = 10 (binary) for super-page address
 	 */
 
-	lda	t0, 0xc01c(zero)	/* t0 = 0000 0000 0000 c01c */
-	ldah	t0, -1(t0)		/* t0 = ffff ffff ffff c01c */
+	lda	t0, 0xc01c(zero)	/* t0 = ffff ffff ffff c01c */
 	sll	t0, 28, t0		/* t0 = ffff fc01 c000 0000 */
 
 
@@ -125,8 +124,7 @@ LEAF_ENTRY(flush_i_cache)
 	 *   va<42:41> = 10 (binary) for super-page address
 	 */
 
-	lda	t0, 0xc01c(zero)	/* t0 = 0000 0000 0000 c01c */
-	ldah	t0, -1(t0)		/* t0 = ffff ffff ffff c01c */
+	lda	t0, 0xc01c(zero)	/* t0 = ffff ffff ffff c01c */
 	sll	t0, 28, t0		/* t0 = ffff fc01 c000 0000 */
 
 

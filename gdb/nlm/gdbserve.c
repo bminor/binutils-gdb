@@ -158,9 +158,7 @@ char *hex2mem (char *buf, void *mem, int count, int may_fault);
 extern void set_step_traps (struct StackFrame *);
 extern void clear_step_traps (struct StackFrame *);
 
-#if 0
-__main() {};
-#endif
+static int __main() {};
 
 /* Read a character from the serial port.  This must busy wait, but
    that's OK because we will be the only thread running anyhow.  */

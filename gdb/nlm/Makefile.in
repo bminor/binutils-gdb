@@ -73,8 +73,7 @@ NLMCONV_FOR_TARGET = ` \
     fi; \
   fi`
 
-NWSOURCE = /gaunt/grossman/unsupported/Novell
-NWINCLUDES = -I/gaunt/grossman/PPC-NETWARE/ndk/include
+NWINCLUDES = -I/gaunt/grossman/ALPHA-NLM/940830/clib/include
 
 LD_FOR_TARGET = ` \
   if [ -f ../../ld/ld.new ] ; then \
