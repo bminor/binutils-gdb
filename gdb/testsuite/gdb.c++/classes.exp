@@ -557,7 +557,7 @@ proc test_wrong_class_members {} {
 # Should give errors.
 #
 
-proc test_nonexistant_members {} {
+proc test_nonexistent_members {} {
     global gdb_prompt
 
     gdb_test "print g_A.y" "There is no member( or method|) named y." "print g_A.y should be error"
@@ -567,6 +567,76 @@ proc test_nonexistant_members {} {
     gdb_test "print g_C.q" "There is no member( or method|) named q." "print g_C.q should be error"
 
     gdb_test "print g_D.p" "There is no member( or method|) named p." "print g_D.p should be error"
+}
+
+#
+# Examine a class with an enum field.
+#
+
+proc test_enums {} {
+    global gdb_prompt
+    global hp_aCC_compiler
+
+    # print the object
+    send_gdb "print obj_with_enum\n"
+    gdb_expect {
+	-re "\\$\[0-9\]* = \\{priv_enum = red, x = 0\\}.*$gdb_prompt $" { pass "print obj_with_enum (1)" }
+	-re "$gdb_prompt $"                     { fail "print obj_with_enum (1)" }
+	timeout                             { fail "(timeout) print obj_with_enum (1)" }
+    }
+
+    send_gdb "next\n"
+    gdb_expect {
+	-re "$gdb_prompt $"                     { pass "next" }
+	timeout                             { fail "(timeout) next" }
+    }
+
+    # print the object again
+    send_gdb "print obj_with_enum\n"
+    gdb_expect {
+	-re "\\$\[0-9\]* = \\{priv_enum = green, x = 0\\}.*$gdb_prompt $" { pass "print obj_with_enum (2)" }
+	-re "$gdb_prompt $"                     { fail "print obj_with_enum (2)" }
+	timeout                             { fail "(timeout) print obj_with_enum (2)" }
+    }
+
+    # print out the enum member
+    send_gdb "print obj_with_enum.priv_enum\n"
+    gdb_expect {
+	-re "\\$\[0-9\]* = green.*$gdb_prompt $" { pass "print obj_with_enum.priv_enum" }
+	-re "$gdb_prompt $"                     { fail "print obj_with_enum.priv_enum" }
+	timeout                             { fail "(timeout) print obj_with_enum.priv_enum" }
+    }
+
+    # ptype on the enum member
+    # The third success case is a little dubious, but it's not clear what
+    # ought to be required of a ptype on a private enum... -sts 19990324
+    send_gdb "ptype obj_with_enum.priv_enum\n"
+    gdb_expect {
+	-re "type = enum ClassWithEnum::PrivEnum \\{red, green, blue, yellow = 42\\}.*$gdb_prompt $" { pass "ptype obj_with_enum.priv_enum" }
+	-re "type = enum PrivEnum \\{red, green, blue, yellow = 42\\}.*$gdb_prompt $" { pass "ptype obj_with_enum.priv_enum" }
+	-re "type = enum \\{red, green, blue, yellow = 42\\}.*$gdb_prompt $" { pass "ptype obj_with_enum.priv_enum" }
+	-re "$gdb_prompt $"                     { fail "ptype obj_with_enum.priv_enum" }
+	timeout                             { fail "(timeout) ptype obj_with_enum.priv_enum" }
+    }
+
+    # ptype on the object
+    # g++ is putting out the wrong debug info.  This works with aCC
+    if {!$hp_aCC_compiler} {setup_xfail "*-*-*"}
+    send_gdb "ptype obj_with_enum\n"
+    gdb_expect {
+	-re "type = class ClassWithEnum \\{\r\n\[ \t\]*public:\r\n\[ \t\]*(enum |)ClassWithEnum::PrivEnum priv_enum;\r\n\[ \t\]*int x;\r\n\\}\r\n$gdb_prompt $" { pass "ptype obj_with_enum" }
+	-re "$gdb_prompt $"                     { fail "ptype obj_with_enum" }
+	timeout                             { fail "(timeout) ptype obj_with_enum" }
+    }
+
+    # g++ is putting out the wrong debug info.  This works with aCC
+    if {!$hp_aCC_compiler} {setup_xfail "*-*-*"}
+    send_gdb "print (ClassWithEnum::PrivEnum) 42\n"
+    gdb_expect {
+	-re "\\$\[0-9\]* = yellow.*$gdb_prompt $" { pass "print (ClassWithEnum::PrivEnum) 42" }
+	-re "$gdb_prompt $"                     { fail "print (ClassWithEnum::PrivEnum) 42" }
+	timeout                             { fail "(timeout) print (ClassWithEnum::PrivEnum) 42" }
+    }
 }
 
 #
@@ -735,7 +805,13 @@ proc do_tests {} {
     if [ runto 'inheritance2(void)' ] then {
 	test_non_inherited_member_access
 	test_wrong_class_members
-	test_nonexistant_members
+	test_nonexistent_members
+    }
+
+    gdb_breakpoint enums2
+    if [ gdb_continue enums2 ]==0 then {
+	send_gdb "finish\n"
+	test_enums
     }
 
     if [istarget "mips-idt-*"] then {
@@ -758,7 +834,7 @@ proc do_tests {} {
 	gdb_reinitialize_dir $srcdir/$subdir
 	gdb_load $binfile
     }
- 
+
     if [ runto marker_reg1 ] then {
 
 	gdb_test "finish" "Run till exit from.*" "finish from marker_reg1"
@@ -782,90 +858,9 @@ proc do_tests {} {
 
 do_tests
 
-
-# Some additional tests for enums inside classes
-
-
-# set a breakpoint and go there
-send_gdb "break 516\n"   
-gdb_expect {   
-   -re "Breakpoint \[0-9\] at.*$gdb_prompt $" { pass "set break 516" }
-   -re "$gdb_prompt $"                     { fail "set break 516" }
-   timeout                             { fail "(timeout) set break 516" }
-}
-send_gdb "continue\n"   
-gdb_expect {   
-   -re "Continuing\\.\r\n\r\nBreakpoint \[0-9\]*, main....at.*misc\\.cc:516\r\n516.*\r\n$gdb_prompt $" { pass "continue" }
-   -re "$gdb_prompt $"                     { fail "continue" }
-   timeout                             { fail "(timeout) continue" }
-}
-
-# print the object
-send_gdb "print obj_with_enum\n"   
-gdb_expect {   
-   -re "\\$\[0-9\]* = \\{priv_enum = red, x = 0\\}.*$gdb_prompt $" { pass "print obj_with_enum (1)" }
-   -re "$gdb_prompt $"                     { fail "print obj_with_enum (1)" }
-   timeout                             { fail "(timeout) print obj_with_enum (1)" }
-}
-
-send_gdb "next\n"   
-gdb_expect {   
-   -re "$gdb_prompt $"                     { pass "next" }
-   timeout                             { fail "(timeout) next" }
-}
-
-# print the object again
-send_gdb "print obj_with_enum\n"   
-gdb_expect {   
-   -re "\\$\[0-9\]* = \\{priv_enum = green, x = 0\\}.*$gdb_prompt $" { pass "print obj_with_enum (2)" }
-   -re "$gdb_prompt $"                     { fail "print obj_with_enum (2)" }
-   timeout                             { fail "(timeout) print obj_with_enum (2)" }
-}
-
-# print out the enum member
-send_gdb "print obj_with_enum.priv_enum\n"   
-gdb_expect {   
-   -re "\\$\[0-9\]* = green.*$gdb_prompt $" { pass "print obj_with_enum.priv_enum" }
-   -re "$gdb_prompt $"                     { fail "print obj_with_enum.priv_enum" }
-   timeout                             { fail "(timeout) print obj_with_enum.priv_enum" }
-}
-
-# ptype on the enum member
-# The third success case is a little dubious, but it's not clear what
-# ought to be required of a ptype on a private enum... -sts 19990324
-send_gdb "ptype obj_with_enum.priv_enum\n"   
-gdb_expect {   
-   -re "type = enum ClassWithEnum::PrivEnum \\{red, green, blue, yellow = 42\\}.*$gdb_prompt $" { pass "ptype obj_with_enum.priv_enum" }
-   -re "type = enum PrivEnum \\{red, green, blue, yellow = 42\\}.*$gdb_prompt $" { pass "ptype obj_with_enum.priv_enum" }
-   -re "type = enum \\{red, green, blue, yellow = 42\\}.*$gdb_prompt $" { pass "ptype obj_with_enum.priv_enum" }
-   -re "$gdb_prompt $"                     { fail "ptype obj_with_enum.priv_enum" }
-   timeout                             { fail "(timeout) ptype obj_with_enum.priv_enum" }
-}
-
-# ptype on the object
-# g++ is putting out the wrong debug info.  This works with aCC
-if {!$hp_aCC_compiler} {setup_xfail "*-*-*"}
-send_gdb "ptype obj_with_enum\n"   
-gdb_expect {   
-   -re "type = class ClassWithEnum \\{\r\n\[ \t\]*public:\r\n\[ \t\]*(enum |)ClassWithEnum::PrivEnum priv_enum;\r\n\[ \t\]*int x;\r\n\\}\r\n$gdb_prompt $" { pass "ptype obj_with_enum" }
-   -re "$gdb_prompt $"                     { fail "ptype obj_with_enum" }
-   timeout                             { fail "(timeout) ptype obj_with_enum" }
-}
-
-# g++ is putting out the wrong debug info.  This works with aCC
-if {!$hp_aCC_compiler} {setup_xfail "*-*-*"}
-send_gdb "print (ClassWithEnum::PrivEnum) 42\n"   
-gdb_expect {   
-   -re "\\$\[0-9\]* = yellow.*$gdb_prompt $" { pass "print (ClassWithEnum::PrivEnum) 42" }
-   -re "$gdb_prompt $"                     { fail "print (ClassWithEnum::PrivEnum) 42" }
-   timeout                             { fail "(timeout) print (ClassWithEnum::PrivEnum) 42" }
-}
-
-
 send_gdb "maint demangle inheritance1__Fv\n"
 gdb_expect {
    -re "inheritance1\\(void\\).*$gdb_prompt $" { pass "demangle" }
    -re ".*$gdb_prompt $"   { fail "demangle" }
    timeout           { fail "(timeout) demangle" }
 }
-

@@ -1,3 +1,14 @@
+2000-07-09  Nick Duffek  <nsd@redhat.com>
+
+	* gdb.c++/classes.exp (test_nonexistant_members): Fix name
+	spelling.
+	(test_enums): New procedure.  Move enum tests from end of script
+	to here.  Set breakpoint on function name instead of line number.
+	* gdb.c++/misc.cc (ClassWithEnum): Move past Foo definitions.
+	(enums2): New marker function.
+	(enums1): New function.
+	(main): Call enums1().  Move enum tests to enums1().
+
 Tue Jul  4 03:43:49 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdb.asm/asm-source.exp: Use raw AS/LD instead of CC to

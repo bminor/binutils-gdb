@@ -393,13 +393,6 @@ class Bar : public Base1, public Foo {
   Bar (int i, int j, int k) : Base1 (10*k), Foo (i, j) { z = k; }
 };
 
-class ClassWithEnum {
-public:
-  enum PrivEnum { red, green, blue, yellow = 42 };
-  PrivEnum priv_enum;
-  int x;
-};
-
 int Foo::operator! () { return !x; }
 
 int Foo::times (int y) { return x * y; }
@@ -410,6 +403,29 @@ Foo::operator int() { return x; }
 
 Foo foo(10, 11);
 Bar bar(20, 21, 22);
+
+class ClassWithEnum {
+public:
+  enum PrivEnum { red, green, blue, yellow = 42 };
+  PrivEnum priv_enum;
+  int x;
+};
+
+void enums2 (void)
+{
+}
+
+/* classes.exp relies on statement order in this function for testing
+   enumeration fields.  */
+
+void enums1 ()
+{
+  ClassWithEnum obj_with_enum;
+  obj_with_enum.priv_enum = ClassWithEnum::red;
+  obj_with_enum.x = 0;
+  enums2 ();
+  obj_with_enum.priv_enum = ClassWithEnum::green;
+}
 
 class Contains_static_instance
 {
@@ -509,6 +525,7 @@ main()
   dummy();
   inheritance1 ();
   inheritance3 ();
+  enums1 ();
   register_class ();
 
   /* FIXME: pmi gets optimized out.  Need to do some more computation with
@@ -518,12 +535,6 @@ main()
 
   /* Make sure the AIX linker doesn't remove the variable.  */
   v_tagless.one = 5;
-
-  /* Class with enumeration inside it */ 
-  ClassWithEnum obj_with_enum;
-  obj_with_enum.priv_enum = ClassWithEnum::red;
-  obj_with_enum.x = 0;
-  obj_with_enum.priv_enum = ClassWithEnum::green;
 
   return foo.*pmi;
 }
