@@ -177,21 +177,21 @@ _initialize_cli_logging (void)
   add_setshow_boolean_cmd ("overwrite", class_support, &logging_overwrite, "\
 Set whether logging overwrites or appends to the log file.", "\
 Show whether logging overwrites or appends to the log file.", "\
-If set, logging overrides the log file.", "\
-Whether logging overwrites or appends to the log file is %s.",
+If set, logging overrides the log file.",
+			   NULL, /* PRINT: Whether logging overwrites or appends to the log file is %s.  */
 			   NULL, NULL, &set_logging_cmdlist, &show_logging_cmdlist);
   add_setshow_boolean_cmd ("redirect", class_support, &logging_redirect, "\
 Set the logging output mode.", "\
 Show the logging output mode.", "\
 If redirect is off, output will go to both the screen and the log file.\n\
-If redirect is on, output will go only to the log file.", "\
-The logging output mode is %s.",
+If redirect is on, output will go only to the log file.",
+			   NULL, /* PRINT: The logging output mode is %s.  */
 			   NULL, NULL, &set_logging_cmdlist, &show_logging_cmdlist);
   add_setshow_filename_cmd ("file", class_support, &logging_filename, "\
 Set the current logfile.", "\
 Show the current logfile.", "\
-The logfile is used when directing GDB's output.", "\
-The current logfile is %s.",
+The logfile is used when directing GDB's output.",
+			    NULL, /* PRINT: The current logfile is %s.  */
 			    NULL, NULL,
 			    &set_logging_cmdlist, &show_logging_cmdlist);
   add_cmd ("on", class_support, set_logging_on,

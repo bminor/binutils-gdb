@@ -562,22 +562,22 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   add_setshow_string_cmd ("download-path", class_obscure, &download_path, "\
 Set the default path for downloadable SREC files.", "\
 Show the default path for downloadable SREC files.", "\
-Determines the default path for downloadable SREC files.", "\
-The default path for downloadable SREC files is %s.",
+Determines the default path for downloadable SREC files.",
+			  NULL, /* PRINT: The default path for downloadable SREC files is %s.  */
 		   NULL, NULL, &setlist, &showlist);
 
   add_setshow_string_cmd ("board-address", class_obscure, &board_addr, "\
 Set IP address for M32R-EVA target board.", "\
 Show IP address for M32R-EVA target board.", "\
-Determine the IP address for M32R-EVA target board.", "\
-IP address for M32R-EVA target board is %s",
+Determine the IP address for M32R-EVA target board.",
+			  NULL, /* PRINT: IP address for M32R-EVA target board is %s.  */
 		   NULL, NULL, &setlist, &showlist);
 
   add_setshow_string_cmd ("server-address", class_obscure, &server_addr, "\
 Set IP address for download server (GDB's host computer).", "\
 Show IP address for download server (GDB's host computer).", "\
-Determine the IP address for download server (GDB's host computer).", "\
-IP address for download server (GDB's host computer) is %s.",
+Determine the IP address for download server (GDB's host computer).",
+			  NULL, /* PRINT: IP address for download server (GDB's host computer) is %s.  */
 		   NULL, NULL, &setlist, &showlist);
 
   add_com ("upload", class_obscure, m32r_upload_command,

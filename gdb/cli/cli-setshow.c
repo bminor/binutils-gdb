@@ -337,6 +337,14 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 
       if (ui_out_is_mi_like_p (uiout))
 	ui_out_field_stream (uiout, "value", stb);
+      else if (c->fprint_setshow != NULL)
+	{
+	  long length;
+	  char *value = ui_file_xstrdup (stb->stream, &length);
+	  make_cleanup (xfree, value);
+	  c->fprint_setshow (c, gdb_stdout, value);
+	  fprintf_filtered (gdb_stdout, "\n");
+	}
       else
 	{
 	  /* Print doc minus "show" at start.  */

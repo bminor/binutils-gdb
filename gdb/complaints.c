@@ -309,13 +309,23 @@ clear_complaints (struct complaints **c, int less_verbose, int noisy)
     complaints->series = SHORT_FIRST_MESSAGE;
 }
 
+static void
+fprint_setshow_complaints (struct cmd_list_element *cmd,
+			   struct ui_file *file,
+			   const char *value)
+{
+  fprintf_filtered (file, _("Max number of complaints about incorrect"
+			    " symbols is %s."),
+		    value);
+}
+
 void
 _initialize_complaints (void)
 {
   add_setshow_zinteger_cmd ("complaints", class_support, &stop_whining, _("\
 Set max number of complaints about incorrect symbols."), _("\
-Show max number of complaints about incorrect symbols."), NULL, _("\
-Max number of complaints about incorrect symbols is %s."),
+Show max number of complaints about incorrect symbols."), NULL,
+			    fprint_setshow_complaints,
 			    NULL, NULL,
 			    &setlist, &showlist);
 

@@ -1555,8 +1555,8 @@ Set whether backtraces should continue past \"main\".", "\
 Show whether backtraces should continue past \"main\".", "\
 Normally the caller of \"main\" is not of interest, so GDB will terminate\n\
 the backtrace at \"main\".  Set this variable if you need to see the rest\n\
-of the stack trace.", "\
-Whether backtraces should continue past \"main\" is %s.",
+of the stack trace.",
+			   NULL, /* PRINT: Whether backtraces should continue past \"main\" is %s.  */
 			   NULL, NULL, &set_backtrace_cmdlist,
 			   &show_backtrace_cmdlist);
 
@@ -1566,8 +1566,8 @@ Set whether backtraces should continue past the entry point of a program.", "\
 Show whether backtraces should continue past the entry point of a program.", "\
 Normally there are no callers beyond the entry point of a program, so GDB\n\
 will terminate the backtrace there.  Set this variable if you need to see \n\
-the rest of the stack trace.", "\
-Whether backtraces should continue past the entry point is %s.",
+the rest of the stack trace.",
+			   NULL, /* PRINT: Whether backtraces should continue past the entry point is %s.  */
 			   NULL, NULL, &set_backtrace_cmdlist,
 			   &show_backtrace_cmdlist);
 
@@ -1576,8 +1576,8 @@ Whether backtraces should continue past the entry point is %s.",
 Set an upper bound on the number of backtrace levels.", "\
 Show the upper bound on the number of backtrace levels.", "\
 No more than the specified number of frames can be displayed or examined.\n\
-Zero is unlimited.", "\
-An upper bound on the number of backtrace levels is %s.",
+Zero is unlimited.",
+			    NULL, /* PRINT: An upper bound on the number of backtrace levels is %s.  */
 			    NULL, NULL, &set_backtrace_cmdlist,
 			    &show_backtrace_cmdlist);
 

@@ -202,8 +202,8 @@ _initialize_observer (void)
   add_setshow_zinteger_cmd ("observer", class_maintenance, &observer_debug, "\
 Set observer debugging.", "\
 Show observer debugging.", "\
-When non-zero, observer debugging is enabled.", "\
-Observer debugging is %s.",
+When non-zero, observer debugging is enabled.",
+			    NULL, /* PRINT: Observer debugging is %s.  */
 			    NULL, NULL,
 			    &setdebuglist, &showdebuglist);
 }

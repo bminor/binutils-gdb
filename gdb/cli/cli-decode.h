@@ -88,6 +88,10 @@ struct cmd_list_element
        Entire string should also end with a period, not a newline.  */
     char *doc;
 
+    /* For set/show commands.  A method for printing the output to the
+       specified stream.  */
+    fprint_setshow_ftype *fprint_setshow;
+
     /* flags : a bitfield 
        
        bit 0: (LSB) CMD_DEPRECATED, when 1 indicated that this command

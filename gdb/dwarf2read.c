@@ -9652,8 +9652,7 @@ _initialize_dwarf2_read (void)
 			    "in memory longer, and more total memory will "
 			    "be used.  Zero disables\n"
 			    "caching, which can slow down startup.",
-			    "The upper bound on the age of cached "
-			    "dwarf2 compilation units is %d.",
+			    NULL, /* PRINT: The upper bound on the age of cached dwarf2 compilation units is %d.  */
 			    NULL, NULL, &set_dwarf2_cmdlist,
 			    &show_dwarf2_cmdlist);
 }

@@ -1,5 +1,35 @@
 2005-02-10  Andrew Cagney  <cagney@gnu.org>
 
+	* cli/cli-decode.c (add_setshow_enum_cmd, add_setshow_cmd_full)
+	(add_setshow_auto_boolean_cmd, add_setshow_boolean_cmd)
+	(add_setshow_filename_cmd, add_setshow_string_cmd)
+	(add_setshow_uinteger_cmd, add_setshow_zinteger_cmd): Replace
+	print string parameter with fprint_setshow function.
+	* command.h (fprint_setshow_ftype): Define.  Update declarations.
+	* cli/cli-setshow.c (do_setshow_command): When fprint_setshow is
+	available, use that.
+	* cli/cli-decode.h (struct cmd_list_element): Add field
+	fprint_setshow.
+	* complaints.c (fprint_setshow_complaints): New function.
+	(_initialize_complaints): Pass to add_setshow_zinteger_cmd.
+	* hppa-tdep.c (_initialize_hppa_tdep): Replace "print" parameter
+	with NULL.
+	* mips-tdep.c (_initialize_mips_tdep): Ditto.
+	* m32r-rom.c (_initialize_m32r_rom): Ditto.
+	* cris-tdep.c (_initialize_cris_tdep): Ditto.
+	* arm-tdep.c (_initialize_arm_tdep): Ditto.
+	* remote-rdi.c (_initialize_remote_rdi): Ditto.
+	* alpha-tdep.c (_initialize_alpha_tdep): Ditto.
+	* dwarf2read.c (_initialize_dwarf2_read): Ditto.
+	* frame.c (_initialize_frame): Ditto.
+	* target.c (initialize_targets): Ditto.
+	* maint.c (_initialize_maint_cmds): Ditto.
+	* observer.c (_initialize_observer): Ditto.
+	* infcall.c (_initialize_infcall): Ditto.
+	* breakpoint.c (_initialize_breakpoint): Ditto.
+	* cli/cli-logging.c (_initialize_cli_logging): Ditto.
+	* remote.c (add_packet_config_cmd, _initialize_remote): Ditto.
+
 	* cli/cli-setshow.c (do_setshow_command): Move code printing the
 	value to the end of the function.  Handle MI and non-MI output
 	differently.

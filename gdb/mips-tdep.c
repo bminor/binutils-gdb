@@ -5187,8 +5187,8 @@ This option can be set to one of:\n\
   64    - Force GDB to treat saved GP registers as 64-bit\n\
   auto  - Allow GDB to use the target's default setting or autodetect the\n\
           saved GP register size from information contained in the executable.\n\
-          (default: auto)", "\
-Size of general purpose registers saved on the stack is %s.\n",
+          (default: auto)",
+			NULL, /* PRINT: Size of general purpose registers saved on the stack is %s.  */
 			NULL, NULL, &setmipscmdlist, &showmipscmdlist);
 
   /* Allow the user to override the argument stack size. */
@@ -5200,8 +5200,8 @@ This option can be set to one of:\n\
   32    - Force GDB to allocate 32-bit chunks per argument\n\
   64    - Force GDB to allocate 64-bit chunks per argument\n\
   auto  - Allow GDB to determine the correct setting from the current\n\
-          target and executable (default)", "\
-The amount of stack space reserved for each argument is %s.\n",
+          target and executable (default)",
+			NULL, /* PRINT: The amount of stack space reserved for each argument is %s.  */
 			NULL, NULL, &setmipscmdlist, &showmipscmdlist);
 
   /* Allow the user to override the ABI. */
@@ -5252,8 +5252,8 @@ Set the distance searched for the start of a function.\n", "\
 Show the distance searched for the start of a function.\n", "\
 If you are debugging a stripped executable, GDB needs to search through the\n\
 program for the start of a function.  This command sets the distance of the\n\
-search.  The only need to set it is when debugging a stripped executable.", "\
-The distance searched for the start of a function is %s.\n",
+search.  The only need to set it is when debugging a stripped executable.",
+			    NULL, /* PRINT: The distance searched for the start of a function is %s.  */
 			    reinit_frame_cache_sfunc, NULL,
 			    &setlist, &showlist);
 
@@ -5263,8 +5263,8 @@ The distance searched for the start of a function is %s.\n",
 Set zeroing of upper 32 bits of 64-bit addresses.", "\
 Show zeroing of upper 32 bits of 64-bit addresses.", "\
 Use \"on\" to enable the masking, \"off\" to disable it and \"auto\" to \n\
-allow GDB to determine the correct value.\n", "\
-Zerroing of upper 32 bits of 64-bit address is %s.",
+allow GDB to determine the correct value.\n",
+				NULL, /* PRINT: Zerroing of upper 32 bits of 64-bit address is %s.  */
 				NULL, show_mask_address, &setmipscmdlist, &showmipscmdlist);
 
   /* Allow the user to control the size of 32 bit registers within the
@@ -5275,8 +5275,8 @@ Set compatibility with 64-bit MIPS target that transfers 32-bit quantities.", "\
 Show compatibility with 64-bit MIPS target that transfers 32-bit quantities.", "\
 Use \"on\" to enable backward compatibility with older MIPS 64 GDB+target\n\
 that would transfer 32 bits for some registers (e.g. SR, FSR) and\n\
-64 bits for others.  Use \"off\" to disable compatibility mode", "\
-Compatibility with 64-bit MIPS target that transfers 32-bit quantities is %s.",
+64 bits for others.  Use \"off\" to disable compatibility mode",
+			   NULL, /* PRINT: Compatibility with 64-bit MIPS target that transfers 32-bit quantities is %s.  */
  set_mips64_transfers_32bit_regs, NULL, &setlist, &showlist);
 
   /* Debug this files internals. */
@@ -5284,8 +5284,8 @@ Compatibility with 64-bit MIPS target that transfers 32-bit quantities is %s.",
 			    &mips_debug, "\
 Set mips debugging.\n", "\
 Show mips debugging.\n", "\
-When non-zero, mips specific debugging is enabled.\n", "\
-Mips debugging is currently %s.\n",
+When non-zero, mips specific debugging is enabled.\n",
+			    NULL, /* PRINT: Mips debugging is currently %s.  */
 			    NULL, NULL,
 			    &setdebuglist, &showdebuglist);
 }

@@ -330,7 +330,8 @@ add_setshow_cmd_full (char *name,
 		      enum command_class class,
 		      var_types var_type, void *var,
 		      const char *set_doc, const char *show_doc,
-		      const char *help_doc, const char *print,
+		      const char *help_doc,
+		      fprint_setshow_ftype *fprint_setshow,
 		      cmd_sfunc_ftype *set_func,
 		      cmd_sfunc_ftype *show_func,
 		      struct cmd_list_element **set_list,
@@ -359,6 +360,8 @@ add_setshow_cmd_full (char *name,
     set_cmd_sfunc (set, set_func);
   show = add_set_or_show_cmd (name, show_cmd, class, var_type, var,
 			      full_show_doc, show_list);
+  show->fprint_setshow = fprint_setshow;
+
   if (show_func != NULL)
     set_cmd_sfunc (show, show_func);
 
@@ -415,7 +418,7 @@ add_setshow_enum_cmd (char *name,
 		      const char *set_doc,
 		      const char *show_doc,
 		      const char *help_doc,
-		      const char *print,
+		      fprint_setshow_ftype *fprint_setshow,
 		      cmd_sfunc_ftype *set_func,
 		      cmd_sfunc_ftype *show_func,
 		      struct cmd_list_element **set_list,
@@ -423,7 +426,8 @@ add_setshow_enum_cmd (char *name,
 {
   struct cmd_list_element *c;
   add_setshow_cmd_full (name, class, var_enum, var,
-			set_doc, show_doc, help_doc, print,
+			set_doc, show_doc, help_doc,
+			fprint_setshow,
 			set_func, show_func,
 			set_list, show_list,
 			&c, NULL);
@@ -439,7 +443,8 @@ add_setshow_auto_boolean_cmd (char *name,
 			      enum command_class class,
 			      enum auto_boolean *var,
 			      const char *set_doc, const char *show_doc,
-			      const char *help_doc, const char *print,
+			      const char *help_doc,
+			      fprint_setshow_ftype *fprint_setshow,
 			      cmd_sfunc_ftype *set_func,
 			      cmd_sfunc_ftype *show_func,
 			      struct cmd_list_element **set_list,
@@ -448,7 +453,7 @@ add_setshow_auto_boolean_cmd (char *name,
   static const char *auto_boolean_enums[] = { "on", "off", "auto", NULL };
   struct cmd_list_element *c;
   add_setshow_cmd_full (name, class, var_auto_boolean, var,
-			set_doc, show_doc, help_doc, print,
+			set_doc, show_doc, help_doc, fprint_setshow,
 			set_func, show_func,
 			set_list, show_list,
 			&c, NULL);
@@ -462,7 +467,8 @@ add_setshow_auto_boolean_cmd (char *name,
 void
 add_setshow_boolean_cmd (char *name, enum command_class class, int *var,
 			 const char *set_doc, const char *show_doc,
-			 const char *help_doc, const char *print,
+			 const char *help_doc,
+			 fprint_setshow_ftype *fprint_setshow,
 			 cmd_sfunc_ftype *set_func,
 			 cmd_sfunc_ftype *show_func,
 			 struct cmd_list_element **set_list,
@@ -471,7 +477,7 @@ add_setshow_boolean_cmd (char *name, enum command_class class, int *var,
   static const char *boolean_enums[] = { "on", "off", NULL };
   struct cmd_list_element *c;
   add_setshow_cmd_full (name, class, var_boolean, var,
-			set_doc, show_doc, help_doc, print,
+			set_doc, show_doc, help_doc, fprint_setshow,
 			set_func, show_func,
 			set_list, show_list,
 			&c, NULL);
@@ -484,14 +490,15 @@ void
 add_setshow_filename_cmd (char *name, enum command_class class,
 			  char **var,
 			  const char *set_doc, const char *show_doc,
-			  const char *help_doc, const char *print,
+			  const char *help_doc,
+			  fprint_setshow_ftype *fprint_setshow,
 			  cmd_sfunc_ftype *set_func,
 			  cmd_sfunc_ftype *show_func,
 			  struct cmd_list_element **set_list,
 			  struct cmd_list_element **show_list)
 {
   add_setshow_cmd_full (name, class, var_filename, var,
-			set_doc, show_doc, help_doc, print,
+			set_doc, show_doc, help_doc, fprint_setshow,
 			set_func, show_func,
 			set_list, show_list,
 			NULL, NULL);
@@ -503,14 +510,15 @@ void
 add_setshow_string_cmd (char *name, enum command_class class,
 			  char **var,
 			  const char *set_doc, const char *show_doc,
-			  const char *help_doc, const char *print,
+			  const char *help_doc,
+			fprint_setshow_ftype *fprint_setshow,
 			  cmd_sfunc_ftype *set_func,
 			  cmd_sfunc_ftype *show_func,
 			  struct cmd_list_element **set_list,
 			  struct cmd_list_element **show_list)
 {
   add_setshow_cmd_full (name, class, var_string, var,
-			set_doc, show_doc, help_doc, print,
+			set_doc, show_doc, help_doc, fprint_setshow,
 			set_func, show_func,
 			set_list, show_list,
 			NULL, NULL);
@@ -524,14 +532,15 @@ void
 add_setshow_uinteger_cmd (char *name, enum command_class class,
 			  unsigned int *var,
 			  const char *set_doc, const char *show_doc,
-			  const char *help_doc, const char *print,
+			  const char *help_doc,
+			  fprint_setshow_ftype *fprint_setshow,
 			  cmd_sfunc_ftype *set_func,
 			  cmd_sfunc_ftype *show_func,
 			  struct cmd_list_element **set_list,
 			  struct cmd_list_element **show_list)
 {
   add_setshow_cmd_full (name, class, var_uinteger, var,
-			set_doc, show_doc, help_doc, print,
+			set_doc, show_doc, help_doc, fprint_setshow,
 			set_func, show_func,
 			set_list, show_list,
 			NULL, NULL);
@@ -545,14 +554,15 @@ void
 add_setshow_zinteger_cmd (char *name, enum command_class class,
 			  int *var,
 			  const char *set_doc, const char *show_doc,
-			  const char *help_doc, const char *print,
+			  const char *help_doc,
+			  fprint_setshow_ftype *fprint_setshow,
 			  cmd_sfunc_ftype *set_func,
 			  cmd_sfunc_ftype *show_func,
 			  struct cmd_list_element **set_list,
 			  struct cmd_list_element **show_list)
 {
   add_setshow_cmd_full (name, class, var_zinteger, var,
-			set_doc, show_doc, help_doc, print,
+			set_doc, show_doc, help_doc, fprint_setshow,
 			set_func, show_func,
 			set_list, show_list,
 			NULL, NULL);

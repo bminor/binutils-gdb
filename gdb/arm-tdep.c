@@ -2884,7 +2884,7 @@ _initialize_arm_tdep (void)
 		       _("Set the disassembly style."),
 		       _("Show the disassembly style."),
 		       helptext,
-		       _("The disassembly style is \"%s\"."),
+		       NULL, /* PRINT: The disassembly style is \"%s\".  */
 		       set_disassembly_style_sfunc, NULL,
 		       &setarmcmdlist, &showarmcmdlist);
 
@@ -2892,7 +2892,7 @@ _initialize_arm_tdep (void)
 			   _("Set usage of ARM 32-bit mode."),
 			   _("Show usage of ARM 32-bit mode."),
 			   _("When off, a 26-bit PC will be used."),
-			   _("Usage of ARM 32-bit mode is %s."),
+			   NULL, /* PRINT: "Usage of ARM 32-bit mode is %s.  */
 			   NULL, NULL,
 			   &setarmcmdlist, &showarmcmdlist);
 
@@ -2905,7 +2905,7 @@ softfpa - Software FP, mixed-endian doubles on little-endian ARMs.\n\
 fpa - FPA co-processor (GCC compiled).\n\
 softvfp - Software FP with pure-endian doubles.\n\
 vfp - VFP co-processor."),
-			_("The floating point type is \"%s\"."),
+			NULL, /* PRINT: "The floating point type is \"%s\".  */
 			set_fp_model_sfunc, show_fp_model,
 			&setarmcmdlist, &showarmcmdlist);
 
@@ -2914,7 +2914,7 @@ vfp - VFP co-processor."),
 			   _("Set ARM debugging."),
 			   _("Show ARM debugging."),
 			   _("When on, arm-specific debugging is enabled."),
-			   _("ARM debugging is %s."),
+			   NULL, /* PRINT: "ARM debugging is %s.  */
 			   NULL, NULL,
 			   &setdebuglist, &showdebuglist);
 }

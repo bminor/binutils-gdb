@@ -995,8 +995,8 @@ _initialize_remote_rdi (void)
 Set target has ROM at addr 0.", "\
 Show if target has ROM at addr 0.", "\
 A true value disables vector catching, false enables vector catching.\n\
-This is evaluated at the time the 'target rdi' command is executed.", "\
-Target has ROM at addr 0 is %s.",
+This is evaluated at the time the 'target rdi' command is executed.",
+			   NULL, /* PRINT: Target has ROM at addr 0 is %s.  */
 			   NULL, NULL,
 			   &setlist, &showlist);
 
@@ -1005,8 +1005,8 @@ Set enable for ADP heartbeat packets.", "\
 Show enable for ADP heartbeat packets.", "\
 I don't know why you would want this. If you enable them,\n\
 it will confuse ARM and EPI JTAG interface boxes as well\n\
-as the Angel Monitor.", "\
-Enable for ADP heartbeat packets is %s.",
+as the Angel Monitor.",
+			   NULL, /* PRINT: Enable for ADP heartbeat packets is %s.  */
 			   NULL, NULL,
 			   &setlist, &showlist);
 }

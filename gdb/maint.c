@@ -863,8 +863,8 @@ of time passes without a response from the target, an error occurs.",
 			   &maintenance_profile_p, "\
 Set internal profiling.", "\
 Show internal profiling.", "\
-When enabled GDB is profiled.", "\
-Internal profiling is %s.",
+When enabled GDB is profiled.",
+			   NULL, /* PRINT: Internal profiling is %s.  */
 			   maintenance_set_profile_cmd, NULL,
 			   &maintenance_set_cmdlist,
 			   &maintenance_show_cmdlist);

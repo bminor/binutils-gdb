@@ -3919,7 +3919,7 @@ _initialize_cris_tdep (void)
 			    "Set the current CRIS version.",
 			    "Show the current CRIS version.",
 			    "Set if autodetection fails.",
-			    "Current CRIS version is %s.",
+			    NULL, /* PRINT: Current CRIS version is %s.  */
 			    set_cris_version, NULL,
 			    &setlist, &showlist);
   
@@ -3928,7 +3928,7 @@ _initialize_cris_tdep (void)
 			   "Set the usage of Dwarf-2 CFI for CRIS.",
 			   "Show the usage of Dwarf-2 CFI for CRIS.",
 			   "Set to \"off\" if using gcc-cris < R59.",
-			   "Usage of Dwarf-2 CFI for CRIS is %d.",
+			   NULL, /* PRINT: Usage of Dwarf-2 CFI for CRIS is %d.  */
 			   set_cris_dwarf2_cfi, NULL,
 			   &setlist, &showlist);
 
