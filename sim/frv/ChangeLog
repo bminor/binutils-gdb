@@ -1,3 +1,9 @@
+2003-09-08  Dave Brolley  <brolley@redhat.com>
+
+	On behalf of Doug Evans <dje@sebabeach.org>
+	* Makefile.in (stamp-arch,stamp-cpu): Pass archfile to cgen.
+	Remove copying of .cpu file to cgen/cpu, no longer needed.
+
 2003-09-03  Dave Brolley  <brolley@redhat.com>
 
 	* cpu.h, model.c, sem.c, decode.h, decode.c: Regenerated.

@@ -111,23 +111,19 @@ CGEN_MAINT = ; @true
 @CGEN_MAINT@CGEN_MAINT =
 
 stamp-arch: $(CGEN_READ_SCM) $(CGEN_ARCH_SCM) $(srcdir)/../../cpu/frv.cpu
-	cp -fp $(srcdir)/../../cpu/frv.cpu $(CGEN_CPU_DIR)/frv.cpu
 	$(MAKE) cgen-arch $(CGEN_FLAGS_TO_PASS) mach=all \
+	  archfile=$(srcdir)/../../cpu/frv.cpu \
 	  FLAGS="with-scache"
-	rm -f $(CGEN_CPU_DIR)/frv.cpu
 	touch stamp-arch
 arch.h arch.c cpuall.h: $(CGEN_MAINT) stamp-arch
 #	@true
 
-# .cpu and .opc files for frv are kept in a different directory, but cgen has no switch to specify that location, so
-# copy those file to the regular place.
 stamp-cpu: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(srcdir)/../../cpu/frv.cpu
-	cp -fp $(srcdir)/../../cpu/frv.cpu $(CGEN_CPU_DIR)/frv.cpu
 	$(MAKE) cgen-cpu-decode $(CGEN_FLAGS_TO_PASS) \
 	  cpu=frvbf mach=frv,fr500,fr400,tomcat,simple SUFFIX= \
+	  archfile=$(srcdir)/../../cpu/frv.cpu \
 	  FLAGS="with-scache with-profile=fn with-generic-write with-parallel-only" \
 	  EXTRAFILES="$(CGEN_CPU_SEM)"
-	rm -f $(CGEN_CPU_DIR)/frv.cpu
 	touch stamp-cpu
 cpu.h sem.c model.c decode.c decode.h: $(CGEN_MAINT) stamp-cpu
 #	@true
