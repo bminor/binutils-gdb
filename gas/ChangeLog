@@ -1,5 +1,15 @@
 1999-06-10  Ian Lance Taylor  <ian@zembu.com>
 
+	Based on patches from John W. Woznack <jwoznack@concentric.net>:
+	* itbl-ops.c (itbl_get_reg_val): Add pval parameter.  Return
+	indication of success rather than a value.
+	(itbl_get_val): Likewise.
+	(itbl_get_field): Use strcspn.  Change delimiters to include
+	parens.
+	* itbl-ops.h (itbl_get_reg_val): Update declaration.
+	(itbl_get_val): Likewise.
+	* config/tc-mips.c (mips_ip): Update call to itbl_get_reg_val.
+
 	* symbols.c (copy_symbol_attributes): Convert local symbols to
 	regular symbols.
 

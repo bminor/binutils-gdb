@@ -1,5 +1,5 @@
 /* itbl-ops.c
-   Copyright (C) 1997, 1998  Free Software Foundation, Inc.
+   Copyright (C) 1997, 1998, 1999 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -457,18 +457,20 @@ form_args (struct itbl_entry *e)
 
 /* Get processor's register name from val */
 
-unsigned long 
-itbl_get_reg_val (char *name)
+int
+itbl_get_reg_val (char *name, unsigned long *pval)
 {
   e_type t;
   e_processor p;
-  int r = 0;
+
   for (p = e_p0; p < e_nprocs; p++)
-    for (t = e_regtype0; t < e_nregtypes; t++)
-      {
-	if (r = itbl_get_val (p, t, name), r)
-	  return r;
-      }
+    {
+      for (t = e_regtype0; t < e_nregtypes; t++)
+	{
+	  if (itbl_get_val (p, t, name, pval))
+	    return 1;
+	}
+    }
   return 0;
 }
 
@@ -486,16 +488,17 @@ itbl_get_name (e_processor processor, e_type type, unsigned long val)
 
 /* Get processor's register value from name */
 
-unsigned long 
-itbl_get_val (e_processor processor, e_type type, char *name)
+int
+itbl_get_val (e_processor processor, e_type type, char *name,
+	      unsigned long *pval)
 {
   struct itbl_entry *r;
   /* type depends on instruction passed */
   r = find_entry_byname (processor, type, name);
-  if (r)
-    return r->value;
-  else
-    return 0;			/* error; invalid operand */
+  if (r == NULL)
+    return 0;
+  *pval = r->value;
+  return 1;
 }
 
 
@@ -732,7 +735,7 @@ extract_range (unsigned long aval, struct itbl_range r)
 /* Extract processor's assembly instruction field name from s;
  * forms are "n args" "n,args" or "n" */
 /* Return next argument from string pointer "s" and advance s.
- * delimiters are " ,\0" */
+ * delimiters are " ,()" */
 
 char *
 itbl_get_field (char **S)
@@ -744,16 +747,8 @@ itbl_get_field (char **S)
   s = *S;
   if (!s || !*s)
     return 0;
-  p = s + strlen (s);
-  if (ps = strchr (s, ','), ps)
-    p = ps;
-  if (ps = strchr (s, ' '), ps)
-    p = min (p, ps);
-  if (ps = strchr (s, '\0'), ps)
-    p = min (p, ps);
-  if (p == 0)
-    return 0;			/* error! */
-  len = p - s;
+  /* FIXME: This is a weird set of delimiters.  */
+  len = strcspn (s, " \t,()");
   ASSERT (128 > len + 1);
   strncpy (n, s, len);
   n[len] = 0;

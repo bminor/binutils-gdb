@@ -7297,23 +7297,22 @@ mips_ip (str, ip)
 		      else if (itbl_have_entries)
 			{
 			  char *p, *n;
-			  int r;
+			  unsigned long r;
 
-			  p = s+1; 	/* advance past '$' */
+			  p = s + 1; 	/* advance past '$' */
 			  n = itbl_get_field (&p);  /* n is name */
 
-			  /* See if this is a register defined in an 
-			     itbl entry */
-			  r = itbl_get_reg_val (n);
-			  if (r)
+			  /* See if this is a register defined in an
+			     itbl entry.  */
+			  if (itbl_get_reg_val (n, &r))
 			    {
 			      /* Get_field advances to the start of
 				 the next field, so we need to back
-				 rack to the end of the last field. */
+				 rack to the end of the last field.  */
 			      if (p) 
 				s = p - 1;
 			      else 
-				s = strchr (s,'\0');
+				s = strchr (s, '\0');
 			      regno = r;
 			    }
 			  else
