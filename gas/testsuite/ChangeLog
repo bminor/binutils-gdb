@@ -1,7 +1,24 @@
+Sat Jun 29 18:21:51 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/all/gas.exp: Add setup_xfail for vax*-*-vms* for 930509a
+	test.
+	* gas/vax/quad.exp: Expect a nop after the movq.
+
 Tue Jun 18 12:39:49 1996  Jeffrey A. Law  <law@rtl.cygnus.com>
 
 	* gas/h8300/cbranchh.s: Switch into h8300h mode.
+	* gas/h8300/h8300.exp (H8/300H misc tests): Fix test names.
 
+start-sanitize-h8s
+	* gas/h8300/{addsubs.s,bitops1s.s,bitops2s.s}: New tests for the
+	H8/S.
+	* gas/h8300/{bitops3.s,bitops4.s,cbranchs.s,logicals.s}: Likewise.
+	* gas/h8300/{branchess.s,compares.s,macs.s,decimals.s}: Likewise.
+	* gas/h8300/{incdecs.s,divmuls.s,miscs.s,multiples.s}: Likewise.
+	* gas/h8300/{movbs.s,movws.s,movls.s,pushpops.s}: Likewise.
+	* gas/h8300/{rotshifts.s,extends.s}: Likewise.
+	* gas/h8300/h8300.exp: Run them.
+end-sanitize-h8s
 Mon Jun 10 14:14:40 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/all/cofftag.s, gas/all/cofftag.d: New test for COFF enum tag
@@ -286,13 +303,11 @@ Mon Aug 14 16:03:07 1995  Ian Lance Taylor  <ian@cygnus.com>
 	* gasp/gasp.exp: Run them.  Also, clean up the test names used in
 	pass and fail.
 
-start-sanitize-sh3e
 Sun Aug 13 00:39:24 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* gas/sh/basic.exp: Update now that we know the right
 	bit patters for the new sts instructions.
 
-end-sanitize-sh3e
 Thu Aug 10 00:46:21 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/mri/char.d: Fix for little endian machines.
@@ -334,12 +349,10 @@ Mon Aug  7 22:39:28 1995  Ian Lance Taylor  <ian@cygnus.com>
 	* gas/m68k/all.exp: Run new tests.  Run schwab test for
 	m68k-*-coff*.
 
-start-sanitize-sh3e
 Mon Aug  7 03:01:32 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* gas/sh/*: New tests for the hitachi-sh.
 
-end-sanitize-sh3e
 Tue Aug  1 18:02:47 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/mri/*: New tests for MRI mode.
