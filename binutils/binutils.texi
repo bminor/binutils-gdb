@@ -1446,6 +1446,7 @@ strip [ -F @var{bfdname} | --target=@var{bfdname} | --target=@var{bfdname} ]
       [ -N @var{symbolname} | --strip-symbol=@var{symbolname} ]
       [ -x | --discard-all ] [ -X | --discard-locals ]
       [ -R @var{sectionname} | --remove-section=@var{sectionname} ]
+      [ -o @var{file} ]
       [ -v | --verbose ]  [ -V | --version ]  [ --help ]
       @var{objfile}@dots{}
 @end smallexample
@@ -1506,6 +1507,11 @@ be given more than once.
 Remove symbol @var{symbolname} from the source file. This option may be
 given more than once, and may be combined with strip options other than
 @code{-K}.
+
+@item -o @var{file}
+Put the stripped output in @var{file}, rather than replacing the
+existing file.  When this argument is used, only one @var{objfile}
+argument may be specified.
 
 @item -x
 @itemx --discard-all
