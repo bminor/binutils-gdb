@@ -4,7 +4,7 @@
 comment "Second file in assembly source debugging testcase."
 
 	.global foo2
-foo2:
+gdbasm_declare foo2
 	gdbasm_enter
 
 comment "Call someplace else (several times)."
@@ -15,3 +15,4 @@ comment "Call someplace else (several times)."
 comment "All done, return."
 
 	gdbasm_leave
+	gdbasm_end foo2
