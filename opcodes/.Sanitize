@@ -40,6 +40,7 @@ Makefile.in
 alpha-dis.c
 alpha-opc.h
 a29k-dis.c
+configure.bat
 configure.in
 dis-buf.c
 disassemble.c
