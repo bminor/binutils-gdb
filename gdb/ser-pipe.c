@@ -65,6 +65,10 @@ pipe_open (serial_t scb, const char *name)
   if (socketpair (AF_UNIX, SOCK_STREAM, 0, pdes) < 0)
     return -1;
 
+  /* Create the child process to run the command in.  Note that the
+     apparent call to vfork() below *might* actually be a call to
+     fork() due to the fact that autoconf will ``#define vfork fork''
+     on certain platforms.  */
   pid = vfork ();
   
   /* Error. */

@@ -253,6 +253,9 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
   if (pre_trace_fun != NULL)
     (*pre_trace_fun) ();
 
+  /* Create the child process.  Note that the apparent call to vfork()
+     below *might* actually be a call to fork() due to the fact that
+     autoconf will ``#define vfork fork'' on certain platforms.  */
   if (debug_fork)
     pid = fork ();
   else
@@ -420,7 +423,9 @@ clone_and_follow_inferior (int child_pid, int *followed_child)
   if (status < 0)
     error ("error getting pipe for handoff semaphore");
 
-  /* Clone the debugger. */
+  /* Clone the debugger.  Note that the apparent call to vfork()
+     below *might* actually be a call to fork() due to the fact that
+     autoconf will ``#define vfork fork'' on certain platforms.  */
   if (debug_fork)
     debugger_pid = fork ();
   else
