@@ -1467,7 +1467,7 @@ s/XM_FILE[ 	]*=[ 	]*\([^ 	]*\)/\1/p
 ' ${host_makefile_frag}`
 
 targetfile=`sed -n '
-s/TM_FILE[ 	]*=[ 	]*\([^ 	]*\)/\1/p
+s/DEPRECATED_TM_FILE[ 	]*=[ 	]*\([^ 	]*\)/\1/p
 ' ${target_makefile_frag}`
 
 if test "${target}" = "${host}"; then
@@ -1509,9 +1509,9 @@ fi
 
 AC_CONFIG_SUBDIRS($configdirs)
 
-# If hostfile (XM_FILE) and/or targetfile (TM_FILE) and/or nativefile
-# (NAT_FILE) is not set in config/*/*.m[ht] files, we link to an empty
-# version.
+# If hostfile (XM_FILE) and/or targetfile (DEPRECATED_TM_FILE) and/or
+# nativefile (NAT_FILE) is not set in config/*/*.m[ht] files, we link
+# to an empty version.
 
 files=
 links=
@@ -1590,7 +1590,7 @@ mv -f Makefile.tem Makefile
 fi
 
 changequote(,)dnl
-sed -e '/^TM_FILE[ 	]*=/s,^TM_FILE[ 	]*=[ 	]*,&config/'"${gdb_target_cpu}"'/,
+sed -e '/^DEPRECATED_TM_FILE[ 	]*=/s,^DEPRECATED_TM_FILE[ 	]*=[ 	]*,&config/'"${gdb_target_cpu}"'/,
 /^XM_FILE[ 	]*=/s,^XM_FILE[ 	]*=[ 	]*,&config/'"${gdb_host_cpu}"'/,
 /^NAT_FILE[ 	]*=/s,^NAT_FILE[ 	]*=[ 	]*,&config/'"${gdb_host_cpu}"'/,' <Makefile >Makefile.tmp
 mv -f Makefile.tmp Makefile

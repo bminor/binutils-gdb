@@ -1202,7 +1202,7 @@ gdb1$(EXEEXT): gdb$(EXEEXT)
 
 TAGS: $(TAGFILES_NO_SRCDIR) $(TAGFILES_WITH_SRCDIR)
 	@echo Making TAGS
-	@etags $(srcdir)/$(TM_FILE) \
+	@etags $(srcdir)/$(DEPRECATED_TM_FILE) \
 	  $(srcdir)/$(XM_FILE) \
 	  $(srcdir)/$(NAT_FILE) \
 	`(for i in $(DEPFILES) $(TAGFILES_NO_SRCDIR); do \

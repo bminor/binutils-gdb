@@ -1,5 +1,85 @@
 2004-09-13  Andrew Cagney  <cagney@gnu.org>
 
+	* configure.in (frags): Replace TM_FILE with DEPRECATED_TM_FILE.
+	* configure: Re-generate.
+	* nlm/Makefile.in (TAGS): Update.
+	* Makefile.in (TAGS): Update.
+	* config/vax/nbsd.mt (TM_FILE): Update.
+	* config/sparc/vxworks.mt (TM_FILE): Update.
+	* config/sparc/sol2.mt (TM_FILE): Update.
+	* config/sparc/sol2-64.mt (TM_FILE): Update.
+	* config/sparc/obsd64.mt (TM_FILE): Update.
+	* config/sparc/obsd.mt (TM_FILE): Update.
+	* config/sparc/nbsd64.mt (TM_FILE): Update.
+	* config/sparc/nbsd.mt (TM_FILE): Update.
+	* config/sparc/linux64.mt (TM_FILE): Update.
+	* config/sparc/linux.mt (TM_FILE): Update.
+	* config/sparc/fbsd.mt (TM_FILE): Update.
+	* config/sh/wince.mt (TM_FILE): Update.
+	* config/sh/nbsd.mt (TM_FILE): Update.
+	* config/sh/linux.mt (TM_FILE): Update.
+	* config/sh/embed.mt (TM_FILE): Update.
+	* config/s390/s390.mt (TM_FILE): Update.
+	* config/rs6000/rs6000lynx.mt (TM_FILE): Update.
+	* config/rs6000/rs6000.mt (TM_FILE): Update.
+	* config/rs6000/aix4.mt (TM_FILE): Update.
+	* config/powerpc/vxworks.mt (TM_FILE): Update.
+	* config/powerpc/ppc-sim.mt (TM_FILE): Update.
+	* config/powerpc/ppc-eabi.mt (TM_FILE): Update.
+	* config/powerpc/obsd.mt (TM_FILE): Update.
+	* config/powerpc/nbsd.mt (TM_FILE): Update.
+	* config/powerpc/linux.mt (TM_FILE): Update.
+	* config/powerpc/aix.mt (TM_FILE): Update.
+	* config/pa/obsd.mt (TM_FILE): Update.
+	* config/pa/linux.mt (TM_FILE): Update.
+	* config/pa/hppahpux.mt (TM_FILE): Update.
+	* config/pa/hppa64.mt (TM_FILE): Update.
+	* config/pa/hppa.mt (TM_FILE): Update.
+	* config/ns32k/nbsdaout.mt (TM_FILE): Update.
+	* config/mips/wince.mt (TM_FILE): Update.
+	* config/mips/vxmips.mt (TM_FILE): Update.
+	* config/mips/nbsd.mt (TM_FILE): Update.
+	* config/mips/linux.mt (TM_FILE): Update.
+	* config/mips/irix6.mt (TM_FILE): Update.
+	* config/mips/irix5.mt (TM_FILE): Update.
+	* config/mips/embed.mt (TM_FILE): Update.
+	* config/m68k/vxworks68.mt (TM_FILE): Update.
+	* config/m68k/st2000.mt (TM_FILE): Update.
+	* config/m68k/os68k.mt (TM_FILE): Update.
+	* config/m68k/obsd.mt (TM_FILE): Update.
+	* config/m68k/nbsd.mt (TM_FILE): Update.
+	* config/m68k/monitor.mt (TM_FILE): Update.
+	* config/m68k/linux.mt (TM_FILE): Update.
+	* config/m68k/cisco.mt (TM_FILE): Update.
+	* config/ia64/linux.mt (TM_FILE): Update.
+	* config/ia64/aix.mt (TM_FILE): Update.
+	* config/ia64/ia64.mt (TM_FILE): Update.
+	* config/i386/vxworks.mt (TM_FILE): Update.
+	* config/i386/obsd64.mt (TM_FILE): Update.
+	* config/i386/obsd.mt (TM_FILE): Update.
+	* config/i386/nto.mt (TM_FILE): Update.
+	* config/i386/nbsd64.mt (TM_FILE): Update.
+	* config/i386/nbsd.mt (TM_FILE): Update.
+	* config/i386/linux64.mt (TM_FILE): Update.
+	* config/i386/linux.mt (TM_FILE): Update.
+	* config/i386/i386sol2.mt (TM_FILE): Update.
+	* config/i386/i386lynx.mt (TM_FILE): Update.
+	* config/i386/fbsd64.mt (TM_FILE): Update.
+	* config/i386/fbsd.mt (TM_FILE): Update.
+	* config/i386/cygwin.mt (TM_FILE): Update.
+	* config/h8300/h8300.mt (TM_FILE): Update.
+	* config/frv/frv.mt (TM_FILE): Update.
+	* config/cris/cris.mt (TM_FILE): Update.
+	* config/arm/wince.mt (TM_FILE): Update.
+	* config/arm/nbsd.mt (TM_FILE): Update.
+	* config/arm/linux.mt (TM_FILE): Update.
+	* config/arm/embed.mt (TM_FILE): Update.
+	* config/alpha/nbsd.mt (TM_FILE): Update.
+	* config/alpha/fbsd.mt (TM_FILE): Update.
+	* config/alpha/alpha.mt (TM_FILE): Update.
+	* config/alpha/alpha-osf1.mt (TM_FILE): Update.
+	* config/alpha/alpha-linux.mt (TM_FILE): Update.
+
 	Eliminate event_loop_p, always has the value 1.
 	* defs.h (event_loop_p): Delete macro.
 	* breakpoint.c (until_break_command): Simplify.
