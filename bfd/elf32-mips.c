@@ -277,8 +277,8 @@ typedef enum {
 #else
 #define MIPS_ELF_ADD_DYNAMIC_ENTRY(info, tag, val) \
   (ABI_64_P (elf_hash_table (info)->dynobj)	   \
-   ? bfd_elf64_add_dynamic_entry (info, tag, val)  \
-   : (abort (), false))
+   : (abort (), false)                             \
+   ? bfd_elf32_add_dynamic_entry (info, tag, val))
 #endif
 
 /* The number of local .got entries we reserve.  */
