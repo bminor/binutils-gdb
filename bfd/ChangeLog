@@ -1,3 +1,7 @@
+2002-11-27  David O'Brien  <obrien@FreeBSD.org>
+
+        * elf.c (_bfd_elf_copy_private_section_data): Don't define bed.
+
 2002-11-21  Richard Henderson  <rth@redhat.com>
 
         * elflink.h (elf_link_add_object_symbols): Don't overwrite the

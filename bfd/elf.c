@@ -5090,7 +5090,6 @@ _bfd_elf_copy_private_section_data (ibfd, isec, obfd, osec)
      asection *osec;
 {
   Elf_Internal_Shdr *ihdr, *ohdr;
-  const struct elf_backend_data *bed = get_elf_backend_data (ibfd);
 
   if (ibfd->xvec->flavour != bfd_target_elf_flavour
       || obfd->xvec->flavour != bfd_target_elf_flavour)
