@@ -55,6 +55,8 @@ static bfd_reloc_status_type ppc64_elf_toc64_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static bfd_reloc_status_type ppc64_elf_unhandled_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+static void ppc64_elf_get_symbol_info
+  PARAMS ((bfd *, asymbol *, symbol_info *));
 static boolean ppc64_elf_set_private_flags
   PARAMS ((bfd *, flagword));
 static boolean ppc64_elf_merge_private_bfd_data
@@ -1629,6 +1631,22 @@ ppc64_elf_unhandled_reloc (abfd, reloc_entry, symbol, data,
       *error_message = buf;
     }
   return bfd_reloc_dangerous;
+}
+
+/* Return symbol info as per usual for ELF targets, except that
+   symbols in .opd are given 'd' or 'D' for type.  */
+
+static void
+ppc64_elf_get_symbol_info (abfd, symbol, ret)
+     bfd *abfd;
+     asymbol *symbol;
+     symbol_info *ret;
+{
+  _bfd_elf_get_symbol_info (abfd, symbol, ret);
+  if (ret->type == '?'
+      && (symbol->flags & (BSF_GLOBAL | BSF_LOCAL)) != 0
+      && strcmp (symbol->section->name, ".opd") == 0)
+    ret->type = (symbol->flags & BSF_GLOBAL) != 0 ? 'D' : 'd';
 }
 
 /* Function to set whether a module needs the -mrelocatable bit set.  */
@@ -6108,6 +6126,7 @@ ppc64_elf_finish_dynamic_sections (output_bfd, info)
 #define bfd_elf64_bfd_merge_private_bfd_data  ppc64_elf_merge_private_bfd_data
 #define bfd_elf64_bfd_link_hash_table_create  ppc64_elf_link_hash_table_create
 #define bfd_elf64_bfd_link_hash_table_free    ppc64_elf_link_hash_table_free
+#define bfd_elf64_get_symbol_info	      ppc64_elf_get_symbol_info
 
 #define elf_backend_section_from_shdr	      ppc64_elf_section_from_shdr
 #define elf_backend_create_dynamic_sections   ppc64_elf_create_dynamic_sections

@@ -1,3 +1,9 @@
+2002-05-29  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc64_elf_get_symbol_info): New function.
+	(bfd_elf64_get_symbol_info): Define.
+	* elfxx-target.h (bfd_elfNN_get_symbol_info): Only define if undef.
+
 2002-05-29  Andrey Volkov  <avolkov@transas.com>
 
 	* cpu-h8300.c: Make default h8300 machine first in machine list.
