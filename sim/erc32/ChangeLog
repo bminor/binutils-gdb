@@ -1,3 +1,8 @@
+Wed Apr  8 18:29:40 1998  Mark Alexander  <marka@cygnus.com>
+
+	* exec.c (dispatch_instruction): Change how carry out is calculated
+	in DIVSCC.  Add emulation of SMULCC, UMUL, and UMULCC.
+
 Sat Apr  4 20:36:25 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
