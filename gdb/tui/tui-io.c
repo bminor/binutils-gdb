@@ -689,7 +689,7 @@ tui_getc (FILE *fp)
   
   if (key_is_command_char (ch))
     {				/* Handle prev/next/up/down here */
-      ch = tuiDispatchCtrlChar (ch);
+      ch = tui_dispatch_ctrl_char (ch);
     }
   
   if (ch == '\n' || ch == '\r' || ch == '\f')

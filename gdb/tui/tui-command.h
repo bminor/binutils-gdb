@@ -1,5 +1,8 @@
 /* Specific command window processing.
-   Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 1998, 1999, 2000, 2001, 2004 Free Software Foundation,
+   Inc.
+
    Contributed by Hewlett-Packard Company.
 
    This file is part of GDB.
@@ -19,24 +22,9 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef _TUI_COMMAND_H
-#define _TUI_COMMAND_H
-/*
-   ** This header file supports
- */
+#ifndef TUI_COMMAND_H
+#define TUI_COMMAND_H
 
-
-/*****************************************
-** TYPE DEFINITIONS                        **
-******************************************/
-
-
-
-/*****************************************
-** PUBLIC FUNCTION EXTERNAL DECLS        **
-******************************************/
-
-extern unsigned int tuiDispatchCtrlChar (unsigned int);
+extern unsigned int tui_dispatch_ctrl_char (unsigned int);
 
 #endif
-/*_TUI_COMMAND_H*/

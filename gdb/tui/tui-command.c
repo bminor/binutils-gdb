@@ -48,12 +48,9 @@
 ** PUBLIC FUNCTIONS                        **
 ******************************************/
 
-/*
-   ** tuiDispatchCtrlChar().
-   **        Dispatch the correct tui function based upon the control character.
- */
+/* Dispatch the correct tui function based upon the control character.   */
 unsigned int
-tuiDispatchCtrlChar (unsigned int ch)
+tui_dispatch_ctrl_char (unsigned int ch)
 {
   TuiWinInfoPtr winInfo = tuiWinWithFocus ();
   WINDOW *w = cmdWin->generic.handle;
