@@ -1,3 +1,26 @@
+2003-04-25  Andrew Cagney  <cagney@redhat.com>
+
+	* d10v-tdep.c (d10v_extract_return_value): Delete call to printf.
+	(_initialize_d10v_tdep): Use add_setshow_boolean_cmd.
+	(d10v_frame_unwind_cache): Use FRAME_OBSTACK_CALLOC.
+	(NR_DMAP_REGS, A0_REGNUM): Delete, replaced by ...
+	(nr_dmap_regs, a0_regnum): ... new functions.
+	(d10v_print_registers_info): Use a0_regnum, use register_size.
+	(d10v_register_byte): Delete function.
+	(d10v_register_raw_size): Delete function.
+	(d10v_register_type): Use a0_regnum.
+	(d10v_print_registers_info): Use a0_regnum.
+	(D10V_SP_REGNUM): Rename _SP_REGNUM, replace it and SP_REGNUM.
+	(d10v_gdbarch_init): Do not set register_byte or
+	register_raw_size, use D10V_SP_REGNUM to set sp_regnum.
+	(d10v_pointer_to_address): Use extract_unsigned_integer instead of
+	extract_address.
+	(trace_command): Use XCALLOC.
+	(print_insn): Delete reference to tm_print_insn.
+	(saved_regs_unwinder): Use store_unsigned_integer instead of
+	store_address.
+	* frame.h (FRAME_OBSTACK_CALLOC): Define
+
 2003-04-25  David Carlton  <carlton@bactrian.org>
 
 	* config/djgpp/fnchange.lst: Add testsuite/gdb.c++/maint.exp.

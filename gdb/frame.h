@@ -369,6 +369,7 @@ enum print_what
 
 extern void *frame_obstack_zalloc (unsigned long size);
 #define FRAME_OBSTACK_ZALLOC(TYPE) ((TYPE *) frame_obstack_zalloc (sizeof (TYPE)))
+#define FRAME_OBSTACK_CALLOC(NUMBER,TYPE) ((TYPE *) frame_obstack_zalloc ((NUMBER) * sizeof (TYPE)))
 
 /* If legacy_frame_chain_valid() returns zero it means that the given
    frame is the outermost one and has no caller.
