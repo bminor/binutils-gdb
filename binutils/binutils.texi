@@ -879,17 +879,14 @@ Display version number information on @code{size} itself.
 @kindex strip
 @cindex removing symbols
 @cindex discarding symbols
+@cindex symbols, discarding
 
 @smallexample
-  strip [ -s | +strip-all ]  [ -g | -S | +strip-debug ]
-         [ -x | +discard-all ]  [ -X | +discard-locals ]
-         [ -T @var{bfdname} ]
-         @var{objfiles}@dots{}
+  strip [ -v ] @var{objfiles}@dots{}
 @end smallexample
 
 GNU @code{strip} will discard all symbols from object files
-@var{objfiles}, if no options are specified; or only certain symbols,
-depending on its command-line options.
+@var{objfiles}.  The list of object files may include archives.
 
 @code{strip} will not execute unless at least one object file is listed.
 
@@ -898,40 +895,10 @@ depending on its command-line options.
 rather than writing modified copies under different names.
 @end quotation
 
-The long and short forms of options, shown here as alternatives, are
-equivalent.
-
 @table @code
-@item -s
-@itemx +strip-all 
-@cindex all symbols, discarding
-This is the default case: strip all symbol entries from @var{objfiles}.
-
-@item -g
-@itemx -S
-@itemx +strip-debug 
-@cindex debugging symbols, discarding
-Discard only debugging symbol information from @var{objfiles}.
-
-@item -x
-@itemx +discard-all 
-@cindex local symbols, discarding
-Discard all symbols local to each file in @var{objfiles}.
-@emph{WARNING:} Note that @code{+discard-all} discards only @emph{local}
-symbols, in spite of its name.
-
-@item -X
-@itemx +discard-locals 
-Discard local symbols starting with @samp{L} from each file in
-@var{objfiles}.  (Some compilers produce internally-used symbols that
-begin with @samp{L}.)
-
-@item -T @var{bfdname}
-@cindex object code format
-You can specify a particular object-code format @var{bfdname} for
-@var{objfiles}.  This may not be necessary; @var{strip} can automatically
-recognize many formats.  @xref{objdump}, for information on listing
-available formats.
+@item -v
+Verbose operation: list all object files modified.  In the case of
+archives, @samp{strip -v} will list all members of the archive.
 @end table
 
 @node Index,  , strip, Top
