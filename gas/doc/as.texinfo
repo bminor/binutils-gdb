@@ -4137,8 +4137,9 @@ around @var{file}.
 
 The @var{skip} argument skips a number of bytes from the start of the
 @var{file}.  The @var{count} argument indicates the maximum number of bytes to
-read. Note that the data from is not aligned in any way, make sure to proper
-alignment is provided before and after the @code{incbin} directive.
+read.  Note that the data is not aligned in any way, so it is the user's
+responsibility to make sure that proper alignment is provided both before and
+after the @code{incbin} directive.
 
 @node Include
 @section @code{.include "@var{file}"}
