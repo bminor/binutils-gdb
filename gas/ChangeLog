@@ -1,5 +1,8 @@
 Tue Mar 11 01:13:31 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* symbols.c (colon): Change type of local to int.  From Alan Modra
+	<alan@spri.levels.unisa.edu.au>.
+
 	* config/tc-m88k.c (m88k_do_align): Don't use a special nop
 	alignment if a zero fill pattern was explicitly specified.
 	* config/tc-sh.c (sh_do_align): Likewise.
