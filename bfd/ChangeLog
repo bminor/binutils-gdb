@@ -12,6 +12,9 @@ start-sanitize-arc
 end-sanitize-arc
 	* bfd-in2.h, libbfd.h: Regenerated.
 
+	* ecoff.c (ecoff_type_to_string): Local variable `buffer1' doesn't
+	need to be static.
+
 Wed Jan 11 14:36:41 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* sunos.c (sunos_add_one_symbol): Don't core dump if a multiple
