@@ -1,7 +1,6 @@
-Tue Nov  7 14:38:45 1995  Kim Knuttila  <krk@cygnus.com>
+Thu Dec 21 14:47:17 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
-	* coff/powerpc.h (IMAGE_NT_OPTIONAL_HDR_MAGIC): Added define.
-	* coff/pe.h: Added defines for file level flags
+	* wait.h: Protect all macros with #ifndef.
 
 Tue Oct 24 21:45:40 1995  Ian Lance Taylor  <ian@cygnus.com>
 
