@@ -57,7 +57,8 @@ extern struct target_ops adapt_ops;		/* Forward declaration */
 /* Forward function declarations */
 static void adapt_fetch_registers ();
 static int  adapt_store_registers ();
-static void   adapt_close ();
+static void adapt_close ();
+static int  adapt_clear_breakpoints() 
 
 /* 
  * Processor types. It is assumed that the adapt has the correct 

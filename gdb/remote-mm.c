@@ -806,19 +806,22 @@ int	regno;
 
 
 /****************************************************** REMOTE_STORE_REGISTERS
-** Store register regno into the target.  
+ * Store register regno into the target.  
  * If regno==-1 then store all the registers.
+ * Result is 0 for success, -1 for failure.
  */
 
 static int 
 mm_store_registers (regno)
 int regno;
 {
+  int result;
   
   if (regno >= 0)
 	return(store_register(regno));
 
   DENTER("mm_store_registers()");
+  result = 0;
 
   out_msg_buf->write_r_msg.code= WRITE_REQ;
 
@@ -830,7 +833,9 @@ int regno;
   out_msg_buf->write_r_msg.data[0] = read_register (GR1_REGNUM);
 
   msg_send_serial( out_msg_buf);
-  expect_msg(WRITE_ACK,in_msg_buf,1);
+  if (!expect_msg(WRITE_ACK,in_msg_buf,1)) {
+	result = -1;
+  }
 
 #if defined(GR64_REGNUM)
 /* Global registers gr64-gr95 */
@@ -843,7 +848,9 @@ int regno;
       out_msg_buf->write_r_msg.data[regno-GR64_REGNUM] = read_register (regno);
     }
   msg_send_serial(out_msg_buf);
-  expect_msg(WRITE_ACK,in_msg_buf,1);
+  if (!expect_msg(WRITE_ACK,in_msg_buf,1)) {
+	result = -1;
+  }
 #endif	/* GR64_REGNUM */
 
 /* Global registers gr96-gr127 */
@@ -855,7 +862,9 @@ int regno;
       out_msg_buf->write_r_msg.data[regno-GR96_REGNUM] = read_register (regno);
     }
   msg_send_serial( out_msg_buf);
-  expect_msg(WRITE_ACK,in_msg_buf,1);
+  if (!expect_msg(WRITE_ACK,in_msg_buf,1)) {
+	result = -1;
+  }
 
 /* Local Registers */
   out_msg_buf->write_r_msg.memory_space = LOCAL_REG;
@@ -868,7 +877,9 @@ int regno;
       out_msg_buf->write_r_msg.data[regno-LR0_REGNUM] = read_register (regno);
     }
   msg_send_serial( out_msg_buf);
-  expect_msg(WRITE_ACK,in_msg_buf,1);
+  if (!expect_msg(WRITE_ACK,in_msg_buf,1)) {
+	result = -1;
+  }
 
 /* Protected Special Registers */ 
   /* VAB through TMR */
@@ -879,7 +890,9 @@ int regno;
   for (regno = 0 ; regno<=9 ; regno++)	/* VAB through TMR */
     out_msg_buf->write_r_msg.data[regno] = read_register (SR_REGNUM(regno));
   msg_send_serial( out_msg_buf);
-  expect_msg(WRITE_ACK,in_msg_buf,1);
+  if (!expect_msg(WRITE_ACK,in_msg_buf,1)) {
+	result = -1;
+  }
 
   /* PC0, PC1, PC2 possibly as shadow registers */
   out_msg_buf->write_r_msg.byte_count = 4* 3;
@@ -891,7 +904,9 @@ int regno;
   else 
     out_msg_buf->write_r_msg.address = 10;	/* PC0 */
   msg_send_serial( out_msg_buf);
-  expect_msg(WRITE_ACK,in_msg_buf,1);
+  if (!expect_msg(WRITE_ACK,in_msg_buf,1)) {
+	result = -1;
+  }
 
   /* LRU and MMU */
   out_msg_buf->write_r_msg.byte_count = 4* 2;
@@ -900,7 +915,9 @@ int regno;
   for (regno=13 ; regno<=14 ; regno++)	/* LRU and MMU */
     out_msg_buf->write_r_msg.data[regno-13] = read_register (SR_REGNUM(regno));
   msg_send_serial( out_msg_buf);
-  expect_msg(WRITE_ACK,in_msg_buf,1);
+  if (!expect_msg(WRITE_ACK,in_msg_buf,1)) {
+	result = -1;
+  }
 
 /* Unprotected Special Registers */ 
   out_msg_buf->write_r_msg.byte_count = 4*8;
@@ -909,10 +926,13 @@ int regno;
   for (regno = 128 ; regno<=135 ; regno++)
     out_msg_buf->write_r_msg.data[regno-128] = read_register(SR_REGNUM(regno));
   msg_send_serial( out_msg_buf);
-  expect_msg(WRITE_ACK,in_msg_buf,1);
+  if (!expect_msg(WRITE_ACK,in_msg_buf,1)) {
+	result = -1;
+  }
  
   registers_changed ();
   DEXIT("mm_store_registers()");
+  return result;
 }
 
 /*************************************************** REMOTE_PREPARE_TO_STORE */
@@ -947,22 +967,6 @@ CORE_ADDR addr;
 #else
         return(addr);
 #endif
-}
-/* FIXME!  Merge these two.  */
-static int
-mm_xfer_inferior_memory (memaddr, myaddr, len, write)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int write;
-{
-
-  memaddr = translate_addr(memaddr);
-
-  if (write)
-    return mm_write_inferior_memory (memaddr, myaddr, len);
-  else
-    return mm_read_inferior_memory (memaddr, myaddr, len);
 }
 
 /******************************************************* REMOTE_FILES_INFO */
@@ -1081,7 +1085,7 @@ int	from_tty;
   /* You may need to do an init_target_mm() */
   /* init_target_mm(?,?,?,?,?,?,?,?); */
   immediate_quit--;
-  symbol_file_add (arg_string, from_tty, text_addr, 0);
+  /* symbol_file_add (arg_string, from_tty, text_addr, 0); */
 #endif
 
 }
@@ -1156,6 +1160,24 @@ mm_read_inferior_memory(memaddr, myaddr, len)
   }
   return(nread);
 }
+
+/* FIXME!  Merge these two.  */
+static int
+mm_xfer_inferior_memory (memaddr, myaddr, len, write)
+     CORE_ADDR memaddr;
+     char *myaddr;
+     int len;
+     int write;
+{
+
+  memaddr = translate_addr(memaddr);
+
+  if (write)
+    return mm_write_inferior_memory (memaddr, myaddr, len);
+  else
+    return mm_read_inferior_memory (memaddr, myaddr, len);
+}
+
 
 /********************************************************** MSG_SEND_SERIAL
 ** This function is used to send a message over the
