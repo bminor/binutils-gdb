@@ -1,3 +1,12 @@
+2002-11-06  Theodore A. Roth  <troth@openavr.org>
+
+	* c-exp.y: Add missing semi-colons.
+	* f-exp.y: Add missing semi-colons.
+	* m2-exp.y: Add missing semi-colons.
+	* p-exp.y: Add missing semi-colons.
+	Add empty action to start rule to avoid a type clash error when
+	building with bison >= 1.50.
+
 2002-10-31  Joel Brobecker  <brobecker@gnat.com>
 
 	* hppa-tdep.c (low_text_segment_addres): Fix a compilation warning.
