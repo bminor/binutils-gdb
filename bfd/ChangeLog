@@ -1,3 +1,8 @@
+2001-12-12  Richard Henderson  <rth@redhat.com>
+
+	* syms.c (_bfd_generic_read_minisymbols): Early return for
+	no symbols.  Patch from FreeBSD folk; exact origin unknown.
+
 2001-12-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* elfcode.h (elf_swap_ehdr_out): Adjust value written for e_shnum
