@@ -2976,7 +2976,8 @@ _bfd_mn10300_elf_merge_private_bfd_data (ibfd, obfd)
 #define TARGET_LITTLE_SYM	bfd_elf32_mn10300_vec
 #define TARGET_LITTLE_NAME	"elf32-mn10300"
 #define ELF_ARCH		bfd_arch_mn10300
-#define ELF_MACHINE_CODE	EM_CYGNUS_MN10300
+#define ELF_MACHINE_CODE	EM_MN10300
+#define ELF_MACHINE_ALT1	EM_CYGNUS_MN10300
 #define ELF_MAXPAGESIZE		0x1000
 
 #define elf_info_to_howto		mn10300_info_to_howto
