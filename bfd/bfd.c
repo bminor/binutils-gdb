@@ -727,7 +727,7 @@ _bfd_abort (file, line, fn)
        BFD_VERSION_STRING, file, line, fn);
   else
     (*_bfd_error_handler)
-      (_("BFD %sinternal error, aborting at %s line %d\n"),
+      (_("BFD %s internal error, aborting at %s line %d\n"),
        BFD_VERSION_STRING, file, line);
   (*_bfd_error_handler) (_("Please report this bug.\n"));
   xexit (EXIT_FAILURE);
