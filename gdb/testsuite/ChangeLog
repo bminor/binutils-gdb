@@ -1,3 +1,13 @@
+Tue Feb 20 16:36:10 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.c++/misc.cc: Add test code from Mike Stump.
+	* gdb.c++/misc.exp: Add test to print s.a, for Mike Stump.
+
+Sat Feb 17 02:22:14 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.base/sigall.exp:  Remove setup_xfail for irix4.  Fixed by
+	Feb 3 procfs.c change.
+
 Fri Feb 16 13:25:31 1996  Fred Fish  <fnf@cygnus.com>
 
 	* config/unix-gdb.exp: Remove extraneous newlines from end of file.
