@@ -3,6 +3,12 @@ srcname="GDB"
 srctrigger=main.c
 gdb_serial_driver=ser-unix.c
 
+echo ${target}
+
+if [ "${target_cpu}" = "sparclite" ] ; then
+	configdirs = "$configdirs sparclite"
+fi
+
 # per-host:
 
 # Map host cpu into the config cpu subdirectory name.
@@ -126,6 +132,7 @@ m68*)			gdb_target_cpu=m68k ;;
 np1)			gdb_target_cpu=gould ;;
 pn)			gdb_target_cpu=gould ;;
 pyramid)		gdb_target_cpu=pyr ;;
+sparc*)			gdb_target_cpu=sparc ;;
 *)			gdb_target_cpu=$target_cpu ;;
 
 esac
@@ -233,7 +240,7 @@ sparc-*-solaris2*)	gdb_target=sun4sol2 ;;
 sparc-*-sunos4*)	gdb_target=sun4os4 ;;
 sparc-*-vxworks*)	gdb_target=sparc-em ;;
 sparc-*-*)		gdb_target=sun4os4 ;;
-sparclite*-*-*)		gdb_target=sun4os4 ;;
+sparclite*-*-*)		gdb_target=sparclite ;;
 
 tahoe-*-*)		gdb_target=tahoe ;;
 vax-*-*)		gdb_target=vax ;;

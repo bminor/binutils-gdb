@@ -1,5 +1,5 @@
-/* Host-dependent code for dos running GO32 for GDB, the GNU debugger.
-   Copyright 1992 Free Software Foundation, Inc.
+/* Macro definitions for GDB for a Fujitsu SPARClite.
+   Copyright 1993 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -17,21 +17,4 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#include <stdio.h>
-
-static void uerror(char *s)
-{
-  fprintf(stderr, "Fatal: %s!\n");
-  exit(1);
-}
-
-re_comp(){uerror("attempt to call re_comp()");}
-re_exec(){uerror("attempt to call re_exec()");}
-
-sigsetmask()
-{
-}
-
-strlwr()
-{
-}
+#include "sparc/tm-sparc.h"

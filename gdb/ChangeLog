@@ -1,3 +1,15 @@
+Tue Apr  6 10:31:26 1993  Stu Grossman  (grossman@cygnus.com)
+
+	* configure.in:  Sparclite uses sparc config dir.  Also has it's
+	own tm- & .mt files now.  Also add sparclite to configdirs.
+	* go32-xdep.c:  Dummy routines for sigsetmask & strlwr.
+	* config/i386/go32.mh:  Nullify def of TERMCAP.
+	* config/i386/xm-go32.h:  Get rid of redef of EIO.
+	* config/sparc/{sparclite.mh tm-sparclite.h}:  New sparclite
+	specific configs.  Very similar to sun4os4, but without solib.
+	* sparclite/{Makefile.in configure.in}:  First cut at making this
+	dir configgable.
+
 Tue Apr  6 03:10:44 1993  Stu Grossman  (grossman@cygnus.com)
 
 	* ser-go32.c:  First cut at adapting to new serial interface.
