@@ -1,3 +1,31 @@
+Thu Nov  9 12:22:15 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.in (--enable-sim-alignment): Fix typo in specifing non
+	string alignment.
+	(--enable-sim-switch): Make default on.
+	(--enable-sim-duplicate): Make default on.
+	(--enable-sim-smp): Make default 0.
+	(--enable-sim-mon): Don't set sim_float if not set.
+	(--enable-sim-inline): If gcc is found and --enable-sim-inline is
+	not specified, define DEFAULT_INLINE to be 2.
+	(all --enable-sim-* rules): Echo rules set to non empty to file
+	descriptor 6.
+	* configure: Regenerate.
+
+	* options.c (options_env): Fix typo if WITH_ENV is 0.
+	(print_options): Print GCC compiler version if available and
+	date/time options was compiled.  If OPCODE_RULES, IGEN_FLAGS,
+	and/or DGEN_FLAGS are defined, print them.
+
+	* Makefile.in (all link actions): Pass SIM_CFLAGS as well as
+	CFLAGS.
+	(options.o): Compile options.o with OPCODE_RULES, IGEN_FLAGS, and
+	DGEN_FLAGS defined, so they can be printed out.
+
+	* igen.c (lf_print_c_validate): Check for WITH_ASSERT, so that
+	this test can be compiled away if the user really wants a fast
+	simulator by not doing assertion failures.
+
 Wed Nov  8 13:19:47 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* options.c: New file to print out all of the WITH_ options.

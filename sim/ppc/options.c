@@ -43,7 +43,7 @@ options_env (int env)
   case OPERATING_ENVIRONMENT:	return "OPERATING";
   case VIRTUAL_ENVIRONMENT:	return "VIRTUAL";
   case USER_ENVIRONMENT:	return "USER";
-  case 0:			return 0;
+  case 0:			return "0";
   }
 
   return "UNKNOWN";
@@ -107,6 +107,12 @@ options_ppc (ppc_model ppc)
 void
 print_options (void)
 {
+#if defined(_GNUC_) && defined(__VERSION__)
+  printf_filtered ("Compiled by GCC %s on %s %s\n", __VERSION__, __DATE__, __TIME__);
+#else
+  printf_filtered ("Compiled on %s %s\n", __DATE__, __TIME__);
+#endif
+
   printf_filtered ("WITH_HOST_BYTE_ORDER     = %s\n", options_byte_order (WITH_HOST_BYTE_ORDER));
   printf_filtered ("WITH_TARGET_BYTE_ORDER   = %s\n", options_byte_order (WITH_TARGET_BYTE_ORDER));
   printf_filtered ("WITH_BSWAP               = %d\n", WITH_BSWAP);
@@ -141,6 +147,18 @@ print_options (void)
   printf_filtered ("SEMANTICS_INLINE         = %d\n", SEMANTICS_INLINE);
   printf_filtered ("IDECODE_INLINE           = %d\n", IDECODE_INLINE);
   printf_filtered ("FUNCTION_UNIT_INLINE     = %d\n", FUNCTION_UNIT_INLINE);
+
+#ifdef OPCODE_RULES
+  printf_filtered ("OPCODE rules             = %s\n", OPCODE_RULES);
+#endif
+
+#ifdef IGEN_FLAGS
+  printf_filtered ("IGEN_FLAGS               = %s\n", IGEN_FLAGS);
+#endif
+
+#ifdef DGEN_FLAGS
+  printf_filtered ("DGEN_FLAGS               = %s\n", DGEN_FLAGS);
+#endif
 }
 
 #endif /* _OPTIONS_C_ */

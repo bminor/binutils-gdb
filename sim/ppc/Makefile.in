@@ -100,6 +100,9 @@ CONFIG_CFLAGS = $(BSWAP_CFLAGS) \
   $(FUNC_CFLAGS) \
   $(MODEL_CFLAGS)
 
+STD_CFLAGS	= $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(WARNING_CFLAGS) $(SIM_CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES)
+NOWARN_CFLAGS	= $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(SIM_CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES)
+
 CONFIG_FILE = @sim_config@
 IGEN_OPCODE_RULES = @sim_opcode@
 IGEN_DUPLICATE = @sim_dup@
@@ -127,7 +130,7 @@ TARGETLIB	= libsim.a
 all:	run $(TARGETLIB) $(GDB_OBJ)
 
 .c.o:
-	$(CC) -c $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(WARNING_CFLAGS) $(SIM_CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES) $<
+	$(CC) -c $(STD_CFLAGS) $<
 
 
 
@@ -254,7 +257,7 @@ GDB_OBJ = sim_calls.o
 
 
 psim: $(TARGETLIB) main.o $(LIBIBERTY_LIB) $(BFD_LIB) $(LIBS)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o psim main.o $(TARGETLIB) $(BFD_LIB) $(LIBIBERTY_LIB) $(LIBS)
+	$(CC) $(CFLAGS) $(SIM_CFLAGS) $(LDFLAGS) -o psim main.o $(TARGETLIB) $(BFD_LIB) $(LIBIBERTY_LIB) $(LIBS)
 
 run: psim
 	rm -f run
@@ -268,7 +271,7 @@ $(TARGETLIB): tmp-igen tmp-dgen $(LIB_OBJ) $(GDB_OBJ)
 # Given that inlines are turned on now, rebuild psim whenever
 # anything changes.
 psim.o: psim.c psim.h $(CPU_H) $(IDECODE_H) $(INLINE) $(LIB_SRC) $(BUILT_SRC)
-	$(CC) -c $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(SIM_CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES) $<
+	$(CC) -c $(NOWARN_CFLAGS) $<
 
 bits.o: bits.c $(BASICS_H)
 
@@ -288,7 +291,7 @@ cpu.o: cpu.c $(CPU_H) $(IDECODE_H)
 interrupts.o: interrupts.c $(CPU_H) $(IDECODE_H) os_emul.h
 
 idecode.o: idecode.c $(CPU_H) $(IDECODE_H) semantics.h
-	$(CC) -c $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(SIM_CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES) $<
+	$(CC) -c $(NOWARN_CFLAGS) $<
 
 # double.o: double.c dp-bit.c
 
@@ -313,13 +316,15 @@ devices.o: devices.c devices.h $(BASICS_H) \
 device_tree.o: device_tree.c device_tree.h devices.h $(BASICS_H)
 
 semantics.o: semantics.c semantics.h $(CPU_H) $(IDECODE_H)
-	$(CC) -c $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(SIM_CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES) $<
+	$(CC) -c $(NOWARN_CFLAGS) $<
 
 itable.o: itable.c itable.h
 
 mon.o: mon.c $(CPU_H)
 
-options.o: options.c $(BASICS_H)
+# Rebuild options whenever something changes so the date/time is up to date.
+options.o: options.c $(BASICS_H) $(CPU_H) $(IDECODE_H) $(INLINE) $(LIB_SRC) $(BUILT_SRC) config.status Makefile
+	$(CC) -c $(STD_CFLAGS) '-DOPCODE_RULES="@sim_opcode@"' '-DIGEN_FLAGS="$(IGEN_FLAGS)"' '-DDGEN_FLAGS="$(DGEN_FLAGS)"' $<
 
 #
 # Rules to create the built c source code files
@@ -368,10 +373,10 @@ itable.h itable.c icache.h idecode.h idecode.c semantics.h semantics.c: tmp-igen
 spreg.h spreg.c: tmp-dgen
 
 dgen: dgen.o table.o lf.o misc.o filter_filename.o
-	$(CC_FOR_BUILD) $(CFLAGS) $(LDFLAGS) -o dgen dgen.o table.o lf.o misc.o filter_filename.o $(LIBIBERTY_LIB) $(LIBS)
+	$(CC_FOR_BUILD) $(CFLAGS) $(SIM_CFLAGS) $(LDFLAGS) -o dgen dgen.o table.o lf.o misc.o filter_filename.o $(LIBIBERTY_LIB) $(LIBS)
 
 igen: igen.o table.o lf.o misc.o filter_filename.o
-	$(CC_FOR_BUILD) $(CFLAGS) $(LDFLAGS) -o igen igen.o table.o lf.o misc.o filter_filename.o $(LIBIBERTY_LIB) $(LIBS)
+	$(CC_FOR_BUILD) $(CFLAGS) $(SIM_CFLAGS) $(LDFLAGS) -o igen igen.o table.o lf.o misc.o filter_filename.o $(LIBIBERTY_LIB) $(LIBS)
 
 table.o: misc.h filter_filename.h lf.h table.h
 lf.o: misc.h filter_filename.h lf.h

@@ -457,6 +457,9 @@ if test -n "$enableval"; then
   no)	sim_cflags="";;
   *)	sim_cflags=`echo "${enableval}" | sed -e "s/,/ /g"`;;
 esac
+if test  x"$sim_cflags" != x""; then
+  echo "Setting sim cflags = $sim_cflags" 6>&1
+fi
 else
   sim_cflags=""
 fi
@@ -469,6 +472,9 @@ if test -n "$enableval"; then
   no)	sim_warnings="-w";;
   *)	sim_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
 esac
+if test  x"$sim_warnings" != x""; then
+  echo "Setting warning flags = $sim_warnings" 6>&1
+fi
 else
   sim_warnings=""
 fi
@@ -481,8 +487,11 @@ if test -n "$enableval"; then
   no)	sim_config="std-config.h";;
   *)	sim_config="${enableval}";;
 esac
+if test  x"$sim_config" != x""; then
+  echo "Setting config flags = $sim_config" 6>&1
+fi
 else
-  sim_config="std-config.h"
+  sim_config="std-config.h"; echo "Setting config flags = $sim_config" 6>&1
 fi
 
 # Check whether --enable-sim-opcode or --disable-sim-opcode was given.
@@ -493,8 +502,11 @@ if test -n "$enableval"; then
   no)	sim_opcode="ppc-opcode-simple";;
   *)	sim_opcode="ppc-opcode-${enableval}";;
 esac
+if test  x"$sim_opcode" != x""; then
+  echo "Setting opcode flags = $sim_opcode" 6>&1
+fi
 else
-  sim_opcode="ppc-opcode-simple"
+  sim_opcode="ppc-opcode-simple"; echo "Setting opcode flags = $sim_opcode"
 fi
 
 # Check whether --enable-sim-switch or --disable-sim-switch was given.
@@ -504,8 +516,11 @@ if test -n "$enableval"; then
   yes)	sim_switch="-s";;
   *)	sim_switch="";;
 esac
+if test  x"$sim_switch" != x""; then
+  echo "Setting switch flags = $sim_switch" 6>&1
+fi
 else
-  sim_switch=""
+  sim_switch="-s"; echo "Setting switch flags = $sim_switch" 6>&1
 fi
 
 # Check whether --enable-sim-duplicate or --disable-sim-duplicate was given.
@@ -515,8 +530,11 @@ if test -n "$enableval"; then
    yes)	sim_dup="-e";;
    *)	sim_dup="";;
 esac
+if test  x"$sim_dup" != x""; then
+  echo "Setting duplicate flags = $sim_dup" 6>&1
+fi
 else
-  sim_dup=""
+  sim_dup="-e"; echo "Setting duplicate flags = $sim_dup" 6>&1
 fi
 
 # Check whether --enable-sim-filter or --disable-sim-filter was given.
@@ -526,8 +544,11 @@ if test -n "$enableval"; then
    yes)	sim_filter="";;
    *)	sim_filter="-f $enableval";;
 esac
+if test  x"$sim_filter" != x""; then
+  echo "Setting filter flags = $sim_filter" 6>&1
+fi
 else
-  sim_filter="-f 64"
+  sim_filter="-f 64"; echo "Setting filter flags = $sim_filter" 6>&1
 fi
 
 # Check whether --enable-sim-icache or --disable-sim-icache was given.
@@ -565,8 +586,15 @@ case "$enableval" in
        fi
      done;;
 esac
+if test  x"$sim_inline" != x""; then
+  echo "Setting inline flags = $sim_inline" 6>&1
+fi
+else
+  if test x"$GCC" != ""; then
+  sim_inline="-DDEFAULT_INLINE=2"; echo "Setting inline flags = $sim_inline" 6>&1
 else
   sim_inline=""
+fi
 fi
 
 # Check whether --enable-sim-bswap or --disable-sim-bswap was given.
@@ -577,6 +605,9 @@ if test -n "$enableval"; then
   no)	sim_bswap="-DWITH_BSWAP=0";;
   *)	sim_bswap="";;
 esac
+if test  x"$sim_bswap" != x""; then
+  echo "Setting bswap flags = $sim_bswap" 6>&1
+fi
 else
   sim_bswap=""
 fi
@@ -595,6 +626,9 @@ if test -n "$enableval"; then
   l*|L*) sim_endian="-DWITH_TARGET_BYTE_ORDER=LITTLE_ENDIAN";;
   *)	sim_endian="";;
 esac
+if test  x"$sim_endian" != x""; then
+  echo "Setting endian flags = $sim_endian" 6>&1
+fi
 else
   sim_endian=""
 fi
@@ -608,6 +642,9 @@ if test -n "$enableval"; then
   l*|L*) sim_hostendian="-DWITH_HOST_BYTE_ORDER=LITTLE_ENDIAN";;
   *)	 sim_hostendian="";;
 esac
+if test  x"$sim_hostendian" != x""; then
+  echo "Setting hostendian flags = $sim_hostendian" 6>&1
+fi
 else
   sim_hostendian=""
 fi
@@ -620,8 +657,11 @@ if test -n "$enableval"; then
   no)	sim_smp="-DWITH_SMP=0";;
   *)	sim_smp="-DWITH_SMP=$enableval";;
 esac
+if test  x"$sim_smp" != x""; then
+  echo "Setting smp flags = $sim_smp" 6>&1
+fi
 else
-  sim_smp=""
+  sim_smp="-DWITH_SMP=0"; echo "Setting smp flags = $sim_smp" 6>&1
 fi
 
 # Check whether --enable-sim-bitsize or --disable-sim-bitsize was given.
@@ -632,6 +672,9 @@ if test -n "$enableval"; then
   no)	sim_bitsize="";;
   *)	sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=$enableval";;
 esac
+if test  x"$sim_bitsize" != x""; then
+  echo "Setting bitsize flags = $sim_bitsize" 6>&1
+fi
 else
   sim_bitsize=""
 fi
@@ -644,6 +687,9 @@ if test -n "$enableval"; then
   no)	sim_hostbitsize="";;
   *)	sim_hostbitsize="-DWITH_HOST_WORD_BITSIZE=$enableval";;
 esac
+if test  x"$sim_hostbitsize" != x""; then
+  echo "Setting hostbitsize flags = $sim_hostbitsize" 6>&1
+fi
 else
   sim_hostbitsize=""
 fi
@@ -657,6 +703,9 @@ if test -n "$enableval"; then
   user | uea)		sim_env="-DWITH_ENVIRONMENT=USER_ENVIRONMENT";;
   *)			sim_env="";;
 esac
+if test  x"$sim_env" != x""; then
+  echo "Setting env flags = $sim_env" 6>&1
+fi
 else
   sim_env=""
 fi
@@ -669,6 +718,9 @@ if test -n "$enableval"; then
   no)	sim_timebase="-DWITH_TIME_BASE=0";;
   *)	sim_timebase="";;
 esac
+if test  x"$sim_timebase" != x""; then
+  echo "Setting timebase flags = $sim_timebase" 6>&1
+fi
 else
   sim_timebase=""
 fi
@@ -678,9 +730,12 @@ enableval="$enable_sim_alignment"
 if test -n "$enableval"; then
   case "${enableval}" in
   yes | strict | STRICT)	sim_alignment="-DWITH_ALIGNMENT=STRICT_ALIGNMENT";;
-  no | nonstrict | NONSTRICT)	sim_alignment="-DWITH_ALIGNMENT=NOSTRICT_ALIGNMENT";;
+  no | nonstrict | NONSTRICT)	sim_alignment="-DWITH_ALIGNMENT=NONSTRICT_ALIGNMENT";;
   *)				sim_alignment="-DWITH_ALIGNMENT=$enableval";;
 esac
+if test  x"$sim_alignment" != x""; then
+  echo "Setting alignment flags = $sim_alignment" 6>&1
+fi
 else
   sim_alignment=""
 fi
@@ -693,6 +748,9 @@ if test -n "$enableval"; then
   no)	sim_trace="-DWITH_TRACE=0";;
   *)	sim_trace="";;
 esac
+if test  x"$sim_trace" != x""; then
+  echo "Setting trace flags = $sim_trace" 6>&1
+fi
 else
   sim_trace=""
 fi
@@ -705,6 +763,9 @@ if test -n "$enableval"; then
   no)	sim_assert="-DWITH_ASSERT=0";;
   *)	sim_assert="";;
 esac
+if test  x"$sim_assert" != x""; then
+  echo "Setting assert flags = $sim_assert" 6>&1
+fi
 else
   sim_assert=""
 fi
@@ -717,6 +778,9 @@ if test -n "$enableval"; then
   no | soft)	sim_float="-DWITH_FLOATING_POINT=SOFT_FLOATING_POINT";;
   *)		sim_float="";;
 esac
+if test  x"$sim_float" != x""; then
+  echo "Setting float flags = $sim_float" 6>&1
+fi
 else
   sim_float=""
 fi
@@ -731,8 +795,11 @@ if test -n "$enableval"; then
   memory)	sim_mon="-DWITH_MON=MONITOR_LOAD_STORE_UNIT";;
   *)		sim_mon="-DWITH_MON='$enableval'";;
 esac
+if test  x"$sim_mon" != x""; then
+  echo "Setting monitor flags = $sim_mon" 6>&1
+fi
 else
-  sim_float=""
+  sim_mon=""
 fi
 
 # Check whether --enable-sim-function-unit or --disable-sim-function-unit was given.
@@ -743,6 +810,9 @@ if test -n "$enableval"; then
   no)	sim_func="-DWITH_FUNCTION_UNIT=0";;
   *)	sim_func="";;
 esac
+if test  x"$sim_func" != x""; then
+  echo "Setting function-unit flags = $sim_func" 6>&1
+fi
 else
   sim_func=""
 fi
@@ -755,6 +825,9 @@ if test -n "$enableval"; then
   no)	sim_model="";;
   *)	sim_model="-DWITH_PPC_MODEL=${enableval}";;
 esac
+if test  x"$sim_model" != x""; then
+  echo "Setting model flags = $sim_model" 6>&1
+fi
 else
   sim_model=""
 fi
@@ -767,11 +840,12 @@ if test -n "$enableval"; then
   no)	sim_default_model="";;
   *)	sim_default_model="-DWITH_DEFAULT_PPC_MODEL=${enableval}";;
 esac
+if test  x"$sim_default_model" != x""; then
+  echo "Setting default-model flags = $sim_default_model" 6>&1
+fi
 else
   sim_model=""
 fi
-
-
 
 ac_aux_dir=
 for ac_dir in `cd $srcdir;pwd`/../.. $srcdir/`cd $srcdir;pwd`/../..; do
@@ -897,6 +971,8 @@ test "$program_transform_name" = "" && program_transform_name="s,x,x,"
 
 
 . ${srcdir}/../../bfd/configure.host
+
+
 
 # Extract the first word of "gcc", so it can be a program name with args.
 set dummy gcc; ac_word=$2
@@ -1036,7 +1112,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1040 "configure"
+#line 1116 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1091,7 +1167,7 @@ else
   ac_cv_c_cross=yes
 else
 cat > conftest.$ac_ext <<EOF
-#line 1095 "configure"
+#line 1171 "configure"
 #include "confdefs.h"
 main(){return(0);}
 EOF
@@ -1129,7 +1205,7 @@ else
   # On the NeXT, cc -E runs the code through the compiler's parser,
   # not just through cpp.
   cat > conftest.$ac_ext <<EOF
-#line 1133 "configure"
+#line 1209 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -1143,7 +1219,7 @@ else
   rm -rf conftest*
   CPP="${CC-cc} -E -traditional-cpp"
   cat > conftest.$ac_ext <<EOF
-#line 1147 "configure"
+#line 1223 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -1176,7 +1252,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1180 "configure"
+#line 1256 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF

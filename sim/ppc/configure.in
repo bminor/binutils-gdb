@@ -8,7 +8,10 @@ AC_ARG_ENABLE(sim-cflags,
   yes)	sim_cflags="-O2 -fomit-frame-pointer";;
   no)	sim_cflags="";;
   *)	sim_cflags=`echo "${enableval}" | sed -e "s/,/ /g"`;;
-esac],[sim_cflags=""])dnl
+esac
+if test  x"$sim_cflags" != x""; then
+  echo "Setting sim cflags = $sim_cflags" 6>&1
+fi],[sim_cflags=""])dnl
 
 AC_ARG_ENABLE(sim-warnings,
 [  --enable-sim-warnings=opts		Extra CFLAGS for turning on compiler warnings except for idecode.o, semantics.o and psim.o],
@@ -16,7 +19,10 @@ AC_ARG_ENABLE(sim-warnings,
   yes)	sim_warnings="-Wall -Wpointer-arith -Wbad-function-cast -Wmissing-prototypes -Wmissing-declarations";;
   no)	sim_warnings="-w";;
   *)	sim_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
-esac],[sim_warnings=""])dnl
+esac
+if test  x"$sim_warnings" != x""; then
+  echo "Setting warning flags = $sim_warnings" 6>&1
+fi],[sim_warnings=""])dnl
 
 AC_ARG_ENABLE(sim-config,
 [  --enable-sim-config=file		Override default config file],
@@ -24,7 +30,10 @@ AC_ARG_ENABLE(sim-config,
   yes)	sim_config="std-config.h";;
   no)	sim_config="std-config.h";;
   *)	sim_config="${enableval}";;
-esac],[sim_config="std-config.h]")dnl
+esac
+if test  x"$sim_config" != x""; then
+  echo "Setting config flags = $sim_config" 6>&1
+fi],[sim_config="std-config.h"; echo "Setting config flags = $sim_config" 6>&1])dnl
 
 AC_ARG_ENABLE(sim-opcode,
 [  --enable-sim-opcode=which		Override default opcode lookup.],
@@ -32,28 +41,40 @@ AC_ARG_ENABLE(sim-opcode,
   yes)	sim_opcode="ppc-opcode-simple";;
   no)	sim_opcode="ppc-opcode-simple";;
   *)	sim_opcode="ppc-opcode-${enableval}";;
-esac],[sim_opcode="ppc-opcode-simple"])dnl
+esac
+if test  x"$sim_opcode" != x""; then
+  echo "Setting opcode flags = $sim_opcode" 6>&1
+fi],[sim_opcode="ppc-opcode-simple"; echo "Setting opcode flags = $sim_opcode"])dnl
 
 AC_ARG_ENABLE(sim-switch,
 [  --enable-sim-switch			Use a switch instead of a table for instruction call.],
 [case "${enableval}" in
   yes)	sim_switch="-s";;
   *)	sim_switch="";;
-esac],[sim_switch=""])dnl
+esac
+if test  x"$sim_switch" != x""; then
+  echo "Setting switch flags = $sim_switch" 6>&1
+fi],[sim_switch="-s"; echo "Setting switch flags = $sim_switch" 6>&1])dnl
 
 AC_ARG_ENABLE(sim-duplicate,
 [  --enable-sim-duplicate		Expand (duplicate) semantic functions.],
 [case "${enableval}" in
    yes)	sim_dup="-e";;
    *)	sim_dup="";;
-esac],[sim_dup=""])dnl
+esac
+if test  x"$sim_dup" != x""; then
+  echo "Setting duplicate flags = $sim_dup" 6>&1
+fi],[sim_dup="-e"; echo "Setting duplicate flags = $sim_dup" 6>&1])dnl
 
 AC_ARG_ENABLE(sim-filter,
 [  --enable-sim-filter=rule		Specify filter rules.],
 [case "${enableval}" in
    yes)	sim_filter="";;
    *)	sim_filter="-f $enableval";;
-esac],[sim_filter="-f 64"])dnl
+esac
+if test  x"$sim_filter" != x""; then
+  echo "Setting filter flags = $sim_filter" 6>&1
+fi],[sim_filter="-f 64"; echo "Setting filter flags = $sim_filter" 6>&1])dnl
 
 AC_ARG_ENABLE(sim-icache,
 [  --enable-sim-icache=size		Specify instruction cache size.],
@@ -84,7 +105,14 @@ case "$enableval" in
 	 sim_inline="$flags $new_flag"
        fi
      done;;
-esac],[sim_inline=""])dnl
+esac
+if test  x"$sim_inline" != x""; then
+  echo "Setting inline flags = $sim_inline" 6>&1
+fi],[if test x"$GCC" != ""; then
+  sim_inline="-DDEFAULT_INLINE=2"; echo "Setting inline flags = $sim_inline" 6>&1
+else
+  sim_inline=""
+fi])dnl
 
 AC_ARG_ENABLE(sim-bswap,
 [  --enable-sim-bswap			Use the BSWAP instruction on Intel 486s and Pentiums.],
@@ -92,7 +120,10 @@ AC_ARG_ENABLE(sim-bswap,
   yes)	sim_bswap="-DWITH_BSWAP=1";;
   no)	sim_bswap="-DWITH_BSWAP=0";;
   *)	sim_bswap="";;
-esac],[sim_bswap=""])dnl
+esac
+if test  x"$sim_bswap" != x""; then
+  echo "Setting bswap flags = $sim_bswap" 6>&1
+fi],[sim_bswap=""])dnl
 
 AC_ARG_ENABLE(sim-endian,
 [  --enable-sim-endian=endian		Specify target byte endian orientation.],
@@ -106,7 +137,10 @@ AC_ARG_ENABLE(sim-endian,
   b*|B*) sim_endian="-DWITH_TARGET_BYTE_ORDER=BIG_ENDIAN";;
   l*|L*) sim_endian="-DWITH_TARGET_BYTE_ORDER=LITTLE_ENDIAN";;
   *)	sim_endian="";;
-esac],[sim_endian=""])dnl
+esac
+if test  x"$sim_endian" != x""; then
+  echo "Setting endian flags = $sim_endian" 6>&1
+fi],[sim_endian=""])dnl
 
 AC_ARG_ENABLE(sim-hostendian,
 [  --enable-sim-hostendain=end		Specify host byte endian orientation.],
@@ -115,7 +149,10 @@ AC_ARG_ENABLE(sim-hostendian,
   b*|B*) sim_hostendian="-DWITH_HOST_BYTE_ORDER=BIG_ENDIAN";;
   l*|L*) sim_hostendian="-DWITH_HOST_BYTE_ORDER=LITTLE_ENDIAN";;
   *)	 sim_hostendian="";;
-esac],[sim_hostendian=""])dnl
+esac
+if test  x"$sim_hostendian" != x""; then
+  echo "Setting hostendian flags = $sim_hostendian" 6>&1
+fi],[sim_hostendian=""])dnl
 
 AC_ARG_ENABLE(sim-smp,
 [  --enable-sim-smp=n			Specify number of processors to configure for.],
@@ -123,7 +160,10 @@ AC_ARG_ENABLE(sim-smp,
   yes)	sim_smp="-DWITH_SMP=2";;
   no)	sim_smp="-DWITH_SMP=0";;
   *)	sim_smp="-DWITH_SMP=$enableval";;
-esac],[sim_smp=""])dnl
+esac
+if test  x"$sim_smp" != x""; then
+  echo "Setting smp flags = $sim_smp" 6>&1
+fi],[sim_smp="-DWITH_SMP=0"; echo "Setting smp flags = $sim_smp" 6>&1])dnl
 
 AC_ARG_ENABLE(sim-bitsize,
 [  --enable-sim-bitsize=n		Specify target bitsize (32 or 64).],
@@ -131,7 +171,10 @@ AC_ARG_ENABLE(sim-bitsize,
   yes)	sim_bitsize="";;
   no)	sim_bitsize="";;
   *)	sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=$enableval";;
-esac],[sim_bitsize=""])dnl
+esac
+if test  x"$sim_bitsize" != x""; then
+  echo "Setting bitsize flags = $sim_bitsize" 6>&1
+fi],[sim_bitsize=""])dnl
 
 AC_ARG_ENABLE(sim-hostbitsize,
 [  --enable-sim-hostbitsize=n		Specify host bitsize (32 or 64).],
@@ -139,7 +182,10 @@ AC_ARG_ENABLE(sim-hostbitsize,
   yes)	sim_hostbitsize="";;
   no)	sim_hostbitsize="";;
   *)	sim_hostbitsize="-DWITH_HOST_WORD_BITSIZE=$enableval";;
-esac],[sim_hostbitsize=""])dnl
+esac
+if test  x"$sim_hostbitsize" != x""; then
+  echo "Setting hostbitsize flags = $sim_hostbitsize" 6>&1
+fi],[sim_hostbitsize=""])dnl
 
 AC_ARG_ENABLE(sim-env,
 [  --enable-sim-env=env			Specify target environment (operating, virtual, user).],
@@ -148,7 +194,10 @@ AC_ARG_ENABLE(sim-env,
   virtual | vea)	sim_env="-DWITH_ENVIRONMENT=VIRTUAL_ENVIRONMENT";;
   user | uea)		sim_env="-DWITH_ENVIRONMENT=USER_ENVIRONMENT";;
   *)			sim_env="";;
-esac],[sim_env=""])dnl
+esac
+if test  x"$sim_env" != x""; then
+  echo "Setting env flags = $sim_env" 6>&1
+fi],[sim_env=""])dnl
 
 AC_ARG_ENABLE(sim-timebase,
 [  --enable-sim-timebase			Specify whether the PPC timebase is supported.],
@@ -156,15 +205,21 @@ AC_ARG_ENABLE(sim-timebase,
   yes)	sim_timebase="-DWITH_TIME_BASE=1";;
   no)	sim_timebase="-DWITH_TIME_BASE=0";;
   *)	sim_timebase="";;
-esac],[sim_timebase=""])dnl
+esac
+if test  x"$sim_timebase" != x""; then
+  echo "Setting timebase flags = $sim_timebase" 6>&1
+fi],[sim_timebase=""])dnl
 
 AC_ARG_ENABLE(sim-alignment,
 [  --enable-sim-alignment=align		Specify strict or nonstrict alignment.],
 [case "${enableval}" in
   yes | strict | STRICT)	sim_alignment="-DWITH_ALIGNMENT=STRICT_ALIGNMENT";;
-  no | nonstrict | NONSTRICT)	sim_alignment="-DWITH_ALIGNMENT=NOSTRICT_ALIGNMENT";;
+  no | nonstrict | NONSTRICT)	sim_alignment="-DWITH_ALIGNMENT=NONSTRICT_ALIGNMENT";;
   *)				sim_alignment="-DWITH_ALIGNMENT=$enableval";;
-esac],[sim_alignment=""])dnl
+esac
+if test  x"$sim_alignment" != x""; then
+  echo "Setting alignment flags = $sim_alignment" 6>&1
+fi],[sim_alignment=""])dnl
 
 AC_ARG_ENABLE(sim-trace,
 [  --enable-sim-trace			Specify whether tracing is supported.],
@@ -172,7 +227,10 @@ AC_ARG_ENABLE(sim-trace,
   yes)	sim_trace="-DWITH_TRACE=1";;
   no)	sim_trace="-DWITH_TRACE=0";;
   *)	sim_trace="";;
-esac],[sim_trace=""])dnl
+esac
+if test  x"$sim_trace" != x""; then
+  echo "Setting trace flags = $sim_trace" 6>&1
+fi],[sim_trace=""])dnl
 
 AC_ARG_ENABLE(sim-assert,
 [  --enable-sim-assert			Specify whether to perform random assertions.],
@@ -180,7 +238,10 @@ AC_ARG_ENABLE(sim-assert,
   yes)	sim_assert="-DWITH_ASSERT=1";;
   no)	sim_assert="-DWITH_ASSERT=0";;
   *)	sim_assert="";;
-esac],[sim_assert=""])dnl
+esac
+if test  x"$sim_assert" != x""; then
+  echo "Setting assert flags = $sim_assert" 6>&1
+fi],[sim_assert=""])dnl
 
 AC_ARG_ENABLE(sim-float,
 [  --enable-sim-float			Specify whether to use host floating point or simulate.],
@@ -188,7 +249,10 @@ AC_ARG_ENABLE(sim-float,
   yes | hard)	sim_float="-DWITH_FLOATING_POINT=HARD_FLOATING_POINT";;
   no | soft)	sim_float="-DWITH_FLOATING_POINT=SOFT_FLOATING_POINT";;
   *)		sim_float="";;
-esac],[sim_float=""])dnl
+esac
+if test  x"$sim_float" != x""; then
+  echo "Setting float flags = $sim_float" 6>&1
+fi],[sim_float=""])dnl
 
 AC_ARG_ENABLE(sim-monitor,
 [  --enable-sim-monitor=mon		Specify whether to enable monitoring events.],
@@ -198,7 +262,10 @@ AC_ARG_ENABLE(sim-monitor,
   instruction)	sim_mon="-DWITH_MON=MONITOR_INSTRUCTION_ISSUE";;
   memory)	sim_mon="-DWITH_MON=MONITOR_LOAD_STORE_UNIT";;
   *)		sim_mon="-DWITH_MON='$enableval'";;
-esac],[sim_float=""])dnl
+esac
+if test  x"$sim_mon" != x""; then
+  echo "Setting monitor flags = $sim_mon" 6>&1
+fi],[sim_mon=""])dnl
 
 AC_ARG_ENABLE(sim-function-unit,
 [  --enable-sim-function-unit		Specify whether detailed functional unit support is built.],
@@ -206,7 +273,10 @@ AC_ARG_ENABLE(sim-function-unit,
   yes)	sim_func="-DWITH_FUNCTION_UNIT=1";;
   no)	sim_func="-DWITH_FUNCTION_UNIT=0";;
   *)	sim_func="";;
-esac],[sim_func=""])dnl
+esac
+if test  x"$sim_func" != x""; then
+  echo "Setting function-unit flags = $sim_func" 6>&1
+fi],[sim_func=""])dnl
 
 AC_ARG_ENABLE(sim-model,
 [  --enable-sim-model=which		Specify PowerPC to model.],
@@ -214,7 +284,10 @@ AC_ARG_ENABLE(sim-model,
   yes)	sim_model="";;
   no)	sim_model="";;
   *)	sim_model="-DWITH_PPC_MODEL=${enableval}";;
-esac],[sim_model=""])dnl
+esac
+if test  x"$sim_model" != x""; then
+  echo "Setting model flags = $sim_model" 6>&1
+fi],[sim_model=""])dnl
 
 AC_ARG_ENABLE(sim-default-model,
 [  --enable-sim-default-model=which	Specify default PowerPC to model.],
@@ -222,15 +295,18 @@ AC_ARG_ENABLE(sim-default-model,
   yes)	sim_default_model="";;
   no)	sim_default_model="";;
   *)	sim_default_model="-DWITH_DEFAULT_PPC_MODEL=${enableval}";;
-esac],[sim_model=""])dnl
-
-AC_CONFIG_HEADER(config.h:config.in)
+esac
+if test  x"$sim_default_model" != x""; then
+  echo "Setting default-model flags = $sim_default_model" 6>&1
+fi],[sim_model=""])dnl
 
 AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/../..)
 AC_CANONICAL_SYSTEM
 AC_ARG_PROGRAM
 
 . ${srcdir}/../../bfd/configure.host
+
+AC_CONFIG_HEADER(config.h:config.in)
 
 AC_PROG_CC
 AC_SUBST(CFLAGS)

@@ -1854,7 +1854,7 @@ lf_print_c_validate(lf *file,
       lf_printf(file, "\n");
       lf_printf(file, "/* validate: %s */\n",
 		instruction->file_entry->fields[insn_format]);
-      lf_printf(file, "if ((instruction & 0x%x) != 0x%x)\n",
+      lf_printf(file, "if (WITH_ASSERT && (instruction & 0x%x) != 0x%x)\n",
 		check_mask, check_val);
       lf_indent(file, +2);
       lf_print_idecode_illegal(file);
