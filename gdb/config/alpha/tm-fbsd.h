@@ -1,5 +1,5 @@
 /* Target-dependent definitions for FreeBSD/Alpha.
-   Copyright (C) 2000 Free Software Foundation, Inc.
+   Copyright 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,6 +22,12 @@
 #define TM_FBSD_H
 
 #include "alpha/tm-alpha.h"
+
+/* FreeBSD uses the old gcc convention for struct returns.  */
+
+#undef USE_STRUCT_CONVENTION
+#define USE_STRUCT_CONVENTION(gcc_p, type) \
+  alphafbsd_use_struct_convention (gcc_p, type)
 
 /* Number of traps that happen between exec'ing the shell to run an
    inferior, and when we finally get to the inferior code.  The

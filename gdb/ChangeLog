@@ -1,3 +1,11 @@
+2001-01-25  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/alpha/tm-fbsd.h: Update copyright.
+	(USE_STRUCT_CONVENTION): Define in terms of
+	alphabsd_use_struct_convention.
+	* config/alpha/fbsd.mt (TDEPFILES): Add alphafbsd-tdep.c.
+	* alphafbsd-tdep.c: New file.
+
 2001-01-24  Fernando Nasser  <fnasser@redhat.com>
 
 	* top.c (print_gdb_version): Update Copyright year.
