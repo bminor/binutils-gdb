@@ -1,7 +1,8 @@
 /* Low-level child interface to ptrace.
 
    Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1998, 1999, 2000, 2001, 2002, 2004 Free Software Foundation, Inc.
+   1998, 1999, 2000, 2001, 2002, 2004, 2005
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -26,7 +27,9 @@
 #include "inflow.h"
 #include "gdbcore.h"
 #include "observer.h"
+#include "regcache.h"
 
+#include "gdb_assert.h"
 #include "gdb_string.h"
 #include "gdb_ptrace.h"
 #include "gdb_wait.h"
@@ -592,10 +595,14 @@ inf_ptrace_pid_to_str (ptid_t ptid)
   return normal_pid_to_str (ptid);
 }
 
+/* Create a prototype ptrace target.  The client can override it with
+   local methods.  */
+
 struct target_ops *
 inf_ptrace_target (void)
 {
   struct target_ops *t = inf_child_target ();
+
   t->to_open = inf_ptrace_open;
   t->to_attach = inf_ptrace_attach;
   t->to_post_attach = inf_ptrace_post_attach;
@@ -633,5 +640,128 @@ inf_ptrace_target (void)
   t->to_has_execution = 1;
   t->to_magic = OPS_MAGIC;
   ptrace_ops_hack = t;
+
+  return t;
+}
+
+
+/* Pointer to a function that returns the oggset within the user area
+   where a particular register is stored.  */
+static CORE_ADDR (*inf_ptrace_register_u_offset)(int);
+
+/* Fetch register REGNUM from the inferior.  */
+
+static void
+inf_ptrace_fetch_register (int regnum)
+{
+  CORE_ADDR addr;
+  size_t size;
+  PTRACE_TYPE_RET *buf;
+  int pid, i;
+
+  /* Cater for systems like GNU/Linux, that implement threads as
+     seperate processes.  */
+  pid = ptid_get_lwp (inferior_ptid);
+  if (pid == 0)
+    pid = ptid_get_pid (inferior_ptid);
+
+  /* This isn't really an address, but ptrace thinks of it as one.  */
+  addr = inf_ptrace_register_u_offset (regnum);
+  size = register_size (current_gdbarch, regnum);
+
+  gdb_assert ((size % sizeof (PTRACE_TYPE_RET)) == 0);
+  buf = alloca (size);
+
+  /* Read the register contents from the inferior a chuck at the time.  */
+  for (i = 0; i < size / sizeof (PTRACE_TYPE_RET); i++)
+    {
+      errno = 0;
+      buf[i] = ptrace (PT_READ_U, pid, (PTRACE_TYPE_ARG3) addr, 0);
+      if (errno != 0)
+	error ("Couldn't read register %s (#%d): %s.", REGISTER_NAME (regnum),
+	       regnum, safe_strerror (errno));
+
+      addr += sizeof (PTRACE_TYPE_RET);
+    }
+  regcache_raw_supply (current_regcache, regnum, buf);
+}
+
+/* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
+   for all registers.  */
+
+static void
+inf_ptrace_fetch_registers (int regnum)
+{
+  if (regnum == -1)
+    for (regnum = 0; regnum < NUM_REGS; regnum++)
+      inf_ptrace_fetch_register (regnum);
+  else
+    inf_ptrace_fetch_register (regnum);
+}
+
+/* Store register REGNUM into the inferior.  */
+
+static void
+inf_ptrace_store_register (int regnum)
+{
+  CORE_ADDR addr;
+  size_t size;
+  PTRACE_TYPE_RET *buf;
+  int pid, i;
+
+  /* Cater for systems like GNU/Linux, that implement threads as
+     seperate processes.  */
+  pid = ptid_get_lwp (inferior_ptid);
+  if (pid == 0)
+    pid = ptid_get_pid (inferior_ptid);
+
+  /* This isn't really an address, but ptrace thinks of it as one.  */
+  addr = inf_ptrace_register_u_offset (regnum);
+  size = register_size (current_gdbarch, regnum);
+
+  gdb_assert ((size % sizeof (PTRACE_TYPE_RET)) == 0);
+  buf = alloca (size);
+
+  /* Write the register contents into the inferior a chunk at the time.  */
+  regcache_raw_collect (current_regcache, regnum, buf);
+  for (i = 0; i < size / sizeof (PTRACE_TYPE_RET); i++)
+    {
+      errno = 0;
+      ptrace (PT_WRITE_U, pid, (PTRACE_TYPE_ARG3) addr, buf[i]);
+      if (errno != 0)
+	error ("Couldn't write register %s (#%d): %s.", REGISTER_NAME (regnum),
+	       regnum, safe_strerror (errno));
+
+      addr += sizeof (PTRACE_TYPE_RET);
+    }
+}
+
+/* Store register REGNUM back into the inferior.  If REGNUM is -1, do
+   this for all registers.  */
+
+void
+inf_ptrace_store_registers (int regnum)
+{
+  if (regnum == -1)
+    for (regnum = 0; regnum < NUM_REGS; regnum++)
+      inf_ptrace_store_register (regnum);
+  else
+    inf_ptrace_store_register (regnum);
+}
+
+/* Create a "traditional" ptrace target.  REGISTER_U_OFFSET should be
+   a function returning the offset within the user area where a
+   particular register is stored.  */
+
+struct target_ops *
+inf_ptrace_trad_target (CORE_ADDR (*register_u_offset)(int))
+{
+  struct target_ops *t = inf_ptrace_target();
+
+  gdb_assert (register_u_offset);
+  inf_ptrace_register_u_offset = register_u_offset;
+  t->to_fetch_registers = inf_ptrace_fetch_registers;
+  t->to_store_registers = inf_ptrace_store_registers;
+
   return t;
 }

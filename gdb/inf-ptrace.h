@@ -1,7 +1,6 @@
-/* Low level Unix child interface to ptrace, for GDB when running
-   under Unix.
+/* Low level child interface to ptrace.
 
-   Copyright 2004 Free Software Foundation, Inc.
+   Copyright 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -27,5 +26,12 @@
    local methods.  */
 
 extern struct target_ops *inf_ptrace_target (void);
+
+/* Create a "traditional" ptrace target.  REGISTER_U_OFFSET should be
+   a function returning the offset within the user area where a
+   particular register is stored.  */
+
+extern struct target_ops *
+  inf_ptrace_trad_target (CORE_ADDR (*register_u_offset)(int));
 
 #endif

@@ -1,3 +1,17 @@
+2005-01-10  Mark Kettenis  <kettenis@gnu.org>
+
+	* inf-ptrace.h: Update copyright year.  Sync comment with
+	inf-ptrace.c.
+	(inf_ptrace_trad_target): New prototype.
+	* inf-ptrace.c: Update copyright year.  Include "regcache.h" and
+	"gdb_assert.h"
+	(inf_ptrace_target): Add comment.
+	(inf_ptrace+register_u_offset): New variable.
+	(inf_ptrace_fetch_register, inf_ptrace_fetch_registers)
+	(inf_ptrace_store_register, inf_ptrace_store_registers)
+	(inf_ptrace_trad_target): New functions.
+	* Makefile.in (inf-ptrace.o): Update dependencies.
+
 2005-01-09  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.ac: Provide prerequisite headers when checking
