@@ -1,5 +1,22 @@
 Wed May 18 13:01:55 1994  Doug Evans  (dje@canuck.cygnus.com)
 
+	* remote-sim.h (sim_verbose): Delete.
+	Document callbacks needed.
+	(sim_*): Change result to void where there isn't one.
+	(sim_open): Clarify argument and error response.
+	(sim_close): Declare.
+	(sim_load): Change bfd_handle argument to file name.  Clarify result.
+	(sim_create_inferior): Renamed from sim_set_args.
+	(sim_set_pc): Delete.
+	(sim_info): Delete printf_fn argument.
+	* remote-sim.c (gdbsim_kill): Add comment describing purpose.
+	(gdbsim_load): Try sim_load first.
+	(gdbsim_create_inferior): Call sim_create_inferior.
+	(gdbsim_open): Handle args == NULL.  Update call to sim_open.
+	(gdbsim_close): Call sim_close.
+	(gdbsim_files_info): Update call to sim_info.
+	(gdbsim_ops): Realign comments.
+
 	* printcmd.c (decode_format): Allow TARGET_PTR_BIT to be non-constant.
 
 Tue May 17 16:45:20 1994  Stan Shebs  (shebs@andros.cygnus.com)

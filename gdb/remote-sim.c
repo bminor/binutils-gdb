@@ -1,7 +1,7 @@
 /* Generic remote debugging interface for simulators.
-   Copyright 1993 Free Software Foundation, Inc.
+   Copyright 1993, 1994 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
-   Steve Chamberlain (sac@cygnus.com) and Doug Evans (dje@cygnus.com).
+   Steve Chamberlain (sac@cygnus.com).
 
 This file is part of GDB.
 
@@ -119,6 +119,9 @@ int regno;
     }
 }
 
+/* Kill the running program.  This may involve closing any open files
+   and releasing other resources acquired by the simulated program.  */
+
 static void
 gdbsim_kill ()
 {
@@ -141,9 +144,13 @@ gdbsim_load (prog, fromtty)
   if (sr_get_debug ())
     printf_filtered ("gdbsim_load: prog \"%s\"\n", prog);
 
-  inferior_pid = 0;  
+  inferior_pid = 0;
+
+  /* This must be done before calling gr_load_image.  */
   program_loaded = 1;
-  gr_load_image (prog, fromtty);
+
+  if (sim_load (prog, fromtty) != 0)
+    gr_load_image (prog, fromtty);
 }
 
 
@@ -161,8 +168,9 @@ gdbsim_create_inferior (exec_file, args, env)
      char *args;
      char **env;
 {
-  int len,entry_pt;
+  int len;
   char *arg_buf,**argv;
+  CORE_ADDR entry_pt;
 
   if (! program_loaded)
     error ("No program loaded.");
@@ -174,7 +182,7 @@ gdbsim_create_inferior (exec_file, args, env)
   if (exec_file == 0 || exec_bfd == 0)
    error ("No exec file specified.");
 
-  entry_pt = (int) bfd_get_start_address (exec_bfd);
+  entry_pt = (CORE_ADDR) bfd_get_start_address (exec_bfd);
 
   gdbsim_kill (NULL, NULL);	 
   remove_breakpoints ();
@@ -188,11 +196,7 @@ gdbsim_create_inferior (exec_file, args, env)
   strcat (arg_buf, args);
   argv = buildargv (arg_buf);
   make_cleanup (freeargv, (char *) argv);
-  /* FIXME: remote-sim.h says targets that don't support this return
-     non-zero.  Perhaps distinguish between "not supported" and other errors?
-     Or maybe that can be the only error.  */
-  if (sim_set_args (argv, env) != 0)
-    return;
+  sim_create_inferior (entry_pt, argv, env);
 
   inferior_pid = 42;
   insert_breakpoints ();	/* Needed to get correct instruction in cache */
@@ -210,15 +214,9 @@ gdbsim_open (args, from_tty)
      int from_tty;
 {
   if (sr_get_debug ())
-    printf_filtered ("gdbsim_open: args \"%s\"\n", args);
+    printf_filtered ("gdbsim_open: args \"%s\"\n", args ? args : "(null)");
 
-  if (sim_open (args) != 0)
-    {
-      /* FIXME: This is totally bogus.  sim_open should have a way to
-	 tell us what the error was, so we can tell the user.  */
-      error ("Unable to initialize simulator (insufficient memory?).");
-      return;
-    }
+  sim_open (args);
 
   push_target (&gdbsim_ops);
   target_fetch_registers (-1);
@@ -244,8 +242,7 @@ gdbsim_close (quitting)
 
   program_loaded = 0;
 
-  /* FIXME: Need to call sim_close() to close all files and
-     delete all mappings. */
+  sim_close (quitting);
 }
 
 /* Takes a program previously attached to and detaches it.
@@ -384,7 +381,7 @@ gdbsim_files_info (target)
     {
       printf_filtered ("\tAttached to %s running program %s\n",
 		       target_shortname, file);
-      sim_info (printf_filtered, 0);
+      sim_info (0);
     }
 }
 
@@ -415,10 +412,10 @@ struct target_ops gdbsim_ops =
   0, 0,				/* Breakpoints */
   0, 0, 0, 0, 0,		/* Terminal handling */
   gdbsim_kill,			/* kill */
-  gdbsim_load, 
+  gdbsim_load,			/* load */
   0,				/* lookup_symbol */
-  gdbsim_create_inferior,		/* create_inferior */ 
-  gdbsim_mourn_inferior,		/* mourn_inferior */
+  gdbsim_create_inferior,	/* create_inferior */ 
+  gdbsim_mourn_inferior,	/* mourn_inferior */
   0,				/* can_run */
   0,				/* notice_signals */
   process_stratum, 0,		/* next */
