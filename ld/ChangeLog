@@ -1,3 +1,7 @@
+2000-05-15  David O'Brien  <obrien@FreeBSD.org>
+
+	* lexsup.c (parse_args): Update the year in the copyright notice.
+
 2000-05-13  Alan Modra  <alan@linuxcare.com.au>
 
 	* ld.h (gettext, dgettext, dcgettext, textdomain, bindtextdomain):
