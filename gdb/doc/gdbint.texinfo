@@ -3885,6 +3885,168 @@ that just @code{#include}s @file{tm-@var{arch}.h} and
 @file{config/tm-@var{os}.h}.
 
 
+@section Converting an existing Target Architecture to Multi-arch
+@cindex converting targets to multi-arch
+
+This section describes the current accepted best practice for converting
+an existing target architecture to the multi-arch framework.
+
+The process consists of generating, testing, posting and committing a
+sequence of patches.  Each patch must contain a single change, for
+instance:
+
+@itemize @bullet
+
+@item
+Directly convert a group of functions into macros (the conversion does
+not change the behavior of any of the functions).
+
+@item
+Replace a non-multi-arch with a multi-arch mechanism (e.g.,
+@code{FRAME_INFO}).
+
+@item
+Enable multi-arch level one.
+
+@item
+Delete one or more files.
+
+@end itemize
+
+@noindent
+There isn't a size limit on a patch, however, a developer is strongly
+encouraged to keep the patch size down.
+
+Since each patch is well defined, and since each change has been tested
+and shows no regressions, the patches are considered @emph{fairly}
+obvious.  Such patches, when submitted by developers listed in the
+@file{MAINTAINERS} file, do not need approval.  Occasional steps in the
+process may be more complicated and less clear.  The developer is
+expected to use their judgment and is encouraged to seek advice as
+needed.
+
+@subsection Preparation
+
+The first step is to establish control.  Build (with @option{-Werror}
+enabled) and test the target so that there is a baseline against which
+the debugger can be compared.
+
+At no stage can the test results regress or @value{GDBN} stop compiling
+with @option{-Werror}.
+
+@subsection Add the multi-arch initialization code
+
+The objective of this step is to establish the basic multi-arch
+framework.  It involves
+
+@itemize @bullet
+
+@item
+The addition of a @code{@var{arch}_gdbarch_init} function@footnote{The
+above is from the original example and uses K&R C.  @value{GDBN}
+has since converted to ISO C but lets ignore that.} that creates
+the architecture:
+@smallexample
+static struct gdbarch *
+d10v_gdbarch_init (info, arches)
+     struct gdbarch_info info;
+     struct gdbarch_list *arches;
+@{
+  struct gdbarch *gdbarch;
+  /* there is only one d10v architecture */
+  if (arches != NULL)
+    return arches->gdbarch;
+  gdbarch = gdbarch_alloc (&info, NULL);
+  return gdbarch;
+@}
+@end smallexample
+@noindent
+@emph{}
+
+@item
+A per-architecture dump function to print any architecture specific
+information:
+@smallexample
+static void
+mips_dump_tdep (struct gdbarch *current_gdbarch,
+                struct ui_file *file)
+@{
+   @dots{} code to print architecture specific info @dots{}
+@}
+@end smallexample
+
+@item
+A change to @code{_initialize_@var{arch}_tdep} to register this new
+architecture:
+@smallexample
+void
+_initialize_mips_tdep (void)
+@{
+  gdbarch_register (bfd_arch_mips, mips_gdbarch_init,
+                    mips_dump_tdep);
+@end smallexample
+
+@item
+Add the macro @code{GDB_MULTI_ARCH}, defined as 0 (zero), to the file@*
+@file{config/@var{arch}/tm-@var{arch}.h}.
+
+@end itemize
+
+@subsection Update multi-arch incompatible mechanisms
+
+Some mechanisms do not work with multi-arch.  They include:
+
+@table @code
+@item EXTRA_FRAME_INFO
+Delete.
+@item FRAME_FIND_SAVED_REGS
+Replaced with @code{FRAME_INIT_SAVED_REGS}
+@end table
+
+@noindent
+At this stage you could also consider converting the macros into
+functions.
+
+@subsection Prepare for multi-arch level to one
+
+Temporally set @code{GDB_MULTI_ARCH} to @code{GDB_MULTI_ARCH_PARTIAL}
+and then build and start @value{GDBN} (the change should not be
+committed).  @value{GDBN} may not build, and once built, it may die with
+an internal error listing the architecture methods that must be
+provided.
+
+Fix any build problems (patch(es)).
+
+Convert all the architecture methods listed, which are only macros, into
+functions (patch(es)).
+
+Update @code{@var{arch}_gdbarch_init} to set all the missing
+architecture methods and wrap the corresponding macros in @code{#if
+!GDB_MULTI_ARCH} (patch(es)).
+
+@subsection Set multi-arch level one
+
+Change the value of @code{GDB_MULTI_ARCH} to GDB_MULTI_ARCH_PARTIAL (a
+single patch).
+
+Any problems with throwing ``the switch'' should have been fixed
+already.
+
+@subsection Convert remaining macros
+
+Suggest converting macros into functions (and setting the corresponding
+architecture method) in small batches.
+
+@subsection Set multi-arch level to two
+
+This should go smoothly.
+
+@subsection Delete the TM file
+
+The @file{tm-@var{arch}.h} can be deleted.  @file{@var{arch}.mt} and
+@file{configure.in} updated.
+
+
 @node Target Vector Definition
 
 @chapter Target Vector Definition

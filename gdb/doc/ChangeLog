@@ -1,3 +1,8 @@
+2002-06-01  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Add section
+	``Converting an existing Target Architecture to Multi-arch''.
+
 2002-05-30  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbint.texinfo (Releasing GDB): Rename ``Obsoleting any code''
