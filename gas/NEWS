@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Support for Renesas M32R2 added.
+
 * Limited support for Mapping Symbols as specified in the ARM ELF specification
   has been added to the arm assembler.
 

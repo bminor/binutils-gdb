@@ -6,6 +6,7 @@
 	to be selected and some warnings to be turned into errors.
 	(line_separator_chars) : Use '!'.
 	* doc/c-m32r.texi: Document new switches and directives.
+	* NEWS: Mention new support.
 
 2003-12-03  Dave Airlie  <airlied@linux.ie>
 
