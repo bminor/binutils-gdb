@@ -1,5 +1,10 @@
 Sun Dec  5 19:32:08 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* som.c (R_DLT_REL, R_AUX_UNWIND, R_SEC_STMT): Add protected
+	definitions for old versions of HPUX which fail to define them.
+	(som_hppa_howto_talbe): Add R_DLT_REL, R_AUX_UNWIND, and R_SEC_STMT
+	now that they're safe.  Delete bogus R_STATEMENT relocations.
+
 	* som.c (som_hppa_howto_table): Add missing R_END_TRY.  Delete 
 	extra R_DATA_OVERRIDE.
 	(hppa_som_gen_reloc_type): Generate a relocation for the rounding

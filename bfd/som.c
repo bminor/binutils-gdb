@@ -652,6 +652,19 @@ static const int comp3_opcodes[] =
   -1
 };
 
+/* These apparently are not in older versions of hpux reloc.h.  */
+#ifndef R_DLT_REL
+#define R_DLT_REL 0x78
+#endif
+
+#ifndef R_AUX_UNWIND
+#define R_AUX_UNWIND 0xcf
+#endif
+
+#ifndef R_SEC_STMT
+#define R_SEC_STMT 0xd7
+#endif
+
 static reloc_howto_type som_hppa_howto_table[] =
 {
   {R_NO_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_NO_RELOCATION"},
@@ -774,8 +787,8 @@ static reloc_howto_type som_hppa_howto_table[] =
   {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
   {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
   {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
+  {R_DLT_REL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DLT_REL"},
+  {R_DLT_REL, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DLT_REL"},
   {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
   {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
   {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
@@ -861,9 +874,7 @@ static reloc_howto_type som_hppa_howto_table[] =
   {R_DATA_OVERRIDE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DATA_OVERRIDE"},
   {R_DATA_OVERRIDE, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_DATA_OVERRIDE"},
   {R_TRANSLATED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_TRANSLATED"},
-  {R_STATEMENT, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_STATEMENT"},
-  {R_STATEMENT, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_STATEMENT"},
-  {R_STATEMENT, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_STATEMENT"},
+  {R_AUX_UNWIND, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_AUX_UNWIND"},
   {R_COMP1, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_COMP1"},
   {R_COMP2, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_COMP2"},
   {R_COMP3, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_COMP3"},
@@ -871,7 +882,7 @@ static reloc_howto_type som_hppa_howto_table[] =
   {R_PREV_FIXUP, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_PREV_FIXUP"},
   {R_PREV_FIXUP, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_PREV_FIXUP"},
   {R_PREV_FIXUP, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_PREV_FIXUP"},
-  {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
+  {R_SEC_STMT, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_SEC_STMT"},
   {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
   {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
   {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
