@@ -3100,8 +3100,14 @@ read_array_type (struct die_info *die, struct objfile *objfile,
 		     with a DW_FORM_block1 attribute.
 		     FIXME: GDB does not yet know how to handle dynamic
 		     arrays properly, treat them as arrays with unspecified
-		     length for now.  */
-		  high = -1;
+		     length for now.
+
+                     FIXME: jimb/2003-09-22: GDB does not really know
+                     how to handle arrays of unspecified length
+                     either; we just represent them as zero-length
+                     arrays.  Choose an appropriate upper bound given
+                     the lower bound we've computed above.  */
+		  high = low - 1;
 		}
 	      else
 		{
