@@ -1504,6 +1504,11 @@ mips_initialize ()
 
   if (mips_monitor != MON_IDT)
     {
+      /* Sometimes PMON ignores the first few characters in the first
+         command sent after a load.  Sending a blank command gets
+	 around that.  */
+      mips_send_command ("\r", -1);
+
       /* Ensure the correct target state: */
       if (mips_monitor != MON_LSI)
 	mips_send_command ("set regsize 64\r", -1);
