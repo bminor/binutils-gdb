@@ -195,8 +195,8 @@ expand_hash_table (struct bcache *bcache)
 /* Find a copy of the LENGTH bytes at ADDR in BCACHE.  If BCACHE has
    never seen those bytes before, add a copy of them to BCACHE.  In
    either case, return a pointer to BCACHE's copy of that string.  */
-void *
-bcache (const void *addr, int length, struct bcache *bcache)
+static void *
+bcache_data (const void *addr, int length, struct bcache *bcache)
 {
   unsigned long full_hash;
   unsigned short half_hash;
@@ -247,6 +247,17 @@ bcache (const void *addr, int length, struct bcache *bcache)
   }
 }
 
+void *
+deprecated_bcache (const void *addr, int length, struct bcache *bcache)
+{
+  return bcache_data (addr, length, bcache);
+}
+
+const void *
+bcache (const void *addr, int length, struct bcache *bcache)
+{
+  return bcache_data (addr, length, bcache);
+}
 
 /* Allocating and freeing bcaches.  */
 

@@ -143,8 +143,13 @@ struct bcache;
 
 /* Find a copy of the LENGTH bytes at ADDR in BCACHE.  If BCACHE has
    never seen those bytes before, add a copy of them to BCACHE.  In
-   either case, return a pointer to BCACHE's copy of that string.  */
-extern void *bcache (const void *addr, int length, struct bcache *bcache);
+   either case, return a pointer to BCACHE's copy of that string.
+   Since the cached value is ment to be read-only, return a const
+   buffer.  */
+extern void *deprecated_bcache (const void *addr, int length,
+				struct bcache *bcache);
+extern const void *bcache (const void *addr, int length,
+			   struct bcache *bcache);
 
 /* Free all the storage used by BCACHE.  */
 extern void bcache_xfree (struct bcache *bcache);

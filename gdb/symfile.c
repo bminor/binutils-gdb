@@ -2680,7 +2680,8 @@ add_psymbol_to_list (char *name, int namelength, domain_enum domain,
   SYMBOL_SET_NAMES (&psymbol, buf, namelength, objfile);
 
   /* Stash the partial symbol away in the cache */
-  psym = bcache (&psymbol, sizeof (struct partial_symbol), objfile->psymbol_cache);
+  psym = deprecated_bcache (&psymbol, sizeof (struct partial_symbol),
+			    objfile->psymbol_cache);
 
   /* Save pointer to partial symbol in psymtab, growing symtab if needed. */
   if (list->next >= list->list + list->size)
@@ -2717,7 +2718,8 @@ add_psymbol_with_dem_name_to_list (char *name, int namelength, char *dem_name,
 
   memcpy (buf, name, namelength);
   buf[namelength] = '\0';
-  DEPRECATED_SYMBOL_NAME (&psymbol) = bcache (buf, namelength + 1, objfile->psymbol_cache);
+  DEPRECATED_SYMBOL_NAME (&psymbol) = deprecated_bcache (buf, namelength + 1,
+							 objfile->psymbol_cache);
 
   buf = alloca (dem_namelength + 1);
   memcpy (buf, dem_name, dem_namelength);
@@ -2728,7 +2730,7 @@ add_psymbol_with_dem_name_to_list (char *name, int namelength, char *dem_name,
     case language_c:
     case language_cplus:
       SYMBOL_CPLUS_DEMANGLED_NAME (&psymbol) =
-	bcache (buf, dem_namelength + 1, objfile->psymbol_cache);
+	deprecated_bcache (buf, dem_namelength + 1, objfile->psymbol_cache);
       break;
       /* FIXME What should be done for the default case? Ignoring for now. */
     }
@@ -2749,7 +2751,8 @@ add_psymbol_with_dem_name_to_list (char *name, int namelength, char *dem_name,
   SYMBOL_INIT_LANGUAGE_SPECIFIC (&psymbol, language);
 
   /* Stash the partial symbol away in the cache */
-  psym = bcache (&psymbol, sizeof (struct partial_symbol), objfile->psymbol_cache);
+  psym = deprecated_bcache (&psymbol, sizeof (struct partial_symbol),
+			    objfile->psymbol_cache);
 
   /* Save pointer to partial symbol in psymtab, growing symtab if needed. */
   if (list->next >= list->list + list->size)

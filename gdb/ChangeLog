@@ -1,3 +1,13 @@
+2003-11-15  Andrew Cagney  <cagney@redhat.com>
+
+	* bcache.h (deprecated_bcache): Declare.
+	(bcache): Make returned buffer constant.
+	* bcache.c (deprecated_bcache): New function.
+	(bcache_data): New function.
+	(bcache): Call bcache data.
+	* symfile.c (add_psymbol_to_list): Use deprecated_bcache.
+	(add_psymbol_with_dem_name_to_list): Ditto.
+
 2003-11-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* glibc-tdep.h (struct gdbarch): Declare opaque.
