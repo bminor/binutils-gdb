@@ -1,4 +1,10 @@
 
+Sun Feb 23 17:54:00 1997  Dawn Perchik  <dawn@cygnus.com>
+
+	* gas/all/itbl-test.c(main): Update function calls.
+	Remove parameters from itbl_get_reg_val and
+	change itbl_get_insn_name to itbl_get_field.
+
 Sun Feb 23 17:22:00 1997  Dawn Perchik  <dawn@cygnus.com>
 
 	* gas/mips/itbl: Add comments.
