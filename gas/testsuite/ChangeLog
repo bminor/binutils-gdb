@@ -1,3 +1,15 @@
+Wed Feb 14 13:49:59 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/mips/jal-xgot.d, gas/mips/la-xgot.d: New tests.
+	* gas/mips/lb-xgot.d, gas/mips/ld-xgot.d: New tests.
+	* gas/mips/lif-xgot.d, gas/mips/ulh-xgot.d: New tests.
+	* gas/mips/mips.exp: Run new tests if svr4pic.
+
+Sat Jan 27 13:27:45 1996  Doug Evans  <dje@charmed.cygnus.com>
+
+	* lib/gas-dg.exp (gas-dg-test): Delete default_flags and libs args.
+	* gas/arc/warn.exp: Delete libs arg in call to dg-runtest.
+
 Fri Jan 26 14:24:01 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/hppa/unsorted/unsorted.exp: Update for objdump changes.
