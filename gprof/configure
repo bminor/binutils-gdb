@@ -2491,7 +2491,7 @@ fi
 done
 
 
-ALL_LINGUAS="fr tr sv es"
+ALL_LINGUAS="fr tr sv es id"
 echo $ac_n "checking how to run the C preprocessor""... $ac_c" 1>&6
 echo "configure:2497: checking how to run the C preprocessor" >&5
 # On Suns, sometimes $CPP names a directory.

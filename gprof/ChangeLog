@@ -1,3 +1,10 @@
+2002-07-23  Nick Clifton  <nickc@redhat.com>
+
+	* po/ld.po: New French translation.
+	* po/id.po: New Indonesian translation.
+	* configure.in (LINGUAS): Add id.
+	* configure: Regenerate.
+
 2002-05-02  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* po/Make-in (.po.gmo): Do not attempt to create a .gmo file if

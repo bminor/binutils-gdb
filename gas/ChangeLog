@@ -1,5 +1,9 @@
 2002-07-23  Nick Clifton  <nickc@redhat.com>
 
+	* po/fr.po: New French translation.
+
+2002-07-23  Nick Clifton  <nickc@redhat.com>
+
 	* CONTRIBUTORS: Ken Raeburn is no longer the maintainer for
 	GAS.
 
