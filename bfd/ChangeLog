@@ -1,3 +1,8 @@
+2001-03-11  Philip Blundell  <philb@gnu.org>
+
+	* elf32-arm.h (elf32_arm_finish_dynamic_symbol): Don't make PLT
+	entries that could serve as a definition for a weak symbol.
+
 2001-03-07  Andreas Jaeger  <aj@suse.de>
 
 	* elf64-x86-64.c (elf64_x86_64_relocate_section): Fix handling of
