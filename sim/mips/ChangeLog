@@ -1,3 +1,35 @@
+Mon Sep 16 11:38:16 1996  James G. Smith  <jsmith@cygnus.co.uk>
+
+	* interp.c (sim_monitor): Improved monitor printf
+ 	simulation. Tidied up simulator warnings, and added "--log" option
+ 	for directing warning message output.
+	* gencode.c: Use sim_warning() rather than WARNING macro.
+
+Thu Aug 22 15:03:12 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (gencode): Depend upon gencode.o, getopt.o, and
+	getopt1.o, rather than on gencode.c.  Link objects together.
+	Don't link against -liberty.
+	(gencode.o, getopt.o, getopt1.o): New targets.
+	* gencode.c: Include <ctype.h> and "ansidecl.h".
+	(AND): Undefine after including "ansidecl.h".
+	(ULONG_MAX): Define if not defined.
+	(OP_*): Don't define macros; now defined in opcode/mips.h.
+	(main): Call my_strtoul rather than strtoul.
+	(my_strtoul): New static function.
+
+Wed Jul 17 18:12:38 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* gencode.c (process_instructions):  Generate word64 and uword64
+	instead of `long long' and `unsigned long long' data types.
+	* interp.c:  #include sysdep.h to get signals, and define default
+	for SIGBUS.
+	* (Convert):  Work around for Visual-C++ compiler bug with type
+	conversion.
+	* support.h:  Make things compile under Visual-C++ by using
+	__int64 instead of `long long'.  Change many refs to long long
+	into word64/uword64 typedefs.
+
 Wed Jun 26 12:24:55 1996  Jason Molenda  (crash@godzilla.cygnus.co.jp)
 
         * Makefile.in (bindir, libdir, datadir, mandir, infodir, includedir,

@@ -948,7 +948,7 @@ process_instructions(doarch,features)
           ensure that the following opcode processing is not
           executed. i.e. the code falls straight out to the simulator
           control loop. */
-       printf("   WARNING(\"Instruction has lo-order offset bits set in instruction\");\n");
+       printf("   sim_warning(\"Instruction has lo-order offset bits set in instruction\");\n");
        printf("  }\n");
      }
 #endif
@@ -1162,7 +1162,7 @@ process_instructions(doarch,features)
           else {
             if (features & FEATURE_WARN_LOHI) {
               printf("   if (%sACCESS != 0)\n",regname);
-              printf("     WARNING(\"MT (move-to) over-writing %s register value\");\n",regname);
+              printf("     sim_warning(\"MT (move-to) over-writing %s register value\");\n",regname);
             }
             printf("   %s = op1;\n",regname);
           }
@@ -1273,7 +1273,7 @@ process_instructions(doarch,features)
         if (features & FEATURE_WARN_RESULT) {
           /* Give user a warning if either op1 or op2 are not 16bit signed integers */
           printf("   if (NOTHALFWORDVALUE(op1) || NOTHALFWORDVALUE(op2))\n");
-          printf("     WARNING(\"MADD16 operation with non-16bit operands\");\n");
+          printf("     sim_warning(\"MADD16 operation with non-16bit operands\");\n");
         }
         printf("   {\n");
         printf("    uword64 temp = (op1 * op2);\n"); /* 16x16 multiply */
@@ -1340,7 +1340,7 @@ process_instructions(doarch,features)
         if (MIPS_DECODE[loop].flags & LINK) {
           if (features & FEATURE_WARN_R31) {
             printf("   if (((instruction >> %d) & 0x%08X) == 31)\n",OP_SH_RS,OP_MASK_RS);
-            printf("    WARNING(\"Branch with link using r31 as source operand\");\n");
+            printf("    sim_warning(\"Branch with link using r31 as source operand\");\n");
           }
           printf("   GPR[31] = (PC + 4); /* NOTE: PC is already 8 ahead */\n");
         }
