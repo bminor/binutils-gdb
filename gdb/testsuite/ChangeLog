@@ -1,3 +1,9 @@
+Sat May 16 23:43:35 1998  Mark Alexander  <marka@cygnus.com>
+
+	* gdb.base/reread.exp: New file.
+	* gdb.base/reread1.c: New file.
+	* gdb.base/reread2.c: New file.
+
 Sat May 16 23:22:09 1998  Mark Alexander  <marka@cygnus.com>
 
 	* config/sim.exp: Use 'target sim -sparclite' when running

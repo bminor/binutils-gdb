@@ -94,6 +94,9 @@ radix.exp
 recurse.c
 recurse.exp
 regs.exp
+reread.exp
+reread1.c
+reread2.c
 return.c
 return.exp
 run.c
