@@ -1078,6 +1078,10 @@ proc all_fpu_comparison_tests { } {
     global prompt
     global hex
     global decimal
+    global timeout
+
+    set oldtimeout $timeout
+    set timeout 30
 
     set fpu_comparison_formats [list {sgl} {dbl} {quad} ]
 
@@ -1130,6 +1134,8 @@ proc all_fpu_comparison_tests { } {
 	    timeout { fail "(timeout) fcmp_$i tests (part2) " }
 	}
     }
+
+    set timeout $oldtimeout
 }
 
 proc all_special_tests { } {

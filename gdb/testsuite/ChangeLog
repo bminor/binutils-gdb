@@ -1,3 +1,8 @@
+Wed Jan 25 11:12:07 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.disasm/hppa.exp (all_fpu_comparison_tests): Set timeout
+	higher, these tests generate a lot of output.
+
 Tue Jan 24 07:58:44 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* lib/gdb.exp (gdb_test): Remove catch from around the send.  The
