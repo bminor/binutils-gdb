@@ -1,3 +1,17 @@
+2002-12-13  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-z8k.c (cons, obj_coff_section): Delete declarations.
+	(whatreg, parse_reg, parse_exp): Make static, prototype.
+	(checkfor, regword, regaddr, get_ctrl_operand): Prototype.
+	(get_flags_operand, get_interrupt_operand, get_cc_operand): Likewise.
+	(get_operand, get_operands, get_specific, newfix): Likewise.
+	(apply_fix, build_bytes): Likewise.
+	(md_atof): Remove declaration of atof_ieee.
+	(tc_aout_fix_to_chars): Delete.
+	(md_begin): Constify "opcode".  Don't try to init opcode->idx.
+	Fix s_unseg call.
+	(md_parse_option): Fix s_segm and s_unseg calls.
+
 2002-12-12  Alexandre Oliva  <aoliva@redhat.com>
 
 	* tc-mips.c (RELAX_BRANCH_ENCODE): Remove reloc_s2 argument.
@@ -14,8 +28,7 @@
 	(md_convert_frag): Use only BFD_RELOC_16_PCREL_S2 for branches.
 
 2002-12-12  Alexandre Oliva  <aoliva@redhat.com>,
-
-	Alan Modra  <amodra@bigpond.net.au>
+	    Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-mn10300.h (TC_VALIDATE_FIX_SUB): Define.
 	(TC_LINKRELAX_FIXUP): Add comments.

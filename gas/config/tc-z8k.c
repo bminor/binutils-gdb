@@ -38,18 +38,24 @@ extern int coff_flags;
 int segmented_mode;
 const int md_reloc_size;
 
-void cons ();
+static void s_segm PARAMS ((int));
+static void s_unseg PARAMS ((int));
+static void even PARAMS ((int));
+static int tohex PARAMS ((int));
+static void sval PARAMS ((int));
 
-void
-s_segm ()
+static void
+s_segm (ignore)
+     int ignore ATTRIBUTE_UNUSED;
 {
   segmented_mode = 1;
   machine = bfd_mach_z8001;
   coff_flags = F_Z8001;
 }
 
-void
-s_unseg ()
+static void
+s_unseg (ignore)
+     int ignore ATTRIBUTE_UNUSED;
 {
   segmented_mode = 0;
   machine = bfd_mach_z8002;
@@ -57,15 +63,14 @@ s_unseg ()
 }
 
 static void
-even ()
+even (ignore)
+     int ignore ATTRIBUTE_UNUSED;
 {
   frag_align (1, 0, 0);
   record_alignment (now_seg, 1);
 }
 
-void obj_coff_section ();
-
-int
+static int
 tohex (c)
      int c;
 {
@@ -76,8 +81,9 @@ tohex (c)
   return c - 'A' + 10;
 }
 
-void
-sval ()
+static void
+sval (ignore)
+     int ignore ATTRIBUTE_UNUSED;
 {
   SKIP_WHITESPACE ();
   if (*input_line_pointer == '\'')
@@ -149,26 +155,21 @@ static struct hash_control *opcode_hash_control;
 void
 md_begin ()
 {
-  opcode_entry_type *opcode;
-  char *prev_name = "";
-  int idx = 0;
+  const opcode_entry_type *opcode;
+  int idx = -1;
 
   opcode_hash_control = hash_new ();
 
   for (opcode = z8k_table; opcode->name; opcode++)
     {
       /* Only enter unique codes into the table.  */
-      if (strcmp (opcode->name, prev_name))
-	{
-	  hash_insert (opcode_hash_control, opcode->name, (char *) opcode);
-	  idx++;
-	}
-      opcode->idx = idx;
-      prev_name = opcode->name;
+      if (idx != opcode->idx)
+	hash_insert (opcode_hash_control, opcode->name, (char *) opcode);
+      idx = opcode->idx;
     }
 
   /* Default to z8002.  */
-  s_unseg ();
+  s_unseg (0);
 
   /* Insert the pseudo ops, too.  */
   for (idx = 0; md_pseudo_table[idx].poc_name; idx++)
@@ -215,7 +216,34 @@ int the_ctrl;
 int the_flags;
 int the_interrupt;
 
-char *
+static char *whatreg PARAMS ((int *, char *));
+static char *parse_reg PARAMS ((char *, int *, unsigned int *));
+static char *parse_exp PARAMS ((char *, expressionS *));
+static char *checkfor PARAMS ((char *, char));
+static void regword PARAMS ((int, char *));
+static void regaddr PARAMS ((int, char *));
+static void get_ctrl_operand
+  PARAMS ((char **, struct z8k_op *, unsigned int));
+static void get_flags_operand
+  PARAMS ((char **, struct z8k_op *, unsigned int));
+static void get_interrupt_operand
+  PARAMS ((char **, struct z8k_op *, unsigned int));
+static void get_cc_operand
+  PARAMS ((char **, struct z8k_op *, unsigned int));
+static void get_operand
+  PARAMS ((char **, struct z8k_op *, unsigned int));
+static char *get_operands
+  PARAMS ((const opcode_entry_type *, char *, op_type *));
+static opcode_entry_type *get_specific
+  PARAMS ((opcode_entry_type *, op_type *));
+static void newfix
+  PARAMS ((int, int, expressionS *));
+static char *apply_fix
+  PARAMS ((char *, int, expressionS *, int));
+static void build_bytes
+  PARAMS ((opcode_entry_type *, struct z8k_op *));
+
+static char *
 whatreg (reg, src)
      int *reg;
      char *src;
@@ -249,7 +277,7 @@ whatreg (reg, src)
 /* Try to parse a reg name.  Return a pointer to the first character
    in SRC after the reg name.  */
 
-char *
+static char *
 parse_reg (src, mode, reg)
      char *src;
      int *mode;
@@ -329,7 +357,7 @@ parse_reg (src, mode, reg)
   return res;
 }
 
-char *
+static char *
 parse_exp (s, op)
      char *s;
      expressionS *op;
@@ -724,7 +752,7 @@ get_operand (ptr, mode, dst)
 
 static char *
 get_operands (opcode, op_end, operand)
-     opcode_entry_type *opcode;
+     const opcode_entry_type *opcode;
      char *op_end;
      op_type *operand;
 {
@@ -825,7 +853,6 @@ static opcode_entry_type *
 get_specific (opcode, operands)
      opcode_entry_type *opcode;
      op_type *operands;
-
 {
   opcode_entry_type *this_try = opcode;
   int found = 0;
@@ -1288,7 +1315,6 @@ md_atof (type, litP, sizeP)
   LITTLENUM_TYPE words[MAX_LITTLENUMS];
   LITTLENUM_TYPE *wordP;
   char *t;
-  char *atof_ieee ();
 
   switch (type)
     {
@@ -1351,9 +1377,9 @@ md_parse_option (c, arg)
     {
     case 'z':
       if (!strcmp (arg, "8001"))
-	s_segm ();
+	s_segm (0);
       else if (!strcmp (arg, "8002"))
-	s_unseg ();
+	s_unseg (0);
       else
 	{
 	  as_bad (_("invalid architecture -z%s"), arg);
@@ -1378,13 +1404,6 @@ Z8K options:\n\
 -z8002			generate unsegmented code\n"));
 }
 
-void
-tc_aout_fix_to_chars ()
-{
-  printf (_("call to tc_aout_fix_to_chars \n"));
-  abort ();
-}
-
 void
 md_convert_frag (headers, seg, fragP)
      object_headers *headers ATTRIBUTE_UNUSED;

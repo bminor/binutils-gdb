@@ -1,3 +1,14 @@
+2002-12-13  Alan Modra  <amodra@bigpond.net.au>
+
+	* z8kgen.c: Include "libiberty.h".
+	(opt, args, toks): Fix initializer warnings.
+	(chewname): Make "name" a char **.  Return mnemonic trimmed of
+	operands.
+	(gas): Improve emitted "DO NOT EDIT" warning.  Format emitted
+	opcode_entry_type, and make "nicename" and "name" const.  Make
+	z8k_table const too.  Formatting.  Generate idx as gas needs it.
+	* z8k-opc.h: Regenerate.
+
 2002-12-08  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* m68hc11-dis.c (print_indexed_operand): Fix PC-relative address
