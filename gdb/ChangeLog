@@ -125,11 +125,12 @@ Thu Apr 11 05:23:19 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 Thu Apr 18 18:08:30 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
+	* symfile.h (free_named_symtabs):  Rename from free_named_symtab.
 	* symfile.c (clear_symtab_users_once, cashier_psymtab,
 	free_named_symtabs):  Move these routines from symmisc.c.
 	(free_symtab):  Make non-static.
 	* symmisc.c (same):  same.
-	* symtab.c (free_symtab):  Declare as exported void fn now.
+	* symtab.h (free_symtab):  Declare as exported void fn now.
 	* dbxread.c (end_symtab, end_psymtab):  Change comments.
 	(initialize_dbxread):  Call dbx_new_init() in case the first
 	command is add-symbols.
