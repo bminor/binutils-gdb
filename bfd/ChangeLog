@@ -7,6 +7,8 @@ Mon Sep 30 15:13:46 1991  Steve Chamberlain  (steve at cygnus.com)
 	the H8 has been even partially done.  This work also ties in with
 	the change in handling architectures.
 
+	* amdcoff.c: (a29k_reloc) fix error message.
+
 	* aout-f1.h: (choose_reloc_size) now calls bfd_get_arch to
 	discover the architecture of the bfd. (sunos4_callback) calls the
 	function bfd_set_arch_mach rather than stuffing stuff directly
