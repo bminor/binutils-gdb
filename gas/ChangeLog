@@ -1,5 +1,9 @@
 Wed Sep 24 11:30:25 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.am (EXTRA_as_new_SOURCES): Set to config/m68k-parse.y,
+	not m68k-parse.y.
+	* Makefile.in: Rebuild.
+
 	* aclocal.m4: Rebuild with new libtool.
 	* configure: Rebuild.
 
