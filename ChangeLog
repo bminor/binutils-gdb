@@ -1,4 +1,8 @@
 start-sanitize-v850
+Sat Nov 23 14:23:01 1996  Gavin Koch  <gavin@cygnus.com>
+        
+	* gcc/depragmaize.c: Handle MSDOS's (non-unix) text files.
+
 Sat Nov 23 10:23:01 1996  Gavin Koch  <gavin@cygnus.com>
         
 	* config.sub: Handle v850-unknown.
