@@ -70,6 +70,12 @@ code on the hardware.
 
 #include "sysdep.h"
 
+#ifndef PARAMS
+#define PARAMS(x) 
+#endif
+
+char* pr_addr PARAMS ((SIM_ADDR addr));
+
 #ifndef SIGBUS
 #define SIGBUS SIGSEGV
 #endif
@@ -85,8 +91,12 @@ extern int target_byte_order;
 /* The following reserved instruction value is used when a simulator
    trap is required. NOTE: Care must be taken, since this value may be
    used in later revisions of the MIPS ISA. */
-#define RSVD_INSTRUCTION        (0x7C000000)
-#define RSVD_INSTRUCTION_AMASK  (0x03FFFFFF)
+#define RSVD_INSTRUCTION           (0x00000005)
+#define RSVD_INSTRUCTION_MASK      (0xFC00003F)
+
+#define RSVD_INSTRUCTION_ARG_SHIFT 6
+#define RSVD_INSTRUCTION_ARG_MASK  0xFFFFF  
+
 
 /* NOTE: These numbers depend on the processor architecture being
    simulated: */
@@ -142,6 +152,7 @@ extern int target_byte_order;
 #define AccessLength_SEXTIBYTE  (5)
 #define AccessLength_SEPTIBYTE  (6)
 #define AccessLength_DOUBLEWORD (7)
+#define AccessLength_QUADWORD   (15)
 
 #if defined(HASFPU)
 /* FPU registers must be one of the following types. All other values
@@ -223,6 +234,126 @@ static int register_widths[LAST_EMBED_REGNUM + 1];
 #define A3      (registers[7])
 #define SP      (registers[29])
 #define RA      (registers[31])
+
+
+/* start-sanitize-r5900 */
+/* 
+The R5900 has 128 bit registers, but the hi 64 bits are only touched by 
+multimedia (MMI) instructions.  The normal mips instructions just use the
+lower 64 bits.  To avoid changing the older parts of the simulator to 
+handle this weirdness, the high 64 bits of each register are kept in 
+a separate array (registers1).  The high 64 bits of any register are by
+convention refered by adding a '1' to the end of the normal register's 
+name.  So LO still refers to the low 64 bits of the LO register, LO1
+refers to the high 64 bits of that same register.
+*/
+
+/* The high part of each register */
+static ut_reg registers1[LAST_EMBED_REGNUM + 1];
+
+#define GPR1     (&registers1[0])
+
+#define LO1      (registers1[33])
+#define HI1      (registers1[34])
+
+#define BYTES_IN_MMI_REGS       (sizeof(registers[0])+sizeof(registers1[0]))
+#define HALFWORDS_IN_MMI_REGS   (BYTES_IN_MMI_REGS/2)
+#define WORDS_IN_MMI_REGS       (BYTES_IN_MMI_REGS/4)
+#define DOUBLEWORDS_IN_MMI_REGS (BYTES_IN_MMI_REGS/8)
+
+#define BYTES_IN_MIPS_REGS       (sizeof(registers[0]))
+#define HALFWORDS_IN_MIPS_REGS   (BYTES_IN_MIPS_REGS/2)
+#define WORDS_IN_MIPS_REGS       (BYTES_IN_MIPS_REGS/4)
+#define DOUBLEWORDS_IN_MIPS_REGS (BYTES_IN_MIPS_REGS/8)
+
+
+/*
+SUB_REG_FETCH - return as lvalue some sub-part of a "register"
+   T  - type of the sub part
+   TC - # of T's in the mips part of the "register"
+   I  - index (from 0) of desired sub part
+   A  - low part of "register"
+   A1 - high part of register
+*/
+#define SUB_REG_FETCH(T,TC,A,A1,I) (*(((T*)(((I) < (TC)) ? (A) : (A1))) + ((I) % (TC))))
+
+/* 
+GPR_<type>(R,I) - return, as lvalue, the I'th <type> of general register R 
+            where <type> has two letters:
+                  1 is S=signed or U=unsigned
+                  2 is B=byte H=halfword W=word D=doubleword 
+*/
+
+#define SUB_REG_SB(A,A1,I) SUB_REG_FETCH(signed char,       BYTES_IN_MIPS_REGS,       A, A1, I)
+#define SUB_REG_SH(A,A1,I) SUB_REG_FETCH(signed short,      HALFWORDS_IN_MIPS_REGS,   A, A1, I)
+#define SUB_REG_SW(A,A1,I) SUB_REG_FETCH(signed int,        WORDS_IN_MIPS_REGS,       A, A1, I)
+#define SUB_REG_SD(A,A1,I) SUB_REG_FETCH(signed long long,  DOUBLEWORDS_IN_MIPS_REGS, A, A1, I)
+
+#define SUB_REG_UB(A,A1,I) SUB_REG_FETCH(unsigned char,     BYTES_IN_MIPS_REGS,       A, A1, I)
+#define SUB_REG_UH(A,A1,I) SUB_REG_FETCH(unsigned short,    HALFWORDS_IN_MIPS_REGS,   A, A1, I)
+#define SUB_REG_UW(A,A1,I) SUB_REG_FETCH(unsigned int,      WORDS_IN_MIPS_REGS,       A, A1, I)
+#define SUB_REG_UD(A,A1,I) SUB_REG_FETCH(unsigned long long,DOUBLEWORDS_IN_MIPS_REGS, A, A1, I)
+
+
+
+#define GPR_SB(R,I) SUB_REG_SB(&registers[R], &registers1[R], I)
+#define GPR_SH(R,I) SUB_REG_SH(&registers[R], &registers1[R], I)
+#define GPR_SW(R,I) SUB_REG_SW(&registers[R], &registers1[R], I)
+#define GPR_SD(R,I) SUB_REG_SD(&registers[R], &registers1[R], I)
+
+#define GPR_UB(R,I) SUB_REG_UB(&registers[R], &registers1[R], I)
+#define GPR_UH(R,I) SUB_REG_UH(&registers[R], &registers1[R], I)
+#define GPR_UW(R,I) SUB_REG_UW(&registers[R], &registers1[R], I)
+#define GPR_UD(R,I) SUB_REG_UD(&registers[R], &registers1[R], I)
+
+
+#define RS_SB(I) SUB_REG_SB(&rs_reg, &rs_reg1, I)
+#define RS_SH(I) SUB_REG_SH(&rs_reg, &rs_reg1, I)
+#define RS_SW(I) SUB_REG_SW(&rs_reg, &rs_reg1, I)
+#define RS_SD(I) SUB_REG_SD(&rs_reg, &rs_reg1, I)
+
+#define RS_UB(I) SUB_REG_UB(&rs_reg, &rs_reg1, I)
+#define RS_UH(I) SUB_REG_UH(&rs_reg, &rs_reg1, I)
+#define RS_UW(I) SUB_REG_UW(&rs_reg, &rs_reg1, I)
+#define RS_UD(I) SUB_REG_UD(&rs_reg, &rs_reg1, I)
+
+#define RT_SB(I) SUB_REG_SB(&rt_reg, &rt_reg1, I)
+#define RT_SH(I) SUB_REG_SH(&rt_reg, &rt_reg1, I)
+#define RT_SW(I) SUB_REG_SW(&rt_reg, &rt_reg1, I)
+#define RT_SD(I) SUB_REG_SD(&rt_reg, &rt_reg1, I)
+
+#define RT_UB(I) SUB_REG_UB(&rt_reg, &rt_reg1, I)
+#define RT_UH(I) SUB_REG_UH(&rt_reg, &rt_reg1, I)
+#define RT_UW(I) SUB_REG_UW(&rt_reg, &rt_reg1, I)
+#define RT_UD(I) SUB_REG_UD(&rt_reg, &rt_reg1, I)
+
+
+
+#define LO_SB(I) SUB_REG_SB(&LO, &LO1, I)
+#define LO_SH(I) SUB_REG_SH(&LO, &LO1, I)
+#define LO_SW(I) SUB_REG_SW(&LO, &LO1, I)
+#define LO_SD(I) SUB_REG_SD(&LO, &LO1, I)
+
+#define LO_UB(I) SUB_REG_UB(&LO, &LO1, I)
+#define LO_UH(I) SUB_REG_UH(&LO, &LO1, I)
+#define LO_UW(I) SUB_REG_UW(&LO, &LO1, I)
+#define LO_UD(I) SUB_REG_UD(&LO, &LO1, I)
+
+#define HI_SB(I) SUB_REG_SB(&HI, &HI1, I)
+#define HI_SH(I) SUB_REG_SH(&HI, &HI1, I)
+#define HI_SW(I) SUB_REG_SW(&HI, &HI1, I)
+#define HI_SD(I) SUB_REG_SD(&HI, &HI1, I)
+
+#define HI_UB(I) SUB_REG_UB(&HI, &HI1, I)
+#define HI_UH(I) SUB_REG_UH(&HI, &HI1, I)
+#define HI_UW(I) SUB_REG_UW(&HI, &HI1, I)
+#define HI_UD(I) SUB_REG_UD(&HI, &HI1, I)
+/* end-sanitize-r5900 */
+
+
+/* start-sanitize-r5900 */
+static ut_reg SA;        /* the shift amount register */
+/* end-sanitize-r5900 */
 
 static ut_reg EPC = 0; /* Exception PC */
 
@@ -324,8 +455,8 @@ extern void sim_error PARAMS((char *fmt,...));
 static void set_endianness PARAMS((void));
 static void ColdReset PARAMS((void));
 static int AddressTranslation PARAMS((uword64 vAddr,int IorD,int LorS,uword64 *pAddr,int *CCA,int host,int raw));
-static void StoreMemory PARAMS((int CCA,int AccessLength,uword64 MemElem,uword64 pAddr,uword64 vAddr,int raw));
-static uword64 LoadMemory PARAMS((int CCA,int AccessLength,uword64 pAddr,uword64 vAddr,int IorD,int raw));
+static void StoreMemory PARAMS((int CCA,int AccessLength,uword64 MemElem,uword64 MemElem1,uword64 pAddr,uword64 vAddr,int raw));
+static void LoadMemory PARAMS((uword64*memvalp,uword64*memval1p,int CCA,int AccessLength,uword64 pAddr,uword64 vAddr,int IorD,int raw));
 static void SignalException PARAMS((int exception,...));
 static void simulate PARAMS((void));
 static long getnum PARAMS((char *value));
@@ -343,7 +474,7 @@ static unsigned int power2 PARAMS((unsigned int value));
                             pending_slot_count[pending_in] = 2;\
                             pending_slot_reg[pending_in] = (r);\
                             pending_slot_value[pending_in] = (uword64)(v);\
-/*printf("DBG: FILL        reg %d value = 0x%08X%08X\n",(r),WORD64HI(v),WORD64LO(v));*/\
+/*printf("DBG: FILL        reg %d value = 0x%s\n",(r),pr_addr(v));*/\
                             pending_total++;\
                             pending_in++;\
                             if (pending_in == PSLOTS)\
@@ -361,6 +492,8 @@ static int LLBIT = 0;
 
 static int HIACCESS = 0;
 static int LOACCESS = 0;
+static int HI1ACCESS = 0;
+static int LO1ACCESS = 0;
 /* The HIACCESS and LOACCESS counts are used to ensure that
    corruptions caused by using the HI or LO register to close to a
    following operation are spotted. */
@@ -377,8 +510,8 @@ static ut_reg HLPC = 0;
    undefined. However, to keep the simulator world simple, we just let
    them use the value read and raise a warning to notify the user: */
 #define CHECKHILO(s)    {\
-                          if ((HIACCESS != 0) || (LOACCESS != 0))\
-                            sim_warning("%s over-writing HI and LO registers values (PC = 0x%08X%08X HLPC = 0x%08X%08X)\n",(s),(unsigned int)(PC>>32),(unsigned int)(PC&0xFFFFFFFF),(unsigned int)(HLPC>>32),(unsigned int)(HLPC&0xFFFFFFFF));\
+                          if ((HIACCESS != 0) || (LOACCESS != 0) || (HI1ACCESS != 0) || (LO1ACCESS != 0))\
+                            sim_warning("%s over-writing HI and LO registers values (PC = 0x%s HLPC = 0x%s)\n",(s),pr_addr(PC),pr_addr(HLPC));\
                         }
 #endif
 
@@ -519,13 +652,13 @@ static fnptr_swap_long host_swap_long;
 /*-- GDB simulator interface ------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-void
-sim_open (args)
-     char *args;
+SIM_DESC
+sim_open (argv)
+     char **argv;
 {
   if (callback == NULL) {
     fprintf(stderr,"SIM Error: sim_open() called without callbacks attached\n");
-    return;
+    return 0;
   }
 
   /* The following ensures that the standard file handles for stdin,
@@ -593,10 +726,9 @@ sim_open (args)
      engine would mean including multiple engines. If the simulator is
      changed to a run-time conditional version, then the ability to
      select a particular architecture would be straightforward. */
-  if (args != NULL) {
+  {
     int c;
     char *cline;
-    char **argv;
     int argc;
     static struct option cmdline[] = {
       {"help",     0,0,'h'},
@@ -611,24 +743,8 @@ sim_open (args)
       {0,     0,0,0}
     };
 
-    /* Unfortunately, getopt_long() is designed to be used with
-       vectors, where the first option is normally program name (and
-       ignored). We cheat by creating a dummy first argument, so that
-       we can use the standard argument processing. */
-#define DUMMYARG "simulator "
-    cline = (char *)malloc(strlen(args) + strlen(DUMMYARG) + 1);
-    if (cline == NULL) {
-      fprintf(stderr,"Failed to allocate memory for command line buffer\n");
-      exit(1);
-    }
-    sprintf(cline,"%s%s",DUMMYARG,args);
-    argv = buildargv(cline);
     for (argc = 0; argv[argc]; argc++);
 
-    /* Unfortunately, getopt_long() assumes that it is ignoring the
-       first argument (normally the program name). This means it
-       ignores the first option on our "args" line. */
-    optind = 0; /* Force reset of argument processing */
     while (1) {
       int option_index = 0;
 
@@ -737,8 +853,6 @@ Re-compile simulator with \"-DPROFILE\" to enable this option.\n");
       callback->printf_filtered(callback,"\n");
     }
 #endif
-
-    freeargv(argv);
   }
 
   if (logfile != NULL) {
@@ -783,7 +897,7 @@ Re-compile simulator with \"-DPROFILE\" to enable this option.\n");
       uword64 paddr;
       int cca;
       if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isRAW))
-       StoreMemory(cca,AccessLength_WORD,(RSVD_INSTRUCTION | ((loop >> 2) & RSVD_INSTRUCTION_AMASK)),paddr,vaddr,isRAW);
+       StoreMemory(cca,AccessLength_WORD,(RSVD_INSTRUCTION | (((loop >> 2) & RSVD_INSTRUCTION_ARG_MASK) << RSVD_INSTRUCTION_ARG_SHIFT)),0,paddr,vaddr,isRAW);
     }
     /* The PMON monitor uses the same address space, but rather than
        branching into it the address of a routine is loaded. We can
@@ -830,9 +944,16 @@ Re-compile simulator with \"-DPROFILE\" to enable this option.\n");
 	    /* FIXME - should monitor_base be SIM_ADDR?? */
         value = ((unsigned int)monitor_base + (value * 8));
         if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isRAW))
-          StoreMemory(cca,AccessLength_WORD,value,paddr,vaddr,isRAW);
+          StoreMemory(cca,AccessLength_WORD,value,0,paddr,vaddr,isRAW);
         else
-          sim_error("Failed to write to monitor space 0x%08X%08X",WORD64HI(vaddr),WORD64LO(vaddr));
+          sim_error("Failed to write to monitor space 0x%s",pr_addr(vaddr));
+
+	/* The LSI MiniRISC PMON has its vectors at 0x200, not 0x500.  */
+	vaddr -= 0x300;
+        if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isRAW))
+          StoreMemory(cca,AccessLength_WORD,value,0,paddr,vaddr,isRAW);
+        else
+          sim_error("Failed to write to monitor space 0x%s",pr_addr(vaddr));
       }
   }
 
@@ -841,7 +962,8 @@ Re-compile simulator with \"-DPROFILE\" to enable this option.\n");
     open_trace();
 #endif /* TRACE */
 
-  return;
+  /* fudge our descriptor for now */
+  return (SIM_DESC) 1;
 }
 
 #if defined(TRACE)
@@ -911,7 +1033,8 @@ writeout16(fh,val)
 }
 
 void
-sim_close (quitting)
+sim_close (sd, quitting)
+     SIM_DESC sd;
      int quitting;
 {
 #ifdef DEBUG
@@ -936,8 +1059,8 @@ sim_close (quitting)
     else {
       int ok;
 #ifdef DEBUG
-      printf("DBG: minpc = 0x%08X\n",(unsigned int)profile_minpc);
-      printf("DBG: maxpc = 0x%08X\n",(unsigned int)profile_maxpc);
+      printf("DBG: minpc = 0x%s\n",pr_addr(profile_minpc));
+      printf("DBG: maxpc = 0x%s\n",pr_addr(profile_maxpc));
 #endif /* DEBUG */
       ok = writeout32(pf,(unsigned int)profile_minpc);
       if (ok)
@@ -991,7 +1114,8 @@ control_c (sig, code, scp, addr)
 }
 
 void
-sim_resume (step,signal_number)
+sim_resume (sd,step,signal_number)
+     SIM_DESC sd;
      int step, signal_number;
 {
   void (*prev) ();
@@ -1020,7 +1144,8 @@ sim_resume (step,signal_number)
 }
 
 int
-sim_write (addr,buffer,size)
+sim_write (sd,addr,buffer,size)
+     SIM_DESC sd;
      SIM_ADDR addr;
      unsigned char *buffer;
      int size;
@@ -1030,7 +1155,7 @@ sim_write (addr,buffer,size)
 
   /* Return the number of bytes written, or zero if error. */
 #ifdef DEBUG
-  callback->printf_filtered(callback,"sim_write(0x%08X%08X,buffer,%d);\n",WORD64HI(addr),WORD64LO(addr),size);
+  callback->printf_filtered(callback,"sim_write(0x%s,buffer,%d);\n",pr_addr(addr),size);
 #endif
 
   /* We provide raw read and write routines, since we do not want to
@@ -1051,7 +1176,7 @@ sim_write (addr,buffer,size)
     int cca;
     if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isRAW)) {
       uword64 value = ((uword64)(*buffer++));
-      StoreMemory(cca,AccessLength_BYTE,value,paddr,vaddr,isRAW);
+      StoreMemory(cca,AccessLength_BYTE,value,0,paddr,vaddr,isRAW);
     }
     vaddr++;
     index &= ~1; /* logical operations usually quicker than arithmetic on RISC systems */
@@ -1071,7 +1196,7 @@ sim_write (addr,buffer,size)
         value =  ((uword64)(*buffer++) << 0);
         value |= ((uword64)(*buffer++) << 8);
       }
-      StoreMemory(cca,AccessLength_HALFWORD,value,paddr,vaddr,isRAW);
+      StoreMemory(cca,AccessLength_HALFWORD,value,0,paddr,vaddr,isRAW);
     }
     vaddr += 2;
     index &= ~2;
@@ -1092,7 +1217,7 @@ sim_write (addr,buffer,size)
         value |= ((uword64)(*buffer++) << 16);
         value |= ((uword64)(*buffer++) << 24);
       }
-      StoreMemory(cca,AccessLength_WORD,value,paddr,vaddr,isRAW);
+      StoreMemory(cca,AccessLength_WORD,value,0,paddr,vaddr,isRAW);
     }
     vaddr += 4;
     index &= ~4;
@@ -1121,7 +1246,7 @@ sim_write (addr,buffer,size)
         value |= ((uword64)(*buffer++) << 48);
         value |= ((uword64)(*buffer++) << 56);
       }
-      StoreMemory(cca,AccessLength_DOUBLEWORD,value,paddr,vaddr,isRAW);
+      StoreMemory(cca,AccessLength_DOUBLEWORD,value,0,paddr,vaddr,isRAW);
     }
     vaddr += 8;
   }
@@ -1130,7 +1255,8 @@ sim_write (addr,buffer,size)
 }
 
 int
-sim_read (addr,buffer,size)
+sim_read (sd,addr,buffer,size)
+     SIM_DESC sd;
      SIM_ADDR addr;
      unsigned char *buffer;
      int size;
@@ -1139,7 +1265,7 @@ sim_read (addr,buffer,size)
 
   /* Return the number of bytes read, or zero if error. */
 #ifdef DEBUG
-  callback->printf_filtered(callback,"sim_read(0x%08X%08X,buffer,%d);\n",WORD64HI(addr),WORD64LO(addr),size);
+  callback->printf_filtered(callback,"sim_read(0x%s,buffer,%d);\n",pr_addr(addr),size);
 #endif /* DEBUG */
 
   /* TODO: Perform same optimisation as the sim_write() code
@@ -1151,7 +1277,7 @@ sim_read (addr,buffer,size)
     int cca;
     vaddr = (uword64)addr + index;
     if (AddressTranslation(vaddr,isDATA,isLOAD,&paddr,&cca,isTARGET,isRAW)) {
-      value = LoadMemory(cca,AccessLength_BYTE,paddr,vaddr,isDATA,isRAW);
+      LoadMemory(&value,NULL,cca,AccessLength_BYTE,paddr,vaddr,isDATA,isRAW);
       buffer[index] = (unsigned char)(value&0xFF);
     } else
      break;
@@ -1161,12 +1287,13 @@ sim_read (addr,buffer,size)
 }
 
 void
-sim_store_register (rn,memory)
+sim_store_register (sd,rn,memory)
+     SIM_DESC sd;
      int rn;
      unsigned char *memory;
 {
 #ifdef DEBUG
-  callback->printf_filtered(callback,"sim_store_register(%d,*memory=0x%08X%08X);\n",rn,*((unsigned int *)memory),*((unsigned int *)(memory + 4)));
+  callback->printf_filtered(callback,"sim_store_register(%d,*memory=0x%s);\n",rn,pr_addr(*((SIM_ADDR *)memory)));
 #endif /* DEBUG */
 
   /* Unfortunately this suffers from the same problem as the register
@@ -1185,12 +1312,13 @@ sim_store_register (rn,memory)
 }
 
 void
-sim_fetch_register (rn,memory)
+sim_fetch_register (sd,rn,memory)
+     SIM_DESC sd;
      int rn;
      unsigned char *memory;
 {
 #ifdef DEBUG
-  callback->printf_filtered(callback,"sim_fetch_register(%d=0x%08X%08X,mem) : place simulator registers into memory\n",rn,WORD64HI(registers[rn]),WORD64LO(registers[rn]));
+  callback->printf_filtered(callback,"sim_fetch_register(%d=0x%s,mem) : place simulator registers into memory\n",rn,pr_addr(registers[rn]));
 #endif /* DEBUG */
 
   if (register_widths[rn] == 0)
@@ -1205,7 +1333,8 @@ sim_fetch_register (rn,memory)
 }
 
 void
-sim_stop_reason (reason,sigrc)
+sim_stop_reason (sd,reason,sigrc)
+     SIM_DESC sd;
      enum sim_stop *reason;
      int *sigrc;
 {
@@ -1261,7 +1390,7 @@ sim_stop_reason (reason,sigrc)
        break;
     }
   } else if (state & simEXIT) {
-#if 0
+#if DEBUG
     printf("DBG: simEXIT (%d)\n",rcexit);
 #endif
     *reason = sim_exited;
@@ -1278,7 +1407,8 @@ sim_stop_reason (reason,sigrc)
 }
 
 void
-sim_info (verbose)
+sim_info (sd,verbose)
+     SIM_DESC sd;
      int verbose;
 {
   /* Accessed from the GDB "info files" command: */
@@ -1287,7 +1417,7 @@ sim_info (verbose)
 
   callback->printf_filtered(callback,"%s endian memory model\n",(state & simBE ? "Big" : "Little"));
 
-  callback->printf_filtered(callback,"0x%08X bytes of memory at 0x%08X%08X\n",(unsigned int)membank_size,WORD64HI(membank_base),WORD64LO(membank_base));
+  callback->printf_filtered(callback,"0x%08X bytes of memory at 0x%s\n",(unsigned int)membank_size,pr_addr(membank_base));
 
 #if !defined(FASTSIM)
   if (instruction_fetch_overflow != 0)
@@ -1316,7 +1446,8 @@ sim_info (verbose)
 }
 
 int
-sim_load (prog,from_tty)
+sim_load (sd,prog,from_tty)
+     SIM_DESC sd;
      char *prog;
      int from_tty;
 {
@@ -1326,13 +1457,14 @@ sim_load (prog,from_tty)
 }
 
 void
-sim_create_inferior (start_address,argv,env)
+sim_create_inferior (sd, start_address,argv,env)
+     SIM_DESC sd;
      SIM_ADDR start_address;
      char **argv;
      char **env;
 {
 #ifdef DEBUG
-  printf("DBG: sim_create_inferior entered: start_address = 0x%08X\n",start_address);
+  printf("DBG: sim_create_inferior entered: start_address = 0x%s\n",pr_addr(start_address));
 #endif /* DEBUG */
 
   /* Prepare to execute the program to be simulated */
@@ -1366,7 +1498,8 @@ sim_create_inferior (start_address,argv,env)
 }
 
 void
-sim_kill ()
+sim_kill (sd)
+     SIM_DESC sd;
 {
 #if 1
   /* This routine should be for terminating any existing simulation
@@ -1374,7 +1507,7 @@ sim_kill ()
      not an issue. It should *NOT* be used to terminate the
      simulator. */
 #else /* do *NOT* call sim_close */
-  sim_close(1); /* Do not hang on errors */
+  sim_close(sd, 1); /* Do not hang on errors */
   /* This would also be the point where any memory mapped areas used
      by the simulator should be released. */
 #endif
@@ -1392,7 +1525,8 @@ sim_get_quit_code ()
 }
 
 void
-sim_set_callbacks (p)
+sim_set_callbacks (sd,p)
+     SIM_DESC sd;
      host_callback *p;
 {
   callback = p;
@@ -1413,7 +1547,8 @@ static struct t_sim_command {
 };
 
 void
-sim_do_command (cmd)
+sim_do_command (sd,cmd)
+     SIM_DESC sd;
      char *cmd;
 {
   struct t_sim_command *cptr;
@@ -1553,7 +1688,8 @@ sim_size(newsize)
 }
 
 int
-sim_trace()
+sim_trace(sd)
+     SIM_DESC sd;
 {
   /* This routine is called by the "run" program, when detailed
      execution information is required. Rather than executing a single
@@ -1588,6 +1724,10 @@ static void
 sim_monitor(reason)
      unsigned int reason;
 {
+#ifdef DEBUG
+  printf("DBG: sim_monitor: entered (reason = %d)\n",reason);
+#endif /* DEBUG */
+
   /* The IDT monitor actually allows two instructions per vector
      slot. However, the simulator currently causes a trap on each
      individual instruction. We cheat, and lose the bottom bit. */
@@ -1624,14 +1764,7 @@ sim_monitor(reason)
         uword64 paddr;
         int cca;
         if (AddressTranslation(A1,isDATA,isLOAD,&paddr,&cca,isHOST,isREAL))
-	  {
-	    if (A0 == 1)
-	      V0 = callback->write_stdout(callback,(const char *)((int)paddr),
-					  (int)A2);
-	    else
-	      V0 = callback->write(callback,(int)A0,(const char *)((int)paddr),
-				   (int)A2);
-	  }
+         V0 = callback->write(callback,(int)A0,(const char *)((int)paddr),(int)A2);
         else
          sim_error("Attempt to pass pointer that does not reference simulated memory");
       }
@@ -1687,16 +1820,16 @@ sim_monitor(reason)
         /* Memory size */
         if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isREAL)) {
           value = (uword64)membank_size;
-          StoreMemory(cca,AccessLength_WORD,value,paddr,vaddr,isRAW);
+          StoreMemory(cca,AccessLength_WORD,value,0,paddr,vaddr,isRAW);
           /* We re-do the address translations, in-case the block
              overlaps a memory boundary: */
           value = 0;
           vaddr += (AccessLength_WORD + 1);
           if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isREAL)) {
-            StoreMemory(cca,AccessLength_WORD,value,paddr,vaddr,isRAW);
+            StoreMemory(cca,AccessLength_WORD,0,value,paddr,vaddr,isRAW);
             vaddr += (AccessLength_WORD + 1);
             if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isREAL))
-             StoreMemory(cca,AccessLength_WORD,value,paddr,vaddr,isRAW);
+             StoreMemory(cca,AccessLength_WORD,value,0,paddr,vaddr,isRAW);
             else
              failed = -1;
           } else
@@ -1818,8 +1951,8 @@ sim_monitor(reason)
       break;
 
     default:
-      sim_warning("TODO: sim_monitor(%d) : PC = 0x%08X%08X",reason,WORD64HI(IPC),WORD64LO(IPC));
-      sim_warning("(Arguments : A0 = 0x%08X%08X : A1 = 0x%08X%08X : A2 = 0x%08X%08X : A3 = 0x%08X%08X)",WORD64HI(A0),WORD64LO(A0),WORD64HI(A1),WORD64LO(A1),WORD64HI(A2),WORD64LO(A2),WORD64HI(A3),WORD64LO(A3));
+      sim_warning("TODO: sim_monitor(%d) : PC = 0x%s",reason,pr_addr(IPC));
+      sim_warning("(Arguments : A0 = 0x%s : A1 = 0x%s : A2 = 0x%s : A3 = 0x%s)",pr_addr(A0),pr_addr(A1),pr_addr(A2),pr_addr(A3));
       break;
   }
   return;
@@ -1849,7 +1982,7 @@ store_word (vaddr, val)
 	  paddr = (paddr & ~mask) | ((paddr & mask) ^ (ReverseEndian << 2));
 	  byte = (vaddr & mask) ^ (BigEndianCPU << 2);
 	  memval = ((uword64) val) << (8 * byte);
-	  StoreMemory (uncached, AccessLength_WORD, memval, paddr, vaddr,
+	  StoreMemory (uncached, AccessLength_WORD, memval, 0, paddr, vaddr,
 		       isREAL);
 	}
     }
@@ -1878,7 +2011,7 @@ load_word (vaddr)
 	  unsigned int byte;
 
 	  paddr = (paddr & ~mask) | ((paddr & mask) ^ (reverse << 2));
-	  memval = LoadMemory (uncached, AccessLength_WORD, paddr, vaddr,
+	  LoadMemory (&memval,NULL,uncached, AccessLength_WORD, paddr, vaddr,
 			       isDATA, isREAL);
 	  byte = (vaddr & mask) ^ (bigend << 2);
 	  return SIGNEXTEND (((memval >> (8 * byte)) & 0xffffffff), 32);
@@ -1897,6 +2030,10 @@ mips16_entry (insn)
      unsigned int insn;
 {
   int aregs, sregs, rreg;
+
+#ifdef DEBUG
+  printf("DBG: mips16_entry: entered (insn = 0x%08X)\n",insn);
+#endif /* DEBUG */
 
   aregs = (insn & 0x700) >> 8;
   sregs = (insn & 0x0c0) >> 6;
@@ -2091,10 +2228,10 @@ void dotrace(FILE *tracefh,int type,SIM_ADDR address,int width,char *comment,...
 {
   if (state & simTRACE) {
     va_list ap;
-    fprintf(tracefh,"%d %08x%08x ; width %d ; ", 
+    fprintf(tracefh,"%d %s ; width %d ; ", 
 		type,
-		sizeof (address) > 4 ? (unsigned long)(address>>32) : 0,
-		(unsigned long)(address&0xffffffff),width);
+		pr_addr(address),
+		width);
     va_start(ap,comment);
     vfprintf(tracefh,comment,ap);
     va_end(ap);
@@ -2299,7 +2436,7 @@ AddressTranslation(vAddr,IorD,LorS,pAddr,CCA,host,raw)
   int res = -1; /* TRUE : Assume good return */
 
 #ifdef DEBUG
-  callback->printf_filtered(callback,"AddressTranslation(0x%08X%08X,%s,%s,...);\n",WORD64HI(vAddr),WORD64LO(vAddr),(IorD ? "isDATA" : "isINSTRUCTION"),(LorS ? "iSTORE" : "isLOAD"));
+  callback->printf_filtered(callback,"AddressTranslation(0x%s,%s,%s,...);\n",pr_addr(vAddr),(IorD ? "isDATA" : "isINSTRUCTION"),(LorS ? "iSTORE" : "isLOAD"));
 #endif
 
   /* Check that the address is valid for this memory model */
@@ -2334,7 +2471,7 @@ AddressTranslation(vAddr,IorD,LorS,pAddr,CCA,host,raw)
      *pAddr = (int)&monitor[((unsigned int)(vAddr - monitor_base) & (monitor_size - 1))];
   } else {
 #ifdef DEBUG
-    sim_warning("Failed: AddressTranslation(0x%08X%08X,%s,%s,...) IPC = 0x%08X%08X",WORD64HI(vAddr),WORD64LO(vAddr),(IorD ? "isDATA" : "isINSTRUCTION"),(LorS ? "isSTORE" : "isLOAD"),WORD64HI(IPC),WORD64LO(IPC));
+    sim_warning("Failed: AddressTranslation(0x%s,%s,%s,...) IPC = 0x%s",pr_addr(vAddr),(IorD ? "isDATA" : "isINSTRUCTION"),(LorS ? "isSTORE" : "isLOAD"),pr_addr(IPC));
 #endif /* DEBUG */
     res = 0; /* AddressTranslation has failed */
     *pAddr = (SIM_ADDR)-1;
@@ -2346,7 +2483,7 @@ AddressTranslation(vAddr,IorD,LorS,pAddr,CCA,host,raw)
 	to print parameters at function start before they have been setup,
 	and hence we should not print a warning except when debugging the
 	simulator.  */
-     sim_warning("AddressTranslation for %s %s from 0x%08X%08X failed",(IorD ? "data" : "instruction"),(LorS ? "store" : "load"),WORD64HI(vAddr),WORD64LO(vAddr));
+     sim_warning("AddressTranslation for %s %s from 0x%s failed",(IorD ? "data" : "instruction"),(LorS ? "store" : "load"),pr_addr(vAddr));
 #endif
   }
 
@@ -2367,7 +2504,7 @@ Prefetch(CCA,pAddr,vAddr,DATA,hint)
      int hint;
 {
 #ifdef DEBUG
-  callback->printf_filtered(callback,"Prefetch(%d,0x%08X%08X,0x%08X%08X,%d,%d);\n",CCA,WORD64HI(pAddr),WORD64LO(pAddr),WORD64HI(vAddr),WORD64LO(vAddr),DATA,hint);
+  callback->printf_filtered(callback,"Prefetch(%d,0x%s,0x%s,%d,%d);\n",CCA,pr_addr(pAddr),pr_addr(vAddr),DATA,hint);
 #endif /* DEBUG */
 
   /* For our simple memory model we do nothing */
@@ -2389,8 +2526,10 @@ Prefetch(CCA,pAddr,vAddr,DATA,hint)
    alignment block of memory is read and loaded into the cache to
    satisfy a load reference. At a minimum, the block is the entire
    memory element. */
-static uword64
-LoadMemory(CCA,AccessLength,pAddr,vAddr,IorD,raw)
+static void
+LoadMemory(memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD,raw)
+     uword64* memvalp;
+     uword64* memval1p;
      int CCA;
      int AccessLength;
      uword64 pAddr;
@@ -2399,10 +2538,11 @@ LoadMemory(CCA,AccessLength,pAddr,vAddr,IorD,raw)
      int raw;
 {
   uword64 value;
+  uword64 value1;
 
 #ifdef DEBUG
   if (membank == NULL)
-   callback->printf_filtered(callback,"DBG: LoadMemory(%d,%d,0x%08X%08X,0x%08X%08X,%s,%s)\n",CCA,AccessLength,WORD64HI(pAddr),WORD64LO(pAddr),WORD64HI(vAddr),WORD64LO(vAddr),(IorD ? "isDATA" : "isINSTRUCTION"),(raw ? "isRAW" : "isREAL"));
+   callback->printf_filtered(callback,"DBG: LoadMemory(%p,%p,%d,%d,0x%s,0x%s,%s,%s)\n",memvalp,memval1p,CCA,AccessLength,pr_addr(pAddr),pr_addr(vAddr),(IorD ? "isDATA" : "isINSTRUCTION"),(raw ? "isRAW" : "isREAL"));
 #endif /* DEBUG */
 
 #if defined(WARN_MEM)
@@ -2411,7 +2551,7 @@ LoadMemory(CCA,AccessLength,pAddr,vAddr,IorD,raw)
 
   if (((pAddr & LOADDRMASK) + AccessLength) > LOADDRMASK) {
     /* In reality this should be a Bus Error */
-    sim_error("AccessLength of %d would extend over %dbit aligned boundary for physical address 0x%08X%08X\n",AccessLength,(LOADDRMASK + 1)<<2,WORD64HI(pAddr),WORD64LO(pAddr));
+    sim_error("AccessLength of %d would extend over %dbit aligned boundary for physical address 0x%s\n",AccessLength,(LOADDRMASK + 1)<<2,pr_addr(pAddr));
   }
 #endif /* WARN_MEM */
 
@@ -2448,7 +2588,7 @@ LoadMemory(CCA,AccessLength,pAddr,vAddr,IorD,raw)
       mem = monitor;
     }
     if (mem == NULL)
-     sim_error("Simulator memory not found for physical address 0x%08X%08X\n",WORD64HI(pAddr),WORD64LO(pAddr));
+     sim_error("Simulator memory not found for physical address 0x%s\n",pr_addr(pAddr));
     else {
       /* If we obtained the endianness of the host, and it is the same
          as the target memory system we can optimise the memory
@@ -2456,6 +2596,7 @@ LoadMemory(CCA,AccessLength,pAddr,vAddr,IorD,raw)
          slow transfer, and hope that the compiler optimisation will
          merge successive loads. */
       value = 0; /* no data loaded yet */
+      value1 = 0;
 
       /* In reality we should always be loading a doubleword value (or
          word value in 32bit memory worlds). The external code then
@@ -2464,6 +2605,23 @@ LoadMemory(CCA,AccessLength,pAddr,vAddr,IorD,raw)
          slots. */
       if (BigEndianMem)
        switch (AccessLength) { /* big-endian memory */
+         case AccessLength_QUADWORD :
+          value1 |= ((uword64)mem[index++] << 56);
+         case 14:   /* AccessLength is one less than datalen */
+          value1 |= ((uword64)mem[index++] << 48);
+         case 13:
+          value1 |= ((uword64)mem[index++] << 40);
+         case 12:
+          value1 |= ((uword64)mem[index++] << 32);
+         case 11:
+          value1 |= ((unsigned int)mem[index++] << 24);
+         case 10:
+          value1 |= ((unsigned int)mem[index++] << 16);
+         case 9:
+          value1 |= ((unsigned int)mem[index++] << 8);
+         case 8:
+          value1 |= mem[index];
+
          case AccessLength_DOUBLEWORD :
           value |= ((uword64)mem[index++] << 56);
          case AccessLength_SEPTIBYTE :
@@ -2485,6 +2643,23 @@ LoadMemory(CCA,AccessLength,pAddr,vAddr,IorD,raw)
       else {
         index += (AccessLength + 1);
         switch (AccessLength) { /* little-endian memory */
+          case AccessLength_QUADWORD :
+           value1 |= ((uword64)mem[--index] << 56);
+         case 14:   /* AccessLength is one less than datalen */
+           value1 |= ((uword64)mem[--index] << 48);
+         case 13:
+           value1 |= ((uword64)mem[--index] << 40);
+         case 12:
+           value1 |= ((uword64)mem[--index] << 32);
+         case 11:
+           value1 |= ((uword64)mem[--index] << 24);
+         case 10:
+           value1 |= ((uword64)mem[--index] << 16);
+         case 9:
+           value1 |= ((uword64)mem[--index] << 8);
+         case 8:
+           value1 |= ((uword64)mem[--index] << 0);
+
           case AccessLength_DOUBLEWORD :
            value |= ((uword64)mem[--index] << 56);
           case AccessLength_SEPTIBYTE :
@@ -2506,28 +2681,34 @@ LoadMemory(CCA,AccessLength,pAddr,vAddr,IorD,raw)
       }
 
 #ifdef DEBUG
-      printf("DBG: LoadMemory() : (offset %d) : value = 0x%08X%08X\n",(int)(pAddr & LOADDRMASK),WORD64HI(value),WORD64LO(value));
+      printf("DBG: LoadMemory() : (offset %d) : value = 0x%s%s\n",
+             (int)(pAddr & LOADDRMASK),pr_addr(value1),pr_addr(value));
 #endif /* DEBUG */
 
       /* TODO: We could try and avoid the shifts when dealing with raw
          memory accesses. This would mean updating the LoadMemory and
          StoreMemory routines to avoid shifting the data before
          returning or using it. */
-      if (!raw) { /* do nothing for raw accessess */
-        if (BigEndianMem)
-         value <<= (((7 - (pAddr & LOADDRMASK)) - AccessLength) * 8);
-        else /* little-endian only needs to be shifted up to the correct byte offset */
-         value <<= ((pAddr & LOADDRMASK) * 8);
+      if (AccessLength <= AccessLength_DOUBLEWORD) {
+        if (!raw) { /* do nothing for raw accessess */
+          if (BigEndianMem)
+            value <<= (((7 - (pAddr & LOADDRMASK)) - AccessLength) * 8);
+          else /* little-endian only needs to be shifted up to the correct byte offset */
+            value <<= ((pAddr & LOADDRMASK) * 8);
+        }
       }
 
 #ifdef DEBUG
-      printf("DBG: LoadMemory() : shifted value = 0x%08X%08X\n",WORD64HI(value),WORD64LO(value));
+      printf("DBG: LoadMemory() : shifted value = 0x%s%s\n",
+             pr_addr(value1),pr_addr(value));
 #endif /* DEBUG */
     }
   }
 
-  return(value);
+*memvalp = value;
+if (memval1p) *memval1p = value1;
 }
+
 
 /* Description from page A-23 of the "MIPS IV Instruction Set" manual (revision 3.1) */
 /* Store a value to memory. The specified data is stored into the
@@ -2540,17 +2721,19 @@ LoadMemory(CCA,AccessLength,pAddr,vAddr,IorD,raw)
    and the AccessLength field indicates which of the bytes within the
    MemElem data should actually be stored; only these bytes in memory
    will be changed. */
+
 static void
-StoreMemory(CCA,AccessLength,MemElem,pAddr,vAddr,raw)
+StoreMemory(CCA,AccessLength,MemElem,MemElem1,pAddr,vAddr,raw)
      int CCA;
      int AccessLength;
      uword64 MemElem;
+     uword64 MemElem1;   /* High order 64 bits */
      uword64 pAddr;
      uword64 vAddr;
      int raw;
 {
 #ifdef DEBUG
-  callback->printf_filtered(callback,"DBG: StoreMemory(%d,%d,0x%08X%08X,0x%08X%08X,0x%08X%08X,%s)\n",CCA,AccessLength,WORD64HI(MemElem),WORD64LO(MemElem),WORD64HI(pAddr),WORD64LO(pAddr),WORD64HI(vAddr),WORD64LO(vAddr),(raw ? "isRAW" : "isREAL"));
+  callback->printf_filtered(callback,"DBG: StoreMemory(%d,%d,0x%s,0x%s,0x%s,0x%s,%s)\n",CCA,AccessLength,pr_addr(MemElem),pr_addr(MemElem1),pr_addr(pAddr),pr_addr(vAddr),(raw ? "isRAW" : "isREAL"));
 #endif /* DEBUG */
 
 #if defined(WARN_MEM)
@@ -2558,7 +2741,7 @@ StoreMemory(CCA,AccessLength,MemElem,pAddr,vAddr,raw)
    sim_warning("StoreMemory CCA (%d) is not uncached (currently all accesses treated as cached)",CCA);
  
   if (((pAddr & LOADDRMASK) + AccessLength) > LOADDRMASK)
-   sim_error("AccessLength of %d would extend over %dbit aligned boundary for physical address 0x%08X%08X\n",AccessLength,(LOADDRMASK + 1)<<2,WORD64HI(pAddr),WORD64LO(pAddr));
+   sim_error("AccessLength of %d would extend over %dbit aligned boundary for physical address 0x%s\n",AccessLength,(LOADDRMASK + 1)<<2,pr_addr(pAddr));
 #endif /* WARN_MEM */
 
 #if defined(TRACE)
@@ -2584,32 +2767,58 @@ StoreMemory(CCA,AccessLength,MemElem,pAddr,vAddr,raw)
     }
 
     if (mem == NULL)
-     sim_error("Simulator memory not found for physical address 0x%08X%08X\n",WORD64HI(pAddr),WORD64LO(pAddr));
+     sim_error("Simulator memory not found for physical address 0x%s\n",pr_addr(pAddr));
     else {
       int shift = 0;
 
 #ifdef DEBUG
-      printf("DBG: StoreMemory: offset = %d MemElem = 0x%08X%08X\n",(unsigned int)(pAddr & LOADDRMASK),WORD64HI(MemElem),WORD64LO(MemElem));
+      printf("DBG: StoreMemory: offset = %d MemElem = 0x%s%s\n",(unsigned int)(pAddr & LOADDRMASK),pr_addr(MemElem1),pr_addr(MemElem));
 #endif /* DEBUG */
 
-      if (BigEndianMem) {
-        if (raw)
-         shift = ((7 - AccessLength) * 8);
-        else /* real memory access */
-         shift = ((pAddr & LOADDRMASK) * 8);
-        MemElem <<= shift;
-      } else {
-        /* no need to shift raw little-endian data */
-        if (!raw)
-         MemElem >>= ((pAddr & LOADDRMASK) * 8);
+      if (AccessLength <= AccessLength_DOUBLEWORD) {
+        if (BigEndianMem) {
+          if (raw)
+            shift = ((7 - AccessLength) * 8);
+          else /* real memory access */
+            shift = ((pAddr & LOADDRMASK) * 8);
+          MemElem <<= shift;
+        } else {
+          /* no need to shift raw little-endian data */
+          if (!raw)
+            MemElem >>= ((pAddr & LOADDRMASK) * 8);
+        }
       }
 
 #ifdef DEBUG
-      printf("DBG: StoreMemory: shift = %d MemElem = 0x%08X%08X\n",shift,WORD64HI(MemElem),WORD64LO(MemElem));
+      printf("DBG: StoreMemory: shift = %d MemElem = 0x%s%s\n",shift,pr_addr(MemElem1),pr_addr(MemElem));
 #endif /* DEBUG */
 
       if (BigEndianMem) {
         switch (AccessLength) { /* big-endian memory */
+          case AccessLength_QUADWORD :
+           mem[index++] = (unsigned char)(MemElem1 >> 56);
+           MemElem1 <<= 8;
+          case 14 :
+           mem[index++] = (unsigned char)(MemElem1 >> 56);
+           MemElem1 <<= 8;
+          case 13 :
+           mem[index++] = (unsigned char)(MemElem1 >> 56);
+           MemElem1 <<= 8;
+          case 12 :
+           mem[index++] = (unsigned char)(MemElem1 >> 56);
+           MemElem1 <<= 8;
+          case 11 :
+           mem[index++] = (unsigned char)(MemElem1 >> 56);
+           MemElem1 <<= 8;
+          case 10 :
+           mem[index++] = (unsigned char)(MemElem1 >> 56);
+           MemElem1 <<= 8;
+          case 9 :
+           mem[index++] = (unsigned char)(MemElem1 >> 56);
+           MemElem1 <<= 8;
+          case 8 :
+           mem[index++] = (unsigned char)(MemElem1 >> 56);
+
           case AccessLength_DOUBLEWORD :
            mem[index++] = (unsigned char)(MemElem >> 56);
            MemElem <<= 8;
@@ -2638,6 +2847,23 @@ StoreMemory(CCA,AccessLength,MemElem,pAddr,vAddr,raw)
       } else {
         index += (AccessLength + 1);
         switch (AccessLength) { /* little-endian memory */
+          case AccessLength_QUADWORD :
+           mem[--index] = (unsigned char)(MemElem1 >> 56);
+          case 14 :
+           mem[--index] = (unsigned char)(MemElem1 >> 48);
+          case 13 :
+           mem[--index] = (unsigned char)(MemElem1 >> 40);
+          case 12 :
+           mem[--index] = (unsigned char)(MemElem1 >> 32);
+          case 11 :
+           mem[--index] = (unsigned char)(MemElem1 >> 24);
+          case 10 :
+           mem[--index] = (unsigned char)(MemElem1 >> 16);
+          case 9 :
+           mem[--index] = (unsigned char)(MemElem1 >> 8);
+          case 8 :
+           mem[--index] = (unsigned char)(MemElem1 >> 0);
+
           case AccessLength_DOUBLEWORD :
            mem[--index] = (unsigned char)(MemElem >> 56);
           case AccessLength_SEPTIBYTE :
@@ -2662,6 +2888,7 @@ StoreMemory(CCA,AccessLength,MemElem,pAddr,vAddr,raw)
 
   return;
 }
+
 
 /* Description from page A-26 of the "MIPS IV Instruction Set" manual (revision 3.1) */
 /* Order loads and stores to synchronise shared memory. Perform the
@@ -2693,7 +2920,7 @@ SignalException (int exception,...)
        reality we should either simulate them, or allow the user to
        ignore them at run-time. */
     case Trap :
-     sim_warning("Ignoring instruction TRAP (PC 0x%08X%08X)",WORD64HI(IPC),WORD64LO(IPC));
+     sim_warning("Ignoring instruction TRAP (PC 0x%s)",pr_addr(IPC));
      break;
 
     case ReservedInstruction :
@@ -2712,8 +2939,8 @@ SignalException (int exception,...)
           space with suitable instruction values. For systems were
           actual trap instructions are used, we would not need to
           perform this magic. */
-       if ((instruction & ~RSVD_INSTRUCTION_AMASK) == RSVD_INSTRUCTION) {
-         sim_monitor(instruction & RSVD_INSTRUCTION_AMASK);
+       if ((instruction & RSVD_INSTRUCTION_MASK) == RSVD_INSTRUCTION) {
+         sim_monitor( ((instruction >> RSVD_INSTRUCTION_ARG_SHIFT) & RSVD_INSTRUCTION_ARG_MASK) );
          PC = RA; /* simulate the return from the vector entry */
          /* NOTE: This assumes that a branch-and-link style
             instruction was used to enter the vector (which is the
@@ -2728,13 +2955,13 @@ SignalException (int exception,...)
 	 mips16_entry (instruction);
 	 break;
        } /* else fall through to normal exception processing */
-       sim_warning("ReservedInstruction 0x%08X at IPC = 0x%08X%08X",instruction,WORD64HI(IPC),WORD64LO(IPC));
+       sim_warning("ReservedInstruction 0x%08X at IPC = 0x%s",instruction,pr_addr(IPC));
      }
 
     default:
 #ifdef DEBUG
      if (exception != BreakPoint)
-      callback->printf_filtered(callback,"DBG: SignalException(%d) IPC = 0x%08X%08X\n",exception,WORD64HI(IPC),WORD64LO(IPC));
+      callback->printf_filtered(callback,"DBG: SignalException(%d) IPC = 0x%s\n",exception,pr_addr(IPC));
 #endif /* DEBUG */
      /* Store exception code into current exception id variable (used
         by exit code): */
@@ -2799,7 +3026,7 @@ SignalException (int exception,...)
 static void
 UndefinedResult()
 {
-  sim_warning("UndefinedResult: IPC = 0x%08X%08X",WORD64HI(IPC),WORD64LO(IPC));
+  sim_warning("UndefinedResult: IPC = 0x%s",pr_addr(IPC));
 #if 0 /* Disabled for the moment, since it actually happens a lot at the moment. */
   state |= simSTOP;
 #endif
@@ -2826,7 +3053,7 @@ CacheOp(op,pAddr,vAddr,instruction)
      enable bit in the Status Register is clear - a coprocessor
      unusable exception is taken. */
 #if 0
-  callback->printf_filtered(callback,"TODO: Cache availability checking (PC = 0x%08X%08X)\n",WORD64HI(IPC),WORD64LO(IPC));
+  callback->printf_filtered(callback,"TODO: Cache availability checking (PC = 0x%s)\n",pr_addr(IPC));
 #endif
 
   switch (op & 0x3) {
@@ -2974,7 +3201,7 @@ ValueFPR(fpr,fmt)
 #endif /* DEBUG */
   }
   if (fmt != fpr_state[fpr]) {
-    sim_warning("FPR %d (format %s) being accessed with format %s - setting to unknown (PC = 0x%08X%08X)",fpr,DOFMT(fpr_state[fpr]),DOFMT(fmt),WORD64HI(IPC),WORD64LO(IPC));
+    sim_warning("FPR %d (format %s) being accessed with format %s - setting to unknown (PC = 0x%s)",fpr,DOFMT(fpr_state[fpr]),DOFMT(fmt),pr_addr(IPC));
     fpr_state[fpr] = fmt_unknown;
   }
 
@@ -3045,7 +3272,7 @@ ValueFPR(fpr,fmt)
    SignalException(SimulatorFault,"Unrecognised FP format in ValueFPR()");
 
 #ifdef DEBUG
-  printf("DBG: ValueFPR: fpr = %d, fmt = %s, value = 0x%08X%08X : PC = 0x%08X%08X : SizeFGR() = %d\n",fpr,DOFMT(fmt),WORD64HI(value),WORD64LO(value),WORD64HI(IPC),WORD64LO(IPC),SizeFGR());
+  printf("DBG: ValueFPR: fpr = %d, fmt = %s, value = 0x%s : PC = 0x%s : SizeFGR() = %d\n",fpr,DOFMT(fmt),pr_addr(value),pr_addr(IPC),SizeFGR());
 #endif /* DEBUG */
 
   return(value);
@@ -3060,7 +3287,7 @@ StoreFPR(fpr,fmt,value)
   int err = 0;
 
 #ifdef DEBUG
-  printf("DBG: StoreFPR: fpr = %d, fmt = %s, value = 0x%08X%08X : PC = 0x%08X%08X : SizeFGR() = %d\n",fpr,DOFMT(fmt),WORD64HI(value),WORD64LO(value),WORD64HI(IPC),WORD64LO(IPC),SizeFGR());
+  printf("DBG: StoreFPR: fpr = %d, fmt = %s, value = 0x%s : PC = 0x%s : SizeFGR() = %d\n",fpr,DOFMT(fmt),pr_addr(value),pr_addr(IPC),SizeFGR());
 #endif /* DEBUG */
 
   if (SizeFGR() == 64) {
@@ -3121,7 +3348,7 @@ StoreFPR(fpr,fmt,value)
    SignalException(SimulatorFault,"Unrecognised FP format in StoreFPR()");
 
 #ifdef DEBUG
-  printf("DBG: StoreFPR: fpr[%d] = 0x%08X%08X (format %s)\n",fpr,WORD64HI(FGR[fpr]),WORD64LO(FGR[fpr]),DOFMT(fmt));
+  printf("DBG: StoreFPR: fpr[%d] = 0x%s (format %s)\n",fpr,pr_addr(FGR[fpr]),DOFMT(fmt));
 #endif /* DEBUG */
 
   return;
@@ -3157,7 +3384,7 @@ NaN(op,fmt)
   }
 
 #ifdef DEBUG
-printf("DBG: NaN: returning %d for 0x%08X%08X (format = %s)\n",boolean,WORD64HI(op),WORD64LO(op),DOFMT(fmt));
+printf("DBG: NaN: returning %d for 0x%s (format = %s)\n",boolean,pr_addr(op),DOFMT(fmt));
 #endif /* DEBUG */
 
   return(boolean);
@@ -3171,7 +3398,7 @@ Infinity(op,fmt)
   int boolean = 0;
 
 #ifdef DEBUG
-  printf("DBG: Infinity: format %s 0x%08X%08X (PC = 0x%08X%08X)\n",DOFMT(fmt),WORD64HI(op),WORD64LO(op),WORD64HI(IPC),WORD64LO(IPC));
+  printf("DBG: Infinity: format %s 0x%s (PC = 0x%s)\n",DOFMT(fmt),pr_addr(op),pr_addr(IPC));
 #endif /* DEBUG */
 
   /* Check if (((E - bias) == (E_max + 1)) && (fraction == 0)). We
@@ -3190,7 +3417,7 @@ Infinity(op,fmt)
   }
 
 #ifdef DEBUG
-  printf("DBG: Infinity: returning %d for 0x%08X%08X (format = %s)\n",boolean,WORD64HI(op),WORD64LO(op),DOFMT(fmt));
+  printf("DBG: Infinity: returning %d for 0x%s (format = %s)\n",boolean,pr_addr(op),DOFMT(fmt));
 #endif /* DEBUG */
 
   return(boolean);
@@ -3207,7 +3434,7 @@ Less(op1,op2,fmt)
   /* Argument checking already performed by the FPCOMPARE code */
 
 #ifdef DEBUG
-  printf("DBG: Less: %s: op1 = 0x%08X%08X : op2 = 0x%08X%08X\n",DOFMT(fmt),WORD64HI(op1),WORD64LO(op1),WORD64HI(op2),WORD64LO(op2));
+  printf("DBG: Less: %s: op1 = 0x%s : op2 = 0x%s\n",DOFMT(fmt),pr_addr(op1),pr_addr(op2));
 #endif /* DEBUG */
 
   /* The format type should already have been checked: */
@@ -3242,7 +3469,7 @@ Equal(op1,op2,fmt)
   /* Argument checking already performed by the FPCOMPARE code */
 
 #ifdef DEBUG
-  printf("DBG: Equal: %s: op1 = 0x%08X%08X : op2 = 0x%08X%08X\n",DOFMT(fmt),WORD64HI(op1),WORD64LO(op1),WORD64HI(op2),WORD64LO(op2));
+  printf("DBG: Equal: %s: op1 = 0x%s : op2 = 0x%s\n",DOFMT(fmt),pr_addr(op1),pr_addr(op2));
 #endif /* DEBUG */
 
   /* The format type should already have been checked: */
@@ -3270,7 +3497,7 @@ AbsoluteValue(op,fmt)
   uword64 result;
 
 #ifdef DEBUG
-  printf("DBG: AbsoluteValue: %s: op = 0x%08X%08X\n",DOFMT(fmt),WORD64HI(op),WORD64LO(op));
+  printf("DBG: AbsoluteValue: %s: op = 0x%s\n",DOFMT(fmt),pr_addr(op));
 #endif /* DEBUG */
 
   /* The format type should already have been checked: */
@@ -3300,7 +3527,7 @@ Negate(op,fmt)
   uword64 result;
 
 #ifdef DEBUG
-  printf("DBG: Negate: %s: op = 0x%08X%08X\n",DOFMT(fmt),WORD64HI(op),WORD64LO(op));
+  printf("DBG: Negate: %s: op = 0x%s\n",DOFMT(fmt),pr_addr(op));
 #endif /* DEBUG */
 
   /* The format type should already have been checked: */
@@ -3332,7 +3559,7 @@ Add(op1,op2,fmt)
   uword64 result;
 
 #ifdef DEBUG
-  printf("DBG: Add: %s: op1 = 0x%08X%08X : op2 = 0x%08X%08X\n",DOFMT(fmt),WORD64HI(op1),WORD64LO(op1),WORD64HI(op2),WORD64LO(op2));
+  printf("DBG: Add: %s: op1 = 0x%s : op2 = 0x%s\n",DOFMT(fmt),pr_addr(op1),pr_addr(op2));
 #endif /* DEBUG */
 
   /* The registers must specify FPRs valid for operands of type
@@ -3357,7 +3584,7 @@ Add(op1,op2,fmt)
   }
 
 #ifdef DEBUG
-  printf("DBG: Add: returning 0x%08X%08X (format = %s)\n",WORD64HI(result),WORD64LO(result),DOFMT(fmt));
+  printf("DBG: Add: returning 0x%s (format = %s)\n",pr_addr(result),DOFMT(fmt));
 #endif /* DEBUG */
 
   return(result);
@@ -3372,7 +3599,7 @@ Sub(op1,op2,fmt)
   uword64 result;
 
 #ifdef DEBUG
-  printf("DBG: Sub: %s: op1 = 0x%08X%08X : op2 = 0x%08X%08X\n",DOFMT(fmt),WORD64HI(op1),WORD64LO(op1),WORD64HI(op2),WORD64LO(op2));
+  printf("DBG: Sub: %s: op1 = 0x%s : op2 = 0x%s\n",DOFMT(fmt),pr_addr(op1),pr_addr(op2));
 #endif /* DEBUG */
 
   /* The registers must specify FPRs valid for operands of type
@@ -3397,7 +3624,7 @@ Sub(op1,op2,fmt)
   }
 
 #ifdef DEBUG
-  printf("DBG: Sub: returning 0x%08X%08X (format = %s)\n",WORD64HI(result),WORD64LO(result),DOFMT(fmt));
+  printf("DBG: Sub: returning 0x%s (format = %s)\n",pr_addr(result),DOFMT(fmt));
 #endif /* DEBUG */
 
   return(result);
@@ -3412,7 +3639,7 @@ Multiply(op1,op2,fmt)
   uword64 result;
 
 #ifdef DEBUG
-  printf("DBG: Multiply: %s: op1 = 0x%08X%08X : op2 = 0x%08X%08X\n",DOFMT(fmt),WORD64HI(op1),WORD64LO(op1),WORD64HI(op2),WORD64LO(op2));
+  printf("DBG: Multiply: %s: op1 = 0x%s : op2 = 0x%s\n",DOFMT(fmt),pr_addr(op1),pr_addr(op2));
 #endif /* DEBUG */
 
   /* The registers must specify FPRs valid for operands of type
@@ -3437,7 +3664,7 @@ Multiply(op1,op2,fmt)
   }
 
 #ifdef DEBUG
-  printf("DBG: Multiply: returning 0x%08X%08X (format = %s)\n",WORD64HI(result),WORD64LO(result),DOFMT(fmt));
+  printf("DBG: Multiply: returning 0x%s (format = %s)\n",pr_addr(result),DOFMT(fmt));
 #endif /* DEBUG */
 
   return(result);
@@ -3452,7 +3679,7 @@ Divide(op1,op2,fmt)
   uword64 result;
 
 #ifdef DEBUG
-  printf("DBG: Divide: %s: op1 = 0x%08X%08X : op2 = 0x%08X%08X\n",DOFMT(fmt),WORD64HI(op1),WORD64LO(op1),WORD64HI(op2),WORD64LO(op2));
+  printf("DBG: Divide: %s: op1 = 0x%s : op2 = 0x%s\n",DOFMT(fmt),pr_addr(op1),pr_addr(op2));
 #endif /* DEBUG */
 
   /* The registers must specify FPRs valid for operands of type
@@ -3477,7 +3704,7 @@ Divide(op1,op2,fmt)
   }
 
 #ifdef DEBUG
-  printf("DBG: Divide: returning 0x%08X%08X (format = %s)\n",WORD64HI(result),WORD64LO(result),DOFMT(fmt));
+  printf("DBG: Divide: returning 0x%s (format = %s)\n",pr_addr(result),DOFMT(fmt));
 #endif /* DEBUG */
 
   return(result);
@@ -3491,7 +3718,7 @@ Recip(op,fmt)
   uword64 result;
 
 #ifdef DEBUG
-  printf("DBG: Recip: %s: op = 0x%08X%08X\n",DOFMT(fmt),WORD64HI(op),WORD64LO(op));
+  printf("DBG: Recip: %s: op = 0x%s\n",DOFMT(fmt),pr_addr(op));
 #endif /* DEBUG */
 
   /* The registers must specify FPRs valid for operands of type
@@ -3515,7 +3742,7 @@ Recip(op,fmt)
   }
 
 #ifdef DEBUG
-  printf("DBG: Recip: returning 0x%08X%08X (format = %s)\n",WORD64HI(result),WORD64LO(result),DOFMT(fmt));
+  printf("DBG: Recip: returning 0x%s (format = %s)\n",pr_addr(result),DOFMT(fmt));
 #endif /* DEBUG */
 
   return(result);
@@ -3529,7 +3756,7 @@ SquareRoot(op,fmt)
   uword64 result;
 
 #ifdef DEBUG
-  printf("DBG: SquareRoot: %s: op = 0x%08X%08X\n",DOFMT(fmt),WORD64HI(op),WORD64LO(op));
+  printf("DBG: SquareRoot: %s: op = 0x%s\n",DOFMT(fmt),pr_addr(op));
 #endif /* DEBUG */
 
   /* The registers must specify FPRs valid for operands of type
@@ -3563,7 +3790,7 @@ SquareRoot(op,fmt)
   }
 
 #ifdef DEBUG
-  printf("DBG: SquareRoot: returning 0x%08X%08X (format = %s)\n",WORD64HI(result),WORD64LO(result),DOFMT(fmt));
+  printf("DBG: SquareRoot: returning 0x%s (format = %s)\n",pr_addr(result),DOFMT(fmt));
 #endif /* DEBUG */
 
   return(result);
@@ -3579,7 +3806,7 @@ Convert(rm,op,from,to)
   uword64 result;
 
 #ifdef DEBUG
-  printf("DBG: Convert: mode %s : op 0x%08X%08X : from %s : to %s : (PC = 0x%08X%08X)\n",RMMODE(rm),WORD64HI(op),WORD64LO(op),DOFMT(from),DOFMT(to),WORD64HI(IPC),WORD64LO(IPC));
+  printf("DBG: Convert: mode %s : op 0x%s : from %s : to %s : (PC = 0x%s)\n",RMMODE(rm),pr_addr(op),DOFMT(from),DOFMT(to),pr_addr(IPC));
 #endif /* DEBUG */
 
   /* The value "op" is converted to the destination format, rounding
@@ -3727,7 +3954,7 @@ Convert(rm,op,from,to)
          case fmt_double:
           tmp = (int)*((double *)&op);
 #ifdef DEBUG
-          printf("DBG: from double %.30f (0x%08X%08X) to word: 0x%08X\n",*((double *)&op),WORD64HI(op),WORD64LO(op),tmp);
+          printf("DBG: from double %.30f (0x%s) to word: 0x%08X\n",*((double *)&op),pr_addr(op),tmp);
 #endif /* DEBUG */
           break;
         }
@@ -3752,7 +3979,7 @@ Convert(rm,op,from,to)
   }
 
 #ifdef DEBUG
-  printf("DBG: Convert: returning 0x%08X%08X (to format = %s)\n",WORD64HI(result),WORD64LO(result),DOFMT(to));
+  printf("DBG: Convert: returning 0x%s (to format = %s)\n",pr_addr(result),DOFMT(to));
 #endif /* DEBUG */
 
   return(result);
@@ -3778,7 +4005,7 @@ COP_LW(coproc_num,coproc_reg,memword)
 #if defined(HASFPU)
     case 1:
 #ifdef DEBUG
-    printf("DBG: COP_LW: memword = 0x%08X (uword64)memword = 0x%08X%08X\n",memword,WORD64HI(memword),WORD64LO(memword));
+    printf("DBG: COP_LW: memword = 0x%08X (uword64)memword = 0x%s\n",memword,pr_addr(memword));
 #endif
      StoreFPR(coproc_reg,fmt_word,(uword64)memword);
      fpr_state[coproc_reg] = fmt_uninterpreted;
@@ -3787,7 +4014,7 @@ COP_LW(coproc_num,coproc_reg,memword)
 
     default:
 #if 0 /* this should be controlled by a configuration option */
-     callback->printf_filtered(callback,"COP_LW(%d,%d,0x%08X) at IPC = 0x%08X%08X : TODO (architecture specific)\n",coproc_num,coproc_reg,memword,WORD64HI(IPC),WORD64LO(IPC));
+     callback->printf_filtered(callback,"COP_LW(%d,%d,0x%08X) at IPC = 0x%s : TODO (architecture specific)\n",coproc_num,coproc_reg,memword,pr_addr(IPC));
 #endif
      break;
   }
@@ -3809,7 +4036,7 @@ COP_LD(coproc_num,coproc_reg,memword)
 
     default:
 #if 0 /* this message should be controlled by a configuration option */
-     callback->printf_filtered(callback,"COP_LD(%d,%d,0x%08X%08X) at IPC = 0x%08X%08X : TODO (architecture specific)\n",coproc_num,coproc_reg,WORD64HI(memword),WORD64LO(memword),WORD64HI(IPC),WORD64LO(IPC));
+     callback->printf_filtered(callback,"COP_LD(%d,%d,0x%s) at IPC = 0x%s : TODO (architecture specific)\n",coproc_num,coproc_reg,pr_addr(memword),pr_addr(IPC));
 #endif
      break;
   }
@@ -3847,7 +4074,7 @@ COP_SW(coproc_num,coproc_reg)
 
     default:
 #if 0 /* should be controlled by configuration option */
-     callback->printf_filtered(callback,"COP_SW(%d,%d) at IPC = 0x%08X%08X : TODO (architecture specific)\n",coproc_num,coproc_reg,WORD64HI(IPC),WORD64LO(IPC));
+     callback->printf_filtered(callback,"COP_SW(%d,%d) at IPC = 0x%s : TODO (architecture specific)\n",coproc_num,coproc_reg,pr_addr(IPC));
 #endif
      break;
   }
@@ -3880,7 +4107,7 @@ COP_SD(coproc_num,coproc_reg)
 
     default:
 #if 0 /* should be controlled by configuration option */
-     callback->printf_filtered(callback,"COP_SD(%d,%d) at IPC = 0x%08X%08X : TODO (architecture specific)\n",coproc_num,coproc_reg,WORD64HI(IPC),WORD64LO(IPC));
+     callback->printf_filtered(callback,"COP_SD(%d,%d) at IPC = 0x%s : TODO (architecture specific)\n",coproc_num,coproc_reg,pr_addr(IPC));
 #endif
      break;
   }
@@ -3954,7 +4181,7 @@ decode_coproc(instruction)
 #endif
           }
         } else
-         sim_warning("Unrecognised COP0 instruction 0x%08X at IPC = 0x%08X%08X : No handler present",instruction,WORD64HI(IPC),WORD64LO(IPC));
+         sim_warning("Unrecognised COP0 instruction 0x%08X at IPC = 0x%s : No handler present",instruction,pr_addr(IPC));
         /* TODO: When executing an ERET or RFE instruction we should
            clear LLBIT, to ensure that any out-standing atomic
            read/modify/write sequence fails. */
@@ -3962,7 +4189,7 @@ decode_coproc(instruction)
       break;
 
     case 2: /* undefined co-processor */
-      sim_warning("COP2 instruction 0x%08X at IPC = 0x%08X%08X : No handler present",instruction,WORD64HI(IPC),WORD64LO(IPC));
+      sim_warning("COP2 instruction 0x%08X at IPC = 0x%s : No handler present",instruction,pr_addr(IPC));
       break;
 
     case 1: /* should not occur (FPU co-processor) */
@@ -4001,7 +4228,7 @@ simulate ()
     uword64 vaddr = (uword64)PC;
     uword64 paddr;
     int cca;
-    unsigned int instruction;
+    unsigned int instruction;	/* uword64? what's this used for?  FIXME! */
     int dsstate = (state & simDELAYSLOT);
 
 #ifdef DEBUG
@@ -4012,12 +4239,13 @@ simulate ()
       if (state & simHALTEX) printf(" simHALTEX");
       if (state & simHALTIN) printf(" simHALTIN");
       if (state & simBE) printf(" simBE");
+      printf("\n");
     }
 #endif /* DEBUG */
 
 #ifdef DEBUG
     if (dsstate)
-     callback->printf_filtered(callback,"DBG: DSPC = 0x%08X%08X\n",WORD64HI(DSPC),WORD64LO(DSPC));
+     callback->printf_filtered(callback,"DBG: DSPC = 0x%s\n",pr_addr(DSPC));
 #endif /* DEBUG */
 
     if (AddressTranslation(PC,isINSTRUCTION,isLOAD,&paddr,&cca,isTARGET,isREAL)) {
@@ -4028,7 +4256,7 @@ simulate ()
 	uword64 value;
 	unsigned int byte;
 	paddr = ((paddr & ~LOADDRMASK) | ((paddr & LOADDRMASK) ^ (reverse << 2)));
-	value = LoadMemory(cca,AccessLength_WORD,paddr,vaddr,isINSTRUCTION,isREAL);
+	LoadMemory(&value,NULL,cca,AccessLength_WORD,paddr,vaddr,isINSTRUCTION,isREAL);
 	byte = ((vaddr & LOADDRMASK) ^ (bigend << 2));
 	instruction = ((value >> (8 * byte)) & 0xFFFFFFFF);
       } else {
@@ -4039,19 +4267,19 @@ simulate ()
 	unsigned int byte;
 	paddr = (((paddr & ~ (uword64) 1) & ~LOADDRMASK)
 		 | (((paddr & ~ (uword64) 1) & LOADDRMASK) ^ (reverse << 1)));
-	value = LoadMemory(cca, AccessLength_HALFWORD,
+	LoadMemory(&value,NULL,cca, AccessLength_HALFWORD,
 			   paddr & ~ (uword64) 1,
 			   vaddr, isINSTRUCTION, isREAL);
 	byte = (((vaddr &~ (uword64) 1) & LOADDRMASK) ^ (bigend << 1));
 	instruction = ((value >> (8 * byte)) & 0xFFFF);
       }
     } else {
-      fprintf(stderr,"Cannot translate address for PC = 0x%08X%08X failed\n",WORD64HI(PC),WORD64LO(PC));
+      fprintf(stderr,"Cannot translate address for PC = 0x%s failed\n",pr_addr(PC));
       exit(1);
     }
 
 #ifdef DEBUG
-    callback->printf_filtered(callback,"DBG: fetched 0x%08X from PC = 0x%08X%08X\n",instruction,WORD64HI(PC),WORD64LO(PC));
+    callback->printf_filtered(callback,"DBG: fetched 0x%08X from PC = 0x%s\n",instruction,pr_addr(PC));
 #endif /* DEBUG */
 
 #if !defined(FASTSIM) || defined(PROFILE)
@@ -4149,6 +4377,10 @@ simulate ()
        HIACCESS--;
       if (LOACCESS > 0)
        LOACCESS--;
+      if (HI1ACCESS > 0)
+       HI1ACCESS--;
+      if (LO1ACCESS > 0)
+       LO1ACCESS--;
 #endif /* WARN_LOHI */
 
 #if defined(WARN_ZERO)
@@ -4157,7 +4389,7 @@ simulate ()
          than within the simulator, since it will help keep the simulator
          small. */
       if (ZERO != 0) {
-        sim_warning("The ZERO register has been updated with 0x%08X%08X (PC = 0x%08X%08X) (reset back to zero)",WORD64HI(ZERO),WORD64LO(ZERO),WORD64HI(IPC),WORD64LO(IPC));
+        sim_warning("The ZERO register has been updated with 0x%s (PC = 0x%s) (reset back to zero)",pr_addr(ZERO),pr_addr(IPC));
         ZERO = 0; /* reset back to zero before next instruction */
       }
 #endif /* WARN_ZERO */
@@ -4168,7 +4400,7 @@ simulate ()
        executed, then update the PC to its new value: */
     if (dsstate) {
 #ifdef DEBUG
-      printf("DBG: dsstate set before instruction execution - updating PC to 0x%08X%08X\n",WORD64HI(DSPC),WORD64LO(DSPC));
+      printf("DBG: dsstate set before instruction execution - updating PC to 0x%s\n",pr_addr(DSPC));
 #endif /* DEBUG */
       PC = DSPC;
       state &= ~(simDELAYSLOT | simJALDELAYSLOT);
@@ -4198,7 +4430,7 @@ simulate ()
             if (--(pending_slot_count[index]) == 0) {
 #ifdef DEBUG
               printf("pending_slot_reg[%d] = %d\n",index,pending_slot_reg[index]);
-              printf("pending_slot_value[%d] = 0x%08X%08X\n",index,WORD64HI(pending_slot_value[index]),WORD64LO(pending_slot_value[index]));
+              printf("pending_slot_value[%d] = 0x%s\n",index,pr_addr(pending_slot_value[index]));
 #endif /* DEBUG */
               if (pending_slot_reg[index] == COCIDX) {
                 SETFCC(0,((FCR31 & (1 << 23)) ? 1 : 0));
@@ -4213,7 +4445,7 @@ simulate ()
 #endif /* HASFPU */
               }
 #ifdef DEBUG
-              printf("registers[%d] = 0x%08X%08X\n",pending_slot_reg[index],WORD64HI(registers[pending_slot_reg[index]]),WORD64LO(registers[pending_slot_reg[index]]));
+              printf("registers[%d] = 0x%s\n",pending_slot_reg[index],pr_addr(registers[pending_slot_reg[index]]));
 #endif /* DEBUG */
               pending_slot_reg[index] = (LAST_EMBED_REGNUM + 1);
               pending_out++;
@@ -4251,6 +4483,49 @@ simulate ()
 #endif /* DEBUG */
 
   return;
+}
+
+/* This code copied from gdb's utils.c.  Would like to share this code,
+   but don't know of a common place where both could get to it. */
+
+/* Temporary storage using circular buffer */
+#define NUMCELLS 16
+#define CELLSIZE 32
+static char*
+get_cell()
+{
+  static char buf[NUMCELLS][CELLSIZE];
+  static int cell=0;
+  if (++cell>=NUMCELLS) cell=0;
+  return buf[cell];
+}     
+
+/* Print routines to handle variable size regs, etc */
+
+/* Eliminate warning from compiler on 32-bit systems */
+static int thirty_two = 32;	
+
+char* 
+pr_addr(addr)
+  SIM_ADDR addr;
+{
+  char *paddr_str=get_cell();
+  switch (sizeof(addr))
+    {
+      case 8:
+        sprintf(paddr_str,"%08x%08x",
+		(unsigned long)(addr>>thirty_two),(unsigned long)(addr&0xffffffff));
+	break;
+      case 4:
+        sprintf(paddr_str,"%08x",(unsigned long)addr);
+	break;
+      case 2:
+        sprintf(paddr_str,"%04x",(unsigned short)(addr&0xffff));
+	break;
+      default:
+        sprintf(paddr_str,"%x",addr);
+    }
+  return paddr_str;
 }
 
 /*---------------------------------------------------------------------------*/

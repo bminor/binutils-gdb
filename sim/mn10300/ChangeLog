@@ -1,3 +1,9 @@
+Thu Mar 13 12:54:45 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* interp.c (sim_open): New SIM_DESC result.  Argument is now
+	in argv form.
+	(other sim_*): New SIM_DESC argument.
+
 Wed Mar 12 15:04:00 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* simops.c: Fix carry bit computation for "add" instructions.

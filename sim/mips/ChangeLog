@@ -1,9 +1,40 @@
+Thu Mar 13 12:51:36 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* interp.c (sim_open): New SIM_DESC result.  Argument is now
+	in argv form.
+	(other sim_*): New SIM_DESC argument.
+
+start-sanitize-r5900
+Wed Feb 26 18:32:21 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* gencode.c (POP_AND,POP_OR,POP_NOR,POP_XOR): 
+	Change values to avoid overloading DOUBLEWORD which is tested
+	for all insns.
+	* gencode.c: reinstate "offending code".
+end-sanitize-r5900
+
+Mon Feb 24 22:47:14 1997  Dawn Perchik  <dawn@cygnus.com>
+
+	* interp.c: Fix printing of addresses for non-64-bit targets.
+	(pr_addr): Add function to print address based on size.
+start-sanitize-r5900
+	* gencode.c: #ifdef out offending code until a permanent fix 
+	can be added.  Code is causing build errors for non-5900 mips targets.
+end-sanitize-r5900
+
+start-sanitize-r5900
+Thu Feb 20 10:40:24 1997  Gavin Koch  <gavin@cetus.cygnus.com>
+
+	* gencode.c (process_instructions): Correct test for ISA dependent
+	architecture bits in isa field of MIPS_DECODE.
+
+end-sanitize-r5900
 Wed Feb 19 14:42:09 1997  Mark Alexander  <marka@cygnus.com>
 
 	* interp.c (simopen): Add support for LSI MiniRISC PMON vectors.
 
 start-sanitize-r5900
-Tue Feb 18 17:03:47 1997  Gavin Koch  <gavin@cetus.cygnus.com>
+Tue Feb 18 17:03:47 1997  Gavin Koch  <gavin@cygnus.com>
 
 	* gencode.c (MIPS_DECODE): Correct instruction feature flags for 
 	PMADDUW.
