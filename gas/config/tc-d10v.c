@@ -69,7 +69,7 @@ static int write_2_short PARAMS ((struct d10v_opcode *opcode1, unsigned long ins
 				  struct d10v_opcode *opcode2, unsigned long insn2, int exec_type, Fixups *fx));
 static unsigned long do_assemble PARAMS ((char *str, struct d10v_opcode **opcode));
 static unsigned long d10v_insert_operand PARAMS (( unsigned long insn, int op_type,
-						   offsetT value, int left));
+						   offsetT value, int left, fixS *fix));
 static int parallel_ok PARAMS ((struct d10v_opcode *opcode1, unsigned long insn1, 
 				  struct d10v_opcode *opcode2, unsigned long insn2));
 
@@ -446,11 +446,12 @@ get_operands (exp)
 }
 
 static unsigned long
-d10v_insert_operand (insn, op_type, value, left) 
+d10v_insert_operand (insn, op_type, value, left, fix) 
      unsigned long insn;
      int op_type;
      offsetT value;
      int left;
+     fixS *fix;
 {
   int shift, bits;
 
@@ -462,7 +463,7 @@ d10v_insert_operand (insn, op_type, value, left)
 
   /* truncate to the proper number of bits */
   if (check_range (value, bits, d10v_operands[op_type].flags))
-    as_bad("operand out of range: %d",value);
+    as_bad_where (fix->fx_file, fix->fx_line, "operand out of range: %d", value);
 
   value &= 0x7FFFFFFF >> (31 - bits);
   insn |= (value << shift);
@@ -1054,8 +1055,20 @@ find_opcode (opcode, myops)
 	    {
 	      int bits = d10v_operands[next_opcode->operands[opnum]].bits;
 	      int flags = d10v_operands[next_opcode->operands[opnum]].flags;
-	      if (!check_range (myops[opnum].X_add_number, bits, flags))
-		  return next_opcode;
+	      if (flags & OPERAND_ADDR)
+		bits += 2;
+	      if (myops[opnum].X_op == O_constant) 
+		{
+		  if (!check_range (myops[opnum].X_add_number, bits, flags))
+		    return next_opcode;
+		}
+	      else
+		{
+		  int value = obstack_next_free(&frchain_now->frch_obstack) - frag_now->fr_literal - 
+		    S_GET_VALUE(myops[opnum].X_add_symbol);
+		  if (!check_range (value, bits, flags))
+		    return next_opcode;
+		}
 	      next_opcode++;
 	    }
 	  as_fatal ("value out of range");
@@ -1230,7 +1243,7 @@ md_apply_fix3 (fixp, valuep, seg)
 	}
     }
   
-  /* printf("md_apply_fix: value=0x%x  type=0x%x  where=0x%x\n",  value, fixp->fx_r_type,fixp->fx_where); */
+  /* printf("md_apply_fix: value=0x%x  type=0x%x  where=0x%x size=%d line=%d\n", value, fixp->fx_r_type,fixp->fx_where,fixp->fx_size, fixp->fx_line); */
 
   op_type = fixp->fx_r_type;
   if (op_type & 2048)
@@ -1262,12 +1275,18 @@ md_apply_fix3 (fixp, valuep, seg)
     case BFD_RELOC_32:
       bfd_putb32 ((bfd_vma) value, (unsigned char *) where);
       return 1;
+    case BFD_RELOC_16:
+      if (fixp->fx_size == 2)
+	{
+	  bfd_putb16 ((bfd_vma) value, (unsigned char *) where);
+	  return 1;
+	}
     default:
       break;
     }
 
   /* printf("   insn=%x  value=%x where=%x  pcrel=%x\n",insn,value,fixp->fx_where,fixp->fx_pcrel); */
-  insn = d10v_insert_operand (insn, op_type, (offsetT)value, left);
+  insn = d10v_insert_operand (insn, op_type, (offsetT)value, left, fixp);
   /* printf("   new insn=%x\n",insn); */
   
   bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);
