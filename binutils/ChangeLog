@@ -1,3 +1,7 @@
+2001-09-28  Richard Henderson  <rth@redhat.com>
+
+	* objdump.c (dump_section_header): Dump SEC_ARCH_BIT_0.
+
 2001-09-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* bucomm.c (fatal): Define using VPARAMS, VA_OPEN, VA_FIXEDARG,

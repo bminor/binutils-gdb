@@ -304,9 +304,6 @@ dump_section_header (abfd, section, ignored)
   PF (SEC_CONSTRUCTOR_BSS, "CONSTRUCTOR BSS");
   PF (SEC_LOAD, "LOAD");
   PF (SEC_RELOC, "RELOC");
-#ifdef SEC_BALIGN
-  PF (SEC_BALIGN, "BALIGN");
-#endif
   PF (SEC_READONLY, "READONLY");
   PF (SEC_CODE, "CODE");
   PF (SEC_DATA, "DATA");
@@ -319,6 +316,7 @@ dump_section_header (abfd, section, ignored)
   PF (SEC_CLINK, "CLINK");
   PF (SEC_SMALL_DATA, "SMALL_DATA");
   PF (SEC_SHARED, "SHARED");
+  PF (SEC_ARCH_BIT_0, "ARCH_BIT_0");
 
   if ((section->flags & SEC_LINK_ONCE) != 0)
     {
