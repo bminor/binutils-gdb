@@ -1,5 +1,7 @@
 2003-02-01  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/i386/tm-i386os9k.h: Removed.
+
 	* configure.host (i[3456]86-*-isc*): Set gdb_host to i386v.
 	Remove i[3456]86-*-sysv3.2* and i[3456]86-*-sysv32* entries since
 	they're identical to i[3456]86-*-sysv* now.
