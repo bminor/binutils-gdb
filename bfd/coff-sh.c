@@ -30,13 +30,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 static bfd_reloc_status_type sh_reloc();
 
+#define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (2)
+
+#define COFF_LONG_FILENAMES
 
 static reloc_howto_type r_imm32 =
   {R_SH_IMM32,  0, 2, 32, false, 0, 
      complain_overflow_bitfield, sh_reloc,"r_imm32",    true, 0xffffffff,0xffffffff, false};
-
-
-/*#define SELECT_RELOC(x,y) x->howto = (&r_imm32)*/
 
 
 #define BADMAG(x) SHBADMAG(x)
@@ -45,16 +45,11 @@ static reloc_howto_type r_imm32 =
 #define __A_MAGIC_SET__
 
 /* Code to swap in the reloc */
-#if 0
-#define SWAP_IN_RELOC_OFFSET   bfd_h_get_32
-#define SWAP_OUT_RELOC_OFFSET bfd_h_put_32
-#endif
 #define SWAP_OUT_RELOC_EXTRA(abfd, src, dst) \
   dst->r_stuff[0] = 'S'; \
   dst->r_stuff[1] = 'C';
 
-/* Code to turn a r_type into a howto ptr, uses the above howto table
-   */
+/* Code to turn a r_type into a howto ptr, uses the above howto table.  */
 static long
 get_symbol_value (symbol)       
      asymbol *symbol;
@@ -75,30 +70,7 @@ get_symbol_value (symbol)
   return(relocation);
 }
 
-static void
-rtype2howto (internal, dst)
-     arelent * internal;
-     struct internal_reloc *dst;
-{
-  switch (dst->r_type)
-    {
-    default:
-      abort();
-    case R_SH_IMM32:
-
-      break;
-    }
-}
-
 #define RTYPE2HOWTO(x,y) ((x)->howto = &r_imm32)
-
-/* Perform any necessaru magic to the addend in a reloc entry */
-
-#if 0
-#define CALC_ADDEND(abfd, symbol, ext_reloc, cache_ptr) \
- cache_ptr->addend =  ext_reloc.r_offset;
-
-#endif
 
 
 /* Compute the addend of a reloc.  If the reloc is to a common symbol,
@@ -131,11 +103,6 @@ rtype2howto (internal, dst)
     else							\
       cache_ptr->addend = 0;					\
   }
-
-#if 0
-#define RELOC_PROCESSING(relent,reloc,symbols,abfd,section) \
- reloc_processing(relent, reloc, symbols, abfd, section)
-#endif
 
 /* this function is in charge of performing all the 29k relocations */
 
@@ -227,7 +194,6 @@ coff_sh_relocate_section (output_bfd, info, input_bfd, input_section,
       struct internal_syment *sym;
       asection *sec;
       bfd_vma val;
-      bfd_reloc_status_type rstat;
 
       symndx = rel->r_symndx;
       loc = contents + rel->r_vaddr - input_section->vma;
@@ -294,38 +260,6 @@ coff_sh_relocate_section (output_bfd, info, input_bfd, input_section,
     }     
 
   return true;
-}
-
-static void 
-reloc_processing (relent, reloc, symbols, abfd, section)
-     arelent * relent;
-     struct internal_reloc *reloc;
-     asymbol ** symbols;
-     bfd * abfd;
-     asection * section;
-{
-  asymbol *ptr;
-  relent->address = reloc->r_vaddr;
-  relent->howto = &r_imm32;
-
-
-  relent->sym_ptr_ptr = symbols + obj_convert(abfd)[reloc->r_symndx];
-
-  ptr = *(relent->sym_ptr_ptr);
-
-  if (ptr 
-      && bfd_asymbol_bfd(ptr) == abfd		
-
-      && ((ptr->flags & BSF_OLD_COMMON)== 0))	
-    {						
-      relent->addend = 0;
-    }						
-  else
-    {					
-      relent->addend = 0;			
-    }			
-  relent->address-= section->vma;
-
 }
 
 #define coff_relocate_section coff_sh_relocate_section

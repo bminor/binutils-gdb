@@ -1,3 +1,12 @@
+Wed Nov 16 16:08:06 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* coff-sh.c: Deleted some code that was commented out or inside
+	"#if 0".
+	(COFF_LONG_FILENAMES): Define.
+
+	* cpu-sh.c (arch_info_struct): Convert name to lowercase, for
+	consistency with other architectures.
+
 Sat Nov 12 23:50:10 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* elfcode.h (elf_export_symbol): Also export symbols which are
