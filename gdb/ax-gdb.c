@@ -620,7 +620,12 @@ gen_var_ref (struct agent_expr *ax, struct axs_value *value, struct symbol *var)
 
     case LOC_COMPUTED:
     case LOC_COMPUTED_ARG:
-      (*SYMBOL_LOCATION_FUNCS (var)->tracepoint_var_ref) (var, ax, value);
+      /* FIXME: cagney/2004-01-26: It should be possible to
+	 unconditionally call the SYMBOL_OPS method when available.
+	 Unfortunatly DWARF 2 stores the frame-base (instead of the
+	 function) location in a function's symbol.  Oops!  For the
+	 moment enable this when/where applicable.  */
+      SYMBOL_OPS (var)->tracepoint_var_ref (var, ax, value);
       break;
 
     case LOC_OPTIMIZED_OUT:

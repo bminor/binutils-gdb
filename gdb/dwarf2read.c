@@ -7974,7 +7974,7 @@ dwarf2_symbol_mark_computed (struct attribute *attr, struct symbol *sym,
 	complaint (&symfile_complaints,
 		   "Location list used without specifying the CU base address.");
 
-      SYMBOL_LOCATION_FUNCS (sym) = &dwarf2_loclist_funcs;
+      SYMBOL_OPS (sym) = &dwarf2_loclist_funcs;
       SYMBOL_LOCATION_BATON (sym) = baton;
     }
   else
@@ -8003,7 +8003,7 @@ dwarf2_symbol_mark_computed (struct attribute *attr, struct symbol *sym,
 	  baton->data = NULL;
 	}
       
-      SYMBOL_LOCATION_FUNCS (sym) = &dwarf2_locexpr_funcs;
+      SYMBOL_OPS (sym) = &dwarf2_locexpr_funcs;
       SYMBOL_LOCATION_BATON (sym) = baton;
     }
 }

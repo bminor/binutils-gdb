@@ -1,5 +1,26 @@
 2004-01-26  Andrew Cagney  <cagney@redhat.com>
 
+	* dwarf2loc.c (dwarf_expr_frame_base): Use SYMBOL_OPS instead of
+	SYMBOL_LOCATION_FUNCS
+	(dwarf2_loclist_funcs, dwarf2_locexpr_funcs): Change type to
+	"struct symbol_ops".
+	* dwarf2loc.h (dwarf2_locexpr_funcs, dwarf2_loclist_funcs): Change
+	type to "struct symbol_ops".
+	* symtab.h (struct symbol_ops): Rename "struct location_funcs".
+	(struct symbol): Replace ".aux_value.loc.funcs" and
+	".aux_value.loc.baton" with ".ops" and ".aux_value.ptr".
+	(SYMBOL_OBJFILE): Delete macro.
+	(SYMBOL_LOCATION_FUNCS): Delete macro.
+	(SYMBOL_LOCATION_BATON): Update.
+	* dwarf2read.c (dwarf2_symbol_mark_computed): Set SYMBOL_OPS
+	intead of SYMBOL_LOCATION_FUNCS.
+	* ax-gdb.c (gen_var_ref): Ditto.
+	* printcmd.c (address_info): Ditto.
+	* findvar.c (read_var_value): Ditto.
+	(symbol_read_needs_frame): Ditto.
+
+2004-01-26  Andrew Cagney  <cagney@redhat.com>
+
 	* dwarf2read.c (read_func_scope): Document frame-base hack.
 
 2004-01-25  Mark Kettenis  <kettenis@gnu.org>
