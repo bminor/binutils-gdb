@@ -1,3 +1,8 @@
+Fri Nov  5 21:45:09 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* hosts/i386mach3.h (HOST_SEGMENT_SIZE),
+	i386mach3.c (SEGMENT_SIZE, TEXT_START_ADDR): Correct values (?).
+
 Fri Nov  5 15:17:57 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* coffcode.h (coff_write_object_contents): Zero out internal_a.
