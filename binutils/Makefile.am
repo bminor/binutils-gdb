@@ -115,7 +115,7 @@ LIBIBERTY = ../libiberty/libiberty.a
 
 POTFILES = $(CFILES) $(DEBUG_SRCS) $(HFILES)
 po/POTFILES.in: @MAINT@ Makefile
-	for file in $(POTFILES); do echo $$file; done | sort > tmp \
+	for f in $(POTFILES); do echo $$f; done | LC_COLLATE= sort > tmp \
 	  && mv tmp $(srcdir)/po/POTFILES.in
 
 EXPECT = `if [ -f $$r/../expect/expect ] ; then \

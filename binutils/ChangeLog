@@ -1,3 +1,8 @@
+2003-08-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am (POTFILES.in): Unset LC_COLLATE.
+	* Makefile.in: Regenerate.
+
 2003-08-11  Ian Lance Taylor  <ian@airs.com>
 
 	* readelf.c (process_archive): Fix error handling.  Remove memory
