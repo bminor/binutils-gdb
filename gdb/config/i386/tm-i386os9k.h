@@ -1,7 +1,6 @@
 /* Macro definitions for i386 running under BSD Unix.
    Copyright 1986, 1987, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
 
-This file is part of GDB.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -38,6 +37,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
                          }
 
 #define DATABASE_REG 	3		/* ebx */
+#undef DECR_PC_AFTER_BREAK
+#define DECR_PC_AFTER_BREAK 0
 
 /* On 386 bsd, sigtramp is above the user stack and immediately below
    the user area. Using constants here allows for cross debugging.
