@@ -1,4 +1,4 @@
-# Sanitize.in for devo/binutils
+# .Sanitize for devo/binutils.
 
 # Each directory to survive its way into a release will need a file
 # like this one called "./.Sanitize".  All keyword lines must exist,
@@ -16,9 +16,15 @@
 Do-first:
 
 if ( echo $* | grep keep\-mpw > /dev/null ) ; then
-	keep_these_too="mpw-build.in mpw-make.in ChangeLog.mpw"
+	keep_these_too="mpw-make.in ChangeLog.mpw"
 else
-	lose_these_too="mpw-build.in mpw-make.in ChangeLog.mpw"
+	lose_these_too="mpw-make.in ChangeLog.mpw"
+fi
+
+if ( echo $* | grep keep\-gm > /dev/null ) ; then
+	keep_these_too="mpw-xconfig.in ChangeLog.gm ${keep_these_too}"
+else
+	lose_these_too="mpw-xconfig.in ChangeLog.gm ${lose_these_too}"
 fi
 
 # All files listed between the "Things-to-keep:" line and the
