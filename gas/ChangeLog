@@ -587,8 +587,7 @@ end-sanitize-r5900
 Thu Mar 19 16:03:12 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-arm.c (md_apply_fix3): fix code to test the range of
-	PC relative branches (PR15358).  Patch courtesy of Jonathan
-	Walton. 
+	PC relative branches.  Patch courtesy of Jonathan Walton. 
 
 start-sanitize-r5900
 Thu Mar 19 14:19:27 1998  Jeffrey A Law  (law@cygnus.com)
@@ -1112,8 +1111,7 @@ Mon Feb  2 18:30:34 1998  Steve Haworth  <steve@pm.cse.rmit.EDU.AU>
 
 Mon Feb  2 10:20:37 1998  Nick Clifton  <nickc@cygnus.com>
 
-	* config/tc-v850.c (md_assemble): Improvements to error messages
-	for PR 14720.
+	* config/tc-v850.c (md_assemble): Improvements to error messages.
 
 Mon Feb  2 12:39:05 1998  Geoff Keating  <geoffk@ozemail.com.au>
 
@@ -1258,8 +1256,7 @@ Tue Jan 27 13:32:01 1998  Robert Lipe  <robertl@dgii.com>
 
 Tue Jan 27 11:06:52 1998  Nick Clifton  <nickc@cygnus.com>
 
-	* config/tc-v850.c: Fix PRs 14721, 14722, 14723, tidying error
-	message production.
+	* config/tc-v850.c: Tidy error message production.
 
 Tue Jan 27 12:24:32 1998  Ian Lance Taylor  <ian@cygnus.com>
 
@@ -3416,7 +3413,7 @@ start-sanitize-d30v
 Sun Mar 23 18:03:31 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config/tc-d30v.c (build_insn): Enable range-checking code.
-	(postfix): Stop at space or comma. Fixes PR 11862.
+	(postfix): Stop at space or comma.
 	(md_assemble): Change error message.
 
 end-sanitize-d30v	
@@ -3931,7 +3928,7 @@ start-sanitize-d30v
 	* config/tc-d30v.h: Define TARGET_BYTES_BIG_ENDIAN.
 end-sanitize-d30v
 	* config/tc-d10v.c (md_pcrel_from_section): Return 0 if
-        relocation is in different section. Fixes PR11574.
+        relocation is in different section.
 
 Fri Feb 21 10:08:25 1997  Jim Wilson  <wilson@cygnus.com>
 
@@ -4341,7 +4338,7 @@ Thu Jan 30 12:08:40 1997  Ian Lance Taylor  <ian@cygnus.com>
 Wed Jan 29 15:31:12 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config/tc-d10v.h (md_do_align): Add this hook to call
-	d10v_cleanup() when a ".align" is detected.  Fixes PR11487.
+	d10v_cleanup() when a ".align" is detected.
 
 	* config/tc-d10v.c (find_opcode): Correctly calculate
 	branch displacement when .aligns are present.
@@ -4629,7 +4626,7 @@ Wed Dec 18 16:00:42 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 Wed Dec 18 15:27:40 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config/tc-d10v.c (md_assemble): Fix bug which caused
-	second instruction in a line to be case sensitize. PR11312
+	second instruction in a line to be case sensitize.
 
 Wed Dec 18 10:08:46 1996  Jeffrey A Law  (law@cygnus.com)
 
