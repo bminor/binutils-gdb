@@ -1,8 +1,18 @@
 Fri Oct 16 03:02:28 1992  John Gilmore  (gnu@cygnus.com)
 
-	* config/decstation.mh, news.mh (NATDEPFILES):  Add corelow.o.
+	Make core files work again (add back the `core' target).
+
+	* config/decstation.mh, news.mh, sun2os3.mh, sun2os4.mh
+	(NATDEPFILES):  Add corelow.o.
 	* config/delta88.mt, m88k.mt (TDEPFILES):  Remove coredep.o, it's
 	native dependent.
+
+	* config/3b1.mh, bigmips.mh, hp300bsd.mh, hppabsd.mh, hppahpux.mh,
+	i386sco.mh, i386v.mh, i386v32.mh, irix3.mh, isi.mh, linux.mh,
+	littlemips.mh, merlin.mh, news1000.mh, pn.mh, rtbsd.mh, tahoe.mh,
+	vaxbsd.mh, vaxult.mh (XDEPFILES): Add corelow.o whenever coredep.o
+	appears.  FIXME, these should be moved to NATDEPFILES for native
+	use only.
 
 Thu Oct 15 21:53:53 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
@@ -38,7 +48,6 @@ Thu Oct 15 02:59:30 1992  John Gilmore  (gnu@cygnus.com)
 	it should be possible to set these attributes independently.
 
 	* core.c (core_command):  Make nicer error message for no core support.
-	
 
 	Lint around file_ptr's (bfd's off_t's) and bfd_seek.
 
