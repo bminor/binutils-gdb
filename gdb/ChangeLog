@@ -1,3 +1,8 @@
+2003-08-26  Andrew Cagney  <cagney@redhat.com>
+
+	* i386-linux-nat.c (ps_get_thread_area): Make "desc" four "int"s
+	in size.  Add comments.
+
 2003-08-25  Chris Demetriou  <cgd@broadcom.com>
 
 	* configure.tgt: Document need for special "mipsisa64" handling.
