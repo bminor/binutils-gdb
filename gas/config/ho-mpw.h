@@ -75,4 +75,9 @@ FILE *mpw_fopen();
 
 #define LOSING_COMPILER
 
+/* Arrange for the debugger hook to be checked right when the assembler
+   starts up. */
+
+#define HOST_SPECIAL_INIT(argc,argv)  mpw_special_init ((argv)[0]);
+
 /* end of ho-mpw.h */

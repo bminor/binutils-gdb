@@ -1,5 +1,9 @@
 # Makefile fragment for GAS.
 
+VERSION = cygnus-2.3.1
+
+gC = gC1
+
 s = "{srcdir}"
 
 o = :
@@ -16,13 +20,16 @@ ALL_CFLAGS = {CFLAGS} {CROSS} -d TARGET_BYTES_BIG_ENDIAN -d BFD_ASSEMBLER -i "{t
 .c.o  \Option-f .c
    {CC}  {DepDir}{Default}.c {ALL_CFLAGS} -s gas_{Default} -o {TargDir}{Default}.c.o
 
+.gc.o  \Option-f .c
+   {gC}  {DepDir}{Default}.c {ALL_CFLAGS} -s gas_{Default} -o {TargDir}{Default}.gc.o
+
 prefix = usr:local:
 
 bindir = {prefix}bin:
 
 OBJECTS = \Option-d
 		"{o}"app.c.o \Option-d
-		"{o}"as.c.o \Option-d
+		"{o}"as.gc.o \Option-d
 		"{o}"atof-generic.c.o \Option-d
 		"{o}"bignum-copy.c.o \Option-d
 		"{o}"cond.c.o \Option-d
@@ -46,36 +53,48 @@ OBJECTS = \Option-d
 		"{o}"ecoff.c.o \Option-d
 		"{o}"xmalloc.c.o \Option-d
 
+TARG_OBJECTS =  "{o}"obj-format.c.o "{o}"targ-cpu.c.o "{o}"atof-targ.c.o
+
+# If you put config.h in INCLUDES, then MPW's stupid make will always
+# want to rebuild everything.  Better to do in two stages.
+
 INCLUDES =
+# "{o}"config.h
 # host.h
 #"{s}".h
 
+CLIBS = ::libiberty:libiberty.o	::bfd:libbfd.o ::opcodes:libopcodes.o
+
 all \Option-f as.new
 
-as.new \Option-f\Option-f {OBJECTS} "{o}"obj-format.c.o "{o}"targ-cpu.c.o "{o}"atof-targ.c.o \Option-d
-		::libiberty:libiberty.o \Option-d
-		::bfd:libbfd.o \Option-d
-		::opcodes:libopcodes.o
-	Link -d -model far -c 'MPS ' -t MPST \Option-d
-		{OBJECTS} \Option-d
-		"{o}"obj-format.c.o "{o}"targ-cpu.c.o "{o}"atof-targ.c.o \Option-d
-		::libiberty:libiberty.o \Option-d
-		::bfd:libbfd.o \Option-d
-		::opcodes:libopcodes.o \Option-d
-		#"{CLibraries}"CSANELib.o \Option-d
-		#"{CLibraries}"Math.o \Option-d
-		#"{CLibraries}"Complex.o \Option-d
-		"{CLibraries}"StdClib.o \Option-d
-		"{Libraries}"Stubs.o \Option-d
-		"{Libraries}"Runtime.o \Option-d
-		"{Libraries}"Interface.o \Option-d
-		#"{Libraries}"ToolLibs.o \Option-d
-		-o as.new
+as.new \Option-f\Option-f {OBJECTS} {TARG_OBJECTS} {CLIBS}
+	Link {LDFLAGS} -o as.new {OBJECTS} {TARG_OBJECTS} {CLIBS} {EXTRALIBS}
+
+
+"{o}"config.h \Option-f "{o}"config-stamp
+
+"{o}"config-stamp \Option-f Makefile
+	Delete -i -y "{o}"config.new "{o}"config-stamp
+	echo '#ifndef TARGET_CPU'			       > "{o}"config.new
+	echo '#define TARGET_CPU       "{target_cpu}"'        >> "{o}"config.new
+	echo '#define TARGET_ALIAS     "{target_alias}"'      >> "{o}"config.new
+	echo '#define TARGET_CANONICAL "{target_canonical}"'  >> "{o}"config.new
+	echo '#define GAS_VERSION      "{VERSION}"'           >> "{o}"config.new
+#	if [ "$(defs)" != "" ]; then \
+#	  for d in .. $(defs) ; do \
+#	    if [ "$$d" != ".." ]; then \
+#	      echo "#define $$d"			      >> "{o}"config.new ; \
+#	    else true; fi; \
+#	  done ; \
+#	else true; fi
+	echo '#endif /* TARGET_CPU */'			      >> "{o}"config.new
+	MoveIfChange "{o}"config.new "{o}"config.h
+	Echo ' ' "{o}"config-stamp
 
 "{o}"app.c.o \Option-f "{s}"app.c {INCLUDES}
-"{o}"as.c.o \Option-f "{s}"as.c {INCLUDES}
+"{o}"as.gc.o \Option-f "{s}"as.c {INCLUDES}
 "{o}"atof-generic.c.o \Option-f "{s}"atof-generic.c {INCLUDES}
-"{o}"bifnum-copy.c.o \Option-f "{s}"bignum-copy.c {INCLUDES}
+"{o}"bignum-copy.c.o \Option-f "{s}"bignum-copy.c {INCLUDES}
 "{o}"cond.c.o \Option-f "{s}"cond.c {INCLUDES}
 "{o}"expr.c.o \Option-f "{s}"expr.c {INCLUDES}
 "{o}"flonum-konst.c.o \Option-f "{s}"flonum-konst.c {INCLUDES}
@@ -95,6 +114,10 @@ as.new \Option-f\Option-f {OBJECTS} "{o}"obj-format.c.o "{o}"targ-cpu.c.o "{o}"a
 "{o}"write.c.o \Option-f "{s}"write.c {INCLUDES}
 "{o}"ecoff.c.o \Option-f "{s}"ecoff.c {INCLUDES}
 "{o}"xmalloc.c.o \Option-f "{s}"xmalloc.c {INCLUDES}
+
+"{o}"targ-cpu.c.o \Option-f "{o}"targ-cpu.c {INCLUDES}
+"{o}"obj-format.c.o \Option-f "{o}"obj-format.c {INCLUDES}
+"{o}"atof-targ.c.o \Option-f "{o}"atof-targ.c {INCLUDES}
 
 install \Option-f
 	If "`Exists "{prefix}"`" == ""

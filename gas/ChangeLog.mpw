@@ -1,3 +1,15 @@
+Sun Jun 26 16:42:12 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* mpw-config.in: Parse target and use to generate forward includes
+	to tc-, obj-, and atof- files, use te-generic.h for emulation.
+	* mpw-make.in (VERSION): Define.
+	(as.c): Compile with GCC.
+	(TARG_OBJECTS, CLIBS): Define.
+	(as.new): Use LDFLAGS, TARG_OBJECTS, CLIBS and EXTRALIBS in link
+	command.
+	(config.h, config-stamp): Build.
+	config/ho-mpw.h (HOST_SPECIAL_INIT): Define.
+
 Sun Jun 12 16:38:42 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* mpw-make.in (C, CFLAGS): Removed definitions.
