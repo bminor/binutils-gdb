@@ -1,3 +1,8 @@
+Sat Aug  1 19:10:13 1992  Ken Raeburn  (raeburn@cygnus.com)
+
+	* config/tc-sparc.c (tc_aout_fix_to_chars): If pc-relative, take
+	fx_offset into account.
+
 Fri Jul 31 21:53:28 1992  Ken Raeburn  (raeburn@cygnus.com)
 
 	* configure.in (mips host): Accept "ultrix" with version number.
