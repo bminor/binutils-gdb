@@ -117,16 +117,15 @@ const pseudo_typeS md_pseudo_table[] =
 
 #define LDI_IMMEDIATE(x) (((x) & 0xf) | (((x) << 4) & 0xf00))
 
-static void show_mcu_list (FILE *stream);
-static char *skip_space (char *s);
-static char *extract_word (char *from, char *to, int limit);
-static unsigned int avr_operand (struct avr_opcodes_s *opcode,
-				 int where, char *op, char **line);
-static unsigned int avr_operands (struct avr_opcodes_s *opcode, char **line);
-static unsigned int avr_get_constant (char *str, int max);
-static char *parse_exp (char *s, expressionS *op);
-static bfd_reloc_code_real_type avr_ldi_expression (expressionS *exp);
-long md_pcrel_from_section PARAMS ((fixS *, segT));
+static void show_mcu_list PARAMS ((FILE *));
+static char *skip_space PARAMS ((char *));
+static char *extract_word PARAMS ((char *, char *, int));
+static unsigned int avr_operand PARAMS ((struct avr_opcodes_s *,
+					 int, char *, char **));
+static unsigned int avr_operands PARAMS ((struct avr_opcodes_s *, char **));
+static unsigned int avr_get_constant PARAMS ((char *, int));
+static char *parse_exp PARAMS ((char *, expressionS *));
+static bfd_reloc_code_real_type avr_ldi_expression PARAMS ((expressionS *));
 
 #define EXP_MOD_NAME(i) exp_mod[i].name
 #define EXP_MOD_RELOC(i) exp_mod[i].reloc
@@ -505,28 +504,18 @@ avr_operands (opcode, line)
       bin |= reg1 | reg2;
     }
 
-  if (!avr_opt.all_opcodes)
-    {
-      /* Detect undefined combinations (like ld r31,Z+).  */
-      if (((bin & 0xFDEF) == 0x91AD) || ((bin & 0xFDEF) == 0x91AE) ||
-	  ((bin & 0xFDEF) == 0x91C9) || ((bin & 0xFDEF) == 0x91CA) ||
-	  ((bin & 0xFDEF) == 0x91E1) || ((bin & 0xFDEF) == 0x91E2) ||
-	  ((bin & 0xFFED) == 0x91E5))
-	as_warn (_("undefined combination of operands"));
-    }
+  /* Detect undefined combinations (like ld r31,Z+).  */
+  if (!avr_opt.all_opcodes && AVR_UNDEF_P (bin))
+    as_warn (_("undefined combination of operands"));
 
   if (opcode->insn_size == 2)
     {
       /* Warn if the previous opcode was cpse/sbic/sbis/sbrc/sbrs
          (AVR core bug, fixed in the newer devices).  */
 
-      if (!((avr_mcu->isa & AVR_ISA_MUL) || avr_opt.no_skip_bug))
-	{
-	  if ((prev & 0xFC00) == 0x1000
-	      || (prev & 0xFD00) == 0x9900
-	      || (prev & 0xFC08) == 0xFC00)
-	    as_warn (_("skipping two-word instruction"));
-	}
+      if (!(avr_opt.no_skip_bug || (avr_mcu->isa & AVR_ISA_MUL))
+	  && AVR_SKIP_P (prev))
+	as_warn (_("skipping two-word instruction"));
 
       bfd_putl32 ((bfd_vma) bin, frag);
     }
@@ -560,13 +549,12 @@ avr_operand (opcode, where, op, line)
     case 'r':
     case 'a':
     case 'v':
-      op_mask = -1;
-      
       if (*str == 'r' || *str == 'R')
 	{
 	  char r_name[20];
 	  
 	  str = extract_word (str, r_name, sizeof (r_name));
+	  op_mask = 0xff;
 	  if (isdigit (r_name[1]))
 	    {
 	      if (r_name[2] == '\0')
@@ -606,10 +594,9 @@ avr_operand (opcode, where, op, line)
 	      break;
 	      
 	    case 'w':
-	      op_mask -= 24;
-	      if (op_mask & 1 || op_mask > 6)
+	      if ((op_mask & 1) || op_mask < 24)
 		as_bad (_("register r24, r26, r28 or r30 required"));
-	      op_mask >>= 1;
+	      op_mask = (op_mask - 24) >> 1;
 	      break;
 	    }
 	  break;
