@@ -1431,13 +1431,13 @@ process_section_headers ()
 	    epnt->e_shnum, epnt->e_shoff);
   
   printf (_("\nSection Header%s....\n"), epnt->e_shnum > 1 ? "s" : "");
-  printf (_("  [Nr] Name           Type               Addr     Off    Size   ES Flg Lk In Al\n"));
+  printf (_("  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk In Al\n"));
       
   for (i = 0; i < epnt->e_shnum; i++)
     {
-      printf ("  [%2d] %-14s", i, SECTION_NAME (spnt));
+      printf ("  [%2d] %-17s", i, SECTION_NAME (spnt));
 	  
-      printf (" %-18s ",get_section_type_name (spnt->sh_type));
+      printf (" %-15s ",get_section_type_name (spnt->sh_type));
       printf ( "%8.8lx %6.6lx %6.6lx %2.2lx",
 	       spnt->sh_addr,
 	       spnt->sh_offset,

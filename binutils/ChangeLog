@@ -10,6 +10,8 @@ Fri Jun 12 16:06:15 1998  Michael Meissner  <meissner@cygnus.com>
 	(process_elf_header): Print endian-ess.  Convert all numeric
 	formats to long or unsigned long.  Print out machine specific flag
 	bits.
+	(process_section_headers): Increase name by 3 columns and decrease
+	type by the same so that .gcc_except_table fits in the space.
 
 	* readelf.h: Include elf/ppc.h, elf/mips.h, and elf/m32r.h to get
 	machine specific flag bits.
