@@ -320,9 +320,16 @@ struct die_info
     unsigned int num_attrs;	/* Number of attributes */
     struct attribute *attrs;	/* An array of attributes */
     struct die_info *next_ref;	/* Next die in ref hash table */
+
+    /* The dies in a compilation unit form an n-ary tree.  PARENT
+       points to this die's parent; CHILD points to the first child of
+       this node; and all the children of a given node are chained
+       together via their SIBLING fields, terminated by a die whose
+       tag is zero.  */
     struct die_info *child;	/* Its first child, if any.  */
     struct die_info *sibling;	/* Its next sibling, if any.  */
     struct die_info *parent;	/* Its parent, if any.  */
+
     struct type *type;		/* Cached type information */
   };
 
