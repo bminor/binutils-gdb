@@ -1,3 +1,8 @@
+1999-07-21  Philippe De Muyter  <phdm@macqel.be>
+
+	* cofflink.c (_bfd_coff_generic_relocate_section): Issue an error
+	message	and fail if a symbol index is out of range.
+
 1999-07-21  Ian Lance Taylor  <ian@zembu.com>
 
 	* elf32-mips.c (mips_elf_calculate_relocation): Get the GP value

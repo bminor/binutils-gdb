@@ -2603,6 +2603,14 @@ _bfd_coff_generic_relocate_section (output_bfd, info, input_bfd,
 	  h = NULL;
 	  sym = NULL;
 	}
+      else if (symndx < 0
+	       || (unsigned long) symndx >= obj_raw_syment_count (input_bfd))
+	{
+	  (*_bfd_error_handler)
+	    ("%s: illegal symbol index %ld in relocs",
+	     bfd_get_filename (input_bfd), symndx);
+	  return false;
+	}
       else
 	{    
 	  h = obj_coff_sym_hashes (input_bfd)[symndx];
