@@ -760,6 +760,53 @@ next_insn (memaddr, pword1, pword2)
     return 0;
 }
 
+/* 'start_frame' is a variable in the MON960 runtime startup routine
+   that contains the frame pointer of the 'start' routine (the routine
+   that calls 'main').  By reading its contents out of remote memory,
+   we can tell where the frame chain ends:  backtraces should halt before
+   they display this frame.  */
+
+int
+mon960_frame_chain_valid (chain, curframe)
+    unsigned int chain;
+    struct frame_info *curframe;
+{
+	struct symbol *sym;
+	struct minimal_symbol *msymbol;
+
+	/* crtmon960.o is an assembler module that is assumed to be linked
+	 * first in an i80960 executable.  It contains the true entry point;
+	 * it performs startup up initialization and then calls 'main'.
+	 *
+	 * 'sf' is the name of a variable in crtmon960.o that is set
+	 *	during startup to the address of the first frame.
+	 *
+	 * 'a' is the address of that variable in 80960 memory.
+	 */
+	static char sf[] = "start_frame";
+	CORE_ADDR a;
+
+
+	chain &= ~0x3f; /* Zero low 6 bits because previous frame pointers
+			   contain return status info in them.  */
+	if ( chain == 0 ){
+		return 0;
+	}
+
+	sym = lookup_symbol(sf, 0, VAR_NAMESPACE, (int *)NULL, 
+				  (struct symtab **)NULL);
+	if ( sym != 0 ){
+		a = SYMBOL_VALUE (sym);
+	} else {
+		msymbol = lookup_minimal_symbol (sf, NULL, NULL);
+		if (msymbol == NULL)
+			return 0;
+		a = SYMBOL_VALUE_ADDRESS (msymbol);
+	}
+
+	return ( chain != read_memory_integer(a,4) );
+}
+
 void
 _initialize_i960_tdep ()
 {

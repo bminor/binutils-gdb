@@ -121,6 +121,10 @@ struct monitor_ops
 #define MO_GETMEM_READ_SINGLE 0x10	/* getmem can only read one loc at a time */
 #define MO_HANDLE_NL 0x20		/* handle \r\n combinations */
 
+#define MO_NO_ECHO_ON_OPEN 0x40	/* don't expect echos in monitor_open */
+
+#define MO_SEND_BREAK_ON_STOP 0x80	/* If set, send break to stop monitor */
+
 extern struct monitor_ops        *current_monitor;
 
 #define LOADTYPES		(current_monitor->loadtypes)
