@@ -1,5 +1,10 @@
 2002-02-15  Richard Henderson  <rth@redhat.com>
 
+	* alpha-opc.c (alpha_opcodes): Fix thinko in ret pseudo
+	disassembly mask.
+
+2002-02-15  Richard Henderson  <rth@redhat.com>
+
 	* alpha-opc.c (alpha_opcodes): Add simple pseudos for
 	lda, ldah, jmp, ret.
 
