@@ -1,5 +1,8 @@
 Fri May 17 14:40:14 1991  Roland H. Pesch  (pesch at fowanton.cygnus.com)
 
+	* readline/inc-history.texinfo, readline/inc-readline.texinfo:
+	applied various small fixes due to or inspired by RMS comments
+
 	* doc/gdb.texinfo: finished using all RMS comments, save those for
 	appendices on readline and cmd history (which are in other source
 	files) 
