@@ -1,3 +1,8 @@
+1999-09-29  Nick Clifton  <nickc@cygnus.com>
+
+	* sh-opc.h: Fix bit patterns for several load and store
+	instructions.  
+
 Thu Sep 23 08:27:20 1999  Jerry Quinn <jerry.quinn.adv91@alum.dartmouth.org
 
 	* hppa-dis.c (print_insn_hppa): Replace 'B', 'M', 'g' and 'l' with
