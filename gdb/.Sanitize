@@ -229,6 +229,7 @@ monitor.h
 news-xdep.c
 nindy-share
 nindy-tdep.c
+nlm
 nlmread.c
 ns32k-pinsn.c
 ns32km3-nat.c
