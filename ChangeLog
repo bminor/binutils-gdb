@@ -1,3 +1,8 @@
+Tue Dec 26 11:45:31 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config.guess (AViiON:dgux:*:*): Update from FSF to add pentium
+	DG/UX support.
+
 Fri Dec 15 10:01:27 1995  Stan Cox  <coxs@dg-rtp.dg.com>
 
 	* config.sub (i*86*) Change [345] to [3456]
