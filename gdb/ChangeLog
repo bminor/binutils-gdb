@@ -1,3 +1,8 @@
+2005-03-17  Paul Brook  <paul@codesourcery.com>
+
+	* amd64-tdep.c (amd64_dwarf_reg_to_regnum): Fix broken logic.
+	* s390-tdep.c (s390_dwarf_reg_to_regnum): Ditto.
+
 2005-03-16  Mark Mitchell  <mark@codesourcery.com>
 
 	* event-top.c (handle_sigquit): Do not define for systems without

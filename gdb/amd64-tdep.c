@@ -200,7 +200,7 @@ amd64_dwarf_reg_to_regnum (int reg)
 {
   int regnum = -1;
 
-  if (reg >= 0 || reg < amd64_dwarf_regmap_len)
+  if (reg >= 0 && reg < amd64_dwarf_regmap_len)
     regnum = amd64_dwarf_regmap[reg];
 
   if (regnum == -1)
