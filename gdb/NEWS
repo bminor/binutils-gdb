@@ -9,7 +9,7 @@ GDB now supports HP PA-RISC machines running HPUX.  A preliminary
 version of this support was available as a set of patches from the
 University of Utah.  GDB does not support debugging of programs
 compiled with the HP compiler, because HP will not document their file
-format.  Instead, you must use GCC (version 2.3.3 or later) and PA-GAS
+format.  Instead, you must use GCC (version 2.3.2 or later) and PA-GAS
 (as available from jaguar.cs.utah.edu:/dist/pa-gas.u4.tar.Z).
 
 Many problems in the preliminary version have been fixed.
@@ -27,6 +27,19 @@ symbol lookups.
 `Cfront' style demangling still doesn't work with AT&T cfront.  It was written
 from the specifications in the Annotated Reference Manual, which AT&T's
 compiler does not actually implement.
+
+ * G++ multiple inheritance compiler problem
+
+In the 2.3.2 release of gcc/g++, how the compiler resolves multiple
+inheritance lattices was reworked to properly discover ambiguities.  We
+recently found an example which causes this new algorithm to fail in a
+very subtle way, producing bad debug information for those classes.
+The file 'gcc.patch' (in this directory) can be applied to gcc to
+circumvent the problem.  A future GCC release will contain a complete
+fix.
+
+The previous G++ debug info problem (mentioned below for the gdb-4.7
+release) is fixed in gcc version 2.3.2.
 
  * Improved configure script
 
