@@ -85,7 +85,9 @@ SECTIONS
 
   .tdata ${TDATA_START_ADDR} : {
 	${RELOCATING+PROVIDE (__ep = .);}
+	*(.tbyte)
 	*(.tdata)
+	*(.tbss)
   }
 
   /* We want the small data sections together, so single-instruction offsets
