@@ -5695,7 +5695,7 @@ emit_one_bundle ()
       for (j = 0; j < md.slot[curr].num_fixups; ++j)
 	{
 	  ifix = md.slot[curr].fixup + j;
-	  fix = fix_new_exp (frag_now, frag_now_fix () - 16 + i, 4,
+	  fix = fix_new_exp (frag_now, frag_now_fix () - 16 + i, 8,
 			     &ifix->expr, ifix->is_pcrel, ifix->code);
 	  fix->tc_fix_data.opnd = ifix->opnd;
 	  fix->fx_plt = (fix->fx_r_type == BFD_RELOC_IA64_PLTOFF22);

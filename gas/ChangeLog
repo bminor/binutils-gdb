@@ -1,3 +1,8 @@
+2000-11-21  Jim Wilson  <wilson@redhat.com>
+
+	* config/tc-ia64.c (emit_one_bundle): Pass size of 8 not 4 to
+	fix_new_exp.
+
 2000-11-21  Jakub Jelinek  <jakub@redhat.com>
 
 	* config/tc-sparc.c (md_pseudo_table): Add .file and .loc.
