@@ -1,3 +1,11 @@
+2002-11-14  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (process_program_headers): Add comment about return
+	value.  Ensure that 0 is returned if the headers are not loaded.
+	(process_file): If process_section_headers failed to load the
+	headers disable any tests that rely upon them.  Similarly for
+	process_program_headers.
+
 2002-11-12  Nick Clifton  <nickc@redhat.com>
 
 	* po/da.po: Updated Danish translation.

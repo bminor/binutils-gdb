@@ -2886,6 +2886,8 @@ get_64bit_program_headers (file, program_headers)
   return 1;
 }
 
+/* Returns 1 if the program headers were loaded.  */
+
 static int
 process_program_headers (file)
      FILE * file;
@@ -2898,7 +2900,7 @@ process_program_headers (file)
     {
       if (do_segments)
 	printf (_("\nThere are no program headers in this file.\n"));
-      return 1;
+      return 0;
     }
 
   if (do_segments && !do_header)
@@ -10053,11 +10055,18 @@ process_file (file_name)
       return 1;
     }
 
-  process_section_headers (file);
+  if (! process_section_headers (file))
+    {
+      /* Without loaded section headers we
+	 cannot process lots of things.  */
+      do_unwind = do_version = do_dump = do_arch = 0;
 
-  process_program_headers (file);
+      if (! do_using_dynamic)
+	do_syms = do_reloc = 0;
+    }
 
-  process_dynamic_segment (file);
+  if (process_program_headers (file))
+    process_dynamic_segment (file);
 
   process_relocs (file);
 
