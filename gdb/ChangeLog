@@ -1,3 +1,13 @@
+2004-10-10  Joel Brobecker  <brobecker@gnat.com>
+
+	* mips-tdep.c (mips16_decode_reg_save): Delete, no longer used.
+	(mips_insn16_frame_cache): Pass frame cache in call to
+	heuristic_proc_desc. Move some code to mips16_heuristic_proc_desc.
+	Remove code that became redundant as a consequence.
+	(mips32_heuristic_proc_desc): No longer compute a fake
+	procedure descriptor. Compute the full frame cache instead.
+	Some minor comment reformatting.
+
 2004-10-10  Jim Blandy  <jimb@redhat.com>
 
 	* MAINTAINERS (generic symtabs, dwarf readers, elf reader, stabs
