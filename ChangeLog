@@ -1,3 +1,24 @@
+Thu Apr 25 06:33:36 1996  Michael Meissner  <meissner@wogglebug.tiac.net>
+
+	* configure.in (powerpcle-*-solaris*): Turn off gdb temporarily.
+
+Tue Apr 23 09:07:39 1996  Tom Tromey  <tromey@creche.cygnus.com>
+
+	* Makefile.in (ALL_MODULES): Added all-inet.
+	(CROSS_CHECK_MODULES): Added check-inet.
+	(INSTALL_MODULES): Added install-inet.
+	(CLEAN_MODULES): Added clean-inet.
+	(all-indent): New target.
+
+	* configure.in (host_tools): Added inet.
+	(native_only): Added inet.
+	(noconfigdirs): Added inet.
+
+Fri Apr 19 15:35:29 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Don't configure libgloss if we are not configuring
+	newlib.
+
 Wed Apr 17 19:30:01 1996  Rob Savoye  <rob@chinadoll.cygnus.com>
 
 	* configure.in: Don't configure libgloss for unsupported
