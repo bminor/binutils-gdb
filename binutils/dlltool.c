@@ -557,7 +557,7 @@ mtable[] =
     "jmpi\t1\n\tnop\n\t.long",
     ".global", ".space", ".align\t2",".align\t4", "",
     "pe-mcore-big", bfd_arch_mcore,
-    mcore_be_jtab, sizeof (mcore_be_jtab), 8
+    mcore_be_jtab, sizeof (mcore_be_jtab), 4
   }
   ,
   {
@@ -566,7 +566,7 @@ mtable[] =
     "jmpi\t1\n\tnop\n\t.long",
     ".global", ".space", ".align\t2",".align\t4", "-EL",
     "pe-mcore-little", bfd_arch_mcore,
-    mcore_le_jtab, sizeof (mcore_le_jtab), 8
+    mcore_le_jtab, sizeof (mcore_le_jtab), 4
   }
   ,
   {
@@ -575,7 +575,7 @@ mtable[] =
     "jmpi\t1\n\tnop\n\t.long",
     ".global", ".space", ".align\t2",".align\t4", "",
     "elf32-mcore-big", bfd_arch_mcore,
-    mcore_be_jtab, sizeof (mcore_be_jtab), 8
+    mcore_be_jtab, sizeof (mcore_be_jtab), 4
   }
   ,
   {
@@ -584,7 +584,7 @@ mtable[] =
     "jmpi\t1\n\tnop\n\t.long",
     ".global", ".space", ".align\t2",".align\t4", "-EL",
     "elf32-mcore-little", bfd_arch_mcore,
-    mcore_le_jtab, sizeof (mcore_le_jtab), 8
+    mcore_le_jtab, sizeof (mcore_le_jtab), 4
   }
   ,
   {
