@@ -1,5 +1,8 @@
 Tue Feb  6 12:12:22 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.host: Make SHLIB_CFLAGS include $(PICFLAG) on a
+	*-*-hpux* host.
+
 	* Makefile.in (program_transform_name): New variable.
 	(install): Transform library name before installing it.
 

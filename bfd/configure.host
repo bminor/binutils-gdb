@@ -119,6 +119,7 @@ if [ "${shared}" = "true" ]; then
   *-*-hpux*)
     # HP/UX uses .sl for shared libraries.
     SHLINK=`echo ${SHLINK} | sed -e 's/so$/sl/'`
+    SHLIB_CFLAGS='-shared $(PICFLAG)'
     ;;
   *-*-irix5*)
     # -fpic is not needed on Irix 5.
