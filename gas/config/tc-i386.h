@@ -1,5 +1,5 @@
 /* tc-i386.h -- Header file for tc-i386.c
-   Copyright (C) 1989, 92, 93, 94, 95, 96, 97, 98, 99, 2000
+   Copyright (C) 1989, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001
    Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
@@ -53,15 +53,6 @@ extern int tc_i386_fix_adjustable PARAMS ((struct fix *));
 #define TC_FIX_ADJUSTABLE(fixP) \
   (! symbol_used_in_reloc_p ((fixP)->fx_addsy) && tc_fix_adjustable (fixP))
 #endif
-
-/* This is the relocation type for direct references to GLOBAL_OFFSET_TABLE.
- * It comes up in complicated expressions such as
- * _GLOBAL_OFFSET_TABLE_+[.-.L284], which cannot be expressed normally with
- * the regular expressions.  The fixup specified here when used at runtime
- * implies that we should add the address of the GOT to the specified location,
- * and as a result we have simplified the expression into something we can use.
- */
-#define TC_RELOC_GLOBAL_OFFSET_TABLE BFD_RELOC_386_GOTPC
 
 /* This expression evaluates to false if the relocation is for a local object
    for which we still want to do the relocation at runtime.  True if we

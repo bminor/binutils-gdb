@@ -1,3 +1,8 @@
+2001-01-11  Andreas Jaeger  <aj@suse.de>
+
+	* config/tc-i386.h (TC_RELOC_GLOBAL_OFFSET_TABLE): Removed, it's
+	not used anywhere.
+
 2001-01-10  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-arm.c (arm_fix_adjustable): Define for OBJ_COFF.
