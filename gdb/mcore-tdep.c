@@ -713,8 +713,7 @@ mcore_find_callers_reg (struct frame_info *fi, int regnum)
 {
   for (; fi != NULL; fi = get_next_frame (fi))
     {
-      if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
-				       get_frame_base (fi)))
+      if (deprecated_pc_in_call_dummy (get_frame_pc (fi)))
 	return deprecated_read_register_dummy (get_frame_pc (fi),
 					       get_frame_base (fi), regnum);
       else if (deprecated_get_frame_saved_regs (fi)[regnum] != 0)
@@ -731,8 +730,7 @@ static CORE_ADDR
 mcore_frame_saved_pc (struct frame_info * fi)
 {
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
-				   get_frame_base (fi)))
+  if (deprecated_pc_in_call_dummy (get_frame_pc (fi)))
     return deprecated_read_register_dummy (get_frame_pc (fi),
 					   get_frame_base (fi), PC_REGNUM);
   else
@@ -750,8 +748,7 @@ mcore_pop_frame (void)
   int rn;
   struct frame_info *fi = get_current_frame ();
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
-				   get_frame_base (fi)))
+  if (deprecated_pc_in_call_dummy (get_frame_pc (fi)))
     deprecated_pop_dummy_frame ();
   else
     {
@@ -995,8 +992,7 @@ mcore_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   get_frame_extra_info (fi)->status = 0;
   get_frame_extra_info (fi)->framesize = 0;
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
-				   get_frame_base (fi)))
+  if (deprecated_pc_in_call_dummy (get_frame_pc (fi)))
     {
       /* We need to setup fi->frame here because call_function_by_hand
          gets it wrong by assuming it's always FP.  */

@@ -131,7 +131,7 @@ deprecated_generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
   return deprecated_grub_regcache_for_registers (regcache);
 }
 
-/* Function: pc_in_call_dummy (pc, sp, fp)
+/* Function: pc_in_call_dummy (pc)
 
    Return true if the PC falls in a dummy frame created by gdb for an
    inferior call.  The code below which allows DECR_PC_AFTER_BREAK is
@@ -139,7 +139,7 @@ deprecated_generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
    subtracted out.  */
 
 int
-deprecated_pc_in_call_dummy (CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR fp)
+deprecated_pc_in_call_dummy (CORE_ADDR pc)
 {
   return pc_in_dummy_frame (pc);
 }

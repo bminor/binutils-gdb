@@ -1064,7 +1064,7 @@ frame_type_from_pc (CORE_ADDR pc)
 {
   /* NOTE: cagney/2004-05-08: Eliminating this function depends on all
      architectures being forced to use the frame-unwind code.  */
-  if (deprecated_pc_in_call_dummy (pc, 0, 0))
+  if (deprecated_pc_in_call_dummy (pc))
     return DUMMY_FRAME;
   else
     return NORMAL_FRAME;
@@ -1582,7 +1582,7 @@ legacy_get_prev_frame (struct frame_info *this_frame)
      has previously set it.  This is really somewhat bogus.  The
      initialization, as seen in create_new_frame(), should occur
      before the INIT function has been called.  */
-  if (deprecated_pc_in_call_dummy (get_frame_pc (prev), 0, 0))
+  if (deprecated_pc_in_call_dummy (get_frame_pc (prev)))
     prev->type = DUMMY_FRAME;
 
   if (prev->type == NORMAL_FRAME)

@@ -539,12 +539,6 @@ f:2:CANNOT_FETCH_REGISTER:int:cannot_fetch_register:int regnum:regnum:::cannot_r
 f:2:CANNOT_STORE_REGISTER:int:cannot_store_register:int regnum:regnum:::cannot_register_not::0
 # setjmp/longjmp support.
 F:2:GET_LONGJMP_TARGET:int:get_longjmp_target:CORE_ADDR *pc:pc
-# NOTE: cagney/2002-11-24: This function with predicate has a valid
-# (callable) initial value.  As a consequence, even when the predicate
-# is false, the corresponding function works.  This simplifies the
-# migration process - old code, calling DEPRECATED_PC_IN_CALL_DUMMY(),
-# doesn't need to be modified.
-F::DEPRECATED_PC_IN_CALL_DUMMY:int:deprecated_pc_in_call_dummy:CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address:pc, sp, frame_address::deprecated_pc_in_call_dummy:deprecated_pc_in_call_dummy
 F:2:DEPRECATED_INIT_FRAME_PC:CORE_ADDR:deprecated_init_frame_pc:int fromleaf, struct frame_info *prev:fromleaf, prev
 #
 v:2:BELIEVE_PCC_PROMOTION:int:believe_pcc_promotion:::::::

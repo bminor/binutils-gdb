@@ -234,7 +234,7 @@ arm_pc_is_thumb_dummy (CORE_ADDR memaddr)
      frame location (true if we have not pushed large data structures or
      gone too many levels deep) and that our 1024 is not enough to consider
      code regions as part of the stack (true for most practical purposes).  */
-  if (DEPRECATED_PC_IN_CALL_DUMMY (memaddr, sp, sp + 1024))
+  if (deprecated_pc_in_call_dummy (memaddr))
     return caller_is_thumb;
   else
     return 0;
@@ -407,7 +407,7 @@ arm_skip_prologue (CORE_ADDR pc)
   struct symtab_and_line sal;
 
   /* If we're in a dummy frame, don't even try to skip the prologue.  */
-  if (DEPRECATED_PC_IN_CALL_DUMMY (pc, 0, 0))
+  if (deprecated_pc_in_call_dummy (pc))
     return pc;
 
   /* See what the symbol table says.  */

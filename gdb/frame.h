@@ -578,8 +578,7 @@ extern CORE_ADDR deprecated_read_register_dummy (CORE_ADDR pc,
 extern void generic_push_dummy_frame (void);
 extern void deprecated_pop_dummy_frame (void);
 
-extern int deprecated_pc_in_call_dummy (CORE_ADDR pc, CORE_ADDR sp,
-					CORE_ADDR fp);
+extern int deprecated_pc_in_call_dummy (CORE_ADDR pc);
 
 /* NOTE: cagney/2002-06-26: Targets should no longer use this
    function.  Instead, the contents of a dummy frame register can be

@@ -1,3 +1,32 @@
+2004-06-10  Andrew Cagney  <cagney@gnu.org>
+
+	* gdbarch.sh (DEPRECATED_PC_IN_CALL_DUMMY): Delete.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* frame.h (deprecated_pc_in_call_dummy): Delete "sp" and "fp"
+	parameters.
+	* dummy-frame.c (deprecated_pc_in_call_dummy): Update.
+	* arm-tdep.c (arm_pc_is_thumb_dummy): Call
+	deprecated_pc_in_call_dummy instead of
+	DEPRECATED_PC_IN_CALL_DUMMY.
+	(arm_skip_prologue): Ditto.
+	* xstormy16-tdep.c (xstormy16_pop_frame, xstormy16_scan_prologue)
+	(xstormy16_frame_saved_pc, xstormy16_frame_chain): Ditto.
+	* v850-tdep.c (v850_find_callers_reg, v850_frame_chain)
+	(v850_pop_frame, v850_frame_saved_pc, v850_frame_init_saved_regs):
+	Ditto.
+	* sh64-tdep.c (sh64_frame_chain, sh64_get_saved_pr) 
+	(sh64_init_extra_frame_info, sh64_get_saved_register) 
+	(sh64_pop_frame): Ditto.
+	* mips-tdep.c (non_heuristic_proc_desc): Ditto.
+	* mcore-tdep.c (mcore_find_callers_reg, mcore_frame_saved_pc) 
+	(mcore_pop_frame, mcore_init_extra_frame_info): Ditto.
+	* h8300-tdep.c (h8300_frame_chain, h8300_frame_saved_pc) 
+	(h8300_pop_frame): Ditto.
+	* blockframe.c (legacy_inside_entry_func) 
+	(legacy_frame_chain_valid): Ditto.
+	* frame.c (frame_type_from_pc, legacy_get_prev_frame): Update call
+	to deprecated_pc_in_call_dummy.
+	
 2004-06-09  Andrew Cagney  <cagney@gnu.org>
 
 	* gdbarch.sh (REGISTER_TO_VALUE, VALUE_TO_REGISTER): Do not

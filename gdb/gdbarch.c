@@ -172,7 +172,6 @@ struct gdbarch
   gdbarch_cannot_fetch_register_ftype *cannot_fetch_register;
   gdbarch_cannot_store_register_ftype *cannot_store_register;
   gdbarch_get_longjmp_target_ftype *get_longjmp_target;
-  gdbarch_deprecated_pc_in_call_dummy_ftype *deprecated_pc_in_call_dummy;
   gdbarch_deprecated_init_frame_pc_ftype *deprecated_init_frame_pc;
   int believe_pcc_promotion;
   gdbarch_deprecated_get_saved_register_ftype *deprecated_get_saved_register;
@@ -322,7 +321,6 @@ struct gdbarch startup_gdbarch =
   0,  /* cannot_fetch_register */
   0,  /* cannot_store_register */
   0,  /* get_longjmp_target */
-  deprecated_pc_in_call_dummy,  /* deprecated_pc_in_call_dummy */
   0,  /* deprecated_init_frame_pc */
   0,  /* believe_pcc_promotion */
   0,  /* deprecated_get_saved_register */
@@ -462,7 +460,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->register_sim_regno = legacy_register_sim_regno;
   current_gdbarch->cannot_fetch_register = cannot_register_not;
   current_gdbarch->cannot_store_register = cannot_register_not;
-  current_gdbarch->deprecated_pc_in_call_dummy = deprecated_pc_in_call_dummy;
   current_gdbarch->convert_register_p = generic_convert_register_p;
   current_gdbarch->pointer_to_address = unsigned_pointer_to_address;
   current_gdbarch->address_to_pointer = unsigned_address_to_pointer;
@@ -605,7 +602,6 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of cannot_fetch_register, invalid_p == 0 */
   /* Skip verify of cannot_store_register, invalid_p == 0 */
   /* Skip verify of get_longjmp_target, has predicate */
-  /* Skip verify of deprecated_pc_in_call_dummy, has predicate */
   /* Skip verify of deprecated_init_frame_pc, has predicate */
   /* Skip verify of deprecated_get_saved_register, has predicate */
   /* Skip verify of convert_register_p, invalid_p == 0 */
@@ -1188,25 +1184,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE = %d\n",
                       DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE);
-#endif
-#ifdef DEPRECATED_PC_IN_CALL_DUMMY_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "DEPRECATED_PC_IN_CALL_DUMMY_P()",
-                      XSTRING (DEPRECATED_PC_IN_CALL_DUMMY_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_PC_IN_CALL_DUMMY_P() = %d\n",
-                      DEPRECATED_PC_IN_CALL_DUMMY_P ());
-#endif
-#ifdef DEPRECATED_PC_IN_CALL_DUMMY
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "DEPRECATED_PC_IN_CALL_DUMMY(pc, sp, frame_address)",
-                      XSTRING (DEPRECATED_PC_IN_CALL_DUMMY (pc, sp, frame_address)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_PC_IN_CALL_DUMMY = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_pc_in_call_dummy
-                      /*DEPRECATED_PC_IN_CALL_DUMMY ()*/);
 #endif
 #ifdef DEPRECATED_POP_FRAME_P
   fprintf_unfiltered (file,
@@ -3352,31 +3329,6 @@ set_gdbarch_get_longjmp_target (struct gdbarch *gdbarch,
                                 gdbarch_get_longjmp_target_ftype get_longjmp_target)
 {
   gdbarch->get_longjmp_target = get_longjmp_target;
-}
-
-int
-gdbarch_deprecated_pc_in_call_dummy_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  return gdbarch->deprecated_pc_in_call_dummy != deprecated_pc_in_call_dummy;
-}
-
-int
-gdbarch_deprecated_pc_in_call_dummy (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address)
-{
-  gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->deprecated_pc_in_call_dummy != NULL);
-  /* Do not check predicate: gdbarch->deprecated_pc_in_call_dummy != deprecated_pc_in_call_dummy, allow call.  */
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_pc_in_call_dummy called\n");
-  return gdbarch->deprecated_pc_in_call_dummy (pc, sp, frame_address);
-}
-
-void
-set_gdbarch_deprecated_pc_in_call_dummy (struct gdbarch *gdbarch,
-                                         gdbarch_deprecated_pc_in_call_dummy_ftype deprecated_pc_in_call_dummy)
-{
-  gdbarch->deprecated_pc_in_call_dummy = deprecated_pc_in_call_dummy;
 }
 
 int

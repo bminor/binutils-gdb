@@ -736,9 +736,7 @@ translate_insn_rn (int rn, int media_mode)
 static CORE_ADDR
 sh64_frame_chain (struct frame_info *frame)
 {
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
-				   get_frame_base (frame),
-				   get_frame_base (frame)))
+  if (deprecated_pc_in_call_dummy (get_frame_pc (frame)))
     return get_frame_base (frame);    /* dummy frame same as caller's frame */
   if (get_frame_pc (frame))
     {
@@ -764,8 +762,7 @@ sh64_get_saved_pr (struct frame_info *fi, int pr_regnum)
   int media_mode = 0;
 
   for (; fi; fi = get_next_frame (fi))
-    if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
-				     get_frame_base (fi)))
+    if (deprecated_pc_in_call_dummy (get_frame_pc (fi)))
       /* When the caller requests PR from the dummy frame, we return
          PC because that's where the previous routine appears to have
          done a call from.  */
@@ -1214,8 +1211,7 @@ sh64_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   if (get_next_frame (fi)) 
     deprecated_update_frame_pc_hack (fi, DEPRECATED_FRAME_SAVED_PC (get_next_frame (fi)));
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
-				   get_frame_base (fi)))
+  if (deprecated_pc_in_call_dummy (get_frame_pc (fi)))
     {
       /* We need to setup fi->frame here because call_function_by_hand
          gets it wrong by assuming it's always FP.  */
@@ -1272,9 +1268,7 @@ sh64_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 
   while (frame && ((frame = get_next_frame (frame)) != NULL))
     {
-      if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
-				       get_frame_base (frame),
-				       get_frame_base (frame)))
+      if (deprecated_pc_in_call_dummy (get_frame_pc (frame)))
 	{
 	  if (lval)		/* found it in a CALL_DUMMY frame */
 	    *lval = not_lval;
@@ -1369,9 +1363,7 @@ sh64_pop_frame (void)
 
   int media_mode = pc_is_isa32 (get_frame_pc (frame));
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
-				   get_frame_base (frame),
-				   get_frame_base (frame)))
+  if (deprecated_pc_in_call_dummy (get_frame_pc (frame)))
     deprecated_pop_dummy_frame ();
   else
     {

@@ -147,9 +147,7 @@ legacy_inside_entry_func (CORE_ADDR pc)
     {
       /* Do not stop backtracing if the program counter is in the call
          dummy at the entry point.  */
-      /* FIXME: This won't always work with zeros for the last two
-         arguments.  */
-      if (DEPRECATED_PC_IN_CALL_DUMMY (pc, 0, 0))
+      if (deprecated_pc_in_call_dummy (pc))
 	return 0;
     }
 
@@ -527,7 +525,7 @@ int
 legacy_frame_chain_valid (CORE_ADDR fp, struct frame_info *fi)
 {
   /* Don't prune CALL_DUMMY frames.  */
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), 0, 0))
+  if (deprecated_pc_in_call_dummy (get_frame_pc (fi)))
     return 1;
 
   /* If the new frame pointer is zero, then it isn't valid.  */

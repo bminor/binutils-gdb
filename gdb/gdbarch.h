@@ -959,37 +959,6 @@ extern void set_gdbarch_get_longjmp_target (struct gdbarch *gdbarch, gdbarch_get
 #define GET_LONGJMP_TARGET(pc) (gdbarch_get_longjmp_target (current_gdbarch, pc))
 #endif
 
-/* NOTE: cagney/2002-11-24: This function with predicate has a valid
-   (callable) initial value.  As a consequence, even when the predicate
-   is false, the corresponding function works.  This simplifies the
-   migration process - old code, calling DEPRECATED_PC_IN_CALL_DUMMY(),
-   doesn't need to be modified. */
-
-#if defined (DEPRECATED_PC_IN_CALL_DUMMY)
-/* Legacy for systems yet to multi-arch DEPRECATED_PC_IN_CALL_DUMMY */
-#if !defined (DEPRECATED_PC_IN_CALL_DUMMY_P)
-#define DEPRECATED_PC_IN_CALL_DUMMY_P() (1)
-#endif
-#endif
-
-extern int gdbarch_deprecated_pc_in_call_dummy_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_PC_IN_CALL_DUMMY_P)
-#error "Non multi-arch definition of DEPRECATED_PC_IN_CALL_DUMMY"
-#endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_PC_IN_CALL_DUMMY_P)
-#define DEPRECATED_PC_IN_CALL_DUMMY_P() (gdbarch_deprecated_pc_in_call_dummy_p (current_gdbarch))
-#endif
-
-typedef int (gdbarch_deprecated_pc_in_call_dummy_ftype) (CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address);
-extern int gdbarch_deprecated_pc_in_call_dummy (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address);
-extern void set_gdbarch_deprecated_pc_in_call_dummy (struct gdbarch *gdbarch, gdbarch_deprecated_pc_in_call_dummy_ftype *deprecated_pc_in_call_dummy);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_PC_IN_CALL_DUMMY)
-#error "Non multi-arch definition of DEPRECATED_PC_IN_CALL_DUMMY"
-#endif
-#if !defined (DEPRECATED_PC_IN_CALL_DUMMY)
-#define DEPRECATED_PC_IN_CALL_DUMMY(pc, sp, frame_address) (gdbarch_deprecated_pc_in_call_dummy (current_gdbarch, pc, sp, frame_address))
-#endif
-
 #if defined (DEPRECATED_INIT_FRAME_PC)
 /* Legacy for systems yet to multi-arch DEPRECATED_INIT_FRAME_PC */
 #if !defined (DEPRECATED_INIT_FRAME_PC_P)

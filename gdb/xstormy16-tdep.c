@@ -423,8 +423,7 @@ xstormy16_pop_frame (void)
   if (fi == NULL)
     return;			/* paranoia */
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
-				   get_frame_base (fi)))
+  if (deprecated_pc_in_call_dummy (get_frame_pc (fi)))
     {
       deprecated_pop_dummy_frame ();
     }
@@ -560,8 +559,7 @@ xstormy16_scan_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
   if (fi)
     {
       /* In a call dummy, don't touch the frame. */
-      if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
-				       get_frame_base (fi)))
+      if (deprecated_pc_in_call_dummy (get_frame_pc (fi)))
 	return start_addr;
 
       /* Grab the frame-relative values of SP and FP, needed below. 
@@ -849,8 +847,7 @@ xstormy16_frame_saved_pc (struct frame_info *fi)
 {
   CORE_ADDR saved_pc;
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
-				   get_frame_base (fi)))
+  if (deprecated_pc_in_call_dummy (get_frame_pc (fi)))
     {
       saved_pc = deprecated_read_register_dummy (get_frame_pc (fi),
 						 get_frame_base (fi),
@@ -911,8 +908,7 @@ xstormy16_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 static CORE_ADDR
 xstormy16_frame_chain (struct frame_info *fi)
 {
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
-				   get_frame_base (fi)))
+  if (deprecated_pc_in_call_dummy (get_frame_pc (fi)))
     {
       /* Call dummy's frame is the same as caller's.  */
       return get_frame_base (fi);

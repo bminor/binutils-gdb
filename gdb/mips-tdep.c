@@ -2305,7 +2305,7 @@ non_heuristic_proc_desc (CORE_ADDR pc, CORE_ADDR *addrptr)
   struct obj_section *sec;
   struct mips_objfile_private *priv;
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (pc, 0, 0))
+  if (deprecated_pc_in_call_dummy (pc))
     return NULL;
 
   find_pc_partial_function (pc, NULL, &startaddr, NULL);

@@ -797,8 +797,7 @@ static CORE_ADDR
 v850_find_callers_reg (struct frame_info *fi, int regnum)
 {
   for (; fi; fi = get_next_frame (fi))
-    if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
-				     get_frame_base (fi)))
+    if (deprecated_pc_in_call_dummy (get_frame_pc (fi)))
       return deprecated_read_register_dummy (get_frame_pc (fi),
 					     get_frame_base (fi), regnum);
     else if (deprecated_get_frame_saved_regs (fi)[regnum] != 0)
@@ -825,7 +824,7 @@ v850_frame_chain (struct frame_info *fi)
   callers_pc = DEPRECATED_FRAME_SAVED_PC (fi);
   /* If caller is a call-dummy, then our FP bears no relation to his FP! */
   fp = v850_find_callers_reg (fi, E_FP_RAW_REGNUM);
-  if (DEPRECATED_PC_IN_CALL_DUMMY (callers_pc, fp, fp))
+  if (deprecated_pc_in_call_dummy (callers_pc))
     return fp;			/* caller is call-dummy: return oldest value of FP */
 
   /* Caller is NOT a call-dummy, so everything else should just work.
@@ -882,9 +881,7 @@ v850_pop_frame (void)
   struct frame_info *frame = get_current_frame ();
   int regnum;
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
-				   get_frame_base (frame),
-				   get_frame_base (frame)))
+  if (deprecated_pc_in_call_dummy (get_frame_pc (frame)))
     deprecated_pop_dummy_frame ();
   else
     {
@@ -1010,8 +1007,7 @@ v850_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 static CORE_ADDR
 v850_frame_saved_pc (struct frame_info *fi)
 {
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
-				   get_frame_base (fi)))
+  if (deprecated_pc_in_call_dummy (get_frame_pc (fi)))
     return deprecated_read_register_dummy (get_frame_pc (fi),
 					   get_frame_base (fi), E_PC_REGNUM);
   else
@@ -1086,8 +1082,7 @@ v850_frame_init_saved_regs (struct frame_info *fi)
 
       /* The call dummy doesn't save any registers on the stack, so we
          can return now.  */
-      if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
-				       get_frame_base (fi)))
+      if (deprecated_pc_in_call_dummy (get_frame_pc (fi)))
 	return;
 
       /* Find the beginning of this function, so we can analyze its
