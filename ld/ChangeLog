@@ -1,3 +1,8 @@
+Tue Oct 31 18:22:24 1995  David Mosberger-Tang  <davidm@azstarnet.com>
+
+	* configure.host (alpha-*-linux*): New host.
+	* configure.tgt (alpha-*-linux*): New target.
+
 Tue Oct 31 12:36:52 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* emultempl/aix.em (export_files): Remove.
