@@ -44,6 +44,9 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define HP9000_SYS 11
 #define APOLLO400_SYS 12
 #define DOS_SYS 13
+#define	VAX_BSD_SYS 14
+#define	TAHOE_BSD_SYS 15
+
 #include <ansidecl.h>
 
 #if __STDC__
@@ -109,6 +112,14 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #if HOST_SYS==DOS_SYS
 #define HOST_IS_DOS 1
 #include <sys/h_dos.h>
+#endif
+
+#if HOST_SYS == VAX_BSD_SYS
+#include <sys/h-vaxbsd.h>
+#endif
+
+#if HOST_SYS == TAHOE_BSD_SYS
+#include <sys/h-tahoebsd.h>
 #endif
 
 #endif 
