@@ -15,7 +15,11 @@ AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/..)
 AC_CANONICAL_SYSTEM
 AC_ARG_PROGRAM
 
-AC_CHECK_HEADERS(unistd.h)
+AC_HEADER_STDC
+AC_CHECK_HEADERS(memory.h string.h strings.h unistd.h)
+AC_HEADER_STAT
+
+AC_FUNC_MMAP
 
 dnl Handle optional features that can be enabled.
 ENABLE_CFLAGS=

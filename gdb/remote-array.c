@@ -34,7 +34,7 @@
 #include <varargs.h>
 #endif
 #include <signal.h>
-#include <string.h>
+#include "gdb_string.h"
 #include <sys/types.h>
 #include "command.h"
 #include "serial.h"

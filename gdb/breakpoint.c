@@ -34,7 +34,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "thread.h"
 #include "target.h"
 #include "language.h"
-#include <string.h>
+#include "gdb_string.h"
 #include "demangle.h"
 #include "annotate.h"
 
@@ -151,34 +151,6 @@ static int executing_breakpoint_commands;
 	for (b = breakpoint_chain;	\
 	     b? (tmp=b->next, 1): 0;	\
 	     b = tmp)
-
-/* Provide defaults for systems that don't support hardware watchpoints. */
-
-#ifndef TARGET_CAN_USE_HARDWARE_WATCHPOINT
-
-/* Returns non-zero if we can set a hardware watchpoint of type TYPE.  TYPE is
-   one of bp_hardware_watchpoint, bp_read_watchpoint, bp_write_watchpoint, or
-   bp_hardware_breakpoint.  CNT is the number of such watchpoints used so far
-   (including this one?).  OTHERTYPE is who knows what...  */
-
-#define TARGET_CAN_USE_HARDWARE_WATCHPOINT(TYPE,CNT,OTHERTYPE) 0
-
-/* Set/clear a hardware watchpoint starting at ADDR, for LEN bytes.  TYPE is 1
-   for read and 2 for read/write accesses.  Returns 0 for success, non-zero for
-   failure.  */
-
-#define target_remove_watchpoint(ADDR,LEN,TYPE) -1
-#define target_insert_watchpoint(ADDR,LEN,TYPE) -1
-#endif
-
-#ifndef target_insert_hw_breakpoint
-#define target_remove_hw_breakpoint(ADDR,SHADOW) -1
-#define target_insert_hw_breakpoint(ADDR,SHADOW) -1
-#endif
-
-#ifndef target_stopped_data_address
-#define target_stopped_data_address() 0
-#endif
 
 /* True if breakpoint hit counts should be displayed in breakpoint info.  */
 
@@ -1114,8 +1086,8 @@ watchpoint_check (p)
 {
   bpstat bs = (bpstat) p;
   struct breakpoint *b;
-  struct frame_info *saved_frame, *fr;
-  int within_current_scope, saved_level;
+  struct frame_info *fr;
+  int within_current_scope;
 
   b = bs->breakpoint_at;
 
@@ -1257,14 +1229,6 @@ bpstat_stop_status (pc, not_a_breakpoint)
 	  && b->type != bp_hardware_breakpoint
 	  && b->address != bp_addr)
 	continue;
-
-/* If defined, then we need to decr pc by this much after a hardware break-
-   point.  Presumably should override DECR_PC_AFTER_BREAK, though it doesn't
-   now...  */
-
-#ifndef DECR_PC_AFTER_HW_BREAK
-#define DECR_PC_AFTER_HW_BREAK 0
-#endif
 
       if (b->type == bp_hardware_breakpoint
 	  && b->address != (bp_addr - DECR_PC_AFTER_HW_BREAK))
@@ -2138,6 +2102,13 @@ set_momentary_breakpoint (sal, frame, type)
   b->enable = enabled;
   b->disposition = donttouch;
   b->frame = (frame ? frame->frame : 0);
+
+  /* If we're debugging a multi-threaded program, then we
+     want momentary breakpoints to be active in only a 
+     single thread of control.  */
+  if (in_thread_list (inferior_pid))
+    b->thread = pid_to_thread_id (inferior_pid);
+
   return b;
 }
 

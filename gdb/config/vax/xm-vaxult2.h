@@ -3,7 +3,6 @@
 #include "vax/xm-vax.h"
 extern char *strdup();
 
-#define MEM_FNS_DECLARED
 #define NO_PTRACE_H
 
 /* Old versions of ultrix have fd_set but not the FD_* macros.  */

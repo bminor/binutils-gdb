@@ -1,5 +1,6 @@
 /* Do various things to symbol tables (other than lookup), for GDB.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994
+   Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -28,7 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "obstack.h"
 #include "language.h"
 
-#include <string.h>
+#include "gdb_string.h"
 
 #ifndef DEV_TTY
 #define DEV_TTY "/dev/tty"
@@ -234,6 +235,9 @@ dump_msymbols (objfile, outfile)
 	  case mst_text:
 	    ms_type = 'T';
 	    break;
+	  case mst_solib_trampoline:
+	    ms_type = 'S';
+	    break;
 	  case mst_data:
 	    ms_type = 'D';
 	    break;
@@ -262,6 +266,10 @@ dump_msymbols (objfile, outfile)
 	{
 	  fprintf_filtered (outfile, "  %s", SYMBOL_DEMANGLED_NAME (msymbol));
 	}
+#ifdef SOFUN_ADDRESS_MAYBE_MISSING
+      if (msymbol->filename)
+	fprintf_filtered (outfile, "  %s", msymbol->filename);
+#endif
       fputs_filtered ("\n", outfile);
     }
   if (objfile -> minimal_symbol_count != index)
@@ -282,7 +290,7 @@ dump_psymtab (objfile, psymtab, outfile)
 
   fprintf_filtered (outfile, "\nPartial symtab for source file %s ",
 		    psymtab -> filename);
-  fprintf_filtered (outfile, "(object )");
+  fprintf_filtered (outfile, "(object ");
   gdb_print_address (psymtab, outfile);
   fprintf_filtered (outfile, ")\n\n");
   fprintf_unfiltered (outfile, "  Read from object file %s (",
@@ -296,22 +304,26 @@ dump_psymtab (objfile, psymtab, outfile)
 		"  Full symtab was read (at ");
       gdb_print_address (psymtab->symtab, outfile);
       fprintf_filtered (outfile, " by function at ");
-      gdb_print_address (psymtab->read_symtab, outfile);
+      gdb_print_address ((PTR)psymtab->read_symtab, outfile);
       fprintf_filtered (outfile, ")\n");
     }
 
   fprintf_filtered (outfile, "  Relocate symbols by ");
   for (i = 0; i < psymtab->objfile->num_sections; ++i)
     {
+      if (i != 0)
+	fprintf_filtered (outfile, ", ");
       wrap_here ("    ");
-      print_address_numeric (ANOFFSET (psymtab->section_offsets, i), outfile);
-      fprintf_filtered (outfile, ", ");
+      print_address_numeric (ANOFFSET (psymtab->section_offsets, i),
+			     1,
+			     outfile);
     }
+  fprintf_filtered (outfile, "\n");
 
   fprintf_filtered (outfile, "  Symbols cover text addresses ");
-  print_address_numeric (psymtab->textlow, outfile);
+  print_address_numeric (psymtab->textlow, 1, outfile);
   fprintf_filtered (outfile, "-");
-  print_address_numeric (psymtab->texthigh, outfile);
+  print_address_numeric (psymtab->texthigh, 1, outfile);
   fprintf_filtered (outfile, "\n");
   fprintf_filtered (outfile, "  Depends on %d other partial symtabs.\n",
 		    psymtab -> number_of_dependencies);
@@ -365,7 +377,7 @@ dump_symtab (objfile, symtab, outfile)
       for (i = 0; i < len; i++)
 	{
 	  fprintf_filtered (outfile, " line %d at ", l->item[i].line);
-	  print_address_numeric (l->item[i].pc, outfile);
+	  print_address_numeric (l->item[i].pc, 1, outfile);
 	  fprintf_filtered (outfile, "\n");
 	}
     }
@@ -382,9 +394,9 @@ dump_symtab (objfile, symtab, outfile)
       gdb_print_address (b, outfile);
       fprintf_filtered (outfile, ") ");
       fprintf_filtered (outfile, "[");
-      print_address_numeric (BLOCK_START (b), outfile);
+      print_address_numeric (BLOCK_START (b), 1, outfile);
       fprintf_filtered (outfile, "..");
-      print_address_numeric (BLOCK_END (b), outfile);
+      print_address_numeric (BLOCK_END (b), 1, outfile);
       fprintf_filtered (outfile, "]");
       if (BLOCK_SUPERBLOCK (b))
 	{
@@ -403,7 +415,7 @@ dump_symtab (objfile, symtab, outfile)
 	}
       if (BLOCK_GCC_COMPILED(b))
 	fprintf_filtered (outfile, " gcc%d compiled", BLOCK_GCC_COMPILED(b));
-      fprintf_filtered ('\n', outfile);
+      fprintf_filtered (outfile, "\n");
       blen = BLOCK_NSYMS (b);
       for (j = 0; j < blen; j++)
 	{
@@ -435,7 +447,8 @@ maintenance_print_symbols (args, from_tty)
 
   if (args == NULL)
     {
-      error ("print-symbols takes an output file name and optional symbol file name");
+      error ("\
+Arguments missing: an output file name and an optional symbol file name");
     }
   else if ((argv = buildargv (args)) == NULL)
     {
@@ -486,7 +499,7 @@ print_symbol (args)
   if (SYMBOL_NAMESPACE (symbol) == LABEL_NAMESPACE)
     {
       fprintf_filtered (outfile, "label %s at ", SYMBOL_SOURCE_NAME (symbol));
-      print_address_numeric (SYMBOL_VALUE_ADDRESS (symbol), outfile);
+      print_address_numeric (SYMBOL_VALUE_ADDRESS (symbol), 1, outfile);
       fprintf_filtered (outfile, "\n");
       return 1;
     }
@@ -546,7 +559,7 @@ print_symbol (args)
 
 	case LOC_STATIC:
 	  fprintf_filtered (outfile, "static at ");
-	  print_address_numeric (SYMBOL_VALUE_ADDRESS (symbol), outfile);
+	  print_address_numeric (SYMBOL_VALUE_ADDRESS (symbol), 1,outfile);
 	  fprintf_filtered (outfile, ",");
 	  break;
 
@@ -596,7 +609,7 @@ print_symbol (args)
 
 	case LOC_LABEL:
 	  fprintf_filtered (outfile, "label at ");
-	  print_address_numeric (SYMBOL_VALUE_ADDRESS (symbol), outfile);
+	  print_address_numeric (SYMBOL_VALUE_ADDRESS (symbol), 1, outfile);
 	  break;
 
 	case LOC_BLOCK:
@@ -604,6 +617,7 @@ print_symbol (args)
 	  gdb_print_address (SYMBOL_BLOCK_VALUE (symbol), outfile);
 	  fprintf_filtered (outfile, ") starting at ");
 	  print_address_numeric (BLOCK_START (SYMBOL_BLOCK_VALUE (symbol)),
+				 1,
 				 outfile);
 	  fprintf_filtered (outfile, ",");
 	  break;
@@ -832,6 +846,92 @@ maintenance_print_objfiles (ignore, from_tty)
   ALL_OBJFILES (objfile)
     dump_objfile (objfile);
   immediate_quit--;
+}
+
+/* Check consistency of psymtabs and symtabs.  */
+
+void
+maintenance_check_symtabs (ignore, from_tty)
+     char *ignore;
+     int from_tty;
+{
+  register struct symbol *sym;
+  register struct partial_symbol *psym;
+  register struct symtab *s = NULL;
+  register struct partial_symtab *ps;
+  struct blockvector *bv;
+  register struct objfile *objfile;
+  register struct block *b;
+  int length;
+
+  ALL_PSYMTABS (objfile, ps)
+    {
+      s = PSYMTAB_TO_SYMTAB(ps);
+      if (s == NULL)
+	continue;
+      bv = BLOCKVECTOR (s);
+      b = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
+      psym = ps->objfile->static_psymbols.list + ps->statics_offset;
+      length = ps->n_static_syms;
+      while (length--)
+	{
+	  sym = lookup_block_symbol (b, SYMBOL_NAME (psym),
+				     SYMBOL_NAMESPACE (psym));
+	  if (!sym)
+	    {
+	      printf_filtered ("Static symbol `");
+	      puts_filtered (SYMBOL_NAME (psym));
+	      printf_filtered ("' only found in ");
+	      puts_filtered (ps->filename);
+	      printf_filtered (" psymtab\n");
+	    }
+	  psym++;
+	}
+      b = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
+      psym = ps->objfile->global_psymbols.list + ps->globals_offset;
+      length = ps->n_global_syms;
+      while (length--)
+	{
+	  sym = lookup_block_symbol (b, SYMBOL_NAME (psym),
+				     SYMBOL_NAMESPACE (psym));
+	  if (!sym)
+	    {
+	      printf_filtered ("Global symbol `");
+	      puts_filtered (SYMBOL_NAME (psym));
+	      printf_filtered ("' only found in ");
+	      puts_filtered (ps->filename);
+	      printf_filtered (" psymtab\n");
+	    }
+	  psym++;
+	}
+      if (ps->texthigh < ps->textlow)
+	{
+	  printf_filtered ("Psymtab ");
+	  puts_filtered (ps->filename);
+	  printf_filtered (" covers bad range ");
+          print_address_numeric (ps->textlow, 1, stdout);
+	  printf_filtered (" - ");
+          print_address_numeric (ps->texthigh, 1, stdout);
+	  printf_filtered ("\n");
+	  continue;
+	}
+      if (ps->texthigh == 0)
+	continue;
+      if (ps->textlow < BLOCK_START (b) || ps->texthigh > BLOCK_END (b))
+	{
+	  printf_filtered ("Psymtab ");
+	  puts_filtered (ps->filename);
+	  printf_filtered (" covers ");
+          print_address_numeric (ps->textlow, 1, stdout);
+	  printf_filtered (" - ");
+          print_address_numeric (ps->texthigh, 1, stdout);
+	  printf_filtered (" but symtab covers only ");
+          print_address_numeric (BLOCK_START (b), 1, stdout);
+	  printf_filtered (" - ");
+          print_address_numeric (BLOCK_END (b), 1, stdout);
+	  printf_filtered ("\n");
+	}
+    }
 }
 
 

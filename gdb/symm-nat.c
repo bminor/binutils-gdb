@@ -36,7 +36,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/proc.h>
 #include <sys/dir.h>
 #include <sys/ioctl.h>
-#include <sys/stat.h>
+#include "gdb_stat.h"
 #ifdef _SEQUENT_
 #include <sys/ptrace.h>
 #else

@@ -22,5 +22,3 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #if !defined (HOST_BYTE_ORDER)
 #define HOST_BYTE_ORDER BIG_ENDIAN
 #endif
-
-#define	MEM_FNS_DECLARED

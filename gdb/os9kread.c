@@ -33,7 +33,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    for real.  os9k_psymtab_to_symtab() is the function that does this */
 
 #include "defs.h"
-#include <string.h>
+#include "gdb_string.h"
 #include <stdio.h>
 
 #if defined(USG) || defined(__CYGNUSCLIB__)
@@ -46,7 +46,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifndef	NO_SYS_FILE
 #include <sys/file.h>
 #endif
-#include <sys/stat.h>
+#include "gdb_stat.h"
 #include <ctype.h>
 #include "symtab.h"
 #include "breakpoint.h"

@@ -33,7 +33,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define PTRACE_DETACH PT_FREEPROC
 
 #include <sys/file.h>
-#include <sys/stat.h>
+#include "gdb_stat.h"
 
 /* Work with core dump and executable files, for GDB. 
    This code would be in core.c if it weren't machine-dependent. */

@@ -40,7 +40,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <setjmp.h>
 #include "top.h"
 #include <sys/ioctl.h>
-#include <string.h>
+#include "gdb_string.h"
 #include "dis-asm.h"
 #include <stdio.h>
 #include "gdbcmd.h"

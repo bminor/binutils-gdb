@@ -77,8 +77,8 @@ typedef struct mips_extra_func_info {
 
 #include <sys/param.h>
 #include <sys/file.h>
-#include <sys/stat.h>
-#include <string.h>
+#include "gdb_stat.h"
+#include "gdb_string.h"
 
 #include "gdb-stabs.h"
 

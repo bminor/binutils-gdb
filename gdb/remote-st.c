@@ -44,7 +44,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <varargs.h>
 #endif
 #include <signal.h>
-#include <string.h>
+#include "gdb_string.h"
 #include <sys/types.h>
 #include "serial.h"
 

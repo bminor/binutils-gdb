@@ -20,10 +20,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "sparc/xm-sparc.h"
 #define FPU
 
-/* SunOS 4.x has memory mapped files.  */
-
-#define HAVE_MMAP
-
 /* If you expect to use the mmalloc package to obtain mapped symbol files,
    for now you have to specify some parameters that determine how gdb places
    the mappings in it's address space.  See the comments in map_to_address()
@@ -40,14 +36,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define MALLOC_INCOMPATIBLE
 #include <malloc.h>
-
-/* acc for SunOS4 comes with string.h and memory.h headers which we
-   pick up somewhere (where?) and which use char *, not void *.  The
-   following should work with acc, gcc, or /bin/cc, at least with
-   SunOS 4.1.1.  */
-
-#define MEM_FNS_DECLARED
-#include <memory.h>
 
 /* SunOS 4.x uses nonstandard "char *" as type of third argument to ptrace() */
 

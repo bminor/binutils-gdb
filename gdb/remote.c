@@ -135,6 +135,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 					running and the debugger should
 					continue to wait for 'W', 'T', etc.
 
+	thread alive	TXX		Find out if the thread XX is alive.
+	reply		OK		thread is still alive
+			ENN		thread is dead
+	
+	remote restart	RXX		Restart the remote server
+
+	extended ops 	!		Use the extended remote protocol.
+					Sticky -- only needs to be set once.
+
 	kill request	k
 
 	toggle debug	d		toggle debug flag (see 386 & 68k stubs)
@@ -165,7 +174,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	"0* " means the same as "0000".  */
 
 #include "defs.h"
-#include <string.h>
+#include "gdb_string.h"
 #include <fcntl.h>
 #include "frame.h"
 #include "inferior.h"
@@ -213,9 +222,23 @@ static int remote_start_remote PARAMS ((char *dummy));
 
 static void remote_open PARAMS ((char *name, int from_tty));
 
+static void extended_remote_open PARAMS ((char *name, int from_tty));
+
+static void remote_open_1 PARAMS ((char *, int, struct target_ops *));
+
 static void remote_close PARAMS ((int quitting));
 
 static void remote_store_registers PARAMS ((int regno));
+
+static void remote_mourn PARAMS ((void));
+
+static void extended_remote_restart PARAMS ((void));
+
+static void extended_remote_mourn PARAMS ((void));
+
+static void extended_remote_create_inferior PARAMS ((char *, char *, char **));
+
+static void remote_mourn_1 PARAMS ((struct target_ops *));
 
 static void getpkt PARAMS ((char *buf, int forever));
 
@@ -242,6 +265,7 @@ static void remote_interrupt_twice PARAMS ((int signo));
 static void interrupt_query PARAMS ((void));
 
 extern struct target_ops remote_ops;	/* Forward decl */
+extern struct target_ops extended_remote_ops;	/* Forward decl */
 
 /* This was 5 seconds, which is a long time to sit and wait.
    Unless this is going though some terminal server or multiplexer or
@@ -313,7 +337,7 @@ set_thread (th, gen)
     cont_thread = th;
 }
 
-/*   Return nonzero if the thread TH is still alive on the remote system.  */
+/*  Return nonzero if the thread TH is still alive on the remote system.  */
 
 static int
 remote_thread_alive (th)
@@ -329,6 +353,25 @@ remote_thread_alive (th)
   putpkt (buf);
   getpkt (buf, 0);
   return (buf[0] == 'O' && buf[1] == 'K');
+}
+
+/*  Restart the remote side; this is an extended protocol operation.  */
+
+static void
+extended_remote_restart ()
+{
+  char buf[PBUFSIZ];
+
+  /* Send the restart command; for reasons I don't understand the
+     remote side really expects a number after the "R".  */
+  buf[0] = 'R';
+  sprintf (&buf[1], "%x", 0);
+  putpkt (buf);
+
+  /* Now query for status so this looks just like we restarted
+     gdbserver from scratch.  */
+  putpkt ("?");
+  getpkt (buf, 0);
 }
 
 /* Clean up connection to a remote debugger.  */
@@ -420,12 +463,41 @@ remote_start_remote (dummy)
 /* Open a connection to a remote debugger.
    NAME is the filename used for communication.  */
 
-static DCACHE *remote_dcache;
-
 static void
 remote_open (name, from_tty)
      char *name;
      int from_tty;
+{
+  remote_open_1 (name, from_tty, &remote_ops);
+}
+
+/* Open a connection to a remote debugger using the extended
+   remote gdb protocol.  NAME is hte filename used for communication.  */
+
+static void
+extended_remote_open (name, from_tty)
+     char *name;
+     int from_tty;
+{
+  char buf[PBUFSIZ];
+
+  /* Do the basic remote open stuff.  */
+  remote_open_1 (name, from_tty, &extended_remote_ops);
+
+  /* Now tell the remote that we're using the extended protocol.  */
+  putpkt ("!");
+  getpkt (buf, 0);
+
+}
+
+/* Generic code for opening a connection to a remote target.  */
+static DCACHE *remote_dcache;
+
+static void
+remote_open_1 (name, from_tty, target)
+     char *name;
+     int from_tty;
+     struct target_ops *target;
 {
   if (name == 0)
     error ("To open a remote debug connection, you need to specify what serial\n\
@@ -433,7 +505,7 @@ device is attached to the remote system (e.g. /dev/ttya).");
 
   target_preopen (from_tty);
 
-  unpush_target (&remote_ops);
+  unpush_target (target);
 
   remote_dcache = dcache_init (remote_read_bytes, remote_write_bytes);
 
@@ -463,7 +535,7 @@ device is attached to the remote system (e.g. /dev/ttya).");
       puts_filtered (name);
       puts_filtered ("\n");
     }
-  push_target (&remote_ops);	/* Switch to using remote target now */
+  push_target (target);	/* Switch to using remote target now */
 
   /* Start out by trying the 'P' request to set registers.  We set this each
      time that we open a new target so that if the user switches from one
@@ -669,20 +741,21 @@ remote_wait (pid, status)
 	      {
 		unsigned char *p1;
 		char *p_temp;
+		unsigned LONGEST val;
 
-		regno = strtol (p, &p_temp, 16); /* Read the register number */
+		regno = strtol ((const char *) p, &p_temp, 16); /* Read the register number */
 		p1 = (unsigned char *)p_temp;
 
 		if (p1 == p)
 		  {
-		    p1 = (unsigned char *) strchr (p, ':');
+		    p1 = (unsigned char *) strchr ((const char *) p, ':');
 		    if (p1 == NULL)
 		      warning ("Malformed packet (missing colon): %s\n\
 Packet: '%s'\n",
 			       p, buf);
-		    if (strncmp (p, "thread", p1 - p) == 0)
+		    if (strncmp ((const char *) p, "thread", p1 - p) == 0)
 		      {
-			thread_num = strtol (++p1, &p_temp, 16);
+			thread_num = strtol ((const char *) ++p1, &p_temp, 16);
 			p = (unsigned char *)p_temp;
 		      }
 		  }
@@ -696,17 +769,20 @@ Packet: '%s'\n",
 			       p, buf);
 
 		    if (regno >= NUM_REGS)
-		      warning ("Remote sent bad register number %d: %s\n\
+		      warning ("Remote sent bad register number %ld: %s\n\
 Packet: '%s'\n",
 			       regno, p, buf);
 
+		    val = 0L;
 		    for (i = 0; i < REGISTER_RAW_SIZE (regno); i++)
 		      {
 			if (p[0] == 0 || p[1] == 0)
 			  warning ("Remote reply is too short: %s", buf);
-			regs[i] = fromhex (p[0]) * 16 + fromhex (p[1]);
+			val = val * 256 + fromhex (p[0]) * 16 + fromhex (p[1]);
 			p += 2;
+
 		      }
+    	   	    store_unsigned_integer (regs, REGISTER_RAW_SIZE (regno), val);
 		    supply_register (regno, regs);
 		  }
 
@@ -750,8 +826,8 @@ Packet: '%s'\n",
 	      last_sent_signal = TARGET_SIGNAL_0;
 	      target_terminal_inferior ();
 
-	      strcpy (buf, last_sent_step ? "s" : "c");
-	      putpkt (buf);
+	      strcpy ((char *) buf, last_sent_step ? "s" : "c");
+	      putpkt ((char *) buf);
 	      continue;
 	    }
 	  /* else fallthrough */
@@ -928,6 +1004,7 @@ remote_store_registers (regno)
 /* Read a word from remote address ADDR and return it.
    This goes through the data cache.  */
 
+#if 0	/* unused? */
 static int
 remote_fetch_word (addr)
      CORE_ADDR addr;
@@ -945,6 +1022,7 @@ remote_store_word (addr, word)
 {
   dcache_poke (remote_dcache, addr, word);
 }
+#endif	/* 0 (unused?) */
 
 
 /* Write memory data directly to the remote machine.
@@ -1403,7 +1481,6 @@ getpkt (buf, forever)
      char *buf;
      int forever;
 {
-  char *bp;
   int c;
   int tries;
   int timeout;
@@ -1502,18 +1579,68 @@ remote_kill ()
 static void
 remote_mourn ()
 {
-  unpush_target (&remote_ops);
+  remote_mourn_1 (&remote_ops);
+}
+
+static void
+extended_remote_mourn ()
+{
+  /* We do _not_ want to mourn the target like this; this will
+     remove the extended remote target  from the target stack,
+     and the next time the user says "run" it'll fail. 
+
+     FIXME: What is the right thing to do here?  */
+#if 0
+  remote_mourn_1 (&extended_remote_ops);
+#endif
+}
+
+/* Worker function for remote_mourn.  */
+static void
+remote_mourn_1 (target)
+     struct target_ops *target;
+{
+  unpush_target (target);
   generic_mourn_inferior ();
 }
+
+/* In the extended protocol we want to be able to do things like
+   "run" and have them basically work as expected.  So we need
+   a special create_inferior function. 
+
+   FIXME: One day add support for changing the exec file
+   we're debugging, arguments and an environment.  */
+
+static void
+extended_remote_create_inferior (exec_file, args, env)
+     char *exec_file;
+     char *args;
+     char **env;
+{
+  /* Rip out the breakpoints; we'll reinsert them after restarting
+     the remote server.  */
+  remove_breakpoints ();
+
+  /* Now restart the remote server.  */
+  extended_remote_restart ();
+
+  /* Now put the breakpoints back in.  This way we're safe if the
+     restart function works via a unix fork on the remote side.  */
+  insert_breakpoints ();
+
+  /* Clean up from the last time we were running.  */
+  clear_proceed_status ();
+
+  /* Let the remote process run.  */
+  proceed (-1, TARGET_SIGNAL_0, 0);
+}
+
 
 #ifdef REMOTE_BREAKPOINT
 
 /* On some machines, e.g. 68k, we may use a different breakpoint instruction
    than other targets.  */
 static unsigned char break_insn[] = REMOTE_BREAKPOINT;
-
-/* Check that it fits in BREAKPOINT_MAX bytes.  */
-static unsigned char check_break_insn_size[BREAKPOINT_MAX] = REMOTE_BREAKPOINT;
 
 #else /* No REMOTE_BREAKPOINT.  */
 
@@ -1602,8 +1729,55 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",  /* to_doc */
   OPS_MAGIC			/* to_magic */
 };
 
+struct target_ops extended_remote_ops = {
+  "extended-remote",			/* to_shortname */
+  "Extended remote serial target in gdb-specific protocol",/* to_longname */
+  "Use a remote computer via a serial line, using a gdb-specific protocol.\n\
+Specify the serial device it is connected to (e.g. /dev/ttya).",  /* to_doc */
+  extended_remote_open,			/* to_open */
+  remote_close,			/* to_close */
+  NULL,				/* to_attach */
+  remote_detach,		/* to_detach */
+  remote_resume,		/* to_resume */
+  remote_wait,			/* to_wait */
+  remote_fetch_registers,	/* to_fetch_registers */
+  remote_store_registers,	/* to_store_registers */
+  remote_prepare_to_store,	/* to_prepare_to_store */
+  remote_xfer_memory,		/* to_xfer_memory */
+  remote_files_info,		/* to_files_info */
+
+  remote_insert_breakpoint,	/* to_insert_breakpoint */
+  remote_remove_breakpoint,	/* to_remove_breakpoint */
+
+  NULL,				/* to_terminal_init */
+  NULL,				/* to_terminal_inferior */
+  NULL,				/* to_terminal_ours_for_output */
+  NULL,				/* to_terminal_ours */
+  NULL,				/* to_terminal_info */
+  remote_kill,			/* to_kill */
+  generic_load,			/* to_load */
+  NULL,				/* to_lookup_symbol */
+  extended_remote_create_inferior,/* to_create_inferior */
+  extended_remote_mourn,	/* to_mourn_inferior */
+  0,				/* to_can_run */
+  0,				/* to_notice_signals */
+  remote_thread_alive,		/* to_thread_alive */
+  0,				/* to_stop */
+  process_stratum,		/* to_stratum */
+  NULL,				/* to_next */
+  1,				/* to_has_all_memory */
+  1,				/* to_has_memory */
+  1,				/* to_has_stack */
+  1,				/* to_has_registers */
+  1,				/* to_has_execution */
+  NULL,				/* sections */
+  NULL,				/* sections_end */
+  OPS_MAGIC			/* to_magic */
+};
+
 void
 _initialize_remote ()
 {
   add_target (&remote_ops);
+  add_target (&extended_remote_ops);
 }

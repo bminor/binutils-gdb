@@ -29,7 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/user.h>
 #include <sys/dir.h>
 #include <sys/ioctl.h>
-#include <sys/stat.h>
+#include "gdb_stat.h"
 #include "gdbcore.h"
 #include <fcntl.h>
 

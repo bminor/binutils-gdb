@@ -25,7 +25,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    Avoid placing any object file format specific code in this file. */
 
 #include "defs.h"
-#include <string.h>
+#include "gdb_string.h"
 #include "bfd.h"
 #include "obstack.h"
 #include "symtab.h"

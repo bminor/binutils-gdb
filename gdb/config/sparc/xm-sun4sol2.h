@@ -51,10 +51,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Solaris PSRVADDR support does not seem to include a place for nPC.  */
 #define PRSVADDR_BROKEN
 
-/* The mem functions are in <string.h>.  */
-#undef MEM_FNS_DECLARED
-#define MEM_FNS_DECLARED 1
-
 /* solaris doesn't have siginterrupt, though it has sigaction; however,
    in this case siginterrupt would just be setting the default. */
 #define NO_SIGINTERRUPT

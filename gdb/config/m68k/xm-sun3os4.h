@@ -20,10 +20,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "m68k/xm-sun3.h"
 #define FPU
 
-/* SunOS 4.x has memory mapped files.  */
-
-#define HAVE_MMAP
-
 /* If you expect to use the mmalloc package to obtain mapped symbol files,
    for now you have to specify some parameters that determine how gdb places
    the mappings in it's address space.  See the comments in map_to_address()

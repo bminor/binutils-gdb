@@ -20,5 +20,3 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* for INT_MIN, to avoid "INT_MIN redefined" warnings from defs.h */
 
 #include <limits.h>
-
-#define MEM_FNS_DECLARED

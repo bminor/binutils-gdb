@@ -28,7 +28,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    whenever the working language changes.  That would be a lot faster.  */
 
 #include "defs.h"
-#include <string.h>
+#include "gdb_string.h"
 #ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
 #else

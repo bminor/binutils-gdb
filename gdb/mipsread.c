@@ -24,7 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    mdebugread.c.  */
 
 #include "defs.h"
-#include <string.h>
+#include "gdb_string.h"
 #include "bfd.h"
 #include "symtab.h"
 #include "symfile.h"
@@ -101,7 +101,8 @@ mipscoff_symfile_read (objfile, section_offsets, mainline)
   /* Now that the executable file is positioned at symbol table,
      process it and define symbols accordingly.  */
 
-  if (ecoff_slurp_symbolic_info (abfd) == false)
+  if (!((*ecoff_backend (abfd)->debug_swap.read_debug_info)
+	(abfd, (asection *) NULL, &ecoff_data (abfd)->debug_info)))
     error ("Error reading symbol table: %s", bfd_errmsg (bfd_get_error ()));
 
   mdebug_build_psymtabs (objfile, &ecoff_backend (abfd)->debug_swap,
@@ -111,13 +112,6 @@ mipscoff_symfile_read (objfile, section_offsets, mainline)
 
   if (mainline)
     read_alphacoff_dynamic_symtab (section_offsets, objfile);
-
-  if (!have_partial_symbols ())
-    {
-      wrap_here ("");
-      printf_filtered ("(no debugging symbols found)...");
-      wrap_here ("");
-    }
 
   /* Install any minimal symbols that have been collected as the current
      minimal symbols for this objfile. */

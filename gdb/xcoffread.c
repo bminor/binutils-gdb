@@ -32,14 +32,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/types.h>
 #include <fcntl.h>
 #include <ctype.h>
-#include <string.h>
+#include "gdb_string.h"
 
 #include "obstack.h"
 #include <sys/param.h>
 #ifndef	NO_SYS_FILE
 #include <sys/file.h>
 #endif
-#include <sys/stat.h>
+#include "gdb_stat.h"
 #include <sys/debug.h>
 
 #include "coff/internal.h"

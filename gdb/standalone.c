@@ -21,7 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/ioctl.h>
 #include <errno.h>
 #include <sys/types.h>
-#include <sys/stat.h>
+#include "gdb_stat.h"
 
 #if defined (SIGTSTP) && defined (SIGIO)
 #include <sys/time.h>

@@ -46,10 +46,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #undef USG	/* In case it was defined in the Makefile for cplus-dem.c */
 #define USG
 
-/* The mem functions are in <string.h>.  */
-#undef MEM_FNS_DECLARED
-#define MEM_FNS_DECLARED 1
-
 #define HAVE_TERMIOS
 
 #define REGISTER_ADDR(u_ar0, regno)					\

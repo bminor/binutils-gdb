@@ -20,7 +20,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "bfd.h"
-#include <string.h>
+#include "gdb_string.h"
 #include "libelf.h"
 #include "elf/mips.h"
 #include "symtab.h"

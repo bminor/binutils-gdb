@@ -21,7 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "defs.h"
 #include <errno.h>
 #include <ctype.h>
-#include <string.h>
+#include "gdb_string.h"
 #include "target.h"
 #include "gdbcmd.h"
 #include "symtab.h"
@@ -333,7 +333,7 @@ cleanup_target (t)
   de_fault (to_mourn_inferior,		(void (*)())noprocess);
   de_fault (to_can_run,			return_zero);
   de_fault (to_notice_signals,		(void (*)())ignore);
-  de_fault (to_thread_alive,		(void (*)())ignore);
+  de_fault (to_thread_alive,		(int (*)())ignore);
   de_fault (to_stop,			(void (*)())ignore);
 
 #undef de_fault
@@ -1778,13 +1778,14 @@ debug_to_notice_signals (pid)
   fprintf_unfiltered (stderr, "target_notice_signals (%d)\n", pid);
 }
 
-static void
+static int
 debug_to_thread_alive (pid)
      int pid;
 {
   debug_target.to_thread_alive (pid);
 
   fprintf_unfiltered (stderr, "target_thread_alive (%d)\n", pid);
+  return (0);
 }
 
 static void

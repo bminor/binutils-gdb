@@ -1,5 +1,5 @@
 /* Perform non-arithmetic operations on values, for GDB.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -30,7 +30,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "language.h"
 
 #include <errno.h>
-#include <string.h>
+#include "gdb_string.h"
 
 /* Local functions.  */
 
@@ -728,10 +728,6 @@ value_addr (arg1)
       VALUE_TYPE (arg2) = lookup_pointer_type (TYPE_TARGET_TYPE (type));
       return arg2;
     }
-  if (current_language->c_style_arrays
-      && (VALUE_REPEATED (arg1)
-	  || TYPE_CODE (type) == TYPE_CODE_ARRAY))
-    return value_coerce_array (arg1);
   if (TYPE_CODE (type) == TYPE_CODE_FUNC)
     return value_coerce_function (arg1);
 
@@ -840,7 +836,16 @@ value_arg_coerce (arg, param_type)
      value_ptr arg;
      struct type *param_type;
 {
-  register struct type *type = param_type ? param_type : VALUE_TYPE (arg);
+  register struct type *type;
+
+#if 1	/* FIXME:  This is only a temporary patch.  -fnf */
+  if (current_language->c_style_arrays
+      && (VALUE_REPEATED (arg)
+	  || TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_ARRAY))
+    arg = value_coerce_array (arg);
+#endif
+
+  type = param_type ? param_type : VALUE_TYPE (arg);
 
   switch (TYPE_CODE (type))
     {
@@ -866,14 +871,23 @@ value_arg_coerce (arg, param_type)
     case TYPE_CODE_FUNC:
       type = lookup_pointer_type (type);
       break;
+    case TYPE_CODE_UNDEF:
+    case TYPE_CODE_PTR:
+    case TYPE_CODE_ARRAY:
+    case TYPE_CODE_STRUCT:
+    case TYPE_CODE_UNION:
+    case TYPE_CODE_VOID:
+    case TYPE_CODE_SET:
+    case TYPE_CODE_RANGE:
+    case TYPE_CODE_STRING:
+    case TYPE_CODE_BITSTRING:
+    case TYPE_CODE_ERROR:
+    case TYPE_CODE_MEMBER:
+    case TYPE_CODE_METHOD:
+    case TYPE_CODE_COMPLEX:
+    default:
+      break;
     }
-
-#if 1	/* FIXME:  This is only a temporary patch.  -fnf */
-  if (current_language->c_style_arrays
-      && (VALUE_REPEATED (arg)
-	  || TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_ARRAY))
-    arg = value_coerce_array (arg);
-#endif
 
   return value_cast (type, arg);
 }
@@ -1436,7 +1450,10 @@ typecmp (staticp, t1, t2)
 	  /* We should be doing hairy argument matching, as below.  */
 	  && (TYPE_CODE (TYPE_TARGET_TYPE (tt1)) == TYPE_CODE (tt2)))
 	{
-	  t2[i] = value_addr (t2[i]);
+	  if (TYPE_CODE (tt2) == TYPE_CODE_ARRAY || VALUE_REPEATED (t2[i]))
+	    t2[i] = value_coerce_array (t2[i]);
+	  else
+	    t2[i] = value_addr (t2[i]);
 	  continue;
 	}
 

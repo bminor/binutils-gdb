@@ -28,10 +28,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "getopt.h"
 
 #include <sys/types.h>
-#include <sys/stat.h>
+#include "gdb_stat.h"
 #include <ctype.h>
 
-#include <string.h>
+#include "gdb_string.h"
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif

@@ -37,7 +37,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <fcntl.h>
 #include <signal.h>
 #include <errno.h>
-#include <string.h>
+#include "gdb_string.h"
 #include "terminal.h"
 #include "minimon.h"
 #include "target.h"

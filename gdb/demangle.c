@@ -26,7 +26,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "command.h"
 #include "gdbcmd.h"
 #include "demangle.h"
-#include <string.h>
+#include "gdb_string.h"
 
 /* Select the default C++ demangling style to use.  The default is "auto",
    which allows gdb to attempt to pick an appropriate demangling style for

@@ -90,7 +90,7 @@ i386_register_u_addr (blockend, regnum)
 #include <sys/user.h>
 #undef curpcb
 #include <sys/file.h>
-#include <sys/stat.h>
+#include "gdb_stat.h"
 #include <sys/ptrace.h>
 
 extern void print_387_control_word ();		/* i387-tdep.h */

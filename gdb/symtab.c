@@ -38,8 +38,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <sys/types.h>
 #include <fcntl.h>
-#include <string.h>
-#include <sys/stat.h>
+#include "gdb_string.h"
+#include "gdb_stat.h"
 #include <ctype.h>
 
 /* Prototypes for local functions */
@@ -585,7 +585,7 @@ found:
   
   if (namespace == VAR_NAMESPACE)
     {
-      msymbol = lookup_minimal_symbol (name, (struct objfile *) NULL);
+      msymbol = lookup_minimal_symbol (name, NULL, NULL);
       if (msymbol != NULL)
 	{
 	  s = find_pc_symtab (SYMBOL_VALUE_ADDRESS (msymbol));
@@ -683,42 +683,6 @@ found:
 	  if (symtab != NULL)
 	    *symtab = s;
 	  return sym;
-	}
-    }
-
-  /* Now search all per-file blocks for static mangled symbols.
-     Do the symtabs first, then check the psymtabs.  */
-
-  if (namespace == VAR_NAMESPACE)
-    {
-      ALL_SYMTABS (objfile, s)
-	{
-	  bv = BLOCKVECTOR (s);
-	  block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-	  sym = lookup_block_symbol (block, name, VAR_NAMESPACE);
-	  if (sym) 
-	    {
-	      block_found = block;
-	      if (symtab != NULL)
-		*symtab = s;
-	      return sym;
-	    }
-	}
-
-      ALL_PSYMTABS (objfile, ps)
-	{
-	  if (!ps->readin && lookup_partial_symbol (ps, name, 0, VAR_NAMESPACE))
-	    {
-	      s = PSYMTAB_TO_SYMTAB(ps);
-	      bv = BLOCKVECTOR (s);
-	      block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-	      sym = lookup_block_symbol (block, name, VAR_NAMESPACE);
-	      if (!sym)
-		error ("Internal: mangled static symbol `%s' found in %s psymtab but not in symtab", name, ps->filename);
-	      if (symtab != NULL)
-		*symtab = s;
-	      return sym;
-	    }
 	}
     }
 
@@ -1282,6 +1246,10 @@ find_pc_line (pc, notcurrent)
 	{
 	  val.symtab = alt_symtab;
 	  val.line = alt->line - 1;
+
+	  /* Don't return line 0, that means that we didn't find the line.  */
+	  if (val.line == 0) ++val.line;
+
 	  val.pc = BLOCK_END (BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK));
 	  val.end = alt->pc;
 	}
@@ -1652,14 +1620,35 @@ operator_chars (p, end)
   return *end;
 }
 
+/* Return the number of methods described for TYPE, including the
+   methods from types it derives from. This can't be done in the symbol
+   reader because the type of the baseclass might still be stubbed
+   when the definition of the derived class is parsed.  */
+
+static int total_number_of_methods PARAMS ((struct type *type));
+
+static int
+total_number_of_methods (type)
+     struct type *type;
+{
+  int n;
+  int count;
+
+  check_stub_type (type);
+  count = TYPE_NFN_FIELDS_TOTAL (type);
+
+  for (n = 0; n < TYPE_N_BASECLASSES (type); n++)
+    count += total_number_of_methods (TYPE_BASECLASS (type, n));
+
+  return count;
+}
+
 /* Recursive helper function for decode_line_1.
- * Look for methods named NAME in type T.
- * Return number of matches.
- * Put matches in SYM_ARR (which better be big enough!).
- * These allocations seem to define "big enough":
- * sym_arr = (struct symbol **) alloca(TYPE_NFN_FIELDS_TOTAL (t) * sizeof(struct symbol*));
- * Note that this function is g++ specific.
- */
+   Look for methods named NAME in type T.
+   Return number of matches.
+   Put matches in SYM_ARR, which should have been allocated with
+   a size of total_number_of_methods (T) * sizeof (struct symbol *).
+   Note that this function is g++ specific.  */
 
 int
 find_methods (t, name, sym_arr)
@@ -2020,7 +2009,8 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
 	      sym = 0;
 	      i1 = 0;		/*  counter for the symbol array */
 	      t = SYMBOL_TYPE (sym_class);
-	      sym_arr = (struct symbol **) alloca(TYPE_NFN_FIELDS_TOTAL (t) * sizeof(struct symbol*));
+	      sym_arr = (struct symbol **) alloca(total_number_of_methods (t)
+						  * sizeof(struct symbol *));
 
 	      /* Cfront objects don't have fieldlists.  */
 	      if (destructor_name_p (copy, t) && TYPE_FN_FIELDLISTS (t) != NULL)
@@ -2200,7 +2190,9 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
   /* Arg token is not digits => try it as a variable name
      Find the next token (everything up to end or next whitespace).  */
 
-  if (is_quoted)
+  if (**argptr == '$')		/* Convenience variable */
+    p = skip_quoted (*argptr + 1);
+  else if (is_quoted)
     {
       p = skip_quoted (*argptr);
       if (p[-1] != '\'')
@@ -2227,6 +2219,32 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
     }
   while (*p == ' ' || *p == '\t') p++;
   *argptr = p;
+
+  /* See if it's a convenience variable */
+
+  if (*copy == '$')
+    {
+      value_ptr valx;
+      int need_canonical = (s == 0) ? 1 : 0;
+
+      valx = value_of_internalvar (lookup_internalvar (copy + 1));
+      if (TYPE_CODE (VALUE_TYPE (valx)) != TYPE_CODE_INT)
+	error ("Convenience variables used in line specs must have integer values.");
+
+      val.symtab = s ? s : default_symtab;
+      val.line = value_as_long (valx);
+      val.pc = 0;
+
+      values.sals = (struct symtab_and_line *)xmalloc (sizeof val);
+      values.sals[0] = val;
+      values.nelts = 1;
+
+      if (need_canonical)
+	build_canonical_line_spec (values.sals, NULL, canonical);
+
+      return values;
+    }
+
 
   /* Look up that token as a variable.
      If file specified, use that file's per-file block to start with.  */
@@ -2285,7 +2303,7 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
 	}
     }
 
-  msymbol = lookup_minimal_symbol (copy, (struct objfile *) NULL);
+  msymbol = lookup_minimal_symbol (copy, NULL, NULL);
   if (msymbol != NULL)
     {
       val.symtab = 0;
@@ -3004,6 +3022,19 @@ completion_list_add_name (symname, sym_text, sym_text_len, text, word)
 	strcat (new, symname);
       }
 
+    /* Recheck for duplicates if we intend to add a modified symbol.  */
+    if (word != sym_text)
+      {
+	for (i = 0; i < return_val_index; ++i)
+	  {
+	    if (STREQ (new, return_val[i]))
+	      {
+		free (new);
+		return;
+	      }
+	  }
+      }
+
     if (return_val_index + 3 > return_val_size)
       {
 	newsize = (return_val_size *= 2) * sizeof (char *);
@@ -3202,51 +3233,6 @@ make_symbol_completion_list (text, word)
   return (return_val);
 }
 
-
-#if 0
-/* Add the type of the symbol sym to the type of the current
-   function whose block we are in (assumed).  The type of
-   this current function is contained in *TYPE.
-   
-   This basically works as follows:  When we find a function
-   symbol (N_FUNC with a 'f' or 'F' in the symbol name), we record
-   a pointer to its type in the global in_function_type.  Every 
-   time we come across a parameter symbol ('p' in its name), then
-   this procedure adds the name and type of that parameter
-   to the function type pointed to by *TYPE.  (Which should correspond
-   to in_function_type if it was called correctly).
-
-   Note that since we are modifying a type, the result of 
-   lookup_function_type() should be memcpy()ed before calling
-   this.  When not in strict typing mode, the expression
-   evaluator can choose to ignore this.
-
-   Assumption:  All of a function's parameter symbols will
-   appear before another function symbol is found.  The parameters 
-   appear in the same order in the argument list as they do in the
-   symbol table. */
-
-void
-add_param_to_type (type,sym)
-   struct type **type;
-   struct symbol *sym;
-{
-   int num = ++(TYPE_NFIELDS(*type));
-
-   if(TYPE_NFIELDS(*type)-1)
-      TYPE_FIELDS(*type) = (struct field *)
-	  (*current_objfile->xrealloc) ((char *)(TYPE_FIELDS(*type)),
-					num*sizeof(struct field));
-   else
-      TYPE_FIELDS(*type) = (struct field *)
-	  (*current_objfile->xmalloc) (num*sizeof(struct field));
-   
-   TYPE_FIELD_BITPOS(*type,num-1) = num-1;
-   TYPE_FIELD_BITSIZE(*type,num-1) = 0;
-   TYPE_FIELD_TYPE(*type,num-1) = SYMBOL_TYPE(sym);
-   TYPE_FIELD_NAME(*type,num-1) = SYMBOL_NAME(sym);
-}
-#endif 
 
 void
 _initialize_symtab ()

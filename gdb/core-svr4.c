@@ -39,7 +39,7 @@ regardless of whether or not the actual target has floating point hardware.
 #include <sys/procfs.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <string.h>
+#include "gdb_string.h"
 
 #include "inferior.h"
 #include "target.h"

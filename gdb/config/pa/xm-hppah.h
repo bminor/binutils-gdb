@@ -39,14 +39,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define HAVE_TERMIOS
 
-/* HP uses non-ANSI definitions, but with void * results.  */
-#define	MEM_FNS_DECLARED	/* Some non-ANSI use void *, not char *.  */
-extern void *
-memcpy PARAMS ((void *, const void *, size_t));		/* 4.11.2.1 */
-
-extern void *
-memset PARAMS ((void *, int, size_t));			/* 4.11.6.1 */
-
 /* HP defines malloc and realloc as returning void *, even for non-ANSI
    compilations (such as with the native compiler). */
 

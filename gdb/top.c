@@ -47,12 +47,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <unistd.h>
 #endif
 
-#include <string.h>
+#include "gdb_string.h"
 #ifndef	NO_SYS_FILE
 #include <sys/file.h>
 #endif
 #include <sys/param.h>
-#include <sys/stat.h>
+#include "gdb_stat.h"
 #include <ctype.h>
 
 extern void initialize_targets PARAMS ((void));

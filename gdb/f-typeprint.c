@@ -36,7 +36,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "typeprint.h"
 #include "frame.h"  /* ??? */
 
-#include <string.h>
+#include "gdb_string.h"
 #include <errno.h>
 
 #if 0	/* Currently unused */

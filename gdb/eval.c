@@ -19,7 +19,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
-#include <string.h>
+#include "gdb_string.h"
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "value.h"
@@ -226,10 +226,8 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
   struct type *type;
   int nargs;
   value_ptr *argvec;
-  struct symbol *tmp_symbol; 
   int upper, lower, retcode; 
   int code;
-  struct internalvar *var; 
 
   /* This expect_type crap should not be used for C.  C expressions do
      not have any notion of expected types, never has and (goddess
@@ -1173,8 +1171,12 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
       if (TYPE_CODE (VALUE_TYPE (arg2)) != TYPE_CODE_INT)
 	error ("Non-integral right operand for \"@\" operator.");
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	return allocate_repeat_value (VALUE_TYPE (arg1),
-				      longest_to_int (value_as_long (arg2)));
+	{
+	  if (VALUE_REPEATED (arg1))
+	    error ("Cannot create artificial arrays of artificial arrays.");
+	  return allocate_repeat_value (VALUE_TYPE (arg1),
+					longest_to_int (value_as_long (arg2)));
+	}
       else
 	return value_repeat (arg1, longest_to_int (value_as_long (arg2)));
 

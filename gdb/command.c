@@ -20,7 +20,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symtab.h"
 #include "value.h"
 #include <ctype.h>
-#include <string.h>
+#include "gdb_string.h"
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif

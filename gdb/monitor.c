@@ -38,7 +38,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <varargs.h>
 #endif
 #include <signal.h>
-#include <string.h>
+#include "gdb_string.h"
 #include <sys/types.h>
 #include "command.h"
 #include "serial.h"
@@ -865,7 +865,7 @@ monitor_files_info (ops)
 static int
 monitor_write_memory (memaddr, myaddr, len)
      CORE_ADDR memaddr;
-     unsigned char *myaddr;
+     char *myaddr;
      int len;
 {
   unsigned LONGEST val;
@@ -929,7 +929,7 @@ monitor_write_memory (memaddr, myaddr, len)
 static int
 monitor_read_memory_single (memaddr, myaddr, len)
      CORE_ADDR memaddr;
-     unsigned char *myaddr;
+     char *myaddr;
      int len;
 {
   unsigned LONGEST val;
@@ -1426,7 +1426,7 @@ monitor_make_srec (buffer, type, memaddr, myaddr, len)
   unsigned char checksum;
   int i;
   char *buf;
-  static char hextab[16] = "0123456789ABCDEF";
+  static char hextab[] = "0123456789ABCDEF";
   static char data_code_table[] = { 0,0,1,2,3};
   static char term_code_table[] = { 0,0,9,8,7};
   int addr_size; /* Number of bytes in the record */
@@ -1545,6 +1545,7 @@ static struct target_ops monitor_ops =
   monitor_mourn_inferior,	/* to_mourn_inferior */
   0,				/* to_can_run */
   0, 				/* to_notice_signals */
+  0,				/* to_thread_alive */
   monitor_stop,			/* to_stop */
   process_stratum,		/* to_stratum */
   0,				/* to_next */

@@ -1,3 +1,59 @@
+Tue Aug  1 11:44:53 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* configure.in: Check for working mmap, ansi headers, string.h,
+	strings.h, and memory.h.
+	* configure: Regenerated.
+
+	* gdb_stat.h: New file, "portable" <sys/stat.h>.
+	* gdb_string.h: New file, "portable" <string.h>.
+
+	* altos-xdep.c, arm-tdep.c, arm-xdep.c, convex-tdep.c,
+	convex-xdep.c, coredep.c, cxux-nat.c, dbxread.c, exec.c,
+	gould-xdep.c, hppa-tdep.c, i386aix-nat.c, i386b-nat.c,
+	i386mach-nat.c, i386v-nat.c, infptrace.c, m88k-nat.c, main.c,
+	mdebugread.c, objfiles.c, os9kread.c, procfs.c, pyr-xdep.c,
+	rs6000-nat.c, source.c, standalone.c, stuff.c, sun386-nat.c,
+	symfile.c, symm-nat.c, symm-tdep.c, symtab.c, top.c, ultra3-nat.c,
+	ultra3-xdep.c, umax-xdep.c, xcoffread.c: Include "gdb_stat.h"
+	instead of <sys/stat.h>.
+
+	* alpha-tdep.c, breakpoint.c, buildsym.c, c-typeprint.c,
+	ch-typeprint.c, coffread.c, command.c, core-sol2.c, core-svr4.c,
+	core.c, corelow.c, cp-valprint.c, dbxread.c, dcache.c, demangle.c,
+	dpx2-nat.c, dstread.c, dwarfread.c, elfread.c, environ.c, eval.c,
+	exec.c, f-lang.c, f-typeprint.c, f-valprint.c, findvar.c,
+	fork-child.c, gdbtypes.c, hpread.c, i386-tdep.c, infcmd.c,
+	inflow.c, infptrace.c, infrun.c, irix5-nat.c, language.c,
+	m2-typeprint.c, main.c, mdebugread.c, minsyms.c, mipsread.c,
+	monitor.c, nlmread.c, objfiles.c, os9kread.c, osfsolib.c, parse.c,
+	printcmd.c, procfs.c, regex.c, remote-adapt.c, remote-arc.c,
+	remote-array.c, remote-bug.c, remote-e7000.c, remote-eb.c,
+	remote-es.c, remote-hms.c, remote-mm.c, remote-os9k.c,
+	remote-pa.c, remote-sim.c, remote-st.c, remote-udi.c,
+	remote-utils.c, remote-vx.c, remote-vx29k.c, remote-vx68.c,
+	remote-vx960.c, remote-vxmips.c, remote-vxsparc.c, remote.c,
+	solib.c, somread.c, source.c, stabsread.c, stack.c, symfile.c,
+	symmisc.c, symtab.c, target.c, top.c, typeprint.c, utils.c,
+	valarith.c, valops.c, valprint.c, values.c, xcoffread.c: Include
+	"gdb_string.h" instead of <string.h>.
+start-sanitize-gdbtk
+	* gdbtk.c: Likewise.
+end-sanitize-gdbtk
+
+	* config/xm-sysv4.h, i386/xm-ptx.h, m68k/xm-sun3os4.h,
+	sparc/xm-sun4os4.h (HAVE_MMAP): Removed.
+
+	* config/xm-lynx.h, config/i386/xm-ptx.h,
+	config/m68k/nm-apollo68b.h, config/m68k/xm-hp300hpux.h,
+	config/mips/xm-irix3.h, config/mips/xm-mips.h,
+	config/mips/xm-news-mips.h, config/mips/xm-riscos.h,
+	config/pa/hppah.h, config/rs6000/xm-rs6000.h,
+	config/sparc/xm-sun4os4.h, config/sparc/xm-sun4sol2.h,
+	config/vax/xm-vaxbsd.h, config/vax/xm-vaxult.h,
+	config/vax/xm-vaxult2.h (MEM_FNS_DECLARED): Removed.
+	* config/mips/xm-irix3.h, config/mips/xm-mips.h,
+	config/pa/xm-hppah.h (memcpy, memset): Removed declarations.
+
 Tue Aug  1 02:08:30 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* mips-tdep.c (mips_extract_return_value):  Fix returning of

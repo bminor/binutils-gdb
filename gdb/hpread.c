@@ -22,7 +22,7 @@
 
 #include "defs.h"
 #include "bfd.h"
-#include <string.h>
+#include "gdb_string.h"
 #include "hp-symtab.h"
 #include "syms.h"
 #include "symtab.h"

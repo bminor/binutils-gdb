@@ -22,7 +22,7 @@
 #include "defs.h"
 #include "dcache.h"
 #include "gdbcmd.h"
-#include <string.h>
+#include "gdb_string.h"
 
 
 /* 

@@ -30,10 +30,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "target.h"
 
 #include <sys/types.h>
-#include <sys/stat.h>
+#include "gdb_stat.h"
 #include <fcntl.h>
 #include <obstack.h>
-#include <string.h>
+#include "gdb_string.h"
 
 /* Prototypes for local functions */
 

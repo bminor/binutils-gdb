@@ -23,7 +23,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "inferior.h"
 #include "wait.h"
 #include "value.h"
-#include <string.h>
+#include "gdb_string.h"
 #include <ctype.h>
 #include <fcntl.h>
 #include <signal.h>

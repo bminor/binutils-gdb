@@ -1,5 +1,5 @@
 /* Memory-access and commands for "inferior" process, for GDB.
-   Copyright 1986, 1987, 1988, 1989, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1988, 1989, 1991, 1992, 1995 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -20,7 +20,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "defs.h"
 #include <signal.h>
 #include <sys/param.h>
-#include <string.h>
+#include "gdb_string.h"
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "frame.h"
@@ -359,7 +359,6 @@ step_1 (skip_subroutines, single_inst, count_string)
 	      printf_filtered ("\
 Single stepping until exit from function %s, \n\
 which has no line number information.\n", name);
-	      gdb_flush (gdb_stdout);
 	    }
 	}
       else
@@ -571,7 +570,7 @@ run_stack_dummy (addr, buffer)
     bpt = set_momentary_breakpoint (sal,
 				    get_current_frame (),
 				    bp_call_dummy);
-    bpt->disposition = delete;
+    bpt->disposition = del;
 
     /* If all error()s out of proceed ended up calling normal_stop (and
        perhaps they should; it already does in the special case of error

@@ -35,7 +35,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <fcntl.h>
 
 #include <sys/file.h>
-#include <sys/stat.h>
+#include "gdb_stat.h"
 
 #include <stddef.h>
 #include <sys/ptrace.h>

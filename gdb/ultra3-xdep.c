@@ -34,7 +34,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcore.h"
 
 #include <sys/file.h>
-#include <sys/stat.h>
+#include "gdb_stat.h"
 
 /* Assorted operating system circumventions */
 

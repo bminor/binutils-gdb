@@ -41,5 +41,3 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
  * USER area using the "PEEKUSER" ptrace call.
  */
 #define PT_READ_U 3
-
-#define	MEM_FNS_DECLARED	/* /usr/include/string.h can get it wrong */

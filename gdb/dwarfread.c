@@ -51,7 +51,7 @@ other things to work on, if you get bored. :-)
 #include "complaints.h"
 
 #include <fcntl.h>
-#include <string.h>
+#include "gdb_string.h"
 
 #ifndef	NO_SYS_FILE
 #include <sys/file.h>

@@ -32,7 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "demangle.h"
 #include "m2-lang.h"
 
-#include <string.h>
+#include "gdb_string.h"
 #include <errno.h>
 
 void

@@ -135,7 +135,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	"0* " means the same as "0000".  */
 
 #include "defs.h"
-#include <string.h>
+#include "gdb_string.h"
 #include <fcntl.h>
 #include "frame.h"
 #include "inferior.h"

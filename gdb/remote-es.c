@@ -96,7 +96,7 @@ STP
 #include <sys/file.h>
 #include <errno.h>
 #include <ctype.h>
-#include <string.h>
+#include "gdb_string.h"
 #include <setjmp.h>
 #include <fcntl.h>
 #include "defs.h"

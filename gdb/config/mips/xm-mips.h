@@ -33,12 +33,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 extern char *strdup();
 #endif
 
-/* DECstation memcpy and memset return void *, not char *.  */
-
-extern void *memcpy();
-extern void *memset();
-#define	MEM_FNS_DECLARED
-
 #if ! defined (__STDC__) && ! defined (offsetof)
 # define offsetof(TYPE, MEMBER) ((unsigned long) &((TYPE *)0)->MEMBER)
 #endif

@@ -23,10 +23,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #undef HAVE_TERMIO
 #define HAVE_TERMIOS
 
-/* SVR4 has mmap facilities */
-
-#define HAVE_MMAP
-
 /* SVR4 is a derivative of System V Release 3 (USG) */
 
 #define USG

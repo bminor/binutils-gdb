@@ -1,5 +1,6 @@
 /* Print values for GDB, the GNU debugger.
-   Copyright 1986, 1988, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1988, 1989, 1991, 1992, 1993, 1994
+             Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -18,7 +19,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
-#include <string.h>
+#include "gdb_string.h"
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "value.h"
@@ -61,9 +62,6 @@ set_output_radix PARAMS ((char *, int, struct cmd_list_element *));
 static void
 set_output_radix_1 PARAMS ((int, unsigned));
 
-static void value_print_array_elements PARAMS ((value_ptr, GDB_FILE *, int,
-						enum val_prettyprint));
-
 /* Maximum number of chars to print for a string pointer value or vector
    contents, or UINT_MAX for no limit.  Note that "set print elements 0"
    stores UINT_MAX in print_max, which displays in a show command as
@@ -84,8 +82,17 @@ int output_format = 0;
 
 unsigned int repeat_count_threshold = 10;
 
-int prettyprint_structs;	/* Controls pretty printing of structures */
-int prettyprint_arrays;		/* Controls pretty printing of arrays.  */
+/* If nonzero, stops printing of char arrays at first null. */
+
+int stop_print_at_null;
+
+/* Controls pretty printing of structures. */
+
+int prettyprint_structs;
+
+/* Controls pretty printing of arrays.  */
+
+int prettyprint_arrays;
 
 /* If nonzero, causes unions inside structures or other unions to be
    printed. */
@@ -163,8 +170,6 @@ value_print (val, stream, format, pretty)
      int format;
      enum val_prettyprint pretty;
 {
-  register unsigned int n, typelen;
-
   if (val == 0)
     {
       printf_filtered ("<address of value unknown>");
@@ -175,59 +180,7 @@ value_print (val, stream, format, pretty)
       printf_filtered ("<value optimized out>");
       return 0;
     }
-
-  /* A "repeated" value really contains several values in a row.
-     They are made by the @ operator.
-     Print such values as if they were arrays.  */
-
-  if (VALUE_REPEATED (val))
-    {
-      n = VALUE_REPETITIONS (val);
-      typelen = TYPE_LENGTH (VALUE_TYPE (val));
-      fprintf_filtered (stream, "{");
-      /* Print arrays of characters using string syntax.  */
-      if (typelen == 1 && TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_INT
-	  && format == 0)
-	LA_PRINT_STRING (stream, VALUE_CONTENTS (val), n, 0);
-      else
-	{
-	  value_print_array_elements (val, stream, format, pretty);
-	}
-      fprintf_filtered (stream, "}");
-      return (n * typelen);
-    }
-  else
-    {
-      struct type *type = VALUE_TYPE (val);
-
-      /* If it is a pointer, indicate what it points to.
-
-	 Print type also if it is a reference.
-
-         C++: if it is a member pointer, we will take care
-	 of that when we print it.  */
-      if (TYPE_CODE (type) == TYPE_CODE_PTR ||
-	  TYPE_CODE (type) == TYPE_CODE_REF)
-	{
-	  /* Hack:  remove (char *) for char strings.  Their
-	     type is indicated by the quoted string anyway. */
-          if (TYPE_CODE (type) == TYPE_CODE_PTR &&
-	      TYPE_LENGTH (TYPE_TARGET_TYPE (type)) == sizeof(char) &&
-	      TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_INT &&
-	      !TYPE_UNSIGNED (TYPE_TARGET_TYPE (type)))
-	    {
-		/* Print nothing */
-	    }
-	  else
-	    {
-	      fprintf_filtered (stream, "(");
-	      type_print (type, "", stream, -1);
-	      fprintf_filtered (stream, ") ");
-	    }
-	}
-      return (val_print (type, VALUE_CONTENTS (val),
-			 VALUE_ADDRESS (val), stream, format, 1, 0, pretty));
-    }
+  return LA_VALUE_PRINT (val, stream, format, pretty);
 }
 
 /*  Called by various <lang>_val_print routines to print TYPE_CODE_INT's */
@@ -252,29 +205,41 @@ val_print_type_code_int (type, valaddr, stream)
 	     sizeof (LONGEST) ones.  */
 	  len = TYPE_LENGTH (type);
 	  
-#if TARGET_BYTE_ORDER == BIG_ENDIAN
-	  for (p = valaddr;
-	       len > sizeof (LONGEST) && p < valaddr + TYPE_LENGTH (type);
-	       p++)
-#else		/* Little endian.  */
-	  first_addr = valaddr;
-	  for (p = valaddr + TYPE_LENGTH (type) - 1;
-	       len > sizeof (LONGEST) && p >= valaddr;
-	       p--)
-#endif		/* Little endian.  */
+	  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
 	    {
-	      if (*p == 0)
+	      for (p = valaddr;
+		   len > sizeof (LONGEST) && p < valaddr + TYPE_LENGTH (type);
+		   p++)
 		{
-		  len--;
+		  if (*p == 0)
+		    {
+		      len--;
+		    }
+		  else
+		    {
+		      break;
+		    }
 		}
-	      else
+	      first_addr = p;
+	    }
+	  else
+	    {
+	      first_addr = valaddr;
+	      for (p = valaddr + TYPE_LENGTH (type) - 1;
+		   len > sizeof (LONGEST) && p >= valaddr;
+		   p--)
 		{
-		  break;
+		  if (*p == 0)
+		    {
+		      len--;
+		    }
+		  else
+		    {
+		      break;
+		    }
 		}
 	    }
-#if TARGET_BYTE_ORDER == BIG_ENDIAN
-	  first_addr = p;
-#endif
+
 	  if (len <= sizeof (LONGEST))
 	    {
 	      /* The most significant bytes are zero, so we can just get
@@ -363,6 +328,7 @@ print_longest (stream, format, use_local, val_long)
       fprintf_filtered (stream,
 			use_local ? local_octal_format_custom ("ll")
 				  : "%llo",
+			val_long);
       break;
     case 'b':
       fprintf_filtered (stream, local_hex_format_custom ("02ll"), val_long);
@@ -499,13 +465,16 @@ print_floating (valaddr, type, stream)
 
 	/* Assume that floating point byte order is the same as
 	   integer byte order.  */
-#if TARGET_BYTE_ORDER == BIG_ENDIAN
-	low = extract_unsigned_integer (valaddr + 4, 4);
-	high = extract_unsigned_integer (valaddr, 4);
-#else
-	low = extract_unsigned_integer (valaddr, 4);
-	high = extract_unsigned_integer (valaddr + 4, 4);
-#endif
+	if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+	  {
+	    low = extract_unsigned_integer (valaddr + 4, 4);
+	    high = extract_unsigned_integer (valaddr, 4);
+	  }
+	else
+	  {
+	    low = extract_unsigned_integer (valaddr, 4);
+	    high = extract_unsigned_integer (valaddr + 4, 4);
+	  }
 	nonnegative = ((high & 0x80000000) == 0);
 	is_nan = (((high >> 20) & 0x7ff) == 0x7ff
 		  && ! ((((high & 0xfffff) == 0)) && (low == 0)));
@@ -553,17 +522,23 @@ print_hex_chars (stream, valaddr, len)
   /* FIXME: We should be not printing leading zeroes in most cases.  */
 
   fprintf_filtered (stream, local_hex_format_prefix ());
-#if TARGET_BYTE_ORDER == BIG_ENDIAN
-  for (p = valaddr;
-       p < valaddr + len;
-       p++)
-#else /* Little endian.  */
-  for (p = valaddr + len - 1;
-       p >= valaddr;
-       p--)
-#endif
+  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
     {
-      fprintf_filtered (stream, "%02x", *p);
+      for (p = valaddr;
+	   p < valaddr + len;
+	   p++)
+	{
+	  fprintf_filtered (stream, "%02x", *p);
+	}
+    }
+  else
+    {
+      for (p = valaddr + len - 1;
+	   p >= valaddr;
+	   p--)
+	{
+	  fprintf_filtered (stream, "%02x", *p);
+	}
     }
   fprintf_filtered (stream, local_hex_format_suffix ());
 }
@@ -657,7 +632,7 @@ val_print_array_elements (type, valaddr, address, stream, format, deref_ref,
     }
 }
 
-static void
+void
 value_print_array_elements (val, stream, format, pretty)
      value_ptr val;
      GDB_FILE *stream;
@@ -696,7 +671,7 @@ value_print_array_elements (val, stream, format, pretty)
 	  val_print (VALUE_TYPE (val), VALUE_CONTENTS (val) + typelen * i,
 		     VALUE_ADDRESS (val) + typelen * i, stream, format, 1,
 		     0, pretty);
-	  fprintf_unfiltered (stream, " <repeats %u times>", reps);
+	  fprintf_filtered (stream, " <repeats %u times>", reps);
 	  i = rep1 - 1;
 	  things_printed += repeat_count_threshold;
 	}
@@ -1052,6 +1027,13 @@ _initialize_valprint ()
     (add_set_cmd ("elements", no_class, var_uinteger, (char *)&print_max,
 		  "Set limit on string chars or array elements to print.\n\
 \"set print elements 0\" causes there to be no limit.",
+		  &setprintlist),
+     &showprintlist);
+
+  add_show_from_set
+    (add_set_cmd ("null-stop", no_class, var_boolean,
+		  (char *)&stop_print_at_null,
+		  "Set printing of char arrays to stop at first null char.",
 		  &setprintlist),
      &showprintlist);
 

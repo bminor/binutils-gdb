@@ -28,7 +28,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "buildsym.h"
 #include <obstack.h>
 
-#include <string.h>
+#include "gdb_string.h"
 
 #include "dst.h"
 

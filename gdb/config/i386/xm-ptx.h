@@ -29,13 +29,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define HAVE_WAIT_STRUCT
 
-#define HAVE_MMAP
-
 #undef HAVE_TERMIO
 #define HAVE_TERMIOS
 #define USG
-
-#define MEM_FNS_DECLARED
 
 #define NEED_POSIX_SETPGID
 

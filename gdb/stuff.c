@@ -22,7 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <stdio.h>
 #include <a.out.h>
 #include <sys/types.h>
-#include <sys/stat.h>
+#include "gdb_stat.h"
 #include <sys/file.h>
 #include <varargs.h>
 

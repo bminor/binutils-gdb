@@ -36,7 +36,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <sys/user.h>		/* After a.out.h  */
 #include <sys/file.h>
-#include <sys/stat.h>
+#include "gdb_stat.h"
 
 #include <errno.h>
 

@@ -19,7 +19,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
-#include <string.h>
+#include "gdb_string.h"
 #include "frame.h"
 #include "symtab.h"
 #include "gdbtypes.h"
@@ -945,7 +945,7 @@ address_info (exp, from_tty)
   printf_filtered ("Symbol \"");
   fprintf_symbol_filtered (gdb_stdout, SYMBOL_NAME (sym),
 			   current_language->la_language, DMGL_ANSI);
-  printf_filtered ("\" is ", SYMBOL_NAME (sym));
+  printf_filtered ("\" is ");
   val = SYMBOL_VALUE (sym);
   basereg = SYMBOL_BASEREG (sym);
 
@@ -1702,7 +1702,7 @@ print_frame_nameless_args (fi, start, num, first, stream)
 #ifdef PRINT_TYPELESS_INTEGER
       PRINT_TYPELESS_INTEGER (stream, builtin_type_int, (LONGEST) arg_value);
 #else
-      fprintf_filtered (stream, "%d", arg_value);
+      fprintf_filtered (stream, "%ld", arg_value);
 #endif /* PRINT_TYPELESS_INTEGER */
 #endif /* PRINT_NAMELESS_INTEGER */
       first = 0;

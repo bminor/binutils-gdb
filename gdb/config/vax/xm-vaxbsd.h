@@ -8,6 +8,3 @@
 #include <sys/param.h>
 
 #include "vax/xm-vax.h"
-
-/* In non-ANSI compiles, memcpy and memset are still void *, not char *.  */
-#define MEM_FNS_DECLARED

@@ -1,4 +1,5 @@
-/* Copyright (C) 1993 Free Software Foundation, Inc.
+/* Portable <string.h>
+   Copyright 1995 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -16,13 +17,32 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#define HAVE_TERMIO
+#if !defined(GDB_STRING_H)
+#define GDB_STRING_H
 
-#if !defined (HOST_BYTE_ORDER)
-#define HOST_BYTE_ORDER BIG_ENDIAN
+#ifdef STDC_HEADERS
+#include <string.h>
+#else
+# ifdef HAVE_STRING_H
+#   include <string.h>
+# else
+#   include <strings.h>
+# endif
+extern char *strchr();
+extern char *strrchr();
+extern char *strstr();
+extern char *strtok();
+extern char *strerror();
+# ifdef HAVE_MEMORY_H
+#   include <memory.h>
+# else
+extern void *memset();
+extern void *memcpy();
+extern void *memmove();
+extern int   memcmp();
+# endif
 #endif
 
-#define USG 1
+extern char *strdup();
 
-/* setjmp.h requires uid_t.  */
-#include <sys/types.h>
+#endif	/* !defined(GDB_STRING_H) */

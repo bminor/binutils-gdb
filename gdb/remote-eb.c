@@ -26,7 +26,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    over the net in real time.  */
 
 #include "defs.h"
-#include <string.h>
+#include "gdb_string.h"
 
 #include "inferior.h"
 #include "bfd.h"

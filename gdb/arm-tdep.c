@@ -35,7 +35,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <sys/user.h>		/* After a.out.h  */
 #include <sys/file.h>
-#include <sys/stat.h>
+#include "gdb_stat.h"
 
 #include <errno.h>
 #endif
@@ -462,7 +462,7 @@ arm_float_info()
 void
 _initialize_arm_tdep ()
 {
-  tm_print_insn = print_insn_arm;
+  tm_print_insn = print_insn_little_arm;
 }
 
 

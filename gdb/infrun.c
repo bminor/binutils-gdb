@@ -19,7 +19,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
-#include <string.h>
+#include "gdb_string.h"
 #include <ctype.h>
 #include "symtab.h"
 #include "frame.h"
@@ -479,7 +479,9 @@ wait_for_inferior ()
       else
 	pid = target_wait (-1, &w);
 
+#ifdef HAVE_NONSTEPPABLE_WATCHPOINT
     have_waited:
+#endif
 
       flush_cached_frames ();
 
@@ -527,6 +529,12 @@ wait_for_inferior ()
 			     (unsigned int)w.value.integer);
 	  else
 	    printf_filtered ("\nProgram exited normally.\n");
+
+	  /* Record the exit code in the convenience variable $_exitcode, so
+	     that the user can inspect this again later.  */
+	  set_internalvar (lookup_internalvar ("_exitcode"),
+			   value_from_longest (builtin_type_int, 
+					       (LONGEST) w.value.integer));
 	  gdb_flush (gdb_stdout);
 	  target_mourn_inferior ();
 #ifdef NO_SINGLE_STEP
@@ -650,32 +658,28 @@ wait_for_inferior ()
 	  /* It's a SIGTRAP or a signal we're interested in.  Switch threads,
 	     and fall into the rest of wait_for_inferior().  */
 
+	  /* Save infrun state for the old thread.  */
+	  save_infrun_state (inferior_pid, prev_pc,
+			     prev_func_start, prev_func_name,
+			     trap_expected, step_resume_breakpoint,
+			     through_sigtramp_breakpoint,
+			     step_range_start, step_range_end,
+			     step_frame_address, handling_longjmp,
+			     another_trap);
+
 	  inferior_pid = pid;
+
+	  /* Load infrun state for the new thread.  */
+	  load_infrun_state (inferior_pid, &prev_pc,
+			     &prev_func_start, &prev_func_name,
+			     &trap_expected, &step_resume_breakpoint,
+			     &through_sigtramp_breakpoint,
+			     &step_range_start, &step_range_end,
+			     &step_frame_address, &handling_longjmp,
+			     &another_trap);
 	  printf_filtered ("[Switching to %s]\n", target_pid_to_str (pid));
 
 	  flush_cached_frames ();
-	  trap_expected = 0;
-	  if (step_resume_breakpoint)
-	    {
-	      delete_breakpoint (step_resume_breakpoint);
-	      step_resume_breakpoint = NULL;
-	    }
-
-	  /* Not sure whether we need to blow this away too,
-	     but probably it is like the step-resume
-	     breakpoint.  */
-	  if (through_sigtramp_breakpoint)
-	    {
-	      delete_breakpoint (through_sigtramp_breakpoint);
-	      through_sigtramp_breakpoint = NULL;
-	    }
-	  prev_pc = 0;
-	  prev_func_name = NULL;
-	  step_range_start = 0;
-	  step_range_end = 0;
-	  step_frame_address = 0;
-	  handling_longjmp = 0;
-	  another_trap = 0;
 	}
 
 #ifdef NO_SINGLE_STEP

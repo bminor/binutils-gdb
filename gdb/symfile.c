@@ -39,8 +39,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <sys/types.h>
 #include <fcntl.h>
-#include <string.h>
-#include <sys/stat.h>
+#include "gdb_string.h"
+#include "gdb_stat.h"
 #include <ctype.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>

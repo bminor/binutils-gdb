@@ -26,7 +26,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "target.h"
 #include "language.h"
 #include "demangle.h"
-#include <string.h>
+#include "gdb_string.h"
 
 /* Define whether or not the C operator '/' truncates towards zero for
    differently signed operands (truncation direction is undefined in C). */
@@ -35,7 +35,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define TRUNCATION_TOWARDS_ZERO ((-5 / 2) == -2)
 #endif
 
-static value_ptr value_subscripted_rvalue PARAMS ((value_ptr, value_ptr));
+static value_ptr value_subscripted_rvalue PARAMS ((value_ptr, value_ptr, int));
 
 
 value_ptr
@@ -125,29 +125,44 @@ value_ptr
 value_subscript (array, idx)
      value_ptr array, idx;
 {
-  int lowerbound;
   value_ptr bound;
-  struct type *range_type;
+  int c_style = current_language->c_style_arrays;
 
   COERCE_REF (array);
+  COERCE_VARYING_ARRAY (array);
 
   if (TYPE_CODE (VALUE_TYPE (array)) == TYPE_CODE_ARRAY
       || TYPE_CODE (VALUE_TYPE (array)) == TYPE_CODE_STRING)
     {
-      range_type = TYPE_FIELD_TYPE (VALUE_TYPE (array), 0);
-      lowerbound = TYPE_FIELD_BITPOS (range_type, 0);
+      struct type *range_type = TYPE_FIELD_TYPE (VALUE_TYPE (array), 0);
+      int lowerbound = TYPE_LOW_BOUND (range_type);
+      int upperbound = TYPE_HIGH_BOUND (range_type);
+
+      if (VALUE_LVAL (array) != lval_memory)
+	return value_subscripted_rvalue (array, idx, lowerbound);
+
+      if (c_style == 0)
+	{
+	  LONGEST index = value_as_long (idx);
+	  if (index >= lowerbound && index <= upperbound)
+	    return value_subscripted_rvalue (array, idx, lowerbound);
+	  warning ("array or string index out of range");
+	  /* fall doing C stuff */
+	  c_style = 1;
+	}
+
       if (lowerbound != 0)
 	{
 	  bound = value_from_longest (builtin_type_int, (LONGEST) lowerbound);
 	  idx = value_sub (idx, bound);
 	}
-      if (VALUE_LVAL (array) != lval_memory)
-	{
-	  return value_subscripted_rvalue (array, idx);
-	}
+
       array = value_coerce_array (array);
     }
-  return value_ind (value_add (array, idx));
+  if (c_style)
+    return value_ind (value_add (array, idx));
+  else
+    error ("not an array or string");
 }
 
 /* Return the value of EXPR[IDX], expr an aggregate rvalue
@@ -155,24 +170,29 @@ value_subscript (array, idx)
    to doubles, but no longer does.  */
 
 static value_ptr
-value_subscripted_rvalue (array, idx)
+value_subscripted_rvalue (array, idx, lowerbound)
      value_ptr array, idx;
+     int lowerbound;
 {
   struct type *elt_type = TYPE_TARGET_TYPE (VALUE_TYPE (array));
   int elt_size = TYPE_LENGTH (elt_type);
-  int elt_offs = elt_size * longest_to_int (value_as_long (idx));
+  LONGEST index = value_as_long (idx);
+  int elt_offs = elt_size * longest_to_int (index - lowerbound);
   value_ptr v;
 
-  if (elt_offs >= TYPE_LENGTH (VALUE_TYPE (array)))
+  if (index < lowerbound || elt_offs >= TYPE_LENGTH (VALUE_TYPE (array)))
     error ("no such vector element");
 
   v = allocate_value (elt_type);
-  memcpy (VALUE_CONTENTS (v), VALUE_CONTENTS (array) + elt_offs, elt_size);
+  if (VALUE_LAZY (array))
+    VALUE_LAZY (v) = 1;
+  else
+    memcpy (VALUE_CONTENTS (v), VALUE_CONTENTS (array) + elt_offs, elt_size);
 
   if (VALUE_LVAL (array) == lval_internalvar)
     VALUE_LVAL (v) = lval_internalvar_component;
   else
-    VALUE_LVAL (v) = not_lval;
+    VALUE_LVAL (v) = VALUE_LVAL (array);
   VALUE_ADDRESS (v) = VALUE_ADDRESS (array);
   VALUE_OFFSET (v) = VALUE_OFFSET (array) + elt_offs;
   VALUE_BITSIZE (v) = elt_size * 8;

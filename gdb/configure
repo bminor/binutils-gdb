@@ -847,7 +847,127 @@ test "$program_suffix" != NONE &&
 test "$program_transform_name" = "" && program_transform_name="s,x,x,"
 
 
-for ac_hdr in unistd.h
+# If we cannot run a trivial program, we must be cross compiling.
+echo $ac_n "checking whether cross-compiling""... $ac_c" 1>&6
+if eval "test \"`echo '$''{'ac_cv_c_cross'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  if test "$cross_compiling" = yes; then
+  ac_cv_c_cross=yes
+else
+cat > conftest.$ac_ext <<EOF
+#line 860 "configure"
+#include "confdefs.h"
+main(){return(0);}
+EOF
+eval $ac_link
+if test -s conftest && (./conftest; exit) 2>/dev/null; then
+  ac_cv_c_cross=no
+else
+  ac_cv_c_cross=yes
+fi
+fi
+rm -fr conftest*
+fi
+cross_compiling=$ac_cv_c_cross
+echo "$ac_t""$ac_cv_c_cross" 1>&6
+
+echo $ac_n "checking for ANSI C header files""... $ac_c" 1>&6
+if eval "test \"`echo '$''{'ac_cv_header_stdc'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 881 "configure"
+#include "confdefs.h"
+#include <stdlib.h>
+#include <stdarg.h>
+#include <string.h>
+#include <float.h>
+EOF
+eval "$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
+ac_err=`grep -v '^ *+' conftest.out`
+if test -z "$ac_err"; then
+  rm -rf conftest*
+  ac_cv_header_stdc=yes
+else
+  echo "$ac_err" >&5
+  rm -rf conftest*
+  ac_cv_header_stdc=no
+fi
+rm -f conftest*
+
+if test $ac_cv_header_stdc = yes; then
+  # SunOS 4.x string.h does not declare mem*, contrary to ANSI.
+cat > conftest.$ac_ext <<EOF
+#line 903 "configure"
+#include "confdefs.h"
+#include <string.h>
+EOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  egrep "memchr" >/dev/null 2>&1; then
+  :
+else
+  rm -rf conftest*
+  ac_cv_header_stdc=no
+fi
+rm -f conftest*
+
+fi
+
+if test $ac_cv_header_stdc = yes; then
+  # ISC 2.0.2 stdlib.h does not declare free, contrary to ANSI.
+cat > conftest.$ac_ext <<EOF
+#line 921 "configure"
+#include "confdefs.h"
+#include <stdlib.h>
+EOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  egrep "free" >/dev/null 2>&1; then
+  :
+else
+  rm -rf conftest*
+  ac_cv_header_stdc=no
+fi
+rm -f conftest*
+
+fi
+
+if test $ac_cv_header_stdc = yes; then
+  # /bin/cc in Irix-4.0.5 gets non-ANSI ctype macros unless using -ansi.
+if test "$cross_compiling" = yes; then
+  ac_cv_header_stdc=no
+else
+cat > conftest.$ac_ext <<EOF
+#line 942 "configure"
+#include "confdefs.h"
+#include <ctype.h>
+#define ISLOWER(c) ('a' <= (c) && (c) <= 'z')
+#define TOUPPER(c) (ISLOWER(c) ? 'A' + ((c) - 'a') : (c))
+#define XOR(e, f) (((e) && !(f)) || (!(e) && (f)))
+int main () { int i; for (i = 0; i < 256; i++)
+if (XOR (islower (i), ISLOWER (i)) || toupper (i) != TOUPPER (i)) exit(2);
+exit (0); }
+
+EOF
+eval $ac_link
+if test -s conftest && (./conftest; exit) 2>/dev/null; then
+  :
+else
+  ac_cv_header_stdc=no
+fi
+fi
+rm -fr conftest*
+fi
+fi
+echo "$ac_t""$ac_cv_header_stdc" 1>&6
+if test $ac_cv_header_stdc = yes; then
+  cat >> confdefs.h <<\EOF
+#define STDC_HEADERS 1
+EOF
+
+fi
+
+for ac_hdr in memory.h string.h strings.h unistd.h
 do
 ac_safe=`echo "$ac_hdr" | tr './\055' '___'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
@@ -855,7 +975,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 859 "configure"
+#line 979 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
@@ -882,6 +1002,161 @@ else
   echo "$ac_t""no" 1>&6
 fi
 done
+
+echo $ac_n "checking whether stat file-mode macros are broken""... $ac_c" 1>&6
+if eval "test \"`echo '$''{'ac_cv_header_stat_broken'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 1012 "configure"
+#include "confdefs.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+
+#if defined(S_ISBLK) && defined(S_IFDIR)
+# if S_ISBLK (S_IFDIR)
+You lose.
+# endif
+#endif
+
+#if defined(S_ISBLK) && defined(S_IFCHR)
+# if S_ISBLK (S_IFCHR)
+You lose.
+# endif
+#endif
+
+#if defined(S_ISLNK) && defined(S_IFREG)
+# if S_ISLNK (S_IFREG)
+You lose.
+# endif
+#endif
+
+#if defined(S_ISSOCK) && defined(S_IFREG)
+# if S_ISSOCK (S_IFREG)
+You lose.
+# endif
+#endif
+
+EOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  egrep "You lose" >/dev/null 2>&1; then
+  rm -rf conftest*
+  ac_cv_header_stat_broken=yes
+else
+  rm -rf conftest*
+  ac_cv_header_stat_broken=no
+fi
+rm -f conftest*
+
+fi
+echo "$ac_t""$ac_cv_header_stat_broken" 1>&6
+if test $ac_cv_header_stat_broken = yes; then
+  cat >> confdefs.h <<\EOF
+#define STAT_MACROS_BROKEN 1
+EOF
+
+fi
+
+
+echo $ac_n "checking for working mmap""... $ac_c" 1>&6
+if eval "test \"`echo '$''{'ac_cv_func_mmap'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  if test "$cross_compiling" = yes; then
+  ac_cv_func_mmap=no
+else
+cat > conftest.$ac_ext <<EOF
+#line 1070 "configure"
+#include "confdefs.h"
+
+/* Thanks to Mike Haertel and Jim Avera for this test. */
+#include <sys/types.h>
+#include <fcntl.h>
+#include <sys/mman.h>
+
+#ifdef BSD
+# ifndef BSD4_1
+#  define HAVE_GETPAGESIZE
+# endif
+#endif
+
+#ifndef HAVE_GETPAGESIZE
+# include <sys/param.h>
+# ifdef EXEC_PAGESIZE
+#  define getpagesize() EXEC_PAGESIZE
+# else
+#  ifdef NBPG
+#   define getpagesize() NBPG * CLSIZE
+#   ifndef CLSIZE
+#    define CLSIZE 1
+#   endif
+#  else
+#   ifdef NBPC
+#    define getpagesize() NBPC
+#   else
+#    define getpagesize() PAGESIZE /* SVR4 */
+#   endif
+#  endif
+# endif
+#endif
+
+#ifdef __osf__
+# define valloc malloc
+#endif
+
+#ifdef __cplusplus
+extern "C" { void *valloc(unsigned), *malloc(unsigned); }
+#else
+char *valloc(), *malloc();
+#endif
+
+int
+main()
+{
+  char *buf1, *buf2, *buf3;
+  int i = getpagesize(), j;
+  int i2 = getpagesize()*2;
+  int fd;
+
+  buf1 = (char *)valloc(i2);
+  buf2 = (char *)valloc(i);
+  buf3 = (char *)malloc(i2);
+  for (j = 0; j < i2; ++j)
+    *(buf1 + j) = rand();
+  fd = open("conftestmmap", O_CREAT | O_RDWR, 0666);
+  write(fd, buf1, i2);
+  mmap(buf2, i, PROT_READ | PROT_WRITE, MAP_FIXED | MAP_PRIVATE, fd, 0);
+  for (j = 0; j < i; ++j)
+    if (*(buf1 + j) != *(buf2 + j))
+      exit(1);
+  lseek(fd, (long)i, 0);
+  read(fd, buf2, i); /* read into mapped memory -- file should not change */
+  /* (it does in i386 SVR4.0 - Jim Avera, jima@netcom.com) */
+  lseek(fd, (long)0, 0);
+  read(fd, buf3, i2);
+  for (j = 0; j < i2; ++j)
+    if (*(buf1 + j) != *(buf3 + j))
+      exit(1);
+  exit(0);
+}
+
+EOF
+eval $ac_link
+if test -s conftest && (./conftest; exit) 2>/dev/null; then
+  ac_cv_func_mmap=yes
+else
+  ac_cv_func_mmap=no
+fi
+fi
+rm -fr conftest*
+fi
+echo "$ac_t""$ac_cv_func_mmap" 1>&6
+if test $ac_cv_func_mmap = yes; then
+  cat >> confdefs.h <<\EOF
+#define HAVE_MMAP 1
+EOF
+
+fi
 
 
 ENABLE_CFLAGS=
@@ -979,7 +1254,7 @@ test -z "$x_direct_test_library" && x_direct_test_library=Xt
 test -z "$x_direct_test_function" && x_direct_test_function=XtMalloc
 test -z "$x_direct_test_include" && x_direct_test_include=X11/Intrinsic.h
 cat > conftest.$ac_ext <<EOF
-#line 983 "configure"
+#line 1258 "configure"
 #include "confdefs.h"
 #include <$x_direct_test_include>
 EOF
@@ -1042,7 +1317,7 @@ rm -f conftest*
 ac_save_LIBS="$LIBS"
 LIBS="-l$x_direct_test_library $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1046 "configure"
+#line 1321 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1160,7 +1435,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lICE  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1164 "configure"
+#line 1439 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1203,7 +1478,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-ldnet  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1207 "configure"
+#line 1482 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1237,7 +1512,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-ldnet_stub  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1241 "configure"
+#line 1516 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1276,7 +1551,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lnsl  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1280 "configure"
+#line 1555 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1314,7 +1589,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lsocket  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1318 "configure"
+#line 1593 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1371,7 +1646,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1375 "configure"
+#line 1650 "configure"
 #include "confdefs.h"
 #include <tk.h>
 EOF
@@ -1473,7 +1748,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1477 "configure"
+#line 1752 "configure"
 #include "confdefs.h"
 #include <tclInt.h>
 EOF

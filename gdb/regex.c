@@ -33,7 +33,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #else  /* not emacs */
 
 #include "defs.h"
-#include <string.h>
+#include "gdb_string.h"
 
 /*
  * Define the syntax stuff, so we can do the \<...\> things.

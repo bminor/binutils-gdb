@@ -39,7 +39,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif
 
 #include <sys/file.h>
-#include <sys/stat.h>
+#include "gdb_stat.h"
 
 #ifndef NO_SYS_REG_H
 #include <sys/reg.h>

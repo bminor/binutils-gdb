@@ -33,7 +33,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    for real.  dbx_psymtab_to_symtab() is the function that does this */
 
 #include "defs.h"
-#include <string.h>
+#include "gdb_string.h"
 
 #if defined(USG) || defined(__CYGNUSCLIB__)
 #include <sys/types.h>
@@ -45,7 +45,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifndef	NO_SYS_FILE
 #include <sys/file.h>
 #endif
-#include <sys/stat.h>
+#include "gdb_stat.h"
 #include <ctype.h>
 #include "symtab.h"
 #include "breakpoint.h"
@@ -70,9 +70,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define SEEK_CUR 1
 #endif
 
-/* Each partial symbol table entry contains a pointer to private data for the
-   sym_read function to use when expanding a partial symbol table entry
-   to a full symbol table entry.  */
+/* We put a pointer to this structure in the read_symtab_private field
+   of the psymtab.  */
 
 struct symloc {
 
@@ -573,8 +572,8 @@ dbx_symfile_read (objfile, section_offsets, mainline)
      process them and define symbols accordingly.  */
 
   read_dbx_symtab (section_offsets, objfile,
-		   bfd_section_vma  (sym_bfd, DBX_TEXT_SECT (objfile)),
-		   bfd_section_size (sym_bfd, DBX_TEXT_SECT (objfile)));
+		   DBX_TEXT_ADDR (objfile),
+		   DBX_TEXT_SIZE (objfile));
 
   /* Add the dynamic symbols.  */
 
@@ -624,6 +623,7 @@ dbx_symfile_init (objfile)
   int val;
   bfd *sym_bfd = objfile->obfd;
   char *name = bfd_get_filename (sym_bfd);
+  asection *text_sect;
   unsigned char size_temp[DBX_STRINGTAB_SIZE_SIZE];
 
   /* Allocate struct to keep track of the symfile */
@@ -637,9 +637,12 @@ dbx_symfile_init (objfile)
   /* FIXME POKING INSIDE BFD DATA STRUCTURES */
 
   DBX_SYMFILE_INFO (objfile)->stab_section_info = NULL;
-  DBX_TEXT_SECT (objfile) = bfd_get_section_by_name (sym_bfd, ".text");
-  if (!DBX_TEXT_SECT (objfile))
+  
+  text_sect = bfd_get_section_by_name (sym_bfd, ".text");
+  if (!text_sect)
     error ("Can't find .text section in symbol file");
+  DBX_TEXT_ADDR (objfile) = bfd_section_vma (sym_bfd, text_sect);
+  DBX_TEXT_SIZE (objfile) = bfd_section_size (sym_bfd, text_sect);
 
   DBX_SYMBOL_SIZE (objfile) = obj_symbol_entry_size (sym_bfd);
   DBX_SYMCOUNT (objfile) = bfd_get_symcount (sym_bfd);
@@ -755,6 +758,13 @@ static char *last_function_name;
    building psymtabs, right?  */
 static char *stringtab_global;
 
+/* These variables are used to control fill_symbuf when the stabs
+   symbols are not contiguous (as may be the case when a COFF file is
+   linked using --split-by-reloc).  */
+static struct stab_section_list *symbuf_sections;
+static unsigned int symbuf_left;
+static unsigned int symbuf_read;
+
 /* Refill the symbol table input buffer
    and set the variables that control fetching entries from it.
    Reports an error if no data available.
@@ -765,13 +775,37 @@ static void
 fill_symbuf (sym_bfd)
      bfd *sym_bfd;
 {
-  int nbytes = bfd_read ((PTR)symbuf, sizeof (symbuf), 1, sym_bfd);
+  unsigned int count;
+  int nbytes;
+
+  if (symbuf_sections == NULL)
+    count = sizeof (symbuf);
+  else
+    {
+      if (symbuf_left <= 0)
+	{
+	  file_ptr filepos = symbuf_sections->section->filepos;
+	  if (bfd_seek (sym_bfd, filepos, SEEK_SET) != 0)
+	    perror_with_name (bfd_get_filename (sym_bfd));
+	  symbuf_left = bfd_section_size (sym_bfd, symbuf_sections->section);
+	  symbol_table_offset = filepos - symbuf_read;
+	  symbuf_sections = symbuf_sections->next;
+	}
+
+      count = symbuf_left;
+      if (count > sizeof (symbuf))
+	count = sizeof (symbuf);
+    }
+
+  nbytes = bfd_read ((PTR)symbuf, count, 1, sym_bfd);
   if (nbytes < 0)
     perror_with_name (bfd_get_filename (sym_bfd));
   else if (nbytes == 0)
     error ("Premature end of file reading symbol table");
   symbuf_end = nbytes / symbol_size;
   symbuf_idx = 0;
+  symbuf_left -= nbytes;
+  symbuf_read += nbytes;
 }
 
 #define SWAP_SYMBOL(symp, abfd) \
@@ -2096,10 +2130,12 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 		  int l = colon_pos - name;
 
 		  m = lookup_minimal_symbol_by_pc (last_pc_address);
-		  if (m && STREQN (SYMBOL_NAME (m), name, l))
+		  if (m && STREQN (SYMBOL_NAME (m), name, l)
+		      && SYMBOL_NAME (m) [l] == '\0')
 		    /* last_pc_address was in this function */
 		    valu = SYMBOL_VALUE (m);
-		  else if (m && STREQN (SYMBOL_NAME (m+1), name, l))
+		  else if (m && STREQN (SYMBOL_NAME (m+1), name, l)
+			   && SYMBOL_NAME (m+1) [l] == '\0')
 		    /* last_pc_address was in last function */
 		    valu = SYMBOL_VALUE (m+1);
 		  else
@@ -2176,9 +2212,10 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
   previous_stab_code = type;
 }
 
-/* FIXME: The only difference between this and elfstab_build_psymtabs is
-   the call to install_minimal_symbols for elf.  If the differences are
-   really that small, the code should be shared.  */
+/* FIXME: The only difference between this and elfstab_build_psymtabs
+   is the call to install_minimal_symbols for elf, and the support for
+   split sections.  If the differences are really that small, the code
+   should be shared.  */
 
 /* Scan and build partial symbols for an coff symbol file.
    The coff file has already been processed to get its minimal symbols.
@@ -2191,8 +2228,9 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
    the base address of the text segment).
    MAINLINE is true if we are reading the main symbol
    table (as opposed to a shared lib or dynamically loaded file).
-   STABOFFSET and STABSIZE define the location in OBJFILE where the .stab
-   section exists.
+   TEXTADDR is the address of the text section.
+   TEXTSIZE is the size of the text section.
+   STABSECTS is the list of .stab sections in OBJFILE.
    STABSTROFFSET and STABSTRSIZE define the location in OBJFILE where the
    .stabstr section exists.
 
@@ -2201,13 +2239,14 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 
 void
 coffstab_build_psymtabs (objfile, section_offsets, mainline, 
-			       staboffset, stabsize,
+			       textaddr, textsize, stabsects,
 			       stabstroffset, stabstrsize)
       struct objfile *objfile;
       struct section_offsets *section_offsets;
       int mainline;
-      file_ptr staboffset;
-      unsigned int stabsize;
+      CORE_ADDR textaddr;
+      unsigned int textsize;
+      struct stab_section_list *stabsects;
       file_ptr stabstroffset;
       unsigned int stabstrsize;
 {
@@ -2215,20 +2254,18 @@ coffstab_build_psymtabs (objfile, section_offsets, mainline,
   bfd *sym_bfd = objfile->obfd;
   char *name = bfd_get_filename (sym_bfd);
   struct dbx_symfile_info *info;
+  unsigned int stabsize;
 
   /* There is already a dbx_symfile_info allocated by our caller.
      It might even contain some info from the coff symtab to help us.  */
   info = (struct dbx_symfile_info *) objfile->sym_stab_info;
 
-  DBX_TEXT_SECT (objfile) = bfd_get_section_by_name (sym_bfd, ".text");
-  if (!DBX_TEXT_SECT (objfile))
-    error ("Can't find .text section in symbol file");
+  DBX_TEXT_ADDR (objfile) = textaddr;
+  DBX_TEXT_SIZE (objfile) = textsize;
 
 #define	COFF_STABS_SYMBOL_SIZE	12	/* XXX FIXME XXX */
   DBX_SYMBOL_SIZE    (objfile) = COFF_STABS_SYMBOL_SIZE;
-  DBX_SYMCOUNT       (objfile) = stabsize / DBX_SYMBOL_SIZE (objfile);
   DBX_STRINGTAB_SIZE (objfile) = stabstrsize;
-  DBX_SYMTAB_OFFSET  (objfile) = staboffset;
   
   if (stabstrsize > bfd_get_size (sym_bfd))
     error ("ridiculous string table size: %d bytes", stabstrsize);
@@ -2254,6 +2291,30 @@ coffstab_build_psymtabs (objfile, section_offsets, mainline,
   /* In a coff file, we've already installed the minimal symbols that came
      from the coff (non-stab) symbol table, so always act like an
      incremental load here. */
+  if (stabsects->next == NULL)
+    {
+      stabsize = bfd_section_size (sym_bfd, stabsects->section);
+      DBX_SYMCOUNT (objfile) = stabsize / DBX_SYMBOL_SIZE (objfile);
+      DBX_SYMTAB_OFFSET (objfile) = stabsects->section->filepos;
+    }
+  else
+    {
+      struct stab_section_list *stabsect;
+
+      DBX_SYMCOUNT (objfile) = 0;
+      for (stabsect = stabsects; stabsect != NULL; stabsect = stabsect->next)
+	{
+	  stabsize = bfd_section_size (sym_bfd, stabsect->section);
+	  DBX_SYMCOUNT (objfile) += stabsize / DBX_SYMBOL_SIZE (objfile);
+	}
+
+      DBX_SYMTAB_OFFSET (objfile) = stabsects->section->filepos;
+
+      symbuf_sections = stabsects->next;
+      symbuf_left = bfd_section_size (sym_bfd, stabsects->section);
+      symbuf_read = 0;
+    }
+
   dbx_symfile_read (objfile, section_offsets, 0);
 }
 
@@ -2293,14 +2354,17 @@ elfstab_build_psymtabs (objfile, section_offsets, mainline,
   bfd *sym_bfd = objfile->obfd;
   char *name = bfd_get_filename (sym_bfd);
   struct dbx_symfile_info *info;
+  asection *text_sect;
 
   /* There is already a dbx_symfile_info allocated by our caller.
      It might even contain some info from the ELF symtab to help us.  */
   info = (struct dbx_symfile_info *) objfile->sym_stab_info;
 
-  DBX_TEXT_SECT (objfile) = bfd_get_section_by_name (sym_bfd, ".text");
-  if (!DBX_TEXT_SECT (objfile))
+  text_sect = bfd_get_section_by_name (sym_bfd, ".text");
+  if (!text_sect)
     error ("Can't find .text section in symbol file");
+  DBX_TEXT_ADDR (objfile) = bfd_section_vma (sym_bfd, text_sect);
+  DBX_TEXT_SIZE (objfile) = bfd_section_size (sym_bfd, text_sect);
 
 #define	ELF_STABS_SYMBOL_SIZE	12	/* XXX FIXME XXX */
   DBX_SYMBOL_SIZE    (objfile) = ELF_STABS_SYMBOL_SIZE;
@@ -2368,6 +2432,7 @@ stabsect_build_psymtabs (objfile, section_offsets, mainline, stab_name,
   char *name = bfd_get_filename (sym_bfd);
   asection *stabsect;
   asection *stabstrsect;
+  asection *text_sect;
 
   stabsect = bfd_get_section_by_name (sym_bfd, stab_name);
   stabstrsect = bfd_get_section_by_name (sym_bfd, stabstr_name);
@@ -2382,9 +2447,11 @@ stabsect_build_psymtabs (objfile, section_offsets, mainline, stab_name,
   objfile->sym_stab_info = (PTR) xmalloc (sizeof (struct dbx_symfile_info));
   memset (DBX_SYMFILE_INFO (objfile), 0, sizeof (struct dbx_symfile_info));
 
-  DBX_TEXT_SECT (objfile) = bfd_get_section_by_name (sym_bfd, text_name);
-  if (!DBX_TEXT_SECT (objfile))
+  text_sect = bfd_get_section_by_name (sym_bfd, text_name);
+  if (!text_sect)
     error ("Can't find %s section in symbol file", text_name);
+  DBX_TEXT_ADDR (objfile) = bfd_section_vma (sym_bfd, text_sect);
+  DBX_TEXT_SIZE (objfile) = bfd_section_size (sym_bfd, text_sect);
 
   DBX_SYMBOL_SIZE    (objfile) = sizeof (struct external_nlist);
   DBX_SYMCOUNT       (objfile) = bfd_section_size (sym_bfd, stabsect)

@@ -32,12 +32,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <sys/param.h>
 #include <fcntl.h>
-#include <string.h>
+#include "gdb_string.h"
 
 #include "gdbcore.h"
 
 #include <ctype.h>
-#include <sys/stat.h>
+#include "gdb_stat.h"
 #ifndef O_BINARY
 #define O_BINARY 0
 #endif
@@ -588,26 +588,47 @@ ignore (addr, contents)
 }
 
 struct target_ops exec_ops = {
-	"exec", "Local exec file",
-	"Use an executable file as a target.\n\
-Specify the filename of the executable file.",
-	exec_file_command, exec_close, /* open, close */
-	find_default_attach, 0, 0, 0, /* attach, detach, resume, wait, */
-	0, 0, /* fetch_registers, store_registers, */
-	0, /* prepare_to_store, */
-	xfer_memory, exec_files_info,
-	ignore, ignore, /* insert_breakpoint, remove_breakpoint, */
-	0, 0, 0, 0, 0, /* terminal stuff */
-	0, 0, /* kill, load */
-	0, /* lookup sym */
-	find_default_create_inferior,
-	0, /* mourn_inferior */
-	0, /* can_run */
-	0, /* notice_signals */
-	file_stratum, 0, /* next */
-	0, 1, 0, 0, 0,	/* all mem, mem, stack, regs, exec */
-	0, 0,			/* section pointers */
-	OPS_MAGIC,		/* Always the last thing */
+  "exec",			/* to_shortname */
+  "Local exec file",		/* to_longname */
+  "Use an executable file as a target.\n\
+Specify the filename of the executable file.", /* to_doc */
+  exec_file_command,		/* to_open */
+  exec_close,			/* to_close */
+  find_default_attach,		/* to_attach */
+  0,				/* to_detach */
+  0,				/* to_resume */
+  0,				/* to_wait */
+  0,				/* to_fetch_registers */
+  0,				/* to_store_registers */
+  0,				/* to_prepare_to_store */
+  xfer_memory,			/* to_xfer_memory */
+  exec_files_info,		/* to_files_info */
+  ignore,			/* to_insert_breakpoint */
+  ignore,			/* to_remove_breakpoint */
+  0,				/* to_terminal_init */
+  0,				/* to_terminal_inferior */
+  0,				/* to_terminal_ours_for_output */
+  0,				/* to_terminal_ours */
+  0,				/* to_terminal_info */
+  0,				/* to_kill */
+  0,				/* to_load */
+  0,				/* to_lookup_symbol */
+  find_default_create_inferior,	/* to_create_inferior */
+  0,				/* to_mourn_inferior */
+  0,				/* to_can_run */
+  0,				/* to_notice_signals */
+  0,				/* to_thread_alive */
+  0,				/* to_stop */
+  file_stratum,			/* to_stratum */
+  0,				/* to_next */
+  0,				/* to_has_all_memory */
+  1,				/* to_has_memory */
+  0,				/* to_has_stack */
+  0,				/* to_has_registers */
+  0,				/* to_has_execution */
+  0,				/* to_sections */
+  0,				/* to_sections_end */
+  OPS_MAGIC,			/* to_magic */
 };
 
 void
