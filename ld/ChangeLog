@@ -1,3 +1,12 @@
+Thu Aug 26 15:15:30 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* ld.h (BYTE_SIZE, SHORT_SIZE, LONG_SIZE): Define as suggested by
+	Steve.
+
+Wed Aug 25 16:29:56 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* configure.in: recognize m88110.
+
 Tue Aug 24 18:49:40 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	From Peter Hoogenboom <hoogen@shafer.cs.utah.edu>:
