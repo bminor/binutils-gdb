@@ -952,9 +952,11 @@ case "${targ}" in
     ;;
   sh*eb-*-linux*)
     targ_defvec=bfd_elf32_shblin_vec
+    targ_selvecs=bfd_elf32_shlin_vec
     ;;
   sh*-*-linux*)
     targ_defvec=bfd_elf32_shlin_vec
+    targ_selvecs=bfd_elf32_shblin_vec
     ;;
 
 #ifdef BFD64
