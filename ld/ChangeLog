@@ -1,3 +1,11 @@
+2002-05-28  Kuang Hwa Lin <kuang@sbcglobal.net>
+
+	* Makefile.am: Add DLX make target.
+	* configure.tgt: Add DLX configuration.
+	* Makefile.in: Regenerate.
+	* emulparams/elf32_dlx.sh: New file
+	* scripttempl/dlx.sc: New file
+
 2002-05-27  Per Lundberg  <per@caleb.dnsalias.org>
 
 	* Makefile.am (eelf_i386_chaos): Use elf_chaos.sc script.

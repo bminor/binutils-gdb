@@ -2616,6 +2616,19 @@ ENUMDOC
   This is a 32-bit pc-relative reloc.
 
 ENUM
+  BFD_RELOC_DLX_HI16_S
+ENUMDOC
+  DLX relocs
+ENUM
+  BFD_RELOC_DLX_LO16
+ENUMDOC
+  DLX relocs
+ENUM
+  BFD_RELOC_DLX_JMP26
+ENUMDOC
+  DLX relocs
+
+ENUM
   BFD_RELOC_M32R_24
 ENUMDOC
   Mitsubishi M32R relocs.

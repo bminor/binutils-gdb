@@ -1,3 +1,12 @@
+2002-05-28  Kuang Hwa Lin <kuang@sbcglobal.net>
+
+	* configure.in: Add DLX configuraton support.
+	* configure: Regenerate.
+	* Makefile.am: Add DLX configuraton support.
+	* Makefile.in: Regenerate.
+	* disassemble.c: Add DLX support.
+	* dlx-dis.c: New file.
+
 2002-05-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am (sh-dis.lo): Don't put make commands in deps.

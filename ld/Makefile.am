@@ -146,6 +146,7 @@ ALL_EMULATIONS = \
 	ed30v_o.o \
 	ed30velf.o \
 	edelta68.o \
+	eelf32_dlx.o \
 	eebmon29k.o \
 	eelf32_i960.o \
 	eelf32_i860.o \
@@ -502,6 +503,9 @@ ed30v_e.c: $(srcdir)/emulparams/d30v_e.sh \
 edelta68.c: $(srcdir)/emulparams/delta68.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/delta68.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} delta68 "$(tdir_delta68)"
+eelf32_dlx.c: $(srcdir)/emulparams/elf32_dlx.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/dlx.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32_dlx "$(tdir_elf32_dlx)"
 eebmon29k.c: $(srcdir)/emulparams/ebmon29k.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/ebmon29k.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} ebmon29k "$(tdir_ebmon29k)"

@@ -56,6 +56,7 @@ ALL_MACHINES = \
 	cpu-cris.lo \
 	cpu-d10v.lo \
 	cpu-d30v.lo \
+	cpu-dlx.lo \
 	cpu-fr30.lo \
 	cpu-h8300.lo \
 	cpu-h8500.lo \
@@ -104,6 +105,7 @@ ALL_MACHINES_CFILES = \
 	cpu-cris.c \
 	cpu-d10v.c \
 	cpu-d30v.c \
+	cpu-dlx.c \
 	cpu-fr30.c \
 	cpu-h8300.c \
 	cpu-h8500.c \
@@ -198,6 +200,7 @@ BFD32_BACKENDS = \
 	elf32-cris.lo \
 	elf32-d10v.lo \
 	elf32-d30v.lo \
+	elf32-dlx.lo \
 	elf32-fr30.lo \
 	elf32-gen.lo \
 	elf32-h8300.lo \
@@ -347,6 +350,7 @@ BFD32_BACKENDS_CFILES = \
 	elf32-cris.c \
 	elf32-d10v.c \
 	elf32-d30v.c \
+	elf32-dlx.c \
 	elf32-fr30.c \
 	elf32-gen.c \
 	elf32-h8300.c \
@@ -867,6 +871,7 @@ cpu-avr.lo: cpu-avr.c $(INCDIR)/filenames.h
 cpu-cris.lo: cpu-cris.c $(INCDIR)/filenames.h
 cpu-d10v.lo: cpu-d10v.c $(INCDIR)/filenames.h
 cpu-d30v.lo: cpu-d30v.c $(INCDIR)/filenames.h
+cpu-dlx.lo: cpu-d30v.c $(INCDIR)/filenames.h
 cpu-fr30.lo: cpu-fr30.c $(INCDIR)/filenames.h
 cpu-h8300.lo: cpu-h8300.c $(INCDIR)/filenames.h
 cpu-h8500.lo: cpu-h8500.c $(INCDIR)/filenames.h
@@ -1082,6 +1087,10 @@ elf32-d10v.lo: elf32-d10v.c $(INCDIR)/filenames.h elf-bfd.h \
 elf32-d30v.lo: elf32-d30v.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/elf/d30v.h $(INCDIR)/elf/reloc-macros.h \
+  elf32-target.h
+elf32-dlx.lo: elf32-dlx.c $(INCDIR)/filenames.h elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(INCDIR)/elf/dlx.h $(INCDIR)/elf/reloc-macros.h \
   elf32-target.h
 elf32-fr30.lo: elf32-fr30.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \

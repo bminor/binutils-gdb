@@ -56,6 +56,7 @@
 #include "elf/cris.h"
 #include "elf/d10v.h"
 #include "elf/d30v.h"
+#include "elf/dlx.h"
 #include "elf/fr30.h"
 #include "elf/h8.h"
 #include "elf/hppa.h"
@@ -601,6 +602,7 @@ guess_is_rela (e_machine)
     case EM_386:
     case EM_486:
     case EM_960:
+    case EM_DLX:
     case EM_OPENRISC:
     case EM_OR32:
     case EM_M32R:
@@ -1004,6 +1006,10 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	case EM_D30V:
 	case EM_CYGNUS_D30V:
 	  rtype = elf_d30v_reloc_type (type);
+	  break;
+
+	case EM_DLX:
+	  rtype = elf_dlx_reloc_type (type);
 	  break;
 
 	case EM_SH:
@@ -1537,6 +1543,7 @@ get_machine_name (e_machine)
     case EM_XSTORMY16:		return "Sanyo Xstormy16 CPU core";
     case EM_OPENRISC:
     case EM_OR32:		return "OpenRISC";
+    case EM_DLX:		return "OpenDLX";
     default:
       sprintf (buff, _("<unknown>: %x"), e_machine);
       return buff;

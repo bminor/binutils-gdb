@@ -1573,6 +1573,7 @@ enum bfd_architecture
 #define bfd_mach_d10v_ts2      2
 #define bfd_mach_d10v_ts3      3
   bfd_arch_d30v,      /* Mitsubishi D30V */
+  bfd_arch_dlx,       /* DLX */
   bfd_arch_m68hc11,   /* Motorola 68HC11 */
   bfd_arch_m68hc12,   /* Motorola 68HC12 */
   bfd_arch_z8k,       /* Zilog Z8000 */
@@ -2520,6 +2521,15 @@ of the container.  */
 
 /* This is a 32-bit pc-relative reloc.  */
   BFD_RELOC_D30V_32_PCREL,
+
+/* DLX relocs  */
+  BFD_RELOC_DLX_HI16_S,
+
+/* DLX relocs  */
+  BFD_RELOC_DLX_LO16,
+
+/* DLX relocs  */
+  BFD_RELOC_DLX_JMP26,
 
 /* Mitsubishi M32R relocs.
 This is a 24 bit absolute address.  */

@@ -883,6 +883,7 @@ _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset, pfound,
   char *file_name;
   char *directory_name;
   int saw_fun;
+  boolean saw_line, saw_func;
 
   *pfound = false;
   *pfilename = bfd_get_filename (abfd);
@@ -1239,13 +1240,13 @@ _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset, pfound,
   directory_name = indexentry->directory_name;
   str = indexentry->str;
 
+  saw_line = false;
+  saw_func = false;
   for (; stab < (indexentry+1)->stab; stab += STABSIZE)
     {
-      boolean done, saw_line, saw_func;
+      boolean done;
       bfd_vma val;
 
-      saw_line = false;
-      saw_func = false;
       done = false;
 
       switch (stab[TYPEOFF])

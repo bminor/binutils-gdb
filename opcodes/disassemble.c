@@ -28,6 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define ARCH_cris
 #define ARCH_d10v
 #define ARCH_d30v
+#define ARCH_dlx
 #define ARCH_h8300
 #define ARCH_h8500
 #define ARCH_hppa
@@ -124,6 +125,12 @@ disassembler (abfd)
 #ifdef ARCH_d30v
     case bfd_arch_d30v:
       disassemble = print_insn_d30v;
+      break;
+#endif
+#ifdef ARCH_dlx
+    case bfd_arch_dlx:
+      /* As far as I know we only handle big-endian DLX objects.  */
+      disassemble = print_insn_dlx;
       break;
 #endif
 #ifdef ARCH_h8300

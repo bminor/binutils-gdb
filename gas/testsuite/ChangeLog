@@ -1,3 +1,20 @@
+2002-05-28  Kuang Hwa Lin <kuang@sbcglobal.net>
+
+	* gas/dlx: New directory: DLX gas testsuite
+	* alltests.exp: New file: Test driver
+	* branch.d: New file: Expected results.
+	* branch.s: New file: Test branch insns.
+	* itype.d: New file: Expected results.
+	* itype.s: New file: Test ordinary insns.
+	* lhi.d: New file: Expected results.
+	* lhi.s: New file: Test load hi insns.
+	* load.d: New file: Expected results.
+	* load.s: New file: Test load insns.
+	* rtype.d: New file: Expected results.
+	* rtype.s: New file: Test arithmetic insns.
+	* store.d: New file: Expected results.
+	* store.s: New file: Test store insns.
+
 2002-05-23  Tom Rix  <trix@redhat.com>
 
 	* gas/d10v/d10v.exp: Add instruction packing test.

@@ -121,6 +121,8 @@ bfd_machines = @bfd_machines@
 bfd_version = @bfd_version@
 bfd_version_date = @bfd_version_date@
 bfd_version_string = @bfd_version_string@
+bfdincludedir = @bfdincludedir@
+bfdlibdir = @bfdlibdir@
 l = @l@
 tdefaults = @tdefaults@
 wordsize = @wordsize@
@@ -242,7 +244,7 @@ DIST_COMMON =  ChangeLog Makefile.am Makefile.in
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
 all: all-redirect
 .SUFFIXES:

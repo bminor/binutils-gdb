@@ -211,6 +211,7 @@ changequote([,])dnl
 
       d10v-*-*)		    fmt=elf bfd_gas=yes ;;
       d30v-*-*)		    fmt=elf bfd_gas=yes ;;
+      dlx-*-*)		    fmt=elf ;;
 
 
       fr30-*-*)		    fmt=elf bfd_gas=yes ;;

@@ -58,6 +58,7 @@ CFILES = \
 	d10v-opc.c \
 	d30v-dis.c \
 	d30v-opc.c \
+	dlx-dis.c \
 	dis-buf.c \
 	disassemble.c \
 	fr30-asm.c \
@@ -161,6 +162,7 @@ ALL_MACHINES = \
 	d10v-opc.lo \
 	d30v-dis.lo \
 	d30v-opc.lo \
+	dlx-dis.lo \
 	fr30-asm.lo \
 	fr30-desc.lo \
 	fr30-dis.lo \
@@ -471,6 +473,9 @@ d30v-dis.lo: d30v-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h opintl.h
 d30v-opc.lo: d30v-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/d30v.h
+dlx-dis.lo: dlx-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/opcode/dlx.h $(INCDIR)/dis-asm.h $(BFD_H) \
+  $(INCDIR)/symcat.h opintl.h
 dis-buf.lo: dis-buf.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h opintl.h
 disassemble.lo: disassemble.c sysdep.h config.h $(INCDIR)/ansidecl.h \

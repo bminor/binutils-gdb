@@ -1,3 +1,17 @@
+2002-05-28  Kuang Hwa Lin <kuang@sbcglobal.net>
+
+	* config.bfd: Added DLX configuraton.
+	* Makefile.am: Added DLX configuraton.
+	* configure.in: Added DLX configuraton.
+	* archures.c: Add DLX architecure.
+	* reloc.c: Add DLX relocs.
+	* targets.c: Added DLX target vector.
+	* configure: Regenerate.
+	* Makefile.in: Regenreate.
+	* bfd-in2.h: Regenreate.
+	* elf32-dlx.c: New file: Support DLX target.
+	* cpu-dlx.c: New file: Support DLX target.
+
 2002-05-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-m68k.c (elf32_m68k_print_private_bfd_data): Formatting.
