@@ -1,3 +1,13 @@
+2004-12-09  Kazuhiro Inaoka <inaoka.kazuhiro@renesas.com>
+
+	Committed by Kei Sakamoto.
+	* traps-linux.c (m32r_trap): Add entries of the following dummy system
+	calls: __NR_mmap2, __NR_lchown32, __NR_getuid32, __NR_getgid32,
+	__NR_geteuid32, __NR_getegid32, __NR_getgroups32, __NR_fchown32,
+	__NR_setfsuid32, __NR_setfsgid32, __NR_getresuid32,
+	__NR_getresgid32 and __NR_chown32.
+	* syscall.h: Add new definitions of system call number.
+
 2004-12-08  Hans-Peter Nilsson  <hp@axis.com>
 
 	* configure: Regenerate for ../common/aclocal.m4 update.
