@@ -1,5 +1,9 @@
 Mon Aug 25 14:25:48 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* symbols.c (resolve_symbol_value): Store the value back into the
+	symbol expression, to handle add or subtract simplification
+	correctly.  Handle O_symbol_rva.  Add default case.
+
 	* config/tc-ppc.c (ppc_change_csect): Temporarily lower the
 	chunksize while creating the new subsection.
 	* as.c (chunksize): Initialize to zero.
