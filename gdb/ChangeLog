@@ -1,9 +1,68 @@
+Mon Dec 16 12:31:46 1991  Fred Fish  (fnf at cygnus.com)
+
+	* solib.c:  Completely reorganized (rewritten) to support
+	SVR4 shared libraries in a manner very close to the original
+	SunOS implementation.  This support is expected to change and
+	become more general at some future time.  The SVR4 version
+	does not yet work for attached processes, for example.
+
+	* dwarfread.c:  Arrange in dwarf_build_psymtabs() for the 
+	relocation address to be valid whether or not symbols are
+	being read from a shared library or an executable.  Use the
+	relocation address recorded in the psymtab when reading
+	full symbol tables (in read_ofile_symtab).  Ensure that the
+	relocated address ranges are recorded in partial symtabs.
+
+	* elfread.c:  Add new function elf_interpreter() to return the
+	string from the ELF ".interp" section.  This is the interpreter
+	that the kernel tries to run and feed the executable to.
+	Expand arguments to record_misc_function to include a type arg.
+	Modify elf_symtab_read() to supply the type arg, and to do symbol
+	relocations for symbols read in from shared libraries.
+
+	* procfs.c:  Add new functions proc_base_address() and
+	proc_address_to_fd(), used by shared library support.
+
+	* tm-svr4.h:  Add macros to support SVR4 shared libraries.
+	Definitions for SOLIB_ADD, SOLIB_CREATE_INFERIOR_HOOK,
+	CLEAR_SOLIB, and DISABLE_UNSETTABLE_BREAK.
+
+Fri Dec 13 20:11:26 1991  John Gilmore  (gnu at cygnus.com)
+
+	* infrun.c, remote-eb.c, remote-nindy.c, remote-vx.c:  Remove
+	unused START_INFERIOR_HOOK.
+
+	* remote-eb.c:  Change timeout to 24 seconds (*10 fits in byte)
+	to account for slow loading from floppies.
+	(eb_create_inferior):  New fn, from eb_start and
+	nindy_create_inferior.
+	(eb_close):  Only use log_file if nonzero.
+	(eb_xfer_memory):  If not writing, then read!
+	(eb_read_inferior_memory, eb_write_inferior_memory):  Return length.
+	(eb_kill):  A new no-op.
+	(eb_mourn_inferior):  Remove breakpoints, then generically weep.
+
 Fri Dec 13 16:09:23 1991  Fred Fish  (fnf at cygnus.com)
 
 	* breakpoint.c, findvar.c, infrun.c, putenv.c, stack.c:  Fix
 	miscellaneous comparisons of integer with NULL that elicit
 	compiler warnings about comparison of integer with pointer, when
 	NULL is ((void *) 0) rather than just a bare 0.
+
+Wed Dec 11 13:02:58 1991  John Gilmore  (gnu at cygnus.com)
+
+	* breakpoint.c (breakpoint_re_set_one):  Disable each breakpoint
+	while we reset it, in case of problems.  Print breakpoint number
+	in error messages.
+
+	* buildsym.c (read_struct_type):  Avoid sun3 compiler bug with
+	foo[--n].
+
+	* source.c (find_source_lines): If getting file mod time fails,
+	don't warn.
+
+	* target.c (target_xfer_memory):  If errno is set, return it,
+	rather than EIO.
 
 Tue Dec 10 04:07:22 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
 

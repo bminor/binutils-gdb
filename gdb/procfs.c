@@ -451,6 +451,93 @@ DEFUN_VOID(proc_set_exec_trap)
     }
 }
 
+/*
+
+GLOBAL FUNCTION
+
+	proc_base_address -- find base address for segment containing address
+
+SYNOPSIS
+
+	CORE_ADDR proc_base_address (CORE_ADDR addr)
+
+DESCRIPTION
+
+	Given an address of a location in the inferior, find and return
+	the base address of the mapped segment containing that address.
+
+	This is used for example, by the shared library support code,
+	where we have the pc value for some location in the shared library
+	where we are stopped, and need to know the base address of the
+	segment containing that address.
+*/
+
+
+CORE_ADDR
+DEFUN(proc_base_address, (addr),
+      CORE_ADDR addr)
+{
+  int nmap;
+  struct prmap *prmaps;
+  struct prmap *prmap;
+  CORE_ADDR baseaddr = 0;
+
+  if (ioctl (pi.fd, PIOCNMAP, &nmap) == 0)
+    {
+      prmaps = alloca ((nmap + 1) * sizeof (*prmaps));
+      if (ioctl (pi.fd, PIOCMAP, prmaps) == 0)
+	{
+	  for (prmap = prmaps; prmap -> pr_size; ++prmap)
+	    {
+	      if ((prmap -> pr_vaddr <= (caddr_t) addr) &&
+		  (prmap -> pr_vaddr + prmap -> pr_size > (caddr_t) addr))
+		{
+		  baseaddr = (CORE_ADDR) prmap -> pr_vaddr;
+		  break;
+		}
+	    }
+	}
+    }
+  return (baseaddr);
+}
+
+/*
+
+GLOBAL_FUNCTION
+
+	proc_address_to_fd -- return open fd for file mapped to address
+
+SYNOPSIS
+
+	int proc_address_to_fd (CORE_ADDR addr)
+
+DESCRIPTION
+
+	Given an address in the current inferior's address space, use the
+	/proc interface to find an open file descriptor for the file that
+	this address was mapped in from.  Return -1 if there is no current
+	inferior.  Print a warning message if there is an inferior but
+	the address corresponds to no file (IE a bogus address).
+
+*/
+
+int
+DEFUN(proc_address_to_fd, (addr),
+      CORE_ADDR addr)
+{
+  int fd = -1;
+
+  if (pi.valid)
+    {
+      if ((fd = ioctl (pi.fd, PIOCOPENM, (caddr_t *) &addr)) < 0)
+	{
+	  print_sys_errmsg (pi.pathname, errno);
+	  warning ("can't find mapped file for address 0x%x", addr);
+	}
+    }
+  return (fd);
+}
+
 
 #ifdef ATTACH_DETACH
 

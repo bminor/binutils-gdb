@@ -535,6 +535,14 @@ DEFUN(dwarf_build_psymtabs,
       init_psymbol_list (1024);
     }
   
+  /* From this point on, we don't need to pass mainline around, so zap
+     addr to zero if we don't need relocation. */
+
+  if (mainline)
+    {
+      addr = 0;
+    }
+
   /* Follow the compilation unit sibling chain, building a partial symbol
      table entry for each one.  Save enough information about each compilation
      unit to locate the full DWARF information later. */
@@ -2356,7 +2364,6 @@ SYNOPSIS
 
 DESCRIPTION
 
-	OFFSET is a relocation offset which gets added to each symbol (FIXME).
  */
 
 static struct symtab *
@@ -2375,6 +2382,7 @@ DEFUN(read_ofile_symtab, (pst),
   dbbase = xmalloc (DBLENGTH(pst));
   dbroff = DBROFF(pst);
   foffset = DBFOFF(pst) + dbroff;
+  baseaddr = pst -> addr;
   if (bfd_seek (abfd, foffset, 0) ||
       (bfd_read (dbbase, DBLENGTH(pst), 1, abfd) != DBLENGTH(pst)))
     {
@@ -2407,7 +2415,7 @@ DEFUN(read_ofile_symtab, (pst),
       make_cleanup (free, lnbase);
     }
 
-  process_dies (dbbase, dbbase + DBLENGTH(pst), pst->objfile);
+  process_dies (dbbase, dbbase + DBLENGTH(pst), pst -> objfile);
   do_cleanups (back_to);
   return (symtab_list);
 }
@@ -2467,7 +2475,6 @@ DEFUN(psymtab_to_symtab_1,
   
   if (DBLENGTH(pst))		/* Otherwise it's a dummy */
     {
-      /* Init stuff necessary for reading in symbols */
       pst -> symtab = read_ofile_symtab (pst);
       if (info_verbose)
 	{
@@ -2958,7 +2965,8 @@ DEFUN(scan_compilation_units,
 	  culength = nextdie - thisdie;
 	  curlnoffset = di.has_at_stmt_list ? lnoffset + di.at_stmt_list : 0;
 	  pst = start_psymtab (objfile, addr, di.at_name,
-				     di.at_low_pc, di.at_high_pc,
+				     di.at_low_pc + addr,
+				     di.at_high_pc + addr,
 				     dbfoff, curoff, culength, curlnoffset,
 				     global_psymbols.next,
 				     static_psymbols.next);
