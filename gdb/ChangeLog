@@ -1,3 +1,7 @@
+Tue Jan  9 04:44:47 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
+
+	* ch-exp.c (parse_primval): in case ARRAY: Add missing FORWARD_TOKEN ().
+
 Mon Jan  8 13:29:34 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* remote-mips.c (mips_receive_header): Recognize \012 instead

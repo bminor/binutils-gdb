@@ -642,6 +642,7 @@ parse_primval ()
       if (PEEK_TOKEN () != TYPENAME)
 	error ("missing MODENAME after ARRAY()");
       type = PEEK_LVAL().tsym.type;
+      FORWARD_TOKEN ();
       expect ('(', NULL);
       parse_expr ();
       expect (')', "missing right parenthesis");
