@@ -1,3 +1,11 @@
+Mon Jun  8 23:10:07 1992  Fred Fish  (fnf@cygnus.com)
+
+	* readline.h (rl_completer_quote_characters):  Add declaration.
+	* readline.c (rl_completer_quote_characters):  Add global var.
+	* readline.c (strpbrk):  Add prototype and function.
+	* readline.c (rl_complete_internal):  Add code to handle
+	expansion of quoted strings.
+
 Mon May 11 12:39:30 1992  John Gilmore  (gnu at cygnus.com)
 
 	* readline.c:  Can't initialize FILE *'s with stdin and stdout,
