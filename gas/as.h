@@ -557,6 +557,8 @@ void print_version_id PARAMS ((void));
 char *app_push PARAMS ((void));
 char *atof_ieee PARAMS ((char *str, int what_kind, LITTLENUM_TYPE * words));
 char *input_scrub_include_file PARAMS ((char *filename, char *position));
+extern void input_scrub_insert_line PARAMS((const char *line));
+extern void input_scrub_insert_file PARAMS((char *path));
 char *input_scrub_new_file PARAMS ((char *filename));
 char *input_scrub_next_buffer PARAMS ((char **bufp));
 int do_scrub_chars PARAMS ((int (*get) (char *, int), char *to, int tolen));

@@ -1247,6 +1247,24 @@ must take two arguments, a @code{segT} for the section and a @code{valueT}
 for the size of the section, and return a @code{valueT} for the rounded
 size.
 
+@item md_macro_start
+@cindex md_macro_start
+If defined, GAS will call this macro when it starts to include a macro
+expansion.  @code{macro_nest} indicates the current macro nesting level, which
+includes the one being expanded. 
+
+@item md_macro_info
+@cindex md_macro_info
+If defined, GAS will call this macro after the macro expansion has been
+included in the input and after parsing the macro arguments.  The single
+argument is a pointer to the macro processing's internal representation of the
+macro (macro_entry *), which includes expansion of the formal arguments.
+
+@item md_macro_end
+@cindex md_macro_end
+Complement to md_macro_start.  If defined, it is called when finished
+processing an inserted macro expansion, just before decrementing macro_nest. 
+
 @item DOUBLEBAR_PARALLEL
 @cindex DOUBLEBAR_PARALLEL
 Affects the preprocessor so that lines containing '||' don't have their

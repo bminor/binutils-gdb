@@ -70,42 +70,6 @@ extern void *alloca ();
 /* The routines in this file handle macro definition and expansion.
    They are called by both gasp and gas.  */
 
-/* Structures used to store macros. 
-
-   Each macro knows its name and included text.  It gets built with a
-   list of formal arguments, and also keeps a hash table which points
-   into the list to speed up formal search.  Each formal knows its
-   name and its default value.  Each time the macro is expanded, the
-   formals get the actual values attatched to them. */
-
-/* describe the formal arguments to a macro */
-
-typedef struct formal_struct
-  {
-    struct formal_struct *next;	/* next formal in list */
-    sb name;			/* name of the formal */
-    sb def;			/* the default value */
-    sb actual;			/* the actual argument (changed on each expansion) */
-    int index;			/* the index of the formal 0..formal_count-1 */
-  }
-formal_entry;
-
-/* Other values found in the index field of a formal_entry.  */
-#define QUAL_INDEX (-1)
-#define NARG_INDEX (-2)
-#define LOCAL_INDEX (-3)
-
-/* describe the macro. */
-
-typedef struct macro_struct
-  {
-    sb sub;			/* substitution text. */
-    int formal_count;		/* number of formal args. */
-    formal_entry *formals;	/* pointer to list of formal_structs */
-    struct hash_control *formal_hash; /* hash table of formals. */
-  }
-macro_entry;
-
 /* Internal functions.  */
 
 static int get_token PARAMS ((int, sb *, sb *));
@@ -1108,11 +1072,12 @@ macro_expand (idx, in, m, out, comment_char)
    gasp.  Return 1 if a macro is found, 0 otherwise.  */
 
 int
-check_macro (line, expand, comment_char, error)
+check_macro (line, expand, comment_char, error, info)
      const char *line;
      sb *expand;
      int comment_char;
      const char **error;
+     macro_entry **info;
 {
   const char *s;
   char *copy, *cs;
@@ -1152,6 +1117,10 @@ check_macro (line, expand, comment_char, error)
   *error = macro_expand (0, &line_sb, macro, expand, comment_char);
 
   sb_kill (&line_sb);
+
+  /* export the macro information if requested */
+  if (info)
+    *info = macro;
 
   return 1;
 }

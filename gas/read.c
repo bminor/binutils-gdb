@@ -879,17 +879,21 @@ read_a_source_file (name)
 			{
 			  sb out;
 			  const char *err;
+                          macro_entry *macro;
 
-			  if (check_macro (s, &out, '\0', &err))
+			  if (check_macro (s, &out, '\0', &err, &macro))
 			    {
 			      if (err != NULL)
 				as_bad ("%s", err);
 			      *input_line_pointer++ = c;
 			      input_scrub_include_sb (&out,
-						      input_line_pointer);
+						      input_line_pointer, 1);
 			      sb_kill (&out);
 			      buffer_limit =
 				input_scrub_next_buffer (&input_line_pointer);
+#ifdef md_macro_info
+                              md_macro_info (macro);
+#endif
 			      continue;
 			    }
 			}
@@ -1842,7 +1846,7 @@ s_irp (irpc)
 
   sb_kill (&s);
 
-  input_scrub_include_sb (&out, input_line_pointer);
+  input_scrub_include_sb (&out, input_line_pointer, 1);
   sb_kill (&out);
   buffer_limit = input_scrub_next_buffer (&input_line_pointer);
 }
@@ -2675,7 +2679,7 @@ do_repeat (count, start, end)
 
   sb_kill (&one);
 
-  input_scrub_include_sb (&many, input_line_pointer);
+  input_scrub_include_sb (&many, input_line_pointer, 1);
   sb_kill (&many);
   buffer_limit = input_scrub_next_buffer (&input_line_pointer);
 }
@@ -4878,7 +4882,6 @@ void
 s_include (arg)
      int arg ATTRIBUTE_UNUSED;
 {
-  char *newbuf;
   char *filename;
   int i;
   FILE *try;
@@ -4929,8 +4932,7 @@ s_include (arg)
 gotit:
   /* malloc Storage leak when file is found on path.  FIXME-SOMEDAY. */
   register_dependency (path);
-  newbuf = input_scrub_include_file (path, input_line_pointer);
-  buffer_limit = input_scrub_next_buffer (&input_line_pointer);
+  input_scrub_insert_file (path);
 }				/* s_include() */
 
 void 
@@ -5113,6 +5115,38 @@ read_print_statistics (file)
      FILE *file;
 {
   hash_print_statistics (file, "pseudo-op table", po_hash);
+}
+
+/* Inserts the given line into the input stream.  
+   
+   This call avoids macro/conditionals nesting checking, since the contents of
+   the line are assumed to replace the contents of a line already scanned.
+
+   An appropriate use of this function would be substition of input lines when
+   called by md_start_line_hook().  The given line is assumed to already be
+   properly scrubbed.  */
+
+void
+input_scrub_insert_line (line)
+  const char *line;
+{
+  sb newline;
+  sb_new (&newline);
+  sb_add_string (&newline, line);
+  input_scrub_include_sb (&newline, input_line_pointer, 0);
+  sb_kill (&newline);
+  buffer_limit = input_scrub_next_buffer (&input_line_pointer);
+}
+
+/* Insert a file into the input stream; the path must resolve to an actual
+   file; no include path searching or dependency registering is performed.  */ 
+
+void
+input_scrub_insert_file (path)
+  char *path;
+{
+  input_scrub_include_file (path, input_line_pointer);
+  buffer_limit = input_scrub_next_buffer (&input_line_pointer);
 }
 
 /* end of read.c */

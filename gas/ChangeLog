@@ -1,3 +1,30 @@
+2000-03-26  Timothy Wall <twall@cygnus.com>
+
+	* gasp.c (macro_op): Add new argument to check_macro call.
+	Macro structure definitions moved to macro.h
+	* sb.h:  Add argument to prototype for input_scrub_include_sb.
+	* input-scrub.c (input_scrub_include_sb): Allow disabling of sb
+	nesting checks with an additional flag.
+	(struct input_save): Add flag to indicate whether current sb
+	should be checked for proper macro/conditional nesting.
+	(input_scrub_push/pop): Save/restore nest check flag.
+	(input_scrub_next_buffer): Ditto.  Also call end of macro hook if
+	defined. 
+	* macro.c (check_macro):  Allow caller to retrieve parsed macro
+	information if a pointer is provided.  This information may be
+	used by the new macro hooks.
+	* macro.h: Update prototype for check_macro.  Macro struct
+	definitions moved here from macro.c/gasp.c.
+	* read.c (read_a_source_file): Add parameter to check_macro call,
+	and pass macro info to the macro hook, if defined.
+	(input_scrub_insert_line): New.  Allow insertion of a line of
+	characters into the input stream.
+	(input_scrub_insert_file): New.  Allow insertion of an arbitrary
+	file into the input stream.
+	(s_include): Use input_scrub_insert_file.
+	* internals.texi: Document new macro hooks.
+	* as.h: New prototypes added.
+	
 2000-03-26  Alan Modra  <alan@linuxcare.com>
 
 	* config/tc-i386.c: Don't start any as_bad or as_warn message with
