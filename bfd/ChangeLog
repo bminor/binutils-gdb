@@ -1,3 +1,16 @@
+Thu Jul 22 13:34:57 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* reloc.c (enum complain_overflow): New enumeration with the
+	various flavours of overflow checking.
+	(srtuct reloc_howto_struct): Changed complain_on_overflow field
+	from boolean to emum complain_overflow.  Removed obsolete absolute
+	field.
+	(HOWTO): Removed absolute argument.
+	(bfd_perform_relocation): Do overflow checking on all types of
+	fields.
+	* bfd-in2.h: Updated accordingly.
+	* all targets: Updated initialization of reloc howto tables.
+
 Wed Jul 21 20:34:34 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* opncls.c (bfd_create): Don't use C++ keyword "template" as a C

@@ -226,24 +226,21 @@ DEFUN(a29k_reloc,(abfd, reloc_entry, symbol_in, data, input_section, output_bfd)
 */
 
 /*FIXME: I'm not real sure about this table */
-#define NA	0	/* Obsolete fields, via the documentation */
-#define NAB false
 static reloc_howto_type howto_table[] = 
 {
-  {R_ABS,     0, 3, NA, false, NA, NAB, true,a29k_reloc,"ABS",     true, 0xffffffff,0xffffffff, false},
+  {R_ABS,     0, 3, 32, false, 0, complain_overflow_bitfield,a29k_reloc,"ABS",     true, 0xffffffff,0xffffffff, false},
   {1},  {2},  {3},   {4},  {5},  {6},  {7},  {8},  {9}, {10},
   {11}, {12}, {13}, {14}, {15}, {16}, {17}, {18}, {19}, {20},
   {21}, {22}, {23},
-  {R_IREL,    0, 3, NA, true,  NA, NAB, true,a29k_reloc,"IREL",    true, 0xffffffff,0xffffffff, false},
-  {R_IABS,    0, 3, NA, false, NA, NAB, true,a29k_reloc,"IABS",    true, 0xffffffff,0xffffffff, false},
-  {R_ILOHALF, 0, 3, NA, true,  NA, NAB, true,a29k_reloc,"ILOHALF", true, 0x0000ffff,0x0000ffff, false},
-  {R_IHIHALF, 0, 3, NA, true,  NA, NAB, true,a29k_reloc,"IHIHALF", true, 0xffff0000,0xffff0000, false},
-  {R_IHCONST, 0, 3, NA, true,  NA, NAB, true,a29k_reloc,"IHCONST", true, 0xffff0000,0xffff0000, false},
-  {R_BYTE,    0, 0, NA, false, NA, NAB, true,a29k_reloc,"BYTE",    true, 0x000000ff,0x000000ff, false},
-  {R_HWORD,   0, 1, NA, false, NA, NAB, true,a29k_reloc,"HWORD",   true, 0x0000ffff,0x0000ffff, false},
-  {R_WORD,    0, 2, NA, false, NA, NAB, true,a29k_reloc,"WORD",    true, 0xffffffff,0xffffffff, false},
+  {R_IREL,    0, 3, 32, true,  0, complain_overflow_signed,a29k_reloc,"IREL",    true, 0xffffffff,0xffffffff, false},
+  {R_IABS,    0, 3, 32, false, 0, complain_overflow_bitfield, a29k_reloc,"IABS",    true, 0xffffffff,0xffffffff, false},
+  {R_ILOHALF, 0, 3, 16, true,  0, complain_overflow_signed, a29k_reloc,"ILOHALF", true, 0x0000ffff,0x0000ffff, false},
+  {R_IHIHALF, 0, 3, 16, true,  16, complain_overflow_signed, a29k_reloc,"IHIHALF", true, 0xffff0000,0xffff0000, false},
+  {R_IHCONST, 0, 3, 16, true,  0, complain_overflow_signed, a29k_reloc,"IHCONST", true, 0xffff0000,0xffff0000, false},
+  {R_BYTE,    0, 0, 8, false, 0, complain_overflow_bitfield, a29k_reloc,"BYTE",    true, 0x000000ff,0x000000ff, false},
+  {R_HWORD,   0, 1, 16, false, 0, complain_overflow_bitfield, a29k_reloc,"HWORD",   true, 0x0000ffff,0x0000ffff, false},
+  {R_WORD,    0, 2, 32, false, 0, complain_overflow_bitfield, a29k_reloc,"WORD",    true, 0xffffffff,0xffffffff, false},
 };
-#undef NA
 
 #define BADMAG(x) A29KBADMAG(x)
 

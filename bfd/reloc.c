@@ -242,6 +242,34 @@ DESCRIPTION
         
 */
 
+/*
+SUBSUBSECTION
+	<<enum complain_overflow>>
+
+	Indicates what sort of overflow checking should be done when
+	performing a relocation.
+
+CODE_FRAGMENT
+.
+.enum complain_overflow
+.{
+.	{* Do not complain on overflow. *}
+.  complain_overflow_dont,
+.
+.	{* Complain if the bitfield overflows, whether it is considered
+.	   as signed or unsigned. *}
+.  complain_overflow_bitfield,
+.
+.	{* Complain if the value overflows when considered as signed
+.	   number. *}
+.  complain_overflow_signed,
+.
+.	{* Complain if the value overflows when considered as an
+.	   unsigned number. *}
+.  complain_overflow_unsigned
+.};
+
+*/
 
 /*
 SUBSUBSECTION 
@@ -272,7 +300,8 @@ CODE_FRAGMENT
 .	    result is to be subtracted from the data.  *}
 .  int size;
 .
-.       {*  Now obsolete?  But m68k-coff still uses it... *}
+.       {*  The number of bits in the item to be relocated.  This is used
+.	    when doing overflow checking.  *}
 .  unsigned int bitsize;
 .
 .       {*  Notes that the relocation is relative to the location in the
@@ -281,14 +310,13 @@ CODE_FRAGMENT
 .           being relocated. *}
 .  boolean pc_relative;
 .
+.	{*  The bit position of the reloc value in the destination.
+.	    The relocated value is left shifted by this amount. *}
 .  unsigned int bitpos;
 .
-.       {*  Now obsolete *}
-.  boolean absolute;
-.
-.       {* Causes the relocation routine to return an error if overflow
-.          is detected when relocating. *}
-.  boolean complain_on_overflow;
+.	{* What type of overflow error should be checked for when
+.	   relocating. *}
+.  enum complain_overflow complain_on_overflow;
 .
 .       {* If this field is non null, then the supplied function is
 .          called rather than the normal function. This allows really
@@ -344,15 +372,15 @@ DESCRIPTION
 	The HOWTO define is horrible and will go away.
 
 
-.#define HOWTO(C, R,S,B, P, BI, ABS, O, SF, NAME, INPLACE, MASKSRC, MASKDST, PC) \
-.  {(unsigned)C,R,S,B, P, BI, ABS,O,SF,NAME,INPLACE,MASKSRC,MASKDST,PC}
+.#define HOWTO(C, R,S,B, P, BI, O, SF, NAME, INPLACE, MASKSRC, MASKDST, PC) \
+.  {(unsigned)C,R,S,B, P, BI, O,SF,NAME,INPLACE,MASKSRC,MASKDST,PC}
 
 DESCRIPTION
 	And will be replaced with the totally magic way. But for the
 	moment, we are compatible, so do it this way..
 
 
-.#define NEWHOWTO( FUNCTION, NAME,SIZE,REL,IN) HOWTO(0,0,SIZE,0,REL,0,false,false,FUNCTION, NAME,false,0,0,IN)
+.#define NEWHOWTO( FUNCTION, NAME,SIZE,REL,IN) HOWTO(0,0,SIZE,0,REL,0,complain_overflow_dont,FUNCTION, NAME,false,0,0,IN)
 .
 DESCRIPTION
 	Helper routine to turn a symbol into a relocation value.
@@ -548,18 +576,50 @@ DEFUN(bfd_perform_relocation,(abfd,
     }
 
 
-  if (howto->complain_on_overflow && howto->pc_relative)
+  /* FIXME: This overflow checking is incomplete, because the value
+     might have overflowed before we get here.  For a correct check we
+     need to compute the value in a size larger than bitsize, but we
+     can't reasonably do that for a reloc the same size as a host
+     machine word.  */
+  switch (howto->complain_on_overflow)
     {
-      /* We can detect overflow safely here */
+    case complain_overflow_dont:
+      break;
+    case complain_overflow_signed:
+      {
+	/* Assumes two's complement.  */
+	bfd_signed_vma reloc_signed_max = (1 << (howto->bitsize - 1)) - 1;
+	bfd_signed_vma reloc_signed_min = ~ reloc_signed_max;
 
-      bfd_signed_vma reloc_max = (1 << (howto->bitsize - 1))-1;
-      bfd_signed_vma reloc_min = ~(reloc_max);
-
-      if ((bfd_signed_vma) relocation > reloc_max
-	  || (bfd_signed_vma) relocation < reloc_min)
-	{
+	if ((bfd_signed_vma) relocation > reloc_signed_max
+	    || (bfd_signed_vma) relocation < reloc_signed_min)
 	  flag = bfd_reloc_overflow;
-	}
+      }
+      break;
+    case complain_overflow_unsigned:
+      {
+	/* Assumes two's complement.  This expression avoids overflow
+	   if howto->bitsize is the number of bits in bfd_vma.  */
+	bfd_vma reloc_unsigned_max =
+	  (((1 << (howto->bitsize - 1)) - 1) << 1) | 1;
+
+	if ((bfd_vma) relocation > reloc_unsigned_max)
+	  flag = bfd_reloc_overflow;
+      }
+      break;
+    case complain_overflow_bitfield:
+      {
+	/* Assumes two's complement.  This expression avoids overflow
+	   if howto->bitsize is the number of bits in bfd_vma.  */
+	bfd_vma reloc_bits = (((1 << (howto->bitsize - 1)) - 1) << 1) | 1;
+
+	if (((bfd_vma) relocation &~ reloc_bits) != 0
+	    && ((bfd_vma) relocation &~ reloc_bits) != (-1 &~ reloc_bits))
+	  flag = bfd_reloc_overflow;
+      }
+      break;
+    default:
+      abort ();
     }
   
   /* 
@@ -905,7 +965,7 @@ DEFUN(bfd_reloc_type_lookup,(abfd, code),
 }
 
 static reloc_howto_type bfd_howto_32 =
- HOWTO(0, 00,2,32,false,0,false,true,0,"VRT32", false,0xffffffff,0xffffffff,true);
+ HOWTO(0, 00,2,32,false,0,complain_overflow_bitfield,0,"VRT32", false,0xffffffff,0xffffffff,true);
 
 
 /*

@@ -955,6 +955,23 @@ typedef struct reloc_cache_entry
   CONST struct reloc_howto_struct *howto;
 
 } arelent;
+enum complain_overflow
+{
+	 /* Do not complain on overflow. */
+  complain_overflow_dont,
+
+	 /* Complain if the bitfield overflows, whether it is considered
+	   as signed or unsigned. */
+  complain_overflow_bitfield,
+
+	 /* Complain if the value overflows when considered as signed
+	   number. */
+  complain_overflow_signed,
+
+	 /* Complain if the value overflows when considered as an
+	   unsigned number. */
+  complain_overflow_unsigned
+};
 
 typedef CONST struct reloc_howto_struct 
 { 
@@ -975,7 +992,8 @@ typedef CONST struct reloc_howto_struct
 	    result is to be subtracted from the data.  */
   int size;
 
-        /*  Now obsolete?  But m68k-coff still uses it... */
+        /*  The number of bits in the item to be relocated.  This is used
+	    when doing overflow checking.  */
   unsigned int bitsize;
 
         /*  Notes that the relocation is relative to the location in the
@@ -984,14 +1002,13 @@ typedef CONST struct reloc_howto_struct
            being relocated. */
   boolean pc_relative;
 
+	 /*  The bit position of the reloc value in the destination.
+	    The relocated value is left shifted by this amount. */
   unsigned int bitpos;
 
-        /*  Now obsolete */
-  boolean absolute;
-
-        /* Causes the relocation routine to return an error if overflow
-          is detected when relocating. */
-  boolean complain_on_overflow;
+	 /* What type of overflow error should be checked for when
+	   relocating. */
+  enum complain_overflow complain_on_overflow;
 
         /* If this field is non null, then the supplied function is
           called rather than the normal function. This allows really
@@ -1036,9 +1053,9 @@ typedef CONST struct reloc_howto_struct
   boolean pcrel_offset;
 
 } reloc_howto_type;
-#define HOWTO(C, R,S,B, P, BI, ABS, O, SF, NAME, INPLACE, MASKSRC, MASKDST, PC) \
-  {(unsigned)C,R,S,B, P, BI, ABS,O,SF,NAME,INPLACE,MASKSRC,MASKDST,PC}
-#define NEWHOWTO( FUNCTION, NAME,SIZE,REL,IN) HOWTO(0,0,SIZE,0,REL,0,false,false,FUNCTION, NAME,false,0,0,IN)
+#define HOWTO(C, R,S,B, P, BI, O, SF, NAME, INPLACE, MASKSRC, MASKDST, PC) \
+  {(unsigned)C,R,S,B, P, BI, O,SF,NAME,INPLACE,MASKSRC,MASKDST,PC}
+#define NEWHOWTO( FUNCTION, NAME,SIZE,REL,IN) HOWTO(0,0,SIZE,0,REL,0,complain_overflow_dont,FUNCTION, NAME,false,0,0,IN)
 
 #define HOWTO_PREPARE(relocation, symbol)      \
   {                                            \
