@@ -122,7 +122,7 @@ just-check:
 	rootme=`pwd`; export rootme; \
 	srcdir=${srcdir} ; export srcdir ; \
 	EXPECT=${EXPECT} ; export EXPECT ; \
-        $(RPATH_ENVVAR)=$$rootme/../../libstdc++:$$rootme/../../tk/unix:$$rootme/../../tcl/unix:$$rootme/../../bfd:$$rootme/../../opcodes:$$$(RPATH_ENVVAR); \
+        $(RPATH_ENVVAR)=$$rootme/../../expect:$$rootme/../../libstdc++:$$rootme/../../tk/unix:$$rootme/../../tcl/unix:$$rootme/../../bfd:$$rootme/../../opcodes:$$$(RPATH_ENVVAR); \
 	export $(RPATH_ENVVAR); \
 	if [ -f $${rootme}/../../expect/expect ] ; then  \
 	  TCL_LIBRARY=$${srcdir}/../../tcl/library ; \

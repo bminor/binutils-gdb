@@ -1,3 +1,8 @@
+Fri Sep 13 18:16:10 1996  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (just-check): Add path to sibling expect dir
+	to environment variable specified by RPATH_ENVVAR.
+
 Fri Sep 13 12:05:34 1996  Fred Fish  <fnf@cygnus.com>
 
 	* Makefile.in (RPATH_ENVVAR): New var, set to @RPATH_ENVVAR@.
