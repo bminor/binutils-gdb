@@ -1,3 +1,9 @@
+2000-10-25  Kevin Buettner  <kevinb@redhat.com>
+
+	* config/rs6000/rs6000lynx.mt (TDEPFILES): Revert 2000-10-24
+	change in which solib-svr4.o was inadvertently added to this
+	list.
+
 2000-10-25  Fred Fish  <fnf@cygnus.com>
 
 	* mips-tdep.c (MIPS_DEFAULT_MASK_ADDRESS_P): Define using either
