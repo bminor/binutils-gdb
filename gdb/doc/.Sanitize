@@ -34,11 +34,11 @@ all-cfg.texi
 configure.in
 gdb.texinfo
 gdbint.texinfo
-gdbinv-s.texi
 h8-cfg.texi
 lpsrc.sed
 psrc.sed
 refcard.tex
+remote.texi
 stabs.texinfo
 
 # Things which are explicitly *not* kept by default.
