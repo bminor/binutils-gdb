@@ -1664,8 +1664,11 @@ pmon_wait (pid, status)
      seems to be caused by a check on the number of arguments, and the
      command length, within the monitor causing it to echo the command
      as a bad packet. */
-  mips_exit_debug ();
-  mips_enter_debug ();
+  if (mips_monitor != MON_CAIRO)
+    {
+      mips_exit_debug ();
+      mips_enter_debug ();
+    }
 
   /* Translate a MIPS waitstatus.  We use constants here rather than WTERMSIG
      and so on, because the constants we want here are determined by the
