@@ -5721,9 +5721,9 @@ ppc_elf_begin_write_processing (abfd, link_info)
       if (strcmp (ptr + 12, APUINFO_LABEL) != 0)
 	goto fail;
 
-      /* Get the number of apuinfo entries.  */
+      /* Get the number of bytes used for apuinfo entries.  */
       datum = bfd_get_32 (ibfd, ptr + 4);
-      if ((datum * 4 + 20) != length)
+      if (datum + 20 != length)
 	goto fail;
 
       /* Make sure that we do not run off the end of the section.  */
@@ -5731,8 +5731,8 @@ ppc_elf_begin_write_processing (abfd, link_info)
 	goto fail;
 
       /* Scan the apuinfo section, building a list of apuinfo numbers.  */
-      for (i = 0; i < datum; i++)
-	apuinfo_list_add (bfd_get_32 (ibfd, ptr + 20 + (i * 4)));
+      for (i = 0; i < datum; i += 4)
+	apuinfo_list_add (bfd_get_32 (ibfd, ptr + 20 + i));
 
       /* Update the offset.  */
       offset += length;
@@ -5808,7 +5808,7 @@ ppc_elf_final_write_processing (abfd, linker)
   /* Create the apuinfo header.  */
   num_entries = apuinfo_list_length ();
   bfd_put_32 (abfd, sizeof APUINFO_LABEL, buffer);
-  bfd_put_32 (abfd, num_entries, buffer + 4);
+  bfd_put_32 (abfd, num_entries * 4, buffer + 4);
   bfd_put_32 (abfd, 0x2, buffer + 8);
   strcpy (buffer + 12, APUINFO_LABEL);
 

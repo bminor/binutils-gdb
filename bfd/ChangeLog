@@ -1,3 +1,9 @@
+2003-06-23  Mark Mitchell  <mark@codesourcery.com>
+
+	* elf32-ppc.c (ppc_elf_begin_write_processing): Use bytes to count
+	APUinfo slots.
+	(ppc_elf_final_write_processing): Likewise.
+
 2003-06-23  H.J. Lu <hongjiu.lu@intel.com>
 
 	* elflink.h (elf_link_input_bfd): Check raw size when using
