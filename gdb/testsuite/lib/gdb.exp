@@ -357,15 +357,41 @@ proc gdb_test { args } {
     }
 
     set result -1
-    if ![string match $command ""] {
-	if { [send_gdb "$command\n"] != "" } {
-	    global suppress_flag;
+    set string "${command}\n";
+    if { $command != "" } {
+	while { "$string" != "" } {
+	    set foo [string first "\n" "$string"];
+	    set len [string length "$string"];
+	    if { $foo < [expr $len - 1] } {
+		set str [string range "$string" 0 $foo];
+		if { [send_gdb "$str"] != "" } {
+		    global suppress_flag;
 
-	    if { ! $suppress_flag } {
-		perror "Couldn't send $command to GDB.";
+		    if { ! $suppress_flag } {
+			perror "Couldn't send $command to GDB.";
+		    }
+		    fail "$message";
+		    return $result;
+		}
+		gdb_expect 2 {
+		    -re "\[\r\n\]" { }
+		    timeout { }
+		}
+		set string [string range "$string" [expr $foo + 1] end];
+	    } else {
+		break;
 	    }
-	    fail "$message";
-	    return $result;
+	}
+	if { "$string" != "" } {
+	    if { [send_gdb "$string"] != "" } {
+		global suppress_flag;
+
+		if { ! $suppress_flag } {
+		    perror "Couldn't send $command to GDB.";
+		}
+		fail "$message";
+		return $result;
+	    }
 	}
     }
 
@@ -623,7 +649,7 @@ proc default_gdb_exit {} {
     if { [is_remote host] && [board_info host exists fileid] } {
 	send_gdb "quit\n";
 	gdb_expect 10 {
-	    -re "and kill it.*y or n. " {
+	    -re "y or n" {
 		send_gdb "y\n";
 		exp_continue;
 	    }
@@ -632,7 +658,9 @@ proc default_gdb_exit {} {
 	}
     }
 
-    remote_close host;
+    if ![is_remote host] {
+	remote_close host;
+    }
     unset gdb_spawn_id
 }
 
@@ -824,6 +852,11 @@ proc gdb_compile {source dest type options} {
 	lappend options "libs=[target_info gdb_stub]";
 	set options [concat $options2 $options]
     }
+    if [target_info exists is_vxworks] {
+	set options2 { "additional_flags=-Dvxworks" }
+	lappend options "libs=[target_info gdb_stub]";
+	set options [concat $options2 $options]
+    }
     if [info exists GDB_TESTCASE_OPTIONS] {
 	lappend options "additional_flags=$GDB_TESTCASE_OPTIONS";
     }
@@ -926,6 +959,7 @@ proc gdb_suppress_entire_file { reason } {
 proc gdb_suppress_tests { args } {
     global suppress_flag;
 
+    return;  # fnf - disable pending review of results where testsuite ran better without this
     incr suppress_flag;
 
     if { $suppress_flag == 1 } {

@@ -1,3 +1,21 @@
+Tue Mar 31 00:40:32 1998  Bob Manson  <manson@charmed.cygnus.com>
+
+	* lib/gdb.exp(gdb_test): Send multiline commands one at a time; wait
+	for a newline from gdb before continuing.
+	(default_gdb_exit): Just look for y or n.
+
+Tue Mar 24 22:44:52 1998  Bob Manson  <manson@charmed.cygnus.com>
+
+	* config/cygmon.exp: New file.
+
+Mon Mar 16 21:39:11 1998  Bob Manson  <manson@charmed.cygnus.com>
+
+	* gdb.base/list.exp: Fix problem with "list default lines around
+ 	main" test on remote targets.
+
+	* gdb.base/scope.exp: Fix problem with filelocal_bss before
+	run test on remote targets.
+
 Thu Mar 12 16:23:00 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* gdb.asm: New directory.
