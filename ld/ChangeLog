@@ -1,3 +1,9 @@
+2000-05-03  Alan Modra  <alan@linuxcare.com.au>
+
+	From Ulf Carlsson <ulfc@engr.sgi.com> and Andreas Jaeger <aj@suse.de>
+	* lexsup.c (set_section_start): Use bfd_scan_vma rather than
+	strtoul.
+
 2000-04-29  Andreas Jaeger  <aj@suse.de>
 
 	* ld.h: Correctly check GCC version.
