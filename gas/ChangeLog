@@ -1,5 +1,18 @@
 Mon Sep 18 15:22:28 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* read.c (mri_comment_field): New function.
+	(mri_comment_end): New function.
+	(s_align_bytes): Use mri_comment_field.
+	(s_align_ptwo, s_comm, s_mri_common, s_fail, s_globl): Likewise.
+	(s_float_space, s_struct): Likewise.
+	(s_space): Use mri_comment_field rather than doing it by hand.
+	(cons_worker, equals): Likewise.
+	(s_end): Ignore comments starting with '*' or '!'.
+	* read.h (mri_comment_field): Declare.
+	(mri_comment_end): Declare.
+	* cond.c (s_if): Use mri_comment_field.
+	* config/tc-m68k.c (s_chip, s_reg): Likewise.
+
 	* write.c (fixup_segment): Handle ABS-sym in -sym case rather than
 	sym-sym case.
 	* config/obj-coff.c (fixup_segment): Likewise.  Permit negative

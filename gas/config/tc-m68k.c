@@ -4232,7 +4232,14 @@ static void
 s_chip (ignore)
      int ignore;
 {
+  char *stop = NULL;
+  char stopc;
+
+  if (flag_mri)
+    stop = mri_comment_field (&stopc);
   mri_chip ();
+  if (flag_mri)
+    mri_comment_end (stop, stopc);
   demand_empty_rest_of_line ();
 }
 
@@ -4493,6 +4500,8 @@ s_reg (ignore)
   int c;
   struct m68k_op rop;
   unsigned long mask;
+  char *stop = NULL;
+  char stopc;
 
   if (line_label == NULL)
     {
@@ -4500,6 +4509,9 @@ s_reg (ignore)
       ignore_rest_of_line ();
       return;
     }
+
+  if (flag_mri)
+    stop = mri_comment_field (&stopc);
 
   SKIP_WHITESPACE ();
 
@@ -4556,11 +4568,7 @@ s_reg (ignore)
   line_label->sy_frag = &zero_address_frag;
 
   if (flag_mri)
-    {
-      /* Ignore the comment field.  */
-      while (! is_end_of_line[(unsigned char) *input_line_pointer])
-	++input_line_pointer;
-    }
+    mri_comment_end (stop, stopc);
 
   demand_empty_rest_of_line ();
 }
