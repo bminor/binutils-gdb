@@ -23,22 +23,6 @@ else
 	lose_these_too="${d30v_files} ${lose_these_too}"
 fi
 
-v850_files="v850-opc.c v850-dis.c"
-
-if ( echo $* | grep keep\-v850 > /dev/null ) ; then
-	keep_these_too="${v850_files} ${keep_these_too}"
-else
- if ( echo $* | grep keep\-v850e > /dev/null ) ; then
-	keep_these_too="${v850_files} ${keep_these_too}"
- else
-  if ( echo $* | grep keep\-v850eq > /dev/null ) ; then
-	keep_these_too="${v850_files} ${keep_these_too}"
-  else
-	lose_these_too="${v850_files} ${lose_these_too}"
-  fi
- fi
-fi
-
 tic80_files="tic80-opc.c tic80-dis.c"
 
 if ( echo $* | grep keep\-tic80 > /dev/null ) ; then
@@ -115,6 +99,8 @@ stamp-h.in
 sysdep.h
 w65-dis.c
 w65-opc.h
+v850-opc.c
+v850-dis.c
 z8k-dis.c
 z8k-opc.h
 z8kgen.c
@@ -151,45 +137,17 @@ else
 	done
 fi
 
-v850_files="ChangeLog Makefile.in Makefile.am configure.in configure disassemble.c"
-if ( echo $* | grep keep\-v850 > /dev/null ) ; then
-	for i in $v850_files ; do
-		if test ! -d $i && (grep sanitize-v850 $i > /dev/null) ; then
+v850e_files="ChangeLog Makefile.in Makefile.am configure.in configure disassemble.c v850-opc.c v850-dis.c"
+
+if ( echo $* | grep keep\-v850eq > /dev/null ) ; then
+	for i in $v850e_files ; do
+		if test -f $i && (grep sanitize-v850eq $i > /dev/null) ; then
 			if [ -n "${verbose}" ] ; then
-				echo Keeping v850 stuff in $i
+				echo Keeping v850eq stuff in $i
 			fi
 		fi
 	done
 else
-	for i in $v850_files ; do
-		if test ! -d $i && (grep sanitize-v850 $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"v850\" from $i...
-			fi
-			cp $i new
-			sed '/start\-sanitize\-v850/,/end-\sanitize\-v850/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				if [ -n "${verbose}" ] ; then
-					echo Caching $i in .Recover...
-				fi
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
-
-v850e_files="ChangeLog Makefile.in Makefile.am configure.in configure disassemble.c v850-opc.c v850-dis.c"
-if ( echo $* | grep keep\-v850e > /dev/null ) ; then
-  if ( echo $* | grep keep\-v850eq > /dev/null ) ; then
-	for i in $v850e_files ; do
-		if test -f $i && (grep sanitize-v850e $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping v850e/v850eq stuff in $i
-			fi
-		fi
-	done
-  else
 	for i in $v850e_files ; do
 		if test -f $i && (grep sanitize-v850eq $i > /dev/null) ; then
 			if [ -n "${verbose}" ] ; then
@@ -206,21 +164,23 @@ if ( echo $* | grep keep\-v850e > /dev/null ) ; then
 			mv new $i
 		fi
 	done
-  fi
-else
-  if ( echo $* | grep keep\-v850eq > /dev/null ) ; then
-	for i in $v850e_files ; do
-		if test -f $i && (grep sanitize-v850eq $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping v850e/v850eq stuff in $i
-			fi
-		fi
-	done
-  else
+fi
+if ( echo $* | grep keep\-v850e > /dev/null ) ; then
 	for i in $v850e_files ; do
 		if test -f $i && (grep sanitize-v850e $i > /dev/null) ; then
 			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"v850e/v850eq\" from $i...
+				echo Keeping v850e stuff in $i
+			fi
+		fi
+	done
+else
+    if ( echo $* | grep keep\-v850eq > /dev/null ) ; then
+      true
+    else
+	for i in $v850e_files ; do
+		if test -f $i && (grep sanitize-v850e $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"v850e\" from $i...
 			fi
 			cp $i new
 			sed '/start\-sanitize\-v850e/,/end\-sanitize\-v850e/d' < $i > new
@@ -233,7 +193,7 @@ else
 			mv new $i
 		fi
 	done
-  fi
+    fi
 fi
 
 

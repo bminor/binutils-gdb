@@ -3,7 +3,6 @@ Tue Sep  2 18:39:08 1997  Jeffrey A Law  (law@cygnus.com)
         * mn10200-dis.c (disassemble): PC relative instructions are
         relative to the next instruction, not the current instruction.
 
-start-sanitize-v850
 Tue Sep  2 15:41:55 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* v850-dis.c (disassemble): Only signed extend values that are not
@@ -18,7 +17,6 @@ Tue Sep  2 15:39:40 1997  Nick Clifton  <nickc@cygnus.com>
 Tue Aug 26 09:42:28 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* v850-opc.c (MOVHI): Immediate parameter is unsigned.
-end-sanitize-v850
 
 Mon Aug 25 15:58:07 1997  Christopher Provenzano  <proven@cygnus.com>
 
@@ -84,7 +82,6 @@ Fri Aug 15 05:17:48 1997  Doug Evans  <dje@canuck.cygnus.com>
 	* disassemble.c (ARCH_all): Define ARCH_arc.
 	(disassembler): Add ARC support.
 
-start-sanitize-v850
 Wed Aug 13 18:52:11 1997  Nick Clifton  <nickc@cygnus.com>
 
 start-sanitize-v850eq
@@ -111,8 +108,6 @@ start-sanitize-v850e
 	* v850-opc.c: Reorganised and re-layed out to improve readability
 	and portability.
 
-end-sanitize-v850
-	
 Tue Aug  5 23:09:31 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure: Rebuild with autoconf 2.12.1.
@@ -389,14 +384,12 @@ Thu Mar 27 14:24:43 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* mips-opc.c: Add cast when setting mips_opcodes.
 
-start-sanitize-v850
 Tue Mar 25 23:04:00 1997  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* v850-dis.c (disassemble):  Fix sign extension problem.
 	* v850-opc.c (extract_d*):  Fix sign extension problems to make
 	disassembly calculate branch offsets correctly.
 
-end-sanitize-v850
 Mon Mar 24 13:22:13 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* sh-opc.h: Add bf/s and bt/s as synonyms for bf.s and bt.s.
@@ -870,25 +863,21 @@ Thu Jan  2 12:14:29 1997  Jeffrey A Law  (law@cygnus.com)
 	* mn10300-dis.c (disassemble): Make sure all variables are initialized
 	before they are used.
 
-start-sanitize-v850
 Tue Dec 31 12:20:38 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* v850-opc.c (v850_opcodes): Put curly-braces around operands
 	for "breakpoint" instruction.
 
-end-sanitize-v850
 Tue Dec 31 15:38:13 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (ALL_CFLAGS): Add -D_GNU_SOURCE.
 	(dep): Use ALL_CFLAGS rather than CFLAGS.
 
-start-sanitize-v850
 Tue Dec 31 15:09:16 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* v850-opc.c (D8_{6,7}): Set V850_OPERAND_ADJUST_SHORT_MEMORY
 	flag.
 
-end-sanitize-v850
 Mon Dec 30 17:02:11 1996  Fred Fish  <fnf@cygnus.com>
 
 	* Makefile.in (m68k-opc.o, alpha-opc.o): Remove dis-asm.h dependency.
@@ -1148,30 +1137,25 @@ Fri Nov  1 10:29:11 1996  Richard Henderson  <rth@tamu.edu>
 	(alpha_opcodes): Add new BWX, CIX, and MAX instructions.  
 	Recategorize PALcode instructions.
 
-start-sanitize-v850
 Wed Oct 30 16:46:58 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* v850-opc.c (v850_opcodes): Add relaxing "jbr".
 
-end-sanitize-v850
 Tue Oct 29 16:30:28 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* mips-dis.c (_print_insn_mips): Don't print a trailing tab if
 	there are no operand types.
 
-start-sanitize-v850
 Tue Oct 29 12:22:21 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* v850-opc.c (D9_RELAX): Renamed from D9, all references
 	changed.
 	(v850_operands): Make sure D22 immediately follows D9_RELAX.
 
-end-sanitize-v850
 Fri Oct 25 12:12:53 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* i386-dis.c (print_insn_x86): Set info->bytes_per_line to 5.
 
-start-sanitize-v850
 Thu Oct 24 17:53:52 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* v850-opc.c (insert_d8_6): Fix operand insertion for sld.w
@@ -1180,7 +1164,6 @@ Thu Oct 24 17:53:52 1996  Jeffrey A Law  (law@cygnus.com)
 	* v850-opc.c (v850_opcodes): Add "jCC" instructions (aliases for
 	"bCC"instructions).
 
-end-sanitize-v850
 Thu Oct 24 17:21:20 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* mips-dis.c (_print_insn_mips): Use a tab between the instruction
@@ -1196,12 +1179,10 @@ Fri Oct 11 16:03:49 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10300-opc.c (mn10300_opcodes): Fix typo in opcode
 	field for movhu instruction.
-start-sanitize-v850
 
 	* v850-dis.c (disassemble): For V850_OPERAND_SIGNED operands,
 	cast value to "long" not "signed long" to keep hpux10
 	compiler quiet.
-end-sanitize-v850
 
 Thu Oct 10 10:25:58 1996  Jeffrey A Law  (law@cygnus.com)
 
@@ -1284,7 +1265,6 @@ Tue Oct  1 10:49:11 1996  Ian Lance Taylor  <ian@cygnus.com>
 	* i386-dis.c (op_rtn): Change to be a pointer.  Adjust uses
 	accordingly.  Don't declare functions using op_rtn.
 
-start-sanitize-v850
 Fri Sep 27 18:28:59 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* v850-dis.c (disassemble):  Add memaddr argument.  Re-arrange
@@ -1295,7 +1275,6 @@ Fri Sep 27 18:28:59 1996  Stu Grossman  (grossman@critters.cygnus.com)
 	bit operands.
 	* (v850_opcodes):  Add breakpoint insn.
 
-end-sanitize-v850
 Mon Sep 23 12:32:26 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* m68k-opc.c: Move the fmovemx data register cases before the
@@ -1321,7 +1300,6 @@ Tue Sep  3 12:09:46 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* sparc-opc.c (sparc_opcodes): Add setuw, setsw, setx.
 
-start-sanitize-v850
 Tue Sep  3 12:05:25 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* v850-dis.c (disassemble): Make static.  Provide prototype.
@@ -1409,13 +1387,11 @@ Wed Aug 28 15:55:43 1996  Jeffrey A Law  (law@cygnus.com)
 	* v850-opc.c (v850_opcodes): Add null opcode to mark the
 	end of the opcode table.
 
-end-sanitize-v850
 Mon Aug 26 13:35:53 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d10v-opc.c (pre_defined_registers): Added register pairs,
 	"r0-r1", "r2-r3", etc.
 
-start-sanitize-v850
 Fri Aug 23 00:27:01 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* v850-opc.c (v850_operands): Make I16 be a signed operand.
@@ -1498,7 +1474,6 @@ Tue Aug 20 14:41:03 1996  J.T. Conklin  <jtc@hippo.cygnus.com>
 	* configure.in: (bfd_v850_arch) Add new case.
 	* v850-opc.c: New file.
 	
-end-sanitize-v850
 Mon Aug 19 15:21:38 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* sparc-dis.c (print_insn_sparc): Handle little endian sparcs.

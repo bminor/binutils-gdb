@@ -545,17 +545,21 @@ const struct v850_opcode v850_opcodes[] =
 { "jmp",	one (0x0060),		one (0xffe0),	      	{R1}, 			1 },
   
 /* load/store instructions */
+/* start-sanitize-v850eq */
 #ifdef ARCH_v850eq
 { "sld.bu",	one (0x0300),		one (0x0780),	      	{D7,   EP,   R2_NOTR0},	1 },
 { "sld.hu",	one (0x0400),		one (0x0780),	      	{D8_7, EP,   R2_NOTR0},	1 },
 { "sld.b",      one (0x0060),		one (0x07f0),         	{D4,   EP,   R2}, 	1 },
 { "sld.h",      one (0x0070),		one (0x07f0),         	{D5_4, EP,   R2}, 	1 },
 #else
+/* end-sanitize-v850eq */
 { "sld.b",	one (0x0300),		one (0x0780),	      	{D7,   EP,   R2},	1 },
 { "sld.h",	one (0x0400),		one (0x0780),	      	{D8_7, EP,   R2}, 	1 },
 { "sld.bu",     one (0x0060),		one (0x07f0),         	{D4,   EP,   R2_NOTR0},	1 },
 { "sld.hu",     one (0x0070),		one (0x07f0),         	{D5_4, EP,   R2_NOTR0},	1 },
+/* start-sanitize-v850eq */
 #endif
+/* end-sanitize-v850eq */
 { "sld.w",	one (0x0500),		one (0x0781),	      	{D8_6, EP,   R2}, 	1 },
 { "sst.b",	one (0x0380),		one (0x0780),	      	{R2,   D7,   EP}, 	2 },
 { "sst.h",	one (0x0480),		one (0x0780),	      	{R2,   D8_7, EP}, 	2 },
