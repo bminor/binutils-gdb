@@ -1,5 +1,5 @@
 /* Helper routines for C++ support in GDB.
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2003 Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
 
@@ -21,9 +21,56 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include <ctype.h>
 #include "cp-support.h"
 #include "gdb_string.h"
 #include "demangle.h"
+#include "gdb_assert.h"
+#include "gdbcmd.h"
+
+/* The list of "maint cplus" commands.  */
+
+static struct cmd_list_element *maint_cplus_cmd_list = NULL;
+
+/* The actual commands.  */
+
+static void maint_cplus_command (char *arg, int from_tty);
+static void first_component_command (char *arg, int from_tty);
+
+/* Here are some random pieces of trivia to keep in mind while trying
+   to take apart demangled names:
+
+   - Names can contain function arguments or templates, so the process
+     has to be, to some extent recursive: maybe keep track of your
+     depth based on encountering <> and ().
+
+   - Parentheses don't just have to happen at the end of a name: they
+     can occur even if the name in question isn't a function, because
+     a template argument might be a type that's a function.
+
+   - Conversely, even if you're trying to deal with a function, its
+     demangled name might not end with ')': it could be a const or
+     volatile class method, in which case it ends with "const" or
+     "volatile".
+
+   - Parentheses are also used in anonymous namespaces: a variable
+     'foo' in an anonymous namespace gets demangled as "(anonymous
+     namespace)::foo".
+
+   - And operator names can contain parentheses or angle brackets.
+     Fortunately, I _think_ that operator names can only occur in a
+     fairly restrictive set of locations (in particular, they have be
+     at depth 0, don't they?).  */
+
+/* NOTE: carlton/2003-02-21: Daniel Jacobowitz came up with an example
+   where operator names don't occur at depth 0.  Sigh.  (It involved a
+   template argument that was a pointer: I hadn't realized that was
+   possible.)  Handling such edge cases does not seem like a
+   high-priority problem to me.  */
+
+/* FIXME: carlton/2003-03-13: We have several functions here with
+   overlapping functionality; can we combine them?  Also, do they
+   handle all the above considerations correctly?  */
 
 /* Find the last component of the demangled C++ name NAME.  NAME
    must be a method name including arguments, in order to correctly
@@ -138,4 +185,164 @@ method_name_from_physname (const char *physname)
 
   xfree (demangled_name);
   return ret;
+}
+
+/* This returns the length of first component of NAME, which should be
+   the demangled name of a C++ variable/function/method/etc.
+   Specifically, it returns the index of the first colon forming the
+   boundary of the first component: so, given 'A::foo' or 'A::B::foo'
+   it returns the 1, and given 'foo', it returns 0.  */
+
+/* Well, that's what it should do when called externally, but to make
+   the recursion easier, it also stops if it reaches an unexpected ')'
+   or '>'.  */
+
+/* NOTE: carlton/2003-03-13: This function is currently only intended
+   for internal use: it's probably not entirely safe when called on
+   user-generated input, because some of the 'index += 2' lines might
+   go past the end of malformed input.  */
+
+/* Let's optimize away calls to strlen("operator").  */
+
+#define LENGTH_OF_OPERATOR 8
+
+unsigned int
+cp_find_first_component (const char *name)
+{
+  /* Names like 'operator<<' screw up the recursion, so let's
+     special-case them.  I _hope_ they can only occur at the start of
+     a component.  */
+
+  unsigned int index = 0;
+
+  if (strncmp (name, "operator", LENGTH_OF_OPERATOR) == 0)
+    {
+      index += LENGTH_OF_OPERATOR;
+      while (isspace(name[index]))
+	++index;
+      switch (name[index])
+	{
+	case '<':
+	  if (name[index + 1] == '<')
+	    index += 2;
+	  else
+	    index += 1;
+	  break;
+	case '>':
+	case '-':
+	  if (name[index + 1] == '>')
+	    index += 2;
+	  else
+	    index += 1;
+	  break;
+	case '(':
+	  index += 2;
+	  break;
+	default:
+	  index += 1;
+	  break;
+	}
+    }
+
+  for (;; ++index)
+    {
+      switch (name[index])
+	{
+	case '<':
+	  /* Template; eat it up.  The calls to cp_first_component
+	     should only return (I hope!) when they reach the '>'
+	     terminating the component or a '::' between two
+	     components.  (Hence the '+ 2'.)  */
+	  index += 1;
+	  for (index += cp_find_first_component (name + index);
+	       name[index] != '>';
+	       index += cp_find_first_component (name + index))
+	    {
+	      gdb_assert (name[index] == ':');
+	      index += 2;
+	    }
+	  break;
+	case '(':
+	  /* Similar comment as to '<'.  */
+	  index += 1;
+	  for (index += cp_find_first_component (name + index);
+	       name[index] != ')';
+	       index += cp_find_first_component (name + index))
+	    {
+	      gdb_assert (name[index] == ':');
+	      index += 2;
+	    }
+	  break;
+	case '>':
+	case ')':
+	case '\0':
+	case ':':
+	  return index;
+	default:
+	  break;
+	}
+    }
+}
+
+/* If NAME is the fully-qualified name of a C++
+   function/variable/method/etc., this returns the length of its
+   entire prefix: all of the namespaces and classes that make up its
+   name.  Given 'A::foo', it returns 1, given 'A::B::foo', it returns
+   4, given 'foo', it returns 0.  */
+
+unsigned int
+cp_entire_prefix_len (const char *name)
+{
+  unsigned int current_len = cp_find_first_component (name);
+  unsigned int previous_len = 0;
+
+  while (name[current_len] != '\0')
+    {
+      gdb_assert (name[current_len] == ':');
+      previous_len = current_len;
+      /* Skip the '::'.  */
+      current_len += 2;
+      current_len += cp_find_first_component (name + current_len);
+    }
+
+  return previous_len;
+}
+
+/* Don't allow just "maintenance cplus".  */
+
+static  void
+maint_cplus_command (char *arg, int from_tty)
+{
+  printf_unfiltered ("\"maintenance cplus\" must be followed by the name of a command.\n");
+  help_list (maint_cplus_cmd_list, "maintenance cplus ", -1, gdb_stdout);
+}
+
+/* This is a front end for cp_find_first_component, for unit testing.
+   Be careful when using it: see the NOTE above
+   cp_find_first_component.  */
+
+static void
+first_component_command (char *arg, int from_tty)
+{
+  int len = cp_find_first_component (arg);
+  char *prefix = alloca (len + 1);
+
+  memcpy (prefix, arg, len);
+  prefix[len] = '\0';
+
+  printf_unfiltered ("%s\n", prefix);
+}
+
+void
+_initialize_cp_support (void)
+{
+  add_prefix_cmd ("cplus", class_maintenance, maint_cplus_command,
+		  "C++ maintenance commands.", &maint_cplus_cmd_list,
+		  "maintenance cplus ", 0, &maintenancelist);
+  add_alias_cmd ("cp", "cplus", class_maintenance, 1, &maintenancelist);
+
+  add_cmd ("first_component", class_maintenance, first_component_command,
+	   "Print the first class/namespace component of NAME.",
+	   &maint_cplus_cmd_list);
+		  
 }

@@ -23,6 +23,21 @@
 #include "block.h"
 #include "symtab.h"
 #include "symfile.h"
+#include "gdb_obstack.h"
+#include "cp-support.h"
+
+/* This is used by struct block to store namespace-related info for
+   C++ files, namely using declarations and the current namespace in
+   scope.  */
+
+struct block_namespace_info
+{
+  const char *scope;
+  struct using_direct *using;
+};
+
+static void block_initialize_namespace (struct block *block,
+					struct obstack *obstack);
 
 /* Return Nonzero if block a is lexically nested within block b,
    or if a and b have the same pc range.
@@ -138,4 +153,49 @@ struct block *
 block_for_pc (register CORE_ADDR pc)
 {
   return block_for_pc_sect (pc, find_pc_mapped_section (pc));
+}
+
+/* Now come some functions designed to deal with C++ namespace
+   issues.  */
+
+/* Set BLOCK's scope member to SCOPE; if needed, allocate memory via
+   OBSTACK.  (It won't make a copy of SCOPE, however, so that already
+   has to be allocated correctly.)  */
+
+void
+block_set_scope (struct block *block, const char *scope,
+		 struct obstack *obstack)
+{
+  block_initialize_namespace (block, obstack);
+
+  BLOCK_NAMESPACE (block)->scope = scope;
+}
+
+/* Set BLOCK's using member to USING; if needed, allocate memory via
+   OBSTACK.  (It won't make a copy of USING, however, so that already
+   has to be allocated correctly.)  */
+
+void
+block_set_using (struct block *block,
+		 struct using_direct *using,
+		 struct obstack *obstack)
+{
+  block_initialize_namespace (block, obstack);
+
+  BLOCK_NAMESPACE (block)->using = using;
+}
+
+/* If BLOCK_NAMESPACE (block) is NULL, allocate it via OBSTACK and
+   ititialize its members to zero.  */
+
+static void
+block_initialize_namespace (struct block *block, struct obstack *obstack)
+{
+  if (BLOCK_NAMESPACE (block) == NULL)
+    {
+      BLOCK_NAMESPACE (block)
+	= obstack_alloc (obstack, sizeof (struct block_namespace_info));
+      BLOCK_NAMESPACE (block)->scope = NULL;
+      BLOCK_NAMESPACE (block)->using = NULL;
+    }
 }

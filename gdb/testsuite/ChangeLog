@@ -1,3 +1,7 @@
+2003-04-15  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/maint.exp: New file.
+
 2003-04-14  Elena Zannoni  <ezannoni@redhat.com>
 
 	* gdb.threads/schedlock.c: Change type of thread function argument

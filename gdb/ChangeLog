@@ -1,3 +1,53 @@
+2003-04-15  David Carlton  <carlton@math.stanford.edu>
+
+	* Makefile.in (SFILES): Add cp-namespace.c.
+	(COMMON_OBS): Add cp-namespace.o.
+	(block.o): Depend on gdb_obstack_h and cp_support_h.
+	(buildsym.o): Depend on cp_support_h.
+	(cp-namespace.o): New.
+	(cp-support.o): Depend on gdb_string_h, demangle_h, gdb_assert_h,
+	gdb_obstack_h, symtab_h, symfile_h, and gdbcmd_h.
+	(dwarf2read.o): Depend on cp_support_h.
+	* jv-lang.c (get_java_class_symtab): Set BLOCK_NAMESPACE.
+	* dwarf2read.c (process_die): Set processing_has_namespace_info,
+	processing_current_namespace.
+	(read_namespace): Update processing_current_namespace; check for
+	anonymous namespaces.
+	(dwarf2_name): New function.
+	(dwarf2_extension): Ditto.
+	* cp-support.h: Update copyright, contributors.
+	Add inclusion guards.
+	Add opaque declaration for structs obstack, block, symbol.
+	(struct using_direct): New struct.
+	Add declarations for cp_find_first_component,
+	cp_entire_prefix_len, processing_has_namespace_info,
+	processing_current_namespace, cp_is_anonymous,
+	cp_add_using_directive, cp_initialize_namespace,
+	cp_finalize_namespace, cp_set_block_scope,
+	cp_scan_for_anonymous_namespaces.
+	* cp-namespace.c: New file.
+	* cp-support.c: Update copyright.
+	Include ctype.h, gdb_assert.h, gdbcmd.h.
+	New variable maint_cplus_cmd_list.
+	(cp_find_first_component): New function.
+	(cp_entire_prefix_len, maint_cplus_command)
+	(first_component_command, _initialize_cp_support): Ditto.
+	* buildsym.c: Include cp-support.h.
+	New variable using_list.
+	(add_symbol_to_list): Check for anonymous namespaces.
+	(finish_block): Set block's scope.
+	(start_symtab): Initialize C++ namespace support.
+	(end_symtab): Finalize C++ namespace support.
+	* block.h: Add opaque declarations for structs
+	block_namespace_info, using_direct, and obstack.
+	Add declarations for block_set_scope and block_set_using.
+	(struct block): Add 'language_specific' member.
+	(BLOCK_NAMESPACE): New macro.
+	* block.c: Include gdb_obstack.h and cp-support.h.
+	(struct block_namespace_info): New struct.
+	(block_set_scope): New function.
+	(block_set_using, block_initialize_namespace): Ditto.
+
 2003-04-14  Kevin Buettner  <kevinb@redhat.com>
 
 	* solib-svr4.c (svr4_have_link_map_offsets): New function.

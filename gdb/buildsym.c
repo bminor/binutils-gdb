@@ -44,6 +44,8 @@
 #include "macrotab.h"
 #include "demangle.h"		/* Needed by SYMBOL_INIT_DEMANGLED_NAME.  */
 #include "block.h"
+#include "cp-support.h"
+
 /* Ask buildsym.h to define the vars it normally declares `extern'.  */
 #define	EXTERN
 /**/
@@ -91,7 +93,10 @@ add_free_pendings (struct pending *list)
     }
 }
       
-/* Add a symbol to one of the lists of symbols.  */
+/* Add a symbol to one of the lists of symbols.  While we're at it, if
+   we're in the C++ case and don't have full namespace debugging info,
+   check to see if it references an anonymous namespace; if so, add an
+   appropriate using directive.  */
 
 void
 add_symbol_to_list (struct symbol *symbol, struct pending **listhead)
@@ -122,6 +127,12 @@ add_symbol_to_list (struct symbol *symbol, struct pending **listhead)
     }
 
   (*listhead)->symbol[(*listhead)->nsyms++] = symbol;
+
+  /* Check to see if we might need to look for a mention of anonymous
+     namespaces.  */
+  
+  if (SYMBOL_LANGUAGE (symbol) == language_cplus)
+    cp_scan_for_anonymous_namespaces (symbol);
 }
 
 /* Find a symbol named NAME on a LIST.  NAME need not be
@@ -280,6 +291,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
   BLOCK_END (block) = end;
   /* Superblock filled in when containing block is made */
   BLOCK_SUPERBLOCK (block) = NULL;
+  BLOCK_NAMESPACE (block) = NULL;
 
   BLOCK_GCC_COMPILED (block) = processing_gcc_compilation;
 
@@ -371,6 +383,12 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 		    }
 		}
 	    }
+	}
+
+      /* If we're in the C++ case, set the block's scope.  */
+      if (SYMBOL_LANGUAGE (symbol) == language_cplus)
+	{
+	  cp_set_block_scope (symbol, block, &objfile->symbol_obstack);
 	}
     }
   else
@@ -814,6 +832,10 @@ start_symtab (char *name, char *dirname, CORE_ADDR start_addr)
     }
   context_stack_depth = 0;
 
+  /* Set up support for C++ namespace support, in case we need it.  */
+
+  cp_initialize_namespace ();
+
   /* Initialize the list of sub source files with one entry for this
      file (the top-level source file).  */
 
@@ -935,6 +957,8 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
       finish_block (0, &global_symbols, 0, last_source_start_addr, end_addr,
 		    objfile);
       blockvector = make_blockvector (objfile);
+      cp_finalize_namespace (BLOCKVECTOR_BLOCK (blockvector, STATIC_BLOCK),
+			     &objfile->symbol_obstack);
     }
 
 #ifndef PROCESS_LINENUMBER_HOOK

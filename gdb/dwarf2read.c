@@ -43,6 +43,7 @@
 #include "bcache.h"
 #include "dwarf2expr.h"
 #include "dwarf2loc.h"
+#include "cp-support.h"
 
 #include <fcntl.h>
 #include "gdb_string.h"
@@ -866,6 +867,10 @@ static void process_die (struct die_info *, struct objfile *,
 			 const struct comp_unit_head *);
 
 static char *dwarf2_linkage_name (struct die_info *);
+
+static char *dwarf2_name (struct die_info *die);
+
+static struct die_info *dwarf2_extension (struct die_info *die);
 
 static char *dwarf_tag_name (unsigned int);
 
@@ -1805,6 +1810,11 @@ process_die (struct die_info *die, struct objfile *objfile,
     case DW_TAG_common_inclusion:
       break;
     case DW_TAG_namespace:
+      if (!processing_has_namespace_info)
+	{
+	  processing_has_namespace_info = 1;
+	  processing_current_namespace = "";
+	}
       read_namespace (die, objfile, cu_header);
       break;
     case DW_TAG_imported_declaration:
@@ -1815,6 +1825,11 @@ process_die (struct die_info *die, struct objfile *objfile,
 	 shouldn't in the C++ case, but conceivably could in the
 	 Fortran case, so we'll have to replace this gdb_assert if
 	 Fortran compilers start generating that info.  */
+      if (!processing_has_namespace_info)
+	{
+	  processing_has_namespace_info = 1;
+	  processing_current_namespace = "";
+	}
       gdb_assert (!die->has_children);
       break;
     default:
@@ -3187,13 +3202,59 @@ read_common_block (struct die_info *die, struct objfile *objfile,
 
 /* Read a C++ namespace.  */
 
-/* FIXME: carlton/2002-10-16: For now, we don't actually do anything
-   useful with the namespace data: we just process its children.  */
-
 static void
 read_namespace (struct die_info *die, struct objfile *objfile,
 		const struct comp_unit_head *cu_header)
 {
+  const char *previous_namespace = processing_current_namespace;
+  const char *name = NULL;
+  int is_anonymous;
+  struct die_info *current_die;
+
+  /* Loop through the extensions until we find a name.  */
+
+  for (current_die = die;
+       current_die != NULL;
+       current_die = dwarf2_extension (die))
+    {
+      name = dwarf2_name (current_die);
+      if (name != NULL)
+	break;
+    }
+
+  /* Is it an anonymous namespace?  */
+
+  is_anonymous = (name == NULL);
+  if (is_anonymous)
+    name = "(anonymous namespace)";
+
+  /* Now build the name of the current namespace.  */
+
+  if (previous_namespace[0] == '\0')
+    {
+      processing_current_namespace = name;
+    }
+  else
+    {
+      /* We need temp_name around because processing_current_namespace
+	 is a const char *.  */
+      char *temp_name = alloca (strlen (previous_namespace)
+				+ 2 + strlen(name) + 1);
+      strcpy (temp_name, previous_namespace);
+      strcat (temp_name, "::");
+      strcat (temp_name, name);
+
+      processing_current_namespace = temp_name;
+    }
+
+  /* If it's an anonymous namespace that we're seeing for the first
+     time, add a using directive.  */
+
+  if (is_anonymous && dwarf_attr (die, DW_AT_extension) == NULL)
+    cp_add_using_directive (processing_current_namespace,
+			    strlen (previous_namespace),
+			    strlen (processing_current_namespace));
+
   if (die->has_children)
     {
       struct die_info *child_die = die->next;
@@ -3204,6 +3265,8 @@ read_namespace (struct die_info *die, struct objfile *objfile,
 	  child_die = sibling_die (child_die);
 	}
     }
+
+  processing_current_namespace = previous_namespace;
 }
 
 /* Extract all information from a DW_TAG_pointer_type DIE and add to
@@ -5668,6 +5731,43 @@ dwarf2_linkage_name (struct die_info *die)
   if (attr && DW_STRING (attr))
     return DW_STRING (attr);
   return NULL;
+}
+
+/* Get name of a die, return NULL if not found.  */
+
+static char *
+dwarf2_name (struct die_info *die)
+{
+  struct attribute *attr;
+
+  attr = dwarf_attr (die, DW_AT_name);
+  if (attr && DW_STRING (attr))
+    return DW_STRING (attr);
+  return NULL;
+}
+
+/* Return the die that this die in an extension of, or NULL if there
+   is none.  */
+
+static struct die_info *
+dwarf2_extension (struct die_info *die)
+{
+  struct attribute *attr;
+  struct die_info *extension_die;
+  unsigned int ref;
+
+  attr = dwarf_attr (die, DW_AT_extension);
+  if (attr == NULL)
+    return NULL;
+
+  ref = dwarf2_get_ref_die_offset (attr);
+  extension_die = follow_die_ref (ref);
+  if (!extension_die)
+    {
+      error ("Dwarf Error: Cannot find referent at offset %d.", ref);
+    }
+
+  return extension_die;
 }
 
 /* Convert a DIE tag into its string name.  */

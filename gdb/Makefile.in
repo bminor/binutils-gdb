@@ -512,7 +512,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	c-exp.y c-lang.c c-typeprint.c c-valprint.c \
 	charset.c cli-out.c coffread.c coff-pe-read.c \
 	complaints.c completer.c corefile.c \
-	cp-abi.c cp-support.c cp-valprint.c \
+	cp-abi.c cp-support.c cp-namespace.c cp-valprint.c \
 	dbxread.c demangle.c disasm.c doublest.c \
 	dummy-frame.c dwarfread.c dwarf2expr.c dwarf2loc.c dwarf2read.c \
 	elfread.c environ.c eval.c event-loop.c event-top.c expprint.c \
@@ -864,6 +864,7 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
 	frame.o frame-unwind.o doublest.o \
 	frame-base.o \
 	gnu-v2-abi.o gnu-v3-abi.o hpacc-abi.o cp-abi.o cp-support.o \
+	cp-namespace.o \
 	reggroups.o
 
 OBS = $(COMMON_OBS) $(ANNOTATE_OBS)
@@ -1551,7 +1552,8 @@ ax-gdb.o: ax-gdb.c $(defs_h) $(symtab_h) $(symfile_h) $(gdbtypes_h) \
 	$(regcache_h)
 ax-general.o: ax-general.c $(defs_h) $(ax_h) $(value_h) $(gdb_string_h)
 bcache.o: bcache.c $(defs_h) $(gdb_obstack_h) $(bcache_h) $(gdb_string_h)
-block.o: block.c $(defs_h) $(block_h) $(symtab_h) $(symfile_h)
+block.o: block.c $(defs_h) $(block_h) $(symtab_h) $(symfile_h) \
+	$(gdb_obstack_h) $(cp_support_h)
 blockframe.o: blockframe.c $(defs_h) $(symtab_h) $(bfd_h) $(symfile_h) \
 	$(objfiles_h) $(frame_h) $(gdbcore_h) $(value_h) $(target_h) \
 	$(inferior_h) $(annotate_h) $(regcache_h) $(gdb_assert_h) \
@@ -1567,7 +1569,7 @@ buildsym.o: buildsym.c $(defs_h) $(bfd_h) $(gdb_obstack_h) $(symtab_h) \
 	$(symfile_h) $(objfiles_h) $(gdbtypes_h) $(gdb_assert_h) \
 	$(complaints_h)	$(gdb_string_h) $(expression_h) $(language_h) \
 	$(bcache_h) $(filenames_h) $(macrotab_h) $(demangle_h) $(buildsym_h) \
-	$(stabsread_h) $(block_h)
+	$(stabsread_h) $(block_h) $(cp_support_h)
 builtin-regs.o: builtin-regs.c $(defs_h) $(builtin_regs_h) $(gdbtypes_h) \
 	$(gdb_string_h) $(gdb_assert_h)
 c-lang.o: c-lang.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
@@ -1613,7 +1615,10 @@ corelow.o: corelow.c $(defs_h) $(gdb_string_h) $(frame_h) $(inferior_h) \
 	$(gdbthread_h) $(regcache_h) $(symfile_h) $(readline_h)
 cp-abi.o: cp-abi.c $(defs_h) $(value_h) $(cp_abi_h) $(command_h) \
 	$(gdbcmd_h) $(ui_out_h) $(gdb_string_h)
-cp-support.o: cp-support.c $(defs_h) $(cp_support_h)
+cp-namespace.o: cp-namespace.c $(defs_h) $(cp_support_h) $(gdb_obstack_h) \
+	$(symtab_h) $(symfile_h) $(gdb_assert_h) $(block_h)
+cp-support.o: cp-support.c $(defs_h) $(cp_support_h) $(gdb_string_h) \
+	$(demangle_h) $(gdb_assert_h) $(gdbcmd_h)
 cp-valprint.o: cp-valprint.c $(defs_h) $(gdb_obstack_h) $(symtab_h) \
 	$(gdbtypes_h) $(expression_h) $(value_h) $(command_h) $(gdbcmd_h) \
 	$(demangle_h) $(annotate_h) $(gdb_string_h) $(c_lang_h) $(target_h) \
@@ -1666,7 +1671,7 @@ dwarf2read.o: dwarf2read.c $(defs_h) $(bfd_h) $(symtab_h) $(gdbtypes_h) \
 	$(symfile_h) $(objfiles_h) $(elf_dwarf2_h) $(buildsym_h) \
 	$(demangle_h) $(expression_h) $(filenames_h) $(macrotab_h) \
 	$(language_h) $(complaints_h) $(bcache_h) $(dwarf2expr_h) \
-	$(dwarf2loc_h) $(gdb_string_h) $(gdb_assert_h)
+	$(dwarf2loc_h) $(cp_support_h) $(gdb_string_h) $(gdb_assert_h)
 dwarfread.o: dwarfread.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(symfile_h) \
 	$(objfiles_h) $(elf_dwarf_h) $(buildsym_h) $(demangle_h) \
 	$(expression_h) $(language_h) $(complaints_h) $(gdb_string_h)
