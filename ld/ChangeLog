@@ -1,3 +1,8 @@
+Fri Oct 11 15:43:04 1991  Roland H. Pesch  (pesch at cygnus.com)
+
+	* Makefile.in: new targets ld.ms, ld-index.ms
+	ld.texinfo: remove tabs, other cleanups for texi2roff
+
 Fri Oct 11 13:51:54 1991  Per Bothner  (bothner at cygnus.com)
 
 	* ldmain.c (main): Make config.magic_demand_paged be true
