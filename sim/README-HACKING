@@ -1,11 +1,13 @@
 This is a loose collection of notes for people hacking on simulators.
-If this document gets big enough it can be prettied it up then.
+If this document gets big enough it can be prettied up then.
 
 Contents
 
 - The "common" directory
 - Common Makefile Support
+- TAGS support
 - Generating "configure" files
+- tconfig.in
 
 The "common" directory
 ======================
@@ -70,9 +72,13 @@ The Makefile.in of a simulator using the common framework should look like:
 # These variables are given default values in COMMON_PRE_CONFIG_FRAG.
 # We override the ones we need to here.
 # Not all of these need to be mentioned, only the necessary ones.
+# In fact it is better to *not* mention ones if the value is the default.
 
 # List of object files, less common parts.
 SIM_OBJS =
+# List of extra dependencies.
+# Generally this consists of simulator specific files included by sim-main.h.
+SIM_EXTRA_DEPS =
 # List of flags to always pass to $(CC).
 SIM_EXTRA_CFLAGS =
 # List of extra libraries to link with.
@@ -101,6 +107,22 @@ The resulting Makefile is created by doing autoconf substitions on
 both the target's Makefile.in and Make-common.in, and inserting
 the two pieces of Make-common.in into the target's Makefile.in at
 COMMON_{PRE,POST}_CONFIG_FRAG.
+
+Note that SIM_EXTRA_{INSTALL,CLEAN} could be removed and "::" targets
+could be used instead.  However, it's not clear yet whether "::" targets
+are portable enough.
+
+TAGS support
+============
+
+Many files generate program symbols at compile time.
+Such symbols can't be found with grep nor do they normally appear in
+the TAGS file.  To get around this, source files can add the comment
+
+/* TAGS: foo1 foo2 */
+
+where foo1, foo2 are program symbols.  Symbols found in such comments
+are greppable and appear in the TAGS file.
 
 Generating "configure" files
 ============================
@@ -130,4 +152,13 @@ updated using the sequence:
 	$  make -f Makefile.in autoheader-changelog
 	$  more */new-ChangeLog
 	$  make -f Makefile.in autoheader-install
+
+tconfig.in
+==========
 
+File tconfig.in defines one or more target configuration macros
+(e.g. a tm.h file).  There are very few that need defining.
+For a list of all of them, see common/tconfig.in.
+It contains them all, commented out.
+The intent is that a new port can just copy this file and
+define the ones it needs.
