@@ -1,5 +1,13 @@
 Thu Jul  8 08:22:05 1993  Doug Evans  (dje@canuck.cygnus.com)
 
+	* (REGISTER_TYPES): Adjust for h8/300h.
+	(REGISTER_RAW_SIZE): Ditto.
+	(REGISTER_VIRTUAL_TYPE): Use builtin_type_unsigned_long for regs
+	on the h8/300h (ints may still be 16 bits).
+	(EXTRACT_RETURN_VALUE, STORE_RETURN_VALUE,
+	EXTRACT_STRUCT_VALUE_ADDRESS): Add FIXME's for h8/300h.  Some
+	thought needed here.
+
 	* h8300-tdep.c (print_insn): Call print_insn_h8300h if h8/300h.
 	(examine_prologue): reg_save_depth is 4 if h8/300h.
 
