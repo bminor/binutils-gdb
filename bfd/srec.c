@@ -586,7 +586,7 @@ DEFUN (srec_set_section_contents, (abfd, section, location, offset, bytes_to_do)
 	  bfd_set_error (bfd_error_no_memory);
 	  return false;
 	}
-      memcpy (data, location, bytes_to_do);
+      memcpy ((PTR) data, location, bytes_to_do);
 
       if ((section->lma + offset + bytes_to_do) <= 0xffff)
 	{

@@ -932,7 +932,7 @@ bfd_ecoff_debug_accumulate_other (handle, output_bfd, output_debug,
   asymbol **sym_end;
   PTR external_fdr;
 
-  memset (&fdr, 0, sizeof fdr);
+  memset ((PTR) &fdr, 0, sizeof fdr);
 
   sec = bfd_get_section_by_name (input_bfd, ".text");
   if (sec != NULL)
@@ -971,7 +971,7 @@ bfd_ecoff_debug_accumulate_other (handle, output_bfd, output_debug,
 
       if (((*sym_ptr)->flags & BSF_EXPORT) != 0)
 	continue;
-      memset (&internal_sym, 0, sizeof internal_sym);
+      memset ((PTR) &internal_sym, 0, sizeof internal_sym);
       internal_sym.iss = ecoff_add_string (ainfo, info, output_debug, &fdr,
 					   (*sym_ptr)->name);
 
@@ -1168,7 +1168,7 @@ ecoff_align_debug (abfd, debug, swap)
   if (add != debug_align)
     {
       if (debug->line != (unsigned char *) NULL)
-	memset (debug->line + symhdr->cbLine, 0, add);
+	memset ((PTR) (debug->line + symhdr->cbLine), 0, add);
       symhdr->cbLine += add;
     }
 
@@ -1176,7 +1176,7 @@ ecoff_align_debug (abfd, debug, swap)
   if (add != debug_align)
     {
       if (debug->ss != (char *) NULL)
-	memset (debug->ss + symhdr->issMax, 0, add);
+	memset ((PTR) (debug->ss + symhdr->issMax), 0, add);
       symhdr->issMax += add;
     }
 
@@ -1184,7 +1184,7 @@ ecoff_align_debug (abfd, debug, swap)
   if (add != debug_align)
     {
       if (debug->ssext != (char *) NULL)
-	memset (debug->ssext + symhdr->issExtMax, 0, add);
+	memset ((PTR) (debug->ssext + symhdr->issExtMax), 0, add);
       symhdr->issExtMax += add;
     }
 
@@ -1192,7 +1192,7 @@ ecoff_align_debug (abfd, debug, swap)
   if (add != aux_align)
     {
       if (debug->external_aux != (union aux_ext *) NULL)
-	memset (debug->external_aux + symhdr->iauxMax, 0,
+	memset ((PTR) (debug->external_aux + symhdr->iauxMax), 0,
 		add * sizeof (union aux_ext));
       symhdr->iauxMax += add;
     }
@@ -1201,8 +1201,8 @@ ecoff_align_debug (abfd, debug, swap)
   if (add != rfd_align)
     {
       if (debug->external_rfd != (PTR) NULL)
-	memset (((char *) debug->external_rfd
-		 + symhdr->crfd * swap->external_rfd_size),
+	memset ((PTR) ((char *) debug->external_rfd
+		       + symhdr->crfd * swap->external_rfd_size),
 		0, add * swap->external_rfd_size);
       symhdr->crfd += add;
     }
@@ -1262,6 +1262,8 @@ ecoff_write_symhdr (abfd, debug, swap, where)
     return false;
 
   where += swap->external_hdr_size;
+
+  symhdr->magic = swap->sym_magic;
 
   /* Fill in the file offsets.  */
 #define SET(offset, count, size) \
@@ -1376,7 +1378,7 @@ ecoff_write_shuffle (abfd, swap, shuffle, space)
 
       i = swap->debug_align - (total & (swap->debug_align - 1));
       s = (bfd_byte *) alloca (i);
-      memset (s, 0, i);
+      memset ((PTR) s, 0, i);
       if (bfd_write ((PTR) s, 1, i, abfd) != i)
 	return false;
     }
@@ -1450,7 +1452,7 @@ bfd_ecoff_write_accumulated_debug (handle, abfd, debug, swap, info, where)
 
 	  i = swap->debug_align - (total & (swap->debug_align - 1));
 	  s = (bfd_byte *) alloca (i);
-	  memset (s, 0, i);
+	  memset ((PTR) s, 0, i);
 	  if (bfd_write ((PTR) s, 1, i, abfd) != i)
 	    return false;
 	}
@@ -1469,7 +1471,7 @@ bfd_ecoff_write_accumulated_debug (handle, abfd, debug, swap, info, where)
       i = (swap->debug_align
 	   - (debug->symbolic_header.issExtMax & (swap->debug_align - 1)));
       s = (bfd_byte *) alloca (i);
-      memset (s, 0, i);
+      memset ((PTR) s, 0, i);
       if (bfd_write ((PTR) s, 1, i, abfd) != i)
 	return false;
     }

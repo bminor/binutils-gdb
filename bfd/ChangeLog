@@ -1,3 +1,22 @@
+Sat Feb 26 10:00:45 1994  Ian Lance Taylor  (ian@cygnus.com)
+
+	* reloc.c (_bfd_relocate_contents): Adjust handling of overflow to
+	avoid depending upon right shifts of signed numbers, and to
+	correct handling of src_mask with lower bits zero.
+
+	* aoutx.h, archive.c: Add casts to avoid warnings from SVR4 cc.
+	* ecoff.c, ecofflink.c, ecoffswap.h, srec.c: Likewise.
+	* elf32-i386.c: Likewise.
+	* elfcode.h (bfd_section_from_shdr): Make i unsigned; remove old
+	#if 0 code.
+	(elf_write_phdrs): Make i unsigned.
+	(map_program_segments): Make i and n_left unsigned.
+	(assign_file_positions_except_relocs): Make i unsigned.
+	(write_shdrs_and_ehdr): Make count unsigned.
+	(assign_file_positions_for_relocs): Make i unsigned.
+	(NAME(bfd,elf_write_object_contents)): Make count unsigned.
+	(section_from_elf_index): Make index argument unsigned.
+
 Fri Feb 25 21:34:58 1994  Ian Lance Taylor  (ian@cygnus.com)
 
 	* elfcode.h: Don't include assert.h.

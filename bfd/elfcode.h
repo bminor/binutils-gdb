@@ -118,7 +118,7 @@ struct elf_sect_data {
 
 /* Forward declarations of static functions */
 
-static struct sec * section_from_elf_index PARAMS ((bfd *, int));
+static struct sec * section_from_elf_index PARAMS ((bfd *, unsigned int));
 
 static int elf_section_from_bfd_section PARAMS ((bfd *, struct sec *));
 
@@ -556,7 +556,7 @@ DEFUN (bfd_section_from_shdr, (abfd, shindex),
 	  return true;
 	}
       {
-	int i;
+	unsigned int i;
 
 	for (i = 1; i < ehdr->e_shnum; i++)
 	  {
@@ -841,7 +841,7 @@ DEFUN (elf_object_p, (abfd), bfd * abfd)
   Elf_Internal_Ehdr *i_ehdrp;	/* Elf file header, internal form */
   Elf_External_Shdr x_shdr;	/* Section header table entry, external form */
   Elf_Internal_Shdr *i_shdrp;	/* Section header table, internal form */
-  int shindex;
+  unsigned int shindex;
   char *shstrtab;		/* Internal copy of section header stringtab */
   struct elf_backend_data *ebd;
   struct elf_obj_tdata *preserved_tdata = elf_tdata (abfd);
@@ -980,27 +980,6 @@ DEFUN (elf_object_p, (abfd), bfd * abfd)
     {
       bfd_section_from_shdr (abfd, i_ehdrp->e_shstrndx);
     }
-
-#if 0
-  for (shindex = i_ehdrp->e_shnum - 1; shindex >= 0; shindex--)
-    {
-      if (!strcmp (elf_string_from_elf_strtab (abfd,
-					       i_shdrp[shindex].sh_name),
-		   ".strtab"))
-	{
-	  elf_tdata(abfd)->strtab_hdr = i_shdrp[shindex];
-	  elf_elfsections(abfd)[shindex] = &elf_tdata(abfd)->strtab_hdr;
-	}
-      else if (!strcmp (elf_string_from_elf_strtab (abfd,
-						    i_shdrp[shindex].sh_name),
-			".symtab"))
-	{
-	  elf_tdata(abfd)->symtab_hdr = i_shdrp[shindex];
-	  elf_elfsections(abfd)[shindex] = &elf_tdata(abfd)->symtab_hdr;
-	  elf_onesymtab (abfd) = shindex;
-	}
-    }
-#endif
 
   /* Read in the string table containing the names of the sections.  We
      will need the base pointer to this table later. */
@@ -1548,7 +1527,7 @@ DEFUN (elf_write_phdrs, (abfd, i_ehdrp, i_phdrp, phdr_cnt),
 {
   /* first program header entry goes after the file header */
   int outbase = i_ehdrp->e_phoff;
-  int i;
+  unsigned int i;
   Elf_External_Phdr x_phdr;
 
   for (i = 0; i < phdr_cnt; i++)
@@ -1697,7 +1676,7 @@ map_program_segments (abfd)
   Elf_Internal_Shdr *i_shdrp;
   Elf_Internal_Phdr *phdr;
   char *done;
-  int i, n_left = 0;
+  unsigned int i, n_left = 0;
   file_ptr lowest_offset = 0;
   struct seg_info *seg = NULL;
 
@@ -1885,7 +1864,7 @@ assign_file_positions_except_relocs (abfd)
 
   struct elf_obj_tdata *t = elf_tdata (abfd);
   file_ptr off;
-  int i;
+  unsigned int i;
   Elf_Internal_Shdr **i_shdrpp = elf_elfsections (abfd);
   Elf_Internal_Shdr *i_shdrp;
   Elf_Internal_Ehdr *i_ehdrp = elf_elfheader (abfd);
@@ -2284,7 +2263,7 @@ write_shdrs_and_ehdr (abfd)
   Elf_Internal_Ehdr *i_ehdrp;	/* Elf file header, internal form */
   Elf_External_Shdr *x_shdrp;	/* Section header table, external form */
   Elf_Internal_Shdr **i_shdrp;	/* Section header table, internal form */
-  int count;
+  unsigned int count;
   struct strtab *shstrtab;
 
   i_ehdrp = elf_elfheader (abfd);
@@ -2329,7 +2308,7 @@ assign_file_positions_for_relocs (abfd)
      bfd *abfd;
 {
   file_ptr off = elf_tdata(abfd)->next_file_pos;
-  int i;
+  unsigned int i;
   Elf_Internal_Shdr **shdrpp = elf_elfsections (abfd);
   Elf_Internal_Shdr *shdrp;
   for (i = 1; i < elf_elfheader(abfd)->e_shnum; i++)
@@ -2349,7 +2328,7 @@ DEFUN (NAME(bfd_elf,write_object_contents), (abfd), bfd * abfd)
   struct elf_backend_data *bed = get_elf_backend_data (abfd);
   Elf_Internal_Ehdr *i_ehdrp;
   Elf_Internal_Shdr **i_shdrp;
-  int count;
+  unsigned int count;
 
   /* We don't know how to write dynamic objects.  Specifically, we
      don't know how to construct the program header.  */
@@ -2406,7 +2385,7 @@ DEFUN (NAME(bfd_elf,write_object_contents), (abfd), bfd * abfd)
 static struct sec *
 DEFUN (section_from_elf_index, (abfd, index),
        bfd * abfd AND
-       int index)
+       unsigned int index)
 {
   /* @@ Is bfd_com_section really correct in all the places it could
      be returned from this routine?  */

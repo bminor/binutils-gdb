@@ -550,7 +550,8 @@ ecoff_swap_rndx_in (bigend, ext_copy, intern)
     intern->index = ((ext->r_bits[1] & RNDX_BITS1_INDEX_LITTLE)
 		    		    >> RNDX_BITS1_INDEX_SH_LITTLE)
 		  | (ext->r_bits[2] << RNDX_BITS2_INDEX_SH_LEFT_LITTLE)
-		  | (ext->r_bits[3] << RNDX_BITS3_INDEX_SH_LEFT_LITTLE);
+		  | ((unsigned int) ext->r_bits[3]
+		     << RNDX_BITS3_INDEX_SH_LEFT_LITTLE);
   }
 
 #ifdef TEST
@@ -820,7 +821,7 @@ ecoff_make_empty_symbol (abfd)
       bfd_set_error (bfd_error_no_memory);
       return (asymbol *) NULL;
     }
-  memset (new, 0, sizeof *new);
+  memset ((PTR) new, 0, sizeof *new);
   new->symbol.section = (asection *) NULL;
   new->fdr = (FDR *) NULL;
   new->local = false;
@@ -2759,7 +2760,7 @@ ecoff_write_object_contents (abfd)
 	      asymbol *sym;
 	      struct internal_reloc in;
 	  
-	      memset (&in, 0, sizeof in);
+	      memset ((PTR) &in, 0, sizeof in);
 
 	      reloc = *reloc_ptr_ptr;
 	      sym = *reloc->sym_ptr_ptr;
@@ -3355,7 +3356,7 @@ ecoff_link_hash_newfunc (entry, table, string)
       ret->indx = -1;
       ret->abfd = NULL;
     }
-  memset (&ret->esym, 0, sizeof ret->esym);
+  memset ((PTR) &ret->esym, 0, sizeof ret->esym);
 
   return (struct bfd_hash_entry *) ret;
 }

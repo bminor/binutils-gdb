@@ -287,7 +287,7 @@ DEFUN(NAME(aout,swap_exec_header_in),(abfd, raw_bytes, execp),
      configuration (IE for i960), so ensure that all such uninitialized
      fields are zero'd out.  There are places where two of these structs
      are memcmp'd, and thus the contents do matter. */
-  memset (execp, 0, sizeof (struct internal_exec));
+  memset ((PTR) execp, 0, sizeof (struct internal_exec));
   /* Now fill in fields in the execp, from the bytes in the raw data.  */
   execp->a_info   = bfd_h_get_32 (abfd, bytes->e_info);
   execp->a_text   = GET_WORD (abfd, bytes->e_text);
@@ -364,7 +364,7 @@ DEFUN(NAME(aout,some_aout_object_p),(abfd, execp, callback_to_real_object_p),
 
   rawptr = (struct aout_data_struct  *) bfd_zalloc (abfd, sizeof (struct aout_data_struct ));
   if (rawptr == NULL) {
-    bfd_error = no_memory;
+    bfd_set_error (bfd_error_no_memory);
     return 0;
   }
 
@@ -552,13 +552,13 @@ DEFUN(NAME(aout,mkobject),(abfd),
 {
   struct aout_data_struct  *rawptr;
 
-  bfd_error = system_call_error;
+  bfd_set_error (bfd_error_system_call);
 
   /* Use an intermediate variable for clarity */
   rawptr = (struct aout_data_struct *)bfd_zalloc (abfd, sizeof (struct aout_data_struct ));
 
   if (rawptr == NULL) {
-    bfd_error = no_memory;
+    bfd_set_error (bfd_error_no_memory);
     return false;
   }
 
@@ -878,7 +878,7 @@ DEFUN (NAME(aout,adjust_sizes_and_vmas), (abfd, text_size, text_end),
 
   if ((obj_textsec (abfd) == NULL) || (obj_datasec (abfd) == NULL))
     {
-      bfd_error = invalid_operation;
+      bfd_set_error (bfd_error_invalid_operation);
       return false;
     }
   if (adata(abfd).magic != undecided_magic) return true;
@@ -1104,7 +1104,7 @@ DEFUN (translate_from_native_sym_flags, (sym_pointer, cache_ptr, abfd),
 
 	if (!copy || !reloc)
 	  {
-	    bfd_error = no_memory;
+	    bfd_set_error (bfd_error_no_memory);
 	    return false;
 	  }
 
@@ -1136,7 +1136,7 @@ DEFUN (translate_from_native_sym_flags, (sym_pointer, cache_ptr, abfd),
 	    cache_ptr->type = N_BSS;
 	    break;
 	  default:
-	    bfd_error = bad_value;
+	    bfd_set_error (bfd_error_bad_value);
 	    return false;
 	  }
 
@@ -1338,14 +1338,14 @@ DEFUN(translate_to_native_sym_flags,(sym_pointer, cache_ptr, abfd),
   else if (bfd_get_output_section(cache_ptr) == NULL) {
     /* Protect the bfd_is_com_section call.
        This case occurs, e.g., for the *DEBUG* section of a COFF file.  */
-    bfd_error = nonrepresentable_section;
+    bfd_set_error (bfd_error_nonrepresentable_section);
     return false;
   }
   else if (bfd_is_com_section (bfd_get_output_section (cache_ptr))) {
     sym_pointer->e_type[0] = (N_UNDF | N_EXT);
   }
   else {
-    bfd_error = nonrepresentable_section;
+    bfd_set_error (bfd_error_nonrepresentable_section);
     return false;
   }
 
@@ -1393,7 +1393,7 @@ DEFUN(NAME(aout,make_empty_symbol),(abfd),
     (aout_symbol_type *)bfd_zalloc (abfd, sizeof (aout_symbol_type));
   if (!new)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return NULL;
     }
   new->symbol.the_bfd = abfd;
@@ -1475,7 +1475,7 @@ DEFUN(NAME(aout,slurp_symbol_table),(abfd),
   symbol_size = exec_hdr(abfd)->a_syms;
   if (symbol_size == 0)
     {
-      bfd_error = no_symbols;
+      bfd_set_error (bfd_error_no_symbols);
       return false;
     }
 
@@ -1505,7 +1505,7 @@ DEFUN(NAME(aout,slurp_symbol_table),(abfd),
   syms = (struct external_nlist *) malloc(symbol_size);
   if (!strings || !cached || !syms)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET);
@@ -1843,7 +1843,7 @@ add_to_stringtab (abfd, str, tab)
     bfd_alloc_by_size_t (abfd, sizeof (struct stringtab_entry));
   if (!entry)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       abort();			/* FIXME */
     }
 
@@ -2336,7 +2336,7 @@ DEFUN(NAME(aout,slurp_reloc_table),(abfd, asect, symbols),
     reloc_size = exec_hdr(abfd)->a_trsize;
   else
     {
-      bfd_error = invalid_operation;
+      bfd_set_error (bfd_error_invalid_operation);
       return false;
     }
 
@@ -2361,7 +2361,7 @@ DEFUN(NAME(aout,slurp_reloc_table),(abfd, asect, symbols),
   if (!reloc_cache)
     {
     nomem:
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
 
@@ -2376,7 +2376,7 @@ DEFUN(NAME(aout,slurp_reloc_table),(abfd, asect, symbols),
     {
       bfd_release (abfd, relocs);
       bfd_release (abfd, reloc_cache);
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return false;
     }
 
@@ -2467,7 +2467,7 @@ DEFUN(NAME(aout,squirt_out_relocs),(abfd, section),
   natsize = each_size * count;
   native = (unsigned char *) bfd_zalloc (abfd, natsize);
   if (!native) {
-    bfd_error = no_memory;
+    bfd_set_error (bfd_error_no_memory);
     return false;
   }
 
@@ -2540,7 +2540,7 @@ DEFUN(NAME(aout,get_reloc_upper_bound),(abfd, asect),
   bfd_size_type dynrel_count = 0;
 
   if (bfd_get_format (abfd) != bfd_object) {
-    bfd_error = invalid_operation;
+    bfd_set_error (bfd_error_invalid_operation);
     return 0;
   }
   if (asect->flags & SEC_CONSTRUCTOR) {
@@ -2568,7 +2568,7 @@ DEFUN(NAME(aout,get_reloc_upper_bound),(abfd, asect),
 	    ((exec_hdr(abfd)->a_trsize / obj_reloc_entry_size (abfd))
 	     + dynrel_count + 1));
 
-  bfd_error = invalid_operation;
+  bfd_set_error (bfd_error_invalid_operation);
   return 0;
 }
 
@@ -2831,7 +2831,7 @@ aout_link_hash_newfunc (entry, table, string)
 	   bfd_hash_allocate (table, sizeof (struct aout_link_hash_entry)));
   if (ret == (struct aout_link_hash_entry *) NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return (struct bfd_hash_entry *) ret;
     }
 
@@ -2858,7 +2858,7 @@ NAME(aout,link_hash_table_create) (abfd)
 	 malloc (sizeof (struct aout_link_hash_table)));
   if (ret == (struct aout_link_hash_table *) NULL)
       {
-	bfd_error = no_memory;
+	bfd_set_error (bfd_error_no_memory);
 	return (struct bfd_link_hash_table *) NULL;
       }
   if (! _bfd_link_hash_table_init (&ret->root, abfd,
@@ -2905,7 +2905,7 @@ NAME(aout,link_add_symbols) (abfd, info)
       return _bfd_generic_link_add_archive_symbols
 	(abfd, info, aout_link_check_archive_element);
     default:
-      bfd_error = wrong_format;
+      bfd_set_error (bfd_error_wrong_format);
       return false;
     }
 }
@@ -2992,7 +2992,7 @@ aout_link_get_symbols (abfd)
 	  malloc ((size_t) count * EXTERNAL_NLIST_SIZE));
   if (syms == (struct external_nlist *) NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
 
@@ -3010,7 +3010,7 @@ aout_link_get_symbols (abfd)
   strings = (char *) malloc ((size_t) stringsize);
   if (strings == NULL)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
 
@@ -3200,7 +3200,7 @@ aout_link_add_symbols (abfd, info)
 			  * sizeof (struct aout_link_hash_entry *))));
   if (!sym_hash)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   obj_aout_sym_hashes (abfd) = sym_hash;
