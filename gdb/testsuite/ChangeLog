@@ -1,3 +1,9 @@
+Wed Mar 16 08:28:28 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* lib/gdb.exp: Set prompt to (gdb) if it isn't already set.
+	(default_gdb_exit): Replace all the hair with sending "quit" to
+	the process with a simple close.
+
 Tue Mar 15 08:45:50 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* TODO: Add suggestions for shared library tests.
