@@ -623,9 +623,9 @@ x86_64_push_arguments (struct regcache *regcache, int nargs,
       else
 	{
 	  int j;
+	  int offset = 0;
 	  for (j = 0; j < n; j++)
 	    {
-	      int offset = 0;
 	      switch (class[j])
 		{
 		case X86_64_NO_CLASS:
