@@ -1,3 +1,23 @@
+Tue Oct 15 08:45:12 1991  John Gilmore  (gnu at cygnus.com)
+
+	Changes from Fred Fish:
+	* tm-68k.h (FPI_REGNUM):  Add.
+	* infrun.c (child_create_inferior):  flush stdout and stderr
+	before forking.
+	* configure.in:  Handle amigados, amix hosts and targets.
+	* inflow.c:  Handle TIOCGLTC_BROKEN for Amiga.
+
+	From Andreas Schwab:
+	* values.c (show_convenience):  Use printf_filtered.
+	* main.c (define_command):  Check result of lookup_command for
+	exact match.
+	(echo_command):  Use printf_filtered, and force output out.
+
+	* dbxread.c (read_enum_type):  Avoid Modula-2 kludge that breaks C
+	programs.
+	* i387-tdep.c (double_to_i387):  Fix typo for double_to_ieee_extended.
+	* utils.c (_initialize_utils):  If !ISATTY, don't paginate.
+
 Mon Oct 14 13:37:50 1991  Roland H. Pesch  (pesch at cygnus.com)
 
 	* doc/gdb.texinfo: Catch up to changes recorded here in ChangeLog

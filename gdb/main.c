@@ -599,7 +599,8 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
   /* After the symbol file has been read, print a newline to get us
      beyond the copyright line...  But errors should still set off
      the error message with a (single) blank line.  */
-  printf_filtered ("\n");
+  if (!quiet)
+    printf_filtered ("\n");
   error_pre_print = "\n";
 
   if (corearg != NULL)
@@ -714,7 +715,7 @@ execute_command (p, from_tty)
   register struct cmd_list_element *c;
   register struct command_line *cmdlines;
   register enum language flang;
-  static enum language current = language_unknown;
+  static struct language_defn *saved_language = 0;
   static int warned = 0;
 
   free_all_values ();
@@ -761,24 +762,28 @@ execute_command (p, from_tty)
 	(*c->function) (arg, from_tty & caution);
    }
 
-  /* Tell the user if the language has changed */
-  if (working_lang != current)
+  /* Tell the user if the language has changed (except first time).  */
+  if (current_language != saved_language)
   {
     if (language_mode == language_mode_auto) {
-      if (current != language_unknown)
+      if (saved_language)
 	language_info ();
     }
-    current = working_lang;
+    saved_language = current_language;
     warned = 0;
   }
 
   /* Warn the user if the working language does not match the
      language of the current frame.  Only warn the user if we are
      actually running the program, i.e. there is a stack. */
+  /* FIXME:  This should be cacheing the frame and only running when
+     the frame changes.  */
   if (target_has_stack)
   {
-    flang = get_frame_language();
-    if(!warned && flang != language_unknown && flang != working_lang)
+    flang = get_frame_language ();
+    if (!warned
+        && flang != language_unknown
+	&& flang != current_language->la_language)
     {
       printf_filtered ("%s\n", lang_frame_mismatch_warn);
       warned = 1;
@@ -1491,7 +1496,11 @@ define_command (comname, from_tty)
 
   validate_comname (comname);
 
+  /* Look it up, and verify that we got an exact match.  */
   c = lookup_cmd (&tem, cmdlist, "", -1, 1);
+  if (c && 0 != strcmp (comname, c->name))
+    c = 0;
+    
   if (c)
     {
       if (c->class == class_user || c->class == class_alias)
@@ -1571,8 +1580,8 @@ print_gnu_advertisement()
 {
     printf ("\
 GDB is free software and you are welcome to distribute copies of it\n\
- under certain conditions; type \"info copying\" to see the conditions.\n\
-There is absolutely no warranty for GDB; type \"info warranty\" for details.\n\
+ under certain conditions; type \"show copying\" to see the conditions.\n\
+There is absolutely no warranty for GDB; type \"show warranty\" for details.\n\
 ");
 }
 
@@ -1763,11 +1772,14 @@ echo_command (text, from_tty)
 
 	    c = parse_escape (&p);
 	    if (c >= 0)
-	      fputc (c, stdout);
+	      printf_filtered ("%c", c);
 	  }
 	else
-	  fputc (c, stdout);
+	  printf_filtered ("%c", c);
       }
+
+  /* Force this output to appear now.  */
+  wrap_here ("");
   fflush (stdout);
 }
 

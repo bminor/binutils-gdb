@@ -60,7 +60,7 @@ void
 double_to_i387 (from, to)
      char *from, *to;
 {
-  ieee_double_to_extended (&ext_format_i387, (double *)from, to);
+  double_to_ieee_extended (&ext_format_i387, (double *)from, to);
 }
 
 void

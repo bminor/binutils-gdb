@@ -493,9 +493,9 @@ show_convenience ()
 #endif
 	  varseen = 1;
 	}
-      printf ("$%s = ", var->name);
+      printf_filtered ("$%s = ", var->name);
       value_print (var->value, stdout, 0, Val_pretty_default);
-      printf ("\n");
+      printf_filtered ("\n");
     }
   if (!varseen)
     printf ("No debugger convenience variables now defined.\n\

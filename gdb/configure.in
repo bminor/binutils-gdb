@@ -16,6 +16,14 @@ m68k)
 		*)	gdb_host=altos ;;	
 		esac
 		;;
+
+	cbm)
+		case ${host_os} in
+		amigados)	gdb_host=amigados ;;
+		svr4)		gdb_host=amix ;;
+		esac
+		;;
+
 	hp)
 		case ${host_os} in
 		hpux)	gdb_host=hp300hpux ;;
@@ -127,6 +135,12 @@ m68k)
 	case "${target_vendor}" in
 	att)	gdb_target=3b1 ;;
 	altos)	gdb_target=altos ;;
+	cbm)
+		case ${target_os} in
+		amigados)	gdb_host=amigados ;;
+		svr4)		gdb_target=amix ;;
+		esac
+		;;
 	hp)
 		case "${target_os}" in
 		bsd)	gdb_target=hp300bsd ;;

@@ -255,6 +255,7 @@ extern struct ext_format ext_format_68881;
 #define FP0_REGNUM 18		/* Floating point register 0 */
 #define FPC_REGNUM 26		/* 68881 control register */
 #define FPS_REGNUM 27		/* 68881 status register */
+#define FPI_REGNUM 28		/* 68881 iaddr register */
 #endif /* 68881.  */
 
 /* Store the address of the place in which to copy the structure the
