@@ -328,7 +328,7 @@ Mon Apr  1 08:32:23 1996  Fred Fish  <fnf@cygnus.com>
 	* hppa-tdep.c (hppa_pop_frame): Call clear_proceed_status before
 	proceeding.
 
-Sun Mar 31 16:15:43 1996  Fred Fish  <fnf@.cygnus.com>
+Sun Mar 31 16:15:43 1996  Fred Fish  <fnf@cygnus.com>
 
 	* hppah-nat.c (store_inferior_registers, store_inferior_registers,
 	fetch_register, child_xfer_memory): Use call_ptrace function supplied
@@ -783,7 +783,7 @@ Thu Feb 22 00:52:42 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
 	* configure.in (m68k-*-netbsd*): New config.
 	* configure: Regenerated.
 
-Wed Feb 21 19:00:21 1996  Fred Fish  <fnf@ninemoons.com>
+Wed Feb 21 19:00:21 1996  Fred Fish  <fnf@cygnus.com>
 
 	* standalone.c (open, _initialize_standalone): Fix obvious typos
 	reported by Martin Pool <martin@citr.uq.oz.au>.
@@ -804,7 +804,7 @@ Tue Feb 20 23:59:19 1996  Jeffrey A Law  (law@cygnus.com)
 	* symfile.c (find_lowest_section): No longer static.
 	* symfile.h (find_lowest_section): Corresponding changes.
 
-Tue Feb 20 18:54:08 1996  Fred Fish  <fnf@rtl.cygnus.com>
+Tue Feb 20 18:54:08 1996  Fred Fish  <fnf@cygnus.com>
 
 	* valops.c (COERCE_FLOAT_TO_DOUBLE): Define default value.
 	(value_arg_coerce): Use COERCE_FLOAT_TO_DOUBLE.
@@ -1490,7 +1490,7 @@ Fri Jan 12 09:36:17 1996  Tom Tromey  <tromey@creche.cygnus.com>
 	(create_command_window): Make Delete delete left, not right.
 end-sanitize-gdbtk
 
-Fri Jan 12 07:14:27 1996  Fred Fish  <fnf@cirdan.cygnus.com>
+Fri Jan 12 07:14:27 1996  Fred Fish  <fnf@cygnus.com>
 
 	* lynx-nat.c, irix4-nat.c, sparc-nat.c: Include gdbcore.h
 	to get "struct core_fns" defined.
@@ -1667,7 +1667,7 @@ end-sanitize-gdbtk
 	* sparcl-tdep.c (sparclite_check_watch_resources):  Fix logic bug
 	which prevented hardware watchpoints from working.
 
-Thu Jan  4 10:44:17 1996  Fred Fish  <fnf@cirdan.cygnus.com>
+Thu Jan  4 10:44:17 1996  Fred Fish  <fnf@cygnus.com>
 
 	* infptrace.c (udot_info): New function.
 	(PT_*): Define each individually if that one is not defined.
