@@ -79,17 +79,32 @@ OPC = opc-sparc.o
 
 BFD_MACHINES = cpu-h8300.o cpu-i960.o cpu-sparc.o cpu-m68k.o cpu-m88k.o \
 	cpu-vax.o cpu-mips.o cpu-a29k.o cpu-i386.o cpu-rs6000.o cpu-hppa.o \
+	cpu-z8k.o cpu-we32k.o \
 	$(OPC)
 
 BFD_BACKENDS = oasys.o ieee.o srec.o elf.o stab-syms.o\
 	aout64.o aout32.o demo64.o sunos.o newsos3.o i386aout.o bout.o \
 	coff-i960.o coff-a29k.o coff-m68k.o coff-i386.o coff-m88k.o \
-	coff-mips.o coff-rs6000.o coff-h8300.o coff-msym.o hppa.o i386linux.o
+	coff-mips.o coff-rs6000.o coff-h8300.o coff-msym.o hppa.o i386linux.o \
+	coff-z8k.o coff-we32k.o
 
 OPTIONAL_BACKENDS = trad-core.o
 
 #### host and target dependent Makefile fragments come in here.
 ###
+
+FLAGS_TO_PASS = \
+	"against=$(against)" \
+	"AR=$(AR)" \
+	"AR_FLAGS=$(AR_FLAGS)" \
+	"CC=$(CC)" \
+	"CFLAGS=$(CFLAGS)" \
+	"RANLIB=$(RANLIB)" \
+	"MAKEINFO=$(MAKEINFO)" \
+	"INSTALL=$(INSTALL)" \
+	"INSTALL_DATA=$(INSTALL_DATA)" \
+	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
+	"BISON=$(BISON)"
 
 .c.o:
 	$(CC) -c $(CFLAGS) $(HDEFINES) $(TDEFINES) $(CSEARCH) $(CSWITCHES) $<
@@ -105,32 +120,26 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c archures.c \
 	 i386linux.c bout.c elf.c \
 	 cpu-h8300.c cpu-i960.c cpu-sparc.c cpu-m68k.c cpu-m88k.c cpu-vax.c \
 	 cpu-mips.c cpu-a29k.c cpu-i386.c cpu-rs6000.c coff-h8300.c hppa.c \
-	 cpu-hppa.c \
+	 cpu-hppa.c coff-we32k.c cpu-we32k.c \
 	opc-sparc.c opc-i960.c
 
 STAGESTUFF = $(TARGETLIB) $(OFILES)
 
 all: $(TARGETLIB) 
-	@$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS)" \
-		"INSTALL=$(INSTALL)" \
-		"INSTALL_DATA=$(INSTALL_DATA)" \
-		"INSTALL_PROGRAM=$(INSTALL_PROGRAM)"
+	@$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
 
 .NOEXPORT:
 
 check:
 
 info: force
-	@$(MAKE) subdir_do DO=info "DODIRS=$(SUBDIRS)" "MAKEINFO=$(MAKEINFO)"
+	@$(MAKE) subdir_do DO=info "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
 
 clean-info:
-	@$(MAKE) subdir_do DO=clean-info "DODIRS=$(SUBDIRS)"
+	@$(MAKE) subdir_do DO=clean-info "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
 	
 install-info: force
-	@$(MAKE) subdir_do DO=install-info "DODIRS=$(SUBDIRS)" \
-		"INSTALL=$(INSTALL)" \
-		"INSTALL_DATA=$(INSTALL_DATA)" \
-		"INSTALL_PROGRAM=$(INSTALL_PROGRAM)"
+	@$(MAKE) subdir_do DO=install-info "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
 
 # HDEPFILES comes from the host config; TDEPFILES from the target config.
 OFILES = $(BFD_LIBS) $(BFD_BACKENDS) $(BFD_MACHINES) $(HDEPFILES) $(TDEPFILES)
@@ -140,26 +149,21 @@ $(TARGETLIB): $(OFILES)
 	 $(AR) $(AR_FLAGS) $(TARGETLIB) $(OFILES)
 	 $(RANLIB) $(TARGETLIB)
 
-# When compiling targets.c, supply the default target info from configure.
+# When compiling archures.c and targets.c, supply the default target
+# info from configure.
+
+
 targets.o: targets.c
+	$(CC) $(CFLAGS) -c $(HDEFINES) $(TDEFINES) $(CSEARCH) $(CSWITCHES) -DMINIMIZE=$(MINIMIZE) $(TDEFAULTS) $<
+
+archures.o: archures.c
 	$(CC) $(CFLAGS) -c $(HDEFINES) $(TDEFINES) $(CSEARCH) $(CSWITCHES) -DMINIMIZE=$(MINIMIZE) $(TDEFAULTS) $<
 
 subdir_do: force
 	@for i in $(DODIRS); do \
 		if [ -d ./$$i ] ; then \
 			if (cd ./$$i; \
-				$(MAKE) \
-					"against=$(against)" \
-					"AR=$(AR)" \
-					"AR_FLAGS=$(AR_FLAGS)" \
-					"CC=$(CC)" \
-					"CFLAGS=$(CFLAGS)" \
-					"RANLIB=$(RANLIB)" \
-					"MAKEINFO=$(MAKEINFO)" \
-					"INSTALL=$(INSTALL)" \
-					"INSTALL_DATA=$(INSTALL_DATA)" \
-					"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
-					"BISON=$(BISON)" $(DO)) ; then true ; \
+				$(MAKE) $(FLAGS_TO_PASS) $(DO)) ; then true ; \
 			else exit 1 ; fi ; \
 		else true ; fi ; \
 	done
@@ -171,11 +175,11 @@ TAGS: force
 
 clean:
 	rm -f *.[oa] *~ core *.E *.p *.ip aout-params.h gen-aout
-	$(MAKE) subdir_do DO=clean "DODIRS=$(SUBDIRS)"
+	$(MAKE) subdir_do DO=clean "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
 
 clobber realclean: clean
 	rm -f libbfd.a TAGS
-	$(MAKE) subdir_do DO=clobber "DODIRS=$(SUBDIRS)"
+	$(MAKE) subdir_do DO=clobber "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
 
 # Mark everything as depending on config.status, since the timestamp on
 # sysdep.h might actually move backwards if we reconfig and relink it
@@ -236,11 +240,17 @@ roll:
 force:
 
 install:
+	-parent=`echo $(libdir)|sed -e 's@/[^/]*$$@@'`; \
+	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
+	-if [ -d $(libdir) ] ; then true ; else mkdir $(libdir) ; fi
 	$(INSTALL_DATA) libbfd.a $(libdir)/libbfd.a
 	$(RANLIB) $(libdir)/libbfd.a
+	-parent=`echo $(includedir)|sed -e 's@/[^/]*$$@@'`; \
+	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
+	-if [ -d $(includedir) ] ; then true ; else mkdir $(includedir) ; fi
 	$(INSTALL_DATA) $(INCDIR)/bfd.h $(includedir)/bfd.h
-	[ -z "$(oldincludedir)" ] || $(INSTALL_DATA) $(INCDIR)/bfd.h $(oldincludedir)/bfd.h
-	@$(MAKE) subdir_do DO=install "DODIRS=$(SUBDIRS)"
+	-if [ -z "$(oldincludedir)" ] ; then true ; else if [ -d $(oldincludedir) ] ; then true ; else mkdir $(oldincludedir) ; fi ; $(INSTALL_DATA) $(INCDIR)/bfd.h $(oldincludedir)/bfd.h ; fi
+	@$(MAKE) subdir_do DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
 
 # Target to uncomment host-specific lines in this makefile.  Such lines must
 # have the following string beginning in column 1: #__<hostname>__#
@@ -280,7 +290,7 @@ gen-aout: $(srcdir)/gen-aout.c Makefile
 	$(CC) -o gen-aout $(CFLAGS) $(LFLAGS) $(srcdir)/gen-aout.c
 
 headers:
-	(cd $(docdir); $(MAKE) protos)
+	(cd $(docdir); $(MAKE) protos $(FLAGS_TO_PASS))
 	# Could really use a "copy-if-change"...
 	cp $(docdir)/bfd.h bfd.h-new
 	$(srcdir)/../move-if-change bfd.h-new $(BFD_H)
@@ -290,13 +300,13 @@ headers:
 	$(srcdir)/../move-if-change libcoff.h-new $(srcdir)/libcoff.h
 
 bfd.info:
-	( cd $(docdir); $(MAKE) bfd.info)
+	( cd $(docdir); $(MAKE) bfd.info $(FLAGS_TO_PASS))
 
 bfd.dvi:
-	(cd $(docdir); $(MAKE) bfd.dvi)
+	(cd $(docdir); $(MAKE) bfd.dvi $(FLAGS_TO_PASS))
 
 bfd.ps: 
-	(cd $(docdir); $(MAKE) bfd.ps)
+	(cd $(docdir); $(MAKE) bfd.ps $(FLAGS_TO_PASS))
 
 # What appears below is generated by a hacked mkdep using gcc -MM.
 
