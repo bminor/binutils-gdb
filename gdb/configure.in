@@ -138,6 +138,8 @@ vax-*-bsd*)		gdb_host=vaxbsd ;;
 vax-*-ultrix2*)		gdb_host=vaxult2 ;;
 vax-*-ultrix*)		gdb_host=vaxult ;;
 
+w65-*-*)		gdb_host=w65 ;;
+
 esac
 
 
@@ -337,6 +339,8 @@ sparc64-*-*)		gdb_target=sp64 ;;
 tahoe-*-*)		gdb_target=tahoe ;;
 
 vax-*-*)		gdb_target=vax ;;
+
+w65-*-*)		gdb_target=w65 ;;
 
 z8k-*-sim*)		gdb_target=z8ksim ;;
 z8k-*-coff*)		gdb_target=z8ksim ;;

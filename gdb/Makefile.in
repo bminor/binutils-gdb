@@ -1448,6 +1448,8 @@ values.o: values.c $(defs_h) $(expression_h) $(frame_h) $(gdbcmd_h) \
 
 vax-pinsn.o: vax-pinsn.c $(OP_INCLUDE)/vax.h $(defs_h) $(symtab_h)
 
+w65-tdep.o : w65-tdep.c
+
 xdr_ld.o: vx-share/xdr_ld.c $(defs_h) vx-share/vxTypes.h \
 	vx-share/vxWorks.h vx-share/xdr_ld.h
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/vx-share/xdr_ld.c

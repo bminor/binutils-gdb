@@ -58,6 +58,7 @@ vax
 xm-lynx.h
 xm-nbsd.h
 xm-sysv4.h
+w65
 z8k
 
 Things-to-lose:

@@ -322,6 +322,7 @@ value.h
 values.c
 vax-pinsn.c
 vx-share
+w65-tdep.c
 w89k-rom.c
 xcoffread.c
 xcoffsolib.c
