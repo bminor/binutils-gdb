@@ -1,3 +1,7 @@
+Fri Jan 31 11:11:45 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure: Rebuild after change to aclocal.m4.
+
 Thu Jan 23 11:46:23 1997  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* configure configure.in Makefile.in:  Update to new configure
