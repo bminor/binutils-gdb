@@ -1,3 +1,11 @@
+Mon Aug 24 11:57:13 1992  Fred Fish  (fnf@cygnus.com)
+
+	* infrun.c (handle_command):  Rewrite to allow multiple signal
+	numbers, signal number ranges, and to recognize "all" to mean all
+	signals except those used by the debugger.
+	* infrun.c (SET_SIGS, UNSET_SIGS):  Macros used in handle_command
+	to set or reset actions for specific signals.
+
 Sun Aug 23 17:10:07 1992  Fred Fish  (fnf@cygnus.com)
 
 	* coffread.c (decode_type):  Call alloc_type to alloc new
