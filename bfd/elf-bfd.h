@@ -297,6 +297,8 @@ struct eh_cie_fde
   unsigned int removed : 1;
   unsigned int make_relative : 1;
   unsigned int make_lsda_relative : 1;
+  unsigned int need_relative : 1;
+  unsigned int need_lsda_relative : 1;
   unsigned int per_encoding_relative : 1;
 };
 

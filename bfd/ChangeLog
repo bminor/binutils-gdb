@@ -1,3 +1,15 @@
+2004-10-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (struct eh_cie_fde): Add need_relative and
+	need_lsda_relative.
+	* elf-eh-frame.c (_bfd_elf_eh_frame_section_offset): Set
+	need_relative or need_lsda_relative if we are processing an
+	offset for a reloc on a FDE initial loc or LSDA field
+	respectively.
+	(_bfd_elf_write_section_eh_frame): Test need_relative and
+	need_lsda_relative in place of corresponding make_* field
+	when deciding to use pc-relative encodings.
+
 2004-09-30  Paul Brook  <paul@codesourcery.com>
 
 	* elf32-arm.h (bfd_elf32_arm_set_target_relocs): Handle "abs"

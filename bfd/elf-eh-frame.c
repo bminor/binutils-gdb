@@ -775,7 +775,10 @@ _bfd_elf_eh_frame_section_offset (bfd *output_bfd ATTRIBUTE_UNUSED,
   if (sec_info->entry[mid].make_relative
       && ! sec_info->entry[mid].cie
       && offset == sec_info->entry[mid].offset + 8)
-    return (bfd_vma) -2;
+    {
+      sec_info->entry[mid].need_relative = 1;
+      return (bfd_vma) -2;
+    }
 
   /* If converting LSDA pointers to DW_EH_PE_pcrel, there will be no need
      for run-time relocation against LSDA field.  */
@@ -783,7 +786,10 @@ _bfd_elf_eh_frame_section_offset (bfd *output_bfd ATTRIBUTE_UNUSED,
       && ! sec_info->entry[mid].cie
       && (offset == (sec_info->entry[mid].offset + 8
 		     + sec_info->entry[mid].lsda_offset)))
-    return (bfd_vma) -2;
+    {
+      sec_info->entry[mid].need_lsda_relative = 1;
+      return (bfd_vma) -2;
+    }
 
   return (offset + sec_info->entry[mid].new_offset
 	  - sec_info->entry[mid].offset);
@@ -850,8 +856,8 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 	{
 	  /* CIE */
 	  cie_offset = sec_info->entry[i].new_offset;
-	  if (sec_info->entry[i].make_relative
-	      || sec_info->entry[i].make_lsda_relative
+	  if (sec_info->entry[i].need_relative
+	      || sec_info->entry[i].need_lsda_relative
 	      || sec_info->entry[i].per_encoding_relative)
 	    {
 	      unsigned char *aug;
@@ -860,8 +866,8 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 
 	      /* Need to find 'R' or 'L' augmentation's argument and modify
 		 DW_EH_PE_* value.  */
-	      action = (sec_info->entry[i].make_relative ? 1 : 0)
-		       | (sec_info->entry[i].make_lsda_relative ? 2 : 0)
+	      action = (sec_info->entry[i].need_relative ? 1 : 0)
+		       | (sec_info->entry[i].need_lsda_relative ? 2 : 0)
 		       | (sec_info->entry[i].per_encoding_relative ? 4 : 0);
 	      buf = contents + sec_info->entry[i].offset;
 	      /* Skip length, id and version.  */
@@ -968,7 +974,7 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 			      + sec_info->entry[i].offset + 8);
 		  break;
 		}
-	      if (sec_info->entry[i].make_relative)
+	      if (sec_info->entry[i].need_relative)
 		value -= (sec->output_section->vma + sec->output_offset
 			  + sec_info->entry[i].new_offset + 8);
 	      write_value (abfd, buf, value, width);
@@ -983,7 +989,7 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 	    }
 
 	  if ((sec_info->entry[i].lsda_encoding & 0xf0) == DW_EH_PE_pcrel
-	      || sec_info->entry[i].make_lsda_relative)
+	      || sec_info->entry[i].need_lsda_relative)
 	    {
 	      buf += sec_info->entry[i].lsda_offset;
 	      width = get_DW_EH_PE_width (sec_info->entry[i].lsda_encoding,
@@ -997,7 +1003,7 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 		      == DW_EH_PE_pcrel)
 		    value += (sec_info->entry[i].offset
 			      - sec_info->entry[i].new_offset);
-		  else if (sec_info->entry[i].make_lsda_relative)
+		  else if (sec_info->entry[i].need_lsda_relative)
 		    value -= (sec->output_section->vma + sec->output_offset
 			      + sec_info->entry[i].new_offset + 8
 			      + sec_info->entry[i].lsda_offset);
