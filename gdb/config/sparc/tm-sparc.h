@@ -326,18 +326,38 @@ sparc_extract_struct_value_address PARAMS ((char [REGISTER_BYTES]));
    The bottom field is misnamed, since it might imply that memory from
    bottom to frame contains this frame.  That need not be true if
    stack frames are allocated in different segments (e.g. some on a
-   stack, some on a heap in the data segment).  */
+   stack, some on a heap in the data segment).
 
-#define EXTRA_FRAME_INFO	CORE_ADDR bottom;
-#define INIT_EXTRA_FRAME_INFO(fromleaf, fci)  \
-  (fci)->bottom =					\
-   ((fci)->next ?					\
-    ((fci)->frame == (fci)->next->frame ?		\
-     (fci)->next->bottom : (fci)->next->frame) :	\
-    read_register (SP_REGNUM));
+   GCC 2.6 and later can generate ``flat register window'' code that
+   makes frames by explicitly saving those registers that need to be
+   saved.  %i7 is used as the frame pointer, and the frame is laid out so
+   that flat and non-flat calls can be intermixed freely within a
+   program.  Unfortunately for GDB, this means it must detect and record
+   the flatness of frames.
+
+   Since the prologue in a flat frame also tells us where fp and pc
+   have been stashed (the frame is of variable size, so their location
+   is not fixed), it's convenient to record them in the frame info.  */
+
+#define EXTRA_FRAME_INFO  \
+  CORE_ADDR bottom;  \
+  int flat;  \
+  CORE_ADDR pc_addr;  \
+  CORE_ADDR fp_addr;  \
+
+#define INIT_EXTRA_FRAME_INFO(fromleaf, fci) \
+  sparc_init_extra_frame_info (fromleaf, fci)
+extern void sparc_init_extra_frame_info ();
+
+#define	PRINT_EXTRA_FRAME_INFO(fi) \
+  { \
+    if ((fi) && (fi)->flat) \
+      printf_filtered (" flat, pc saved at 0x%x, fp saved at 0x%x\n", \
+                       (fi)->pc_addr, (fi)->fp_addr); \
+  }
 
 #define FRAME_CHAIN(thisframe) (sparc_frame_chain (thisframe))
-CORE_ADDR sparc_frame_chain ();
+extern CORE_ADDR sparc_frame_chain ();
 
 /* Define other aspects of the stack frame.  */
 
@@ -358,7 +378,7 @@ CORE_ADDR sparc_frame_chain ();
 /* Where is the PC for a specific frame */
 
 #define FRAME_SAVED_PC(FRAME) sparc_frame_saved_pc (FRAME)
-CORE_ADDR sparc_frame_saved_pc ();
+extern CORE_ADDR sparc_frame_saved_pc ();
 
 /* If the argument is on the stack, it will be here.  */
 #define FRAME_ARGS_ADDRESS(fi) ((fi)->frame)
