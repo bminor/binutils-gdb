@@ -897,7 +897,11 @@ static void s_thumb PARAMS ((int));
 static void s_code PARAMS ((int));
 static void s_force_thumb PARAMS ((int));
 static void s_thumb_func PARAMS ((int));
+static void s_thumb_set PARAMS ((int));
+static void arm_s_text PARAMS ((int));
+static void arm_s_data PARAMS ((int));
 #ifdef OBJ_ELF
+static void arm_s_section PARAMS ((int));
 static void s_arm_elf_cons PARAMS ((int));
 #endif
 
@@ -905,27 +909,35 @@ static int my_get_expression PARAMS ((expressionS *, char **));
 
 CONST pseudo_typeS md_pseudo_table[] =
 {
-  {"req",         s_req, 0},	/* Never called becasue '.req' does not start line */
-  {"bss",         s_bss, 0},
-  {"align",       s_align, 0},
-  {"arm",         s_arm, 0},
-  {"thumb",       s_thumb, 0},
-  {"code",        s_code, 0},
-  {"force_thumb", s_force_thumb, 0},
-  {"thumb_func",  s_thumb_func, 0},
-  {"even",        s_even, 0},
-  {"ltorg",       s_ltorg, 0},
-  {"pool",        s_ltorg, 0},
+  { "req",         s_req,         0 },	/* Never called becasue '.req' does not start line */
+  { "bss",         s_bss,         0 },
+  { "align",       s_align,       0 },
+  { "arm",         s_arm,         0 },
+  { "thumb",       s_thumb,       0 },
+  { "code",        s_code,        0 },
+  { "force_thumb", s_force_thumb, 0 },
+  { "thumb_func",  s_thumb_func,  0 },
+  { "thumb_set",   s_thumb_set,   0 },
+  { "even",        s_even,        0 },
+  { "ltorg",       s_ltorg,       0 },
+  { "pool",        s_ltorg,       0 },
+  /* Allow for the effect of section changes.  */
+  { "text",        arm_s_text,    0 },
+  { "data",        arm_s_data,    0 },
 #ifdef OBJ_ELF  
-  {"word",        s_arm_elf_cons, 4},
-  {"long",        s_arm_elf_cons, 4},
+  { "section",     arm_s_section, 0 },
+  { "section.s",   arm_s_section, 0 },
+  { "sect",        arm_s_section, 0 },
+  { "sect.s",      arm_s_section, 0 },
+  { "word",        s_arm_elf_cons, 4 },
+  { "long",        s_arm_elf_cons, 4 },
 #else
-  {"word",        cons, 4},
+  { "word",        cons, 4},
 #endif
-  {"extend",      float_cons, 'x'},
-  {"ldouble",     float_cons, 'x'},
-  {"packed",      float_cons, 'p'},
-  {0, 0, 0}
+  { "extend",      float_cons, 'x' },
+  { "ldouble",     float_cons, 'x' },
+  { "packed",      float_cons, 'p' },
+  { 0, 0, 0 }
 };
 
 /* Stuff needed to resolve the label ambiguity
@@ -1109,19 +1121,14 @@ s_even (ignore)
 }
 
 static void
-s_ltorg (internal)
-     int internal;
+s_ltorg (ignored)
+     int ignored;
 {
   int lit_count = 0;
   char sym_name[20];
 
   if (current_poolP == NULL)
-    {
-      /* Nothing to do */
-      if (!internal)
-	as_tsktsk (_("Nothing to put in the pool\n"));
-      return;
-    }
+    return;
 
   /* Align pool as you have word accesses */
   /* Only make a frag if we have to ... */
@@ -1129,9 +1136,6 @@ s_ltorg (internal)
     frag_align (2, 0, 0);
 
   record_alignment (now_seg, 2);
-
-  if (internal)
-    as_tsktsk (_("Inserting implicit pool at change of section"));
 
   sprintf (sym_name, "$$lit_\002%x", lit_pool_num++);
 
@@ -1220,6 +1224,135 @@ s_thumb_func (ignore)
   
   demand_empty_rest_of_line ();
 }
+
+/* Perform a .set directive, but also mark the alias as
+   being a thumb function.  */
+
+static void
+s_thumb_set (equiv)
+     int equiv;
+{
+  /* XXX the following is a duplicate of the code for s_set() in read.c
+     We cannot just call that code as we need to get at the symbol that
+     is created.  */
+  register char *    name;
+  register char      delim;
+  register char *    end_name;
+  register symbolS * symbolP;
+
+  /*
+   * Especial apologies for the random logic:
+   * this just grew, and could be parsed much more simply!
+   * Dean in haste.
+   */
+  name      = input_line_pointer;
+  delim     = get_symbol_end ();
+  end_name  = input_line_pointer;
+  *end_name = delim;
+  
+  SKIP_WHITESPACE ();
+
+  if (*input_line_pointer != ',')
+    {
+      *end_name = 0;
+      as_bad (_("Expected comma after name \"%s\""), name);
+      *end_name = delim;
+      ignore_rest_of_line ();
+      return;
+    }
+
+  input_line_pointer++;
+  *end_name = 0;
+
+  if (name[0] == '.' && name[1] == '\0')
+    {
+      /* XXX - this should not happen to .thumb_set  */
+      abort ();
+    }
+
+  if ((symbolP = symbol_find (name)) == NULL
+      && (symbolP = md_undefined_symbol (name)) == NULL)
+    {
+#ifndef NO_LISTING
+      /* When doing symbol listings, play games with dummy fragments living
+	 outside the normal fragment chain to record the file and line info
+         for this symbol.  */
+      if (listing & LISTING_SYMBOLS)
+	{
+	  extern struct list_info_struct * listing_tail;
+	  fragS * dummy_frag = (fragS *) xmalloc (sizeof(fragS));
+	  memset (dummy_frag, 0, sizeof(fragS));
+	  dummy_frag->fr_type = rs_fill;
+	  dummy_frag->line = listing_tail;
+	  symbolP = symbol_new (name, undefined_section, 0, dummy_frag);
+	  dummy_frag->fr_symbol = symbolP;
+	}
+      else
+#endif
+        symbolP = symbol_new (name, undefined_section, 0, &zero_address_frag);
+			    
+#ifdef OBJ_COFF
+      /* "set" symbols are local unless otherwise specified. */
+      SF_SET_LOCAL (symbolP);
+#endif /* OBJ_COFF */
+    }				/* make a new symbol */
+
+  symbol_table_insert (symbolP);
+
+  * end_name = delim;
+
+  if (equiv
+      && S_IS_DEFINED (symbolP)
+      && S_GET_SEGMENT (symbolP) != reg_section)
+    as_bad (_("symbol `%s' already defined"), S_GET_NAME (symbolP));
+
+  pseudo_set (symbolP);
+  
+  demand_empty_rest_of_line ();
+
+  /* XXX now we come to the Thumb specific bit of code.  */
+  
+  THUMB_SET_FUNC (symbolP, 1);
+  ARM_SET_THUMB (symbolP, 1);
+  ARM_SET_INTERWORK (symbolP, support_interwork);
+}
+
+/* If we change section we must dump the literal pool first.  */
+static void
+arm_s_text (ignore)
+     int ignore;
+{
+  if (now_seg != text_section)
+    s_ltorg (0);
+  
+  s_text (ignore);
+}
+
+static void
+arm_s_data (ignore)
+     int ignore;
+{
+  if (flag_readonly_data_in_text)
+    {
+      if (now_seg != text_section)
+	s_ltorg (0);
+    }
+  else if (now_seg != data_section)
+    s_ltorg (0);
+  
+  s_data (ignore);
+}
+
+#ifdef OBJ_ELF
+static void
+arm_s_section (ignore)
+     int ignore;
+{
+  s_ltorg (0);
+
+  obj_elf_section (ignore);
+}
+#endif
 
 static void
 opcode_select (width)
@@ -6845,4 +6978,3 @@ s_arm_elf_cons (nbytes)
 }
 
 #endif /* OBJ_ELF */
-

@@ -1,3 +1,23 @@
+1999-06-16  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-arm.c (thumb_set): New pseudo op.
+	(text, data, section): Override these pseudo ops with ARM
+	specific versions.
+	(s_thumb_set): New function: Perform the same as a .set pseudo
+	op, but also mark the alias'ed symbol as being a Thumb
+	function.
+	(arm_s_text): New function: Perform the same as the .text
+	pseudo op, but dump the literal pool before changing
+	sections. 
+	(arm_s_data): New function: Perform the same as the .data
+	pseudo op, but dump the literal pool before changing
+	sections. 
+	(arm_s_section): New function: Perform the same as the
+	.section pseudo op, but dump the literal pool before changing 
+	sections. 
+	(arm_cleanup): Do not reset the current section before dumping
+	the literal pool.
+
 1999-06-17  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-m32r.c (md_longopts): Fix OPTION_WARN_UNMATCHED and
