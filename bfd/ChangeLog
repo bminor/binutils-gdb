@@ -1,5 +1,8 @@
 Tue Mar  7 12:23:47 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* format.c (bfd_check_format_matches): Skip binary_vec when
+	searching through bfd_target_vector.
+
 	* elfcode.h (elf_sort_hdrs): Check SHT_NOBITS before checking
 	sh_size.
 
