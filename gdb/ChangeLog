@@ -1,3 +1,9 @@
+Mon Feb  8 12:05:05 1999  David Taylor  <taylor@texas.cygnus.com>
+
+	* dsrec.c (make_srec): cast targ_addr to int in call to sprintf
+ 	otherwise on big endian machine with a bfd_vma of 64 bits,
+ 	*everything* gets loaded at location 0.  (PR 18929)
+
 Mon Jan  4 10:05:43 1999  Frank Ch. Eigler  <fche@cygnus.com>
 
        * infrun.c (wait_for_inferior): Allow SIGTRAP to be "pass"ed
