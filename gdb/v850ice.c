@@ -35,6 +35,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdb-stabs.h"
 #include "gdbthread.h"
 #endif
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 
 /* Prototypes for local functions */
 
@@ -75,7 +77,18 @@ static int ice_open = 0;
 #define EXPORT __declspec(dllexport)
 #endif
 
-EXPORT long __stdcall ExeAppReq (char *, long, char *, char *);
+struct MessageIO
+{
+  int size;			/* length of input or output in bytes */
+  char *buf;			/* buffer having the input/output information */
+};
+
+struct MessageIO null_iob = { 0, NULL };
+
+EXPORT long __stdcall ExeAppReq (char *, long, char *, struct MessageIO *);
+EXPORT long __stdcall RegisterClient (HWND);
+EXPORT long __stdcall UnregisterClient (void);
+EXPORT long __stdcall GdbCallBack (void);
 
 #define	MREADREG          0x0001
 #define	MWRITEREG         0x0002
@@ -125,6 +138,19 @@ EXPORT long __stdcall ExeAppReq (char *, long, char *, char *);
 #define	MRCCMD    	  0x002E
 #define	MDOWNLOAD	  0x0050
 
+#define StatRunning	0
+#define StatExecBreak	1   /* an execution breakpoint has been reached */
+#define StatStepped	2   /* a single step has been completed */
+#define StatException	3   /* the target has stopped due to an exception */
+#define StatHalted	4   /* target has been halted by a user request */
+#define StatExited      5   /* target called exit */
+#define StatTerminated  6   /* target program terminated by a user request */
+#define StatNoProcess   7   /* no process on target and none of the above */
+#define StatNeedInput   8   /* REV: obsolete */
+#define StatNeedDirCmd  9   /* waiting for an entry in the remote window */
+#define StatHardBreak	10  /* hit hardware breakpoint */
+#define StatFailure	11  /* an error occured in the last run/single */
+
 extern struct target_ops v850ice_ops;	/* Forward decl */
 
 /*   "pir", "tkcw", "chcw", "adtre" */
@@ -137,7 +163,6 @@ v850ice_open (name, from_tty)
      int from_tty;
 {
   long retval;
-  char retmsg[1000];
 
   if (name)
     error ("Too many arguments.");
@@ -166,12 +191,21 @@ v850ice_open (name, from_tty)
      In particular, if the user quits, be sure to discard it
      (we'd be in an inconsistent state otherwise).  */
 
-  retval = ExeAppReq ("GDB", MINITEXEC, "0", retmsg);
-  ice_open = 1;
+  WinExec ("necsrv", SW_SHOW);	/* Start up necsrv */
 
-  start_remote ();
+  retval = RegisterClient (NULL);
 
-/*  pop_target();*/
+  if (retval == 0)
+    {
+      ice_open = 1;
+
+      start_remote ();
+      return;
+    }
+
+  pop_target();
+
+  error ("v850ice_open: MINITEXEC return error: 0x%x", retval);
 }
 
 /* Clean up connection to a remote debugger.  */
@@ -185,10 +219,13 @@ v850ice_close (quitting)
 
   if (ice_open)
     {
-      retval = ExeAppReq ("GDB", MEXITEXEC, NULL, NULL);
+#if 0
+      retval = ExeAppReq ("GDB", MEXITEXEC, NULL, &null_iob);
       if (retval)
 	error ("ExeAppReq (MEXITEXEC) returned %d", retval);
+#endif
       ice_open = 0;
+      UnregisterClient ();
     }
 }
 
@@ -213,16 +250,14 @@ v850ice_resume (pid, step, siggnal)
      enum target_signal siggnal;
 {
   long retval;
-  char cmd[100];
-  char val[100];
 
   if (step)
-    retval = ExeAppReq ("GDB", MSINGLESTEP, "step", val);
+    retval = ExeAppReq ("GDB", MSINGLESTEP, "step", &null_iob);
   else
-    retval = ExeAppReq ("GDB", MRESUME, "run", val);
+    retval = ExeAppReq ("GDB", MRESUME, "run", &null_iob);
 
   if (retval)
-    error ("ExeAppReq (step = %d) returned %d: cmd = %s", step, retval, cmd);
+    error ("ExeAppReq (step = %d) returned %d", step, retval);
 }
 
 /* Wait until the remote machine stops, then return,
@@ -235,6 +270,10 @@ v850ice_wait (pid, status)
      int pid;
      struct target_waitstatus *status;
 {
+  long v850_status;
+
+  v850_status = ExeAppReq ("GDB", MCHECKSTATUS, NULL, &null_iob);
+
   status->kind = TARGET_WAITKIND_STOPPED;
   status->value.sig = TARGET_SIGNAL_TRAP;
 
@@ -269,6 +308,7 @@ v850ice_fetch_registers (regno)
   long retval;
   char cmd[100];
   char val[100];
+  struct MessageIO iob;
   unsigned long regval;
   char *p;
 
@@ -283,7 +323,9 @@ v850ice_fetch_registers (regno)
   if (!convert_register (regno, &cmd[4]))
     return;
 
-  retval = ExeAppReq ("GDB", MREADREG, cmd, val);
+  iob.size = sizeof val;
+  iob.buf = val;
+  retval = ExeAppReq ("GDB", MREADREG, cmd, &iob);
   if (retval)
     error ("ExeAppReq returned %d: cmd = %s", retval, cmd);
 
@@ -305,7 +347,6 @@ v850ice_store_registers (regno)
 {
   long retval;
   char cmd[100];
-  char val[100];
   unsigned long regval;
 
   if (regno == -1)
@@ -322,7 +363,7 @@ v850ice_store_registers (regno)
     return;
   sprintf (cmd + strlen (cmd), "=0x%x", regval);
 
-  retval = ExeAppReq ("GDB", MWRITEREG, cmd, val);
+  retval = ExeAppReq ("GDB", MWRITEREG, cmd, &null_iob);
   if (retval)
     error ("ExeAppReq returned %d: cmd = %s", retval, cmd);
 }
@@ -350,15 +391,19 @@ v850ice_xfer_memory (memaddr, myaddr, len, should_write, target)
 {
   long retval;
   char cmd[100];
+  struct MessageIO iob;
+
+  iob.size = len;
+  iob.buf = myaddr;
 
   if (should_write)
     {
 #if 1
       sprintf (cmd, "memory b c 0x%x=0x00 l=%d", (int)memaddr, len);
-      retval = ExeAppReq ("GDB", MWRITEBLOCK, cmd, myaddr);
+      retval = ExeAppReq ("GDB", MWRITEBLOCK, cmd, &iob);
 #else
       sprintf (cmd, "memory b c 0x%x=0x%x", (int)memaddr, *myaddr & 0xff);
-      retval = ExeAppReq ("GDB", MWRITEBLOCK, cmd, myaddr);
+      retval = ExeAppReq ("GDB", MWRITEBLOCK, cmd, &iob);
       return 1;
 #endif
     }
@@ -370,9 +415,13 @@ v850ice_xfer_memory (memaddr, myaddr, len, should_write, target)
       tmp = alloca (len + 100);
       memset (tmp + len, 0xff, 100);
       
+#if 1
       sprintf (cmd, "memory b 0x%x l=%d", (int)memaddr, len);
-      retval = ExeAppReq ("GDB", MREADBLOCK, cmd, tmp);
-
+      retval = ExeAppReq ("GDB", MREADBLOCK, cmd, &iob);
+#else
+      sprintf (cmd, "memory h 0x%x", (int)memaddr);
+      retval = ExeAppReq ("GDB", MREADMEM, cmd, &iob);
+#endif
       for (i = 0; i <  100; i++)
 	{
 	  if (tmp[len + i] != 0xff)
@@ -404,14 +453,13 @@ v850ice_insert_breakpoint (addr, contents_cache)
 {
   long retval;
   char cmd[100];
-  char val[100];
 
   sprintf (cmd, "%d, ", addr);
 
 #if 1
-  retval = ExeAppReq ("GDB", MSETBREAK, cmd, val);
+  retval = ExeAppReq ("GDB", MSETBREAK, cmd, &null_iob);
 #else
-  retval = ExeAppReq ("GDB", MSETHARDBRK, cmd, val);
+  retval = ExeAppReq ("GDB", MSETHARDBRK, cmd, &null_iob);
 #endif
   if (retval)
     error ("ExeAppReq (MSETBREAK) returned %d: cmd = %s", retval, cmd);
@@ -426,14 +474,13 @@ v850ice_remove_breakpoint (addr, contents_cache)
 {
   long retval;
   char cmd[100];
-  char val[100];
 
   sprintf (cmd, "%d, ", addr);
 
 #if 1
-  retval = ExeAppReq ("GDB", MREMOVEBREAK, cmd, val);
+  retval = ExeAppReq ("GDB", MREMOVEBREAK, cmd, &null_iob);
 #else
-  retval = ExeAppReq ("GDB", MREMOVEHARDBRK, cmd, val);
+  retval = ExeAppReq ("GDB", MREMOVEHARDBRK, cmd, &null_iob);
 #endif
   if (retval)
     error ("ExeAppReq (MREMOVEBREAK) returned %d: cmd = %s", retval, cmd);

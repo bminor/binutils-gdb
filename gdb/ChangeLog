@@ -1,3 +1,8 @@
+Fri Jul 25 15:37:15 1997  Stu Grossman  <grossman@cygnus.com>
+
+	* v850ice.c:  Include <windows.h>.  Support new v850 DLL interface.
+	* Add defs for target status.
+	
 start-sanitize-gdbtk
 Tue Jul 22 19:45:37 1997  Martin M. Hunt  <hunt@cygnus.com>
 
