@@ -1,5 +1,8 @@
 2004-11-20  Mark Kettenis  <kettenis@gnu.org>
 
+	* dbxread.c (process_one_symbol): Fix a few coding standard
+	issues.  Improve code formatting.
+
 	* dbxread.c: Include "gdb_string.h".
 	(record_minimal_symbol, read_ofile_symtab): Replace
 	DEPRECATED_STREQ and DEPRECATED_STREQN with strcmp and strncmp.
