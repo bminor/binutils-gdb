@@ -3660,7 +3660,7 @@ is displayed.", &setlist),
     add_set_cmd ("remotetimeout", no_class, var_integer, (char *)&remote_timeout,
 		   "Set timeout limit to wait for target to respond.\n\
 This value is used to set the time limit for gdb to wait for a response\n\
-from he target.", &setlist),
+from the target.", &setlist),
 		     &showlist);
 
   c = add_set_cmd ("annotate", class_obscure, var_zinteger, 
