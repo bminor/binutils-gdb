@@ -93,7 +93,6 @@ typedef unsigned int DIEREF;	/* Reference to a DIE */
 
 #define STREQ(a,b)		(strcmp(a,b)==0)
 
-extern CORE_ADDR entry_point;		/* Process entry point */
 extern CORE_ADDR startup_file_start;	/* From blockframe.c */
 extern CORE_ADDR startup_file_end;	/* From blockframe.c */
 extern CORE_ADDR entry_scope_lowpc;	/* From blockframe.c */

@@ -96,10 +96,6 @@ static CORE_ADDR first_object_file_end;
 static FILE *nlist_stream_global;
 static int nlist_nsyms_global;
 
-/* The entry point (starting address) of the file, if it is an executable.  */
-
-static CORE_ADDR entry_point;
-
 /* The index in the symbol table of the last coff symbol that was processed.  */
 
 static int symnum;

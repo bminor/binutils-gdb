@@ -38,11 +38,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <string.h>
 #include <sys/stat.h>
 
+CORE_ADDR entry_point;			/* Where execution starts in symfile */
+
 extern int info_verbose;
 
 extern void qsort ();
 extern char *getenv ();
 extern char *rindex ();
+
+extern CORE_ADDR startup_file_start;	/* From blockframe.c */
+extern CORE_ADDR startup_file_end;	/* From blockframe.c */
 
 /* Functions this file defines */
 static bfd *symfile_open();
@@ -89,6 +94,7 @@ long /* really time_t */ symfile_mtime = 0;
 
 /* Structures with which to manage partial symbol allocation.  */
 
+#include "param.h"
 struct psymbol_allocation_list global_psymbols = {0}, static_psymbols = {0};
 
 /* Flag for whether user will be reloading symbols multiple times.
@@ -337,6 +343,11 @@ condense_misc_bunches (inclink)
 	  if (misc_function_vector[j].name[0] == '_')
 	      misc_function_vector[j].name++;
 #endif
+#ifdef SOME_NAMES_HAVE_DOT
+	  if (misc_function_vector[j].name[0] == '.')
+	      misc_function_vector[j].name++;
+#endif
+	  
 	}
       bunch = bunch->next;
       misc_bunch_index = MISC_BUNCH_SIZE;
@@ -389,23 +400,14 @@ psymtab_to_symtab (pst)
    where the text segment was loaded.  */
 
 void
-symbol_file_add (name, from_tty, addr, mainline)
-     char *name;
-     int from_tty;
+syms_from_bfd (sym_bfd, addr, mainline)
+     bfd *sym_bfd;
      CORE_ADDR addr;
      int mainline;
 {
-  bfd *sym_bfd;
   asection *text_sect;
   struct sym_fns *sf;
   char *realname;
-
-  sym_bfd = symfile_open (name);
-
-  entry_point = bfd_get_start_address (sym_bfd);
-
-  if (mainline)
-    symfile_mtime = bfd_get_mtime (sym_bfd);
 
   /* There is a distinction between having no symbol table
      (we refuse to read the file, leaving the old set of symbols around)
@@ -413,21 +415,24 @@ symbol_file_add (name, from_tty, addr, mainline)
      the file and end up with a mostly empty symbol table).  */
 
   if (!(bfd_get_file_flags (sym_bfd) & HAS_SYMS))
+    return;
+
+  /* Save startup file's range of PC addresses to help blockframe.c
+     decide where the bottom of the stack is.  */
+  if (bfd_get_file_flags (sym_bfd) & EXEC_P)
     {
-      error ("%s has no symbol-table", name);
+      /* Executable file -- record its entry point so we'll recognize
+	 the startup file because it contains the entry point.  */
+      entry_point = bfd_get_start_address (sym_bfd);
     }
-
-  if ((symtab_list || partial_symtab_list)
-      && mainline
-      && from_tty
-      && !query ("Load new symbol table from \"%s\"? ", name))
-    error ("Not confirmed.");
-
-  if (from_tty)
+  else
     {
-      printf_filtered ("Reading symbols from %s...", name);
-      wrap_here ("");
-      fflush (stdout);
+      /* Examination of non-executable.o files.  Short-circuit this stuff.  */
+      /* ~0 will not be in any file, we hope.  */
+      entry_point = ~0;
+      /* set the startup file to be an empty range.  */
+      startup_file_start = 0;
+      startup_file_end = 0;
     }
 
   sf = symfile_init (sym_bfd);
@@ -472,6 +477,57 @@ symbol_file_add (name, from_tty, addr, mainline)
 
   /* If we have wiped out any old symbol tables, clean up.  */
   clear_symtab_users_once ();
+}
+
+
+/* Process a symbol file, as either the main file or as a dynamically
+   loaded file.
+
+   NAME is the file name (which will be tilde-expanded and made
+   absolute herein) (but we don't free or modify NAME itself).
+   FROM_TTY says how verbose to be.  MAINLINE specifies whether this
+   is the main symbol file, or whether it's an extra symbol file such
+   as dynamically loaded code.  If !mainline, ADDR is the address
+   where the text segment was loaded.  */
+
+void
+symbol_file_add (name, from_tty, addr, mainline)
+     char *name;
+     int from_tty;
+     CORE_ADDR addr;
+     int mainline;
+{
+  bfd *sym_bfd;
+
+  sym_bfd = symfile_open (name);
+
+  if (mainline)
+    symfile_mtime = bfd_get_mtime (sym_bfd);
+
+  /* There is a distinction between having no symbol table
+     (we refuse to read the file, leaving the old set of symbols around)
+     and having no debugging symbols in your symbol table (we read
+     the file and end up with a mostly empty symbol table).  */
+
+  if (!(bfd_get_file_flags (sym_bfd) & HAS_SYMS))
+    {
+      error ("%s has no symbol-table", name);
+    }
+
+  if ((symtab_list || partial_symtab_list)
+      && mainline
+      && from_tty
+      && !query ("Load new symbol table from \"%s\"? ", name))
+    error ("Not confirmed.");
+
+  if (from_tty)
+    {
+      printf_filtered ("Reading symbols from %s...", name);
+      wrap_here ("");
+      fflush (stdout);
+    }
+
+  syms_from_bfd (sym_bfd, addr, mainline);
 
   if (from_tty)
     {
@@ -755,7 +811,6 @@ clear_complaints ()
    Caller must set these fields:
 	LINETABLE(symtab)
 	symtab->blockvector
-	symtab->typevector
 	symtab->dirname
 	symtab->free_code
 	symtab->free_ptr

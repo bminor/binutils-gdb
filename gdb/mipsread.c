@@ -213,8 +213,6 @@ CORE_ADDR sigtramp_address, sigtramp_end;
 
 /* The entry point (starting address) of the file, if it is an executable.  */
 
-static CORE_ADDR entry_point;
-
 extern CORE_ADDR startup_file_start;	/* From blockframe.c */
 extern CORE_ADDR startup_file_end;	/* From blockframe.c */
 
@@ -233,24 +231,6 @@ mipscoff_symfile_init (sf)
 {
   bfd *abfd = sf->sym_bfd;
   sf->sym_private = NULL;
-
-  /* Save startup file's range of PC addresses to help blockframe.c
-     decide where the bottom of the stack is.  */
-  if (bfd_get_file_flags (abfd) & EXEC_P)
-    {
-      /* Executable file -- record its entry point so we'll recognize
-	 the startup file because it contains the entry point.  */
-      entry_point = bfd_get_start_address (abfd);
-    }
-  else
-    {
-      /* Examination of non-executable.o files.  Short-circuit this stuff.  */
-      /* ~0 will not be in any file, we hope.  */
-      entry_point = ~0;
-      /* set the startup file to be an empty range.  */
-      startup_file_start = 0;
-      startup_file_end = 0;
-    }
 }
 
 void

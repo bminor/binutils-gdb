@@ -4,6 +4,13 @@ Sat Oct 26 00:16:32 1991  John Gilmore  (gnu at cygus.com)
 	from dbxread.c, so they can be shared with xcoffread.c.
 	* buildsym.h:  New file.  Declarations for buildsym.c users.
 	* dbxread.c:  Remove large chunks into buildsym.c.
+	* Makefile.in:  Add buildsym.c and buildsym.h.
+
+	* symfile.c (syms_from_bfd):  New routine.
+	(add_symbol_file):  Call it to do the real work.
+	(syms_from_bfd):  Initialize entry_point before calling symfile_init.
+	* symtab.h, symfile.c, coffread.c, mipsread.c, dwarfread.c:
+	Avoid declaring or setting entry_point (symfile.h & symfile.c cope).
 
 Fri Oct 25 18:59:32 1991  Per Bothner  (bothner at cygnus.com)
 
