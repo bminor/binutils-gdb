@@ -573,6 +573,34 @@ mips_use_struct_convention (int gcc_p, struct type *type)
     return 1;			/* Structures are returned by ref in extra arg0 */
 }
 
+/* Should call_function pass struct by reference? 
+   For each architecture, structs are passed either by
+   value or by reference, depending on their size.  */
+
+static int
+mips_eabi_reg_struct_has_addr (int gcc_p, struct type *type)
+{
+  enum type_code typecode = TYPE_CODE (check_typedef (type));
+  int len = TYPE_LENGTH (check_typedef (type));
+
+  if (typecode == TYPE_CODE_STRUCT || typecode == TYPE_CODE_UNION)
+    return (len > MIPS_SAVED_REGSIZE);
+
+  return 0;
+}
+
+static int
+mips_n32n64_reg_struct_has_addr (int gcc_p, struct type *type)
+{
+  return 0;	/* Assumption: N32/N64 never passes struct by ref.  */
+}
+
+int
+mips_o32_reg_struct_has_addr (int gcc_p, struct type *type)
+{
+  return 0;	/* Assumption: O32/O64 never passes struct by ref.  */
+}
+
 /* Tell if the program counter value in MEMADDR is in a MIPS16 function.  */
 
 static int
@@ -4489,6 +4517,8 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
       set_gdbarch_long_long_bit (gdbarch, 64);
+      set_gdbarch_reg_struct_has_addr (gdbarch, 
+				       mips_o32_reg_struct_has_addr);
       break;
     case MIPS_ABI_O64:
       tdep->mips_default_saved_regsize = 8;
@@ -4502,6 +4532,8 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
       set_gdbarch_long_long_bit (gdbarch, 64);
+      set_gdbarch_reg_struct_has_addr (gdbarch, 
+				       mips_o32_reg_struct_has_addr);
       break;
     case MIPS_ABI_EABI32:
       tdep->mips_default_saved_regsize = 4;
@@ -4515,6 +4547,8 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
       set_gdbarch_long_long_bit (gdbarch, 64);
+      set_gdbarch_reg_struct_has_addr (gdbarch, 
+				       mips_eabi_reg_struct_has_addr);
       break;
     case MIPS_ABI_EABI64:
       tdep->mips_default_saved_regsize = 8;
@@ -4528,6 +4562,8 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_bit (gdbarch, 64);
       set_gdbarch_ptr_bit (gdbarch, 64);
       set_gdbarch_long_long_bit (gdbarch, 64);
+      set_gdbarch_reg_struct_has_addr (gdbarch, 
+				       mips_eabi_reg_struct_has_addr);
       break;
     case MIPS_ABI_N32:
       tdep->mips_default_saved_regsize = 8;
@@ -4552,6 +4588,8 @@ mips_gdbarch_init (struct gdbarch_info info,
 	tm_print_insn_info.mach = info.bfd_arch_info->mach;
       else
 	tm_print_insn_info.mach = bfd_mach_mips8000;
+      set_gdbarch_reg_struct_has_addr (gdbarch, 
+				       mips_n32n64_reg_struct_has_addr);
       break;
     case MIPS_ABI_N64:
       tdep->mips_default_saved_regsize = 8;
@@ -4576,6 +4614,8 @@ mips_gdbarch_init (struct gdbarch_info info,
 	tm_print_insn_info.mach = info.bfd_arch_info->mach;
       else
 	tm_print_insn_info.mach = bfd_mach_mips8000;
+      set_gdbarch_reg_struct_has_addr (gdbarch, 
+				       mips_n32n64_reg_struct_has_addr);
       break;
     default:
       internal_error (__FILE__, __LINE__,
