@@ -1729,6 +1729,18 @@ target_signal_from_host (int hostsig)
 	error ("GDB bug: target.c (target_signal_from_host): unrecognized real-time signal");
     }
 #endif
+
+#if defined (SIGRTMIN)
+  if (hostsig >= SIGRTMIN && hostsig <= SIGRTMAX)
+    {
+      /* This block of TARGET_SIGNAL_REALTIME value is in order.  */
+      if (33 <= hostsig && hostsig <= 63)
+	return (enum target_signal)
+	  (hostsig - 33 + (int) TARGET_SIGNAL_REALTIME_33);
+      else
+	error ("GDB bug: target.c (target_signal_from_host): unrecognized real-time signal");
+    }
+#endif
   return TARGET_SIGNAL_UNKNOWN;
 }
 
@@ -1983,6 +1995,19 @@ do_target_signal_to_host (enum target_signal oursig,
 	  return 32;
 	}
 #endif
+#endif
+
+#if defined (SIGRTMIN)
+      if (oursig >= TARGET_SIGNAL_REALTIME_33
+	  && oursig <= TARGET_SIGNAL_REALTIME_63)
+	{
+	  /* This block of signals is continuous, and
+             TARGET_SIGNAL_REALTIME_33 is 33 by definition.  */
+	  int retsig =
+	    (int) oursig - (int) TARGET_SIGNAL_REALTIME_33 + 33;
+	  if (retsig >= SIGRTMIN && retsig <= SIGRTMAX)
+	    return retsig;
+	}
 #endif
       *oursig_ok = 0;
       return 0;
