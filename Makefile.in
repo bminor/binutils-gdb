@@ -197,7 +197,7 @@ CC_FOR_TARGET = ` \
   if [ -f $$r/gcc/xgcc ] ; then \
     if [ -f $$r/$(TARGET_SUBDIR)/newlib/Makefile ] ; then \
       if [ -f $$r/$(TARGET_SUBDIR)/winsup/Makefile ] ; then \
-        echo $$r/gcc/xgcc -B$$r/gcc/ -B$$r/newlib/ -L$$r/$(TARGET_SUBDIR)/winsup -idirafter $$r/$(TARGET_SUBDIR)/newlib/targ-include -idirafter $$s/newlib/libc/include -nostdinc; \
+        echo $$r/gcc/xgcc -B$$r/gcc/ -B$$r/$(TARGET_SUBDIR)/newlib/ -L$$r/$(TARGET_SUBDIR)/winsup -idirafter $$r/$(TARGET_SUBDIR)/newlib/targ-include -idirafter $$s/newlib/libc/include -nostdinc; \
       else \
         echo $$r/gcc/xgcc -B$$r/gcc/ -idirafter $$r/$(TARGET_SUBDIR)/newlib/targ-include -idirafter $$s/newlib/libc/include -nostdinc; \
       fi; \
@@ -236,7 +236,7 @@ CXX_FOR_TARGET = ` \
   if [ -f $$r/gcc/xgcc ] ; then \
     if [ -f $$r/$(TARGET_SUBDIR)/newlib/Makefile ] ; then \
       if [ -f $$r/$(TARGET_SUBDIR)/winsup/Makefile ] ; then \
-        echo $$r/gcc/xgcc -B$$r/gcc/ -B$$r/newlib/ -L$$r/winsup -idirafter $$r/$(TARGET_SUBDIR)/newlib/targ-include -idirafter $$s/newlib/libc/include -nostdinc; \
+        echo $$r/gcc/xgcc -B$$r/gcc/ -B$$r/$(TARGET_SUBDIR)/newlib/ -L$$r/winsup -idirafter $$r/$(TARGET_SUBDIR)/newlib/targ-include -idirafter $$s/newlib/libc/include -nostdinc; \
       else \
         echo $$r/gcc/xgcc -B$$r/gcc/ -idirafter $$r/$(TARGET_SUBDIR)/newlib/targ-include -idirafter $$s/newlib/libc/include -nostdinc; \
       fi; \
@@ -352,7 +352,6 @@ BASE_FLAGS_TO_PASS = \
 	"CXXFLAGS_FOR_TARGET=$(CXXFLAGS_FOR_TARGET)" \
 	"CXX_FOR_TARGET=$(CXX_FOR_TARGET)" \
 	"DLLTOOL_FOR_TARGET=$(DLLTOOL_FOR_TARGET)" \
-	"gxx_include_dir=$(gxx_include_dir)" \
 	"INSTALL=$(INSTALL)" \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
@@ -364,7 +363,6 @@ BASE_FLAGS_TO_PASS = \
 	"LIBCFLAGS_FOR_TARGET=$(LIBCFLAGS_FOR_TARGET)" \
 	"LIBCXXFLAGS=$(LIBCXXFLAGS)" \
 	"LIBCXXFLAGS_FOR_TARGET=$(LIBCXXFLAGS_FOR_TARGET)" \
-	"local_prefix=$(local_prefix)" \
 	"M4=$(M4)" \
 	"MAKE=$(MAKE)" \
 	"MAKEINFO=$(MAKEINFO) $(MAKEINFOFLAGS)" \
@@ -536,7 +534,7 @@ ALL_MODULES = \
 	all-send-pr \
 	all-shellutils \
 	all-sim \
-	all-sn \
+	all-snavigator \
 	all-tar \
 	all-tcl \
 	all-texinfo \
@@ -611,7 +609,7 @@ CROSS_CHECK_MODULES = \
 	check-sed \
 	check-send-pr \
 	check-shellutils \
-	check-sn \
+	check-snavigator \
 	check-sim \
 	check-tar \
 	check-tcl \
@@ -632,6 +630,8 @@ CHECK_MODULES=$(NATIVE_CHECK_MODULES) $(CROSS_CHECK_MODULES)
 # We put install-opcodes before install-binutils because the installed
 # binutils might be on PATH, and they might need the shared opcodes
 # library.
+# We put install-tcl before install-itcl because itcl wants to run a
+# program on installation which uses the Tcl libraries.
 INSTALL_MODULES = \
 	install-apache \
 	install-autoconf \
@@ -666,6 +666,7 @@ INSTALL_MODULES = \
 	install-indent \
 	install-inet \
 	install-ispell \
+	install-tcl \
 	install-itcl \
 	$(start-sanitize-ide) \
 	install-jstools \
@@ -689,9 +690,8 @@ INSTALL_MODULES = \
 	install-send-pr \
 	install-shellutils \
 	install-sim \
-	install-sn \
+	install-snavigator \
 	install-tar \
-	install-tcl \
 	install-texinfo \
 	install-textutils \
 	install-tgas \
@@ -852,7 +852,7 @@ CLEAN_MODULES = \
 	clean-send-pr \
 	clean-shellutils \
 	clean-sim \
-	clean-sn \
+	clean-snavigator \
 	clean-tar \
 	clean-tcl \
 	clean-texinfo \
@@ -1535,7 +1535,7 @@ all-sed: all-libiberty
 all-send-pr: all-prms
 all-shellutils:
 all-sim: all-libiberty all-bfd all-opcodes all-readline
-all-sn: all-tcl all-tk all-tix all-itcl all-db all-grep
+all-snavigator: all-tcl all-tk all-tix all-itcl all-db all-grep
 all-tar: all-libiberty
 all-tcl:
 all-tclX: all-tcl all-tk
@@ -1555,9 +1555,10 @@ all-uudecode: all-libiberty
 configure-target-libiberty: $(ALL_GCC)
 all-target-libiberty: configure-target-libiberty all-gcc all-ld all-target-newlib
 all-target: $(ALL_TARGET_MODULES)
-install-itcl: install-tcl
 install-target: $(INSTALL_TARGET_MODULES)
-
+# start-sanitize-gdbtk
+install-gdbtk: install-tcl install-tk install-itcl install-tix install-libgui install-gdb
+#end-sanitize-gdbtk
 ### other supporting targets
 
 MAKEDIRS= \
