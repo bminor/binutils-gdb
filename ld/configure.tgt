@@ -16,7 +16,7 @@ arm-*-pe)		targ_emul=armpe ;;
 arc-*-elf*)		targ_emul=arcelf ;;
 # end-sanitize-arc
 # start-sanitize-d10v
-d10v-*-elf*)		targ_emul=d10velf ;;
+d10v-*-*)		targ_emul=d10velf ;;
 # end-sanitize-d10v
 sparc64-*-aout*)	targ_emul=sparcaout ;;
 sparc64-*-elf*)		targ_emul=elf64_sparc ;;
@@ -43,43 +43,43 @@ m68*-wrs-vxworks*)	targ_emul=sun3 ;;
 m68*-ericsson-ose)	targ_emul=sun3 ;;
 m68*-apple-aux*)	targ_emul=m68kaux ;;
 *-tandem-none)		targ_emul=st2000 ;;
-i[345]86-*-vsta)	targ_emul=vsta ;;
-i[345]86-go32-rtems*)	targ_emul=i386go32 ;;
-i[345]86-*-go32)	targ_emul=i386go32 ;;
-i[345]86-*-aix*)	targ_emul=i386coff ;;
-i[345]86-*-sco*)	targ_emul=i386coff ;;
-i[345]86-*-isc*)	targ_emul=i386coff ;;
-i[345]86-*-lynxos*)	targ_emul=i386lynx ;;
-i[345]86-*-coff)	targ_emul=i386coff ;;
-i[345]86-*-rtems*)	targ_emul=i386coff ;;
-i[345]86-*-bsd)		targ_emul=i386bsd ;;
-i[345]86-*-bsd386)	targ_emul=i386bsd ;;
-i[345]86-*-bsdi*)	targ_emul=i386bsd ;;
-i[345]86-*-aout)	targ_emul=i386aout ;;
-i[345]86-*-linuxaout*)	targ_emul=i386linux
+i[3456]86-*-vsta)	targ_emul=vsta ;;
+i[3456]86-go32-rtems*)	targ_emul=i386go32 ;;
+i[3456]86-*-go32)	targ_emul=i386go32 ;;
+i[3456]86-*-aix*)	targ_emul=i386coff ;;
+i[3456]86-*-sco*)	targ_emul=i386coff ;;
+i[3456]86-*-isc*)	targ_emul=i386coff ;;
+i[3456]86-*-lynxos*)	targ_emul=i386lynx ;;
+i[3456]86-*-coff)	targ_emul=i386coff ;;
+i[3456]86-*-rtems*)	targ_emul=i386coff ;;
+i[3456]86-*-bsd)	targ_emul=i386bsd ;;
+i[3456]86-*-bsd386)	targ_emul=i386bsd ;;
+i[3456]86-*-bsdi*)	targ_emul=i386bsd ;;
+i[3456]86-*-aout)	targ_emul=i386aout ;;
+i[3456]86-*-linuxaout*)	targ_emul=i386linux
 			targ_extra_emuls=elf_i386
 			tdir_elf_i386=`echo ${targ_alias} | sed -e 's/aout//'`
 			;;
-i[345]86-*-linuxoldld)	targ_emul=i386linux; targ_extra_emuls=elf_i386 ;;
-i[345]86-*-linux*)	targ_emul=elf_i386
+i[3456]86-*-linuxoldld)	targ_emul=i386linux; targ_extra_emuls=elf_i386 ;;
+i[3456]86-*-linux*)	targ_emul=elf_i386
 			targ_extra_emuls=i386linux
 			tdir_i386linux=${targ_alias}aout
 			;;
-i[345]86-*-sysv4*)	targ_emul=elf_i386 ;;
-i[345]86-*-unixware)	targ_emul=elf_i386 ;;
-i[345]86-*-netbsd*)	targ_emul=i386nbsd ;;
-i[345]86-*-netware)	targ_emul=i386nw ;;
-i[345]86-*-elf*)	targ_emul=elf_i386 ;;
-i[345]86-*-freebsdelf*)	targ_emul=elf_i386 ;;
-i[345]86-*-sysv*)	targ_emul=i386coff ;;
-i[345]86-*-ptx*)	targ_emul=i386coff ;;
-i[345]86-*-mach*)	targ_emul=i386mach ;;
-i[345]86-*-gnu*)	targ_emul=elf_i386; targ_extra_emuls=i386mach ;;
-i[345]86-*-msdos*)	targ_emul=i386msdos; targ_extra_emuls=i386aout ;;
-i[345]86-*-moss*)	targ_emul=i386moss; targ_extra_emuls=i386msdos ;;
-i[345]86-*-winnt)	targ_emul=i386pe ;;
-i[345]86-*-pe)		targ_emul=i386pe ;;
-i[345]86-*-cygwin32)	targ_emul=i386pe ;;
+i[3456]86-*-sysv4*)	targ_emul=elf_i386 ;;
+i[3456]86-*-unixware)	targ_emul=elf_i386 ;;
+i[3456]86-*-netbsd*)	targ_emul=i386nbsd ;;
+i[3456]86-*-netware)	targ_emul=i386nw ;;
+i[3456]86-*-elf*)	targ_emul=elf_i386 ;;
+i[3456]86-*-freebsdelf*) targ_emul=elf_i386 ;;
+i[3456]86-*-sysv*)	targ_emul=i386coff ;;
+i[3456]86-*-ptx*)	targ_emul=i386coff ;;
+i[3456]86-*-mach*)	targ_emul=i386mach ;;
+i[3456]86-*-gnu*)	targ_emul=elf_i386; targ_extra_emuls=i386mach ;;
+i[3456]86-*-msdos*)	targ_emul=i386msdos; targ_extra_emuls=i386aout ;;
+i[3456]86-*-moss*)	targ_emul=i386moss; targ_extra_emuls=i386msdos ;;
+i[3456]86-*-winnt)	targ_emul=i386pe ;;
+i[3456]86-*-pe)		targ_emul=i386pe ;;
+i[3456]86-*-cygwin32)	targ_emul=i386pe ;;
 m8*-*-*)		targ_emul=m88kbcs ;;
 a29k-*-udi)		targ_emul=sa29200 ;;
 a29k-*-ebmon)		targ_emul=ebmon29k ;;
@@ -92,6 +92,9 @@ h8300-*-hms)		targ_emul=h8300; targ_extra_emuls="h8300h h8300s"
 			;;
 h8500-*-hms)		targ_emul=h8500
 			targ_extra_emuls="h8500s h8500b h8500m h8500c"
+			;;
+sh-*-elf*)		targ_emul=shelf
+			targ_extra_emuls="shlelf sh shl"
 			;;
 sh-*-*)			targ_emul=sh; targ_extra_emuls=shl ;;
 m68k-sony-*)		targ_emul=news ;;
@@ -139,6 +142,7 @@ alpha-*-linux*)		targ_emul=elf64alpha targ_extra_emuls=alpha
 			tdir_alpha=`echo ${targ_alias} | sed -e 's/linux/linuxecoff/'`
 			;;
 alpha-*-osf*)		targ_emul=alpha ;;
+alpha-*-gnu*)		targ_emul=elf64alpha ;;
 alpha-*-netware*)	targ_emul=alpha ;;
 z8k-*-coff) 		targ_emul=z8002; targ_extra_emuls=z8001 ;;
 ns32k-pc532-mach* | ns32k-pc532-ux*)	targ_emul=pc532macha ;;
@@ -154,6 +158,9 @@ powerpcle-*-winnt*)     targ_emul=ppcpe ;;
 powerpcle-*-cygwin32)   targ_emul=ppcpe ;;
 powerpc-*-aix*)		targ_emul=aixppc ;;
 rs6000-*-aix*)		targ_emul=aixrs6 ;;
+# start-sanitize-v850
+v850-*-*)		targ_emul=v850 ;;
+# end-sanitize-v850
 w65-*-*)		targ_emul=w65 ;;
 *-*-aout)		targ_emul=${target_cpu}-${target_vendor} ;;
 *-*-coff)		targ_emul=${target_cpu}-${target_vendor} ;;

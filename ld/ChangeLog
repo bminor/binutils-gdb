@@ -1,4 +1,17 @@
+Wed Sep  4 15:53:43 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.tgt (alpha-*-gnu*): New target.  From Fila Kolodny
+	<fila@ibi.com>.
+
 start-sanitize-v850
+Tue Sep  3 00:52:54 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* emulparms/v850.sh: Set OTHER_RELOCATING_SECTIONS
+
+Sun Sep  1 21:48:58 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* emulparms/v850.sh: Set EMBEDDED.
+
 Fri Aug 30 22:30:30 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* emulparms/v850.sh: Entry symbol is "_start", tweak
