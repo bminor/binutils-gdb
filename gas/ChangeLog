@@ -1,3 +1,10 @@
+2000-05-08  David Mosberger  <davidm@hpl.hp.com>
+
+	* config/tc-ia64.c (output_P7_format, case mem_stack_f): Output fixed
+	frame size in units of 16 bytes, as required per SW Conventions manual.
+	(output_unw_records): Output info-block header as a dword to get
+	byte-order right.
+
 2000-05-08  Alan Modra  <alan@linuxcare.com.au>
 
 	* as.h: #include "file", not <file> on files from ../include.

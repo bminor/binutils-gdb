@@ -1010,8 +1010,8 @@ output_P7_format (f, rtype, w1, w2)
   switch (rtype)
     {
       case mem_stack_f:
-        r = 0;
-	count += output_leb128 (bytes + count, w2, 0);
+	r = 0;
+	count += output_leb128 (bytes + count, w2 >> 4, 0);
 	break;
       case mem_stack_v:
         r = 1;
@@ -2213,11 +2213,10 @@ output_unw_records (list, ptr)
   /* Clear the padding area and personality.  */
   memset (mem + 8 + size, 0 , extra + 8);
   /* Initialize the header area.  */
-  md_number_to_chars (mem, 1, 2);	/* version number. */
-  md_number_to_chars (mem + 2, 0x03, 2);  /* Set E and U handler bits.  */    
-
-  /* Length in double words.  */
-  md_number_to_chars (mem + 4, (size + extra) / 8, 4);
+  md_number_to_chars (mem, (  ((bfd_vma) 1 << 48)     /* version */
+			    | ((bfd_vma) 3 << 32)     /* U & E handler flags */
+			    | ((size + extra) / 8)),  /* length (dwords) */
+		      8);
 
   process_unw_records (list, output_vbyte_mem);
 
