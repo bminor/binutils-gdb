@@ -71,11 +71,6 @@ struct catcher
   SIGJMP_BUF buf;
   /* Status buffer belonging to the exception handler.  */
   volatile struct exception *exception;
-  /* Should the error / quit message be printed?  Old code assumes
-     that this file prints the error/quit message when first reported.
-     New code instead directly handles the printing of error/quit
-     messages.  */
-  int print_message;
   /* Saved/current state.  */
   int mask;
   char *saved_error_pre_print;
@@ -93,8 +88,7 @@ static SIGJMP_BUF *
 catcher_init (struct ui_out *func_uiout,
 	      char *errstring,
 	      volatile struct exception *exception,
-	      return_mask mask,
-	      int print_message)
+	      return_mask mask)
 {
   struct catcher *new_catcher = XZALLOC (struct catcher);
 
@@ -105,7 +99,6 @@ catcher_init (struct ui_out *func_uiout,
   new_catcher->exception = exception;
 
   new_catcher->mask = mask;
-  new_catcher->print_message = print_message;
 
   /* Override error/quit messages during FUNC. */
   new_catcher->saved_error_pre_print = error_pre_print;
@@ -374,11 +367,11 @@ print_any_exception (struct ui_file *file, const char *prefix,
 }
 
 NORETURN static void
-throw_it (enum return_reason reason, enum errors error, const char *prefix,
-	  const char *fmt, va_list ap) ATTR_NORETURN;
+throw_it (enum return_reason reason, enum errors error, const char *fmt,
+	  va_list ap) ATTR_NORETURN;
 NORETURN static void
-throw_it (enum return_reason reason, enum errors error, const char *prefix,
-	  const char *fmt, va_list ap)
+throw_it (enum return_reason reason, enum errors error, const char *fmt,
+	  va_list ap)
 {
   struct exception e;
 
@@ -398,13 +391,13 @@ throw_it (enum return_reason reason, enum errors error, const char *prefix,
 NORETURN void
 throw_verror (enum errors error, const char *fmt, va_list ap)
 {
-  throw_it (RETURN_ERROR, error, error_pre_print, fmt, ap);
+  throw_it (RETURN_ERROR, error, fmt, ap);
 }
 
 NORETURN void
 throw_vfatal (const char *fmt, va_list ap)
 {
-  throw_it (RETURN_QUIT, NO_ERROR, quit_pre_print, fmt, ap);
+  throw_it (RETURN_QUIT, NO_ERROR, fmt, ap);
 }
 
 NORETURN void
@@ -412,7 +405,7 @@ throw_error (enum errors error, const char *fmt, ...)
 {
   va_list args;
   va_start (args, fmt);
-  throw_it (RETURN_ERROR, error, error_pre_print, fmt, args);
+  throw_it (RETURN_ERROR, error, fmt, args);
   va_end (args);
 }
 
@@ -465,7 +458,7 @@ catch_exception (struct ui_out *uiout,
 {
   volatile struct exception exception;
   SIGJMP_BUF *catch;
-  catch = catcher_init (uiout, NULL, &exception, mask, 0);
+  catch = catcher_init (uiout, NULL, &exception, mask);
   for (SIGSETJMP ((*catch));
        catcher_state_machine (CATCH_ITER);)
     (*func) (uiout, func_args);
@@ -481,7 +474,7 @@ catch_exceptions_with_msg (struct ui_out *uiout,
 {
   volatile struct exception exception;
   volatile int val = 0;
-  SIGJMP_BUF *catch = catcher_init (uiout, NULL, &exception, mask, 1);
+  SIGJMP_BUF *catch = catcher_init (uiout, NULL, &exception, mask);
   for (SIGSETJMP ((*catch)); catcher_state_machine (CATCH_ITER);)
     val = (*func) (uiout, func_args);
   print_any_exception (gdb_stderr, NULL, exception);
@@ -510,7 +503,7 @@ catch_errors (catch_errors_ftype *func, void *func_args, char *errstring,
 {
   volatile int val = 0;
   volatile struct exception exception;
-  SIGJMP_BUF *catch = catcher_init (uiout, errstring, &exception, mask, 1);
+  SIGJMP_BUF *catch = catcher_init (uiout, errstring, &exception, mask);
   /* This illustrates how it is possible to nest the mechanism and
      hence catch "break".  Of course this doesn't address the need to
      also catch "return".  */
