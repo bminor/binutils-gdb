@@ -23,6 +23,13 @@ AC_ARG_ENABLE(targets,
   no)	    enable_targets= ;;
   *)	    enable_targets=$enableval ;;
 esac])dnl
+AC_ARG_ENABLE(shared,
+[  --enable-shared         build shared BFD library],
+[case "${enableval}" in
+  yes) shared=true ;;
+  no)  shared=false ;;
+  *)   AC_MSG_ERROR([bad value ${enableval} for BFD shared option]) ;;
+esac])dnl
 
 # Generate a header file -- gets more post-processing by Makefile later.
 AC_CONFIG_HEADER(conf)
@@ -64,9 +71,22 @@ case ${cpu_type} in
   alpha | vax)
     ;;
   *)
-    OPCODES_LIB="../opcodes/libopcodes.a"
+    OPCODES_DEP=../opcodes/libopcodes.a
+    OPCODES_LIB='-L../opcodes -lopcodes'
+
+    # We need to handle some special cases if opcodes was built shared.
+    if test "${shared}" = "true"; then
+      case "${host}" in
+      *-*-sunos*)
+      # On SunOS, we must link against the name we are going to install,
+      # not -lbfd, since SunOS does not support SONAME.
+      OPCODES_LIB='-L../opcodes -l`echo opcodes | sed '"'"'$(program_transform_name)'"'"'`'
+      ;;
+      esac
+    fi
     ;;
 esac
+AC_SUBST(OPCODES_DEP)
 AC_SUBST(OPCODES_LIB)
 
 gas_target=${cpu_type}
@@ -326,7 +346,12 @@ changequote([,])dnl
     esac
 
     case ${cpu_type} in
-      m68k) extra_objects="$extra_objects m68k-parse.o" ;;
+      m68k)
+	case ${extra_objects} in
+	*m68k-parse.o*) ;;
+	*) extra_objects="$extra_objects m68k-parse.o" ;;
+	esac
+	;;
     esac
 
 # See if we really can support this configuration with the emulation code.
@@ -520,10 +545,23 @@ case "${primary_bfd_gas}" in
 esac
 
 case "${need_bfd}" in
-  yes)	BFDLIB=../bfd/libbfd.a
+  yes)	BFDDEP=../bfd/libbfd.a
+	BFDLIB='-L../bfd -lbfd'
 	ALL_OBJ_DEPS="$ALL_OBJ_DEPS ../bfd/bfd.h"
+
+	# We need to handle some special cases if BFD was built shared.
+	if test "${shared}" = "true"; then
+	  case "${host}" in
+	  *-*-sunos*)
+	  # On SunOS, we must link against the name we are going to install,
+	  # not -lbfd, since SunOS does not support SONAME.
+	  BFDLIB='-L../bfd -l`echo bfd | sed '"'"'$(program_transform_name)'"'"'`'
+	  ;;
+	  esac
+	fi
 	;;
 esac
+AC_SUBST(BFDDEP)
 AC_SUBST(BFDLIB)
 AC_SUBST(ALL_OBJ_DEPS)
 
@@ -592,6 +630,45 @@ GAS_CHECK_DECL_NEEDED(errno, f, int f, [
 #include <errno.h>
 #endif
 ])
+
+HLDFLAGS=
+# If we have shared libraries, try to set rpath reasonably.
+if test "${shared}" = "true"; then
+  case "${host}" in
+  *-*-irix5*)
+    HLDFLAGS='-Wl,-rpath,$(libdir)'
+    ;;
+  *-*-linux*aout*)
+    ;;
+  *-*-linux*)
+    HLDFLAGS='-Wl,-rpath,$(libdir)'
+    ;;
+  *-*-sysv4* | *-*-solaris*)
+    HLDFLAGS='-R $(libdir)'
+    ;;
+  esac
+fi
+
+# On SunOS, if the linker supports the -rpath option, use it to
+# prevent ../bfd and ../opcodes from being included in the run time
+# search path.
+case "${host}" in
+  *-*-sunos*)
+    echo 'main () { }' > conftest.c
+    ${CC} -o conftest -Wl,-rpath= conftest.c >/dev/null 2>conftest.t
+    if grep 'unrecognized' conftest.t >/dev/null 2>&1; then
+      :
+    elif grep 'No such file' conftest.t >/dev/null 2>&1; then
+      :
+    elif test "${shared}" = "true"; then
+      HLDFLAGS='-Wl,-rpath=$(libdir)'
+    else
+      HLDFLAGS='-Wl,-rpath='
+    fi
+    rm -f conftest.t conftest.c conftest
+    ;;
+esac
+AC_SUBST(HLDFLAGS)
 
 dnl This must come last.
 AC_OUTPUT(Makefile doc/Makefile .gdbinit:gdbinit.in)

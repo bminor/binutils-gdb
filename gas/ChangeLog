@@ -1,3 +1,18 @@
+Wed Feb  7 14:12:03 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Check for --enable-shared.  If linking against
+	shared BFD and opcodes, fix library name on SunOS, and try to set
+	-rpath reasonably.
+	* configure: Rebuild.
+
+Tue Feb  6 15:16:17 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* as.h (flag_m68k_mri): Declare.
+	* as.c (parse_args): If TC_M68K, set flag_m68k_mri for -M.
+	* Many files: For MRI syntax that is specific to the m68k MRI
+	assembler, check flag_m68k_mri rather than flag_mri or
+	MRI_MODE_NEEDS_PSEUDO_DOT.
+
 Mon Feb  5 16:29:11 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-i960.c (ARCH_HX): Define.
