@@ -28,7 +28,15 @@ v850_files="v850.h"
 if ( echo $* | grep keep\-v850 > /dev/null ) ; then
 	keep_these_too="${v850_files} ${keep_these_too}"
 else
+ if ( echo $* | grep keep\-v850e > /dev/null ) ; then
+	keep_these_too="${v850_files} ${keep_these_too}"
+ else
+  if ( echo $* | grep keep\-v850eq > /dev/null ) ; then
+	keep_these_too="${v850_files} ${keep_these_too}"
+  else
 	lose_these_too="${v850_files} ${lose_these_too}"
+  fi
+ fi
 fi
 
 tic80_files="tic80.h"
@@ -124,6 +132,60 @@ else
 			fi
 			cp $i new
 			sed '/start\-sanitize\-v850/,/end-\sanitize\-v850/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
+v850e_files="ChangeLog v850.h"
+if ( echo $* | grep keep\-v850e > /dev/null ) ; then
+	for i in $v850e_files ; do
+		if test ! -d $i && (grep sanitize-v850e $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping v850e stuff in $i
+			fi
+		fi
+	done
+else
+	for i in $v850e_files ; do
+		if test ! -d $i && (grep sanitize-v850e $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"v850e\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-v850e/,/end-\sanitize\-v850e/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+if ( echo $* | grep keep\-v850eq > /dev/null ) ; then
+	for i in $v850e_files ; do
+		if test ! -d $i && (grep sanitize-v850eq $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping v850eq stuff in $i
+			fi
+		fi
+	done
+else
+	for i in $v850e_files ; do
+		if test ! -d $i && (grep sanitize-v850eq $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"v850eq\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-v850eq/,/end-\sanitize\-v850eq/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...

@@ -1,3 +1,33 @@
+Wed Aug 13 18:45:48 1997  Nick Clifton  <nickc@cygnus.com>
+
+start-sanitize-v850e
+	* .Sanitize (Do-first, Do-last): Add support for keep-v850e
+	command line option. 
+end-sanitize-v850e
+
+start-sanitize-v850eq
+	* .Sanitize (Do-first, Do-last): Add support for keep-v850eq
+	command line options.
+end-sanitize-v850eq
+
+	* v850.h (struct v850_opcode): Add flags field.
+	(struct v850_operand): Extend meaning of 'bits' and 'shift'
+	fields. 
+start-sanitize-v850e
+start-sanitize-v850eq
+	(V850E_INSTRUCTION, V850EQ_INSTRUCTION): New flags.
+	(V850E_PUSH_POP, V850E_IMMEDIATE16, V850E_IMMEDIATE32): New flags.
+end-sanitize-v850eq
+end-sanitize-v850e
+
+Fri Aug  8 16:58:42 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* arc.h: New file.
+
+Thu Jul 24 21:16:58 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* sparc.h (sparc_opcodes): Declare as const.
+
 Thu Jul 10 12:53:25 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* mips.h (FP_S, FP_D): Define.  Bitmasks indicating if an insn
@@ -611,31 +641,11 @@ Wed Jun 21 18:49:51 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 	[!NO_DEFAULT_SIZES]: An omitted size defaults to `w'.
 	(m68k_opcode_aliases): Add more aliases.
 
-start-sanitize-arc
-Sat Apr 29 23:17:03 1995  Doug Evans  <dje@chestnut.cygnus.com>
-
-	* arc.h (struct arc_opcode): New flag value ARC_OPCODE_COND_BRANCH.
-	(ARC_DELAY_{NONE,NORMAL,JUMP): Define delay slot types.
-end-sanitize-arc
-
 Fri Apr 14 22:15:34 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* m68k.h: Added explcitly short-sized conditional branches, and a
 	bunch of aliases (fmov*, ftest*, tdivul) to support gcc's
 	svr4-based configurations.
-
-start-sanitize-arc
-Wed Apr 12 08:54:32 1995  Doug Evans  <dje@canuck.cygnus.com>
-
-	* arc.h (struct arc_opcode): New members next_asm, next_dis.
-	(ARC_HASH_OPCODE, ARC_HASH_ICODE): Define.
-	(ARC_OPCODE_NEXT_ASM, ARC_OPCODE_NEXT_DIS): Define.
-	(arc_opcode_lookup_asm, arc_opcode_lookup_dis): Add prototypes.
-
-Thu Apr  6 20:36:55 1995  Doug Evans  <dje@chestnut.cygnus.com>
-
-	* arc.h (arc_get_opcode_mach): Define prototype.
-end-sanitize-arc
 
 Mon Mar 13 21:30:01 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
@@ -665,15 +675,6 @@ Wed Mar  8 03:13:23 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 	[DONT_DEFINE_TABLE]: Declare numopcodes, numaliases, and
 	m68k_opcode_aliases; update declaration of m68k_opcodes.
 
-start-sanitize-arc
-Tue Mar  7 21:03:26 1995  Doug Evans  <dje@chestnut.cygnus.com>
-
-	* arc.h (ARC_MACH_BIG): Define.
-	(ARC_MACH_MASK): Update.
-	(ARC_MACH_CPU_MASK): Define.
-	(ARC_OPCODE_CPU, ARC_OPVAL_CPU, ARC_HAVE_CPU): Likewise.
-end-sanitize-arc
-
 Mon Mar  6 10:02:00 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* hppa.h (delay_type): Delete unused enumeration.
@@ -696,24 +697,6 @@ Thu Feb 23 17:33:09 1995  Jeff Law  (law@snake.cs.utah.edu)
 Wed Feb 15 12:19:52 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* mips.h (M_ULD, M_ULD_A, M_USD, M_USD_A): Define.
-
-start-sanitize-arc
-Mon Feb 13 11:05:00 1995  Doug Evans  <dje@canuck.cygnus.com>
-
-	* arc.h (ARC_OPERAND_LIMM): New flag.
-	(ARC_OPERAND_ADDRESS): Likewise.
-
-Thu Feb  9 18:55:59 1995  Doug Evans  <dje@canuck.cygnus.com>
-
-	* arc.h (ARC_MACH_{BASE,HOST,GRAPHICS,AUDIO}): Define.
-	(ARC_MACH_MASK, ARC_OPCODE_MACH, ARC_OPVAL_MACH): Define.
-	(ARC_HAVE_MULT_SHIFT): Delete.
-	(ARC_HAVE_MACH): Define.
-	(struct arc_opcode): New field `flags'.
-	(struct arc_operand_value): Ditto.
-	(arc_opcode_supported): New function.
-	(arc_opval_supported): Ditto.
-end-sanitize-arc
 
 Mon Feb  6 10:35:23 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
@@ -744,19 +727,6 @@ Thu Jan 19 14:47:53 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 Tue Jan 17 10:55:30 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* mips.h (INSN_ISA, INSN_4650): Define.
-
-start-sanitize-arc
-Mon Dec 19 12:15:52 1994  Doug Evans  <dje@canuck.cygnus.com>
-
-	* arc.h: Misc. cleanup.  Merge "modifiers" into flags field.
-	Support multiply/shift insns.
-end-sanitize-arc
-
-start-sanitize-arc
-Tue Nov 29 17:52:41 1994  Doug Evans  <dje@canuck.cygnus.com>
-
-	* arc.h: New file.
-end-sanitize-arc
 
 Wed Oct 19 13:34:17 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
