@@ -2624,6 +2624,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "slliq",   XRC(31,248,0), X_MASK,	M601,		{ RA, RS, SH } },
 { "slliq.",  XRC(31,248,1), X_MASK,	M601,		{ RA, RS, SH } },
 
+{ "icbt",    X(31,262),	XRT_MASK,	PPC403,		{ RA, RB } },
+
 { "doz",     XO(31,264,0,0), XO_MASK,	M601,		{ RT, RA, RB } },
 { "doz.",    XO(31,264,0,1), XO_MASK,	M601,		{ RT, RA, RB } },
 { "dozo",    XO(31,264,1,0), XO_MASK,	M601,		{ RT, RA, RB } },
@@ -2644,8 +2646,6 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "dcbt",    X(31,278),	XRT_MASK,	PPC,		{ RA, RB } },
 
 { "lhzx",    X(31,279),	X_MASK,		COM,		{ RT, RA, RB } },
-
-{ "icbt",    X(31,262),	XRT_MASK,	PPC403,		{ RA, RB } },
 
 { "eqv",     XRC(31,284,0), X_MASK,	COM,		{ RA, RS, RB } },
 { "eqv.",    XRC(31,284,1), X_MASK,	COM,		{ RA, RS, RB } },

@@ -1,3 +1,7 @@
+2001-08-28  matthew gren  <mrg@redhat.com>
+
+	* ppc-opc.c (icbt): Order correctly.
+
 2001-08-27  David Edelsohn  <dje@watson.ibm.com>
 	    Torbjorn Granlund  <tege@swox.com>
 
