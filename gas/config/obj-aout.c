@@ -19,6 +19,7 @@ to the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
 #include "as.h"
 #include "aout/stab_gnu.h"
+#include "aout/aout64.h"
 #include "obstack.h"
 
 #ifndef BFD_ASSEMBLER
@@ -114,13 +115,25 @@ obj_aout_frob_symbol (sym, punt)
   sec = sym->bsym->section;
 
   /* Only frob simple symbols this way right now.  */
-  if (! (type & ~0x1f))
+  if (! (type & ~ (N_TYPE | N_EXT)))
     {
       if (sec == &bfd_abs_section
 	  || sec == &bfd_und_section)
 	return;
       if (flags & BSF_EXPORT)
-	type |= 1;
+	type |= N_EXT;
+
+      /* Set the debugging flag for constructor symbols so that BFD
+	 leaves them alone.  */
+      switch (type & N_TYPE)
+	{
+	case N_SETA:
+	case N_SETT:
+	case N_SETD:
+	case N_SETB:
+	  sym->bsym->flags |= BSF_DEBUGGING;
+	  break;
+	}
     }
   else
     {

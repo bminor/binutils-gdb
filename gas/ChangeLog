@@ -1,5 +1,9 @@
 Wed Jul 21 12:47:51 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* config/obj-aout.c: Include aout/aout64.h.
+	(obj_aout_frob_symbol): Set BSF_DEBUGGING for a constructor
+	symbol, so that BFD doesn't tamper with the type.
+
 	* read.c (read_a_source_file): If NO_PSEUDO_DOT is defined, look
 	up opcodes as pseudo-ops even if they don't start with '.'.
 	* config/tc-m88k.h (NO_PSEUDO_DOT): Define.
