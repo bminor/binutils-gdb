@@ -27,9 +27,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/param.h>
 #include <sys/time.h>
 
-/* Required by <sys/ptrace.h>.  */
-#include <sys/siginfo.h>
-
 #define HAVE_TERMIO
 
 /*#define USIZE 2048*/

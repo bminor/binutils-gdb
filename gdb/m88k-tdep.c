@@ -22,13 +22,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "inferior.h"
 #include "value.h"
 
-#ifdef USG
 #include <sys/types.h>
-#endif
-
 #include <sys/param.h>
 #include <signal.h>
 #include "gdbcore.h"
+#include <sys/dir.h>	/* needed by sys/user.h on delta88 running SVR3.  */
 #include <sys/user.h>
 #ifndef USER			/* added to support BCS ptrace_user */
 
