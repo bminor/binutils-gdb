@@ -21,10 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "sysdep.h"
 #include "libbfd.h"
 #include "elf-bfd.h"
-
-#define START_RELOC_NUMBERS(name)   enum name {
-#define RELOC_NUMBER(name, number)  name = number ,
-#define END_RELOC_NUMBERS           R_MN10300_MAX };
 #include "elf/mn10300.h"
 
 struct elf32_mn10300_link_hash_entry

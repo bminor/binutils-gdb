@@ -30,10 +30,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "bfdlink.h"
 #include "genlink.h"
 #include "elf-bfd.h"
-
-#define START_RELOC_NUMBERS(name)   enum name {
-#define RELOC_NUMBER(name, number)  name = number ,
-#define END_RELOC_NUMBERS           };
 #include "elf/mips.h"
 
 /* Get the ECOFF swapping routines.  */
