@@ -1,3 +1,7 @@
+Wed Oct 13 22:54:06 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* gdb.t06/signals.exp: Add xfail for sun3.
+
 Thu Oct  7 12:01:03 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.t17/interrupt.exp: Add xfail for Irix (currently not really
