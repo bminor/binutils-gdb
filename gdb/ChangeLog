@@ -1,3 +1,8 @@
+2000-10-28  Kevin Buettner  <kevinb@redhat.com>
+
+	* symtab.c (decode_line_2, file_matches, search_symbols): Protoize.
+	* thread.c (iterate_over_threads): Protoize.
+
 2000-10-27  J.T. Conklin  <jtc@redback.com>
 
 	* arch-utils.c (set_architecture, set_architecture_from_arch_mach,

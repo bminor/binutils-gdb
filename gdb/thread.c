@@ -191,9 +191,8 @@ find_thread_pid (int pid)
  */
 
 struct thread_info *
-iterate_over_threads (callback, data)
-     int (*callback) ();
-     void *data;
+iterate_over_threads (int (*callback) (struct thread_info *, void *),
+		      void *data)
 {
   struct thread_info *tp;
 

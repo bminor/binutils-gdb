@@ -3260,11 +3260,8 @@ decode_line_spec (char *string, int funfirstline)
    as canonical line specs there.  */
 
 static struct symtabs_and_lines
-decode_line_2 (sym_arr, nelts, funfirstline, canonical)
-     struct symbol *sym_arr[];
-     int nelts;
-     int funfirstline;
-     char ***canonical;
+decode_line_2 (struct symbol *sym_arr[], int nelts, int funfirstline,
+	       char ***canonical)
 {
   struct symtabs_and_lines values, return_values;
   char *args, *arg1;
@@ -3479,10 +3476,7 @@ sources_info (char *ignore, int from_tty)
 }
 
 static int
-file_matches (file, files, nfiles)
-     char *file;
-     char *files[];
-     int nfiles;
+file_matches (char *file, char *files[], int nfiles)
 {
   int i;
 
@@ -3539,12 +3533,8 @@ make_cleanup_free_search_symbols (struct symbol_search *symbols)
    free_search_symbols should be called when *MATCHES is no longer needed.
  */
 void
-search_symbols (regexp, kind, nfiles, files, matches)
-     char *regexp;
-     namespace_enum kind;
-     int nfiles;
-     char *files[];
-     struct symbol_search **matches;
+search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
+		struct symbol_search **matches)
 
 {
   register struct symtab *s;
