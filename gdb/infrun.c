@@ -66,12 +66,7 @@ static int restore_selected_frame (void *);
 
 static void build_infrun (void);
 
-static void follow_inferior_fork (int parent_pid, int child_pid,
-				  int has_forked, int has_vforked);
-
-static void follow_fork (int parent_pid, int child_pid);
-
-static void follow_vfork (int parent_pid, int child_pid);
+static int follow_fork ();
 
 static void set_schedlock_func (char *args, int from_tty,
 				struct cmd_list_element *c);
@@ -384,15 +379,11 @@ static const char *follow_fork_mode_kind_names[] = {
 static const char *follow_fork_mode_string = follow_fork_mode_parent;
 
 
-static void
-follow_inferior_fork (int parent_pid, int child_pid, int has_forked,
-		      int has_vforked)
+static int
+follow_fork ()
 {
-  int followed_parent = 0;
-  int followed_child = 0;
-
-  /* Which process did the user want us to follow? */
   const char *follow_mode = follow_fork_mode_string;
+  int follow_child = (follow_mode == follow_fork_mode_child);
 
   /* Or, did the user not know, and want us to ask? */
   if (follow_fork_mode_string == follow_fork_mode_ask)
@@ -402,138 +393,36 @@ follow_inferior_fork (int parent_pid, int child_pid, int has_forked,
       /* follow_mode = follow_fork_mode_...; */
     }
 
-  /* If we're to be following the parent, then detach from child_pid.
-     We're already following the parent, so need do nothing explicit
-     for it. */
-  if (follow_mode == follow_fork_mode_parent)
-    {
-      followed_parent = 1;
-
-      /* We're already attached to the parent, by default. */
-
-      /* Before detaching from the child, remove all breakpoints from
-         it.  (This won't actually modify the breakpoint list, but will
-         physically remove the breakpoints from the child.) */
-      detach_breakpoints (child_pid);
-#ifdef SOLIB_REMOVE_INFERIOR_HOOK
-      SOLIB_REMOVE_INFERIOR_HOOK (child_pid);
-#endif
-
-      /* Detach from the child. */
-      dont_repeat ();
-
-      target_require_detach (child_pid, "", 1);
-    }
-
-  /* If we're to be following the child, then attach to it, detach
-     from inferior_ptid, and set inferior_ptid to child_pid. */
-  else if (follow_mode == follow_fork_mode_child)
-    {
-      char child_pid_spelling[100];	/* Arbitrary length. */
-
-      followed_child = 1;
-
-      /* Before detaching from the parent, detach all breakpoints from
-         the child.  Note that this only works if we're following vforks
-	 right away; if we've exec'd then the breakpoints are already detached
-	 and the shadow contents are out of date.  */
-      detach_breakpoints (child_pid);
-
-      /* Before detaching from the parent, remove all breakpoints from it. */
-      remove_breakpoints ();
-
-      /* Also reset the solib inferior hook from the parent. */
-#ifdef SOLIB_REMOVE_INFERIOR_HOOK
-      SOLIB_REMOVE_INFERIOR_HOOK (PIDGET (inferior_ptid));
-#endif
-
-      /* Detach from the parent. */
-      dont_repeat ();
-      target_detach (NULL, 1);
-
-      /* Attach to the child. */
-      inferior_ptid = pid_to_ptid (child_pid);
-      sprintf (child_pid_spelling, "%d", child_pid);
-      dont_repeat ();
-
-      target_require_attach (child_pid_spelling, 1);
-
-      /* Was there a step_resume breakpoint?  (There was if the user
-         did a "next" at the fork() call.)  If so, explicitly reset its
-         thread number.
-
-         step_resumes are a form of bp that are made to be per-thread.
-         Since we created the step_resume bp when the parent process
-         was being debugged, and now are switching to the child process,
-         from the breakpoint package's viewpoint, that's a switch of
-         "threads".  We must update the bp's notion of which thread
-         it is for, or it'll be ignored when it triggers... */
-      /* As above, if we're following vforks at exec time then resetting the
-	 step resume breakpoint is probably wrong.  */
-      if (step_resume_breakpoint)
-	breakpoint_re_set_thread (step_resume_breakpoint);
-
-      /* Reinsert all breakpoints in the child.  (The user may've set
-         breakpoints after catching the fork, in which case those
-         actually didn't get set in the child, but only in the parent.) */
-      breakpoint_re_set ();
-      insert_breakpoints ();
-    }
-
-  /* The parent and child of a vfork share the same address space.
-     Also, on some targets the order in which vfork and exec events
-     are received for parent in child requires some delicate handling
-     of the events.
-
-     For instance, on ptrace-based HPUX we receive the child's vfork
-     event first, at which time the parent has been suspended by the
-     OS and is essentially untouchable until the child's exit or second
-     exec event arrives.  At that time, the parent's vfork event is
-     delivered to us, and that's when we see and decide how to follow
-     the vfork.  But to get to that point, we must continue the child
-     until it execs or exits.  To do that smoothly, all breakpoints
-     must be removed from the child, in case there are any set between
-     the vfork() and exec() calls.  But removing them from the child
-     also removes them from the parent, due to the shared-address-space
-     nature of a vfork'd parent and child.  On HPUX, therefore, we must
-     take care to restore the bp's to the parent before we continue it.
-     Else, it's likely that we may not stop in the expected place.  (The
-     worst scenario is when the user tries to step over a vfork() call;
-     the step-resume bp must be restored for the step to properly stop
-     in the parent after the call completes!)
-
-     Sequence of events, as reported to gdb from HPUX:
-
-     Parent        Child           Action for gdb to take
-     -------------------------------------------------------
-     1                VFORK               Continue child
-     2                EXEC
-     3                EXEC or EXIT
-     4  VFORK */
-  if (has_vforked)
-    {
-      target_post_follow_vfork (parent_pid,
-				followed_parent, child_pid, followed_child);
-    }
-
   pending_follow.fork_event.saw_parent_fork = 0;
   pending_follow.fork_event.saw_child_fork = 0;
+
+  return target_follow_fork (follow_child);
 }
 
-static void
-follow_fork (int parent_pid, int child_pid)
+void
+follow_inferior_reset_breakpoints (void)
 {
-  follow_inferior_fork (parent_pid, child_pid, 1, 0);
-}
+  /* Was there a step_resume breakpoint?  (There was if the user
+     did a "next" at the fork() call.)  If so, explicitly reset its
+     thread number.
 
+     step_resumes are a form of bp that are made to be per-thread.
+     Since we created the step_resume bp when the parent process
+     was being debugged, and now are switching to the child process,
+     from the breakpoint package's viewpoint, that's a switch of
+     "threads".  We must update the bp's notion of which thread
+     it is for, or it'll be ignored when it triggers.  */
 
-/* Forward declaration. */
-static void follow_exec (int, char *);
+  if (step_resume_breakpoint)
+    breakpoint_re_set_thread (step_resume_breakpoint);
 
-static void
-follow_vfork (int parent_pid, int child_pid)
-{
-  follow_inferior_fork (parent_pid, child_pid, 0, 1);
+  /* Reinsert all breakpoints in the child.  The user may have set
+     breakpoints after catching the fork, in which case those
+     were never set in the child, but only in the parent.  This makes
+     sure the inserted breakpoints match the breakpoint list.  */
+
+  breakpoint_re_set ();
+  insert_breakpoints ();
 }
 
 /* EXECD_PATHNAME is assumed to be non-NULL. */
@@ -722,38 +611,19 @@ resume (int step, enum target_signal sig)
 #endif
 
   /* If there were any forks/vforks/execs that were caught and are
-     now to be followed, then do so. */
+     now to be followed, then do so.  */
   switch (pending_follow.kind)
     {
-    case (TARGET_WAITKIND_FORKED):
+    case TARGET_WAITKIND_FORKED:
+    case TARGET_WAITKIND_VFORKED:
       pending_follow.kind = TARGET_WAITKIND_SPURIOUS;
-      follow_fork (PIDGET (inferior_ptid),
-		   pending_follow.fork_event.child_pid);
+      if (follow_fork ())
+	should_resume = 0;
       break;
 
-    case (TARGET_WAITKIND_VFORKED):
-      {
-	int saw_child_exec = pending_follow.fork_event.saw_child_exec;
-
-	pending_follow.kind = TARGET_WAITKIND_SPURIOUS;
-	follow_vfork (PIDGET (inferior_ptid),
-		      pending_follow.fork_event.child_pid);
-
-	/* Did we follow the child, but not yet see the child's exec event?
-	   If so, then it actually ought to be waiting for us; we respond to
-	   parent vfork events.  We don't actually want to resume the child
-	   in this situation; we want to just get its exec event. */
-	if (!saw_child_exec &&
-	    (PIDGET (inferior_ptid) == pending_follow.fork_event.child_pid))
-	  should_resume = 0;
-      }
-      break;
-
-    case (TARGET_WAITKIND_EXECD):
-      /* If we saw a vfork event but couldn't follow it until we saw
-         an exec, then now might be the time! */
-      pending_follow.kind = TARGET_WAITKIND_SPURIOUS;
+    case TARGET_WAITKIND_EXECD:
       /* follow_exec is called as soon as the exec event is seen. */
+      pending_follow.kind = TARGET_WAITKIND_SPURIOUS;
       break;
 
     default:

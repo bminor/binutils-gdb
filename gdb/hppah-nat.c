@@ -385,6 +385,7 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 }
 
 char *saved_child_execd_pathname = NULL;
+int saved_vfork_pid;
 enum {
   STATE_NONE,
   STATE_GOT_CHILD,
@@ -393,48 +394,121 @@ enum {
   STATE_FAKE_EXEC
 } saved_vfork_state = STATE_NONE;
 
-void
-child_post_follow_vfork (int parent_pid, int followed_parent, int child_pid,
-			 int followed_child)
+int
+child_follow_fork (int follow_child)
 {
-  /* Are we a debugger that followed the parent of a vfork?  If so,
-     then recall that the child's vfork event was delivered to us
-     first.  And, that the parent was suspended by the OS until the
-     child's exec or exit events were received.
+  ptid_t last_ptid;
+  struct target_waitstatus last_status;
+  int has_vforked;
+  int parent_pid, child_pid;
 
-     Upon receiving that child vfork, then, we were forced to remove
-     all breakpoints in the child and continue it so that it could
-     reach the exec or exit point.
+  get_last_target_status (&last_ptid, &last_status);
+  has_vforked = (last_status.kind == TARGET_WAITKIND_VFORKED);
+  parent_pid = ptid_get_pid (last_ptid);
+  child_pid = last_status.value.related_pid;
 
-     But also recall that the parent and child of a vfork share the
-     same address space.  Thus, removing bp's in the child also
-     removed them from the parent.
+  /* At this point, if we are vforking, breakpoints were already
+     detached from the child in child_wait; and the child has already
+     called execve().  If we are forking, both the parent and child
+     have breakpoints inserted.  */
 
-     Now that the child has safely exec'd or exited, we must restore
-     the parent's breakpoints before we continue it.  Else, we may
-     cause it run past expected stopping points. */
-  if (followed_parent)
+  if (! follow_child)
     {
-      reattach_breakpoints (parent_pid);
+      if (! has_vforked)
+	{
+	  detach_breakpoints (child_pid);
+#ifdef SOLIB_REMOVE_INFERIOR_HOOK
+	  SOLIB_REMOVE_INFERIOR_HOOK (child_pid);
+#endif
+	}
+
+      /* Detach from the child. */
+      target_require_detach (child_pid, "", 1);
+
+      /* The parent and child of a vfork share the same address space.
+	 Also, on some targets the order in which vfork and exec events
+	 are received for parent in child requires some delicate handling
+	 of the events.
+
+	 For instance, on ptrace-based HPUX we receive the child's vfork
+	 event first, at which time the parent has been suspended by the
+	 OS and is essentially untouchable until the child's exit or second
+	 exec event arrives.  At that time, the parent's vfork event is
+	 delivered to us, and that's when we see and decide how to follow
+	 the vfork.  But to get to that point, we must continue the child
+	 until it execs or exits.  To do that smoothly, all breakpoints
+	 must be removed from the child, in case there are any set between
+	 the vfork() and exec() calls.  But removing them from the child
+	 also removes them from the parent, due to the shared-address-space
+	 nature of a vfork'd parent and child.  On HPUX, therefore, we must
+	 take care to restore the bp's to the parent before we continue it.
+	 Else, it's likely that we may not stop in the expected place.  (The
+	 worst scenario is when the user tries to step over a vfork() call;
+	 the step-resume bp must be restored for the step to properly stop
+	 in the parent after the call completes!)
+
+	 Sequence of events, as reported to gdb from HPUX:
+
+	 Parent        Child           Action for gdb to take
+	 -------------------------------------------------------
+	 1                VFORK               Continue child
+	 2                EXEC
+	 3                EXEC or EXIT
+	 4  VFORK
+
+	 Now that the child has safely exec'd or exited, we must restore
+	 the parent's breakpoints before we continue it.  Else, we may
+	 cause it run past expected stopping points.  */
+
+      if (has_vforked)
+	reattach_breakpoints (parent_pid);
+    }
+  else
+    {
+      char child_pid_spelling[40];
+
+      /* Needed to keep the breakpoint lists in sync.  */
+      if (! has_vforked)
+	detach_breakpoints (child_pid);
+
+      /* Before detaching from the parent, remove all breakpoints from it. */
+      remove_breakpoints ();
+
+      /* Also reset the solib inferior hook from the parent. */
+#ifdef SOLIB_REMOVE_INFERIOR_HOOK
+      SOLIB_REMOVE_INFERIOR_HOOK (PIDGET (inferior_ptid));
+#endif
+
+      /* Detach from the parent. */
+      target_detach (NULL, 1);
+
+      /* Attach to the child. */
+      inferior_ptid = pid_to_ptid (child_pid);
+      sprintf (child_pid_spelling, "%d", child_pid);
+
+      target_require_attach (child_pid_spelling, 1);
+
+      /* If we vforked, then we've also execed by now.  The exec will be
+	 reported momentarily.  follow_exec () will handle breakpoints, so
+	 we don't have to..  */
+      if (!has_vforked)
+	follow_inferior_reset_breakpoints ();
     }
 
-  /* If we followed the parent, don't try to follow the child's exec.  */
-  if (saved_vfork_state != STATE_GOT_PARENT && saved_vfork_state != STATE_FAKE_EXEC)
-    fprintf_unfiltered (gdb_stdout, "hppa: post follow vfork: confused state\n");
-
-  if (followed_parent || saved_vfork_state == STATE_GOT_PARENT)
-    saved_vfork_state = STATE_NONE;
-
-  /* Are we a debugger that followed the child of a vfork?  If so,
-     then recall that we don't actually acquire control of the child
-     until after it has exec'd or exited.  */
-  if (followed_child)
+  if (has_vforked)
     {
-      /* If the child has exited, then there's nothing for us to do.
-         In the case of an exec event, we'll let that be handled by
-         the normal mechanism that notices and handles exec events, in
-         resume(). */
+      /* If we followed the parent, don't try to follow the child's exec.  */
+      if (saved_vfork_state != STATE_GOT_PARENT
+	  && saved_vfork_state != STATE_FAKE_EXEC)
+	fprintf_unfiltered (gdb_stdout,
+			    "hppa: post follow vfork: confused state\n");
+
+      if (! follow_child || saved_vfork_state == STATE_GOT_PARENT)
+	saved_vfork_state = STATE_NONE;
+      else
+	return 1;
     }
+  return 0;
 }
 
 /* Format a process id, given PID.  Be sure to terminate
@@ -592,13 +666,26 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	  if (saved_vfork_state == STATE_GOT_CHILD)
 	    {
 	      child_post_startup_inferior (pid_to_ptid (pid));
-	      ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
+	      detach_breakpoints (pid);
+#ifdef SOLIB_REMOVE_INFERIOR_HOOK
+	      SOLIB_REMOVE_INFERIOR_HOOK (pid);
+#endif
+	      child_resume (pid_to_ptid (pid), 0, TARGET_SIGNAL_0);
+	      ourstatus->kind = TARGET_WAITKIND_IGNORE;
+	      return pid_to_ptid (related_pid);
+	    }
+	  else if (saved_vfork_state == STATE_FAKE_EXEC)
+	    {
+	      ourstatus->kind = TARGET_WAITKIND_VFORKED;
+	      ourstatus->value.related_pid = related_pid;
 	      return pid_to_ptid (pid);
 	    }
 	  else
 	    {
-	      ourstatus->kind = TARGET_WAITKIND_VFORKED;
-	      ourstatus->value.related_pid = related_pid;
+	      /* We saw the parent's vfork, but we haven't seen the exec yet.
+		 Wait for it, for simplicity's sake.  It should be pending.  */
+	      saved_vfork_pid = related_pid;
+	      ourstatus->kind = TARGET_WAITKIND_IGNORE;
 	      return pid_to_ptid (pid);
 	    }
 	}
@@ -608,27 +695,32 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	  /* On HP-UX, events associated with a vforking inferior come in
 	     threes: a vfork event for the child (always first), followed
 	     a vfork event for the parent and an exec event for the child.
-	     The latter two can come in either order.
-
-	     If we get the parent vfork event first, life's good: We follow
-	     either the parent or child, and then the child's exec event is
-	     a "don't care".
-
-	     But if we get the child's exec event first, then we delay
-	     responding to it until we handle the parent's vfork.  Because,
-	     otherwise we can't satisfy a "catch vfork".  */
-	  if (saved_vfork_state == STATE_GOT_CHILD)
+	     The latter two can come in either order.  Make sure we get
+	     both.  */
+	  if (saved_vfork_state != STATE_NONE)
 	    {
+	      if (saved_vfork_state == STATE_GOT_CHILD)
+		{
+		  saved_vfork_state = STATE_GOT_EXEC;
+		  /* On HP/UX with ptrace, the child must be resumed before
+		     the parent vfork event is delivered.  A single-step
+		     suffices.  */
+		  if (RESUME_EXECD_VFORKING_CHILD_TO_GET_PARENT_VFORK ())
+		    target_resume (pid_to_ptid (pid), 1, TARGET_SIGNAL_0);
+		  ourstatus->kind = TARGET_WAITKIND_IGNORE;
+		}
+	      else if (saved_vfork_state == STATE_GOT_PARENT)
+		{
+		  saved_vfork_state = STATE_FAKE_EXEC;
+		  ourstatus->kind = TARGET_WAITKIND_VFORKED;
+		  ourstatus->value.related_pid = saved_vfork_pid;
+		}
+	      else
+		fprintf_unfiltered (gdb_stdout,
+				    "hppa: exec: unexpected state\n");
+
 	      saved_child_execd_pathname = execd_pathname;
-	      saved_vfork_state = STATE_GOT_EXEC;
 
-	      /* On HP/UX with ptrace, the child must be resumed before
-		 the parent vfork event is delivered.  A single-step
-		 suffices.  */
-	      if (RESUME_EXECD_VFORKING_CHILD_TO_GET_PARENT_VFORK ())
-		target_resume (pid_to_ptid (pid), 1, TARGET_SIGNAL_0);
-
-	      ourstatus->kind = TARGET_WAITKIND_IGNORE;
 	      return inferior_ptid;
 	    }
 	  

@@ -469,14 +469,12 @@ child_remove_vfork_catchpoint (int pid)
 }
 #endif
 
-#if !defined(CHILD_POST_FOLLOW_VFORK)
-void
-child_post_follow_vfork (int parent_pid, int followed_parent, int child_pid,
-			 int followed_child)
+#if !defined(CHILD_FOLLOW_FORK)
+int
+child_follow_fork (int follow_child)
 {
-  /* This version of Unix doesn't require a meaningful "post follow vfork"
-     operation by a clone debugger.
-   */
+  /* This version of Unix doesn't support following fork or vfork events.  */
+  return 0;
 }
 #endif
 
@@ -645,7 +643,7 @@ init_child_ops (void)
   child_ops.to_remove_fork_catchpoint = child_remove_fork_catchpoint;
   child_ops.to_insert_vfork_catchpoint = child_insert_vfork_catchpoint;
   child_ops.to_remove_vfork_catchpoint = child_remove_vfork_catchpoint;
-  child_ops.to_post_follow_vfork = child_post_follow_vfork;
+  child_ops.to_follow_fork = child_follow_fork;
   child_ops.to_insert_exec_catchpoint = child_insert_exec_catchpoint;
   child_ops.to_remove_exec_catchpoint = child_remove_exec_catchpoint;
   child_ops.to_reported_exec_events_per_exec_call = child_reported_exec_events_per_exec_call;

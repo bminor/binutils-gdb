@@ -473,8 +473,8 @@ cleanup_target (struct target_ops *t)
   de_fault (to_remove_vfork_catchpoint, 
 	    (int (*) (int)) 
 	    tcomplain);
-  de_fault (to_post_follow_vfork, 
-	    (void (*) (int, int, int, int)) 
+  de_fault (to_follow_fork, 
+	    (int (*) (int)) 
 	    target_ignore);
   de_fault (to_insert_exec_catchpoint, 
 	    (int (*) (int)) 
@@ -597,7 +597,7 @@ update_current_target (void)
       INHERIT (to_remove_fork_catchpoint, t);
       INHERIT (to_insert_vfork_catchpoint, t);
       INHERIT (to_remove_vfork_catchpoint, t);
-      INHERIT (to_post_follow_vfork, t);
+      INHERIT (to_follow_fork, t);
       INHERIT (to_insert_exec_catchpoint, t);
       INHERIT (to_remove_exec_catchpoint, t);
       INHERIT (to_reported_exec_events_per_exec_call, t);
@@ -2064,15 +2064,15 @@ debug_to_remove_vfork_catchpoint (int pid)
   return retval;
 }
 
-static void
-debug_to_post_follow_vfork (int parent_pid, int followed_parent, int child_pid,
-			    int followed_child)
+static int
+debug_to_follow_fork (int follow_child)
 {
-  debug_target.to_post_follow_vfork (parent_pid, followed_parent, child_pid, followed_child);
+  int retval =  debug_target.to_follow_fork (follow_child);
 
-  fprintf_unfiltered (gdb_stdlog,
-		      "target_post_follow_vfork (%d, %d, %d, %d)\n",
-		    parent_pid, followed_parent, child_pid, followed_child);
+  fprintf_unfiltered (gdb_stdlog, "target_follow_fork (%d) = %d\n",
+		      follow_child, retval);
+
+  return retval;
 }
 
 static int
@@ -2285,7 +2285,7 @@ setup_target_debug (void)
   current_target.to_remove_fork_catchpoint = debug_to_remove_fork_catchpoint;
   current_target.to_insert_vfork_catchpoint = debug_to_insert_vfork_catchpoint;
   current_target.to_remove_vfork_catchpoint = debug_to_remove_vfork_catchpoint;
-  current_target.to_post_follow_vfork = debug_to_post_follow_vfork;
+  current_target.to_follow_fork = debug_to_follow_fork;
   current_target.to_insert_exec_catchpoint = debug_to_insert_exec_catchpoint;
   current_target.to_remove_exec_catchpoint = debug_to_remove_exec_catchpoint;
   current_target.to_reported_exec_events_per_exec_call = debug_to_reported_exec_events_per_exec_call;

@@ -304,6 +304,8 @@ extern int signal_pass_update (int, int);
 extern void get_last_target_status(ptid_t *ptid,
                                    struct target_waitstatus *status);
 
+extern void follow_inferior_reset_breakpoints (void);
+
 /* From infcmd.c */
 
 extern void tty_command (char *, int);

@@ -1,3 +1,7 @@
+2002-12-10  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/foll-vfork.exp: Re-enable test on HP/UX.
+
 2002-12-06  David Carlton  <carlton@math.stanford.edu>
 
 	* gdb.base/store.c: Don't declare functions static.

@@ -276,7 +276,7 @@ struct target_ops
     int (*to_remove_fork_catchpoint) (int);
     int (*to_insert_vfork_catchpoint) (int);
     int (*to_remove_vfork_catchpoint) (int);
-    void (*to_post_follow_vfork) (int, int, int, int);
+    int (*to_follow_fork) (int);
     int (*to_insert_exec_catchpoint) (int);
     int (*to_remove_exec_catchpoint) (int);
     int (*to_reported_exec_events_per_exec_call) (void);
@@ -548,7 +548,7 @@ extern int child_remove_vfork_catchpoint (int);
 
 extern void child_acknowledge_created_inferior (int);
 
-extern void child_post_follow_vfork (int, int, int, int);
+extern int child_follow_fork (int);
 
 extern int child_insert_exec_catchpoint (int);
 
@@ -705,16 +705,16 @@ extern void target_load (char *arg, int from_tty);
 #define target_remove_vfork_catchpoint(pid) \
      (*current_target.to_remove_vfork_catchpoint) (pid)
 
-/* An inferior process has been created via a vfork() system call.
-   The debugger has followed the parent, the child, or both.  The
-   process of setting up for that follow may have required some
-   target-specific trickery to track the sequence of reported events.
-   If so, this function should be defined by those targets that
-   require the debugger to perform cleanup or initialization after
-   the vfork follow.  */
+/* If the inferior forks or vforks, this function will be called at
+   the next resume in order to perform any bookkeeping and fiddling
+   necessary to continue debugging either the parent or child, as
+   requested, and releasing the other.  Information about the fork
+   or vfork event is available via get_last_target_status ().
+   This function returns 1 if the inferior should not be resumed
+   (i.e. there is another event pending).  */
 
-#define target_post_follow_vfork(parent_pid,followed_parent,child_pid,followed_child) \
-     (*current_target.to_post_follow_vfork) (parent_pid,followed_parent,child_pid,followed_child)
+#define target_follow_fork(follow_child) \
+     (*current_target.to_follow_fork) (follow_child)
 
 /* On some targets, we can catch an inferior exec event when it
    occurs.  These functions insert/remove an already-created

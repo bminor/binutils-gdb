@@ -1,5 +1,37 @@
 2002-12-10  Daniel Jacobowitz  <drow@mvista.com>
 
+	* config/pa/nm-hppah.h (CHILD_POST_FOLLOW_VFORK): Change to
+	CHILD_FOLLOW_FORK.
+	* hppah-nat.c (saved_vfork_pid): Add.
+	(child_post_follow_vfork): Remove.
+	(child_follow_fork): New function.
+	(child_wait): Call detach_breakpoints after receiving the child vfork.
+	Call child_resume directly instead of going through resume ().
+	Make sure we have the exec before reporting the vfork.
+	* inferior.h (follow_inferior_reset_breakpoints): Add prototype.
+	* infrun.c (follow_fork, follow_vfork, follow_inferior_fork): Remove.
+	(follow_fork): New function.  Call target_follow_fork.
+	(follow_inferior_reset_breakpoints): New function broken out from
+	old follow_inferior_fork.
+	(resume): Remove hack to follow exec after vfork.
+	* inftarg.c (child_post_follow_vfork): Remove.
+	(child_follow_fork): New function.
+	(init_child_ops): Replace to_post_follow_vfork with to_follow_fork.
+	* target.c (cleanup_target): Replace to_post_follow_vfork with
+	to_follow_fork.
+	(update_current_target): Likewise.
+	(setup_target_debug): Likewise.
+	(debug_to_post_follow_vfork): Remove.
+	(debug_to_follow_fork): New function.
+	* target.h (struct target_ops): Replace to_post_folow_vfork with
+	to_follow_fork.
+	(child_post_follow_vfork): Remove prototype.
+	(child_follow_fork): Add prototype.
+	(target_post_follow_vfork): Remove macro.
+	(target_follow_fork): Add macro.
+
+2002-12-10  Daniel Jacobowitz  <drow@mvista.com>
+
 	* hppah-nat.c (saved_child_execd_pathname, saved_vfork_state): New.
 	(child_post_follow_vfork): Cancel pending exec event if we follow
 	the parent.

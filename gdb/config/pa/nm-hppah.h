@@ -65,7 +65,7 @@
 /* In hppah-nat.c: */
 #define FETCH_INFERIOR_REGISTERS
 #define CHILD_XFER_MEMORY
-#define CHILD_POST_FOLLOW_VFORK
+#define CHILD_FOLLOW_FORK
 
 /* While this is for use by threaded programs, it doesn't appear
  * to hurt non-threaded ones.  This is used in infrun.c: */
