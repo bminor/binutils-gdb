@@ -232,6 +232,14 @@ OBJS = \
 	xmalloc.o \
 	$(TE_OBJS)
 
+# These are objects we know we'll be pulling in from other directories.
+# For VMS, we have to build them explicitly.
+VMS_OTHER_OBJS = \
+	../libiberty/obstack.o \
+	../libiberty/strdup.o \
+	../libiberty/strncasecmp.o \
+	../libiberty/getruntime.o
+
 all: as.new gasp.new
 	@srcroot=`cd $(srcroot); pwd`; export srcroot; \
 	(cd doc ; $(MAKE) $(FLAGS_TO_PASS) all)
@@ -242,7 +250,7 @@ dvi info install-info clean-info:
 
 make-gas.com: stamp-mk.com
 stamp-mk.com: vmsconf.sh Makefile
-	sh $(srcdir)/vmsconf.sh $(OBJS) ../libiberty/obstack.o ../libiberty/strdup.o > new-make.com
+	sh $(srcdir)/vmsconf.sh $(OBJS) $(VMS_OTHER_OBJS) > new-make.com
 	$(srcdir)/../move-if-change new-make.com $(srcdir)/make-gas.com
 	touch stamp-mk.com
 
@@ -274,6 +282,8 @@ SUBDIR_INCLUDES = -I.. -I$(srcdir) -I$(srcdir)/config
 
 # Files to be copied away after each stage in building.
 STAGESTUFF = *.o as.new gasp.new
+
+$(OBJS): $(ALL_OBJ_DEPS)
 
 as.new: $(OBJS) $(LIBS)
 	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o as.new $(OBJS) $(LIBS) $(LOADLIBES)

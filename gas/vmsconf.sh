@@ -53,19 +53,19 @@ EOF
 cfiles="`echo $* | sed -e 's/\.o/.c/g' -e 's!../\([^ /]*\)/\([^ /]*\.c\)![-.\1]\2!g'`"
 
 for cfile in $cfiles ; do
-  echo "\$ gcc 'c_flags'/define=('C_DEFS') $cfile"
   case $cfile in
-    "[-."*)  copyfiles="$copyfiles $cfile" ;;
+    "[-."*)
+	base=`echo $cfile | sed -e 's/\[.*\]//' -e 's/\.c$//'`
+	echo "\$ gcc 'c_flags'/define=('C_DEFS')/object=[]$base.obj $cfile"
+	;;
+    *)
+	echo "\$ gcc 'c_flags'/define=('C_DEFS') $cfile"
+	;;
   esac
 done
 
-for c in $copyfiles ; do
-  base=`echo $c | sed -e 's/\[.*\]//' -e 's/\.c$//'`
-  dir=`echo $c | sed 's/\].*$/]/'`
-  echo "\$if f\$search(\"$base.obj\").eqs.\"\" then copy $dir$base.obj *.*"
-done
-
 cat << 'EOF'
+$link:
 $ link/nomap/exec=gcc-as version.opt/opt+sys$input:/opt
 !
 !	Linker options file for GNU assembler
@@ -73,9 +73,12 @@ $ link/nomap/exec=gcc-as version.opt/opt+sys$input:/opt
 EOF
 
 for obj in $* ; do
-  echo $obj,- | sed 's!.*/!!g'
+  # Change "foo.o" into "foo.obj".
+  echo ${obj}bj,- | sed 's!.*/!!g'
 done
 
 cat << 'EOF'
 gnu_cc:[000000]gcclib/lib,sys$share:vaxcrtl/lib
+! Tell linker exactly what psect attributes we want -- match VAXCRTL.
+psect_addr=ENVIRON,long,pic,ovr,rel,gbl,noshr,noexe,rd,wrt
 EOF

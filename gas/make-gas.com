@@ -73,42 +73,47 @@ $ gcc 'c_flags'/define=('C_DEFS') listing.c
 $ gcc 'c_flags'/define=('C_DEFS') ecoff.c
 $ gcc 'c_flags'/define=('C_DEFS') stabs.c
 $ gcc 'c_flags'/define=('C_DEFS') xmalloc.c
-$ gcc 'c_flags'/define=('C_DEFS') [-.libiberty]obstack.c
-$ gcc 'c_flags'/define=('C_DEFS') [-.libiberty]strdup.c
-$if f$search("obstack.obj").eqs."" then copy [-.libiberty]obstack.obj *.*
-$if f$search("strdup.obj").eqs."" then copy [-.libiberty]strdup.obj *.*
+$ gcc 'c_flags'/define=('C_DEFS')/object=[]obstack.obj [-.libiberty]obstack.c
+$ gcc 'c_flags'/define=('C_DEFS')/object=[]strdup.obj [-.libiberty]strdup.c
+$ gcc 'c_flags'/define=('C_DEFS')/object=[]strncasecmp.obj [-.libiberty]strncasecmp.c
+$ gcc 'c_flags'/define=('C_DEFS')/object=[]getruntime.obj [-.libiberty]getruntime.c
+$link:
 $ link/nomap/exec=gcc-as version.opt/opt+sys$input:/opt
 !
 !	Linker options file for GNU assembler
 !
-targ-cpu.o,-
-obj-format.o,-
-atof-targ.o,-
-app.o,-
-as.o,-
-atof-generic.o,-
-bignum-copy.o,-
-cond.o,-
-expr.o,-
-flonum-konst.o,-
-flonum-copy.o,-
-flonum-mult.o,-
-frags.o,-
-hash.o,-
-hex-value.o,-
-input-file.o,-
-input-scrub.o,-
-literal.o,-
-messages.o,-
-output-file.o,-
-read.o,-
-subsegs.o,-
-symbols.o,-
-write.o,-
-listing.o,-
-ecoff.o,-
-stabs.o,-
-xmalloc.o,-
-obstack.o,-
-strdup.o,-
+targ-cpu.obj,-
+obj-format.obj,-
+atof-targ.obj,-
+app.obj,-
+as.obj,-
+atof-generic.obj,-
+bignum-copy.obj,-
+cond.obj,-
+expr.obj,-
+flonum-konst.obj,-
+flonum-copy.obj,-
+flonum-mult.obj,-
+frags.obj,-
+hash.obj,-
+hex-value.obj,-
+input-file.obj,-
+input-scrub.obj,-
+literal.obj,-
+messages.obj,-
+output-file.obj,-
+read.obj,-
+subsegs.obj,-
+symbols.obj,-
+write.obj,-
+listing.obj,-
+ecoff.obj,-
+stabs.obj,-
+xmalloc.obj,-
+obstack.obj,-
+strdup.obj,-
+strncasecmp.obj,-
+getruntime.obj,-
 gnu_cc:[000000]gcclib/lib,sys$share:vaxcrtl/lib
+! Tell linker exactly what psect attributes we want -- match VAXCRTL.
+psect_addr=ENVIRON,long,pic,ovr,rel,gbl,noshr,noexe,rd,wrt

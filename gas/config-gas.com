@@ -41,14 +41,16 @@ $line=f$extract(ijk,f$length(line)-ijk,line)
 $ijk=f$locate("\n",line)
 $line=f$extract(0,ijk,line)
 $!
+$ if f$search("version.opt").nes."" then delete/noconfirm version.opt;*
 $open ifile$ version.opt/write
 $write ifile$ "ident="+""""+line+""""
 $close ifile$
 $! Now write config.h.
+$ if f$search("config.h").nes."" then delete/noconfirm config.h;*
 $open ifile$ config.h/write
 $write ifile$ "#define TARGET_CPU       """,cpu_type,"""
 $write ifile$ "#define TARGET_ALIAS     ""vms"""
-$write ifile$ "#define TARGET_CANONICAL ""vax-dec-vms""""
+$write ifile$ "#define TARGET_CANONICAL ""vax-dec-vms"""
 $write ifile$ "#define GAS_VERSION      """,line,""""
 $close ifile$
 $!

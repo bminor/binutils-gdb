@@ -32,4 +32,6 @@
 #define EXIT_FAILURE 0
 #endif
 
+#define unlink delete
+
 /* end of ho-vms.h */

@@ -338,8 +338,11 @@ case ${bfd_gas} in
 esac
 
 case ${need_bfd} in
-  yes)	bfdlib="BFDLIB=../bfd/libbfd.a"			;;
-  *)	bfdlib=""					;;
+  yes)	bfdlib="BFDLIB=../bfd/libbfd.a"
+	all_obj_deps="$all_obj_deps ../bfd/bfd.h"
+	;;
+  *)	bfdlib=""
+	;;
 esac
 
 case "x${host}" in
@@ -349,11 +352,8 @@ esac
 
 rm -f Makefile.tem
 echo $cross			>  Makefile.tem
-case "$extra_def" in
-  "") ;;
-  *)  echo defs=$extra_def	>> Makefile.tem
-      ;;
-esac
+echo ALL_OBJ_DEPS=$all_obj_deps	>> Makefile.tem
+echo defs=$extra_def		>> Makefile.tem
 echo $bfdlib			>> Makefile.tem
 echo "OPCODES_LIB=$opcodes"	>> Makefile.tem
 cat Makefile			>> Makefile.tem

@@ -4,6 +4,26 @@ Thu Apr 14 15:12:36 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 	floating point and binary numbers respectively; if it doesn't
 	work, treat them as local labels.
 
+	* Makefile.in: Make $(OBJS) depend on $(ALL_OBJ_DEPS).
+	* configure.in: Set ALL_OBJ_DEPS in output Makefile.
+
+	Based on suggestions from <BAILEY@hmivax.humgen.upenn.edu>
+	(Charles Bailey):
+	* vmsconf.sh: In generated file, get ".obj" suffix right, build
+	source files from other directories into objects in the current
+	directory, and specify PSECT attributes explicitly to linker.
+	Also added missing label.
+	* Makefile.in (stamp-mk.com): Reference new variable
+	VMS_OTHER_OBJS for list of non-local object files, instead of
+	listing them here.
+	(VMS_OTHER_OBJS): New variable, added more libiberty files.
+	* make-gas.com: Regenerated.
+
+	* config/ho-vms.h (unlink): Define as delete.
+
+	* config-gas.com: Fix quoting on TARGET_CANONICAL definition.
+	Delete files before creating them.
+
 Thu Apr 14 13:34:24 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* Makefile.in (de-stage1, de-stage2, de-stage3): Use rm -f.
