@@ -903,7 +903,7 @@ x86_64_skip_prologue (CORE_ADDR pc)
 }
 
 /* Sequence of bytes for breakpoint instruction.  */
-static unsigned char *
+static const unsigned char *
 x86_64_breakpoint_from_pc (CORE_ADDR *pc, int *lenptr)
 {
   static unsigned char breakpoint[] = { 0xcc };
@@ -925,13 +925,10 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_long_long_bit (gdbarch, 64);
   set_gdbarch_ptr_bit (gdbarch, 64);
 
-  set_gdbarch_long_double_format (gdbarch, &floatformat_i387_ext);
-
   set_gdbarch_num_regs (gdbarch, X86_64_NUM_REGS);
   set_gdbarch_register_name (gdbarch, x86_64_register_name);
   set_gdbarch_register_size (gdbarch, 8);
   set_gdbarch_register_raw_size (gdbarch, x86_64_register_raw_size);
-  set_gdbarch_max_register_raw_size (gdbarch, 16);
   set_gdbarch_register_byte (gdbarch, x86_64_register_byte);
 
   /* Total amount of space needed to store our copies of the machine's
@@ -940,8 +937,6 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   for (i = 0, sum = 0; i < X86_64_NUM_REGS; i++)
     sum += x86_64_register_info_table[i].size;
   set_gdbarch_register_bytes (gdbarch, sum);
-  set_gdbarch_register_virtual_size (gdbarch, generic_register_size);
-  set_gdbarch_max_register_virtual_size (gdbarch, 16);
 
   set_gdbarch_register_virtual_type (gdbarch, x86_64_register_virtual_type);
 
@@ -970,12 +965,6 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 				        x86_64_frameless_function_invocation);
   set_gdbarch_frame_saved_pc (gdbarch, x86_64_linux_frame_saved_pc);
 
-  set_gdbarch_frame_args_address (gdbarch, default_frame_address);
-  set_gdbarch_frame_locals_address (gdbarch, default_frame_address);
-
-  /* Return number of bytes at start of arglist that are not really args.  */
-  set_gdbarch_frame_args_skip (gdbarch, 8);
-
   set_gdbarch_frame_init_saved_regs (gdbarch, x86_64_frame_init_saved_regs);
 
   /* Frame pc initialization is handled by unwind informations.  */
@@ -992,29 +981,15 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Cons up virtual frame pointer for trace */
   set_gdbarch_virtual_frame_pointer (gdbarch, cfi_virtual_frame_pointer);
 
+  /* FIXME: kettenis/20021025: Shouldn't this be set to
+     generic_file_frame_chain_valid?  */
   set_gdbarch_frame_chain_valid (gdbarch, file_frame_chain_valid);
 
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
-  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
-  set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
-  set_gdbarch_call_dummy_length (gdbarch, 0);
-  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
-  set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_at_entry_point);
-  set_gdbarch_call_dummy_words (gdbarch, 0);
-  set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
-  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
-  set_gdbarch_call_dummy_p (gdbarch, 1);
-  set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
-  set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
   set_gdbarch_push_return_address (gdbarch, x86_64_push_return_address);
   set_gdbarch_push_arguments (gdbarch, x86_64_push_arguments);
 
   /* Return number of args passed to a frame, no way to tell.  */
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
-  /* Don't use default structure extract routine */
-  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, 0);
 
   /* If USE_STRUCT_CONVENTION retruns 0, then gdb uses
      STORE_RETURN_VALUE and EXTRACT_RETURN_VALUE to store/fetch the
@@ -1038,24 +1013,11 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_deprecated_store_return_value (gdbarch,
 					     x86_64_store_return_value);
 
-  /* Offset from address of function to start of its code.  */
-  set_gdbarch_function_start_offset (gdbarch, 0);
-
   set_gdbarch_skip_prologue (gdbarch, x86_64_skip_prologue);
 
   set_gdbarch_saved_pc_after_call (gdbarch, x86_64_linux_saved_pc_after_call);
 
-  set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-
-  set_gdbarch_breakpoint_from_pc (gdbarch,
-				  (gdbarch_breakpoint_from_pc_ftype *)
-				  x86_64_breakpoint_from_pc);
-
   set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
-
-  /* Amount PC must be decremented by after a breakpoint.  This is
-     often the number of bytes in BREAKPOINT but not always.  */
-  set_gdbarch_decr_pc_after_break (gdbarch, 1);
 
   /* Use dwarf2 debug frame informations.  */
   set_gdbarch_dwarf2_build_frame_info (gdbarch, dwarf2_build_frame_info);
@@ -1091,6 +1053,48 @@ x86_64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   gdbarch = gdbarch_alloc (&info, tdep);
 
   tdep->osabi = osabi;
+
+  /* FIXME: kettenis/20021025: The following calls are going to
+     disappear when we integrate the x86_64 target into the i386
+     target.  */
+
+  set_gdbarch_long_double_format (gdbarch, &floatformat_i387_ext);
+
+  set_gdbarch_max_register_raw_size (gdbarch, 16);
+  set_gdbarch_max_register_virtual_size (gdbarch, 16);
+
+  set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
+
+  set_gdbarch_breakpoint_from_pc (gdbarch, x86_64_breakpoint_from_pc);
+  set_gdbarch_decr_pc_after_break (gdbarch, 1);
+  set_gdbarch_function_start_offset (gdbarch, 0);
+
+  set_gdbarch_frame_args_skip (gdbarch, 8);
+  set_gdbarch_frame_args_address (gdbarch, default_frame_address);
+  set_gdbarch_frame_locals_address (gdbarch, default_frame_address);
+
+  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
+
+  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
+  set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
+  set_gdbarch_call_dummy_start_offset (gdbarch, 0);
+  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
+  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
+  set_gdbarch_call_dummy_length (gdbarch, 0);
+  set_gdbarch_call_dummy_p (gdbarch, 1);
+  set_gdbarch_call_dummy_words (gdbarch, NULL);
+  set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
+  set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
+  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
+
+  set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_at_entry_point);
+
+  set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
+
+  /* FIXME: kettenis/20021025: These already are the default.  */
+
+  set_gdbarch_register_virtual_size (gdbarch, generic_register_size);
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, 0);
 
   x86_64_init_abi (info, gdbarch);
 
