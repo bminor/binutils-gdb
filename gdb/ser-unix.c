@@ -221,9 +221,10 @@ hardwire_noflush_set_tty_state (scb, new_ttystate, old_ttystate)
      serial_ttystate new_ttystate;
      serial_ttystate old_ttystate;
 {
-  struct hardwire_ttystate new_state =
-    *(struct hardwire_ttystate *)new_ttystate;
+  struct hardwire_ttystate new_state;
   struct hardwire_ttystate *state = (struct hardwire_ttystate *) old_ttystate;
+
+  new_state = *(struct hardwire_ttystate *)new_ttystate;
 
 #ifdef HAVE_TERMIOS
   /* I'm not sure whether this is necessary; the manpage makes no mention
