@@ -1,3 +1,8 @@
+2003-09-23  Bob Wilson  <bob.wilson@acm.org>
+
+	* elf32-xtensa.c (elf_xtensa_relocate_section): Fix typo that clobbered
+	dynamic relocation offsets.
+
 2003-09-23  Alan Modra  <alan@modra.org>
 
 	* simple.c (bfd_simple_get_relocated_section_contents): Free the

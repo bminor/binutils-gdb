@@ -2081,8 +2081,8 @@ elf_xtensa_relocate_section (output_bfd, info, input_bfd,
 		memset (&outrel, 0, sizeof outrel);
 	      else
 		{
-		  outrel.r_offset = (input_section->output_section->vma
-				     + input_section->output_offset);
+		  outrel.r_offset += (input_section->output_section->vma
+				      + input_section->output_offset);
 
 		  if (dynamic_symbol)
 		    {
