@@ -1,3 +1,10 @@
+Thu Aug 17 16:29:09 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
+
+	* coff-sh.c (sh_relax_section): Cast value for used_by_bfd field
+	to PTR, not coff_section_tdata pointer, since PTR is the real type
+	of the field.
+	* cofflink.c (_bfd_coff_read_internal_relocs): Ditto.
+
 Thu Aug 17 14:44:26 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	Add support for linking SPARC SunOS PIC compiled code.
