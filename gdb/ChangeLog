@@ -1,5 +1,9 @@
 2001-05-08  Jim Blandy  <jimb@redhat.com>
 
+	* Makefile.in (obstack_h, target_h): Define; these are already
+	used elsewhere, but have been expanding to the empty string.
+	(memattr_h): Define; needed by target_h.
+
 	* mn10300-tdep.c (mn10300_extract_return_value): Mark this as
 	static.  (This was accidentally omitted from the earlier patch.)
 	

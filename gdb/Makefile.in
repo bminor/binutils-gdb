@@ -555,6 +555,7 @@ bfd_h =		$(BFD_DIR)/bfd.h
 dis-asm_h =	$(INCLUDE_DIR)/dis-asm.h 
 remote-sim_h =	$(INCLUDE_DIR)/remote-sim.h
 demangle_h =    $(INCLUDE_DIR)/demangle.h
+obstack_h =     $(INCLUDE_DIR)/obstack.h
 
 dcache_h = dcache.h
 remote_utils_h = $(dcache_h) serial.h target.h remote-utils.h $(remote-sim_h)
@@ -597,6 +598,8 @@ defs_h =	defs.h $(xm_h) $(tm_h) $(nm_h) config.status config.h gdbarch.h ui-file
 
 top_h =		top.h
 inferior_h =	inferior.h $(breakpoint_h)
+target_h =      target.h $(bfd_h) $(symtab_h) $(dcache_h) $(memattr_h)
+memattr_h =     memattr.h
 tracepoint_h =	tracepoint.h
 ax_h = 		ax.h
 event_loop_h =  event-loop.h
