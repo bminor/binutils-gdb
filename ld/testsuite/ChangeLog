@@ -1,3 +1,11 @@
+2003-05-08  H.J. Lu <hongjiu.lu@intel.com>
+
+	* ld-elfvers/vers.exp: Add vers27d4 and vers27d5 to test
+	versioned reference for hidden symbol.
+
+	* ld-elfvers/vers27d4.dsym: New file.
+	* ld-elfvers/vers27d4.ver: Likewise.
+
 2003-05-07  H.J. Lu <hongjiu.lu@intel.com>
 
 	* ld-elfvers/vers27d3.c (__start): New.
