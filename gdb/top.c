@@ -516,7 +516,7 @@ return_to_top_level (reason)
 
 int
 catch_errors (func, args, errstring, mask)
-     int (*func) PARAMS ((char *));
+     catch_errors_ftype *func;
      PTR args;
      char *errstring;
      return_mask mask;

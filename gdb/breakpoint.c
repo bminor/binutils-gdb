@@ -68,8 +68,7 @@ map_breakpoint_numbers PARAMS ((char *,	void (*)(struct breakpoint *)));
 static void
 ignore_command PARAMS ((char *, int));
 
-static int
-breakpoint_re_set_one PARAMS ((char *));
+static int breakpoint_re_set_one PARAMS ((PTR));
 
 static void
 clear_command PARAMS ((char *, int));
@@ -116,8 +115,7 @@ breakpoint_1 PARAMS ((int, int));
 static bpstat
 bpstat_alloc PARAMS ((struct breakpoint *, bpstat));
 
-static int
-breakpoint_cond_eval PARAMS ((char *));
+static int breakpoint_cond_eval PARAMS ((PTR));
 
 static void
 cleanup_executing_breakpoints PARAMS ((PTR));
@@ -154,10 +152,9 @@ typedef struct {
   int enable;
 } args_for_catchpoint_enable;
 
-static int watchpoint_check PARAMS ((char *));
+static int watchpoint_check PARAMS ((PTR));
 
-static struct symtab_and_line *
-cover_target_enable_exception_callback PARAMS ((args_for_catchpoint_enable *));
+static int cover_target_enable_exception_callback PARAMS ((PTR));
 
 static int print_it_done PARAMS ((bpstat));
 
@@ -647,8 +644,6 @@ insert_breakpoints ()
          /* If we get here, we must have a callback mechanism for exception
             events -- with g++ style embedded label support, we insert
             ordinary breakpoints and not catchpoints. */ 
-        struct symtab_and_line * sal;
-        args_for_catchpoint_enable args;  
         sprintf (message, message1, b->number); /* Format possible error message */
  
         val = target_insert_breakpoint(b->address, b->shadow_contents);
@@ -663,25 +658,25 @@ insert_breakpoints ()
         else
           {
               /* Bp set, now make sure callbacks are enabled */ 
-              args.kind = b->type == bp_catch_catch ? EX_EVENT_CATCH : EX_EVENT_THROW;
-              args.enable = 1;
-              sal = (struct symtab_and_line *)
-		catch_errors ((int (*) PARAMS ((char *)))
-			      cover_target_enable_exception_callback,
-			      (char *) &args,
-			      message, RETURN_MASK_ALL);
-              if (sal && (sal != (struct symtab_and_line *) -1))
-                {
-                  b->inserted = 1;
-                }
-              /* Check if something went wrong; sal == 0 can be ignored */ 
-              if (sal == (struct symtab_and_line *) -1)
-                {
-                  /* something went wrong */ 
-                  target_terminal_ours_for_output ();
-                  fprintf_unfiltered (gdb_stderr, "Cannot insert catchpoint %d; disabling it\n", b->number);
-                  b->enable = disabled;
-                }
+	    int val;
+	    args_for_catchpoint_enable args;  
+	    args.kind = b->type == bp_catch_catch ? EX_EVENT_CATCH : EX_EVENT_THROW;
+	    args.enable = 1;
+	    val = catch_errors (cover_target_enable_exception_callback,
+				&args,
+				message, RETURN_MASK_ALL);
+	    if (val != 0 && val != -1)
+	      {
+		b->inserted = 1;
+	      }
+	    /* Check if something went wrong; val == 0 can be ignored */ 
+	    if (val == -1)
+	      {
+		/* something went wrong */ 
+		target_terminal_ours_for_output ();
+		fprintf_unfiltered (gdb_stderr, "Cannot insert catchpoint %d; disabling it\n", b->number);
+		b->enable = disabled;
+	      }
           }
       }
 
@@ -1807,7 +1802,7 @@ bpstat_print (bs)
 
 static int
 breakpoint_cond_eval (exp)
-     char *exp;
+     PTR exp;
 {
   value_ptr mark = value_mark ();
   int i = !value_true (evaluate_expression ((struct expression *)exp));
@@ -1850,7 +1845,7 @@ bpstat_alloc (b, cbs)
 
 static int
 watchpoint_check (p)
-     char *p;
+     PTR p;
 {
   bpstat bs = (bpstat) p;
   struct breakpoint *b;
@@ -2079,8 +2074,7 @@ bpstat_stop_status (pc, not_a_breakpoint)
       sprintf (message, message1, b->number);
       if (b->type == bp_watchpoint || b->type == bp_hardware_watchpoint)
 	{
-	  switch (catch_errors ((int (*) PARAMS ((char *))) watchpoint_check, (char *) bs, message,
-				RETURN_MASK_ALL))
+	  switch (catch_errors (watchpoint_check, bs, message, RETURN_MASK_ALL))
 	    {
 	    case WP_DELETED:
 	      /* We've already printed what needs to be printed.  */
@@ -2134,8 +2128,7 @@ bpstat_stop_status (pc, not_a_breakpoint)
                 }
             }
 	  if (found) 
-	    switch (catch_errors ((int (*) PARAMS ((char *))) watchpoint_check, (char *) bs, message,
-			 RETURN_MASK_ALL))
+	    switch (catch_errors (watchpoint_check, bs, message, RETURN_MASK_ALL))
    	      {
                 case WP_DELETED:
                   /* We've already printed what needs to be printed.  */
@@ -2184,7 +2177,7 @@ bpstat_stop_status (pc, not_a_breakpoint)
 		 so that the conditions will have the right context.  */
 	      select_frame (get_current_frame (), 0);
 	      value_is_zero
-		= catch_errors ((int (*) PARAMS ((char *))) breakpoint_cond_eval, (char *)(b->cond),
+		= catch_errors (breakpoint_cond_eval, (b->cond),
 				"Error in testing breakpoint condition:\n",
 				RETURN_MASK_ALL);
 				/* FIXME-someday, should give breakpoint # */
@@ -5014,11 +5007,19 @@ catch_exception_command_1 (ex_event, arg, tempflag, from_tty)
 /* Cover routine to allow wrapping target_enable_exception_catchpoints
    inside a catch_errors */
 
-static struct symtab_and_line *
-cover_target_enable_exception_callback (args)
-  args_for_catchpoint_enable * args;
+static int
+cover_target_enable_exception_callback (arg)
+  PTR arg;
 {
-  target_enable_exception_callback (args->kind, args->enable);
+  args_for_catchpoint_enable *args = arg;
+  struct symtab_and_line *sal;
+  sal = target_enable_exception_callback (args->kind, args->enable);
+  if (sal == NULL)
+    return 0;
+  else if (sal == (struct symtab_and_line *) -1)
+    return -1;
+  else
+    return 1; /*is valid*/
 }
 
 
@@ -5548,9 +5549,8 @@ delete_breakpoint (bpt)
       sprintf (message, message1, bpt->number);	/* Format possible error msg */
       args.kind = bpt->type == bp_catch_catch ? EX_EVENT_CATCH : EX_EVENT_THROW;
       args.enable = 0;
-      (void) catch_errors ((int (*) PARAMS ((char *))) cover_target_enable_exception_callback,
-                           (char *) &args,
-                           message, RETURN_MASK_ALL);
+      catch_errors (cover_target_enable_exception_callback, &args,
+		    message, RETURN_MASK_ALL);
     }
 
 
@@ -5703,7 +5703,7 @@ delete_command (arg, from_tty)
 
 static int
 breakpoint_re_set_one (bint)
-     char *bint;
+     PTR bint;
 {
   struct breakpoint *b = (struct breakpoint *)bint;  /* get past catch_errs */
   struct value *mark;
@@ -5888,8 +5888,7 @@ breakpoint_re_set ()
   ALL_BREAKPOINTS_SAFE (b, temp)
     {
       sprintf (message, message1, b->number);	/* Format possible error msg */
-      catch_errors ((int (*) PARAMS ((char *))) breakpoint_re_set_one, (char *) b, message,
-		    RETURN_MASK_ALL);
+      catch_errors (breakpoint_re_set_one, b, message, RETURN_MASK_ALL);
     }
   set_language (save_language);
   input_radix = save_input_radix;

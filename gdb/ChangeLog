@@ -1,3 +1,21 @@
+Mon Jan 18 08:47:02 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+	
+	* defs.h (catch_errors_ftype): Define.
+	(catch_errors): Replace char* arg with PTR arg.
+	* top.c (catch_errors): Update
+
+	* breakpoint.c (bpstat_stop_status, bpstat_stop_status,
+ 	delete_breakpoint, breakpoint_re_set): Delete all casts in call to
+ 	catch_errors.
+ 	(breakpoint_cond_eval, watchpoint_check,
+ 	cover_target_enable_exception_callback, breakpoint_re_set_one):
+ 	Arg is PTR not char*.
+	
+	* breakpoint.c (cover_target_enable_exception_callback): Change
+ 	type to int. Check for cast values of 0 and -1.  Return a result!
+	(insert_breakpoints): Move declaration of SAL and ARGS to where
+ 	they are used.
+
 1999-01-16  Fernando Nasser  <fnasser@totem.to.cygnus.com>
 
 	* remote.c (remote_query): new function - creates proper interface
