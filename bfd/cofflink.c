@@ -40,6 +40,15 @@ static int process_embedded_commands
   PARAMS ((bfd *, struct bfd_link_info *, bfd *));
 static void mark_relocs PARAMS ((struct coff_final_link_info *, bfd *));
 
+/* Return true if SYM is a weak, external symbol.  */
+#define IS_WEAK_EXTERNAL(abfd, sym)			\
+  ((sym).n_sclass == C_WEAKEXT				\
+   || (obj_pe (abfd) && (sym).n_sclass == C_NT_WEAK))
+
+/* Return true if SYM is an external symbol.  */
+#define IS_EXTERNAL(abfd, sym)				\
+  ((sym).n_sclass == C_EXT || IS_WEAK_EXTERNAL (abfd, sym))
+
 /* Define macros so that the ISFCN, et. al., macros work correctly.
    These macros are defined in include/coff/internal.h in terms of
    N_TMASK, etc.  These definitions require a user to define local
@@ -395,8 +404,7 @@ coff_link_add_symbols (abfd, info)
 	      break;
 	    }
 
-	  if (sym.n_sclass == C_WEAKEXT
-	      || (obj_pe (abfd) && sym.n_sclass == C_NT_WEAK))
+	  if (IS_WEAK_EXTERNAL (abfd, sym))
 	    flags = BSF_WEAK;
 
 	  addit = true;
@@ -1833,12 +1841,8 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
 	    }
 
 	  /* If doing task linking, convert normal global function symbols to
-	     static functions. */
-
-	  if (finfo->info->task_link
-	      && (isym.n_sclass == C_EXT
-		  || isym.n_sclass == C_WEAKEXT
-		  || (obj_pe (input_bfd) && isym.n_sclass == C_NT_WEAK)))
+	     static functions.  */
+	  if (finfo->info->task_link && IS_EXTERNAL (input_bfd, isym))
 	    isym.n_sclass = C_STAT;
 
 	  /* Output the symbol.  */
@@ -2548,17 +2552,22 @@ _bfd_coff_write_global_sym (h, data)
   /* If doing task linking and this is the pass where we convert
      defined globals to statics, then do that conversion now.  If the
      symbol is not being converted, just ignore it and it will be
-     output during a later pass. */
+     output during a later pass.  */
   if (finfo->global_to_static)
     {
-      if (isym.n_sclass != C_EXT
-	  && isym.n_sclass != C_WEAKEXT
-	  && (! obj_pe (output_bfd) || isym.n_sclass != C_NT_WEAK))
-	{
-	  return true;
-	}
+      if (! IS_EXTERNAL (output_bfd, isym))
+	return true;
+
       isym.n_sclass = C_STAT;
     }
+
+  /* When a weak symbol is not overriden by a strong one,
+     turn it into an external symbol when not building a
+     shared or relocateable object.  */
+  if (! finfo->info->shared
+      && ! finfo->info->relocateable
+      && IS_WEAK_EXTERNAL (finfo->output_bfd, isym))
+    isym.n_sclass = C_EXT;
 
   isym.n_numaux = h->numaux;
   

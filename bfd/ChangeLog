@@ -1,3 +1,15 @@
+2000-07-03  Mark Elbrecht  <snowball3@bigfoot.com>
+
+	* cofflink.c (_bfd_coff_write_global_sym): Turn a weak symbol into
+	an external symbol for a non-shared, non-relocatable link.
+	
+2000-07-03  Nick Clifton  <nickc@redhat.com>
+
+	(IS_EXTERNAL): New macro: Return true if the symbol is an external
+	symbol.
+	(IS_WEAK_EXTERNAL): New macro: Return true if the symbol is a weak
+	external symbol.
+	
 2000-07-03  Kazu Hirata  <kazu@hxi.com>
 
 	* reloc16.c: Fix formatting.
