@@ -1,3 +1,19 @@
+Fri Feb  3 11:54:42 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* Makefile.in (source-vault, binary-vault): New targets
+
+Thu Jan 26 13:00:11 1995  Michael Meissner  <meissner@cygnus.com>
+
+	* config.sub: Recognize -eabi as a basic system type.
+
+Thu Jan 12 13:13:23 1995  Jason Merrill  <jason@phydeaux.cygnus.com>
+
+	* configure.in (enable_shared stuff): Fix typo.
+
+Thu Jan 12 01:36:51 1995  deanm@medulla.LABS.TEK.COM (Dean Messing)
+
+	* Makefile.in (BASE_FLAGS_TO_PASS): Fix typo in passing LIBCXXFLAGS*.
+
 Wed Jan 11 16:29:53 1995  Jason Merrill  <jason@phydeaux.cygnus.com>
 
 	* Makefile.in (LIBCXXFLAGS_FOR_TARGET): Add -fno-implicit-templates.
