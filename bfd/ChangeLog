@@ -1,3 +1,14 @@
+Tue May 19 23:42:10 1992  D. V. Henkel-Wallace  (gumby@cygnus.com)
+
+	* sco-core.c: new file from net.
+	* aoutx.h (translate_to_native_sym_flags): bugfix from net:
+	  Now we have the hairy linker, it's possible to move symbols from
+	  one section into another.  Actually make that work!
+
+Sat May 16 17:57:59 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* hosts/sun3.h: fix declaration of free.
+
 Tue May 12 14:08:59 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* coff-a29k.c (perform_reloc): fix bug in jmp/call evaluation

@@ -935,6 +935,10 @@ DEFUN(translate_to_native_sym_flags,(sym_pointer, cache_ptr, abfd),
 {
   bfd_vma value = cache_ptr->value;
 
+  /* mask out any existing type bits in case copying from one section
+     to another */
+  sym_pointer->e_type[0] &= ~N_TYPE;
+  
   if (bfd_get_output_section(cache_ptr) == obj_bsssec (abfd)) {
       sym_pointer->e_type[0] |= N_BSS;
     }
@@ -1199,14 +1203,9 @@ DEFUN(NAME(aout,swap_std_reloc_out),(abfd, g, natptr),
     
   /* name was clobbered by aout_write_syms to be symbol index */
 
-  if (output_section == &bfd_abs_section) 
-  {
-    r_extern = 0;
-    r_index = N_ABS;
-    r_addend += sym->value;
-  }
-  else if (output_section == &bfd_com_section 
-	   || output_section == &bfd_und_section) 
+if (output_section == &bfd_com_section 
+    || output_section == &bfd_abs_section
+    || output_section == &bfd_und_section) 
   {
     /* Fill in symbol */
     r_extern = 1;
@@ -1269,14 +1268,9 @@ DEFUN(NAME(aout,swap_ext_reloc_out),(abfd, g, natptr),
   r_addend = g->addend + (*(g->sym_ptr_ptr))->section->output_section->vma;
 
 
-  if (output_section == &bfd_abs_section) 
-  {
-    r_extern = 0;
-    r_index = N_ABS;
-    r_addend += sym->value;
-  }
-  else if (output_section == &bfd_com_section 
-	   || output_section == &bfd_und_section) 
+ if (output_section == &bfd_com_section 
+     || output_section == &bfd_abs_section
+     || output_section == &bfd_und_section) 
   {
     /* Fill in symbol */
     r_extern = 1;
