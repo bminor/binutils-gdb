@@ -412,10 +412,15 @@ gnuv3_baseclass_offset (struct type *type, int index, char *valaddr,
      v3 C++ ABI Section 2.4.I.2.b.  Fortunately the ABI guarantees that the
      vtable pointer will be located at the beginning of the object, so we can
      bypass the casting.  Verify that the TYPE_VPTR_FIELDNO is in fact at the
-     start of whichever baseclass it resides in, as a sanity measure.  */
+     start of whichever baseclass it resides in, as a sanity measure - iff
+     we have debugging information for that baseclass.  */
 
   vbasetype = TYPE_VPTR_BASETYPE (type);
-  if (TYPE_FIELD_BITPOS (vbasetype, TYPE_VPTR_FIELDNO (vbasetype)) != 0)
+  if (TYPE_VPTR_FIELDNO (vbasetype) < 0)
+    fill_in_vptr_fieldno (vbasetype);
+
+  if (TYPE_VPTR_FIELDNO (vbasetype) >= 0
+      && TYPE_FIELD_BITPOS (vbasetype, TYPE_VPTR_FIELDNO (vbasetype)) != 0)
     error ("Illegal vptr offset in class %s",
 	   TYPE_NAME (vbasetype) ? TYPE_NAME (vbasetype) : "<unknown>");
 
