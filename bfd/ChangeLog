@@ -1,3 +1,8 @@
+2003-07-24  Nick Clifton  <nickc@redhat.com>
+
+	* coff-arm.c (EXTRA_S_FLAGS): Include SEC_CODE so that code
+	sections are assigned the LOAD attribute.
+
 2003-07-25  Kaz Kojima  <kkojima@rr.iij4u.or.jp>  
 
 	* elf32-sh.c: Convert to C90.  Replace PTR with void *.
