@@ -52,9 +52,9 @@ tui_set_source_content (struct symtab *s, int line_no, int noerror)
 
   if (s != (struct symtab *) NULL && s->filename != (char *) NULL)
     {
-      register FILE *stream;
-      register int i, desc, c, line_width, nlines;
-      register char *src_line = 0;
+      FILE *stream;
+      int i, desc, c, line_width, nlines;
+      char *src_line = 0;
 
       if ((ret = tui_alloc_source_buffer (TUI_SRC_WIN)) == TUI_SUCCESS)
 	{
@@ -92,7 +92,7 @@ tui_set_source_content (struct symtab *s, int line_no, int noerror)
 		}
 	      else
 		{
-		  register int offset, cur_line_no, cur_line, cur_len, threshold;
+		  int offset, cur_line_no, cur_line, cur_len, threshold;
 		  struct tui_gen_win_info * locator = tui_locator_win_info_ptr ();
                   struct tui_source_info * src = &TUI_SRC_WIN->detail.source_info;
 

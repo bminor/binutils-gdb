@@ -418,8 +418,8 @@ tui_set_layout_for_display_command (const char *layout_name)
 
   if (layout_name != (char *) NULL)
     {
-      register int i;
-      register char *buf_ptr;
+      int i;
+      char *buf_ptr;
       enum tui_layout_type new_layout = UNDEFINED_LAYOUT;
       enum tui_register_display_type dpy_type = TUI_UNDEFINED_REGS;
       enum tui_layout_type cur_layout = tui_current_layout ();

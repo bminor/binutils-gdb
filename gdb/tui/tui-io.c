@@ -322,8 +322,7 @@ tui_readline_output (int code, gdb_client_data data)
 
    Comes from readline/complete.c  */
 static char *
-printable_part (pathname)
-     char *pathname;
+printable_part (char *pathname)
 {
   char *temp;
 
@@ -360,8 +359,7 @@ printable_part (pathname)
     } while (0)
 
 static int
-print_filename (to_print, full_pathname)
-     char *to_print, *full_pathname;
+print_filename (char *to_print, char *full_pathname)
 {
   int printed_len = 0;
   char *s;
@@ -376,7 +374,7 @@ print_filename (to_print, full_pathname)
 /* The user must press "y" or "n".  Non-zero return means "y" pressed.
    Comes from readline/complete.c  */
 static int
-get_y_or_n ()
+get_y_or_n (void)
 {
   extern int _rl_abort_internal ();
   int c;
@@ -402,9 +400,7 @@ get_y_or_n ()
    Comes from readline/complete.c and modified to write in
    the TUI command window using tui_putc/tui_puts.  */
 static void
-tui_rl_display_match_list (matches, len, max)
-     char **matches;
-     int len, max;
+tui_rl_display_match_list (char **matches, int len, int max)
 {
   typedef int QSFUNC (const void *, const void *);
   extern int _rl_qsort_string_compare (const void*, const void*);
@@ -598,7 +594,7 @@ tui_cont_sig (int sig)
 
 /* Initialize the IO for gdb in curses mode.  */
 void
-tui_initialize_io ()
+tui_initialize_io (void)
 {
 #ifdef SIGCONT
   signal (SIGCONT, tui_cont_sig);

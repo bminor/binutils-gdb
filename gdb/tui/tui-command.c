@@ -65,7 +65,7 @@ tui_dispatch_ctrl_char (unsigned int ch)
   else
     {
       unsigned int c = 0, ch_copy = ch;
-      register int i;
+      int i;
       char *term;
 
       /* If this is an xterm, page next/prev keys aren't returned

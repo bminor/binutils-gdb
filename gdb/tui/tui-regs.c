@@ -111,7 +111,7 @@ static void tui_scroll_regs_backward_command (char *, int);
 int
 tui_last_regs_line_no (void)
 {
-  register int num_lines = (-1);
+  int num_lines = (-1);
 
   if (TUI_DATA_WIN->detail.data_display_info.regs_content_count > 0)
     {
@@ -282,7 +282,7 @@ tui_display_registers_from (int start_element_no)
   if (TUI_DATA_WIN->detail.data_display_info.regs_content != (tui_win_content) NULL &&
       TUI_DATA_WIN->detail.data_display_info.regs_content_count > 0)
     {
-      register int i = start_element_no;
+      int i = start_element_no;
       int j, value_chars_wide, item_win_width, cur_y, label_width;
       enum precision_type precision;
 
@@ -367,11 +367,11 @@ tui_display_reg_element_at_line (int start_element_no, int start_line_no)
   if (TUI_DATA_WIN->detail.data_display_info.regs_content != (tui_win_content) NULL &&
       TUI_DATA_WIN->detail.data_display_info.regs_content_count > 0)
     {
-      register int element_no = start_element_no;
+      int element_no = start_element_no;
 
       if (start_element_no != 0 && start_line_no != 0)
 	{
-	  register int last_line_no, first_line_on_last_page;
+	  int last_line_no, first_line_on_last_page;
 
 	  last_line_no = tui_last_regs_line_no ();
 	  first_line_on_last_page = last_line_no - (TUI_DATA_WIN->generic.height - 2);

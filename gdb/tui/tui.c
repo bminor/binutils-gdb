@@ -283,7 +283,7 @@ tui_rl_next_keymap (int notused1, int notused2)
    the command window is cleaner.  It will be displayed if
    we temporarily leave the SingleKey mode.  */
 static int
-tui_rl_startup_hook ()
+tui_rl_startup_hook (void)
 {
   rl_already_prompted = 1;
   if (tui_current_key_mode != TUI_COMMAND_MODE)
@@ -305,7 +305,7 @@ tui_set_key_mode (enum tui_key_mode mode)
 /* Initialize readline and configure the keymap for the switching
    key shortcut.  */
 void
-tui_initialize_readline ()
+tui_initialize_readline (void)
 {
   int i;
   Keymap tui_ctlx_keymap;

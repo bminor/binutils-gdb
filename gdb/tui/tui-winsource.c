@@ -205,7 +205,7 @@ tui_clear_source_content (struct tui_win_info * win_info, int display_prompt)
 {
   if (win_info != NULL)
     {
-      register int i;
+      int i;
 
       win_info->generic.content_in_use = FALSE;
       tui_erase_source_content (win_info, display_prompt);
@@ -372,7 +372,7 @@ tui_set_is_exec_point_at (union tui_line_or_address l, struct tui_win_info * win
    This is called whenever a breakpoint is inserted, removed or
    has its state changed.  */
 void
-tui_update_all_breakpoint_info ()
+tui_update_all_breakpoint_info (void)
 {
   struct tui_list *list = tui_source_windows ();
   int i;
@@ -558,8 +558,8 @@ tui_update_exec_info (struct tui_win_info * win_info)
 enum tui_status
 tui_alloc_source_buffer (struct tui_win_info *win_info)
 {
-  register char *src_line_buf;
-  register int i, line_width, max_lines;
+  char *src_line_buf;
+  int i, line_width, max_lines;
   enum tui_status ret = TUI_FAILURE;
 
   max_lines = win_info->generic.height;	/* less the highlight box */

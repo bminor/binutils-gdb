@@ -326,11 +326,11 @@ void
 tui_show_frame_info (struct frame_info *fi)
 {
   struct tui_win_info * win_info;
-  register int i;
+  int i;
 
   if (fi)
     {
-      register int start_line, i;
+      int start_line, i;
       CORE_ADDR low;
       struct tui_gen_win_info * locator = tui_locator_win_info_ptr ();
       int source_already_displayed;

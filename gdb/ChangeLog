@@ -1,4 +1,11 @@
 2004-02-07  Andrew Cagney  <cagney@redhat.com>
+	
+	* tui/tui-command.c: Include "gdb_string.h", delete register
+	attribute, use ISO-C function signatures.
+	* tui/tui-disasm.c, tui/tui-file.c, tui/tui-io.c: Ditto.
+	* tui/tui-layout.c, tui/tui-regs.c, tui/tui-source.c: Ditto.
+	* tui/tui-stack.c, tui/tui-win.c, tui/tui-winsource.c: Ditto.
+	* tui/tui.c: Ditto.
 
 	* tui/tui-command.c: Change variable and function names to lower
 	case.

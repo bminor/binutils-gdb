@@ -54,7 +54,7 @@
 #endif
 #endif
 
-#include <string.h>
+#include "gdb_string.h"
 #include <ctype.h>
 #include <readline/readline.h>
 
@@ -241,7 +241,7 @@ translate (const char *name, struct tui_translate *table)
    Returns 1 if the configuration has changed and the screen should
    be redrawn.  */
 int
-tui_update_variables ()
+tui_update_variables (void)
 {
   int need_redraw = 0;
   struct tui_translate *entry;
@@ -404,7 +404,7 @@ Usage: w <#lines>\n");
 
 /* Update gdb's knowledge of the terminal size.  */
 void
-tui_update_gdb_sizes ()
+tui_update_gdb_sizes (void)
 {
   char cmd[50];
   int screenheight, screenwidth;

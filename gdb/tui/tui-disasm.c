@@ -95,7 +95,7 @@ tui_disassemble (struct tui_asm_line* lines, CORE_ADDR pc, int count)
 static CORE_ADDR
 tui_find_disassembly_address (CORE_ADDR pc, int from)
 {
-  register CORE_ADDR new_low;
+  CORE_ADDR new_low;
   int max_lines;
   int i;
   struct tui_asm_line* lines;
@@ -176,9 +176,9 @@ enum tui_status
 tui_set_disassem_content (CORE_ADDR pc)
 {
   enum tui_status ret = TUI_FAILURE;
-  register int i;
+  int i;
   int offset = TUI_DISASM_WIN->detail.source_info.horizontal_offset;
-  register int line_width, max_lines;
+  int line_width, max_lines;
   CORE_ADDR cur_pc;
   struct tui_gen_win_info * locator = tui_locator_win_info_ptr ();
   int tab_len = tui_default_tab_len ();
