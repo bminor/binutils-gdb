@@ -1,3 +1,8 @@
+2002-06-22  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.base/selftest.exp (do_stes_and_next): Skip calls to
+	setlocale, bindtextdomain and textdomain.
+
 2002-06-11  Jim Blandy  <jimb@redhat.com>
 
 	* lib/gdb.exp (get_debug_format): Tolerate message saying whether
