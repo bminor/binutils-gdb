@@ -1,3 +1,7 @@
+2001-03-18  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* gas/mri/mri.exp: Fix test of m6811/m6812 targets.
+
 2001-03-17  Philip Blundell  <philb@gnu.org>
 
 	* gas/vtable/vtable.exp: Don't run tests on AVR.

@@ -21,7 +21,7 @@ run_dump_test comment
 gas_test "empty.s" "-M" "" "MRI empty macro"
 run_dump_test semi
 
-if [istarget "m6811-*-*" || istarget "m6812-*-*"] {
+if {[istarget "m6811-*-*"] || [istarget "m6812-*-*"]} {
     return
 }
 
