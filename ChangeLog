@@ -1,3 +1,10 @@
+Thu Apr 29 23:30:48 1993  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (gdb.tar.Z):  Make prototype gdb testsuite directory
+	at the same time we make the prototype gdb directory.
+	* Makefile.in (make-gdb.tar.Z):  Make the testsuite distribution
+	files at the same time as the gdb base release distribution.
+
 Thu Apr 29 12:50:37 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Makefile.in (check): Use individual check targets rather than

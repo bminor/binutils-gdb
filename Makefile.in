@@ -959,6 +959,7 @@ setup-dirs-gdb:
 
 gdb.tar.Z: setup-dirs-gdb
 	(cd gdb; $(MAKE) -f Makefile.in make-proto-gdb.dir BISON="byacc")
+	(cd gdb; $(MAKE) -f Makefile.in make-proto-testsuite.dir)
 	$(MAKE) $(MFLAGS) -f Makefile.in make-gdb.tar.Z
 
 make-gdb.tar.Z: $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS) gdb texinfo/texinfo.tex
@@ -1003,6 +1004,19 @@ make-gdb.tar.Z: $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS) gdb texinfo/texinfo.tex
 		tar cfh - gdb-$$VER | $(COMPRESS) -v >gdb-$$VER.tar.Z; \
 		echo "==> Making gdb-$$VER.tar.z"; \
 		tar cfh - gdb-$$VER | $(GZIP) -v -9 >gdb-$$VER.tar.z)
+
+	# Make the testsuite archive separately.
+	ln -s ../../gdb/proto-testsuite.dir/testsuite proto-toplev/gdb/testsuite
+	# Put a copy of COPYING in the tar file.
+	ln proto-toplev/gdb/COPYING proto-toplev/gdb/testsuite/COPYING
+	chmod og=u `find proto-toplev/gdb/testsuite -print`
+	(VER=`sed <gdb/Makefile.in -n 's/VERSION = //p'`; \
+		echo "==> Making gdb-$$VER-testsuite.tar.Z"; \
+		tar cfh - gdb-$$VER/gdb/testsuite | \
+			$(COMPRESS) -v >gdb-$$VER-testsuite.tar.Z; \
+		echo "==> Making gdb-$$VER-testsuite.tar.z"; \
+		tar cfh - gdb-$$VER/gdb/testsuite | \
+			$(GZIP) -v -9 >gdb-$$VER-testsuite.tar.z)
 
 # When you use `make setup-dirs' or `make taz' you should always redefine
 # this macro.
