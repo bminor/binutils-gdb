@@ -1,3 +1,14 @@
+Thu Apr 18 19:49:10 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
+
+	* putenv.c: New file
+	Makefile.dist: Add it to $(OBS).
+
+	* mipsread.c [!CMUCS]: #include <syms.h>.
+
+	* mips-xdep.c (fetch_core_registers): #if 0 out the whole function.
+
+	* Move read_memory_nobpt from mem-break.c to breakpoint.c.
+
 Mon Apr 15 21:45:35 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
 
 	* utils.c (_initialize_utils): Rename "set demangle" to
