@@ -1,3 +1,20 @@
+1998-07-19 15:24  Ulrich Drepper  <drepper@cygnus.com>
+
+	* mips.h (PT_MIPS_OPTIONS): New symbol.
+
+Fri Jun 26 10:46:35 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300.h: New file.
+
+Thu Jun 18 19:27:56 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* common.h (EM_960, EM_V800, EM_FR20, EM_RH32, EM_MMA,
+	EM_OLD_ALPHA): Add these constants.
+
+Thu Jun 11 17:59:01 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* common.h (EM_486, EM_S370): Add these constants.
+
 Tue Jun  9 09:35:29 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* common.h (EM_ARM): Add this constant.
@@ -51,18 +68,18 @@ Mon Dec 15 15:07:49 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* m32r.h (EF_M32R_ARCH, E_M32R_ARCH): New flags to
 	specify machine architecture.
-start-sanitize-m32rx	
+start-sanitize-m32rx
 	(E_M32RX_ARCH): New flag for m32rx architecture.
-end-sanitize-m32rx	
-	
+end-sanitize-m32rx
+
 Fri Dec  5 11:20:08 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* v850.h: New constants: SHN_V850_SCOMMON, SHN_V850_TCOMMON,
 	SHN_V850_ZCOMMON, SHT_V850_SCOMMON, SHT_V850_TCOMMON,
 	SHT_V850_ZCOMMON to handle v850 common sections.
 	enum reloc_type renamed to v850_reloc_type to avoid name
-	conflict. 
-	
+	conflict.
+
 Thu Oct 23 13:55:24 1997  Richard Henderson  <rth@cygnus.com>
 
 	* sparc.h (enum elf_sparc_reloc_type): Add UA64 & UA16.
@@ -180,7 +197,7 @@ Fri Jan  3 11:32:51 1997  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 Thu Jan  2 19:30:23 1997  Michael Meissner  <meissner@tiktok.cygnus.com>
 
-	* v850.h: New file, provide V850 specific definitions. 
+	* v850.h: New file, provide V850 specific definitions.
 
 Tue Dec 31 14:44:32 1996  Ian Lance Taylor  <ian@cygnus.com>
 
@@ -226,7 +243,7 @@ Tue Aug 20 14:47:54 1996  J.T. Conklin  <jtc@hippo.cygnus.com>
 Mon Aug 19 10:59:10 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* common.h (EM_CYGNUS_M32R): Define.
-	
+
 Mon Jul 22 18:59:55 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* mips.h (SHT_MIPS_IFACE, SHT_MIPS_CONTENT): Define.
@@ -240,7 +257,7 @@ Thu Jul 18 19:12:15 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 Jul 18 13:20:39 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
-	* common.h (EM_CYGNUS_D10V): Define. 
+	* common.h (EM_CYGNUS_D10V): Define.
 	* d10v.h: New file.
 
 Fri Jun 21 12:33:24 1996  Richard Henderson  <rth@tamu.edu>
@@ -450,7 +467,7 @@ Fri Apr  3 20:58:58 1992  Mark Eichin  (eichin at cygnus.com)
 	* common.h: added ELF_R_{SYM,TYPE,INFO} for handling relocation
 	info
 	added EM_MIPS, and corrected value of EM_860 based on System V ABI
-	manual. 
+	manual.
 
 	* external.h: added Elf_External_{Rel,Rela}.
 

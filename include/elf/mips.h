@@ -1,5 +1,5 @@
 /* MIPS ELF support for BFD.
-   Copyright (C) 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 1995, 1996, 1998 Free Software Foundation, Inc.
 
    By Ian Lance Taylor, Cygnus Support, <ian@cygnus.com>, from
    information in the System V Application Binary Interface, MIPS
@@ -293,6 +293,9 @@ extern void bfd_mips_elf32_swap_reginfo_out
 
 /* Runtime procedure table.  */
 #define PT_MIPS_RTPROC		0x70000001
+
+/* Options (for what ???).  */
+#define PT_MIPS_OPTIONS		0x70000002
 
 /* Processor specific dynamic array tags.  */
 
@@ -563,26 +566,26 @@ extern void bfd_mips_elf64_swap_reginfo_out
 
 typedef struct
 {
-  /* Offset into overlay string table section.  */
-  char name[8];
-  char lma[8];
-  char vma[8];
-} Elf64_Dvp_External_Overlay;
+  /* `name' is offset into overlay string table section.  */
+  char name[4];
+  char lma[4];
+  char vma[4];
+} Elf32_Dvp_External_Overlay;
 
 typedef struct
 {
   bfd_vma name;
   bfd_vma lma;
   bfd_vma vma;
-} Elf64_Dvp_Internal_Overlay;
+} Elf32_Dvp_Internal_Overlay;
 
 /* overlay swapping routines.  */
-extern void bfd_dvp_elf64_swap_overlay_in
-  PARAMS ((bfd *, const Elf64_Dvp_External_Overlay *,
-	   Elf64_Dvp_Internal_Overlay *));
-extern void bfd_dvp_elf64_swap_overlay_out
-  PARAMS ((bfd *, const Elf64_Dvp_Internal_Overlay *,
-	   Elf64_Dvp_External_Overlay *));
+extern void bfd_dvp_elf32_swap_overlay_in
+  PARAMS ((bfd *, const Elf32_Dvp_External_Overlay *,
+	   Elf32_Dvp_Internal_Overlay *));
+extern void bfd_dvp_elf32_swap_overlay_out
+  PARAMS ((bfd *, const Elf32_Dvp_Internal_Overlay *,
+	   Elf32_Dvp_External_Overlay *));
 
 /* end-sanitize-sky */
 
