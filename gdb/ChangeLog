@@ -1,3 +1,12 @@
+2004-02-27  Andrew Cagney  <cagney@redhat.com>
+
+	* hppa-tdep.c (hppa_gdbarch_init): On 32-bit systems always
+	"return_value" and "push_dummy_call".
+	(hppa32_use_struct_convention): Delete unused function.
+	(hppa32_store_return_value): Delete unused function.
+	(hppa32_extract_return_value): Delete unused function.
+	(hppa32_stack_align): Delete function.
+
 2004-02-27  Eli Zaretskii  <eliz@elta.co.il>
 
 	* coffread.c (enter_linenos): Don't let rawptr reference memory

@@ -183,7 +183,6 @@ int hppa_in_solib_call_trampoline (CORE_ADDR pc, char *name);
 int hppa_in_solib_return_trampoline (CORE_ADDR pc, char *name);
 CORE_ADDR hppa_saved_pc_after_call (struct frame_info *frame);
 int hppa_inner_than (CORE_ADDR lhs, CORE_ADDR rhs);
-CORE_ADDR hppa32_stack_align (CORE_ADDR sp);
 CORE_ADDR hppa64_stack_align (CORE_ADDR sp);
 int hppa_pc_requires_run_before_use (CORE_ADDR pc);
 int hppa_instruction_nullified (void);
@@ -192,13 +191,9 @@ int hppa_register_byte (int reg_nr);
 struct type * hppa32_register_virtual_type (int reg_nr);
 struct type * hppa64_register_virtual_type (int reg_nr);
 void hppa_store_struct_return (CORE_ADDR addr, CORE_ADDR sp);
-void hppa32_extract_return_value (struct type *type, char *regbuf,
-                                  char *valbuf);
 void hppa64_extract_return_value (struct type *type, char *regbuf,
                                   char *valbuf);
-int hppa32_use_struct_convention (int gcc_p, struct type *type);
 int hppa64_use_struct_convention (int gcc_p, struct type *type);
-void hppa32_store_return_value (struct type *type, char *valbuf);
 void hppa64_store_return_value (struct type *type, char *valbuf);
 int hppa_cannot_store_register (int regnum);
 void hppa_init_extra_frame_info (int fromleaf, struct frame_info *frame);
@@ -239,14 +234,6 @@ extern int hp_som_som_object_present;
 extern int exception_catchpoints_are_fragile;
 
 /* Should call_function allocate stack space for a struct return?  */
-
-int
-hppa32_use_struct_convention (int gcc_p, struct type *type)
-{
-  return (TYPE_LENGTH (type) > 2 * DEPRECATED_REGISTER_SIZE);
-}
-
-/* Same as hppa32_use_struct_convention() for the PA64 ABI.  */
 
 int
 hppa64_use_struct_convention (int gcc_p, struct type *type)
@@ -5446,30 +5433,6 @@ hppa_skip_permanent_breakpoint (void)
   /* We can leave the tail's space the same, since there's no jump.  */
 }
 
-/* Copy the function value from VALBUF into the proper location
-   for a function return.
-
-   Called only in the context of the "return" command.  */
-
-void
-hppa32_store_return_value (struct type *type, char *valbuf)
-{
-  /* For software floating point, the return value goes into the
-     integer registers.  But we do not have any flag to key this on,
-     so we always store the value into the integer registers.
-
-     If its a float value, then we also store it into the floating
-     point registers.  */
-  deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (28)
-				   + (TYPE_LENGTH (type) > 4
-				      ? (8 - TYPE_LENGTH (type))
-				      : (4 - TYPE_LENGTH (type))),
-				   valbuf, TYPE_LENGTH (type));
-  if (TYPE_CODE (type) == TYPE_CODE_FLT)
-    deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (FP4_REGNUM),
-				     valbuf, TYPE_LENGTH (type));
-}
-
 /* Same as hppa32_store_return_value(), but for the PA64 ABI.  */
 
 void
@@ -5494,28 +5457,6 @@ hppa64_store_return_value (struct type *type, char *valbuf)
       deprecated_write_register_bytes
         (DEPRECATED_REGISTER_BYTE (29), valbuf + 8, TYPE_LENGTH (type) - 8);
     }
-}
-
-/* Copy the function's return value into VALBUF.
-
-   This function is called only in the context of "target function calls",
-   ie. when the debugger forces a function to be called in the child, and
-   when the debugger forces a fucntion to return prematurely via the
-   "return" command.  */
-
-void
-hppa32_extract_return_value (struct type *type, char *regbuf, char *valbuf)
-{
-  if (TYPE_CODE (type) == TYPE_CODE_FLT)
-    memcpy (valbuf, regbuf + DEPRECATED_REGISTER_BYTE (FP4_REGNUM), TYPE_LENGTH (type));
-  else
-    memcpy (valbuf,
-	    (regbuf
-	     + DEPRECATED_REGISTER_BYTE (28)
-	     + (TYPE_LENGTH (type) > 4
-		? (8 - TYPE_LENGTH (type))
-		: (4 - TYPE_LENGTH (type)))),
-	    TYPE_LENGTH (type));
 }
 
 /* Same as hppa32_extract_return_value but for the PA64 ABI case.  */
@@ -5561,15 +5502,6 @@ hppa_inner_than (CORE_ADDR lhs, CORE_ADDR rhs)
 {
   /* Stack grows upward */
   return (lhs > rhs);
-}
-
-CORE_ADDR
-hppa32_stack_align (CORE_ADDR sp)
-{
-  /* elz: adjust the quantity to the next highest value which is
-     64-bit aligned.  This is used in valops.c, when the sp is adjusted.
-     On hppa the sp must always be kept 64-bit aligned */
-  return ((sp % 8) ? (sp + 7) & -8 : sp);
 }
 
 CORE_ADDR
@@ -5844,74 +5776,54 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_have_nonsteppable_watchpoint (gdbarch, 1);
 
   /* Inferior function call methods.  */
-  if (0)
+  switch (tdep->bytes_per_address)
     {
-      switch (tdep->bytes_per_address)
+    case 4:
+      set_gdbarch_push_dummy_call (gdbarch, hppa32_push_dummy_call);
+      set_gdbarch_frame_align (gdbarch, hppa32_frame_align);
+      break;
+    case 8:
+      if (0)
 	{
-	case 4:
-	  set_gdbarch_push_dummy_call (gdbarch, hppa32_push_dummy_call);
-	  set_gdbarch_frame_align (gdbarch, hppa32_frame_align);
-	  break;
-	case 8:
 	  set_gdbarch_push_dummy_call (gdbarch, hppa64_push_dummy_call);
 	  set_gdbarch_frame_align (gdbarch, hppa64_frame_align);
 	  break;
 	}
-    }
-  else
-    {
-      switch (tdep->bytes_per_address)
+      else
 	{
-	case 4:
-	  set_gdbarch_deprecated_call_dummy_length (gdbarch, hppa32_call_dummy_length);
-	  set_gdbarch_deprecated_stack_align (gdbarch, hppa32_stack_align);
-	  set_gdbarch_deprecated_reg_struct_has_addr (gdbarch, hppa_reg_struct_has_addr);
-	  break;
-	case 8:
 	  set_gdbarch_deprecated_call_dummy_breakpoint_offset (gdbarch, hppa64_call_dummy_breakpoint_offset);
 	  set_gdbarch_deprecated_call_dummy_length (gdbarch, hppa64_call_dummy_length);
 	  set_gdbarch_deprecated_stack_align (gdbarch, hppa64_stack_align);
 	  break;
+	  set_gdbarch_deprecated_push_dummy_frame (gdbarch, hppa_push_dummy_frame);
+	  /* set_gdbarch_deprecated_fix_call_dummy (gdbarch, hppa_fix_call_dummy); */
+	  set_gdbarch_deprecated_push_arguments (gdbarch, hppa_push_arguments);
+	  set_gdbarch_deprecated_use_generic_dummy_frames (gdbarch, 0);
+	  set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_on_stack);
+	  set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
 	}
-      set_gdbarch_deprecated_push_dummy_frame (gdbarch, hppa_push_dummy_frame);
-      /* set_gdbarch_deprecated_fix_call_dummy (gdbarch, hppa_fix_call_dummy); */
-      set_gdbarch_deprecated_push_arguments (gdbarch, hppa_push_arguments);
-      set_gdbarch_deprecated_use_generic_dummy_frames (gdbarch, 0);
-      set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_on_stack);
-      set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
+      break;
     }
       
   /* Struct return methods.  */
-  if (0)
+  switch (tdep->bytes_per_address)
     {
-      switch (tdep->bytes_per_address)
+    case 4:
+      set_gdbarch_return_value (gdbarch, hppa32_return_value);
+      break;
+    case 8:
+      if (0)
+	set_gdbarch_return_value (gdbarch, hppa64_return_value);
+      else
 	{
-	case 4:
-	  set_gdbarch_return_value (gdbarch, hppa32_return_value);
-	  break;
-	case 8:
-	  set_gdbarch_return_value (gdbarch, hppa64_return_value);
-	  break;
-	default:
-	  internal_error (__FILE__, __LINE__, "bad switch");
-	}
-    }
-  else
-    {
-      switch (tdep->bytes_per_address)
-	{
-	case 4:
-	  set_gdbarch_deprecated_extract_return_value (gdbarch, hppa32_extract_return_value);
-	  set_gdbarch_use_struct_convention (gdbarch, hppa32_use_struct_convention);
-	  set_gdbarch_deprecated_store_return_value (gdbarch, hppa32_store_return_value);
-	  break;
-	case 8:
 	  set_gdbarch_deprecated_extract_return_value (gdbarch, hppa64_extract_return_value);
 	  set_gdbarch_use_struct_convention (gdbarch, hppa64_use_struct_convention);
 	  set_gdbarch_deprecated_store_return_value (gdbarch, hppa64_store_return_value);
-	  break;
+	  set_gdbarch_deprecated_store_struct_return (gdbarch, hppa_store_struct_return);
 	}
-      set_gdbarch_deprecated_store_struct_return (gdbarch, hppa_store_struct_return);
+      break;
+    default:
+      internal_error (__FILE__, __LINE__, "bad switch");
     }
       
   /* Frame unwind methods.  */
