@@ -1,3 +1,10 @@
+2001-09-25  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/tc-mn10300.c (tc_gen_reloc): Don't emit an *ABS*
+	relocation for differences between symbols in a section other
+	than the one in which the difference is to be placed; apply
+	the relocation instead.
+
 2001-09-24  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* config/tc-arc.c: Add missing prototype.

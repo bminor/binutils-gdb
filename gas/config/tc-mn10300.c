@@ -1824,12 +1824,41 @@ tc_gen_reloc (seg, fixp)
 	{
 	  as_bad_where (fixp->fx_file, fixp->fx_line,
 			"Difference of symbols in different sections is not supported");
-	  return NULL;
+	}
+      else
+	{
+	  char *fixpos = fixp->fx_where + fixp->fx_frag->fr_literal;
+
+	  reloc->addend = (S_GET_VALUE (fixp->fx_addsy)
+			   - S_GET_VALUE (fixp->fx_subsy) + fixp->fx_offset);
+
+	  switch (fixp->fx_r_type)
+	    {
+	    case BFD_RELOC_8:
+	      md_number_to_chars (fixpos, reloc->addend, 1);
+	      break;
+	      
+	    case BFD_RELOC_16:
+	      md_number_to_chars (fixpos, reloc->addend, 2);
+	      break;
+
+	    case BFD_RELOC_24:
+	      md_number_to_chars (fixpos, reloc->addend, 3);
+	      break;
+
+	    case BFD_RELOC_32:
+	      md_number_to_chars (fixpos, reloc->addend, 4);
+	      break;
+
+	    default:
+	      reloc->sym_ptr_ptr = (asymbol **) &bfd_abs_symbol;
+	      return reloc;
+	    }
 	}
 
-      reloc->sym_ptr_ptr = (asymbol **) &bfd_abs_symbol;
-      reloc->addend = (S_GET_VALUE (fixp->fx_addsy)
-		       - S_GET_VALUE (fixp->fx_subsy) + fixp->fx_offset);
+      free (reloc->sym_ptr_ptr);
+      free (reloc);
+      return NULL;
     }
   else
     {
