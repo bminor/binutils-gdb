@@ -960,12 +960,13 @@ because only certain debugging formats are supported, and the
 conversion process can be time consuming.
 
 @item --gap-fill @var{val}
-Fill gaps between sections with @var{val}.  This is done by increasing
+Fill gaps between sections with @var{val}.  This operation applies to
+the @emph{load address} (LMA) of the sections.  It is done by increasing
 the size of the section with the lower address, and filling in the extra
 space created with @var{val}.
 
 @item --pad-to @var{address}
-Pad the output file up to the virtual address @var{address}.  This is
+Pad the output file up to the load address @var{address}.  This is
 done by increasing the size of the last section.  The extra space is
 filled in with the value specified by @samp{--gap-fill} (default zero).
 

@@ -178,12 +178,13 @@ because only certain debugging formats are supported, and the
 conversion process can be time consuming.
 .TP
 .B \-\-gap\-fill=\fIval
-Fill gaps between sections with \fIval\fP.  This is done by increasing
+Fill gaps between sections with \fIval\fP.  This operation applies to
+the \fIload address\fP (LMA) of the sections.  It is done by increasing
 the size of the section with the lower address, and filling in the extra
 space created with \fIval\fP.
 .TP
 .B \-\-pad\-to=\fIaddress
-Pad the output file up to the virtual address \fIaddress\fP.  This is
+Pad the output file up to the load address \fIaddress\fP.  This is
 done by increasing the size of the last section.  The extra space is
 filled in with the value specified by \fB\-\-gap\-fill\fP (default
 zero).
