@@ -155,6 +155,7 @@ delta68-nat.c
 demangle.c
 doc
 dpx2-nat.c
+dsrec.c
 dst.h
 dstread.c
 dwarfread.c
@@ -329,7 +330,6 @@ sparc-stub.c
 sparc-tdep.c
 sparcl-stub.c
 sparcl-tdep.c
-srec.c
 srec.h
 stabsread.c
 stabsread.h
