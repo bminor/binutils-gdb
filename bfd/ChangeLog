@@ -1,3 +1,10 @@
+2002-09-12  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf32-i386.c (dtpoff_base, tpoff): Don't crash if tls_segment is
+	NULL.
+	(elf_i386_relocate_section): Return false after printing error about
+	unresolvable relocation.
+
 2002-09-12  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-arm.h (elf32_arm_final_link_relocate): Fix handling of

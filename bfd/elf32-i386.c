@@ -1962,7 +1962,9 @@ static bfd_vma
 dtpoff_base (info)
      struct bfd_link_info *info;
 {
-  BFD_ASSERT (elf_hash_table (info)->tls_segment != NULL);
+  /* If tls_segment is NULL, we should have signalled an error already.  */
+  if (elf_hash_table (info)->tls_segment == NULL)
+    return 0;
   return elf_hash_table (info)->tls_segment->start;
 }
 
@@ -1977,7 +1979,9 @@ tpoff (info, address)
   struct elf_link_tls_segment *tls_segment
     = elf_hash_table (info)->tls_segment;
 
-  BFD_ASSERT (tls_segment != NULL);
+  /* If tls_segment is NULL, we should have signalled an error already.  */
+  if (tls_segment == NULL)
+    return 0;
   return (align_power (tls_segment->size, tls_segment->align)
 	  + tls_segment->start - address);
 }
@@ -2756,12 +2760,15 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
       if (unresolved_reloc
 	  && !((input_section->flags & SEC_DEBUGGING) != 0
 	       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0))
-	(*_bfd_error_handler)
-	  (_("%s(%s+0x%lx): unresolvable relocation against symbol `%s'"),
-	   bfd_archive_filename (input_bfd),
-	   bfd_get_section_name (input_bfd, input_section),
-	   (long) rel->r_offset,
-	   h->root.root.string);
+	{
+	  (*_bfd_error_handler)
+	    (_("%s(%s+0x%lx): unresolvable relocation against symbol `%s'"),
+	     bfd_archive_filename (input_bfd),
+	     bfd_get_section_name (input_bfd, input_section),
+	     (long) rel->r_offset,
+	     h->root.root.string);
+	  return false;
+	}
 
       r = _bfd_final_link_relocate (howto, input_bfd, input_section,
 				    contents, rel->r_offset,
