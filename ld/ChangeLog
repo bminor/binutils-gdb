@@ -1,5 +1,10 @@
 2002-11-11  Charles Wilson  <cwilson@ece.gatech.edu>
 
+	* pe-dll.c (autofilter_liblist): add libmingwex and libgcj to the list
+	of restricted auto-export libs.
+
+2002-11-11  Charles Wilson  <cwilson@ece.gatech.edu>
+
 	* pe-dll.c (autofilter_liblist): Generalize library names to catch more
 	creative library naming instances like, e.g., libstdc++-2.a.
 

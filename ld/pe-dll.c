@@ -231,9 +231,11 @@ static autofilter_entry_type autofilter_liblist[] =
   { "libgcc", 6 },
   { "libstdc++", 9 },
   { "libmingw32", 10 },
+  { "libmingwex", 10 },
   { "libg2c", 6 },
   { "libsupc++", 9 },
   { "libobjc", 7 },
+  { "libgcj", 6 },
   { NULL, 0 }
 };
 
