@@ -109,7 +109,6 @@ tahoe-*-*)		gdb_host=tahoe ;;
 
 vax-*-bsd*)		gdb_host=vaxbsd ;;
 vax-*-ultrix2*)		gdb_host=vaxult2 ;;
-vax-*-ultrix3*)		gdb_host=vaxult2 ;;
 vax-*-ultrix*)		gdb_host=vaxult ;;
 
 esac
