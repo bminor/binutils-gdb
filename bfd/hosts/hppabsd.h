@@ -9,9 +9,8 @@
 #include <ctype.h>
 #include <string.h>
 #include <sys/file.h>
-
-extern PTR  malloc PARAMS ((unsigned));
-extern void free   PARAMS ((PTR));
+#include <stdlib.h>
+#include <unistd.h>
 
 #define HOST_HPPABSD
 
