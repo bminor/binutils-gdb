@@ -785,12 +785,18 @@ gld${EMULATION_NAME}_vercheck (s)
 
 static asection *hold_section;
 static lang_output_section_statement_type *hold_use;
-static lang_output_section_statement_type *hold_text;
-static lang_output_section_statement_type *hold_rodata;
-static lang_output_section_statement_type *hold_data;
-static lang_output_section_statement_type *hold_bss;
-static lang_output_section_statement_type *hold_rel;
-static lang_output_section_statement_type *hold_interp;
+
+struct orphan_save
+{
+  lang_output_section_statement_type *os;
+  lang_statement_union_type **stmt;
+};
+static struct orphan_save hold_text;
+static struct orphan_save hold_rodata;
+static struct orphan_save hold_data;
+static struct orphan_save hold_bss;
+static struct orphan_save hold_rel;
+static struct orphan_save hold_interp;
 
 /*ARGSUSED*/
 static boolean
@@ -798,7 +804,7 @@ gld${EMULATION_NAME}_place_orphan (file, s)
      lang_input_statement_type *file;
      asection *s;
 {
-  lang_output_section_statement_type *place;
+  struct orphan_save *place;
   asection *snew, **pps;
   lang_statement_list_type *old;
   lang_statement_list_type add;
@@ -829,9 +835,9 @@ gld${EMULATION_NAME}_place_orphan (file, s)
   if (! link_info.shared
       && ! link_info.relocateable
       && strncmp (secname, ".gnu.warning.", sizeof ".gnu.warning." - 1) == 0
-      && hold_text != NULL)
+      && hold_text.os != NULL)
     {
-      wild_doit (&hold_text->children, s, hold_text, file);
+      wild_doit (&hold_text.os->children, s, hold_text.os, file);
       return true;
     }
 
@@ -840,30 +846,29 @@ gld${EMULATION_NAME}_place_orphan (file, s)
      right after the .interp section, so that the PT_NOTE segment is
      stored right after the program headers where the OS can read it
      in the first page.  */
-  place = NULL;
   if (s->flags & SEC_EXCLUDE)
     return false;
   else if ((s->flags & SEC_LOAD) != 0
-      && strncmp (secname, ".note", 4) == 0
-      && hold_interp != NULL)
-    place = hold_interp;
+	   && strncmp (secname, ".note", 4) == 0
+	   && hold_interp.os != NULL)
+    place = &hold_interp;
   else if ((s->flags & SEC_HAS_CONTENTS) == 0
-	   && hold_bss != NULL)
-    place = hold_bss;
+	   && hold_bss.os != NULL)
+    place = &hold_bss;
   else if ((s->flags & SEC_READONLY) == 0
-	   && hold_data != NULL)
-    place = hold_data;
+	   && hold_data.os != NULL)
+    place = &hold_data;
   else if (strncmp (secname, ".rel", 4) == 0
-	   && hold_rel != NULL)
-    place = hold_rel;
+	   && hold_rel.os != NULL)
+    place = &hold_rel;
   else if ((s->flags & SEC_CODE) == 0
 	   && (s->flags & SEC_READONLY) != 0
-	   && hold_rodata != NULL)
-    place = hold_rodata;
+	   && hold_rodata.os != NULL)
+    place = &hold_rodata;
   else if ((s->flags & SEC_READONLY) != 0
-	   && hold_text != NULL)
-    place = hold_text;
-  if (place == NULL)
+	   && hold_text.os != NULL)
+    place = &hold_text;
+  else
     return false;
 
   /* Choose a unique name for the section.  This will be needed if the
@@ -896,13 +901,17 @@ gld${EMULATION_NAME}_place_orphan (file, s)
   if (snew == NULL)
       einfo ("%P%F: output format %s cannot represent section called %s\n",
 	     output_bfd->xvec->name, outsecname);
-  if (place->bfd_section != NULL)
+  if (place->os->bfd_section != NULL)
     {
+      /* Unlink it first.  */
       for (pps = &output_bfd->sections; *pps != snew; pps = &(*pps)->next)
 	;
       *pps = snew->next;
-      snew->next = place->bfd_section->next;
-      place->bfd_section->next = snew;
+      snew->next = NULL;
+      /* Now tack it on to the end of the "place->os" section list.  */
+      for (pps = &place->os->bfd_section; *pps; pps = &(*pps)->next)
+	;
+      *pps = snew;
     }
 
   /* Start building a list of statements for this section.  */
@@ -956,9 +965,19 @@ gld${EMULATION_NAME}_place_orphan (file, s)
 				      exp_nameop (NAME, ".")));
     }
 
-  /* Now stick the new statement list right after PLACE.  */
-  *add.tail = place->header.next;
-  place->header.next = add.head;
+  if (! place->stmt)
+    {
+      /* Put the new statement list right at the head.  */
+      *add.tail = place->os->header.next;
+      place->os->header.next = add.head;
+    }
+  else
+    {
+      /* Put it after the last orphan statement we added.  */
+      *add.tail = *place->stmt;
+      *place->stmt = add.head;
+    }
+  place->stmt = add.tail;	/* Save the end of this list.  */
 
   stat_ptr = old;
 
@@ -983,20 +1002,20 @@ gld${EMULATION_NAME}_place_section (s)
     hold_use = os;
 
   if (strcmp (os->name, ".text") == 0)
-    hold_text = os;
+    hold_text.os = os;
   else if (strcmp (os->name, ".rodata") == 0)
-    hold_rodata = os;
+    hold_rodata.os = os;
   else if (strcmp (os->name, ".data") == 0)
-    hold_data = os;
+    hold_data.os = os;
   else if (strcmp (os->name, ".bss") == 0)
-    hold_bss = os;
-  else if (hold_rel == NULL
+    hold_bss.os = os;
+  else if (hold_rel.os == NULL
 	   && os->bfd_section != NULL
 	   && (os->bfd_section->flags & SEC_ALLOC) != 0
 	   && strncmp (os->name, ".rel", 4) == 0)
-    hold_rel = os;
+    hold_rel.os = os;
   else if (strcmp (os->name, ".interp") == 0)
-    hold_interp = os;
+    hold_interp.os = os;
 }
 
 /* Look through an expression for an assignment statement.  */

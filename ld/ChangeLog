@@ -1,3 +1,15 @@
+2000-04-12  Alan Modra  <alan@linuxcare.com.au>
+
+	* emultempl/elf32.em (struct orphan_save): New.
+	(hold_text, hold_rodata, hold_data, hold_bss, hold_rel,
+	hold_interp): Make them struct orphan_save.
+	(gld${EMULATION_NAME}_place_section): Modify for new hold_*.
+	(gld${EMULATION_NAME}_place_orphan): Add new orphan sections to
+	the end of the relevant section list.  Also add associated section
+	statements to the end of any previous orphan statements.
+	* emultempl/armelf.em: Similarly.
+	* emultempl/pe.em: Similarly.
+
 2000-04-11  Alan Modra  <alan@linuxcare.com.au>
 
 	* ld.texinfo (Simple Example): Remove extraneous paragraph.

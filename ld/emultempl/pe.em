@@ -1077,10 +1077,16 @@ gld_${EMULATION_NAME}_finish ()
 static asection *hold_section;
 static char *hold_section_name;
 static lang_output_section_statement_type *hold_use;
-static lang_output_section_statement_type *hold_text;
-static lang_output_section_statement_type *hold_rdata;
-static lang_output_section_statement_type *hold_data;
-static lang_output_section_statement_type *hold_bss;
+
+struct orphan_save
+{
+  lang_output_section_statement_type *os;
+  lang_statement_union_type **stmt;
+};
+static struct orphan_save hold_text;
+static struct orphan_save hold_rdata;
+static struct orphan_save hold_data;
+static struct orphan_save hold_bss;
 
 /* Place an orphan section.  We use this to put random SHF_ALLOC
    sections in the right segment.  */
@@ -1116,7 +1122,7 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
 
   if (hold_use == NULL)
     {
-      lang_output_section_statement_type *place;
+      struct orphan_save *place;
       char *outsecname;
       asection *snew, **pps;
       lang_statement_list_type *old;
@@ -1127,18 +1133,18 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
 	 on the section name and section flags.  */
       place = NULL;
       if ((s->flags & SEC_HAS_CONTENTS) == 0
-	  && hold_bss != NULL)
-	place = hold_bss;
+	  && hold_bss.os != NULL)
+	place = &hold_bss;
       else if ((s->flags & SEC_READONLY) == 0
-	       && hold_data != NULL)
-	place = hold_data;
+	       && hold_data.os != NULL)
+	place = &hold_data;
       else if ((s->flags & SEC_CODE) == 0
 	       && (s->flags & SEC_READONLY) != 0
-	       && hold_rdata != NULL)
-	place = hold_rdata;
+	       && hold_rdata.os != NULL)
+	place = &hold_rdata;
       else if ((s->flags & SEC_READONLY) != 0
-	       && hold_text != NULL)
-	place = hold_text;
+	       && hold_text.os != NULL)
+	place = &hold_text;
 
       /* Choose a unique name for the section.  This will be needed if
 	 the same section name appears in the input file with
@@ -1175,13 +1181,17 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
       if (snew == NULL)
 	einfo ("%P%F: output format %s cannot represent section called %s\n",
 	       output_bfd->xvec->name, outsecname);
-      if (place != NULL && place->bfd_section != NULL)
+      if (place != NULL && place->os->bfd_section != NULL)
 	{
+	  /* Unlink it first.  */
 	  for (pps = &output_bfd->sections; *pps != snew; pps = &(*pps)->next)
 	    ;
 	  *pps = snew->next;
-	  snew->next = place->bfd_section->next;
-	  place->bfd_section->next = snew;
+	  snew->next = NULL;
+	  /* Now tack it on to the end of the "place->os" section list.  */
+	  for (pps = &place->os->bfd_section; *pps; pps = &(*pps)->next)
+	    ;
+	  *pps = snew;
 	}
 
       /* Start building a list of statements for this section.  */
@@ -1212,11 +1222,21 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
 	 (struct lang_output_section_phdr_list *) NULL,
 	"*default*");
 
-      /* Now stick the new statement list right after PLACE.  */
       if (place != NULL)
 	{
-	  *add.tail = place->header.next;
-	  place->header.next = add.head;
+	  if (! place->stmt)
+	    {
+	      /* Put the new statement list right at the head.  */
+	      *add.tail = place->os->header.next;
+	      place->os->header.next = add.head;
+	    }
+	  else
+	    {
+	      /* Put it after the last orphan statement we added.  */
+	      *add.tail = *place->stmt;
+	      *place->stmt = add.head;
+	    }
+	  place->stmt = add.tail;	/* Save the end of this list.  */
 	}
 
       stat_ptr = old;
@@ -1291,13 +1311,13 @@ gld${EMULATION_NAME}_place_section (s)
     hold_use = os;
 
   if (strcmp (os->name, ".text") == 0)
-    hold_text = os;
+    hold_text.os = os;
   else if (strcmp (os->name, ".rdata") == 0)
-    hold_rdata = os;
+    hold_rdata.os = os;
   else if (strcmp (os->name, ".data") == 0)
-    hold_data = os;
+    hold_data.os = os;
   else if (strcmp (os->name, ".bss") == 0)
-    hold_bss = os;
+    hold_bss.os = os;
 }
 
 static int
