@@ -1,3 +1,10 @@
+2000-06-18  H.J. Lu  <hjl@gnu.org>
+
+	* coff-i386.c (coff_i386_reloc): Don't return in case of
+	output_bfd == (bfd *) NULL if COFF_WITH_PE is defined.
+	Compensate PE relocations when linking with non-PE object
+	files to generate a non-PE executable.
+
 2000-06-17  Ulf Carlsson  <ulfc@engr.sgi.com>
 
 	* elf32-mips.c (mips_elf_calculate_relocation): Explicitly write
