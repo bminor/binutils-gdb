@@ -851,11 +851,12 @@ sunos_add_one_symbol (info, abfd, name, flags, section, value, string,
   if (hashp != NULL)
     *hashp = (struct bfd_link_hash_entry *) h;
 
-  /* Treat a common symbol in a dynamic object as an undefined symbol.
-     We don't want to allocate space in .bss for it.  */
+  /* Treat a common symbol in a dynamic object as defined in the .bss
+     section of the dynamic object.  We don't want to allocate space
+     for it in our process image.  */
   if ((abfd->flags & DYNAMIC) != 0
       && section == &bfd_com_section)
-    section = &bfd_und_section;
+    section = obj_bsssec (abfd);
 
   if (section != &bfd_und_section
       && h->root.root.type != bfd_link_hash_new
