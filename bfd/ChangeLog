@@ -1,3 +1,8 @@
+2000-07-07  DJ Delorie  <dj@redhat.com>
+
+	* archive.c (_bfd_write_archive_contents): Add an informative
+	comment.
+
 2000-07-06  Kazu Hirata  <kazu@hxi.com>
 
 	* srec.c: Fix formatting.

@@ -1684,6 +1684,11 @@ _bfd_write_archive_contents (arch)
      then construct a fresh ar_hdr for them.  */
   for (current = arch->archive_head; current; current = current->next)
     {
+      /* This check is checking the bfds for the objects we're reading
+	 from (which are usually either an object file or archive on
+	 disk), not the archive entries we're writing to.  We don't
+	 actually create bfds for the archive members, we just copy
+	 them byte-wise when we write out the archive.  */
       if (bfd_write_p (current))
 	{
 	  bfd_set_error (bfd_error_invalid_operation);
