@@ -1,3 +1,7 @@
+Wed Jan 11 16:29:53 1995  Jason Merrill  <jason@phydeaux.cygnus.com>
+
+	* Makefile.in (LIBCXXFLAGS_FOR_TARGET): Add -fno-implicit-templates.
+
 Mon Jan  9 12:48:01 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>
 
 	* configure.in (rs6000-*-*): Don't build gas.
