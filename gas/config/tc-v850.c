@@ -726,9 +726,9 @@ reg_name_search (regs, regcount, name, accept_numbers)
     {
       /* If the symbol is an alias for another name then use that.
 	 If the symbol is an alias for a number, then return the number.  */
-      if (symbolP->sy_value.X_op == O_symbol)
+      if (symbol_equated_p (symbolP))
 	{
-	  name = S_GET_NAME (symbolP->sy_value.X_add_symbol);
+	  name = S_GET_NAME (symbol_get_value_expression (symbolP)->X_add_symbol);
 	}
       else if (accept_numbers)
 	{

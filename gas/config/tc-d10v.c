@@ -36,8 +36,8 @@ int Optimizing = 0;
 
 #define AT_WORD_P(X) ((X)->X_op == O_right_shift \
 		      && (X)->X_op_symbol != NULL \
-		      && (X)->X_op_symbol->sy_value.X_op == O_constant \
-		      && (X)->X_op_symbol->sy_value.X_add_number == AT_WORD_RIGHT_SHIFT)
+		      && symbol_constant_p ((X)->X_op_symbol) \
+		      && S_GET_VALUE ((X)->X_op_symbol) == AT_WORD_RIGHT_SHIFT)
 #define AT_WORD_RIGHT_SHIFT 2
 
 

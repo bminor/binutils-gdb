@@ -1,5 +1,11 @@
 1999-06-22  Ian Lance Taylor  <ian@zembu.com>
 
+	* config/tc-arc.c (get_arc_exp_reloc_type): Change uses of
+	sy_value with appropriate accessor functions.
+	* config/tc-arm.c (md_apply_fix3): Likewise.
+	* config/tc-d10v.c (AT_WORD_P): Likewise.
+	* config/tc-v850.c (reg_name_search): Likewise.
+
 	* config/obj-ecoff.c (obj_ecoff_set_ext): Change uses of bsym to
 	use symbol_get_bfdsym instead.
 	* config/tc-ppc.c (md_assemble): Likewise.

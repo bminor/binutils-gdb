@@ -5279,7 +5279,7 @@ md_apply_fix3 (fixP, val, seg)
 
   /* Note whether this will delete the relocation.  */
 #if 0 /* patch from REarnshaw to JDavis (disabled for the moment, since it doesn't work fully) */
-  if ((fixP->fx_addsy == 0 || fixP->fx_addsy->sy_value.X_op == O_constant)
+  if ((fixP->fx_addsy == 0 || symbol_constant_p (fixP->fx_addsy))
       && !fixP->fx_pcrel)
 #else
   if (fixP->fx_addsy == 0 && !fixP->fx_pcrel)

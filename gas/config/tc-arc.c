@@ -1242,13 +1242,13 @@ get_arc_exp_reloc_type (data_p, default_type, exp, expnew)
 
   if (exp->X_op == O_right_shift
       && exp->X_op_symbol != NULL
-      && exp->X_op_symbol->sy_value.X_op == O_constant
-      && exp->X_op_symbol->sy_value.X_add_number == 2
+      && symbol_constant_p (exp->X_op_symbol)
+      && S_GET_VALUE (exp->X_op_symbol) == 2
       && exp->X_add_number == 0)
     {
       if (exp->X_add_symbol != NULL
-	  && (exp->X_add_symbol->sy_value.X_op == O_constant
-	      || exp->X_add_symbol->sy_value.X_op == O_symbol))
+	  && (symbol_constant_p (exp->X_add_symbol)
+	      || symbol_equated_p (exp->X_add_symbol)))
 	{
 	  *expnew = *exp;
 	  expnew->X_op = O_symbol;
@@ -1256,9 +1256,10 @@ get_arc_exp_reloc_type (data_p, default_type, exp, expnew)
 	  return data_p ? BFD_RELOC_ARC_B26 : arc_operand_map['J'];
 	}
       else if (exp->X_add_symbol != NULL
-	       && exp->X_add_symbol->sy_value.X_op == O_subtract)
+	       && (symbol_get_value_expression (exp->X_add_symbol)->X_op
+		   == O_subtract))
 	{
-	  *expnew = exp->X_add_symbol->sy_value;
+	  *expnew = *symbol_get_value_expression (exp->X_add_symbol);
 	  return data_p ? BFD_RELOC_ARC_B26 : arc_operand_map['J'];
 	}
     }
