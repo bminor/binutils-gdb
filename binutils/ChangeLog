@@ -1,4 +1,8 @@
-2000-04-06  Jason Merrill  <jason@casey.cygnus.com>
+2000-04-06  Jason Merrill  <jason@yorick.cygnus.com>
+
+	* readelf.c (decode_location_expression): Loop through multiple
+	operations.
+	(read_and_display_attr): Pass in length.
 
 	* readelf.c (read_and_display_attr): Add CU offset to references.
 	(display_debug_info): Pass it in.
