@@ -47,6 +47,7 @@ typedef struct external_aouthdr
 
 #define AOUTSZ (sizeof(AOUTHDR))
 
+#define ZMAGIC          0413    /* demand load format, eg normal ld output */
 
 /********************** SECTION HEADER **********************/
 
@@ -77,6 +78,7 @@ struct external_scnhdr {
 #define _SBSS	".sbss"
 #define _LIT4	".lit4"
 #define _LIT8	".lit8"
+#define _LIB	".lib"
 
 #define DEFAULT_DATA_SECTION_ALIGNMENT 4
 #define DEFAULT_BSS_SECTION_ALIGNMENT 4
@@ -98,16 +100,38 @@ struct external_scnhdr {
 
 struct external_reloc {
   unsigned char r_vaddr[4];
-  unsigned char r_symndx[4];
-  unsigned char r_type[2];
-  unsigned char pad[2];
+  unsigned char r_bits[4];
 };
 
+/* MIPS ECOFF uses a packed 8 byte format for relocs.  These constants
+   are used to unpack the r_bits field.  FIXME: Check these on a big
+   endian machine.  */
+
+#define RELOC_BITS0_SYMNDX_SH_LEFT_BIG		16
+#define RELOC_BITS0_SYMNDX_SH_LEFT_LITTLE	0
+
+#define RELOC_BITS1_SYMNDX_SH_LEFT_BIG		8
+#define RELOC_BITS1_SYMNDX_SH_LEFT_LITTLE	8
+
+#define RELOC_BITS2_SYMNDX_SH_LEFT_BIG		0
+#define RELOC_BITS2_SYMNDX_SH_LEFT_LITTLE	16
+
+#define RELOC_BITS3_TYPE_BIG			0x3C
+#define RELOC_BITS3_TYPE_SH_BIG			2
+#define RELOC_BITS3_TYPE_LITTLE			0x78
+#define RELOC_BITS3_TYPE_SH_LITTLE		3
+
+#define RELOC_BITS3_EXTERN_BIG			0x01
+#define RELOC_BITS3_EXTERN_LITTLE		0x80
+
+/* We store the extern field in the r_offset field of a struct
+   internal_reloc.  FIXME: Do this more sensibly.  */
+#define r_extern r_offset
 
 /* Relevent values for r_type and ecoff.  Would someone please document them */
 
 #define RELOC struct external_reloc
-#define RELSZ 12
+#define RELSZ 8
 
 /* gcc uses mips-tfile to output type information in special stabs
    entries.  These must match the corresponding definition in

@@ -300,14 +300,46 @@ struct rfd_ext {
   unsigned char	rfd[4];
 };
 
+/* Optimizer symbol external record */
+
+struct opt_ext {
+  unsigned char o_bits1[1];
+  unsigned char o_bits2[1];
+  unsigned char o_bits3[1];
+  unsigned char o_bits4[1];
+  struct rndx_ext o_rndx;
+  unsigned char o_offset[4];
+};
+
+#define OPT_BITS2_VALUE_SH_LEFT_BIG	16
+#define OPT_BITS2_VALUE_SH_LEFT_LITTLE	0
+
+#define OPT_BITS3_VALUE_SH_LEFT_BIG	8
+#define OPT_BITS3_VALUE_SH_LEFT_LITTLE	8
+
+#define OPT_BITS4_VALUE_SH_LEFT_BIG	0
+#define OPT_BITS4_VALUE_SH_LEFT_LITTLE	16
+
 /* Prototypes for the swapping functions.  These require that sym.h be
    included before this file.  */
 extern void ecoff_swap_hdr_in PARAMS ((bfd *, struct hdr_ext *, HDRR *));
+extern void ecoff_swap_hdr_out PARAMS ((bfd *, HDRR *, struct hdr_ext *));
 extern void ecoff_swap_fdr_in PARAMS ((bfd *, struct fdr_ext *, FDR *));
+extern void ecoff_swap_fdr_out PARAMS ((bfd *, FDR *, struct fdr_ext *));
 extern void ecoff_swap_pdr_in PARAMS ((bfd *, struct pdr_ext *, PDR *));
+extern void ecoff_swap_pdr_out PARAMS ((bfd *, PDR *, struct pdr_ext *));
 extern void ecoff_swap_sym_in PARAMS ((bfd *, struct sym_ext *, SYMR *));
+extern void ecoff_swap_sym_out PARAMS ((bfd *, SYMR *, struct sym_ext *));
 extern void ecoff_swap_ext_in PARAMS ((bfd *, struct ext_ext *, EXTR *));
+extern void ecoff_swap_ext_out PARAMS ((bfd *, EXTR *, struct ext_ext *));
+extern void ecoff_swap_dnr_in PARAMS ((bfd *, struct dnr_ext *, DNR *));
+extern void ecoff_swap_dnr_out PARAMS ((bfd *, DNR *, struct dnr_ext *));
 extern void ecoff_swap_tir_in PARAMS ((int bigend, struct tir_ext *, TIR *));
 extern void ecoff_swap_rndx_in PARAMS ((int bigend, struct rndx_ext *,
 					RNDXR *));
+extern void ecoff_swap_rndx_out PARAMS ((int bigend, RNDXR *,
+					 struct rndx_ext *));
 extern void ecoff_swap_rfd_in PARAMS ((bfd *, struct rfd_ext *, RFDT *));
+extern void ecoff_swap_rfd_out PARAMS ((bfd *, RFDT *, struct rfd_ext *));
+extern void ecoff_swap_opt_in PARAMS ((bfd *, struct opt_ext *, OPTR *));
+extern void ecoff_swap_opt_out PARAMS ((bfd *, OPTR *, struct opt_ext *));

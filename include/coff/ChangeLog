@@ -1,3 +1,12 @@
+Fri Jan 15 18:17:00 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ecoff-ext.h: Added prototypes for new ECOFF swapping functions.
+	(opt_ext): New structure.
+	* mips.h (ZMAGIC): Defined to be 0413.
+	(_LIB): Defined to be ".lib"
+	(external_reloc): MIPS ECOFF relocs are only 8 bytes.  Added
+	macros to aid in swapping.
+
 Fri Jan  8 16:19:26 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ecoff-ext.h: Added prototypes for ECOFF swapping functions.
