@@ -1,3 +1,15 @@
+1999-07-14  Philip Blundell  <pb@nexus.co.uk>
+
+	* symbols.c (dollar_label_name): Prepend LOCAL_LABEL_PREFIX if it
+	is defined.
+	* config/tc-arm.h (LOCAL_LABEL_PREFIX): Define to '.' for ELF.
+
+	* config/tc-arm.c (md_begin): Set F_SOFTFLOAT in the output file
+	if -mno-fpu was given.
+	(tc_gen_reloc): Fix typo.  Delete bogus code related to GOTPC
+	relocs.
+	(cons_fix_new_arm): Remove misleading comments.
+
 1999-07-14  Ian Lance Taylor  <ian@zembu.com>
 
 	* write.c (cvt_frag_to_fill): Use frag file and line in rs_org

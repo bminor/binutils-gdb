@@ -5036,6 +5036,7 @@ md_begin ()
     if (support_interwork) flags |= F_INTERWORK;
     if (uses_apcs_float)   flags |= F_APCS_FLOAT;
     if (pic_code)          flags |= F_PIC;
+    if ((cpu_variant & FPU_ALL) == FPU_NONE) flags |= F_SOFT_FLOAT;
 
     bfd_set_private_flags (stdoutput, flags);
   }
@@ -5923,16 +5924,10 @@ tc_gen_reloc (section, fixp)
     case BFD_RELOC_ARM_LITERAL:
     case BFD_RELOC_ARM_HWLITERAL:
       /* If this is called then the a literal has been referenced across
-	 a section boundry - possibly due to an implicit dump */
+	 a section boundary - possibly due to an implicit dump */
       as_bad_where (fixp->fx_file, fixp->fx_line,
-		    _("Literal referenced across section boundry (Implicit dump?)"));
+		    _("Literal referenced across section boundary (Implicit dump?)"));
       return NULL;
-
-    case BFD_RELOC_ARM_GOTPC:
-      assert (fixp->fx_pcrel != 0);
-      code = fixp->fx_r_type;
-      code = BFD_RELOC_32_PCREL;
-      break;
 
 #ifdef OBJ_ELF
     case BFD_RELOC_ARM_GOT32:
@@ -6755,24 +6750,7 @@ fix_new_arm (frag, where, size, exp, pc_rel, reloc)
 }
 
 
-/*
- * This fix_new is called by cons via TC_CONS_FIX_NEW
- *
- * We check the expression to see if it is of the form
- *  __GLOBAL_OFFSET_TABLE + ???
- * If it is then this is a PC relative reference to the GOT.
- * i.e.
- * 	ldr	sl, L1
- * 	add	sl, pc, sl
- * L2:
- * 	...
- * L1:
- *	.word	__GLOBAL_OFFSET_TABLE + (. - (L2 + 4))
- *
- * In this case use a reloc type BFD_RELOC_ARM_GOTPC instead of the
- * normal BFD_RELOC_{16,32,64}
- */
-
+/* This fix_new is called by cons via TC_CONS_FIX_NEW.  */
 void
 cons_fix_new_arm (frag, where, size, exp)
      fragS *       frag;
@@ -6800,13 +6778,6 @@ cons_fix_new_arm (frag, where, size, exp)
       type = BFD_RELOC_64;
       break;
     }
-  
-  /* Look for possible GOTPC reloc */
-  
-  /*
-   * Look for pic assembler and 'undef symbol + expr symbol' expression
-   * and a 32 bit size.
-   */
   
   fix_new_exp (frag, where, (int) size, exp, pcrel, type);
 }

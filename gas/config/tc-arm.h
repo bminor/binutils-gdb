@@ -171,6 +171,9 @@ char * arm_canonicalize_symbol_name PARAMS ((char *));
 
 #define LOCAL_LABEL(name) (name[0] == '.' && (name[1] == 'L'))
 #define LOCAL_LABELS_FB   1
+#ifdef OBJ_ELF
+#define LOCAL_LABEL_PREFIX '.'
+#endif
 
 /* This expression evaluates to false if the relocation is for a local object
    for which we still want to do the relocation at runtime.  True if we
