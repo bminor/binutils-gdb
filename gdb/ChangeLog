@@ -1,3 +1,8 @@
+Wed Aug 10 16:13:45 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* defs.h, top.c:  Use `extern' in declarations of GUI hooks, and
+	define them in top.c.  Add comments to the hooks.
+
 Wed Aug 10 15:57:43 1994  Doug Evans  (dje@canuck.cygnus.com)
 
 	* remote-sim.c (gdbsim_ops): Set `to_insert_breakpoint' and

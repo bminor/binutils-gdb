@@ -317,6 +317,42 @@ static void stop_sig PARAMS ((int));
 #if 0 == (HAVE_SIGSETMASK)
 #define sigsetmask(n)
 #endif
+
+/* Hooks for alternate command interfaces.  */
+
+/* Called after most modules have been initialized, but before taking users
+   command file.  */
+
+void (*init_ui_hook) PARAMS ((void));
+
+/* Called instead of command_loop at top level.  Can be invoked via
+   return_to_top_level.  */
+
+void (*command_loop_hook) PARAMS ((void));
+
+/* Called instead of fputs for all output.  */
+
+void (*fputs_unfiltered_hook) PARAMS ((const char *linebuffer));
+
+/* Called from print_frame_info to list the line we stopped in.  */
+
+void (*print_frame_info_listing_hook) PARAMS ((struct symtab *s, int line,
+					       int stopline, int noerror));
+/* Replaces most of query.  */
+
+int (*query_hook) PARAMS (());
+
+/* Called from gdb_flush to flush output.  */
+
+void (*flush_hook) PARAMS ((FILE *stream));
+
+/* Called as appropriate to notify the interface of the specified breakpoint
+   conditions.  */
+
+void (*create_breakpoint_hook) PARAMS ((struct breakpoint *b));
+void (*delete_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
+void (*enable_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
+void (*disable_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
 
 /* Where to go for return_to_top_level (RETURN_ERROR).  */
 jmp_buf error_return;

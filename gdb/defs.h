@@ -39,14 +39,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 typedef bfd_vma CORE_ADDR;
 
-/* These are supposedly internal to BFD, but in practice are needed
-   all over GDB's readers.  They should be defined in bfd.h (FIXME).  */
-
-bfd_size_type	bfd_read  PARAMS ((PTR ptr, bfd_size_type size,
-				   bfd_size_type nitems, bfd *abfd));
-int		bfd_seek  PARAMS ((bfd* CONST abfd, CONST file_ptr fp,
-				   CONST int direction));
-
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define max(a, b) ((a) > (b) ? (a) : (b))
 
@@ -837,17 +829,17 @@ struct symtab;
 struct breakpoint;
 #endif
 
-void (*init_ui_hook) PARAMS ((void));
-void (*command_loop_hook) PARAMS ((void));
-void (*fputs_unfiltered_hook) PARAMS ((const char *linebuffer));
-void (*print_frame_info_listing_hook) PARAMS ((struct symtab *s, int line,
+extern void (*init_ui_hook) PARAMS ((void));
+extern void (*command_loop_hook) PARAMS ((void));
+extern void (*fputs_unfiltered_hook) PARAMS ((const char *linebuffer));
+extern void (*print_frame_info_listing_hook) PARAMS ((struct symtab *s, int line,
 					       int stopline, int noerror));
-int (*query_hook) PARAMS (());
-void (*flush_hook) PARAMS ((FILE *stream));
-void (*create_breakpoint_hook) PARAMS ((struct breakpoint *b));
-void (*delete_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
-void (*enable_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
-void (*disable_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
+extern int (*query_hook) PARAMS (());
+extern void (*flush_hook) PARAMS ((FILE *stream));
+extern void (*create_breakpoint_hook) PARAMS ((struct breakpoint *b));
+extern void (*delete_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
+extern void (*enable_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
+extern void (*disable_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
 
 /* Inhibit window interface if non-zero. */
 
