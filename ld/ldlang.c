@@ -818,6 +818,7 @@ lang_insert_orphan (lang_input_statement_type *file,
   etree_type *load_base;
   lang_output_section_statement_type *os;
   lang_output_section_statement_type **os_tail;
+  asection **bfd_tail;
 
   /* Start building a list of statements for this section.
      First save the current statement pointer.  */
@@ -871,6 +872,7 @@ lang_insert_orphan (lang_input_statement_type *file,
 
   os_tail = ((lang_output_section_statement_type **)
 	     lang_output_section_statement.tail);
+  bfd_tail = output_bfd->section_tail;
   os = lang_enter_output_section_statement (secname, address, 0, NULL, NULL,
 					    load_base, 0);
 
@@ -902,7 +904,7 @@ lang_insert_orphan (lang_input_statement_type *file,
 
   if (after != NULL && os->bfd_section != NULL)
     {
-      asection *snew, **pps;
+      asection *snew;
 
       snew = os->bfd_section;
 
@@ -929,9 +931,8 @@ lang_insert_orphan (lang_input_statement_type *file,
 	place->section = &output_bfd->sections;
 
       /* Unlink the section.  */
-      for (pps = &output_bfd->sections; *pps != snew; pps = &(*pps)->next)
-	continue;
-      bfd_section_list_remove (output_bfd, pps);
+      ASSERT (*bfd_tail == snew);
+      bfd_section_list_remove (output_bfd, bfd_tail);
 
       /* Now tack it back on in the right place.  */
       bfd_section_list_insert (output_bfd, place->section, snew);
