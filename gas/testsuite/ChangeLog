@@ -1,4 +1,8 @@
 2001-08-04  H.J. Lu  <hjl@gnu.org>
+
+	* gas/cris/operand-err-1.s: Updated.
+
+2001-08-04  H.J. Lu  <hjl@gnu.org>
 	    Chris G. Demetriou <cgd@broadcom.com>
 
 	* gas/mips/e32-rel4.s: Removed.
