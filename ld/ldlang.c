@@ -1896,6 +1896,10 @@ lang_relocate_globals ()
   {
     asymbol *it;
 
+    /* Skip indirect symbols.  */
+    if (lgs->flags & SYM_INDIRECT)
+      continue;
+
     if (lgs->sdefs_chain)
       {
 	it = *(lgs->sdefs_chain);
