@@ -1,3 +1,8 @@
+2004-09-23  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/sigstep.exp: Avoid comments withing gdb_test_multiple
+	block.
+
 2004-09-23  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.base/constvars.exp (local_compiler_xfail_check_2):

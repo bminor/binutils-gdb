@@ -211,12 +211,12 @@ proc skip_to_handler { i } {
     set prefix "$i to handler"
     
     # Run around to the done
+    # You can add more patterns to this if you need them.
     set test "$prefix; resync"
     gdb_test_multiple "continue" "$test" {
 	-re "done = 0.*$gdb_prompt " {
 	    pass "$test"
 	}
-	# other patterns can go here
     }
     
     # Advance to the infinite loop
@@ -252,12 +252,12 @@ proc skip_to_handler_entry { i } {
     set prefix "$i to handler entry"
     
     # Run around to the done
+    # You can add more patterns to this if you need them.
     set test "$prefix; resync"
     gdb_test_multiple "continue" "$test" {
 	-re "done = 0.*$gdb_prompt " {
 	    pass "$test"
 	}
-	# other patterns can go here
     }
     
     # Advance to the infinite loop
@@ -285,12 +285,12 @@ proc skip_over_handler { i } {
     set prefix "$i over handler"
     
     # Run around to the done
+    # You can add more patterns to this if you need them.
     set test "$prefix; resync"
     gdb_test_multiple "continue" "$test" {
 	-re "done = 0.*$gdb_prompt " {
 	    pass "$test"
 	}
-	# other patterns can go here
     }
     
     # Advance to the infinite loop
@@ -316,12 +316,12 @@ proc breakpoint_to_handler { i } {
     set prefix "$i on breakpoint, to handler"
     
     # Run around to the done
+    # You can add more patterns to this if you need them.
     set test "$prefix; resync"
     gdb_test_multiple "continue" "$test" {
 	-re "done = 0.*$gdb_prompt " {
 	    pass "$test"
 	}
-	# other patterns can go here
     }
     
     gdb_test "break $infinite_loop" "" "$prefix; break infinite loop"
@@ -361,12 +361,12 @@ proc breakpoint_to_handler_entry { i } {
     set prefix "$i on breakpoint, to handler entry"
     
     # Run around to the done
+    # You can add more patterns to this if you need them.
     set test "$prefix; resync"
     gdb_test_multiple "continue" "$test" {
 	-re "done = 0.*$gdb_prompt " {
 	    pass "$test"
 	}
-	# other patterns can go here
     }
     
     gdb_test "break $infinite_loop" "" "$prefix; break infinite loop"
@@ -398,12 +398,12 @@ proc breakpoint_over_handler { i } {
     set prefix "$i on breakpoint, skip handler"
     
     # Run around to the done
+    # You can add more patterns to this if you need them.
     set test "$prefix; resync"
     gdb_test_multiple "continue" "$test" {
 	-re "done = 0.*$gdb_prompt " {
 	    pass "$test"
 	}
-	# other patterns can go here
     }
     
     gdb_test "break $infinite_loop" "" "$prefix; break infinite loop"
