@@ -1,3 +1,8 @@
+Sun Oct 22 13:04:42 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* cfg-ml-com.in (powerpc*): Shorten some of the multilib directory
+	names.
+
 Fri Oct 20 18:02:10 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* cfg-ml-com.in (powerpc*-eabi*): Add mcall-aixdesc varients.
