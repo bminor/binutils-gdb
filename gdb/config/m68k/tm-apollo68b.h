@@ -22,10 +22,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define BPT_VECTOR 0xb
 
-/* Assume we have a coprocessor. If we don't, it still shouldn't hurt */
-
-#define	HAVE_68881 1
-
 #include "m68k/tm-m68k.h"
 
 #define FRAME_CHAIN_VALID(chain, thisframe) (chain != 0)

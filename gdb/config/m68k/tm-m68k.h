@@ -153,9 +153,7 @@ extern CORE_ADDR m68k_saved_pc_after_call PARAMS ((struct frame_info *));
 
 #define REGISTER_CONVERTIBLE(N) (((unsigned)(N) - FP0_REGNUM) < 8)
 
-/* Put the declaration out here because if it's in the macros, PCC
-   will complain.  */
-extern const struct ext_format ext_format_68881;
+#include "floatformat.h"
 
 /* Convert data from raw format for register REGNUM in buffer FROM
    to virtual format with type TYPE in buffer TO.  */
@@ -163,7 +161,7 @@ extern const struct ext_format ext_format_68881;
 #define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,TYPE,FROM,TO) \
 { \
   double val; \
-  ieee_extended_to_double (&ext_format_68881, (FROM), &val); \
+  floatformat_to_double (&floatformat_m68881_ext, (FROM), &val); \
   store_floating ((TO), TYPE_LENGTH (TYPE), val); \
 }
 
@@ -173,7 +171,7 @@ extern const struct ext_format ext_format_68881;
 #define REGISTER_CONVERT_TO_RAW(TYPE,REGNUM,FROM,TO)	\
 { \
   double val = extract_floating ((FROM), TYPE_LENGTH (TYPE)); \
-  double_to_ieee_extended (&ext_format_68881, &val, (TO)); \
+  floatformat_from_double (&floatformat_m68881_ext, &val, (TO)); \
 }
 
 /* Return the GDB type object for the "standard" data type
