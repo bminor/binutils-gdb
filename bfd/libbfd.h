@@ -24,9 +24,13 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Align an address upward to a boundary, expressed as a number of bytes.
-   E.g. align to an 8-byte boundary with argument of 8.  */
-#define BFD_ALIGN(this, boundary) \
-  ((( (this) + ((boundary) -1)) & (~((boundary)-1))))
+   E.g. align to an 8-byte boundary with argument of 8.  Take care never
+   to wrap around if the address is within boundary-1 of the end of the
+   address space.  */
+#define BFD_ALIGN(this, boundary)					\
+  ((((this) + (boundary) - 1) >= (this))				\
+   ? (((this) + ((boundary) - 1)) & (~((boundary)-1)))			\
+   : ~ (bfd_vma) 0)
 
 /* If you want to read and write large blocks, you might want to do it
    in quanta of this amount */
@@ -808,6 +812,7 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
 
   "BFD_RELOC_MN10300_32_PCREL",
   "BFD_RELOC_MN10300_16_PCREL",
+  "BFD_RELOC_TIC30_LDP",
  "@@overflow: BFD_RELOC_UNUSED@@",
 };
 #endif
