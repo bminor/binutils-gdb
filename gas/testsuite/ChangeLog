@@ -1,3 +1,7 @@
+2004-09-19  Paul Brook  <paul@codesourcery.com>
+
+	* gas/elf/elf.exp: Recognise additional arm elf targets.
+
 2004-09-17  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/pic.s: Add (target2).
