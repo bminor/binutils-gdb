@@ -18,6 +18,14 @@ Fri Apr 22 15:17:06 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 	underscores, since symbol_new will already have done it.
 	* config/obj-coffbfd.c (obj_symbol_new_hook): Ditto.
 
+	* as.c (main): If tc_init_after_args is defined, invoke it after
+	all arguments have been processed.
+
+	Some changes to help Apollo support, from troy@cbme.unsw.edu.au:
+	* as.c (perform_an_assembly_pass) [TE_APOLLO]: Create .wtext
+	section instead of .text.  Call create_target_segments.
+	* read.c (demand_copy_string): No longer static.
+
 Thu Apr 21 15:50:04 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-mips.c (append_insn): Permit branches to be switched
