@@ -1,3 +1,9 @@
+2001-08-24  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/xm-lynx.h, config/xm-nbsd.h, config/xm-sysv4.h,
+	config/i386/xm-i386aix.h, config/m68k/xm-dpx2.h: Remove redundant
+	inclusion of <limits.h>.
+
 2001-08-24  Andrew Cagney  <ac131313@redhat.com>
 
 	* regcache.c (read_register_bytes): When REGISTER_NAME indicates

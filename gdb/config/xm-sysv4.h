@@ -27,7 +27,3 @@
 /* SVR4 is a derivative of System V Release 3 (USG) */
 
 #define USG
-
-/* We have to include these files now, so that GDB will not make
-   competing definitions in defs.h.  */
-#include <limits.h>

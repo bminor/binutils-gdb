@@ -27,5 +27,3 @@
 
 #undef HAVE_TERMIO
 #define HAVE_SGTTY
-
-#include <limits.h>

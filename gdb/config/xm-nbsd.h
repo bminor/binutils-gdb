@@ -22,10 +22,6 @@
    define on some systems. */
 #include <sys/param.h>
 
-/* We have to include these files now, so that GDB will not make
-   competing definitions in defs.h.  */
-#include <limits.h>
-
 #include <machine/endian.h>
 #if BYTE_ORDER == BIG_ENDIAN
 #define HOST_BYTE_ORDER BIG_ENDIAN

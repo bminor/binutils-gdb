@@ -22,6 +22,3 @@
 
 #define HAVE_TERMIOS
 #define USG
-
-/* Avoid redefinition errors */
-#include <limits.h>
