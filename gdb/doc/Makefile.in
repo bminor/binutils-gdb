@@ -118,10 +118,10 @@ refcard.ps : refcard.tex
 
 # Cover file for "Readline" appendices
 rdl-apps.texi: ${READLINE_DIR}/doc/rluser.texinfo \
-			${READLINE_DIR}/doc/hsuser.texinfo
+			${READLINE_DIR}/doc/inc-hist.texi
 	rm -f rdl-apps.texi
 	echo "@include ${READLINE_DIR}/doc/rluser.texinfo" >rdl-apps.texi
-	echo "@include ${READLINE_DIR}/doc/hsuser.texinfo" >>rdl-apps.texi
+	echo "@include ${READLINE_DIR}/doc/inc-hist.texi" >>rdl-apps.texi
 
 # File to record current GDB version number (copied from main dir Makefile.in)
 gdbVN.m4 : ${gdbdir}/Makefile.in
