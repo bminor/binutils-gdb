@@ -1,3 +1,8 @@
+2004-07-10  Ben Elliston  <bje@au.ibm.com>
+
+	* hw-tree.c (parse_integer_property): Typo fix in comments.
+	* sim-options.c	(sim_args_command): Likewise.
+
 2004-06-28  Andrew Cagney  <cagney@gnu.org>
 
 	* run.c: Rename ui_loop_hook to deprecated_ui_loop_hook.
