@@ -3,6 +3,10 @@
    Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
+** NOTE: libbfd.h is a GENERATED file.  Don't change it; instead,
+** change libbfd-in.h or the other BFD source files processed to
+** generate this file.
+
 This file is part of BFD, the Binary File Descriptor library.
 
 This program is free software; you can redistribute it and/or modify
@@ -80,24 +84,12 @@ PTR	bfd_alloc_by_size_t PARAMS ((bfd *abfd, size_t wanted));
 
 #define	bfd_release(x,y) (void) obstack_free(&(x->memory),y)
 
-
-bfd_size_type	bfd_read  PARAMS ((PTR ptr, bfd_size_type size,
-				   bfd_size_type nitems, bfd *abfd));
-bfd_size_type	bfd_write PARAMS ((CONST PTR ptr, bfd_size_type size,
-				   bfd_size_type nitems, bfd *abfd));
-int		bfd_seek  PARAMS ((bfd* CONST abfd, CONST file_ptr fp,
-				   CONST int direction));
-long		bfd_tell  PARAMS ((bfd *abfd));
-
-int		bfd_flush PARAMS ((bfd *abfd));
-int		bfd_stat  PARAMS ((bfd *abfd, struct stat *));
-
 bfd *	_bfd_create_empty_archive_element_shell PARAMS ((bfd *obfd));
 bfd *	_bfd_look_for_bfd_in_cache PARAMS ((bfd *arch_bfd, file_ptr index));
 boolean _bfd_add_bfd_to_archive_cache PARAMS ((bfd *, file_ptr, bfd *));
 boolean	_bfd_generic_mkarchive PARAMS ((bfd *abfd));
-struct areltdata *	_bfd_snarf_ar_hdr PARAMS ((bfd *abfd));
-bfd_target *		bfd_generic_archive_p PARAMS ((bfd *abfd));
+struct areltdata *_bfd_snarf_ar_hdr PARAMS ((bfd *abfd));
+const bfd_target *bfd_generic_archive_p PARAMS ((bfd *abfd));
 boolean	bfd_slurp_armap PARAMS ((bfd *abfd));
 boolean bfd_slurp_bsd_armap_f2 PARAMS ((bfd *abfd));
 #define bfd_slurp_bsd_armap bfd_slurp_armap
@@ -121,8 +113,8 @@ long	bfd_0l PARAMS ((bfd *ignore));
 long	_bfd_n1 PARAMS ((bfd *ignore));
 void	bfd_void PARAMS ((bfd *ignore));
 
-bfd *	_bfd_new_bfd_contained_in PARAMS ((bfd *));
-bfd_target *	_bfd_dummy_target PARAMS ((bfd *abfd));
+bfd *_bfd_new_bfd_contained_in PARAMS ((bfd *));
+const bfd_target *_bfd_dummy_target PARAMS ((bfd *abfd));
 
 void	bfd_dont_truncate_arname PARAMS ((bfd *abfd, CONST char *filename,
 					char *hdr));
@@ -365,6 +357,23 @@ extern bfd_reloc_status_type _bfd_final_link_relocate
 /* Relocate a particular location by a howto and a value.  */
 extern bfd_reloc_status_type _bfd_relocate_contents
   PARAMS ((const reloc_howto_type *, bfd *, bfd_vma, bfd_byte *));
+
+/* Create a string table.  */
+extern struct bfd_strtab_hash *_bfd_stringtab_init PARAMS ((void));
+
+/* Free a string table.  */
+extern void _bfd_stringtab_free PARAMS ((struct bfd_strtab_hash *));
+
+/* Get the size of a string table.  */
+extern bfd_size_type _bfd_stringtab_size PARAMS ((struct bfd_strtab_hash *));
+
+/* Add a string to a string table.  */
+extern bfd_size_type _bfd_stringtab_add
+  PARAMS ((struct bfd_strtab_hash *, const char *, boolean hash,
+	   boolean copy));
+
+/* Write out a string table.  */
+extern boolean _bfd_stringtab_emit PARAMS ((bfd *, struct bfd_strtab_hash *));
 
 /* Macros to tell if bfds are read or write enabled.
 
@@ -401,8 +410,8 @@ extern bfd *bfd_last_cache;
 
 /* List of supported target vectors, and the default vector (if
    bfd_default_vector[0] is NULL, there is no default).  */
-extern bfd_target *bfd_target_vector[];
-extern bfd_target *bfd_default_vector[];
+extern const bfd_target * const bfd_target_vector[];
+extern const bfd_target * const bfd_default_vector[];
 
 /* And more follows */
 

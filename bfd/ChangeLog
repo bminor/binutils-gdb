@@ -1,3 +1,14 @@
+Mon Aug 22 12:26:42 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* hash.c: Copy string hash functions from aoutx.h.
+	* aoutx.h: String hash functions moved to hash.c.  Retain
+	simplified versions of add_to_stringtab and emit_stringtab.
+	Change all callers to use new function and structure names.
+	* libbfd-in.h (_bfd_stringtab_init, _bfd_stringtab_free): Declare.
+	(_bfd_stringtab_size, _bfd_stringtab_add): Declare.
+	(_bfd_stringtab_emit): Declare.
+	* libbfd.h: Rebuilt.
+
 Mon Aug 22 10:49:37 1994  Eric Youngdale  (ericy@cais.cais.com)
 
 	* i386linux.c (linux_add_one_symbol): Create a fixup for any
