@@ -1,3 +1,11 @@
+start-sanitize-tx49
+Wed Oct 29 14:21:32 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* gencode.c: Add tx49 configury and insns.
+	* configure.in: Add tx49 configury.
+	* configure: Update.
+
+end-sanitize-tx49
 Wed Oct 29 11:13:56 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mips.igen: 

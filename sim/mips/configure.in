@@ -17,6 +17,9 @@ case "${target}" in
 # start-sanitize-tx19
   mipstx19*-*-*)        SIMCONF="-mips1 -mcpu=r1900 -mno-fp --warnings";;
 # end-sanitize-tx19
+# start-sanitize-tx49
+  mips64tx49*-*-*)      SIMCONF="-mips3 --warnings -mcpu=r4900";;
+# end-sanitize-tx49
 # start-sanitize-r5900
   mips64r59*-*-*)      SIMCONF="-mips3 --warnings -mcpu=r5900";;
 # end-sanitize-r5900

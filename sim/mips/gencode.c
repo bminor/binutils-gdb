@@ -480,6 +480,10 @@ typedef struct instruction {
 #define ARCH_R5900        ((unsigned)1 << 30) /* Toshiba r5900 extension instructions */
 /* end-sanitize-r5900 */
 #define ARCH_R3900        ((unsigned)1 << 29) /* Toshiba r3900 (tx39) */
+/* start-sanitize-tx49 */
+#define ARCH_R4900        ((unsigned)1 << 28) /* Toshiba r4900 (tx49) */
+/* end-sanitize-tx49 */   
+
 /* start-sanitize-tx19 */
 /* The r1900 (tx19) is a tx39 with a mips16 decoder.  For the purposes
    of implementing the simulator we treat them as the same. */
@@ -488,6 +492,9 @@ typedef struct instruction {
 /* A list (or'ed) of extension insn sets that can be requested independant of the ISA# */
 #define MASK_ISA_INDEP  (0                                             \
                          | ARCH_R3900                                  \
+                         /* start-sanitize-tx49 */                     \
+                         | ARCH_R4900                                  \
+                         /* end-sanitize-tx49 */                       \
                          /* start-sanitize-r5900 */                    \
                          | ARCH_R5900                                  \
                          /* end-sanitize-r5900 */                      \
@@ -516,6 +523,9 @@ typedef struct instruction {
 
 #define G5 (0                                         \
             | ARCH_R3900                              \
+            /* start-sanitize-tx49 */                 \
+            | ARCH_R4900                              \
+            /* end-sanitize-tx49 */                   \
             /* start-sanitize-r5900 */                \
             | ARCH_R5900                              \
             /* end-sanitize-r5900 */                  \
@@ -523,7 +533,27 @@ typedef struct instruction {
 
 #define G6 (3 | ARCH_R3900)
 
-#define T3 ARCH_R3900
+#define G7 (ARCH_R3900                                \
+            /* start-sanitize-tx49 */                 \
+            | ARCH_R4900                              \
+            /* end-sanitize-tx49 */                   \
+            )
+
+#define G8 (4                                         \
+            /* start-sanitize-tx49 */                 \
+            | ARCH_R4900                              \
+            /* end-sanitize-tx49 */                   \
+            /* start-sanitize-r5900 */                \
+            | ARCH_R5900                              \
+            /* end-sanitize-r5900 */                  \
+            )
+
+#define G9 (3                                         \
+            /* start-sanitize-tx49 */                 \
+            | ARCH_R4900                              \
+            /* end-sanitize-tx49 */                   \
+            )
+
 /* start-sanitize-r5900 */
 #define T5 ARCH_R5900       
 /* end-sanitize-r5900 */
@@ -588,8 +618,9 @@ struct instruction MIPS_DECODE[] = {
  {"DIVU1",  T5,"011100sssssggggg0000000000011011",MMINORM,DIV,      (WORD | WORD32 | UNSIGNED | SIGNEXTEND | HI | LO | PIPE1)},
  /* end-sanitize-r5900 */
  {"DMADD16",G1,"000000sssssggggg0000000000101001",SPECIAL,MADD16,   (DOUBLEWORD | HI | LO)},
- {"DMULT",   3,"000000sssssggggg0000000000011100",SPECIAL,MUL,      (DOUBLEWORD | HI | LO)},
- {"DMULTU",  3,"000000sssssggggg0000000000011101",SPECIAL,MUL,      (DOUBLEWORD | UNSIGNED | HI | LO)},
+ /* See note near MULT for explanation of 3op-ness. */
+ {"DMULT",  G9,"000000sssssgggggddddd00000011100",SPECIAL,MUL,      (OP3 | DOUBLEWORD | HI | LO)},
+ {"DMULTU", G9,"000000sssssgggggddddd00000011101",SPECIAL,MUL,      (OP3 | DOUBLEWORD | UNSIGNED | HI | LO)},
  {"DMxC1",   3,"01000100x01kkkkkvvvvv00000000000",COP1S,  FPMOVEC,  (FP | DOUBLEWORD)},
  {"DSLL",    3,"00000000000gggggdddddaaaaa111000",SPECIAL,SHIFT,    (DOUBLEWORD | LEFT | LOGICAL)},
  {"DSLLV",   3,"000000sssssgggggddddd00000010100",SPECIAL,SHIFT,    (DOUBLEWORD | LEFT | LOGICAL | REG)},
@@ -671,6 +702,10 @@ struct instruction MIPS_DECODE[] = {
  {"MSUB.D", G3,"010011bbbbbkkkkkvvvvvrrrrr101001",COP1X,  FPSUB,    (FP | MULTIPLY | DOUBLE)},
  {"MSUB.S", G3,"010011bbbbbkkkkkvvvvvrrrrr101000",COP1X,  FPSUB,    (FP | MULTIPLY | SINGLE)},
  {"MUL",     1,"01000110mmmkkkkkvvvvvrrrrr000010",COP1,   FPMUL,    (FP | HI | LO)},
+ /* The 3op version of MULT and MULTU are TX39 (and related chips) specific.
+    They should be removed from other chips sets, so that using the 3op opcode
+    causes a reserved instruction exception, but gencode can't deal with
+    that currently. */
  {"MULT",    1,"000000sssssgggggddddd00000011000",SPECIAL,MUL,      (OP3 | WORD | WORD32 | HI | LO)},
  /* start-sanitize-r5900 */
  {"MULT1",  T5,"011100sssssgggggddddd00000011000",MMINORM,MUL,      (OP3 | WORD | WORD32 | HI | LO | PIPE1)},
@@ -811,7 +846,7 @@ struct instruction MIPS_DECODE[] = {
  {"PXOR",   T5,"011100SSSSSTTTTTddddd10011001001",MMI2,   POP,      (POP_XOR)},
  /* end-sanitize-r5900 */
 
- {"PREF",   G2,"110011sssssnnnnnyyyyyyyyyyyyyyyy",NORMAL, PREFETCH, (NONE)},
+ {"PREF",   G8,"110011sssssnnnnnyyyyyyyyyyyyyyyy",NORMAL, PREFETCH, (NONE)},
  {"PREFX",   4,"010011sssssgggggvvvvv00000001111",COP1X,  FPPREFX,  (FP)},
 
  /* start-sanitize-r5900 */
@@ -827,7 +862,7 @@ struct instruction MIPS_DECODE[] = {
  {"SCD",     3,"111100sssssgggggeeeeeeeeeeeeeeee",NORMAL, STORE,    (DOUBLEWORD | ATOMIC)},
  {"SD",      3,"111111sssssgggggeeeeeeeeeeeeeeee",NORMAL, STORE,    (DOUBLEWORD)},
  {"SDC1",    2,"111101sssssttttteeeeeeeeeeeeeeee",NORMAL, STORE,    (DOUBLEWORD | COPROC)},
- {"SDBBP",  T3,"000000????????????????????001110",SPECIAL,SDBBP,    (NOARG)},
+ {"SDBBP",  G7,"000000????????????????????001110",SPECIAL,SDBBP,    (NOARG)},
  {"SDC2",    2,"111110sssssttttteeeeeeeeeeeeeeee",NORMAL, STORE,    (DOUBLEWORD | COPROC)},
  {"SDL",     3,"101100sssssgggggyyyyyyyyyyyyyyyy",NORMAL, STORE,    (DOUBLEWORD | LEFT)},
  {"SDR",     3,"101101sssssgggggyyyyyyyyyyyyyyyy",NORMAL, STORE,    (DOUBLEWORD | RIGHT)},
@@ -946,7 +981,7 @@ static const struct instruction MIPS16_DECODE[] = {
 {"NOT",     1, "11101dddyyy01111Z", RR,      OR,      NOT },
 {"OR",      1, "11101wwwyyy01101",  RR,      OR,      NONE },
 {"SB",      1, "11000xxxyyy55555",  RRI,     STORE,   BYTE },
-{"SDBBP",  T3, "11100??????00001",  RR,      SDBBP,   NOARG },
+{"SDBBP",  G7, "11100??????00001",  RR,      SDBBP,   NOARG },
 {"SD",      3, "01111xxxyyyDDDDD",  RRI,     STORE,   DOUBLEWORD },
 {"SDSP",    3, "11111001yyyDDDDDs", RI64,    STORE,   DOUBLEWORD },
 {"SDRASP",  3, "11111010CCCCCCCCsQ", I64,    STORE,   DOUBLEWORD },
@@ -4429,6 +4464,9 @@ struct architectures {
 static const struct architectures available_architectures[] = {
   {"4100",ARCH_VR4100}, /* NEC MIPS VR4100 */
   {"3900",ARCH_R3900},   /* Toshiba R3900 (TX39) */
+  /* start-sanitize-tx49 */
+  {"4900",ARCH_R4900},   /* Toshiba R4900 (TX49) */
+  /* end-sanitize-tx49  */
   /* start-sanitize-tx19 */
   {"1900",ARCH_R3900},   /* Toshiba R1900 (TX19) */
   /* end-sanitize-tx19  */
