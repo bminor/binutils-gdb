@@ -1,3 +1,19 @@
+Tue Jan 23 15:54:18 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ieee.c: Various changes to write out definitions of C++ classes.
+
+	* debug.c (debug_append_filename): Remove.
+	* debug.h (debug_append_filename): Don't declare.
+
+	* stabs.c (struct stab_handle): Remove last_type field.  Add
+	so_string and so_value fields.
+	(finish_stab): Call stab_emit_pending_vars before calling
+	debug_end_function.  Don't warn about pending variables.
+	(parse_stab): Accumulate N_SO strings until a non N_SO symbol is
+	seen, rather than calling debug_append_filename.  Call
+	stab_emit_pending_vars before calling debug_end_function.  Don't
+	set info->last_type.
+
 Tue Jan 23 09:53:54 1996  Doug Evans  <dje@charmed.cygnus.com>
 
 	* objdump.c (disassemble_data): Handle unknown endianness.

@@ -1,4 +1,4 @@
-/* ieee.c -- Write out IEEE-695 debugging information.
+/* ieee.c -- Read and write IEEE-695 debugging information.
    Copyright (C) 1996 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
 
@@ -3136,6 +3136,29 @@ struct ieee_range
   bfd_vma high;
 };
 
+/* This structure holds information for a class on the type stack.  */
+
+struct ieee_type_class
+{
+  /* The name of the class.  */
+  const char *name;
+  /* The name index in the debugging information.  */
+  unsigned int indx;
+  /* The pmisc records for the class.  */
+  struct ieee_buf *pmiscbuf;
+  /* The number of pmisc records.  */
+  unsigned int pmisccount;
+  /* The name of the class holding the virtual table, if not this
+     class.  */
+  const char *vclass;
+  /* Whether this class holds its own virtual table.  */
+  boolean ownvptr;
+  /* The largest virtual table offset seen so far.  */
+  bfd_vma voffset;
+  /* The current method.  */
+  const char *method;
+};
+
 /* This is how we store types for the writing routines.  Most types
    are simply represented by a type index.  */
 
@@ -3148,6 +3171,8 @@ struct ieee_write_type
   /* If this is a struct, this is where the struct definition is
      built.  */
   struct ieee_buf *strdef;
+  /* If this is a class, this is where the class information is built.  */
+  struct ieee_type_class *classdef;
   /* Whether the type is unsigned.  */
   unsigned int unsignedp : 1;
   /* Whether this is a reference type.  */
@@ -3218,6 +3243,9 @@ struct ieee_handle
   /* List of buffers for variables and functions in the current
      compilation unit.  */
   struct ieee_buf *vars;
+  /* List of buffers for C++ class definitions in the current
+     compilation unit.  */
+  struct ieee_buf *cxx;
   /* List of buffers for line numbers in the current compilation unit.  */
   struct ieee_buf *linenos;
   /* Ranges for the current compilation unit.  */
@@ -3243,6 +3271,8 @@ struct ieee_handle
   const char *lineno_filename;
   /* Line number name index.  */
   unsigned int lineno_name_indx;
+  /* Highest address seen at end of procedure.  */
+  bfd_vma highaddr;
 };
 
 static boolean ieee_change_buffer
@@ -3258,13 +3288,21 @@ static boolean ieee_real_write_byte PARAMS ((struct ieee_handle *, int));
 static boolean ieee_write_2bytes PARAMS ((struct ieee_handle *, int));
 static boolean ieee_write_number PARAMS ((struct ieee_handle *, bfd_vma));
 static boolean ieee_write_id PARAMS ((struct ieee_handle *, const char *));
+static boolean ieee_write_asn
+  PARAMS ((struct ieee_handle *, unsigned int, bfd_vma));
+static boolean ieee_write_atn65
+  PARAMS ((struct ieee_handle *, unsigned int, const char *));
 static boolean ieee_define_type
   PARAMS ((struct ieee_handle *, unsigned int, boolean));
 static boolean ieee_define_named_type
-  PARAMS ((struct ieee_handle *, const char *, boolean, unsigned int, boolean,
-	   struct ieee_buf **));
+  PARAMS ((struct ieee_handle *, const char *, boolean, unsigned int,
+	   unsigned int, boolean, struct ieee_buf **));
 static boolean ieee_finish_compilation_unit PARAMS ((struct ieee_handle *));
 static boolean ieee_output_pending_parms PARAMS ((struct ieee_handle *));
+static unsigned int ieee_vis_to_flags PARAMS ((enum debug_visibility));
+static boolean ieee_class_method_var
+  PARAMS ((struct ieee_handle *, const char *, enum debug_visibility, boolean,
+	   boolean, boolean, bfd_vma, boolean));
 
 static boolean ieee_start_compilation_unit PARAMS ((PTR, const char *));
 static boolean ieee_start_source PARAMS ((PTR, const char *));
@@ -3654,6 +3692,34 @@ ieee_write_id (info, s)
   return true;
 }
 
+/* Write out an ASN record.  */
+
+static boolean
+ieee_write_asn (info, indx, val)
+     struct ieee_handle *info;
+     unsigned int indx;
+     bfd_vma val;
+{
+  return (ieee_write_2bytes (info, (int) ieee_asn_record_enum)
+	  && ieee_write_number (info, indx)
+	  && ieee_write_number (info, val));
+}
+
+/* Write out an ATN65 record.  */
+
+static boolean
+ieee_write_atn65 (info, indx, s)
+     struct ieee_handle *info;
+     unsigned int indx;
+     const char *s;
+{
+  return (ieee_write_2bytes (info, (int) ieee_atn_record_enum)
+	  && ieee_write_number (info, indx)
+	  && ieee_write_number (info, 0)
+	  && ieee_write_number (info, 65)
+	  && ieee_write_id (info, s));
+}
+
 /* Start defining a type.  */
 
 static boolean
@@ -3662,17 +3728,18 @@ ieee_define_type (info, size, unsignedp)
      unsigned int size;
      boolean unsignedp;
 {
-  return ieee_define_named_type (info, (const char *) NULL, false, size,
+  return ieee_define_named_type (info, (const char *) NULL, false, 0, size,
 				 unsignedp, (struct ieee_buf **) NULL);
 }
 
 /* Start defining a named type.  */
 
 static boolean
-ieee_define_named_type (info, name, tagp, size, unsignedp, ppbuf)
+ieee_define_named_type (info, name, tagp, id, size, unsignedp, ppbuf)
      struct ieee_handle *info;
      const char *name;
      boolean tagp;
+     unsigned int id;
      unsigned int size;
      boolean unsignedp;
      struct ieee_buf **ppbuf;
@@ -3680,7 +3747,7 @@ ieee_define_named_type (info, name, tagp, size, unsignedp, ppbuf)
   unsigned int type_indx;
   unsigned int name_indx;
 
-  if (! tagp || name == NULL || *name == '\0')
+  if (! tagp || id == (unsigned int) -1)
     {
       type_indx = info->type_indx;
       ++info->type_indx;
@@ -3688,19 +3755,32 @@ ieee_define_named_type (info, name, tagp, size, unsignedp, ppbuf)
   else
     {
       struct ieee_name_type *nt;
+      const char *tag;
+      char ab[20];
+
+      /* We need to create a tag for internal use even if we don't
+         want one for external use.  This will let us refer to an
+         anonymous struct.  */
+      if (name != NULL)
+	tag = name;
+      else
+	{
+	  sprintf (ab, "__anon%u", id);
+	  tag = ab;
+	}
 
       /* The name is a tag.  If we have already defined the tag, we
          must use the existing type index.  */
       for (nt = info->tags; nt != NULL; nt = nt->next)
-	if (nt->name[0] == name[0]
-	    && strcmp (nt->name, name) == 0)
+	if (nt->name[0] == tag[0]
+	    && strcmp (nt->name, tag) == 0)
 	  break;
 
       if (nt == NULL)
 	{
 	  nt = (struct ieee_name_type *) xmalloc (sizeof *nt);
 	  memset (nt, 0, sizeof *nt);
-	  nt->name = name;
+	  nt->name = tag;
 	  nt->next = info->tags;
 	  info->tags = nt;
 	  nt->type.indx = info->type_indx;
@@ -3936,6 +4016,7 @@ ieee_start_compilation_unit (p, filename)
 
   info->types = NULL;
   info->vars = NULL;
+  info->cxx = NULL;
   info->linenos = NULL;
   info->ranges = NULL;
 
@@ -3955,6 +4036,46 @@ ieee_finish_compilation_unit (info)
     {
       if (! ieee_change_buffer (info, &info->types)
 	  || ! ieee_write_byte (info, (int) ieee_be_record_enum))
+	return false;
+    }
+
+  if (info->cxx != NULL)
+    {
+      /* Append any C++ information to the global function and
+         variable information.  */
+      if (info->vars != NULL)
+	{
+	  if (! ieee_change_buffer (info, &info->vars))
+	    return false;
+	}
+      else
+	{
+	  if (! ieee_change_buffer (info, &info->vars)
+	      || ! ieee_write_byte (info, (int) ieee_bb_record_enum)
+	      || ! ieee_write_byte (info, 3)
+	      || ! ieee_write_number (info, 0)
+	      || ! ieee_write_id (info, info->modname))
+	    return false;
+	}
+
+      /* We put the pmisc records in a dummy procedure, just as the
+         MRI compiler does.  */
+      if (! ieee_write_byte (info, (int) ieee_bb_record_enum)
+	  || ! ieee_write_byte (info, 6)
+	  || ! ieee_write_number (info, 0)
+	  || ! ieee_write_id (info, "__XRYCPP")
+	  || ! ieee_write_number (info, 0)
+	  || ! ieee_write_number (info, 0)
+	  || ! ieee_write_number (info, info->highaddr))
+	return false;
+
+      for (pp = &info->vars; *pp != NULL; pp = &(*pp)->next)
+	;
+      *pp = info->cxx;
+
+      if (! ieee_change_buffer (info, &info->vars)
+	  || ! ieee_write_byte (info, (int) ieee_be_record_enum)
+	  || ! ieee_write_number (info, info->highaddr))
 	return false;
     }
 
@@ -4231,8 +4352,8 @@ ieee_enum_type (p, tag, names, vals)
 	}
     }
 
-  if (! ieee_define_named_type (info, tag, true, 0, true,
-				(struct ieee_buf **) NULL)
+  if (! ieee_define_named_type (info, tag, true, (unsigned int) -1, 0,
+				true, (struct ieee_buf **) NULL)
       || ! ieee_write_number (info, simple ? 'E' : 'N'))
     return false;
   if (simple)
@@ -4504,6 +4625,26 @@ ieee_volatile_type (p)
 	  && ieee_write_number (info, indx));
 }
 
+/* Convert an enum debug_visibility into a CXXFLAGS value.  */
+
+static unsigned int
+ieee_vis_to_flags (visibility)
+     enum debug_visibility visibility;
+{
+  switch (visibility)
+    {
+    default:
+      abort ();
+    case DEBUG_VISIBILITY_PUBLIC:
+      return CXXFLAGS_VISIBILITY_PUBLIC;
+    case DEBUG_VISIBILITY_PRIVATE:
+      return CXXFLAGS_VISIBILITY_PRIVATE;
+    case DEBUG_VISIBILITY_PROTECTED:
+      return CXXFLAGS_VISIBILITY_PROTECTED;
+    }
+  /*NOTREACHED*/
+}
+
 /* Start defining a struct type.  We build it in the strdef field on
    the stack, to avoid confusing type definitions required by the
    fields with the struct type itself.  */
@@ -4520,7 +4661,7 @@ ieee_start_struct_type (p, tag, id, structp, size)
   struct ieee_buf *strdef;
 
   strdef = NULL;
-  if (! ieee_define_named_type (info, tag, true, size, true, &strdef)
+  if (! ieee_define_named_type (info, tag, true, id, size, true, &strdef)
       || ! ieee_write_number (info, structp ? 'S' : 'U')
       || ! ieee_write_number (info, size))
     return false;
@@ -4551,6 +4692,26 @@ ieee_struct_field (p, name, bitpos, bitsize, visibility)
   indx = ieee_pop_type (info);
 
   assert (info->type_stack != NULL && info->type_stack->type.strdef != NULL);
+
+  if (info->type_stack->type.classdef != NULL)
+    {
+      unsigned int flags;
+      unsigned int nindx;
+
+      /* This is a class.  We must add a description of this field to
+         the class records we are building.  */
+
+      flags = ieee_vis_to_flags (visibility);
+      nindx = info->type_stack->type.classdef->indx;
+      if (! ieee_change_buffer (info,
+				&info->type_stack->type.classdef->pmiscbuf)
+	  || ! ieee_write_asn (info, nindx, 'd')
+	  || ! ieee_write_asn (info, nindx, flags)
+	  || ! ieee_write_atn65 (info, nindx, name)
+	  || ! ieee_write_atn65 (info, nindx, name))
+	return false;
+      info->type_stack->type.classdef->pmisccount += 4;
+    }
 
   /* If the bitsize doesn't match the expected size, we need to output
      a bitfield type.  */
@@ -4621,11 +4782,75 @@ ieee_start_class_type (p, tag, id, structp, size, vptr, ownvptr)
      boolean ownvptr;
 {
   struct ieee_handle *info = (struct ieee_handle *) p;
+  const char *vclass;
+  struct ieee_buf *pmiscbuf;
+  unsigned int indx;
+  struct ieee_type_class *classdef;
+  struct ieee_name_type *nt;
 
-  /* FIXME.  */
+  /* A C++ class is output as a C++ struct along with a set of pmisc
+     records describing the class.  */
+
+  /* We need to have a name so that we can associate the struct and
+     the class.  */
+  if (tag == NULL)
+    {
+      char *t;
+
+      t = (char *) xmalloc (20);
+      sprintf (t, "__anon%u", id);
+      tag = t;
+    }
+
+  /* We can't write out the virtual table information until we have
+     finished the class, because we don't know the virtual table size.
+     We get the size from the largest voffset we see.  */
+  vclass = NULL;
   if (vptr && ! ownvptr)
-    (void) ieee_pop_type (info);
-  return ieee_start_struct_type (p, tag, id, structp, size);
+    {
+      assert (info->type_stack->type.classdef != NULL);
+      vclass = info->type_stack->type.classdef->name;
+      (void) ieee_pop_type (info);
+    }
+
+  if (! ieee_start_struct_type (p, tag, id, structp, size))
+    return false;
+
+  indx = info->name_indx;
+  ++info->name_indx;
+
+  /* We write out pmisc records into the classdef field.  We will
+     write out the pmisc start after we know the number of records we
+     need.  */
+  pmiscbuf = NULL;
+  if (! ieee_change_buffer (info, &pmiscbuf)
+      || ! ieee_write_asn (info, indx, 'T')
+      || ! ieee_write_asn (info, indx, structp ? 'o' : 'u')
+      || ! ieee_write_atn65 (info, indx, tag))
+    return false;
+
+  classdef = (struct ieee_type_class *) xmalloc (sizeof *classdef);
+  memset (classdef, 0, sizeof *classdef);
+
+  classdef->name = tag;
+  classdef->indx = indx;
+  classdef->pmiscbuf = pmiscbuf;
+  classdef->pmisccount = 3;
+  classdef->vclass = vclass;
+  classdef->ownvptr = ownvptr;
+
+  info->type_stack->type.classdef = classdef;
+
+  /* We need to fill in the classdef in the tag as well, so that it
+     will be set when ieee_tag_type is called.  */
+  for (nt = info->tags; nt != NULL; nt = nt->next)
+    if (nt->name[0] == tag[0]
+	&& strcmp (nt->name, tag) == 0)
+      break;
+  assert (nt != NULL);
+  nt->type.classdef = classdef;
+
+  return true;
 }
 
 /* Add a static member to a class.  */
@@ -4638,9 +4863,30 @@ ieee_class_static_member (p, name, physname, visibility)
      enum debug_visibility visibility;
 {
   struct ieee_handle *info = (struct ieee_handle *) p;
+  unsigned int flags;
+  unsigned int nindx;
 
-  /* FIXME.  */
+  /* We don't care about the type.  Hopefully there will be a call
+     ieee_variable declaring the physical name and the type, since
+     that is where an IEEE consumer must get the type.  */
   (void) ieee_pop_type (info);
+
+  assert (info->type_stack != NULL
+	  && info->type_stack->type.classdef != NULL);
+
+  flags = ieee_vis_to_flags (visibility);
+  flags |= CXXFLAGS_STATIC;
+
+  nindx = info->type_stack->type.classdef->indx;
+
+  if (! ieee_change_buffer (info, &info->type_stack->type.classdef->pmiscbuf)
+      || ! ieee_write_asn (info, nindx, 'd')
+      || ! ieee_write_asn (info, nindx, flags)
+      || ! ieee_write_atn65 (info, nindx, name)
+      || ! ieee_write_atn65 (info, nindx, physname))
+    return false;
+  info->type_stack->type.classdef->pmisccount += 4;
+
   return true;
 }
 
@@ -4654,9 +4900,61 @@ ieee_class_baseclass (p, bitpos, virtual, visibility)
      enum debug_visibility visibility;
 {
   struct ieee_handle *info = (struct ieee_handle *) p;
+  const char *bname;
+  unsigned int bindx;
+  char *fname;
+  unsigned int flags;
+  unsigned int nindx;
 
-  /* FIXME.  */
-  (void) ieee_pop_type (info);
+  assert (info->type_stack != NULL
+	  && info->type_stack->type.classdef != NULL
+	  && info->type_stack->next != NULL
+	  && info->type_stack->next->type.classdef != NULL
+	  && info->type_stack->next->type.strdef != NULL);
+
+  bname = info->type_stack->type.classdef->name;
+  bindx = ieee_pop_type (info);
+
+  /* We are currently defining both a struct and a class.  We must
+     write out a field definition in the struct which holds the base
+     class.  The stabs debugging reader will create a field named
+     _vb$CLASS for a virtual base class, so we just use that.  FIXME:
+     we should not depend upon a detail of stabs debugging.  */
+  if (virtual)
+    {
+      fname = (char *) xmalloc (strlen (bname) + sizeof "_vb$");
+      sprintf (fname, "_vb$%s", bname);
+      flags = BASEFLAGS_VIRTUAL;
+    }
+  else
+    {
+      fname = (char *) xmalloc (strlen (bname) + sizeof "_b$");
+      sprintf (fname, "_b$%s", bname);
+
+      if (! ieee_change_buffer (info, &info->type_stack->type.strdef)
+	  || ! ieee_write_id (info, fname)
+	  || ! ieee_write_number (info, bindx)
+	  || ! ieee_write_number (info, bitpos / 8))
+	return false;
+      flags = 0;
+    }
+
+  if (visibility == DEBUG_VISIBILITY_PRIVATE)
+    flags |= BASEFLAGS_PRIVATE;
+
+  nindx = info->type_stack->type.classdef->indx;
+
+  if (! ieee_change_buffer (info, &info->type_stack->type.classdef->pmiscbuf)
+      || ! ieee_write_asn (info, nindx, 'b')
+      || ! ieee_write_asn (info, nindx, flags)
+      || ! ieee_write_atn65 (info, nindx, bname)
+      || ! ieee_write_asn (info, nindx, 0)
+      || ! ieee_write_atn65 (info, nindx, fname))
+    return false;
+  info->type_stack->type.classdef->pmisccount += 5;
+
+  free (fname);
+
   return true;
 }
 
@@ -4667,7 +4965,90 @@ ieee_class_start_method (p, name)
      PTR p;
      const char *name;
 {
-  /* FIXME.  */
+  struct ieee_handle *info = (struct ieee_handle *) p;
+
+  assert (info->type_stack != NULL
+	  && info->type_stack->type.classdef != NULL
+	  && info->type_stack->type.classdef->method == NULL);
+
+  info->type_stack->type.classdef->method = name;
+
+  return true;
+}
+
+/* Define a new method variant, either static or not.  */
+
+static boolean
+ieee_class_method_var (info, physname, visibility, staticp, constp,
+		       volatilep, voffset, context)
+     struct ieee_handle *info;
+     const char *physname;
+     enum debug_visibility visibility;
+     boolean staticp;
+     boolean constp;
+     boolean volatilep;
+     bfd_vma voffset;
+     boolean context;
+{
+  unsigned int flags;
+  unsigned int nindx;
+  boolean virtual;
+
+  /* We don't need the type of the method.  An IEEE consumer which
+     wants the type must track down the function by the physical name
+     and get the type from that.  */
+  (void) ieee_pop_type (info);
+
+  /* We don't use the context.  FIXME: We probably ought to use it to
+     adjust the voffset somehow, but I don't really know how.  */
+  if (context)
+    (void) ieee_pop_type (info);
+
+  assert (info->type_stack != NULL
+	  && info->type_stack->type.classdef != NULL
+	  && info->type_stack->type.classdef->method != NULL);
+
+  flags = ieee_vis_to_flags (visibility);
+
+  /* FIXME: We never set CXXFLAGS_OVERRIDE, CXXFLAGS_OPERATOR,
+     CXXFLAGS_CTORDTOR, CXXFLAGS_CTOR, or CXXFLAGS_INLINE.  */
+
+  if (staticp)
+    flags |= CXXFLAGS_STATIC;
+  if (constp)
+    flags |= CXXFLAGS_CONST;
+  if (volatilep)
+    flags |= CXXFLAGS_VOLATILE;
+
+  nindx = info->type_stack->type.classdef->indx;
+
+  virtual = context || voffset > 0;
+
+  if (! ieee_change_buffer (info,
+			    &info->type_stack->type.classdef->pmiscbuf)
+      || ! ieee_write_asn (info, nindx, virtual ? 'v' : 'm')
+      || ! ieee_write_asn (info, nindx, flags)
+      || ! ieee_write_atn65 (info, nindx,
+			     info->type_stack->type.classdef->method)
+      || ! ieee_write_atn65 (info, nindx, physname))
+    return false;
+
+  if (virtual)
+    {
+      if (voffset > info->type_stack->type.classdef->voffset)
+	info->type_stack->type.classdef->voffset = voffset;
+      /* FIXME: The size of a vtable entry depends upon the
+         architecture.  */
+      if (! ieee_write_asn (info, nindx, (voffset / 4) + 1))
+	return false;
+      ++info->type_stack->type.classdef->pmisccount;
+    }
+
+  if (! ieee_write_asn (info, nindx, 0))
+    return false;
+
+  info->type_stack->type.classdef->pmisccount += 5;
+
   return true;
 }
 
@@ -4686,11 +5067,8 @@ ieee_class_method_variant (p, physname, visibility, constp, volatilep,
 {
   struct ieee_handle *info = (struct ieee_handle *) p;
 
-  /* FIXME.  */
-  (void) ieee_pop_type (info);
-  if (context)
-    (void) ieee_pop_type (info);
-  return true;
+  return ieee_class_method_var (info, physname, visibility, false, constp,
+				volatilep, voffset, context);
 }
 
 /* Define a new static method variant.  */
@@ -4705,9 +5083,8 @@ ieee_class_static_method_variant (p, physname, visibility, constp, volatilep)
 {
   struct ieee_handle *info = (struct ieee_handle *) p;
 
-  /* FIXME.  */
-  (void) ieee_pop_type (info);
-  return true;
+  return ieee_class_method_var (info, physname, visibility, true, constp,
+				volatilep, 0, false);
 }
 
 /* Finish up a method.  */
@@ -4716,7 +5093,14 @@ static boolean
 ieee_class_end_method (p)
      PTR p;
 {
-  /* FIXME.  */
+  struct ieee_handle *info = (struct ieee_handle *) p;
+
+  assert (info->type_stack != NULL
+	  && info->type_stack->type.classdef != NULL
+	  && info->type_stack->type.classdef->method != NULL);
+
+  info->type_stack->type.classdef->method = NULL;
+
   return true;
 }
 
@@ -4726,6 +5110,67 @@ static boolean
 ieee_end_class_type (p)
      PTR p;
 {
+  struct ieee_handle *info = (struct ieee_handle *) p;
+  unsigned int nindx;
+  struct ieee_buf **pb;
+
+  assert (info->type_stack != NULL
+	  && info->type_stack->type.classdef != NULL);
+
+  nindx = info->type_stack->type.classdef->indx;
+
+  /* If we have a virtual table, we can write out the information now.  */
+  if (info->type_stack->type.classdef->vclass != NULL
+      || info->type_stack->type.classdef->ownvptr)
+    {
+      bfd_vma vsize;
+
+      /* FIXME: This calculation is architecture dependent.  */
+      vsize = (info->type_stack->type.classdef->voffset + 4) / 4;
+
+      if (! ieee_change_buffer (info,
+				&info->type_stack->type.classdef->pmiscbuf)
+	  || ! ieee_write_asn (info, nindx, 'z')
+	  || ! ieee_write_atn65 (info, nindx, "")
+	  || ! ieee_write_asn (info, nindx, vsize))
+	return false;
+      if (info->type_stack->type.classdef->ownvptr)
+	{
+	  if (! ieee_write_atn65 (info, nindx, ""))
+	    return false;
+	}
+      else
+	{
+	  if (! ieee_write_atn65 (info, nindx,
+				  info->type_stack->type.classdef->vclass))
+	    return false;
+	}
+      if (! ieee_write_asn (info, nindx, 0))
+	return false;
+      info->type_stack->type.classdef->pmisccount += 5;
+    }
+
+  /* Now that we know the number of pmisc records, we can write out
+     the atn62 which starts the pmisc records, and append them to the
+     C++ buffers.  */
+
+  if (! ieee_change_buffer (info, &info->cxx)
+      || ! ieee_write_byte (info, (int) ieee_nn_record)
+      || ! ieee_write_number (info, nindx)
+      || ! ieee_write_id (info, "")
+      || ! ieee_write_2bytes (info, (int) ieee_atn_record_enum)
+      || ! ieee_write_number (info, nindx)
+      || ! ieee_write_number (info, 0)
+      || ! ieee_write_number (info, 62)
+      || ! ieee_write_number (info, 80)
+      || ! ieee_write_number (info,
+			      info->type_stack->type.classdef->pmisccount))
+    return false;
+
+  for (pb = &info->cxx; *pb != NULL; pb = &(*pb)->next)
+    ;
+  *pb = info->type_stack->type.classdef->pmiscbuf;
+
   return ieee_end_struct_type (p);
 }
 
@@ -4767,9 +5212,13 @@ ieee_tag_type (p, name, id, kind)
 {
   struct ieee_handle *info = (struct ieee_handle *) p;
   register struct ieee_name_type *nt;
+  char ab[20];
 
   if (name == NULL)
-    return true;
+    {
+      sprintf (ab, "__anon%u", id);
+      name = ab;
+    }
 
   for (nt = info->tags; nt != NULL; nt = nt->next)
     {
@@ -4987,7 +5436,7 @@ ieee_typdef (p, name)
 	}
     }
 
-  if (! ieee_define_named_type (info, name, false, size, unsignedp,
+  if (! ieee_define_named_type (info, name, false, 0, size, unsignedp,
 				(struct ieee_buf **) NULL)
       || ! ieee_write_number (info, 'T')
       || ! ieee_write_number (info, indx))
@@ -5131,9 +5580,7 @@ ieee_variable (p, name, kind, val)
 
   if (asn)
     {
-      if (! ieee_write_2bytes (info, (int) ieee_asn_record_enum)
-	  || ! ieee_write_number (info, name_indx)
-	  || ! ieee_write_number (info, val))
+      if (! ieee_write_asn (info, name_indx, val))
 	return false;
     }
 
@@ -5280,7 +5727,7 @@ ieee_start_block (p, addr)
     {
       if (! ieee_write_byte (info, (int) ieee_bb_record_enum)
 	  || ! ieee_write_byte (info, 6)
-	  || ! ieee_write_byte (info, 0)
+	  || ! ieee_write_number (info, 0)
 	  || ! ieee_write_id (info, "")
 	  || ! ieee_write_number (info, 0)
 	  || ! ieee_write_number (info, 0)
@@ -5314,6 +5761,9 @@ ieee_end_block (p, addr)
     return false;
 
   --info->block_depth;
+
+  if (addr > info->highaddr)
+    info->highaddr = addr;
 
   return true;
 }
@@ -5396,7 +5846,5 @@ ieee_lineno (p, filename, lineno, addr)
 	  && ieee_write_number (info, 7)
 	  && ieee_write_number (info, lineno)
 	  && ieee_write_number (info, 0)
-	  && ieee_write_2bytes (info, (int) ieee_asn_record_enum)
-	  && ieee_write_number (info, info->lineno_name_indx)
-	  && ieee_write_number (info, addr));
+	  && ieee_write_asn (info, info->lineno_name_indx, addr));
 }
