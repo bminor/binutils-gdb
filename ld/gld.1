@@ -58,7 +58,7 @@ gld \- the GNU linker
 .I searchdir\c
 \&\|] 
 .RB "[\|" \-M | \-m "\|]"  
-.RB "[\|" \-n "\|]" 
+.RB "[\|" \-n | \-N "\|]" 
 .RB "[\|" \-noinhibit-exec "\|]" 
 .RB "[\|" "\-R\ "\c
 .I filename\c
@@ -509,6 +509,23 @@ about where symbols are mapped by \c
 .B ld\c
 \&, and information on global
 common storage allocation.
+
+.TP
+.B \-N 
+specifies readable and writable \c
+.B text\c
+\& and \c
+.B data\c
+\& sections. If
+the output format supports Unix style magic numbers, the output is
+marked as \c
+.B OMAGIC\c
+\&.
+
+When you use the `\|\c
+.B \-N\c
+\&\|' option, the linker does not page-align the
+data segment.
 
 .TP
 .B \-n 
