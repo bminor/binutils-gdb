@@ -1,5 +1,23 @@
 2002-12-08  Elena Zannoni  <ezannoni@redhat.com>
 
+	* Makefile.in (readline_h): Define.
+	(completer.o): Depend on readline_h.
+	(corelow.o): Ditto.
+	(event-top.o): Ditto.
+	(exec.o): Ditto.
+	(solib.o): Ditto.
+	(source.o): Ditto. 
+	(symfile.o): Ditto. 
+	(symmisc.o): Ditto. 
+	(top.o): Ditto.
+	(tracepoint.o): Ditto. 
+	(utils.o): Ditto.
+	(cli-dump.o): Ditto.
+	(tui-hooks.o): Ditto. 
+	(tuiWin.o): Ditto. 
+
+2002-12-08  Elena Zannoni  <ezannoni@redhat.com>
+
 	More cleanup from import of readline 4.3.
 	* completer.h (complete_line, readline_line_completion_function):
 	Update prototypes.
