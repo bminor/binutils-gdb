@@ -209,6 +209,7 @@ changequote([,])dnl
       i960-*-vxworks5.0)    fmt=bout ;;
       i960-*-vxworks5.*)    fmt=coff em=ic960 ;;
       i960-*-vxworks*)      fmt=bout ;;
+      i960-*-elf*)	    fmt=elf ;;
 
       m32r-*-*)		    fmt=elf bfd_gas=yes ;;
 

@@ -1,3 +1,11 @@
+1999-05-28  Martin Dorey  <mdorey@madge.com>
+
+	* config/tc-i960.c: Several minor changes to add ELF and
+	BFD_ASSEMBLER support.
+	* config/tc-i960.h: Likewise.
+	* configure.in (i960-*-elf*): New target.
+	* aclocal.m4, configure: Rebuild.
+
 1999-05-25  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* config/tc-i386.c (md_apply_fix3): Only do 1999-05-17 fx_pcrel
