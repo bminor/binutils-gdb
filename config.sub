@@ -203,6 +203,11 @@ case $basic_machine in
 	mips64vr5000 | mips64vr5000el) # CYGNUS LOCAL ian/vr5000
 		basic_machine=$basic_machine-unknown
 		;;
+# start-sanitize-vr5400
+	mips64vr5400)			 # CYGNUS LOCAL cagney/vr5400
+		basic_machine=$basic_machine-unknown
+		;;
+# end-sanitize-vr5400
 # start-sanitize-r5900
 	mips64r5900 | mips64r5900el) # CYGNUS LOCAL gavin/r5900
 		basic_machine=$basic_machine-unknown
