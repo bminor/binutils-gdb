@@ -705,6 +705,7 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 	     table entry.  A similar situation occurs when creating
 	     shared libraries and symbol visibility changes render the
 	     symbol local.
+
 	     If on the other hand, we are creating an executable, we
 	     may need to keep relocations for symbols satisfied by a
 	     dynamic library if we manage to avoid copy relocs for the
@@ -1213,7 +1214,8 @@ allocate_plt_and_got_and_discard_relocs (h, inf)
 
   if (!info->shared
       && (h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0
-      && ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
+      && (((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
+	   && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
 	  || (htab->root.dynamic_sections_created
 	      && (h->root.type == bfd_link_hash_undefweak
 		  || h->root.type == bfd_link_hash_undefined))))
@@ -1707,8 +1709,10 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 		  && h != NULL
 		  && h->dynindx != -1
 		  && (h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0
-		  && ((h->elf_link_hash_flags
-		       & ELF_LINK_HASH_DEF_DYNAMIC) != 0
+		  && (((h->elf_link_hash_flags
+			& ELF_LINK_HASH_DEF_DYNAMIC) != 0
+		       && (h->elf_link_hash_flags
+			   & ELF_LINK_HASH_DEF_REGULAR) == 0)
 		      || h->root.type == bfd_link_hash_undefweak
 		      || h->root.type == bfd_link_hash_undefined)))
 	    {

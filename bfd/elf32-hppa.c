@@ -1562,7 +1562,12 @@ elf32_hppa_check_relocs (abfd, info, sec, relocs)
 	     links or visibility changes anyway.  A STUB_REL reloc
 	     is absolute too, as in that case it is the reloc in the
 	     stub we will be creating, rather than copying the PCREL
-	     reloc in the branch.  */
+	     reloc in the branch.
+
+	     If on the other hand, we are creating an executable, we
+	     may need to keep relocations for symbols satisfied by a
+	     dynamic library if we manage to avoid copy relocs for the
+	     symbol.  */
 	  if ((info->shared
 	       && (sec->flags & SEC_ALLOC) != 0
 	       && (IS_ABSOLUTE_RELOC (r_type)
@@ -2140,7 +2145,8 @@ allocate_plt_and_got_and_discard_relocs (h, inf)
   /* First handle the non-shared case.  */
   if (!info->shared
       && (h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0
-      && ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
+      && (((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
+	   && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
 	  || (hplink->root.dynamic_sections_created
 	      && (h->root.type == bfd_link_hash_undefweak
 		  || h->root.type == bfd_link_hash_undefined))))
@@ -3893,17 +3899,17 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_PARISC_DPREL21L:
 	case R_PARISC_DIR32:
 	  /* The reloc types handled here and this conditional
-	     expression must match the code in check_relocs and
-	     hppa_discard_copies.  ie. We need exactly the same
-	     condition as in check_relocs, with some extra conditions
-	     (dynindx test in this case) to cater for relocs removed
-	     by hppa_discard_copies.  If you squint, the non-shared
-	     test here does indeed match the one in check_relocs, the
-	     difference being that here we test DEF_DYNAMIC rather
-	     than a maybe-DEF_DYNAMIC via !DEF_REGULAR.  Common syms
-	     end up with !DEF_REGULAR, which is why we can't use that
-	     here.  Conversely, DEF_DYNAMIC can't be used in
-	     check_relocs as there all files have not been loaded.  */
+	     expression must match the code in ..check_relocs and
+	     ..discard_relocs.  ie. We need exactly the same condition
+	     as in ..check_relocs, with some extra conditions (dynindx
+	     test in this case) to cater for relocs removed by
+	     ..discard_relocs.  If you squint, the non-shared test
+	     here does indeed match the one in ..check_relocs, the
+	     difference being that here we test DEF_DYNAMIC as well as
+	     !DEF_REGULAR.  All common syms end up with !DEF_REGULAR,
+	     which is why we can't use just that test here.
+	     Conversely, DEF_DYNAMIC can't be used in check_relocs as
+	     there all files have not been loaded.  */
 	  if ((info->shared
 	       && (input_section->flags & SEC_ALLOC) != 0
 	       && (IS_ABSOLUTE_RELOC (r_type)
@@ -3917,8 +3923,10 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 		  && h != NULL
 		  && h->elf.dynindx != -1
 		  && (h->elf.elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0
-		  && ((h->elf.elf_link_hash_flags
-		       & ELF_LINK_HASH_DEF_DYNAMIC) != 0
+		  && (((h->elf.elf_link_hash_flags
+			& ELF_LINK_HASH_DEF_DYNAMIC) != 0
+		       && (h->elf.elf_link_hash_flags
+			   & ELF_LINK_HASH_DEF_REGULAR) == 0)
 		      || h->elf.root.type == bfd_link_hash_undefweak
 		      || h->elf.root.type == bfd_link_hash_undefined)))
 	    {

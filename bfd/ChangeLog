@@ -1,3 +1,11 @@
+2001-09-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-i386.c (elf_i386_relocate_section): Check !DEF_REGULAR
+	as well as DEF_DYNAMIC in test for avoided copy relocs.
+	(allocate_plt_and_got_and_discard_relocs): Likewise.
+	* elf32-hppa.c (elf_i386_relocate_section): Likewise.
+	(allocate_plt_and_got_and_discard_relocs): Likewise.
+
 2001-09-07  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* elf32-mips.c (mips_elf_calculate_relocation): Fix overflow handling
@@ -9,13 +17,13 @@
 	definitions.
 	(mips_elf64_howto_table_rel): Likewise.
 
-2001-09-05  Tom Rix <trix@redhat.com> 
+2001-09-05  Tom Rix <trix@redhat.com>
 
-	* xcofflink.c (bfd_xcoff_import_symbol): Handle import file XMC_XO 
+	* xcofflink.c (bfd_xcoff_import_symbol): Handle import file XMC_XO
 	and syscall symbols.
-	(write_global_symbol) : Same.	
+	(write_global_symbol) : Same.
 	(bfd_xcoff_export_symbol): Remove unused syscall param.
-	* libxcoff.h: Change prototype of bfd_xcoff_export symbol and 
+	* libxcoff.h: Change prototype of bfd_xcoff_export symbol and
 	bfd_xcoff_import_symbol.
 	* bfd-in.h: Same.
 	* bfd-in2.h : Regenerate.
