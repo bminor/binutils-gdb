@@ -14,7 +14,7 @@ HAS_RELOC, HAS_SYMS
 start address 0x0+
 
 Sections:
-Idx Name          Size      VMA               LMA               File off  Algn
+Idx Name          Size      VMA       LMA       File off  Algn
   0 \.text         0+6c  0+  0+  0+34  2\*\*0
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
   1 \.data         0+  0+  0+  0+a0  2\*\*0
