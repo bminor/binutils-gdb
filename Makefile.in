@@ -78,11 +78,7 @@ MAKEINFO = `if [ -f $${rootme}/texinfo/C/makeinfo ] ; \
 CC_FOR_BUILD = $(CC)
 CXX_FOR_BUILD = $(CXX)
 
-SUBDIRS = libiberty mmalloc glob readline opcodes bfd h8300sim z8ksim \
-	$(start-sanitize-chill) \
-          chillrt \
-	$(end-sanitize-chill) \
-	  gdb binutils ld gas tgas gcc libg++ newlib deja-gnu
+SUBDIRS = "this is set via configure, don't edit this"
 OTHERS = 
 
 ALL = all.normal
@@ -578,7 +574,7 @@ install-newlib: force
 
 ### start-sanitize-chill
 ### chillrt
-all-chillrt: all-binutils all-ld all-gas all-gcc
+all-chillrt: all-binutils all-ld all-gas all-gcc all-newlib
 	@if [ -f ./chillrt/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		srcroot=`cd $(srcdir); pwd` ; export srcroot ; \
@@ -1254,6 +1250,14 @@ install-textutils: force
 ### other supporting targets
 
 subdir_do:
+### start-sanitize-chill
+### 
+### WARNING: THIS IS VERY UGLY AND I DID NOT DO THIS WILLINGLY
+###
+### if you change the code for libg++ et al, also change the
+### code for chillrt
+###
+### end-sanitize-chill
 	@for i in $(DODIRS); do \
 	  if [ -f ./$$i/localenv ] || [ -f ./$$i/Makefile ] ; then \
 	    case $$i in \
@@ -1264,13 +1268,7 @@ subdir_do:
 		  $(MAKE) $(TARGET_FLAGS_TO_PASS) $(DO)) ; then true ; \
 	      else exit 1 ; fi \
 	      ;; \
-### start-sanitize-chill
-### 
-### WARNING: THIS IS VERY UGLY AND I DID NOT DO THIS WILLINGLY
-###
-### if you change the above code for libg++ et al, also change the
-### code down here
-###
+	$(start-sanitize-chill) \
 	    chillrt) \
 	      if (rootme=`pwd` ; export rootme ; \
 		  srcroot=`cd $(srcdir); pwd` ; export srcroot ; \
@@ -1278,7 +1276,7 @@ subdir_do:
 		  $(MAKE) $(TARGET_FLAGS_TO_PASS) $(DO)) ; then true ; \
 	      else exit 1 ; fi \
 	      ;; \
-### end-sanitize-chill
+	$(end-sanitize-chill) \
 	    *) \
 	      if (rootme=`pwd` ; export rootme ; \
 		  cd ./$$i ; \
