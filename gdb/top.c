@@ -1693,6 +1693,39 @@ quit_confirm (void)
   return 1;
 }
 
+/* Helper routine for quit_force that requires error handling.  */
+
+struct qt_args
+{
+  char *args;
+  int from_tty;
+};
+
+static int
+quit_target (void *arg)
+{
+  struct qt_args *qt = (struct qt_args *)arg;
+
+  if (! ptid_equal (inferior_ptid, null_ptid) && target_has_execution)
+    {
+      if (attach_flag)
+        target_detach (qt->args, qt->from_tty);
+      else
+        target_kill ();
+    }
+
+  /* UDI wants this, to kill the TIP.  */
+  target_close (1);
+
+  /* Save the history information if it is appropriate to do so.  */
+  if (write_history_p && history_filename)
+    write_history (history_filename);
+
+  do_final_cleanups (ALL_CLEANUPS);	/* Do any final cleanups before exiting */
+
+  return 0;
+}
+
 /* Quit without asking for confirmation.  */
 
 void
@@ -1709,22 +1742,9 @@ quit_force (char *args, int from_tty)
       exit_code = (int) value_as_long (val);
     }
 
-  if (! ptid_equal (inferior_ptid, null_ptid) && target_has_execution)
-    {
-      if (attach_flag)
-	target_detach (args, from_tty);
-      else
-	target_kill ();
-    }
-
-  /* UDI wants this, to kill the TIP.  */
-  target_close (1);
-
-  /* Save the history information if it is appropriate to do so.  */
-  if (write_history_p && history_filename)
-    write_history (history_filename);
-
-  do_final_cleanups (ALL_CLEANUPS);	/* Do any final cleanups before exiting */
+  /* We want to handle any quit errors and exit regardless.  */
+  catch_errors (quit_target, args,
+	        "Quitting: ", RETURN_MASK_ALL);
 
   exit (exit_code);
 }
