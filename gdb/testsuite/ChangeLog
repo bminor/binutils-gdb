@@ -1,3 +1,8 @@
+Thu Dec 20 09:54:36 2001  Jeffrey A Law  (law@redhat.com)
+
+	* gdb.base/annota1.exp: Expect failure for hpux11 when posting
+	a SIGTRAP to the inferior.
+
 2001-12-19  Corinna Vinschen  <vinschen@redhat.com>
 
 	* gdb.asm/asm-source.exp: Drop setting link-flags for xstormy16.
