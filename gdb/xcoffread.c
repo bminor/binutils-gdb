@@ -1627,7 +1627,7 @@ process_xcoff_symbol (cs, objfile)
         /* FIXME: I believe this is to avoid a Sun-specific hack somewhere.
 	   Needs more investigation.  */
 
-	if (*name == ':' || (pp = (char *) index (name, ':')) == NULL)
+	if (*name == ':' || (pp = (char *) strchr(name, ':')) == NULL)
 	  return NULL;
 
 	++pp;

@@ -468,11 +468,10 @@ leafproc_return (ip)
   int dst;
   unsigned int insn1, insn2;
   CORE_ADDR return_addr;
-  char *index ();
 
   if ((msymbol = lookup_minimal_symbol_by_pc (ip)) != NULL)
     {
-      if ((p = index (SYMBOL_NAME (msymbol), '.')) && STREQ (p, ".lf"))
+      if ((p = strchr(SYMBOL_NAME (msymbol), '.')) && STREQ (p, ".lf"))
 	{
 	  if (next_insn (SYMBOL_VALUE_ADDRESS (msymbol), &insn1, &insn2)
 	      && (insn1 & 0xff87ffff) == 0x5c80161e       /* mov g14, gx */

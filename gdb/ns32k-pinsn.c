@@ -227,7 +227,7 @@ print_insn (memaddr, stream)
       for (argnum = 0; argnum <= maxarg; argnum++)
 	{
 	  CORE_ADDR addr;
-	  char *ch, *index ();
+	  char *ch;
 	  for (ch = arg_bufs[argnum]; *ch;)
 	    {
 	      if (*ch == NEXT_IS_ADDR)

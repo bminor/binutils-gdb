@@ -1,3 +1,8 @@
+Wed Sep  1 14:36:00 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* i960-tdep.c, ns32k-pinsn.c, remote-adapt.c, xcoffread.c:
+	  index -> strchr.
+
 Wed Sep  1 11:35:49 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* remote.c: Add comment explaining why dcache is disabled.

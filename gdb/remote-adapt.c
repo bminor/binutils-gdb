@@ -1331,7 +1331,7 @@ adapt_com (args, fromtty)
 		break;
 	/* Begin commands that take input in the form 'c x,y[,z...]' */
 	case 'S':	/* Set memory or register */
-		if (index(args,',')) {	/* Assume it is properly formatted */
+		if (strchr(args,',')) {	/* Assume it is properly formatted */
 			write(adapt_desc,args,strlen(args));
 			write(adapt_desc,"\r",1);
 			expect_prompt();
