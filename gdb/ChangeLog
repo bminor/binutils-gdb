@@ -1,3 +1,8 @@
+Tue Sep 28 18:00:50 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* infcmd.c (run_stack_dummy): Set the frame in the bp_call_dummy
+	breakpoint.
+
 Tue Sep 28 17:53:26 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/nm-sysv4.h: Include solib.h.  Define SVR4_SHARED_LIBS.
