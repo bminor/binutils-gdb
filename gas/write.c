@@ -750,7 +750,7 @@ write_contents (abfd, sec, xxx)
 static void
 merge_data_into_text ()
 {
-#ifdef BFD_ASSEMBLER
+#if defined(BFD_ASSEMBLER) || defined(MANY_SEGMENTS)
   seg_info (text_section)->frchainP->frch_last->fr_next =
     seg_info (data_section)->frchainP->frch_root;
   seg_info (text_section)->frchainP->frch_last =

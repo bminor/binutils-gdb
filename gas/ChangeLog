@@ -1,3 +1,14 @@
+Tue Sep  7 10:22:52 1993  Stan Shebs  (shebs@rtl.cygnus.com)
+
+	* read.c: (s_stab, s_xstab, s_desc): New functions to parse
+	various stab-related directives.
+	* read.h: (s_stab, s_xstab, s_desc): New function prototypes.
+	* write.c: (merge_data_into_text): Fix ifdef tangle.
+	* config/obj-coffbfd.c (current_stab_symbol): Fake symbol
+	for stab reader to use.
+	* config/obj-coffbfdh.h (obj_symbol_type): Added fields for
+	stab reader, macros to access. 
+
 Fri Sep  3 16:44:03 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* config/obj-elf.h (elf_symbol): Fixed name of elf_symbol_type.

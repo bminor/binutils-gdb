@@ -31,7 +31,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
  Hacked for BFDness by steve chamberlain
 
- This object module now supports the Hitachi H8/{3|5}00 and the AMD 29k
+ This object module now supports everything but the i960 and i860.
 
  sac@cygnus.com
 */
@@ -80,6 +80,12 @@ const short seg_N_TYPE[] =
 int function_lineoff = -1;	/* Offset in line#s where the last function
 				   started (the odd entry for line #0) */
 
+/* This is used along with macros in the .h file to fake the .stabX
+   directive reader into thinking it's working on a real symbol, when
+   it's actually only a temporary that will get converted into a
+   stab-section symbol later. */
+
+symbolS current_stab_symbol;
 
 static symbolS *last_line_symbol;
 
@@ -148,7 +154,6 @@ static void EXFUN (obj_coff_val, (void));
 void EXFUN (obj_coff_section, (void));
 static void EXFUN (tag_init, (void));
 static void EXFUN (tag_insert, (char *name, symbolS * symbolP));
-
 
 static struct hash_control *tag_hash;
 static symbolS *def_symbol_in_progress = NULL;
