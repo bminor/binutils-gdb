@@ -343,105 +343,97 @@ proc all_branch_tests { } {
 	timeout { fail "(timeout) comib_nullified_tests " }
     }
 
-    # Fails because of true-false usage and polarity of conditions.
-    setup_xfail "hppa*-*-*"
     send "x/16i addb_tests\n"
     expect {
 	-re ".*
-.*addbt r1,arg0,.* <addb_tests>\r\n\
-.*addbt,= r1,arg0,.* <addb_tests>\r\n\
-.*addbt,< r1,arg0,.* <addb_tests>\r\n\
-.*addbt,<= r1,arg0,.* <addb_tests>\r\n\
-.*addbt,nuv r1,arg0,.* <addb_tests>\r\n\
-.*addbt,znv r1,arg0,.* <addb_tests>\r\n\
-.*addbt,sv r1,arg0,.* <addb_tests>\r\n\
-.*addbt,od r1,arg0,.* <addb_tests>\r\n\
-.*addbf r1,arg0,.* <addb_tests>\r\n\
-.*addbf,= r1,arg0,.* <addb_tests>\r\n\
-.*addbf,< r1,arg0,.* <addb_tests>\r\n\
-.*addbf,<= r1,arg0,.* <addb_tests>\r\n\
-.*addbf,nuv r1,arg0,.* <addb_tests>\r\n\
-.*addbf,znv r1,arg0,.* <addb_tests>\r\n\
-.*addbf,sv r1,arg0,.* <addb_tests>\r\n\
-.*addbf,od r1,arg0,.* <addb_tests>\r\n\
+.*addb r1,r4,.* <addb_tests>\r\n\
+.*addb,= r1,r4,.* <addb_tests>\r\n\
+.*addb,< r1,r4,.* <addb_tests>\r\n\
+.*addb,<= r1,r4,.* <addb_tests>\r\n\
+.*addb,nuv r1,r4,.* <addb_tests>\r\n\
+.*addb,znv r1,r4,.* <addb_tests>\r\n\
+.*addb,sv r1,r4,.* <addb_tests>\r\n\
+.*addb,od r1,r4,.* <addb_tests>\r\n\
+.*addbf r1,r4,.* <addb_tests>\r\n\
+.*addbf,= r1,r4,.* <addb_tests>\r\n\
+.*addbf,< r1,r4,.* <addb_tests>\r\n\
+.*addbf,<= r1,r4,.* <addb_tests>\r\n\
+.*addbf,nuv r1,r4,.* <addb_tests>\r\n\
+.*addbf,znv r1,r4,.* <addb_tests>\r\n\
+.*addbf,sv r1,r4,.* <addb_tests>\r\n\
+.*addbf,od r1,r4,.* <addb_tests>\r\n\
 .*$prompt $" { pass "addb_tests" }
 	-re "$prompt $" { fail "addb_tests" }
 	timeout { fail "(timeout) addb_tests " }
     }
 
-    # Fails because of true-false usage and polarity of conditions.
-    setup_xfail "hppa*-*-*"
     send "x/16i addb_nullified_tests\n"
     expect {
 	-re ".*
-.*addbt,n r1,arg0,.* <addb_tests>\r\n\
-.*addbt,=,n r1,arg0,.* <addb_tests>\r\n\
-.*addbt,<,n r1,arg0,.* <addb_tests>\r\n\
-.*addbt,<=,n r1,arg0,.* <addb_tests>\r\n\
-.*addbt,nuv,n r1,arg0,.* <addb_tests>\r\n\
-.*addbt,znv,n r1,arg0,.* <addb_tests>\r\n\
-.*addbt,sv,n r1,arg0,.* <addb_tests>\r\n\
-.*addbt,od,n r1,arg0,.* <addb_tests>\r\n\
-.*addbf,n r1,arg0,.* <addb_tests>\r\n\
-.*addbf,=,n r1,arg0,.* <addb_tests>\r\n\
-.*addbf,<,n r1,arg0,.* <addb_tests>\r\n\
-.*addbf,<=,n r1,arg0,.* <addb_tests>\r\n\
-.*addbf,nuv,n r1,arg0,.* <addb_tests>\r\n\
-.*addbf,znv,n r1,arg0,.* <addb_tests>\r\n\
-.*addbf,sv,n r1,arg0,.* <addb_tests>\r\n\
-.*addbf,od,n r1,arg0,.* <addb_tests>\r\n\
+.*addb,n r1,r4,.* <addb_tests>\r\n\
+.*addb,=,n r1,r4,.* <addb_tests>\r\n\
+.*addb,<,n r1,r4,.* <addb_tests>\r\n\
+.*addb,<=,n r1,r4,.* <addb_tests>\r\n\
+.*addb,nuv,n r1,r4,.* <addb_tests>\r\n\
+.*addb,znv,n r1,r4,.* <addb_tests>\r\n\
+.*addb,sv,n r1,r4,.* <addb_tests>\r\n\
+.*addb,od,n r1,r4,.* <addb_tests>\r\n\
+.*addbf,n r1,r4,.* <addb_tests>\r\n\
+.*addbf,=,n r1,r4,.* <addb_tests>\r\n\
+.*addbf,<,n r1,r4,.* <addb_tests>\r\n\
+.*addbf,<=,n r1,r4,.* <addb_tests>\r\n\
+.*addbf,nuv,n r1,r4,.* <addb_tests>\r\n\
+.*addbf,znv,n r1,r4,.* <addb_tests>\r\n\
+.*addbf,sv,n r1,r4,.* <addb_tests>\r\n\
+.*addbf,od,n r1,r4,.* <addb_tests>\r\n\
 .*$prompt $" { pass "addb_nullified_tests" }
 	-re "$prompt $" { fail "addb_nullified_tests" }
 	timeout { fail "(timeout) addb_nullified_tests " }
     }
 
-    # Fails because of true-false usage and polarity of conditions.
-    setup_xfail "hppa*-*-*"
     send "x/16i addib_tests\n"
     expect {
 	-re ".*
-.*addibt -1,arg0,.* <addib_tests>\r\n\
-.*addibt,= -1,arg0,.* <addib_tests>\r\n\
-.*addibt,< -1,arg0,.* <addib_tests>\r\n\
-.*addibt,<= -1,arg0,.* <addib_tests>\r\n\
-.*addibt,nuv -1,arg0,.* <addib_tests>\r\n\
-.*addibt,znv -1,arg0,.* <addib_tests>\r\n\
-.*addibt,sv -1,arg0,.* <addib_tests>\r\n\
-.*addibt,od -1,arg0,.* <addib_tests>\r\n\
-.*addibf -1,arg0,.* <addib_tests>\r\n\
-.*addibf,= -1,arg0,.* <addib_tests>\r\n\
-.*addibf,< -1,arg0,.* <addib_tests>\r\n\
-.*addibf,<= -1,arg0,.* <addib_tests>\r\n\
-.*addibf,nuv -1,arg0,.* <addib_tests>\r\n\
-.*addibf,znv -1,arg0,.* <addib_tests>\r\n\
-.*addibf,sv -1,arg0,.* <addib_tests>\r\n\
-.*addbf,od -1,arg0,.* <addib_tests>\r\n\
+.*addib -1,r4,.* <addib_tests>\r\n\
+.*addib,= -1,r4,.* <addib_tests>\r\n\
+.*addib,< -1,r4,.* <addib_tests>\r\n\
+.*addib,<= -1,r4,.* <addib_tests>\r\n\
+.*addib,nuv -1,r4,.* <addib_tests>\r\n\
+.*addib,znv -1,r4,.* <addib_tests>\r\n\
+.*addib,sv -1,r4,.* <addib_tests>\r\n\
+.*addib,od -1,r4,.* <addib_tests>\r\n\
+.*addibf -1,r4,.* <addib_tests>\r\n\
+.*addibf,= -1,r4,.* <addib_tests>\r\n\
+.*addibf,< -1,r4,.* <addib_tests>\r\n\
+.*addibf,<= -1,r4,.* <addib_tests>\r\n\
+.*addibf,nuv -1,r4,.* <addib_tests>\r\n\
+.*addibf,znv -1,r4,.* <addib_tests>\r\n\
+.*addibf,sv -1,r4,.* <addib_tests>\r\n\
+.*addibf,od -1,r4,.* <addib_tests>\r\n\
 .*$prompt $" { pass "addib_tests" }
 	-re "$prompt $" { fail "addib_tests" }
 	timeout { fail "(timeout) addib_tests " }
     }
 
-    # Fails because of true-false usage and polarity of conditions.
-    setup_xfail "hppa*-*-*"
     send "x/16i addib_nullified_tests\n"
     expect {
 	-re ".*
-.*addibt,n -1,arg0,.* <addib_tests>\r\n\
-.*addibt,=,n -1,arg0,.* <addib_tests>\r\n\
-.*addibt,<,n -1,arg0,.* <addib_tests>\r\n\
-.*addibt,<=,n -1,arg0,.* <addib_tests>\r\n\
-.*addibt,nuv,n -1,arg0,.* <addib_tests>\r\n\
-.*addibt,znv,n -1,arg0,.* <addib_tests>\r\n\
-.*addibt,sv,n -1,arg0,.* <addib_tests>\r\n\
-.*addibt,od,n -1,arg0,.* <addib_tests>\r\n\
-.*addibf,n -1,arg0,.* <addib_tests>\r\n\
-.*addibf,=,n -1,arg0,.* <addib_tests>\r\n\
-.*addibf,<,n -1,arg0,.* <addib_tests>\r\n\
-.*addibf,<=,n -1,arg0,.* <addib_tests>\r\n\
-.*addibf,nuv,n -1,arg0,.* <addib_tests>\r\n\
-.*addibf,znv,n -1,arg0,.* <addib_tests>\r\n\
-.*addibf,sv,n -1,arg0,.* <addib_tests>\r\n\
-.*addibf,od,n -1,arg0,.* <addib_tests>\r\n\
+.*addib,n -1,r4,.* <addib_tests>\r\n\
+.*addib,=,n -1,r4,.* <addib_tests>\r\n\
+.*addib,<,n -1,r4,.* <addib_tests>\r\n\
+.*addib,<=,n -1,r4,.* <addib_tests>\r\n\
+.*addib,nuv,n -1,r4,.* <addib_tests>\r\n\
+.*addib,znv,n -1,r4,.* <addib_tests>\r\n\
+.*addib,sv,n -1,r4,.* <addib_tests>\r\n\
+.*addib,od,n -1,r4,.* <addib_tests>\r\n\
+.*addibf,n -1,r4,.* <addib_tests>\r\n\
+.*addibf,=,n -1,r4,.* <addib_tests>\r\n\
+.*addibf,<,n -1,r4,.* <addib_tests>\r\n\
+.*addibf,<=,n -1,r4,.* <addib_tests>\r\n\
+.*addibf,nuv,n -1,r4,.* <addib_tests>\r\n\
+.*addibf,znv,n -1,r4,.* <addib_tests>\r\n\
+.*addibf,sv,n -1,r4,.* <addib_tests>\r\n\
+.*addibf,od,n -1,r4,.* <addib_tests>\r\n\
 .*$prompt $" { pass "addb_nullified_tests" }
 	-re "$prompt $" { fail "addb_nullified_tests" }
 	timeout { fail "(timeout) addb_nullified_tests " }
