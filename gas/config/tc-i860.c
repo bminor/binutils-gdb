@@ -638,12 +638,6 @@ i860_process_insn (char *str)
 
 		    case 'g':
 		      opcode |= mask << 16;
-		      if (dual_mode != DUAL_OFF)
-			opcode |= (1 << 9);
-		      if (dual_mode == DUAL_DDOT)
-			dual_mode = DUAL_OFF;
-		      if (dual_mode == DUAL_ONDDOT)
-			dual_mode = DUAL_ON;
 		      if ((opcode & (1 << 10)) && mask != 0
 			  && (mask == ((opcode >> 11) & 0x1f)))
 			as_warn (_("Pipelined instruction: fsrc1 = fdest"));
@@ -932,6 +926,21 @@ i860_process_insn (char *str)
 	    }
 	}
       break;
+    }
+
+  /* Set the dual bit on this instruction if necessary.  */
+  if (dual_mode != DUAL_OFF)
+    {
+      if ((opcode & 0xfc000000) == 0x48000000 || opcode == 0xb0000000)
+        {
+	  opcode |= (1 << 9);
+          if (dual_mode == DUAL_DDOT)
+	    dual_mode = DUAL_OFF;
+          else if (dual_mode == DUAL_ONDDOT)
+	    dual_mode = DUAL_ON;
+        }
+      else if (dual_mode == DUAL_DDOT || dual_mode == DUAL_ONDDOT)
+        as_bad (_("Prefix 'd.' invalid for instruction `%s'"), insn->name);
     }
 
   the_insn.opcode = opcode;
