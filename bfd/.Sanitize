@@ -155,6 +155,7 @@ i386bsd.c
 i386linux.c
 i386lynx.c
 i386mach3.c
+i386os9k.c
 ieee.c
 init.c
 irix-core.c
