@@ -56,17 +56,19 @@ struct stab_link_includes_table
 };
 
 /* A linked list of totals that we have found for a particular header
-   file.  A total is the sum of all the STABS characters for a particular
-   file and the number of these charactes.  It is used to identify
-   duplicate files which can be excluded.  XXX: A better method would be to
-   compute an MD5 checksum, but that is coding left for another day.
-   The bfd_vma type is used because it is a very large unsigned type.  */
+   file.  A total is a unique identifier for a particular BINCL...EINCL
+   sequence of STABs that can be used to identify duplicate sequences.
+   It consists of three fields, 'sum_chars' which is the sum of all the
+   STABS characters; 'num_chars' which is the number of these charactes
+   and 'symb' which is a buffer of all the symbols in the sequence.  This
+   buffer is only checked as a last resort.  */
 
 struct stab_link_includes_totals
 {
   struct stab_link_includes_totals *next;
   bfd_vma sum_chars;  /* Accumulated sum of STABS characters.  */
   bfd_vma num_chars;  /* Number of STABS characters.  */
+  const char* symb;   /* The STABS characters themselves.  */
 };
 
 /* An entry in the header file hash table.  */
@@ -347,14 +349,19 @@ _bfd_link_section_stabs (abfd, psinfo, stabsec, stabstrsec, psecinfo, pstring_of
 	{
 	  bfd_vma sum_chars;
 	  bfd_vma num_chars;
+	  bfd_vma buf_len = 0;
+	  char * symb;
+	  char * symb_rover;
 	  int nest;
-	  bfd_byte *incl_sym;
-	  struct stab_link_includes_entry *incl_entry;
-	  struct stab_link_includes_totals *t;
-	  struct stab_excl_list *ne;
+	  bfd_byte * incl_sym;
+	  struct stab_link_includes_entry * incl_entry;
+	  struct stab_link_includes_totals * t;
+	  struct stab_excl_list * ne;
 
+	  symb = symb_rover = NULL;
 	  sum_chars = num_chars = 0;
 	  nest = 0;
+
 	  for (incl_sym = sym + STABSIZE;
 	       incl_sym < symend;
 	       incl_sym += STABSIZE)
@@ -383,6 +390,15 @@ _bfd_link_section_stabs (abfd, psinfo, stabsec, stabstrsec, psecinfo, pstring_of
 			 + bfd_get_32 (abfd, incl_sym + STRDXOFF));
 		  for (; *str != '\0'; str++)
 		    {
+		      if (num_chars >= buf_len)
+			{
+			  buf_len += 32 * 1024;
+			  symb = bfd_realloc (symb, buf_len);
+			  if (symb == NULL)
+			    goto error_return;
+			  symb_rover = symb + num_chars;
+			}
+		      * symb_rover ++ = * str;
 		      sum_chars += *str;
 		      num_chars ++;
 		      if (*str == '(')
@@ -397,6 +413,8 @@ _bfd_link_section_stabs (abfd, psinfo, stabsec, stabstrsec, psecinfo, pstring_of
 		}
 	    }
 
+	  BFD_ASSERT (num_chars == (bfd_vma) (symb_rover - symb));
+
 	  /* If we have already included a header file with the same
 	     value, then replaced this one with an N_EXCL symbol.  */
 	  incl_entry = stab_link_includes_lookup (&sinfo->includes, string,
@@ -405,7 +423,9 @@ _bfd_link_section_stabs (abfd, psinfo, stabsec, stabstrsec, psecinfo, pstring_of
 	    goto error_return;
 
 	  for (t = incl_entry->totals; t != NULL; t = t->next)
-	    if (t->sum_chars == sum_chars && t->num_chars == num_chars)
+	    if (t->sum_chars == sum_chars
+		&& t->num_chars == num_chars
+		&& memcmp (t->symb, symb, num_chars) == 0)
 	      break;
 
 	  /* Record this symbol, so that we can set the value
@@ -430,6 +450,7 @@ _bfd_link_section_stabs (abfd, psinfo, stabsec, stabstrsec, psecinfo, pstring_of
 		goto error_return;
 	      t->sum_chars = sum_chars;
 	      t->num_chars = num_chars;
+	      t->symb = bfd_realloc (symb, num_chars); /* Trim data down.  */
 	      t->next = incl_entry->totals;
 	      incl_entry->totals = t;
 	    }
@@ -440,6 +461,9 @@ _bfd_link_section_stabs (abfd, psinfo, stabsec, stabstrsec, psecinfo, pstring_of
 	      /* We have seen this header file before.  Tell the final
 		 pass to change the type to N_EXCL.  */
 	      ne->type = (int) N_EXCL;
+
+	      /* Free off superfluous symbols.  */
+	      free (symb);
 
 	      /* Mark the skipped symbols.  */
 

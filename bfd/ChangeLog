@@ -1,3 +1,13 @@
+2004-04-01  Andy Chittenden  <achittenden@bluearc.com>
+
+	* stabs.c (struct stab_link_includes_totals): Add field 'symb'
+	that keeps the characters in a B_INCL..B_EINCL range.
+	(_bfd_link_section_stabs): When computing the sum of the
+	characters in a B_INCL..B_EINCL range also keep a copy of those
+	characters.  Use this information to distinguish between
+	include sections that have the same sum and the same length
+	but which are nevertheless unique.
+
 2004-03-31  Paul Brook  <paul@codesourcery.com>
 
 	* elf32-arm.h (elf32_arm_final_link_relocate): Add R_ARM_ALU*.
