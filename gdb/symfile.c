@@ -120,6 +120,8 @@ static void cashier_psymtab (struct partial_symtab *);
 
 bfd *symfile_bfd_open (char *);
 
+int get_section_index (struct objfile *, char *);
+
 static void find_sym_fns (struct objfile *);
 
 static void decrement_reading_symtab (void *);
@@ -1113,6 +1115,18 @@ symfile_bfd_open (char *name)
 	     bfd_errmsg (bfd_get_error ()));
     }
   return (sym_bfd);
+}
+
+/* Return the section index for the given section name. Return -1 if
+   the section was not found. */
+int
+get_section_index (struct objfile *objfile, char *section_name)
+{
+  asection *sect = bfd_get_section_by_name (objfile->obfd, section_name);
+  if (sect)
+    return sect->index;
+  else
+    return -1;
 }
 
 /* Link a new symtab_fns into the global symtab_fns list.  Called on gdb
