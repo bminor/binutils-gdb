@@ -3853,7 +3853,7 @@ do {
     TRACE_RESULT (current_cpu, "cr-0", 'x', opval);
   }
   {
-    SI opval = m32r_trap (current_cpu, OPRND (uimm4));
+    SI opval = m32r_trap (current_cpu, OPRND (pc), OPRND (uimm4));
     BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, opval));
     taken_p = 1;
     TRACE_RESULT (current_cpu, "pc", 'x', opval);

@@ -1,4 +1,32 @@
+Wed Sep  9 15:29:36 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* m32r-sim.h (m32r_trap): Update prototype.
+	* traps.c (m32r_trap): New arg `pc'.
+	* sem.c,sem-switch.c: Regenerated.
+start-sanitize-m32rx
+	* cpux.h,readx.c,semx.c: Regenerated.
+end-sanitize-m32rx
+
 Mon Aug  3 12:59:17 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	Rename cpu m32r to m32rb to distinguish from architecture name.
+	* Makefile.in (mloop.c): cpu m32r renamed to m32rb.
+	(stamp-cpu): Ditto.
+	* sim-main.h (WANT_CPU_M32RB): Renamed from WANT_CPU_M32R.
+	* tconfig.in (WANT_CPU_M32RB): Ditto.
+	* m32r.c (WANT_CPU_M32RB): Ditto.
+	(*): m32r_ cpu fns renamed to m32rb_.
+	* sim-if.c (sim_stop,sim_sync_stop,sim_resume): Update.
+	* arch.h,arch.c: Regenerate.
+	* cpu.c,cpu.h,decode.c,decode.h,extract.c,model.c: Regenerate.
+	* sem-switch.c,sem.c: Regenerate.
+
+	* sim-if.c (sim_open): Don't allocate memory on top of any user
+	specified memory.
+	(h_gr_get,h_gr_set): Delete.
+	* sim-main.h (h_gr_get,h_gr_set): Delete.
+	* traps.c (m32r_trap): Replace calls to h_gr_[gs]et with
+	a_m32r_h_gr_[gs]et.
 
 	* Makefile.in (INCLUDE_DEPS): Add include/opcode/cgen.h.
 

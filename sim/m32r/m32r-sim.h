@@ -33,11 +33,24 @@ typedef struct {
   unsigned int fillnop_count;
   /* number of parallel insns */
   unsigned int parallel_count;
+
+  /* FIXME: generalize this to handle all insn lengths, move to common.  */
   /* number of short insns, not including parallel ones */
   unsigned int short_count;
   /* number of long insns */
   unsigned int long_count;
+
+  /* Working area for computing cycle counts.  */
+  unsigned long insn_cycles;
+  unsigned long cti_stall;
+  unsigned long load_stall;
+  unsigned long biggest_cycles;
 } M32R_MISC_PROFILE;
+
+/* Initialize the working area.  */
+void m32r_init_insn_cycles (SIM_CPU *, int);
+/* Update the totals for the insn.  */
+void m32r_record_insn_cycles (SIM_CPU *, int);
 
 /* This is invoked by the nop pattern in the .cpu file.  */
 #define PROFILE_COUNT_FILLNOPS(cpu, addr) \
@@ -78,7 +91,9 @@ do { \
    - NEW_PC_SKIP, sc/snc insn
    - NEW_PC_2, 2 byte non-branch non-sc/snc insn
    - NEW_PC_4, 4 byte non-branch insn
-   The special values have bit 1 set so it's cheap to distinguish them.  */
+   The special values have bit 1 set so it's cheap to distinguish them.
+   This works because all cti's are defined to zero the bottom two bits.  */
+/* FIXME: replace 0xffff0001 with 1?  */
 #define NEW_PC_BASE 0xffff0001
 #define NEW_PC_SKIP NEW_PC_BASE
 #define NEW_PC_2 (NEW_PC_BASE + 2)
@@ -154,6 +169,6 @@ extern device m32r_devices;
 struct _device { int foo; };
 
 /* Handle the trap insn.  */
-USI m32r_trap (SIM_CPU *, int);
+USI m32r_trap (SIM_CPU *, PCADDR, int);
 
 #endif /* M32R_SIM_H */

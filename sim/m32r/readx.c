@@ -852,8 +852,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
   EXTRACT_FMT_TRAP_VARS /* f-op1 f-r1 f-op2 f-uimm4 */
   EXTRACT_FMT_TRAP_CODE
       /* Fetch the input operands for the semantic handler.  */
-      OPRND (pc) = CPU (h_pc);
       OPRND (h_cr_0) = m32rx_h_cr_get (current_cpu, ((HOSTUINT) 0));
+      OPRND (pc) = CPU (h_pc);
       OPRND (uimm4) = f_uimm4;
 #undef OPRND
     }

@@ -103,7 +103,7 @@ syscall_write_mem (host_callback *cb, struct cb_syscall *sc,
    Preprocessing like saving the various registers has already been done.  */
 
 USI
-a_m32r_trap (SIM_CPU *current_cpu, int num)
+m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
 {
   SIM_DESC sd = CPU_STATE (current_cpu);
   host_callback *cb = STATE_CALLBACK (sd);
@@ -115,7 +115,7 @@ a_m32r_trap (SIM_CPU *current_cpu, int num)
     {
       /* First try sim-break.c.  If it's a breakpoint the simulator "owns"
 	 it doesn't return.  Otherwise it returns and let's us try.  */
-      sim_handle_breakpoint (sd, current_cpu, sim_pc_get (current_cpu));
+      sim_handle_breakpoint (sd, current_cpu, pc);
       /* Fall through.  */
     }
 #endif
@@ -135,25 +135,24 @@ a_m32r_trap (SIM_CPU *current_cpu, int num)
 	CB_SYSCALL s;
 
 	CB_SYSCALL_INIT (&s);
-	s.func = h_gr_get (current_cpu, 0);
-	s.arg1 = h_gr_get (current_cpu, 1);
-	s.arg2 = h_gr_get (current_cpu, 2);
-	s.arg3 = h_gr_get (current_cpu, 3);
+	s.func = a_m32r_h_gr_get (current_cpu, 0);
+	s.arg1 = a_m32r_h_gr_get (current_cpu, 1);
+	s.arg2 = a_m32r_h_gr_get (current_cpu, 2);
+	s.arg3 = a_m32r_h_gr_get (current_cpu, 3);
 
 	if (s.func == TARGET_SYS_exit)
 	  {
-	    sim_engine_halt (sd, current_cpu, NULL, sim_pc_get (current_cpu),
-			     sim_exited, s.arg1);
+	    sim_engine_halt (sd, current_cpu, NULL, pc, sim_exited, s.arg1);
 	  }
 
 	s.p1 = (PTR) sd;
 	s.p2 = (PTR) current_cpu;
 	s.read_mem = syscall_read_mem;
 	s.write_mem = syscall_write_mem;
-	cb_syscall (STATE_CALLBACK (sd), &s);
-	h_gr_set (current_cpu, 2, s.errcode);
-	h_gr_set (current_cpu, 0, s.result);
-	h_gr_set (current_cpu, 1, s.result2);
+	cb_syscall (cb, &s);
+	a_m32r_h_gr_set (current_cpu, 2, s.errcode);
+	a_m32r_h_gr_set (current_cpu, 0, s.result);
+	a_m32r_h_gr_set (current_cpu, 1, s.result2);
 	break;
       }
 
@@ -170,5 +169,5 @@ a_m32r_trap (SIM_CPU *current_cpu, int num)
     }
 
   /* Fake an "rte" insn.  */
-  return (sim_pc_get (current_cpu) & -4) + 4;
+  return (pc & -4) + 4;
 }

@@ -100,6 +100,7 @@ typedef struct {
 #define CPU_CGEN_PROFILE(cpu) (& (cpu)->cpu_data.profile)
 } M32RX_CPU_DATA;
 
+/* Cover fns for register access.  */
 USI m32rx_h_pc_get (SIM_CPU *);
 void m32rx_h_pc_set (SIM_CPU *, USI);
 SI m32rx_h_gr_get (SIM_CPU *, UINT);
@@ -285,19 +286,11 @@ struct argbuf {
       UINT f_acc;
       UINT f_r2;
     } fmt_machi_a;
-    struct { /* e.g. macwhi $src1,$src2 */
-      UINT f_r1;
-      UINT f_r2;
-    } fmt_macwhi;
     struct { /* e.g. mulhi $src1,$src2,$acc */
       UINT f_r1;
       UINT f_acc;
       UINT f_r2;
     } fmt_mulhi_a;
-    struct { /* e.g. mulwhi $src1,$src2 */
-      UINT f_r1;
-      UINT f_r2;
-    } fmt_mulwhi;
     struct { /* e.g. mv $dr,$sr */
       UINT f_r1;
       UINT f_r2;
@@ -395,6 +388,10 @@ struct argbuf {
       UINT f_r1;
       UINT f_r2;
     } fmt_macwu1;
+    struct { /* e.g. msblo $src1,$src2 */
+      UINT f_r1;
+      UINT f_r2;
+    } fmt_msblo;
     struct { /* e.g. mulwu1 $src1,$src2 */
       UINT f_r1;
       UINT f_r2;
@@ -959,20 +956,6 @@ struct scache {
   f_op23 = EXTRACT_UNSIGNED (insn, 16, 9, 3); \
   f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
 
-#define EXTRACT_FMT_MACWHI_VARS \
-  /* Instruction fields.  */ \
-  UINT f_op1; \
-  UINT f_r1; \
-  UINT f_op2; \
-  UINT f_r2; \
-  unsigned int length;
-#define EXTRACT_FMT_MACWHI_CODE \
-  length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
-
 #define EXTRACT_FMT_MULHI_A_VARS \
   /* Instruction fields.  */ \
   UINT f_op1; \
@@ -987,20 +970,6 @@ struct scache {
   f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
   f_acc = EXTRACT_UNSIGNED (insn, 16, 8, 1); \
   f_op23 = EXTRACT_UNSIGNED (insn, 16, 9, 3); \
-  f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
-
-#define EXTRACT_FMT_MULWHI_VARS \
-  /* Instruction fields.  */ \
-  UINT f_op1; \
-  UINT f_r1; \
-  UINT f_op2; \
-  UINT f_r2; \
-  unsigned int length;
-#define EXTRACT_FMT_MULWHI_CODE \
-  length = 2; \
-  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
-  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
-  f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
   f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
 
 #define EXTRACT_FMT_MV_VARS \
@@ -1363,6 +1332,20 @@ struct scache {
   f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
   f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
 
+#define EXTRACT_FMT_MSBLO_VARS \
+  /* Instruction fields.  */ \
+  UINT f_op1; \
+  UINT f_r1; \
+  UINT f_op2; \
+  UINT f_r2; \
+  unsigned int length;
+#define EXTRACT_FMT_MSBLO_CODE \
+  length = 2; \
+  f_op1 = EXTRACT_UNSIGNED (insn, 16, 0, 4); \
+  f_r1 = EXTRACT_UNSIGNED (insn, 16, 4, 4); \
+  f_op2 = EXTRACT_UNSIGNED (insn, 16, 8, 4); \
+  f_r2 = EXTRACT_UNSIGNED (insn, 16, 12, 4); \
+
 #define EXTRACT_FMT_MULWU1_VARS \
   /* Instruction fields.  */ \
   UINT f_op1; \
@@ -1544,19 +1527,10 @@ struct parexec {
       SI src1;
       SI src2;
     } fmt_machi_a;
-    struct { /* e.g. macwhi $src1,$src2 */
-      DI accum;
-      SI src1;
-      SI src2;
-    } fmt_macwhi;
     struct { /* e.g. mulhi $src1,$src2,$acc */
       SI src1;
       SI src2;
     } fmt_mulhi_a;
-    struct { /* e.g. mulwhi $src1,$src2 */
-      SI src1;
-      SI src2;
-    } fmt_mulwhi;
     struct { /* e.g. mv $dr,$sr */
       SI sr;
     } fmt_mv;
@@ -1629,8 +1603,8 @@ struct parexec {
       SI src1;
     } fmt_st_plus;
     struct { /* e.g. trap $uimm4 */
-      USI pc;
       USI h_cr_0;
+      SI pc;
       SI uimm4;
     } fmt_trap;
     struct { /* e.g. unlock $src1,@$src2 */
@@ -1654,6 +1628,11 @@ struct parexec {
       SI src1;
       SI src2;
     } fmt_macwu1;
+    struct { /* e.g. msblo $src1,$src2 */
+      DI accum;
+      SI src1;
+      SI src2;
+    } fmt_msblo;
     struct { /* e.g. mulwu1 $src1,$src2 */
       SI src1;
       SI src2;
