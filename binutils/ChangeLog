@@ -1,3 +1,11 @@
+1998-07-20 07:14  Ulrich Drepper  <drepper@cygnus.com>
+
+	* readelf.c: Correct reading of .dynamic section.
+	(dynamic_section): Now a global variable.
+	(process_mips_fpe_exception, process_mips_specific,
+	process_arch_specific): New functions.
+	(get_file_header): Call process_arch_specific.
+
 1998-07-19 15:15  Ulrich Drepper  <drepper@cygnus.com>
 
 	* readelf.c: Fix several versioning related bugs.  Produce nicer

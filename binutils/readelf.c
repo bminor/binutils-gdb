@@ -25,6 +25,7 @@
 #include <assert.h>
 #include <sys/stat.h>
 #include <stdio.h>
+#include <time.h>
 
 #include "bfd.h"
 #include "elf/common.h"
@@ -55,8 +56,9 @@ char            	program_interpreter [64];
 int             	dynamic_info [DT_JMPREL + 1];
 int             	version_info [16];
 int             	loadaddr = 0;
-Elf_Internal_Ehdr        elf_header;
-Elf_Internal_Shdr *      section_headers;
+Elf_Internal_Ehdr       elf_header;
+Elf_Internal_Shdr *     section_headers;
+Elf_Internal_Dyn *      dynamic_segment;
 int 			show_name;
 int 			do_dynamic;
 int 			do_syms;
@@ -122,6 +124,8 @@ static int    get_file_header PARAMS ((FILE * file));
 static Elf_Internal_Sym * get_elf_symbols
   PARAMS ((FILE * file, unsigned long offset, unsigned long number));
 static int *  get_dynamic_data PARAMS ((FILE * file, unsigned int number));
+
+typedef int Elf32_Word;
 
 #define SECTION_NAME(X) 	(string_table + (X)->sh_name)
 
@@ -1904,7 +1908,6 @@ static int
 process_dynamic_segment (file)
      FILE * file;
 {
-  Elf_Internal_Dyn *    dynamic_segment;
   Elf_Internal_Dyn *    entry;
   Elf32_External_Dyn *  edyn;
   unsigned int i;
@@ -1920,7 +1923,12 @@ process_dynamic_segment (file)
   GET_DATA_ALLOC (dynamic_addr, dynamic_size,
 		  edyn, Elf32_External_Dyn *, "dynamic segment");
 
-  dynamic_size = dynamic_size / sizeof (Elf32_External_Dyn);
+  /* SGI's ELF has more than one section in the DYNAMIC segment.  Determine
+     how large .dynamic is now.  We can do this even before the byte
+     swapping since the DT_NULL tag is recognizable.  */
+  dynamic_size = 0;
+  while (*(Elf32_Word *) edyn[dynamic_size++].d_tag != DT_NULL)
+    ;
 
   dynamic_segment = (Elf_Internal_Dyn *)
     malloc (dynamic_size * sizeof (Elf_Internal_Dyn));
@@ -2020,13 +2028,12 @@ process_dynamic_segment (file)
 
   if (do_dynamic && dynamic_addr)
     printf (_("\nDynamic segment at offset 0x%x contains %d entries:\n"),
-	    dynamic_addr, dynamic_size % 1000);
+	    dynamic_addr, dynamic_size);
   if (do_dynamic)
     printf (_("  Tag        Type                         Name/Value\n"));
 
   for (i = 0, entry = dynamic_segment;
-       /* XXX SGI's linker produces a number which is 1000 higher.  */
-       i < (dynamic_size % 1000);
+       i < dynamic_size;
        i++, entry ++)
     {
       if (do_dynamic)
@@ -2142,8 +2149,6 @@ process_dynamic_segment (file)
 	  break;
 	}
     }
-
-  free (dynamic_segment);
 
   return 1;
 }
@@ -3143,6 +3148,301 @@ process_section_contents (file)
   return 1;
 }
 
+static void
+process_mips_fpe_exception (mask)
+     int mask;
+{
+  if (mask)
+    {
+      int first = 1;
+      if (mask & OEX_FPU_INEX)
+	fputs ("INEX", stdout), first = 0;
+      if (mask & OEX_FPU_UFLO)
+	printf ("%sUFLO", first ? "" : "|"), first = 0;
+      if (mask & OEX_FPU_OFLO)
+	printf ("%sOFLO", first ? "" : "|"), first = 0;
+      if (mask & OEX_FPU_DIV0)
+	printf ("%sDIV0", first ? "" : "|"), first = 0;
+      if (mask & OEX_FPU_INVAL)
+	printf ("%sINVAL", first ? "" : "|");
+    }
+  else
+    fputs ("0", stdout);
+}
+
+static int
+process_mips_specific (file)
+     FILE *file;
+{
+  Elf_Internal_Dyn *    entry;
+  size_t liblist_offset = 0;
+  size_t liblistno = 0;
+  size_t options_offset = 0;
+
+  /* We have a lot of special sections.  Thanks SGI!  */
+  if (dynamic_segment == NULL)
+    /* No information available.  */
+    return 0;
+
+  for (entry = dynamic_segment; entry->d_tag != DT_NULL; ++entry)
+    switch (entry->d_tag)
+      {
+      case DT_MIPS_LIBLIST:
+	liblist_offset = entry->d_un.d_val - loadaddr;
+	break;
+      case DT_MIPS_LIBLISTNO:
+	liblistno = entry->d_un.d_val;
+	break;
+      case DT_MIPS_OPTIONS:
+	options_offset = entry->d_un.d_val - loadaddr;
+	break;
+      default:
+	break;
+      }
+
+  if (liblist_offset != 0 && liblistno != 0 && do_dynamic)
+    {
+      Elf32_External_Lib *elib;
+      size_t cnt;
+
+      GET_DATA_ALLOC (liblist_offset, liblistno * sizeof (Elf32_External_Lib),
+		      elib, Elf32_External_Lib *, "liblist");
+
+      printf ("\nSection '.liblist' contains %d entries:\n", liblistno);
+      fputs ("     Library              Time Stamp       Checksum   Version Flags\n",
+	     stdout);
+
+      for (cnt = 0; cnt < liblistno; ++cnt)
+	{
+	  Elf32_Lib liblist;
+	  time_t time;
+	  char timebuf[17];
+
+	  liblist.l_name = BYTE_GET (elib[cnt].l_name);
+	  time = BYTE_GET (elib[cnt].l_time_stamp);
+	  liblist.l_checksum = BYTE_GET (elib[cnt].l_checksum);
+	  liblist.l_version = BYTE_GET (elib[cnt].l_version);
+	  liblist.l_flags = BYTE_GET (elib[cnt].l_flags);
+
+	  strftime (timebuf, 17, "%Y-%m-%dT%H:%M", gmtime (&time));
+
+	  printf ("%3d: %-20s %s %#10lx %-7ld %#lx\n", cnt,
+		  dynamic_strings + liblist.l_name, timebuf,
+		  liblist.l_checksum, liblist.l_version, liblist.l_flags);
+	}
+
+      free (elib);
+    }
+
+  if (options_offset != 0)
+    {
+      Elf_External_Options *eopt;
+      Elf_Internal_Shdr *sect = section_headers;
+      Elf_Internal_Options *iopt;
+      Elf_Internal_Options *option;
+      size_t offset;
+      int cnt;
+
+      /* Find the section header so that we get the size.  */
+      while (sect->sh_type != SHT_MIPS_OPTIONS)
+	++sect;
+
+      GET_DATA_ALLOC (options_offset, sect->sh_size, eopt,
+		      Elf_External_Options *, "options");
+
+      iopt = (Elf_Internal_Options *) malloc ((sect->sh_size / sizeof (eopt))
+					      * sizeof (*iopt));
+      if (iopt == NULL)
+	{
+	  error (_("Out of memory"));
+	  return 0;
+	}
+
+      offset = cnt = 0;
+      option = iopt;
+      while (offset < sect->sh_size)
+	{
+	  Elf_External_Options *eoption;
+
+	  eoption = (Elf_External_Options *) ((char *) eopt + offset);
+
+	  option->kind = BYTE_GET (eoption->kind);
+	  option->size = BYTE_GET (eoption->size);
+	  option->section = BYTE_GET (eoption->section);
+	  option->info = BYTE_GET (eoption->info);
+
+	  offset += option->size;
+	  ++option;
+	  ++cnt;
+	}
+
+      printf (_("\nSection '%s' contains %d entries:\n"),
+	      string_table + sect->sh_name, cnt);
+
+      option = iopt;
+      while (cnt-- > 0)
+	{
+	  size_t len;
+
+	  switch (option->kind)
+	    {
+	    case ODK_NULL:
+	      /* This shouldn't happen.  */
+	      printf (" NULL       %d %x", option->section, option->info);
+	      break;
+	    case ODK_REGINFO:
+	      printf (" REGINFO    ");
+	      if (elf_header.e_machine == EM_MIPS)
+		{
+		  /* 32bit form.  */
+		  Elf32_External_RegInfo *ereg;
+		  Elf32_RegInfo reginfo;
+
+		  ereg = (Elf32_External_RegInfo *) (option + 1);
+		  reginfo.ri_gprmask = BYTE_GET (ereg->ri_gprmask);
+		  reginfo.ri_cprmask[0] = BYTE_GET (ereg->ri_cprmask[0]);
+		  reginfo.ri_cprmask[1] = BYTE_GET (ereg->ri_cprmask[1]);
+		  reginfo.ri_cprmask[2] = BYTE_GET (ereg->ri_cprmask[2]);
+		  reginfo.ri_cprmask[3] = BYTE_GET (ereg->ri_cprmask[3]);
+		  reginfo.ri_gp_value = BYTE_GET (ereg->ri_gp_value);
+
+		  printf ("GPR %08lx  GP %ld\n",
+			  reginfo.ri_gprmask, reginfo.ri_gp_value);
+		  printf ("            CPR0 %08lx  CPR1 %08lx  CPR2 %08lx  CPR3 %08lx\n",
+			  reginfo.ri_cprmask[0], reginfo.ri_cprmask[1],
+			  reginfo.ri_cprmask[2], reginfo.ri_cprmask[3]);
+		}
+	      else
+		{
+		  /* 64 bit form.  */
+		  Elf64_External_RegInfo *ereg;
+		  Elf64_Internal_RegInfo reginfo;
+
+		  ereg = (Elf64_External_RegInfo *) (option + 1);
+		  reginfo.ri_gprmask = BYTE_GET (ereg->ri_gprmask);
+		  reginfo.ri_cprmask[0] = BYTE_GET (ereg->ri_cprmask[0]);
+		  reginfo.ri_cprmask[1] = BYTE_GET (ereg->ri_cprmask[1]);
+		  reginfo.ri_cprmask[2] = BYTE_GET (ereg->ri_cprmask[2]);
+		  reginfo.ri_cprmask[3] = BYTE_GET (ereg->ri_cprmask[3]);
+		  reginfo.ri_gp_value = BYTE_GET (ereg->ri_gp_value);
+
+		  printf ("GPR %08lx  GP %ld\n",
+			  reginfo.ri_gprmask, reginfo.ri_gp_value);
+		  printf ("            CPR0 %08lx  CPR1 %08lx  CPR2 %08lx  CPR3 %08lx\n",
+			  reginfo.ri_cprmask[0], reginfo.ri_cprmask[1],
+			  reginfo.ri_cprmask[2], reginfo.ri_cprmask[3]);
+		}
+	      ++option;
+	      continue;
+	    case ODK_EXCEPTIONS:
+	      fputs (" EXCEPTIONS fpe_min(", stdout);
+	      process_mips_fpe_exception (option->info & OEX_FPU_MIN);
+	      fputs (") fpe_max(", stdout);
+	      process_mips_fpe_exception ((option->info & OEX_FPU_MAX) >> 8);
+	      fputs (")", stdout);
+
+	      if (option->info & OEX_PAGE0)
+		fputs (" PAGE0", stdout);
+	      if (option->info & OEX_SMM)
+		fputs (" SMM", stdout);
+	      if (option->info & OEX_FPDBUG)
+		fputs (" FPDBUG", stdout);
+	      if (option->info & OEX_DISMISS)
+		fputs (" DISMISS", stdout);
+	      break;
+	    case ODK_PAD:
+	      fputs (" PAD       ", stdout);
+	      if (option->info & OPAD_PREFIX)
+		fputs (" PREFIX", stdout);
+	      if (option->info & OPAD_POSTFIX)
+		fputs (" POSTFIX", stdout);
+	      if (option->info & OPAD_SYMBOL)
+		fputs (" SYMBOL", stdout);
+	      break;
+	    case ODK_HWPATCH:
+	      fputs (" HWPATCH   ", stdout);
+	      if (option->info & OHW_R4KEOP)
+		fputs (" R4KEOP", stdout);
+	      if (option->info & OHW_R8KPFETCH)
+		fputs (" R8KPFETCH", stdout);
+	      if (option->info & OHW_R5KEOP)
+		fputs (" R5KEOP", stdout);
+	      if (option->info & OHW_R5KCVTL)
+		fputs (" R5KCVTL", stdout);
+	      break;
+	    case ODK_FILL:
+	      fputs (" FILL       ", stdout);
+	      /* XXX Print content of info word?  */
+	      break;
+	    case ODK_TAGS:
+	      fputs (" TAGS       ", stdout);
+	      /* XXX Print content of info word?  */
+	      break;
+	    case ODK_HWAND:
+	      fputs (" HWAND     ", stdout);
+	      if (option->info & OHWA0_R4KEOP_CHECKED)
+		fputs (" R4KEOP_CHECKED", stdout);
+	      if (option->info & OHWA0_R4KEOP_CLEAN)
+		fputs (" R4KEOP_CLEAN", stdout);
+	      break;
+	    case ODK_HWOR:
+	      fputs (" HWOR      ", stdout);
+	      if (option->info & OHWA0_R4KEOP_CHECKED)
+		fputs (" R4KEOP_CHECKED", stdout);
+	      if (option->info & OHWA0_R4KEOP_CLEAN)
+		fputs (" R4KEOP_CLEAN", stdout);
+	      break;
+	    case ODK_GP_GROUP:
+	      printf (" GP_GROUP  %#06x  self-contained %#06x",
+		      option->info & OGP_GROUP,
+		      (option->info & OGP_SELF) >> 16);
+	      break;
+	    case ODK_IDENT:
+	      printf (" IDENT     %#06x  self-contained %#06x",
+		      option->info & OGP_GROUP,
+		      (option->info & OGP_SELF) >> 16);
+	      break;
+	    default:
+	      /* This shouldn't happen.  */
+	      printf (" %3d ???     %d %x",
+		      option->kind, option->section, option->info);
+	      break;
+	    }
+
+	  len = sizeof (*eopt);
+	  while (len < option->size)
+	    if (((char *) option)[len] >= ' '
+		&& ((char *) option)[len++] < 0x7f)
+	      printf ("%c", ((char *) option)[len++]);
+	    else
+	      printf ("\\%03o", ((char *) option)[len++]);
+
+	  fputs ("\n", stdout);
+	  ++option;
+	}
+
+      free (eopt);
+    }
+
+  return 1;
+}
+
+static int
+process_arch_specific (file)
+     FILE *file;
+{
+  switch (elf_header.e_machine)
+    {
+    case EM_MIPS:
+    case EM_MIPS_RS4_BE:
+      return process_mips_specific (file);
+      break;
+    default:
+      break;
+    }
+  return 1;
+}
+
 static int
 get_file_header (file)
      FILE * file;
@@ -3235,6 +3535,8 @@ process_file (file_name)
   process_version_sections (file);
 
   process_section_contents (file);
+
+  process_arch_specific (file);
 
   fclose (file);
 
