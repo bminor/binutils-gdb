@@ -950,7 +950,6 @@ struct execution_control_state
   int handling_longjmp;		/* FIXME */
   ptid_t ptid;
   ptid_t saved_inferior_ptid;
-  int update_step_sp;
   int stepping_through_solib_after_catch;
   bpstat stepping_through_solib_catchpoints;
   int enable_hw_watchpoints_after_wait;
@@ -1102,7 +1101,6 @@ init_execution_control_state (struct execution_control_state *ecs)
   ecs->random_signal = 0;
   ecs->remove_breakpoints_on_following_step = 0;
   ecs->handling_longjmp = 0;	/* FIXME */
-  ecs->update_step_sp = 0;
   ecs->stepping_through_solib_after_catch = 0;
   ecs->stepping_through_solib_catchpoints = NULL;
   ecs->enable_hw_watchpoints_after_wait = 0;
@@ -1260,7 +1258,7 @@ handle_step_into_function (struct execution_control_state *ecs)
 static void
 adjust_pc_after_break (struct execution_control_state *ecs)
 {
-  CORE_ADDR stop_pc;
+  CORE_ADDR breakpoint_pc;
 
   /* If this target does not decrement the PC after breakpoints, then
      we have nothing to do.  */
@@ -1294,40 +1292,53 @@ adjust_pc_after_break (struct execution_control_state *ecs)
   if (ecs->ws.value.sig != TARGET_SIGNAL_TRAP)
     return;
 
-  /* Find the location where (if we've hit a breakpoint) the breakpoint would
-     be.  */
-  stop_pc = read_pc_pid (ecs->ptid) - DECR_PC_AFTER_BREAK;
+  /* Find the location where (if we've hit a breakpoint) the
+     breakpoint would be.  */
+  breakpoint_pc = read_pc_pid (ecs->ptid) - DECR_PC_AFTER_BREAK;
 
-  /* If we're software-single-stepping, then assume this is a breakpoint.
-     NOTE drow/2004-01-17: This doesn't check that the PC matches, or that
-     we're even in the right thread.  The software-single-step code needs
-     some modernization.
-
-     If we're not software-single-stepping, then we first check that there
-     is an enabled software breakpoint at this address.  If there is, and
-     we weren't using hardware-single-step, then we've hit the breakpoint.
-
-     If we were using hardware-single-step, we check prev_pc; if we just
-     stepped over an inserted software breakpoint, then we should decrement
-     the PC and eventually report hitting the breakpoint.  The prev_pc check
-     prevents us from decrementing the PC if we just stepped over a jump
-     instruction and landed on the instruction after a breakpoint.
-
-     The last bit checks that we didn't hit a breakpoint in a signal handler
-     without an intervening stop in sigtramp, which is detected by a new
-     stack pointer value below any usual function calling stack adjustments.
-
-     NOTE drow/2004-01-17: I'm not sure that this is necessary.  The check
-     predates checking for software single step at the same time.  Also,
-     if we've moved into a signal handler we should have seen the
-     signal.  */
-
-  if ((SOFTWARE_SINGLE_STEP_P () && singlestep_breakpoints_inserted_p)
-      || (software_breakpoint_inserted_here_p (stop_pc)
-	  && !(currently_stepping (ecs)
-	       && prev_pc != stop_pc
-	       && !(step_range_end && INNER_THAN (read_sp (), (step_sp - 16))))))
-    write_pc_pid (stop_pc, ecs->ptid);
+  if (SOFTWARE_SINGLE_STEP_P ())
+    {
+      /* When using software single-step, a SIGTRAP can only indicate
+	 an inserted breakpoint.  This actually makes things
+	 easier.  */
+      if (singlestep_breakpoints_inserted_p)
+	/* When software single stepping, the instruction at [prev_pc]
+	   is never a breakpoint, but the instruction following
+	   [prev_pc] (in program execution order) always is.  Assume
+	   that following instruction was reached and hence a software
+	   breakpoint was hit.  */
+	write_pc_pid (breakpoint_pc, ecs->ptid);
+      else if (software_breakpoint_inserted_here_p (breakpoint_pc))
+	/* The inferior was free running (i.e., no single-step
+	   breakpoints inserted) and it hit a software breakpoint.  */
+	write_pc_pid (breakpoint_pc, ecs->ptid);
+    }
+  else
+    {
+      /* When using hardware single-step, a SIGTRAP is reported for
+	 both a completed single-step and a software breakpoint.  Need
+	 to differentiate between the two as the latter needs
+	 adjusting but the former does not.  */
+      if (currently_stepping (ecs))
+	{
+	  if (prev_pc == breakpoint_pc
+	      && software_breakpoint_inserted_here_p (breakpoint_pc))
+	    /* Hardware single-stepped a software breakpoint (as
+	       occures when the inferior is resumed with PC pointing
+	       at not-yet-hit software breakpoint).  Since the
+	       breakpoint really is executed, the inferior needs to be
+	       backed up to the breakpoint address.  */
+	    write_pc_pid (breakpoint_pc, ecs->ptid);
+	}
+      else
+	{
+	  if (software_breakpoint_inserted_here_p (breakpoint_pc))
+	    /* The inferior was free running (i.e., no hardware
+	       single-step and no possibility of a false SIGTRAP) and
+	       hit a software breakpoint.  */
+	    write_pc_pid (breakpoint_pc, ecs->ptid);
+	}
+    }
 }
 
 /* Given an execution control state that has been freshly filled in
@@ -2410,11 +2421,6 @@ process_event_stop_test:
       return;
     }
 
-  /* We can't update step_sp every time through the loop, because
-     reading the stack pointer would slow down stepping too much.
-     But we can update it every time we leave the step range.  */
-  ecs->update_step_sp = 1;
-
   if (step_range_end != 1
       && (step_over_calls == STEP_OVER_UNDEBUGGABLE
 	  || step_over_calls == STEP_OVER_ALL)
@@ -2703,10 +2709,6 @@ keep_going (struct execution_control_state *ecs)
 {
   /* Save the pc before execution, to compare with pc after stop.  */
   prev_pc = read_pc ();		/* Might have been DECR_AFTER_BREAK */
-
-  if (ecs->update_step_sp)
-    step_sp = read_sp ();
-  ecs->update_step_sp = 0;
 
   /* If we did not do break;, it means we should keep running the
      inferior and not return to debugger.  */

@@ -187,7 +187,8 @@ CORE_ADDR step_range_end;	/* Exclusive */
 struct frame_id step_frame_id;
 
 /* Our notion of the current stack pointer.  */
-
+/* NOTE: cagney/2004-05-09: This variable is not used and should be
+   garbage collected.  */
 CORE_ADDR step_sp;
 
 enum step_over_calls_kind step_over_calls;

@@ -1,3 +1,12 @@
+2004-05-12  Andrew Cagney  <cagney@redhat.com>
+
+	* infrun.c (adjust_pc_after_break): Rewrite decr logic,
+	eliminate reference to step_sp.
+	(struct execution_control_state, init_execution_control_state)
+	(handle_inferior_event, keep_going): Delete update_step_sp and
+	step_sp.
+	* infcmd.c (step_sp): Note that variable is unused.
+
 2004-05-11  Andrew Cagney  <cagney@redhat.com>
 
 	* infrun.c (step_over_function): Delete function.
