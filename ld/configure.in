@@ -47,6 +47,12 @@ m68k)
 		bsd)	my_host=hp300bsd ;;
 		esac
 		;;
+	apollo*)
+		case "${host_os}" in
+		sysv*)	my_host=apollov68 ;;
+		bsd*)	my_host=apollo68;;
+		esac
+		;;
 	sony)	my_host=news ;;
 	sun)	my_host=sun3 ;;
 	esac
