@@ -1,3 +1,8 @@
+2003-05-20  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/namespace1.cc: Actually do 'cvs add' before committing
+	this time.
+
 2003-05-19  David Carlton  <carlton@bactrian.org>
 
 	* gdb.c++/rtti.exp: New file, containing tests for PR c++/488.
