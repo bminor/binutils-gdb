@@ -6,6 +6,7 @@
 configdirs="doc"
 srctrigger=libbfd.c
 srcname="BFD"
+target_dependent=true
 
 # per-host:
 
@@ -40,7 +41,7 @@ m68k)
 	cbm)
 		case ${host_os} in
 		amigados)	my_host=amigados ;;
-		svr4)		my_host=amix ;;
+		sysv4*)		my_host=amix ;;
 		esac
 		;;
 	hp)	
@@ -54,12 +55,15 @@ m68k)
 	esac
 	;;
 
+i860)	my_host=stratus
+	;;
+
 i386)
 	case "${host_vendor}" in
 	*)
 		case "${host_os}" in
+		sysv4*)	my_host=i386v4 ;;
 		sysv*)	my_host=i386v ;;
-		svr4*)	my_host=i386v4 ;;
 		mach*)	my_host=i386mach ;;
 		msdos*)	my_host=dose ;;
 		esac
@@ -96,16 +100,16 @@ esac
 files="hosts/h-${my_host}.h"
 links="sysdep.h"
 
-if [ ! -f ${files} ] ; then
+if [ ! -f ${srcdir}/${files} ] ; then
 	if [ -n "${my_host}" ] ; then
-		echo '***' No file ${files}
+		echo '***' No file ${srcdir}/${files}
 	fi
 	echo '***' ${srcname} does not support host ${host}
 	exit 1
 fi
 
 host_makefile_frag=
-if [ -f config/mh-${my_host} ] ; then
+if [ -f ${srcdir}/config/mh-${my_host} ] ; then
 	host_makefile_frag=config/mh-${my_host}
 fi
 
@@ -115,7 +119,18 @@ case "${target_vendor}" in
 aout | coff | bout | elf) bfd_target=${target_cpu}-${target_vendor} ;;
 sony)		bfd_target=news ;;
 intel)		bfd_target=${target_cpu}-coff ;;	
-cbm | ncr)	bfd_target=${target_cpu}-elf ;;
+stratus | cbm | ncr)	bfd_target=${target_cpu}-elf ;;
+
+unknown)
+	case "${target_os}" in
+	bsd) bfd_target=${target_cpu}-aout ;;
+	sysv4*) bfd_target=${target_cpu}-elf ;;
+	sysv*) bfd_target=${target_cpu}-coff ;;
+	none)	case "${target_cpu}" in
+		tahoe | vax)	bfd_target=${target_cpu} ;;
+		esac
+	esac
+	;;
 
 ibm)	my_host=rs6000
 	case "${target_cpu}" in
@@ -202,9 +217,9 @@ motorola)
 	;;
 esac
 
-if [ ! -f config/mt-${bfd_target} ] ; then
+if [ ! -f ${srcdir}/config/mt-${bfd_target} ] ; then
 	if [ -n "${bfd_target}" ] ; then
-		echo '***' No file config/mt-${bfd_target}
+		echo '***' No file ${srcdir}/config/mt-${bfd_target}
 	fi
 	echo '***' BFD does not support target ${target}
 	echo '***' Look in bfd/configure.in for supported targets
