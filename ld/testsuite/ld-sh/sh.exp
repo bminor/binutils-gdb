@@ -56,7 +56,14 @@ if ![ld_assemble $as "-relax $srcdir/$subdir/sh1.s" tmpdir/sh1.o] {
 
 set testsrec "SH relaxing to S-records"
 
-if ![ld_simple_link $ld tmpdir/sh1.s1 "-relax --oformat srec tmpdir/sh1.o"] {
+if [istarget sh*-linux-gnu] {
+    # This target needs the explicit entry address.
+    catch "exec $objdump -x tmpdir/sh1 | grep start\\ address | sed s/start\\ address//" entry_addr
+    set srec_relax_arg "-Ttext $entry_addr -relax --oformat srec tmpdir/sh1.o"
+} else {
+    set srec_relax_arg "-relax --oformat srec tmpdir/sh1.o"
+}
+if ![ld_simple_link $ld tmpdir/sh1.s1 $srec_relax_arg ] {
     fail $testsrec
 } else {
     # The file name is embedded in the S-records, so create both
