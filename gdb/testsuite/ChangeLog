@@ -1,3 +1,7 @@
+2003-08-17  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/annota3.exp: Add missing newline.
+
 2003-08-07  Elena Zannoni  <ezannoni@redhat.com>
 
        * gdb.base/completion.exp: Remove reduntant completion test
