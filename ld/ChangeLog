@@ -1,3 +1,9 @@
+Fri Sep  8 16:32:43 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.host (i[345]86-sequent-ptx* | i[345]86-sequent-sysv*)
+	New case.
+	* configure.tgt (i[345]86-*-ptx*): New case.
+
 Thu Sep  7 10:48:26 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config.in: Rename from config.h.in.

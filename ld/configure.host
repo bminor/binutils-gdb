@@ -40,6 +40,11 @@ i[345]86-*-sysv4*)
   NATIVE_LIB_DIRS=/usr/ccs/lib
   ;;
 
+i[345]86-sequent-ptx* | i[345]86-sequent-sysv*)
+  HOSTING_CRT0='/lib/crt0.o `if [ -f ../gcc/crtbegin.o ]; then echo ../gcc/crtbegin.o; else gcc -print-libgcc-file-name | sed -e 's/libgcc.a/crtbegin.o/'; fi`'
+  HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else gcc -print-libgcc-file-name; fi` -lc `if [ -f ../gcc/crtend.o ]; then echo ../gcc/crtend.o; else gcc -print-libgcc-file-name | sed -e 's/libgcc.a/crtend.o/'; fi`'
+  ;;
+
 i[345]86-*-sysv*)
   HOSTING_CRT0='/lib/crt1.o `if [ -f ../gcc/crtbegin.o ]; then echo ../gcc/crtbegin.o; fi`'
   HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else gcc -print-libgcc-file-name; fi`  -lc `if [ -f ../gcc/crtend.o ]; then echo ../gcc/crtend.o; fi` /lib/crtn.o'
