@@ -1,5 +1,12 @@
 2003-04-10  Corinna Vinschen  <vinschen@redhat.com>
 
+	* i386-cygwin-tdep.c (i386_cygwin_frame_chain): New function.
+	(i386_cygwin_init_abi): Set i386_cygwin_frame_chain as new
+	frame_chain function.
+	* Makefile.in: Add dependencies due to above change.
+
+2003-04-10  Corinna Vinschen  <vinschen@redhat.com>
+
 	* blockframe.c (legacy_frame_chain_valid): Move call to
 	DEPRECATED_FRAME_CHAIN_VALID before calls to inside_entry_func and
 	inside_entry_file.

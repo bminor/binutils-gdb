@@ -1798,7 +1798,7 @@ i386gnu-tdep.o: i386gnu-tdep.c $(defs_h) $(i386_tdep_h) $(osabi_h)
 i386ly-tdep.o: i386ly-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) \
 	$(regcache_h) $(target_h) $(i386_tdep_h) $(osabi_h)
 i386-cygwin-tdep.o: i386-cygwin-tdep.c $(defs_h) $(gdb_string_h) \
-	$(i386_tdep_h) $(osabi_h)
+	$(i386_tdep_h) $(osabi_h) $(gdbcore_h) $(frame_h) $(dummy_frame_h)
 i386nbsd-tdep.o: i386nbsd-tdep.c $(defs_h) $(gdbtypes_h) $(gdbcore_h) \
 	$(regcache_h) $(arch_utils_h) $(i386_tdep_h) $(i387_tdep_h) \
 	$(nbsd_tdep_h) $(solib_svr4_h) $(osabi_h)
