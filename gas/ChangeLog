@@ -1,3 +1,8 @@
+Mon Sep 19 12:05:03 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* config/obj-coff.c (c_dot_file_symbol): Use bfd_abs_section_ptr,
+	not &bfd_abs_section.
+
 Thu Sep 15 18:36:34 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* expr.c (clean_up_expression): Use addressT, not bfd_vma.
