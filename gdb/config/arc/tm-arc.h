@@ -24,9 +24,6 @@
 /* Used by arc-tdep.c to set the default cpu type.  */
 #define DEFAULT_ARC_CPU_TYPE "base"
 
-/* We have IEEE floating point, if we have any float at all.  */
-#define IEEE_FLOAT (1)
-
 /* Offset from address of function to start of its code.
    Zero on most machines.  */
 #define FUNCTION_START_OFFSET 0

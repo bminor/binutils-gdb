@@ -1,5 +1,9 @@
 2002-01-20  Andrew Cagney  <ac131313@redhat.com>
 
+	* config/arc/tm-arc.h (IEEE_FLOAT): Delete.
+
+2002-01-20  Andrew Cagney  <ac131313@redhat.com>
+
 	From Jeff Law <law@redhat.com>:
 	* infttrace.c: Include <sys/pstat.h>.
 	(child_pid_to_exec_file): Revamp.  Use pstat call to get the
@@ -114,7 +118,6 @@
 	* config/h8300/tm-h8300.h (IEEE_FLOAT): Ditto.
 	* config/fr30/tm-fr30.h (IEEE_FLOAT): Ditto.
 	* config/arm/tm-arm.h (IEEE_FLOAT): Ditto.
-	* config/arc/tm-arc.h (IEEE_FLOAT): Ditto.
 	* config/alpha/tm-alpha.h (IEEE_FLOAT): Ditto.
 
 	* s390-tdep.c (s390_gdbarch_init): Do not set ieee_float.
