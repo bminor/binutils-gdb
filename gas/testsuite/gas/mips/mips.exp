@@ -746,4 +746,8 @@ if { [istarget mips*-*-*] } then {
     run_list_test "noat-5" ""
     run_list_test "noat-6" ""
     run_list_test "noat-7" ""
+
+    if { $elf && !$no_mips16 } {
+	run_dump_test "mips16-dwarf2"
+    }
 }

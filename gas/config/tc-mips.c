@@ -2009,6 +2009,15 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	}
     }
 
+#ifdef OBJ_ELF
+  /* The value passed to dwarf2_emit_insn is the distance between
+     the beginning of the current instruction and the address that
+     should be recorded in the debug tables.  For MIPS16 debug info
+     we want to use ISA-encoded addresses, so we pass -1 for an
+     address higher by one than the current.  */
+  dwarf2_emit_insn (mips_opts.mips16 ? -1 : 0);
+#endif
+
   /* Record the frag type before frag_var.  */
   if (prev_insn_frag)
     prev_insn_frag_type = prev_insn_frag->fr_type;
@@ -2243,24 +2252,11 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
     }
 
   if (! mips_opts.mips16)
-    {
-      md_number_to_chars (f, ip->insn_opcode, 4);
-#ifdef OBJ_ELF
-      dwarf2_emit_insn (4);
-#endif
-    }
+    md_number_to_chars (f, ip->insn_opcode, 4);
   else if (*reloc_type == BFD_RELOC_MIPS16_JMP)
     {
       md_number_to_chars (f, ip->insn_opcode >> 16, 2);
       md_number_to_chars (f + 2, ip->insn_opcode & 0xffff, 2);
-#ifdef OBJ_ELF
-      /* The value passed to dwarf2_emit_insn is the distance between
-	 the end of the current instruction and the address that should
-	 be recorded in the debug tables.  Since we want to use ISA-encoded
-	 addresses in MIPS16 debug info, the value is one byte less than
-	 the real instruction length.  */
-      dwarf2_emit_insn (3);
-#endif
     }
   else
     {
@@ -2270,9 +2266,6 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	  f += 2;
 	}
       md_number_to_chars (f, ip->insn_opcode, 2);
-#ifdef OBJ_ELF
-      dwarf2_emit_insn (ip->use_extend ? 3 : 1);
-#endif
     }
 
   /* Update the register mask information.  */

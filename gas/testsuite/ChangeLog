@@ -1,3 +1,10 @@
+2005-02-22  Maciej W. Rozycki  <macro@mips.com>
+
+	* gas/mips/mips16-dwarf2.d: New test to check DWARF2 line
+	information for MIPS16.
+	* gas/mips/mips16-dwarf2.s: Source for the new test.
+	* gas/mips/mips.exp: Run the new test.
+
 2005-02-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/d10v/instruction_packing-005.d: Adjust.

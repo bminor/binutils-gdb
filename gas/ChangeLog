@@ -1,3 +1,8 @@
+2005-02-22  Maciej W. Rozycki  <macro@mips.com>
+
+	* config/tc-mips.c (append_insn): Call dwarf2_emit_insn() before
+	emitting insn.
+
 2005-02-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/obj-coff.c (obj_coff_section): Replace SEC_SHARED with
