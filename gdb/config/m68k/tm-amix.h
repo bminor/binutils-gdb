@@ -44,7 +44,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define FRAME_CHAIN_VALID_ALTERNATE
 
 #include "tm-sysv4.h"
-#include "m68k/tm-68k.h"
+#include "m68k/tm-m68k.h"
 
 /* Offsets (in target ints) into jmp_buf.  Not defined in any system header
    file, so we have to step through setjmp/longjmp with a debugger and figure

@@ -82,4 +82,4 @@ Here is an m-news.h file for gdb.  It supports the 68881 registers.
     val = read_memory_integer (pc + 2, 4);			\
   val >>= 2; }
 
-#include "m68k/tm-68k.h"
+#include "m68k/tm-m68k.h"

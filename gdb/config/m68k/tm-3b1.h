@@ -26,4 +26,4 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define STACK_END_ADDR 0x300000
 
-#include "m68k/tm-68k.h"
+#include "m68k/tm-m68k.h"

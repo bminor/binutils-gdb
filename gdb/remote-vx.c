@@ -386,7 +386,7 @@ vx_read_register (regno)
   ptrace_in.pid = inferior_pid;
   ptrace_out.info.more_data = (caddr_t) &out_data;
 #ifndef I80960
-  out_data.len   = 18 * REGISTER_RAW_SIZE (0);		/* FIXME 68k hack */
+  out_data.len   = 18 * REGISTER_RAW_SIZE (0);		/* FIXME m68k hack */
 #else
   out_data.len = (16 + 16 + 3) * REGISTER_RAW_SIZE (0);
 #endif
@@ -506,7 +506,7 @@ vx_write_register (regno)
 
   in_data.len = (16 + 16 + 3) * sizeof (REGISTER_TYPE);
 
-#else  /* not 960 -- assume 68k -- FIXME */
+#else  /* not 960 -- assume m68k -- FIXME */
 
   in_data.len = 18 * sizeof (REGISTER_TYPE);
 
@@ -536,7 +536,7 @@ vx_write_register (regno)
       in_data.bytes = &registers[REGISTER_BYTE (FP0_REGNUM)];
       in_data.len = 4 * REGISTER_RAW_SIZE (FP0_REGNUM);
 #endif
-#else  /* not 960 -- assume 68k -- FIXME */
+#else  /* not 960 -- assume m68k -- FIXME */
 
       in_data.bytes = &registers[REGISTER_BYTE (FP0_REGNUM)];
       in_data.len = (8 * REGISTER_RAW_SIZE (FP0_REGNUM)

@@ -307,7 +307,7 @@ HFILES = breakpoint.h buildsym.h call-cmds.h command.h defs.h environ.h \
 	partial-stab.h serial.h signals.h solib.h symfile.h symtab.h \
 	stabsread.h target.h terminal.h typeprint.h xcoffsolib.h value.h \
 	c-lang.h ch-lang.h m2-lang.h complaints.h ns32k-opcode.h valprint.h \
-	config/m68k/tm-68k.h config/pa/tm-hppa.h \
+	config/m68k/tm-m68k.h config/pa/tm-hppa.h \
 	config/i960/tm-i960.h config/sparc/tm-sparc.h config/tm-sunos.h \
 	config/tm-sysv4.h config/m68k/xm-m68k.h config/sparc/xm-sparc.h \
 	config/xm-sysv4.h config/vax/xm-vax.h config/nm-trash.h \
@@ -564,8 +564,8 @@ config-check-targets:
 # for some machines.
 # But these rules don't do what we want; we want to hack the foo.o: tm.h
 # dependency to do the right thing.
-tm-isi.h tm-sun3.h tm-news.h tm-hp300bsd.h tm-altos.h: tm-68k.h
-tm-hp300hpux.h tm-sun2.h tm-3b1.h: tm-68k.h
+tm-isi.h tm-sun3.h tm-news.h tm-hp300bsd.h tm-altos.h: tm-m68k.h
+tm-hp300hpux.h tm-sun2.h tm-3b1.h: tm-m68k.h
 xm-news1000.h: xm-news.h
 xm-i386-sv32.h: xm-i386.h
 tm-i386gas.h: tm-i386.h

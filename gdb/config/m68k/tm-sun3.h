@@ -24,7 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define GDB_TARGET_IS_SUN3 1
 
-#include "m68k/tm-68k.h"
+#include "m68k/tm-m68k.h"
 
 /* Offsets (in target ints) into jmp_buf.  Not defined by Sun, but at least
    documented in a comment in <machine/setjmp.h>! */

@@ -185,8 +185,8 @@ print_insn (memaddr, stream)
 
 		case 'P':
 		  /* This output looks just like absolute addressing, but
-		     maybe that's OK (it's what the GDB 68k and EBMON
-		     29k disassemblers do).  */
+		     maybe that's OK (it's what the GDB m68k and EBMON
+		     a29k disassemblers do).  */
 		  /* All the shifting is to sign-extend it.  p*/
 		  print_address
 		    (memaddr +

@@ -1,4 +1,4 @@
-/* Target machine parameters for embedded m68k with 6888x float, for GDB.
+/* Target machine parameters for embedded m68k, without float, for GDB.
    Copyright 1986, 1987, 1989, 1992, 1993 Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -17,9 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#define HAVE_68881
-
-#include "m68k/tm-68k.h"
+#include "m68k/tm-m68k.h"
 
 /* Longjmp info comes from the Sun-3 machine description.  Might as well
    guess... */

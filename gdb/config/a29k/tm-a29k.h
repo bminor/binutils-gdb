@@ -24,7 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
    If gdb is ported to other a29k machines/systems, the
    machine/system-specific parts should be removed from this file (a
-   la tm-68k.h).  */
+   la tm-m68k.h).  */
 
 /* Byte order is configurable, but this machine runs big-endian.  */
 #define TARGET_BYTE_ORDER BIG_ENDIAN

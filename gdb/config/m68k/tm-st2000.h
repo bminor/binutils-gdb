@@ -19,4 +19,4 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define HAVE_68881		/* GDB won't compile without this */
 
-#include "m68k/tm-68k.h"
+#include "m68k/tm-m68k.h"

@@ -24,4 +24,4 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <machine/vmparam.h>
 #define STACK_END_ADDR USRSTACK
 
-#include "m68k/tm-68k.h"
+#include "m68k/tm-m68k.h"

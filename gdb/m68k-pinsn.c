@@ -20,7 +20,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "defs.h"
 #include "dis-asm.h"
 
-/* 68k instructions are never longer than this many bytes.  */
+/* m68k instructions are never longer than this many bytes.  */
 #define MAXLEN 22
 
 /* Print the m68k instruction at address MEMADDR in debugged memory,

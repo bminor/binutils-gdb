@@ -33,7 +33,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define DECR_PC_AFTER_BREAK 0
 
 /* The only reason this is here is the tm-altos.h reference below.  It
-   was moved back here from tm-68k.h.  FIXME? */
+   was moved back here from tm-m68k.h.  FIXME? */
 
 #define SKIP_PROLOGUE(pc)   \
 { register int op = read_memory_integer (pc, 2);	\
@@ -51,4 +51,4 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
     pc += 2;   /* skip bra #char */			\
 }
 
-#include "m68k/tm-68k.h"
+#include "m68k/tm-m68k.h"

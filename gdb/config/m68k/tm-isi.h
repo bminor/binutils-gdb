@@ -135,7 +135,7 @@ retry:									\
 }
 
 /* The only reason this is here is the tm-isi.h reference below.  It
-   was moved back here from tm-68k.h.  FIXME? */
+   was moved back here from tm-m68k.h.  FIXME? */
 
 #define SKIP_PROLOGUE(pc)   \
 { register int op = read_memory_integer (pc, 2);	\
@@ -153,4 +153,4 @@ retry:									\
     pc += 2;   /* skip bra #char */			\
 }
 
-#include "m68k/tm-68k.h"
+#include "m68k/tm-m68k.h"

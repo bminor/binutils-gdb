@@ -1,8 +1,19 @@
-Mon Mar 29 13:55:29 1993  Jim Kingdon  (kingdon@cygnus.com)
-
-	* breakpoint.c: Add comments regarding breakpoint_re_set.
-
 Mon Mar 29 15:03:25 1993  Fred Fish  (fnf@cygnus.com)
+
+	* config/m68k/tm-m68k.h:  Renamed from config/m68k/tm-68k.h.
+	* m68k/{tm-3b1.h, tm-altos.h, tm-amix.h, tm-es1800.h,
+	tm-hp300bsd.h, tm-hp300hpux.h, tm-isi.h, tm-news.h, tm-os68k.h,
+	tm-st2000.h, tm-sun2.h, tm-sun3.h, tm-vx68.h}:  Include tm-m68k.h
+	instead of tm-68k.h.
+	* Makefile.in (HFILES):  tm-68k.h renamed to tm-m68k.h.
+	* README, a29k-pinsn.c, m68k-pinsn.c, m68k-stub.c, remote-vx.c,
+	m68k/{altos.mh, altos.mt, apollo68b.mh, nm-apollo68b.h,
+	nm-hp300bsd.h, config/m68k/xm-apollo68b.h}:  Map '68k' to 'm68k'.
+	* a29k/tm-a29k.h, doc/gdbint.texinfo:  Account for renaming of
+	tm-68k.h to tm-m68k.h.
+	* m68k/m68k-fp.mt (TM_FILE):  tm-68k-fp.h renamed to tm-m68k-fp.h.
+	* m68k/m68k-nofp.mt (TM_FILE):  tm-68k-nofp.h renamed to
+	tm-m68k-nofp.h.
 
 	* config/a29k/tm-a29k.h:  Renamed from config/a29k/tm-29k.h.
 	* a29k-pinsn.c:  Renamed from am29k-pinsn.c.
@@ -21,6 +32,8 @@ Mon Mar 29 15:03:25 1993  Fred Fish  (fnf@cygnus.com)
 	* doc/gdbinit.texinfo:  Document renaming of tm-29k.h to tm-a29k.h.
 
 Mon Mar 29 13:55:29 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* breakpoint.c: Add comments regarding breakpoint_re_set.
 
 	* xcoffread.c (sort_syms, compare_symbols): Remove.
 	(xcoff_symfile_read): Use sort_all_symtab_syms from symfile.c

@@ -18,7 +18,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* This is a hack.  This is only a hack.  Were this a common source file,
-   rather than a config file specific to BSD on HP 68k's, you would have
+   rather than a config file specific to BSD on HP m68k's, you would have
    been instructed to clean this up.  As it is, clean it up if FSF's 
    HP's-running-ancient-BSD ever go away.  */
 
