@@ -1,3 +1,11 @@
+Wed Feb  2 12:30:13 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* coffcode.h (coff_write_relocs): If SELECT_RELOC is defined, pass
+	in the internal_reloc itself, not the type.
+	* coff-apollo.c, coff-h8300.c, coff-h8500.c, coff-i386.c,
+	coff-m68k.c, coff-sh.c, coff-we32k.c, coff-z8k.c: Changed
+	definition of SELECT_RELOC accordingly.
+
 Tue Feb  1 12:05:44 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* coffcode.h (bfd_coff_backend_data): Added new arguments to

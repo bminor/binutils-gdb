@@ -1,5 +1,5 @@
 /* Support for the generic parts of most COFF variants, for BFD.
-   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -1079,7 +1079,7 @@ DEFUN(coff_write_relocs,(abfd),
 
 #ifdef SELECT_RELOC
       /* Work out reloc type from what is required */
-      SELECT_RELOC(n.r_type, q->howto);
+      SELECT_RELOC(n, q->howto);
 #else
       n.r_type = q->howto->type;
 #endif
