@@ -51,6 +51,9 @@ static long parse_float PARAMS ((char **, const char **));
 static symbolS * create_label PARAMS ((const char *, const char *));
 static symbolS * create_colon_label PARAMS ((int, const char *, const char *));
 static char * unique_name PARAMS ((const char *));
+static int compute_nloop PARAMS ((gif_type, int, int));
+static void check_nloop PARAMS ((gif_type, int, int, int,
+				 char *, unsigned int));
 static long eval_expr PARAMS ((int, int, const char *, ...));
 static long parse_dma_addr_autocount ();
 static void inline_dma_data PARAMS ((int, DVP_INSN *));
@@ -125,8 +128,10 @@ static const char *dma_data_name;
 static gif_type gif_insn_type;
 /* Name of label of current gif<foo> insn's data.  */
 static const char *gif_data_name;
-/* Pointer to current gif insn in fragment.  */
-static char *gif_insn_frag;
+/* Pointer to frag of current gif insn.  */
+static fragS *gif_insn_frag;
+/* Pointer to current gif insn in gif_insn_frag.  */
+static char *gif_insn_frag_loc;
 
 /* For variable length instructions, pointer to the initial frag
    and pointer into that frag.  These only hold valid values if
@@ -210,6 +215,7 @@ static void s_state PARAMS ((int));
 const pseudo_typeS md_pseudo_table[] =
 {
   { "word", cons, 4 },
+  { "quad", cons, 16 },
   { "dmadata", s_dmadata, 0 },
   { "dmapackvif", s_dmapackvif, 0 },
   { "enddirect", s_enddirect, 0 },
@@ -612,7 +618,8 @@ assemble_gif (str)
 
   record_mach (DVP_GIF, 1);
 
-  gif_insn_frag = f = frag_more (16);
+  gif_insn_frag_loc = f = frag_more (16);
+  gif_insn_frag = frag_now;
   for (i = 0; i < 4; ++i)
     md_number_to_chars (f + i * 4, insn_buf[i], 4);
 
@@ -1278,6 +1285,27 @@ md_apply_fix3 (fixP, valueP, seg)
       decode_fixup_reloc_type ((int) fixP->fx_r_type,
 			       & cpu, & operand);
 
+      /* For the gif nloop operand, if it was specified by the user ensure
+	 it matches the value we computed.  */
+      if (cpu == DVP_GIF
+	  && (operand - gif_operands) == gif_operand_nloop)
+	{
+	  value = compute_nloop (fixP->tc_fix_data.type,
+				 fixP->tc_fix_data.nregs,
+				 value);
+	  if (fixP->tc_fix_data.user_nloop != -1)
+	    {
+	      check_nloop (fixP->tc_fix_data.type,
+			   fixP->tc_fix_data.nregs,
+			   fixP->tc_fix_data.user_nloop,
+			   value,
+			   fixP->fx_file, fixP->fx_line);
+	      /* Don't override the user specified value.  */
+	      fixP->fx_done = 1;
+	      return 1;
+	    }
+	}
+
       /* Fetch the instruction, insert the fully resolved operand
 	 value, and stuff the instruction back again.  The fixup is recorded
 	 at the appropriate word so pass DVP_MOD_THIS_WORD so any offset
@@ -1331,7 +1359,7 @@ md_apply_fix3 (fixP, valueP, seg)
 	  md_number_to_chars (where, value, 4);
 	  break;
 	default:
-	  abort ();
+	  as_fatal ("unexpected fixup");
 	}
     }
 
@@ -1597,6 +1625,52 @@ unique_name (prefix)
   asprintf (&result, "%s%d", prefix, counter);
   ++counter;
   return result;
+}
+
+/* Compute a value for nloop.  */
+
+static int
+compute_nloop (type, nregs, bytes)
+     gif_type type;
+     int nregs, bytes;
+{
+  int computed_nloop;
+
+  switch (type)
+    {
+    case GIF_PACKED :
+      /* We can't compute a value if no regs were specified and there is a
+	 non-zero amount of data.  Just set to something useful, a warning
+	 will be issued later.  */
+      if (nregs == 0)
+	nregs = 1;
+      computed_nloop = (bytes >> 4) / nregs;
+      break;
+    case GIF_REGLIST :
+      if (nregs == 0)
+	nregs = 1;
+      computed_nloop = (bytes >> 3) / nregs;
+      break;
+    case GIF_IMAGE :
+      computed_nloop = bytes >> 4;
+      break;
+    }
+
+  return computed_nloop;
+}
+
+/* Issue a warning if the user specified nloop value doesn't match the
+   computed value.  */
+
+static void
+check_nloop (type, nregs, user_nloop, computed_nloop, file, line)
+     gif_type type;
+     int nregs,user_nloop,computed_nloop;
+     char *file;
+     unsigned int line;
+{
+  if (user_nloop != computed_nloop)
+    as_warn_where (file, line, "nloop value does not match amount of data");
 }
 
 /* Compute the auto-count value for a DMA tag.
@@ -2183,10 +2257,14 @@ static void
 s_endgif (ignore)
      int ignore;
 {
-  long count;
+  int bytes;
   int specified_nloop = gif_nloop ();
   int computed_nloop;
   int nregs = gif_nregs ();
+  char *file;
+  unsigned int line;
+
+  as_where (&file, &line);
 
   if (CUR_ASM_STATE != ASM_GIF)
     {
@@ -2195,77 +2273,72 @@ s_endgif (ignore)
     }
   pop_asm_state (0);
 
-  /* The -16 is because the `gif_data_name' label is emitted at the start
-     of the gif tag.  */
-  count = eval_expr (0, 0, ". - %s - 16", gif_data_name);
-
-  if (count < 0
-      || fixup_count != 0)
-    {
-      as_warn ("bad data count");
-      return;
-    }
-
-  /* Compute a value for nloop.
-     Also check whether we're left on a double/quadword boundary.  */
+  /* Fill out to proper boundary.
+     ??? This may cause eval_expr to always queue a fixup.  So be it.  */
   switch (gif_insn_type)
     {
-    case GIF_PACKED :
-      if (count % 16 != 0)
-	as_warn ("data doesn't fill last quadword");
-      if (nregs == 0)
-	{
-	  if (count != 0)
-	    as_warn ("non-zero amount of data, but no registers specified");
-	  computed_nloop = 0;
-	}
-      else
-	computed_nloop = (count >> 4) / nregs;
-      break;
-    case GIF_REGLIST :
-      if (count % 8 != 0)
-	as_warn ("data doesn't fill last doubleword");
-      /* Fill out to quadword if odd number of doublewords.  */
-      if (nregs == 0)
-	{
-	  if (count != 0)
-	    as_warn ("non-zero amount of data, but no registers specified");
-	  computed_nloop = 0;
-	}
-      else
-	computed_nloop = (count >> 3) / nregs;
-      break;
-    case GIF_IMAGE :
-      if (count % 16 != 0)
-	as_warn ("data doesn't fill last quadword");
-      computed_nloop = count >> 4;
-      break;
+    case GIF_PACKED :  frag_align (4, 0, 0); break;
+    case GIF_REGLIST : frag_align (3, 0, 0); break;
+    case GIF_IMAGE :   frag_align (4, 0, 0); break;
     }
 
-  /* FIXME: How should be handle the case where count is not a proper
-     multiple of 8/16?  We could just always emit a .align 16 or some
-     such.  */
+  /* The -16 is because the `gif_data_name' label is emitted at the start
+     of the gif tag.  If we're in a different frag from the one we started
+     with, this can't be computed until much later.  To cope we queue a fixup
+     and deal with it then.
+     ??? The other way to handle this is by having expr() compute "syma - symb"
+     when they're in different fragments but the difference is constant.
+     Not sure how much of a slowdown that will introduce though.  */
+  fixup_count = 0;
+  bytes = eval_expr (gif_operand_nloop, 0, ". - %s - 16", gif_data_name);
 
-  /* Validate nloop if specified.  Otherwise write the computed value into
-     the insn.  */
-  if (specified_nloop != -1)
+  /* Compute a value for nloop if we can.  */
+
+  if (fixup_count == 0)
     {
-      if (computed_nloop != specified_nloop)
-	{
-	  as_warn ("nloop value does not match size of data");
-	  return;
-	}
+      computed_nloop = compute_nloop (gif_insn_type, nregs, bytes);
+
+      /* If the user specified nloop, verify it.  */
+      if (specified_nloop != -1)
+	check_nloop (gif_insn_type, nregs, specified_nloop, computed_nloop,
+		     file, line);
     }
+
+  /* If computation of nloop can't be done yet, queue a fixup and do it later.
+     Otherwise validate nloop if specified or write the computed value into
+     the insn.  */
+
+  if (fixup_count != 0)
+    {
+      /* FIXME: It might eventually be possible to combine all the various
+	 copies of this bit of code.  */
+      int op_type, reloc_type, offset;
+      const dvp_operand *operand;
+      fixS *fix;
+
+      op_type = fixups[0].opindex;
+      offset = fixups[0].offset;
+      reloc_type = encode_fixup_reloc_type (DVP_GIF, op_type);
+      operand = &gif_operands[op_type];
+      fix = fix_new_exp (gif_insn_frag,
+			 gif_insn_frag_loc + offset - gif_insn_frag->fr_literal,
+			 4, &fixups[0].exp, 0,
+			 (bfd_reloc_code_real_type) reloc_type);
+      /* Record user specified value so we can test it when we compute the
+	 actual value.  */
+      fix->tc_fix_data.type = gif_insn_type;
+      fix->tc_fix_data.nregs = nregs;
+      fix->tc_fix_data.user_nloop = specified_nloop;
+    }
+  else if (specified_nloop != -1)
+    ; /* nothing to do */
   else
     {
-      DVP_INSN insn = bfd_getl32 (gif_insn_frag);
-      char *file;
-      unsigned int line;
-      as_where (&file, &line);
+      DVP_INSN insn = bfd_getl32 (gif_insn_frag_loc);
       insert_operand_final (DVP_GIF, &gif_operands[gif_operand_nloop],
 			    DVP_MOD_THIS_WORD, &insn,
 			    (offsetT) computed_nloop, file, line);
-      bfd_putl32 ((bfd_vma) insn, gif_insn_frag);
+      bfd_putl32 ((bfd_vma) insn, gif_insn_frag_loc);
     }
 
   gif_data_name = NULL;
