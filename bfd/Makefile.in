@@ -77,6 +77,10 @@ $(TARGETLIB): $(OFILES)
 	 $(AR) $(AR_FLAGS) $(TARGETLIB) $(OFILES)
 	 $(RANLIB) $(TARGETLIB)
 
+# When compiling targets.c, supply the default target info from configure.
+targets.o: targets.c
+	$(CC) $(CFLAGS) -c $(TDEFAULTS) $<
+
 stage1: force
 	- mkdir stage1
 	- mv -f $(STAGESTUFF) stage1
