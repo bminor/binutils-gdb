@@ -1,5 +1,11 @@
 Mon Jan 30 11:44:52 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.base/nodebug.c (inner): Use variables so AIX linker doesn't
+	remove them.
+	* gdb.base/nodebug.exp: Accept "function" in addition to "text
+	variable and "variable" in addition to "data variable".
+	* gdb.base/nodebug.exp: xfail datalocal and bsslocal tests for AIX.
+
 	* gdb.base/list.exp (test_forward_search): Set listsize to 4 not
 	2.
 	* gdb.base/list1.c (long_line): Add additional statement at start
