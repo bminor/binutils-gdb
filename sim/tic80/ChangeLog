@@ -1,3 +1,12 @@
+Mon Sep 29 12:49:06 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* insns (get_fp_reg, set_fp_reg): Update to use changed sim_fpu
+ 	interface.
+	(do_fadd, do_fcmp, do_fdiv, do_fmpy, do_frnd, do_fsub): Ditto.
+
+	* misc.c (tic80_trace_fpu3, tic80_trace_fpu2, tic80_trace_fpu1,
+ 	tic80_trace_fpu2i) Update to use changed sim_fpu interface.
+	
 Fri Oct  3 09:28:00 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (SIM_AC_OPTIONS_BITSIZE): Define.

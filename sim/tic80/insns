@@ -434,10 +434,12 @@ void::function::do_dst:int Source, unsigned32 base, unsigned32 *rBase, int m , i
 
 
 sim_fpu::function::get_fp_reg:int reg, unsigned32 val, int precision
+	sim_fpu ans;
 	switch (precision)
 	  {
 	  case 0: /* single */
-	    return sim_fpu_32to (val);
+	    sim_fpu_32to (&ans, val);
+	    break;
 	  case 1: /* double */
 	    if (reg < 0)
 	      sim_engine_abort (SD, CPU, cia, "DP immediate invalid");
@@ -445,43 +447,43 @@ sim_fpu::function::get_fp_reg:int reg, unsigned32 val, int precision
 	      sim_engine_abort (SD, CPU, cia, "DP FP register must be even");
 	    if (reg <= 1)
 	      sim_engine_abort (SD, CPU, cia, "DP FP register must be >= 2");
-	    return sim_fpu_64to (INSERTED64 (GPR (reg + 1), 63, 32)
-	                         | INSERTED64 (GPR (reg), 31, 0));
+	    sim_fpu_232to (&ans, GPR (reg), GPR (reg + 1));
+	    break;
 	  case 2: /* 32 bit signed integer */
-	    return sim_fpu_i32to (val);
+	    sim_fpu_i32to (&ans, val, 0);
+	    break;
 	  case 3: /* 32 bit unsigned integer */
-	    return sim_fpu_u32to (val);
+	    sim_fpu_u32to (&ans, val, 0);
+	    break;
 	  default:
 	    sim_engine_abort (SD, CPU, cia, "Unsupported FP precision");
 	  }
-	return sim_fpu_i32to (0);
+	return ans;
 void::function::set_fp_reg:int Dest, sim_fpu val, int PD
 	switch (PD)
 	  {
 	  case 0: /* single */
 	    {
-	      GPR (Dest) = sim_fpu_to32 (val);
+	      sim_fpu_to32 (&GPR (Dest), &val);
 	      break;
 	    }
 	  case 1: /* double */
 	    {
-	      unsigned64 v = sim_fpu_to64 (val);
 	      if (Dest & 1)
 	        sim_engine_abort (SD, CPU, cia, "DP FP Dest register must be even");
 	      if (Dest <= 1)
 	        sim_engine_abort (SD, CPU, cia, "DP FP Dest register must be >= 2");
-	      GPR (Dest + 0) = VL4_8 (v);
-	      GPR (Dest + 1) = VH4_8 (v);
+	      sim_fpu_to232 (&GPR (Dest + 0), &GPR (Dest + 1), &val);
 	      break;
 	    }
 	  case 2: /* signed */
 	    {
-	      GPR (Dest) = sim_fpu_to32i (val);
+	      sim_fpu_to32i (&GPR (Dest), &val, 0);
 	      break;
 	    }
 	  case 3: /* unsigned */
 	    {
-	      GPR (Dest) = sim_fpu_to32u (val);
+	      sim_fpu_to32u (&GPR (Dest), &val, 0);
 	      break;
 	    }
 	  default:
@@ -490,7 +492,8 @@ void::function::set_fp_reg:int Dest, sim_fpu val, int PD
 
 // fadd.{s|d}{s|d}{s|d}
 void::function::do_fadd:int Dest, int PD, sim_fpu s1, sim_fpu s2
-	sim_fpu ans = sim_fpu_add (s1, s2);
+	sim_fpu ans;
+	sim_fpu_add (&ans, &s1, &s2);
 	TRACE_FPU3 (ans, s1, s2);
 	set_fp_reg (_SD, Dest, ans, PD);
 const char *::function::str_PX:int PX
@@ -517,25 +520,25 @@ const char *::function::str_PX:int PX
 // fcmp.{s|d}{s|d}{s|d}
 void::function::do_fcmp:unsigned32 *rDest, sim_fpu s1, sim_fpu s2
 	unsigned32 result = 0;
-	if (sim_fpu_is_nan (s1) || sim_fpu_is_nan (s2))
+	if (sim_fpu_is_nan (&s1) || sim_fpu_is_nan (&s2))
 	  result |= BIT32 (30);
 	else
 	  {
 	    result |= BIT32 (31);
-	    if (sim_fpu_is_eq (s1, s2)) result |= BIT32(20);
-	    if (sim_fpu_is_ne (s1, s2)) result |= BIT32(21);
-	    if (sim_fpu_is_gt (s1, s2)) result |= BIT32(22);
-	    if (sim_fpu_is_le (s1, s2)) result |= BIT32(23);
-	    if (sim_fpu_is_lt (s1, s2)) result |= BIT32(24);
-	    if (sim_fpu_is_ge (s1, s2)) result |= BIT32(25);
-	    if (sim_fpu_is_lt (s1, sim_fpu_i32to (0))
-	        || sim_fpu_is_gt (s1, s2)) result |= BIT32(26);
-	    if (sim_fpu_is_lt (sim_fpu_i32to (0), s1)
-	        && sim_fpu_is_lt (s1, s2)) result |= BIT32(27);
-	    if (sim_fpu_is_le (sim_fpu_i32to (0), s1)
-	        && sim_fpu_is_le (s1, s2)) result |= BIT32(28);
-	    if (sim_fpu_is_le (s1, sim_fpu_i32to (0))
-	        || sim_fpu_is_ge (s1, s2)) result |= BIT32(29);
+	    if (sim_fpu_is_eq (&s1, &s2)) result |= BIT32(20);
+	    if (sim_fpu_is_ne (&s1, &s2)) result |= BIT32(21);
+	    if (sim_fpu_is_gt (&s1, &s2)) result |= BIT32(22);
+	    if (sim_fpu_is_le (&s1, &s2)) result |= BIT32(23);
+	    if (sim_fpu_is_lt (&s1, &s2)) result |= BIT32(24);
+	    if (sim_fpu_is_ge (&s1, &s2)) result |= BIT32(25);
+	    if (sim_fpu_is_lt (&s1, &sim_fpu_zero)
+	        || sim_fpu_is_gt (&s1, &s2)) result |= BIT32(26);
+	    if (sim_fpu_is_lt (&sim_fpu_zero, &s1)
+	        && sim_fpu_is_lt (&s1, &s2)) result |= BIT32(27);
+	    if (sim_fpu_is_le (&sim_fpu_zero, &s1)
+	        && sim_fpu_is_le (&s1, &s2)) result |= BIT32(28);
+	    if (sim_fpu_is_le (&s1, &sim_fpu_zero)
+	        || sim_fpu_is_ge (&s1, &s2)) result |= BIT32(29);
 	  }
 	*rDest = result;
 	TRACE_FPU2I (result, s1, s2);
@@ -554,7 +557,8 @@ void::function::do_fcmp:unsigned32 *rDest, sim_fpu s1, sim_fpu s2
 
 // fdiv.{s|d}{s|d}{s|d}
 void::function::do_fdiv:int Dest, int PD, sim_fpu s1, sim_fpu s2
-	sim_fpu ans = sim_fpu_div (s1, s2);
+	sim_fpu ans;
+	sim_fpu_div (&ans, &s1, &s2);
 	TRACE_FPU3 (ans, s1, s2);
 	set_fp_reg (_SD, Dest, ans, PD);
 31.Dest,26.Source2,21.0b111110011,12.0,11./,10.PD,8.P2,6.P1,4.Source1::f::fdiv r
@@ -575,19 +579,28 @@ void::function::do_fmpy:int Dest, int PD, sim_fpu s1, sim_fpu s2
 	  {
 	  case 2: /* signed */
 	    {
-	      GPR (Dest) = sim_fpu_to64i (s1) * sim_fpu_to64i (s2);
+	      signed64 i1;
+	      signed64 i2;
+	      sim_fpu_to64i (&i1, &s1, 0);
+	      sim_fpu_to64i (&i2, &s2, 0);
+	      GPR (Dest) = i1 * i2;
 	      TRACE_FPU2I (GPR (Dest), s1, s2);
 	      break;
 	    }
 	  case 3: /* unsigned */
 	    {
-	      GPR (Dest) = sim_fpu_to64u (s1) * sim_fpu_to64u (s2);
+	      unsigned64 u1;
+	      unsigned64 u2;
+	      sim_fpu_to64u (&u1, &s1, 0);
+	      sim_fpu_to64u (&u2, &s2, 0);
+	      GPR (Dest) = u1 * u2;
 	      TRACE_FPU2I (GPR (Dest), s1, s2);
 	      break;
 	    }
 	  default:
 	    {
-	      sim_fpu ans = sim_fpu_mul (s1, s2);
+	      sim_fpu ans;
+	      sim_fpu_mul (&ans, &s1, &s2);
 	      set_fp_reg (_SD, Dest, ans, PD);
 	      TRACE_FPU3 (ans, s1, s2);
 	    }
@@ -664,7 +677,8 @@ void::function::do_frnd:int Dest, int PD, sim_fpu s1
 
 // fsub.{s|d}{s|d}{s|d}
 void::function::do_fsub:int Dest, int PD, sim_fpu s1, sim_fpu s2
-	sim_fpu ans = sim_fpu_sub (s1, s2);
+	sim_fpu ans;
+	sim_fpu_sub (&ans, &s1, &s2);
 	TRACE_FPU3 (ans, s1, s2);
 	set_fp_reg (_SD, Dest, ans, PD);
 31.Dest,26.Source2,21.0b111110001,12.0,11.r,10.PD,8.P2,6.P1,4.Source1::f::fsub r
