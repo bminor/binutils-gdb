@@ -1,3 +1,8 @@
+Fri Nov  8 12:29:51 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* remote-sim.c (simulator_command): Set up callbacks before
+	entering the simulator.
+
 start-sanitize-d10v
 Thu Nov  7 15:19:08 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 

@@ -441,15 +441,19 @@ gdbsim_mourn_inferior ()
   generic_mourn_inferior ();
 }
 
-/* Put a command string, in args, out to MONITOR.  Output from MONITOR
-   is placed on the users terminal until the prompt is seen. FIXME: We
-   read the characters ourseleves here cause of a nasty echo.  */
+/* Pass the command argument through to the simulator verbatim.  The
+   simulator must do any command interpretation work.  */
 
 static void
 simulator_command (args, from_tty)
      char *args;
      int from_tty;
 {
+  /* The user may give a command before the simulator is opened, so
+     ensure that the callbacks have been set up.  */
+  sim_set_callbacks (&default_callback);
+  default_callback.init (&default_callback);
+
   sim_do_command (args);
 }
 
