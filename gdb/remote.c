@@ -222,6 +222,7 @@ struct packet_reg
   long offset; /* Offset into G packet.  */
   long regnum; /* GDB's internal register number.  */
   LONGEST pnum; /* Remote protocol register number.  */
+  int in_g_packet; /* Always part of G packet.  */
   /* long size in bytes;  == REGISTER_RAW_SIZE (regnum); at present.  */
   /* char *name; == REGISTER_NAME (regnum); at present.  */
 };
@@ -230,7 +231,10 @@ struct remote_state
 {
   /* Description of the remote protocol registers.  */
   long sizeof_g_packet;
-  struct packet_reg *g_packet; /* NULL terminated.  */
+
+  /* Description of the remote protocol registers indexed by REGNUM
+     (making an array of NUM_REGS + NUM_PSEUDO_REGS in size).  */
+  struct packet_reg *regs;
 
   /* This is the size (in chars) of the first response to the ``g''
      packet.  It is used as a heuristic when determining the maximum
@@ -264,16 +268,15 @@ init_remote_state (struct gdbarch *gdbarch)
      behavour - just copy in the description of the register cache.  */
   rs->sizeof_g_packet = REGISTER_BYTES; /* OK use.   */
 
-  /* Since, for the moment, the regcache is still being direct mapped,
-     there are exactly NUM_REGS.  Zero allocate a buffer adding space
-     for a sentinal.  */
-  rs->g_packet = xcalloc (NUM_REGS + 1, sizeof (struct packet_reg));
-  rs->g_packet[NUM_REGS].offset = -1;
-  for (regnum = 0; regnum < NUM_REGS; regnum++)
+  /* Assume a 1:1 regnum<->pnum table.  */
+  rs->regs = xcalloc (NUM_REGS + NUM_PSEUDO_REGS, sizeof (struct packet_reg));
+  for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
     {
-      rs->g_packet[regnum].pnum = regnum;
-      rs->g_packet[regnum].regnum = regnum;
-      rs->g_packet[regnum].offset = REGISTER_BYTE (regnum);
+      struct packet_reg *r = &rs->regs[regnum];
+      r->pnum = regnum;
+      r->regnum = regnum;
+      r->offset = REGISTER_BYTE (regnum);
+      r->in_g_packet = (regnum < NUM_REGS);
       /* ...size = REGISTER_RAW_SIZE (regnum); */
       /* ...name = REGISTER_NAME (regnum); */
     }
@@ -306,30 +309,32 @@ static void
 free_remote_state (struct gdbarch *gdbarch, void *pointer)
 {
   struct remote_state *data = pointer;
-  xfree (data->g_packet);
+  xfree (data->regs);
   xfree (data);
 }
 
 static struct packet_reg *
 packet_reg_from_regnum (struct remote_state *rs, long regnum)
 {
-  struct packet_reg *reg;
-  for (reg = rs->g_packet; reg->offset >= 0; reg++)
+  if (regnum < 0 && regnum >= NUM_REGS + NUM_PSEUDO_REGS)
+    return NULL;
+  else
     {
-      if (reg->regnum == regnum)
-	return reg;
+      struct packet_reg *r = &rs->regs[regnum];
+      gdb_assert (r->regnum == regnum);
+      return r;
     }
-  return NULL;
 }
 
 static struct packet_reg *
 packet_reg_from_pnum (struct remote_state *rs, LONGEST pnum)
 {
-  struct packet_reg *reg;
-  for (reg = rs->g_packet; reg->offset >= 0; reg++)
+  int i;
+  for (i = 0; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
     {
-      if (reg->pnum == pnum)
-	return reg;
+      struct packet_reg *r = &rs->regs[i];
+      if (r->pnum == pnum)
+	return r;
     }
   return NULL;
 }
@@ -3406,6 +3411,16 @@ remote_fetch_registers (int regnum)
 
   set_thread (PIDGET (inferior_ptid), 1);
 
+  if (regnum >= 0)
+    {
+      struct packet_reg *reg = packet_reg_from_regnum (rs, regnum);
+      gdb_assert (reg != NULL);
+      if (!reg->in_g_packet)
+	internal_error (__FILE__, __LINE__,
+			"Attempt to fetch a non G-packet register when this "
+			"remote.c does not support the p-packet.");
+    }
+
   sprintf (buf, "g");
   remote_send (buf, (rs->remote_packet_size));
 
@@ -3462,14 +3477,18 @@ remote_fetch_registers (int regnum)
 	warning ("Remote reply is too short: %s", buf);
     }
 
-supply_them:
+ supply_them:
   {
-    struct packet_reg *g;
-    for (g = rs->g_packet; g->offset >= 0; g++)
+    int i;
+    for (i = 0; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
       {
-	supply_register (g->regnum, regs + g->offset);
-	if (buf[g->offset * 2] == 'x')
-	  set_register_cached (i, -1);
+	struct packet_reg *r = &rs->regs[i];
+	if (r->in_g_packet)
+	  {
+	    supply_register (r->regnum, regs + r->offset);
+	    if (buf[r->offset * 2] == 'x')
+	      set_register_cached (i, -1);
+	  }
       }
   }
 }
@@ -3566,12 +3585,14 @@ remote_store_registers (int regnum)
   /* Extract all the registers in the regcache copying them into a
      local buffer.  */
   {
-    struct packet_reg *g;
+    int i;
     regs = alloca (rs->sizeof_g_packet);
     memset (regs, rs->sizeof_g_packet, 0);
-    for (g = rs->g_packet; g->offset >= 0; g++)
+    for (i = 0; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
       {
-	regcache_collect (g->regnum, regs + g->offset);
+	struct packet_reg *r = &rs->regs[i];
+	if (r->in_g_packet)
+	  regcache_collect (r->regnum, regs + r->offset);
       }
   }
 

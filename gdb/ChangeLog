@@ -1,5 +1,16 @@
 2001-12-20  Andrew Cagney  <ac131313@redhat.com>
 
+	* remote.c (struct packet_reg): Add field in_g_packet.
+	(struct remote_state): Rename field g_packet to regs;
+	(free_remote_state): Update.
+	(init_remote_state): Add pseudo-registers to table.  Initialize
+	in_g_packet.  Drop sentinal from table.
+	(packet_reg_from_regnum, packet_reg_from_pnum): Update.
+	(remote_fetch_registers): Handle registers not in the g-packet.
+	(remote_store_registers): Ditto.
+
+2001-12-20  Andrew Cagney  <ac131313@redhat.com>
+
 	* gdbarch.sh (TARGET_CHAR_SIGNED): Do not specify the print
 	format.
 
