@@ -242,7 +242,8 @@ s390_get_frame_info (CORE_ADDR pc, struct frame_extra_info *fextra_info,
     {
       if (fi && fi->frame)
 	{
-	  orig_sp = fi->frame + fextra_info->stack_bought;
+          if (! init_extra_info && fextra_info->initialised)
+            orig_sp = fi->frame + fextra_info->stack_bought;
 	  saved_regs = fi->saved_regs;
 	}
       if (init_extra_info || !fextra_info->initialised)

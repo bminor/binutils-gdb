@@ -1,3 +1,8 @@
+2001-12-03  Jim Blandy  <jimb@redhat.com>
+
+	* s390-tdep.c (s390_get_frame_info): Don't used fextra_info to set
+ 	orig_sp if it's not initialized.
+
 2001-11-30  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* findvar.c (locate_var_value): Specify in which register a register
