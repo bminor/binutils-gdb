@@ -1,3 +1,8 @@
+Fri Sep 12 12:01:39 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (mips_options): Fix samples option short form, should
+ 	be `x'.
+
 Thu Sep 11 09:35:29 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (sim_info): Enable info code.  Was just returning.

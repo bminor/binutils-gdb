@@ -747,7 +747,7 @@ static const OPTION mips_options[] =
       'y', "FREQ", "Profile frequency",
       mips_option_handler },
   { {"samples",  required_argument, NULL,'x'},
-      'y', "SIZE", "Profile sample size",
+      'x', "SIZE", "Profile sample size",
       mips_option_handler },
   { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL }
 };
