@@ -1,5 +1,6 @@
-2001-07-11  Greg McGary  <greg@mcgary.org>
- 
+2001-07-11  J.T. Conklin  <jtc@redback.com>
+
+	From Greg McGary <greg@mcgary.org>:
 	* gdbserver/remote-utils.c (remote_open): Set gdbserver as "owner"
 	of SIGIO.
 	(input_interrupt): Don't block on read, in case we got redundant
