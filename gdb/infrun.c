@@ -2745,6 +2745,20 @@ handle_inferior_event (struct execution_control_state *ecs)
 	if (step_over_calls > 0 || IGNORE_HELPER_CALL (stop_pc))
 	  {
 	    /* We're doing a "next".  */
+
+	    if (IN_SIGTRAMP (stop_pc, ecs->stop_func_name)
+		&& INNER_THAN (step_frame_address, read_sp()))
+	      /* We stepped out of a signal handler, and into its
+                 calling trampoline.  This is misdetected as a
+                 subroutine call, but stepping over the signal
+                 trampoline isn't such a bad idea.  In order to do
+                 that, we have to ignore the value in
+                 step_frame_address, since that doesn't represent the
+                 frame that'll reach when we return from the signal
+                 trampoline.  Otherwise we'll probably continue to the
+                 end of the program.  */
+	      step_frame_address = 0;
+
 	    step_over_function (ecs);
 	    keep_going (ecs);
 	    return;
@@ -3045,7 +3059,7 @@ step_over_function (struct execution_control_state *ecs)
   step_resume_breakpoint =
     set_momentary_breakpoint (sr_sal, get_current_frame (), bp_step_resume);
 
-  if (!IN_SOLIB_DYNSYM_RESOLVE_CODE (sr_sal.pc))
+  if (step_frame_address && !IN_SOLIB_DYNSYM_RESOLVE_CODE (sr_sal.pc))
     step_resume_breakpoint->frame = step_frame_address;
 
   if (breakpoints_inserted)

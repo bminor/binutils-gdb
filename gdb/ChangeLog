@@ -1,3 +1,11 @@
+2000-05-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* infrun.c (handle_inferior_event): When doing a "next", and
+	stepping out of a signal handler into its calling trampoline
+	ignore the value of step_frame_address.
+	(step_over_function): Only modify step_resume_breakpoint->frame if
+	the value of step_frame_address is non-zero.
+
 2000-05-03  Michael Snyder  <msnyder@seadog.cygnus.com>
 
 	* monitor.c (monitor_fetch_register): MAX_REGISTER_RAW_SIZE
