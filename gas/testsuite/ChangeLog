@@ -1,3 +1,10 @@
+2003-11-18  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
+	* gas/mips/lca-svr4pic.d: New test for the "lca" macro.
+	* gas/mips/lca-xgot.d: Likewise.
+	* gas/mips/lca.s: Source for the new tests.
+	* gas/mips/mips.exp: Run the new tests.
+
 2003-11-14  Nick Clifton  <nickc@redhat.com>
 
 	* gas/arm/arm7.d: Pass -D instead of -d to objdump in order to

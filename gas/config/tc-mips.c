@@ -4010,6 +4010,7 @@ macro (struct mips_cl_insn *ip)
   int coproc = 0;
   int lr = 0;
   int imm = 0;
+  int call = 0;
   offsetT maxnum;
   int off;
   bfd_reloc_code_real_type r;
@@ -4774,9 +4775,15 @@ macro (struct mips_cl_insn *ip)
       macro_build (NULL, &icnt, NULL, s2, "d", dreg);
       return;
 
+    case M_DLCA_AB:
+      dbl = 1;
+    case M_LCA_AB:
+      call = 1;
+      goto do_la;
     case M_DLA_AB:
       dbl = 1;
     case M_LA_AB:
+    do_la:
       /* Load the address of a symbol into a register.  If breg is not
 	 zero, we then add a base register to it.  */
 
@@ -4956,7 +4963,7 @@ macro (struct mips_cl_insn *ip)
 	  /* If this is a reference to an external symbol, and there
 	     is no constant, we want
 	       lw	$tempreg,<sym>($gp)	(BFD_RELOC_MIPS_GOT16)
-	     or if tempreg is PIC_CALL_REG
+	     or for lca or if tempreg is PIC_CALL_REG
 	       lw	$tempreg,<sym>($gp)	(BFD_RELOC_MIPS_CALL16)
 	     For a local symbol, we want
 	       lw	$tempreg,<sym>($gp)	(BFD_RELOC_MIPS_GOT16)
@@ -4986,7 +4993,8 @@ macro (struct mips_cl_insn *ip)
 	  expr1.X_add_number = offset_expr.X_add_number;
 	  offset_expr.X_add_number = 0;
 	  frag_grow (32);
-	  if (expr1.X_add_number == 0 && tempreg == PIC_CALL_REG)
+	  if (expr1.X_add_number == 0 && breg == 0
+	      && (call || tempreg == PIC_CALL_REG))
 	    lw_reloc_type = (int) BFD_RELOC_MIPS_CALL16;
 	  macro_build (NULL, &icnt, &offset_expr, ADDRESS_LOAD_INSN, "t,o(b)",
 		       tempreg, lw_reloc_type, mips_gp_register);
@@ -5082,7 +5090,7 @@ macro (struct mips_cl_insn *ip)
 	     constant, or local symbol (*), with or without a
 	     constant, we want
 	       lw	$tempreg,<sym>($gp)	(BFD_RELOC_MIPS_GOT_DISP)
-	     or if tempreg is PIC_CALL_REG
+	     or for lca or if tempreg is PIC_CALL_REG
 	       lw	$tempreg,<sym>($gp)	(BFD_RELOC_MIPS_CALL16)
 
 	     If we have a small constant, and this is a reference to
@@ -5102,7 +5110,8 @@ macro (struct mips_cl_insn *ip)
 	     instruction.  */
 
 	  frag_grow (28);
-	  if (offset_expr.X_add_number == 0 && tempreg == PIC_CALL_REG)
+	  if (offset_expr.X_add_number == 0 && breg == 0
+	      && (call || tempreg == PIC_CALL_REG))
 	    lw_reloc_type = (int) BFD_RELOC_MIPS_CALL16;
 	  if (offset_expr.X_add_number)
 	    {
@@ -5206,7 +5215,7 @@ macro (struct mips_cl_insn *ip)
 	       lui	$tempreg,<sym>		(BFD_RELOC_MIPS_GOT_HI16)
 	       addu	$tempreg,$tempreg,$gp
 	       lw	$tempreg,<sym>($tempreg) (BFD_RELOC_MIPS_GOT_LO16)
-	     or if tempreg is PIC_CALL_REG
+	     or for lca or if tempreg is PIC_CALL_REG
 	       lui	$tempreg,<sym>		(BFD_RELOC_MIPS_CALL_HI16)
 	       addu	$tempreg,$tempreg,$gp
 	       lw	$tempreg,<sym>($tempreg) (BFD_RELOC_MIPS_CALL_LO16)
@@ -5249,7 +5258,8 @@ macro (struct mips_cl_insn *ip)
 	    gpdel = 4;
 	  else
 	    gpdel = 0;
-	  if (expr1.X_add_number == 0 && tempreg == PIC_CALL_REG)
+	  if (expr1.X_add_number == 0 && breg == 0
+	      && (call || tempreg == PIC_CALL_REG))
 	    {
 	      lui_reloc_type = (int) BFD_RELOC_MIPS_CALL_HI16;
 	      lw_reloc_type = (int) BFD_RELOC_MIPS_CALL_LO16;
@@ -5410,7 +5420,7 @@ macro (struct mips_cl_insn *ip)
 	       lui	$tempreg,<sym>		(BFD_RELOC_MIPS_GOT_HI16)
 	       add	$tempreg,$tempreg,$gp
 	       lw	$tempreg,<sym>($tempreg) (BFD_RELOC_MIPS_GOT_LO16)
-	     or if tempreg is PIC_CALL_REG
+	     or for lca or if tempreg is PIC_CALL_REG
 	       lui	$tempreg,<sym>		(BFD_RELOC_MIPS_CALL_HI16)
 	       add	$tempreg,$tempreg,$gp
 	       lw	$tempreg,<sym>($tempreg) (BFD_RELOC_MIPS_CALL_LO16)
@@ -5442,7 +5452,8 @@ macro (struct mips_cl_insn *ip)
 	    expr1.X_add_number = offset_expr.X_add_number;
 	  offset_expr.X_add_number = 0;
 
-	  if (expr1.X_add_number == 0 && tempreg == PIC_CALL_REG)
+	  if (expr1.X_add_number == 0 && breg == 0
+	      && (call || tempreg == PIC_CALL_REG))
 	    {
 	      lui_reloc_type = (int) BFD_RELOC_MIPS_CALL_HI16;
 	      lw_reloc_type = (int) BFD_RELOC_MIPS_CALL_LO16;

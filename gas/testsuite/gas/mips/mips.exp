@@ -463,6 +463,8 @@ if { [istarget mips*-*-*] } then {
     # Not sure when it first cropped up, but may be related to addition of
     # "la" -> "addiu" pattern in MIPS opcode table long ago.
     if $ecoff { run_dump_test "la-empic" }
+    if $elf { run_dump_test "lca-svr4pic" }
+    if $elf { run_dump_test "lca-xgot" }
     if !$aout {
 	# XXX FIXME: Has mips2 and later insns with mips1 disassemblies.
 	# (Should split and then use appropriate arch lists.)

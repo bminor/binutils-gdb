@@ -1,3 +1,9 @@
+2003-11-18  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
+	* config/tc-mips.c (macro): Handle new macros: "lca" and "dlca"
+	for loading addresses using CALL relocations.
+	Don't emit CALL relocations when a base register is used.
+
 2003-11-15  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
 
 	* config/tc-mips.c: Formatting fixes.

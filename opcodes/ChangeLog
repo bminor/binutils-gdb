@@ -1,3 +1,8 @@
+2003-11-18  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
+	* mips-opc.c (mips_builtin_opcodes): Handle new macros: "lca" and
+	"dlca".
+
 2003-11-14  Nick Clifton  <nickc@redhat.com>
 
 	* dis-init.c (init_disassemble_info): Initialise
