@@ -902,6 +902,9 @@ print_insn_hppa (memaddr, info)
 					   float_format_names[GET_FIELD
 							      (insn, 20, 20)]);
 		  break;
+		case 'g':
+		  fputs_filtered (",gate", info);
+		  break;
 		default:
 		  (*info->fprintf_func) (info->stream, "%c", *s);
 		  break;
