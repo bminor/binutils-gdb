@@ -1,3 +1,14 @@
+2003-06-17  Loren James Rittle  <rittle@latour.rsch.comm.mot.com>
+
+	* gas/alpha/elf-reloc-1.d: Allow system-specific gunk after
+	canonical file format.
+	* gas/alpha/elf-reloc-4.d: Likewise.
+	* gas/alpha/elf-reloc-5.d: Likewise.
+	* gas/alpha/elf-reloc-7.d: Likewise.
+	* gas/alpha/elf-reloc-8.d: Likewise.
+	* gas/alpha/elf-tls-1.d: Likewise.
+	* gas/alpha/elf-usepv-1.d: Likewise.
+
 2003-06-16  Hans-Peter Nilsson  <hp@axis.com>
 
 	* gas/cris: Match output having $ register prefix.  Deal with

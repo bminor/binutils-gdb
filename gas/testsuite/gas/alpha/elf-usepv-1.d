@@ -1,7 +1,7 @@
 #objdump: --syms
 #name: alpha elf-usepv-1
 
-.*:     file format elf64-alpha
+.*:     file format elf64-alpha.*
 
 SYMBOL TABLE:
 0*0000000 l    d  .text	0*0000000 
