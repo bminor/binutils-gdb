@@ -1,5 +1,10 @@
 1999-01-12  Jason Molenda  (jsm@bugshack.cygnus.com)
 
+	* monitor.c (init_base_monitor_ops): Whitespace cleanup.
+	(_initialize_remote_monitors): Same.
+
+1999-01-12  Jason Molenda  (jsm@bugshack.cygnus.com)
+
 	* monitor.c (init_monitor_ops): Initialize the monitor_ops
 	structure if it hasn't already been done.
 
