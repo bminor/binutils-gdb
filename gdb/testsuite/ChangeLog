@@ -1,3 +1,8 @@
+2003-06-10  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/fileio.c: New file, testing File-I/O.
+	* gdb.base/fileio.exp: Ditto.
+
 2003-06-09  Raoul Gough  <RaoulGough@yahoo.co.uk>
 
 	* gdb.base/shreloc.exp: New file, check symbol values obtained from
