@@ -4968,9 +4968,9 @@ md_number_to_chars (buf, val, n)
 }
 
 #ifdef GPOPT
-CONST char *md_shortopts = "E:O::g::G:";
+CONST char *md_shortopts = "O::g::G:";
 #else
-CONST char *md_shortopts = "E:O::g::";
+CONST char *md_shortopts = "O::g::";
 #endif
 struct option md_longopts[] = {
 #define OPTION_MIPS1 (OPTION_MD_BASE + 1)
@@ -4990,6 +4990,10 @@ struct option md_longopts[] = {
 #define OPTION_BREAK (OPTION_MD_BASE + 9)
   {"break", no_argument, NULL, OPTION_BREAK},
   {"no-trap", no_argument, NULL, OPTION_BREAK},
+#define OPTION_EB (OPTION_MD_BASE + 10)
+  {"EB", no_argument, NULL, OPTION_EB},
+#define OPTION_EL (OPTION_MD_BASE + 11)
+  {"EL", no_argument, NULL, OPTION_EL},
 
 #ifdef OBJ_ELF
 #define OPTION_CALL_SHARED (OPTION_MD_BASE + 6)
@@ -5018,38 +5022,30 @@ md_parse_option (c, arg)
       mips_trap = 0;
       break;
 
-    case 'E':
-      if (arg[1] == 'B')
-	byte_order = BIG_ENDIAN;
-      else if (arg[1] == 'L')
-	byte_order = LITTLE_ENDIAN;
-      else
-	{
-	  as_bad("invalid endianness -E%c", arg[1]);
-	  return 0;
-	}
-
+    case OPTION_EB:
+      byte_order = BIG_ENDIAN;
 #ifdef OBJ_AOUT
-      if (arg[1] == 'B')
-	mips_target_format = "a.out-mips-big";
-      else
-	mips_target_format = "a.out-mips-little";
+      mips_target_format = "a.out-mips-big";
 #endif
 #ifdef OBJ_ECOFF
-      if (arg[1] == 'B')
-	mips_target_format = "ecoff-bigmips";
-      else
-	mips_target_format = "ecoff-littlemips";
+      mips_target_format = "ecoff-bigmips";
 #endif
 #ifdef OBJ_ELF
-      if (arg[1] == 'B')
-	mips_target_format = "elf32-bigmips";
-      else
-	mips_target_format = "elf32-littlemips";
+      mips_target_format = "elf32-bigmips";
 #endif
+      break;
 
-      /* FIXME: This breaks -L -EL.  */
-      flag_keep_locals = 0;
+    case OPTION_EL:
+      byte_order = LITTLE_ENDIAN;
+#ifdef OBJ_AOUT
+      mips_target_format = "a.out-mips-little";
+#endif
+#ifdef OBJ_ECOFF
+      mips_target_format = "ecoff-littlemips";
+#endif
+#ifdef OBJ_ELF
+      mips_target_format = "elf32-littlemips";
+#endif
       break;
 
     case 'O':
