@@ -1,7 +1,7 @@
 Sun Jun 26 13:23:54 1994  Jeff Law  (law@snake.cs.utah.edu)
 
-	* gas/lib/gas-defs.exp (gas_finish): Call "close" before exiting.
-	Make note about possibly needing a call to "wait" too.
+	* gas/lib/gas-defs.exp (gas_finish): Call "close" and "wait"
+	before exiting.  Enclose both calls inside a "catch".
 	(objdump_finish): Likewise.
 
 Fri Jun 10 10:23:35 1994  Jeff Law  (law@snake.cs.utah.edu)
