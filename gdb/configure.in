@@ -55,6 +55,7 @@ i[34]86-*-sco*)		gdb_host=i386sco ;;
 i[34]86-*-solaris*)	gdb_host=i386sol2 ;;
 i[34]86-*-sunos*)	gdb_host=sun386 ;;
 i[34]86-*-sysv3.2*)	gdb_host=i386v32 ;;
+i[34]86-*-sysv32*)	gdb_host=i386v32 ;;
 i[34]86-*-sysv4*)	gdb_host=i386v4 ;;
 i[34]86-*-unixware)	gdb_host=i386v4 ;;
 i[34]86-*-sysv*)	gdb_host=i386v ;;

@@ -1,5 +1,8 @@
 Thu Mar  3 12:41:16 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
+	* configure.in: Accept i[34]86-*-*sysv32 because that is what
+	config.guess and config.sub produce.
+
 	* mips-tdep.c: Change value to value_ptr.
 
 Wed Mar  2 09:17:55 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
