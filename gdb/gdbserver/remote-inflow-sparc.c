@@ -48,6 +48,8 @@ char buf2[MAX_REGISTER_RAW_SIZE];
 #include <sys/ptrace.h>
 #include <machine/reg.h>
 
+extern int sys_nerr;
+extern char **sys_errlist;
 extern char **environ;
 extern int errno;
 extern int inferior_pid;

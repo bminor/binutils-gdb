@@ -1,3 +1,17 @@
+Thu Aug 12 20:40:14 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdbserver/Makefile.in: Use GDBSERVER_LIBS and
+	GDBSERVER_DEPFILES.  Also remove much (but not all that could be
+	removed) crud inherited from gdb Makefile.in.
+	* config/i386/i386lynx.mh, config/sparc/sun4os4.mh: Define GDBSERVER_*.
+	* gdbserver/README: Say it works on Sun and change configuration
+	instructions slightly.
+
+Wed Aug 11 18:56:59 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* config/i386/i386v4.mh: use -lsocket and -lnsl, for remote
+	targets that use BSD style network connections
+
 Wed Aug 11 17:54:24 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* remote-{monitor,bug}.c: Make bug_ops not static (forward declaration
