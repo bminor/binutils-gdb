@@ -124,8 +124,6 @@ ld.dvi:ld.tex
 	tex ld.tex
 
 mkscript: mkscript.c
-	$(CC) -o mkscript mkscript.c
-
 
 ldgld.o: $(PROCESSED_SCRIPTS) ldgld.c 
 
