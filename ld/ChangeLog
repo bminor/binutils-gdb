@@ -1,3 +1,8 @@
+Wed May 27 15:15:58 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+        * ldgram.y, ldlex.l: parse ABSOLUTE
+	* ldexp.c: add support for ABSOLUTE
+
 Wed May 27 13:07:20 1992  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* Makefile.in:  Added default definitions for HOSTING_CRT0,
