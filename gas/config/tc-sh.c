@@ -602,7 +602,8 @@ parse_reg (src, mode, reg)
   return 0;
 }
 
-static symbolS *dot()
+static symbolS *
+dot ()
 {
   const char *fake;
 
@@ -613,12 +614,9 @@ static symbolS *dot()
 		      now_seg,
 		      (valueT) frag_now_fix (),
 		      frag_now);
-
 }
 
-
-static
-char *
+static char *
 parse_exp (s, op)
      char *s;
      sh_operand_info *op;
@@ -635,7 +633,6 @@ parse_exp (s, op)
   input_line_pointer = save;
   return new;
 }
-
 
 /* The many forms of operand:
 
@@ -654,11 +651,9 @@ parse_exp (s, op)
    disp:12
    #imm8
    pr, gbr, vbr, macl, mach
-
  */
 
-static
-char *
+static char *
 parse_at (src, op)
      char *src;
      sh_operand_info *op;
@@ -728,11 +723,12 @@ parse_at (src, op)
 		}
 	      else if (mode == A_PC)
 		{
-		  /* Turn a plain @(4,pc) into @(.+4,pc) */
-		  if (op->immediate.X_op == O_constant) { 
-		    op->immediate.X_add_symbol = dot();
-		    op->immediate.X_op = O_symbol;
-		  }
+		  /* Turn a plain @(4,pc) into @(.+4,pc).  */
+		  if (op->immediate.X_op == O_constant)
+		    {
+		      op->immediate.X_add_symbol = dot();
+		      op->immediate.X_op = O_symbol;
+		    }
 		  op->type = A_DISP_PC;
 		}
 	      else
@@ -822,8 +818,7 @@ get_operand (ptr, op)
     }
 }
 
-static
-char *
+static char *
 get_operands (info, args, operand)
      sh_opcode_info *info;
      char *args;
@@ -884,8 +879,7 @@ get_operands (info, args, operand)
    addressing modes, return the opcode which matches the opcodes
    provided.  */
 
-static
-sh_opcode_info *
+static sh_opcode_info *
 get_specific (opcode, operands)
      sh_opcode_info *opcode;
      sh_operand_info *operands;
@@ -893,6 +887,7 @@ get_specific (opcode, operands)
   sh_opcode_info *this_try = opcode;
   char *name = opcode->name;
   int n = 0;
+
   while (opcode->name)
     {
       this_try = opcode++;
@@ -902,7 +897,7 @@ get_specific (opcode, operands)
 	     opcodes with the same name.  */
 	  return 0;
 	}
-      
+
       /* Look at both operands needed by the opcodes and provided by
          the user - since an arg test will often fail on the same arg
          again and again, we'll try and test the last failing arg the
@@ -911,7 +906,7 @@ get_specific (opcode, operands)
 	{
 	  sh_operand_info *user = operands + n;
 	  sh_arg_type arg = this_try->arg[n];
-	  
+
 	  switch (arg)
 	    {
 	    case A_IMM:
@@ -979,7 +974,7 @@ get_specific (opcode, operands)
 		goto fail;
 	      break;
 
-            case A_REG_B:
+	    case A_REG_B:
 	      if (user->type != arg)
 		goto fail;
 	      reg_b = user->reg;
@@ -1150,7 +1145,7 @@ get_specific (opcode, operands)
 		goto fail;
 	      reg_m = 4;
 	      break;
-	
+
 	    default:
 	      printf (_("unhandled %d\n"), arg);
 	      goto fail;
@@ -1160,7 +1155,8 @@ get_specific (opcode, operands)
 	goto fail;
       valid_arch &= this_try->arch;
       return this_try;
-    fail:;
+    fail:
+      ;
     }
 
   return 0;
@@ -1180,7 +1176,6 @@ check (operand, low, high)
     }
   return operand->X_add_number;
 }
-
 
 static void
 insert (where, how, pcrel, op)
@@ -1261,7 +1256,7 @@ insert_loop_bounds (output, operand)
 	 Hence a 9 digit number should be enough to count all REPEATs.  */
       name = alloca (11);
       sprintf (name, "_R%x", count++ & 0x3fffffff);
-      end_sym =  symbol_new (name, undefined_section, 0, &zero_address_frag);
+      end_sym = symbol_new (name, undefined_section, 0, &zero_address_frag);
       /* Make this a local symbol.  */
 #ifdef OBJ_COFF
       SF_SET_LOCAL (end_sym);
@@ -1323,7 +1318,7 @@ build_Mytes (opcode, operand)
 	    case REG_NM:
 	      nbuf[index] = reg_n | (reg_m >> 2);
 	      break;
-            case REG_B:
+	    case REG_B:
 	      nbuf[index] = reg_b | 0x08;
 	      break;
 	    case IMM0_4BY4:
@@ -1378,14 +1373,16 @@ build_Mytes (opcode, operand)
 	    }
 	}
     }
-  if (! target_big_endian) {
-    output[1] = (nbuf[0] << 4) | (nbuf[1]);
-    output[0] = (nbuf[2] << 4) | (nbuf[3]);
-  }
-  else {
-    output[0] = (nbuf[0] << 4) | (nbuf[1]);
-    output[1] = (nbuf[2] << 4) | (nbuf[3]);
-  }
+  if (!target_big_endian)
+    {
+      output[1] = (nbuf[0] << 4) | (nbuf[1]);
+      output[0] = (nbuf[2] << 4) | (nbuf[3]);
+    }
+  else
+    {
+      output[0] = (nbuf[0] << 4) | (nbuf[1]);
+      output[1] = (nbuf[2] << 4) | (nbuf[3]);
+    }
 }
 
 /* Find an opcode at the start of *STR_P in the hash table, and set
@@ -1400,7 +1397,7 @@ find_cooked_opcode (str_p)
   unsigned char *op_end;
   char name[20];
   int nlen = 0;
-  
+
   /* Drop leading whitespace.  */
   while (*str == ' ')
     str++;
@@ -1426,7 +1423,7 @@ find_cooked_opcode (str_p)
       name[nlen] = c;
       nlen++;
     }
-  
+
   name[nlen] = 0;
   *str_p = op_end;
 
@@ -1473,7 +1470,7 @@ assemble_ppi (op_end, opcode)
 	  as_bad (_("invalid operands for opcode"));
 	  return;
 	}
-      
+
       if (opcode->nibbles[0] != PPI)
 	as_bad (_("insn can't be combined with parallel processing insn"));
 
@@ -1737,7 +1734,7 @@ sh_frob_label ()
       offset = frag_now_fix ();
       if (frag_now != last_label_frag
 	  || offset != last_label_offset)
-	{	
+	{
 	  fix_new (frag_now, offset, 2, &abs_symbol, 0, 0, BFD_RELOC_SH_LABEL);
 	  last_label_frag = frag_now;
 	  last_label_offset = offset;
@@ -1844,7 +1841,7 @@ md_atof (type, litP, sizeP)
 	  litP += 2;
 	}
     }
-     
+
   return NULL;
 }
 
@@ -1890,7 +1887,7 @@ struct option md_longopts[] =
   {"dsp", no_argument, NULL, OPTION_DSP},
   {NULL, no_argument, NULL, 0}
 };
-size_t md_longopts_size = sizeof(md_longopts);
+size_t md_longopts_size = sizeof (md_longopts);
 
 int
 md_parse_option (c, arg)
@@ -1927,7 +1924,7 @@ void
 md_show_usage (stream)
      FILE *stream;
 {
-  fprintf(stream, _("\
+  fprintf (stream, _("\
 SH options:\n\
 -little			generate little endian code\n\
 -relax			alter jump instructions for long displacements\n\
@@ -1957,7 +1954,6 @@ struct sh_count_relocs
    symbol.  When using BFD_ASSEMBLER, this is called via
    bfd_map_over_sections.  */
 
-/*ARGSUSED*/
 static void
 sh_count_relocs (abfd, sec, data)
      bfd *abfd ATTRIBUTE_UNUSED;
@@ -1987,7 +1983,6 @@ sh_count_relocs (abfd, sec, data)
 /* Handle the count relocs for a particular section.  When using
    BFD_ASSEMBLER, this is called via bfd_map_over_sections.  */
 
-/*ARGSUSED*/
 static void
 sh_frob_section (abfd, sec, ignore)
      bfd *abfd ATTRIBUTE_UNUSED;
@@ -2167,15 +2162,16 @@ md_convert_frag (headers, seg, fragP)
 		(unsigned long) fragP->fr_address);
       else if (S_IS_DEFINED (fragP->fr_symbol))
 	as_bad (_("at 0x%lx, displacement to defined symbol %s overflows 12-bit field"),
-		(unsigned long) fragP->fr_address,		
+		(unsigned long) fragP->fr_address,
 		S_GET_NAME (fragP->fr_symbol));
       else
 	as_bad (_("at 0x%lx, displacement to undefined symbol %s overflows 12-bit field"),
-		(unsigned long) fragP->fr_address,		
+		(unsigned long) fragP->fr_address,
 		S_GET_NAME (fragP->fr_symbol));
 
-#if 0		/* This code works, but generates poor code and the compiler
-		   should never produce a sequence that requires it to be used.  */
+#if 0
+      /* This code works, but generates poor code and the compiler
+	 should never produce a sequence that requires it to be used.  */
 
       /* A jump wont fit in 12 bits, make code which looks like
 	 bra foo
@@ -2185,21 +2181,21 @@ md_convert_frag (headers, seg, fragP)
 	 */
       int t = buffer[0] & 0x10;
 
-      buffer[highbyte] = 0xa0;	/* branch over move and disp */
-      buffer[lowbyte] = 3;
-      buffer[highbyte+2] = 0xd0 | JREG;	/* Build mov insn */
-      buffer[lowbyte+2] = 0x00;
+      buffer[highbyte     ] = 0xa0;	/* branch over move and disp */
+      buffer[lowbyte      ] = 3;
+      buffer[highbyte +  2] = 0xd0 | JREG;	/* Build mov insn */
+      buffer[lowbyte  +  2] = 0x00;
 
-      buffer[highbyte+4] = 0;	/* space for 32 bit jump disp */
-      buffer[lowbyte+4] = 0;
-      buffer[highbyte+6] = 0;
-      buffer[lowbyte+6] = 0;
+      buffer[highbyte +  4] = 0;	/* space for 32 bit jump disp */
+      buffer[lowbyte  +  4] = 0;
+      buffer[highbyte +  6] = 0;
+      buffer[lowbyte  +  6] = 0;
 
-      buffer[highbyte+8] = 0x40 | JREG;	/* Build jmp @JREG */
-      buffer[lowbyte+8] = t ? 0xb : 0x2b;
+      buffer[highbyte +  8] = 0x40 | JREG;	/* Build jmp @JREG */
+      buffer[lowbyte  +  8] = t ? 0xb : 0x2b;
 
-      buffer[highbyte+10] = 0x20; /* build nop */
-      buffer[lowbyte+10] = 0x0b;
+      buffer[highbyte + 10] = 0x20; /* build nop */
+      buffer[lowbyte  + 10] = 0x0b;
 
       /* Make reloc for the long disp.  */
       fix_new (fragP,
@@ -2224,7 +2220,7 @@ md_convert_frag (headers, seg, fragP)
 	 branch with delay slot.  It turned:
                      bf.s    L6              (slot mov.l   r12,@(44,r0))
          into:
-   
+
 2c:  8f 01 a0 8b     bf.s    32 <_main+32>   (slot bra       L6)
 30:  00 09           nop
 32:  10 cb           mov.l   r12,@(44,r0)
@@ -2286,19 +2282,20 @@ md_convert_frag (headers, seg, fragP)
     case C (COND_JUMP, UNDEF_WORD_DISP):
     case C (COND_JUMP_DELAY, UNDEF_WORD_DISP):
       if (fragP->fr_symbol == NULL)
-	as_bad (_("at 0x%lx, displacement overflows 8-bit field"), 
+	as_bad (_("at 0x%lx, displacement overflows 8-bit field"),
 		(unsigned long) fragP->fr_address);
       else if (S_IS_DEFINED (fragP->fr_symbol))
 	as_bad (_("at 0x%lx, displacement to defined symbol %s overflows 8-bit field "),
-		(unsigned long) fragP->fr_address,		
+		(unsigned long) fragP->fr_address,
 		S_GET_NAME (fragP->fr_symbol));
       else
 	as_bad (_("at 0x%lx, displacement to undefined symbol %s overflows 8-bit field "),
-		(unsigned long) fragP->fr_address,		
+		(unsigned long) fragP->fr_address,
 		S_GET_NAME (fragP->fr_symbol));
 
-#if 0		/* This code works, but generates poor code, and the compiler
-		   should never produce a sequence that requires it to be used.  */
+#if 0
+      /* This code works, but generates poor code, and the compiler
+	 should never produce a sequence that requires it to be used.  */
 
       /* A bcond won't fit and it won't go into a 12 bit
 	 displacement either, the code sequence looks like:
@@ -2512,7 +2509,7 @@ sh_fix_adjustable (fixP)
 
   if (fixP->fx_addsy == NULL)
     return 1;
-  
+
   /* We need the symbol name for the VTABLE entries */
   if (fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
@@ -2637,7 +2634,7 @@ md_apply_fix (fixP, val)
          Note that adding further restrictions may invalidate
          reasonable looking assembly code, such as ``and -0x1,r0''.  */
       max = 0xff;
-      min = - 0xff;
+      min = -0xff;
       *buf++ = val;
       break;
 
@@ -2684,14 +2681,14 @@ md_apply_fix (fixP, val)
       break;
 
     case BFD_RELOC_32:
-      if (! target_big_endian) 
+      if (!target_big_endian)
 	{
 	  *buf++ = val >> 0;
 	  *buf++ = val >> 8;
 	  *buf++ = val >> 16;
 	  *buf++ = val >> 24;
 	}
-      else 
+      else
 	{
 	  *buf++ = val >> 24;
 	  *buf++ = val >> 16;
@@ -2705,8 +2702,8 @@ md_apply_fix (fixP, val)
 	{
 	  *buf++ = val >> 0;
 	  *buf++ = val >> 8;
-	} 
-      else 
+	}
+      else
 	{
 	  *buf++ = val >> 8;
 	  *buf++ = val >> 0;
