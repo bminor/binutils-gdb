@@ -1,5 +1,7 @@
 2000-04-07  J.T. Conklin  <jtc@redback.com>
 
+	* gdb.base/call-ar-st.exp: Relax patterns matching tab characters.
+
 	* gdb.base/funcargs.exp: Relax patterns matching pointers to char.
 
 Thu Mar 30 13:26:19 2000  Philippe De Muyter  <phdm@macqel.be>

@@ -366,7 +366,7 @@ gdb_expect {
 if {![target_info exists gdb,skip_float_tests]} {
   send_gdb "print print_small_structs(*struct1, *struct2, *struct3, *struct4, *flags, *flags_combo, *three_char, *five_char, *int_char_combo, *d1, *d2, *d3, *f1, *f2, *f3)\n"
   gdb_expect {
-    -re ".*alpha\[\t\r\n \]+gamma\[\t\r\n \]+epsilon\[\t\r\n \]+alpha\[\t\r\n \]+gamma\[\t\r\n \]+epsilon\[\t\r\n \]+ch1: y\tch2: n\[\t\r\n \]+Contents of three_char_t:\[\t\r\n \]+a\tb\tc\[\t\r\n \]+Contents of five_char_t:\[\t\r\n \]+l\tm\tn\to\tp\[\t\r\n \]+Contents of int_char_combo_t:\[\t\r\n \]+123.*z\[\t\r\n \]+Sum of the 4 struct values and seed :\[\t\r\n \]+52\[\t\r\n \]+Contents of struct1:\[\t\r\n \]+6.*0\[\t\r\n \]+Contents of struct2:\[\t\r\n \]+10.*0\[\t\r\n \]+Contents of struct3:\[\t\r\n \]+12.*0\[\t\r\n \]+Contents of one_double_t:\[\t\r\n \]+10.500000\[\t\r\n \]+Contents of one_double_t:.*-3.375000\[\t\r\n \]+Contents of one_double_t:.*675.093750\[\t\r\n \]+Contents of two_floats_t:.*45.234001.*43.599998\[\t\r\n \]+Contents of two_floats_t:.*78.010002.*122.099998\[\t\r\n \]+Contents of two_floats_t:.*-1232.344971.*-199.210007\[\t\r\n \]+.*$gdb_prompt $" {
+    -re ".*alpha\[\t\r\n \]+gamma\[\t\r\n \]+epsilon\[\t\r\n \]+alpha\[\t\r\n \]+gamma\[\t\r\n \]+epsilon\[\t\r\n \]+ch1: y.*ch2: n\[\t\r\n \]+Contents of three_char_t:\[\t\r\n \]+a.*b.*c\[\t\r\n \]+Contents of five_char_t:\[\t\r\n \]+l.*m.*n.*o.*p\[\t\r\n \]+Contents of int_char_combo_t:\[\t\r\n \]+123.*z\[\t\r\n \]+Sum of the 4 struct values and seed :\[\t\r\n \]+52\[\t\r\n \]+Contents of struct1:\[\t\r\n \]+6.*0\[\t\r\n \]+Contents of struct2:\[\t\r\n \]+10.*0\[\t\r\n \]+Contents of struct3:\[\t\r\n \]+12.*0\[\t\r\n \]+Contents of one_double_t:\[\t\r\n \]+10.500000\[\t\r\n \]+Contents of one_double_t:.*-3.375000\[\t\r\n \]+Contents of one_double_t:.*675.093750\[\t\r\n \]+Contents of two_floats_t:.*45.234001.*43.599998\[\t\r\n \]+Contents of two_floats_t:.*78.010002.*122.099998\[\t\r\n \]+Contents of two_floats_t:.*-1232.344971.*-199.210007\[\t\r\n \]+.*$gdb_prompt $" {
       pass "print print_small_structs"
     }
     -re ".*$gdb_prompt $" { fail "print print_small_structs" }
@@ -461,7 +461,7 @@ if {![target_info exists gdb,skip_float_tests]} {
     setup_xfail "sparc*-*-solaris*"
     send_gdb "print print_small_structs(struct1, struct2, struct3, struct4, flags, flags_combo, three_char, five_char, int_char_combo, d1, d2, d3, f1, f2, f3)\n"
     gdb_expect {
-	-re ".*alpha${ws}gamma${ws}epsilon${ws}alpha${ws}gamma${ws}epsilon${ws}ch1: y\tch2: n${ws}Contents of three_char_t:${ws}a\tb\tc${ws}Contents of five_char_t:${ws}l\tm\tn\to\tp${ws}Contents of int_char_combo_t:${ws}123.*z${ws}Sum of the 4 struct values and seed :${ws}52${ws}Contents of struct1:${ws}6.*0${ws}Contents of struct2:${ws}10.*0${ws}Contents of struct3:${ws}12.*0${ws}Contents of one_double_t:${ws}10.500000${ws}Contents of one_double_t:${ws}-3.375000${ws}Contents of one_double_t:${ws}675.093750${ws}Contents of two_floats_t:${ws}45.234001.*43.599998${ws}Contents of two_floats_t:${ws}78.010002.*122.099998${ws}Contents of two_floats_t:${ws}-1232.344971.*-199.210007${ws}.*$gdb_prompt $" {
+	-re ".*alpha${ws}gamma${ws}epsilon${ws}alpha${ws}gamma${ws}epsilon${ws}ch1: y.*ch2: n${ws}Contents of three_char_t:${ws}a.*b.*c${ws}Contents of five_char_t:${ws}l.*m.*n.*o.*p${ws}Contents of int_char_combo_t:${ws}123.*z${ws}Sum of the 4 struct values and seed :${ws}52${ws}Contents of struct1:${ws}6.*0${ws}Contents of struct2:${ws}10.*0${ws}Contents of struct3:${ws}12.*0${ws}Contents of one_double_t:${ws}10.500000${ws}Contents of one_double_t:${ws}-3.375000${ws}Contents of one_double_t:${ws}675.093750${ws}Contents of two_floats_t:${ws}45.234001.*43.599998${ws}Contents of two_floats_t:${ws}78.010002.*122.099998${ws}Contents of two_floats_t:${ws}-1232.344971.*-199.210007${ws}.*$gdb_prompt $" {
 	    pass "print print_small_structs from print_long_arg_list"
 	}
 	-re ".*$gdb_prompt $" { fail "print print_small_structs from print_long_arg_list" }
@@ -491,7 +491,7 @@ init_bit_flags_combo \\(bit_flags_combo=, a=1, b=0, ch1=121 .y., g=1, d=0, ch2=1
 #call print_bit_flags_combo(*bit_flags_combo)
 send_gdb "print print_bit_flags_combo(*bit_flags_combo)\n"
 gdb_expect {
-    -re ".*alpha.*gamma.*epsilon.*ch1: y\tch2: n.*$gdb_prompt $" {
+    -re ".*alpha.*gamma.*epsilon.*ch1: y.*ch2: n.*$gdb_prompt $" {
         pass "print print_bit_flags_combo from init_bit_flags_combo"
       }
     -re ".*$gdb_prompt $" { fail "print print_bit_flags_combo from init_bit_flags_combo" }
@@ -518,7 +518,7 @@ if {$hp_aCC_compiler} {setup_xfail "hppa*-*-*" CLLbs16994}
 if {![target_info exists gdb,skip_float_tests]} {
   send_gdb "print print_long_arg_list(a, b, c, d, e, f, *struct1, *struct2, *struct3, *struct4, *flags, *flags_combo, *three_char, *five_char, *int_char_combo, *d1, *d2, *d3, *f1, *f2, *f3)\n"
   gdb_expect {
-    -re ".*double : 22.250000.*double : 33.375000.*int : 0.*int : -25.*int : 100.*int : 2345.*alpha.*gamma.*epsilon.*ch1: y\tch2: n.*Contents of three_char_t:.*x\ty\tz.*Contents of five_char_t:.*h\te\tl\tl\to.*Contents of int_char_combo_t:.*123\tz.*Sum of the 4 struct values and seed :.*52.*Contents of struct1:.*6\[ \]+0.*Contents of struct2:.*10\[ \]+0.*Contents of struct3:.*12.*0.*Contents of one_double_t:\[ \n\r\t\]+1.111110\[ \n\r\t\]+Contents of one_double_t:\[ \n\r\t\]+-345.340000\[ \n\r\t\]+Contents of one_double_t:\[ \n\r\t\]+546464.200000\[ \n\r\t\]+Contents of two_floats_t:\[ \n\r\t\]+0.234000\t453.100006\[ \n\r\t\]+Contents of two_floats_t:\[ \n\r\t\]+78.345001\t23.090000\[ \n\r\t\]+Contents of two_floats_t:\[ \n\r\t\]+-2.345000\t1.000000.*$gdb_prompt $" {
+    -re ".*double : 22.250000.*double : 33.375000.*int : 0.*int : -25.*int : 100.*int : 2345.*alpha.*gamma.*epsilon.*ch1: y.*ch2: n.*Contents of three_char_t:.*x.*y.*z.*Contents of five_char_t:.*h.*e.*l.*l.*o.*Contents of int_char_combo_t:.*123.*z.*Sum of the 4 struct values and seed :.*52.*Contents of struct1:.*6\[ \]+0.*Contents of struct2:.*10\[ \]+0.*Contents of struct3:.*12.*0.*Contents of one_double_t:\[ \n\r\t\]+1.111110\[ \n\r\t\]+Contents of one_double_t:\[ \n\r\t\]+-345.340000\[ \n\r\t\]+Contents of one_double_t:\[ \n\r\t\]+546464.200000\[ \n\r\t\]+Contents of two_floats_t:\[ \n\r\t\]+0.234000.*453.100006\[ \n\r\t\]+Contents of two_floats_t:\[ \n\r\t\]+78.345001.*23.090000\[ \n\r\t\]+Contents of two_floats_t:\[ \n\r\t\]+-2.345000.*1.000000.*$gdb_prompt $" {
       pass "print print_long_arg_list"
     }
     -re ".*$gdb_prompt $" { fail "print print_long_arg_list" }
