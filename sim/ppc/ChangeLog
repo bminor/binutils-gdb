@@ -1,3 +1,10 @@
+2004-06-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* hw_htab.c (htab_sum_binary(bfd): Use bfd_get_section_size
+	instead of bfd_get_section_size_before_reloc.
+	(htab_dma_binary(bfd): Likewise.
+	* hw_init.c (update_for_binary_section(bfd): Likewise.
+
 2004-05-10  Daniel Jacobowitz  <dan@debian.org>
 
 	* configure.in (sim_fpu_cflags): Add -I../common.
