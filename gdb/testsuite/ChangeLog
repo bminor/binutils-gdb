@@ -1,3 +1,9 @@
+2002-04-18  David S. Miller  <davem@redhat.com>
+
+	* gdb.base/annota1.exp: Expect addresses as $hex + whitespace to
+	handle 64-bit platforms correctly.
+	* gdb.base/maint.exp: Likewise.
+
 2002-04-18  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.base/shlib-call.exp (additional_flags): AIX doesn't need
