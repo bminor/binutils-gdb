@@ -1,5 +1,5 @@
 /* tc-mn10300.c -- Assembler code for the Matsushita 10300
-   Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -118,11 +118,13 @@ size_t md_longopts_size = sizeof(md_longopts);
 /* The target specific pseudo-ops which we support.  */
 const pseudo_typeS md_pseudo_table[] =
 {
-  { "am30",	set_arch_mach,		300 },
-  { "am33",	set_arch_mach,		330 },
-  { "mn10300",	set_arch_mach,		300 },
+  { "am30",	set_arch_mach,		AM30 },
+  { "am33",	set_arch_mach,		AM33 },
+  { "mn10300",	set_arch_mach,		MN103 },
   {NULL, 0, 0}
 };
+
+#define HAVE_AM33 (current_machine == AM33)
 
 /* Opcode hash table.  */
 static struct hash_control *mn10300_hash;
@@ -879,10 +881,10 @@ md_begin ()
   linkrelax = 1;
 
   /* Set the default machine type.  */
-  if (!bfd_set_arch_mach (stdoutput, bfd_arch_mn10300, 300))
+  if (!bfd_set_arch_mach (stdoutput, bfd_arch_mn10300, MN103))
     as_warn (_("could not set architecture and machine"));
 
-  current_machine = 300;
+  current_machine = MN103;
 }
 
 void
@@ -942,7 +944,7 @@ md_assemble (str)
       /* If the instruction is not available on the current machine
 	 then it can not possibly match.  */
       if (opcode->machine
-	  && (opcode->machine != current_machine))
+	  && !(opcode->machine == AM33 && HAVE_AM33))
 	goto error;
 
       for (op_idx = 1, opindex_ptr = opcode->operands;
@@ -1207,25 +1209,25 @@ md_assemble (str)
 		      value |= 0x08;
 		      *input_line_pointer = c;
 		    }
-		  else if (current_machine == 330
+		  else if (HAVE_AM33
 			   && strcasecmp (start, "exreg0") == 0)
 		    {
 		      value |= 0x04;
 		      *input_line_pointer = c;
 		    }
-		  else if (current_machine == 330
+		  else if (HAVE_AM33
 			   && strcasecmp (start, "exreg1") == 0)
 		    {
 		      value |= 0x02;
 		      *input_line_pointer = c;
 		    }
-		  else if (current_machine == 330
+		  else if (HAVE_AM33
 			   && strcasecmp (start, "exother") == 0)
 		    {
 		      value |= 0x01;
 		      *input_line_pointer = c;
 		    }
-		  else if (current_machine == 330
+		  else if (HAVE_AM33
 			   && strcasecmp (start, "all") == 0)
 		    {
 		      value |= 0xff;
@@ -1262,13 +1264,13 @@ md_assemble (str)
 	      str = hold;
 	      goto error;
 	    }
-	  else if (r_register_name (&ex))
+	  else if (HAVE_AM33 && r_register_name (&ex))
 	    {
 	      input_line_pointer = hold;
 	      str = hold;
 	      goto error;
 	    }
-	  else if (xr_register_name (&ex))
+	  else if (HAVE_AM33 && xr_register_name (&ex))
 	    {
 	      input_line_pointer = hold;
 	      str = hold;
@@ -1298,7 +1300,8 @@ md_assemble (str)
 		int mask;
 
 		mask = MN10300_OPERAND_DREG | MN10300_OPERAND_AREG;
-		mask |= MN10300_OPERAND_RREG | MN10300_OPERAND_XRREG;
+		if (HAVE_AM33)
+		  mask |= MN10300_OPERAND_RREG | MN10300_OPERAND_XRREG;
 		if ((operand->flags & mask) == 0)
 		  {
 		    input_line_pointer = hold;
