@@ -23,14 +23,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #define WANT_CPU
-#define WANT_CPU_M32R
+#define WANT_CPU_M32RB
 
 #include "sim-main.h"
 #include "cgen-ops.h"
 #include "cpu-sim.h"
 
 void
-EX_FN_NAME (m32r,fmt_add) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_add) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_add.f
   EXTRACT_FMT_ADD_VARS /* f-op1 f-r1 f-op2 f-r2 */
@@ -57,7 +57,7 @@ EX_FN_NAME (m32r,fmt_add) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF 
 }
 
 void
-EX_FN_NAME (m32r,fmt_add3) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_add3) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_add3.f
   EXTRACT_FMT_ADD3_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
@@ -85,7 +85,7 @@ EX_FN_NAME (m32r,fmt_add3) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF
 }
 
 void
-EX_FN_NAME (m32r,fmt_and3) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_and3) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_and3.f
   EXTRACT_FMT_AND3_VARS /* f-op1 f-r1 f-op2 f-r2 f-uimm16 */
@@ -113,7 +113,7 @@ EX_FN_NAME (m32r,fmt_and3) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF
 }
 
 void
-EX_FN_NAME (m32r,fmt_or3) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_or3) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_or3.f
   EXTRACT_FMT_OR3_VARS /* f-op1 f-r1 f-op2 f-r2 f-uimm16 */
@@ -141,7 +141,7 @@ EX_FN_NAME (m32r,fmt_or3) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF 
 }
 
 void
-EX_FN_NAME (m32r,fmt_addi) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_addi) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_addi.f
   EXTRACT_FMT_ADDI_VARS /* f-op1 f-r1 f-simm8 */
@@ -168,7 +168,7 @@ EX_FN_NAME (m32r,fmt_addi) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF
 }
 
 void
-EX_FN_NAME (m32r,fmt_addv) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_addv) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_addv.f
   EXTRACT_FMT_ADDV_VARS /* f-op1 f-r1 f-op2 f-r2 */
@@ -195,7 +195,7 @@ EX_FN_NAME (m32r,fmt_addv) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF
 }
 
 void
-EX_FN_NAME (m32r,fmt_addv3) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_addv3) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_addv3.f
   EXTRACT_FMT_ADDV3_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
@@ -223,7 +223,7 @@ EX_FN_NAME (m32r,fmt_addv3) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBU
 }
 
 void
-EX_FN_NAME (m32r,fmt_addx) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_addx) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_addx.f
   EXTRACT_FMT_ADDX_VARS /* f-op1 f-r1 f-op2 f-r2 */
@@ -250,7 +250,7 @@ EX_FN_NAME (m32r,fmt_addx) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF
 }
 
 void
-EX_FN_NAME (m32r,fmt_bc8) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_bc8) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_bc8.f
   EXTRACT_FMT_BC8_VARS /* f-op1 f-r1 f-disp8 */
@@ -267,7 +267,7 @@ EX_FN_NAME (m32r,fmt_bc8) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF 
 }
 
 void
-EX_FN_NAME (m32r,fmt_bc24) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_bc24) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_bc24.f
   EXTRACT_FMT_BC24_VARS /* f-op1 f-r1 f-disp24 */
@@ -284,7 +284,7 @@ EX_FN_NAME (m32r,fmt_bc24) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF
 }
 
 void
-EX_FN_NAME (m32r,fmt_beq) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_beq) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_beq.f
   EXTRACT_FMT_BEQ_VARS /* f-op1 f-r1 f-op2 f-r2 f-disp16 */
@@ -311,7 +311,7 @@ EX_FN_NAME (m32r,fmt_beq) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF 
 }
 
 void
-EX_FN_NAME (m32r,fmt_beqz) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_beqz) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_beqz.f
   EXTRACT_FMT_BEQZ_VARS /* f-op1 f-r1 f-op2 f-r2 f-disp16 */
@@ -337,7 +337,7 @@ EX_FN_NAME (m32r,fmt_beqz) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF
 }
 
 void
-EX_FN_NAME (m32r,fmt_bl8) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_bl8) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_bl8.f
   EXTRACT_FMT_BL8_VARS /* f-op1 f-r1 f-disp8 */
@@ -362,7 +362,7 @@ EX_FN_NAME (m32r,fmt_bl8) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF 
 }
 
 void
-EX_FN_NAME (m32r,fmt_bl24) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_bl24) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_bl24.f
   EXTRACT_FMT_BL24_VARS /* f-op1 f-r1 f-disp24 */
@@ -387,7 +387,7 @@ EX_FN_NAME (m32r,fmt_bl24) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF
 }
 
 void
-EX_FN_NAME (m32r,fmt_bra8) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_bra8) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_bra8.f
   EXTRACT_FMT_BRA8_VARS /* f-op1 f-r1 f-disp8 */
@@ -404,7 +404,7 @@ EX_FN_NAME (m32r,fmt_bra8) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF
 }
 
 void
-EX_FN_NAME (m32r,fmt_bra24) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_bra24) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_bra24.f
   EXTRACT_FMT_BRA24_VARS /* f-op1 f-r1 f-disp24 */
@@ -421,7 +421,7 @@ EX_FN_NAME (m32r,fmt_bra24) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBU
 }
 
 void
-EX_FN_NAME (m32r,fmt_cmp) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_cmp) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_cmp.f
   EXTRACT_FMT_CMP_VARS /* f-op1 f-r1 f-op2 f-r2 */
@@ -447,7 +447,7 @@ EX_FN_NAME (m32r,fmt_cmp) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF 
 }
 
 void
-EX_FN_NAME (m32r,fmt_cmpi) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_cmpi) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_cmpi.f
   EXTRACT_FMT_CMPI_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
@@ -473,7 +473,7 @@ EX_FN_NAME (m32r,fmt_cmpi) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF
 }
 
 void
-EX_FN_NAME (m32r,fmt_div) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_div) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_div.f
   EXTRACT_FMT_DIV_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
@@ -500,7 +500,7 @@ EX_FN_NAME (m32r,fmt_div) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF 
 }
 
 void
-EX_FN_NAME (m32r,fmt_jl) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_jl) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_jl.f
   EXTRACT_FMT_JL_VARS /* f-op1 f-r1 f-op2 f-r2 */
@@ -526,7 +526,7 @@ EX_FN_NAME (m32r,fmt_jl) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *
 }
 
 void
-EX_FN_NAME (m32r,fmt_jmp) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_jmp) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_jmp.f
   EXTRACT_FMT_JMP_VARS /* f-op1 f-r1 f-op2 f-r2 */
@@ -551,7 +551,7 @@ EX_FN_NAME (m32r,fmt_jmp) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF 
 }
 
 void
-EX_FN_NAME (m32r,fmt_ld) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_ld) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_ld.f
   EXTRACT_FMT_LD_VARS /* f-op1 f-r1 f-op2 f-r2 */
@@ -578,7 +578,7 @@ EX_FN_NAME (m32r,fmt_ld) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *
 }
 
 void
-EX_FN_NAME (m32r,fmt_ld_d) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_ld_d) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_ld_d.f
   EXTRACT_FMT_LD_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
@@ -606,7 +606,7 @@ EX_FN_NAME (m32r,fmt_ld_d) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF
 }
 
 void
-EX_FN_NAME (m32r,fmt_ldb) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_ldb) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_ldb.f
   EXTRACT_FMT_LDB_VARS /* f-op1 f-r1 f-op2 f-r2 */
@@ -633,7 +633,7 @@ EX_FN_NAME (m32r,fmt_ldb) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF 
 }
 
 void
-EX_FN_NAME (m32r,fmt_ldb_d) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_ldb_d) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_ldb_d.f
   EXTRACT_FMT_LDB_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
@@ -661,7 +661,7 @@ EX_FN_NAME (m32r,fmt_ldb_d) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBU
 }
 
 void
-EX_FN_NAME (m32r,fmt_ldh) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_ldh) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_ldh.f
   EXTRACT_FMT_LDH_VARS /* f-op1 f-r1 f-op2 f-r2 */
@@ -688,7 +688,7 @@ EX_FN_NAME (m32r,fmt_ldh) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF 
 }
 
 void
-EX_FN_NAME (m32r,fmt_ldh_d) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_ldh_d) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_ldh_d.f
   EXTRACT_FMT_LDH_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
@@ -716,7 +716,7 @@ EX_FN_NAME (m32r,fmt_ldh_d) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBU
 }
 
 void
-EX_FN_NAME (m32r,fmt_ld_plus) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_ld_plus) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_ld_plus.f
   EXTRACT_FMT_LD_PLUS_VARS /* f-op1 f-r1 f-op2 f-r2 */
@@ -743,7 +743,7 @@ EX_FN_NAME (m32r,fmt_ld_plus) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARG
 }
 
 void
-EX_FN_NAME (m32r,fmt_ld24) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_ld24) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_ld24.f
   EXTRACT_FMT_LD24_VARS /* f-op1 f-r1 f-uimm24 */
@@ -769,7 +769,7 @@ EX_FN_NAME (m32r,fmt_ld24) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF
 }
 
 void
-EX_FN_NAME (m32r,fmt_ldi8) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_ldi8) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_ldi8.f
   EXTRACT_FMT_LDI8_VARS /* f-op1 f-r1 f-simm8 */
@@ -795,7 +795,7 @@ EX_FN_NAME (m32r,fmt_ldi8) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF
 }
 
 void
-EX_FN_NAME (m32r,fmt_ldi16) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_ldi16) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_ldi16.f
   EXTRACT_FMT_LDI16_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
@@ -821,7 +821,7 @@ EX_FN_NAME (m32r,fmt_ldi16) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBU
 }
 
 void
-EX_FN_NAME (m32r,fmt_lock) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_lock) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_lock.f
   EXTRACT_FMT_LOCK_VARS /* f-op1 f-r1 f-op2 f-r2 */
@@ -848,7 +848,7 @@ EX_FN_NAME (m32r,fmt_lock) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF
 }
 
 void
-EX_FN_NAME (m32r,fmt_machi) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_machi) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_machi.f
   EXTRACT_FMT_MACHI_VARS /* f-op1 f-r1 f-op2 f-r2 */
@@ -874,7 +874,7 @@ EX_FN_NAME (m32r,fmt_machi) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBU
 }
 
 void
-EX_FN_NAME (m32r,fmt_mulhi) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_mulhi) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_mulhi.f
   EXTRACT_FMT_MULHI_VARS /* f-op1 f-r1 f-op2 f-r2 */
@@ -900,7 +900,7 @@ EX_FN_NAME (m32r,fmt_mulhi) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBU
 }
 
 void
-EX_FN_NAME (m32r,fmt_mv) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_mv) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_mv.f
   EXTRACT_FMT_MV_VARS /* f-op1 f-r1 f-op2 f-r2 */
@@ -927,7 +927,7 @@ EX_FN_NAME (m32r,fmt_mv) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *
 }
 
 void
-EX_FN_NAME (m32r,fmt_mvfachi) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_mvfachi) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_mvfachi.f
   EXTRACT_FMT_MVFACHI_VARS /* f-op1 f-r1 f-op2 f-r2 */
@@ -952,7 +952,7 @@ EX_FN_NAME (m32r,fmt_mvfachi) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARG
 }
 
 void
-EX_FN_NAME (m32r,fmt_mvfc) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_mvfc) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_mvfc.f
   EXTRACT_FMT_MVFC_VARS /* f-op1 f-r1 f-op2 f-r2 */
@@ -978,7 +978,7 @@ EX_FN_NAME (m32r,fmt_mvfc) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF
 }
 
 void
-EX_FN_NAME (m32r,fmt_mvtachi) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_mvtachi) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_mvtachi.f
   EXTRACT_FMT_MVTACHI_VARS /* f-op1 f-r1 f-op2 f-r2 */
@@ -1003,7 +1003,7 @@ EX_FN_NAME (m32r,fmt_mvtachi) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARG
 }
 
 void
-EX_FN_NAME (m32r,fmt_mvtc) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_mvtc) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_mvtc.f
   EXTRACT_FMT_MVTC_VARS /* f-op1 f-r1 f-op2 f-r2 */
@@ -1029,7 +1029,7 @@ EX_FN_NAME (m32r,fmt_mvtc) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF
 }
 
 void
-EX_FN_NAME (m32r,fmt_nop) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_nop) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_nop.f
   EXTRACT_FMT_NOP_VARS /* f-op1 f-r1 f-op2 f-r2 */
@@ -1045,7 +1045,7 @@ EX_FN_NAME (m32r,fmt_nop) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF 
 }
 
 void
-EX_FN_NAME (m32r,fmt_rac) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_rac) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_rac.f
   EXTRACT_FMT_RAC_VARS /* f-op1 f-r1 f-op2 f-r2 */
@@ -1061,7 +1061,7 @@ EX_FN_NAME (m32r,fmt_rac) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF 
 }
 
 void
-EX_FN_NAME (m32r,fmt_rte) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_rte) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_rte.f
   EXTRACT_FMT_RTE_VARS /* f-op1 f-r1 f-op2 f-r2 */
@@ -1077,7 +1077,7 @@ EX_FN_NAME (m32r,fmt_rte) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF 
 }
 
 void
-EX_FN_NAME (m32r,fmt_seth) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_seth) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_seth.f
   EXTRACT_FMT_SETH_VARS /* f-op1 f-r1 f-op2 f-r2 f-hi16 */
@@ -1103,7 +1103,7 @@ EX_FN_NAME (m32r,fmt_seth) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF
 }
 
 void
-EX_FN_NAME (m32r,fmt_sll3) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_sll3) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_sll3.f
   EXTRACT_FMT_SLL3_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
@@ -1131,7 +1131,7 @@ EX_FN_NAME (m32r,fmt_sll3) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF
 }
 
 void
-EX_FN_NAME (m32r,fmt_slli) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_slli) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_slli.f
   EXTRACT_FMT_SLLI_VARS /* f-op1 f-r1 f-shift-op2 f-uimm5 */
@@ -1158,7 +1158,7 @@ EX_FN_NAME (m32r,fmt_slli) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF
 }
 
 void
-EX_FN_NAME (m32r,fmt_st) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_st) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_st.f
   EXTRACT_FMT_ST_VARS /* f-op1 f-r1 f-op2 f-r2 */
@@ -1184,7 +1184,7 @@ EX_FN_NAME (m32r,fmt_st) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *
 }
 
 void
-EX_FN_NAME (m32r,fmt_st_d) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_st_d) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_st_d.f
   EXTRACT_FMT_ST_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
@@ -1211,7 +1211,7 @@ EX_FN_NAME (m32r,fmt_st_d) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF
 }
 
 void
-EX_FN_NAME (m32r,fmt_stb) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_stb) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_stb.f
   EXTRACT_FMT_STB_VARS /* f-op1 f-r1 f-op2 f-r2 */
@@ -1237,7 +1237,7 @@ EX_FN_NAME (m32r,fmt_stb) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF 
 }
 
 void
-EX_FN_NAME (m32r,fmt_stb_d) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_stb_d) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_stb_d.f
   EXTRACT_FMT_STB_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
@@ -1264,7 +1264,7 @@ EX_FN_NAME (m32r,fmt_stb_d) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBU
 }
 
 void
-EX_FN_NAME (m32r,fmt_sth) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_sth) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_sth.f
   EXTRACT_FMT_STH_VARS /* f-op1 f-r1 f-op2 f-r2 */
@@ -1290,7 +1290,7 @@ EX_FN_NAME (m32r,fmt_sth) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF 
 }
 
 void
-EX_FN_NAME (m32r,fmt_sth_d) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_sth_d) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_sth_d.f
   EXTRACT_FMT_STH_D_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */
@@ -1317,7 +1317,7 @@ EX_FN_NAME (m32r,fmt_sth_d) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBU
 }
 
 void
-EX_FN_NAME (m32r,fmt_st_plus) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_st_plus) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_st_plus.f
   EXTRACT_FMT_ST_PLUS_VARS /* f-op1 f-r1 f-op2 f-r2 */
@@ -1344,7 +1344,7 @@ EX_FN_NAME (m32r,fmt_st_plus) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARG
 }
 
 void
-EX_FN_NAME (m32r,fmt_trap) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_trap) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_trap.f
   EXTRACT_FMT_TRAP_VARS /* f-op1 f-r1 f-op2 f-uimm4 */
@@ -1361,7 +1361,7 @@ EX_FN_NAME (m32r,fmt_trap) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF
 }
 
 void
-EX_FN_NAME (m32r,fmt_unlock) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,fmt_unlock) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
 #define FLD(f) abuf->fields.fmt_unlock.f
   EXTRACT_FMT_UNLOCK_VARS /* f-op1 f-r1 f-op2 f-r2 */
@@ -1387,7 +1387,7 @@ EX_FN_NAME (m32r,fmt_unlock) (SIM_CPU *current_cpu, PCADDR pc, insn_t insn, ARGB
 }
 
 void
-EX_FN_NAME (m32r,illegal) (SIM_CPU *cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EX_FN_NAME (m32rb,illegal) (SIM_CPU *cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
   abuf->length = CGEN_BASE_INSN_SIZE;
   abuf->addr = pc;
@@ -1396,7 +1396,7 @@ EX_FN_NAME (m32r,illegal) (SIM_CPU *cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 
 #if 0 /*wip*/
 void
-EXC_FN_NAME (m32r,illegal) (SIM_CPU *cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
+EXC_FN_NAME (m32rb,illegal) (SIM_CPU *cpu, PCADDR pc, insn_t insn, ARGBUF *abuf)
 {
   abuf->length = CGEN_BASE_INSN_SIZE;
   abuf->addr = pc;
