@@ -1,3 +1,9 @@
+Mon Apr 10 16:47:57 1995  Kung Hsu  <kung@mexican.cygnus.com>
+
+	* config/mips/xm-irix5.h: turn on CC_has_LONG_LONG and 
+	PRINTF_HAS_LONG_LONG.
+	* config/mips/tm-irix5.h: turn on FORCE_LONG_LONG.
+
 Sat Apr  8 02:47:45 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* mdebugread.c (parse_symbol):  Use new variable 

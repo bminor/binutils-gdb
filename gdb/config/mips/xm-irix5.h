@@ -20,6 +20,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "xm-sysv4.h"
 
+#define CC_HAS_LONG_LONG 1
+#define PRINTF_HAS_LONG_LONG 1
 #define HOST_BYTE_ORDER BIG_ENDIAN
 
 /* Override register locations in upage for SGI machines */

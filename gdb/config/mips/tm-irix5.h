@@ -19,6 +19,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "mips/tm-irix3.h"
 
+#define FORCE_LONG_LONG
+
 /* When calling functions on Irix 5 (or any MIPS SVR4 ABI compliant
    platform) $25 must hold the function address.  Dest_Reg is a macro
    used in CALL_DUMMY in tm-mips.h.  */
