@@ -3116,6 +3116,9 @@ update_method_name_from_physname (char **old_name, char *physname)
    $ is the CPLUS_MARKER (usually '$'), `*' holds the place for an operator
    name (such as `+=') and `.' marks the end of the operator name.
 
+   If we read at least one method with a complete physname, set
+   TYPE_NAME (TYPE) appropriately.
+
    Returns 1 for success, 0 for failure.  */
 
 static int
@@ -3248,6 +3251,34 @@ read_member_functions (struct field_info *fip, char **pp, struct type *type,
 	    }
 	  new_sublist->fn_field.physname = savestring (*pp, p - *pp);
 	  *pp = p + 1;
+
+	  /* For classes with qualified names (e.g. nested classes, classes
+	     in namespaces, etc.) we can infer what the fully qualified name
+	     should be.  GCC doesn't output this information directly,
+	     but it does output mangled names for methods:
+	     - Every class will have debug information for at least one
+	     constructor, either user specified or compiler-synthesized.
+	     - For v3 there are no abbreviated physnames, so we can find the
+	     fully qualified class name from such a constructor.
+	     - For v2 constructors (related to the fact that the mangled name
+	     for a constructor starts with a double underscore instead of
+	     with the method name, as for ordinary methods) the full physname
+	     will be included.
+
+	     So from a constructor we can infer the class's qualified name.  */
+
+	  if (TYPE_NAME (type) == NULL
+	      && is_constructor_name (new_sublist->fn_field.physname))
+	    {
+	      char *class_name
+		= class_name_from_physname (new_sublist->fn_field.physname);
+
+	      /* G++ anonymous structures have names starting with '.' or
+		 '$'.  */
+	      if (is_cplus_marker (class_name[0]))
+		TYPE_NAME (type) = obconcat (&objfile->type_obstack, "",
+					     "", class_name);
+	    }
 
 	  /* Set this member function's visibility fields.  */
 	  switch (*(*pp)++)

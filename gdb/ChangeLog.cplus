@@ -1,5 +1,10 @@
 2002-10-05  Daniel Jacobowitz  <drow@mvista.com>
 
+	* stabsread.c (read_member_functions): Update comment.
+	Set TYPE_NAME if possible.
+
+2002-10-05  Daniel Jacobowitz  <drow@mvista.com>
+
 	* c-typeprint.c (cp_type_print_method_args): Don't recursively
 	expand classes in the arguments to methods.
 	(c_type_print_base): Use the name of the method to figure out
