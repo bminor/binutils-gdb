@@ -1,3 +1,9 @@
+2004-09-02  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.base/sigstep.exp (advance): Use "-continue_timer" option
+	of "exp_continue".
+	(advancei): Likewise.
+
 2004-09-01  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* gdb.base/unload.exp: Fix so messages aren't duplicated.
