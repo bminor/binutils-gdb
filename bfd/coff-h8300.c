@@ -1,6 +1,6 @@
 /* BFD back-end for Hitachi H8/300 COFF binaries.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000
+   2000, 2001
    Free Software Foundation, Inc.
    Written by Steve Chamberlain, <sac@cygnus.com>.
 
@@ -38,25 +38,25 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    the offset where we'll add the next entry.  */
 
 struct funcvec_hash_entry
-{
-  /* The basic hash table entry.  */
-  struct bfd_hash_entry root;
+  {
+    /* The basic hash table entry.  */
+    struct bfd_hash_entry root;
 
-  /* The offset within the vectors section where
-     this entry lives.  */
-  bfd_vma offset;
-};
+    /* The offset within the vectors section where
+       this entry lives.  */
+    bfd_vma offset;
+  };
 
 struct funcvec_hash_table
-{
-  /* The basic hash table.  */
-  struct bfd_hash_table root;
+  {
+    /* The basic hash table.  */
+    struct bfd_hash_table root;
 
-  bfd *abfd;
+    bfd *abfd;
 
-  /* Offset at which we'll add the next entry.  */
-  unsigned int offset;
-};
+    /* Offset at which we'll add the next entry.  */
+    unsigned int offset;
+  };
 
 static struct bfd_hash_entry *
 funcvec_hash_newfunc
@@ -68,6 +68,15 @@ funcvec_hash_table_init
            struct bfd_hash_entry *(*) PARAMS ((struct bfd_hash_entry *,
                                                struct bfd_hash_table *,
                                                const char *))));
+
+static bfd_reloc_status_type special PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+static int select_reloc PARAMS ((reloc_howto_type *));
+static void rtype2howto PARAMS ((arelent *, struct internal_reloc *));
+static void reloc_processing PARAMS ((arelent *, struct internal_reloc *, asymbol **, bfd *, asection *));
+static boolean h8300_symbol_address_p PARAMS ((bfd *, asection *, bfd_vma));
+static int h8300_reloc16_estimate PARAMS ((bfd *, asection *, arelent *, unsigned int, struct bfd_link_info *));
+static void h8300_reloc16_extra_cases PARAMS ((bfd *, struct bfd_link_info *, struct bfd_link_order *, arelent *, bfd_byte *, unsigned int *, unsigned int *));
+static boolean h8300_bfd_link_add_symbols PARAMS ((bfd *, struct bfd_link_info *));
 
 /* To lookup a value in the function vector hash table.  */
 #define funcvec_hash_lookup(table, string, create, copy) \

@@ -68,18 +68,6 @@ static reloc_howto_type *m68kcoff_common_addend_rtype_to_howto
 #endif
 
 static boolean m68k_coff_is_local_label_name PARAMS ((bfd *, const char *));
-#ifdef STATIC_RELOCS
-static
-#endif
-reloc_howto_type * m68k_reloc_type_lookup PARAMS ((bfd *, bfd_reloc_code_real_type));
-#ifdef STATIC_RELOCS
-static
-#endif
-int m68k_howto2rtype PARAMS ((reloc_howto_type *));
-#ifdef STATIC_RELOCS
-static
-#endif
-void m68k_rtype2howto PARAMS ((arelent *, int));
 
 /* On the delta, a symbol starting with L% is local.  We won't see
    such a symbol on other platforms, so it should be safe to always
@@ -135,10 +123,19 @@ extern int m68k_howto2rtype PARAMS ((reloc_howto_type *));
 extern reloc_howto_type *m68k_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
 #else
+
 #ifdef STATIC_RELOCS
-static
+#define STAT_REL static
+#else
+#define STAT_REL
 #endif
-void
+
+STAT_REL reloc_howto_type * m68k_reloc_type_lookup PARAMS ((bfd *, bfd_reloc_code_real_type));
+STAT_REL int m68k_howto2rtype PARAMS ((reloc_howto_type *));
+STAT_REL void m68k_rtype2howto PARAMS ((arelent *, int));
+
+
+STAT_REL void
 m68k_rtype2howto(internal, relocentry)
      arelent *internal;
      int relocentry;
@@ -155,10 +152,7 @@ m68k_rtype2howto(internal, relocentry)
     }
 }
 
-#ifdef STATIC_RELOCS
-static
-#endif
-int
+STAT_REL int
 m68k_howto2rtype (internal)
      reloc_howto_type *internal;
 {
@@ -183,10 +177,7 @@ m68k_howto2rtype (internal)
   return R_RELLONG;
 }
 
-#ifdef STATIC_RELOCS
-static
-#endif
-reloc_howto_type *
+STAT_REL reloc_howto_type *
 m68k_reloc_type_lookup (abfd, code)
      bfd *abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;

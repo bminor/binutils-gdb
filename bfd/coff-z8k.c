@@ -28,6 +28,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "coff/internal.h"
 #include "libcoff.h"
 
+static void extra_case PARAMS ((bfd *, struct bfd_link_info *, struct bfd_link_order *, arelent *, bfd_byte *, unsigned int *, unsigned int *));
+static void reloc_processing PARAMS ((arelent *, struct internal_reloc *, asymbol **, bfd *, asection *));
+static void rtype2howto PARAMS ((arelent *, struct internal_reloc *));
+static int coff_z8k_select_reloc PARAMS ((reloc_howto_type *));
+
 #define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (1)
 
 static reloc_howto_type r_imm32 =
@@ -81,15 +86,14 @@ coff_z8k_select_reloc (howto)
 #define Z8K 1			/* Customize coffcode.h */
 #define __A_MAGIC_SET__
 
-/* Code to swap in the reloc */
+/* Code to swap in the reloc.  */
 #define SWAP_IN_RELOC_OFFSET   bfd_h_get_32
 #define SWAP_OUT_RELOC_OFFSET bfd_h_put_32
 #define SWAP_OUT_RELOC_EXTRA(abfd, src, dst) \
   dst->r_stuff[0] = 'S'; \
   dst->r_stuff[1] = 'C';
 
-/* Code to turn a r_type into a howto ptr, uses the above howto table
-   */
+/* Code to turn a r_type into a howto ptr, uses the above howto table.  */
 
 static void
 rtype2howto (internal, dst)
@@ -128,9 +132,9 @@ rtype2howto (internal, dst)
     }
 }
 
-#define RTYPE2HOWTO(internal, relocentry) rtype2howto(internal,relocentry)
+#define RTYPE2HOWTO(internal, relocentry) rtype2howto (internal, relocentry)
 
-/* Perform any necessary magic to the addend in a reloc entry */
+/* Perform any necessary magic to the addend in a reloc entry.  */
 
 #define CALC_ADDEND(abfd, symbol, ext_reloc, cache_ptr) \
  cache_ptr->addend =  ext_reloc.r_offset;

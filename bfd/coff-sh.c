@@ -1,5 +1,5 @@
 /* BFD back-end for Hitachi Super-H COFF binaries.
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
    Free Software Foundation, Inc.
    Contributed by Cygnus Support.
    Written by Steve Chamberlain, <sac@cygnus.com>.
@@ -65,6 +65,7 @@ static boolean sh_relocate_section
 static bfd_byte *sh_coff_get_relocated_section_contents
   PARAMS ((bfd *, struct bfd_link_info *, struct bfd_link_order *,
 	   bfd_byte *, boolean, asymbol **));
+static reloc_howto_type * sh_coff_reloc_type_lookup PARAMS ((bfd *, bfd_reloc_code_real_type));
 
 #ifdef COFF_WITH_PE
 /* Can't build import tables with 2**4 alignment.  */
@@ -83,6 +84,7 @@ static bfd_byte *sh_coff_get_relocated_section_contents
 #define COFF_LONG_FILENAMES
 
 #ifdef COFF_WITH_PE
+static boolean in_reloc_p PARAMS ((bfd *, reloc_howto_type *));
 /* Return true if this relocation should
    appear in the output .reloc section.  */
 static boolean in_reloc_p (abfd, howto)
@@ -412,6 +414,7 @@ get_symbol_value (symbol)
 /* Convert an rtype to howto for the COFF backend linker.
    Copied from coff-i386.  */
 #define coff_rtype_to_howto coff_sh_rtype_to_howto
+static reloc_howto_type * coff_sh_rtype_to_howto PARAMS ((bfd *, asection *, struct internal_reloc *, struct coff_link_hash_entry *, struct internal_syment *, bfd_vma *));
 
 static reloc_howto_type *
 coff_sh_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
@@ -2074,6 +2077,7 @@ static const struct sh_minor_opcode sh_opcodef[] =
   { MAP (sh_opcodef1), 0xf0ff }
 };
 
+#ifndef COFF_IMAGE_WITH_PE
 static struct sh_major_opcode sh_opcodes[] =
 {
   { MAP (sh_opcode0) },
@@ -2093,6 +2097,7 @@ static struct sh_major_opcode sh_opcodes[] =
   { MAP (sh_opcodee) },
   { MAP (sh_opcodef) }
 };
+#endif
 
 /* The double data transfer / parallel processing insns are not
    described here.  This will cause sh_align_load_span to leave them alone.  */
@@ -3133,6 +3138,8 @@ CREATE_LITTLE_COFF_TARGET_VEC (TARGET_SYM, TARGET_SHL_NAME, BFD_IS_RELAXABLE,
 #endif
 
 #ifndef TARGET_SHL_SYM
+static const bfd_target * coff_small_object_p PARAMS ((bfd *));
+static boolean coff_small_new_section_hook PARAMS ((bfd *, asection *));
 /* Some people want versions of the SH COFF target which do not align
    to 16 byte boundaries.  We implement that by adding a couple of new
    target vectors.  These are just like the ones above, but they
