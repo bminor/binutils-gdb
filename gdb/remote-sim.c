@@ -560,6 +560,7 @@ gdbsim_close (quitting)
     }
 
   end_callbacks ();
+  generic_mourn_inferior ();
 }
 
 /* Takes a program previously attached to and detaches it.

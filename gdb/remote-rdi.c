@@ -462,6 +462,7 @@ arm_rdi_close (quitting)
       closed_already = 1;
       inferior_pid = 0;
       Adp_CloseDevice ();
+      generic_mourn_inferior ();
     }
 }
 
