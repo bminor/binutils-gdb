@@ -1,5 +1,7 @@
 2004-10-31  Andrew Cagney  <cagney@gnu.org>
 
+	* mips-tdep.c (mips_dump_tdep): Don't print any of the macros.
+
 	* config/mips/obsd64.mt (DEPRECATED_TM_FILE): Delete.
 
 	* config/mips/tm-mips.h: Delete file.
