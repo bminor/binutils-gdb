@@ -1,5 +1,25 @@
 Wed Jun 22 13:42:14 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* lexsup.c (parse_args): Add support for new options -( -) with
+	synonyms --start-group --end-group.
+	* ldlang.h (enum statement_enum): Add lang_group_statement_enum.
+	(lang_group_statement_type): Define new struct.
+	(lang_statement_union_type): Add group_statement field.
+	(lang_enter_group, lang_leave_group): Declare.
+	* ldlang.c (lang_for_each_statement_worker): Handle
+	lang_group_statement_enum.
+	(map_input_to_output_sections, print_statement): Likewise.
+	(lang_size_sections, lang_do_assignments): Likewise.
+	(open_input_bfds): Completely rewrite.  Now does its own looping,
+	rather than using lang_for_each_statement.  Handle groups.
+	(lang_process): Update call to open_input_bfds.
+	(print_group): New static function.
+	(lang_enter_group, lang_leave_group): New static functions.
+	* ldfile.c (ldfile_open_file): If the file has already been
+	opened, just return rather than taking an assertion failure.
+	* ldver.c (help): Mention new options.
+	* ld.texinfo: Document new options.
+
 	* ldlang.c (end_of_data_section_statement_list): Don't define.
 	(lang_leave_output_section_statement): Don't set obsolete variable
 	end_of_data_section_statement_list.
