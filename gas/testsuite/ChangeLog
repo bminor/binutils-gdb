@@ -1,3 +1,10 @@
+2005-03-21  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/iwmmxt.s: Update instructions that use the "never" value
+	in the conditional field to use "le" instead.  This is so that the
+	disassembler will disassemble them.
+	* gas/arm/iwmmxt.d: Update expected disassemblies.
+
 2005-03-17  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/i386/intel.d: Add stderr directive. 
