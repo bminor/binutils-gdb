@@ -214,19 +214,19 @@ static struct dos_ttystate
 ports[4] =
 {
   {
-    COM1ADDR, 4
+    COM1ADDR, 4, 0, NULL, 0, 0, "", 0, 0, 0, 0, 0, 0, 0, 0
   }
   ,
   {
-    COM2ADDR, 3
+    COM2ADDR, 3, 0, NULL, 0, 0, "", 0, 0, 0, 0, 0, 0, 0, 0
   }
   ,
   {
-    COM3ADDR, 4
+    COM3ADDR, 4, 0, NULL, 0, 0, "", 0, 0, 0, 0, 0, 0, 0, 0
   }
   ,
   {
-    COM4ADDR, 3
+    COM4ADDR, 3, 0, NULL, 0, 0, "", 0, 0, 0, 0, 0, 0, 0, 0
   }
 };
 
@@ -879,6 +879,7 @@ static struct serial_ops dos_ops =
   dos_setbaudrate,
   dos_setstopbits,
   dos_noop,			/* wait for output to drain */
+  (void (*)(serial_t, int))NULL	/* change into async mode */
 };
 
 
