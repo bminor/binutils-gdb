@@ -1,3 +1,9 @@
+2004-03-05  Fred Fish  <fnf@redhat.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_finish_dynamic_symbol): Just force
+	mips16 symbols to be even rather than testing first for even/odd.
+	(_bfd_mips_elf_link_output_symbol_hook): Ditto.
+
 2004-03-05  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* elf.c (map_sections_to_segments): Ignore .tbss sections for

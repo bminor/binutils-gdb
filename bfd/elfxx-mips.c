@@ -1,6 +1,6 @@
 /* MIPS-specific support for ELF
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003 Free Software Foundation, Inc.
+   2003, 2004 Free Software Foundation, Inc.
 
    Most of the information added by Ian Lance Taylor, Cygnus Support,
    <ian@cygnus.com>.
@@ -4891,9 +4891,8 @@ _bfd_mips_elf_link_output_symbol_hook
       && strcmp (input_sec->name, ".scommon") == 0)
     sym->st_shndx = SHN_MIPS_SCOMMON;
 
-  if (sym->st_other == STO_MIPS16
-      && (sym->st_value & 1) != 0)
-    --sym->st_value;
+  if (sym->st_other == STO_MIPS16)
+    sym->st_value &= ~1;
 
   return TRUE;
 }
@@ -6814,9 +6813,8 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
     }
 
   /* If this is a mips16 symbol, force the value to be even.  */
-  if (sym->st_other == STO_MIPS16
-      && (sym->st_value & 1) != 0)
-    --sym->st_value;
+  if (sym->st_other == STO_MIPS16)
+    sym->st_value &= ~1;
 
   return TRUE;
 }
