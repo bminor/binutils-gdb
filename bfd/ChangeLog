@@ -1,5 +1,25 @@
 Fri Apr 22 11:08:38 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	Get rid of the ECOFF .reginfo section hack.
+	* ecoff.c (ecoff_mkobject_hook): Don't create a .reginfo section.
+	(ecoff_new_section_hook): Don't handle the .reginfo section.
+	(ecoff_sizeof_headers): Likewise.
+	(ecoff_get_section_contents): Likewise.
+	(ecoff_compute_section_file_positions): Likewise.
+	(ecoff_compute_reloc_file_positions): Likewise.
+	(ecoff_set_section_contents): Likewise.
+	(ecoff_write_object_contents): Likewise.
+	(ecoff_bfd_final_link): Likewise.
+	(ecoff_bfd_copy_private_bfd_data): Copy the GP value and the
+	register masks.
+	(bfd_ecoff_get_gp_value): New function.
+	(bfd_ecoff_set_gp_value): New function.
+	(bfd_ecoff_set_regmasks): New function.
+	* bfd-in.h (bfd_ecoff_get_gp_value): Declare.
+	(bfd_ecoff_set_gp_value): Declare.
+	(bfd_ecoff_set_regmasks): Declare.
+	* bfd-in2.h: Rebuilt.
+
 	Fix ECOFF objcopy to actually copy debugging information.
 	* ecoff.c (ecoff_bfd_copy_private_bfd_data): New function.
 	(ecoff_get_extr): Assume that any ECOFF symbol with local clear is
