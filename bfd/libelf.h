@@ -241,7 +241,8 @@ extern bfd_reloc_status_type bfd_elf_generic_reloc PARAMS ((bfd *,
 							    asymbol *,
 							    PTR,
 							    asection *,
-							    bfd *));
+							    bfd *,
+							    char **));
 extern boolean bfd_elf_mkobject PARAMS ((bfd *));
 extern Elf_Internal_Shdr *bfd_elf_find_section PARAMS ((bfd *, char *));
 

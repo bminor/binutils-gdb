@@ -286,41 +286,32 @@ typedef struct sec *sec_ptr;
 
 typedef struct stat stat_type; 
 
-/** Error handling */
+/* Error handling */
 
-typedef enum bfd_error {
-	      no_error = 0, system_call_error, invalid_target,
-	      wrong_format, invalid_operation, no_memory,
-	      no_symbols, no_relocation_info,
-	      no_more_archived_files, malformed_archive,
-	      symbol_not_found, file_not_recognized,
-	      file_ambiguously_recognized, no_contents,
-	      bfd_error_nonrepresentable_section,
-	      no_debug_section, bad_value,
-
-	      /* An input file is shorter than expected.  */
-	      file_truncated,
-	      
-	      invalid_error_code} bfd_ec;
+typedef enum bfd_error
+{
+  no_error = 0,
+  system_call_error,
+  invalid_target,
+  wrong_format,
+  invalid_operation,
+  no_memory,
+  no_symbols,
+  no_relocation_info,
+  no_more_archived_files,
+  malformed_archive,
+  symbol_not_found,
+  file_not_recognized,
+  file_ambiguously_recognized,
+  no_contents,
+  bfd_error_nonrepresentable_section,
+  no_debug_section,
+  bad_value,
+  file_truncated,
+  invalid_error_code
+} bfd_ec;
 
 extern bfd_ec bfd_error;
-struct reloc_cache_entry;
-struct bfd_seclet;
-
-
-typedef struct bfd_error_vector {
-  void (* nonrepresentable_section ) PARAMS ((CONST bfd  *CONST abfd,
-					      CONST char *CONST name));
-  void (* undefined_symbol) PARAMS ((CONST struct reloc_cache_entry *rel,
-				     CONST struct bfd_seclet *sec));
-  void (* reloc_value_truncated) PARAMS ((CONST struct
-					  reloc_cache_entry *rel,
-					  struct bfd_seclet *sec));
-
-  void (* reloc_dangerous) PARAMS ((CONST struct reloc_cache_entry *rel,
-				    CONST struct bfd_seclet *sec));
-  
-} bfd_error_vector_type;
 
 CONST char *bfd_errmsg PARAMS ((bfd_ec error_tag));
 void bfd_perror PARAMS ((CONST char *message));
@@ -345,6 +336,86 @@ typedef struct _symbol_info
   short stab_desc;             /* Info for N_TYPE.  */
   CONST char *stab_name;
 } symbol_info;
+
+/* Hash table routines.  There is no way to free up a hash table.  */
+
+/* An element in the hash table.  Most uses will actually use a larger
+   structure, and an instance of this will be the first field.  */
+
+struct bfd_hash_entry
+{
+  /* Next entry for this hash code.  */
+  struct bfd_hash_entry *next;
+  /* String being hashed.  */
+  const char *string;
+  /* Hash code.  This is the full hash code, not the index into the
+     table.  */
+  unsigned long hash;
+};
+
+/* A hash table.  */
+
+struct bfd_hash_table
+{
+  /* The hash array.  */
+  struct bfd_hash_entry **table;
+  /* The number of slots in the hash table.  */
+  unsigned int size;
+  /* A function used to create new elements in the hash table.  The
+     first entry is itself a pointer to an element.  When this
+     function is first invoked, this pointer will be NULL.  However,
+     having the pointer permits a hierarchy of method functions to be
+     built each of which calls the function in the superclass.  Thus
+     each function should be written to allocate a new block of memory
+     only if the argument is NULL.  */
+  struct bfd_hash_entry *(*newfunc) PARAMS ((struct bfd_hash_entry *,
+					     struct bfd_hash_table *,
+					     const char *));
+  /* An obstack for this hash table.  */
+  struct obstack memory;
+};
+
+/* Initialize a hash table.  */
+extern boolean bfd_hash_table_init
+  PARAMS ((struct bfd_hash_table *,
+	   struct bfd_hash_entry *(*) (struct bfd_hash_entry *,
+				       struct bfd_hash_table *,
+				       const char *)));
+
+/* Initialize a hash table specifying a size.  */
+extern boolean bfd_hash_table_init_n
+  PARAMS ((struct bfd_hash_table *,
+	   struct bfd_hash_entry *(*) (struct bfd_hash_entry *,
+				       struct bfd_hash_table *,
+				       const char *),
+	   unsigned int size));
+
+/* Free up a hash table.  */
+extern void bfd_hash_table_free PARAMS ((struct bfd_hash_table *));
+
+/* Look up a string in a hash table.  If CREATE is true, a new entry
+   will be created for this string if one does not already exist.  The
+   COPY argument must be true if this routine should copy the string
+   into newly allocated memory when adding an entry.  */
+extern struct bfd_hash_entry *bfd_hash_lookup
+  PARAMS ((struct bfd_hash_table *, const char *, boolean create,
+	   boolean copy));
+
+/* Base method for creating a hash table entry.  */
+extern struct bfd_hash_entry *bfd_hash_newfunc
+  PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *,
+	   const char *));
+
+/* Grab some space for a hash table entry.  */
+extern PTR bfd_hash_allocate PARAMS ((struct bfd_hash_table *, size_t));
+
+/* Traverse a hash table in a random order, calling a function on each
+   element.  If the function returns false, the traversal stops.  The
+   INFO argument is passed to the function.  */
+extern void bfd_hash_traverse PARAMS ((struct bfd_hash_table *,
+				       boolean (*) (struct bfd_hash_entry *,
+						    PTR),
+				       PTR info));
 
 /* The code that implements targets can initialize a jump table with this
    macro.  It must name all its routines the same way (a prefix plus
@@ -406,9 +477,11 @@ CAT(NAME,_bfd_debug_info_end),\
 CAT(NAME,_bfd_debug_info_accumulate),\
 CAT(NAME,_bfd_get_relocated_section_contents),\
 CAT(NAME,_bfd_relax_section),\
-CAT(NAME,_bfd_seclet_link),\
 CAT(NAME,_bfd_reloc_type_lookup),\
-CAT(NAME,_bfd_make_debug_symbol)
+CAT(NAME,_bfd_make_debug_symbol),\
+CAT(NAME,_bfd_link_hash_table_create),\
+CAT(NAME,_bfd_link_add_symbols),\
+CAT(NAME,_bfd_final_link)
 
 #define COFF_SWAP_TABLE (PTR) &bfd_coff_std_swap_table
 
@@ -807,8 +880,8 @@ typedef struct sec
    struct symbol_cache_entry *symbol;  
    struct symbol_cache_entry **symbol_ptr_ptr;
 
-   struct bfd_seclet *seclets_head;
-   struct bfd_seclet *seclets_tail;
+   struct bfd_link_order *link_order_head;
+   struct bfd_link_order *link_order_tail;
 } asection ;
 
 
@@ -1014,7 +1087,8 @@ typedef enum bfd_reloc_status
 
         /* The relocation was performed, but may not be ok - presently
           generated only when linking i960 coff files with i960 b.out
-          symbols. */
+          symbols.  If this type is returned, the error_message argument
+          to bfd_perform_relocation will be set.  */
   bfd_reloc_dangerous
  }
  bfd_reloc_status_type;
@@ -1068,16 +1142,8 @@ typedef struct reloc_howto_struct
   unsigned int rightshift;
 
 	 /*  The size of the item to be relocated.  This is *not* a
-	    power-of-two measure.
-		 0 : one byte
-		 1 : two bytes
-		 2 : four bytes
-		 3 : nothing done (unless special_function is nonzero)
-		 4 : eight bytes
-		-2 : two bytes, result should be subtracted from the
-		     data instead of added
-	    There is currently no trivial way to extract a "number of
-	    bytes" from a howto pointer.  */
+	    power-of-two measure.  To get the number of bytes operated
+	    on by a type of relocation, use bfd_get_reloc_size.  */
   int size;
 
         /*  The number of bits in the item to be relocated.  This is used
@@ -1108,7 +1174,8 @@ typedef struct reloc_howto_struct
                                             struct symbol_cache_entry *symbol,
                                             PTR data,
                                             asection *input_section, 
-                                            bfd *output_bfd));
+                                            bfd *output_bfd,
+                                            char **error_message));
 
         /* The textual name of the relocation type. */
   char *name;
@@ -1156,6 +1223,9 @@ typedef struct reloc_howto_struct
     }                                          \
   }                                            \
 }                      
+int 
+bfd_get_reloc_size  PARAMS ((const reloc_howto_type *));
+
 typedef unsigned char bfd_byte;
 
 typedef struct relent_chain {
@@ -1169,7 +1239,8 @@ bfd_perform_relocation
     arelent *reloc_entry,
     PTR data,
     asection *input_section,
-    bfd *output_bfd));
+    bfd *output_bfd,
+    char **error_message));
 
 typedef enum bfd_reloc_code_real 
 {
@@ -1625,6 +1696,13 @@ struct _bfd
     struct _bfd *archive_head;    /* The first BFD in the archive.  */
     boolean has_armap;           
 
+     /* A chain of BFD structures involved in a link.  */
+    struct _bfd *link_next;
+
+     /* A field used by _bfd_generic_link_add_archive_symbols.  This will
+       be used only for archive elements.  */
+    int archive_pass;
+
      /* Used by the back end to hold private data. */
 
     union 
@@ -1658,9 +1736,6 @@ struct _bfd
 
      /* Where all the allocated stuff under this BFD goes */
     struct obstack memory;
-
-     /* Is this really needed in addition to usrdata?  */
-    asymbol **ld_symbols;
 };
 
 unsigned int 
@@ -1723,14 +1798,23 @@ bfd_scan_vma PARAMS ((CONST char *string, CONST char **end, int base));
 #define bfd_set_arch_mach(abfd, arch, mach)\
         BFD_SEND ( abfd, _bfd_set_arch_mach, (abfd, arch, mach))
 
-#define bfd_get_relocated_section_contents(abfd, seclet, data, relocateable) \
-	BFD_SEND (abfd, _bfd_get_relocated_section_contents, (abfd, seclet, data, relocateable))
+#define bfd_get_relocated_section_contents(abfd, link_info, link_order, data, relocateable, symbols) \
+	BFD_SEND (abfd, _bfd_get_relocated_section_contents, \
+                 (abfd, link_info, link_order, data, relocateable, symbols))
  
-#define bfd_relax_section(abfd, section, symbols) \
-       BFD_SEND (abfd, _bfd_relax_section, (abfd, section, symbols))
+#define bfd_relax_section(abfd, section, link_info, symbols) \
+       BFD_SEND (abfd, _bfd_relax_section, \
+                 (abfd, section, link_info, symbols))
 
-#define bfd_seclet_link(abfd, data, relocateable) \
-       BFD_SEND (abfd, _bfd_seclet_link, (abfd, data, relocateable))
+#define bfd_link_hash_table_create(abfd) \
+	BFD_SEND (abfd, _bfd_link_hash_table_create, (abfd))
+
+#define bfd_link_add_symbols(abfd, info) \
+	BFD_SEND (abfd, _bfd_link_add_symbols, (abfd, info))
+
+#define bfd_final_link(abfd, info) \
+	BFD_SEND (abfd, _bfd_final_link, (abfd, info))
+
 symindex 
 bfd_get_next_mapent PARAMS ((bfd *abfd, symindex previous, carsym **sym));
 
@@ -1769,6 +1853,10 @@ enum bfd_flavour {
   bfd_target_tekhex_flavour,
   bfd_target_srec_flavour,
   bfd_target_som_flavour};
+
+ /* Forward declaration.  */
+typedef struct bfd_link_info _bfd_link_info;
+
 typedef struct bfd_target
 {
   char *name;
@@ -1856,14 +1944,13 @@ typedef struct bfd_target
   void       (*_bfd_debug_info_accumulate) PARAMS ((bfd *, struct sec *));
 
   bfd_byte * (*_bfd_get_relocated_section_contents) PARAMS ((bfd *,
-                    struct bfd_seclet *, bfd_byte *data,
-                    boolean relocateable));
-
-  boolean    (*_bfd_relax_section) PARAMS ((bfd *, struct sec *,
+                    struct bfd_link_info *, struct bfd_link_order *,
+                    bfd_byte *data, boolean relocateable,
                     struct symbol_cache_entry **));
 
-  boolean    (*_bfd_seclet_link) PARAMS ((bfd *, PTR data,
-                     boolean relocateable));
+  boolean    (*_bfd_relax_section) PARAMS ((bfd *, struct sec *,
+                    struct bfd_link_info *, struct symbol_cache_entry **));
+
   /* See documentation on reloc types.  */
  CONST struct reloc_howto_struct *
        (*reloc_type_lookup) PARAMS ((bfd *abfd,
@@ -1876,6 +1963,18 @@ typedef struct bfd_target
        bfd *abfd,
        void *ptr,
        unsigned long size));
+
+  /* Create a hash table for the linker.  Different backends store
+    different information in this table.  */
+ struct bfd_link_hash_table *(*_bfd_link_hash_table_create) PARAMS ((bfd *));
+
+  /* Add symbols from this object file into the hash table.  */
+ boolean (*_bfd_link_add_symbols) PARAMS ((bfd *, struct bfd_link_info *));
+
+  /* Do a link based on the link_order structures attached to each
+    section of the BFD.  */
+ boolean (*_bfd_final_link) PARAMS ((bfd *, struct bfd_link_info *));
+
  PTR backend_data;
 } bfd_target;
 bfd_target *

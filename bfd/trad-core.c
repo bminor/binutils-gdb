@@ -80,6 +80,12 @@ trad_unix_core_file_p (abfd)
   int val;
   struct user u;
 
+#ifdef TRAD_CORE_USER_OFFSET
+  /* If defined, this macro is the file position of the user struct.  */
+  if (bfd_seek (abfd, TRAD_CORE_USER_OFFSET, SEEK_SET) == 0)
+    return 0;
+#endif
+    
   val = bfd_read ((void *)&u, 1, sizeof u, abfd);
   if (val != sizeof u)
     {
@@ -116,6 +122,7 @@ trad_unix_core_file_p (abfd)
 	bfd_error = file_truncated;
 	return 0;
       }
+#ifndef TRAD_CORE_ALLOW_ANY_EXTRA_SIZE
     if (NBPG * (UPAGES + u.u_dsize + u.u_ssize)
 #ifdef TRAD_CORE_EXTRA_SIZE_ALLOWED
 	/* Some systems write the file too big.  */
@@ -128,6 +135,7 @@ trad_unix_core_file_p (abfd)
 	bfd_error = wrong_format;
 	return 0;
       }
+#endif
   }
 
   /* OK, we believe you.  You're a core file (sure, sure).  */
@@ -186,7 +194,13 @@ trad_unix_core_file_p (abfd)
 #else
   core_datasec (abfd)->vma = HOST_TEXT_START_ADDR + (NBPG * u.u_tsize);
 #endif
+
+#ifdef HOST_STACK_START_ADDR
+  core_stacksec (abfd)->vma = HOST_STACK_START_ADDR;
+#else
   core_stacksec (abfd)->vma = HOST_STACK_END_ADDR - (NBPG * u.u_ssize);
+#endif
+
   /* This is tricky.  As the "register section", we give them the entire
      upage and stack.  u.u_ar0 points to where "register 0" is stored.
      There are two tricks with this, though.  One is that the rest of the
@@ -204,7 +218,11 @@ trad_unix_core_file_p (abfd)
   core_regsec (abfd)->vma = 0 - (int) u.u_ar0;
 
   core_datasec (abfd)->filepos = NBPG * UPAGES;
+#ifdef TRAD_CORE_STACK_FILEPOS
+  core_stacksec (abfd)->filepos = TRAD_CORE_STACK_FILEPOS;
+#else
   core_stacksec (abfd)->filepos = (NBPG * UPAGES) + NBPG * u.u_dsize;
+#endif
   core_regsec (abfd)->filepos = 0; /* Register segment is the upage */
 
   /* Align to word at least */
@@ -303,12 +321,16 @@ trad_unix_core_file_matches_executable_p  (core_bfd, exec_bfd)
 	((bfd *, struct sec *))) bfd_void
 #define trad_unix_bfd_get_relocated_section_contents bfd_generic_get_relocated_section_contents
 #define trad_unix_bfd_relax_section		bfd_generic_relax_section
-#define trad_unix_bfd_seclet_link \
-  ((boolean (*) PARAMS ((bfd *, PTR, boolean))) bfd_false)
 #define trad_unix_bfd_reloc_type_lookup \
   ((CONST struct reloc_howto_struct *(*) PARAMS ((bfd *, bfd_reloc_code_real_type))) bfd_nullvoidptr)
 #define trad_unix_bfd_make_debug_symbol \
   ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
+#define trad_unix_bfd_link_hash_table_create \
+  ((struct bfd_link_hash_table *(*) PARAMS ((bfd *))) bfd_nullvoidptr)
+#define trad_unix_bfd_link_add_symbols \
+  ((boolean (*) PARAMS ((bfd *, struct bfd_link_info *))) bfd_false)
+#define trad_unix_bfd_final_link \
+  ((boolean (*) PARAMS ((bfd *, struct bfd_link_info *))) bfd_false)
 
 /* If somebody calls any byte-swapping routines, shoot them.  */
 void
@@ -328,7 +350,7 @@ bfd_target trad_core_vec =
     true,			/* target headers byte order */
     (HAS_RELOC | EXEC_P |	/* object flags */
      HAS_LINENO | HAS_DEBUG |
-     HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
+     HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
     (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
     0,			                                   /* symbol prefix */
     ' ',						   /* ar_pad_char */

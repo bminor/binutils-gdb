@@ -21,8 +21,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
+#include "bfdlink.h"
 #include "libbfd.h"
-#include "seclet.h"
 #include "aout/ar.h"
 #include "aout/ranlib.h"
 
@@ -111,6 +111,8 @@ ecoff_mkobject_hook (abfd, filehdr, aouthdr)
   regsec = bfd_make_section (abfd, REGINFO);
   if (regsec == NULL)
     return NULL;
+  /* Tell the linker to leave this section completely alone.  */
+  regsec->flags = SEC_SHARED_LIBRARY;
 
   if (internal_a != (struct internal_aouthdr *) NULL)
     {
@@ -1322,7 +1324,7 @@ ecoff_type_to_string (abfd, aux_ptr, indx, bigendian)
     case btStruct:		/* Structure (Record) */
       ecoff_swap_rndx_in (bigendian, &aux_ptr[indx].a_rndx, &rndx);
       ecoff_emit_aggregate (abfd, p1, &rndx,
-			    AUX_GET_ISYM (bigendian, &aux_ptr[indx+1]),
+			    (long) AUX_GET_ISYM (bigendian, &aux_ptr[indx+1]),
 			    "struct");
       indx++;			/* skip aux words */
       break;
@@ -1334,7 +1336,7 @@ ecoff_type_to_string (abfd, aux_ptr, indx, bigendian)
     case btUnion:		/* Union */
       ecoff_swap_rndx_in (bigendian, &aux_ptr[indx].a_rndx, &rndx);
       ecoff_emit_aggregate (abfd, p1, &rndx,
-			    AUX_GET_ISYM (bigendian, &aux_ptr[indx+1]),
+			    (long) AUX_GET_ISYM (bigendian, &aux_ptr[indx+1]),
 			    "union");
       indx++;			/* skip aux words */
       break;
@@ -1346,7 +1348,7 @@ ecoff_type_to_string (abfd, aux_ptr, indx, bigendian)
     case btEnum:		/* Enumeration */
       ecoff_swap_rndx_in (bigendian, &aux_ptr[indx].a_rndx, &rndx);
       ecoff_emit_aggregate (abfd, p1, &rndx,
-			    AUX_GET_ISYM (bigendian, &aux_ptr[indx+1]),
+			    (long) AUX_GET_ISYM (bigendian, &aux_ptr[indx+1]),
 			    "enum");
       indx++;			/* skip aux words */
       break;
@@ -2040,8 +2042,9 @@ ecoff_find_nearest_line (abfd,
 /* We can't use the generic linking routines for ECOFF, because we
    have to handle all the debugging information.  The generic link
    routine just works out the section contents and attaches a list of
-   symbols.  We find each input BFD by looping over all the seclets.
-   We accumulate the debugging information for each input BFD.  */
+   symbols.  We find each input BFD by looping over all the link_order
+   information.  We accumulate the debugging information for each
+   input BFD.  */
 
 /* Get ECOFF EXTR information for an external symbol.  This function
    is passed to bfd_ecoff_debug_externals.  */
@@ -2084,6 +2087,14 @@ ecoff_get_extr (sym, esym)
   (*(ecoff_backend (input_bfd)->debug_swap.swap_ext_in))
     (input_bfd, ecoff_sym_ptr->native, esym);
 
+  /* If the symbol was defined by the linker, then esym will be
+     undefined but sym will not be.  Get a better class for such a
+     symbol.  */
+  if ((esym->asym.sc == scUndefined
+       || esym->asym.sc == scSUndefined)
+      && bfd_get_section (sym) != &bfd_und_section)
+    esym->asym.sc = scAbs;
+
   /* Adjust the FDR index for the symbol by that used for the input
      BFD.  */
   esym->ifd += ecoff_data (input_bfd)->debug_info.ifdbase;
@@ -2107,16 +2118,15 @@ ecoff_set_index (sym, indx)
    link.  */
 
 boolean
-ecoff_bfd_seclet_link (abfd, data, relocateable)
+ecoff_bfd_final_link (abfd, info)
      bfd *abfd;
-     PTR data;
-     boolean relocateable;
+     struct bfd_link_info *info;
 {
   const struct ecoff_backend_data * const backend = ecoff_backend (abfd);
   struct ecoff_debug_info * const debug = &ecoff_data (abfd)->debug_info;
   HDRR *symhdr;
-  register asection *o;
-  register bfd_seclet_type *p;
+  register bfd *input_bfd;
+  asection *o;
 
   /* We accumulate the debugging information counts in the symbolic
      header.  */
@@ -2147,69 +2157,49 @@ ecoff_bfd_seclet_link (abfd, data, relocateable)
   debug->external_fdr = debug->external_fdr_end = NULL;
   debug->external_rfd = debug->external_rfd_end = NULL;
 
-  /* We need to accumulate the debugging symbols from each input BFD.
-     We do this by looking through all the seclets to gather all the
-     input BFD's.  We use the output_has_begun field to avoid
-     including a particular input BFD more than once.  */
+  /* We accumulate the debugging symbols from each input BFD.  */
+  for (input_bfd = info->input_bfds;
+       input_bfd != (bfd *) NULL;
+       input_bfd = input_bfd->link_next)
+    {
+      boolean ret;
 
-  /* Clear the output_has_begun fields.  */
-  for (o = abfd->sections; o != (asection *) NULL; o = o->next)
-    for (p = o->seclets_head;
-	 p != (bfd_seclet_type *) NULL;
-	 p = p->next)
-      if (p->type == bfd_indirect_seclet)
-	p->u.indirect.section->owner->output_has_begun = false;
-  
-  /* Add in each input BFD.  */
+      if (bfd_get_flavour (input_bfd) == bfd_target_ecoff_flavour)
+	ret = (bfd_ecoff_debug_accumulate
+	       (abfd, debug, &backend->debug_swap,
+		input_bfd, &ecoff_data (input_bfd)->debug_info,
+		&ecoff_backend (input_bfd)->debug_swap, info->relocateable));
+      else
+	ret = bfd_ecoff_debug_link_other (abfd,
+					  debug,
+					  &backend->debug_swap,
+					  input_bfd);
+
+      if (! ret)
+	return false;
+
+      /* Combine the register masks.  */
+      ecoff_data (abfd)->gprmask |= ecoff_data (input_bfd)->gprmask;
+      ecoff_data (abfd)->fprmask |= ecoff_data (input_bfd)->fprmask;
+      ecoff_data (abfd)->cprmask[0] |= ecoff_data (input_bfd)->cprmask[0];
+      ecoff_data (abfd)->cprmask[1] |= ecoff_data (input_bfd)->cprmask[1];
+      ecoff_data (abfd)->cprmask[2] |= ecoff_data (input_bfd)->cprmask[2];
+      ecoff_data (abfd)->cprmask[3] |= ecoff_data (input_bfd)->cprmask[3];
+    }
+
+  /* Don't let the generic routine link the .reginfo sections.  */
   for (o = abfd->sections; o != (asection *) NULL; o = o->next)
     {
-      for (p = o->seclets_head;
-	   p != (bfd_seclet_type *) NULL;
-	   p = p->next)
-	{
-	  bfd *input_bfd;
-	  boolean ret;
-
-	  if (p->type != bfd_indirect_seclet)
-	    continue;
-
-	  input_bfd = p->u.indirect.section->owner;
-	  if (input_bfd->output_has_begun)
-	    continue;
-
-	  if (bfd_get_flavour (input_bfd) == bfd_target_ecoff_flavour)
-	    ret = (bfd_ecoff_debug_accumulate
-		   (abfd, debug, &backend->debug_swap,
-		    input_bfd, &ecoff_data (input_bfd)->debug_info,
-		    &ecoff_backend (input_bfd)->debug_swap, relocateable));
-	  else
-	    ret = bfd_ecoff_debug_link_other (abfd,
-					      debug,
-					      &backend->debug_swap,
-					      input_bfd);
-
-	  if (ret == false)
-	    return false;
-
-	  /* Combine the register masks.  */
-	  ecoff_data (abfd)->gprmask |= ecoff_data (input_bfd)->gprmask;
-	  ecoff_data (abfd)->fprmask |= ecoff_data (input_bfd)->fprmask;
-	  ecoff_data (abfd)->cprmask[0] |= ecoff_data (input_bfd)->cprmask[0];
-	  ecoff_data (abfd)->cprmask[1] |= ecoff_data (input_bfd)->cprmask[1];
-	  ecoff_data (abfd)->cprmask[2] |= ecoff_data (input_bfd)->cprmask[2];
-	  ecoff_data (abfd)->cprmask[3] |= ecoff_data (input_bfd)->cprmask[3];
-
-	  input_bfd->output_has_begun = true;
-	}
-
-      /* Don't bother to do any linking of .reginfo sections.  */
       if (strcmp (o->name, REGINFO) == 0)
-	o->seclets_head = (bfd_seclet_type *) NULL;
+	{
+	  o->link_order_head = (struct bfd_link_order *) NULL;
+	  break;
+	}
     }
 
   /* Let the generic link routine handle writing out the section
      contents.  */
-  return bfd_generic_seclet_link (abfd, data, relocateable);
+  return _bfd_generic_final_link (abfd, info);
 }
 
 /* Set the architecture.  The supported architecture is stored in the
@@ -2279,7 +2269,7 @@ ecoff_get_section_contents (abfd, section, location, offset, count)
      size is reasonable.  We don't have to worry about swapping or any
      such thing; the .reginfo section is defined such that the
      contents are an ecoff_reginfo structure as seen on the host.  */
-  memcpy (location, ((char *) &s) + offset, count);
+  memcpy (location, ((char *) &s) + offset, (size_t) count);
   return true;
 }
 
@@ -2382,7 +2372,7 @@ ecoff_set_section_contents (abfd, section, location, offset, count)
 	 swapping or any such thing; the .reginfo section is defined
 	 such that the contents are an ecoff_reginfo structure as seen
 	 on the host.  */
-      memcpy (((char *) &s) + offset, location, count);
+      memcpy (((char *) &s) + offset, location, (size_t) count);
 
       tdata->gp = s.gp_value;
       tdata->gprmask = s.gprmask;
@@ -3134,7 +3124,7 @@ ecoff_write_armap (abfd, elength, map, orl_count, stridx)
       != sizeof (struct ar_hdr))
     return false;
 
-  bfd_h_put_32 (abfd, hashsize, temp);
+  bfd_h_put_32 (abfd, (bfd_vma) hashsize, temp);
   if (bfd_write (temp, 1, 4, abfd) != 4)
     return false;
   
@@ -3178,8 +3168,10 @@ ecoff_write_armap (abfd, elength, map, orl_count, stridx)
 	  hash = srch;
 	}
 	
-      bfd_h_put_32 (abfd, map[i].namidx, (PTR) (hashtable + hash * 8));
-      bfd_h_put_32 (abfd, firstreal, (PTR) (hashtable + hash * 8 + 4));
+      bfd_h_put_32 (abfd, (bfd_vma) map[i].namidx,
+		    (PTR) (hashtable + hash * 8));
+      bfd_h_put_32 (abfd, (bfd_vma) firstreal,
+		    (PTR) (hashtable + hash * 8 + 4));
     }
 
   if (bfd_write (hashtable, 1, symdefsize, abfd) != symdefsize)
@@ -3188,7 +3180,7 @@ ecoff_write_armap (abfd, elength, map, orl_count, stridx)
   bfd_release (abfd, hashtable);
 
   /* Now write the strings.  */
-  bfd_h_put_32 (abfd, stringsize, temp);
+  bfd_h_put_32 (abfd, (bfd_vma) stringsize, temp);
   if (bfd_write (temp, 1, 4, abfd) != 4)
     return false;
   for (i = 0; i < orl_count; i++)

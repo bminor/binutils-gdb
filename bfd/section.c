@@ -112,23 +112,23 @@ SUBSECTION
 
 
 SUBSECTION
-	Seclets
+	Link orders
 
-	The data within a section is stored in a @dfn{seclet}.  These
-	are much like the fixups in <<gas>>.  The seclet abstraction
-	allows a section to grow and shrink within itself.
+	The data within a section is stored in a @dfn{link_order}.
+	These are much like the fixups in <<gas>>.  The link_order
+	abstraction allows a section to grow and shrink within itself.
 
-	A seclet knows how big it is, and which is the next seclet and
-	where the raw data for it is; it also points to a list of
-	relocations which apply to it.
+	A link_order knows how big it is, and which is the next
+	link_order and where the raw data for it is; it also points to
+	a list of relocations which apply to it.
 
-	The seclet is used by the linker to perform relaxing on final
-	code.  The compiler creates code which is as big as
+	The link_order is used by the linker to perform relaxing on
+	final code.  The compiler creates code which is as big as
 	necessary to make it work without relaxing, and the user can
 	select whether to relax.  Sometimes relaxing takes a lot of
 	time.  The linker runs around the relocations to see if any
 	are attached to data which can be shrunk, if so it does it on
-	a seclet by seclet basis.
+	a link_order by link_order basis.
 
 */
 
@@ -361,8 +361,8 @@ CODE_FRAGMENT
 .   struct symbol_cache_entry *symbol;  
 .   struct symbol_cache_entry **symbol_ptr_ptr;
 .
-.   struct bfd_seclet *seclets_head;
-.   struct bfd_seclet *seclets_tail;
+.   struct bfd_link_order *link_order_head;
+.   struct bfd_link_order *link_order_tail;
 .} asection ;
 .
 .

@@ -279,7 +279,7 @@ unsigned int length)
 static int white(x)
 char x;
 {
-return (x== ' ' || x == '\t' || x == '\n' || x == '\r');
+  return (x== ' ' || x == '\t' || x == '\n' || x == '\r');
 }
 static int
 skipwhite(src,abfd)
@@ -309,12 +309,11 @@ DEFUN(srec_mkobject, (abfd),
     
 }
 
-static void
-DEFUN(pass_over,(abfd, func, symbolfunc, section),
-      bfd *abfd AND
-      void (*func)() AND
-      void (*symbolfunc)() AND
-      asection *section)
+static void pass_over(abfd, func, symbolfunc, section)
+     bfd *abfd;
+     void (*func)();
+     void (*symbolfunc)();
+     asection *section;
 {
   unsigned int bytes_on_line;
   boolean eof = false;
@@ -348,45 +347,46 @@ DEFUN(pass_over,(abfd, func, symbolfunc, section),
 
      case ' ':
       /* spaces - maybe just before a symbol */
-      while (*src != '\n' && white(*src)) {
-      eof = skipwhite(src, abfd);
-
-{
-	int val = 0;
-	int slen = 0;
-	char symbol[MAXCHUNK];
-
-	/* get the symbol part */
-	while (!eof && !white(*src) && slen < MAXCHUNK)
+      while (*src != '\n' && *src != '\r' && white(*src)) 
 	{
-	  symbol[slen++] = *src;
-	  eof =  (boolean)(bfd_read(src, 1, 1, abfd) != 1);	  
-	}
-	symbol[slen] = 0;
-	eof = skipwhite(src, abfd);
-	/* skip the $ for the hex value */
-	if (*src == '$') 
-	{
-	  eof =  (boolean)(bfd_read(src, 1, 1, abfd) != 1);
-	}
+	  eof = skipwhite(src, abfd);
 
-	/* Scan off the hex number */
-	while (isxdigit(*src ))
-	{
-	  val *= 16;
-	  if (isdigit(*src))
-	   val += *src - '0';
-	  else if (isupper(*src)) {
-	    val += *src - 'A' + 10;
+	  {
+	    int val = 0;
+	    int slen = 0;
+	    char symbol[MAXCHUNK];
+
+	    /* get the symbol part */
+	    while (!eof && !white(*src) && slen < MAXCHUNK)
+	      {
+		symbol[slen++] = *src;
+		eof =  (boolean)(bfd_read(src, 1, 1, abfd) != 1);	  
+	      }
+	    symbol[slen] = 0;
+	    eof = skipwhite(src, abfd);
+	    /* skip the $ for the hex value */
+	    if (*src == '$') 
+	      {
+		eof =  (boolean)(bfd_read(src, 1, 1, abfd) != 1);
+	      }
+
+	    /* Scan off the hex number */
+	    while (isxdigit(*src ))
+	      {
+		val *= 16;
+		if (isdigit(*src))
+		  val += *src - '0';
+		else if (isupper(*src)) {
+		  val += *src - 'A' + 10;
+		}
+		else {
+		  val += *src - 'a' + 10;
+		}
+		eof =  (boolean)(bfd_read(src, 1, 1, abfd) != 1);
+	      }
+	    symbolfunc(abfd, symbol, slen, val);
 	  }
-	  else {
-	    val += *src - 'a' + 10;
-	  }
-	  eof =  (boolean)(bfd_read(src, 1, 1, abfd) != 1);
 	}
-	symbolfunc(abfd, symbol, slen, val);
-      }
-}
       break;
      case 'S':
       src++;
@@ -733,7 +733,7 @@ srec_write_symbols(abfd)
       if (len > 3 && s->name[len-2] == '.') 
       {
 	int l;
-	sprintf(buffer, "$$ %s\n\r", s->name);
+	sprintf(buffer, "$$ %s\r\n", s->name);
 	l = strlen(buffer);
 	bfd_write(buffer, l, 1, abfd);
       }
@@ -749,13 +749,13 @@ srec_write_symbols(abfd)
 	int l;
 	char buf2[40], *p;
 
-	sprintf (buffer,"  %s $", s->name);
-	sprintf_vma (buf2, s->value + s->section->lma);
+	sprintf_vma (buf2,
+		     s->value + s->section->output_section->lma 
+		     + s->section->output_offset);
 	p = buf2;
 	while (p[0] == '0' && p[1] != 0)
 	  p++;
-	strcat (buffer, p);
-	strcat (buffer, "\n\r");
+	sprintf (buffer, "  %s $%s\r\n", s->name, p);
 	l = strlen(buffer);
 	bfd_write(buffer, l, 1,abfd);
       }
@@ -906,11 +906,13 @@ DEFUN(srec_print_symbol,(ignore_abfd, afile, symbol, how),
 #define srec_bfd_debug_info_accumulate  (FOO(void, (*), (bfd *,	 asection *))) bfd_void
 #define srec_bfd_get_relocated_section_contents bfd_generic_get_relocated_section_contents
 #define srec_bfd_relax_section bfd_generic_relax_section
-#define srec_bfd_seclet_link bfd_generic_seclet_link
 #define srec_bfd_reloc_type_lookup \
   ((CONST struct reloc_howto_struct *(*) PARAMS ((bfd *, bfd_reloc_code_real_type))) bfd_nullvoidptr)
 #define srec_bfd_make_debug_symbol \
   ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
+#define srec_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
+#define srec_bfd_link_add_symbols _bfd_generic_link_add_symbols
+#define srec_bfd_final_link _bfd_generic_final_link
 
 bfd_target srec_vec =
 {
@@ -920,19 +922,19 @@ bfd_target srec_vec =
     true,			/* target headers byte order */
     (HAS_RELOC | EXEC_P |	/* object flags */
      HAS_LINENO | HAS_DEBUG |
-     HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
+     HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
     (SEC_CODE|SEC_DATA|SEC_ROM|SEC_HAS_CONTENTS
      |SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
      0,				/* leading underscore */
     ' ',			/* ar_pad_char */
     16,				/* ar_max_namelen */
     1,				/* minimum alignment */
-    _do_getb64, _do_getb_signed_64, _do_putb64,
-      _do_getb32, _do_getb_signed_32,     _do_putb32,
-      _do_getb16, _do_getb_signed_16, _do_putb16, /* data */
-    _do_getb64, _do_getb_signed_64, _do_putb64,
-      _do_getb32, _do_getb_signed_32,     _do_putb32,
-      _do_getb16, _do_getb_signed_16, _do_putb16, /* hdrs */
+    bfd_getb64, bfd_getb_signed_64, bfd_putb64,
+      bfd_getb32, bfd_getb_signed_32,     bfd_putb32,
+      bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* data */
+    bfd_getb64, bfd_getb_signed_64, bfd_putb64,
+      bfd_getb32, bfd_getb_signed_32,     bfd_putb32,
+      bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* hdrs */
 
   {
       _bfd_dummy_target,
@@ -965,19 +967,19 @@ bfd_target symbolsrec_vec =
     true,			/* target headers byte order */
     (HAS_RELOC | EXEC_P |	/* object flags */
      HAS_LINENO | HAS_DEBUG |
-     HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
+     HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
     (SEC_CODE|SEC_DATA|SEC_ROM|SEC_HAS_CONTENTS
      |SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
      0,				/* leading underscore */
     ' ',			/* ar_pad_char */
     16,				/* ar_max_namelen */
     1,				/* minimum alignment */
-    _do_getb64, _do_getb_signed_64, _do_putb64,
-      _do_getb32, _do_getb_signed_32,     _do_putb32,
-      _do_getb16, _do_getb_signed_16, _do_putb16, /* data */
-    _do_getb64, _do_getb_signed_64, _do_putb64,
-      _do_getb32, _do_getb_signed_32,     _do_putb32,
-      _do_getb16, _do_getb_signed_16, _do_putb16, /* hdrs */
+    bfd_getb64, bfd_getb_signed_64, bfd_putb64,
+      bfd_getb32, bfd_getb_signed_32,     bfd_putb32,
+      bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* data */
+    bfd_getb64, bfd_getb_signed_64, bfd_putb64,
+      bfd_getb32, bfd_getb_signed_32,     bfd_putb32,
+      bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* hdrs */
 
   {
       _bfd_dummy_target,

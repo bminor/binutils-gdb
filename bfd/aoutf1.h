@@ -1,5 +1,5 @@
 /* A.out "format 1" file handling code for BFD.
-   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -30,8 +30,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "aout/ar.h"
 
 /* This is needed to reject a NewsOS file, e.g. in
-   gdb/testsuite/gdb.t10/crossload.exp.  */
-#define MACHTYPE_OK(mtype) ((mtype) == M_68010 || (mtype) == M_68020 \
+   gdb/testsuite/gdb.t10/crossload.exp. <kingdon@cygnus.com>
+   I needed to add M_UNKNOWN to recognize a 68000 object, so this will
+   probably no longer reject a NewsOS object.  <ian@cygnus.com>. */
+#define MACHTYPE_OK(mtype) ((mtype) == M_UNKNOWN \
+			    || (mtype) == M_68010 \
+			    || (mtype) == M_68020 \
 			    || (mtype) == M_SPARC)
 
 /*
@@ -56,8 +60,6 @@ The name put into the target vector.
 
 */
 
-void (*bfd_error_trap)();
-
 /*SUPPRESS558*/
 /*SUPPRESS529*/
 
@@ -72,9 +74,9 @@ DEFUN(NAME(sunos,set_arch_mach), (abfd, machtype),
 
   case M_UNKNOWN:
       /* Some Sun3s make magic numbers without cpu types in them, so
-	 we'll default to the 68020. */
+	 we'll default to the 68000. */
     arch = bfd_arch_m68k;
-    machine = 68020;
+    machine = 68000;
     break;
     
   case M_68010:
@@ -95,6 +97,7 @@ DEFUN(NAME(sunos,set_arch_mach), (abfd, machtype),
     break;
     
   case M_386:
+  case M_386_DYNIX:
     arch = bfd_arch_i386;
     machine = 0;
     break;

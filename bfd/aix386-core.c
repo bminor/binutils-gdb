@@ -290,12 +290,16 @@ DEFUN(aix386_core_file_matches_executable_p, (core_bfd, exec_bfd),
 	(bfd *, struct sec *))) bfd_void
 #define aix386_bfd_get_relocated_section_contents bfd_generic_get_relocated_section_contents
 #define aix386_bfd_relax_section bfd_generic_relax_section
-#define aix386_bfd_seclet_link \
-  ((boolean (*) PARAMS ((bfd *, PTR, boolean))) bfd_false)
 #define aix386_bfd_reloc_type_lookup \
   ((CONST struct reloc_howto_struct *(*) PARAMS ((bfd *, bfd_reloc_code_real_type))) bfd_nullvoidptr)
 #define aix386_bfd_make_debug_symbol \
   ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
+#define aix386_bfd_link_hash_table_create \
+  ((struct bfd_link_hash_table *(*) PARAMS ((bfd *))) bfd_nullvoidptr)
+#define aix386_bfd_link_add_symbols \
+  ((boolean (*) PARAMS ((bfd *, struct bfd_link_info *))) bfd_false)
+#define aix386_bfd_final_link \
+  ((boolean (*) PARAMS ((bfd *, struct bfd_link_info *))) bfd_false)
 
 /* If somebody calls any byte-swapping routines, shoot them.  */
 void

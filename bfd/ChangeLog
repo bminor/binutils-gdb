@@ -1,3 +1,110 @@
+Thu Dec 30 13:37:24 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	Extensive changes to move the bulk of the linker into BFD so that
+	more efficient backend code can be written for specific object
+	files.  Only existing efficient backend is a.out.
+	* seclet.c, seclet.h: Removed.
+	* hash.c, linker.c, genlink.h: New files.
+	* bfd-in.h: Removed bfd_error_vector.  Declared hash table
+	structures and functions.
+	(JUMP_TABLE): Removed bfd_seclet_link, added
+	bfd_link_hash_table_create, bfd_link_add_symbols and
+	bfd_final_link.
+	* All backends: Changed accordingly.
+	* bfd-in2.h: Rebuilt.
+	* bfd.c (struct _bfd): Added link_next and archive_pass fields.
+	Removed ld_symbols field.
+	(bfd_nonrepresentable_section, bfd_undefined_symbol,
+	bfd_reloc_value_truncated, bfd_reloc_is_dangerous,
+	bfd_error_vector): Removed.
+	(bfd_default_error_trap, bfd_error_trap,
+	bfd_error_nonrepresentabltrap): Removed.
+	(bfd_get_relocated_section_contents): Pass link_info.  Pass
+	link_order instead of seclet.  Pass symbols.
+	(bfd_relax_section): Pass link_info.
+	(bfd_seclet_link): Removed.
+	(bfd_link_hash_table_create, bfd_link_add_symbols,
+	bfd_final_link): New macros.
+	* libbfd-in.h: If __GNUC__ is defined and alloca is not, define
+	alloca as __builtin_alloca.  Declare internal linking functions.
+	* libbfd.h: Rebuilt.
+	* libbfd.c (bfd_seek): Comment out fseek assertion.  It's worked
+	for months.
+	* reloc.c (reloc_howto_type): Added error_message argument to
+	special_function field.  Changed all callers and all definitions.
+	(bfd_get_reloc_size): Make argument a const pointer.
+	(bfd_perform_relocation): Add error_message argument to hold
+	string set if return value if bfd_reloc_dangerous.  Changed all
+	callers.
+	(_bfd_final_link_relocate, _bfd_relocate_contents): New functions.
+	* section.c (asection): Renamed seclets_head and seclets_tail to
+	link_order_head and link_order_tail.
+	* targets.c (bfd_target): Replaced seclet argument with link_info
+	and link_order and symbols arguments in
+	bfd_get_relocated_section_contents.  Added symbols argument to
+	bfd_relax_section.  Removed bfd_seclet_link.  Added
+	bfd_link_hash_table_create, bfd_link_add_symbols and
+	bfd_final_link.
+	* libaout.h (struct aoutdata): Added external_syms,
+	external_sym_count, external_strings, sym_hashes fields.
+	(obj_aout_external_syms, obj_aout_external_sym_count,
+	obj_aout_external_strings, obj_aout_sym_hashes): New accessor
+	macros.
+	(WRITE_HEADERS): Only output symbols if outsymbols is not NULL.
+	* aoutx.h: Wrote new back end linker routines.
+	(translate_to_native_sym_flags): Return boolean value.  Don't use
+	bfd_error_vector.
+	(NAME(aout,write_syms)): Return boolean value.  Check return value
+	of translate_to_native_sym_flags and bfd_write.
+	* aout-target.h (final_link_callback): New function.
+	(MY_bfd_final_link): New function.
+	* aout-adobe.c (aout_adobe_write_object_contents): Check return
+	value of aout_32_write_syms.
+	* hp300hpux.c (MY(write_object_contents)): Likewise.
+	* i386lynx.c (WRITE_HEADERS): Likewise.
+	* libaout.h (WRITE_HEADERS): Likewise.
+	* bout.c: Changed functions to use link_info->callbacks rather
+	than bfd_error_vector, and link_orders rather than seclets.
+	* coff-alpha.c: Likewise.
+	* coff-h8300.c: Likewise.
+	* coff-h8500.c: Likewise.
+	* coff-sh.c: Likewise.
+	* coff-z8k.c: Likewise.
+	* elf32-hppa.c: Likewise.
+	* reloc16.c: Likewise.
+	* coff-alpha.c (alpha_ecoff_get_relocated_section_contents): Look
+	up _gp in the hash table rather than in outsymbols.
+	* coff-a29k.c (a29k_reloc): Pass errors back in new error_message
+	argument rather than printing them.
+	* coffcode.h (bfd_coff_reloc16_extra_cases): Take link_info and
+	link_order arguments rather than seclet.  Changed all uses and
+	definitions.
+	(bfd_coff_reloc16_estimate): Pass link_info arguments.  Changed
+	all uses and definitions.
+	* libcoff.h: Rebuilt.
+	* ecoff.c (ecoff_get_extr): If symbol is defined by linker, but
+	not by ECOFF, make it scAbs.
+	(ecoff_bfd_final_link): Renamed from ecoff_bfd_seclet_link and
+	rewritten.
+	* elf32-mips.c (mips_elf_final_link): Renamed from
+	mips_elf_seclet_link and rewritten.
+	* elf32-hppa.c (elf32_hppa_stub_description): Added link_info
+	field.
+	(new_stub, add_stub_by_name, hppa_elf_build_arg_reloc_stub,
+	hppa_elf_build_long_branch_stub, hppa_look_for_stubs_in_section):
+	Added link_info arguments.  Changed all callers.
+	* elfcode.h (elf_slurp_symbol_table): Don't quit if outsymbols is
+	not NULL.
+	* oasys.c (oasys_write_sections): Return boolean value rather than
+	using bfd_error_vector.
+	(oasys_write_object_contents): Check return value of
+	oasys_write_sections.
+	* hosts/std-host.h: Don't declare qsort or strtol.
+	* Makefile.in: Rebuild dependencies.
+	(BFD_LIBS): Removed seclet.o.  Added hash.o and linker.o.
+	(CFILES): Removed seclet.c.  Added hash.c and linker.c.
+	(HFILES): Removed seclet.h.  Added genlink.h.
+
 Thu Dec 30 07:41:36 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* section.c (bfd_get_section_contents):  Return zero filled buffer

@@ -114,8 +114,8 @@ typedef unsigned HOST_64_BIT uint64_type;
 #if !defined (uint64_type) && defined (__GNUC__)
 #define uint64_type unsigned long long
 #define int64_type long long
-#define uint64_typeLOW(x) (unsigned long)(((x) & 0xffffffff))
-#define uint64_typeHIGH(x) (unsigned long)(((x) >> 32) & 0xffffffff)
+#define uint64_typeLOW(x) ((unsigned long)(((x) & 0xffffffff)))
+#define uint64_typeHIGH(x) ((unsigned long)(((x) >> 32) & 0xffffffff))
 #endif
 
 typedef unsigned HOST_64_BIT bfd_vma;
@@ -123,9 +123,9 @@ typedef HOST_64_BIT bfd_signed_vma;
 typedef unsigned HOST_64_BIT bfd_size_type;
 typedef unsigned HOST_64_BIT symvalue;
 #define fprintf_vma(s,x) \
-		fprintf(s,"%08x%08x", uint64_typeHIGH(x), uint64_typeLOW(x))
+		fprintf(s,"%08lx%08lx", uint64_typeHIGH(x), uint64_typeLOW(x))
 #define sprintf_vma(s,x) \
-		sprintf(s,"%08x%08x", uint64_typeHIGH(x), uint64_typeLOW(x))
+		sprintf(s,"%08lx%08lx", uint64_typeHIGH(x), uint64_typeLOW(x))
 #else /* not BFD64  */
 
 /* Represent a target address.  Also used as a generic unsigned type
@@ -286,41 +286,32 @@ typedef struct sec *sec_ptr;
 
 typedef struct stat stat_type; 
 
-/** Error handling */
+/* Error handling */
 
-typedef enum bfd_error {
-	      no_error = 0, system_call_error, invalid_target,
-	      wrong_format, invalid_operation, no_memory,
-	      no_symbols, no_relocation_info,
-	      no_more_archived_files, malformed_archive,
-	      symbol_not_found, file_not_recognized,
-	      file_ambiguously_recognized, no_contents,
-	      bfd_error_nonrepresentable_section,
-	      no_debug_section, bad_value,
-
-	      /* An input file is shorter than expected.  */
-	      file_truncated,
-	      
-	      invalid_error_code} bfd_ec;
+typedef enum bfd_error
+{
+  no_error = 0,
+  system_call_error,
+  invalid_target,
+  wrong_format,
+  invalid_operation,
+  no_memory,
+  no_symbols,
+  no_relocation_info,
+  no_more_archived_files,
+  malformed_archive,
+  symbol_not_found,
+  file_not_recognized,
+  file_ambiguously_recognized,
+  no_contents,
+  bfd_error_nonrepresentable_section,
+  no_debug_section,
+  bad_value,
+  file_truncated,
+  invalid_error_code
+} bfd_ec;
 
 extern bfd_ec bfd_error;
-struct reloc_cache_entry;
-struct bfd_seclet;
-
-
-typedef struct bfd_error_vector {
-  void (* nonrepresentable_section ) PARAMS ((CONST bfd  *CONST abfd,
-					      CONST char *CONST name));
-  void (* undefined_symbol) PARAMS ((CONST struct reloc_cache_entry *rel,
-				     CONST struct bfd_seclet *sec));
-  void (* reloc_value_truncated) PARAMS ((CONST struct
-					  reloc_cache_entry *rel,
-					  struct bfd_seclet *sec));
-
-  void (* reloc_dangerous) PARAMS ((CONST struct reloc_cache_entry *rel,
-				    CONST struct bfd_seclet *sec));
-  
-} bfd_error_vector_type;
 
 CONST char *bfd_errmsg PARAMS ((bfd_ec error_tag));
 void bfd_perror PARAMS ((CONST char *message));
@@ -345,6 +336,86 @@ typedef struct _symbol_info
   short stab_desc;             /* Info for N_TYPE.  */
   CONST char *stab_name;
 } symbol_info;
+
+/* Hash table routines.  There is no way to free up a hash table.  */
+
+/* An element in the hash table.  Most uses will actually use a larger
+   structure, and an instance of this will be the first field.  */
+
+struct bfd_hash_entry
+{
+  /* Next entry for this hash code.  */
+  struct bfd_hash_entry *next;
+  /* String being hashed.  */
+  const char *string;
+  /* Hash code.  This is the full hash code, not the index into the
+     table.  */
+  unsigned long hash;
+};
+
+/* A hash table.  */
+
+struct bfd_hash_table
+{
+  /* The hash array.  */
+  struct bfd_hash_entry **table;
+  /* The number of slots in the hash table.  */
+  unsigned int size;
+  /* A function used to create new elements in the hash table.  The
+     first entry is itself a pointer to an element.  When this
+     function is first invoked, this pointer will be NULL.  However,
+     having the pointer permits a hierarchy of method functions to be
+     built each of which calls the function in the superclass.  Thus
+     each function should be written to allocate a new block of memory
+     only if the argument is NULL.  */
+  struct bfd_hash_entry *(*newfunc) PARAMS ((struct bfd_hash_entry *,
+					     struct bfd_hash_table *,
+					     const char *));
+  /* An obstack for this hash table.  */
+  struct obstack memory;
+};
+
+/* Initialize a hash table.  */
+extern boolean bfd_hash_table_init
+  PARAMS ((struct bfd_hash_table *,
+	   struct bfd_hash_entry *(*) (struct bfd_hash_entry *,
+				       struct bfd_hash_table *,
+				       const char *)));
+
+/* Initialize a hash table specifying a size.  */
+extern boolean bfd_hash_table_init_n
+  PARAMS ((struct bfd_hash_table *,
+	   struct bfd_hash_entry *(*) (struct bfd_hash_entry *,
+				       struct bfd_hash_table *,
+				       const char *),
+	   unsigned int size));
+
+/* Free up a hash table.  */
+extern void bfd_hash_table_free PARAMS ((struct bfd_hash_table *));
+
+/* Look up a string in a hash table.  If CREATE is true, a new entry
+   will be created for this string if one does not already exist.  The
+   COPY argument must be true if this routine should copy the string
+   into newly allocated memory when adding an entry.  */
+extern struct bfd_hash_entry *bfd_hash_lookup
+  PARAMS ((struct bfd_hash_table *, const char *, boolean create,
+	   boolean copy));
+
+/* Base method for creating a hash table entry.  */
+extern struct bfd_hash_entry *bfd_hash_newfunc
+  PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *,
+	   const char *));
+
+/* Grab some space for a hash table entry.  */
+extern PTR bfd_hash_allocate PARAMS ((struct bfd_hash_table *, size_t));
+
+/* Traverse a hash table in a random order, calling a function on each
+   element.  If the function returns false, the traversal stops.  The
+   INFO argument is passed to the function.  */
+extern void bfd_hash_traverse PARAMS ((struct bfd_hash_table *,
+				       boolean (*) (struct bfd_hash_entry *,
+						    PTR),
+				       PTR info));
 
 /* The code that implements targets can initialize a jump table with this
    macro.  It must name all its routines the same way (a prefix plus
@@ -406,9 +477,11 @@ CAT(NAME,_bfd_debug_info_end),\
 CAT(NAME,_bfd_debug_info_accumulate),\
 CAT(NAME,_bfd_get_relocated_section_contents),\
 CAT(NAME,_bfd_relax_section),\
-CAT(NAME,_bfd_seclet_link),\
 CAT(NAME,_bfd_reloc_type_lookup),\
-CAT(NAME,_bfd_make_debug_symbol)
+CAT(NAME,_bfd_make_debug_symbol),\
+CAT(NAME,_bfd_link_hash_table_create),\
+CAT(NAME,_bfd_link_add_symbols),\
+CAT(NAME,_bfd_final_link)
 
 #define COFF_SWAP_TABLE (PTR) &bfd_coff_std_swap_table
 

@@ -1,5 +1,5 @@
 /* Define a target vector and some small routines for a variant of a.out.
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Copyright (C) 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -93,9 +93,16 @@ DEFUN(MY(object_p),(abfd),
     return 0;
   }
 
+#ifdef NO_SWAP_MAGIC
+  memcpy (&exec.a_info, exec_bytes.e_info, sizeof(exec.a_info));
+#else
   exec.a_info = bfd_h_get_32 (abfd, exec_bytes.e_info);
+#endif /* NO_SWAP_MAGIC */
 
   if (N_BADMAG (exec)) return 0;
+#ifdef MACHTYPE_OK
+  if (!(MACHTYPE_OK (N_MACHTYPE (exec)))) return 0;
+#endif
 
   NAME(aout,swap_exec_header_in)(abfd, &exec_bytes, &exec);
   target = NAME(aout,some_aout_object_p) (abfd, &exec, MY(callback));
@@ -199,6 +206,38 @@ static CONST struct aout_backend_data MY(backend_data) = {
 #define MY_backend_data &MY(backend_data)
 #endif
 
+#ifndef MY_bfd_final_link
+
+/* Final link routine.  We need to use a call back to get the correct
+   offsets in the output file.  */
+
+static void final_link_callback
+  PARAMS ((bfd *, file_ptr *, file_ptr *, file_ptr *));
+
+static void
+final_link_callback (abfd, ptreloff, pdreloff, psymoff)
+     bfd *abfd;
+     file_ptr *ptreloff;
+     file_ptr *pdreloff;
+     file_ptr *psymoff;
+{
+  struct internal_exec *execp = exec_hdr (abfd);
+
+  *ptreloff = N_TRELOFF (*execp);
+  *pdreloff = N_DRELOFF (*execp);
+  *psymoff = N_SYMOFF (*execp);
+}
+
+static boolean
+MY_bfd_final_link (abfd, info)
+     bfd *abfd;
+     struct bfd_link_info *info;
+{
+  return NAME(aout,final_link) (abfd, info, final_link_callback);
+}
+
+#endif
+
 /* We assume BFD generic archive files.  */
 #ifndef	MY_openr_next_archived_file
 #define	MY_openr_next_archived_file	bfd_generic_openr_next_archived_file
@@ -296,6 +335,9 @@ static CONST struct aout_backend_data MY(backend_data) = {
 #ifndef MY_print_symbol
 #define MY_print_symbol NAME(aout,print_symbol)
 #endif
+#ifndef MY_get_symbol_info
+#define MY_get_symbol_info NAME(aout,get_symbol_info)
+#endif
 #ifndef MY_get_lineno
 #define MY_get_lineno NAME(aout,get_lineno)
 #endif
@@ -314,20 +356,24 @@ static CONST struct aout_backend_data MY(backend_data) = {
 #ifndef MY_sizeof_headers
 #define MY_sizeof_headers NAME(aout,sizeof_headers)
 #endif
-#ifndef MY_bfd_debug_info_start
-#define MY_bfd_debug_info_start NAME(aout,bfd_debug_info_start)
+#ifndef MY_bfd_get_relocated_section_contents
+#define MY_bfd_get_relocated_section_contents \
+			bfd_generic_get_relocated_section_contents
 #endif
-#ifndef MY_bfd_debug_info_end
-#define MY_bfd_debug_info_end NAME(aout,bfd_debug_info_end)
+#ifndef MY_bfd_relax_section
+#define MY_bfd_relax_section bfd_generic_relax_section
 #endif
-#ifndef MY_bfd_debug_info_accumulat
-#define MY_bfd_debug_info_accumulat NAME(aout,bfd_debug_info_accumulat)
+#ifndef MY_bfd_reloc_type_lookup
+#define MY_bfd_reloc_type_lookup NAME(aout,reloc_type_lookup)
 #endif
-#ifndef MY_reloc_howto_type_lookup
-#define MY_reloc_howto_type_lookup NAME(aout,reloc_type_lookup)
+#ifndef MY_bfd_make_debug_symbol
+#define MY_bfd_make_debug_symbol 0
 #endif
-#ifndef MY_make_debug_symbol
-#define MY_make_debug_symbol 0
+#ifndef MY_bfd_link_hash_table_create
+#define MY_bfd_link_hash_table_create NAME(aout,link_hash_table_create)
+#endif
+#ifndef MY_bfd_link_add_symbols
+#define MY_bfd_link_add_symbols NAME(aout,link_add_symbols)
 #endif
 
 /* Aout symbols normally have leading underscores */
@@ -335,6 +381,12 @@ static CONST struct aout_backend_data MY(backend_data) = {
 #define MY_symbol_leading_char '_'
 #endif
 
+/* Aout archives normally use spaces for padding */
+#ifndef AR_PAD_CHAR
+#define AR_PAD_CHAR ' '
+#endif
+
+#ifndef MY_BFD_TARGET
 bfd_target MY(vec) =
 {
   TARGETNAME,		/* name */
@@ -348,18 +400,26 @@ bfd_target MY(vec) =
 #endif
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
+   HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
   MY_symbol_leading_char,
-  ' ',				/* ar_pad_char */
+  AR_PAD_CHAR,			/* ar_pad_char */
   15,				/* ar_max_namelen */
-  1,				/* minimum alignment */
+  3,				/* minimum alignment */
 #ifdef TARGET_IS_BIG_ENDIAN_P
-  _do_getb64, _do_putb64,	_do_getb32, _do_putb32, _do_getb16, _do_putb16, /* data */
-  _do_getb64, _do_putb64,	_do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
+  bfd_getb64, bfd_getb_signed_64, bfd_putb64,
+     bfd_getb32, bfd_getb_signed_32, bfd_putb32,
+     bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* data */
+  bfd_getb64, bfd_getb_signed_64, bfd_putb64,
+     bfd_getb32, bfd_getb_signed_32, bfd_putb32,
+     bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* hdrs */
 #else
-  _do_getl64, _do_putl64,	_do_getl32, _do_putl32, _do_getl16, _do_putl16, /* data */
-  _do_getl64, _do_putl64,	_do_getl32, _do_putl32, _do_getl16, _do_putl16, /* hdrs */
+  bfd_getl64, bfd_getl_signed_64, bfd_putl64,
+     bfd_getl32, bfd_getl_signed_32, bfd_putl32,
+     bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* data */
+  bfd_getl64, bfd_getl_signed_64, bfd_putl64,
+     bfd_getl32, bfd_getl_signed_32, bfd_putl32,
+     bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* hdrs */
 #endif
     {_bfd_dummy_target, MY_object_p, /* bfd_check_format */
        bfd_generic_archive_p, MY_core_file_p},
@@ -368,36 +428,7 @@ bfd_target MY(vec) =
     {bfd_false, MY_write_object_contents, /* bfd_write_contents */
        _bfd_write_archive_contents, bfd_false},
 
-  MY_core_file_failing_command,
-  MY_core_file_failing_signal,
-  MY_core_file_matches_executable_p,
-  MY_slurp_armap,
-  MY_slurp_extended_name_table,
-  MY_truncate_arname,
-  MY_write_armap,
-  MY_close_and_cleanup,
-  MY_set_section_contents,
-  MY_get_section_contents,
-  MY_new_section_hook,
-  MY_get_symtab_upper_bound,
-  MY_get_symtab,
-  MY_get_reloc_upper_bound,
-  MY_canonicalize_reloc,
-  MY_make_empty_symbol,
-  MY_print_symbol,
-  MY_get_lineno,
-  MY_set_arch_mach,
-  MY_openr_next_archived_file,
-  MY_find_nearest_line,
-  MY_generic_stat_arch_elt,
-  MY_sizeof_headers,
-  MY_bfd_debug_info_start,
-  MY_bfd_debug_info_end,
-  MY_bfd_debug_info_accumulate,
-  bfd_generic_get_relocated_section_contents,
-  bfd_generic_relax_section,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* COFF stuff?! */
-  MY_reloc_howto_type_lookup,
-  MY_make_debug_symbol,
+  JUMP_TABLE (MY),
   (PTR) MY_backend_data,
 };
+#endif /* MY_BFD_TARGET */

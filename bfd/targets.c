@@ -130,7 +130,10 @@ DESCRIPTION
 .  bfd_target_tekhex_flavour,
 .  bfd_target_srec_flavour,
 .  bfd_target_som_flavour};
-
+.
+.{* Forward declaration.  *}
+.typedef struct bfd_link_info _bfd_link_info;
+.
 .typedef struct bfd_target
 .{
 
@@ -290,15 +293,13 @@ Symbols and relocations.
 .  void       (*_bfd_debug_info_accumulate) PARAMS ((bfd *, struct sec *));
 .
 .  bfd_byte * (*_bfd_get_relocated_section_contents) PARAMS ((bfd *,
-.                    struct bfd_seclet *, bfd_byte *data,
-.                    boolean relocateable));
-.
-.  boolean    (*_bfd_relax_section) PARAMS ((bfd *, struct sec *,
+.                    struct bfd_link_info *, struct bfd_link_order *,
+.                    bfd_byte *data, boolean relocateable,
 .                    struct symbol_cache_entry **));
 .
-.  boolean    (*_bfd_seclet_link) PARAMS ((bfd *, PTR data,
-.                     boolean relocateable));
-
+.  boolean    (*_bfd_relax_section) PARAMS ((bfd *, struct sec *,
+.                    struct bfd_link_info *, struct symbol_cache_entry **));
+.
 . {* See documentation on reloc types.  *}
 . CONST struct reloc_howto_struct *
 .       (*reloc_type_lookup) PARAMS ((bfd *abfd,
@@ -311,6 +312,18 @@ Symbols and relocations.
 .       bfd *abfd,
 .       void *ptr,
 .       unsigned long size));
+.
+. {* Create a hash table for the linker.  Different backends store
+.    different information in this table.  *}
+. struct bfd_link_hash_table *(*_bfd_link_hash_table_create) PARAMS ((bfd *));
+.
+. {* Add symbols from this object file into the hash table.  *}
+. boolean (*_bfd_link_add_symbols) PARAMS ((bfd *, struct bfd_link_info *));
+.
+. {* Do a link based on the link_order structures attached to each
+.    section of the BFD.  *}
+. boolean (*_bfd_final_link) PARAMS ((bfd *, struct bfd_link_info *));
+.
 
 Data for use by back-end routines, which isn't generic enough to belong
 in this structure.
@@ -376,6 +389,7 @@ extern bfd_target newsos3_vec;
 extern bfd_target nlm32_big_generic_vec;
 extern bfd_target nlm32_i386_vec;
 extern bfd_target nlm32_sparc_vec;
+extern bfd_target nlm32_alpha_vec;
 extern bfd_target nlm32_little_generic_vec;
 extern bfd_target nlm64_big_generic_vec;
 extern bfd_target nlm64_little_generic_vec;

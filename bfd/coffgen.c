@@ -39,7 +39,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "sysdep.h"
 #include "libbfd.h"
 #include "coff/internal.h"
-#include "seclet.h"
 #include "libcoff.h"
 
 static asection bfd_debug_section = { "*DEBUG*" };
@@ -67,6 +66,13 @@ DEFUN(make_a_section_from_file,(abfd, hdr, target_index),
   return_section = bfd_make_section(abfd, name);
   if (return_section == NULL)
     return_section = bfd_coff_make_section_hook (abfd, name);
+
+  /* Handle several sections of the same name.  For example, if an executable
+     has two .bss sections, GDB better be able to find both of them
+     (PR 3562).  */
+  if (return_section == NULL)
+    return_section = bfd_make_section_anyway (abfd, name);
+
   if (return_section == NULL)
     return false;
 
@@ -904,10 +910,7 @@ coff_section_symbol (abfd, name)
   combined_entry_type *csym;
 
   sym = sec->symbol;
-  if (coff_symbol_from (abfd, sym))
-    csym = coff_symbol_from (abfd, sym)->native;
-  else
-    csym = 0;
+  csym = coff_symbol_from (abfd, sym)->native;
   /* Make sure back-end COFF stuff is there.  */
   if (csym == 0)
     {
@@ -924,18 +927,16 @@ coff_section_symbol (abfd, name)
   csym[0].u.syment.n_sclass = C_STAT;
   csym[0].u.syment.n_numaux = 1;
 /*  SF_SET_STATICS (sym);	@@ ??? */
-  if (sec)
+  csym[1].u.auxent.x_scn.x_scnlen = sec->_raw_size;
+  csym[1].u.auxent.x_scn.x_nreloc = sec->reloc_count;
+  csym[1].u.auxent.x_scn.x_nlinno = sec->lineno_count;
+
+  if (sec->output_section == NULL)
     {
-      csym[1].u.auxent.x_scn.x_scnlen = sec->_raw_size;
-      csym[1].u.auxent.x_scn.x_nreloc = sec->reloc_count;
-      csym[1].u.auxent.x_scn.x_nlinno = sec->lineno_count;
+      sec->output_section = sec;
+      sec->output_offset = 0;
     }
-  else
-    {
-      csym[1].u.auxent.x_scn.x_scnlen = 0;
-      csym[1].u.auxent.x_scn.x_nreloc = 0;
-      csym[1].u.auxent.x_scn.x_nlinno = 0;
-    }
+
   return sym;
 }
 
@@ -1326,13 +1327,13 @@ coff_print_symbol (abfd, filep, symbol, how)
 	  fprintf (file,"[%3d]", combined - root);
 
 	  fprintf (file,
-		   "(sc %2d)(fl 0x%02x)(ty %3x)(sc %3d) (nx %d) 0x%08x %s",
+		   "(sc %2d)(fl 0x%02x)(ty %3x)(sc %3d) (nx %d) 0x%08lx %s",
 		   combined->u.syment.n_scnum,
 		   combined->u.syment.n_flags,
 		   combined->u.syment.n_type,
 		   combined->u.syment.n_sclass,
 		   combined->u.syment.n_numaux,
-		   combined->u.syment.n_value,
+		   (unsigned long) combined->u.syment.n_value,
 		   symbol->name);
 
 	  for (aux = 0; aux < combined->u.syment.n_numaux; aux++) 
@@ -1353,7 +1354,7 @@ coff_print_symbol (abfd, filep, symbol, how)
 		  break;
 		default:
 
-		  fprintf (file, "AUX lnno %d size 0x%x tagndx %d",
+		  fprintf (file, "AUX lnno %d size 0x%x tagndx %ld",
 			   auxp->u.auxent.x_sym.x_misc.x_lnsz.x_lnno,
 			   auxp->u.auxent.x_sym.x_misc.x_lnsz.x_size,
 			   tagndx);
@@ -1367,9 +1368,10 @@ coff_print_symbol (abfd, filep, symbol, how)
 	      l++;
 	      while (l->line_number) 
 		{
-		  fprintf (file, "\n%4d : 0x%x",
-			  l->line_number,
-			  l->u.offset);
+		  fprintf (file, "\n%4d : 0x%lx",
+			   l->line_number,
+			   ((unsigned long)
+			    (l->u.offset + symbol->section->vma)));
 		  l++;
 		}
 	    }

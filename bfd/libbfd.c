@@ -1,5 +1,5 @@
 /* Assorted BFD support routines, only used internally.
-   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -310,7 +310,7 @@ DEFUN(bfd_seek,(abfd, position, direction),
 #ifdef FILE_OFFSET_IS_CHAR_INDEX
   if (abfd->format != bfd_archive && abfd->my_archive == 0)
     {
-#ifndef NDEBUG
+#if 0
       /* Explanation for this code: I'm only about 95+% sure that the above
 	 conditions are sufficient and that all i/o calls are properly
 	 adjusting the `where' field.  So this is sort of an `assert'
@@ -461,7 +461,7 @@ DESCRIPTION
 .{* Byte swapping macros for user section data.  *}
 .
 .#define bfd_put_8(abfd, val, ptr) \
-.                (*((unsigned char *)(ptr)) = (unsigned char)val)
+.                (*((unsigned char *)(ptr)) = (unsigned char)(val))
 .#define bfd_put_signed_8 \
 .		bfd_put_8
 .#define bfd_get_8(abfd, ptr) \

@@ -19,6 +19,12 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+/* Use builtin alloca for gcc.  */
+#ifdef __GNUC__
+#ifndef alloca
+#define alloca __builtin_alloca
+#endif
+#endif
 
 /* Align an address upward to a boundary, expressed as a number of bytes.
    E.g. align to an 8-byte boundary with argument of 8.  */
@@ -103,7 +109,7 @@ boolean bfd_slurp_bsd_armap_f2 PARAMS ((bfd *abfd));
 #define bfd_slurp_coff_armap bfd_slurp_armap
 boolean	_bfd_slurp_extended_name_table PARAMS ((bfd *abfd));
 boolean	_bfd_write_archive_contents PARAMS ((bfd *abfd));
-bfd *	new_bfd PARAMS (());
+bfd *	new_bfd PARAMS ((void));
 
 #define DEFAULT_STRING_SPACE_SIZE 0x2000
 boolean	bfd_add_to_string_table PARAMS ((char **table, char *new_string,
@@ -150,7 +156,60 @@ boolean	bfd_generic_get_section_contents PARAMS ((bfd *abfd, sec_ptr section,
 boolean	bfd_generic_set_section_contents PARAMS ((bfd *abfd, sec_ptr section,
 						  PTR location, file_ptr offset,
 						  bfd_size_type count));
+
+/* A routine to create entries for a bfd_link_hash_table.  */
+extern struct bfd_hash_entry *_bfd_link_hash_newfunc
+  PARAMS ((struct bfd_hash_entry *entry,
+	   struct bfd_hash_table *table,
+	   const char *string));
 
+/* Initialize a bfd_link_hash_table.  */
+extern boolean _bfd_link_hash_table_init
+  PARAMS ((struct bfd_link_hash_table *, bfd *,
+	   struct bfd_hash_entry *(*) (struct bfd_hash_entry *,
+				       struct bfd_hash_table *,
+				       const char *)));
+
+/* Generic link hash table creation routine.  */
+extern struct bfd_link_hash_table *_bfd_generic_link_hash_table_create
+  PARAMS ((bfd *));
+
+/* Generic add symbol routine.  */
+extern boolean _bfd_generic_link_add_symbols
+  PARAMS ((bfd *, struct bfd_link_info *));
+
+/* Generic archive add symbol routine.  */
+extern boolean _bfd_generic_link_add_archive_symbols
+  PARAMS ((bfd *, struct bfd_link_info *,
+	   boolean (*checkfn) (bfd *, struct bfd_link_info *, boolean *)));
+
+/* Forward declaration to avoid prototype errors.  */
+typedef struct bfd_link_hash_entry _bfd_link_hash_entry;
+
+/* Generic routine to add a single symbol.  */
+extern boolean _bfd_generic_link_add_one_symbol
+  PARAMS ((struct bfd_link_info *, bfd *, const char *name, flagword,
+	   asection *, bfd_vma, const char *, boolean copy,
+	   struct bfd_link_hash_entry **));
+
+/* Generic link routine.  */
+extern boolean _bfd_generic_final_link
+  PARAMS ((bfd *, struct bfd_link_info *));
+
+/* Default link order processing routine.  */
+extern boolean _bfd_default_link_order
+  PARAMS ((bfd *, struct bfd_link_info *, asection *,
+	   struct bfd_link_order *));
+
+/* Final link relocation routine.  */
+extern bfd_reloc_status_type _bfd_final_link_relocate
+  PARAMS ((const reloc_howto_type *, bfd *, asection *, bfd_byte *,
+	   bfd_vma address, bfd_vma value, bfd_vma addend));
+
+/* Relocate a particular location by a howto and a value.  */
+extern bfd_reloc_status_type _bfd_relocate_contents
+  PARAMS ((const reloc_howto_type *, bfd *, bfd_vma, bfd_byte *));
+
 /* Macros to tell if bfds are read or write enabled.
 
    Note that bfds open for read may be scribbled into if the fd passed
@@ -186,6 +245,11 @@ extern bfd *bfd_last_cache;
 
 /* Generic routine for close_and_cleanup is really just bfd_true.  */
 #define	bfd_generic_close_and_cleanup	bfd_true
+
+/* List of supported target vectors, and the default vector (if
+   default_vector[0] is NULL, there is no default).  */
+extern bfd_target *target_vector[];
+extern bfd_target *default_vector[];
 
 /* And more follows */
 
@@ -234,14 +298,17 @@ boolean
 bfd_generic_relax_section
  PARAMS ((bfd *abfd,
     asection *section,
+    struct bfd_link_info *,
     asymbol **symbols));
 
 bfd_byte *
 
 bfd_generic_get_relocated_section_contents  PARAMS ((bfd *abfd,
-    struct bfd_seclet *seclet,
+    struct bfd_link_info *link_info,
+    struct bfd_link_order *link_order,
     bfd_byte *data,
-    boolean relocateable));
+    boolean relocateable,
+    asymbol **symbols));
 
 boolean 
 bfd_generic_seclet_link

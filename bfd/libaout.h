@@ -26,7 +26,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    for a 32-bit architecture or a 64-bit architecture.  */
 #if ARCH_SIZE==64
 #define GET_WORD bfd_h_get_64
-#define GET_SWORD (int64_type)GET_WORD
+#define GET_SWORD bfd_h_get_signed_64
 #define PUT_WORD bfd_h_put_64
 #ifndef NAME
 #define NAME(x,y) CAT3(x,_64_,y)
@@ -35,7 +35,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define BYTES_IN_WORD 8
 #else /* ARCH_SIZE == 32 */
 #define GET_WORD bfd_h_get_32
-#define GET_SWORD (int32_type)GET_WORD
+#define GET_SWORD bfd_h_get_signed_32
 #define PUT_WORD bfd_h_put_32
 #ifndef NAME
 #define NAME(x,y) CAT3(x,_32_,y)
@@ -111,6 +111,12 @@ struct internal_exec
 3130292827262524232221201918171615141312111009080706050403020100
 < FLAGS      >< MACHINE TYPE ><  MAGIC NUMBER		       >
 */
+/* Magic number for NetBSD is
+<MSB         >
+3130292827262524232221201918171615141312111009080706050403020100
+< FLAGS    ><                  ><  MAGIC NUMBER                >
+*/
+
 enum machine_type {
   M_UNKNOWN = 0,
   M_68010 = 1,
@@ -119,6 +125,8 @@ enum machine_type {
   /* skip a bunch so we don't run into any of suns numbers */
   M_386 = 100,
   M_29K = 101,          /* AMD 29000 */
+  M_386_DYNIX = 102,	/* Sequent running dynix */
+  M_386_NETBSD = 134,		/* NetBSD/386 binary */
   M_MIPS1 = 151,        /* MIPS R2000/R3000 binary */
   M_MIPS2 = 152,        /* MIPS R4000/R6000 binary */
   M_HP200 = 200,	/* HP 200 (68010) BSD binary */
@@ -128,24 +136,41 @@ enum machine_type {
 
 #define N_DYNAMIC(exec) ((exec).a_info & 0x8000000)
 
-#define N_MAGIC(exec) ((exec).a_info & 0xffff)
-#define N_MACHTYPE(exec) ((enum machine_type)(((exec).a_info >> 16) & 0xff))
-#define N_FLAGS(exec) (((exec).a_info >> 24) & 0xff)
-#define N_SET_INFO(exec, magic, type, flags) \
+#ifndef N_MAGIC
+# define N_MAGIC(exec) ((exec).a_info & 0xffff)
+#endif
+
+#ifndef N_MACHTYPE
+# define N_MACHTYPE(exec) ((enum machine_type)(((exec).a_info >> 16) & 0xff))
+#endif
+
+#ifndef N_FLAGS
+# define N_FLAGS(exec) (((exec).a_info >> 24) & 0xff)
+#endif
+
+#ifndef N_SET_INFO
+# define N_SET_INFO(exec, magic, type, flags) \
 ((exec).a_info = ((magic) & 0xffff) \
  | (((int)(type) & 0xff) << 16) \
  | (((flags) & 0xff) << 24))
+#endif
 
-#define N_SET_MAGIC(exec, magic) \
+#ifndef N_SET_MAGIC
+# define N_SET_MAGIC(exec, magic) \
 ((exec).a_info = (((exec).a_info & 0xffff0000) | ((magic) & 0xffff)))
+#endif
 
-#define N_SET_MACHTYPE(exec, machtype) \
+#ifndef N_SET_MACHTYPE
+# define N_SET_MACHTYPE(exec, machtype) \
 ((exec).a_info = \
  ((exec).a_info&0xff00ffff) | ((((int)(machtype))&0xff) << 16))
+#endif
 
-#define N_SET_FLAGS(exec, flags) \
+#ifndef N_SET_FLAGS
+# define N_SET_FLAGS(exec, flags) \
 ((exec).a_info = \
  ((exec).a_info&0x00ffffff) | (((flags) & 0xff) << 24))
+#endif
 
 typedef struct aout_symbol {
   asymbol symbol;
@@ -197,6 +222,12 @@ struct aoutdata {
     z_magic,
     o_magic,
     n_magic } magic;
+
+  /* The external symbol information.  */
+  struct external_nlist *external_syms;
+  bfd_size_type external_sym_count;
+  char *external_strings;
+  struct aout_link_hash_entry **sym_hashes;
 };
 
 struct  aout_data_struct {
@@ -215,6 +246,10 @@ struct  aout_data_struct {
 #define	obj_reloc_entry_size(bfd) (adata(bfd).reloc_entry_size)
 #define	obj_symbol_entry_size(bfd) (adata(bfd).symbol_entry_size)
 #define obj_aout_subformat(bfd)	(adata(bfd).subformat)
+#define obj_aout_external_syms(bfd) (adata(bfd).external_syms)
+#define obj_aout_external_sym_count(bfd) (adata(bfd).external_sym_count)
+#define obj_aout_external_strings(bfd) (adata(bfd).external_strings)
+#define obj_aout_sym_hashes(bfd) (adata(bfd).sym_hashes)
 
 /* We take the address of the first element of an asymbol to ensure that the
    macro is only ever applied to an asymbol */
@@ -254,7 +289,7 @@ NAME(aout,make_empty_symbol) PARAMS ((bfd *abfd));
 boolean
 NAME(aout,slurp_symbol_table) PARAMS ((bfd *abfd));
 
-void
+boolean
 NAME(aout,write_syms) PARAMS ((bfd *abfd));
 
 void
@@ -314,6 +349,17 @@ void
 NAME(aout,swap_exec_header_out) PARAMS ((bfd *abfd,
        struct internal_exec *execp, struct external_exec *raw_bytes));
 
+struct bfd_link_hash_table *
+NAME(aout,link_hash_table_create) PARAMS ((bfd *));
+
+boolean
+NAME(aout,link_add_symbols) PARAMS ((bfd *, struct bfd_link_info *));
+
+boolean
+NAME(aout,final_link) PARAMS ((bfd *, struct bfd_link_info *,
+			       void (*) (bfd *, file_ptr *, file_ptr *,
+					 file_ptr *)));
+
 /* Prototypes for functions in stab-syms.c. */
 
 CONST char *
@@ -351,11 +397,12 @@ aout_stab_name PARAMS ((int code));
 	bfd_write ((PTR) &exec_bytes, 1, EXEC_BYTES_SIZE, abfd);	      \
 	/* Now write out reloc info, followed by syms and strings */	      \
   									      \
-	if (bfd_get_symcount (abfd) != 0) 				      \
+	if (bfd_get_outsymbols (abfd) != (asymbol **) NULL		      \
+	    && bfd_get_symcount (abfd) != 0) 				      \
 	    {								      \
 	      bfd_seek (abfd, (file_ptr)(N_SYMOFF(*execp)), SEEK_SET);	      \
 									      \
-	      NAME(aout,write_syms)(abfd);				      \
+	      if (! NAME(aout,write_syms)(abfd)) return false;		      \
 									      \
 	      bfd_seek (abfd, (file_ptr)(N_TRELOFF(*execp)), SEEK_SET);	      \
 									      \

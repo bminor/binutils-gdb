@@ -216,13 +216,15 @@ bfd_elf_generic_reloc (abfd,
 		       symbol,
 		       data,
 		       input_section,
-		       output_bfd)
+		       output_bfd,
+		       error_message)
      bfd *abfd;
      arelent *reloc_entry;
      asymbol *symbol;
      PTR data;
      asection *input_section;
      bfd *output_bfd;
+     char **error_message;
 {
   if (output_bfd != (bfd *) NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
