@@ -1,3 +1,8 @@
+Wed Jan 28 09:55:03 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* v850-opc.c (insertion routines): If both alignment and size is
+	wrong then report this.
+
 Tue Jan 27 21:52:59 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* mips-dis.c (_print_insn_mips): Set target_processor as appropriate.
