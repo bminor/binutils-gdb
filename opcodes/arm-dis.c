@@ -422,27 +422,15 @@ print_insn_arm (pc, info, given)
 		      break;
 
 		    case 'C':
-		      switch (given & 0x000f0000)
-			{
-			default:
-			  func (stream, "_???");
-			  break;
-			case 0x90000:
-			  func (stream, "_all");
-			  break;
-			case 0x10000:
-			  func (stream, "_c");
-			  break;
-			case 0x20000:
-			  func (stream, "_x");
-			  break;
-			case 0x40000:
-			  func (stream, "_s");
-			  break;
-			case 0x80000:
-			  func (stream, "_f");
-			  break;
-			}
+		      func (stream, "_");
+		      if (given & 0x80000)
+			func (stream, "f");
+		      if (given & 0x40000)
+			func (stream, "s");
+		      if (given & 0x20000)
+			func (stream, "x");
+		      if (given & 0x10000)
+			func (stream, "c");
 		      break;
 
 		    case 'F':

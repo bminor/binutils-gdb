@@ -1,3 +1,7 @@
+2000-07-04  Alexandre Oliva  <aoliva@redhat.com>
+
+	* arm-dis.c (print_insn_arm): Output combinations of PSR flags.
+
 2000-07-03  Marek Michalkiewicz  <marekm@linux.org.pl>
 
 	* avr-dis.c (avr_operand): Change _ () to _() around all strings
