@@ -1,3 +1,11 @@
+2000-11-28  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* config/tc-sh.c (md_convert_frag) <undefined symbol, conditional
+	jump>: Use as_bad_where	instead of as_bad.  Tweak error message
+	accordingly.  Stabilize frag by updating fix part and resetting
+	variant part.
+	<undefined symbol, unconditional jump>: Ditto.
+
 2000-11-28  Kazu Hirata  <kazu@hxi.com>
 
 	* config/obj-aout.h: Fix formatting.

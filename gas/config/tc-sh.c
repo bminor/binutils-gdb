@@ -2391,17 +2391,19 @@ md_convert_frag (headers, seg, fragP)
     case C (UNCOND_JUMP, UNCOND32):
     case C (UNCOND_JUMP, UNDEF_WORD_DISP):
       if (fragP->fr_symbol == NULL)
-	as_bad (_("at 0x%lx, displacement overflows 12-bit field"),
-		(unsigned long) fragP->fr_address);
+	as_bad_where (fragP->fr_file, fragP->fr_line,
+		      _("displacement overflows 12-bit field"));
       else if (S_IS_DEFINED (fragP->fr_symbol))
-	as_bad (_("at 0x%lx, displacement to defined symbol %s overflows 12-bit field"),
-		(unsigned long) fragP->fr_address,
-		S_GET_NAME (fragP->fr_symbol));
+	as_bad_where (fragP->fr_file, fragP->fr_line,
+		      _("displacement to defined symbol %s overflows 12-bit field"),
+		      S_GET_NAME (fragP->fr_symbol));
       else
-	as_bad (_("at 0x%lx, displacement to undefined symbol %s overflows 12-bit field"),
-		(unsigned long) fragP->fr_address,
-		S_GET_NAME (fragP->fr_symbol));
-
+	as_bad_where (fragP->fr_file, fragP->fr_line,
+		      _("displacement to undefined symbol %s overflows 12-bit field"),
+		      S_GET_NAME (fragP->fr_symbol));
+      /* Stabilize this frag, so we don't trip an assert.  */
+      fragP->fr_fix += fragP->fr_var;
+      fragP->fr_var = 0;
       break;
 
     case C (COND_JUMP, COND12):
@@ -2474,16 +2476,19 @@ md_convert_frag (headers, seg, fragP)
     case C (COND_JUMP, UNDEF_WORD_DISP):
     case C (COND_JUMP_DELAY, UNDEF_WORD_DISP):
       if (fragP->fr_symbol == NULL)
-	as_bad (_("at 0x%lx, displacement overflows 8-bit field"),
-		(unsigned long) fragP->fr_address);
+	as_bad_where (fragP->fr_file, fragP->fr_line,
+		      _("displacement overflows 8-bit field"));
       else if (S_IS_DEFINED (fragP->fr_symbol))
-	as_bad (_("at 0x%lx, displacement to defined symbol %s overflows 8-bit field "),
-		(unsigned long) fragP->fr_address,
-		S_GET_NAME (fragP->fr_symbol));
+	as_bad_where (fragP->fr_file, fragP->fr_line,
+		      _("displacement to defined symbol %s overflows 8-bit field"),
+		      S_GET_NAME (fragP->fr_symbol));
       else
-	as_bad (_("at 0x%lx, displacement to undefined symbol %s overflows 8-bit field "),
-		(unsigned long) fragP->fr_address,
-		S_GET_NAME (fragP->fr_symbol));
+	as_bad_where (fragP->fr_file, fragP->fr_line,
+		      _("displacement to undefined symbol %s overflows 8-bit field "),
+		      S_GET_NAME (fragP->fr_symbol));
+      /* Stabilize this frag, so we don't trip an assert.  */
+      fragP->fr_fix += fragP->fr_var;
+      fragP->fr_var = 0;
       break;
 
     default:
