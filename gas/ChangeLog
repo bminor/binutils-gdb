@@ -78,8 +78,9 @@ Fri Mar 27 12:46:47 1998  Ian Lance Taylor  <ian@cygnus.com>
 	(md_estimate_size_before_relax): Likewise.
 
 Fri Mar 27 10:30:01 1998  Catherine Moore  <clm@cygnus.com>
-        * config/tc-v850.c (md_assemble):  Store relocation
-        addend in fixup instead of instruction.
+
+	* config/tc-v850.c (md_assemble):  Store relocation addend in
+	fixup instead of instruction.
 
 Thu Mar 26 23:07:18 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
