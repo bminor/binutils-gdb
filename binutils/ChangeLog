@@ -1,3 +1,9 @@
+Fri Jul 16 15:19:59 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* strings.c (print_strings): Handle STREAM being NULL.
+	(strings_a_section): Pass a NULL.
+	(main): Don't open /dev/null.
+
 Thu Jul 15 12:44:09 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* objdump.c (disassemble_data): Handle the m88k.
