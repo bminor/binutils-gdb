@@ -10,8 +10,6 @@
 #include <string.h>
 #include <sys/file.h>
 
-#include "fopen-same.h"
-
 #ifndef O_ACCMODE
 #define O_ACCMODE (O_RDONLY | O_WRONLY | O_RDWR)
 #endif
@@ -19,6 +17,7 @@
 #define SEEK_CUR 1
 
 #define POSIX_UTIME
+#define HAVE_PROCFS	/* This host has /proc support */
 
 extern PROTO(int,  abort,(void));
 extern PROTO(int,  close,(int));
@@ -63,3 +62,5 @@ typedef short int16_type;
 typedef unsigned short uint16_type;
 typedef int int32_type;
 typedef unsigned int uint32_type;
+
+#include "fopen-same.h"
