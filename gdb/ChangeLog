@@ -1,5 +1,14 @@
 2001-11-20  Keith Seitz  <keiths@redhat.com>
 
+	* varobj.c (c_value_of_child): Release memory for "name" when
+	finshed using it.
+	(c_type_of_child): Likewise.
+	(cplus_value_of_child): Isolate the use of name_of_child to
+	one case that needs it.
+	Release memory for "name" when finished using it.
+
+2001-11-20  Keith Seitz  <keiths@redhat.com>
+
 	* top.c (gdb_init): Call init_ui_hook before initializing
 	the default UI.
 

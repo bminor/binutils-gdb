@@ -1977,6 +1977,7 @@ c_value_of_child (struct varobj *parent, int index)
   if (value != NULL)
     release_value (value);
 
+  xfree (name);
   return value;
 }
 
@@ -2019,6 +2020,7 @@ c_type_of_child (struct varobj *parent, int index)
       break;
     }
 
+  xfree (name);
   return type;
 }
 
@@ -2281,7 +2283,6 @@ cplus_value_of_child (struct varobj *parent, int index)
 {
   struct type *type;
   struct value *value;
-  char *name;
 
   if (CPLUS_FAKE_CHILD (parent))
     type = get_type_deref (parent->parent);
@@ -2289,19 +2290,22 @@ cplus_value_of_child (struct varobj *parent, int index)
     type = get_type_deref (parent);
 
   value = NULL;
-  name = name_of_child (parent, index);
 
   if (((TYPE_CODE (type)) == TYPE_CODE_STRUCT) ||
       ((TYPE_CODE (type)) == TYPE_CODE_UNION))
     {
       if (CPLUS_FAKE_CHILD (parent))
 	{
+	  char *name;
 	  struct value *temp = parent->parent->value;
 
+	  name = name_of_child (parent, index);
 	  gdb_value_struct_elt (NULL, &value, &temp, NULL, name, NULL,
 				"cplus_structure");
 	  if (value != NULL)
 	    release_value (value);
+
+	  xfree (name);
 	}
       else if (index >= TYPE_N_BASECLASSES (type))
 	{
