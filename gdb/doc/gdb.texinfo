@@ -3671,6 +3671,7 @@ This is the default format.
 Show which format _GDBN__ will use to print structures.
 
 @item set print sevenbit-strings on
+@kindex set print sevenbit-strings
 Print using only seven-bit characters; if this option is set, 
 _GDBN__ will display any eight-bit characters (in strings or character
 values) using the notation @code{\}@var{nnn}.  For example, @kbd{M-a} is
@@ -3681,6 +3682,7 @@ Print using either seven-bit or eight-bit characters, as required.  This
 is the default.
 
 @item show print sevenbit-strings
+@kindex show print sevenbit-strings
 Show whether or not _GDBN__ will print only seven-bit characters.
 
 @item set print union on
