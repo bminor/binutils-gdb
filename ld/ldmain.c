@@ -248,6 +248,7 @@ main (argc, argv)
   link_info.new_dtags = FALSE;
   link_info.combreloc = TRUE;
   link_info.eh_frame_hdr = FALSE;
+  link_info.strip_discarded = TRUE;
   link_info.strip = strip_none;
   link_info.discard = discard_sec_merge;
   link_info.common_skip_ar_aymbols = bfd_link_common_skip_none;

@@ -133,7 +133,9 @@ int parsing_defsym = 0;
 #define OPTION_NO_DEFINE_COMMON		(OPTION_SPARE_DYNAMIC_TAGS + 1)
 #define OPTION_NOSTDLIB			(OPTION_NO_DEFINE_COMMON + 1)
 #define OPTION_NO_OMAGIC		(OPTION_NOSTDLIB + 1)
-#define OPTION_ACCEPT_UNKNOWN_INPUT_ARCH    (OPTION_NO_OMAGIC + 1)
+#define OPTION_STRIP_DISCARDED		(OPTION_NO_OMAGIC + 1)
+#define OPTION_NO_STRIP_DISCARDED	(OPTION_STRIP_DISCARDED + 1)
+#define OPTION_ACCEPT_UNKNOWN_INPUT_ARCH    (OPTION_NO_STRIP_DISCARDED + 1)
 #define OPTION_NO_ACCEPT_UNKNOWN_INPUT_ARCH (OPTION_ACCEPT_UNKNOWN_INPUT_ARCH + 1)
 
 /* The long options.  This structure is used for both the option
@@ -241,6 +243,10 @@ static const struct ld_option ld_options[] =
       's', NULL, N_("Strip all symbols"), TWO_DASHES },
   { {"strip-debug", no_argument, NULL, 'S'},
       'S', NULL, N_("Strip debugging symbols"), TWO_DASHES },
+  { {"strip-discarded", no_argument, NULL, OPTION_STRIP_DISCARDED},
+      '\0', NULL, N_("Strip symbols in discarded sections"), TWO_DASHES },
+  { {"no-strip-discarded", no_argument, NULL, OPTION_NO_STRIP_DISCARDED},
+      '\0', NULL, N_("Do not strip symbols in discarded sections"), TWO_DASHES },
   { {"trace", no_argument, NULL, 't'},
       't', NULL, N_("Trace file opens"), TWO_DASHES },
   { {"script", required_argument, NULL, 'T'},
@@ -923,6 +929,12 @@ parse_args (argc, argv)
 	  break;
 	case 's':
 	  link_info.strip = strip_all;
+	  break;
+	case OPTION_STRIP_DISCARDED:
+	  link_info.strip_discarded = TRUE;
+	  break;
+	case OPTION_NO_STRIP_DISCARDED:
+	  link_info.strip_discarded = FALSE;
 	  break;
 	case OPTION_SHARED:
 	  if (config.has_shared)

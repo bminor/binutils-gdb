@@ -1,17 +1,25 @@
+2002-12-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldmain.c (main): Init "strip_discarded".
+	* lexsup.c (OPTION_STRIP_DISCARDED): Define.
+	(OPTION_NO_STRIP_DISCARDED): Define.
+	(ld_options): Add "strip-discarded" and "no-strip-discarded".
+	(parse_args): Handle them.
+
 2002-12-23  Nick Clifton  <nickc@redhat.com>
 
 	* ld.h (struct args_type): Add new field
 	'accept_unknown_input_architecture'.
-        * ldmain.c (main): Initialise 'accept_unknown_input_architecture'
+	* ldmain.c (main): Initialise 'accept_unknown_input_architecture'
 	to false.
-        * ldlang.c (lang_check): Pass accept_unknown_input_architecture to
+	* ldlang.c (lang_check): Pass accept_unknown_input_architecture to
 	bfd_arch_get_compatible.
-        * ldfile.c (ldfile_try_open_bfd): Likewise.
-        * lexsup.c (ld_options): Add new command line switch
+	* ldfile.c (ldfile_try_open_bfd): Likewise.
+	* lexsup.c (ld_options): Add new command line switch
 	--accept-unknown-input-architecture and its inverse.
-        (parse_args): Handle --accept-unknown-input-architecture.
-        * ld.texinfo: Document new linker option.
-        * NEWS: Mention new linker option.
+	(parse_args): Handle --accept-unknown-input-architecture.
+	* ld.texinfo: Document new linker option.
+	* NEWS: Mention new linker option.
 
 2002-12-20  Alan Modra  <amodra@bigpond.net.au>
 
@@ -46,7 +54,7 @@
 	so that it is not confused with -c.
 
 2002-12-13  Ralf Habacker  <Ralf.Habacker@freenet.de>
-            Charles Wilson  <cwilson@ece.gatech.edu>
+	    Charles Wilson  <cwilson@ece.gatech.edu>
 
 	* configure.in: Add check for realpath function.
 	* configure: Regenerate.
