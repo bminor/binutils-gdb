@@ -63,6 +63,8 @@ hex-value.c
 input-file.c
 input-file.h
 input-scrub.c
+listing.c
+listing.h
 make-gas.com
 makefile.dos
 messages.c
@@ -92,7 +94,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.5  1991/12/12 03:28:12  sac
+# Revision 1.6  1992/01/17 20:54:32  rich
+# keep listing*
+#
+# Revision 1.5  1991/12/12  03:28:12  sac
 # Added makefile.dos configure.dos
 #
 # Revision 1.4  1991/12/09  11:58:44  tiemann
