@@ -1,0 +1,5 @@
+# The new BSD `make' has a bug: it doesn't pass empty arguments in
+# shell commands.  So we need to make this value non-empty in order
+# for the genscripts.sh call to work.  There's nothing magic about
+# the value `/lib'; it's just a dummy.
+NATIVE_LIB_DIRS = /lib

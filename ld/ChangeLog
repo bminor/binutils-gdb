@@ -1,3 +1,7 @@
+Tue Mar  8 04:22:27 1994  David J. Mackenzie  (djm@rtl.cygnus.com)
+
+	* config/i386bsd.mh: New file.
+
 Mon Mar  7 15:23:24 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* elf.sc: Permit TEXT_START_SYMBOLS and DATA_START_SYMBOLS to be
