@@ -1,5 +1,9 @@
 2003-12-13  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/obj-elf.c: Convert to C90, remove unneeded prototypes and
+	casts.  Formatting.
+	* config/obj-elf.h: Remove PARAMS.
+
 	* read.c (s_lcomm_internal): Make global.
 	* read.h (s_lcomm_internal): Declare.
 	* config/obj-elf.c (elf_pseudo_table): Handle lcomm.
