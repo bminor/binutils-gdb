@@ -983,56 +983,58 @@ The stab for @code{s_flap} is located just before the @code{N_LBRAC} for
 @node Parameters
 @section Parameters 
 
-@table @strong
-@item Directive: 
-@code{.stabs}
-@item Type:
-@code{N_PSYM}
-@item Symbol Descriptor:
-@code{p}
-@end table
+The symbol descriptor @samp{p} is used to refer to parameters which are
+in the arglist.  They follow the symbol that represents the procedure
+itself.  The value of the symbol is the offset relative to the argument
+list.
 
-Procedure parameters are represented by the N_PSYM stab type.  The
-following source lines show the parameters of the main routine.
+If the parameter is passed in a register, or is allocated as a local
+variable rather than an argument (the latter distinction is important
+for machines in which the argument list offset is relative to something
+different from a local variable offset), then the traditional way to do
+this is to provide two symbols for each argument:
+
+@example
+.stabs "arg:p1" . . .
+.stabs "arg:r1" . . .
+@end example
+
+Debuggers are expected to use the second one to find the value, and the
+first one to know that it is an argument.
+
+Because this is kind of ugly, some compilers use symbol descriptor @samp{P}
+or @samp{R} to indicate an argument which is in a register.  The symbol
+value is the register number.  @samp{P} and @samp{R} mean the same
+thing, the difference is that @samp{P} is a GNU invention and @samp{R}
+is an IBM (xcoff) invention.  As of version 4.9, GDB should handle
+either one.
+
+There is no symbol descriptor analogous to @samp{P} for local variables.
+Some compilers are said to use the pair of symbols approach described
+above, but I don't know which ones.  On the intel 960, the type of the
+variable indicates whether a @samp{p} symbol's value is an the argument
+list offset or a local variable offset.
+
+As a simple example, the code
 
 @example
 17 main (argc, argv)
 18      int argc;
-19      char* argv[];
+19      char **argv;
 20 @{
 @end example
 
-The N_PSYM stabs describing parameters to a function directly follow
-the N_FUN stab that represents the procedure itself.  The N_FUN stab
-immediately follows the code of the procedure it describes.  Following
-the N_PSYM parameter stabs are any N_LSYM stabs representing local
-variables.
+produces the stabs
 
 @example
-@exdent <36> N_FUN - describing the procedure main
-
-94 .stabs "main:F1",36,0,0,_main
-
-@exdent <160> N_PSYM - parameters
-@exdent .stabs "name:sym_desc(value_param)type_ref(int)", N_PSYM,
-@exdent NIL, NIL, frame_ptr_offset
-
-95 .stabs "argc:p1",160,0,0,68
-    
-@exdent <160> N_PSYM - parameter
-@exdent .stabs "name:sym_desc(value_param)type_def(20)=ptr_to type_def(21)=
-@exdent ptr_to type_ref(char)
-
+94 .stabs "main:F1",36,0,0,_main                 ; 36 is N_FUN
+95 .stabs "argc:p1",160,0,0,68                   ; 160 is N_PSYM
 96 .stabs "argv:p20=*21=*2",160,0,0,72
 @end example
 
-The type definition of argv is interesting because it defines two new
-types in terms of an existing one.  The ``array'' argv is really a
-pointer, according to C language rules, since it is declared as a
-parameter.  Its element type is character pointers.  Thus the type of
-argv is ptr to ptr to char.  The stab for argv contains nested
-type_definitions.  Type 21 is ptr to type 2 (char) and argv (type 20)
-is ptr to type 21.
+The type definition of argv is interesting because it contains several
+type definitions.  Type 21 is ptr to type 2 (char) and argv (type 20) is
+ptr to type 21.
  
 @node Aggregate Types
 @chapter Aggregate Types 
@@ -2417,20 +2419,43 @@ n_type  n_type  name      used to describe
 @node Symbol descriptors
 @section Table C: Symbol descriptors
 
-@example
-descriptor      meaning                                 
--------------------------------------------------
-(empty)         local variable                          
-   f            local function
-   F            global function
-   G            global variable                         
-   p            value parameter                         
-   r            register variable                       
-   S            static global variable                  
-   t            type name                               
-   T            enumeration, struct or type tag         
-   V            static local variable           
-@end example
+@table @code
+@item (empty)
+Local variable, @xref{Automatic variables}.
+
+@item f
+Local function, @xref{Procedures}.
+
+@item F
+Global function, @xref{Procedures}.
+
+@item t
+Type name, @xref{Typedefs}.
+
+@item T
+enumeration, struct or union tag, @xref{Unions}.
+
+@item G
+Global variable, @xref{Global Variables}.
+
+@item r
+Register variable, @xref{Register variables}.
+
+@item S
+Static file scope variable @xref{Initialized statics},
+@xref{Un-initialized static variables}.
+
+@item V
+Static procedure scope variable @xref{Initialized statics},
+@xref{Un-initialized static variables}.
+
+@item p
+Argument list parameter @xref{Parameters}.
+
+@item P
+@item R
+Register parameter @xref{Parameters}.
+@end table
 
 @node Type Descriptors
 @section Table D: Type Descriptors 
@@ -3019,7 +3044,10 @@ dbx?
 @node xcoff-differences
 @appendix Differences between GNU stabs in a.out and GNU stabs in xcoff
 
-(The AIX/RS6000 native object file format is xcoff with stabs)
+@c FIXME: Merge *all* these into the main body of the document.
+(The AIX/RS6000 native object file format is xcoff with stabs).  This
+appendix only covers those differences which are not covered in the main
+body of this document.
 
 @itemize @bullet
 @item
@@ -3081,10 +3109,6 @@ the end marked with .ei "filename"
 @item
 If the xcoff stab is a N_FUN (C_FUN) then follow the string field with
 ,. instead of just , 
-
-@item
-The symbol descriptor for register parameters is P for a.out and R for
-xcoff.
 @end itemize
 
 
@@ -3136,6 +3160,8 @@ N_LENG          unknown
 @node Sun-differences
 @appendix Differences between GNU stabs and Sun native stabs.
 
+@c FIXME: Merge all this stuff into the main body of the document.
+
 @itemize @bullet
 @item
 GNU C stabs define *all* types, file or procedure scope, as
@@ -3144,7 +3170,7 @@ N_LSYM.  Sun doc talks about using N_GSYM too.
 @item
 Stabs describing block scopes, N_LBRAC and N_RBRAC are supposed to
 contain the nesting level of the block in the desc field, re Sun doc.
-GNU stabs always have 0 in that field.
+GNU stabs always have 0 in that field.  dbx seems not to care.
 
 @item
 Sun C stabs use type number pairs in the format (a,b) where a is a

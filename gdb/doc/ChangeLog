@@ -1,3 +1,9 @@
+Sun Apr 18 09:47:45 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* stabs.texinfo (Symbol descriptors): Re-do using @table and @xref.
+	(Parameters): Rewrite.
+	(xcoff-differences, Sun-differences): Minor changes.
+
 Thu Apr 15 02:35:24 1993  John Gilmore  (gnu@cacophony.cygnus.com)
 
 	* stabs.texinfo:  Minor cleanup.
