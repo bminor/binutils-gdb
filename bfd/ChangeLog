@@ -1,3 +1,18 @@
+2004-04-01  Paul Brook  <paul@codesourcery.com>
+
+	* bfd-in.h (bfd_elf32_arm_process_before_allocation): Update.
+	* elf32-arm.h (struct elf32_elf_section_map): New.
+	(struct _arm_elf_section_data): New.
+	(elf32_arm_section_data): Define.
+	(struct elf32_arm_link_hash_table): Add byteswap_code.
+	(elf32_arm_link_hash_table_create): Initialize byteswap_code.
+	(bfd_elf32_arm_process_before_allocation): Add byteswap_code.
+	(elf32_arm_post_process_headers): Set EF_ARM_BE8.
+	(elf32_arm_output_symbol_hook, elf32_arm_new_section_hook,
+	elf32_arm_compare_mapping, elf32_arm_write_section): New functions.
+	(bfd_elf32_new_section_hook, elf_backend_write_section,
+	elf_backend_link_output_symbol_hook): Define.
+
 2004-04-01  Andy Chittenden  <achittenden@bluearc.com>
 
 	* stabs.c (struct stab_link_includes_totals): Add field 'symb'

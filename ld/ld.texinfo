@@ -4762,6 +4762,12 @@ But it also sets the bottom bit of the address, so that it can be
 branched to using a BX instruction, and the program will start
 executing in Thumb mode straight away.
 
+@cindex BE8
+@kindex --be8
+The @samp{--be8} switch instructs @command{ld} to generate BE8 format
+executables.  This option is only valid when linking big-endian objects.
+The resulting image will contain big-endian data and little-endian code.
+
 @ifclear GENERIC
 @lowersections
 @end ifclear

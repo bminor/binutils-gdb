@@ -1,3 +1,13 @@
+2004-04-01  Paul Brook  <paul@codesourcery.com>
+
+	* emultempl/armelf.em (byteswap_code): Add.
+	(arm_elf_before_allocation): Pass extra parameter.
+	(PARSE_AND_LIST_PROLOGUE): Add OPTION_BE8.
+	(PARSE_AND_LIST_LONGOPTS, PARSE_AND_LIST_OPTIONS): Add be8.
+	(PARSE_AND_LIST_ARGS_CASES): Handle OPTION_BE8.
+	* emultempl/armelf_oabi.em: Pass extra parameter.
+	* ld.texinfo: Document --be8.
+
 2004-03-30  Stan Shebs  <shebs@apple.com>
 
 	Remove long-obsolete MPW support.
