@@ -2274,23 +2274,32 @@ search_struct_method (char *name, struct value **arg1p,
 
 	  if (j > 0 && args == 0)
 	    error ("cannot resolve overloaded method `%s': no arguments supplied", name);
-	  while (j >= 0)
+	  else if (j == 0 && args == 0)
 	    {
 	      if (TYPE_FN_FIELD_STUB (f, j))
 		check_stub_method (type, i, j);
-	      if (!typecmp (TYPE_FN_FIELD_STATIC_P (f, j),
-			    TYPE_FN_FIELD_ARGS (f, j), args))
-		{
-		  if (TYPE_FN_FIELD_VIRTUAL_P (f, j))
-		    return value_virtual_fn_field (arg1p, f, j, type, offset);
-		  if (TYPE_FN_FIELD_STATIC_P (f, j) && static_memfuncp)
-		    *static_memfuncp = 1;
-		  v = value_fn_field (arg1p, f, j, type, offset);
-		  if (v != NULL)
-		    return v;       
-		}
-	      j--;
+	      v = value_fn_field (arg1p, f, j, type, offset);
+	      if (v != NULL)
+		return v;
 	    }
+	  else
+	    while (j >= 0)
+	      {
+		if (TYPE_FN_FIELD_STUB (f, j))
+		  check_stub_method (type, i, j);
+		if (!typecmp (TYPE_FN_FIELD_STATIC_P (f, j),
+			      TYPE_FN_FIELD_ARGS (f, j), args))
+		  {
+		    if (TYPE_FN_FIELD_VIRTUAL_P (f, j))
+		      return value_virtual_fn_field (arg1p, f, j, type, offset);
+		    if (TYPE_FN_FIELD_STATIC_P (f, j) && static_memfuncp)
+		      *static_memfuncp = 1;
+		    v = value_fn_field (arg1p, f, j, type, offset);
+		    if (v != NULL)
+		      return v;       
+		  }
+		j--;
+	      }
 	}
     }
 

@@ -1,5 +1,12 @@
 2002-02-03  Daniel Jacobowitz  <drow@mvista.com>
 
+	* c-valprint.c (c_val_print): Pass a proper valaddr to
+	cp_print_class_method.
+	* valops.c (search_struct_method): If there is only one method
+	and args is NULL, return that method.
+
+2002-02-03  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdbtypes.c (init_simd_type): Use TYPE_TAG_NAME instead of
 	accessing tag_name directly.
 

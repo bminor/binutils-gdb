@@ -441,8 +441,12 @@ c_val_print (struct type *type, char *valaddr, int embedded_offset,
       break;
 
     case TYPE_CODE_METHOD:
-      cp_print_class_method (valaddr + embedded_offset, lookup_pointer_type (type), stream);
-      break;
+      {
+	struct value *v = value_at (type, address, NULL);
+	cp_print_class_method (VALUE_CONTENTS (value_addr (v)),
+			       lookup_pointer_type (type), stream);
+	break;
+      }
 
     case TYPE_CODE_VOID:
       fprintf_filtered (stream, "void");
