@@ -1,3 +1,15 @@
+Mon Oct  5 03:30:36 1992  Mark Eichin  (eichin at tweedledumber.cygnus.com)
+
+	* configure.in:	recognize i386-*-bsd emulation.
+
+Thu Oct  1 23:05:12 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* configure.in: use the cpu-vendor-os triple for host and target
+
+Mon Sep 28 21:18:24 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* read.c (cons): If NO_RELOC is defined, use it.
+
 Fri Sep 25 17:53:43 1992  John Gilmore  (gnu@cygnus.com)
 
 	* messages.c:  Comment changes.

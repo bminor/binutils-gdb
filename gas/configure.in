@@ -36,34 +36,28 @@ configdirs=doc
 
 gas_host=generic
 
-case "${host_cpu}" in
-a29k | rs6000 | vax)  gas_host=${host_cpu} ;;	
-mips)
-	case "${host_os}" in
-	ultrix*) gas_host=decstation ;;
-	esac
-	;;
-i386)
-	case "${host_os}" in
-	aix*)	gas_host=i386aix ;;
-	esac
-	;;
-*)
-	case "${host_os}" in
-	ansi | ultrix | hpux | sysv*)	gas_host=${host_os} ;;
-	*)
-		case "${host_vendor}" in
-		sun)
-			case "${host_cpu}" in
-			m68k)	gas_host=sun3 ;;
-			i386)	gas_host=sun386 ;;
-			sparc)	gas_host=sun4 ;;
-			esac
-			;;
-		esac
-		;;
-	esac
-	;;
+case "${host}" in
+  a29k-*-* | rs6000-*-* | vax-*-*)  
+    gas_host=${host_cpu} 
+    ;;	
+  mips-dec-ultrix) 
+    gas_host=decstation 
+    ;;
+  i386-ibm-aix)	
+    gas_host=i386aix
+    ;;
+  m68k-sun-sunos*)
+    gas_host=sun3 
+    ;;
+  i386-sun-sunos*)
+    gas_host=sun386  
+    ;;
+  sparc-sun-*)
+    gas_host=sun4 
+    ;;
+  *-*-ansi | *-*-ultrix | *-*-hpux | *-*-sysv*)
+    gas_host=${host_os} 
+    ;;
 esac
 
 # per-target:
@@ -75,126 +69,109 @@ cpu_type=${target_cpu}
 
 # check for architecture variants
 case ${target_cpu} in
-sparclite) cpu_type=sparc ;;
-m680[01234]0) cpu_type=m68k ;;
-m683?2) cpu_type=m68k ;;
+  sparclite)    cpu_type=sparc ;;
+  m680[01234]0) cpu_type=m68k ;;
+  m683?2)       cpu_type=m68k ;;
 esac
 
 gas_target=${cpu_type}
 
 # assign object format
-case ${target_os} in
-aix*)
-	case "${target_cpu}" in
-	i386)	obj_format=coff
-		gas_target=i386aix
-		emulation=i386aix
-		;;
-	esac
-	;;
-
-bout*) obj_format=bout ;;
-nindy*) obj_format=bout ;;
-bsd* | sunos*) 
-	obj_format=aout 
-	emulation=sun3	;;
-
-udi)
-	obj_format=coffbfd
-	need_bfd="./../bfd/libbfd.a"
-	gas_target=ebmon29k
-	;;
-ebmon-old)
-	obj_format=coff
-	need_bfd="./../bfd/libbfd.a"
-	gas_target=ebmon29k
-	;;
-
-ebmon)
-	obj_format=coffbfd
-	need_bfd="./../bfd/libbfd.a"
-	gas_target=ebmon29k
-	;;
-
-generic) obj_format=generic ;;
-
-xray | hms)
-	obj_format=coffbfd
-	need_bfd="./../bfd/libbfd.a"
-	;;
-
-sysv32)
-	obj_format=coff
-	emulation=sysv32
-	;;
-
-sim)	
-	obj_format=coffbfd
-	need_bfd="./../bfd/libbfd.a"
-	;;
-
-
-coff* | sysv*)
-	obj_format=coff
-
-	case ${target_cpu} in
-		m68*) 	obj_format=coffbfd
-		      	need_bfd="./../bfd/libbfd.a"
-			gas_target=m68kcoff
-			;;
-		i386)
-		 	obj_format=coffbfd
-		      	need_bfd="./../bfd/libbfd.a"
-			gas_target=i386coff
-			;;
-
-	esac
-
-	case ${target_vendor} in
-	bull)	emulation=dpx2 ;;
-	sco)	emulation=sco386 ;;
-	sun)	emulation=sun3 ;;
-	*)
-	esac
-	;;
-vxworks)
-	case ${target_cpu} in
-	i960) obj_format=bout ;;
-	m68k|m680[01234]0|m683?2)
-		obj_format=aout
-		emulation=sun3
-		;;
-	*) obj_format=aout ;;
-	esac
-	;;
-OSE | ose)
-	obj_format=aout
-	emulation=sun3
-	;;
-aout | scout)
-	obj_format=aout
-	;;
-*)
-	case ${target_vendor} in
-	aout) obj_format=aout ;;
-	bout) obj_format=bout ;;
-	coff)
-		obj_format=coff
-		case ${target_cpu} in
-		i960) emulation=ic960 ;;
-		esac
-		;;
-	*) obj_format=aout ;;
-	esac
-	;;
-
+case ${target} in
+  a29k-amd-udi)
+    obj_format=coffbfd
+    need_bfd="./../bfd/libbfd.a"
+    gas_target=ebmon29k
+    ;;
+  a29k-amd-ebmon)
+    obj_format=coffbfd
+    need_bfd="./../bfd/libbfd.a"
+    gas_target=ebmon29k
+    ;;
+  a29k-amd-ebmonold)
+    obj_format=coff
+    need_bfd="./../bfd/libbfd.a"
+    gas_target=ebmon29k
+    ;;
+  i[34]86-ibm-aix*)
+    obj_format=coff
+    gas_target=i386aix
+    emulation=i386aix
+    ;;
+  i[34]86-*-bsd*) 
+    obj_format=aout 
+    emulation=i386bsd	
+    ;;
+  i[34]86-*-coff)
+    obj_format=coffbfd
+    need_bfd="./../bfd/libbfd.a"
+    gas_target=i386coff
+    ;; 
+  i960-wrs-vxworks)
+    obj_format=bout 
+    ;;
+  i960-*-coff)
+    obj_format=coff
+    emulation=ic960 
+    ;;
+  m68k-wrs-vxworks)
+    obj_format=aout
+    emulation=sun3
+    ;;    
+  m68k-ericsson-[Oo][Ss][Ee])
+    obj_format=aout
+    emulation=sun3
+    ;;
+  m68k-*-coff)
+    obj_format=coffbfd
+    need_bfd="./../bfd/libbfd.a"
+    gas_target=m68kcoff
+    ;;
+  *-*-aout | *-*-scout)
+    obj_format=aout
+    ;;
+  *-*-bout* | *-*-nindy*)
+    obj_format=bout 
+    ;;
+  *-*-bsd* | *-*-sunos*) 
+    obj_format=aout 
+    emulation=sun3	
+    ;;
+  *-*-generic)
+    obj_format=generic 
+    ;;
+  *-*-xray | *-*-hms)
+    obj_format=coffbfd
+    need_bfd="./../bfd/libbfd.a"
+    ;;
+  *-*-sysv32)
+    obj_format=coff
+    emulation=sysv32
+    ;;
+  *-*-sim)	
+    obj_format=coffbfd
+    need_bfd="./../bfd/libbfd.a"
+    ;;
+  *-*-coff* | *-sysv* | *-*-sco*)
+    obj_format=coff
+    case ${target_vendor} in
+      bull)  emulation=dpx2 ;;
+      sun)   emulation=sun3 ;;
+    esac
+    ;;
+  *-*-vxworks)
+    obj_format=aout 
+    ;;
+  *-*-coff)
+    obj_format=coff
+    ;;
 esac
 
 # assign floating point type
 case ${target_cpu} in
-ns32k)	atof=ns32k ;;
-vax)	atof=vax ;;
-*)	atof=ieee ;;
+  ns32k) atof=ns32k ;;
+  vax)	 atof=vax ;;
+  *)	 atof=ieee ;;
 esac
 
 # and target makefile frag
