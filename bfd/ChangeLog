@@ -1,3 +1,8 @@
+Mon Feb 21 10:12:02 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* Makefile.in (targets.o, archures.o): Use ALL_CFLAGS to supply
+	flags to explicit compile actions.
+
 Mon Feb 21 09:50:06 1994  Ian Lance Taylor  (ian@lisa.cygnus.com)
 
 	* coff-alpha.c (alpha_relocate_section): Rewrite mask and shift
