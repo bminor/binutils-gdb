@@ -1,3 +1,10 @@
+2004-01-12  Andrew Cagney  <cagney@redhat.com>
+
+	* mi/ChangeLog: Delete file.  Renamed to ...
+	* mi/ChangeLog-1999-2003: New file.
+	* tui/ChangeLog: Delete file.  Renamed to ...
+	* tui/ChangeLog-1998-2003: New file.
+	
 2004-01-11  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc64nbsd-tdep.c: Include "regset.h".
@@ -632,7 +639,8 @@
 	in <machine/reg.h>.
 	* configure, config.in: Regenerate.
 
-For older changes see ChangeLog-2003
+For older changes see ChangeLog-2003, mi/ChangeLog-1999-2003, and
+tui/ChangeLog-1998-2003.
 
 Local Variables:
 mode: change-log

@@ -1,5 +1,10 @@
 2004-01-12  Andrew Cagney  <cagney@redhat.com>
 
+	* gdb.mi/ChangeLog: Delete file.  Renamed to ...
+	* gdb.mi/ChangeLog-1999-2003: New file.
+
+2004-01-12  Andrew Cagney  <cagney@redhat.com>
+
 	* gdb.base/fileio.exp: Update copyright year.  On GNU/Linux, for
 	"Renaming a directory to a non-empty directory returns ENOTEMPTY
 	or EEXIST", treat EBUSY as an XFAIL.
@@ -11276,6 +11281,8 @@ Sun Feb 21 10:55:55 1993  Mike Werner  (mtw@poseidon.cygnus.com)
 	of dejagnu.  The modifications to these testcases, etc., which
 	will allow them to work with the new version of dejagnu will be
 	made in a future update.
+
+For additional changes see gdb.mi/ChangeLog-1999-2003.
 
 Local Variables:
 mode: change-log
