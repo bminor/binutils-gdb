@@ -27,7 +27,4 @@
 
 #include "xm-sysv4.h"
 
-#define GDB_GREGSET_T prgregset_t
-#define GDB_FPREGSET_T prfpregset_t
-
 #endif /* #ifndef XM_AIX_H */

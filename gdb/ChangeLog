@@ -1,3 +1,11 @@
+2001-03-02  Kevin Buettner  <kevinb@redhat.com>
+
+	* config/ia64/xm-aix.h (GDB_GREGSET_T, GDB_FPREGSET_T): Move defines
+	from here...
+	* config/ia64/nm-aix.h (GDB_GREGSET_T, GDB_FPREGSET_T): ...to here.
+	(MONTEREY): Don't define.
+	(AIX5): Define.
+
 2001-03-02  Matt Hiller  <hiller@redhat.com>
 
 	* config/mn10300/tm-mn10300.h (E0_REGNUM): Correct to 15.

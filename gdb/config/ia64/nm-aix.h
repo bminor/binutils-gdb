@@ -23,12 +23,15 @@
 
 #include "nm-sysv4.h"
 
-#ifndef MONTEREY
-#define MONTEREY 1
+#ifndef AIX5
+#define AIX5 1
 #endif
 
 /* Type of the operation code for sending control messages to the
    /proc/PID/ctl file */
 #define PROC_CTL_WORD_TYPE int
+
+#define GDB_GREGSET_T prgregset_t
+#define GDB_FPREGSET_T prfpregset_t
 
 #endif /* #ifndef NM_AIX_H */
