@@ -1,10 +1,46 @@
 Sat Sep 26 00:25:15 1992  John Gilmore  (gnu@cygnus.com)
 
+	Make the /proc support a target-struct in its own right.
+
 	* Makefile.in: Remove inftarg.[co], since it is now included via
 	config/*.mh files.
 	* config/*.mh:  Add inftarg.o and fork-child.o to all *.mh that
 	reference infptrace.o.  Add fork-child.o to all *.mh that
 	reference procfs.o.
+
+	* inferior.h (proc_wait, inferior_proc_init, proc_set_exec_trap):
+	No longer global functions.
+	(fork_inferior):  New global function from fork-child.c.
+	* inftarg.c (child_wait):  Remove USE_PROC_FS conditional.
+	(ptrace_me, ptrace_him):  New stub functions for fork_inferior().
+	(child_create_inferior):  Moved to fork-child.c as fork_inferior.
+	(child_create_inferior):  New tiny function that calls fork_inferior.
+	* fork-child.c:  New file, containing fork_inferior, which is
+	built from slight mods to inftarg.c's child_create_inferior.
+
+	* procfs.c (procfs_ops):  Add target vector.
+	(attach):  Rename as static do_attach.
+	(procfs_create_inferior):  New tiny function that calls fork_inferior.
+	(child_xfer_memory):  Rename to static procfs_xfer_memory.
+	(store_inferior_registers):  Rename to static procfs_store_registers.
+	(inferior_proc_init):  Rename to static procfs_init_inferior.
+	(procfs_attach, procfs_detach, procfs_prepare_to_store,
+	procfs_files_info, procfs_open, procfs_mourn_inferior,
+	procfs_can_run):  Slightly mangled copies of the corresponding
+	child_XXX routines from inftarg.c.
+	(proc_wait):  Renamed to static procfs_wait.
+	(child_resume):  Rename to static procfs_resume.
+	(fetch_inferior_registers):  Rename to static procfs_fetch_registers.
+	(initialize_proc_fs):  Rename to initialize_procfs.  Set up
+	procfs_ops, too.
+
+	* putenv.c:  index -> strchr.
+	* regex.c:  Always rename bcopy to memcpy, etc.
+	FIXME:  Eventually do the renames rather than use #define's.
+	* sparc-tdep.c (deferred_stores):  Moved from sparc-xdep.c.
+	Fix bcopy->memcpy.
+	* sparc-xdep.c:  Move deferred_stores to target dependent.
+	* xm-irix4.h, xm-sysv4.h (CREATE_INFERIOR_HOOK):  No longer needed.
 
 Fri Sep 25 21:59:27 1992  John Gilmore  (gnu@cygnus.com)
 

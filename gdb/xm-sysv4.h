@@ -55,13 +55,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define ATTACH_DETACH
 
-/* If we are using SVR4 /proc instead of ptrace, use CREATE_INFERIOR_HOOK
-   to do internal /proc initialization. */
-
-#ifdef USE_PROC_FS
-#define CREATE_INFERIOR_HOOK(pid) inferior_proc_init(pid)
-#endif
-
 /* Use setpgid(0,0) to run inferior in a separate process group */
 
 #define NEED_POSIX_SETPGID

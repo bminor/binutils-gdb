@@ -43,12 +43,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define USE_PROC_FS
 #define PROC_NAME_FMT "/debug/%d"
 
-/* If we are using SVR4 /proc instead of ptrace, use CREATE_INFERIOR_HOOK
-   to do internal /proc initialization. */
-#ifdef USE_PROC_FS
-#define CREATE_INFERIOR_HOOK(pid) inferior_proc_init(pid)
-#endif
-
 /* Irix defines psignal() in signal.h, which gets gcc rather angry at us
  * because their definition is markedly different.
  */
