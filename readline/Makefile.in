@@ -74,20 +74,22 @@ all: libreadline.a
 all-info: history.info readline.info
 
 history.info: history.texi
-	- $(MAKEINFO) -o history.info $(srcdir)/history.texi
+	$(MAKEINFO) -o history.info $(srcdir)/history.texi
 
-readline.info: readline.texi
-	- $(MAKEINFO) -o readline.info $(srcdir)/readline.texi
+readline.info: readline.texi inc-read.texi
+	$(MAKEINFO) -o readline.info $(srcdir)/readline.texi
 
-libreadline.a:	readline.o history.o funmap.o keymaps.o
+libreadline.a:	readline.o history.o funmap.o keymaps.o tilde.o
 		$(RM) -f libreadline.a
-		$(AR) $(AR_FLAGS) libreadline.a readline.o history.o funmap.o keymaps.o
+		$(AR) $(AR_FLAGS) libreadline.a readline.o history.o funmap.o keymaps.o tilde.o
 		$(RANLIB) libreadline.a
 
 readline.o:	readline.h chardefs.h  keymaps.h history.h readline.c vi_mode.c
 history.o:	history.c history.h
 funmap.o:	readline.h
 keymaps.o:	emacs_keymap.c vi_keymap.c keymaps.h chardefs.h keymaps.c
+tilde.o:	../glob/tilde.c
+		$(CC) -c $(CFLAGS) $(LOCAL_INCLUDES) $(CPPFLAGS) $(READLINE_DEFINES) ../glob/tilde.c
 
 libtest:	libreadline.a libtest.c
 		$(CC) -o libtest $(CFLAGS) $(CPPFLAGS) -L. libtest.c -lreadline -ltermcap
