@@ -1,3 +1,10 @@
+2004-01-12  Nick Clifton  <nickc@redhat.com>
+
+	* objcopy.c (copy_object): Make the function boolean, returning
+	FALSE upon failure.
+        (copy_archive): Handle the return value from copy_object.
+        (copy_file): Likewise.
+
 2004-01-07  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (find_section): New function.  Locates a named
