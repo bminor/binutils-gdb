@@ -1029,6 +1029,16 @@ alpha_heuristic_frame_unwind_cache (struct frame_info *next_frame,
 	    {
 	      reg = (word & 0x03e00000) >> 21;
 
+              /* Ignore this instruction if we have already encountered
+                 an instruction saving the same register earlier in the
+                 function code.  The current instruction does not tell
+                 us where the original value upon function entry is saved.
+                 All it says is that the function we are scanning reused
+                 that register for some computation of its own, and is now
+                 saving its result.  */
+              if (info->saved_regs[reg])
+                continue;
+
 	      if (reg == 31)
 		continue;
 
