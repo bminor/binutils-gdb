@@ -1,3 +1,10 @@
+2001-11-28  Andreas Schwab  <schwab@suse.de>
+
+	* as.c (parse_args): Call md_after_parse_args if defined.
+	* config/tc-ia64.h (md_after_parse_args): Define.
+	* config/tc-ia64.c (ia64_after_parse_args): Reject --gstabs.
+	* doc/internals.texi (CPU backend): Document md_after_parse_args.
+
 2001-11-23  Jakub Jelinek  <jakub@redhat.com>
 
 	* config/tc-alpha.c (tc_gen_reloc): Remove SEC_MERGE test.
@@ -1772,7 +1779,7 @@ Wed Aug 29 12:05:13 2001  J"orn Rennecke <amylaar@redhat.com>
 	TC_FINALIZE_SYMS_BEFORE_SIZE_SEG just before size_segs is
 	called.
 
-	* doc/internals.texi; Document
+	* doc/internals.texi: Document
 	TC_FINALIZE_SYMS_BEFORE_SIZE_SEG.
 
 2001-07-02  Alan Modra  <amodra@bigpond.net.au>

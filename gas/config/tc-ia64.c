@@ -6310,6 +6310,13 @@ IA-64 options:\n\
 	stream);
 }
 
+void
+ia64_after_parse_args ()
+{
+  if (debug_type == DEBUG_STABS)
+    as_fatal (_("--gstabs is not supported for ia64"));
+}
+
 /* Return true if TYPE fits in TEMPL at SLOT.  */
 
 static int

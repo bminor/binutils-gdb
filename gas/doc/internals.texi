@@ -843,11 +843,13 @@ zero if the target is little endian.
 @itemx md_longopts_size
 @itemx md_parse_option
 @itemx md_show_usage
+@itemx md_after_parse_args
 @cindex md_shortopts
 @cindex md_longopts
 @cindex md_longopts_size
 @cindex md_parse_option
 @cindex md_show_usage
+@cindex md_after_parse_args
 GAS uses these variables and functions during option processing.
 @code{md_shortopts} is a @code{const char *} which GAS adds to the machine
 independent string passed to @code{getopt}.  @code{md_longopts} is a
@@ -859,6 +861,9 @@ GAS will call @code{md_parse_option} whenever @code{getopt} returns an
 unrecognized code, presumably indicating a special code value which appears in
 @code{md_longopts}.  GAS will call @code{md_show_usage} when a usage message is
 printed; it should print a description of the machine specific options.
+@code{md_after_pase_args}, if defined, is called after all options are
+processed, to let the backend override settings done by the generic option
+parsing.
 
 @item md_begin
 @cindex md_begin

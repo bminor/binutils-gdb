@@ -762,6 +762,10 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 
   *pargc = new_argc;
   *pargv = new_argv;
+
+#ifdef md_after_parse_args
+  md_after_parse_args ();
+#endif
 }
 
 static long start_time;
