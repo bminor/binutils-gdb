@@ -647,17 +647,23 @@ main (argc, argv)
 	case delete:
 	  if (files != NULL)
 	    delete_members (arch, files);
+	  else
+	    output_filename = NULL;
 	  break;
 
 	case move:
 	  if (files != NULL)
 	    move_members (arch, files);
+	  else
+	    output_filename = NULL;
 	  break;
 
 	case replace:
 	case quick_append:
 	  if (files != NULL || write_armap > 0)
 	    replace_members (arch, files, operation == quick_append);
+	  else
+	    output_filename = NULL;
 	  break;
 
 	  /* Shouldn't happen! */
@@ -1179,9 +1185,9 @@ delete_members (arch, files_to_delete)
     }
 
   if (something_changed == true)
-    {
-      write_archive (arch);
-    }
+    write_archive (arch);
+  else
+    output_filename = NULL;
 }
 
 
@@ -1332,6 +1338,8 @@ replace_members (arch, files_to_move, quick)
 
   if (changed)
     write_archive (arch);
+  else
+    output_filename = NULL;
 }
 
 static void

@@ -1,3 +1,8 @@
+1999-09-12  Ian Lance Taylor  <ian@zembu.com>
+
+	* ar.c (main): Clear output_file if we don't change the archive.
+	(delete_members, replace_members): Likewise.
+
 1999-09-12  Donn Terry  <donn@interix.com>
 
 	* objdump.c (dump_headers): If wide_output, print Flags header.
