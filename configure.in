@@ -41,7 +41,10 @@
 
 # these libraries are used by various programs built for the host environment
 #
-host_libs="mmalloc libiberty opcodes bfd readline gash db tcl tk tclX itcl libide"
+host_libs="mmalloc libiberty opcodes bfd readline gash db tcl tk tclX itcl"
+# start-sanitize-ide
+host_libs="${host_libs} libide"
+# end-sanitize-ide
 
 if [ "${enable_gdbgui}" = "yes" ] ; then
 	host_libs="${host_libs} libgui"
@@ -50,8 +53,10 @@ fi
 # these tools are built for the host environment
 # Note, the powerpc-eabi build depends on sim occurring before gdb in order to
 # know that we are building the simulator.
-host_tools="texinfo byacc flex bison binutils ld gas gcc sim gdb make patch prms send-pr gprof gdbtest tgas etc expect dejagnu bash m4 autoconf ispell grep diff rcs cvs fileutils shellutils time textutils wdiff find emacs emacs19 uudecode hello tar gzip indent recode release sed utils guile perl apache inet gawk findutils sn vmake"
-
+host_tools="texinfo byacc flex bison binutils ld gas gcc sim gdb make patch prms send-pr gprof gdbtest tgas etc expect dejagnu bash m4 autoconf ispell grep diff rcs cvs fileutils shellutils time textutils wdiff find emacs emacs19 uudecode hello tar gzip indent recode release sed utils guile perl apache inet gawk findutils sn"
+# start-sanitize-ide
+host_tools="${host_tools} ilu vmake"
+# end-sanitize-ide
 
 # these libraries are built for the target environment, and are built after
 # the host libraries and the host tools (which may be a cross compiler)
@@ -227,7 +232,10 @@ case ${with_x} in
   yes | "")  # the default value for this tree is that X11 is available
 	;;
   no)
-	skipdirs="${skipdirs} tk gash libide vmake"
+	skipdirs="${skipdirs} tk gash"
+# start-sanitize-ide
+	skipdirs="${skipdirs} libide vmake"
+# end-sanitize-ide
 	;;
   *)
     	echo "*** bad value \"${with_x}\" for -with-x flag; ignored" 1>&2
@@ -371,13 +379,22 @@ noconfigdirs=""
 
 case "${host}" in
   i[3456]86-*-vsta)
-    noconfigdirs="tcl expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff guile perl apache inet itcl db sn gnuserv libide vmake"
+    noconfigdirs="tcl expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff guile perl apache inet itcl db sn gnuserv"
+# start-sanitize-ide
+    noconfigdirs="$noconfigdirs libide vmake"
+# end-sanitize-ide
     ;;
   i[3456]86-*-go32)
-    noconfigdirs="tcl tk expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff guile perl apache inet itcl db sn gnuserv libide vmake"
+    noconfigdirs="tcl tk expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff guile perl apache inet itcl db sn gnuserv"
+# start-sanitize-ide
+    noconfigdirs="$noconfigdirs libide vmake"
+# end-sanitize-ide
 	;;
   *-*-cygwin32)
-     noconfigdirs="expect dejagnu cvs autoconf bison send-pr gprof rcs guile perl texinfo apache inet itcl db sn gnuserv libide vmake"
+     noconfigdirs="expect dejagnu cvs autoconf bison send-pr gprof rcs guile perl texinfo apache inet itcl db sn gnuserv"
+# start-sanitize-ide
+     noconfigdirs="$noconfigdirs libide vmake"
+# end-sanitize-ide
     ;;
   *-*-windows*)
 # This is only used to build WinGDB...
@@ -385,7 +402,10 @@ case "${host}" in
      target_configdirs=
     ;;
   ppc*-*-pe)
-     noconfigdirs="patch diff make tk tcl expect dejagnu cvs autoconf texinfo bison send-pr gprof rcs guile perl apache inet itcl db sn gnuserv libide vmake"
+     noconfigdirs="patch diff make tk tcl expect dejagnu cvs autoconf texinfo bison send-pr gprof rcs guile perl apache inet itcl db sn gnuserv"
+# start-sanitize-ide
+     noconfigdirs="$noconfigdirs libide vmake"
+# end-sanitize-ide
     ;;
 esac
 
@@ -429,7 +449,10 @@ case "${target}" in
     ;;
 # start-sanitize-d30v
   d30v-*-*)
-    noconfigdirs="$noconfigdirs tcl tk expect gcc gdb newlib target-librx target-libg++ target-libstdc++ target-libio target-libgloss itcl db sn gnuserv target-libiberty target-newlib target-examples libide vmake"
+    noconfigdirs="$noconfigdirs tcl tk expect gcc gdb newlib target-librx target-libg++ target-libstdc++ target-libio target-libgloss itcl db sn gnuserv target-libiberty target-newlib target-examples"
+# start-sanitize-ide
+    noconfigdirs="$noconfigdirs libide vmake"
+# end-sanitize-ide
     ;;
 # end-sanitize-d30v
   h8300*-*-* | \
@@ -457,7 +480,10 @@ case "${target}" in
     ;;
   *-*-cygwin32)
     target_configdirs="$target_configdirs target-winsup"
-    noconfigdirs="$noconfigdirs expect target-libgloss itcl db sn gnuserv libide vmake"
+    noconfigdirs="$noconfigdirs expect target-libgloss itcl db sn gnuserv"
+# start-sanitize-ide
+    noconfigdirs="$noconfigdirs libide vmake"
+# end-sanitize-ide
     # always build newlib.
     skipdirs=`echo " ${skipdirs} " | sed -e 's/ target-newlib / /'`
 
@@ -507,13 +533,19 @@ case "${target}" in
     ;;
   powerpc*-*-winnt* | powerpc*-*-pe* | ppc*-*-pe)
     target_configdirs="$target_configdirs target-winsup"
-    noconfigdirs="$noconfigdirs gdb tcl tk make expect target-libgloss itcl db sn gnuserv libide vmake"
+    noconfigdirs="$noconfigdirs gdb tcl tk make expect target-libgloss itcl db sn gnuserv"
+# start-sanitize-ide
+    noconfigdirs="$noconfigdirs libide vmake"
+# end-sanitize-ide
     # always build newlib.
     skipdirs=`echo " ${skipdirs} " | sed -e 's/ target-newlib / /'`
     ;;
     # This is temporary until we can link against shared libraries
   powerpcle-*-solaris*)
-    noconfigdirs="$noconfigdirs gdb sim make tcl tk expect itcl db sn gnuserv libide vmake"
+    noconfigdirs="$noconfigdirs gdb sim make tcl tk expect itcl db sn gnuserv"
+# start-sanitize-ide
+    noconfigdirs="$noconfigdirs libide vmake"
+# end-sanitize-ide
     ;;
   rs6000-*-lynxos*)
     # The CVS server code doesn't work on the RS/6000
@@ -610,7 +642,10 @@ esac
 # If we are building a Canadian Cross, discard tools that can not be built
 # using a cross compiler.  FIXME: These tools should be fixed.
 if [ "${build}" != "${host}" ]; then
-  noconfigdirs="$noconfigdirs expect dejagnu itcl db sn gnuserv libide vmake"
+  noconfigdirs="$noconfigdirs expect dejagnu itcl db sn gnuserv"
+# start-sanitize-ide
+  noconfigdirs="$noconfigdirs libide ilu vmake"
+# end-sanitize-ide
 fi
 
 # Make sure we don't let GNU ld be added if we didn't want it.

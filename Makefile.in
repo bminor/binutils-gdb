@@ -448,6 +448,9 @@ ALL_MODULES = \
 	all-grez \
 	all-gzip \
 	all-hello \
+	$(start-sanitize-ide) \
+	all-ilu \
+	$(end-sanitize-ide) \
 	all-indent \
 	all-inet \
 	all-ispell \
@@ -516,6 +519,9 @@ CROSS_CHECK_MODULES = \
 	check-grep \
 	check-gzip \
 	check-hello \
+	$(start-sanitize-ide) \
+	check-ilu \
+	$(end-sanitize-ide) \
 	check-indent \
 	check-inet \
 	check-ispell \
@@ -581,6 +587,9 @@ INSTALL_MODULES = \
 	install-grez \
 	install-gzip \
 	install-hello \
+	$(start-sanitize-ide) \
+	install-ilu \
+	$(end-sanitize-ide) \
 	install-indent \
 	install-inet \
 	install-ispell \
@@ -724,6 +733,9 @@ CLEAN_MODULES = \
 	clean-grez \
 	clean-gzip \
 	clean-hello \
+	$(start-sanitize-ide) \
+	clean-ilu \
+	$(end-sanitize-ide) \
 	clean-indent \
 	clean-inet \
 	clean-ispell \
@@ -1341,7 +1353,7 @@ all-gas: all-libiberty all-opcodes all-bfd
 all-gash: all-tcl
 all-gawk:
 ALL_GCC = all-gcc
-all-gcc: all-libiberty all-byacc all-binutils all-gas all-ld
+all-gcc: all-byacc all-binutils all-gas all-ld
 all-bootstrap: all-libiberty all-byacc all-binutils all-gas all-ld
 GDB_TK = all-tk all-tcl
 all-gdb: all-libiberty all-opcodes all-bfd all-mmalloc all-readline all-byacc all-sim $(gdbnlmrequirements) $(GDB_TK)
@@ -1353,6 +1365,9 @@ all-gui: all-gdb all-libproc all-target-librx
 all-guile:
 all-gzip: all-libiberty
 all-hello: all-libiberty
+# start-sanitize-ide
+all-ilu:
+# end-sanitize-ide
 all-indent:
 all-inet: all-tcl all-send-pr all-perl
 all-ispell: all-emacs19
@@ -1466,7 +1481,7 @@ ETC_SUPPORT= Makefile.in configure configure.in standards.texi \
 # this macro.
 SUPPORT_FILES = list-of-support-files-for-tool-in-question
 # Files where "byacc" (Cygnus version) should be changed to "bison -y" (FSF).
-DISTBISONFILES= binutils/Makefile.in gas/Makefile.in gdb/Makefile.in
+DISTBISONFILES= binutils/Makefile.in gas/Makefile.in gdb/Makefile.in ld/Makefile.in
 
 .PHONY: taz
 
