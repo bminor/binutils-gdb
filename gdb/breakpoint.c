@@ -665,7 +665,8 @@ insert_breakpoints ()
               /* Bp set, now make sure callbacks are enabled */ 
               args.kind = b->type == bp_catch_catch ? EX_EVENT_CATCH : EX_EVENT_THROW;
               args.enable = 1;
-              sal = catch_errors ((int (*) PARAMS ((char *))) cover_target_enable_exception_callback,
+              sal = catch_errors ((int (*) PARAMS ((char *))) 
+				  cover_target_enable_exception_callback,
                                   (char *) &args,
                                   message, RETURN_MASK_ALL);
               if (sal && (sal != (struct symtab_and_line *) -1))
@@ -914,7 +915,7 @@ update_breakpoints_after_exec ()
           (b->type == bp_catch_vfork) ||
           (b->type == bp_catch_fork))
         {
-          b->address = NULL;
+          b->address = (CORE_ADDR) NULL;
           continue;
         }
 
@@ -959,7 +960,7 @@ update_breakpoints_after_exec ()
       /* If this breakpoint has survived the above battery of checks, then
          it must have a symbolic address.  Be sure that it gets reevaluated
          to a target address, rather than reusing the old evaluation.  */
-      b->address = NULL;
+      b->address = (CORE_ADDR) NULL;
     }
 }
 

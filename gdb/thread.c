@@ -73,6 +73,35 @@ struct thread_info
 
 };
 
+/* Prototypes for exported functions. */
+
+void _initialize_thread PARAMS ((void));
+
+/* Prototypes for local functions. */
+
+#if !defined(FIND_NEW_THREADS)
+#define FIND_NEW_THREADS target_find_new_threads
+#endif  
+			   
+static struct thread_info *thread_list = NULL;
+static int highest_thread_num;
+
+static struct thread_info * find_thread_id PARAMS ((int num));
+
+static void thread_command PARAMS ((char * tidstr, int from_tty));
+static void thread_apply_all_command PARAMS ((char *, int));
+static int  thread_alive PARAMS ((struct thread_info *));
+static void info_threads_command PARAMS ((char *, int));
+static void thread_apply_command PARAMS ((char *, int));
+static void restore_current_thread PARAMS ((int));
+static void switch_to_thread PARAMS ((int pid));
+static void prune_threads PARAMS ((void));
+
+/* If the host has threads, the host machine definition may set this
+   macro. But, for remote thread debugging, it gets more complex and
+   setting macros does not bind to the various target dependent
+   methods well. So, we use the vector target_thread_functions */
+
 static struct target_thread_vector *target_thread_functions;
 
 int
@@ -87,10 +116,9 @@ target_find_new_threads ()
 
 
 int
-target_get_thread_info PARAMS ((
-				 gdb_threadref * ref,
-				 int selection,		/* FIXME: Selection */
-				 struct gdb_ext_thread_info * info));
+target_get_thread_info PARAMS ((gdb_threadref * ref,
+				int selection,		/* FIXME: Selection */
+				struct gdb_ext_thread_info * info));
 
 int
 target_get_thread_info (ref, selection, info)
@@ -121,8 +149,6 @@ bind_target_thread_vector (vec)
   target_thread_functions = vec;
 }
 
-/* Prototypes for exported functions. */
-
 struct target_thread_vector *
 unbind_target_thread_vector ()
 {
@@ -131,55 +157,6 @@ unbind_target_thread_vector ()
   target_thread_functions = 0;
   return retval;
 }				/* unbind_target_thread-vector */
-
-void _initialize_thread PARAMS ((void));
-
-
-/* Prototypes for local functions. */
-/* If the host has threads, the host machine definition may
-   set this macro. But, for remote thread debugging, it gets more
-   complex and setting macros does not bind to the various target
-   dependent methods well. So, we use the vector target_thread_functions
-   */
-#if !defined(FIND_NEW_THREADS)
-#define FIND_NEW_THREADS target_find_new_threads
-#endif  
-			   
-static struct thread_info *thread_list = NULL;
-static int highest_thread_num;
-
-static void
-thread_command PARAMS ((char * tidstr, int from_tty));
-static void
-prune_threads PARAMS ((void));
-
-static void
-switch_to_thread PARAMS ((int pid));
-
-static struct thread_info *
-find_thread_id PARAMS ((int num));
-
-static void
-info_threads_command PARAMS ((char *, int));
-
-static void
-restore_current_thread PARAMS ((int));
-
-static void
-thread_apply_all_command PARAMS ((char *, int));
-
-static void
-thread_apply_command PARAMS ((char *, int));
-
-static void info_threads_command PARAMS ((char *, int));
-
-static void restore_current_thread PARAMS ((int));
-
-static void thread_apply_all_command PARAMS ((char *, int));
-
-static void thread_apply_command PARAMS ((char *, int));
-
-static int thread_alive PARAMS ((struct thread_info *));
 
 void
 init_thread_list ()

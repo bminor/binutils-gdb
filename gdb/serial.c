@@ -508,17 +508,19 @@ _initialize_serial ()
 Use <CR>~. or <CR>~^D to break out.");
 #endif /* 0 */
 
-  add_show_from_set (add_set_cmd ("remotelogfile", no_class,
-				  var_filename, (char *)&serial_logfile,
-				  "Set filename for remote session recording.\n\
+  add_show_from_set 
+    (add_set_cmd ("remotelogfile", no_class,
+		  var_filename, (char *) &serial_logfile,
+		  "Set filename for remote session recording.\n\
 This file is used to record the remote session for future playback\n\
-by gdbserver.", &setlist),
-		     &showlist);
+by gdbserver.", 
+		  &setlist),
+     &showlist);
 
-  add_show_from_set (add_set_enum_cmd ("remotelogbase", no_class,
-				       logbase_enums,
-				       (char *)&serial_logbase,
-				       "Set numerical base for remote session logging",
-				       &setlist),
-			   &showlist);
+  add_show_from_set 
+    (add_set_enum_cmd ("remotelogbase", no_class,
+		       logbase_enums, (char *) &serial_logbase,
+		       "Set numerical base for remote session logging",
+		       &setlist),
+     &showlist);
 }
