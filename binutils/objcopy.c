@@ -1,6 +1,6 @@
 /* objcopy.c -- copy object file from input to output, optionally massaging it.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003
+   2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -1084,23 +1084,6 @@ add_redefine_syms_file (const char *filename)
   free (buf);
 }
 
-/* Keep only every `copy_byte'th byte in MEMHUNK, which is *SIZE bytes long.
-   Adjust *SIZE.  */
-
-static void
-filter_bytes (char *memhunk, bfd_size_type *size)
-{
-  char *from = memhunk + copy_byte, *to = memhunk, *end = memhunk + *size;
-
-  for (; from < end; from += interleave)
-    *to++ = *from;
-
-  if (*size % interleave > (bfd_size_type) copy_byte)
-    *size = (*size / interleave) + 1;
-  else
-    *size /= interleave;
-}
-
 /* Copy object file IBFD onto OBFD.  */
 
 static void
@@ -2003,7 +1986,18 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 	RETURN_NONFATAL (bfd_get_filename (ibfd));
 
       if (copy_byte >= 0)
-	filter_bytes (memhunk, &size);
+	{
+	  /* Keep only every `copy_byte'th byte in MEMHUNK.  */
+	  char *from = memhunk + copy_byte;
+	  char *to = memhunk;
+	  char *end = memhunk + size;
+
+	  for (; from < end; from += interleave)
+	    *to++ = *from;
+
+	  size = (size + interleave - 1 - copy_byte) / interleave;
+	  osection->lma /= interleave;
+	}
 
       if (!bfd_set_section_contents (obfd, osection, memhunk, 0, size))
 	RETURN_NONFATAL (bfd_get_filename (obfd));

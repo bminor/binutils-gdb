@@ -1,3 +1,9 @@
+2004-01-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* objcopy.c (filter_bytes): Delete.  Move code to..
+	(copy_section): ..here.  Simplify size adjustment.  Divide
+	section lma by interleave.
+
 2004-01-02  Nick Clifton  <nickc@redhat.com>
 
 	* po/ru.po: New file: Russian translation.
