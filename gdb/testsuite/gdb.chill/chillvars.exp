@@ -182,8 +182,7 @@ proc test_arrays {} {
     gdb_test_exact "ptype bytetable4" \
 	{type = ARRAY (1:2) ARRAY ('c':'d') ARRAY (FALSE:TRUE) BYTE}
     gdb_test_exact "print bytetable4" \
-    {= [(1): [('c'): [(FALSE): 0, (TRUE): 1], ('d'): [(FALSE): 2, (TRUE): 3]], (2
-): [('c'): [(FALSE): 4, (TRUE): 5], ('d'): [(FALSE): 6, (TRUE): 7]]]}
+    {= [(1): [('c'): [(FALSE): 0, (TRUE): 1], ('d'): [(FALSE): 2, (TRUE): 3]], (2): [('c'): [(FALSE): 4, (TRUE): 5], ('d'): [(FALSE): 6, (TRUE): 7]]]}
 
     gdb_test "ptype ubytetable1"	"type = ARRAY \[(\]+0:4\[)\]+ UBYTE"
     gdb_test_exact "print ubytetable1"	\

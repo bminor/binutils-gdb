@@ -30,6 +30,8 @@ chillvars.exp
 configure.in
 pr-5020.ch
 pr-5020.exp
+pr-5022.ch
+pr-5022.exp
 
 Things-to-lose:
 

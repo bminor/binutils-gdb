@@ -1,0 +1,14 @@
+Thu Jun  9 15:20:43 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* pr-5022.ch, pr-5022.exp:  New testcase.
+	* chillvars.exp:  Remove spurious newline.
+
+	* Makefile.in:  Bunch of fixes so it actually works in this
+	directory.  (E.g. add extra ../ where needed.)
+	Also, add .exe to executables, so we can use suffix rules.
+	* chexp.exp (test_print_reject):  Update syntax error message.
+	* chillvars.ch (module PR_5020):  Moved from here ...
+	* pr-5022.ch: ... to this new file.
+	* chillvars.exp, pr-5020.exp (binfile):  Add .exe extension.
+	* chillvars.exp, pr-5020.exp: Don't check all_flag.
+	* pr-5020.exp:  Add more tests; fix "print y pretty" output.
