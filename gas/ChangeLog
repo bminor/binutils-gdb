@@ -1,3 +1,10 @@
+Tue Jan 27 06:51:59 1998  Richard Henderson  <rth@cygnus.com>
+
+	* listing.c (MAX_BYTES): Use listing variables not constants.
+	(data_buffer): No longer an array, but a pointer.
+	(calc_hex): sizeof(data_buffer) -> MAX_BYTES.
+	(listing_listing): Allocate data_buffer.
+
 Tue Jan 27 06:38:35 1998  Richard Henderson  <rth@cygnus.com>
 
 	* as.c (parse_args): Add --listing-lhs-width, --listing-lhs-width2,

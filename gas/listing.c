@@ -194,12 +194,12 @@ static FILE *list_file;
    before the start of the line.  */
 
 #define MAX_BYTES							\
-  (((LISTING_WORD_SIZE * 2) + 1) * LISTING_LHS_WIDTH			\
-   + ((((LISTING_WORD_SIZE * 2) + 1) * LISTING_LHS_WIDTH_SECOND)	\
-      * LISTING_LHS_CONT_LINES)						\
+  (((LISTING_WORD_SIZE * 2) + 1) * listing_lhs_width			\
+   + ((((LISTING_WORD_SIZE * 2) + 1) * listing_lhs_width_second)	\
+      * listing_lhs_cont_lines)						\
    + 20)
 
-static char data_buffer[MAX_BYTES];
+static char *data_buffer;
 
 /* Prototypes.  */
 static void listing_message PARAMS ((const char *name, const char *message));
@@ -562,7 +562,7 @@ calc_hex (list)
       /* Print as many bytes from the fixed part as is sensible */
       byte_in_frag = 0;
       while (byte_in_frag < frag_ptr->fr_fix
-	     && data_buffer_size < sizeof (data_buffer) - 3)
+	     && data_buffer_size < MAX_BYTES - 3)
 	{
 	  if (address == ~0)
 	    {
@@ -582,7 +582,7 @@ calc_hex (list)
 	/* Print as many bytes from the variable part as is sensible */
 	while ((byte_in_frag
 		< frag_ptr->fr_fix + frag_ptr->fr_var * frag_ptr->fr_offset)
-	       && data_buffer_size < sizeof (data_buffer) - 3)
+	       && data_buffer_size < MAX_BYTES - 3)
 	  {
 	    if (address == ~0)
 	      {
@@ -924,6 +924,7 @@ listing_listing (name)
   unsigned int width;
 
   buffer = xmalloc (listing_rhs_width);
+  data_buffer = xmalloc (MAX_BYTES);
   eject = 1;
   list = head;
 
@@ -1029,7 +1030,10 @@ listing_listing (name)
 
       list = list->next;
     }
+
   free (buffer);
+  free (data_buffer);
+  data_buffer = NULL;
 }
 
 void
