@@ -1,3 +1,8 @@
+2005-03-14  Paul Brook  <paul@codesourcery.com>
+
+	* lib/mi-support.exp: Use mi_gdb_target_cmd to connect to remote
+	targets.
+
 2005-03-09  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.dwarf2/dup-psym.S: New file.

@@ -494,14 +494,9 @@ proc mi_gdb_load { arg } {
 	}
     } elseif { [target_info gdb_protocol] == "remote" } {
 	# remote targets
-	send_gdb "target [target_info gdb_protocol] [target_info netport]\n"
-	gdb_expect 60 {
-	    -re "\\^done,.*$mi_gdb_prompt$" {
-	    }
-	    timeout {
-		perror "Unable to connect to remote target"
-		return -1
-	    }
+	if { [mi_gdb_target_cmd "remote" [target_info netport]] != 0 } {
+	    perror "Unable to connect to remote target"
+	    return -1
 	}
 	send_gdb "48-target-download\n"
 	gdb_expect 10 {
