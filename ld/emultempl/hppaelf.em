@@ -106,7 +106,7 @@ hook_in_stub (info, lp)
   lang_statement_union_type *l;
   boolean ret;
 
-  for (; (l = *lp) != NULL; lp = &l->next)
+  for (; (l = *lp) != NULL; lp = &l->header.next)
     {
       switch (l->header.type)
 	{

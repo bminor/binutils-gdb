@@ -1703,7 +1703,7 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
 	   sections.  */
 
 	found_dollar = false;
-	for ( ; *pl != NULL; pl = &(*pl)->next)
+	for ( ; *pl != NULL; pl = &(*pl)->header.next)
 	  {
 	    lang_input_section_type *ls;
 	    const char *lname;
@@ -1730,7 +1730,7 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
 
     if (add_child.head != NULL)
       {
-	add_child.head->next = *pl;
+	add_child.head->header.next = *pl;
 	*pl = add_child.head;
       }
   }

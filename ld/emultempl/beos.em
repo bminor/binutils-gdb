@@ -554,7 +554,7 @@ sort_sections_1 (startptr, next_after, count, sort_func)
   vec = ((lang_statement_union_type **)
 	 xmalloc (count * sizeof (lang_statement_union_type *)));
 
-  for (p = *startptr, i = 0; i < count; i++, p = p->next)
+  for (p = *startptr, i = 0; i < count; i++, p = p->header.next)
     vec[i] = p;
 
   qsort (vec, count, sizeof (vec[0]), sort_func);
@@ -587,7 +587,7 @@ static void
 sort_sections (s)
      lang_statement_union_type *s;
 {
-  for (; s ; s = s->next)
+  for (; s ; s = s->header.next)
     switch (s->header.type)
       {
       case lang_output_section_statement_enum:
@@ -625,7 +625,7 @@ sort_sections (s)
 			  for (end = start, count = 0;
 			       end && (end->header.type
 				       == lang_input_section_enum);
-			       end = end->next)
+			       end = end->header.next)
 			    count++;
 
 			  p = sort_sections_1 (p, end, count,
@@ -652,7 +652,7 @@ sort_sections (s)
 		      lang_statement_union_type *end;
 		      int count;
 
-		      for (end = *p, count = 0; end; end = end->next)
+		      for (end = *p, count = 0; end; end = end->header.next)
 			{
 			  if (end->header.type != lang_input_section_enum)
 			    abort ();
@@ -772,7 +772,7 @@ gld${EMULATION_NAME}_place_orphan (file, s)
 
   ps[0] = '\$';
   ps[1] = 0;
-  for (l = os->children.head; l; l = l->next)
+  for (l = os->children.head; l; l = l->header.next)
     if (l->header.type == lang_wild_statement_enum)
       {
 	struct wildcard_list *sec;

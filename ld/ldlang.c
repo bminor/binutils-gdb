@@ -377,7 +377,7 @@ lang_for_each_statement_worker (func, s)
      void (*func) PARAMS ((lang_statement_union_type *));
      lang_statement_union_type *s;
 {
-  for (; s != (lang_statement_union_type *) NULL; s = s->next)
+  for (; s != (lang_statement_union_type *) NULL; s = s->header.next)
     {
       func (s);
 
@@ -1259,7 +1259,7 @@ wild_sort (wild, sec, file, section)
     return NULL;
 
   section_name = bfd_get_section_name (file->the_bfd, section);
-  for (l = wild->children.head; l != NULL; l = l->next)
+  for (l = wild->children.head; l != NULL; l = l->header.next)
     {
       lang_input_section_type *ls;
 
@@ -1389,14 +1389,14 @@ output_section_callback (ptr, sec, section, file, output)
 	 be NULL.  */
       if (list.head != NULL)
 	{
-	  ASSERT (list.head->next == NULL);
+	  ASSERT (list.head->header.next == NULL);
 
 	  for (pp = &ptr->children.head;
 	       *pp != before;
-	       pp = &(*pp)->next)
+	       pp = &(*pp)->header.next)
 	    ASSERT (*pp != NULL);
 
-	  list.head->next = *pp;
+	  list.head->header.next = *pp;
 	  *pp = list.head;
 	}
     }
@@ -1906,7 +1906,7 @@ open_input_bfds (s, force)
      lang_statement_union_type *s;
      boolean force;
 {
-  for (; s != (lang_statement_union_type *) NULL; s = s->next)
+  for (; s != (lang_statement_union_type *) NULL; s = s->header.next)
     {
       switch (s->header.type)
 	{
@@ -1967,8 +1967,8 @@ open_input_bfds (s, force)
 
 	      if (add.head != NULL)
 		{
-		  *add.tail = s->next;
-		  s->next = add.head;
+		  *add.tail = s->header.next;
+		  s->header.next = add.head;
 		}
 	    }
 	  break;
@@ -2062,7 +2062,7 @@ map_input_to_output_sections (s, target, output_section_statement)
      const char *target;
      lang_output_section_statement_type *output_section_statement;
 {
-  for (; s != (lang_statement_union_type *) NULL; s = s->next)
+  for (; s != (lang_statement_union_type *) NULL; s = s->header.next)
     {
       switch (s->header.type)
 	{
@@ -2513,7 +2513,7 @@ print_statement_list (s, os)
   while (s != NULL)
     {
       print_statement (s, os);
-      s = s->next;
+      s = s->header.next;
     }
 }
 
@@ -2619,7 +2619,7 @@ dprint_statement (s, n)
       while (s && --n >= 0)
 	{
 	  print_statement (s, abs_output_section);
-	  s = s->next;
+	  s = s->header.next;
 	}
     }
 
@@ -2832,7 +2832,7 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 						ldfile_output_machine);
 
   /* Size up the sections from their constituent parts.  */
-  for (; s != (lang_statement_union_type *) NULL; s = s->next)
+  for (; s != (lang_statement_union_type *) NULL; s = s->header.next)
     {
       switch (s->header.type)
 	{
@@ -2855,7 +2855,7 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 		asection *input;
 
 		if (os->children.head == NULL
-		    || os->children.head->next != NULL
+		    || os->children.head->header.next != NULL
 		    || os->children.head->header.type != lang_input_section_enum)
 		  einfo (_("%P%X: Internal error on COFF shared library section %s\n"),
 			 os->name);
@@ -3197,7 +3197,7 @@ lang_do_assignments (s, output_section_statement, fill, dot)
   unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture,
 						ldfile_output_machine);
 
-  for (; s != (lang_statement_union_type *) NULL; s = s->next)
+  for (; s != (lang_statement_union_type *) NULL; s = s->header.next)
     {
       switch (s->header.type)
 	{
@@ -4006,7 +4006,7 @@ static void
 lang_gc_sections_1 (s)
      lang_statement_union_type *s;
 {
-  for (; s != (lang_statement_union_type *) NULL; s = s->next)
+  for (; s != (lang_statement_union_type *) NULL; s = s->header.next)
     {
       switch (s->header.type)
 	{

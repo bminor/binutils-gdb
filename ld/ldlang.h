@@ -290,7 +290,6 @@ typedef struct {
 
 typedef union lang_statement_union {
   lang_statement_header_type header;
-  union lang_statement_union *next;
   lang_wild_statement_type wild_statement;
   lang_data_statement_type data_statement;
   lang_reloc_statement_type reloc_statement;

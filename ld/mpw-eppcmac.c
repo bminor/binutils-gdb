@@ -572,13 +572,13 @@ gldppcmacos_before_allocation ()
       if (os == NULL)
 	einfo (_("%P%F: can't find output section %s\n"),
 	       sec->output_section->name);
-      for (pls = &os->children.head; *pls != NULL; pls = &(*pls)->next)
+      for (pls = &os->children.head; *pls != NULL; pls = &(*pls)->header.next)
 	{
 	  if ((*pls)->header.type == lang_input_section_enum
 	      && (*pls)->input_section.section == sec)
 	    {
 	      is = (lang_input_section_type *) *pls;
-	      *pls = (*pls)->next;
+	      *pls = (*pls)->header.next;
 	      break;
 	    }
 	  if ((*pls)->header.type == lang_wild_statement_enum)
@@ -587,13 +587,13 @@ gldppcmacos_before_allocation ()
 
 	      for (pwls = &(*pls)->wild_statement.children.head;
 		   *pwls != NULL;
-		   pwls = &(*pwls)->next)
+		   pwls = &(*pwls)->header.next)
 		{
 		  if ((*pwls)->header.type == lang_input_section_enum
 		      && (*pwls)->input_section.section == sec)
 		    {
 		      is = (lang_input_section_type *) *pwls;
-		      *pwls = (*pwls)->next;
+		      *pwls = (*pwls)->header.next;
 		      break;
 		    }
 		}
