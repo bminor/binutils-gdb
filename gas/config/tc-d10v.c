@@ -457,6 +457,11 @@ get_operands (exp)
 	  else
 	    {
 	      exp[numops].X_add_number = OPERAND_ATSIGN;
+	      if (*p == '+')
+		{
+		  exp[++numops].X_add_number = OPERAND_PLUS;
+		  ++p;
+		}
 	      post = postfix (p);
 	    }
 	  numops++;

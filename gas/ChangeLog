@@ -1,5 +1,8 @@
 2001-11-29  Alexandre Oliva  <aoliva@redhat.com>
 
+	* config/tc-d10v.c (get_operands): Emit OPERAND_PLUS for
+	prefix `+'.
+
 	* config/tc-d10v.c (find_opcode): Reject non-SP operand if
 	flags requires SP.
 
