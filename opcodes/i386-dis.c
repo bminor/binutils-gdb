@@ -3191,8 +3191,10 @@ OP_E (int bytemode, int sizeflag)
 	{
 	  havesib = 1;
 	  FETCH_DATA (the_info, codep + 1);
-	  scale = (*codep >> 6) & 3;
 	  index = (*codep >> 3) & 7;
+	  if (index != 0x4)
+	    /* When INDEX == 0x4, scale is ignored.  */
+	    scale = (*codep >> 6) & 3;
 	  base = *codep & 7;
 	  USED_REX (REX_EXTY);
 	  USED_REX (REX_EXTZ);

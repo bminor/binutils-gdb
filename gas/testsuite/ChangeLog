@@ -1,3 +1,10 @@
+2005-01-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386/i386.exp: Run "sib".
+
+	* gas/i386/sib.d: New file.
+	* gas/i386/sib.s: Likewise.
+
 2005-01-09  Andreas Schwab  <schwab@suse.de>
 
 	* gas/i386/intel16.d: Ignore trailing text with #pass. 
