@@ -1847,7 +1847,7 @@ Print the version number of @command{objdump} and exit.
 @cindex header information, all
 Display all available header information, including the symbol table and
 relocation entries.  Using @option{-x} is equivalent to specifying all of
-@option{-a -f -h -r -t}.
+@option{-a -f -h -p -r -t}.
 
 @item -w
 @itemx --wide

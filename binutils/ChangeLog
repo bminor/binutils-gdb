@@ -1,3 +1,8 @@
+2004-09-06  Michael Wardle  <mbw@endbracket.net>
+
+	* doc/binutils.texi (objdump): Document that the -x switch includs
+	the effect of the -p switch.
+
 2004-09-04   Danny Smith  <dannysmith@users.sourceforge.net>
 
 	* dlltool.c (make_one_lib_file): Test if internal_name was
