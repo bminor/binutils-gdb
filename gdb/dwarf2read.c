@@ -732,9 +732,6 @@ static void set_cu_language (unsigned int, struct dwarf2_cu *);
 static struct attribute *dwarf2_attr (struct die_info *, unsigned int,
 				      struct dwarf2_cu *);
 
-static int dwarf2_attribute_true_p (struct die_info *die, unsigned name,
-                                    struct dwarf2_cu *cu);
-
 static int die_is_declaration (struct die_info *, struct dwarf2_cu *cu);
 
 static struct die_info *die_specification (struct die_info *die,
@@ -5552,28 +5549,11 @@ dwarf2_attr (struct die_info *die, unsigned int name, struct dwarf2_cu *cu)
   return NULL;
 }
 
-/* Return non-zero iff the attribute NAME is defined for the given DIE,
-   and holds a non-zero value.  */
-
-static int
-dwarf2_attribute_true_p (struct die_info *die, unsigned name,
-                         struct dwarf2_cu *cu)
-{
-  struct attribute *attr = dwarf2_attr (die, name, cu);
-
-  return (attr && DW_UNSND (attr));
-}
-
 static int
 die_is_declaration (struct die_info *die, struct dwarf2_cu *cu)
 {
-  /* A DIE is a declaration if it has a DW_AT_declaration attribute
-     which value is non-zero.  However, we have to be careful of DIEs
-     with a DW_AT_specification attribute, because dwarf2_attribute_p()
-     follows this attribute, and therefore might cause us to find a
-     DW_AT_declaration attribute, but that belongs to a different DIE.  */
-  return (dwarf2_attribute_true_p (die, DW_AT_declaration, cu)
-	  && ! dwarf2_attribute_true_p (die, DW_AT_specification, cu));
+  return (dwarf2_attr (die, DW_AT_declaration, cu)
+	  && ! dwarf2_attr (die, DW_AT_specification, cu));
 }
 
 /* Return the die giving the specification for DIE, if there is
