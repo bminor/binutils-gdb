@@ -17,5 +17,5 @@
 # along with GDB; see the file COPYING.  If not, write to
 # the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
-TDEPFILES= symmetry-tdep.o i386-pinsn.o
+TDEPFILES= symm-tdep.o i386-pinsn.o
 TM_FILE= tm-symmetry.h
