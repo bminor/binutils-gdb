@@ -33,6 +33,9 @@ struct _serial_t
   unsigned char *bufp;		/* Current byte */
   unsigned char buf[BUFSIZ];	/* Da buffer itself */
   int current_timeout;		/* (termio{s} only), last value of VTIME */
+  /* ser-unix.c termio{,s} only, we still need to wait for this many more
+     seconds.  */
+  int timeout_remaining;
 };
 
 typedef struct _serial_t *serial_t;

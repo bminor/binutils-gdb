@@ -1,3 +1,10 @@
+Sat Jan 29 07:44:59 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* ser-unix.c (wait_for, hardwire_readchar) [HAVE_TERMIO, HAVE_TERMIOS]:
+	If the timeout is too big to fit in c_cc[VTIME], then do multiple reads
+	to achieve the desired timeout.
+	* serial.h (serial_t): Add field timeout_remaining.
+
 Fri Jan 28 08:45:02 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* c-exp.y (yylex): Reenable nested type code.
@@ -29,7 +36,6 @@ Fri Jan 28 11:55:52 1994  Rob Savoye  (rob@darkstar.cygnus.com)
 	addition to the standard serial support.
 
 Fri Jan 28 08:45:02 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
->>>>>>> 1.2186
 
 	* mdebugread.c (psymtab_to_symtab_1): Don't complain on stLabel with
 	index indexNil.

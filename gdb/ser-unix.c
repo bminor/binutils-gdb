@@ -391,42 +391,47 @@ wait_for(scb, timeout)
      serial_t scb;
      int timeout;
 {
+  scb->timeout_remaining = 0;
+
 #ifdef HAVE_SGTTY
-  struct timeval tv;
-  fd_set readfds;
+  {
+    struct timeval tv;
+    fd_set readfds;
 
-  FD_ZERO (&readfds);
+    FD_ZERO (&readfds);
 
-  tv.tv_sec = timeout;
-  tv.tv_usec = 0;
+    tv.tv_sec = timeout;
+    tv.tv_usec = 0;
 
-  FD_SET(scb->fd, &readfds);
+    FD_SET(scb->fd, &readfds);
 
-  while (1)
-    {
-      int numfds;
+    while (1)
+      {
+	int numfds;
 
-      if (timeout >= 0)
-	numfds = select(scb->fd+1, &readfds, 0, 0, &tv);
-      else
-	numfds = select(scb->fd+1, &readfds, 0, 0, 0);
-
-      if (numfds <= 0)
-	if (numfds == 0)
-	  return SERIAL_TIMEOUT;
-	else if (errno == EINTR)
-	  continue;
+	if (timeout >= 0)
+	  numfds = select(scb->fd+1, &readfds, 0, 0, &tv);
 	else
-	  return SERIAL_ERROR;	/* Got an error from select or poll */
+	  numfds = select(scb->fd+1, &readfds, 0, 0, 0);
 
-      return 0;
-    }
+	if (numfds <= 0)
+	  if (numfds == 0)
+	    return SERIAL_TIMEOUT;
+	  else if (errno == EINTR)
+	    continue;
+	  else
+	    return SERIAL_ERROR;	/* Got an error from select or poll */
 
+	return 0;
+      }
+  }
 #endif	/* HAVE_SGTTY */
 
 #if defined HAVE_TERMIO || defined HAVE_TERMIOS
   if (timeout == scb->current_timeout)
     return 0;
+
+  scb->current_timeout = timeout;
 
   {
     struct hardwire_ttystate state;
@@ -447,8 +452,14 @@ wait_for(scb, timeout)
 	state.termios.c_cc[VTIME] = timeout * 10;
 	if (state.termios.c_cc[VTIME] != timeout * 10)
 	  {
-	    warning ("Timeout value %d too large, using %d", timeout,
-		     state.termios.c_cc[VTIME] / 10);
+
+	    /* If c_cc is an 8-bit signed character, we can't go 
+	       bigger than this.  If it is always unsigned, we could use
+	       25.  */
+
+	    scb->current_timeout = 12;
+	    state.termios.c_cc[VTIME] = scb->current_timeout * 10;
+	    scb->timeout_remaining = timeout - scb->current_timeout;
 	  }
       }
 #endif
@@ -466,13 +477,16 @@ wait_for(scb, timeout)
 	state.termio.c_cc[VTIME] = timeout * 10;
 	if (state.termio.c_cc[VTIME] != timeout * 10)
 	  {
-	    warning ("Timeout value %d too large, using %d", timeout,
-		     state.termio.c_cc[VTIME] / 10);
+	    /* If c_cc is an 8-bit signed character, we can't go 
+	       bigger than this.  If it is always unsigned, we could use
+	       25.  */
+
+	    scb->current_timeout = 12;
+	    state.termios.c_cc[VTIME] = scb->current_timeout * 10;
+	    scb->timeout_remaining = timeout - scb->current_timeout;
 	  }
       }
 #endif
-
-    scb->current_timeout = timeout;
 
     if (set_tty_state (scb, &state))
       fprintf_unfiltered(gdb_stderr, "set_tty_state failed: %s\n", safe_strerror(errno));
@@ -497,24 +511,37 @@ hardwire_readchar(scb, timeout)
   if (scb->bufcnt-- > 0)
     return *scb->bufp++;
 
-  status = wait_for(scb, timeout);
+  while (1)
+    {
+      status = wait_for (scb, timeout);
 
-  if (status < 0)
-    return status;
+      if (status < 0)
+	return status;
 
-  scb->bufcnt = read(scb->fd, scb->buf, BUFSIZ);
+      scb->bufcnt = read (scb->fd, scb->buf, BUFSIZ);
 
-  if (scb->bufcnt <= 0)
-    if (scb->bufcnt == 0)
-      return SERIAL_TIMEOUT;	/* 0 chars means timeout [may need to
-				   distinguish between EOF & timeouts
-				   someday] */
-    else
-      return SERIAL_ERROR;	/* Got an error from read */
+      if (scb->bufcnt <= 0)
+	{
+	  if (scb->bufcnt == 0)
+	    {
+	      /* Zero characters means timeout (it could also be EOF, but
+		 we don't (yet at least) distinguish).  */
+	      if (scb->timeout_remaining > 0)
+		{
+		  timeout = scb->timeout_remaining;
+		  continue;
+		}
+	      else
+		return SERIAL_TIMEOUT;
+	    }
+	  else
+	    return SERIAL_ERROR;	/* Got an error from read */
+	}
 
-  scb->bufcnt--;
-  scb->bufp = scb->buf;
-  return *scb->bufp++;
+      scb->bufcnt--;
+      scb->bufp = scb->buf;
+      return *scb->bufp++;
+    }
 }
 
 #ifndef B19200
