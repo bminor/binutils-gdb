@@ -637,7 +637,7 @@ f:2:IN_SOLIB_RETURN_TRAMPOLINE:int:in_solib_return_trampoline:CORE_ADDR pc, char
 # does not.
 f:2:PC_IN_SIGTRAMP:int:pc_in_sigtramp:CORE_ADDR pc, char *name:pc, name:::legacy_pc_in_sigtramp::0
 F:2:SIGTRAMP_START:CORE_ADDR:sigtramp_start:CORE_ADDR pc:pc
-f:2:SIGTRAMP_END:CORE_ADDR:sigtramp_end:CORE_ADDR pc:pc:::::0
+F::SIGTRAMP_END:CORE_ADDR:sigtramp_end:CORE_ADDR pc:pc
 # A target might have problems with watchpoints as soon as the stack
 # frame of the current function has been destroyed.  This mostly happens
 # as the first action in a funtion's epilogue.  in_function_epilogue_p()

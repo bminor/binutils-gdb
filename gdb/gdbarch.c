@@ -794,7 +794,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of in_solib_return_trampoline, invalid_p == 0 */
   /* Skip verify of pc_in_sigtramp, invalid_p == 0 */
   /* Skip verify of sigtramp_start, has predicate */
-  /* Skip verify of sigtramp_end, invalid_p == 0 */
+  /* Skip verify of sigtramp_end, has predicate */
   /* Skip verify of in_function_epilogue_p, invalid_p == 0 */
   /* Skip verify of construct_inferior_arguments, invalid_p == 0 */
   /* Skip verify of dwarf2_build_frame_info, has predicate */
@@ -4844,6 +4844,13 @@ set_gdbarch_sigtramp_start (struct gdbarch *gdbarch,
                             gdbarch_sigtramp_start_ftype sigtramp_start)
 {
   gdbarch->sigtramp_start = sigtramp_start;
+}
+
+int
+gdbarch_sigtramp_end_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->sigtramp_end != 0;
 }
 
 CORE_ADDR

@@ -2422,6 +2422,31 @@ extern void set_gdbarch_sigtramp_start (struct gdbarch *gdbarch, gdbarch_sigtram
 #endif
 #endif
 
+#if defined (SIGTRAMP_END)
+/* Legacy for systems yet to multi-arch SIGTRAMP_END */
+#if !defined (SIGTRAMP_END_P)
+#define SIGTRAMP_END_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (SIGTRAMP_END_P)
+#define SIGTRAMP_END_P() (0)
+#endif
+
+extern int gdbarch_sigtramp_end_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (SIGTRAMP_END_P)
+#error "Non multi-arch definition of SIGTRAMP_END"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (SIGTRAMP_END_P)
+#define SIGTRAMP_END_P() (gdbarch_sigtramp_end_p (current_gdbarch))
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (SIGTRAMP_END)
+#define SIGTRAMP_END(pc) (internal_error (__FILE__, __LINE__, "SIGTRAMP_END"), 0)
+#endif
+
 typedef CORE_ADDR (gdbarch_sigtramp_end_ftype) (CORE_ADDR pc);
 extern CORE_ADDR gdbarch_sigtramp_end (struct gdbarch *gdbarch, CORE_ADDR pc);
 extern void set_gdbarch_sigtramp_end (struct gdbarch *gdbarch, gdbarch_sigtramp_end_ftype *sigtramp_end);
