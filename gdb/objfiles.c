@@ -34,7 +34,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Prototypes for local functions */
 
 static int
-open_mapped_file PARAMS ((char *basefile, long mtime, int mapped));
+open_mapped_file PARAMS ((char *filename, long mtime, int mapped));
 
 static CORE_ADDR
 map_to_address PARAMS ((void));
@@ -44,13 +44,14 @@ map_to_address PARAMS ((void));
 struct objfile *object_files;		/* Linked list of all objfiles */
 int mapped_symbol_files;		/* Try to use mapped symbol files */
 
-/* Allocate a new objfile struct, fill it in as best we can, and return it.
-   It is also linked into the list of all known object files. */
+/* Given a pointer to an initialized bfd (ABFD) and a flag that indicates
+   whether or not an objfile is to be mapped (MAPPED), allocate a new objfile
+   struct, fill it in as best we can, link it into the list of all known
+   objfiles, and return a pointer to the new objfile struct. */
 
 struct objfile *
-allocate_objfile (abfd, filename, mapped)
+allocate_objfile (abfd, mapped)
      bfd *abfd;
-     char *filename;
      int mapped;
 {
   struct objfile *objfile = NULL;
@@ -71,10 +72,11 @@ allocate_objfile (abfd, filename, mapped)
      pointers to the alloc/free functions in the obstack, in case these
      functions have moved within the current gdb. */
 
-  fd = open_mapped_file (filename, bfd_get_mtime (abfd), mapped);
+  fd = open_mapped_file (bfd_get_filename (abfd), bfd_get_mtime (abfd),
+			 mapped);
   if (fd >= 0)
     {
-      if (((mapto = map_to_address ()) == NULL) ||
+      if (((mapto = map_to_address ()) == 0) ||
 	  ((md = mmalloc_attach (fd, (void *) mapto)) == NULL))
 	{
 	  close (fd);
@@ -115,7 +117,8 @@ allocate_objfile (abfd, filename, mapped)
 
   if (mapped && (objfile == NULL))
     {
-      warning ("symbol table for '%s' will not be mapped", filename);
+      warning ("symbol table for '%s' will not be mapped",
+	       bfd_get_filename (abfd));
     }
 
 #else	/* defined(NO_MMALLOC) || !defined(HAVE_MMAP) */
@@ -151,13 +154,12 @@ allocate_objfile (abfd, filename, mapped)
 
     }
 
-  /* Now, malloc a fresh copy of the filename string. */
-
-  objfile -> name = xmmalloc (objfile -> md, strlen (filename) + 1);
-  strcpy (objfile -> name, filename);
+  /* Update the per-objfile information that comes from the bfd, ensuring
+     that any data that is reference is saved in the per-objfile data
+     region. */
 
   objfile -> obfd = abfd;
-
+  objfile -> name = mstrsave (objfile -> md, bfd_get_filename (abfd));
   objfile -> mtime = bfd_get_mtime (abfd);
 
   /* Push this file onto the head of the linked list of other such files. */
@@ -408,10 +410,10 @@ iterate_over_psymtabs (func, arg1, arg2, arg3)
 }
 
 
-/* Look for a mapped symbol file that corresponds to BASEFILE and is more
+/* Look for a mapped symbol file that corresponds to FILENAME and is more
    recent than MTIME.  If MAPPED is nonzero, the user has asked that gdb
-   use a mapped symbol file for this base file, so create a new one if
-   one does not currently exist.
+   use a mapped symbol file for this file, so create a new one if one does
+   not currently exist.
 
    If found, then return an open file descriptor for the file, otherwise
    return -1.
@@ -421,8 +423,8 @@ iterate_over_psymtabs (func, arg1, arg2, arg3)
    symbols that gdb would like to read. */
 
 static int
-open_mapped_file (basefile, mtime, mapped)
-     char *basefile;
+open_mapped_file (filename, mtime, mapped)
+     char *filename;
      long mtime;
      int mapped;
 {
@@ -433,7 +435,7 @@ open_mapped_file (basefile, mtime, mapped)
   /* For now, all we do is look in the local directory for a file with
      the name of the base file and an extension of ".syms" */
 
-  symfilename = concat ("./", basename (basefile), ".syms", (char *) NULL);
+  symfilename = concat ("./", basename (filename), ".syms", (char *) NULL);
 
   /* Check to see if the desired file already exists and is more recent than
      the corresponding base file (specified by the passed MTIME parameter).

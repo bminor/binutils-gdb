@@ -1,3 +1,35 @@
+Wed Mar 18 08:39:52 1992  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (VERSION):  Roll  4.4.6.
+	* exec.c (exec_file_command):  Add code to ignore optional args
+	passed in by file_command() for use in symbol_file_command().
+	* main.c (main):  Document -mapped and -readnow in help summary.
+	* objfiles.c (open_mapped_file):  Cosmetic change, arg renamed.
+	* objfiles.c (allocate_objfile):  Filename arg removed.  Changes
+	to get filename from bfd with bfd_get_filename().  Test mapto
+	against 0, not NULL.  Use mstrsave() to make copy of filename.
+	* remote-mm.c (mm_load):  Symbol_file_add() takes an additional
+	arg.
+	* remote-vx.c (vx_load_command, add_symbol_stub):
+	Symbol_file_add() takes an additional arg.
+	* solib.c (symbol_add_stub):  Symbol_file_add() takes an
+	additional arg.
+	* symfile.c (symfile_open):  Renamed to symfile_bfd_open and
+	changed to return a bfd not an objfile pointer.
+	* symfile.c (syms_from_objfile): Eliminate local copy of bfd.
+	* symfile.c (symbol_file_add):  Takes an additional arg (readnow).
+	Change to eliminate local bfd and use symfile_bfd_open() plus
+	allocate_objfile().  Add code to implement readnow option.
+	* symfile.c (symbol_file_command): Changes to option handling,
+	readnow functionality moved to symbol_file_add().
+	* symfile.c (symfile_init):  Eliminate local copy of bfd.
+	* symfile.c (add_symbol_file_command):  Changes to parse mapped
+	and readnow options.
+	* symfile.h (allocate_objfile):  Arg removed from prototype.
+	* symtab.h (symbol_file_add):  Arg added to prototype.
+	* xcoffexec.c (map_vmap):  Allocate_objfile() takes an additional
+	arg.
+
 Sat Mar 14 16:38:47 1992  Fred Fish  (fnf@cygnus.com)
 
 	* gmalloc.c, gmalloc.h mcheck.c mmap-alloc.c mmap-sbrk.c mtrace.c,

@@ -1,5 +1,5 @@
 /* Symbol table definitions for GDB.
-   Copyright (C) 1986, 1989, 1991 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1989, 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -21,13 +21,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define SYMTAB_H 1
 #include "obstack.h"
 
-/* An obstack to hold objects that should be freed
-   when we load a new symbol table.
-   This includes the symbols made by dbxread
-   and the types that are not permanent.  */
+/* See the comment in symfile.c about how current_objfile is used. */
 
-extern struct obstack *symbol_obstack;
-extern struct obstack *psymbol_obstack;
+extern struct objfile *current_objfile;
 
 /* Some definitions and declarations to go with use of obstacks.  */
 #define obstack_chunk_alloc xmalloc
@@ -41,236 +37,60 @@ extern struct obstack *psymbol_obstack;
 #define	B_BYTES(x)	( 1 + ((x)>>3) )
 #define	B_CLRALL(a,x) bzero (a, B_BYTES(x))
 
-/* gdb can know one or several symbol tables at the same time;
-   the ultimate intent is to have one for each separately-compiled module.
-   Each such symbol table is recorded by a struct symtab, and they
-   are all chained together.  */
 
-/* In addition, gdb can record any number of miscellaneous undebuggable
-   functions' addresses.  In a system that appends _ to function names,
-   the _'s are removed from the names stored in this table.  */
+/* Define a simple structure used to hold some very basic information about
+   all defined global symbols (text, data, bss, abs, etc).  The only two
+   required pieces of information are the symbol's name and the address
+   associated with that symbol.  In many cases, even if a file was compiled
+   with no special options for debugging at all, as long as was not stripped
+   it will contain sufficient information to build a useful minimal symbol
+   table using this structure.  Even when a file contains enough debugging
+   information to build a full symbol table, these minimal symbols are still
+   useful for quickly mapping between names and addresses, and vice versa.
+   They are also sometimes used to figure out what full symbol table entries
+   need to be read in. */
 
-/* Actually, the misc function list is used to store *all* of the
-   global symbols (text, data, bss, and abs).  It is sometimes used
-   to figure out what symtabs to read in.  The "type" field is used
-   occasionally.  Calling it the misc "function" vector is now a misnomer.
-
-   The misc_info field is available for machine-specific information
-   that can be cached along with a misc function vector entry.  The
-   AMD 29000 tdep.c uses it to remember things it has decoded from the
-   instructions in the function header, so it doesn't have to rederive
-   the info constantly (over a serial line).  It is initialized to zero
-   and stays that way until target-dependent code sets it.  */
-
-enum misc_function_type {mf_unknown = 0, mf_text, mf_data, mf_bss, mf_abs};
-
-struct misc_function
+struct minimal_symbol
 {
+
+  /* Name of the symbol.  This is a required field.  Storage for the name is
+     allocated on the symbol_obstack for the associated objfile. */
+
   char *name;
+
+  /* Address of the symbol.  This is a required field. */
+
   CORE_ADDR address;
-  char *misc_info;	/* Random pointer to misc info.  void * but for old C */
-  enum misc_function_type type;
-};
 
-/* Address and length of the vector recording all misc function names/addresses.  */
+  /* The info field is available for caching machine-specific information that
+     The AMD 29000 tdep.c uses it to remember things it has decoded from the
+     instructions in the function header, so it doesn't have to rederive the
+     info constantly (over a serial line).  It is initialized to zero and
+     stays that way until target-dependent code sets it.  Storage for any data
+     pointed to by this field should be allocated on the symbol_obstack for
+     the associated objfile.  The type would be "void *" except for reasons
+     of compatibility with older compilers.  This field is optional. */
 
-struct misc_function *misc_function_vector;
-int misc_function_count;
-
-/* Different kinds of data types are distinguished by the `code' field.  */
+  char *info;
 
-enum type_code
-{
-  TYPE_CODE_UNDEF,		/* Not used; catches errors */
-  TYPE_CODE_PTR,		/* Pointer type */
-  TYPE_CODE_ARRAY,		/* Array type, lower bound zero */
-  TYPE_CODE_STRUCT,		/* C struct or Pascal record */
-  TYPE_CODE_UNION,		/* C union or Pascal variant part */
-  TYPE_CODE_ENUM,		/* Enumeration type */
-  TYPE_CODE_FUNC,		/* Function type */
-  TYPE_CODE_INT,		/* Integer type */
-  TYPE_CODE_FLT,		/* Floating type */
-  TYPE_CODE_VOID,		/* Void type (values zero length) */
-  TYPE_CODE_SET,		/* Pascal sets */
-  TYPE_CODE_RANGE,		/* Range (integers within spec'd bounds) */
-  TYPE_CODE_PASCAL_ARRAY,	/* Array with explicit type of index */
-  TYPE_CODE_ERROR,              /* Unknown type */
+  /* Classification types for this symbol.  These should be taken as "advisory
+     only", since if gdb can't easily figure out a classification it simply
+     selects mst_unknown.  It may also have to guess when it can't figure out
+     which is a better match between two types (mst_data versus mst_bss) for
+     example.  Since the minimal symbol info is sometimes derived from the
+     BFD library's view of a file, we need to live with what information bfd
+     supplies. */
 
-  /* C++ */
-  TYPE_CODE_MEMBER,		/* Member type */
-  TYPE_CODE_METHOD,		/* Method type */
-  TYPE_CODE_REF,		/* C++ Reference types */
-
-  /* Modula-2 */
-  TYPE_CODE_CHAR,		/* *real* character type */
-  TYPE_CODE_BOOL		/* Builtin Modula-2 BOOLEAN */
-};
-
-/* This appears in a type's flags word for an unsigned integer type.  */
-#define TYPE_FLAG_UNSIGNED 1
-/* This appears in a type's flags word
-   if it is a (pointer to a|function returning a)* built in scalar type.
-   These types are never freed.  */
-#define TYPE_FLAG_PERM 4
-/* This appears in a type's flags word if it is a stub type (eg. if
-   someone referenced a type that wasn't definined in a source file
-   via (struct sir_not_appearing_in_this_film *)).  */
-#define TYPE_FLAG_STUB 8
-
-struct type
-{
-  /* Code for kind of type */
-  enum type_code code;
-  /* Name of this type, or zero if none.
-     This is used for printing only, except by poorly designed C++ code.
-     Type names specified as input are defined by symbols.  */
-  char *name;
-  /* Length in bytes of storage for a value of this type */
-  unsigned length;
-  /* For a pointer type, describes the type of object pointed to.
-     For an array type, describes the type of the elements.
-     For a function or method type, describes the type of the value.
-     For a range type, describes the type of the full range.
-     Unused otherwise.  */
-  struct type *target_type;
-
-  /* Type that is a pointer to this type.
-     Zero if no such pointer-to type is known yet.
-     The debugger may add the address of such a type
-     if it has to construct one later.  */ 
-  struct type *pointer_type;
-  /* C++: also need a reference type.  */
-  struct type *reference_type;
-  /* Type that is a function returning this type.
-     Zero if no such function type is known here.
-     The debugger may add the address of such a type
-     if it has to construct one later.  */
-  struct type *function_type;
-
-  /* Flags about this type.  */
-  short flags;
-  /* Number of fields described for this type */
-  short nfields;
-  /* For structure and union types, a description of each field.
-     For set and pascal array types, there is one "field",
-     whose type is the domain type of the set or array.
-     For range types, there are two "fields",
-     the minimum and maximum values (both inclusive).
-     For enum types, each possible value is described by one "field".
-
-     Using a pointer to a separate array of fields
-     allows all types to have the same size, which is useful
-     because we can allocate the space for a type before
-     we know what to put in it.  */
-  struct field
+  enum minimal_symbol_type
     {
-      /* Position of this field, counting in bits from start of
-	 containing structure.  For a function type, this is the
-	 position in the argument list of this argument.
-	 For a range bound or enum value, this is the value itself.  */
-      int bitpos;
-      /* Size of this field, in bits, or zero if not packed.
-	 For an unpacked field, the field's type's length
-	 says how many bytes the field occupies.  */
-      int bitsize;
-      /* In a struct or enum type, type of this field.
-	 In a function type, type of this argument.
-	 In an array type, the domain-type of the array.  */
-      struct type *type;
-      /* Name of field, value or argument.
-	 Zero for range bounds and array domains.  */
-      char *name;
-    } *fields;
+      mst_unknown = 0,		/* Unknown type, the default */
+      mst_text,			/* Generally executable instructions */
+      mst_data,			/* Generally initialized data */
+      mst_bss,			/* Generally uninitialized data */
+      mst_abs			/* Generally absolute (nonrelocatable) */
+    } type;
 
-  /* For types with virtual functions, VPTR_BASETYPE is the base class which
-     defined the virtual function table pointer.  VPTR_FIELDNO is
-     the field number of that pointer in the structure.
-
-     For types that are pointer to member types, VPTR_BASETYPE
-     is the type that this pointer is a member of.
-
-     Unused otherwise.  */
-  struct type *vptr_basetype;
-
-  int vptr_fieldno;
-
-  /* Slot to point to additional language-specific fields of this type.  */
-  union type_specific
-    {
-      /* ARG_TYPES is for TYPE_CODE_METHOD and TYPE_CODE_FUNC.  */
-      struct type **arg_types;
-      /* CPLUS_STUFF is for TYPE_CODE_STRUCT.  */
-      struct cplus_struct_type *cplus_stuff;
-    } type_specific;
 };
-
-/* C++ language-specific information for TYPE_CODE_STRUCT and TYPE_CODE_UNION
-   nodes.  */
-struct cplus_struct_type
-{
-  B_TYPE *virtual_field_bits; /* if base class is virtual */
-  B_TYPE *private_field_bits;
-  B_TYPE *protected_field_bits;
-
-  /* Number of methods described for this type */
-  short nfn_fields;
-  /* Number of base classes this type derives from. */
-  short n_baseclasses;
-
-  /* Number of methods described for this type plus all the
-     methods that it derives from.  */
-  int nfn_fields_total;
-
-  /* For classes, structures, and unions, a description of each field,
-     which consists of an overloaded name, followed by the types of
-     arguments that the method expects, and then the name after it
-     has been renamed to make it distinct.  */
-  struct fn_fieldlist
-    {
-      /* The overloaded name.  */
-      char *name;
-      /* The number of methods with this name.  */
-      int length;
-      /* The list of methods.  */
-      struct fn_field
-	{
-	  /* The return value of the method */
-	  struct type *type;
-	  /* The argument list */
-	  struct type **args;
-	  /* The name after it has been processed */
-	  char *physname;
-
-	  /* For virtual functions.   */
-	  /* First baseclass that defines this virtual function.   */
-	  struct type *fcontext;
-	  unsigned int is_const : 1;
-	  unsigned int is_volatile : 1;
-	  unsigned int is_private : 1;
-	  unsigned int is_protected : 1;
-	  unsigned int is_stub : 1;
-	  unsigned int dummy : 3;
-
-	  /* Index into that baseclass's virtual function table,
-	     minus 2; else if static: VOFFSET_STATIC; else: 0.  */
-	  unsigned voffset : 24;
-#	  define VOFFSET_STATIC 1
-	} *fn_fields;
-
-    } *fn_fieldlists;
-
-  unsigned char via_protected;
-  unsigned char via_public;
-};
-/* The default value of TYPE_CPLUS_SPECIFIC(T) points to the
-   this shared static structure. */
-
-extern struct cplus_struct_type cplus_struct_default;
-
-extern void allocate_cplus_struct_type ();
-#define ALLOCATE_CPLUS_STRUCT_TYPE(type) allocate_cplus_struct_type (type)
-#define HAVE_CPLUS_STRUCT(type) \
-  (TYPE_CPLUS_SPECIFIC(type) != &cplus_struct_default)
 
 
 /* All of the name-scope contours of the program
@@ -438,7 +258,7 @@ struct symbol
    symbols whose types we have not parsed yet.  For functions, it also
    contains their memory address, so we can find them from a PC value.
    Each partial_symbol sits in a partial_symtab, all of which are chained
-   on the partial_symtab_list and which points to the corresponding 
+   on a  partial symtab list and which points to the corresponding 
    normal symtab once the partial_symtab has been referenced.  */
 
 struct partial_symbol
@@ -542,8 +362,6 @@ struct symtab
 
     /* Object file from which this symbol information was read.  */
     struct objfile *objfile;
-    /* Chain of all symtabs owned by that objfile.  */
-    struct symtab *objfile_chain;
 
     /* Anything extra for this symtab.  This is for target machines
        with special debugging info of some sort (which cannot just
@@ -557,12 +375,13 @@ struct symtab
    a partial_symtab.  This contains the information on where in the
    executable the debugging symbols for a specific file are, and a
    list of names of global symbols which are located in this file.
-   They are all chained on partial_symtab_list.
+   They are all chained on partial symtab lists.
 
    Even after the source file has been read into a symtab, the
    partial_symtab remains around.  They are allocated on an obstack,
    psymbol_obstack.  FIXME, this is bad for dynamic linking or VxWorks-
    style execution of a bunch of .o's.  */
+
 struct partial_symtab
 {
   /* Chain of all existing partial symtabs.  */
@@ -572,8 +391,6 @@ struct partial_symtab
 
   /* Information about the object file from which symbols should be read.  */
   struct objfile *objfile;
-  /* Chain of psymtabs owned by this objfile */
-  struct partial_symtab *objfile_chain;
 
   /* Address relative to which the symbols in this file are.  Need to
      relocate by this amount when reading in symbols from the symbol
@@ -606,7 +423,7 @@ struct partial_symtab
   struct symtab *symtab;
   /* Pointer to function which will read in the symtab corresponding to
      this psymtab.  */
-  void (*read_symtab) ();
+  void (*read_symtab) PARAMS ((struct partial_symtab *));
   /* Information that lets read_symtab() locate the part of the symbol table
      that this psymtab corresponds to.  This information is private to the
      format-dependent symbol reading routines.  For further detail examine
@@ -622,14 +439,6 @@ struct partial_symtab
 #define	PSYMTAB_TO_SYMTAB(pst)  ((pst)->symtab? 		\
 				 (pst)->symtab: 		\
 				 psymtab_to_symtab (pst) )
-
-/* This is the list of struct symtab's that gdb considers current.  */
-
-struct symtab *symtab_list;
-
-/* This is the list of struct partial_symtab's that gdb may need to access */
-
-struct partial_symtab *partial_symtab_list;
 
 /* This symtab variable specifies the current file for printing source lines */
 
@@ -670,86 +479,6 @@ int current_source_line;
 #define SYMBOL_TYPE(symbol) (symbol)->type
 #define SYMBOL_LINE(symbol) (symbol)->line
 
-#define TYPE_NAME(thistype) (thistype)->name
-#define TYPE_TARGET_TYPE(thistype) (thistype)->target_type
-#define TYPE_POINTER_TYPE(thistype) (thistype)->pointer_type
-#define TYPE_REFERENCE_TYPE(thistype) (thistype)->reference_type
-#define TYPE_FUNCTION_TYPE(thistype) (thistype)->function_type
-#define TYPE_LENGTH(thistype) (thistype)->length
-#define TYPE_FLAGS(thistype) (thistype)->flags
-#define TYPE_UNSIGNED(thistype) ((thistype)->flags & TYPE_FLAG_UNSIGNED)
-#define TYPE_CODE(thistype) (thistype)->code
-#define TYPE_NFIELDS(thistype) (thistype)->nfields
-#define TYPE_FIELDS(thistype) (thistype)->fields
-/* C++ */
-#define TYPE_VPTR_BASETYPE(thistype) (thistype)->vptr_basetype
-#define TYPE_DOMAIN_TYPE(thistype) (thistype)->vptr_basetype
-#define TYPE_VPTR_FIELDNO(thistype) (thistype)->vptr_fieldno
-#define TYPE_FN_FIELDS(thistype) TYPE_CPLUS_SPECIFIC(thistype)->fn_fields
-#define TYPE_NFN_FIELDS(thistype) TYPE_CPLUS_SPECIFIC(thistype)->nfn_fields
-#define TYPE_NFN_FIELDS_TOTAL(thistype) TYPE_CPLUS_SPECIFIC(thistype)->nfn_fields_total
-#define	TYPE_TYPE_SPECIFIC(thistype) (thistype)->type_specific
-#define TYPE_ARG_TYPES(thistype) (thistype)->type_specific.arg_types
-#define TYPE_CPLUS_SPECIFIC(thistype) (thistype)->type_specific.cplus_stuff
-#define TYPE_BASECLASS(thistype,index) (thistype)->fields[index].type
-#define TYPE_N_BASECLASSES(thistype) TYPE_CPLUS_SPECIFIC(thistype)->n_baseclasses
-#define TYPE_BASECLASS_NAME(thistype,index) (thistype)->fields[index].name
-#define TYPE_BASECLASS_BITPOS(thistype,index) (thistype)->fields[index].bitpos
-#define BASETYPE_VIA_PUBLIC(thistype, index) (!TYPE_FIELD_PRIVATE(thistype, index))
-#define BASETYPE_VIA_VIRTUAL(thistype, index) \
-  B_TST(TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits, (index))
-
-#define TYPE_FIELD(thistype, n) (thistype)->fields[n]
-#define TYPE_FIELD_TYPE(thistype, n) (thistype)->fields[n].type
-#define TYPE_FIELD_NAME(thistype, n) (thistype)->fields[n].name
-#define TYPE_FIELD_VALUE(thistype, n) (* (int*) &(thistype)->fields[n].type)
-#define TYPE_FIELD_BITPOS(thistype, n) (thistype)->fields[n].bitpos
-#define TYPE_FIELD_BITSIZE(thistype, n) (thistype)->fields[n].bitsize
-#define TYPE_FIELD_PACKED(thistype, n) (thistype)->fields[n].bitsize
-
-#define TYPE_FIELD_PRIVATE_BITS(thistype) \
-  TYPE_CPLUS_SPECIFIC(thistype)->private_field_bits
-#define TYPE_FIELD_PROTECTED_BITS(thistype) \
-  TYPE_CPLUS_SPECIFIC(thistype)->protected_field_bits
-#define TYPE_FIELD_VIRTUAL_BITS(thistype) \
-  TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits
-#define SET_TYPE_FIELD_PRIVATE(thistype, n) \
-  B_SET (TYPE_CPLUS_SPECIFIC(thistype)->private_field_bits, (n))
-#define SET_TYPE_FIELD_PROTECTED(thistype, n) \
-  B_SET (TYPE_CPLUS_SPECIFIC(thistype)->protected_field_bits, (n))
-#define SET_TYPE_FIELD_VIRTUAL(thistype, n) \
-  B_SET (TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits, (n))
-#define TYPE_FIELD_PRIVATE(thistype, n) \
-  (TYPE_CPLUS_SPECIFIC(thistype)->private_field_bits == NULL ? 0 \
-    : B_TST(TYPE_CPLUS_SPECIFIC(thistype)->private_field_bits, (n)))
-#define TYPE_FIELD_PROTECTED(thistype, n) \
-  (TYPE_CPLUS_SPECIFIC(thistype)->protected_field_bits == NULL ? 0 \
-    : B_TST(TYPE_CPLUS_SPECIFIC(thistype)->protected_field_bits, (n)))
-#define TYPE_FIELD_VIRTUAL(thistype, n) \
-       B_TST(TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits, (n))
-
-#define TYPE_FIELD_STATIC(thistype, n) ((thistype)->fields[n].bitpos == -1)
-#define TYPE_FIELD_STATIC_PHYSNAME(thistype, n) ((char *)(thistype)->fields[n].bitsize)
-
-#define TYPE_FN_FIELDLISTS(thistype) TYPE_CPLUS_SPECIFIC(thistype)->fn_fieldlists
-#define TYPE_FN_FIELDLIST(thistype, n) TYPE_CPLUS_SPECIFIC(thistype)->fn_fieldlists[n]
-#define TYPE_FN_FIELDLIST1(thistype, n) TYPE_CPLUS_SPECIFIC(thistype)->fn_fieldlists[n].fn_fields
-#define TYPE_FN_FIELDLIST_NAME(thistype, n) TYPE_CPLUS_SPECIFIC(thistype)->fn_fieldlists[n].name
-#define TYPE_FN_FIELDLIST_LENGTH(thistype, n) TYPE_CPLUS_SPECIFIC(thistype)->fn_fieldlists[n].length
-
-#define TYPE_FN_FIELD(thisfn, n) (thisfn)[n]
-#define TYPE_FN_FIELD_NAME(thisfn, n) (thisfn)[n].name
-#define TYPE_FN_FIELD_TYPE(thisfn, n) (thisfn)[n].type
-#define TYPE_FN_FIELD_ARGS(thisfn, n) TYPE_ARG_TYPES ((thisfn)[n].type)
-#define TYPE_FN_FIELD_PHYSNAME(thisfn, n) (thisfn)[n].physname
-#define TYPE_FN_FIELD_VIRTUAL_P(thisfn, n) ((thisfn)[n].voffset > 1)
-#define TYPE_FN_FIELD_STATIC_P(thisfn, n) ((thisfn)[n].voffset == VOFFSET_STATIC)
-#define TYPE_FN_FIELD_VOFFSET(thisfn, n) ((thisfn)[n].voffset-2)
-#define TYPE_FN_FIELD_FCONTEXT(thisfn, n) ((thisfn)[n].fcontext)
-#define TYPE_FN_FIELD_STUB(thisfn, n) ((thisfn)[n].is_stub)
-#define TYPE_FN_FIELD_PRIVATE(thisfn, n) ((thisfn)[n].is_private)
-#define TYPE_FN_FIELD_PROTECTED(thisfn, n) ((thisfn)[n].is_protected)
-
 /* The virtual function table is now an array of structures
    which have the form { int16 offset, delta; void *pfn; }. 
 
@@ -775,93 +504,95 @@ int current_source_line;
 
 /* Functions that work on the objects described above */
 
-extern struct symtab *lookup_symtab ();
-extern struct symbol *lookup_symbol ();
-extern struct symbol *lookup_block_symbol ();
-extern int lookup_misc_func ();
-extern void check_stub_type ();
-extern void check_stub_method ();
-extern struct type *lookup_primitive_typename ();
-extern struct type *lookup_typename ();
-extern struct type *lookup_unsigned_typename ();
-extern struct type *lookup_struct ();
-extern struct type *lookup_union ();
-extern struct type *lookup_enum ();
-extern struct type *lookup_struct_elt_type ();
-extern struct type *lookup_pointer_type ();
-extern struct type *lookup_function_type ();
-extern struct type *create_array_type ();
-extern struct symbol *block_function ();
-extern struct symbol *find_pc_function ();
-extern int find_pc_partial_function ();
-extern void clear_pc_function_cache ();
-extern struct partial_symtab *lookup_partial_symtab ();
-extern struct partial_symtab *find_pc_psymtab ();
-extern struct symtab *find_pc_symtab ();
-extern struct partial_symbol *find_pc_psymbol ();
-extern int find_pc_misc_function ();
-extern int find_pc_line_pc_range ();
-extern char *type_name_no_tag ();
-extern int contained_in();
+extern struct symtab *
+lookup_symtab PARAMS ((char *));
 
-/* C++ stuff.  */
-extern struct type *lookup_template_type ();
-extern struct type *lookup_reference_type ();
-extern struct type *lookup_member_type ();
-extern void smash_to_method_type ();
-void smash_to_member_type (
-#ifdef __STDC__
-			   struct type *, struct type *, struct type *
-#endif
-			   );
-extern struct type *allocate_stub_method ();
-/* end of C++ stuff.  */
+extern struct symbol *
+lookup_symbol PARAMS ((const char *, const struct block *,
+		       const enum namespace, int *, struct symtab **));
 
-extern void reread_symbols ();
+extern struct symbol *
+lookup_block_symbol PARAMS ((const struct block *, const char *,
+			     const enum namespace));
 
-extern struct type *builtin_type_void;
-extern struct type *builtin_type_char;
-extern struct type *builtin_type_short;
-extern struct type *builtin_type_int;
-extern struct type *builtin_type_long;
-extern struct type *builtin_type_unsigned_char;
-extern struct type *builtin_type_unsigned_short;
-extern struct type *builtin_type_unsigned_int;
-extern struct type *builtin_type_unsigned_long;
-extern struct type *builtin_type_float;
-extern struct type *builtin_type_double;
-extern struct type *builtin_type_long_double;
-extern struct type *builtin_type_complex;
-extern struct type *builtin_type_double_complex;
-/* This type represents a type that was unrecognized in symbol
-   read-in.  */
-extern struct type *builtin_type_error;
+extern struct type *
+lookup_struct PARAMS ((char *, struct block *));
 
-extern struct type *builtin_type_long_long;
-extern struct type *builtin_type_unsigned_long_long;
+extern struct type *
+lookup_union PARAMS ((char *, struct block *));
 
-/* Modula-2 types */
-extern struct type *builtin_type_m2_char;
-extern struct type *builtin_type_m2_int;
-extern struct type *builtin_type_m2_card;
-extern struct type *builtin_type_m2_real;
-extern struct type *builtin_type_m2_bool;
+extern struct type *
+lookup_enum PARAMS ((char *, struct block *));
 
-/* LONG_LONG is defined if the host has "long long".  */
-#ifdef LONG_LONG
-#define BUILTIN_TYPE_LONGEST builtin_type_long_long
-#define BUILTIN_TYPE_UNSIGNED_LONGEST builtin_type_unsigned_long_long
-/* This should not be a typedef, because "unsigned LONGEST" needs
-   to work.  */
-#define LONGEST long long
+extern struct symbol *
+block_function PARAMS ((struct block *));
 
-#else /* not LONG_LONG.  */
+extern struct symbol *
+find_pc_function PARAMS ((CORE_ADDR));
 
-#define BUILTIN_TYPE_LONGEST builtin_type_long
-#define BUILTIN_TYPE_UNSIGNED_LONGEST builtin_type_unsigned_long
-#define LONGEST long
+extern int
+find_pc_partial_function PARAMS ((CORE_ADDR, char **, CORE_ADDR *));
 
-#endif /* not LONG_LONG.  */
+extern void
+clear_pc_function_cache PARAMS ((void));
+
+extern struct partial_symtab *
+lookup_partial_symtab PARAMS ((char *));
+
+extern struct partial_symtab *
+find_pc_psymtab PARAMS ((CORE_ADDR));
+
+extern struct symtab *
+find_pc_symtab PARAMS ((CORE_ADDR));
+
+extern struct partial_symbol *
+find_pc_psymbol PARAMS ((struct partial_symtab *, CORE_ADDR));
+
+extern int
+find_pc_line_pc_range PARAMS ((CORE_ADDR, CORE_ADDR *, CORE_ADDR *));
+
+extern int
+contained_in PARAMS ((struct block *, struct block *));
+
+extern void
+reread_symbols PARAMS ((void));
+
+extern int
+have_partial_symbols PARAMS ((void));
+
+extern int
+have_full_symbols PARAMS ((void));
+
+/* Functions for dealing with the minimal symbol table, really a misc
+   address<->symbol mapping for things we don't have debug symbols for.  */
+
+extern int
+have_minimal_symbols PARAMS ((void));
+
+extern void
+prim_record_minimal_symbol PARAMS ((const char *, CORE_ADDR,
+				    enum minimal_symbol_type));
+
+extern struct minimal_symbol *
+lookup_minimal_symbol PARAMS ((const char *, struct objfile *));
+
+extern struct minimal_symbol *
+lookup_minimal_symbol_by_pc PARAMS ((CORE_ADDR));
+
+extern PTR
+iterate_over_msymbols PARAMS ((PTR (*func) (struct objfile *,
+					    struct minimal_symbol *,
+					    PTR, PTR, PTR),
+			       PTR, PTR, PTR));
+
+extern void
+init_minimal_symbol_collection PARAMS ((void));
+
+extern void
+discard_minimal_symbols PARAMS ((int));
+
+extern void
+install_minimal_symbols PARAMS ((struct objfile *));
 
 struct symtab_and_line
 {
@@ -881,48 +612,78 @@ struct symtabs_and_lines
    Second arg nonzero means if pc is on the boundary
    use the previous statement's line number.  */
 
-struct symtab_and_line find_pc_line ();
+extern struct symtab_and_line
+find_pc_line PARAMS ((CORE_ADDR, int));
 
 /* Given a symtab and line number, return the pc there.  */
-extern CORE_ADDR find_line_pc ();
-extern int find_line_pc_range ();
+
+extern CORE_ADDR
+find_line_pc PARAMS ((struct symtab *, int));
+
+extern int 
+find_line_pc_range PARAMS ((struct symtab *, int, CORE_ADDR *, CORE_ADDR *));
+
+extern void
+resolve_sal_pc PARAMS ((struct symtab_and_line *));
 
 /* Given a string, return the line specified by it.
    For commands like "list" and "breakpoint".  */
 
-struct symtabs_and_lines decode_line_spec ();
-struct symtabs_and_lines decode_line_spec_1 ();
-struct symtabs_and_lines decode_line_1 ();
+extern struct symtabs_and_lines
+decode_line_spec PARAMS ((char *, int));
+
+extern struct symtabs_and_lines
+decode_line_spec_1 PARAMS ((char *, int));
+
+extern struct symtabs_and_lines
+decode_line_1 PARAMS ((char **, int, struct symtab *, int));
 
 /* Symmisc.c */
-void free_symtab ();
+
+extern void
+free_symtab PARAMS ((struct symtab *));
 
 /* Symbol-reading stuff in symfile.c and solib.c.  */
-struct symtab *psymtab_to_symtab ();
-void clear_solib ();
-void symbol_file_add ();
+
+extern struct symtab *
+psymtab_to_symtab PARAMS ((struct partial_symtab *));
+
+extern void
+clear_solib PARAMS ((void));
+
+extern struct objfile *
+symbol_file_add PARAMS ((char *, int, CORE_ADDR, int, int, int));
 
 /* source.c */
-int identify_source_line ();
-void print_source_lines ();
-void forget_cached_source_info (
-#ifdef __STDC__
-				void
-#endif
-				);
-void select_source_symtab (
-#ifdef __STDC__
-			   struct symtab *
-#endif
-			   );
 
-char **make_symbol_completion_list ();
+extern int
+identify_source_line PARAMS ((struct symtab *, int, int));
 
-/* Maximum and minimum values of built-in types */
-#define	MAX_OF_TYPE(t)	\
-   TYPE_UNSIGNED(t) ? UMAX_OF_SIZE(TYPE_LENGTH(t)) : MAX_OF_SIZE(TYPE_LENGTH(t))
+extern void
+print_source_lines PARAMS ((struct symtab *, int, int, int));
 
-#define MIN_OF_TYPE(t)	\
-   TYPE_UNSIGNED(t) ? UMIN_OF_SIZE(TYPE_LENGTH(t)) : MIN_OF_SIZE(TYPE_LENGTH(t))
+extern void
+forget_cached_source_info PARAMS ((void));
 
-#endif /* symtab.h not already included.  */
+extern void
+select_source_symtab PARAMS ((struct symtab *));
+
+extern char **
+make_symbol_completion_list PARAMS ((char *));
+
+/* symtab.c */
+
+extern struct partial_symtab *
+find_main_psymtab PARAMS ((void));
+
+/* blockframe.c */
+
+extern struct blockvector *
+blockvector_for_pc PARAMS ((CORE_ADDR, int *));
+
+/* symfile.c */
+
+extern enum language
+deduce_language_from_filename PARAMS ((char *));
+
+#endif /* !defined(SYMTAB_H) */

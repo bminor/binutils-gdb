@@ -41,7 +41,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 CORE_ADDR entry_point;			/* Where execution starts in symfile */
 struct sym_fns *symtab_fns = NULL;	/* List of all available sym_fns.  */
-int readnow_symbol_files;		/* Read full symbols immediately */
+int readnow_symbol_files;			/* Read full symbols immediately */
 
 /* External variables and functions referenced. */
 
@@ -67,8 +67,8 @@ compare_psymbols PARAMS ((const void *, const void *));
 static int
 compare_symbols PARAMS ((const void *, const void *));
 
-static struct objfile *
-symfile_open PARAMS ((char *, int));
+static bfd *
+symfile_bfd_open PARAMS ((char *));
 
 static struct sym_fns *
 symfile_init PARAMS ((struct objfile *));
@@ -352,23 +352,22 @@ syms_from_objfile (objfile, addr, mainline, verbo)
 {
   asection *text_sect;
   struct sym_fns *sf;
-  bfd *sym_bfd = objfile->obfd;
 
   /* There is a distinction between having no symbol table
      (we refuse to read the file, leaving the old set of symbols around)
      and having no debugging symbols in your symbol table (we read
      the file and end up with a mostly empty symbol table).  */
 
-  if (!(bfd_get_file_flags (sym_bfd) & HAS_SYMS))
+  if (!(bfd_get_file_flags (objfile -> obfd) & HAS_SYMS))
     return;
 
   /* Save startup file's range of PC addresses to help blockframe.c
      decide where the bottom of the stack is.  */
-  if (bfd_get_file_flags (sym_bfd) & EXEC_P)
+  if (bfd_get_file_flags (objfile -> obfd) & EXEC_P)
     {
       /* Executable file -- record its entry point so we'll recognize
 	 the startup file because it contains the entry point.  */
-      entry_point = bfd_get_start_address (sym_bfd);
+      entry_point = bfd_get_start_address (objfile -> obfd);
     }
   else
     {
@@ -394,8 +393,8 @@ syms_from_objfile (objfile, addr, mainline, verbo)
 
       /* For mainline, caller didn't know the specified address of the
          text section.  We fix that here.  */
-      text_sect = bfd_get_section_by_name (sym_bfd, ".text");
-      addr = bfd_section_vma (sym_bfd, text_sect);
+      text_sect = bfd_get_section_by_name (objfile -> obfd, ".text");
+      addr = bfd_section_vma (objfile -> obfd, text_sect);
     }
 
   /* Allow complaints to appear for this new file, and record how
@@ -444,18 +443,20 @@ syms_from_objfile (objfile, addr, mainline, verbo)
    Upon failure, jumps back to command level (never returns). */
 
 struct objfile *
-symbol_file_add (name, from_tty, addr, mainline, mapped)
+symbol_file_add (name, from_tty, addr, mainline, mapped, readnow)
      char *name;
      int from_tty;
      CORE_ADDR addr;
      int mainline;
      int mapped;
+     int readnow;
 {
   struct objfile *objfile;
-  bfd *sym_bfd;
+  struct partial_symtab *psymtab;
 
-  objfile = symfile_open (name, mapped);
-  sym_bfd = objfile->obfd;
+  /* Open a bfd for the file, then allocate a new objfile. */
+
+  objfile = allocate_objfile (symfile_bfd_open (name), mapped);
 
   /* There is a distinction between having no symbol table
      (we refuse to read the file, leaving the old set of symbols around)
@@ -463,7 +464,7 @@ symbol_file_add (name, from_tty, addr, mainline, mapped)
      the file and end up with a mostly empty symbol table, but with lots
      of stuff in the minimal symbol table).  */
 
-  if (!(bfd_get_file_flags (sym_bfd) & HAS_SYMS))
+  if (!(bfd_get_file_flags (objfile -> obfd) & HAS_SYMS))
     {
       error ("%s has no symbol-table", name);
     }
@@ -496,6 +497,24 @@ symbol_file_add (name, from_tty, addr, mainline, mapped)
       
       syms_from_objfile (objfile, addr, mainline, from_tty);
       
+      readnow |= readnow_symbol_files;
+      if (readnow)
+	{
+	  if (from_tty || info_verbose)
+	    {
+	      printf_filtered ("expanding to full symbols...");
+	      wrap_here ("");
+	      fflush (stdout);
+	    }
+      
+	  for (psymtab = objfile -> psymtabs;
+	       psymtab != NULL;
+	       psymtab = psymtab -> next)
+	    {
+	      (void) psymtab_to_symtab (psymtab);
+	    }
+	}
+
       if (from_tty || info_verbose)
 	{
 	  printf_filtered ("done.\n");
@@ -514,10 +533,9 @@ symbol_file_command (args, from_tty)
      int from_tty;
 {
   char **argv;
-  char *name;
+  char *name = NULL;
   struct cleanup *cleanups;
   struct objfile *objfile;
-  struct partial_symtab *psymtab;
   int mapped = 0;
   int readnow = 0;
 
@@ -549,65 +567,65 @@ symbol_file_command (args, from_tty)
 	  nomem (0);
 	}
       cleanups = make_cleanup (freeargv, (char *) argv);
-
-      name = *argv;
-      while (*++argv != NULL)
+      while (*argv != NULL)
 	{
-	  if (!strcmp (*argv, "mapped"))
+	  if (strcmp (*argv, "-mapped") == 0)
 	    {
 	      mapped = 1;
 	    }
-	  else if (!strcmp (*argv, "readnow"))
+	  else if (strcmp (*argv, "-readnow") == 0)
 	    {
 	      readnow = 1;
 	    }
+	  else if (**argv == '-')
+	    {
+	      error ("unknown option `%s'", *argv);
+	    }
+	  else
+	    {
+	      name = *argv;
+	    }
+	  argv++;
 	}
 
-      if (name != NULL)
+      if (name == NULL)
+	{
+	  error ("no symbol file name was specified");
+	}
+      else
 	{
 	  /* Getting new symbols may change our opinion about what is
 	     frameless.  */
 	  reinit_frame_cache ();
 	  objfile = symbol_file_add (name, from_tty, (CORE_ADDR)0, 1,
-				     mapped);
-	  readnow |= readnow_symbol_files;
-	  if (readnow)
-	    {
-	      for (psymtab = objfile -> psymtabs;
-		   psymtab != NULL;
-		   psymtab = psymtab -> next)
-		{
-		  (void) psymtab_to_symtab (psymtab);
-		}
-	    }
+				     mapped, readnow);
 	}
       do_cleanups (cleanups);
     }
 }
 
-/* Open NAME and hand it off to BFD for preliminary analysis.  Result
-   is newly malloc'd struct objfile *, which includes a newly malloc'd`
-   copy of NAME (tilde-expanded and made absolute).
+/* Open file specified by NAME and hand it off to BFD for preliminary
+   analysis.  Result is a newly initialized bfd *, which includes a newly
+   malloc'd` copy of NAME (tilde-expanded and made absolute).
    In case of trouble, error() is called.  */
 
-static struct objfile *
-symfile_open (name, mapped)
+static bfd *
+symfile_bfd_open (name)
      char *name;
-     int mapped;
 {
   bfd *sym_bfd;
   int desc;
   char *absolute_name;
-  struct objfile *objfile;
 
   name = tilde_expand (name);	/* Returns 1st new malloc'd copy */
 
   /* Look down path for it, allocate 2nd new malloc'd copy.  */
   desc = openp (getenv ("PATH"), 1, name, O_RDONLY, 0, &absolute_name);
-  if (desc < 0) {
-    make_cleanup (free, name);
-    perror_with_name (name);
-  }
+  if (desc < 0)
+    {
+      make_cleanup (free, name);
+      perror_with_name (name);
+    }
   free (name);			/* Free 1st new malloc'd copy */
   name = absolute_name;		/* Keep 2nd malloc'd copy in bfd */
 
@@ -616,19 +634,19 @@ symfile_open (name, mapped)
     {
       close (desc);
       make_cleanup (free, name);
-      error ("Could not open `%s' to read symbols: %s",
-	     name, bfd_errmsg (bfd_error));
+      error ("\"%s\": can't open to read symbols: %s.", name,
+	     bfd_errmsg (bfd_error));
     }
 
-  if (!bfd_check_format (sym_bfd, bfd_object)) {
-    bfd_close (sym_bfd);	/* This also closes desc */
-    make_cleanup (free, name);
-    error ("\"%s\": can't read symbols: %s.",
-	   name, bfd_errmsg (bfd_error));
-  }
+  if (!bfd_check_format (sym_bfd, bfd_object))
+    {
+      bfd_close (sym_bfd);	/* This also closes desc */
+      make_cleanup (free, name);
+      error ("\"%s\": can't read symbols: %s.", name,
+	     bfd_errmsg (bfd_error));
+    }
 
-  objfile = allocate_objfile (sym_bfd, name, mapped);
-  return objfile;
+  return (sym_bfd);
 }
 
 /* Link a new symtab_fns into the global symtab_fns list.
@@ -652,24 +670,23 @@ symfile_init (objfile)
      struct objfile *objfile;
 {
   struct sym_fns *sf, *sf2;
-  bfd *sym_bfd = objfile->obfd;
 
   for (sf = symtab_fns; sf != NULL; sf = sf->next)
     {
-      if (!strncmp (bfd_get_target (sym_bfd), sf->sym_name, sf->sym_namelen))
+      if (!strncmp (bfd_get_target (objfile -> obfd), sf->sym_name, sf->sym_namelen))
 	{
 	  sf2 = (struct sym_fns *)xmalloc (sizeof (*sf2));	
 	  /* FIXME, who frees this? */
 	  *sf2 = *sf;
   	  sf2->objfile = objfile;
-	  sf2->sym_bfd = sym_bfd;
+	  sf2->sym_bfd = objfile -> obfd;
 	  sf2->sym_private = 0;			/* Not alloc'd yet */
 	  (*sf2->sym_init) (sf2);
 	  return sf2;
 	}
     }
   error ("I'm sorry, Dave, I can't do that.  Symbol format `%s' unknown.",
-	 bfd_get_target (sym_bfd));
+	 bfd_get_target (objfile -> obfd));
   return 0; /* Appease lint.  */
 }
 
@@ -688,40 +705,80 @@ load_command (arg, from_tty)
 
 /* ARGSUSED */
 static void
-add_symbol_file_command (arg_string, from_tty)
-     char *arg_string;
+add_symbol_file_command (args, from_tty)
+     char *args;
      int from_tty;
 {
-  char *name;
+  char *name = NULL;
   CORE_ADDR text_addr;
+  char *arg;
+  int readnow;
+  int mapped;
   
-  /* Getting new symbols may change our opinion about what is
-     frameless.  */
-  reinit_frame_cache ();
-
-  if (arg_string == 0)
-    error ("add-symbol-file takes a file name and an address");
-
-  arg_string = tilde_expand (arg_string);
-  make_cleanup (free, arg_string);
-
-  for( ; *arg_string == ' '; arg_string++ );
-  name = arg_string;
-  for( ; *arg_string && *arg_string != ' ' ; arg_string++ );
-  *arg_string++ = (char) 0;
-
-  if (name[0] == 0)
-    error ("add-symbol-file takes a file name and an address");
-
-  text_addr = parse_and_eval_address (arg_string);
-
   dont_repeat ();
+
+  if (args == NULL)
+    {
+      error ("add-symbol-file takes a file name and an address");
+    }
+
+  /* Make a copy of the string that we can safely write into. */
+
+  args = strdup (args);
+  make_cleanup (free, args);
+
+  /* Pick off any -option args and the file name. */
+
+  while ((*args != '\000') && (name == NULL))
+    {
+      while (isspace (*args)) {args++;}
+      arg = args;
+      while ((*args != '\000') && !isspace (*args)) {args++;}
+      if (*args != '\000')
+	{
+	  *args++ = '\000';
+	}
+      if (*arg != '-')
+	{
+	  name = arg;
+	}
+      else if (strcmp (arg, "-mapped") == 0)
+	{
+	  mapped = 1;
+	}
+      else if (strcmp (arg, "-readnow") == 0)
+	{
+	  readnow = 1;
+	}
+      else
+	{
+	  error ("unknown option `%s'", arg);
+	}
+    }
+
+  /* After picking off any options and the file name, args should be
+     left pointing at the remainder of the command line, which should
+     be the address expression to evaluate. */
+
+  if ((name == NULL) || (*args == '\000') )
+    {
+      error ("add-symbol-file takes a file name and an address");
+    }
+  name = tilde_expand (name);
+  make_cleanup (free, name);
+
+  text_addr = parse_and_eval_address (args);
 
   if (!query ("add symbol table from file \"%s\" at text_addr = %s?\n",
 	      name, local_hex_string (text_addr)))
     error ("Not confirmed.");
 
-  (void) symbol_file_add (name, 0, text_addr, 0, 0);
+  /* Getting new symbols may change our opinion about what is
+     frameless.  */
+
+  reinit_frame_cache ();
+
+  (void) symbol_file_add (name, 0, text_addr, 0, mapped, readnow);
 }
 
 /* Re-read symbols if a symbol-file has changed.  */

@@ -18,27 +18,25 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 
+#include "defs.h"
+
 #include <sys/types.h>
 #include <signal.h>
 #include <string.h>
 #include <link.h>
 #include <sys/param.h>
 #include <fcntl.h>
-#include <stdio.h>
 #include <a.out.h>
 
-#include "defs.h"
 #include "symtab.h"
+#include "bfd.h"
+#include "symfile.h"
 #include "gdbcore.h"
 #include "command.h"
 #include "target.h"
 #include "frame.h"
 #include "regex.h"
 #include "inferior.h"
-
-extern char *getenv ();
-extern char *elf_interpreter ();	/* Interpreter name from exec file */
-extern char *re_comp ();
 
 #define MAX_PATH_SIZE 256		/* FIXME: Should be dynamic */
 
@@ -76,8 +74,6 @@ static CORE_ADDR flag_addr;
 #define LM_NAME(so) ((so) -> lm.l_name)
 static struct r_debug debug_copy;
 char shadow_contents[BREAKPOINT_MAX];	/* Stash old bkpt addr contents */
-extern CORE_ADDR proc_base_address ();
-extern int proc_address_to_fd ();
 
 #endif	/* !SVR4_SHARED_LIBS */
 
@@ -90,6 +86,7 @@ struct so_list {
   char symbols_loaded;			/* flag: symbols read in yet? */
   char from_tty;			/* flag: print msgs? */
   bfd *so_bfd;				/* bfd for so_name */
+  struct objfile *objfile;		/* objfile for loaded lib */
   struct section_table *sections;
   struct section_table *sections_end;
 };
@@ -98,6 +95,50 @@ static struct so_list *so_list_head;	/* List of known shared objects */
 static CORE_ADDR debug_base;		/* Base of dynamic linker structures */
 static CORE_ADDR breakpoint_addr;	/* Address where end bkpt is set */
 
+/* Local function prototypes */
+
+static void
+special_symbol_handling PARAMS ((struct so_list *));
+
+static void
+sharedlibrary_command PARAMS ((char *, int));
+
+static int
+enable_break PARAMS ((void));
+
+static int
+disable_break PARAMS ((void));
+
+static void
+info_sharedlibrary_command PARAMS ((void));
+
+static int
+symbol_add_stub PARAMS ((char *));
+
+static struct so_list *
+find_solib PARAMS ((struct so_list *));
+
+static struct link_map *
+first_link_map_member PARAMS ((void));
+
+static CORE_ADDR
+locate_base PARAMS ((void));
+
+static int
+look_for_base PARAMS ((int, CORE_ADDR));
+
+static CORE_ADDR
+bfd_lookup_symbol PARAMS ((bfd *, char *));
+
+static void
+solib_map_sections PARAMS ((struct so_list *));
+
+#ifndef SVR4_SHARED_LIBS
+
+static void
+solib_add_common_symbols PARAMS ((struct rtc_symb *, struct objfile *));
+
+#endif
 
 /*
 
@@ -179,56 +220,69 @@ solib_map_sections (so)
 }
 
 /* Read all dynamically loaded common symbol definitions from the inferior
-   and add them to the misc_function_vector.  */
+   and add them to the minimal symbol table for the shared library objfile.  */
 
 #ifndef SVR4_SHARED_LIBS
 
 static void
-solib_add_common_symbols (rtc_symp)
+solib_add_common_symbols (rtc_symp, objfile)
     struct rtc_symb *rtc_symp;
+    struct objfile *objfile;
 {
   struct rtc_symb inferior_rtc_symb;
   struct nlist inferior_rtc_nlist;
-  extern void discard_misc_bunches();
+  int len;
+  char *name;
+  char *origname;
 
-  init_misc_bunches ();
-  make_cleanup (discard_misc_bunches, 0);
+  init_minimal_symbol_collection ();
+  make_cleanup (discard_minimal_symbols, 0);
 
   while (rtc_symp)
     {
-    read_memory((CORE_ADDR)rtc_symp,
-		&inferior_rtc_symb,
-		sizeof(inferior_rtc_symb));
-    read_memory((CORE_ADDR)inferior_rtc_symb.rtc_sp,
-		&inferior_rtc_nlist,
-		sizeof(inferior_rtc_nlist));
-    if (inferior_rtc_nlist.n_type == N_COMM)
-      {
-	/* FIXME: The length of the symbol name is not available, but in the
-	   current implementation the common symbol is allocated immediately
-	   behind the name of the symbol. */
-	int len = inferior_rtc_nlist.n_value - inferior_rtc_nlist.n_un.n_strx;
-	char *name, *origname;
+      read_memory ((CORE_ADDR) rtc_symp,
+		   (char *) &inferior_rtc_symb,
+		   sizeof (inferior_rtc_symb));
+      read_memory ((CORE_ADDR) inferior_rtc_symb.rtc_sp,
+		   (char *) &inferior_rtc_nlist,
+		   sizeof(inferior_rtc_nlist));
+      if (inferior_rtc_nlist.n_type == N_COMM)
+	{
+	  /* FIXME: The length of the symbol name is not available, but in the
+	     current implementation the common symbol is allocated immediately
+	     behind the name of the symbol. */
+	  len = inferior_rtc_nlist.n_value - inferior_rtc_nlist.n_un.n_strx;
 
-	origname = name = xmalloc (len);
-    	read_memory((CORE_ADDR)inferior_rtc_nlist.n_un.n_name, name, len);
+	  origname = name = xmalloc (len);
+	  read_memory ((CORE_ADDR) inferior_rtc_nlist.n_un.n_name, name, len);
 
-	/* Don't enter the symbol twice if the target is re-run. */
+	  /* Don't enter the symbol twice if the target is re-run. */
 
 #ifdef NAMES_HAVE_UNDERSCORE
-	if (*name == '_')
-	  name++;
+	  if (*name == '_')
+	    {
+	      name++;
+	    }
 #endif
-  	if (lookup_misc_func (name) < 0)
-  	  prim_record_misc_function (obsavestring (name, strlen (name)),
-				     inferior_rtc_nlist.n_value,
-				     mf_bss);
-	free (origname);
-      }
-    rtc_symp = inferior_rtc_symb.rtc_next;
+	  /* FIXME:  Do we really want to exclude symbols which happen
+	     to match symbols for other locations in the inferior's
+	     address space, even when they are in different linkage units? */
+	  if (lookup_minimal_symbol (name, (struct objfile *) NULL) == NULL)
+	    {
+	      name = obsavestring (name, strlen (name),
+				   &objfile -> symbol_obstack);
+	      prim_record_minimal_symbol (name, inferior_rtc_nlist.n_value,
+					  mst_bss);
+	    }
+	  free (origname);
+	}
+      rtc_symp = inferior_rtc_symb.rtc_next;
     }
 
-  condense_misc_bunches (1);
+  /* Install any minimal symbols that have been collected as the current
+     minimal symbols for this objfile. */
+
+  install_minimal_symbols (objfile);
 }
 
 #endif	/* SVR4_SHARED_LIBS */
@@ -259,9 +313,9 @@ DESCRIPTION
 */
 
 static CORE_ADDR
-DEFUN (bfd_lookup_symbol, (abfd, symname),
-       bfd *abfd AND
-       char *symname)
+bfd_lookup_symbol (abfd, symname)
+     bfd *abfd;
+     char *symname;
 {
   unsigned int storage_needed;
   asymbol *sym;
@@ -270,7 +324,6 @@ DEFUN (bfd_lookup_symbol, (abfd, symname),
   unsigned int i;
   struct cleanup *back_to;
   CORE_ADDR symaddr = 0;
-  enum misc_function_type mf_type;
   
   storage_needed = get_symtab_upper_bound (abfd);
 
@@ -321,9 +374,9 @@ DESCRIPTION
  */
 
 static int
-DEFUN (look_for_base, (fd, baseaddr),
-       int fd AND
-       CORE_ADDR baseaddr)
+look_for_base (fd, baseaddr)
+     int fd;
+     CORE_ADDR baseaddr;
 {
   bfd *interp_bfd;
   CORE_ADDR address;
@@ -401,15 +454,18 @@ DESCRIPTION
 	For SunOS, the job is almost trivial, since the dynamic linker and
 	all of it's structures are statically linked to the executable at
 	link time.  Thus the symbol for the address we are looking for has
-	already been added to the misc function vector at the time the symbol
-	file's symbols were read, and all we have to do is look it up there.
+	already been added to the minimal symbol table for the executable's
+	objfile at the time the symbol file's symbols were read, and all we
+	have to do is look it up there.  Note that we explicitly do NOT want
+	to find the copies in the shared library.
 
 	The SVR4 version is much more complicated because the dynamic linker
 	and it's structures are located in the shared C library, which gets
 	run as the executable's "interpreter" by the kernel.  We have to go
 	to a lot more work to discover the address of DEBUG_BASE.  Because
 	of this complexity, we cache the value we find and return that value
-	on subsequent invocations.
+	on subsequent invocations.  Note there is no copy in the executable
+	symbol tables.
 
 	Note that we can assume nothing about the process state at the time
 	we need to find this address.  We may be stopped on the first instruc-
@@ -425,13 +481,17 @@ locate_base ()
 
 #ifndef SVR4_SHARED_LIBS
 
-  int i;
+  struct minimal_symbol *msymbol;
   CORE_ADDR address = 0;
 
-  i = lookup_misc_func (DEBUG_BASE);
-  if (i >= 0 && misc_function_vector[i].address != 0)
+  /* For SunOS, we want to limit the search for DEBUG_BASE to the executable
+     being debugged, since there is a duplicate named symbol in the shared
+     library.  We don't want the shared library versions. */
+
+  msymbol = lookup_minimal_symbol (DEBUG_BASE, symfile_objfile);
+  if ((msymbol != NULL) && (msymbol -> address != 0))
     {
-      address = misc_function_vector[i].address;
+      address = msymbol -> address;
     }
   return (address);
 
@@ -461,19 +521,19 @@ first_link_map_member ()
 
 #ifndef SVR4_SHARED_LIBS
 
-  read_memory (debug_base, &dynamic_copy, sizeof (dynamic_copy));
+  read_memory (debug_base, (char *) &dynamic_copy, sizeof (dynamic_copy));
   if (dynamic_copy.ld_version >= 2)
     {
       /* It is a version that we can deal with, so read in the secondary
 	 structure and find the address of the link map list from it. */
-      read_memory ((CORE_ADDR) dynamic_copy.ld_un.ld_2, &ld_2_copy,
+      read_memory ((CORE_ADDR) dynamic_copy.ld_un.ld_2, (char *) &ld_2_copy,
 		   sizeof (struct link_dynamic_2));
       lm = ld_2_copy.ld_loaded;
     }
 
 #else	/* SVR4_SHARED_LIBS */
 
-  read_memory (debug_base, &debug_copy, sizeof (struct r_debug));
+  read_memory (debug_base, (char *) &debug_copy, sizeof (struct r_debug));
   lm = debug_copy.r_map;
 
 #endif	/* !SVR4_SHARED_LIBS */
@@ -483,7 +543,7 @@ first_link_map_member ()
 
 /*
 
-GLOBAL FUNCTION
+LOCAL FUNCTION
 
 	find_solib -- step through list of shared objects
 
@@ -504,7 +564,7 @@ DESCRIPTION
 	in <link.h>.
  */
 
-struct so_list *
+static struct so_list *
 find_solib (so_list_ptr)
      struct so_list *so_list_ptr;	/* Last lm or NULL for first one */
 {
@@ -568,7 +628,8 @@ find_solib (so_list_ptr)
 	  so_list_head = new;
 	}      
       so_list_next = new;
-      read_memory ((CORE_ADDR) lm, &(new -> lm), sizeof (struct link_map));
+      read_memory ((CORE_ADDR) lm, (char *) &(new -> lm),
+		   sizeof (struct link_map));
       /* For the SVR4 version, there is one entry that has no name
 	 (for the inferior executable) since it is not a shared object. */
       if (LM_NAME (new) != 0)
@@ -591,8 +652,8 @@ symbol_add_stub (arg)
 {
   register struct so_list *so = (struct so_list *) arg;	/* catch_errs bogon */
   
-  symbol_file_add (so -> so_name, so -> from_tty,
-		   (unsigned int) LM_ADDR (so), 0);
+  so -> objfile = symbol_file_add (so -> so_name, so -> from_tty,
+				   (unsigned int) LM_ADDR (so), 0, 0, 0);
   return (1);
 }
 
@@ -644,10 +705,12 @@ solib_add (arg_string, from_tty, target)
 	    }
 	  else
 	    {
-	      so -> symbols_loaded = 1;
-	      so -> from_tty = from_tty;
 	      catch_errors (symbol_add_stub, (char *) so,
 			    "Error while reading shared library symbols:\n");
+	      
+	      special_symbol_handling (so);
+	      so -> symbols_loaded = 1;
+	      so -> from_tty = from_tty;
 	    }
 	}
     }
@@ -737,7 +800,7 @@ info_sharedlibrary_command ()
 		     "Shared Object Library");
 	      header_done++;
 	    }
-	  printf ("%-12s", local_hex_string_custom (LM_ADDR (so), "08"));
+	  printf ("%-12s", local_hex_string_custom ((int) LM_ADDR (so), "08"));
 	  printf ("%-12s", local_hex_string_custom (so -> lmend, "08"));
 	  printf ("%-12s", so -> symbols_loaded ? "Yes" : "No");
 	  printf ("%s\n",  so -> so_name);
@@ -848,18 +911,14 @@ disable_break ()
      breakpoint address.  Remove the breakpoint by writing the original
      contents back. */
 
-  read_memory (debug_addr, &debug_copy, sizeof (debug_copy));
-
-  /* Get common symbol definitions for the loaded object. */
-  if (debug_copy.ldd_cp)
-    solib_add_common_symbols (debug_copy.ldd_cp);
+  read_memory (debug_addr, (char *) &debug_copy, sizeof (debug_copy));
 
   /* Set `in_debugger' to zero now. */
 
-  write_memory (flag_addr, &in_debugger, sizeof (in_debugger));
+  write_memory (flag_addr, (char *) &in_debugger, sizeof (in_debugger));
 
   breakpoint_addr = (CORE_ADDR) debug_copy.ldd_bp_addr;
-  write_memory (breakpoint_addr, &debug_copy.ldd_bp_inst,
+  write_memory (breakpoint_addr, (char *) &debug_copy.ldd_bp_inst,
 		sizeof (debug_copy.ldd_bp_inst));
 
 #else	/* SVR4_SHARED_LIBS */
@@ -962,18 +1021,18 @@ enable_break ()
 
   in_debugger = 1;
 
-  write_memory (flag_addr, &in_debugger, sizeof (in_debugger));
+  write_memory (flag_addr, (char *) &in_debugger, sizeof (in_debugger));
 
 #else	/* SVR4_SHARED_LIBS */
 
 #ifdef BKPT_AT_MAIN
 
-  int i;
+  struct minimal_symbol *msymbol;
 
-  i = lookup_misc_func ("main");
-  if (i >= 0 && misc_function_vector[i].address != 0)
+  msymbol = lookup_minimal_symbol ("main", symfile_objfile);
+  if ((msymbol != NULL) && (msymbol -> address != 0))
     {
-      breakpoint_addr = misc_function_vector[i].address;
+      breakpoint_addr = msymbol -> address;
     }
   else
     {
@@ -1102,19 +1161,64 @@ solib_create_inferior_hook()
 
 /*
 
-GLOBAL FUNCTION
+LOCAL FUNCTION
+
+	special_symbol_handling -- additional shared library symbol handling
+
+SYNOPSIS
+
+	void special_symbol_handling (struct so_list *so)
+
+DESCRIPTION
+
+	Once the symbols from a shared object have been loaded in the usual
+	way, we are called to do any system specific symbol handling that 
+	is needed.
+
+	For Suns, this consists of grunging around in the dynamic linkers
+	structures to find symbol definitions for "common" symbols and 
+	adding them to the minimal symbol table for the corresponding
+	objfile.
+
+*/
+
+static void
+special_symbol_handling (so)
+struct so_list *so;
+{
+#ifndef SVR4_SHARED_LIBS
+
+  /* Read the debugger structure from the inferior, just to make sure
+     we have a current copy. */
+
+  read_memory (debug_addr, (char *) &debug_copy, sizeof (debug_copy));
+
+  /* Get common symbol definitions for the loaded object. */
+
+  if (debug_copy.ldd_cp)
+    {
+      solib_add_common_symbols (debug_copy.ldd_cp, so -> objfile);
+    }
+
+#endif	/* !SVR4_SHARED_LIBS */
+}
+
+
+/*
+
+LOCAL FUNCTION
 
 	sharedlibrary_command -- handle command to explicitly add library
 
 SYNOPSIS
 
-	void sharedlibrary_command (char *args, int from_tty)
+	static void sharedlibrary_command (char *args, int from_tty)
 
 DESCRIPTION
 
 */
 
-void
+static void
 sharedlibrary_command (args, from_tty)
 char *args;
 int from_tty;

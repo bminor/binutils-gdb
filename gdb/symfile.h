@@ -251,7 +251,7 @@ extern struct symtab *
 allocate_symtab PARAMS ((char *, struct objfile *));
 
 extern struct objfile *
-allocate_objfile PARAMS ((bfd *, char *, int));
+allocate_objfile PARAMS ((bfd *, int));
 
 extern void
 free_objfile PARAMS ((struct objfile *));

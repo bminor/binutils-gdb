@@ -330,7 +330,7 @@ map_vmap (bfd *bf, bfd *arch)
 
   obj = lookup_objfile_bfd (bf);
   if (exec_bfd && !obj) {
-    obj = allocate_objfile (bf, bfd_get_filename (bf), 0);
+    obj = allocate_objfile (bf, 0);
     syms_from_objfile (obj, 0, 0, 0);
   }
 

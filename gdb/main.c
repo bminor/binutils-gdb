@@ -591,7 +591,9 @@ Options available are:\n\
   -exec=EXECFILE    Use EXECFILE as the executable.\n\
   -se=FILE          Use FILE as symbol file and executable file.\n\
   -core=COREFILE    Analyze the core dump COREFILE.\n\
-  -b BAUDRATE       Set serial port baud rate used for remote debugging\n\
+  -b BAUDRATE       Set serial port baud rate used for remote debugging.\n\
+  -mapped           Use mapped symbol files if supported on this system.\n\
+  -readnow          Fully read symbol files on first access.\n\
 ", stderr);
 #ifdef ADDITIONAL_OPTION_HELP
 	fputs (ADDITIONAL_OPTION_HELP, stderr);
