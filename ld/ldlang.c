@@ -662,18 +662,7 @@ wild_doit (ptr, section, output, file)
      lang_input_statement_type * file;
 {
   if (output->bfd_section == (asection *) NULL)
-  {
     init_os (output);
-    /* Initialize the vma and size to the existing section.  This will
-       be overriden in lang_size_sections unless SEC_NEVER_LOAD gets
-       set.  */
-    if (section != (asection *) NULL)
-    {
-      bfd_set_section_vma (0, output->bfd_section,
-			   bfd_section_vma (0, section));
-      output->bfd_section->_raw_size = section->_raw_size;
-    }
-  }
 
   if (section != (asection *) NULL
       && section->output_section == (asection *) NULL)
@@ -685,14 +674,14 @@ wild_doit (ptr, section, output, file)
     new->ifile = file;
     section->output_section = output->bfd_section;
 
-    /* Be selective about what the output section inherits from the
-       input section */
-
-    if ((section->flags & SEC_SHARED_LIBRARY) != 0)
-      section->output_section->flags |= section->flags;
-    else
-      section->output_section->flags |=
-	section->flags & (flagword) (~ SEC_NEVER_LOAD);
+    /* We don't copy the SEC_NEVER_LOAD flag from an input section to
+       an output section, because we want to be able to include a
+       SEC_NEVER_LOAD section in the middle of an otherwise loaded
+       section (I don't know why we want to do this, but we do).
+       build_link_order in ldwrite.c handles this case by turning the
+       embedded SEC_NEVER_LOAD section into a fill.  */
+    section->output_section->flags |=
+      section->flags & (flagword) (~ SEC_NEVER_LOAD);
 
     if (!output->loadable) 
     {
@@ -1650,10 +1639,27 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
        bfd_vma after;
        lang_output_section_statement_type *os = &s->output_section_statement;
 
-       /* If this is a shared library section, don't change the size
-	  and address.  */
-       if (os->bfd_section->flags & SEC_SHARED_LIBRARY)
-	 break;
+       /* If this is a COFF shared library section, use the size and
+	  address from the input section.  FIXME: This is COFF
+	  specific; it would be cleaner if there were some other way
+	  to do this, but nothing simple comes to mind.  */
+       if ((os->bfd_section->flags & SEC_COFF_SHARED_LIBRARY) != 0)
+	 {
+	   asection *input;
+
+	   if (os->children.head == NULL
+	       || os->children.head->next != NULL
+	       || os->children.head->header.type != lang_input_section_enum)
+	     einfo ("%P%X: Internal error on COFF shared library section %s",
+		    os->name);
+
+	   input = os->children.head->input_section.section;
+	   bfd_set_section_vma (os->bfd_section->owner,
+				os->bfd_section,
+				bfd_section_vma (input->owner, input));
+	   os->bfd_section->_raw_size = input->_raw_size;
+	   break;
+	 }
 
        if (os->bfd_section == &bfd_abs_section)
        {
@@ -1852,29 +1858,38 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 		      &newdot);
 
        if (newdot != dot && !relax)
-	/* We've been moved ! so insert a pad */
-       {
-	 lang_statement_union_type *new =
-	  (lang_statement_union_type *)
-	   stat_alloc ((bfd_size_type) (sizeof (lang_padding_statement_type)));
+	 {
+	   /* The assignment changed dot.  Insert a pad.  */
+	   if (output_section_statement == abs_output_section)
+	     {
+	       /* If we don't have an output section, then just adjust
+		  the default memory address.  */
+	       lang_memory_region_lookup ("*default*")->current = newdot;
+	     }
+	   else
+	     {
+	       lang_statement_union_type *new =
+		 ((lang_statement_union_type *)
+		  stat_alloc (sizeof (lang_padding_statement_type)));
 
-	 /* Link into existing chain */
-	 new->header.next = *prev;
-	 *prev = new;
-	 new->header.type = lang_padding_statement_enum;
-	 new->padding_statement.output_section =
-	  output_section_statement->bfd_section;
-	 new->padding_statement.output_offset =
-	  dot - output_section_statement->bfd_section->vma;
-	 new->padding_statement.fill = fill;
-	 new->padding_statement.size = newdot - dot;
-	 output_section_statement->bfd_section->_raw_size +=
-	  new->padding_statement.size;
-	 dot = newdot;
-       }
+	       /* Link into existing chain */
+	       new->header.next = *prev;
+	       *prev = new;
+	       new->header.type = lang_padding_statement_enum;
+	       new->padding_statement.output_section =
+		 output_section_statement->bfd_section;
+	       new->padding_statement.output_offset =
+		 dot - output_section_statement->bfd_section->vma;
+	       new->padding_statement.fill = fill;
+	       new->padding_statement.size = newdot - dot;
+	       output_section_statement->bfd_section->_raw_size +=
+		 new->padding_statement.size;
+	     }
+
+	   dot = newdot;
+	 }
      }
-
-      break;
+     break;
 
    case lang_padding_statement_enum:
      /* If we are relaxing, and this is not the first pass, some

@@ -1,3 +1,10 @@
+Tue May 10 14:31:16 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ldlang.c (wild_doit): Don't bother initializing the vma and
+	section size.  Don't special case SEC_SHARED_LIBRARY.
+	(lang_size_sections): Handle SEC_COFF_SHARED_LIBRARY sections
+	specially.
+
 Fri May  6 12:24:27 1994  Steve Chamberlain  (sac@cygnus.com)
 
 	* config/go32.mh : New file for Xgo32X.
