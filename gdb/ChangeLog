@@ -1,3 +1,7 @@
+2000-03-17  Jim Blandy  <jimb@redhat.com>
+
+	* solib.c (solib_add): Delete debugging code.
+
 2000-03-17  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb_wait.h: add definitions of WSETSTOP and WSETEXIT for Linux.
