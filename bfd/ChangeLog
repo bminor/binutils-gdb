@@ -26,7 +26,7 @@
 	(bfd_sym_scan): New function split out from bfd_sym_object_p.
 	* xsym.h (bfd_sym_scan): Declare.
 	* elfcode.h (elf_object_p): Use bfd_preserve_save/restore/finish.
-	(elf_core_file_p): Likewise.
+	* elfcore.h (elf_core_file_p): Likewise.
 	* targets.c (_bfd_target_vector): Revert 2002-11-08 change.
 
 2002-11-12  Nick Clifton  <nickc@redhat.com>
