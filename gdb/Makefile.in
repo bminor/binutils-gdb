@@ -146,6 +146,10 @@ LDFLAGS = $(CFLAGS)
 LIBIBERTY_DIR = ${srcdir}/../libiberty
 LIBIBERTY = ./../libiberty${subdir}/libiberty.a
 
+# Where is the "-lopcodes" library, with (some of) the opcode tables and
+# disassemblers?
+OPCODES = ./../opcodes${subdir}/libopcodes.a
+
 # The config/mh-* file must define REGEX and REGEX1 on USG machines.
 # If your sysyem is missing alloca(), or, more likely, it's there but
 # it doesn't work, define ALLOCA & ALLOCA1 too.
@@ -154,9 +158,9 @@ LIBIBERTY = ./../libiberty${subdir}/libiberty.a
 # Libraries and corresponding dependencies for compiling gdb.
 # {X,T}M_CLIBS, defined in *config files, have host- and target-dependent libs.
 # TERMCAP comes after readline, since readline depends on it.
-CLIBS = ${BFD_LIB}  ${RL_LIB} ${TERMCAP} ${MMALLOC_LIB} ${LIBIBERTY} \
+CLIBS = ${BFD_LIB}  ${RL_LIB} ${TERMCAP} ${OPCODES} ${MMALLOC_LIB} ${LIBIBERTY} \
 	${XM_CLIBS} ${TM_CLIBS}
-CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${MMALLOC_LIB} ${LIBIBERTY} \
+CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${OPCODES} ${MMALLOC_LIB} ${LIBIBERTY} \
 	${RL_LIB} ${MMALLOC_LIB}
 
 ADD_FILES = ${REGEX} ${ALLOCA} ${XM_ADD_FILES} ${TM_ADD_FILES}
@@ -350,6 +354,7 @@ saber_gdb: $(SFILES) $(DEPFILES) copying.c version.c
 	#unload ${srcdir}/nindy-share/[A-Z]*
 	#load c-exp.tab.c m2-exp.tab.c
 	#load copying.c version.c
+	#load ../opcodes/libopcodes.a
 	#load ../libiberty/libiberty.a
 	#load ../bfd/libbfd.a
 	#load ../readline/libreadline.a
