@@ -1,3 +1,8 @@
+Tue Feb  1 22:13:25 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* procfs.c (wait_fd):  Handle EINTR error return from PIOCWSTOP ioctl
+	by restarting the ioctl.
+
 Tue Feb  1 16:16:25 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* target.h (target_wait): Add comment about calling

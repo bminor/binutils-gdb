@@ -579,10 +579,13 @@ wait_fd ()
 #else
   pi = current_procinfo;
 
-  if (ioctl (pi->fd, PIOCWSTOP, &pi->prstatus) < 0)
+  while (ioctl (pi->fd, PIOCWSTOP, &pi->prstatus) < 0)
     {
-      print_sys_errmsg (pi->pathname, errno);
-      error ("PIOCWSTOP failed");
+      if (errno != EINTR)
+	{
+	  print_sys_errmsg (pi->pathname, errno);
+	  error ("PIOCWSTOP failed");
+	}
     }
   pi->had_event = 1;
 #endif  
