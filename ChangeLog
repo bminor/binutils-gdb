@@ -1,3 +1,16 @@
+Sat Jan 24 01:59:45 1998  Manfred Hollstein  <manfred@s-direktnet.de>
+
+	* configure (package_makefile_frag): Move inserting the
+	${package_makefile_frag} to where it should be according
+	to the comment.
+
+start-sanitize-gdbtk
+Thu Jan 22 11:33:03 1998  Keith Seitz  <keiths@cygnus.com>
+
+	* Makefile.in (install-gdbtk): New install target which will install
+	EVERYTHING needed for gdbtk.
+	
+end-sanitize-gdbtk
 Fri Jan 23 00:30:21 1998  Philip Blundell  <pb@nexus.co.uk>
 
 	* config.guess: Add support for Linux/ARM.

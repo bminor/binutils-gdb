@@ -990,7 +990,7 @@ esac
 if [ "$enable_gdbtk" != "no" ]; then
 	GDB_TK="all-tcl all-tk all-itcl all-tix all-libgui"
 	# start-sanitize-ide
-	if [ "$enable_ide" != "no" ]; then
+	if [ "$enable_ide" = "yes" ]; then
 		GDB_TK="all-tcl all-tk all-itcl all-tix all-libgui all-libide"
 	fi
 	# end-sanitize-ide
@@ -1108,36 +1108,17 @@ EOF
 
         if [ -f ${srcdir}/${subdir}/${Makefile_in} ] ; then
 
-            # Conditionalize the makefile for this package from "Makefile.in" (or whatever it's called) into Makefile.tem.
-            rm -f ${subdir}/${Makefile}.tem
-            case "${package_makefile_frag}" in
-              "") cp ${srcdir}/${subdir}/${Makefile_in} ${subdir}/Makefile.tem ;;
-              *)
-                      if [ ! -f ${package_makefile_frag} ] ; then
-                              package_makefile_frag=${srcdir}/${package_makefile_frag}
-                      fi
-                      if [ -f ${package_makefile_frag} ] ; then
-                              sed -e "/^####/  r ${package_makefile_frag}" ${srcdir}/${subdir}/${Makefile_in} > ${Makefile}.tem
-                      else
-                              echo '***' Expected package makefile fragment \"${package_makefile_frag}\" 1>&2
-                              echo '***' is missing in ${PWD=`pwd`}. 1>&2
-                              cp ${srcdir}/${subdir}/${Makefile_in} ${subdir}/Makefile.tem
-                      fi
-            esac
-            # working copy now in ${Makefile}.tem
-
             # Conditionalize for this site.
             rm -f ${Makefile}
-              case "${site}" in
-              "") mv ${subdir}/Makefile.tem ${Makefile} ;;
+            case "${site}" in
+              "") cp ${srcdir}/${subdir}/${Makefile_in} ${Makefile} ;;
               *)
                       site_makefile_frag=${srcdir}/config/ms-${site}
 
                       if [ -f ${site_makefile_frag} ] ; then
-                              sed -e "/^####/  r ${site_makefile_frag}" ${subdir}/Makefile.tem \
-                                      > ${Makefile}
+                              sed -e "/^####/  r ${site_makefile_frag}" ${srcdir}/${subdir}/${Makefile_in} > ${Makefile}
                       else
-                              mv ${subdir}/Makefile.tem ${Makefile}
+                              cp ${srcdir}/${subdir}/${Makefile_in} ${Makefile}
                               site_makefile_frag=
                       fi
                       ;;
@@ -1178,9 +1159,27 @@ EOF
                       fi
                       ;;
             esac
-            # real copy now in ${Makefile}
+            # working copy now in ${Makefile}
 
-            mv ${Makefile} ${subdir}/Makefile.tem
+            # Conditionalize the makefile for this package from "Makefile.in" (or whatever it's called) into Makefile.tem.
+            rm -f ${subdir}/${Makefile}.tem
+            case "${package_makefile_frag}" in
+              "") mv ${Makefile} ${subdir}/Makefile.tem ;;
+              *)
+                      if [ ! -f ${package_makefile_frag} ] ; then
+                              package_makefile_frag=${srcdir}/${package_makefile_frag}
+                      fi
+                      if [ -f ${package_makefile_frag} ] ; then
+                              sed -e "/^####/  r ${package_makefile_frag}" ${Makefile} > ${subdir}/${Makefile}.tem
+                      else
+                              echo '***' Expected package makefile fragment \"${package_makefile_frag}\" 1>&2
+                              echo '***' is missing in ${PWD=`pwd`}. 1>&2
+                              mv ${Makefile} ${subdir}/Makefile.tem
+                      fi
+            esac
+            # real copy now in ${subdir}/${Makefile}.tem
+
+            mv ${subdir}/${Makefile}.tem ${subdir}/Makefile.tem 2>/dev/null
 
             # real copy now in ${subdir}/Makefile.tem
 
@@ -1233,6 +1232,15 @@ EOF
             if [ "${site_makefile_frag}" != "" ] ; then
                 echo site_makefile_frag = ${invsubdir}${site_makefile_frag} >>${Makefile}
             fi 
+
+	    # provide a proper gxx_include_dir to all subdirs.
+	    # Note, if you change the default, make sure to fix both here
+	    # and in the gcc subdirectory.
+	    if test -z "${with_gxx_include_dir}"; then
+		echo gxx_include_dir = '${prefix}/include/g++' >> ${Makefile}
+	    else
+		echo gxx_include_dir = ${with_gxx_include_dir} >> ${Makefile}
+	    fi
 
             # reset prefix, exec_prefix, srcdir, SUBDIRS, NONSUBDIRS,
             # remove any form feeds.
