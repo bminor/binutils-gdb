@@ -2123,7 +2123,7 @@ NAME(_bfd_elf,link_read_relocs) (abfd, o, external_relocs, internal_relocs,
   if (!elf_link_read_relocs_from_section 
       (abfd, 
        elf_section_data (o)->rel_hdr2,
-       external_relocs + rel_hdr->sh_size,
+       ((bfd_byte *) external_relocs) + rel_hdr->sh_size,
        internal_relocs + rel_hdr->sh_size / rel_hdr->sh_entsize))
     goto error_return;
 
