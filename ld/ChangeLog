@@ -1,3 +1,8 @@
+Tue Jan 30 13:18:56 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* emultempl/aix.em (gld${EMULATION_NAME}_parse_args): Ignore
+	-bnoentry, since the right thing tends to happen anyhow.
+
 Mon Jan 29 12:29:26 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld.texinfo, ld.1: Document -export-dynamic.
