@@ -1,6 +1,10 @@
+Mon Mar  4 17:47:03 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* top.c (print_gdb_version): Update copyright year.
+
 Mon Mar  4 14:44:54 1996  Jeffrey A Law  (law@cygnus.com)
 
-	* From Peter Schauer:
+	From Peter Schauer:
 	* infrun.c (wait_for_inferior): Remove breakpoints and
 	switch terminal settings before calling SOLIB_ADD.
 	* solib.c (enable_break, SVR4 variant): Don't map in symbols

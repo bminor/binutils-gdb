@@ -2713,7 +2713,7 @@ GDB %s (%s", version, host_name);
 
   fprintf_filtered (stream, "), ");
   wrap_here("");
-  fprintf_filtered (stream, "Copyright 1995 Free Software Foundation, Inc.");
+  fprintf_filtered (stream, "Copyright 1996 Free Software Foundation, Inc.");
 }
 
 /* ARGSUSED */
