@@ -169,6 +169,17 @@ David Whedon writes:
 > gdb/rdi-share/unixcomm.c.  SERPORT1 et. al. never get defined because we
 > aren't one of the architectures supported.
 
+--
+
+Problem with weak functions
+http://sourceware.cygnus.com/ml/gdb/2000-05/msg00060.html
+
+Dan Nicolaescu writes:
+> It seems that gdb-4.95.1  does not display correctly the function when
+> stoping in weak functions. 
+> 
+> It stops in a function that is defined as weak, not in the function
+> that is actualy run... 
 
 --
 
