@@ -1,3 +1,7 @@
+Tue May 12 12:22:47 1992  John Gilmore  (gnu at cygnus.com)
+
+	* gdb.texinfo:  `info user' => `show user'.  Noticed by David Taylor.
+
 Mon May 11 19:06:27 1992  John Gilmore  (gnu at cygnus.com)
 
 	* gdb.texinfo:  Say how to read the `info' files.

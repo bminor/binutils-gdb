@@ -6821,9 +6821,9 @@ does not change the documentation.
 List all user-defined commands, with the first line of the documentation
 (if any) for each.
 
-@item info user
-@itemx info user @var{commandname}
-@kindex info user
+@item show user
+@itemx show user @var{commandname}
+@kindex show user
 Display the _GDBN__ commands used to define @var{commandname} (but not its
 documentation).  If no @var{commandname} is given, display the
 definitions for all user-defined commands.
