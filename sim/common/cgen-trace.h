@@ -78,7 +78,7 @@ typedef struct {
 extern int sim_disasm_sprintf (SFILE *, const char *, ...);
 
 /* For opcodes based disassemblers.  */
-#ifdef BFD_VERSION
+#ifdef __BFD_H_SEEN__
 struct disassemble_info;
 extern int
 sim_disasm_read_memory (bfd_vma memaddr_, bfd_byte *myaddr_, int length_,
