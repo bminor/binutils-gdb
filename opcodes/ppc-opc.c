@@ -2957,7 +2957,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "wrteei",  X(31,163),	XE_MASK,	PPC403,		{ E } },
 { "wrteei",  X(31,163),	XE_MASK,	BOOKE,		{ E } },
 
-{ "mtmsrd",  X(31,178),	XRLARB_MASK,	PPC64,		{ RS , MTMSRD_L } },
+{ "mtmsrd",  X(31,178),	XRLARB_MASK,	PPC64,		{ RS, MTMSRD_L } },
 
 { "stdux",   X(31,181),	X_MASK,		PPC64,		{ RS, RAS, RB } },
 
