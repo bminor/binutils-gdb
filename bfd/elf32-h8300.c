@@ -225,7 +225,7 @@ struct elf_reloc_map {
   unsigned char howto_index;
 };
 
-/* An array mapping BFD reloc codes to SH ELF relocs.  */
+/* An array mapping BFD reloc codes to H8 ELF relocs.  */
 
 static const struct elf_reloc_map h8_reloc_map[] = {
   { BFD_RELOC_NONE, R_H8_NONE_X },
