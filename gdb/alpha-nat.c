@@ -196,7 +196,7 @@ kernel_u_size (void)
  */
 
 void
-supply_gregset (gregset_t *gregsetp)
+supply_gregset (gdb_gregset_t *gregsetp)
 {
   register int regi;
   register long *regp = ALPHA_REGSET_BASE (gregsetp);
@@ -214,7 +214,7 @@ supply_gregset (gregset_t *gregsetp)
 }
 
 void
-fill_gregset (gregset_t *gregsetp, int regno)
+fill_gregset (gdb_gregset_t *gregsetp, int regno)
 {
   int regi;
   register long *regp = ALPHA_REGSET_BASE (gregsetp);
@@ -233,7 +233,7 @@ fill_gregset (gregset_t *gregsetp, int regno)
  */
 
 void
-supply_fpregset (fpregset_t *fpregsetp)
+supply_fpregset (gdb_fpregset_t *fpregsetp)
 {
   register int regi;
   register long *regp = ALPHA_REGSET_BASE (fpregsetp);
@@ -243,7 +243,7 @@ supply_fpregset (fpregset_t *fpregsetp)
 }
 
 void
-fill_fpregset (fpregset_t *fpregsetp, int regno)
+fill_fpregset (gdb_fpregset_t *fpregsetp, int regno)
 {
   int regi;
   register long *regp = ALPHA_REGSET_BASE (fpregsetp);

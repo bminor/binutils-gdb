@@ -1,3 +1,9 @@
+2000-12-07  Mark Kettenis  <kettenis@gnu.org>
+
+	From Richard Henderson <rth@twiddle.net>:
+	* alpha-nat.c (supply_gregset, fill_gregset): Use gdb_gregset_t.
+	(supply_fpregset, fill_fpregset): Use gdb_fpregset_t.
+
 2000-12-06  Fernando Nasser  <fnasser@redhat.com>
 
 	* cli/cli-decode.c (add_abbrev_cmd): Reinstate. Add comment saying
