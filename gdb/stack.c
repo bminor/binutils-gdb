@@ -1066,7 +1066,7 @@ up_silently_command (count_exp, from_tty)
     count = parse_and_eval_address (count_exp);
   count1 = count;
   
-  if (!target_has_stack)
+  if (target_has_stack == 0 || selected_frame == 0)
     error ("No stack.");
 
   frame = find_relative_frame (selected_frame, &count1);
@@ -1099,7 +1099,7 @@ down_silently_command (count_exp, from_tty)
     count = - parse_and_eval_address (count_exp);
   count1 = count;
   
-  if (!target_has_stack)
+  if (target_has_stack == 0 || selected_frame == 0)
     error ("No stack.");
 
   frame = find_relative_frame (selected_frame, &count1);
@@ -1129,12 +1129,23 @@ return_command (retval_exp, from_tty)
   FRAME frame;
   char *funcname;
   struct cleanup *back_to;
+  value return_value;
 
   if (selected_frame == NULL)
     error ("No selected frame.");
   thisfun = get_frame_function (selected_frame);
   selected_frame_addr = FRAME_FP (selected_frame);
   selected_frame_pc = (get_frame_info (selected_frame))->pc;
+
+  /* Compute the return value (if any -- possibly getting errors here).
+     Call VALUE_CONTENTS to make sure we have fully evaluated it, since
+     it might live in the stack frame we're about to pop.  */
+
+  if (retval_exp)
+    {
+      return_value = parse_and_eval (retval_exp);
+      (void) (VALUE_CONTENTS (return_value));
+    }
 
   /* If interactive, require confirmation.  */
 
@@ -1173,7 +1184,7 @@ return_command (retval_exp, from_tty)
      for return values.  */
 
   if (retval_exp)
-    set_return_value (parse_and_eval (retval_exp));
+    set_return_value (return_value);
 
   /* If interactive, print the frame that is now current.  */
 

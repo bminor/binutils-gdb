@@ -1098,7 +1098,7 @@ fputs_demangled (linebuffer, stream, arg_mode)
   && (isalnum(c) || (c) == '_' || (c) == CPLUS_MARKER))
 
   char buf[SYMBOL_MAX+1];
-# define SLOP 5		/* How much room to leave in buf */
+# define DMSLOP 5		/* How much room to leave in buf */
   char *p;
 
   if (linebuffer == NULL)
@@ -1116,7 +1116,7 @@ fputs_demangled (linebuffer, stream, arg_mode)
     int i = 0;
 
     /* collect non-interesting characters into buf */
-    while ( *p != (char) 0 && !SYMBOL_CHAR(*p) && i < (int)sizeof(buf)-SLOP ) {
+    while (*p != (char) 0 && !SYMBOL_CHAR(*p) && i < (int)sizeof(buf)-DMSLOP ) {
       buf[i++] = *p;
       p++;
     }
@@ -1131,7 +1131,7 @@ fputs_demangled (linebuffer, stream, arg_mode)
     while (i < SYMBOL_MAX
      && *p != (char) 0
      && SYMBOL_CHAR(*p)
-     && i < (int)sizeof(buf) - SLOP) {
+     && i < (int)sizeof(buf) - DMSLOP) {
       buf[i++] = *p;
       p++;
     }

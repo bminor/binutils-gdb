@@ -61,19 +61,19 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/stat.h>
 
 
-#define PROC_LOW_ADDR(proc) ((proc)->adr) /* least address */
-#define PROC_HIGH_ADDR(proc) ((proc)->pad2) /* upper address bound */
-#define PROC_FRAME_OFFSET(proc) ((proc)->framesize)
-#define PROC_FRAME_REG(proc) ((proc)->framereg)
-#define PROC_REG_MASK(proc) ((proc)->regmask)
-#define PROC_FREG_MASK(proc) ((proc)->fregmask)
-#define PROC_REG_OFFSET(proc) ((proc)->regoffset)
-#define PROC_FREG_OFFSET(proc) ((proc)->fregoffset)
-#define PROC_PC_REG(proc) ((proc)->pcreg)
-#define PROC_SYMBOL(proc) (*(struct symbol**)&(proc)->isym)
+#define PROC_LOW_ADDR(proc) ((proc)->pdr.adr) /* least address */
+#define PROC_HIGH_ADDR(proc) ((proc)->pdr.iline) /* upper address bound */
+#define PROC_FRAME_OFFSET(proc) ((proc)->pdr.frameoffset)
+#define PROC_FRAME_REG(proc) ((proc)->pdr.framereg)
+#define PROC_REG_MASK(proc) ((proc)->pdr.regmask)
+#define PROC_FREG_MASK(proc) ((proc)->pdr.fregmask)
+#define PROC_REG_OFFSET(proc) ((proc)->pdr.regoffset)
+#define PROC_FREG_OFFSET(proc) ((proc)->pdr.fregoffset)
+#define PROC_PC_REG(proc) ((proc)->pdr.pcreg)
+#define PROC_SYMBOL(proc) (*(struct symbol**)&(proc)->pdr.isym)
 #define _PROC_MAGIC_ 0x0F0F0F0F
-#define PROC_DESC_IS_DUMMY(proc) ((proc)->isym == _PROC_MAGIC_)
-#define SET_PROC_DESC_IS_DUMMY(proc) ((proc)->isym = _PROC_MAGIC_)
+#define PROC_DESC_IS_DUMMY(proc) ((proc)->pdr.isym == _PROC_MAGIC_)
+#define SET_PROC_DESC_IS_DUMMY(proc) ((proc)->pdr.isym = _PROC_MAGIC_)
 
 struct linked_proc_info
 {
@@ -84,7 +84,7 @@ struct linked_proc_info
 
 #define READ_FRAME_REG(fi, regno) read_next_frame_reg((fi)->next, regno)
 
-int
+static int
 read_next_frame_reg(fi, regno)
      FRAME fi;
      int regno;
@@ -113,38 +113,28 @@ int
 mips_frame_saved_pc(frame)
      FRAME frame;
 {
-  mips_extra_func_info_t proc_desc = (mips_extra_func_info_t)frame->proc_desc;
+  mips_extra_func_info_t proc_desc = frame->proc_desc;
   int pcreg = proc_desc ? PROC_PC_REG(proc_desc) : RA_REGNUM;
+
   if (proc_desc && PROC_DESC_IS_DUMMY(proc_desc))
       return read_memory_integer(frame->frame - 4, 4);
-#if 0
-  /* If in the procedure prologue, RA_REGNUM might not have been saved yet.
-   * Assume non-leaf functions start with:
-   *	addiu $sp,$sp,-frame_size
-   *	sw $ra,ra_offset($sp)
-   * This if the pc is pointing at either of these instructions,
-   * then $ra hasn't been trashed.
-   * If the pc has advanced beyond these two instructions,
-   * then $ra has been saved.
-   * critical, and much more complex. Handling $ra is enough to get
-   * a stack trace, but some register values with be wrong.
-   */
-  if (frame->proc_desc && frame->pc < PROC_LOW_ADDR(proc_desc) + 8)
-      return read_register(pcreg);
-#endif
+
   return read_next_frame_reg(frame, pcreg);
 }
 
 static struct mips_extra_func_info temp_proc_desc;
 static struct frame_saved_regs temp_saved_regs;
 
-CORE_ADDR heuristic_proc_start(pc)
+static CORE_ADDR
+heuristic_proc_start(pc)
     CORE_ADDR pc;
 {
-
     CORE_ADDR start_pc = pc;
     CORE_ADDR fence = start_pc - 200;
+
+    if (start_pc == 0)	return 0;
     if (fence < VM_MIN_ADDRESS) fence = VM_MIN_ADDRESS;
+
     /* search back for previous return */
     for (start_pc -= 4; ; start_pc -= 4)
 	if (start_pc < fence) return 0; 
@@ -160,7 +150,7 @@ CORE_ADDR heuristic_proc_start(pc)
     return start_pc;
 }
 
-mips_extra_func_info_t
+static mips_extra_func_info_t
 heuristic_proc_desc(start_pc, limit_pc, next_frame)
     CORE_ADDR start_pc, limit_pc;
     FRAME next_frame;
@@ -231,18 +221,17 @@ heuristic_proc_desc(start_pc, limit_pc, next_frame)
     return &temp_proc_desc;
 }
 
-mips_extra_func_info_t
+static mips_extra_func_info_t
 find_proc_desc(pc, next_frame)
     CORE_ADDR pc;
     FRAME next_frame;
 {
   mips_extra_func_info_t proc_desc;
-  extern struct block *block_for_pc();
-  struct block   *b = block_for_pc(pc);
-
+  struct block *b = block_for_pc(pc);
   struct symbol *sym =
       b ? lookup_symbol(".gdbinfo.", b, LABEL_NAMESPACE, 0, NULL) : NULL;
-  if (sym != NULL)
+
+  if (sym)
     {
 	/* IF this is the topmost frame AND
 	 * (this proc does not have debugging information OR
@@ -250,11 +239,12 @@ find_proc_desc(pc, next_frame)
 	 * THEN create a "heuristic" proc_desc (by analyzing
 	 * the actual code) to replace the "official" proc_desc.
 	 */
-	proc_desc = (struct mips_extra_func_info *)sym->value.value;
+	proc_desc = (mips_extra_func_info_t)SYMBOL_VALUE(sym);
 	if (next_frame == NULL) {
 	    struct symtab_and_line val;
 	    struct symbol *proc_symbol =
 		PROC_DESC_IS_DUMMY(proc_desc) ? 0 : PROC_SYMBOL(proc_desc);
+
 	    if (proc_symbol) {
 		val = find_pc_line (BLOCK_START
 				    (SYMBOL_BLOCK_VALUE(proc_symbol)),
@@ -271,6 +261,11 @@ find_proc_desc(pc, next_frame)
     }
   else
     {
+      /* Is linked_proc_desc_table really necessary?  It only seems to be used
+	 by procedure call dummys.  However, the procedures being called ought
+	 to have their own proc_descs, and even if they don't,
+	 heuristic_proc_desc knows how to create them! */
+
       register struct linked_proc_info *link;
       for (link = linked_proc_desc_table; link; link = link->next)
 	  if (PROC_LOW_ADDR(&link->info) <= pc
@@ -284,28 +279,23 @@ find_proc_desc(pc, next_frame)
 
 mips_extra_func_info_t cached_proc_desc;
 
-FRAME_ADDR mips_frame_chain(frame)
+FRAME_ADDR
+mips_frame_chain(frame)
     FRAME frame;
 {
     mips_extra_func_info_t proc_desc;
     CORE_ADDR saved_pc = FRAME_SAVED_PC(frame);
 
-    if (symfile_objfile->ei.entry_file_lowpc)
-      { /* has at least the __start symbol */
-	if (saved_pc == 0 || inside_entry_file (saved_pc)) return 0;
-      }
-    else
-      { /* This hack depends on the internals of __start. */
-	/* We also assume the breakpoints are *not* inserted */
-        if (saved_pc == 0
-	    || read_memory_integer (saved_pc + 8, 4) & 0xFC00003F == 0xD)
-	    return 0;  /* break */
-      }
+    if (saved_pc == 0 || inside_entry_file (saved_pc))
+      return 0;
+
     proc_desc = find_proc_desc(saved_pc, frame);
-    if (!proc_desc) return 0;
+    if (!proc_desc)
+      return 0;
+
     cached_proc_desc = proc_desc;
     return read_next_frame_reg(frame, PROC_FRAME_REG(proc_desc))
-	+ PROC_FRAME_OFFSET(proc_desc);
+      + PROC_FRAME_OFFSET(proc_desc);
 }
 
 void
@@ -316,11 +306,12 @@ init_extra_frame_info(fci)
   /* Use proc_desc calculated in frame_chain */
   mips_extra_func_info_t proc_desc = fci->next ? cached_proc_desc :
       find_proc_desc(fci->pc, fci->next);
+
   fci->saved_regs = (struct frame_saved_regs*)
     obstack_alloc (&frame_cache_obstack, sizeof(struct frame_saved_regs));
   bzero(fci->saved_regs, sizeof(struct frame_saved_regs));
   fci->proc_desc =
-      proc_desc == &temp_proc_desc ? (char*)NULL : (char*)proc_desc;
+      proc_desc == &temp_proc_desc ? 0 : proc_desc;
   if (proc_desc)
     {
       int ireg;
@@ -373,12 +364,11 @@ init_extra_frame_info(fci)
 
       fci->saved_regs->regs[PC_REGNUM] = fci->saved_regs->regs[RA_REGNUM];
     }
-  if (fci->next == 0)
-      supply_register(FP_REGNUM, &fci->frame);
 }
 
 
-CORE_ADDR mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
+CORE_ADDR
+mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
   int nargs;
   value *args;
   CORE_ADDR sp;
@@ -538,7 +528,7 @@ mips_pop_frame()
   set_current_frame (create_new_frame (new_sp, read_pc ()));
 }
 
-static
+static void
 mips_print_register(regnum, all)
      int regnum, all;
 {
@@ -592,6 +582,7 @@ mips_print_register(regnum, all)
 }
 
 /* Replacement for generic do_registers_info.  */
+void
 mips_do_registers_info (regnum, fpregs)
      int regnum;
      int fpregs;
@@ -618,6 +609,7 @@ mips_do_registers_info (regnum, fpregs)
 /* Return number of args passed to a frame. described by FIP.
    Can return -1, meaning no way to tell.  */
 
+int
 mips_frame_num_args(fip)
 	FRAME fip;
 {
@@ -805,7 +797,7 @@ mips_skip_prologue(pc)
 
        Actually, it would not hurt to skip the storing
        of arguments on the stack as well. */
-    if (((struct mips_extra_func_info *)f->value.value)->framesize)
+    if (((mips_extra_func_info_t)SYMBOL_VALUE(f))->pdr.frameoffset)
 	return pc + 4;
 
     return pc;

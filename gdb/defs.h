@@ -664,8 +664,10 @@ qsort PARAMS ((void *base, size_t nmemb,		/* 4.10.5.2 */
 	       size_t size,
 	       int (*comp)(const void *, const void *)));
 
+#ifndef	MEM_FNS_DECLARED	/* Some non-ANSI use void *, not char *.  */
 extern PTR
 memcpy PARAMS ((void *, const void *, size_t));		/* 4.11.2.1 */
+#endif
 
 extern int
 memcmp PARAMS ((const void *, const void *, size_t));	/* 4.11.4.1 */
@@ -682,8 +684,10 @@ strstr PARAMS ((const char *, const char *));		/* 4.11.5.7 */
 extern char *
 strtok PARAMS ((char *, const char *));			/* 4.11.5.8 */
 
+#ifndef	MEM_FNS_DECLARED	/* Some non-ANSI use void *, not char *.  */
 extern PTR
 memset PARAMS ((void *, int, size_t));			/* 4.11.6.1 */
+#endif
 
 extern char *
 strerror PARAMS ((int));				/* 4.11.6.2 */
@@ -696,7 +700,11 @@ strerror PARAMS ((int));				/* 4.11.6.2 */
 #  ifdef sparc
 #   include <alloca.h>		/* NOTE:  Doesn't declare alloca() */
 #  endif
-   extern PTR alloca PARAMS ((size_t));
+#  ifdef __STDC__
+   extern void *alloca (size_t);
+#  else /* __STDC__ */
+   extern char *alloca ();
+#  endif
 # endif
 #endif
 

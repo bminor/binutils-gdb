@@ -985,6 +985,9 @@ scan_file_globals (objfile)
   struct minimal_symbol *msymbol;
   struct symbol *sym, *prev;
 
+  if (objfile->msymbols == 0)		/* Beware the null file.  */
+    return;
+
   for (msymbol = objfile -> msymbols; msymbol -> name != NULL; msymbol++)
     {
       QUIT;
