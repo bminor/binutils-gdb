@@ -1,3 +1,10 @@
+2002-02-12  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/tc-mn10300.c (other_registers): Added `epsw'.  Mark `pc'
+	and `epsw' as available on AM33 and above only.
+	(other_register_name): Add logic to handle machine type encoded in
+	reg_number.
+
 2002-02-11  Tom Rix  <trix@redhat.com>
 
 	* config/tc-ppc.c (md_apply_fix3): Check for insert fop invalid for 
