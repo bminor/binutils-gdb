@@ -481,6 +481,9 @@ ALL_MODULES = \
 	all-inet \
 	all-ispell \
 	all-itcl \
+	$(start-sanitize-ide) \
+	all-jstools \
+	$(end-sanitize-ide) \
 	all-ld \
 	all-libiberty \
 	$(start-sanitize-ide) \
@@ -553,6 +556,9 @@ CROSS_CHECK_MODULES = \
 	check-inet \
 	check-ispell \
 	check-itcl \
+	$(start-sanitize-ide) \
+	check-jstools \
+	$(end-sanitize-ide) \
 	check-ld \
 	check-libiberty \
 	$(start-sanitize-ide) \
@@ -626,6 +632,9 @@ INSTALL_MODULES = \
 	install-inet \
 	install-ispell \
 	install-itcl \
+	$(start-sanitize-ide) \
+	install-jstools \
+	$(end-sanitize-ide) \
 	install-ld \
 	install-libiberty \
 	$(start-sanitize-ide) \
@@ -780,6 +789,9 @@ CLEAN_MODULES = \
 	clean-inet \
 	clean-ispell \
 	clean-itcl \
+	$(start-sanitize-ide) \
+	clean-jstools \
+	$(end-sanitize-ide) \
 	clean-ld \
 	clean-libiberty \
 	$(start-sanitize-ide) \
@@ -1418,6 +1430,9 @@ all-indent:
 all-inet: all-tcl all-send-pr all-perl
 all-ispell: all-emacs19
 all-itcl: all-tcl all-tk
+# start-sanitize-ide
+all-jstools: all-tcl all-tk all-libide
+# end-sanitize-ide
 all-ld: all-libiberty all-bfd all-opcodes all-byacc all-flex
 configure-target-libg++: $(ALL_GCC) configure-target-librx
 all-target-libg++: configure-target-libg++ all-gas all-ld all-gcc all-target-libiberty all-target-newlib all-target-libio all-target-librx all-target-libstdc++

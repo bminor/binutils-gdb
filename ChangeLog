@@ -1,3 +1,9 @@
+start-sanitize-ide
+Mon Aug 11 13:49:46 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in, configure.in: Handle jstools like vmake.
+
+end-sanitize-ide
 Sun Aug 10 14:41:11 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (taz): Get the version number from AM_INIT_AUTOMAKE in
