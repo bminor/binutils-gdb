@@ -2681,33 +2681,11 @@ md_apply_fix (fixP, val)
       break;
 
     case BFD_RELOC_32:
-      if (!target_big_endian)
-	{
-	  *buf++ = val >> 0;
-	  *buf++ = val >> 8;
-	  *buf++ = val >> 16;
-	  *buf++ = val >> 24;
-	}
-      else
-	{
-	  *buf++ = val >> 24;
-	  *buf++ = val >> 16;
-	  *buf++ = val >> 8;
-	  *buf++ = val >> 0;
-	}
+      md_number_to_chars (buf, val, 4);
       break;
 
     case BFD_RELOC_16:
-      if (! target_big_endian)
-	{
-	  *buf++ = val >> 0;
-	  *buf++ = val >> 8;
-	}
-      else
-	{
-	  *buf++ = val >> 8;
-	  *buf++ = val >> 0;
-	}
+      md_number_to_chars (buf, val, 2);
       break;
 
     case BFD_RELOC_SH_USES:

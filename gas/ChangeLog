@@ -1,3 +1,8 @@
+2000-08-15  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/tc-sh.c (md_apply_fix) [BFD_RELOC_32, BFD_RELOC_16]: Use
+	md_number_to_chars.
+
 2000-08-14  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-arm.c (do_bx): Allow "bx pc".
