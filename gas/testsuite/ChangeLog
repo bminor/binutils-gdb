@@ -1,3 +1,8 @@
+2005-03-30  Julian Brown  <julian@codesourcery.com>
+
+	* gas/arm/mapping.d: Update expected output due to mapping symbols
+	being untyped.
+
 2005-03-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp: Run segment and inval-seg for i386. Run

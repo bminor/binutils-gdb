@@ -1,3 +1,10 @@
+2005-03-30  Julian Brown  <julian@codesourcery.com>
+
+	* ld-arm/arm-app-abs32.d: Update expected output due to mapping symbols
+	being untyped.
+	* ld-arm/arm-app.d: Likewise.
+	* ld-arm/mixed-app.d: Likewise.
+
 2005-03-29  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ld-arm/tls-lib.s, ld-arm/tls-lib.d, ld-arm/tls-lib.r,

@@ -1,3 +1,16 @@
+2005-03-30  Julian Brown  <julian@codesourcery.com>
+
+	* bfd-in.h (bfd_elf32_is_arm_mapping_symbol_name): Add prototype.
+	* bfd-in2.h: Regenerate.
+	* elf32-arm.c (elf32_arm_is_target_special_symbol): Rename call to
+	bfd_elf32_is_arm_mapping_symbol_name.
+	(elf32_arm_output_symbol_hook): Likewise.
+	(arm_elf_find_function): Likewise, and include STT_NOTYPE in test for
+	mapping symbols.
+	(is_arm_mapping_symbol_name): Function moved from here...
+	* cpu-arm.c (bfd_elf32_is_arm_mapping_symbol_name): ...to here, renamed
+	and made global.
+
 2005-03-29  Aaron W. LaFramboise  <aaron98wiridge9@aaronwl.com>
 
 	* configure.in: Check for ffs decl and alphabetize.

@@ -8,7 +8,7 @@ Disassembly of section .plt:
 
 .* <.plt>:
  .*:	e52de004 	str	lr, \[sp, #-4\]!
- .*:	e59fe004 	ldr	lr, \[pc, #4\]	; .* <.plt\+0x10>
+ .*:	e59fe004 	ldr	lr, \[pc, #4\]	; .* <_start-0x2c>
  .*:	e08fe00e 	add	lr, pc, lr
  .*:	e5bef008 	ldr	pc, \[lr, #8\]!
  .*:	.*
@@ -34,7 +34,7 @@ Disassembly of section .text:
 .* <app_func>:
  .*:	e1a0c00d 	mov	ip, sp
  .*:	e92dd800 	stmdb	sp!, {fp, ip, lr, pc}
- .*:	ebffffe. 	bl	.* <.text-0x..>
+ .*:	ebffffe. 	bl	.* <_start-0x..>
  .*:	e89d6800 	ldmia	sp, {fp, sp, lr}
  .*:	e12fff1e 	bx	lr
  .*:	e1a00000 	nop			\(mov r0,r0\)
@@ -49,7 +49,7 @@ Disassembly of section .text:
 
 .* <app_tfunc>:
  .*:	b500      	push	{lr}
- .*:	(ffc.f7ff|f7ffffc.) 	bl	.* <.text-0x..>
+ .*:	(ffc.f7ff|f7ffffc.) 	bl	.* <_start-0x..>
  .*:	bd00      	pop	{pc}
  .*:	4770      	bx	lr
  .*:	46c0      	nop			\(mov r8, r8\)
