@@ -24,17 +24,4 @@ esac
 configdirs=${sim_target}
 AC_CONFIG_SUBDIRS($configdirs)
 
-if test ! -f ${srcdir}/${sim_target}/${sim_target}.mt ; then
-	target_makefile_frag=/dev/null
-else
-	target_makefile_frag=${srcdir}/${sim_target}/${sim_target}.mt
-fi
-
-frags=
-if test $target_makefile_frag != /dev/null; then
-	frags="$frags $target_makefile_frag"
-fi
-AC_SUBST_FILE(target_makefile_frag)
-AC_SUBST(frags)
-
 AC_OUTPUT(Makefile)
