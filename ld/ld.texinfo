@@ -219,7 +219,7 @@ whitespace, or be given as separate arguments immediately following the
 option that requires them.
 
 For options whose names are multiple letters, either one dash or two can
-precede the option name; for example, @samp{--oformat} and
+precede the option name; for example, @samp{-oformat} and
 @samp{--oformat} are equivalent.  Arguments to multiple-letter options
 must either be separated from the option name by an equals sign, or be
 given as separate arguments immediately following the option that

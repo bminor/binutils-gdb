@@ -173,10 +173,10 @@ gld_${EMULATION_NAME}_before_parse()
 #define OPTION_IMP_COMPAT		(OPTION_WARN_DUPLICATE_EXPORTS + 1)
 #define OPTION_ENABLE_AUTO_IMAGE_BASE	(OPTION_IMP_COMPAT + 1)
 #define OPTION_DISABLE_AUTO_IMAGE_BASE	(OPTION_ENABLE_AUTO_IMAGE_BASE + 1)
-#define OPTION_DLL_SEARCH_PREFIX		(OPTION_DISABLE_AUTO_IMAGE_BASE + 1)
+#define OPTION_DLL_SEARCH_PREFIX	(OPTION_DISABLE_AUTO_IMAGE_BASE + 1)
+#define OPTION_NO_DEFAULT_EXCLUDES	(OPTION_DLL_SEARCH_PREFIX + 1)
 
-static struct option longopts[] =
-{
+static struct option longopts[] = {
   /* PE options */
   {"base-file", required_argument, NULL, OPTION_BASE_FILE},
   {"dll", no_argument, NULL, OPTION_DLL},
@@ -211,6 +211,7 @@ static struct option longopts[] =
   {"enable-auto-image-base", no_argument, NULL, OPTION_ENABLE_AUTO_IMAGE_BASE},
   {"disable-auto-image-base", no_argument, NULL, OPTION_DISABLE_AUTO_IMAGE_BASE},
   {"dll-search-prefix", required_argument, NULL, OPTION_DLL_SEARCH_PREFIX},
+  {"no-default-excludes", no_argument, NULL, OPTION_NO_DEFAULT_EXCLUDES},
 #endif
   {NULL, no_argument, NULL, 0}
 };
@@ -562,6 +563,9 @@ gld_${EMULATION_NAME}_parse_args(argc, argv)
       break;
     case OPTION_DLL_SEARCH_PREFIX:
       pe_dll_search_prefix = xstrdup( optarg );
+      break;
+    case OPTION_NO_DEFAULT_EXCLUDES:
+      pe_dll_do_default_excludes = 0;
       break;
 #endif
     }

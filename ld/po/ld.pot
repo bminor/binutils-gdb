@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-12-12 12:46-0800\n"
+"POT-Creation-Date: 2000-12-26 12:54-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -27,230 +27,230 @@ msgstr ""
 msgid "Errors encountered processing file %s"
 msgstr ""
 
-#: emultempl/armcoff.em:206 emultempl/pe.em:1207
+#: emultempl/armcoff.em:206 emultempl/pe.em:1211
 msgid "%P: warning: '--thumb-entry %s' is overriding '-e %s'\n"
 msgstr ""
 
-#: emultempl/armcoff.em:211 emultempl/pe.em:1212
+#: emultempl/armcoff.em:211 emultempl/pe.em:1216
 msgid "%P: warning: connot find thumb start symbol %s\n"
 msgstr ""
 
-#: emultempl/pe.em:265
+#: emultempl/pe.em:266
 msgid ""
 "  --base_file <basefile>             Generate a base file for relocatable "
 "DLLs\n"
 msgstr ""
 
-#: emultempl/pe.em:266
+#: emultempl/pe.em:267
 msgid ""
 "  --dll                              Set image base to the default for DLLs\n"
 msgstr ""
 
-#: emultempl/pe.em:267
+#: emultempl/pe.em:268
 msgid "  --file-alignment <size>            Set file alignment\n"
 msgstr ""
 
-#: emultempl/pe.em:268
-msgid "  --heap <size>                      Set initial size of the heap\n"
-msgstr ""
-
 #: emultempl/pe.em:269
-msgid ""
-"  --image-base <address>             Set start address of the executable\n"
+msgid "  --heap <size>                      Set initial size of the heap\n"
 msgstr ""
 
 #: emultempl/pe.em:270
 msgid ""
-"  --major-image-version <number>     Set version number of the executable\n"
+"  --image-base <address>             Set start address of the executable\n"
 msgstr ""
 
 #: emultempl/pe.em:271
-msgid "  --major-os-version <number>        Set minimum required OS version\n"
+msgid ""
+"  --major-image-version <number>     Set version number of the executable\n"
 msgstr ""
 
 #: emultempl/pe.em:272
+msgid "  --major-os-version <number>        Set minimum required OS version\n"
+msgstr ""
+
+#: emultempl/pe.em:273
 msgid ""
 "  --major-subsystem-version <number> Set minimum required OS subsystem "
 "version\n"
 msgstr ""
 
-#: emultempl/pe.em:273
+#: emultempl/pe.em:274
 msgid ""
 "  --minor-image-version <number>     Set revision number of the executable\n"
 msgstr ""
 
-#: emultempl/pe.em:274
+#: emultempl/pe.em:275
 msgid "  --minor-os-version <number>        Set minimum required OS revision\n"
 msgstr ""
 
-#: emultempl/pe.em:275
+#: emultempl/pe.em:276
 msgid ""
 "  --minor-subsystem-version <number> Set minimum required OS subsystem "
 "revision\n"
 msgstr ""
 
-#: emultempl/pe.em:276
+#: emultempl/pe.em:277
 msgid "  --section-alignment <size>         Set section alignment\n"
 msgstr ""
 
-#: emultempl/pe.em:277
-msgid "  --stack <size>                     Set size of the initial stack\n"
-msgstr ""
-
 #: emultempl/pe.em:278
-msgid ""
-"  --subsystem <name>[:<version>]     Set required OS subsystem [& version]\n"
+msgid "  --stack <size>                     Set size of the initial stack\n"
 msgstr ""
 
 #: emultempl/pe.em:279
 msgid ""
-"  --support-old-code                 Support interworking with old code\n"
+"  --subsystem <name>[:<version>]     Set required OS subsystem [& version]\n"
 msgstr ""
 
 #: emultempl/pe.em:280
+msgid ""
+"  --support-old-code                 Support interworking with old code\n"
+msgstr ""
+
+#: emultempl/pe.em:281
 msgid ""
 "  --thumb-entry=<symbol>             Set the entry point to be Thumb "
 "<symbol>\n"
 msgstr ""
 
-#: emultempl/pe.em:282
+#: emultempl/pe.em:283
 msgid ""
 "  --add-stdcall-alias                Export symbols with and without @nn\n"
 msgstr ""
 
-#: emultempl/pe.em:283
-msgid "  --disable-stdcall-fixup            Don't link _sym to _sym@nn\n"
-msgstr ""
-
 #: emultempl/pe.em:284
-msgid ""
-"  --enable-stdcall-fixup             Link _sym to _sym@nn without warnings\n"
+msgid "  --disable-stdcall-fixup            Don't link _sym to _sym@nn\n"
 msgstr ""
 
 #: emultempl/pe.em:285
 msgid ""
-"  --exclude-symbols sym,sym,...      Exclude symbols from automatic export\n"
+"  --enable-stdcall-fixup             Link _sym to _sym@nn without warnings\n"
 msgstr ""
 
 #: emultempl/pe.em:286
+msgid ""
+"  --exclude-symbols sym,sym,...      Exclude symbols from automatic export\n"
+msgstr ""
+
+#: emultempl/pe.em:287
 msgid ""
 "  --export-all-symbols               Automatically export all globals to "
 "DLL\n"
 msgstr ""
 
-#: emultempl/pe.em:287
+#: emultempl/pe.em:288
 msgid "  --kill-at                          Remove @nn from exported symbols\n"
 msgstr ""
 
-#: emultempl/pe.em:288
+#: emultempl/pe.em:289
 msgid "  --out-implib <file>                Generate import library\n"
 msgstr ""
 
-#: emultempl/pe.em:289
+#: emultempl/pe.em:290
 msgid ""
 "  --output-def <file>                Generate a .DEF file for the built DLL\n"
 msgstr ""
 
-#: emultempl/pe.em:290
+#: emultempl/pe.em:291
 msgid "  --warn-duplicate-exports           Warn about duplicate exports.\n"
 msgstr ""
 
-#: emultempl/pe.em:291
+#: emultempl/pe.em:292
 msgid ""
 "  --compat-implib                    Create backward compatible import "
 "libs;\n"
 msgstr ""
 
-#: emultempl/pe.em:292
+#: emultempl/pe.em:293
 msgid "                                       create __imp_<SYMBOL> as well.\n"
 msgstr ""
 
-#: emultempl/pe.em:293
+#: emultempl/pe.em:294
 msgid ""
 "  --enable-auto-image-base           Automatically choose image base for "
 "DLLs\n"
 msgstr ""
 
-#: emultempl/pe.em:294
+#: emultempl/pe.em:295
 msgid "                                       unless user specifies one\n"
 msgstr ""
 
-#: emultempl/pe.em:295
+#: emultempl/pe.em:296
 msgid ""
 "  --disable-auto-image-base          Do not auto-choose image base. "
 "(default)\n"
 msgstr ""
 
-#: emultempl/pe.em:296
+#: emultempl/pe.em:297
 msgid ""
 "  --dll-search-prefix=<string>       When linking dynamically to a dll "
 "witout an\n"
 msgstr ""
 
-#: emultempl/pe.em:297
+#: emultempl/pe.em:298
 msgid ""
 "                                       importlib, use <string><basename>.dll "
 "\n"
 msgstr ""
 
-#: emultempl/pe.em:298
+#: emultempl/pe.em:299
 msgid ""
 "                                       in preference to lib<basename>.dll \n"
 msgstr ""
 
-#: emultempl/pe.em:366
+#: emultempl/pe.em:367
 msgid "%P: warning: bad version number in -subsystem option\n"
 msgstr ""
 
-#: emultempl/pe.em:402
+#: emultempl/pe.em:403
 msgid "%P%F: invalid subsystem type %s\n"
 msgstr ""
 
-#: emultempl/pe.em:417
+#: emultempl/pe.em:418
 msgid "%P%F: invalid hex number for PE parameter '%s'\n"
 msgstr ""
 
-#: emultempl/pe.em:435
+#: emultempl/pe.em:436
 msgid "%P%F: strange hex info for PE parameter '%s'\n"
 msgstr ""
 
-#: emultempl/pe.em:474
+#: emultempl/pe.em:475
 #, c-format
 msgid "%s: Can't open base file %s\n"
 msgstr ""
 
-#: emultempl/pe.em:664
+#: emultempl/pe.em:668
 msgid "%P: warning, file alignment > section alignment.\n"
 msgstr ""
 
-#: emultempl/pe.em:735 emultempl/pe.em:761
+#: emultempl/pe.em:739 emultempl/pe.em:765
 #, c-format
 msgid "Warning: resolving %s by linking to %s\n"
 msgstr ""
 
-#: emultempl/pe.em:740 emultempl/pe.em:766
+#: emultempl/pe.em:744 emultempl/pe.em:770
 msgid "Use --enable-stdcall-fixup to disable these warnings\n"
 msgstr ""
 
-#: emultempl/pe.em:741 emultempl/pe.em:767
+#: emultempl/pe.em:745 emultempl/pe.em:771
 msgid "Use --disable-stdcall-fixup to disable these fixups\n"
 msgstr ""
 
-#: emultempl/pe.em:784
+#: emultempl/pe.em:788
 msgid "%F%P: PE operations on non PE file.\n"
 msgstr ""
 
-#: emultempl/pe.em:1011
+#: emultempl/pe.em:1015
 #, c-format
 msgid "Errors encountered processing file %s\n"
 msgstr ""
 
-#: emultempl/pe.em:1034
+#: emultempl/pe.em:1038
 #, c-format
 msgid "Errors encountered processing file %s for interworking"
 msgstr ""
 
-#: emultempl/pe.em:1090 ldlang.c:1980 ldlang.c:4346 ldlang.c:4379
+#: emultempl/pe.em:1094 ldlang.c:1981 ldlang.c:4347 ldlang.c:4380
 #: ldmain.c:1016
 msgid "%P%F: bfd_link_hash_lookup failed: %E\n"
 msgstr ""
@@ -457,200 +457,200 @@ msgstr ""
 msgid "%P%F: cannot represent machine `%s'\n"
 msgstr ""
 
-#: ldlang.c:735
+#: ldlang.c:736
 msgid ""
 "\n"
 "Memory Configuration\n"
 "\n"
 msgstr ""
 
-#: ldlang.c:737
+#: ldlang.c:738
 msgid "Name"
 msgstr ""
 
-#: ldlang.c:737
+#: ldlang.c:738
 msgid "Origin"
 msgstr ""
 
-#: ldlang.c:737
+#: ldlang.c:738
 msgid "Length"
 msgstr ""
 
-#: ldlang.c:737
+#: ldlang.c:738
 msgid "Attributes"
 msgstr ""
 
-#: ldlang.c:779
+#: ldlang.c:780
 msgid ""
 "\n"
 "Linker script and memory map\n"
 "\n"
 msgstr ""
 
-#: ldlang.c:796
+#: ldlang.c:797
 msgid "%P%F: Illegal use of `%s' section"
 msgstr ""
 
-#: ldlang.c:806
+#: ldlang.c:807
 msgid "%P%F: output format %s cannot represent section called %s\n"
 msgstr ""
 
-#: ldlang.c:968
+#: ldlang.c:969
 msgid "%P: %B: warning: ignoring duplicate section `%s'\n"
 msgstr ""
 
-#: ldlang.c:971
+#: ldlang.c:972
 msgid "%P: %B: warning: ignoring duplicate `%s' section symbol `%s'\n"
 msgstr ""
 
-#: ldlang.c:985
+#: ldlang.c:986
 msgid "%P: %B: warning: duplicate section `%s' has different size\n"
 msgstr ""
 
-#: ldlang.c:1036
+#: ldlang.c:1037
 msgid "%P%F: Failed to create hash table\n"
 msgstr ""
 
-#: ldlang.c:1426
+#: ldlang.c:1427
 msgid "%B: file not recognized: %E\n"
 msgstr ""
 
-#: ldlang.c:1427
+#: ldlang.c:1428
 msgid "%B: matching formats:"
 msgstr ""
 
-#: ldlang.c:1434
+#: ldlang.c:1435
 msgid "%F%B: file not recognized: %E\n"
 msgstr ""
 
-#: ldlang.c:1487
+#: ldlang.c:1488
 msgid "%F%B: object %B in archive is not object\n"
 msgstr ""
 
-#: ldlang.c:1493 ldlang.c:1505
+#: ldlang.c:1494 ldlang.c:1506
 msgid "%F%B: could not read symbols: %E\n"
 msgstr ""
 
-#: ldlang.c:1765
+#: ldlang.c:1766
 msgid ""
 "%P: warning: could not find any targets that match endianness requirement\n"
 msgstr ""
 
-#: ldlang.c:1778
+#: ldlang.c:1779
 msgid "%P%F: target %s not found\n"
 msgstr ""
 
-#: ldlang.c:1780
+#: ldlang.c:1781
 msgid "%P%F: cannot open output file %s: %E\n"
 msgstr ""
 
-#: ldlang.c:1790
+#: ldlang.c:1791
 msgid "%P%F:%s: can not make object file: %E\n"
 msgstr ""
 
-#: ldlang.c:1794
+#: ldlang.c:1795
 msgid "%P%F:%s: can not set architecture: %E\n"
 msgstr ""
 
-#: ldlang.c:1798
+#: ldlang.c:1799
 msgid "%P%F: can not create link hash table: %E\n"
 msgstr ""
 
-#: ldlang.c:2103
+#: ldlang.c:2104
 msgid " load address 0x%V"
 msgstr ""
 
-#: ldlang.c:2233
+#: ldlang.c:2234
 msgid "%W (size before relaxing)\n"
 msgstr ""
 
-#: ldlang.c:2315
+#: ldlang.c:2316
 #, c-format
 msgid "Address of section %s set to "
 msgstr ""
 
-#: ldlang.c:2464
+#: ldlang.c:2465
 #, c-format
 msgid "Fail with %d\n"
 msgstr ""
 
-#: ldlang.c:2702
+#: ldlang.c:2703
 msgid "%X%P: section %s [%V -> %V] overlaps section %s [%V -> %V]\n"
 msgstr ""
 
-#: ldlang.c:2736
+#: ldlang.c:2737
 msgid "%X%P: address 0x%v of %B section %s is not within region %s\n"
 msgstr ""
 
-#: ldlang.c:2744
+#: ldlang.c:2745
 msgid "%X%P: region %s is full (%B section %s)\n"
 msgstr ""
 
-#: ldlang.c:2793
+#: ldlang.c:2794
 msgid "%P%X: Internal error on COFF shared library section %s\n"
 msgstr ""
 
-#: ldlang.c:2834
+#: ldlang.c:2835
 msgid "%P: warning: no memory region specified for section `%s'\n"
 msgstr ""
 
-#: ldlang.c:2847
+#: ldlang.c:2848
 msgid "%P: warning: changing start of section %s by %u bytes\n"
 msgstr ""
 
-#: ldlang.c:2861
+#: ldlang.c:2862
 msgid "%F%S: non constant address expression for section %s\n"
 msgstr ""
 
-#: ldlang.c:2926
+#: ldlang.c:2927
 msgid "%X%P: use an absolute load address or a load memory region, not both\n"
 msgstr ""
 
-#: ldlang.c:3042
+#: ldlang.c:3043
 msgid "%P%F: can't relax section: %E\n"
 msgstr ""
 
-#: ldlang.c:3209
+#: ldlang.c:3210
 msgid "%F%P: invalid data statement\n"
 msgstr ""
 
-#: ldlang.c:3246
+#: ldlang.c:3247
 msgid "%F%P: invalid reloc statement\n"
 msgstr ""
 
-#: ldlang.c:3382
+#: ldlang.c:3383
 msgid "%P%F:%s: can't set start address\n"
 msgstr ""
 
-#: ldlang.c:3395 ldlang.c:3412
+#: ldlang.c:3396 ldlang.c:3413
 msgid "%P%F: can't set start address\n"
 msgstr ""
 
-#: ldlang.c:3407
+#: ldlang.c:3408
 msgid "%P: warning: cannot find entry symbol %s; defaulting to %V\n"
 msgstr ""
 
-#: ldlang.c:3417
+#: ldlang.c:3418
 msgid "%P: warning: cannot find entry symbol %s; not setting start address\n"
 msgstr ""
 
-#: ldlang.c:3459
+#: ldlang.c:3460
 msgid ""
 "%P: warning: %s architecture of input file `%B' is incompatible with %s "
 "output\n"
 msgstr ""
 
-#: ldlang.c:3477
+#: ldlang.c:3478
 msgid "%E%X: failed to merge target specific data of file %B\n"
 msgstr ""
 
-#: ldlang.c:3564
+#: ldlang.c:3565
 msgid ""
 "\n"
 "Allocating common symbols\n"
 msgstr ""
 
-#: ldlang.c:3565
+#: ldlang.c:3566
 msgid ""
 "Common symbol       size              file\n"
 "\n"
@@ -659,43 +659,43 @@ msgstr ""
 #. This message happens when using the
 #. svr3.ifile linker script, so I have
 #. disabled it.
-#: ldlang.c:3647
+#: ldlang.c:3648
 msgid "%P: no [COMMON] command, defaulting to .bss\n"
 msgstr ""
 
-#: ldlang.c:3706
+#: ldlang.c:3707
 msgid "%P%F: invalid syntax in flags\n"
 msgstr ""
 
-#: ldlang.c:4295
+#: ldlang.c:4296
 msgid "%P%Fmultiple STARTUP files\n"
 msgstr ""
 
-#: ldlang.c:4565
+#: ldlang.c:4566
 msgid "%F%P: bfd_record_phdr failed: %E\n"
 msgstr ""
 
-#: ldlang.c:4584
+#: ldlang.c:4585
 msgid "%X%P: section `%s' assigned to non-existent phdr `%s'\n"
 msgstr ""
 
-#: ldlang.c:4892
+#: ldlang.c:4893
 msgid "%X%P: unknown language `%s' in version information\n"
 msgstr ""
 
-#: ldlang.c:4941
+#: ldlang.c:4942
 msgid "%X%P: duplicate version tag `%s'\n"
 msgstr ""
 
-#: ldlang.c:4954 ldlang.c:4967
+#: ldlang.c:4955 ldlang.c:4968
 msgid "%X%P: duplicate expression `%s' in version information\n"
 msgstr ""
 
-#: ldlang.c:5004
+#: ldlang.c:5005
 msgid "%X%P: unable to find version dependency `%s'\n"
 msgstr ""
 
-#: ldlang.c:5026
+#: ldlang.c:5027
 msgid "%X%P: unable to read .exports section contents"
 msgstr ""
 

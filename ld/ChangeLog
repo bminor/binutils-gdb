@@ -1,3 +1,10 @@
+2000-12-26  Danny Smith  <danny_r_smith_2001@yahoo.co.nz>
+
+	* emultempl/pe.em (OPTION_NO_DEFAULT_EXCLUDES): Define.
+	(longopts[]): New --no-default-excludes option.
+	(gld_${EMULATION_NAME}_list_options): Document.
+	(gld_${EMULATION_NAME}_parse_args): Handle.
+
 2000-12-13  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
 	* ldlang.c (new_stat): Revert the last beautification with "innocent"
