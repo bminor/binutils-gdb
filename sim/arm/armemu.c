@@ -1998,8 +1998,9 @@ ARMul_Emulate26 (register ARMul_State * state)
 	      UNDEF_LSRPCBaseWb;
 	      UNDEF_LSRPCOffWb;
 	      lhs = LHS;
+	      temp = lhs - LSRegRHS;
 	      if (LoadWord (state, instr, lhs))
-		LSBase = lhs - LSRegRHS;
+		LSBase = temp;
 	      break;
 
 	    case 0x62:		/* Store Word, WriteBack, Post Dec, Reg */
@@ -2030,9 +2031,10 @@ ARMul_Emulate26 (register ARMul_State * state)
 	      UNDEF_LSRPCBaseWb;
 	      UNDEF_LSRPCOffWb;
 	      lhs = LHS;
+	      temp = lhs - LSRegRHS;
 	      state->NtransSig = LOW;
 	      if (LoadWord (state, instr, lhs))
-		LSBase = lhs - LSRegRHS;
+		LSBase = temp;
 	      state->NtransSig = (state->Mode & 3) ? HIGH : LOW;
 	      break;
 
@@ -2062,8 +2064,9 @@ ARMul_Emulate26 (register ARMul_State * state)
 	      UNDEF_LSRPCBaseWb;
 	      UNDEF_LSRPCOffWb;
 	      lhs = LHS;
+	      temp = lhs - LSRegRHS;
 	      if (LoadByte (state, instr, lhs, LUNSIGNED))
-		LSBase = lhs - LSRegRHS;
+		LSBase = temp;
 	      break;
 
 	    case 0x66:		/* Store Byte, WriteBack, Post Dec, Reg */
@@ -2094,9 +2097,10 @@ ARMul_Emulate26 (register ARMul_State * state)
 	      UNDEF_LSRPCBaseWb;
 	      UNDEF_LSRPCOffWb;
 	      lhs = LHS;
+	      temp = lhs - LSRegRHS;
 	      state->NtransSig = LOW;
 	      if (LoadByte (state, instr, lhs, LUNSIGNED))
-		LSBase = lhs - LSRegRHS;
+		LSBase = temp;
 	      state->NtransSig = (state->Mode & 3) ? HIGH : LOW;
 	      break;
 
@@ -2126,8 +2130,9 @@ ARMul_Emulate26 (register ARMul_State * state)
 	      UNDEF_LSRPCBaseWb;
 	      UNDEF_LSRPCOffWb;
 	      lhs = LHS;
+	      temp = lhs + LSRegRHS;
 	      if (LoadWord (state, instr, lhs))
-		LSBase = lhs + LSRegRHS;
+		LSBase = temp;
 	      break;
 
 	    case 0x6a:		/* Store Word, WriteBack, Post Inc, Reg */
@@ -2158,9 +2163,10 @@ ARMul_Emulate26 (register ARMul_State * state)
 	      UNDEF_LSRPCBaseWb;
 	      UNDEF_LSRPCOffWb;
 	      lhs = LHS;
+	      temp = lhs + LSRegRHS;
 	      state->NtransSig = LOW;
 	      if (LoadWord (state, instr, lhs))
-		LSBase = lhs + LSRegRHS;
+		LSBase = temp;
 	      state->NtransSig = (state->Mode & 3) ? HIGH : LOW;
 	      break;
 
@@ -2190,8 +2196,9 @@ ARMul_Emulate26 (register ARMul_State * state)
 	      UNDEF_LSRPCBaseWb;
 	      UNDEF_LSRPCOffWb;
 	      lhs = LHS;
+	      temp = lhs + LSRegRHS;
 	      if (LoadByte (state, instr, lhs, LUNSIGNED))
-		LSBase = lhs + LSRegRHS;
+		LSBase = temp;
 	      break;
 
 	    case 0x6e:		/* Store Byte, WriteBack, Post Inc, Reg */
@@ -2222,9 +2229,10 @@ ARMul_Emulate26 (register ARMul_State * state)
 	      UNDEF_LSRPCBaseWb;
 	      UNDEF_LSRPCOffWb;
 	      lhs = LHS;
+	      temp = lhs + LSRegRHS;
 	      state->NtransSig = LOW;
 	      if (LoadByte (state, instr, lhs, LUNSIGNED))
-		LSBase = lhs + LSRegRHS;
+		LSBase = temp;
 	      state->NtransSig = (state->Mode & 3) ? HIGH : LOW;
 	      break;
 

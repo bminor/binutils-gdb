@@ -1,5 +1,9 @@
 2000-07-04  Alexandre Oliva  <aoliva@redhat.com>
 
+	* armemu.c (ARMul_Emulate): Compute writeback value before
+	loading, since the offset register may be the destination
+	register.
+
 	* armdefs.h (SYSTEMBANK): Define as USERBANK.
 	* armsupp.c (ARMul_SwitchMode): Remove SYSTEMBANK cases.
 
