@@ -1,3 +1,10 @@
+Tue Nov  5 22:47:46 1991  Steve Chamberlain  (sac at cygnus.com)
+
+	* Makefile.in: put a - infront of the mv y.tab.c c-exp.tab.c and
+	mv y.tab.c m2-exp.tab.c, so that if bison is used, and the files
+	are created in place, so the mv fails, then the make continues.
+
+
 Tue Nov  5 16:47:47 1991  Per Bothner  (bothner at cygnus.com)
 
 	Add C++ as a separate language.
