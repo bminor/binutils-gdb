@@ -1,3 +1,10 @@
+2002-04-19  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* gas/all/gas.exp (cofftag): Do not run test for xscale-coff
+	toolchain.
+	(struct, align, incbin): Use case switch so that other targets to
+	be skipped can be added in the future.
+
 2002-04-17  matthew green  <mrg@redhat.com>
 
 	* gas/ppc/altivec.d: Fix dssall test.
