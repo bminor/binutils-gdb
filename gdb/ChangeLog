@@ -1,5 +1,12 @@
 Thu Apr 28 08:40:56 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* dbxread.c (stabsect_build_psymtabs): Assign to sym_stab_info
+	directly, rather than via DBX_SYMFILE_INFO.  A cast on the left
+	side of an assignment is non-portable.
+
+	* symtab.c (decode_line_1): Call error not warning and then
+	return_to_top_level. 
+
 	* utils.c (query): Change syntax of query annotations to be
 	consistent with other input annotations.
 	(prompt_for_continue): Likewise for prompt-for-continue annotation.
