@@ -540,6 +540,7 @@ stamp-lib: libbfd.la
 	libtooldir=`$(LIBTOOL) --config | sed -n -e 's/^objdir=//p'`; \
 	if [ -f $$libtooldir/libbfd.a ]; then \
 	  cp $$libtooldir/libbfd.a libbfd.tmp; \
+	  $(RANLIB) libbfd.tmp; \
 	  $(SHELL) $(srcdir)/../move-if-change libbfd.tmp libbfd.a; \
 	else true; fi
 	touch stamp-lib
