@@ -69,7 +69,8 @@ extern int pgrp_inferior;
 
 extern char *source_path;
 
-char **pprompt;			/* Pointer to pointer to prompt */
+/* The name of the executable file */
+static char *exec_file;
 
 /* Tell energize_command_line_input() where to get its text from */
 static int doing_breakcommands_message = 0;
@@ -1149,18 +1150,25 @@ kernel_dispatch(queue)
 	  }
 	  break;
 	case DynamicLoadRType:
-	  switch (req->dynamicLoad.request->action)
-	    {
-	    case CDynamicLoadUpdateSymtab:
-	      printf_filtered("CDynamicLoadUpdateSymtab, filename=%s\n",
-			      req->dynamicLoad.filenames.text);
-	      break;
-	    default:
-	      printf_filtered("DynamicLoadRType: unknown action=%d, filename=%s\n",
-			      req->dynamicLoad.request->action,
-			      req->dynamicLoad.filenames.text);
-	      break;
-	    }
+	  {
+	    char *filename;
+
+	    filename = req->dynamicLoad.filenames.byteLen ?
+	      req->dynamicLoad.filenames.text : exec_file;
+
+	    switch (req->dynamicLoad.request->action)
+	      {
+	      case CDynamicLoadUpdateSymtab:
+		execute_command_1(1, queue, "exec-file %s", filename);
+		execute_command_1(1, queue, "symbol-file %s", filename);
+		break;
+	      default:
+		printf_filtered("DynamicLoadRType: unknown action=%d, filename=%s\n",
+				req->dynamicLoad.request->action,
+				req->dynamicLoad.filenames.text);
+		break;
+	      }
+	  }
 	  break;
 	default:
 	  fprintf(stderr, "Unknown Debugger request type = %d\n",
@@ -1308,6 +1316,8 @@ energize_initialize(energize_id, execarg)
     return;
 
   if (!execarg) execarg = "";
+
+  exec_file = strdup(execarg);	/* Save for later */
 
   printf("\ngdb-debugger pid=%d\n", getpid()); /* XXX - debugging only */
   

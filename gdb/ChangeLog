@@ -1,5 +1,7 @@
 Fri Jul 17 16:52:04 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* energize.c:  Second cut at DynamicLoad message handling.
+
 	* energize.c:  Relativize pathnames in #include statements.
 	* (kernel_dispatch):  Better error messages for unknown protocol
 	messages.
