@@ -1,5 +1,16 @@
 2002-06-26  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* config/vax/tm-vax.h (BREAKPOINT): Remove.
+	(BELIEVE_PCC_PROMOTION): Remove.
+	(AP_REGNUM): Move to...
+	* config/vax/nm-vax.h: ...here.
+	* vax-tdep.c: Use VAX_AP_REGNUM instead of AP_REGNUM.
+	(vax_breakpoint_from_pc): New function.
+	(vax_gdbarch_init): Initialize gdbarch_breakpoint_from_pc
+	and gdbarch_believe_pcc_promotion.
+
+2002-06-26  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* Makefile.in (vax_tdep_h): Define.  
 	(vax-tdep.o): Use $(vax_tdep_h).
 	* vax-tdep.c (vax_gdbarch_init): Use generic OS ABI framework.

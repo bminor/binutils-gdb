@@ -31,11 +31,6 @@
 #define SIGTRAMP_START(pc)	STACK_END_ADDR
 #define SIGTRAMP_END(pc)	0x80000000
 
-/* Sequence of bytes for breakpoint instruction.  */
-#define BREAKPOINT {3}
-
-#define AP_REGNUM 12	/* XXXJRT */
-
 /* Offset to saved PC in sigcontext, from <sys/signal.h>.  */
 /* XXXJRT should go away */
 #define SIGCONTEXT_PC_OFFSET 12
@@ -43,6 +38,3 @@
 /* XXXJRT not yet under gdbarch control */
 #define FRAME_ARGS_ADDRESS_CORRECT(fi) vax_frame_args_address_correct ((fi))
 extern CORE_ADDR vax_frame_args_address_correct (struct frame_info *);
-
-/* If vax pcc says CHAR or SHORT, it provides the correct address.  */
-#define BELIEVE_PCC_PROMOTION 1
