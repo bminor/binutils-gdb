@@ -1920,10 +1920,90 @@ md_apply_fix3 (fixp, valuep, seg)
      valueT *valuep;
      segT seg;
 {
-  /* We shouldn't ever get here because linkrelax is nonzero.  */
-  abort ();
+
+  valueT value = *valuep;
+  char *fixpos = fixp->fx_where + fixp->fx_frag->fr_literal;
+  int size = 0;
+
+  assert (fixp->fx_r_type < BFD_RELOC_UNUSED);
+
+  /* This should never happen.  */
+  if (seg->flags & SEC_ALLOC)
+      abort ();
+
+  /* If the fix is relative to a symbol which is not defined, or not
+     in the same segment as the fix, we cannot resolve it here.  */
+  if (fixp->fx_addsy != NULL
+      && (! S_IS_DEFINED (fixp->fx_addsy)
+	  || (S_GET_SEGMENT (fixp->fx_addsy) != seg)))
+    {
+      fixp->fx_done = 0;
+      return 0;
+    }
+
+  switch (fixp->fx_r_type)
+    {
+    case BFD_RELOC_8:
+      size = 1;
+      break;
+
+    case BFD_RELOC_16:
+      size = 2;
+      break;
+
+    case BFD_RELOC_32:
+      size = 4;
+      break;
+
+    case BFD_RELOC_VTABLE_INHERIT:
+    case BFD_RELOC_VTABLE_ENTRY:
+      fixp->fx_done = 0;
+      return 1;
+
+    case BFD_RELOC_NONE:
+    default:
+      as_bad_where (fixp->fx_file, fixp->fx_line,
+                   _("Bad relocation fixup type (%d)"), fixp->fx_r_type);
+    }
+
+  md_number_to_chars (fixpos, fixp->fx_offset, size);
+
   fixp->fx_done = 1;
   return 0;
+
+}
+
+/* Return nonzero if the fixup in FIXP will require a relocation,
+   even it if appears that the fixup could be completely handled
+   within GAS.  */
+
+int
+mn10300_force_relocation (fixp)
+     struct fix *fixp;
+{
+  if (fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+      || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+    return 1;
+
+  return 0;
+}
+
+/* Return zero if the fixup in fixp should be left alone and not
+   adjusted.  */
+
+boolean
+mn10300_fix_adjustable (fixp)
+     struct fix *fixp;
+{
+  /* Prevent all adjustments to global symbols.  */
+  if (S_IS_EXTERN (fixp->fx_addsy) || S_IS_WEAK (fixp->fx_addsy))
+    return 0;
+
+  if (fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+      || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+    return 0;
+
+  return 1;
 }
 
 /* Insert an operand value into an instruction.  */

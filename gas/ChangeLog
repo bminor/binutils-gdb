@@ -1,3 +1,21 @@
+2000-08-22  Eric Christopher  <echristo@cygnus.com>
+
+	* config/tc-mn10300.c: (md_apply_fix): New function.
+	(mn10300_force_relocation): New function.
+	(mn10300_fix_adjustable): New function.
+
+	* config/tc-mn10300.h: (TC_FORCE_RELOCATION): Define.
+	(TC_HANDLES_FX_DONE): Define.
+	(obj_fix_adjustable): Define.
+	(MD_APPLY_FIX3): Define.
+	(TC_LINKRELAX_FIXUP): Define.
+
+	* write.c: (TC_LINKRELAX_FIXUP):  Define if not
+	previously defined.
+	(fixup_segment): Use TC_LINKRELAX_FIXUP.
+
+	* doc/internals.texi: Document TC_LINKRELAX_FIXUP.
+
 2000-08-21  Jason Eckhardt  <jle@cygnus.com>
 
 	* config/tc-i860.c (md_apply_fix3): Do not insert the immediate
@@ -186,7 +204,7 @@ Wed Aug  9 16:28:21 EDT 2000	Diego Novillo <dnovillo@cygnus.com>
 	(find): Accept 68hc12 register indirect modes.
 
 	* NEWS: Mention 68HC11 & 68HC12 support.
-	
+
 2000-08-07  Richard Henderson  <rth@cygnus.com>
 
 	* config/tc-ia64.c (unwind): Add prologue_mask member.
@@ -251,7 +269,7 @@ Wed Aug  9 16:28:21 EDT 2000	Diego Novillo <dnovillo@cygnus.com>
 
 	* doc/c-m68k.texi (section M680x0 Options): Turn into a table
 	index by command line option.
-	
+
 2000-08-01  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
 	* doc/c-m68k.texi (@cindex @samp{--pcrel}): Rewrite option description.
@@ -277,7 +295,7 @@ Wed Aug  9 16:28:21 EDT 2000	Diego Novillo <dnovillo@cygnus.com>
         emit absolute jumps for anything with --pcrel.
 
 	* doc/c-m68k.texi: Document new command line option.
-	
+
 2000-07-28  Jason Eckhardt  <jle@cygnus.com>
 
         * configure.in: Add bits for i860-stardent-{sysv4, elf}*.
@@ -362,7 +380,7 @@ Thu Jul 27 11:25:01 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* po/POTFILES.in, po/gas.pot: Regenerate.
 
 2000-07-20  Kazu Hirata  <kazu@hxi.com>
-	
+
 	* read.c: Fix formatting.
 	* write.c: Fix formatting.
 
@@ -539,7 +557,7 @@ Thu Jul 27 11:25:01 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 2000-07-08  Ulf Carlsson  <ulfc@engr.sgi.com>
 
 	* doc/internals.texi (Expressions): Fix typo.
-	
+
 2000-07-08  Kazu Hirata  <kazu@hxi.com>
 
 	* config/tc-sh.c: Fix formatting.
@@ -628,7 +646,7 @@ Tue Jul  4 14:08:28 2000  Andrew Cagney  <cagney@b1.cygnus.com>
         test for Link Once sections as in adjust_reloc_syms.
         * config/te-tmips.h: New file for traditional mips targets. Define
         TE_TMIPS.
-	
+
 2000-06-29 Mark Elbrecht <snowball3@bigfoot.com>
 
 	* config/obj-coff.c (obj_coff_setcion) [BFD_ASSEMBLER]: If the
@@ -657,7 +675,7 @@ Thu Jun 29 21:30:00 2000  Hans-Peter Nilsson  <hp@axis.com>
 2000-06-27  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-d30v.c (write_2_short): Do not allow opcodes with
-	the EITHER_BUT_PREFER_MU attribute to be combined into a reverse 
+	the EITHER_BUT_PREFER_MU attribute to be combined into a reverse
 	sequential order, and emit warning messages if the input source
 	code contains constructs like that, or parallel constructs
 	containing such opcodes.
@@ -693,7 +711,7 @@ Thu Jun 29 21:30:00 2000  Hans-Peter Nilsson  <hp@axis.com>
 	(md_apply_fix3): ditto
 
 2000-06-24  Frank Ch. Eigler  <fche@redhat.com>
- 
+
 	* cgen.c (expr_jmp_buf_p): New validity flag for expr_jmp_buf.
 	(gas_cgen_parse_operand): Set it around expression() call.
 	(gas_cgen_md_operand): Test for it before longjmp().

@@ -644,7 +644,7 @@ The variable characters are to be repeated @code{fr_offset} times.  If
 have this type.
 
 @item rs_leb128
-This state is used to implement the DWARF ``little endian base 128'' 
+This state is used to implement the DWARF ``little endian base 128''
 variable length number format.  The @code{fr_symbol} is always an expression
 symbol, as constant expressions are emitted directly.  The @code{fr_offset}
 field is used during relaxation to hold the previous size of the number so
@@ -964,7 +964,7 @@ default value is @code{LEX_NAME | LEX_BEGIN_NAME}.
 @item NUMBERS_WITH_SUFFIX
 @cindex NUMBERS_WITH_SUFFIX
 When this macro is defined to be non-zero, the parser allows the radix of a
-constant to be indicated with a suffix.  Valid suffixes are binary (B), 
+constant to be indicated with a suffix.  Valid suffixes are binary (B),
 octal (Q), and hexadecimal (H).  Case is not significant.
 
 @item SINGLE_QUOTE_STRINGS
@@ -999,7 +999,7 @@ default definition is to accept any name followed by a colon character.
 @item TC_START_LABEL_WITHOUT_COLON
 @cindex TC_START_LABEL_WITHOUT_COLON
 Same as TC_START_LABEL, but should be used instead of TC_START_LABEL when
-LABELS_WITHOUT_COLONS is defined. 
+LABELS_WITHOUT_COLONS is defined.
 
 @item NO_PSEUDO_DOT
 @cindex NO_PSEUDO_DOT
@@ -1183,6 +1183,15 @@ If you define this macro, and the global variable @samp{linkrelax} is set
 @samp{.align} directive will cause extra space to be allocated.  The linker can
 then discard this space when relaxing the section.
 
+@item TC_LINKRELAX_FIXUP ($var{segT})
+@cindex TC_LINKRELAX_FIXUP
+If defined, this macro allows control over whether fixups for a
+given section will be processed when the @var{linkrelax} variable is
+set.  The macro is given the N_TYPE bits for the section in its
+@var{segT} argument.  If the macro evaluates to a non-zero value
+then the fixups will be converted into relocs, otherwise they will
+be passed to @var{md_apply_fix3} as normal.
+
 @item md_convert_frag
 @cindex md_convert_frag
 GAS will call this for each rs_machine_dependent fragment.
@@ -1257,7 +1266,7 @@ size.
 @cindex md_macro_start
 If defined, GAS will call this macro when it starts to include a macro
 expansion.  @code{macro_nest} indicates the current macro nesting level, which
-includes the one being expanded. 
+includes the one being expanded.
 
 @item md_macro_info
 @cindex md_macro_info
@@ -1269,7 +1278,7 @@ macro (macro_entry *), which includes expansion of the formal arguments.
 @item md_macro_end
 @cindex md_macro_end
 Complement to md_macro_start.  If defined, it is called when finished
-processing an inserted macro expansion, just before decrementing macro_nest. 
+processing an inserted macro expansion, just before decrementing macro_nest.
 
 @item DOUBLEBAR_PARALLEL
 @cindex DOUBLEBAR_PARALLEL

@@ -48,6 +48,10 @@
 #define TC_FORCE_RELOCATION_SECTION(FIXP,SEG) TC_FORCE_RELOCATION(FIXP)
 #endif
 
+#ifndef TC_LINKRELAX_FIXUP
+#define TC_LINKRELAX_FIXUP(SEG) 1
+#endif
+
 #ifndef	MD_PCREL_FROM_SECTION
 #define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from(FIXP)
 #endif
@@ -284,12 +288,12 @@ fix_new_exp (frag, where, size, exp, pcrel, r_type)
 	 the difference expression cannot immediately be reduced.  */
       {
 	symbolS *stmp = make_expr_symbol (exp);
-	
+
 	exp->X_op = O_symbol;
 	exp->X_op_symbol = 0;
 	exp->X_add_symbol = stmp;
 	exp->X_add_number = 0;
-	
+
 	return fix_new_exp (frag, where, size, exp, pcrel, r_type);
       }
 
@@ -1235,7 +1239,7 @@ relax_and_size_all_segments ()
   /* Join the 2 segments into 1 huge segment.
      To do this, re-compute every rn_address in the SEG_DATA frags.
      Then join the data frags after the text frags.
-    
+
      Determine a_data [length of data segment].  */
   if (data_frag_root)
     {
@@ -1497,7 +1501,7 @@ write_object_file ()
 
 #ifndef BFD_ASSEMBLER
   /* Crawl the symbol chain.
-    
+
      For each symbol whose value depends on a frag, take the address of
      that frag and subsume it into the value of the symbol.
      After this, there is just one way to lookup a symbol value.
@@ -1505,10 +1509,10 @@ write_object_file ()
      We adjust the values of 'L' local symbols, even if we do
      not intend to emit them to the object file, because their values
      are needed for fix-ups.
-    
+
      Unless we saw a -L flag, remove all symbols that begin with 'L'
      from the symbol chain.  (They are still pointed to by the fixes.)
-    
+
      Count the remaining symbols.
      Assign a symbol number to each symbol.
      Count the number of string-table chars we will emit.
@@ -2106,9 +2110,9 @@ relax_align (address, alignment)
 
 /* Now we have a segment, not a crowd of sub-segments, we can make
    fr_address values.
-  
+
    Relax the frags.
-  
+
    After this, all frags in this segment have addresses that are correct
    within the segment. Since segments live in different file addresses,
    these frag addresses may not be the same as final object-file
@@ -2204,7 +2208,7 @@ relax_segment (segment_frag_root, segment)
     do
       {
 	stretch = stretched = 0;
-	
+
 	for (fragP = segment_frag_root; fragP; fragP = fragP->fr_next)
 	  {
 	    long growth = 0;
@@ -2461,7 +2465,7 @@ fixup_segment (fixP, this_segment_type)
      i960 (the only machine for which we've got a relaxing linker right now),
      we might be able to turn callx/callj into bal anyways in cases where we
      know the maximum displacement.  */
-  if (linkrelax)
+  if (linkrelax && TC_LINKRELAX_FIXUP (this_segment_type))
     {
       for (; fixP; fixP = fixP->fx_next)
 	seg_reloc_count++;
