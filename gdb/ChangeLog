@@ -1,3 +1,8 @@
+2004-03-25  Andrew Cagney  <cagney@redhat.com>
+
+	* PROBLEMS: Add general section titles, remove references to
+	specific releases.
+
 2004-03-25  Daniel Jacobowitz  <drow@mvista.com>
 
 	* arm-linux-tdep.c (ARM_LINUX_JB_ELEMENT_SIZE): Define to
