@@ -474,6 +474,28 @@ assemble_vif (str)
   const char *file;
   /* Length in 32 bit words.  */
   int data_len;
+  /* Macro expansion, if there is one.  */
+  char * macstr;
+
+  /* First check for macros.  */
+  macstr = dvp_expand_macro (vif_macros, vif_macro_count, str);
+  if (macstr)
+    {
+      /* The macro may expand into several insns (delimited with '\n'),
+	 so loop.  */
+      char * next = macstr;
+      do
+	{
+	  char *p = strchr (next, '\n');
+	  if (p)
+	    *p = 0;
+	  assemble_vif (next);
+	  next = p ? p + 1 : 0;
+	}
+      while (next);
+      free (macstr);
+      return;
+    }
 
   opcode = assemble_one_insn (DVP_VIF,
 			      vif_opcode_lookup_asm (str), vif_operands,

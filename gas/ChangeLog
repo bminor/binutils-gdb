@@ -1,3 +1,9 @@
+start-sanitize-sky
+Mon Apr  6 17:08:47 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* config/tc-dvp.c (assemble_vif): Watch for macro insns.
+
+end-sanitize-sky
 Mon Apr  6 12:06:39 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* config/tc-m68k.c (m68k_ip, case "#B"): Install the offset of the
