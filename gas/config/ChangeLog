@@ -1,5 +1,8 @@
 Tue Feb 18 02:11:10 1992  K. Richard Pixley  (rich at cygnus.com)
 
+	* tc-m88k.[hc]: pulled in from hack's unfinished work.  These
+	  aren't yet integrated.
+
 	* tc-i860.[hc]: blew off the dust.  Something must still be done
 	  about conflicting relocation types.
 
