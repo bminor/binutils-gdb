@@ -1383,6 +1383,21 @@ parse_at (src, op)
 		}
 	      else if (mode == A_PC)
 		{
+		  /* We want @(expr, pc) to uniformly address . + expr,
+		     no matter if expr is a constant, or a more complex
+		     expression, e.g. sym-. or sym1-sym2.
+		     However, we also used to accept @(sym,pc)
+		     as adressing sym, i.e. meaning the same as plain sym.
+		     Some existing code does use the @(sym,pc) syntax, so
+		     we give it the old semantics for now, but warn about
+		     its use, so that users have some time to fix their code.
+
+		     Note that due to this backward compatibility hack,
+		     we'll get unexpected results when @(offset, pc) is used,
+		     and offset is a symbol that is set later to an an address
+		     difference, or an external symbol that is set to an
+		     address difference in another source file, so we want to
+		     eventually remove it.  */
 		  if (op->immediate.X_op == O_symbol)
 		    {
 		      op->type = A_DISP_PC;
