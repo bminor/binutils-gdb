@@ -389,8 +389,8 @@ read_indirect_string (unit, buf, bytes_read_ptr)
       if (! stash->dwarf_abbrev_buffer)
 	return NULL;
 
-      if (! bfd_get_section_contents (abfd, msec, stash->dwarf_str_buffer,
-				      (bfd_vma) 0, msec->_raw_size))
+      if (! bfd_simple_get_relocated_section_contents 
+	  (abfd, msec, stash->dwarf_str_buffer))
 	return NULL;
     }
 
@@ -550,8 +550,8 @@ read_abbrevs (abfd, offset, stash)
       if (! stash->dwarf_abbrev_buffer)
 	  return 0;
 
-      if (! bfd_get_section_contents (abfd, msec, stash->dwarf_abbrev_buffer,
-				      (bfd_vma) 0, msec->_raw_size))
+      if (! bfd_simple_get_relocated_section_contents
+	  (abfd, msec, stash->dwarf_abbrev_buffer))
 	return 0;
     }
 
@@ -1023,8 +1023,8 @@ decode_line_info (unit, stash)
       if (! stash->dwarf_line_buffer)
 	return 0;
 
-      if (! bfd_get_section_contents (abfd, msec, stash->dwarf_line_buffer,
-				      (bfd_vma) 0, msec->_raw_size))
+      if (! bfd_simple_get_relocated_section_contents
+	  (abfd, msec, stash->dwarf_line_buffer))
 	return 0;
 
       /* FIXME: We ought to apply the relocs against this section before
@@ -1939,8 +1939,8 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
 
 	  start = stash->info_ptr_end - stash->info_ptr;
 
-	  if (! bfd_get_section_contents (abfd, msec, stash->info_ptr + start,
-					  (bfd_vma) 0, size))
+	  if (! bfd_simple_get_relocated_section_contents
+	      (abfd, msec, stash->info_ptr + start))
 	    continue;
 
 	  stash->info_ptr_end = stash->info_ptr + start + size;

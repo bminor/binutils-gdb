@@ -1,3 +1,14 @@
+2002-11-07  Michal Ludvig  <mludvig@suse.cz>
+
+	* dwarf2.c (read_indirect_string, read_abbrevs,	decode_line_info,
+	_bfd_dwarf2_find_nearest_line): Use
+	bfd_simple_get_relocated_section_contents() instead of
+	bfd_get_section_contents().
+	* reloc.c (bfd_perform_relocation): Add sanity check.
+	* simple.c (simple_get_relocated_section_contents): If the section
+	does not have any relocs associated with it, just return the
+	unadjusted contents.
+
 2002-11-07  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elf32-cris.c (cris_elf_relocate_section) <case R_CRIS_16_GOT,
