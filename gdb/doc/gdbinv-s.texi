@@ -339,7 +339,7 @@ stream.  @code{set remotedebug off} turns it off, and @code{show
 remotedebug} will show you its current state.
 @end ifset
 
-@ifset Icmlx
+@ifset I960
 @node i960-Nindy Remote
 @subsection @value{GDBN} with a remote i960 (Nindy)
 
@@ -444,7 +444,7 @@ a break is detected.
 @c @end group
 @end ifset
 
-@ifset AMDxxixK
+@ifset AMD29K
 @node UDI29K Remote
 @subsection @value{GDBN} and the UDI protocol for AMD29K
 
@@ -655,7 +655,7 @@ unexpected events on the PC side of the connection.
 
 @end ifset
 
-@ifset STmm
+@ifset ST2000
 @node ST2000 Remote
 @subsection @value{GDBN} with a Tandem ST2000
 
@@ -836,16 +836,17 @@ or suspended when you attach to it.  If running, it will be suspended at
 the time of attachment.
 @end ifset
 
-@ifset Hviii
-@node Hitachi H8 Remote
-@subsection @value{GDBN} and the Hitachi H8/300 and H8/500
-@value{GDBN} needs to know these things to talk to your H8/300 or H8/500: 
+@ifset H8
+@node Hitachi Remote
+@subsection @value{GDBN} and Hitachi Microprocessors
+@value{GDBN} needs to know these things to talk to your
+Hitachi SH, H8/300, or H8/500: 
 
 @enumerate
 @item
-that you want to use @samp{target hms}, the remote debugging
-interface for the H8/300 and H8/500 (this is the default when
-GDB is configured specifically for the H8/300 or H8/500);
+that you want to use @samp{target hms}, the remote debugging interface
+for Hitachi microprocessors (this is the default when GDB is configured
+specifically for the Hitachi SH, H8/300, or H8/500);
 
 @item
 what serial device connects your host to your Hitachi board (the first
@@ -858,32 +859,37 @@ what speed to use over the serial device.
 @end ignore
 @end enumerate
 
-@ignore
+@ifclear H8EXCLUSIVE
 @c only for Unix hosts
 @kindex device
-@cindex serial device, H8/300 or H8/500
+@cindex serial device, Hitachi micros
 Use the special @code{@value{GDBP}} command @samp{device @var{port}} if you
 need to explicitly set the serial device.  The default @var{port} is the
 first available port on your host.  This is only necessary on Unix
 hosts, where it is typically something like @file{/dev/ttya}.
 
 @kindex speed
-@cindex serial line speed, H8/300 or H8/500
+@cindex serial line speed, Hitachi micros
 @code{@value{GDBP}} has another special command to set the communications
 speed: @samp{speed @var{bps}}.  This command also is only used from Unix
 hosts; on DOS hosts, set the line speed as usual from outside GDB with
 the DOS @kbd{mode} command (for instance, @w{@samp{mode
 com2:9600,n,8,1,p}} for a 9600 bps connection).
-@end ignore
 
+The @samp{device} and @samp{speed} commands are available only when you
+use a Unix host to debug your Hitachi microprocessor programs.  If you
+use a DOS host,
+@end ifclear
 @value{GDBN} depends on an auxiliary terminate-and-stay-resident program
 called @code{asynctsr} to communicate with the development board
 through a PC serial port.  You must also use the DOS @code{mode} command
 to set up the serial port on the DOS side.
 
+@ifset DOSHOST
 The following sample session illustrates the steps needed to start a
-program under @value{GDBN} control on an H8/300.  The example uses a sample
-H8/300 program called @file{t.x}.
+program under @value{GDBN} control on an H8/300.  The example uses a
+sample H8/300 program called @file{t.x}.  The procedure is the same for
+the Hitachi SH and the H8/500.
 
 First hook up your development board.  In this example, we use a
 board attached to serial port @code{COM2}; if you use a different serial
@@ -966,6 +972,7 @@ to detect program completion.
 In either case, @value{GDBN} will see the effect of a @sc{reset} on the
 development board as a ``normal exit'' of your program.
 @end ifset
+@end ifset
 
 @ifset SIMS
 @node Simulator
@@ -974,25 +981,30 @@ development board as a ``normal exit'' of your program.
 @ifset GENERIC
 @cindex simulator
 @cindex simulator, Z8000
-@cindex simulator, H8/300 or H8/500
 @cindex Z8000 simulator
+@cindex simulator, H8/300 or H8/500
 @cindex H8/300 or H8/500 simulator
+@cindex simulator, Hitachi SH
+@cindex Hitachi SH simulator
 @cindex CPU simulator
 For some configurations, @value{GDBN} includes a CPU simulator that you
 can use instead of a hardware CPU to debug your programs.  Currently,
 a simulator is available when @value{GDBN} is configured to debug Zilog
-Z8000 or Hitachi H8/300 or H8/500 targets.
+Z8000 or Hitachi microprocessor targets.
 @end ifset
 
 @ifclear GENERIC
-@ifset Hviii
+@ifset H8
 @cindex simulator, H8/300 or H8/500
 @cindex Hitachi H8/300 or H8/500 simulator
-When configured for debugging Hitachi H8/300 or H8/500 targets,
-@value{GDBN} includes an H8/300 or H8/500 CPU simulator.
+@cindex simulator, Hitachi SH
+@cindex Hitachi SH simulator
+When configured for debugging Hitachi microprocessor targets,
+@value{GDBN} includes a CPU simulator for the target chip (a Hitachi SH,
+H8/300, or H8/500).
 @end ifset
 
-@ifset ZviiiK
+@ifset Z8K
 @cindex simulator, Z8000
 @cindex Zilog Z8000 simulator
 When configured for debugging Zilog Z8000 targets, @value{GDBN} includes
@@ -1000,7 +1012,7 @@ a Z8000 simulator.
 @end ifset
 @end ifclear
 
-@ifset ZviiiK
+@ifset Z8K
 For the Z8000 family, @samp{target sim} simulates either the Z8002 (the
 unsegmented variant of the Z8000 architecture) or the Z8001 (the
 segmented variant).  The simulator recognizes which architecture is

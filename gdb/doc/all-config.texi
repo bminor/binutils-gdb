@@ -19,24 +19,24 @@
 @set GENERIC
 @c
 @c Hitachi H8/300 target:
-@set Hviii
+@set H8
 @c Hitachi H8/300 target ONLY:
-@clear HviiiEXCLUSIVE
+@clear H8EXCLUSIVE
 @c
 @c SPARC target:
 @set SPARC
 @c
 @c AMD 29000 target:
-@set AMDxxixK
+@set AMD29K
 @c
 @c Intel 960 target:
-@set Icmlx
+@set I960
 @c
 @c Tandem ST2000 (phone switch) target:
-@set STmm
+@set ST2000
 @c
 @c Zilog 8000 target:
-@set ZviiiK
+@set Z8K
 @c
 @c Lucid "Energize" environment:
 @clear LUCID

@@ -2,15 +2,16 @@
 @include GDBvn.texi
 @c
 @set   AGGLOMERATION
-@clear AMDxxixK
+@clear AMD29K
 @set   BARETARGET
 @set   CONLY
 @set   DOSHOST
 @clear FSFDOC
 @clear GENERIC
-@set   Hviii
-@set   HviiiEXCLUSIVE
-@clear Icmlx
+@set   H8
+@set   H8EXCLUSIVE
+@clear HAVE-FLOAT
+@clear I960
 @clear NOVEL
 @clear POSIX
 @set   PRECONFIGURED
@@ -18,9 +19,9 @@
 @set   SIMS
 @clear SERIAL
 @clear SPARC
-@clear STmm
+@clear ST2000
 @clear VXWORKS
-@clear ZviiiK
+@clear Z8K
 @c ----------------------------------------------------------------------
 @c STRINGS:
 @c
@@ -34,7 +35,7 @@
 @set GDBINIT .gdbinit
 @c 
 @c Name of target.
-@set TARGET Hitachi H/300 and H/500
+@set TARGET Hitachi Microprocessors
 @c
 @c Name of GCC product
 @set NGCC GCC
