@@ -1,5 +1,8 @@
 2004-02-15  Andrew Cagney  <cagney@redhat.com>
 
+	* config/tm-lynx.h (START_INFERIOR_TRAPS_EXPECTED): Delete macro.
+	* config/rs6000/tm-rs6000.h (START_INFERIOR_TRAPS_EXPECTED): Ditto.
+
 	* procfs.c (procfs_init_inferior): Assume that
 	START_INFERIOR_TRAPS_EXPECTED is defined.
 	* config/ns32k/nbsdaout.mt (TM_FILE): Set to tm-ns32k.h.
