@@ -77,6 +77,13 @@
 #define WARN_COMMENTS 1
 #endif
 
+#ifdef TE_NetBSD
+/* XXX the original OpenBSD code has labels without colons,
+   so this is required, for now -- fredette@netbsd.org */
+/* Labels are not required to have a colon for a suffix.  */
+#define LABELS_WITHOUT_COLONS 1
+#endif
+
 /* FIXME.  Why oh why aren't these defined somewhere globally?  */
 #ifndef FALSE
 #define FALSE   (0)
