@@ -1,3 +1,12 @@
+Tue Jun  9 17:29:04 1992  Fred Fish  (fnf@cygnus.com)
+
+	* config/{mh-ncr3000, mh-sysv4}:  Add definition for INSTALL using
+	/usr/ucb/install.
+
+Thu Apr 30 22:36:31 1992  Fred Fish  (fnf@cygnus.com)
+
+	* sbrk-sup.c (sbrk_morecore):  Fix sbrk() error return test.
+
 Mon Apr 20 21:03:30 1992  K. Richard Pixley  (rich@cygnus.com)
 
 	* Makefile.in: rework CFLAGS so that they can be passed from the
