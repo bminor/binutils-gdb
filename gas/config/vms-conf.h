@@ -79,8 +79,8 @@
 /* Needed only for sparc configuration */
 #undef sparcv9
 
-/* Define if you have the delete function.  */
-#define HAVE_DELETE
+/* Define if you have the remove function.  */
+#define HAVE_REMOVE
 
 /* Define if you have the unlink function.  */
 #undef HAVE_UNLINK
