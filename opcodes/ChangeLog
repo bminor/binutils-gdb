@@ -1,3 +1,10 @@
+2001-08-31  Andreas Jaeger  <aj@suse.de>
+
+	* tic54x-opc.c: Add default initializers to avoid warnings.
+
+	* arc-opc.c: Include "sysdep.h" to get stdio.h as include file.
+	* arc-ext.c: Likewise.
+
 2001-08-28  matthew gren  <mrg@redhat.com>
 
 	* ppc-opc.c (icbt): Order correctly.
