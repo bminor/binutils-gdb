@@ -2394,7 +2394,8 @@ sparc-linux-tdep.o: sparc-linux-tdep.c $(defs_h) $(floatformat_h) $(frame_h) \
 sparc-nat.o: sparc-nat.c $(defs_h) $(inferior_h) $(regcache_h) $(target_h) \
 	$(gdb_assert_h) $(gdb_string_h) $(gdb_wait_h) $(sparc_tdep_h) \
 	$(sparc_nat_h)
-sparcnbsd-nat.o: sparcnbsd-nat.c $(defs_h) $(sparc_tdep_h) $(sparc_nat_h)
+sparcnbsd-nat.o: sparcnbsd-nat.c $(defs_h) $(gdbcore_h) $(regcache_h) \
+	$(sparc_tdep_h) $(sparc_nat_h) $(bsd_kvm_h)
 sparcnbsd-tdep.o: sparcnbsd-tdep.c $(defs_h) $(floatformat_h) $(frame_h) \
 	$(frame_unwind_h) $(gdbcore_h) $(osabi_h) $(regcache_h) $(regset_h) \
 	$(solib_svr4_h) $(symtab_h) $(trad_frame_h) $(gdb_assert_h) \

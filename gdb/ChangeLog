@@ -1,3 +1,13 @@
+2004-05-23  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparcnbsd-nat.c: Include "gdbcore.h", "regcache.h",
+	<sys/types.h>, <machine/pcb.h> and "bsd-kvm.h".
+	(sparc32nbsd_supply_pcb): New function.
+	(_initialize_sparcnbsd_nat): Enable libkvm interface.
+	* Makefile.in (sparcnbsd-nat.o): Update dependencies.
+	* config/sparc/nbsdelf.mh (NATDEPFILES): Add bsd-kvm.o.
+	(LOADLIBES): New variable.
+
 2004-05-22  Mark Kettenis  <kettenis@gnu.org>
 
 	* bsd-kvm.c, bsd-kvm.h: New files.
