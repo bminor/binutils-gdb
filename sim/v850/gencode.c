@@ -28,7 +28,7 @@ write_header ()
   struct v850_opcode *opcode;
 
   for (opcode = (struct v850_opcode *)v850_opcodes; opcode->name; opcode++)
-    printf("void OP_%X PARAMS ((void));\t\t/* %s */\n",
+    printf("int OP_%X PARAMS ((void));\t\t/* %s */\n",
 	   opcode->opcode, opcode->name);
 }
 
