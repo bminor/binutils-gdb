@@ -1,3 +1,14 @@
+2004-10-23  Aaron W. LaFramboise  <aaron98wiridge9@aaronwl.com>
+
+	* binutils-all/alias.def: New file.
+	* binutils-all/dlltool.exp: Two new -p tests.
+	* config/default.exp (dlltool_gas_flag): New variable.
+	Copy gas and lds executables into tmpdir/gas directory rather than
+	making symlinks which might not be supported by the host OS.
+	Attempt to handle the case where the host OS does not use the .exe
+	extension but the target OS does.
+	* lib/utils-lib.exp (exe_ext): New procedure.
+
 2004-07-12  Nick Clifton  <nickc@redhat.com>
 
 	* binutils-all/dlltool.exp: Check that the -p switch is not

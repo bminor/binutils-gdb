@@ -149,3 +149,15 @@ proc is_elf_format {} {
     }
     return 1
 }
+
+#
+# exe_ext
+#	Returns target executable extension, if any.
+#
+proc exe_ext {} {
+    if { [istarget *-*-mingw32] || [istarget *-*-cygwin*] } {
+        return ".exe"
+    } else {
+        return ""
+    }
+}

@@ -261,6 +261,8 @@
 #include <varargs.h>
 #endif
 
+#include <assert.h>
+
 #ifdef DLLTOOL_ARM
 #include "coff/arm.h"
 #include "coff/internal.h"
@@ -428,7 +430,11 @@ static char * mcore_elf_linker_flags = NULL;
 #define DRECTVE_SECTION_NAME ".drectve"
 #endif
 
-#define PATHMAX 250		/* What's the right name for this ?  */
+/* What's the right name for this ?  */
+#define PATHMAX 250		
+
+/* External name alias numbering starts here.  */
+#define PREFIX_ALIAS_BASE	20000
 
 char *tmp_asm_buf;
 char *tmp_head_s_buf;
@@ -642,6 +648,7 @@ typedef struct export
   {
     const char *name;
     const char *internal_name;
+    const char *import_name;
     int ordinal;
     int constant;
     int noname;		/* Don't put name in image file.  */
@@ -901,6 +908,7 @@ def_exports (const char *name, const char *internal_name, int ordinal,
 
   p->name = name;
   p->internal_name = internal_name ? internal_name : name;
+  p->import_name = name;
   p->ordinal = ordinal;
   p->constant = constant;
   p->noname = noname;
@@ -2248,7 +2256,6 @@ make_one_lib_file (export_type *exp, int i)
       asymbol *  exp_label;
       asymbol *  iname = 0;
       asymbol *  iname2;
-      asymbol *  iname2_pre = 0;
       asymbol *  iname_lab;
       asymbol ** iname_lab_pp;
       asymbol ** iname_pp;
@@ -2338,23 +2345,6 @@ make_one_lib_file (export_type *exp, int i)
 	    bfd_coff_set_symbol_class (abfd, exp_label, C_THUMBEXTFUNC);
 #endif
 	  ptrs[oidx++] = exp_label;
-
-	  if (ext_prefix_alias)
-	    {
-	      asymbol *  exp_label_pre;
-
-	      exp_label_pre = bfd_make_empty_symbol (abfd);
-	      exp_label_pre->name
-		= make_imp_label (ext_prefix_alias, exp->name);
-	      exp_label_pre->section = exp_label->section;
-	      exp_label_pre->flags = exp_label->flags;
-	      exp_label_pre->value = exp_label->value;
-#ifdef DLLTOOL_ARM
-	      if (machine == MTHUMB)
-		bfd_coff_set_symbol_class (abfd, exp_label, C_THUMBEXTFUNC);
-#endif
-	      ptrs[oidx++] = exp_label_pre;
-	    }
 	}
 
       /* Generate imp symbols with one underscore for Microsoft
@@ -2375,19 +2365,6 @@ make_one_lib_file (export_type *exp, int i)
       iname2->flags = BSF_GLOBAL;
       iname2->value = 0;
 
-      if (ext_prefix_alias)
-	{
-	  char *pre_name;
-
-	  iname2_pre = bfd_make_empty_symbol (abfd);
-	  pre_name = xmalloc (strlen (ext_prefix_alias) + 7);
-	  sprintf(pre_name, "__imp_%s", ext_prefix_alias);
-	  iname2_pre->name = make_imp_label (pre_name, exp->name);
-	  iname2_pre->section = iname2->section;
-	  iname2_pre->flags = iname2->flags;
-	  iname2_pre->value = iname2->value;
-	}
-
       iname_lab = bfd_make_empty_symbol (abfd);
 
       iname_lab->name = head_label;
@@ -2399,8 +2376,6 @@ make_one_lib_file (export_type *exp, int i)
       if (create_compat_implib)
 	ptrs[oidx++] = iname;
       ptrs[oidx++] = iname2;
-      if (ext_prefix_alias)
-	ptrs[oidx++] = iname2_pre;
 
       iname_lab_pp = ptrs + oidx;
       ptrs[oidx++] = iname_lab;
@@ -2517,11 +2492,11 @@ make_one_lib_file (export_type *exp, int i)
                      why it did that, and it does not match what I see
                      in programs compiled with the MS tools.  */
 		  int idx = exp->hint;
-		  si->size = strlen (xlate (exp->name)) + 3;
+		  si->size = strlen (xlate (exp->import_name)) + 3;
 		  si->data = xmalloc (si->size);
 		  si->data[0] = idx & 0xff;
 		  si->data[1] = idx >> 8;
-		  strcpy (si->data + 2, xlate (exp->name));
+		  strcpy (si->data + 2, xlate (exp->import_name));
 		}
 	      break;
 	    case IDATA7:
@@ -2843,6 +2818,26 @@ gen_lib_file (void)
       n = make_one_lib_file (exp, i);
       n->next = head;
       head = n;
+      if (ext_prefix_alias)
+	{
+	  export_type alias_exp;
+
+	  assert (i < PREFIX_ALIAS_BASE);
+	  alias_exp.name = make_imp_label (ext_prefix_alias, exp->name);
+	  alias_exp.internal_name = exp->internal_name;
+	  alias_exp.import_name = exp->name;
+	  alias_exp.ordinal = exp->ordinal;
+	  alias_exp.constant = exp->constant;
+	  alias_exp.noname = exp->noname;
+	  alias_exp.private = exp->private;
+	  alias_exp.data = exp->data;
+	  alias_exp.hint = exp->hint;
+	  alias_exp.forward = exp->forward;
+	  alias_exp.next = exp->next;
+	  n = make_one_lib_file (&alias_exp, i + PREFIX_ALIAS_BASE);
+	  n->next = head;
+	  head = n;
+	}
     }
 
   /* Now stick them all into the archive.  */
@@ -2886,6 +2881,13 @@ gen_lib_file (void)
 	  if (unlink (name) < 0)
 	    /* xgettext:c-format */
 	    non_fatal (_("cannot delete %s: %s"), name, strerror (errno));
+	  if (ext_prefix_alias)
+	    {
+	      sprintf (name, "%s%05d.o", TMP_STUB, i + PREFIX_ALIAS_BASE);
+	      if (unlink (name) < 0)
+		/* xgettext:c-format */
+		non_fatal (_("cannot delete %s: %s"), name, strerror (errno));
+	    }
 	}
     }
 

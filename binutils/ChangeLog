@@ -1,3 +1,13 @@
+2004-10-23  Aaron W. LaFramboise  <aaron98wiridge9@aaronwl.com>
+
+	* dlltool.c: Include <assert.h>.
+	(PREFIX_ALIAS_BASE): Define.
+	(struct export): Add member import_name;
+	(def_exports): Set import_name.
+	(make_one_lib_file): Remove prefix alias code, use import_name
+	in .idata$6.
+	(gen_lib_file): Create and delete aliases.
+
 2004-10-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (process_section_groups): Free symtab after use.
