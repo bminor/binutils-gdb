@@ -1,3 +1,10 @@
+2002-09-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-ppc.c (PPC_HIGHER, PPC_HIGHEST): Fix warning.
+	(md_parse_option): No -a64 without BFD64.
+	(ppc_set_cpu): Select appropriate cpu when ppc_obj64.
+	(ppc_arch): Use bfd_mach_rs6k for bfd_arch_rs6000.
+
 2002-09-04  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-ppc.c (md_begin): Do not insert non-BookE32
