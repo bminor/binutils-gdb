@@ -1,3 +1,13 @@
+1999-12-02  Nick Clifton  <nickc@cygnus.com>
+
+	* Makefile.am: Fix arm-epoc-pe dependencies.
+	* Makefile.in: Regenerate.
+	
+	* emulparams/arm_epoc_pe.sh (SCRIPT_NAME): Set to epocpe.
+
+	* scripttempl/epocpe.sc: New file: copy of pe.sc, customised for
+	EPOC by placing .rdata into .text.
+
 1999-11-26  Andreas Schwab  <schwab@suse.de>
 
 	* configure.in: Put AC_MSG_CHECKING/AC_MSG_RESULT around check for
