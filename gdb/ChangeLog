@@ -388,6 +388,17 @@
 	* config.in: Regenerated.
 	* configure: Regenerated.
 
+2003-01-24  Nick Clifton  <nickc@redhat.com>
+
+	* Add sh2e support:
+
+	2002-04-02  Elena Zannoni  <ezannoni@redhat.com>
+
+		* gdb/sh-tdep.c (sh_sh2e_register_name): New.
+		(sh2e_show_regs): New.
+		(sh_gdbarch_init): Handle bfd_mach_sh2e.
+		* config/sh/tm-sh.h: Added sh2e to comments.
+
 2003-01-23  Jim Blandy  <jimb@redhat.com>
 
 	* symfile.c (syms_from_objfile): Don't print the "(no debugging

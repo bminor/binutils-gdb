@@ -157,6 +157,28 @@ sh_sh3e_register_name (int reg_nr)
 }
 
 static const char *
+sh_sh2e_register_name (int reg_nr)
+{
+  static char *register_names[] =
+  {
+    "r0",   "r1",   "r2",   "r3",   "r4",   "r5",   "r6",   "r7",
+    "r8",   "r9",   "r10",  "r11",  "r12",  "r13",  "r14",  "r15",
+    "pc",   "pr",   "gbr",  "vbr",  "mach", "macl", "sr",
+    "fpul", "fpscr",
+    "fr0",  "fr1",  "fr2",  "fr3",  "fr4",  "fr5",  "fr6",  "fr7",
+    "fr8",  "fr9",  "fr10", "fr11", "fr12", "fr13", "fr14", "fr15",
+    "",  "",
+    "", "", "", "", "", "", "", "",
+    "", "", "", "", "", "", "", "",
+  };
+  if (reg_nr < 0)
+    return NULL;
+  if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
+    return NULL;
+  return register_names[reg_nr];
+}
+
+static const char *
 sh_sh_dsp_register_name (int reg_nr)
 {
   static char *register_names[] =
@@ -2625,6 +2647,62 @@ sh3_show_regs (void)
 
 
 static void
+sh2e_show_regs (void)
+{
+  printf_filtered ("PC=%s SR=%08lx PR=%08lx MACH=%08lx MACHL=%08lx\n",
+		   paddr (read_register (PC_REGNUM)),
+		   (long) read_register (SR_REGNUM),
+		   (long) read_register (PR_REGNUM),
+		   (long) read_register (MACH_REGNUM),
+		   (long) read_register (MACL_REGNUM));
+
+  printf_filtered ("GBR=%08lx VBR=%08lx",
+		   (long) read_register (GBR_REGNUM),
+		   (long) read_register (VBR_REGNUM));
+  printf_filtered (" FPUL=%08lx FPSCR=%08lx",
+	  	   (long) read_register (gdbarch_tdep (current_gdbarch)->FPUL_REGNUM),
+                   (long) read_register (gdbarch_tdep (current_gdbarch)->FPSCR_REGNUM));
+
+  printf_filtered ("\nR0-R7  %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
+		   (long) read_register (0),
+		   (long) read_register (1),
+		   (long) read_register (2),
+		   (long) read_register (3),
+		   (long) read_register (4),
+		   (long) read_register (5),
+		   (long) read_register (6),
+		   (long) read_register (7));
+  printf_filtered ("R8-R15 %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
+		   (long) read_register (8),
+		   (long) read_register (9),
+		   (long) read_register (10),
+		   (long) read_register (11),
+		   (long) read_register (12),
+		   (long) read_register (13),
+		   (long) read_register (14),
+		   (long) read_register (15));
+
+  printf_filtered (("FP0-FP7  %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n"),
+		   (long) read_register (FP0_REGNUM + 0),
+		   (long) read_register (FP0_REGNUM + 1),
+		   (long) read_register (FP0_REGNUM + 2),
+		   (long) read_register (FP0_REGNUM + 3),
+		   (long) read_register (FP0_REGNUM + 4),
+		   (long) read_register (FP0_REGNUM + 5),
+		   (long) read_register (FP0_REGNUM + 6),
+		   (long) read_register (FP0_REGNUM + 7));
+  printf_filtered (("FP8-FP15 %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n"),
+		   (long) read_register (FP0_REGNUM + 8),
+		   (long) read_register (FP0_REGNUM + 9),
+		   (long) read_register (FP0_REGNUM + 10),
+		   (long) read_register (FP0_REGNUM + 11),
+		   (long) read_register (FP0_REGNUM + 12),
+		   (long) read_register (FP0_REGNUM + 13),
+		   (long) read_register (FP0_REGNUM + 14),
+		   (long) read_register (FP0_REGNUM + 15));
+}
+
+static void
 sh3e_show_regs (void)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch); 
@@ -4329,6 +4407,20 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_register_virtual_size (gdbarch, sh_default_register_raw_size);
       set_gdbarch_register_byte (gdbarch, sh_default_register_byte);
       break;      
+    case bfd_mach_sh2e:
+      sh_register_name = sh_sh2e_register_name;
+      sh_show_regs = sh2e_show_regs;
+      sh_store_return_value = sh3e_sh4_store_return_value;
+      sh_register_virtual_type = sh_sh3e_register_virtual_type;
+      set_gdbarch_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
+      set_gdbarch_register_raw_size (gdbarch, sh_default_register_raw_size);
+      set_gdbarch_register_virtual_size (gdbarch, sh_default_register_raw_size);
+      set_gdbarch_register_byte (gdbarch, sh_default_register_byte);
+      set_gdbarch_fp0_regnum (gdbarch, 25);
+      tdep->FPUL_REGNUM = 23;
+      tdep->FPSCR_REGNUM = 24;
+      tdep->FP_LAST_REGNUM = 40;
+      break;
     case bfd_mach_sh_dsp:
       sh_register_name = sh_sh_dsp_register_name;
       sh_show_regs = sh_dsp_show_regs;
