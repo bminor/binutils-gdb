@@ -81,6 +81,10 @@ extern int core_addr_greaterthan (CORE_ADDR lhs, CORE_ADDR rhs);
 extern const struct floatformat *default_float_format (struct gdbarch *gdbarch);
 extern const struct floatformat *default_double_format (struct gdbarch *gdbarch);
 
+/* Return the start address of ABFD.  This is exactly like
+   bfd_get_start_address, except that it's a gdbarch function.  */
+extern CORE_ADDR generic_bfd_entry_point (struct gdbarch *gdbarch, bfd *abfd);
+
 /* The following DEPRECATED interfaces are for pre- multi-arch legacy
    targets. */
 

@@ -1036,7 +1036,8 @@ enable_break (void)
 	 the current pc (which should point at the entry point for the
 	 dynamic linker) and subtracting the offset of the entry point.  */
       if (!load_addr_found)
-	load_addr = read_pc () - tmp_bfd->start_address;
+	load_addr = (read_pc ()
+                     - gdbarch_bfd_entry_point (current_gdbarch, tmp_bfd));
 
       /* Record the relocated start and end address of the dynamic linker
          text and plt section for svr4_in_dynsym_resolve_code.  */

@@ -1,5 +1,12 @@
 2003-06-13  Jim Blandy  <jimb@redhat.com>
 
+	* gdbarch.sh (gdbarch_bfd_entry_point): New gdbarch method.
+	* arch-utils.c (generic_bfd_entry_point): New function.
+	* arch-utils.h (generic_bfd_entry_point): New declaration.
+	* gdbarch.c, gdbarch.h: Regenerated.
+	* solib-svr4.c (enable_break): Call it, instead of accessing
+	tmp_bfd->start_address directly.
+
 	* ppc-linux-tdep.c (ppc64_linux_convert_from_func_ptr_addr): New
 	function.
 	(ppc_linux_init_abi): Register it as the

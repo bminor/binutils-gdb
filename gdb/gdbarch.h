@@ -2699,6 +2699,20 @@ extern void set_gdbarch_skip_trampoline_code (struct gdbarch *gdbarch, gdbarch_s
 #define SKIP_TRAMPOLINE_CODE(pc) (gdbarch_skip_trampoline_code (current_gdbarch, pc))
 #endif
 
+/* The actual instruction address at which ABFD would begin execution.
+   If ABFD is position-independent code, this address is not relocated;
+   it's the address at which execution would begin if the file were
+   loaded at its sections' vmas.
+  
+   On most architectures, this is simply bfd_get_start_address.  But on
+   some (like 64-bit PPC), that points to a function descriptor, not an
+   instruction.  The descriptor contains the actual entry point, and
+   other pointers needed to call the function. */
+
+typedef CORE_ADDR (gdbarch_bfd_entry_point_ftype) (struct gdbarch *gdbarch, bfd *abfd);
+extern CORE_ADDR gdbarch_bfd_entry_point (struct gdbarch *gdbarch, bfd *abfd);
+extern void set_gdbarch_bfd_entry_point (struct gdbarch *gdbarch, gdbarch_bfd_entry_point_ftype *bfd_entry_point);
+
 /* For SVR4 shared libraries, each call goes through a small piece of
    trampoline code in the ".plt" section.  IN_SOLIB_CALL_TRAMPOLINE evaluates
    to nonzero if we are currently stopped in one of these. */

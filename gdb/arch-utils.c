@@ -368,6 +368,12 @@ cannot_register_not (int regnum)
   return 0;
 }
 
+CORE_ADDR
+generic_bfd_entry_point (struct gdbarch *gdbarch, bfd *abfd)
+{
+  return bfd_get_start_address (abfd);
+}
+
 /* Legacy version of target_virtual_frame_pointer().  Assumes that
    there is an DEPRECATED_FP_REGNUM and that it is the same, cooked or
    raw.  */

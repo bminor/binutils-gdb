@@ -666,6 +666,16 @@ F:2:SOFTWARE_SINGLE_STEP:void:software_single_step:enum target_signal sig, int i
 f:2:TARGET_PRINT_INSN:int:print_insn:bfd_vma vma, disassemble_info *info:vma, info:::legacy_print_insn::0
 f:2:SKIP_TRAMPOLINE_CODE:CORE_ADDR:skip_trampoline_code:CORE_ADDR pc:pc:::generic_skip_trampoline_code::0
 
+# The actual instruction address at which ABFD would begin execution.
+# If ABFD is position-independent code, this address is not relocated;
+# it's the address at which execution would begin if the file were
+# loaded at its sections' vmas.
+# 
+# On most architectures, this is simply bfd_get_start_address.  But on
+# some (like 64-bit PPC), that points to a function descriptor, not an
+# instruction.  The descriptor contains the actual entry point, and
+# other pointers needed to call the function.
+m:1::CORE_ADDR:bfd_entry_point:bfd *abfd:abfd:::generic_bfd_entry_point::0
 
 # For SVR4 shared libraries, each call goes through a small piece of
 # trampoline code in the ".plt" section.  IN_SOLIB_CALL_TRAMPOLINE evaluates
