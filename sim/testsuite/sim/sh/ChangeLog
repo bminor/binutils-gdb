@@ -1,0 +1,14 @@
+2003-07-08  Michael Snyder  <msnyder@redhat.com>
+
+	* allinsn.exp, testutils.inc, add.s, fabs.s, fadd.s, fcmpeq.s,
+	fcmpgt.s, fcnvds.s, fcnvsd.s, fdiv.s, fldi0.s, fldi1.s, flds.s,
+	float.s, fmac.s, fmov.s, fmul.s, fneg.s, frchg.s, fschg.s, 
+	fsqrt.s, fsub.s, ftrc.s, shll16.s, shll2.s, shll8.s, shll.s, 
+	shlr16.s, shlr2.s, shlr8.s, shlr.s, swap.s: New files.
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+End:
