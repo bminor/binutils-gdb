@@ -12,4 +12,11 @@ AC_SUBST(CC)
 AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/../../..)
 AC_CANONICAL_SYSTEM
 
+dnl In default case we need to link with some file so use common.inc.
+archinc=common.inc
+case ${target} in
+d10v-*-*) archinc=d10v.inc ;;
+esac
+AC_LINK_FILES($archinc,arch.inc)
+
 AC_OUTPUT(Makefile)

@@ -30,6 +30,8 @@ configure
 asm-source.exp
 asmsrc1.s
 asmsrc2.s
+common.inc
+d10v.inc
 
 Things-to-lose:
 
