@@ -36,7 +36,8 @@ proc set_lang_chill {} {
     global binfile objdir subdir
 
     if ![file exists $objdir/$subdir/$binfile] then {
-	return 0
+	warning "$binfile does not exist; tests suppressed."
+	return 1
     }
     verbose "loading file '$objdir/$subdir/$binfile'"
     gdb_load $objdir/$subdir/$binfile

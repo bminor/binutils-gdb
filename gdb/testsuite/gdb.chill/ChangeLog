@@ -1,3 +1,8 @@
+Thu Mar  2 06:17:41 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* misc.exp: If executable does not exist, issue warning and skip
+	remaining tests, like other chill tests.
+
 Wed Mar  1 20:28:42 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* misc.ch, misc.exp, Makefile.in:  New test case.
