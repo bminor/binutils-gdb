@@ -7,6 +7,12 @@
 
 1999-09-11  Donn Terry  <donn@interix.com>
 
+	* coffswap.h (IMAGE_BASE): Don't define.
+	* pei-arm.c (IMAGE_BASE): Don't define.
+	* pei-i386.c (IMAGE_BASE): Don't define.
+	* pei-mcore.c (IMAGE_BASE): Don't define.
+	* pei-ppc.c (IMAGE_BASE): Don't define.
+
 	* cofflink.c (_bfd_coff_link_input_bfd): When writing out a
 	symbol, switch on the class when determining whether to modify the
 	value.  For PE, don't modify the value of a C_FCN symbol not named

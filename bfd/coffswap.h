@@ -27,10 +27,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    Any file which uses this must first include "coff/internal.h" and
    "coff/CPU.h".  The functions will then be correct for that CPU.  */
 
-#ifndef IMAGE_BASE
-#define IMAGE_BASE 0
-#endif
-
 #define PUTWORD bfd_h_put_32
 #define PUTHALF bfd_h_put_16
 #define	PUTBYTE bfd_h_put_8
