@@ -189,7 +189,8 @@ void
 free_bcache (struct bcache *bcache)
 {
   obstack_free (&bcache->cache, 0);
-  free (bcache->bucket);
+  if (bcache->bucket)
+    free (bcache->bucket);
 
   /* This isn't necessary, but at least the bcache is always in a
      consistent state.  */
