@@ -1,5 +1,5 @@
-# FRV testcase
-# mach: fr400,fr500
+# frv testcase
+# mach: fr500 
 
 	.include "testutils.inc"
 
@@ -7,8 +7,8 @@
 
 	.global Ipipe
 Ipipe:
-	; clear the packing bit if the insn at 'pack:'. We can't simply use
-	; '.p' because the assembler will catch the error.
+	; Clear the packing bit of the insn at 'pack:'. We can't
+	; simply use '.p' because the assembler will catch the error.
 	set_gr_mem	pack,gr10
 	and_gr_immed	0x7fffffff,gr10
 	set_mem_gr	gr10,pack
