@@ -1,3 +1,19 @@
+2001-05-15  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* mips-dis.c (INSNLEN): Rename MAXLEN.
+	(std_reg_names): Replace by mips32_reg_names and mips64_reg_names.
+	(print_insn_arg): Remove $ prefix of register names.
+	(set_mips_isa_type): Remove.
+	(imps_isa_type): New function.
+	(get_mips_isa): New Function.
+	(print_insn_mips): Rename _print_insn_mips.
+	(_print_insn_mips): New function, contains code which was
+	duplicated in print_insn_big_mips and print_insn_little_mips.
+	(print_insn_big_mips): Moved code to _print_insn_mips.
+	(print_insn_little_mips): Likewise.
+	(print_mips16_insn_arg): Remove $ prefix of register names.
+	Print error message before abort.
+
 2001-05-14  J.T. Conklin  <jtc@redback.com>
 
 	* ppc-opc.c (powerpc_opcodes): Fixed extended opcode field of
