@@ -1,3 +1,57 @@
+Tue May 16 15:08:20 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* internal.h (NT_subsystem, NT_stack_heap): Now extern.
+
+	* Tut tut, Steve should've added:
+	Sat May 13 10:14:08 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* coff/pe.h: New file.
+	* coff/i386.h (NT_SECTION_ALIGNMENT, NT_FILE_ALIGNMENT,
+	NT_DEF_RESERVE, NT_DEF_COMMIT): New.
+	* coff/internal.h (internal_filehdr):  New fields for PE.
+	(IMAGE_DATA_DIRECTORY): New.
+	(internal_aouthdr): New fields for PE.
+
+Tue Feb 14 17:59:37 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ecoff.h (struct ecoff_fdrtab_entry): Define.
+	(struct ecoff_find_line): Define.
+
+Sat Feb  4 14:38:03 1995  David Mosberger-Tang  <davidm@piston.cs.arizona.edu>
+
+	* sym.h (struct pdr): field "prof" added.
+
+	* alpha.h (PDR_BITS1_PROF_*): added, macros for PDR_BITS*_RESERVED_*
+	updated accordingly.
+
+Sun Jan 15 18:38:33 1995  Steve Chamberlain  <sac@splat>
+
+	* w65.h: New file.
+
+Wed Nov 23 22:43:38 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* sh.h (SH_ARCH_MAGIC_BIG, SH_ARCH_MAGIC_LITTLE): New.
+	(SHBADMAG): Changed to suit.
+
+start-sanitize-i960xl
+Tue Jul 26 17:46:08 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* i960.h (F_I960XL): New macro.
+
+end-sanitize-i960xl
+Wed Jul  6 00:48:57 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* alpha.h:  Add definitions for alpha file header flags, encoding
+	the object type of the file.
+
+Mon Jun 20 13:47:01 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* ecoff.h (ecoff_swap_tir_in): Remove declaration.
+	(ecoff_swap_tir_out): Likewise.
+	(ecoff_swap_rndx_in, ecoff_swap_rndx_out): Likewise.
+	(struct ecoff_debug_swap): Add new fields: swap_tir_in,
+	swap_rndx_in, swap_tir_out, swap_rndx_out, read_debug_info.
+
 Sun Jun 12 03:51:52 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* symconst.h:  Pick up SGI define for stIndirect.
