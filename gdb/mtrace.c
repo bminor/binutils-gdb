@@ -22,6 +22,13 @@
 
 #include <stdio.h>
 #include "ansidecl.h"
+
+/* size_t may be defined in the system-supplied stdio.h.  */
+/* So just kludge it.  */
+#define size_t unsigned int
+#define ptrdiff_t int
+#define __ONEFILE
+
 #include <stdlib.h>
 #include "gmalloc.h"
 
