@@ -276,9 +276,16 @@ alpha_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 	case TYPE_CODE_CHAR:
 	case TYPE_CODE_RANGE:
 	case TYPE_CODE_ENUM:
-	  if (TYPE_LENGTH (arg_type) < TYPE_LENGTH (builtin_type_long))
+	  if (TYPE_LENGTH (arg_type) == 4)
 	    {
-	      arg_type = builtin_type_long;
+	      /* 32-bit values must be sign-extended to 64 bits
+		 even if the base data type is unsigned.  */
+	      arg_type = builtin_type_int32;
+	      arg = value_cast (arg_type, arg);
+	    }
+	  if (TYPE_LENGTH (arg_type) < ALPHA_REGISTER_SIZE)
+	    {
+	      arg_type = builtin_type_int64;
 	      arg = value_cast (arg_type, arg);
 	    }
 	  break;
@@ -541,6 +548,10 @@ alpha_store_return_value (struct type *valtype, struct regcache *regcache,
 
     default:
       /* Assume everything else degenerates to an integer.  */
+      /* 32-bit values must be sign-extended to 64 bits
+	 even if the base data type is unsigned.  */
+      if (length == 4)
+	valtype = builtin_type_int32;
       l = unpack_long (valtype, valbuf);
       regcache_cooked_write_unsigned (regcache, ALPHA_V0_REGNUM, l);
       break;
