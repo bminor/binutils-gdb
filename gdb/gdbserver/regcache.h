@@ -21,6 +21,8 @@
 #ifndef REGCACHE_H
 #define REGCACHE_H
 
+struct inferior_info;
+
 /* Create a new register cache for INFERIOR.  */
 
 void create_register_cache (struct inferior_info *inferior);

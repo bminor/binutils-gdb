@@ -372,7 +372,7 @@ regsets_fetch_inferior_registers (void)
 	}
 
       buf = malloc (regset->size);
-      res = ptrace (regset->get_request, inferior_pid, 0, (int) buf);
+      res = ptrace (regset->get_request, inferior_pid, 0, buf);
       if (res < 0)
 	{
 	  if (errno == EIO)
@@ -421,7 +421,7 @@ regsets_store_inferior_registers (void)
 
       buf = malloc (regset->size);
       regset->fill_function (buf);
-      res = ptrace (regset->set_request, inferior_pid, 0, (int) buf);
+      res = ptrace (regset->set_request, inferior_pid, 0, buf);
       if (res < 0)
 	{
 	  if (errno == EIO)

@@ -1,3 +1,10 @@
+2002-04-24  Michal Ludvig  <mludvig@suse.cz>
+
+	* gdbserver/linux-low.c (regsets_fetch_inferior_registers),
+	(regsets_store_inferior_registers): Removed cast to int from 
+	ptrace() calls.
+	* gdbserver/regcache.h: Added declaration of struct inferior_info.
+
 2002-04-24  David S. Miller  <davem@redhat.com>
 
 	* i960-tdep.c (register_in_window_p): New function.
