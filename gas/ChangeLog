@@ -1,3 +1,8 @@
+Thu May  5 18:12:51 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-mips.c (mips_emit_delays): Make call to
+	mips_no_prev_insn unconditional.
+
 Thu May  5 17:25:38 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* config/obj-coff*.*: Merged coffbfd versions into coff versions,
