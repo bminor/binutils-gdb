@@ -1,3 +1,30 @@
+Mon Nov  1 17:54:29 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-mips.c (PIC_CALL_REG, SP, FP): Define.
+	(mips_pic, mips_cprestore_offset): New static variables.
+	(md_pseudo_table): Handle .abicalls, .cpload, and .cprestore.
+	Ignore .bgnb and .endb.
+	(gp_reference): _gp_disp is never addressed off GP.
+	(macro_build): Ignore macros while searching for insn.  For cases
+	i, j, and o, accept the reloc type as an argument rather than
+	assuming BFD_RELOC_LO16.  Don't try to convert BFD_RELOC_LO16 to
+	BFD_RELOC_MIPS_GPREL.  Added new case a.
+	(set_at, load_register, macro): Changed calls to macro_build to
+	pass new argument for i, j and o cases.
+	(macro): Handle M_JAL_1, M_JAL_2 and M_JAL_A.  These require
+	special handling when generating SVR4 PIC code.
+	(mips_ip, tc_get_register, s_frame): Use macros FP, SP, GP and AT
+	rather than hard coded constants.
+	(md_apply_fix): Handle BFD_RELOC_MIPS_LITERAL and
+	BFD_RELOC_MIPS_CALL16.
+	(s_option): Set mips_pic based on .option picN.
+	(s_abicalls): New function; set mips_pic to 2.
+	(s_cpload): New function; handle .cpload.
+	(s_cprestore): New function; handle .cprestore.
+
+	* config/obj-ecoff.c (obj_pseudo_table): Add entries for .bgnb,
+	.endb and .verstamp, setting them to s_ignore.
+
 Sun Oct 31 00:36:40 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c (subspace_dictionary_chain): Add new ssd_defined
