@@ -25,19 +25,18 @@
    All debugging information is preserved */
 
 #include <bfd.h>
-#include <getopt.h>
-#include <stdio.h>
-#include <time.h>
-#include <libiberty.h>
+#include "sysdep.h"
 #include "bucomm.h"
 #include "sysroff.h"
 #include "coffgrok.h"
+#include <libiberty.h>
+#include <getopt.h>
 
 #include "coff/internal.h"
 #include "../bfd/libcoff.h"
 
 #define PROGRAM_VERSION "1.5"
-/*#define FOOP1 1*/
+/*#define FOOP1 1 */
 
 static int sh;
 static int h8300;
@@ -50,10 +49,12 @@ static FILE *file;
 static bfd *abfd;
 static int debug = 0;
 static int quick = 0;
-
+static int noprescan = 0;
 static struct coff_ofile *tree;
+/* Obsolete ?? 
+   static int absolute_p;
+ */
 
-static int absolute_p;
 static int segmented_p;
 static int code;
 
@@ -298,10 +299,11 @@ wr_tr ()
 }
 
 static void
-wr_un (ptr, sfile, first)
+wr_un (ptr, sfile, first, nsecs)
      struct coff_ofile *ptr;
      struct coff_sfile *sfile;
      int first;
+     int nsecs;
 {
   struct IT_un un;
 
@@ -314,7 +316,15 @@ wr_un (ptr, sfile, first)
   else
     un.format = FORMAT_OM;
   un.spare1 = 0;
+
+
+#if 0
   un.nsections = ptr->nsections - 1;	/*  Don't count the abs section */
+#else
+  /*NEW - only count sections with size */
+  un.nsections = nsecs;
+#endif
+
   un.nextdefs = 0;
   un.nextrefs = 0;
   /* Count all the undefined and defined variables with global scope */
@@ -440,13 +450,13 @@ wr_ob (p, section)
   unsigned char stuff[200];
 
   i = 0;
-  while (i < section->size)
+  while (i < section->bfd_section->_raw_size)
     {
       struct IT_ob ob;
       int todo = 200;		/* Copy in 200 byte lumps */
       ob.spare = 0;
-      if (i + todo > section->size)
-	todo = section->size - i;
+      if (i + todo > section->bfd_section->_raw_size)
+	todo = section->bfd_section->_raw_size - i;
 
       if (first)
 	{
@@ -467,9 +477,28 @@ wr_ob (p, section)
       ob.data.len = todo;
       bfd_get_section_contents (abfd, section->bfd_section, stuff, i, todo);
       ob.data.data = stuff;
-      sysroff_swap_ob_out (file, &ob /*, i + todo < section->size*/ );
+      sysroff_swap_ob_out (file, &ob /*, i + todo < section->size */ );
       i += todo;
     }
+  /* Now fill the rest with blanks */
+  while (i < section->size)
+    {
+      struct IT_ob ob;
+      int todo = 200;		/* Copy in 200 byte lumps */
+      ob.spare = 0;
+      if (i + todo > section->size)
+	todo = section->size - i;
+      ob.saf = 0;
+
+      ob.cpf = 0;		/* Never compress */
+      ob.data.len = todo;
+      memset (stuff, 0, todo);
+      ob.data.data = stuff;
+      sysroff_swap_ob_out (file, &ob);
+      i += todo;
+    }
+  /* Now fill the rest with blanks */
+
 }
 
 static void
@@ -824,42 +853,43 @@ walk_tree_type_1 (sfile, symbol, type, nest)
     }
 }
 
-static void
-dty_start ()
-{
-  struct IT_dty dty;
-  dty.end = 0;
-  dty.neg = 0x1001;
-  dty.spare = 0;
-  sysroff_swap_dty_out (file, &dty);
-}
+/* Obsolete ? 
+   static void
+   dty_start ()
+   {
+   struct IT_dty dty;
+   dty.end = 0;
+   dty.neg = 0x1001;
+   dty.spare = 0;
+   sysroff_swap_dty_out (file, &dty);
+   }
 
-static void
-dty_stop ()
-{
-  struct IT_dty dty;
-  dty.end = 0;
-  dty.neg = 0x1001;
-  dty.end = 1;
-  sysroff_swap_dty_out (file, &dty);
-}
-
-
-static void
-dump_tree_structure (sfile, symbol, type, nest)
-     struct coff_sfile *sfile;
-     struct coff_symbol *symbol;
-     struct coff_type *type;
-     int nest;
-{
-  if (symbol->type->type == coff_function_type)
-    {
+   static void
+   dty_stop ()
+   {
+   struct IT_dty dty;
+   dty.end = 0;
+   dty.neg = 0x1001;
+   dty.end = 1;
+   sysroff_swap_dty_out (file, &dty);
+   }
 
 
-    }
+   static void
+   dump_tree_structure (sfile, symbol, type, nest)
+   struct coff_sfile *sfile;
+   struct coff_symbol *symbol;
+   struct coff_type *type;
+   int nest;
+   {
+   if (symbol->type->type == coff_function_type)
+   {
 
-}
 
+   }
+
+   }
+ */
 
 static void
 walk_tree_type (sfile, symbol, type, nest)
@@ -1067,8 +1097,8 @@ walk_tree_symbol (sfile, section, symbol, nest)
       break;
     case coff_where_member_of_enum:
       /*      dsy.bitunit = 0;
-		dsy.field_len  = symbol->type->size;
-		dsy.field_off = symbol->where->offset;*/
+         dsy.field_len  = symbol->type->size;
+         dsy.field_off = symbol->where->offset; */
       break;
     case coff_where_register:
     case coff_where_unknown:
@@ -1327,7 +1357,7 @@ wr_dus (p, sfile)
 }
 
 /* Find the offset of the .text section for this sfile in the
-    .text section for the output file */
+   .text section for the output file */
 
 static int
 find_base (sfile, section)
@@ -1537,12 +1567,13 @@ wr_cs ()
    for all the sections which appear in the output file, even
    if there isn't an equivalent one on the input */
 
-static void
+static int
 wr_sc (ptr, sfile)
      struct coff_ofile *ptr;
      struct coff_sfile *sfile;
 {
   int i;
+int scount = 0;
   /* First work out the total number of sections */
 
   int total_sec = ptr->nsections;
@@ -1555,7 +1586,7 @@ wr_sc (ptr, sfile)
   struct coff_symbol *symbol;
 
   struct myinfo *info
-  = (struct myinfo *) calloc (total_sec, sizeof (struct myinfo));
+    = (struct myinfo *) calloc (total_sec, sizeof (struct myinfo));
 
 
 
@@ -1646,14 +1677,13 @@ wr_sc (ptr, sfile)
 	{
 	  sc.contents = CONTENTS_CODE;
 	}
-
-
-      sysroff_swap_sc_out (file, &sc);
-
-
-
+      /* NEW */
+      if (sc.length) {
+	sysroff_swap_sc_out (file, &sc);
+	scount++;
+      }
     }
-
+return scount;
 }
 
 static void
@@ -1731,8 +1761,16 @@ wr_unit_info (ptr)
        sfile;
        sfile = sfile->next)
     {
-      wr_un (ptr, sfile, first);
-      wr_sc (ptr, sfile);
+      long p1;
+      long p2;
+      int nsecs;
+      p1 = ftell (file);
+      wr_un (ptr, sfile, first, 0);
+      nsecs = wr_sc (ptr, sfile);
+      p2 = ftell (file);
+      fseek (file, p1, 0);
+      wr_un (ptr, sfile, first, nsecs);
+      fseek (file, p2, 0);      
       wr_er (ptr, sfile, first);
       wr_ed (ptr, sfile, first);
       first = 0;
@@ -1776,7 +1814,7 @@ prescan (tree)
       if (s->visible->type == coff_vis_common)
 	{
 	  struct coff_where *w = s->where;
-	  /*	  s->visible->type = coff_vis_ext_def; leave it as common */
+	  /*      s->visible->type = coff_vis_ext_def; leave it as common */
 	  common_section->size = align (common_section->size);
 	  w->offset = common_section->size + common_section->address;
 	  w->section = common_section;
@@ -1817,6 +1855,7 @@ main (ac, av)
   {
     {"debug", no_argument, 0, 'd'},
     {"quick", no_argument, 0, 'q'},
+    {"noprescan", no_argument, 0, 'n'},
     {"help", no_argument, 0, 'h'},
     {"version", no_argument, 0, 'V'},
     {NULL, no_argument, 0, 0}
@@ -1828,7 +1867,7 @@ main (ac, av)
   program_name = av[0];
   xmalloc_set_program_name (program_name);
 
-  while ((opt = getopt_long (ac, av, "dhVq", long_options,
+  while ((opt = getopt_long (ac, av, "dhVqn", long_options,
 			     (int *) NULL))
 	 != EOF)
     {
@@ -1837,21 +1876,24 @@ main (ac, av)
 	case 'q':
 	  quick = 1;
 	  break;
+	case 'n':
+	  noprescan = 1;
+	  break;
 	case 'd':
 	  debug = 1;
 	  break;
 	case 'h':
 	  show_help ();
-	  /*NOTREACHED*/
+	  /*NOTREACHED */
 	case 'V':
 	  printf ("GNU %s version %s\n", program_name, PROGRAM_VERSION);
 	  exit (0);
-	  /*NOTREACHED*/
+	  /*NOTREACHED */
 	case 0:
 	  break;
 	default:
 	  show_usage (stderr, 1);
-	  /*NOTREACHED*/
+	  /*NOTREACHED */
 	}
     }
 
@@ -1889,7 +1931,7 @@ main (ac, av)
   if (!output_file)
     {
       /* Take a .o off the input file and stick on a .obj.  If
-	 it doesn't end in .o, then stick a .obj on anyway */
+         it doesn't end in .o, then stick a .obj on anyway */
 
       int len = strlen (input_file);
       output_file = xmalloc (len + 5);
@@ -1936,7 +1978,8 @@ main (ac, av)
   if (debug)
     printf ("ids %d %d\n", base1, base2);
   tree = coff_grok (abfd);
-  prescan (tree);
+  if (!noprescan)
+    prescan (tree);
   wr_module (tree);
   return 0;
 }

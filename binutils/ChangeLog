@@ -1,3 +1,17 @@
+Wed Jun 28 17:51:24 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* ar.c: (print_contents.c, extract_file, do_quick_append):
+	Malloc buffers rather than allocate on stack (so it works
+	on NT).
+	* deflex.l: Names can have an @ in them.
+	* dlltool.c: Loads of stuff. Can now generate .imp files which
+	work with NT .dlls.
+
+Thu Jun 22 19:10:50 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-make.in (demangle.c.o): Remove.
+	(arparse.h): Depend on arparse.c instead of arparse.y.
+
 Wed Jun 21 17:32:45 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* Makefile.in (DISTSTUFF): Don't include info here.

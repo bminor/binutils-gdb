@@ -27,6 +27,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "bfd.h"
 #include "sysdep.h"
 #include "libiberty.h"
+#include "progress.h"
 #include "bucomm.h"
 #include "aout/ar.h"
 #include "libbfd.h"
@@ -163,7 +164,10 @@ map_over_members (arch, function, files, count)
   if (count == 0)
     {
       for (head = arch->next; head; head = head->next)
-	function (head);
+	{
+	  PROGRESS (1);
+	  function (head);
+	}
       return;
     }
   /* This may appear to be a baroque way of accomplishing what we want.
@@ -175,8 +179,10 @@ map_over_members (arch, function, files, count)
   for (; count > 0; files++, count--)
     {
       boolean found = false;
+
       for (head = arch->next; head; head = head->next)
 	{
+	  PROGRESS (1);
 	  if (head->filename == NULL)
 	    {
 	      /* Some archive formats don't get the filenames filled in
@@ -218,6 +224,7 @@ Usage: %s [-]{dmpqrtx}[abcilosuvV] [member-name] archive-file file...\n\
   else
     fprintf (stderr, "\
 Usage: %s [-vV] archive\n", program_name);
+  list_supported_targets (program_name, stderr);
   xexit (1);
 }
 
@@ -282,6 +289,8 @@ main (argc, argv)
 
   program_name = argv[0];
   xmalloc_set_program_name (program_name);
+
+  START_PROGRESS (program_name, 0);
 
   bfd_init ();
   show_version = 0;
@@ -410,6 +419,13 @@ main (argc, argv)
 	case 'M':
 	  mri_mode = 1;
 	  break;
+	case 'f':
+	  /* On HP/UX 9, the f modifier means to truncate names to 14
+             characters when comparing them to existing names.  We
+             always use an extended name table, so the truncation has
+             no purpose for us.  We ignore the modifier for
+             compatibility with the AR_FLAGS definition in make.  */
+	  break;
 	default:
 	  fprintf (stderr, "%s: illegal option -- %c\n", program_name, c);
 	  usage ();
@@ -523,6 +539,8 @@ main (argc, argv)
 	}
     }
 
+  END_PROGRESS (program_name);
+
   xexit (0);
   return 0;
 }
@@ -579,6 +597,7 @@ open_inarch (archive_filename)
        next_one;
        next_one = bfd_openr_next_archived_file (arch, next_one))
     {
+      PROGRESS (1);
       *last_one = next_one;
       last_one = &next_one->next;
     }
@@ -593,6 +612,7 @@ print_contents (abfd)
      bfd *abfd;
 {
   int ncopied = 0;
+  char *cbuf = xmalloc (BUFSIZE);
   struct stat buf;
   long size;
   if (bfd_stat_arch_elt (abfd, &buf) != 0)
@@ -606,7 +626,7 @@ print_contents (abfd)
   size = buf.st_size;
   while (ncopied < size)
     {
-      char cbuf[BUFSIZE];
+
       int nread;
       int tocopy = size - ncopied;
       if (tocopy > BUFSIZE)
@@ -620,6 +640,7 @@ print_contents (abfd)
       fwrite (cbuf, 1, nread, stdout);
       ncopied += tocopy;
     }
+  free (cbuf);
 }
 
 /* Extract a member of the archive into its own file.
@@ -637,7 +658,7 @@ extract_file (abfd)
      bfd *abfd;
 {
   FILE *ostream;
-  char cbuf[BUFSIZE];
+  char *cbuf = xmalloc (BUFSIZE);
   int nread, tocopy;
   int ncopied = 0;
   long size;
@@ -706,7 +727,7 @@ extract_file (abfd)
 
   if (preserve_dates)
     {
-#ifdef POSIX_UTIME
+#if POSIX_UTIME
       struct utimbuf tb;
       tb.actime = buf.st_mtime;
       tb.modtime = buf.st_mtime;
@@ -727,6 +748,7 @@ extract_file (abfd)
 #endif /* ! USE_UTIME */
 #endif /* ! POSIX_UTIME */
     }
+free (cbuf);
 }
 
 /* Just do it quickly; don't worry about dups, armap, or anything like that */
@@ -737,7 +759,7 @@ do_quick_append (archive_filename, files_to_append)
      char **files_to_append;
 {
   FILE *ofile, *ifile;
-  char buf[BUFSIZE];
+  char *buf = xmalloc (BUFSIZE);
   long tocopy, thistime;
   bfd *temp;
   struct stat sbuf;
@@ -830,6 +852,7 @@ do_quick_append (archive_filename, files_to_append)
     }
   fclose (ofile);
   bfd_close (temp);
+  free (buf);
 }
 
 
@@ -838,19 +861,12 @@ write_archive (iarch)
      bfd *iarch;
 {
   bfd *obfd;
-  int namelen = strlen (bfd_get_filename (iarch));
-  char *old_name = xmalloc (namelen + 1);
-  char *new_name = xmalloc (namelen + EXT_NAME_LEN);
+  char *old_name, *new_name;
   bfd *contents_head = iarch->next;
 
+  old_name = xmalloc (strlen (bfd_get_filename (iarch)) + 1);
   strcpy (old_name, bfd_get_filename (iarch));
-  strcpy (new_name, bfd_get_filename (iarch));
-
-#ifdef __GO32__			/* avoid long .extensions for MS-DOS */
-  strcpy (new_name + namelen, "-a");
-#else
-  strcpy (new_name + namelen, "-art");
-#endif
+  new_name = make_tempname (old_name);
 
   output_filename = new_name;
 
@@ -1037,7 +1053,8 @@ replace_members (arch, files_to_move)
 	{
 	  current = *current_ptr;
 
-	  if (!strcmp (normalize (*files_to_move), current->filename))
+	  if (!strcmp (normalize (*files_to_move),
+		       normalize (current->filename)))
 	    {
 	      if (newer_only)
 		{

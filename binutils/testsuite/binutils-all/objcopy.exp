@@ -47,14 +47,17 @@ if ![string match "" $got] then {
     # in the first place, and may order things a little differently.
     # Those systems should use setup_xfail here.
 
-    setup_xfail "sh-*-coff" "sh-*-hms"
+    setup_xfail "sh-*-coff" "sh-*-hms" 
+    setup_xfail "arm-*-pe" 
     setup_xfail "m68*-*-hpux*" "m68*-*-sunos*" "m68*-*-coff" "m68*-*-vxworks*"
     setup_xfail "m68*-ericsson-ose"
     setup_xfail "i*86-*-linux"
     setup_xfail "a29k-*-udi" "a29k-*-coff"
     setup_xfail "i960-*-vxworks5.1" "i960-*-coff"
     setup_xfail "h8300-*-hms" "h8300-*-coff"
+    setup_xfail "h8500-*-hms" "h8500-*-coff"
     setup_xfail "hppa*-*-*"
+    clear_xfail "hppa*-*-*elf*"
     setup_xfail "m88*-*-coff"
 
     if [string match "" $exec_output] then {
