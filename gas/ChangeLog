@@ -1,3 +1,10 @@
+Sat Apr 19 23:09:25 1997  Niklas Hallqvist  <niklas@petra.appli.se>
+
+	* configure.in (i386-*-openbsd*, m68k-*-openbsd*,
+	mips-dec-openbsd*, ppc-*-*bsd*, ns32k-pc532-openbsd*,
+	sparc-*-openbsd*): New targets.
+	* configure: Rebuild.
+
 Sat Apr 19 22:52:03 1997  Jim Wilson  <wilson@cygnus.com>
 
 	* config/obj-elf.c (elf_frob_symbol): If TC_MIPS, set BSF_OBJECT
