@@ -97,7 +97,7 @@ allocate_value (struct type *type)
   VALUE_REGNUM (val) = -1;
   val->lazy = 0;
   val->optimized_out = 0;
-  VALUE_EMBEDDED_OFFSET (val) = 0;
+  val->embedded_offset = 0;
   VALUE_POINTED_TO_OFFSET (val) = 0;
   val->modifiable = 1;
   return val;
@@ -210,6 +210,18 @@ set_value_optimized_out (struct value *value, int val)
 {
   value->optimized_out = val;
 }
+
+int
+value_embedded_offset (struct value *value)
+{
+  return value->embedded_offset;
+}
+
+void
+set_value_embedded_offset (struct value *value, int val)
+{
+  value->embedded_offset = val;
+}
 
 /* Return a mark in the value chain.  All values allocated after the
    mark is obtained (except for those released) are subject to being freed
@@ -315,7 +327,7 @@ value_copy (struct value *arg)
   VALUE_REGNUM (val) = VALUE_REGNUM (arg);
   val->lazy = arg->lazy;
   val->optimized_out = arg->optimized_out;
-  VALUE_EMBEDDED_OFFSET (val) = VALUE_EMBEDDED_OFFSET (arg);
+  val->embedded_offset = value_embedded_offset (arg);
   VALUE_POINTED_TO_OFFSET (val) = VALUE_POINTED_TO_OFFSET (arg);
   val->modifiable = arg->modifiable;
   if (!value_lazy (val))
@@ -1005,10 +1017,8 @@ value_primitive_field (struct value *arg1, int offset,
 	memcpy (value_contents_all_raw (v), value_contents_all_raw (arg1),
 		TYPE_LENGTH (value_enclosing_type (arg1)));
       v->offset = value_offset (arg1);
-      VALUE_EMBEDDED_OFFSET (v)
-	= offset +
-	VALUE_EMBEDDED_OFFSET (arg1) +
-	TYPE_FIELD_BITPOS (arg_type, fieldno) / 8;
+      v->embedded_offset = (offset + value_embedded_offset (arg1)
+			    + TYPE_FIELD_BITPOS (arg_type, fieldno) / 8);
     }
   else
     {
@@ -1022,7 +1032,7 @@ value_primitive_field (struct value *arg1, int offset,
 		value_contents_raw (arg1) + offset,
 		TYPE_LENGTH (type));
       v->offset = (value_offset (arg1) + offset
-		   + VALUE_EMBEDDED_OFFSET (arg1));
+		   + value_embedded_offset (arg1));
     }
   VALUE_LVAL (v) = VALUE_LVAL (arg1);
   if (VALUE_LVAL (arg1) == lval_internalvar)

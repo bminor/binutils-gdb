@@ -665,12 +665,12 @@ cp_print_static_field (struct type *type,
 
       CHECK_TYPEDEF (type);
       cp_print_value_fields (type, type, value_contents_all (val),
-			     VALUE_EMBEDDED_OFFSET (val), VALUE_ADDRESS (val),
+			     value_embedded_offset (val), VALUE_ADDRESS (val),
 			     stream, format, recurse, pretty, NULL, 1);
       return;
     }
   val_print (type, value_contents_all (val), 
-	     VALUE_EMBEDDED_OFFSET (val), VALUE_ADDRESS (val),
+	     value_embedded_offset (val), VALUE_ADDRESS (val),
 	     stream, format, 0, recurse, pretty);
 }
 

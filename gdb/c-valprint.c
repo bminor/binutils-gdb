@@ -598,7 +598,7 @@ c_value_print (struct value *val, struct ui_file *stream, int format,
     }
 
   return val_print (type, value_contents_all (val),
-		    VALUE_EMBEDDED_OFFSET (val),
+		    value_embedded_offset (val),
 		    VALUE_ADDRESS (val) + value_offset (val),
 		    stream, format, 1, 0, pretty);
 }

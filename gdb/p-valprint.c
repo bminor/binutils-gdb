@@ -565,7 +565,7 @@ pascal_value_print (struct value *val, struct ui_file *stream, int format,
 	  fprintf_filtered (stream, ") ");
 	}
     }
-  return val_print (type, value_contents (val), VALUE_EMBEDDED_OFFSET (val),
+  return val_print (type, value_contents (val), value_embedded_offset (val),
 		    VALUE_ADDRESS (val) + value_offset (val),
 		    stream, format, 1, 0, pretty);
 }

@@ -1148,7 +1148,7 @@ evaluate_subexp_standard (struct type *expect_type,
 		 reflect any ``this'' changes.  */
 	      arg2 = value_from_longest (lookup_pointer_type(value_type (temp)),
 					 VALUE_ADDRESS (temp) + value_offset (temp)
-					 + VALUE_EMBEDDED_OFFSET (temp));
+					 + value_embedded_offset (temp));
 	      argvec[1] = arg2;	/* the ``this'' pointer */
 	    }
 

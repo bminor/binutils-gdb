@@ -232,7 +232,7 @@ gnuv3_rtti_type (struct value *value,
   vtable_symbol
     = lookup_minimal_symbol_by_pc (VALUE_ADDRESS (vtable)
                                    + value_offset (vtable)
-                                   + VALUE_EMBEDDED_OFFSET (vtable));
+                                   + value_embedded_offset (vtable));
   if (! vtable_symbol)
     return NULL;
   
@@ -265,7 +265,7 @@ gnuv3_rtti_type (struct value *value,
     = value_as_long (value_field (vtable, vtable_field_offset_to_top));
 
   if (full_p)
-    *full_p = (- offset_to_top == VALUE_EMBEDDED_OFFSET (value)
+    *full_p = (- offset_to_top == value_embedded_offset (value)
                && (TYPE_LENGTH (value_enclosing_type (value))
                    >= TYPE_LENGTH (run_time_type)));
   if (top_p)

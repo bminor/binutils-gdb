@@ -104,7 +104,7 @@ hpacc_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
   /* pai: FIXME -- 32x64 possible problem? */
   /* First word (4 bytes) in object layout is the vtable pointer */
   coreptr = *(CORE_ADDR *) (value_contents (argp));	/* pai: (temp)  */
-  /* + offset + VALUE_EMBEDDED_OFFSET (argp)); */
+  /* + offset + value_embedded_offset (argp)); */
 
   if (!coreptr)
     error
@@ -223,7 +223,7 @@ hpacc_value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
                             + value_offset (v)
                             + (using_enclosing
                                ? 0
-                               : VALUE_EMBEDDED_OFFSET (v)));
+                               : value_embedded_offset (v)));
   if (coreptr == 0)
     /* return silently -- maybe called on gdb-generated value */
     return NULL;
@@ -278,7 +278,7 @@ hpacc_value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
        ||
        /* Or we checked on the embedded object and top offset was the
           same as the embedded offset */
-       ((top_offset == VALUE_EMBEDDED_OFFSET (v)) &&
+       ((top_offset == value_embedded_offset (v)) &&
         !using_enclosing &&
         TYPE_LENGTH (value_enclosing_type (v)) == TYPE_LENGTH (rtti_type))))
 

@@ -398,7 +398,7 @@ value_cast (struct type *type, struct value *arg2)
                       CORE_ADDR addr2 = value_as_address (arg2);
                       addr2 -= (VALUE_ADDRESS (v)
                                 + value_offset (v)
-                                + VALUE_EMBEDDED_OFFSET (v));
+                                + value_embedded_offset (v));
                       return value_from_pointer (type, addr2);
 		    }
 		}
@@ -544,7 +544,7 @@ value_assign (struct value *toval, struct value *fromval)
       set_internalvar (VALUE_INTERNALVAR (toval), fromval);
       val = value_copy (VALUE_INTERNALVAR (toval)->value);
       val = value_change_enclosing_type (val, value_enclosing_type (fromval));
-      VALUE_EMBEDDED_OFFSET (val) = VALUE_EMBEDDED_OFFSET (fromval);
+      set_value_embedded_offset (val, value_embedded_offset (fromval));
       VALUE_POINTED_TO_OFFSET (val) = VALUE_POINTED_TO_OFFSET (fromval);
       return val;
 
@@ -732,7 +732,7 @@ value_assign (struct value *toval, struct value *fromval)
 	  TYPE_LENGTH (type));
   val->type = type;
   val = value_change_enclosing_type (val, value_enclosing_type (fromval));
-  VALUE_EMBEDDED_OFFSET (val) = VALUE_EMBEDDED_OFFSET (fromval);
+  set_value_embedded_offset (val, value_embedded_offset (fromval));
   VALUE_POINTED_TO_OFFSET (val) = VALUE_POINTED_TO_OFFSET (fromval);
 
   return val;
@@ -868,13 +868,13 @@ value_addr (struct value *arg1)
   arg2 = value_from_pointer (lookup_pointer_type (value_type (arg1)),
 			     (VALUE_ADDRESS (arg1)
 			      + value_offset (arg1)
-			      + VALUE_EMBEDDED_OFFSET (arg1)));
+			      + value_embedded_offset (arg1)));
 
   /* This may be a pointer to a base subobject; so remember the
      full derived object's type ... */
   arg2 = value_change_enclosing_type (arg2, lookup_pointer_type (value_enclosing_type (arg1)));
   /* ... and also the relative position of the subobject in the full object */
-  VALUE_POINTED_TO_OFFSET (arg2) = VALUE_EMBEDDED_OFFSET (arg1);
+  VALUE_POINTED_TO_OFFSET (arg2) = value_embedded_offset (arg1);
   return arg2;
 }
 
@@ -914,7 +914,7 @@ value_ind (struct value *arg1)
       arg2->type = TYPE_TARGET_TYPE (base_type);
       /* Add embedding info */
       arg2 = value_change_enclosing_type (arg2, enc_type);
-      VALUE_EMBEDDED_OFFSET (arg2) = VALUE_POINTED_TO_OFFSET (arg1);
+      set_value_embedded_offset (arg2, VALUE_POINTED_TO_OFFSET (arg1));
 
       /* We may be pointing to an object of some derived type */
       arg2 = value_full_object (arg2, NULL, 0, 0, 0);
@@ -1504,7 +1504,7 @@ search_struct_method (char *name, struct value **arg1p,
 	      int skip;
 	      find_rt_vbase_offset (type, TYPE_BASECLASS (type, i),
 				    value_contents_all (*arg1p),
-				    offset + VALUE_EMBEDDED_OFFSET (*arg1p),
+				    offset + value_embedded_offset (*arg1p),
 				    &base_offset, &skip);
 	      if (skip >= 0)
 		error ("Virtual base class offset not found in vtable");
@@ -1738,7 +1738,7 @@ find_method_list (struct value **argp, char *method, int offset,
 	      int skip;
 	      find_rt_vbase_offset (type, TYPE_BASECLASS (type, i),
 				    value_contents_all (*argp),
-				    offset + VALUE_EMBEDDED_OFFSET (*argp),
+				    offset + value_embedded_offset (*argp),
 				    &base_offset, &skip);
 	      if (skip >= 0)
 		error ("Virtual base class offset not found in vtable");
@@ -2624,9 +2624,11 @@ value_full_object (struct value *argp, struct type *rtype, int xfull, int xtop,
      adjusting for the embedded offset of argp if that's what value_rtti_type
      used for its computation. */
   new_val = value_at_lazy (real_type, VALUE_ADDRESS (argp) - top +
-			   (using_enc ? 0 : VALUE_EMBEDDED_OFFSET (argp)));
+			   (using_enc ? 0 : value_embedded_offset (argp)));
   new_val->type = value_type (argp);
-  VALUE_EMBEDDED_OFFSET (new_val) = using_enc ? top + VALUE_EMBEDDED_OFFSET (argp) : top;
+  set_value_embedded_offset (new_val, (using_enc
+				       ? top + value_embedded_offset (argp)
+				       : top));
   return new_val;
 }
 

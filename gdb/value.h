@@ -215,7 +215,8 @@ extern int value_fetch_lazy (struct value *val);
 #define VALUE_REGNUM(val) (val)->regnum
 extern int value_optimized_out (struct value *value);
 extern void set_value_optimized_out (struct value *value, int val);
-#define VALUE_EMBEDDED_OFFSET(val) ((val)->embedded_offset)
+extern int value_embedded_offset (struct value *value);
+extern void set_value_embedded_offset (struct value *value, int val);
 #define VALUE_POINTED_TO_OFFSET(val) ((val)->pointed_to_offset)
 
 /* Convert a REF to the object referenced.  */
