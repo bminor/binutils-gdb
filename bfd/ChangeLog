@@ -1,3 +1,9 @@
+1999-07-14  Mark Mitchell  <mark@codesourcery.com>
+
+	* elf32-mips.c (mips_elf_obtain_contents): Swap 16-bit halves of
+	things relocated by R_MIPS16_GPREL.
+	(mips_elf_perform_relocation): Likewise.
+
 Wed Jul 14 15:23:19 1999  Jim Wilson  <wilson@cygnus.com>
 
 	* elfxx-target.h (elfNN_bed): Add elf_backend_want_dynbss.

@@ -6101,7 +6101,8 @@ mips_elf_obtain_contents (howto, relocation, input_bfd, contents)
   /* Obtain the bytes.  */
   x = bfd_get (8 * bfd_get_reloc_size (howto), input_bfd, location);
 
-  if (ELF32_R_TYPE (relocation->r_info) == R_MIPS16_26
+  if ((ELF32_R_TYPE (relocation->r_info) == R_MIPS16_26
+       || ELF32_R_TYPE (relocation->r_info) == R_MIPS16_GPREL)
       && bfd_little_endian (input_bfd))
     /* The two 16-bit words will be reversed on a little-endian
        system.  See mips_elf_perform_relocation for more details.  */
@@ -6208,18 +6209,6 @@ mips_elf_perform_relocation (info, howto, relocation, value,
 		 | ((value & 0x3e00000) >> 5) 
 		 | (value & 0xffff));
       
-      /* Perform the relocation.  */
-      x |= (value & howto->dst_mask);
-
-      /* Swap the high- and low-order 16 bits on little-endian
-         systems.  */
-      if (bfd_little_endian (input_bfd))
-	x = (((x & 0xffff) << 16)
-	     | ((x & 0xffff0000) >> 16));
-
-      /* Store the value.  */
-      bfd_put_32 (input_bfd, x, location);
-      return;
     }
   else if (ELF32_R_TYPE (relocation->r_info) == R_MIPS16_GPREL)
     {
@@ -6239,7 +6228,9 @@ mips_elf_perform_relocation (info, howto, relocation, value,
 	 addend is retrieved and stored as shown in this diagram; that
 	 is, the Imm fields above replace the V-rel16 field.  
 
-         All we need to do here is shuffle the bits appropriately.  */
+         All we need to do here is shuffle the bits appropriately.  As
+	 above, the two 16-bit halves must be swapped on a
+	 little-endian system.  */
       value = (((value & 0x7e0) << 16)
 	       | ((value & 0xf800) << 5)
 	       | (value & 0x1f));
@@ -6248,6 +6239,13 @@ mips_elf_perform_relocation (info, howto, relocation, value,
   /* Set the field.  */
   x |= (value & howto->dst_mask);
 
+  /* Swap the high- and low-order 16 bits on little-endian systems
+     when doing a MIPS16 relocation.  */
+  if ((ELF32_R_TYPE (relocation->r_info) == R_MIPS16_GPREL
+       || ELF32_R_TYPE (relocation->r_info) == R_MIPS16_26)
+      && bfd_little_endian (input_bfd))
+    x = (((x & 0xffff) << 16) | ((x & 0xffff0000) >> 16));
+  
   /* Put the value into the output.  */
   bfd_put (8 * bfd_get_reloc_size (howto), input_bfd, x, location);
 }
