@@ -1,5 +1,9 @@
 2005-04-01  Michael Snyder  <msnyder@redhat.com>
 
+	* mn10300-tdep.c (mn10300_frame_unwind_cache): Use 
+	find_partial_func instead of unwind_pc to identify frame.
+	(mn10300_push_dummy_call): Handle struct args, struct_return.
+
 	* mn10300-prologue.c (set_movm_offsets): Don't test variable
 	before setting it.
 	* mn10300-tdep.c (mn10300_skip_prologue): Use analyze_prologue

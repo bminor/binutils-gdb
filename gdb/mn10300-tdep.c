@@ -313,7 +313,7 @@ mn10300_frame_unwind_cache (struct frame_info *next_frame,
 			    void **this_prologue_cache)
 {
   struct trad_frame_cache *cache;
-  CORE_ADDR pc;
+  CORE_ADDR pc, start, end;
 
   if (*this_prologue_cache)
     return (*this_prologue_cache);
@@ -321,10 +321,14 @@ mn10300_frame_unwind_cache (struct frame_info *next_frame,
   cache = trad_frame_cache_zalloc (next_frame);
   pc = gdbarch_unwind_pc (current_gdbarch, next_frame);
   mn10300_analyze_prologue (next_frame, (void **) &cache, pc);
-
-  trad_frame_set_id (cache, 
-		     frame_id_build (trad_frame_get_this_base (cache), 
-				     frame_func_unwind (next_frame)));
+  if (find_pc_partial_function (pc, NULL, &start, &end))
+    trad_frame_set_id (cache, 
+		       frame_id_build (trad_frame_get_this_base (cache), 
+				       start));
+  else
+    trad_frame_set_id (cache, 
+		       frame_id_build (trad_frame_get_this_base (cache), 
+				       frame_func_unwind (next_frame)));
 
   (*this_prologue_cache) = cache;
   return cache;
@@ -445,15 +449,17 @@ mn10300_push_dummy_call (struct gdbarch *gdbarch,
 			 CORE_ADDR struct_addr)
 {
   const int push_size = register_size (gdbarch, E_PC_REGNUM);
-  int regs_used = struct_return ? 1 : 0;
+  int regs_used;
   int len, arg_len; 
   int stack_offset = 0;
   int argnum;
-  char *val;
+  char *val, valbuf[MAX_REGISTER_SIZE];
 
+#if 0
   /* FIXME temp, don't handle struct args at all.  */
   if (struct_return)
     error ("Target doesn't handle struct return");
+#endif
 
   /* This should be a nop, but align the stack just in case something
      went wrong.  Stacks are four byte aligned on the mn10300.  */
@@ -463,11 +469,14 @@ mn10300_push_dummy_call (struct gdbarch *gdbarch,
 
      XXX This doesn't appear to handle pass-by-invisible reference
      arguments.  */
+  regs_used = struct_return ? 1 : 0;
   for (len = 0, argnum = 0; argnum < nargs; argnum++)
     {
       arg_len = (TYPE_LENGTH (value_type (args[argnum])) + 3) & ~3;
+#if 0
       if (TYPE_CODE (value_type (args[argnum])) == TYPE_CODE_STRUCT)
 	error ("Target does not handle struct args");
+#endif
       while (regs_used < 2 && arg_len > 0)
 	{
 	  regs_used++;
@@ -479,18 +488,37 @@ mn10300_push_dummy_call (struct gdbarch *gdbarch,
   /* Allocate stack space.  */
   sp -= len;
 
-  regs_used = struct_return ? 1 : 0;
+  if (struct_return)
+    {
+      regs_used = 1;
+      write_register (E_D0_REGNUM, struct_addr);
+    }
+  else
+    regs_used = 0;
+
   /* Push all arguments onto the stack. */
   for (argnum = 0; argnum < nargs; argnum++)
     {
-      /* FIXME what about structs?  */
-      arg_len = TYPE_LENGTH (value_type (*args));
-      val = (char *) value_contents (*args);
+      /* FIXME what about structs?  Unions?  */
+      if (TYPE_CODE (value_type (*args)) == TYPE_CODE_STRUCT
+	  && TYPE_LENGTH (value_type (*args)) > 8)
+	{
+	  /* Change to pointer-to-type.  */
+	  arg_len = push_size;
+	  store_unsigned_integer (valbuf, push_size, 
+				  VALUE_ADDRESS (*args));
+	  val = &valbuf[0];
+	}
+      else
+	{
+	  arg_len = TYPE_LENGTH (value_type (*args));
+	  val = (char *) value_contents (*args);
+	}
 
       while (regs_used < 2 && arg_len > 0)
 	{
-	  write_register (regs_used, extract_unsigned_integer (val, 
-							       push_size));
+	  write_register (regs_used, 
+			  extract_unsigned_integer (val, push_size));
 	  val += push_size;
 	  arg_len -= push_size;
 	  regs_used++;
