@@ -1,3 +1,25 @@
+Tue Mar 22 15:28:33 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* remote.c (get_offsets): Reinstate comment which was in
+	remote_wait about use of SECT_OFF_TEXT and so on.
+
+Mon Mar 21 13:11:30 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* symmisc.c (maintenance_check_symtabs):  New function to check
+	consistency of psymtabs and symtabs.
+	* symtab.h (maintenance_check_symtabs):  Add prototype.
+	* maint.c:  Add new `maint check-symtabs' command.
+	* config/i386/tm-i386aix.h, config/i386/tm-sun386.h,
+	config/i386/tm-symmetry.h (REGISTER_CONVERT_TO_RAW):  Fix typo.
+	* config/i386/tm-symmetry.h:  Make comment inside #if 0 a real
+	comment.
+	* config/i386/tm-symmetry.h (STORE_STRUCT_RETURN):  Cast argument
+	to write_memory to avoid warnings from gcc.
+	* config/i386/xm-symmetry.h:  Add missing #endif.
+	* config/i386/nm-symmetry.h (NO_PTRACE_H):  Add for Dynix.
+	* config/i386/symmetry.mt (TDEPFILES):  Add i386-tdep.o.
+	* config/i386/symmetry.mh (NAT_FILE, NATDEPFILES):  Add.
+
 Mon Mar 21 11:50:28 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* hppa-tdep.c (hppa_fix_call_dummy): Use value_ptr.
