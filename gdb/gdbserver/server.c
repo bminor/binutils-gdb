@@ -235,6 +235,7 @@ handle_v_cont (char *own_buf, char *status, unsigned char *signal)
     cont_thread = resume_info[0].thread;
   else
     cont_thread = -1;
+  set_desired_inferior (0);
 
   (*the_target->resume) (resume_info);
 

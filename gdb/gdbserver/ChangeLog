@@ -1,5 +1,9 @@
 2004-02-29  Daniel Jacobowitz  <drow@mvista.com>
 
+	* server.c (handle_v_cont): Call set_desired_inferior.
+
+2004-02-29  Daniel Jacobowitz  <drow@mvista.com>
+
 	* remote-utils.c (prepare_resume_reply): Always supply "thread:".
 
 2004-02-29  Daniel Jacobowitz  <drow@mvista.com>
