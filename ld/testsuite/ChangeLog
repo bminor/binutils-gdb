@@ -1,3 +1,9 @@
+2002-10-10  Jakub Jelinek  <jakub@redhat.com>
+
+	* ld-i386/combreloc.s: New test.
+	* ld-i386/combreloc.d: New test.
+	* ld-i386/i386.exp (i386tests): Add it.
+
 2002-10-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-i386/i386.exp (reloc): Turn off combreloc.
