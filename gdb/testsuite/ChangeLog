@@ -1,3 +1,14 @@
+Tue Oct 24 11:12:12 1995  Jeffrey A Law  (law@cygnus.com)
+
+	* gdb.disasm/hppa.exp: Test lci and syncdma instructions.
+	* gdb.disasm/hppa.s: Corresponding changes.
+
+Wed Oct 18 11:27:47 1995  Jeffrey A Law  (law@cygnus.com)
+
+	* gdb.base/configure.in (hppa*-*-hpux*): No longer needs target
+	makefile fragment.
+	* config/mt-hpux: Deleted.
+
 Tue Oct 17 23:02:12 1995  Jeffrey A Law  (law@cygnus.com)
 
 	* Many files: When warning about suppressed tests due to a 
