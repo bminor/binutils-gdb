@@ -380,10 +380,9 @@ CORE_ADDR rs6000_frame_chain PARAMS ((struct frame_info *));
    by FI does not have a frame on the stack associated with it.  If it
    does not, FRAMELESS is set to 1, else 0.  */
 
+extern int rs6000_frameless_function_invocation (struct frame_info *);
 #define FRAMELESS_FUNCTION_INVOCATION(FI) \
-  (frameless_function_invocation (FI))
-
-extern int frameless_function_invocation PARAMS ((struct frame_info *));
+  (rs6000_frameless_function_invocation (FI))
 
 #define INIT_FRAME_PC_FIRST(fromleaf, prev) \
   prev->pc = (fromleaf ? SAVED_PC_AFTER_CALL (prev->next) : \
@@ -407,9 +406,9 @@ extern void rs6000_init_extra_frame_info (int fromleaf, struct frame_info *);
 #define	DEFAULT_LR_SAVE 8
 
 /* Return saved PC from a frame */
-#define FRAME_SAVED_PC(FRAME)  frame_saved_pc (FRAME)
+#define FRAME_SAVED_PC(FRAME)  rs6000_frame_saved_pc (FRAME)
 
-extern unsigned long frame_saved_pc PARAMS ((struct frame_info *));
+extern unsigned long rs6000_frame_saved_pc (struct frame_info *);
 
 extern CORE_ADDR rs6000_frame_args_address PARAMS ((struct frame_info *));
 #define FRAME_ARGS_ADDRESS(FI) rs6000_frame_args_address (FI)

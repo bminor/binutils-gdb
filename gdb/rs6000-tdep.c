@@ -1,5 +1,5 @@
 /* Target-dependent code for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 2000
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -1238,8 +1238,7 @@ skip_trampoline_code (pc)
 /* Determines whether the function FI has a frame on the stack or not.  */
 
 int
-frameless_function_invocation (fi)
-     struct frame_info *fi;
+rs6000_frameless_function_invocation (struct frame_info *fi)
 {
   CORE_ADDR func_start;
   struct rs6000_framedata fdata;
@@ -1273,8 +1272,7 @@ frameless_function_invocation (fi)
 /* Return the PC saved in a frame */
 
 unsigned long
-frame_saved_pc (fi)
-     struct frame_info *fi;
+rs6000_frame_saved_pc (struct frame_info *fi)
 {
   CORE_ADDR func_start;
   struct rs6000_framedata fdata;
@@ -1302,14 +1300,13 @@ frame_saved_pc (fi)
       if (fi->next->signal_handler_caller)
 	return read_memory_integer (fi->next->frame + SIG_FRAME_LR_OFFSET, 4);
       else
-	return read_memory_integer (rs6000_frame_chain (fi) + DEFAULT_LR_SAVE,
-				    4);
+	return read_memory_integer (FRAME_CHAIN (fi) + DEFAULT_LR_SAVE, 4);
     }
 
   if (fdata.lr_offset == 0)
     return read_register (LR_REGNUM);
 
-  return read_memory_integer (rs6000_frame_chain (fi) + fdata.lr_offset, 4);
+  return read_memory_integer (FRAME_CHAIN (fi) + fdata.lr_offset, 4);
 }
 
 /* If saved registers of frame FI are not known yet, read and cache them.
@@ -1480,7 +1477,7 @@ rs6000_frame_chain (thisframe)
     fp = read_memory_integer (thisframe->frame + SIG_FRAME_FP_OFFSET, 4);
   else if (thisframe->next != NULL
 	   && thisframe->next->signal_handler_caller
-	   && frameless_function_invocation (thisframe))
+	   && FRAMELESS_FUNCTION_INVOCATION (thisframe))
     /* A frameless function interrupted by a signal did not change the
        frame pointer.  */
     fp = FRAME_FP (thisframe);
