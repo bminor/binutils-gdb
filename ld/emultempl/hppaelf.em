@@ -50,7 +50,7 @@ static int need_laying_out = 0;
 /* Maximum size of a group of input sections that can be handled by
    one stub section.  A value of +/-1 indicates the bfd back-end
    should use a suitable default size.  */
-static bfd_signed_vma group_size = -1;
+static bfd_signed_vma group_size = 1;
 
 /* Stops the linker merging .text sections on a relocatable link,
    and adds millicode library to the list of input files.  */
