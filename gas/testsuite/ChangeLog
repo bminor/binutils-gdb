@@ -1,5 +1,9 @@
 2002-09-30  H.J. Lu <hjl@gnu.org>
 
+	* gas/mips/mips.exp: Undo the last change.
+
+2002-09-30  H.J. Lu <hjl@gnu.org>
+
 	* gas/mips/mips.exp: Set xfail on empic, empic2, empic3_g1 and
 	empic3_g2 on Linux/mips.
 
