@@ -1,3 +1,8 @@
+Mon Jun 20 15:17:43 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* ecoff.c (ecoff_build_aux): Call swap_tir_out and swap_rndx_out
+	via backend pointer, not directly.
+
 Fri Jun 17 18:05:06 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* Makefile.in (config-stamp): Make sure there is at least one
