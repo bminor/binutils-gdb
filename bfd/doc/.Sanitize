@@ -23,6 +23,7 @@ Do-first:
 
 Things-to-keep:
 
+Makefile.am
 Makefile.in
 bfd.texinfo
 bfdsumm.texi

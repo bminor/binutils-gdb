@@ -1,3 +1,8 @@
+Thu Jul 31 20:00:12 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am: New file, based on old Makefile.in.
+	* Makefile.in: Now built with automake.
+
 Tue Jul 22 14:44:00 1997  Robert Hoehne <robert.hoehne@Mathematik.TU-Chemnitz.DE>
 
 	* Makefile.in: Change stamp-* files to s-* files.  Use bfdt.texi
