@@ -707,7 +707,7 @@ DEFUN(bfd_section_from_phdr, (abfd, hdr, index),
 	   (hdr -> p_memsz > hdr -> p_filesz));
   sprintf (namebuf, split ? "segment%da" : "segment%d", index);
   name = bfd_alloc (abfd, strlen (namebuf) + 1);
-  (void) strcpy (name, namebuf);
+  strcpy (name, namebuf);
   newsect = bfd_make_section (abfd, name);
   newsect -> vma = hdr -> p_vaddr;
   newsect -> _raw_size = hdr -> p_filesz;
@@ -733,7 +733,7 @@ DEFUN(bfd_section_from_phdr, (abfd, hdr, index),
     {
       sprintf (namebuf, "segment%db", index);
       name = bfd_alloc (abfd, strlen (namebuf) + 1);
-      (void) strcpy (name, namebuf);
+      strcpy (name, namebuf);
       newsect = bfd_make_section (abfd, name);
       newsect -> vma = hdr -> p_vaddr + hdr -> p_filesz;
       newsect -> _raw_size = hdr -> p_memsz - hdr -> p_filesz;
