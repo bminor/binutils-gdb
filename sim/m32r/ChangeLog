@@ -1,3 +1,91 @@
+Fri Oct  9 16:11:58 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	Add pseudo-basic-block execution support.
+	* Makefile.in (SIM_OBJS): Add sim-reg.o, cgen-run.o, sim-stop.o.
+	(SIM_EXTRA_DEPS): Add include/opcode/cgen.h.
+	(INCLUDE_DEPS): Delete cpu-sim.h, include/opcode/cgen.h.
+	(mloop.c): Build pseudo-basic-block version.  Depend on stamp-cpu.
+	(stamp-decode): Delete, build decode files with other cpu files.
+	* arch.c,arch.h,cpuall.h: Regenerate.
+	* cpu.c,cpu.h,decode.c,decode.h,extract.c,model.c: Regenerate.
+	* sem-switch.c,sem.c: Regenerate.
+	* m32r-sim.h (M32R_MISC_PROFILE): New members load_regs,
+	load_regs_pending.
+	* m32r.c (m32rbf_fetch_register): Renamed from m32rb_fetch_register.
+	(m32rbf_store_register,m32rbf_h_cr_get,m32rbf_h_cr_set,
+	m32rbf_h_psw_get,m32rbf_h_psw_set,m32rbf_h_accum_get,
+	m32rbf_h_accum_set): Likewise.
+	(m32r_model_{init,update}_insn_cycles): Delete.
+	(m32rbf_model_insn_{before,after}): New fns.
+	(m32r_model_record_cti,m32r_model_record_cycles): Delete.
+	(m32rb_model_mark_get_h_gr,m32rb_model_mark_set_h_gr): Delete.
+	(m32rb_model_mark_busy_reg,m32rb_model_mark_unbusy_reg): Delete.
+	(check_load_stall): New fn.
+	(m32rbf_model_m32r_d_u_{exec,cmp,mac,cti,load,store}): New fns.
+	(m32rbf_model_test_u_exec): New fn.
+	* mloop.in: Rewrite, use pbb support.
+	* sim-if.c (sim_stop,sim_sync_stop,sim_resume): Delete.
+	(sim_fetch_register,sim_store_register): Delete.
+	* sim-main.h (CIA_GET,CIA_SET): Fix.
+	(SIM_ENGINE_HALT_HOOK,SIM_ENGINE_RESTART_HOOK): Delete.
+	* tconfig.in (WITH_SCACHE_PBB): Define.
+	(WITH_SCACHE_PBB_M32RBF): Define.
+	* traps.c (sim_engine_invalid_insn): Renamed from ..._illegal_....
+	(m32r_trap): Pass pc to sim_engine_halt.
+	* configure.in (SIM_AC_OPTION_SCACHE): Change 1024 to 16384.
+	* configure: Regenerate.
+start-sanitize-m32rx
+	* Makefile.in (M32RX_OBJS): Delete semx.o, add extract.o.
+	(mloopx.c): Build pseudo-basic-block version.  Depend on stamp-xcpu.
+	(semx.o): Delete.
+	(extractx.o): Add.
+	(stamp-xdecode): Delete, build decode files with other cpu files.
+	* cpux.c,cpux.h,decodex.c,decodex.h,modelx.c: Regenerate.
+	* readx.c: Delete.
+	* semx.c: Delete.
+	* extractx.c: New file.
+	* semx-switch.c: New file.
+	* m32r-sim.h (BRANCH_NEW_PC): Delete.
+	(SEM_SKIP_INSN): New macro.
+	* m32rx.c (m32rxf_fetch_register): Renamed from m32rx_fetch_register.
+	(m32rxf_store_register,m32rxf_h_cr_get,m32rxf_h_cr_set,
+	m32rxf_h_psw_get,m32rxf_h_psw_set,m32rxf_h_accum_get,
+	m32rxf_h_accum_set,m32rxf_h_accums_get,m32rxf_h_accums_set): Likewise.
+	(m32rxf_model_insn_{before,after}): New fns.
+	(m32rx_model_mark_get_h_gr,m32rx_model_mark_set_h_gr): Delete.
+	(m32rx_model_mark_busy_reg,m32rx_model_mark_unbusy_reg): Delete.
+	(check_load_stall): New fn.
+	(m32rxf_model_m32rx_u_{exec,cmp,mac,cti,load,store}): New fns.
+	* mloopx.in: Rewrite, use pbb support.
+	* tconfig.in (WITH_SCACHE_PBB_M32RXF): Define.
+	(WITH_SEM_SWITCH_FULL): Change from 0 to 1.
+end-sanitize-m32rx
+
+Wed Sep 16 18:22:27 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* m32r-sim.h ({PSW,CBR,SPI,SPU,BPC,BBPSW,BBPC}_REGNUM): New macros.
+	({ACC1L,ACC1H}_REGNUM): New macros.
+	(m32r_decode_gdb_ctrl_regnum): Add prototype.
+	* m32r.c (m32r_decode_gdb_ctrl_regnum): New function.
+	(m32r_fetch_register,m32r_store_register): Rewrite.
+start-sanitize-m32rx
+	* m32rx.c (m32rx_fetch_register,m32rx_store_register): Rewrite.
+end-sanitize-m32rx
+
+Tue Sep 15 15:01:14 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* m32r-sim.h (GET_H_SM): New macro.
+	(UART params): Update to msa2000.
+	* devices.c (device_io_read_buffer): Update to msa2000.
+	* m32r.c (m32rb_h_cr_get,m32rb_h_cr_set): Handle bbpc,bbpsw.
+	(m32rb_h_psw_get,m32rb_h_psw_set): New functions.
+	* arch.c,arch.h,cpu.c,cpu.h,sem-switch.c,sem.c: Regenerate.
+start-sanitize-m32rx
+	* m32rx.c (m32rx_h_cr_get,m32rx_h_cr_set): Handle bbpc,bbpsw.
+	(m32rx_h_psw_get,m32rx_h_psw_set): New functions.
+	* cpux.c,cpux.h,readx.c,semx.c: Regenerate.
+end-sanitize-m32rx
+
 Wed Sep  9 15:29:36 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* m32r-sim.h (m32r_trap): Update prototype.
