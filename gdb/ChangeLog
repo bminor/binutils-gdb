@@ -1,3 +1,29 @@
+2004-10-11  Orjan Friberg  <orjanf@axis.com>
+
+	* cris-tdep.c (cris_sigtramp_start, cris_rt_sigtramp_start)
+	(cris_sigcontext_addr, cris_sigtramp_frame_unwind_cache)
+	(cris_sigtramp_frame_this_id, cris_sigtramp_frame_prev_register)
+	(cris_sigtramp_frame_sniffer): New functions.
+	(cris_gdbarch_init): Hook in signal trampoline unwinder.
+	(cris_dwarf2_reg_to_regnum, cris_dwarf2_frame_init_reg): New functions.
+	(cris_gdbarch_init): Hook in Dwarf-2 unwinder.
+	(struct gdbarch_tdep, set_cris_dwarf2_cfi, cris_dump_tdep)
+	(cris_gdbarch_init, _initialize_cris_tdep): Add CRIS Dwarf-2 CFI usage
+	command.
+	(cris_version_update): Remove, replace with ...
+	(set_cris_version): New function.
+	(struct gdbarch_tdep, cris_mode, cris_mode_update)
+	(cris_cannot_store_register, cris_dump_tdep, cris_gdbarch_init)
+	(_initialize_cris_tdep): Remove CRIS mode command.
+	(cris_fpless_backtrace, _initialize_cris_tdep): Remove 
+	cris-fpless-backtrace command.
+	(cris_scan_prologue): Fix prologue scanning limit.
+	(cris_register_type): Update to reflect actual registers.
+	(cris_register_bytes_ok) Remove.
+	(cris_gdbarch_init): Remove support for CRIS v8 and v9.
+	Remove set_gdbarch_deprecated_register_size,
+	set_gdbarch_deprecated_register_byte, set_gdbarch_register_bytes_ok.
+	
 2004-10-10  Andrew Cagney  <cagney@gnu.org>
 
 	* ada-lang.c (lim_warning): Add ATTR_FORMAT prototype and FIXME
