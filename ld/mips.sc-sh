@@ -35,6 +35,7 @@ SECTIONS
   ${RELOCATING+ edata  =  .;}
   .sbss ${RELOCATING+ .} : {
     *(.sbss)
+    *(.scommon)
   }
   .bss ${RELOCATING+ .} : {
     *(.bss)

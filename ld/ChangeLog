@@ -1,3 +1,13 @@
+Tue Feb  2 11:32:27 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* mips.sc-sh: Put .scommon sections into .sbss section.
+
+	* ldmain.c (subfile_wanted_p): Preserve section of common symbols,
+	rather than always putting them in bfd_com_section.
+	* ldlang.c (lang_common): If a common symbol is not in
+	bfd_com_section, put in a section of the same name, rather than
+	always putting it in section COMMON.
+
 Fri Jan 29 09:57:58 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* ldmain.c (subfile_wanted_p): If we already have a common
