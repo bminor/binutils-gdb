@@ -30,7 +30,6 @@
 #define TARGET_FORMAT "elf32-d10v"
 
 #define MD_APPLY_FIX3
-#define md_operand(x)
 
 /* call md_pcrel_from_section, not md_pcrel_from */
 #define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section(FIXP, SEC)   
@@ -50,6 +49,8 @@
 
 int d10v_cleanup PARAMS ((void));
 #define md_after_pass_hook()	     d10v_cleanup()
+#define md_cleanup()		     d10v_cleanup()
+#define md_do_align(a,b,c,d)	     d10v_cleanup()
 #define TC_START_LABEL(ch, ptr)  (ch == ':' && d10v_cleanup())
 
 

@@ -912,9 +912,6 @@ md_assemble (str)
   static int etype=0;		/* saved extype.  used for multiline instructions */
   char *str2;
 
-  for (str2 = str; *str2; str2++)
-    *str2 = tolower(*str2);
-
   if (etype == 0)
     {
       /* look for the special multiple instruction separators */
@@ -1027,7 +1024,7 @@ do_assemble (str, opcode)
        && !is_end_of_line[*op_end] && *op_end != ' ';
        op_end++)
     {
-      name[nlen] = op_start[nlen];
+      name[nlen] = tolower(op_start[nlen]);
       nlen++;
     }
   name[nlen] = 0;
@@ -1103,7 +1100,7 @@ find_opcode (opcode, myops)
 		  /* calculate the current address by running through the previous frags */
 		  /* and adding our current offset */
 		  for (value = 0, f = frchain_now->frch_root; f; f = f->fr_next)
-		    value += f->fr_fix;
+		    value += f->fr_fix + f->fr_offset;
 
 		  if (flags & OPERAND_ADDR)
 		    value = S_GET_VALUE(myops[opnum].X_add_symbol) - value -
