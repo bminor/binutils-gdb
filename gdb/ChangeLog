@@ -1,3 +1,8 @@
+2001-01-15  Daniel Jacobowitz  <drow@mvista.com>
+
+	* stabsread.c (read_type): Pass dbx_lookup_type (typenums)
+	to make_cv_type.
+
 2002-01-14  Andrew Cagney  <ac131313@redhat.com>
 
 	* config/pa/tm-hppa.h (DEPRECATED_CLEAN_UP_REGISTER_VALUE): Rename

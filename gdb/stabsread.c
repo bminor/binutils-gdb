@@ -2586,7 +2586,8 @@ again:
       if (type_descriptor == 'c' && !os9k_stabs)
 	return error_type (pp, objfile);
       type = read_type (pp, objfile);
-      type = make_cv_type (1, TYPE_VOLATILE (type), type, 0);
+      type = make_cv_type (1, TYPE_VOLATILE (type), type,
+			   dbx_lookup_type (typenums));
       break;
 
     case 'B':			/* Volatile qual on some type (Sun) */
@@ -2596,7 +2597,8 @@ again:
       if (type_descriptor == 'i' && !os9k_stabs)
 	return error_type (pp, objfile);
       type = read_type (pp, objfile);
-      type = make_cv_type (TYPE_CONST (type), 1, type, 0);
+      type = make_cv_type (TYPE_CONST (type), 1, type,
+			   dbx_lookup_type (typenums));
       break;
 
     case '@':
