@@ -916,6 +916,20 @@ set_section (name)
   input_line_pointer = saved_input_line_pointer;
 }
 
+/* Map 's' to SHF_IA_64_SHORT.  */
+
+int
+ia64_elf_section_letter (letter, ptr_msg)
+     int letter;
+     char **ptr_msg;
+{
+  if (letter == 's')
+    return SHF_IA_64_SHORT;
+
+  *ptr_msg = _("Bad .section directive: want a,s,w,x,M,S in string");
+  return 0;
+}
+
 /* Map SHF_IA_64_SHORT to SEC_SMALL_DATA.  */
 
 flagword

@@ -1,3 +1,12 @@
+2001-09-11  Richard Henderson  <rth@redhat.com>
+
+	* config/tc-alpha.c (alpha_elf_section_letter): New.
+	(alpha_elf_section_flags): New.
+	* config/tc-alpha.h (md_elf_section_letter): New.
+	(md_elf_section_flags): New.
+	* config/tc-ia64.c (ia64_elf_section_letter): New.
+	* config/tc-ia64.h (md_elf_section_letter): New.
+
 2001-09-11  Jakub Jelinek  <jakub@redhat.com>
 
 	* config/obj-elf.c (obj_elf_parse_section_letters): Use 'M' instead

@@ -5399,6 +5399,34 @@ select_gp_value ()
 }
 #endif /* OBJ_ECOFF */
 
+#ifdef OBJ_ELF
+/* Map 's' to SHF_ALPHA_GPREL.  */
+
+int
+alpha_elf_section_letter (letter, ptr_msg)
+     int letter;
+     char **ptr_msg;
+{
+  if (letter == 's')
+    return SHF_ALPHA_GPREL;
+
+  *ptr_msg = _("Bad .section directive: want a,s,w,x,M,S in string");
+  return 0;
+}
+
+/* Map SHF_ALPHA_GPREL to SEC_SMALL_DATA.  */
+
+flagword
+alpha_elf_section_flags (flags, attr, type)
+     flagword flags;
+     int attr, type ATTRIBUTE_UNUSED;
+{
+  if (attr & SHF_ALPHA_GPREL)
+    flags |= SEC_SMALL_DATA;
+  return flags;
+}
+#endif /* OBJ_ELF */
+
 /* Called internally to handle all alignment needs.  This takes care
    of eliding calls to frag_align if'n the cached current alignment
    says we've already got it, as well as taking care of the auto-align

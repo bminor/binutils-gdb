@@ -81,6 +81,7 @@ extern void ia64_cons_fix_new PARAMS ((fragS *f, int where, int nbytes,
 				       expressionS *exp));
 extern void ia64_validate_fix PARAMS ((struct fix *fix));
 extern char * ia64_canonicalize_symbol_name PARAMS ((char *));
+extern int ia64_elf_section_letter PARAMS ((int, char **));
 extern flagword ia64_elf_section_flags PARAMS ((flagword, int, int));
 extern int ia64_elf_section_type PARAMS ((const char *, size_t len));
 extern long ia64_pcrel_from_section PARAMS ((struct fix *fix, segT sec));
@@ -104,6 +105,7 @@ extern void ia64_handle_align PARAMS ((fragS *f));
 					as_fatal ("ia64_create_short_jump")
 #define md_estimate_size_before_relax(f,s) \
 			(as_fatal ("ia64_estimate_size_before_relax"), 1)
+#define md_elf_section_letter		ia64_elf_section_letter
 #define md_elf_section_flags		ia64_elf_section_flags
 #define TC_FIX_TYPE			struct ia64_fix
 #define TC_INIT_FIX_DATA(f)		{ f->tc_fix_data.opnd = 0; }
