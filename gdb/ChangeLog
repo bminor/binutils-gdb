@@ -1,5 +1,16 @@
 2001-06-15  Andrew Cagney  <ac131313@redhat.com>
 
+	* gdbarch.sh (CANNOT_FETCH_REGISTER): Multi-arch.
+	(CANNOT_STORE_REGISTER): Ditto.
+	* infptrace.c (CANNOT_FETCH_REGISTER): Delete definition.
+	(CANNOT_STORE_REGISTER): Ditto.
+	* regcache.c (CANNOT_STORE_REGISTER): Ditto.
+	* lynx-nat.c (CANNOT_STORE_REGISTER): Ditto.
+	* arch-utils.h (cannot_register_not): Define.
+	* arch-utils.c (cannot_register_not): Declare.
+	
+2001-06-15  Andrew Cagney  <ac131313@redhat.com>
+
 	* gdbarch.sh: Clarify pre/post default
 	(INIT_FRAME_PC_FIRST, INIT_FRAME_PC): Multiarch.
 	* blockframe.c (get_prev_frame): Remove #ifdef from around

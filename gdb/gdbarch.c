@@ -176,6 +176,8 @@ struct gdbarch
   gdbarch_do_registers_info_ftype *do_registers_info;
   gdbarch_register_sim_regno_ftype *register_sim_regno;
   gdbarch_register_bytes_ok_ftype *register_bytes_ok;
+  gdbarch_cannot_fetch_register_ftype *cannot_fetch_register;
+  gdbarch_cannot_store_register_ftype *cannot_store_register;
   int use_generic_dummy_frames;
   int call_dummy_location;
   gdbarch_call_dummy_address_ftype *call_dummy_address;
@@ -279,6 +281,8 @@ struct gdbarch startup_gdbarch =
   8 * sizeof (void*),
   8 * sizeof (void*),
   8 * sizeof (void*),
+  0,
+  0,
   0,
   0,
   0,
@@ -455,6 +459,8 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->max_register_virtual_size = -1;
   gdbarch->do_registers_info = do_registers_info;
   gdbarch->register_sim_regno = default_register_sim_regno;
+  gdbarch->cannot_fetch_register = cannot_register_not;
+  gdbarch->cannot_store_register = cannot_register_not;
   gdbarch->use_generic_dummy_frames = -1;
   gdbarch->call_dummy_start_offset = -1;
   gdbarch->call_dummy_breakpoint_offset = -1;
@@ -602,6 +608,8 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of do_registers_info, invalid_p == 0 */
   /* Skip verify of register_sim_regno, invalid_p == 0 */
   /* Skip verify of register_bytes_ok, has predicate */
+  /* Skip verify of cannot_fetch_register, invalid_p == 0 */
+  /* Skip verify of cannot_store_register, invalid_p == 0 */
   if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->use_generic_dummy_frames == -1))
     internal_error (__FILE__, __LINE__,
@@ -1041,6 +1049,18 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: %s # %s\n",
                       "REGISTER_BYTES_OK(nr_bytes)",
                       XSTRING (REGISTER_BYTES_OK (nr_bytes)));
+#endif
+#ifdef CANNOT_FETCH_REGISTER
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "CANNOT_FETCH_REGISTER(reg_nr)",
+                      XSTRING (CANNOT_FETCH_REGISTER (reg_nr)));
+#endif
+#ifdef CANNOT_STORE_REGISTER
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "CANNOT_STORE_REGISTER(reg_nr)",
+                      XSTRING (CANNOT_STORE_REGISTER (reg_nr)));
 #endif
 #ifdef USE_GENERIC_DUMMY_FRAMES
   fprintf_unfiltered (file,
@@ -1756,6 +1776,20 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: REGISTER_BYTES_OK = 0x%08lx\n",
                         (long) current_gdbarch->register_bytes_ok
                         /*REGISTER_BYTES_OK ()*/);
+#endif
+#ifdef CANNOT_FETCH_REGISTER
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: CANNOT_FETCH_REGISTER = 0x%08lx\n",
+                        (long) current_gdbarch->cannot_fetch_register
+                        /*CANNOT_FETCH_REGISTER ()*/);
+#endif
+#ifdef CANNOT_STORE_REGISTER
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: CANNOT_STORE_REGISTER = 0x%08lx\n",
+                        (long) current_gdbarch->cannot_store_register
+                        /*CANNOT_STORE_REGISTER ()*/);
 #endif
 #ifdef USE_GENERIC_DUMMY_FRAMES
   fprintf_unfiltered (file,
@@ -3052,6 +3086,42 @@ set_gdbarch_register_bytes_ok (struct gdbarch *gdbarch,
                                gdbarch_register_bytes_ok_ftype register_bytes_ok)
 {
   gdbarch->register_bytes_ok = register_bytes_ok;
+}
+
+int
+gdbarch_cannot_fetch_register (struct gdbarch *gdbarch, int reg_nr)
+{
+  if (gdbarch->cannot_fetch_register == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_cannot_fetch_register invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_cannot_fetch_register called\n");
+  return gdbarch->cannot_fetch_register (reg_nr);
+}
+
+void
+set_gdbarch_cannot_fetch_register (struct gdbarch *gdbarch,
+                                   gdbarch_cannot_fetch_register_ftype cannot_fetch_register)
+{
+  gdbarch->cannot_fetch_register = cannot_fetch_register;
+}
+
+int
+gdbarch_cannot_store_register (struct gdbarch *gdbarch, int reg_nr)
+{
+  if (gdbarch->cannot_store_register == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_cannot_store_register invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_cannot_store_register called\n");
+  return gdbarch->cannot_store_register (reg_nr);
+}
+
+void
+set_gdbarch_cannot_store_register (struct gdbarch *gdbarch,
+                                   gdbarch_cannot_store_register_ftype cannot_store_register)
+{
+  gdbarch->cannot_store_register = cannot_store_register;
 }
 
 int

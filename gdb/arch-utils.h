@@ -115,4 +115,9 @@ extern int generic_prepare_to_proceed (int select_it);
 
 void init_frame_pc_noop (int fromleaf, struct frame_info *prev);
 
+/* Version of cannot_fetch_register() / cannot_store_register() that
+   always fails. */
+
+int cannot_register_not (int regnum);
+
 #endif

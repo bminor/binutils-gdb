@@ -315,11 +315,6 @@ read_register_gen (int regnum, char *buf)
 /* Write register REGNUM at MYADDR to the target.  MYADDR points at
    REGISTER_RAW_BYTES(REGNUM), which must be in target byte-order.  */
 
-/* Registers we shouldn't try to store.  */
-#if !defined (CANNOT_STORE_REGISTER)
-#define CANNOT_STORE_REGISTER(regnum) 0
-#endif
-
 static void
 legacy_write_register_gen (int regnum, char *myaddr)
 {

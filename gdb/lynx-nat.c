@@ -539,11 +539,6 @@ fetch_inferior_registers (int regno)
    If REGNO is -1, do this for all registers.
    Otherwise, REGNO specifies which register (so we can save time).  */
 
-/* Registers we shouldn't try to store.  */
-#if !defined (CANNOT_STORE_REGISTER)
-#define CANNOT_STORE_REGISTER(regno) 0
-#endif
-
 void
 store_inferior_registers (int regno)
 {

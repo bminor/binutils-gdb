@@ -306,6 +306,12 @@ init_frame_pc_noop (int fromleaf, struct frame_info *prev)
   return;
 }
 
+int
+cannot_register_not (int regnum)
+{
+  return 0;
+}
+
 /* Functions to manipulate the endianness of the target.  */
 
 #ifdef TARGET_BYTE_ORDER_SELECTABLE

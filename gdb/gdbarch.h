@@ -664,6 +664,34 @@ extern void set_gdbarch_register_bytes_ok (struct gdbarch *gdbarch, gdbarch_regi
 #endif
 #endif
 
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (CANNOT_FETCH_REGISTER)
+#define CANNOT_FETCH_REGISTER(regnum) (cannot_register_not (regnum))
+#endif
+
+typedef int (gdbarch_cannot_fetch_register_ftype) (int regnum);
+extern int gdbarch_cannot_fetch_register (struct gdbarch *gdbarch, int regnum);
+extern void set_gdbarch_cannot_fetch_register (struct gdbarch *gdbarch, gdbarch_cannot_fetch_register_ftype *cannot_fetch_register);
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (CANNOT_FETCH_REGISTER)
+#define CANNOT_FETCH_REGISTER(regnum) (gdbarch_cannot_fetch_register (current_gdbarch, regnum))
+#endif
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (CANNOT_STORE_REGISTER)
+#define CANNOT_STORE_REGISTER(regnum) (cannot_register_not (regnum))
+#endif
+
+typedef int (gdbarch_cannot_store_register_ftype) (int regnum);
+extern int gdbarch_cannot_store_register (struct gdbarch *gdbarch, int regnum);
+extern void set_gdbarch_cannot_store_register (struct gdbarch *gdbarch, gdbarch_cannot_store_register_ftype *cannot_store_register);
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (CANNOT_STORE_REGISTER)
+#define CANNOT_STORE_REGISTER(regnum) (gdbarch_cannot_store_register (current_gdbarch, regnum))
+#endif
+#endif
+
 extern int gdbarch_use_generic_dummy_frames (struct gdbarch *gdbarch);
 extern void set_gdbarch_use_generic_dummy_frames (struct gdbarch *gdbarch, int use_generic_dummy_frames);
 #if GDB_MULTI_ARCH

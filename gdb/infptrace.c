@@ -349,11 +349,6 @@ _initialize_kernel_u_addr (void)
     - KERNEL_U_ADDR
 #endif
 
-/* Registers we shouldn't try to fetch.  */
-#if !defined (CANNOT_FETCH_REGISTER)
-#define CANNOT_FETCH_REGISTER(regno) 0
-#endif
-
 /* Fetch one register.  */
 
 static void
@@ -417,11 +412,6 @@ fetch_inferior_registers (int regno)
 	}
     }
 }
-
-/* Registers we shouldn't try to store.  */
-#if !defined (CANNOT_STORE_REGISTER)
-#define CANNOT_STORE_REGISTER(regno) 0
-#endif
 
 /* Store one register. */
 
