@@ -1,3 +1,7 @@
+Wed May 10 15:59:00 1995  Torbjorn Granlund  <tege@adder.cygnus.com>
+
+	* remote-est.c (est_open): Make static to match prototype.
+
 Tue May  9 16:58:50 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* configure.in: Add little endian PowerPC support.

@@ -151,7 +151,7 @@ static struct monitor_ops est_cmds =
   MONITOR_OPS_MAGIC		/* magic */
   };
 
-void
+static void
 est_open(args, from_tty)
      char *args;
      int from_tty;
