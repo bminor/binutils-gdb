@@ -1,3 +1,29 @@
+Tue Feb 14 18:03:03 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objdump.c (with_source_code): New global variable.
+	(usage): Mention -S/--source.
+	(long_options): Add --source.
+	(prev_functionname, prev_line): New static variables.
+	(struct print_file_list): Define.
+	(print_files): New static variable.
+	(skip_to_line, show_line): New static functions.
+	(disassemble_data): Call show_line to handle -l and -S.
+	(main): Handle -S.
+	* binutils.texi, objdump.1: Document -S/--source.
+
+Thu Feb  9 16:11:53 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objcopy.c (copy_usage): Rename parameter to avoid shadowing.
+	(strip_usage): Likewise.
+
+	* objcopy.c (struct section_add): Define.
+	(add_sections): New static variable.
+	(copy_options): Accept --add-section.
+	(copy_usage): Mention --add-section.
+	(copy_object): Add sections from the add_sections list.
+	(copy_main): Handle --add-section.
+	* binutils.texi, objcopy.1: Document --add-section.
+
 Wed Feb  1 15:04:57 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* objdump.c (disassemble_data): Pass section offset, not absolute
