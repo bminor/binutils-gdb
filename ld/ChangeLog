@@ -1,3 +1,13 @@
+2000-07-07  Mumit Khan  <khan@xraylith.wisc.edu>
+
+	* ld/emultempl/pe.em (pe_enable_auto_image_base): New variable. 
+	(longopts): New --{enable,disable}-auto-image-base options.
+	(gld_${EMULATION_NAME}_list_options): Document. 
+	(gld_${EMULATION_NAME}_parse): Handle.
+	(strhash): New static function.
+	(compute_dll_image_base): New static function. 
+	(gld_${EMULATION_NAME}_set_symbols): Use.
+
 2000-06-05  DJ Delorie  <dj@redhat.com>
 
 	* MAINTAINERS: new

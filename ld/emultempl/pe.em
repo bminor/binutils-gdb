@@ -118,6 +118,7 @@ static int pe_enable_stdcall_fixup = -1; /* 0=disable 1=enable */
 #ifdef DLL_SUPPORT
 static char *pe_out_def_filename = NULL;
 static char *pe_implib_filename = NULL;
+static int pe_enable_auto_image_base = 0;
 #endif
 
 extern const char *output_filename;
@@ -169,6 +170,8 @@ gld_${EMULATION_NAME}_before_parse()
 #define OPTION_THUMB_ENTRY		(OPTION_IMPLIB_FILENAME + 1)
 #define OPTION_WARN_DUPLICATE_EXPORTS	(OPTION_THUMB_ENTRY + 1)
 #define OPTION_IMP_COMPAT		(OPTION_WARN_DUPLICATE_EXPORTS + 1)
+#define OPTION_ENABLE_AUTO_IMAGE_BASE	(OPTION_IMP_COMPAT + 1)
+#define OPTION_DISABLE_AUTO_IMAGE_BASE	(OPTION_ENABLE_AUTO_IMAGE_BASE + 1)
 
 static struct option longopts[] =
 {
@@ -203,6 +206,8 @@ static struct option longopts[] =
   {"out-implib", required_argument, NULL, OPTION_IMPLIB_FILENAME},
   {"warn-duplicate-exports", no_argument, NULL, OPTION_WARN_DUPLICATE_EXPORTS},
   {"compat-implib", no_argument, NULL, OPTION_IMP_COMPAT},
+  {"enable-auto-image-base", no_argument, NULL, OPTION_ENABLE_AUTO_IMAGE_BASE},
+  {"disable-auto-image-base", no_argument, NULL, OPTION_DISABLE_AUTO_IMAGE_BASE},
 #endif
   {NULL, no_argument, NULL, 0}
 };
@@ -282,6 +287,9 @@ gld_${EMULATION_NAME}_list_options (file)
   fprintf (file, _("  --warn-duplicate-exports           Warn about duplicate exports.\n"));
   fprintf (file, _("  --compat-implib                    Create backward compatible import libs;\n"));
   fprintf (file, _("                                       create __imp_<SYMBOL> as well.\n"));
+  fprintf (file, _("  --enable-auto-image-base           Automatically choose image base for DLLs\n"));
+  fprintf (file, _("                                       unless user specifies one\n"));
+  fprintf (file, _("  --disable-auto-image-base          Do not auto-choose image base. (default)\n"));
 #endif
 }
 
@@ -540,11 +548,49 @@ gld_${EMULATION_NAME}_parse_args(argc, argv)
     case OPTION_IMP_COMPAT:
       pe_dll_compat_implib = 1;
       break;
+    case OPTION_ENABLE_AUTO_IMAGE_BASE:
+      pe_enable_auto_image_base = 1;
+      break;
+    case OPTION_DISABLE_AUTO_IMAGE_BASE:
+      pe_enable_auto_image_base = 0;
+      break;
 #endif
     }
   return 1;
 }
 
+
+static unsigned long 
+strhash (const char *str)
+{
+  const unsigned char *s;
+  unsigned long hash;
+  unsigned int c;
+  unsigned int len;
+
+  hash = 0;
+  len = 0;
+  s = (const unsigned char *) str;
+  while ((c = *s++) != '\0')
+    {
+      hash += c + (c << 17);
+      hash ^= hash >> 2;
+      ++len;
+    }
+  hash += len + (len << 17);
+  hash ^= hash >> 2;
+
+  return hash;
+}
+
+/* Use the output file to create a image base for relocatable DLLs. */
+static unsigned long
+compute_dll_image_base (const char *ofile)
+{
+  unsigned long hash = strhash (ofile);
+  return 0x60000000 | ((hash << 16) & 0x0FFC0000);
+}
+
 /* Assign values to the special symbols before the linker script is
    read.  */
 
@@ -561,7 +607,8 @@ gld_${EMULATION_NAME}_set_symbols ()
       if (link_info.relocateable)
 	init[IMAGEBASEOFF].value = 0;
       else if (init[DLLOFF].value || link_info.shared)
-	init[IMAGEBASEOFF].value = NT_DLL_IMAGE_BASE;
+	init[IMAGEBASEOFF].value = (pe_enable_auto_image_base) ?
+	  compute_dll_image_base (output_filename) : NT_DLL_IMAGE_BASE;
       else
 	init[IMAGEBASEOFF].value = NT_EXE_IMAGE_BASE;
     }
