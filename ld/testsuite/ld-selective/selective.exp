@@ -41,8 +41,8 @@ set seltests {
   {selective1 C 1.c {} {} {dropme1 dropme2} {alpha*-*}}
   {selective2 C 2.c {} {} {foo} {alpha*-* mips*-*}}
   {selective3 C 2.c {-u foo} {foo} {{foo 0}} {mips*-*}}
-  {selective4 C++ 3.cc {} {start a A::foo() B::foo()} {A::bar()} {mips*-*}}
-  {selective5 C++ 4.cc {} {start a A::bar()} {A::foo() B::foo()} {mips*-*}}
+  {selective4 C++ 3.cc {} {start a A::foo() B::foo()} {A::bar()} {alpha*-*  mips*-*}}
+  {selective5 C++ 4.cc {} {start a A::bar()} {A::foo() B::foo()} {alpha*-*  mips*-*}}
   {selective6 C++ 5.cc {} {start a A::bar()}
     {A::foo() B::foo() dropme1() dropme2()} {*-*-*}}
 }

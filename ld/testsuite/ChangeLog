@@ -1,3 +1,7 @@
+2001-07-27  H.J. Lu  <hjl@gnu.org>
+
+	* ld-selective/selective.exp: Fix the error in the last change.
+
 2001-07-24  Loren J. Rittle  <ljrittle@acm.org>
 
 	* ld-selective/selective.exp: Support g++ V3 ABI (along side
