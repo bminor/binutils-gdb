@@ -515,6 +515,8 @@ dbx_new_init (ignore)
    be called unless this is an a.out (or very similar) file. 
    FIXME, there should be a cleaner peephole into the BFD environment here.  */
 
+#define DBX_STRINGTAB_SIZE_SIZE sizeof(long)   /* FIXME */
+
 static void
 dbx_symfile_init (objfile)
      struct objfile *objfile;
@@ -522,7 +524,7 @@ dbx_symfile_init (objfile)
   int val;
   bfd *sym_bfd = objfile->obfd;
   char *name = bfd_get_filename (sym_bfd);
-  unsigned char size_temp[sizeof(long)];
+  unsigned char size_temp[DBX_STRINGTAB_SIZE_SIZE];
 
   /* Allocate struct to keep track of the symfile */
   objfile->sym_private = (PTR)
@@ -552,41 +554,48 @@ dbx_symfile_init (objfile)
      table size would be so totally bogus that the malloc would fail.  Now
      that we put in on the psymbol_obstack, we can't do this since gdb gets
      a fatal error (out of virtual memory) if the size is bogus.  We can
-     however at least check to see if the size is zero or some negative
-     value.  */
+     however at least check to see if the size is less than the size of
+     the size field itself, or larger than the size of the entire file.
+     Note that all valid string tables have a size greater than zero, since
+     the bytes used to hold the size are included in the count. */
 
-  val = bfd_seek (sym_bfd, STRING_TABLE_OFFSET, L_SET);
-  if (val < 0)
-    perror_with_name (name);
-
-  memset (size_temp, 0, sizeof (size_temp));
-  val = bfd_read ((PTR)size_temp, sizeof (long), 1, sym_bfd);
-  if (val < 0)
-    perror_with_name (name);
-
-  DBX_STRINGTAB_SIZE (objfile) = bfd_h_get_32 (sym_bfd, size_temp);
-
-  if (DBX_STRINGTAB_SIZE (objfile) == 0)
-    error ("%s has no string table.", name);
-
-  if (DBX_STRINGTAB_SIZE (objfile) < 0
-      || DBX_STRINGTAB_SIZE (objfile) > bfd_get_size (sym_bfd))
-    error ("ridiculous string table size (%d bytes).",
-	   DBX_STRINGTAB_SIZE (objfile));
-
-  DBX_STRINGTAB (objfile) =
-    (char *) obstack_alloc (&objfile -> psymbol_obstack,
-			    DBX_STRINGTAB_SIZE (objfile));
-
-  /* Now read in the string table in one big gulp.  */
-
-  val = bfd_seek (sym_bfd, STRING_TABLE_OFFSET, L_SET);
-  if (val < 0)
-    perror_with_name (name);
-  val = bfd_read (DBX_STRINGTAB (objfile), DBX_STRINGTAB_SIZE (objfile), 1,
-		  sym_bfd);
-  if (val != DBX_STRINGTAB_SIZE (objfile))
-    perror_with_name (name);
+  if (STRING_TABLE_OFFSET == 0)
+    {
+      DBX_STRINGTAB_SIZE (objfile) = 0;
+      DBX_STRINGTAB (objfile) = NULL;
+    }
+  else
+    {
+      val = bfd_seek (sym_bfd, STRING_TABLE_OFFSET, L_SET);
+      if (val < 0)
+	perror_with_name (name);
+      
+      memset ((PTR) size_temp, 0, sizeof (size_temp));
+      val = bfd_read ((PTR) size_temp, sizeof (size_temp), 1, sym_bfd);
+      if (val < 0)
+	perror_with_name (name);
+      
+      DBX_STRINGTAB_SIZE (objfile) = bfd_h_get_32 (sym_bfd, size_temp);
+      
+      if (DBX_STRINGTAB_SIZE (objfile) < sizeof (size_temp)
+	  || DBX_STRINGTAB_SIZE (objfile) > bfd_get_size (sym_bfd))
+	error ("ridiculous string table size (%d bytes).",
+	       DBX_STRINGTAB_SIZE (objfile));
+      
+      DBX_STRINGTAB (objfile) =
+	(char *) obstack_alloc (&objfile -> psymbol_obstack,
+				DBX_STRINGTAB_SIZE (objfile));
+      
+      /* Now read in the string table in one big gulp.  */
+      
+      val = bfd_seek (sym_bfd, STRING_TABLE_OFFSET, L_SET);
+      if (val < 0)
+	perror_with_name (name);
+      val = bfd_read (DBX_STRINGTAB (objfile), DBX_STRINGTAB_SIZE (objfile), 1,
+		      sym_bfd);
+      if (val != DBX_STRINGTAB_SIZE (objfile))
+	perror_with_name (name);
+    }
 }
 
 /* Perform any local cleanups required when we are done with a particular

@@ -1,3 +1,12 @@
+Wed Mar  3 15:51:28 1993  Fred Fish  (fnf@cygnus.com)
+
+	* dbxread.c (dbx_symfile_init):  Make size of the string table
+	size field a define (DBX_STRINGTAB_SIZE_SIZE).  Ensure that the
+	offset to the string table is nonzero and handle the nonexistant
+	string table case, should it occur.  Ensure that the string table
+	size read from the file is reasonable, with a minimum lower bound
+	of DBX_STRINGTAB_SIZE_SIZE instead of zero.
+
 Wed Mar  3 07:23:03 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Makefile.in: Changes to build testsuite correctly.
