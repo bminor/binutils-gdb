@@ -103,7 +103,7 @@ hpacc_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
 
   /* pai: FIXME -- 32x64 possible problem? */
   /* First word (4 bytes) in object layout is the vtable pointer */
-  coreptr = *(CORE_ADDR *) (VALUE_CONTENTS (argp));	/* pai: (temp)  */
+  coreptr = *(CORE_ADDR *) (value_contents (argp));	/* pai: (temp)  */
   /* + offset + VALUE_EMBEDDED_OFFSET (argp)); */
 
   if (!coreptr)
@@ -132,7 +132,7 @@ hpacc_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
 		     coreptr + 4 * (TYPE_FN_FIELD_VOFFSET (f, j) +
 				    HP_ACC_VFUNC_START));
 
-      coreptr = *(CORE_ADDR *) (VALUE_CONTENTS (vp));
+      coreptr = *(CORE_ADDR *) (value_contents (vp));
       /* coreptr now contains the address of the virtual function */
       /* (Actually, it contains the pointer to the plabel for the function. */
     }
@@ -153,10 +153,10 @@ hpacc_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
       /* Indirect once more, offset by function index */
       /* pai: FIXME 32x64 problem here, again multiplier could be 8 and value long */
       coreptr =
-	*(CORE_ADDR *) (VALUE_CONTENTS (vp) +
+	*(CORE_ADDR *) (value_contents (vp) +
 			4 * TYPE_FN_FIELD_VOFFSET (f, j));
       vp = value_at (builtin_type_int, coreptr);
-      coreptr = *(CORE_ADDR *) (VALUE_CONTENTS (vp));
+      coreptr = *(CORE_ADDR *) (value_contents (vp));
 
       /* coreptr now contains the address of the virtual function */
       /* (Actually, it contains the pointer to the plabel for the function.) */
@@ -241,7 +241,7 @@ hpacc_value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
   vp = value_at (builtin_type_int, coreptr + 4 * HP_ACC_TYPEINFO_OFFSET);
   /* Indirect through the typeinfo pointer and retrieve the pointer
    * to the string name */
-  coreptr = *(CORE_ADDR *) (VALUE_CONTENTS (vp));
+  coreptr = *(CORE_ADDR *) (value_contents (vp));
   if (!coreptr)
     error ("Retrieved null typeinfo pointer in trying to determine "
            "run-time type");
@@ -249,7 +249,7 @@ hpacc_value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
   vp = value_at (builtin_type_int, coreptr + 4);
   /* FIXME possible 32x64 problem */
 
-  coreptr = *(CORE_ADDR *) (VALUE_CONTENTS (vp));
+  coreptr = *(CORE_ADDR *) (value_contents (vp));
 
   read_memory_string (coreptr, rtti_type_name, 256);
 

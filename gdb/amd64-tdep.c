@@ -1,7 +1,7 @@
 /* Target-dependent code for AMD64.
 
-   Copyright 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
-   Contributed by Jiri Smid, SuSE Labs.
+   Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation,
+   Inc.  Contributed by Jiri Smid, SuSE Labs.
 
    This file is part of GDB.
 
@@ -581,7 +581,7 @@ amd64_push_arguments (struct regcache *regcache, int nargs,
       else
 	{
 	  /* The argument will be passed in registers.  */
-	  char *valbuf = VALUE_CONTENTS (args[i]);
+	  const bfd_byte *valbuf = value_contents (args[i]);
 	  char buf[8];
 
 	  gdb_assert (len <= 16);
@@ -630,7 +630,7 @@ amd64_push_arguments (struct regcache *regcache, int nargs,
   for (i = 0; i < num_stack_args; i++)
     {
       struct type *type = value_type (stack_args[i]);
-      char *valbuf = VALUE_CONTENTS (stack_args[i]);
+      const bfd_byte *valbuf = value_contents (stack_args[i]);
       int len = TYPE_LENGTH (type);
 
       write_memory (sp + element * 8, valbuf, len);

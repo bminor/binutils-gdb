@@ -1,6 +1,7 @@
 /* Common target dependent code for GDB on ARM systems.
-   Copyright 1988, 1989, 1991, 1992, 1993, 1995, 1996, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+
+   Copyright 1988, 1989, 1991, 1992, 1993, 1995, 1996, 1998, 1999,
+   2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1222,13 +1223,13 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       struct type *arg_type;
       struct type *target_type;
       enum type_code typecode;
-      char *val;
+      bfd_byte *val;
 
       arg_type = check_typedef (value_type (args[argnum]));
       len = TYPE_LENGTH (arg_type);
       target_type = TYPE_TARGET_TYPE (arg_type);
       typecode = TYPE_CODE (arg_type);
-      val = VALUE_CONTENTS (args[argnum]);
+      val = value_contents_writeable (args[argnum]);
 
       /* If the argument is a pointer to a function, and it is a
 	 Thumb function, create a LOCAL copy of the value and set

@@ -229,7 +229,7 @@ value_subscript (struct value *array, struct value *idx)
 	error ("bitstring index out of range");
       index -= lowerbound;
       offset = index / TARGET_CHAR_BIT;
-      byte = *((char *) VALUE_CONTENTS (array) + offset);
+      byte = *((char *) value_contents (array) + offset);
       bit_index = index % TARGET_CHAR_BIT;
       byte >>= (BITS_BIG_ENDIAN ? TARGET_CHAR_BIT - 1 - bit_index : bit_index);
       v = value_from_longest (LA_BOOL_TYPE, byte & 1);
@@ -271,7 +271,8 @@ value_subscripted_rvalue (struct value *array, struct value *idx, int lowerbound
   if (value_lazy (array))
     VALUE_LAZY (v) = 1;
   else
-    memcpy (VALUE_CONTENTS (v), VALUE_CONTENTS (array) + elt_offs, elt_size);
+    memcpy (value_contents_writeable (v),
+	    value_contents (array) + elt_offs, elt_size);
 
   if (VALUE_LVAL (array) == lval_internalvar)
     VALUE_LVAL (v) = lval_internalvar_component;
@@ -659,7 +660,7 @@ value_concat (struct value *arg1, struct value *arg2)
 	  if (TYPE_CODE (type2) == TYPE_CODE_CHAR)
 	    {
 	      inchar = (char) unpack_long (type2,
-					   VALUE_CONTENTS (inval2));
+					   value_contents (inval2));
 	      for (idx = 0; idx < count; idx++)
 		{
 		  *(ptr + idx) = inchar;
@@ -669,7 +670,7 @@ value_concat (struct value *arg1, struct value *arg2)
 	    {
 	      for (idx = 0; idx < count; idx++)
 		{
-		  memcpy (ptr + (idx * inval2len), VALUE_CONTENTS (inval2),
+		  memcpy (ptr + (idx * inval2len), value_contents (inval2),
 			  inval2len);
 		}
 	    }
@@ -699,20 +700,20 @@ value_concat (struct value *arg1, struct value *arg2)
       ptr = (char *) alloca (inval1len + inval2len);
       if (TYPE_CODE (type1) == TYPE_CODE_CHAR)
 	{
-	  *ptr = (char) unpack_long (type1, VALUE_CONTENTS (inval1));
+	  *ptr = (char) unpack_long (type1, value_contents (inval1));
 	}
       else
 	{
-	  memcpy (ptr, VALUE_CONTENTS (inval1), inval1len);
+	  memcpy (ptr, value_contents (inval1), inval1len);
 	}
       if (TYPE_CODE (type2) == TYPE_CODE_CHAR)
 	{
 	  *(ptr + inval1len) =
-	    (char) unpack_long (type2, VALUE_CONTENTS (inval2));
+	    (char) unpack_long (type2, value_contents (inval2));
 	}
       else
 	{
-	  memcpy (ptr + inval1len, VALUE_CONTENTS (inval2), inval2len);
+	  memcpy (ptr + inval1len, value_contents (inval2), inval2len);
 	}
       outval = value_string (ptr, inval1len + inval2len);
     }
@@ -1154,7 +1155,7 @@ int
 value_logical_not (struct value *arg1)
 {
   int len;
-  char *p;
+  const bfd_byte *p;
   struct type *type1;
 
   arg1 = coerce_number (arg1);
@@ -1164,7 +1165,7 @@ value_logical_not (struct value *arg1)
     return 0 == value_as_double (arg1);
 
   len = TYPE_LENGTH (type1);
-  p = VALUE_CONTENTS (arg1);
+  p = value_contents (arg1);
 
   while (--len >= 0)
     {
@@ -1183,8 +1184,8 @@ value_strcmp (struct value *arg1, struct value *arg2)
 {
   int len1 = TYPE_LENGTH (value_type (arg1));
   int len2 = TYPE_LENGTH (value_type (arg2));
-  char *s1 = VALUE_CONTENTS (arg1);
-  char *s2 = VALUE_CONTENTS (arg2);
+  const bfd_byte *s1 = value_contents (arg1);
+  const bfd_byte *s2 = value_contents (arg2);
   int i, len = len1 < len2 ? len1 : len2;
 
   for (i = 0; i < len; i++)
@@ -1212,7 +1213,8 @@ int
 value_equal (struct value *arg1, struct value *arg2)
 {
   int len;
-  char *p1, *p2;
+  const bfd_byte *p1;
+  const bfd_byte *p2;
   struct type *type1, *type2;
   enum type_code code1;
   enum type_code code2;
@@ -1246,8 +1248,8 @@ value_equal (struct value *arg1, struct value *arg2)
 	   && ((len = (int) TYPE_LENGTH (type1))
 	       == (int) TYPE_LENGTH (type2)))
     {
-      p1 = VALUE_CONTENTS (arg1);
-      p2 = VALUE_CONTENTS (arg2);
+      p1 = value_contents (arg1);
+      p2 = value_contents (arg2);
       while (--len >= 0)
 	{
 	  if (*p1++ != *p2++)
@@ -1363,7 +1365,7 @@ value_complement (struct value *arg1)
 }
 
 /* The INDEX'th bit of SET value whose value_type is TYPE,
-   and whose VALUE_CONTENTS is valaddr.
+   and whose value_contents is valaddr.
    Return -1 if out of range, -2 other error. */
 
 int
@@ -1401,7 +1403,7 @@ value_in (struct value *element, struct value *set)
       && TYPE_CODE (eltype) != TYPE_CODE_ENUM
       && TYPE_CODE (eltype) != TYPE_CODE_BOOL)
     error ("First argument of 'IN' has wrong type");
-  member = value_bit_index (settype, VALUE_CONTENTS (set),
+  member = value_bit_index (settype, value_contents (set),
 			    value_as_long (element));
   if (member < 0)
     error ("First argument of 'IN' not in range");

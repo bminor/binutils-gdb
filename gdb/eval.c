@@ -209,7 +209,7 @@ evaluate_struct_tuple (struct value *struct_val,
       struct value *val = NULL;
       int nlabels = 0;
       int bitpos, bitsize;
-      char *addr;
+      bfd_byte *addr;
 
       /* Skip past the labels, and count them. */
       while (get_label (exp, pos) != NULL)
@@ -315,12 +315,12 @@ evaluate_struct_tuple (struct value *struct_val,
 	  bitpos = TYPE_FIELD_BITPOS (struct_type, fieldno);
 	  if (variantno >= 0)
 	    bitpos += TYPE_FIELD_BITPOS (substruct_type, subfieldno);
-	  addr = VALUE_CONTENTS (struct_val) + bitpos / 8;
+	  addr = value_contents_writeable (struct_val) + bitpos / 8;
 	  if (bitsize)
 	    modify_field (addr, value_as_long (val),
 			  bitpos % 8, bitsize);
 	  else
-	    memcpy (addr, VALUE_CONTENTS (val),
+	    memcpy (addr, value_contents (val),
 		    TYPE_LENGTH (value_type (val)));
 	}
       while (--nlabels > 0);
@@ -362,7 +362,7 @@ init_array_element (struct value *array, struct value *element,
 	{
 	  memcpy (value_contents_raw (array)
 		  + (index - low_bound) * element_size,
-		  VALUE_CONTENTS (element), element_size);
+		  value_contents (element), element_size);
 	}
     }
   else
@@ -371,7 +371,7 @@ init_array_element (struct value *array, struct value *element,
       if (index < low_bound || index > high_bound)
 	error ("tuple index out of range");
       memcpy (value_contents_raw (array) + (index - low_bound) * element_size,
-	      VALUE_CONTENTS (element), element_size);
+	      value_contents (element), element_size);
     }
   return index;
 }
@@ -546,7 +546,7 @@ evaluate_subexp_standard (struct type *expect_type,
 		    error ("Too many array elements");
 		  memcpy (value_contents_raw (array)
 			  + (index - low_bound) * element_size,
-			  VALUE_CONTENTS (element),
+			  value_contents (element),
 			  element_size);
 		}
 	      index++;
@@ -1442,7 +1442,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	  if ((TYPE_CODE (value_type (arg1)) == TYPE_CODE_PTR) &&
 	      (TYPE_CODE (TYPE_TARGET_TYPE (value_type (arg1))) == TYPE_CODE_MEMBER))
 	    {
-	      unsigned int *ptr = (unsigned int *) VALUE_CONTENTS (arg2);	/* forces evaluation */
+	      unsigned int *ptr = (unsigned int *) value_contents (arg2);	/* forces evaluation */
 	      *ptr |= 0x20000000;	/* set 29th bit */
 	    }
 	}
@@ -1939,7 +1939,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	      (TYPE_CODE (value_type (retvalp)) == TYPE_CODE_PTR) &&
 	      (TYPE_CODE (TYPE_TARGET_TYPE (value_type (retvalp))) == TYPE_CODE_MEMBER))
 	    {
-	      unsigned int *ptr = (unsigned int *) VALUE_CONTENTS (retvalp);	/* forces evaluation */
+	      unsigned int *ptr = (unsigned int *) value_contents (retvalp);	/* forces evaluation */
 	      *ptr |= 0x20000000;	/* set 29th bit */
 	    }
 	  return retvalp;

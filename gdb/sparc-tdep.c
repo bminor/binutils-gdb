@@ -1,6 +1,6 @@
 /* Target-dependent code for SPARC.
 
-   Copyright 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -388,7 +388,7 @@ sparc32_store_arguments (struct regcache *regcache, int nargs,
              correct, and wasting a few bytes shouldn't be a problem.  */
 	  sp &= ~0x7;
 
-	  write_memory (sp, VALUE_CONTENTS (args[i]), len);
+	  write_memory (sp, value_contents (args[i]), len);
 	  args[i] = value_from_pointer (lookup_pointer_type (type), sp);
 	  num_elements++;
 	}
@@ -423,7 +423,7 @@ sparc32_store_arguments (struct regcache *regcache, int nargs,
 
   for (i = 0; i < nargs; i++)
     {
-      char *valbuf = VALUE_CONTENTS (args[i]);
+      const bfd_byte *valbuf = value_contents (args[i]);
       struct type *type = value_type (args[i]);
       int len = TYPE_LENGTH (type);
 

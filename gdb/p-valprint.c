@@ -239,7 +239,7 @@ pascal_val_print (struct type *type, const bfd_byte *valaddr,
 		      wtype = TYPE_TARGET_TYPE (type);
 		    }
 		  vt_val = value_at (wtype, vt_address);
-		  val_print (value_type (vt_val), VALUE_CONTENTS (vt_val), 0,
+		  val_print (value_type (vt_val), value_contents (vt_val), 0,
 			     VALUE_ADDRESS (vt_val), stream, format,
 			     deref_ref, recurse + 1, pretty);
 		  if (pretty)
@@ -292,7 +292,7 @@ pascal_val_print (struct type *type, const bfd_byte *valaddr,
 	       unpack_pointer (lookup_pointer_type (builtin_type_void),
 			       valaddr + embedded_offset));
 	      val_print (value_type (deref_val),
-			 VALUE_CONTENTS (deref_val), 0,
+			 value_contents (deref_val), 0,
 			 VALUE_ADDRESS (deref_val), stream, format,
 			 deref_ref, recurse + 1, pretty);
 	    }
@@ -565,7 +565,7 @@ pascal_value_print (struct value *val, struct ui_file *stream, int format,
 	  fprintf_filtered (stream, ") ");
 	}
     }
-  return val_print (type, VALUE_CONTENTS (val), VALUE_EMBEDDED_OFFSET (val),
+  return val_print (type, value_contents (val), VALUE_EMBEDDED_OFFSET (val),
 		    VALUE_ADDRESS (val) + value_offset (val),
 		    stream, format, 1, 0, pretty);
 }
@@ -846,7 +846,7 @@ pascal_object_print_value_fields (struct type *type, const bfd_byte *valaddr,
 		  v = value_from_longest (TYPE_FIELD_TYPE (type, i),
 				   unpack_field_as_long (type, valaddr, i));
 
-		  val_print (TYPE_FIELD_TYPE (type, i), VALUE_CONTENTS (v), 0, 0,
+		  val_print (TYPE_FIELD_TYPE (type, i), value_contents (v), 0, 0,
 			     stream, format, 0, recurse + 1, pretty);
 		}
 	    }
@@ -1041,11 +1041,11 @@ pascal_object_print_static_field (struct type *type, struct value *val,
 		    sizeof (CORE_ADDR));
 
       CHECK_TYPEDEF (type);
-      pascal_object_print_value_fields (type, VALUE_CONTENTS (val), VALUE_ADDRESS (val),
+      pascal_object_print_value_fields (type, value_contents (val), VALUE_ADDRESS (val),
 				  stream, format, recurse, pretty, NULL, 1);
       return;
     }
-  val_print (type, VALUE_CONTENTS (val), 0, VALUE_ADDRESS (val),
+  val_print (type, value_contents (val), 0, VALUE_ADDRESS (val),
 	     stream, format, 0, recurse, pretty);
 }
 

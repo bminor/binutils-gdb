@@ -358,7 +358,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 		    (TYPE_FIELD_TYPE (type, i), 
 		     unpack_field_as_long (type, valaddr + offset, i));
 
-		  val_print (TYPE_FIELD_TYPE (type, i), VALUE_CONTENTS (v),
+		  val_print (TYPE_FIELD_TYPE (type, i), value_contents (v),
 			     0, 0, stream, format, 0, recurse + 1, pretty);
 		}
 	    }
@@ -423,7 +423,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
       v = value_from_pointer (lookup_pointer_type (builtin_type_unsigned_long),
 			      *(unsigned long *) (valaddr + offset));
 
-      val_print (value_type (v), VALUE_CONTENTS (v), 0, 0,
+      val_print (value_type (v), value_contents (v), 0, 0,
 		 stream, format, 0, recurse + 1, pretty);
       fields_seen = 1;
 
@@ -789,7 +789,7 @@ cp_print_hpacc_virtual_table_entries (struct type *type, int *vfuncs,
 	  vf->type = value_type (v);	/* make it a pointer */
 
 	  /* print out the entry */
-	  val_print (value_type (vf), VALUE_CONTENTS (vf), 0, 0,
+	  val_print (value_type (vf), value_contents (vf), 0, 0,
 		     stream, format, 0, recurse + 1, pretty);
 	  field_physname
 	    = TYPE_FN_FIELD_PHYSNAME (TYPE_FN_FIELDLIST1 (type, fn), oi);

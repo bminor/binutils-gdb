@@ -1,5 +1,7 @@
 /* GNU/Linux on ARM target support.
-   Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+
+   Copyright 1999, 2000, 2001, 2002, 2003, 2005 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -153,7 +155,7 @@ arm_linux_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
       target_type = TYPE_TARGET_TYPE (arg_type);
       len = TYPE_LENGTH (arg_type);
       typecode = TYPE_CODE (arg_type);
-      val = (char *) VALUE_CONTENTS (args[argnum]);
+      val = (char *) value_contents (args[argnum]);
 
       /* ANSI C code passes float arguments as integers, K&R code
          passes float arguments as doubles.  The .stabs record for 

@@ -54,7 +54,7 @@ java_value_print (struct value *val, struct ui_file *stream, int format,
 
       /* Get the run-time type, and cast the object into that */
 
-      obj_addr = unpack_pointer (type, VALUE_CONTENTS (val));
+      obj_addr = unpack_pointer (type, value_contents (val));
 
       if (obj_addr != 0)
 	{
@@ -172,7 +172,7 @@ java_value_print (struct value *val, struct ui_file *stream, int format,
 		{
 		  VALUE_LAZY (next_v) = 1;
 		  next_v->offset += TYPE_LENGTH (el_type);
-		  if (memcmp (VALUE_CONTENTS (v), VALUE_CONTENTS (next_v),
+		  if (memcmp (value_contents (v), value_contents (next_v),
 			      TYPE_LENGTH (el_type)) != 0)
 		    break;
 		}
@@ -182,7 +182,7 @@ java_value_print (struct value *val, struct ui_file *stream, int format,
 	      else
 		fprintf_filtered (stream, "%d..%d: ", i, i + reps - 1);
 
-	      val_print (value_type (v), VALUE_CONTENTS (v), 0, 0,
+	      val_print (value_type (v), value_contents (v), 0, 0,
 			 stream, format, 2, 1, pretty);
 
 	      things_printed++;
@@ -235,7 +235,7 @@ java_value_print (struct value *val, struct ui_file *stream, int format,
       return 0;
     }
 
-  return (val_print (type, VALUE_CONTENTS (val), 0, address,
+  return (val_print (type, value_contents (val), 0, address,
 		     stream, format, 1, 0, pretty));
 }
 
@@ -384,7 +384,7 @@ java_print_value_fields (struct type *type, const bfd_byte *valaddr,
 		  v = value_from_longest (TYPE_FIELD_TYPE (type, i),
 				   unpack_field_as_long (type, valaddr, i));
 
-		  val_print (TYPE_FIELD_TYPE (type, i), VALUE_CONTENTS (v), 0,
+		  val_print (TYPE_FIELD_TYPE (type, i), value_contents (v), 0,
 			     0, stream, format, 0, recurse + 1, pretty);
 		}
 	    }
@@ -405,7 +405,7 @@ java_print_value_fields (struct type *type, const bfd_byte *valaddr,
 		      if (TYPE_CODE (t) == TYPE_CODE_STRUCT)
 			v = value_addr (v);
 		      val_print (value_type (v),
-				 VALUE_CONTENTS (v), 0, VALUE_ADDRESS (v),
+				 value_contents (v), 0, VALUE_ADDRESS (v),
 				 stream, format, 0, recurse + 1, pretty);
 		    }
 		}

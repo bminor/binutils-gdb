@@ -931,7 +931,7 @@ insert_bp_location (struct bp_location *bpt,
 	     laziness to determine what memory GDB actually needed
 	     in order to compute the value of the expression.  */
 	  v = evaluate_expression (bpt->owner->exp);
-	  VALUE_CONTENTS (v);
+	  value_contents (v);
 	  value_release_to_mark (mark);
 
 	  bpt->owner->val_chain = v;

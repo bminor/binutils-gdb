@@ -1,6 +1,7 @@
 /* Target dependent code for CRIS, for GDB, the GNU debugger.
 
-   Copyright 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation,
+   Inc.
 
    Contributed by Axis Communications AB.
    Written by Hendrik Ruijter, Stefan Andersson, and Orjan Friberg.
@@ -892,7 +893,7 @@ cris_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       int i;
       
       len = TYPE_LENGTH (value_type (args[argnum]));
-      val = (char *) VALUE_CONTENTS (args[argnum]);
+      val = (char *) value_contents (args[argnum]);
       
       /* How may registers worth of storage do we need for this argument?  */
       reg_demand = (len / 4) + (len % 4 != 0 ? 1 : 0);

@@ -106,7 +106,7 @@ struct value
      When we store the entire object, `enclosing_type' is the run-time
      type -- the complete object -- and `embedded_offset' is the
      offset of `type' within that larger type, in bytes.  The
-     VALUE_CONTENTS macro takes `embedded_offset' into account, so
+     value_contents() macro takes `embedded_offset' into account, so
      most GDB code continues to see the `type' portion of the value,
      just as the inferior would.
 
@@ -182,23 +182,23 @@ extern struct type *value_enclosing_type (struct value *);
 extern int value_lazy (struct value *);
 #define VALUE_LAZY(val) (val)->lazy
 
-/* VALUE_CONTENTS and value_contents_raw() both return the address of
-   the gdb buffer used to hold a copy of the contents of the lval.
-   VALUE_CONTENTS is used when the contents of the buffer are needed
+/* value_contents() and value_contents_raw() both return the address
+   of the gdb buffer used to hold a copy of the contents of the lval.
+   value_contents() is used when the contents of the buffer are needed
    -- it uses value_fetch_lazy() to load the buffer from the process
-   being debugged if it hasn't already been loaded.
-   value_contents_raw() is used when data is being stored into the
-   buffer, or when it is certain that the contents of the buffer are
-   valid.
+   being debugged if it hasn't already been loaded
+   (value_contents_writeable() is used when a writeable but fetched
+   buffer is required)..  value_contents_raw() is used when data is
+   being stored into the buffer, or when it is certain that the
+   contents of the buffer are valid.
 
    Note: The contents pointer is adjusted by the offset required to
    get to the real subobject, if the value happens to represent
    something embedded in a larger run-time object.  */
 
 extern bfd_byte *value_contents_raw (struct value *);
-#define VALUE_CONTENTS(val) \
- ((void)(VALUE_LAZY(val) && value_fetch_lazy(val)), \
-  (val)->aligner.contents)
+extern const bfd_byte *value_contents (struct value *);
+extern bfd_byte *value_contents_writeable (struct value *);
 
 /* The ALL variants of the above two macros do not adjust the returned
    pointer by the embedded_offset value.  */

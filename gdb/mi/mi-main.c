@@ -1,7 +1,7 @@
 /* MI Command Set.
 
-   Copyright 2000, 2001, 2002, 2003, 2004 Free Software Foundation,
-   Inc.
+   Copyright 2000, 2001, 2002, 2003, 2004, 2005 Free Software
+   Foundation, Inc.
 
    Contributed by Cygnus Solutions (a Red Hat company).
 
@@ -679,7 +679,7 @@ mi_cmd_data_evaluate_expression (char *command, char **argv, int argc)
   val = evaluate_expression (expr);
 
   /* Print the result of the expression evaluation. */
-  val_print (value_type (val), VALUE_CONTENTS (val),
+  val_print (value_type (val), value_contents (val),
 	     VALUE_EMBEDDED_OFFSET (val), VALUE_ADDRESS (val),
 	     stb->stream, 0, 0, 0, 0);
 

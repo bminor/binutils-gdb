@@ -1,7 +1,8 @@
 /* Target-dependent code for PowerPC systems using the SVR4 ABI
    for GDB, the GNU debugger.
 
-   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003, 2005 Free Software Foundation,
+   Inc.
 
    This file is part of GDB.
 
@@ -99,7 +100,7 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  struct value *arg = args[argno];
 	  struct type *type = check_typedef (value_type (arg));
 	  int len = TYPE_LENGTH (type);
-	  char *val = VALUE_CONTENTS (arg);
+	  const bfd_byte *val = value_contents (arg);
 
 	  if (TYPE_CODE (type) == TYPE_CODE_FLT
 	      && ppc_floating_point_unit_p (current_gdbarch) && len <= 8)
@@ -635,7 +636,7 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	{
 	  struct value *arg = args[argno];
 	  struct type *type = check_typedef (value_type (arg));
-	  char *val = VALUE_CONTENTS (arg);
+	  const bfd_byte *val = value_contents (arg);
 	  if (TYPE_CODE (type) == TYPE_CODE_FLT && TYPE_LENGTH (type) <= 8)
 	    {
 	      /* Floats and Doubles go in f1 .. f13.  They also

@@ -262,7 +262,7 @@ xstormy16_push_dummy_call (struct gdbarch *gdbarch,
 	break;
 
       /* Put argument into registers wordwise. */
-      val = VALUE_CONTENTS (args[i]);
+      val = value_contents (args[i]);
       for (j = 0; j < typelen; j += xstormy16_reg_size)
 	regcache_cooked_write_unsigned (regcache, argreg++,
 			extract_unsigned_integer (val + j,
@@ -281,7 +281,7 @@ xstormy16_push_dummy_call (struct gdbarch *gdbarch,
       typelen = TYPE_LENGTH (value_enclosing_type (args[j]));
       slacklen = typelen & 1;
       val = alloca (typelen + slacklen);
-      memcpy (val, VALUE_CONTENTS (args[j]), typelen);
+      memcpy (val, value_contents (args[j]), typelen);
       memset (val + typelen, 0, slacklen);
 
       /* Now write this data to the stack. The stack grows upwards. */

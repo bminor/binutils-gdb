@@ -1,8 +1,8 @@
 /* Print values for GNU debugger GDB.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
-   Foundation, Inc.
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -321,7 +321,7 @@ print_formatted (struct value *val, int format, int size,
 	/* User specified format, so don't look to the
 	 * the type to tell us what to do.
 	 */
-	print_scalar_formatted (VALUE_CONTENTS (val), type,
+	print_scalar_formatted (value_contents (val), type,
 				format, size, stream);
     }
 }

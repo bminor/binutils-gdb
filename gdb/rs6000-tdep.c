@@ -1,7 +1,7 @@
 /* Target-dependent code for GDB, the GNU debugger.
 
    Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
+   1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free Software
    Foundation, Inc.
 
    This file is part of GDB.
@@ -1497,7 +1497,7 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 	  regcache_cooked_write (regcache,
 	                         tdep->ppc_fp0_regnum + 1 + f_argno,
-	                         VALUE_CONTENTS (arg));
+	                         value_contents (arg));
 	  ++f_argno;
 	}
 
@@ -1510,7 +1510,7 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      char word[MAX_REGISTER_SIZE];
 	      memset (word, 0, reg_size);
 	      memcpy (word,
-		      ((char *) VALUE_CONTENTS (arg)) + argbytes,
+		      ((char *) value_contents (arg)) + argbytes,
 		      (len - argbytes) > reg_size
 		        ? reg_size : len - argbytes);
 	      regcache_cooked_write (regcache,
@@ -1531,7 +1531,7 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  char word[MAX_REGISTER_SIZE];
 
 	  memset (word, 0, reg_size);
-	  memcpy (word, VALUE_CONTENTS (arg), len);
+	  memcpy (word, value_contents (arg), len);
 	  regcache_cooked_write (regcache, tdep->ppc_gp0_regnum + 3 +ii, word);
 	}
       ++argno;
@@ -1589,7 +1589,7 @@ ran_out_of_registers_for_arguments:
       if (argbytes)
 	{
 	  write_memory (sp + 24 + (ii * 4),
-			((char *) VALUE_CONTENTS (arg)) + argbytes,
+			((char *) value_contents (arg)) + argbytes,
 			len - argbytes);
 	  ++argno;
 	  ii += ((len - argbytes + 3) & -4) / 4;
@@ -1613,12 +1613,12 @@ ran_out_of_registers_for_arguments:
 
 	      regcache_cooked_write (regcache,
 				     tdep->ppc_fp0_regnum + 1 + f_argno,
-				     VALUE_CONTENTS (arg));
+				     value_contents (arg));
 	      ++f_argno;
 	    }
 
 	  write_memory (sp + 24 + (ii * 4),
-                        (char *) VALUE_CONTENTS (arg),
+                        (char *) value_contents (arg),
                         len);
 	  ii += ((len + 3) & -4) / 4;
 	}

@@ -306,7 +306,7 @@ value_cast (struct type *type, struct value *arg2)
 	    case TYPE_CODE_MEMBER:
 	      retvalp = value_from_longest (type, value_as_long (arg2));
 	      /* force evaluation */
-	      ptr = (unsigned int *) VALUE_CONTENTS (retvalp);
+	      ptr = (unsigned int *) value_contents (retvalp);
 	      *ptr &= ~0x20000000;	/* zap 29th bit to remove bias */
 	      return retvalp;
 
@@ -326,7 +326,7 @@ value_cast (struct type *type, struct value *arg2)
          sees a cast as a simple reinterpretation of the pointer's
          bits.  */
       if (code2 == TYPE_CODE_PTR)
-        longest = extract_unsigned_integer (VALUE_CONTENTS (arg2),
+        longest = extract_unsigned_integer (value_contents (arg2),
                                             TYPE_LENGTH (type2));
       else
         longest = value_as_long (arg2);
@@ -429,8 +429,6 @@ struct value *
 value_zero (struct type *type, enum lval_type lv)
 {
   struct value *val = allocate_value (type);
-
-  memset (VALUE_CONTENTS (val), 0, TYPE_LENGTH (check_typedef (type)));
   VALUE_LVAL (val) = lv;
 
   return val;
@@ -442,7 +440,7 @@ value_zero (struct type *type, enum lval_type lv)
    if we can be 'lazy' and defer the fetch, perhaps indefinately, call
    value_at_lazy instead.  value_at_lazy simply records the address of
    the data and sets the lazy-evaluation-required flag.  The lazy flag
-   is tested in the VALUE_CONTENTS macro, which is used if and when
+   is tested in the value_contents macro, which is used if and when
    the contents are actually required.
 
    Note: value_at does *NOT* handle embedded offsets; perform such
@@ -485,16 +483,16 @@ value_at_lazy (struct type *type, CORE_ADDR addr)
   return val;
 }
 
-/* Called only from the VALUE_CONTENTS and value_contents_all()
+/* Called only from the value_contents and value_contents_all()
    macros, if the current data for a variable needs to be loaded into
-   VALUE_CONTENTS(VAL).  Fetches the data from the user's process, and
+   value_contents(VAL).  Fetches the data from the user's process, and
    clears the lazy flag to indicate that the data in the buffer is
    valid.
 
    If the value is zero-length, we avoid calling read_memory, which would
    abort.  We mark the value as fetched anyway -- all 0 bytes of it.
 
-   This function returns a value because it is used in the VALUE_CONTENTS
+   This function returns a value because it is used in the value_contents
    macro as part of an expression, where a void would not work.  The
    value is ignored.  */
 
@@ -560,7 +558,7 @@ value_assign (struct value *toval, struct value *fromval)
 
     case lval_memory:
       {
-	char *dest_buffer;
+	const bfd_byte *dest_buffer;
 	CORE_ADDR changed_addr;
 	int changed_len;
         char buffer[sizeof (LONGEST)];
@@ -589,7 +587,7 @@ value_assign (struct value *toval, struct value *fromval)
 	  {
 	    changed_addr = VALUE_ADDRESS (toval) + value_offset (toval);
 	    changed_len = TYPE_LENGTH (type);
-	    dest_buffer = VALUE_CONTENTS (fromval);
+	    dest_buffer = value_contents (fromval);
 	  }
 
 	write_memory (changed_addr, dest_buffer, changed_len);
@@ -616,7 +614,7 @@ value_assign (struct value *toval, struct value *fromval)
 	    /* If TOVAL is a special machine register requiring
 	       conversion of program values to a special raw format.  */
 	    VALUE_TO_REGISTER (frame, VALUE_REGNUM (toval),
-			       type, VALUE_CONTENTS (fromval));
+			       type, value_contents (fromval));
 	  }
 	else
 	  {
@@ -663,7 +661,7 @@ value_assign (struct value *toval, struct value *fromval)
 			    value_as_long (fromval),
 			    value_bitpos (toval), value_bitsize (toval));
 	    else
-	      memcpy (buffer + byte_offset, VALUE_CONTENTS (fromval),
+	      memcpy (buffer + byte_offset, value_contents (fromval),
 		      TYPE_LENGTH (type));
 
 	    /* Copy it out.  */
@@ -730,7 +728,7 @@ value_assign (struct value *toval, struct value *fromval)
     }
 
   val = value_copy (toval);
-  memcpy (value_contents_raw (val), VALUE_CONTENTS (fromval),
+  memcpy (value_contents_raw (val), value_contents (fromval),
 	  TYPE_LENGTH (type));
   val->type = type;
   val = value_change_enclosing_type (val, value_enclosing_type (fromval));
@@ -1284,7 +1282,7 @@ search_struct_field (char *name, struct value *arg1, int offset,
 	  struct value *v2 = allocate_value (basetype);
 
 	  boffset = baseclass_offset (type, i,
-				      VALUE_CONTENTS (arg1) + offset,
+				      value_contents (arg1) + offset,
 				      VALUE_ADDRESS (arg1)
 				      + value_offset (arg1) + offset);
 	  if (boffset == -1)
@@ -1514,7 +1512,7 @@ search_struct_method (char *name, struct value **arg1p,
 	  else
 	    {
 	      struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
-	      char *base_valaddr;
+	      const bfd_byte *base_valaddr;
 
 	      /* The virtual base class pointer might have been clobbered by the
 	         user program. Make sure that it still points to a valid memory
@@ -1522,15 +1520,15 @@ search_struct_method (char *name, struct value **arg1p,
 
 	      if (offset < 0 || offset >= TYPE_LENGTH (type))
 		{
-		  base_valaddr = (char *) alloca (TYPE_LENGTH (baseclass));
+		  bfd_byte *tmp = alloca (TYPE_LENGTH (baseclass));
 		  if (target_read_memory (VALUE_ADDRESS (*arg1p)
 					  + value_offset (*arg1p) + offset,
-					  base_valaddr,
-					  TYPE_LENGTH (baseclass)) != 0)
+					  tmp, TYPE_LENGTH (baseclass)) != 0)
 		    error ("virtual baseclass botch");
+		  base_valaddr = tmp;
 		}
 	      else
-		base_valaddr = VALUE_CONTENTS (*arg1p) + offset;
+		base_valaddr = value_contents (*arg1p) + offset;
 
 	      base_offset =
 		baseclass_offset (type, i, base_valaddr,
@@ -1751,7 +1749,7 @@ find_method_list (struct value **argp, char *method, int offset,
 	      base_offset = value_offset (*argp) + offset;
 	      base_offset =
 		baseclass_offset (type, i,
-				  VALUE_CONTENTS (*argp) + base_offset,
+				  value_contents (*argp) + base_offset,
 				  VALUE_ADDRESS (*argp) + base_offset);
 	      if (base_offset == -1)
 		error ("virtual baseclass botch");
@@ -2738,7 +2736,7 @@ value_slice (struct value *array, int lowbound, int length)
       for (i = 0; i < length; i++)
 	{
 	  int element = value_bit_index (array_type,
-					 VALUE_CONTENTS (array),
+					 value_contents (array),
 					 lowbound + i);
 	  if (element < 0)
 	    error ("internal error accessing bitstring");
@@ -2766,7 +2764,8 @@ value_slice (struct value *array, int lowbound, int length)
       if (value_lazy (array))
 	VALUE_LAZY (slice) = 1;
       else
-	memcpy (VALUE_CONTENTS (slice), VALUE_CONTENTS (array) + offset,
+	memcpy (value_contents_writeable (slice),
+		value_contents (array) + offset,
 		TYPE_LENGTH (slice_type));
       if (VALUE_LVAL (array) == lval_internalvar)
 	VALUE_LVAL (slice) = lval_internalvar_component;
@@ -2796,9 +2795,9 @@ value_literal_complex (struct value *arg1, struct value *arg2, struct type *type
   arg2 = value_cast (real_type, arg2);
 
   memcpy (value_contents_raw (val),
-	  VALUE_CONTENTS (arg1), TYPE_LENGTH (real_type));
+	  value_contents (arg1), TYPE_LENGTH (real_type));
   memcpy (value_contents_raw (val) + TYPE_LENGTH (real_type),
-	  VALUE_CONTENTS (arg2), TYPE_LENGTH (real_type));
+	  value_contents (arg2), TYPE_LENGTH (real_type));
   return val;
 }
 
@@ -2815,9 +2814,9 @@ cast_into_complex (struct type *type, struct value *val)
       struct value *im_val = allocate_value (val_real_type);
 
       memcpy (value_contents_raw (re_val),
-	      VALUE_CONTENTS (val), TYPE_LENGTH (val_real_type));
+	      value_contents (val), TYPE_LENGTH (val_real_type));
       memcpy (value_contents_raw (im_val),
-	      VALUE_CONTENTS (val) + TYPE_LENGTH (val_real_type),
+	      value_contents (val) + TYPE_LENGTH (val_real_type),
 	      TYPE_LENGTH (val_real_type));
 
       return value_literal_complex (re_val, im_val, type);

@@ -2455,7 +2455,7 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	    fprintf_unfiltered (gdb_stdlog, " push");
 	}
       else
-	val = (char *) VALUE_CONTENTS (arg);
+	val = (char *) value_contents (arg);
 
       /* 32-bit ABIs always start floating point arguments in an
          even-numbered floating point register.  Round the FP register
@@ -2723,7 +2723,7 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			    "mips_n32n64_push_dummy_call: %d len=%d type=%d",
 			    argnum + 1, len, (int) typecode);
 
-      val = (char *) VALUE_CONTENTS (arg);
+      val = (char *) value_contents (arg);
 
       if (fp_register_arg_p (typecode, arg_type)
 	  && float_argreg <= MIPS_LAST_FP_ARG_REGNUM)
@@ -3063,7 +3063,7 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			    "mips_o32_push_dummy_call: %d len=%d type=%d",
 			    argnum + 1, len, (int) typecode);
 
-      val = (char *) VALUE_CONTENTS (arg);
+      val = (char *) value_contents (arg);
 
       /* 32-bit ABIs always start floating point arguments in an
          even-numbered floating point register.  Round the FP register
@@ -3517,7 +3517,7 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			    "mips_o64_push_dummy_call: %d len=%d type=%d",
 			    argnum + 1, len, (int) typecode);
 
-      val = (char *) VALUE_CONTENTS (arg);
+      val = (char *) value_contents (arg);
 
       /* 32-bit ABIs always start floating point arguments in an
          even-numbered floating point register.  Round the FP register

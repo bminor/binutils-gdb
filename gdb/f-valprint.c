@@ -441,7 +441,7 @@ f_val_print (struct type *type, const bfd_byte *valaddr, int embedded_offset,
 	       unpack_pointer (lookup_pointer_type (builtin_type_void),
 			       valaddr + embedded_offset));
 	      val_print (value_type (deref_val),
-			 VALUE_CONTENTS (deref_val),
+			 value_contents (deref_val),
 			 0,
 			 VALUE_ADDRESS (deref_val),
 			 stream,

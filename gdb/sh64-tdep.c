@@ -1,7 +1,7 @@
 /* Target-dependent code for Renesas Super-H, for GDB.
 
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004 Free Software Foundation, Inc.
+   2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1520,14 +1520,14 @@ sh64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	      /* value gets right-justified in the register or stack word */
 	      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 		memcpy (valbuf + argreg_size - len,
-			(char *) VALUE_CONTENTS (args[argnum]), len);
+			(char *) value_contents (args[argnum]), len);
 	      else
-		memcpy (valbuf, (char *) VALUE_CONTENTS (args[argnum]), len);
+		memcpy (valbuf, (char *) value_contents (args[argnum]), len);
 
 	      val = valbuf;
 	    }
 	  else
-	    val = (char *) VALUE_CONTENTS (args[argnum]);
+	    val = (char *) value_contents (args[argnum]);
 
 	  while (len > 0)
 	    {
@@ -1557,7 +1557,7 @@ sh64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	}
       else
 	{
-	  val = (char *) VALUE_CONTENTS (args[argnum]);
+	  val = (char *) value_contents (args[argnum]);
 	  if (len == 4)
 	    {
 	      /* Where is it going to be stored? */

@@ -1,6 +1,6 @@
 /* Target-dependent code for the Motorola 88000 series.
 
-   Copyright 2004 Free Software Foundation, Inc.
+   Copyright 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -306,7 +306,7 @@ m88k_store_arguments (struct regcache *regcache, int nargs,
 
   for (i = 0; i < nargs; i++)
     {
-      char *valbuf = VALUE_CONTENTS (args[i]);
+      const bfd_byte *valbuf = value_contents (args[i]);
       struct type *type = value_type (args[i]);
       int len = TYPE_LENGTH (type);
       int stack_word = num_stack_words;

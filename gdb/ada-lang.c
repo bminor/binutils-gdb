@@ -455,7 +455,7 @@ coerce_unspec_val_to_type (struct value *val, struct type *type)
           || TYPE_LENGTH (type) > TYPE_LENGTH (value_type (val)))
         VALUE_LAZY (result) = 1;
       else
-        memcpy (value_contents_raw (result), VALUE_CONTENTS (val),
+        memcpy (value_contents_raw (result), value_contents (val),
                 TYPE_LENGTH (type));
       return result;
     }
@@ -1821,7 +1821,7 @@ ada_value_primitive_packed_val (struct value *obj, const bfd_byte *valaddr,
   else
     {
       v = allocate_value (type);
-      bytes = (unsigned char *) VALUE_CONTENTS (obj) + offset;
+      bytes = (unsigned char *) value_contents (obj) + offset;
     }
 
   if (obj != NULL)
@@ -1840,7 +1840,7 @@ ada_value_primitive_packed_val (struct value *obj, const bfd_byte *valaddr,
     }
   else
     v->bitsize = bit_size;
-  unpacked = (unsigned char *) VALUE_CONTENTS (v);
+  unpacked = (unsigned char *) value_contents (v);
 
   srcBitsLeft = bit_size;
   nsrc = len;
@@ -1935,7 +1935,8 @@ ada_value_primitive_packed_val (struct value *obj, const bfd_byte *valaddr,
    TARGET, starting at bit offset TARG_OFFSET.  SOURCE and TARGET must
    not overlap.  */
 static void
-move_bits (char *target, int targ_offset, char *source, int src_offset, int n)
+move_bits (bfd_byte *target, int targ_offset, const bfd_byte *source,
+	   int src_offset, int n)
 {
   unsigned int accum, mask;
   int accum_bits, chunk_size;
@@ -2028,17 +2029,17 @@ ada_value_assign (struct value *toval, struct value *fromval)
       read_memory (VALUE_ADDRESS (toval) + value_offset (toval), buffer, len);
       if (BITS_BIG_ENDIAN)
         move_bits (buffer, value_bitpos (toval),
-                   VALUE_CONTENTS (fromval),
+                   value_contents (fromval),
                    TYPE_LENGTH (value_type (fromval)) * TARGET_CHAR_BIT -
                    bits, bits);
       else
-        move_bits (buffer, value_bitpos (toval), VALUE_CONTENTS (fromval),
+        move_bits (buffer, value_bitpos (toval), value_contents (fromval),
                    0, bits);
       write_memory (VALUE_ADDRESS (toval) + value_offset (toval), buffer,
                     len);
 
       val = value_copy (toval);
-      memcpy (value_contents_raw (val), VALUE_CONTENTS (fromval),
+      memcpy (value_contents_raw (val), value_contents (fromval),
               TYPE_LENGTH (type));
       val->type = type;
 
@@ -3543,7 +3544,7 @@ convert_actual (struct value *actual, struct type *formal_type0,
               actual_type = ada_check_typedef (value_type (actual));
               val = allocate_value (actual_type);
               memcpy ((char *) value_contents_raw (val),
-                      (char *) VALUE_CONTENTS (actual),
+                      (char *) value_contents (actual),
                       TYPE_LENGTH (actual_type));
               actual = ensure_lval (val, sp);
             }
@@ -3574,11 +3575,11 @@ make_array_descriptor (struct type *type, struct value *arr, CORE_ADDR *sp)
 
   for (i = ada_array_arity (ada_check_typedef (value_type (arr))); i > 0; i -= 1)
     {
-      modify_general_field (VALUE_CONTENTS (bounds),
+      modify_general_field (value_contents_writeable (bounds),
                             value_as_long (ada_array_bound (arr, i, 0)),
                             desc_bound_bitpos (bounds_type, i, 0),
                             desc_bound_bitsize (bounds_type, i, 0));
-      modify_general_field (VALUE_CONTENTS (bounds),
+      modify_general_field (value_contents_writeable (bounds),
                             value_as_long (ada_array_bound (arr, i, 1)),
                             desc_bound_bitpos (bounds_type, i, 1),
                             desc_bound_bitsize (bounds_type, i, 1));
@@ -3586,12 +3587,12 @@ make_array_descriptor (struct type *type, struct value *arr, CORE_ADDR *sp)
 
   bounds = ensure_lval (bounds, sp);
 
-  modify_general_field (VALUE_CONTENTS (descriptor),
+  modify_general_field (value_contents_writeable (descriptor),
                         VALUE_ADDRESS (ensure_lval (arr, sp)),
                         fat_pntr_data_bitpos (desc_type),
                         fat_pntr_data_bitsize (desc_type));
 
-  modify_general_field (VALUE_CONTENTS (descriptor),
+  modify_general_field (value_contents_writeable (descriptor),
                         VALUE_ADDRESS (bounds),
                         fat_pntr_bounds_bitpos (desc_type),
                         fat_pntr_bounds_bitsize (desc_type));
@@ -5327,7 +5328,7 @@ ada_value_primitive_field (struct value *arg1, int offset, int fieldno,
       int bit_pos = TYPE_FIELD_BITPOS (arg_type, fieldno);
       int bit_size = TYPE_FIELD_BITSIZE (arg_type, fieldno);
 
-      return ada_value_primitive_packed_val (arg1, VALUE_CONTENTS (arg1),
+      return ada_value_primitive_packed_val (arg1, value_contents (arg1),
                                              offset + bit_pos / 8,
                                              bit_pos % 8, bit_size, type);
     }
@@ -5535,7 +5536,7 @@ ada_value_struct_elt (struct value *arg, char *name, char *err)
       if (TYPE_CODE (t) == TYPE_CODE_PTR)
         address = value_as_address (arg);
       else
-        address = unpack_pointer (t, VALUE_CONTENTS (arg));
+        address = unpack_pointer (t, value_contents (arg));
 
       t1 = ada_to_fixed_type (ada_get_base_type (t1), NULL, address, NULL);
       if (find_struct_field (name, t1, 0,
@@ -6415,7 +6416,7 @@ to_fixed_variant_branch_type (struct type *var_type0, const bfd_byte *valaddr,
 
   which =
     ada_which_variant_applies (var_type,
-                               value_type (dval), VALUE_CONTENTS (dval));
+                               value_type (dval), value_contents (dval));
 
   if (which < 0)
     return empty_record (TYPE_OBJFILE (var_type));
@@ -7124,7 +7125,7 @@ ada_value_equal (struct value *arg1, struct value *arg2)
          and do not have user-defined equality.  */
       return
         TYPE_LENGTH (value_type (arg1)) == TYPE_LENGTH (value_type (arg2))
-        && memcmp (VALUE_CONTENTS (arg1), VALUE_CONTENTS (arg2),
+        && memcmp (value_contents (arg1), value_contents (arg2),
                    TYPE_LENGTH (value_type (arg1))) == 0;
     }
   return value_equal (arg1, arg2);

@@ -1,6 +1,7 @@
 /* Target-dependent code for Renesas Super-H, for GDB.
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004 Free Software Foundation, Inc.
+
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
+   2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -876,12 +877,12 @@ sh_justify_value_in_reg (struct value *val, int len)
     {
       /* value gets right-justified in the register or stack word */
       if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-	memcpy (valbuf + (4 - len), (char *) VALUE_CONTENTS (val), len);
+	memcpy (valbuf + (4 - len), (char *) value_contents (val), len);
       else
-	memcpy (valbuf, (char *) VALUE_CONTENTS (val), len);
+	memcpy (valbuf, (char *) value_contents (val), len);
       return valbuf;
     }
-  return (char *) VALUE_CONTENTS (val);
+  return (char *) value_contents (val);
 }
 
 /* Helper function to eval number of bytes to allocate on stack. */

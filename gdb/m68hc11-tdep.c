@@ -1,6 +1,6 @@
 /* Target-dependent code for Motorola 68HC11 & 68HC12
 
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004 Free Software
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free Software
    Foundation, Inc.
 
    Contributed by Stephane Carrez, stcarrez@nerim.fr
@@ -1203,7 +1203,7 @@ m68hc11_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
         {
           ULONGEST v;
 
-          v = extract_unsigned_integer (VALUE_CONTENTS (args[0]), len);
+          v = extract_unsigned_integer (value_contents (args[0]), len);
           first_stack_argnum = 1;
 
           regcache_cooked_write_unsigned (regcache, HARD_D_REGNUM, v);
@@ -1227,7 +1227,7 @@ m68hc11_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
           sp--;
           write_memory (sp, &zero, 1);
         }
-      val = (char*) VALUE_CONTENTS (args[argnum]);
+      val = (char*) value_contents (args[argnum]);
       sp -= len;
       write_memory (sp, val, len);
     }

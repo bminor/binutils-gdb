@@ -1,5 +1,6 @@
 /* Target-dependent code for the Fujitsu FR-V, for GDB, the GNU Debugger.
-   Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
+
+   Copyright 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1180,7 +1181,7 @@ frv_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  store_unsigned_integer
 	    (valbuf, 4,
 	     find_func_descr (gdbarch,
-	                      extract_unsigned_integer (VALUE_CONTENTS (arg),
+	                      extract_unsigned_integer (value_contents (arg),
 			                                4)));
 	  typecode = TYPE_CODE_PTR;
 	  len = 4;
@@ -1188,7 +1189,7 @@ frv_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	}
       else
 	{
-	  val = (char *) VALUE_CONTENTS (arg);
+	  val = (char *) value_contents (arg);
 	}
 
       while (len > 0)

@@ -1,7 +1,7 @@
 /* Target-dependent code for the HP PA architecture, for GDB.
 
    Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
+   1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free Software
    Foundation, Inc.
 
    Contributed by the Center for Software Science at the
@@ -723,7 +723,7 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      param_len = 4;
 	      struct_ptr += align_up (TYPE_LENGTH (type), 8);
 	      if (write_pass)
-		write_memory (struct_end - struct_ptr, VALUE_CONTENTS (arg),
+		write_memory (struct_end - struct_ptr, value_contents (arg),
 			      TYPE_LENGTH (type));
 	      store_unsigned_integer (param_val, 4, struct_end - struct_ptr);
 	    }
@@ -735,13 +735,13 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      param_len = align_up (TYPE_LENGTH (type), 4);
 	      store_unsigned_integer (param_val, param_len,
 				      unpack_long (type,
-						   VALUE_CONTENTS (arg)));
+						   value_contents (arg)));
 	    }
 	  else if (TYPE_CODE (type) == TYPE_CODE_FLT)
             {
 	      /* Floating point value store, right aligned.  */
 	      param_len = align_up (TYPE_LENGTH (type), 4);
-	      memcpy (param_val, VALUE_CONTENTS (arg), param_len);
+	      memcpy (param_val, value_contents (arg), param_len);
             }
 	  else
 	    {
@@ -749,7 +749,7 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 	      /* Small struct value are stored right-aligned.  */
 	      memcpy (param_val + param_len - TYPE_LENGTH (type),
-		      VALUE_CONTENTS (arg), TYPE_LENGTH (type));
+		      value_contents (arg), TYPE_LENGTH (type));
 
 	      /* Structures of size 5, 6 and 7 bytes are special in that
 	         the higher-ordered word is stored in the lower-ordered
@@ -901,7 +901,7 @@ hppa64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       struct value *arg = args[i];
       struct type *type = value_type (arg);
       int len = TYPE_LENGTH (type);
-      char *valbuf;
+      const bfd_byte *valbuf;
       int regnum;
 
       /* "Each parameter begins on a 64-bit (8-byte) boundary."  */
@@ -960,7 +960,7 @@ hppa64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		     the right halves of the floating point registers;
 		     the left halves are unused."  */
 		  regcache_cooked_write_part (regcache, regnum, offset % 8,
-					      len, VALUE_CONTENTS (arg));
+					      len, value_contents (arg));
 		}
 	    }
 	}
@@ -978,9 +978,9 @@ hppa64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	}
 
       /* Always store the argument in memory.  */
-      write_memory (sp + offset, VALUE_CONTENTS (arg), len);
+      write_memory (sp + offset, value_contents (arg), len);
 
-      valbuf = VALUE_CONTENTS (arg);
+      valbuf = value_contents (arg);
       regnum = HPPA_ARG0_REGNUM - offset / 8;
       while (regnum > HPPA_ARG0_REGNUM - 8 && len > 0)
 	{

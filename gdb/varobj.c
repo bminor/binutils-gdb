@@ -1909,9 +1909,9 @@ c_value_of_root (struct varobj **var_handle)
 	      /* We need to catch errors because if
 	         value_fetch_lazy fails we still want to continue
 	         (after making val->error = 1) */
-	      /* FIXME: Shouldn't be using VALUE_CONTENTS?  The
-	         comment on value_fetch_lazy() says it is only
-	         called from the macro... */
+	      /* FIXME: Shouldn't be using value_contents()?  The
+	         comment on value_fetch_lazy() says it is only called
+	         from the macro... */
 	      if (!gdb_value_fetch_lazy (new_val))
 		var->error = 1;
 	      else

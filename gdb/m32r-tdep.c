@@ -1,7 +1,7 @@
 /* Target-dependent code for Renesas M32R, for GDB.
 
-   Copyright 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
-   Foundation, Inc.
+   Copyright 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free
+   Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -726,11 +726,11 @@ m32r_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	{
 	  /* value gets right-justified in the register or stack word */
 	  memcpy (valbuf + (register_size (gdbarch, argreg) - len),
-		  (char *) VALUE_CONTENTS (args[argnum]), len);
+		  (char *) value_contents (args[argnum]), len);
 	  val = valbuf;
 	}
       else
-	val = (char *) VALUE_CONTENTS (args[argnum]);
+	val = (char *) value_contents (args[argnum]);
 
       while (len > 0)
 	{

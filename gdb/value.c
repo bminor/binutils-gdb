@@ -179,6 +179,20 @@ value_lazy (struct value *value)
   return value->lazy;
 }
 
+const bfd_byte *
+value_contents (struct value *value)
+{
+  return value_contents_writeable (value);
+}
+
+bfd_byte *
+value_contents_writeable (struct value *value)
+{
+  if (value->lazy)
+    value_fetch_lazy (value);
+  return value->aligner.contents;
+}
+
 
 /* Return a mark in the value chain.  All values allocated after the
    mark is obtained (except for those released) are subject to being freed
@@ -493,13 +507,13 @@ void
 set_internalvar_component (struct internalvar *var, int offset, int bitpos,
 			   int bitsize, struct value *newval)
 {
-  char *addr = VALUE_CONTENTS (var->value) + offset;
+  bfd_byte *addr = value_contents_writeable (var->value) + offset;
 
   if (bitsize)
     modify_field (addr, value_as_long (newval),
 		  bitpos, bitsize);
   else
-    memcpy (addr, VALUE_CONTENTS (newval), TYPE_LENGTH (value_type (newval)));
+    memcpy (addr, value_contents (newval), TYPE_LENGTH (value_type (newval)));
 }
 
 void
@@ -586,7 +600,7 @@ value_as_long (struct value *val)
      in disassemble_command).  It also dereferences references, which
      I suspect is the most logical thing to do.  */
   val = coerce_array (val);
-  return unpack_long (value_type (val), VALUE_CONTENTS (val));
+  return unpack_long (value_type (val), value_contents (val));
 }
 
 DOUBLEST
@@ -595,7 +609,7 @@ value_as_double (struct value *val)
   DOUBLEST foo;
   int inv;
 
-  foo = unpack_double (value_type (val), VALUE_CONTENTS (val), &inv);
+  foo = unpack_double (value_type (val), value_contents (val), &inv);
   if (inv)
     error ("Invalid floating value found in program.");
   return foo;
@@ -699,9 +713,9 @@ value_as_address (struct value *val)
       && TYPE_CODE (value_type (val)) != TYPE_CODE_REF
       && gdbarch_integer_to_address_p (current_gdbarch))
     return gdbarch_integer_to_address (current_gdbarch, value_type (val),
-				       VALUE_CONTENTS (val));
+				       value_contents (val));
 
-  return unpack_long (value_type (val), VALUE_CONTENTS (val));
+  return unpack_long (value_type (val), value_contents (val));
 #endif
 }
 
@@ -953,7 +967,7 @@ value_primitive_field (struct value *arg1, int offset,
     {
       v = value_from_longest (type,
 			      unpack_field_as_long (arg_type,
-						    VALUE_CONTENTS (arg1)
+						    value_contents (arg1)
 						    + offset,
 						    fieldno));
       v->bitpos = TYPE_FIELD_BITPOS (arg_type, fieldno) % 8;
@@ -1266,7 +1280,7 @@ coerce_ref (struct value *arg)
   if (TYPE_CODE (value_type_arg_tmp) == TYPE_CODE_REF)
     arg = value_at_lazy (TYPE_TARGET_TYPE (value_type_arg_tmp),
 			 unpack_pointer (value_type (arg),		
-					 VALUE_CONTENTS (arg)));
+					 value_contents (arg)));
   return arg;
 }
 

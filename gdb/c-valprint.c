@@ -233,7 +233,7 @@ c_val_print (struct type *type, const bfd_byte *valaddr, int embedded_offset,
 		      wtype = TYPE_TARGET_TYPE (type);
 		    }
 		  vt_val = value_at (wtype, vt_address);
-		  val_print (value_type (vt_val), VALUE_CONTENTS (vt_val), 0,
+		  val_print (value_type (vt_val), value_contents (vt_val), 0,
 			     VALUE_ADDRESS (vt_val), stream, format,
 			     deref_ref, recurse + 1, pretty);
 		  if (pretty)
@@ -284,7 +284,7 @@ c_val_print (struct type *type, const bfd_byte *valaddr, int embedded_offset,
 	       unpack_pointer (lookup_pointer_type (builtin_type_void),
 			       valaddr + embedded_offset));
 	      val_print (value_type (deref_val),
-			 VALUE_CONTENTS (deref_val),
+			 value_contents (deref_val),
 			 0,
 			 VALUE_ADDRESS (deref_val),
 			 stream,
@@ -446,7 +446,7 @@ c_val_print (struct type *type, const bfd_byte *valaddr, int embedded_offset,
     case TYPE_CODE_METHOD:
       {
 	struct value *v = value_at (type, address);
-	cp_print_class_method (VALUE_CONTENTS (value_addr (v)),
+	cp_print_class_method (value_contents (value_addr (v)),
 			       lookup_pointer_type (type), stream);
 	break;
       }

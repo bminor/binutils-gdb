@@ -1,8 +1,8 @@
 /* Print and select stack frames for GDB, the GNU debugger.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free
-   Software Foundation, Inc.
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -354,7 +354,7 @@ print_frame_args (struct symbol *func, struct frame_info *fi, int num,
 
 	  if (val)
 	    {
-	      val_print (value_type (val), VALUE_CONTENTS (val), 0,
+	      val_print (value_type (val), value_contents (val), 0,
 			 VALUE_ADDRESS (val),
 			 stb->stream, 0, 0, 2, Val_no_prettyprint);
 	      ui_out_field_stream (uiout, "value", stb);
@@ -1906,7 +1906,7 @@ If you continue, the return value that you specified will be ignored.\n";
 		  == RETURN_VALUE_REGISTER_CONVENTION);
       gdbarch_return_value (current_gdbarch, return_type,
 			    current_regcache, NULL /*read*/,
-			    VALUE_CONTENTS (return_value) /*write*/);
+			    value_contents (return_value) /*write*/);
     }
 
   /* If we are at the end of a call dummy now, pop the dummy frame

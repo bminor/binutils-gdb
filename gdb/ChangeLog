@@ -1,3 +1,22 @@
+2005-02-06  Andrew Cagney  <cagney@gnu.org>
+
+	* value.c (value_contents, value_contents_writeable): New
+	functions.
+	* value.h (VALUE_CONTENTS): Delete macro.
+	(value_contents, value_contents_writeable): Declare.
+	* xstormy16-tdep.c, value.c, valops.c, valarith.c: Update.
+	* stack.c, sparc-tdep.c, sparc64-tdep.c, sh-tdep.c: Update.
+	* sh64-tdep.c, scm-valprint.c, scm-exp.c, s390-tdep.c: Update.
+	* rs6000-tdep.c, p-valprint.c, printcmd.c: Update.
+	* ppc-sysv-tdep.c, mips-tdep.c, mi/mi-main.c: Update.
+	* m88k-tdep.c, m68hc11-tdep.c, m32r-tdep.c: Update.
+	* jv-valprint.c, ia64-tdep.c, hppa-tdep.c: Update.
+	* hpacc-abi.c, f-valprint.c, frv-tdep.c, eval.c: Update.
+	* c-valprint.c, cris-tdep.c, cp-valprint.c: Update.
+	* cli/cli-dump.c, breakpoint.c, avr-tdep.c, arm-tdep.c: Update.
+	* arm-linux-tdep.c, amd64-tdep.c, alpha-tdep.c: Update.
+	* ada-valprint.c, ada-lang.c: Update.
+
 2005-02-03  Andrew Cagney  <cagney@gnu.org>
 
 	* utils.c (xzalloc): New function.
