@@ -109,12 +109,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define EM_CYGNUS_ARC 0x9040
 /* end-sanitize-arc */
 
+/* start-sanitize-m32r */
+/* Cygnus M32R ELF backend.  Written in the absence of an ABI.  */
+#define EM_CYGNUS_M32R 0x9041
+/* end-sanitize-m32r */
+
 /* Alpha backend magic number.  Written in the absence of an ABI.  */
 #define EM_ALPHA	0x9026
 
 /* start-sanitize-d10v */
 /* D10V backend magic number.  Written in the absence of an ABI.  */
-#define EM_CYGNUS_D10V	0x9027
+#define EM_CYGNUS_D10V	0x7650
 /* end-sanitize-d10v */
 
 /* See the above comment before you add a new EM_* value here.  */
