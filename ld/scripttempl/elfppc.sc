@@ -42,6 +42,8 @@ ${RELOCATING- /* For some reason, the Solaris linker makes bad executables
   if gld -r is used and the intermediate file has sections starting
   at non-zero addresses.  Could be a Solaris ld bug, could be a GNU ld
   bug.  But for now assigning the zero vmas works.  */}
+
+${RELOCATING+PROVIDE (__stack = 0);}
 SECTIONS
 {
   /* Read-only sections, merged into text segment: */
