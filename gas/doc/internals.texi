@@ -469,12 +469,9 @@ This normally indicates the symbol to use when relaxing the frag according to
 @item fr_opcode
 Points to the lowest-addressed byte of the opcode, for use in relaxation.
 
-@item fr_opcode_frag
-@itemx fr_opcode_offset
-@itemx fr_bsr
-These fields are only used in the NS32k configuration.  But since @code{struct
-frag} is defined before the CPU-specific header files are included, they must
-unconditionally be defined.
+@item tc_frag_data
+Target specific fragment data of type TC_FRAG_TYPE.
+Only present if @code{TC_FRAG_TYPE} is defined.
 
 @item fr_file
 @itemx fr_line
