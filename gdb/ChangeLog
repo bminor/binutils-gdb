@@ -1,3 +1,9 @@
+2003-08-29  Mark Kettenis  <kettenis@gnu.org>
+
+	* regcache.c (supply_register): Reimplement to call
+	regcache_raw_supply.
+	(regcache_collect): Reimplement by calling regcache_raw_collect.
+
 2003-08-28  Mark Kettenis  <kettenis@gnu.org>
 
 	* regcache.c (register_buffer): Consitify first argument.

@@ -1218,21 +1218,7 @@ write_register_pid (int regnum, CORE_ADDR val, ptid_t ptid)
 void
 supply_register (int regnum, const void *val)
 {
-#if 1
-  if (! ptid_equal (registers_ptid, inferior_ptid))
-    {
-      registers_changed ();
-      registers_ptid = inferior_ptid;
-    }
-#endif
-
-  set_register_cached (regnum, 1);
-  if (val)
-    memcpy (register_buffer (current_regcache, regnum), val, 
-	    REGISTER_RAW_SIZE (regnum));
-  else
-    memset (register_buffer (current_regcache, regnum), '\000', 
-	    REGISTER_RAW_SIZE (regnum));
+  regcache_raw_supply (current_regcache, regnum, val);
 
   /* On some architectures, e.g. HPPA, there are a few stray bits in
      some registers, that the rest of the code would like to ignore.  */
@@ -1252,8 +1238,7 @@ supply_register (int regnum, const void *val)
 void
 regcache_collect (int regnum, void *buf)
 {
-  memcpy (buf, register_buffer (current_regcache, regnum),
-	  REGISTER_RAW_SIZE (regnum));
+  regcache_raw_collect (current_regcache, regnum, buf);
 }
 
 /* Supply register REGNUM, whose contents are store in BUF, to REGCACHE.  */
