@@ -1,3 +1,7 @@
+Tue Aug 12 10:27:34 1997  Richard Henderson  <rth@cygnus.com>
+
+	* doc/internals.texi: Document rs_leb128.
+
 Tue Aug 12 12:17:03 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-m68k.c (m68k_ip): Give an error message for SIZE_BYTE
