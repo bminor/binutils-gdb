@@ -1,3 +1,8 @@
+Fri Dec  6 16:47:40 1996  J.T. Conklin  <jtc@rhino.cygnus.com>
+
+	* m68k-opc.c (m68k_opcodes): Revert change to use < and >
+	specifiers for fmovem* instructions.
+
 Fri Dec  6 14:48:09 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10300-dis.c (disassemble): Remove '$' register prefixing.
