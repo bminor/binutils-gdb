@@ -1,3 +1,7 @@
+Fri Nov 21 10:52:39 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* Makefile.in (SHELL): Really do the change.
+
 Fri Nov 21 02:19:57 1997  Geoffrey Noer  <noer@cygnus.com>
 
 	* Makefile.in: also revert SHELL change until configury
