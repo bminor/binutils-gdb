@@ -1,3 +1,8 @@
+Wed Dec 31 11:43:53 1997  Mark Alexander  <marka@cygnus.com>
+
+	* dsrec.c (load_srec): Check remotedebug flag when printing
+	debug info.
+
 Wed Dec 31 10:33:15 1997  David Taylor  <taylor@texas.cygnus.com>
 
 	* breakpoint.c (breakpoint_re_set): add _siglongjmp to list of
