@@ -1,3 +1,11 @@
+1999-10-25  Nick Clifton  <nickc@cygnus.com>
+
+	* mcore-opc.h (enum mcore_opclass): Add class OPSR.
+	(mcore_table): Add psrclr and psrset instructions.
+
+	* mcore-dis.c (array imsk): Add mask for OPSR class.
+	(print_insn_mcore): Add decode for OPSR class insns.
+
 1999-10-18  Michael Meissner  <meissner@cygnus.com>
 
 	* alpha-opc.c (alpha_operands): Fill in missing initializer.

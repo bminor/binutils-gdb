@@ -57,6 +57,52 @@ static const unsigned short imsk[] =
     /* OMc */ 0xFF00,
     /* SIa */ 0xFE00,
 
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
+#include <stdio.h>
+#define STATIC_TABLE
+#define DEFINE_TABLE
+
+#include "mcore-opc.h"
+#include "dis-asm.h"
+
+/* Mask for each mcore_opclass: */
+static const unsigned short imsk[] =
+{
+    /* O0  */ 0xFFFF,
+    /* OT  */ 0xFFFC,
+    /* O1  */ 0xFFF0,
+    /* OC  */ 0xFFE0,
+    /* O2  */ 0xFF00,
+    /* X1  */ 0xFFF0,
+    /* OI  */ 0xFE00,
+    /* OB  */ 0xFE00,
+	      
+    /* OMa */ 0xFFF0,
+    /* SI  */ 0xFE00,
+    /* I7  */ 0xF800,
+    /* LS  */ 0xF000,
+    /* BR  */ 0xF800,
+    /* BL  */ 0xFF00,
+    /* LR  */ 0xF000,
+    /* LJ  */ 0xFF00,
+	      
+    /* RM  */ 0xFFF0,
+    /* RQ  */ 0xFFF0,
+    /* JSR */ 0xFFF0,
+    /* JMP */ 0xFFF0,
+    /* OBRa*/ 0xFFF0,
+    /* OBRb*/ 0xFF80,
+    /* OBRc*/ 0xFF00,
+    /* OBR2*/ 0xFE00,
+	      
+    /* O1R1*/ 0xFFF0,
+    /* OMb */ 0xFF80,
+    /* OMc */ 0xFF00,
+    /* SIa */ 0xFE00,
+
+  /* OPSR  */ 0xFFF8,   /* psrset/psrclr */
+		 
     /* JC  */ 0,		/* JC,JU,JL don't appear in object */
     /* JU  */ 0,
     /* JL  */ 0,
@@ -237,6 +283,18 @@ print_insn_mcore (memaddr, info)
 	  }
 	  break;
 	  
+	case OPSR:
+	  {
+	    static char * fields[] = 
+	    {
+	      "af", "ie",    "fe",    "fe,ie", 
+	      "ee", "ee,ie", "ee,fe", "ee,fe,ie"
+	    };
+	    
+	    fprintf (stream, "\t%s", fields[inst & 0x7]);
+	  }
+	  break;
+
 	default:
 	  /* if the disassembler lags the instruction set */
 	  fprintf (stream, "\tundecoded operands, inst is 0x%04x", inst);

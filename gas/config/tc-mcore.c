@@ -42,14 +42,15 @@ static void   mcore_float_cons PARAMS ((int));
 static void   mcore_stringer PARAMS ((int));
 static void   mcore_fill   PARAMS ((int));
 static int    log2 PARAMS ((unsigned int));
-static char * parse_reg PARAMS ((char *, unsigned *));
-static char * parse_creg PARAMS ((char *, unsigned *));
-static char * parse_exp PARAMS ((char *, expressionS *));
+static char * parse_reg    PARAMS ((char *, unsigned *));
+static char * parse_creg   PARAMS ((char *, unsigned *));
+static char * parse_exp    PARAMS ((char *, expressionS *));
+static char * parse_rt     PARAMS ((char *, char **, int, expressionS *));
+static char * parse_imm    PARAMS ((char *, unsigned *, unsigned, unsigned));
+static char * parse_mem    PARAMS ((char *, unsigned *, unsigned *, unsigned));
+static char * parse_psrmod PARAMS ((char *, unsigned *));
 static void   make_name PARAMS ((char *, char *, int));
 static int    enter_literal PARAMS ((expressionS *, int));
-static char * parse_rt PARAMS ((char *, char **, int, expressionS *));
-static char * parse_imm PARAMS ((char *, unsigned *, unsigned, unsigned));
-static char * parse_mem PARAMS ((char *, unsigned *, unsigned *, unsigned));
 static void   dump_literals PARAMS ((int));
 static void   check_literals PARAMS ((int, int));
 static void   mcore_s_text    PARAMS ((int));
@@ -59,7 +60,6 @@ static void   mcore_s_bss     PARAMS ((int));
 #ifdef OBJ_ELF
 static void   mcore_s_comm    PARAMS ((int));
 #endif
-
 
 /* Several places in this file insert raw instructions into the
    object. They should use MCORE_INST_XXX macros to get the opcodes
@@ -336,16 +336,17 @@ mcore_fill (unused)
 	}
 
       poolspan += size * repeat;
+      
+      check_literals (1, 0);
     }
   
   s_fill (unused);
 
-  check_literals (2, 0);
+  check_literals (1, 0);
 }
 
 /* Handle the section changing pseudo-ops.  These call through to the
    normal implementations, but they dump the literal pool first.  */
-
 static void
 mcore_s_text (ignore)
      int ignore;
@@ -589,6 +590,46 @@ parse_creg (s, reg)
 }
 
 static char *
+parse_psrmod (s, reg)
+  char *     s;
+  unsigned * reg;
+{
+  int  i;
+  char buf[10];
+  static struct psrmods
+  {
+    char *       name;
+    unsigned int value;
+  }
+  psrmods[] =
+  {
+    { "ie", 1 },
+    { "fe", 2 },
+    { "ee", 4 },
+    { "af", 8 }	/* really 0 and non-combinable */
+  };
+  
+  for (i = 0; i < 2; i++)
+    buf[i] = isascii (s[i]) ? tolower (s[i]) : 0;
+  
+  for (i = sizeof (psrmods) / sizeof (psrmods[0]); i--;)
+    {
+      if (! strncmp (psrmods[i].name, buf, 2))
+	{
+          * reg = psrmods[i].value;
+	  
+          return s + 2;
+	}
+    }
+  
+  as_bad (_("bad/missing psr specifier"));
+  
+  * reg = 0;
+  
+  return s;
+}
+
+static char *
 parse_exp (s, e)
      char * s;
      expressionS * e;
@@ -713,7 +754,7 @@ check_literals (kind, offset)
   
   if (poolspan > SPANCLOSE && kind > 0)
     dump_literals (0);
-  else if (poolspan > SPANEXIT && kind > 1)
+  else if (/* poolspan > SPANEXIT &&*/ kind > 1)
     dump_literals (0);
   else if (poolspan >= (SPANPANIC - poolsize * 2))
     dump_literals (1);
@@ -1594,6 +1635,29 @@ md_assemble (str)
       output = frag_more (2);
       break;
 
+    case OPSR:
+      op_end = parse_psrmod (op_end + 1, & reg);
+      
+      /* Look for further selectors.  */
+      while (* op_end == ',')
+	{
+	  unsigned value;
+	    
+	  op_end = parse_psrmod (op_end + 1, & value);
+	  
+	  if (value & reg)
+	    as_bad (_("duplicated psr bit specifier"));
+	  
+	  reg |= value;
+	}
+      
+      if (reg > 8)
+	as_bad (_("`af' must appear alone"));
+	
+      inst |= (reg & 0x7);
+      output = frag_more (2);
+      break;
+ 
     default:
       as_bad (_("unimplemented opcode \"%s\""), name);
     }
