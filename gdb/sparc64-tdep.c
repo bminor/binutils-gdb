@@ -52,17 +52,6 @@
 /* The functions on this page are intended to be used to classify
    function arguments.  */
 
-/* Return the contents if register REGNUM as an address.  */
-
-static CORE_ADDR
-sparc_address_from_register (int regnum)
-{
-  ULONGEST addr;
-
-  regcache_cooked_read_unsigned (current_regcache, regnum, &addr);
-  return addr;
-}
-
 /* Check whether TYPE is "Integral or Pointer".  */
 
 static int
@@ -579,8 +568,7 @@ sparc64_frame_base_address (struct frame_info *next_frame, void **this_cache)
   struct sparc_frame_cache *cache =
     sparc64_frame_cache (next_frame, this_cache);
 
-  /* ??? Should we take BIAS into account here?  */
-  return cache->base;
+  return cache->base + BIAS;
 }
 
 static const struct frame_base sparc64_frame_base =
@@ -943,7 +931,7 @@ sparc64_store_arguments (struct regcache *regcache, int nargs,
 	      gdb_assert (element < 6);
 	      regnum = SPARC_O0_REGNUM + element;
 	      regcache_cooked_write (regcache, regnum, valbuf);
-	      regcache_cooked_write (regcache, regnum + 1, valbuf);
+	      regcache_cooked_write (regcache, regnum + 1, valbuf + 8);
 	    }
 	}
 
@@ -960,7 +948,7 @@ sparc64_store_arguments (struct regcache *regcache, int nargs,
 }
 
 static CORE_ADDR
-sparc64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+sparc64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			 struct regcache *regcache, CORE_ADDR bp_addr,
 			 int nargs, struct value **args, CORE_ADDR sp,
 			 int struct_return, CORE_ADDR struct_addr)

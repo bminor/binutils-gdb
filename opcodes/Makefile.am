@@ -57,6 +57,8 @@ CFILES = \
 	cgen-opc.c \
 	cris-dis.c \
 	cris-opc.c \
+	crx-dis.c \
+	crx-opc.c \
 	d10v-dis.c \
 	d10v-opc.c \
 	d30v-dis.c \
@@ -179,6 +181,8 @@ ALL_MACHINES = \
 	cgen-opc.lo \
 	cris-dis.lo \
 	cris-opc.lo \
+	crx-dis.lo \
+	crx-opc.lo \
 	d10v-dis.lo \
 	d10v-opc.lo \
 	d30v-dis.lo \
@@ -548,6 +552,9 @@ cris-dis.lo: cris-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h sysdep.h config.h \
   $(INCDIR)/opcode/cris.h $(INCDIR)/libiberty.h
 cris-opc.lo: cris-opc.c $(INCDIR)/opcode/cris.h
+crx-dis.lo: crx-dis.c $(INCDIR)/opcode/crx.h \
+  $(INCDIR)/dis-asm.h sysdep.h $(INCDIR)/ansidecl.h
+crx-opc.lo: crx-opc.c $(INCDIR)/opcode/crx.h
 d10v-dis.lo: d10v-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/d10v.h $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/symcat.h

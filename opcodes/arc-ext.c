@@ -1,5 +1,5 @@
 /* ARC target-dependent stuff. Extension structure access functions
-   Copyright 1995, 1997, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1995, 1997, 2000, 2001, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -248,7 +248,7 @@ build_ARC_extmap (text_bfd)
   for (p = text_bfd->sections; p != NULL; p = p->next)
     if (!strcmp (p->name, ".arcextmap"))
       {
-        count = p->_raw_size;
+        count = bfd_get_section_size (p);
         arcExtMap = (char *) xmalloc (count);
         if (bfd_get_section_contents (text_bfd, p, (PTR) arcExtMap, 0, count))
           {

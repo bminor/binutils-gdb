@@ -1,5 +1,6 @@
 /* Definitions to target GDB to GNU/Linux on IA-64 Linux.
-   Copyright 1992, 1993, 2000 Free Software Foundation, Inc.
+
+   Copyright 1992, 1993, 2000, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -25,8 +26,6 @@
 
 #include "ia64/tm-ia64.h"
 #include "config/tm-linux.h"
-
-#define TARGET_ELF64
 
 extern int ia64_linux_in_sigtramp (CORE_ADDR pc, char *func_name);
 #define DEPRECATED_IN_SIGTRAMP(pc,func_name) ia64_linux_in_sigtramp (pc, func_name)

@@ -1,5 +1,6 @@
 /* Target-specific functions for ARM running under NetBSD.
-   Copyright 2002, 2003 Free Software Foundation, Inc.
+
+   Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,13 +22,15 @@
 #include "defs.h"
 #include "osabi.h"
 
+#include "gdb_string.h"
+
 #include "arm-tdep.h"
 #include "nbsd-tdep.h"
 #include "solib-svr4.h"
 
 /* Description of the longjmp buffer.  */
 #define ARM_NBSD_JB_PC 24
-#define ARM_NBSD_JB_ELEMENT_SIZE INT_REGISTER_RAW_SIZE
+#define ARM_NBSD_JB_ELEMENT_SIZE INT_REGISTER_SIZE
 
 /* For compatibility with previous implemenations of GDB on arm/NetBSD,
    override the default little-endian breakpoint.  */

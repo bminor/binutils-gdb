@@ -953,7 +953,7 @@ d10v_push_dummy_code (struct gdbarch *gdbarch,
 }
 
 static CORE_ADDR
-d10v_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+d10v_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      struct regcache *regcache, CORE_ADDR bp_addr,
 		      int nargs, struct value **args, CORE_ADDR sp, 
 		      int struct_return, CORE_ADDR struct_addr)
@@ -1542,8 +1542,8 @@ _initialize_d10v_tdep (void)
 {
   register_gdbarch_init (bfd_arch_d10v, d10v_gdbarch_init);
 
-  target_resume_hook = d10v_eva_prepare_to_trace;
-  target_wait_loop_hook = d10v_eva_get_trace_data;
+  deprecated_target_resume_hook = d10v_eva_prepare_to_trace;
+  deprecated_target_wait_loop_hook = d10v_eva_get_trace_data;
 
   deprecate_cmd (add_com ("regs", class_vars, show_regs, 
 			  "Print all registers"),

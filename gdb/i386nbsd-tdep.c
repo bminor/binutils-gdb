@@ -23,10 +23,12 @@
 
 #include "defs.h"
 #include "arch-utils.h"
+#include "frame.h"
 #include "gdbcore.h"
 #include "regcache.h"
 #include "regset.h"
 #include "osabi.h"
+#include "symtab.h"
 
 #include "gdb_assert.h"
 #include "gdb_string.h"
@@ -62,7 +64,7 @@ i386nbsd_aout_supply_regset (const struct regset *regset,
 			     struct regcache *regcache, int regnum,
 			     const void *regs, size_t len)
 {
-  const struct gdbarch_tdep *tdep = regset->descr;
+  const struct gdbarch_tdep *tdep = gdbarch_tdep (regset->arch);
 
   gdb_assert (len >= tdep->sizeof_gregset + I387_SIZEOF_FSAVE);
 
@@ -84,11 +86,8 @@ i386nbsd_aout_regset_from_core_section (struct gdbarch *gdbarch,
       && sect_size >= tdep->sizeof_gregset + I387_SIZEOF_FSAVE)
     {
       if (tdep->gregset == NULL)
-	{
-	  tdep->gregset = XMALLOC (struct regset);
-	  tdep->gregset->descr = tdep;
-	  tdep->gregset->supply_regset = i386nbsd_aout_supply_regset;
-	}
+        tdep->gregset =
+	  regset_alloc (gdbarch, i386nbsd_aout_supply_regset, NULL);
       return tdep->gregset;
     }
 
@@ -183,9 +182,16 @@ i386nbsd_sigtramp_offset (CORE_ADDR pc)
   return -1;
 }
 
+/* Return whether the frame preceding NEXT_FRAME corresponds to a
+   NetBSD sigtramp routine.  */
+
 static int
-i386nbsd_pc_in_sigtramp (CORE_ADDR pc, char *name)
+i386nbsd_sigtramp_p (struct frame_info *next_frame)
 {
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  char *name;
+
+  find_pc_partial_function (pc, &name, NULL, NULL);
   return (nbsd_pc_in_sigtramp (pc, name)
 	  || i386nbsd_sigtramp_offset (pc) >= 0);
 }
@@ -225,12 +231,9 @@ i386nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sizeof_gregset = 16 * 4;
 
   /* NetBSD has different signal trampoline conventions.  */
-  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, i386nbsd_pc_in_sigtramp);
-  /* FIXME: kettenis/20020906: We should probably provide
-     NetBSD-specific versions of these functions if we want to
-     recognize signal trampolines that live on the stack.  */
-  set_gdbarch_deprecated_sigtramp_start (gdbarch, NULL);
-  set_gdbarch_deprecated_sigtramp_end (gdbarch, NULL);
+  tdep->sigtramp_start = 0;
+  tdep->sigtramp_end = 0;
+  tdep->sigtramp_p = i386nbsd_sigtramp_p;
 
   /* NetBSD uses -freg-struct-return by default.  */
   tdep->struct_return = reg_struct_return;

@@ -1,4 +1,6 @@
-# Copyright 2000, 2002 Free Software Foundation, Inc.
+# This testcase is part of GDB, the GNU debugger.
+
+# Copyright 2000, 2002, 2003, 2004 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,9 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
-
-# Please email any bugs, comments, and/or additions to this file to:
-# bug-gdb@prep.ai.mit.edu
 
 if $tracelevel {
     strace $tracelevel
@@ -103,16 +102,10 @@ proc check_sizeof { type size } {
     }
 
     set pat [string_to_regexp "sizeof (${type}) == ${size}"]
-    send_gdb "next\n"
-    gdb_expect {
+    set test "check sizeof ${type}"
+    gdb_test_multiple "next" "$test" {
 	-re "${pat}\[\r\n\].*$gdb_prompt $" {
-	    pass "check sizeof ${type} == ${size}"
-	}
-	-re ".*$gdb_prompt $" {
-	    fail "check sizeof ${type} == ${size}"
-	}
-	timeout {
-	    fail "check sizeof ${type} == ${size} (timeout)"
+	    pass "$test"
 	}
     }
 }

@@ -164,7 +164,7 @@ syscall_write_mem (host_callback *cb, struct cb_syscall *sc,
 
 /* syscall */
 INLINE_SIM_MAIN (void)
-do_syscall ()
+do_syscall (void)
 {
 
   /* We use this for simulated system calls; we may need to change

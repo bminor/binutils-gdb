@@ -44,22 +44,8 @@ static const char arm_linux_arm_le_breakpoint[] = { 0x01, 0x00, 0x9f, 0xef };
 
 static const char arm_linux_arm_be_breakpoint[] = { 0xef, 0x9f, 0x00, 0x01 };
 
-/* DEPRECATED_CALL_DUMMY_WORDS:
-   This sequence of words is the instructions
-
-   mov  lr, pc
-   mov  pc, r4
-   swi	bkpt_swi
-
-   Note this is 12 bytes.  */
-
-LONGEST arm_linux_call_dummy_words[] =
-{
-  0xe1a0e00f, 0xe1a0f004, 0xef9f001
-};
-
 /* Description of the longjmp buffer.  */
-#define ARM_LINUX_JB_ELEMENT_SIZE	INT_REGISTER_RAW_SIZE
+#define ARM_LINUX_JB_ELEMENT_SIZE	INT_REGISTER_SIZE
 #define ARM_LINUX_JB_PC			21
 
 /* Extract from an array REGBUF containing the (raw) register state
@@ -130,7 +116,7 @@ arm_linux_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
       /* ANSI C code passes float arguments as integers, K&R code
          passes float arguments as doubles.  Correct for this here.  */
       if (TYPE_CODE_FLT == TYPE_CODE (arg_type) && DEPRECATED_REGISTER_SIZE == len)
-	nstack_size += FP_REGISTER_VIRTUAL_SIZE;
+	nstack_size += TARGET_DOUBLE_BIT / TARGET_CHAR_BIT;
       else
 	nstack_size += len;
     }
@@ -489,9 +475,6 @@ arm_linux_init_abi (struct gdbarch_info info,
 
   set_solib_svr4_fetch_link_map_offsets
     (gdbarch, arm_linux_svr4_fetch_link_map_offsets);
-
-  set_gdbarch_deprecated_call_dummy_words (gdbarch, arm_linux_call_dummy_words);
-  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (arm_linux_call_dummy_words));
 
   /* The following two overrides shouldn't be needed.  */
   set_gdbarch_deprecated_extract_return_value (gdbarch, arm_linux_extract_return_value);

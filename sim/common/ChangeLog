@@ -1,3 +1,44 @@
+2004-06-28  Andrew Cagney  <cagney@gnu.org>
+
+	* run.c: Rename ui_loop_hook to deprecated_ui_loop_hook.
+
+2004-06-27  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* callback.c (os_shutdown): Fix bug in last change: actually
+	mark file descriptors as available on startup.
+
+2004-06-25  J"orn Rennecke <joern.rennecke@superh.com>
+
+	[ include/gdb: * callback.h (host_callback_struct): Replace
+		       members fdopen and alwaysopen with fd_buddy.  ]
+        * callback.c: Changed all users.
+
+2004-06-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* sim-load.c (sim_load_file): Use bfd_get_section_size
+	instead of bfd_get_section_size_before_reloc.
+
+2004-05-18  Daniel Jacobowitz  <dan@debian.org>
+
+	* dv-glue.c (hw_glue_finish): Cast result of sizeof to long before
+	passing it to printf.
+
+2004-05-10  Daniel Jacobowitz  <dan@debian.org>
+
+	* callback.c: Update copyright dates.
+	* run.c: Likewise.
+	* sim-basics.h: Likewise.
+	* sim-load.c: Likewise.
+	* syscall.c: Likewise.
+
+2004-05-10  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
+	* callback.c: Include cconfig.h instead of config.h.
+	* run.c: Likewise.
+	* sim-basics.h: Likewise.
+	* sim-load.c: Likewise.
+	* syscall.c: Likewise.
+
 2004-01-16  Ben Elliston  <bje@wasabisystems.com>
 
 	* Makefile.in (clean): Remove rm -f $(ALL), as $(ALL) is empty.

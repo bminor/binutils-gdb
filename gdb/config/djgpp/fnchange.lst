@@ -120,6 +120,8 @@
 @V@/gdb/gdbtk/library/ChangeLog-2000 @V@/gdb/gdbtk/library/ChangeLog.000
 @V@/gdb/gdbtk/plugins/intel-pentium/intel-pentium.tcl.in @V@/gdb/gdbtk/plugins/intel-pentium/intel-pentium.t-in
 @V@/gdb/gdbtk/plugins/rhabout/rhabout.tcl.in @V@/gdb/gdbtk/plugins/rhabout/rhabout.t-in
+@V@/gdb/hppabsd-nat.c @V@/gdb/hppab-nat.c
+@V@/gdb/hppabsd-tdep.c @V@/gdb/hppab-tdep.c
 @V@/gdb/i386-interix-nat.c @V@/gdb/i386ix-nat.c
 @V@/gdb/i386-interix-tdep.c @V@/gdb/i386ix-tdep.c
 @V@/gdb/i386-linux-tdep.c @V@/gdb/i386lx-tdep.c
@@ -141,6 +143,8 @@
 @V@/gdb/m2-exp.tab.c @V@/gdb/m2-exp_tab.c
 @V@/gdb/m68klinux-nat.c @V@/gdb/m68kl-nat.c
 @V@/gdb/m68klinux-tdep.c @V@/gdb/m68kl-tdep.c
+@V@/gdb/m68kbsd-nat.c @V@/gdb/m68bsd-nat.c
+@V@/gdb/m68kbsd-tdep.c @V@/gdb/m68bsd-tdep.c
 @V@/gdb/m68knbsd-nat.c @V@/gdb/m6nbsd-nat.c
 @V@/gdb/m68knbsd-tdep.c @V@/gdb/m6nbsd-tdep.c
 @V@/gdb/mips-linux-nat.c @V@/gdb/mipslnxnat.c
@@ -156,6 +160,8 @@
 @V@/gdb/ppc-linux-nat.c @V@/gdb/ppc-lx-nat.c
 @V@/gdb/ppcnbsd-nat.c @V@/gdb/ppcnb-nat.c
 @V@/gdb/ppcnbsd-tdep.c @V@/gdb/ppcnb-tdep.c
+@V@/gdb/ppcobsd-nat.c @V@/gdb/ppcob-nat.c
+@V@/gdb/ppcobsd-tdep.c @V@/gdb/ppcob-tdep.c
 @V@/gdb/regformats/reg-i386-linux.dat @V@/gdb/regformats/r-i386-lnx.dat
 @V@/gdb/regformats/reg-s390x.dat @V@/gdb/regformats/r-s390x.dat
 @V@/gdb/remote-e7000.c @V@/gdb/rmt-e7000.c
@@ -188,6 +194,8 @@
 @V@/gdb/testsuite/gdb.arch/altivec-abi.exp @V@/gdb/testsuite/gdb.arch/av-abi.exp
 @V@/gdb/testsuite/gdb.arch/altivec-regs.c @V@/gdb/testsuite/gdb.arch/av-regs.c
 @V@/gdb/testsuite/gdb.arch/altivec-regs.exp @V@/gdb/testsuite/gdb.arch/av-regs.exp
+@V@/gdb/testsuite/gdb.arch/powerpc-aix-prologue.exp @V@/gdb/testsuite/gdb.arch/ppcaprol.exp
+@V@/gdb/testsuite/gdb.arch/powerpc-aix-prologue.c @V@/gdb/testsuite/gdb.arch/ppcaprol.c
 @V@/gdb/testsuite/gdb.base/coremaker2.c @V@/gdb/testsuite/gdb.base/core2maker.c
 @V@/gdb/testsuite/gdb.cp/m-static1.cc @V@/gdb/testsuite/gdb.cp/m-stat1.cc
 @V@/gdb/testsuite/gdb.cp/namespace1.cc @V@/gdb/testsuite/gdb.cp/namesp1.cc
@@ -232,6 +240,8 @@
 @V@/gdb/testsuite/gdb.mi/mi2-var-display.exp @V@/gdb/testsuite/gdb.mi/mi2vardisplay.exp
 @V@/gdb/amd64-linux-tdep.c @V@/gdb/amd64-ltdep.c
 @V@/gdb/amd64-linux-nat.c @V@/gdb/amd64-lnat.c
+@V@/gdb/hppa-linux-tdep.c @V@/gdb/palnxtdep.c
+@V@/gdb/hppa-linux-nat.c @V@/gdb/palnxnat.c
 @V@/include/ChangeLog-9103 @V@/include/ChangeLog.9103
 @V@/include/coff/ChangeLog-9103 @V@/include/coff/ChangeLog.9103
 @V@/include/elf/ChangeLog-9103 @V@/include/elf/ChangeLog.9103

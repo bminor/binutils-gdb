@@ -34,21 +34,11 @@
    are not handled by KDB; the program's own trap handler
    gets to handle then.  */
 
-#define FAULT_CODE_ORIGIN 0
 #define FAULT_CODE_UNITS 4
 #define FAULT_TABLE    \
 { 0, SIGKILL, SIGSEGV, 0, 0, 0, 0, 0, \
   0, 0, SIGTRAP, SIGTRAP, 0, 0, 0, 0, \
   0, 0, 0, 0, 0, 0, 0, 0}
-
-/* Start running with a stack stretching from BEG to END.
-   BEG and END should be symbols meaningful to the assembler.
-   This is used only for kdb.  */
-
-#define INIT_STACK(beg, end)  \
-{ asm (".globl end");         \
-  asm ("movl $ end, sp");      \
-  asm ("clrl fp"); }
 
 /* Push the frame pointer register on the stack.  */
 #define PUSH_FRAME_PTR        \

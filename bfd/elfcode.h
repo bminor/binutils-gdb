@@ -1,6 +1,6 @@
 /* ELF executable support for BFD.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    Written by Fred Fish @ Cygnus Support, from information published
    in "UNIX System V Release 4, Programmers Guide: ANSI C and
@@ -105,6 +105,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define elf_canonicalize_symtab		NAME(bfd_elf,canonicalize_symtab)
 #define elf_canonicalize_dynamic_symtab \
   NAME(bfd_elf,canonicalize_dynamic_symtab)
+#define elf_get_synthetic_symtab \
+  NAME(bfd_elf,get_synthetic_symtab)
 #define elf_make_empty_symbol		NAME(bfd_elf,make_empty_symbol)
 #define elf_get_symbol_info		NAME(bfd_elf,get_symbol_info)
 #define elf_get_lineno			NAME(bfd_elf,get_lineno)
@@ -115,24 +117,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define elf_no_info_to_howto		NAME(bfd_elf,no_info_to_howto)
 #define elf_no_info_to_howto_rel	NAME(bfd_elf,no_info_to_howto_rel)
 #define elf_find_section		NAME(bfd_elf,find_section)
-#define elf_bfd_link_add_symbols	NAME(bfd_elf,bfd_link_add_symbols)
-#define elf_add_dynamic_entry		NAME(bfd_elf,add_dynamic_entry)
 #define elf_write_shdrs_and_ehdr	NAME(bfd_elf,write_shdrs_and_ehdr)
 #define elf_write_out_phdrs		NAME(bfd_elf,write_out_phdrs)
 #define elf_write_relocs		NAME(bfd_elf,write_relocs)
 #define elf_slurp_reloc_table		NAME(bfd_elf,slurp_reloc_table)
-#define elf_bfd_discard_info		NAME(bfd_elf,discard_info)
-#define elf_reloc_symbol_deleted_p	NAME(_bfd_elf,reloc_symbol_deleted_p)
-#define elf_link_record_dynamic_symbol  _bfd_elf_link_record_dynamic_symbol
-#define elf_bfd_final_link		NAME(bfd_elf,bfd_final_link)
-#define elf_gc_sections			NAME(_bfd_elf,gc_sections)
-#define elf_gc_common_finalize_got_offsets \
-  NAME(_bfd_elf,gc_common_finalize_got_offsets)
-#define elf_gc_common_final_link	NAME(_bfd_elf,gc_common_final_link)
-#define elf_gc_record_vtinherit		NAME(_bfd_elf,gc_record_vtinherit)
-#define elf_gc_record_vtentry		NAME(_bfd_elf,gc_record_vtentry)
-#define elf_link_record_local_dynamic_symbol \
-  NAME(_bfd_elf,link_record_local_dynamic_symbol)
 
 #if ARCH_SIZE == 64
 #define ELF_R_INFO(X,Y)	ELF64_R_INFO(X,Y)
@@ -150,10 +138,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define FILE_ALIGN	4
 #define LOG_FILE_ALIGN	2
 #endif
-
-#define elf_stringtab_init _bfd_elf_stringtab_init
-
-#define section_from_elf_index bfd_section_from_elf_index
 
 #ifdef DEBUG
 static void elf_debug_section (int, Elf_Internal_Shdr *);
@@ -1111,8 +1095,8 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bfd_boolean dynamic)
 	  else if (isym->st_shndx < SHN_LORESERVE
 		   || isym->st_shndx > SHN_HIRESERVE)
 	    {
-	      sym->symbol.section = section_from_elf_index (abfd,
-							    isym->st_shndx);
+	      sym->symbol.section = bfd_section_from_elf_index (abfd,
+								isym->st_shndx);
 	      if (sym->symbol.section == NULL)
 		{
 		  /* This symbol is in a section for which we did not
@@ -1371,7 +1355,7 @@ elf_slurp_reloc_table (bfd *abfd,
 	 case because relocations against this section may use the
 	 dynamic symbol table, and in that case bfd_section_from_shdr
 	 in elf.c does not update the RELOC_COUNT.  */
-      if (asect->_raw_size == 0)
+      if (asect->size == 0)
 	return TRUE;
 
       rel_hdr = &d->this_hdr;
@@ -1737,7 +1721,6 @@ NAME(_bfd_elf,bfd_from_remote_memory)
 }
 
 #include "elfcore.h"
-#include "elflink.h"
 
 /* Size-dependent data and functions.  */
 const struct elf_size_info NAME(_bfd_elf,size_info) = {

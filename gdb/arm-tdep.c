@@ -191,7 +191,7 @@ static int target_is_thumb;
 
 /* Flag set by arm_fix_call_dummy that tells whether the calling
    function is a Thumb function.  This flag is checked by
-   arm_pc_is_thumb and arm_call_dummy_breakpoint_offset.  */
+   arm_pc_is_thumb.  */
 
 static int caller_is_thumb;
 
@@ -234,7 +234,7 @@ arm_pc_is_thumb_dummy (CORE_ADDR memaddr)
      frame location (true if we have not pushed large data structures or
      gone too many levels deep) and that our 1024 is not enough to consider
      code regions as part of the stack (true for most practical purposes).  */
-  if (DEPRECATED_PC_IN_CALL_DUMMY (memaddr, sp, sp + 1024))
+  if (deprecated_pc_in_call_dummy (memaddr))
     return caller_is_thumb;
   else
     return 0;
@@ -291,7 +291,7 @@ arm_frameless_function_invocation (struct frame_info *fi)
 	stmdb sp!, {}
 	sub sp, ip, #4.  */
 
-  func_start = (get_frame_func (fi) + FUNCTION_START_OFFSET);
+  func_start = (get_frame_func (fi) + DEPRECATED_FUNCTION_START_OFFSET);
   after_prologue = SKIP_PROLOGUE (func_start);
 
   /* There are some frameless functions whose first two instructions
@@ -407,7 +407,7 @@ arm_skip_prologue (CORE_ADDR pc)
   struct symtab_and_line sal;
 
   /* If we're in a dummy frame, don't even try to skip the prologue.  */
-  if (DEPRECATED_PC_IN_CALL_DUMMY (pc, 0, 0))
+  if (deprecated_pc_in_call_dummy (pc))
     return pc;
 
   /* See what the symbol table says.  */
@@ -993,15 +993,6 @@ arm_prologue_this_id (struct frame_info *next_frame,
     return;
 
   id = frame_id_build (cache->prev_sp, func);
-
-  /* Check that we're not going round in circles with the same frame
-     ID (but avoid applying the test to sentinel frames which do go
-     round in circles).  */
-  if (frame_relative_level (next_frame) >= 0
-      && get_frame_type (next_frame) == NORMAL_FRAME
-      && frame_id_eq (get_frame_id (next_frame), id))
-    return;
-
   *this_id = id;
 }
 
@@ -1094,7 +1085,7 @@ arm_make_sigtramp_cache (struct frame_info *next_frame)
   cache->framereg = ARM_SP_REGNUM;
   cache->prev_sp
     = read_memory_integer (cache->saved_regs[cache->framereg].addr,
-			   DEPRECATED_REGISTER_RAW_SIZE (cache->framereg));
+			   register_size (current_gdbarch, cache->framereg));
 
   return cache;
 }
@@ -1144,13 +1135,8 @@ struct frame_unwind arm_sigtramp_unwind = {
 static const struct frame_unwind *
 arm_sigtramp_unwind_sniffer (struct frame_info *next_frame)
 {
-  /* Note: If an ARM DEPRECATED_PC_IN_SIGTRAMP method ever needs to
-     compare against the name of the function, the code below will
-     have to be changed to first fetch the name of the function and
-     then pass this name to DEPRECATED_PC_IN_SIGTRAMP.  */
-
   if (SIGCONTEXT_REGISTER_ADDRESS_P ()
-      && DEPRECATED_PC_IN_SIGTRAMP (frame_pc_unwind (next_frame), (char *) 0))
+      && legacy_pc_in_sigtramp (frame_pc_unwind (next_frame), (char *) 0))
     return &arm_sigtramp_unwind;
 
   return NULL;
@@ -1186,20 +1172,6 @@ arm_unwind_sp (struct gdbarch *gdbarch, struct frame_info *this_frame)
 {
   return frame_unwind_register_unsigned (this_frame, ARM_SP_REGNUM);
 }
-
-/* DEPRECATED_CALL_DUMMY_WORDS:
-   This sequence of words is the instructions
-
-   mov  lr,pc
-   mov  pc,r4
-   illegal
-
-   Note this is 12 bytes.  */
-
-static LONGEST arm_call_dummy_words[] =
-{
-  0xe1a0e00f, 0xe1a0f004, 0xe7ffdefe
-};
 
 /* When arguments must be pushed onto the stack, they go on in reverse
    order.  The code below implements a FILO (stack) to do this.  */
@@ -1238,7 +1210,7 @@ pop_stack_item (struct stack_item *si)
    we should probably support some of them based on the selected ABI.  */
 
 static CORE_ADDR
-arm_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		     struct regcache *regcache, CORE_ADDR bp_addr, int nargs,
 		     struct value **args, CORE_ADDR sp, int struct_return,
 		     CORE_ADDR struct_addr)
@@ -1396,7 +1368,7 @@ arm_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
    register N.  */
 
 static struct type *
-arm_register_type (int regnum)
+arm_register_type (struct gdbarch *gdbarch, int regnum)
 {
   if (regnum >= ARM_F0_REGNUM && regnum < ARM_F0_REGNUM + NUM_FREGS)
     {
@@ -1416,42 +1388,14 @@ static int
 arm_register_byte (int regnum)
 {
   if (regnum < ARM_F0_REGNUM)
-    return regnum * INT_REGISTER_RAW_SIZE;
+    return regnum * INT_REGISTER_SIZE;
   else if (regnum < ARM_PS_REGNUM)
-    return (NUM_GREGS * INT_REGISTER_RAW_SIZE
-	    + (regnum - ARM_F0_REGNUM) * FP_REGISTER_RAW_SIZE);
+    return (NUM_GREGS * INT_REGISTER_SIZE
+	    + (regnum - ARM_F0_REGNUM) * FP_REGISTER_SIZE);
   else
-    return (NUM_GREGS * INT_REGISTER_RAW_SIZE
-	    + NUM_FREGS * FP_REGISTER_RAW_SIZE
+    return (NUM_GREGS * INT_REGISTER_SIZE
+	    + NUM_FREGS * FP_REGISTER_SIZE
 	    + (regnum - ARM_FPS_REGNUM) * STATUS_REGISTER_SIZE);
-}
-
-/* Number of bytes of storage in the actual machine representation for
-   register N.  All registers are 4 bytes, except fp0 - fp7, which are
-   12 bytes in length.  */
-
-static int
-arm_register_raw_size (int regnum)
-{
-  if (regnum < ARM_F0_REGNUM)
-    return INT_REGISTER_RAW_SIZE;
-  else if (regnum < ARM_FPS_REGNUM)
-    return FP_REGISTER_RAW_SIZE;
-  else
-    return STATUS_REGISTER_SIZE;
-}
-
-/* Number of bytes of storage in a program's representation
-   for register N.  */
-static int
-arm_register_virtual_size (int regnum)
-{
-  if (regnum < ARM_F0_REGNUM)
-    return INT_REGISTER_VIRTUAL_SIZE;
-  else if (regnum < ARM_FPS_REGNUM)
-    return FP_REGISTER_VIRTUAL_SIZE;
-  else
-    return STATUS_REGISTER_SIZE;
 }
 
 /* Map GDB internal REGNUM onto the Arm simulator register numbers.  */
@@ -2082,7 +2026,7 @@ arm_extract_return_value (struct type *type,
 	    /* The value is in register F0 in internal format.  We need to
 	       extract the raw value and then convert it to the desired
 	       internal type.  */
-	    bfd_byte tmpbuf[FP_REGISTER_RAW_SIZE];
+	    bfd_byte tmpbuf[FP_REGISTER_SIZE];
 
 	    regcache_cooked_read (regs, ARM_F0_REGNUM, tmpbuf);
 	    convert_from_extended (floatformat_from_type (type), tmpbuf,
@@ -2095,7 +2039,7 @@ arm_extract_return_value (struct type *type,
 	  regcache_cooked_read (regs, ARM_A1_REGNUM, valbuf);
 	  if (TYPE_LENGTH (type) > 4)
 	    regcache_cooked_read (regs, ARM_A1_REGNUM + 1,
-				  valbuf + INT_REGISTER_RAW_SIZE);
+				  valbuf + INT_REGISTER_SIZE);
 	  break;
 
 	default:
@@ -2124,11 +2068,11 @@ arm_extract_return_value (struct type *type,
 	     anything special for small big-endian values.  */
 	  regcache_cooked_read_unsigned (regs, regno++, &tmp);
 	  store_unsigned_integer (valbuf, 
-				  (len > INT_REGISTER_RAW_SIZE
-				   ? INT_REGISTER_RAW_SIZE : len),
+				  (len > INT_REGISTER_SIZE
+				   ? INT_REGISTER_SIZE : len),
 				  tmp);
-	  len -= INT_REGISTER_RAW_SIZE;
-	  valbuf += INT_REGISTER_RAW_SIZE;
+	  len -= INT_REGISTER_SIZE;
+	  valbuf += INT_REGISTER_SIZE;
 	}
     }
   else
@@ -2138,15 +2082,15 @@ arm_extract_return_value (struct type *type,
          registers with 32-bit load instruction(s).  */
       int len = TYPE_LENGTH (type);
       int regno = ARM_A1_REGNUM;
-      bfd_byte tmpbuf[INT_REGISTER_RAW_SIZE];
+      bfd_byte tmpbuf[INT_REGISTER_SIZE];
 
       while (len > 0)
 	{
 	  regcache_cooked_read (regs, regno++, tmpbuf);
 	  memcpy (valbuf, tmpbuf,
-		  len > INT_REGISTER_RAW_SIZE ? INT_REGISTER_RAW_SIZE : len);
-	  len -= INT_REGISTER_RAW_SIZE;
-	  valbuf += INT_REGISTER_RAW_SIZE;
+		  len > INT_REGISTER_SIZE ? INT_REGISTER_SIZE : len);
+	  len -= INT_REGISTER_SIZE;
+	  valbuf += INT_REGISTER_SIZE;
 	}
     }
 }
@@ -2270,7 +2214,7 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
-      char buf[ARM_MAX_REGISTER_RAW_SIZE];
+      char buf[MAX_REGISTER_SIZE];
 
       switch (arm_get_fp_model (current_gdbarch))
 	{
@@ -2285,7 +2229,7 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 	  regcache_cooked_write (regs, ARM_A1_REGNUM, valbuf);
 	  if (TYPE_LENGTH (type) > 4)
 	    regcache_cooked_write (regs, ARM_A1_REGNUM + 1, 
-				   valbuf + INT_REGISTER_RAW_SIZE);
+				   valbuf + INT_REGISTER_SIZE);
 	  break;
 
 	default:
@@ -2306,10 +2250,10 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 	{
 	  /* Values of one word or less are zero/sign-extended and
 	     returned in r0.  */
-	  bfd_byte tmpbuf[INT_REGISTER_RAW_SIZE];
+	  bfd_byte tmpbuf[INT_REGISTER_SIZE];
 	  LONGEST val = unpack_long (type, valbuf);
 
-	  store_signed_integer (tmpbuf, INT_REGISTER_RAW_SIZE, val);
+	  store_signed_integer (tmpbuf, INT_REGISTER_SIZE, val);
 	  regcache_cooked_write (regs, ARM_A1_REGNUM, tmpbuf);
 	}
       else
@@ -2323,8 +2267,8 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 	  while (len > 0)
 	    {
 	      regcache_cooked_write (regs, regno++, valbuf);
-	      len -= INT_REGISTER_RAW_SIZE;
-	      valbuf += INT_REGISTER_RAW_SIZE;
+	      len -= INT_REGISTER_SIZE;
+	      valbuf += INT_REGISTER_SIZE;
 	    }
 	}
     }
@@ -2335,15 +2279,15 @@ arm_store_return_value (struct type *type, struct regcache *regs,
          registers with 32-bit load instruction(s).  */
       int len = TYPE_LENGTH (type);
       int regno = ARM_A1_REGNUM;
-      bfd_byte tmpbuf[INT_REGISTER_RAW_SIZE];
+      bfd_byte tmpbuf[INT_REGISTER_SIZE];
 
       while (len > 0)
 	{
 	  memcpy (tmpbuf, valbuf,
-		  len > INT_REGISTER_RAW_SIZE ? INT_REGISTER_RAW_SIZE : len);
+		  len > INT_REGISTER_SIZE ? INT_REGISTER_SIZE : len);
 	  regcache_cooked_write (regs, regno++, tmpbuf);
-	  len -= INT_REGISTER_RAW_SIZE;
-	  valbuf += INT_REGISTER_RAW_SIZE;
+	  len -= INT_REGISTER_SIZE;
+	  valbuf += INT_REGISTER_SIZE;
 	}
     }
 }
@@ -2352,16 +2296,16 @@ static int
 arm_get_longjmp_target (CORE_ADDR *pc)
 {
   CORE_ADDR jb_addr;
-  char buf[INT_REGISTER_RAW_SIZE];
+  char buf[INT_REGISTER_SIZE];
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   
   jb_addr = read_register (ARM_A1_REGNUM);
 
   if (target_read_memory (jb_addr + tdep->jb_pc * tdep->jb_elt_size, buf,
-			  INT_REGISTER_RAW_SIZE))
+			  INT_REGISTER_SIZE))
     return 0;
 
-  *pc = extract_unsigned_integer (buf, INT_REGISTER_RAW_SIZE);
+  *pc = extract_unsigned_integer (buf, INT_REGISTER_SIZE);
   return 1;
 }
 
@@ -2766,9 +2710,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->lowest_pc = 0x20;
   tdep->jb_pc = -1;	/* Longjump support not enabled by default.  */
 
-  set_gdbarch_deprecated_call_dummy_words (gdbarch, arm_call_dummy_words);
-  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, 0);
-
   set_gdbarch_push_dummy_call (gdbarch, arm_push_dummy_call);
 
   set_gdbarch_write_pc (gdbarch, arm_write_pc);
@@ -2805,15 +2746,11 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pc_regnum (gdbarch, ARM_PC_REGNUM);
   set_gdbarch_deprecated_register_byte (gdbarch, arm_register_byte);
   set_gdbarch_deprecated_register_bytes (gdbarch,
-					 (NUM_GREGS * INT_REGISTER_RAW_SIZE
-					  + NUM_FREGS * FP_REGISTER_RAW_SIZE
+					 (NUM_GREGS * INT_REGISTER_SIZE
+					  + NUM_FREGS * FP_REGISTER_SIZE
 					  + NUM_SREGS * STATUS_REGISTER_SIZE));
   set_gdbarch_num_regs (gdbarch, NUM_GREGS + NUM_FREGS + NUM_SREGS);
-  set_gdbarch_deprecated_register_raw_size (gdbarch, arm_register_raw_size);
-  set_gdbarch_deprecated_register_virtual_size (gdbarch, arm_register_virtual_size);
-  set_gdbarch_deprecated_max_register_raw_size (gdbarch, FP_REGISTER_RAW_SIZE);
-  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, FP_REGISTER_VIRTUAL_SIZE);
-  set_gdbarch_deprecated_register_virtual_type (gdbarch, arm_register_type);
+  set_gdbarch_register_type (gdbarch, arm_register_type);
 
   /* Internal <-> external register number maps.  */
   set_gdbarch_register_sim_regno (gdbarch, arm_register_sim_regno);
@@ -2825,7 +2762,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Returning results.  */
   set_gdbarch_extract_return_value (gdbarch, arm_extract_return_value);
   set_gdbarch_store_return_value (gdbarch, arm_store_return_value);
-  set_gdbarch_use_struct_convention (gdbarch, arm_use_struct_convention);
+  set_gdbarch_deprecated_use_struct_convention (gdbarch, arm_use_struct_convention);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, arm_extract_struct_value_address);
 
   /* Single stepping.  */

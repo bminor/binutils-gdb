@@ -238,13 +238,15 @@
 // On the r3900, restriction (2) is not present, and restriction (3) is not
 // present for multiplication.
 //
-// For now this code is paranoid.  Historically the simulator
-// enforced restrictions (2) and (3) for more ISAs and CPU types than
-// necessary.  Unfortunately, at least some MIPS IV and later parts'
-// documentation describes them as having these hazards (e.g. vr5000),
-// so they can't be removed for at leats MIPS IV.  MIPS V hasn't been
-// checked (since there are no known hardware implementations).
-// 
+// Unfortunately, there seems to be some confusion about whether the last
+// two restrictions should apply to "MIPS IV" as well.  One edition of
+// the MIPS IV ISA says they do, but references in later ISA documents
+// suggest they don't.
+//
+// In reality, some MIPS IV parts, such as the VR5000 and VR5400, do have
+// these restrictions, while others, like the VR5500, don't.  To accomodate
+// such differences, the MIPS IV and MIPS V version of these helper functions
+// use auxillary routines to determine whether the restriction applies.
 
 // check_mf_cycles:
 //
@@ -274,13 +276,23 @@
 *mipsI:
 *mipsII:
 *mipsIII:
-*mipsIV:
-*mipsV:
 *vr4100:
 *vr5000:
 {
   signed64 time = sim_events_time (SD);
   int ok = check_mf_cycles (SD_, history, time, "MT");
+  history->mt.timestamp = time;
+  history->mt.cia = CIA;
+  return ok;
+}
+
+:function:::int:check_mt_hilo:hilo_history *history
+*mipsIV:
+*mipsV:
+{
+  signed64 time = sim_events_time (SD);
+  int ok = (! MIPS_MACH_HAS_MT_HILO_HAZARD (SD)
+	    || check_mf_cycles (SD_, history, time, "MT"));
   history->mt.timestamp = time;
   history->mt.cia = CIA;
   return ok;
@@ -350,14 +362,27 @@
 *mipsI:
 *mipsII:
 *mipsIII:
-*mipsIV:
-*mipsV:
 *vr4100:
 *vr5000:
 {
   signed64 time = sim_events_time (SD);
   int ok = (check_mf_cycles (SD_, hi, time, "OP")
 	    && check_mf_cycles (SD_, lo, time, "OP"));
+  hi->op.timestamp = time;
+  lo->op.timestamp = time;
+  hi->op.cia = CIA;
+  lo->op.cia = CIA;
+  return ok;
+}
+
+:function:::int:check_mult_hilo:hilo_history *hi, hilo_history *lo
+*mipsIV:
+*mipsV:
+{
+  signed64 time = sim_events_time (SD);
+  int ok = (! MIPS_MACH_HAS_MULT_HILO_HAZARD (SD)
+	    || (check_mf_cycles (SD_, hi, time, "OP")
+	        && check_mf_cycles (SD_, lo, time, "OP")));
   hi->op.timestamp = time;
   lo->op.timestamp = time;
   hi->op.cia = CIA;
@@ -389,8 +414,6 @@
 *mipsI:
 *mipsII:
 *mipsIII:
-*mipsIV:
-*mipsV:
 *vr4100:
 *vr5000:
 *r3900:
@@ -398,6 +421,21 @@
   signed64 time = sim_events_time (SD);
   int ok = (check_mf_cycles (SD_, hi, time, "OP")
 	    && check_mf_cycles (SD_, lo, time, "OP"));
+  hi->op.timestamp = time;
+  lo->op.timestamp = time;
+  hi->op.cia = CIA;
+  lo->op.cia = CIA;
+  return ok;
+}
+
+:function:::int:check_div_hilo:hilo_history *hi, hilo_history *lo
+*mipsIV:
+*mipsV:
+{
+  signed64 time = sim_events_time (SD);
+  int ok = (! MIPS_MACH_HAS_DIV_HILO_HAZARD (SD)
+	    || (check_mf_cycles (SD_, hi, time, "OP")
+	        && check_mf_cycles (SD_, lo, time, "OP")));
   hi->op.timestamp = time;
   lo->op.timestamp = time;
   hi->op.cia = CIA;
@@ -3605,23 +3643,6 @@
 // ReservedInstruction exception if not.
 //
 
-// check_fmt checks that the format is single or double.
-:function:::void:check_fmt:int fmt, instruction_word insn
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
-*mipsV:
-*mips32:
-*mips64:
-*vr4100:
-*vr5000:
-*r3900:
-{
-  if ((fmt != fmt_single) && (fmt != fmt_double))
-    SignalException (ReservedInstruction, insn);
-}
-
 // check_fmt_p checks that the format is single, double, or paired single.
 :function:::void:check_fmt_p:int fmt, instruction_word insn
 *mipsI:
@@ -3635,7 +3656,8 @@
 {
   /* None of these ISAs support Paired Single, so just fall back to
      the single/double check.  */
-  check_fmt (SD_, fmt, insn);
+  if ((fmt != fmt_single) && (fmt != fmt_double))
+    SignalException (ReservedInstruction, insn);
 }
 
 :function:::void:check_fmt_p:int fmt, instruction_word insn
@@ -3742,7 +3764,7 @@
 }
 
 
-010001,10,3.FMT,00000,5.FS,5.FD,000101:COP1:32,f::ABS.fmt
+010001,10,3.FMT!2!3!4!5!7,00000,5.FS,5.FD,000101:COP1:32,f::ABS.fmt
 "abs.%s<FMT> f<FD>, f<FS>"
 *mipsI:
 *mipsII:
@@ -3763,7 +3785,7 @@
 
 
 
-010001,10,3.FMT,5.FT,5.FS,5.FD,000000:COP1:32,f::ADD.fmt
+010001,10,3.FMT!2!3!4!5!7,5.FT,5.FS,5.FD,000000:COP1:32,f::ADD.fmt
 "add.%s<FMT> f<FD>, f<FS>, f<FT>"
 *mipsI:
 *mipsII:
@@ -3864,7 +3886,7 @@
 }
 
 
-010001,10,3.FMT,5.FT,5.FS,3.0,00,11,4.COND:COP1:32,f::C.cond.fmta
+010001,10,3.FMT!2!3!4!5!6!7,5.FT,5.FS,3.0,00,11,4.COND:COP1:32,f::C.cond.fmta
 "c.%s<COND>.%s<FMT> f<FS>, f<FT>"
 *mipsI:
 *mipsII:
@@ -3872,12 +3894,11 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  check_fmt_p (SD_, fmt, instruction_0);
   Compare (ValueFPR (FS, fmt), ValueFPR (FT, fmt), fmt, COND, 0);
   TRACE_ALU_RESULT (ValueFCR (31));
 }
 
-010001,10,3.FMT,5.FT,5.FS,3.CC,00,11,4.COND:COP1:32,f::C.cond.fmtb
+010001,10,3.FMT!2!3!4!5!7,5.FT,5.FS,3.CC,00,11,4.COND:COP1:32,f::C.cond.fmtb
 "c.%s<COND>.%s<FMT> f<FS>, f<FT>":CC == 0
 "c.%s<COND>.%s<FMT> <CC>, f<FS>, f<FT>"
 *mipsIV:
@@ -3896,7 +3917,7 @@
 }
 
 
-010001,10,3.FMT,00000,5.FS,5.FD,001010:COP1:64,f::CEIL.L.fmt
+010001,10,3.FMT!2!3!4!5!6!7,00000,5.FS,5.FD,001010:COP1:64,f::CEIL.L.fmt
 "ceil.l.%s<FMT> f<FD>, f<FS>"
 *mipsIII:
 *mipsIV:
@@ -3908,13 +3929,12 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  check_fmt (SD_, fmt, instruction_0);
   StoreFPR (FD, fmt_long, Convert (FP_RM_TOPINF, ValueFPR (FS, fmt), fmt,
 	    fmt_long));
 }
 
 
-010001,10,3.FMT,00000,5.FS,5.FD,001110:COP1:32,f::CEIL.W
+010001,10,3.FMT!2!3!4!5!6!7,00000,5.FS,5.FD,001110:COP1:32,f::CEIL.W
 "ceil.w.%s<FMT> f<FD>, f<FS>"
 *mipsII:
 *mipsIII:
@@ -3928,7 +3948,6 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  check_fmt (SD_, fmt, instruction_0);
   StoreFPR (FD, fmt_word, Convert (FP_RM_TOPINF, ValueFPR (FS, fmt), fmt,
 	    fmt_word));
 }
@@ -4026,7 +4045,7 @@
 //
 // FIXME: Does not correctly differentiate between mips*
 //
-010001,10,3.FMT,00000,5.FS,5.FD,100001:COP1:32,f::CVT.D.fmt
+010001,10,3.FMT!1!2!3!6!7,00000,5.FS,5.FD,100001:COP1:32,f::CVT.D.fmt
 "cvt.d.%s<FMT> f<FD>, f<FS>"
 *mipsI:
 *mipsII:
@@ -4048,7 +4067,7 @@
 }
 
 
-010001,10,3.FMT,00000,5.FS,5.FD,100101:COP1:64,f::CVT.L.fmt
+010001,10,3.FMT!2!3!4!5!6!7,00000,5.FS,5.FD,100101:COP1:64,f::CVT.L.fmt
 "cvt.l.%s<FMT> f<FD>, f<FS>"
 *mipsIII:
 *mipsIV:
@@ -4082,7 +4101,7 @@
 //
 // FIXME: Does not correctly differentiate between mips*
 //
-010001,10,3.FMT!6,00000,5.FS,5.FD,100000:COP1:32,f::CVT.S.fmt
+010001,10,3.FMT!0!2!3!6!7,00000,5.FS,5.FD,100000:COP1:32,f::CVT.S.fmt
 "cvt.s.%s<FMT> f<FD>, f<FS>"
 *mipsI:
 *mipsII:
@@ -4126,7 +4145,7 @@
 }
 
 
-010001,10,3.FMT!6,00000,5.FS,5.FD,100100:COP1:32,f::CVT.W.fmt
+010001,10,3.FMT!2!3!4!5!6!7,00000,5.FS,5.FD,100100:COP1:32,f::CVT.W.fmt
 "cvt.w.%s<FMT> f<FD>, f<FS>"
 *mipsI:
 *mipsII:
@@ -4148,7 +4167,7 @@
 }
 
 
-010001,10,3.FMT,5.FT,5.FS,5.FD,000011:COP1:32,f::DIV.fmt
+010001,10,3.FMT!2!3!4!5!6!7,5.FT,5.FS,5.FD,000011:COP1:32,f::DIV.fmt
 "div.%s<FMT> f<FD>, f<FS>, f<FT>"
 *mipsI:
 *mipsII:
@@ -4163,7 +4182,6 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  check_fmt (SD_, fmt, instruction_0);
   StoreFPR (FD, fmt, Divide (ValueFPR (FS, fmt), ValueFPR (FT, fmt), fmt));
 }
 
@@ -4245,7 +4263,7 @@
 }
 
 
-010001,10,3.FMT,00000,5.FS,5.FD,001011:COP1:64,f::FLOOR.L.fmt
+010001,10,3.FMT!2!3!4!5!6!7,00000,5.FS,5.FD,001011:COP1:64,f::FLOOR.L.fmt
 "floor.l.%s<FMT> f<FD>, f<FS>"
 *mipsIII:
 *mipsIV:
@@ -4257,13 +4275,12 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  check_fmt (SD_, fmt, instruction_0);
   StoreFPR (FD, fmt_long, Convert (FP_RM_TOMINF, ValueFPR (FS, fmt), fmt,
 	    fmt_long));
 }
 
 
-010001,10,3.FMT,00000,5.FS,5.FD,001111:COP1:32,f::FLOOR.W.fmt
+010001,10,3.FMT!2!3!4!5!6!7,00000,5.FS,5.FD,001111:COP1:32,f::FLOOR.W.fmt
 "floor.w.%s<FMT> f<FD>, f<FS>"
 *mipsII:
 *mipsIII:
@@ -4277,7 +4294,6 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  check_fmt (SD_, fmt, instruction_0);
   StoreFPR (FD, fmt_word, Convert (FP_RM_TOMINF, ValueFPR (FS, fmt), fmt,
 	    fmt_word));
 }
@@ -4370,7 +4386,7 @@
 
 
 
-010011,5.FR,5.FT,5.FS,5.FD,100,3.FMT:COP1X:64,f::MADD.fmt
+010011,5.FR,5.FT,5.FS,5.FD,100,3.FMT!2!3!4!5!7:COP1X:64,f::MADD.fmt
 "madd.%s<FMT> f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
 *mipsV:
@@ -4415,7 +4431,7 @@
 }
 
 
-010001,10,3.FMT,00000,5.FS,5.FD,000110:COP1:32,f::MOV.fmt
+010001,10,3.FMT!2!3!4!5!7,00000,5.FS,5.FD,000110:COP1:32,f::MOV.fmt
 "mov.%s<FMT> f<FD>, f<FS>"
 *mipsI:
 *mipsII:
@@ -4453,7 +4469,7 @@
 
 // MOVF.fmt
 // MOVT.fmt
-010001,10,3.FMT,3.CC,0,1.TF,5.FS,5.FD,010001:COP1:32,f::MOVtf.fmt
+010001,10,3.FMT!2!3!4!5!7,3.CC,0,1.TF,5.FS,5.FD,010001:COP1:32,f::MOVtf.fmt
 "mov%s<TF>.%s<FMT> f<FD>, f<FS>, <CC>"
 *mipsIV:
 *mipsV:
@@ -4482,7 +4498,7 @@
 }
 
 
-010001,10,3.FMT,5.RT,5.FS,5.FD,010011:COP1:32,f::MOVN.fmt
+010001,10,3.FMT!2!3!4!5!7,5.RT,5.FS,5.FD,010011:COP1:32,f::MOVN.fmt
 "movn.%s<FMT> f<FD>, f<FS>, r<RT>"
 *mipsIV:
 *mipsV:
@@ -4505,7 +4521,7 @@
 
 
 
-010001,10,3.FMT,5.RT,5.FS,5.FD,010010:COP1:32,f::MOVZ.fmt
+010001,10,3.FMT!2!3!4!5!7,5.RT,5.FS,5.FD,010010:COP1:32,f::MOVZ.fmt
 "movz.%s<FMT> f<FD>, f<FS>, r<RT>"
 *mipsIV:
 *mipsV:
@@ -4521,7 +4537,7 @@
 }
 
 
-010011,5.FR,5.FT,5.FS,5.FD,101,3.FMT:COP1X:64,f::MSUB.fmt
+010011,5.FR,5.FT,5.FS,5.FD,101,3.FMT!2!3!4!5!7:COP1X:64,f::MSUB.fmt
 "msub.%s<FMT> f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
 *mipsV:
@@ -4566,7 +4582,7 @@
 }
 
 
-010001,10,3.FMT,5.FT,5.FS,5.FD,000010:COP1:32,f::MUL.fmt
+010001,10,3.FMT!2!3!4!5!7,5.FT,5.FS,5.FD,000010:COP1:32,f::MUL.fmt
 "mul.%s<FMT> f<FD>, f<FS>, f<FT>"
 *mipsI:
 *mipsII:
@@ -4586,7 +4602,7 @@
 }
 
 
-010001,10,3.FMT,00000,5.FS,5.FD,000111:COP1:32,f::NEG.fmt
+010001,10,3.FMT!2!3!4!5!7,00000,5.FS,5.FD,000111:COP1:32,f::NEG.fmt
 "neg.%s<FMT> f<FD>, f<FS>"
 *mipsI:
 *mipsII:
@@ -4606,7 +4622,7 @@
 }
 
 
-010011,5.FR,5.FT,5.FS,5.FD,110,3.FMT:COP1X:64,f::NMADD.fmt
+010011,5.FR,5.FT,5.FS,5.FD,110,3.FMT!2!3!4!5!7:COP1X:64,f::NMADD.fmt
 "nmadd.%s<FMT> f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
 *mipsV:
@@ -4622,7 +4638,7 @@
 }
 
 
-010011,5.FR,5.FT,5.FS,5.FD,111,3.FMT:COP1X:64,f::NMSUB.fmt
+010011,5.FR,5.FT,5.FS,5.FD,111,3.FMT!2!3!4!5!7:COP1X:64,f::NMSUB.fmt
 "nmsub.%s<FMT> f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
 *mipsV:
@@ -4705,7 +4721,7 @@
 }
 
 
-010001,10,3.FMT,00000,5.FS,5.FD,010101:COP1:32,f::RECIP.fmt
+010001,10,3.FMT!2!3!4!5!6!7,00000,5.FS,5.FD,010101:COP1:32,f::RECIP.fmt
 "recip.%s<FMT> f<FD>, f<FS>"
 *mipsIV:
 *mipsV:
@@ -4714,12 +4730,11 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  check_fmt (SD_, fmt, instruction_0);
   StoreFPR (FD, fmt, Recip (ValueFPR (FS, fmt), fmt));
 }
 
 
-010001,10,3.FMT,00000,5.FS,5.FD,001000:COP1:64,f::ROUND.L.fmt
+010001,10,3.FMT!2!3!4!5!6!7,00000,5.FS,5.FD,001000:COP1:64,f::ROUND.L.fmt
 "round.l.%s<FMT> f<FD>, f<FS>"
 *mipsIII:
 *mipsIV:
@@ -4731,13 +4746,12 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  check_fmt (SD_, fmt, instruction_0);
   StoreFPR (FD, fmt_long, Convert (FP_RM_NEAREST, ValueFPR (FS, fmt), fmt,
 	    fmt_long));
 }
 
 
-010001,10,3.FMT,00000,5.FS,5.FD,001100:COP1:32,f::ROUND.W.fmt
+010001,10,3.FMT!2!3!4!5!6!7,00000,5.FS,5.FD,001100:COP1:32,f::ROUND.W.fmt
 "round.w.%s<FMT> f<FD>, f<FS>"
 *mipsII:
 *mipsIII:
@@ -4751,13 +4765,12 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  check_fmt (SD_, fmt, instruction_0);
   StoreFPR (FD, fmt_word, Convert (FP_RM_NEAREST, ValueFPR (FS, fmt), fmt,
 	    fmt_word));
 }
 
 
-010001,10,3.FMT,00000,5.FS,5.FD,010110:COP1:32,f::RSQRT.fmt
+010001,10,3.FMT!2!3!4!5!6!7,00000,5.FS,5.FD,010110:COP1:32,f::RSQRT.fmt
 "rsqrt.%s<FMT> f<FD>, f<FS>"
 *mipsIV:
 *mipsV:
@@ -4766,7 +4779,6 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  check_fmt (SD_, fmt, instruction_0);
   StoreFPR (FD, fmt, RSquareRoot (ValueFPR (FS, fmt), fmt));
 }
 
@@ -4827,7 +4839,7 @@
 }
 
 
-010001,10,3.FMT,00000,5.FS,5.FD,000100:COP1:32,f::SQRT.fmt
+010001,10,3.FMT!2!3!4!5!6!7,00000,5.FS,5.FD,000100:COP1:32,f::SQRT.fmt
 "sqrt.%s<FMT> f<FD>, f<FS>"
 *mipsII:
 *mipsIII:
@@ -4841,12 +4853,11 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  check_fmt (SD_, fmt, instruction_0);
   StoreFPR (FD, fmt,  (SquareRoot (ValueFPR (FS, fmt), fmt)));
 }
 
 
-010001,10,3.FMT,5.FT,5.FS,5.FD,000001:COP1:32,f::SUB.fmt
+010001,10,3.FMT!2!3!4!5!7,5.FT,5.FS,5.FD,000001:COP1:32,f::SUB.fmt
 "sub.%s<FMT> f<FD>, f<FS>, f<FT>"
 *mipsI:
 *mipsII:
@@ -4951,7 +4962,7 @@
 }
 
 
-010001,10,3.FMT,00000,5.FS,5.FD,001001:COP1:64,f::TRUNC.L.fmt
+010001,10,3.FMT!2!3!4!5!6!7,00000,5.FS,5.FD,001001:COP1:64,f::TRUNC.L.fmt
 "trunc.l.%s<FMT> f<FD>, f<FS>"
 *mipsIII:
 *mipsIV:
@@ -4963,13 +4974,12 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  check_fmt (SD_, fmt, instruction_0);
   StoreFPR (FD, fmt_long, Convert (FP_RM_TOZERO, ValueFPR (FS, fmt), fmt,
 	    fmt_long));
 }
 
 
-010001,10,3.FMT,00000,5.FS,5.FD,001101:COP1:32,f::TRUNC.W
+010001,10,3.FMT!2!3!4!5!6!7,00000,5.FS,5.FD,001101:COP1:32,f::TRUNC.W
 "trunc.w.%s<FMT> f<FD>, f<FS>"
 *mipsII:
 *mipsIII:
@@ -4983,7 +4993,6 @@
 {
   int fmt = FMT;
   check_fpu (SD_);
-  check_fmt (SD_, fmt, instruction_0);
   StoreFPR (FD, fmt_word, Convert (FP_RM_TOZERO, ValueFPR (FS, fmt), fmt,
 	    fmt_word));
 }

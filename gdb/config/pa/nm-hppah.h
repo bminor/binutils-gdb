@@ -91,15 +91,6 @@ extern int hppa_require_detach (int, int);
 #define PT_WRITE_I	PT_WIUSER
 #define PT_WRITE_D	PT_WDUSER
 
-/* attach/detach works to some extent under BSD and HPUX.  So long
-   as the process you're attaching to isn't blocked waiting on io,
-   blocked waiting on a signal, or in a system call things work 
-   fine.  (The problems in those cases are related to the fact that
-   the kernel can't provide complete register information for the
-   target process...  Which really pisses off GDB.)  */
-
-#define ATTACH_DETACH
-
 /* In infptrace or infttrace.c: */
 
 /* Starting with HP-UX 10.30, support is provided (in the form of

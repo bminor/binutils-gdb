@@ -1,6 +1,6 @@
 /* Remote debugging interface for M32R/SDI.
 
-   Copyright 2003 Free Software Foundation, Inc.
+   Copyright 2003, 2004 Free Software Foundation, Inc.
 
    Contributed by Renesas Technology Co.
    Written by Kei Sakamoto <sakamoto.kei@renesas.com>.
@@ -264,7 +264,8 @@ check_mmu_status (void)
 /* This is called not only when we first attach, but also when the
    user types "run" after having attached.  */
 static void
-m32r_create_inferior (char *execfile, char *args, char **env)
+m32r_create_inferior (char *execfile, char *args, char **env,
+		      int from_tty)
 {
   CORE_ADDR entry_pt;
 
@@ -1319,7 +1320,7 @@ m32r_load (char *args, int from_tty)
 	  int n;
 
 	  section_address = bfd_section_lma (pbfd, section);
-	  section_size = bfd_get_section_size_before_reloc (section);
+	  section_size = bfd_get_section_size (section);
 
 	  if (!mmu_on)
 	    {

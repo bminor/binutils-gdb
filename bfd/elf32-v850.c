@@ -73,7 +73,7 @@ static bfd_boolean v850_elf_section_from_bfd_section
 static void v850_elf_symbol_processing
   PARAMS ((bfd *, asymbol *));
 static bfd_boolean v850_elf_add_symbol_hook
-  PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
+  PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Sym *,
 	   const char **, flagword *, asection **, bfd_vma *));
 static bfd_boolean v850_elf_link_output_symbol_hook
   PARAMS ((struct bfd_link_info *, const char *, Elf_Internal_Sym *,
@@ -699,14 +699,14 @@ v850_elf_check_relocs (abfd, info, sec, relocs)
         /* This relocation describes the C++ object vtable hierarchy.
            Reconstruct it for later use during GC.  */
         case R_V850_GNU_VTINHERIT:
-          if (!_bfd_elf32_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
+          if (!bfd_elf_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
             return FALSE;
           break;
 
         /* This relocation describes which C++ vtable entries
 	   are actually used.  Record for later use during GC.  */
         case R_V850_GNU_VTENTRY:
-          if (!_bfd_elf32_gc_record_vtentry (abfd, sec, h, rel->r_addend))
+          if (!bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_addend))
             return FALSE;
           break;
 
@@ -1359,7 +1359,7 @@ v850_elf_reloc (abfd, reloc, symbol, data, isection, obfd, err)
   /* We handle final linking of some relocs ourselves.  */
 
   /* Is the address of the relocation really within the section?  */
-  if (reloc->address > isection->_cooked_size)
+  if (reloc->address > bfd_get_section_limit (abfd, isection))
     return bfd_reloc_outofrange;
 
   /* Work out which section the relocation is targeted at and the
@@ -2124,7 +2124,7 @@ static bfd_boolean
 v850_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
      bfd *abfd;
      struct bfd_link_info *info ATTRIBUTE_UNUSED;
-     const Elf_Internal_Sym *sym;
+     Elf_Internal_Sym *sym;
      const char **namep ATTRIBUTE_UNUSED;
      flagword *flagsp ATTRIBUTE_UNUSED;
      asection **secp;
@@ -2515,11 +2515,6 @@ v850_elf_relax_section (abfd, sec, link_info, again)
       || sec->reloc_count == 0)
     return TRUE;
 
-  /* If this is the first time we have been called
-     for this section, initialize the cooked size.  */
-  if (sec->_cooked_size == 0)
-    sec->_cooked_size = sec->_raw_size;
-
   symtab_hdr = & elf_tdata (abfd)->symtab_hdr;
 
   internal_relocs = (_bfd_elf_link_read_relocs
@@ -2530,9 +2525,9 @@ v850_elf_relax_section (abfd, sec, link_info, again)
 
   irelend = internal_relocs + sec->reloc_count;
 
-  while (addr < sec->_cooked_size)
+  while (addr < sec->size)
     {
-      toaddr = sec->_cooked_size;
+      toaddr = sec->size;
 
       for (irel = internal_relocs; irel < irelend; irel ++)
 	if (ELF32_R_TYPE (irel->r_info) == (int) R_V850_ALIGN
@@ -2606,12 +2601,7 @@ v850_elf_relax_section (abfd, sec, link_info, again)
 		contents = elf_section_data (sec)->this_hdr.contents;
 	      else
 		{
-		  contents = (bfd_byte *) bfd_malloc (sec->_raw_size);
-		  if (contents == NULL)
-		    goto error_return;
-
-		  if (! bfd_get_section_contents (abfd, sec, contents,
-						  (file_ptr) 0, sec->_raw_size))
+		  if (!bfd_malloc_and_get_section (abfd, sec, &contents))
 		    goto error_return;
 		}
 	    }
@@ -2633,7 +2623,7 @@ v850_elf_relax_section (abfd, sec, link_info, again)
 	  if (ELF32_R_TYPE (irel->r_info) == (int) R_V850_LONGCALL)
 	    {
 	      /* Check code for -mlong-calls output. */
-	      if (laddr + 16 <= (bfd_vma) sec->_raw_size)
+	      if (laddr + 16 <= (bfd_vma) sec->size)
 		{
 		  insn[0] = bfd_get_16 (abfd, contents + laddr);
 		  insn[1] = bfd_get_16 (abfd, contents + laddr + 4);
@@ -2862,7 +2852,7 @@ v850_elf_relax_section (abfd, sec, link_info, again)
 	  else if (ELF32_R_TYPE (irel->r_info) == (int) R_V850_LONGJUMP)
 	    {
 	      /* Check code for -mlong-jumps output.  */
-	      if (laddr + 10 <= (bfd_vma) sec->_raw_size)
+	      if (laddr + 10 <= (bfd_vma) sec->size)
 		{
 		  insn[0] = bfd_get_16 (abfd, contents + laddr);
 		  insn[1] = bfd_get_16 (abfd, contents + laddr + 4);
@@ -3104,10 +3094,10 @@ v850_elf_relax_section (abfd, sec, link_info, again)
 #ifdef DEBUG_RELAX
       fprintf (stderr, "relax pad %d shorten %d -> %d\n",
 	       align_pad_size,
-	       sec->_cooked_size,
-	       sec->_cooked_size - align_pad_size);
+	       sec->size,
+	       sec->size - align_pad_size);
 #endif
-      sec->_cooked_size -= align_pad_size;
+      sec->size -= align_pad_size;
     }
 
  finish:

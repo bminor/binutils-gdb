@@ -1,6 +1,6 @@
 /* Support for the generic parts of most COFF variants, for BFD.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003
+   2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -309,6 +309,9 @@ CODE_FRAGMENT
 
 #define STRING_SIZE_SIZE (4)
 
+#define DOT_DEBUG	".debug"
+#define GNU_LINKONCE_WI ".gnu.linkonce.wi."
+
 static long sec_to_styp_flags
   PARAMS ((const char *, flagword));
 static bfd_boolean styp_to_sec_flags
@@ -428,7 +431,7 @@ sec_to_styp_flags (sec_name, sec_flags)
       styp_flags = STYP_LIT;
 #endif /* _LIT */
     }
-  else if (!strncmp (sec_name, ".debug", 6))
+  else if (!strncmp (sec_name, DOT_DEBUG, sizeof (DOT_DEBUG) - 1))
     {
       /* Handle the XCOFF debug section and DWARF2 debug sections.  */
       if (!sec_name[6])
@@ -441,7 +444,7 @@ sec_to_styp_flags (sec_name, sec_flags)
       styp_flags = STYP_DEBUG_INFO;
     }
 #ifdef COFF_LONG_SECTION_NAMES
-  else if (!strncmp (sec_name, ".gnu.linkonce.wi.", 17))
+  else if (!strncmp (sec_name, GNU_LINKONCE_WI, sizeof (GNU_LINKONCE_WI) - 1))
     {
       styp_flags = STYP_DEBUG_INFO;
     }
@@ -518,7 +521,7 @@ sec_to_styp_flags (sec_name, sec_flags)
 
 static long
 sec_to_styp_flags (sec_name, sec_flags)
-     const char *sec_name ATTRIBUTE_UNUSED;
+     const char *sec_name;
      flagword sec_flags;
 {
   long styp_flags = 0;
@@ -530,6 +533,11 @@ sec_to_styp_flags (sec_name, sec_flags)
      COFF files.  IMAGE_SCN_* are the PE section flags which appear in
      PE files.  The STYP_* flags and the IMAGE_SCN_* flags overlap,
      but there are more IMAGE_SCN_* flags.  */
+
+  /* FIXME: There is no gas syntax to specify the debug section flag.  */
+  if (strncmp (sec_name, DOT_DEBUG, sizeof (DOT_DEBUG) - 1) == 0
+      || strncmp (sec_name, GNU_LINKONCE_WI, sizeof (GNU_LINKONCE_WI) - 1) == 0)
+    sec_flags = SEC_READONLY | SEC_DEBUGGING;
 
   /* skip LOAD */
   /* READONLY later */
@@ -675,12 +683,12 @@ styp_to_sec_flags (abfd, hdr, name, section, flags_ptr)
 #endif
 	sec_flags |= SEC_ALLOC;
     }
-  else if (strncmp (name, ".debug", 6) == 0
+  else if (strncmp (name, DOT_DEBUG, sizeof (DOT_DEBUG) - 1) == 0
 #ifdef _COMMENT
 	   || strcmp (name, _COMMENT) == 0
 #endif
 #ifdef COFF_LONG_SECTION_NAMES
-	   || strncmp (name, ".gnu.linkonce.wi.", 17) == 0
+	   || strncmp (name, GNU_LINKONCE_WI, sizeof (GNU_LINKONCE_WI) - 1) == 0
 #endif
 	   || strncmp (name, ".stab", 5) == 0)
     {
@@ -1055,7 +1063,15 @@ styp_to_sec_flags (abfd, hdr, name, section, flags_ptr)
 	  unhandled = "IMAGE_SCN_MEM_NOT_CACHED";
 	  break;
 	case IMAGE_SCN_MEM_NOT_PAGED:
+#if 0
 	  unhandled = "IMAGE_SCN_MEM_NOT_PAGED";
+#else
+	  /* Generate a warning message rather using the 'unhandled'
+	     variable as this will allow some .sys files generate by
+	     other toolchains to be processed.  See bugzilla issue 196.  */
+	  _bfd_error_handler (_("%s: Warning: Ignoring section flag IMAGE_SCN_MEM_NOT_PAGED in section %s"),
+	     bfd_archive_filename (abfd), name);
+#endif
 	  break;
 	case IMAGE_SCN_MEM_EXECUTE:
 	  sec_flags |= SEC_CODE;
@@ -3004,10 +3020,10 @@ coff_compute_section_file_positions (abfd)
 	{
 	  asection *dsec;
 
-	  dsec = bfd_make_section_old_way (abfd, ".debug");
+	  dsec = bfd_make_section_old_way (abfd, DOT_DEBUG);
 	  if (dsec == NULL)
 	    abort ();
-	  dsec->_raw_size = sz;
+	  dsec->size = sz;
 	  dsec->flags |= SEC_HAS_CONTENTS;
 	}
     }
@@ -3106,7 +3122,7 @@ coff_compute_section_file_positions (abfd)
 	   a zero size and having real contents are different
 	   concepts: .bss has no contents, but (usually) non-zero
 	   size.  */
-	if (current->_raw_size == 0)
+	if (current->size == 0)
 	  {
 	    /* Discard.  However, it still might have (valid) symbols
 	       in it, so arbitrarily set it to section 1 (indexing is
@@ -3157,7 +3173,7 @@ coff_compute_section_file_positions (abfd)
 	    return FALSE;
 	}
       if (pei_section_data (abfd, current)->virt_size == 0)
-	pei_section_data (abfd, current)->virt_size = current->_raw_size;
+	pei_section_data (abfd, current)->virt_size = current->size;
 #endif
 
       /* Only deal with sections which have contents.  */
@@ -3166,7 +3182,7 @@ coff_compute_section_file_positions (abfd)
 
 #ifdef COFF_IMAGE_WITH_PE
       /* Make sure we skip empty sections in a PE image.  */
-      if (current->_raw_size == 0)
+      if (current->size == 0)
 	continue;
 #endif
 
@@ -3214,7 +3230,7 @@ coff_compute_section_file_positions (abfd)
 	    }
 #endif
 	  if (previous != (asection *) NULL)
-	    previous->_raw_size += sofar - old_sofar;
+	    previous->size += sofar - old_sofar;
 	}
 
 #endif
@@ -3230,10 +3246,10 @@ coff_compute_section_file_positions (abfd)
 
 #ifdef COFF_IMAGE_WITH_PE
       /* Set the padded size.  */
-      current->_raw_size = (current->_raw_size + page_size -1) & -page_size;
+      current->size = (current->size + page_size -1) & -page_size;
 #endif
 
-      sofar += current->_raw_size;
+      sofar += current->size;
 
 #ifdef ALIGN_SECTIONS_IN_FILE
       /* Make sure that this section is of the right size too.  */
@@ -3241,26 +3257,26 @@ coff_compute_section_file_positions (abfd)
 	{
 	  bfd_size_type old_size;
 
-	  old_size = current->_raw_size;
-	  current->_raw_size = BFD_ALIGN (current->_raw_size,
-					  1 << current->alignment_power);
-	  align_adjust = current->_raw_size != old_size;
-	  sofar += current->_raw_size - old_size;
+	  old_size = current->size;
+	  current->size = BFD_ALIGN (current->size,
+				     1 << current->alignment_power);
+	  align_adjust = current->size != old_size;
+	  sofar += current->size - old_size;
 	}
       else
 	{
 	  old_sofar = sofar;
 	  sofar = BFD_ALIGN (sofar, 1 << current->alignment_power);
 	  align_adjust = sofar != old_sofar;
-	  current->_raw_size += sofar - old_sofar;
+	  current->size += sofar - old_sofar;
 	}
 #endif
 
 #ifdef COFF_IMAGE_WITH_PE
       /* For PE we need to make sure we pad out to the aligned
-         _raw_size, in case the caller only writes out data to the
-         unaligned _raw_size.  */
-      if (pei_section_data (abfd, current)->virt_size < current->_raw_size)
+         size, in case the caller only writes out data to the
+         unaligned size.  */
+      if (pei_section_data (abfd, current)->virt_size < current->size)
 	align_adjust = TRUE;
 #endif
 
@@ -3632,7 +3648,7 @@ coff_write_object_contents (abfd)
 #endif
       section.s_vaddr = current->vma;
       section.s_paddr = current->lma;
-      section.s_size =  current->_raw_size;
+      section.s_size =  current->size;
 #ifdef coff_get_section_load_page
       section.s_page = coff_get_section_load_page (current);
 #endif
@@ -3651,8 +3667,8 @@ coff_write_object_contents (abfd)
 
       /* If this section has no size or is unloadable then the scnptr
 	 will be 0 too.  */
-      if (current->_raw_size == 0 ||
-	  (current->flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0)
+      if (current->size == 0
+	  || (current->flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0)
 	section.s_scnptr = 0;
       else
 	section.s_scnptr = current->filepos;
@@ -3886,6 +3902,8 @@ coff_write_object_contents (abfd)
 #ifdef COFF_IMAGE_WITH_PE
   if (! hasdebug)
     internal_f.f_flags |= IMAGE_FILE_DEBUG_STRIPPED;
+  if (pe_data (abfd)->real_flags & IMAGE_FILE_LARGE_ADDRESS_AWARE)
+    internal_f.f_flags |= IMAGE_FILE_LARGE_ADDRESS_AWARE;
 #endif
 
 #ifdef COFF_WITH_PE
@@ -4122,17 +4140,17 @@ coff_write_object_contents (abfd)
 
   if (text_sec)
     {
-      internal_a.tsize = bfd_get_section_size_before_reloc (text_sec);
+      internal_a.tsize = text_sec->size;
       internal_a.text_start = internal_a.tsize ? text_sec->vma : 0;
     }
   if (data_sec)
     {
-      internal_a.dsize = bfd_get_section_size_before_reloc (data_sec);
+      internal_a.dsize = data_sec->size;
       internal_a.data_start = internal_a.dsize ? data_sec->vma : 0;
     }
   if (bss_sec)
     {
-      internal_a.bsize = bfd_get_section_size_before_reloc (bss_sec);
+      internal_a.bsize = bss_sec->size;
       if (internal_a.bsize && bss_sec->vma < internal_a.data_start)
 	internal_a.data_start = bss_sec->vma;
     }
@@ -5501,6 +5519,10 @@ static const bfd_coff_backend_data ticoff1_swap_table =
 #define coff_bfd_copy_private_symbol_data   _bfd_generic_bfd_copy_private_symbol_data
 #endif
 
+#ifndef coff_bfd_copy_private_header_data
+#define coff_bfd_copy_private_header_data   _bfd_generic_bfd_copy_private_header_data
+#endif
+
 #ifndef coff_bfd_copy_private_section_data
 #define coff_bfd_copy_private_section_data  _bfd_generic_bfd_copy_private_section_data
 #endif
@@ -5554,6 +5576,10 @@ static const bfd_coff_backend_data ticoff1_swap_table =
 
 #ifndef coff_bfd_merge_sections
 #define coff_bfd_merge_sections		    bfd_generic_merge_sections
+#endif
+
+#ifndef coff_bfd_is_group_section
+#define coff_bfd_is_group_section	    bfd_generic_is_group_section
 #endif
 
 #ifndef coff_bfd_discard_group

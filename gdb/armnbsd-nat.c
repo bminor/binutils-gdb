@@ -459,6 +459,6 @@ static struct core_fns arm_netbsd_elfcore_fns =
 void
 _initialize_arm_netbsd_nat (void)
 {
-  add_core_fns (&arm_netbsd_core_fns);
-  add_core_fns (&arm_netbsd_elfcore_fns);
+  deprecated_add_core_fns (&arm_netbsd_core_fns);
+  deprecated_add_core_fns (&arm_netbsd_elfcore_fns);
 }

@@ -372,11 +372,17 @@ execute_cfa_program (unsigned char *insn_ptr, unsigned char *insn_end,
 	      {
 		struct dwarf2_frame_state_reg_info *old_rs = fs->regs.prev;
 
-		gdb_assert (old_rs);
-
-		xfree (fs->regs.reg);
-		fs->regs = *old_rs;
-		xfree (old_rs);
+		if (old_rs == NULL)
+		  {
+		    complaint (&symfile_complaints, "\
+bad CFI data; mismatched DW_CFA_restore_state at 0x%s", paddr (fs->pc));
+		  }
+		else
+		  {
+		    xfree (fs->regs.reg);
+		    fs->regs = *old_rs;
+		    xfree (old_rs);
+		  }
 	      }
 	      break;
 
@@ -1082,6 +1088,14 @@ read_encoded_value (struct comp_unit *unit, unsigned char encoding,
     case DW_EH_PE_textrel:
       base = unit->tbase;
       break;
+    case DW_EH_PE_funcrel:
+      /* FIXME: kettenis/20040501: For now just pretend
+         DW_EH_PE_funcrel is equivalent to DW_EH_PE_absptr.  For
+         reading the initial location of an FDE it should be treated
+         as such, and currently that's the only place where this code
+         is used.  */
+      base = 0;
+      break;
     case DW_EH_PE_aligned:
       base = 0;
       offset = buf - unit->dwarf_frame_buffer;
@@ -1254,6 +1268,7 @@ decode_frame_entry_1 (struct comp_unit *unit, char *start, int eh_frame_p)
       /* This is a CIE.  */
       struct dwarf2_cie *cie;
       char *augmentation;
+      unsigned int cie_version;
 
       /* Record the offset into the .debug_frame section of this CIE.  */
       cie_pointer = start - unit->dwarf_frame_buffer;
@@ -1274,7 +1289,8 @@ decode_frame_entry_1 (struct comp_unit *unit, char *start, int eh_frame_p)
       cie->encoding = encoding_for_size (unit->addr_size);
 
       /* Check version number.  */
-      if (read_1_byte (unit->abfd, buf) != DW_CIE_VERSION)
+      cie_version = read_1_byte (unit->abfd, buf);
+      if (cie_version != 1 && cie_version != 3)
 	return NULL;
       buf += 1;
 
@@ -1300,8 +1316,15 @@ decode_frame_entry_1 (struct comp_unit *unit, char *start, int eh_frame_p)
 	read_signed_leb128 (unit->abfd, buf, &bytes_read);
       buf += bytes_read;
 
-      cie->return_address_register = read_1_byte (unit->abfd, buf);
-      buf += 1;
+      if (cie_version == 1)
+	{
+	  cie->return_address_register = read_1_byte (unit->abfd, buf);
+	  bytes_read = 1;
+	}
+      else
+	cie->return_address_register = read_unsigned_leb128 (unit->abfd, buf,
+							     &bytes_read);
+      buf += bytes_read;
 
       cie->saw_z_augmentation = (*augmentation == 'z');
       if (cie->saw_z_augmentation)
@@ -1548,8 +1571,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
       unit.dwarf_frame_buffer = dwarf2_read_section (objfile,
 						     dwarf_eh_frame_section);
 
-      unit.dwarf_frame_size
-	= bfd_get_section_size_before_reloc (dwarf_eh_frame_section);
+      unit.dwarf_frame_size = bfd_get_section_size (dwarf_eh_frame_section);
       unit.dwarf_frame_section = dwarf_eh_frame_section;
 
       /* FIXME: kettenis/20030602: This is the DW_EH_PE_datarel base
@@ -1576,8 +1598,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
       unit.cie = NULL;
       unit.dwarf_frame_buffer = dwarf2_read_section (objfile,
 						     dwarf_frame_section);
-      unit.dwarf_frame_size
-	= bfd_get_section_size_before_reloc (dwarf_frame_section);
+      unit.dwarf_frame_size = bfd_get_section_size (dwarf_frame_section);
       unit.dwarf_frame_section = dwarf_frame_section;
 
       frame_ptr = unit.dwarf_frame_buffer;

@@ -1,6 +1,6 @@
 /* Generic symbol-table support for the BFD library.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003
+   2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -934,8 +934,12 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 	  return TRUE;
 	}
 
-      stabsize = info->stabsec->_raw_size;
-      strsize = info->strsec->_raw_size;
+      stabsize = (info->stabsec->rawsize
+		  ? info->stabsec->rawsize
+		  : info->stabsec->size);
+      strsize = (info->strsec->rawsize
+		 ? info->strsec->rawsize
+		 : info->strsec->size);
     }
   else
     {
@@ -965,8 +969,12 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 	  return TRUE;
 	}
 
-      stabsize = info->stabsec->_raw_size;
-      strsize = info->strsec->_raw_size;
+      stabsize = (info->stabsec->rawsize
+		  ? info->stabsec->rawsize
+		  : info->stabsec->size);
+      strsize = (info->strsec->rawsize
+		 ? info->strsec->rawsize
+		 : info->strsec->size);
 
       info->stabs = bfd_alloc (abfd, stabsize);
       info->strs = bfd_alloc (abfd, strsize);
@@ -974,9 +982,9 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 	return FALSE;
 
       if (! bfd_get_section_contents (abfd, info->stabsec, info->stabs,
-				      (bfd_vma) 0, stabsize)
+				      0, stabsize)
 	  || ! bfd_get_section_contents (abfd, info->strsec, info->strs,
-					 (bfd_vma) 0, strsize))
+					 0, strsize))
 	return FALSE;
 
       /* If this is a relocatable object file, we have to relocate

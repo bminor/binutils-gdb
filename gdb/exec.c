@@ -53,7 +53,7 @@
 
 struct vmap *map_vmap (bfd *, bfd *);
 
-void (*file_changed_hook) (char *);
+void (*deprecated_file_changed_hook) (char *);
 
 /* Prototypes for local functions */
 
@@ -267,8 +267,8 @@ exec_file_attach (char *filename, int from_tty)
       push_target (&exec_ops);
 
       /* Tell display code (if any) about the changed file name.  */
-      if (exec_file_display_hook)
-	(*exec_file_display_hook) (filename);
+      if (deprecated_exec_file_display_hook)
+	(*deprecated_exec_file_display_hook) (filename);
     }
 }
 
@@ -324,8 +324,8 @@ file_command (char *arg, int from_tty)
      the exec file, but that's rough.  */
   exec_file_command (arg, from_tty);
   symbol_file_command (arg, from_tty);
-  if (file_changed_hook)
-    file_changed_hook (arg);
+  if (deprecated_file_changed_hook)
+    deprecated_file_changed_hook (arg);
 }
 
 

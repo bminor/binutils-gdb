@@ -107,9 +107,6 @@ static void extended_remote_restart (void);
 
 static void extended_remote_mourn (void);
 
-static void extended_remote_create_inferior (char *, char *, char **);
-static void extended_remote_async_create_inferior (char *, char *, char **);
-
 static void remote_mourn_1 (struct target_ops *);
 
 static void remote_send (char *buf, long sizeof_buf);
@@ -654,12 +651,12 @@ add_packet_config_cmd (struct packet_config *config,
   config->title = title;
   config->detect = AUTO_BOOLEAN_AUTO;
   config->support = PACKET_SUPPORT_UNKNOWN;
-  xasprintf (&set_doc, "Set use of remote protocol `%s' (%s) packet",
-	     name, title);
-  xasprintf (&show_doc, "Show current use of remote protocol `%s' (%s) packet",
-	     name, title);
+  set_doc = xstrprintf ("Set use of remote protocol `%s' (%s) packet",
+			name, title);
+  show_doc = xstrprintf ("Show current use of remote protocol `%s' (%s) packet",
+			 name, title);
   /* set/show TITLE-packet {auto,on,off} */
-  xasprintf (&cmd_name, "%s-packet", title);
+  cmd_name = xstrprintf ("%s-packet", title);
   add_setshow_auto_boolean_cmd (cmd_name, class_obscure,
 				&config->detect, set_doc, show_doc,
 				set_func, show_func,
@@ -668,7 +665,7 @@ add_packet_config_cmd (struct packet_config *config,
   if (legacy)
     {
       char *legacy_name;
-      xasprintf (&legacy_name, "%s-packet", name);
+      legacy_name = xstrprintf ("%s-packet", name);
       add_alias_cmd (legacy_name, cmd_name, class_obscure, 0,
 		     set_remote_list);
       add_alias_cmd (legacy_name, cmd_name, class_obscure, 0,
@@ -773,42 +770,6 @@ show_remote_protocol_qSymbol_packet_cmd (char *args, int from_tty,
 {
   show_packet_config_cmd (&remote_protocol_qSymbol);
 }
-
-/* Should we try the 'e' (step over range) request? */
-static struct packet_config remote_protocol_e;
-
-static void
-set_remote_protocol_e_packet_cmd (char *args, int from_tty,
-				  struct cmd_list_element *c)
-{
-  update_packet_config (&remote_protocol_e);
-}
-
-static void
-show_remote_protocol_e_packet_cmd (char *args, int from_tty,
-				   struct cmd_list_element *c)
-{
-  show_packet_config_cmd (&remote_protocol_e);
-}
-
-
-/* Should we try the 'E' (step over range / w signal #) request? */
-static struct packet_config remote_protocol_E;
-
-static void
-set_remote_protocol_E_packet_cmd (char *args, int from_tty,
-				  struct cmd_list_element *c)
-{
-  update_packet_config (&remote_protocol_E);
-}
-
-static void
-show_remote_protocol_E_packet_cmd (char *args, int from_tty,
-				   struct cmd_list_element *c)
-{
-  show_packet_config_cmd (&remote_protocol_E);
-}
-
 
 /* Should we try the 'P' (set register) request?  */
 
@@ -1006,8 +967,8 @@ static void *sigint_remote_token;
 /* These are pointers to hook functions that may be set in order to
    modify resume/wait behavior for a particular architecture.  */
 
-void (*target_resume_hook) (void);
-void (*target_wait_loop_hook) (void);
+void (*deprecated_target_resume_hook) (void);
+void (*deprecated_target_wait_loop_hook) (void);
 
 
 
@@ -2077,8 +2038,6 @@ static void
 init_all_packet_configs (void)
 {
   int i;
-  update_packet_config (&remote_protocol_e);
-  update_packet_config (&remote_protocol_E);
   update_packet_config (&remote_protocol_P);
   update_packet_config (&remote_protocol_qSymbol);
   update_packet_config (&remote_protocol_vcont);
@@ -2552,8 +2511,8 @@ remote_resume (ptid_t ptid, int step, enum target_signal siggnal)
 
   /* A hook for when we need to do something at the last moment before
      resumption.  */
-  if (target_resume_hook)
-    (*target_resume_hook) ();
+  if (deprecated_target_resume_hook)
+    (*deprecated_target_resume_hook) ();
 
   /* The vCont packet doesn't need to specify threads via Hc.  */
   if (remote_vcont_resume (ptid, step, siggnal))
@@ -2564,60 +2523,6 @@ remote_resume (ptid_t ptid, int step, enum target_signal siggnal)
     set_thread (0, 0);		/* run any thread */
   else
     set_thread (pid, 0);	/* run this thread */
-
-  /* The s/S/c/C packets do not return status.  So if the target does
-     not support the S or C packets, the debug agent returns an empty
-     string which is detected in remote_wait().  This protocol defect
-     is fixed in the e/E packets. */
-
-  if (step && step_range_end)
-    {
-      /* If the target does not support the 'E' packet, we try the 'S'
-	 packet.  Ideally we would fall back to the 'e' packet if that
-	 too is not supported.  But that would require another copy of
-	 the code to issue the 'e' packet (and fall back to 's' if not
-	 supported) in remote_wait().  */
-
-      if (siggnal != TARGET_SIGNAL_0)
-	{
-	  if (remote_protocol_E.support != PACKET_DISABLE)
-	    {
-	      p = buf;
-	      *p++ = 'E';
-	      *p++ = tohex (((int) siggnal >> 4) & 0xf);
-	      *p++ = tohex (((int) siggnal) & 0xf);
-	      *p++ = ',';
-	      p += hexnumstr (p, (ULONGEST) step_range_start);
-	      *p++ = ',';
-	      p += hexnumstr (p, (ULONGEST) step_range_end);
-	      *p++ = 0;
-
-	      putpkt (buf);
-	      getpkt (buf, (rs->remote_packet_size), 0);
-
-	      if (packet_ok (buf, &remote_protocol_E) == PACKET_OK)
-		return;
-	    }
-	}
-      else
-	{
-	  if (remote_protocol_e.support != PACKET_DISABLE)
-	    {
-	      p = buf;
-	      *p++ = 'e';
-	      p += hexnumstr (p, (ULONGEST) step_range_start);
-	      *p++ = ',';
-	      p += hexnumstr (p, (ULONGEST) step_range_end);
-	      *p++ = 0;
-
-	      putpkt (buf);
-	      getpkt (buf, (rs->remote_packet_size), 0);
-
-	      if (packet_ok (buf, &remote_protocol_e) == PACKET_OK)
-		return;
-	    }
-	}
-    }
 
   if (siggnal != TARGET_SIGNAL_0)
     {
@@ -2883,8 +2788,8 @@ remote_wait (ptid_t ptid, struct target_waitstatus *status)
 
       /* This is a hook for when we need to do something (perhaps the
          collection of trace data) every time the target stops.  */
-      if (target_wait_loop_hook)
-	(*target_wait_loop_hook) ();
+      if (deprecated_target_wait_loop_hook)
+	(*deprecated_target_wait_loop_hook) ();
 
       remote_stopped_by_watchpoint_p = 0;
 
@@ -3074,8 +2979,8 @@ remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
 
       /* This is a hook for when we need to do something (perhaps the
          collection of trace data) every time the target stops.  */
-      if (target_wait_loop_hook)
-	(*target_wait_loop_hook) ();
+      if (deprecated_target_wait_loop_hook)
+	(*deprecated_target_wait_loop_hook) ();
 
       switch (buf[0])
 	{
@@ -4338,7 +4243,8 @@ remote_mourn_1 (struct target_ops *target)
    we're debugging, arguments and an environment.  */
 
 static void
-extended_remote_create_inferior (char *exec_file, char *args, char **env)
+extended_remote_create_inferior (char *exec_file, char *args, char **env,
+				 int from_tty)
 {
   /* Rip out the breakpoints; we'll reinsert them after restarting
      the remote server.  */
@@ -4360,7 +4266,8 @@ extended_remote_create_inferior (char *exec_file, char *args, char **env)
 
 /* Async version of extended_remote_create_inferior. */
 static void
-extended_remote_async_create_inferior (char *exec_file, char *args, char **env)
+extended_remote_async_create_inferior (char *exec_file, char *args, char **env,
+				       int from_tty)
 {
   /* Rip out the breakpoints; we'll reinsert them after restarting
      the remote server.  */
@@ -4640,10 +4547,13 @@ remote_stopped_by_watchpoint (void)
     return remote_stopped_by_watchpoint_p;
 }
 
+extern int stepped_after_stopped_by_watchpoint;
+
 static CORE_ADDR
 remote_stopped_data_address (void)
 {
-  if (remote_stopped_by_watchpoint ())
+  if (remote_stopped_by_watchpoint ()
+      || stepped_after_stopped_by_watchpoint)
     return remote_watch_data_address;
   return (CORE_ADDR)0;
 }
@@ -4819,7 +4729,7 @@ compare_sections_command (char *args, int from_tty)
       if (!(s->flags & SEC_LOAD))
 	continue;		/* skip non-loadable section */
 
-      size = bfd_get_section_size_before_reloc (s);
+      size = bfd_get_section_size (s);
       if (size == 0)
 	continue;		/* skip zero-length section */
 
@@ -5419,8 +5329,6 @@ show_remote_cmd (char *args, int from_tty)
   /* FIXME: cagney/2002-06-15: This function should iterate over
      remote_show_cmdlist for a list of sub commands to show.  */
   show_remote_protocol_Z_packet_cmd (args, from_tty, NULL);
-  show_remote_protocol_e_packet_cmd (args, from_tty, NULL);
-  show_remote_protocol_E_packet_cmd (args, from_tty, NULL);
   show_remote_protocol_P_packet_cmd (args, from_tty, NULL);
   show_remote_protocol_qSymbol_packet_cmd (args, from_tty, NULL);
   show_remote_protocol_vcont_packet_cmd (args, from_tty, NULL);
@@ -5479,8 +5387,8 @@ _initialize_remote (void)
   add_target (&extended_async_remote_ops);
 
   /* Hook into new objfile notification.  */
-  remote_new_objfile_chain = target_new_objfile_hook;
-  target_new_objfile_hook  = remote_new_objfile;
+  remote_new_objfile_chain = deprecated_target_new_objfile_hook;
+  deprecated_target_new_objfile_hook  = remote_new_objfile;
 
 #if 0
   init_remote_threadtests ();
@@ -5604,28 +5512,6 @@ in a memory packet.\n",
 			 show_remote_protocol_qSymbol_packet_cmd,
 			 &remote_set_cmdlist, &remote_show_cmdlist,
 			 0);
-
-  add_packet_config_cmd (&remote_protocol_e,
-			 "e", "step-over-range",
-			 set_remote_protocol_e_packet_cmd,
-			 show_remote_protocol_e_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
-  /* Disable by default.  The ``e'' packet has nasty interactions with
-     the threading code - it relies on global state.  */
-  remote_protocol_e.detect = AUTO_BOOLEAN_FALSE;
-  update_packet_config (&remote_protocol_e);
-
-  add_packet_config_cmd (&remote_protocol_E,
-			 "E", "step-over-range-w-signal",
-			 set_remote_protocol_E_packet_cmd,
-			 show_remote_protocol_E_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
-  /* Disable by default.  The ``e'' packet has nasty interactions with
-     the threading code - it relies on global state.  */
-  remote_protocol_E.detect = AUTO_BOOLEAN_FALSE;
-  update_packet_config (&remote_protocol_E);
 
   add_packet_config_cmd (&remote_protocol_P,
 			 "P", "set-register",

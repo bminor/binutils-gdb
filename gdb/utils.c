@@ -83,7 +83,7 @@ extern char *canonicalize_file_name (const char *);
 /* readline defines this.  */
 #undef savestring
 
-void (*error_begin_hook) (void);
+void (*deprecated_error_begin_hook) (void);
 
 /* Holds the last error message issued by gdb */
 
@@ -566,8 +566,8 @@ discard_all_intermediate_continuations (void)
 void
 vwarning (const char *string, va_list args)
 {
-  if (warning_hook)
-    (*warning_hook) (string, args);
+  if (deprecated_warning_hook)
+    (*deprecated_warning_hook) (string, args);
   else
     {
       target_terminal_ours ();
@@ -659,8 +659,8 @@ error_output_message (char *pre_print, char *msg)
 NORETURN void
 error_stream (struct ui_file *stream)
 {
-  if (error_begin_hook)
-    error_begin_hook ();
+  if (deprecated_error_begin_hook)
+    deprecated_error_begin_hook ();
 
   /* Copy the stream into the GDB_LASTERR buffer.  */
   ui_file_rewind (gdb_lasterr);
@@ -752,8 +752,8 @@ internal_vproblem (struct internal_problem *problem,
      so that the user knows that they are living on the edge.  */
   {
     char *msg;
-    xvasprintf (&msg, fmt, ap);
-    xasprintf (&reason, "\
+    msg = xstrvprintf (fmt, ap);
+    reason = xstrprintf ("\
 %s:%d: %s: %s\n\
 A problem internal to GDB has been detected,\n\
 further debugging may prove unreliable.", file, line, problem->name, msg);
@@ -1156,7 +1156,7 @@ xstrprintf (const char *format, ...)
   char *ret;
   va_list args;
   va_start (args, format);
-  xvasprintf (&ret, format, args);
+  ret = xstrvprintf (format, args);
   va_end (args);
   return ret;
 }
@@ -1166,7 +1166,7 @@ xasprintf (char **ret, const char *format, ...)
 {
   va_list args;
   va_start (args, format);
-  xvasprintf (ret, format, args);
+  (*ret) = xstrvprintf (format, args);
   va_end (args);
 }
 
@@ -1186,6 +1186,21 @@ xvasprintf (char **ret, const char *format, va_list ap)
 		    "vasprintf call failed (errno %d)", errno);
 }
 
+char *
+xstrvprintf (const char *format, va_list ap)
+{
+  char *ret = NULL;
+  int status = vasprintf (&ret, format, ap);
+  /* NULL is returned when there was a memory allocation problem.  */
+  if (ret == NULL)
+    nomem (0);
+  /* A negative status (the printed length) with a non-NULL buffer
+     should never happen, but just to be sure.  */
+  if (status < 0)
+    internal_error (__FILE__, __LINE__,
+		    "vasprintf call failed (errno %d)", errno);
+  return ret;
+}
 
 /* My replacement for the read system call.
    Used like `read' but keeps going if `read' returns too soon.  */
@@ -1270,11 +1285,10 @@ query (const char *ctlstr, ...)
   int ans2;
   int retval;
 
-  va_start (args, ctlstr);
-
-  if (query_hook)
+  if (deprecated_query_hook)
     {
-      return query_hook (ctlstr, args);
+      va_start (args, ctlstr);
+      return deprecated_query_hook (ctlstr, args);
     }
 
   /* Automatically answer "yes" if input is not from a terminal.  */
@@ -1289,7 +1303,9 @@ query (const char *ctlstr, ...)
       if (annotation_level > 1)
 	printf_filtered ("\n\032\032pre-query\n");
 
+      va_start (args, ctlstr);
       vfprintf_filtered (gdb_stdout, ctlstr, args);
+      va_end (args);
       printf_filtered ("(y or n) ");
 
       if (annotation_level > 1)
@@ -1372,9 +1388,9 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
       n_string = "[n]";
     }
 
-  if (query_hook)
+  if (deprecated_query_hook)
     {
-      return query_hook (ctlstr, args);
+      return deprecated_query_hook (ctlstr, args);
     }
 
   /* Automatically answer default value if input is not from a terminal.  */
@@ -1387,13 +1403,13 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
       gdb_flush (gdb_stdout);
 
       if (annotation_level > 1)
-	printf_filtered ("\n\032\032pre-%cquery\n", defchar);
+	printf_filtered ("\n\032\032pre-query\n");
 
       vfprintf_filtered (gdb_stdout, ctlstr, args);
       printf_filtered ("(%s or %s) ", y_string, n_string);
 
       if (annotation_level > 1)
-	printf_filtered ("\n\032\032%cquery\n", defchar);
+	printf_filtered ("\n\032\032query\n");
 
       wrap_here ("");
       gdb_flush (gdb_stdout);
@@ -1437,7 +1453,7 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
     }
 
   if (annotation_level > 1)
-    printf_filtered ("\n\032\032post-%cquery\n", defchar);
+    printf_filtered ("\n\032\032post-query\n");
   return retval;
 }
 
@@ -2259,7 +2275,7 @@ vfprintf_maybe_filtered (struct ui_file *stream, const char *format,
   char *linebuffer;
   struct cleanup *old_cleanups;
 
-  xvasprintf (&linebuffer, format, args);
+  linebuffer = xstrvprintf (format, args);
   old_cleanups = make_cleanup (xfree, linebuffer);
   fputs_maybe_filtered (linebuffer, stream, filter);
   do_cleanups (old_cleanups);
@@ -2278,7 +2294,7 @@ vfprintf_unfiltered (struct ui_file *stream, const char *format, va_list args)
   char *linebuffer;
   struct cleanup *old_cleanups;
 
-  xvasprintf (&linebuffer, format, args);
+  linebuffer = xstrvprintf (format, args);
   old_cleanups = make_cleanup (xfree, linebuffer);
   fputs_unfiltered (linebuffer, stream);
   do_cleanups (old_cleanups);

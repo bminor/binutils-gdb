@@ -1,3 +1,496 @@
+2004-07-08  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdb.java/jmain.exp: Fix expected line number for main to
+	break at.  Set XFAIL for break at main test since gcj does not 
+	provide line number info for first statement in main.
+
+2004-07-08  Andrew Cagney  <cagney@gnu.org>
+
+	* gdb.base/attach.exp: Cleanup copyright.  Re-indent.
+
+	* gdb.base/sigbpt.exp: Make the common part of each test name a
+	prefix instead of suffix.
+
+2004-07-07  Bob Rossi  <bob_rossi@cox.net>
+
+	* gdb.mi/mi2-file.exp: Revert to version 1.1, except changed name of
+	test from test_tbreak_creation_and_listing to
+	test_file_list_exec_source_file
+	* gdb.mi/mi-file.exp: Add test for -file-list-exec-source-files
+	Changed name of test from test_tbreak_creation_and_listing to
+	test_file_list_exec_source_file
+
+2004-07-07  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdb.java/jmisc.exp: Fix expected output of ptype to look for
+	the jmisc() constructor instead of <init>.
+	* gdb.java/jmisc1.exp: Ditto.
+
+2004-07-07  Andrew Cagney  <cagney@gnu.org>
+
+	* gdb.base/sigbpt.exp (stepi_out): Check for a single step
+	corrupting the PC.
+
+2004-07-06  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/templates.exp: Accept whitespace change in demangler
+	output.
+
+2004-07-06  Andrew Cagney  <cagney@gnu.org>
+
+	* gdb.base/sigbpt.exp, gdb.base/sigbpt.c: New test.
+
+2004-07-02  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* lib/compiler.c: Accept __HP_CXD_SPP for old hp ansi c compiler.
+	* lib/compiler.cc: Likewise.
+
+2004-06-30  Michael Chastain   <mec.gnu@mindspring.com>
+
+	* lib/compiler.cc: Work around string preprocessing problem
+	with old hp c++ compiler.
+	* lib/compiler.c: Likewise.
+
+2004-06-29  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.arch/i386-prologue.c: Add copyright header.  Use preprocessor
+	directives to conditionalize symbol prefixing.
+	* gdb.arch/i386-prologue.exp: Allow symbol prefixing by adding
+	additional_flags handling.  Add underscore prefix for Cygwin.
+	* gdb.arch/i386-unwind.c: Use preprocessor directives to
+	conditionalize symbol prefixing.
+	* gdb.arch/i386-unwind.exp: Allow symbol prefixing by adding
+	additional_flags handling.  Add underscore prefix for Cygwin.
+
+2004-06-29  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/bigcore.exp: Skip test on Cygwin.
+
+2004-06-28  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.hp/gdb.base-hp/reg.exp: Accept both old and new gdb output
+	formats for "info register".  Use gdb_test_multiple.  Fix
+	the "invalid register" test.
+
+2004-06-28  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/attach.exp: Fix copyright date.  Set testpid to Windows
+	PID for Cygwin.  Add Cygwin specific strings to check for in some
+	tests.
+	(do_attach_tests): Add a test for user interaction when attaching
+	to a process with no matching symbol table already loaded.
+
+2004-06-26  Andrew Cagney  <cagney@gnu.org>
+
+	Test PR java/1567 and PR java/1565.
+	* gdb.java/jmain.exp, gdb.java/jmain.java: New files.
+	* gdb.java/jmisc2.exp: Delete file.
+
+2004-06-26  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.hp/gdb.base-hp/reg.exp: Update copyright notice.
+
+2004-06-25  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/attach.exp (do_attach_tests): Don't forget to kill second
+	attach process.
+
+2004-06-23  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/pr-1553.exp: Remove.
+
+2004-06-22  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/pr-1553.cc: Remove.
+	* gdb.cp/pr-1553.exp: Disable this test.
+
+2004-06-20  Jim Blandy  <jimb@redhat.com>
+
+        Fix PR testsuite/1680.
+	* gdb.arch/i386-sse.exp: Properly quote curly braces in
+	regular expressions.
+
+2004-06-19  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Fix PR testsuite/1679.
+	* gdb.arch/i386-sse.exp: Do not call gdb_suppress_entire_file.
+	Issue an UNSUPPORTED result instead.
+
+2004-06-18  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/charset.exp: Only send a control-C if we see a new
+	prompt and incomplete command.
+
+2004-06-18  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/pr-574.cc: Add copyright notice.
+
+2004-06-17  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/charset.exp: Don't refer to $expect_out(1,string) in
+	cases where the regexp has no groups; this grabs random text from
+	the previous test suite, whatever that was.
+
+2004-06-17  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/printmethod.cc: Add copyright notice.
+
+2004-06-16  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/psmang1.cc, gdb.cp/psmang2.cc: Add copyright notice.
+
+2004-06-16  Andrew Cagney  <cagney@gnu.org>
+
+	* gdb.base/signull.c: Update copyright.  Include <string.h>.
+	(bowler): Replace data_pointer with data_read
+	and data_write cases.  Add code_descriptor case.
+	(zero, desc): New array and pointer.
+	(data, code): Change to simple pointers.
+	* gdb.base/signull.exp: Fix probe pattern matching a function
+	descriptor SIGSEGV.  Replace data_pointer with data_read and
+	data_write tests.
+
+2004-06-16  Andrew Cagney  <cagney@gnu.org>
+
+	* gdb.base/long_long.exp, gdb.base/long_long.c: Rewrite.
+
+2004-06-15  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.base/long_long.c: Add copyright notice.
+
+2004-06-15  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.base/long_long.exp: Remove reference to
+	bug-gdb@prep.ai.mit.edu.  Change line-number-specific breakpoint
+	to gdb_breakpoint and gdb_continue_to_breakpoint.
+
+2004-06-14  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.arch/e500-regs.exp: Fix up 'print' pattern for the little-
+	endian case.
+
+2004-06-14  Andrew Cagney  <cagney@gnu.org>
+
+	* gdb.base/gcore.exp (capture_command_output): Delete the always
+	passing tests containing inferior values.
+	* gdb.base/ending-run.exp: Do not include the breakpoint address
+	in the test message.  Update copyright.
+	* gdb.base/sizeof.exp (check_sizeof): Do not include the type's
+	size in the test name, use gdb_test_multiple.  Update copyright.
+
+2004-06-14  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/ref-types.cc: Add copyright notice.
+
+2004-06-14  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* lib/compiler.c: Remove gcc_compiled, hp_cc_compiler,
+	hp_aCC_compiler.
+	* lib/compiler.cc: Likewise.
+	* lib/gdb.exp (get_compiler_info): Eval lines only if they are
+	'set' commands.  Log diagnostics for other lines.  Set
+	gcc_compiled, hp_cc_compiler, and hp_aCC_compiler.
+
+2004-06-13  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/try_catch.cc: Add copyright notice.
+
+2004-06-12  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/userdef.cc: Add copyright notice.
+
+2004-06-11  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/virtfunc.cc: Add copyright notice.
+
+2004-06-11  Randolph Chung  <tausq@debian.org>
+
+	* gdb.base/structs2.exp: Mark two tests as xfail because of a compiler
+	problem.
+
+2004-06-10  Andrew Cagney  <cagney@gnu.org>
+
+	* lib/compiler.cc, lib/compiler.c: Append either
+	__GNUC_PATCHLEVEL__, or "unknown" to the compiler_info.
+	* gdb.base/structs.exp (test_struct_calls): Check for gcc-3-3-*
+	instead of gcc-3-3.
+
+2004-06-09  Andrew Cagney  <cagney@gnu.org>
+
+	* gdb.base/structs.exp (test_struct_calls): Fix KFAIL for
+	gdb/1455, bug is specific to "long long" and "double".
+	
+	* gdb.base/structs.exp (test_struct_returns, test_struct_returns)
+	(test_struct_calls): Remove KFAIL of "long double" on i*86-*-*,
+	x86_64-*-*, sparc64-*-*, and sparc*-*-solaris2*.  PR tdep/1447
+	fixed.
+
+2004-06-09  Andrew Cagney  <cagney@gnu.org>
+
+	* gdb.base/structs.exp (test_struct_returns): Replace
+	"return_value_unknown" and "finish_value_unknown" by
+	"return_value_known" and "finish_value_known".  Instead of
+	"return_value_unknown" iff "finish_value_unknown", check
+	"return_value_known" implies "finish_value_known".
+
+2004-06-08  Martin Hunt  <hunt@redhat.com>
+
+	* gdb.base/float.exp: Add pattern for mips targets.
+
+2004-06-08  Randolph Chung  <tausq@debian.org>
+
+	* gdb.base/float.exp: Add pattern for hppa*-* target; make the failure
+	message for unknown architectures more clear.
+
+2004-06-08  Joel Brobecker  <brobecker@gnat.com>
+
+	* gdb.ada/null_record.exp: Use "start" instead of "begin" to
+	start the execution of the program.
+
+2004-06-07  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.arch/i386-sse.exp, gdb.arch/i386-sse.c: New tests.
+	* gdb.arch/i386-cpuid.h: New helper file.
+
+2004-06-07  Randolph Chung  <tausq@debian.org>
+
+	* gdb.base/shlib-call.exp: Allow breakpoint to be added after inferior
+	has started.
+
+2004-06-04  Roland McGrath  <roland@redhat.com>
+
+	Fix PR gdb/1647.
+	* gdb.base/auxv.exp (fetch_auxv): Revert last change and fix it
+	differently to be robust to output buffering differences.
+
+2004-06-04  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.threads/pthreads.exp: Update copyright years.
+	(check_control_c): Change asynchronous 'after' to synchronous.
+
+2004-06-04  Roland McGrath  <roland@redhat.com>
+
+	* gdb.base/auxv.exp (fetch_auxv): Consume output fully through
+	next gdb prompt.
+
+2004-06-02  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Fix PR gdb/1636.
+	* gdb.threads/manythreads.exp: Change asynchronous 'after'
+	calls to synchronous.
+
+2004-05-26  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.arch/e500-prologue.exp, gdb.arch/e500-prologue.c: New tests.
+
+2004-05-24  Randolph Chung  <tausq@debian.org>
+
+	* gdb.asm/asm-source.exp: Enable test for hppa-linux target.
+	* gdb.asm/pa.inc: New file.
+
+2004-05-22  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/signull.c: Use sigjmp_buf instead of jmp_buf.
+
+2004-05-21  Joel Brobecker  <brobecker@gnat.com>
+            Daniel Jacobowitz  <drow@mvista.com>
+
+	* lib/gdb.exp (gdb_test_multiple): Improve regexp matching the
+	GDB prompt.
+
+2004-05-20  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
+	* gdb.base/signull.c: Use sigsetjmp/siglongjmp instead of
+	setjmp/longjmp.  Use sigaction instead of signal.
+
+2004-05-19  J. Brobecker  <brobecker@gnat.com>
+            Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.threads/pthread_cond_wait.c: New file.
+	* gdb.threads/pthread_cond_wait.exp: New testcase.
+
+2004-05-13  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/signull.exp, gdb.base/signull.c: New files.
+	* gdb.base/gdb1476.c, gdb.base/gdb1476.exp: Delete files.
+
+2004-05-11  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/sigstep.exp (advancei): Update KFAILs.  gdb/1613 is
+	fixed but revealed gdb/1639.
+
+2004-05-10  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/signals.exp (signal_tests_1): Simplify "continue to
+	func1" and "next to 2nd alarm", kernel bug avoided.
+
+2004-05-10  Daniel Jacobowitz  <dan@debian.org>
+
+	PR external/1568
+	* gdb.base/bigcore.exp: Check the size of the dumped core file.
+	XFAIL if it is smaller than bytes_allocated.
+	* gdb.base/bigcore.c (bytes_allocated): Make static and unsigned.
+	(main): Make chunks_allocated unsigned.  Correct comment.
+
+2004-05-07  Joel Brobecker  <brobecker@gnat.com>
+
+	* gdb.arch/powerpc-aix-prologue.c: New file.
+	* gdb.arch/powerpc-aix-prologue.exp: New file.
+
+2004-05-07  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/lineinc.exp, gdb.base/lineinc1.h, gdb.base/lineinc2.h,
+	gdb.base/lineinc3.h, gdb.base/lineinc.c: New tests.
+
+2004-05-06  Joel Brobecker  <brobecker@gnat.com>
+
+	* gdb.base/sep.exp: No longer setup_kfail when the program was
+	built with dwarf2.
+
+2004-05-05  Jim Ingham  <jingham@apple.com>
+
+	* gdb.base/pending.exp: Make sure pending breakpoints
+	preserve the ignore count.
+
+2004-04-27  Jerome Guitton  <guitton@gnat.com>
+
+	* i386-prologue.exp: Add testcase for jump instruction as first
+	instruction of the real code.
+	* i386-prologue.c (jump_at_beginning): New function.
+
+2004-04-28  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/call-sc.exp: Remove patterns to KFAIL PR gdb/1624 on
+	x86_64-*-*.
+
+2004-04-28  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/call-sc.exp: Remove patterns to KFAIL PR gdb/1623 on
+	i*86-*-*.
+
+2004-04-25  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/call-sc.exp (start_scalars_test): Fix regular
+	expression that checks the return type.
+
+2004-04-23  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/call-sc.exp: New test of scalar call/return values.
+	* gdb.base/call-sc.c: Ditto.
+
+2004-04-23  Ulrich Weigand <Ulrich.Weigand@de.ibm.com>
+
+	* gdb.threads/manythreads.c: Reduce thread stack size.
+
+2004-04-23  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdb.threads/manythreads.c: Add copyright notice.
+
+2004-04-23  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/siginfo.exp: Better handle step out of signal.
+	* gdb.base/sigstep.exp: Ditto.
+
+2004-04-22  Jeff Johnston  <jjohnstn@redhat.com>
+            Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.threads/manythreads.c: New testcase.
+	* gdb.threads/manythreads.exp: Ditto.
+
+2004-04-22  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.stabs/exclfwd.exp, gdb.stabs/exclfwd1.c,
+	gdb.stabs/exclfwd2.c, gdb.stabs/exclfwd.h: New test.
+
+2004-04-21  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.stabs/weird.exp: Accept full pathname for $binfile.
+
+2004-04-21  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/sigstep.c: New file.
+	* gdb.base/sigstep.exp: New file.
+
+2004-04-16  Joel Brobecker  <brobecker@gnat.com>
+
+	* gdb.gdb/observer.exp (test_normal_stop_notifications): Update
+	call to observer_notify_normal_stop.
+
+2004-04-15  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/siginfo.c: New file.
+	* gdb.base/siginfo.exp: New file.
+
+2004-04-12  J. Brobecker  <brobecker@gnat.com>
+
+	* gdb.base/sep.exp: Fix typo in comment.
+
+2004-04-12  J. Brobecker  <brobecker@gnat.com>
+
+	* gdb.base/sep.c: New file.
+	* gdb.base/sep-proc.c: New file.
+	* gdb.base/sep.exp: New testcase.
+
+2004-04-09  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/bigcore.exp: Disable on Solaris; no sparse core file
+	support.
+
+2004-04-05  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/sigaltstack.c: New file.
+	* gdb.base/sigaltstack.exp: New file.
+
+2004-04-04  Joel Brobecker  <brobecker@gnat.com>
+
+	* gdb.base/foll-fork.exp: Update the expected output for
+	"help set follow-fork-mode", to match a change that was made
+	to the help of this variable on 2004-01-13.
+
+2004-04-01  Joel Brobecker  <brobecker@gnat.com>
+
+	* lib/ada.exp: Add copyright notice.
+	* bar.ads: Likewise.
+	* bar.adb: Likewise.
+	* null_record.adb: Likewise.
+	* null_record.exp: Likewise.
+	* gnat_ada.gpr.in: Likewise. Fix typo in a comment, clarify another.
+
+2004-04-01  Joel Brobecker  <brobecker@gnat.com>
+
+	* configure.in: Generate gdb.ada/Makefile and gdb.ada/gnat_ada.gpr.
+	* configure: Regenerate.
+
+2004-04-01  Joel Brobecker  <brobecker@gnat.com>
+
+	* lib/ada.exp (gdb_compile_ada): Emit UNSUPPORTED if we failed
+	to build the application. Remove the message printed when in
+	verbose mode, redundant with the UNSUPPORTED message above.
+
+2004-03-31  Joel Brobecker  <brobecker@gnat.com>
+
+	* gdb.ada (bar.ads, bar.adb, null_record.adb): New files.
+	* gdb.ada (null_record.exp): New testcase.
+
+2004-03-31  Joel Brobecker  <brobecker@gnat.com>
+
+	* Makefile.in (ALL_SUBDIRS) Add gdb.ada.
+
+2004-03-31  Joel Brobecker  <brobecker@gnat.com>
+
+	* gdb.ada: New subdirectory.
+	* gdb.ada/Makefile.in: New file.
+	* gdb.ada/gnat_ada.gpr.in: New file.
+
+2004-03-31  Joel Brobecker  <brobecker@gnat.com>
+
+	* lib/ada.exp: New file.
+
+2004-03-24  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/gdb1250.exp: Use runto {allow-pending}.
+	* lib/gdb.exp (runto, gdb_breakpoint): Support {allow-pending}.
+
 2004-03-22  Andrew Cagney  <cagney@redhat.com>
 
 	* gdb.base/watchpoint.exp (test_stepping): Delete bogus XFAILs

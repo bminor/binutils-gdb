@@ -53,9 +53,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "block.h"
 #include "cp-support.h"
 
-/* Flag indicating we're dealing with HP-compiled objects */ 
-extern int hp_som_som_object_present;
-
 /* Remap normal yacc parser interface names (yyparse, yylex, yyerror, etc),
    as well as gratuitiously global symbol names, so we can have multiple
    yacc generated parsers in gdb.  Note that these are only the variables

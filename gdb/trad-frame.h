@@ -42,6 +42,8 @@ void trad_frame_get_id (struct trad_frame_cache *this_trad_cache,
 
 void trad_frame_set_reg_unknown (struct trad_frame_cache *this_trad_cache,
 				 int regnum, CORE_ADDR addr);
+void trad_frame_set_reg_addr (struct trad_frame_cache *this_trad_cache,
+			      int regnum, CORE_ADDR addr);
 void trad_frame_get_register (struct trad_frame_cache *this_trad_cache,
 			      struct frame_info *next_frame,
 			      int regnum, int *optimizedp,

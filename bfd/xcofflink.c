@@ -1,5 +1,5 @@
 /* POWER/PowerPC XCOFF linker support.
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>, Cygnus Support.
 
@@ -171,15 +171,14 @@ xcoff_get_section_contents (abfd, sec)
 
   if (coff_section_data (abfd, sec)->contents == NULL)
     {
-      coff_section_data (abfd, sec)->contents = ((bfd_byte *)
-						 bfd_malloc (sec->_raw_size));
-      if (coff_section_data (abfd, sec)->contents == NULL)
-	return FALSE;
-
-      if (! bfd_get_section_contents (abfd, sec,
-				      coff_section_data (abfd, sec)->contents,
-				      (file_ptr) 0, sec->_raw_size))
-	return FALSE;
+      bfd_byte *contents;
+      if (!bfd_malloc_and_get_section (abfd, sec, &contents))
+	{
+	  if (contents != NULL)
+	    free (contents);
+	  return FALSE;
+	}
+      coff_section_data (abfd, sec)->contents = contents;
     }
 
   return TRUE;
@@ -1514,7 +1513,7 @@ xcoff_link_add_symbols (abfd, info)
 	    if (! bfd_is_abs_section (enclosing)
 		&& ((bfd_vma) sym.n_value < enclosing->vma
 		    || ((bfd_vma) sym.n_value + aux.x_csect.x_scnlen.l
-			> enclosing->vma + enclosing->_raw_size)))
+			> enclosing->vma + enclosing->size)))
 	      {
 		(*_bfd_error_handler)
 		  (_("%s: csect `%s' not in enclosing section"),
@@ -1526,7 +1525,7 @@ xcoff_link_add_symbols (abfd, info)
 	    csect->filepos = (enclosing->filepos
 			      + sym.n_value
 			      - enclosing->vma);
-	    csect->_raw_size = aux.x_csect.x_scnlen.l;
+	    csect->size = aux.x_csect.x_scnlen.l;
 	    csect->flags |= SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS;
 	    csect->alignment_power = SMTYP_ALIGN (aux.x_csect.x_smtyp);
 
@@ -1563,7 +1562,7 @@ xcoff_link_add_symbols (abfd, info)
 				      + relindx * bfd_coff_relsz (abfd));
 		while (relindx < enclosing->reloc_count
 		       && *rel_csect == NULL
-		       && rel->r_vaddr < csect->vma + csect->_raw_size)
+		       && rel->r_vaddr < csect->vma + csect->size)
 		  {
 
 		    *rel_csect = csect;
@@ -1664,7 +1663,7 @@ xcoff_link_add_symbols (abfd, info)
 	  if (csect == NULL)
 	    goto error_return;
 	  csect->vma = sym.n_value;
-	  csect->_raw_size = aux.x_csect.x_scnlen.l;
+	  csect->size = aux.x_csect.x_scnlen.l;
 	  csect->flags |= SEC_ALLOC;
 	  csect->alignment_power = SMTYP_ALIGN (aux.x_csect.x_smtyp);
 	  /* There are a number of other fields and section flags
@@ -1690,7 +1689,7 @@ xcoff_link_add_symbols (abfd, info)
 	  if (sym.n_sclass == C_EXT)
 	    {
 	      csect->flags |= SEC_IS_COMMON;
-	      csect->_raw_size = 0;
+	      csect->size = 0;
 	      section = csect;
 	      value = aux.x_csect.x_scnlen.l;
 	    }
@@ -1895,7 +1894,7 @@ xcoff_link_add_symbols (abfd, info)
 		  || (*sym_hash)->root.u.c.p->section != csect)
 		{
 		  /* We don't need the common csect we just created.  */
-		  csect->_raw_size = 0;
+		  csect->size = 0;
 		}
 	      else
 		{
@@ -1937,7 +1936,7 @@ xcoff_link_add_symbols (abfd, info)
 	 the .debug section, since we need to read it below in
 	 bfd_xcoff_size_dynamic_sections.  */
       if (strcmp (bfd_get_section_name (abfd, o), ".debug") != 0)
-	o->_raw_size = 0;
+	o->size = 0;
       o->lineno_count = 0;
 
       if ((o->flags & SEC_RELOC) != 0)
@@ -2511,7 +2510,7 @@ xcoff_sweep (info)
 		o->flags |= SEC_MARK;
 	      else
 		{
-		  o->_raw_size = 0;
+		  o->size = 0;
 		  o->reloc_count = 0;
 		  o->lineno_count = 0;
 		}
@@ -3035,8 +3034,8 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
   /* We now know the final size of the .loader section.  Allocate
      space for it.  */
   lsec = xcoff_hash_table (info)->loader_section;
-  lsec->_raw_size = stoff + ldhdr->l_stlen;
-  lsec->contents = (bfd_byte *) bfd_zalloc (output_bfd, lsec->_raw_size);
+  lsec->size = stoff + ldhdr->l_stlen;
+  lsec->contents = (bfd_byte *) bfd_zalloc (output_bfd, lsec->size);
   if (lsec->contents == NULL)
     goto error_return;
 
@@ -3085,23 +3084,23 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
 
   /* Allocate space for the magic sections.  */
   sec = xcoff_hash_table (info)->linkage_section;
-  if (sec->_raw_size > 0)
+  if (sec->size > 0)
     {
-      sec->contents = (bfd_byte *) bfd_zalloc (output_bfd, sec->_raw_size);
+      sec->contents = (bfd_byte *) bfd_zalloc (output_bfd, sec->size);
       if (sec->contents == NULL)
 	goto error_return;
     }
   sec = xcoff_hash_table (info)->toc_section;
-  if (sec->_raw_size > 0)
+  if (sec->size > 0)
     {
-      sec->contents = (bfd_byte *) bfd_zalloc (output_bfd, sec->_raw_size);
+      sec->contents = (bfd_byte *) bfd_zalloc (output_bfd, sec->size);
       if (sec->contents == NULL)
 	goto error_return;
     }
   sec = xcoff_hash_table (info)->descriptor_section;
-  if (sec->_raw_size > 0)
+  if (sec->size > 0)
     {
-      sec->contents = (bfd_byte *) bfd_zalloc (output_bfd, sec->_raw_size);
+      sec->contents = (bfd_byte *) bfd_zalloc (output_bfd, sec->size);
       if (sec->contents == NULL)
 	goto error_return;
     }
@@ -3122,14 +3121,14 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
       if (sub->xvec != info->hash->creator)
 	continue;
       subdeb = bfd_get_section_by_name (sub, ".debug");
-      if (subdeb == NULL || subdeb->_raw_size == 0)
+      if (subdeb == NULL || subdeb->size == 0)
 	continue;
 
       if (info->strip == strip_all
 	  || info->strip == strip_debugger
 	  || info->discard == discard_all)
 	{
-	  subdeb->_raw_size = 0;
+	  subdeb->size = 0;
 	  continue;
 	}
 
@@ -3148,11 +3147,7 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
 	 bfd_alloc, because I expect that, when linking many files
 	 together, many of the strings will be the same.  Storing the
 	 strings in the hash table should save space in this case.  */
-      debug_contents = (bfd_byte *) bfd_malloc (subdeb->_raw_size);
-      if (debug_contents == NULL)
-	goto error_return;
-      if (! bfd_get_section_contents (sub, subdeb, (PTR) debug_contents,
-				      (file_ptr) 0, subdeb->_raw_size))
+      if (!bfd_malloc_and_get_section (sub, subdeb, &debug_contents))
 	goto error_return;
 
       csectpp = xcoff_data (sub)->csects;
@@ -3200,7 +3195,7 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
 
       /* Clear the size of subdeb, so that it is not included directly
 	 in the output file.  */
-      subdeb->_raw_size = 0;
+      subdeb->size = 0;
 
       if (! info->keep_memory)
 	{
@@ -3210,7 +3205,7 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
     }
 
   if (info->strip != strip_all)
-    xcoff_hash_table (info)->debug_section->_raw_size =
+    xcoff_hash_table (info)->debug_section->size =
       _bfd_stringtab_size (debug_strtab);
 
   return TRUE;
@@ -3369,10 +3364,10 @@ xcoff_build_ldsyms (h, p)
       sec = xcoff_hash_table (ldinfo->info)->linkage_section;
       h->root.type = bfd_link_hash_defined;
       h->root.u.def.section = sec;
-      h->root.u.def.value = sec->_raw_size;
+      h->root.u.def.value = sec->size;
       h->smclas = XMC_GL;
       h->flags |= XCOFF_DEF_REGULAR;
-      sec->_raw_size += bfd_xcoff_glink_code_size(ldinfo->output_bfd);
+      sec->size += bfd_xcoff_glink_code_size(ldinfo->output_bfd);
 
       /* The global linkage code requires a TOC entry for the
 	 descriptor.  */
@@ -3396,8 +3391,8 @@ xcoff_build_ldsyms (h, p)
 	    return FALSE;
 
 	  hds->toc_section = xcoff_hash_table (ldinfo->info)->toc_section;
-	  hds->u.toc_offset = hds->toc_section->_raw_size;
-	  hds->toc_section->_raw_size += byte_size;
+	  hds->u.toc_offset = hds->toc_section->size;
+	  hds->toc_section->size += byte_size;
 	  ++xcoff_hash_table (ldinfo->info)->ldrel_count;
 	  ++hds->toc_section->reloc_count;
 	  hds->indx = -2;
@@ -3432,13 +3427,13 @@ xcoff_build_ldsyms (h, p)
 	  sec = xcoff_hash_table (ldinfo->info)->descriptor_section;
 	  h->root.type = bfd_link_hash_defined;
 	  h->root.u.def.section = sec;
-	  h->root.u.def.value = sec->_raw_size;
+	  h->root.u.def.value = sec->size;
 	  h->smclas = XMC_DS;
 	  h->flags |= XCOFF_DEF_REGULAR;
 
 	  /* The size of the function descriptor depends if this is an
 	     xcoff32 (12) or xcoff64 (24).  */
-	  sec->_raw_size +=
+	  sec->size +=
 	    bfd_xcoff_function_descriptor_size(ldinfo->output_bfd);
 
 	  /* A function descriptor uses two relocs: one for the
@@ -3465,10 +3460,10 @@ xcoff_build_ldsyms (h, p)
   if (h->root.type == bfd_link_hash_common
       && (! xcoff_hash_table (ldinfo->info)->gc
 	  || (h->flags & XCOFF_MARK) != 0)
-      && h->root.u.c.p->section->_raw_size == 0)
+      && h->root.u.c.p->section->size == 0)
     {
       BFD_ASSERT (bfd_is_com_section (h->root.u.c.p->section));
-      h->root.u.c.p->section->_raw_size = h->root.u.c.size;
+      h->root.u.c.p->section->size = h->root.u.c.size;
     }
 
   /* We need to add a symbol to the .loader section if it is mentioned
@@ -3618,8 +3613,10 @@ _bfd_xcoff_bfd_final_link (abfd, info)
 
 	      o->reloc_count += sec->reloc_count;
 
-	      if (sec->_raw_size > max_contents_size)
-		max_contents_size = sec->_raw_size;
+	      if (sec->rawsize > max_contents_size)
+		max_contents_size = sec->rawsize;
+	      if (sec->size > max_contents_size)
+		max_contents_size = sec->size;
 	      if (sec->lineno_count > max_lineno_count)
 		max_lineno_count = sec->lineno_count;
 	      if (coff_section_data (sec->owner, sec) != NULL
@@ -3722,11 +3719,11 @@ _bfd_xcoff_bfd_final_link (abfd, info)
 		{
 		  bfd_vma pageoff;
 
-		  BFD_ASSERT (o->_raw_size == 0);
+		  BFD_ASSERT (o->size == 0);
 		  pageoff = sofar & (file_align - 1);
 		  if (pageoff != 0)
 		    {
-		      o->_raw_size = file_align - pageoff;
+		      o->size = file_align - pageoff;
 		      sofar += file_align - pageoff;
 		      o->flags |= SEC_HAS_CONTENTS;
 		    }
@@ -3734,7 +3731,7 @@ _bfd_xcoff_bfd_final_link (abfd, info)
 	      else
 		{
 		  if ((o->flags & SEC_HAS_CONTENTS) != 0)
-		    sofar += BFD_ALIGN (o->_raw_size,
+		    sofar += BFD_ALIGN (o->size,
 					1 << o->alignment_power);
 		}
 	    }
@@ -4083,27 +4080,27 @@ _bfd_xcoff_bfd_final_link (abfd, info)
 		  + xcoff_hash_table (info)->ldhdr.l_impoff));
   o = xcoff_hash_table (info)->loader_section;
   if (! bfd_set_section_contents (abfd, o->output_section, o->contents,
-				  (file_ptr) o->output_offset, o->_raw_size))
+				  (file_ptr) o->output_offset, o->size))
     goto error_return;
 
   /* Write out the magic sections.  */
   o = xcoff_hash_table (info)->linkage_section;
-  if (o->_raw_size > 0
+  if (o->size > 0
       && ! bfd_set_section_contents (abfd, o->output_section, o->contents,
 				     (file_ptr) o->output_offset,
-				     o->_raw_size))
+				     o->size))
     goto error_return;
   o = xcoff_hash_table (info)->toc_section;
-  if (o->_raw_size > 0
+  if (o->size > 0
       && ! bfd_set_section_contents (abfd, o->output_section, o->contents,
 				     (file_ptr) o->output_offset,
-				     o->_raw_size))
+				     o->size))
     goto error_return;
   o = xcoff_hash_table (info)->descriptor_section;
-  if (o->_raw_size > 0
+  if (o->size > 0
       && ! bfd_set_section_contents (abfd, o->output_section, o->contents,
 				     (file_ptr) o->output_offset,
-				     o->_raw_size))
+				     o->size))
     goto error_return;
 
   /* Write out the string table.  */
@@ -4128,7 +4125,7 @@ _bfd_xcoff_bfd_final_link (abfd, info)
       struct bfd_strtab_hash *debug_strtab;
 
       debug_strtab = xcoff_hash_table (info)->debug_strtab;
-      BFD_ASSERT (o->output_section->_raw_size - o->output_offset
+      BFD_ASSERT (o->output_section->size - o->output_offset
 		  >= _bfd_stringtab_size (debug_strtab));
       pos = o->output_section->filepos + o->output_offset;
       if (bfd_seek (abfd, pos, SEEK_SET) != 0)
@@ -4423,7 +4420,7 @@ xcoff_link_input_bfd (finfo, input_bfd)
 		 output section, as it does in the default linker
 		 script.  */
 	      tocend = ((*csectpp)->output_section->vma
-			+ (*csectpp)->output_section->_raw_size);
+			+ (*csectpp)->output_section->size);
 	      for (inp = finfo->info->input_bfds;
 		   inp != NULL;
 		   inp = inp->link_next)
@@ -4435,7 +4432,7 @@ xcoff_link_input_bfd (finfo, input_bfd)
 			bfd_vma new_toc_end;
 			new_toc_end = (o->output_section->vma
 				       + o->output_offset
-				       + o->_cooked_size);
+				       + o->size);
 			if (new_toc_end > tocend)
 			  tocend = new_toc_end;
 		      }
@@ -5053,7 +5050,7 @@ xcoff_link_input_bfd (finfo, input_bfd)
 	}
 
       if ((o->flags & SEC_HAS_CONTENTS) == 0
-	  || o->_raw_size == 0
+	  || o->size == 0
 	  || (o->flags & SEC_IN_MEMORY) != 0)
 	continue;
 
@@ -5062,12 +5059,13 @@ xcoff_link_input_bfd (finfo, input_bfd)
       if (coff_section_data (input_bfd, o) != NULL
 	  && coff_section_data (input_bfd, o)->contents != NULL)
 	contents = coff_section_data (input_bfd, o)->contents;
-      else {
-	if (! bfd_get_section_contents (input_bfd, o, finfo->contents,
-					(file_ptr) 0, o->_raw_size))
-	  return FALSE;
-	contents = finfo->contents;
-      }
+      else
+	{
+	  bfd_size_type sz = o->rawsize ? o->rawsize : o->size;
+	  if (!bfd_get_section_contents (input_bfd, o, finfo->contents, 0, sz))
+	    return FALSE;
+	  contents = finfo->contents;
+	}
 
       if ((o->flags & SEC_RELOC) != 0)
 	{
@@ -5352,9 +5350,7 @@ xcoff_link_input_bfd (finfo, input_bfd)
       /* Write out the modified section contents.  */
       if (! bfd_set_section_contents (output_bfd, o->output_section,
 				      contents, (file_ptr) o->output_offset,
-				      (o->_cooked_size != 0
-				       ? o->_cooked_size
-				       : o->_raw_size)))
+				      o->size))
 	return FALSE;
     }
 

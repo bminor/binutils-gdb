@@ -595,8 +595,7 @@ kill_command (char *arg, int from_tty)
       if (deprecated_selected_frame == NULL)
 	fputs_filtered ("No selected stack frame.\n", gdb_stdout);
       else
-	print_stack_frame (deprecated_selected_frame,
-			   frame_relative_level (deprecated_selected_frame), 1);
+	print_stack_frame (get_selected_frame (), 1, SRC_AND_LOC);
     }
 }
 

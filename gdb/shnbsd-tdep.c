@@ -166,19 +166,10 @@ static struct core_fns shnbsd_elfcore_fns =
   NULL					/* next */
 };
 
-static int
-shnbsd_pc_in_sigtramp (CORE_ADDR pc, char *func_name)
-{
-  /* FIXME: Need to add support for kernel-provided signal trampolines.  */
-  return (nbsd_pc_in_sigtramp (pc, func_name));
-}
-
 static void
 shnbsd_init_abi (struct gdbarch_info info,
                   struct gdbarch *gdbarch)
 {
-  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, shnbsd_pc_in_sigtramp);
-
   set_solib_svr4_fetch_link_map_offsets (gdbarch,
 		                nbsd_ilp32_solib_svr4_fetch_link_map_offsets);
 }
@@ -186,8 +177,8 @@ shnbsd_init_abi (struct gdbarch_info info,
 void
 _initialize_shnbsd_tdep (void)
 {
-  add_core_fns (&shnbsd_core_fns);
-  add_core_fns (&shnbsd_elfcore_fns);
+  deprecated_add_core_fns (&shnbsd_core_fns);
+  deprecated_add_core_fns (&shnbsd_elfcore_fns);
 
   gdbarch_register_osabi (bfd_arch_sh, 0, GDB_OSABI_NETBSD_ELF,
 			  shnbsd_init_abi);

@@ -135,26 +135,6 @@ if test x"$enable_gdbmi" = xyes; then
   fi
 fi
 
-# FIXME: kettenis/20030102: We seem to prefer HP curses (Hcurses) over
-# Xcurses on HP-UX; see the `-D__HP_CURSES' in the relevant host
-# Makefile fragments.  That's why we need to have `Hcurses' before
-# `curses'.  I don't see why we should use HP curses if a more
-# standard curses is available, except that according to HP's
-# documentation one needs to compile `-D_XOPEN_SOURCE_EXTENDED' on
-# HP-UX 10.10 and 10.20.
-
-AC_SEARCH_LIBS(initscr, [ncurses Hcurses curses pdcurses], [],
-    [AC_MSG_WARN([no curses library found])])
-
-# Check whether the wborder function is provided by the curses
-# library detected above.  In certain implementations such as
-# the HP/UX Hcurses for instance, this function is provided by an
-# additional library.  So if we did not find this function inside
-# the curses library, try some alternate libraries we know might
-# provide it.
-AC_SEARCH_LIBS(wborder, [cur_colr], [],
-    [AC_MSG_WARN([wborder function not found, tui will be disabled])])
-
 # Enable TUI.
 AC_ARG_ENABLE(tui,
 [  --enable-tui            enable full-screen terminal user interface (TUI)],
@@ -331,6 +311,32 @@ if test "$ac_cv_search_tgetent" = no; then
   AC_MSG_ERROR([no termcap library found])
 fi
 
+# FIXME: kettenis/20030102: We seem to prefer HP curses (Hcurses) over
+# Xcurses on HP-UX; see the `-D__HP_CURSES' in the relevant host
+# Makefile fragments.  That's why we need to have `Hcurses' before
+# `curses'.  I don't see why we should use HP curses if a more
+# standard curses is available, except that according to HP's
+# documentation one needs to compile `-D_XOPEN_SOURCE_EXTENDED' on
+# HP-UX 10.10 and 10.20.
+
+# FIXME: ncurses does not work on native alphaev68-dec-osf5.1,
+# and probably other platforms.  AC_SEARCH_LIBS finds the library
+# in a place such as /usr/local/lib/libncurses.a, but does not
+# do anything to look for the matching include files.
+# -- chastain 2004-05-01
+
+AC_SEARCH_LIBS(initscr, [ncurses Hcurses curses pdcurses], [],
+  [AC_MSG_WARN([no curses library found])])
+
+# Check whether the wborder function is provided by the curses
+# library detected above.  In certain implementations such as
+# the HP/UX Hcurses for instance, this function is provided by an
+# additional library.  So if we did not find this function inside
+# the curses library, try some alternate libraries we know might
+# provide it.
+AC_SEARCH_LIBS(wborder, [cur_colr], [],
+    [AC_MSG_WARN([wborder function not found, tui will be disabled])])
+
 # ------------------------- #
 # Checks for header files.  #
 # ------------------------- #
@@ -342,7 +348,7 @@ AC_CHECK_HEADERS(link.h)
 AC_CHECK_HEADERS(machine/reg.h)
 AC_CHECK_HEADERS(nlist.h)
 AC_CHECK_HEADERS(poll.h sys/poll.h)
-AC_CHECK_HEADERS(proc_service.h thread_db.h)
+AC_CHECK_HEADERS(proc_service.h thread_db.h gnu/libc-version.h)
 AC_CHECK_HEADERS(stddef.h)
 AC_CHECK_HEADERS(stdlib.h)
 AC_CHECK_HEADERS(stdint.h)
@@ -488,6 +494,16 @@ if test "$gdb_with_regex" = yes; then
     [Define to 1 if the regex included in libiberty should be used.])
 fi
 
+# See if <sys/proc.h> defines `struct thread' with a td_pcb member.
+AC_CACHE_CHECK([for td_pcb in struct thread], gdb_cv_struct_thread_td_pcb,
+[AC_TRY_COMPILE([#include <sys/param.h>
+#include <sys/proc.h>], [struct thread td; td.td_pcb;],
+gdb_cv_struct_thread_td_pcb=yes, gdb_cv_struct_thread_td_pcb=no)])
+if test $gdb_cv_struct_thread_td_pcb = yes; then
+  AC_DEFINE(HAVE_STRUCT_THREAD_TD_PCB, 1,
+            [Define to 1 if your system has td_pcb in struct thread.])
+fi
+
 # See if <machine/reg.h> degines `struct reg'.
 AC_CACHE_CHECK([for struct reg in machine/reg.h], gdb_cv_struct_reg,
 [AC_TRY_COMPILE([#include <sys/types.h>
@@ -621,6 +637,10 @@ if test "${target}" = "${host}"; then
       ;;
   *-*-solaris2.[[6789]])
       AC_DEFINE(NEW_PROC_API)
+      ;;
+  mips-sgi-irix5*)
+      # Work around <sys/proc.h> needing _KMEMUSER problem on IRIX 5.
+      AC_DEFINE([_KMEMUSER], 1)
       ;;
   esac
 fi
@@ -852,6 +872,7 @@ aix*)
 
     LDFLAGS=$LDFLAGS\ $gdb_cv_bigtoc
     AC_TRY_LINK([], [int i;], [], [gdb_cv_bigtoc=])
+    LDFLAGS="${SAVE_LDFLAGS}"
   ])
   CONFIG_LDFLAGS="${CONFIG_LDFLAGS} ${gdb_cv_bigtoc}"
   ;;
@@ -1114,7 +1135,14 @@ WIN32LDAPP=
 AC_SUBST(WIN32LIBS)
 AC_SUBST(WIN32LDAPP)
 
-configdir="unix"
+case "${host}" in
+*-*-cygwin*)
+    configdir="win"
+    ;;
+*)
+    configdir="unix"
+    ;;
+esac
 
 GDBTKLIBS=
 if test "${enable_gdbtk}" = "yes"; then
@@ -1133,14 +1161,7 @@ if test "${enable_gdbtk}" = "yes"; then
 
 	# now look for Tcl library stuff
 
-	case "${host}" in
-	*-*-cygwin*)
-	    tcldir=../tcl/win/
-	    ;;
-	*)
-	    tcldir=../tcl/unix/
-	    ;;
-	esac
+	tcldir="../tcl/${configdir}/"
 
 	TCL_DEPS="${tcldir}${TCL_LIB_FILE}"
 
@@ -1156,14 +1177,7 @@ if test "${enable_gdbtk}" = "yes"; then
 
 	   # now look for Tk library stuff
 
-	   case "${host}" in
-	   *-*-cygwin*)
-	       tkdir=../tk/win/
-	       ;;
-	   *)
-	       tkdir=../tk/unix/
-	       ;;
-	   esac
+	   tkdir="../tk/${configdir}/"
 
 	   TK_DEPS="${tkdir}${TK_LIB_FILE}"
 

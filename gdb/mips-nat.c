@@ -250,5 +250,5 @@ static struct core_fns mips_core_fns =
 void
 _initialize_core_mips (void)
 {
-  add_core_fns (&mips_core_fns);
+  deprecated_add_core_fns (&mips_core_fns);
 }

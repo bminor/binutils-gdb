@@ -1,7 +1,7 @@
 /* Low level Unix child interface to ttrace, for GDB when running under HP-UX.
-   Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998,
-   1999, 2000, 2001, 2003
-   Free Software Foundation, Inc.
+
+   Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
+   1998, 1999, 2000, 2001, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -28,6 +28,7 @@
 #include "gdb_wait.h"
 #include "command.h"
 #include "gdbthread.h"
+#include "infttrace.h"
 
 /* We need pstat functionality so that we can get the exec file
    for a process we attach to.
@@ -4559,8 +4560,6 @@ child_resume (ptid_t ptid, int step, enum target_signal signal)
 }
 #endif /* CHILD_RESUME */
 
-
-#ifdef ATTACH_DETACH
 /*
  * Like it says.
  *
@@ -4732,10 +4731,8 @@ update_thread_state_after_attach (int pid, attach_continue_t kind_of_go)
 
   attach_flag = 1;
 }
-#endif /* ATTACH_DETACH */
 
 
-#ifdef ATTACH_DETACH
 /* Start debugging the process whose number is PID.
  * (A _real_ pid).
  */
@@ -4802,7 +4799,6 @@ detach (int signal)
 
   /* Process-state? */
 }
-#endif /* ATTACH_DETACH */
 
 
 /* Default the type of the ttrace transfer to int.  */

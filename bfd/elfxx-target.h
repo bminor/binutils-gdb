@@ -1,6 +1,6 @@
 /* Target definitions for NN-bit ELF
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003 Free Software Foundation, Inc.
+   2003, 2004 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -34,6 +34,8 @@
 
 #define bfd_elfNN_canonicalize_dynamic_symtab \
   _bfd_elf_canonicalize_dynamic_symtab
+#define bfd_elfNN_get_synthetic_symtab \
+  _bfd_elf_get_synthetic_symtab
 #ifndef bfd_elfNN_canonicalize_reloc
 #define bfd_elfNN_canonicalize_reloc	_bfd_elf_canonicalize_reloc
 #endif
@@ -126,12 +128,16 @@
 #define elf_backend_gc_sweep_hook	NULL
 #endif
 #ifndef bfd_elfNN_bfd_gc_sections
-#define bfd_elfNN_bfd_gc_sections _bfd_elfNN_gc_sections
+#define bfd_elfNN_bfd_gc_sections bfd_elf_gc_sections
 #endif
 
 #ifndef bfd_elfNN_bfd_merge_sections
 #define bfd_elfNN_bfd_merge_sections \
   _bfd_elf_merge_sections
+#endif
+
+#ifndef bfd_elfNN_bfd_is_group_section
+#define bfd_elfNN_bfd_is_group_section bfd_elf_is_group_section
 #endif
 
 #ifndef bfd_elfNN_bfd_discard_group
@@ -151,6 +157,10 @@
 #ifndef bfd_elfNN_bfd_copy_private_section_data
 #define bfd_elfNN_bfd_copy_private_section_data \
   _bfd_elf_copy_private_section_data
+#endif
+#ifndef bfd_elfNN_bfd_copy_private_header_data
+#define bfd_elfNN_bfd_copy_private_header_data \
+  _bfd_elf_copy_private_header_data
 #endif
 #ifndef bfd_elfNN_bfd_copy_private_bfd_data
 #define bfd_elfNN_bfd_copy_private_bfd_data \
@@ -188,6 +198,12 @@
 #ifdef elf_backend_relocate_section
 #ifndef bfd_elfNN_bfd_link_hash_table_create
 #define bfd_elfNN_bfd_link_hash_table_create _bfd_elf_link_hash_table_create
+#endif
+#ifndef bfd_elfNN_bfd_link_add_symbols
+#define bfd_elfNN_bfd_link_add_symbols	bfd_elf_link_add_symbols
+#endif
+#ifndef bfd_elfNN_bfd_final_link
+#define bfd_elfNN_bfd_final_link	bfd_elf_final_link
 #endif
 #else /* ! defined (elf_backend_relocate_section) */
 /* If no backend relocate_section routine, use the generic linker.
@@ -233,6 +249,10 @@
 
 #ifndef bfd_elfNN_mkarchive
 #define bfd_elfNN_mkarchive _bfd_generic_mkarchive
+#endif
+
+#ifndef bfd_elfNN_print_symbol
+#define bfd_elfNN_print_symbol bfd_elf_print_symbol
 #endif
 
 #ifndef elf_symbol_leading_char
@@ -304,8 +324,14 @@
 #ifndef elf_backend_create_dynamic_sections
 #define elf_backend_create_dynamic_sections 0
 #endif
+#ifndef elf_backend_omit_section_dynsym
+#define elf_backend_omit_section_dynsym _bfd_elf_link_omit_section_dynsym
+#endif
 #ifndef elf_backend_check_relocs
 #define elf_backend_check_relocs	0
+#endif
+#ifndef elf_backend_check_directives
+#define elf_backend_check_directives	0
 #endif
 #ifndef elf_backend_adjust_dynamic_symbol
 #define elf_backend_adjust_dynamic_symbol 0
@@ -433,6 +459,13 @@
 #define elf_backend_rela_normal 0
 #endif
 
+#ifndef elf_backend_plt_sym_val
+#define elf_backend_plt_sym_val NULL
+#endif
+#ifndef elf_backend_relplt_name
+#define elf_backend_relplt_name NULL
+#endif
+
 #ifndef ELF_MACHINE_ALT1
 #define ELF_MACHINE_ALT1 0
 #endif
@@ -478,7 +511,9 @@ static const struct elf_backend_data elfNN_bed =
   elf_backend_add_symbol_hook,
   elf_backend_link_output_symbol_hook,
   elf_backend_create_dynamic_sections,
+  elf_backend_omit_section_dynsym,
   elf_backend_check_relocs,
+  elf_backend_check_directives,
   elf_backend_adjust_dynamic_symbol,
   elf_backend_always_size_sections,
   elf_backend_size_dynamic_sections,
@@ -514,6 +549,8 @@ static const struct elf_backend_data elfNN_bed =
   elf_backend_mips_rtype_to_howto,
   elf_backend_ecoff_debug_swap,
   elf_backend_bfd_from_remote_memory,
+  elf_backend_plt_sym_val,
+  elf_backend_relplt_name,
   ELF_MACHINE_ALT1,
   ELF_MACHINE_ALT2,
   &elf_backend_size_info,

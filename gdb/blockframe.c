@@ -43,34 +43,6 @@
 
 void _initialize_blockframe (void);
 
-/* Is ADDR inside the startup file?  Note that if your machine has a
-   way to detect the bottom of the stack, there is no need to call
-   this function from DEPRECATED_FRAME_CHAIN_VALID; the reason for
-   doing so is that some machines have no way of detecting bottom of
-   stack.
-
-   A PC of zero is always considered to be the bottom of the stack. */
-
-int
-deprecated_inside_entry_file (CORE_ADDR addr)
-{
-  if (addr == 0)
-    return 1;
-  if (symfile_objfile == 0)
-    return 0;
-  if (CALL_DUMMY_LOCATION == AT_ENTRY_POINT
-      || CALL_DUMMY_LOCATION == AT_SYMBOL)
-    {
-      /* Do not stop backtracing if the pc is in the call dummy
-         at the entry point.  */
-      /* FIXME: Won't always work with zeros for the last two arguments */
-      if (DEPRECATED_PC_IN_CALL_DUMMY (addr, 0, 0))
-	return 0;
-    }
-  return (addr >= symfile_objfile->ei.deprecated_entry_file_lowpc &&
-	  addr < symfile_objfile->ei.deprecated_entry_file_highpc);
-}
-
 /* Test whether PC is in the range of addresses that corresponds to
    the "main" function.  */
 
@@ -163,28 +135,6 @@ inside_entry_func (struct frame_info *this_frame)
   return (get_frame_func (this_frame) == entry_point_address ());
 }
 
-/* Similar to inside_entry_func, but accomodating legacy frame code.  */
-
-static int
-legacy_inside_entry_func (CORE_ADDR pc)
-{
-  if (symfile_objfile == 0)
-    return 0;
-
-  if (CALL_DUMMY_LOCATION == AT_ENTRY_POINT)
-    {
-      /* Do not stop backtracing if the program counter is in the call
-         dummy at the entry point.  */
-      /* FIXME: This won't always work with zeros for the last two
-         arguments.  */
-      if (DEPRECATED_PC_IN_CALL_DUMMY (pc, 0, 0))
-	return 0;
-    }
-
-  return (symfile_objfile->ei.entry_func_lowpc <= pc
-	  && symfile_objfile->ei.entry_func_highpc > pc);
-}
-
 /* Return nonzero if the function for this frame lacks a prologue.
    Many machines can define DEPRECATED_FRAMELESS_FUNCTION_INVOCATION
    to just call this function.  */
@@ -197,7 +147,7 @@ legacy_frameless_look_for_prologue (struct frame_info *frame)
   func_start = get_frame_func (frame);
   if (func_start)
     {
-      func_start += FUNCTION_START_OFFSET;
+      func_start += DEPRECATED_FUNCTION_START_OFFSET;
       /* NOTE: cagney/2004-02-09: Eliminated per-architecture
          PROLOGUE_FRAMELESS_P call as architectures with custom
          implementations had all been deleted.  Eventually even this
@@ -380,23 +330,6 @@ find_pc_partial_function (CORE_ADDR pc, char **name, CORE_ADDR *address,
       && section == cache_pc_function_section)
     goto return_cached_value;
 
-  /* If sigtramp is in the u area, it counts as a function (especially
-     important for step_1).  */
-  /* NOTE: cagney/2004-03-16: Determining if the PC is in a signal
-     trampoline typically depends on the detailed analysis of dynamic
-     information obtained from the inferior yet this function is
-     expected to work using static information obtained from the
-     symbol table.  */
-  if (DEPRECATED_SIGTRAMP_START_P ()
-      && DEPRECATED_PC_IN_SIGTRAMP (mapped_pc, (char *) NULL))
-    {
-      cache_pc_function_low = DEPRECATED_SIGTRAMP_START (mapped_pc);
-      cache_pc_function_high = DEPRECATED_SIGTRAMP_END (mapped_pc);
-      cache_pc_function_name = "<sigtramp>";
-      cache_pc_function_section = section;
-      goto return_cached_value;
-    }
-
   msymbol = lookup_minimal_symbol_by_pc_section (mapped_pc, section);
   pst = find_pc_sect_psymtab (mapped_pc, section);
   if (pst)
@@ -564,33 +497,6 @@ block_innermost_frame (struct block *block)
    below is for infrun.c, which may give the macro a pc without that
    subtracted out.  */
 
-/* Is the PC in a call dummy?  SP and FRAME_ADDRESS are the bottom and
-   top of the stack frame which we are checking, where "bottom" and
-   "top" refer to some section of memory which contains the code for
-   the call dummy.  Calls to this macro assume that the contents of
-   SP_REGNUM and DEPRECATED_FP_REGNUM (or the saved values thereof),
-   respectively, are the things to pass.
-
-   This won't work on the 29k, where SP_REGNUM and
-   DEPRECATED_FP_REGNUM don't have that meaning, but the 29k doesn't
-   use ON_STACK.  This could be fixed by generalizing this scheme,
-   perhaps by passing in a frame and adding a few fields, at least on
-   machines which need them for DEPRECATED_PC_IN_CALL_DUMMY.
-
-   Something simpler, like checking for the stack segment, doesn't work,
-   since various programs (threads implementations, gcc nested function
-   stubs, etc) may either allocate stack frames in another segment, or
-   allocate other kinds of code on the stack.  */
-
-int
-deprecated_pc_in_call_dummy_on_stack (CORE_ADDR pc, CORE_ADDR sp,
-				      CORE_ADDR frame_address)
-{
-  return (INNER_THAN ((sp), (pc))
-	  && (frame_address != 0)
-	  && INNER_THAN ((pc), (frame_address)));
-}
-
 /* Returns true for a user frame or a call_function_by_hand dummy
    frame, and false for the CRT0 start-up frame.  Purpose is to
    terminate backtrace.  */
@@ -599,8 +505,7 @@ int
 legacy_frame_chain_valid (CORE_ADDR fp, struct frame_info *fi)
 {
   /* Don't prune CALL_DUMMY frames.  */
-  if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES
-      && DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), 0, 0))
+  if (deprecated_pc_in_call_dummy (get_frame_pc (fi)))
     return 1;
 
   /* If the new frame pointer is zero, then it isn't valid.  */
@@ -617,17 +522,10 @@ legacy_frame_chain_valid (CORE_ADDR fp, struct frame_info *fi)
   if (DEPRECATED_FRAME_CHAIN_VALID_P ())
     return DEPRECATED_FRAME_CHAIN_VALID (fp, fi);
 
-  /* If we're already inside the entry function for the main objfile, then it
-     isn't valid.  */
-  if (legacy_inside_entry_func (get_frame_pc (fi)))
+  /* If we're already inside the entry function for the main objfile,
+     then it isn't valid.  */
+  if (inside_entry_func (fi))
     return 0;
-
-  /* If we're inside the entry file, it isn't valid.  */
-  /* NOTE/drow 2002-12-25: should there be a way to disable this check?  It
-     assumes a single small entry file, and the way some debug readers (e.g.
-     dbxread) figure out which object is the entry file is somewhat hokey.  */
-  if (deprecated_inside_entry_file (frame_pc_unwind (fi)))
-      return 0;
 
   return 1;
 }

@@ -1,5 +1,6 @@
 /* Macro definitions for Intel 386 running under LynxOS.
-   Copyright 1993, 1995, 2002 Free Software Foundation, Inc.
+
+   Copyright 1993, 1995, 2002, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,8 +23,5 @@
 #define TM_I386LYNX_H
 
 #include "config/tm-lynx.h"
-
-/* Most definitions from sysv could be used. */
-#include "i386/tm-i386.h"
 
 #endif /* TM_I386LYNX_H */

@@ -48,8 +48,6 @@
 
 extern void _initialize_remote_sim (void);
 
-extern int (*ui_loop_hook) (int signo);
-
 static void dump_mem (char *buf, int len);
 
 static void init_callbacks (void);
@@ -82,8 +80,6 @@ static void gdbsim_store_register (int regno);
 static void gdbsim_kill (void);
 
 static void gdbsim_load (char *prog, int fromtty);
-
-static void gdbsim_create_inferior (char *exec_file, char *args, char **env);
 
 static void gdbsim_open (char *args, int from_tty);
 
@@ -268,8 +264,8 @@ gdb_os_evprintf_filtered (host_callback * p, const char *format, va_list ap)
 static void
 gdb_os_error (host_callback * p, const char *format,...)
 {
-  if (error_hook)
-    (*error_hook) ();
+  if (deprecated_error_hook)
+    (*deprecated_error_hook) ();
   else
     {
       va_list args;
@@ -429,7 +425,7 @@ gdbsim_load (char *prog, int fromtty)
    user types "run" after having attached.  */
 
 static void
-gdbsim_create_inferior (char *exec_file, char *args, char **env)
+gdbsim_create_inferior (char *exec_file, char *args, char **env, int from_tty)
 {
   int len;
   char *arg_buf, **argv;
@@ -636,8 +632,8 @@ gdbsim_stop (void)
 static int
 gdb_os_poll_quit (host_callback *p)
 {
-  if (ui_loop_hook != NULL)
-    ui_loop_hook (0);
+  if (deprecated_ui_loop_hook != NULL)
+    deprecated_ui_loop_hook (0);
 
   if (quit_flag)		/* gdb's idea of quit */
     {

@@ -1176,6 +1176,16 @@ language_demangle (const struct language_defn *current_language,
   return NULL;
 }
 
+/* Return class name from physname or NULL.  */
+char *
+language_class_name_from_physname (const struct language_defn *current_language,
+				   const char *physname)
+{
+  if (current_language != NULL && current_language->la_class_name_from_physname)
+    return current_language->la_class_name_from_physname (physname);
+  return NULL;
+}
+
 /* Return the default string containing the list of characters
    delimiting words.  This is a reasonable default value that
    most languages should be able to use.  */
@@ -1258,6 +1268,10 @@ static char *unk_lang_demangle (const char *mangled, int options)
   return cplus_demangle (mangled, options);
 }
 
+static char *unk_lang_class_name (const char *mangled)
+{
+  return NULL;
+}
 
 static struct type **const (unknown_builtin_types[]) =
 {
@@ -1279,6 +1293,7 @@ const struct language_defn unknown_language_defn =
   &exp_descriptor_standard,
   unk_lang_parser,
   unk_lang_error,
+  null_post_parser,
   unk_lang_printchar,		/* Print character constant */
   unk_lang_printstr,
   unk_lang_emit_char,
@@ -1291,6 +1306,7 @@ const struct language_defn unknown_language_defn =
   basic_lookup_symbol_nonlocal, /* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   unk_lang_demangle,		/* Language specific symbol demangler */
+  unk_lang_class_name,		/* Language specific class_name_from_physname */
   {"", "", "", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */
   {"%ld", "", "d", ""},		/* Decimal format info */
@@ -1315,6 +1331,7 @@ const struct language_defn auto_language_defn =
   &exp_descriptor_standard,
   unk_lang_parser,
   unk_lang_error,
+  null_post_parser,
   unk_lang_printchar,		/* Print character constant */
   unk_lang_printstr,
   unk_lang_emit_char,
@@ -1327,6 +1344,7 @@ const struct language_defn auto_language_defn =
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   unk_lang_demangle,		/* Language specific symbol demangler */
+  unk_lang_class_name,		/* Language specific class_name_from_physname */
   {"", "", "", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */
   {"%ld", "", "d", ""},		/* Decimal format info */
@@ -1350,6 +1368,7 @@ const struct language_defn local_language_defn =
   &exp_descriptor_standard,
   unk_lang_parser,
   unk_lang_error,
+  null_post_parser,
   unk_lang_printchar,		/* Print character constant */
   unk_lang_printstr,
   unk_lang_emit_char,
@@ -1362,6 +1381,7 @@ const struct language_defn local_language_defn =
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   unk_lang_demangle,		/* Language specific symbol demangler */
+  unk_lang_class_name,		/* Language specific class_name_from_physname */
   {"", "", "", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */
   {"%ld", "", "d", ""},		/* Decimal format info */

@@ -418,6 +418,7 @@ const struct language_defn m2_language_defn =
   &exp_descriptor_standard,
   m2_parse,			/* parser */
   m2_error,			/* parser error function */
+  null_post_parser,
   m2_printchar,			/* Print character constant */
   m2_printstr,			/* function to print string constant */
   m2_emit_char,			/* Function to print a single character */
@@ -430,6 +431,7 @@ const struct language_defn m2_language_defn =
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   NULL,				/* Language specific symbol demangler */
+  NULL,				/* Language specific class_name_from_physname */
   {"", "", "", ""},		/* Binary format info */
   {"%loB", "", "o", "B"},	/* Octal format info */
   {"%ld", "", "d", ""},		/* Decimal format info */

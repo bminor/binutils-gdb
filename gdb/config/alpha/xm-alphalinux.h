@@ -19,8 +19,5 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* The alpha has no siginterrupt routine.  */
-#define NO_SIGINTERRUPT
-
 #define HAVE_TERMIOS
 #define USG

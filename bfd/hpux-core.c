@@ -115,11 +115,11 @@ static void swap_abort
   PARAMS ((void));
 
 static asection *
-make_bfd_asection (abfd, name, flags, _raw_size, vma, alignment_power)
+make_bfd_asection (abfd, name, flags, size, vma, alignment_power)
      bfd *abfd;
      const char *name;
      flagword flags;
-     bfd_size_type _raw_size;
+     bfd_size_type size;
      bfd_vma vma;
      unsigned int alignment_power;
 {
@@ -137,7 +137,7 @@ make_bfd_asection (abfd, name, flags, _raw_size, vma, alignment_power)
     return NULL;
 
   asect->flags = flags;
-  asect->_raw_size = _raw_size;
+  asect->size = size;
   asect->vma = vma;
   asect->filepos = bfd_tell (abfd);
   asect->alignment_power = alignment_power;
@@ -276,7 +276,8 @@ hpux_core_core_file_p (abfd)
 	case CORE_ANON_SHMEM:
 	  if (!make_bfd_asection (abfd, ".data",
 				  SEC_ALLOC + SEC_LOAD + SEC_HAS_CONTENTS,
-				  core_header.len, core_header.addr, 2))
+				  core_header.len,
+				  (bfd_vma) core_header.addr, 2))
 	    goto fail;
 
 	  bfd_seek (abfd, (file_ptr) core_header.len, SEEK_CUR);

@@ -41,9 +41,9 @@ divs_w_imm4_reg:
 	set_grs_a5a5
 
 	;; divs.w xx:4, rd
-	mov.w	#32, r1
+	mov.w	#-32, r1
 	set_ccr_zero
-	divs.w	#-2:4, r1
+	divs.w	#2:4, r1
 
 	;; test ccr		; H=0 N=1 Z=0 V=0 C=0
 	test_neg_set
@@ -88,9 +88,9 @@ divs_l_imm4_reg:
 	set_grs_a5a5
 
 	;; divs.l xx:4, rd
-	mov.l	#320000, er1
+	mov.l	#-320000, er1
 	set_ccr_zero
-	divs.l	#-2:4, er1
+	divs.l	#2:4, er1
 
 	;; test ccr		; H=0 N=1 Z=0 V=0 C=0
 	test_neg_set
@@ -221,9 +221,9 @@ divxs_b_imm4_reg:
 	set_grs_a5a5
 
 	;; divxs.b xx:4, rd
-	mov.w	#32, r1
+	mov.w	#-32, r1
 	set_ccr_zero
-	divxs.b	#-2:4, r1
+	divxs.b	#2:4, r1
 
 	;; test ccr		; H=0 N=1 Z=0 V=0 C=0
 	test_neg_set

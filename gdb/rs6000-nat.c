@@ -28,7 +28,7 @@
 #include "xcoffsolib.h"
 #include "symfile.h"
 #include "objfiles.h"
-#include "libbfd.h"		/* For bfd_cache_lookup (FIXME) */
+#include "libbfd.h"		/* For bfd_default_set_arch_mach (FIXME) */
 #include "bfd.h"
 #include "gdb-stabs.h"
 #include "regcache.h"
@@ -156,12 +156,15 @@ regmap (int regno, int *isfloat)
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
   *isfloat = 0;
-  if (tdep->ppc_gp0_regnum <= regno && regno <= tdep->ppc_gplast_regnum)
+  if (tdep->ppc_gp0_regnum <= regno
+      && regno < tdep->ppc_gp0_regnum + ppc_num_gprs)
     return regno;
-  else if (FP0_REGNUM <= regno && regno <= FPLAST_REGNUM)
+  else if (tdep->ppc_fp0_regnum >= 0
+           && tdep->ppc_fp0_regnum <= regno
+           && regno < tdep->ppc_fp0_regnum + ppc_num_fprs)
     {
       *isfloat = 1;
-      return regno - FP0_REGNUM + FPR0;
+      return regno - tdep->ppc_fp0_regnum + FPR0;
     }
   else if (regno == PC_REGNUM)
     return IAR;
@@ -175,7 +178,8 @@ regmap (int regno, int *isfloat)
     return CTR;
   else if (regno == tdep->ppc_xer_regnum)
     return XER;
-  else if (regno == tdep->ppc_fpscr_regnum)
+  else if (tdep->ppc_fpscr_regnum >= 0
+           && regno == tdep->ppc_fpscr_regnum)
     return FPSCR;
   else if (tdep->ppc_mq_regnum >= 0 && regno == tdep->ppc_mq_regnum)
     return MQ;
@@ -350,15 +354,16 @@ fetch_inferior_registers (int regno)
 
       /* Read 32 general purpose registers.  */
       for (regno = tdep->ppc_gp0_regnum;
-           regno <= tdep->ppc_gplast_regnum;
+           regno < tdep->ppc_gp0_regnum + ppc_num_gprs;
 	   regno++)
 	{
 	  fetch_register (regno);
 	}
 
       /* Read general purpose floating point registers.  */
-      for (regno = FP0_REGNUM; regno <= FPLAST_REGNUM; regno++)
-	fetch_register (regno);
+      if (tdep->ppc_fp0_regnum >= 0)
+        for (regno = 0; regno < ppc_num_fprs; regno++)
+          fetch_register (tdep->ppc_fp0_regnum + regno);
 
       /* Read special registers.  */
       fetch_register (PC_REGNUM);
@@ -367,7 +372,8 @@ fetch_inferior_registers (int regno)
       fetch_register (tdep->ppc_lr_regnum);
       fetch_register (tdep->ppc_ctr_regnum);
       fetch_register (tdep->ppc_xer_regnum);
-      fetch_register (tdep->ppc_fpscr_regnum);
+      if (tdep->ppc_fpscr_regnum >= 0)
+        fetch_register (tdep->ppc_fpscr_regnum);
       if (tdep->ppc_mq_regnum >= 0)
 	fetch_register (tdep->ppc_mq_regnum);
     }
@@ -389,15 +395,16 @@ store_inferior_registers (int regno)
 
       /* Write general purpose registers first.  */
       for (regno = tdep->ppc_gp0_regnum;
-           regno <= tdep->ppc_gplast_regnum;
+           regno < tdep->ppc_gp0_regnum + ppc_num_gprs;
 	   regno++)
 	{
 	  store_register (regno);
 	}
 
       /* Write floating point registers.  */
-      for (regno = FP0_REGNUM; regno <= FPLAST_REGNUM; regno++)
-	store_register (regno);
+      if (tdep->ppc_fp0_regnum >= 0)
+        for (regno = 0; regno < ppc_num_fprs; regno++)
+          store_register (tdep->ppc_fp0_regnum + regno);
 
       /* Write special registers.  */
       store_register (PC_REGNUM);
@@ -406,7 +413,8 @@ store_inferior_registers (int regno)
       store_register (tdep->ppc_lr_regnum);
       store_register (tdep->ppc_ctr_regnum);
       store_register (tdep->ppc_xer_regnum);
-      store_register (tdep->ppc_fpscr_regnum);
+      if (tdep->ppc_fpscr_regnum >= 0)
+        store_register (tdep->ppc_fpscr_regnum);
       if (tdep->ppc_mq_regnum >= 0)
 	store_register (tdep->ppc_mq_regnum);
     }
@@ -578,11 +586,14 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
 
   if (ARCH64 ())
     {
-      for (regi = 0; regi < 32; regi++)
-        supply_register (regi, (char *) &regs->r64.gpr[regi]);
+      for (regi = 0; regi < ppc_num_gprs; regi++)
+        supply_register (tdep->ppc_gp0_regnum + regi,
+                         (char *) &regs->r64.gpr[regi]);
 
-      for (regi = 0; regi < 32; regi++)
-	supply_register (FP0_REGNUM + regi, (char *) &regs->r64.fpr[regi]);
+      if (tdep->ppc_fp0_regnum >= 0)
+        for (regi = 0; regi < ppc_num_fprs; regi++)
+          supply_register (tdep->ppc_fp0_regnum + regi,
+                           (char *) &regs->r64.fpr[regi]);
 
       supply_register (PC_REGNUM, (char *) &regs->r64.iar);
       supply_register (tdep->ppc_ps_regnum, (char *) &regs->r64.msr);
@@ -590,15 +601,19 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
       supply_register (tdep->ppc_lr_regnum, (char *) &regs->r64.lr);
       supply_register (tdep->ppc_ctr_regnum, (char *) &regs->r64.ctr);
       supply_register (tdep->ppc_xer_regnum, (char *) &regs->r64.xer);
-      supply_register (tdep->ppc_fpscr_regnum, (char *) &regs->r64.fpscr);
+      if (tdep->ppc_fpscr_regnum >= 0)
+        supply_register (tdep->ppc_fpscr_regnum, (char *) &regs->r64.fpscr);
     }
   else
     {
-      for (regi = 0; regi < 32; regi++)
-        supply_register (regi, (char *) &regs->r32.gpr[regi]);
+      for (regi = 0; regi < ppc_num_gprs; regi++)
+        supply_register (tdep->ppc_gp0_regnum + regi,
+                         (char *) &regs->r32.gpr[regi]);
 
-      for (regi = 0; regi < 32; regi++)
-	supply_register (FP0_REGNUM + regi, (char *) &regs->r32.fpr[regi]);
+      if (tdep->ppc_fp0_regnum >= 0)
+        for (regi = 0; regi < ppc_num_fprs; regi++)
+          supply_register (tdep->ppc_fp0_regnum + regi,
+                           (char *) &regs->r32.fpr[regi]);
 
       supply_register (PC_REGNUM, (char *) &regs->r32.iar);
       supply_register (tdep->ppc_ps_regnum, (char *) &regs->r32.msr);
@@ -606,7 +621,8 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
       supply_register (tdep->ppc_lr_regnum, (char *) &regs->r32.lr);
       supply_register (tdep->ppc_ctr_regnum, (char *) &regs->r32.ctr);
       supply_register (tdep->ppc_xer_regnum, (char *) &regs->r32.xer);
-      supply_register (tdep->ppc_fpscr_regnum, (char *) &regs->r32.fpscr);
+      if (tdep->ppc_fpscr_regnum >= 0)
+        supply_register (tdep->ppc_fpscr_regnum, (char *) &regs->r32.fpscr);
       if (tdep->ppc_mq_regnum >= 0)
 	supply_register (tdep->ppc_mq_regnum, (char *) &regs->r32.mq);
     }
@@ -880,8 +896,8 @@ vmap_ldinfo (LdInfo *ldi)
 
 	  /* Announce new object files.  Doing this after symbol relocation
 	     makes aix-thread.c's job easier. */
-	  if (target_new_objfile_hook && vp->objfile)
-	    target_new_objfile_hook (vp->objfile);
+	  if (deprecated_target_new_objfile_hook && vp->objfile)
+	    deprecated_target_new_objfile_hook (vp->objfile);
 
 	  /* There may be more, so we don't break out of the loop.  */
 	}
@@ -1162,8 +1178,8 @@ xcoff_relocate_core (struct target_ops *target)
 
       vmap_symtab (vp);
 
-      if (target_new_objfile_hook && vp != vmap && vp->objfile)
-	target_new_objfile_hook (vp->objfile);
+      if (deprecated_target_new_objfile_hook && vp != vmap && vp->objfile)
+	deprecated_target_new_objfile_hook (vp->objfile);
     }
   while (LDI_NEXT (ldi, arch64) != 0);
   vmap_exec ();
@@ -1223,5 +1239,5 @@ _initialize_core_rs6000 (void)
      starting a child process. */
   rs6000_set_host_arch_hook = set_host_arch;
 
-  add_core_fns (&rs6000_core_fns);
+  deprecated_add_core_fns (&rs6000_core_fns);
 }

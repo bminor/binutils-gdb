@@ -1,4 +1,7 @@
 # Host: NetBSD/i386 ELF
-NATDEPFILES= fork-child.o infptrace.o inftarg.o i386bsd-nat.o
+NATDEPFILES= fork-child.o infptrace.o inftarg.o \
+	i386bsd-nat.o i386nbsd-nat.o bsd-kvm.o
 NAT_FILE= nm-nbsd.h
 XM_FILE= xm-nbsd.h
+
+LOADLIBES= -lkvm

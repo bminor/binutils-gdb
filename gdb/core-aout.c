@@ -142,5 +142,5 @@ static struct core_fns aout_core_fns =
 void
 _initialize_core_aout (void)
 {
-  add_core_fns (&aout_core_fns);
+  deprecated_add_core_fns (&aout_core_fns);
 }

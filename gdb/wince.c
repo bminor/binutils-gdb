@@ -60,9 +60,6 @@
 #include "mips-tdep.h"
 #endif
 
-/* The ui's event loop. */
-extern int (*ui_loop_hook) (int signo);
-
 /* If we're not using the old Cygwin header file set, define the
    following which never should have been in the generic Win32 API
    headers in the first place since they were our own invention... */
@@ -1510,8 +1507,8 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
       {
 	int detach = 0;
 
-	if (ui_loop_hook != NULL)
-	  detach = ui_loop_hook (0);
+	if (deprecated_ui_loop_hook != NULL)
+	  detach = deprecated_ui_loop_hook (0);
 
 	if (detach)
 	  child_kill_inferior ();
@@ -1720,7 +1717,8 @@ wince_initialize (void)
    ALLARGS is a string containing the arguments to the program.
    ENV is the environment vector to pass.  Errors reported with error().  */
 static void
-child_create_inferior (char *exec_file, char *args, char **env)
+child_create_inferior (char *exec_file, char *args, char **env,
+		       int from_tty)
 {
   PROCESS_INFORMATION pi;
   struct target_waitstatus dummy;

@@ -394,7 +394,7 @@ serial_printf (struct serial *desc, const char *format,...)
   char *buf;
   va_start (args, format);
 
-  xvasprintf (&buf, format, args);
+  buf = xstrvprintf (format, args);
   serial_write (desc, buf, strlen (buf));
 
   xfree (buf);

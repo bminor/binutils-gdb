@@ -189,6 +189,10 @@ extern void new_symfile_objfile (struct objfile *, int, int);
 extern struct objfile *symbol_file_add (char *, int,
 					struct section_addr_info *, int, int);
 
+extern struct objfile *symbol_file_add_from_bfd (bfd *, int,
+                                                 struct section_addr_info *,
+                                                 int, int);
+
 /* Create a new section_addr_info, with room for NUM_SECTIONS.  */
 
 extern struct section_addr_info *alloc_section_addr_info (size_t
@@ -315,7 +319,7 @@ extern void dwarf_build_psymtabs (struct objfile *, int, file_ptr,
 
 /* From dwarf2read.c */
 
-extern int dwarf2_has_info (bfd *abfd);
+extern int dwarf2_has_info (struct objfile *);
 
 extern void dwarf2_build_psymtabs (struct objfile *, int);
 extern void dwarf2_build_frame_info (struct objfile *);

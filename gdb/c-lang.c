@@ -546,6 +546,7 @@ const struct language_defn c_language_defn =
   &exp_descriptor_standard,
   c_preprocess_and_parse,
   c_error,
+  null_post_parser,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
   c_emit_char,			/* Print a single char */
@@ -558,6 +559,7 @@ const struct language_defn c_language_defn =
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   NULL,				/* Language specific symbol demangler */
+  NULL,				/* Language specific class_name_from_physname */
   {"", "", "", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */
   {"%ld", "", "d", ""},		/* Decimal format info */
@@ -604,6 +606,7 @@ const struct language_defn cplus_language_defn =
   &exp_descriptor_standard,
   c_preprocess_and_parse,
   c_error,
+  null_post_parser,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
   c_emit_char,			/* Print a single char */
@@ -616,6 +619,7 @@ const struct language_defn cplus_language_defn =
   cp_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   cp_lookup_transparent_type,   /* lookup_transparent_type */
   cplus_demangle,		/* Language specific symbol demangler */
+  cp_class_name_from_physname,  /* Language specific class_name_from_physname */
   {"", "", "", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */
   {"%ld", "", "d", ""},		/* Decimal format info */
@@ -639,6 +643,7 @@ const struct language_defn asm_language_defn =
   &exp_descriptor_standard,
   c_preprocess_and_parse,
   c_error,
+  null_post_parser,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
   c_emit_char,			/* Print a single char */
@@ -651,6 +656,7 @@ const struct language_defn asm_language_defn =
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   NULL,				/* Language specific symbol demangler */
+  NULL,				/* Language specific class_name_from_physname */
   {"", "", "", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */
   {"%ld", "", "d", ""},		/* Decimal format info */
@@ -679,6 +685,7 @@ const struct language_defn minimal_language_defn =
   &exp_descriptor_standard,
   c_preprocess_and_parse,
   c_error,
+  null_post_parser,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
   c_emit_char,			/* Print a single char */
@@ -691,6 +698,7 @@ const struct language_defn minimal_language_defn =
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   NULL,				/* Language specific symbol demangler */
+  NULL,				/* Language specific class_name_from_physname */
   {"", "", "", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */
   {"%ld", "", "d", ""},		/* Decimal format info */

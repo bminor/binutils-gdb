@@ -253,6 +253,7 @@ const struct language_defn scm_language_defn =
   &exp_descriptor_scm,
   scm_parse,
   c_error,
+  null_post_parser,
   scm_printchar,		/* Print a character constant */
   scm_printstr,			/* Function to print string constant */
   NULL,				/* Function to print a single character */
@@ -265,6 +266,7 @@ const struct language_defn scm_language_defn =
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   NULL,				/* Language specific symbol demangler */
+  NULL,				/* Language specific class_name_from_physname */
   {"", "", "", ""},		/* Binary format info */
   {"#o%lo", "#o", "o", ""},	/* Octal format info */
   {"%ld", "", "d", ""},		/* Decimal format info */

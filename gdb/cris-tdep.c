@@ -511,7 +511,7 @@ cris_push_dummy_code (struct gdbarch *gdbarch,
 }
 
 static CORE_ADDR
-cris_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+cris_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      struct regcache *regcache, CORE_ADDR bp_addr,
 		      int nargs, struct value **args, CORE_ADDR sp,
 		      int struct_return, CORE_ADDR struct_addr)
@@ -3645,7 +3645,7 @@ _initialize_cris_tdep (void)
                "Note that this displays the address after the jump to the "
                "subroutine.", &cmdlist);
   
-  add_core_fns (&cris_elf_core_fns);
+  deprecated_add_core_fns (&cris_elf_core_fns);
   
 }
 
@@ -3795,7 +3795,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_return_value (gdbarch, cris_return_value);
   set_gdbarch_deprecated_reg_struct_has_addr (gdbarch, 
 					      cris_reg_struct_has_addr);
-  set_gdbarch_use_struct_convention (gdbarch, always_use_struct_convention);
+  set_gdbarch_deprecated_use_struct_convention (gdbarch, always_use_struct_convention);
 
   /* There are 32 registers (some of which may not be implemented).  */
   set_gdbarch_num_regs (gdbarch, 32);
@@ -3857,15 +3857,9 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* The length of the registers in the actual machine representation.  */
   set_gdbarch_deprecated_register_raw_size (gdbarch, cris_register_size);
   
-  /* The largest value DEPRECATED_REGISTER_RAW_SIZE can have.  */
-  set_gdbarch_deprecated_max_register_raw_size (gdbarch, 32);
-  
   /* The length of the registers in the program's representation.  */
   set_gdbarch_deprecated_register_virtual_size (gdbarch, cris_register_size);
   
-  /* The largest value DEPRECATED_REGISTER_VIRTUAL_SIZE can have.  */
-  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 32);
-
   set_gdbarch_deprecated_register_virtual_type (gdbarch, cris_register_virtual_type);
   
   /* Dummy frame functions.  */

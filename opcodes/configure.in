@@ -177,6 +177,7 @@ if test x${all_targets} = xfalse ; then
 	bfd_avr_arch)		ta="$ta avr-dis.lo" ;;
 	bfd_convex_arch)	;;
 	bfd_cris_arch)		ta="$ta cris-dis.lo cris-opc.lo" ;;
+	bfd_crx_arch)    	ta="$ta crx-dis.lo crx-opc.lo" ;;
 	bfd_d10v_arch)		ta="$ta d10v-dis.lo d10v-opc.lo" ;;
 	bfd_d30v_arch)		ta="$ta d30v-dis.lo d30v-opc.lo" ;;
 	bfd_dlx_arch)		ta="$ta dlx-dis.lo" ;;

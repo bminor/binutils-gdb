@@ -40,6 +40,7 @@
 #include "arch-utils.h"
 #include "osabi.h"
 #include "block.h"
+#include "infcall.h"
 
 #include "elf-bfd.h"
 
@@ -263,7 +264,7 @@ alpha_value_to_register (struct frame_info *frame, int regnum,
    structure to be returned is passed as a hidden first argument.  */
 
 static CORE_ADDR
-alpha_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+alpha_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		       struct regcache *regcache, CORE_ADDR bp_addr,
 		       int nargs, struct value **args, CORE_ADDR sp,
 		       int struct_return, CORE_ADDR struct_addr)
@@ -281,6 +282,7 @@ alpha_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   struct alpha_arg *m_arg;
   char arg_reg_buffer[ALPHA_REGISTER_SIZE * ALPHA_NUM_ARG_REGS];
   int required_arg_regs;
+  CORE_ADDR func_addr = find_function_addr (function, NULL);
 
   /* The ABI places the address of the called function in T12.  */
   regcache_cooked_write_signed (regcache, ALPHA_T12_REGNUM, func_addr);
@@ -863,14 +865,20 @@ alpha_sigtramp_frame_sniffer (struct frame_info *next_frame)
   CORE_ADDR pc = frame_pc_unwind (next_frame);
   char *name;
 
-  /* We shouldn't even bother to try if the OSABI didn't register
-     a sigcontext_addr handler.  */
-  if (!gdbarch_tdep (current_gdbarch)->sigcontext_addr)
+  /* NOTE: cagney/2004-04-30: Do not copy/clone this code.  Instead
+     look at tramp-frame.h and other simplier per-architecture
+     sigtramp unwinders.  */
+
+  /* We shouldn't even bother to try if the OSABI didn't register a
+     sigcontext_addr handler or pc_in_sigtramp hander.  */
+  if (gdbarch_tdep (current_gdbarch)->sigcontext_addr == NULL)
+    return NULL;
+  if (gdbarch_tdep (current_gdbarch)->pc_in_sigtramp == NULL)
     return NULL;
 
   /* Otherwise we should be in a signal frame.  */
   find_pc_partial_function (pc, &name, NULL, NULL);
-  if (DEPRECATED_PC_IN_SIGTRAMP (pc, name))
+  if (gdbarch_tdep (current_gdbarch)->pc_in_sigtramp (pc, name))
     return &alpha_sigtramp_frame_unwind;
 
   return NULL;
@@ -1028,6 +1036,16 @@ alpha_heuristic_frame_unwind_cache (struct frame_info *next_frame,
 	  else if ((word & 0xfc1f0000) == 0xb41e0000)	/* stq reg,n($sp) */
 	    {
 	      reg = (word & 0x03e00000) >> 21;
+
+              /* Ignore this instruction if we have already encountered
+                 an instruction saving the same register earlier in the
+                 function code.  The current instruction does not tell
+                 us where the original value upon function entry is saved.
+                 All it says is that the function we are scanning reused
+                 that register for some computation of its own, and is now
+                 saving its result.  */
+              if (info->saved_regs[reg])
+                continue;
 
 	      if (reg == 31)
 		continue;
@@ -1483,7 +1501,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Lowest text address.  This is used by heuristic_proc_start()
      to decide when to stop looking.  */
-  tdep->vm_min_address = (CORE_ADDR) 0x120000000;
+  tdep->vm_min_address = (CORE_ADDR) 0x120000000LL;
 
   tdep->dynamic_sigtramp_offset = NULL;
   tdep->sigcontext_addr = NULL;
@@ -1532,7 +1550,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Call info.  */
 
-  set_gdbarch_use_struct_convention (gdbarch, always_use_struct_convention);
+  set_gdbarch_deprecated_use_struct_convention (gdbarch, always_use_struct_convention);
   set_gdbarch_extract_return_value (gdbarch, alpha_extract_return_value);
   set_gdbarch_store_return_value (gdbarch, alpha_store_return_value);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, alpha_extract_struct_value_address);

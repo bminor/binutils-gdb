@@ -1,6 +1,6 @@
 /* opncls.c -- open and close a BFD.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000,
-   2001, 2002, 2003
+   2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    Written by Cygnus Support.
@@ -103,6 +103,7 @@ _bfd_new_bfd_contained_in (bfd *obfd)
   if (nbfd == NULL)
     return NULL;
   nbfd->xvec = obfd->xvec;
+  nbfd->iovec = obfd->iovec;
   nbfd->my_archive = obfd;
   nbfd->direction = read_direction;
   nbfd->target_defaulted = obfd->target_defaulted;
@@ -322,6 +323,183 @@ bfd_openstreamr (const char *filename, const char *target, void *streamarg)
 
   return nbfd;
 }
+
+/*
+FUNCTION
+	bfd_openr_iovec
+
+SYNOPSIS
+        bfd *bfd_openr_iovec (const char *filename, const char *target,
+                              void *(*open) (struct bfd *nbfd,
+                                             void *open_closure),
+                              void *open_closure,
+                              file_ptr (*pread) (struct bfd *nbfd,
+                                                 void *stream,
+                                                 void *buf,
+                                                 file_ptr nbytes,
+                                                 file_ptr offset),
+                              int (*close) (struct bfd *nbfd,
+                                            void *stream));
+
+DESCRIPTION
+
+        Create and return a BFD backed by a read-only @var{stream}.
+        The @var{stream} is created using @var{open}, accessed using
+        @var{pread} and destroyed using @var{close}.
+
+	Calls <<bfd_find_target>>, so @var{target} is interpreted as by
+	that function.
+
+	Calls @var{open} (which can call <<bfd_zalloc>> and
+	<<bfd_get_filename>>) to obtain the read-only stream backing
+	the BFD.  @var{open} either succeeds returning the
+	non-<<NULL>> @var{stream}, or fails returning <<NULL>>
+	(setting <<bfd_error>>).
+
+	Calls @var{pread} to request @var{nbytes} of data from
+	@var{stream} starting at @var{offset} (e.g., via a call to
+	<<bfd_read>>).  @var{pread} either succeeds returning the
+	number of bytes read (which can be less than @var{nbytes} when
+	end-of-file), or fails returning -1 (setting <<bfd_error>>).
+
+	Calls @var{close} when the BFD is later closed using
+	<<bfd_close>>.  @var{close} either succeeds returning 0, or
+	fails returning -1 (setting <<bfd_error>>).
+
+	If <<bfd_openr_iovec>> returns <<NULL>> then an error has
+	occurred.  Possible errors are <<bfd_error_no_memory>>,
+	<<bfd_error_invalid_target>> and <<bfd_error_system_call>>.
+
+*/
+
+struct opncls
+{
+  void *stream;
+  file_ptr (*pread) (struct bfd *abfd, void *stream, void *buf,
+		     file_ptr nbytes, file_ptr offset);
+  int (*close) (struct bfd *abfd, void *stream);
+  file_ptr where;
+};
+
+static file_ptr
+opncls_btell (struct bfd *abfd)
+{
+  struct opncls *vec = abfd->iostream;
+  return vec->where;
+}
+
+static int
+opncls_bseek (struct bfd *abfd, file_ptr offset, int whence)
+{
+  struct opncls *vec = abfd->iostream;
+  switch (whence)
+    {
+    case SEEK_SET: vec->where = offset; break;
+    case SEEK_CUR: vec->where += offset; break;
+    case SEEK_END: return -1;
+    }
+  return 0;
+}
+
+static file_ptr
+opncls_bread (struct bfd *abfd, void *buf, file_ptr nbytes)
+{
+  struct opncls *vec = abfd->iostream;
+  file_ptr nread = vec->pread (abfd, vec->stream, buf, nbytes, vec->where);
+  if (nread < 0)
+    return nread;
+  vec->where += nread;
+  return nread;
+}
+
+static file_ptr
+opncls_bwrite (struct bfd *abfd ATTRIBUTE_UNUSED,
+	      const void *where ATTRIBUTE_UNUSED,
+	      file_ptr nbytes ATTRIBUTE_UNUSED)
+{
+  return -1;
+}
+
+static int
+opncls_bclose (struct bfd *abfd)
+{
+  struct opncls *vec = abfd->iostream;
+  /* Since the VEC's memory is bound to the bfd deleting the bfd will
+     free it.  */
+  int status = 0;
+  if (vec->close != NULL)
+    status = vec->close (abfd, vec->stream);
+  abfd->iostream = NULL;
+  return status;
+}
+
+static int
+opncls_bflush (struct bfd *abfd ATTRIBUTE_UNUSED)
+{
+  return 0;
+}
+
+static int
+opncls_bstat (struct bfd *abfd ATTRIBUTE_UNUSED, struct stat *sb)
+{
+  memset (sb, 0, sizeof (*sb));
+  return 0;
+}
+
+static const struct bfd_iovec opncls_iovec = {
+  &opncls_bread, &opncls_bwrite, &opncls_btell, &opncls_bseek,
+  &opncls_bclose, &opncls_bflush, &opncls_bstat
+};
+
+bfd *
+bfd_openr_iovec (const char *filename, const char *target,
+		 void *(*open) (struct bfd *nbfd,
+				void *open_closure),
+		 void *open_closure,
+		 file_ptr (*pread) (struct bfd *abfd,
+				    void *stream,
+				    void *buf,
+				    file_ptr nbytes,
+				    file_ptr offset),
+		 int (*close) (struct bfd *nbfd,
+			       void *stream))
+{
+  bfd *nbfd;
+  const bfd_target *target_vec;
+  struct opncls *vec;
+  void *stream;
+
+  nbfd = _bfd_new_bfd ();
+  if (nbfd == NULL)
+    return NULL;
+
+  target_vec = bfd_find_target (target, nbfd);
+  if (target_vec == NULL)
+    {
+      _bfd_delete_bfd (nbfd);
+      return NULL;
+    }
+
+  nbfd->filename = filename;
+  nbfd->direction = read_direction;
+
+  stream = open (nbfd, open_closure);
+  if (stream == NULL)
+    {
+      _bfd_delete_bfd (nbfd);
+      return NULL;
+    }
+
+  vec = bfd_zalloc (nbfd, sizeof (struct opncls));
+  vec->stream = stream;
+  vec->pread = pread;
+  vec->close = close;
+
+  nbfd->iovec = &opncls_iovec;
+  nbfd->iostream = vec;
+
+  return nbfd;
+}
 
 /* bfd_openw -- open for writing.
    Returns a pointer to a freshly-allocated BFD on success, or NULL.
@@ -415,7 +593,12 @@ bfd_close (bfd *abfd)
   if (! BFD_SEND (abfd, _close_and_cleanup, (abfd)))
     return FALSE;
 
-  ret = bfd_cache_close (abfd);
+  /* FIXME: cagney/2004-02-15: Need to implement a BFD_IN_MEMORY io
+     vector.  */
+  if (!(abfd->flags & BFD_IN_MEMORY))
+    ret = abfd->iovec->bclose (abfd);
+  else
+    ret = 0;
 
   /* If the file was open for writing and is now executable,
      make it so.  */
@@ -630,7 +813,7 @@ INTERNAL_FUNCTION
 	bfd_alloc
 
 SYNOPSIS
-	void *bfd_alloc (bfd *abfd, size_t wanted);
+	void *bfd_alloc (bfd *abfd, bfd_size_type wanted);
 
 DESCRIPTION
 	Allocate a block of @var{wanted} bytes of memory attached to
@@ -793,12 +976,10 @@ DESCRIPTION
 static char *
 get_debug_link_info (bfd *abfd, unsigned long *crc32_out)
 {
-  asection * sect;
-  bfd_size_type debuglink_size;
+  asection *sect;
   unsigned long crc32;
-  char * contents;
+  bfd_byte *contents;
   int crc_offset;
-  bfd_boolean ret;
 
   BFD_ASSERT (abfd);
   BFD_ASSERT (crc32_out);
@@ -808,16 +989,10 @@ get_debug_link_info (bfd *abfd, unsigned long *crc32_out)
   if (sect == NULL)
     return NULL;
 
-  debuglink_size = bfd_section_size (abfd, sect);  
-
-  contents = malloc (debuglink_size);
-  if (contents == NULL)
-    return NULL;
-
-  ret = bfd_get_section_contents (abfd, sect, contents, 0, debuglink_size);
-  if (! ret)
+  if (!bfd_malloc_and_get_section (abfd, sect, &contents))
     {
-      free (contents);
+      if (contents != NULL)
+	free (contents);
       return NULL;
     }
 

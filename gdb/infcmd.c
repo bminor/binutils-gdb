@@ -186,10 +186,6 @@ CORE_ADDR step_range_end;	/* Exclusive */
 
 struct frame_id step_frame_id;
 
-/* Our notion of the current stack pointer.  */
-
-CORE_ADDR step_sp;
-
 enum step_over_calls_kind step_over_calls;
 
 /* If stepping, nonzero means step count is > 1
@@ -379,13 +375,14 @@ tty_command (char *file, int from_tty)
   inferior_io_terminal = savestring (file, strlen (file));
 }
 
-static void
-run_command (char *args, int from_tty)
+/* Kill the inferior if already running.  This function is designed
+   to be called when we are about to start the execution of the program
+   from the beginning.  Ask the user to confirm that he wants to restart
+   the program being debugged when FROM_TTY is non-null.  */
+
+void
+kill_if_already_running (int from_tty)
 {
-  char *exec_file;
-
-  dont_repeat ();
-
   if (! ptid_equal (inferior_ptid, null_ptid) && target_has_execution)
     {
       if (from_tty
@@ -398,7 +395,16 @@ Start it from the beginning? "))
 #endif
       init_wait_for_inferior ();
     }
+}
 
+static void
+run_command (char *args, int from_tty)
+{
+  char *exec_file;
+
+  dont_repeat ();
+
+  kill_if_already_running (from_tty);
   clear_breakpoint_hit_counts ();
 
   /* Purge old solib objfiles. */
@@ -473,7 +479,7 @@ Start it from the beginning? "))
   /* We call get_inferior_args() because we might need to compute
      the value now.  */
   target_create_inferior (exec_file, get_inferior_args (),
-			  environ_vector (inferior_environ));
+			  environ_vector (inferior_environ), from_tty);
 }
 
 
@@ -484,6 +490,29 @@ run_no_args_command (char *args, int from_tty)
   xfree (old_args);
 }
 
+
+/* Start the execution of the program up until the beginning of the main
+   program.  */
+
+static void
+start_command (char *args, int from_tty)
+{
+  /* Some languages such as Ada need to search inside the program
+     minimal symbols for the location where to put the temporary
+     breakpoint before starting.  */
+  if (!have_minimal_symbols ())
+    error ("No symbol table loaded.  Use the \"file\" command.");
+
+  /* If the inferior is already running, we want to ask the user if we
+     should restart it or not before we insert the temporary breakpoint.
+     This makes sure that this command doesn't have any side effect if
+     the user changes its mind.  */
+  kill_if_already_running (from_tty);
+
+  /* Insert the temporary breakpoint, and run...  */
+  tbreak_command (main_name (), 0);
+  run_command (args, from_tty);
+} 
 
 void
 continue_command (char *proc_count_exp, int from_tty)
@@ -624,7 +653,6 @@ step_1 (int skip_subroutines, int single_inst, char *count_string)
 	  if (!frame)		/* Avoid coredump here.  Why tho? */
 	    error ("No current frame");
 	  step_frame_id = get_frame_id (frame);
-	  step_sp = read_sp ();
 
 	  if (!single_inst)
 	    {
@@ -724,7 +752,6 @@ step_once (int skip_subroutines, int single_inst, int count)
       if (!frame)		/* Avoid coredump here.  Why tho? */
 	error ("No current frame");
       step_frame_id = get_frame_id (frame);
-      step_sp = read_sp ();
 
       if (!single_inst)
 	{
@@ -977,7 +1004,6 @@ until_next_command (int from_tty)
 
   step_over_calls = STEP_OVER_ALL;
   step_frame_id = get_frame_id (frame);
-  step_sp = read_sp ();
 
   step_multi = 0;		/* Only one call to proceed */
 
@@ -1046,80 +1072,62 @@ advance_command (char *arg, int from_tty)
   until_break_command (arg, from_tty, 1);
 }
 
-
 /* Print the result of a function at the end of a 'finish' command.  */
 
 static void
 print_return_value (int struct_return, struct type *value_type)
 {
+  struct gdbarch *gdbarch = current_gdbarch;
   struct cleanup *old_chain;
   struct ui_stream *stb;
   struct value *value;
 
-  if (!struct_return)
-    {
-      /* The return value can be found in the inferior's registers.  */
-      value = register_value_being_returned (value_type, stop_registers);
-    }
-  /* FIXME: cagney/2004-01-17: When both return_value and
-     extract_returned_value_address are available, should use that to
-     find the address of and then extract the returned value.  */
+  gdb_assert (TYPE_CODE (value_type) != TYPE_CODE_VOID);
+
   /* FIXME: 2003-09-27: When returning from a nested inferior function
      call, it's possible (with no help from the architecture vector)
      to locate and return/print a "struct return" value.  This is just
      a more complicated case of what is already being done in in the
      inferior function call code.  In fact, when inferior function
      calls are made async, this will likely be made the norm.  */
-  else if (gdbarch_return_value_p (current_gdbarch))
-    /* We cannot determine the contents of the structure because it is
-       on the stack, and we don't know where, since we did not
-       initiate the call, as opposed to the call_function_by_hand
-       case.  */
+
+  switch (gdbarch_return_value (gdbarch, value_type, NULL, NULL, NULL))
     {
-      gdb_assert (gdbarch_return_value (current_gdbarch, value_type,
-					NULL, NULL, NULL)
-		  == RETURN_VALUE_STRUCT_CONVENTION);
+    case RETURN_VALUE_REGISTER_CONVENTION:
+    case RETURN_VALUE_ABI_RETURNS_ADDRESS:
+      value = allocate_value (value_type);
+      CHECK_TYPEDEF (value_type);
+      gdbarch_return_value (current_gdbarch, value_type, stop_registers,
+			    VALUE_CONTENTS_RAW (value), NULL);
+      break;
+    case RETURN_VALUE_STRUCT_CONVENTION:
+      value = NULL;
+      break;
+    default:
+      internal_error (__FILE__, __LINE__, "bad switch");
+    }
+
+  if (value)
+    {
+      /* Print it.  */
+      stb = ui_out_stream_new (uiout);
+      old_chain = make_cleanup_ui_out_stream_delete (stb);
+      ui_out_text (uiout, "Value returned is ");
+      ui_out_field_fmt (uiout, "gdb-result-var", "$%d",
+			record_latest_value (value));
+      ui_out_text (uiout, " = ");
+      value_print (value, stb->stream, 0, Val_no_prettyprint);
+      ui_out_field_stream (uiout, "return-value", stb);
+      ui_out_text (uiout, "\n");
+      do_cleanups (old_chain);
+    }
+  else
+    {
       ui_out_text (uiout, "Value returned has type: ");
       ui_out_field_string (uiout, "return-type", TYPE_NAME (value_type));
       ui_out_text (uiout, ".");
       ui_out_text (uiout, " Cannot determine contents\n");
-      return;
     }
-  else
-    {
-      if (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P ())
-	{
-	  CORE_ADDR addr = DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS (stop_registers);
-	  if (!addr)
-	    error ("Function return value unknown.");
-	  value = value_at (value_type, addr, NULL);
-	}
-      else
-	{
-	  /* It is "struct return" yet the value is being extracted,
-             presumably from registers, using EXTRACT_RETURN_VALUE.
-             This doesn't make sense.  Unfortunately, the legacy
-             interfaces allowed this behavior.  Sigh!  */
-	  value = allocate_value (value_type);
-	  CHECK_TYPEDEF (value_type);
-	  /* If the function returns void, don't bother fetching the
-	     return value.  */
-	  EXTRACT_RETURN_VALUE (value_type, stop_registers,
-				VALUE_CONTENTS_RAW (value));
-	}
-    }
-
-  /* Print it.  */
-  stb = ui_out_stream_new (uiout);
-  old_chain = make_cleanup_ui_out_stream_delete (stb);
-  ui_out_text (uiout, "Value returned is ");
-  ui_out_field_fmt (uiout, "gdb-result-var", "$%d",
-		    record_latest_value (value));
-  ui_out_text (uiout, " = ");
-  value_print (value, stb->stream, 0, Val_no_prettyprint);
-  ui_out_field_stream (uiout, "return-value", stb);
-  ui_out_text (uiout, "\n");
-  do_cleanups (old_chain);
 }
 
 /* Stuff that needs to be done by the finish command after the target
@@ -1234,8 +1242,7 @@ finish_command (char *arg, int from_tty)
   if (from_tty)
     {
       printf_filtered ("Run till exit from ");
-      print_stack_frame (deprecated_selected_frame,
-			 frame_relative_level (deprecated_selected_frame), 0);
+      print_stack_frame (get_selected_frame (), 1, LOCATION);
     }
 
   /* If running asynchronously and the target support asynchronous
@@ -1505,8 +1512,7 @@ default_print_registers_info (struct gdbarch *gdbarch,
 {
   int i;
   const int numregs = NUM_REGS + NUM_PSEUDO_REGS;
-  char raw_buffer[MAX_REGISTER_SIZE];
-  char virtual_buffer[MAX_REGISTER_SIZE];
+  char buffer[MAX_REGISTER_SIZE];
 
   if (DEPRECATED_DO_REGISTERS_INFO_P ())
     {
@@ -1546,26 +1552,10 @@ default_print_registers_info (struct gdbarch *gdbarch,
       print_spaces_filtered (15 - strlen (REGISTER_NAME (i)), file);
 
       /* Get the data in raw format.  */
-      if (! frame_register_read (frame, i, raw_buffer))
+      if (! frame_register_read (frame, i, buffer))
 	{
 	  fprintf_filtered (file, "*value not available*\n");
 	  continue;
-	}
-
-      /* FIXME: cagney/2002-08-03: This code shouldn't be necessary.
-         The function frame_register_read() should have returned the
-         pre-cooked register so no conversion is necessary.  */
-      /* Convert raw data to virtual format if necessary.  */
-      if (DEPRECATED_REGISTER_CONVERTIBLE_P ()
-	  && DEPRECATED_REGISTER_CONVERTIBLE (i))
-	{
-	  DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL (i, register_type (current_gdbarch, i),
-				       raw_buffer, virtual_buffer);
-	}
-      else
-	{
-	  memcpy (virtual_buffer, raw_buffer,
-		  DEPRECATED_REGISTER_VIRTUAL_SIZE (i));
 	}
 
       /* If virtual format is floating, print it that way, and in raw
@@ -1574,7 +1564,7 @@ default_print_registers_info (struct gdbarch *gdbarch,
 	{
 	  int j;
 
-	  val_print (register_type (current_gdbarch, i), virtual_buffer, 0, 0,
+	  val_print (register_type (current_gdbarch, i), buffer, 0, 0,
 		     file, 0, 1, 0, Val_pretty_default);
 
 	  fprintf_filtered (file, "\t(raw 0x");
@@ -1585,21 +1575,21 @@ default_print_registers_info (struct gdbarch *gdbarch,
 		idx = j;
 	      else
 		idx = DEPRECATED_REGISTER_RAW_SIZE (i) - 1 - j;
-	      fprintf_filtered (file, "%02x", (unsigned char) raw_buffer[idx]);
+	      fprintf_filtered (file, "%02x", (unsigned char) buffer[idx]);
 	    }
 	  fprintf_filtered (file, ")");
 	}
       else
 	{
 	  /* Print the register in hex.  */
-	  val_print (register_type (current_gdbarch, i), virtual_buffer, 0, 0,
+	  val_print (register_type (current_gdbarch, i), buffer, 0, 0,
 		     file, 'x', 1, 0, Val_pretty_default);
           /* If not a vector register, print it also according to its
              natural format.  */
 	  if (TYPE_VECTOR (register_type (current_gdbarch, i)) == 0)
 	    {
 	      fprintf_filtered (file, "\t");
-	      val_print (register_type (current_gdbarch, i), virtual_buffer, 0, 0,
+	      val_print (register_type (current_gdbarch, i), buffer, 0, 0,
 			 file, 0, 1, 0, Val_pretty_default);
 	    }
 	}
@@ -1798,9 +1788,6 @@ attach_command (char *args, int from_tty)
      based on what modes we are starting it with.  */
   target_terminal_init ();
 
-  /* Install inferior's terminal modes.  */
-  target_terminal_inferior ();
-
   /* Set up execution context to know that we should return from
      wait_for_inferior as soon as the target reports a stop.  */
   init_wait_for_inferior ();
@@ -1859,10 +1846,13 @@ attach_command (char *args, int from_tty)
    */
   target_post_attach (PIDGET (inferior_ptid));
 
+  /* Install inferior's terminal modes.  */
+  target_terminal_inferior ();
+
   normal_stop ();
 
-  if (attach_hook)
-    attach_hook ();
+  if (deprecated_attach_hook)
+    deprecated_attach_hook ();
 }
 
 /*
@@ -1884,8 +1874,8 @@ detach_command (char *args, int from_tty)
 #if defined(SOLIB_RESTART)
   SOLIB_RESTART ();
 #endif
-  if (detach_hook)
-    detach_hook ();
+  if (deprecated_detach_hook)
+    deprecated_detach_hook ();
 }
 
 /* Disconnect from the current target without resuming it (leaving it
@@ -1904,8 +1894,8 @@ disconnect_command (char *args, int from_tty)
 #if defined(SOLIB_RESTART)
   SOLIB_RESTART ();
 #endif
-  if (detach_hook)
-    detach_hook ();
+  if (deprecated_detach_hook)
+    deprecated_detach_hook ();
 }
 
 /* Stop the execution of the target while running in async mode, in
@@ -2133,6 +2123,13 @@ use \"set args\" without arguments.");
   if (xdb_commands)
     add_com ("R", class_run, run_no_args_command,
 	     "Start debugged program with no arguments.");
+
+  c = add_com ("start", class_run, start_command,
+               "\
+Run the debugged program until the beginning of the main procedure.\n\
+You may specify arguments to give to your program, just as with the\n\
+\"run\" command.");
+  set_cmd_completer (c, filename_completer);
 
   add_com ("interrupt", class_run, interrupt_target_command,
 	   "Interrupt the execution of the debugged program.");

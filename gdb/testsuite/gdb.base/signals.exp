@@ -60,102 +60,47 @@ proc signal_tests_1 {} {
 	# An alarm has been signaled, give the signal time to get delivered.
 	sleep 2
 
-	# i386 BSD currently fails the next test with a SIGTRAP.
-	setup_xfail "i*86-*-bsd*"
-	# But Dynix has a DECR_PC_AFTER_BREAK of zero, so the failure
-	# is shadowed by hitting the through_sigtramp_breakpoint.
-	clear_xfail "i*86-sequent-bsd*"
-	# Univel SVR4 i386 continues instead of stepping.
-	setup_xfail "i*86-univel-sysv4*"
-	# lynx fails with "next" acting like "continue"
-	setup_xfail "*-*-*lynx*"
-	# linux (aout versions) also fails with "next" acting like "continue"
-	# this is probably more dependant on the kernel version than on the
-	# object file format or utils.  (sigh)
-	setup_xfail "i*86-pc-linuxaout-gnu" "i*86-pc-linuxoldld-gnu"
-	send_gdb "next\n"
-	gdb_expect {
-	    -re "alarm .*$gdb_prompt $" { pass "next to 2nd alarm (1)" }
-	    -re "Program received signal SIGTRAP.*first.*$gdb_prompt $" {
+	# NOTE: cagney/2004-05-09: The following is retained as an
+	# historical reference.  Because signal delivery when doing a
+	# next has been changed to use a continue, and not a
+	# single-step, the kernel bug of a stuck trace-bit in the
+	# trampoline's saved PS register is avoided.
 
-		# This can happen on machines that have a trace flag
-		# in their PS register.
-		# The trace flag in the PS register will be set due to
-		# the `next' command.
-		# Before calling the signal handler, the PS register
-		# is pushed along with the context on the user stack.
-		# When the signal handler has finished, it reenters the
-		# the kernel via a sigreturn syscall, which restores the
-		# PS register along with the context.
-		# If the kernel erroneously does not clear the trace flag
-		# in the pushed context, gdb will receive a SIGTRAP from
-		# the set trace flag in the restored context after the
-		# signal handler has finished.
+	# This can happen on machines that have a trace flag in their
+	# PS register.  The trace flag in the PS register will be set
+	# due to the `next' command.  Before calling the signal
+	# handler, the PS register is pushed along with the context on
+	# the user stack.  When the signal handler has finished, it
+	# reenters the the kernel via a sigreturn syscall, which
+	# restores the PS register along with the context.  If the
+	# kernel erroneously does not clear the trace flag in the
+	# pushed context, gdb will receive a SIGTRAP from the set
+	# trace flag in the restored context after the signal handler
+	# has finished.
 
-		# I do not yet understand why the SIGTRAP does not occur
-		# after stepping the instruction at the restored PC on
-		# i386 BSDI 1.0 systems.
+	# I do not yet understand why the SIGTRAP does not occur after
+	# stepping the instruction at the restored PC on i386 BSDI 1.0
+	# systems.
 
-		# Note that the vax under Ultrix also exhibits
-		# this behaviour (it is uncovered by the `continue from
-		# a break in a signal handler' test below).
-		# With this test the failure is shadowed by hitting the
-		# through_sigtramp_breakpoint upon return from the signal
-		# handler.
+	# Note that the vax under Ultrix also exhibits this behaviour
+	# (it is uncovered by the `continue from a break in a signal
+	# handler' test below).  With this test the failure is
+	# shadowed by hitting the through_sigtramp_breakpoint upon
+	# return from the signal handler.
+	
+	# SVR4 and Linux based i*86 systems exhibit this behaviour as
+	# well (it is uncovered by the `continue from a break in a
+	# signal handler' test below).  As these systems use procfs,
+	# where we tell the kernel not to tell gdb about `pass'
+	# signals, and the trace flag is cleared by the kernel before
+	# entering the sigtramp routine, GDB will not notice the
+	# execution of the signal handler.  Upon return from the
+	# signal handler, GDB will receive a SIGTRAP from the set
+	# trace flag in the restored context.  The SIGTRAP marks the
+	# end of a (albeit long winded) single step for GDB, causing
+	# this test to pass.
 
-		# SVR4 and Linux based i*86 systems exhibit this behaviour
-		# as well (it is uncovered by the `continue from a break
-		# in a signal handler' test below).
-		# As these systems use procfs, where we tell the kernel not
-		# to tell gdb about `pass' signals, and the trace flag is
-		# cleared by the kernel before entering the sigtramp
-		# routine, GDB will not notice the execution of the signal 
-		# handler.
-		# Upon return from the signal handler, GDB will receive
-		# a SIGTRAP from the set trace flag in the restored context.
-		# The SIGTRAP marks the end of a (albeit long winded)
-		# single step for GDB, causing this test to pass.
-
-		fail "next to 2nd alarm (1) (probably kernel bug)"
-		gdb_test "next" "alarm.*" "next to 2nd alarm (1)"
-	    }
-	    -re "Program exited with code.*$gdb_prompt $" {
-
-		# This is apparently a bug in the UnixWare kernel (but
-		# has not been investigated beyond the
-		# resume/target_wait level, and has not been reported
-		# to Univel).  If it steps when a signal is pending,
-		# it does a continue instead.  I don't know whether
-		# there is a workaround.
-
-		# Perhaps this problem exists on other SVR4 systems;
-		# but (a) we have no reason to think so, and (b) if we
-		# put a wrong xfail here, we never get an XPASS to let
-		# us know that it was incorrect (and then if such a
-		# configuration regresses we have no way of knowing).
-		# Solaris is not a relevant data point either way
-		# because it lacks single stepping.
-
-		# fnf: I don't agree with the above philosophy.  We
-		# can never be sure that any particular XFAIL is
-		# specified 100% correctly in that no systems with
-		# the bug are missed and all systems without the bug
-		# are excluded.  If we include an XFAIL that isn't
-		# appropriate for a particular system, then when that
-		# system gets tested it will XPASS, and someone should
-		# investigate and fix the setup_xfail as appropriate,
-		# or more preferably, the actual bug.  Each such case
-		# adds more data to narrowing down the scope of the
-		# problem and ultimately fixing it.
-
-		setup_xfail "i*86-*-sysv4*"
-		fail "'next' behaved as 'continue (known SVR4 bug)'"
-		return 0
-	    }
-	    -re ".*$gdb_prompt $" { fail "next to 2nd alarm (1)" }
-	    timeout { fail "next to 2nd alarm (1); (timeout)" }
-	    eof { fail "next to 2nd alarm (1); (eof)" }
-	}
+	gdb_test "next" "alarm .*" "next to 2nd alarm"
 
 	gdb_test "break handler" "Breakpoint \[0-9\]+ .*"
 	gdb_test "next" "\\+\\+count; /\\* second \\*/" \
@@ -191,41 +136,13 @@ proc signal_tests_1 {} {
 	gdb_test "break func1" "Breakpoint \[0-9\]+ .*"
 	gdb_test "break func2" "Breakpoint \[0-9\]+ .*"
 
-	# Vax Ultrix and i386 BSD currently fail the next test with
-	# a SIGTRAP, but with different symptoms.
-	setup_xfail "vax-*-ultrix*"
-	setup_xfail "i*86-*-bsd*"
-	setup_xfail "i*86-*-freebsd*"
-	setup_xfail "i*86-pc-linux-gnu*"
-	setup_xfail "i*86-*-solaris2*"
-	send_gdb "continue\n"
-	gdb_expect {
-	    -re "Breakpoint.*func1.*$gdb_prompt $" { pass "continue to func1" }
-	    -re "Program received signal SIGTRAP.*second.*$gdb_prompt $" {
+	# NOTE: cagney/2004-05-09: Ref "next to 2nd alarm" above.
+	# Because signal delivery when doing a next has been changed
+	# to use a continue, and not a single-step, the kernel bug of
+	# a stuck trace-bit in the trampoline's saved PS register is
+	# avoided.
 
-		# See explanation for `next to 2nd alarm (1)' fail above.
-		# We did step into the signal handler, hit a breakpoint
-		# in the handler and continued from the breakpoint.
-		# The set trace flag in the restored context is causing
-		# the SIGTRAP, without stepping an instruction.
-
-		fail "continue to func1 (probably kernel bug)"
-		gdb_test "continue" "Breakpoint.*func1.*" \
-		    "extra continue to func1"
-	    }
-	    -re "Program received signal SIGTRAP.*func1 ..;.*$gdb_prompt $" {
-
-		# On the vax under Ultrix the set trace flag in the restored
-		# context is causing the SIGTRAP, but after stepping one
-		# instruction, as expected.
-
-		fail "continue to func1 (probably kernel bug)"
-		gdb_test "continue" "Breakpoint.*func1.*" \
-		    "extra continue to func1"
-	    }
-	    -re ".*$gdb_prompt $" { fail "continue to func1" }
-	    default { fail "continue to func1" }
-	}
+	gdb_test "continue" "Breakpoint.*func1.*" "continue to func1"
 
 	setup_xfail "*-*-irix*"
 	send_gdb "signal SIGUSR1\n"

@@ -55,7 +55,7 @@ sparc32nbsd_supply_gregset (const struct regset *regset,
 			    struct regcache *regcache,
 			    int regnum, const void *gregs, size_t len)
 {
-  sparc32_supply_gregset (regset->descr, regcache, regnum, gregs);
+  sparc32_supply_gregset (&sparc32nbsd_gregset, regcache, regnum, gregs);
 
   /* Traditional NetBSD core files don't use multiple register sets.
      Instead, the general-purpose and floating-point registers are
@@ -274,16 +274,12 @@ sparc32nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_long_double_bit (gdbarch, 64);
   set_gdbarch_long_double_format (gdbarch, &floatformat_ieee_double_big);
 
-  tdep->gregset = XMALLOC (struct regset);
-  tdep->gregset->descr = &sparc32nbsd_gregset;
-  tdep->gregset->supply_regset = sparc32nbsd_supply_gregset;
+  tdep->gregset = regset_alloc (gdbarch, sparc32nbsd_supply_gregset, NULL);
   tdep->sizeof_gregset = 20 * 4;
 
-  tdep->fpregset = XMALLOC (struct regset);
-  tdep->fpregset->supply_regset = sparc32nbsd_supply_fpregset;
+  tdep->fpregset = regset_alloc (gdbarch, sparc32nbsd_supply_fpregset, NULL);
   tdep->sizeof_fpregset = 33 * 4;
 
-  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, sparc32nbsd_pc_in_sigtramp);
   frame_unwind_append_sniffer (gdbarch, sparc32nbsd_sigtramp_frame_sniffer);
 }
 
@@ -346,9 +342,8 @@ _initialize_sparnbsd_tdep (void)
   gdbarch_register_osabi_sniffer (bfd_arch_sparc, bfd_target_aout_flavour,
 				  sparcnbsd_aout_osabi_sniffer);
 
-  /* BFD doesn't set the architecture for NetBSD style a.out core
-     files.  */
-  gdbarch_register_osabi_sniffer (bfd_arch_unknown, bfd_target_unknown_flavour,
+  /* BFD doesn't set a flavour for NetBSD style a.out core files.  */
+  gdbarch_register_osabi_sniffer (bfd_arch_sparc, bfd_target_unknown_flavour,
                                   sparcnbsd_core_osabi_sniffer);
 
   gdbarch_register_osabi (bfd_arch_sparc, 0, GDB_OSABI_NETBSD_AOUT,

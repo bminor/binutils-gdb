@@ -50,8 +50,6 @@ struct MessageIO
 /* Prototypes for functions located in other files */
 extern void break_command (char *, int);
 
-extern int (*ui_loop_hook) (int);
-
 /* Prototypes for local functions */
 static int init_hidden_window (void);
 
@@ -443,7 +441,7 @@ v850ice_wait (ptid_t ptid, struct target_waitstatus *status)
     {
       if (count++ % 100000)
 	{
-	  ui_loop_hook (0);
+	  deprecated_ui_loop_hook (0);
 	  count = 0;
 	}
 

@@ -37,9 +37,6 @@
 #include "block.h"
 #include "parser-defs.h"
 
-/* Defined in symtab.c */
-extern int hp_som_som_object_present;
-
 /* This is defined in valops.c */
 extern int overload_resolution;
 
@@ -972,7 +969,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	  /* 1997-08-01 Currently we do not support function invocation
 	     via pointers-to-methods with HP aCC. Pointer does not point
 	     to the function, but possibly to some thunk. */
-	  if (hp_som_som_object_present)
+	  if (deprecated_hp_som_som_object_present)
 	    {
 	      error ("Not implemented: function invocation through pointer to method with HP aCC");
 	    }
@@ -1368,7 +1365,7 @@ evaluate_subexp_standard (struct type *expect_type,
       arg2 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
 
       /* With HP aCC, pointers to methods do not point to the function code */
-      if (hp_som_som_object_present &&
+      if (deprecated_hp_som_som_object_present &&
 	  (TYPE_CODE (VALUE_TYPE (arg2)) == TYPE_CODE_PTR) &&
       (TYPE_CODE (TYPE_TARGET_TYPE (VALUE_TYPE (arg2))) == TYPE_CODE_METHOD))
 	error ("Pointers to methods not supported with HP aCC");	/* 1997-08-19 */
@@ -1381,7 +1378,7 @@ evaluate_subexp_standard (struct type *expect_type,
       arg2 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
 
       /* With HP aCC, pointers to methods do not point to the function code */
-      if (hp_som_som_object_present &&
+      if (deprecated_hp_som_som_object_present &&
 	  (TYPE_CODE (VALUE_TYPE (arg2)) == TYPE_CODE_PTR) &&
       (TYPE_CODE (TYPE_TARGET_TYPE (VALUE_TYPE (arg2))) == TYPE_CODE_METHOD))
 	error ("Pointers to methods not supported with HP aCC");	/* 1997-08-19 */
@@ -1391,7 +1388,7 @@ evaluate_subexp_standard (struct type *expect_type,
     handle_pointer_to_member:
       /* HP aCC generates offsets that have bit #29 set; turn it off to get
          a real offset to the member. */
-      if (hp_som_som_object_present)
+      if (deprecated_hp_som_som_object_present)
 	{
 	  if (!mem_offset)	/* no bias -> really null */
 	    error ("Attempted dereference of null pointer-to-member");
@@ -1431,7 +1428,7 @@ evaluate_subexp_standard (struct type *expect_type,
       arg2 = evaluate_subexp (VALUE_TYPE (arg1), exp, pos, noside);
 
       /* Do special stuff for HP aCC pointers to members */
-      if (hp_som_som_object_present)
+      if (deprecated_hp_som_som_object_present)
 	{
 	  /* 1997-08-19 Can't assign HP aCC pointers to methods. No details of
 	     the implementation yet; but the pointer appears to point to a code
@@ -1934,7 +1931,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	{
 	  struct value *retvalp = evaluate_subexp_for_address (exp, pos, noside);
 	  /* If HP aCC object, use bias for pointers to members */
-	  if (hp_som_som_object_present &&
+	  if (deprecated_hp_som_som_object_present &&
 	      (TYPE_CODE (VALUE_TYPE (retvalp)) == TYPE_CODE_PTR) &&
 	      (TYPE_CODE (TYPE_TARGET_TYPE (VALUE_TYPE (retvalp))) == TYPE_CODE_MEMBER))
 	    {

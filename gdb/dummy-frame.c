@@ -1,8 +1,8 @@
 /* Code dealing with dummy stack frames, for GDB, the GNU debugger.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software
-   Foundation, Inc.
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free
+   Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -112,7 +112,7 @@ find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
   return NULL;
 }
 
-struct regcache *
+static struct regcache *
 deprecated_find_dummy_frame_regcache (CORE_ADDR pc, CORE_ADDR fp)
 {
   struct dummy_frame *dummy = find_dummy_frame (pc, fp);
@@ -131,7 +131,7 @@ deprecated_generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
   return deprecated_grub_regcache_for_registers (regcache);
 }
 
-/* Function: pc_in_call_dummy (pc, sp, fp)
+/* Function: pc_in_call_dummy (pc)
 
    Return true if the PC falls in a dummy frame created by gdb for an
    inferior call.  The code below which allows DECR_PC_AFTER_BREAK is
@@ -139,7 +139,7 @@ deprecated_generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
    subtracted out.  */
 
 int
-deprecated_pc_in_call_dummy (CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR fp)
+deprecated_pc_in_call_dummy (CORE_ADDR pc)
 {
   return pc_in_dummy_frame (pc);
 }
@@ -151,11 +151,7 @@ deprecated_pc_in_call_dummy (CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR fp)
 
    FIXME: cagney/2002-11-23: This is silly.  Surely "infrun.c" can
    figure out what the real PC (as in the resume address) is BEFORE
-   calling this function (Oh, and I'm not even sure that this function
-   is called with an decremented PC, the call to pc_in_call_dummy() in
-   that file is conditional on
-   !DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET_P yet generic dummy
-   targets set DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET. True?).  */
+   calling this function.  */
 
 static int
 pc_in_dummy_frame (CORE_ADDR pc)
@@ -353,7 +349,7 @@ dummy_frame_this_id (struct frame_info *next_frame,
 	 determine the dummy frame's ID.  */
       (*this_id) = gdbarch_unwind_dummy_id (current_gdbarch, next_frame);
     }
-  else if (frame_relative_level (next_frame) < 0)
+  else if (get_frame_type (next_frame) == SENTINEL_FRAME)
     {
       /* We're unwinding a sentinel frame, the PC of which is pointing
 	 at a stack dummy.  Fake up the dummy frame's ID using the
@@ -398,7 +394,6 @@ const struct frame_unwind *
 dummy_frame_sniffer (struct frame_info *next_frame)
 {
   CORE_ADDR pc = frame_pc_unwind (next_frame);
-  gdb_assert (DEPRECATED_USE_GENERIC_DUMMY_FRAMES);
   if (pc_in_dummy_frame (pc))
     return &dummy_frame_unwind;
   else

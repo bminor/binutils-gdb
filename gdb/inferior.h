@@ -364,10 +364,6 @@ extern CORE_ADDR step_range_end;	/* Exclusive */
 
 extern struct frame_id step_frame_id;
 
-/* Our notion of the current stack pointer.  */
-
-extern CORE_ADDR step_sp;
-
 /* 1 means step over all subroutine calls.
    -1 means step over calls to undebuggable functions.  */
 
@@ -443,25 +439,10 @@ extern int attach_flag;
 /* FIXME: cagney/2000-04-17: gdbarch should manage this.  The default
    shouldn't be necessary. */
 
-#if !defined PUSH_DUMMY_FRAME
-#define PUSH_DUMMY_FRAME (internal_error (__FILE__, __LINE__, "PUSH_DUMMY_FRAME"), 0)
-#endif
-
 #if !defined STORE_STRUCT_RETURN
 #define STORE_STRUCT_RETURN(a1,a2) (internal_error (__FILE__, __LINE__, "STORE_STRUCT_RETURN"), 0)
 #endif
 
-
-/* Are we in a call dummy? */
-
-/* NOTE: cagney/2002-11-24 cagney/2004-03-22: Targets need to both
-   switch to generic dummy frames.  The generic version should be able
-   to handle all cases since that code works by saving the address of
-   the dummy's breakpoint (where ever it is).  */
-
-extern int deprecated_pc_in_call_dummy_on_stack (CORE_ADDR pc,
-						 CORE_ADDR sp,
-						 CORE_ADDR frame_address);
 
 /* If STARTUP_WITH_SHELL is set, GDB's "run"
    will attempts to start up the debugee under a shell.

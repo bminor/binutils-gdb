@@ -34,6 +34,10 @@
    NetBSD/sparc64 overlaps with M_MIPS1.  */
 #define M_SPARC64_OPENBSD	M_MIPS1
 
+/* Offset of StackGhost cookie within `struct md_coredump' on
+   OpenBSD/sparc.  */
+#define CORE_WCOOKIE_OFFSET	344
+
 struct netbsd_core_struct
 {
   struct core core;
@@ -135,35 +139,84 @@ netbsd_core_file_p (abfd)
 	goto punt;
 
       asect->flags = flags;
-      asect->_raw_size = coreseg.c_size;
+      asect->size = coreseg.c_size;
       asect->vma = coreseg.c_addr;
       asect->filepos = offset;
       asect->alignment_power = 2;
 
+      if (CORE_GETMID (core) == M_SPARC_NETBSD
+	  && CORE_GETFLAG (coreseg) == CORE_CPU
+	  && coreseg.c_size > CORE_WCOOKIE_OFFSET)
+	{
+	  /* Truncate the .reg section.  */
+	  asect->size = CORE_WCOOKIE_OFFSET;
+
+	  /* And create the .wcookie section.  */
+	  asect = bfd_make_section_anyway (abfd, ".wcookie");
+	  if (asect == NULL)
+	    goto punt;
+
+	  asect->flags = SEC_ALLOC + SEC_HAS_CONTENTS;
+	  asect->size = 4;
+	  asect->vma = 0;
+	  asect->filepos = offset + CORE_WCOOKIE_OFFSET;
+	  asect->alignment_power = 2;
+	}
+
       offset += coreseg.c_size;
     }
 
- /* Set architecture from machine ID.  */
- switch (CORE_GETMID (core))
-   {
-   case M_X86_64_NETBSD:
-     bfd_default_set_arch_mach (abfd, bfd_arch_i386, bfd_mach_x86_64);
-     break;
+  /* Set architecture from machine ID.  */
+  switch (CORE_GETMID (core))
+    {
+    case M_ALPHA_NETBSD:
+      bfd_default_set_arch_mach (abfd, bfd_arch_alpha, 0);
+      break;
 
-   case M_386_NETBSD:
-     bfd_default_set_arch_mach (abfd, bfd_arch_i386, bfd_mach_i386_i386);
-     break;
+    case M_ARM6_NETBSD:
+      bfd_default_set_arch_mach (abfd, bfd_arch_arm, bfd_mach_arm_3);
+      break;
 
-   case M_SPARC_NETBSD:
-     bfd_default_set_arch_mach (abfd, bfd_arch_sparc, bfd_mach_sparc);
-     break;
+    case M_X86_64_NETBSD:
+      bfd_default_set_arch_mach (abfd, bfd_arch_i386, bfd_mach_x86_64);
+      break;
 
-   case M_SPARC64_NETBSD:
-   case M_SPARC64_OPENBSD:
-     bfd_default_set_arch_mach (abfd, bfd_arch_sparc, bfd_mach_sparc_v9);
-     break;
-   }
- 
+    case M_386_NETBSD:
+      bfd_default_set_arch_mach (abfd, bfd_arch_i386, bfd_mach_i386_i386);
+      break;
+
+    case M_68K_NETBSD:
+    case M_68K4K_NETBSD:
+      bfd_default_set_arch_mach (abfd, bfd_arch_m68k, 0);
+      break;
+
+    case M_88K_OPENBSD:
+      bfd_default_set_arch_mach (abfd, bfd_arch_m88k, 0);
+      break;
+
+    case M_HPPA_OPENBSD:
+      bfd_default_set_arch_mach (abfd, bfd_arch_hppa, bfd_mach_hppa11);
+      break;
+
+    case M_POWERPC_NETBSD:
+      bfd_default_set_arch_mach (abfd, bfd_arch_powerpc, bfd_mach_ppc);
+      break;
+
+    case M_SPARC_NETBSD:
+      bfd_default_set_arch_mach (abfd, bfd_arch_sparc, bfd_mach_sparc);
+      break;
+
+    case M_SPARC64_NETBSD:
+    case M_SPARC64_OPENBSD:
+      bfd_default_set_arch_mach (abfd, bfd_arch_sparc, bfd_mach_sparc_v9);
+      break;
+
+    case M_VAX_NETBSD:
+    case M_VAX4K_NETBSD:
+      bfd_default_set_arch_mach (abfd, bfd_arch_vax, 0);
+      break;
+    }
+
   /* OK, we believe you.  You're a core file (sure, sure).  */
   return abfd->xvec;
 

@@ -104,7 +104,7 @@ band_imm3_abs8:
 
 	test_grs_a5a5		; general registers should not be changed.
 
-.if (sim_cpu)			; non-zero means not h8300
+.if (sim_cpu > h8300h)
 band_imm3_abs16:
 	set_grs_a5a5
 	set_ccr_zero
@@ -314,7 +314,7 @@ bld_imm3_abs8:
 
 	test_grs_a5a5		; general registers should not be changed.
 
-.if (sim_cpu)			; non-zero means not h8300
+.if (sim_cpu > h8300h)
 bld_imm3_abs16:
 	set_grs_a5a5
 	set_ccr_zero
@@ -491,7 +491,7 @@ btst_imm3_abs8:
 
 	test_grs_a5a5		; general registers should not be changed.
 
-.if (sim_cpu)			; non-zero means not h8300
+.if (sim_cpu > h8300h)
 btst_imm3_abs16:
 	set_grs_a5a5
 	set_ccr_zero

@@ -202,7 +202,7 @@ vx_remove_breakpoint (int addr)
    On VxWorks, we ignore exec_file.  */
 
 static void
-vx_create_inferior (char *exec_file, char *args, char **env)
+vx_create_inferior (char *exec_file, char *args, char **env, int from_tty)
 {
   enum clnt_stat status;
   arg_array passArgs;
@@ -747,17 +747,8 @@ net_step (void)
   SOURCE_STEP source_step;
 
   source_step.taskId = PIDGET (inferior_ptid);
-
-  if (step_range_end)
-    {
-      source_step.startAddr = step_range_start;
-      source_step.endAddr = step_range_end;
-    }
-  else
-    {
-      source_step.startAddr = 0;
-      source_step.endAddr = 0;
-    }
+  source_step.startAddr = 0;
+  source_step.endAddr = 0;
 
   status = net_clnt_call (VX_SOURCE_STEP, xdr_SOURCE_STEP, &source_step,
 			  xdr_int, &step_status);

@@ -630,7 +630,7 @@ remote_rdp_fetch_register (int regno)
     }
   else
     {
-      char buf[ARM_MAX_REGISTER_RAW_SIZE];
+      char buf[MAX_REGISTER_SIZE];
       if (regno < 15)
 	rdp_fetch_one_register (1 << regno, buf);
       else if (regno == ARM_PC_REGNUM)
@@ -660,7 +660,7 @@ remote_rdp_store_register (int regno)
     }
   else
     {
-      char tmp[ARM_MAX_REGISTER_RAW_SIZE];
+      char tmp[MAX_REGISTER_SIZE];
       deprecated_read_register_gen (regno, tmp);
       if (regno < 15)
 	rdp_store_one_register (1 << regno, tmp);
@@ -721,7 +721,7 @@ rdp_set_command_line (char *command, char *args)
   if (commandline != NULL)
     xfree (commandline);
 
-  xasprintf (&commandline, "%s %s", command, args);
+  commandline = xstrprintf ("%s %s", command, args);
 }
 
 static void
@@ -1181,7 +1181,7 @@ remote_rdp_open (char *args, int from_tty)
   flush_cached_frames ();
   registers_changed ();
   stop_pc = read_pc ();
-  print_stack_frame (get_selected_frame (), -1, 1);
+  print_stack_frame (get_selected_frame (), 0, SRC_AND_LOC);
 }
 
 
@@ -1351,7 +1351,8 @@ remote_rdp_files_info (struct target_ops *target)
 
 
 static void
-remote_rdp_create_inferior (char *exec_file, char *allargs, char **env)
+remote_rdp_create_inferior (char *exec_file, char *allargs, char **env,
+			    int from_tty)
 {
   CORE_ADDR entry_point;
 

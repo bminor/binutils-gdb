@@ -205,8 +205,9 @@ find_function_addr (struct value *function, struct type **retval_type)
   else
     error ("Invalid data type for function to be called.");
 
-  *retval_type = value_type;
-  return funaddr;
+  if (retval_type != NULL)
+    *retval_type = value_type;
+  return funaddr + DEPRECATED_FUNCTION_START_OFFSET;
 }
 
 /* Call breakpoint_auto_delete on the current contents of the bpstat
@@ -216,85 +217,6 @@ static void
 breakpoint_auto_delete_contents (void *arg)
 {
   breakpoint_auto_delete (*(bpstat *) arg);
-}
-
-static CORE_ADDR
-legacy_push_dummy_code (struct gdbarch *gdbarch,
-			CORE_ADDR sp, CORE_ADDR funaddr, int using_gcc,
-			struct value **args, int nargs,
-			struct type *value_type,
-			CORE_ADDR *real_pc, CORE_ADDR *bp_addr)
-{
-  /* CALL_DUMMY is an array of words (DEPRECATED_REGISTER_SIZE), but
-     each word is in host byte order.  Before calling
-     DEPRECATED_FIX_CALL_DUMMY, we byteswap it and remove any extra
-     bytes which might exist because ULONGEST is bigger than
-     DEPRECATED_REGISTER_SIZE.  */
-  /* NOTE: This is pretty wierd, as the call dummy is actually a
-     sequence of instructions.  But CISC machines will have to pack
-     the instructions into DEPRECATED_REGISTER_SIZE units (and so will
-     RISC machines for which INSTRUCTION_SIZE is not
-     DEPRECATED_REGISTER_SIZE).  */
-  /* NOTE: This is pretty stupid.  CALL_DUMMY should be in strict
-     target byte order. */
-  CORE_ADDR start_sp;
-  ULONGEST *dummy = alloca (DEPRECATED_SIZEOF_CALL_DUMMY_WORDS);
-  int sizeof_dummy1 = (DEPRECATED_REGISTER_SIZE
-		       * DEPRECATED_SIZEOF_CALL_DUMMY_WORDS
-		       / sizeof (ULONGEST));
-  char *dummy1 = alloca (sizeof_dummy1);
-  memcpy (dummy, DEPRECATED_CALL_DUMMY_WORDS,
-	  DEPRECATED_SIZEOF_CALL_DUMMY_WORDS);
-  if (INNER_THAN (1, 2))
-    {
-      /* Stack grows down */
-      sp -= sizeof_dummy1;
-      start_sp = sp;
-    }
-  else
-    {
-      /* Stack grows up */
-      start_sp = sp;
-      sp += sizeof_dummy1;
-    }
-  /* NOTE: cagney/2002-09-10: Don't bother re-adjusting the stack
-     after allocating space for the call dummy.  A target can specify
-     a SIZEOF_DUMMY1 (via DEPRECATED_SIZEOF_CALL_DUMMY_WORDS) such
-     that all local alignment requirements are met.  */
-  /* Create a call sequence customized for this function and the
-     number of arguments for it.  */
-  {
-    int i;
-    for (i = 0; i < (int) (DEPRECATED_SIZEOF_CALL_DUMMY_WORDS / sizeof (dummy[0]));
-	 i++)
-      store_unsigned_integer (&dummy1[i * DEPRECATED_REGISTER_SIZE],
-			      DEPRECATED_REGISTER_SIZE,
-			      (ULONGEST) dummy[i]);
-  }
-  /* NOTE: cagney/2003-04-22: This computation of REAL_PC, BP_ADDR and
-     DUMMY_ADDR is pretty messed up.  It comes from constant tinkering
-     with the values.  Instead a DEPRECATED_FIX_CALL_DUMMY replacement
-     (PUSH_DUMMY_BREAKPOINT?) should just do everything.  */
-  if (!gdbarch_push_dummy_call_p (current_gdbarch))
-    {
-      if (DEPRECATED_FIX_CALL_DUMMY_P ())
-	{
-	  /* gdb_assert (CALL_DUMMY_LOCATION == ON_STACK) true?  */
-	  DEPRECATED_FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs, args,
-				     value_type, using_gcc);
-	}
-      (*real_pc) = start_sp;
-    }
-  /* Yes, the offset is applied to the real_pc and not the dummy addr.
-     Ulgh!  Blame the HP/UX target.  */
-  (*bp_addr) = (*real_pc) + DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET;
-  /* Yes, the offset is applied to the real_pc and not the
-     dummy_addr.  Ulgh!  Blame the HP/UX target.  */
-  (*real_pc) += DEPRECATED_CALL_DUMMY_START_OFFSET;
-  write_memory (start_sp, (char *) dummy1, sizeof_dummy1);
-  if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
-    generic_save_call_dummy_addr (start_sp, start_sp + sizeof_dummy1);
-  return sp;
 }
 
 static CORE_ADDR
@@ -333,8 +255,8 @@ generic_push_dummy_code (struct gdbarch *gdbarch,
   return sp;
 }
 
-/* Provide backward compatibility.  Once DEPRECATED_FIX_CALL_DUMMY is
-   eliminated, this can be simplified.  */
+/* For CALL_DUMMY_ON_STACK, push a breakpoint sequence that the called
+   function returns to.  */
 
 static CORE_ADDR
 push_dummy_code (struct gdbarch *gdbarch,
@@ -346,10 +268,6 @@ push_dummy_code (struct gdbarch *gdbarch,
   if (gdbarch_push_dummy_code_p (gdbarch))
     return gdbarch_push_dummy_code (gdbarch, sp, funaddr, using_gcc,
 				    args, nargs, value_type, real_pc, bp_addr);
-  else if (DEPRECATED_FIX_CALL_DUMMY_P ()
-	   && !gdbarch_push_dummy_call_p (gdbarch))
-    return legacy_push_dummy_code (gdbarch, sp, funaddr, using_gcc,
-				   args, nargs, value_type, real_pc, bp_addr);
   else    
     return generic_push_dummy_code (gdbarch, sp, funaddr, using_gcc,
 				    args, nargs, value_type, real_pc, bp_addr);
@@ -407,34 +325,23 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   inf_status = save_inferior_status (1);
   inf_status_cleanup = make_cleanup_restore_inferior_status (inf_status);
 
-  if (DEPRECATED_PUSH_DUMMY_FRAME_P ())
-    {
-      /* DEPRECATED_PUSH_DUMMY_FRAME is responsible for saving the
-	 inferior registers (and frame_pop() for restoring them).  (At
-	 least on most machines) they are saved on the stack in the
-	 inferior.  */
-      DEPRECATED_PUSH_DUMMY_FRAME;
-    }
-  else
-    {
-      /* FIXME: cagney/2003-02-26: Step zero of this little tinker is
-      to extract the generic dummy frame code from the architecture
-      vector.  Hence this direct call.
+  /* FIXME: cagney/2003-02-26: Step zero of this little tinker is to
+     extract the generic dummy frame code from the architecture
+     vector.  Hence this direct call.
 
-      A follow-on change is to modify this interface so that it takes
-      thread OR frame OR ptid as a parameter, and returns a dummy
-      frame handle.  The handle can then be used further down as a
-      parameter to generic_save_dummy_frame_tos().  Hmm, thinking
-      about it, since everything is ment to be using generic dummy
-      frames, why not even use some of the dummy frame code to here -
-      do a regcache dup and then pass the duped regcache, along with
-      all the other stuff, at one single point.
+     A follow-on change is to modify this interface so that it takes
+     thread OR frame OR ptid as a parameter, and returns a dummy frame
+     handle.  The handle can then be used further down as a parameter
+     to generic_save_dummy_frame_tos().  Hmm, thinking about it, since
+     everything is ment to be using generic dummy frames, why not even
+     use some of the dummy frame code to here - do a regcache dup and
+     then pass the duped regcache, along with all the other stuff, at
+     one single point.
 
-      In fact, you can even save the structure's return address in the
-      dummy frame and fix one of those nasty lost struct return edge
-      conditions.  */
-      generic_push_dummy_frame ();
-    }
+     In fact, you can even save the structure's return address in the
+     dummy frame and fix one of those nasty lost struct return edge
+     conditions.  */
+  generic_push_dummy_frame ();
 
   /* Ensure that the initial SP is correctly aligned.  */
   {
@@ -545,18 +452,6 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 	}
       break;
     case AT_ENTRY_POINT:
-      if (DEPRECATED_FIX_CALL_DUMMY_P ()
-	  && !gdbarch_push_dummy_call_p (current_gdbarch))
-	{
-	  /* Sigh.  Some targets use DEPRECATED_FIX_CALL_DUMMY to
-             shove extra stuff onto the stack or into registers.  That
-             code should be in PUSH_DUMMY_CALL, however, in the mean
-             time ...  */
-	  /* If the target is manipulating DUMMY1, it looses big time.  */
-	  void *dummy1 = NULL;
-	  DEPRECATED_FIX_CALL_DUMMY (dummy1, sp, funaddr, nargs, args,
-				     value_type, using_gcc);
-	}
       real_pc = funaddr;
       dummy_addr = entry_point_address ();
       /* Make certain that the address points at real code, and not a
@@ -596,10 +491,9 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
       internal_error (__FILE__, __LINE__, "bad switch");
     }
 
-  if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
-    /* Save where the breakpoint is going to be inserted so that the
-       dummy-frame code is later able to re-identify it.  */
-    generic_save_call_dummy_addr (bp_addr, bp_addr + 1);
+  /* Save where the breakpoint is going to be inserted so that the
+     dummy-frame code is later able to re-identify it.  */
+  generic_save_call_dummy_addr (bp_addr, bp_addr + 1);
 
   if (nargs < TYPE_NFIELDS (ftype))
     error ("too few arguments in function call");
@@ -767,7 +661,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
     /* When there is no push_dummy_call method, should this code
        simply error out.  That would the implementation of this method
        for all ABIs (which is probably a good thing).  */
-    sp = gdbarch_push_dummy_call (current_gdbarch, funaddr, current_regcache,
+    sp = gdbarch_push_dummy_call (current_gdbarch, function, current_regcache,
 				  bp_addr, nargs, args, sp, struct_return,
 				  struct_addr);
   else  if (DEPRECATED_PUSH_ARGUMENTS_P ())
@@ -775,7 +669,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
     sp = DEPRECATED_PUSH_ARGUMENTS (nargs, args, sp, struct_return,
 				    struct_addr);
   else
-    sp = legacy_push_arguments (nargs, args, sp, struct_return, struct_addr);
+    error ("This target does not support function calls");
 
   if (DEPRECATED_PUSH_RETURN_ADDRESS_P ())
     /* for targets that use no CALL_DUMMY */
@@ -828,16 +722,13 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
   if (DEPRECATED_DUMMY_WRITE_SP_P ())
     DEPRECATED_DUMMY_WRITE_SP (sp);
 
-  if (gdbarch_unwind_dummy_id_p (current_gdbarch))
-    {
-      /* Sanity.  The exact same SP value is returned by
-	 PUSH_DUMMY_CALL, saved as the dummy-frame TOS, and used by
-	 unwind_dummy_id to form the frame ID's stack address.  */
-      gdb_assert (DEPRECATED_USE_GENERIC_DUMMY_FRAMES);
-      generic_save_dummy_frame_tos (sp);
-    }
-  else if (DEPRECATED_SAVE_DUMMY_FRAME_TOS_P ())
+  if (DEPRECATED_SAVE_DUMMY_FRAME_TOS_P ())
     DEPRECATED_SAVE_DUMMY_FRAME_TOS (sp);
+  else
+    /* Sanity.  The exact same SP value is returned by
+       PUSH_DUMMY_CALL, saved as the dummy-frame TOS, and used by
+       unwind_dummy_id to form the frame ID's stack address.  */
+    generic_save_dummy_frame_tos (sp);
 
   /* Now proceed, having reached the desired place.  */
   clear_proceed_status ();
@@ -861,7 +752,6 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 	/* Sanity.  The exact same SP value is returned by
 	 PUSH_DUMMY_CALL, saved as the dummy-frame TOS, and used by
 	 unwind_dummy_id to form the frame ID's stack address.  */
-	gdb_assert (DEPRECATED_USE_GENERIC_DUMMY_FRAMES);
 	frame = frame_id_build (sp, sal.pc);
       }
     else
@@ -1032,9 +922,14 @@ the function call).", name);
      leave the RETBUF alone.  */
   do_cleanups (inf_status_cleanup);
 
-  /* Figure out the value returned by the function.  */
-  if (struct_return)
-    {
+  /* Figure out the value returned by the function, return that.  */
+  {
+    struct value *retval;
+    if (TYPE_CODE (value_type) == TYPE_CODE_VOID)
+      /* If the function returns void, don't bother fetching the
+	 return value.  */
+      retval = allocate_value (value_type);
+    else if (struct_return)
       /* NOTE: cagney/2003-09-27: This assumes that PUSH_DUMMY_CALL
 	 has correctly stored STRUCT_ADDR in the target.  In the past
 	 that hasn't been the case, the old MIPS PUSH_ARGUMENTS
@@ -1043,18 +938,21 @@ the function call).", name);
 	 you're seeing problems with values being returned using the
 	 "struct return convention", check that PUSH_DUMMY_CALL isn't
 	 playing tricks.  */
-      struct value *retval = value_at (value_type, struct_addr, NULL);
-      do_cleanups (retbuf_cleanup);
-      return retval;
-    }
-  else
-    {
-      /* The non-register case was handled above.  */
-      struct value *retval = register_value_being_returned (value_type,
-							    retbuf);
-      do_cleanups (retbuf_cleanup);
-      return retval;
-    }
+      retval = value_at (value_type, struct_addr, NULL);
+    else
+      {
+	/* This code only handles "register convention".  */
+	retval = allocate_value (value_type);
+	gdb_assert (gdbarch_return_value (current_gdbarch, value_type,
+					  NULL, NULL, NULL)
+		    == RETURN_VALUE_REGISTER_CONVENTION);
+	gdbarch_return_value (current_gdbarch, value_type, retbuf,
+			      VALUE_CONTENTS_RAW (retval) /*read*/,
+			      NULL /*write*/);
+      }
+    do_cleanups (retbuf_cleanup);
+    return retval;
+  }
 }
 
 void _initialize_infcall (void);
@@ -1089,7 +987,7 @@ The unwindonsignal lets the user determine what gdb should do if a signal\n\
 is received while in a function called from gdb (call dummy).  If set, gdb\n\
 unwinds the stack and restore the context to what as it was before the call.\n\
 The default is to stop in the frame where the signal was received.", "\
-Set unwinding of stack if a signal is received while in a call dummy.\n\
+Show unwinding of stack if a signal is received while in a call dummy.\n\
 The unwindonsignal lets the user determine what gdb should do if a signal\n\
 is received while in a function called from gdb (call dummy).  If set, gdb\n\
 unwinds the stack and restore the context to what as it was before the call.\n\

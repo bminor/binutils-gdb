@@ -27,8 +27,3 @@
 /* SVR4 has /proc support, so use it instead of ptrace. */
 
 #define USE_PROC_FS
-
-/* SVR4 machines can easily do attach and detach via /proc (procfs.c)
-   support */
-
-#define ATTACH_DETACH

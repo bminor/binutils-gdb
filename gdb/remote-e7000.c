@@ -1,7 +1,7 @@
 /* Remote debugging interface for Renesas E7000 ICE, for GDB
 
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003 Free Software Foundation, Inc.
+   2002, 2003, 2004 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support. 
 
@@ -371,7 +371,8 @@ get_hex_regs (int n, int regno)
    user types "run" after having attached.  */
 
 static void
-e7000_create_inferior (char *execfile, char *args, char **env)
+e7000_create_inferior (char *execfile, char *args, char **env,
+		       int from_tty)
 {
   int entry_pt;
 
@@ -629,7 +630,7 @@ e7000_start_remote (void *dummy)
   flush_cached_frames ();
   registers_changed ();
   stop_pc = read_pc ();
-  print_stack_frame (get_selected_frame (), -1, 1);
+  print_stack_frame (get_selected_frame (), 0, SRC_AND_LOC);
 
   return 1;
 }
@@ -1568,7 +1569,7 @@ e7000_load (char *args, int from_tty)
 	  file_ptr fptr;
 
 	  section_address = bfd_get_section_vma (pbfd, section);
-	  section_size = bfd_get_section_size_before_reloc (section);
+	  section_size = bfd_get_section_size (section);
 
 	  if (!quiet)
 	    printf_filtered ("[Loading section %s at 0x%s (%s bytes)]\n",

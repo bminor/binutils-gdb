@@ -431,9 +431,10 @@ hpux_thread_notice_signals (ptid_t ptid)
 /* Fork an inferior process, and start debugging it with /proc.  */
 
 static void
-hpux_thread_create_inferior (char *exec_file, char *allargs, char **env)
+hpux_thread_create_inferior (char *exec_file, char *allargs, char **env,
+			     int from_tty)
 {
-  child_ops.to_create_inferior (exec_file, allargs, env);
+  child_ops.to_create_inferior (exec_file, allargs, env, from_tty);
 
   if (hpux_thread_active)
     {
@@ -581,6 +582,6 @@ _initialize_hpux_thread (void)
 
   child_suppress_run = 1;
   /* Hook into new_objfile notification. */
-  target_new_objfile_chain = target_new_objfile_hook;
-  target_new_objfile_hook  = hpux_thread_new_objfile;
+  target_new_objfile_chain = deprecated_target_new_objfile_hook;
+  deprecated_target_new_objfile_hook  = hpux_thread_new_objfile;
 }

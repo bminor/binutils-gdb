@@ -278,11 +278,11 @@ struct eh_cie_fde
   unsigned char fde_encoding;
   unsigned char lsda_encoding;
   unsigned char lsda_offset;
-  unsigned char cie : 1;
-  unsigned char removed : 1;
-  unsigned char make_relative : 1;
-  unsigned char make_lsda_relative : 1;
-  unsigned char per_encoding_relative : 1;
+  unsigned int cie : 1;
+  unsigned int removed : 1;
+  unsigned int make_relative : 1;
+  unsigned int make_lsda_relative : 1;
+  unsigned int per_encoding_relative : 1;
 };
 
 struct eh_frame_sec_info
@@ -356,11 +356,11 @@ struct elf_link_hash_table
   /* The _GLOBAL_OFFSET_TABLE_ symbol.  */
   struct elf_link_hash_entry *hgot;
 
-  /* A pointer to information used to link stabs in sections.  */
-  void *stab_info;
-
   /* A pointer to information used to merge SEC_MERGE sections.  */
   void *merge_info;
+
+  /* Used to link stabs in sections.  */
+  struct stab_info stab_info;
 
   /* Used by eh_frame code when editing .eh_frame.  */
   struct eh_frame_hdr_info eh_info;
@@ -492,6 +492,7 @@ struct elf_reloc_cookie
   size_t locsymcount;
   size_t extsymoff;
   struct elf_link_hash_entry **sym_hashes;
+  int r_sym_shift;
   bfd_boolean bad_symtab;
 };
 
@@ -596,7 +597,7 @@ struct elf_backend_data
   /* A function to convert machine dependent section header flags to
      BFD internal section header flags.  */
   bfd_boolean (*elf_backend_section_flags)
-    (flagword *, Elf_Internal_Shdr *);
+    (flagword *, const Elf_Internal_Shdr *);
 
   /* A function to handle unusual program segment types when creating BFD
      sections from ELF program segments.  */
@@ -625,7 +626,7 @@ struct elf_backend_data
      indices, and must set at least *FLAGS and *SEC for each processor
      dependent case; failure to do so will cause a link error.  */
   bfd_boolean (*elf_add_symbol_hook)
-    (bfd *abfd, struct bfd_link_info *info, const Elf_Internal_Sym *,
+    (bfd *abfd, struct bfd_link_info *info, Elf_Internal_Sym *,
      const char **name, flagword *flags, asection **sec, bfd_vma *value);
 
   /* If this field is not NULL, it is called by the elf_link_output_sym
@@ -645,6 +646,11 @@ struct elf_backend_data
   bfd_boolean (*elf_backend_create_dynamic_sections)
     (bfd *abfd, struct bfd_link_info *info);
 
+  /* When creating a shared library, determine whether to omit the
+     dynamic symbol for the section.  */
+  bfd_boolean (*elf_backend_omit_section_dynsym)
+    (bfd *output_bfd, struct bfd_link_info *info, asection *osec);
+
   /* The CHECK_RELOCS function is called by the add_symbols phase of
      the ELF backend linker.  It is called once for each section with
      relocs of an object file, just after the symbols for the object
@@ -658,6 +664,13 @@ struct elf_backend_data
   bfd_boolean (*check_relocs)
     (bfd *abfd, struct bfd_link_info *info, asection *o,
      const Elf_Internal_Rela *relocs);
+
+  /* The CHECK_DIRECTIVES function is called once per input file by
+     the add_symbols phase of the ELF backend linker.  The function
+     must inspect the bfd and create any additional symbols according
+     to any custom directives in the bfd.  */
+  bfd_boolean (*check_directives)
+    (bfd *abfd, struct bfd_link_info *info);
 
   /* The ADJUST_DYNAMIC_SYMBOL function is called by the ELF backend
      linker for every symbol which is defined by a dynamic object and
@@ -901,6 +914,13 @@ struct elf_backend_data
      (bfd *templ, bfd_vma ehdr_vma, bfd_vma *loadbasep,
       int (*target_read_memory) (bfd_vma vma, char *myaddr, int len));
 
+  /* This function is used by `_bfd_elf_get_synthetic_symtab';
+     see elf.c.  */
+  bfd_vma (*plt_sym_val) (bfd_vma, const asection *, const arelent *);
+
+  /* Name of the PLT relocation section.  */
+  const char *relplt_name;
+
   /* Alternate EM_xxxx machine codes for this backend.  */
   int elf_machine_alt1;
   int elf_machine_alt2;
@@ -1054,8 +1074,8 @@ struct bfd_elf_section_data
 #define elf_discarded_section(sec)				\
   (!bfd_is_abs_section (sec)					\
    && bfd_is_abs_section ((sec)->output_section)		\
-   && sec->sec_info_type != ELF_INFO_TYPE_MERGE			\
-   && sec->sec_info_type != ELF_INFO_TYPE_JUST_SYMS)
+   && (sec)->sec_info_type != ELF_INFO_TYPE_MERGE		\
+   && (sec)->sec_info_type != ELF_INFO_TYPE_JUST_SYMS)
 
 #define get_elf_backend_data(abfd) \
   ((const struct elf_backend_data *) (abfd)->xvec->backend_data)
@@ -1203,6 +1223,9 @@ struct elf_obj_tdata
   /* Segment flags for the PT_GNU_STACK segment.  */
   unsigned int stack_flags;  
 
+  /* Should the PT_GNU_RELRO segment be emitted?  */
+  bfd_boolean relro;
+
   /* Symbol version definitions in external objects.  */
   Elf_Internal_Verdef *verdef;
 
@@ -1308,9 +1331,6 @@ extern void bfd_elf_print_symbol
   bfd_elf_string_from_elf_section (abfd, elf_elfheader(abfd)->e_shstrndx, \
 				   strindex)
 
-#define bfd_elf32_print_symbol	bfd_elf_print_symbol
-#define bfd_elf64_print_symbol	bfd_elf_print_symbol
-
 extern void _bfd_elf_sprintf_vma
   (bfd *, char *, bfd_vma);
 extern void _bfd_elf_fprintf_vma
@@ -1363,12 +1383,16 @@ extern bfd_boolean _bfd_elf_slurp_version_tables
   (bfd *);
 extern bfd_boolean _bfd_elf_merge_sections
   (bfd *, struct bfd_link_info *);
+extern bfd_boolean bfd_elf_is_group_section
+  (bfd *, const struct bfd_section *);
 extern bfd_boolean bfd_elf_discard_group
   (bfd *, struct bfd_section *);
 extern void bfd_elf_set_group_contents
   (bfd *, asection *, void *);
 extern void _bfd_elf_link_just_syms
   (asection *, struct bfd_link_info *);
+extern bfd_boolean _bfd_elf_copy_private_header_data
+  (bfd *, bfd *);
 extern bfd_boolean _bfd_elf_copy_private_symbol_data
   (bfd *, asymbol *, bfd *, asymbol *);
 extern bfd_boolean _bfd_elf_copy_private_section_data
@@ -1387,6 +1411,8 @@ extern long _bfd_elf_get_dynamic_symtab_upper_bound
   (bfd *);
 extern long _bfd_elf_canonicalize_dynamic_symtab
   (bfd *, asymbol **);
+extern long _bfd_elf_get_synthetic_symtab
+  (bfd *, asymbol **, asymbol **);
 extern long _bfd_elf_get_reloc_upper_bound
   (bfd *, sec_ptr);
 extern long _bfd_elf_canonicalize_reloc
@@ -1492,8 +1518,6 @@ extern bfd_boolean _bfd_elf_link_find_version_dependencies
 extern bfd_boolean _bfd_elf_link_assign_sym_version
   (struct elf_link_hash_entry *, void *);
 
-extern bfd_boolean _bfd_elf_link_record_dynamic_symbol
-  (struct bfd_link_info *, struct elf_link_hash_entry *);
 extern long _bfd_elf_link_lookup_local_dynindx
   (struct bfd_link_info *, bfd *, long);
 extern bfd_boolean _bfd_elf_compute_section_file_positions
@@ -1508,6 +1532,8 @@ extern bfd_boolean _bfd_elf_validate_reloc
 
 extern bfd_boolean _bfd_elf_link_create_dynamic_sections
   (bfd *, struct bfd_link_info *);
+extern bfd_boolean _bfd_elf_link_omit_section_dynsym
+  (bfd *, struct bfd_link_info *, asection *);
 extern bfd_boolean _bfd_elf_create_dynamic_sections
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_elf_create_got_section
@@ -1544,9 +1570,6 @@ extern bfd_boolean _bfd_elf_dynamic_symbol_p
 extern bfd_boolean _bfd_elf_symbol_refs_local_p
   (struct elf_link_hash_entry *, struct bfd_link_info *, bfd_boolean);
 
-extern bfd_boolean _bfd_elf_link_add_archive_symbols
-  (bfd *, struct bfd_link_info *);
-
 extern const bfd_target *bfd_elf32_object_p
   (bfd *);
 extern const bfd_target *bfd_elf32_core_file_p
@@ -1557,11 +1580,6 @@ extern int bfd_elf32_core_file_failing_signal
   (bfd *);
 extern bfd_boolean bfd_elf32_core_file_matches_executable_p
   (bfd *, bfd *);
-
-extern bfd_boolean bfd_elf32_bfd_link_add_symbols
-  (bfd *, struct bfd_link_info *);
-extern bfd_boolean bfd_elf32_bfd_final_link
-  (bfd *, struct bfd_link_info *);
 
 extern void bfd_elf32_swap_symbol_in
   (bfd *, const void *, const void *, Elf_Internal_Sym *);
@@ -1593,8 +1611,6 @@ extern void bfd_elf32_write_relocs
   (bfd *, asection *, void *);
 extern bfd_boolean bfd_elf32_slurp_reloc_table
   (bfd *, asection *, asymbol **, bfd_boolean);
-extern bfd_boolean bfd_elf32_add_dynamic_entry
-  (struct bfd_link_info *, bfd_vma, bfd_vma);
 
 extern const bfd_target *bfd_elf64_object_p
   (bfd *);
@@ -1606,10 +1622,6 @@ extern int bfd_elf64_core_file_failing_signal
   (bfd *);
 extern bfd_boolean bfd_elf64_core_file_matches_executable_p
   (bfd *, bfd *);
-extern bfd_boolean bfd_elf64_bfd_link_add_symbols
-  (bfd *, struct bfd_link_info *);
-extern bfd_boolean bfd_elf64_bfd_final_link
-  (bfd *, struct bfd_link_info *);
 
 extern void bfd_elf64_swap_symbol_in
   (bfd *, const void *, const void *, Elf_Internal_Sym *);
@@ -1641,20 +1653,17 @@ extern void bfd_elf64_write_relocs
   (bfd *, asection *, void *);
 extern bfd_boolean bfd_elf64_slurp_reloc_table
   (bfd *, asection *, asymbol **, bfd_boolean);
-extern bfd_boolean bfd_elf64_add_dynamic_entry
+
+extern bfd_boolean bfd_elf_link_add_symbols
+  (bfd *, struct bfd_link_info *);
+extern bfd_boolean _bfd_elf_add_dynamic_entry
   (struct bfd_link_info *, bfd_vma, bfd_vma);
 
-#define bfd_elf32_link_record_dynamic_symbol \
-  _bfd_elf_link_record_dynamic_symbol
-#define bfd_elf64_link_record_dynamic_symbol \
-  _bfd_elf_link_record_dynamic_symbol
+extern bfd_boolean bfd_elf_link_record_dynamic_symbol
+  (struct bfd_link_info *, struct elf_link_hash_entry *);
 
-extern int elf_link_record_local_dynamic_symbol
+extern int bfd_elf_link_record_local_dynamic_symbol
   (struct bfd_link_info *, bfd *, long);
-#define _bfd_elf32_link_record_local_dynamic_symbol \
-  elf_link_record_local_dynamic_symbol
-#define _bfd_elf64_link_record_local_dynamic_symbol \
-  elf_link_record_local_dynamic_symbol
 
 extern bfd_boolean _bfd_elf_close_and_cleanup
   (bfd *);
@@ -1662,31 +1671,25 @@ extern bfd_reloc_status_type _bfd_elf_rel_vtable_reloc_fn
   (bfd *, arelent *, struct bfd_symbol *, void *,
    asection *, bfd *, char **);
 
-extern bfd_boolean _bfd_elf32_gc_sections
+extern bfd_boolean bfd_elf_final_link
   (bfd *, struct bfd_link_info *);
-extern bfd_boolean _bfd_elf32_gc_common_finalize_got_offsets
+
+extern bfd_boolean bfd_elf_gc_sections
   (bfd *, struct bfd_link_info *);
-extern bfd_boolean _bfd_elf32_gc_common_final_link
-  (bfd *, struct bfd_link_info *);
-extern bfd_boolean _bfd_elf32_gc_record_vtinherit
-  (bfd *, asection *, struct elf_link_hash_entry *, bfd_vma);
-extern bfd_boolean _bfd_elf32_gc_record_vtentry
+
+extern bfd_boolean bfd_elf_gc_record_vtinherit
   (bfd *, asection *, struct elf_link_hash_entry *, bfd_vma);
 
-extern bfd_boolean _bfd_elf64_gc_sections
-  (bfd *, struct bfd_link_info *);
-extern bfd_boolean _bfd_elf64_gc_common_finalize_got_offsets
-  (bfd *, struct bfd_link_info *);
-extern bfd_boolean _bfd_elf64_gc_common_final_link
-  (bfd *, struct bfd_link_info *);
-extern bfd_boolean _bfd_elf64_gc_record_vtinherit
-  (bfd *, asection *, struct elf_link_hash_entry *, bfd_vma);
-extern bfd_boolean _bfd_elf64_gc_record_vtentry
+extern bfd_boolean bfd_elf_gc_record_vtentry
   (bfd *, asection *, struct elf_link_hash_entry *, bfd_vma);
 
-extern bfd_boolean _bfd_elf32_reloc_symbol_deleted_p
-  (bfd_vma, void *);
-extern bfd_boolean _bfd_elf64_reloc_symbol_deleted_p
+extern bfd_boolean bfd_elf_gc_common_finalize_got_offsets
+  (bfd *, struct bfd_link_info *);
+
+extern bfd_boolean bfd_elf_gc_common_final_link
+  (bfd *, struct bfd_link_info *);
+
+extern bfd_boolean bfd_elf_reloc_symbol_deleted_p
   (bfd_vma, void *);
 
 /* Exported interface for writing elf corefile notes. */
@@ -1716,6 +1719,16 @@ extern bfd *_bfd_elf64_bfd_from_remote_memory
 
 extern bfd_boolean _sh_elf_set_mach_from_flags
   (bfd *);
+
+/* This is the condition under which finish_dynamic_symbol will be called.
+   If our finish_dynamic_symbol isn't called, we'll need to do something
+   about initializing any .plt and .got entries in relocate_section.  */
+#define WILL_CALL_FINISH_DYNAMIC_SYMBOL(DYN, SHARED, H) \
+  ((DYN)								\
+   && ((SHARED)								\
+       || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)	\
+   && ((H)->dynindx != -1						\
+       || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0))
 
 /* This macro is to avoid lots of duplicated code in the body
    of xxx_relocate_section() in the various elfxx-xxxx.c files.  */
@@ -1762,12 +1775,14 @@ extern bfd_boolean _sh_elf_set_mach_from_flags
 	;								\
       else								\
 	{								\
-	  if (! info->callbacks->undefined_symbol			\
-	      (info, h->root.root.string, input_bfd,			\
-	       input_section, rel->r_offset,				\
-	       (info->unresolved_syms_in_objects == RM_GENERATE_ERROR	\
-		|| ELF_ST_VISIBILITY (h->other))			\
-	       ))							\
+	  bfd_boolean err;						\
+	  err = (info->unresolved_syms_in_objects == RM_GENERATE_ERROR	\
+		 || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT);	\
+	  if (!info->callbacks->undefined_symbol (info,			\
+						  h->root.root.string,	\
+						  input_bfd,		\
+						  input_section,	\
+						  rel->r_offset, err))	\
 	    return FALSE;						\
 	  warned = TRUE;						\
 	}								\

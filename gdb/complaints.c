@@ -186,8 +186,8 @@ vcomplaint (struct complaints **c, const char *file, int line, const char *fmt,
 
   if (complaint->file != NULL)
     internal_vwarning (complaint->file, complaint->line, complaint->fmt, args);
-  else if (warning_hook)
-    (*warning_hook) (complaint->fmt, args);
+  else if (deprecated_warning_hook)
+    (*deprecated_warning_hook) (complaint->fmt, args);
   else
     {
       if (complaints->explanation == NULL)
@@ -197,7 +197,7 @@ vcomplaint (struct complaints **c, const char *file, int line, const char *fmt,
 	{
 	  char *msg;
 	  struct cleanup *cleanups;
-	  xvasprintf (&msg, complaint->fmt, args);
+	  msg = xstrvprintf (complaint->fmt, args);
 	  cleanups = make_cleanup (xfree, msg);
 	  wrap_here ("");
 	  if (series != SUBSEQUENT_MESSAGE)

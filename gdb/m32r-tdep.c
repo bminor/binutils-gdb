@@ -686,7 +686,7 @@ m32r_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
 
 
 static CORE_ADDR
-m32r_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+m32r_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      struct regcache *regcache, CORE_ADDR bp_addr, int nargs,
 		      struct value **args, CORE_ADDR sp, int struct_return,
 		      CORE_ADDR struct_addr)
@@ -844,16 +844,6 @@ m32r_frame_this_id (struct frame_info *next_frame,
     return;
 
   id = frame_id_build (base, func);
-
-  /* Check that we're not going round in circles with the same frame
-     ID (but avoid applying the test to sentinel frames which do go
-     round in circles).  Can't use frame_id_eq() as that doesn't yet
-     compare the frame's PC value.  */
-  if (frame_relative_level (next_frame) >= 0
-      && get_frame_type (next_frame) != DUMMY_FRAME
-      && frame_id_eq (get_frame_id (next_frame), id))
-    return;
-
   (*this_id) = id;
 }
 
@@ -940,7 +930,7 @@ m32r_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_push_dummy_call (gdbarch, m32r_push_dummy_call);
   set_gdbarch_store_return_value (gdbarch, m32r_store_return_value);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, m32r_extract_struct_value_address);
-  set_gdbarch_use_struct_convention (gdbarch, m32r_use_struct_convention);
+  set_gdbarch_deprecated_use_struct_convention (gdbarch, m32r_use_struct_convention);
 
   set_gdbarch_skip_prologue (gdbarch, m32r_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);

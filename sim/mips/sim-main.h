@@ -383,7 +383,7 @@ struct _sim_cpu {
 #define NR_COP0_GPR	32
   unsigned_word cop0_gpr[NR_COP0_GPR];
 #define COP0_GPR	((CPU)->cop0_gpr)
-#define COP0_BADVADDR ((unsigned32)(COP0_GPR[8]))
+#define COP0_BADVADDR	(COP0_GPR[8])
 
   /* While space is allocated for the floating point registers in the
      main registers array, they are stored separatly.  This is because
@@ -952,6 +952,18 @@ extern int mips_mach_multi(SIM_DESC sd);
 #else
 #define	MIPS_MACH(SD)	MIPS_MACH_DEFAULT
 #endif
+
+/* Macros for determining whether a MIPS IV or MIPS V part is subject
+   to the hi/lo restrictions described in mips.igen.  */
+
+#define MIPS_MACH_HAS_MT_HILO_HAZARD(SD) \
+  (MIPS_MACH (SD) != bfd_mach_mips5500)
+
+#define MIPS_MACH_HAS_MULT_HILO_HAZARD(SD) \
+  (MIPS_MACH (SD) != bfd_mach_mips5500)
+
+#define MIPS_MACH_HAS_DIV_HILO_HAZARD(SD) \
+  (MIPS_MACH (SD) != bfd_mach_mips5500)
 
 #if H_REVEALS_MODULE_P (SIM_MAIN_INLINE)
 #include "sim-main.c"

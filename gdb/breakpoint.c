@@ -266,13 +266,13 @@ int breakpoint_count;
 /* Pointer to current exception event record */
 static struct exception_event_record *current_exception_event;
 
-/* Indicator of whether exception catchpoints should be nuked
-   between runs of a program */
-int exception_catchpoints_are_fragile = 0;
+/* Indicator of whether exception catchpoints should be nuked between
+   runs of a program.  */
+int deprecated_exception_catchpoints_are_fragile = 0;
 
 /* Indicator of when exception catchpoints set-up should be
-   reinitialized -- e.g. when program is re-run */
-int exception_support_initialized = 0;
+   reinitialized -- e.g. when program is re-run.  */
+int deprecated_exception_support_initialized = 0;
 
 /* This function returns a pointer to the string representation of the
    pathname of the dynamically-linked library that has just been
@@ -746,6 +746,23 @@ insert_catchpoint (struct ui_out *uo, void *args)
   return 0;
 }
 
+/* Helper routine: free the value chain for a breakpoint (watchpoint).  */
+
+static void free_valchain (struct bp_location *b)
+{
+  struct value *v;
+  struct value *n;
+
+  /* Free the saved value chain.  We will construct a new one
+     the next time the watchpoint is inserted.  */
+  for (v = b->owner->val_chain; v; v = n)
+    {
+      n = v->next;
+      value_free (v);
+    }
+  b->owner->val_chain = NULL;
+}
+
 /* Insert a low-level "breakpoint" of some type.  BPT is the breakpoint.
    Any error messages are printed to TMP_ERROR_STREAM; and DISABLED_BREAKS,
    PROCESS_WARNING, and HW_BREAKPOINT_ERROR are used to report problems.
@@ -893,18 +910,17 @@ insert_bp_location (struct bp_location *bpt,
 	 must watch.  As soon as a many-to-one mapping is available I'll
 	 convert this.  */
 
-      struct frame_info *saved_frame;
-      int saved_level, within_current_scope;
+      int within_current_scope;
       struct value *mark = value_mark ();
       struct value *v;
+      struct frame_id saved_frame_id;
 
-      /* Save the current frame and level so we can restore it after
+      /* Save the current frame's ID so we can restore it after
 	 evaluating the watchpoint expression on its own frame.  */
       /* FIXME drow/2003-09-09: It would be nice if evaluate_expression
 	 took a frame parameter, so that we didn't have to change the
 	 selected frame.  */
-      saved_frame = deprecated_selected_frame;
-      saved_level = frame_relative_level (deprecated_selected_frame);
+      saved_frame_id = get_frame_id (deprecated_selected_frame);
 
       /* Determine if the watchpoint is within scope.  */
       if (bpt->owner->exp_valid_block == NULL)
@@ -920,6 +936,8 @@ insert_bp_location (struct bp_location *bpt,
 
       if (within_current_scope)
 	{
+	  free_valchain (bpt);
+
 	  /* Evaluate the expression and cut the chain of values
 	     produced off from the value chain.
 
@@ -999,10 +1017,8 @@ insert_bp_location (struct bp_location *bpt,
 	  bpt->owner->disposition = disp_del_at_next_stop;
 	}
 
-      /* Restore the frame and level.  */
-      if (saved_frame != deprecated_selected_frame
-	  || saved_level != frame_relative_level (deprecated_selected_frame))
-	select_frame (saved_frame);
+      /* Restore the selected frame.  */
+      select_frame (frame_find_by_id (saved_frame_id));
 
       return val;
     }
@@ -1505,15 +1521,6 @@ remove_breakpoint (struct bp_location *b, insertion_state_t is)
       if ((is == mark_uninserted) && (b->inserted))
 	warning ("Could not remove hardware watchpoint %d.",
 		 b->owner->number);
-
-      /* Free the saved value chain.  We will construct a new one
-         the next time the watchpoint is inserted.  */
-      for (v = b->owner->val_chain; v; v = n)
-	{
-	  n = v->next;
-	  value_free (v);
-	}
-      b->owner->val_chain = NULL;
     }
   else if ((b->owner->type == bp_catch_fork ||
 	    b->owner->type == bp_catch_vfork ||
@@ -1636,8 +1643,8 @@ breakpoint_init_inferior (enum inf_context context)
       default:
 	/* Likewise for exception catchpoints in dynamic-linked
 	   executables where required */
-	if (ep_is_exception_catchpoint (b) &&
-	    exception_catchpoints_are_fragile)
+	if (ep_is_exception_catchpoint (b)
+	    && deprecated_exception_catchpoints_are_fragile)
 	  {
 	    warning_needed = 1;
 	    delete_breakpoint (b);
@@ -1646,8 +1653,8 @@ breakpoint_init_inferior (enum inf_context context)
       }
   }
 
-  if (exception_catchpoints_are_fragile)
-    exception_support_initialized = 0;
+  if (deprecated_exception_catchpoints_are_fragile)
+    deprecated_exception_support_initialized = 0;
 
   /* Don't issue the warning unless it's really needed... */
   if (warning_needed && (context != inf_exited))
@@ -1757,37 +1764,6 @@ software_breakpoint_inserted_here_p (CORE_ADDR pc)
 	}
     }
 
-  return 0;
-}
-
-/* Return nonzero if FRAME is a dummy frame.  We can't use
-   DEPRECATED_PC_IN_CALL_DUMMY because figuring out the saved SP would
-   take too much time, at least using frame_register() on the 68k.
-   This means that for this function to work right a port must use the
-   bp_call_dummy breakpoint.  */
-
-int
-deprecated_frame_in_dummy (struct frame_info *frame)
-{
-  struct breakpoint *b;
-
-  /* This function is used by two files: get_frame_type(), after first
-     checking that !DEPRECATED_USE_GENERIC_DUMMY_FRAMES; and
-     sparc-tdep.c, which doesn't yet use generic dummy frames anyway.  */
-  gdb_assert (!DEPRECATED_USE_GENERIC_DUMMY_FRAMES);
-
-  ALL_BREAKPOINTS (b)
-  {
-    if (b->type == bp_call_dummy
-	&& frame_id_eq (b->frame_id, get_frame_id (frame))
-    /* We need to check the PC as well as the frame on the sparc,
-       for signals.exp in the testsuite.  */
-	&& (get_frame_pc (frame)
-	    >= (b->loc->address
-		- DEPRECATED_SIZEOF_CALL_DUMMY_WORDS / sizeof (LONGEST) * DEPRECATED_REGISTER_SIZE))
-	&& get_frame_pc (frame) <= b->loc->address)
-      return 1;
-  }
   return 0;
 }
 
@@ -2583,7 +2559,9 @@ which its expression is valid.\n");
 }
 
 /* Get a bpstat associated with having just stopped at address
-   BP_ADDR.  */
+   BP_ADDR in thread PTID.  STOPPED_BY_WATCHPOINT is 1 if the
+   target thinks we stopped due to a hardware watchpoint, 0 if we
+   know we did not trigger a hardware watchpoint, and -1 if we do not know.  */
 
 /* Determine whether we stopped at a breakpoint, etc, or whether we
    don't understand this stop.  Result is a chain of bpstat's such that:
@@ -2600,7 +2578,7 @@ which its expression is valid.\n");
    commands, FIXME??? fields.  */
 
 bpstat
-bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid)
+bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid, int stopped_by_watchpoint)
 {
   struct breakpoint *b, *temp;
   /* True if we've hit a breakpoint (as opposed to a watchpoint).  */
@@ -2634,6 +2612,18 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid)
 	    && !section_is_mapped (b->loc->section))
 	  continue;
       }
+
+    /* Continuable hardware watchpoints are treated as non-existent if the 
+       reason we stopped wasn't a hardware watchpoint (we didn't stop on 
+       some data address).  Otherwise gdb won't stop on a break instruction 
+       in the code (not from a breakpoint) when a hardware watchpoint has 
+       been defined.  */
+
+    if ((b->type == bp_hardware_watchpoint
+	 || b->type == bp_read_watchpoint
+	 || b->type == bp_access_watchpoint)
+	&& !stopped_by_watchpoint)
+      continue;
 
     if (b->type == bp_hardware_breakpoint)
       {
@@ -3017,8 +3007,7 @@ bpstat_what (bpstat bs)
 
   /* step_resume entries: a step resume breakpoint overrides another
      breakpoint of signal handling (see comment in wait_for_inferior
-     at first DEPRECATED_PC_IN_SIGTRAMP where we set the step_resume
-     breakpoint).  */
+     at where we set the step_resume breakpoint).  */
   /* We handle the through_sigtramp_breakpoint the same way; having both
      one of those and a step_resume_breakpoint is probably very rare (?).  */
 
@@ -4269,7 +4258,7 @@ create_thread_event_breakpoint (CORE_ADDR address)
   
   b->enable_state = bp_enabled;
   /* addr_string has to be used or breakpoint_re_set will delete me.  */
-  xasprintf (&b->addr_string, "*0x%s", paddr (b->loc->address));
+  b->addr_string = xstrprintf ("*0x%s", paddr (b->loc->address));
 
   return b;
 }
@@ -4723,13 +4712,13 @@ mention (struct breakpoint *b)
   stb = ui_out_stream_new (uiout);
   old_chain = make_cleanup_ui_out_stream_delete (stb);
 
-  /* FIXME: This is misplaced; mention() is called by things (like hitting a
-     watchpoint) other than breakpoint creation.  It should be possible to
-     clean this up and at the same time replace the random calls to
-     breakpoint_changed with this hook, as has already been done for
-     delete_breakpoint_hook and so on.  */
-  if (create_breakpoint_hook)
-    create_breakpoint_hook (b);
+  /* FIXME: This is misplaced; mention() is called by things (like
+     hitting a watchpoint) other than breakpoint creation.  It should
+     be possible to clean this up and at the same time replace the
+     random calls to breakpoint_changed with this hook, as has already
+     been done for deprecated_delete_breakpoint_hook and so on.  */
+  if (deprecated_create_breakpoint_hook)
+    deprecated_create_breakpoint_hook (b);
   breakpoint_create_event (b->number);
 
   if (b->ops != NULL && b->ops->print_mention != NULL)
@@ -4913,7 +4902,7 @@ create_breakpoints (struct symtabs_and_lines sals, char **addr_string,
 	else
 	  /* addr_string has to be used or breakpoint_re_set will delete
 	     me.  */
-	  xasprintf (&b->addr_string, "*0x%s", paddr (b->loc->address));
+	  b->addr_string = xstrprintf ("*0x%s", paddr (b->loc->address));
 	b->cond_string = cond_string[i];
 	b->ignore_count = ignore_count;
 	b->enable_state = bp_enabled;
@@ -4937,6 +4926,10 @@ create_breakpoints (struct symtabs_and_lines sals, char **addr_string,
 	       be copied too.  */
 	    if (pending_bp->commands)
 	      b->commands = copy_command_lines (pending_bp->commands);
+	    
+	    /* We have to copy over the ignore_count and thread as well.  */
+	    b->ignore_count = pending_bp->ignore_count;
+	    b->thread = pending_bp->thread;
 	  }
 	mention (b);
       }
@@ -5040,7 +5033,8 @@ breakpoint_sals_to_pc (struct symtabs_and_lines *sals,
 
          Give the target a chance to bless sals.sals[i].pc before we
          try to make a breakpoint for it. */
-      if (PC_REQUIRES_RUN_BEFORE_USE (sals->sals[i].pc))
+#ifdef DEPRECATED_PC_REQUIRES_RUN_BEFORE_USE
+      if (DEPRECATED_PC_REQUIRES_RUN_BEFORE_USE (sals->sals[i].pc))
 	{
 	  if (address == NULL)
 	    error ("Cannot break without a running program.");
@@ -5048,6 +5042,7 @@ breakpoint_sals_to_pc (struct symtabs_and_lines *sals,
 	    error ("Cannot break on %s without a running program.", 
 		   address);
 	}
+#endif
     }
 }
 
@@ -6874,12 +6869,14 @@ delete_breakpoint (struct breakpoint *bpt)
   if (bpt->type == bp_none)
     return;
 
-  if (delete_breakpoint_hook)
-    delete_breakpoint_hook (bpt);
+  if (deprecated_delete_breakpoint_hook)
+    deprecated_delete_breakpoint_hook (bpt);
   breakpoint_delete_event (bpt->number);
 
   if (bpt->loc->inserted)
     remove_breakpoint (bpt->loc, mark_inserted);
+
+  free_valchain (bpt->loc);
 
   if (breakpoint_chain == bpt)
     breakpoint_chain = bpt->next;
@@ -7507,8 +7504,8 @@ disable_breakpoint (struct breakpoint *bpt)
 
   check_duplicates (bpt);
 
-  if (modify_breakpoint_hook)
-    modify_breakpoint_hook (bpt);
+  if (deprecated_modify_breakpoint_hook)
+    deprecated_modify_breakpoint_hook (bpt);
   breakpoint_modify_event (bpt->number);
 }
 
@@ -7548,8 +7545,6 @@ disable_command (char *args, int from_tty)
 static void
 do_enable_breakpoint (struct breakpoint *bpt, enum bpdisp disposition)
 {
-  struct frame_info *save_selected_frame = NULL;
-  int save_selected_frame_level = -1;
   int target_resources_ok, other_type_used;
   struct value *mark;
 
@@ -7596,6 +7591,9 @@ do_enable_breakpoint (struct breakpoint *bpt, enum bpdisp disposition)
 	  bpt->type == bp_read_watchpoint || 
 	  bpt->type == bp_access_watchpoint)
 	{
+	  struct frame_id saved_frame_id;
+
+	  saved_frame_id = get_frame_id (get_selected_frame ());
 	  if (bpt->exp_valid_block != NULL)
 	    {
 	      struct frame_info *fr =
@@ -7608,9 +7606,6 @@ is valid is not currently in scope.\n", bpt->number);
 		  bpt->enable_state = bp_disabled;
 		  return;
 		}
-	      
-	      save_selected_frame = deprecated_selected_frame;
-	      save_selected_frame_level = frame_relative_level (deprecated_selected_frame);
 	      select_frame (fr);
 	    }
 	  
@@ -7645,14 +7640,13 @@ have been allocated for other watchpoints.\n", bpt->number);
 		}
 	    }
 	  
-	  if (save_selected_frame_level >= 0)
-	    select_frame (save_selected_frame);
+	  select_frame (frame_find_by_id (saved_frame_id));
 	  value_free_to_mark (mark);
 	}
     }
 
-  if (modify_breakpoint_hook)
-    modify_breakpoint_hook (bpt);
+  if (deprecated_modify_breakpoint_hook)
+    deprecated_modify_breakpoint_hook (bpt);
   breakpoint_modify_event (bpt->number);
 }
 

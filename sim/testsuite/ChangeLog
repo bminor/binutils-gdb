@@ -1,3 +1,7 @@
+2004-05-12  Ben Elliston  <bje@au.ibm.com>
+
+	* lib/sim-defs.exp: Remove stray semicolons.
+
 2004-03-01  Richard Sandiford  <rsandifo@redhat.com>
 
 	* sim/frv/allinsn.exp (all_machs): Add fr405 and fr450.

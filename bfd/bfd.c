@@ -1,6 +1,6 @@
 /* Generic BFD library interface and support routines.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003
+   2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -45,14 +45,10 @@ CODE_FRAGMENT
 .  {* A pointer to the target jump table.  *}
 .  const struct bfd_target *xvec;
 .
-.  {* To avoid dragging too many header files into every file that
-.     includes `<<bfd.h>>', IOSTREAM has been declared as a "char *",
-.     and MTIME as a "long".  Their correct types, to which they
-.     are cast when used, are "FILE *" and "time_t".    The iostream
-.     is the result of an fopen on the filename.  However, if the
-.     BFD_IN_MEMORY flag is set, then iostream is actually a pointer
-.     to a bfd_in_memory struct.  *}
+.  {* The IOSTREAM, and corresponding IO vector that provide access
+.     to the file backing the BFD.  *}
 .  void *iostream;
+.  const struct bfd_iovec *iovec;
 .
 .  {* Is the file descriptor being cached?  That is, can it be closed as
 .     needed, and re-opened when accessed later?  *}
@@ -512,6 +508,9 @@ DESCRIPTION
 const char *
 bfd_archive_filename (bfd *abfd)
 {
+  if (abfd == NULL)
+    return NULL;
+  
   if (abfd->my_archive)
     {
       static size_t curr = 0;
@@ -766,12 +765,14 @@ bfd_get_sign_extend_vma (bfd *abfd)
 
   name = bfd_get_target (abfd);
 
-  /* Return a proper value for DJGPP COFF (an x86 COFF variant).
+  /* Return a proper value for DJGPP & PE COFF (x86 COFF variants).
      This function is required for DWARF2 support, but there is
      no place to store this information in the COFF back end.
      Should enough other COFF targets add support for DWARF2,
      a place will have to be found.  Until then, this hack will do.  */
-  if (strncmp (name, "coff-go32", sizeof ("coff-go32") - 1) == 0)
+  if (strncmp (name, "coff-go32", sizeof ("coff-go32") - 1) == 0
+      || strcmp (name, "pe-i386") == 0
+      || strcmp (name, "pei-i386") == 0)
     return 1;
 
   bfd_set_error (bfd_error_wrong_format);
@@ -981,6 +982,29 @@ bfd_scan_vma (const char *string, const char **end, int base)
 
 /*
 FUNCTION
+	bfd_copy_private_header_data
+
+SYNOPSIS
+	bfd_boolean bfd_copy_private_header_data (bfd *ibfd, bfd *obfd);
+
+DESCRIPTION
+	Copy private BFD header information from the BFD @var{ibfd} to the
+	the BFD @var{obfd}.  This copies information that may require
+	sections to exist, but does not require symbol tables.  Return
+	<<true>> on success, <<false>> on error.
+	Possible error returns are:
+
+	o <<bfd_error_no_memory>> -
+	Not enough memory exists to create private data for @var{obfd}.
+
+.#define bfd_copy_private_header_data(ibfd, obfd) \
+.     BFD_SEND (obfd, _bfd_copy_private_header_data, \
+.		(ibfd, obfd))
+
+*/
+
+/*
+FUNCTION
 	bfd_copy_private_bfd_data
 
 SYNOPSIS
@@ -1082,6 +1106,9 @@ DESCRIPTION
 .#define bfd_merge_sections(abfd, link_info) \
 .	BFD_SEND (abfd, _bfd_merge_sections, (abfd, link_info))
 .
+.#define bfd_is_group_section(abfd, sec) \
+.	BFD_SEND (abfd, _bfd_is_group_section, (abfd, sec))
+.
 .#define bfd_discard_group(abfd, sec) \
 .	BFD_SEND (abfd, _bfd_discard_group, (abfd, sec))
 .
@@ -1111,6 +1138,9 @@ DESCRIPTION
 .
 .#define bfd_canonicalize_dynamic_symtab(abfd, asymbols) \
 .	BFD_SEND (abfd, _bfd_canonicalize_dynamic_symtab, (abfd, asymbols))
+.
+.#define bfd_get_synthetic_symtab(abfd, dynsyms, ret) \
+.	BFD_SEND (abfd, _bfd_get_synthetic_symtab, (abfd, dynsyms, ret))
 .
 .#define bfd_get_dynamic_reloc_upper_bound(abfd) \
 .	BFD_SEND (abfd, _bfd_get_dynamic_reloc_upper_bound, (abfd))
@@ -1386,4 +1416,47 @@ bfd_preserve_finish (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_preserve *preserve)
      inside bfd_alloc'd memory.  The section hash is on a separate
      objalloc.  */
   bfd_hash_table_free (&preserve->section_htab);
+}
+
+/*
+FUNCTION
+	bfd_get_section_ident
+
+SYNOPSIS
+	char *bfd_get_section_ident (asection *sec);
+
+DESCRIPTION
+	This function returns "section name[group name]" in a malloced
+	buffer if @var{sec} is a member of an ELF section group and
+	returns NULL otherwise. The caller should free the non-NULL
+	return after use.
+
+*/
+
+char *
+bfd_get_section_ident (asection *sec)
+{
+  char *buf;
+  bfd_size_type nlen;
+  bfd_size_type glen;
+
+  if (sec->owner == NULL
+      || bfd_get_flavour (sec->owner) != bfd_target_elf_flavour
+      || elf_next_in_group (sec) == NULL
+      || (sec->flags & SEC_GROUP) != 0)
+    return NULL;
+
+  nlen = strlen (sec->name);
+  glen = strlen (elf_group_name (sec));
+  buf = bfd_malloc (nlen + glen + 2 + 1);
+  if (buf != NULL)
+    {
+      strcpy (buf, sec->name);
+      buf [nlen] = '[';
+      strcpy (&buf [nlen + 1], elf_group_name (sec));
+      buf [nlen + 1 + glen] = ']';
+      buf [nlen + 1 + glen + 1] = '\0';
+    }
+
+  return buf;
 }

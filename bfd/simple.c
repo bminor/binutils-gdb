@@ -1,5 +1,5 @@
 /* simple.c -- BFD simple client routines
-   Copyright 2002, 2003
+   Copyright 2002, 2003, 2004
    Free Software Foundation, Inc.
    Contributed by MontaVista Software, Inc.
 
@@ -140,42 +140,21 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
   bfd_byte *contents, *data;
   int storage_needed;
   void *saved_offsets;
-  bfd_boolean saved_reloc_done = sec->reloc_done;
-
-#undef RETURN
-#define RETURN(x)				\
-  do						\
-    {						\
-      sec->reloc_done = saved_reloc_done;	\
-      return (x);				\
-    }						\
-  while (0)
-
-  /* Foul hack to prevent bfd_section_size aborts.  The reloc_done flag
-     only controls that macro (and the related size macros), selecting
-     between _raw_size and _cooked_size.  We may be called with relocation
-     done or not, so we need to save the done-flag and mark the section as
-     not relocated.
-
-     Debug sections won't change size while we're only relocating.  There
-     may be trouble here someday if it tries to run relaxation
-     unexpectedly, so make sure.  */
-  BFD_ASSERT (sec->_raw_size == sec->_cooked_size);
-  sec->reloc_done = 0;
 
   if (! (sec->flags & SEC_RELOC))
     {
-      bfd_size_type size = bfd_section_size (abfd, sec);
+      bfd_size_type amt = sec->rawsize > sec->size ? sec->rawsize : sec->size;
+      bfd_size_type size = sec->rawsize ? sec->rawsize : sec->size;
 
       if (outbuf == NULL)
-	contents = bfd_malloc (size);
+	contents = bfd_malloc (amt);
       else
 	contents = outbuf;
 
       if (contents)
 	bfd_get_section_contents (abfd, sec, contents, 0, size);
 
-      RETURN (contents);
+      return contents;
     }
 
   /* In order to use bfd_get_relocated_section_contents, we need
@@ -197,15 +176,15 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
   link_order.next = NULL;
   link_order.type = bfd_indirect_link_order;
   link_order.offset = 0;
-  link_order.size = bfd_section_size (abfd, sec);
+  link_order.size = sec->size;
   link_order.u.indirect.section = sec;
 
   data = NULL;
   if (outbuf == NULL)
     {
-      data = bfd_malloc (bfd_section_size (abfd, sec));
+      data = bfd_malloc (sec->size);
       if (data == NULL)
-	RETURN (NULL);
+	return NULL;
       outbuf = data;
     }
 
@@ -224,7 +203,7 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
     {
       if (data)
 	free (data);
-      RETURN (NULL);
+      return NULL;
     }
   bfd_map_over_sections (abfd, simple_save_output_info, saved_offsets);
 
@@ -267,5 +246,5 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
 
   _bfd_generic_link_hash_table_free (link_info.hash);
 
-  RETURN (contents);
+  return contents;
 }

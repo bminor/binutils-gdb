@@ -2102,7 +2102,7 @@ decode_coproc (SIM_DESC sd,
 	      case 8:
 		/* 8 = BadVAddr            R4000   VR4100  VR4300 */
 		if (code == 0x00)
-		  GPR[rt] = COP0_BADVADDR;
+		  GPR[rt] = (signed_word) (signed_address) COP0_BADVADDR;
 		else
 		  COP0_BADVADDR = GPR[rt];
 		break;

@@ -700,7 +700,7 @@ fi
 AC_MSG_CHECKING(for common simulator directory fpu implementation)
 if test -f "${srcdir}/../common/sim-fpu.c"; then
   AC_MSG_RESULT(yes)
-  sim_fpu_cflags="-DHAVE_COMMON_FPU -I${srcdir}/../common"
+  sim_fpu_cflags="-DHAVE_COMMON_FPU -I../common -I${srcdir}/../common"
   sim_fpu="sim-fpu.o"
 else
   AC_MSG_RESULT(no)

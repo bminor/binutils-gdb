@@ -51,8 +51,7 @@
 #include "i386-tdep.h"
 #include "i387-tdep.h"
 
-/* Names of the registers.  The first 10 registers match the register
-   numbering scheme used by GCC for stabs and DWARF.  */
+/* Register names.  */
 
 static char *i386_register_names[] =
 {
@@ -71,7 +70,7 @@ static char *i386_register_names[] =
 
 static const int i386_num_register_names = ARRAY_SIZE (i386_register_names);
 
-/* MMX registers.  */
+/* Register names for MMX pseudo-registers.  */
 
 static char *i386_mmx_names[] =
 {
@@ -166,17 +165,24 @@ i386_register_name (int reg)
   return NULL;
 }
 
-/* Convert stabs register number REG to the appropriate register
+/* Convert a dbx register number REG to the appropriate register
    number used by GDB.  */
 
 static int
-i386_stab_reg_to_regnum (int reg)
+i386_dbx_reg_to_regnum (int reg)
 {
-  /* This implements what GCC calls the "default" register map.  */
+  /* This implements what GCC calls the "default" register map
+     (dbx_register_map[]).  */
+
   if (reg >= 0 && reg <= 7)
     {
-      /* General-purpose registers.  */
-      return reg;
+      /* General-purpose registers.  The debug info calls %ebp
+         register 4, and %esp register 5.  */
+      if (reg == 4)
+        return 5;
+      else if (reg == 5)
+        return 4;
+      else return reg;
     }
   else if (reg >= 12 && reg <= 19)
     {
@@ -198,13 +204,16 @@ i386_stab_reg_to_regnum (int reg)
   return NUM_REGS + NUM_PSEUDO_REGS;
 }
 
-/* Convert DWARF register number REG to the appropriate register
-   number used by GDB.  */
+/* Convert SVR4 register number REG to the appropriate register number
+   used by GDB.  */
 
 static int
-i386_dwarf_reg_to_regnum (int reg)
+i386_svr4_reg_to_regnum (int reg)
 {
-  /* The DWARF register numbering includes %eip and %eflags, and
+  /* This implements the GCC register map that tries to be compatible
+     with the SVR4 C compiler for DWARF (svr4_dbx_register_map[]).  */
+
+  /* The SVR4 register numbering includes %eip and %eflags, and
      numbers the floating point registers differently.  */
   if (reg >= 0 && reg <= 9)
     {
@@ -218,8 +227,8 @@ i386_dwarf_reg_to_regnum (int reg)
     }
   else if (reg >= 21)
     {
-      /* The SSE and MMX registers have identical numbers as in stabs.  */
-      return i386_stab_reg_to_regnum (reg);
+      /* The SSE and MMX registers have the same numbers as with dbx.  */
+      return i386_dbx_reg_to_regnum (reg);
     }
 
   /* This will hopefully provoke a warning.  */
@@ -563,12 +572,12 @@ i386_analyze_frame_setup (CORE_ADDR pc, CORE_ADDR current_pc,
 
 	    subl $XXX, %esp
 
-	 NOTE: You can't subtract a 16 bit immediate from a 32 bit
+	 NOTE: You can't subtract a 16-bit immediate from a 32-bit
 	 reg, so we don't have to worry about a data16 prefix.  */
       op = read_memory_unsigned_integer (pc + 3, 1);
       if (op == 0x83)
 	{
-	  /* `subl' with 8 bit immediate.  */
+	  /* `subl' with 8-bit immediate.  */
 	  if (read_memory_unsigned_integer (pc + 4, 1) != 0xec)
 	    /* Some instruction starting with 0x83 other than `subl'.  */
 	    return pc + 3;
@@ -580,12 +589,12 @@ i386_analyze_frame_setup (CORE_ADDR pc, CORE_ADDR current_pc,
 	}
       else if (op == 0x81)
 	{
-	  /* Maybe it is `subl' with a 32 bit immedediate.  */
+	  /* Maybe it is `subl' with a 32-bit immediate.  */
 	  if (read_memory_unsigned_integer (pc + 4, 1) != 0xec)
 	    /* Some instruction starting with 0x81 other than `subl'.  */
 	    return pc + 3;
 
-	  /* It is `subl' with a 32 bit immediate.  */
+	  /* It is `subl' with a 32-bit immediate.  */
 	  cache->locals = read_memory_integer (pc + 5, 4);
 	  return pc + 9;
 	}
@@ -648,9 +657,9 @@ i386_analyze_register_saves (CORE_ADDR pc, CORE_ADDR current_pc,
    once used in the System V compiler).
 
    Local space is allocated just below the saved %ebp by either the
-   'enter' instruction, or by "subl $<size>, %esp".  'enter' has a 16
-   bit unsigned argument for space to allocate, and the 'addl'
-   instruction could have either a signed byte, or 32 bit immediate.
+   'enter' instruction, or by "subl $<size>, %esp".  'enter' has a
+   16-bit unsigned argument for space to allocate, and the 'addl'
+   instruction could have either a signed byte, or 32-bit immediate.
 
    Next, the registers used by this function are pushed.  With the
    System V compiler they will always be in the order: %edi, %esi,
@@ -741,7 +750,13 @@ i386_skip_prologue (CORE_ADDR start_pc)
 	}
     }
 
-  return i386_follow_jump (pc);
+  /* If the function starts with a branch (to startup code at the end)
+     the last instruction should bring us back to the first
+     instruction of the real code.  */
+  if (i386_follow_jump (start_pc) != start_pc)
+    pc = i386_follow_jump (pc);
+
+  return pc;
 }
 
 /* This function is 64-bit safe.  */
@@ -1010,17 +1025,27 @@ static const struct frame_unwind i386_sigtramp_frame_unwind =
 static const struct frame_unwind *
 i386_sigtramp_frame_sniffer (struct frame_info *next_frame)
 {
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
-  char *name;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (next_frame));
 
-  /* We shouldn't even bother to try if the OSABI didn't register
-     a sigcontext_addr handler.  */
-  if (!gdbarch_tdep (current_gdbarch)->sigcontext_addr)
+  /* We shouldn't even bother if we don't have a sigcontext_addr
+     handler.  */
+  if (tdep->sigcontext_addr == NULL)
     return NULL;
 
-  find_pc_partial_function (pc, &name, NULL, NULL);
-  if (DEPRECATED_PC_IN_SIGTRAMP (pc, name))
-    return &i386_sigtramp_frame_unwind;
+  if (tdep->sigtramp_p != NULL)
+    {
+      if (tdep->sigtramp_p (next_frame))
+	return &i386_sigtramp_frame_unwind;
+    }
+
+  if (tdep->sigtramp_start != 0)
+    {
+      CORE_ADDR pc = frame_pc_unwind (next_frame);
+
+      gdb_assert (tdep->sigtramp_end != 0);
+      if (pc >= tdep->sigtramp_start && pc < tdep->sigtramp_end)
+	return &i386_sigtramp_frame_unwind;
+    }
 
   return NULL;
 }
@@ -1094,7 +1119,7 @@ i386_get_longjmp_target (CORE_ADDR *pc)
 
 
 static CORE_ADDR
-i386_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+i386_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      struct regcache *regcache, CORE_ADDR bp_addr, int nargs,
 		      struct value **args, CORE_ADDR sp, int struct_return,
 		      CORE_ADDR struct_addr)
@@ -1142,7 +1167,7 @@ i386_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
      (i386_frame_this_id, i386_sigtramp_frame_this_id,
      i386_unwind_dummy_id).  It's there, since all frame unwinders for
      a given target have to agree (within a certain margin) on the
-     defenition of the stack address of a frame.  Otherwise
+     definition of the stack address of a frame.  Otherwise
      frame_id_inner() won't work correctly.  Since DWARF2/GCC uses the
      stack address *before* the function call as a frame's CFA.  On
      the i386, when %ebp is used as a frame pointer, the offset
@@ -1327,7 +1352,28 @@ i386_return_value (struct gdbarch *gdbarch, struct type *type,
 
   if ((code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION)
       && !i386_reg_struct_return_p (gdbarch, type))
-    return RETURN_VALUE_STRUCT_CONVENTION;
+    {
+      /* The System V ABI says that:
+
+	 "A function that returns a structure or union also sets %eax
+	 to the value of the original address of the caller's area
+	 before it returns.  Thus when the caller receives control
+	 again, the address of the returned object resides in register
+	 %eax and can be used to access the object."
+
+	 So the ABI guarantees that we can always find the return
+	 value just after the function has returned.  */
+
+      if (readbuf)
+	{
+	  ULONGEST addr;
+
+	  regcache_raw_read_unsigned (regcache, I386_EAX_REGNUM, &addr);
+	  read_memory (addr, readbuf, TYPE_LENGTH (type));
+	}
+
+      return RETURN_VALUE_ABI_RETURNS_ADDRESS;
+    }
 
   /* This special case is for structures consisting of a single
      `float' or `double' member.  These structures are returned in
@@ -1514,7 +1560,7 @@ i386_register_to_value (struct frame_info *frame, int regnum,
       return;
     }
 
-  /* Read a value spread accross multiple registers.  */
+  /* Read a value spread across multiple registers.  */
 
   gdb_assert (len > 4 && len % 4 == 0);
 
@@ -1546,7 +1592,7 @@ i386_value_to_register (struct frame_info *frame, int regnum,
       return;
     }
 
-  /* Write a value spread accross multiple registers.  */
+  /* Write a value spread across multiple registers.  */
 
   gdb_assert (len > 4 && len % 4 == 0);
 
@@ -1562,15 +1608,15 @@ i386_value_to_register (struct frame_info *frame, int regnum,
     }
 }
 
-/* Supply register REGNUM from the general-purpose register set REGSET
-   to register cache REGCACHE.  If REGNUM is -1, do this for all
-   registers in REGSET.  */
+/* Supply register REGNUM from the buffer specified by GREGS and LEN
+   in the general-purpose register set REGSET to register cache
+   REGCACHE.  If REGNUM is -1, do this for all registers in REGSET.  */
 
 void
 i386_supply_gregset (const struct regset *regset, struct regcache *regcache,
 		     int regnum, const void *gregs, size_t len)
 {
-  const struct gdbarch_tdep *tdep = regset->descr;
+  const struct gdbarch_tdep *tdep = gdbarch_tdep (regset->arch);
   const char *regs = gregs;
   int i;
 
@@ -1584,15 +1630,39 @@ i386_supply_gregset (const struct regset *regset, struct regcache *regcache,
     }
 }
 
-/* Supply register REGNUM from the floating-point register set REGSET
-   to register cache REGCACHE.  If REGNUM is -1, do this for all
-   registers in REGSET.  */
+/* Collect register REGNUM from the register cache REGCACHE and store
+   it in the buffer specified by GREGS and LEN as described by the
+   general-purpose register set REGSET.  If REGNUM is -1, do this for
+   all registers in REGSET.  */
+
+void
+i386_collect_gregset (const struct regset *regset,
+		      const struct regcache *regcache,
+		      int regnum, void *gregs, size_t len)
+{
+  const struct gdbarch_tdep *tdep = gdbarch_tdep (regset->arch);
+  char *regs = gregs;
+  int i;
+
+  gdb_assert (len == tdep->sizeof_gregset);
+
+  for (i = 0; i < tdep->gregset_num_regs; i++)
+    {
+      if ((regnum == i || regnum == -1)
+	  && tdep->gregset_reg_offset[i] != -1)
+	regcache_raw_collect (regcache, i, regs + tdep->gregset_reg_offset[i]);
+    }
+}
+
+/* Supply register REGNUM from the buffer specified by FPREGS and LEN
+   in the floating-point register set REGSET to register cache
+   REGCACHE.  If REGNUM is -1, do this for all registers in REGSET.  */
 
 static void
 i386_supply_fpregset (const struct regset *regset, struct regcache *regcache,
 		      int regnum, const void *fpregs, size_t len)
 {
-  const struct gdbarch_tdep *tdep = regset->descr;
+  const struct gdbarch_tdep *tdep = gdbarch_tdep (regset->arch);
 
   if (len == I387_SIZEOF_FXSAVE)
     {
@@ -1602,6 +1672,28 @@ i386_supply_fpregset (const struct regset *regset, struct regcache *regcache,
 
   gdb_assert (len == tdep->sizeof_fpregset);
   i387_supply_fsave (regcache, regnum, fpregs);
+}
+
+/* Collect register REGNUM from the register cache REGCACHE and store
+   it in the buffer specified by FPREGS and LEN as described by the
+   floating-point register set REGSET.  If REGNUM is -1, do this for
+   all registers in REGSET.  */
+
+static void
+i386_collect_fpregset (const struct regset *regset,
+		       const struct regcache *regcache,
+		       int regnum, void *fpregs, size_t len)
+{
+  const struct gdbarch_tdep *tdep = gdbarch_tdep (regset->arch);
+
+  if (len == I387_SIZEOF_FXSAVE)
+    {
+      i387_collect_fxsave (regcache, regnum, fpregs);
+      return;
+    }
+
+  gdb_assert (len == tdep->sizeof_fpregset);
+  i387_collect_fsave (regcache, regnum, fpregs);
 }
 
 /* Return the appropriate register set for the core section identified
@@ -1616,11 +1708,8 @@ i386_regset_from_core_section (struct gdbarch *gdbarch,
   if (strcmp (sect_name, ".reg") == 0 && sect_size == tdep->sizeof_gregset)
     {
       if (tdep->gregset == NULL)
-	{
-	  tdep->gregset = XMALLOC (struct regset);
-	  tdep->gregset->descr = tdep;
-	  tdep->gregset->supply_regset = i386_supply_gregset;
-	}
+	tdep->gregset = regset_alloc (gdbarch, i386_supply_gregset,
+				      i386_collect_gregset);
       return tdep->gregset;
     }
 
@@ -1629,11 +1718,8 @@ i386_regset_from_core_section (struct gdbarch *gdbarch,
 	  && sect_size == I387_SIZEOF_FXSAVE))
     {
       if (tdep->fpregset == NULL)
-	{
-	  tdep->fpregset = XMALLOC (struct regset);
-	  tdep->fpregset->descr = tdep;
-	  tdep->fpregset->supply_regset = i386_supply_fpregset;
-	}
+	tdep->fpregset = regset_alloc (gdbarch, i386_supply_fpregset,
+				       i386_collect_fpregset);
       return tdep->fpregset;
     }
 
@@ -1690,12 +1776,16 @@ i386_pe_skip_trampoline_code (CORE_ADDR pc, char *name)
 }
 
 
-/* Return non-zero if PC and NAME show that we are in a signal
-   trampoline.  */
+/* Return whether the frame preceding NEXT_FRAME corresponds to a
+   sigtramp routine.  */
 
 static int
-i386_pc_in_sigtramp (CORE_ADDR pc, char *name)
+i386_sigtramp_p (struct frame_info *next_frame)
 {
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  char *name;
+
+  find_pc_partial_function (pc, &name, NULL, NULL);
   return (name && strcmp ("_sigtramp", name) == 0);
 }
 
@@ -1725,11 +1815,18 @@ i386_print_insn (bfd_vma pc, struct disassemble_info *info)
 
 /* System V Release 4 (SVR4).  */
 
+/* Return whether the frame preceding NEXT_FRAME corresponds to a SVR4
+   sigtramp routine.  */
+
 static int
-i386_svr4_pc_in_sigtramp (CORE_ADDR pc, char *name)
+i386_svr4_sigtramp_p (struct frame_info *next_frame)
 {
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  char *name;
+
   /* UnixWare uses _sigacthandler.  The origin of the other symbols is
      currently unknown.  */
+  find_pc_partial_function (pc, &name, NULL, NULL);
   return (name && (strcmp ("_sigreturn", name) == 0
 		   || strcmp ("_sigacthandler", name) == 0
 		   || strcmp ("sigvechandler", name) == 0));
@@ -1752,23 +1849,13 @@ i386_svr4_sigcontext_addr (struct frame_info *next_frame)
 }
 
 
-/* DJGPP.  */
-
-static int
-i386_go32_pc_in_sigtramp (CORE_ADDR pc, char *name)
-{
-  /* DJGPP doesn't have any special frames for signal handlers.  */
-  return 0;
-}
-
-
 /* Generic ELF.  */
 
 void
 i386_elf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  /* We typically use stabs-in-ELF with the DWARF register numbering.  */
-  set_gdbarch_stab_reg_to_regnum (gdbarch, i386_dwarf_reg_to_regnum);
+  /* We typically use stabs-in-ELF with the SVR4 register numbering.  */
+  set_gdbarch_stab_reg_to_regnum (gdbarch, i386_svr4_reg_to_regnum);
 }
 
 /* System V Release 4 (SVR4).  */
@@ -1785,7 +1872,7 @@ i386_svr4_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
 
-  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, i386_svr4_pc_in_sigtramp);
+  tdep->sigtramp_p = i386_svr4_sigtramp_p;
   tdep->sigcontext_addr = i386_svr4_sigcontext_addr;
   tdep->sc_pc_offset = 36 + 14 * 4;
   tdep->sc_sp_offset = 36 + 17 * 4;
@@ -1800,7 +1887,8 @@ i386_go32_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, i386_go32_pc_in_sigtramp);
+  /* DJGPP doesn't have any special frames for signal handlers.  */
+  tdep->sigtramp_p = NULL;
 
   tdep->jb_pc_offset = 36;
 }
@@ -1905,7 +1993,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->sizeof_fpregset = I387_SIZEOF_FSAVE;
 
   /* The default settings include the FPU registers, the MMX registers
-     and the SSE registers.  This can be overidden for a specific ABI
+     and the SSE registers.  This can be overridden for a specific ABI
      by adjusting the members `st0_regnum', `mm0_regnum' and
      `num_xmm_regs' of `struct gdbarch_tdep', otherwise the registers
      will show up in the output of "info all-registers".  Ideally we
@@ -1921,7 +2009,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->st0_regnum = I386_ST0_REGNUM;
 
   /* The MMX registers are implemented as pseudo-registers.  Put off
-     caclulating the register number for %mm0 until we know the number
+     calculating the register number for %mm0 until we know the number
      of raw registers.  */
   tdep->mm0_regnum = 0;
 
@@ -1932,6 +2020,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->struct_return = pcc_struct_return;
   tdep->sigtramp_start = 0;
   tdep->sigtramp_end = 0;
+  tdep->sigtramp_p = i386_sigtramp_p;
   tdep->sigcontext_addr = NULL;
   tdep->sc_reg_offset = NULL;
   tdep->sc_pc_offset = -1;
@@ -1960,13 +2049,43 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_ps_regnum (gdbarch, I386_EFLAGS_REGNUM); /* %eflags */
   set_gdbarch_fp0_regnum (gdbarch, I386_ST0_REGNUM); /* %st(0) */
 
-  /* Use the "default" register numbering scheme for stabs and COFF.  */
-  set_gdbarch_stab_reg_to_regnum (gdbarch, i386_stab_reg_to_regnum);
-  set_gdbarch_sdb_reg_to_regnum (gdbarch, i386_stab_reg_to_regnum);
+  /* NOTE: kettenis/20040418: GCC does have two possible register
+     numbering schemes on the i386: dbx and SVR4.  These schemes
+     differ in how they number %ebp, %esp, %eflags, and the
+     floating-point registers, and are implemented by the arrays
+     dbx_register_map[] and svr4_dbx_register_map in
+     gcc/config/i386.c.  GCC also defines a third numbering scheme in
+     gcc/config/i386.c, which it designates as the "default" register
+     map used in 64bit mode.  This last register numbering scheme is
+     implemented in dbx64_register_map, and is used for AMD64; see
+     amd64-tdep.c.
 
-  /* Use the DWARF register numbering scheme for DWARF and DWARF 2.  */
-  set_gdbarch_dwarf_reg_to_regnum (gdbarch, i386_dwarf_reg_to_regnum);
-  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, i386_dwarf_reg_to_regnum);
+     Currently, each GCC i386 target always uses the same register
+     numbering scheme across all its supported debugging formats
+     i.e. SDB (COFF), stabs and DWARF 2.  This is because
+     gcc/sdbout.c, gcc/dbxout.c and gcc/dwarf2out.c all use the
+     DBX_REGISTER_NUMBER macro which is defined by each target's
+     respective config header in a manner independent of the requested
+     output debugging format.
+
+     This does not match the arrangement below, which presumes that
+     the SDB and stabs numbering schemes differ from the DWARF and
+     DWARF 2 ones.  The reason for this arrangement is that it is
+     likely to get the numbering scheme for the target's
+     default/native debug format right.  For targets where GCC is the
+     native compiler (FreeBSD, NetBSD, OpenBSD, GNU/Linux) or for
+     targets where the native toolchain uses a different numbering
+     scheme for a particular debug format (stabs-in-ELF on Solaris)
+     the defaults below will have to be overridden, like
+     i386_elf_init_abi() does.  */
+
+  /* Use the dbx register numbering scheme for stabs and COFF.  */
+  set_gdbarch_stab_reg_to_regnum (gdbarch, i386_dbx_reg_to_regnum);
+  set_gdbarch_sdb_reg_to_regnum (gdbarch, i386_dbx_reg_to_regnum);
+
+  /* Use the SVR4 register numbering scheme for DWARF and DWARF 2.  */
+  set_gdbarch_dwarf_reg_to_regnum (gdbarch, i386_svr4_reg_to_regnum);
+  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, i386_svr4_reg_to_regnum);
 
   /* We don't define ECOFF_REG_TO_REGNUM, since ECOFF doesn't seem to
      be in use on any of the supported i386 targets.  */
@@ -1993,7 +2112,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_decr_pc_after_break (gdbarch, 1);
 
   set_gdbarch_frame_args_skip (gdbarch, 8);
-  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, i386_pc_in_sigtramp);
 
   /* Wire in the MMX registers.  */
   set_gdbarch_num_pseudo_regs (gdbarch, i386_num_mmx_regs);

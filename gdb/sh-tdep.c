@@ -885,7 +885,7 @@ sh_treat_as_flt_p (struct type *type)
 
 static CORE_ADDR
 sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
-			CORE_ADDR func_addr,
+			struct value *function,
 			struct regcache *regcache,
 			CORE_ADDR bp_addr, int nargs,
 			struct value **args,
@@ -997,7 +997,7 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
 
 static CORE_ADDR
 sh_push_dummy_call_nofpu (struct gdbarch *gdbarch,
-			  CORE_ADDR func_addr,
+			  struct value *function,
 			  struct regcache *regcache,
 			  CORE_ADDR bp_addr,
 			  int nargs, struct value **args,
@@ -1147,7 +1147,11 @@ sh3e_sh4_store_return_value (struct type *type, struct regcache *regcache,
       int len = TYPE_LENGTH (type);
       int i, regnum = FP0_REGNUM;
       for (i = 0; i < len; i += 4)
-	regcache_raw_write (regcache, regnum++, (char *) valbuf + i);
+	if (TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
+	  regcache_raw_write (regcache, regnum++,
+			      (char *) valbuf + len - 4 - i);
+	else
+	  regcache_raw_write (regcache, regnum++, (char *) valbuf + i);
     }
   else
     sh_default_store_return_value (type, regcache, valbuf);
@@ -2211,7 +2215,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_print_registers_info (gdbarch, sh_print_registers_info);
 
   set_gdbarch_breakpoint_from_pc (gdbarch, sh_breakpoint_from_pc);
-  set_gdbarch_use_struct_convention (gdbarch, sh_use_struct_convention);
+  set_gdbarch_deprecated_use_struct_convention (gdbarch, sh_use_struct_convention);
 
   set_gdbarch_print_insn (gdbarch, gdb_print_insn_sh);
   set_gdbarch_register_sim_regno (gdbarch, legacy_register_sim_regno);

@@ -1,4 +1,4 @@
-# Copyright 2003 Free Software Foundation, Inc.
+# Copyright 2003, 2004 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -36,7 +36,15 @@ if ![istarget "i?86-*-*"] then {
 set testfile "i386-prologue"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
-if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
+
+# some targets have leading underscores on assembly symbols.
+# TODO: detect this automatically
+set additional_flags ""
+if [istarget "i?86-*-cygwin*"] then {
+  set additional_flags "additional_flags=-DSYMBOL_PREFIX=\"_\""
+}   
+
+if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug $additional_flags]] != "" } {
     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
@@ -76,3 +84,16 @@ gdb_test "backtrace 10" \
 gdb_test "info frame" \
 	".*Saved registers:.*ebx at.*esi at.*edi at.*eip at.*" \
 	"saved registers in gdb1338"
+
+# Testcase jump_at_beginning.
+gdb_test_multiple "break jump_at_beginning" \
+	"set breakpoint in jump_at_beginning" {
+    -re "Breakpoint \[0-9\]* at ($hex).*$gdb_prompt $" {
+	gdb_test "x/i $expect_out(1,string)" \
+		".*<jump_at_beginning.*>:.*jmp.*" \
+		"check jump_at_beginning prologue end"
+    }
+    default {
+        fail "set breakpoint in jump_at_beginning"
+    }
+}

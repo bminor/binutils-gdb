@@ -43,6 +43,7 @@
 #include "regcache.h"
 #include "gdb_assert.h"
 #include "exec.h"
+#include "hppa-tdep.h"
 
 #include <fcntl.h>
 
@@ -278,7 +279,7 @@ static void
 som_solib_add_solib_objfile (struct so_list *so, char *name, int from_tty,
 			     CORE_ADDR text_addr)
 {
-  obj_private_data_t *obj_private;
+  struct hppa_objfile_private *obj_private;
   struct obj_section *s;
 
   so->objfile = symbol_file_add (name, from_tty, NULL, 0, OBJF_SHARED);
@@ -307,17 +308,18 @@ som_solib_add_solib_objfile (struct so_list *so, char *name, int from_tty,
    */
   so->objfile->flags |= OBJF_SHARED;
 
-  if (so->objfile->obj_private == NULL)
+  obj_private = (struct hppa_objfile_private *)
+	        objfile_data (so->objfile, hppa_objfile_priv_data);
+  if (obj_private == NULL)
     {
-      obj_private = (obj_private_data_t *)
+      obj_private = (struct hppa_objfile_private *)
 	obstack_alloc (&so->objfile->objfile_obstack,
-		       sizeof (obj_private_data_t));
+		       sizeof (struct hppa_objfile_private));
+      set_objfile_data (so->objfile, hppa_objfile_priv_data, obj_private);
       obj_private->unwind_info = NULL;
       obj_private->so_info = NULL;
-      so->objfile->obj_private = obj_private;
     }
 
-  obj_private = (obj_private_data_t *) so->objfile->obj_private;
   obj_private->so_info = so;
 
   if (!bfd_check_format (so->abfd, bfd_object))
@@ -1062,7 +1064,7 @@ som_solib_remove_inferior_hook (int pid)
   CORE_ADDR addr;
   struct minimal_symbol *msymbol;
   int status;
-  char dld_flags_buffer[TARGET_INT_BIT / TARGET_CHAR_BIT];
+  char dld_flags_buffer[4];
   unsigned int dld_flags_value;
   struct cleanup *old_cleanups = save_inferior_ptid ();
 
@@ -1079,16 +1081,13 @@ som_solib_remove_inferior_hook (int pid)
   msymbol = lookup_minimal_symbol ("__dld_flags", NULL, NULL);
 
   addr = SYMBOL_VALUE_ADDRESS (msymbol);
-  status = target_read_memory (addr, dld_flags_buffer, TARGET_INT_BIT / TARGET_CHAR_BIT);
+  status = target_read_memory (addr, dld_flags_buffer, 4);
 
-  dld_flags_value = extract_unsigned_integer (dld_flags_buffer,
-					      sizeof (dld_flags_value));
+  dld_flags_value = extract_unsigned_integer (dld_flags_buffer, 4);
 
   dld_flags_value &= ~DLD_FLAGS_HOOKVALID;
-  store_unsigned_integer (dld_flags_buffer,
-			  sizeof (dld_flags_value),
-			  dld_flags_value);
-  status = target_write_memory (addr, dld_flags_buffer, TARGET_INT_BIT / TARGET_CHAR_BIT);
+  store_unsigned_integer (dld_flags_buffer, 4, dld_flags_value);
+  status = target_write_memory (addr, dld_flags_buffer, 4);
 
   do_cleanups (old_cleanups);
 }
@@ -1135,7 +1134,7 @@ som_solib_have_load_event (int pid)
 {
   CORE_ADDR event_kind;
 
-  event_kind = read_register (ARG0_REGNUM);
+  event_kind = read_register (HPPA_ARG0_REGNUM);
   return (event_kind == SHL_LOAD);
 }
 
@@ -1144,7 +1143,7 @@ som_solib_have_unload_event (int pid)
 {
   CORE_ADDR event_kind;
 
-  event_kind = read_register (ARG0_REGNUM);
+  event_kind = read_register (HPPA_ARG0_REGNUM);
   return (event_kind == SHL_UNLOAD);
 }
 
@@ -1158,7 +1157,7 @@ som_solib_library_pathname (int pid)
   static char dll_pathname[1024];
 
   /* Read the descriptor of this newly-loaded library. */
-  dll_handle_address = read_register (ARG1_REGNUM);
+  dll_handle_address = read_register (HPPA_ARG1_REGNUM);
   read_memory (dll_handle_address, (char *) &dll_descriptor, sizeof (dll_descriptor));
 
   /* We can find a pointer to the dll's pathname within the descriptor. */

@@ -25,6 +25,7 @@
 
 #include "defs.h"
 #include "inferior.h"
+#include "gdb_assert.h"
 
 #include "ppc-tdep.h"
 #include "ppcnbsd-tdep.h"
@@ -35,7 +36,8 @@ getregs_supplies (int regno)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
-  return ((regno >= 0 && regno <= 31)
+  return ((regno >= tdep->ppc_gp0_regnum
+           && regno < tdep->ppc_gp0_regnum + ppc_num_gprs)
           || regno == tdep->ppc_lr_regnum
           || regno == tdep->ppc_cr_regnum
           || regno == tdep->ppc_xer_regnum
@@ -49,7 +51,20 @@ getfpregs_supplies (int regno)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
-  return ((regno >= FP0_REGNUM && regno <= FP0_REGNUM + 31)
+  /* FIXME: jimb/2004-05-05: Some PPC variants don't have floating
+     point registers.  Traditionally, GDB's register set has still
+     listed the floating point registers for such machines, so this
+     code is harmless.  However, the new E500 port actually omits the
+     floating point registers entirely from the register set --- they
+     don't even have register numbers assigned to them.
+
+     It's not clear to me how best to update this code, so this assert
+     will alert the first person to encounter the NetBSD/E500
+     combination to the problem.  */
+  gdb_assert (ppc_floating_point_unit_p (current_gdbarch));
+
+  return ((regno >= tdep->ppc_fp0_regnum
+           && regno < tdep->ppc_fp0_regnum + ppc_num_fprs)
 	  || regno == tdep->ppc_fpscr_regnum);
 }
 

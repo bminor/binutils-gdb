@@ -30,6 +30,7 @@
 #include "gdb_assert.h"
 #include "gdb_string.h"
 #include "gdbcmd.h"		/* For maintenanceprintlist.  */
+#include "observer.h"
 
 /*
  * DATA STRUCTURE
@@ -63,9 +64,9 @@ struct regcache_descr
   /* The cooked register space.  Each cooked register in the range
      [0..NR_RAW_REGISTERS) is direct-mapped onto the corresponding raw
      register.  The remaining [NR_RAW_REGISTERS
-     .. NR_COOKED_REGISTERS) (a.k.a. pseudo regiters) are mapped onto
+     .. NR_COOKED_REGISTERS) (a.k.a. pseudo registers) are mapped onto
      both raw registers and memory by the architecture methods
-     gdbarch_register_read and gdbarch_register_write.  */
+     gdbarch_pseudo_register_read and gdbarch_pseudo_register_write.  */
   int nr_cooked_registers;
   long sizeof_cooked_registers;
   long sizeof_cooked_register_valid_p;
@@ -566,6 +567,14 @@ real_register (int regnum)
   return regnum >= 0 && regnum < NUM_REGS;
 }
 
+/* Observer for the target_changed event.  */
+
+void
+regcache_observer_target_changed (struct target_ops *target)
+{
+  registers_changed ();
+}
+
 /* Low level examining and depositing of registers.
 
    The caller is responsible for making sure that the inferior is
@@ -594,8 +603,8 @@ registers_changed (void)
   for (i = 0; i < current_regcache->descr->nr_raw_registers; i++)
     set_register_cached (i, 0);
 
-  if (registers_changed_hook)
-    registers_changed_hook ();
+  if (deprecated_registers_changed_hook)
+    deprecated_registers_changed_hook ();
 }
 
 /* DEPRECATED_REGISTERS_FETCHED ()
@@ -1230,20 +1239,6 @@ void
 supply_register (int regnum, const void *val)
 {
   regcache_raw_supply (current_regcache, regnum, val);
-
-  /* On some architectures, e.g. HPPA, there are a few stray bits in
-     some registers, that the rest of the code would like to ignore.  */
-
-  /* NOTE: cagney/2001-03-16: The macro CLEAN_UP_REGISTER_VALUE is
-     going to be deprecated.  Instead architectures will leave the raw
-     register value as is and instead clean things up as they pass
-     through the method gdbarch_pseudo_register_read() clean up the
-     values. */
-
-#ifdef DEPRECATED_CLEAN_UP_REGISTER_VALUE
-  DEPRECATED_CLEAN_UP_REGISTER_VALUE \
-    (regnum, register_buffer (current_regcache, regnum));
-#endif
 }
 
 void
@@ -1577,7 +1572,7 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
 		char *n;
 		if (!footnote_register_type_name_null)
 		  footnote_register_type_name_null = ++footnote_nr;
-		xasprintf (&n, "*%d", footnote_register_type_name_null);
+		n = xstrprintf ("*%d", footnote_register_type_name_null);
 		make_cleanup (xfree, n);
 		t = n;
 	      }
@@ -1710,6 +1705,8 @@ _initialize_regcache (void)
   DEPRECATED_REGISTER_GDBARCH_SWAP (deprecated_registers);
   DEPRECATED_REGISTER_GDBARCH_SWAP (deprecated_register_valid);
   deprecated_register_gdbarch_swap (NULL, 0, build_regcache);
+
+  observer_attach_target_changed (regcache_observer_target_changed);
 
   add_com ("flushregs", class_maintenance, reg_flush_command,
 	   "Force gdb to flush its register cache (maintainer command)");

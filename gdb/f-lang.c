@@ -465,6 +465,7 @@ const struct language_defn f_language_defn =
   &exp_descriptor_standard,
   f_parse,			/* parser */
   f_error,			/* parser error function */
+  null_post_parser,
   f_printchar,			/* Print character constant */
   f_printstr,			/* function to print string constant */
   f_emit_char,			/* Function to print a single character */
@@ -477,6 +478,7 @@ const struct language_defn f_language_defn =
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   NULL,				/* Language specific symbol demangler */
+  NULL,				/* Language specific class_name_from_physname */
   {"", "", "", ""},		/* Binary format info */
   {"0%o", "0", "o", ""},	/* Octal format info */
   {"%d", "", "d", ""},		/* Decimal format info */

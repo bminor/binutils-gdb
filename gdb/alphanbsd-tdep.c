@@ -27,11 +27,12 @@
 #include "value.h"
 #include "osabi.h"
 
-#include "solib-svr4.h"
+#include "gdb_string.h"
 
 #include "alpha-tdep.h"
 #include "alphabsd-tdep.h"
 #include "nbsd-tdep.h"
+#include "solib-svr4.h"
 
 static void
 fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
@@ -205,8 +206,6 @@ alphanbsd_init_abi (struct gdbarch_info info,
   /* Hook into the MDEBUG frame unwinder.  */
   alpha_mdebug_init_abi (info, gdbarch);
 
-  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, alphanbsd_pc_in_sigtramp);
-
   /* NetBSD/alpha does not provide single step support via ptrace(2); we
      must use software single-stepping.  */
   set_gdbarch_software_single_step (gdbarch, alpha_software_single_step);
@@ -215,6 +214,7 @@ alphanbsd_init_abi (struct gdbarch_info info,
                                  nbsd_lp64_solib_svr4_fetch_link_map_offsets);
 
   tdep->dynamic_sigtramp_offset = alphanbsd_sigtramp_offset;
+  tdep->pc_in_sigtramp = alphanbsd_pc_in_sigtramp;
   tdep->sigcontext_addr = alphanbsd_sigcontext_addr;
 
   tdep->jb_pc = 2;
@@ -226,9 +226,7 @@ _initialize_alphanbsd_tdep (void)
 {
   gdbarch_register_osabi (bfd_arch_alpha, 0, GDB_OSABI_NETBSD_ELF,
                           alphanbsd_init_abi);
-  gdbarch_register_osabi (bfd_arch_alpha, 0, GDB_OSABI_OPENBSD_ELF,
-                          alphanbsd_init_abi);
 
-  add_core_fns (&alphanbsd_core_fns);
-  add_core_fns (&alphanbsd_elfcore_fns);
+  deprecated_add_core_fns (&alphanbsd_core_fns);
+  deprecated_add_core_fns (&alphanbsd_elfcore_fns);
 }

@@ -68,8 +68,6 @@ static void arm_rdi_resume (ptid_t pid, int step,
 
 static void arm_rdi_open (char *name, int from_tty);
 
-static void arm_rdi_create_inferior (char *exec_file, char *args, char **env);
-
 static void arm_rdi_close (int quitting);
 
 static void arm_rdi_store_registers (int regno);
@@ -334,7 +332,7 @@ device is attached to the remote system (e.g. /dev/ttya).");
    user types "run" after having attached.  */
 
 static void
-arm_rdi_create_inferior (char *exec_file, char *args, char **env)
+arm_rdi_create_inferior (char *exec_file, char *args, char **env, int from_tty)
 {
   int len, rslt;
   unsigned long arg1, arg2;

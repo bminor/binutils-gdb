@@ -281,6 +281,7 @@ read_indirect_string (struct comp_unit* unit,
     {
       asection *msec;
       bfd *abfd = unit->abfd;
+      bfd_size_type sz;
 
       msec = bfd_get_section_by_name (abfd, ".debug_str");
       if (! msec)
@@ -291,13 +292,14 @@ read_indirect_string (struct comp_unit* unit,
 	  return NULL;
 	}
 
-      stash->dwarf_str_size = msec->_raw_size;
-      stash->dwarf_str_buffer = bfd_alloc (abfd, msec->_raw_size);
+      sz = msec->rawsize ? msec->rawsize : msec->size;
+      stash->dwarf_str_size = sz;
+      stash->dwarf_str_buffer = bfd_alloc (abfd, sz);
       if (! stash->dwarf_abbrev_buffer)
 	return NULL;
 
       if (! bfd_get_section_contents (abfd, msec, stash->dwarf_str_buffer,
-				      0, msec->_raw_size))
+				      0, sz))
 	return NULL;
     }
 
@@ -443,7 +445,7 @@ read_abbrevs (bfd *abfd, bfd_uint64_t offset, struct dwarf2_debug *stash)
 	  return 0;
 	}
 
-      stash->dwarf_abbrev_size = msec->_raw_size;
+      stash->dwarf_abbrev_size = msec->size;
       stash->dwarf_abbrev_buffer
 	= bfd_simple_get_relocated_section_contents (abfd, msec, NULL,
 						     stash->syms);
@@ -801,10 +803,9 @@ add_line_info (struct line_info_table *table,
   info->column = column;
   info->end_sequence = end_sequence;
 
-  amt = strlen (filename);
-  if (amt)
+  if (filename && filename[0])
     {
-      info->filename = bfd_alloc (table->abfd, amt + 1);
+      info->filename = bfd_alloc (table->abfd, strlen (filename) + 1);
       if (info->filename)
 	strcpy (info->filename, filename);
     }
@@ -922,7 +923,7 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 	  return 0;
 	}
 
-      stash->dwarf_line_size = msec->_raw_size;
+      stash->dwarf_line_size = msec->size;
       stash->dwarf_line_buffer
 	= bfd_simple_get_relocated_section_contents (abfd, msec, NULL,
 						     stash->syms);
@@ -1677,7 +1678,7 @@ find_debug_info (bfd *abfd, asection *after_sec)
   return NULL;
 }
 
-/* The DWARF2 version of find_nearest line.  Return TRUE if the line
+/* The DWARF2 version of find_nearest_line.  Return TRUE if the line
    is found without error.  ADDR_SIZE is the number of bytes in the
    initial .debug_info length field and in the abbreviation offset.
    You may use zero to indicate that the default value should be
@@ -1745,7 +1746,7 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 	 In the second pass we read in the section's contents.  The allows
 	 us to avoid reallocing the data as we add sections to the stash.  */
       for (total_size = 0; msec; msec = find_debug_info (abfd, msec))
-	total_size += msec->_raw_size;
+	total_size += msec->size;
 
       stash->info_ptr = bfd_alloc (abfd, total_size);
       if (stash->info_ptr == NULL)
@@ -1760,7 +1761,7 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 	  bfd_size_type size;
 	  bfd_size_type start;
 
-	  size = msec->_raw_size;
+	  size = msec->size;
 	  if (size == 0)
 	    continue;
 
@@ -1834,7 +1835,7 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 	  stash->info_ptr += length;
 
 	  if ((bfd_vma) (stash->info_ptr - stash->sec_info_ptr)
-	      == stash->sec->_raw_size)
+	      == stash->sec->size)
 	    {
 	      stash->sec = find_debug_info (abfd, stash->sec);
 	      stash->sec_info_ptr = stash->info_ptr;

@@ -225,7 +225,7 @@ ocd_start_remote (void *dummy)
   flush_cached_frames ();
   registers_changed ();
   stop_pc = read_pc ();
-  print_stack_frame (get_selected_frame (), -1, 1);
+  print_stack_frame (get_selected_frame (), 0, SRC_AND_LOC);
 
   buf[0] = OCD_LOG_FILE;
   buf[1] = 3;			/* close existing WIGGLERS.LOG */
@@ -1014,7 +1014,7 @@ ocd_mourn (void)
    the program at that point.  */
 
 void
-ocd_create_inferior (char *exec_file, char *args, char **env)
+ocd_create_inferior (char *exec_file, char *args, char **env, int from_tty)
 {
   if (args && (*args != '\000'))
     error ("Args are not supported by BDM.");

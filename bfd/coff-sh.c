@@ -1,6 +1,6 @@
 /* BFD back-end for Renesas Super-H COFF binaries.
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
-   Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
+   2003, 2004 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
    Written by Steve Chamberlain, <sac@cygnus.com>.
    Relaxing code written by Ian Lance Taylor, <ian@cygnus.com>.
@@ -698,11 +698,9 @@ sh_relax_section (abfd, sec, link_info, again)
      bfd_boolean *again;
 {
   struct internal_reloc *internal_relocs;
-  struct internal_reloc *free_relocs = NULL;
   bfd_boolean have_code;
   struct internal_reloc *irel, *irelend;
   bfd_byte *contents = NULL;
-  bfd_byte *free_contents = NULL;
 
   *again = FALSE;
 
@@ -711,10 +709,13 @@ sh_relax_section (abfd, sec, link_info, again)
       || sec->reloc_count == 0)
     return TRUE;
 
-  /* If this is the first time we have been called for this section,
-     initialize the cooked size.  */
-  if (sec->_cooked_size == 0)
-    sec->_cooked_size = sec->_raw_size;
+  if (coff_section_data (abfd, sec) == NULL)
+    {
+      bfd_size_type amt = sizeof (struct coff_section_tdata);
+      sec->used_by_bfd = (PTR) bfd_zalloc (abfd, amt);
+      if (sec->used_by_bfd == NULL)
+	return FALSE;
+    }
 
   internal_relocs = (_bfd_coff_read_internal_relocs
 		     (abfd, sec, link_info->keep_memory,
@@ -722,8 +723,6 @@ sh_relax_section (abfd, sec, link_info, again)
 		      (struct internal_reloc *) NULL));
   if (internal_relocs == NULL)
     goto error_return;
-  if (! link_info->keep_memory)
-    free_relocs = internal_relocs;
 
   have_code = FALSE;
 
@@ -745,18 +744,11 @@ sh_relax_section (abfd, sec, link_info, again)
       /* Get the section contents.  */
       if (contents == NULL)
 	{
-	  if (coff_section_data (abfd, sec) != NULL
-	      && coff_section_data (abfd, sec)->contents != NULL)
+	  if (coff_section_data (abfd, sec)->contents != NULL)
 	    contents = coff_section_data (abfd, sec)->contents;
 	  else
 	    {
-	      contents = (bfd_byte *) bfd_malloc (sec->_raw_size);
-	      if (contents == NULL)
-		goto error_return;
-	      free_contents = contents;
-
-	      if (! bfd_get_section_contents (abfd, sec, contents,
-					      (file_ptr) 0, sec->_raw_size))
+	      if (!bfd_malloc_and_get_section (abfd, sec, &contents))
 		goto error_return;
 	    }
 	}
@@ -768,7 +760,7 @@ sh_relax_section (abfd, sec, link_info, again)
       laddr = irel->r_vaddr - sec->vma + 4;
       /* Careful to sign extend the 32-bit offset.  */
       laddr += ((irel->r_offset & 0xffffffff) ^ 0x80000000) - 0x80000000;
-      if (laddr >= sec->_raw_size)
+      if (laddr >= sec->size)
 	{
 	  (*_bfd_error_handler) ("%s: 0x%lx: warning: bad R_SH_USES offset",
 				 bfd_archive_filename (abfd),
@@ -795,7 +787,7 @@ sh_relax_section (abfd, sec, link_info, again)
       paddr = insn & 0xff;
       paddr *= 4;
       paddr += (laddr + 4) &~ (bfd_vma) 3;
-      if (paddr >= sec->_raw_size)
+      if (paddr >= sec->size)
 	{
 	  ((*_bfd_error_handler)
 	   ("%s: 0x%lx: warning: bad R_SH_USES load offset",
@@ -812,11 +804,12 @@ sh_relax_section (abfd, sec, link_info, again)
 #ifdef COFF_WITH_PE
 	    && (irelfn->r_type == R_SH_IMM32
 		|| irelfn->r_type == R_SH_IMM32CE
-		|| irelfn->r_type == R_SH_IMAGEBASE))
+		|| irelfn->r_type == R_SH_IMAGEBASE)
 
 #else
-	    && irelfn->r_type == R_SH_IMM32)
+	    && irelfn->r_type == R_SH_IMM32
 #endif
+	    )
 	  break;
       if (irelfn >= irelend)
 	{
@@ -894,21 +887,11 @@ sh_relax_section (abfd, sec, link_info, again)
 	 that would be more work, but would require less memory when
 	 the linker is run.  */
 
-      if (coff_section_data (abfd, sec) == NULL)
-	{
-	  bfd_size_type amt = sizeof (struct coff_section_tdata);
-	  sec->used_by_bfd = (PTR) bfd_zalloc (abfd, amt);
-	  if (sec->used_by_bfd == NULL)
-	    goto error_return;
-	}
-
       coff_section_data (abfd, sec)->relocs = internal_relocs;
       coff_section_data (abfd, sec)->keep_relocs = TRUE;
-      free_relocs = NULL;
 
       coff_section_data (abfd, sec)->contents = contents;
       coff_section_data (abfd, sec)->keep_contents = TRUE;
-      free_contents = NULL;
 
       obj_coff_keep_syms (abfd) = TRUE;
 
@@ -1011,18 +994,11 @@ sh_relax_section (abfd, sec, link_info, again)
       /* Get the section contents.  */
       if (contents == NULL)
 	{
-	  if (coff_section_data (abfd, sec) != NULL
-	      && coff_section_data (abfd, sec)->contents != NULL)
+	  if (coff_section_data (abfd, sec)->contents != NULL)
 	    contents = coff_section_data (abfd, sec)->contents;
 	  else
 	    {
-	      contents = (bfd_byte *) bfd_malloc (sec->_raw_size);
-	      if (contents == NULL)
-		goto error_return;
-	      free_contents = contents;
-
-	      if (! bfd_get_section_contents (abfd, sec, contents,
-					      (file_ptr) 0, sec->_raw_size))
+	      if (!bfd_malloc_and_get_section (abfd, sec, &contents))
 		goto error_return;
 	    }
 	}
@@ -1032,58 +1008,42 @@ sh_relax_section (abfd, sec, link_info, again)
 
       if (swapped)
 	{
-	  if (coff_section_data (abfd, sec) == NULL)
-	    {
-	      bfd_size_type amt = sizeof (struct coff_section_tdata);
-	      sec->used_by_bfd = (PTR) bfd_zalloc (abfd, amt);
-	      if (sec->used_by_bfd == NULL)
-		goto error_return;
-	    }
-
 	  coff_section_data (abfd, sec)->relocs = internal_relocs;
 	  coff_section_data (abfd, sec)->keep_relocs = TRUE;
-	  free_relocs = NULL;
 
 	  coff_section_data (abfd, sec)->contents = contents;
 	  coff_section_data (abfd, sec)->keep_contents = TRUE;
-	  free_contents = NULL;
 
 	  obj_coff_keep_syms (abfd) = TRUE;
 	}
     }
 
-  if (free_relocs != NULL)
-    {
-      free (free_relocs);
-      free_relocs = NULL;
-    }
-
-  if (free_contents != NULL)
+  if (internal_relocs != NULL
+      && internal_relocs != coff_section_data (abfd, sec)->relocs)
     {
       if (! link_info->keep_memory)
-	free (free_contents);
+	free (internal_relocs);
       else
-	{
-	  /* Cache the section contents for coff_link_input_bfd.  */
-	  if (coff_section_data (abfd, sec) == NULL)
-	    {
-	      bfd_size_type amt = sizeof (struct coff_section_tdata);
-	      sec->used_by_bfd = (PTR) bfd_zalloc (abfd, amt);
-	      if (sec->used_by_bfd == NULL)
-		goto error_return;
-	      coff_section_data (abfd, sec)->relocs = NULL;
-	    }
-	  coff_section_data (abfd, sec)->contents = contents;
-	}
+	coff_section_data (abfd, sec)->relocs = internal_relocs;
+    }
+
+  if (contents != NULL && contents != coff_section_data (abfd, sec)->contents)
+    {
+      if (! link_info->keep_memory)
+	free (contents);
+      else
+	/* Cache the section contents for coff_link_input_bfd.  */
+	coff_section_data (abfd, sec)->contents = contents;
     }
 
   return TRUE;
 
  error_return:
-  if (free_relocs != NULL)
-    free (free_relocs);
-  if (free_contents != NULL)
-    free (free_contents);
+  if (internal_relocs != NULL
+      && internal_relocs != coff_section_data (abfd, sec)->relocs)
+    free (internal_relocs);
+  if (contents != NULL && contents != coff_section_data (abfd, sec)->contents)
+    free (contents);
   return FALSE;
 }
 
@@ -1111,7 +1071,7 @@ sh_relax_delete_bytes (abfd, sec, addr, count)
      power larger than the number of bytes we are deleting.  */
 
   irelalign = NULL;
-  toaddr = sec->_cooked_size;
+  toaddr = sec->size;
 
   irel = coff_section_data (abfd, sec)->relocs;
   irelend = irel + sec->reloc_count;
@@ -1131,7 +1091,7 @@ sh_relax_delete_bytes (abfd, sec, addr, count)
   memmove (contents + addr, contents + addr + count,
 	   (size_t) (toaddr - addr - count));
   if (irelalign == NULL)
-    sec->_cooked_size -= count;
+    sec->size -= count;
   else
     {
       int i;
@@ -1443,17 +1403,12 @@ sh_relax_delete_bytes (abfd, sec, addr, count)
 		    ocontents = coff_section_data (abfd, o)->contents;
 		  else
 		    {
+		      if (!bfd_malloc_and_get_section (abfd, o, &ocontents))
+			return FALSE;
 		      /* We always cache the section contents.
                          Perhaps, if info->keep_memory is FALSE, we
                          should free them, if we are permitted to,
                          when we leave sh_coff_relax_section.  */
-		      ocontents = (bfd_byte *) bfd_malloc (o->_raw_size);
-		      if (ocontents == NULL)
-			return FALSE;
-		      if (! bfd_get_section_contents (abfd, o, ocontents,
-						      (file_ptr) 0,
-						      o->_raw_size))
-			return FALSE;
 		      coff_section_data (abfd, o)->contents = ocontents;
 		    }
 		}
@@ -2694,7 +2649,7 @@ sh_align_loads (abfd, sec, internal_relocs, contents, pswapped)
       if (irel < irelend)
 	stop = irel->r_vaddr - sec->vma;
       else
-	stop = sec->_cooked_size;
+	stop = sec->size;
 
       if (! _bfd_sh_align_load_span (abfd, sec, contents, sh_swap_insns,
 				     (PTR) internal_relocs, &label,
@@ -3046,7 +3001,7 @@ sh_coff_get_relocated_section_contents (output_bfd, link_info, link_order,
 						       symbols);
 
   memcpy (data, coff_section_data (input_bfd, input_section)->contents,
-	  (size_t) input_section->_raw_size);
+	  (size_t) input_section->size);
 
   if ((input_section->flags & SEC_RELOC) != 0
       && input_section->reloc_count > 0)

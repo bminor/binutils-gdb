@@ -20,9 +20,43 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include "gdbcore.h"
+#include "regcache.h"
 
 #include "sparc-tdep.h"
 #include "sparc-nat.h"
+
+/* Support for debugging kernel virtual memory images.  */
+
+#include <sys/types.h>
+#include <machine/pcb.h>
+
+#include "bsd-kvm.h"
+
+static int
+sparc32nbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
+{
+  /* The following is true for NetBSD 1.6.2:
+
+     The pcb contains %sp, %sp, %psr and %wim.  From this information
+     we reconstruct the register state as it would look when we just
+     returned from cpu_switch().  */
+
+  /* The stack pointer shouldn't be zero.  */
+  if (pcb->pcb_sp == 0)
+    return 0;
+
+  regcache_raw_supply (regcache, SPARC_SP_REGNUM, &pcb->pcb_sp);
+  regcache_raw_supply (regcache, SPARC_O7_REGNUM, &pcb->pcb_pc);
+  regcache_raw_supply (regcache, SPARC32_PSR_REGNUM, &pcb->pcb_psr);
+  regcache_raw_supply (regcache, SPARC32_WIM_REGNUM, &pcb->pcb_wim);
+  regcache_raw_supply (regcache, SPARC32_PC_REGNUM, &pcb->pcb_pc);
+
+  sparc_supply_rwindow (regcache, pcb->pcb_sp, -1);
+
+  return 1;
+}
+
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 void _initialize_sparcnbsd_nat (void);
@@ -31,4 +65,7 @@ void
 _initialize_sparcnbsd_nat (void)
 {
   sparc_gregset = &sparc32nbsd_gregset;
+
+  /* Support debugging kernel virtual memory images.  */
+  bsd_kvm_add_target (sparc32nbsd_supply_pcb);
 }

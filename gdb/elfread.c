@@ -83,12 +83,12 @@ elf_locate_sections (bfd *ignore_abfd, asection *sectp, void *eip)
   if (strcmp (sectp->name, ".debug") == 0)
     {
       ei->dboffset = sectp->filepos;
-      ei->dbsize = bfd_get_section_size_before_reloc (sectp);
+      ei->dbsize = bfd_get_section_size (sectp);
     }
   else if (strcmp (sectp->name, ".line") == 0)
     {
       ei->lnoffset = sectp->filepos;
-      ei->lnsize = bfd_get_section_size_before_reloc (sectp);
+      ei->lnsize = bfd_get_section_size (sectp);
     }
   else if (strcmp (sectp->name, ".stab") == 0)
     {
@@ -575,7 +575,7 @@ elf_symfile_read (struct objfile *objfile, int mainline)
 				str_sect->filepos,
 				bfd_section_size (abfd, str_sect));
     }
-  if (dwarf2_has_info (abfd))
+  if (dwarf2_has_info (objfile))
     {
       /* DWARF 2 sections */
       dwarf2_build_psymtabs (objfile, mainline);

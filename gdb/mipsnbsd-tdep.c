@@ -47,7 +47,7 @@ mipsnbsd_supply_reg (char *regs, int regno)
 	  if (CANNOT_FETCH_REGISTER (i))
 	    supply_register (i, NULL);
 	  else
-            supply_register (i, regs + (i * mips_regsize (current_gdbarch)));
+            supply_register (i, regs + (i * mips_isa_regsize (current_gdbarch)));
         }
     }
 }
@@ -59,7 +59,7 @@ mipsnbsd_fill_reg (char *regs, int regno)
 
   for (i = 0; i <= PC_REGNUM; i++)
     if ((regno == i || regno == -1) && ! CANNOT_STORE_REGISTER (i))
-      regcache_collect (i, regs + (i * mips_regsize (current_gdbarch)));
+      regcache_collect (i, regs + (i * mips_isa_regsize (current_gdbarch)));
 }
 
 void
@@ -76,7 +76,7 @@ mipsnbsd_supply_fpreg (char *fpregs, int regno)
 	  if (CANNOT_FETCH_REGISTER (i))
 	    supply_register (i, NULL);
 	  else
-            supply_register (i, fpregs + ((i - FP0_REGNUM) * mips_regsize (current_gdbarch)));
+            supply_register (i, fpregs + ((i - FP0_REGNUM) * mips_isa_regsize (current_gdbarch)));
 	}
     }
 }
@@ -89,7 +89,7 @@ mipsnbsd_fill_fpreg (char *fpregs, int regno)
   for (i = FP0_REGNUM; i <= mips_regnum (current_gdbarch)->fp_control_status;
        i++)
     if ((regno == i || regno == -1) && ! CANNOT_STORE_REGISTER (i))
-      regcache_collect (i, fpregs + ((i - FP0_REGNUM) * mips_regsize (current_gdbarch)));
+      regcache_collect (i, fpregs + ((i - FP0_REGNUM) * mips_isa_regsize (current_gdbarch)));
 }
 
 static void
@@ -221,13 +221,6 @@ mipsnbsd_sigtramp_offset (CORE_ADDR pc)
   return -1;
 }
 
-static int
-mipsnbsd_pc_in_sigtramp (CORE_ADDR pc, char *func_name)
-{
-  return (nbsd_pc_in_sigtramp (pc, func_name)
-	  || mipsnbsd_sigtramp_offset (pc) >= 0);
-}
-
 /* Figure out where the longjmp will land.  We expect that we have
    just entered longjmp and haven't yet setup the stack frame, so
    the args are still in the argument regs.  A0_REGNUM points at the
@@ -236,7 +229,7 @@ mipsnbsd_pc_in_sigtramp (CORE_ADDR pc, char *func_name)
    success.  */
 
 #define NBSD_MIPS_JB_PC			(2 * 4)
-#define NBSD_MIPS_JB_ELEMENT_SIZE	mips_regsize (current_gdbarch)
+#define NBSD_MIPS_JB_ELEMENT_SIZE	mips_isa_regsize (current_gdbarch)
 #define NBSD_MIPS_JB_OFFSET		(NBSD_MIPS_JB_PC * \
 					 NBSD_MIPS_JB_ELEMENT_SIZE)
 
@@ -345,8 +338,6 @@ static void
 mipsnbsd_init_abi (struct gdbarch_info info,
                    struct gdbarch *gdbarch)
 {
-  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, mipsnbsd_pc_in_sigtramp);
-
   set_gdbarch_get_longjmp_target (gdbarch, mipsnbsd_get_longjmp_target);
 
   set_gdbarch_cannot_fetch_register (gdbarch, mipsnbsd_cannot_fetch_register);
@@ -366,6 +357,6 @@ _initialize_mipsnbsd_tdep (void)
   gdbarch_register_osabi (bfd_arch_mips, 0, GDB_OSABI_NETBSD_ELF,
 			  mipsnbsd_init_abi);
 
-  add_core_fns (&mipsnbsd_core_fns);
-  add_core_fns (&mipsnbsd_elfcore_fns);
+  deprecated_add_core_fns (&mipsnbsd_core_fns);
+  deprecated_add_core_fns (&mipsnbsd_elfcore_fns);
 }

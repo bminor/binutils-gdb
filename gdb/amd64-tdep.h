@@ -45,6 +45,12 @@ enum amd64_regnum
   AMD64_R15_REGNUM = 15,	/* %r15 */
   AMD64_RIP_REGNUM,		/* %rip */
   AMD64_EFLAGS_REGNUM,		/* %eflags */
+  AMD64_CS_REGNUM,		/* %cs */
+  AMD64_SS_REGNUM,		/* %ss */
+  AMD64_DS_REGNUM,		/* %ds */
+  AMD64_ES_REGNUM,		/* %es */
+  AMD64_FS_REGNUM,		/* %fs */
+  AMD64_GS_REGNUM,		/* %gs */
   AMD64_ST0_REGNUM = 24,	/* %st0 */
   AMD64_XMM0_REGNUM = 40,	/* %xmm0 */
   AMD64_XMM1_REGNUM		/* %xmm1 */

@@ -229,7 +229,8 @@ get_hex_regs (int n, int regno)
 /* This is called not only when we first attach, but also when the
    user types "run" after having attached.  */
 static void
-st2000_create_inferior (char *execfile, char *args, char **env)
+st2000_create_inferior (char *execfile, char *args, char **env,
+			int from_tty)
 {
   int entry_pt;
 

@@ -1,0 +1,4 @@
+# Host: NetBSD/vax a.out
+NATDEPFILES= vaxbsd-nat.o fork-child.o infptrace.o inftarg.o \
+	solib.o solib-sunos.o
+NAT_FILE= nm-nbsdaout.h
