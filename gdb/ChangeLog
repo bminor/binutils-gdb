@@ -15,6 +15,19 @@ Tue Feb  6 18:38:51 1996  J.T. Conklin  <jtc@slave.cygnus.com>
 	* nindy-share/nindy.c (say): Use stdarg.h macros when compiling
         with an ANSI compiler.
 
+start-sanitize-gdbtk
+Tue Feb  6 16:31:25 1996  Tom Tromey  <tromey@creche.cygnus.com>
+
+	* gdbtk.tcl (create_file_win): Eliminate text widget B1 binding so
+	double-clicking will work again.
+	(create_asm_win): Put "break" at end of all B1 bindings.
+	(create_file_win): Lower "sel" tag, don't raise it.
+	(ensure_line_visible): New proc.
+	(update_listing, update_assembly): Use it.
+	(create_copyright_window): Destroy window on Leave event.
+	(create_command_window): Put "break" at end of all B2 bindings.
+
+end-sanitize-gdbtk	
 Mon Feb  5 18:24:28 1996  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	From Michael_Snyder@NeXT.COM (Michael Snyder):

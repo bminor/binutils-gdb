@@ -98,6 +98,37 @@ proc bind_widget_after_class {widget} {
   bindtags $widget $newList
 }
 
+#
+# Make sure line number $LINE is visible in the text widget.  But be
+# more clever than the "see" command: if LINE is not currently
+# displayed, arrange for LINE to be centered.  There are cases in
+# which this does not work, so as a last resort we revert to "see".
+#
+# This is inefficient, but probably not slow enough to actually
+# notice.
+#
+proc ensure_line_visible {text line} {
+  set pixHeight [winfo height $text]
+  # Compute height of widget in lines.  This fails if a line is wider
+  # than the screen.  FIXME.
+  set topLine [lindex [split [$text index @0,0] .] 0]
+  set botLine [lindex [split [$text index @0,${pixHeight}] .] 0]
+
+  if {$line > $topLine && $line < $botLine} then {
+    # Onscreen, and not on the very edge.
+    return
+  }
+
+  set newTop [expr {$line - ($botLine - $topLine)}]
+  if {$newTop < 0} then {
+    set newTop 0
+  }
+  $text yview moveto $newTop
+
+  # In case the above failed.
+  $text see ${line}.0
+}
+
 if {[info exists env(EDITOR)]} then {
   set editor $env(EDITOR)
 } else {
@@ -1245,10 +1276,19 @@ proc create_file_win {filename debug_file} {
 		%W tag remove sel $last end
 		%W tag add sel anchor @%x,%y
 		}
-	$win tag bind sel <1> do_nothing
-	$win tag bind sel <Double-Button-1> {display_expression [selection get]}
-	$win tag raise sel
+	$win tag bind sel <1> break
+	$win tag bind sel <Double-Button-1> {
+	  display_expression [selection get]
+	  break
+	}
+        $win tag bind sel <B1-Motion> break
+	$win tag lower sel
 
+        # Make these bindings do nothing on the text window -- they
+	# are completely handled by the tag bindings above.
+        bind $win <1> break
+        bind $win <B1-Motion> break
+        bind $win <Double-Button-1> break
 
 # Scan though the breakpoint data base and install any destined for this file
 
@@ -1300,8 +1340,9 @@ proc create_asm_win {funcname pc} {
 # Setup all the bindings
 
 	bind $win <Enter> {focus %W}
-	bind $win <1> {asm_window_button_1 %W %X %Y %x %y}
-	bind $win <B1-Motion> do_nothing
+        bind $win <1> {asm_window_button_1 %W %X %Y %x %y; break}
+	bind $win <B1-Motion> break
+        bind $win <Double-Button-1> break
 
 	bind $win <Key-Alt_R> do_nothing
 	bind $win <Key-Alt_L> do_nothing
@@ -1431,7 +1472,8 @@ proc update_listing {linespec} {
 
 		.src.scroll configure -command "$wins($cfile) yview"
 
-	        $wins($cfile) see "${line}.0 linestart"
+	         # $wins($cfile) see "${line}.0 linestart"
+	         ensure_line_visible $wins($cfile) $line
 		}
 
 # Update the label widget in case the filename or function name has changed
@@ -1458,7 +1500,7 @@ proc update_listing {linespec} {
 
 		$wins($cfile) delete $pointer_pos "$pointer_pos + 2 char"
 		$wins($cfile) insert $pointer_pos "->"
-	        $wins($cfile) see "${line}.0 linestart"
+	        ensure_line_visible $wins($cfile) $line
 		$wins($cfile) configure -state disabled
 		}
 }
@@ -1837,7 +1879,7 @@ proc update_assembly {linespec} {
 			-after .asm.scroll
 		.asm.scroll configure -command "$win yview"
 		set line [pc_to_line $pclist($cfunc) $pc]
-	        $win see "${line}.0 linestart"
+	        ensure_line_visible $win $line
 		update
 		}
 
@@ -1872,7 +1914,7 @@ proc update_assembly {linespec} {
 
 		$win delete $pointer_pos "$pointer_pos + 2 char"
 		$win insert $pointer_pos "->"
-	        $win yview "${line}.0 linestart"
+	        ensure_line_visible $win $line
 		$win configure -state disabled
 		}
 }
@@ -2293,6 +2335,8 @@ proc create_command_window {} {
 	  append command_line [selection get]
 	  break
 	}
+        bind .cmd.text <B2-Motion> break
+        bind .cmd.text <ButtonRelease-2> break
 	bind .cmd.text <Key-Tab> {
 	  set choices [gdb_cmd "complete $command_line"]
 	  set choices [string trimright $choices \n]
@@ -3022,6 +3066,7 @@ proc create_copyright_window {} {
   pack .c.m
 
   bind .c.m <1> {destroy .c}
+  bind .c <Leave> {destroy .c}
   # "suitable period" currently means "15 seconds".
   after 15000 {
     if {[winfo exists .c]} then {
