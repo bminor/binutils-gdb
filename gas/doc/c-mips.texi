@@ -60,12 +60,14 @@ to select big-endian output, and @samp{-EL} for little-endian.
 @itemx -mips2
 @itemx -mips3
 @itemx -mips4
+@itemx -mips32
 Generate code for a particular MIPS Instruction Set Architecture level.
 @samp{-mips1} corresponds to the @sc{r2000} and @sc{r3000} processors,
 @samp{-mips2} to the @sc{r6000} processor, @samp{-mips3} to the
-@sc{r4000} processor, and @samp{-mips4} to the @sc{r8000} and
-@sc{r10000} processors.  You can also switch instruction sets during the
-assembly; see @ref{MIPS ISA,, Directives to override the ISA level}.
+@sc{r4000} processor, @samp{-mips4} to the @sc{r8000} and
+@sc{r10000} processors, and @samp{-mips32} to a generic @sc(MIPS32)
+processor.  You can also switch instruction sets during the
+assembly; see @ref{MIPS ISA, Directives to override the ISA level}.
 
 @item -mgp32
 Assume that 32-bit general purpose registers are available.  This
@@ -140,10 +142,8 @@ rm5721,
 6000,
 rm7000,
 8000,
-10000
-4Kc
-4Km
-4Kp
+10000,
+mips32-4k
 @end quotation
 
 
@@ -239,8 +239,8 @@ assembly language programmers!
 @kindex @code{.set mips@var{n}}
 @sc{gnu} @code{@value{AS}} supports an additional directive to change
 the @sc{mips} Instruction Set Architecture level on the fly: @code{.set
-mips@var{n}}.  @var{n} should be a number from 0 to 4.  A value from 1
-to 4 makes the assembler accept instructions for the corresponding
+mips@var{n}}.  @var{n} should be a number from 0 to 4, or 32.  The values 1
+to 4 and 32 make the assembler accept instructions for the corresponding
 @sc{isa} level, from that point on in the assembly.  @code{.set
 mips@var{n}} affects not only which instructions are permitted, but also
 how certain macros are expanded.  @code{.set mips0} restores the

@@ -187,10 +187,13 @@ struct mips_set_options
 };
 
 /* This is the struct we use to hold the current set of options.  Note
-   that we must set the isa and mips16 fields to -1 to indicate that
-   they have not been initialized.  */
+   that we must set the isa field to ISA_UNKNOWN and the mips16 field to
+   -1 to indicate that they have not been initialized.  */
 
-static struct mips_set_options mips_opts = { -1, -1, 0, 0, 0, 0, 0, 0 };
+static struct mips_set_options mips_opts =
+{
+  ISA_UNKNOWN, -1, 0, 0, 0, 0, 0, 0
+};
 
 /* These variables are filled in with the masks of registers used.
    The object format code reads them and puts them in the appropriate
@@ -199,10 +202,10 @@ unsigned long mips_gprmask;
 unsigned long mips_cprmask[4];
 
 /* MIPS ISA we are using for this output file.  */
-static int file_mips_isa;
+static int file_mips_isa = ISA_UNKNOWN;
 
-/* The CPU type as a number: 2000, 3000, 4000, 4400, etc.  */
-static int mips_cpu = -1;
+/* The CPU type we are using for this output file.  */
+static int mips_cpu = CPU_UNKNOWN;
 
 /* The argument of the -mabi= flag.  */
 static char* mips_abi_string = 0;
@@ -226,15 +229,15 @@ static int mips_gp32 = 0;
    also assume that ISAs which don't have delays for these insns, don't
    have delays for the INSN_LOAD_MEMORY_DELAY instructions either.  */
 #define ISA_HAS_COPROC_DELAYS(ISA) (        \
-   (ISA) == 1                               \
-   || (ISA) == 2                            \
-   || (ISA) == 3                            \
+   (ISA) == ISA_MIPS1                       \
+   || (ISA) == ISA_MIPS2                    \
+   || (ISA) == ISA_MIPS3                    \
    )
 
 /*  Return true if ISA supports 64 bit gp register instructions.  */
 #define ISA_HAS_64BIT_REGS(ISA) (    \
-   (ISA) == 3                        \
-   || (ISA) == 4                     \
+   (ISA) == ISA_MIPS3                \
+   || (ISA) == ISA_MIPS4             \
    )
 
 /* Whether the processor uses hardware interlocks to protect
@@ -270,7 +273,7 @@ static int mips_gp32 = 0;
 /* Whether the processor uses hardware interlocks to protect reads
    from the GPRs, and thus does not require nops to be inserted.  */
 #define gpr_interlocks \
-  (mips_opts.isa != 1  \
+  (mips_opts.isa != ISA_MIPS1  \
    || mips_cpu == CPU_R3900)
 
 /* As with other "interlocks" this is used by hardware that has FP
@@ -706,9 +709,24 @@ static void s_mips_stab PARAMS ((int));
 static void s_mips_weakext PARAMS ((int));
 static void s_file PARAMS ((int));
 static int mips16_extended_frag PARAMS ((fragS *, asection *, long));
-static char *mips_cpu_to_str PARAMS ((int));
-
+static const char *mips_isa_to_str PARAMS ((int));
+static const char *mips_cpu_to_str PARAMS ((int));
 static int validate_mips_insn PARAMS ((const struct mips_opcode *));
+
+/* Table and functions used to map between CPU/ISA names, and
+   ISA levels, and CPU numbers.  */
+
+struct mips_cpu_info
+{
+  const char *name;           /* CPU or ISA name.  */
+  int is_isa;                 /* Is this an ISA?  (If 0, a CPU.) */
+  int isa;                    /* ISA level.  */
+  int cpu;                    /* CPU number (default CPU if ISA).  */
+};
+
+static const struct mips_cpu_info *mips_cpu_info_from_name PARAMS ((const char *));
+static const struct mips_cpu_info *mips_cpu_info_from_isa PARAMS ((int));
+static const struct mips_cpu_info *mips_cpu_info_from_cpu PARAMS ((int));
 
 /* Pseudo-op table.
 
@@ -852,33 +870,34 @@ static boolean mips16_small, mips16_ext;
 static segT pdr_seg;
 #endif
 
-static char *
+static const char *
+mips_isa_to_str (isa)
+     int isa;
+{
+  const struct mips_cpu_info *ci;
+  static char s[20];
+
+  ci = mips_cpu_info_from_isa (isa);
+  if (ci != NULL)
+    return (ci->name);
+
+  sprintf (s, "ISA#%d", isa);
+  return s;
+}
+
+static const char *
 mips_cpu_to_str (cpu)
      int cpu;
 {
+  const struct mips_cpu_info *ci;
   static char s[16];
-  switch (cpu)
-    {
-    case CPU_R2000: return "R2000";
-    case CPU_R3000: return "R3000";
-    case CPU_R3900: return "R3900";
-    case CPU_R4000: return "R4000";
-    case CPU_R4010: return "R4010";
-    case CPU_VR4100: return "VR4100";
-    case CPU_R4111: return "R4111";
-    case CPU_R4300: return "R4300";
-    case CPU_R4400: return "R4400";
-    case CPU_R4600: return "R4600";
-    case CPU_R4650: return "R4650";
-    case CPU_R5000: return "R5000";
-    case CPU_R6000: return "R6000";
-    case CPU_R8000: return "R8000";
-    case CPU_R10000: return "R10000";
-    case CPU_4K: return "4K";
-    default:
-      sprintf (s, "%d", cpu);
-      return s;
-    }
+
+  ci = mips_cpu_info_from_cpu (cpu);
+  if (ci != NULL)
+    return (ci->name);
+
+  sprintf (s, "CPU#%d", cpu);
+  return s;
 }
 
 /* This function is called once, at assembler startup time.  It should
@@ -887,13 +906,14 @@ mips_cpu_to_str (cpu)
 void
 md_begin ()
 {
-  boolean ok = false;
   register const char *retval = NULL;
   int i = 0;
   const char *cpu;
   char *a = NULL;
   int broken = 0;
   int mips_isa_from_cpu;
+  int target_cpu_had_mips16 = 0;
+  const struct mips_cpu_info *ci;
 
   /* GP relative stuff not working for PE */
   if (strncmp (TARGET_OS, "pe", 2) == 0
@@ -913,129 +933,51 @@ md_begin ()
       cpu = a;
     }
 
-  if (mips_cpu < 0)
+  if (strncmp (cpu, "mips16", sizeof "mips16" - 1) == 0)
     {
-      /* Set mips_cpu based on TARGET_CPU, unless TARGET_CPU is
-         just the generic 'mips', in which case set mips_cpu based
-         on the given ISA, if any.  */
-
-      if (strcmp (cpu, "mips") == 0)
-        {
-	  if (mips_opts.isa < 0)
-	    mips_cpu = CPU_R3000;
-
-	  else if (mips_opts.isa == 2)
-            mips_cpu = CPU_R6000;
-
-          else if (mips_opts.isa == 3)
-            mips_cpu = CPU_R4000;
-
-          else if (mips_opts.isa == 4)
-            mips_cpu = CPU_R8000;
-
-          else
-            mips_cpu = CPU_R3000;
-        }
-
-      else if (strcmp (cpu, "r3900") == 0
-               || strcmp (cpu, "mipstx39") == 0
-               )
-        mips_cpu = CPU_R3900;
-
-      else if (strcmp (cpu, "r6000") == 0
-	       || strcmp (cpu, "mips2") == 0)
-        mips_cpu = CPU_R6000;
-
-      else if (strcmp (cpu, "mips64") == 0
-	       || strcmp (cpu, "r4000") == 0
-	       || strcmp (cpu, "mips3") == 0)
-        mips_cpu = CPU_R4000;
-
-      else if (strcmp (cpu, "r4400") == 0)
-        mips_cpu = CPU_R4400;
-
-      else if (strcmp (cpu, "mips64orion") == 0
-	       || strcmp (cpu, "r4600") == 0)
-        mips_cpu = CPU_R4600;
-
-      else if (strcmp (cpu, "r4650") == 0)
-        mips_cpu = CPU_R4650;
-
-      else if (strcmp (cpu, "mips64vr4300") == 0)
-        mips_cpu = CPU_R4300;
-
-      else if (strcmp (cpu, "mips64vr4111") == 0)
-        mips_cpu = CPU_R4111;
-
-      else if (strcmp (cpu, "mips64vr4100") == 0)
-        mips_cpu = CPU_VR4100;
-
-      else if (strcmp (cpu, "r4010") == 0)
-        mips_cpu = CPU_R4010;
-
-      else if (strcmp (cpu, "4Kc") == 0
-	       || strcmp (cpu, "4Kp") == 0
-	       || strcmp (cpu, "4Km") == 0)
-	mips_cpu = CPU_4K;
-
-      else if (strcmp (cpu, "r5000") == 0
-	       || strcmp (cpu, "mips64vr5000") == 0)
-        mips_cpu = CPU_R5000;
-
-      else if (strcmp (cpu, "r8000") == 0
-	       || strcmp (cpu, "mips4") == 0)
-        mips_cpu = CPU_R8000;
-
-      else if (strcmp (cpu, "r10000") == 0)
-        mips_cpu = CPU_R10000;
-
-      else if (strcmp (cpu, "mips16") == 0)
-        mips_cpu = 0; /* FIXME */
-
-      else
-        mips_cpu = CPU_R3000;
-    }
-
-  if (mips_cpu == CPU_R3000
-      || mips_cpu == CPU_R3900)
-    mips_isa_from_cpu = 1;
-
-  else if (mips_cpu == CPU_R6000
-	   || mips_cpu == CPU_R4010)
-    mips_isa_from_cpu = 2;
-
-  else if (mips_cpu == CPU_R4000
-	   || mips_cpu == CPU_VR4100
-	   || mips_cpu == CPU_R4111
-	   || mips_cpu == CPU_R4400
-	   || mips_cpu == CPU_R4300
-	   || mips_cpu == CPU_R4600
-	   || mips_cpu == CPU_R4650)
-    mips_isa_from_cpu = 3;
-
-  else if (mips_cpu == CPU_R5000
-	   || mips_cpu == CPU_R8000
-               || mips_cpu == CPU_R10000)
-    mips_isa_from_cpu = 4;
-
-  else
-    mips_isa_from_cpu = -1;
-
-  if (mips_opts.isa == -1)
-    {
-      if (mips_isa_from_cpu != -1)
-	mips_opts.isa = mips_isa_from_cpu;
-      else
-	mips_opts.isa = 1;
+      target_cpu_had_mips16 = 1;
+      cpu += sizeof "mips16" - 1;
     }
 
   if (mips_opts.mips16 < 0)
+    mips_opts.mips16 = target_cpu_had_mips16;
+
+  /* At this point, mips_cpu will either be CPU_UNKNOWN if no CPU was
+     specified on the command line, or some other value if one was.
+     Similarly, mips_opts.isa will be ISA_UNKNOWN if not specified on
+     the command line, or will be set otherwise if one was.  */
+  if (mips_cpu != CPU_UNKNOWN && mips_opts.isa != ISA_UNKNOWN)
     {
-      if (strncmp (TARGET_CPU, "mips16", sizeof "mips16" - 1) == 0)
-	mips_opts.mips16 = 1;
-      else
-	mips_opts.mips16 = 0;
+      /* We have it all.  There's nothing to do.  */
     }
+  else if (mips_cpu != CPU_UNKNOWN && mips_opts.isa == ISA_UNKNOWN)
+    {
+      /* We have CPU, we need ISA.  */
+      ci = mips_cpu_info_from_cpu (mips_cpu);
+      assert (ci != NULL);
+      mips_opts.isa = ci->isa;
+    }
+  else if (mips_cpu == CPU_UNKNOWN && mips_opts.isa != ISA_UNKNOWN)
+    {
+      /* We have ISA, we need default CPU.  */
+      ci = mips_cpu_info_from_isa (mips_opts.isa);
+      assert (ci != NULL);
+      mips_cpu = ci->cpu;
+    }
+  else
+    {
+      /* We need to set both ISA and CPU from target cpu.  */
+      ci = mips_cpu_info_from_name (cpu);
+      if (ci == NULL)
+        ci = mips_cpu_info_from_cpu (CPU_R3000);
+      assert (ci != NULL);
+      mips_opts.isa = ci->isa;
+      mips_cpu = ci->cpu;
+    }
+
+  ci = mips_cpu_info_from_cpu (mips_cpu);
+  assert (ci != NULL);
+  mips_isa_from_cpu = ci->isa;
 
   /* End of TARGET_CPU processing, get rid of malloced memory
      if necessary.  */
@@ -1046,7 +988,7 @@ md_begin ()
       a = NULL;
     }
 
-  if (mips_opts.isa == 1 && mips_trap)
+  if (mips_opts.isa == ISA_MIPS1 && mips_trap)
     as_bad (_("trap exception not supported at ISA 1"));
 
   /* Set the EABI kind based on the ISA before the user gets
@@ -1057,37 +999,14 @@ md_begin ()
       && 0 == strcmp (mips_abi_string,"eabi"))
     mips_eabi64 = 1;
 
-  if (mips_cpu != 0 && mips_cpu != -1)
-    {
-      ok = bfd_set_arch_mach (stdoutput, bfd_arch_mips, mips_cpu);
+  /* If they asked for mips1 or mips2 and a cpu that is
+     mips3 or greater, then mark the object file 32BITMODE.  */
+  if (mips_isa_from_cpu != ISA_UNKNOWN
+      && ! ISA_HAS_64BIT_REGS (mips_opts.isa)
+      && ISA_HAS_64BIT_REGS (mips_isa_from_cpu))
+    mips_32bitmode = 1;
 
-      /* If they asked for mips1 or mips2 and a cpu that is
-	 mips3 or greater, then mark the object file 32BITMODE.  */
-      if (mips_isa_from_cpu != -1
-	  && ! ISA_HAS_64BIT_REGS (mips_opts.isa)
-	  && ISA_HAS_64BIT_REGS (mips_isa_from_cpu))
-	mips_32bitmode = 1;
-    }
-  else
-    {
-      switch (mips_opts.isa)
-	{
-	case 1:
-	  ok = bfd_set_arch_mach (stdoutput, bfd_arch_mips, CPU_R3000);
-	  break;
-	case 2:
-	  ok = bfd_set_arch_mach (stdoutput, bfd_arch_mips, CPU_R6000);
-	  break;
-	case 3:
-	  ok = bfd_set_arch_mach (stdoutput, bfd_arch_mips, CPU_R4000);
-	  break;
-	case 4:
-	  ok = bfd_set_arch_mach (stdoutput, bfd_arch_mips, CPU_R8000);
-	  break;
-	}
-    }
-
-  if (! ok)
+  if (! bfd_set_arch_mach (stdoutput, bfd_arch_mips, mips_cpu))
     as_warn (_("Could not set architecture and machine"));
 
   file_mips_isa = mips_opts.isa;
@@ -1549,7 +1468,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	       && ISA_HAS_COPROC_DELAYS (mips_opts.isa)
 	       && (((prev_pinfo & INSN_COPROC_MOVE_DELAY)
                     && ! cop_interlocks)
-		   || (mips_opts.isa == 1
+		   || (mips_opts.isa == ISA_MIPS1
 		       && (prev_pinfo & INSN_COPROC_MEMORY_DELAY))))
 	{
 	  /* A generic coprocessor delay.  The previous instruction
@@ -2083,7 +2002,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 		  && ! gpr_interlocks
 		  && (prev_pinfo & INSN_LOAD_MEMORY_DELAY))
 	      || (! mips_opts.mips16
-		  && mips_opts.isa == 1
+		  && mips_opts.isa == ISA_MIPS1
                   /* Itbl support may require additional care here.  */
 		  && (prev_pinfo & INSN_COPROC_MEMORY_DELAY))
 	      /* We can not swap with a branch instruction.  */
@@ -2419,7 +2338,7 @@ mips_emit_delays (insns)
 	      && (prev_insn.insn_mo->pinfo
                   & INSN_LOAD_MEMORY_DELAY))
 	  || (! mips_opts.mips16
-	      && mips_opts.isa == 1
+	      && mips_opts.isa == ISA_MIPS1
 	      && (prev_insn.insn_mo->pinfo
 		  & INSN_COPROC_MEMORY_DELAY)))
 	{
@@ -5421,7 +5340,7 @@ macro (ip)
       s = segment_name (S_GET_SEGMENT (offset_expr.X_add_symbol));
       if (strcmp (s, ".lit8") == 0)
 	{
-	  if (mips_opts.isa != 1)
+	  if (mips_opts.isa != ISA_MIPS1)
 	    {
 	      macro_build ((char *) NULL, &icnt, &offset_expr, "ldc1",
 			   "T,o(b)", treg, (int) BFD_RELOC_MIPS_LITERAL, GP);
@@ -5446,7 +5365,7 @@ macro (ip)
 	      macro_build_lui ((char *) NULL, &icnt, &offset_expr, AT);
 	    }
 
-	  if (mips_opts.isa != 1)
+	  if (mips_opts.isa != ISA_MIPS1)
 	    {
 	      macro_build ((char *) NULL, &icnt, &offset_expr, "ldc1",
 			   "T,o(b)", treg, (int) BFD_RELOC_LO16, AT);
@@ -5473,7 +5392,7 @@ macro (ip)
 	 to adjust when loading from memory.  */
       r = BFD_RELOC_LO16;
     dob:
-      assert (mips_opts.isa == 1);
+      assert (mips_opts.isa == ISA_MIPS1);
       macro_build ((char *) NULL, &icnt, &offset_expr, "lwc1", "T,o(b)",
 		   target_big_endian ? treg + 1 : treg,
 		   (int) r, breg);
@@ -5512,7 +5431,7 @@ macro (ip)
 	}
       /* Itbl support may require additional care here.  */
       coproc = 1;
-      if (mips_opts.isa != 1)
+      if (mips_opts.isa != ISA_MIPS1)
 	{
 	  s = "ldc1";
 	  goto ld;
@@ -5529,7 +5448,7 @@ macro (ip)
 	  return;
 	}
 
-      if (mips_opts.isa != 1)
+      if (mips_opts.isa != ISA_MIPS1)
 	{
 	  s = "sdc1";
 	  goto st;
@@ -6157,7 +6076,7 @@ macro2 (ip)
 	  as_bad (_("opcode not supported on this processor"));
 	  return;
 	}
-      assert (mips_opts.isa == 1);
+      assert (mips_opts.isa == ISA_MIPS1);
       /* Even on a big endian machine $fn comes before $fn+1.  We have
 	 to adjust when storing to memory.  */
       macro_build ((char *) NULL, &icnt, &offset_expr, "swc1", "T,o(b)",
@@ -6466,7 +6385,7 @@ macro2 (ip)
 
     case M_TRUNCWS:
     case M_TRUNCWD:
-      assert (mips_opts.isa == 1);
+      assert (mips_opts.isa == ISA_MIPS1);
       sreg = (ip->insn_opcode >> 11) & 0x1f;	/* floating reg */
       dreg = (ip->insn_opcode >> 06) & 0x1f;	/* floating reg */
 
@@ -7146,8 +7065,9 @@ mips_ip (str, ip)
   	    {
 	      static char buf[100];
 	      sprintf (buf,
-		       _("opcode not supported on this processor: %s (MIPS%d)"),
-		       mips_cpu_to_str (mips_cpu), mips_opts.isa);
+		       _("opcode not supported on this processor: %s (%s)"),
+		       mips_cpu_to_str (mips_cpu),
+		       mips_isa_to_str (mips_opts.isa));
 
 	      insn_error = buf;
 	      return;
@@ -8964,9 +8884,6 @@ struct option md_longopts[] =
   {"no-construct-floats", no_argument, NULL, OPTION_NO_CONSTRUCT_FLOATS},
 #define OPTION_MIPS32 (OPTION_MD_BASE + 28)
   {"mips32", no_argument, NULL, OPTION_MIPS32},
-#define OPTION_NO_MIPS32 (OPTION_MD_BASE + 29)
-  {"no-mips32", no_argument, NULL, OPTION_NO_MIPS32},
-
 #ifdef OBJ_ELF
 #define OPTION_ELF_BASE    (OPTION_MD_BASE + 35)
 #define OPTION_CALL_SHARED (OPTION_ELF_BASE + 0)
@@ -9037,154 +8954,39 @@ md_parse_option (c, arg)
       break;
 
     case OPTION_MIPS1:
-      mips_opts.isa = 1;
+      mips_opts.isa = ISA_MIPS1;
       break;
 
     case OPTION_MIPS2:
-      mips_opts.isa = 2;
+      mips_opts.isa = ISA_MIPS2;
       break;
 
     case OPTION_MIPS3:
-      mips_opts.isa = 3;
+      mips_opts.isa = ISA_MIPS3;
       break;
 
     case OPTION_MIPS4:
-      mips_opts.isa = 4;
+      mips_opts.isa = ISA_MIPS4;
+      break;
+
+    case OPTION_MIPS32:
+      mips_opts.isa = ISA_MIPS32;
       break;
 
     case OPTION_MCPU:
       {
-	char *p;
-
-	/* Identify the processor type */
-	p = arg;
-	if (strcmp (p, "default") == 0
-	    || strcmp (p, "DEFAULT") == 0)
-	  mips_cpu = -1;
+	/* Identify the processor type.  */
+	if (strcasecmp (arg, "default") == 0)
+	  mips_cpu = CPU_UNKNOWN;
 	else
 	  {
-	    int sv = 0;
+	    const struct mips_cpu_info *ci;
 
-	    /* We need to cope with the various "vr" prefixes for the 4300
-	       processor.  */
-	    if (*p == 'v' || *p == 'V')
-	      {
-		sv = 1;
-		p++;
-	      }
-
-	    if (*p == 'r' || *p == 'R')
-	      p++;
-
-	    mips_cpu = -1;
-	    switch (*p)
-	      {
-	      case '1':
-		if (strcmp (p, "10000") == 0
-		    || strcmp (p, "10k") == 0
-		    || strcmp (p, "10K") == 0)
-		  mips_cpu = CPU_R10000;
-		break;
-
-	      case '2':
-		if (strcmp (p, "2000") == 0
-		    || strcmp (p, "2k") == 0
-		    || strcmp (p, "2K") == 0)
-		  mips_cpu = CPU_R2000;
-		break;
-
-	      case '3':
-		if (strcmp (p, "3000") == 0
-		    || strcmp (p, "3k") == 0
-		    || strcmp (p, "3K") == 0)
-		  mips_cpu = CPU_R3000;
-                else if (strcmp (p, "3900") == 0)
-                  mips_cpu = CPU_R3900;
-		break;
-
-	      case '4':
-		if (strcmp (p, "4000") == 0
-		    || strcmp (p, "4k") == 0
-		    || strcmp (p, "4K") == 0)
-		  mips_cpu = CPU_R4000;
-		else if (strcmp (p, "4100") == 0)
-                    mips_cpu = CPU_VR4100;
-		else if (strcmp (p, "4111") == 0)
-                    mips_cpu = CPU_R4111;
-		else if (strcmp (p, "4300") == 0)
-		  mips_cpu = CPU_R4300;
-		else if (strcmp (p, "4400") == 0)
-		  mips_cpu = CPU_R4400;
-		else if (strcmp (p, "4600") == 0)
-		  mips_cpu = CPU_R4600;
-		else if (strcmp (p, "4650") == 0)
-		    mips_cpu = CPU_R4650;
-		else if (strcmp (p, "4010") == 0)
-                  mips_cpu = CPU_R4010;
-		else if (strcmp (p, "4Kc") == 0
-			 || strcmp (p, "4Kp") == 0
-			 || strcmp (p, "4Km") == 0)
-		  mips_cpu = CPU_MIPS32;
-		break;
-
-	      case '5':
-		if (strcmp (p, "5000") == 0
-		    || strcmp (p, "5k") == 0
-		    || strcmp (p, "5K") == 0)
-		  mips_cpu = CPU_R5000;
-		break;
-
-	      case '6':
-		if (strcmp (p, "6000") == 0
-		    || strcmp (p, "6k") == 0
-		    || strcmp (p, "6K") == 0)
-		  mips_cpu = CPU_R6000;
-		break;
-
-	      case '8':
-		if (strcmp (p, "8000") == 0
-		    || strcmp (p, "8k") == 0
-		    || strcmp (p, "8K") == 0)
-		  mips_cpu = CPU_R8000;
-		break;
-
-	      case 'o':
-		if (strcmp (p, "orion") == 0)
-		  mips_cpu = CPU_R4600;
-		break;
-
-	      case 'm':
-	      case 'M':
-		switch (atoi (p + 1))
-		  {
-		  case 5200:
-		  case 5230:
-		  case 5231:
-		  case 5261:
-		  case 5721:
-		  case 7000:
-		    mips_cpu = CPU_R5000;
-		    break;
-		  default:
-		    break;
-		  }
-	      }
-
-	    if (sv
-		&& (mips_cpu != CPU_R4300
-		    && mips_cpu != CPU_VR4100
-		    && mips_cpu != CPU_R4111
-		    && mips_cpu != CPU_R5000))
-	      {
-		as_bad (_("ignoring invalid leading 'v' in -mcpu=%s switch"), arg);
-		return 0;
-	      }
-
-	    if (mips_cpu == -1)
-	      {
-		as_bad (_("invalid architecture -mcpu=%s"), arg);
-		return 0;
-	      }
+	    ci = mips_cpu_info_from_name (arg);
+	    if (ci == NULL || ci->is_isa)
+              as_bad (_("invalid architecture -mcpu=%s"), arg);
+	    else
+	      mips_cpu = ci->cpu;
 	  }
       }
       break;
@@ -9208,13 +9010,6 @@ md_parse_option (c, arg)
       break;
 
     case OPTION_NO_M4100:
-      break;
-
-    case OPTION_MIPS32:
-      mips_cpu = CPU_MIPS32;
-      break;
-
-    case OPTION_NO_MIPS32:
       break;
 
     case OPTION_M3900:
@@ -9411,6 +9206,7 @@ MIPS options:\n\
 -mips2			generate MIPS ISA II instructions\n\
 -mips3			generate MIPS ISA III instructions\n\
 -mips4			generate MIPS ISA IV instructions\n\
+-mips32                 generate MIPS32 ISA instructions\n\
 -mcpu=CPU		generate code for CPU, where CPU is one of:\n"));
 
   first = 1;
@@ -9430,9 +9226,7 @@ MIPS options:\n\
   show (stream, "6000", &column, &first);
   show (stream, "8000", &column, &first);
   show (stream, "10000", &column, &first);
-  show (stream, "4Kc", &column, &first);
-  show (stream, "4Kp", &column, &first);
-  show (stream, "4Km", &column, &first);
+  show (stream, "mips32-4k", &column, &first);
   fputc ('\n', stream);
 
   fprintf (stream, _("\
@@ -9447,9 +9241,6 @@ MIPS options:\n\
   show (stream, "4100", &column, &first);
   show (stream, "4650", &column, &first);
   fputc ('\n', stream);
-
-  fprintf (stream, _("\
--mips32                 generate MIPS32 instructions\n"));
 
   fprintf(stream, _("\
 -mips16			generate mips16 instructions\n\
@@ -10441,12 +10232,18 @@ s_mipsset (x)
       /* Permit the user to change the ISA on the fly.  Needless to
 	 say, misuse can cause serious problems.  */
       isa = atoi (name + 4);
-      if (isa == 0)
-	mips_opts.isa = file_mips_isa;
-      else if (isa < 1 || isa > 4)
-	as_bad (_("unknown ISA level"));
-      else
-	mips_opts.isa = isa;
+      switch (isa)
+      {
+      case  0: mips_opts.isa = file_mips_isa; break;
+      case  1: mips_opts.isa = ISA_MIPS1;     break;
+      case  2: mips_opts.isa = ISA_MIPS2;     break;
+      case  3: mips_opts.isa = ISA_MIPS3;     break;
+      case  4: mips_opts.isa = ISA_MIPS4;     break;
+      case 32: mips_opts.isa = ISA_MIPS32;    break;
+      default:
+        as_bad (_("unknown ISA level"));
+        break;
+      }
     }
   else if (strcmp (name, "autoextend") == 0)
     mips_opts.noautoextend = 0;
@@ -12092,3 +11889,179 @@ s_loc (x)
   symbolP->sy_segment = now_seg;
 }
 #endif
+
+/* CPU name/ISA/number mapping table.
+
+   Entries are grouped by type.  The first matching CPU or ISA entry
+   gets chosen by CPU or ISA, so it should be the 'canonical' name
+   for that type.  Entries after that within the type are sorted
+   alphabetically.
+
+   Case is ignored in comparison, so put the canonical entry in the
+   appropriate case but everything else in lower case to ease eye pain.  */
+static const struct mips_cpu_info mips_cpu_info_table[] =
+{
+  /* MIPS1 ISA */
+  { "MIPS1",          1,      ISA_MIPS1,      CPU_R3000, },
+  { "mips",           1,      ISA_MIPS1,      CPU_R3000, },
+
+  /* MIPS2 ISA */
+  { "MIPS2",          1,      ISA_MIPS2,      CPU_R6000, },
+
+  /* MIPS3 ISA */
+  { "MIPS3",          1,      ISA_MIPS3,      CPU_R4000, },
+
+  /* MIPS4 ISA */
+  { "MIPS4",          1,      ISA_MIPS4,      CPU_R8000, },
+
+  /* MIPS32 ISA */
+  { "MIPS32",         1,      ISA_MIPS32,     CPU_MIPS32, },
+  { "Generic-MIPS32", 0,      ISA_MIPS32,     CPU_MIPS32, },
+
+  /* XXX for now, MIPS64 -> MIPS3 because of history */
+  { "MIPS64",         1,      ISA_MIPS3,      CPU_R4000 }, /* XXX! */
+
+  /* R2000 CPU */
+  { "R2000",          0,      ISA_MIPS1,      CPU_R2000, },
+  { "2000",           0,      ISA_MIPS1,      CPU_R2000, },
+  { "2k",             0,      ISA_MIPS1,      CPU_R2000, },
+  { "r2k",            0,      ISA_MIPS1,      CPU_R2000, },
+
+  /* R3000 CPU */
+  { "R3000",          0,      ISA_MIPS1,      CPU_R3000, },
+  { "3000",           0,      ISA_MIPS1,      CPU_R3000, },
+  { "3k",             0,      ISA_MIPS1,      CPU_R3000, },
+  { "r3k",            0,      ISA_MIPS1,      CPU_R3000, },
+
+  /* TX3900 CPU */
+  { "R3900",          0,      ISA_MIPS1,      CPU_R3900, },
+  { "3900",           0,      ISA_MIPS1,      CPU_R3900, },
+  { "mipstx39",               0,      ISA_MIPS1,      CPU_R3900, },
+
+  /* R4000 CPU */
+  { "R4000",          0,      ISA_MIPS3,      CPU_R4000, },
+  { "4000",           0,      ISA_MIPS3,      CPU_R4000, },
+  { "4k",             0,      ISA_MIPS3,      CPU_R4000, },   /* beware */
+  { "r4k",            0,      ISA_MIPS3,      CPU_R4000, },
+
+  /* R4010 CPU */
+  { "R4010",          0,      ISA_MIPS2,      CPU_R4010, },
+  { "4010",           0,      ISA_MIPS2,      CPU_R4010, },
+
+  /* R4400 CPU */
+  { "R4400",          0,      ISA_MIPS3,      CPU_R4400, },
+  { "4400",           0,      ISA_MIPS3,      CPU_R4400, },
+
+  /* R4600 CPU */
+  { "R4600",          0,      ISA_MIPS3,      CPU_R4600, },
+  { "4600",           0,      ISA_MIPS3,      CPU_R4600, },
+  { "mips64orion",    0,      ISA_MIPS3,      CPU_R4600, },
+  { "orion",          0,      ISA_MIPS3,      CPU_R4600, },
+
+  /* R4650 CPU */
+  { "R4650",          0,      ISA_MIPS3,      CPU_R4650, },
+  { "4650",           0,      ISA_MIPS3,      CPU_R4650, },
+
+  /* R6000 CPU */
+  { "R6000",          0,      ISA_MIPS2,      CPU_R6000, },
+  { "6000",           0,      ISA_MIPS2,      CPU_R6000, },
+  { "6k",             0,      ISA_MIPS2,      CPU_R6000, },
+  { "r6k",            0,      ISA_MIPS2,      CPU_R6000, },
+
+  /* R8000 CPU */
+  { "R8000",          0,      ISA_MIPS4,      CPU_R8000, },
+  { "8000",           0,      ISA_MIPS4,      CPU_R8000, },
+  { "8k",             0,      ISA_MIPS4,      CPU_R8000, },
+  { "r8k",            0,      ISA_MIPS4,      CPU_R8000, },
+
+  /* R10000 CPU */
+  { "R10000",         0,      ISA_MIPS4,      CPU_R10000, },
+  { "10000",          0,      ISA_MIPS4,      CPU_R10000, },
+  { "10k",            0,      ISA_MIPS4,      CPU_R10000, },
+  { "r10k",           0,      ISA_MIPS4,      CPU_R10000, },
+
+  /* VR4100 CPU */
+  { "VR4100",         0,      ISA_MIPS3,      CPU_VR4100, },
+  { "4100",           0,      ISA_MIPS3,      CPU_VR4100, },
+  { "mips64vr4100",   0,      ISA_MIPS3,      CPU_VR4100, },
+  { "r4100",          0,      ISA_MIPS3,      CPU_VR4100, },
+
+  /* VR4111 CPU */
+  { "VR4111",         0,      ISA_MIPS3,      CPU_R4111, },
+  { "4111",           0,      ISA_MIPS3,      CPU_R4111, },
+  { "mips64vr4111",   0,      ISA_MIPS3,      CPU_R4111, },
+  { "r4111",          0,      ISA_MIPS3,      CPU_R4111, },
+
+  /* VR4300 CPU */
+  { "VR4300",         0,      ISA_MIPS3,      CPU_R4300, },
+  { "4300",           0,      ISA_MIPS3,      CPU_R4300, },
+  { "mips64vr4300",   0,      ISA_MIPS3,      CPU_R4300, },
+  { "r4300",          0,      ISA_MIPS3,      CPU_R4300, },
+
+  /* VR5000 CPU */
+  { "VR5000",         0,      ISA_MIPS4,      CPU_R5000, },
+  { "5000",           0,      ISA_MIPS4,      CPU_R5000, },
+  { "5k",             0,      ISA_MIPS4,      CPU_R5000, },
+  { "mips64vr5000",   0,      ISA_MIPS4,      CPU_R5000, },
+  { "r5000",          0,      ISA_MIPS4,      CPU_R5000, },
+  { "r5200",          0,      ISA_MIPS4,      CPU_R5000, },
+  { "r5230",          0,      ISA_MIPS4,      CPU_R5000, },
+  { "r5231",          0,      ISA_MIPS4,      CPU_R5000, },
+  { "r5261",          0,      ISA_MIPS4,      CPU_R5000, },
+  { "r5721",          0,      ISA_MIPS4,      CPU_R5000, },
+  { "r5k",            0,      ISA_MIPS4,      CPU_R5000, },
+  { "r7000",          0,      ISA_MIPS4,      CPU_R5000, },
+
+  /* MIPS32 4K CPU */
+  { "MIPS32-4K",      0,      ISA_MIPS32,     CPU_MIPS32_4K, },
+  { "4kc",            0,      ISA_MIPS32,     CPU_MIPS32_4K, },
+  { "4km",            0,      ISA_MIPS32,     CPU_MIPS32_4K, },
+  { "4kp",            0,      ISA_MIPS32,     CPU_MIPS32_4K, },
+  { "mips32-4kc",     0,      ISA_MIPS32,     CPU_MIPS32_4K, },
+  { "mips32-4km",     0,      ISA_MIPS32,     CPU_MIPS32_4K, },
+  { "mips32-4kp",     0,      ISA_MIPS32,     CPU_MIPS32_4K, },
+
+  /* End marker. */
+  { NULL, 0, 0, 0, },
+};
+
+static const struct mips_cpu_info *
+mips_cpu_info_from_name (name)
+     const char *name;
+{
+  int i;
+
+  for (i = 0; mips_cpu_info_table[i].name != NULL; i++)
+    if (strcasecmp(name, mips_cpu_info_table[i].name) == 0)
+      return (&mips_cpu_info_table[i]);
+
+  return (NULL);
+}
+
+static const struct mips_cpu_info *
+mips_cpu_info_from_isa (isa)
+     int isa;
+{
+  int i;
+
+  for (i = 0; mips_cpu_info_table[i].name != NULL; i++)
+    if (mips_cpu_info_table[i].is_isa
+      && isa == mips_cpu_info_table[i].isa)
+      return (&mips_cpu_info_table[i]);
+
+  return (NULL);
+}
+
+static const struct mips_cpu_info *
+mips_cpu_info_from_cpu (cpu)
+     int cpu;
+{
+  int i;
+
+  for (i = 0; mips_cpu_info_table[i].name != NULL; i++)
+    if (!mips_cpu_info_table[i].is_isa
+      && cpu == mips_cpu_info_table[i].cpu)
+      return (&mips_cpu_info_table[i]);
+
+  return (NULL);
+}

@@ -287,8 +287,8 @@ set_mips_isa_type (mach, isa, cputype)
      int *isa;
      int *cputype;
 {
-  int target_processor = 0;
-  int mips_isa = 0;
+  int target_processor = CPU_UNKNOWN;
+  int mips_isa = ISA_UNKNOWN;
 
   /* Use standard MIPS register names by default.  */
   reg_names = std_reg_names;
@@ -297,71 +297,75 @@ set_mips_isa_type (mach, isa, cputype)
     {
     case bfd_mach_mips3000:
       target_processor = CPU_R3000;
-      mips_isa = 1;
+      mips_isa = ISA_MIPS1;
       break;
     case bfd_mach_mips3900:
       target_processor = CPU_R3900;
-      mips_isa = 1;
+      mips_isa = ISA_MIPS1;
       break;
     case bfd_mach_mips4000:
       target_processor = CPU_R4000;
-      mips_isa = 3;
+      mips_isa = ISA_MIPS3;
       break;
     case bfd_mach_mips4010:
       target_processor = CPU_R4010;
-      mips_isa = 2;
+      mips_isa = ISA_MIPS2;
       break;
     case bfd_mach_mips4100:
       target_processor = CPU_VR4100;
-      mips_isa = 3;
+      mips_isa = ISA_MIPS3;
       break;
     case bfd_mach_mips4111:
       target_processor = CPU_VR4100; /* FIXME: Shouldn't this be CPU_R4111 ??? */
-      mips_isa = 3;
+      mips_isa = ISA_MIPS3;
       break;
     case bfd_mach_mips4300:
       target_processor = CPU_R4300;
-      mips_isa = 3;
+      mips_isa = ISA_MIPS3;
       break;
     case bfd_mach_mips4400:
       target_processor = CPU_R4400;
-      mips_isa = 3;
+      mips_isa = ISA_MIPS3;
       break;
     case bfd_mach_mips4600:
       target_processor = CPU_R4600;
-      mips_isa = 3;
+      mips_isa = ISA_MIPS3;
       break;
     case bfd_mach_mips4650:
       target_processor = CPU_R4650;
-      mips_isa = 3;
-      break;
-    case bfd_mach_mips4K:
-      target_processor = CPU_4K;
-      mips_isa = 2;
+      mips_isa = ISA_MIPS3;
       break;
     case bfd_mach_mips5000:
       target_processor = CPU_R5000;
-      mips_isa = 4;
+      mips_isa = ISA_MIPS4;
       break;
     case bfd_mach_mips6000:
       target_processor = CPU_R6000;
-      mips_isa = 2;
+      mips_isa = ISA_MIPS2;
       break;
     case bfd_mach_mips8000:
       target_processor = CPU_R8000;
-      mips_isa = 4;
+      mips_isa = ISA_MIPS4;
       break;
     case bfd_mach_mips10000:
       target_processor = CPU_R10000;
-      mips_isa = 4;
+      mips_isa = ISA_MIPS4;
       break;
     case bfd_mach_mips16:
       target_processor = CPU_MIPS16;
-      mips_isa = 3;
+      mips_isa = ISA_MIPS3;
+      break;
+    case bfd_mach_mips32:
+      target_processor = CPU_MIPS32;
+      mips_isa = ISA_MIPS32;
+      break;
+    case bfd_mach_mips32_4k:
+      target_processor = CPU_MIPS32_4K;
+      mips_isa = ISA_MIPS32;
       break;
     default:
       target_processor = CPU_R3000;
-      mips_isa = 3;
+      mips_isa = ISA_MIPS3;
       break;
     }
 

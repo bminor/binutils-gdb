@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-12-01 10:13-0800\n"
+"POT-Creation-Date: 2000-12-01 13:21-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -979,8 +979,8 @@ msgid "Unknown segment type"
 msgstr ""
 
 #. Probably a memory allocation problem?  Give up now.
-#: config/tc-a29k.c:330 config/tc-hppa.c:1412 config/tc-mips.c:1107
-#: config/tc-mips.c:1149 config/tc-sparc.c:846
+#: config/tc-a29k.c:330 config/tc-hppa.c:1412 config/tc-mips.c:1026
+#: config/tc-mips.c:1068 config/tc-sparc.c:846
 msgid "Broken assembler.  No assembly attempted."
 msgstr ""
 
@@ -1104,7 +1104,7 @@ msgstr ""
 msgid "type %d reloc done?\n"
 msgstr ""
 
-#: config/tc-alpha.c:1379 config/tc-alpha.c:1386 config/tc-mips.c:7422
+#: config/tc-alpha.c:1379 config/tc-alpha.c:1386 config/tc-mips.c:7351
 msgid "Used $at without \".set noat\""
 msgstr ""
 
@@ -1460,7 +1460,7 @@ msgid "invalid symbol to rename to"
 msgstr ""
 
 #: config/tc-arc.c:1009 config/tc-avr.c:372 config/tc-d10v.c:291
-#: config/tc-d30v.c:366 config/tc-mips.c:8850 config/tc-mn10200.c:375
+#: config/tc-d30v.c:366 config/tc-mips.c:8783 config/tc-mn10200.c:375
 #: config/tc-pj.c:356 config/tc-ppc.c:4511 config/tc-sh.c:2058
 #: config/tc-v850.c:1291
 msgid "bad call to md_atof"
@@ -1477,8 +1477,8 @@ msgstr ""
 
 #: config/tc-arc.c:1325 config/tc-arm.c:4570 config/tc-avr.c:852
 #: config/tc-cris.c:2733 config/tc-d10v.c:1538 config/tc-d30v.c:1865
-#: config/tc-mips.c:3293 config/tc-mips.c:4225 config/tc-mips.c:5010
-#: config/tc-mips.c:5556 config/tc-ppc.c:4847 config/tc-v850.c:2385
+#: config/tc-mips.c:3225 config/tc-mips.c:4157 config/tc-mips.c:4942
+#: config/tc-mips.c:5488 config/tc-ppc.c:4847 config/tc-v850.c:2385
 msgid "expression too complex"
 msgstr ""
 
@@ -1519,7 +1519,7 @@ msgstr ""
 msgid "Invalid syntax for .req directive."
 msgstr ""
 
-#: config/tc-arm.c:1506 config/tc-mips.c:10088 read.c:2047
+#: config/tc-arm.c:1506 config/tc-mips.c:9892 read.c:2047
 #, c-format
 msgid "Alignment too large: %d. assumed."
 msgstr ""
@@ -1978,7 +1978,7 @@ msgstr ""
 msgid "out of range branch"
 msgstr ""
 
-#: config/tc-arm.c:7096 config/tc-arm.c:7112 config/tc-mips.c:9915
+#: config/tc-arm.c:7096 config/tc-arm.c:7112 config/tc-mips.c:9719
 msgid "Branch out of range"
 msgstr ""
 
@@ -2061,7 +2061,7 @@ msgstr ""
 msgid "Cannot represent %s relocation in this object file format"
 msgstr ""
 
-#: config/tc-arm.c:7515 config/tc-mips.c:11428 config/tc-sh.c:3177
+#: config/tc-arm.c:7515 config/tc-mips.c:11238 config/tc-sh.c:3177
 #, c-format
 msgid "Can not represent %s relocation in this object file format"
 msgstr ""
@@ -2830,7 +2830,7 @@ msgstr ""
 msgid "invalid operands"
 msgstr ""
 
-#: config/tc-h8300.c:1250 config/tc-h8500.c:1104 config/tc-mips.c:8046
+#: config/tc-h8300.c:1250 config/tc-h8500.c:1104 config/tc-mips.c:7979
 #: config/tc-sh.c:1877 config/tc-w65.c:740 config/tc-z8k.c:1205
 msgid "unknown opcode"
 msgstr ""
@@ -3694,7 +3694,7 @@ msgstr ""
 msgid "Unknown temporary pseudo register"
 msgstr ""
 
-#: config/tc-i860.c:181 config/tc-mips.c:1104
+#: config/tc-i860.c:181 config/tc-mips.c:1023
 #, c-format
 msgid "internal error: can't hash `%s': %s\n"
 msgstr ""
@@ -4051,7 +4051,7 @@ msgid ""
 "  -xdebug\t\t  debug dependency violation checker\n"
 msgstr ""
 
-#: config/tc-ia64.c:6147 config/tc-mips.c:1091
+#: config/tc-ia64.c:6147 config/tc-mips.c:1010
 msgid "Could not set architecture and machine"
 msgstr ""
 
@@ -4578,7 +4578,7 @@ msgstr ""
 msgid "Can not do %d byte pic relocation"
 msgstr ""
 
-#: config/tc-m68k.c:919 config/tc-mips.c:11409
+#: config/tc-m68k.c:919 config/tc-mips.c:11219
 #, c-format
 msgid "Cannot make %s relocation PC relative"
 msgstr ""
@@ -5221,327 +5221,327 @@ msgstr ""
 msgid "Cannot represent relocation type %s"
 msgstr ""
 
-#: config/tc-mips.c:636
+#: config/tc-mips.c:639
 #, c-format
 msgid "internal Error, line %d, %s"
 msgstr ""
 
-#: config/tc-mips.c:638
+#: config/tc-mips.c:641
 msgid "MIPS internal Error"
 msgstr ""
 
-#: config/tc-mips.c:903
+#: config/tc-mips.c:923
 msgid "-G not supported in this configuration."
 msgstr ""
 
-#: config/tc-mips.c:1050
+#: config/tc-mips.c:992
 msgid "trap exception not supported at ISA 1"
 msgstr ""
 
-#: config/tc-mips.c:1130
+#: config/tc-mips.c:1049
 #, c-format
 msgid "internal: can't hash `%s': %s"
 msgstr ""
 
-#: config/tc-mips.c:1138
+#: config/tc-mips.c:1057
 #, c-format
 msgid "internal error: bad mips16 opcode: %s %s\n"
 msgstr ""
 
-#: config/tc-mips.c:1306
+#: config/tc-mips.c:1225
 #, c-format
 msgid "returned from mips_ip(%s) insn_opcode = 0x%x\n"
 msgstr ""
 
-#: config/tc-mips.c:1860 config/tc-mips.c:11541
+#: config/tc-mips.c:1779 config/tc-mips.c:11351
 msgid "extended instruction in delay slot"
 msgstr ""
 
-#: config/tc-mips.c:1882 config/tc-mips.c:1889
+#: config/tc-mips.c:1801 config/tc-mips.c:1808
 #, c-format
 msgid "jump to misaligned address (0x%lx)"
 msgstr ""
 
-#: config/tc-mips.c:2538 config/tc-mips.c:2879
+#: config/tc-mips.c:2457 config/tc-mips.c:2811
 msgid "Macro instruction expanded into multiple instructions"
 msgstr ""
 
-#: config/tc-mips.c:2932
+#: config/tc-mips.c:2864
 msgid "unsupported large constant"
 msgstr ""
 
-#: config/tc-mips.c:2934
+#: config/tc-mips.c:2866
 #, c-format
 msgid "Instruction %s requires absolute expression"
 msgstr ""
 
-#: config/tc-mips.c:3080
+#: config/tc-mips.c:3012
 msgid "Number larger than 32 bits"
 msgstr ""
 
-#: config/tc-mips.c:3101
+#: config/tc-mips.c:3033
 msgid "Number larger than 64 bits"
 msgstr ""
 
-#: config/tc-mips.c:3367 config/tc-mips.c:3439 config/tc-mips.c:5118
-#: config/tc-mips.c:5169 config/tc-mips.c:5705 config/tc-mips.c:5768
+#: config/tc-mips.c:3299 config/tc-mips.c:3371 config/tc-mips.c:5050
+#: config/tc-mips.c:5101 config/tc-mips.c:5637 config/tc-mips.c:5700
 msgid "PIC code offset overflow (max 16 signed bits)"
 msgstr ""
 
-#: config/tc-mips.c:3678
+#: config/tc-mips.c:3610
 #, c-format
 msgid "Branch %s is always false (nop)"
 msgstr ""
 
-#: config/tc-mips.c:3683
+#: config/tc-mips.c:3615
 #, c-format
 msgid "Branch likely %s is always false"
 msgstr ""
 
-#: config/tc-mips.c:3690 config/tc-mips.c:3764 config/tc-mips.c:3867
-#: config/tc-mips.c:3922 config/tc-mips.c:6805 config/tc-mips.c:6814
-#: config/tc-mips.c:6822 config/tc-mips.c:6931
+#: config/tc-mips.c:3622 config/tc-mips.c:3696 config/tc-mips.c:3799
+#: config/tc-mips.c:3854 config/tc-mips.c:6737 config/tc-mips.c:6746
+#: config/tc-mips.c:6754 config/tc-mips.c:6863
 msgid "Unsupported large constant"
 msgstr ""
 
 #. result is always true
-#: config/tc-mips.c:3726
+#: config/tc-mips.c:3658
 #, c-format
 msgid "Branch %s is always true"
 msgstr ""
 
-#: config/tc-mips.c:3998 config/tc-mips.c:4105
+#: config/tc-mips.c:3930 config/tc-mips.c:4037
 msgid "Divide by zero."
 msgstr ""
 
-#: config/tc-mips.c:4689
+#: config/tc-mips.c:4621
 msgid "MIPS PIC call to register other than $25"
 msgstr ""
 
-#: config/tc-mips.c:4694 config/tc-mips.c:4806
+#: config/tc-mips.c:4626 config/tc-mips.c:4738
 msgid "No .cprestore pseudo-op used in PIC code"
 msgstr ""
 
-#: config/tc-mips.c:4879 config/tc-mips.c:4968 config/tc-mips.c:5456
-#: config/tc-mips.c:5497 config/tc-mips.c:5515 config/tc-mips.c:6144
+#: config/tc-mips.c:4811 config/tc-mips.c:4900 config/tc-mips.c:5388
+#: config/tc-mips.c:5429 config/tc-mips.c:5447 config/tc-mips.c:6076
 msgid "opcode not supported on this processor"
 msgstr ""
 
-#: config/tc-mips.c:5975 config/tc-mips.c:6699
+#: config/tc-mips.c:5907 config/tc-mips.c:6631
 msgid "Macro used $at after \".set noat\""
 msgstr ""
 
-#: config/tc-mips.c:6115 config/tc-mips.c:6133
+#: config/tc-mips.c:6047 config/tc-mips.c:6065
 msgid "rotate count too large"
 msgstr ""
 
-#: config/tc-mips.c:6184
+#: config/tc-mips.c:6116
 #, c-format
 msgid "Instruction %s: result is always false"
 msgstr ""
 
-#: config/tc-mips.c:6353
+#: config/tc-mips.c:6285
 #, c-format
 msgid "Instruction %s: result is always true"
 msgstr ""
 
-#: config/tc-mips.c:6492 config/tc-mips.c:6519 config/tc-mips.c:6591
-#: config/tc-mips.c:6616
+#: config/tc-mips.c:6424 config/tc-mips.c:6451 config/tc-mips.c:6523
+#: config/tc-mips.c:6548
 msgid "operand overflow"
 msgstr ""
 
 #. FIXME: Check if this is one of the itbl macros, since they
 #. are added dynamically.
-#: config/tc-mips.c:6695
+#: config/tc-mips.c:6627
 #, c-format
 msgid "Macro %s not implemented yet"
 msgstr ""
 
-#: config/tc-mips.c:6965
+#: config/tc-mips.c:6897
 #, c-format
 msgid "internal: bad mips opcode (mask error): %s %s"
 msgstr ""
 
-#: config/tc-mips.c:7019
+#: config/tc-mips.c:6953
 #, c-format
 msgid "internal: bad mips opcode (unknown operand type `%c'): %s %s"
 msgstr ""
 
-#: config/tc-mips.c:7026
+#: config/tc-mips.c:6960
 #, c-format
 msgid "internal: bad mips opcode (bits 0x%lx undefined): %s %s"
 msgstr ""
 
-#: config/tc-mips.c:7134
+#: config/tc-mips.c:7068
 #, c-format
-msgid "opcode not supported on this processor: %s (MIPS%d)"
+msgid "opcode not supported on this processor: %s (%s)"
 msgstr ""
 
-#: config/tc-mips.c:7204
+#: config/tc-mips.c:7139
 #, c-format
 msgid "Improper shift amount (%ld)"
 msgstr ""
 
-#: config/tc-mips.c:7230 config/tc-mips.c:8386 config/tc-mips.c:8501
+#: config/tc-mips.c:7165 config/tc-mips.c:8319 config/tc-mips.c:8434
 #, c-format
 msgid "Invalid value for `%s' (%lu)"
 msgstr ""
 
-#: config/tc-mips.c:7248 config/tc-mips.c:7278
+#: config/tc-mips.c:7183
 #, c-format
 msgid "Illegal break code (%ld)"
 msgstr ""
 
-#: config/tc-mips.c:7262
+#: config/tc-mips.c:7197
 #, c-format
 msgid "Illegal lower break code (%ld)"
 msgstr ""
 
-#: config/tc-mips.c:7293
+#: config/tc-mips.c:7210
 #, c-format
-msgid "Illegal syscall code (%ld)"
+msgid "Illegal 20-bit code (%ld)"
 msgstr ""
 
-#: config/tc-mips.c:7305
+#: config/tc-mips.c:7222
 #, c-format
 msgid "Coproccesor code > 25 bits (%ld)"
 msgstr ""
 
-#: config/tc-mips.c:7319
+#: config/tc-mips.c:7235
+#, c-format
+msgid "Illegal 19-bit code (%ld)"
+msgstr ""
+
+#: config/tc-mips.c:7247
 #, c-format
 msgid "Invalidate performance regster (%ld)"
 msgstr ""
 
-#: config/tc-mips.c:7355
+#: config/tc-mips.c:7284
 #, c-format
 msgid "Invalid register number (%d)"
 msgstr ""
 
-#: config/tc-mips.c:7515
+#: config/tc-mips.c:7448
 #, c-format
 msgid "Invalid float register number (%d)"
 msgstr ""
 
-#: config/tc-mips.c:7525
+#: config/tc-mips.c:7458
 #, c-format
 msgid "Float register should be even, was %d"
 msgstr ""
 
-#: config/tc-mips.c:7576
+#: config/tc-mips.c:7509
 msgid "absolute expression required"
 msgstr ""
 
-#: config/tc-mips.c:7637
+#: config/tc-mips.c:7570
 #, c-format
 msgid "Bad floating point constant: %s"
 msgstr ""
 
-#: config/tc-mips.c:7759
+#: config/tc-mips.c:7692
 msgid "Can't use floating point insn in this section"
 msgstr ""
 
-#: config/tc-mips.c:7813
+#: config/tc-mips.c:7746
 msgid "16 bit expression not in range 0..65535"
 msgstr ""
 
-#: config/tc-mips.c:7850
+#: config/tc-mips.c:7783
 msgid "16 bit expression not in range -32768..32767"
 msgstr ""
 
-#: config/tc-mips.c:7921
+#: config/tc-mips.c:7854
 msgid "lui expression not in range 0..65535"
 msgstr ""
 
-#: config/tc-mips.c:7945
+#: config/tc-mips.c:7878
 #, c-format
 msgid "invalid condition code register $fcc%d"
 msgstr ""
 
-#: config/tc-mips.c:7970
+#: config/tc-mips.c:7903
 msgid "invalid coprocessor sub-selection value (0-7)"
 msgstr ""
 
-#: config/tc-mips.c:7975
+#: config/tc-mips.c:7908
 #, c-format
 msgid "bad char = '%c'\n"
 msgstr ""
 
-#: config/tc-mips.c:7988 config/tc-mips.c:8526
+#: config/tc-mips.c:7921 config/tc-mips.c:8459
 msgid "illegal operands"
 msgstr ""
 
-#: config/tc-mips.c:8055
+#: config/tc-mips.c:7988
 msgid "unrecognized opcode"
 msgstr ""
 
-#: config/tc-mips.c:8164
+#: config/tc-mips.c:8097
 #, c-format
 msgid "invalid register number (%d)"
 msgstr ""
 
-#: config/tc-mips.c:8245
+#: config/tc-mips.c:8178
 msgid "used $at without \".set noat\""
 msgstr ""
 
-#: config/tc-mips.c:8420
+#: config/tc-mips.c:8353
 msgid "can't parse register list"
 msgstr ""
 
-#: config/tc-mips.c:8454 config/tc-mips.c:8484
+#: config/tc-mips.c:8387 config/tc-mips.c:8417
 msgid "invalid register list"
 msgstr ""
 
-#: config/tc-mips.c:8651
+#: config/tc-mips.c:8584
 msgid "extended operand requested but not required"
 msgstr ""
 
-#: config/tc-mips.c:8653
+#: config/tc-mips.c:8586
 msgid "invalid unextended operand value"
 msgstr ""
 
-#: config/tc-mips.c:8681
+#: config/tc-mips.c:8614
 msgid "operand value out of range for instruction"
 msgstr ""
 
-#: config/tc-mips.c:9166
-#, c-format
-msgid "ignoring invalid leading 'v' in -mcpu=%s switch"
-msgstr ""
-
-#: config/tc-mips.c:9172
+#: config/tc-mips.c:8987
 #, c-format
 msgid "invalid architecture -mcpu=%s"
 msgstr ""
 
-#: config/tc-mips.c:9228
+#: config/tc-mips.c:9036
 msgid "-G may not be used with embedded PIC code"
 msgstr ""
 
-#: config/tc-mips.c:9240
+#: config/tc-mips.c:9048
 msgid "-call_shared is supported only for ELF format"
 msgstr ""
 
-#: config/tc-mips.c:9246 config/tc-mips.c:10330 config/tc-mips.c:10498
+#: config/tc-mips.c:9054 config/tc-mips.c:10134 config/tc-mips.c:10308
 msgid "-G may not be used with SVR4 PIC code"
 msgstr ""
 
-#: config/tc-mips.c:9255
+#: config/tc-mips.c:9063
 msgid "-non_shared is supported only for ELF format"
 msgstr ""
 
-#: config/tc-mips.c:9271
+#: config/tc-mips.c:9079
 msgid "-G is not supported for this configuration"
 msgstr ""
 
-#: config/tc-mips.c:9276
+#: config/tc-mips.c:9084
 msgid "-G may not be used with SVR4 or embedded PIC code"
 msgstr ""
 
-#: config/tc-mips.c:9300
+#: config/tc-mips.c:9108
 msgid "No compiled in support for 64 bit object file format"
 msgstr ""
 
-#: config/tc-mips.c:9388
+#: config/tc-mips.c:9196
 msgid ""
 "MIPS options:\n"
 "-membedded-pic\t\tgenerate embedded position independent code\n"
@@ -5552,33 +5552,30 @@ msgid ""
 "\t\t\timplicitly with the gp register [default 8]\n"
 msgstr ""
 
-#: config/tc-mips.c:9396
+#: config/tc-mips.c:9204
 msgid ""
 "-mips1\t\t\tgenerate MIPS ISA I instructions\n"
 "-mips2\t\t\tgenerate MIPS ISA II instructions\n"
 "-mips3\t\t\tgenerate MIPS ISA III instructions\n"
 "-mips4\t\t\tgenerate MIPS ISA IV instructions\n"
+"-mips32                 generate MIPS32 ISA instructions\n"
 "-mcpu=CPU\t\tgenerate code for CPU, where CPU is one of:\n"
 msgstr ""
 
-#: config/tc-mips.c:9425
+#: config/tc-mips.c:9232
 msgid ""
 "-mCPU\t\t\tequivalent to -mcpu=CPU.\n"
 "-no-mCPU\t\tdon't generate code specific to CPU.\n"
 "\t\t\tFor -mCPU and -no-mCPU, CPU must be one of:\n"
 msgstr ""
 
-#: config/tc-mips.c:9438
-msgid "-mips32                 generate MIPS32 instructions\n"
-msgstr ""
-
-#: config/tc-mips.c:9441
+#: config/tc-mips.c:9245
 msgid ""
 "-mips16\t\t\tgenerate mips16 instructions\n"
 "-no-mips16\t\tdo not generate mips16 instructions\n"
 msgstr ""
 
-#: config/tc-mips.c:9444
+#: config/tc-mips.c:9248
 msgid ""
 "-O0\t\t\tremove unneeded NOPs, do not swap branches\n"
 "-O\t\t\tremove unneeded NOPs and swap branches\n"
@@ -5587,7 +5584,7 @@ msgid ""
 "--break, --no-trap\tbreak exception on div by 0 and mult overflow\n"
 msgstr ""
 
-#: config/tc-mips.c:9451
+#: config/tc-mips.c:9255
 msgid ""
 "-KPIC, -call_shared\tgenerate SVR4 position independent code\n"
 "-non_shared\t\tdo not generate position independent code\n"
@@ -5596,170 +5593,170 @@ msgid ""
 "-64\t\t\tcreate 64 bit object file\n"
 msgstr ""
 
-#: config/tc-mips.c:9508
+#: config/tc-mips.c:9312
 #, c-format
 msgid "Unsupported reloc size %d"
 msgstr ""
 
-#: config/tc-mips.c:9611
+#: config/tc-mips.c:9415
 msgid "Unmatched %%hi reloc"
 msgstr ""
 
-#: config/tc-mips.c:9735
+#: config/tc-mips.c:9539
 msgid "Invalid PC relative reloc"
 msgstr ""
 
-#: config/tc-mips.c:9845 config/tc-sparc.c:3101 config/tc-sparc.c:3108
+#: config/tc-mips.c:9649 config/tc-sparc.c:3101 config/tc-sparc.c:3108
 #: config/tc-sparc.c:3115 config/tc-sparc.c:3122 config/tc-sparc.c:3129
 #: config/tc-sparc.c:3138 config/tc-sparc.c:3149 config/tc-sparc.c:3175
 #: config/tc-sparc.c:3203 write.c:984 write.c:1048
 msgid "relocation overflow"
 msgstr ""
 
-#: config/tc-mips.c:9861
+#: config/tc-mips.c:9665
 #, c-format
 msgid "Branch to odd address (%lx)"
 msgstr ""
 
-#: config/tc-mips.c:10025
+#: config/tc-mips.c:9829
 #, c-format
 msgid "%08lx  UNDEFINED\n"
 msgstr ""
 
-#: config/tc-mips.c:10091
+#: config/tc-mips.c:9895
 msgid "Alignment negative: 0 assumed."
 msgstr ""
 
-#: config/tc-mips.c:10179
+#: config/tc-mips.c:9983
 msgid "No read only data section in this object file format"
 msgstr ""
 
-#: config/tc-mips.c:10202
+#: config/tc-mips.c:10006
 msgid "Global pointers not supported; recompile -G 0"
 msgstr ""
 
-#: config/tc-mips.c:10288
+#: config/tc-mips.c:10092
 #, c-format
 msgid "%s: no such section"
 msgstr ""
 
-#: config/tc-mips.c:10325
+#: config/tc-mips.c:10129
 #, c-format
 msgid ".option pic%d not supported"
 msgstr ""
 
-#: config/tc-mips.c:10336
+#: config/tc-mips.c:10140
 #, c-format
 msgid "Unrecognized option \"%s\""
 msgstr ""
 
-#: config/tc-mips.c:10399
+#: config/tc-mips.c:10203
 msgid "`noreorder' must be set before `nomacro'"
 msgstr ""
 
-#: config/tc-mips.c:10434
+#: config/tc-mips.c:10244
 msgid "unknown ISA level"
 msgstr ""
 
-#: config/tc-mips.c:10457
+#: config/tc-mips.c:10267
 msgid ".set pop with no .set push"
 msgstr ""
 
-#: config/tc-mips.c:10481
+#: config/tc-mips.c:10291
 #, c-format
 msgid "Tried to set unrecognized symbol: %s\n"
 msgstr ""
 
-#: config/tc-mips.c:10531
+#: config/tc-mips.c:10341
 msgid ".cpload not in noreorder section"
 msgstr ""
 
-#: config/tc-mips.c:10613
+#: config/tc-mips.c:10423
 msgid "Unsupported use of .gpword"
 msgstr ""
 
-#: config/tc-mips.c:10750
+#: config/tc-mips.c:10560
 msgid "expected `$'"
 msgstr ""
 
-#: config/tc-mips.c:10758
+#: config/tc-mips.c:10568
 msgid "Bad register number"
 msgstr ""
 
-#: config/tc-mips.c:10774
+#: config/tc-mips.c:10584
 msgid "Unrecognized register name"
 msgstr ""
 
-#: config/tc-mips.c:10973
+#: config/tc-mips.c:10783
 msgid "unsupported PC relative reference to different section"
 msgstr ""
 
-#: config/tc-mips.c:11082
+#: config/tc-mips.c:10892
 msgid "unsupported relocation"
 msgstr ""
 
-#: config/tc-mips.c:11187
+#: config/tc-mips.c:10997
 msgid "AT used after \".set noat\" or macro used after \".set nomacro\""
 msgstr ""
 
-#: config/tc-mips.c:11250
+#: config/tc-mips.c:11060
 msgid "Double check fx_r_type in tc-mips.c:tc_gen_reloc"
 msgstr ""
 
-#: config/tc-mips.c:11762
+#: config/tc-mips.c:11572
 msgid "missing `.end' at end of assembly"
 msgstr ""
 
-#: config/tc-mips.c:11777
+#: config/tc-mips.c:11587
 msgid "Expected simple number."
 msgstr ""
 
-#: config/tc-mips.c:11803
+#: config/tc-mips.c:11613
 #, c-format
 msgid " *input_line_pointer == '%c' 0x%02x\n"
 msgstr ""
 
-#: config/tc-mips.c:11805
+#: config/tc-mips.c:11615
 msgid "Invalid number"
 msgstr ""
 
-#: config/tc-mips.c:11859
+#: config/tc-mips.c:11669
 msgid ".end not in text section"
 msgstr ""
 
-#: config/tc-mips.c:11863
+#: config/tc-mips.c:11673
 msgid ".end directive without a preceding .ent directive."
 msgstr ""
 
-#: config/tc-mips.c:11872
+#: config/tc-mips.c:11682
 msgid ".end symbol does not match .ent symbol."
 msgstr ""
 
-#: config/tc-mips.c:11875
+#: config/tc-mips.c:11685
 msgid ".end directive missing or unknown symbol"
 msgstr ""
 
-#: config/tc-mips.c:11950
+#: config/tc-mips.c:11760
 msgid ".ent or .aent not in text section."
 msgstr ""
 
-#: config/tc-mips.c:11953
+#: config/tc-mips.c:11763
 msgid "missing `.end'"
 msgstr ""
 
-#: config/tc-mips.c:11986 ecoff.c:3205
+#: config/tc-mips.c:11796 ecoff.c:3205
 msgid ".frame outside of .ent"
 msgstr ""
 
-#: config/tc-mips.c:11997 ecoff.c:3216
+#: config/tc-mips.c:11807 ecoff.c:3216
 msgid "Bad .frame directive"
 msgstr ""
 
-#: config/tc-mips.c:12027
+#: config/tc-mips.c:11837
 msgid ".mask/.fmask outside of .ent"
 msgstr ""
 
-#: config/tc-mips.c:12034
+#: config/tc-mips.c:11844
 msgid "Bad .mask/.fmask directive"
 msgstr ""
 

@@ -17,6 +17,14 @@
         MIPS32 "sdbbp" to use 'B' operand specifier.  Add MIPS32
         "wait" variant which uses 'J' operand specifier.
         
+        * mips-dis.c (set_mips_isa_type): Update to use
+        CPU_UNKNOWN and ISA_* constants.  Add bfd_mach_mips32 case.
+        Replace bfd_mach_mips4K with bfd_mach_mips32_4k case.
+        * mips-opc.c (I32): New constant for instructions added in
+        MIPS32.
+        (P4): Delete.
+        (mips_builtin_opcodes) Replace all uses of P4 with I32.
+
 2000-11-28  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* sh-dis.c (print_insn_ddt): Make insn_x, insn_y unsigned.

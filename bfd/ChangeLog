@@ -1,3 +1,28 @@
+2000-12-01  Chris Demetriou  <cgd@sibyte.com>
+
+        * aoutx.h (NAME(aout,machine_type)): Add bfd_mach_mips32 and
+        bfd_mach_mips32_4k.  Update FIXME comment.
+        * archures.c (bfd_mach_mips32): New constant.
+        (bfd_mach_mips4K, bfd_mach_mips32_4k) Rename the former to
+        the latter, renumber it.
+        * bfd-in2.h (bfd_mach_mips32): New constant.
+        (bfd_mach_mips4K, bfd_mach_mips32_4k) Rename the former to
+        the latter, renumber it.
+        * cpu-mips.c (I_mips32): New constant.
+        (I_mips4K, I_mips32_4k): Rename the former to the latter.
+        (arch_info_struct): Add bfd_mach_mips32 entry, replace
+        bfd_mach_mips4K entry with bfd_mach_mips32_4k entry.
+        * elf32-mips.c (elf_mips_isa): Add E_MIPS_ARCH_32 case.
+        (elf_mips_mach): Likewise.  Also, replace E_MIPS_MACH_MIPS32
+        with E_MIPS_MACH_MIPS32_4K.
+        (_bfd_mips_elf_final_write_processing): Replace
+        bfd_mach_mips4K with bfd_mach_mips32_4k case, add
+        bfd_mach_mips32 case.
+        (_bfd_mips_elf_merge_private_bfd_data): Generalize ISA mixing
+        comparison with support for MIPS32.
+        (_bfd_mips_elf_print_private_bfd_data): Print ISA name for
+        MIPS32.
+
 2000-12-01      Joel Sherrill <joel@OARcorp.com>
 
 	* config.bfd (arm-*-rtems*, a29k-*rtems*): New targets.

@@ -276,7 +276,8 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
 @end ifset
 @ifset MIPS
  [ -nocpp ] [ -EL ] [ -EB ] [ -G @var{num} ] [ -mcpu=@var{CPU} ]
- [ -mips1 ] [ -mips2 ] [ -mips3 ] [ -m4650 ] [ -no-m4650 ] [ -mips32 ] [ -no-mips32 ]
+ [ -mips1 ] [ -mips2 ] [ -mips3 ] [ -mips4 ] [ -mips32 ]
+ [ -m4650 ] [ -no-m4650 ]
  [ --trap ] [ --break ]
  [ --emulation=@var{name} ]
 @end ifset
@@ -669,10 +670,12 @@ Generate ``little endian'' format output.
 @item -mips1
 @itemx -mips2
 @itemx -mips3
+@itemx -mips4
+@itemx -mips32
 Generate code for a particular MIPS Instruction Set Architecture level.
 @samp{-mips1} corresponds to the @sc{r2000} and @sc{r3000} processors,
-@samp{-mips2} to the @sc{r6000} processor, and @samp{-mips3} to the @sc{r4000}
-processor.
+@samp{-mips2} to the @sc{r6000} processor, @samp{-mips3} to the @sc{r4000}
+processor, @samp{-mips32} to a generic @sc{MIPS32} processor.
 
 @item -m4650
 @itemx -no-m4650
@@ -680,12 +683,6 @@ Generate code for the MIPS @sc{r4650} chip.  This tells the assembler to accept
 the @samp{mad} and @samp{madu} instruction, and to not schedule @samp{nop}
 instructions around accesses to the @samp{HI} and @samp{LO} registers.
 @samp{-no-m4650} turns off this option.
-
-@item -mips32
-@itemx -no-mips32
-Generate code for the @sc{MIPS32} architecture. This tells the assembler to
-accept ISA level 2 instructions and MIPS32 extensions including some @sc{r4000}
-instructions.
 
 @item -mcpu=@var{CPU}
 Generate code for a particular MIPS cpu.  This has little effect on the

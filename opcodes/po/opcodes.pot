@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-09-05 17:03-0700\n"
+"POT-Creation-Date: 2000-12-01 13:18-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,7 +22,8 @@ msgstr ""
 msgid "jump hint unaligned"
 msgstr ""
 
-#: arc-dis.c:232
+#. Default text to print if an instruction isn't recognized.
+#: arc-dis.c:232 fr30-dis.c:39 m32r-dis.c:39
 msgid "*unknown*"
 msgstr ""
 
@@ -48,21 +49,21 @@ msgstr ""
 msgid "branch address not on 4 byte boundary"
 msgstr ""
 
-#: arm-dis.c:466
+#: arm-dis.c:489
 msgid "<illegal precision>"
 msgstr ""
 
-#: arm-dis.c:878
+#: arm-dis.c:904
 #, c-format
 msgid "Unrecognised register name set: %s\n"
 msgstr ""
 
-#: arm-dis.c:885
+#: arm-dis.c:911
 #, c-format
 msgid "Unrecognised disassembler option: %s\n"
 msgstr ""
 
-#: arm-dis.c:1049
+#: arm-dis.c:1075
 msgid ""
 "\n"
 "The following ARM specific disassembler options are supported for use with\n"
@@ -203,6 +204,10 @@ msgstr ""
 msgid "%02x\t\t*unknown*"
 msgstr ""
 
+#: i386-dis.c:1949
+msgid "<internal disassembler error>"
+msgstr ""
+
 #: m10200-dis.c:199
 #, c-format
 msgid "unknown\t0x%02x"
@@ -233,7 +238,7 @@ msgstr ""
 msgid "# <dis error: %08x>"
 msgstr ""
 
-#: mips-dis.c:242
+#: mips-dis.c:273
 #, c-format
 msgid "# internal error, undefined modifier(%c)"
 msgstr ""
@@ -277,21 +282,21 @@ msgid "invalid register operand when updating"
 msgstr ""
 
 #. Mark as non-valid instruction
-#: sparc-dis.c:743
+#: sparc-dis.c:748
 msgid "unknown"
 msgstr ""
 
-#: sparc-dis.c:815
+#: sparc-dis.c:823
 #, c-format
 msgid "Internal error:  bad sparc-opcode.h: \"%s\", %#.8lx, %#.8lx\n"
 msgstr ""
 
-#: sparc-dis.c:826
+#: sparc-dis.c:834
 #, c-format
 msgid "Internal error: bad sparc-opcode.h: \"%s\", %#.8lx, %#.8lx\n"
 msgstr ""
 
-#: sparc-dis.c:875
+#: sparc-dis.c:883
 #, c-format
 msgid "Internal error: bad sparc-opcode.h: \"%s\" == \"%s\"\n"
 msgstr ""

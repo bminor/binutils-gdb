@@ -1810,6 +1810,8 @@ elf_mips_isa (flags)
       return 3;
     case E_MIPS_ARCH_4:
       return 4;
+    case E_MIPS_ARCH_32:
+      return 32;
     }
   return 4;
 }
@@ -1837,8 +1839,8 @@ elf_mips_mach (flags)
     case E_MIPS_MACH_4650:
       return bfd_mach_mips4650;
 
-    case E_MIPS_MACH_MIPS32:
-      return bfd_mach_mips4K;
+    case E_MIPS_MACH_MIPS32_4K:
+      return bfd_mach_mips32_4k;
 
     default:
       switch (flags & EF_MIPS_ARCH)
@@ -1858,6 +1860,10 @@ elf_mips_mach (flags)
 
 	case E_MIPS_ARCH_4:
 	  return bfd_mach_mips8000;
+	  break;
+
+	case E_MIPS_ARCH_32:
+	  return bfd_mach_mips32;
 	  break;
 	}
     }
@@ -2336,8 +2342,12 @@ _bfd_mips_elf_final_write_processing (abfd, linker)
       val = E_MIPS_ARCH_4;
       break;
 
-    case bfd_mach_mips4K:
-      val = E_MIPS_ARCH_2 | E_MIPS_MACH_MIPS32;
+    case bfd_mach_mips32:
+      val = E_MIPS_ARCH_32;
+      break;
+
+    case bfd_mach_mips32_4k:
+      val = E_MIPS_ARCH_32 | E_MIPS_MACH_MIPS32_4K;
       break;
     }
 
@@ -2537,13 +2547,12 @@ _bfd_mips_elf_merge_private_bfd_data (ibfd, obfd)
 	  || new_mach == old_mach
 	  )
 	{
-	  /* Don't warn about mixing -mips1 and -mips2 code, or mixing -mips3
-	     and -mips4 code.  They will normally use the same data sizes and
-	     calling conventions.  */
+	  /* Don't warn about mixing code using 32-bit ISAs, or mixing code
+	     using 64-bit ISAs.  They will normally use the same data sizes
+	     and calling conventions.  */
 
-	  if ((new_isa == 1 || new_isa == 2)
-	      ? (old_isa != 1 && old_isa != 2)
-	      : (old_isa == 1 || old_isa == 2))
+	  if ((  (new_isa == 1 || new_isa == 2 || new_isa == 32)
+	       ^ (old_isa == 1 || old_isa == 2 || old_isa == 32)) != 0)
 	    {
 	      (*_bfd_error_handler)
 	       (_("%s: ISA mismatch (-mips%d) with previous modules (-mips%d)"),
@@ -2647,6 +2656,8 @@ _bfd_mips_elf_print_private_bfd_data (abfd, ptr)
     fprintf (file, _(" [mips3]"));
   else if ((elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_4)
     fprintf (file, _(" [mips4]"));
+  else if ((elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_32)
+    fprintf (file, _ (" [mips32]"));
   else
     fprintf (file, _(" [unknown ISA]"));
 

@@ -38,26 +38,28 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
     NEXT,						\
   }
 
-enum {
-I_mips3000,
-I_mips3900,
-I_mips4000,
-I_mips4010,
-I_mips4100,
-I_mips4111,
-I_mips4300,
-I_mips4400,
-I_mips4600,
-I_mips4650,
-I_mips5000,
-I_mips6000,
-I_mips8000,
-I_mips10000,
-I_mips4K,
-I_mips16
+enum
+{
+  I_mips3000,
+  I_mips3900,
+  I_mips4000,
+  I_mips4010,
+  I_mips4100,
+  I_mips4111,
+  I_mips4300,
+  I_mips4400,
+  I_mips4600,
+  I_mips4650,
+  I_mips5000,
+  I_mips6000,
+  I_mips8000,
+  I_mips10000,
+  I_mips16,
+  I_mips32,
+  I_mips32_4k,
 };
 
-#define NN(index) (&arch_info_struct[(index)+1])
+#define NN(index) (&arch_info_struct[(index) + 1])
 
 static const bfd_arch_info_type arch_info_struct[] =
 {
@@ -74,9 +76,10 @@ static const bfd_arch_info_type arch_info_struct[] =
   N (64, 64, bfd_mach_mips5000, "mips:5000", false, NN(I_mips5000)),
   N (32, 32, bfd_mach_mips6000, "mips:6000", false, NN(I_mips6000)),
   N (64, 64, bfd_mach_mips8000, "mips:8000", false, NN(I_mips8000)),
-  N (64, 64, bfd_mach_mips10000, "mips:10000", false, NN(I_mips10000)),
-  N (32, 32, bfd_mach_mips4K,   "mips:4K",   false, NN(I_mips4K)),
-  N (64, 64, bfd_mach_mips16,   "mips:16",   false, 0),
+  N (64, 64, bfd_mach_mips10000,"mips:10000",false, NN(I_mips10000)),
+  N (64, 64, bfd_mach_mips16,   "mips:16",   false, NN(I_mips16)),
+  N (32, 32, bfd_mach_mips32,   "mips:mips32", false, NN(I_mips32)),
+  N (32, 32, bfd_mach_mips32_4k,"mips:mips32-4k", false, 0),
 };
 
 /* The default architecture is mips:3000, but with a machine number of

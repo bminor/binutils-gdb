@@ -1398,8 +1398,9 @@ enum bfd_architecture
 #define bfd_mach_mips6000              6000
 #define bfd_mach_mips8000              8000
 #define bfd_mach_mips10000             10000
-#define bfd_mach_mips4K                32
 #define bfd_mach_mips16                16
+#define bfd_mach_mips32                32
+#define bfd_mach_mips32_4k             3204113 /* 32, 04, octal 'K' */
   bfd_arch_i386,      /* Intel 386 */
 #define bfd_mach_i386_i386 0
 #define bfd_mach_i386_i8086 1
