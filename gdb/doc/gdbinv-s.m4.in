@@ -5,6 +5,360 @@ _dnl__ M4 FRAGMENT $Id$
 _dnl__ This text diverted to "Remote Debugging" section in general case;
 _dnl__ however, if we're doing a manual specifically for one of these, it
 _dnl__ belongs up front (in "Getting In and Out" chapter).
+@node Remote Serial
+@subsection The _GDBN__ remote serial protocol
+
+@cindex remote serial debugging, overview
+To debug a program running on another machine (the debugging
+@dfn{target} machine), you must first arrange for all the usual
+prerequisites for the program to run by itself.  For example, for a C
+program, you need
+
+@enumerate
+@item
+A startup routine to set up the C runtime environment; these usually
+have a name like @file{crt0}.  The startup routine may be supplied by
+your hardware supplier, or you may have to write your own.
+
+@item 
+You probably need a C subroutine library to support your program's
+subroutine calls, notably managing input and output.
+
+@item
+A way of getting your program to the other machine---for example, a
+download program.  These are often supplied by the hardware
+manufacturer, but you may have to write your own from hardware
+documentation.
+@end enumerate
+
+The next step is to arrange for your program to use a serial port to
+communicate with the machine where _GDBN__ is running (the @dfn{host}
+machine).  In general terms, the scheme looks like this:
+
+@table @emph
+@item On the host,
+_GDBN__ already understands how to use this protocol; when everything
+else is set up, you can simply use the @samp{target remote} command
+(@pxref{Targets,,Specifying a Debugging Target}).
+
+@item On the target,
+you must link with your program a few special-purpose subroutines that
+implement the _GDBN__ remote serial protocol.  The file containing these
+subroutines is called  a @dfn{debugging stub}.
+@end table
+
+The debugging stub is specific to the architecture of the remote
+machine; for example, use @file{sparc-stub.c} to debug programs on
+@sc{sparc} boards.
+
+@cindex remote serial stub list
+These working remote stubs are distributed with _GDBN__:
+
+@c FIXME! verify these...
+@table @code
+@item sparc-stub.c
+@kindex sparc-stub.c
+For @sc{sparc} architectures.
+
+@item m68-stub.c
+@kindex m68-stub.c
+For Motorola 680x0 architectures.
+
+@item i36-stub.c
+@kindex i36-stub.c
+For Intel 386 and compatible architectures.
+@end table
+
+The @file{README} file in the _GDBN__ distribution may list other
+recently added stubs.
+
+@menu
+* stub contents::       What the stub can do for you
+* bootstrapping::       What you must do for the stub
+* debug session::       Putting it all together
+* protocol::            Outline of the communication protocol
+@end menu
+
+@node stub contents
+@subsubsection What the stub can do for you
+
+@cindex remote serial stub
+The debugging stub for your architecture supplies these three
+subroutines:
+
+@table @code
+@item handle_exception
+@kindex handle_exception
+@cindex remote serial stub, main routine
+This is the central workhorse, but your program never calls it
+explicitly---the setup code arranges for @code{handle_exception} to
+run when a trap is triggered.
+
+@code{handle_exception} takes control when your program stops during
+execution (for example, on a breakpoint), and mediates communications
+with _GDBN__ on the host machine.  This is where the communications
+protocol is implemented; @code{handle_exception} acts as the _GDBN__
+representative on the target machine; it begins by sending summary
+information on the state of your program, then continues to execute,
+retrieving and transmitting any information _GDBN__ needs, until you
+execute a _GDBN__ command that makes your program resume; at that point,
+@code{handle_exception} returns control to your own code on the target
+machine. 
+
+@item set_debug_traps
+@kindex set_debug_traps
+@cindex remote serial stub, initialization
+You must call this subroutine explicitly near the beginning of your
+program.  This is the routine that arranges to transfer control to
+@code{handle_exception} when your program stops.
+
+@item breakpoint
+@cindex @code{breakpoint} subroutine, remote
+Use this auxiliary subroutine to make your program contain a
+breakpoint.  Depending on the particular situation, this may be the only
+way for _GDBN__ to get control.  For instance, if your target
+machine has some sort of interrupt button, you won't need to call this;
+pressing the interrupt button will transfer control to
+@code{handle_exception}---in efect, to _GDBN__.  On some machines,
+simply receiving characters on the serial port may also trigger a trap;
+again, in that situation, you don't need to call @code{breakpoint} from
+your own program---simply running @samp{target remote} from the host
+_GDBN__ session will get control.  
+
+Call @code{breakpoint} if none of these is true, or if you simply want
+to make certain your program stops at a predetermined point for the
+start of your debugging session.
+
+@quotation
+@emph{Warning:} when you set a breakpoint using this subroutine, it's a
+little harder than usual to restart your program afterwards---because if
+you simply @code{continue}, you will immediately run into the line of
+your program that sets the breakpoint!
+
+To get past this, adjust the program counter manually to get past the
+current instruction before issuing the @code{continue} command.  For example,
+
+@example
+(_GDBP__) p $pc = 4+$pc
+
+FIXME!!! Stu, I suspect I don't have this quite right.  
+         Please supply the right incantation...  presumably the
+         constant depends on instruction width, BTW?
+         Sample output would be nice too, so I don't have to make
+         up a ridiculous number.         
+
+Nothing simpler works, right?  Frinstance, an ignore count on the
+continue would just keep stopping at the same place too?
+
+Whatta bout $pc++ ---does GDB know the instruction width as a "type" size?
+
+(_GDBP__) continue
+@end example
+@end quotation
+@end table
+
+@node bootstrapping
+@subsubsection What you must do for the stub
+
+@cindex remote stub, support routines
+The debugging stubs that come with _GDBN__ are set up for a particular
+chip architecture, but they have no information about the rest of your
+debugging target machine.  To allow the stub to work, you must supply
+three special low-level subroutines, and make sure one library routine
+is available.
+
+@table @code
+@item int getDebugChar()
+@kindex getDebugChar
+Write this subroutine to read a single character from the serial port.
+It may be identical to @code{getchar} for your target system; a
+different name is used to allow you to distinguish the two if you wish.
+
+@item void putDebugChar(int)
+@kindex putDebugChar
+Write this subroutine to write a single character to the serial port.
+It may be identical to @code{putchar} for your target system; a 
+different name is used to allow you to distinguish the two if you wish.
+
+@item void flush_i_cache()
+@kindex flush_i_cache
+Write this subroutine to flush the instruction cache, if any, on your
+target machine.  If there is no instruction cache, this subroutine may
+be a no-op.
+
+On target machines that have instruction caches, _GDBN__ requires this
+function to make certain that the state of your program is stable.
+
+@item void *memset(void *, int, int)
+@kindex memset
+This is the standard library function @code{memset} that sets an area of
+memory to a known value.  If you have one of the free versions of
+@code{libc.a}, @code{memset} can be found there; otherwise, you must
+either obtain it from your hardware manufacturer, or write your own.
+@end table
+
+If you do not use the GNU C compiler, you may also need other standard
+library subroutines; this will vary from one stub to another, but in
+general the stubs are likely to use any of the common library
+subroutines which @code{gcc} generates as inline code.
+
+
+@node debug session
+@subsubsection Putting it all together
+
+@cindex remote serial debugging summary
+In summary, when your program is ready to debug, you must follow these
+steps.
+
+@enumerate
+@item
+Make sure you have the supporting low-level routines:
+@code{getDebugChar}, @code{putDebugChar}, @code{flush_i_cache},
+@code{memset}.
+
+@item
+Insert these lines near the top of your program:
+
+@example
+set_debug_traps();
+breakpoint();
+@end example
+
+@item
+Compile and link together: your program, the _GDBN__ debugging stub for
+your target architecture, and the supporting subroutines.
+
+@item
+Make sure you have a serial connection between your target machine and
+the _GDBN__ host, and identify the serial port used for this on the host.
+
+@item
+Download your program to your target machine (or get it there by
+whatever means the manufacturer provides), and start it.
+
+@item
+To start remote debugging, run _GDBN__ on the host machine, and specify
+as an executable file the program that is running in the remote machine.
+This tells _GDBN__ how to find your program's symbols and the contents
+of its pure text.
+
+Then establish communication using the @code{target remote} command.
+Its argument is the name of the device you're using to control the
+target machine.  For example:
+
+@example
+target remote /dev/ttyb
+@end example
+
+@noindent
+if the serial line is connected to the device named @file{/dev/ttyb}.  
+@ignore
+@c this is from the old text, but it doesn't seem to make sense now that I've
+@c seen an example...  pesch 4sep1992
+This will stop the remote machine if it is not already stopped.
+@end ignore
+
+@end enumerate
+
+Now you can use all the usual commands to examine and change data and to
+step and continue the remote program.
+
+To resume the remote program and stop debugging it, use the @code{detach}
+command.
+
+@node protocol
+@subsubsection Outline of the communication protocol
+
+@cindex debugging stub, example
+@cindex remote stub, example
+@cindex stub example, remote debugging
+The stub files provided with _GDBN__ implement the target side of the
+communication protocol, and the _GDBN__ side is implemented in the
+_GDBN__ source file @file{remote.c}.  Normally, you can simply allow
+these subroutines to communicate, and ignore the details.  (If you're
+implementing your own stub file, you can still ignore the details: start
+with one of the existing stub files.  @file{sparc-stub.c} is the best
+organized, and therefore the easiest to read.)
+
+However, there may be occasions when you need to know something about
+the protocol---for example, if there is only one serial port to your
+target machine, you might want your program to do something special if
+it recognizes a packet meant for _GDBN__.
+
+@cindex protocol, _GDBN__ remote serial
+@cindex serial protocol, _GDBN__ remote
+@cindex remote serial protocol
+All _GDBN__ commands and responses (other than acknowledgements, which
+are single characters) are sent as a packet which includes a
+checksum.  A packet is introduced with the character @samp{$}, and ends
+with the character @samp{#} followed by a two-digit checksum:
+
+@example
+$@var{packet info}#@var{checksum}
+@end example
+
+@cindex checksum, for _GDBN__ remote
+@noindent
+@var{checksum} is computed as the modulo 256 sum of the @var{packet
+info} characters.
+
+When either the host or the target machine receives a packet, the first
+response expected is an acknowledgement: a single character, either
+@samp{+} (to indicate the package was received correctly) or @samp{-}
+(to request retransmission).
+
+The host (_GDBN__) sends commands, and the target (the debugging stub
+incorporated in your program) sends data in response.  The target also
+sends data when your program stops.
+
+Command packets are distinguished by their first character, which
+identifies the kind of command.
+
+These are the commands currently supported:
+
+@table @code
+@item g
+Requests the values of CPU registers.
+
+@item G
+Sets the values of CPU registers.
+
+@item m@var{addr},@var{count}
+Read @var{count} bytes at location @var{addr}.
+
+@item M@var{addr},@var{count}:@dots{}
+Write @var{count} bytes at location @var{addr}.
+
+@item c
+@itemx c@var{addr}
+Resume execution at the current address (or at @var{addr} if supplied).
+
+@item s
+@itemx s@var{addr}
+Step the target program for one instruction, from either the current
+program counter or from @var{addr} if supplied.
+
+@item k
+Kill the target program.
+
+@item ?
+Report the most recent signal.  To allow you to take advantage of the
+_GDBN__ signal handling commands, one of the functions of the debugging
+stub is to report CPU traps as the corresponding POSIX signal values.
+@end table
+
+@kindex set remotedebug
+@kindex show remotedebug
+@cindex packets, reporting on stdout
+@cindex serial connections, debugging
+If you have trouble with the serial connection, you can use the command
+@code{set remotedebug}.  This makes _GDBN__ report on all packets sent
+back and forth across the serial line to the remote machine.  The
+packet-debugging information is printed on the _GDBN__ standard output
+stream.  @code{set remotedebug off} turns it off, and @code{show
+remotedebug} will show you its current state.
+
+
 _if__(_I960__)
 @node i960-Nindy Remote
 @subsection _GDBN__ with a Remote i960 (Nindy)

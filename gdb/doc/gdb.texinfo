@@ -1,6 +1,6 @@
 _dnl__                                          -*-Texinfo-*-
 _dnl__ Copyright (c) 1988 1989 1990 1991 1992 Free Software Foundation, Inc.
-_dnl__ $Id$
+_dnl__ $Id$<>_dnl__
 \input texinfo      @c -*-texinfo-*-
 @c Copyright (c) 1988 1989 1990 1991 1992 Free Software Foundation, Inc.
 @c %**start of header 
@@ -321,12 +321,12 @@ Using the new command @code{target}, you can select at runtime whether
 you are debugging local files, local processes, standalone systems over
 a serial port, realtime systems over a TCP/IP connection, etc.  The
 command @code{load} can download programs into a remote system.  Serial
-stubs are available for Motorola 680x0 and Intel 80386 remote systems;
-GDB also supports debugging realtime processes running under
+stubs are available for Motorola 680x0, Intel 80386, and Sparc remote
+systems; GDB also supports debugging realtime processes running under
 VxWorks, using SunRPC Remote Procedure Calls over TCP/IP to talk to a
-debugger stub on the target system.  Internally, GDB now uses a
-function vector to mediate access to different targets; if you need to
-add your own support for a remote protocol, this makes it much easier.
+debugger stub on the target system.  Internally, GDB now uses a function
+vector to mediate access to different targets; if you need to add your
+own support for a remote protocol, this makes it much easier.
 
 @item Watchpoints
 GDB now sports watchpoints as well as breakpoints.  You can use a
@@ -6562,46 +6562,6 @@ not specific to any particular target system) which you can use if you
 write the remote stubs---the code that will run on the remote system to
 communicate with GDB.
 
-To use the GDB remote serial protocol, the program to be debugged on
-the remote machine needs to contain a debugging stub which talks to
-GDB over the serial line.  Several working remote stubs are
-distributed with GDB; see the @file{README} file in the GDB
-distribution for more information.
-
-For details of this communication protocol, see the comments in the
-GDB source file @file{remote.c}.
-
-To start remote debugging, first run GDB and specify as an executable file
-the program that is running in the remote machine.  This tells GDB how
-to find your program's symbols and the contents of its pure text.  Then
-establish communication using the @code{target remote} command with a device
-name as an argument.  For example:
-
-@example
-target remote /dev/ttyb
-@end example
-
-@noindent
-if the serial line is connected to the device named @file{/dev/ttyb}.  This
-will stop the remote machine if it is not already stopped.
-
-Now you can use all the usual commands to examine and change data and to
-step and continue the remote program.
-
-To resume the remote program and stop debugging it, use the @code{detach}
-command.
-
-@kindex set remotedebug
-@kindex show remotedebug
-@cindex packets, reporting on stdout
-@cindex serial connections, debugging
-If you have trouble with the serial connection, you can use the command
-@code{set remotedebug}.  This makes _GDBN__ report on all packets sent
-back and forth across the serial line to the remote machine.  The
-packet-debugging information is printed on the _GDBN__ standard output
-stream.  @code{set remotedebug off} turns it off, and @code{show
-remotedebug} will show you its current state.
-
 Other remote targets may be available in your
 configuration of GDB; use @code{help targets} to list them.
 
@@ -6887,7 +6847,7 @@ complaints from being suppressed.
 Displays how many symbol complaints _GDBN__ is permitted to produce.
 @end table
 
-By default, _GDBN__ is cautious, and asks what sometimes seem to be a
+By default, _GDBN__ is cautious, and asks what sometimes seems to be a
 lot of stupid questions to confirm certain commands.  For example, if
 you try to run a program which is already running:
 
