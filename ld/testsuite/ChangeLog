@@ -1,3 +1,7 @@
+2002-02-02  Alexandre Oliva  <aoliva@redhat.com>
+
+	* ld-sh/shared-1.d: Fix incorrect offsets.
+
 2002-02-01  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* ld-mmix/bpo-1.d, ld-mmix/bpo-1.s, ld-mmix/bpo-1m.d,

@@ -11,12 +11,12 @@
 # about how, when, where and which addends to use.  A DSO must have the
 # same value in the addend as in the data, so either can be used.
 
-Relocation section '\.rela\.text' at offset 0x32c contains 1 entries:
+Relocation section '\.rela\.text' at offset 0x328 contains 1 entries:
  Offset     Info    Type            Symbol's Value  Symbol's Name          Addend
-00000340  000000a5 R_SH_RELATIVE                                          00000344
+0000033c  000000a5 R_SH_RELATIVE                                          00000344
 
 Hex dump of section '\.rela\.text':
-  0x0000032c          00000344 000000a5 00000340 .*
+  0x00000328          00000340 000000a5 0000033c .*
 
 Hex dump of section '\.text':
-  0x00000338          00000344 00090009 00090009 .*
+  0x00000334          00000340 00090009 00090009 .*
