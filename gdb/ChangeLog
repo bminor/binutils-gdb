@@ -1,5 +1,7 @@
 2004-04-09  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/i386/i386aout.mt: Remove file.
+
 	* configure.tgt: Remove i[34567]86-*-go32*,
 	i[34567]86-*-msdosdjgpp*, i[34567]86-*-sco*, i[34567]86-*-sysv*
 	and i[34567]86-*-isc*.  Set gdb_target to i386 for
