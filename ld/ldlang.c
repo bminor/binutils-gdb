@@ -36,6 +36,10 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 static void print_statements PARAMS ((void));
 static void print_statement PARAMS ((lang_statement_union_type *,
 				      lang_output_section_statement_type *));
+static lang_statement_union_type *new_statement PARAMS ((enum statement_enum,
+							 size_t,
+							 lang_statement_list_type*));
+
 
 /* LOCALS */
 static struct obstack stat_obstack;
@@ -220,7 +224,7 @@ static
 lang_statement_union_type *
 new_statement (type, size, list)
      enum statement_enum type;
-     bfd_size_type size;
+     size_t size;
      lang_statement_list_type * list;
 {
   lang_statement_union_type *new = (lang_statement_union_type *)
