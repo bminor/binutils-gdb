@@ -53,13 +53,18 @@ extern CORE_ADDR skip_prologue PARAMS ((CORE_ADDR, int));
 #define BIG_BREAKPOINT { 0x12, 0x1f, 0xff, 0xff }
 #define LITTLE_BREAKPOINT { 0xff, 0xff, 0x1f, 0x12 }
 
-/* ??? This value may eventually be correct (if/when proper breakpoints
-   are added).  Until then no value is correct so leave as is and cope.  */
+/* Given the exposed pipeline, there isn't any one correct value.
+   However, this value must be 4.  GDB can't handle any other value (other than
+   zero).  See for example infrun.c:
+   "prev_pc != stop_pc - DECR_PC_AFTER_BREAK"  */
+/* FIXME */
 #define DECR_PC_AFTER_BREAK 8
 
 /* We don't have a reliable single step facility.
    ??? We do have a cycle single step facility, but that won't work.  */
 #define NO_SINGLE_STEP
+
+/* FIXME: Need to set STEP_SKIPS_DELAY.  */
 
 /* Given a pc value as defined by the hardware, return the real address.
    Remember that on the ARC blink contains that status register which
