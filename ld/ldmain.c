@@ -17,9 +17,6 @@ You should have received a copy of the GNU General Public License
 along with GLD; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* 
- * $Id$ 
- */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -248,10 +245,15 @@ main (argc, argv)
 
     if (config.make_executable == false && force_make_executable ==false) 
     {
-      printf("Link errors found, deleting executable %s\n",
-	     output_filename);
+
+      if (trace_files == true) 
+      {
+	einfo("%P: Link errors found, deleting executable `%s'\n",
+	      output_filename);
+      }
+
       if (output_bfd->iostream)
-       fclose(output_bfd->iostream);
+       fclose((FILE*)(output_bfd->iostream));
 
       unlink(output_filename);
       exit(1);
@@ -283,7 +285,7 @@ Q_read_entry_symbols (desc, entry)
 /*
  * turn this item into a reference 
  */
-static void
+ void
 refize(sp, nlist_p)
 ldsym_type *sp;
 asymbol **nlist_p;
@@ -321,16 +323,19 @@ definitions seen, undefined global symbols and pending commons.
 extern boolean relaxing;
 
 void
-Q_enter_global_ref (nlist_p)
-     asymbol **nlist_p;
-
+DEFUN(Q_enter_global_ref,(nlist_p, name),
+      asymbol **nlist_p AND /* pointer into symbol table from incoming bfd */
+      CONST char *name            /* name of symbol in linker table */ )
 {
   asymbol *sym = *nlist_p;
-  CONST char *name = sym->name;
-  ldsym_type *sp = ldsym_get (name);
+  ldsym_type *sp ;
+
+  /* Lookup the name from the incoming bfd's symbol table in the
+     linker's global symbol table */
+
 
   flagword this_symbol_flags = sym->flags;
-
+  sp = ldsym_get (name);
 
   ASSERT(sym->udata == 0);
 
@@ -462,6 +467,7 @@ lang_input_statement_type *entry;
 
   total_symbols_seen += entry->symbol_count;
   total_files_seen ++;
+if (entry->symbol_count)
   for (q = entry->asymbols; *q; q++)
   {
     asymbol *p = *q;
@@ -474,13 +480,12 @@ lang_input_statement_type *entry;
     {
       add_warning(p);
     }
-
     else   if (p->section == &bfd_und_section
 	       || (p->flags & BSF_GLOBAL) 
 	       || p->section == &bfd_com_section
 	       || (p->flags & BSF_CONSTRUCTOR))
     {
-      Q_enter_global_ref(q);
+      Q_enter_global_ref(q, p->name);
     }
 
 
@@ -753,6 +758,11 @@ struct lang_input_statement_struct *entry;
   boolean more_to_do = true;
   register struct lang_input_statement_struct *prev = 0;
 
+  if (entry->complained == false) {
+  einfo("%P: library %s has bad table of contents, rerun ranlib\n", 
+	entry->the_bfd->filename);
+  entry->complained = true;
+}
   while (more_to_do) {
 
     bfd *  archive = bfd_openr_next_archived_file(entry->the_bfd,0);
@@ -797,9 +807,10 @@ struct lang_input_statement_struct *entry;
   }
 }
 
-  /* ENTRY is an entry for a library member.
-     Its symbols have been read into core, but not entered.
-     Return nonzero if we ought to load this member.  */
+  /* ENTRY is an entry for a file inside an archive
+     Its symbols have been read into core, but not entered into the
+     linker ymbol table
+     Return nonzero if we ought to load this file */
 
 boolean
 subfile_wanted_p (entry)
@@ -814,10 +825,9 @@ struct lang_input_statement_struct *entry;
       /* If the symbol has an interesting definition, we could
 	 potentially want it.  */
 
-      if (p->flags & BSF_INDIRECT) {
-	/* Grab out the name we've indirected to, and keep the insides
-	   */
-	add_indirect(q);
+      if (p->flags & BSF_INDIRECT) 
+      {
+/**	add_indirect(q);*/
       }
 
       if (p->section == &bfd_com_section
