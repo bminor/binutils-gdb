@@ -121,20 +121,24 @@ typedef long int file_ptr;
    use gcc's "long long" type.  Otherwise, BFD_HOST_64_BIT must be
    defined above.  */
 
+#ifndef BFD_HOST_64_BIT
+# if BFD_HOST_64BIT_LONG
+#  define BFD_HOST_64_BIT long
+#  define BFD_HOST_U_64_BIT unsigned long
+# else
+#  ifdef __GNUC__
+#   if __GNUC__ >= 2
+#    define BFD_HOST_64_BIT long long
+#    define BFD_HOST_U_64_BIT unsigned long long
+#   endif /* __GNUC__ >= 2 */
+#  endif /* ! defined (__GNUC__) */
+# endif /* ! BFD_HOST_64BIT_LONG */
+#endif /* ! defined (BFD_HOST_64_BIT) */
+
 #ifdef BFD64
 
 #ifndef BFD_HOST_64_BIT
-#if BFD_HOST_64BIT_LONG
-#define BFD_HOST_64_BIT long
-#define BFD_HOST_U_64_BIT unsigned long
-#else
-#ifdef __GNUC__
-#define BFD_HOST_64_BIT long long
-#define BFD_HOST_U_64_BIT unsigned long long
-#else /* ! defined (__GNUC__) */
  #error No 64 bit integer type available
-#endif /* ! defined (__GNUC__) */
-#endif /* ! BFD_HOST_64BIT_LONG */
 #endif /* ! defined (BFD_HOST_64_BIT) */
 
 typedef BFD_HOST_U_64_BIT bfd_vma;
@@ -175,7 +179,9 @@ typedef unsigned long bfd_size_type;
 /* Print a bfd_vma x on stream s.  */
 #define fprintf_vma(s,x) fprintf(s, "%08lx", x)
 #define sprintf_vma(s,x) sprintf(s, "%08lx", x)
+
 #endif /* not BFD64  */
+
 #define printf_vma(x) fprintf_vma(stdout,x)
 
 typedef unsigned int flagword;	/* 32 bits of flags */

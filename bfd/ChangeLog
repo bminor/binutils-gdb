@@ -1,5 +1,11 @@
 Sun Dec  6 16:30:33 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* bfd-in.h: Always define BFD_HOST_64_BIT and BFD_HOST_U_64_BIT if
+	possible, rather than only if BFD64.
+	* elflink.h (compute_bucket_count): Just check BFD_HOST_U_64_BIT,
+	not __GNUC__.
+	* bfd-in2.h: Rebuild.
+
 	* srec.c (srec_set_section_contents): Correct test to avoid
 	switching to 4 byte addresses after seeing a second section which
 	requires 3 byte addresses.  From Joel Schantz

@@ -2240,13 +2240,10 @@ compute_bucket_count (info)
   elf_link_hash_traverse (elf_hash_table (info),
 			  elf_collect_hash_codes, &hashcodesp);
 
-/* We have a problem here.  The following code to optimize the table size
-   requires an integer type with more the 32 bits.  If BFD_HOST_U_64_BIT
-   is set or GCC 2 is used we know about such a type.  */
-#if defined BFD_HOST_U_64_BIT || __GNUC__ >= 2
-# ifndef BFD_HOST_U_64_BIT
-#  define BFD_HOST_U_64_BIT	unsigned long long int
-# endif
+/* We have a problem here.  The following code to optimize the table
+   size requires an integer type with more the 32 bits.  If
+   BFD_HOST_U_64_BIT is set we know about such a type.  */
+#ifdef BFD_HOST_U_64_BIT
   if (info->optimize == true)
     {
       unsigned long int nsyms = hashcodesp - hashcodes;
@@ -2336,7 +2333,7 @@ compute_bucket_count (info)
       free (counts);
     }
   else
-#endif
+#endif /* defined (BFD_HOST_U_64_BIT) */
     {
       /* This is the fallback solution if no 64bit type is available or if we
 	 are not supposed to spend much time on optimizations.  We select the
