@@ -1,5 +1,12 @@
 2004-09-02  Andrew Cagney  <cagney@gnu.org>
 
+	* config/powerpc/tm-ppcle-sim.h: Delete.
+	* config/powerpc/tm-ppcle-eabi.h: Delete.
+	* config/powerpc/tm-nbsd.h: Delete.
+	* config/powerpc/nbsd.mt (TM_FILE): Set to tm-ppc-eabi.h.
+	* config/djgpp/fnchange.lst: Do not rename tm-ppcle-sim.h or
+	tm-ppcle-eabi.h.
+
 	* config/i386/nto.mh (NAT_FILE): Delete.
 	* config/i386/nm-nto.h: Delete.
 
