@@ -1343,7 +1343,7 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
   if (hashp != NULL && *hashp != NULL)
     {
       h = *hashp;
-      BFD_ASSERT (strcmp (h->name, name) == 0);
+      BFD_ASSERT (strcmp (h->root.string, name) == 0);
     }
   else
     {
