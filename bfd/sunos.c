@@ -271,11 +271,8 @@ sunos4_write_object_contents (abfd)
     /* This is not strictly true, but will probably do for the default
 	case.  FIXME.  
 	*/
-    /* Also the size has already had the sizeof the header taken into
-       account. It may be wrong for the application to have to do this
-       (though this is what sizeof_headers is for), but it's the way
-       it is, so that's the way it will stay for the moment.*/
-    execp->a_text = obj_textsec (abfd)->size ; /*+ sizeof(struct exec);*/
+
+    execp->a_text = obj_textsec (abfd)->size + EXEC_BYTES_SIZE;
     N_SET_MAGIC (*execp, ZMAGIC);
   } else if (abfd->flags & WP_TEXT) {
     N_SET_MAGIC (*execp, NMAGIC);

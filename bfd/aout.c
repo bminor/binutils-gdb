@@ -201,6 +201,11 @@ some_aout_object_p (abfd, callback_to_real_object_p)
   obj_bsssec (abfd)->size = execp->a_bss;
   obj_textsec (abfd)->size = execp->a_text;
 
+  if (abfd->flags & D_PAGED) {
+    obj_textsec (abfd)->size -=  EXEC_BYTES_SIZE;
+  }
+    
+
   obj_textsec (abfd)->flags = (execp->a_trsize != 0 ?
                                (SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_HAS_CONTENTS) :
                                (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS));
@@ -413,21 +418,23 @@ aout_set_section_contents (abfd, section, location, offset, count)
 	obj_textsec(abfd)->filepos = sizeof(struct exec);
 	obj_textsec(abfd)->size = align_power(obj_textsec(abfd)->size,
 					      obj_textsec(abfd)->alignment_power);
-	obj_datasec(abfd)->filepos =  obj_textsec (abfd)->size;
+	obj_datasec(abfd)->filepos =  obj_textsec (abfd)->size + EXEC_BYTES_SIZE;
 	obj_datasec(abfd)->size = align_power(obj_datasec(abfd)->size,
 					      obj_datasec(abfd)->alignment_power);
 
+
       }
   /* regardless, once we know what we're doing, we might as well get going */
-  if (section != obj_bsssec(abfd)) {
-    bfd_seek (abfd, section->filepos + offset, SEEK_SET);
+  if (section != obj_bsssec(abfd)) 
+      {
+	bfd_seek (abfd, section->filepos + offset, SEEK_SET);
 
-    if (count) {
-      return (bfd_write ((PTR)location, 1, count, abfd) == count) ?
-	true : false;
-    }
-    return false;
-  }
+	if (count) {
+	  return (bfd_write ((PTR)location, 1, count, abfd) == count) ?
+	    true : false;
+	}
+	return false;
+      }
   return true;
 }
 
