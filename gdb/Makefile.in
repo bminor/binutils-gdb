@@ -195,7 +195,7 @@ FLAGS_TO_PASS = \
 SFILES_MAINDIR = \
 	 blockframe.c breakpoint.c command.c core.c demangle.c \
 	 environ.c eval.c expprint.c findvar.c infcmd.c inflow.c infrun.c \
-	 main.c core.c printcmd.c gdbtypes.c \
+	 main.c printcmd.c gdbtypes.c \
 	 remote.c source.c stack.c symmisc.c symtab.c symfile.c \
 	 utils.c valarith.c valops.c valprint.c values.c c-exp.y m2-exp.y \
 	 mem-break.c target.c \
