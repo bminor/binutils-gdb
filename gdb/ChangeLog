@@ -1,3 +1,8 @@
+2004-11-12  Mark Kettenis  <kettenis@jive.nl>
+
+	* tui/tui-io.c: Don't include "terminal.h".
+	* Makefile.in (tui-io.o): Update dependencies.
+
 2004-11-12  Kei Sakamoto  <sakamoto.kei@renesas.com>
 
 	* Makefile.in (m32r-linux-tdep.o): Update dependencies.

@@ -23,7 +23,6 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
-#include "terminal.h"
 #include "target.h"
 #include "event-loop.h"
 #include "event-top.h"

@@ -3036,7 +3036,7 @@ tui-interp.o: $(srcdir)/tui/tui-interp.c $(defs_h) $(interps_h) $(top_h) \
 	$(event_top_h) $(event_loop_h) $(ui_out_h) $(cli_out_h) \
 	$(tui_data_h) $(readline_h) $(tui_win_h) $(tui_h) $(tui_io_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-interp.c
-tui-io.o: $(srcdir)/tui/tui-io.c $(defs_h) $(terminal_h) $(target_h) \
+tui-io.o: $(srcdir)/tui/tui-io.c $(defs_h) $(target_h) \
 	$(event_loop_h) $(event_top_h) $(command_h) $(top_h) $(tui_h) \
 	$(tui_data_h) $(tui_io_h) $(tui_command_h) $(tui_win_h) \
 	$(tui_wingeneral_h) $(tui_file_h) $(ui_out_h) $(cli_out_h) \
