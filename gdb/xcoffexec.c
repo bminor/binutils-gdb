@@ -392,27 +392,28 @@ struct stat *vip;
 	} else if (vp->member[0]) {
 	  /* no match, and member present, not this one. */
 	  continue;
-	} else {
+	} else if (vip) {
+	  /* No match, and no member. need to be sure.
+	     If we were given a stat structure, see if the open file
+	     underlying this BFD matches.  */
 	  struct stat si;
 	  FILE *io;
 	  
-	  /*
-	   * no match, and no member. need to be sure.
-	   */
 	  io = bfd_cache_lookup(objfile->obfd);
 	  if (!io)
 	    fatal("cannot find BFD's iostream for sym");
-	  /*
-	   * see if we are referring to the same file
-	   */
+
+	  /* see if we are referring to the same file */
 	  if (fstat(fileno(io), &si) < 0)
 	    fatal("cannot fstat BFD for sym");
 	  
-	  if (vip && (si.st_dev != vip->st_dev
+	  if ((si.st_dev != vip->st_dev
 	      || si.st_ino != vip->st_ino))
 	    continue;
+	} else {
+          continue;	/* No stat struct: no way to match it */
 	}
-	
+
 	if (vp->tstart != old_start) {
 
 	  /* Once we find a relocation base address for one of the symtabs

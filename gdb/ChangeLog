@@ -5,8 +5,6 @@ Wed Nov 18 15:05:45 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 Wed Nov 18 14:39:57 1992  Stu Grossman  (grossman at cygnus.com)
 
-	* infcmd.c (set_environment_command):  Make set env FOO x=y work.
-	Fix from maj@lucid.com.
 	* remote-udi.c (udi_open):  Reset vars so that user can re-run
 	programs without leaving GDB.
 	* (many routines):  Slightly improve error handling.
@@ -150,6 +148,12 @@ Sun Nov 15 09:22:09 1992  Fred Fish  (fnf@cygnus.com)
 	* expprint.c (print_subexp):  Add OP_BOOL case.	
 	**** end-sanitize-chill ****
 
+Fri Nov 13 20:36:28 1992  John Gilmore  (gnu@cygnus.com)
+
+	* infcmd.c (set_environment_command):  Avoid skipping first
+	char of env value if an '=' appears in it.  Bug report and fix
+	by Mark Jungerman, <maj@lucid.com>.
+
 Fri Nov 13 20:24:10 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* infcmd.c (step_over_calls):  Improve comments.
@@ -158,6 +162,14 @@ Fri Nov 13 20:24:10 1992  Stu Grossman  (grossman at cygnus.com)
 	* (find_pc_line):  General cleanups, efficiency improvements.
 	Also, don't return garbage when some line info exists, but there
 	was no good match.
+
+Thu Nov  5 23:04:38 1992 Rob Ryan (rr2b@andrew.cmu.edu)
+
+        * xcoffexec.c (vmap_symtab): fixed a bug where if a object has no
+        member, and the stat pointer passed to vmap_symtab was NULL, the
+        wrong vmap entries would be modified.  Fixes behavior where
+        attempting to load symbols for a module with no member would mess
+        up already read in symbols.
 
 Wed Nov 11 17:09:17 1992  Stu Grossman  (grossman at cygnus.com)
 
