@@ -1,5 +1,5 @@
 /* Everything about breakpoints, for GDB.
-   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997
+   Copyright 1986, 87, 89, 90, 91, 92, 93, 94, 95, 96, 97, 1998
              Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -71,7 +71,7 @@ ignore_command PARAMS ((char *, int));
 static int
 breakpoint_re_set_one PARAMS ((char *));
 
-static void
+void
 delete_command PARAMS ((char *, int));
 
 static void
@@ -98,7 +98,7 @@ break_command_1 PARAMS ((char *, int, int));
 static void
 mention PARAMS ((struct breakpoint *));
 
-static struct breakpoint *
+struct breakpoint *
 set_raw_breakpoint PARAMS ((struct symtab_and_line));
 
 static void
@@ -131,7 +131,7 @@ condition_command PARAMS ((char *, int));
 static int
 get_number PARAMS ((char **));
 
-static void
+void
 set_breakpoint_count PARAMS ((int));
 
 static int
@@ -221,11 +221,11 @@ struct breakpoint *breakpoint_chain;
 
 /* Number of last breakpoint made.  */
 
-static int breakpoint_count;
+int breakpoint_count;
 
 /* Set breakpoint count to NUM.  */
 
-static void
+void
 set_breakpoint_count (num)
      int num;
 {
@@ -2104,7 +2104,7 @@ check_duplicates (address, section)
    error(); otherwise it leaves a bogus breakpoint on the chain.  Validate
    your arguments BEFORE calling this routine!  */
 
-static struct breakpoint *
+struct breakpoint *
 set_raw_breakpoint (sal)
      struct symtab_and_line sal;
 {
@@ -2627,8 +2627,7 @@ resolve_sal_pc (sal)
 
   if (sal->pc == 0 && sal->symtab != NULL)
     {
-      pc = find_line_pc (sal->symtab, sal->line);
-      if (pc == 0)
+      if (!find_line_pc (sal->symtab, sal->line, &pc))
 	error ("No line %d in file \"%s\".",
 	       sal->line, sal->symtab->filename);
       sal->pc = pc;
@@ -2642,12 +2641,15 @@ resolve_sal_pc (sal)
       int                 index;
 
       bv  = blockvector_for_pc_sect (sal->pc, 0, &index, sal->symtab);
-      b   = BLOCKVECTOR_BLOCK (bv, index);
-      sym = block_function (b);
-      if (sym != NULL)
+      if (bv != NULL)
 	{
-	  fixup_symbol_section (sym, sal->symtab->objfile);
-	  sal->section = SYMBOL_BFD_SECTION (block_function (b));
+	  b   = BLOCKVECTOR_BLOCK (bv, index);
+	  sym = block_function (b);
+	  if (sym != NULL)
+	    {
+	      fixup_symbol_section (sym, sal->symtab->objfile);
+	      sal->section = SYMBOL_BFD_SECTION (block_function (b));
+	    }
 	}
     }
 }
@@ -3475,7 +3477,7 @@ delete_breakpoint (bpt)
   free ((PTR)bpt);
 }
 
-static void
+void
 delete_command (arg, from_tty)
      char *arg;
      int from_tty;
@@ -3484,15 +3486,26 @@ delete_command (arg, from_tty)
 
   if (arg == 0)
     {
+      int breaks_to_delete = 0;
+
+      /* Delete all breakpoints if no argument.
+	 Do not delete internal or call-dummy breakpoints, these
+	 have to be deleted with an explicit breakpoint number argument.  */
+      ALL_BREAKPOINTS (b) 
+	{
+	  if (b->type != bp_call_dummy && b->number >= 0)
+	    breaks_to_delete = 1;
+	}
+
       /* Ask user only if there are some breakpoints to delete.  */
       if (!from_tty
-	  || (breakpoint_chain && query ("Delete all breakpoints? ")))
+	  || (breaks_to_delete && query ("Delete all breakpoints? ")))
 	{
-	  /* No arg; clear all breakpoints.  */
-	  ALL_BREAKPOINTS_SAFE(b, temp) 
-	    /* do not delete call-dummy breakpoint unles explicitly named! */
-	    if (b->type != bp_call_dummy)
-	      delete_breakpoint (b);
+	  ALL_BREAKPOINTS_SAFE (b, temp) 
+	    {
+	      if (b->type != bp_call_dummy && b->number >= 0)
+		delete_breakpoint (b);
+	    }
 	}
     }
   else
@@ -3927,7 +3940,7 @@ void
 enable_breakpoint (bpt)
      struct breakpoint *bpt;
 {
-  do_enable_breakpoint (bpt, donttouch);
+  do_enable_breakpoint (bpt, bpt->disposition);
 }
 
 /* The enable command enables the specified breakpoints (or all defined
@@ -4062,6 +4075,8 @@ With no subcommand, breakpoints are enabled until you command otherwise.\n\
 This is used to cancel the effect of the \"disable\" command.\n\
 With a subcommand you can enable temporarily.",
 		  &enablelist, "enable ", 1, &cmdlist);
+
+  add_com_alias ("en", "enable", class_breakpoint, 1);
 
   add_abbrev_prefix_cmd ("breakpoints", class_breakpoint, enable_command,
 		  "Enable some breakpoints.\n\

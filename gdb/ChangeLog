@@ -1,3 +1,15 @@
+Wed Jul 15 11:51:33 1998  Keith Seitz  <keiths@cygnus.com>
+
+	* main.c (main): Fix violations of GNU coding standard.
+
+	* breakpoint.c: Export delete_command.
+
+	* infcmd.c: Export continue_command, stepi_command, and nexti_command.
+
+	* Makefile.in: Add target for v850ice.o.
+
+	* configure.tgt: Add cygwin32 dependencies for v850 ice.
+	
 Wed Jul 15 10:58:29 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* tracepoint.c (set_raw_tracepoint): Cope with symbols that do not
