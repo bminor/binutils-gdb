@@ -1,5 +1,9 @@
 2002-11-11  Andrew Cagney  <ac131313@redhat.com>
 
+	* blockframe.c (sigtramp_saved_pc): Fix tipo. void_func_ptr
+	instead of void_code_ptr.
+	(sigtramp_saved_pc): Ditto.
+
 	* x86-64-tdep.c (i386_fp_regnum_p): Copy i386-tdep.c's
 	i386_fp_regnum_p.
 
