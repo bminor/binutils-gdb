@@ -30,7 +30,7 @@ struct expression;
 /* enum exp_opcode;     ANSI's `wisdom' didn't include forward enum decls. */
 
 /* This used to be included to configure GDB for one or more specific
-   languages.  Now it is shortcutted to configure for all of them.  FIXME.  */
+   languages.  Now it is left out to configure for all of them.  FIXME.  */
 /* #include "lang_def.h" */
 #define	_LANG_c
 #define	_LANG_m2
@@ -255,7 +255,7 @@ struct language_defn
    its own language and we should keep track of that regardless of the
    language when symbols are read.  If we want some manual setting for
    the language of symbol files (e.g. detecting when ".c" files are
-   C++), it should be a seprate setting from the current_language.  */
+   C++), it should be a separate setting from the current_language.  */
 
 extern const struct language_defn *current_language;
 

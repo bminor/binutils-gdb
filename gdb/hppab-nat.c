@@ -182,7 +182,7 @@ store_inferior_registers (int regno)
 
    This call may fail if the given addresses are not valid in the inferior
    process.  This most often happens when restarting a program which
-   as watchpoints inserted on heap or stack memory.  */
+   has watchpoints inserted on heap or stack memory.  */
 
 #define PT_PROT 21
 

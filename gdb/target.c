@@ -2076,7 +2076,7 @@ store_waitstatus (struct target_waitstatus *ourstatus, int hoststatus)
    signal.  The idea is to keep these circumstances limited so that
    users (and scripts) develop portable habits.  For comparison,
    POSIX.2 `kill' requires that 1,2,3,6,9,14, and 15 work (and using a
-   numeric signal at all is obscelescent.  We are slightly more
+   numeric signal at all is obsolescent.  We are slightly more
    lenient and allow 1-15 which should match host signal numbers on
    most systems.  Use of symbolic signal names is strongly encouraged.  */
 

@@ -1132,8 +1132,8 @@ mips16_next_pc (CORE_ADDR pc)
   return pc;
 }				/* mips16_next_pc */
 
-/* The mips_next_pc function supports single_tep when the remote target monitor or
-   stub is not developed enough to so a single_step.
+/* The mips_next_pc function supports single_step when the remote 
+   target monitor or stub is not developed enough to do a single_step.
    It works by decoding the current instruction and predicting where a branch
    will go. This isnt hard because all the data is available.
    The MIPS32 and MIPS16 variants are quite different

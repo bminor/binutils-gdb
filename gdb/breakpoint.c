@@ -1266,7 +1266,7 @@ remove_breakpoint (struct breakpoint *b, insertion_state_t is)
 	  /* Check to see if breakpoint is in an overlay section;
 	     if so, we should remove the breakpoint at the LMA address.
 	     If that is not equal to the raw address, then we should 
-	     presumable remove the breakpoint there as well.  */
+	     presumably remove the breakpoint there as well.  */
 	  if (overlay_debugging && b->section &&
 	      section_is_overlay (b->section))
 	    {
@@ -2780,7 +2780,7 @@ bpstat_what (bpstat bs)
      back and decide something of a lower priority is better.  The
      ordering is:
 
-     kc   < clr sgl shl slr sn sr ss ts
+     kc   < clr sgl shl shlr slr sn sr ss ts
      sgl  < clrs shl shlr slr sn sr ss ts
      slr  < err shl shlr sn sr ss ts
      clr  < clrs err shl shlr sn sr ss ts

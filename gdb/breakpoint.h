@@ -280,17 +280,17 @@ struct breakpoint
     char *dll_pathname;
 
     /* Filename of a dll whose state change (e.g., load or unload)
-       triggered this catchpoint.  This field is only vaid immediately
+       triggered this catchpoint.  This field is only valid immediately
        after this catchpoint has triggered.  */
     char *triggered_dll_pathname;
 
     /* Process id of a child process whose forking triggered this
-       catchpoint.  This field is only vaid immediately after this
+       catchpoint.  This field is only valid immediately after this
        catchpoint has triggered.  */
     int forked_inferior_pid;
 
     /* Filename of a program whose exec triggered this catchpoint.
-       This field is only vaid immediately after this catchpoint has
+       This field is only valid immediately after this catchpoint has
        triggered.  */
     char *exec_pathname;
 
@@ -620,7 +620,7 @@ extern void set_longjmp_resume_breakpoint (CORE_ADDR, struct frame_info *);
    cause the inferior to stop in places where this frame is visible,
    and that can cause execution control to become very confused.
 
-   Note that if a user sets breakpoints in an interactively call
+   Note that if a user sets breakpoints in an interactively called
    function, the call_disabled watchpoints will have been reenabled
    when the first such breakpoint is reached.  However, on targets
    that are unable to unwind through the call dummy frame, watches

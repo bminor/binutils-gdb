@@ -117,7 +117,7 @@ struct gdbarch
      verify_gdbarch(): Confirm that the target updated the field
      correctly.
 
-     gdbarch_dump(): Add a fprintf_unfiltered call to so that the new
+     gdbarch_dump(): Add a fprintf_unfiltered call so that the new
      field is dumped out
 
      ``startup_gdbarch()'': Append an initial value to the static

@@ -432,7 +432,7 @@ extern void mips_print_extra_frame_info (struct frame_info *frame);
    multiple functions with the same SP.  But on the MIPS we can't do
    that since the PC is not stored in the same part of the frame every
    time.  This does not seem to be a very clever way to set up frames,
-   but there is nothing we can do about that).  */
+   but there is nothing we can do about that.  */
 
 #define SETUP_ARBITRARY_FRAME(argc, argv) setup_arbitrary_frame (argc, argv)
 extern struct frame_info *setup_arbitrary_frame (int, CORE_ADDR *);

@@ -1108,7 +1108,7 @@ start_remote (void)
 
   /* Always go on waiting for the target, regardless of the mode. */
   /* FIXME: cagney/1999-09-23: At present it isn't possible to
-     indicate th wait_for_inferior that a target should timeout if
+     indicate to wait_for_inferior that a target should timeout if
      nothing is returned (instead of just blocking).  Because of this,
      targets expecting an immediate response need to, internally, set
      things up so that the target_wait() is forced to eventually

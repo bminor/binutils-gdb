@@ -2143,7 +2143,7 @@ cashier_psymtab (struct partial_symtab *pst)
    it is not called for subsidiary files such as .h files.
 
    Return value is 1 if we blew away the environment, 0 if not.
-   FIXME.  The return valu appears to never be used.
+   FIXME.  The return value appears to never be used.
 
    FIXME.  I think this is not the best way to do this.  We should
    work on being gentler to the environment while still cleaning up

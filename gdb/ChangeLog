@@ -1,3 +1,11 @@
+2000-10-26  David B. Anderson <davea@sgi.com>
+
+	* breakpoint.c breakpoint.h hppab-nat.c infrun.c
+	language.h mcore-tdep.c mips-tdep.c symfile.c symtab.c
+	symtab.h target.c tm-mips.h xm-sun4sol2.h: Corrected
+	spelling errors in comments.
+	* gdbarch.c gdbarch.sh: Removed word from comment.
+
 2000-10-26  Kevin Buettner  <kevinb@redhat.com>
 
 	* sun3-nat.c (fetch_core_registers): Protoize.

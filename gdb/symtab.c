@@ -1569,7 +1569,7 @@ done:
 }
 #endif /* 0 */
 
-/* Find the source file and line number for a given PC value and section.
+/* Find the source file and line number for a given PC value and SECTION.
    Return a structure containing a symtab pointer, a line number,
    and a pc range for the entire source line.
    The value's .pc field is NOT the specified pc.

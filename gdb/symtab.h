@@ -761,7 +761,7 @@ struct partial_symbol
 
 
 /* Source-file information.  This describes the relation between source files,
-   ine numbers and addresses in the program text.  */
+   line numbers and addresses in the program text.  */
 
 struct sourcevector
   {
@@ -1417,7 +1417,7 @@ extern struct partial_symbol *fixup_psymbol_section (struct partial_symbol
 /* Symbol searching */
 
 /* When using search_symbols, a list of the following structs is returned.
-   Callers must free the search list using free_symbol_search! */
+   Callers must free the search list using free_search_symbols! */
 struct symbol_search
   {
     /* The block in which the match was found. Could be, for example,
