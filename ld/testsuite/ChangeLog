@@ -1,3 +1,8 @@
+2004-11-08  Inderpreet Singh   <inderpreetb@nioda.hcltech.com>
+	    Vineet Sharma      <vineets@noida.hcltech.com>
+
+	* ld-maxq: New directory.  Contains tests for the new maxq port.
+
 2004-11-04  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* ld-elf/merge.d: xfail crisv32-*-*.

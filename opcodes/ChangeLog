@@ -1,3 +1,16 @@
+2004-11-08  Inderpreet Singh   <inderpreetb@nioda.hcltech.com>
+	    Vineet Sharma      <vineets@noida.hcltech.com>
+
+	* maxq-dis.c: New file.
+	* disassemble.c (ARCH_maxq): Define.
+ 	(disassembler): Add 'print_insn_maxq_little' for handling maxq
+	instructions..
+	* configure.in: Add case for bfd_maxq_arch.
+	* configure: Regenerate.
+	* Makefile.am: Add support for maxq-dis.c
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+
 2004-11-05  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* crx-opc.c (crx_optab): Rename 'arg_icr' to 'arg_idxr' for Index register
