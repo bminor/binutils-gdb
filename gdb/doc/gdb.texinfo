@@ -1086,7 +1086,6 @@ values, you can use @samp{show} with no arguments; you may also use
 
 @kindex show version
 @item show version
-@c FIXME: chgd to "show version" from "info".  Verify John doing same to GDBv4.
 Show what version of _GDBN__ is running.  You should include this
 information in _GDBN__ bug-reports.  If multiple versions of _GDBN__ are
 in use at your site, you may occasionally want to make sure what version
@@ -2346,7 +2345,7 @@ for @samp{backtrace}.
 
 Each line in the backtrace shows the frame number and the function name.
 The program counter value is also shown---unless you use @samp{set
-addressprint off}.  The backtrace also shows the source file name and
+print address off}.  The backtrace also shows the source file name and
 line number, as well as the arguments to the function.  The program
 counter value is omitted if it is at the beginning of the code for that
 line number.
@@ -2667,8 +2666,8 @@ Reset the source path to empty again.  This requires confirmation.
 The @samp{directory} command will not repeat if you press @key{RET} a
 second time after executing it once.
 
-@item info directories
-@kindex info directories
+@item show directories
+@kindex show directories
 Print the source path: show which directories it contains.
 @end table
 
@@ -3185,17 +3184,17 @@ This limit also applies to the display of strings.
 Display the number of elements of a large array that _GDBN__ will print
 before losing patience.
 
-@item set arrayprint
-@itemx set arrayprint on
-@kindex set arrayprint
+@item set print array
+@itemx set print array on
+@kindex set print array
 _GDBN__ will pretty print arrays.  This format is more convenient to read,
 but uses more space.  The default is off.
 
-@item set arrayprint off.
+@item set print array off.
 Return to compressed format for arrays.
 
-@item show arrayprint
-@kindex show arrayprint
+@item show print array
+@kindex show print array
 Show whether compressed or pretty format is selected for displaying
 arrays. 
 
@@ -3222,33 +3221,33 @@ The default is off.
 Show whether C++ names in assembly listings will be printed in mangled
 or demangled form.
 
-@item set vtblprint 
-@itemx set vtblprint on 
-@kindex set vtblprint
+@item set print vtbl 
+@itemx set print vtbl on 
+@kindex set print vtbl
 Pretty print C++ virtual function tables.  The default is off.
 
-@item set vtblprint off
+@item set print vtbl off
 Do not pretty print C++ virtual function tables.
 
-@item show vtblprint
-@kindex show vtblprint
+@item show print vtbl
+@kindex show print vtbl
 Show whether C++ virtual function tables are pretty printed, or not.
 
-@item set addressprint
-@item set addressprint on
-@kindex set addressprint
+@item set print address
+@item set print address on
+@kindex set print address
 _GDBN__ will print memory addresses in stack traces, structure values, pointer
 values, breakpoints, etc.  The default is on.
 
-@item set addressprint off
+@item set print address off
 Do not print addresses.
 
-@item show addressprint
-@kindex show addressprint
+@item show print address
+@kindex show print address
 Show whether or not addresses are to be printed.
 
-@item set prettyprint on
-@kindex set prettyprint
+@item set print pretty on
+@kindex set print pretty
 Cause _GDBN__ to print structures in an indented format with one member per
 line, like this:
 
@@ -3263,7 +3262,7 @@ $1 = @{
 @}
 @end example
 
-@item set prettyprint off
+@item set print pretty off
 Cause _GDBN__ to print structures in a compact format, like this:
 
 @smallexample
@@ -3274,20 +3273,20 @@ $1 = @{next = 0x0, flags = @{sweet = 1, sour = 1@}, meat \
 @noindent
 This is the default format.
 
-@item show prettyprint
-@kindex show prettyprint
+@item show print pretty
+@kindex show print pretty
 Show which format _GDBN__ will use to print structures.
 
-@item set unionprint on
-@kindex set unionprint
+@item set print union on
+@kindex set print union
 Tell _GDBN__ to print unions which are contained in structures.  This is the
 default setting.
 
-@item set unionprint off
+@item set print union off
 Tell _GDBN__ not to print unions which are contained in structures.
 
-@item show unionprint
-@kindex show unionprint
+@item show print union
+@kindex show print union
 Ask _GDBN__ whether or not it will print unions which are contained in
 structures. 
 
@@ -3310,14 +3309,14 @@ struct thing foo = @{Tree, @{Acorn@}@};
 @end smallexample
 
 @noindent
-with @samp{set unionprint on} in effect @samp{p foo} would print
+with @samp{set print union on} in effect @samp{p foo} would print
 
 @smallexample
 $1 = @{it = Tree, form = @{tree = Acorn, bug = Cocoon@}@}
 @end smallexample
 
 @noindent
-and with @samp{set unionprint off} in effect it would print
+and with @samp{set print union off} in effect it would print
 
 @smallexample
 $1 = @{it = Tree, form = @{...@}@}
@@ -3382,19 +3381,16 @@ then the value recorded in the value history by the @samp{print} command
 remains 4 even though the value of @code{x} has changed.
 
 @table @code
-@kindex info values
-@item info values
-@itemx info history
-@kindex info history
-These two commands are synonymous.  Either form will print the last ten
-values in the value history, with their item numbers.  This is like
-@samp{p@ $$9} repeated ten times, except that @samp{info values} does
-not change the history.
+@kindex show values
+@item show values
+Print the last ten values in the value history, with their item numbers.
+This is like @samp{p@ $$9} repeated ten times, except that @samp{show
+values} does not change the history.
 
-@item info values @var{n}
+@item show values @var{n}
 Print ten history values centered on history item number @var{n}.
 
-@item info values +
+@item show values +
 Print ten history values just after the values last printed.
 @end table
 
@@ -3433,8 +3429,8 @@ that variable already has a value of a different type.  The convenience
 variable, when used as an expression, has the type of its current value.
 
 @table @code
-@item info convenience
-@kindex info convenience
+@item show convenience
+@kindex show convenience
 Print a list of convenience variables used so far, and their values.
 Abbreviated @samp{i con}.
 @end table
@@ -3943,7 +3939,7 @@ _GDBN__, the @samp{load} command may be available.  Where it exists, it
 is meant to make @var{filename} (an executable) available for debugging
 on the remote system---by downloading, or dynamic linking, for example.
 @samp{load} also records @var{filename}'s symbol table in _GDBN__, like
-the @samp{add-syms} command.
+the @samp{add-symbol-file} command.
 
 If @samp{load} is not available on your _GDBN__, attempting to execute
 it gets the error message ``@code{You can't do that when your target is
@@ -3963,10 +3959,10 @@ _fi__(_I960__)
 
 @samp{load} will not repeat if you press @key{RET} again after using it.
 
-@item add-syms @var{filename} @var{address}
-@kindex add-syms
+@item add-symbol-file @var{filename} @var{address}
+@kindex add-symbol-file
 @cindex dynamic linking
-The @samp{add-syms} command reads additional symbol table information
+The @samp{add-symbol-file} command reads additional symbol table information
 from the file @var{filename}.  You would use this command when that file
 has been dynamically loaded (by some other means) into the program that
 is running.  @var{address} should be the memory address at which the
@@ -3974,23 +3970,21 @@ file has been loaded; _GDBN__ cannot figure this out for itself.
 
 The symbol table of the file @var{filename} is added to the symbol table
 originally read with the @samp{symbol-file} command.  You can use the
-@samp{add-syms} command any number of times; the new symbol data thus
+@samp{add-symbol-file} command any number of times; the new symbol data thus
 read keeps adding to the old.  To discard all old symbol data instead,
 use the @samp{symbol-file} command. 
 
-@samp{add-syms} will not repeat if you press @key{RET} after using it.
+@samp{add-symbol-file} will not repeat if you press @key{RET} after using it.
 
 @item info files
 @itemx info target
 @kindex info files
 @kindex info target
 @samp{info files} and @samp{info target} are synonymous; both print the
-current targets (@pxref{Targets}), including the names of the
-executable and core dump files currently in use by _GDBN__, and the files
-from which symbols were loaded.
-
-Beware: the similar command @samp{info targets} lists all possible
-targets rather than current ones.
+current targets (@pxref{Targets}), including the names of the executable
+and core dump files currently in use by _GDBN__, and the files from
+which symbols were loaded.  The command @samp{help targets} lists all
+possible targets rather than current ones.
 
 @end table
 
@@ -4175,24 +4169,20 @@ target machine.
 
 Further @var{parameters} are interpreted by the target protocol, but
 typically include things like device names or host names to connect
-with, process numbers, and baud rates.  Executing 
-@example
-   target @var{type}
-@end example
-
-@noindent
-(without any parameters) will issue a message about what
-parameters are required for that target type.
+with, process numbers, and baud rates.  
 
 The @samp{target} command will not repeat if you press @key{RET} again
 after executing the command.
 
-@item info targets
-@kindex info targets
-Displays the names of all targets available.  Beware: the similar
-command @samp{info target} displays targets currently in use rather than
-all available ones.  @samp{info files} gives the same information as
-@samp{info target} (@pxref{Files}).
+@item help targets
+@kindex help targets
+Displays the names of all targets available.  To display targets
+currently selected, use either @samp{info target} or @samp{info files}
+(@pxref{Files}).
+
+@item help target @var{name}
+Describe a particular target, including any parameters necessary to
+select it.
 @end table
 
 Here are some common targets (available, or not, depending on the _GDBN__
@@ -4293,7 +4283,7 @@ To resume the remote program and stop debugging it, use the @samp{detach}
 command.
 
 Other remote targets may be available in your
-configuration of _GDBN__; use @samp{info targets} to list them.  
+configuration of _GDBN__; use @samp{help targets} to list them.  
 
 @node Controlling _GDBN__,,,
 @chapter Controlling _GDBN__
@@ -4428,14 +4418,14 @@ These commands display the state of the _GDBN__ history parameters.
 @end table
 
 @table @code
-@kindex info editing
-@item info editing
+@kindex show commands
+@item show commands
 Display the last ten commands in the command history.
 
-@item info editing @var{n}
+@item show commands @var{n}
 Print ten commands centered on command number @var{n}.
 
-@item info editing +
+@item show commands +
 Print ten commands just after the commands last printed.
 
 @end table
@@ -4455,18 +4445,18 @@ rather than simply letting it overflow onto the following line.
 Normally _GDBN__ knows the size of the screen from the termcap data base
 together with the value of the @code{TERM} environment variable and the
 @code{stty rows} and @code{stty cols} settings. If this is not correct,
-you can override it with the @samp{set screen-height} and @samp{set
-screen-width} commands:
+you can override it with the @samp{set height} and @samp{set
+width} commands:
 
 @table @code
-@item set screen-height @var{lpp}
-@itemx show screen-height
-@itemx set screen-width @var{cpl}
-@itemx show screen-width
-@kindex set screen-height
-@kindex set screen-width
-@kindex show screen-width
-@kindex show screen-height
+@item set height @var{lpp}
+@itemx show height
+@itemx set width @var{cpl}
+@itemx show width
+@kindex set height
+@kindex set width
+@kindex show width
+@kindex show height
 These @samp{set} commands specify a screen height of @var{lpp} lines and
 a screen width of @var{cpl} characters.  The associated @samp{show}
 commands display the current settings.
