@@ -1,9 +1,14 @@
 start-sanitize-gdbtk
+Sat Apr 15 13:52:24 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdbtk.c (gdb_disassemble): Read from inferior if connected
+	to a VxWorks target.
+
 Fri Apr 14 10:18:20 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* README.GDBTK:  New file.  Contains the obvious.
-
 end-sanitize-gdbtk
+
 Thu Apr 13 16:17:04 1995  Rob Savoye  <rob@darkstar.cygnus.com>
 
 	* remote-array.c: New file for Array Tech LSI33k based controller
@@ -105,10 +110,12 @@ Tue Apr 11 09:35:20 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* nlm/Makefile.in: Remove comments discussing munch.
 
+start-sanitize-gdbtk
 Tue Apr 11 11:07:12 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* gdbtk.c (gdbtk_init): If SIOCSPGRP is not available, but
 	F_SETOWN is, use that.
+end-sanitize-gdbtk
 
 Mon Apr 10 18:31:57 1995  Stan Shebs  <shebs@andros.cygnus.com>
 	

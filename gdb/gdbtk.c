@@ -801,7 +801,8 @@ gdb_disassemble (clientData, interp, argc, argv)
 
   if (disassemble_from_exec == -1)
     if (strcmp (target_shortname, "child") == 0
-	|| strcmp (target_shortname, "procfs") == 0)
+	|| strcmp (target_shortname, "procfs") == 0
+	|| strcmp (target_shortname, "vxprocess") == 0)
       disassemble_from_exec = 0; /* It's a child process, read inferior mem */
     else
       disassemble_from_exec = 1; /* It's remote, read the exec file */
