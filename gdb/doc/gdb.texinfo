@@ -4125,7 +4125,50 @@ all machines---whether or not they involve pointer arguments.
 @item show print address
 @kindex show print address
 Show whether or not addresses are to be printed.
+@end table
 
+When @value{GDBN} prints a symbolic address, it normally prints the
+closest earlier symbol plus an offset.  If that symbol does not uniquely
+identify the address (for example, it is a name whose scope is a single
+source file), you may need to disambiguate.  One way to do this is with
+@code{info line}, for example @code{info line *0x4537}.  Alternately,
+you can set @value{GDBN} to print the source file and line number when
+it prints a symbolic address:
+
+@table @code
+@item set print symbol-filename on
+@kindex set print symbol-filename
+Tell @value{GDBN} to print the source file name and line number of a
+symbol in the symbolic form of an address.
+
+@item set print symbol-filename off
+Do not print source file name and line number of a symbol.  This is the
+default.
+
+@item show print symbol-filename
+@kindex show print symbol-filename
+Show whether or not @value{GDBN} will print the source file name and
+line number of a symbol in the symbolic form of an address.
+@end table
+
+Also, you may wish to see the symbolic form only if the address being
+printed is reasonably close to the closest earlier symbol:
+
+@table @code
+@item set print max-symbolic-offset @var{max-offset}
+@kindex set print max-symbolic-offset
+Tell @value{GDBN} to only display the symbolic form of an address if the
+offset between the closest earlier symbol and the address is less than
+@var{max-offset}.  The default is 0, which means to always print the
+symbolic form of an address, if any symbol precedes it.
+
+@item show print max-symbolic-offset
+@kindex show print max-symbolic-offset
+Ask how large the maximum offset is that @value{GDBN} will print in a
+symbolic address.
+@end table
+
+@table @code
 @item set print array
 @itemx set print array on
 @kindex set print array
@@ -4247,32 +4290,6 @@ and with @code{set print union off} in effect it would print
 @smallexample
 $1 = @{it = Tree, form = @{...@}@}
 @end smallexample
-
-@item set print max-symbolic-offset @var{maxoff}
-@kindex set print max-symbolic-offset
-Tell @value{GDBN} to only display the symbolic form of an address if the
-offset between the closest earlier symbol and the address is less than
-@var{maxoff}.  The default is 0, which means to always print the
-symbolic form of an address, if any symbol precedes it.
-
-@item show print max-symbolic-offset
-@kindex show print max-symbolic-offset
-Ask how large the maximum offset is that @value{GDBN} will print in a
-symbolic address.
-
-@item set print symbol-filename on
-@kindex set print symbol-filename
-Tell @value{GDBN} to print the source filename and linenumber of a symbol
-in the symbolic form of an address.
-
-@item set print symbol-filename off
-Do not print source filename and linenumber of a symbol.  This is the default.
-
-@item show print symbol-filename
-@kindex show print symbol-filename
-Show whether or not @value{GDBN} will print the source filename and linenumber
-of a symbol in the symbolic form of an address.
-
 @end table
 
 @ifclear CONLY

@@ -1,3 +1,9 @@
+Tue Jun  8 13:42:04 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* gdb.texinfo (Print Settings): Move all stuff relating to symbolic
+	addresses together.  Also motivate the set print symbol-filename
+	command and suggest other solutions.
+
 Tue Jun  1 22:46:43 1993  Fred Fish  (fnf@cygnus.com)
 
 	* gdb.texinfo (set print elements):  Note that the number of
