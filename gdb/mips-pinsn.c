@@ -1,5 +1,5 @@
 /* Print mips instructions for GDB, the GNU debugger.
-   Copyright 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1989, 1991, 1992 Free Software Foundation, Inc.
    Contributed by Nobuyuki Hikichi(hikichi@sra.co.jp)
 
 This file is part of GDB.
@@ -115,6 +115,7 @@ print_insn (memaddr, stream)
   unsigned long int l;
 
   read_memory (memaddr, buffer, MAXLEN);
+  SWAP_TARGET_AND_HOST (buffer, MAXLEN);
 
   for (i = 0; i < NOPCODES; i++)
     {
