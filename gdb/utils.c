@@ -56,6 +56,12 @@
 
 #include <readline/readline.h>
 
+#ifndef MALLOC_INCOMPATIBLE
+#ifdef NEED_DECLARATION_FREE
+extern void free ();
+#endif
+#endif
+
 #undef XMALLOC
 #define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
 
@@ -1110,7 +1116,7 @@ void
 xfree (void *ptr)
 {
   if (ptr != NULL)
-    free (ptr);
+    free (ptr); /* NOTE: GDB's only call to free() */
 }
 
 

@@ -1,3 +1,10 @@
+2001-03-19  Andrew Cagney  <ac131313@redhat.com>
+
+	* defs.h (free): Move declaration from here.
+	* utils.c (free): To here.
+	(xfree): Document as the only call to free().
+	* config/pa/xm-hppah.h (free): Delete declaration.
+
 2001-03-19  Kevin Buettner  <kevinb@redhat.com>
 
 	* config/ia64/linux.mh (NATDEPFILES): Add proc-service.o to

@@ -955,10 +955,6 @@ extern PTR malloc ();
 extern PTR realloc ();
 #endif
 
-#ifdef NEED_DECLARATION_FREE
-extern void free ();
-#endif
-
 #endif /* MALLOC_INCOMPATIBLE */
 
 /* Various possibilities for alloca.  */
