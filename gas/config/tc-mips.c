@@ -19,7 +19,7 @@
 
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "as.h"
 #include "config.h"
@@ -125,6 +125,13 @@ static int mips_cpu = -1;
 
 /* Whether the 4650 instructions (mad/madu) are permitted.  */
 static int mips_4650 = -1;
+
+/* Whether the 4010 instructions are permitted.  */
+static int mips_4010 = -1;
+
+/* Whether the processor uses hardware interlocks, and thus does not
+   require nops to be inserted.  */
+static int interlocks = -1;
 
 /* MIPS PIC level.  */
 
@@ -584,6 +591,14 @@ md_begin ()
 	  if (mips_4650 == -1)
 	    mips_4650 = 1;
 	}
+      else if (strcmp (cpu, "r4010") == 0)
+	{
+	  mips_isa = 2;
+	  if (mips_cpu == -1)
+	    mips_cpu = 4010;
+	  if (mips_4010 == -1)
+	    mips_4010 = 1;
+	}
       else if (strcmp (cpu, "r8000") == 0
 	       || strcmp (cpu, "mips4") == 0)
 	{
@@ -610,6 +625,14 @@ md_begin ()
 
   if (mips_4650 < 0)
     mips_4650 = 0;
+
+  if (mips_4010 < 0)
+    mips_4010 = 0;
+
+  if (mips_4650 || mips_4010)
+    interlocks = 1;
+  else
+    interlocks = 0;
 
   if (mips_isa < 2 && mips_trap)
     as_bad ("trap exception not supported at ISA 1");
@@ -936,7 +959,7 @@ append_insn (place, ip, address_expr, reloc_type)
 	  /* The previous instruction reads the LO register; if the
 	     current instruction writes to the LO register, we must
 	     insert two NOPS.  The R4650 has interlocks.  */
-	  if (! mips_4650
+	  if (! interlocks
 	      && (mips_optimize == 0
 		  || (pinfo & INSN_WRITE_LO)))
 	    nops += 2;
@@ -946,7 +969,7 @@ append_insn (place, ip, address_expr, reloc_type)
 	  /* The previous instruction reads the HI register; if the
 	     current instruction writes to the HI register, we must
 	     insert a NOP.  The R4650 has interlocks.  */
-	  if (! mips_4650
+	  if (! interlocks
 	      && (mips_optimize == 0
 		  || (pinfo & INSN_WRITE_HI)))
 	    nops += 2;
@@ -967,10 +990,10 @@ append_insn (place, ip, address_expr, reloc_type)
 	       && (pinfo & INSN_READ_COND_CODE))
 	      || ((prev_prev_insn.insn_mo->pinfo & INSN_READ_LO)
 		  && (pinfo & INSN_WRITE_LO)
-		  && ! mips_4650)
+		  && ! interlocks)
 	      || ((prev_prev_insn.insn_mo->pinfo & INSN_READ_HI)
 		  && (pinfo & INSN_WRITE_HI)
-		  && ! mips_4650)))
+		  && ! interlocks)))
 	++nops;
 
       /* If we are being given a nop instruction, don't bother with
@@ -1143,7 +1166,7 @@ append_insn (place, ip, address_expr, reloc_type)
 		      & (INSN_LOAD_COPROC_DELAY
 			 | INSN_COPROC_MOVE_DELAY
 			 | INSN_WRITE_COND_CODE)))
-	      || (! mips_4650
+	      || (! interlocks
 		  && (prev_pinfo
 		      & (INSN_READ_LO
 			 | INSN_READ_HI)))
@@ -1333,7 +1356,7 @@ mips_emit_delays ()
 	       & (INSN_LOAD_COPROC_DELAY
 		  | INSN_COPROC_MOVE_DELAY
 		  | INSN_WRITE_COND_CODE)))
-	  || (! mips_4650
+	  || (! interlocks
 	      && (prev_insn.insn_mo->pinfo
 		  & (INSN_READ_LO
 		     | INSN_READ_HI)))
@@ -1345,14 +1368,14 @@ mips_emit_delays ()
 	  nop = 1;
 	  if ((mips_isa < 4
 	       && (prev_insn.insn_mo->pinfo & INSN_WRITE_COND_CODE))
-	      || (! mips_4650
+	      || (! interlocks
 		  && ((prev_insn.insn_mo->pinfo & INSN_READ_HI)
 		      || (prev_insn.insn_mo->pinfo & INSN_READ_LO))))
 	    emit_nop ();
 	}
       else if ((mips_isa < 4
 		&& (prev_prev_insn.insn_mo->pinfo & INSN_WRITE_COND_CODE))
-	       || (! mips_4650
+	       || (! interlocks
 		   && ((prev_prev_insn.insn_mo->pinfo & INSN_READ_HI)
 		       || (prev_prev_insn.insn_mo->pinfo & INSN_READ_LO))))
 	nop = 1;
@@ -4358,7 +4381,9 @@ mips_ip (str, ip)
 
       if (insn_isa > mips_isa
 	  || ((insn->pinfo & INSN_ISA) == INSN_4650
-	      && ! mips_4650))
+	      && ! mips_4650)
+	  || ((insn->pinfo & INSN_ISA) == INSN_4010
+	      && ! mips_4010))
 	{
 	  if (insn + 1 < &mips_opcodes[NUMOPCODES]
 	      && strcmp (insn->name, insn[1].name) == 0)
@@ -5241,6 +5266,10 @@ struct option md_longopts[] = {
   {"m4650", no_argument, NULL, OPTION_M4650},
 #define OPTION_NO_M4650 (OPTION_MD_BASE + 14)
   {"no-m4650", no_argument, NULL, OPTION_NO_M4650},
+#define OPTION_M4010 (OPTION_MD_BASE + 15)
+  {"m4010", no_argument, NULL, OPTION_M4010},
+#define OPTION_NO_M4010 (OPTION_MD_BASE + 16)
+  {"no-m4010", no_argument, NULL, OPTION_NO_M4010},
 
 #define OPTION_CALL_SHARED (OPTION_MD_BASE + 7)
 #define OPTION_NON_SHARED (OPTION_MD_BASE + 8)
@@ -5373,6 +5402,12 @@ md_parse_option (c, arg)
 		    if (mips_4650 < 0)
 		      mips_4650 = 1;
 		  }
+		else if (strcmp (p, "4010") == 0)
+		  {
+		    mips_cpu = 4010;
+		    if (mips_4010 < 0)
+		      mips_4010 = 1;
+		  }
 		break;
 
 	      case '6':
@@ -5410,6 +5445,14 @@ md_parse_option (c, arg)
 
     case OPTION_NO_M4650:
       mips_4650 = 0;
+      break;
+
+    case OPTION_M4010:
+      mips_4010 = 1;
+      break;
+
+    case OPTION_NO_M4010:
+      mips_4010 = 0;
       break;
 
     case OPTION_MEMBEDDED_PIC:
@@ -5489,8 +5532,10 @@ MIPS options:\n\
 -mips2, -mcpu=r6000	generate code for r6000\n\
 -mips3, -mcpu=r4000	generate code for r4000\n\
 -mips4, -mcpu=r8000	generate code for r8000\n\
--m4650			permit -m4650 instructions\n\
--no-m4650		do not permit -m4650 instructions\n\
+-m4650			permit R4650 instructions\n\
+-no-m4650		do not permit R4650 instructions\n\
+-m4010			permit R4010 instructions\n\
+-no-m4010		do not permit R4010 instructions\n\
 -O0			remove unneeded NOPs, do not swap branches\n\
 -O			remove unneeded NOPs and swap branches\n\
 --trap, --no-break	trap exception on div by 0 and mult overflow\n\
