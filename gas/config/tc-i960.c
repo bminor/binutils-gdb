@@ -859,7 +859,7 @@ md_number_to_field (instrP, val, bfixP)
 
   /* Surprise! -- we stored the number of bits to be modified rather
      than a pointer to a structure.  */
-  numbits = (int) bfixP;
+  numbits = (int) (size_t) bfixP;
   if (numbits == 1)
     {
       /* This is a no-op, stuck here by reloc_callj() */
@@ -1116,9 +1116,6 @@ md_estimate_size_before_relax (fragP, segment_type)
   	executable code is actually downloaded to the i80960).  Therefore,
   	we leave it in host byte order.
 
-  	The above comment is no longer true.  This routine now really
-  	does do the reordering (Ian Taylor 28 Aug 92).
-
   *************************************************************************** */
 static void md_ri_to_chars PARAMS ((char *, struct relocation_info *));
 
@@ -1127,17 +1124,25 @@ md_ri_to_chars (where, ri)
      char *where;
      struct relocation_info *ri;
 {
-  md_number_to_chars (where, ri->r_address,
-		      sizeof (ri->r_address));
-  where[4] = ri->r_index & 0x0ff;
-  where[5] = (ri->r_index >> 8) & 0x0ff;
-  where[6] = (ri->r_index >> 16) & 0x0ff;
-  where[7] = ((ri->r_pcrel << 0)
-	      | (ri->r_length << 1)
-	      | (ri->r_extern << 3)
-	      | (ri->r_bsr << 4)
-	      | (ri->r_disp << 5)
-	      | (ri->r_callj << 6));
+  host_number_to_chars (where, ri->r_address, 4);
+  host_number_to_chars (where + 4, ri->r_index, 3);
+#if WORDS_BIGENDIAN
+  where[7] = (ri->r_pcrel << 7
+	      | ri->r_length << 5
+	      | ri->r_extern << 4
+	      | ri->r_bsr << 3
+	      | ri->r_disp << 2
+	      | ri->r_callj << 1
+	      | ri->nuthin << 0);
+#else
+  where[7] = (ri->r_pcrel << 0
+	      | ri->r_length << 1
+	      | ri->r_extern << 3
+	      | ri->r_bsr << 4
+	      | ri->r_disp << 5
+	      | ri->r_callj << 6
+	      | ri->nuthin << 7);
+#endif
 }
 
 #endif /* defined(OBJ_AOUT) | defined(OBJ_BOUT) */
@@ -1508,7 +1513,7 @@ get_cdisp (dispP, ifmtP, instr, numbits, var_frag, callj)
 	       * bit_fix structure.  So we're going to lie and store
 	       * the number of bits affected instead of a pointer.
 	       */
-	      fixP->fx_bit_fixP = (bit_fixS *) numbits;
+	      fixP->fx_bit_fixP = (bit_fixS *) (size_t) numbits;
 	    }
 	}
       else
@@ -2832,7 +2837,7 @@ md_apply_fix3 (fixP, valP, seg)
 
       md_number_to_imm (place, val, fixP->fx_size);
     }
-  else if ((int) fixP->fx_bit_fixP == 13
+  else if ((int) (size_t) fixP->fx_bit_fixP == 13
 	   && fixP->fx_addsy != NULL
 	   && S_GET_SEGMENT (fixP->fx_addsy) == undefined_section)
     {

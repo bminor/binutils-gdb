@@ -1,3 +1,29 @@
+2005-03-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* configure.in (AC_C_BIGENDIAN): Invoke.
+	* configure: Regenerate.
+	* write.c (write_object_file <!BFD_ASSEMBLER>): Don't use sizeof
+	host variable to set string header size.
+	* config/obj-aout.c (obj_header_append): Don't use host structs.
+	(obj_symbol_to_chars): Likewise.
+	(obj_emit_strings): Likewise.  Use the passed in output pointer.
+	* config/obj-aout.h (H_GET_FILE_SIZE): Include H_GET_LINENO_SIZE.
+	* config/obj-bout.c (obj_emit_relocations): Use md_reloc_size,
+	not sizeof host struct.
+	(obj_header_append, obj_symbol_to_chars): Don't use host structs.
+	(obj_emit_strings): Likewise.
+	* config/obj-bout.h (EXEC_BYTES_SIZE): Define.
+	(N_TXTOFF, H_GET_FILE_SIZE, H_GET_HEADER_SIZE): Use instead of
+	sizeof host struct.
+	(H_SET_SYMBOL_TABLE_SIZE): Hard code sym size rather than using
+	sizeof host struct.
+	(host_number_to_chars): Define.
+	* config/obj-hp300.c (hp300_header_append): Don't use sizeof
+	host internal struct to set header sizes.
+	* config/tc-i960.c (md_number_to_field): Warning fix.
+	(md_ri_to_chars): Use host byte order.
+	(get_cdisp, md_apply_fix3): Warning fix.
+
 2005-02-28  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
 
 	* doc/c-arc.texi: Update documentation about ARC's extension

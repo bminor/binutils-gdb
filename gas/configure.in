@@ -86,6 +86,9 @@ case "${host}" in
 esac
 AC_SUBST(GDBINIT)
 
+#We need this for the host.  BOUT header is in host order.
+AC_C_BIGENDIAN
+
 te_file=generic
 
 # Makefile target for installing gas in $(tooldir)/bin.

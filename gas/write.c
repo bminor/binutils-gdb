@@ -1569,11 +1569,11 @@ write_object_file (void)
      Count the number of string-table chars we will emit.
      Put this info into the headers as appropriate.  */
   know (zero_address_frag.fr_address == 0);
-  string_byte_count = sizeof (string_byte_count);
+  string_byte_count = 4;
 
   obj_crawl_symbol_chain (&headers);
 
-  if (string_byte_count == sizeof (string_byte_count))
+  if (string_byte_count == 4)
     string_byte_count = 0;
 
   H_SET_STRING_SIZE (&headers, string_byte_count);
