@@ -1,5 +1,9 @@
 Mon Oct 17 18:06:05 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
+	* symbols.c (symbol_create): Use udata.p, not just udata.
+	* config/obj-elf.c (obj_ecoff_set_ext): Likewise.
+	(elf_get_extr): Likewise.
+
 	* read.c (read_a_source_file): The second argument to as_where is
 	unsigned int *, not int *.
 
