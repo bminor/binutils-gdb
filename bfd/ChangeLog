@@ -1,3 +1,24 @@
+Fri Jan 30 19:07:07 1998  Geoff Keating  <geoffk@ozemail.com.au>
+
+	* elf32-ppc.c (ppc_elf_create_dynamic_sections): New procedure
+	to create .dynsbss and .rela.sbss sections.
+	(ppc_elf_adjust_dynamic_symbol): Put space for small data to be
+	copied from dynamic objects into .sbss.
+	(ppc_elf_size_dynamic_sections): Strip .rela.sbss if we don't
+	use it.  Correct typo of .rela.sdata2.
+	(ppc_elf_finish_dynamic_symbol): Generate reloc to where we
+	put the data, which may now be in .sbss.
+	(ppc_elf_relocate_section): A SDAREL16 reloc can be in dynsbss.
+	(elf_backend_create_dynamic_sections): Define as
+	ppc_elf_create_dynamic_sections.
+
+	* elf32-ppc.c (ppc_elf_check_relocs): Don't emit R_PPC_REL* relocs
+	against _GLOBAL_OFFSET_TABLE_.
+ 	(ppc_elf_relocate_section): Don't emit R_PPC_REL32 relocs in
+	shared libraries which refer to local symbols.  Make sure that the
+	test for allocating space for a reloc in a shared object is the
+	same as the test for emitting a reloc.
+
 start-sanitize-sky
 Thu Jan 29 17:44:53 1998  Doug Evans  <devans@canuck.cygnus.com>
 
