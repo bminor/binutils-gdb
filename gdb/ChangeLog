@@ -1,3 +1,7 @@
+2000-12-13  Michael Chastain  <chastain@redhat.com>
+
+	* MAINTAINERS: Add Michael Chastain to Write After Approval list.
+
 2000-12-11  Fernando Nasser  <fnasser@redhat.com>
 
         * Makefile.in (CONFIG_LOBS): New macro.  Configured to the files
