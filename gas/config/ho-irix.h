@@ -17,6 +17,8 @@
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#include "ho-generic.h"
+
 /* The assert.h macros don't work if the argument contains a newline.  */
 #ifndef __GNUC__
 #define BROKEN_ASSERT
