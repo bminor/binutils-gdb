@@ -2824,8 +2824,8 @@ lang_one_common (h, info)
   section = h->u.c.p->section;
 
   /* Increase the size of the section.  */
-  section->_raw_size = ALIGN_N (section->_raw_size,
-				(bfd_size_type) (1 << power_of_two));
+  section->_cooked_size = ALIGN_N (section->_cooked_size,
+				   (bfd_size_type) (1 << power_of_two));
 
   /* Adjust the alignment if necessary.  */
   if (power_of_two > section->alignment_power)
@@ -2834,10 +2834,10 @@ lang_one_common (h, info)
   /* Change the symbol from common to defined.  */
   h->type = bfd_link_hash_defined;
   h->u.def.section = section;
-  h->u.def.value = section->_raw_size;
+  h->u.def.value = section->_cooked_size;
 
   /* Increase the size of the section.  */
-  section->_raw_size += size;
+  section->_cooked_size += size;
 
   /* Make sure the section is allocated in memory, and make sure that
      it is no longer a common section.  */

@@ -1,3 +1,8 @@
+Sat Apr 18 18:41:12 1998  Richard Henderson  <rth@cygnus.com>
+
+	* ldlang.c (lang_one_common): Manipulate the section's cooked size
+	rather than its raw size.
+
 Tue Apr  7 13:35:29 1998  H.J. Lu  <hjl@gnu.org>
 
 	* configure.in (TESTBFDLIB): New.  Defined and substituted.
