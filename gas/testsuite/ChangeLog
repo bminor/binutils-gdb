@@ -1,5 +1,8 @@
 Wed Oct  8 15:12:35 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* gas/sparc/synth.d: Update for recent disassembler changes.
+	* gas/sparc/synth64.d: Likewise.
+
 	* gas/mips/beq.s: Add .text to .globl to mark the symbol to as a
 	function symbol.
 	* gas/mips/jal.s: Likewise.
