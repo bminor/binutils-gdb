@@ -1,5 +1,11 @@
 Fri Mar 21 15:42:37 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/obj-coff.h (DO_STRIP): Don't define.
+	* config/tc-h8300.h (DO_STRIP): Don't define.
+	* config/tc-h8500.h (DO_STRIP): Don't define.
+	* config/tc-w65.h (DO_STRIP): Don't define.
+	* config/tc-z8k.h (DO_STRIP): Don't define.
+
 	* symbols.c (colon): Call obj_frob_label if it is defined.
 	* config/obj-vms.h (obj_frob_label): Rename from tc_frob_label.
 
