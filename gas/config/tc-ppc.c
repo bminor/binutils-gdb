@@ -16,7 +16,7 @@
 
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #include <stdio.h>
 #include <ctype.h>
@@ -320,8 +320,8 @@ PowerPC options:\n\
   fprintf(stream, "\
 -mrelocatable		support for GCC's -mrelocatble option\n\
 -mlittle, -mlittle-endian\n\
-			generate code for a little endian machine\n
--mbig, -mbig-endian	generate code for a big endian machine\n
+			generate code for a little endian machine\n\
+-mbig, -mbig-endian	generate code for a big endian machine\n\
 -V			print assembler version number\n\
 -Qy, -Qn		ignored\n");
 #endif
@@ -548,6 +548,16 @@ ppc_elf_suffix (str_p)
       *str_p += 2;
       return BFD_RELOC_HI16;
     }
+  else if (strncmp (str, "@sdarel", 7) == 0 || strncmp (str, "@sdarel", 7) == 0)
+    {
+      *str_p += 7;
+      return BFD_RELOC_GPREL16;
+    }
+  else if (strncmp (str, "@FIXUP", 6) == 0 || strncmp (str, "@fixup", 6) == 0)
+    {
+      *str_p += 6;
+      return BFD_RELOC_CTOR;	/* synonym for BFD_RELOC_32 that doesn't get */
+    }				/* warnings with -mrelocatable */
 
   return BFD_RELOC_UNUSED;
 }
@@ -594,7 +604,9 @@ ppc_elf_cons (nbytes)
   demand_empty_rest_of_line ();
 }
 
-/* Validate any relocations emitted for -mrelocatable */
+/* Validate any relocations emitted for -mrelocatable, possibly adding
+   fixups for word relocations in writable segments, so we can adjust
+   them at runtime.  */
 static void
 ppc_elf_validate_fix (fixp, seg)
      fixS *fixp;
@@ -607,10 +619,15 @@ ppc_elf_validate_fix (fixp, seg)
       && strcmp (segment_name (seg), ".got2") != 0
       && strcmp (segment_name (seg), ".dtors") != 0
       && strcmp (segment_name (seg), ".ctors") != 0
+      && strcmp (segment_name (seg), ".fixup") != 0
       && strcmp (segment_name (seg), ".stab") != 0)
     {
-      as_warn_where (fixp->fx_file, fixp->fx_line,
-		     "Relocation cannot be done when using -mrelocatable");
+      if ((seg->flags & (SEC_READONLY | SEC_CODE)) != 0
+	  || fixp->fx_r_type != BFD_RELOC_CTOR)
+	{
+	  as_warn_where (fixp->fx_file, fixp->fx_line,
+			 "Relocation cannot be done when using -mrelocatable");
+	}
     }
 }
 
@@ -779,8 +796,34 @@ md_assemble (str)
       else if (ex.X_op == O_absent)
 	as_bad ("missing operand");
       else if (ex.X_op == O_constant)
-	insn = ppc_insert_operand (insn, operand, ex.X_add_number,
-				   (char *) NULL, 0);
+	{
+#ifdef OBJ_ELF
+	  /* Allow @HA, @L, @H on constants. */
+	  char *orig_str = str;
+	  if ((reloc = ppc_elf_suffix (&str)) != BFD_RELOC_UNUSED)
+	    switch (reloc)
+	      {
+	      default:
+		str = orig_str;
+		break;
+
+	      case BFD_RELOC_LO16:
+		ex.X_add_number = ((ex.X_add_number & 0xffff) ^ 0x8000) - 0x8000;
+		break;
+
+	      case BFD_RELOC_HI16:
+		ex.X_add_number = (ex.X_add_number >> 16) & 0xffff;
+		break;
+
+	      case BFD_RELOC_HI16_S:
+		ex.X_add_number = ((ex.X_add_number >> 16) & 0xffff)
+		  + ((ex.X_add_number >> 15) & 1);
+		break;
+	      }
+#endif
+	  insn = ppc_insert_operand (insn, operand, ex.X_add_number,
+				     (char *) NULL, 0);
+	}
 
 #ifdef OBJ_ELF
       else if ((reloc = ppc_elf_suffix (&str)) != BFD_RELOC_UNUSED)
@@ -858,13 +901,25 @@ md_assemble (str)
 	  reloc_howto_type *reloc_howto = bfd_reloc_type_lookup (stdoutput, fixups[i].reloc);
 	  int size = (!reloc_howto) ? 0 : bfd_get_reloc_size (reloc_howto);
 	  int offset = target_big_endian ? (4 - size) : 0;
+	  fixS *fixP;
 
 	  if (size > 4)
 	    abort();
 
-	  fix_new_exp (frag_now, f - frag_now->fr_literal + offset, size,
-		       &fixups[i].exp, (reloc_howto && reloc_howto->pc_relative),
-		       fixups[i].reloc);
+	  fixP = fix_new_exp (frag_now, f - frag_now->fr_literal + offset, size,
+			      &fixups[i].exp, (reloc_howto && reloc_howto->pc_relative),
+			      fixups[i].reloc);
+
+	  /* Turn off complaints that the addend is too large for things like
+	     foo+100000@ha.  */
+	  switch (fixups[i].reloc)
+	    {
+	    case BFD_RELOC_LO16:
+	    case BFD_RELOC_HI16:
+	    case BFD_RELOC_HI16_S:
+	      fixP->fx_no_overflow = 1;
+	      break;
+	    }
 	}
       else
 	fix_new_exp (frag_now, f - frag_now->fr_literal, 4,
@@ -2683,6 +2738,7 @@ md_apply_fix3 (fixp, valuep, seg)
       switch (fixp->fx_r_type)
 	{
 	case BFD_RELOC_32:
+	case BFD_RELOC_CTOR:
 	  if (fixp->fx_pcrel)
 	    {
 	      fixp->fx_r_type = BFD_RELOC_32_PCREL;
@@ -2693,11 +2749,13 @@ md_apply_fix3 (fixp, valuep, seg)
 	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
 			      value, 4);
 	  break;
+
 	case BFD_RELOC_LO16:
 	case BFD_RELOC_HI16:
 	case BFD_RELOC_HI16_S:
 	case BFD_RELOC_PPC_TOC16:
 	case BFD_RELOC_16:
+	case BFD_RELOC_GPREL16:
 	  if (fixp->fx_pcrel)
 	    abort ();
 
@@ -2712,6 +2770,7 @@ md_apply_fix3 (fixp, valuep, seg)
 	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
 			      value, 1);
 	  break;
+
 	default:
 	  abort ();
 	}

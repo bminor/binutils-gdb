@@ -1,3 +1,8 @@
+Mon Aug 21 13:41:33 1995  Michael Meissner  <meissner@cygnus.com>
+
+	* config/tc-ppc.c (md_assemble): Allow @HA, @L, and @H suffixes on
+	constant expressions.
+
 Sun Aug 20 15:54:37 1995  Jim Wilson  <wilson@cygnus.com>
 
 	* config/tc-arm.c (md_reloc_size): Add const to declaration.
