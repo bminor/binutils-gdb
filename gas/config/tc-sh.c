@@ -222,8 +222,10 @@ md_begin ()
   /* Insert unique names into hash table */
   for (opcode = sh_table; opcode->name; opcode++)
     {
-      if (opcode->arch & target_arch && strcmp (prev_name, opcode->name))
+      if (strcmp (prev_name, opcode->name))
 	{
+	  if (! (opcode->arch & target_arch))
+	    continue;
 	  prev_name = opcode->name;
 	  hash_insert (opcode_hash_control, opcode->name, (char *) opcode);
 	}
@@ -1148,6 +1150,8 @@ get_specific (opcode, operands)
 	      goto fail;
 	    }
 	}
+      if ( !(valid_arch & this_try->arch))
+	goto fail;
       valid_arch &= this_try->arch;
       return this_try;
     fail:;

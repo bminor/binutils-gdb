@@ -1,3 +1,10 @@
+Thu Mar 16 23:45:16 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+	* config/tc-sh.c (md_begin): When encountering insn that are
+	not supported by the current arch, only change the name if
+	its contents are the same as prev_name.
+	(get_specific): If the the architecture doesn't match, fail.
+
 Thu Mar 16 21:18:13 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	* config/tc-sh.c (IDENT_CHAR): Define.
