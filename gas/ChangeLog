@@ -1,3 +1,7 @@
+Sun Sep 19 10:43:31 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-hppa.c (pa_ip): Handle 'g' operand.
+
 at Sep 18 12:13:28 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-hppa.c (md_assemble): Fix dwarf2 line handling.

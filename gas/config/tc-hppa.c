@@ -2682,6 +2682,13 @@ pa_ip (str)
 	      nullif = pa_parse_nullif (&s);
 	      INSERT_FIELD_AND_CONTINUE (opcode, nullif, 5);
 
+	    /* Handle ,gate completer for new syntax branches.  */
+	    case 'g':
+	      if (*s == ',' && strcasecmp (s + 1, "gate") == 0)
+		s += 5;
+	      else
+		break;
+	      continue;
 
 	    /* Handle a 11 bit immediate at 31.  */
 	    case 'i':
