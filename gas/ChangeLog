@@ -1,3 +1,9 @@
+Thu Jan 27 18:14:19 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* atof-generic.c: Some reformatting.
+	(atof_generic): Be careful when mixing signed/unsigned values of
+	different sizes.
+
 Thu Jan 27 16:43:51 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* read.c (lex_type): No longer make '{' a valid character for
