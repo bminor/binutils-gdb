@@ -1,5 +1,7 @@
 #!/bin/sh
 
+### WARNING: this file contains embedded tabs.  Do not run untabify on this file.
+
 # Configuration script
 #   Copyright (C) 1988, 1990-1993 Free Software Foundation, Inc.
 
@@ -776,20 +778,20 @@ EOF
             # remove any form feeds.
             if [ -z "${subdirs}" ]; then
                 rm -f ${subdir}/Makefile.tem2
-                sed -e "s:^SUBDIRS[         ]*=.*$:SUBDIRS = ${configdirs}:" \
-                    -e "s:^NONSUBDIRS[      ]*=.*$:NONSUBDIRS = ${noconfigdirs}:" \
+                sed -e "s:^SUBDIRS[ 	]*=.*$:SUBDIRS = ${configdirs}:" \
+                    -e "s:^NONSUBDIRS[ 	]*=.*$:NONSUBDIRS = ${noconfigdirs}:" \
                     ${subdir}/Makefile.tem > ${subdir}/Makefile.tem2
                 rm -f ${subdir}/Makefile.tem
                 mv ${subdir}/Makefile.tem2 ${subdir}/Makefile.tem
             fi
-            sed -e "s:^prefix[      ]*=.*$:prefix = ${prefix}:" \
-                    -e "s:^exec_prefix[     ]*=.*$:exec_prefix = ${exec_prefix}:" \
-                    -e "s:^srcdir[  ]*=.*$:srcdir = ${makesrcdir}:" \
+            sed -e "s:^prefix[ 	]*=.*$:prefix = ${prefix}:" \
+                    -e "s:^exec_prefix[ 	]*=.*$:exec_prefix = ${exec_prefix}:" \
+                    -e "s:^srcdir[ 	]*=.*$:srcdir = ${makesrcdir}:" \
                     -e "s///" \
-                    -e "s:^program_prefix[  ]*=.*$:program_prefix = ${program_prefix}:" \
-                    -e "s:^program_suffix[  ]*=.*$:program_suffix = ${program_suffix}:" \
-                    -e "s:^program_transform_name[  ]*=.*$:program_transform_name = ${program_transform_name}:" \
-                    -e "s:^tooldir[         ]*=.*$:tooldir = ${tooldir}:" \
+                    -e "s:^program_prefix[ 	]*=.*$:program_prefix = ${program_prefix}:" \
+                    -e "s:^program_suffix[ 	]*=.*$:program_suffix = ${program_suffix}:" \
+                    -e "s:^program_transform_name[ 	]*=.*$:program_transform_name = ${program_transform_name}:" \
+                    -e "s:^tooldir[ 	]*=.*$:tooldir = ${tooldir}:" \
                     ${subdir}/Makefile.tem >> ${Makefile}
             # final copy now in ${Makefile}
 
