@@ -707,8 +707,6 @@ v850_elf_reloc (abfd, reloc, symbol, data, isection, obfd, err)
     case R_V850_LO16:
       relocation += (short)bfd_get_16 (abfd, (bfd_byte *) data + reloc->address);
       /* Do not complain if value has top bit set, as this has been anticipated.  */
-      if ((unsigned long)relocation > 0xffff)
-	return bfd_reloc_overflow;
       bfd_put_16 (abfd, relocation, (bfd_byte *)data + reloc->address);
       return bfd_reloc_ok;
 

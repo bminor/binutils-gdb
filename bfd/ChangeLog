@@ -1,3 +1,7 @@
+Wed Sep 10 15:17:25 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-v850.c (v850_elf_reloc): Remove spurious error message.
+
 Wed Sep 10 11:17:50 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* archures.c (bfd_default_scan): Use strcasecmp.
