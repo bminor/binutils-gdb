@@ -1,5 +1,32 @@
 2004-08-15  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.mi/mi-cli.exp: Use gdb_get_line_number.  Remove reference
+	to bug-gnu@prep.ai.mit.edu.
+	* gdb.mi/mi-disassemble.exp: Likewise.
+	* gdb.mi/mi-eval.exp: Likewise.
+	* gdb.mi/mi-file.exp: Likewise.  Also, add comment about the
+	default line number.
+	* gdb.mi/mi-return.exp: Likewise.
+	* gdb.mi/mi-simplerun.exp: Likewise.
+	* gdb.mi/mi-stack.exp: Likewise.
+	* gdb.mi/mi-stepi.exp: Likewise.  Also, replace wildcarded line
+	number with explicit range test.
+	* gdb.mi/mi-watch.exp: Likewise.
+	* gdb.mi/mi2-break.exp: Likewise.
+	* gdb.mi/mi2-cli.exp: Likewise.
+	* gdb.mi/mi2-disassemble.exp: Likewise.
+	* gdb.mi/mi2-eval.exp: Likewise.
+	* gdb.mi/mi2-file.exp: Likewise.  Also, add comment about the
+	default line number.
+	* gdb.mi/mi2-return.exp: Likewise.
+	* gdb.mi/mi2-simplerun.exp: Likewise.
+	* gdb.mi/mi2-stack.exp: Likewise.
+	* gdb.mi/mi2-stepi.exp: Likewise.  Also, replace wildcarded line
+	number with explicit range test.
+	* gdb.mi/mi2-watch.exp: Likewise.
+
+2004-08-15  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.cp/ctti.exp: Tweak srcfile and objfile to have no slashes.
 	* gdb.cp/m-static.exp: Likewise.
 	* gdb.cp/rtti.exp: Likewise.
