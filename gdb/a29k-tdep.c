@@ -989,14 +989,15 @@ get_longjmp_target(pc)
      CORE_ADDR *pc;
 {
   CORE_ADDR jb_addr;
+  char buf[sizeof(CORE_ADDR)];
 
   jb_addr = read_register(LR2_REGNUM);
 
-  if (target_read_memory(jb_addr + JB_PC * JB_ELEMENT_SIZE, (char *) pc,
+  if (target_read_memory(jb_addr + JB_PC * JB_ELEMENT_SIZE, (char *) buf,
                          sizeof(CORE_ADDR)))
     return 0;
 
-  SWAP_TARGET_AND_HOST(pc, sizeof(CORE_ADDR));
+  *pc = extract_address ((PTR) buf, sizeof(CORE_ADDR));
   return 1;
 }
 #endif /* GET_LONGJMP_TARGET */

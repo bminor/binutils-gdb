@@ -1,3 +1,16 @@
+Thu Apr 13 12:23:31 1995  Kung Hsu  <kung@rtl.cygnus.com>
+
+	* a29k-tdep.c (get_longjmp_target): Replace SWAP_TARGET_AND_HOST with
+	extract_address.
+	* remote-vxsparc.c: New file, preliminary check in, this configuration
+	not supported yet. 
+	* remote-vxmips.c: ditto.
+
+Thu Apr 13 12:10:14 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* rs6000-tdep.c (xcoff_add_toc_to_loadinfo): Don't use a prototype
+	to declare the function.
+
 Wed Apr 12 16:40:20 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* monitor.h (init_monitor_ops): Declare.
