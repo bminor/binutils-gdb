@@ -1,3 +1,9 @@
+2001-06-28  Geoffrey Keating  <geoffk@redhat.com>
+
+	* cgen-asm.c (cgen_parse_keyword): Allow any first character.
+	* cgen-opc.c (cgen_keyword_add): Ignore special first
+	character when building nonalpha_chars field.
+
 2001-06-24  Ben Elliston  <bje@redhat.com>
 
 	* m88k-dis.c: Format to conform to GNU coding standards.

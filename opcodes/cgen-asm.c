@@ -212,6 +212,12 @@ cgen_parse_keyword (cd, strp, keyword_table, valuep)
 
   p = start = *strp;
 
+  /* Allow any first character.  This is to make life easier for
+     the fairly common case of suffixes, eg. 'ld.b.w', where the first
+     character of the suffix ('.') is special.  */
+  if (*p)
+    ++p;
+  
   /* Allow letters, digits, and any special characters.  */
   while (((p - start) < (int) sizeof (buf))
 	 && *p

@@ -134,7 +134,7 @@ cgen_keyword_add (kt, ke)
   if (ke->name[0] == 0)
     kt->null_entry = ke;
 
-  for (i = 0; i < strlen (ke->name); i++)
+  for (i = 1; i < strlen (ke->name); i++)
     if (! isalnum ((unsigned char) ke->name[i])
 	&& ! strchr (kt->nonalpha_chars, ke->name[i]))
       {
