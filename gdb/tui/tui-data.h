@@ -96,7 +96,7 @@ TuiGenWinInfo, *TuiGenWinInfoPtr;
 #define TUI_GENERAL_SPECIAL_REGS_NAME_LOWER  "$regs"
 
 /* Scroll direction enum */
-typedef enum
+typedef enum tui_scroll_direction
   {
     FORWARD_SCROLL,
     BACKWARD_SCROLL,

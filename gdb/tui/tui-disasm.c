@@ -1,7 +1,7 @@
 /* Disassembly display.
 
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation,
-   Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
+   Foundation, Inc.
 
    Contributed by Hewlett-Packard Company.
 
@@ -172,8 +172,8 @@ tui_find_disassembly_address (CORE_ADDR pc, int from)
 }
 
 /* Function to set the disassembly window's content.  */
-TuiStatus
-tuiSetDisassemContent (CORE_ADDR pc)
+enum tui_status
+tui_set_disassem_content (CORE_ADDR pc)
 {
   TuiStatus ret = TUI_FAILURE;
   register int i;
@@ -270,12 +270,9 @@ tuiSetDisassemContent (CORE_ADDR pc)
 }
 
 
-/*
-   ** tuiShowDisassem().
-   **        Function to display the disassembly window with disassembled code.
- */
+/* Function to display the disassembly window with disassembled code.   */
 void
-tuiShowDisassem (CORE_ADDR startAddr)
+tui_show_disassem (CORE_ADDR startAddr)
 {
   struct symtab *s = find_pc_symtab (startAddr);
   TuiWinInfoPtr winWithFocus = tuiWinWithFocus ();
@@ -292,19 +289,16 @@ tuiShowDisassem (CORE_ADDR startAddr)
     tuiSetWinFocusTo (disassemWin);
 
   return;
-}				/* tuiShowDisassem */
+}
 
 
-/*
-   ** tuiShowDisassemAndUpdateSource().
-   **        Function to display the disassembly window.
- */
+/* Function to display the disassembly window.   */
 void
-tuiShowDisassemAndUpdateSource (CORE_ADDR startAddr)
+tui_show_disassem_and_update_source (CORE_ADDR startAddr)
 {
   struct symtab_and_line sal;
 
-  tuiShowDisassem (startAddr);
+  tui_show_disassem (startAddr);
   if (currentLayout () == SRC_DISASSEM_COMMAND)
     {
       TuiLineOrAddress val;
@@ -326,13 +320,10 @@ tuiShowDisassemAndUpdateSource (CORE_ADDR startAddr)
     }
 
   return;
-}				/* tuiShowDisassemAndUpdateSource */
+}
 
-/*
-   ** tuiGetBeginAsmAddress().
- */
 CORE_ADDR
-tuiGetBeginAsmAddress (void)
+tui_get_begin_asm_address (void)
 {
   TuiGenWinInfoPtr locator;
   TuiLocatorElementPtr element;
@@ -361,7 +352,7 @@ tuiGetBeginAsmAddress (void)
     addr = element->addr;
 
   return addr;
-}				/* tuiGetBeginAsmAddress */
+}
 
 /* Determine what the low address will be to display in the TUI's
    disassembly window.  This may or may not be the same as the
@@ -381,13 +372,10 @@ tuiGetLowDisassemblyAddress (CORE_ADDR low, CORE_ADDR pc)
   return pc;
 }
 
-/*
-   ** tuiVerticalDisassemScroll().
-   **      Scroll the disassembly forward or backward vertically
- */
+/* Scroll the disassembly forward or backward vertically.  */
 void
-tuiVerticalDisassemScroll (TuiScrollDirection scrollDirection,
-                           int numToScroll)
+tui_vertical_disassem_scroll (enum tui_scroll_direction scrollDirection,
+			      int numToScroll)
 {
   if (disassemWin->generic.content != (OpaquePtr) NULL)
     {

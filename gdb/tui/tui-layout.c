@@ -193,7 +193,7 @@ tuiSetLayout (TuiLayoutType layoutType,
 		         ** 2. if target was compiled without -g
 		         ** We still want to show the assembly though!
 		       */
-		      addr = tuiGetBeginAsmAddress ();
+		      addr = tui_get_begin_asm_address ();
 		      tuiSetWinFocusTo (disassemWin);
 		      layoutDef->displayMode = DISASSEM_WIN;
 		      layoutDef->split = FALSE;
@@ -206,7 +206,7 @@ tuiSetLayout (TuiLayoutType layoutType,
 		         ** 2. if target was compiled without -g
 		         ** We still want to show the assembly though!
 		       */
-		      addr = tuiGetBeginAsmAddress ();
+		      addr = tui_get_begin_asm_address ();
 		      if (winWithFocus == srcWin)
 			tuiSetWinFocusTo (srcWin);
 		      else
@@ -229,7 +229,7 @@ tuiSetLayout (TuiLayoutType layoutType,
 		         ** 2. if target was compiled without -g
 		         ** We still want to show the assembly though!
 		       */
-		      addr = tuiGetBeginAsmAddress ();
+		      addr = tui_get_begin_asm_address ();
 		      if (winWithFocus != dataWin)
 			tuiSetWinFocusTo (disassemWin);
 		      else

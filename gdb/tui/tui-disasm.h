@@ -1,5 +1,8 @@
 /* Disassembly display.
-   Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 1998, 1999, 2000, 2001, 2004 Free Software Foundation,
+   Inc.
+   
    Contributed by Hewlett-Packard Company.
 
    This file is part of GDB.
@@ -19,23 +22,16 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef _TUI_DISASSEM_H
-#define _TUI_DISASSEM_H
+#ifndef TUI_DISASM_H
+#define TUI_DISASM_H
 
-/*****************************************
-** TYPE DEFINITIONS                        **
-******************************************/
+#include "tui/tui.h"		/* For enum tui_status.  */
+#include "tui/tui-data.h"	/* For enum tui_scroll_direction.  */
 
-
-
-/*****************************************
-** PUBLIC FUNCTION EXTERNAL DECLS        **
-******************************************/
-extern TuiStatus tuiSetDisassemContent (CORE_ADDR);
-extern void tuiShowDisassem (CORE_ADDR);
-extern void tuiShowDisassemAndUpdateSource (CORE_ADDR);
-extern void tuiVerticalDisassemScroll (TuiScrollDirection, int);
-extern CORE_ADDR tuiGetBeginAsmAddress (void);
+extern enum tui_status tui_set_disassem_content (CORE_ADDR);
+extern void tui_show_disassem (CORE_ADDR);
+extern void tui_show_disassem_and_update_source (CORE_ADDR);
+extern void tui_vertical_disassem_scroll (enum tui_scroll_direction, int);
+extern CORE_ADDR tui_get_begin_asm_address (void);
 
 #endif
-/*_TUI_DISASSEM_H*/

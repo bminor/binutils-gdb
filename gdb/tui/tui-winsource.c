@@ -1,7 +1,7 @@
 /* TUI display source/assembly window.
 
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation,
-   Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
+   Foundation, Inc.
 
    Contributed by Hewlett-Packard Company.
 
@@ -55,7 +55,7 @@ tui_display_main (void)
     {
       CORE_ADDR addr;
 
-      addr = tuiGetBeginAsmAddress ();
+      addr = tui_get_begin_asm_address ();
       if (addr != (CORE_ADDR) 0)
 	{
 	  struct symtab_and_line sal;
@@ -102,7 +102,7 @@ tuiUpdateSourceWindowAsIs (TuiWinInfoPtr winInfo, struct symtab *s,
   if (winInfo->generic.type == SRC_WIN)
     ret = tuiSetSourceContent (s, lineOrAddr.lineNo, noerror);
   else
-    ret = tuiSetDisassemContent (lineOrAddr.addr);
+    ret = tui_set_disassem_content (lineOrAddr.addr);
 
   if (ret == TUI_FAILURE)
     {
@@ -154,10 +154,10 @@ tuiUpdateSourceWindowsWithAddr (CORE_ADDR addr)
 	{
 	case DISASSEM_COMMAND:
 	case DISASSEM_DATA_COMMAND:
-	  tuiShowDisassem (addr);
+	  tui_show_disassem (addr);
 	  break;
 	case SRC_DISASSEM_COMMAND:
-	  tuiShowDisassemAndUpdateSource (addr);
+	  tui_show_disassem_and_update_source (addr);
 	  break;
 	default:
 	  sal = find_pc_line (addr, 0);
@@ -206,7 +206,7 @@ tuiUpdateSourceWindowsWithLine (struct symtab *s, int line)
       if (currentLayout () == SRC_DISASSEM_COMMAND)
 	{
 	  find_line_pc (s, line, &pc);
-	  tuiShowDisassem (pc);
+	  tui_show_disassem (pc);
 	}
       break;
     }

@@ -467,7 +467,7 @@ tuiScrollForward (TuiWinInfoPtr winToScroll, int numToScroll)
       if (winToScroll == srcWin)
 	tuiVerticalSourceScroll (FORWARD_SCROLL, _numToScroll);
       else if (winToScroll == disassemWin)
-	tuiVerticalDisassemScroll (FORWARD_SCROLL, _numToScroll);
+	tui_vertical_disassem_scroll (FORWARD_SCROLL, _numToScroll);
       else if (winToScroll == dataWin)
 	tuiVerticalDataScroll (FORWARD_SCROLL, _numToScroll);
     }
@@ -497,7 +497,7 @@ tuiScrollBackward (TuiWinInfoPtr winToScroll, int numToScroll)
       if (winToScroll == srcWin)
 	tuiVerticalSourceScroll (BACKWARD_SCROLL, _numToScroll);
       else if (winToScroll == disassemWin)
-	tuiVerticalDisassemScroll (BACKWARD_SCROLL, _numToScroll);
+	tui_vertical_disassem_scroll (BACKWARD_SCROLL, _numToScroll);
       else if (winToScroll == dataWin)
 	tuiVerticalDataScroll (BACKWARD_SCROLL, _numToScroll);
     }

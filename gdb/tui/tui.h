@@ -1,5 +1,8 @@
 /* External/Public TUI Header File.
-   Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 1998, 1999, 2000, 2001, 2004 Free Software Foundation,
+   Inc.
+
    Contributed by Hewlett-Packard Company.
 
    This file is part of GDB.
@@ -53,7 +56,7 @@ Opaque (*OpaqueFuncPtr) (va_list);
 extern void strcat_to_buf (char *, int, const char *);
 
 /* Types of error returns */
-     typedef enum
+     typedef enum tui_status
        {
 	 TUI_SUCCESS,
 	 TUI_FAILURE

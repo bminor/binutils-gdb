@@ -1,5 +1,23 @@
 2004-01-20  Andrew Cagney  <cagney@redhat.com>
 
+	* tui/tui-disasm.h: Update copyright.  Include "tui.h" and
+	"tui-data.h".
+	(tui_set_disassem_content): Rename tuiSetDisassemContent.
+	(tui_show_disassem): Rename tuiShowDisassem.
+	(tui_show_disassem_and_update_source): Rename
+	tuiVerticalDisassemScroll.
+	(tui_vertical_disassem_scroll): Rename tuiVerticalDisassemScroll.
+	(tui_get_begin_asm_address): Rename tuiGetBeginAsmAddress.
+	* tui/tui.h: Update copyright.
+	(enum tui_status): Define.
+	* tui/tui-data.h (enum tui_scroll_direction): Define.
+	* tui/tui-disasm.c: Update copyright.  Update references.
+	* tui/tui-winsource.c: 	Update copyright.  Update references.
+	* tui/tui-win.c: Update references.
+	* tui/tui-layout.c: Update references.
+
+2004-01-20  Andrew Cagney  <cagney@redhat.com>
+
 	* mi/mi-cmd-stack.c (list_args_or_locals): Move declaration of
 	sym2 to start of block.
 
