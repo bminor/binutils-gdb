@@ -1,3 +1,7 @@
+Fri Jan 28 15:40:33 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* remote-udi.c (udi_close, udi_detach, udi_kill): Add comments.
+
 Fri Jan 28 11:55:52 1994  Rob Savoye  (rob@darkstar.cygnus.com)
 
 	* configure.in: Make m68k-coff and aout add monitor support in

@@ -360,8 +360,11 @@ udi_detach (args,from_tty)
   if (UDIDisconnect (udi_session_id, UDIContinueSession))
     error ("UDIDisconnect() failed in udi_detach");
 
-  pop_target();         	/* calls udi_close to do the real work */
+  /* calls udi_close to do the real work (which looks like it calls
+     UDIDisconnect with UDITerminateSession, FIXME).  */
+  pop_target();
 
+  /* FIXME, message too similar to what udi_close prints.  */
   if (from_tty)
     printf_unfiltered ("Ending remote debugging\n");
 }
@@ -1011,7 +1014,9 @@ just invoke udi_close, which seems to get things right.
 #endif /* 0 */
 
   /* Keep the target around, e.g. so "run" can do the right thing when
-     we are already debugging something.  */
+     we are already debugging something.  FIXME-maybe: should we kill the
+     TIP with UDIDisconnect using UDITerminateSession, and then restart
+     it on the next "run"?  */
 
   inferior_pid = 0;
 }
