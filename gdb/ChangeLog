@@ -1,3 +1,30 @@
+2002-07-22  Kevin Buettner  <kevinb@redhat.com>
+
+	* aix-thread.c (gdb_assert.h): Include.
+	(fill_sprs64, fill_sprs32): Add selected asserts to make sure that
+	register sizes (from register cache) match size of buffer holding
+	register data.
+	(fill_sprs32): Change parameter types to match those in the ptrace()
+	buffer.
+	(store_regs_lib): Likewise, but for 32-bit temporary variables.
+	(ops_prepare_to_store): Rename loop variable ``i'' to ``regno''.
+
+2002-07-22  Michael Snyder  <msnyder@redhat.com>
+
+	* aix-thread.c (supply_sprs64): Cosmetic change.
+	(supply_sprs32): Cosmetic change.
+	(fill_gprs64, fill_gprs32, fill_fprs, fill_sprs32): New funcs.
+	(fill_sprs64): Use regcache_collect instead of read_register.
+	(store_regs_lib): Use regcache_collect instead of 
+	read_register.  Use fill_sprs32 instead of fill_sprs64,
+	if debugging a 32-bit architecture.
+	(store_regs_kern): Use fill_gprs64 etc. to pull the values
+	out of the register cache, instead of passing a pointer into
+	the register cache directly to ptrace.  Use regcache_collect
+	insteaad of read_register.
+	(ops_prepare_to_store): Use target_read_registers instead
+	of read_register_bytes.
+
 2002-07-20  Aidan Skinner <aidan@velvet.net>
 
 	* MAINTAINERS: Add self under write after approval. 

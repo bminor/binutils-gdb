@@ -42,6 +42,7 @@
      */
 
 #include "defs.h"
+#include "gdb_assert.h"
 #include "gdbthread.h"
 #include "target.h"
 #include "inferior.h"
@@ -1038,7 +1039,8 @@ supply_sprs64 (uint64_t iar, uint64_t msr, uint32_t cr,
 	       uint64_t lr, uint64_t ctr, uint32_t xer)
 {
   int regno = FIRST_UISA_SP_REGNUM;
-  supply_register (regno, (char *) &iar);
+
+  supply_register (regno,     (char *) &iar);
   supply_register (regno + 1, (char *) &msr);
   supply_register (regno + 2, (char *) &cr);
   supply_register (regno + 3, (char *) &lr);
@@ -1054,7 +1056,8 @@ supply_sprs32 (uint32_t iar, uint32_t msr, uint32_t cr,
 	       uint32_t lr, uint32_t ctr, uint32_t xer)
 {
   int regno = FIRST_UISA_SP_REGNUM;
-  supply_register (regno, (char *) &iar);
+
+  supply_register (regno,     (char *) &iar);
   supply_register (regno + 1, (char *) &msr);
   supply_register (regno + 2, (char *) &cr);
   supply_register (regno + 3, (char *) &lr);
@@ -1209,6 +1212,36 @@ ops_fetch_registers (int regno)
     }
 }
 
+/* Store the gp registers into an array of uint32_t or uint64_t.  */
+
+static void
+fill_gprs64 (uint64_t *vals)
+{
+  int regno;
+
+  for (regno = 0; regno < FP0_REGNUM; regno++)
+    regcache_collect (regno, vals + regno);
+}
+
+static void 
+fill_gprs32 (uint32_t *vals)
+{
+  int regno;
+
+  for (regno = 0; regno < FP0_REGNUM; regno++)
+    regcache_collect (regno, vals + regno);
+}
+
+/* Store the floating point registers into a double array.  */
+static void
+fill_fprs (double *vals)
+{
+  int regno;
+
+  for (regno = FP0_REGNUM; regno < FPLAST_REGNUM; regno++)
+    regcache_collect (regno, vals + regno);
+}
+
 /* Store the special registers into the specified 64-bit and 32-bit
    locations.  */
 
@@ -1217,12 +1250,35 @@ fill_sprs64 (uint64_t *iar, uint64_t *msr, uint32_t *cr,
 	     uint64_t *lr, uint64_t *ctr, uint32_t *xer)
 {
   int regno = FIRST_UISA_SP_REGNUM;
-  *iar = read_register (regno);
-  *msr = read_register (regno + 1);
-  *cr = read_register (regno + 2);
-  *lr = read_register (regno + 3);
-  *ctr = read_register (regno + 4);
-  *xer = read_register (regno + 5);
+
+  gdb_assert (sizeof (*iar) == REGISTER_RAW_SIZE (regno));
+
+  regcache_collect (regno,     iar);
+  regcache_collect (regno + 1, msr);
+  regcache_collect (regno + 2, cr);
+  regcache_collect (regno + 3, lr);
+  regcache_collect (regno + 4, ctr);
+  regcache_collect (regno + 5, xer);
+}
+
+static void
+fill_sprs32 (unsigned long *iar, unsigned long *msr, unsigned long *cr,
+	     unsigned long *lr,  unsigned long *ctr, unsigned long *xer)
+{
+  int regno = FIRST_UISA_SP_REGNUM;
+
+  /* If this assert() fails, the most likely reason is that GDB was
+     built incorrectly.  In order to make use of many of the header
+     files in /usr/include/sys, GDB needs to be configured so that
+     sizeof (long) == 4).  */
+  gdb_assert (sizeof (*iar) == REGISTER_RAW_SIZE (regno));
+
+  regcache_collect (regno,     iar);
+  regcache_collect (regno + 1, msr);
+  regcache_collect (regno + 2, cr);
+  regcache_collect (regno + 3, lr);
+  regcache_collect (regno + 4, ctr);
+  regcache_collect (regno + 5, xer);
 }
 
 /* Store all registers into pthread PDTID, which doesn't have a kernel
@@ -1236,6 +1292,9 @@ store_regs_lib (pthdb_pthread_t pdtid)
 {
   int status, i;
   pthdb_context_t ctx;
+  uint32_t int32;
+  uint64_t int64;
+  double   dbl;
 
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog, 
@@ -1248,19 +1307,46 @@ store_regs_lib (pthdb_pthread_t pdtid)
     error ("aix-thread: store_registers: pthdb_pthread_context returned %s",
            pd_status2str (status));
 
-  /* General-purpose registers.  */
+  /* Collect general-purpose register values from the regcache.  */
 
   for (i = 0; i < 32; i++)
-    ctx.gpr[i] = read_register (i);
+    {
+      if (arch64)
+	{
+	  regcache_collect (i, (void *) &int64);
+	  ctx.gpr[i] = int64;
+	}
+      else
+	{
+	  regcache_collect (i, (void *) &int32);
+	  ctx.gpr[i] = int32;
+	}
+    }
 
-  /* Floating-point registers.  */
+  /* Collect floating-point register values from the regcache.  */
+  fill_fprs (ctx.fpr);
 
-  for (i = 0; i < 32; i++)
-    ctx.fpr[i] = *(double *) &registers[REGISTER_BYTE (FP0_REGNUM + i)];
+  /* Special registers (always kept in ctx as 64 bits).  */
+  if (arch64)
+    {
+      fill_sprs64 (&ctx.iar, &ctx.msr, &ctx.cr, &ctx.lr, &ctx.ctr, &ctx.xer);
+    }
+  else
+    {
+      /* Problem: ctx.iar etc. are 64 bits, but raw_registers are 32.
+	 Solution: use 32-bit temp variables.  (The assert() in fill_sprs32()
+	 will fail if the size of an unsigned long is incorrect.  If this
+	 happens, GDB needs to be reconfigured so that longs are 32-bits.)  */
+      unsigned long tmp_iar, tmp_msr, tmp_cr, tmp_lr, tmp_ctr, tmp_xer;
 
-  /* Special registers.  */
-
-  fill_sprs64 (&ctx.iar, &ctx.msr, &ctx.cr, &ctx.lr, &ctx.ctr, &ctx.xer);
+      fill_sprs32 (&tmp_iar, &tmp_msr, &tmp_cr, &tmp_lr, &tmp_ctr, &tmp_xer);
+      ctx.iar = tmp_iar;
+      ctx.msr = tmp_msr;
+      ctx.cr  = tmp_cr;
+      ctx.lr  = tmp_lr;
+      ctx.ctr = tmp_ctr;
+      ctx.xer = tmp_xer;
+    }
 
   status = pthdb_pthread_setcontext (pd_session, pdtid, &ctx);
   if (status != PTHDB_SUCCESS)
@@ -1279,9 +1365,12 @@ store_regs_lib (pthdb_pthread_t pdtid)
 static void
 store_regs_kern (int regno, pthdb_tid_t tid)
 {
+  uint64_t gprs64[32];
+  uint32_t gprs32[32];
+  double fprs[32];
   struct ptxsprs sprs64;
-  struct ptsprs sprs32;
-  char *regp;
+  struct ptsprs  sprs32;
+  int i;
 
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog, "store_regs_kern tid=%lx regno=%d\n",
@@ -1290,19 +1379,24 @@ store_regs_kern (int regno, pthdb_tid_t tid)
   /* General-purpose registers.  */
   if (regno == -1 || regno < FP0_REGNUM)
     {
-      regp = &registers[REGISTER_BYTE (0)];
       if (arch64)
-	ptrace64aix (PTT_WRITE_GPRS, tid, (unsigned long) regp, 0, NULL);
+	{
+	  fill_gprs64 (gprs64);
+	  ptrace64aix (PTT_WRITE_GPRS, tid, (unsigned long) gprs64, 0, NULL);
+	}
       else
-	ptrace32 (PTT_WRITE_GPRS, tid, (int *) regp, 0, NULL);
+	{
+	  fill_gprs32 (gprs32);
+	  ptrace32 (PTT_WRITE_GPRS, tid, gprs32, 0, NULL);
+	}
     }
 
   /* Floating-point registers.  */
 
   if (regno == -1 || (regno >= FP0_REGNUM && regno <= FPLAST_REGNUM))
     {
-      regp = &registers[REGISTER_BYTE (FP0_REGNUM)];
-      ptrace32 (PTT_WRITE_FPRS, tid, (int *) regp, 0, NULL);
+      fill_fprs (fprs);
+      ptrace32 (PTT_WRITE_FPRS, tid, (int *) fprs, 0, NULL);
     }
 
   /* Special-purpose registers.  */
@@ -1312,27 +1406,24 @@ store_regs_kern (int regno, pthdb_tid_t tid)
     {
       if (arch64)
 	{
+	  /* Must read first, not all of it's in the cache.  */
 	  ptrace64aix (PTT_READ_SPRS, tid, 
 		       (unsigned long) &sprs64, 0, NULL);
 	  fill_sprs64 (&sprs64.pt_iar, &sprs64.pt_msr, &sprs64.pt_cr,
-		       &sprs64.pt_lr, &sprs64.pt_ctr, &sprs64.pt_xer);
+		       &sprs64.pt_lr,  &sprs64.pt_ctr, &sprs64.pt_xer);
 	  ptrace64aix (PTT_WRITE_SPRS, tid, 
 		       (unsigned long) &sprs64, 0, NULL);
 	}
       else
 	{
+	  /* Must read first, not all of it's in the cache.  */
 	  ptrace32 (PTT_READ_SPRS, tid, (int *) &sprs32, 0, NULL);
 
-	  regno = FIRST_UISA_SP_REGNUM;
-	  sprs32.pt_iar = read_register (regno);
-	  sprs32.pt_msr = read_register (regno + 1);
-	  sprs32.pt_cr = read_register (regno + 2);
-	  sprs32.pt_lr = read_register (regno + 3);
-	  sprs32.pt_ctr = read_register (regno + 4);
-	  sprs32.pt_xer = read_register (regno + 5);
+	  fill_sprs32 (&sprs32.pt_iar, &sprs32.pt_msr, &sprs32.pt_cr,
+		       &sprs32.pt_lr,  &sprs32.pt_ctr, &sprs32.pt_xer);
 
 	  if (REGISTER_RAW_SIZE (LAST_UISA_SP_REGNUM))
-	    sprs32.pt_mq = read_register (LAST_UISA_SP_REGNUM);
+	    regcache_collect (LAST_UISA_SP_REGNUM, &sprs32.pt_mq);
 
 	  ptrace32 (PTT_WRITE_SPRS, tid, (int *) &sprs32, 0, NULL);
 	}
@@ -1362,15 +1453,20 @@ ops_store_registers (int regno)
     }
 }
 
-/* Prepare to modify the registers array.  */
+/* Prepare to copy the register cache to the child:
+   The register cache must be fully fetched and up to date.  */
 
 static void
 ops_prepare_to_store (void)
 {
+  int regno;
+
   if (!PD_TID (inferior_ptid))
     base_ops.to_prepare_to_store ();
   else
-    read_register_bytes (0, NULL, REGISTER_BYTES);
+    for (regno = 0; regno < NUM_REGS; regno++)
+      if (!register_cached (regno))
+	target_fetch_registers (regno);
 }
 
 /* Transfer LEN bytes of memory from GDB address MYADDR to target
