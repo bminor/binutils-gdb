@@ -1,3 +1,16 @@
+Wed May  6 13:26:19 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	changed calling convention for Q_enter_global_ref
+	* ldexp.c, ldlang.c, ldmain.c: reflect this
+	* ldver.c: bump version to 1.97.1
+	* ldindr.c (add_indirect): when an edict declaring an indirect
+	symbol is found, make sure that any ideas about the symbol being
+	common are changed if it now known to be defined.
+	* ldmain.c (linear_library): complain once if archive isn't
+	ranlibbed.
+	* ldlang.h, ldlang.c: make room for and initialize the complain
+	once field.
+
 Wed May  6 11:07:35 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
 
 	* Makefile.in: use flex & bison from ../ if they exist.

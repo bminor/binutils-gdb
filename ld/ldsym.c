@@ -18,17 +18,13 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/*
- *  $Id$ 
- */
-
 /* 
    We keep a hash table of global symbols. Each entry in a hash table
    is called an ldsym_type. Each has three chains; a pointer to a
    chain of definitions for the symbol (hopefully one long), a pointer
    to a chain of references to the symbol, and a pointer to a chain of
    common symbols. Each pointer points into the canonical symbol table
-   provided by bfd, each one of which points to an asymbol. Duringing
+   provided by bfd, each one of which points to an asymbol. During
    linkage, the linker uses the udata field to point to the next entry
    in a canonical table....
 

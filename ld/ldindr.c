@@ -1,6 +1,10 @@
 /* ldindr.c
    Handle indirect symbols.
 
+   An indirect symbol is where a global symbol in one file say's that
+   all refs like it should be turned into refs of the symbol pointed
+   at by the value of the indirect symbol.
+
    BFD supplies symbols to be indirected with the BFD_INDIRECT bit
    set. Whenever the linker gets one of these, it calls add_indirect
    with the symbol. We look up the symbol which this one dereferneces,
@@ -42,17 +46,40 @@ asymbol **b_list)
   }
 }
 
+#if 0
+void 
+DEFUN(copy_over,(ldsym, bfdsym),
+   ldsym_type *ldsym AND
+   asymbol **bfdsym)
+{
+  while (list && *list)
+  {
+    refize(Q_enter_global_ref(list, name);
+    list = (asymbol **)((*list)->udata);
+  }
+}
+#endif
+
+/* This call allows us to change the symbol table so that all future
+   refs to the symbol are patched to know the alias - but we still
+   have to fix all the old ones */
 void 
 DEFUN(add_indirect,(ptr),
 asymbol **ptr)
 {
+  asymbol **p;
   ldsym_type *lgs = ldsym_get((*ptr)->name);
   ldsym_type *new = ldsym_get(((asymbol *)((*ptr)->value))->name);
 
   /* If the mapping has already been done, stop now */
   if (lgs == new) return;
+
   lgs->flags |= SYM_INDIRECT;
 
+  if (lgs->sdefs_chain && lgs->sdefs_chain[0]) 
+  {
+    einfo("indirect symbol already has definition %s",   lgs->sdefs_chain[0]);
+  }
   new->scoms_chain = move_it(new->scoms_chain, lgs->scoms_chain);
   lgs->scoms_chain = 0;
   new->srefs_chain = move_it(new->srefs_chain, lgs->srefs_chain);
@@ -60,7 +87,12 @@ asymbol **ptr)
   new->sdefs_chain = move_it(new->sdefs_chain, lgs->sdefs_chain);
   lgs->sdefs_chain = 0;
 
-  lgs->sdefs_chain = (asymbol **)new;
+  /* If the result has any commons they should be turned into refs */
+
+  if (new->sdefs_chain && new->scoms_chain) 
+  {
+    refize(new, new->scoms_chain);
+  }    
 }
 
 
