@@ -1,3 +1,8 @@
+Sat Apr 22 01:26:29 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config/pa/tm-hppa.h (EXTRACT_RETURN_VALUE): Rewrite to correctly
+	handle "short", "int" and small structures returned in registers. 
+
 Fri Apr 21 12:57:53 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
 	* minsyms.c: add new function lookup_minimal_symbol_text, to look
