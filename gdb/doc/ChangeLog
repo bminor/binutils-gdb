@@ -1,3 +1,8 @@
+2001-05-14  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (CLEAR_DEFERRED_STORES): Delete stray @item
+	(FRAME_ARGS_ADDRESS_CORRECT): Ditto.
+
 2001-05-12  Andrew Cagney  <ac131313@redhat.com>
 
 	* Makefile.in (GDBvn.texi): Set GDBVN from ../version.in.

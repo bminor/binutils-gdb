@@ -2667,7 +2667,7 @@ status words, and other special registers.  If this is not defined,
 @value{GDBN} will assume that all registers may be written.
 
 @item DO_DEFERRED_STORES
-@itemx CLEAR_DEFERRED_STORES@item
+@itemx CLEAR_DEFERRED_STORES
 @findex CLEAR_DEFERRED_STORES
 @findex DO_DEFERRED_STORES
 Define this to execute any deferred stores of registers into the inferior,
@@ -2791,7 +2791,7 @@ Define this to an expression that returns 1 if the function invocation
 represented by @var{fi} does not have a stack frame associated with it.
 Otherwise return 0.
 
-@item FRAME_ARGS_ADDRESS_CORRECT@item
+@item FRAME_ARGS_ADDRESS_CORRECT
 @findex FRAME_ARGS_ADDRESS_CORRECT
 See @file{stack.c}.
 
