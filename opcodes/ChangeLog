@@ -1,3 +1,8 @@
+2002-12-19  Nick Kelsey  <nickk@ubicom.com>
+
+	* cgen-asm.c (cgen_parse_keyword): Added underscore to symbol character
+	check to fix false keyword trigger with names such as <keyword>_foo.
+
 2002-12-19  Doug Evans  <dje@sebabeach.org>
 
 	* Makefile.am (CGEN_CPUS): New variable.

@@ -225,7 +225,9 @@ cgen_parse_keyword (cd, strp, keyword_table, valuep)
   /* Allow letters, digits, and any special characters.  */
   while (((p - start) < (int) sizeof (buf))
 	 && *p
-	 && (ISALNUM (*p) || strchr (keyword_table->nonalpha_chars, *p)))
+	 && (ISALNUM (*p)
+	     || *p == '_'
+	     || strchr (keyword_table->nonalpha_chars, *p)))
     ++p;
 
   if (p - start >= (int) sizeof (buf))
