@@ -1,5 +1,8 @@
 Wed Apr  6 00:09:37 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* configure.in (hppa*-*-*elf*): Don't require "-hp-" for the
+	manufacturer.
+
 	* emultempl/hppaelf.em (hppaelf_finish): Only resize sections
 	if building a final executable.
 

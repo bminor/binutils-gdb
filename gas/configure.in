@@ -42,9 +42,9 @@ case "${host}" in
 
   alpha-*-osf*)			gas_host=ansi		;;
 
-  hppa*-hp-hpux*)		gas_host=hpux		;;
-  hppa*-hp-bsd*)		gas_host=hppabsd	;;
-  hppa*-hp-osf*)		gas_host=hppaosf	;;
+  hppa*-*-hpux*)		gas_host=hpux		;;
+  hppa*-*-bsd*)			gas_host=hppabsd	;;
+  hppa*-*-osf*)			gas_host=hppaosf	;;
   hppa*-*-hiux*)		gas_host=hpux		;;
 
   i[34]86-ibm-aix*)		gas_host=i386aix	;;
@@ -180,6 +180,7 @@ case ${generic_target} in
 
   m68k-wrs-vxworks | m68k-ericsson-ose | m68k-*-sunos*)
 			obj_format=aout emulation=sun3 ;;
+  m68k-motorola-sysv)	obj_format=coffbfd gas_target=m68kcoff emulation=delta ;;
 # The dpx2-specific support has apparently not been used in a while, or
 # it's not currently required.  Either way, I've heard nothing about it,
 # and the configure.in code that would've selected te-dpx2.h wasn't being
@@ -188,7 +189,6 @@ case ${generic_target} in
 # code.  So if you really need te-dpx2.h, start with this for now, and try
 # to make it work:
 # m68k-bull-sysv3*)	obj_format=coffbfd gas_target=m68kcoff emulation=dpx2 ;;
-
   m68k-*-coff | m68k-*-sysv*)
 			obj_format=coffbfd gas_target=m68kcoff ;;
   m68k-*-hpux)		obj_format=hp300 emulation=hp300 ;;
@@ -289,7 +289,7 @@ target_makefile_frag=config/${gas_target}.mt
 
 case ${bfd_gas}-${obj_format} in
   yes-coffbfd)	obj_format=coff ;;
-  no-coffbfd)	need_bfd=yes ;;
+  no-coffbfd)	need_bfd=yes extra_def="MANY_SEGMENTS" ;;
   *-elf)	bfd_gas=yes ;;
   *-ecoff)	bfd_gas=yes ;;
   *-som)	bfd_gas=yes ;;
@@ -334,8 +334,7 @@ links="host.h targ-cpu.c targ-cpu.h targ-env.h obj-format.h obj-format.c atof-ta
 # post-target:
 
 case ${bfd_gas} in
-  yes)	bfddef="BFDDEF=define" need_bfd=yes		;;
-  *)    bfddef="BFDDEF=undef"				;;
+  yes)	extra_def="BFD_ASSEMBLER" need_bfd=yes		;;
 esac
 
 case ${need_bfd} in
@@ -349,9 +348,13 @@ case "x${host}" in
 esac
 
 rm -f Makefile.tem
-echo $bfddef			>  Makefile.tem
+echo $cross			>  Makefile.tem
+case "$extra_def" in
+  "") ;;
+  *)  echo defs=$extra_def	>> Makefile.tem
+      ;;
+esac
 echo $bfdlib			>> Makefile.tem
-echo $cross			>> Makefile.tem
 echo "OPCODES_LIB=$opcodes"	>> Makefile.tem
 cat Makefile			>> Makefile.tem
 mv -f Makefile.tem Makefile
