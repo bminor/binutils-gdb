@@ -192,7 +192,7 @@ case "${target}" in
         *) ;;
     esac
     noconfigdirs="$noconfigdirs ld binutils shellutils"
-    if [ -r pagas/configure.in ]; then
+    if [ -f ${srcdir}/pagas/configure.in ]; then
       configdirs=`echo ${configdirs} | sed -e 's/gas /pagas /'`
     else
       # It'll still DTRT if "gas" directory isn't here either.
