@@ -1,3 +1,10 @@
+Wed Aug  7 20:47:43 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.base/list.exp (test_forward_search): Increase timeout
+	temporarily by 60 seconds for searching extremely long line,
+ 	and then reset to old value when done.  Increase expect input
+	buffer to 10000.
+
 Wed Aug  7 15:34:22 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/list.exp (test_forward_search): Fix to handle very
