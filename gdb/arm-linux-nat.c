@@ -1,5 +1,5 @@
 /* GNU/Linux on ARM native support.
-   Copyright 1999 Free Software Foundation, Inc.
+   Copyright 1999, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
