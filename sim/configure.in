@@ -110,7 +110,7 @@ yes)
 	;;
 esac
 
-configdirs="common ${sim_target}"
+configdirs="${sim_target}"
 AC_CONFIG_SUBDIRS($configdirs)
 
 AC_OUTPUT(Makefile)

@@ -1,7 +1,23 @@
-Fri Nov  1 08:03:30 1996  Michael Meissner  <meissner@wogglebug.ziplink.net>
+Thu Jan 23 13:59:52 1997  Stu Grossman  (grossman@critters.cygnus.com)
 
-	* configure (powerpc*-*-linux*): Treat like the other powerpc
+	* configure configure.in:  Don't configure common anymore.  Files
+	from common are now built in the individual simualtor directories.
+	This fixes problems with the WinGDB build procedure.
+
+Mon Jan 13 13:16:42 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* configure: Enable the mn10200 simulator.
+
+Wed Nov 20 01:00:36 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* configure.in (configdirs): Add common.
+	* configure: Regenerated.
+
+Fri Nov  1 08:03:30 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.in (powerpc*-*-linux*): Treat like the other powerpc
 	system V based targets.
+	* configure: Regenerate.
 
 Thu Oct 17 12:50:08 1996  Doug Evans  <dje@canuck.cygnus.com>
 
