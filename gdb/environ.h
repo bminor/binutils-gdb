@@ -44,7 +44,7 @@ extern char *get_in_environ (const struct environ *, const char *);
 
 extern void set_in_environ (struct environ *, const char *, const char *);
 
-extern void unset_in_environ (struct environ *, char *);
+extern void unset_in_environ (struct environ *, const char *);
 
 extern char **environ_vector (struct environ *);
 

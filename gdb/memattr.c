@@ -133,7 +133,7 @@ lookup_mem_region (CORE_ADDR addr)
 
 
 static void
-mem_command (char *args, int from_tty)
+mem_command (const char *args, int from_tty)
 {
   CORE_ADDR lo, hi;
   char *tok;
@@ -211,7 +211,7 @@ mem_command (char *args, int from_tty)
 
 
 static void
-mem_info_command (char *args, int from_tty)
+mem_info_command (const char *args, int from_tty)
 {
   struct mem_region *m;
   struct mem_attrib *attrib;
@@ -350,10 +350,10 @@ mem_enable (int num)
 }
 
 static void
-mem_enable_command (char *args, int from_tty)
+mem_enable_command (const char *args, int from_tty)
 {
-  char *p = args;
-  char *p1;
+  const char *p = args;
+  const char *p1;
   int num;
   struct mem_region *m;
 
@@ -400,10 +400,10 @@ mem_disable (int num)
 }
 
 static void
-mem_disable_command (char *args, int from_tty)
+mem_disable_command (const char *args, int from_tty)
 {
-  char *p = args;
-  char *p1;
+  const char *p = args;
+  const char *p1;
   int num;
   struct mem_region *m;
 
@@ -479,10 +479,10 @@ mem_delete (int num)
 }
 
 static void
-mem_delete_command (char *args, int from_tty)
+mem_delete_command (const char *args, int from_tty)
 {
-  char *p = args;
-  char *p1;
+  const char *p = args;
+  const char *p1;
   int num;
 
   dcache_invalidate (target_dcache);

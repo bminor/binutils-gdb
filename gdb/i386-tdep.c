@@ -864,7 +864,7 @@ i386_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
       char buf[4];
 
       sp -= 4;
-      store_address (buf, 4, struct_addr);
+      store_unsigned_integer (buf, 4, struct_addr);
       write_memory (sp, buf, 4);
     }
 

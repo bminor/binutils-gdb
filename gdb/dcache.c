@@ -175,7 +175,7 @@ static struct dcache_block *dcache_alloc (DCACHE *dcache, CORE_ADDR addr);
 
 static int dcache_writeback (DCACHE *dcache);
 
-static void dcache_info (char *exp, int tty);
+static void dcache_info (const char *exp, int tty);
 
 void _initialize_dcache (void);
 
@@ -553,7 +553,7 @@ dcache_xfer_memory (DCACHE *dcache, CORE_ADDR memaddr, char *myaddr, int len,
 }
 
 static void
-dcache_info (char *exp, int tty)
+dcache_info (const char *exp, int tty)
 {
   struct dcache_block *p;
 

@@ -56,40 +56,41 @@
 
 static void until_break_command_continuation (struct continuation_arg *arg);
 
-static void catch_command_1 (char *, int, int);
+static void catch_command_1 (const char *, int, int);
 
-static void enable_delete_command (char *, int);
+static void enable_delete_command (const char *, int);
 
 static void enable_delete_breakpoint (struct breakpoint *);
 
-static void enable_once_command (char *, int);
+static void enable_once_command (const char *, int);
 
 static void enable_once_breakpoint (struct breakpoint *);
 
-static void disable_command (char *, int);
+static void disable_command (const char *, int);
 
-static void enable_command (char *, int);
+static void enable_command (const char *, int);
 
-static void map_breakpoint_numbers (char *, void (*)(struct breakpoint *));
+static void map_breakpoint_numbers (const char *,
+				    void (*)(struct breakpoint *));
 
-static void ignore_command (char *, int);
+static void ignore_command (const char *, int);
 
 static int breakpoint_re_set_one (void *);
 
-static void clear_command (char *, int);
+static void clear_command (const char *, int);
 
-static void catch_command (char *, int);
+static void catch_command (const char *, int);
 
-static void watch_command (char *, int);
+static void watch_command (const char *, int);
 
 static int can_use_hardware_watchpoint (struct value *);
 
-extern void break_at_finish_command (char *, int);
-extern void break_at_finish_at_depth_command (char *, int);
+extern void break_at_finish_command (const char *, int);
+extern void break_at_finish_at_depth_command (const char *, int);
 
-extern void tbreak_at_finish_command (char *, int);
+extern void tbreak_at_finish_command (const char *, int);
 
-static void break_command_1 (char *, int, int);
+static void break_command_1 (const char *, int, int);
 
 static void mention (struct breakpoint *);
 
@@ -99,7 +100,7 @@ static void check_duplicates (struct breakpoint *);
 
 static void describe_other_breakpoints (CORE_ADDR, asection *);
 
-static void breakpoints_info (char *, int);
+static void breakpoints_info (const char *, int);
 
 static void breakpoint_1 (int, int);
 
@@ -109,11 +110,11 @@ static int breakpoint_cond_eval (void *);
 
 static void cleanup_executing_breakpoints (void *);
 
-static void commands_command (char *, int);
+static void commands_command (const char *, int);
 
-static void condition_command (char *, int);
+static void condition_command (const char *, int);
 
-static int get_number_trailer (char **, int);
+static int get_number_trailer (const char **, int);
 
 void set_breakpoint_count (int);
 
@@ -141,29 +142,29 @@ static int watchpoint_check (void *);
 
 static int cover_target_enable_exception_callback (void *);
 
-static void maintenance_info_breakpoints (char *, int);
+static void maintenance_info_breakpoints (const char *, int);
 
-static void create_longjmp_breakpoint (char *);
+static void create_longjmp_breakpoint (const char *);
 
-static void create_overlay_event_breakpoint (char *);
+static void create_overlay_event_breakpoint (const char *);
 
 static int hw_breakpoint_used_count (void);
 
 static int hw_watchpoint_used_count (enum bptype, int *);
 
-static void hbreak_command (char *, int);
+static void hbreak_command (const char *, int);
 
-static void thbreak_command (char *, int);
+static void thbreak_command (const char *, int);
 
-static void watch_command_1 (char *, int, int);
+static void watch_command_1 (const char *, int, int);
 
-static void rwatch_command (char *, int);
+static void rwatch_command (const char *, int);
 
-static void awatch_command (char *, int);
+static void awatch_command (const char *, int);
 
 static void do_enable_breakpoint (struct breakpoint *, enum bpdisp);
 
-static void solib_load_unload_1 (char *hookname,
+static void solib_load_unload_1 (const char *hookname,
 				 int tempflag,
 				 char *dll_pathname,
 				 char *cond_string, enum bptype bp_kind);
@@ -172,37 +173,38 @@ static void create_fork_vfork_event_catchpoint (int tempflag,
 						char *cond_string,
 						enum bptype bp_kind);
 
-static void break_at_finish_at_depth_command_1 (char *arg,
+static void break_at_finish_at_depth_command_1 (const char *arg,
 						int flag, int from_tty);
 
-static void break_at_finish_command_1 (char *arg, int flag, int from_tty);
+static void break_at_finish_command_1 (const char *arg, int flag, int from_tty);
 
-static void stop_command (char *arg, int from_tty);
+static void stop_command (const char *arg, int from_tty);
 
-static void stopin_command (char *arg, int from_tty);
+static void stopin_command (const char *arg, int from_tty);
 
-static void stopat_command (char *arg, int from_tty);
+static void stopat_command (const char *arg, int from_tty);
 
-static char *ep_find_event_name_end (char *arg);
+static const char *ep_find_event_name_end (const char *arg);
 
-static char *ep_parse_optional_if_clause (char **arg);
+static const char *ep_parse_optional_if_clause (const char **arg);
 
-static char *ep_parse_optional_filename (char **arg);
+static char *ep_parse_optional_filename (const char **arg);
 
 #if defined(CHILD_INSERT_EXEC_CATCHPOINT)
 static void catch_exec_command_1 (char *arg, int tempflag, int from_tty);
 #endif
 
-static void create_exception_catchpoint (int tempflag, char *cond_string,
+static void create_exception_catchpoint (int tempflag, const char *cond_string,
 					 enum exception_event_kind ex_event,
 					 struct symtab_and_line *sal);
 
 static void catch_exception_command_1 (enum exception_event_kind ex_event, 
-				       char *arg, int tempflag, int from_tty);
+				       const char *arg, int tempflag,
+				       int from_tty);
 
-static void tcatch_command (char *arg, int from_tty);
+static void tcatch_command (const char *arg, int from_tty);
 
-static void ep_skip_leading_whitespace (char **s);
+static void ep_skip_leading_whitespace (const char **s);
 
 /* Prototypes for exported functions. */
 
@@ -360,10 +362,10 @@ int default_breakpoint_line;
    TRAILER is a character which can be found after the number; most
    commonly this is `-'.  If you don't want a trailer, use \0.  */ 
 static int
-get_number_trailer (char **pp, int trailer)
+get_number_trailer (const char **pp, int trailer)
 {
   int retval = 0;	/* default */
-  char *p = *pp;
+  const char *p = *pp;
 
   if (p == NULL)
     /* Empty line means refer to the last breakpoint.  */
@@ -373,7 +375,7 @@ get_number_trailer (char **pp, int trailer)
       /* Make a copy of the name, so we can null-terminate it
          to pass to lookup_internalvar().  */
       char *varname;
-      char *start = ++p;
+      const char *start = ++p;
       struct value *val;
 
       while (isalnum (*p) || *p == '_')
@@ -424,7 +426,7 @@ get_number_trailer (char **pp, int trailer)
 
 /* Like get_number_trailer, but don't allow a trailer.  */
 int
-get_number (char **pp)
+get_number (const char **pp)
 {
   return get_number_trailer (pp, '\0');
 }
@@ -446,10 +448,10 @@ get_number (char **pp)
  */
 
 int 
-get_number_or_range (char **pp)
+get_number_or_range (const char **pp)
 {
   static int last_retval, end_value;
-  static char *end_ptr;
+  static const char *end_ptr;
   static int in_range = 0;
 
   if (**pp != '-')
@@ -459,7 +461,7 @@ get_number_or_range (char **pp)
       last_retval = get_number_trailer (pp, '-');
       if (**pp == '-')
 	{
-	  char **temp;
+	  const char **temp;
 
 	  /* This is the start of a range (<number1> - <number2>).
 	     Skip the '-', parse and remember the second number,
@@ -510,10 +512,10 @@ get_number_or_range (char **pp)
 /* condition N EXP -- set break condition of breakpoint N to EXP.  */
 
 static void
-condition_command (char *arg, int from_tty)
+condition_command (const char *arg, int from_tty)
 {
   register struct breakpoint *b;
-  char *p;
+  const char *p;
   register int bnum;
 
   if (arg == 0)
@@ -562,10 +564,10 @@ condition_command (char *arg, int from_tty)
 
 /* ARGSUSED */
 static void
-commands_command (char *arg, int from_tty)
+commands_command (const char *arg, int from_tty)
 {
   register struct breakpoint *b;
-  char *p;
+  const char *p;
   register int bnum;
   struct command_line *l;
 
@@ -3198,7 +3200,7 @@ print_one_breakpoint (struct breakpoint *b,
   struct ep_type_description
     {
       enum bptype type;
-      char *description;
+      const char *description;
     };
   static struct ep_type_description bptypes[] =
   {
@@ -3229,7 +3231,7 @@ print_one_breakpoint (struct breakpoint *b,
     {bp_catch_throw, "catch throw"}
   };
   
-  static char *bpdisps[] =
+  static const char *bpdisps[] =
   {"del", "dstp", "dis", "keep"};
   static char bpenables[] = "nynny";
   char wrap_indent[80];
@@ -3641,7 +3643,7 @@ breakpoint_1 (int bnum, int allflag)
 
 /* ARGSUSED */
 static void
-breakpoints_info (char *bnum_exp, int from_tty)
+breakpoints_info (const char *bnum_exp, int from_tty)
 {
   int bnum = -1;
 
@@ -3653,7 +3655,7 @@ breakpoints_info (char *bnum_exp, int from_tty)
 
 /* ARGSUSED */
 static void
-maintenance_info_breakpoints (char *bnum_exp, int from_tty)
+maintenance_info_breakpoints (const char *bnum_exp, int from_tty)
 {
   int bnum = -1;
 
@@ -3916,7 +3918,7 @@ create_internal_breakpoint (CORE_ADDR address, enum bptype type)
 
 
 static void
-create_longjmp_breakpoint (char *func_name)
+create_longjmp_breakpoint (const char *func_name)
 {
   struct breakpoint *b;
   struct minimal_symbol *m;
@@ -3969,7 +3971,7 @@ disable_longjmp_breakpoint (void)
 }
 
 static void
-create_overlay_event_breakpoint (char *func_name)
+create_overlay_event_breakpoint (const char *func_name)
 {
   struct breakpoint *b;
   struct minimal_symbol *m;
@@ -4121,15 +4123,15 @@ re_enable_breakpoints_in_shlibs (void)
 #endif
 
 static void
-solib_load_unload_1 (char *hookname, int tempflag, char *dll_pathname,
+solib_load_unload_1 (const char *hookname, int tempflag, char *dll_pathname,
 		     char *cond_string, enum bptype bp_kind)
 {
   struct breakpoint *b;
   struct symtabs_and_lines sals;
   struct cleanup *old_chain;
   struct cleanup *canonical_strings_chain = NULL;
-  char *addr_start = hookname;
-  char *addr_end = NULL;
+  const char *addr_start = hookname;
+  const char *addr_end = NULL;
   char **canonical = (char **) NULL;
   int thread = -1;		/* All threads. */
 
@@ -4608,11 +4610,11 @@ create_breakpoints (struct symtabs_and_lines sals, char **addr_string,
    address strings. ARG points to the end of the SAL. */
 
 void
-parse_breakpoint_sals (char **address,
+parse_breakpoint_sals (const char **address,
 		       struct symtabs_and_lines *sals,
 		       char ***addr_string)
 {
-  char *addr_start = *address;
+  const char *addr_start = *address;
   *addr_string = NULL;
   /* If no arg given, or if first arg is 'if ', use the default
      breakpoint. */
@@ -4676,7 +4678,7 @@ parse_breakpoint_sals (char **address,
 
 void
 breakpoint_sals_to_pc (struct symtabs_and_lines *sals,
-		       char *address)
+		       const char *address)
 {    
   int i;
   for (i = 0; i < sals->nelts; i++)
@@ -4712,7 +4714,7 @@ breakpoint_sals_to_pc (struct symtabs_and_lines *sals,
    second bit : 0 normal breakpoint, 1 hardware breakpoint. */
 
 static void
-break_command_1 (char *arg, int flag, int from_tty)
+break_command_1 (const char *arg, int flag, int from_tty)
 {
   int tempflag, hardwareflag;
   struct symtabs_and_lines sals;
@@ -4720,7 +4722,7 @@ break_command_1 (char *arg, int flag, int from_tty)
   /* Pointers in arg to the start, and one past the end, of the
      condition.  */
   char **cond_string = (char **) NULL;
-  char *addr_start = arg;
+  const char *addr_start = arg;
   char **addr_string;
   struct cleanup *old_chain;
   struct cleanup *breakpoint_chain = NULL;
@@ -4781,13 +4783,13 @@ break_command_1 (char *arg, int flag, int from_tty)
   thread = -1;			/* No specific thread yet */
   for (i = 0; i < sals.nelts; i++)
     {
-      char *tok = arg;
+      const char *tok = arg;
       while (tok && *tok)
 	{
-	  char *end_tok;
+	  const char *end_tok;
 	  int toklen;
-	  char *cond_start = NULL;
-	  char *cond_end = NULL;
+	  const char *cond_start = NULL;
+	  const char *cond_end = NULL;
 	  while (*tok == ' ' || *tok == '\t')
 	    tok++;
 
@@ -4809,7 +4811,7 @@ break_command_1 (char *arg, int flag, int from_tty)
 	    }
 	  else if (toklen >= 1 && strncmp (tok, "thread", toklen) == 0)
 	    {
-	      char *tmptok;
+	      const char *tmptok;
 
 	      tok = end_tok + 1;
 	      tmptok = tok;
@@ -4866,7 +4868,7 @@ do_captured_breakpoint (void *data)
   char **addr_string;
   char **cond_string;
 
-  char *address_end;
+  const char *address_end;
 
   /* Parse the source and lines spec.  Delay check that the expression
      didn't contain trailing garbage until after cleanups are in
@@ -4927,7 +4929,7 @@ do_captured_breakpoint (void *data)
     {
       if (args->condition != NULL)
 	{
-	  char *tok = args->condition;
+	  const char *tok = args->condition;
 	  cond[i] = parse_exp_1 (&tok, block_for_pc (sals.sals[i].pc), 0);
 	  if (*tok != '\0')
 	    error ("Garbage %s follows condition", tok);
@@ -4967,11 +4969,11 @@ gdb_breakpoint (char *address, char *condition,
 
 
 static void
-break_at_finish_at_depth_command_1 (char *arg, int flag, int from_tty)
+break_at_finish_at_depth_command_1 (const char *arg, int flag, int from_tty)
 {
   struct frame_info *frame;
   CORE_ADDR low, high, selected_pc = 0;
-  char *extra_args = NULL;
+  const char *extra_args = NULL;
   char *level_arg;
   char *addr_string;
   int extra_args_len = 0, if_arg = 0;
@@ -5025,7 +5027,7 @@ break_at_finish_at_depth_command_1 (char *arg, int flag, int from_tty)
 
   if (selected_pc)
     {
-      if (find_pc_partial_function (selected_pc, (char **) NULL, &low, &high))
+      if (find_pc_partial_function (selected_pc, NULL, &low, &high))
 	{
 	  addr_string = (char *) xmalloc (26 + extra_args_len);
 	  if (extra_args_len)
@@ -5044,14 +5046,16 @@ break_at_finish_at_depth_command_1 (char *arg, int flag, int from_tty)
 
 
 static void
-break_at_finish_command_1 (char *arg, int flag, int from_tty)
+break_at_finish_command_1 (const char *arg, int flag, int from_tty)
 {
-  char *addr_string, *break_string, *beg_addr_string;
+  const char *addr_string;
+  char *break_string;
+  char *beg_addr_string;
   CORE_ADDR low, high;
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
   struct cleanup *old_chain;
-  char *extra_args = NULL;
+  const char *extra_args = NULL;
   int extra_args_len = 0;
   int i, if_arg = 0;
 
@@ -5062,9 +5066,10 @@ break_at_finish_command_1 (char *arg, int flag, int from_tty)
 	{
 	  if (deprecated_selected_frame)
 	    {
-	      addr_string = (char *) xmalloc (15);
-	      sprintf (addr_string, "*0x%s",
-		       paddr_nz (get_frame_pc (deprecated_selected_frame)));
+	      char *tmp;
+	      xasprintf (&tmp, "*0x%s",
+			 paddr_nz (get_frame_pc (deprecated_selected_frame)));
+	      beg_addr_string = tmp;
 	      if (arg)
 		if_arg = 1;
 	    }
@@ -5076,8 +5081,7 @@ break_at_finish_command_1 (char *arg, int flag, int from_tty)
     }
   else
     {
-      addr_string = (char *) xmalloc (strlen (arg) + 1);
-      strcpy (addr_string, arg);
+      beg_addr_string = xstrdup (arg);
     }
 
   if (if_arg)
@@ -5099,7 +5103,7 @@ break_at_finish_command_1 (char *arg, int flag, int from_tty)
   sals.sals = NULL;
   sals.nelts = 0;
 
-  beg_addr_string = addr_string;
+  addr_string = beg_addr_string;
   sals = decode_line_1 (&addr_string, 1, (struct symtab *) NULL, 0,
 			(char ***) NULL);
 
@@ -5108,7 +5112,7 @@ break_at_finish_command_1 (char *arg, int flag, int from_tty)
   for (i = 0; (i < sals.nelts); i++)
     {
       sal = sals.sals[i];
-      if (find_pc_partial_function (sal.pc, (char **) NULL, &low, &high))
+      if (find_pc_partial_function (sal.pc, NULL, &low, &high))
 	{
 	  break_string = (char *) xmalloc (extra_args_len + 26);
 	  if (extra_args_len)
@@ -5180,49 +5184,49 @@ resolve_sal_pc (struct symtab_and_line *sal)
 }
 
 void
-break_command (char *arg, int from_tty)
+break_command (const char *arg, int from_tty)
 {
   break_command_1 (arg, 0, from_tty);
 }
 
 void
-break_at_finish_command (char *arg, int from_tty)
+break_at_finish_command (const char *arg, int from_tty)
 {
   break_at_finish_command_1 (arg, 0, from_tty);
 }
 
 void
-break_at_finish_at_depth_command (char *arg, int from_tty)
+break_at_finish_at_depth_command (const char *arg, int from_tty)
 {
   break_at_finish_at_depth_command_1 (arg, 0, from_tty);
 }
 
 void
-tbreak_command (char *arg, int from_tty)
+tbreak_command (const char *arg, int from_tty)
 {
   break_command_1 (arg, BP_TEMPFLAG, from_tty);
 }
 
 void
-tbreak_at_finish_command (char *arg, int from_tty)
+tbreak_at_finish_command (const char *arg, int from_tty)
 {
   break_at_finish_command_1 (arg, BP_TEMPFLAG, from_tty);
 }
 
 static void
-hbreak_command (char *arg, int from_tty)
+hbreak_command (const char *arg, int from_tty)
 {
   break_command_1 (arg, BP_HARDWAREFLAG, from_tty);
 }
 
 static void
-thbreak_command (char *arg, int from_tty)
+thbreak_command (const char *arg, int from_tty)
 {
   break_command_1 (arg, (BP_TEMPFLAG | BP_HARDWAREFLAG), from_tty);
 }
 
 static void
-stop_command (char *arg, int from_tty)
+stop_command (const char *arg, int from_tty)
 {
   printf_filtered ("Specify the type of breakpoint to set.\n\
 Usage: stop in <function | address>\n\
@@ -5230,7 +5234,7 @@ Usage: stop in <function | address>\n\
 }
 
 static void
-stopin_command (char *arg, int from_tty)
+stopin_command (const char *arg, int from_tty)
 {
   int badInput = 0;
 
@@ -5238,7 +5242,7 @@ stopin_command (char *arg, int from_tty)
     badInput = 1;
   else if (*arg != '*')
     {
-      char *argptr = arg;
+      const char *argptr = arg;
       int hasColon = 0;
 
       /* look for a ':'.  If this is a line number specification, then
@@ -5263,7 +5267,7 @@ stopin_command (char *arg, int from_tty)
 }
 
 static void
-stopat_command (char *arg, int from_tty)
+stopat_command (const char *arg, int from_tty)
 {
   int badInput = 0;
 
@@ -5271,7 +5275,7 @@ stopat_command (char *arg, int from_tty)
     badInput = 1;
   else
     {
-      char *argptr = arg;
+      const char *argptr = arg;
       int hasColon = 0;
 
       /* look for a ':'.  If there is a '::' then get out, otherwise
@@ -5299,7 +5303,7 @@ stopat_command (char *arg, int from_tty)
                 hw_read:   watch read, 
 		hw_access: watch access (read or write) */
 static void
-watch_command_1 (char *arg, int accessflag, int from_tty)
+watch_command_1 (const char *arg, int accessflag, int from_tty)
 {
   struct breakpoint *b;
   struct symtab_and_line sal;
@@ -5308,12 +5312,13 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
   struct value *val, *mark;
   struct frame_info *frame;
   struct frame_info *prev_frame = NULL;
-  char *exp_start = NULL;
-  char *exp_end = NULL;
-  char *tok, *end_tok;
+  const char *exp_start = NULL;
+  const char *exp_end = NULL;
+  const char *tok;
+  const char *end_tok;
   int toklen;
-  char *cond_start = NULL;
-  char *cond_end = NULL;
+  const char *cond_start = NULL;
+  const char *cond_end = NULL;
   struct expression *cond = NULL;
   int i, other_type_used, target_resources_ok = 0;
   enum bptype bp_type;
@@ -5551,7 +5556,7 @@ watch_command_wrapper (char *arg, int from_tty)
 }
 
 static void
-watch_command (char *arg, int from_tty)
+watch_command (const char *arg, int from_tty)
 {
   watch_command_1 (arg, hw_write, from_tty);
 }
@@ -5563,7 +5568,7 @@ rwatch_command_wrapper (char *arg, int from_tty)
 }
 
 static void
-rwatch_command (char *arg, int from_tty)
+rwatch_command (const char *arg, int from_tty)
 {
   watch_command_1 (arg, hw_read, from_tty);
 }
@@ -5575,7 +5580,7 @@ awatch_command_wrapper (char *arg, int from_tty)
 }
 
 static void
-awatch_command (char *arg, int from_tty)
+awatch_command (const char *arg, int from_tty)
 {
   watch_command_1 (arg, hw_access, from_tty);
 }
@@ -5599,7 +5604,7 @@ until_break_command_continuation (struct continuation_arg *arg)
 
 /* ARGSUSED */
 void
-until_break_command (char *arg, int from_tty, int anywhere)
+until_break_command (const char *arg, int from_tty, int anywhere)
 {
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
@@ -5715,7 +5720,7 @@ enable_catch_breakpoint (void)
 #endif /* 0 */
 
 static void
-ep_skip_leading_whitespace (char **s)
+ep_skip_leading_whitespace (const char **s)
 {
   if ((s == NULL) || (*s == NULL))
     return;
@@ -5728,11 +5733,11 @@ ep_skip_leading_whitespace (char **s)
    possible match is found, a pointer to the last character of
    the token is returned.  Else, NULL is returned. */
 
-static char *
-ep_find_event_name_end (char *arg)
+static const char *
+ep_find_event_name_end (const char *arg)
 {
-  char *s = arg;
-  char *event_name_end = NULL;
+  const char *s = arg;
+  const char *event_name_end = NULL;
 
   /* If we could depend upon the presense of strrpbrk, we'd use that... */
   if (arg == NULL)
@@ -5761,10 +5766,10 @@ ep_find_event_name_end (char *arg)
    it updates arg to point to the first character following the parsed
    if clause in the arg string. */
 
-static char *
-ep_parse_optional_if_clause (char **arg)
+static const char *
+ep_parse_optional_if_clause (const char **arg)
 {
-  char *cond_string;
+  const char *cond_string;
 
   if (((*arg)[0] != 'i') || ((*arg)[1] != 'f') || !isspace ((*arg)[2]))
     return NULL;
@@ -5794,10 +5799,10 @@ ep_parse_optional_if_clause (char **arg)
    Note that clients needing to preserve the returned filename for
    future access should copy it to their own buffers. */
 static char *
-ep_parse_optional_filename (char **arg)
+ep_parse_optional_filename (const char **arg)
 {
   static char filename[1024];
-  char *arg_p = *arg;
+  const char *arg_p = *arg;
   int i;
   char c;
 
@@ -5893,10 +5898,10 @@ catch_exec_command_1 (char *arg, int tempflag, int from_tty)
 
 #if defined(SOLIB_ADD)
 static void
-catch_load_command_1 (char *arg, int tempflag, int from_tty)
+catch_load_command_1 (const char *arg, int tempflag, int from_tty)
 {
   char *dll_pathname = NULL;
-  char *cond_string = NULL;
+  const char *cond_string = NULL;
 
   ep_skip_leading_whitespace (&arg);
 
@@ -5935,10 +5940,10 @@ catch_load_command_1 (char *arg, int tempflag, int from_tty)
 }
 
 static void
-catch_unload_command_1 (char *arg, int tempflag, int from_tty)
+catch_unload_command_1 (const char *arg, int tempflag, int from_tty)
 {
   char *dll_pathname = NULL;
-  char *cond_string = NULL;
+  const char *cond_string = NULL;
 
   ep_skip_leading_whitespace (&arg);
 
@@ -5983,7 +5988,7 @@ catch_unload_command_1 (char *arg, int tempflag, int from_tty)
    exception event callback */
 
 static void
-create_exception_catchpoint (int tempflag, char *cond_string,
+create_exception_catchpoint (int tempflag, const char *cond_string,
 			     enum exception_event_kind ex_event,
 			     struct symtab_and_line *sal)
 {
@@ -6066,10 +6071,11 @@ static struct breakpoint_ops gnu_v3_exception_catchpoint_ops = {
 };
 
 static int
-handle_gnu_v3_exceptions (int tempflag, char *cond_string,
+handle_gnu_v3_exceptions (int tempflag, const char *cond_string,
 			  enum exception_event_kind ex_event, int from_tty)
 {
-  char *trigger_func_name, *nameptr;
+  char *trigger_func_name;
+  const char *nameptr;
   struct symtabs_and_lines sals;
   struct breakpoint *b;
 
@@ -6106,10 +6112,10 @@ handle_gnu_v3_exceptions (int tempflag, char *cond_string,
 /* Deal with "catch catch" and "catch throw" commands */
 
 static void
-catch_exception_command_1 (enum exception_event_kind ex_event, char *arg,
-			   int tempflag, int from_tty)
+catch_exception_command_1 (enum exception_event_kind ex_event,
+			   const char *arg, int tempflag, int from_tty)
 {
-  char *cond_string = NULL;
+  const char *cond_string = NULL;
   struct symtab_and_line *sal = NULL;
 
   ep_skip_leading_whitespace (&arg);
@@ -6160,7 +6166,7 @@ cover_target_enable_exception_callback (void *arg)
 }
 
 static void
-catch_command_1 (char *arg, int tempflag, int from_tty)
+catch_command_1 (const char *arg, int tempflag, int from_tty)
 {
 
   /* The first argument may be an event name, such as "start" or "load".
@@ -6169,8 +6175,8 @@ catch_command_1 (char *arg, int tempflag, int from_tty)
      the v4.16-and-earlier GDB meaning of the "catch" command.)
 
      First, try to find the bounds of what might be an event name. */
-  char *arg1_start = arg;
-  char *arg1_end;
+  const char *arg1_start = arg;
+  const char *arg1_end;
   int arg1_length;
 
   if (arg1_start == NULL)
@@ -6319,14 +6325,14 @@ delete_catch (char *args)
 #endif /* 0 */
 
 static void
-catch_command (char *arg, int from_tty)
+catch_command (const char *arg, int from_tty)
 {
   catch_command_1 (arg, 0, from_tty);
 }
 
 
 static void
-tcatch_command (char *arg, int from_tty)
+tcatch_command (const char *arg, int from_tty)
 {
   catch_command_1 (arg, 1, from_tty);
 }
@@ -6334,7 +6340,7 @@ tcatch_command (char *arg, int from_tty)
 /* Delete breakpoints by address or line.  */
 
 static void
-clear_command (char *arg, int from_tty)
+clear_command (const char *arg, int from_tty)
 {
   struct breakpoint *b, *tmp, *prev, *found;
   int default_match;
@@ -6671,7 +6677,7 @@ make_exec_cleanup_delete_breakpoint (struct breakpoint *b)
 }
 
 void
-delete_command (char *arg, int from_tty)
+delete_command (const char *arg, int from_tty)
 {
   struct breakpoint *b, *temp;
 
@@ -6725,7 +6731,7 @@ breakpoint_re_set_one (void *bint)
   struct value *mark;
   int i;
   struct symtabs_and_lines sals;
-  char *s;
+  const char *s;
   enum enable_state save_enable;
 
   switch (b->type)
@@ -7014,9 +7020,9 @@ breakpoint_clear_ignore_counts (void)
 /* Command to set ignore-count of breakpoint N to COUNT.  */
 
 static void
-ignore_command (char *args, int from_tty)
+ignore_command (const char *args, int from_tty)
 {
-  char *p = args;
+  const char *p = args;
   register int num;
 
   if (p == 0)
@@ -7039,10 +7045,11 @@ ignore_command (char *args, int from_tty)
    whose numbers are given in ARGS.  */
 
 static void
-map_breakpoint_numbers (char *args, void (*function) (struct breakpoint *))
+map_breakpoint_numbers (const char *args,
+			void (*function) (struct breakpoint *))
 {
-  register char *p = args;
-  char *p1;
+  const char *p = args;
+  const char *p1;
   register int num;
   register struct breakpoint *b, *tmp;
   int match;
@@ -7107,7 +7114,7 @@ disable_breakpoint (struct breakpoint *bpt)
 
 /* ARGSUSED */
 static void
-disable_command (char *args, int from_tty)
+disable_command (const char *args, int from_tty)
 {
   register struct breakpoint *bpt;
   if (args == 0)
@@ -7241,7 +7248,7 @@ enable_breakpoint (struct breakpoint *bpt)
 
 /* ARGSUSED */
 static void
-enable_command (char *args, int from_tty)
+enable_command (const char *args, int from_tty)
 {
   register struct breakpoint *bpt;
   if (args == 0)
@@ -7281,7 +7288,7 @@ enable_once_breakpoint (struct breakpoint *bpt)
 
 /* ARGSUSED */
 static void
-enable_once_command (char *args, int from_tty)
+enable_once_command (const char *args, int from_tty)
 {
   map_breakpoint_numbers (args, enable_once_breakpoint);
 }
@@ -7294,7 +7301,7 @@ enable_delete_breakpoint (struct breakpoint *bpt)
 
 /* ARGSUSED */
 static void
-enable_delete_command (char *args, int from_tty)
+enable_delete_command (const char *args, int from_tty)
 {
   map_breakpoint_numbers (args, enable_delete_breakpoint);
 }
@@ -7302,7 +7309,7 @@ enable_delete_command (char *args, int from_tty)
 /* Use default_breakpoint_'s, or nothing if they aren't valid.  */
 
 struct symtabs_and_lines
-decode_line_spec_1 (char *string, int funfirstline)
+decode_line_spec_1 (const char *string, int funfirstline)
 {
   struct symtabs_and_lines sals;
   if (string == 0)

@@ -65,9 +65,9 @@ static struct core_fns *sniff_core_bfd (bfd *);
 
 static int gdb_check_format (bfd *);
 
-static void core_open (char *, int);
+static void core_open (const char *, int);
 
-static void core_detach (char *, int);
+static void core_detach (const char *, int);
 
 static void core_close (int);
 
@@ -256,7 +256,7 @@ add_to_thread_list (bfd *abfd, asection *asect, void *reg_sect_arg)
 /* This routine opens and sets up the core file bfd.  */
 
 static void
-core_open (char *filename, int from_tty)
+core_open (const char *filename, int from_tty)
 {
   const char *p;
   int siggy;
@@ -377,7 +377,7 @@ your %s; do ``info files''", target_longname);
 }
 
 static void
-core_detach (char *args, int from_tty)
+core_detach (const char *args, int from_tty)
 {
   if (args)
     error ("Too many arguments");

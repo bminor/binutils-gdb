@@ -102,7 +102,7 @@ static void malloc_botch (void);
 
 static void prompt_for_continue (void);
 
-static void set_width_command (char *, int, struct cmd_list_element *);
+static void set_width_command (const char *, int, struct cmd_list_element *);
 
 static void set_width (void);
 
@@ -163,15 +163,15 @@ int sevenbit_strings = 0;
 
 /* String to be printed before error messages, if any.  */
 
-char *error_pre_print;
+const char *error_pre_print;
 
 /* String to be printed before quit messages, if any.  */
 
-char *quit_pre_print;
+const char *quit_pre_print;
 
 /* String to be printed before warning messages, if any.  */
 
-char *warning_pre_print = "\nwarning: ";
+const char *warning_pre_print = "\nwarning: ";
 
 int pagination_enabled = 1;
 
@@ -1575,7 +1575,7 @@ static char *wrap_pointer;
 
 /* String to indent by if the wrap occurs.  Must not be NULL if wrap_column
    is non-zero.  */
-static char *wrap_indent;
+static const char *wrap_indent;
 
 /* Column number on the screen where wrap_buffer begins, or 0 if wrapping
    is not in effect.  */
@@ -1668,7 +1668,7 @@ set_width (void)
 
 /* ARGSUSED */
 static void
-set_width_command (char *args, int from_tty, struct cmd_list_element *c)
+set_width_command (const char *args, int from_tty, struct cmd_list_element *c)
 {
   set_width ();
 }
@@ -1765,7 +1765,7 @@ reinitialize_more_filter (void)
    used to force out output from the wrap_buffer.  */
 
 void
-wrap_here (char *indent)
+wrap_here (const char *indent)
 {
   /* This should have been allocated, but be paranoid anyway. */
   if (!wrap_buffer)
@@ -2279,7 +2279,7 @@ print_spaces_filtered (int n, struct ui_file *stream)
    demangling is off, the name is printed in its "raw" form. */
 
 void
-fprintf_symbol_filtered (struct ui_file *stream, char *name,
+fprintf_symbol_filtered (struct ui_file *stream, const char *name,
 			 enum language lang, int arg_mode)
 {
   char *demangled;
@@ -2448,16 +2448,16 @@ subset_compare (char *string_to_compare, char *template_string)
 }
 
 
-static void pagination_on_command (char *arg, int from_tty);
+static void pagination_on_command (const char *arg, int from_tty);
 static void
-pagination_on_command (char *arg, int from_tty)
+pagination_on_command (const char *arg, int from_tty)
 {
   pagination_enabled = 1;
 }
 
-static void pagination_on_command (char *arg, int from_tty);
+static void pagination_on_command (const char *arg, int from_tty);
 static void
-pagination_off_command (char *arg, int from_tty)
+pagination_off_command (const char *arg, int from_tty)
 {
   pagination_enabled = 0;
 }

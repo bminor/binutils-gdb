@@ -74,17 +74,17 @@ void _initialize_source (void);
 
 static int get_filename_and_charpos (struct symtab *, char **);
 
-static void reverse_search_command (char *, int);
+static void reverse_search_command (const char *, int);
 
-static void forward_search_command (char *, int);
+static void forward_search_command (const char *, int);
 
-static void line_info (char *, int);
+static void line_info (const char *, int);
 
 static void ambiguous_line_spec (struct symtabs_and_lines *);
 
-static void source_info (char *, int);
+static void source_info (const char *, int);
 
-static void show_directories (char *, int);
+static void show_directories (const char *, int);
 
 /* Path of directories to search for source files.
    Same format as the PATH environment variable's value.  */
@@ -303,7 +303,7 @@ select_source_symtab (register struct symtab *s)
 }
 
 static void
-show_directories (char *ignore, int from_tty)
+show_directories (const char *ignore, int from_tty)
 {
   puts_filtered ("Source directories searched: ");
   puts_filtered (source_path);
@@ -367,7 +367,7 @@ init_last_source_visited (void)
 /* Add zero or more directories to the front of the source path.  */
 
 void
-directory_command (char *dirname, int from_tty)
+directory_command (const char *dirname, int from_tty)
 {
   dont_repeat ();
   /* FIXME, this goes to "delete dir"... */
@@ -392,7 +392,7 @@ directory_command (char *dirname, int from_tty)
 /* Add zero or more directories to the front of an arbitrary path.  */
 
 void
-mod_path (char *dirname, char **which_path)
+mod_path (const char *dirname, char **which_path)
 {
   add_path (dirname, which_path, 1);
 }
@@ -404,15 +404,16 @@ mod_path (char *dirname, char **which_path)
    as space or tab. */
 
 void
-add_path (char *dirname, char **which_path, int parse_separators)
+add_path (const char *dir, char **which_path, int parse_separators)
 {
+  char *dirname;
   char *old = *which_path;
   int prefix = 0;
 
-  if (dirname == 0)
+  if (dir == NULL)
     return;
 
-  dirname = xstrdup (dirname);
+  dirname = xstrdup (dir);
   make_cleanup (xfree, dirname);
 
   do
@@ -592,7 +593,7 @@ add_path (char *dirname, char **which_path, int parse_separators)
 
 
 static void
-source_info (char *ignore, int from_tty)
+source_info (const char *ignore, int from_tty)
 {
   register struct symtab *s = current_source_symtab;
 
@@ -1251,7 +1252,7 @@ ambiguous_line_spec (struct symtabs_and_lines *sals)
 /* Print info on range of pc's in a specified line.  */
 
 static void
-line_info (char *arg, int from_tty)
+line_info (const char *arg, int from_tty)
 {
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
@@ -1349,7 +1350,7 @@ line_info (char *arg, int from_tty)
 
 /* ARGSUSED */
 static void
-forward_search_command (char *regex, int from_tty)
+forward_search_command (const char *regex, int from_tty)
 {
   register int c;
   register int desc;
@@ -1445,7 +1446,7 @@ forward_search_command (char *regex, int from_tty)
 
 /* ARGSUSED */
 static void
-reverse_search_command (char *regex, int from_tty)
+reverse_search_command (const char *regex, int from_tty)
 {
   register int c;
   register int desc;

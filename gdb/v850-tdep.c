@@ -958,7 +958,7 @@ v850_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
       if (!v850_type_is_scalar (VALUE_TYPE (*args))
 	  && TYPE_LENGTH (VALUE_TYPE (*args)) > E_MAX_RETTYPE_SIZE_IN_REGS)
 	{
-	  store_address (valbuf, 4, VALUE_ADDRESS (*args));
+	  store_unsigned_integer (valbuf, 4, VALUE_ADDRESS (*args));
 	  len = 4;
 	  val = valbuf;
 	}

@@ -139,7 +139,7 @@ extern void write_dollar_variable (struct stoken str);
 extern struct symbol *parse_nested_classes_for_hpacc (char *, int, char **,
 						      int *, char **);
 
-extern char *find_template_name_end (char *);
+extern const char *find_template_name_end (const char *);
 
 extern void start_arglist (void);
 

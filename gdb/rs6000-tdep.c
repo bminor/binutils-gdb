@@ -1269,7 +1269,7 @@ ran_out_of_registers_for_arguments:
     write_register (SP_REGNUM, sp);
 
   /* set back chain properly */
-  store_address (tmp_buffer, 4, saved_sp);
+  store_unsigned_integer (tmp_buffer, 4, saved_sp);
   write_memory (sp, tmp_buffer, 4);
 
   target_store_registers (-1);
@@ -1415,7 +1415,7 @@ rs6000_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
    in handle_inferior_event() to skip past @FIX code.  */
 
 int
-rs6000_in_solib_return_trampoline (CORE_ADDR pc, char *name)
+rs6000_in_solib_return_trampoline (CORE_ADDR pc, const char *name)
 {
   return name && !strncmp (name, "@FIX", 4);
 }
@@ -2985,7 +2985,7 @@ rs6000_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 static struct cmd_list_element *info_powerpc_cmdlist = NULL;
 
 static void
-rs6000_info_powerpc_command (char *args, int from_tty)
+rs6000_info_powerpc_command (const char *args, int from_tty)
 {
   help_list (info_powerpc_cmdlist, "info powerpc ", class_info, gdb_stdout);
 }

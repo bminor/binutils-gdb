@@ -126,7 +126,7 @@ static int display_number;
 
 /* Prototypes for exported functions. */
 
-void output_command (char *, int);
+void output_command (const char *, int);
 
 void _initialize_printcmd (void);
 
@@ -134,38 +134,38 @@ void _initialize_printcmd (void);
 
 static void delete_display (int);
 
-static void enable_display (char *, int);
+static void enable_display (const char *, int);
 
-static void disable_display_command (char *, int);
+static void disable_display_command (const char *, int);
 
-static void printf_command (char *, int);
+static void printf_command (const char *, int);
 
 static void print_frame_nameless_args (struct frame_info *, long,
 				       int, int, struct ui_file *);
 
-static void display_info (char *, int);
+static void display_info (const char *, int);
 
 static void do_one_display (struct display *);
 
-static void undisplay_command (char *, int);
+static void undisplay_command (const char *, int);
 
 static void free_display (struct display *);
 
-static void display_command (char *, int);
+static void display_command (const char *, int);
 
-void x_command (char *, int);
+void x_command (const char *, int);
 
-static void address_info (char *, int);
+static void address_info (const char *, int);
 
-static void set_command (char *, int);
+static void set_command (const char *, int);
 
-static void call_command (char *, int);
+static void call_command (const char *, int);
 
-static void inspect_command (char *, int);
+static void inspect_command (const char *, int);
 
-static void print_command (char *, int);
+static void print_command (const char *, int);
 
-static void print_command_1 (char *, int, int);
+static void print_command_1 (const char *, int, int);
 
 static void validate_format (struct format_data, char *);
 
@@ -174,9 +174,9 @@ static void do_examine (struct format_data, CORE_ADDR addr,
 
 static void print_formatted (struct value *, int, int, struct ui_file *);
 
-static struct format_data decode_format (char **, int, int);
+static struct format_data decode_format (const char **, int, int);
 
-static void sym_info (char *, int);
+static void sym_info (const char *, int);
 
 
 /* Decode a format specification.  *STRING_PTR should point to it.
@@ -190,10 +190,10 @@ static void sym_info (char *, int);
    past the specification and past all whitespace following it.  */
 
 static struct format_data
-decode_format (char **string_ptr, int oformat, int osize)
+decode_format (const char **string_ptr, int oformat, int osize)
 {
   struct format_data val;
-  register char *p = *string_ptr;
+  const char *p = *string_ptr;
 
   val.format = '?';
   val.size = '?';
@@ -542,8 +542,8 @@ set_next_address (CORE_ADDR addr)
    settings of the demangle and asm_demangle variables.  */
 
 void
-print_address_symbolic (CORE_ADDR addr, struct ui_file *stream, int do_demangle,
-			char *leadin)
+print_address_symbolic (CORE_ADDR addr, struct ui_file *stream,
+			int do_demangle, const char *leadin)
 {
   char *name = NULL;
   char *filename = NULL;
@@ -872,7 +872,7 @@ validate_format (struct format_data fmt, char *cmdname)
  */
 
 static void
-print_command_1 (char *exp, int inspect, int voidprint)
+print_command_1 (const char *exp, int inspect, int voidprint)
 {
   struct expression *expr;
   register struct cleanup *old_chain = 0;
@@ -946,7 +946,7 @@ print_command_1 (char *exp, int inspect, int voidprint)
 
 /* ARGSUSED */
 static void
-print_command (char *exp, int from_tty)
+print_command (const char *exp, int from_tty)
 {
   print_command_1 (exp, 0, 1);
 }
@@ -954,7 +954,7 @@ print_command (char *exp, int from_tty)
 /* Same as print, except in epoch, it gets its own window */
 /* ARGSUSED */
 static void
-inspect_command (char *exp, int from_tty)
+inspect_command (const char *exp, int from_tty)
 {
   extern int epoch_interface;
 
@@ -964,14 +964,14 @@ inspect_command (char *exp, int from_tty)
 /* Same as print, except it doesn't print void results. */
 /* ARGSUSED */
 static void
-call_command (char *exp, int from_tty)
+call_command (const char *exp, int from_tty)
 {
   print_command_1 (exp, 0, 0);
 }
 
 /* ARGSUSED */
 void
-output_command (char *exp, int from_tty)
+output_command (const char *exp, int from_tty)
 {
   struct expression *expr;
   register struct cleanup *old_chain;
@@ -1006,7 +1006,7 @@ output_command (char *exp, int from_tty)
 
 /* ARGSUSED */
 static void
-set_command (char *exp, int from_tty)
+set_command (const char *exp, int from_tty)
 {
   struct expression *expr = parse_expression (exp);
   register struct cleanup *old_chain =
@@ -1017,7 +1017,7 @@ set_command (char *exp, int from_tty)
 
 /* ARGSUSED */
 static void
-sym_info (char *arg, int from_tty)
+sym_info (const char *arg, int from_tty)
 {
   struct minimal_symbol *msymbol;
   struct objfile *objfile;
@@ -1062,7 +1062,7 @@ sym_info (char *arg, int from_tty)
 
 /* ARGSUSED */
 static void
-address_info (char *exp, int from_tty)
+address_info (const char *exp, int from_tty)
 {
   register struct symbol *sym;
   register struct minimal_symbol *msymbol;
@@ -1283,7 +1283,7 @@ address_info (char *exp, int from_tty)
 }
 
 void
-x_command (char *exp, int from_tty)
+x_command (const char *exp, int from_tty)
 {
   struct expression *expr;
   struct format_data fmt;
@@ -1360,7 +1360,7 @@ x_command (char *exp, int from_tty)
    Specify the expression.  */
 
 static void
-display_command (char *exp, int from_tty)
+display_command (const char *exp, int from_tty)
 {
   struct format_data fmt;
   register struct expression *expr;
@@ -1477,10 +1477,10 @@ delete_display (int num)
    Specify the element numbers.  */
 
 static void
-undisplay_command (char *args, int from_tty)
+undisplay_command (const char *args, int from_tty)
 {
-  register char *p = args;
-  register char *p1;
+  const char *p = args;
+  const char *p1;
   register int num;
 
   if (args == 0)
@@ -1638,7 +1638,7 @@ disable_current_display (void)
 }
 
 static void
-display_info (char *ignore, int from_tty)
+display_info (const char *ignore, int from_tty)
 {
   register struct display *d;
 
@@ -1665,10 +1665,10 @@ Num Enb Expression\n");
 }
 
 static void
-enable_display (char *args, int from_tty)
+enable_display (const char *args, int from_tty)
 {
-  register char *p = args;
-  register char *p1;
+  const char *p = args;
+  const char *p1;
   register int num;
   register struct display *d;
 
@@ -1704,10 +1704,10 @@ enable_display (char *args, int from_tty)
 
 /* ARGSUSED */
 static void
-disable_display_command (char *args, int from_tty)
+disable_display_command (const char *args, int from_tty)
 {
-  register char *p = args;
-  register char *p1;
+  const char *p = args;
+  const char *p1;
   register struct display *d;
 
   if (p == 0)
@@ -1969,10 +1969,10 @@ print_frame_nameless_args (struct frame_info *fi, long start, int num,
 
 /* ARGSUSED */
 static void
-printf_command (char *arg, int from_tty)
+printf_command (const char *arg, int from_tty)
 {
   register char *f = NULL;
-  register char *s = arg;
+  const char *s = arg;
   char *string = NULL;
   struct value **val_args;
   char *substrings;
@@ -2144,7 +2144,7 @@ printf_command (char *arg, int from_tty)
 
     while (*s != '\0')
       {
-	char *s1;
+	const char *s1;
 	if (nargs == allocated_args)
 	  val_args = (struct value **) xrealloc ((char *) val_args,
 						 (allocated_args *= 2)

@@ -56,11 +56,11 @@ static int highest_thread_num;
 
 static struct thread_info *find_thread_id (int num);
 
-static void thread_command (char *tidstr, int from_tty);
-static void thread_apply_all_command (char *, int);
+static void thread_command (const char *tidstr, int from_tty);
+static void thread_apply_all_command (const char *, int);
 static int thread_alive (struct thread_info *);
-static void info_threads_command (char *, int);
-static void thread_apply_command (char *, int);
+static void info_threads_command (const char *, int);
+static void thread_apply_command (const char *, int);
 static void restore_current_thread (ptid_t);
 static void switch_to_thread (ptid_t ptid);
 static void prune_threads (void);
@@ -412,7 +412,7 @@ prune_threads (void)
  */
 
 static void
-info_threads_command (char *arg, int from_tty)
+info_threads_command (const char *arg, int from_tty)
 {
   struct thread_info *tp;
   ptid_t current_ptid;
@@ -536,7 +536,7 @@ make_cleanup_restore_current_thread (ptid_t inferior_ptid)
  */
 
 static void
-thread_apply_all_command (char *cmd, int from_tty)
+thread_apply_all_command (const char *cmd, int from_tty)
 {
   struct thread_info *tp;
   struct cleanup *old_chain;
@@ -576,9 +576,9 @@ thread_apply_all_command (char *cmd, int from_tty)
 }
 
 static void
-thread_apply_command (char *tidlist, int from_tty)
+thread_apply_command (const char *tidlist, int from_tty)
 {
-  char *cmd;
+  const char *cmd;
   char *p;
   struct cleanup *old_chain;
   struct cleanup *saved_cmd_cleanup_chain;
@@ -657,7 +657,7 @@ thread_apply_command (char *tidlist, int from_tty)
    if prefix of arg is `apply'.  */
 
 static void
-thread_command (char *tidstr, int from_tty)
+thread_command (const char *tidstr, int from_tty)
 {
   if (!tidstr)
     {
@@ -713,7 +713,7 @@ do_captured_thread_select (struct ui_out *uiout, void *tidstr)
 }
 
 enum gdb_rc
-gdb_thread_select (struct ui_out *uiout, char *tidstr)
+gdb_thread_select (struct ui_out *uiout, const char *tidstr)
 {
   return catch_exceptions (uiout, do_captured_thread_select, tidstr,
 			   NULL, RETURN_MASK_ALL);

@@ -5332,7 +5332,7 @@ set_gdbarch_skip_trampoline_code (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_in_solib_call_trampoline (struct gdbarch *gdbarch, CORE_ADDR pc, char *name)
+gdbarch_in_solib_call_trampoline (struct gdbarch *gdbarch, CORE_ADDR pc, const char *name)
 {
   gdb_assert (gdbarch != NULL);
   if (gdbarch->in_solib_call_trampoline == 0)
@@ -5351,7 +5351,7 @@ set_gdbarch_in_solib_call_trampoline (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_in_solib_return_trampoline (struct gdbarch *gdbarch, CORE_ADDR pc, char *name)
+gdbarch_in_solib_return_trampoline (struct gdbarch *gdbarch, CORE_ADDR pc, const char *name)
 {
   gdb_assert (gdbarch != NULL);
   if (gdbarch->in_solib_return_trampoline == 0)
@@ -5370,7 +5370,8 @@ set_gdbarch_in_solib_return_trampoline (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_pc_in_sigtramp (struct gdbarch *gdbarch, CORE_ADDR pc, char *name)
+gdbarch_pc_in_sigtramp (struct gdbarch *gdbarch, CORE_ADDR pc,
+			const char *name)
 {
   gdb_assert (gdbarch != NULL);
   if (gdbarch->pc_in_sigtramp == 0)

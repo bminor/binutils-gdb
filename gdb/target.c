@@ -38,17 +38,13 @@
 
 extern int errno;
 
-static void target_info (char *, int);
-
 static void cleanup_target (struct target_ops *);
 
 static void maybe_kill_then_create_inferior (char *, char *, char **);
 
-static void maybe_kill_then_attach (char *, int);
-
 static void kill_or_be_killed (int);
 
-static void default_terminal_info (char *, int);
+static void default_terminal_info (const char *, int);
 
 static int default_region_size_ok_for_hw_watchpoint (int);
 
@@ -66,7 +62,7 @@ static int return_minus_one (void);
 
 void target_ignore (void);
 
-static void target_command (char *, int);
+static void target_command (const char *, int);
 
 static struct target_ops *find_default_run_target (char *);
 
@@ -87,13 +83,13 @@ static int target_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
 
 static void init_dummy_target (void);
 
-static void debug_to_open (char *, int);
+static void debug_to_open (const char *, int);
 
 static void debug_to_close (int);
 
-static void debug_to_attach (char *, int);
+static void debug_to_attach (const char *, int);
 
-static void debug_to_detach (char *, int);
+static void debug_to_detach (const char *, int);
 
 static void debug_to_resume (ptid_t, int, enum target_signal);
 
@@ -140,11 +136,9 @@ static void debug_to_terminal_save_ours (void);
 
 static void debug_to_terminal_ours (void);
 
-static void debug_to_terminal_info (char *, int);
+static void debug_to_terminal_info (const char *, int);
 
 static void debug_to_kill (void);
-
-static void debug_to_load (char *, int);
 
 static int debug_to_lookup_symbol (char *, CORE_ADDR *);
 
@@ -206,7 +200,7 @@ DCACHE *target_dcache;
 
 /* ARGSUSED */
 static void
-target_command (char *arg, int from_tty)
+target_command (const char *arg, int from_tty)
 {
   fputs_filtered ("Argument required (target name).  Try `help target'\n",
 		  gdb_stdout);
@@ -252,7 +246,7 @@ target_ignore (void)
 }
 
 void
-target_load (char *arg, int from_tty)
+target_load (const char *arg, int from_tty)
 {
   dcache_invalidate (target_dcache);
   (*current_target.to_load) (arg, from_tty);
@@ -300,7 +294,7 @@ nosupport_runtime (void)
 
 /* ARGSUSED */
 static void
-default_terminal_info (char *args, int from_tty)
+default_terminal_info (const char *args, int from_tty)
 {
   printf_unfiltered ("No saved terminal information.\n");
 }
@@ -333,7 +327,7 @@ kill_or_be_killed (int from_tty)
 }
 
 static void
-maybe_kill_then_attach (char *args, int from_tty)
+maybe_kill_then_attach (const char *args, int from_tty)
 {
   kill_or_be_killed (from_tty);
   target_attach (args, from_tty);
@@ -358,7 +352,7 @@ cleanup_target (struct target_ops *t)
     t->field = value
 
   de_fault (to_open, 
-	    (void (*) (char *, int)) 
+	    (void (*) (const char *, int)) 
 	    tcomplain);
   de_fault (to_close, 
 	    (void (*) (int)) 
@@ -369,7 +363,7 @@ cleanup_target (struct target_ops *t)
 	    (void (*) (int)) 
 	    target_ignore);
   de_fault (to_detach, 
-	    (void (*) (char *, int)) 
+	    (void (*) (const char *, int)) 
 	    target_ignore);
   de_fault (to_resume, 
 	    (void (*) (ptid_t, int, enum target_signal)) 
@@ -443,7 +437,7 @@ cleanup_target (struct target_ops *t)
 	    (void (*) (void)) 
 	    noprocess);
   de_fault (to_load, 
-	    (void (*) (char *, int)) 
+	    (void (*) (const char *, int)) 
 	    tcomplain);
   de_fault (to_lookup_symbol, 
 	    (int (*) (char *, CORE_ADDR *)) 
@@ -504,7 +498,7 @@ cleanup_target (struct target_ops *t)
 	    (void (*) (void)) 
 	    target_ignore);
   de_fault (to_rcmd, 
-	    (void (*) (char *, struct ui_file *)) 
+	    (void (*) (const char *, struct ui_file *)) 
 	    tcomplain);
   de_fault (to_enable_exception_callback, 
 	    (struct symtab_and_line * (*) (enum exception_event_kind, int)) 
@@ -1073,7 +1067,7 @@ target_write_memory_partial (CORE_ADDR memaddr, char *buf, int len, int *err)
 
 /* ARGSUSED */
 static void
-target_info (char *args, int from_tty)
+target_info (const char *args, int from_tty)
 {
   struct target_ops *t;
   struct target_stack_item *item;
@@ -1131,7 +1125,7 @@ target_preopen (int from_tty)
 /* Detach a target after doing deferred register stores.  */
 
 void
-target_detach (char *args, int from_tty)
+target_detach (const char *args, int from_tty)
 {
   /* Handle any optimized stores to the inferior.  */
 #ifdef DO_DEFERRED_STORES
@@ -1193,7 +1187,7 @@ find_default_run_target (char *do_mesg)
 }
 
 void
-find_default_attach (char *args, int from_tty)
+find_default_attach (const char *args, int from_tty)
 {
   struct target_ops *t;
 
@@ -1521,7 +1515,7 @@ init_dummy_target (void)
 static struct target_ops debug_target;
 
 static void
-debug_to_open (char *args, int from_tty)
+debug_to_open (const char *args, int from_tty)
 {
   debug_target.to_open (args, from_tty);
 
@@ -1537,7 +1531,7 @@ debug_to_close (int quitting)
 }
 
 static void
-debug_to_attach (char *args, int from_tty)
+debug_to_attach (const char *args, int from_tty)
 {
   debug_target.to_attach (args, from_tty);
 
@@ -1554,7 +1548,7 @@ debug_to_post_attach (int pid)
 }
 
 static void
-debug_to_detach (char *args, int from_tty)
+debug_to_detach (const char *args, int from_tty)
 {
   debug_target.to_detach (args, from_tty);
 
@@ -1902,7 +1896,7 @@ debug_to_terminal_save_ours (void)
 }
 
 static void
-debug_to_terminal_info (char *arg, int from_tty)
+debug_to_terminal_info (const char *arg, int from_tty)
 {
   debug_target.to_terminal_info (arg, from_tty);
 
@@ -1919,7 +1913,7 @@ debug_to_kill (void)
 }
 
 static void
-debug_to_load (char *args, int from_tty)
+debug_to_load (const char *args, int from_tty)
 {
   debug_target.to_load (args, from_tty);
 
@@ -2152,7 +2146,7 @@ debug_to_query (int type, char *req, char *resp, int *siz)
 }
 
 static void
-debug_to_rcmd (char *command,
+debug_to_rcmd (const char *command,
 	       struct ui_file *outbuf)
 {
   debug_target.to_rcmd (command, outbuf);
@@ -2262,14 +2256,13 @@ Shows the entire stack of targets currently in use (including the exec-file,\n\
 core-file, and process, if any), as well as the symbol file name.";
 
 static void
-do_monitor_command (char *cmd,
-		 int from_tty)
+do_monitor_command (const char *cmd, int from_tty)
 {
   if ((current_target.to_rcmd
-       == (void (*) (char *, struct ui_file *)) tcomplain)
+       == (void (*) (const char *, struct ui_file *)) tcomplain)
       || (current_target.to_rcmd == debug_to_rcmd
 	  && (debug_target.to_rcmd
-	      == (void (*) (char *, struct ui_file *)) tcomplain)))
+	      == (void (*) (const char *, struct ui_file *)) tcomplain)))
     {
       error ("\"monitor\" command not supported by this target.\n");
     }

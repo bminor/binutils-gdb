@@ -855,7 +855,7 @@ compare_selectors (const void *a, const void *b)
  */
 
 static void
-selectors_info (char *regexp, int from_tty)
+selectors_info (const char *regexp, int from_tty)
 {
   struct objfile	*objfile;
   struct minimal_symbol *msymbol;
@@ -1006,7 +1006,7 @@ compare_classes (const void *a, const void *b)
  */
 
 static void
-classes_info (char *regexp, int from_tty)
+classes_info (const char *regexp, int from_tty)
 {
   struct objfile	*objfile;
   struct minimal_symbol *msymbol;
@@ -1419,9 +1419,10 @@ find_methods (struct symtab *symtab, char type,
     *ndebug = cdebug;
 }
 
-char *find_imps (struct symtab *symtab, struct block *block,
-		 char *method, struct symbol **syms, 
-		 unsigned int *nsym, unsigned int *ndebug)
+const char *
+find_imps (struct symtab *symtab, struct block *block,
+	   const char *method, struct symbol **syms, 
+	   unsigned int *nsym, unsigned int *ndebug)
 {
   char type = '\0';
   char *class = NULL;
@@ -1550,7 +1551,7 @@ char *find_imps (struct symtab *symtab, struct block *block,
 }
 
 void 
-print_object_command (char *args, int from_tty)
+print_object_command (const char *args, int from_tty)
 {
   struct value *object, *function, *description;
   CORE_ADDR string_addr, object_addr;

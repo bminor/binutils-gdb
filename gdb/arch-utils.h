@@ -148,9 +148,9 @@ extern gdbarch_virtual_frame_pointer_ftype legacy_virtual_frame_pointer;
 
 extern CORE_ADDR generic_skip_trampoline_code (CORE_ADDR pc);
 
-extern int generic_in_solib_call_trampoline (CORE_ADDR pc, char *name);
+extern int generic_in_solib_call_trampoline (CORE_ADDR pc, const char *name);
 
-extern int generic_in_solib_return_trampoline (CORE_ADDR pc, char *name);
+extern int generic_in_solib_return_trampoline (CORE_ADDR pc, const char *name);
 
 extern int generic_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc);
 
@@ -163,7 +163,7 @@ extern int generic_register_size (int regnum);
 extern int generic_register_byte (int regnum);
 
 /* Prop up old targets that use various IN_SIGTRAMP() macros.  */
-extern int legacy_pc_in_sigtramp (CORE_ADDR pc, char *name);
+extern int legacy_pc_in_sigtramp (CORE_ADDR pc, const char *name);
 
 /* The orginal register_convert*() functions were overloaded.  They
    were used to both: convert between virtual and raw register formats

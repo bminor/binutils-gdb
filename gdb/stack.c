@@ -43,41 +43,41 @@
 
 /* Prototypes for exported functions. */
 
-void args_info (char *, int);
+void args_info (const char *, int);
 
-void locals_info (char *, int);
+void locals_info (const char *, int);
 
 void (*selected_frame_level_changed_hook) (int);
 
 void _initialize_stack (void);
 
-void return_command (char *, int);
+void return_command (const char *, int);
 
 /* Prototypes for local functions. */
 
-static void down_command (char *, int);
+static void down_command (const char *, int);
 
-static void down_silently_base (char *);
+static void down_silently_base (const char *);
 
-static void down_silently_command (char *, int);
+static void down_silently_command (const char *, int);
 
-static void up_command (char *, int);
+static void up_command (const char *, int);
 
-static void up_silently_base (char *);
+static void up_silently_base (const char *);
 
-static void up_silently_command (char *, int);
+static void up_silently_command (const char *, int);
 
-void frame_command (char *, int);
+void frame_command (const char *, int);
 
-static void current_frame_command (char *, int);
+static void current_frame_command (const char *, int);
 
-static void select_frame_command (char *, int);
+static void select_frame_command (const char *, int);
 
 static void print_frame_arg_vars (struct frame_info *, struct ui_file *);
 
-static void catch_info (char *, int);
+static void catch_info (const char *, int);
 
-static void args_plus_locals_info (char *, int);
+static void args_plus_locals_info (const char *, int);
 
 static void print_frame_label_vars (struct frame_info *, int,
 				    struct ui_file *);
@@ -99,11 +99,11 @@ static void print_frame (struct frame_info *fi,
 			 int args, 
 			 struct symtab_and_line sal);
 
-static void backtrace_command (char *, int);
+static void backtrace_command (const char *, int);
 
-struct frame_info *parse_frame_specification (char *);
+struct frame_info *parse_frame_specification (const char *);
 
-static void frame_info (char *, int);
+static void frame_info (const char *, int);
 
 extern int addressprint;	/* Print addresses, or stay symbolic only? */
 
@@ -486,7 +486,7 @@ show_stack_frame (struct frame_info *fi)
    this function never returns NULL).  */
 
 struct frame_info *
-parse_frame_specification (char *frame_exp)
+parse_frame_specification (const char *frame_exp)
 {
   int numargs = 0;
 #define	MAXARGS	4
@@ -495,7 +495,8 @@ parse_frame_specification (char *frame_exp)
 
   if (frame_exp)
     {
-      char *addr_string, *p;
+      char *addr_string;
+      const char *p;
       struct cleanup *tmp_cleanup;
 
       while (*frame_exp == ' ')
@@ -604,7 +605,7 @@ parse_frame_specification (char *frame_exp)
    This means absolutely all information in the frame is printed.  */
 
 static void
-frame_info (char *addr_exp, int from_tty)
+frame_info (const char *addr_exp, int from_tty)
 {
   struct frame_info *fi;
   struct symtab_and_line sal;
@@ -897,10 +898,10 @@ backtrace_limit_info (char *arg, int from_tty)
 
 /* Print briefly all stack frames or just the innermost COUNT frames.  */
 
-static void backtrace_command_1 (char *count_exp, int show_locals,
+static void backtrace_command_1 (const char *count_exp, int show_locals,
 				 int from_tty);
 static void
-backtrace_command_1 (char *count_exp, int show_locals, int from_tty)
+backtrace_command_1 (const char *count_exp, int show_locals, int from_tty)
 {
   struct frame_info *fi;
   register int count;
@@ -997,12 +998,12 @@ backtrace_command_1 (char *count_exp, int show_locals, int from_tty)
 }
 
 static void
-backtrace_command (char *arg, int from_tty)
+backtrace_command (const char *arg, int from_tty)
 {
   struct cleanup *old_chain = (struct cleanup *) NULL;
   char **argv = (char **) NULL;
   int argIndicatingFullTrace = (-1), totArgLen = 0, argc = 0;
-  char *argPtr = arg;
+  const char *argPtr = arg;
 
   if (arg != (char *) NULL)
     {
@@ -1061,9 +1062,9 @@ backtrace_command (char *arg, int from_tty)
     do_cleanups (old_chain);
 }
 
-static void backtrace_full_command (char *arg, int from_tty);
+static void backtrace_full_command (const char *arg, int from_tty);
 static void
-backtrace_full_command (char *arg, int from_tty)
+backtrace_full_command (const char *arg, int from_tty)
 {
   backtrace_command_1 (arg, 1, from_tty);
 }
@@ -1253,7 +1254,7 @@ print_frame_label_vars (register struct frame_info *fi, int this_level_only,
 
 /* ARGSUSED */
 void
-locals_info (char *args, int from_tty)
+locals_info (const char *args, int from_tty)
 {
   if (!deprecated_selected_frame)
     error ("No frame selected.");
@@ -1261,7 +1262,7 @@ locals_info (char *args, int from_tty)
 }
 
 static void
-catch_info (char *ignore, int from_tty)
+catch_info (const char *ignore, int from_tty)
 {
   struct symtab_and_line *sal;
 
@@ -1349,7 +1350,7 @@ print_frame_arg_vars (register struct frame_info *fi,
 }
 
 void
-args_info (char *ignore, int from_tty)
+args_info (const char *ignore, int from_tty)
 {
   if (!deprecated_selected_frame)
     error ("No frame selected.");
@@ -1358,7 +1359,7 @@ args_info (char *ignore, int from_tty)
 
 
 static void
-args_plus_locals_info (char *ignore, int from_tty)
+args_plus_locals_info (const char *ignore, int from_tty)
 {
   args_info (ignore, from_tty);
   locals_info (ignore, from_tty);
@@ -1465,7 +1466,7 @@ select_frame_command_wrapper (char *level_exp, int from_tty)
 }
 
 static void
-select_frame_command (char *level_exp, int from_tty)
+select_frame_command (const char *level_exp, int from_tty)
 {
   struct frame_info *frame;
   int level = frame_relative_level (deprecated_selected_frame);
@@ -1485,7 +1486,7 @@ select_frame_command (char *level_exp, int from_tty)
    frame.  */
 
 void
-frame_command (char *level_exp, int from_tty)
+frame_command (const char *level_exp, int from_tty)
 {
   select_frame_command (level_exp, from_tty);
   print_stack_frame (deprecated_selected_frame,
@@ -1495,7 +1496,7 @@ frame_command (char *level_exp, int from_tty)
 /* The XDB Compatibility command to print the current frame. */
 
 static void
-current_frame_command (char *level_exp, int from_tty)
+current_frame_command (const char *level_exp, int from_tty)
 {
   if (target_has_stack == 0 || deprecated_selected_frame == 0)
     error ("No stack.");
@@ -1508,7 +1509,7 @@ current_frame_command (char *level_exp, int from_tty)
 
 /* ARGSUSED */
 static void
-up_silently_base (char *count_exp)
+up_silently_base (const char *count_exp)
 {
   register struct frame_info *fi;
   int count = 1, count1;
@@ -1527,13 +1528,13 @@ up_silently_base (char *count_exp)
 }
 
 static void
-up_silently_command (char *count_exp, int from_tty)
+up_silently_command (const char *count_exp, int from_tty)
 {
   up_silently_base (count_exp);
 }
 
 static void
-up_command (char *count_exp, int from_tty)
+up_command (const char *count_exp, int from_tty)
 {
   up_silently_base (count_exp);
   print_stack_frame (deprecated_selected_frame,
@@ -1545,7 +1546,7 @@ up_command (char *count_exp, int from_tty)
 
 /* ARGSUSED */
 static void
-down_silently_base (char *count_exp)
+down_silently_base (const char *count_exp)
 {
   register struct frame_info *frame;
   int count = -1, count1;
@@ -1574,13 +1575,13 @@ down_silently_base (char *count_exp)
 
 /* ARGSUSED */
 static void
-down_silently_command (char *count_exp, int from_tty)
+down_silently_command (const char *count_exp, int from_tty)
 {
   down_silently_base (count_exp);
 }
 
 static void
-down_command (char *count_exp, int from_tty)
+down_command (const char *count_exp, int from_tty)
 {
   down_silently_base (count_exp);
   print_stack_frame (deprecated_selected_frame,
@@ -1588,7 +1589,7 @@ down_command (char *count_exp, int from_tty)
 }
 
 void
-return_command (char *retval_exp, int from_tty)
+return_command (const char *retval_exp, int from_tty)
 {
   struct symbol *thisfun;
   CORE_ADDR selected_frame_addr;
@@ -1693,9 +1694,8 @@ struct function_bounds
   CORE_ADDR low, high;
 };
 
-static void func_command (char *arg, int from_tty);
 static void
-func_command (char *arg, int from_tty)
+func_command (const char *arg, int from_tty)
 {
   struct frame_info *fp;
   int found = 0;
@@ -1714,8 +1714,7 @@ func_command (char *arg, int from_tty)
   for (i = 0; (i < sals.nelts && !found); i++)
     {
       if (sals.sals[i].pc == (CORE_ADDR) 0 ||
-	  find_pc_partial_function (sals.sals[i].pc,
-				    (char **) NULL,
+	  find_pc_partial_function (sals.sals[i].pc, NULL,
 				    &func_bounds[i].low,
 				    &func_bounds[i].high) == 0)
 	{

@@ -57,13 +57,13 @@ static ptid_t child_wait (ptid_t, struct target_waitstatus *);
 void child_post_wait (ptid_t, int);
 #endif
 
-static void child_open (char *, int);
+static void child_open (const char *, int);
 
 static void child_files_info (struct target_ops *);
 
-static void child_detach (char *, int);
+static void child_detach (const char *, int);
 
-static void child_attach (char *, int);
+static void child_attach (const char *, int);
 
 #if !defined(CHILD_POST_ATTACH)
 extern void child_post_attach (int);
@@ -192,7 +192,7 @@ child_thread_alive (ptid_t ptid)
 /* Attach to process PID, then initialize for debugging it.  */
 
 static void
-child_attach (char *args, int from_tty)
+child_attach (const char *args, int from_tty)
 {
   if (!args)
     error_no_arg ("process-id to attach");
@@ -203,7 +203,7 @@ child_attach (char *args, int from_tty)
   {
     char *exec_file;
     int pid;
-    char *dummy;
+    const char *dummy;
 
     dummy = args;
     pid = strtol (args, &dummy, 0);
@@ -254,7 +254,7 @@ child_post_attach (int pid)
    started via the normal ptrace (PTRACE_TRACEME).  */
 
 static void
-child_detach (char *args, int from_tty)
+child_detach (const char *args, int from_tty)
 {
 #ifdef ATTACH_DETACH
   {
@@ -308,7 +308,7 @@ child_files_info (struct target_ops *ignore)
 
 /* ARGSUSED */
 static void
-child_open (char *arg, int from_tty)
+child_open (const char *arg, int from_tty)
 {
   error ("Use the \"run\" command to start a Unix child process.");
 }

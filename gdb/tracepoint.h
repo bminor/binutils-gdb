@@ -112,10 +112,10 @@ extern unsigned long trace_running_p;
 void (*create_tracepoint_hook) (struct tracepoint *);
 void (*delete_tracepoint_hook) (struct tracepoint *);
 void (*modify_tracepoint_hook) (struct tracepoint *);
-void (*trace_find_hook) (char *arg, int from_tty);
+void (*trace_find_hook) (char *const arg, int from_tty);
 void (*trace_start_stop_hook) (int start, int from_tty);
 
-struct tracepoint *get_tracepoint_by_number (char **, int, int);
+struct tracepoint *get_tracepoint_by_number (const char **, int, int);
 int get_traceframe_number (void);
 void free_actions (struct tracepoint *);
 enum actionline_type validate_actionline (char **, struct tracepoint *);

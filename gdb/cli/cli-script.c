@@ -52,7 +52,7 @@ static char *insert_args (char *line);
 
 static struct cleanup * setup_user_args (char *p);
 
-static void validate_comname (char *);
+static void validate_comname (const char *);
 
 /* Level of control structure.  */
 static int control_level;
@@ -80,7 +80,7 @@ struct user_args
    control commands (if/while).  */
 
 static struct command_line *
-build_command_line (enum command_control_type type, char *args)
+build_command_line (enum command_control_type type, const char *args)
 {
   struct command_line *cmd;
 
@@ -446,7 +446,7 @@ execute_control_command (struct command_line *cmd)
    loop condition is nonzero.  */
 
 void
-while_command (char *arg, int from_tty)
+while_command (const char *arg, int from_tty)
 {
   struct command_line *command = NULL;
 
@@ -464,7 +464,7 @@ while_command (char *arg, int from_tty)
    on the value of the if conditional.  */
 
 void
-if_command (char *arg, int from_tty)
+if_command (const char *arg, int from_tty)
 {
   struct command_line *command = NULL;
 
@@ -1044,9 +1044,9 @@ copy_command_lines (struct command_line *cmds)
 }
 
 static void
-validate_comname (char *comname)
+validate_comname (const char *comname)
 {
-  register char *p;
+  const char *p;
 
   if (comname == 0)
     error_no_arg ("name of command to define");
@@ -1062,12 +1062,12 @@ validate_comname (char *comname)
 
 /* This is just a placeholder in the command data structures.  */
 static void
-user_defined_command (char *ignore, int from_tty)
+user_defined_command (const char *ignore, int from_tty)
 {
 }
 
 void
-define_command (char *comname, int from_tty)
+define_command (const char *comname, int from_tty)
 {
 #define MAX_TMPBUF 128   
   enum cmd_hook_type
@@ -1178,11 +1178,11 @@ define_command (char *comname, int from_tty)
 }
 
 void
-document_command (char *comname, int from_tty)
+document_command (const char *comname, int from_tty)
 {
   struct command_line *doclines;
   register struct cmd_list_element *c;
-  char *tem = comname;
+  const char *tem = comname;
   char tmpbuf[128];
 
   validate_comname (comname);
@@ -1223,8 +1223,8 @@ struct source_cleanup_lines_args
 {
   int old_line;
   char *old_file;
-  char *old_pre_error;
-  char *old_error_pre_print;
+  const char *old_pre_error;
+  const char *old_error_pre_print;
 };
 
 static void

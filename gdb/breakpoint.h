@@ -556,7 +556,7 @@ extern int deprecated_frame_in_dummy (struct frame_info *);
 
 extern int breakpoint_thread_match (CORE_ADDR, ptid_t);
 
-extern void until_break_command (char *, int, int);
+extern void until_break_command (const char *, int, int);
 
 extern void breakpoint_re_set (void);
 
@@ -585,15 +585,15 @@ extern void breakpoint_auto_delete (bpstat);
 
 extern void breakpoint_clear_ignore_counts (void);
 
-extern void break_command (char *, int);
+extern void break_command (const char *, int);
 
 extern void hbreak_command_wrapper (char *, int);
 extern void thbreak_command_wrapper (char *, int);
-extern void rbreak_command_wrapper (char *, int);
+extern void rbreak_command_wrapper (const char *, int);
 extern void watch_command_wrapper (char *, int);
 extern void awatch_command_wrapper (char *, int);
 extern void rwatch_command_wrapper (char *, int);
-extern void tbreak_command (char *, int);
+extern void tbreak_command (const char *, int);
 
 extern int insert_breakpoints (void);
 
@@ -668,9 +668,9 @@ extern void enable_watchpoints_after_interactive_call_stop (void);
 
 extern void clear_breakpoint_hit_counts (void);
 
-extern int get_number (char **);
+extern int get_number (const char **);
 
-extern int get_number_or_range (char **);
+extern int get_number_or_range (const char **);
 
 /* The following are for displays, which aren't really breakpoints, but
    here is as good a place as any for them.  */
@@ -724,7 +724,7 @@ extern struct breakpoint *set_breakpoint_sal (struct symtab_and_line);
 
 /* Enable breakpoints and delete when hit.  Called with ARG == NULL
    deletes all breakpoints. */
-extern void delete_command (char *arg, int from_tty);
+extern void delete_command (const char *arg, int from_tty);
 
 /* Pull all H/W watchpoints from the target. Return non-zero if the
    remove fails. */

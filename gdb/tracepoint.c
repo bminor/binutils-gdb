@@ -125,24 +125,24 @@ static struct symtab_and_line traceframe_sal;
 static struct cmd_list_element *tfindlist;
 
 /* ======= Important command functions: ======= */
-static void trace_command (char *, int);
-static void tracepoints_info (char *, int);
-static void delete_trace_command (char *, int);
-static void enable_trace_command (char *, int);
-static void disable_trace_command (char *, int);
-static void trace_pass_command (char *, int);
-static void trace_actions_command (char *, int);
-static void trace_start_command (char *, int);
-static void trace_stop_command (char *, int);
-static void trace_status_command (char *, int);
-static void trace_find_command (char *, int);
-static void trace_find_pc_command (char *, int);
-static void trace_find_tracepoint_command (char *, int);
-static void trace_find_line_command (char *, int);
-static void trace_find_range_command (char *, int);
-static void trace_find_outside_command (char *, int);
-static void tracepoint_save_command (char *, int);
-static void trace_dump_command (char *, int);
+static void trace_command (const char *, int);
+static void tracepoints_info (const char *, int);
+static void delete_trace_command (const char *, int);
+static void enable_trace_command (const char *, int);
+static void disable_trace_command (const char *, int);
+static void trace_pass_command (const char *, int);
+static void trace_actions_command (const char *, int);
+static void trace_start_command (const char *, int);
+static void trace_stop_command (const char *, int);
+static void trace_status_command (const char *, int);
+static void trace_find_command (const char *, int);
+static void trace_find_pc_command (const char *, int);
+static void trace_find_tracepoint_command (const char *, int);
+static void trace_find_line_command (const char *, int);
+static void trace_find_range_command (const char *, int);
+static void trace_find_outside_command (const char *, int);
+static void tracepoint_save_command (const char *, int);
+static void trace_dump_command (const char *, int);
 
 /* support routines */
 static void trace_mention (struct tracepoint *);
@@ -192,8 +192,7 @@ trace_error (char *buf)
 
 /* Utility: wait for reply from stub, while accepting "O" packets */
 static char *
-remote_get_noisy_reply (char *buf,
-			long sizeof_buf)
+remote_get_noisy_reply (const char *buf, long sizeof_buf)
 {
   do				/* loop on reply from remote stub */
     {
@@ -375,13 +374,14 @@ set_raw_tracepoint (struct symtab_and_line sal)
 
 /* Set a tracepoint according to ARG (function, linenum or *address) */
 static void
-trace_command (char *arg, int from_tty)
+trace_command (const char *arg, int from_tty)
 {
   char **canonical = (char **) NULL;
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
   struct tracepoint *t;
-  char *addr_start = 0, *addr_end = 0;
+  const char *addr_start = 0;
+  const char *addr_end = 0;
   int i;
 
   if (!arg || !*arg)
@@ -448,7 +448,7 @@ trace_mention (struct tracepoint *tp)
 /* Print information on tracepoint number TPNUM_EXP, or all if omitted.  */
 
 static void
-tracepoints_info (char *tpnum_exp, int from_tty)
+tracepoints_info (const char *tpnum_exp, int from_tty)
 {
   struct tracepoint *t;
   struct action_line *action;
@@ -598,11 +598,11 @@ tracepoint_operation (struct tracepoint *t, int from_tty,
    if OPTIONAL_P is true, then if the argument is missing, the most
    recent tracepoint (tracepoint_count) is returned.  */
 struct tracepoint *
-get_tracepoint_by_number (char **arg, int multi_p, int optional_p)
+get_tracepoint_by_number (const char **arg, int multi_p, int optional_p)
 {
   struct tracepoint *t;
   int tpnum;
-  char *instring = arg == NULL ? NULL : *arg;
+  const char *instring = arg == NULL ? NULL : *arg;
 
   if (arg == NULL || *arg == NULL || ! **arg)
     {
@@ -638,7 +638,7 @@ get_tracepoint_by_number (char **arg, int multi_p, int optional_p)
 
 /* Utility: parse a list of tracepoint numbers, and call a func for each. */
 static void
-map_args_over_tracepoints (char *args, int from_tty,
+map_args_over_tracepoints (const char *args, int from_tty,
 			   enum tracepoint_opcode opcode)
 {
   struct tracepoint *t, *tmp;
@@ -659,7 +659,7 @@ map_args_over_tracepoints (char *args, int from_tty,
 
 /* The 'enable trace' command enables tracepoints.  Not supported by all targets.  */
 static void
-enable_trace_command (char *args, int from_tty)
+enable_trace_command (const char *args, int from_tty)
 {
   dont_repeat ();
   map_args_over_tracepoints (args, from_tty, enable_op);
@@ -667,7 +667,7 @@ enable_trace_command (char *args, int from_tty)
 
 /* The 'disable trace' command enables tracepoints.  Not supported by all targets.  */
 static void
-disable_trace_command (char *args, int from_tty)
+disable_trace_command (const char *args, int from_tty)
 {
   dont_repeat ();
   map_args_over_tracepoints (args, from_tty, disable_op);
@@ -675,7 +675,7 @@ disable_trace_command (char *args, int from_tty)
 
 /* Remove a tracepoint (or all if no argument) */
 static void
-delete_trace_command (char *args, int from_tty)
+delete_trace_command (const char *args, int from_tty)
 {
   dont_repeat ();
   if (!args || !*args)		/* No args implies all tracepoints; */
@@ -694,7 +694,7 @@ delete_trace_command (char *args, int from_tty)
    Also accepts special argument "all".  */
 
 static void
-trace_pass_command (char *args, int from_tty)
+trace_pass_command (const char *args, int from_tty)
 {
   struct tracepoint *t1 = (struct tracepoint *) -1, *t2;
   unsigned int count;
@@ -753,26 +753,26 @@ static void read_actions (struct tracepoint *);
    which is always an error.  */
 
 static void
-end_actions_pseudocommand (char *args, int from_tty)
+end_actions_pseudocommand (const char *args, int from_tty)
 {
   error ("This command cannot be used at the top level.");
 }
 
 static void
-while_stepping_pseudocommand (char *args, int from_tty)
+while_stepping_pseudocommand (const char *args, int from_tty)
 {
   error ("This command can only be used in a tracepoint actions list.");
 }
 
 static void
-collect_pseudocommand (char *args, int from_tty)
+collect_pseudocommand (const char *args, int from_tty)
 {
   error ("This command can only be used in a tracepoint actions list.");
 }
 
 /* Enter a list of actions for a tracepoint.  */
 static void
-trace_actions_command (char *args, int from_tty)
+trace_actions_command (const char *args, int from_tty)
 {
   struct tracepoint *t;
   char tmpbuf[128];
@@ -911,7 +911,7 @@ validate_actionline (char **line, struct tracepoint *t)
   struct cmd_list_element *c;
   struct expression *exp = NULL;
   struct cleanup *old_chain = NULL;
-  char *p;
+  const char *p;
 
   for (p = *line; isspace ((int) *p);)
     p++;
@@ -999,7 +999,7 @@ validate_actionline (char **line, struct tracepoint *t)
     }
   else if (cmd_cfunc_eq (c, while_stepping_pseudocommand))
     {
-      char *steparg;		/* in case warning is necessary */
+      const char *steparg;		/* in case warning is necessary */
 
       while (isspace ((int) *p))
 	p++;
@@ -1476,7 +1476,7 @@ encode_actions (struct tracepoint *t, char ***tdp_actions,
 		char ***stepping_actions)
 {
   static char tdp_buff[2048], step_buff[2048];
-  char *action_exp;
+  const char *action_exp;
   struct expression *exp = NULL;
   struct action_line *action;
   int i;
@@ -1708,7 +1708,7 @@ remote_set_transparent_ranges (void)
    Tell target to start a new trace experiment.  */
 
 static void
-trace_start_command (char *args, int from_tty)
+trace_start_command (const char *args, int from_tty)
 {				/* STUB_COMM MOSTLY_IMPLEMENTED */
   struct tracepoint *t;
   char buf[2048];
@@ -1808,7 +1808,7 @@ trace_start_command (char *args, int from_tty)
 
 /* tstop command */
 static void
-trace_stop_command (char *args, int from_tty)
+trace_stop_command (const char *args, int from_tty)
 {				/* STUB_COMM IS_IMPLEMENTED */
   if (target_is_remote ())
     {
@@ -1828,7 +1828,7 @@ unsigned long trace_running_p;
 
 /* tstatus command */
 static void
-trace_status_command (char *args, int from_tty)
+trace_status_command (const char *args, int from_tty)
 {				/* STUB_COMM IS_IMPLEMENTED */
   if (target_is_remote ())
     {
@@ -1848,7 +1848,7 @@ trace_status_command (char *args, int from_tty)
 
 /* Worker function for the various flavors of the tfind command */
 static void
-finish_tfind_command (char *msg,
+finish_tfind_command (const char *msg,
 		      long sizeof_msg,
 		      int from_tty)
 {
@@ -1972,7 +1972,7 @@ finish_tfind_command (char *msg,
 
 /* tfind command */
 static void
-trace_find_command (char *args, int from_tty)
+trace_find_command (const char *args, int from_tty)
 {				/* STUB_COMM PART_IMPLEMENTED */
   /* this should only be called with a numeric argument */
   int frameno = -1;
@@ -2013,28 +2013,28 @@ trace_find_command (char *args, int from_tty)
 
 /* tfind end */
 static void
-trace_find_end_command (char *args, int from_tty)
+trace_find_end_command (const char *args, int from_tty)
 {
   trace_find_command ("-1", from_tty);
 }
 
 /* tfind none */
 static void
-trace_find_none_command (char *args, int from_tty)
+trace_find_none_command (const char *args, int from_tty)
 {
   trace_find_command ("-1", from_tty);
 }
 
 /* tfind start */
 static void
-trace_find_start_command (char *args, int from_tty)
+trace_find_start_command (const char *args, int from_tty)
 {
   trace_find_command ("0", from_tty);
 }
 
 /* tfind pc command */
 static void
-trace_find_pc_command (char *args, int from_tty)
+trace_find_pc_command (const char *args, int from_tty)
 {				/* STUB_COMM PART_IMPLEMENTED */
   CORE_ADDR pc;
   char tmp[40];
@@ -2056,7 +2056,7 @@ trace_find_pc_command (char *args, int from_tty)
 
 /* tfind tracepoint command */
 static void
-trace_find_tracepoint_command (char *args, int from_tty)
+trace_find_tracepoint_command (const char *args, int from_tty)
 {				/* STUB_COMM PART_IMPLEMENTED */
   int tdp;
 
@@ -2088,7 +2088,7 @@ trace_find_tracepoint_command (char *args, int from_tty)
    corresponding to a source line OTHER THAN THE CURRENT ONE.  */
 
 static void
-trace_find_line_command (char *args, int from_tty)
+trace_find_line_command (const char *args, int from_tty)
 {				/* STUB_COMM PART_IMPLEMENTED */
   static CORE_ADDR start_pc, end_pc;
   struct symtabs_and_lines sals;
@@ -2176,7 +2176,7 @@ trace_find_line_command (char *args, int from_tty)
 
 /* tfind range command */
 static void
-trace_find_range_command (char *args, int from_tty)
+trace_find_range_command (const char *args, int from_tty)
 {
   static CORE_ADDR start, stop;
   char start_str[40], stop_str[40];
@@ -2215,7 +2215,7 @@ trace_find_range_command (char *args, int from_tty)
 
 /* tfind outside command */
 static void
-trace_find_outside_command (char *args, int from_tty)
+trace_find_outside_command (const char *args, int from_tty)
 {
   CORE_ADDR start, stop;
   char start_str[40], stop_str[40];
@@ -2254,7 +2254,7 @@ trace_find_outside_command (char *args, int from_tty)
 
 /* save-tracepoints command */
 static void
-tracepoint_save_command (char *args, int from_tty)
+tracepoint_save_command (const char *args, int from_tty)
 {
   struct tracepoint *tp;
   struct action_line *line;
@@ -2470,11 +2470,11 @@ replace_comma (void *data)
 
 /* tdump command */
 static void
-trace_dump_command (char *args, int from_tty)
+trace_dump_command (const char *args, int from_tty)
 {
   struct tracepoint *t;
   struct action_line *action;
-  char *action_exp, *next_comma;
+  const char *action_exp, *next_comma;
   struct cleanup *old_cleanups;
   int stepping_actions = 0;
   int stepping_frame = 0;

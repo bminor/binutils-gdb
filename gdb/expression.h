@@ -356,9 +356,9 @@ struct expression
 
 /* From parse.c */
 
-extern struct expression *parse_expression (char *);
+extern struct expression *parse_expression (const char *);
 
-extern struct expression *parse_exp_1 (char **, struct block *, int);
+extern struct expression *parse_exp_1 (const char **, struct block *, int);
 
 /* The innermost context required by the stack and register variables
    we've encountered so far.  To use this, set it to NULL, then call

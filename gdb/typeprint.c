@@ -43,13 +43,13 @@ extern int objectprint;		/* Controls looking up an object's derived type
 
 extern void _initialize_typeprint (void);
 
-static void ptype_command (char *, int);
+static void ptype_command (const char *, int);
 
 static struct type *ptype_eval (struct expression *);
 
-static void whatis_command (char *, int);
+static void whatis_command (const char *, int);
 
-static void whatis_exp (char *, int);
+static void whatis_exp (const char *, int);
 
 /* Print a description of a type in the format of a 
    typedef for the current language.
@@ -113,7 +113,7 @@ type_print (struct type *type, char *varstring, struct ui_file *stream,
    show is passed to type_print.  */
 
 static void
-whatis_exp (char *exp, int show)
+whatis_exp (const char *exp, int show)
 {
   struct expression *expr;
   struct value *val;
@@ -175,7 +175,7 @@ whatis_exp (char *exp, int show)
 
 /* ARGSUSED */
 static void
-whatis_command (char *exp, int from_tty)
+whatis_command (const char *exp, int from_tty)
 {
   /* Most of the time users do not want to see all the fields
      in a structure.  If they do they can use the "ptype" command.
@@ -202,7 +202,7 @@ ptype_eval (struct expression *exp)
 
 /* ARGSUSED */
 static void
-ptype_command (char *typename, int from_tty)
+ptype_command (const char *typename, int from_tty)
 {
   register struct type *type;
   struct expression *expr;

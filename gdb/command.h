@@ -97,24 +97,27 @@ struct cmd_list_element;
 
 /* Forward-declarations of the entry-points of cli/cli-decode.c.  */
 
-extern struct cmd_list_element *add_cmd (char *, enum command_class,
-					 void (*fun) (char *, int), char *,
+extern struct cmd_list_element *add_cmd (const char *, enum command_class,
+					 void (*fun) (const char *, int),
+					 const char *,
 					 struct cmd_list_element **);
 
-extern struct cmd_list_element *add_alias_cmd (char *, char *,
+extern struct cmd_list_element *add_alias_cmd (const char *, const char *,
 					       enum command_class, int,
 					       struct cmd_list_element **);
 
-extern struct cmd_list_element *add_prefix_cmd (char *, enum command_class,
-						void (*fun) (char *, int),
-						char *,
+extern struct cmd_list_element *add_prefix_cmd (const char *,
+						enum command_class,
+						void (*fun) (const char *,
+							     int),
+						const char *,
 						struct cmd_list_element **,
-						char *, int,
+						const char *, int,
 						struct cmd_list_element **);
 
 extern struct cmd_list_element *add_abbrev_prefix_cmd (char *,
 						       enum command_class,
-						       void (*fun) (char *,
+						       void (*fun) (const char *,
 								    int),
 						       char *,
 						       struct cmd_list_element
@@ -124,11 +127,11 @@ extern struct cmd_list_element *add_abbrev_prefix_cmd (char *,
 
 /* Set the commands corresponding callback.  */
 
-typedef void cmd_cfunc_ftype (char *args, int from_tty);
+typedef void cmd_cfunc_ftype (const char *args, int from_tty);
 extern void set_cmd_cfunc (struct cmd_list_element *cmd,
 			   cmd_cfunc_ftype *cfunc);
 
-typedef void cmd_sfunc_ftype (char *args, int from_tty,
+typedef void cmd_sfunc_ftype (const char *args, int from_tty,
 			      struct cmd_list_element *c);
 extern void set_cmd_sfunc (struct cmd_list_element *cmd,
 			   cmd_sfunc_ftype *sfunc);
@@ -139,7 +142,7 @@ extern void set_cmd_completer (struct cmd_list_element *cmd,
 /* HACK: cagney/2002-02-23: Code, mostly in tracepoints.c, grubs
    around in cmd objects to test the value of the commands sfunc().  */
 extern int cmd_cfunc_eq (struct cmd_list_element *cmd,
-			 void (*cfunc) (char *args, int from_tty));
+			 void (*cfunc) (const char *args, int from_tty));
 
 /* Each command object has a local context attached to it. .  */
 extern void set_cmd_context (struct cmd_list_element *cmd, void *context);
@@ -164,7 +167,7 @@ extern void execute_cmd_post_hook (struct cmd_list_element *cmd);
 extern enum cmd_types cmd_type (struct cmd_list_element *cmd);
 
 
-extern struct cmd_list_element *lookup_cmd (char **,
+extern struct cmd_list_element *lookup_cmd (const char **,
 					    struct cmd_list_element *, char *,
 					    int, int);
 
@@ -176,31 +179,32 @@ extern struct cmd_list_element *lookup_cmd_1 (char **,
 extern struct cmd_list_element *
   deprecate_cmd (struct cmd_list_element *, char * );
 
-extern void
-  deprecated_cmd_warning (char **);
+extern void deprecated_cmd_warning (const char **);
 
-extern int
-  lookup_cmd_composition (char *text,
-                        struct cmd_list_element **alias,
-                        struct cmd_list_element **prefix_cmd,
-                        struct cmd_list_element **cmd);
+extern int lookup_cmd_composition (const char *text,
+				   struct cmd_list_element **alias,
+				   struct cmd_list_element **prefix_cmd,
+				   struct cmd_list_element **cmd);
 
-extern struct cmd_list_element *add_com (char *, enum command_class,
-					 void (*fun) (char *, int), char *);
+extern struct cmd_list_element *add_com (const char *, enum command_class,
+					 void (*fun) (const char *, int),
+					 const char *);
 
-extern struct cmd_list_element *add_com_alias (char *, char *,
+extern struct cmd_list_element *add_com_alias (const char *, const char *,
 					       enum command_class, int);
 
-extern struct cmd_list_element *add_info (char *, void (*fun) (char *, int),
-					  char *);
+extern struct cmd_list_element *add_info (const char *,
+					  void (*fun) (const char *, int),
+					  const char *);
 
-extern struct cmd_list_element *add_info_alias (char *, char *, int);
+extern struct cmd_list_element *add_info_alias (const char *, const char *,
+						int);
 
 extern char **complete_on_cmdlist (struct cmd_list_element *, char *, char *);
 
 extern char **complete_on_enum (const char *enumlist[], char *, char *);
 
-extern void delete_cmd (char *, struct cmd_list_element **);
+extern void delete_cmd (const char *, struct cmd_list_element **);
 
 extern void help_cmd (char *, struct ui_file *);
 
@@ -208,7 +212,7 @@ extern void help_list (struct cmd_list_element *, char *,
 		       enum command_class, struct ui_file *);
 
 extern void help_cmd_list (struct cmd_list_element *, enum command_class,
-			   char *, int, struct ui_file *);
+			   const char *, int, struct ui_file *);
 
 extern void add_setshow_cmd (char *name,
 			     enum command_class class,
@@ -230,17 +234,17 @@ extern void add_setshow_cmd_full (char *name,
 				  struct cmd_list_element **set_result,
 				  struct cmd_list_element **show_result);
 
-extern struct cmd_list_element *add_set_cmd (char *name, enum
+extern struct cmd_list_element *add_set_cmd (const char *name, enum
 					     command_class class,
 					     var_types var_type, void *var,
-					     char *doc,
+					     const char *doc,
 					     struct cmd_list_element **list);
 
-extern struct cmd_list_element *add_set_enum_cmd (char *name,
+extern struct cmd_list_element *add_set_enum_cmd (const char *name,
 						  enum command_class class,
 						  const char *enumlist[],
 						  const char **var,
-						  char *doc,
+						  const char *doc,
 						  struct cmd_list_element **list);
 
 extern void add_setshow_auto_boolean_cmd (char *name,
@@ -268,9 +272,9 @@ extern struct cmd_list_element *add_show_from_set (struct cmd_list_element *,
 
 /* Do a "show" command for each thing on a command list.  */
 
-extern void cmd_show_list (struct cmd_list_element *, int, char *);
+extern void cmd_show_list (struct cmd_list_element *, int, const char *);
 
-extern NORETURN void error_no_arg (char *) ATTR_NORETURN;
+extern NORETURN void error_no_arg (const char *) ATTR_NORETURN;
 
 extern void dont_repeat (void);
 
@@ -278,7 +282,7 @@ extern void dont_repeat (void);
    function field NULL, the command is interpreted as a help topic, or
    as a class of commands.  */
 
-extern void not_just_help_class_command (char *, int);
+extern void not_just_help_class_command (const char *, int);
 
 /* check function pointer */
 extern int cmd_func_p (struct cmd_list_element *cmd);

@@ -39,7 +39,7 @@
 /* Local function declarations.  */
 
 extern void _initialize_core (void);
-static void call_extra_exec_file_hooks (char *filename);
+static void call_extra_exec_file_hooks (const char *filename);
 
 /* You can have any number of hooks for `exec_file_command' command to call.
    If there's only one hook, it is set in exec_file_display hook.
@@ -49,7 +49,7 @@ static void call_extra_exec_file_hooks (char *filename);
    old code that assumed that only one hook could be set, and which called
    exec_file_display_hook directly.  */
 
-typedef void (*hook_type) (char *);
+typedef void (*hook_type) (const char *);
 
 hook_type exec_file_display_hook;	/* the original hook */
 static hook_type *exec_file_extra_hooks;	/* array of additional hooks */
@@ -63,7 +63,7 @@ bfd *core_bfd = NULL;
 /* Backward compatability with old way of specifying core files.  */
 
 void
-core_file_command (char *filename, int from_tty)
+core_file_command (const char *filename, int from_tty)
 {
   struct target_ops *t;
 
@@ -84,7 +84,7 @@ core_file_command (char *filename, int from_tty)
  * this function will call all of the hook functions. */
 
 static void
-call_extra_exec_file_hooks (char *filename)
+call_extra_exec_file_hooks (const char *filename)
 {
   int i;
 
@@ -96,7 +96,7 @@ call_extra_exec_file_hooks (char *filename)
    This is called from the x-window display code.  */
 
 void
-specify_exec_file_hook (void (*hook) (char *))
+specify_exec_file_hook (void (*hook) (const char *))
 {
   hook_type *new_array;
 
@@ -412,10 +412,9 @@ char *gnutarget;
 /* Same thing, except it is "auto" not NULL for the default case.  */
 static char *gnutarget_string;
 
-static void set_gnutarget_command (char *, int, struct cmd_list_element *);
-
 static void
-set_gnutarget_command (char *ignore, int from_tty, struct cmd_list_element *c)
+set_gnutarget_command (const char *ignore, int from_tty,
+		       struct cmd_list_element *c)
 {
   if (strcmp (gnutarget_string, "auto") == 0)
     gnutarget = NULL;

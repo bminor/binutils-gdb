@@ -48,21 +48,21 @@
 
 extern void _initialize_language (void);
 
-static void show_language_command (char *, int);
+static void show_language_command (const char *, int);
 
-static void set_language_command (char *, int);
+static void set_language_command (const char *, int);
 
-static void show_type_command (char *, int);
+static void show_type_command (const char *, int);
 
-static void set_type_command (char *, int);
+static void set_type_command (const char *, int);
 
-static void show_range_command (char *, int);
+static void show_range_command (const char *, int);
 
-static void set_range_command (char *, int);
+static void set_range_command (const char *, int);
 
-static void show_case_command (char *, int);
+static void show_case_command (const char *, int);
 
-static void set_case_command (char *, int);
+static void set_case_command (const char *, int);
 
 static void set_case_str (void);
 
@@ -76,9 +76,9 @@ static void unk_lang_error (char *);
 
 static int unk_lang_parser (void);
 
-static void show_check (char *, int);
+static void show_check (const char *, int);
 
-static void set_check (char *, int);
+static void set_check (const char *, int);
 
 static void set_type_range_case (void);
 
@@ -158,7 +158,7 @@ char lang_frame_mismatch_warn[] =
 /* Show command.  Display a warning if the language set
    does not match the frame. */
 static void
-show_language_command (char *ignore, int from_tty)
+show_language_command (const char *ignore, int from_tty)
 {
   enum language flang;		/* The language of the current frame */
 
@@ -171,7 +171,7 @@ show_language_command (char *ignore, int from_tty)
 
 /* Set command.  Change the current working language. */
 static void
-set_language_command (char *ignore, int from_tty)
+set_language_command (const char *ignore, int from_tty)
 {
   int i;
   enum language flang;
@@ -243,7 +243,7 @@ set_language_command (char *ignore, int from_tty)
 /* Show command.  Display a warning if the type setting does
    not match the current language. */
 static void
-show_type_command (char *ignore, int from_tty)
+show_type_command (const char *ignore, int from_tty)
 {
   if (type_check != current_language->la_type_check)
     printf_unfiltered (
@@ -252,7 +252,7 @@ show_type_command (char *ignore, int from_tty)
 
 /* Set command.  Change the setting for type checking. */
 static void
-set_type_command (char *ignore, int from_tty)
+set_type_command (const char *ignore, int from_tty)
 {
   if (STREQ (type, "on"))
     {
@@ -288,7 +288,7 @@ set_type_command (char *ignore, int from_tty)
 /* Show command.  Display a warning if the range setting does
    not match the current language. */
 static void
-show_range_command (char *ignore, int from_tty)
+show_range_command (const char *ignore, int from_tty)
 {
 
   if (range_check != current_language->la_range_check)
@@ -298,7 +298,7 @@ show_range_command (char *ignore, int from_tty)
 
 /* Set command.  Change the setting for range checking. */
 static void
-set_range_command (char *ignore, int from_tty)
+set_range_command (const char *ignore, int from_tty)
 {
   if (STREQ (range, "on"))
     {
@@ -334,7 +334,7 @@ set_range_command (char *ignore, int from_tty)
 /* Show command.  Display a warning if the case sensitivity setting does
    not match the current language. */
 static void
-show_case_command (char *ignore, int from_tty)
+show_case_command (const char *ignore, int from_tty)
 {
    if (case_sensitivity != current_language->la_case_sensitivity)
       printf_unfiltered(
@@ -343,7 +343,7 @@ show_case_command (char *ignore, int from_tty)
 
 /* Set command.  Change the setting for case sensitivity. */
 static void
-set_case_command (char *ignore, int from_tty)
+set_case_command (const char *ignore, int from_tty)
 {
    if (STREQ (case_sensitive, "on"))
    {
@@ -1300,7 +1300,7 @@ language_str (enum language lang)
 }
 
 static void
-set_check (char *ignore, int from_tty)
+set_check (const char *ignore, int from_tty)
 {
   printf_unfiltered (
      "\"set check\" must be followed by the name of a check subcommand.\n");
@@ -1308,7 +1308,7 @@ set_check (char *ignore, int from_tty)
 }
 
 static void
-show_check (char *ignore, int from_tty)
+show_check (const char *ignore, int from_tty)
 {
   cmd_show_list (showchecklist, from_tty, "");
 }

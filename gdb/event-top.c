@@ -1090,7 +1090,8 @@ handle_sigwinch (int sig)
 /* Called by do_setshow_command.  */
 /* ARGSUSED */
 void
-set_async_editing_command (char *args, int from_tty, struct cmd_list_element *c)
+set_async_editing_command (const char *args, int from_tty,
+			   struct cmd_list_element *c)
 {
   change_line_handler ();
 }
@@ -1098,7 +1099,8 @@ set_async_editing_command (char *args, int from_tty, struct cmd_list_element *c)
 /* Called by do_setshow_command.  */
 /* ARGSUSED */
 void
-set_async_annotation_level (char *args, int from_tty, struct cmd_list_element *c)
+set_async_annotation_level (const char *args, int from_tty,
+			    struct cmd_list_element *c)
 {
   change_annotation_level ();
 }
@@ -1106,7 +1108,7 @@ set_async_annotation_level (char *args, int from_tty, struct cmd_list_element *c
 /* Called by do_setshow_command.  */
 /* ARGSUSED */
 void
-set_async_prompt (char *args, int from_tty, struct cmd_list_element *c)
+set_async_prompt (const char *args, int from_tty, struct cmd_list_element *c)
 {
   PROMPT (0) = savestring (new_async_prompt, strlen (new_async_prompt));
 }

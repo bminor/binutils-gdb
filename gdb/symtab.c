@@ -58,15 +58,15 @@
 
 static void completion_list_add_name (char *, char *, int, char *, char *);
 
-static void rbreak_command (char *, int);
+static void rbreak_command (const char *, int);
 
-static void types_info (char *, int);
+static void types_info (const char *, int);
 
-static void functions_info (char *, int);
+static void functions_info (const char *, int);
 
-static void variables_info (char *, int);
+static void variables_info (const char *, int);
 
-static void sources_info (char *, int);
+static void sources_info (const char *, int);
 
 static void output_source_filename (char *, int *);
 
@@ -74,7 +74,7 @@ static int find_line_common (struct linetable *, int, int *);
 
 /* This one is used by linespec.c */
 
-char *operator_chars (char *p, char **end);
+const char *operator_chars (const char *p, const char **end);
 
 static struct partial_symbol *lookup_partial_symbol (struct partial_symtab *,
 						     const char *,
@@ -139,7 +139,7 @@ static void print_symbol_info (namespace_enum,
 
 static void print_msymbol_info (struct minimal_symbol *);
 
-static void symtab_symbol_info (char *, namespace_enum, int);
+static void symtab_symbol_info (const char *, namespace_enum, int);
 
 static void overload_list_add_symbol (struct symbol *sym, char *oload_name);
 
@@ -2530,8 +2530,8 @@ find_function_start_sal (struct symbol *sym, int funfirstline)
    some legitimate operator text, return a pointer to the
    beginning of the substring of the operator text.
    Otherwise, return "".  */
-char *
-operator_chars (char *p, char **end)
+const char *
+operator_chars (const char *p, const char **end)
 {
   *end = "";
   if (strncmp (p, "operator", 8))
@@ -2551,7 +2551,7 @@ operator_chars (char *p, char **end)
 
   if (isalpha (*p) || *p == '_' || *p == '$')
     {
-      register char *q = p + 1;
+      const char *q = p + 1;
       while (isalnum (*q) || *q == '_' || *q == '$')
 	q++;
       *end = q;
@@ -2739,7 +2739,7 @@ output_source_filename (char *name, int *first)
 }
 
 static void
-sources_info (char *ignore, int from_tty)
+sources_info (const char *ignore, int from_tty)
 {
   register struct symtab *s;
   register struct partial_symtab *ps;
@@ -2880,8 +2880,8 @@ sort_search_symbols (struct symbol_search *prevtail, int nfound)
    separately alphabetized.
  */
 void
-search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
-		struct symbol_search **matches)
+search_symbols (const char *regexp, namespace_enum kind, int nfiles,
+		char *files[], struct symbol_search **matches)
 {
   register struct symtab *s;
   register struct partial_symtab *ps;
@@ -2934,8 +2934,8 @@ search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
          This is just a courtesy to make the matching less sensitive
          to how many spaces the user leaves between 'operator'
          and <TYPENAME> or <OPERATOR>. */
-      char *opend;
-      char *opname = operator_chars (regexp, &opend);
+      const char *opend;
+      const char *opname = operator_chars (regexp, &opend);
       if (*opname)
 	{
 	  int fix = -1;		/* -1 means ok; otherwise number of spaces needed. */
@@ -3237,7 +3237,7 @@ print_msymbol_info (struct minimal_symbol *msymbol)
    matches.
  */
 static void
-symtab_symbol_info (char *regexp, namespace_enum kind, int from_tty)
+symtab_symbol_info (const char *regexp, namespace_enum kind, int from_tty)
 {
   static char *classnames[]
   =
@@ -3285,20 +3285,20 @@ symtab_symbol_info (char *regexp, namespace_enum kind, int from_tty)
 }
 
 static void
-variables_info (char *regexp, int from_tty)
+variables_info (const char *regexp, int from_tty)
 {
   symtab_symbol_info (regexp, VARIABLES_NAMESPACE, from_tty);
 }
 
 static void
-functions_info (char *regexp, int from_tty)
+functions_info (const char *regexp, int from_tty)
 {
   symtab_symbol_info (regexp, FUNCTIONS_NAMESPACE, from_tty);
 }
 
 
 static void
-types_info (char *regexp, int from_tty)
+types_info (const char *regexp, int from_tty)
 {
   symtab_symbol_info (regexp, TYPES_NAMESPACE, from_tty);
 }
@@ -3306,13 +3306,13 @@ types_info (char *regexp, int from_tty)
 /* Breakpoint all functions matching regular expression. */
 
 void
-rbreak_command_wrapper (char *regexp, int from_tty)
+rbreak_command_wrapper (const char *regexp, int from_tty)
 {
   rbreak_command (regexp, from_tty);
 }
 
 static void
-rbreak_command (char *regexp, int from_tty)
+rbreak_command (const char *regexp, int from_tty)
 {
   struct symbol_search *ss;
   struct symbol_search *p;
@@ -4162,7 +4162,7 @@ make_symbol_overload_list (struct symbol *fsym)
 /* End of overload resolution functions */
 
 struct symtabs_and_lines
-decode_line_spec (char *string, int funfirstline)
+decode_line_spec (const char *string, int funfirstline)
 {
   struct symtabs_and_lines sals;
   struct symtab_and_line cursal;

@@ -599,7 +599,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 		       type pointer to function or just a function.  */
 		    if (args[i]->lval == not_lval)
 		      {
-			char *arg_name;
+			const char *arg_name;
 			if (find_pc_partial_function ((CORE_ADDR) args[i]->aligner.contents[0], &arg_name, NULL, NULL))
 			  error ("\
 You cannot use function <%s> as argument. \n\

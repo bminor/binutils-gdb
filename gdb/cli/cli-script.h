@@ -27,7 +27,7 @@ struct cmd_list_element;
 
 extern void script_from_file (FILE *stream, char *file);
 
-extern void document_command (char *, int);
+extern void document_command (const char *, int);
 
 extern void define_command (char *, int);
 

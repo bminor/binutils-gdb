@@ -399,7 +399,7 @@ extern int annotation_level;	/* in stack.c */
 
 extern void begin_line (void);
 
-extern void wrap_here (char *);
+extern void wrap_here (const char *);
 
 extern void reinitialize_more_filter (void);
 
@@ -501,7 +501,7 @@ extern const char *core_addr_to_string (const CORE_ADDR addr);
 extern const char *core_addr_to_string_nz (const CORE_ADDR addr);
 extern CORE_ADDR string_to_core_addr (const char *my_string);
 
-extern void fprintf_symbol_filtered (struct ui_file *, char *,
+extern void fprintf_symbol_filtered (struct ui_file *, const char *,
 				     enum language, int);
 
 extern NORETURN void perror_with_name (const char *) ATTR_NORETURN;
@@ -516,10 +516,10 @@ extern char *re_comp (const char *);
 
 /* From symfile.c */
 
-extern void symbol_file_command (char *, int);
+extern void symbol_file_command (const char *, int);
 
 /* Remote targets may wish to use this as their load function.  */
-extern void generic_load (char *name, int from_tty);
+extern void generic_load (const char *name, int from_tty);
 
 /* Summarise a download */
 extern void print_transfer_performance (struct ui_file *stream,
@@ -531,7 +531,7 @@ extern void print_transfer_performance (struct ui_file *stream,
 
 typedef void initialize_file_ftype (void);
 
-extern char *skip_quoted (char *);
+extern const char *skip_quoted (const char *);
 
 extern char *gdb_readline (char *);
 
@@ -550,7 +550,7 @@ extern int info_verbose;
 extern void set_next_address (CORE_ADDR);
 
 extern void print_address_symbolic (CORE_ADDR, struct ui_file *, int,
-				    char *);
+				    const char *);
 
 extern int build_address_symbolic (CORE_ADDR addr,
 				   int do_demangle, 
@@ -570,11 +570,11 @@ extern int openp (const char *, int, const char *, int, int, char **);
 
 extern int source_full_path_of (char *, char **);
 
-extern void mod_path (char *, char **);
+extern void mod_path (const char *, char **);
 
-extern void add_path (char *, char **, int);
+extern void add_path (const char *, char **, int);
 
-extern void directory_command (char *, int);
+extern void directory_command (const char *, int);
 
 extern char *source_path;
 
@@ -865,15 +865,15 @@ extern int parse_escape (char **);
 
 /* Message to be printed before the error message, when an error occurs.  */
 
-extern char *error_pre_print;
+extern const char *error_pre_print;
 
 /* Message to be printed before the error message, when an error occurs.  */
 
-extern char *quit_pre_print;
+extern const char *quit_pre_print;
 
 /* Message to be printed before the warning message, when a warning occurs.  */
 
-extern char *warning_pre_print;
+extern const char *warning_pre_print;
 
 extern NORETURN void verror (const char *fmt, va_list ap) ATTR_NORETURN;
 
@@ -958,7 +958,7 @@ struct ui_out;
 typedef int (catch_exceptions_ftype) (struct ui_out *ui_out, void *args);
 extern int catch_exceptions (struct ui_out *uiout,
 			     catch_exceptions_ftype *func, void *func_args,
-			     char *errstring, return_mask mask);
+			     const char *errstring, return_mask mask);
 
 /* If CATCH_ERRORS_FTYPE throws an error, catch_errors() returns zero
    otherwize the result from CATCH_ERRORS_FTYPE is returned. It is
@@ -970,13 +970,16 @@ extern int catch_exceptions (struct ui_out *uiout,
    This function is superseeded by catch_exceptions().  */
 
 typedef int (catch_errors_ftype) (void *);
-extern int catch_errors (catch_errors_ftype *, void *, char *, return_mask);
+extern int catch_errors (catch_errors_ftype *, void *, const char *,
+			 return_mask);
 
 /* Template to catch_errors() that wraps calls to command
    functions. */
 
-typedef void (catch_command_errors_ftype) (char *, int);
-extern int catch_command_errors (catch_command_errors_ftype *func, char *command, int from_tty, return_mask);
+typedef void (catch_command_errors_ftype) (const char *, int);
+extern int catch_command_errors (catch_command_errors_ftype *func,
+				 const char *command, int from_tty,
+				 return_mask);
 
 extern void warning (const char *, ...) ATTR_FORMAT (printf, 1, 2);
 
@@ -1134,8 +1137,6 @@ extern void store_signed_integer (void *, int, LONGEST);
 
 extern void store_unsigned_integer (void *, int, ULONGEST);
 
-extern void store_address (void *, int, LONGEST);
-
 extern void store_typed_address (void *buf, struct type *type, CORE_ADDR addr);
 
 
@@ -1174,7 +1175,7 @@ extern void (*show_load_progress) (const char *section,
 extern void (*print_frame_info_listing_hook) (struct symtab * s,
 					      int line, int stopline,
 					      int noerror);
-extern struct frame_info *parse_frame_specification (char *frame_exp);
+extern struct frame_info *parse_frame_specification (const char *frame_exp);
 extern int (*query_hook) (const char *, va_list);
 extern void (*warning_hook) (const char *, va_list);
 extern void (*flush_hook) (struct ui_file * stream);

@@ -51,7 +51,7 @@
 
 struct vmap *map_vmap (bfd *, bfd *);
 
-void (*file_changed_hook) (char *);
+void (*file_changed_hook) (const char *);
 
 /* Prototypes for local functions */
 
@@ -59,9 +59,9 @@ static void add_to_section_table (bfd *, sec_ptr, void *);
 
 static void exec_close (int);
 
-static void file_command (char *, int);
+static void file_command (const char *, int);
 
-static void set_section_command (char *, int);
+static void set_section_command (const char *, int);
 
 static void exec_files_info (struct target_ops *);
 
@@ -95,7 +95,7 @@ CORE_ADDR text_end = 0;
 struct vmap *vmap;
 
 void
-exec_open (char *args, int from_tty)
+exec_open (const char *args, int from_tty)
 {
   target_preopen (from_tty);
   exec_file_attach (args, from_tty);
@@ -187,7 +187,7 @@ exec_file_clear (int from_tty)
    ARGS is assumed to be the filename. */
 
 void
-exec_file_attach (char *filename, int from_tty)
+exec_file_attach (const char *filename, int from_tty)
 {
   /* Remove any previous exec file.  */
   unpush_target (&exec_ops);
@@ -312,7 +312,7 @@ exec_file_attach (char *filename, int from_tty)
    If ARGS is NULL, we just want to close the exec file. */
 
 static void
-exec_file_command (char *args, int from_tty)
+exec_file_command (const char *args, int from_tty)
 {
   char **argv;
   char *filename;
@@ -349,7 +349,7 @@ exec_file_command (char *args, int from_tty)
    command was added?  */
 
 static void
-file_command (char *arg, int from_tty)
+file_command (const char *arg, int from_tty)
 {
   /* FIXME, if we lose on reading the symbol file, we should revert
      the exec file, but that's rough.  */
@@ -645,10 +645,10 @@ exec_set_section_offsets (bfd_signed_vma text_off, bfd_signed_vma data_off,
 }
 
 static void
-set_section_command (char *args, int from_tty)
+set_section_command (const char *args, int from_tty)
 {
   struct section_table *p;
-  char *secname;
+  const char *secname;
   unsigned seclen;
   unsigned long secaddr;
   char secprint[100];

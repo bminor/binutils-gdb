@@ -1029,13 +1029,13 @@ extern struct symbol *find_pc_sect_function (CORE_ADDR, asection *);
 
 /* lookup function from address, return name, start addr and end addr */
 
-extern int find_pc_partial_function (CORE_ADDR, char **, CORE_ADDR *,
+extern int find_pc_partial_function (CORE_ADDR, const char **, CORE_ADDR *,
 				     CORE_ADDR *);
 
 extern void clear_pc_function_cache (void);
 
-extern int find_pc_sect_partial_function (CORE_ADDR, asection *,
-					  char **, CORE_ADDR *, CORE_ADDR *);
+extern int find_pc_sect_partial_function (CORE_ADDR, asection *, const char **,
+					  CORE_ADDR *, CORE_ADDR *);
 
 /* from symtab.c: */
 
@@ -1219,29 +1219,29 @@ extern void resolve_sal_pc (struct symtab_and_line *);
 /* Given a string, return the line specified by it.  For commands like "list"
    and "breakpoint".  */
 
-extern struct symtabs_and_lines decode_line_spec (char *, int);
+extern struct symtabs_and_lines decode_line_spec (const char *, int);
 
-extern struct symtabs_and_lines decode_line_spec_1 (char *, int);
+extern struct symtabs_and_lines decode_line_spec_1 (const char *, int);
 
 /* Symmisc.c */
 
-void maintenance_print_symbols (char *, int);
+void maintenance_print_symbols (const char *, int);
 
-void maintenance_print_psymbols (char *, int);
+void maintenance_print_psymbols (const char *, int);
 
-void maintenance_print_msymbols (char *, int);
+void maintenance_print_msymbols (const char *, int);
 
-void maintenance_print_objfiles (char *, int);
+void maintenance_print_objfiles (const char *, int);
 
-void maintenance_info_symtabs (char *, int);
+void maintenance_info_symtabs (const char *, int);
 
-void maintenance_info_psymtabs (char *, int);
+void maintenance_info_psymtabs (const char *, int);
 
-void maintenance_check_symtabs (char *, int);
+void maintenance_check_symtabs (const char *, int);
 
 /* maint.c */
 
-void maintenance_print_statistics (char *, int);
+void maintenance_print_statistics (const char *, int);
 
 extern void free_symtab (struct symtab *);
 
@@ -1320,7 +1320,7 @@ struct symbol_search
   struct symbol_search *next;
 };
 
-extern void search_symbols (char *, namespace_enum, int, char **,
+extern void search_symbols (const char *, namespace_enum, int, char **,
 			    struct symbol_search **);
 extern void free_search_symbols (struct symbol_search *);
 extern struct cleanup *make_cleanup_free_search_symbols (struct symbol_search

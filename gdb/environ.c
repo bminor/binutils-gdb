@@ -161,7 +161,7 @@ set_in_environ (struct environ *e, const char *var, const char *value)
 /* Remove the setting for variable VAR from environment E.  */
 
 void
-unset_in_environ (struct environ *e, char *var)
+unset_in_environ (struct environ *e, const char *var)
 {
   register int len = strlen (var);
   register char **vector = e->vector;

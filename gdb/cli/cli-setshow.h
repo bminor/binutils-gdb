@@ -33,6 +33,6 @@ extern void do_setshow_command (char *arg, int from_tty,
 /* Exported to cli/cli-cmds.c and gdb/top.c, language.c and valprint.c */
 
 extern void cmd_show_list (struct cmd_list_element *list, int from_tty,
-			   char *prefix);
+			   const char *prefix);
 
 #endif /* !defined (CLI_SETSHOW_H) */

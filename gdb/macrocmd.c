@@ -33,7 +33,7 @@
 static struct cmd_list_element *macrolist;
 
 static void
-macro_command (char *arg, int from_tty)
+macro_command (const char *arg, int from_tty)
 {
   printf_unfiltered
     ("\"macro\" must be followed by the name of a macro command.\n");
@@ -46,7 +46,7 @@ macro_command (char *arg, int from_tty)
 
 
 static void
-macro_expand_command (char *exp, int from_tty)
+macro_expand_command (const char *exp, int from_tty)
 {
   struct macro_scope *ms = NULL;
   char *expanded = NULL;
@@ -82,7 +82,7 @@ macro_expand_command (char *exp, int from_tty)
 
 
 static void
-macro_expand_once_command (char *exp, int from_tty)
+macro_expand_once_command (const char *exp, int from_tty)
 {
   struct macro_scope *ms = NULL;
   char *expanded = NULL;
@@ -135,7 +135,7 @@ show_pp_source_pos (struct ui_file *stream,
 
 
 static void
-info_macro_command (char *name, int from_tty)
+info_macro_command (const char *name, int from_tty)
 {
   struct macro_scope *ms = NULL;
   struct cleanup *cleanup_chain = make_cleanup (free_current_contents, &ms);
@@ -199,21 +199,21 @@ info_macro_command (char *name, int from_tty)
 static struct macro_table *user_macros;
 
 static void
-macro_define_command (char *exp, int from_tty)
+macro_define_command (const char *exp, int from_tty)
 {
   error ("Command not implemented yet.");
 }
 
 
 static void
-macro_undef_command (char *exp, int from_tty)
+macro_undef_command (const char *exp, int from_tty)
 {
   error ("Command not implemented yet.");
 }
 
 
 static void
-macro_list_command (char *exp, int from_tty)
+macro_list_command (const char *exp, int from_tty)
 {
   error ("Command not implemented yet.");
 }

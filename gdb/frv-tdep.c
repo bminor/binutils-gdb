@@ -843,7 +843,7 @@ frv_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 
       if (typecode == TYPE_CODE_STRUCT || typecode == TYPE_CODE_UNION)
 	{
-	  store_address (valbuf, 4, VALUE_ADDRESS (arg));
+	  store_unsigned_integer (valbuf, 4, VALUE_ADDRESS (arg));
 	  typecode = TYPE_CODE_PTR;
 	  len = 4;
 	  val = valbuf;

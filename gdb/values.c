@@ -44,9 +44,9 @@ void _initialize_values (void);
 
 /* Prototypes for local functions. */
 
-static void show_values (char *, int);
+static void show_values (const char *, int);
 
-static void show_convenience (char *, int);
+static void show_convenience (const char *, int);
 
 
 /* The value-history records all the values printed
@@ -345,7 +345,7 @@ clear_value_history (void)
 }
 
 static void
-show_values (char *num_exp, int from_tty)
+show_values (const char *num_exp, int from_tty)
 {
   register int i;
   struct value *val;
@@ -402,7 +402,7 @@ static struct internalvar *internalvars;
    one is created, with a void value.  */
 
 struct internalvar *
-lookup_internalvar (char *name)
+lookup_internalvar (const char *name)
 {
   register struct internalvar *var;
 
@@ -496,7 +496,7 @@ clear_internalvars (void)
 }
 
 static void
-show_convenience (char *ignore, int from_tty)
+show_convenience (const char *ignore, int from_tty)
 {
   register struct internalvar *var;
   int varseen = 0;

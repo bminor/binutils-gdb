@@ -178,7 +178,7 @@ alphanbsd_sigtramp_offset (CORE_ADDR pc)
 }
 
 static int
-alphanbsd_pc_in_sigtramp (CORE_ADDR pc, char *func_name)
+alphanbsd_pc_in_sigtramp (CORE_ADDR pc, const char *func_name)
 {
   return (nbsd_pc_in_sigtramp (pc, func_name)
 	  || alphanbsd_sigtramp_offset (pc) >= 0);

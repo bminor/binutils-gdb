@@ -31,7 +31,7 @@
 void _initialize_kod (void);
 
 /* Prototypes for local functions.  */
-static void info_kod_command (char *, int);
+static void info_kod_command (const char *, int);
 static void load_kod_library (char *);
 
 /* Prototypes for callbacks.  These are passed into the KOD modules.  */
@@ -63,7 +63,7 @@ static void gdb_kod_query (char *, char *, int *);
 
 static char *(*gdb_kod_open) (kod_display_callback_ftype *display,
 			      kod_query_callback_ftype *query);
-static void (*gdb_kod_request) (char *, int);
+static void (*gdb_kod_request) (const char *, int);
 static void (*gdb_kod_close) ();
 
 
@@ -128,7 +128,7 @@ gdb_kod_query (char *arg, char *result, int *maxsiz)
    subcommand which is what the user actually uses to query the OS.  */
 
 static void
-kod_set_os (char *arg, int from_tty, struct cmd_list_element *command)
+kod_set_os (const char *arg, int from_tty, struct cmd_list_element *command)
 {
   char *p;
 
@@ -194,7 +194,7 @@ kod_set_os (char *arg, int from_tty, struct cmd_list_element *command)
    argument is empty.  */
 
 static void
-info_kod_command (char *arg, int from_tty)
+info_kod_command (const char *arg, int from_tty)
 {
   (*gdb_kod_request) (arg, from_tty);
 }

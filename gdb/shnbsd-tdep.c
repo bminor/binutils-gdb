@@ -167,7 +167,7 @@ static struct core_fns shnbsd_elfcore_fns =
 };
 
 static int
-shnbsd_pc_in_sigtramp (CORE_ADDR pc, char *func_name)
+shnbsd_pc_in_sigtramp (CORE_ADDR pc, const char *func_name)
 {
   /* FIXME: Need to add support for kernel-provided signal trampolines.  */
   return (nbsd_pc_in_sigtramp (pc, func_name));

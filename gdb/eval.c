@@ -77,7 +77,7 @@ evaluate_subexp (struct type *expect_type, register struct expression *exp,
    and return the result as a number.  */
 
 CORE_ADDR
-parse_and_eval_address (char *exp)
+parse_and_eval_address (const char *exp)
 {
   struct expression *expr = parse_expression (exp);
   register CORE_ADDR addr;
@@ -93,7 +93,7 @@ parse_and_eval_address (char *exp)
    and advanced that variable across the characters parsed.  */
 
 CORE_ADDR
-parse_and_eval_address_1 (char **expptr)
+parse_and_eval_address_1 (const char **expptr)
 {
   struct expression *expr = parse_exp_1 (expptr, (struct block *) 0, 0);
   register CORE_ADDR addr;
@@ -108,7 +108,7 @@ parse_and_eval_address_1 (char **expptr)
 /* Like parse_and_eval_address, but treats the value of the expression
    as an integer, not an address, returns a LONGEST, not a CORE_ADDR */
 LONGEST
-parse_and_eval_long (char *exp)
+parse_and_eval_long (const char *exp)
 {
   struct expression *expr = parse_expression (exp);
   register LONGEST retval;
@@ -121,7 +121,7 @@ parse_and_eval_long (char *exp)
 }
 
 struct value *
-parse_and_eval (char *exp)
+parse_and_eval (const char *exp)
 {
   struct expression *expr = parse_expression (exp);
   struct value *val;
@@ -138,7 +138,7 @@ parse_and_eval (char *exp)
    EXPP is advanced to point to the comma.  */
 
 struct value *
-parse_to_comma_and_eval (char **expp)
+parse_to_comma_and_eval (const char **expp)
 {
   struct expression *expr = parse_exp_1 (expp, (struct block *) 0, 1);
   struct value *val;

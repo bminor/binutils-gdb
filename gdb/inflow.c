@@ -49,7 +49,7 @@ extern void _initialize_inflow (void);
 
 static void pass_signal (int);
 
-static void kill_command (char *, int);
+static void kill_command (const char *, int);
 
 static void terminal_ours_1 (int);
 
@@ -414,14 +414,14 @@ terminal_ours_1 (int output_only)
 
 /* ARGSUSED */
 void
-term_info (char *arg, int from_tty)
+term_info (const char *arg, int from_tty)
 {
   target_terminal_info (arg, from_tty);
 }
 
 /* ARGSUSED */
 void
-child_terminal_info (char *args, int from_tty)
+child_terminal_info (const char *args, int from_tty)
 {
   if (!gdb_has_a_terminal ())
     {
@@ -574,7 +574,7 @@ new_tty (void)
 
 /* ARGSUSED */
 static void
-kill_command (char *arg, int from_tty)
+kill_command (const char *arg, int from_tty)
 {
   /* FIXME:  This should not really be inferior_ptid (or target_has_execution).
      It should be a distinct flag that indicates that a target is active, cuz

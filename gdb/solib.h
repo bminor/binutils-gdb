@@ -37,7 +37,7 @@ extern void clear_solib (void);
 #define SOLIB_ADD(filename, from_tty, targ, readsyms) \
     solib_add (filename, from_tty, targ, readsyms)
 
-extern void solib_add (char *, int, struct target_ops *, int);
+extern void solib_add (const char *, int, struct target_ops *, int);
 
 /* Function to be called when the inferior starts up, to discover the names
    of shared libraries that are dynamically linked, the base addresses to
@@ -199,6 +199,6 @@ extern int in_solib_dynsym_resolve_code (CORE_ADDR);	/* solib.c */
 
 /* Discard symbols that were auto-loaded from shared libraries. */
 
-extern void no_shared_libraries (char *ignored, int from_tty);
+extern void no_shared_libraries (const char *ignored, int from_tty);
 
 #endif /* SOLIB_H */

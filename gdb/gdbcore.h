@@ -96,14 +96,14 @@ extern void generic_search (int len, char *data, char *mask,
 
 /* Hook for `exec_file_command' command to call.  */
 
-extern void (*exec_file_display_hook) (char *filename);
+extern void (*exec_file_display_hook) (const char *filename);
 
 /* Hook for "file_command", which is more useful than above
    (because it is invoked AFTER symbols are read, not before) */
 
-extern void (*file_changed_hook) (char *filename);
+extern void (*file_changed_hook) (const char *filename);
 
-extern void specify_exec_file_hook (void (*hook) (char *filename));
+extern void specify_exec_file_hook (void (*hook) (const char *filename));
 
 /* Binary File Diddlers for the exec and core files */
 
@@ -114,11 +114,11 @@ extern bfd *exec_bfd;
 
 extern int write_files;
 
-extern void core_file_command (char *filename, int from_tty);
+extern void core_file_command (const char *filename, int from_tty);
 
-extern void exec_open (char *filename, int from_tty);
+extern void exec_open (const char *filename, int from_tty);
 
-extern void exec_file_attach (char *filename, int from_tty);
+extern void exec_file_attach (const char *filename, int from_tty);
 
 extern void exec_file_clear (int from_tty);
 

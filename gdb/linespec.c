@@ -44,29 +44,30 @@ extern char *operator_chars (char *, char **);
 static void initialize_defaults (struct symtab **default_symtab,
 				 int *default_line);
 
-static void set_flags (char *arg, int *is_quoted, char **paren_pointer);
+static void set_flags (const char *arg, int *is_quoted, char **paren_pointer);
 
-static struct symtabs_and_lines decode_indirect (char **argptr);
+static struct symtabs_and_lines decode_indirect (const char **argptr);
 
-static char *locate_first_half (char **argptr, int *is_quote_enclosed);
+static const char *locate_first_half (const char **argptr,
+				      int *is_quote_enclosed);
 
-static struct symtabs_and_lines decode_objc (char **argptr,
+static struct symtabs_and_lines decode_objc (const char **argptr,
 					     int funfirstline,
 					     struct symtab *file_symtab,
 					     char ***canonical,
-					     char *saved_arg);
+					     const char *saved_arg);
 
-static struct symtabs_and_lines decode_compound (char **argptr,
+static struct symtabs_and_lines decode_compound (const char **argptr,
 						 int funfirstline,
 						 char ***canonical,
-						 char *saved_arg,
-						 char *p);
+						 const char *saved_arg,
+						 const char *p);
 
-static struct symbol *lookup_prefix_sym (char **argptr, char *p);
+static struct symbol *lookup_prefix_sym (const char **argptr, const char *p);
 
 static struct symtabs_and_lines find_method (int funfirstline,
 					     char ***canonical,
-					     char *saved_arg,
+					     const char *saved_arg,
 					     char *copy,
 					     struct type *t,
 					     struct symbol *sym_class);
@@ -85,21 +86,22 @@ static int find_methods (struct type *, char *, struct symbol **);
 static void build_canonical_line_spec (struct symtab_and_line *,
 				       char *, char ***);
 
-static char *find_toplevel_char (char *s, char c);
+static const char *find_toplevel_char (const char *s, char c);
 
 static struct symtabs_and_lines decode_line_2 (struct symbol *[],
 					       int, int, char ***);
 
-static struct symtab *symtab_from_filename (char **argptr,
-					    char *p, int is_quote_enclosed);
+static struct symtab *symtab_from_filename (const char **argptr,
+					    const char *p,
+					    int is_quote_enclosed);
 
 static struct
-symtabs_and_lines decode_all_digits (char **argptr,
+symtabs_and_lines decode_all_digits (const char **argptr,
 				     struct symtab *default_symtab,
 				     int default_line,
 				     char ***canonical,
 				     struct symtab *file_symtab,
-				     char *q);
+				     const char *q);
 
 static struct symtabs_and_lines decode_dollar (char *copy,
 					       int funfirstline,
@@ -374,14 +376,14 @@ build_canonical_line_spec (struct symtab_and_line *sal, char *symname,
    strings.  Also, ignore the char within a template name, like a ','
    within foo<int, int>.  */
 
-static char *
-find_toplevel_char (char *s, char c)
+static const char *
+find_toplevel_char (const char *s, char c)
 {
   int quoted = 0;		/* zero if we're not in quotes;
 				   '"' if we're in a double-quoted string;
 				   '\'' if we're in a single-quoted string.  */
   int depth = 0;		/* Number of unclosed parens we've seen.  */
-  char *scan;
+  const char *scan;
 
   for (scan = s; *scan; scan++)
     {
@@ -579,11 +581,12 @@ decode_line_2 (struct symbol *sym_arr[], int nelts, int funfirstline,
    can use as appropriate instead of make_symbol_completion_list.  */
 
 struct symtabs_and_lines
-decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
+decode_line_1 (const char **argptr, int funfirstline,
+	       struct symtab *default_symtab,
 	       int default_line, char ***canonical)
 {
-  char *p;
-  char *q;
+  const char *p;
+  const char *q;
   /* If a file name is specified, this is its symtab.  */
   struct symtab *file_symtab = NULL;
 
@@ -597,7 +600,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   /* Is part of *ARGPTR is enclosed in double quotes?  */
   int is_quote_enclosed;
   int is_objc_method = 0;
-  char *saved_arg = *argptr;
+  const char *saved_arg = *argptr;
 
   /* Defaults have defaults.  */
 
@@ -811,7 +814,7 @@ initialize_defaults (struct symtab **default_symtab, int *default_line)
 }
 
 static void
-set_flags (char *arg, int *is_quoted, char **paren_pointer)
+set_flags (const char *arg, int *is_quoted, char **paren_pointer)
 {
   char *ii;
   int has_if = 0;
@@ -853,7 +856,7 @@ set_flags (char *arg, int *is_quoted, char **paren_pointer)
 /* Decode arg of the form *PC.  */
 
 static struct symtabs_and_lines
-decode_indirect (char **argptr)
+decode_indirect (const char **argptr)
 {
   struct symtabs_and_lines values;
   CORE_ADDR pc;
@@ -879,11 +882,12 @@ decode_indirect (char **argptr)
    enclosed in double quotes; if so, set is_quote_enclosed, advance
    ARGPTR past that and zero out the trailing double quote.  */
 
-static char *
-locate_first_half (char **argptr, int *is_quote_enclosed)
+static const char *
+locate_first_half (const char **argptr, int *is_quote_enclosed)
 {
-  char *ii;
-  char *p, *p1;
+  const char *ii;
+  const char *p;
+  const char *p1;
   int has_comma;
 
   /* Maybe we were called with a line range FILENAME:LINENUM,FILENAME:LINENUM
@@ -920,7 +924,7 @@ locate_first_half (char **argptr, int *is_quote_enclosed)
     {
       if (p[0] == '<')
 	{
-	  char *temp_end = find_template_name_end (p);
+	  const char *temp_end = find_template_name_end (p);
 	  if (!temp_end)
 	    error ("malformed template specification in command");
 	  p = temp_end;
@@ -983,13 +987,13 @@ locate_first_half (char **argptr, int *is_quote_enclosed)
    the existing C++ code to let the user choose one.  */
 
 struct symtabs_and_lines
-decode_objc (char **argptr, int funfirstline, struct symtab *file_symtab,
-	     char ***canonical, char *saved_arg)
+decode_objc (const char **argptr, int funfirstline, struct symtab *file_symtab,
+	     char ***canonical, const char *saved_arg)
 {
   struct symtabs_and_lines values;
   struct symbol **sym_arr = NULL;
   struct symbol *sym = NULL;
-  char *copy = NULL;
+  const char *copy = NULL;
   struct block *block = NULL;
   int i1 = 0;
   int i2 = 0;
@@ -1068,16 +1072,16 @@ decode_objc (char **argptr, int funfirstline, struct symtab *file_symtab,
    at the first component separator, i.e. double-colon or period.  */
 
 static struct symtabs_and_lines
-decode_compound (char **argptr, int funfirstline, char ***canonical,
-		 char *saved_arg, char *p)
+decode_compound (const char **argptr, int funfirstline, char ***canonical,
+		 const char *saved_arg, const char *p)
 {
   struct symtabs_and_lines values;
-  char *p2;
+  const char *p2;
 #if 0
   char *q, *q1;
 #endif
-  char *saved_arg2 = *argptr;
-  char *temp_end;
+  const char *saved_arg2 = *argptr;
+  const char *temp_end;
   struct symbol *sym;
   /* The symtab that SYM was found in.  */
   struct symtab *sym_symtab;
@@ -1234,9 +1238,9 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
    whitespace.  */
 
 static struct symbol *
-lookup_prefix_sym (char **argptr, char *p)
+lookup_prefix_sym (const char **argptr, const char *p)
 {
-  char *p1;
+  const char *p1;
   char *copy;
 
   /* Extract the class name.  */
@@ -1261,7 +1265,7 @@ lookup_prefix_sym (char **argptr, char *p)
    symbol is SYM_CLASS.  */
 
 static struct symtabs_and_lines
-find_method (int funfirstline, char ***canonical, char *saved_arg,
+find_method (int funfirstline, char ***canonical, const char *saved_arg,
 	     char *copy, struct type *t, struct symbol *sym_class)
 {
   struct symtabs_and_lines values;
@@ -1361,9 +1365,10 @@ collect_methods (char *copy, struct type *t,
    of *ARGPTR ending at P, and advance ARGPTR past that filename.  */
 
 static struct symtab *
-symtab_from_filename (char **argptr, char *p, int is_quote_enclosed)
+symtab_from_filename (const char **argptr, const char *p,
+		      int is_quote_enclosed)
 {
-  char *p1;
+  const char *p1;
   char *copy;
   struct symtab *file_symtab;
   
@@ -1405,9 +1410,9 @@ symtab_from_filename (char **argptr, char *p, int is_quote_enclosed)
    the other arguments are as usual.  */
 
 static struct symtabs_and_lines
-decode_all_digits (char **argptr, struct symtab *default_symtab,
+decode_all_digits (const char **argptr, struct symtab *default_symtab,
 		   int default_line, char ***canonical,
-		   struct symtab *file_symtab, char *q)
+		   struct symtab *file_symtab, const char *q)
 
 {
   struct symtabs_and_lines values;

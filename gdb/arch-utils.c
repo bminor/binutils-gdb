@@ -150,13 +150,13 @@ generic_skip_trampoline_code (CORE_ADDR pc)
 }
 
 int
-generic_in_solib_call_trampoline (CORE_ADDR pc, char *name)
+generic_in_solib_call_trampoline (CORE_ADDR pc, const char *name)
 {
   return 0;
 }
 
 int
-generic_in_solib_return_trampoline (CORE_ADDR pc, char *name)
+generic_in_solib_return_trampoline (CORE_ADDR pc, const char *name)
 {
   return 0;
 }
@@ -470,7 +470,7 @@ generic_register_byte (int regnum)
 
 
 int
-legacy_pc_in_sigtramp (CORE_ADDR pc, char *name)
+legacy_pc_in_sigtramp (CORE_ADDR pc, const char *name)
 {
 #if !defined (IN_SIGTRAMP)
   if (SIGTRAMP_START_P ())
@@ -530,7 +530,7 @@ static const char *set_endian_string;
 /* Called by ``show endian''.  */
 
 static void
-show_endian (char *args, int from_tty)
+show_endian (const char *args, int from_tty)
 {
   if (TARGET_BYTE_ORDER_AUTO)
     printf_unfiltered ("The target endianness is set automatically (currently %s endian)\n",
@@ -541,7 +541,7 @@ show_endian (char *args, int from_tty)
 }
 
 static void
-set_endian (char *ignore_args, int from_tty, struct cmd_list_element *c)
+set_endian (const char *ignore_args, int from_tty, struct cmd_list_element *c)
 {
   if (set_endian_string == endian_auto)
     {
@@ -713,7 +713,7 @@ set_architecture_from_file (bfd *abfd)
    argument. */
 
 static void
-show_architecture (char *args, int from_tty)
+show_architecture (const char *args, int from_tty)
 {
   const char *arch;
   arch = TARGET_ARCHITECTURE->printable_name;
@@ -728,7 +728,8 @@ show_architecture (char *args, int from_tty)
    argument. */
 
 static void
-set_architecture (char *ignore_args, int from_tty, struct cmd_list_element *c)
+set_architecture (const char *ignore_args, int from_tty,
+		  struct cmd_list_element *c)
 {
   if (strcmp (set_architecture_string, "auto") == 0)
     {

@@ -130,8 +130,9 @@ set_cmd_completer (struct cmd_list_element *cmd,
    of *LIST). */
 
 struct cmd_list_element *
-add_cmd (char *name, enum command_class class, void (*fun) (char *, int),
-	 char *doc, struct cmd_list_element **list)
+add_cmd (const char *name, enum command_class class,
+	 void (*fun) (const char *, int),
+	 const char *doc, struct cmd_list_element **list)
 {
   register struct cmd_list_element *c
   = (struct cmd_list_element *) xmalloc (sizeof (struct cmd_list_element));
@@ -187,7 +188,8 @@ add_cmd (char *name, enum command_class class, void (*fun) (char *, int),
 /* Note: Doesn't seem to be used anywhere currently. */
 
 struct cmd_list_element *
-add_abbrev_cmd (char *name, enum command_class class, void (*fun) (char *, int),
+add_abbrev_cmd (char *name, enum command_class class,
+		void (*fun) (const char *, int),
 		char *doc, struct cmd_list_element **list)
 {
   register struct cmd_list_element *c
@@ -221,11 +223,11 @@ deprecate_cmd (struct cmd_list_element *cmd, char *replacement)
 }
 
 struct cmd_list_element *
-add_alias_cmd (char *name, char *oldname, enum command_class class,
+add_alias_cmd (const char *name, const char *oldname, enum command_class class,
 	       int abbrev_flag, struct cmd_list_element **list)
 {
   /* Must do this since lookup_cmd tries to side-effect its first arg */
-  char *copied_name;
+  const char *copied_name;
   register struct cmd_list_element *old;
   register struct cmd_list_element *c;
   copied_name = (char *) alloca (strlen (oldname) + 1);
@@ -256,9 +258,10 @@ add_alias_cmd (char *name, char *oldname, enum command_class class,
    of the variable containing that list.  */
 
 struct cmd_list_element *
-add_prefix_cmd (char *name, enum command_class class, void (*fun) (char *, int),
-		char *doc, struct cmd_list_element **prefixlist,
-		char *prefixname, int allow_unknown,
+add_prefix_cmd (const char *name, enum command_class class,
+		void (*fun) (const char *, int),
+		const char *doc, struct cmd_list_element **prefixlist,
+		const char *prefixname, int allow_unknown,
 		struct cmd_list_element **list)
 {
   register struct cmd_list_element *c = add_cmd (name, class, fun, doc, list);
@@ -307,12 +310,12 @@ empty_sfunc (char *args, int from_tty, struct cmd_list_element *c)
    DOC is the documentation string.  */
 
 static struct cmd_list_element *
-add_set_or_show_cmd (char *name,
+add_set_or_show_cmd (const char *name,
 		     enum cmd_types type,
 		     enum command_class class,
 		     var_types var_type,
 		     void *var,
-		     char *doc,
+		     const char *doc,
 		     struct cmd_list_element **list)
 {
   struct cmd_list_element *c = add_cmd (name, class, NULL, doc, list);
@@ -383,11 +386,11 @@ add_setshow_cmd (char *name,
 }
 
 struct cmd_list_element *
-add_set_cmd (char *name,
+add_set_cmd (const char *name,
 	     enum command_class class,
 	     var_types var_type,
 	     void *var,
-	     char *doc,
+	     const char *doc,
 	     struct cmd_list_element **list)
 {
   return add_set_or_show_cmd (name, set_cmd, class, var_type, var, doc, list);
@@ -402,11 +405,11 @@ add_set_cmd (char *name,
    DOC is the documentation string.  */
 
 struct cmd_list_element *
-add_set_enum_cmd (char *name,
+add_set_enum_cmd (const char *name,
 		  enum command_class class,
 		  const char *enumlist[],
 		  const char **var,
-		  char *doc,
+		  const char *doc,
 		  struct cmd_list_element **list)
 {
   struct cmd_list_element *c
@@ -492,7 +495,7 @@ add_show_from_set (struct cmd_list_element *setcmd,
 /* Remove the command named NAME from the command list.  */
 
 void
-delete_cmd (char *name, struct cmd_list_element **list)
+delete_cmd (const char *name, struct cmd_list_element **list)
 {
   register struct cmd_list_element *c;
   struct cmd_list_element *p;
@@ -532,7 +535,7 @@ delete_cmd (char *name, struct cmd_list_element **list)
 /* Add an element to the list of info subcommands.  */
 
 struct cmd_list_element *
-add_info (char *name, void (*fun) (char *, int), char *doc)
+add_info (const char *name, void (*fun) (char *, int), const char *doc)
 {
   return add_cmd (name, no_class, fun, doc, &infolist);
 }
@@ -540,7 +543,7 @@ add_info (char *name, void (*fun) (char *, int), char *doc)
 /* Add an alias to the list of info subcommands.  */
 
 struct cmd_list_element *
-add_info_alias (char *name, char *oldname, int abbrev_flag)
+add_info_alias (const char *name, const char *oldname, int abbrev_flag)
 {
   return add_alias_cmd (name, oldname, 0, abbrev_flag, &infolist);
 }
@@ -548,8 +551,8 @@ add_info_alias (char *name, char *oldname, int abbrev_flag)
 /* Add an element to the list of commands.  */
 
 struct cmd_list_element *
-add_com (char *name, enum command_class class, void (*fun) (char *, int),
-	 char *doc)
+add_com (const char *name, enum command_class class, void (*fun) (char *, int),
+	 const char *doc)
 {
   return add_cmd (name, class, fun, doc, &cmdlist);
 }
@@ -557,7 +560,7 @@ add_com (char *name, enum command_class class, void (*fun) (char *, int),
 /* Add an alias or abbreviation command to the list of commands.  */
 
 struct cmd_list_element *
-add_com_alias (char *name, char *oldname, enum command_class class,
+add_com_alias (const char *name, const char *oldname, enum command_class class,
 	       int abbrev_flag)
 {
   return add_alias_cmd (name, oldname, class, abbrev_flag, &cmdlist);
@@ -569,7 +572,7 @@ add_com_alias (char *name, char *oldname, enum command_class class,
 */
 void 
 apropos_cmd (struct ui_file *stream, struct cmd_list_element *commandlist,
-			 struct re_pattern_buffer *regex, char *prefix)
+	     struct re_pattern_buffer *regex, const char *prefix)
 {
   register struct cmd_list_element *c;
   int returnvalue=1; /*Needed to avoid double printing*/
@@ -705,7 +708,7 @@ help_cmd (char *command, struct ui_file *stream)
  * If you call this routine with a class >= 0, it recurses.
  */
 void
-help_list (struct cmd_list_element *list, char *cmdtype,
+help_list (struct cmd_list_element *list, const char *cmdtype,
 	   enum command_class class, struct ui_file *stream)
 {
   int len;
@@ -776,11 +779,11 @@ help_all (struct ui_file *stream)
 
 /* Print only the first line of STR on STREAM.  */
 void
-print_doc_line (struct ui_file *stream, char *str)
+print_doc_line (struct ui_file *stream, const char *str)
 {
   static char *line_buffer = 0;
   static int line_size;
-  register char *p;
+  const char *p;
 
   if (!line_buffer)
     {
@@ -822,7 +825,7 @@ print_doc_line (struct ui_file *stream, char *str)
  */
 void
 help_cmd_list (struct cmd_list_element *list, enum command_class class,
-	       char *prefix, int recurse, struct ui_file *stream)
+	       const char *prefix, int recurse, struct ui_file *stream)
 {
   register struct cmd_list_element *c;
 
@@ -1046,7 +1049,7 @@ lookup_cmd_1 (char **text, struct cmd_list_element *clist,
 /* All this hair to move the space to the front of cmdtype */
 
 static void
-undef_cmd_error (char *cmdtype, char *q)
+undef_cmd_error (const char *cmdtype, char *q)
 {
   error ("Undefined %scommand: \"%s\".  Try \"help%s%.*s\".",
 	 cmdtype,
@@ -1109,7 +1112,7 @@ lookup_cmd (char **line, struct cmd_list_element *list, char *cmdtype,
          values.  */
       int local_allow_unknown = (last_list ? last_list->allow_unknown :
 				 allow_unknown);
-      char *local_cmdtype = last_list ? last_list->prefixname : cmdtype;
+      const char *local_cmdtype = last_list ? last_list->prefixname : cmdtype;
       struct cmd_list_element *local_list =
       (last_list ? *(last_list->prefixlist) : list);
 

@@ -62,37 +62,37 @@ extern void show_commands (char *, int);
 
 /* Prototypes for local command functions */
 
-static void complete_command (char *, int);
+static void complete_command (const char *, int);
 
-static void echo_command (char *, int);
+static void echo_command (const char *, int);
 
-static void pwd_command (char *, int);
+static void pwd_command (const char *, int);
 
 static void show_version (char *, int);
 
 static void validate_comname (char *);
 
-static void help_command (char *, int);
+static void help_command (const char *, int);
 
-static void show_command (char *, int);
+static void show_command (const char *, int);
 
-static void info_command (char *, int);
+static void info_command (const char *, int);
 
-static void show_debug (char *, int);
+static void show_debug (const char *, int);
 
-static void set_debug (char *, int);
+static void set_debug (const char *, int);
 
-static void show_user (char *, int);
+static void show_user (const char *, int);
 
-static void make_command (char *, int);
+static void make_command (const char *, int);
 
 static void shell_escape (char *, int);
 
-static void edit_command (char *, int);
+static void edit_command (const char *, int);
 
-static void list_command (char *, int);
+static void list_command (const char *, int);
 
-void apropos_command (char *, int);
+void apropos_command (const char *, int);
 
 /* Prototypes for local utility functions */
 
@@ -187,7 +187,7 @@ struct cmd_list_element *showchecklist;
    none is supplied. */
 
 void
-error_no_arg (char *why)
+error_no_arg (const char *why)
 {
   error ("Argument required (%s).", why);
 }
@@ -197,7 +197,7 @@ error_no_arg (char *why)
 
 /* ARGSUSED */
 static void
-info_command (char *arg, int from_tty)
+info_command (const char *arg, int from_tty)
 {
   printf_unfiltered ("\"info\" must be followed by the name of an info command.\n");
   help_list (infolist, "info ", -1, gdb_stdout);
@@ -207,7 +207,7 @@ info_command (char *arg, int from_tty)
 
 /* ARGSUSED */
 static void
-show_command (char *arg, int from_tty)
+show_command (const char *arg, int from_tty)
 {
   cmd_show_list (showlist, from_tty, "");
 }
@@ -217,7 +217,7 @@ show_command (char *arg, int from_tty)
 
 /* ARGSUSED */
 static void
-help_command (char *command, int from_tty)
+help_command (const char *command, int from_tty)
 {
   help_cmd (command, gdb_stdout);
 }
@@ -235,7 +235,7 @@ compare_strings (const void *arg1, const void *arg2)
 
 /* ARGSUSED */
 static void
-complete_command (char *arg, int from_tty)
+complete_command (const char *arg, int from_tty)
 {
   int i;
   int argpoint;
@@ -299,7 +299,7 @@ show_version (char *args, int from_tty)
 /* Handle the quit command.  */
 
 void
-quit_command (char *args, int from_tty)
+quit_command (const char *args, int from_tty)
 {
   if (!quit_confirm ())
     error ("Not confirmed.");
@@ -308,7 +308,7 @@ quit_command (char *args, int from_tty)
 
 /* ARGSUSED */
 static void
-pwd_command (char *args, int from_tty)
+pwd_command (const char *args, int from_tty)
 {
   if (args)
     error ("The \"pwd\" command does not take an argument: %s", args);
@@ -322,7 +322,7 @@ pwd_command (char *args, int from_tty)
 }
 
 void
-cd_command (char *dir, int from_tty)
+cd_command (const char *dir, int from_tty)
 {
   int len;
   /* Found something other than leading repetitions of "/..".  */
@@ -422,7 +422,7 @@ cd_command (char *dir, int from_tty)
 }
 
 void
-source_command (char *args, int from_tty)
+source_command (const char *args, int from_tty)
 {
   FILE *stream;
   struct cleanup *old_cleanups;
@@ -452,7 +452,7 @@ source_command (char *args, int from_tty)
 
 /* ARGSUSED */
 static void
-echo_command (char *text, int from_tty)
+echo_command (const char *text, int from_tty)
 {
   char *p = text;
   register int c;
@@ -543,7 +543,7 @@ shell_escape (char *arg, int from_tty)
 }
 
 static void
-edit_command (char *arg, int from_tty)
+edit_command (const char *arg, int from_tty)
 {
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
@@ -648,7 +648,7 @@ edit_command (char *arg, int from_tty)
 }
 
 static void
-list_command (char *arg, int from_tty)
+list_command (const char *arg, int from_tty)
 {
   struct symtabs_and_lines sals, sals_end;
   struct symtab_and_line sal, sal_end, cursal;
@@ -832,10 +832,10 @@ list_command (char *arg, int from_tty)
 
 /* ARGSUSED */
 static void
-disassemble_command (char *arg, int from_tty)
+disassemble_command (const char *arg, int from_tty)
 {
   CORE_ADDR low, high;
-  char *name;
+  const char *name;
   CORE_ADDR pc, pc_masked;
   char *space_index;
 #if 0
@@ -914,7 +914,7 @@ disassemble_command (char *arg, int from_tty)
 }
 
 static void
-make_command (char *arg, int from_tty)
+make_command (const char *arg, int from_tty)
 {
   char *p;
 
@@ -958,7 +958,7 @@ show_user (char *args, int from_tty)
    regular expression.
 */
 void 
-apropos_command (char *searchstr, int from_tty)
+apropos_command (const char *searchstr, int from_tty)
 {
   extern struct cmd_list_element *cmdlist; /*This is the main command list*/
   regex_t pattern;

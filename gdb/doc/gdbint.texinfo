@@ -2617,19 +2617,6 @@ appropriate way for the current architecture.  If you can, use
 @code{extract_typed_address} instead.
 @end deftypefun
 
-@deftypefun void store_address (void *@var{addr}, int @var{len}, LONGEST @var{val})
-Store @var{val} at @var{addr} as a @var{len}-byte integer, in the
-appropriate endianness for the current architecture.  Note that
-@var{addr} refers to a buffer in @value{GDBN}'s memory, not the
-inferior's.
-
-This function should only be used in architecture-specific code; it
-doesn't have enough information to turn a true address into bits in the
-appropriate way for the current architecture.  If you can, use
-@code{store_typed_address} instead.
-@end deftypefun
-
-
 Here are some macros which architectures can define to indicate the
 relationship between pointers and addresses.  These have default
 definitions, appropriate for architectures on which all pointers are

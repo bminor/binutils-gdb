@@ -563,7 +563,7 @@ parse_nested_classes_for_hpacc (char *name, int len, char **token,
      consider *prefixes* of the string; there is no need to look up
      "B::C" separately as a symbol in the previous example. */
 
-  register char *p;
+  const char *p;
   char *start, *end;
   char *prefix = NULL;
   char *tmp;
@@ -572,7 +572,7 @@ parse_nested_classes_for_hpacc (char *name, int len, char **token,
   struct type *t;
   int prefix_len = 0;
   int done = 0;
-  char *q;
+  const char *q;
 
   /* Check for HP-compiled executable -- in other cases
      return NULL, and caller must default to standard GDB
@@ -691,8 +691,8 @@ parse_nested_classes_for_hpacc (char *name, int len, char **token,
   return sym_var ? sym_var : sym_class;		/* found */
 }
 
-char *
-find_template_name_end (char *p)
+const char *
+find_template_name_end (const char *p)
 {
   int depth = 1;
   int just_seen_right = 0;
@@ -1103,11 +1103,11 @@ prefixify_subexp (register struct expression *inexpr,
    If COMMA is nonzero, stop if a comma is reached.  */
 
 struct expression *
-parse_exp_1 (char **stringptr, struct block *block, int comma)
+parse_exp_1 (const char **stringptr, struct block *block, int comma)
 {
   struct cleanup *old_chain;
 
-  lexptr = *stringptr;
+  const char *lexptr = *stringptr;
   prev_lexptr = NULL;
 
   paren_depth = 0;
@@ -1172,7 +1172,7 @@ parse_exp_1 (char **stringptr, struct block *block, int comma)
    to use up all of the contents of STRING.  */
 
 struct expression *
-parse_expression (char *string)
+parse_expression (const char *string)
 {
   register struct expression *exp;
   exp = parse_exp_1 (&string, 0, 0);

@@ -1046,7 +1046,8 @@ set_target_charset (const char *charset)
 
 /* This is the sfunc for the 'set charset' command.  */
 static void
-set_charset_sfunc (char *charset, int from_tty, struct cmd_list_element *c)
+set_charset_sfunc (const char *charset, int from_tty,
+		   struct cmd_list_element *c)
 {
   struct charset *cs = lookup_charset_or_error (host_charset_name);
   check_valid_host_charset (cs);
@@ -1058,7 +1059,7 @@ set_charset_sfunc (char *charset, int from_tty, struct cmd_list_element *c)
 /* 'set host-charset' command sfunc.  We need a wrapper here because
    the function needs to have a specific signature.  */
 static void
-set_host_charset_sfunc (char *charset, int from_tty,
+set_host_charset_sfunc (const char *charset, int from_tty,
 			  struct cmd_list_element *c)
 {
   set_host_charset (host_charset_name);
@@ -1066,15 +1067,15 @@ set_host_charset_sfunc (char *charset, int from_tty,
 
 /* Wrapper for the 'set target-charset' command.  */
 static void
-set_target_charset_sfunc (char *charset, int from_tty,
-			    struct cmd_list_element *c)
+set_target_charset_sfunc (const char *charset, int from_tty,
+			  struct cmd_list_element *c)
 {
   set_target_charset (target_charset_name);
 }
 
 /* sfunc for the 'show charset' command.  */
 static void
-show_charset (char *arg, int from_tty)
+show_charset (const char *arg, int from_tty)
 {
   if (current_host_charset == current_target_charset)
     {

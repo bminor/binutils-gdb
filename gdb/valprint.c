@@ -45,19 +45,19 @@ static int partial_memory_read (CORE_ADDR memaddr, char *myaddr,
 static void print_hex_chars (struct ui_file *, unsigned char *,
 			     unsigned int);
 
-static void show_print (char *, int);
+static void show_print (const char *, int);
 
-static void set_print (char *, int);
+static void set_print (const char *, int);
 
-static void set_radix (char *, int);
+static void set_radix (const char *, int);
 
-static void show_radix (char *, int);
+static void show_radix (const char *, int);
 
-static void set_input_radix (char *, int, struct cmd_list_element *);
+static void set_input_radix (const char *, int, struct cmd_list_element *);
 
 static void set_input_radix_1 (int, unsigned);
 
-static void set_output_radix (char *, int, struct cmd_list_element *);
+static void set_output_radix (const char *, int, struct cmd_list_element *);
 
 static void set_output_radix_1 (int, unsigned);
 
@@ -1185,7 +1185,7 @@ val_print_string (CORE_ADDR addr, int len, int width, struct ui_file *stream)
 
 /* ARGSUSED */
 static void
-set_input_radix (char *args, int from_tty, struct cmd_list_element *c)
+set_input_radix (const char *args, int from_tty, struct cmd_list_element *c)
 {
   set_input_radix_1 (from_tty, input_radix);
 }
@@ -1218,7 +1218,7 @@ set_input_radix_1 (int from_tty, unsigned radix)
 
 /* ARGSUSED */
 static void
-set_output_radix (char *args, int from_tty, struct cmd_list_element *c)
+set_output_radix (const char *args, int from_tty, struct cmd_list_element *c)
 {
   set_output_radix_1 (from_tty, output_radix);
 }
@@ -1262,7 +1262,7 @@ set_output_radix_1 (int from_tty, unsigned radix)
    the 'set input-radix' command. */
 
 static void
-set_radix (char *arg, int from_tty)
+set_radix (const char *arg, int from_tty)
 {
   unsigned radix;
 
@@ -1280,7 +1280,7 @@ set_radix (char *arg, int from_tty)
 
 /*ARGSUSED */
 static void
-show_radix (char *arg, int from_tty)
+show_radix (const char *arg, int from_tty)
 {
   if (from_tty)
     {
@@ -1302,7 +1302,7 @@ show_radix (char *arg, int from_tty)
 
 /*ARGSUSED */
 static void
-set_print (char *arg, int from_tty)
+set_print (const char *arg, int from_tty)
 {
   printf_unfiltered (
      "\"set print\" must be followed by the name of a print subcommand.\n");
@@ -1311,7 +1311,7 @@ set_print (char *arg, int from_tty)
 
 /*ARGSUSED */
 static void
-show_print (char *args, int from_tty)
+show_print (const char *args, int from_tty)
 {
   cmd_show_list (showprintlist, from_tty, "");
 }

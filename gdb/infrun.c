@@ -47,9 +47,9 @@
 
 /* Prototypes for local functions */
 
-static void signals_info (char *, int);
+static void signals_info (const char *, int);
 
-static void handle_command (char *, int);
+static void handle_command (const char *, int);
 
 static void sig_print_info (enum target_signal);
 
@@ -70,14 +70,14 @@ static void build_infrun (void);
 
 static int follow_fork (void);
 
-static void set_schedlock_func (char *args, int from_tty,
+static void set_schedlock_func (const char *args, int from_tty,
 				struct cmd_list_element *c);
 
 struct execution_control_state;
 
 static int currently_stepping (struct execution_control_state *ecs);
 
-static void xdb_handle_command (char *args, int from_tty);
+static void xdb_handle_command (const char *args, int from_tty);
 
 void _initialize_infrun (void);
 
@@ -512,7 +512,7 @@ static const char *scheduler_enums[] = {
 };
 
 static void
-set_schedlock_func (char *args, int from_tty, struct cmd_list_element *c)
+set_schedlock_func (const char *args, int from_tty, struct cmd_list_element *c)
 {
   /* NOTE: cagney/2002-03-17: The add_show_from_set() function clones
      the set command passed as a parameter.  The clone operation will
@@ -924,7 +924,7 @@ struct execution_control_state
   int random_signal;
   CORE_ADDR stop_func_start;
   CORE_ADDR stop_func_end;
-  char *stop_func_name;
+  const char *stop_func_name;
   struct symtab_and_line sal;
   int remove_breakpoints_on_following_step;
   int current_line;
@@ -1190,7 +1190,7 @@ context_switch (struct execution_control_state *ecs)
 static int
 pc_in_sigtramp (CORE_ADDR pc)
 {
-  char *name;
+  const char *name;
   find_pc_partial_function (pc, &name, NULL, NULL);
   return PC_IN_SIGTRAMP (pc, name);
 }
@@ -3247,7 +3247,7 @@ sig_print_info (enum target_signal oursig)
 /* Specify how various signals in the inferior should be handled.  */
 
 static void
-handle_command (char *args, int from_tty)
+handle_command (const char *args, int from_tty)
 {
   char **argv;
   int digits, wordlen;
@@ -3427,7 +3427,7 @@ Are you sure you want to change it? ", target_signal_to_name ((enum target_signa
 }
 
 static void
-xdb_handle_command (char *args, int from_tty)
+xdb_handle_command (const char *args, int from_tty)
 {
   char **argv;
   struct cleanup *old_chain;
@@ -3499,7 +3499,7 @@ xdb_handle_command (char *args, int from_tty)
    targets, all signals should be in the signal tables).  */
 
 static void
-signals_info (char *signum_exp, int from_tty)
+signals_info (const char *signum_exp, int from_tty)
 {
   enum target_signal oursig;
   sig_print_header ();

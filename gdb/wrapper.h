@@ -27,7 +27,7 @@ struct block;
 /* Use this struct to pass arguments to wrapper routines. */
 struct gdb_wrapper_arguments;
 
-extern int gdb_parse_exp_1 (char **, struct block *,
+extern int gdb_parse_exp_1 (const char **, struct block *,
 			    int, struct expression **);
 
 extern int gdb_evaluate_expression (struct expression *, struct value **);

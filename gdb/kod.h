@@ -54,7 +54,7 @@ extern char *cisco_kod_open (kod_display_callback_ftype *display_func,
    the Cisco kernel: we ask for a dump of everything, and it returns
    it.  */
 
-extern void cisco_kod_request (char *arg, int from_tty);
+extern void cisco_kod_request (const char *arg, int from_tty);
 
 extern void cisco_kod_close (void);
 

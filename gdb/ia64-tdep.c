@@ -1239,13 +1239,13 @@ ia64_get_saved_register (char *raw_buffer,
   if (regnum == SP_REGNUM && get_next_frame (frame))
     {
       /* Handle SP values for all frames but the topmost. */
-      store_address (raw_buffer, REGISTER_RAW_SIZE (regnum),
-		     get_frame_base (frame));
+      store_unsigned_integer (raw_buffer, REGISTER_RAW_SIZE (regnum),
+			      get_frame_base (frame));
     }
   else if (regnum == IA64_BSP_REGNUM)
     {
-      store_address (raw_buffer, REGISTER_RAW_SIZE (regnum), 
-                     get_frame_extra_info (frame)->bsp);
+      store_unsigned_integer (raw_buffer, REGISTER_RAW_SIZE (regnum), 
+			      get_frame_extra_info (frame)->bsp);
     }
   else if (regnum == IA64_VFP_REGNUM)
     {
@@ -1255,7 +1255,7 @@ ia64_get_saved_register (char *raw_buffer,
 	 still provide a value since we know the size of the frame */
       CORE_ADDR vfp = (get_frame_base (frame)
 		       + get_frame_extra_info (frame)->mem_stack_frame_size);
-      store_address (raw_buffer, REGISTER_RAW_SIZE (IA64_VFP_REGNUM), vfp);
+      store_unsigned_integer (raw_buffer, REGISTER_RAW_SIZE (IA64_VFP_REGNUM), vfp);
     }
   else if (IA64_PR0_REGNUM <= regnum && regnum <= IA64_PR63_REGNUM)
     {
@@ -1338,7 +1338,7 @@ ia64_get_saved_register (char *raw_buffer,
         {
 	  pc = read_pc ();
 	}
-      store_address (raw_buffer, REGISTER_RAW_SIZE (IA64_IP_REGNUM), pc);
+      store_unsigned_integer (raw_buffer, REGISTER_RAW_SIZE (IA64_IP_REGNUM), pc);
     }
   else if (IA64_GR32_REGNUM <= regnum && regnum <= IA64_GR127_REGNUM)
     {
@@ -1769,8 +1769,8 @@ find_func_descr (CORE_ADDR faddr, CORE_ADDR *fdaptr)
       if (global_pointer == 0)
 	global_pointer = read_register (IA64_GR1_REGNUM);
 
-      store_address (buf, 8, faddr);
-      store_address (buf + 8, 8, global_pointer);
+      store_unsigned_integer (buf, 8, faddr);
+      store_unsigned_integer (buf + 8, 8, global_pointer);
 
       write_memory (fdesc, buf, 16);
     }
@@ -1862,9 +1862,9 @@ ia64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	{
 	  char val_buf[8];
 
-	  store_address (val_buf, 8,
-	    find_func_descr (extract_address (VALUE_CONTENTS (arg), 8),
-	                     &funcdescaddr));
+	  store_unsigned_integer (val_buf, 8,
+				  find_func_descr (extract_address (VALUE_CONTENTS (arg), 8),
+						   &funcdescaddr));
 	  if (slotnum < rseslots)
 	    write_memory (rse_address_add (bsp, slotnum), val_buf, 8);
 	  else
@@ -1920,9 +1920,9 @@ ia64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   /* Store the struct return value in r8 if necessary. */
   if (struct_return)
     {
-      store_address (&deprecated_registers[REGISTER_BYTE (IA64_GR8_REGNUM)],
-                     REGISTER_RAW_SIZE (IA64_GR8_REGNUM),
-		     struct_addr);
+      store_unsigned_integer (&deprecated_registers[REGISTER_BYTE (IA64_GR8_REGNUM)],
+			      REGISTER_RAW_SIZE (IA64_GR8_REGNUM),
+			      struct_addr);
     }
 
   /* Sync gdb's idea of what the registers are with the target. */

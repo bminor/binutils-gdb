@@ -40,7 +40,7 @@ static int there_is_a_visible_common_named (char *);
 #endif
 
 extern void _initialize_f_valprint (void);
-static void info_common_command (char *, int);
+static void info_common_command (const char *, int);
 static void list_all_visible_commons (char *);
 static void f77_print_array (struct type *, char *, CORE_ADDR,
 			     struct ui_file *, int, int, int,
@@ -575,7 +575,7 @@ list_all_visible_commons (char *funname)
    given name */
 
 static void
-info_common_command (char *comname, int from_tty)
+info_common_command (const char *comname, int from_tty)
 {
   SAVED_F77_COMMON_PTR the_common;
   COMMON_ENTRY_PTR entry;

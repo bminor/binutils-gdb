@@ -70,7 +70,7 @@ static int do_captured_value_struct_elt (struct ui_out *uiout, void *data);
 static int wrap_parse_and_eval_type (char *);
 
 int
-gdb_parse_exp_1 (char **stringptr, struct block *block, int comma,
+gdb_parse_exp_1 (const char **stringptr, struct block *block, int comma,
 		 struct expression **expression)
 {
   struct gdb_wrapper_arguments args;
@@ -95,7 +95,7 @@ wrap_parse_exp_1 (char *argptr)
 {
   struct gdb_wrapper_arguments *args 
     = (struct gdb_wrapper_arguments *) argptr;
-  args->result.pointer = parse_exp_1((char **) args->args[0].pointer,
+  args->result.pointer = parse_exp_1((const char **) args->args[0].pointer,
 				     (struct block *) args->args[1].pointer,
 				     args->args[2].integer);
   return 1;

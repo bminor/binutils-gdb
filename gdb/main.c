@@ -219,7 +219,7 @@ captured_main (void *data)
     gdb_sysroot = TARGET_SYSTEM_ROOT;
 #else
 #if defined (TARGET_SYSTEM_ROOT)
-  gdb_sysroot = TARGET_SYSTEM_ROOT;
+  gdb_sysroot = xstrdup (TARGET_SYSTEM_ROOT);
 #else
   gdb_sysroot = "";
 #endif

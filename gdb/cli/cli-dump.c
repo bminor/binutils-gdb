@@ -82,8 +82,8 @@ make_cleanup_fclose (FILE *file)
   return make_cleanup (do_fclose_cleanup, file);
 }
 
-char *
-scan_filename_with_cleanup (char **cmd, const char *defname)
+const char *
+scan_filename_with_cleanup (const char **cmd, const char *defname)
 {
   char *filename;
   char *fullname;
@@ -178,14 +178,14 @@ struct cmd_list_element *binary_dump_cmdlist;
 struct cmd_list_element *binary_append_cmdlist;
 
 static void
-dump_command (char *cmd, int from_tty)
+dump_command (const char *cmd, int from_tty)
 {
   printf_unfiltered ("\"dump\" must be followed by a subcommand.\n\n");
   help_list (dump_cmdlist, "dump ", -1, gdb_stdout);
 }
 
 static void
-append_command (char *cmd, int from_tty)
+append_command (const char *cmd, int from_tty)
 {
   printf_unfiltered ("\"append\" must be followed by a subcommand.\n\n");
   help_list (dump_cmdlist, "append ", -1, gdb_stdout);
@@ -223,7 +223,7 @@ dump_bfd_file (char *filename, char *mode,
 }
 
 static void
-dump_memory_to_file (char *cmd, char *mode, char *file_format)
+dump_memory_to_file (const char *cmd, char *mode, char *file_format)
 {
   struct cleanup *old_cleanups = make_cleanup (null_cleanup, NULL);
   CORE_ADDR lo;
@@ -274,13 +274,13 @@ dump_memory_to_file (char *cmd, char *mode, char *file_format)
 }
 
 static void
-dump_memory_command (char *cmd, char *mode)
+dump_memory_command (const char *cmd, char *mode)
 {
   dump_memory_to_file (cmd, mode, "binary");
 }
 
 static void
-dump_value_to_file (char *cmd, char *mode, char *file_format)
+dump_value_to_file (const char *cmd, char *mode, char *file_format)
 {
   struct cleanup *old_cleanups = make_cleanup (null_cleanup, NULL);
   struct value *val;
@@ -325,7 +325,7 @@ dump_value_to_file (char *cmd, char *mode, char *file_format)
 }
 
 static void
-dump_value_command (char *cmd, char *mode)
+dump_value_command (const char *cmd, char *mode)
 {
   dump_value_to_file (cmd, mode, "binary");
 }
@@ -422,19 +422,20 @@ append_binary_value (char *args, int from_tty)
 
 struct dump_context
 {
-  void (*func) (char *cmd, char *mode);
+  void (*func) (const char *cmd, char *mode);
   char *mode;
 };
 
 static void
-call_dump_func (struct cmd_list_element *c, char *args, int from_tty)
+call_dump_func (struct cmd_list_element *c, const char *args, int from_tty)
 {
   struct dump_context *d = get_cmd_context (c);
   d->func (args, d->mode);
 }
 
 void
-add_dump_command (char *name, void (*func) (char *args, char *mode),
+add_dump_command (const char *name,
+		  void (*func) (const char *args, char *mode),
 		  char *descr)
 
 {
@@ -596,7 +597,7 @@ restore_binary_file (char *filename, struct callback_data *data)
 }
 
 static void
-restore_command (char *args, int from_tty)
+restore_command (const char *args, int from_tty)
 {
   char *filename;
   struct callback_data data;
@@ -664,35 +665,35 @@ restore_command (char *args, int from_tty)
 }
 
 static void
-srec_dump_command (char *cmd, int from_tty)
+srec_dump_command (const char *cmd, int from_tty)
 {
   printf_unfiltered ("\"dump srec\" must be followed by a subcommand.\n");
   help_list (srec_cmdlist, "dump srec ", -1, gdb_stdout);
 }
 
 static void
-ihex_dump_command (char *cmd, int from_tty)
+ihex_dump_command (const char *cmd, int from_tty)
 {
   printf_unfiltered ("\"dump ihex\" must be followed by a subcommand.\n");
   help_list (ihex_cmdlist, "dump ihex ", -1, gdb_stdout);
 }
 
 static void
-tekhex_dump_command (char *cmd, int from_tty)
+tekhex_dump_command (const char *cmd, int from_tty)
 {
   printf_unfiltered ("\"dump tekhex\" must be followed by a subcommand.\n");
   help_list (tekhex_cmdlist, "dump tekhex ", -1, gdb_stdout);
 }
 
 static void
-binary_dump_command (char *cmd, int from_tty)
+binary_dump_command (const char *cmd, int from_tty)
 {
   printf_unfiltered ("\"dump binary\" must be followed by a subcommand.\n");
   help_list (binary_dump_cmdlist, "dump binary ", -1, gdb_stdout);
 }
 
 static void
-binary_append_command (char *cmd, int from_tty)
+binary_append_command (const char *cmd, int from_tty)
 {
   printf_unfiltered ("\"append binary\" must be followed by a subcommand.\n");
   help_list (binary_append_cmdlist, "append binary ", -1, gdb_stdout);

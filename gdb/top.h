@@ -33,8 +33,8 @@ extern char gdbinit[];
 
 extern void print_gdb_version (struct ui_file *);
 
-extern void source_command (char *, int);
-extern void cd_command (char *, int);
+extern void source_command (const char *, int);
+extern void cd_command (const char *, int);
 extern void read_command_file (FILE *);
 extern void init_history (void);
 extern void command_loop (void);
@@ -43,9 +43,9 @@ extern void simplified_command_loop (char *(*read_input_func) (char *),
 								   int));
 extern int quit_confirm (void);
 extern void quit_force (char *, int);
-extern void quit_command (char *, int);
+extern void quit_command (const char *, int);
 extern int quit_cover (void *);
-extern void execute_command (char *, int);
+extern void execute_command (const char *, int);
 
 /* This function returns a pointer to the string that is used
    by gdb for its command prompt. */

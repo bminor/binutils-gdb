@@ -81,11 +81,11 @@ extern void display_gdb_prompt (char *new_prompt);
 void gdb_setup_readline (void);
 void gdb_disable_readline (void);
 extern void async_init_signals (void);
-extern void set_async_editing_command (char *args, int from_tty,
+extern void set_async_editing_command (const char *args, int from_tty,
 				       struct cmd_list_element *c);
-extern void set_async_annotation_level (char *args, int from_tty,
+extern void set_async_annotation_level (const char *args, int from_tty,
 					struct cmd_list_element *c);
-extern void set_async_prompt (char *args, int from_tty,
+extern void set_async_prompt (const char *args, int from_tty,
 			      struct cmd_list_element *c);
 
 /* Signal to catch ^Z typed while reading a command: SIGTSTP or SIGCONT.  */

@@ -209,7 +209,7 @@ list_cp_abis (int from_tty)
    argument is given.  */
 
 static void
-set_cp_abi_cmd (char *args, int from_tty)
+set_cp_abi_cmd (const char *args, int from_tty)
 {
   if (args == NULL)
     {
@@ -224,7 +224,7 @@ set_cp_abi_cmd (char *args, int from_tty)
 /* Show the currently selected C++ ABI.  */
 
 static void
-show_cp_abi_cmd (char *args, int from_tty)
+show_cp_abi_cmd (const char *args, int from_tty)
 {
   ui_out_text (uiout, "The currently selected C++ ABI is \"");
 

@@ -51,9 +51,9 @@ extern char *parse_method (char *method, char *type,
 			   char **class, char **category, 
 			   char **selector);
 
-extern char *find_imps (struct symtab *symtab, struct block *block,
-			char *method, struct symbol **syms, 
-			unsigned int *nsym, unsigned int *ndebug);
+extern const char *find_imps (struct symtab *symtab, struct block *block,
+			      const char *method, struct symbol **syms, 
+			      unsigned int *nsym, unsigned int *ndebug);
 
 extern struct value *value_nsstring (char *ptr, int len);
 

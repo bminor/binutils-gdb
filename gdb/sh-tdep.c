@@ -1873,8 +1873,8 @@ sh64_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 	  if (regnum == SP_REGNUM)
 	    {
 	      if (raw_buffer)	/* SP register treated specially */
-		store_address (raw_buffer, REGISTER_RAW_SIZE (regnum),
-			       get_frame_saved_regs (frame)[regnum]);
+		store_unsigned_integer (raw_buffer, REGISTER_RAW_SIZE (regnum),
+					get_frame_saved_regs (frame)[regnum]);
 	    }
 	  else
 	    { /* any other register */

@@ -106,7 +106,7 @@ bad_packet (void)
    querying the Cisco kernel: we ask for a dump of everything, and
    it returns it.  */
 void
-cisco_kod_request (char *arg, int from_tty)
+cisco_kod_request (const char *arg, int from_tty)
 {
   char buffer[PBUFSIZ], command[PBUFSIZ];
   int done = 0, i;

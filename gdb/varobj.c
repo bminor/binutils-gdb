@@ -433,7 +433,7 @@ varobj_create (char *objname,
 
   if (expression != NULL)
     {
-      char *p;
+      const char *p;
       enum varobj_languages lang;
 
       /* Parse and evaluate the expression, filling in as much
@@ -795,7 +795,7 @@ varobj_set_value (struct varobj *var, char *expression)
 
   if (var->value != NULL && variable_editable (var) && !var->error)
     {
-      char *s = expression;
+      const char *s = expression;
       int i;
 
       input_radix = 10;		/* ALWAYS reset to decimal temporarily */

@@ -5,15 +5,15 @@
 #include "command.h"
 #include "gdbcmd.h"
 
-static void show_copying_command (char *, int);
+static void show_copying_command (const char *, int);
 
-static void show_warranty_command (char *, int);
+static void show_warranty_command (const char *, int);
 
 void _initialize_copying (void);
 
 extern int immediate_quit;
 static void
-show_copying_command (char *ignore, int from_tty)
+show_copying_command (const char *ignore, int from_tty)
 {
   immediate_quit++;
   printf_filtered ("		    GNU GENERAL PUBLIC LICENSE\n");
@@ -277,7 +277,7 @@ show_copying_command (char *ignore, int from_tty)
 }
 
 static void
-show_warranty_command (char *ignore, int from_tty)
+show_warranty_command (const char *ignore, int from_tty)
 {
   immediate_quit++;
   printf_filtered ("			    NO WARRANTY\n");

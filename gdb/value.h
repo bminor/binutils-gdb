@@ -431,17 +431,17 @@ extern struct value *evaluate_type (struct expression *exp);
 extern struct value *evaluate_subexp_with_coercion (struct expression *,
 						    int *, enum noside);
 
-extern struct value *parse_and_eval (char *exp);
+extern struct value *parse_and_eval (const char *exp);
 
-extern struct value *parse_to_comma_and_eval (char **expp);
+extern struct value *parse_to_comma_and_eval (const char **expp);
 
 extern struct type *parse_and_eval_type (char *p, int length);
 
-extern CORE_ADDR parse_and_eval_address (char *exp);
+extern CORE_ADDR parse_and_eval_address (const char *exp);
 
-extern CORE_ADDR parse_and_eval_address_1 (char **expptr);
+extern CORE_ADDR parse_and_eval_address_1 (const char **expptr);
 
-extern LONGEST parse_and_eval_long (char *exp);
+extern LONGEST parse_and_eval_long (const char *exp);
 
 extern struct value *access_value_history (int num);
 
@@ -454,7 +454,7 @@ extern void set_internalvar_component (struct internalvar *var,
 				       int bitpos, int bitsize,
 				       struct value *newvalue);
 
-extern struct internalvar *lookup_internalvar (char *name);
+extern struct internalvar *lookup_internalvar (const char *name);
 
 extern int value_equal (struct value *arg1, struct value *arg2);
 

@@ -109,17 +109,17 @@ int is_complete_command (struct cmd_list_element *cmd);
 
 /* Exported to gdb/main.c */
 
-extern void cd_command (char *, int);
+extern void cd_command (const char *, int);
 
 /* Exported to gdb/top.c and gdb/main.c */
 
-extern void quit_command (char *, int);
+extern void quit_command (const char *, int);
 
-extern void source_command (char *, int);
+extern void source_command (const char *, int);
 
 /* Used everywhere whenever at least one parameter is required and
   none is specified. */
 
-extern NORETURN void error_no_arg (char *) ATTR_NORETURN;
+extern NORETURN void error_no_arg (const char *) ATTR_NORETURN;
 
 #endif /* !defined (CLI_CMDS_H) */

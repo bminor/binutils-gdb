@@ -351,7 +351,7 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 /* Show all the settings in a list of show commands.  */
 
 void
-cmd_show_list (struct cmd_list_element *list, int from_tty, char *prefix)
+cmd_show_list (struct cmd_list_element *list, int from_tty, const char *prefix)
 {
   struct cleanup *showlist_chain;
 

@@ -2845,8 +2845,8 @@ extern void set_gdbarch_skip_trampoline_code (struct gdbarch *gdbarch, gdbarch_s
 #define IN_SOLIB_CALL_TRAMPOLINE(pc, name) (generic_in_solib_call_trampoline (pc, name))
 #endif
 
-typedef int (gdbarch_in_solib_call_trampoline_ftype) (CORE_ADDR pc, char *name);
-extern int gdbarch_in_solib_call_trampoline (struct gdbarch *gdbarch, CORE_ADDR pc, char *name);
+typedef int (gdbarch_in_solib_call_trampoline_ftype) (CORE_ADDR pc, const char *name);
+extern int gdbarch_in_solib_call_trampoline (struct gdbarch *gdbarch, CORE_ADDR pc, const char *name);
 extern void set_gdbarch_in_solib_call_trampoline (struct gdbarch *gdbarch, gdbarch_in_solib_call_trampoline_ftype *in_solib_call_trampoline);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (IN_SOLIB_CALL_TRAMPOLINE)
 #error "Non multi-arch definition of IN_SOLIB_CALL_TRAMPOLINE"
@@ -2864,8 +2864,8 @@ extern void set_gdbarch_in_solib_call_trampoline (struct gdbarch *gdbarch, gdbar
 #define IN_SOLIB_RETURN_TRAMPOLINE(pc, name) (generic_in_solib_return_trampoline (pc, name))
 #endif
 
-typedef int (gdbarch_in_solib_return_trampoline_ftype) (CORE_ADDR pc, char *name);
-extern int gdbarch_in_solib_return_trampoline (struct gdbarch *gdbarch, CORE_ADDR pc, char *name);
+typedef int (gdbarch_in_solib_return_trampoline_ftype) (CORE_ADDR pc, const char *name);
+extern int gdbarch_in_solib_return_trampoline (struct gdbarch *gdbarch, CORE_ADDR pc, const char *name);
 extern void set_gdbarch_in_solib_return_trampoline (struct gdbarch *gdbarch, gdbarch_in_solib_return_trampoline_ftype *in_solib_return_trampoline);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (IN_SOLIB_RETURN_TRAMPOLINE)
 #error "Non multi-arch definition of IN_SOLIB_RETURN_TRAMPOLINE"
@@ -2902,8 +2902,8 @@ extern void set_gdbarch_in_solib_return_trampoline (struct gdbarch *gdbarch, gdb
 #define PC_IN_SIGTRAMP(pc, name) (legacy_pc_in_sigtramp (pc, name))
 #endif
 
-typedef int (gdbarch_pc_in_sigtramp_ftype) (CORE_ADDR pc, char *name);
-extern int gdbarch_pc_in_sigtramp (struct gdbarch *gdbarch, CORE_ADDR pc, char *name);
+typedef int (gdbarch_pc_in_sigtramp_ftype) (CORE_ADDR pc, const char *name);
+extern int gdbarch_pc_in_sigtramp (struct gdbarch *gdbarch, CORE_ADDR pc, const char *name);
 extern void set_gdbarch_pc_in_sigtramp (struct gdbarch *gdbarch, gdbarch_pc_in_sigtramp_ftype *pc_in_sigtramp);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (PC_IN_SIGTRAMP)
 #error "Non multi-arch definition of PC_IN_SIGTRAMP"

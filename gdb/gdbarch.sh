@@ -658,10 +658,10 @@ f:2:SKIP_TRAMPOLINE_CODE:CORE_ADDR:skip_trampoline_code:CORE_ADDR pc:pc:::generi
 # For SVR4 shared libraries, each call goes through a small piece of
 # trampoline code in the ".plt" section.  IN_SOLIB_CALL_TRAMPOLINE evaluates
 # to nonzero if we are currently stopped in one of these.
-f:2:IN_SOLIB_CALL_TRAMPOLINE:int:in_solib_call_trampoline:CORE_ADDR pc, char *name:pc, name:::generic_in_solib_call_trampoline::0
+f:2:IN_SOLIB_CALL_TRAMPOLINE:int:in_solib_call_trampoline:CORE_ADDR pc, const char *name:pc, name:::generic_in_solib_call_trampoline::0
 
 # Some systems also have trampoline code for returning from shared libs.
-f:2:IN_SOLIB_RETURN_TRAMPOLINE:int:in_solib_return_trampoline:CORE_ADDR pc, char *name:pc, name:::generic_in_solib_return_trampoline::0
+f:2:IN_SOLIB_RETURN_TRAMPOLINE:int:in_solib_return_trampoline:CORE_ADDR pc, char *const name:pc, name:::generic_in_solib_return_trampoline::0
 
 # Sigtramp is a routine that the kernel calls (which then calls the
 # signal handler).  On most machines it is a library routine that is
@@ -683,7 +683,7 @@ f:2:IN_SOLIB_RETURN_TRAMPOLINE:int:in_solib_return_trampoline:CORE_ADDR pc, char
 # FIXME: cagney/2002-04-21: PC_IN_SIGTRAMP is something of a mess.
 # Some code also depends on SIGTRAMP_START and SIGTRAMP_END but other
 # does not.
-f:2:PC_IN_SIGTRAMP:int:pc_in_sigtramp:CORE_ADDR pc, char *name:pc, name:::legacy_pc_in_sigtramp::0
+f:2:PC_IN_SIGTRAMP:int:pc_in_sigtramp:CORE_ADDR pc, const char *name:pc, name:::legacy_pc_in_sigtramp::0
 F:2:SIGTRAMP_START:CORE_ADDR:sigtramp_start:CORE_ADDR pc:pc
 F:2:SIGTRAMP_END:CORE_ADDR:sigtramp_end:CORE_ADDR pc:pc
 # A target might have problems with watchpoints as soon as the stack

@@ -79,7 +79,7 @@ void (*show_load_progress) (const char *section,
 			    unsigned long section_size, 
 			    unsigned long total_sent, 
 			    unsigned long total_size);
-void (*pre_add_symbol_hook) (char *);
+void (*pre_add_symbol_hook) (const char *);
 void (*post_add_symbol_hook) (void);
 void (*target_new_objfile_hook) (struct objfile *);
 
@@ -101,19 +101,19 @@ static void simple_free_overlay_region_table (void);
 
 static void set_initial_language (void);
 
-static void load_command (char *, int);
+static void load_command (const char *, int);
 
-static void symbol_file_add_main_1 (char *args, int from_tty, int flags);
+static void symbol_file_add_main_1 (const char *args, int from_tty, int flags);
 
-static void add_symbol_file_command (char *, int);
+static void add_symbol_file_command (const char *, int);
 
-static void add_shared_symbol_files_command (char *, int);
+static void add_shared_symbol_files_command (const char *, int);
 
 static void reread_separate_symbols (struct objfile *objfile);
 
 static void cashier_psymtab (struct partial_symtab *);
 
-bfd *symfile_bfd_open (char *);
+bfd *symfile_bfd_open (const char *);
 
 int get_section_index (struct objfile *, char *);
 
@@ -125,21 +125,21 @@ static void overlay_invalidate_all (void);
 
 static int overlay_is_mapped (struct obj_section *);
 
-void list_overlays_command (char *, int);
+void list_overlays_command (const char *, int);
 
-void map_overlay_command (char *, int);
+void map_overlay_command (const char *, int);
 
-void unmap_overlay_command (char *, int);
+void unmap_overlay_command (const char *, int);
 
-static void overlay_auto_command (char *, int);
+static void overlay_auto_command (const char *, int);
 
-static void overlay_manual_command (char *, int);
+static void overlay_manual_command (const char *, int);
 
-static void overlay_off_command (char *, int);
+static void overlay_off_command (const char *, int);
 
-static void overlay_load_command (char *, int);
+static void overlay_load_command (const char *, int);
 
-static void overlay_command (char *, int);
+static void overlay_command (const char *, int);
 
 static void simple_free_overlay_table (void);
 
@@ -151,9 +151,9 @@ static int simple_overlay_update_1 (struct obj_section *);
 
 static void add_filename_language (char *ext, enum language lang);
 
-static void set_ext_lang_command (char *args, int from_tty);
+static void set_ext_lang_command (const char *args, int from_tty);
 
-static void info_ext_lang_command (char *args, int from_tty);
+static void info_ext_lang_command (const char *args, int from_tty);
 
 static char *find_separate_debug_file (struct objfile *objfile);
 
@@ -846,7 +846,7 @@ new_symfile_objfile (struct objfile *objfile, int mainline, int verbo)
    Upon success, returns a pointer to the objfile that was added.
    Upon failure, jumps back to command level (never returns). */
 static struct objfile *
-symbol_file_add_with_addrs_or_offsets (char *name, int from_tty,
+symbol_file_add_with_addrs_or_offsets (const char *name, int from_tty,
                                        struct section_addr_info *addrs,
                                        struct section_offsets *offsets,
                                        int num_offsets,
@@ -995,7 +995,8 @@ symbol_file_add_with_addrs_or_offsets (char *name, int from_tty,
    loaded file.  See symbol_file_add_with_addrs_or_offsets's comments
    for details.  */
 struct objfile *
-symbol_file_add (char *name, int from_tty, struct section_addr_info *addrs,
+symbol_file_add (const char *name, int from_tty,
+		 struct section_addr_info *addrs,
 		 int mainline, int flags)
 {
   return symbol_file_add_with_addrs_or_offsets (name, from_tty, addrs, 0, 0, 
@@ -1012,13 +1013,13 @@ symbol_file_add (char *name, int from_tty, struct section_addr_info *addrs,
    command itself.  */
    
 void
-symbol_file_add_main (char *args, int from_tty)
+symbol_file_add_main (const char *args, int from_tty)
 {
   symbol_file_add_main_1 (args, from_tty, 0);
 }
 
 static void
-symbol_file_add_main_1 (char *args, int from_tty, int flags)
+symbol_file_add_main_1 (const char *args, int from_tty, int flags)
 {
   symbol_file_add (args, from_tty, NULL, 1, flags);
 
@@ -1212,7 +1213,7 @@ find_separate_debug_file (struct objfile *objfile)
    and pass that to symbol_file_add(). This is no longer supported. */
 
 void
-symbol_file_command (char *args, int from_tty)
+symbol_file_command (const char *args, int from_tty)
 {
   char **argv;
   char *name = NULL;
@@ -1298,15 +1299,12 @@ set_initial_language (void)
    In case of trouble, error() is called.  */
 
 bfd *
-symfile_bfd_open (char *name)
+symfile_bfd_open (const char *n)
 {
   bfd *sym_bfd;
   int desc;
   char *absolute_name;
-
-
-
-  name = tilde_expand (name);	/* Returns 1st new malloc'd copy */
+  char *name = tilde_expand (n);	/* Returns 1st new malloc'd copy */
 
   /* Look down path for it, allocate 2nd new malloc'd copy.  */
   desc = openp (getenv ("PATH"), 1, name, O_RDONLY | O_BINARY, 0, &absolute_name);
@@ -1412,7 +1410,7 @@ find_sym_fns (struct objfile *objfile)
 /* This function runs the load command of our current target.  */
 
 static void
-load_command (char *arg, int from_tty)
+load_command (const char *arg, int from_tty)
 {
   if (arg == NULL)
     arg = get_exec_file (1);
@@ -1547,7 +1545,7 @@ load_section_callback (bfd *abfd, asection *asec, void *data)
 }
 
 void
-generic_load (char *args, int from_tty)
+generic_load (const char *args, int from_tty)
 {
   asection *s;
   bfd *loadfile_bfd;
@@ -1683,11 +1681,11 @@ print_transfer_performance (struct ui_file *stream,
 
 /* ARGSUSED */
 static void
-add_symbol_file_command (char *args, int from_tty)
+add_symbol_file_command (const char *args, int from_tty)
 {
   char *filename = NULL;
   int flags = OBJF_USERLOADED;
-  char *arg;
+  const char *arg;
   int expecting_option = 0;
   int section_index = 0;
   int argcnt = 0;
@@ -1698,8 +1696,8 @@ add_symbol_file_command (char *args, int from_tty)
 
   struct
   {
-    char *name;
-    char *value;
+    const char *name;
+    const char *value;
   } sect_opts[SECT_OFF_MAX];
 
   struct section_addr_info section_addrs;
@@ -1802,8 +1800,8 @@ add_symbol_file_command (char *args, int from_tty)
   for (i = 0; i < section_index; i++)
     {
       CORE_ADDR addr;
-      char *val = sect_opts[i].value;
-      char *sec = sect_opts[i].name;
+      const char *val = sect_opts[i].value;
+      const char *sec = sect_opts[i].name;
  
       val = sect_opts[i].value;
       if (val[0] == '0' && val[1] == 'x')
@@ -1839,7 +1837,7 @@ add_symbol_file_command (char *args, int from_tty)
 }
 
 static void
-add_shared_symbol_files_command (char *args, int from_tty)
+add_shared_symbol_files_command (const char *args, int from_tty)
 {
 #ifdef ADD_SHARED_SYMBOL_FILES
   ADD_SHARED_SYMBOL_FILES (args, from_tty);
@@ -2156,7 +2154,7 @@ add_filename_language (char *ext, enum language lang)
 static char *ext_args;
 
 static void
-set_ext_lang_command (char *args, int from_tty)
+set_ext_lang_command (const char *args, int from_tty)
 {
   int i;
   char *cp = ext_args;
@@ -2213,7 +2211,7 @@ set_ext_lang_command (char *args, int from_tty)
 }
 
 static void
-info_ext_lang_command (char *args, int from_tty)
+info_ext_lang_command (const char *args, int from_tty)
 {
   int i;
 
@@ -3107,7 +3105,7 @@ find_pc_mapped_section (CORE_ADDR pc)
    Print a list of mapped sections and their PC ranges */
 
 void
-list_overlays_command (char *args, int from_tty)
+list_overlays_command (const char *args, int from_tty)
 {
   int nmapped = 0;
   struct objfile *objfile;
@@ -3146,7 +3144,7 @@ list_overlays_command (char *args, int from_tty)
    Mark the named section as mapped (ie. residing at its VMA address).  */
 
 void
-map_overlay_command (char *args, int from_tty)
+map_overlay_command (const char *args, int from_tty)
 {
   struct objfile *objfile, *objfile2;
   struct obj_section *sec, *sec2;
@@ -3197,7 +3195,7 @@ the 'overlay manual' command.");
    (ie. resident in its LMA address range, rather than the VMA range).  */
 
 void
-unmap_overlay_command (char *args, int from_tty)
+unmap_overlay_command (const char *args, int from_tty)
 {
   struct objfile *objfile;
   struct obj_section *sec;
@@ -3227,7 +3225,7 @@ the 'overlay manual' command.");
    Possibly this should be done via a set/show command. */
 
 static void
-overlay_auto_command (char *args, int from_tty)
+overlay_auto_command (const char *args, int from_tty)
 {
   overlay_debugging = ovly_auto;
   enable_overlay_breakpoints ();
@@ -3240,7 +3238,7 @@ overlay_auto_command (char *args, int from_tty)
    Possibly this should be done via a set/show command. */
 
 static void
-overlay_manual_command (char *args, int from_tty)
+overlay_manual_command (const char *args, int from_tty)
 {
   overlay_debugging = ovly_on;
   disable_overlay_breakpoints ();
@@ -3253,7 +3251,7 @@ overlay_manual_command (char *args, int from_tty)
    Possibly this should be done via a set/show command. */
 
 static void
-overlay_off_command (char *args, int from_tty)
+overlay_off_command (const char *args, int from_tty)
 {
   overlay_debugging = ovly_off;
   disable_overlay_breakpoints ();
@@ -3262,7 +3260,7 @@ overlay_off_command (char *args, int from_tty)
 }
 
 static void
-overlay_load_command (char *args, int from_tty)
+overlay_load_command (const char *args, int from_tty)
 {
   if (target_overlay_update)
     (*target_overlay_update) (NULL);
@@ -3277,7 +3275,7 @@ overlay_load_command (char *args, int from_tty)
 struct cmd_list_element *overlaylist;
 
 static void
-overlay_command (char *args, int from_tty)
+overlay_command (const char *args, int from_tty)
 {
   printf_unfiltered
     ("\"overlay\" must be followed by the name of an overlay command.\n");

@@ -492,7 +492,7 @@ generic_elf_osabi_sniffer (bfd *abfd)
 }
 
 static void
-set_osabi (char *args, int from_tty, struct cmd_list_element *c)
+set_osabi (const char *args, int from_tty, struct cmd_list_element *c)
 {
   struct gdbarch_info info;
 
@@ -532,7 +532,7 @@ set_osabi (char *args, int from_tty, struct cmd_list_element *c)
 }
 
 void
-show_osabi (char *args, int from_tty)
+show_osabi (const char *args, int from_tty)
 {
   if (user_osabi_state == osabi_auto)
     printf_filtered ("The current OS ABI is \"auto\" (currently \"%s\").\n",

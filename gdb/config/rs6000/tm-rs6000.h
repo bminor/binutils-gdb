@@ -34,7 +34,7 @@ struct frame_info;
 
 #define IN_SOLIB_RETURN_TRAMPOLINE(pc, name) \
   rs6000_in_solib_return_trampoline (pc, name)
-extern int rs6000_in_solib_return_trampoline (CORE_ADDR, char *);
+extern int rs6000_in_solib_return_trampoline (CORE_ADDR, const char *);
 
 /* If PC is in some function-call trampoline code, return the PC
    where the function itself actually starts.  If not, return NULL.  */

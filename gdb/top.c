@@ -377,14 +377,14 @@ catcher (catch_exceptions_ftype *func,
 	 void *func_args,
 	 int *func_val,
 	 enum return_reason *func_caught,
-	 char *errstring,
+	 const char *errstring,
 	 return_mask mask)
 {
   SIGJMP_BUF *saved_catch;
   SIGJMP_BUF catch;
   struct cleanup *saved_cleanup_chain;
-  char *saved_error_pre_print;
-  char *saved_quit_pre_print;
+  const char *saved_error_pre_print;
+  const char *saved_quit_pre_print;
   struct ui_out *saved_uiout;
 
   /* Return value from SIGSETJMP(): enum return_reason if error or
@@ -466,7 +466,7 @@ int
 catch_exceptions (struct ui_out *uiout,
 		  catch_exceptions_ftype *func,
 		  void *func_args,
-		  char *errstring,
+		  const char *errstring,
 		  return_mask mask)
 {
   int val;
@@ -493,7 +493,7 @@ do_catch_errors (struct ui_out *uiout, void *data)
 }
 
 int
-catch_errors (catch_errors_ftype *func, void *func_args, char *errstring,
+catch_errors (catch_errors_ftype *func, void *func_args, const char *errstring,
 	      return_mask mask)
 {
   int val;
@@ -508,11 +508,11 @@ catch_errors (catch_errors_ftype *func, void *func_args, char *errstring,
 }
 
 struct captured_command_args
-  {
-    catch_command_errors_ftype *command;
-    char *arg;
-    int from_tty;
-  };
+{
+  catch_command_errors_ftype *command;
+  const char *arg;
+  int from_tty;
+};
 
 static int
 do_captured_command (void *data)
@@ -532,7 +532,7 @@ do_captured_command (void *data)
 
 int
 catch_command_errors (catch_command_errors_ftype * command,
-		      char *arg, int from_tty, return_mask mask)
+		      const char *arg, int from_tty, return_mask mask)
 {
   struct captured_command_args args;
   args.command = command;
@@ -633,12 +633,12 @@ do_chdir_cleanup (void *old_dir)
    Pass FROM_TTY as second argument to the defining function.  */
 
 void
-execute_command (char *p, int from_tty)
+execute_command (const char *p, int from_tty)
 {
   register struct cmd_list_element *c;
   register enum language flang;
   static int warned = 0;
-  char *line;
+  const char *line;
   
   free_all_values ();
 
@@ -656,7 +656,7 @@ execute_command (char *p, int from_tty)
     p++;
   if (*p)
     {
-      char *arg;
+      const char *arg;
       line = p;
 
       c = lookup_cmd (&p, cmdlist, "", 0, 1);
@@ -1419,7 +1419,9 @@ get_prompt_1 (void *data)
   else
     /* formatted prompt */
     {
-      char fmt[40], *promptp, *outp, *tmp;
+      char fmt[40];
+      const char **promptp;
+      char *outp, *tmp;
       struct value *arg_val;
       DOUBLEST doubleval;
       LONGEST longval;
@@ -1738,7 +1740,7 @@ input_from_terminal_p (void)
 
 /* ARGSUSED */
 static void
-dont_repeat_command (char *ignored, int from_tty)
+dont_repeat_command (const char *ignored, int from_tty)
 {
   *line = 0;			/* Can't call dont_repeat here because we're not
 				   necessarily reading from stdin.  */
@@ -1824,7 +1826,8 @@ show_commands (char *args, int from_tty)
 /* Called by do_setshow_command.  */
 /* ARGSUSED */
 static void
-set_history_size_command (char *args, int from_tty, struct cmd_list_element *c)
+set_history_size_command (const char *args, int from_tty,
+			  struct cmd_list_element *c)
 {
   if (history_size == INT_MAX)
     unstifle_history ();

@@ -135,7 +135,7 @@ static void gen_expr (union exp_element **pc,
 		      struct agent_expr *ax, struct axs_value *value);
 
 static void print_axs_value (struct ui_file *f, struct axs_value * value);
-static void agent_command (char *exp, int from_tty);
+static void agent_command (const char *exp, int from_tty);
 
 
 /* Detecting constant expressions.  */
@@ -1826,7 +1826,7 @@ print_axs_value (struct ui_file *f, struct axs_value *value)
 
 
 static void
-agent_command (char *exp, int from_tty)
+agent_command (const char *exp, int from_tty)
 {
   struct cleanup *old_chain = 0;
   struct expression *expr;

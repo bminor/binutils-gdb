@@ -80,15 +80,15 @@ static void gdbsim_store_register (int regno);
 
 static void gdbsim_kill (void);
 
-static void gdbsim_load (char *prog, int fromtty);
+static void gdbsim_load (const char *prog, int fromtty);
 
 static void gdbsim_create_inferior (char *exec_file, char *args, char **env);
 
-static void gdbsim_open (char *args, int from_tty);
+static void gdbsim_open (const char *args, int from_tty);
 
 static void gdbsim_close (int quitting);
 
-static void gdbsim_detach (char *args, int from_tty);
+static void gdbsim_detach (const char *args, int from_tty);
 
 static void gdbsim_resume (ptid_t ptid, int step, enum target_signal siggnal);
 
@@ -107,7 +107,7 @@ static void gdbsim_mourn_inferior (void);
 
 static void gdbsim_stop (void);
 
-void simulator_command (char *args, int from_tty);
+void simulator_command (const char *args, int from_tty);
 
 /* Naming convention:
 
@@ -399,7 +399,7 @@ gdbsim_kill (void)
    GDB's symbol tables to match.  */
 
 static void
-gdbsim_load (char *prog, int fromtty)
+gdbsim_load (const char *prog, int fromtty)
 {
   if (sr_get_debug ())
     printf_filtered ("gdbsim_load: prog \"%s\"\n", prog);
@@ -477,7 +477,7 @@ gdbsim_create_inferior (char *exec_file, char *args, char **env)
 /* Called when selecting the simulator. EG: (gdb) target sim name.  */
 
 static void
-gdbsim_open (char *args, int from_tty)
+gdbsim_open (const char *args, int from_tty)
 {
   int len;
   char *arg_buf;
@@ -585,7 +585,7 @@ gdbsim_close (int quitting)
    Use this when you want to detach and do something else with your gdb.  */
 
 static void
-gdbsim_detach (char *args, int from_tty)
+gdbsim_detach (const char *args, int from_tty)
 {
   if (sr_get_debug ())
     printf_filtered ("gdbsim_detach: args \"%s\"\n", args);
@@ -827,7 +827,7 @@ gdbsim_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
    simulator must do any command interpretation work.  */
 
 void
-simulator_command (char *args, int from_tty)
+simulator_command (const char *args, int from_tty)
 {
   if (gdbsim_desc == NULL)
     {

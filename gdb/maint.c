@@ -40,27 +40,15 @@
 
 extern void _initialize_maint_cmds (void);
 
-static void maintenance_command (char *, int);
+static void maintenance_do_deprecate (const char *text, int deprecate);
 
-static void maintenance_dump_me (char *, int);
+static void maintenance_command (const char *, int);
 
-static void maintenance_internal_error (char *args, int from_tty);
-
-static void maintenance_demangle (char *, int);
-
-static void maintenance_time_display (char *, int);
-
-static void maintenance_space_display (char *, int);
-
-static void maintenance_info_command (char *, int);
+static void maintenance_info_command (const char *, int);
 
 static void print_section_table (bfd *, asection *, void *);
 
-static void maintenance_info_sections (char *, int);
-
-static void maintenance_print_command (char *, int);
-
-static void maintenance_do_deprecate (char *, int);
+static void maintenance_print_command (const char *, int);
 
 /* Set this to the maximum number of seconds to wait instead of waiting forever
    in target_wait().  If this timer times out, then it generates an error and
@@ -85,7 +73,7 @@ int watchdog = 0;
  */
 
 static void
-maintenance_command (char *args, int from_tty)
+maintenance_command (const char *args, int from_tty)
 {
   printf_unfiltered ("\"maintenance\" must be followed by the name of a maintenance command.\n");
   help_list (maintenancelist, "maintenance ", -1, gdb_stdout);
@@ -94,7 +82,7 @@ maintenance_command (char *args, int from_tty)
 #ifndef _WIN32
 /* ARGSUSED */
 static void
-maintenance_dump_me (char *args, int from_tty)
+maintenance_dump_me (const char *args, int from_tty)
 {
   if (query ("Should GDB dump core? "))
     {
@@ -116,7 +104,7 @@ maintenance_dump_me (char *args, int from_tty)
    GDB. */
 
 static void
-maintenance_internal_error (char *args, int from_tty)
+maintenance_internal_error (const char *args, int from_tty)
 {
   internal_error (__FILE__, __LINE__, "%s", (args == NULL ? "" : args));
 }
@@ -141,7 +129,7 @@ maintenance_internal_warning (char *args, int from_tty)
    demangle and print what it points to, etc.  (FIXME) */
 
 static void
-maintenance_demangle (char *args, int from_tty)
+maintenance_demangle (const char *args, int from_tty)
 {
   char *demangled;
 
@@ -166,7 +154,7 @@ maintenance_demangle (char *args, int from_tty)
 }
 
 static void
-maintenance_time_display (char *args, int from_tty)
+maintenance_time_display (const char *args, int from_tty)
 {
   extern int display_time;
 
@@ -177,7 +165,7 @@ maintenance_time_display (char *args, int from_tty)
 }
 
 static void
-maintenance_space_display (char *args, int from_tty)
+maintenance_space_display (const char *args, int from_tty)
 {
   extern int display_space;
 
@@ -193,7 +181,7 @@ maintenance_space_display (char *args, int from_tty)
 
 /* ARGSUSED */
 static void
-maintenance_info_command (char *arg, int from_tty)
+maintenance_info_command (const char *arg, int from_tty)
 {
   printf_unfiltered ("\"maintenance info\" must be followed by the name of an info command.\n");
   help_list (maintenanceinfolist, "maintenance info ", -1, gdb_stdout);
@@ -339,7 +327,7 @@ print_bfd_section_info (bfd *abfd,
 static void
 print_objfile_section_info (bfd *abfd, 
 			    struct obj_section *asect, 
-			    char *string)
+			    const char *string)
 {
   flagword flags = bfd_get_section_flags (abfd, asect->the_bfd_section);
   const char *name = bfd_section_name (abfd, asect->the_bfd_section);
@@ -355,7 +343,7 @@ print_objfile_section_info (bfd *abfd,
 
 /* ARGSUSED */
 static void
-maintenance_info_sections (char *arg, int from_tty)
+maintenance_info_sections (const char *arg, int from_tty)
 {
   if (exec_bfd)
     {
@@ -428,7 +416,7 @@ maintenance_print_architecture (char *args, int from_tty)
 
 /* ARGSUSED */
 static void
-maintenance_print_command (char *arg, int from_tty)
+maintenance_print_command (const char *arg, int from_tty)
 {
   printf_unfiltered ("\"maintenance print\" must be followed by the name of a print command.\n");
   help_list (maintenanceprintlist, "maintenance print ", -1, gdb_stdout);
@@ -536,7 +524,7 @@ the command you want to undeprecate.\n");
    replacement.  */
 
 static void
-maintenance_do_deprecate (char *text, int deprecate)
+maintenance_do_deprecate (const char *text, int deprecate)
 {
 
   struct cmd_list_element *alias = NULL;
@@ -618,14 +606,14 @@ static struct cmd_list_element *maintenance_set_cmdlist;
 static struct cmd_list_element *maintenance_show_cmdlist;
 
 static void
-maintenance_set_cmd (char *args, int from_tty)
+maintenance_set_cmd (const char *args, int from_tty)
 {
   printf_unfiltered ("\"maintenance set\" must be followed by the name of a set command.\n");
   help_list (maintenance_set_cmdlist, "maintenance set ", -1, gdb_stdout);
 }
 
 static void
-maintenance_show_cmd (char *args, int from_tty)
+maintenance_show_cmd (const char *args, int from_tty)
 {
   cmd_show_list (maintenance_show_cmdlist, from_tty, "");
 }
@@ -656,7 +644,7 @@ mcleanup_wrapper (void)
 }
 
 static void
-maintenance_set_profile_cmd (char *args, int from_tty, struct cmd_list_element *c)
+maintenance_set_profile_cmd (const char *args, int from_tty, struct cmd_list_element *c)
 {
   if (maintenance_profile_p == profiling_state)
     return;
@@ -688,7 +676,7 @@ maintenance_set_profile_cmd (char *args, int from_tty, struct cmd_list_element *
 }
 #else
 static void
-maintenance_set_profile_cmd (char *args, int from_tty, struct cmd_list_element *c)
+maintenance_set_profile_cmd (const char *args, int from_tty, struct cmd_list_element *c)
 {
   error ("Profiling support is not available on this system.");
 }

@@ -221,9 +221,9 @@ extern void fetch_inferior_registers (int);
 
 extern void solib_create_inferior_hook (void);
 
-extern void child_terminal_info (char *, int);
+extern void child_terminal_info (const char *, int);
 
-extern void term_info (char *, int);
+extern void term_info (const char *, int);
 
 extern void terminal_ours_for_output (void);
 
@@ -300,9 +300,9 @@ extern void follow_inferior_reset_breakpoints (void);
 
 /* From infcmd.c */
 
-extern void tty_command (char *, int);
+extern void tty_command (const char *, int);
 
-extern void attach_command (char *, int);
+extern void attach_command (const char *, int);
 
 extern char *get_inferior_args (void);
 
@@ -310,15 +310,15 @@ extern char *set_inferior_args (char *);
 
 extern void set_inferior_args_vector (int, char **);
 
-extern void registers_info (char *, int);
+extern void registers_info (const char *, int);
 
-extern void nexti_command (char *, int);
+extern void nexti_command (const char *, int);
 
-extern void stepi_command (char *, int);
+extern void stepi_command (const char *, int);
 
-extern void continue_command (char *, int);
+extern void continue_command (const char *, int);
 
-extern void interrupt_target_command (char *args, int from_tty);
+extern void interrupt_target_command (const char *args, int from_tty);
 
 /* Last signal that the inferior received (why it stopped).  */
 

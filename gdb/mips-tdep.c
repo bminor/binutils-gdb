@@ -2767,7 +2767,7 @@ mips_eabi_push_arguments (int nargs,
       if (len > MIPS_SAVED_REGSIZE
 	  && (typecode == TYPE_CODE_STRUCT || typecode == TYPE_CODE_UNION))
 	{
-	  store_address (valbuf, MIPS_SAVED_REGSIZE, VALUE_ADDRESS (arg));
+	  store_unsigned_integer (valbuf, MIPS_SAVED_REGSIZE, VALUE_ADDRESS (arg));
 	  typecode = TYPE_CODE_PTR;
 	  len = MIPS_SAVED_REGSIZE;
 	  val = valbuf;
@@ -5442,7 +5442,7 @@ mips_get_saved_register (char *raw_buffer,
 	      /* Only MIPS_SAVED_REGSIZE bytes of GP registers are
 		 saved. */
 	      LONGEST val = read_memory_integer ((*addrp), MIPS_SAVED_REGSIZE);
-	      store_address (raw_buffer, REGISTER_RAW_SIZE (regnum), val);
+	      store_unsigned_integer (raw_buffer, REGISTER_RAW_SIZE (regnum), val);
 	    }
 	}
     }

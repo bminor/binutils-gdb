@@ -77,7 +77,7 @@ struct _sr_settings sr_settings =
 struct gr_settings *gr_settings = NULL;
 
 static void usage (char *, char *);
-static void sr_com (char *, int);
+static void sr_com (const char *, int);
 
 static void
 usage (char *proto, char *junk)
@@ -277,7 +277,7 @@ sr_expect (char *string)
 }
 
 void
-sr_write (char *a, int l)
+sr_write (const char *a, int l)
 {
   int i;
 
@@ -292,7 +292,7 @@ sr_write (char *a, int l)
 }
 
 void
-sr_write_cr (char *s)
+sr_write_cr (const char *s)
 {
   sr_write (s, strlen (s));
   sr_write ("\r", 1);
@@ -376,7 +376,7 @@ sr_get_hex_word (void)
    FIXME: Can't handle commands that take input.  */
 
 static void
-sr_com (char *args, int fromtty)
+sr_com (const char *args, int fromtty)
 {
   sr_check_open ();
 

@@ -495,13 +495,13 @@ extern int frame_register_read (struct frame_info *frame, int regnum,
 				void *buf);
 
 /* From stack.c.  */
-extern void args_info (char *, int);
+extern void args_info (const char *, int);
 
-extern void locals_info (char *, int);
+extern void locals_info (const char *, int);
 
 extern void (*selected_frame_level_changed_hook) (int);
 
-extern void return_command (char *, int);
+extern void return_command (const char *, int);
 
 
 /* NOTE: cagney/2002-11-27:

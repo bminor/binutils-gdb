@@ -285,7 +285,7 @@ find_pc_function (CORE_ADDR pc)
 
 static CORE_ADDR cache_pc_function_low = 0;
 static CORE_ADDR cache_pc_function_high = 0;
-static char *cache_pc_function_name = 0;
+static const char *cache_pc_function_name = 0;
 static struct sec *cache_pc_function_section = NULL;
 
 /* Clear cache, e.g. when symbol table is discarded. */
@@ -311,8 +311,9 @@ clear_pc_function_cache (void)
    returns 0.  */
 
 int
-find_pc_sect_partial_function (CORE_ADDR pc, asection *section, char **name,
-			       CORE_ADDR *address, CORE_ADDR *endaddr)
+find_pc_sect_partial_function (CORE_ADDR pc, asection *section,
+			       const char **name, CORE_ADDR *address,
+			       CORE_ADDR *endaddr)
 {
   struct partial_symtab *pst;
   struct symbol *f;
@@ -477,7 +478,7 @@ find_pc_sect_partial_function (CORE_ADDR pc, asection *section, char **name,
 /* Backward compatibility, no section argument.  */
 
 int
-find_pc_partial_function (CORE_ADDR pc, char **name, CORE_ADDR *address,
+find_pc_partial_function (CORE_ADDR pc, const char **name, CORE_ADDR *address,
 			  CORE_ADDR *endaddr)
 {
   asection *section;

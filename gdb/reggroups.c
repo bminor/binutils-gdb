@@ -214,7 +214,7 @@ reggroups_dump (struct gdbarch *gdbarch, struct ui_file *file)
 }
 
 static void
-maintenance_print_reggroups (char *args, int from_tty)
+maintenance_print_reggroups (const char *args, int from_tty)
 {
   if (args == NULL)
     reggroups_dump (current_gdbarch, gdb_stdout);

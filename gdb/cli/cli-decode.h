@@ -56,7 +56,7 @@ struct cmd_list_element
     struct cmd_list_element *next;
 
     /* Name of this command.  */
-    char *name;
+    const char *name;
 
     /* Command class; class values are chosen by application program.  */
     enum command_class class;
@@ -86,7 +86,7 @@ struct cmd_list_element
        First line is brief documentation; remaining lines form, with it,
        the full documentation.  First line should end with a period.
        Entire string should also end with a period, not a newline.  */
-    char *doc;
+    const char *doc;
 
     /* flags : a bitfield 
        
@@ -136,7 +136,7 @@ struct cmd_list_element
        plus any others needed to get to it.  Should end in a space.
        It is used before the word "command" in describing the
        commands reached through this prefix.  */
-    char *prefixname;
+    const char *prefixname;
 
     /* For prefix commands only:
        nonzero means do not get an error if subcommand is not
@@ -195,24 +195,27 @@ struct cmd_list_element
 
 /* API to the manipulation of command lists.  */
 
-extern struct cmd_list_element *add_cmd (char *, enum command_class,
-					 void (*fun) (char *, int), char *,
+extern struct cmd_list_element *add_cmd (const char *, enum command_class,
+					 void (*fun) (const char *, int),
+					 const char *,
 					 struct cmd_list_element **);
 
-extern struct cmd_list_element *add_alias_cmd (char *, char *,
+extern struct cmd_list_element *add_alias_cmd (const char *, const char *,
 					       enum command_class, int,
 					       struct cmd_list_element **);
 
-extern struct cmd_list_element *add_prefix_cmd (char *, enum command_class,
-						void (*fun) (char *, int),
-						char *,
+extern struct cmd_list_element *add_prefix_cmd (const char *,
+						enum command_class,
+						void (*fun) (const char *,
+							     int),
+						const char *,
 						struct cmd_list_element **,
-						char *, int,
+						const char *, int,
 						struct cmd_list_element **);
 
 extern struct cmd_list_element *add_abbrev_prefix_cmd (char *,
 						       enum command_class,
-						       void (*fun) (char *,
+						       void (*fun) (const char *,
 								    int),
 						       char *,
 						       struct cmd_list_element
@@ -223,10 +226,10 @@ extern struct cmd_list_element *add_abbrev_prefix_cmd (char *,
 /* Set the commands corresponding callback.  */
 
 extern void set_cmd_cfunc (struct cmd_list_element *cmd,
-			   void (*cfunc) (char *args, int from_tty));
+			   void (*cfunc) (const char *args, int from_tty));
 
 extern void set_cmd_sfunc (struct cmd_list_element *cmd,
-			   void (*sfunc) (char *args, int from_tty,
+			   void (*sfunc) (const char *args, int from_tty,
 					  struct cmd_list_element * c));
 
 extern void set_cmd_completer (struct cmd_list_element *cmd,
@@ -235,13 +238,12 @@ extern void set_cmd_completer (struct cmd_list_element *cmd,
 /* HACK: cagney/2002-02-23: Code, mostly in tracepoints.c, grubs
    around in cmd objects to test the value of the commands sfunc().  */
 extern int cmd_cfunc_eq (struct cmd_list_element *cmd,
-			 void (*cfunc) (char *args, int from_tty));
-
+			 void (*cfunc) (const char *args, int from_tty));
 /* Access to the command's local context.  */
 extern void set_cmd_context (struct cmd_list_element *cmd, void *context);
 extern void *get_cmd_context (struct cmd_list_element *cmd);
 
-extern struct cmd_list_element *lookup_cmd (char **,
+extern struct cmd_list_element *lookup_cmd (const char **,
 					    struct cmd_list_element *, char *,
 					    int, int);
 
@@ -253,46 +255,47 @@ extern struct cmd_list_element *lookup_cmd_1 (char **,
 extern struct cmd_list_element *
   deprecate_cmd (struct cmd_list_element *, char * );
 
-extern void
-  deprecated_cmd_warning (char **);
+extern void deprecated_cmd_warning (const char **);
 
-extern int
-  lookup_cmd_composition (char *text,
-                        struct cmd_list_element **alias,
-                        struct cmd_list_element **prefix_cmd,
-                        struct cmd_list_element **cmd);
+extern int lookup_cmd_composition (const char *text,
+				   struct cmd_list_element **alias,
+				   struct cmd_list_element **prefix_cmd,
+				   struct cmd_list_element **cmd);
 
-extern struct cmd_list_element *add_com (char *, enum command_class,
-					 void (*fun) (char *, int), char *);
+extern struct cmd_list_element *add_com (const char *, enum command_class,
+					 void (*fun) (const char *, int),
+					 const char *);
 
-extern struct cmd_list_element *add_com_alias (char *, char *,
+extern struct cmd_list_element *add_com_alias (const char *, const char *,
 					       enum command_class, int);
 
-extern struct cmd_list_element *add_info (char *, void (*fun) (char *, int),
-					  char *);
+extern struct cmd_list_element *add_info (const char *,
+					  void (*fun) (const char *, int),
+					  const char *);
 
-extern struct cmd_list_element *add_info_alias (char *, char *, int);
+extern struct cmd_list_element *add_info_alias (const char *, const char *,
+						int);
 
 extern char **complete_on_cmdlist (struct cmd_list_element *, char *, char *);
 
 extern char **complete_on_enum (const char *enumlist[], char *, char *);
 
-extern void delete_cmd (char *, struct cmd_list_element **);
+extern void delete_cmd (const char *, struct cmd_list_element **);
 
 extern void help_cmd_list (struct cmd_list_element *, enum command_class,
-			   char *, int, struct ui_file *);
+			   const char *, int, struct ui_file *);
 
-extern struct cmd_list_element *add_set_cmd (char *name, enum
+extern struct cmd_list_element *add_set_cmd (const char *name, enum
 					     command_class class,
 					     var_types var_type, void *var,
-					     char *doc,
+					     const char *doc,
 					     struct cmd_list_element **list);
 
-extern struct cmd_list_element *add_set_enum_cmd (char *name,
+extern struct cmd_list_element *add_set_enum_cmd (const char *name,
 						  enum command_class class,
 						  const char *enumlist[],
 						  const char **var,
-						  char *doc,
+						  const char *doc,
 						  struct cmd_list_element **list);
 
 extern struct cmd_list_element *add_show_from_set (struct cmd_list_element *,
@@ -313,11 +316,11 @@ extern void apropos_cmd (struct ui_file *, struct cmd_list_element *,
    function field NULL, the command is interpreted as a help topic, or
    as a class of commands.  */
 
-extern void not_just_help_class_command (char *arg, int from_tty);
+extern void not_just_help_class_command (const char *arg, int from_tty);
 
 /* Exported to cli/cli-setshow.c */
 
-extern void print_doc_line (struct ui_file *, char *);
+extern void print_doc_line (struct ui_file *, const char *);
 
 
 #endif /* !defined (CLI_DECODE_H) */

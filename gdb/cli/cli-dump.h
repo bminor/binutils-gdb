@@ -23,11 +23,12 @@
 #define CLI_DUMP_H
 
 extern void add_dump_command (char *name,
-			      void (*func) (char *args, char *mode),
+			      void (*func) (const char *args, char *mode),
 			      char *descr);
 
 /* Utilities for doing the dump.  */
-extern char *scan_filename_with_cleanup (char **cmd, const char *defname);
+extern const char *scan_filename_with_cleanup (const char **cmd,
+					       const char *defname);
 
 extern char *scan_expression_with_cleanup (char **cmd, const char *defname);
 

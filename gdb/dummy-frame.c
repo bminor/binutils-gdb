@@ -443,7 +443,7 @@ fprint_dummy_frames (struct ui_file *file)
 }
 
 static void
-maintenance_print_dummy_frames (char *args, int from_tty)
+maintenance_print_dummy_frames (const char *args, int from_tty)
 {
   if (args == NULL)
     fprint_dummy_frames (gdb_stdout);

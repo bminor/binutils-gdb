@@ -34,8 +34,8 @@ static struct cmd_list_element *maint_cplus_cmd_list = NULL;
 
 /* The actual commands.  */
 
-static void maint_cplus_command (char *arg, int from_tty);
-static void first_component_command (char *arg, int from_tty);
+static void maint_cplus_command (const char *arg, int from_tty);
+static void first_component_command (const char *arg, int from_tty);
 
 /* Here are some random pieces of trivia to keep in mind while trying
    to take apart demangled names:
@@ -327,7 +327,7 @@ cp_entire_prefix_len (const char *name)
 /* Don't allow just "maintenance cplus".  */
 
 static  void
-maint_cplus_command (char *arg, int from_tty)
+maint_cplus_command (const char *arg, int from_tty)
 {
   printf_unfiltered ("\"maintenance cplus\" must be followed by the name of a command.\n");
   help_list (maint_cplus_cmd_list, "maintenance cplus ", -1, gdb_stdout);
@@ -338,7 +338,7 @@ maint_cplus_command (char *arg, int from_tty)
    cp_find_first_component.  */
 
 static void
-first_component_command (char *arg, int from_tty)
+first_component_command (const char *arg, int from_tty)
 {
   int len = cp_find_first_component (arg);
   char *prefix = alloca (len + 1);

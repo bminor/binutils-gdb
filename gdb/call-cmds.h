@@ -28,8 +28,8 @@
 
 extern void initialize_all_files (void);
 
-extern void core_file_command (char *, int);
+extern void core_file_command (const char *, int);
 
-extern void break_command (char *, int);
+extern void break_command (const char *, int);
 
 #endif
