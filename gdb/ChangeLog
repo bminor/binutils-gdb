@@ -1,9 +1,23 @@
+2002-02-23  Richard Earnshaw  <rearnsha@arm.com>
+
+	* arm-linux-tdep.c (arm_linux_extract_return_value): Make static.
+	(arm_linux_push_arguments): Likewise.
+	(arm_linux_init_abi): Register them.  Also register linux-specific
+	call_dummy_words.
+	(find_minsym_and_objfile): Use strcmp, not STREQ.
+	* config/arm/tm-linux.h (CALL_DUMMY_WORDS): Delete.
+	(arm_linux_call_dummy_words): Delete declaration.
+	(EXTRACT_RETURN_VALUE, PUSH_ARGUMENTS): Delete.
+	(arm_linux_extract_return_value, arm_linux_push_arguments): Delete
+	declarations.
+	(LOWEST_PC): Delete.
+
 2002-02-23  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	* maint.c (print_section_info): Do not prepend `0x' to filepos
 	output, it will be handled by local_hex_string_custom.
 
-2002-02-23  Richard Earnshaw  <rearnsha"arm.com>
+2002-02-23  Richard Earnshaw  <rearnsha@arm.com>
 
 	* arm-linux-nat.c (store_newfpe_single): Use regcache_collect.
 	(store_newfpe_double, store_newfpe_extended, store_fpregister)

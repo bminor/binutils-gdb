@@ -34,46 +34,6 @@
 extern struct link_map_offsets *arm_linux_svr4_fetch_link_map_offsets (void);
 #define SVR4_FETCH_LINK_MAP_OFFSETS() arm_linux_svr4_fetch_link_map_offsets ()
 
-#undef CALL_DUMMY_WORDS
-#define CALL_DUMMY_WORDS arm_linux_call_dummy_words
-extern LONGEST arm_linux_call_dummy_words[];
-
-/* Extract from an array REGBUF containing the (raw) register state
-   a function return value of type TYPE, and copy that, in virtual format,
-   into VALBUF.  */
-struct type;
-struct value;
-extern void arm_linux_extract_return_value (struct type *, char[], char *);
-#undef EXTRACT_RETURN_VALUE
-#define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
-	arm_linux_extract_return_value ((TYPE), (REGBUF), (VALBUF))
-
-/* Things needed for making the inferior call functions.  
-
-   FIXME:  This and arm_push_arguments should be merged.  However this 
-   	   function breaks on a little endian host, big endian target
-   	   using the COFF file format.  ELF is ok.  
-   	   
-   	   ScottB.  */
-
-#undef PUSH_ARGUMENTS
-#define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
-     sp = arm_linux_push_arguments ((nargs), (args), (sp), (struct_return), \
-     				    (struct_addr))
-extern CORE_ADDR arm_linux_push_arguments (int, struct value **, CORE_ADDR, 
-					   int, CORE_ADDR);
-
-/* The first page is not writeable in ARM GNU/Linux.  */
-#undef LOWEST_PC
-#define LOWEST_PC	0x8000
-
-/* Define NO_SINGLE_STEP if ptrace(PT_STEP,...) fails to function
-   correctly on ARM Linux kernel.  This is the case on 2.0.x kernels,
-   2.1.x kernels and some 2.2.x kernels.  This will include the
-   implementation of single_step() in armlinux-tdep.c.  See
-   armlinux-ss.c for more details. */
-/* #define NO_SINGLE_STEP	1 */
-
 /* Offset to saved PC in sigcontext structure, from <asm/sigcontext.h> */
 #define SIGCONTEXT_PC_OFFSET	(sizeof(unsigned long) * 18)
 

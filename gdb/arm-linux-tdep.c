@@ -66,8 +66,11 @@ LONGEST arm_linux_call_dummy_words[] =
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  */
-
-void
+/* FIXME rearnsha/2002-02-23: This function shouldn't be necessary.
+   The ARM generic one should be able to handle the model used by
+   linux and the low-level formatting of the registers should be
+   hidden behind the regcache abstraction.  */
+static void
 arm_linux_extract_return_value (struct type *type,
 				char regbuf[REGISTER_BYTES],
 				char *valbuf)
@@ -101,7 +104,7 @@ arm_linux_extract_return_value (struct type *type,
 #define MAKE_THUMB_ADDR(addr)	((addr) | 1)
 #define UNMAKE_THUMB_ADDR(addr) ((addr) & ~1)
    	  
-CORE_ADDR
+static CORE_ADDR
 arm_linux_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		          int struct_return, CORE_ADDR struct_addr)
 {
@@ -360,7 +363,7 @@ find_minsym_and_objfile (char *name, struct objfile **objfile_p)
       ALL_OBJFILE_MSYMBOLS (objfile, msym)
 	{
 	  if (SYMBOL_NAME (msym)
-	      && STREQ (SYMBOL_NAME (msym), name))
+	      && strcmp (SYMBOL_NAME (msym), name) == 0)
 	    {
 	      *objfile_p = objfile;
 	      return msym;
@@ -523,6 +526,14 @@ arm_linux_init_abi (struct gdbarch_info info,
 
   tdep->jb_pc = JB_PC;
   tdep->jb_elt_size = JB_ELEMENT_SIZE;
+
+  set_gdbarch_call_dummy_words (gdbarch, arm_linux_call_dummy_words);
+  set_gdbarch_sizeof_call_dummy_words (gdbarch,
+				       sizeof (arm_linux_call_dummy_words));
+
+  /* The following two overrides shouldn't be needed.  */
+  set_gdbarch_extract_return_value (gdbarch, arm_linux_extract_return_value);
+  set_gdbarch_push_arguments (gdbarch, arm_linux_push_arguments);
 }
 
 void
