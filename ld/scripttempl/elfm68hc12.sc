@@ -165,6 +165,10 @@ BSS_DATA_RELOC="
   .scommon 0 : { *(.scommon) }
 "
 
+SOFT_REGS_RELOC="
+  .softregs 0 : { *(.softregs) }
+"
+
 cat <<EOF
 ${RELOCATING+/* Linker script for 68HC12 executable (PROM).  */}
 ${RELOCATING-/* Linker script for 68HC12 object file (ld -r).  */}
@@ -393,10 +397,12 @@ SECTIONS
 
   /* Relocation for some bss and data sections.  */
   ${RELOCATING-${BSS_DATA_RELOC}}
+  ${RELOCATING-${SOFT_REGS_RELOC}}
 
   .bss ${RELOCATING-0} :
   {
     ${RELOCATING+__bss_start = .;}
+    ${RELOCATING+*(.softregs)}
     ${RELOCATING+*(.sbss)}
     ${RELOCATING+*(.scommon)}
 
@@ -409,6 +415,12 @@ SECTIONS
   } ${RELOCATING+ > ${DATA_MEMORY}}
   ${RELOCATING+__bss_size = SIZEOF(.bss);}
   ${RELOCATING+PROVIDE (__bss_size = SIZEOF(.bss));}
+
+  .eeprom ${RELOCATING-0} :
+  {
+    *(.eeprom)
+    *(.eeprom.*)
+  } ${RELOCATING+ > ${EEPROM_MEMORY}}
 
   ${RELOCATING+${VECTORS}}
 

@@ -100,6 +100,7 @@ MEMORY
   page0 (rwx) : ORIGIN = 0x0, LENGTH = 256
   text  (rx)  : ORIGIN = ${ROM_START_ADDR}, LENGTH = ${ROM_SIZE}
   data        : ORIGIN = ${RAM_START_ADDR}, LENGTH = ${RAM_SIZE}
+  eeprom      : ORIGIN = ${EEPROM_START_ADDR}, LENGTH = ${EEPROM_SIZE}
 }
 
 /* Setup the stack on the top of the data memory bank.  */
@@ -163,6 +164,10 @@ BSS_DATA_RELOC="
   .sdata   0 : { *(.sdata) }
   .sbss    0 : { *(.sbss) }
   .scommon 0 : { *(.scommon) }
+"
+
+SOFT_REGS_RELOC="
+  .softregs 0 : { *(.softregs) }
 "
 
 cat <<EOF
@@ -294,6 +299,7 @@ SECTIONS
   .page0 :
   {
     *(.page0)
+    ${RELOCATING+*(.softregs)}
   } ${RELOCATING+ > page0}
 
   /* Start of text section.  */
@@ -393,6 +399,7 @@ SECTIONS
 
   /* Relocation for some bss and data sections.  */
   ${RELOCATING-${BSS_DATA_RELOC}}
+  ${RELOCATING-${SOFT_REGS_RELOC}}
 
   .bss ${RELOCATING-0} :
   {
@@ -409,6 +416,12 @@ SECTIONS
   } ${RELOCATING+ > ${DATA_MEMORY}}
   ${RELOCATING+__bss_size = SIZEOF(.bss);}
   ${RELOCATING+PROVIDE (__bss_size = SIZEOF(.bss));}
+
+  .eeprom ${RELOCATING-0} :
+  {
+    *(.eeprom)
+    *(.eeprom.*)
+  } ${RELOCATING+ > ${EEPROM_MEMORY}}
 
   ${RELOCATING+${VECTORS}}
 

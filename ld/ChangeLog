@@ -1,3 +1,15 @@
+2002-06-29  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* emulparams/m68hc12elfb.sh (EEPROM_MEMORY): Define.
+	* emulparams/m68hc11elfb.sh (EEPROM_MEMORY): Define.
+	* emulparams/m68hc11elf.sh (EEPROM_SIZE): Define.
+	(EEPROM_START_ADDR): Define.
+	(EEPROM_MEMORY): Define.
+	* emulparams/m68hc12elf.sh: Likewise.
+	* scripttempl/elfm68hc11.sc: Handle .eeprom section; handle .softregs
+	section to put soft registers in .page0.
+	* scripttempl/elfm68hc12.sc: Likewise but put soft registers in bss.
+
 2002-06-26  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* emulparams/hppa64linux.sh (OTHER_GOT_RELOC_SECTIONS): Add rela.opd
