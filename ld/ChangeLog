@@ -1,3 +1,7 @@
+2002-01-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldmisc.c (demangle): Put back dots when string not demangled.
+
 2002-01-22  Richard Henderson  <rth@redhat.com>
 
 	* emulparams/elf64alpha.sh (NOP): Use unop.

@@ -1,5 +1,6 @@
 /* ldmisc.c
-   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000
+   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
+   2000, 2002
    Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support.
 
@@ -69,18 +70,20 @@ demangle (string)
      const char *string;
 {
   char *res;
+  const char *p;
 
   if (output_bfd != NULL
       && bfd_get_symbol_leading_char (output_bfd) == string[0])
     ++string;
 
-  /* This is a hack for better error reporting on XCOFF, or the MS PE
-     format.  Xcoff has a single '.', while the NT PE for PPC has
-     '..'.  So we remove all of them.  */
-  while (string[0] == '.')
-    ++string;
+  /* This is a hack for better error reporting on XCOFF, PowerPC64-ELF
+     or the MS PE format.  These formats have a number of leading '.'s
+     on at least some symbols, so we remove all dots.  */
+  p = string;
+  while (*p == '.')
+    ++p;
 
-  res = cplus_demangle (string, DMGL_ANSI | DMGL_PARAMS);
+  res = cplus_demangle (p, DMGL_ANSI | DMGL_PARAMS);
   return res ? res : xstrdup (string);
 }
 
