@@ -1951,9 +1951,9 @@ TBL("tblunb", "tblunw", "tblunl", 0, 0),
 {"unpk",	one(0100600),	one(0170770), "DsDd#w", m68020up },
 {"unpk",	one(0100610),	one(0170770), "-s-d#w", m68020up },
 
-{"wddatab",	one(0172000),   one(0177700), "~s", mcf },
-{"wddataw",	one(0172100),   one(0177700), "~s", mcf },
-{"wddatal",	one(0172200),   one(0177700), "~s", mcf },
+{"wddatab",	one(0175400),   one(0177700), "~s", mcf },
+{"wddataw",	one(0175500),   one(0177700), "~s", mcf },
+{"wddatal",	one(0175600),   one(0177700), "~s", mcf },
 
 {"wdebug",	two(0175720, 03),	two(0177770, 0xffff), "as", mcf },
 {"wdebug",	two(0175750, 03),	two(0177770, 0xffff), "ds", mcf },

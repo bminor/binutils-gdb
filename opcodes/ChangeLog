@@ -1,3 +1,7 @@
+2001-11-12  Niraj Gupta <ngupta@zumanetworks.com>
+
+	* m68k-opc.c: Fix definitions of wddata[bwl].
+
 2001-11-09  Richard Sandiford  <rsandifo@redhat.com>
 
 	* cgen-asm.c (cgen_parse_keyword): If the keyword is too big to
