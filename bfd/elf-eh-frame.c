@@ -287,7 +287,7 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec, ehdrsec,
      bfd *abfd;
      struct bfd_link_info *info;
      asection *sec, *ehdrsec;
-     boolean (*reloc_symbol_deleted_p) (bfd_vma, PTR);
+     boolean (*reloc_symbol_deleted_p) PARAMS ((bfd_vma, PTR));
      struct elf_reloc_cookie *cookie;
 {
   bfd_byte *ehbuf = NULL, *buf;
