@@ -1,3 +1,11 @@
+2002-02-13  Matt Fredette  <fredette@netbsd.org>
+
+	* config/tc-m68k.c (md_show_usage): No longer display a
+	hard-coded "68020" for the default CPU, instead display the
+	canonical name of the true, configured default CPU.
+	(m68k_elf_final_processing): Mark objects for sub-68020
+	CPUs with the new EF_M68000 flag.
+
 2002-02-13  Andreas Schwab  <schwab@suse.de>
 
 	* config/tc-i386.c (tc_i386_fix_adjustable): Don't adjust

@@ -1,3 +1,7 @@
+2002-02-13  Matt Fredette  <fredette@netbsd.org>
+
+	* readelf.c (get_machine_flags): Recognize EF_M68000.
+
 2002-02-12  Alexandre Oliva  <aoliva@redhat.com>
 
 	* MAINTAINERS: Added self as MN10300 co-maintainer.

@@ -1,3 +1,8 @@
+2002-02-13  Matt Fredette  <fredette@netbsd.org>
+
+	* elf32-m68k.c (elf32_m68k_print_private_bfd_data): Recognize
+	EF_M68000.
+
 2002-02-12  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elf-m10300.c (mn10300_elf_relax_section): Skip section before
