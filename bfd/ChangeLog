@@ -1,5 +1,13 @@
 2002-07-04  Alan Modra  <amodra@bigpond.net.au>
 
+	* section.c (_bfd_strip_section_from_output):  Remove unnecessary
+	link order code.  Don't actually remove the output section here;
+	Just set a flag for the linker to do so.
+	* elflink.c (_bfd_elf_link_renumber_dynsyms): Test for removed
+	sections when setting up output section dynsyms.
+
+2002-07-04  Alan Modra  <amodra@bigpond.net.au>
+
 	* elflink.h (elf_link_add_object_symbols): Revert 1999-09-02 hpux
 	fudge.
 	* elf.c (bfd_section_from_shdr): Work around broken hpux shared

@@ -1301,80 +1301,40 @@ SYNOPSIS
 
 DESCRIPTION
 	Remove @var{section} from the output.  If the output section
-	becomes empty, remove it from the output bfd.  @var{info} may
-	be NULL; if it is not, it is used to decide whether the output
-	section is empty.
+	becomes empty, remove it from the output bfd.
+
+	This function won't actually do anything except twiddle flags
+	if called too late in the linking process, when it's not safe
+	to remove sections.
 */
 void
 _bfd_strip_section_from_output (info, s)
      struct bfd_link_info *info;
      asection *s;
 {
-  asection **spp, *os;
-  struct bfd_link_order *p, *pp;
-  boolean keep_os;
-
-  /* Excise the input section from the link order.
-
-     FIXME: For all calls that I can see to this function, the link
-     orders have not yet been set up.  So why are we checking them? --
-     Ian */
-  os = s->output_section;
-
-  /* Handle a section that wasn't output.  */
-  if (os == NULL)
-    return;
-
-  for (p = os->link_order_head, pp = NULL; p != NULL; pp = p, p = p->next)
-    if (p->type == bfd_indirect_link_order
-	&& p->u.indirect.section == s)
-      {
-	if (pp)
-	  pp->next = p->next;
-	else
-	  os->link_order_head = p->next;
-	if (!p->next)
-	  os->link_order_tail = pp;
-	break;
-      }
-
-  keep_os = os->link_order_head != NULL;
-
-  if (! keep_os && info != NULL)
-    {
-      bfd *abfd;
-      for (abfd = info->input_bfds; abfd != NULL; abfd = abfd->link_next)
-	{
-	  asection *is;
-	  for (is = abfd->sections; is != NULL; is = is->next)
-	    {
-	      if (is != s && is->output_section == os
-		  && (is->flags & SEC_EXCLUDE) == 0)
-		break;
-	    }
-	  if (is != NULL)
-	    break;
-	}
-      if (abfd != NULL)
-	keep_os = true;
-    }
-
-  /* If the output section is empty, remove it too.  Careful about sections
-     that have been discarded in the link script -- they are mapped to
-     bfd_abs_section, which has no owner.  */
-  if (!keep_os && os->owner != NULL)
-    {
-      for (spp = &os->owner->sections; *spp; spp = &(*spp)->next)
-	if (*spp == os)
-	  {
-	    bfd_section_list_remove (os->owner, spp);
-	    os->flags |= SEC_EXCLUDE;
-	    os->owner->section_count--;
-	    break;
-	  }
-    }
+  asection *os;
+  asection *is;
+  bfd *abfd;
 
   s->flags |= SEC_EXCLUDE;
+
+  /* If the section wasn't assigned to an output section, or the
+     section has been discarded by the linker script, there's nothing
+     more to do.  */
+  os = s->output_section;
+  if (os == NULL || os->owner == NULL)
+    return;
+
+  /* If the output section has other (non-excluded) input sections, we
+     can't remove it.  */
+  for (abfd = info->input_bfds; abfd != NULL; abfd = abfd->link_next)
+    for (is = abfd->sections; is != NULL; is = is->next)
+      if (is->output_section == os && (is->flags & SEC_EXCLUDE) == 0)
+	return;
+
+  /* If the output section is empty, flag it for removal too.
+     See ldlang.c:strip_excluded_output_sections for the action.  */
+  os->flags |= SEC_EXCLUDE;
 }
 
 /*

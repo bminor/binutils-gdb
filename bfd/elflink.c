@@ -357,7 +357,8 @@ _bfd_elf_link_renumber_dynsyms (output_bfd, info)
     {
       asection *p;
       for (p = output_bfd->sections; p ; p = p->next)
-	elf_section_data (p)->dynindx = ++dynsymcount;
+	if ((p->flags & SEC_EXCLUDE) == 0)
+	  elf_section_data (p)->dynindx = ++dynsymcount;
     }
 
   if (elf_hash_table (info)->dynlocal)
