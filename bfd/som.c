@@ -23,7 +23,7 @@
 #include "bfd.h"
 #include "sysdep.h"
 
-#if defined (HOST_HPPAHPUX) || defined (HOST_HPPABSD)
+#if defined (HOST_HPPAHPUX) || defined (HOST_HPPABSD) || defined (HOST_HPPAOSF)
 
 #include "libbfd.h"
 #include "som.h"
@@ -3579,6 +3579,7 @@ som_set_reloc_info (fixup, end, internal_relocs, section, symbols, just_count)
 	  rptr->address = offset;
 	  rptr->howto = &som_hppa_howto_table[op];
 	  rptr->addend = 0;
+	  rptr->sym_ptr_ptr = bfd_abs_section.symbol_ptr_ptr;
 	}
 
       /* Set default input length to 0.  Get the opcode class index
@@ -3895,8 +3896,8 @@ som_new_section_hook (abfd, newsect)
 void
 bfd_som_set_section_attributes (section, defined, private, sort_key, spnum)
      asection *section;
-     char defined;
-     char private;
+     int defined;
+     int private;
      unsigned char sort_key;
      int spnum;
 {
@@ -3919,7 +3920,7 @@ bfd_som_set_subsection_attributes (section, container, access,
      asection *section;
      asection *container;
      int access;
-     unsigned char sort_key;
+     unsigned int sort_key;
      int quadrant;
 {
   struct subspace_dictionary_record *subspace_dict;
@@ -4215,4 +4216,4 @@ bfd_target som_vec =
   (PTR) 0
 };
 
-#endif /* HOST_HPPAHPUX || HOST_HPPABSD */
+#endif /* HOST_HPPAHPUX || HOST_HPPABSD || HOST_HPPAOSF */
