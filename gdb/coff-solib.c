@@ -25,6 +25,8 @@
 #include "bfd.h"
 #include "gdbcore.h"
 #include "symtab.h"
+#include "symfile.h"
+#include "objfiles.h"
 
 /*
 

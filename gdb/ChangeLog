@@ -1,5 +1,11 @@
 2001-06-28  Andrew Cagney  <ac131313@redhat.com>
 
+	From 2000-06-14 John Marshall <john_w_marshall@palm.com>:
+	* coff-solib.c: Include symfile.h and objfiles.h to make
+	OBJF_SHARED visible.
+
+2001-06-28  Andrew Cagney  <ac131313@redhat.com>
+
 	* configure.in (--enable-gdbmi): Enable by default.
 	* configure: Regenerate.
 	* TODO: Update.
