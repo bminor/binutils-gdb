@@ -181,9 +181,13 @@ proc gdb_sparclet_startup { arg } {
 
 	send_gdb "load $loader [target_info gdb_stub_offset]\n"
 	verbose "Loading $loader into $GDB" 2
+	set no_run_command 0;
 	gdb_expect 1200 {
 	     -re "Loading.*$gdb_prompt $" {
 		verbose "Loaded $loader into $GDB" 1
+	    }
+	    -re "Transfer rate:.*Switching to remote protocol.*Remote debugging" {
+		set no_run_command 1;
 	    }
 	     -re "$gdb_prompt $"     {
 		if $verbose>1 then {
@@ -197,25 +201,27 @@ proc gdb_sparclet_startup { arg } {
 	    }
 	}
 
-	send_gdb "run\n";
-	gdb_expect 60 {
-	     -re "A program is being debug.*Kill it.*y or n. $" {
-		send_gdb "y\n"
-		exp_continue
-	    }
-	     -re "The program being debugged .*y or n. $" {
-		send_gdb "y\n"
-		exp_continue
-	    }
-	     -re "Starting program:.*loader.*$" { 
-		verbose "Starting loader succeeded" 
-	    }
-	    timeout { 
-		perror "(timeout) starting the loader" ; 
-		return -1 
-	    }
-	    default {
-		perror "error starting the loader";
+	if !$no_run_command {
+	    send_gdb "run\n";
+	    gdb_expect 60 {
+		-re "A program is being debug.*Kill it.*y or n. $" {
+		    send_gdb "y\n"
+		    exp_continue
+		}
+		-re "The program being debugged .*y or n. $" {
+		    send_gdb "y\n"
+		    exp_continue
+		}
+		-re "Starting program:.*loader.*$" { 
+		    verbose "Starting loader succeeded" 
+		}
+		timeout { 
+		    perror "(timeout) starting the loader" ; 
+		    return -1 
+		}
+		default {
+		    perror "error starting the loader";
+		}
 	    }
 	}
 	sleep 2;

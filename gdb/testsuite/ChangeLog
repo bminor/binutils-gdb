@@ -1,3 +1,16 @@
+Tue Sep  2 19:55:34 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* config/sparclet.exp: Detect gratuitous change to sparclet gdb
+ 	target mode.
+
+Mon Jul 28 12:14:47 1997  Stan Shebs  <shebs@andros.cygnus.com>
+
+	From Bob Manson:
+	* config/monitor.exp (gdb_target_monitor): Look for "Connected to"
+ 	string from GDB when it connects.
+
+	* lib/gdb.exp: Look for $TOOL_EXECUTABLE.
+
 Thu Jul  3 15:35:12 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* lib/gdb.exp(get_debug_format): Don't cause the testsuite to fail
