@@ -1,3 +1,10 @@
+2001-02-06  H.J. Lu  <hjl@gnu.org>
+
+	* bfd/peicode.h (coff_swap_filehdr_in): Remove the e_magic
+	checking.
+	(pe_bfd_object_p): Rewrite with external_PEI_DOS_hdr and
+	external_PEI_IMAGE_hdr.
+
 2001-02-06  Kazu Hirata  <kazu@hxi.com>
 
 	* elf-m10200.c: Fix formatting.
