@@ -1110,7 +1110,7 @@ ldlang_open_output (statement)
 	output_bfd->flags |= WP_TEXT;
       else
 	output_bfd->flags &= ~WP_TEXT;
-      if (config.traditional_format)
+      if (link_info.traditional_format)
 	output_bfd->flags |= BFD_TRADITIONAL_FORMAT;
       else
 	output_bfd->flags &= ~BFD_TRADITIONAL_FORMAT;
@@ -2139,7 +2139,10 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 
 	i = (*prev)->input_section.section;
 	if (! relax)
-	  i->_cooked_size = i->_raw_size;
+	  {
+	    if (i->_cooked_size == 0)
+	      i->_cooked_size = i->_raw_size;
+	  }
 	else
 	  {
 	    boolean again;

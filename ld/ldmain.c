@@ -169,7 +169,6 @@ main (argc, argv)
   /* Initialize the data about options.  */
   trace_files = trace_file_tries = version_printed = false;
   whole_archive = false;
-  config.traditional_format = false;
   config.build_constructors = true;
   config.dynamic_link = false;
   command_line.force_common_definition = false;
@@ -181,6 +180,7 @@ main (argc, argv)
   link_info.shared = false;
   link_info.symbolic = false;
   link_info.static_link = false;
+  link_info.traditional_format = false;
   link_info.strip = strip_none;
   link_info.discard = discard_none;
   link_info.lprefix_len = 1;
@@ -660,6 +660,17 @@ multiple_definition (info, name, obfd, osec, oval, nbfd, nsec, nval)
      asection *nsec;
      bfd_vma nval;
 {
+  /* If either section has the output_section field set to
+     bfd_abs_section_ptr, it means that the section is being
+     discarded, and this is not really a multiple definition at all.
+     FIXME: It would be cleaner to somehow ignore symbols defined in
+     sections which are being discarded.  */
+  if ((osec->output_section != NULL
+       && bfd_is_abs_section (osec->output_section))
+      || (nsec->output_section != NULL
+	  && bfd_is_abs_section (nsec->output_section)))
+    return true;
+
   einfo ("%X%C: multiple definition of `%T'\n",
 	 nbfd, nsec, nval, name);
   if (obfd != (bfd *) NULL)

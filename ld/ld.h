@@ -1,6 +1,6 @@
 /* ld.h -
 
-   Copyright (C) 1991, 1993 Free Software Foundation, Inc.
+   Copyright (C) 1991, 1993, 1994, 1995 Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
 
@@ -20,6 +20,17 @@
 
 #ifndef LD_H
 #define LD_H
+
+/* Look in this environment name for the linker to pretend to be */
+#define EMULATION_ENVIRON "LDEMULATION"
+/* If in there look for the strings: */
+
+/* Look in this variable for a target format */
+#define TARGET_ENVIRON "GNUTARGET"
+
+/* Input sections which are put in a section of this name are actually
+   discarded.  */
+#define DISCARD_SECTION_NAME "/DISCARD/"
 
 /* Extra information we hold on sections */
 typedef struct  user_section_struct
@@ -59,6 +70,10 @@ typedef struct
   /* Runtime library search path from the -rpath argument.  */
   char *rpath;
 
+  /* Link time runtime library search path from the -rpath-link
+     argument.  */
+  char *rpath_link;
+
   /* Big or little endian as set on command line.  */
   enum { ENDIAN_UNSET = 0, ENDIAN_BIG, ENDIAN_LITTLE } endian;
 
@@ -81,19 +96,24 @@ typedef struct
   boolean magic_demand_paged;
   boolean make_executable;
 
-  /* If true, request BFD to use the traditional format.  */
-  boolean traditional_format;
-
   /* If true, doing a dynamic link.  */
   boolean dynamic_link;
 
+  /* If true, build constructors.  */
   boolean build_constructors;
+
+  /* If true, warn about any constructors.  */
+  boolean warn_constructors;
 
   /* If true, warn about merging common symbols with others.  */
   boolean warn_common;
 
   /* If true, only warn once about a particular undefined symbol.  */
   boolean warn_once;
+
+  /* If true, warn if multiple global-pointers are needed (Alpha
+     only).  */
+  boolean warn_multiple_gp;
 
   boolean sort_common;
 
@@ -119,6 +139,9 @@ typedef enum
 
 extern boolean had_script;
 extern boolean force_make_executable;
+
+/* Non-zero if we are processing a --defsym from the command line.  */
+extern int parsing_defsym;
 
 extern int yyparse PARAMS ((void));
 

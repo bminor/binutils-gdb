@@ -1,5 +1,16 @@
 Mon Apr 22 12:07:32 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ldlang.c (lang_size_sections): If _cooked_size is not 0, then
+	don't clobber it when not relaxing.
+
+	* ld.h (ld_config_type): Remove traditional_format field.
+	* ldmain.c (main): Use link_info.traditional_format rather than
+	config.traditional_format.
+	* ldlang.c (ldlang_open_output): Likewise.
+	* lexsup.c (parse_args): Likewise.
+	* emultempl/aix.em (gld${EMULATION_NAME}_parse_args): Likewise.
+	* mpw-eppcmac.c (gldppcmacos_parse_args): Likewise.
+
 	* ldlang.c (wild_doit): Discard debugging sections if we are
 	stripping debugging information.
 

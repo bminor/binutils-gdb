@@ -141,11 +141,11 @@ static const struct ld_option ld_options[] =
       'E', NULL, "Export all dynamic symbols", TWO_DASHES },
   { {NULL, optional_argument, NULL, '\0'},
       'F', "[FORMAT]", "Ignored", ONE_DASH },
+  { {NULL, no_argument, NULL, '\0'},
+      'g', NULL, "Ignored", ONE_DASH },
   { {"gpsize", required_argument, NULL, 'G'},
       'G', "SIZE", "Small data size (if no size, same as --shared)",
       TWO_DASHES },
-  { {NULL, no_argument, NULL, '\0'},
-      'g', NULL, "Ignored", ONE_DASH },
   { {"soname", required_argument, NULL, OPTION_SONAME},
       'h', "FILENAME", "Set internal name of shared library", ONE_DASH },
   { {"library", required_argument, NULL, 'l'},
@@ -204,9 +204,9 @@ static const struct ld_option ld_options[] =
       '\0', "KEYWORD", "Ignored for SunOS compatibility", ONE_DASH },
   { {"Bdynamic", no_argument, NULL, OPTION_CALL_SHARED},
       '\0', NULL, "Link against shared libraries", ONE_DASH },
-  { {"call_shared", no_argument, NULL, OPTION_CALL_SHARED},
-      '\0', NULL, NULL, ONE_DASH },
   { {"dy", no_argument, NULL, OPTION_CALL_SHARED},
+      '\0', NULL, NULL, ONE_DASH },
+  { {"call_shared", no_argument, NULL, OPTION_CALL_SHARED},
       '\0', NULL, NULL, ONE_DASH },
   { {"Bstatic", no_argument, NULL, OPTION_NON_SHARED},
       '\0', NULL, "Do not link against shared libraries", ONE_DASH },
@@ -630,7 +630,7 @@ parse_args (argc, argv)
 	  set_section_start (".text", optarg);
 	  break;
 	case OPTION_TRADITIONAL_FORMAT:
-	  config.traditional_format = true;
+	  link_info.traditional_format = true;
 	  break;
 	case OPTION_UR:
 	  link_info.relocateable = true;

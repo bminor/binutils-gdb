@@ -335,7 +335,7 @@ gldppcmacos_parse_args (argc, argv)
       break;
 
     case OPTION_NOSTRCMPCT:
-      config.traditional_format = true;
+      link_info.traditional_format = true;
       break;
 
     case OPTION_PD:
@@ -384,7 +384,7 @@ gldppcmacos_parse_args (argc, argv)
       break;
 
     case OPTION_STRCMPCT:
-      config.traditional_format = false;
+      link_info.traditional_format = false;
       break;
 
     case OPTION_UNIX:
