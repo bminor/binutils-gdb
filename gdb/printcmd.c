@@ -718,15 +718,17 @@ build_address_symbolic (CORE_ADDR addr,  /* IN */
 void
 print_address_numeric (CORE_ADDR addr, int use_local, struct ui_file *stream)
 {
-  /* Truncate address to the size of a target pointer, avoiding shifts
+  /* Truncate address to the size of a target address, avoiding shifts
      larger or equal than the width of a CORE_ADDR.  The local
-     variable PTR_BIT stops the compiler reporting a shift overflow
-     when it won't occure. */
+     variable ADDR_BIT stops the compiler reporting a shift overflow
+     when it won't occur. */
   /* NOTE: This assumes that the significant address information is
      kept in the least significant bits of ADDR - the upper bits were
      either zero or sign extended.  Should ADDRESS_TO_POINTER() or
      some ADDRESS_TO_PRINTABLE() be used to do the conversion?  */
+
   int addr_bit = TARGET_ADDR_BIT;
+
   if (addr_bit < (sizeof (CORE_ADDR) * HOST_CHAR_BIT))
     addr &= ((CORE_ADDR) 1 << addr_bit) - 1;
   print_longest (stream, 'x', use_local, (ULONGEST) addr);
@@ -1334,8 +1336,8 @@ x_command (char *exp, int from_tty)
 	val = value_ind (val);
       /* In rvalue contexts, such as this, functions are coerced into
          pointers to functions.  This makes "x/i main" work.  */
-      if (			/* last_format == 'i'
-				   && */ TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_FUNC
+      if (/* last_format == 'i'  && */ 
+	  TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_FUNC
 	   && VALUE_LVAL (val) == lval_memory)
 	next_address = VALUE_ADDRESS (val);
       else

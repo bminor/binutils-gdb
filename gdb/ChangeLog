@@ -1,5 +1,9 @@
 2001-02-28  Michael Snyder  <msnyder@mvstp600e.cygnus.com>
 
+	* printcmd.c (print_address_numeric): Update comments to refer
+	to sizeof addr, not sizeof pointer.
+	(x_command): Remove needless whitespace (shorten long line).
+	
 	* breakpoint.c (print_one_breakpoint): Formatting clean-up.
 	(read_memory_nobpt): Ditto.
 	(ep_is_catchpoint): Ditto.
