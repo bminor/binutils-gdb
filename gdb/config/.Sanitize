@@ -73,6 +73,8 @@ irix3.mt
 irix4.mh
 isi.mh
 isi.mt
+linux.mh
+linux.mt
 littlemips.mh
 littlemips.mt
 m88k.mh
