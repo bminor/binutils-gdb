@@ -1716,7 +1716,7 @@
 	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (reverse << shift)));
 	    LoadMemory(&memval,&memval1,uncached,AccessLength_WORD,paddr,vaddr,isDATA,isREAL);
 	    byte = ((vaddr & mask) ^ (bigend << shift));
-	    GPR[RT] = (SIGNEXTEND(((memval >> (8 * byte)) & 0xFFFFFFFF),32));
+	    GPR[RT] = EXTEND32 (memval >> (8 * byte));
 	    LLBIT = 1;
 	  }
       }
@@ -3269,9 +3269,9 @@
   else
     { /* control from */
       if (FS == 0)
- 	PENDING_FILL(RT,SIGNEXTEND(FCR0,32));
+ 	PENDING_FILL(RT, EXTEND32 (FCR0));
       else if (FS == 31)
- 	PENDING_FILL(RT,SIGNEXTEND(FCR31,32));
+ 	PENDING_FILL(RT, EXTEND32 (FCR31));
       /* else NOP */
     }
 }
@@ -3310,12 +3310,12 @@
       if (FS == 0)
 	{
 	  TRACE_ALU_INPUT1 (FCR0);
-	  GPR[RT] = SIGNEXTEND (FCR0, 32);
+	  GPR[RT] = EXTEND32 (FCR0);
 	}
       else if (FS == 31)
 	{
 	  TRACE_ALU_INPUT1 (FCR31);
-	  GPR[RT] = SIGNEXTEND (FCR31, 32);
+	  GPR[RT] = EXTEND32 (FCR31);
 	}
       TRACE_ALU_RESULT (GPR[RT]);
       /* else NOP */
@@ -3656,7 +3656,7 @@
 	PENDING_FILL ((FS + FGRIDX), VL4_8(GPR[RT]));
     }
   else /*MFC1*/
-    PENDING_FILL (RT, SIGNEXTEND(FGR[FS],32));
+    PENDING_FILL (RT, EXTEND32 (FGR[FS]));
 }
 010001,00,X,00,5.RT,5.FS,00000000000:COP1Sb:32,f::MxC1
 "m%s<X>c1 r<RT>, f<FS>"
@@ -3672,7 +3672,7 @@
     /*MTC1*/
     StoreFPR (FS, fmt_uninterpreted_32, VL4_8 (GPR[RT]));
   else /*MFC1*/
-    GPR[RT] = SIGNEXTEND(FGR[FS],32);
+    GPR[RT] = EXTEND32 (FGR[FS]);
 }
 
 

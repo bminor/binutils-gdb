@@ -1426,7 +1426,7 @@ load_word (SIM_DESC sd,
 	  LoadMemory (&memval,NULL,uncached, AccessLength_WORD, paddr, vaddr,
 			       isDATA, isREAL);
 	  byte = (vaddr & mask) ^ (bigend << 2);
-	  return SIGNEXTEND (((memval >> (8 * byte)) & 0xffffffff), 32);
+	  return EXTEND32 (memval >> (8 * byte));
 	}
     }
 

@@ -1,5 +1,10 @@
 2002-03-02  Chris Demetriou  <cgd@broadcom.com>
 
+	* interp.c (load_word): Use EXTEND32 rather than SIGNEXTEND.
+	* mips.igen (LL, CxC1, MxC1): Likewise.
+
+2002-03-02  Chris Demetriou  <cgd@broadcom.com>
+
 	* mips.igen (LL, LLD, PREF, SC, SCD, ABS.fmt, ADD.fmt, CEIL.L.fmt,
 	CEIL.W, CVT.D.fmt, CVT.L.fmt, CVT.S.fmt, CVT.W.fmt, DIV.fmt,
 	FLOOR.L.fmt, FLOOR.W.fmt, MADD.D, MADD.S, MOV.fmt, MOVtf.fmt,
