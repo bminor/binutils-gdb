@@ -1,3 +1,8 @@
+2002-09-09  Fred Fish  <fnf@intrinsity.com>
+
+	* printcmd.c (print_scalar_formatted): "len" is the number of
+	target bytes, NOT the number of target bits.
+
 2002-09-09  Elena Zannoni  <ezannoni@redhat.com>
 
 	From: Emmanuel Thome'  <thome@lix.polytechnique.fr>

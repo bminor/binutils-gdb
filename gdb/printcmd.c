@@ -391,10 +391,10 @@ print_scalar_formatted (char *valaddr, struct type *type, int format, int size,
     val_long = unpack_long (type, valaddr);
 
   /* If the value is a pointer, and pointers and addresses are not the
-     same, then at this point, the value's length is TARGET_ADDR_BIT, not
-     TYPE_LENGTH (type).  */
+     same, then at this point, the value's length (in target bytes) is
+     TARGET_ADDR_BIT/TARGET_CHAR_BIT, not TYPE_LENGTH (type).  */
   if (TYPE_CODE (type) == TYPE_CODE_PTR)
-    len = TARGET_ADDR_BIT;
+    len = TARGET_ADDR_BIT / TARGET_CHAR_BIT;
 
   /* If we are printing it as unsigned, truncate it in case it is actually
      a negative signed value (e.g. "print/u (short)-1" should print 65535
