@@ -1,3 +1,8 @@
+2001-08-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* lib/mi-support.exp (mi_gdb_start): Move call to sid_start to
+	beginning of function.  Fix PR gdb/191.
+
 2001-08-16  Frank Ch. Eigler  <fche@redhat.com>
 
 	* config/sid.exp (sid_start): Don't warn if we cannot figure out

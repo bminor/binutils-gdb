@@ -99,6 +99,12 @@ proc mi_gdb_start { } {
 
     gdb_stop_suppressing_tests;
 
+    # Start SID.
+    if { [info procs sid_start] != "" } {
+	verbose "Spawning SID"
+	sid_start
+    }
+
     verbose "Spawning $GDB -nw $GDBFLAGS $MIFLAGS"
 
     if [info exists gdb_spawn_id] {
@@ -168,12 +174,6 @@ proc mi_gdb_start { } {
 	timeout {
 	    warning "Couldn't set the width to 0."
 	}
-    }
-
-    # Finally start SID.
-    if { [info procs sid_start] != "" } {
-	verbose "Spawning SID"
-	sid_start
     }
 
     return 0;
