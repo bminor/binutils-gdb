@@ -1,3 +1,10 @@
+Mon Nov 15 20:12:43 1999  Donald Lindsay  <dlindsay@cygnus.com>
+
+	* config/tc-arm.c (do_mia,do_mar,do_mra,do_pld,do_ldrl,do_co_reg): Small
+	improvements in error checking.
+	(md_assemble): Support for unconditional ARM instructions.
+	(md_parse_option): Support for -m[arm]v5e flag.
+
 1999-11-12  Nick Clifton  <nickc@cygnus.com>
 
 	* macro.c (buffer_and_nest): Do not check beyond the end of the
