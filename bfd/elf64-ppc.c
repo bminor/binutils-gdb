@@ -2803,6 +2803,9 @@ struct ppc_link_hash_table
     bfd_vma offset;
   } tlsld_got;
 
+  /* Statistics.  */
+  unsigned long stub_count[ppc_stub_plt_call];
+
   /* Set if we should emit symbols for stubs.  */
   unsigned int emit_stub_syms;
 
@@ -2893,6 +2896,8 @@ static bfd_boolean ppc_build_one_stub
   PARAMS ((struct bfd_hash_entry *, PTR));
 static bfd_boolean ppc_size_one_stub
   PARAMS ((struct bfd_hash_entry *, PTR));
+static int toc_adjusting_stub_needed
+  PARAMS ((struct bfd_link_info *, asection *));
 static void group_sections
   PARAMS ((struct ppc_link_hash_table *, bfd_size_type, bfd_boolean));
 static bfd_boolean ppc64_elf_relocate_section
@@ -3031,7 +3036,7 @@ ppc64_elf_link_hash_table_create (abfd)
   struct ppc_link_hash_table *htab;
   bfd_size_type amt = sizeof (struct ppc_link_hash_table);
 
-  htab = (struct ppc_link_hash_table *) bfd_malloc (amt);
+  htab = (struct ppc_link_hash_table *) bfd_zmalloc (amt);
   if (htab == NULL)
     return NULL;
 
@@ -3048,41 +3053,6 @@ ppc64_elf_link_hash_table_create (abfd)
   /* And the branch hash table.  */
   if (!bfd_hash_table_init (&htab->branch_hash_table, branch_hash_newfunc))
     return NULL;
-
-  htab->stub_bfd = NULL;
-  htab->add_stub_section = NULL;
-  htab->layout_sections_again = NULL;
-  htab->stub_group = NULL;
-  htab->no_multi_toc = 0;
-  htab->multi_toc_needed = 0;
-  htab->toc_curr = 0;
-  htab->sgot = NULL;
-  htab->srelgot = NULL;
-  htab->splt = NULL;
-  htab->srelplt = NULL;
-  htab->sdynbss = NULL;
-  htab->srelbss = NULL;
-  htab->sglink = NULL;
-  htab->sfpr = NULL;
-  htab->sbrlt = NULL;
-  htab->srelbrlt = NULL;
-  htab->tls_sec = NULL;
-  htab->tls_get_addr = NULL;
-  htab->tlsld_got.refcount = 0;
-  htab->emit_stub_syms = 0;
-  htab->stub_error = 0;
-  htab->has_14bit_branch = 0;
-  htab->have_undefweak = 0;
-  htab->stub_iteration = 0;
-  htab->sym_sec.abfd = NULL;
-  /* Initializing two fields of the union is just cosmetic.  We really
-     only care about glist, but when compiled on a 32-bit host the
-     bfd_vma fields are larger.  Setting the bfd_vma to zero makes
-     debugger inspection of these fields look nicer.  */
-  htab->elf.init_refcount.refcount = 0;
-  htab->elf.init_refcount.glist = NULL;
-  htab->elf.init_offset.offset = 0;
-  htab->elf.init_offset.glist = NULL;
 
   return &htab->elf.root;
 }
@@ -6221,6 +6191,7 @@ ppc_build_one_stub (gen_entry, in_arg)
 
   stub_bfd = stub_sec->owner;
 
+  htab->stub_count[(int) stub_entry->stub_type - 1] += 1;
   switch (stub_entry->stub_type)
     {
     case ppc_stub_long_branch:
@@ -6598,17 +6569,77 @@ ppc64_elf_reinit_toc (output_bfd, info)
   htab->toc_curr = TOC_BASE_OFF;
 }
 
+/* No toc references were found in ISEC.  If the code in ISEC makes no
+   calls, then there's no need to use toc adjusting stubs when branching
+   into ISEC.  Actually, indirect calls from ISEC are OK as they will
+   load r2.  */
+
+static int
+toc_adjusting_stub_needed (info, isec)
+     struct bfd_link_info *info;
+     asection *isec;
+{
+  bfd_byte *contents;
+  bfd_size_type i;
+  int ret;
+  int branch_ok;
+
+  /* Hack for linux kernel.  .fixup contains branches, but only back to
+     the function that hit an exception.  */
+  branch_ok = strcmp (isec->name, ".fixup") == 0;
+
+  contents = elf_section_data (isec)->this_hdr.contents;
+  if (contents == NULL)
+    {
+      contents = bfd_malloc (isec->_raw_size);
+      if (contents == NULL)
+	return -1;
+      if (! bfd_get_section_contents (isec->owner, isec, contents,
+				      (file_ptr) 0, isec->_raw_size))
+	{
+	  free (contents);
+	  return -1;
+	}
+      if (info->keep_memory)
+	elf_section_data (isec)->this_hdr.contents = contents;
+    }
+
+  /* Code scan, because we don't necessarily have relocs on calls to
+     static functions.  */
+  ret = 0;
+  for (i = 0; i < isec->_raw_size; i += 4)
+    {
+      unsigned long insn = bfd_get_32 (isec->owner, contents + i);
+      /* Is this a branch?  */
+      if ((insn & (0x1f << 26)) == (18 << 26)
+	  /* If branch and link, it's a function call.  */
+	  && ((insn & 1) != 0
+	      /* Sibling calls use a plain branch.  I don't know a way
+		 of deciding whether a branch is really a sibling call.  */
+	      || !branch_ok))
+	{
+	  ret = 1;
+	  break;
+	}
+    }
+
+  if (elf_section_data (isec)->this_hdr.contents != contents)
+    free (contents);
+  return ret;
+}
+
 /* The linker repeatedly calls this function for each input section,
    in the order that input sections are linked into output sections.
    Build lists of input sections to determine groupings between which
    we may insert linker stubs.  */
 
-void
+bfd_boolean
 ppc64_elf_next_input_section (info, isec)
      struct bfd_link_info *info;
      asection *isec;
 {
   struct ppc_link_hash_table *htab = ppc_hash_table (info);
+  int ret;
 
   if ((isec->output_section->flags & SEC_CODE) != 0
       && isec->output_section->index <= htab->top_index)
@@ -6626,13 +6657,20 @@ ppc64_elf_next_input_section (info, isec)
      to use the right TOC (obviously).  Also, make sure that .opd gets
      the correct TOC value.  */
   if (isec->has_gp_reloc || (isec->flags & SEC_CODE) == 0)
-    if (elf_gp (isec->owner) != 0)
-      htab->toc_curr = elf_gp (isec->owner);
+    {
+      if (elf_gp (isec->owner) != 0)
+	htab->toc_curr = elf_gp (isec->owner);
+    }
+  else if ((ret = toc_adjusting_stub_needed (info, isec)) < 0)
+    return FALSE;
+  else
+    isec->has_gp_reloc = ret;
 
   /* Functions that don't use the TOC can belong in any TOC group.
      Use the last TOC base.  This happens to make _init and _fini
      pasting work.  */
   htab->stub_group[isec->id].toc_off = htab->toc_curr;
+  return TRUE;
 }
 
 /* See whether we can group stub sections together.  Grouping stub
@@ -6904,7 +6942,9 @@ ppc64_elf_size_stubs (output_bfd, stub_bfd, info, group_size,
 		      if (sym_sec != NULL
 			  && sym_sec->output_section != NULL
 			  && (htab->stub_group[sym_sec->id].toc_off
-			      != htab->stub_group[section->id].toc_off))
+			      != htab->stub_group[section->id].toc_off)
+			  && sym_sec->has_gp_reloc
+			  && section->has_gp_reloc)
 			stub_type = ppc_stub_long_branch_r2off;
 		    }
 

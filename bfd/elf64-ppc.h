@@ -33,7 +33,7 @@ void ppc64_elf_next_toc_section
   PARAMS ((struct bfd_link_info *, asection *));
 void ppc64_elf_reinit_toc
   PARAMS ((bfd *, struct bfd_link_info *));
-void ppc64_elf_next_input_section
+bfd_boolean ppc64_elf_next_input_section
   PARAMS ((struct bfd_link_info *, asection *));
 bfd_boolean ppc64_elf_size_stubs
   PARAMS ((bfd *, bfd *, struct bfd_link_info *, bfd_signed_vma,
