@@ -108,7 +108,7 @@ DEFUN (symtab_finalize, (tab), Sym_Table * tab)
 			   src->is_func ? 'F' : 'f',
 			   dst[-1].name, dst[-1].is_static ? 't' : 'T',
 			   dst[-1].is_func ? 'F' : 'f');
-		   printf (" (addr=%lx)\n", src->addr));
+		   printf (" (addr=%lx)\n", (unsigned long) src->addr));
 	      dst[-1] = *src;
 	    }
 	  else
@@ -119,7 +119,7 @@ DEFUN (symtab_finalize, (tab), Sym_Table * tab)
 			   dst[-1].is_func ? 'F' : 'f',
 			   src->name, src->is_static ? 't' : 'T',
 			   src->is_func ? 'F' : 'f');
-		   printf (" (addr=%lx)\n", src->addr));
+		   printf (" (addr=%lx)\n", (unsigned long) src->addr));
 	    }
 	}
       else
@@ -170,7 +170,8 @@ DEFUN (dbg_sym_lookup, (symtab, address), Sym_Table * symtab AND bfd_vma address
   long low, mid, high;
   Sym *sym;
 
-  fprintf (stderr, "[dbg_sym_lookup] address 0x%lx\n", address);
+  fprintf (stderr, "[dbg_sym_lookup] address 0x%lx\n",
+	   (unsigned long) address);
 
   sym = symtab->base;
   for (low = 0, high = symtab->len - 1; low != high;)
@@ -179,7 +180,8 @@ DEFUN (dbg_sym_lookup, (symtab, address), Sym_Table * symtab AND bfd_vma address
       fprintf (stderr, "[dbg_sym_lookup] low=0x%lx, mid=0x%lx, high=0x%lx\n",
 	       low, mid, high);
       fprintf (stderr, "[dbg_sym_lookup] sym[m]=0x%lx sym[m + 1]=0x%lx\n",
-	       sym[mid].addr, sym[mid + 1].addr);
+	       (unsigned long) sym[mid].addr,
+	       (unsigned long) sym[mid + 1].addr);
       if (sym[mid].addr <= address && sym[mid + 1].addr > address)
 	{
 	  return &sym[mid];

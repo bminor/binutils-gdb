@@ -323,11 +323,13 @@ DEFUN_VOID (sym_id_parse)
 		       printf (
 				"[sym_id_parse]: arc %s:%s(%lx-%lx) -> %s:%s(%lx-%lx) to %s\n",
 				left->file ? left->file->name : "*",
-				left->name ? left->name : "*", left->addr,
-				left->end_addr,
+				left->name ? left->name : "*",
+				(unsigned long) left->addr,
+				(unsigned long) left->end_addr,
 				right->file ? right->file->name : "*",
-				right->name ? right->name : "*", right->addr,
-				right->end_addr,
+				right->name ? right->name : "*",
+				(unsigned long) right->addr,
+				(unsigned long) right->end_addr,
 				table_name[id->which_table]));
 		  arc_add (left, right, (unsigned long) 0);
 		}

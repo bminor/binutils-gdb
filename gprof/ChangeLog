@@ -1,3 +1,10 @@
+1999-07-01  Ian Lance Taylor  <ian@zembu.com>
+
+	* Many files: Add casts in many print statements to cast bfd_vma
+	values to unsigned long when calling printf.
+	* Makefile.am ($(OBJECTS)): Add gmon.h.
+	* Makefile.in: Rebuild.
+
 Mon Jun 14 10:35:28 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 
 	* gprof.texi: Fix typo.

@@ -104,7 +104,8 @@ alpha_find_call (parent, p_lowpc, p_highpc)
       p_highpc = s_highpc;
     }
   DBG (CALLDEBUG, printf (_("[find_call] %s: 0x%lx to 0x%lx\n"),
-			  parent->name, p_lowpc, p_highpc));
+			  parent->name, (unsigned long) p_lowpc,
+			  (unsigned long) p_highpc));
   for (pc = (alpha_Instruction *) (p_lowpc + delta);
        pc < (alpha_Instruction *) (p_highpc + delta);
        ++pc)
@@ -125,7 +126,7 @@ alpha_find_call (parent, p_lowpc, p_highpc)
 	    {
 	      DBG (CALLDEBUG,
 		   printf (_("[find_call] 0x%lx: jsr%s <indirect_child>\n"),
-			   (bfd_vma) pc - delta,
+			   (unsigned long) pc - delta,
 			   pc->j.func == Jxx_FUNC_JSR ? "" : "_coroutine"));
 	      arc_add (parent, &indirect_child, (unsigned long) 0);
 	    }
@@ -133,7 +134,8 @@ alpha_find_call (parent, p_lowpc, p_highpc)
 
 	case OP_BSR:
 	  DBG (CALLDEBUG,
-	       printf (_("[find_call] 0x%lx: bsr"), (bfd_vma) pc - delta));
+	       printf (_("[find_call] 0x%lx: bsr"),
+		       (unsigned long) pc - delta));
 	  /*
 	   * Regular PC relative addressing.  Check that this is the
 	   * address of a function.  The linker sometimes redirects
@@ -146,7 +148,8 @@ alpha_find_call (parent, p_lowpc, p_highpc)
 	      child = sym_lookup (&symtab, dest_pc);
 	      DBG (CALLDEBUG,
 		   printf (" 0x%lx\t; name=%s, addr=0x%lx",
-			   dest_pc, child->name, child->addr));
+			   (unsigned long) dest_pc, child->name,
+			   (unsigned long) child->addr));
 	      if (child->addr == dest_pc || child->addr == dest_pc - 8)
 		{
 		  DBG (CALLDEBUG, printf ("\n"));

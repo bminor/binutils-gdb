@@ -242,11 +242,12 @@ DEFUN (gmon_out_read, (filename), const char *filename)
       hist_num_bins = samp_bytes / sizeof (UNIT);
       DBG (SAMPLEDEBUG,
 	   printf ("[gmon_out_read] lowpc 0x%lx highpc 0x%lx ncnt %d\n",
-		   h.low_pc, h.high_pc, h.ncnt);
+		   (unsigned long) h.low_pc, (unsigned long) h.high_pc,
+		   h.ncnt);
 	   printf ("[gmon_out_read]   s_lowpc 0x%lx   s_highpc 0x%lx\n",
-		   s_lowpc, s_highpc);
+		   (unsigned long) s_lowpc, (unsigned long) s_highpc);
 	   printf ("[gmon_out_read]     lowpc 0x%lx     highpc 0x%lx\n",
-		   lowpc, highpc);
+		   (unsigned long) lowpc, (unsigned long) highpc);
 	   printf ("[gmon_out_read] samp_bytes %d hist_num_bins %d\n",
 		   samp_bytes, hist_num_bins));
 
@@ -286,7 +287,7 @@ DEFUN (gmon_out_read, (filename), const char *filename)
 	  count = bfd_get_32 (core_bfd, (bfd_byte *) raw_arc.count);
 	  DBG (SAMPLEDEBUG,
 	     printf ("[gmon_out_read] frompc 0x%lx selfpc 0x%lx count %lu\n",
-		     from_pc, self_pc, count));
+		     (unsigned long) from_pc, (unsigned long) self_pc, count));
 	  /* add this arc: */
 	  cg_tally (from_pc, self_pc, count);
 	}
@@ -440,7 +441,8 @@ DEFUN (gmon_out_write, (filename), const char *filename)
 		}
 	      DBG (SAMPLEDEBUG,
 		   printf ("[dumpsum] frompc 0x%lx selfpc 0x%lx count %lu\n",
-			   arc->parent->addr, arc->child->addr, arc->count));
+			   (unsigned long) arc->parent->addr,
+			   (unsigned long) arc->child->addr, arc->count));
 	    }
 	}
       fclose (ofp);

@@ -195,8 +195,8 @@ DEFUN (core_get_text_space, (core_bfd), bfd * core_bfd)
 
   if (!core_text_space)
     {
-      fprintf (stderr, _("%s: ran out room for %ld bytes of text space\n"),
-	       whoami, core_text_sect->_raw_size);
+      fprintf (stderr, _("%s: ran out room for %lu bytes of text space\n"),
+	       whoami, (unsigned long) core_text_sect->_raw_size);
       done (1);
     }
   if (!bfd_get_section_contents (core_bfd, core_text_sect, core_text_space,
@@ -371,7 +371,7 @@ DEFUN (get_src_info, (addr, filename, name, line_num),
       && fname && func_name && l)
     {
       DBG (AOUTDEBUG, printf ("[get_src_info] 0x%lx -> %s:%d (%s)\n",
-			      addr, fname, l, func_name));
+			      (unsigned long) addr, fname, l, func_name));
       *filename = fname;
       *name = func_name;
       *line_num = l;
@@ -446,7 +446,8 @@ DEFUN (core_create_function_syms, (core_bfd), bfd * core_bfd)
 	{
 	  DBG (AOUTDEBUG,
 	       printf ("[core_create_function_syms] rejecting: 0x%lx %s\n",
-		       core_syms[i]->value, core_syms[i]->name));
+		       (unsigned long) core_syms[i]->value,
+		       core_syms[i]->name));
 	  continue;
 	}
       /* This should be replaced with a binary search or hashed
@@ -545,7 +546,8 @@ DEFUN (core_create_function_syms, (core_bfd), bfd * core_bfd)
 
       DBG (AOUTDEBUG, printf ("[core_create_function_syms] %ld %s 0x%lx\n",
 			      (long) (symtab.limit - symtab.base),
-			      symtab.limit->name, symtab.limit->addr));
+			      symtab.limit->name,
+			      (unsigned long) symtab.limit->addr));
       ++symtab.limit;
     }
 
@@ -722,7 +724,7 @@ DEFUN (core_create_line_syms, (core_bfd), bfd * core_bfd)
 
       DBG (AOUTDEBUG, printf ("[core_create_line_syms] %d %s 0x%lx\n",
 			      ltab.limit - ltab.base, ltab.limit->name,
-			      ltab.limit->addr));
+			      (unsigned long) ltab.limit->addr));
       ++ltab.limit;
     }
 
