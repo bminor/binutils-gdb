@@ -179,6 +179,7 @@ their platform.
 
 AIX			Peter Schauer		Peter.Schauer@regent.e-technik.tu-muenchen.de
 			Kevin Buettner		kevinb@redhat.com
+			Joel Brobecker		brobecker@gnat.com
 
 djgpp native		Eli Zaretskii		eliz@gnu.org
 			DJ Delorie		dj@redhat.com
@@ -310,7 +311,7 @@ Scott Bambrough					scottb@netwinder.org
 Jim Blandy					jimb@redhat.com
 Philip Blundell					philb@gnu.org
 Per Bothner					per@bothner.com
-Joel Brobecker					brobecker@act-europe.fr
+Joel Brobecker					brobecker@gnat.com
 Dave Brolley					brolley@redhat.com
 Paul Brook					paul@codesourcery.com
 Kevin Buettner					kevinb@redhat.com
