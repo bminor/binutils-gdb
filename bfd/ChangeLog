@@ -1,3 +1,18 @@
+2001-01-22  Bo Thorsen  <bo@suse.de>
+
+	* elf64-x86-64.c: Added PIC support for X86-64.
+	(elf64_x86_64_link_hash_newfunc): Function added.
+	(elf64_x86_64_link_hash_table_create): Likewise.
+	(elf64_x86_64_check_relocs): Likewise.
+	(elf64_x86_64_gc_mark_hook): Likewise.
+	(elf64_x86_64_gc_sweep_hook): Likewise.
+	(elf64_x86_64_adjust_dynamic_symbol): Likewise.
+	(elf64_x86_64_size_dynamic_sections): Likewise.
+	(elf64_x86_64_discard_copies): Likewise.
+	(elf64_x86_64_finish_dynamic_symbol): Likewise.
+	(elf64_x86_64_finish_dynamic_sections): Likewise.
+	(elf64_x86_64_relocate_section): Add relocation of PIC sections.
+
 2001-01-21  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
 
 	* Makefile.am (install-data-local): Make use of $(DESTDIR).
