@@ -64,8 +64,8 @@
 /* When doing file read/writes, do this many bytes at a time.  */
 #define FILE_XFR_SIZE 4096
 
-/* FIXME: for now */
-#define TWORD unsigned long
+/* FIXME: for now, need to consider target word size.  */
+#define TWORD long
 #define TADDR unsigned long
 
 /* Utility of cb_syscall to fetch a path name or other string from the target.
@@ -131,8 +131,10 @@ cb_syscall (cb, sc)
      host_callback *cb;
      CB_SYSCALL *sc;
 {
-  /* ??? Need to consider target word size.  */
-  long result = 0, errcode = 0;
+  TWORD result = 0, errcode = 0;
+
+  if (sc->magic != CB_SYSCALL_MAGIC)
+    abort ();
 
   switch (cb_target_to_host_syscall (cb, sc->func))
     {
@@ -390,10 +392,7 @@ cb_syscall (cb, sc)
 	    result = -1;
 	    goto FinishSyscall;
 	  }
-	/* ??? Coercion to unsigned avoids -Wall -Werror failure.
-	   Ya, cb_host_to_target_stat could return an unsigned int,
-	   but that seems worse.  */
-	if ((*sc->write_mem) (cb, sc, addr, buf, buflen) != (unsigned) buflen)
+	if ((*sc->write_mem) (cb, sc, addr, buf, buflen) != buflen)
 	  {
 	    free (buf);
 	    errcode = EINVAL;
@@ -425,10 +424,7 @@ cb_syscall (cb, sc)
 	    result = -1;
 	    goto FinishSyscall;
 	  }
-	/* ??? Coercion to unsigned avoids -Wall -Werror failure.
-	   Ya, cb_host_to_target_stat could return an unsigned int,
-	   but that seems worse.  */
-	if ((*sc->write_mem) (cb, sc, addr, buf, buflen) != (unsigned) buflen)
+	if ((*sc->write_mem) (cb, sc, addr, buf, buflen) != buflen)
 	  {
 	    free (buf);
 	    errcode = EINVAL;
