@@ -1,5 +1,7 @@
 Tue Dec 14 17:19:03 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* ldlex.h: Don't declare yywrap if it is a macro.
+	* ldlex.l: Include sysdep.h.
 	* ldlang.c (lang_for_each_statement_worker,
 	lang_for_each_statement): Forgot to use PARAMS.
 
