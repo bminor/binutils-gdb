@@ -569,7 +569,7 @@ install-bison: force
 	fi
 
 ### gcc
-all-gcc: .stmp-libiberty .stmp-bison .stmp-gas
+all-gcc: .stmp-libiberty .stmp-bison .stmp-gas .stmp-gcc
 .stmp-gcc:
 	if [ -d ./gcc ] ; then \
 		rootme=`pwd` ; export rootme ; \
