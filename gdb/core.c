@@ -74,6 +74,18 @@ core_close (quitting)
   }
 }
 
+#ifdef SOLIB_ADD
+/* Stub function for catch_errors around shared library hacking. */
+
+int 
+solib_add_stub (from_tty)
+     int from_tty;
+{
+    SOLIB_ADD (NULL, from_tty, &core_ops);
+    return 0;
+}
+#endif /* SOLIB_ADD */
+
 /* This routine opens and sets up the core file bfd */
 
 void
@@ -146,9 +158,10 @@ core_open (filename, from_tty)
   if (ontop) {
     /* Fetch all registers from core file */
     target_fetch_registers (-1);
+
     /* Add symbols and section mappings for any shared libraries */
 #ifdef SOLIB_ADD
-    SOLIB_ADD (NULL, from_tty, &core_ops);
+    (void) catch_errors (solib_add_stub, from_tty, (char *)0);
 #endif
     /* Now, set up the frame cache, and print the top of stack */
     set_current_frame ( create_new_frame (read_register (FP_REGNUM),

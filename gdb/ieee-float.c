@@ -76,7 +76,7 @@ double_to_ieee_extended (ext_format, from, to)
   double dfrom = *from;
   unsigned long twolongs[2];
   unsigned long mant0, mant1, exponent;
-  unsigned char twobytes[2];
+  unsigned char tobytes[8];
 
   bzero (to, TOTALSIZE);
   if (dfrom == 0)
@@ -95,13 +95,13 @@ double_to_ieee_extended (ext_format, from, to)
   /* The following code assumes that the host has IEEE doubles.  FIXME-someday.
      It also assumes longs are 32 bits!  FIXME-someday.  */
   bcopy (from, twolongs, 8);
-  bcopy (from, twobytes, 2);
+  bcopy (from, tobytes, 8);
 #if HOST_BYTE_ORDER == BIG_ENDIAN
-  exponent = ((twobytes[1] & 0xF0) >> 4) | (twobytes[0] & 0x7F) << 4;
+  exponent = ((tobytes[1] & 0xF0) >> 4) | (tobytes[0] & 0x7F) << 4;
   mant0 = (twolongs[0] << 11) | twolongs[1] >> 21;
   mant1 = (twolongs[1] << 11);
 #else
-  exponent = ((twobytes[0] & 0xF0) >> 4) | (twobytes[1] & 0x7F) << 4;
+  exponent = ((tobytes[6] & 0xF0) >> 4) | (tobytes[7] & 0x7F) << 4;
   mant0 = (twolongs[1] << 11) | twolongs[0] >> 21;
   mant1 = (twolongs[0] << 11);
 #endif
