@@ -70,14 +70,12 @@ int multiple_def_count;
    decremented when the common declaration is overridden
 
    Another way of thinking of it is that this is a count of
-   all ldsym_types with a ->scoms field
-*/
+   all ldsym_types with a ->scoms field */
+
 unsigned int commons_pending;
 
-
 /* Count the number of global symbols referenced and not defined. 
-   common symbols are not included in this count.
-  */
+   common symbols are not included in this count.   */
 
 unsigned int undefined_global_sym_count;
 
@@ -88,8 +86,6 @@ int warning_count;
 
 /* have we had a load script ? */
 extern boolean had_script;
-
-
 
 /* Nonzero means print names of input files as processed.  */
 boolean trace_files;
@@ -106,21 +102,12 @@ int unix_relocate;
 enum target_flavour_enum output_flavor = BFD_BOUT_FORMAT;
 #endif
 
-
-
-
-
-
-
-
 /* Force the make_executable to be output, even if there are non-fatal
    errors */
 boolean force_make_executable;
 
-
 /* A count of the total number of local symbols ever seen - by adding
  the symbol_count field of each newly read afile.*/
-
 
 unsigned int total_symbols_seen;
 
@@ -128,7 +115,6 @@ unsigned int total_symbols_seen;
  in file_chain
  */
 unsigned int total_files_seen;
-
 
 /* IMPORTS */
 args_type command_line;
@@ -142,6 +128,7 @@ main (argc, argv)
   program_name = argv[0];
   output_filename = "a.out";
 
+  bfd_init();
 #ifdef GNU960
    {
      int i;
@@ -163,8 +150,6 @@ main (argc, argv)
   /* Initialize the data about options.  */
 
   trace_files = false;
-
-
   write_map = false;
   config.relocateable_output = false;
   unix_relocate = 0;
@@ -188,12 +173,8 @@ main (argc, argv)
     emulation= DEFAULT_EMULATION;
   }
 
-
   ldemul_choose_mode(emulation);
-
-
   default_target =  ldemul_choose_target();
-
   lang_init();
   ldemul_before_parse();
   lang_has_input_file = false;
@@ -207,11 +188,7 @@ main (argc, argv)
   }
 
   ldemul_after_parse();
-
   lang_process();
-
-
-
 
   /* Print error messages for any missing symbols, for any warning
      symbols, and possibly multiple definitions */
@@ -223,6 +200,19 @@ main (argc, argv)
     lang_map(stdout);
   }
 
+  if (config.text_read_only) {
+    /* Look for a text section and mark the readonly attribute in it */
+    asection *found = bfd_get_section_by_name(output_bfd, ".text");
+    if (found == (asection *)NULL) {
+      info("%P%F: text marked read only, but no text section present");
+    }
+    found->flags |= SEC_READONLY;
+    output_bfd->flags |= WP_TEXT;
+  }
+  else {
+    output_bfd->flags |= WP_TEXT;
+  }
+    
 
   if (config.relocateable_output) {
     output_bfd->flags &=  ~( D_PAGED);
@@ -253,7 +243,6 @@ Q_read_entry_symbols (desc, entry)
   if (entry->asymbols == (asymbol **)NULL) {
     bfd_size_type table_size = get_symtab_upper_bound(desc);
     entry->asymbols = (asymbol **)ldmalloc(table_size);
-
     entry->symbol_count =  bfd_canonicalize_symtab(desc, entry->asymbols) ;
   }
 }
@@ -312,26 +301,30 @@ Q_enter_global_ref (nlist_p)
 
   ASSERT(sym->udata == 0);
 
+
   if (flag_is_constructor(this_symbol_flags))  {
-    /* Just remeber the name, do it once per name by placing it as if
-       it were a zero sized common. The next ref */
-      ldlang_add_constructor(sp);
+    /* Add this constructor to the list we keep */
+    ldlang_add_constructor(sp);
+    /* Turn any commons into refs */
+    if (sp->scoms_chain != (asymbol **)NULL) {
+      refize(sp, sp->scoms_chain);
+      sp->scoms_chain = 0;
+    }
+
 
   }
   else {  
     if (flag_is_common(this_symbol_flags)) {
       /* If we have a definition of this symbol already then
-       * this common turns into a reference. Also we only
-       * ever point to the largest common, so if we
-       * have a common, but it's bigger that the new symbol
-       * the turn this into a reference too.
-       */
+         this common turns into a reference. Also we only
+         ever point to the largest common, so if we
+         have a common, but it's bigger that the new symbol
+         the turn this into a reference too. */
       if (sp->sdefs_chain)  
 	  {
 	    /* This is a common symbol, but we already have a definition
 	       for it, so just link it into the ref chain as if
-	       it were a reference
-	       */
+	       it were a reference  */
 	    refize(sp, nlist_p);
 	  }
       else  if (sp->scoms_chain) {
@@ -347,14 +340,23 @@ Q_enter_global_ref (nlist_p)
 	}
       }
       else {
-	/* This is the first time we've seen a common, so
-	 * remember it - if it was undefined before, we know it's defined now
-	 */
-	if (sp->srefs_chain)
-	  undefined_global_sym_count--;
+	/* This is the first time we've seen a common, so remember it
+	   - if it was undefined before, we know it's defined now. If
+	   the symbol has been marked as really being a constructor,
+	   then treat this as a ref 
+	   */
+	if (sp->flags & SYM_CONSTRUCTOR) {
+	  /* Turn this into a ref */
+	  refize(sp, nlist_p);
+	}
+	else {
+	  /* treat like a common */
+	  if (sp->srefs_chain)
+	    undefined_global_sym_count--;
 
-	commons_pending++;
-	sp->scoms_chain = nlist_p;
+	  commons_pending++;
+	  sp->scoms_chain = nlist_p;
+	}
       }
     }
 
@@ -603,107 +605,107 @@ symdef_library (entry)
 
 
   while (not_finished == true)
-    {
-      carsym *exported_library_name;
-      bfd *prev_archive_member_bfd = 0;    
+      {
+	carsym *exported_library_name;
+	bfd *prev_archive_member_bfd = 0;    
 
-      int idx = bfd_get_next_mapent(entry->the_bfd,
-				    BFD_NO_MORE_SYMBOLS,
-				    &exported_library_name);
+	int idx = bfd_get_next_mapent(entry->the_bfd,
+				      BFD_NO_MORE_SYMBOLS,
+				      &exported_library_name);
 
-      not_finished = false;
+	not_finished = false;
 
-      while (idx != BFD_NO_MORE_SYMBOLS  && undefined_global_sym_count)
-	{
-
-	  if (exported_library_name->name) 
+	while (idx != BFD_NO_MORE_SYMBOLS  && undefined_global_sym_count)
 	    {
 
-	      ldsym_type *sp =  ldsym_get_soft (exported_library_name->name);
+	      if (exported_library_name->name) 
+		  {
 
-	      /* If we find a symbol that appears to be needed, think carefully
-		 about the archive member that the symbol is in.  */
-	      /* So - if it exists, and is referenced somewhere and is
-		 undefined or */
-	      if (sp && sp->srefs_chain && !sp->sdefs_chain)
-		{
-		  bfd *archive_member_bfd = bfd_get_elt_at_index(entry->the_bfd, idx);
-		  struct lang_input_statement_struct *archive_member_lang_input_statement_struct;
+		    ldsym_type *sp =  ldsym_get_soft (exported_library_name->name);
+
+		    /* If we find a symbol that appears to be needed, think carefully
+		       about the archive member that the symbol is in.  */
+		    /* So - if it exists, and is referenced somewhere and is
+		       undefined or */
+		    if (sp && sp->srefs_chain && !sp->sdefs_chain)
+			{
+			  bfd *archive_member_bfd = bfd_get_elt_at_index(entry->the_bfd, idx);
+			  struct lang_input_statement_struct *archive_member_lang_input_statement_struct;
 
 #ifdef GNU960
-		  if (archive_member_bfd && gnu960_check_format(archive_member_bfd, bfd_object)) 
+			  if (archive_member_bfd && gnu960_check_format(archive_member_bfd, bfd_object)) 
 #else
-		  if (archive_member_bfd && bfd_check_format(archive_member_bfd, bfd_object)) 
+			    if (archive_member_bfd && bfd_check_format(archive_member_bfd, bfd_object)) 
 #endif
-		    {
-
-		      /* Don't think carefully about any archive member
-			 more than once in a given pass.  */
-		      if (prev_archive_member_bfd != archive_member_bfd)
-			{
-
-			  prev_archive_member_bfd = archive_member_bfd;
-
-			  /* Read the symbol table of the archive member.  */
-
-			  if (archive_member_bfd->usrdata != (PTR)NULL) {
-
-			    archive_member_lang_input_statement_struct =(lang_input_statement_type *) archive_member_bfd->usrdata;
-			  }
-			  else {
-
-			    archive_member_lang_input_statement_struct =
-			      decode_library_subfile (entry, archive_member_bfd);
-			    archive_member_bfd->usrdata = (PTR) archive_member_lang_input_statement_struct;
-
-			  }
-
-	  if (archive_member_lang_input_statement_struct == 0) {
-	    info ("%F%I contains invalid archive member %s\n",
-		    entry,
-		    sp->name);
-	  }
-
-			  if (archive_member_lang_input_statement_struct->loaded == false)  
-			    {
-
-			      Q_read_entry_symbols (archive_member_bfd, archive_member_lang_input_statement_struct);
-			      /* Now scan the symbol table and decide whether to load.  */
-
-
-			      if (subfile_wanted_p (archive_member_lang_input_statement_struct) == true)
-
 				{
-				  /* This member is needed; load it.
-				     Since we are loading something on this pass,
-				     we must make another pass through the symdef data.  */
 
-				  not_finished = true;
+				  /* Don't think carefully about any archive member
+				     more than once in a given pass.  */
+				  if (prev_archive_member_bfd != archive_member_bfd)
+				      {
 
-				  Q_enter_file_symbols (archive_member_lang_input_statement_struct);
+					prev_archive_member_bfd = archive_member_bfd;
 
-				  if (prev)
-				    prev->chain = archive_member_lang_input_statement_struct;
-				  else
-				    entry->subfiles = archive_member_lang_input_statement_struct;
+					/* Read the symbol table of the archive member.  */
+
+					if (archive_member_bfd->usrdata != (PTR)NULL) {
+
+					  archive_member_lang_input_statement_struct =(lang_input_statement_type *) archive_member_bfd->usrdata;
+					}
+					else {
+
+					  archive_member_lang_input_statement_struct =
+					    decode_library_subfile (entry, archive_member_bfd);
+					  archive_member_bfd->usrdata = (PTR) archive_member_lang_input_statement_struct;
+
+					}
+
+					if (archive_member_lang_input_statement_struct == 0) {
+					  info ("%F%I contains invalid archive member %s\n",
+						entry,
+						sp->name);
+					}
+
+					if (archive_member_lang_input_statement_struct->loaded == false)  
+					    {
+
+					      Q_read_entry_symbols (archive_member_bfd, archive_member_lang_input_statement_struct);
+					      /* Now scan the symbol table and decide whether to load.  */
 
 
-				  prev = archive_member_lang_input_statement_struct;
+					      if (subfile_wanted_p (archive_member_lang_input_statement_struct) == true)
+
+						  {
+						    /* This member is needed; load it.
+						       Since we are loading something on this pass,
+						       we must make another pass through the symdef data.  */
+
+						    not_finished = true;
+
+						    Q_enter_file_symbols (archive_member_lang_input_statement_struct);
+
+						    if (prev)
+						      prev->chain = archive_member_lang_input_statement_struct;
+						    else
+						      entry->subfiles = archive_member_lang_input_statement_struct;
 
 
-				  /* Clear out this member's symbols from the symdef data
-				     so that following passes won't waste time on them.  */
-				  clear_syms(entry, exported_library_name->file_offset);
-				  archive_member_lang_input_statement_struct->loaded = true;
+						    prev = archive_member_lang_input_statement_struct;
+
+
+						    /* Clear out this member's symbols from the symdef data
+						       so that following passes won't waste time on them.  */
+						    clear_syms(entry, exported_library_name->file_offset);
+						    archive_member_lang_input_statement_struct->loaded = true;
+						  }
+					    }
+				      }
 				}
-			    }
 			}
-		    }
-		}
+		  }
+	      idx = bfd_get_next_mapent(entry->the_bfd, idx, &exported_library_name);
 	    }
-	  idx = bfd_get_next_mapent(entry->the_bfd, idx, &exported_library_name);
-	}
-    }
+      }
 }
 
 void
@@ -774,6 +776,12 @@ struct lang_input_statement_struct *entry;
       /* If the symbol has an interesting definition, we could
 	 potentially want it.  */
 
+      if (p->flags & BSF_INDIRECT) {
+	/* Grab out the name we've indirected to, and keep the insides
+	   */
+	add_indirect(q);
+      }
+
       if (p->flags & BSF_FORT_COMM 
 	  || p->flags & BSF_GLOBAL)
 	{
@@ -792,6 +800,10 @@ struct lang_input_statement_struct *entry;
 
 		if (flag_is_common(p->flags))
 		  {
+
+		    /* If the symbol in the table is a constructor, we won't to
+		       anything fancy with it */
+		    if ((sp->flags & SYM_CONSTRUCTOR) == 0) {
 		    /* This libary member has something to
 		       say about this element. We should 
 		       remember if its a new size  */
@@ -830,6 +842,7 @@ struct lang_input_statement_struct *entry;
 			   bfd_make_section(com->the_bfd, "COMMON");
 		      }
 		    }
+		  }
 		    ASSERT(p->udata == 0);
 		  }
 	      

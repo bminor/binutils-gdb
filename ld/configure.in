@@ -74,6 +74,14 @@ sparc)
 	;;
 m88k)	my_target=m88k-bcs ;;
 a29k)	my_target=coff-a29k ;;
+h8300)	my_target=h8300hds ;;
+m68k)	
+	case ${target_vendor} in
+	sun) my_target=sun3 ;;
+	sony) my_target=news;;
+	*) echo "Unknown 68k target vendor:" ${target_vendor} ;;
+	esac
+
 esac
 
 target_makefile_frag=config/t-${my_target}

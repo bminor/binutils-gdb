@@ -16,6 +16,7 @@ SECTIONS
   .data  ALIGN(0x20000)  :		
   { 					
     *(.data) 				
+   CONSTRUCTORS
       _edata  =  .; 			
   }  					
   .bss   SIZEOF(.data) + ADDR(.data) :	
