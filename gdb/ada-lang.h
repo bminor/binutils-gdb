@@ -196,7 +196,8 @@ extern int ada_value_print (struct value *, struct ui_file *, int,
 
                                 /* Defined in ada-lang.c */
 
-extern struct value *value_from_contents_and_address (struct type *, char *,
+extern struct value *value_from_contents_and_address (struct type *,
+						      const bfd_byte *,
                                                       CORE_ADDR);
 
 extern void ada_emit_char (int, struct ui_file *, int, int);
@@ -339,13 +340,14 @@ extern struct type *ada_system_address_type (void);
 
 extern int ada_which_variant_applies (struct type *, struct type *, char *);
 
-extern struct type *ada_to_fixed_type (struct type *, char *, CORE_ADDR,
-                                       struct value *);
+extern struct type *ada_to_fixed_type (struct type *, const bfd_byte *,
+				       CORE_ADDR, struct value *);
 
-extern struct type *
-  ada_template_to_fixed_record_type_1 (struct type *type, char *valaddr,
-                                       CORE_ADDR address, struct value *dval0,
-                                       int keep_dynamic_fields);
+extern struct type *ada_template_to_fixed_record_type_1 (struct type *type,
+							 const bfd_byte *valaddr,
+							 CORE_ADDR address,
+							 struct value *dval0,
+							 int keep_dynamic_fields);
 
 extern int ada_name_prefix_len (const char *);
 

@@ -1,5 +1,15 @@
 2005-01-28  Andrew Cagney  <cagney@gnu.org>
 
+	* ada-lang.c (value_from_contents_and_address)
+	(to_record_with_fixed_variant_part)
+	(value_tag_from_contents_and_address, ada_to_fixed_type)
+	(to_fixed_variant_branch_type, to_fixed_record_type)
+	(ada_template_to_fixed_record_type, cond_offset_host)
+	(ada_template_to_fixed_record_type_1): Make buffer a const
+	bfd_byte.
+	* ada-lang.h (ada_template_to_fixed_record_type_1)
+	(value_from_contents_and_address, ada_to_fixed_type): Ditto.
+
 	* ada-valprint.c (char_at, printstr): Make buffer a const bfd_byte.
 
 	* gdbtypes.h (print_scalar_formatted): Make buffer a const bfd_byte.
