@@ -22,12 +22,14 @@ Do-first:
 Things-to-keep:
 
 ChangeLog
-mh-aix
+Do-last:
 mh-a68bsd
+mh-aix
 mh-apollo68
 mh-decstation
 mh-delta88
 mh-dgux
+mh-hpux
 mh-irix4
 mh-linux
 mh-ncr3000
@@ -38,9 +40,8 @@ mh-sysv4
 mt-a29k
 mt-ebmon29k
 mt-os68k
-mt-vxworks960
 mt-vxworks68
-Do-last:
+mt-vxworks960
 
 echo Done in `pwd`.
 
