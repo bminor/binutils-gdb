@@ -1,5 +1,5 @@
 /* BFD backend for Extended Tektronix Hex Format  objects.
-   Copyright (C) 1992, 1993 Free Software Foundation, Inc.
+   Copyright (C) 1992, 1993, 1994 Free Software Foundation, Inc.
 
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
@@ -1064,6 +1064,7 @@ bfd_target tekhex_vec =
   BFD_JUMP_TABLE_RELOCS (_bfd_norelocs),
   BFD_JUMP_TABLE_WRITE (tekhex),
   BFD_JUMP_TABLE_LINK (tekhex),
+  BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   (PTR) 0
 };

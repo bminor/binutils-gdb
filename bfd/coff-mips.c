@@ -1,5 +1,5 @@
 /* BFD back-end for MIPS Extended-Coff files.
-   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
    Original version by Per Bothner.
    Full support added by Ian Lance Taylor, ian@cygnus.com.
 
@@ -1815,6 +1815,7 @@ bfd_target ecoff_little_vec =
      BFD_JUMP_TABLE_RELOCS (ecoff),
      BFD_JUMP_TABLE_WRITE (ecoff),
      BFD_JUMP_TABLE_LINK (ecoff),
+     BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   (PTR) &mips_ecoff_backend_data
 };
@@ -1856,6 +1857,7 @@ bfd_target ecoff_big_vec =
      BFD_JUMP_TABLE_RELOCS (ecoff),
      BFD_JUMP_TABLE_WRITE (ecoff),
      BFD_JUMP_TABLE_LINK (ecoff),
+     BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   (PTR) &mips_ecoff_backend_data
 };

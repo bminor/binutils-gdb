@@ -1,5 +1,5 @@
 /* bfd back-end for HP PA-RISC SOM objects.
-   Copyright (C) 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright (C) 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).
@@ -5561,6 +5561,7 @@ bfd_target som_vec =
   BFD_JUMP_TABLE_RELOCS (som),
   BFD_JUMP_TABLE_WRITE (som),
   BFD_JUMP_TABLE_LINK (som),
+  BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   (PTR) 0
 };

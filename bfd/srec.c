@@ -1011,6 +1011,7 @@ bfd_target srec_vec =
   BFD_JUMP_TABLE_RELOCS (_bfd_norelocs),
   BFD_JUMP_TABLE_WRITE (srec),
   BFD_JUMP_TABLE_LINK (srec),
+  BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   (PTR) 0
 };
@@ -1066,6 +1067,7 @@ bfd_target symbolsrec_vec =
   BFD_JUMP_TABLE_RELOCS (_bfd_norelocs),
   BFD_JUMP_TABLE_WRITE (srec),
   BFD_JUMP_TABLE_LINK (srec),
+  BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   (PTR) 0
 };

@@ -1,5 +1,5 @@
 /* Target definitions for 32-bit ELF
-   Copyright 1993 Free Software Foundation, Inc.
+   Copyright 1993, 1994 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -204,6 +204,7 @@ bfd_target TARGET_BIG_SYM =
       BFD_JUMP_TABLE_RELOCS (bfd_elf32),
       BFD_JUMP_TABLE_WRITE (bfd_elf32),
       BFD_JUMP_TABLE_LINK (bfd_elf32),
+      BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   /* backend_data: */
   (PTR) &elf32_bed,
@@ -291,6 +292,7 @@ bfd_target TARGET_LITTLE_SYM =
       BFD_JUMP_TABLE_RELOCS (bfd_elf32),
       BFD_JUMP_TABLE_WRITE (bfd_elf32),
       BFD_JUMP_TABLE_LINK (bfd_elf32),
+      BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   /* backend_data: */
   (PTR) &elf32_bed,

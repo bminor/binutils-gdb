@@ -1,5 +1,5 @@
 /* BFD back-end for Intel 960 b.out binaries.
-   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -1399,6 +1399,7 @@ bfd_target b_out_vec_big_host =
      BFD_JUMP_TABLE_RELOCS (b_out),
      BFD_JUMP_TABLE_WRITE (b_out),
      BFD_JUMP_TABLE_LINK (b_out),
+     BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   (PTR) 0,
 };
@@ -1440,6 +1441,7 @@ bfd_target b_out_vec_little_host =
      BFD_JUMP_TABLE_RELOCS (b_out),
      BFD_JUMP_TABLE_WRITE (b_out),
      BFD_JUMP_TABLE_LINK (b_out),
+     BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   (PTR) 0
 };

@@ -3417,6 +3417,7 @@ bfd_target ieee_vec =
   BFD_JUMP_TABLE_RELOCS (ieee),
   BFD_JUMP_TABLE_WRITE (ieee),
   BFD_JUMP_TABLE_LINK (ieee),
+  BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   (PTR) 0
 };

@@ -1,5 +1,5 @@
 /* BFD back-end for os9000 i386 binaries.
-   Copyright 1990, 1991, 1992, 1993 1994 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -370,6 +370,7 @@ bfd_target i386os9k_vec =
      BFD_JUMP_TABLE_RELOCS (aout_32),
      BFD_JUMP_TABLE_WRITE (aout_32),
      BFD_JUMP_TABLE_LINK (os9k),
+     BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   (PTR) 0,
 };

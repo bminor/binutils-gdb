@@ -1,5 +1,5 @@
 /* Target definitions for 32/64-bit NLM (NetWare Loadable Module)
-   Copyright (C) 1993 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -136,6 +136,7 @@ bfd_target TARGET_BIG_SYM =
   BFD_JUMP_TABLE_RELOCS (nlm),
   BFD_JUMP_TABLE_WRITE (nlm),
   BFD_JUMP_TABLE_LINK (nlm),
+  BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   /* backend_data: */
   (PTR) TARGET_BACKEND_DATA
@@ -225,6 +226,7 @@ bfd_target TARGET_LITTLE_SYM =
   BFD_JUMP_TABLE_RELOCS (nlm),
   BFD_JUMP_TABLE_WRITE (nlm),
   BFD_JUMP_TABLE_LINK (nlm),
+  BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   /* backend_data: */
   (PTR) TARGET_BACKEND_DATA

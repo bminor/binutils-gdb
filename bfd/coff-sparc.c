@@ -1,5 +1,5 @@
 /* BFD back-end for Sparc COFF files.
-   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -255,6 +255,7 @@ bfd_target
      BFD_JUMP_TABLE_RELOCS (coff),
      BFD_JUMP_TABLE_WRITE (coff),
      BFD_JUMP_TABLE_LINK (coff),
+     BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   COFF_SWAP_TABLE,
 };

@@ -1,5 +1,75 @@
 Wed Apr  6 17:24:14 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	Add new target vectors to read the dynamic symbols and dynamic
+	relocs.  Change a.out to use these rather than reading the dynamic
+	symbols and relocs along with the normal symbols and relocs.
+	* targets.c (bfd_target): Add fields
+	_bfd_get_dynamic_symtab_upper_bound,
+	_bfd_canonicalize_dynamic_symtab,
+	_bfd_get_dynamic_reloc_upper_bound,
+	_bfd_canonicalize_dynamic_reloc.
+	(BFD_JUMP_TABLE_DYNAMIC): Define.
+	* libbfd-in.h (_bfd_nodynamic_get_dynamic_symtab_upper_bound):
+	Define.
+	(_bfd_nodynamic_canonicalize_dynamic_symtab): Define.
+	(_bfd_nodynamic_get_dynamic_reloc_upper_bound): Define.
+	(_bfd_nodynamic_canonicalize_dynamic_reloc): Define.
+	* bfd.c (bfd_get_dynamic_symtab_upper_bound): Define.
+	(bfd_canonicalize_dynamic_symtab): Define.
+	(bfd_get_dynamic_reloc_upper_bound): Define.
+	(bfd_canonicalize_dynamic_reloc): Define.
+	* sunos.c (MY_read_dynamic_symbols): Don't define.
+	(MY_read_dynamic_relocs): Don't define.
+	(MY_get_dynamic_symtab_upper_bound): Define.
+	(MY_canonicalize_dynamic_symtab): Define.
+	(MY_get_dynamic_reloc_upper_bound): Define.
+	(MY_canonicalize_dynamic_reloc): Define.
+	(struct sunos_dynamic_info): Change type of dynsym_count and
+	dynrel_count to long.  Add fields canonical_dynsym and
+	canonical_dynrel.
+	(sunos_read_dynamic_info): Check that BFD had DYNAMIC flag set.
+	Clear info->canonical_dynsym and info->canonical_dynrel.
+	(MY(read_dynamic_symbols)): Removed.
+	(MY(read_dynamic_relocs)): Removed.
+	(sunos_get_dynamic_symtab_upper_bound): New function.
+	(sunos_canonicalize_dynamic_symtab): New function.
+	(sunos_get_dynamic_reloc_upper_bound): New function.
+	(sunos_canonicalize_dynamic_reloc): New function.
+	* libaout.h: Declare struct reloc_ext_external and
+	reloc_std_external to avoid prototype problems.
+	(struct aout_backend_data): Remove fields read_dynamic_symbols and
+	read_dynamic_relocs.
+	(NAME(aout,translate_symbol_table)): Declare.
+	(NAME(aout,swap_ext_reloc_in)): Declare.
+	(NAME(aout,swap_std_reloc_in)): Declare.
+	* aoutx.h (NAME(aout,translate_symbol_table)): Renamed from
+	translate_symbol_table and made non-static.  Changed all callers.
+	(NAME(aout,slurp_symbol_table)): Don't read dynamic symbols.
+	(NAME(aout,slurp_reloc_table)): Don't read dynamic relocs.
+	(NAME(aout,get_reloc_upper_bound)): Don't count dynamic relocs.
+	* aoutf1.h (aout_32_sunos4_write_object_contents): Don't bother to
+	remove dynamic symbols and relocs.  They will no longer be
+	present.
+	(MY_read_dynamic_symbols): Don't define.
+	(MY_read_dynamic_relocs): Don't define.
+	(sunos4_aout_backend): Don't initialize dynamic entry points.
+	* aout-target.h (MY_read_dynamic_symbols): Don't define.
+	(MY_read_dynamic_relocs): Don't define.
+	(MY(backend_data)): Don't initialize dynamic entry points.
+	(MY_get_dynamic_symtab_upper_bound): If not defined, define to
+	_bfd_nodynamic version.
+	(MY_canonicalize_dynamic_symtab): Likewise.
+	(MY_get_dynamic_reloc_upper_bound): Likewise.
+	(MY_canonicalize_dynamic_reloc): Likewise.
+	* All backends: Added BFD_JUMP_TABLE_DYNAMIC to target vector.
+	* bfd-in2.h: Rebuilt.
+	* libbfd.h: Rebuilt.
+
+	* cf-m68klynx.c: Include sysdep.h.
+
+	* hp300hpux.c: Removed some spaces in uses of NAME to avoid
+	problems with traditional C compilers.
+
 	* targets.c (bfd_target): Rearranged fields in target vector.
 	Removed _bfd_debug_info_start, _bfd_debug_info_end and
 	_bfd_debug_info_accumulate, which were never used.

@@ -1,5 +1,5 @@
 /* BFD back-end for a.out.adobe binaries.
-   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
    Written by Cygnus Support.  Based on bout.c.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -523,6 +523,7 @@ bfd_target a_out_adobe_vec =
      BFD_JUMP_TABLE_RELOCS (aout_32),
      BFD_JUMP_TABLE_WRITE (aout_32),
      BFD_JUMP_TABLE_LINK (aout_32),
+     BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   (PTR) 0
 };
