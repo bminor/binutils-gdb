@@ -1,3 +1,42 @@
+Tue Apr 25 19:14:37 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* objdump.c (dump_section_header): Display load address after
+	virtual memory (run-time) address.
+
+Wed Apr 19 09:44:06 1995  Jason Merrill  <jason@phydeaux.cygnus.com>
+
+	* Makefile.in (cplus-dem.o): Pass -DVERSION='"$(VERSION)"' to the
+        compile.
+	(DEMANGLER_PROG): No longer uses version.o.
+
+Mon Apr 10 13:29:49 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	Merge in support for Mac MPW as a host.
+	(Old change descriptions retained for informational value.)
+
+	* mpw-config.in (TDEFINES): Define as empty in makefile frag.
+
+	* mpw-config.in: Create mk.tmp, define ARCHDEFS in it.
+
+	* mpw-config.in: New file, MPW configure fragment for binutils.
+	* mpw-make.in (install-only): New target.
+	(install): Also depend on install-only.
+
+	* mpw-make.in (cplusfilt): Renamed from c++filt.
+	(INCLUDES): Add more paths.
+
+	* mpw-make.in: New file, MPW makefile fragment for binutils.
+	(Normally automatically generated from Makefile.in.)
+
+Mon Mar 27 11:52:57 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ar.c (write_archive): Call make_tempname to get output file
+	name, rather than using a fixed name based on the input file.
+
+	* objcopy.c (make_tempname): Copy from here...
+	* bucomm.c (make_tempname): ...to here, and make global.
+	* bucomm.h (make_tempname): Declare.
+
 Fri Mar 24 11:47:42 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* strings.c: Include "bfd.h" before other headers.  Include
