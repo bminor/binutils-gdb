@@ -1,3 +1,13 @@
+Thu Jun  3 00:27:06 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in (vault-install): add an 'else true' (for Ultrix)
+
+Wed Jun  2 18:19:16 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in (install-no-fixedincludes):  install gcc last, so
+	that rebuilds that might happen during 'make install' don't get 
+	bogus gcc include files
+
 Wed Jun  2 16:14:10 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	Change from Utah for HPPA support:
