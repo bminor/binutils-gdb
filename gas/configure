@@ -67,51 +67,50 @@ verbose=
 for arg in $*;
 do
 	case ${arg} in
-	-ansi | +ansi)
+	-ansi | +a*)
 		ansi=true
 		;;
 	-destdir=* | +destdir=* | +destdi=* | +destd=* | +dest=* | +des=* | +de=* | +d=*)
 		destdir=`echo ${arg} | sed 's/[+-]d[a-z]*=//'`
-		;;
-	-forcesubdirs | +forcesubdirs | +forcesubdir | +forcesubdi | +forcesubd \
-	| +forcesub | +forcesu | +forces | +force | +forc | +for | +fo | +f)
-		forcesubdirs=${arg}
 		;;
 	-languages=* | +languages=* | +language=* | +languag=* \
 		| +langua=* | +langu=* | +lang=* | +lan=* | +la=* \
 		| +l=*)
 		languages="${languages} `echo ${arg} | sed 's/[+-]l[a-z]*=//'`"
 		;;
-	-gas | +gas | +ga | +g)
+	-gas | +g*)
 		gas=yes
 		;;
-	-help | +h | +help)
+	-help | +h*)
 		fatal=true
 		;;
-	-nfp | +nfp | +nf | +n)
+	-nfp | +nf*)
 		nfp=yes
 		;;
-	-norecurse | +norecurse)
+	-norecurse | +no*)
 		norecurse=true
 		;;
-	-rm | +rm)
+	-rm | +r*)
 		removing=${arg}
 		;;
 #	-srcdir=* | +srcdir=* | +srcdi=* | +srcd=* | +src=* | +sr=* | +s=*)
 #		srcdir=`echo ${arg} | sed 's/[+-]s[a-z]*=//'`
 #		;;
-	-target=* | +target=* | +targe=* | +targ=* | +tar=* | +ta=* | +t=*)
+	-subdirs | +f* | +su*)
+		subdirs=${arg}
+		;;
+	-target=* | +target=* | +targe=* | +targ=* | +tar=* | +ta=*)
 		if [ -n "${targets}" ] ; then
-			forcesubdirs="+forcesubdirs"
+			subdirs="+subdirs"
 		fi
 
 		newtargets="${targets} `echo ${arg} | sed 's/[+-]t[a-z]*=//'`"
 		targets="${newtargets}"
 		;;
-	-template=* | +template=*)
+	-template=* | +template=* | +templat=* | +templa=* | +templ=* | +temp=* | +tem=* | +te=*)
 		template=`echo ${arg} | sed 's/[+-]template=//'`
 		;;
-	+verbose | +verbos | +verbo | +verb | +ver | +ve | +v)
+	-verbose | +v*)
 		verbose=${arg}
 		;;
 	-* | +*)
@@ -122,7 +121,7 @@ do
 		;;
 	*)
 		if [ -n "${hosts}" ] ; then
-			forcesubdirs="+forcesubdirs"
+			subdirs="+subdirs"
 		fi
 
 		newhosts="${hosts} ${arg}"
@@ -153,7 +152,7 @@ if [ -n "${fatal}" -o "${hosts}" = "help" ] ; then
 	echo "Options: [defaults in brackets]" ;
 	echo " +ansi		configure w/ANSI library. [no ansi lib]" ;
 	echo " +destdir=MYDIR	configure for installation into MYDIR. [/usr/local]" ;
-	echo " +forcesubdirs	configure in subdirectories.  [in source directories]" ;
+	echo " +subdirs		configure in subdirectories.  [in source directories]" ;
 	echo " +lang=LANG	configure to build LANG. [gcc]" ;
 	echo " +help		print this message. [normal config]" ;
 	echo " +gas		configure the compilers for use with gas. [native as]" ;
@@ -164,7 +163,7 @@ if [ -n "${fatal}" -o "${hosts}" = "help" ] ; then
 	echo " +template=TEM	rebuild configure using TEM. [normal config]" ;
 	echo ;
 	echo "Where HOST and TARGET are something like \"vax\", \"sun3\", \"encore\", etc." ;
-	echo "Asking for more than one \"+target\" implies \"+forcesubdirs\".  Any other" ;
+	echo "Asking for more than one \"+target\" implies \"+subdirs\".  Any other" ;
 	echo "options given will apply to all targets.") 1>&2
 
 	if [ -r config.status ] ; then
@@ -182,6 +181,7 @@ fi
 
 srctrigger=as.c
 srcname="gas"
+targetdependent=true
 
 ## end of common part.
 
@@ -316,6 +316,8 @@ for host in ${hosts} ; do
 #### configure.in per-target parts come in here.
 
 # assign cpu type
+emulation=generic
+
 case ${target} in
 sun4* | sparc*)
 	cpu_type=sparc
@@ -328,6 +330,7 @@ i386*)
 	;;
 i960*)
 	cpu_type=i960
+	emulation=ic960
 	;;
 a29k*)
 	cpu_type=a29k
@@ -367,7 +370,7 @@ vax)
 esac
 
 files="config/ho-${host}.h config/tc-${cpu_type}.c \
-	config/tc-${cpu_type}.h config/te-generic.h \
+	config/tc-${cpu_type}.h config/te-${emulation}.h \
 	config/obj-${obj_format}.h config/obj-${obj_format}.c \
 	config/atof-${atof}.c"
 
@@ -379,7 +382,7 @@ links="host.h targ-cpu.c targ-cpu.h targ-env.h obj-format.h obj-format.c atof-ta
 		targetsubdir=Target-${target}
 
 		if [ -n "${removing}" ] ; then
-			if [ -n "${forcesubdirs}" ] ; then
+			if [ -n "${subdirs}" ] ; then
 				if [ -d "${hostsubdir}" ] ; then
 					rm -rf ${hostsubdir}/${targetsubdir}
 
@@ -393,7 +396,7 @@ links="host.h targ-cpu.c targ-cpu.h targ-env.h obj-format.h obj-format.c atof-ta
 				rm -f ${Makefile} config.status ${links}
 			fi
 		else
-			if [ -n "${forcesubdirs}" ] ; then
+			if [ -n "${subdirs}" ] ; then
 				# check for existing status before allowing forced subdirs.
 				if [ -f ${Makefile} ] ; then
 					echo "${Makefile} already exists in source directory.  `pwd` not configured."
@@ -495,7 +498,7 @@ links="host.h targ-cpu.c targ-cpu.h targ-env.h obj-format.h obj-format.c atof-ta
 			echo "host = ${host}" >> ${Makefile}
 			echo "target = ${target}" >> ${Makefile}
 
-			if [ -n "${forcesubdirs}" ] ; then
+			if [ -n "${subdirs}" ] ; then
 				echo "subdir = /${hostsubdir}/${targetsubdir}" >> ${Makefile}
 			else
 				echo "subdir =" >> ${Makefile}
@@ -574,7 +577,7 @@ links="host.h targ-cpu.c targ-cpu.h targ-env.h obj-format.h obj-format.c atof-ta
 	done # for each target
 
 	# Now build a Makefile for this host.
-	if [ -n "${forcesubdirs}" -a ! -n "${removing}" ] ; then
+	if [ -n "${subdirs}" -a ! -n "${removing}" ] ; then
 		cd ${hostsubdir}
 		cat > GNUmakefile << E!O!F
 # Makefile generated by configure for host ${host}.
@@ -614,7 +617,7 @@ for configdir in ${configdirs} ; do
 		if [ -n "${commons}" ] ; then
 			if [ -d ${configdir} ] ; then
 				(cd ${configdir} ;
-					./configure ${commons} ${verbose} ${forcesubdirs} ${removing} +destdir=${destdir}) \
+					./configure ${commons} ${verbose} ${subdirs} ${removing} +destdir=${destdir}) \
 					| sed 's/^/	/'
 			else
 				echo Warning: directory \"${configdir}\" is missing.
@@ -625,7 +628,7 @@ for configdir in ${configdirs} ; do
 			for host in ${specifics} ; do
 				echo Configuring target specific directory ${configdir}.${host}...
 				(cd ${configdir}.${host} ;
-					./configure ${host} ${verbose} ${forcesubdirs} ${removing} +destdir=${destdir}) \
+					./configure ${host} ${verbose} ${subdirs} ${removing} +destdir=${destdir}) \
 					| sed 's/^/	/'
 			done # for host in specifics
 		fi # if there are any specifics
@@ -650,7 +653,7 @@ for configdir in ${configdirs} ; do
 		if [ -n "${commons}" ] ; then
 			if [ -d ${configdir} ] ; then
 				(cd ${configdir} ;
-					./configure ${hosts} ${verbose} ${forcesubdirs} ${removing} \
+					./configure ${hosts} ${verbose} ${subdirs} ${removing} \
 						${commons} +destdir=${destdir}) \
 					| sed 's/^/	/'
 			else
@@ -662,7 +665,7 @@ for configdir in ${configdirs} ; do
 			for target in ${specifics} ; do
 				echo Configuring target specific directory ${configdir}.${target}...
 				(cd ${configdir}.${target} ;
-					./configure ${hosts} ${verbose} ${forcesubdirs} ${removing} \
+					./configure ${hosts} ${verbose} ${subdirs} ${removing} \
 						"+target=${target}" +destdir=${destdir}) \
 					| sed 's/^/	/'
 			done
@@ -674,7 +677,22 @@ exit 0
 
 #
 # $Log$
-# Revision 1.16  1991/08/06 19:12:37  rich
+# Revision 1.20  1991/08/14 00:29:31  rich
+# Deal with emulations more gracefully.
+#
+# Revision 1.19  1991/08/08  01:12:07  rich
+# allow +f to stand in for +subdirs
+#
+# Revision 1.26  1991/08/07  19:21:32  rich
+# +forcesubdirs -> +subdirs
+#
+# Revision 1.25  1991/08/07  07:05:30  rich
+# Added make.
+#
+# Revision 1.24  1991/08/06  19:26:01  rich
+# revised option parsing.
+#
+# Revision 1.23  1991/08/06  19:12:32  rich
 # Host-level GNUmakefiles.
 #
 # Revision 1.22  1991/07/20  01:22:30  rich

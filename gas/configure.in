@@ -5,20 +5,34 @@
 
 srctrigger=as.c
 srcname="gas"
+targetdependent=true
+
+# per-host:
+
+# per-target:
 
 # assign cpu type
-case $target in
+emulation=generic
+
+case ${target} in
 sun4* | sparc*)
 	cpu_type=sparc
 	;;
 sun3*)
 	cpu_type=m68k
 	;;
+i386*)
+	cpu_type=i386
+	;;
 i960*)
 	cpu_type=i960
+	emulation=ic960
 	;;
 a29k*)
 	cpu_type=a29k
+	;;
+m68k*)
+	cpu_type=m68k
 	;;
 *)
 	cpu_type=generic
@@ -26,7 +40,7 @@ a29k*)
 esac
 
 # assign object format
-case $target in
+case ${target} in
 *-coff)
 	obj_format=coff
 	;;
@@ -42,7 +56,7 @@ generic)
 esac
 
 # assign floating point type
-case $target in
+case ${target} in
 vax)
 	atof=vax
 	;;
@@ -52,7 +66,7 @@ vax)
 esac
 
 files="config/ho-${host}.h config/tc-${cpu_type}.c \
-	config/tc-${cpu_type}.h config/te-generic.h \
+	config/tc-${cpu_type}.h config/te-${emulation}.h \
 	config/obj-${obj_format}.h config/obj-${obj_format}.c \
 	config/atof-${atof}.c"
 
