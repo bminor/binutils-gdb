@@ -2924,7 +2924,10 @@ md_apply_fix (fixP, valp)
       /* PLABEL field selectors should not be passed to hppa_field_adjust.  */
       if (fmt != 0 && hppa_fixP->fx_r_field != R_HPPA_PSEL
 	  && hppa_fixP->fx_r_field != R_HPPA_LPSEL
-	  && hppa_fixP->fx_r_field != R_HPPA_RPSEL)
+	  && hppa_fixP->fx_r_field != R_HPPA_RPSEL
+	  && hppa_fixP->fx_r_field != R_HPPA_TSEL
+	  && hppa_fixP->fx_r_field != R_HPPA_LTSEL
+	  && hppa_fixP->fx_r_field != R_HPPA_RTSEL)
 	new_val = hppa_field_adjust (val, 0, hppa_fixP->fx_r_field);
       else
 	new_val = 0;
