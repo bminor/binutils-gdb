@@ -91,7 +91,7 @@ else
 fi
 
 for i in * ; do
-	if test ! -d $i && (grep sanitize $i > /dev/null) ; then
-		echo '***' Some mentions of Sanitize are still left in $i! 1>&2
-	fi
+  if test ! -d $i && (grep sanitize $i > /dev/null) ; then
+    echo '***' Some mentions of Sanitize are still left in ld/emultempl/$i! 1>&2
+  fi
 done
