@@ -2124,19 +2124,19 @@ map_sections_to_segments (abfd)
              skip a page in the segment, then we need a new segment.  */
 	  new_segment = true;
 	}
-      else if ((abfd->flags & D_PAGED) == 0)
-	{
-	  /* If the file is not demand paged, which means that we
-             don't require the sections to be correctly aligned in the
-             file, then there is no other reason for a new segment.  */
-	  new_segment = false;
-	}
       else if ((last_hdr->flags & SEC_LOAD) == 0
 	       && (hdr->flags & SEC_LOAD) != 0)
 	{
 	  /* We don't want to put a loadable section after a
              nonloadable section in the same segment.  */
 	  new_segment = true;
+	}
+      else if ((abfd->flags & D_PAGED) == 0)
+	{
+	  /* If the file is not demand paged, which means that we
+             don't require the sections to be correctly aligned in the
+             file, then there is no other reason for a new segment.  */
+	  new_segment = false;
 	}
       else if (! writable
 	       && (hdr->flags & SEC_READONLY) == 0
@@ -2503,29 +2503,40 @@ assign_file_positions_for_segments (abfd)
 	    {
 	      bfd_vma adjust;
 
-	      /* The section VMA must equal the file position modulo
-                 the page size.  */
-	      if ((flags & SEC_ALLOC) != 0)
+	      if ((flags & SEC_LOAD) != 0)
+		adjust = sec->lma - (p->p_paddr + p->p_memsz);
+	      else if ((flags & SEC_ALLOC) != 0)
 		{
+		  /* The section VMA must equal the file position
+		     modulo the page size.  FIXME: I'm not sure if
+		     this adjustment is really necessary.  We used to
+		     not have the SEC_LOAD case just above, and then
+		     this was necessary, but now I'm not sure.  */
 		  if ((abfd->flags & D_PAGED) != 0)
 		    adjust = (sec->vma - voff) % bed->maxpagesize;
 		  else
 		    adjust = (sec->vma - voff) % align;
-		  if (adjust != 0)
-		    {
-		      if (i == 0)
-			abort ();
-		      p->p_memsz += adjust;
-		      off += adjust;
-		      voff += adjust;
-		      if ((flags & SEC_LOAD) != 0)
-			p->p_filesz += adjust;
-		    }
+		}
+
+	      if (adjust != 0)
+		{
+		  if (i == 0)
+		    abort ();
+		  p->p_memsz += adjust;
+		  off += adjust;
+		  voff += adjust;
+		  if ((flags & SEC_LOAD) != 0)
+		    p->p_filesz += adjust;
 		}
 
 	      sec->filepos = off;
 
-	      if ((flags & SEC_LOAD) != 0)
+	      /* We check SEC_HAS_CONTENTS here because if NOLOAD is
+                 used in a linker script we may have a section with
+                 SEC_LOAD clear but which is supposed to have
+                 contents.  */
+	      if ((flags & SEC_LOAD) != 0
+		  || (flags & SEC_HAS_CONTENTS) != 0)
 		off += sec->_raw_size;
 	      if ((flags & SEC_ALLOC) != 0)
 		voff += sec->_raw_size;
@@ -2870,7 +2881,6 @@ prep_headers (abfd)
       i_ehdrp->e_machine = EM_CYGNUS_D30V;
       break;
 /* end-sanitize-d30v */
-/* start-sanitize-v850 */
     case bfd_arch_v850:
       switch (bfd_get_mach (abfd))
 	{
@@ -2878,7 +2888,6 @@ prep_headers (abfd)
 	case 0:               i_ehdrp->e_machine = EM_CYGNUS_V850; break;
 	}
       break;
-/* end-sanitize-v850 */
    case bfd_arch_arc:
       i_ehdrp->e_machine = EM_CYGNUS_ARC;
       break;
