@@ -1,3 +1,7 @@
+2002-04-21  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* config/alpha/tm-fbsd.h (FRAME_CHAIN_VALID): Remove.
+
 2002-04-21  Andrew Cagney  <ac131313@redhat.com>
 
 	* arm-tdep.c (arm_breakpoint_from_pc): Make static.  Make return
