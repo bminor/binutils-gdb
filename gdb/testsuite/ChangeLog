@@ -1,3 +1,7 @@
+2003-02-23  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* lib/gdb.exp: Don't execute C++ tests on m6811/m6812 targets.
+
 2003-02-13  Michael Chastain  <mec@shout.net>
 
 	* gdb.base/exprs.exp: Remove i960 remnants.
