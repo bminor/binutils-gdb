@@ -1,3 +1,68 @@
+2005-03-02  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
+
+	* elfxx-mips.c (struct mips_got_entry): Add tls_type.
+	(struct mips_got_info): Add tls_gotno, tls_assigned_gotno,
+	and tls_ldm_offset.
+	(struct mips_elf_got_per_bfd_arg): Add global_count.
+	(struct mips_elf_count_tls_arg): New.
+	(struct mips_elf_hash_sort_data): Update comment for min_got_dynindx.
+	(struct mips_elf_link_hash_entry): Add tls_type and tls_got_offset.
+	(GOT_NORMAL, GOT_TLS_GD, GOT_TLS_LDM, GOT_TLS_IE)
+	(GOT_TLS_OFFSET_DONE, GOT_TLS_DONE): Define.
+	(TLS_RELOC_P): Define.
+	(TP_OFFSET, DTP_OFFSET): Define.
+	(dtprel_base, tprel_base): New functions.
+	(mips_elf_link_hash_newfunc): Initialize tls_type.
+	(mips_elf_got_entry_hash, mips_elf_got_entry_eq)
+	(mips_elf_multi_got_entry_hash, mips_elf_multi_got_entry_eq): Handle
+	TLS entries.
+	(mips_tls_got_relocs, mips_elf_count_local_tls_relocs)
+	(mips_elf_count_global_tls_entries, mips_elf_count_global_tls_relocs)
+	(mips_elf_output_dynamic_relocation, mips_elf_initialize_tls_slots)
+	(mips_tls_got_index): New functions.
+	(mips_elf_local_got_index): Add new R_SYMNDX, H, and R_TYPE
+	arguments.  Pass them to mips_elf_create_local_got_entry.  Use
+	mips_tls_got_index.
+	(mips_elf_global_got_index): Add new R_TYPE and INFO arguments.
+	Handle TLS entries.
+	(mips_elf_got_page, mips_elf_got16_entry): Update calls to
+	mips_elf_create_local_got_entry.
+	(mips_elf_create_local_got_entry): Add new R_SYMNDX, H, and R_TYPE
+	arguments.  Handle TLS entries.
+	(mips_elf_sort_hash_table_f): Add non-TLS assertions.
+	(mips_elf_record_local_got_symbol): Add new TLS_FLAG argument.  Handle
+	TLS entries.
+	(mips_elf_record_global_got_symbol): Likewise.
+	(mips_elf_make_got_per_bfd): Initialize new mips_got_info members.
+	Count TLS entries.
+	(mips_elf_merge_gots): Handle TLS entries when merging.
+	(mips_elf_initialize_tls_index): New function.
+	(mips_elf_set_global_got_offset): Handle TLS entries.
+	(mips_elf_adjust_gp): Handle TLS.
+	(mips_elf_multi_got): Remove redundant call to
+	mips_elf_resolve_final_got_entries.  Initialize global_count.
+	Correct a comment.  Initialize new TLS members of mips_got_info.
+	Assign TLS GOT indexes for new GOTs.
+	(mips_elf_create_got_section): Initialize new TLS members of
+	mips_got_info.
+	(mips_elf_calculate_relocation): Handle TLS relocs.
+	(_bfd_mips_elf_check_relocs): Likewise.  Update calls to changed
+	functions.
+	(_bfd_mips_elf_always_size_sections): Handle TLS.
+	(_bfd_mips_elf_size_dynamic_sections): Likewise.
+	(_bfd_mips_elf_finish_dynamic_symbol): Likewise.  Update calls to
+	changed functions.
+	(_bfd_mips_elf_copy_indirect_symbol): Copy tls_type.
+	(_bfd_mips_elf_hide_symbol): Handle TLS.
+	* elfn32-mips.c (elf_mips_howto_table_rel, elf_mips_howto_table_rela)
+	(mips_reloc_map): Add TLS relocs.
+	* elf32-mips.c (elf_mips_howto_table_rel, mips_reloc_map): Likewise.
+	* elf64-mips.c (mips_elf64_howto_table_rel)
+	(mips_elf64_howto_table_rela, mips_reloc_map): Likewise.
+	* reloc.c: Define new MIPS TLS relocations.
+	* libbfd.h, bfd-in2.h: Regenerated.
+
 2005-03-02  Jan Beulich  <jbeulich@novell.com>
 
 	* Makefile.am: Add dependency of cache.o on libiberty.h.
