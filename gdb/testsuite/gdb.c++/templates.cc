@@ -714,8 +714,8 @@ int main()
 
     // New tests added here
 
-  Foo<int> fint;
-  Foo<char> fchar;
+  Foo<int> fint={0,0};
+  Foo<char> fchar={0,0};
   Foo<volatile char *> fvpchar = {0, 0};
 
   Bar<int, 33> bint;

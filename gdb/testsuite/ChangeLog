@@ -1,3 +1,14 @@
+2000-06-03  Daniel Berlin  <dan@cgsoftware.com>
+
+	* gdb.c++/templates.exp (do_tests): Make all of these work under
+	g++, and stop skipping them. 
+
+	* gdb.c++/namespace.exp: Move from gdb.hp/gdb.aCC to here, make it
+	work under g++.
+
+	* gdb.c++/misc.cc: Fix ambiguous initialization with correct initialization.
+	
+
 2000-05-18  Michael Snyder  <msnyder@seadog.cygnus.com>
 
 	* gdb.base/annota1.exp (annotate-signal-handler-caller):
