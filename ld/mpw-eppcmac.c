@@ -72,6 +72,9 @@ static unsigned short modtype = ('1' << 8) | 'L';
    permitted).  */
 static int textro;
 
+/* Whether to implement Unix like linker semantics.  */
+static int unix_ld;
+
 /* Structure used to hold import file list.  */
 
 struct filelist
@@ -134,6 +137,7 @@ gldppcmacos_parse_args (argc, argv)
 #define OPTION_PD (OPTION_NOSTRCMPCT + 1)
 #define OPTION_PT (OPTION_PD + 1)
 #define OPTION_STRCMPCT (OPTION_PT + 1)
+#define OPTION_UNIX (OPTION_STRCMPCT + 1)
 
   static struct option longopts[] = {
     {"basis", no_argument, NULL, OPTION_IGNORE},
@@ -174,6 +178,7 @@ gldppcmacos_parse_args (argc, argv)
     {"bstrcmpct", no_argument, NULL, OPTION_STRCMPCT},
     {"btextro", no_argument, &textro, 1},
     {"static", no_argument, NULL, OPTION_NOAUTOIMP},
+    {"unix", no_argument, NULL, OPTION_UNIX},
     {NULL, no_argument, NULL, 0}
   };
 
@@ -381,6 +386,10 @@ gldppcmacos_parse_args (argc, argv)
     case OPTION_STRCMPCT:
       config.traditional_format = false;
       break;
+
+    case OPTION_UNIX:
+      unix_ld = true;
+      break;
     }
 
   return 1;
@@ -437,6 +446,7 @@ gldppcmacos_before_allocation ()
   struct filelist *fl;
   struct export_symbol_list *el;
   char *libpath;
+  boolean export_defineds;
   asection *special_sections[6];
   int i;
 
@@ -487,13 +497,20 @@ gldppcmacos_before_allocation ()
 	}
     }
 
+  /* If we are emulating the Unix linker, we want to export all
+     defined symbols, unless an explicit -bE option was used.  */
+  export_defineds = false;
+  if (unix_ld && export_symbols == NULL)
+    export_defineds = true;
+
   /* Let the XCOFF backend set up the .loader section.  */
   if (! bfd_xcoff_size_dynamic_sections (output_bfd, &link_info, libpath,
 					 entry_symbol, file_align,
 					 maxstack, maxdata,
-					 gc ? true : false,
+					 gc && ! unix_ld ? true : false,
 					 modtype,
 					 textro ? true : false,
+					 export_defineds,
 					 special_sections))
     einfo ("%P%F: failed to set dynamic section sizes: %E\n");
 

@@ -1,3 +1,11 @@
+Tue Dec 12 13:55:41 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-config.in: Recognize mips-*-* as equivalent to
+	mips-idt-ecoff.
+	* mpw-eppcmacos.c: Rename to shorter mpw-eppcmac.c.
+	* mpw-ld.r: Add version resources.
+	(cfrg): Use symbolic instead of literal name for executable.
+
 Mon Dec 11 15:13:41 1995  Kim Knuttila  <krk@cygnus.com>
 
 	* scripttempl/ppcpe.sc (FINI): Moved the .reloc section.
