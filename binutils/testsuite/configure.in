@@ -3,7 +3,7 @@
 # script appropriate for this directory.  For more information, check
 # any existing configure script.
 
-srctrigger="binutils.all"
+srctrigger="Makefile.in"
 srcname="DejaGnu"
 
 configdirs="binutils.all"
