@@ -1,3 +1,17 @@
+2000-08-22  H.J. Lu  <hjl@gnu.org>
+
+	* elf-bfd.h (elf_link_hash_table): Add runpath.
+
+	* bfd-in.h (bfd_elf_get_runpath_list): New prototype.
+	* bfd-in2.h: Rebuilt.
+
+	* elf.c (_bfd_elf_link_hash_table_init): Initialize the
+	"runpath" field to NULL.
+	(bfd_elf_get_runpath_list): New function.
+
+	* elflink.h (elf_link_add_object_symbols): Record DT_RPATH and
+	DT_RUNPATH entries.
+
 2000-08-22  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elf32-sh.c (sh_elf_relocate_section) [R_SH_IND12W,

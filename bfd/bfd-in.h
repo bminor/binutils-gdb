@@ -629,6 +629,8 @@ extern boolean bfd_elf64_size_dynamic_sections
 extern void bfd_elf_set_dt_needed_name PARAMS ((bfd *, const char *));
 extern void bfd_elf_set_dt_needed_soname PARAMS ((bfd *, const char *));
 extern const char *bfd_elf_get_dt_soname PARAMS ((bfd *));
+extern struct bfd_link_needed_list *bfd_elf_get_runpath_list
+  PARAMS ((bfd *, struct bfd_link_info *));
 
 /* Return an upper bound on the number of bytes required to store a
    copy of ABFD's program header table entries.  Return -1 if an error

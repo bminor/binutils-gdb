@@ -1112,6 +1112,8 @@ elf_link_add_object_symbols (abfd, info)
 	  Elf_External_Dyn *extdynend;
 	  int elfsec;
 	  unsigned long link;
+	  int rpath;
+	  int runpath;
 
 	  dynbuf = (Elf_External_Dyn *) bfd_malloc ((size_t) s->_raw_size);
 	  if (dynbuf == NULL)
@@ -1145,6 +1147,8 @@ elf_link_add_object_symbols (abfd, info)
 
 	  extdyn = dynbuf;
 	  extdynend = extdyn + s->_raw_size / sizeof (Elf_External_Dyn);
+	  rpath = 0;
+	  runpath = 0;
 	  for (; extdyn < extdynend; extdyn++)
 	    {
 	      Elf_Internal_Dyn dyn;
@@ -1180,6 +1184,73 @@ elf_link_add_object_symbols (abfd, info)
 		       pn = &(*pn)->next)
 		    ;
 		  *pn = n;
+		}
+	      if (dyn.d_tag == DT_RUNPATH)
+		{
+		  struct bfd_link_needed_list *n, **pn;
+		  char *fnm, *anm;
+
+		  /* When we see DT_RPATH before DT_RUNPATH, we have
+		     to free runpath. */
+		  if (rpath && elf_hash_table (info)->runpath)
+		    {
+		      struct bfd_link_needed_list *nn;
+		      for (n = elf_hash_table (info)->runpath;
+			   n != NULL; n = nn)
+			{
+			  nn = n->next;
+			  bfd_release (abfd, n);
+			}
+		      bfd_release (abfd, elf_hash_table (info)->runpath);
+		      elf_hash_table (info)->runpath = NULL;
+		    }
+
+		  n = ((struct bfd_link_needed_list *)
+		       bfd_alloc (abfd, sizeof (struct bfd_link_needed_list)));
+		  fnm = bfd_elf_string_from_elf_section (abfd, link,
+							 dyn.d_un.d_val);
+		  if (n == NULL || fnm == NULL)
+		    goto error_return;
+		  anm = bfd_alloc (abfd, strlen (fnm) + 1);
+		  if (anm == NULL)
+		    goto error_return;
+		  strcpy (anm, fnm);
+		  n->name = anm;
+		  n->by = abfd;
+		  n->next = NULL;
+		  for (pn = &elf_hash_table (info)->runpath;
+		       *pn != NULL;
+		       pn = &(*pn)->next)
+		    ;
+		  *pn = n;
+		  runpath = 1;
+		  rpath = 0;
+		}
+	      /* Ignore DT_RPATH if we have seen DT_RUNPATH. */
+	      if (!runpath && dyn.d_tag == DT_RPATH)
+	        {
+		  struct bfd_link_needed_list *n, **pn;
+		  char *fnm, *anm;
+
+		  n = ((struct bfd_link_needed_list *)
+		       bfd_alloc (abfd, sizeof (struct bfd_link_needed_list)));
+		  fnm = bfd_elf_string_from_elf_section (abfd, link,
+							 dyn.d_un.d_val);
+		  if (n == NULL || fnm == NULL)
+		    goto error_return;
+		  anm = bfd_alloc (abfd, strlen (fnm) + 1);
+		  if (anm == NULL)
+		    goto error_return;
+		  strcpy (anm, fnm);
+		  n->name = anm;
+		  n->by = abfd;
+		  n->next = NULL;
+		  for (pn = &elf_hash_table (info)->runpath;
+		       *pn != NULL;
+		       pn = &(*pn)->next)
+		    ;
+		  *pn = n;
+		  rpath = 1;
 		}
 	    }
 

@@ -243,6 +243,9 @@ struct elf_link_hash_table
   PTR stab_info;
   /* A linked list of local symbols to be added to .dynsym.  */
   struct elf_link_local_dynamic_entry *dynlocal;
+  /* A linked list of DT_RPATH/DT_RUNPATH names found in dynamic
+     objects included in the link.  */
+  struct bfd_link_needed_list *runpath;
 };
 
 /* Look up an entry in an ELF linker hash table.  */

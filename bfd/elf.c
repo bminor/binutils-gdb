@@ -1007,6 +1007,7 @@ _bfd_elf_link_hash_table_init (table, abfd, newfunc)
   table->dynstr = NULL;
   table->bucketcount = 0;
   table->needed = NULL;
+  table->runpath = NULL;
   table->hgot = NULL;
   table->stab_info = NULL;
   table->dynlocal = NULL;
@@ -1071,6 +1072,19 @@ bfd_elf_get_needed_list (abfd, info)
   if (info->hash->creator->flavour != bfd_target_elf_flavour)
     return NULL;
   return elf_hash_table (info)->needed;
+}
+
+/* Get the list of DT_RPATH/DT_RUNPATH entries for a link.  This is a
+   hook for the linker ELF emulation code.  */
+
+struct bfd_link_needed_list *
+bfd_elf_get_runpath_list (abfd, info)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     struct bfd_link_info *info;
+{
+  if (info->hash->creator->flavour != bfd_target_elf_flavour)
+    return NULL;
+  return elf_hash_table (info)->runpath;
 }
 
 /* Get the name actually used for a dynamic object for a link.  This
