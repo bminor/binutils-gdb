@@ -32,9 +32,11 @@ enum { HPPA_INSTRUCTION_SIZE = 4 };
    to be actual register numbers as far as the user is concerned
    but do serve to get the desired values when passed to read_register.  */
 
-enum {
+enum hppa_regnum
+{
   HPPA_R0_REGNUM = 0,		/* Doesn't actually exist, used as base for
 				   other r registers.  */
+  HPPA_R1_REGNUM = 1,
   HPPA_FLAGS_REGNUM = 0,	/* Various status flags */
   HPPA_RP_REGNUM = 2,		/* return pointer */
   HPPA_FP_REGNUM = 3,		/* The ABI's frame pointer, when used */
