@@ -1,3 +1,8 @@
+2002-11-07  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (get_symbol_index_type): Revert part of previous
+	patch: Display unknown symbol types in decimal, not hex.
+
 2002-11-07  Danny Smith  <dannysmith@users.sourceforge.net>
 
 	* dlltool.c (add_excludes): Don't prefix excluded fastcall
