@@ -1,5 +1,5 @@
 /* Select disassembly routine for specified architecture.
-   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2004
+   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2004, 2005
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -423,6 +423,15 @@ disassemble_init_for_target (struct disassemble_info * info)
     case bfd_arch_arm:
       info->symbol_is_valid = arm_symbol_is_valid;
       break;
+#endif
+#ifdef ARCH_ia64
+    case bfd_arch_ia64:
+      info->skip_zeroes = 16;
+      break;
+#endif
+#ifdef ARCH_tic4x
+    case bfd_arch_tic4x:
+      info->skip_zeroes = 32;
 #endif
     default:
       break;

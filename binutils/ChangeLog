@@ -1,3 +1,15 @@
+2005-01-10  Andreas Schwab  <schwab@suse.de>
+
+	* configure.in: Don't define SKIP_ZEROES.
+	* configure: Regenerate.
+	* objdump.c (disassemble_data): Set skip_zeroes and
+	skip_zeroes_at_end in disasm_info to defaults.
+	(DEFAULT_SKIP_ZEROES): Rename from SKIP_ZEROES and always define.
+	(DEFAULT_SKIP_ZEROES_AT_END): Rename from SKIP_ZEROES_AT_END and
+	always define.
+	(disassemble_bytes): Use skip_zeroes and skip_zeroes_at_end from
+	objdump_disasm_info.
+
 2005-01-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (display_debug_loc): Display base address

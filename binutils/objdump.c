@@ -1202,9 +1202,7 @@ process_section_p (asection * section)
 /* The number of zeroes we want to see before we start skipping them.
    The number is arbitrarily chosen.  */
 
-#ifndef SKIP_ZEROES
-#define SKIP_ZEROES (8)
-#endif
+#define DEFAULT_SKIP_ZEROES 8
 
 /* The number of zeroes to skip at the end of a section.  If the
    number of zeroes at the end is between SKIP_ZEROES_AT_END and
@@ -1213,9 +1211,7 @@ process_section_p (asection * section)
    attempt to avoid disassembling zeroes inserted by section
    alignment.  */
 
-#ifndef SKIP_ZEROES_AT_END
-#define SKIP_ZEROES_AT_END (3)
-#endif
+#define DEFAULT_SKIP_ZEROES_AT_END 3
 
 /* Disassemble some data in memory between given values.  */
 
@@ -1236,7 +1232,9 @@ disassemble_bytes (struct disassemble_info * info,
   bfd_boolean done_dot;
   int skip_addr_chars;
   bfd_vma addr_offset;
-  int opb = info->octets_per_byte;
+  unsigned int opb = info->octets_per_byte;
+  unsigned int skip_zeroes = info->skip_zeroes;
+  unsigned int skip_zeroes_at_end = info->skip_zeroes_at_end;
   SFILE sfile;
 
   aux = (struct objdump_disasm_info *) info->application_data;
@@ -1292,9 +1290,9 @@ disassemble_bytes (struct disassemble_info * info,
       if (! disassemble_zeroes
 	  && (info->insn_info_valid == 0
 	      || info->branch_delay_insns == 0)
-	  && (z - addr_offset * opb >= SKIP_ZEROES
+	  && (z - addr_offset * opb >= skip_zeroes
 	      || (z == stop_offset * opb &&
-		  z - addr_offset * opb < SKIP_ZEROES_AT_END)))
+		  z - addr_offset * opb < skip_zeroes_at_end)))
 	{
 	  printf ("\t...\n");
 
@@ -1855,6 +1853,8 @@ disassemble_data (bfd *abfd)
   disasm_info.mach = bfd_get_mach (abfd);
   disasm_info.disassembler_options = disassembler_options;
   disasm_info.octets_per_byte = bfd_octets_per_byte (abfd);
+  disasm_info.skip_zeroes = DEFAULT_SKIP_ZEROES;
+  disasm_info.skip_zeroes_at_end = DEFAULT_SKIP_ZEROES_AT_END;
 
   if (bfd_big_endian (abfd))
     disasm_info.display_endian = disasm_info.endian = BFD_ENDIAN_BIG;

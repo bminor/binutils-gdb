@@ -310,12 +310,6 @@ changequote([,])dnl
   	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
 	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_MCORE_ELF"
 	  ;;
-        c4x-*-* | tic4x-*-*)
-          OBJDUMP_DEFS="$OBJDUMP_DEFS -DSKIP_ZEROES=32"
-          ;;
-	ia64-*-*)
-	  OBJDUMP_DEFS="$OBJDUMP_DEFS -DSKIP_ZEROES=16"
-	  ;;
 	esac
     fi
 done

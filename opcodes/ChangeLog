@@ -1,3 +1,9 @@
+2005-01-10  Andreas Schwab  <schwab@suse.de>
+
+	* disassemble.c (disassemble_init_for_target) <case
+	bfd_arch_ia64>: Set skip_zeroes to 16.
+	<case bfd_arch_tic4x>: Set skip_zeroes to 32.
+
 2004-12-23  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* crx-opc.c: Mark 'bcop' instruction as RELAXABLE.
