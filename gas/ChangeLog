@@ -1,3 +1,11 @@
+Thu Jul 14 13:21:06 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* config/obj-aout.c (obj_aout_frob_symbol): Use
+	bfd_ind_section_ptr and bfd_und_section_ptr.
+
+	* subsegs.c (subseg_set_rest): Compare segT values directly,
+	without casting to int first.
+
 Wed Jul 13 14:49:05 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* config/tc-m68k.c (m68k_ip): Change rp to be a const pointer.

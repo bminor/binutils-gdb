@@ -223,10 +223,10 @@ subseg_set_rest (seg, subseg)
    * position of chain rooted in frchain_root.
    */
   for (frcP = *(lastPP = &frchain_root);
-       frcP && (int) (frcP->frch_seg) <= (int) seg;
+       frcP && frcP->frch_seg <= seg;
        frcP = *(lastPP = &frcP->frch_next))
     {
-      if ((int) (frcP->frch_seg) == (int) seg
+      if (frcP->frch_seg == seg
 	  && frcP->frch_subseg >= subseg)
 	{
 	  break;
@@ -254,7 +254,7 @@ subseg_set_rest (seg, subseg)
    *
    */
   if (!frcP
-      || ((int) (frcP->frch_seg) > (int) seg
+      || (frcP->frch_seg > seg
 	  || frcP->frch_subseg > subseg))	/* Kinky logic only works with 2 segments. */
     {
       /*
