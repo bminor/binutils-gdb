@@ -1,3 +1,7 @@
+Sat Mar 15 19:03:29 1997  H.J. Lu  <hjl@lucon.org>
+
+	* sparc.h (sparc_opcode_lookup_arch): Use full prototype.
+
 Fri Mar 14 15:22:01 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* sparc.h: Include <ansidecl.h>.  Update function declarations to
