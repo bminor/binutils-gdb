@@ -5,6 +5,7 @@ arc-dis.c
 arc-opc.c
 arm-dis.c
 arm-opc.h
+avr-dis.c
 cgen-asm.c
 cgen-dis.c
 cgen-opc.c
@@ -12,8 +13,8 @@ d10v-dis.c
 d10v-opc.c
 d30v-dis.c
 d30v-opc.c
-dis-buf.c
 disassemble.c
+dis-buf.c
 fr30-asm.c
 fr30-desc.c
 fr30-desc.h
@@ -46,9 +47,9 @@ m68k-opc.c
 m88k-dis.c
 mcore-dis.c
 mcore-opc.h
+mips16-opc.c
 mips-dis.c
 mips-opc.c
-mips16-opc.c
 ns32k-dis.c
 pj-dis.c
 pj-opc.c
@@ -68,5 +69,5 @@ vax-dis.c
 w65-dis.c
 w65-opc.h
 z8k-dis.c
-z8k-opc.h
 z8kgen.c
+z8k-opc.h
