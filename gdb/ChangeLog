@@ -1,5 +1,10 @@
 2003-05-10  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.c (i386_analyze_struct_return): Correctly indent
+	comment.
+	(i386_analyze_frame_setup): Report correct bug after matching
+	initial `pushl %ebp'.
+
 	* dwarf-frame.c: Add support for .eh_frame sections.  Fix a few
 	bugs.
 

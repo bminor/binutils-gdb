@@ -355,15 +355,14 @@ i386_analyze_struct_return (CORE_ADDR pc, CORE_ADDR current_pc,
 {
   /* Functions that return a structure or union start with:
 
-         popl %eax             0x58
-         xchgl %eax, (%esp)    0x87 0x04 0x24
-      or xchgl %eax, 0(%esp)   0x87 0x44 0x24 0x00
+        popl %eax             0x58
+        xchgl %eax, (%esp)    0x87 0x04 0x24
+     or xchgl %eax, 0(%esp)   0x87 0x44 0x24 0x00
 
-      (the System V compiler puts out the second `xchg'
-      instruction, and the assembler doesn't try to optimize it, so
-      the 'sib' form gets generated).  This sequence is used to get
-      the address of the return buffer for a function that returns
-      a structure.  */
+     (the System V compiler puts out the second `xchg' instruction,
+     and the assembler doesn't try to optimize it, so the 'sib' form
+     gets generated).  This sequence is used to get the address of the
+     return buffer for a function that returns a structure.  */
   static unsigned char proto1[3] = { 0x87, 0x04, 0x24 };
   static unsigned char proto2[4] = { 0x87, 0x44, 0x24, 0x00 };
   unsigned char buf[4];
@@ -473,14 +472,14 @@ i386_analyze_frame_setup (CORE_ADDR pc, CORE_ADDR current_pc,
 	{
 	case 0x8b:
 	  if (read_memory_unsigned_integer (pc + 2, 1) != 0xec)
-	    return pc;
+	    return pc + 1;
 	  break;
 	case 0x89:
 	  if (read_memory_unsigned_integer (pc + 2, 1) != 0xe5)
-	    return pc;
+	    return pc + 1;
 	  break;
 	default:
-	  return pc;
+	  return pc + 1;
 	}
 
       /* OK, we actually have a frame.  We just don't know how large it is
