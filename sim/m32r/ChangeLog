@@ -1,10 +1,10 @@
 Mon Apr 27 15:36:30 1998  Doug Evans  <devans@seba.cygnus.com>
 
-	* cpu.c,model.c,sem-switch.c,sem.c: Regenerated.  Mostly comment
+	* cpu.h,model.c,sem-switch.c,sem.c: Regenerated.  Mostly comment
 	and variable renaming due to macro insn additions.
 	* mloop.in: Update to use CGEN_INSN_NUM.
 start-sanitize-m32rx
-	* cpu.x,modelx.c,readx.c,semx.c: Regenerated.
+	* cpux.h,modelx.c,readx.c,semx.c: Regenerated.
 	* mloopx.in: Update to use CGEN_INSN_NUM.
 end-sanitize-m32rx
 

@@ -280,7 +280,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     }
     BREAK (read);
 
-    CASE (read, READ_FMT_BC8) : /* e.g. bc $disp8 */
+    CASE (read, READ_FMT_BC8) : /* e.g. bc.s $disp8 */
     {
 #define OPRND(f) par_exec->operands.fmt_bc8.f
   EXTRACT_FMT_BC8_VARS /* f-op1 f-r1 f-disp8 */
@@ -293,7 +293,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     }
     BREAK (read);
 
-    CASE (read, READ_FMT_BC24) : /* e.g. bc $disp24 */
+    CASE (read, READ_FMT_BC24) : /* e.g. bc.l $disp24 */
     {
 #define OPRND(f) par_exec->operands.fmt_bc24.f
   EXTRACT_FMT_BC24_VARS /* f-op1 f-r1 f-disp24 */
@@ -333,7 +333,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     }
     BREAK (read);
 
-    CASE (read, READ_FMT_BL8) : /* e.g. bl $disp8 */
+    CASE (read, READ_FMT_BL8) : /* e.g. bl.s $disp8 */
     {
 #define OPRND(f) par_exec->operands.fmt_bl8.f
   EXTRACT_FMT_BL8_VARS /* f-op1 f-r1 f-disp8 */
@@ -346,7 +346,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     }
     BREAK (read);
 
-    CASE (read, READ_FMT_BL24) : /* e.g. bl $disp24 */
+    CASE (read, READ_FMT_BL24) : /* e.g. bl.l $disp24 */
     {
 #define OPRND(f) par_exec->operands.fmt_bl24.f
   EXTRACT_FMT_BL24_VARS /* f-op1 f-r1 f-disp24 */
@@ -359,7 +359,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     }
     BREAK (read);
 
-    CASE (read, READ_FMT_BCL8) : /* e.g. bcl $disp8 */
+    CASE (read, READ_FMT_BCL8) : /* e.g. bcl.s $disp8 */
     {
 #define OPRND(f) par_exec->operands.fmt_bcl8.f
   EXTRACT_FMT_BCL8_VARS /* f-op1 f-r1 f-disp8 */
@@ -373,7 +373,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     }
     BREAK (read);
 
-    CASE (read, READ_FMT_BCL24) : /* e.g. bcl $disp24 */
+    CASE (read, READ_FMT_BCL24) : /* e.g. bcl.l $disp24 */
     {
 #define OPRND(f) par_exec->operands.fmt_bcl24.f
   EXTRACT_FMT_BCL24_VARS /* f-op1 f-r1 f-disp24 */
@@ -387,7 +387,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     }
     BREAK (read);
 
-    CASE (read, READ_FMT_BRA8) : /* e.g. bra $disp8 */
+    CASE (read, READ_FMT_BRA8) : /* e.g. bra.s $disp8 */
     {
 #define OPRND(f) par_exec->operands.fmt_bra8.f
   EXTRACT_FMT_BRA8_VARS /* f-op1 f-r1 f-disp8 */
@@ -399,7 +399,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     }
     BREAK (read);
 
-    CASE (read, READ_FMT_BRA24) : /* e.g. bra $disp24 */
+    CASE (read, READ_FMT_BRA24) : /* e.g. bra.l $disp24 */
     {
 #define OPRND(f) par_exec->operands.fmt_bra24.f
   EXTRACT_FMT_BRA24_VARS /* f-op1 f-r1 f-disp24 */
@@ -606,7 +606,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     }
     BREAK (read);
 
-    CASE (read, READ_FMT_LDI8) : /* e.g. ldi $dr,$simm8 */
+    CASE (read, READ_FMT_LDI8) : /* e.g. ldi8 $dr,$simm8 */
     {
 #define OPRND(f) par_exec->operands.fmt_ldi8.f
   EXTRACT_FMT_LDI8_VARS /* f-op1 f-r1 f-simm8 */
@@ -618,7 +618,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     }
     BREAK (read);
 
-    CASE (read, READ_FMT_LDI16) : /* e.g. ldi $dr,$hash$slo16 */
+    CASE (read, READ_FMT_LDI16) : /* e.g. ldi16 $dr,$hash$slo16 */
     {
 #define OPRND(f) par_exec->operands.fmt_ldi16.f
   EXTRACT_FMT_LDI16_VARS /* f-op1 f-r1 f-op2 f-r2 f-simm16 */

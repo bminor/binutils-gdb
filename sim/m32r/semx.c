@@ -380,7 +380,7 @@ do {
 #undef OPRND
 }
 
-/* Perform bc8: bc $disp8.  */
+/* Perform bc8: bc.s $disp8.  */
 CIA
 SEM_FN_NAME (m32rx,bc8) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
@@ -408,7 +408,7 @@ if (OPRND (condbit)) {
 #undef OPRND
 }
 
-/* Perform bc24: bc $disp24.  */
+/* Perform bc24: bc.l $disp24.  */
 CIA
 SEM_FN_NAME (m32rx,bc24) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
@@ -639,7 +639,7 @@ if (NESI (OPRND (src2), 0)) {
 #undef OPRND
 }
 
-/* Perform bl8: bl $disp8.  */
+/* Perform bl8: bl.s $disp8.  */
 CIA
 SEM_FN_NAME (m32rx,bl8) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
@@ -670,7 +670,7 @@ do {
 #undef OPRND
 }
 
-/* Perform bl24: bl $disp24.  */
+/* Perform bl24: bl.l $disp24.  */
 CIA
 SEM_FN_NAME (m32rx,bl24) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
@@ -701,7 +701,7 @@ do {
 #undef OPRND
 }
 
-/* Perform bcl8: bcl $disp8.  */
+/* Perform bcl8: bcl.s $disp8.  */
 CIA
 SEM_FN_NAME (m32rx,bcl8) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
@@ -734,7 +734,7 @@ do {
 #undef OPRND
 }
 
-/* Perform bcl24: bcl $disp24.  */
+/* Perform bcl24: bcl.l $disp24.  */
 CIA
 SEM_FN_NAME (m32rx,bcl24) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
@@ -748,7 +748,7 @@ SEM_FN_NAME (m32rx,bcl24) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_e
 
 if (OPRND (condbit)) {
 do {
-  CPU (h_gr[14]) = ADDSI (ANDSI (OPRND (pc), -4), 4);
+  CPU (h_gr[14]) = ADDSI (OPRND (pc), 4);
   TRACE_RESULT (current_cpu, "h-gr-14", 'x', CPU (h_gr[14]));
   BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp24)));
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
@@ -767,7 +767,7 @@ do {
 #undef OPRND
 }
 
-/* Perform bnc8: bnc $disp8.  */
+/* Perform bnc8: bnc.s $disp8.  */
 CIA
 SEM_FN_NAME (m32rx,bnc8) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
@@ -795,7 +795,7 @@ if (NOTBI (OPRND (condbit))) {
 #undef OPRND
 }
 
-/* Perform bnc24: bnc $disp24.  */
+/* Perform bnc24: bnc.l $disp24.  */
 CIA
 SEM_FN_NAME (m32rx,bnc24) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
@@ -852,7 +852,7 @@ if (NESI (OPRND (src1), OPRND (src2))) {
 #undef OPRND
 }
 
-/* Perform bra8: bra $disp8.  */
+/* Perform bra8: bra.s $disp8.  */
 CIA
 SEM_FN_NAME (m32rx,bra8) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
@@ -878,7 +878,7 @@ SEM_FN_NAME (m32rx,bra8) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
 #undef OPRND
 }
 
-/* Perform bra24: bra $disp24.  */
+/* Perform bra24: bra.l $disp24.  */
 CIA
 SEM_FN_NAME (m32rx,bra24) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
@@ -904,7 +904,7 @@ SEM_FN_NAME (m32rx,bra24) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_e
 #undef OPRND
 }
 
-/* Perform bncl8: bncl $disp8.  */
+/* Perform bncl8: bncl.s $disp8.  */
 CIA
 SEM_FN_NAME (m32rx,bncl8) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
@@ -937,7 +937,7 @@ do {
 #undef OPRND
 }
 
-/* Perform bncl24: bncl $disp24.  */
+/* Perform bncl24: bncl.l $disp24.  */
 CIA
 SEM_FN_NAME (m32rx,bncl24) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
@@ -951,7 +951,7 @@ SEM_FN_NAME (m32rx,bncl24) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_
 
 if (NOTBI (OPRND (condbit))) {
 do {
-  CPU (h_gr[14]) = ADDSI (ANDSI (OPRND (pc), -4), 4);
+  CPU (h_gr[14]) = ADDSI (OPRND (pc), 4);
   TRACE_RESULT (current_cpu, "h-gr-14", 'x', CPU (h_gr[14]));
   BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, OPRND (disp24)));
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
@@ -1721,7 +1721,7 @@ SEM_FN_NAME (m32rx,ld24) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
 #undef OPRND
 }
 
-/* Perform ldi8: ldi $dr,$simm8.  */
+/* Perform ldi8: ldi8 $dr,$simm8.  */
 CIA
 SEM_FN_NAME (m32rx,ldi8) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
@@ -1747,7 +1747,7 @@ SEM_FN_NAME (m32rx,ldi8) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_ex
 #undef OPRND
 }
 
-/* Perform ldi16: ldi $dr,$hash$slo16.  */
+/* Perform ldi16: ldi16 $dr,$hash$slo16.  */
 CIA
 SEM_FN_NAME (m32rx,ldi16) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_exec)
 {
