@@ -65,6 +65,4 @@ we32k.h
 
 Do-last:
 
-echo Done in `pwd`.
-
 # End of file.
