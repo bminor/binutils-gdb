@@ -1,5 +1,9 @@
 Mon Mar 29 13:55:29 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* xcoffread.c (sort_syms, compare_symbols): Remove.
+	(xcoff_symfile_read): Use sort_all_symtab_syms from symfile.c
+	not our own sort_syms (it is identical).
+
 	* xcoffread.c: Nuke NAMES_HAVE_DOT define (not used).
 
 Fri Mar 26 11:29:30 1993  Jim Kingdon  (kingdon@cygnus.com)

@@ -215,64 +215,6 @@ read_xcoff_symtab PARAMS ((struct objfile *, int));
 static void
 add_stab_to_list PARAMS ((char *, struct pending_stabs **));
 
-static void
-sort_syms PARAMS ((void));
-
-static int
-compare_symbols PARAMS ((const void *, const void *));
-
-/* Call sort_syms to sort alphabetically
-   the symbols of each block of each symtab.  */
-
-static int
-compare_symbols (s1p, s2p)
-     const PTR s1p;
-     const PTR s2p;
-{
-  /* Names that are less should come first.  */
-  register struct symbol **s1 = (struct symbol **) s1p;
-  register struct symbol **s2 = (struct symbol **) s2p;
-  register int namediff = STRCMP (SYMBOL_NAME (*s1), SYMBOL_NAME (*s2));
-  if (namediff != 0) 
-    return namediff;
-
-  /* For symbols of the same name, registers should come first.  */
-  return ((SYMBOL_CLASS (*s2) == LOC_REGISTER)
-      - (SYMBOL_CLASS (*s1) == LOC_REGISTER));
-}
-
-
-/* Sort a vector of symbols by their value. */
-
-static void
-sort_syms ()
-{
-  register struct symtab *s;
-  register struct objfile *objfile;
-  register int i, nbl;
-  register struct blockvector *bv;
-  register struct block *b;
-
-  for (objfile = object_files; objfile != NULL; objfile = objfile -> next)
-    {
-      for (s = objfile -> symtabs; s != NULL; s = s -> next)
-	{
-	  bv = BLOCKVECTOR (s);
-	  nbl = BLOCKVECTOR_NBLOCKS (bv);
-	  for (i = 0; i < nbl; i++)
-	    {
-	      b = BLOCKVECTOR_BLOCK (bv, i);
-	      if (BLOCK_SHOULD_SORT (b))
-		{
-		  qsort (&BLOCK_SYM (b, 0), BLOCK_NSYMS (b),
-			 sizeof (struct symbol *), compare_symbols);
-		}
-	    }
-	}
-    }
-}
-
-
 /* add a given stab string into given stab vector. */
 
 static void
@@ -2350,7 +2292,7 @@ xcoff_symfile_read (objfile, section_offset, mainline)
   free_debugsection ();
 
   /* Sort symbols alphabetically within each block.  */
-  sort_syms ();
+  sort_all_symtab_syms ();
 
   /* Install any minimal symbols that have been collected as the current
      minimal symbols for this objfile. */
