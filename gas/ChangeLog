@@ -1,3 +1,12 @@
+2002-02-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: "make dep-am".
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* doc/Makefile.in: Regenerate.
+
 2002-02-10  Richard Henderson  <rth@redhat.com>
 
 	* doc/c-alpha.texi: New file.
