@@ -790,6 +790,121 @@ bpstat_alloc (b, cbs)
   bs->print_it = print_it_normal;
   return bs;
 }
+
+/* Return the frame which we can use to evaluate the expression
+   whose valid block is valid_block, or NULL if not in scope.
+
+   This whole concept is probably not the way to do things (it is incredibly
+   slow being the main reason, not to mention fragile (e.g. the sparc
+   frame pointer being fetched as 0 bug causes it to stop)).  Instead,
+   introduce a version of "struct frame" which survives over calls to the
+   inferior, but which is better than FRAME_ADDR in the sense that it lets
+   us evaluate expressions relative to that frame (on some machines, it
+   can just be a FRAME_ADDR).  Save one of those instead of (or in addition
+   to) the exp_valid_block, and then use it to evaluate the watchpoint
+   expression, with no need to do all this backtracing every time.
+
+   Or better yet, what if it just copied the struct frame and its next
+   frame?  Off the top of my head, I would think that would work
+   because things like (a29k) rsize and msize, or (sparc) bottom just
+   depend on the frame, and aren't going to be different just because
+   the inferior has done something.  Trying to recalculate them
+   strikes me as a lot of work, possibly even impossible.  Saving the
+   next frame is needed at least on a29k, where get_saved_register
+   uses fi->next->saved_msp.  For figuring out whether that frame is
+   still on the stack, I guess this needs to be machine-specific (e.g.
+   a29k) but I think
+
+      read_register (FP_REGNUM) INNER_THAN watchpoint_frame->frame
+
+   would generally work.
+
+   Of course the scope of the expression could be less than a whole
+   function; perhaps if the innermost frame is the one which the
+   watchpoint is relative to (another machine-specific thing, usually
+
+      FRAMELESS_FUNCTION_INVOCATION (get_current_frame(), fromleaf)
+      read_register (FP_REGNUM) == wp_frame->frame
+      && !fromleaf
+
+   ), *then* it could do a
+
+      contained_in (get_current_block (), wp->exp_valid_block).
+
+      */
+
+FRAME
+within_scope (valid_block)
+     struct block *valid_block;
+{
+  FRAME fr = get_current_frame ();
+  struct frame_info *fi = get_frame_info (fr);
+  CORE_ADDR func_start;
+
+  /* If caller_pc_valid is true, we are stepping through
+     a function prologue, which is bounded by callee_func_start
+     (inclusive) and callee_prologue_end (exclusive).
+     caller_pc is the pc of the caller.
+
+     Yes, this is hairy.  */
+  static int caller_pc_valid = 0;
+  static CORE_ADDR caller_pc;
+  static CORE_ADDR callee_func_start;
+  static CORE_ADDR callee_prologue_end;
+  
+  find_pc_partial_function (fi->pc, (PTR)NULL, &func_start);
+  func_start += FUNCTION_START_OFFSET;
+  if (fi->pc == func_start)
+    {
+      /* We just called a function.  The only other case I
+	 can think of where the pc would equal the pc of the
+	 start of a function is a frameless function (i.e.
+	 no prologue) where we branch back to the start
+	 of the function.  In that case, SKIP_PROLOGUE won't
+	 find one, and we'll clear caller_pc_valid a few lines
+	 down.  */
+      caller_pc_valid = 1;
+      caller_pc = SAVED_PC_AFTER_CALL (fr);
+      callee_func_start = func_start;
+      SKIP_PROLOGUE (func_start);
+      callee_prologue_end = func_start;
+    }
+  if (caller_pc_valid)
+    {
+      if (fi->pc < callee_func_start
+	  || fi->pc >= callee_prologue_end)
+	caller_pc_valid = 0;
+    }
+	  
+  if (contained_in (block_for_pc (caller_pc_valid
+				  ? caller_pc
+				  : fi->pc),
+		    valid_block))
+    {
+      return fr;
+    }
+  fr = get_prev_frame (fr);
+	  
+  /* If any active frame is in the exp_valid_block, then it's
+     OK.  Note that this might not be the same invocation of
+     the exp_valid_block that we were watching a little while
+     ago, or the same one as when the watchpoint was set (e.g.
+     we are watching a local variable in a recursive function.
+     When we return from a recursive invocation, then we are
+     suddenly watching a different instance of the variable).
+
+     At least for now I am going to consider this a feature.  */
+  for (; fr != NULL; fr = get_prev_frame (fr))
+    {
+      fi = get_frame_info (fr);
+      if (contained_in (block_for_pc (fi->pc),
+			valid_block))
+	{
+	  return fr;
+	}
+    }
+  return NULL;
+}
 
 /* Possible return values for watchpoint_check (this can't be an enum
    because of check_errors).  */
@@ -806,14 +921,22 @@ watchpoint_check (p)
      PTR p;
 {
   bpstat bs = (bpstat) p;
+  FRAME fr;
 
   int within_current_scope;
-  if (bs->breakpoint_at->exp_valid_block != NULL)
-    within_current_scope =
-      contained_in (get_selected_block (), bs->breakpoint_at->exp_valid_block);
-  else
+  if (bs->breakpoint_at->exp_valid_block == NULL)
     within_current_scope = 1;
-
+  else
+    {
+      fr = within_scope (bs->breakpoint_at->exp_valid_block);
+      within_current_scope = fr != NULL;
+      if (within_current_scope)
+	/* If we end up stopping, the current frame will get selected
+	   in normal_stop.  So this call to select_frame won't affect
+	   the user.  */
+	select_frame (fr, -1);
+    }
+      
   if (within_current_scope)
     {
       /* We use value_{,free_to_}mark because it could be a
@@ -2615,6 +2738,9 @@ static void
 enable_breakpoint (bpt)
      struct breakpoint *bpt;
 {
+  FRAME save_selected_frame;
+  int save_selected_frame_level = -1;
+  
   bpt->enable = enabled;
 
   if (xgdb_verbose && bpt->type == bp_breakpoint)
@@ -2623,14 +2749,20 @@ enable_breakpoint (bpt)
   check_duplicates (bpt->address);
   if (bpt->type == bp_watchpoint)
     {
-      if (bpt->exp_valid_block != NULL
-       && !contained_in (get_selected_block (), bpt->exp_valid_block))
+      if (bpt->exp_valid_block != NULL)
 	{
-	  printf_filtered ("\
+	  FRAME fr = within_scope (bpt->exp_valid_block);
+	  if (fr == NULL)
+	    {
+	      printf_filtered ("\
 Cannot enable watchpoint %d because the block in which its expression\n\
 is valid is not currently in scope.\n", bpt->number);
-	  bpt->enable = disabled;
-	  return;
+	      bpt->enable = disabled;
+	      return;
+	    }
+	  save_selected_frame = selected_frame;
+	  save_selected_frame_level = selected_frame_level;
+	  select_frame (fr, -1);
 	}
 
       value_free (bpt->val);
@@ -2639,6 +2771,9 @@ is valid is not currently in scope.\n", bpt->number);
       release_value (bpt->val);
       if (VALUE_LAZY (bpt->val))
 	value_fetch_lazy (bpt->val);
+
+      if (save_selected_frame_level >= 0)
+	select_frame (save_selected_frame, save_selected_frame_level);
     }
 }
 
