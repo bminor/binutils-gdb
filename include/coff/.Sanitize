@@ -37,6 +37,7 @@ internal.h
 m68k.h
 m88k.h
 mips.h
+pe.h
 rs6000.h
 sh.h
 sparc.h
