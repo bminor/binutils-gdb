@@ -77,7 +77,6 @@ static segT prev_seg;
 static void s_dmadata PARAMS ((int));
 static void s_dmapackpke PARAMS ((int));
 static void s_enddirect PARAMS ((int));
-static void s_enddmadata PARAMS ((int));
 static void s_endgpuif PARAMS ((int));
 static void s_endmpg PARAMS ((int));
 static void s_endunpack PARAMS ((int));
@@ -86,11 +85,10 @@ static void s_vu PARAMS ((int));
 /* The target specific pseudo-ops which we support.  */
 const pseudo_typeS md_pseudo_table[] =
 {
-  { "word", cons, 4 },
-  { "dmadata", s_dmadata, 0 },
+  { "dmadata", s_dmadata, 1 },
   { "dmapackpke", s_dmapackpke, 0 },
   { "enddirect", s_enddirect, 0 },
-  { "enddmadata", s_enddmadata, 0 },
+  { "enddmadata", s_dmadata, 0 },
   { "endgpuif", s_endgpuif, 0 },
   { "endmpg", s_endmpg, 0 },
   { "endunpack", s_endunpack, 0 },
@@ -908,35 +906,102 @@ txvu_insert_operand (insn, operand, mods, val, file, line)
 }
 
 static void
-s_dmadata (ignore)
-     int ignore;
+s_dmadata( type)
+    int type;
 {
+    static short state = 0;
+    struct symbol *label;		/* Points to symbol */
+    char *name, *name2;			/* points to name of first / final symbol */
+    int temp;
+
+    switch( type) {
+    case 1:	/* .DmaData */
+    	if( state != 0)
+	{
+	    as_bad( "DmaData blocks cannot be nested.");
+	    ignore_rest_of_line();
+	    state = 1;
+	    break;
+	}
+	state = 1;
+	  
+	SKIP_WHITESPACE();		/* Leading whitespace is part of operand. */
+	name = input_line_pointer;
+      
+	if( !is_name_beginner( *name) )
+	{
+	    as_bad( "invalid identifier for \".DmaData\"");
+	    obstack_1grow (&cond_obstack, 0);
+	    ignore_rest_of_line();
+	    break;
+	}
+	else
+	{
+	    char c;
+
+	    c = get_symbol_end();
+	    line_label = label = colon( name);	/* user-defined label */
+	    *input_line_pointer = c;
+
+	    demand_empty_rest_of_line();
+	}				/* if a valid identifyer name */
+	break;
+
+    case 0:	/* .EndDmaData */
+    	if( state != 1)
+	{
+	    as_warn( ".EndDmaData encountered outside a DmaData block -- ignored.");
+	    ignore_rest_of_line();
+	    state = 0;
+	    break;
+	}
+	state = 0;
+	demand_empty_rest_of_line();
+
+	/*
+	*"label" points to beginning of block
+	* Create a name for the final label like _$<name>
+	*/
+	name = label->bsym->name;
+	temp = strlen( name) + 1;
+	name2 = malloc( temp + 2);
+	name2[ 0] = '_';
+	name2[ 1] = '$';
+	memcpy( name2+2, name, temp);	/* copy original name & \0 */
+	colon( name2);
+	free( name2);
+	break;
+
+    default:
+	as_assert( __FILE__, __LINE__, 0);
+    }
 }
 
 static void
-s_dmapackpke (ignore)
+s_dmapackpke( ignore)
      int ignore;
 {
-  /* Syntax: .dmapackpke 0|1 */
-  if (*input_line_pointer == '0')
-    dma_pack_pke_p = 0;
-  else if (*input_line_pointer == '1')
-    dma_pack_pke_p = 1;
-  else
-    as_bad ("illegal argument to `.dmapackpke'");
+    /* Syntax: .dmapackpke 0|1 */
+    struct symbol *label;		/* Points to symbol */
+    char *name;				/* points to name of symbol */
 
-  input_line_pointer++;
-  demand_empty_rest_of_line ();
+    SKIP_WHITESPACE();		/* Leading whitespace is part of operand. */
+    switch( *input_line_pointer++)
+    {
+    case 0:
+	dma_pack_pke_p = 0;
+	break;
+    case 1:
+	dma_pack_pke_p = 1;
+	break;
+    default:
+	as_bad( "illegal argument to `.DmaPackPke'");
+    }
+    demand_empty_rest_of_line();
 }
 
 static void
 s_enddirect (ignore)
-     int ignore;
-{
-}
-
-static void
-s_enddmadata (ignore)
      int ignore;
 {
 }
