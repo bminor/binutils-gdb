@@ -1,5 +1,10 @@
 2003-05-07  Jim Blandy  <jimb@redhat.com>
 
+	Add support for assembly source testing on the s390x.
+	* gdb.asm/asm-source.exp: Add a case for the s390x-*-*
+	architecture.
+	* gdb.asm/s390x.inc: New file.
+
 	* gdb.asm/asm-source.exp: Use a 'switch -glob' statement, not a
 	succession of 'if' statements.
 

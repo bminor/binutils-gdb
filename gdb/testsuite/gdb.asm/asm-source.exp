@@ -48,6 +48,9 @@ switch -glob -- [istarget] {
     "s390-*-*" {
         set asm-arch s390
     }
+    "s390x-*-*" {
+        set asm-arch s390x
+    }
     "x86_64-*-*" {
         set asm-arch x86_64
         set asm-flags "-gdwarf2 -I${srcdir}/${subdir} -I${objdir}/${subdir}"
