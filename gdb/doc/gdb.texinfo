@@ -2064,7 +2064,7 @@ further qualifier.
 
 @c FIXME!! (1) Does the [New...] message appear even for the very first
 @c         thread of a program, or does it only appear for the
-@c         second---i.e., when it becomes obvious we have a multithread
+@c         second---i.e.@: when it becomes obvious we have a multithread
 @c         program?
 @c         (2) *Is* there necessarily a first thread always?  Or do some
 @c         multithread systems permit starting a program with multiple
@@ -5641,7 +5641,7 @@ Memory is read only.
 @item wo
 Memory is write only.
 @item rw
-Memory is read/write (default).
+Memory is read/write.  This is the default.
 @end table
 
 @subsubsection Memory Access Size
@@ -5682,8 +5682,8 @@ registers.
 @table @code
 @item cache
 Enable @value{GDBN} to cache target memory. 
-@item nocache (default)
-Disable @value{GDBN} from caching target memory.
+@item nocache
+Disable @value{GDBN} from caching target memory.  This is the default.
 @end table
 
 @c @subsubsection Memory Write Verification
@@ -7286,8 +7286,8 @@ following ways:
 @itemize @bullet
 @item
 Integer constants are a sequence of digits.  Octal constants are
-specified by a leading @samp{0} (i.e. zero), and hexadecimal constants by
-a leading @samp{0x} or @samp{0X}.  Constants may also end with a letter
+specified by a leading @samp{0} (i.e.@: zero), and hexadecimal constants
+by a leading @samp{0x} or @samp{0X}.  Constants may also end with a letter
 @samp{l}, specifying that the constant should be treated as a
 @code{long} value.
 
@@ -8716,7 +8716,7 @@ that conflict with the regular expression language (eg.
 @kindex info variables
 @item info variables
 Print the names and data types of all variables that are declared
-outside of functions (i.e., excluding local variables).
+outside of functions (i.e.@: excluding local variables).
 
 @item info variables @var{regexp}
 Print the names and data types of all variables (except for local
@@ -9413,7 +9413,7 @@ Section contains common symbols.
 @kindex set trust-readonly-sections
 @item set trust-readonly-sections on
 Tell @value{GDBN} that readonly sections in your object file
-really are read-only (ie.@: that their contents will not change).
+really are read-only (i.e.@: that their contents will not change).
 In that case, @value{GDBN} can fetch values from these sections
 out of the object file, rather than from the target program.
 For some targets (notably embedded ones), this can be a significant
@@ -9514,7 +9514,7 @@ If @var{threshold} is nonzero and shared library autoloading is enabled,
 symbols from all shared object libraries will be loaded until the total
 size of the loaded shared library symbols exceeds this threshold.
 Otherwise, symbols must be loaded manually, using the
-@code{sharedlibrary} command.  The default threshold is 100 (i.e. 100
+@code{sharedlibrary} command.  The default threshold is 100 (i.e.@: 100
 Mb).
 
 @kindex show auto-solib-limit
@@ -14291,7 +14291,7 @@ See @samp{i} and @samp{S} for likely syntax and semantics.
 @tab @code{k}
 @tab
 FIXME: @emph{There is no description of how to operate when a specific
-thread context has been selected (ie.@: does 'k' kill only that thread?)}.
+thread context has been selected (i.e.@: does 'k' kill only that thread?)}.
 
 @item reserved
 @tab @code{l}
