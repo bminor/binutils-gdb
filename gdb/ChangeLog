@@ -1,5 +1,10 @@
 2003-05-28  David Carlton  <carlton@bactrian.org>
 
+	* dwarf2read.c (add_partial_structure): When looking for a
+	subprogram child, go sibling by sibling.
+
+2003-05-28  David Carlton  <carlton@bactrian.org>
+
 	* dwarf2read.c (determine_prefix): Handle anonymous
 	classes/structures.
 

@@ -1774,6 +1774,11 @@ add_partial_structure (struct partial_die_info *struct_pdi, char *info_ptr,
 		struct_pdi->name = actual_class_name;
 	      break;
 	    }
+	  else
+	    {
+	      next_child = locate_pdi_sibling (&child_pdi, next_child,
+					       abfd, cu_header);
+	    }
 	}
     }
 
