@@ -1,3 +1,9 @@
+Fri Jan  7 09:38:25 1994  Steve Chamberlain  (sac@cygnus.com)
+
+	* config/obj-coffbfd.c (fill_section):  Don't ever fill past the
+	end of a section. (write_object_file): Temporary fix - setup
+	stdoutput.
+
 Thu Jan  6 18:05:21 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* config/tc-sparc.c (tc_gen_reloc): Fix handling of addends in
