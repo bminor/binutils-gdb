@@ -1440,6 +1440,12 @@ hpux-thread.o: $(srcdir)/hpux-thread.c
 procfs.o: $(srcdir)/procfs.c
 	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $(srcdir)/procfs.c
 
+# FIXME: Thread-db.o gets warnings because the definitions of the register
+# sets are different from kernel to kernel.
+thread-db.o: $(srcdir)/thread-db.c
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) \
+		$(srcdir)/thread-db.c
+
 v850ice.o: $(srcdir)/v850ice.c
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) \
 		$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) \

@@ -1,3 +1,8 @@
+2002-12-06  Elena Zannoni  <ezannoni@redhat.com>
+
+	* Makefile.in (thread-db.o): Add explicit rule to ignore the use of
+	-Werror on this file.
+
 2002-12-07  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbarch.sh (TARGET_FLOAT_FORMAT): Use the macro when printing
