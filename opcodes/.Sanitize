@@ -86,10 +86,10 @@ makefile.vms
 mips-dis.c
 mips-opc.c
 mips16-opc.c
-mn10200-dis.c
-mn10200-opc.c
-mn10300-dis.c
-mn10300-opc.c
+m10200-dis.c
+m10200-opc.c
+m10300-dis.c
+m10300-opc.c
 mpw-config.in
 mpw-make.sed
 ns32k-dis.c
