@@ -1,3 +1,13 @@
+Sat Jun 12 15:03:58 1993  Fred Fish  (fnf@cygnus.com)
+
+	* gdb.t00/{default.exp, help.exp}:  Account for changes to radix
+	commands.
+	* gdb.t16/gdbme.c:  Add and use struct containing arrays of char.
+	* gdb.t16/printcmds.exp:  Fix all lines that match "unsigned char *".
+	* gdb.t16/printcmds.exp (test_print_char_arrays):  Test printing
+	of struct of char arrays.
+	* gdb.t00/radix.exp:  New tests for radix commands.
+
 Fri Jun 11 13:12:27 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* gdb.t16/printcmd.exp: Print a variable before running program
