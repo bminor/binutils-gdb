@@ -1,3 +1,9 @@
+Mon Nov  8 06:08:31 1993  D. V. Henkel-Wallace  (gumby@cirdan.cygnus.com)
+
+	* configure.bfd: make unixware equivalent to sysv4.
+
+	* config/i386-nlm.mt: bring in elf config; make it the default.
+
 Sun Nov  7 20:21:38 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* libbfd.c (bfd_put_8): Add parens around reference to "val"
