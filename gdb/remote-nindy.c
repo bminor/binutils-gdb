@@ -738,7 +738,8 @@ specified when you started GDB.",
 	nindy_fetch_registers, nindy_store_registers,
 	nindy_prepare_to_store,
 	nindy_xfer_inferior_memory, nindy_files_info,
-	0, 0, /* insert_breakpoint, remove_breakpoint, */
+	memory_insert_breakpoint,
+	memory_remove_breakpoint,
 	0, 0, 0, 0, 0,	/* Terminal crud */
 	nindy_kill,
 	generic_load,

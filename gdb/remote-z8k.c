@@ -335,7 +335,8 @@ struct target_ops sim_ops =
   sim_prepare_to_store,
   sim_xfer_inferior_memory,
   sim_files_info,
-  0, 0,				/* Breakpoints */
+  memory_insert_breakpoint,
+  memory_remove_breakpoint,
   0, 0, 0, 0, 0,		/* Terminal handling */
   sim_kill,			/* FIXME, kill */
   sim_load,

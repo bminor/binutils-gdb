@@ -30,10 +30,3 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define QUIT  { pollquit(); }
 
 #define GDBINIT_FILENAME "gdb.ini"
-
-#if !defined(SIGURG) & !defined(SIGALRM) & !defined(SIGBUS) & !defined(SIGSTOP)
-#define SIGURG (NSIG)
-#define SIGALRM (NSIG + 1)
-#define SIGBUS (NSIG + 2)
-#define SIGSTOP (NSIG + 3)
-#endif /* missing some signals */
