@@ -1,3 +1,19 @@
+2003-07-15  Michal Ludvig  <mludvig@suse.cz>
+
+	* x86-64-linux-nat.c (regmap): Removed.
+	(supply_gregset, fill_gregset): Call 
+	x86_64_linux_(fill,supply)_gregset functions.
+	* x86-64-linux-tdep.c (USER_*): New defines.
+	(user_to_gdb_regmap, x86_64_core_fns): New structure.
+	(x86_64_linux_supply_gregset, x86_64_linux_fill_gregset):
+	New functions.
+	(fetch_core_registers): Ditto.
+	(_initialize_x86_64_linux_tdep): Call add_core_fns().
+	* x86-64-linux-tdep.h: New file.
+	* config/i386/x86-64linux.mh (NATDEPFILES): Remove corelow.o
+	and core-regset.o.
+	* config/i386/x86-64linux.mt (TDEPFILES): Add corelow.o.
+
 2003-07-13  Mark Kettenis  <kettenis@gnu.org>
 
 	* x86-64-tdep.c (x86_64_store_return_value): Use
