@@ -18,6 +18,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
+DebugOptions = -d DEBUG_BFD_SEND
+
+gC = gC1
+
 s = "{srcdir}"
 
 o = :
@@ -27,7 +31,10 @@ o = :
 # Default rule that puts each file into separate segment.
 
 .c.o  \Option-f .c
-   {CC}  {DepDir}{Default}.c {ALL_CFLAGS} -d DEBUG_BFD_SEND {SymOptions} -s {Default} -o {TargDir}{Default}.c.o
+   {CC}  {DepDir}{Default}.c {ALL_CFLAGS} -s bfd_{Default} -o {TargDir}{Default}.c.o
+
+.gc.o  \Option-f .c
+   {gC}  {DepDir}{Default}.c {ALL_CFLAGS} -s bfd_{Default} -o {TargDir}{Default}.gc.o
 
 HDEFINES =
 TDEFINES =
@@ -101,7 +108,7 @@ BFD_LIBS = \Option-d
 	"{o}"archive.c.o "{o}"archures.c.o "{o}"bfd.c.o "{o}"cache.c.o "{o}"coffgen.c.o "{o}"core.c.o "{o}"ctor.c.o \Option-d
 	"{o}"format.c.o "{o}"init.c.o "{o}"libbfd.c.o "{o}"opncls.c.o "{o}"reloc.c.o \Option-d
 	"{o}"section.c.o "{o}"syms.c.o "{o}"targets.c.o "{o}"hash.c.o "{o}"linker.c.o \Option-d
-	"{o}"ecoff.c.o "{o}"ecofflink.c.o "{o}"elf.c.o "{o}"srec.c.o
+	"{o}"elf.c.o "{o}"srec.c.o
 
 # This list is alphabetized to make it easier to keep in sync
 # with the decls and initializer in archures.c.
@@ -200,11 +207,6 @@ OPTIONAL_BACKENDS = \Option-d
 	"{o}"trad-core.c.o
 
 # These are defined by configure.in\Option-f
-WORDSIZE=32
-BFD_BACKENDS = "{o}"coff-mips.c.o
-BFD_MACHINES = "{o}"cpu-mips.c.o
-TDEFAULTS = -d DEFAULT_VECTOR=ecoff_big_vec -d SELECT_VECS='&ecoff_big_vec,&ecoff_little_vec' -d SELECT_ARCHITECTURES='bfd_mips_arch'
-
 
 all \Option-f libbfd.o
 
@@ -227,7 +229,7 @@ FLAGS_TO_PASS = \Option-d
 	"INSTALL_PROGRAM={INSTALL_PROGRAM}" \Option-d
 	"BISON={BISON}"
 
-ALL_CFLAGS={CFLAGS} {HDEFINES} {TDEFINES} {CSEARCH} {CSWITCHES}
+ALL_CFLAGS={CFLAGS} {HDEFINES} {TDEFINES} {CSEARCH} {CSWITCHES} {DebugOptions}
 
 # C source files that correspond to .o's.
 CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \Option-d

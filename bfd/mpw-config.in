@@ -2,5 +2,13 @@
 
 forward-include "{srcdir}"hosts:mpw.h sysdep.h
 
-StreamEdit -e '/@WORDSIZE@/ Replace /@WORDSIZE@/ "32"' {srcdir}bfd-in2.h >bfd.h-new
+sed -e 's/@WORDSIZE@/32/' {srcdir}bfd-in2.h >bfd.h-new
 MoveIfChange bfd.h-new bfd.h
+
+If "{target_canonical}" =~ /m68k-aout/
+Else If "{target_canonical}" =~ /mips-idt-ecoff/
+	Echo 'WORDSIZE = 32' >"{objdir}"mk.tmp
+	Echo 'BFD_BACKENDS = "{o}"coff-mips.c.o "{o}"ecoff.c.o "{o}"ecofflink.c.o' >>"{objdir}"mk.tmp
+	Echo 'BFD_MACHINES = "{o}"cpu-mips.c.o' >>"{objdir}"mk.tmp
+	Echo 'TDEFAULTS = -d DEFAULT_VECTOR=ecoff_big_vec -d SELECT_VECS=&ecoff_big_vec,&ecoff_little_vec -d SELECT_ARCHITECTURES=bfd_mips_arch' >>"{objdir}"mk.tmp
+End If

@@ -1,3 +1,11 @@
+Sun Jun 26 15:55:53 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* mpw-config.in: Use sed instead of StreamEdit, add definitions
+	for mips target.
+	* mpw-make.in: Remove mips targets definitions, add rule to
+	compile with GCC, remove ecoff.c.o and ecofflink.c.o from list of
+	required object files.
+
 Tue Apr  5 17:54:07 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* hosts/mpw.h (CLOSE_BEFORE_UNLINK): Define.
