@@ -5888,7 +5888,19 @@ display_debug_lines (section, start, file)
 
 	  op_code = * data ++;
 
-	  switch (op_code)
+	  if (op_code >= info.li_opcode_base)
+	    {
+	      op_code -= info.li_opcode_base;
+	      adv      = (op_code / info.li_line_range) * info.li_min_insn_length;
+	      state_machine_regs.address += adv;
+	      printf (_("  Special opcode %d: advance Address by %d to 0x%lx"),
+		      op_code, adv, state_machine_regs.address);
+	      adv = (op_code % info.li_line_range) + info.li_line_base;
+	      state_machine_regs.line += adv;
+	      printf (_(" and Line by %d to %d\n"),
+		      adv, state_machine_regs.line);
+	    } 
+	  else switch (op_code) 
 	    {
 	    case DW_LNS_extended_op:
 	      data += process_extended_line_op (data, info.li_default_is_stmt,
@@ -5958,20 +5970,36 @@ display_debug_lines (section, start, file)
 		      adv, state_machine_regs.address);
 	      break;
 
+	    case DW_LNS_set_prologue_end:
+	      printf (_("  Set prologue_end to true\n"));
+	      break;
+	      
+	    case DW_LNS_set_epilogue_begin:
+	      printf (_("  Set epilogue_begin to true\n"));
+	      break;
+	      
+	    case DW_LNS_set_isa:
+	      adv = read_leb128 (data, & bytes_read, 0);
+	      data += bytes_read;
+	      printf (_("  Set ISA to %d\n"), adv);
+	      break;
+	      
 	    default:
-	      op_code -= info.li_opcode_base;
-	      adv      = (op_code / info.li_line_range) * info.li_min_insn_length;
-	      state_machine_regs.address += adv;
-	      printf (_("  Special opcode %d: advance Address by %d to 0x%lx"),
-		      op_code, adv, state_machine_regs.address);
-	      adv = (op_code % info.li_line_range) + info.li_line_base;
-	      state_machine_regs.line += adv;
-	      printf (_(" and Line by %d to %d\n"),
-		      adv, state_machine_regs.line);
+	      printf (_("  Unknown opcode %d with operands: "), op_code);
+	      {
+		int i;
+		for (i = standard_opcodes[op_code - 1]; i > 0 ; --i)
+		  {
+		    printf ("0x%lx%s", read_leb128 (data, &bytes_read, 0),
+			    i == 1 ? "" : ", ");
+		    data += bytes_read;
+		  }
+		putchar ('\n');
+	      }
 	      break;
 	    }
 	}
-      printf ("\n");
+      putchar ('\n');
     }
 
   return 1;

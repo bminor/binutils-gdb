@@ -1,9 +1,16 @@
+2001-11-13  Geoffrey Keating  <geoffk@redhat.com>
+
+	* readelf.c (display_debug_lines): Deal with unknown standard
+	opcodes.  Handle DW_LNS_set_prologue_end, DW_LNS_set_epilogue_begin,
+	DW_LNS_set_isa.
+
 2001-11-13  Timothy Wall  <twall@alum.mit.edu>
+
 	* MAINTAINERS: Add self as tic54x maintainer.  This target
 	includes the IBM C54XDSP clone.
 
 2001-11-12  * Steven J. Hill <sjhill@realitydiluted.com>
-	
+
 	* bucomm.c (make_tempname): Use mkstemp in place of mktemp.
 
 2001-11-09  Jeffrey A Law  (law@cygnus.com)

@@ -979,7 +979,22 @@ decode_line_info (unit, stash)
 	  op_code = read_1_byte (abfd, line_ptr);
 	  line_ptr += 1;
 
-	  switch (op_code)
+	  if (op_code >= lh.opcode_base)
+	    {		/* Special operand.  */
+	      adj_opcode = op_code - lh.opcode_base;
+	      address += (adj_opcode / lh.line_range)
+		* lh.minimum_instruction_length;
+	      line += lh.line_base + (adj_opcode % lh.line_range);
+	      /* Append row to matrix using current values.  */
+	      add_line_info (table, address, filename, line, column, 0);
+	      basic_block = 1;
+	      if (need_low_pc)
+		{
+		  need_low_pc = 0;
+		  low_pc = address;
+		}
+	    }
+	  else switch (op_code)
 	    {
 	    case DW_LNS_extended_op:
 	      line_ptr += 1;	/* Ignore length.  */
@@ -1079,19 +1094,15 @@ decode_line_info (unit, stash)
 	      address += read_2_bytes (abfd, line_ptr);
 	      line_ptr += 2;
 	      break;
-	    default:		/* Special operand.  */
-	      adj_opcode = op_code - lh.opcode_base;
-	      address += (adj_opcode / lh.line_range)
-		* lh.minimum_instruction_length;
-	      line += lh.line_base + (adj_opcode % lh.line_range);
-	      /* Append row to matrix using current values.  */
-	      add_line_info (table, address, filename, line, column, 0);
-	      basic_block = 1;
-	      if (need_low_pc)
-		{
-		  need_low_pc = 0;
-		  low_pc = address;
-		}
+	    default:
+	      {  /* Unknown standard opcode, ignore it.  */
+		int i;
+		for (i = 0; i < lh.standard_opcode_lengths[op_code]; i++)
+		  {
+		    (void) read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+		    line_ptr += bytes_read;
+		  }
+	      }
 	    }
 	}
     }

@@ -1,3 +1,8 @@
+2001-11-13  Geoffrey Keating  <geoffk@redhat.com>
+
+	* dwarf2.c (decode_line_info): Properly deal with unknown standard
+	opcodes.
+
 2001-11-13  John Marshall  <jmarshall@acm.org>
 	    Alan Modra  <amodra@bigpond.net.au>
 
