@@ -1354,8 +1354,9 @@ bfd_section_from_shdr (abfd, shindex)
 	target_sect->rel_filepos = hdr->sh_offset;
 	/* In the section to which the relocations apply, mark whether
 	   its relocations are of the REL or RELA variety.  */
-	elf_section_data (target_sect)->use_rela_p 
-	  = (hdr->sh_type == SHT_RELA);
+	if (hdr->sh_size != 0)
+	  elf_section_data (target_sect)->use_rela_p
+	    = (hdr->sh_type == SHT_RELA);
 	abfd->flags |= HAS_RELOC;
 	return true;
       }
@@ -3744,7 +3745,7 @@ copy_private_bfd_data (ibfd, obfd)
 	 more to do.  */
 
       isec = 0;
-      matching_lma = false;
+      matching_lma = 0;
       suggested_lma = 0;
 
       for (j = 0, s = ibfd->sections; s != NULL; s = s->next)
@@ -3810,21 +3811,32 @@ copy_private_bfd_data (ibfd, obfd)
 	  free (sections);
 	  continue;
 	}
-      else if (matching_lma != 0)
-	{
-	  /* At least one section fits inside the current segment.
-	     Keep it, but modify its physical address to match the
-	     LMA of the first section that fitted.  */
-
-	  m->p_paddr = matching_lma;
-	}
       else
 	{
-	  /* None of the sections fitted inside the current segment.
-	     Change the current segment's physical address to match
-	     the LMA of the first section.  */
+	  if (matching_lma != 0)
+	    {
+	      /* At least one section fits inside the current segment.
+		 Keep it, but modify its physical address to match the
+		 LMA of the first section that fitted.  */
 
-	  m->p_paddr = suggested_lma;
+	      m->p_paddr = matching_lma;
+	    }
+	  else
+	    {
+	      /* None of the sections fitted inside the current segment.
+		 Change the current segment's physical address to match
+		 the LMA of the first section.  */
+
+	      m->p_paddr = suggested_lma;
+	    }
+
+	  /* Offset the segment physical address from the lma to allow
+	     for space taken up by elf headers.  */
+	  if (m->includes_filehdr)
+	    m->p_paddr -= iehdr->e_ehsize;
+
+	  if (m->includes_phdrs)
+	    m->p_paddr -= iehdr->e_phnum * iehdr->e_phentsize;
 	}
 
       /* Step Three: Loop over the sections again, this time assigning
@@ -3857,7 +3869,12 @@ copy_private_bfd_data (ibfd, obfd)
 		    {
 		      /* If the first section in a segment does not start at
 			 the beginning of the segment, then something is wrong.  */
-		      if (os->lma != m->p_paddr)
+		      if (os->lma != (m->p_paddr
+				      + (m->includes_filehdr
+					 ? iehdr->e_ehsize : 0)
+				      + (m->includes_phdrs
+					 ? iehdr->e_phnum * iehdr->e_phentsize
+					 : 0)))
 			abort ();
 		    }
 		  else
