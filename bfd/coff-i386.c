@@ -417,9 +417,30 @@ coff_i386_reloc_type_lookup (abfd, code)
     }
 }
 
-
-
 #define coff_rtype_to_howto coff_i386_rtype_to_howto
+
+#ifdef TARGET_UNDERSCORE
+
+/* If i386 gcc uses underscores for symbol names, then it does not use
+   a leading dot for local labels, so if TARGET_UNDERSCORE is defined
+   we treat all symbols starting with L as local.  */
+
+static boolean coff_i386_is_local_label_name PARAMS ((bfd *, const char *));
+
+static boolean
+coff_i386_is_local_label_name (abfd, name)
+     bfd *abfd;
+     const char *name;
+{
+  if (name[0] == 'L')
+    return true;
+
+  return _bfd_coff_is_local_label_name (abfd, name);
+}
+
+#define coff_bfd_is_local_label_name coff_i386_is_local_label_name
+
+#endif /* TARGET_UNDERSCORE */
 
 #include "coffcode.h"
 
@@ -507,9 +528,11 @@ const bfd_target
    HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
 
 #ifndef COFF_WITH_PE
-  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
+  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC /* section flags */
+   | SEC_CODE | SEC_DATA),
 #else
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC /* section flags */
+   | SEC_CODE | SEC_DATA
    | SEC_LINK_ONCE | SEC_LINK_DUPLICATES),
 #endif
 

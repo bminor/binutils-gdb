@@ -1,3 +1,10 @@
+Mon Jul  7 16:41:20 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coff-i386.c (coff_i386_is_local_label_name): New static function
+	if TARGET_UNDERSCORE.
+	(coff_bfd_is_local_label_name): Define if TARGET_UNDERSCORE.
+	(i386coff_vec): Add SEC_CODE and SEC_DATA to section_flags.
+
 Mon Jun 30 14:29:26 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf32-m68k.c (howto_table): Use complain_overflow_bitfield, not
