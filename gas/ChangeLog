@@ -1,3 +1,8 @@
+Mon May 26 13:24:25 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* doc/as.texinfo: Don't use @value in section names or index
+	entries; it confuses texinfo.tex.
+
 Fri May 23 00:09:35 1997  Tom Tromey  <tromey@cygnus.com>
 
 	* doc/as.texinfo: Updated for -MD option.
