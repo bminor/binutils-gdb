@@ -1,15 +1,7 @@
-	.section .text,"ax",@progbits
+	.text
 	.long 1,2
+	.p2align 5
 
-	.section .data,"aw",@progbits
+	.data
 	.long 3,4,5
-
-	.section .bss,"aw",@nobits
-	.long 0,0,0,0
-	
-	# thread local storage sections
-	.section .tdata,"awT",@progbits
-	.long 6,7,8,9,10
-	
-	.section .tbss,"awT",@nobits
-	.long 0,0,0,0,0,0
+	.p2align 4
