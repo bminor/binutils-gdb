@@ -1,3 +1,11 @@
+Sun Jul 18 19:42:14 1993  Jim Kingdon  (kingdon@rtl.cygnus.com)
+
+	* coffcode.h: Recognize I386PTXMAGIC.
+	* aoutf1.h, libaout.h: Add M_386_DYNIX.
+	* trad-core.c (TRAD_CORE_USER_OFFSET, TRAD_CORE_STACK_FILEPOS):
+	New macros; use it if defined.
+	* config/symmetry.mh, hosts/symmetry.h: New files.
+
 Fri Jul 16 14:56:31 1993  Jim Kingdon  (kingdon@rtl.cygnus.com)
 
 	* Rename elf{32,64}-generic.c to *-gen.c for 14 char filenames.
