@@ -1,5 +1,20 @@
 Mon Sep 14 19:20:43 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* energize.c (pty_to_kernel):  Must check for EAGAIN as
+	termination condition.
+	(full_filename):  Don't prepend dirname if filename begins with /.
+	(breakpoint_notify, kernel_dispatch):  Deal with DynamicLoad
+	messages properly!!
+	(getpty (NCR)):  Lotsa bug fixes...
+	(kernel_dispatch (case StopRType)):  Use kill() instead of
+	killpg() so we can deal with losing systems...
+	(wait_for_events):  Work around NCR select() lossage.  It doesn't
+	zero out readfds when select() returns zero.
+	(energize_initialize):  Use I_SETSIG to get SIGIO interrupts.  Use
+	getcwd() instead of getwd() (NCR getwd() seg faults).
+	(energize_wait):  Use sigaction() for NCR.  Their version of signal()
+	is unreliable by default.
+
 	* procfs.c (proc_wait):  Call print_sys_errmsg() if we get an
 	error from PIOCSWSTOP.
 

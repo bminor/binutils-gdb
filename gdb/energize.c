@@ -48,6 +48,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Non-zero means that we're doing the energize interface. */
 int energize = 0;
 
+/* Non-zero means we are reloading breakpoints, etc from the
+   Energize kernel, and we should suppress various messages */
+static int energize_reloading = 0;
+
 /* Connection block for debugger<=>kernel communications. */
 static Connection *conn = 0;
 
@@ -144,14 +148,15 @@ pty_to_kernel()
 
       if (cc == 0
 	  || (cc < 0
-	      && errno == EWOULDBLOCK))
+	      && (errno == EWOULDBLOCK
+		  || errno == EAGAIN)))
 	break;
 
       if (cc < 0)
 	{
 	  close(inferior_pty);
 	  inferior_pty = -1;
-	  perror("pty read error");
+	  perror("pty_to_kernel: pty read error");
 	  break;
 	}
 
@@ -179,7 +184,7 @@ kernel_to_pty(data, len)
 	{
 	  close(inferior_pty);
 	  inferior_pty = -1;
-	  perror("pty write error");
+	  perror("kernel_to_pty: pty write error");
 	  return;
 	}
       printf("Couldn't write all the data to the pty, wanted %d, got %d\n",
@@ -199,6 +204,9 @@ full_filename(symtab)
 
   if (symtab->fullname)
     return savestring(symtab->fullname, strlen(symtab->fullname));
+
+  if (symtab->filename[0] == '/')
+    return savestring(symtab->filename, strlen(symtab->filename));
 
   if (symtab->dirname)
     pathlen = strlen(symtab->dirname);
@@ -220,7 +228,7 @@ full_filename(symtab)
 }
 
 /* Tell the energize kernel how high the stack is so that frame numbers (which
-   are relative to the current stack height) make sense.
+   are relative to the current stack height make sense.
 
    Calculate the number of frames on the stack, and the number of subroutine
    invocations that haven't changed since the last call to this routine.  The
@@ -659,8 +667,8 @@ execute_command_1(va_alist)
   va_list args;
 
   va_start(args);
-
   echo = va_arg(args, int);
+
   queue = va_arg(args, int);
   cmd = va_arg(args, char *);
 
@@ -741,7 +749,9 @@ breakpoint_notify(b, action)
   char *filename;
   char *included_in_filename = "";
 
-  if (!energize)
+  if (!energize
+      || energize_reloading)	/* Don't notify energize about breakpoint changes, as it's about to send us
+				   a new bunch.  */
     return;
 
   if (b->type != bp_breakpoint)
@@ -871,7 +881,10 @@ getpty()
   extern char *ptsname();
   int j, i;
   int n, mfd, sfd;
+  struct stat statbuf; 
   struct termios termios;
+
+  if (stat("/dev/ptmx",&statbuf)) error ("getpty: can't locate master\n");
 
   /* Number of pseudo-terms is tuneable(16 - 255). System default is 16. */
   for (i = 0; i < MAX_PTM_TRY; i++)
@@ -896,37 +909,52 @@ getpty()
 	}
 
       slavename = ptsname(mfd); /* get the slave device name */
-      if (!slavename)
-	{
-	  close(mfd);
-	  continue;
-	}
+      if (slavename)
+	break;			/* Success! */
 
-      sfd = open(slavename, O_RDWR);
-
-      if (sfd < 0)
-	{
-	  close(mfd);
-	  continue;
-	}
-
-      /* setup mty for non-blocking I/O.  Also make it give us a SIGIO
-	 when there's data availabe. */
-      n = fcntl(mfd, F_GETFL, 0);
-      fcntl(mfd, F_SETFL, n | O_NDELAY | O_SYNC);
-      fcntl(mfd, F_SETOWN,getpid());
-  
-      tcgetattr(sfd, &termios);
-      termios.c_oflag &= ~OPOST;	/* no post-processing */
-      tcsetattr(sfd, TCSANOW, &termios);
-
-      inferior_pty=mfd;
-      inferior_tty=sfd;
-      return;
+      close(mfd);
+      continue;
     }
-  error ("getpty: can't get a pts\n");
+
+  sfd = open(slavename, O_RDWR);
+
+  if (sfd < 0)
+    {
+      close(mfd);
+      error ("getpty: can't open slave\n");
+    }
+
+  if (slavename==NULL && i >= MAX_PTM_TRY)
+    error ("getpty: can't get a pts\n");
+
+  /* setup mty for non-blocking I/O. */
+
+  if ((n = fcntl(mfd, F_GETFL)) < 0)
+    perror ("getpty: fcntl F_GETFL failed");
+  else if (fcntl(mfd, F_SETFL, n|O_NDELAY) <0)
+    perror("getpty:fcntl F_SETFL fails");
+
+  /* set up for async i/o - V.4 will send SIGPOLL when data available */
+
+  if (ioctl (mfd,  I_SETSIG, S_INPUT|S_RDNORM) < 0)
+    perror ("getpty: ioctl I_SETSIG failed");
+
+  /* fcntl(mfd, F_SETOWN,getpid()); SVR4 does not support this */
+
+  if (ioctl(sfd, I_PUSH, "ptem")) perror ("getpty: ioctl I_PUSH fails");
+  if (ioctl(sfd, I_PUSH, "ldterm")) perror ("getpty: ioctl I_PUSH fails");
+
+  if (tcgetattr(sfd, &termios)) perror("getpty: tcgetattr fails");
+  termios.c_oflag &= ~OPOST;	/* no post-processing */
+  if (tcsetattr(sfd, TCSANOW, &termios)) perror("getpty: tcsetattr fails");
+
+  inferior_pty=mfd;
+  inferior_tty=sfd;
+
+  return;
 } 
-#endif
+
+#endif /* NCR486 */
 
 /* Examine a protocol packet from the driver. */
 
@@ -1078,7 +1106,7 @@ kernel_dispatch(queue)
 	  }
 	  break;
 	case StopRType:
-	  killpg(pgrp_inferior, SIGINT);
+	  kill(-pgrp_inferior, SIGINT);
 	  break;
 	case UserInputRType:
 	  {
@@ -1256,8 +1284,20 @@ kernel_dispatch(queue)
 	    switch (req->dynamicLoad.request->action)
 	      {
 	      case CDynamicLoadUpdateSymtab:
+		energize_reloading = 1;
+		execute_command_1(1, queue, "set confirm no");
+		execute_command_1(1, queue, "delete");
+/*		execute_command_1(1, queue, "set $bpnum=1");*/ /* Use this to reset breakpoint #s */
 		execute_command_1(1, queue, "exec-file %s", filename);
 		execute_command_1(1, queue, "symbol-file %s", filename);
+		execute_command_1(1, queue, "set confirm yes");
+		energize_reloading = 0;
+		break;
+	      case CDynamicLoadRestoreStart:
+		break;
+	      case CDynamicLoadRestoreEnd: /* Not used anymore??? */
+		printf_filtered("\n[Target has changed, automatic restoration of state has been done.]\n");
+		print_prompt();
 		break;
 	      default:
 		printf_filtered("DynamicLoadRType: unknown action=%d, filename=%s\n",
@@ -1300,14 +1340,18 @@ wait_for_events(poll)
   do
     {
       FD_SET(kerfd, &readfds);
-      if (inferior_pty > 0)
-	FD_SET(inferior_pty, &readfds);
+
+      FD_SET(inferior_pty, &readfds);
+
       if (poll)
 	numfds = select(sizeof(readfds)*8, &readfds, 0, 0, &tv);
       else
 	numfds = select(sizeof(readfds)*8, &readfds, 0, 0, 0);
     }
   while (numfds <= 0 && !poll);
+
+  if (numfds == 0)
+    return 0;
 
   if (FD_ISSET(inferior_pty, &readfds))
     eventmask |= PTY_EVENT;
@@ -1428,12 +1472,14 @@ energize_initialize(energize_id, execarg)
 
   /* Setup for I/O interrupts when appropriate. */
 
+#ifdef NCR486
+  if (ioctl (kerfd,  I_SETSIG, S_INPUT|S_RDNORM) < 0)
+    perror ("getpty: ioctl I_SETSIG failed");
+#else
   n = fcntl(kerfd, F_GETFL, 0);
-#ifdef NCR486...
-  O_SYNC
-#endif
   fcntl(kerfd, F_SETFL, n|FASYNC);
-  fcntl(kerfd, F_SETOWN, getpid());
+  fcntl(kerfd, F_SETOWN, getpid()); 
+#endif
 
   /* Setup connection buffering. */
 
@@ -1473,7 +1519,7 @@ energize_initialize(energize_id, execarg)
 
   req = CWriteTtyRequest (conn, RunningProgramRType);
   req->runningprogram.argc = 8;
-  getwd (pathname);
+  getcwd (pathname, MAXPATHLEN);
   CWriteVstring0 (conn, pathname);
 
   CWriteVstring0 (conn, "0");
@@ -1498,9 +1544,15 @@ energize_initialize(energize_id, execarg)
   /* Tell the rest of the world that Energize is now set up. */
   energize = 1;
 
-  setsid();			/* Drop controlling tty, become pgrp master */
+  /* Drop controlling tty, become pgrp master */
+
+  setsid();
+
   getpty();			/* Setup the pty */
-  dup2(inferior_tty, 0);	/* Attach all GDB I/O to the pty */
+
+  /* Attach all GDB I/O to the pty */
+
+  dup2(inferior_tty, 0);
   dup2(inferior_tty, 1);
   dup2(inferior_tty, 2);
 }
@@ -1572,15 +1624,31 @@ energize_wait(status)
      int *status;
 {
   int pid;
+  static sigset_t nullsigmask = {0};
 
   if (!energize)
+#ifdef USE_PROC_FS
+    return proc_wait (status);
+#else
     return wait(status);
+#endif
 
+#ifdef NCR486
+  action.sa_handler = iosig;
+  action.sa_mask = nullsigmask;
+  action.sa_flags = SA_RESTART;
+  sigaction(SIGIO, &action, NULL);
+#else
   signal(SIGIO, iosig);
+#endif
 
+#ifdef USE_PROC_FS
+  pid = proc_wait (status);
+#else
   pid = wait(status);
+#endif
 
-  signal(SIGIO, SIG_DFL);
+  signal(SIGIO, SIG_IGN);
   return pid;
 }
 
