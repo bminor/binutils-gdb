@@ -24,6 +24,11 @@ if ![istarget hppa*-*-*] then {
   return
 }
 
+# These tests are not suitable for wide mode.
+if [istarget hppa*w-*-*] then {
+  return
+}
+
 if {[which $OBJDUMP] == 0} then {
     perror "$OBJDUMP does not exist"
     return
