@@ -183,6 +183,64 @@ gdbtk_query (query, args)
   val = atol (interp->result);
   return val;
 }
+
+/* VARARGS */
+static void
+#ifdef ANSI_PROTOTYPES
+gdbtk_readline_begin (char *format, ...)
+#else
+gdbtk_readline_begin (va_alist)
+     va_dcl
+#endif
+{
+  va_list args;
+  char buf[200], *merge[2];
+  char *command;
+
+#ifdef ANSI_PROTOTYPES
+  va_start (args, format);
+#else
+  char *format;
+  va_start (args);
+  format = va_arg (args, char *);
+#endif
+
+  vsprintf (buf, format, args);
+  merge[0] = "gdbtk_tcl_readline_begin";
+  merge[1] = buf;
+  command = Tcl_Merge (2, merge);
+  Tcl_Eval (interp, command);
+  free (command);
+}
+
+static char *
+gdbtk_readline (prompt)
+     char *prompt;
+{
+  char *merge[2];
+  char *command;
+
+  merge[0] = "gdbtk_tcl_readline";
+  merge[1] = prompt;
+  command = Tcl_Merge (2, merge);
+  if (Tcl_Eval (interp, command) == TCL_OK)
+    {
+      return (strdup (interp -> result));
+    }
+  else
+    {
+      gdbtk_fputs (interp -> result, gdb_stdout);
+      gdbtk_fputs ("\n", gdb_stdout);
+      return (NULL);
+    }
+}
+
+static void
+gdbtk_readline_end ()
+{
+  Tcl_Eval (interp, "gdbtk_tcl_readline_end");
+}
+
 
 static void
 #ifdef ANSI_PROTOTYPES
@@ -1117,6 +1175,10 @@ gdbtk_call_command (cmdblk, arg, from_tty)
 static void
 tk_command_loop ()
 {
+  extern GDB_FILE *instream;
+
+  /* We no longer want to use stdin as the command input stream */
+  instream = NULL;
   Tcl_Eval (interp, "gdbtk_tcl_preloop");
   Tk_MainLoop ();
 }
@@ -1180,6 +1242,9 @@ gdbtk_init ()
   interactive_hook = gdbtk_interactive;
   target_wait_hook = gdbtk_wait;
   call_command_hook = gdbtk_call_command;
+  readline_begin_hook = gdbtk_readline_begin;
+  readline_hook = gdbtk_readline;
+  readline_end_hook = gdbtk_readline_end;
 
   /* Get the file descriptor for the X server */
 

@@ -265,6 +265,86 @@ proc gdbtk_tcl_breakpoint {action bpnum} {
 	${action}_breakpoint $bpnum $file $line $pc
 }
 
+#
+# GDB Callback:
+#
+#	gdbtk_tcl_readline_begin (message) - Notify Tk to open an interaction
+#	window and start gathering user input
+#
+# Description:
+#
+#	GDB calls this to notify TK that it needs to open an interaction
+#	window, displaying the given message, and be prepared to accept
+#	calls to gdbtk_tcl_readline to gather user input.
+
+proc gdbtk_tcl_readline_begin {message} {
+    global readline_text
+
+    # If another readline window already exists, just bring it to the front.
+    if {[winfo exists .rl]} {raise .rl ; return}
+
+    # Create top level frame with scrollbar and text widget.
+    toplevel .rl
+    wm title .rl "Interaction Window"
+    wm iconname .rl "Input"
+    message .rl.msg -text $message -aspect 7500 -justify left
+    text .rl.text -width 80 -height 20 -setgrid true -cursor hand2 \
+	    -yscrollcommand {.rl.scroll set}
+    scrollbar .rl.scroll -command {.rl.text yview}
+    pack .rl.msg -side top -fill x
+    pack .rl.scroll -side right -fill y
+    pack .rl.text -side left -fill both -expand true
+
+    # When the user presses return, get the text from the command start mark to the
+    # current insert point, stash it in the readline text variable, and update the
+    # command start mark to the current insert point
+    bind .rl.text <Return> {
+	set readline_text [.rl.text get cmdstart {end - 1 char}]
+	.rl.text mark set cmdstart insert
+    }
+    bindtags .rl.text {.rl.text Text all}
+}
+
+#
+# GDB Callback:
+#
+#	gdbtk_tcl_readline (prompt) - Get one user input line
+#
+# Description:
+#
+#	GDB calls this to get one line of input from the user interaction
+#	window, using "prompt" as the command line prompt.
+
+proc gdbtk_tcl_readline {prompt} {
+    global readline_text
+
+    .rl.text insert end $prompt
+    .rl.text mark set cmdstart insert
+    .rl.text mark gravity cmdstart left
+    .rl.text see insert
+
+    # Make this window the current one for input.
+    focus .rl.text
+    grab .rl
+    tkwait variable readline_text
+    grab release .rl
+    return $readline_text
+}
+
+#
+# GDB Callback:
+#
+#	gdbtk_tcl_readline_end  - Terminate a user interaction
+#
+# Description:
+#
+#	GDB calls this when it is done getting interactive user input.
+#	Destroy the interaction window.
+
+proc gdbtk_tcl_readline_end {} {
+    if {[winfo exists .rl]} { destroy .rl }
+}
+
 proc create_breakpoints_window {} {
 	global bpframe_lasty
 
@@ -3149,8 +3229,8 @@ proc tclsh {} {
     text .eval.text -width 80 -height 20 -setgrid true -cursor hand2 \
 	    -yscrollcommand {.eval.scroll set}
     scrollbar .eval.scroll -command {.eval.text yview}
-    pack .eval.scroll -side left -fill y
-    pack .eval.text -side right -fill both -expand true
+    pack .eval.scroll -side right -fill y
+    pack .eval.text -side left -fill both -expand true
 
     # Insert the tcl_prompt and initialize the cmdstart mark
     .eval.text insert insert $tcl_prompt

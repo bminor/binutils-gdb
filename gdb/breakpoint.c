@@ -330,10 +330,9 @@ commands_command (arg, from_tty)
   ALL_BREAKPOINTS (b)
     if (b->number == bnum)
       {
-	if (from_tty && input_from_terminal_p ())
-	  printf_filtered ("Type commands for when breakpoint %d is hit, one per line.\n\
-End with a line saying just \"end\".\n", bnum);
-	l = read_command_lines ();
+	char tmpbuf[128];
+	sprintf (tmpbuf, "Type commands for when breakpoint %d is hit, one per line.", bnum);
+	l = read_command_lines (tmpbuf, from_tty);
 	free_command_lines (&b->commands);
 	b->commands = l;
 	breakpoints_changed ();

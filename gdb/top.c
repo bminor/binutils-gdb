@@ -275,7 +275,7 @@ struct cmd_list_element *showchecklist;
 
 /* stdio stream that command input is being read from.  Set to stdin normally.
    Set by source_command to the file we are sourcing.  Set to NULL if we are
-   executing a user-defined command.  */
+   executing a user-defined command or interacting via a GUI.  */
 
 FILE *instream;
 
@@ -394,6 +394,21 @@ int (*query_hook) PARAMS (());
 /* Called from gdb_flush to flush output.  */
 
 void (*flush_hook) PARAMS ((FILE *stream));
+
+/* These three functions support getting lines of text from the user.  They
+   are used in sequence.  First readline_begin_hook is called with a text
+   string that might be (for example) a message for the user to type in a
+   sequence of commands to be executed at a breakpoint.  If this function
+   calls back to a GUI, it might take this opportunity to pop up a text
+   interaction window with this message.  Next, readline_hook is called
+   with a prompt that is emitted prior to collecting the user input.
+   It can be called multiple times.  Finally, readline_end_hook is called
+   to notify the GUI that we are done with the interaction window and it
+   can close it. */
+
+void (*readline_begin_hook) PARAMS ((char *, ...));
+char * (*readline_hook) PARAMS ((char *));
+void (*readline_end_hook) PARAMS ((void));
 
 /* Called as appropriate to notify the interface of the specified breakpoint
    conditions.  */
@@ -1237,7 +1252,7 @@ command_loop ()
   extern int display_time;
   extern int display_space;
 
-  while (!feof (instream))
+  while (instream && !feof (instream))
     {
       if (window_hook && instream == stdin)
 	(*window_hook) (instream, prompt);
@@ -1962,11 +1977,18 @@ command_line_input (prrompt, repeat, annotation_suffix)
 	}
 
       /* Don't use fancy stuff if not talking to stdin.  */
-      if (command_editing_p && instream == stdin
-	  && ISATTY (instream))
-	rl = readline (local_prompt);
+      if (readline_hook && instream == NULL)
+	{
+	  rl = (*readline_hook) (local_prompt);
+	}
+      else if (command_editing_p && instream == stdin && ISATTY (instream))
+	{
+	  rl = readline (local_prompt);
+	}
       else
-	rl = gdb_readline (local_prompt);
+	{
+	  rl = gdb_readline (local_prompt);
+	}
 
       if (annotation_level > 1 && instream == stdin)
 	{
@@ -2138,7 +2160,7 @@ read_next_line (command)
     error ("Control nesting too deep!\n");
 
   /* Set a prompt based on the nesting of the control commands.  */
-  if (instream == stdin)
+  if (instream == stdin || (instream == 0 && readline_hook != NULL))
     {
       for (i = 0; i < control_level; i++)
 	control_prompt[i] = ' ';
@@ -2220,7 +2242,7 @@ read_next_line (command)
 }
 
 /* Recursively read in the control structures and create a command_line 
-   tructure from them.
+   structure from them.
 
    The parent_control parameter is the control structure in which the
    following commands are nested.  */
@@ -2331,18 +2353,33 @@ recurse_read_control_structure (current_cmd)
   return ret;
 }
 
+/* Read lines from the input stream and accumulate them in a chain of
+   struct command_line's, which is then returned.  For input from a
+   terminal, the special command "end" is used to mark the end of the
+   input, and is not included in the returned chain of commands. */
 
-/* Read lines from the input stream
-   and accumulate them in a chain of struct command_line's
-   which is then returned.  */
+#define END_MESSAGE "End with a line saying just \"end\"."
 
 struct command_line *
-read_command_lines ()
+read_command_lines (prompt, from_tty)
+char *prompt;
+int from_tty;
 {
   struct command_line *head, *tail, *next;
   struct cleanup *old_chain;
   enum command_control_type ret;
   enum misc_command_type val;
+
+  if (readline_begin_hook)
+    {
+      /* Note - intentional to merge messages with no newline */
+      (*readline_begin_hook) ("%s  %s\n", prompt, END_MESSAGE);
+    }
+  else if (from_tty && input_from_terminal_p ())
+    {
+      printf_unfiltered ("%s\n%s\n", prompt, END_MESSAGE);
+      gdb_flush (gdb_stdout);
+    }
 
   head = tail = NULL;
   old_chain = NULL;
@@ -2397,13 +2434,16 @@ read_command_lines ()
       if (ret != invalid_control)
 	{
 	  discard_cleanups (old_chain);
-	  return head;
 	}
       else
 	do_cleanups (old_chain);
     }
 
-  return NULL;
+  if (readline_end_hook)
+    {
+      (*readline_end_hook) ();
+    }
+  return (head);
 }
 
 /* Free a chain of struct command_line's.  */
@@ -2579,6 +2619,7 @@ define_command (comname, from_tty)
   register struct command_line *cmds;
   register struct cmd_list_element *c, *newc, *hookc = 0;
   char *tem = comname;
+  char tmpbuf[128];
 #define	HOOK_STRING	"hook-"
 #define	HOOK_LEN 5
 
@@ -2626,15 +2667,9 @@ define_command (comname, from_tty)
   for (tem = comname; *tem; tem++)
     if (isupper(*tem)) *tem = tolower(*tem);
 
-  if (from_tty)
-    {
-      printf_unfiltered ("Type commands for definition of \"%s\".\n\
-End with a line saying just \"end\".\n", comname);
-      gdb_flush (gdb_stdout);
-    }
-
   control_level = 0;
-  cmds = read_command_lines ();
+  sprintf (tmpbuf, "Type commands for definition of \"%s\".", comname);
+  cmds = read_command_lines (tmpbuf, from_tty);
 
   if (c && c->class == class_user)
     free_command_lines (&c->user_commands);
@@ -2661,6 +2696,7 @@ document_command (comname, from_tty)
   struct command_line *doclines;
   register struct cmd_list_element *c;
   char *tem = comname;
+  char tmpbuf[128];
 
   validate_comname (comname);
 
@@ -2669,11 +2705,8 @@ document_command (comname, from_tty)
   if (c->class != class_user)
     error ("Command \"%s\" is built-in.", comname);
 
-  if (from_tty)
-    printf_unfiltered ("Type documentation for \"%s\".\n\
-End with a line saying just \"end\".\n", comname);
-
-  doclines = read_command_lines ();
+  sprintf (tmpbuf, "Type documentation for \"%s\".", comname);
+  doclines = read_command_lines (tmpbuf, from_tty);
 
   if (c->doc) free (c->doc);
 

@@ -1,3 +1,34 @@
+Sun May 19 16:49:37 1996  Fred Fish  <fnf@cygnus.com>
+
+	* defs.h (read_command_lines, query_hook): Update prototypes.
+	(readline_begin_hook, readline_hook, readline_end_hook): Declare.
+	* breakpoint.c (commands_command): Build message in temporary buffer
+	and pass that, as well as tty control flag, to read_command_lines.
+	* top.c (readline_begin_hook, readline_hook, readline_end_hook):
+	Define here.
+	(command_loop): Check for non-NULL instream before looping.
+	(command_line_input): Use readline_hook when appropriate, to get
+	user input from a GUI window.
+	(read_next_line): Also build prompt if getting user input from a GUI.
+	(recurse_read_control_structure): Fix typo in comment.
+	(read_command_lines): Use passed in prompt and tty flag to decide how
+	to build message.  Use readline_begin_hook when appropriate, to set
+	up a GUI interaction window.  Just return head, whether NULL or not,
+	after using readline_end_hook to complete GUI interaction.
+	(define_command, document_command): Build message in a temporary
+	buffer and pass it to read_command_lines, along with tty flag.
+
+start-sanitize-gdbtk
+	* gdbtk.c (gdbtk_readline_begin, gdbtk_readline, gdbtk_readline_end):
+	New functions.
+	(tk_command_loop): Set instream to NULL to enable Tk user interaction.
+	(gdbtk_init): Set readline_begin_hook, readline_hook,
+	and readline_end_hook.
+	* gdbtk.tcl (gdbtk_tcl_readline_begin, gdbtk_tcl_readline,
+	gdbtk_tcl_readline_end): New functions.
+	(tclsh): Pack scroll bar on right side of window, not left.
+end-sanitize-gdbtk
+
 Sat May 18 02:43:58 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* blockframe.c (frameless_look_for_prologue):
