@@ -66,6 +66,7 @@ enum {
   OPTION_TRACE_FPU,
   OPTION_TRACE_BRANCH,
   OPTION_TRACE_SEMANTICS,
+  OPTION_TRACE_DEBUG,
   OPTION_TRACE_FILE
 };
 
@@ -95,11 +96,9 @@ static const OPTION trace_options[] =
   { {"trace-alu", optional_argument, NULL, OPTION_TRACE_ALU},
       '\0', "on|off", "Perform ALU tracing",
       trace_option_handler },
-#if (WITH_CORE)
   { {"trace-core", optional_argument, NULL, OPTION_TRACE_CORE},
       '\0', "on|off", "Perform CORE tracing",
       trace_option_handler },
-#endif
   { {"trace-events", optional_argument, NULL, OPTION_TRACE_EVENTS},
       '\0', "on|off", "Perform EVENTS tracing",
       trace_option_handler },
@@ -111,6 +110,9 @@ static const OPTION trace_options[] =
       trace_option_handler },
   { {"trace-semantics", optional_argument, NULL, OPTION_TRACE_SEMANTICS},
       '\0', "on|off", "Perform ALU, FPU, MEMORY, and BRANCH tracing",
+      trace_option_handler },
+  { {"trace-debug", optional_argument, NULL, OPTION_TRACE_DEBUG},
+      '\0', "on|off", "Add information useful for debugging the simulator to the tracing output",
       trace_option_handler },
   { {"trace-file", required_argument, NULL, OPTION_TRACE_FILE},
       '\0', "FILE NAME", "Specify tracing output file",
@@ -133,6 +135,7 @@ set_trace_options (sd, name, first_trace, last_trace, arg)
   int trace_nr;
   int cpu_nr;
   int trace_val = 1;
+
   if (arg != NULL)
     {
       if (strcmp (arg, "yes") == 0
@@ -149,26 +152,29 @@ set_trace_options (sd, name, first_trace, last_trace, arg)
 	  return SIM_RC_FAIL;
 	}
     }
+
   trace_nr = first_trace;
   do
     {
+      /* Set non-cpu specific values.  */
       switch (trace_nr)
 	{
-#if (WITH_CORE)
-	case TRACE_CORE_IDX:
-	  STATE_CORE(sd)->trace = trace_val;
-	  break;
-#endif
 	case TRACE_EVENTS_IDX:
-	  STATE_EVENTS(sd)->trace = trace_val;
+	  STATE_EVENTS (sd)->trace = trace_val;
+	  break;
+	case TRACE_DEBUG_IDX:
+	  STATE_TRACE_FLAGS (sd)[trace_nr] = trace_val;
 	  break;
 	}
+
+      /* Set cpu values.  */
       for (cpu_nr = 0; cpu_nr < MAX_NR_PROCESSORS; cpu_nr++)
 	{
 	  CPU_TRACE_FLAGS (STATE_CPU (sd, cpu_nr))[trace_nr] = trace_val;
 	}
     }
   while (++trace_nr < last_trace);
+
   return SIM_RC_OK;
 }
 
@@ -288,6 +294,13 @@ trace_option_handler (sd, opt, arg, is_command)
 	sim_io_eprintf (sd, "Alu, fpu, memory, and/or branch tracing not compiled in, `--trace-semantics' ignored\n");
       break;
 
+    case OPTION_TRACE_DEBUG :
+      if (WITH_TRACE_DEBUG_P)
+	return set_trace_options (sd, "-debug", TRACE_DEBUG_IDX, -1, arg);
+      else
+	sim_io_eprintf (sd, "Tracing debug support not compiled in, `--trace-debug' ignored\n");
+      break;
+
     case OPTION_TRACE_FILE :
       if (! WITH_TRACE)
 	sim_io_eprintf (sd, "Tracing not compiled in, `--trace-file' ignored\n");
@@ -302,6 +315,7 @@ trace_option_handler (sd, opt, arg, is_command)
 	    }
 	  for (n = 0; n < MAX_NR_PROCESSORS; ++n)
 	    TRACE_FILE (CPU_TRACE_DATA (STATE_CPU (sd, n))) = f;
+	  TRACE_FILE (STATE_TRACE_DATA (sd)) = f;
 	}
       break;
     }
@@ -319,6 +333,7 @@ trace_install (SIM_DESC sd)
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
   sim_add_option_table (sd, trace_options);
+  memset (STATE_TRACE_DATA (sd), 0, sizeof (* STATE_TRACE_DATA (sd)));
   for (i = 0; i < MAX_NR_PROCESSORS; ++i)
     memset (CPU_TRACE_DATA (STATE_CPU (sd, i)), 0,
 	    sizeof (* CPU_TRACE_DATA (STATE_CPU (sd, i))));
@@ -330,20 +345,23 @@ static void
 trace_uninstall (SIM_DESC sd)
 {
   int i,j;
+  FILE *sfile = TRACE_FILE (STATE_TRACE_DATA (sd));
+
+  if (sfile != NULL)
+    fclose (sfile);
 
   for (i = 0; i < MAX_NR_PROCESSORS; ++i)
     {
-      TRACE_DATA *data = CPU_TRACE_DATA (STATE_CPU (sd, i));
-      if (TRACE_FILE (data) != NULL)
+      FILE *cfile = TRACE_FILE (CPU_TRACE_DATA (STATE_CPU (sd, i)));
+      if (cfile != NULL && cfile != sfile)
 	{
 	  /* If output from different cpus is going to the same file,
 	     avoid closing the file twice.  */
 	  for (j = 0; j < i; ++j)
-	    if (TRACE_FILE (CPU_TRACE_DATA (STATE_CPU (sd, j)))
-		== TRACE_FILE (data))
+	    if (TRACE_FILE (CPU_TRACE_DATA (STATE_CPU (sd, j))) == cfile)
 	      break;
 	  if (i == j)
-	    fclose (TRACE_FILE (data));
+	    fclose (cfile);
 	}
     }
 }
@@ -434,16 +452,26 @@ trace_one_insn (SIM_DESC sd, sim_cpu *cpu, address_word pc,
 void
 trace_vprintf (SIM_DESC sd, sim_cpu *cpu, const char *fmt, va_list ap)
 {
-  if (cpu != NULL && TRACE_FILE (CPU_TRACE_DATA (cpu)) != NULL)
-    vfprintf (TRACE_FILE (CPU_TRACE_DATA (cpu)), fmt, ap);
+  if (cpu != NULL)
+    {
+      if (TRACE_FILE (CPU_TRACE_DATA (cpu)) != NULL)
+	vfprintf (TRACE_FILE (CPU_TRACE_DATA (cpu)), fmt, ap);
+      else
+	sim_io_evprintf (sd, fmt, ap);
+    }
   else
-    sim_io_evprintf (sd, fmt, ap);
+    {
+      if (TRACE_FILE (STATE_TRACE_DATA (sd)) != NULL)
+	vfprintf (TRACE_FILE (STATE_TRACE_DATA (sd)), fmt, ap);
+      else
+	sim_io_evprintf (sd, fmt, ap);
+    }
 }
 
 void
 trace_printf VPARAMS ((SIM_DESC sd, sim_cpu *cpu, const char *fmt, ...))
 {
-#ifndef __STDC__
+#if !defined __STDC__ && !defined ALMOST_STDC
   SIM_DESC sd;
   sim_cpu *cpu;
   const char *fmt;
@@ -451,7 +479,7 @@ trace_printf VPARAMS ((SIM_DESC sd, sim_cpu *cpu, const char *fmt, ...))
   va_list ap;
 
   VA_START (ap, fmt);
-#ifndef __STDC__
+#if !defined __STDC__ && !defined ALMOST_STDC
   sd = va_arg (ap, SIM_DESC);
   cpu = va_arg (ap, sim_cpu *);
   fmt = va_arg (ap, const char *);
@@ -465,14 +493,14 @@ trace_printf VPARAMS ((SIM_DESC sd, sim_cpu *cpu, const char *fmt, ...))
 void
 debug_printf VPARAMS ((sim_cpu *cpu, const char *fmt, ...))
 {
-#ifndef __STDC__
+#if !defined __STDC__ && !defined ALMOST_STDC
   sim_cpu *cpu;
   const char *fmt;
 #endif
   va_list ap;
 
   VA_START (ap, fmt);
-#ifndef __STDC__
+#if !defined __STDC__ && !defined ALMOST_STDC
   cpu = va_arg (ap, sim_cpu *);
   fmt = va_arg (ap, const char *);
 #endif

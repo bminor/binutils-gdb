@@ -9,10 +9,9 @@ Mon Nov 24 12:09:59 1997  Doug Evans  <devans@seba.cygnus.com>
 
 	* sim-model.c (model_options): Use '\0' for `shortopt'.
 
-	* Make-common.in (all): Add .gdbinit.
-	* gdbinit.in: Add dump command.
-
-	* sim-model.c (model_options): Use '\0' for `shortopt'.
+	* sim-trace.c (trace_option_handler): Set state trace file
+	for --trace-file in addition to cpu's values.
+	(trace_vprintf): If cpu == NULL, try state's trace file.
 
 Sun Nov 23 10:57:00 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
