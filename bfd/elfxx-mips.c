@@ -587,17 +587,20 @@ static bfd *reldyn_sorting_bfd;
    offsets from $gp.  */
 #define MIPS_ELF_GOT_MAX_SIZE(abfd) (ELF_MIPS_GP_OFFSET(abfd) + 0x7fff)
 
-/* Instructions which appear in a stub.  For some reason the stub is
-   slightly different on an SGI system.  */
+/* Instructions which appear in a stub.  */
 #define STUB_LW(abfd)						\
   ((ABI_64_P (abfd)  						\
     ? 0xdf998010		/* ld t9,0x8010(gp) */		\
     : 0x8f998010))              /* lw t9,0x8010(gp) */
 #define STUB_MOVE(abfd)                                         \
-  (SGI_COMPAT (abfd) ? 0x03e07825 : 0x03e07821)         /* move t7,ra */
-#define STUB_JALR 0x0320f809				/* jal t9 */
+   ((ABI_64_P (abfd)						\
+     ? 0x03e0782d		/* daddu t7,ra */		\
+     : 0x03e07821))		/* addu t7,ra */
+#define STUB_JALR 0x0320f809	/* jalr t9,ra */
 #define STUB_LI16(abfd)                                         \
-  (SGI_COMPAT (abfd) ? 0x34180000 : 0x24180000)         /* ori t8,zero,0 */
+  ((ABI_64_P (abfd)						\
+   ? 0x64180000			/* daddiu t8,zero,0 */		\
+   : 0x24180000))		/* addiu t8,zero,0 */
 #define MIPS_FUNCTION_STUB_SIZE (16)
 
 /* The name of the dynamic interpreter.  This is put in the .interp

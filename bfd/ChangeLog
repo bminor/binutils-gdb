@@ -1,3 +1,8 @@
+2003-10-08  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* elfxx-mips.c (STUB_MOVE,STUB_LI16): Fix stub code
+	for non-SGI N64 ABI. Improve code consitency.
+
 2003-10-07  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elf32-frv.c (elf32_frv_howto_table): Set R_FRV_LABEL16's
