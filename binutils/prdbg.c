@@ -1,5 +1,5 @@
 /* prdbg.c -- Print out generic debugging information.
-   Copyright (C) 1995 Free Software Foundation, Inc.
+   Copyright (C) 1995, 1996 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
 
    This file is part of GNU Binutils.
@@ -78,7 +78,8 @@ static boolean pr_int_type PARAMS ((PTR, unsigned int, boolean));
 static boolean pr_float_type PARAMS ((PTR, unsigned int));
 static boolean pr_complex_type PARAMS ((PTR, unsigned int));
 static boolean pr_bool_type PARAMS ((PTR, unsigned int));
-static boolean pr_enum_type PARAMS ((PTR, const char **, bfd_signed_vma *));
+static boolean pr_enum_type
+  PARAMS ((PTR, const char *, const char **, bfd_signed_vma *));
 static boolean pr_pointer_type PARAMS ((PTR));
 static boolean pr_function_type PARAMS ((PTR));
 static boolean pr_reference_type PARAMS ((PTR));
@@ -90,12 +91,13 @@ static boolean pr_offset_type PARAMS ((PTR));
 static boolean pr_method_type PARAMS ((PTR, boolean, int));
 static boolean pr_const_type PARAMS ((PTR));
 static boolean pr_volatile_type PARAMS ((PTR));
-static boolean pr_start_struct_type PARAMS ((PTR, boolean, unsigned int));
+static boolean pr_start_struct_type
+  PARAMS ((PTR, const char *, boolean, unsigned int));
 static boolean pr_struct_field
   PARAMS ((PTR, const char *, bfd_vma, bfd_vma, enum debug_visibility));
 static boolean pr_end_struct_type PARAMS ((PTR));
 static boolean pr_start_class_type
-  PARAMS ((PTR, boolean, unsigned int, boolean, boolean));
+  PARAMS ((PTR, const char *, boolean, unsigned int, boolean, boolean));
 static boolean pr_class_static_member
   PARAMS ((PTR, const char *, const char *, enum debug_visibility));
 static boolean pr_class_baseclass
@@ -121,9 +123,9 @@ static boolean pr_start_function PARAMS ((PTR, const char *, boolean));
 static boolean pr_function_parameter
   PARAMS ((PTR, const char *, enum debug_parm_kind, bfd_vma));
 static boolean pr_start_block PARAMS ((PTR, bfd_vma));
-static boolean pr_lineno PARAMS ((PTR, const char *, unsigned long, bfd_vma));
 static boolean pr_end_block PARAMS ((PTR, bfd_vma));
 static boolean pr_end_function PARAMS ((PTR));
+static boolean pr_lineno PARAMS ((PTR, const char *, unsigned long, bfd_vma));
 
 static const struct debug_write_fns pr_fns =
 {
@@ -168,9 +170,9 @@ static const struct debug_write_fns pr_fns =
   pr_start_function,
   pr_function_parameter,
   pr_start_block,
-  pr_lineno,
   pr_end_block,
-  pr_end_function
+  pr_end_function,
+  pr_lineno
 };
 
 /* Print out the generic debugging information recorded in dhandle.  */
@@ -337,7 +339,7 @@ pop_type (info)
      struct pr_handle *info;
 {
   struct pr_stack *o;
-  char *ret, *s;
+  char *ret;
 
   assert (info->stack != NULL);
 
@@ -345,10 +347,6 @@ pop_type (info)
   info->stack = o->next;
   ret = o->type;
   free (o);
-
-  s = strchr (ret, '+');
-  if (s != NULL)
-    memmove (s, s + 2, strlen (s + 2) + 1);
 
   return ret;
 }
@@ -500,8 +498,9 @@ pr_bool_type (p, size)
 /* Push an enum type onto the type stack.  */
 
 static boolean
-pr_enum_type (p, names, values)
+pr_enum_type (p, tag, names, values)
      PTR p;
+     const char *tag;
      const char **names;
      bfd_signed_vma *values;
 {
@@ -509,8 +508,15 @@ pr_enum_type (p, names, values)
   unsigned int i;
   bfd_signed_vma val;
 
-  /* The + indicates where the tag goes, if there is one.  */
-  if (! push_type (info, "enum + { "))
+  if (! push_type (info, "enum "))
+    return false;
+  if (tag != NULL)
+    {
+      if (! append_type (info, tag)
+	  || ! append_type (info, " "))
+	return false;
+    }
+  if (! append_type (info, "{ "))
     return false;
 
   val = 0;
@@ -824,26 +830,30 @@ pr_volatile_type (p)
 /* Start accumulating a struct type.  */
 
 static boolean
-pr_start_struct_type (p, structp, size)
+pr_start_struct_type (p, tag, structp, size)
      PTR p;
+     const char *tag;
      boolean structp;
      unsigned int size;
 {
   struct pr_handle *info = (struct pr_handle *) p;
-  const char *t;
   char ab[30];
 
   info->indent += 2;
 
-  if (structp)
-    t = "struct";
-  else
-    t = "union";
+  if (! push_type (info, structp ? "struct " : "union "))
+    return false;
+  if (tag != NULL)
+    {
+      if (! append_type (info, tag)
+	  || ! append_type (info, " "))
+	return false;
+    }
   if (size != 0)
-    sprintf (ab, "%s + { /* size %u */\n", t, size);
+    sprintf (ab, "{ /* size %u */\n", size);
   else
-    sprintf (ab, "%s + {\n", t);
-  if (! push_type (info, ab))
+    strcpy (ab, "{\n");
+  if (! append_type (info, ab))
     return false;
   info->stack->visibility = DEBUG_VISIBILITY_PUBLIC;
   return indent_type (info);
@@ -977,8 +987,9 @@ pr_end_struct_type (p)
 /* Start a class type.  */
 
 static boolean
-pr_start_class_type (p, structp, size, vptr, ownvptr)
+pr_start_class_type (p, tag, structp, size, vptr, ownvptr)
      PTR p;
+     const char *tag;
      boolean structp;
      unsigned int size;
      boolean vptr;
@@ -996,8 +1007,15 @@ pr_start_class_type (p, structp, size, vptr, ownvptr)
 	return false;
     }
 
-  if (! push_type (info, structp ? "class" : "union class")
-      || ! append_type (info, " + {"))
+  if (! push_type (info, structp ? "class " : "union class "))
+    return false;
+  if (tag != NULL)
+    {
+      if (! append_type (info, tag)
+	  || ! append_type (info, " "))
+	return false;
+    }
+  if (! append_type (info, "{"))
     return false;
   if (size != 0 || vptr || ownvptr)
     {
@@ -1079,7 +1097,7 @@ pr_class_baseclass (p, bitpos, virtual, visibility)
   char *t;
   const char *prefix;
   char ab[20];
-  char *s, *n;
+  char *s, *l, *n;
 
   assert (info->stack != NULL && info->stack->next != NULL);
 
@@ -1134,27 +1152,19 @@ pr_class_baseclass (p, bitpos, virtual, visibility)
 
   /* Now the top of the stack is something like "public A / * bitpos
      10 * /".  The next element on the stack is something like "class
-     + { / * size 8 * /\n...".  We want to substitute the top of the
-     stack in after the +.  */
-  s = strchr (info->stack->next->type, '+');
+     xx { / * size 8 * /\n...".  We want to substitute the top of the
+     stack in before the {.  */
+  s = strchr (info->stack->next->type, '{');
   assert (s != NULL);
+  --s;
 
-  if (s[2] != ':')
-    {
-      ++s;
-      assert (s[1] == '{');
-      if (! prepend_type (info, " : "))
-	return false;
-    }
-  else
-    {
-      /* We already have a baseclass.  Append this one after a comma.  */
-      s = strchr (s, '{');
-      assert (s != NULL);
-      --s;
-      if (! prepend_type (info, ", "))
-	return false;
-    }
+  /* If there is already a ':', then we already have a baseclass, and
+     we must append this one after a comma.  */
+  for (l = info->stack->next->type; l != s; l++)
+    if (*l == ':')
+      break;
+  if (! prepend_type (info, l == s ? " : " : ", "))
+    return false;
 
   t = pop_type (info);
   if (t == NULL)
@@ -1426,31 +1436,17 @@ pr_typdef (p, name)
   return true;
 }
 
-/* Output a tag.  */
+/* Output a tag.  The tag should already be in the string on the
+   stack, so all we have to do here is print it out.  */
 
+/*ARGSUSED*/
 static boolean
 pr_tag (p, name)
      PTR p;
      const char *name;
 {
   struct pr_handle *info = (struct pr_handle *) p;
-  char *t, *s, *n;
-
-  assert (info->stack != NULL);
-
-  t = info->stack->type;
-
-  s = strchr (t, '+');
-  assert (s != NULL);
-
-  n = (char *) xmalloc (strlen (t) + strlen (name));
-
-  memcpy (n, t, s - t);
-  strcpy (n + (s - t), name);
-  strcat (n, s + 1);
-
-  free (t);
-  info->stack->type = n;
+  char *t;
 
   t = pop_type (info);
   if (t == NULL)
@@ -1459,7 +1455,7 @@ pr_tag (p, name)
   indent (info);
   fprintf (info->f, "%s;\n", t);
 
-  free (n);
+  free (t);
 
   return true;
 }

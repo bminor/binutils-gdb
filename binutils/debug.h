@@ -1,5 +1,5 @@
 /* debug.h -- Describe generic debugging information.
-   Copyright (C) 1995 Free Software Foundation, Inc.
+   Copyright (C) 1995, 1996 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
 
    This file is part of GNU Binutils.
@@ -192,9 +192,11 @@ struct debug_write_fns
   /* Push a boolean type onto the type stack, given the size.  */
   boolean (*bool_type) PARAMS ((PTR, unsigned int));
 
-  /* Push an enum type onto the type stack, given a NULL terminated
-     array of names and the associated values.  */
-  boolean (*enum_type) PARAMS ((PTR, const char **, bfd_signed_vma *));
+  /* Push an enum type onto the type stack, given the tag, a NULL
+     terminated array of names and the associated values.  If there is
+     no tag, the tag argument will be NULL.  */
+  boolean (*enum_type) PARAMS ((PTR, const char *, const char **,
+				bfd_signed_vma *));
 
   /* Pop the top type on the type stack, and push a pointer to that
      type onto the type stack.  */
@@ -240,8 +242,8 @@ struct debug_write_fns
      method).  An argument type of -1 means that no argument in
      formation is available.  The next type on the type stack below
      the domain and the argument types is the return type of the
-     method.  All these types must be poppsed, and then the method
-     type must be pushed.  */
+     method.  All these types must be popped, and then the method type
+     must be pushed.  */
   boolean (*method_type) PARAMS ((PTR, boolean, int));
 
   /* Pop the top type off the type stack, and push a const qualified
@@ -254,10 +256,12 @@ struct debug_write_fns
 
   /* Start building a struct.  This is followed by calls to the
      struct_field function, and finished by a call to the
-     end_struct_type function.  The boolean argument is true for a
-     struct, false for a union.  The unsigned int argument is the
-     size.  */
-  boolean (*start_struct_type) PARAMS ((PTR, boolean, unsigned int));
+     end_struct_type function.  The second argument is the tag; this
+     will be NULL if there isn't one.  The boolean argument is true
+     for a struct, false for a union.  The unsigned int argument is
+     the size.  */
+  boolean (*start_struct_type) PARAMS ((PTR, const char *, boolean,
+					unsigned int));
 
   /* Add a field to the struct type currently being built.  The type
      of the field should be popped off the type stack.  The arguments
@@ -273,19 +277,20 @@ struct debug_write_fns
      functions: struct_field, class_static_member, class_baseclass,
      class_start_method, class_method_variant,
      class_static_method_variant, and class_end_method.  The class is
-     finished by a call to end_class_type.  The boolean argument is
-     true for a struct, false for a union.  The next argument is the
-     size.  The next argument is true if there is a virtual function
-     table; if there is, the next argument is true if the virtual
-     function table can be found in the type itself, and is false if
-     the type of the object holding the virtual function table should
-     be popped from the type stack.  */
-  boolean (*start_class_type) PARAMS ((PTR, boolean, unsigned int,
-				       boolean, boolean));
+     finished by a call to end_class_type.  The second argument is the
+     tag; this will be NULL if there isn't one.  The boolean argument
+     is true for a struct, false for a union.  The next argument is
+     the size.  The next argument is true if there is a virtual
+     function table; if there is, the next argument is true if the
+     virtual function table can be found in the type itself, and is
+     false if the type of the object holding the virtual function
+     table should be popped from the type stack.  */
+  boolean (*start_class_type) PARAMS ((PTR, const char *, boolean,
+				       unsigned int, boolean, boolean));
 
   /* Add a static member to the class currently being built.  The
      arguments are the field name, the physical name, and the
-     visibility.  */
+     visibility.  The type must be popped off the type stack.  */
   boolean (*class_static_member) PARAMS ((PTR, const char *, const char *,
 					  enum debug_visibility));
   
@@ -319,7 +324,8 @@ struct debug_write_fns
 
   /* Describe a static variant to the class method currently being
      built.  The arguments are the same as for class_method_variant,
-     except that the last two arguments are omitted.  */
+     except that the last two arguments are omitted.  The type of the
+     variant must be popped off the type stack.  */
   boolean (*class_static_method_variant) PARAMS ((PTR, const char *,
 						  enum debug_visibility,
 						  boolean, boolean));
@@ -342,7 +348,9 @@ struct debug_write_fns
   boolean (*typdef) PARAMS ((PTR, const char *));
 
   /* Pop the type stack, and declare it as a tagged struct or union or
-     enum or whatever.  */
+     enum or whatever.  The tag passed down here is redundant, since
+     was also passed when enum_type, start_struct_type, or
+     start_class_type was called.  */
   boolean (*tag) PARAMS ((PTR, const char *));
 
   /* This is called to record a named integer constant.  */
@@ -376,15 +384,15 @@ struct debug_write_fns
      starting address of the block.  */
   boolean (*start_block) PARAMS ((PTR, bfd_vma));
 
-  /* Record line number information for the current block.  */
-  boolean (*lineno) PARAMS ((PTR, const char *, unsigned long, bfd_vma));
-
   /* Finish writing out a block.  The argument is the ending address
      of the block.  */
   boolean (*end_block) PARAMS ((PTR, bfd_vma));
 
   /* Finish writing out a function.  */
   boolean (*end_function) PARAMS ((PTR));
+
+  /* Record line number information for the current compilation unit.  */
+  boolean (*lineno) PARAMS ((PTR, const char *, unsigned long, bfd_vma));
 };
 
 /* Exported functions.  */
@@ -446,8 +454,8 @@ extern boolean debug_start_block PARAMS ((PTR, bfd_vma));
 
 extern boolean debug_end_block PARAMS ((PTR, bfd_vma));
 
-/* Associate a line number in the current source file and function
-   with a given address.  */
+/* Associate a line number in the current source file with a given
+   address.  */
 
 extern boolean debug_record_line PARAMS ((PTR, unsigned long, bfd_vma));
 

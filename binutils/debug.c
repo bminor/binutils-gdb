@@ -1,5 +1,5 @@
 /* debug.c -- Handle generic debugging information.
-   Copyright (C) 1995 Free Software Foundation, Inc.
+   Copyright (C) 1995, 1996 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
 
    This file is part of GNU Binutils.
@@ -48,7 +48,7 @@ struct debug_handle
   struct debug_function *current_function;
   /* The current block.  */
   struct debug_block *current_block;
-  /* The current line number information for the current block.  */
+  /* The current line number information for the current unit.  */
   struct debug_lineno *current_lineno;
   /* Mark.  This is used by debug_write.  */
   unsigned int mark;
@@ -66,6 +66,10 @@ struct debug_unit
      file is always the main one, and that is where the main file name
      is stored.  */
   struct debug_file *files;
+  /* Line number information for this compilation unit.  This is not
+     stored by function, because assembler code may have line number
+     information without function information.  */
+  struct debug_lineno *linenos;
 };
 
 /* Information kept for a single source file.  */
@@ -394,12 +398,11 @@ struct debug_block
   bfd_vma end;
   /* Local variables.  */
   struct debug_namespace *locals;
-  /* Line number information.  */
-  struct debug_lineno *linenos;
 };
 
-/* Line number information we keep for a function.  FIXME: This
-   structure is easy to create, but can be very space inefficient.  */
+/* Line number information we keep for a compilation unit.  FIXME:
+   This structure is easy to create, but can be very space
+   inefficient.  */
 
 struct debug_lineno
 {
@@ -511,7 +514,7 @@ static boolean debug_write_type
 	   struct debug_type *, struct debug_name *));
 static boolean debug_write_class_type
   PARAMS ((struct debug_handle *, const struct debug_write_fns *, PTR,
-	   struct debug_type *));
+	   struct debug_type *, const char *));
 static boolean debug_write_function
   PARAMS ((struct debug_handle *, const struct debug_write_fns *, PTR,
 	   const char *, enum debug_object_linkage, struct debug_function *));
@@ -769,7 +772,6 @@ debug_record_function (handle, name, return_type, global, addr)
 
   info->current_function = f;
   info->current_block = b;
-  info->current_lineno = NULL;
 
   /* FIXME: If we could handle nested functions, this would be the
      place: we would want to use a different namespace.  */
@@ -855,7 +857,6 @@ debug_end_function (handle, addr)
 
   info->current_function = NULL;
   info->current_block = NULL;
-  info->current_lineno = NULL;
 
   return true;
 }
@@ -897,7 +898,6 @@ debug_start_block (handle, addr)
   *pb = b;
 
   info->current_block = b;
-  info->current_lineno = NULL;
 
   return true;
 }
@@ -931,7 +931,6 @@ debug_end_block (handle, addr)
   info->current_block->end = addr;
 
   info->current_block = parent;
-  info->current_lineno = NULL;
 
   return true;
 }
@@ -949,10 +948,9 @@ debug_record_line (handle, lineno, addr)
   struct debug_lineno *l;
   unsigned int i;
 
-  if (info->current_unit == NULL
-      || info->current_block == NULL)
+  if (info->current_unit == NULL)
     {
-      debug_error ("debug_record_line: no current block");
+      debug_error ("debug_record_line: no current unit");
       return false;
     }
 
@@ -971,11 +969,12 @@ debug_record_line (handle, lineno, addr)
     }
 
   /* If we get here, then either 1) there is no current_lineno
-     structure, which means this is the first line number since we got
-     to this block, 2) the current_lineno structure is for a different
-     file, or 3) the current_lineno structure is full.  Regardless, we
-     want to allocate a new debug_lineno structure, put it in the
-     right place, and make it the new current_lineno structure.  */
+     structure, which means this is the first line number in this
+     compilation unit, 2) the current_lineno structure is for a
+     different file, or 3) the current_lineno structure is full.
+     Regardless, we want to allocate a new debug_lineno structure, put
+     it in the right place, and make it the new current_lineno
+     structure.  */
 
   l = (struct debug_lineno *) xmalloc (sizeof *l);
   memset (l, 0, sizeof *l);
@@ -989,18 +988,7 @@ debug_record_line (handle, lineno, addr)
   if (info->current_lineno != NULL)
     info->current_lineno->next = l;
   else
-    {
-      struct debug_lineno **pl;
-
-      /* We may be back in this block after dealing with child blocks,
-         which means we may have some line number information for this
-         block even though current_lineno was NULL.  */
-      for (pl = &info->current_block->linenos;
-	   *pl != NULL;
-	   pl = &(*pl)->next)
-	;
-      *pl = l;
-    }
+    info->current_unit->linenos = l;
 
   info->current_lineno = l;
 
@@ -2098,6 +2086,7 @@ debug_write (handle, fns, fhandle)
     {
       struct debug_file *f;
       boolean first_file;
+      struct debug_lineno *l;
 
       if (! (*fns->start_compilation_unit) (fhandle, u->files->filename))
 	return false;
@@ -2122,6 +2111,20 @@ debug_write (handle, fns, fhandle)
 		  if (! debug_write_name (info, fns, fhandle, n))
 		    return false;
 		}
+	    }
+	}
+
+      for (l = u->linenos; l != NULL; l = l->next)
+	{
+	  unsigned int i;
+
+	  for (i = 0; i < DEBUG_LINENO_COUNT; i++)
+	    {
+	      if (l->linenos[i] == (unsigned long) -1)
+		break;
+	      if (! (*fns->lineno) (fhandle, l->file->filename, l->linenos[i],
+				    l->addrs[i]))
+		return false;
 	    }
 	}
     }
@@ -2179,7 +2182,11 @@ debug_write_name (info, fns, fhandle, n)
   /*NOTREACHED*/
 }
 
-/* Write out a type.  */
+/* Write out a type.  If the type is DEBUG_KIND_NAMED or
+   DEBUG_KIND_TAGGED, then the name argument is the name for which we
+   are about to call typedef or tag.  If the type is anything else,
+   then the name argument is a tag from a DEBUG_KIND_TAGGED type which
+   points to this one.  */
 
 static boolean
 debug_write_type (info, fns, fhandle, type, name)
@@ -2190,6 +2197,7 @@ debug_write_type (info, fns, fhandle, type, name)
      struct debug_name *name;
 {
   unsigned int i;
+  const char *tag;
 
   /* If we have a name for this type, just output it.  We only output
      typedef names after they have been defined.  We output type tags
@@ -2213,6 +2221,15 @@ debug_write_type (info, fns, fhandle, type, name)
      itself will work.  */
   if (name != NULL)
     name->mark = info->mark;
+
+  tag = NULL;
+  if (name != NULL
+      && type->kind != DEBUG_KIND_NAMED
+      && type->kind != DEBUG_KIND_TAGGED)
+    {
+      assert (name->kind == DEBUG_OBJECT_TAG);
+      tag = name->name;
+    }
 
   switch (type->kind)
     {
@@ -2241,7 +2258,7 @@ debug_write_type (info, fns, fhandle, type, name)
 	}
       type->u.kclass->mark = info->class_mark;
 
-      if (! (*fns->start_struct_type) (fhandle,
+      if (! (*fns->start_struct_type) (fhandle, tag,
 				       type->kind == DEBUG_KIND_STRUCT,
 				       type->size))
 	return false;
@@ -2262,9 +2279,9 @@ debug_write_type (info, fns, fhandle, type, name)
       return (*fns->end_struct_type) (fhandle);
     case DEBUG_KIND_CLASS:
     case DEBUG_KIND_UNION_CLASS:
-      return debug_write_class_type (info, fns, fhandle, type);
+      return debug_write_class_type (info, fns, fhandle, type, tag);
     case DEBUG_KIND_ENUM:
-      return (*fns->enum_type) (fhandle, type->u.kenum->names,
+      return (*fns->enum_type) (fhandle, tag, type->u.kenum->names,
 				type->u.kenum->values);
     case DEBUG_KIND_POINTER:
       if (! debug_write_type (info, fns, fhandle, type->u.kpointer,
@@ -2349,9 +2366,11 @@ debug_write_type (info, fns, fhandle, type, name)
 	return false;
       return (*fns->volatile_type) (fhandle);
     case DEBUG_KIND_NAMED:
-    case DEBUG_KIND_TAGGED:
       return debug_write_type (info, fns, fhandle, type->u.knamed->type,
 			       (struct debug_name *) NULL);
+    case DEBUG_KIND_TAGGED:
+      return debug_write_type (info, fns, fhandle, type->u.knamed->type,
+			       type->u.knamed->name);
     default:
       abort ();
       return false;
@@ -2361,11 +2380,12 @@ debug_write_type (info, fns, fhandle, type, name)
 /* Write out a class type.  */
 
 static boolean
-debug_write_class_type (info, fns, fhandle, type)
+debug_write_class_type (info, fns, fhandle, type, tag)
      struct debug_handle *info;
      const struct debug_write_fns *fns;
      PTR fhandle;
      struct debug_type *type;
+     const char *tag;
 {
   unsigned int i;
 
@@ -2385,7 +2405,7 @@ debug_write_class_type (info, fns, fhandle, type)
 	return false;
     }
 
-  if (! (*fns->start_class_type) (fhandle,
+  if (! (*fns->start_class_type) (fhandle, tag,
 				  type->kind == DEBUG_KIND_CLASS,
 				  type->size,
 				  type->u.kclass->vptrbase != NULL,
@@ -2533,7 +2553,6 @@ debug_write_block (info, fns, fhandle, block)
      struct debug_block *block;
 {
   struct debug_name *n;
-  struct debug_lineno *l;
   struct debug_block *b;
 
   if (! (*fns->start_block) (fhandle, block->start))
@@ -2544,20 +2563,6 @@ debug_write_block (info, fns, fhandle, block)
       for (n = block->locals->list; n != NULL; n = n->next)
 	{
 	  if (! debug_write_name (info, fns, fhandle, n))
-	    return false;
-	}
-    }
-
-  for (l = block->linenos; l != NULL; l = l->next)
-    {
-      unsigned int i;
-
-      for (i = 0; i < DEBUG_LINENO_COUNT; i++)
-	{
-	  if (l->linenos[i] == (unsigned long) -1)
-	    break;
-	  if (! (*fns->lineno) (fhandle, l->file->filename, l->linenos[i],
-				l->addrs[i]))
 	    return false;
 	}
     }
