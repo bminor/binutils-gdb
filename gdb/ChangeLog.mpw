@@ -1,0 +1,7 @@
+Thu Mar 10 15:49:05 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* mpw-config.in: New file, MPW configuration fragment.
+	* mpw-make.in: New file, MPW makefile fragment.
+	* config/m68k/xm-mpw.h: New file, MPW host definitions.
+	* ser-mac.c: New file, Mac serial interface.
+

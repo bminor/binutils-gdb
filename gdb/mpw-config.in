@@ -1,0 +1,13 @@
+# Configuration fragment for GDB.
+
+forward-include "{srcdir}"config:m68k:xm-mpw.h xm.h
+
+forward-include "{srcdir}"config:m68k:xm-m68k.h 'm68k/xm-m68k.h'
+
+Echo "/* dummy */" >termio.h
+
+Set xdepfiles   " "
+Set natdepfiles " "
+Set tdepfiles   " "
+
+Set xm_file '"{s}"xm-mpw.h'
