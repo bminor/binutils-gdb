@@ -1,5 +1,8 @@
 Thu Aug 10 00:38:11 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* doc/as.texinfo: Add documentation for MRI compatibility mode.
+	* doc/as.1: Likewise.
+
 	* config/tc-m68k.c (m68k_ip): When recognizing '#', use isbyte and
 	iword rather than expr8 and expr16.  When recognizing 'M', use
 	issbyte rather than expr8.  When recognizing 'Q' and 't', just
