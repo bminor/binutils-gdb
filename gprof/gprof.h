@@ -205,12 +205,12 @@ struct stringlist {
     struct stringlist	*next;
     char		*string;
 };
-struct stringlist	*elist;
-struct stringlist	*Elist;
-struct stringlist	*flist;
-struct stringlist	*Flist;
-struct stringlist	*kfromlist;
-struct stringlist	*ktolist;
+extern struct stringlist	*elist;
+extern struct stringlist	*Elist;
+extern struct stringlist	*flist;
+extern struct stringlist	*Flist;
+extern struct stringlist	*kfromlist;
+extern struct stringlist	*ktolist;
 
     /*
      *	function declarations

@@ -1,3 +1,8 @@
+Thu Sep  1 10:40:45 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gprof.h (kfromlist, ktolist, flist, Flist, elist, Elist): Make
+	decls extern to keep native HP compiler quiet.
+
 Tue Aug 30 11:12:13 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* gprof.c (funcsymbol): Ignore ___gnu_compiled as well as
