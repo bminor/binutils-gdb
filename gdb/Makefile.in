@@ -192,25 +192,24 @@ SFILES_STAND = $(SFILES) standalone.c
 SFILES_KGDB  = $(SFILES) stuff.c kdb-start.c
 
 # Header files that are not named in config/* Makefile fragments go here.
-HFILES=	breakpoint.h command.h defs.h environ.h \
+HFILES=	breakpoint.h buildsym.h command.h defs.h environ.h \
 	expression.h frame.h gdbcmd.h gdbcore.h \
 	ieee-float.h inferior.h minimon.h \
 	signals.h signame.h symfile.h symtab.h \
-	target.h terminal.h tm-68k.h tm-i960.h tm-sunos.h \
-	language.h parser-defs.h value.h
+	target.h terminal.h tm-68k.h tm-i960.h tm-sunos.h tm-svr4.h \
+	xm-m68k.h xm-svr4.h language.h parser-defs.h value.h
 
 # Header files for machine opcode tables.
 # when OPCODE_DIR changes to ../include, remove the whole $(OPCODES)
-# business, since they will be included in the separate includes tar file
-# rather than in the gdb tar file.
+# business, since they will be put into the GDB release files by somebody else.
 OPCODE_DIR =
-OPCODES = $(OPCODE_DIR)pn-opcode.h $(OPCODE_DIR)np1-opcode.h \
+OPCODES = $(OPCODE_DIR)pn-opcode.h  $(OPCODE_DIR)np1-opcode.h \
 	$(OPCODE_DIR)sparc-opcode.h $(OPCODE_DIR)vax-opcode.h \
-	$(OPCODE_DIR)m68k-opcode.h $(OPCODE_DIR)ns32k-opcode.h \
+	$(OPCODE_DIR)m68k-opcode.h  $(OPCODE_DIR)ns32k-opcode.h \
 	$(OPCODE_DIR)convx-opcode.h $(OPCODE_DIR)pyr-opcode.h \
-	$(OPCODE_DIR)mips-opcode.h $(OPCODE_DIR)am29k-opcode.h \
-	$(OPCODE_DIR)arm-opcode.h $(OPCODE_DIR)m88k-opcode.h \
-	$(OPCODE_DIR)tahoe-opcode.h
+	$(OPCODE_DIR)mips-opcode.h  $(OPCODE_DIR)am29k-opcode.h \
+	$(OPCODE_DIR)arm-opcode.h   $(OPCODE_DIR)m88k-opcode.h \
+	$(OPCODE_DIR)tahoe-opcode.h $(OPCODE_DIR)rs6k-opcode.h
 
 REMOTE_EXAMPLES = m68k-stub.c i386-stub.c rem-multi.shar
 
@@ -223,7 +222,7 @@ POSSLIBS = $(POSSLIBS_MAINDIR)
 TESTS = testbpt.c testfun.c testrec.c testreg.c testregs.c
 
 OTHERS = Makefile.in depend alldeps.mak createtags munch configure.in \
-	 ChangeLog ChangeLog-3.x refcard.ps \
+	 ChangeLog ChangeLog-3.x gdb.1 refcard.ps \
 	 README TODO TAGS WHATS.NEW Projects \
 	 .gdbinit COPYING $(YYFILES) \
 	 copying.c Convex.notes copying.awk \
