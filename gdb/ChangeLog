@@ -1,3 +1,19 @@
+Thu May  2 17:53:56 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	Mips bringup and general cleanup
+
+	* cplus-dem.c:  Move CPLUS_MARKER define to after defs.h.
+	* infptrace.c (PT_WRITE_D, PT_READ_D):  Use correct values.
+	(This still doesn't seem to make MIPS bkpts work.)
+	* mipsread.c:  Remove dup "Reading symbol data..." msg.
+	(symbol_file_command, add_file_command):  Remove, obsol.
+	* printcmd.c (ptype_command):  Say "an enum" rather than "a enum".
+	Wrap output appropriately.
+	* stack.c (locals_info, catch_info, args_info):  Check
+	selected_frame rather than target_has_stack or coredumping.
+	* valprint.c (type_print_varspec_suffix):  Wrap "ptype" output of
+	enums appropriately.
+
 Wed May  1 14:10:22 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
 
 	* signame.c: Include defs.h and param.h.

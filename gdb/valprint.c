@@ -1488,8 +1488,10 @@ type_print_varspec_suffix (type, stream, show, passed_a_ptr)
 	      type_print_1 (args[i], "", stream, -1, 0);
 	      if (args[i+1] == 0)
 		fprintf_filtered (stream, "...");
-	      else if (args[i+1]->code != TYPE_CODE_VOID)
+	      else if (args[i+1]->code != TYPE_CODE_VOID) {
 		fprintf_filtered (stream, ",");
+		wrap_here ("    ");
+	      }
 	    }
 	  fprintf_filtered (stream, ")");
 	}
@@ -1549,6 +1551,7 @@ type_print_base (type, stream, show, level)
 
   QUIT;
 
+  wrap_here ("    ");
   if (type == 0)
     {
       fprintf_filtered (stream, "type unknown");
@@ -1583,6 +1586,7 @@ type_print_base (type, stream, show, level)
 	{
 	  fputs_filtered (name, stream);
 	  fputs_filtered (" ", stream);
+	  wrap_here ("    ");
 	}
       if (show < 0)
 	fprintf_filtered (stream, "{...}");
@@ -1714,6 +1718,7 @@ type_print_base (type, stream, show, level)
 	  fputs_filtered (name, stream);
 	  fputs_filtered (" ", stream);
 	}
+      wrap_here ("    ");
       if (show < 0)
 	fprintf_filtered (stream, "{...}");
       else
@@ -1725,6 +1730,7 @@ type_print_base (type, stream, show, level)
 	    {
 	      QUIT;
 	      if (i) fprintf_filtered (stream, ", ");
+	      wrap_here ("    ");
 	      fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
 	      if (lastval != TYPE_FIELD_BITPOS (type, i))
 		{

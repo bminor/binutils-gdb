@@ -32,7 +32,10 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/dir.h>
 #include <signal.h>
 #include <sys/ioctl.h>
+#ifndef USG
 #include <sys/ptrace.h>
+#endif
+
 #if !defined (PT_KILL)
 #define PT_KILL 8
 #define PT_STEP 9
@@ -40,9 +43,9 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define PT_READ_U 3
 #define PT_WRITE_U 6
 #define PT_READ_I 1
+#define	PT_READ_D 2
 #define PT_WRITE_I 4
-/* The Following Change is for a Sun */
-#define PT_WRITE_D 4
+#define PT_WRITE_D 5
 #endif /* No PT_KILL.  */
 
 #ifndef PT_ATTACH

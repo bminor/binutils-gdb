@@ -54,13 +54,6 @@
 /* define this if names don't start with _ */
 /* #define nounderscore 1 */
 
-/* This is '$' on systems where the assembler can deal with that.
-   Where the assembler can't, it's '.' (but on many systems '.' is
-   used for other things).  */
-#if !defined (CPLUS_MARKER)
-#define CPLUS_MARKER '$'
-#endif
-
 #include <stdio.h>
 #include <ctype.h>
 
@@ -77,6 +70,13 @@
 #define memcmp(s1, s2, n) bcmp ((s2), (s1), (n))
 #define strchr index 
 #define strrchr rindex
+#endif
+
+/* This is '$' on systems where the assembler can deal with that.
+   Where the assembler can't, it's '.' (but on many systems '.' is
+   used for other things).  */
+#if !defined (CPLUS_MARKER)
+#define CPLUS_MARKER '$'
 #endif
 
 #ifndef __STDC__
