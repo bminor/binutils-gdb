@@ -190,9 +190,19 @@ add_abbrev_prefix_cmd (name, class, fun, doc, prefixlist, prefixname,
   return c;
 }
 
-/* ARGSUSED */
+/* This is an empty "cfunc".  */
 void
-not_just_help_class_command (args, from_tty, c)
+not_just_help_class_command (args, from_tty)
+     char *args;
+     int from_tty;
+{
+}
+
+/* This is an empty "sfunc".  */
+static void empty_sfunc PARAMS ((char *, int, struct cmd_list_element *));
+
+static void
+empty_sfunc (args, from_tty, c)
      char *args;
      int from_tty;
      struct cmd_list_element *c;
@@ -223,7 +233,7 @@ add_set_cmd (name, class, var_type, var, doc, list)
   c->var = var;
   /* This needs to be something besides NO_FUNCTION so that this isn't
      treated as a help class.  */
-  c->function.sfunc = not_just_help_class_command;
+  c->function.sfunc = empty_sfunc;
   return c;
 }
 
