@@ -295,7 +295,7 @@ typedef struct relent_chain {
 /* Used in generating armaps.  Perhaps just a forward definition would do? */
 struct orl {			/* output ranlib */
   char **name;			/* symbol name */ 
-  file_ptr pos;			/* element number or file position */
+  file_ptr pos;			/* bfd* or file position */
   int namidx;			/* index into string table */
 };
 
