@@ -17,10 +17,10 @@ int mn10300_debug;
 static SIM_OPEN_KIND sim_kind;
 static char *myname;
 
-static struct hash_entry *lookup_hash PARAMS ((uint32 ins, int));
+static void dispatch PARAMS ((uint32, uint32, int));
 static long hash PARAMS ((long));
 static void init_system PARAMS ((void));
-#define MAX_HASH  63
+#define MAX_HASH  127
 
 struct hash_entry
 {
@@ -28,6 +28,9 @@ struct hash_entry
   long opcode;
   long mask;
   struct simops *ops;
+#ifdef HASH_STAT
+  unsigned long count;
+#endif
 };
 
 struct hash_entry hash_table[MAX_HASH+1];
@@ -39,28 +42,51 @@ static INLINE long
 hash(insn)
      long insn;
 {
-  /* These are one byte insns.  */
+  /* These are one byte insns, we special case these since, in theory,
+     they should be the most heavily used.  */
   if ((insn & 0xffffff00) == 0)
     {
-      if ((insn & 0xf0) == 0x00
-	  || (insn & 0xf0) == 0x40)
-	return (insn & 0xf3) & 0x3f;
+      switch (insn & 0xf0)
+	{
+	  case 0x00:
+	    return 0x70;
 
-      if ((insn & 0xf0) == 0x10
-	  || (insn & 0xf0) == 0x30
-	  || (insn & 0xf0) == 0x50)
-	return (insn & 0xfc) & 0x3f;
+	  case 0x40:
+	    return 0x71;
 
-      if ((insn & 0xf0) == 0x60
-	  || (insn & 0xf0) == 0x70
-	  || (insn & 0xf0) == 0x80
-	  || (insn & 0xf0) == 0x90
-	  || (insn & 0xf0) == 0xa0
-	  || (insn & 0xf0) == 0xb0
-	  || (insn & 0xf0) == 0xe0)
-	return (insn & 0xf0) & 0x3f;
+	  case 0x10:
+	    return 0x72;
 
-      return (insn & 0xff) & 0x3f;
+	  case 0x30:
+	    return 0x73;
+
+	  case 0x50:
+	    return 0x74;
+
+	  case 0x60:
+	    return 0x75;
+
+	  case 0x70:
+	    return 0x76;
+
+	  case 0x80:
+	    return 0x77;
+
+	  case 0x90:
+	    return 0x78;
+
+	  case 0xa0:
+	    return 0x79;
+
+	  case 0xb0:
+	    return 0x7a;
+
+	  case 0xe0:
+	    return 0x7b;
+
+	  default:
+	    return 0x7c;
+	}
     }
 
   /* These are two byte insns */
@@ -68,57 +94,86 @@ hash(insn)
     {
       if ((insn & 0xf000) == 0x2000
 	  || (insn & 0xf000) == 0x5000)
-	return ((insn & 0xfc00) >> 8) & 0x3f;
+	return ((insn & 0xfc00) >> 8) & 0x7f;
 
       if ((insn & 0xf000) == 0x4000)
-	return ((insn & 0xf300) >> 8) & 0x3f;
+	return ((insn & 0xf300) >> 8) & 0x7f;
 
       if ((insn & 0xf000) == 0x8000
 	  || (insn & 0xf000) == 0x9000
 	  || (insn & 0xf000) == 0xa000
 	  || (insn & 0xf000) == 0xb000)
-	return ((insn & 0xf000) >> 8) & 0x3f;
+	return ((insn & 0xf000) >> 8) & 0x7f;
 
-      return ((insn & 0xff00) >> 8) & 0x3f;
+      if ((insn & 0xff00) == 0xf000
+	  || (insn & 0xff00) == 0xf100
+	  || (insn & 0xff00) == 0xf200
+	  || (insn & 0xff00) == 0xf500
+	  || (insn & 0xff00) == 0xf600)
+	return ((insn & 0xfff0) >> 4) & 0x7f;
+ 
+      if ((insn & 0xf000) == 0xc000)
+	return ((insn & 0xff00) >> 8) & 0x7f;
+
+      return ((insn & 0xffc0) >> 6) & 0x7f;
     }
 
   /* These are three byte insns.  */
   if ((insn & 0xff000000) == 0)
     {
       if ((insn & 0xf00000) == 0x000000)
-	return ((insn & 0xf30000) >> 16) & 0x3f;
+	return ((insn & 0xf30000) >> 16) & 0x7f;
 
       if ((insn & 0xf00000) == 0x200000
 	  || (insn & 0xf00000) == 0x300000)
-	return ((insn & 0xfc0000) >> 16) & 0x3f;
+	return ((insn & 0xfc0000) >> 16) & 0x7f;
 
-        return ((insn & 0xff0000) >> 16) & 0x3f;
+      if ((insn & 0xff0000) == 0xf80000)
+	return ((insn & 0xfff000) >> 12) & 0x7f;
+
+      if ((insn & 0xff0000) == 0xf90000)
+	return ((insn & 0xfffc00) >> 10) & 0x7f;
+
+      return ((insn & 0xff0000) >> 16) & 0x7f;
     }
 
   /* These are four byte or larger insns.  */
-  return ((insn & 0xff000000) >> 24) & 0x3f;
+  if ((insn & 0xf0000000) == 0xf0000000)
+    return ((insn & 0xfff00000) >> 20) & 0x7f;
+
+  return ((insn & 0xff000000) >> 24) & 0x7f;
 }
 
-static struct hash_entry *
-lookup_hash (ins, length)
-     uint32 ins;
+static void
+dispatch (insn, extension, length)
+     uint32 insn;
+     uint32 extension;
      int length;
 {
   struct hash_entry *h;
 
-  h = &hash_table[hash(ins)];
+  h = &hash_table[hash(insn)];
 
-  while ((ins & h->mask) != h->opcode
-	 || (length != h->ops->length))
+  while ((insn & h->mask) != h->opcode
+	  || (length != h->ops->length))
     {
-      if (h->next == NULL)
+      if (!h->next)
 	{
-	  (*mn10300_callback->printf_filtered) (mn10300_callback, "ERROR looking up hash for 0x%x, PC=0x%x\n", ins, PC);
+	  (*mn10300_callback->printf_filtered) (mn10300_callback,
+	    "ERROR looking up hash for 0x%x, PC=0x%x\n", insn, PC);
 	  exit(1);
 	}
       h = h->next;
     }
-  return (h);
+
+
+#ifdef HASH_STAT
+  h->count++;
+#endif
+
+  /* Now call the right function.  */
+  (h->ops->func)(insn, extension);
+  PC += length;
 }
 
 /* FIXME These would more efficient to use than load_mem/store_mem,
@@ -316,14 +371,28 @@ sim_open (kind,argv)
 	(*mn10300_callback->printf_filtered) (mn10300_callback, "ERROR: unsupported option(s): %s\n",*p);
     }
 
-  /* put all the opcodes in the hash table */
+ /* put all the opcodes in the hash table */
   for (s = Simops; s->func; s++)
     {
       h = &hash_table[hash(s->opcode)];
-      
+
       /* go to the last entry in the chain */
       while (h->next)
-	  h = h->next;
+	{
+	  /* Don't insert the same opcode more than once.  */
+	  if (h->opcode == s->opcode
+	      && h->mask == s->mask
+	      && h->ops == s)
+	    continue;
+	  else
+	    h = h->next;
+	}
+
+      /* Don't insert the same opcode more than once.  */
+      if (h->opcode == s->opcode
+	  && h->mask == s->mask
+	  && h->ops == s)
+	continue;
 
       if (h->ops)
 	{
@@ -333,7 +402,11 @@ sim_open (kind,argv)
       h->ops = s;
       h->mask = s->mask;
       h->opcode = s->opcode;
+#if HASH_STAT
+      h->count = 0;
+#endif
     }
+
 
   /* fudge our descriptor for now */
   return (SIM_DESC) 1;
@@ -362,6 +435,13 @@ sim_set_profile_size (n)
   (*mn10300_callback->printf_filtered) (mn10300_callback, "sim_set_profile_size %d\n", n);
 }
 
+int
+sim_stop (sd)
+     SIM_DESC sd;
+{
+  return 0;
+}
+
 void
 sim_resume (sd, step, siggnal)
      SIM_DESC sd;
@@ -381,212 +461,396 @@ sim_resume (sd, step, siggnal)
       unsigned long insn, extension;
 
       /* Fetch the current instruction.  */
-      inst = load_mem_big (PC, 1);
+      inst = load_mem_big (PC, 2);
       oldpc = PC;
 
-      /* These are one byte insns.  */
-      if ((inst & 0xf3) == 0x00
-	  || (inst & 0xf0) == 0x10
-	  || (inst & 0xfc) == 0x3c
-	  || (inst & 0xf3) == 0x41
-	  || (inst & 0xf3) == 0x40
-	  || (inst & 0xfc) == 0x50
-	  || (inst & 0xfc) == 0x54
-	  || (inst & 0xf0) == 0x60
-	  || (inst & 0xf0) == 0x70
-	  || ((inst & 0xf0) == 0x80
-	      && (inst & 0x0c) >> 2 != (inst & 0x03))
-	  || ((inst & 0xf0) == 0x90
-	      && (inst & 0x0c) >> 2 != (inst & 0x03))
-	  || ((inst & 0xf0) == 0xa0
-	      && (inst & 0x0c) >> 2 != (inst & 0x03))
-	  || ((inst & 0xf0) == 0xb0
-	      && (inst & 0x0c) >> 2 != (inst & 0x03))
-	  || (inst & 0xff) == 0xcb
-	  || (inst & 0xfc) == 0xd0
-	  || (inst & 0xfc) == 0xd4
-	  || (inst & 0xfc) == 0xd8
-	  || (inst & 0xf0) == 0xe0
-	  || (inst & 0xff) == 0xff)
+      /* Using a giant case statement may seem like a waste because of the
+ 	code/rodata size the table itself will consume.  However, using
+ 	a giant case statement speeds up the simulator by 10-15% by avoiding
+ 	cascading if/else statements or cascading case statements.  */
+
+      switch ((inst >> 8) & 0xff)
 	{
-	  insn = inst;
-	  h = lookup_hash (insn, 1);
-	  extension = 0;
-	  (h->ops->func)(insn, extension);
-	  PC += 1;
-	}
+	  /* All the single byte insns except 0x80, 0x90, 0xa0, 0xb0
+	     which must be handled specially.  */
+	  case 0x00:
+	  case 0x04:
+	  case 0x08:
+	  case 0x0c:
+	  case 0x11:
+	  case 0x12:
+	  case 0x13:
+	  case 0x14:
+	  case 0x15:
+	  case 0x16:
+	  case 0x17:
+	  case 0x18:
+	  case 0x19:
+	  case 0x1a:
+	  case 0x1b:
+	  case 0x1c:
+	  case 0x1d:
+	  case 0x1e:
+	  case 0x1f:
+	  case 0x3c:
+	  case 0x3d:
+	  case 0x3e:
+	  case 0x3f:
+	  case 0x40:
+	  case 0x41:
+	  case 0x44:
+	  case 0x45:
+	  case 0x48:
+	  case 0x49:
+	  case 0x4c:
+	  case 0x4d:
+	  case 0x50:
+	  case 0x51:
+	  case 0x52:
+	  case 0x53:
+	  case 0x54:
+	  case 0x55:
+	  case 0x56:
+	  case 0x57:
+	  case 0x60:
+	  case 0x61:
+	  case 0x62:
+	  case 0x63:
+	  case 0x64:
+	  case 0x65:
+	  case 0x66:
+	  case 0x67:
+	  case 0x68:
+	  case 0x69:
+	  case 0x6a:
+	  case 0x6b:
+	  case 0x6c:
+	  case 0x6d:
+	  case 0x6e:
+	  case 0x6f:
+	  case 0x70:
+	  case 0x71:
+	  case 0x72:
+	  case 0x73:
+	  case 0x74:
+	  case 0x75:
+	  case 0x76:
+	  case 0x77:
+	  case 0x78:
+	  case 0x79:
+	  case 0x7a:
+	  case 0x7b:
+	  case 0x7c:
+	  case 0x7d:
+	  case 0x7e:
+	  case 0x7f:
+	  case 0xcb:
+	  case 0xd0:
+	  case 0xd1:
+	  case 0xd2:
+	  case 0xd3:
+	  case 0xd4:
+	  case 0xd5:
+	  case 0xd6:
+	  case 0xd7:
+	  case 0xd8:
+	  case 0xd9:
+	  case 0xda:
+	  case 0xdb:
+	  case 0xe0:
+	  case 0xe1:
+	  case 0xe2:
+	  case 0xe3:
+	  case 0xe4:
+	  case 0xe5:
+	  case 0xe6:
+	  case 0xe7:
+	  case 0xe8:
+	  case 0xe9:
+	  case 0xea:
+	  case 0xeb:
+	  case 0xec:
+	  case 0xed:
+	  case 0xee:
+	  case 0xef:
+	  case 0xff:
+	    insn = (inst >> 8) & 0xff;
+	    extension = 0;
+	    dispatch (insn, extension, 1);
+	    break;
 
-      /* These are two byte insns.  */
-      else if ((inst & 0xf0) == 0x80
-	       || (inst & 0xf0) == 0x90
-	       || (inst & 0xf0) == 0xa0
-	       || (inst & 0xf0) == 0xb0
-	       || (inst & 0xfc) == 0x20
-	       || (inst & 0xfc) == 0x28
-	       || (inst & 0xf3) == 0x43
-	       || (inst & 0xf3) == 0x42
-	       || (inst & 0xfc) == 0x58
-	       || (inst & 0xfc) == 0x5c
-	       || ((inst & 0xf0) == 0xc0
-		   && (inst & 0xff) != 0xcb
-		   && (inst & 0xff) != 0xcc
-		   && (inst & 0xff) != 0xcd)
-	       || (inst & 0xff) == 0xf0
-	       || (inst & 0xff) == 0xf1
-	       || (inst & 0xff) == 0xf2
-	       || (inst & 0xff) == 0xf3
-	       || (inst & 0xff) == 0xf4
-	       || (inst & 0xff) == 0xf5
-	       || (inst & 0xff) == 0xf6)
-	{
-	  insn = load_mem_big (PC, 2);
-	  h = lookup_hash (insn, 2);
-	  extension = 0;
-	  (h->ops->func)(insn, extension);
-	  PC += 2;
-	}
+	  /* Special cases where dm == dn is used to encode a different
+	     instruction.  */
+	  case 0x80:
+	  case 0x85:
+	  case 0x8a:
+	  case 0x8f:
+	  case 0x90:
+	  case 0x95:
+	  case 0x9a:
+	  case 0x9f:
+	  case 0xa0:
+	  case 0xa5:
+	  case 0xaa:
+	  case 0xaf:
+	  case 0xb0:
+	  case 0xb5:
+	  case 0xba:
+	  case 0xbf:
+	    insn = inst;
+	    extension = 0;
+	    dispatch (insn, extension, 2);
+	    break;
 
-      /* These are three byte insns.  */
-      else if ((inst & 0xff) == 0xf8
-	       || (inst & 0xff) == 0xcc 
-	       || (inst & 0xff) == 0xf9
-	       || (inst & 0xf3) == 0x01
-	       || (inst & 0xf3) == 0x02
-	       || (inst & 0xf3) == 0x03
-	       || (inst & 0xfc) == 0x24
-	       || (inst & 0xfc) == 0x2c
-	       || (inst & 0xfc) == 0x30
-	       || (inst & 0xfc) == 0x34
-	       || (inst & 0xfc) == 0x38
-	       || (inst & 0xff) == 0xde
-	       || (inst & 0xff) == 0xdf
-	       || (inst & 0xff) == 0xcc)
-	{
-	  insn = load_mem_big (PC, 3);
-	  h = lookup_hash (insn, 3);
-	  extension = 0;
-	  /* If it's a format D1 insn, "ret", or "retf" insn, then
-	     there's no need to worry about endianness.  Others have
-	     a 16bit immediate in little endian form that we need to
-	     extract.  */
-	  if (h->ops->format == FMT_D1
-	      || h->opcode == 0xdf0000
-	      || h->opcode == 0xde0000)
-	    (h->ops->func)(insn, extension);
-	  else
-	    {
-	      insn &= 0xff0000;
-	      insn |= load_mem (PC + 1, 2);
-	      (h->ops->func)(insn, extension);
-	    }
-	  PC += 3;
-	}
+	  case 0x81:
+	  case 0x82:
+	  case 0x83:
+	  case 0x84:
+	  case 0x86:
+	  case 0x87:
+	  case 0x88:
+	  case 0x89:
+	  case 0x8b:
+	  case 0x8c:
+	  case 0x8d:
+	  case 0x8e:
+	  case 0x91:
+	  case 0x92:
+	  case 0x93:
+	  case 0x94:
+	  case 0x96:
+	  case 0x97:
+	  case 0x98:
+	  case 0x99:
+	  case 0x9b:
+	  case 0x9c:
+	  case 0x9d:
+	  case 0x9e:
+	  case 0xa1:
+	  case 0xa2:
+	  case 0xa3:
+	  case 0xa4:
+	  case 0xa6:
+	  case 0xa7:
+	  case 0xa8:
+	  case 0xa9:
+	  case 0xab:
+	  case 0xac:
+	  case 0xad:
+	  case 0xae:
+	  case 0xb1:
+	  case 0xb2:
+	  case 0xb3:
+	  case 0xb4:
+	  case 0xb6:
+	  case 0xb7:
+	  case 0xb8:
+	  case 0xb9:
+	  case 0xbb:
+	  case 0xbc:
+	  case 0xbd:
+	  case 0xbe:
+	    insn = (inst >> 8) & 0xff;
+	    extension = 0;
+	  dispatch (insn, extension, 1);
+	  break;
 
-      /* These are four byte insns.  */
-      else if ((inst & 0xff) == 0xfa
-	       || (inst & 0xff) == 0xfb)
-	{
-	  insn = load_mem_big (PC, 4);
-	  h = lookup_hash (insn, 4);
-	  extension = 0;
-	  /* This must be a format D2 insn; a small number of such insns
-	     don't have any 16bit immediates (they instead have two 8 bit
-	     immediates).  */
- 	  if (h->opcode == 0xfaf80000
-	      || h->opcode == 0xfaf00000
-	      || h->opcode == 0xfaf40000)
-	    (h->ops->func)(insn, extension);
-	  else
-	    {
-	      insn &= 0xffff0000;
-	      insn |= load_mem (PC + 2, 2);
-	      (h->ops->func)(insn, extension);
-	    }
-	  PC += 4;
-	}
+	  /* The two byte instructions.  */
+	  case 0x20:
+	  case 0x21:
+	  case 0x22:
+	  case 0x23:
+	  case 0x28:
+	  case 0x29:
+	  case 0x2a:
+	  case 0x2b:
+	  case 0x42:
+	  case 0x43:
+	  case 0x46:
+	  case 0x47:
+	  case 0x4a:
+	  case 0x4b:
+	  case 0x4e:
+	  case 0x4f:
+	  case 0x58:
+	  case 0x59:
+	  case 0x5a:
+	  case 0x5b:
+	  case 0x5c:
+	  case 0x5d:
+	  case 0x5e:
+	  case 0x5f:
+	  case 0xc0:
+	  case 0xc1:
+	  case 0xc2:
+	  case 0xc3:
+	  case 0xc4:
+	  case 0xc5:
+	  case 0xc6:
+	  case 0xc7:
+	  case 0xc8:
+	  case 0xc9:
+	  case 0xca:
+	  case 0xce:
+	  case 0xcf:
+	  case 0xf0:
+	  case 0xf1:
+	  case 0xf2:
+	  case 0xf3:
+	  case 0xf4:
+	  case 0xf5:
+	  case 0xf6:
+	    insn = inst;
+	    extension = 0;
+	    dispatch (insn, extension, 2);
+	    break;
 
-      /* These are five byte insns.  */
-      else if ((inst & 0xff) == 0xcd
-	       || (inst & 0xff) == 0xdc)
-	{
-	  insn = load_mem_big (PC, 4);
-	  h = lookup_hash (insn, 5);
+	  /* The three byte insns with a 16bit operand in little endian
+	     format.  */
+	  case 0x01:
+	  case 0x02:
+	  case 0x03:
+	  case 0x05:
+	  case 0x06:
+	  case 0x07:
+	  case 0x09:
+	  case 0x0a:
+	  case 0x0b:
+	  case 0x0d:
+	  case 0x0e:
+	  case 0x0f:
+	  case 0x24:
+	  case 0x25:
+	  case 0x26:
+	  case 0x27:
+	  case 0x2c:
+	  case 0x2d:
+	  case 0x2e:
+	  case 0x2f:
+	  case 0x30:
+	  case 0x31:
+	  case 0x32:
+	  case 0x33:
+	  case 0x34:
+	  case 0x35:
+	  case 0x36:
+	  case 0x37:
+	  case 0x38:
+	  case 0x39:
+	  case 0x3a:
+	  case 0x3b:
+	  case 0xcc:
+	    insn = load_mem (PC, 1);
+	    insn <<= 16;
+	    insn |= load_mem (PC + 1, 2);
+	    extension = 0;
+	    dispatch (insn, extension, 3);
+	    break;
 
-	  /* This must be a format S4 insn.  */
-	  if (h->opcode == 0xdc000000)
-	    {
-	      /* A "jmp" instruction with a 32bit immediate stored
-	    	 in little endian form.  */
-	      unsigned long temp;
-	      temp = load_mem (PC + 1, 4);
-	      insn &= 0xff000000;
-	      insn |= (temp & 0xffffff00) >> 8;
-	      extension = temp & 0xff;
-	    }
-	  else
-	    {
-	      /* A "call" instruction with a 16bit immediate in little
-		 endian form.  */
-	      unsigned long temp;
-	      temp = load_mem (PC + 1, 2);
-	      insn &= 0xff0000ff;
-	      insn |= temp << 8;
-	      extension = load_mem (PC + 4, 1);
-	    }
-	  (h->ops->func)(insn, extension);
-	  PC += 5;
-	}
+	  /* The three byte insns without 16bit operand.  */
+	  case 0xde:
+	  case 0xdf:
+	  case 0xf8:
+	  case 0xf9:
+	    insn = load_mem_big (PC, 3);
+	    extension = 0;
+	    dispatch (insn, extension, 3);
+	    break;
+	  
+	  /* Four byte insns.  */
+	  case 0xfa:
+	  case 0xfb:
+	    if ((inst & 0xfffc) == 0xfaf0
+		|| (inst & 0xfffc) == 0xfaf4
+		|| (inst & 0xfffc) == 0xfaf8)
+	      insn = load_mem_big (PC, 4);
+	    else
+	      {
+		insn = inst;
+		insn <<= 16;
+		insn |= load_mem (PC + 2, 2);
+		extension = 0;
+	      }
+	    dispatch (insn, extension, 4);
+	    break;
 
-      /* These are six byte insns.  */
-      else if ((inst & 0xff) == 0xfd
-	       || (inst & 0xff) == 0xfc)
-	{
-	  unsigned long temp;
+	  /* Five byte insns.  */
+	  case 0xcd:
+	    insn = load_mem (PC, 1);
+	    insn <<= 24;
+	    insn |= (load_mem (PC + 1, 2) << 8);
+	    insn |= load_mem (PC + 3, 1);
+	    extension = load_mem (PC + 4, 1);
+	    dispatch (insn, extension, 5);
+	    break;
 
-	  insn = load_mem_big (PC, 4);
-	  h = lookup_hash (insn, 6);
+	  case 0xdc:
+	    insn = load_mem (PC, 1);
+	    insn <<= 24;
+	    extension = load_mem (PC + 1, 4);
+	    insn |= (extension & 0xffffff00) >> 8;
+	    extension &= 0xff;
+	    dispatch (insn, extension, 5);
+	    break;
+	
+	  /* Six byte insns.  */
+	  case 0xfc:
+	  case 0xfd:
+	    insn = (inst << 16);
+	    extension = load_mem (PC + 2, 4);
+	    insn |= ((extension & 0xffff0000) >> 16);
+	    extension &= 0xffff;
+	    dispatch (insn, extension, 6);
+	    break;
+	    
+	  case 0xdd:
+	    insn = load_mem (PC, 1) << 24;
+	    extension = load_mem (PC + 1, 4);
+	    insn |= ((extension >> 8) & 0xffffff);
+	    extension = (extension & 0xff) << 16;
+	    extension |= load_mem (PC + 5, 1) << 8;
+	    extension |= load_mem (PC + 6, 1);
+	    dispatch (insn, extension, 7);
+	    break;
 
-	  temp = load_mem (PC + 2, 4);
-	  insn &= 0xffff0000;
-	  insn |= (temp >> 16) & 0xffff;
-	  extension = temp & 0xffff;
-	  (h->ops->func)(insn, extension);
-	  PC += 6;
-	}
+	  case 0xfe:
+	    insn = inst << 16;
+	    extension = load_mem (PC + 2, 4);
+	    insn |= ((extension >> 16) & 0xffff);
+	    extension <<= 8;
+	    extension &= 0xffff00;
+	    extension |= load_mem (PC + 6, 1);
+	    dispatch (insn, extension, 7);
+	    break;
 
-      /* Else its a seven byte insns (in theory).  */
-      else
-	{
-	  insn = load_mem_big (PC, 4);
-	  h = lookup_hash (insn, 7);
-
-	  if (h->ops->format == FMT_S6)
-	    {
-	      unsigned long temp;
-
-	      temp = load_mem (PC + 1, 4);
-	      insn &= 0xff000000;
-	      insn |= (temp >> 8) & 0xffffff;
-
-	      extension = (temp & 0xff) << 16;
-	      extension |= load_mem (PC + 5, 1) << 8;
-	      extension |= load_mem (PC + 6, 1);
-	    }
-	  else
-	    {
-	      unsigned long temp;
-
-	      temp = load_mem (PC + 2, 4);
-	      insn &= 0xffff0000;
-	      insn |= (temp >> 16) & 0xffff;
-	      extension = (temp & 0xffff) << 8;
-	      extension = load_mem (PC + 6, 1);
-	    }
-	  (h->ops->func)(insn, extension);
-	  PC += 7;
+	  default:
+	    abort ();
 	}
     }
   while (!State.exception);
+
+#ifdef HASH_STAT
+  {
+    int i;
+    for (i = 0; i < MAX_HASH; i++)
+      {
+	 struct hash_entry *h;
+	 h = &hash_table[i];
+
+	 printf("hash 0x%x:\n", i);
+
+	 while (h)
+	   {
+	     printf("h->opcode = 0x%x, count = 0x%x\n", h->opcode, h->count);
+	     h = h->next;
+	   }
+
+	 printf("\n\n");
+      }
+    fflush (stdout);
+  }
+#endif
+
 }
 
 int

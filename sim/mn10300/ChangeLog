@@ -1,3 +1,10 @@
+Tue May  6 13:24:36 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* interp.c: Improve hashing routine to avoid long list
+	traversals for common instructions.  Add HASH_STAT support.
+	Rewrite opcode dispatch code using a big switch instead of
+	cascaded if/else statements.  Avoid useless calls to load_mem.
+
 Mon May  5 18:07:48 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10300_sim.h (struct _state): Add space for mdrq register.
