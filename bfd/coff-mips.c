@@ -526,6 +526,8 @@ ecoff_sec_to_styp_flags (name, flags)
     styp = STYP_BSS;
   else if (strcmp (name, _SBSS) == 0)
     styp = STYP_SBSS;
+  else if (strcmp (name, _INIT) == 0)
+    styp = STYP_MIPS_INIT;
   else if (flags & SEC_CODE) 
     styp = STYP_TEXT;
   else if (flags & SEC_DATA) 
@@ -533,7 +535,7 @@ ecoff_sec_to_styp_flags (name, flags)
   else if (flags & SEC_READONLY)
     styp = STYP_RDATA;
   else if (flags & SEC_LOAD)
-    styp = STYP_TEXT;
+    styp = STYP_REG;
   else
     styp = STYP_BSS;
 
@@ -559,7 +561,8 @@ ecoff_styp_to_sec_flags (abfd, hdr)
 
   /* For 386 COFF, at least, an unloadable text or data section is
      actually a shared library section.  */
-  if (styp_flags & STYP_TEXT)
+  if ((styp_flags & STYP_TEXT)
+      || (stype_FLAGS & STYP_MIPS_INIT))
     {
       if (sec_flags & SEC_NEVER_LOAD)
 	sec_flags |= SEC_CODE | SEC_SHARED_LIBRARY;
