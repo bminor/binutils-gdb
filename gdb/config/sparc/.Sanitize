@@ -28,21 +28,26 @@ fi
 
 Things-to-keep:
 
+nm-sparclynx.h
 nm-sun4os4.h
 sparc-em.mt
 sparclite.mt
+sparclynx.mh
+sparclynx.mt
 sun4os4.mh
 sun4os4.mt
 sun4sol2.mh
 sun4sol2.mt
 tm-sparc.h
 tm-sparclite.h
+tm-sparclynx.h
 tm-spc-em.h
 tm-sun4os4.h
 tm-sun4sol2.h
 tm-vxsparc.h
 vxsparc.mt
 xm-sparc.h
+xm-sparclynx.h
 xm-sun4os4.h
 xm-sun4sol2.h
 

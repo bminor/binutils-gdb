@@ -42,6 +42,8 @@ hp300hpux.mt
 isi.mh
 isi.mt
 m68k-em.mt
+m68klynx.mh
+m68klynx.mt
 monitor.mt
 news.mh
 news.mt
@@ -52,6 +54,7 @@ nm-delta68.h
 nm-dpx2.h
 nm-hp300bsd.h
 nm-hp300hpux.h
+nm-m68klynx.h
 nm-news.h
 nm-sun2.h
 nm-sun3.h
@@ -70,6 +73,7 @@ tm-apollo68b.h
 tm-delta68.h
 tm-m68k-em.h
 tm-m68k.h
+tm-m68klynx.h
 tm-altos.h
 tm-amix.h
 tm-dpx2.h
@@ -98,6 +102,7 @@ xm-hp300bsd.h
 xm-hp300hpux.h
 xm-isi.h
 xm-m68k.h
+xm-m68klynx.h
 xm-news.h
 xm-news1000.h
 xm-sun2.h

@@ -48,6 +48,7 @@ tahoe
 tm-sunos.h
 tm-sysv4.h
 vax
+xm-lynx.h
 xm-sysv4.h
 z8k
 
