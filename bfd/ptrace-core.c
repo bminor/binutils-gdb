@@ -254,7 +254,7 @@ ptrace_unix_core_file_matches_executable_p  (core_bfd, exec_bfd)
 #define ptrace_unix_bfd_copy_private_bfd_data \
   ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_false)
 #define ptrace_unix_bfd_is_local_label \
-  ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_false)
+  ((boolean (*) PARAMS ((bfd *, asymbol *))) bfd_false)
 #define ptrace_unix_bfd_free_cached_info bfd_true
 
 /* If somebody calls any byte-swapping routines, shoot them.  */

@@ -1,3 +1,12 @@
+Mon Apr  4 10:56:45 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* aix386-core.c (aix386_bfd_is_local_label):  Correct cast from
+	asection to asymbol.
+	* ptrace-core.c (ptrace_unix_bfd_is_local_label):  Correct cast from
+	bfd to asymbol.
+	* trad-core.c (trad_unix_bfd_is_local_label):  Correct cast from
+	asection to asymbol.
+
 Sun Apr  3 18:27:29 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* som.c (som_slurp_string_table): Use malloc to allocate space
