@@ -438,9 +438,7 @@ extern bfd_target bfd_elf32_powerpc_vec;
 extern bfd_target bfd_elf32_sparc_vec;
 extern bfd_target bfd_elf64_big_generic_vec;
 extern bfd_target bfd_elf64_little_generic_vec;
-/* start-sanitize-v9 */
 extern bfd_target bfd_elf64_sparc_vec;
-/* end-sanitize-v9 */
 extern bfd_target demo_64_vec;
 extern bfd_target ecoff_big_vec;
 extern bfd_target ecoff_little_vec;
@@ -457,6 +455,7 @@ extern bfd_target i386dynix_vec;
 extern bfd_target i386os9k_vec;
 extern bfd_target netbsd386_vec;
 extern bfd_target i386coff_vec;
+extern bfd_target go32coff_vec;
 extern bfd_target i386linux_vec;
 extern bfd_target i386lynx_aout_vec;
 extern bfd_target i386lynx_coff_vec;
@@ -545,11 +544,9 @@ bfd_target *bfd_target_vector[] = {
 	&bfd_elf64_big_generic_vec,
 	&bfd_elf64_little_generic_vec,
 #endif
-/* start-sanitize-v9 */
 #if 0
 	&bfd_elf64_sparc_vec,
 #endif
-/* end-sanitize-v9 */
 	/* We don't include cisco_core_vec.  Although it has a magic number,
 	   the magic number isn't at the beginning of the file, and thus
 	   might spuriously match other kinds of files.  */
@@ -579,6 +576,7 @@ bfd_target *bfd_target_vector[] = {
 	&i386bsd_vec,
 	&netbsd386_vec,
 	&i386coff_vec,
+	&go32coff_vec,
 #if 0
 	/* Since a.out files lack decent magic numbers, no way to recognize
 	   which kind of a.out file it is.  */

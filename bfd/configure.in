@@ -137,6 +137,7 @@ do
     # with the two vector lists in targets.c.
     a29kcoff_big_vec)		tb="$tb coff-a29k.o" ;;
     a_out_adobe_vec)		tb="$tb aout-adobe.o aout32.o stab-syms.o" ;;
+    aout0_big_vec)		tb="$tb aout0.o aout32.o stab-syms.o" ;;
     aout_mips_big_vec)		tb="$tb mipsbsd.o aout32.o stab-syms.o" ;;
     aout_mips_little_vec)	tb="$tb mipsbsd.o aout32.o stab-syms.o" ;;
     apollocoff_vec)		tb="$tb coff-apollo.o" ;;
@@ -151,16 +152,15 @@ do
     bfd_elf32_littlemips_vec) 	tb="$tb elf32-mips.o elf32.o elf.o" ;;
     bfd_elf32_m68k_vec)		tb="$tb elf32-m68k.o elf32.o elf.o" ;;
     bfd_elf32_m88k_vec)		tb="$tb elf32-m88k.o elf32.o elf.o" ;;
-    bfd_elf32_powerpc_vec)	tb="$tb elf32-powerpc.o elf32.o elf.o" ;;
+    bfd_elf32_powerpc_vec)	tb="$tb elf32-ppc.o elf32.o elf.o" ;;
     bfd_elf32_sparc_vec)	tb="$tb elf32-sparc.o elf32.o elf.o" ;;
     bfd_elf64_big_generic_vec) 	tb="$tb elf64-gen.o elf64.o elf.o"
 				target64=true ;;
     bfd_elf64_little_generic_vec) tb="$tb elf64-gen.o elf64.o elf.o"
 				target64=true ;;
-#   start-sanitize-v9
     bfd_elf64_sparc_vec)	tb="$tb elf64-sparc.o elf64.o elf.o"
 				target64=true ;;
-#   end-sanitize-v9
+    cisco_core_vec)		tb="$tb cisco-core.o" ;;
     demo_64_vec)		tb="$tb demo64.o aout64.o stab-syms.o"
 				target64=true ;;
     ecoff_big_vec)		tb="$tb coff-mips.o" ;;
@@ -175,6 +175,7 @@ do
     som_vec)			tb="$tb som.o" ;;
     i386aout_vec)		tb="$tb i386aout.o aout32.o stab-syms.o" ;;
     i386bsd_vec)		tb="$tb i386bsd.o aout32.o stab-syms.o" ;;
+    i386dynix_vec)		tb="$tb i386dynix.o aout32.o stab-syms.o" ;;
     netbsd386_vec)		tb="$tb netbsd386.o aout32.o stab-syms.o" ;;
     i386coff_vec)		tb="$tb coff-i386.o" ;;
     i386linux_vec)		tb="$tb i386linux.o aout32.o stab-syms.o" ;;
@@ -195,9 +196,7 @@ do
     nlm32_sparc_vec)		tb="$tb nlm32-sparc.o nlm32.o nlm.o" ;;
     nlm32_alpha_vec)		tb="$tb nlm32-alpha.o nlm32.o nlm.o"
 				target64=true ;;
-#	start-sanitize-powerpc-netware
-    nlm32_powerpc_vec)		tb="$tb nlm32-powerpc.o nlm32.o nlm.o" ;;
-#	end-sanitize-powerpc-netware
+    nlm32_powerpc_vec)		tb="$tb nlm32-ppc.o nlm32.o nlm.o" ;;
     rs6000coff_vec)		tb="$tb coff-rs6000.o" ;;
     shcoff_vec)			tb="$tb coff-sh.o reloc16.o" ;;
     sparclynx_aout_vec)		tb="$tb sparclynx.o lynx-core.o aout32.o stab-syms.o" ;;
