@@ -1,3 +1,8 @@
+Mon Jul 17 13:08:00 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* remote-vx.c (vx_ops, vx_run_ops): Initialize new to_thread_alive
+	field.
+
 Sat Jul 15 01:02:53 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* config/alpha/alpha-osf3.mh, config/alpha/nm-osf3.h:  New files
@@ -55,7 +60,6 @@ Thu Jul 13 13:42:38 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
 	* remote-pa.c (remote_hppro_ops): Likewise.
 	* remote-sim.c (gdbsim_ops): Likewise.
 	* sparcl-tdep.c (sparclite_ops): Likewise.
-
 
 Tue Jul 11 11:15:55 1995  Kung Hsu  <kung@rtl.cygnus.com>
 
