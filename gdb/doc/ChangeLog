@@ -1,3 +1,8 @@
+Fri May  7 10:12:30 1993  Fred Fish  (fnf@cygnus.com)
+
+	* Clarify the intended use of the gdb-testers and gdb-patches
+	mailing lists, and shrink gzip comment.
+
 Thu May  6 16:39:50 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
 	* gdb.texinfo (Shell Commands): do not mention SHELL env var in

@@ -1,6 +1,6 @@
 			 GDB SNAPSHOT SYSTEM
 			    (general info)
-			    Updated 5/6/93
+			    Updated 5/7/93
 
 WHAT ARE GDB SNAPSHOTS
 ----------------------
@@ -89,11 +89,8 @@ however, the process will be manually run by one of the gdb maintainers
 and the appropriate files moved to the ftp area at some convenient point
 during the day.
 
-Note that the current plan is to provide gzip compressed files only, on the
-theory that serious GDB testers and developers should have no problem 
-acquiring and installing a copy of GNU gzip.  We may revisit this issue if
-it turns out to be a problem.  You can ftp GNU gzip from prep.ai.mit.edu
-in directory pub/gnu.
+Note that the current plan is to provide GNU gzip compressed files only.
+You can ftp gzip from prep.ai.mit.edu in directory pub/gnu.
 
 Also, as the gcc developers did with their gcc snapshot system, even though
 we will make the snapshots available on a publically accessible ftp area,
@@ -121,20 +118,43 @@ themselves only cover a small portion of GDB features, and what tests
 do exist for a feature are not exhaustive.  New tests are welcomed.
 
 
-HOW TO SUBMIT CHANGES
----------------------
+GETTING HELP, GDB DISCUSSIONS, etc
+----------------------------------
 
-Patches should be sent to gdb-patches@cygnus.com.  Questions about the
-snapshots themselves, problems accessing the snapshots, etc can also be sent
-to the same email address.  One of the GDB team members will take on the
-responsibility of responding to your questions or submitted patches.
+Mail sent to gdb-testers@cygnus.com goes to everyone on the list of gdb
+testers, which should include everyone getting the gdb snapshots.  It is
+appropriate whenever you wish your mail to be seen by all the testers.
+This would include announcements of any kind, notices of intent to implement
+a specific enhancement (to coordinate with other people on the list), etc.
+Before sending something to gdb-testers, ask yourself if what you are about
+to send would be something you would care to see show up in your mailbox if
+it was sent by someone else.
+
+Mail sent to gdb-patches@cygnus.com goes to gdb support people internal to
+Cygnus.  Despite the name, it is appropriate for more than just patches.
+Questions about the snapshots, problems accessing the snapshots, bug reports
+without patches, requests for advice on how to track down a bug you have
+encountered, discussion about bug fixes or enhancements in progress, etc are
+all welcome in gdb-patches.  Usually mail sent to gdb-patches will result in
+a short private email discussion between you and one or more of the gdb
+developers who can assist you with simple questions or handle your patches.
+Note that gdb-patches is *not* a general gdb electronic support line.
+If you are in need of such support, you probably should not be using the
+snapshots and should seek out one of the commercial suppliers of support
+for free software.
 
 Do *not* send any questions about the snapshots or patches specific to
 the snapshots to bug-gdb@prep.ai.mit.edu (gateway'd to the usenet group
 gnu.gdb.bug).  Nobody there will have any idea what you are talking about
 and it will just cause confusion.
 
-Here are some simple guidelines for submitting patches:
+
+FORMAT FOR PATCHES
+------------------
+
+If you have a fix for a bug, or an enhancement to submit, send your
+patch to gdb-patches@cygnus.com.  Here are some simple guidelines for
+submitting patches:
 
     o	Use "context diffs" for patches.  A typical command for generating
 	context diffs is "diff -rc gdb-old gdb-new".
