@@ -1,3 +1,12 @@
+Sat Jun 10 22:31:46 2000  Christopher Faylor <cgf@cygnus.com>
+
+	* win32-nat.c (safe_symbol_file_add_args): Store old gdb_stderr and
+	gdb_stdout here.
+	(safe_symbol_file_add_stub): Redirect gdb_stdout as well as stderr.
+	(safe_symbol_file_add_cleanup): Restore gdb_stdout.
+	(info_dll_command): Use the pager for displaying DLLs since there are
+	often quite a few.
+
 Sun Jun 11 11:34:05 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	From Sat Jun 10 17:54:04 2000 Hans-Peter Nilsson <hp@axis.com>:

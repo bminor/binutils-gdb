@@ -422,6 +422,7 @@ struct safe_symbol_file_add_args
   struct section_addr_info *addrs;
   int mainline;
   int flags;
+  struct ui_file *err, *out;
   struct objfile *ret;
 };
 
@@ -438,11 +439,15 @@ safe_symbol_file_add_stub (void *argv)
 
 /* Restore gdb's stderr after calling symbol_file_add */
 static void
-safe_symbol_file_add_cleanup (void *gdb_stderrv)
+safe_symbol_file_add_cleanup (void *p)
 {
+#define sp ((struct safe_symbol_file_add_args *)p)
   gdb_flush (gdb_stderr);
+  gdb_flush (gdb_stdout);
   ui_file_delete (gdb_stderr);
-  gdb_stderr = (struct ui_file *)gdb_stderrv;
+  ui_file_delete (gdb_stdout);
+  gdb_stderr = sp->err;
+  gdb_stdout = sp->err;
 }
 
 /* symbol_file_add wrapper that prevents errors from being displayed. */
@@ -455,10 +460,14 @@ safe_symbol_file_add (char *name, int from_tty,
   struct safe_symbol_file_add_args p;
   struct cleanup *cleanup;
 
-  cleanup = make_cleanup (safe_symbol_file_add_cleanup, gdb_stderr);
+  cleanup = make_cleanup (safe_symbol_file_add_cleanup, &p);
 
+  p.err = gdb_stderr;
+  p.out = gdb_stdout;
   gdb_flush (gdb_stderr);
+  gdb_flush (gdb_stdout);
   gdb_stderr = ui_file_new ();
+  gdb_stdout = ui_file_new ();
   p.name = name;
   p.from_tty = from_tty;
   p.addrs = addrs;
@@ -652,7 +661,7 @@ info_dll_command (char *ignore, int from_tty)
 
   printf ("%*s  Load Address\n", -max_dll_name_len, "DLL Name");
   while ((so = so->next) != NULL)
-    printf_unfiltered ("%*s  %08lx\n", -max_dll_name_len, so->name, so->load_addr);
+    printf_filtered ("%*s  %08lx\n", -max_dll_name_len, so->name, so->load_addr);
 
   return;
 }
