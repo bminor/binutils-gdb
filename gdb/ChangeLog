@@ -1,3 +1,12 @@
+2000-08-10  Mark Kettenis  <kettenis@gnu.org>
+
+	* i387-nat.h (i387_supply_fsave, i387_fill_fsave): Make extern.
+	(i387_supply_fxsave, i387_fill_fxsave): New prototypes.
+	* i387-nat.c (i387_supply_fsave): Declare `val' as `unsigned int'.
+	(fxsave_offset): New variable.
+	(FXSAVE_ADDR): New macro.
+	(i387_supply_fxsave, i387_fill_fxsave, i387_tag): New functions.
+
 2000-08-08  Tom Tromey  <tromey@cygnus.com>
 
 	* jv-valprint.c (java_value_print): Only print non-null Strings.
