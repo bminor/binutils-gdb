@@ -673,7 +673,7 @@ DEFUN (symbol_to_chars, (abfd, where, symbolP),
 				      &symbolP->sy_symbol.ost_auxent[i],
 				      S_GET_DATA_TYPE (symbolP),
 				      S_GET_STORAGE_CLASS (symbolP),
-				      where);
+				      i, numaux, where);
     }
   return where;
 
