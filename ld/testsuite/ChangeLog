@@ -1,3 +1,9 @@
+2001-11-12  Donn Terry <donnte@microsoft.com>
+
+	* ld-bootstrap/bootstrap.exp: Only compare the tail end of the two
+	binary files produced in order to avoid date stamp present in PE
+	binaries.
+
 2001-11-11  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* ld-mmix/sec-5.d (Sections): Add whitespace missing in commit.
