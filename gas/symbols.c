@@ -942,7 +942,7 @@ resolve_symbol_value (symp)
 	    {
 	      if (finalize_syms)
 		{
-		  S_SET_SEGMENT (symp, S_GET_SEGMENT (add_symbol));
+		  final_seg = S_GET_SEGMENT (add_symbol);
 		  symp->sy_value.X_op = O_symbol;
 		  symp->sy_value.X_add_symbol = add_symbol;
 		  symp->sy_value.X_add_number = final_val;
@@ -1146,18 +1146,18 @@ resolve_symbol_value (symp)
     }
 
   if (finalize_syms)
-    {
-      S_SET_VALUE (symp, final_val);
-
-#if defined (OBJ_AOUT) && ! defined (BFD_ASSEMBLER)
-      /* The old a.out backend does not handle S_SET_SEGMENT correctly
-         for a stab symbol, so we use this bad hack.  */
-      if (final_seg != S_GET_SEGMENT (symp))
-#endif
-	S_SET_SEGMENT (symp, final_seg);
-    }
+    S_SET_VALUE (symp, final_val);
 
 exit_dont_set_value:
+  /* Always set the segment, even if not finalizing the value.
+     The segment is used to determine whether a symbol is defined.  */
+#if defined (OBJ_AOUT) && ! defined (BFD_ASSEMBLER)
+  /* The old a.out backend does not handle S_SET_SEGMENT correctly
+     for a stab symbol, so we use this bad hack.  */
+  if (final_seg != S_GET_SEGMENT (symp))
+#endif
+    S_SET_SEGMENT (symp, final_seg);
+
   /* Don't worry if we can't resolve an expr_section symbol.  */
   if (finalize_syms)
     {
