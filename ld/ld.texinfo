@@ -230,7 +230,8 @@ of multiple-letter options are accepted.
 
 Note - if the linker is being invoked indirectly, via a compiler driver
 (eg @samp{gcc}) then all the linker command line options should be
-prefixed by @samp{-Wl,}  like this:
+prefixed by @samp{-Wl,} (or whatever is appropriate for the particular
+compiler driver) like this:
 
 @smallexample
   gcc -Wl,--startgroup foo.o bar.o -Wl,--endgroup
@@ -558,8 +559,8 @@ which caused the archive member to be brought in.
 @kindex --nmagic
 @item -n
 @itemx --nmagic
-Set the text segment to be read only, and mark the output as
-@code{NMAGIC} if possible.
+Turn off page alignment of sections, and mark the output as
+@code{NMAGIC} if possible. 
 
 @kindex -N
 @kindex --omagic

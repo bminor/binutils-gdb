@@ -1,8 +1,9 @@
 2000-01-07  Nick Clifton  <nickc@cygnus.com>
 
 	* ld.texinfo (Options): Remind users to preceed linker command
-	line switches with -Wl, if it is being invoked by a comnpiler
-	driver program.
+	line switches with -Wl, (or whatever is appropriate) if it is
+	being invoked by a comnpiler driver program.
+	Fix description of the behaviour of the -n command line switch. 
 
 Wed Jan  5 08:02:12 2000  Catherine Moore  <clm@cygnus.com>
 
