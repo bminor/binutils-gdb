@@ -1,5 +1,5 @@
 /* Read dbx symbol tables and convert to internal format, for GDB.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996
+   Copyright 1986, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 1998
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -1448,11 +1448,20 @@ end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
       if (p == NULL)
 	p = last_function_name;
       n = p - last_function_name;
-      p = alloca (n + 1);
+      p = alloca (n + 2);
       strncpy (p, last_function_name, n);
       p[n] = 0;
     
       minsym = lookup_minimal_symbol (p, pst->filename, objfile);
+      if (minsym == NULL)
+	{
+	  /* Sun Fortran appends an underscore to the minimal symbol name,
+	     try again with an appended underscore if the minimal symbol
+	     was not found.  */
+	  p[n] = '_';
+	  p[n + 1] = 0;
+	  minsym = lookup_minimal_symbol (p, pst->filename, objfile);
+	}
 
       if (minsym)
 	pst->texthigh = SYMBOL_VALUE_ADDRESS (minsym) + MSYMBOL_SIZE (minsym);
@@ -1922,6 +1931,10 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 	  finish_block (new->name, &local_symbols, new->old_blocks,
 			new->start_addr, new->start_addr + valu,
 			objfile);
+
+	  if (block_address_function_relative)
+	    function_start_offset = 0;
+
 	  break;
 	}
 
@@ -2114,8 +2127,10 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
       /* This type of "symbol" really just records
 	 one line-number -- core-address correspondence.
 	 Enter it in the line list for this symbol table.  */
+
       /* Relocate for dynamic loading and for ELF acc fn-relative syms.  */
       valu += function_start_offset;
+
 #ifdef SUN_FIXED_LBRAC_BUG
       last_pc_address = valu;	/* Save for SunOS bug circumcision */
 #endif
@@ -2260,12 +2275,22 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 		  if (p == NULL)
 		    p = name;
 		  n = p - name;
-		  p = alloca (n + 1);
+		  p = alloca (n + 2);
 		  strncpy (p, name, n);
 		  p[n] = 0;
 
 		  msym = lookup_minimal_symbol (p, last_source_file,
 						objfile);
+		  if (msym == NULL)
+		    {
+		      /* Sun Fortran appends an underscore to the minimal
+			 symbol name, try again with an appended underscore
+			 if the minimal symbol was not found.  */
+		      p[n] = '_';
+		      p[n + 1] = 0;
+		      msym = lookup_minimal_symbol (p, last_source_file,
+						    objfile);
+		    }
 		  if (msym)
 		    valu = SYMBOL_VALUE_ADDRESS (msym);
 		}
@@ -2381,6 +2406,7 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 		    file's symbols at once.  */
     case N_ENDM:		/* Solaris 2:  End of module */
     case N_MAIN:		/* Name of main routine.  */
+    case N_ALIAS:		/* SunPro F77: alias name, ignore for now.  */
       break;
     }
 

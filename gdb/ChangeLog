@@ -1,3 +1,13 @@
+Sun Jun 28 11:35:48 1998  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	Improve support for SunPro F77.
+	* dbxread.c (end_psymtab, process_one_symbol):  Handle minimal
+	symbols with trailing underscore names.
+	* minsyms.c (find_stab_function_addr):  Ditto.
+	* dbxread.c (process_one_symbol):  Ignore N_ALIAS for now.
+	* partial-stab.h (case N_ALIAS):  Ditto.
+	* stabsread.c (read_sun_builtin_type):  Handle boolean types.
+
 Fri Jun 26 14:03:01 1998  Keith Seitz  <keiths@cygnus.com>
 
 	* symtab.h (enum namespace): Add new namespaces FUNCTIONS_NAMESPACE,

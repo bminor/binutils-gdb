@@ -4282,8 +4282,9 @@ read_enum_type (pp, type, objfile)
 /* Sun's ACC uses a somewhat saner method for specifying the builtin
    typedefs in every file (for int, long, etc):
 
-	type = b <signed> <width>; <offset>; <nbits>
-	signed = u or s.  Possible c in addition to u or s (for char?).
+	type = b <signed> <width> <format type>; <offset>; <nbits>
+	signed = u or s.
+	optional format type = c or b for char or boolean.
 	offset = offset from high order bit to start bit of type.
 	width is # bytes in object of this type, nbits is # bits in type.
 
@@ -4300,6 +4301,7 @@ read_sun_builtin_type (pp, typenums, objfile)
   int type_bits;
   int nbits;
   int signed_type;
+  enum type_code code = TYPE_CODE_INT;
 
   switch (**pp)
     {
@@ -4317,10 +4319,16 @@ read_sun_builtin_type (pp, typenums, objfile)
   /* For some odd reason, all forms of char put a c here.  This is strange
      because no other type has this honor.  We can safely ignore this because
      we actually determine 'char'acterness by the number of bits specified in
-     the descriptor.  */
+     the descriptor.
+     Boolean forms, e.g Fortran logical*X, put a b here.  */
 
   if (**pp == 'c')
     (*pp)++;
+  else if (**pp == 'b')
+    {
+      code = TYPE_CODE_BOOL;
+      (*pp)++;
+    }
 
   /* The first number appears to be the number of bytes occupied
      by this type, except that unsigned short is 4 instead of 2.
@@ -4353,7 +4361,7 @@ read_sun_builtin_type (pp, typenums, objfile)
 		      signed_type ? 0 : TYPE_FLAG_UNSIGNED, (char *)NULL,
 		      objfile);
   else
-    return init_type (TYPE_CODE_INT,
+    return init_type (code,
 		      type_bits / TARGET_CHAR_BIT,
 		      signed_type ? 0 : TYPE_FLAG_UNSIGNED, (char *)NULL,
 		      objfile);

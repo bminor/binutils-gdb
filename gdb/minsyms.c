@@ -1,5 +1,5 @@
 /* GDB routines for manipulating the minimal symbol tables.
-   Copyright 1992, 1993, 1994, 1996, 1996 Free Software Foundation, Inc.
+   Copyright 1992, 93, 94, 96, 97, 1998 Free Software Foundation, Inc.
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
 This file is part of GDB.
@@ -452,11 +452,20 @@ find_stab_function_addr (namestring, pst, objfile)
   if (p == NULL)
     p = namestring;
   n = p - namestring;
-  p = alloca (n + 1);
+  p = alloca (n + 2);
   strncpy (p, namestring, n);
   p[n] = 0;
 
   msym = lookup_minimal_symbol (p, pst->filename, objfile);
+  if (msym == NULL)
+    {
+      /* Sun Fortran appends an underscore to the minimal symbol name,
+	 try again with an appended underscore if the minimal symbol
+	 was not found.  */
+      p[n] = '_';
+      p[n + 1] = 0;
+      msym = lookup_minimal_symbol (p, pst->filename, objfile);
+    }
   return msym == NULL ? 0 : SYMBOL_VALUE_ADDRESS (msym);
 }
 #endif /* SOFUN_ADDRESS_MAYBE_MISSING */
