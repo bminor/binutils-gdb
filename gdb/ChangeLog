@@ -1,3 +1,9 @@
+2002-11-05  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* values.c (value_change_enclosing_type): Set 
+	enclosing_type field correctly also for the case where 
+	more memory needs to be allocated.
+
 2002-11-03  Mark Kettenis  <kettenis@gnu.org>
 
 	* i387-tdep.c (i387_print_float_info): Call fputs_filtered instead
