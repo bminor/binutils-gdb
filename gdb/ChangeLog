@@ -1,5 +1,11 @@
 Thu Jan 27 15:12:23 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* symmisc.c (maintenance_print_symbols): Don't refer to the name
+	of the command in error message (the text was referring to the old
+	name of the command).
+
+	* symmisc.c (dump_symtab): Fix args to fprintf_filtered.
+
 	* c-typeprint.c (c_type_print_base): Have SHOW == 0 mean to print
 	full details on structure elements without names.  This partially
 	reverts the changes of 1 Jul 1993 and 31 Aug 1993; I think this aspect
