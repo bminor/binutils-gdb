@@ -858,7 +858,7 @@ fixS *fixP;
 	case RELOC_CONSTH: return (R_IHIHALF);
 	case RELOC_JUMPTARG: return (R_IREL);
 	default:	printf("need %o3\n", fixP->fx_r_type);
-		abort(0);
+		abort();
 	} /* switch on type */
 	
 	return(0);

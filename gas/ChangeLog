@@ -1,3 +1,13 @@
+Tue May 26 16:47:56 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* config/tc-a29k.c: lint
+	* listing.c, expr.c: patches from Andrew Smith
+
+Mon Apr 27 13:13:31 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* as.c, write.c: use -K rather than -k for the broken word warning
+	  option.
+
 Tue Apr 21 13:35:30 1992  K. Richard Pixley  (rich@cygnus.com)
 
 	* Makefile.in: do not print recursion lines.
