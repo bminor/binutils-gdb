@@ -60,15 +60,15 @@ struct symbol;
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 
-#define SKIP_PROLOGUE(pc)	(alpha_skip_prologue(pc, 0))
-extern CORE_ADDR alpha_skip_prologue (CORE_ADDR addr, int lenient);
+#define SKIP_PROLOGUE(pc) alpha_skip_prologue((pc))
+extern CORE_ADDR alpha_skip_prologue (CORE_ADDR addr);
 
 /* Immediately after a function call, return the saved pc.
    Can't always go through the frames for this because on some machines
    the new frame is not set up until the new function executes
    some instructions.  */
 
-#define SAVED_PC_AFTER_CALL(frame)	alpha_saved_pc_after_call(frame)
+#define SAVED_PC_AFTER_CALL(frame) alpha_saved_pc_after_call(frame)
 extern CORE_ADDR alpha_saved_pc_after_call (struct frame_info *);
 
 /* Are we currently handling a signal ?  */
@@ -144,17 +144,20 @@ extern int alpha_cannot_store_register (int);
 /* Index within `registers' of the first byte of the space for
    register N.  */
 
-#define REGISTER_BYTE(N) ((N) * 8)
+#define REGISTER_BYTE(N) alpha_register_byte ((N))
+extern int alpha_register_byte (int);
 
 /* Number of bytes of storage in the actual machine representation
    for register N.  On Alphas, all regs are 8 bytes.  */
 
-#define REGISTER_RAW_SIZE(N) 8
+#define REGISTER_RAW_SIZE(N) alpha_register_raw_size ((N))
+extern int alpha_register_raw_size (int);
 
 /* Number of bytes of storage in the program's representation
    for register N.  On Alphas, all regs are 8 bytes.  */
 
-#define REGISTER_VIRTUAL_SIZE(N) 8
+#define REGISTER_VIRTUAL_SIZE(N) alpha_register_virtual_size ((N))
+extern int alpha_register_virtual_size (int);
 
 /* Largest value REGISTER_RAW_SIZE can have.  */
 
@@ -255,11 +258,12 @@ extern CORE_ADDR alpha_frame_chain (struct frame_info *);
    by FI does not have a frame on the stack associated with it. */
 /* We handle this differently for alpha, and maybe we should not */
 
-#define FRAMELESS_FUNCTION_INVOCATION(FI)  (0)
+#define FRAMELESS_FUNCTION_INVOCATION(FI) \
+  generic_frameless_function_invocation_not ((FI))
 
 /* Saved Pc.  */
 
-#define FRAME_SAVED_PC(FRAME)	(alpha_frame_saved_pc(FRAME))
+#define FRAME_SAVED_PC(FRAME) alpha_frame_saved_pc(FRAME)
 extern CORE_ADDR alpha_frame_saved_pc (struct frame_info *);
 
 /* The alpha has two different virtual pointers for arguments and locals.
@@ -286,7 +290,7 @@ extern CORE_ADDR alpha_frame_locals_address (struct frame_info *);
 /* Return number of args passed to a frame.
    Can return -1, meaning no way to tell.  */
 
-#define FRAME_NUM_ARGS(fi)	(-1)
+#define FRAME_NUM_ARGS(fi) frame_num_args_unknown ((fi))
 
 /* Return number of bytes at start of arglist that are not really args.  */
 
@@ -312,12 +316,12 @@ alpha_push_arguments (int, struct value **, CORE_ADDR, int, CORE_ADDR);
 
 /* Push an empty stack frame, to record the current PC, etc.  */
 
-#define PUSH_DUMMY_FRAME 	alpha_push_dummy_frame()
+#define PUSH_DUMMY_FRAME alpha_push_dummy_frame()
 extern void alpha_push_dummy_frame (void);
 
 /* Discard from the stack the innermost frame, restoring all registers.  */
 
-#define POP_FRAME		alpha_pop_frame()
+#define POP_FRAME alpha_pop_frame()
 extern void alpha_pop_frame (void);
 
 /* Alpha OSF/1 inhibits execution of code on the stack.
@@ -432,7 +436,8 @@ extern struct frame_info *setup_arbitrary_frame (int, CORE_ADDR *);
    values are always passed in as doubles.  Thus by setting this to 1, both
    types of calls will work. */
 
-#define COERCE_FLOAT_TO_DOUBLE(formal, actual) (1)
+#define COERCE_FLOAT_TO_DOUBLE(formal, actual) \
+  standard_coerce_float_to_double ((formal), (actual))
 
 /* Return TRUE if procedure descriptor PROC is a procedure descriptor
    that refers to a dynamically generated sigtramp function.

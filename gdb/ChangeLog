@@ -1,3 +1,23 @@
+2002-01-19  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* alpha-tdep.c (alpha_register_byte): New function.
+	(alpha_register_raw_size): Ditto.
+	(alpha_register_virtual_size): Ditto.
+	(alpha_skip_prologue_internal): Renamed from
+	alpha_skip_prologue.
+	(alpha_skip_prologue): New version that calls
+	alpha_skip_prologue_internal.
+	(alpha_in_lenient_prologue): Use alpha_skip_prologue_internal.
+	* config/alpha/tm-alpha.h (SKIP_PROLOGUE): Remove
+	second argument from alpha_skip_prologue.
+	(REGISTER_BYTE): Use alpha_register_byte.
+	(REGISTER_RAW_SIZE): Use alpha_register_raw_size.
+	(REGISTER_VIRTUAL_SIZE): Use alpha_register_virtual_size.
+	(FRAMELESS_FUNCTION_INVOCATION): Use
+	generic_frameless_function_invocation_not.
+	(FRAME_NUM_ARGS): Use frame_num_args_unknown.
+	(COERCE_FLOAT_TO_DOUBLE): Use standard_coerce_float_to_double.
+
 2002-01-19  Andrew Cagney  <ac131313@redhat.com>
 
 	* config/mips/xm-news-mips.h: Delete file.

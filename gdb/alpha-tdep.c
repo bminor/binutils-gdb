@@ -322,6 +322,24 @@ alpha_register_virtual_type (int regno)
   return ((regno >= FP0_REGNUM && regno < (FP0_REGNUM+31))
 	  ? builtin_type_double : builtin_type_long);
 }
+
+int
+alpha_register_byte (int regno)
+{
+  return (regno * 8);
+}
+
+int
+alpha_register_raw_size (int regno)
+{
+  return 8;
+}
+
+int
+alpha_register_virtual_size (int regno)
+{
+  return 8;
+}
 
 
 /* Guaranteed to set frame->saved_regs to some values (it never leaves it
@@ -1277,8 +1295,8 @@ alpha_pop_frame (void)
    Currently we must not skip more on the alpha, but we might need the
    lenient stuff some day.  */
 
-CORE_ADDR
-alpha_skip_prologue (CORE_ADDR pc, int lenient)
+static CORE_ADDR
+alpha_skip_prologue_internal (CORE_ADDR pc, int lenient)
 {
   unsigned long inst;
   int offset;
@@ -1350,6 +1368,12 @@ alpha_skip_prologue (CORE_ADDR pc, int lenient)
   return pc + offset;
 }
 
+CORE_ADDR
+alpha_skip_prologue (CORE_ADDR addr)
+{
+  return (alpha_skip_prologue_internal (addr, 0));
+}
+
 #if 0
 /* Is address PC in the prologue (loosely defined) for function at
    STARTADDR?  */
@@ -1357,7 +1381,7 @@ alpha_skip_prologue (CORE_ADDR pc, int lenient)
 static int
 alpha_in_lenient_prologue (CORE_ADDR startaddr, CORE_ADDR pc)
 {
-  CORE_ADDR end_prologue = alpha_skip_prologue (startaddr, 1);
+  CORE_ADDR end_prologue = alpha_skip_prologue_internal (startaddr, 1);
   return pc >= startaddr && pc < end_prologue;
 }
 #endif
