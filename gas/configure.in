@@ -10,7 +10,7 @@ AC_INIT(as.h)
 
 AC_CANONICAL_SYSTEM
 
-AM_INIT_AUTOMAKE(gas, 2.9.1)
+AM_INIT_AUTOMAKE(gas, 2.9.4)
 
 AM_PROG_LIBTOOL
 
@@ -77,9 +77,10 @@ changequote([,])dnl
 changequote(,)dnl
       i[456]86)		cpu_type=i386 ;;
       m680[012346]0)	cpu_type=m68k ;;
+changequote([,])dnl
       m68008)		cpu_type=m68k ;;
       m683??)		cpu_type=m68k ;;
-changequote([,])dnl
+      m5200)		cpu_type=m68k ;;
       m8*)		cpu_type=m88k ;;
       mips*el)		cpu_type=mips endian=little ;;
 # start-sanitize-r5900

@@ -1,3 +1,9 @@
+Wed Jun  3 15:09:10 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Recognize m5200 as a cpu_type of m68k.
+	* aclocal.m4: Rebuild with current libtool.
+	* configure: Rebuild.
+
 Wed Jun  3 14:11:59 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* config/tc-m68k.c (md_estimate_size_before_relax): Add more calls
