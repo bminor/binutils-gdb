@@ -72,7 +72,7 @@ static void
 command_loop_marker PARAMS ((int));
 
 static void
-print_gdb_version PARAMS ((void));
+print_gdb_version PARAMS ((FILE *));
 
 static void
 quit_command PARAMS ((char *, int));
@@ -518,6 +518,7 @@ main (argc, argv)
 	{"m", no_argument, &mapped_symbol_files, 1},
 	{"quiet", no_argument, &quiet, 1},
 	{"q", no_argument, &quiet, 1},
+	{"silent", no_argument, &quiet, 1},
 	{"nx", no_argument, &inhibit_gdbinit, 1},
 	{"n", no_argument, &inhibit_gdbinit, 1},
 	{"batch", no_argument, &batch, 1},
@@ -612,20 +613,19 @@ main (argc, argv)
 #endif
 	  case '?':
 	    fprintf (stderr,
-		     "Use `%s +help' for a complete list of options.\n",
+		     "Use `%s --help' for a complete list of options.\n",
 		     argv[0]);
 	    exit (1);
 	  }
-
       }
+
     if (print_help)
       {
-	fputs ("\
-This is GDB, the GNU debugger.  Use the command\n\
-    gdb [options] [executable [core-file]]\n\
-to enter the debugger.\n\
-\n\
-Options available are:\n\
+	print_gdb_version(stderr);
+	fputs ("\n\
+This is the GNU debugger.  Usage:\n\
+    gdb [options] [executable-file [core-file or process-id]]\n\
+Options:\n\
   -help             Print this message.\n\
   -quiet            Do not print version number on startup.\n\
   -fullname         Output information used by emacs-GDB interface.\n\
@@ -689,7 +689,7 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
       /* Print all the junk at the top, with trailing "..." if we are about
 	 to read a symbol file (possibly slowly).  */
       print_gnu_advertisement ();
-      print_gdb_version ();
+      print_gdb_version (stdout);
       if (symarg)
 	printf_filtered ("..");
       wrap_here("");
@@ -1759,7 +1759,7 @@ define_command (comname, from_tty)
      int from_tty;
 {
   register struct command_line *cmds;
-  register struct cmd_list_element *c, *newc, *hookc;
+  register struct cmd_list_element *c, *newc, *hookc = 0;
   char *tem = comname;
 #define	HOOK_STRING	"hook-"
 #define	HOOK_LEN 5
@@ -1890,9 +1890,10 @@ There is absolutely no warranty for GDB; type \"show warranty\" for details.\n\
 }
 
 static void
-print_gdb_version ()
+print_gdb_version (stream)
+  FILE *stream;
 {
-  printf_filtered ("\
+  fprintf_filtered (stream, "\
 GDB %s, Copyright 1992 Free Software Foundation, Inc.",
 	  version);
 }
@@ -1905,7 +1906,7 @@ show_version (args, from_tty)
 {
   immediate_quit++;
   print_gnu_advertisement ();
-  print_gdb_version ();
+  print_gdb_version (stdout);
   printf_filtered ("\n");
   immediate_quit--;
 }

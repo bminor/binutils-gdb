@@ -1,5 +1,11 @@
 Tue Dec 15 02:01:00 1992  John Gilmore  (gnu@cygnus.com)
 
+	* remote.c:  Avoid printf_filtered line limit.  Suggested by
+	Robert R. Henry, <rrh@tera.com>.
+
+	* main.c (main):  Accept --silent as well as --quiet.  Change +help
+	to --help.  Suggested by Karl Berry, <karl@cs.umb.edu>.
+
 	* doc/gdbint.texinfo:  SWAP_HOST_AND_TARGET => SWAP_TARGET_AND_HOST.
 	Noticed by Andy Jackson, <arj@cam-orl.co.uk>.
 
@@ -47,7 +53,7 @@ Mon Dec 14 18:48:52 1992  Fred Fish  (fnf@cygnus.com)
 
 Mon Dec 14 17:18:42 1992  Stu Grossman  (grossman at cygnus.com)
 
-	* convex-xdep.c, hppab-nat.c, i860-tdep.c, infptrace.c:  Remove
+	* convex-xdep.c, hppab-nat.c, infptrace.c:  Remove
 	decl for attach_flag, it now lives in inferior.h.
 	* hppa-pinsn.c:  Reformat opcode tables.  Add function prototypes.
 	Make most functions static.
