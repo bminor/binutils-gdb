@@ -1533,6 +1533,12 @@ coff_set_arch_mach_hook (abfd, filehdr)
       break;
 #endif
 
+#ifdef TIC80_ARCH_MAGIC
+    case TIC80_ARCH_MAGIC:
+      arch = bfd_arch_tic80;
+      break;
+#endif
+
     default:			/* Unreadable input file type */
       arch = bfd_arch_obscure;
       break;
