@@ -1,3 +1,8 @@
+Tue Sep 22 17:55:14 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* d30v-opc.c: Add use of EITHER_BUT_PREFER_MU execution unit
+	class. 
+
 start-sanitize-sky
 Fri Sep 18 16:23:32 1998  Doug Evans  <devans@canuck.cygnus.com>
 
