@@ -1,3 +1,8 @@
+2004-11-08  Randolph Chung  <tausq@debian.org>
+
+	* gdb.texinfo (inferior_debugging info): Document "set debug infrun"
+	and "show debug infrun".  Add index entries.
+
 2004-10-23  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (SVR4 Process Information): Document subcommands of

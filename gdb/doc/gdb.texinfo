@@ -13879,6 +13879,13 @@ default is off.
 @item show debug frame
 Displays the current state of displaying @value{GDBN} frame debugging
 info.
+@item set debug infrun
+@cindex inferior debugging info
+Turns on or off display of @value{GDBN} debugging info for running the inferior.
+The default is off.  @file{infrun.c} contains GDB's runtime state machine used 
+for implementing operations such as single-stepping the inferior.
+@item show debug infrun
+Displays the current state of @value{GDBN} inferior debugging.
 @item set debug observer
 @cindex observer debugging info
 Turns on or off display of @value{GDBN} observer debugging.  This
