@@ -22,15 +22,8 @@
 #ifndef NM_OBSD_H
 #define NM_OBSD_H
 
-/* Type of the third argument to the `ptrace' system call.  */
-#define PTRACE_ARG3_TYPE caddr_t
-
-/* Override copies of {fetch,store}_inferior_registers in `infptrace.c'.  */
-#define FETCH_INFERIOR_REGISTERS
-
-/* We can attach and detach.  */
-#define ATTACH_DETACH
-
+/* Get generic BSD native definitions.  */
+#include "config/nm-bsd.h"
 
 /* Support for the user struct.  */
 

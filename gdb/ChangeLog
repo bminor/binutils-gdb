@@ -1,3 +1,13 @@
+2004-03-13  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/nm-fbsd.h: Include "config/nm-bsd.h".
+	(PTRACE_ARG3_TYPE, FETCH_INFERIOR_REGISTERS, ATTACH_DETACH):
+	Remove defines.
+	* config/i386/nm-fbsd64.h: Likewise.
+	* config/i386/nm-obsd.h: Likewise.
+	* config/sparc/nm-fbsd.h: Likewise.  Update copyright year.
+	* config/alpha/nm-fbsd.h: Likewise.  Update copyright year.
+
 2004-03-12  Kevin Buettner  <kevinb@redhat.com>
 
 	* frv-tdep.c (set_variant_scratch_registers): New function.

@@ -1,6 +1,6 @@
-/* Native-dependent definitions for FreeBSD/amd64.
+/* Native-dependent definitions for *BSD.
 
-   Copyright 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2001, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -19,13 +19,11 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef NM_FBSD64_H
-#define NM_FBSD64_H
+/* Type of the third argument to the `ptrace' system call.  */
+#define PTRACE_ARG3_TYPE caddr_t
 
-/* Get generic BSD native definitions.  */
-#include "config/nm-bsd.h"
+/* Override copies of {fetch,store}_inferior_registers in `infptrace.c'.  */
+#define FETCH_INFERIOR_REGISTERS
 
-/* Override child_pid_to_exec_file in 'inftarg.c'.  */
-#define CHILD_PID_TO_EXEC_FILE
-
-#endif /* nm-fbsd64.h */
+/* We can attach and detach.  */
+#define ATTACH_DETACH
