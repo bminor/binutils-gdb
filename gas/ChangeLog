@@ -1,3 +1,7 @@
+1999-06-11  Ian Lance Taylor  <ian@zembu.com>
+
+	* dwarf2dbg.h: Use PARAMS in function declarations.
+
 1999-06-11  Martin Dorey  <mdorey@madge.com>
 
 	* write.c (fixup_segment): Don't add symbol value for i960 ELF.
