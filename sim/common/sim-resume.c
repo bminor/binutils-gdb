@@ -18,9 +18,10 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#include "sim-main.h"
-
 #include <signal.h>
+
+#include "sim-main.h"
+#include "sim-assert.h"
 
 /* Halt the simulator after just one instruction */
 
@@ -28,6 +29,7 @@ static void
 has_stepped (SIM_DESC sd,
 	     void *data)
 {
+  ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
   sim_engine_halt (sd, NULL, NULL, NULL_CIA, sim_stopped, SIGTRAP);
 }
 
@@ -41,6 +43,9 @@ sim_resume (SIM_DESC sd,
 {
   sim_engine *engine = STATE_ENGINE (sd);
   jmp_buf buf;
+  int jmpval;
+
+  ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
   /* we only want to be single stepping the simulator once */
   if (engine->stepper != NULL)
@@ -52,8 +57,14 @@ sim_resume (SIM_DESC sd,
     engine->stepper = sim_events_schedule (sd, 1, has_stepped, sd);
 
   /* run/resume the simulator */
+  /*   jmpval: 0 (initial use) start simulator
+               1               halt simulator
+               2               restart simulator
+             */
+
   engine->jmpbuf = &buf;
-  if (! setjmp (buf))
+  jmpval = setjmp (buf);
+  if (jmpval == 0 || jmpval == 2)
     {
       int last_cpu_nr = sim_engine_last_cpu_nr (sd);
       int next_cpu_nr = sim_engine_next_cpu_nr (sd);

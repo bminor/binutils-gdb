@@ -18,10 +18,11 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#include "sim-main.h"
-
 #include <stdio.h>
 #include <signal.h>
+
+#include "sim-main.h"
+#include "sim-assert.h"
 
 
 /* Generic halt */
@@ -35,6 +36,7 @@ sim_engine_halt (SIM_DESC sd,
 		 int sigrc)
 {
   sim_engine *engine = STATE_ENGINE (sd);
+  ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
   if (engine->jmpbuf != NULL)
     {
       jmp_buf *halt_buf = engine->jmpbuf;
@@ -59,13 +61,14 @@ sim_engine_restart (SIM_DESC sd,
 		    sim_cia cia)
 {
   sim_engine *engine = STATE_ENGINE (sd);
+  ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
   if (engine->jmpbuf != NULL)
     {
       jmp_buf *halt_buf = engine->jmpbuf;
       engine->last_cpu = last_cpu;
       engine->next_cpu = next_cpu;
       SIM_ENGINE_RESTART_HOOK (sd, last_cpu, cia);
-      longjmp(*halt_buf, 0);
+      longjmp(*halt_buf, 2);
     }
   else
     sim_io_error (sd, "sim_restart - bad long jump");
@@ -81,6 +84,7 @@ sim_engine_abort (SIM_DESC sd,
 		  const char *fmt,
 		  ...)
 {
+  ASSERT (sd == NULL || STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
   if (sd == NULL)
     {
       va_list ap;
