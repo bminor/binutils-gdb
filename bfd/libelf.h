@@ -601,6 +601,8 @@ extern boolean _bfd_elf_find_nearest_line PARAMS ((bfd *, asection *,
 						    bfd_vma, CONST char **,
 						    CONST char **,
 						    unsigned int *));
+#define _bfd_elf_read_minisymbols _bfd_generic_read_minisymbols
+#define _bfd_elf_minisymbol_to_symbol _bfd_generic_minisymbol_to_symbol
 extern int _bfd_elf_sizeof_headers PARAMS ((bfd *, boolean));
 extern boolean _bfd_elf_new_section_hook PARAMS ((bfd *, asection *));
 

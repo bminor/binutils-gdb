@@ -19,7 +19,7 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -5943,6 +5943,8 @@ som_bfd_link_split_section (abfd, sec)
 
 #define som_get_lineno                  _bfd_nosymbols_get_lineno
 #define som_bfd_make_debug_symbol	_bfd_nosymbols_bfd_make_debug_symbol
+#define som_read_minisymbols		_bfd_generic_read_minisymbols
+#define som_minisymbol_to_symbol	_bfd_generic_minisymbol_to_symbol
 
 #define som_bfd_get_relocated_section_contents \
  bfd_generic_get_relocated_section_contents

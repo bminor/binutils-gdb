@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define KEEPMINUSPCININST 0
 
@@ -227,14 +227,14 @@ ieee_write_expression (abfd, value, symbol, pcrel, index)
     }
 
   if (bfd_is_com_section (symbol->section)
-      || symbol->section == &bfd_und_section)
+      || bfd_is_und_section (symbol->section))
     {
       /* Def of a common symbol */
       ieee_write_byte (abfd, ieee_variable_X_enum);
       ieee_write_int (abfd, symbol->value);
       term_count++;
     }
-  else if (symbol->section != &bfd_abs_section)
+  else if (! bfd_is_abs_section (symbol->section))
     {
       /* Ref to defined symbol - */
 
@@ -435,7 +435,7 @@ parse_expression (ieee, value, symbol, pcrel, extra, section)
 	    next_byte (&(ieee->h));
 	    *pcrel = true;
 	    section_n = must_parse_int (&(ieee->h));
-	    PUSH (NOSYMBOL, &bfd_abs_section,
+	    PUSH (NOSYMBOL, bfd_abs_section_ptr,
 		  TOS.value = ieee->section_table[section_n]->vma +
 		  ieee_per_section (ieee->section_table[section_n])->pc);
 	    break;
@@ -467,7 +467,7 @@ parse_expression (ieee, value, symbol, pcrel, extra, section)
 	    sy.index = (int) (must_parse_int (&(ieee->h)));
 	    sy.letter = 'X';
 
-	    PUSH (sy, &bfd_und_section, 0);
+	    PUSH (sy, bfd_und_section_ptr, 0);
 	  }
 	  break;
 	case ieee_function_minus_enum:
@@ -493,7 +493,9 @@ parse_expression (ieee, value, symbol, pcrel, extra, section)
 
 	    POP (sy1, section1, value1);
 	    POP (sy2, section2, value2);
-	    PUSH (sy1.letter ? sy1 : sy2, section1 != &bfd_abs_section ? section1 : section2, value1 + value2);
+	    PUSH (sy1.letter ? sy1 : sy2,
+		  bfd_is_abs_section (section1) ? section2 : section1,
+		  value1 + value2);
 	  }
 	  break;
 	default:
@@ -503,7 +505,7 @@ parse_expression (ieee, value, symbol, pcrel, extra, section)
 		    || this_byte (&(ieee->h)) > (int) ieee_variable_Z_enum);
 	    if (parse_int (&(ieee->h), &va))
 	      {
-		PUSH (NOSYMBOL, &bfd_abs_section, va);
+		PUSH (NOSYMBOL, bfd_abs_section_ptr, va);
 	      }
 	    else
 	      {
@@ -623,7 +625,7 @@ ieee_slurp_external_symbols (abfd)
 
 	  symbol->symbol.the_bfd = abfd;
 	  symbol->symbol.name = read_id (&(ieee->h));
-	  symbol->symbol.udata = (PTR) NULL;
+	  symbol->symbol.udata.p = (PTR) NULL;
 	  symbol->symbol.flags = BSF_NO_FLAGS;
 	  break;
 	case ieee_external_symbol_enum:
@@ -639,7 +641,7 @@ ieee_slurp_external_symbols (abfd)
 
 	  symbol->symbol.the_bfd = abfd;
 	  symbol->symbol.name = read_id (&(ieee->h));
-	  symbol->symbol.udata = (PTR) NULL;
+	  symbol->symbol.udata.p = (PTR) NULL;
 	  symbol->symbol.flags = BSF_NO_FLAGS;
 	  break;
 	case ieee_attribute_record_enum >> 8:
@@ -706,7 +708,7 @@ ieee_slurp_external_symbols (abfd)
 		value = 0;
 	      }
 	    /* This turns into a common */
-	    symbol->symbol.section = &bfd_com_section;
+	    symbol->symbol.section = bfd_com_section_ptr;
 	    symbol->symbol.value = size;
 	  }
 	  break;
@@ -722,8 +724,8 @@ ieee_slurp_external_symbols (abfd)
 
 	  symbol->symbol.the_bfd = abfd;
 	  symbol->symbol.name = read_id (&(ieee->h));
-	  symbol->symbol.udata = (PTR) NULL;
-	  symbol->symbol.section = &bfd_und_section;
+	  symbol->symbol.udata.p = (PTR) NULL;
+	  symbol->symbol.section = bfd_und_section_ptr;
 	  symbol->symbol.value = (bfd_vma) 0;
 	  symbol->symbol.flags = 0;
 
@@ -812,7 +814,7 @@ ieee_get_symtab (abfd, location)
   static bfd dummy_bfd;
   static asymbol empty_symbol =
   /* the_bfd, name, value, attr, section */
-  {&dummy_bfd, " ieee empty", (symvalue) 0, BSF_DEBUGGING, &bfd_abs_section};
+  {&dummy_bfd, " ieee empty", (symvalue) 0, BSF_DEBUGGING, bfd_abs_section_ptr};
 
   if (abfd->symcount)
     {
@@ -1796,7 +1798,7 @@ ieee_write_section_part (abfd)
   ieee->w.r.section_part = bfd_tell (abfd);
   for (s = abfd->sections; s != (asection *) NULL; s = s->next)
     {
-      if (s != &bfd_abs_section)
+      if (! bfd_is_abs_section (s))
 	{
 	  ieee_write_byte (abfd, ieee_section_type_enum);
 	  ieee_write_byte (abfd, (bfd_byte) (s->index + IEEE_SECTION_NUMBER_BASE));
@@ -2823,7 +2825,7 @@ ieee_write_debug_part (abfd)
 		ieee_write_byte (abfd, 0);
 		ieee_write_byte (abfd, 0xf9);
 		ieee_write_expression (abfd, s->size,
-				       bfd_abs_section.symbol, 0, 0, 0);
+				       bfd_abs_section_ptr->symbol, 0, 0, 0);
 		i++;
 	      }
 
@@ -2957,7 +2959,7 @@ ieee_write_external_part (abfd)
 	{
 	  asymbol *p = *q;
 	  hadone = true;
-	  if (p->section == &bfd_und_section)
+	  if (bfd_is_und_section (p->section))
 	    {
 	      /* This must be a symbol reference .. */
 	      ieee_write_byte (abfd, ieee_external_reference_enum);
@@ -2998,7 +3000,7 @@ ieee_write_external_part (abfd)
 	      /* Write out the value */
 	      ieee_write_2bytes (abfd, ieee_value_record_enum);
 	      ieee_write_int (abfd, public_index);
-	      if (p->section != &bfd_abs_section)
+	      if (! bfd_is_abs_section (p->section))
 		{
 		  if (abfd->flags & EXEC_P)
 		    {
@@ -3020,7 +3022,7 @@ ieee_write_external_part (abfd)
 		{
 		  ieee_write_expression (abfd,
 					 p->value,
-					 bfd_abs_section.symbol,
+					 bfd_abs_section_ptr->symbol,
 					 false, 0);
 		}
 	      p->value = public_index;
@@ -3349,15 +3351,21 @@ ieee_bfd_debug_info_accumulate (abfd, section)
 
 #define ieee_slurp_armap bfd_true
 #define ieee_slurp_extended_name_table bfd_true
+#define ieee_construct_extended_name_table \
+  ((boolean (*) PARAMS ((bfd *, char **, bfd_size_type *, const char **))) \
+   bfd_true)
 #define ieee_truncate_arname bfd_dont_truncate_arname
 #define ieee_write_armap \
   ((boolean (*) \
     PARAMS ((bfd *, unsigned int, struct orl *, unsigned int, int))) \
    bfd_true)
+#define ieee_update_armap_timestamp bfd_true
 
 #define ieee_bfd_is_local_label bfd_generic_is_local_label
 #define ieee_get_lineno _bfd_nosymbols_get_lineno
 #define ieee_bfd_make_debug_symbol _bfd_nosymbols_bfd_make_debug_symbol
+#define ieee_read_minisymbols _bfd_generic_read_minisymbols
+#define ieee_minisymbol_to_symbol _bfd_generic_minisymbol_to_symbol
 
 #define ieee_bfd_reloc_type_lookup _bfd_norelocs_bfd_reloc_type_lookup
 
@@ -3369,6 +3377,7 @@ ieee_bfd_debug_info_accumulate (abfd, section)
 #define ieee_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define ieee_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define ieee_bfd_final_link _bfd_generic_final_link
+#define ieee_bfd_link_split_section  _bfd_generic_link_split_section
 
 /*SUPPRESS 460 */
 const bfd_target ieee_vec =

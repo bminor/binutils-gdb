@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /*
 SUBSECTION
@@ -778,8 +778,7 @@ srec_get_section_contents (abfd, section, location, offset, count)
   return true;
 }
 
-/* we have to save up all the Srecords for a splurge before output,
-   also remember   */
+/* we have to save up all the Srecords for a splurge before output */
 
 static boolean
 srec_set_section_contents (abfd, section, location, offset, bytes_to_do)
@@ -800,7 +799,8 @@ srec_set_section_contents (abfd, section, location, offset, bytes_to_do)
       return false;
     }
 
-  if ((section->flags & SEC_ALLOC)
+  if (bytes_to_do
+      && (section->flags & SEC_ALLOC)
       && (section->flags & SEC_LOAD))
     {
       bfd_byte *data = (bfd_byte *) bfd_alloc (abfd, bytes_to_do);
@@ -811,11 +811,11 @@ srec_set_section_contents (abfd, section, location, offset, bytes_to_do)
 	}
       memcpy ((PTR) data, location, bytes_to_do);
 
-      if ((section->lma + offset + bytes_to_do) <= 0xffff)
+      if ((section->lma + offset + bytes_to_do - 1) <= 0xffff)
 	{
 
 	}
-      else if ((section->lma + offset + bytes_to_do) <= 0xffffff
+      else if ((section->lma + offset + bytes_to_do - 1) <= 0xffffff
 	       && tdata->type < 2)
 	{
 	  tdata->type = 2;
@@ -1212,6 +1212,8 @@ srec_print_symbol (ignore_abfd, afile, symbol, how)
 #define srec_get_lineno _bfd_nosymbols_get_lineno
 #define srec_find_nearest_line _bfd_nosymbols_find_nearest_line
 #define srec_bfd_make_debug_symbol _bfd_nosymbols_bfd_make_debug_symbol
+#define srec_read_minisymbols _bfd_generic_read_minisymbols
+#define srec_minisymbol_to_symbol _bfd_generic_minisymbol_to_symbol
 
 #define srec_get_reloc_upper_bound \
   ((long (*) PARAMS ((bfd *, asection *))) bfd_0l)
@@ -1227,6 +1229,7 @@ srec_print_symbol (ignore_abfd, afile, symbol, how)
 #define srec_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define srec_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define srec_bfd_final_link _bfd_generic_final_link
+#define srec_bfd_link_split_section _bfd_generic_link_split_section
 
 const bfd_target srec_vec =
 {

@@ -2539,6 +2539,78 @@ NAME(aout,print_symbol) (ignore_abfd, afile, symbol, how)
   }
 }
 
+/* If we don't have to allocate more than 1MB to hold the generic
+   symbols, we use the generic minisymbol methord: it's faster, since
+   it only translates the symbols once, not multiple times.  */
+#define MINISYM_THRESHOLD (1000000 / sizeof (asymbol))
+
+/* Read minisymbols.  For minisymbols, we use the unmodified a.out
+   symbols.  The minisymbol_to_symbol function translates these into
+   BFD asymbol structures.  */
+
+long
+NAME(aout,read_minisymbols) (abfd, dynamic, minisymsp, sizep)
+     bfd *abfd;
+     boolean dynamic;
+     PTR *minisymsp;
+     unsigned int *sizep;
+{
+  if (dynamic)
+    {
+      /* We could handle the dynamic symbols here as well, but it's
+         easier to hand them off.  */
+      return _bfd_generic_read_minisymbols (abfd, dynamic, minisymsp, sizep);
+    }
+
+  if (! aout_get_external_symbols (abfd))
+    return -1;
+
+  if (obj_aout_external_sym_count (abfd) < MINISYM_THRESHOLD)
+    return _bfd_generic_read_minisymbols (abfd, dynamic, minisymsp, sizep);
+
+  *minisymsp = (PTR) obj_aout_external_syms (abfd);
+
+  /* By passing the external symbols back from this routine, we are
+     giving up control over the memory block.  Clear
+     obj_aout_external_syms, so that we do not try to free it
+     ourselves.  */
+  obj_aout_external_syms (abfd) = NULL;
+
+  *sizep = EXTERNAL_NLIST_SIZE;
+  return obj_aout_external_sym_count (abfd);
+}
+
+/* Convert a minisymbol to a BFD asymbol.  A minisymbol is just an
+   unmodified a.out symbol.  The SYM argument is a structure returned
+   by bfd_make_empty_symbol, which we fill in here.  */
+
+asymbol *
+NAME(aout,minisymbol_to_symbol) (abfd, dynamic, minisym, sym)
+     bfd *abfd;
+     boolean dynamic;
+     const PTR minisym;
+     asymbol *sym;
+{
+  if (dynamic
+      || obj_aout_external_sym_count (abfd) < MINISYM_THRESHOLD)
+    return _bfd_generic_minisymbol_to_symbol (abfd, dynamic, minisym, sym);
+
+  memset (sym, 0, sizeof (aout_symbol_type));
+
+  /* We call translate_symbol_table to translate a single symbol.  */
+  if (! (NAME(aout,translate_symbol_table)
+	 (abfd,
+	  (aout_symbol_type *) sym,
+	  (struct external_nlist *) minisym,
+	  (bfd_size_type) 1,
+	  obj_aout_external_strings (abfd),
+	  obj_aout_external_string_size (abfd),
+	  false)))
+    return NULL;
+
+  return sym;
+}
+
 /*
  provided a BFD, a section and an offset into the section, calculate
  and return the name of the source file and the line nearest to the
@@ -2761,12 +2833,12 @@ NAME(aout,link_hash_table_create) (abfd)
   struct aout_link_hash_table *ret;
 
   ret = ((struct aout_link_hash_table *)
-	 malloc (sizeof (struct aout_link_hash_table)));
-  if (ret == (struct aout_link_hash_table *) NULL)
-      {
-	bfd_set_error (bfd_error_no_memory);
-	return (struct bfd_link_hash_table *) NULL;
-      }
+	 bfd_alloc (abfd, sizeof (struct aout_link_hash_table)));
+  if (ret == NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return (struct bfd_link_hash_table *) NULL;
+    }
   if (! NAME(aout,link_hash_table_init) (ret, abfd,
 					 NAME(aout,link_hash_newfunc)))
     {
@@ -2784,26 +2856,11 @@ NAME(aout,link_add_symbols) (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
 {
-  bfd *first;
-
   switch (bfd_get_format (abfd))
     {
     case bfd_object:
       return aout_link_add_object_symbols (abfd, info);
     case bfd_archive:
-      first = bfd_openr_next_archived_file (abfd, (bfd *) NULL);
-      if (first == NULL)
-	return false;
-      if (! bfd_check_format (first, bfd_object))
-	return false;
-      if (bfd_get_flavour (first) != bfd_target_aout_flavour)
-	{
-	  /* On Linux, we may have an ELF archive which got recognized
-             as an a.out archive.  Therefore, we treat all archives as
-             though they were actually of the flavour of their first
-             element.  */
-	  return (*first->xvec->_bfd_link_add_symbols) (abfd, info);
-	}
       return _bfd_generic_link_add_archive_symbols
 	(abfd, info, aout_link_check_archive_element);
     default:

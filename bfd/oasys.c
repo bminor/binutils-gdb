@@ -1,5 +1,5 @@
 /* BFD back-end for oasys objects.
-   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support, <sac@cygnus.com>.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define UNDERSCORE_HACK 1
 #include "bfd.h"
@@ -1174,7 +1174,7 @@ oasys_write_data (abfd)
 		  if (relocs_to_go != 0)
 		    {
 		      arelent *r = *p;
-		      const reloc_howto_type *const how = r->howto;
+		      reloc_howto_type *const how = r->howto;
 		      /* There is a relocation, is it for this byte ? */
 		      if (r->address == current_byte_index)
 			{
@@ -1475,6 +1475,9 @@ oasys_sizeof_headers (abfd, exec)
 
 #define oasys_slurp_armap bfd_true
 #define oasys_slurp_extended_name_table bfd_true
+#define oasys_construct_extended_name_table \
+  ((boolean (*) PARAMS ((bfd *, char **, bfd_size_type *, const char **))) \
+   bfd_true)
 #define oasys_truncate_arname bfd_dont_truncate_arname
 #define oasys_write_armap \
   ((boolean (*) \
@@ -1485,6 +1488,8 @@ oasys_sizeof_headers (abfd, exec)
 #define oasys_bfd_is_local_label bfd_generic_is_local_label
 #define oasys_get_lineno _bfd_nosymbols_get_lineno
 #define oasys_bfd_make_debug_symbol _bfd_nosymbols_bfd_make_debug_symbol
+#define oasys_read_minisymbols _bfd_generic_read_minisymbols
+#define oasys_minisymbol_to_symbol _bfd_generic_minisymbol_to_symbol
 
 #define oasys_bfd_reloc_type_lookup _bfd_norelocs_bfd_reloc_type_lookup
 
@@ -1496,6 +1501,7 @@ oasys_sizeof_headers (abfd, exec)
 #define oasys_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define oasys_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define oasys_bfd_final_link _bfd_generic_final_link
+#define oasys_bfd_link_split_section _bfd_generic_link_split_section
 
 /*SUPPRESS 460 */
 const bfd_target oasys_vec =

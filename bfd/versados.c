@@ -19,7 +19,7 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /*
    SUBSECTION
@@ -52,41 +52,46 @@ static const bfd_target *versados_object_p PARAMS ((bfd *));
 
 
 #define VHEADER '1'
-#define VEXTDEF '2'
+#define VESTDEF '2'
 #define VOTR '3'
 #define VEND '4'
 
 
-#define ES_BASE 17 /* first symbol has esdid 17 */
+#define ES_BASE 17		/* first symbol has esdid 17 */
 
 /* Per file target dependent information */
 
 /* one for each section */
 struct esdid
-{
-  asection *section;		/* ptr to bfd version */
-  unsigned char *contents;	/* used to build image */
-  int pc; 
-  int relocs;			/* reloc count, valid end of pass 1 */
-  int donerel;			/* have relocs been translated */
-};
+  {
+    asection *section;		/* ptr to bfd version */
+    unsigned char *contents;	/* used to build image */
+    int pc;
+    int relocs;			/* reloc count, valid end of pass 1 */
+    int donerel;		/* have relocs been translated */
+  };
 
 typedef struct versados_data_struct
-{
-  int es_done;			/* count of symbol index, starts at ES_BASE */
-  asymbol *symbols;		/* pointer to local symbols */
-  char *strings;		/* strings of all the above */
-  int stringlen;		/* len of string table (valid end of pass1) */
-  int nsyms;			/* number of symbols (valid end of pass1) */
-  int nsecsyms;			/* number of sections */
+  {
+    int es_done;		/* count of symbol index, starts at ES_BASE */
+    asymbol *symbols;		/* pointer to local symbols */
+    char *strings;		/* strings of all the above */
+    int stringlen;		/* len of string table (valid end of pass1) */
+    int nsecsyms;		/* number of sections */
 
-  int pass_2_done; 
+    int ndefs;			/* number of exported symbols (they dont get esdids) */
+    int nrefs;			/* number of imported symbols  (valid end of pass1) */
 
-  struct esdid e[16];		/* per section info */
-  int alert;			/* to see if we're trampling */
-  asymbol *rest[256 - 16];	/* per symbol info */
+    int ref_idx;		/* current processed value of the above */
+    int def_idx;
 
-}
+    int pass_2_done;
+
+    struct esdid e[16];		/* per section info */
+    int alert;			/* to see if we're trampling */
+    asymbol *rest[256 - 16];	/* per symbol info */
+
+  }
 tdata_type;
 
 #define VDATA(abfd)       (abfd->tdata.versados_data)
@@ -97,7 +102,7 @@ struct ext_otr
   {
     unsigned char size;
     char type;
-    char map[4];
+    unsigned char map[4];
     unsigned char esdid;
     unsigned char data[200];
   };
@@ -125,14 +130,17 @@ struct ext_esd
     char type;
     unsigned char esd_entries[1];
   };
-#define ESD_ABS 0
-#define EST_SHRT_REL_SEC 1
-#define EST_STD_REL_SEC 2
+#define ESD_ABS 	0
+#define ESD_COMMON 	1
+#define ESD_STD_REL_SEC 2
+#define ESD_SHRT_REL_SEC 3
 #define ESD_XDEF_IN_SEC 4
 #define ESD_XREF_SYM    7
+#define ESD_XREF_SEC	6
+#define ESD_XDEF_IN_ABS 5
 union ext_any
   {
-    char size;
+    unsigned char size;
     struct ext_vheader header;
     struct ext_esd esd;
     struct ext_otr otr;
@@ -160,7 +168,7 @@ versados_mkobject (abfd)
 	}
       abfd->tdata.versados_data = tdata;
       tdata->symbols = NULL;
-      VDATA(abfd)->alert = 0x12345678;
+      VDATA (abfd)->alert = 0x12345678;
     }
 
   bfd_default_set_arch_mach (abfd, bfd_arch_m68k, 0);
@@ -270,10 +278,10 @@ process_esd (abfd, esd, pass)
 	{
 	default:
 	  abort ();
-
+	case ESD_XREF_SEC:
 	case ESD_XREF_SYM:
 	  {
-	    int snum = VDATA (abfd)->nsyms++;
+	    int snum = VDATA (abfd)->ref_idx++;
 	    get_10 (&ptr, name);
 	    if (pass == 1)
 	      {
@@ -291,20 +299,24 @@ process_esd (abfd, esd, pass)
 	      }
 	  }
 	  break;
+
+
 	case ESD_ABS:
 	  size = get_4 (&ptr);
 	  start = get_4 (&ptr);
 	  break;
-	case EST_STD_REL_SEC:
-	case EST_SHRT_REL_SEC:
+	case ESD_STD_REL_SEC:
+	case ESD_SHRT_REL_SEC:
 	  {
 	    sec->_raw_size = get_4 (&ptr);
-	    sec->flags |= SEC_HAS_CONTENTS | SEC_LOAD | SEC_ALLOC;
+	    sec->flags |= SEC_ALLOC;
 	  }
 	  break;
+	case ESD_XDEF_IN_ABS:
+	  sec = (asection *) & bfd_abs_section;
 	case ESD_XDEF_IN_SEC:
 	  {
-	    int snum = VDATA (abfd)->nsyms++;
+	    int snum = VDATA (abfd)->def_idx++;
 	    long val;
 	    get_10 (&ptr, name);
 	    val = get_4 (&ptr);
@@ -317,7 +329,7 @@ process_esd (abfd, esd, pass)
 	      {
 		asymbol *s;
 		char *n = new_symbol_string (abfd, name);
-		s = versados_new_symbol (abfd, snum, n, val, sec, scn);
+		s = versados_new_symbol (abfd, snum + VDATA (abfd)->nrefs, n, val, sec, scn);
 		s->flags |= BSF_GLOBAL;
 	      }
 	  }
@@ -334,20 +346,39 @@ process_esd (abfd, esd, pass)
 reloc_howto_type versados_howto_table[] =
 {
   HOWTO (R_RELWORD, 0, 1, 16, false,
-	 0, complain_overflow_bitfield, 0,
+	 0, complain_overflow_dont, 0,
 	 "+v16", true, 0x0000ffff, 0x0000ffff, false),
   HOWTO (R_RELLONG, 0, 2, 32, false,
-	 0, complain_overflow_bitfield, 0,
+	 0, complain_overflow_dont, 0,
 	 "+v32", true, 0xffffffff, 0xffffffff, false),
 
   HOWTO (R_RELWORD_NEG, 0, -1, 16, false,
-	 0, complain_overflow_bitfield, 0,
+	 0, complain_overflow_dont, 0,
 	 "-v16", true, 0x0000ffff, 0x0000ffff, false),
   HOWTO (R_RELLONG_NEG, 0, -2, 32, false,
-	 0, complain_overflow_bitfield, 0,
+	 0, complain_overflow_dont, 0,
 	 "-v32", true, 0xffffffff, 0xffffffff, false),
 };
 
+
+static int
+get_offset (len, ptr)
+     int len;
+     unsigned char *ptr;
+{
+  int val = 0;
+  if (len)
+    {
+      int i;
+      val = *ptr++;
+      if (val & 0x80)
+	val |= ~0xff;
+      for (i = 1; i < len; i++)
+	val = (val << 8) | *ptr++;
+    }
+
+  return val;
+}
 
 static void
 process_otr (abfd, otr, pass)
@@ -364,91 +395,87 @@ process_otr (abfd, otr, pass)
   | (otr->map[2] << 8)
   | (otr->map[3] << 0);
 
-  unsigned char *contents = EDATA (abfd, otr->esdid - 1).contents;
+  struct esdid *esdid = &EDATA (abfd, otr->esdid - 1);
+  unsigned char *contents = esdid->contents;
+  int need_contents = 0;
+  int dst_idx = esdid->pc;
 
-  int dst_idx = EDATA (abfd, otr->esdid - 1).pc;
-  for (shift = (1 << 31); srcp < endp; shift >>= 1)
+  for (shift = (1 << 31); shift && srcp < endp; shift >>= 1)
     {
       if (bits & shift)
 	{
 	  int flag = *srcp++;
-	  int esdids = (flag >> 5) & 3;
+	  int esdids = (flag >> 5) & 0x7;
 	  int sizeinwords = ((flag >> 3) & 1) ? 2 : 1;
-	  int offsetlen = flag & 7;
-
+	  int offsetlen = flag & 0x7;
 	  int j;
-	  for (j = 0; j < esdids; j++)
+
+
+	  if (esdids == 0)
 	    {
-	      int esdid = *srcp++;
-	      /* don't process zero esdids */
-	      if (esdid)
-		{
-		  int rn = EDATA (abfd, otr->esdid - 1).relocs++;
-		  if (pass == 1)
-		    {
-		      /* this is the first pass over the data, 
-		         just remember that we need a reloc */
-		    }
-		  else
-		    {
-		      arelent *n =
-		      EDATA (abfd, otr->esdid - 1).section->relocation + rn;
-		      n->address = dst_idx;
-
-		      n->sym_ptr_ptr = (asymbol **) esdid;
-		      n->addend = 0;
-		      n->howto
-			= versados_howto_table
-			+ ((j & 1) * 2)
-			+ (sizeinwords - 1);
-
-		    }
-
-		}
-	    }
-
-	  if (offsetlen)
-	    {
-	      /* MSB is sign extended */
-	      val = srcp[0] | ((srcp[0] & 0x80) ? ~0xff : 0);
-	      for (j = 1; j < offsetlen; j++)
-		{
-		  val = val << 8;
-		  val |= srcp[j];
-		}
+	      /* A zero esdid means the new pc is the offset given */
+	      dst_idx += get_offset (offsetlen, srcp);
 	      srcp += offsetlen;
 	    }
 	  else
-	    val = 0;
+	    {
+	      int val = get_offset (offsetlen, srcp + esdids);
+	      if (pass == 1)
+		need_contents = 1;
+	      else
+		for (j = 0; j < sizeinwords * 2; j++)
+		  {
+		    contents[dst_idx + (sizeinwords * 2) - j - 1] = val;
+		    val >>= 8;
+		  }
 
-	  /* Insert addend into stream */
-	  if (pass == 2)
-	    switch (sizeinwords)
-	      {
-	      case 2:
-		contents[dst_idx++] = val >> 24;
-		contents[dst_idx++] = val >> 16;
-		/* fall through */
-	      case 1:
-		contents[dst_idx++] = val >> 8;
-		contents[dst_idx++] = val >> 0;
-		break;
-	      }
+	      for (j = 0; j < esdids; j++)
+		{
+		  int esdid = *srcp++;
 
+		  if (esdid)
+		    {
+		      int rn = EDATA (abfd, otr->esdid - 1).relocs++;
+		      if (pass == 1)
+			{
+			  /* this is the first pass over the data, 
+			     just remember that we need a reloc */
+			}
+		      else
+			{
+			  arelent *n =
+			  EDATA (abfd, otr->esdid - 1).section->relocation + rn;
+			  n->address = dst_idx;
+
+			  n->sym_ptr_ptr = (asymbol **) esdid;
+			  n->addend = 0;
+			  n->howto = versados_howto_table + ((j & 1) * 2) + (sizeinwords - 1);
+			}
+		    }
+		}
+	      srcp += offsetlen;
+	      dst_idx += sizeinwords * 2;
+	    }
 	}
       else
 	{
-	  if (pass == 2)
-	    {
-	      /* absolute code, comes in 16 bit lumps */
-	      contents[dst_idx] = srcp[0];
-	      contents[dst_idx + 1] = srcp[1];
-	    }
+	  need_contents = 1;
+	  if (dst_idx < esdid->section->_raw_size)
+	    if (pass == 2)
+	      {
+		/* absolute code, comes in 16 bit lumps */
+		contents[dst_idx] = srcp[0];
+		contents[dst_idx + 1] = srcp[1];
+	      }
 	  dst_idx += 2;
 	  srcp += 2;
 	}
     }
   EDATA (abfd, otr->esdid - 1).pc = dst_idx;
+
+  if (!contents && need_contents)
+    esdid->contents = (unsigned char *) bfd_alloc (abfd, esdid->section->_raw_size);
+
 
 }
 
@@ -459,6 +486,12 @@ versados_scan (abfd)
   int loop = 1;
   int i;
   int j;
+  int nsecs = 0;
+
+  VDATA (abfd)->nrefs = 0;
+  VDATA (abfd)->ndefs = 0;
+  VDATA (abfd)->ref_idx = 0;
+  VDATA (abfd)->def_idx = 0;
 
   while (loop)
     {
@@ -472,7 +505,7 @@ versados_scan (abfd)
 	case VEND:
 	  loop = 0;
 	  break;
-	case VEXTDEF:
+	case VESTDEF:
 	  process_esd (abfd, &any.esd, 1);
 	  break;
 	case VOTR:
@@ -483,6 +516,13 @@ versados_scan (abfd)
 
   /* Now allocate space for the relocs and sections */
 
+  VDATA (abfd)->nrefs = VDATA (abfd)->ref_idx;
+  VDATA (abfd)->ndefs = VDATA (abfd)->def_idx;
+  VDATA (abfd)->ref_idx = 0;
+  VDATA (abfd)->def_idx = 0;
+
+  abfd->symcount = VDATA (abfd)->nrefs + VDATA (abfd)->ndefs;
+
   for (i = 0; i < 16; i++)
     {
       struct esdid *esdid = &EDATA (abfd, i);
@@ -491,28 +531,35 @@ versados_scan (abfd)
 	  esdid->section->relocation
 	    = (arelent *) bfd_alloc (abfd, sizeof (arelent) * esdid->relocs);
 
-	  esdid->contents
-	    = (unsigned char *) bfd_alloc (abfd, esdid->section->_raw_size);
-
 	  esdid->pc = 0;
+
+	  if (esdid->contents)
+	    esdid->section->flags |= SEC_HAS_CONTENTS | SEC_LOAD;
+
 	  esdid->section->reloc_count = esdid->relocs;
 	  if (esdid->relocs)
 	    esdid->section->flags |= SEC_RELOC;
+
 	  esdid->relocs = 0;
 
 	  /* Add an entry into the symbol table for it */
-	  abfd->symcount++;
+	  nsecs++;
 	  VDATA (abfd)->stringlen += strlen (esdid->section->name) + 1;
 	}
     }
+
+  abfd->symcount += nsecs;
+
   VDATA (abfd)->symbols = (asymbol *) bfd_alloc (abfd,
-				     sizeof (asymbol) * abfd->symcount);
+				       sizeof (asymbol) * (abfd->symcount));
+
   VDATA (abfd)->strings = bfd_alloc (abfd, VDATA (abfd)->stringlen);
-  abfd->symcount = VDATA (abfd)->nsyms;
 
-  /* Actually fill in the section symbols */
 
-  for (j = 0, i = 0; i < 16; i++)
+  /* Actually fill in the section symbols,
+     we stick them at the end of the table */
+
+  for (j = VDATA (abfd)->nrefs + VDATA (abfd)->ndefs, i = 0; i < 16; i++)
     {
       struct esdid *esdid = &EDATA (abfd, i);
       asection *sec = esdid->section;
@@ -527,11 +574,15 @@ versados_scan (abfd)
 	  j++;
 	}
     }
-  abfd->symcount += j;
   if (abfd->symcount)
     abfd->flags |= HAS_SYMS;
-  VDATA (abfd)->nsecsyms = j;
-  VDATA (abfd)->nsyms = j;
+
+  /* Set this to nsecs - since we've already planted the section
+     symbols */
+  VDATA (abfd)->nsecsyms = nsecs;
+
+  VDATA (abfd)->ref_idx = 0;
+
   return 1;
 }
 
@@ -583,6 +634,7 @@ versados_pass_2 (abfd)
 
   VDATA (abfd)->es_done = ES_BASE;
 
+
   /* read records till we get to where we want to be */
 
   while (1)
@@ -593,7 +645,7 @@ versados_pass_2 (abfd)
 	case VEND:
 	  VDATA (abfd)->pass_2_done = 1;
 	  return 1;
-	case VEXTDEF:
+	case VESTDEF:
 	  process_esd (abfd, &any.esd, 2);
 	  break;
 	case VOTR:
@@ -747,15 +799,24 @@ versados_canonicalize_reloc (abfd, section, relptr, symbols)
       for (count = 0; count < section->reloc_count; count++)
 	{
 	  int esdid = (int) src[count].sym_ptr_ptr;
-	  if (esdid < ES_BASE)	/* Section relative thing */
+
+	  if (esdid == 0)
 	    {
-	      src[count].sym_ptr_ptr 
-		= EDATA (abfd, esdid - 1).section->symbol_ptr_ptr;
+	      src[count].sym_ptr_ptr = bfd_abs_section.symbol_ptr_ptr;
+	    }
+	  else if (esdid < ES_BASE)	/* Section relative thing */
+	    {
+	      struct esdid *e = &EDATA (abfd, esdid - 1);
+	      if (!section)
+		{
+		 /** relocation relative to section which was
+		   never declared ! */
+		}
+	      src[count].sym_ptr_ptr = e->section->symbol_ptr_ptr;
 	    }
 	  else
 	    {
-	      src[count].sym_ptr_ptr
-		= symbols + esdid - 17 + VDATA (abfd)->nsecsyms;
+	      src[count].sym_ptr_ptr = symbols + esdid - ES_BASE;
 	    }
 
 	}
@@ -777,6 +838,8 @@ versados_canonicalize_reloc (abfd, section, relptr, symbols)
 #define versados_get_lineno _bfd_nosymbols_get_lineno
 #define versados_find_nearest_line _bfd_nosymbols_find_nearest_line
 #define versados_bfd_make_debug_symbol _bfd_nosymbols_bfd_make_debug_symbol
+#define versados_read_minisymbols _bfd_generic_read_minisymbols
+#define versados_minisymbol_to_symbol _bfd_generic_minisymbol_to_symbol
 
 #define versados_bfd_reloc_type_lookup _bfd_norelocs_bfd_reloc_type_lookup
 

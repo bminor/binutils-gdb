@@ -1,3 +1,28 @@
+Thu Jul 13 10:33:25 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* targets.c (bfd_target): Add fields _read_minisymbols and
+	_minisymbol_to_symbol.
+	(BFD_JUMP_TABLE_SYMBOLS): Add _read_minisymbols and
+	_minisymbol_to_symbol.
+	(bfd_read_minisymbols): Define.
+	(bfd_minisymbol_to_symbol): Define.
+	* syms.c (_bfd_generic_read_minisymbols): Define.
+	(_bfd_generic_minisymbol_to_symbol): Define.
+	* libbfd-in.h (_bfd_nosymbols_read_minisymbols): Define.
+	(_bfd_nosymbols_minisymbol_to_symbol): Define.
+	(_bfd_generic_read_minisymbols): Declare.
+	(_bfd_generic_minisymbol_to_symbol): Declare.
+	* bfd-in2.h: Rebuild.
+	* libbfd.h: Rebuild.
+	* aoutx.h (MINISYM_THRESHOLD): Define.
+	(NAME(aout,read_minisymbols)): New function.
+	(NAME(aout,minisymbol_to_symbol)): New function.
+	* libaout.h (NAME(aout,read_minisymbols)): Declare.
+	(NAME(aout,minisymbol_to_symbol)): Declare.
+	* aout-target.h (MY_read_minisymbols): Define.
+	(MY_minisymbol_to_symbol): Define.
+	* All targets: Define read_minisymbols and minisymbol_to_symbol.
+
 Wed Jul 12 17:55:55 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* elflink.h (elf_link_add_object_symbols): Cast return value from
