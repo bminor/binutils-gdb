@@ -35,15 +35,9 @@
 #include "coff/internal.h"	/* for libcoff.h */
 #include "bfd/libcoff.h"	/* for xcoff_data */
 
-/* Some important register numbers.  Keep these in the same order as in
-   /usr/mstsave.h `mstsave' structure, for easier processing. */
+#include "elf-bfd.h"
 
-#define	GP0_REGNUM 0		/* GPR register 0 */
-#define	TOC_REGNUM 2		/* TOC register */
-#define PS_REGNUM 65		/* Processor (or machine) status (%msr) */
-#define	CR_REGNUM 66		/* Condition register */
-#define	LR_REGNUM 67		/* Link register */
-#define	CTR_REGNUM 68		/* Count register */
+#include "ppc-tdep.h"
 
 /* If the kernel has to deliver a signal, it pushes a sigcontext
    structure on the stack and then calls the signal handler, passing
@@ -89,6 +83,7 @@ struct reg
 struct gdbarch_tdep
   {
     int wordsize;		/* size in bytes of fixed-point word */
+    int osabi;			/* OS / ABI from ELF header */
     int *regoff;		/* byte offsets in register arrays */
     const struct reg *regs;	/* from current variant */
   };
@@ -157,7 +152,7 @@ struct frame_extra_info
   CORE_ADDR initial_sp;		/* initial stack pointer. */
 };
 
-static void
+void
 rs6000_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
   fi->extra_info = (struct frame_extra_info *)
@@ -182,7 +177,7 @@ rs6000_init_extra_frame_info (int fromleaf, struct frame_info *fi)
    not sure if it will be needed. The following function takes care of gpr's
    and fpr's only. */
 
-static void
+void
 rs6000_frame_init_saved_regs (struct frame_info *fi)
 {
   frame_get_saved_regs (fi, NULL);
@@ -205,7 +200,7 @@ rs6000_frame_args_address (struct frame_info *fi)
 static CORE_ADDR
 rs6000_saved_pc_after_call (struct frame_info *fi)
 {
-  return read_register (LR_REGNUM);
+  return read_register (PPC_LR_REGNUM);
 }
 
 /* Calculate the destination of a branch/jump.  Return -1 if not a branch.  */
@@ -243,7 +238,7 @@ branch_dest (int opcode, int instr, CORE_ADDR pc, CORE_ADDR safety)
 
       if (ext_op == 16)		/* br conditional register */
 	{
-	  dest = read_register (LR_REGNUM) & ~3;
+	  dest = read_register (PPC_LR_REGNUM) & ~3;
 
 	  /* If we are about to return from a signal handler, dest is
 	     something like 0x3c90.  The current frame is a signal handler
@@ -262,13 +257,13 @@ branch_dest (int opcode, int instr, CORE_ADDR pc, CORE_ADDR safety)
 
       else if (ext_op == 528)	/* br cond to count reg */
 	{
-	  dest = read_register (CTR_REGNUM) & ~3;
+	  dest = read_register (PPC_CTR_REGNUM) & ~3;
 
 	  /* If we are about to execute a system call, dest is something
 	     like 0x22fc or 0x3b00.  Upon completion the system call
 	     will return to the address in the link register.  */
 	  if (dest < TEXT_SEGMENT_BASE)
-	    dest = read_register (LR_REGNUM) & ~3;
+	    dest = read_register (PPC_LR_REGNUM) & ~3;
 	}
       else
 	return -1;
@@ -715,7 +710,7 @@ rs6000_pop_frame (void)
   else
     prev_sp = read_memory_addr (sp, wordsize);
   if (fdata.lr_offset == 0)
-    lr = read_register (LR_REGNUM);
+    lr = read_register (PPC_LR_REGNUM);
   else
     lr = read_memory_addr (prev_sp + fdata.lr_offset, wordsize);
 
@@ -766,7 +761,7 @@ rs6000_fix_call_dummy (char *dummyname, CORE_ADDR pc, CORE_ADDR fun,
   if (rs6000_find_toc_address_hook != NULL)
     {
       CORE_ADDR tocvalue = (*rs6000_find_toc_address_hook) (fun);
-      write_register (TOC_REGNUM, tocvalue);
+      write_register (PPC_TOC_REGNUM, tocvalue);
     }
 }
 
@@ -989,7 +984,7 @@ ran_out_of_registers_for_arguments:
 static CORE_ADDR
 ppc_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
-  write_register (LR_REGNUM, CALL_DUMMY_ADDRESS ());
+  write_register (PPC_LR_REGNUM, CALL_DUMMY_ADDRESS ());
   return sp;
 }
 
@@ -1085,7 +1080,7 @@ rs6000_skip_trampoline_code (CORE_ADDR pc)
 
 /* Determines whether the function FI has a frame on the stack or not.  */
 
-static int
+int
 rs6000_frameless_function_invocation (struct frame_info *fi)
 {
   CORE_ADDR func_start;
@@ -1119,7 +1114,7 @@ rs6000_frameless_function_invocation (struct frame_info *fi)
 
 /* Return the PC saved in a frame */
 
-static CORE_ADDR
+CORE_ADDR
 rs6000_frame_saved_pc (struct frame_info *fi)
 {
   CORE_ADDR func_start;
@@ -1152,7 +1147,7 @@ rs6000_frame_saved_pc (struct frame_info *fi)
     }
 
   if (fdata.lr_offset == 0)
-    return read_register (LR_REGNUM);
+    return read_register (PPC_LR_REGNUM);
 
   return read_memory_addr (FRAME_CHAIN (fi) + fdata.lr_offset, wordsize);
 }
@@ -1223,12 +1218,12 @@ frame_get_saved_regs (struct frame_info *fi, struct rs6000_framedata *fdatap)
   /* If != 0, fdatap->cr_offset is the offset from the frame that holds
      the CR.  */
   if (fdatap->cr_offset != 0)
-    fi->saved_regs[CR_REGNUM] = frame_addr + fdatap->cr_offset;
+    fi->saved_regs[PPC_CR_REGNUM] = frame_addr + fdatap->cr_offset;
 
   /* If != 0, fdatap->lr_offset is the offset from the frame that holds
      the LR.  */
   if (fdatap->lr_offset != 0)
-    fi->saved_regs[LR_REGNUM] = frame_addr + fdatap->lr_offset;
+    fi->saved_regs[PPC_LR_REGNUM] = frame_addr + fdatap->lr_offset;
 }
 
 /* Return the address of a frame. This is the inital %sp value when the frame
@@ -1313,7 +1308,7 @@ frame_initial_stack_address (struct frame_info *fi)
 /* In the case of the RS/6000, the frame's nominal address
    is the address of a 4-byte word containing the calling frame's address.  */
 
-static CORE_ADDR
+CORE_ADDR
 rs6000_frame_chain (struct frame_info *thisframe)
 {
   CORE_ADDR fp, fpp, lr;
@@ -1338,7 +1333,7 @@ rs6000_frame_chain (struct frame_info *thisframe)
   else
     fp = read_memory_addr ((thisframe)->frame, wordsize);
 
-  lr = read_register (LR_REGNUM);
+  lr = read_register (PPC_LR_REGNUM);
   if (lr == entry_point_address ())
     if (fp != 0 && (fpp = read_memory_addr (fp, wordsize)) != 0)
       if (PC_IN_CALL_DUMMY (lr, fpp, fpp))
@@ -1500,7 +1495,7 @@ rs6000_store_return_value (struct type *type, char *valbuf)
 			  TYPE_LENGTH (type));
   else
     /* Everything else is returned in GPR3 and up. */
-    write_register_bytes (REGISTER_BYTE (GP0_REGNUM + 3), valbuf,
+    write_register_bytes (REGISTER_BYTE (PPC_GP0_REGNUM + 3), valbuf,
 			  TYPE_LENGTH (type));
 }
 
@@ -1909,6 +1904,84 @@ find_variant_by_arch (enum bfd_architecture arch, unsigned long mach)
   return NULL;
 }
 
+
+
+
+static void
+process_note_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
+{
+  int *os_ident_ptr = obj;
+  const char *name;
+  unsigned int sectsize;
+
+  name = bfd_get_section_name (abfd, sect);
+  sectsize = bfd_section_size (abfd, sect);
+  if (strcmp (name, ".note.ABI-tag") == 0 && sectsize > 0)
+    {
+      unsigned int name_length, data_length, note_type;
+      char *note = alloca (sectsize);
+
+      bfd_get_section_contents (abfd, sect, note,
+                                (file_ptr) 0, (bfd_size_type) sectsize);
+
+      name_length = bfd_h_get_32 (abfd, note);
+      data_length = bfd_h_get_32 (abfd, note + 4);
+      note_type   = bfd_h_get_32 (abfd, note + 8);
+
+      if (name_length == 4 && data_length == 16 && note_type == 1
+          && strcmp (note + 12, "GNU") == 0)
+	{
+	  int os_number = bfd_h_get_32 (abfd, note + 16);
+
+	  /* The case numbers are from abi-tags in glibc */
+	  switch (os_number)
+	    {
+	    case 0 :
+	      *os_ident_ptr = ELFOSABI_LINUX;
+	      break;
+	    case 1 :
+	      *os_ident_ptr = ELFOSABI_HURD;
+	      break;
+	    case 2 :
+	      *os_ident_ptr = ELFOSABI_SOLARIS;
+	      break;
+	    default :
+	      internal_error (
+		"process_note_abi_sections: unknown OS number %d", os_number);
+	      break;
+	    }
+	}
+    }
+}
+
+/* Return one of the ELFOSABI_ constants for BFDs representing ELF
+   executables.  If it's not an ELF executable or if the OS/ABI couldn't
+   be determined, simply return -1. */
+
+static int
+get_elfosabi (bfd *abfd)
+{
+  int elfosabi = -1;
+
+  if (abfd != NULL && bfd_get_flavour (abfd) == bfd_target_elf_flavour)
+    {
+      elfosabi = elf_elfheader (abfd)->e_ident[EI_OSABI];
+
+      /* When elfosabi is 0 (ELFOSABI_NONE), this is supposed to indicate
+         that we're on a SYSV system.  However, GNU/Linux uses a note section
+	 to record OS/ABI info, but leaves e_ident[EI_OSABI] zero.  So we
+	 have to check the note sections too. */
+      if (elfosabi == 0)
+	{
+	  bfd_map_over_sections (abfd,
+	                         process_note_abi_tag_sections,
+				 &elfosabi);
+	}
+    }
+
+  return elfosabi;
+}
+
 
 
 /* Initialize the current architecture based on INFO.  If possible, re-use an
@@ -1923,21 +1996,36 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
   struct gdbarch_tdep *tdep;
-  int wordsize, fromexec, power, i, off;
+  int wordsize, from_xcoff_exec, from_elf_exec, power, i, off;
   struct reg *regs;
   const struct variant *v;
   enum bfd_architecture arch;
   unsigned long mach;
   bfd abfd;
+  int osabi, sysv_abi;
 
-  fromexec = info.abfd && info.abfd->format == bfd_object &&
+  from_xcoff_exec = info.abfd && info.abfd->format == bfd_object &&
     bfd_get_flavour (info.abfd) == bfd_target_xcoff_flavour;
+
+  from_elf_exec = info.abfd && info.abfd->format == bfd_object &&
+    bfd_get_flavour (info.abfd) == bfd_target_elf_flavour;
+
+  sysv_abi = info.abfd && bfd_get_flavour (info.abfd) == bfd_target_elf_flavour;
+
+  osabi = get_elfosabi (info.abfd);
 
   /* Check word size.  If INFO is from a binary file, infer it from that,
      else use the previously-inferred size. */
-  if (fromexec)
+  if (from_xcoff_exec)
     {
       if (xcoff_data (info.abfd)->xcoff64)
+	wordsize = 8;
+      else
+	wordsize = 4;
+    }
+  else if (from_elf_exec)
+    {
+      if (elf_elfheader (info.abfd)->e_ident[EI_CLASS] == ELFCLASS64)
 	wordsize = 8;
       else
 	wordsize = 4;
@@ -1960,7 +2048,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
          meaningful, because 64-bit CPUs can run in 32-bit mode.  So, perform
          separate word size check. */
       tdep = gdbarch_tdep (arches->gdbarch);
-      if (tdep && tdep->wordsize == wordsize)
+      if (tdep && tdep->wordsize == wordsize && tdep->osabi == osabi)
 	return arches->gdbarch;
     }
 
@@ -1972,7 +2060,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
        - "set arch"		trust blindly
        - GDB startup		useless but harmless */
 
-  if (!fromexec)
+  if (!from_xcoff_exec)
     {
       arch = info.bfd_architecture;
       mach = info.bfd_arch_info->mach;
@@ -1986,6 +2074,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
   tdep = xmalloc (sizeof (struct gdbarch_tdep));
   tdep->wordsize = wordsize;
+  tdep->osabi = osabi;
   gdbarch = gdbarch_alloc (&info, tdep);
   power = arch == bfd_arch_rs6000;
 
@@ -2060,15 +2149,16 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_convert_to_raw (gdbarch, rs6000_register_convert_to_raw);
 
   set_gdbarch_extract_return_value (gdbarch, rs6000_extract_return_value);
-  set_gdbarch_push_arguments (gdbarch, rs6000_push_arguments);
+  
+  if (sysv_abi)
+    set_gdbarch_push_arguments (gdbarch, ppc_sysv_abi_push_arguments);
+  else
+    set_gdbarch_push_arguments (gdbarch, rs6000_push_arguments);
 
   set_gdbarch_store_struct_return (gdbarch, rs6000_store_struct_return);
   set_gdbarch_store_return_value (gdbarch, rs6000_store_return_value);
   set_gdbarch_extract_struct_value_address (gdbarch, rs6000_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, generic_use_struct_convention);
-
-  set_gdbarch_frame_init_saved_regs (gdbarch, rs6000_frame_init_saved_regs);
-  set_gdbarch_init_extra_frame_info (gdbarch, rs6000_init_extra_frame_info);
 
   set_gdbarch_pop_frame (gdbarch, rs6000_pop_frame);
 
@@ -2081,10 +2171,32 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Not sure on this. FIXMEmgo */
   set_gdbarch_frame_args_skip (gdbarch, 8);
 
-  set_gdbarch_frameless_function_invocation (gdbarch, rs6000_frameless_function_invocation);
-  set_gdbarch_frame_chain (gdbarch, rs6000_frame_chain);
   set_gdbarch_frame_chain_valid (gdbarch, file_frame_chain_valid);
-  set_gdbarch_frame_saved_pc (gdbarch, rs6000_frame_saved_pc);
+  if (osabi == ELFOSABI_LINUX)
+    {
+      set_gdbarch_frameless_function_invocation (gdbarch,
+	ppc_linux_frameless_function_invocation);
+      set_gdbarch_frame_chain (gdbarch, ppc_linux_frame_chain);
+      set_gdbarch_frame_saved_pc (gdbarch, ppc_linux_frame_saved_pc);
+
+      set_gdbarch_frame_init_saved_regs (gdbarch,
+	                                 ppc_linux_frame_init_saved_regs);
+      set_gdbarch_init_extra_frame_info (gdbarch,
+	                                 ppc_linux_init_extra_frame_info);
+
+      set_gdbarch_memory_remove_breakpoint (gdbarch,
+	                                    ppc_linux_memory_remove_breakpoint);
+    }
+  else
+    {
+      set_gdbarch_frameless_function_invocation (gdbarch,
+	rs6000_frameless_function_invocation);
+      set_gdbarch_frame_chain (gdbarch, rs6000_frame_chain);
+      set_gdbarch_frame_saved_pc (gdbarch, rs6000_frame_saved_pc);
+
+      set_gdbarch_frame_init_saved_regs (gdbarch, rs6000_frame_init_saved_regs);
+      set_gdbarch_init_extra_frame_info (gdbarch, rs6000_init_extra_frame_info);
+    }
   set_gdbarch_frame_args_address (gdbarch, rs6000_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, rs6000_frame_args_address);
   set_gdbarch_saved_pc_after_call (gdbarch, rs6000_saved_pc_after_call);

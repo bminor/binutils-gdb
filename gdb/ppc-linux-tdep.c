@@ -29,6 +29,8 @@
 #include "symfile.h"
 #include "objfiles.h"
 
+#include "ppc-tdep.h"
+
 /* The following two instructions are used in the signal trampoline
    code on linux/ppc */
 #define INSTR_LI_R0_0x7777	0x38007777
@@ -95,7 +97,7 @@
 #define PPC_LINUX_PT_FPR31 (PPC_LINUX_PT_FPR0 + 2*31)
 #define PPC_LINUX_PT_FPSCR (PPC_LINUX_PT_FPR0 + 2*32 + 1)
 
-int ppc_linux_at_sigtramp_return_path (CORE_ADDR pc);
+static int ppc_linux_at_sigtramp_return_path (CORE_ADDR pc);
 
 /* Determine if pc is in a signal trampoline...
 
@@ -150,7 +152,7 @@ ppc_linux_in_sigtramp (CORE_ADDR pc, char *func_name)
   char buf[4];
   CORE_ADDR handler;
 
-  lr = read_register (LR_REGNUM);
+  lr = read_register (PPC_LR_REGNUM);
   if (!ppc_linux_at_sigtramp_return_path (lr))
     return 0;
 
@@ -177,7 +179,7 @@ ppc_linux_in_sigtramp (CORE_ADDR pc, char *func_name)
  * instructions.  It'd be faster though if we could find a way to do this
  * via some simple address comparisons.
  */
-int
+static int
 ppc_linux_at_sigtramp_return_path (CORE_ADDR pc)
 {
   char buf[12];
@@ -308,7 +310,7 @@ ppc_linux_skip_trampoline_code (CORE_ADDR pc)
 /* The rs6000 version of FRAME_SAVED_PC will almost work for us.  The
    signal handler details are different, so we'll handle those here
    and call the rs6000 version to do the rest. */
-unsigned long
+CORE_ADDR
 ppc_linux_frame_saved_pc (struct frame_info *fi)
 {
   if (fi->signal_handler_caller)
@@ -372,14 +374,14 @@ ppc_linux_frame_init_saved_regs (struct frame_info *fi)
       regs_addr =
 	read_memory_integer (fi->frame + PPC_LINUX_REGS_PTR_OFFSET, 4);
       fi->saved_regs[PC_REGNUM] = regs_addr + 4 * PPC_LINUX_PT_NIP;
-      fi->saved_regs[PS_REGNUM] = regs_addr + 4 * PPC_LINUX_PT_MSR;
-      fi->saved_regs[CR_REGNUM] = regs_addr + 4 * PPC_LINUX_PT_CCR;
-      fi->saved_regs[LR_REGNUM] = regs_addr + 4 * PPC_LINUX_PT_LNK;
-      fi->saved_regs[CTR_REGNUM] = regs_addr + 4 * PPC_LINUX_PT_CTR;
-      fi->saved_regs[XER_REGNUM] = regs_addr + 4 * PPC_LINUX_PT_XER;
-      fi->saved_regs[MQ_REGNUM] = regs_addr + 4 * PPC_LINUX_PT_MQ;
+      fi->saved_regs[PPC_PS_REGNUM] = regs_addr + 4 * PPC_LINUX_PT_MSR;
+      fi->saved_regs[PPC_CR_REGNUM] = regs_addr + 4 * PPC_LINUX_PT_CCR;
+      fi->saved_regs[PPC_LR_REGNUM] = regs_addr + 4 * PPC_LINUX_PT_LNK;
+      fi->saved_regs[PPC_CTR_REGNUM] = regs_addr + 4 * PPC_LINUX_PT_CTR;
+      fi->saved_regs[PPC_XER_REGNUM] = regs_addr + 4 * PPC_LINUX_PT_XER;
+      fi->saved_regs[PPC_MQ_REGNUM] = regs_addr + 4 * PPC_LINUX_PT_MQ;
       for (i = 0; i < 32; i++)
-	fi->saved_regs[GP0_REGNUM + i] = regs_addr + 4 * PPC_LINUX_PT_R0 + 4 * i;
+	fi->saved_regs[PPC_GP0_REGNUM + i] = regs_addr + 4 * PPC_LINUX_PT_R0 + 4 * i;
       for (i = 0; i < 32; i++)
 	fi->saved_regs[FP0_REGNUM + i] = regs_addr + 4 * PPC_LINUX_PT_FPR0 + 8 * i;
     }

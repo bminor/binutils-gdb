@@ -1,3 +1,55 @@
+2000-07-31  Kevin Buettner  <kevinb@redhat.com>
+
+	* ppc-tdep.h: New file.
+	* Makefile.in (ppc-linux-tdep.o, rs6000-tdep.o): Add ppc-tdep.h
+	as a dependency.
+	* ppc-linux-tdep.c, rs6000-tdep.c (ppc-tdep.h): Include.
+
+	* ppc-linux-tdep.c (ppc_linux_at_sigtramp_return_path): Made static.
+
+	* rs6000-tdep.c (elf-bfd.h): Include.
+	(gdbarch_tdep): Add field osabi to this struct.
+	(rs6000_init_extra_frame_info, rs6000_frame_init_saved_regs,
+	rs6000_frameless_function_invocation, rs6000_frame_saved_pc,
+	rs6000_frame_chain): No longer static.
+	(process_note_abi_tag_sections, get_elfosabi): New static
+	functions.
+	(rs6000_gdbarch_init): Revised to accomodate ELF executables;
+	also use Linux specific methods when the target is Linux.
+
+	* config/powerpc/aix.mt, config/powerpc/cygwin.mt,
+	config/powerpc/macos.mt, config/powerpc/nbsd.mt,
+	config/powerpc/ppc-eabi.mt, config/powerpc/ppc-nw.mt,
+	config/powerpc/ppc-sim.mt, config/powerpc/ppcle-eabi.mt,
+	config/powerpc/ppcle-sim.mt, config/powerpc/solaris.mt,
+	config/powerpc/vxworks.mt, config/rs6000/aix4.mt,
+	config/rs6000/rs6000.mt, config/rs6000/rs6000lynx.mt
+	(TDEPFILES): Add ppc-linux-tdep.o.
+
+	* config/tm-linux.h (SIGCONTEXT_PC_OFFSET, FRAME_SAVED_PC,
+	INIT_EXTRA_FRAME_INFO, FRAMELESS_FUNCTION_INVOCATION,
+	FRAME_INIT_SAVED_REGS, FRAME_CHAIN, PUSH_ARGUMENTS,
+	MEMORY_REMOVE_BREAKPOINT: Removed defines.
+	(ppc_linux_frame_saved_pc, ppc_linux_init_extra_frame_info,
+	ppc_linux_frameless_function_invocation,
+	ppc_linux_frame_init_saved_regs, ppc_linux_frame_chain,
+	ppc_sysv_abi_push_arguments, ppc_linux_memory_remove_breakpoint):
+	Removed declarations.
+	(CANNOT_FETCH_REGISTER, CANNOT_STORE_REGISTER): Disabled.
+
+	* dink32-rom.c (dink32_regnames): Make array size implicit.
+
+	* ppc-bdm.h (ppc-tdep.h): Include.
+
+	* rs6000-tdep.c, ppc-linux-tdep.c, ppc-bdm.h, ppc-tdep.h
+	(GP0_REGNUM, TOC_REGNUM, PS_REGNUM, CR_REGNUM, LR_REGNUM,
+	CTR_REGNUM, XER_REGNUM, MQ_REGNUM): Add PPC_ prefix.
+
+	From Nick Duffek:
+	* ppc-tdep.h (ppc_linux_frame_saved_pc, rs6000_frame_saved_pc):
+	Change return type to CORE_ADDR.
+	* ppc-linux-tdep.c (ppc_linux_frame_saved_pc): Likewise.
+
 2000-07-31  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* remote-e7000.c (e7000_start_remote): Use void *, not char * as

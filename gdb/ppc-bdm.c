@@ -36,6 +36,7 @@
 #include <signal.h>
 #include "serial.h"
 #include "ocd.h"
+#include "ppc-tdep.h"
 
 static void bdm_ppc_open (char *name, int from_tty);
 
@@ -198,7 +199,7 @@ bdm_ppc_fetch_registers (int regno)
 /*      printf("Asking for register %d\n", first_regno); */
 
       /* if asking for an invalid register */
-      if ((first_regno == MQ_REGNUM) ||
+      if ((first_regno == PPC_MQ_REGNUM) ||
 	  ((first_regno >= FP0_REGNUM) && (first_regno <= FPLAST_REGNUM)))
 	{
 /*          printf("invalid reg request!\n"); */
@@ -287,14 +288,14 @@ bdm_ppc_store_registers (int regno)
 
       /* only attempt to write if it's a valid ppc 8xx register */
       /* (need to avoid FP regs and MQ reg) */
-      if ((i != MQ_REGNUM) && ((i < FP0_REGNUM) || (i > FPLAST_REGNUM)))
+      if ((i != PPC_MQ_REGNUM) && ((i < FP0_REGNUM) || (i > FPLAST_REGNUM)))
 	{
 /*          printf("write valid reg %d\n", bdm_regno); */
 	  ocd_write_bdm_registers (bdm_regno, registers + REGISTER_BYTE (i), 4);
 	}
 /*
-   else if (i == MQ_REGNUM)
-   printf("don't write invalid reg %d (MQ_REGNUM)\n", bdm_regno);
+   else if (i == PPC_MQ_REGNUM)
+   printf("don't write invalid reg %d (PPC_MQ_REGNUM)\n", bdm_regno);
    else
    printf("don't write invalid reg %d\n", bdm_regno);
  */

@@ -1627,7 +1627,7 @@ ppc-linux-nat.o: ppc-linux-nat.c $(defs_h) $(gdbcore_h) $(frame_h) \
 	$(inferior_h) target.h
 
 ppc-linux-tdep.o: ppc-linux-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) \
-	target.h
+	target.h ppc-tdep.h
 
 ppcbug-rom.o: ppcbug-rom.c monitor.h $(bfd_h) gdb_wait.h $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) target.h serial.h terminal.h
@@ -1769,7 +1769,7 @@ rs6000-nat.o: rs6000-nat.c $(bfd_h) $(defs_h) $(inferior_h) target.h \
 	xcoffsolib.h
 
 rs6000-tdep.o: rs6000-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) \
-	target.h xcoffsolib.h
+	target.h xcoffsolib.h ppc-tdep.h
 
 scm-exp.o: $(defs_h) $(value_h) parser-defs.h language.h c-lang.h \
 	scm-lang.h scm-tags.h
