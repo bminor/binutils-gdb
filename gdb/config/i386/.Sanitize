@@ -91,6 +91,7 @@ sun386.mt
 symmetry.mh
 symmetry.mt
 tm-cygwin32.h
+tm-fbsd.h
 tm-i386.h
 tm-i386aix.h
 tm-i386bsd.h
