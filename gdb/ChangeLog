@@ -1,5 +1,11 @@
 2002-10-14  Adam Fedor  <fedor@gnu.org>
 
+	* symtab.h: New objc_specific struct.
+	(SYMBOL_INIT_LANGUAGE_SPECIFIC): Handle ObjC.
+	(SYMBOL_DEMANGLED_NAME): Likewise.
+
+2002-10-14  Adam Fedor  <fedor@gnu.org>
+
 	* symfile.c (init_filename_language_table): Add ObjC file extension.
 
 2002-10-14  Adam Fedor  <fedor@gnu.org>
