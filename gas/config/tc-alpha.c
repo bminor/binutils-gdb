@@ -652,10 +652,10 @@ alpha_fix_adjustable (f)
   return !alpha_force_relocation (f);
 }
 
-unsigned long
+valueT
 md_section_align (seg, size)
      segT seg;
-     unsigned long size;
+     valueT size;
 {
 #ifdef OBJ_ECOFF
   /* This should probably be handled within BFD, or by pulling the
@@ -1711,7 +1711,7 @@ alpha_do_align (n, fill)
 	  || !strcmp (now_seg->name, ".init")
 	  || !strcmp (now_seg->name, ".fini")))
     {
-      static const char nop_pattern[] =	{ 0x1f, 0x04, 0xff, 0x47 };
+      static const unsigned char nop_pattern[] = { 0x1f, 0x04, 0xff, 0x47 };
       frag_align_pattern (n, nop_pattern, sizeof (nop_pattern));
       return 1;
     }
@@ -1862,10 +1862,8 @@ md_apply_fix (fixP, valueP)
 }
 
 void
-alpha_frob_file ()
+alpha_frob_ecoff_data ()
 {
-  /* This bit only works because tc_frob_file gets called before
-     obj_frob_file does.  Sigh.  */
   select_gp_value ();
   /* $zero and $f31 are read-only */
   alpha_gprmask &= ~1;
