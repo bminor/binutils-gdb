@@ -79,7 +79,7 @@ proc test_tbreak_creation_and_listing {} {
              "insert temp breakpoint at \"<fullfilename>\":6 (callee4)"
 
     mi_gdb_test "666-break-list" \
-                "666\\^done,BreakpointTable=\{hdr=\{.*\},bkpt=\{number=\"1\",type=\"breakpoint\",disp=\"del\",enabled=\"y\",addr=\"$hex\",func=\"main\",file=\".*basics.c\",line=\"32\",times=\"0\"\},.*\}\}" \
+	    "666\\\^done,BreakpointTable=\{nr_rows=\".\",nr_cols=\".\",hdr=\\\[\{width=\".*\",alignment=\".*\",col_name=\"number\",colhdr=\"Num\"\}.*colhdr=\"Type\".*colhdr=\"Disp\".*colhdr=\"Enb\".*colhdr=\"Address\".*colhdr=\"What\".*\\\],body=\\\[bkpt=\{number=\"1\",type=\"breakpoint\",disp=\"del\",enabled=\"y\",addr=\"$hex\",func=\"main\",file=\".*basics.c\",line=\"32\",times=\"0\"\}.*\\\]\}" \
                 "list of breakpoints"
 
     mi_gdb_test "777-break-delete" \
@@ -123,7 +123,7 @@ proc test_rbreak_creation_and_listing {} {
 
     setup_xfail "*-*-*"
     mi_gdb_test "166-break-list" \
-                "166\\^done,BreakpointTable=\{hdr=\{.*\},bkpt=\{number=\"5\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"main\",file=\".*basics.c\",line=\"32\",times=\"0\"\},.*\}\}" \
+	    "1\\\^done,BreakpointTable=\{nr_rows=\".\",nr_cols=\".\",hdr=\\\[\{width=\".*\",alignment=\".*\",col_name=\"number\",colhdr=\"Num\"\}.*colhdr=\"Type\".*colhdr=\"Disp\".*colhdr=\"Enb\".*colhdr=\"Address\".*colhdr=\"What\".*\\\],body=\\\[bkpt=\{number=\"5\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"main\",file=\".*basics.c\",line=\"32\",times=\"0\"\},.*\}\\\]\}" \
                 "list of breakpoints"
 
     mi_gdb_test "177-break-delete" \

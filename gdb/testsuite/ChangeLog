@@ -1,3 +1,8 @@
+2001-06-27  Andrew Cagney  <ac131313@redhat.com>
+
+	* lib/mi-support.exp (mi_delete_breakpoints): Accept mi1 format
+	empty breakpoint tables.
+
 2001-06-25  Andrew Cagney  <ac131313@redhat.com>
 
 	* lib/mi-support.exp: Update args=... part of stop-reason

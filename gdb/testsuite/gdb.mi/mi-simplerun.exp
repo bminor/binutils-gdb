@@ -78,7 +78,7 @@ proc test_breakpoints_creation_and_listing {} {
              "insert breakpoint at \"<fullfilename>\":6 (callee4)"
 
     mi_gdb_test "204-break-list" \
-                "204\\^done,BreakpointTable=\{hdr=\{.*\},bkpt=\{number=\"1\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"main\",file=\".*basics.c\",line=\"32\",times=\"0\"\},.*\}\}" \
+	    "204\\^done,BreakpointTable=\{.*,hdr=\\\[.*\\\],body=\\\[bkpt=\{number=\"1\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"main\",file=\".*basics.c\",line=\"32\",times=\"0\"\},.*\}\\\]\}" \
                 "list of breakpoints"
 
     mi_gdb_test "205-break-disable 2 3 4" \
@@ -86,7 +86,7 @@ proc test_breakpoints_creation_and_listing {} {
                 "disabling of breakpoints"
 
     mi_gdb_test "206-break-info 2" \
-                "206\\^done,BreakpointTable=\{hdr=\{.*\},bkpt=\{number=\"2\",.*,enabled=\"n\",.*\}\}" \
+	    "206\\^done,BreakpointTable=\{.*,hdr=\\\[.*\\\],body=\\\[bkpt=\{number=\"2\",.*,enabled=\"n\",.*\}\\\]\}" \
                 "list of breakpoints, 16 disabled"
 }
 

@@ -1,3 +1,17 @@
+2001-06-27  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-out.c (mi_table_begin): Include nr_cols and nr_rows in mi1
+	table output.
+	* mi-out.c (mi_table_begin): Only suppress output when mi0. Change
+	the header to a list.
+	(mi_table_body): For mi1, close the header list and open a table
+	body list.
+	(mi_table_end): For mi1, close the body list.
+	(mi_table_header): For mi1, output a tuple containing all the
+	header information.
+	(mi_open, mi_close): Reverse logic of mi_version test.
+	* gdbmi.texinfo (GDB/MI Breakpoint Table Commands): Update.
+
 2001-06-26  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbmi.texinfo (GDB/MI Output Syntax): Delete reference to query

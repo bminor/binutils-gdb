@@ -588,10 +588,16 @@ The corresponding @value{GDBN} command is @samp{ignore}.
 ^done
 (@value{GDBP})
 -break-list
-^done,BreakpointTable=@{hdr=@{"Num","Type","Disp","Enb","Address","What"@},
-bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
+^done,BreakpointTable=@{nr_rows="1",nr_cols="6",
+hdr=[@{width="3",alignment="-1",col_name="number",colhdr="Num"@},
+@{width="14",alignment="-1",col_name="type",colhdr="Type"@},
+@{width="4",alignment="-1",col_name="disp",colhdr="Disp"@},
+@{width="3",alignment="-1",col_name="enabled",colhdr="Enb"@},
+@{width="10",alignment="-1",col_name="addr",colhdr="Address"@},
+@{width="40",alignment="2",col_name="what",colhdr="What"@}],
+body=[bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
 addr="0x000100d0",func="main",file="hello.c",line="5",times="0",
-ignore="3"@}@}
+ignore="3"@}]@}
 (@value{GDBP})
 @end smallexample
 
@@ -630,10 +636,16 @@ The corresponding @value{GDBN} command is @samp{condition}.
 ^done
 (@value{GDBP})
 -break-list
-^done,BreakpointTable=@{hdr=@{"Num","Type","Disp","Enb","Address","What"@},
-bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
+^done,BreakpointTable=@{nr_rows="1",nr_cols="6",
+hdr=[@{width="3",alignment="-1",col_name="number",colhdr="Num"@},
+@{width="14",alignment="-1",col_name="type",colhdr="Type"@},
+@{width="4",alignment="-1",col_name="disp",colhdr="Disp"@},
+@{width="3",alignment="-1",col_name="enabled",colhdr="Enb"@},
+@{width="10",alignment="-1",col_name="addr",colhdr="Address"@},
+@{width="40",alignment="2",col_name="what",colhdr="What"@}],
+body=[bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
 addr="0x000100d0",func="main",file="hello.c",line="5",cond="1",
-times="0",ignore="3"@}@}
+times="0",ignore="3"@}]@}
 (@value{GDBP})
 @end smallexample
 
@@ -661,7 +673,14 @@ The corresponding @value{GDBN} command is @samp{delete}.
 ^done
 (@value{GDBP})
 -break-list
-^done,BreakpointTable=@{@}
+^done,BreakpointTable=@{nr_rows="0",nr_cols="6",
+hdr=[@{width="3",alignment="-1",col_name="number",colhdr="Num"@},
+@{width="14",alignment="-1",col_name="type",colhdr="Type"@},
+@{width="4",alignment="-1",col_name="disp",colhdr="Disp"@},
+@{width="3",alignment="-1",col_name="enabled",colhdr="Enb"@},
+@{width="10",alignment="-1",col_name="addr",colhdr="Address"@},
+@{width="40",alignment="2",col_name="what",colhdr="What"@}],
+body=[]@}
 (@value{GDBP})
 @end example
 
@@ -689,9 +708,15 @@ The corresponding @value{GDBN} command is @samp{disable}.
 ^done
 (@value{GDBP})
 -break-list
-^done,BreakpointTable=@{hdr=@{"Num","Type","Disp","Enb","Address","What"@},
-bkpt=@{number="2",type="breakpoint",disp="keep",enabled="n",
-addr="0x000100d0",func="main",file="hello.c",line="5",times="0"@}@}
+^done,BreakpointTable=@{nr_rows="1",nr_cols="6",
+hdr=[@{width="3",alignment="-1",col_name="number",colhdr="Num"@},
+@{width="14",alignment="-1",col_name="type",colhdr="Type"@},
+@{width="4",alignment="-1",col_name="disp",colhdr="Disp"@},
+@{width="3",alignment="-1",col_name="enabled",colhdr="Enb"@},
+@{width="10",alignment="-1",col_name="addr",colhdr="Address"@},
+@{width="40",alignment="2",col_name="what",colhdr="What"@}],
+body=[bkpt=@{number="2",type="breakpoint",disp="keep",enabled="n",
+addr="0x000100d0",func="main",file="hello.c",line="5",times="0"@}]@}
 (@value{GDBP})
 @end smallexample
 
@@ -718,9 +743,15 @@ The corresponding @value{GDBN} command is @samp{enable}.
 ^done
 (@value{GDBP})
 -break-list
-^done,BreakpointTable=@{hdr=@{"Num","Type","Disp","Enb","Address","What"@},
-bkpt=@{number="2",type="breakpoint",disp="keep",enabled="y",
-addr="0x000100d0",func="main",file="hello.c",line="5",times="0"@}@}
+^done,BreakpointTable=@{nr_rows="1",nr_cols="6",
+hdr=[@{width="3",alignment="-1",col_name="number",colhdr="Num"@},
+@{width="14",alignment="-1",col_name="type",colhdr="Type"@},
+@{width="4",alignment="-1",col_name="disp",colhdr="Disp"@},
+@{width="3",alignment="-1",col_name="enabled",colhdr="Enb"@},
+@{width="10",alignment="-1",col_name="addr",colhdr="Address"@},
+@{width="40",alignment="2",col_name="what",colhdr="What"@}],
+body=[bkpt=@{number="2",type="breakpoint",disp="keep",enabled="y",
+addr="0x000100d0",func="main",file="hello.c",line="5",times="0"@}]@}
 (@value{GDBP})
 @end smallexample
 
@@ -818,11 +849,17 @@ The corresponding @value{GDBN} commands are @samp{break}, @samp{tbreak},
 ^done,bkpt=@{number="2",addr="0x00010774",file="recursive2.c",line="11"@}
 (@value{GDBP})
 -break-list
-^done,BreakpointTable=@{hdr=@{"Num","Type","Disp","Enb","Address","What"@},
-bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
+^done,BreakpointTable=@{nr_rows="2",nr_cols="6",
+hdr=[@{width="3",alignment="-1",col_name="number",colhdr="Num"@},
+@{width="14",alignment="-1",col_name="type",colhdr="Type"@},
+@{width="4",alignment="-1",col_name="disp",colhdr="Disp"@},
+@{width="3",alignment="-1",col_name="enabled",colhdr="Enb"@},
+@{width="10",alignment="-1",col_name="addr",colhdr="Address"@},
+@{width="40",alignment="2",col_name="what",colhdr="What"@}],
+body=[bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
 addr="0x0001072c", func="main",file="recursive2.c",line="4",times="0"@},
 bkpt=@{number="2",type="breakpoint",disp="del",enabled="y",
-addr="0x00010774",func="foo",file="recursive2.c",line="11",times="0"@}@}
+addr="0x00010774",func="foo",file="recursive2.c",line="11",times="0"@}]@}
 (@value{GDBP})
 -break-insert -r foo.*
 ~int foo(int, int);
@@ -861,7 +898,7 @@ number of times the breakpoint has been hit
 @end table
 
 If there are no breakpoints or watchpoints, the @code{BreakpointTable}
-field is an empty list.
+@code{body} field is an empty list.
 
 @subsubheading @value{GDBN} Command
 
@@ -872,11 +909,17 @@ The corresponding @value{GDBN} command is @samp{info break}.
 @smallexample
 (@value{GDBP})
 -break-list
-^done,BreakpointTable=@{hdr=@{"Num","Type","Disp","Enb","Address","What"@},
-bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
+^done,BreakpointTable=@{nr_rows="2",nr_cols="6",
+hdr=[@{width="3",alignment="-1",col_name="number",colhdr="Num"@},
+@{width="14",alignment="-1",col_name="type",colhdr="Type"@},
+@{width="4",alignment="-1",col_name="disp",colhdr="Disp"@},
+@{width="3",alignment="-1",col_name="enabled",colhdr="Enb"@},
+@{width="10",alignment="-1",col_name="addr",colhdr="Address"@},
+@{width="40",alignment="2",col_name="what",colhdr="What"@}],
+body=[bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
 addr="0x000100d0",func="main",file="hello.c",line="5",times="0"@},
 bkpt=@{number="2",type="breakpoint",disp="keep",enabled="y",
-addr="0x00010114",func="foo",file="hello.c",line="13",times="0"@}@}
+addr="0x00010114",func="foo",file="hello.c",line="13",times="0"@}]@}
 (@value{GDBP})
 @end smallexample
 
@@ -885,7 +928,14 @@ Here's an example of the result when there are no breakpoints:
 @smallexample
 (@value{GDBP})
 -break-list
-^done,BreakpointTable=@{@}
+^done,BreakpointTable=@{nr_rows="0",nr_cols="6",
+hdr=[@{width="3",alignment="-1",col_name="number",colhdr="Num"@},
+@{width="14",alignment="-1",col_name="type",colhdr="Type"@},
+@{width="4",alignment="-1",col_name="disp",colhdr="Disp"@},
+@{width="3",alignment="-1",col_name="enabled",colhdr="Enb"@},
+@{width="10",alignment="-1",col_name="addr",colhdr="Address"@},
+@{width="40",alignment="2",col_name="what",colhdr="What"@}],
+body=[]@}
 (@value{GDBP})
 @end smallexample
 
@@ -967,12 +1017,18 @@ deleted.
 ^done,wpt=@{number="2",exp="C"@}
 (@value{GDBP})
 -break-list
-^done,BreakpointTable=@{hdr=@{"Num","Type","Disp","Enb","Address","What"@},
-bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
+^done,BreakpointTable=@{nr_rows="2",nr_cols="6",
+hdr=[@{width="3",alignment="-1",col_name="number",colhdr="Num"@},
+@{width="14",alignment="-1",col_name="type",colhdr="Type"@},
+@{width="4",alignment="-1",col_name="disp",colhdr="Disp"@},
+@{width="3",alignment="-1",col_name="enabled",colhdr="Enb"@},
+@{width="10",alignment="-1",col_name="addr",colhdr="Address"@},
+@{width="40",alignment="2",col_name="what",colhdr="What"@}],
+body=[bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
 addr="0x00010734",func="callee4",
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="8",times="1"@},
 bkpt=@{number="2",type="watchpoint",disp="keep",
-enabled="y",addr="",what="C",times="0"@}@}
+enabled="y",addr="",what="C",times="0"@}]@}
 (@value{GDBP})
 -exec-continue
 ^running
@@ -982,12 +1038,18 @@ frame=@{func="callee4",args=[],
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="13"@}
 (@value{GDBP})
 -break-list
-^done,BreakpointTable=@{hdr=@{"Num","Type","Disp","Enb","Address","What"@},
-bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
+^done,BreakpointTable=@{nr_rows="2",nr_cols="6",
+hdr=[@{width="3",alignment="-1",col_name="number",colhdr="Num"@},
+@{width="14",alignment="-1",col_name="type",colhdr="Type"@},
+@{width="4",alignment="-1",col_name="disp",colhdr="Disp"@},
+@{width="3",alignment="-1",col_name="enabled",colhdr="Enb"@},
+@{width="10",alignment="-1",col_name="addr",colhdr="Address"@},
+@{width="40",alignment="2",col_name="what",colhdr="What"@}],
+body=[bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
 addr="0x00010734",func="callee4",
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="8",times="1"@},
 bkpt=@{number="2",type="watchpoint",disp="keep",
-enabled="y",addr="",what="C",times="-5"@}@}
+enabled="y",addr="",what="C",times="-5"@}]@}
 (@value{GDBP})
 -exec-continue
 ^running
@@ -997,10 +1059,16 @@ value="0x11940 \"A string argument.\""@}],
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="18"@}
 (@value{GDBP})
 -break-list
-^done,BreakpointTable=@{hdr=@{"Num","Type","Disp","Enb","Address","What"@},
-bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
+^done,BreakpointTable=@{nr_rows="1",nr_cols="6",
+hdr=[@{width="3",alignment="-1",col_name="number",colhdr="Num"@},
+@{width="14",alignment="-1",col_name="type",colhdr="Type"@},
+@{width="4",alignment="-1",col_name="disp",colhdr="Disp"@},
+@{width="3",alignment="-1",col_name="enabled",colhdr="Enb"@},
+@{width="10",alignment="-1",col_name="addr",colhdr="Address"@},
+@{width="40",alignment="2",col_name="what",colhdr="What"@}],
+body=[bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
 addr="0x00010734",func="callee4",
-file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="8",times="1"@}@}
+file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="8",times="1"@}]@}
 (@value{GDBP})
 @end smallexample
 

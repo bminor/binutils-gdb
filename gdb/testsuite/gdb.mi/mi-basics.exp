@@ -139,7 +139,7 @@ proc test_breakpoints_deletion {} {
              "break-delete (all) operation"
 
     mi_gdb_test "201-break-list" \
-             ".*\\\^done,BreakpointTable=\\\{\\\}" \
+             ".*\\\^done,BreakpointTable=\\\{.*,body=\\\[\\\]\\\}" \
              "all breakpoints removed"
 }
 

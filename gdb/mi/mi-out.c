@@ -105,18 +105,26 @@ static void out_field_fmt (struct ui_out *uiout, int fldno, char *fldname,
 /* Mark beginning of a table */
 
 void
-mi_table_begin (struct ui_out *uiout, int nbrofcols,
+mi_table_begin (struct ui_out *uiout,
+		int nr_cols,
 		int nr_rows,
 		const char *tblid)
 {
   struct ui_out_data *data = ui_out_data (uiout);
   mi_open (uiout, tblid, ui_out_type_tuple);
-  if (nr_rows == 0)
+  if (data->mi_version == 0)
     {
-      data->suppress_output = 1;
+      if (nr_rows == 0)
+	data->suppress_output = 1;
+      else
+	mi_open (uiout, "hdr", ui_out_type_list);
       return;
     }
-  mi_open (uiout, "hdr", ui_out_type_tuple);
+  mi_field_int (uiout, -1/*fldno*/, -1/*width*/, -1/*alin*/,
+		"nr_rows", nr_rows);
+  mi_field_int (uiout, -1/*fldno*/, -1/*width*/, -1/*alin*/,
+		"nr_cols", nr_cols);
+  mi_open (uiout, "hdr", ui_out_type_list);
 }
 
 /* Mark beginning of a table body */
@@ -125,10 +133,13 @@ void
 mi_table_body (struct ui_out *uiout)
 {
   struct ui_out_data *data = ui_out_data (uiout);
-  /* close the table header line if there were any headers */
   if (data->suppress_output)
     return;
-  mi_close (uiout, ui_out_type_tuple);
+  /* close the table header line if there were any headers */
+  mi_close (uiout, ui_out_type_list);
+  if (data->mi_version == 0)
+    return;
+  mi_open (uiout, "body", ui_out_type_list);
 }
 
 /* Mark end of a table */
@@ -138,6 +149,12 @@ mi_table_end (struct ui_out *uiout)
 {
   struct ui_out_data *data = ui_out_data (uiout);
   data->suppress_output = 0;
+  if (data->mi_version == 0)
+    {
+      mi_close (uiout, ui_out_type_tuple);
+      return;
+    }
+  mi_close (uiout, ui_out_type_list); /* body */
   mi_close (uiout, ui_out_type_tuple);
 }
 
@@ -151,7 +168,17 @@ mi_table_header (struct ui_out *uiout, int width, int alignment,
   struct ui_out_data *data = ui_out_data (uiout);
   if (data->suppress_output)
     return;
-  mi_field_string (uiout, 0, width, alignment, 0, colhdr);
+  if (data->mi_version == 0)
+    {
+      mi_field_string (uiout, 0, width, alignment, 0, colhdr);
+      return;
+    }
+  mi_open (uiout, NULL, ui_out_type_tuple);
+  mi_field_int (uiout, 0, 0, 0, "width", width);
+  mi_field_int (uiout, 0, 0, 0, "alignment", alignment);
+  mi_field_string (uiout, 0, 0, 0, "col_name", col_name);
+  mi_field_string (uiout, 0, width, alignment, "colhdr", colhdr);
+  mi_close (uiout, ui_out_type_tuple);
 }
 
 /* Mark beginning of a list */
@@ -337,10 +364,10 @@ mi_open (struct ui_out *uiout,
       fputc_unfiltered ('{', data->buffer);
       break;
     case ui_out_type_list:
-      if (data->mi_version > 0)
-	fputc_unfiltered ('[', data->buffer);
-      else
+      if (data->mi_version == 0)
 	fputc_unfiltered ('{', data->buffer);
+      else
+	fputc_unfiltered ('[', data->buffer);
       break;
     default:
       internal_error (__FILE__, __LINE__, "bad switch");
@@ -358,10 +385,10 @@ mi_close (struct ui_out *uiout,
       fputc_unfiltered ('}', data->buffer);
       break;
     case ui_out_type_list:
-      if (data->mi_version > 0)
-	fputc_unfiltered (']', data->buffer);
-      else
+      if (data->mi_version == 0)
 	fputc_unfiltered ('}', data->buffer);
+      else
+	fputc_unfiltered (']', data->buffer);
       break;
     default:
       internal_error (__FILE__, __LINE__, "bad switch");

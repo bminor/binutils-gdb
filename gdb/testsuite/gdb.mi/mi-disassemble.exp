@@ -61,7 +61,7 @@ proc test_breakpoints_creation_and_listing {} {
              "break-insert operation"
 
     mi_gdb_test "204-break-list" \
-                "204\\^done,BreakpointTable=\{hdr=\{.*\},bkpt=\{number=\"1\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"main\",file=\".*basics.c\",line=\"32\",times=\"0\"\}\}" \
+                "204\\^done,BreakpointTable=\{.*,body=\\\[bkpt=\{number=\"1\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"main\",file=\".*basics.c\",line=\"32\",times=\"0\"\}\\\]\}" \
                 "list of breakpoints"
 }
 
