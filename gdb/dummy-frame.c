@@ -33,8 +33,6 @@
 #include "gdbcmd.h"
 #include "gdb_string.h"
 
-static int pc_in_dummy_frame (CORE_ADDR pc);
-
 /* Dummy frame.  This saves the processor state just prior to setting
    up the inferior function call.  Older targets save the registers
    on the target stack (but that really slows down function calls).  */
@@ -42,54 +40,42 @@ static int pc_in_dummy_frame (CORE_ADDR pc);
 struct dummy_frame
 {
   struct dummy_frame *next;
-
-  /* These values belong to the caller (the previous frame, the frame
-     that this unwinds back to).  */
-  CORE_ADDR pc;
-  CORE_ADDR top;
+  /* This frame's ID.  Must match the value returned by
+     gdbarch_unwind_dummy_id.  */
   struct frame_id id;
+  /* The caller's regcache.  */
   struct regcache *regcache;
-
-  /* Address range of the call dummy code.  Look for PC in the range
-     [LO..HI) (after allowing for DECR_PC_AFTER_BREAK).  */
-  CORE_ADDR call_lo;
-  CORE_ADDR call_hi;
 };
 
 static struct dummy_frame *dummy_frame_stack = NULL;
 
-/* Function: pc_in_call_dummy (pc)
+/* Function: deprecated_pc_in_call_dummy (pc)
 
-   Return true if the PC falls in a dummy frame created by gdb for an
-   inferior call.  The code below which allows DECR_PC_AFTER_BREAK is
-   for infrun.c, which may give the function a PC without that
-   subtracted out.  */
-
-int
-deprecated_pc_in_call_dummy (CORE_ADDR pc)
-{
-  return pc_in_dummy_frame (pc);
-}
-
-/* Return non-zero if the PC falls in a dummy frame.
-
-   The code below which allows DECR_PC_AFTER_BREAK is for infrun.c,
-   which may give the function a PC without that subtracted out.
+   Return non-zero if the PC falls in a dummy frame created by gdb for
+   an inferior call.  The code below which allows DECR_PC_AFTER_BREAK
+   is for infrun.c, which may give the function a PC without that
+   subtracted out.
 
    FIXME: cagney/2002-11-23: This is silly.  Surely "infrun.c" can
    figure out what the real PC (as in the resume address) is BEFORE
-   calling this function.  */
+   calling this function.
 
-static int
-pc_in_dummy_frame (CORE_ADDR pc)
+   NOTE: cagney/2004-08-02: I'm pretty sure that, with the introduction of
+   infrun.c:adjust_pc_after_break (thanks), this function is now
+   always called with a correctly adjusted PC!
+
+   NOTE: cagney/2004-08-02: Code should not need to call this.  */
+
+int
+deprecated_pc_in_call_dummy (CORE_ADDR pc)
 {
   struct dummy_frame *dummyframe;
   for (dummyframe = dummy_frame_stack;
        dummyframe != NULL;
        dummyframe = dummyframe->next)
     {
-      if ((pc >= dummyframe->call_lo)
-	  && (pc < dummyframe->call_hi + DECR_PC_AFTER_BREAK))
+      if ((pc >= dummyframe->id.code_addr)
+	  && (pc <= dummyframe->id.code_addr + DECR_PC_AFTER_BREAK))
 	return 1;
     }
   return 0;
@@ -110,8 +96,7 @@ dummy_frame_push (struct regcache *caller_regcache,
   dummy_frame = dummy_frame_stack;
   while (dummy_frame)
     /* FIXME: cagney/2004-08-02: Should just test IDs.  */
-    if (gdbarch_inner_than (current_gdbarch, dummy_frame->top,
-			    dummy_id->stack_addr))
+    if (frame_id_inner (dummy_frame->id, (*dummy_id)))
       /* Stale -- destroy!  */
       {
 	dummy_frame_stack = dummy_frame->next;
@@ -125,12 +110,6 @@ dummy_frame_push (struct regcache *caller_regcache,
   dummy_frame = XZALLOC (struct dummy_frame);
   dummy_frame->regcache = caller_regcache;
   dummy_frame->id = (*dummy_id);
-  /* FIXME: cagney/2004-08-02: Retain for compatibility - trust the
-     ID.  */
-  dummy_frame->pc = dummy_id->code_addr;
-  dummy_frame->top = dummy_id->stack_addr;
-  dummy_frame->call_lo = dummy_id->code_addr + 0;
-  dummy_frame->call_hi = dummy_id->code_addr + 1;
   dummy_frame->next = dummy_frame_stack;
   dummy_frame_stack = dummy_frame;
 }
@@ -169,25 +148,15 @@ dummy_frame_sniffer (const struct frame_unwind *self,
        dummyframe != NULL;
        dummyframe = dummyframe->next)
     {
-      /* Does the PC fall within the dummy frame's breakpoint
-         instruction.  If not, discard this one.  */
-      if (!(this_id.code_addr >= dummyframe->call_lo
-	    && this_id.code_addr < dummyframe->call_hi))
-	continue;
-      /* Does the FP match?  "infcall.c" explicitly saved the
-	 top-of-stack before the inferior function call, assume
-	 unwind_dummy_id() returns that same stack value.  */
-      if (this_id.stack_addr != dummyframe->top)
-	continue;
-      /* The FP matches this dummy frame.  */
-      {
-	struct dummy_frame_cache *cache;
-	cache = FRAME_OBSTACK_ZALLOC (struct dummy_frame_cache);
-	cache->prev_regcache = dummyframe->regcache;
-	cache->this_id = this_id;
-	(*this_prologue_cache) = cache;
-	return 1;
-      }
+      if (frame_id_eq (dummyframe->id, this_id))
+	{
+	  struct dummy_frame_cache *cache;
+	  cache = FRAME_OBSTACK_ZALLOC (struct dummy_frame_cache);
+	  cache->prev_regcache = dummyframe->regcache;
+	  cache->this_id = this_id;
+	  (*this_prologue_cache) = cache;
+	  return 1;
+	}
     }
   return 0;
 }
@@ -262,12 +231,8 @@ fprint_dummy_frames (struct ui_file *file)
     {
       gdb_print_host_address (s, file);
       fprintf_unfiltered (file, ":");
-      fprintf_unfiltered (file, " pc=0x%s", paddr (s->pc));
-      fprintf_unfiltered (file, " top=0x%s", paddr (s->top));
       fprintf_unfiltered (file, " id=");
       fprint_frame_id (file, s->id);
-      fprintf_unfiltered (file, " call_lo=0x%s", paddr (s->call_lo));
-      fprintf_unfiltered (file, " call_hi=0x%s", paddr (s->call_hi));
       fprintf_unfiltered (file, "\n");
     }
 }
