@@ -378,8 +378,8 @@ d10v_integer_to_address (struct type *type, void *buf)
 
 static enum return_value_convention
 d10v_return_value (struct gdbarch *gdbarch, struct type *valtype,
-		   struct regcache *regcache, const void *writebuf,
-		   void *readbuf)
+		   struct regcache *regcache, void *readbuf,
+		   const void *writebuf)
 {
   if (TYPE_LENGTH (valtype) > 8)
     /* Anything larger than 8 bytes (4 registers) goes on the stack.  */

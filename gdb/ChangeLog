@@ -1,5 +1,20 @@
 2003-11-10  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (return_value): Replace "inval" and "outval" with
+	"readbuf" and "writebuf".
+	* ppcnbsd-tdep.c (ppcnbsd_return_value): Ditto.
+	* d10v-tdep.c (d10v_return_value): Ditto.
+	* ppc-tdep.h (ppc_sysv_abi_return_value): Ditto.
+	(ppc_sysv_abi_broken_return_value): Ditto.
+	(ppc64_sysv_abi_return_value): Ditto.
+	* ppc-sysv-tdep.c (do_ppc_sysv_return_value): Ditto.
+	(ppc_sysv_abi_return_value): Ditto.
+	(ppc_sysv_abi_broken_return_value): Ditto.
+	(ppc64_sysv_abi_return_value): Ditto.
+	* values.c (register_value_being_returned): Update call.
+	* stack.c (return_command): Update call.
+	* gdbarch.h, gdbarch.c: Re-generate.
+
 	* target.h (struct target_ops): Order xfer buffer parameters "read
 	write" not "write read".
 	* bfd-target.c (target_bfd_xfer_partial): Update.

@@ -1935,8 +1935,9 @@ The location at which to store the function's return value is unknown.\n";
 	  gdb_assert (gdbarch_return_value (current_gdbarch, return_type,
 					    NULL, NULL, NULL)
 		      == RETURN_VALUE_REGISTER_CONVENTION);
-	  gdbarch_return_value (current_gdbarch, return_type, current_regcache,
-				VALUE_CONTENTS (return_value), NULL);
+	  gdbarch_return_value (current_gdbarch, return_type,
+				current_regcache, NULL /*read*/,
+				VALUE_CONTENTS (return_value) /*write*/);
 	}
     }
 

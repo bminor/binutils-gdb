@@ -4289,13 +4289,13 @@ gdbarch_return_value_p (struct gdbarch *gdbarch)
 }
 
 enum return_value_convention
-gdbarch_return_value (struct gdbarch *gdbarch, struct type *valtype, struct regcache *regcache, const void *inval, void *outval)
+gdbarch_return_value (struct gdbarch *gdbarch, struct type *valtype, struct regcache *regcache, void *readbuf, const void *writebuf)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->return_value != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_return_value called\n");
-  return gdbarch->return_value (gdbarch, valtype, regcache, inval, outval);
+  return gdbarch->return_value (gdbarch, valtype, regcache, readbuf, writebuf);
 }
 
 void

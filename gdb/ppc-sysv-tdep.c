@@ -323,8 +323,8 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 
 static enum return_value_convention
 do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *type,
-			  struct regcache *regcache, const void *inval,
-			  void *outval, int broken_gcc)
+			  struct regcache *regcache, void *readbuf,
+			  const void *writebuf, int broken_gcc)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   gdb_assert (tdep->wordsize == 4);
@@ -332,22 +332,22 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *type,
       && TYPE_LENGTH (type) <= 8
       && ppc_floating_point_unit_p (gdbarch))
     {
-      if (outval)
+      if (readbuf)
 	{
 	  /* Floats and doubles stored in "f1".  Convert the value to
 	     the required type.  */
 	  char regval[MAX_REGISTER_SIZE];
 	  struct type *regtype = register_type (gdbarch, FP0_REGNUM + 1);
 	  regcache_cooked_read (regcache, FP0_REGNUM + 1, regval);
-	  convert_typed_floating (regval, regtype, outval, type);
+	  convert_typed_floating (regval, regtype, readbuf, type);
 	}
-      if (inval)
+      if (writebuf)
 	{
 	  /* Floats and doubles stored in "f1".  Convert the value to
 	     the register's "double" type.  */
 	  char regval[MAX_REGISTER_SIZE];
 	  struct type *regtype = register_type (gdbarch, FP0_REGNUM);
-	  convert_typed_floating (inval, type, regval, regtype);
+	  convert_typed_floating (writebuf, type, regval, regtype);
 	  regcache_cooked_write (regcache, FP0_REGNUM + 1, regval);
 	}
       return RETURN_VALUE_REGISTER_CONVENTION;
@@ -355,28 +355,28 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *type,
   if ((TYPE_CODE (type) == TYPE_CODE_INT && TYPE_LENGTH (type) == 8)
       || (TYPE_CODE (type) == TYPE_CODE_FLT && TYPE_LENGTH (type) == 8))
     {
-      if (outval)
+      if (readbuf)
 	{
 	  /* A long long, or a double stored in the 32 bit r3/r4.  */
 	  regcache_cooked_read (regcache, tdep->ppc_gp0_regnum + 3,
-				(bfd_byte *) outval + 0);
+				(bfd_byte *) readbuf + 0);
 	  regcache_cooked_read (regcache, tdep->ppc_gp0_regnum + 4,
-				(bfd_byte *) outval + 4);
+				(bfd_byte *) readbuf + 4);
 	}
-      if (inval)
+      if (writebuf)
 	{
 	  /* A long long, or a double stored in the 32 bit r3/r4.  */
 	  regcache_cooked_write (regcache, tdep->ppc_gp0_regnum + 3,
-				 (bfd_byte *) inval + 0);
+				 (const bfd_byte *) writebuf + 0);
 	  regcache_cooked_write (regcache, tdep->ppc_gp0_regnum + 4,
-				 (bfd_byte *) inval + 4);
+				 (const bfd_byte *) writebuf + 4);
 	}
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
   if (TYPE_CODE (type) == TYPE_CODE_INT
       && TYPE_LENGTH (type) <= tdep->wordsize)
     {
-      if (outval)
+      if (readbuf)
 	{
 	  /* Some sort of integer stored in r3.  Since TYPE isn't
 	     bigger than the register, sign extension isn't a problem
@@ -384,14 +384,14 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *type,
 	  ULONGEST regval;
 	  regcache_cooked_read_unsigned (regcache, tdep->ppc_gp0_regnum + 3,
 					 &regval);
-	  store_unsigned_integer (outval, TYPE_LENGTH (type), regval);
+	  store_unsigned_integer (readbuf, TYPE_LENGTH (type), regval);
 	}
-      if (inval)
+      if (writebuf)
 	{
 	  /* Some sort of integer stored in r3.  Use unpack_long since
 	     that should handle any required sign extension.  */
 	  regcache_cooked_write_unsigned (regcache, tdep->ppc_gp0_regnum + 3,
-					  unpack_long (type, inval));
+					  unpack_long (type, writebuf));
 	}
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
@@ -399,15 +399,15 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *type,
       && TYPE_CODE (type) == TYPE_CODE_ARRAY
       && TYPE_VECTOR (type) && tdep->ppc_vr0_regnum >= 0)
     {
-      if (outval)
+      if (readbuf)
 	{
 	  /* Altivec places the return value in "v2".  */
-	  regcache_cooked_read (regcache, tdep->ppc_vr0_regnum + 2, outval);
+	  regcache_cooked_read (regcache, tdep->ppc_vr0_regnum + 2, readbuf);
 	}
-      if (inval)
+      if (writebuf)
 	{
 	  /* Altivec places the return value in "v2".  */
-	  regcache_cooked_write (regcache, tdep->ppc_vr0_regnum + 2, inval);
+	  regcache_cooked_write (regcache, tdep->ppc_vr0_regnum + 2, writebuf);
 	}
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
@@ -420,15 +420,15 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *type,
 	 corresponds to the entire r3 value for e500, whereas GDB's r3
 	 only corresponds to the least significant 32-bits.  So place
 	 the 64-bit DSP type's value in ev3.  */
-      if (outval)
-	regcache_cooked_read (regcache, tdep->ppc_ev0_regnum + 3, outval);
-      if (inval)
-	regcache_cooked_write (regcache, tdep->ppc_ev0_regnum + 3, inval);
+      if (readbuf)
+	regcache_cooked_read (regcache, tdep->ppc_ev0_regnum + 3, readbuf);
+      if (writebuf)
+	regcache_cooked_write (regcache, tdep->ppc_ev0_regnum + 3, writebuf);
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
   if (broken_gcc && TYPE_LENGTH (type) <= 8)
     {
-      if (outval)
+      if (readbuf)
 	{
 	  /* GCC screwed up.  The last register isn't "left" aligned.
 	     Need to extract the least significant part of each
@@ -446,12 +446,12 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *type,
 	      regcache_cooked_read_unsigned (regcache,
 					     tdep->ppc_gp0_regnum + 3 + word,
 					     &reg);
-	      store_unsigned_integer (((bfd_byte *) outval
+	      store_unsigned_integer (((bfd_byte *) readbuf
 				       + word * tdep->wordsize), len, reg);
 	      word++;
 	    }
 	}
-      if (inval)
+      if (writebuf)
 	{
 	  /* GCC screwed up.  The last register isn't "left" aligned.
 	     Need to extract the least significant part of each
@@ -466,7 +466,7 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *type,
 		break;
 	      if (len > tdep->wordsize)
 		len = tdep->wordsize;
-	      reg = extract_unsigned_integer (((bfd_byte *) inval
+	      reg = extract_unsigned_integer (((const bfd_byte *) writebuf
 					       + word * tdep->wordsize), len);
 	      regcache_cooked_write_unsigned (regcache,
 					      tdep->ppc_gp0_regnum + 3 + word,
@@ -478,7 +478,7 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *type,
     }
   if (TYPE_LENGTH (type) <= 8)
     {
-      if (outval)
+      if (readbuf)
 	{
 	  /* This matches SVr4 PPC, it does not match GCC.  */
 	  /* The value is right-padded to 8 bytes and then loaded, as
@@ -489,16 +489,16 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *type,
 	  if (TYPE_LENGTH (type) > tdep->wordsize)
 	    regcache_cooked_read (regcache, tdep->ppc_gp0_regnum + 4,
 				  regvals + 1 * tdep->wordsize);
-	  memcpy (outval, regvals, TYPE_LENGTH (type));
+	  memcpy (readbuf, regvals, TYPE_LENGTH (type));
 	}
-      if (inval)
+      if (writebuf)
 	{
 	  /* This matches SVr4 PPC, it does not match GCC.  */
 	  /* The value is padded out to 8 bytes and then loaded, as
 	     two "words" into r3/r4.  */
 	  char regvals[MAX_REGISTER_SIZE * 2];
 	  memset (regvals, 0, sizeof regvals);
-	  memcpy (regvals, inval, TYPE_LENGTH (type));
+	  memcpy (regvals, writebuf, TYPE_LENGTH (type));
 	  regcache_cooked_write (regcache, tdep->ppc_gp0_regnum + 3,
 				 regvals + 0 * tdep->wordsize);
 	  if (TYPE_LENGTH (type) > tdep->wordsize)
@@ -512,17 +512,21 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *type,
 
 enum return_value_convention
 ppc_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *valtype,
-			   struct regcache *regcache, const void *inval, void *outval)
+			   struct regcache *regcache, void *readbuf,
+			   const void *writebuf)
 {
-  return do_ppc_sysv_return_value (gdbarch, valtype, regcache, inval, outval, 0);
+  return do_ppc_sysv_return_value (gdbarch, valtype, regcache, readbuf,
+				   writebuf, 0);
 }
 
 enum return_value_convention
-ppc_sysv_abi_broken_return_value (struct gdbarch *gdbarch, struct type *valtype,
-				  struct regcache *regcache, const void *inval,
-				  void *outval)
+ppc_sysv_abi_broken_return_value (struct gdbarch *gdbarch,
+				  struct type *valtype,
+				  struct regcache *regcache,
+				  void *readbuf, const void *writebuf)
 {
-  return do_ppc_sysv_return_value (gdbarch, valtype, regcache, inval, outval, 1);
+  return do_ppc_sysv_return_value (gdbarch, valtype, regcache, readbuf,
+				   writebuf, 1);
 }
 
 /* Pass the arguments in either registers, or in the stack. Using the
@@ -821,14 +825,14 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
    0 if the return-value is instead stored on the stack (a.k.a.,
    struct return convention).
 
-   For a return-value stored in a register: when INVAL is non-NULL,
+   For a return-value stored in a register: when WRITEBUF is non-NULL,
    copy the buffer to the corresponding register return-value location
-   location; when OUTVAL is non-NULL, fill the buffer from the
+   location; when READBUF is non-NULL, fill the buffer from the
    corresponding register return-value location.  */
 enum return_value_convention
 ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *valtype,
-			     struct regcache *regcache, const void *inval,
-			     void *outval)
+			     struct regcache *regcache, void *readbuf,
+			     const void *writebuf)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   /* Floats and doubles in F1.  */
@@ -836,35 +840,35 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *valtype,
     {
       char regval[MAX_REGISTER_SIZE];
       struct type *regtype = register_type (gdbarch, FP0_REGNUM);
-      if (inval != NULL)
+      if (writebuf != NULL)
 	{
-	  convert_typed_floating (inval, valtype, regval, regtype);
+	  convert_typed_floating (writebuf, valtype, regval, regtype);
 	  regcache_cooked_write (regcache, FP0_REGNUM + 1, regval);
 	}
-      if (outval != NULL)
+      if (readbuf != NULL)
 	{
 	  regcache_cooked_read (regcache, FP0_REGNUM + 1, regval);
-	  convert_typed_floating (regval, regtype, outval, valtype);
+	  convert_typed_floating (regval, regtype, readbuf, valtype);
 	}
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
   if (TYPE_CODE (valtype) == TYPE_CODE_INT && TYPE_LENGTH (valtype) <= 8)
     {
       /* Integers in r3.  */
-      if (inval != NULL)
+      if (writebuf != NULL)
 	{
 	  /* Be careful to sign extend the value.  */
 	  regcache_cooked_write_unsigned (regcache, tdep->ppc_gp0_regnum + 3,
-					  unpack_long (valtype, inval));
+					  unpack_long (valtype, writebuf));
 	}
-      if (outval != NULL)
+      if (readbuf != NULL)
 	{
 	  /* Extract the integer from r3.  Since this is truncating the
 	     value, there isn't a sign extension problem.  */
 	  ULONGEST regval;
 	  regcache_cooked_read_unsigned (regcache, tdep->ppc_gp0_regnum + 3,
 					 &regval);
-	  store_unsigned_integer (outval, TYPE_LENGTH (valtype), regval);
+	  store_unsigned_integer (readbuf, TYPE_LENGTH (valtype), regval);
 	}
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
@@ -872,10 +876,10 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *valtype,
   if (TYPE_CODE (valtype) == TYPE_CODE_PTR)
     {
       /* All pointers live in r3.  */
-      if (inval != NULL)
-	regcache_cooked_write (regcache, tdep->ppc_gp0_regnum + 3, inval);
-      if (outval != NULL)
-	regcache_cooked_read (regcache, tdep->ppc_gp0_regnum + 3, outval);
+      if (writebuf != NULL)
+	regcache_cooked_write (regcache, tdep->ppc_gp0_regnum + 3, writebuf);
+      if (readbuf != NULL)
+	regcache_cooked_read (regcache, tdep->ppc_gp0_regnum + 3, readbuf);
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
   if (TYPE_CODE (valtype) == TYPE_CODE_ARRAY
@@ -886,12 +890,12 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *valtype,
       /* Small character arrays are returned, right justified, in r3.  */
       int offset = (register_size (gdbarch, tdep->ppc_gp0_regnum + 3)
 		    - TYPE_LENGTH (valtype));
-      if (inval != NULL)
+      if (writebuf != NULL)
 	regcache_cooked_write_part (regcache, tdep->ppc_gp0_regnum + 3,
-				    offset, TYPE_LENGTH (valtype), inval);
-      if (outval != NULL)
+				    offset, TYPE_LENGTH (valtype), writebuf);
+      if (readbuf != NULL)
 	regcache_cooked_read_part (regcache, tdep->ppc_gp0_regnum + 3,
-				   offset, TYPE_LENGTH (valtype), outval);
+				   offset, TYPE_LENGTH (valtype), readbuf);
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
   /* Big floating point values get stored in adjacent floating
@@ -899,17 +903,17 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *valtype,
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT
       && (TYPE_LENGTH (valtype) == 16 || TYPE_LENGTH (valtype) == 32))
     {
-      if (inval || outval != NULL)
+      if (writebuf || readbuf != NULL)
 	{
 	  int i;
 	  for (i = 0; i < TYPE_LENGTH (valtype) / 8; i++)
 	    {
-	      if (inval != NULL)
+	      if (writebuf != NULL)
 		regcache_cooked_write (regcache, FP0_REGNUM + 1 + i,
-				       (const bfd_byte *) inval + i * 8);
-	      if (outval != NULL)
+				       (const bfd_byte *) writebuf + i * 8);
+	      if (readbuf != NULL)
 		regcache_cooked_read (regcache, FP0_REGNUM + 1 + i,
-				      (bfd_byte *) outval + i * 8);
+				      (bfd_byte *) readbuf + i * 8);
 	    }
 	}
       return RETURN_VALUE_REGISTER_CONVENTION;
@@ -926,19 +930,19 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *valtype,
 	      char regval[MAX_REGISTER_SIZE];
 	      struct type *regtype =
 		register_type (current_gdbarch, FP0_REGNUM);
-	      if (inval != NULL)
+	      if (writebuf != NULL)
 		{
-		  convert_typed_floating ((const bfd_byte *) inval +
+		  convert_typed_floating ((const bfd_byte *) writebuf +
 					  i * (TYPE_LENGTH (valtype) / 2),
 					  valtype, regval, regtype);
 		  regcache_cooked_write (regcache, FP0_REGNUM + 1 + i,
 					 regval);
 		}
-	      if (outval != NULL)
+	      if (readbuf != NULL)
 		{
 		  regcache_cooked_read (regcache, FP0_REGNUM + 1 + i, regval);
 		  convert_typed_floating (regval, regtype,
-					  (bfd_byte *) outval +
+					  (bfd_byte *) readbuf +
 					  i * (TYPE_LENGTH (valtype) / 2),
 					  valtype);
 		}
@@ -954,12 +958,12 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *valtype,
 	  int i;
 	  for (i = 0; i < 4; i++)
 	    {
-	      if (inval != NULL)
+	      if (writebuf != NULL)
 		regcache_cooked_write (regcache, FP0_REGNUM + 1 + i,
-				       (const bfd_byte *) inval + i * 8);
-	      if (outval != NULL)
+				       (const bfd_byte *) writebuf + i * 8);
+	      if (readbuf != NULL)
 		regcache_cooked_read (regcache, FP0_REGNUM + 1 + i,
-				      (bfd_byte *) outval + i * 8);
+				      (bfd_byte *) readbuf + i * 8);
 	    }
 	}
       return RETURN_VALUE_REGISTER_CONVENTION;

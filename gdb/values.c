@@ -1243,7 +1243,7 @@ register_value_being_returned (struct type *valtype, struct regcache *retbuf)
 				    NULL, NULL, NULL)
 	      == RETURN_VALUE_REGISTER_CONVENTION);
   gdbarch_return_value (current_gdbarch, valtype, retbuf,
-			NULL, VALUE_CONTENTS_RAW (val));
+			VALUE_CONTENTS_RAW (val) /*read*/, NULL /*write*/);
   return val;
 }
 

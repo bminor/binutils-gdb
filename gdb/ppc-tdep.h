@@ -37,13 +37,13 @@ CORE_ADDR ppc_linux_frame_chain (struct frame_info *);
 enum return_value_convention ppc_sysv_abi_return_value (struct gdbarch *gdbarch,
 							struct type *valtype,
 							struct regcache *regcache,
-							const void *inval,
-							void *outval);
+							void *readbuf,
+							const void *writebuf);
 enum return_value_convention ppc_sysv_abi_broken_return_value (struct gdbarch *gdbarch,
 							       struct type *valtype,
 							       struct regcache *regcache,
-							       const void *inval,
-							       void *outval);
+							       void *readbuf,
+							       const void *writebuf);
 CORE_ADDR ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
 					CORE_ADDR func_addr,
 					struct regcache *regcache,
@@ -68,8 +68,8 @@ void ppc_linux_supply_fpregset (char *buf);
 enum return_value_convention ppc64_sysv_abi_return_value (struct gdbarch *gdbarch,
 							  struct type *valtype,
 							  struct regcache *regcache,
-							  const void *inval,
-							  void *outval);
+							  void *readbuf,
+							  const void *writebuf);
 
 /* From rs6000-tdep.c... */
 CORE_ADDR rs6000_frame_saved_pc (struct frame_info *fi);

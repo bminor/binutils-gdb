@@ -602,7 +602,7 @@ F:2:DEPRECATED_STORE_STRUCT_RETURN:void:deprecated_store_struct_return:CORE_ADDR
 # should take the type/value of the function to be called and not the
 # return type.  This is left as an exercise for the reader.
 
-M:::enum return_value_convention:return_value:struct type *valtype, struct regcache *regcache, const void *inval, void *outval:valtype, regcache, inval, outval
+M:::enum return_value_convention:return_value:struct type *valtype, struct regcache *regcache, void *readbuf, const void *writebuf:valtype, regcache, readbuf, writebuf
 
 # The deprecated methods RETURN_VALUE_ON_STACK, EXTRACT_RETURN_VALUE,
 # STORE_RETURN_VALUE and USE_STRUCT_CONVENTION have all been folded

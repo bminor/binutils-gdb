@@ -1451,8 +1451,8 @@ extern void set_gdbarch_deprecated_store_struct_return (struct gdbarch *gdbarch,
 
 extern int gdbarch_return_value_p (struct gdbarch *gdbarch);
 
-typedef enum return_value_convention (gdbarch_return_value_ftype) (struct gdbarch *gdbarch, struct type *valtype, struct regcache *regcache, const void *inval, void *outval);
-extern enum return_value_convention gdbarch_return_value (struct gdbarch *gdbarch, struct type *valtype, struct regcache *regcache, const void *inval, void *outval);
+typedef enum return_value_convention (gdbarch_return_value_ftype) (struct gdbarch *gdbarch, struct type *valtype, struct regcache *regcache, void *readbuf, const void *writebuf);
+extern enum return_value_convention gdbarch_return_value (struct gdbarch *gdbarch, struct type *valtype, struct regcache *regcache, void *readbuf, const void *writebuf);
 extern void set_gdbarch_return_value (struct gdbarch *gdbarch, gdbarch_return_value_ftype *return_value);
 
 /* The deprecated methods RETURN_VALUE_ON_STACK, EXTRACT_RETURN_VALUE,

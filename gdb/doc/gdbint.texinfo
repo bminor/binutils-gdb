@@ -3828,7 +3828,7 @@ allocated on the stack.  @xref{unwind_dummy_id}.
 Define this to convert sdb register numbers into @value{GDBN} regnums.  If not
 defined, no conversion will be done.
 
-@item enum return_value_convention gdbarch_return_value (struct gdbarch *@var{gdbarch}, struct type *@var{valtype}, struct regcache *@var{regcache}, const void *@var{inval}, void *@var{outval})
+@item enum return_value_convention gdbarch_return_value (struct gdbarch *@var{gdbarch}, struct type *@var{valtype}, struct regcache *@var{regcache}, void *@var{readbuf}, const void *@var{writebuf})
 @findex gdbarch_return_value
 @anchor{gdbarch_return_value} Given a function with a return-value of
 type @var{rettype}, return which return-value convention that function
@@ -3840,13 +3840,13 @@ in registers; and @code{RETURN_VALUE_STRUCT_CONVENTION} where the return
 value is found in memory and the address of that memory location is
 passed in as the function's first parameter.
 
-If the register convention is being used, and @var{inval} is
-non-@code{NULL}, also copy the return-value in @var{inval} into
+If the register convention is being used, and @var{writebuf} is
+non-@code{NULL}, also copy the return-value in @var{writebuf} into
 @var{regcache}.
 
-If the register convention is being used, and @var{outval} is
+If the register convention is being used, and @var{readbuf} is
 non-@code{NULL}, also copy the return value from @var{regcache} into
-@var{outval} (@var{regcache} contains a copy of the registers from the
+@var{readbuf} (@var{regcache} contains a copy of the registers from the
 just returned function).
 
 @xref{EXTRACT_STRUCT_VALUE_ADDRESS}, for a description of how

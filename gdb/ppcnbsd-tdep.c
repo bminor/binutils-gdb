@@ -210,7 +210,8 @@ ppcnbsd_pc_in_sigtramp (CORE_ADDR pc, char *func_name)
 
 static enum return_value_convention
 ppcnbsd_return_value (struct gdbarch *gdbarch, struct type *valtype,
-		      struct regcache *regcache, const void *inval, void *outval)
+		      struct regcache *regcache, void *readbuf,
+		      const void *writebuf)
 {
   if ((TYPE_CODE (valtype) == TYPE_CODE_STRUCT
        || TYPE_CODE (valtype) == TYPE_CODE_UNION)
@@ -223,7 +224,7 @@ ppcnbsd_return_value (struct gdbarch *gdbarch, struct type *valtype,
     return RETURN_VALUE_STRUCT_CONVENTION;
   else
     return ppc_sysv_abi_broken_return_value (gdbarch, valtype, regcache,
-					     inval, outval);
+					     readbuf, writebuf);
 }
 
 static void

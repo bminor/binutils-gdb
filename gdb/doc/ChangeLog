@@ -1,3 +1,9 @@
+2003-11-10  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Replace the
+	return_value method's "inval" and "outval" parameters with
+	"readbuf" and "writebuf".
+
 2003-10-28  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.texinfo (The F request packet, The F reply packet): Renamed
