@@ -1,3 +1,11 @@
+2003-07-03  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (REGISTER_RAW_SIZE, REGISTER_VIRTUAL_SIZE): Add
+	predicate.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* regcache.c (init_regcache_descr): Use legacy code when either
+	REGISTER_BYTE or REGISTER_RAW_SIZE is set.
+
 2003-07-02  Daniel Jacobowitz  <drow@mvista.com>
 
 	* NEWS: Move "set logging" entry into GDB 6.0 section.
