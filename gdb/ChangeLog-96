@@ -123,12 +123,10 @@ Thu Dec 19 19:42:44 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 	register saves by using the ep register.
 
 end-sanitize-v850
-start-sanitize-m32r
 Thu Dec 19 15:57:16 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* m32r-tdep.c (m32r_frame_find_saved_regs): Fix thinko in arg def.
 
-end-sanitize-m32r
 Thu Dec 19 09:38:56 1996  Mark Alexander  <marka@cygnus.com>
 
 	* values.c (unpack_double): Make it compile with MSVC++ 2.x.
@@ -276,9 +274,7 @@ Tue Dec  3 11:38:14 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
 	* blockframe.c: add macro USE_GENERIC_DUMMY_FRAMES to enable/disable
 	  code for generic call_dummy frames.
 	* config/h8300/tm-h8300.h: turn on USE_GENERIC_DUMMY_FRAMES
-start-sanitize-m32r
 	* config/m32r/tm-m32r.h: Ditto.
-end-sanitize-m32r
 	* config/sh/tm-sh.h: Ditto.
 start-sanitize-v850
 	* config/v850/tm-v850.h: Ditto.
@@ -505,9 +501,7 @@ Wed Nov 27 11:29:06 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* blockframe.c: Remove old-style CALL_DUMMY code.
 	* h8300-tdep.c, config/h8300/tm-h8300.h: Ditto.
-start-sanitize-m32r
 	* m32r-tdep.c, config/m32r/tm-m32r.h: Ditto.
-end-sanitize-m32r
 	* sh-tdep.c, config/sh/tm-sh.h: Ditto.
 start-sanitize-v850
 	* v850-tdep.c, config/v850/tm-v850.h: Ditto.
@@ -521,10 +515,8 @@ Wed Nov 27 10:32:14 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
 	* frame.h:      Declarations for generic CALL_DUMMY frame support.
 	* h8300-tdep.c: Add target function calls using generic frame support.
 	* config/h8300/tm-h8300.h: config for generic target function calls.
-start-sanitize-m32r
 	* m32r-tdep.c:  Add target function calls using generic frame support.
 	* config/m32r/tm-m32r.h:   config for generic target function calls.
-end-sanitize-m32r
 	* sh-tdep.c:    Add target function calls using generic frame support.
 	* config/sh/tm-sh.h:       config for generic target function calls.
 start-sanitize-v850
@@ -685,13 +677,11 @@ Tue Nov 12 12:16:40 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
 	* sh-tdep.c: Add functionality for target function calls.
 	* config/sh/tm-sh.h: Add support for target function calls.
 
-start-sanitize-m32r
 Tue Nov 12 12:06:58 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
 	 
 	* m32r-tdep.c: Add functionality for target function calls.
 	* valops.c:    Small change to support target function calls.
 	* config/m32r/tm-m32r.h: Add support for target function calls.
-end-sanitize-m32r
 	 
 Mon Nov 11 17:15:59 1996  Geoffrey Noer  <noer@cygnus.com>
 
@@ -765,12 +755,10 @@ Thu Nov  7 15:19:08 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 	* config/d10v/tm-d10v.h (EXTRA_FRAME_INFO): Change dummy to be
 	a pointer to the dummy's stack instead of just a flag.
 	
-start-sanitize-m32r
 Tue Nov  5 10:21:02 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* m32r-tdep.c: Improved frame_chain and fn prologue analysis.
 	* config/tm-m32r.h: Add framesize and register to extra_frame_info.
-end-sanitize-m32r
 
 Tue Nov  5 10:08:07 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
@@ -812,7 +800,6 @@ Fri Nov  1 10:50:51 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 	* monitor.c (dev_name,targ_ops): Move static variables before
 	first use, to avoid compiler warnings.
 
-start-sanitize-m32r
 Thu Oct 31 16:37:17 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* m32r-tdep.c: Improved frame_chain and fn prologue analysis.
@@ -828,7 +815,6 @@ Wed Oct 30 18:14:14 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
 	* m32r-tdep.c, m32r-rom.c: New files.
 	* config/m32r/m32r.mt: New file.
 	* config/m32r/tm-m32r.h: New file.
-end-sanitize-m32r
 
 Tue Oct 29 16:56:01 1996  Geoffrey Noer  <noer@cygnus.com>
 

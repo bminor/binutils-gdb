@@ -49,20 +49,6 @@ else
 	fi
 fi
 
-m32r_files="m32r"
-
-if ( echo $* | grep keep\-m32r > /dev/null ) ; then
-	keep_these_too="${m32r_files} ${keep_these_too}"
-	if [ -n "${verbose}" ] ; then
-		echo Keeping ${m32r_files}
-	fi
-else
-	lose_these_too="${m32r_files} ${lose_these_too}"
-	if [ -n "${verbose}" ] ; then
-		echo Deleting ${m32r_files}
-	fi
-fi
-
 tic80_files="tic80"
 
 if ( echo $* | grep keep\-tic80 > /dev/null ) ; then
@@ -95,6 +81,7 @@ h8300
 h8500
 i386
 i960
+m32r
 m68k
 m88k
 mips

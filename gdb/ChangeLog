@@ -538,14 +538,12 @@ Tue Feb 11 22:24:39 1997  Dawn Perchik  <dawn@cygnus.com>
 	(pollquit, quit, notice_quit): Fix to read cntl-C from the 
 	Windows message queue.
 
-start-sanitize-m32r
 Tue Feb 11 15:36:31 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* m32r-rom.c: #include <sys/types.h>.
 	#ifdef out new load support if wingdb.
 	* m32r/tm-m32r.h (TARGET_M32R): Define, for wingdb.
 
-end-sanitize-m32r
 Tue Feb 11 12:28:09 1997  Jeffrey A Law  (law@cygnus.com)
 
 
@@ -672,13 +670,11 @@ Mon Feb 03 17:57:58 1997  Mark Alexander  <marka@cygnus.com>
 	(mips_push_arguments): Don't align small arguments in EABI.
 	(mips32_skip_prologue): Attempt to shrink code size a little.
 
-start-sanitize-m32r
 Mon Feb  3 11:06:05 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* m32r-stub.c: New -- remote protocol support for M32R cpu.
 	* m32r-rom.c:  Several experiments with improved download time.
 	* .Sanitize:   Add entry for m32r-stub.c
-end-sanitize-m32r
 
 Fri Jan 31 08:26:39 1997  Mark Alexander  <marka@cygnus.com>
 
