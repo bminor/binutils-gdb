@@ -1,3 +1,8 @@
+Fri Jul 25 16:27:07 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ecofflink.c (bfd_ecoff_debug_accumulate): Only merge files with
+	the same number of aux entries.
+
 Fri Jul 25 08:22:15 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* som.c (hppa_som_gen_reloc_type): Use R_DATA_EXPR for the
