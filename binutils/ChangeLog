@@ -1,3 +1,7 @@
+1999-07-14  Richard Henderson  <rth@cygnus.com>
+
+	* objdump.c (dump_section_header): Print SEC_SHORT.
+
 1999-07-11  Ian Lance Taylor  <ian@zembu.com>
 
 	* Many files: Changes to avoid gcc warnings: Add ATTRIBUTE_UNUSED
