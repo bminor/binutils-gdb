@@ -554,7 +554,7 @@ clean: mostlyclean
 distclean:
 	-rm -f Makefile config.status *.o *~ \#* core y.* \
 		binutils.?? binutils.??s binutils.aux binutils.log binutils.toc
-	-rm -f $(PROGS) underscore.c config.cache
+	-rm -f $(PROGS) underscore.c config.h stamp-h config.cache config.log
 realclean: clean distclean
 	-rm -f $(DISTSTUFF) *.info TAGS
 

@@ -1,5 +1,8 @@
 Thu Sep  7 12:12:17 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.in (distclean): Remove config.h, stamp-h, and
+        config.log.
+
 	* nm.c (value_format): Initialize based on BFD64 and
 	BFD_HOST_64BIT_LONG.
 	(print_radix): New static variable.
