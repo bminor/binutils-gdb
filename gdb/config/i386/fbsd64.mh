@@ -2,6 +2,5 @@
 NATDEPFILES= fork-child.o inf-child.o inf-ptrace.o \
 	fbsd-nat.o amd64-nat.o amd64bsd-nat.o amd64fbsd-nat.o \
 	gcore.o bsd-kvm.o
-NAT_FILE= config/nm-bsd.h
 
 LOADLIBES= -lkvm

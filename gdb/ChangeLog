@@ -1,5 +1,8 @@
 2004-09-27  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/i386/fbsd64.mh, config/i386/nbsd64.mh,
+	config/i386/obsd64.mh (NAT_FILE): Remove variable.
+
 	* configure.in: Don't comment out NATDEPFILES in the generated
 	Makefile if NAT_FILE is unset.
 	* configure: Regenerate.
