@@ -74,6 +74,15 @@ static int mips_output_flavor (void) { return OUTPUT_FLAVOR; }
 
 int mips_flag_mdebug = -1;
 
+/* Control generation of .pdr sections.  Off by default on IRIX: the native
+   linker doesn't know about and discards them, but relocations against them
+   remain, leading to rld crashes.  */
+#ifdef TE_IRIX
+int mips_flag_pdr = FALSE;
+#else
+int mips_flag_pdr = TRUE;
+#endif
+
 #include "ecoff.h"
 
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
@@ -1283,7 +1292,7 @@ md_begin (void)
 	    (void) bfd_set_section_alignment (stdoutput, sec, 2);
 	  }
 #ifdef OBJ_ELF
-	else if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
+	else if (OUTPUT_FLAVOR == bfd_target_elf_flavour && mips_flag_pdr)
 	  {
 	    pdr_seg = subseg_new (".pdr", (subsegT) 0);
 	    (void) bfd_set_section_flags (stdoutput, pdr_seg,
@@ -10322,6 +10331,10 @@ struct option md_longopts[] =
   {"mdebug", no_argument, NULL, OPTION_MDEBUG},
 #define OPTION_NO_MDEBUG   (OPTION_ELF_BASE + 8)
   {"no-mdebug", no_argument, NULL, OPTION_NO_MDEBUG},
+#define OPTION_PDR	   (OPTION_ELF_BASE + 9)
+  {"mpdr", no_argument, NULL, OPTION_PDR},
+#define OPTION_NO_PDR	   (OPTION_ELF_BASE + 10)
+  {"mno-pdr", no_argument, NULL, OPTION_NO_PDR},
 #endif /* OBJ_ELF */
 
   {NULL, no_argument, NULL, 0}
@@ -10669,6 +10682,14 @@ md_parse_option (int c, char *arg)
 
     case OPTION_NO_MDEBUG:
       mips_flag_mdebug = FALSE;
+      break;
+
+    case OPTION_PDR:
+      mips_flag_pdr = TRUE;
+      break;
+
+    case OPTION_NO_PDR:
+      mips_flag_pdr = FALSE;
       break;
 #endif /* OBJ_ELF */
 
@@ -14040,7 +14061,8 @@ s_mips_end (int x ATTRIBUTE_UNUSED)
 
 #ifdef OBJ_ELF
   /* Generate a .pdr section.  */
-  if (OUTPUT_FLAVOR == bfd_target_elf_flavour && ! ECOFF_DEBUGGING)
+  if (OUTPUT_FLAVOR == bfd_target_elf_flavour && ! ECOFF_DEBUGGING
+      && mips_flag_pdr)
     {
       segT saved_seg = now_seg;
       subsegT saved_subseg = now_subseg;
@@ -14525,6 +14547,7 @@ MIPS options:\n\
 -KPIC, -call_shared	generate SVR4 position independent code\n\
 -non_shared		do not generate position independent code\n\
 -xgot			assume a 32 bit GOT\n\
+-mpdr, -mno-pdr		enable/disable creation of .pdr sections\n\
 -mabi=ABI		create ABI conformant object file for:\n"));
 
   first = 1;

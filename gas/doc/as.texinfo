@@ -399,6 +399,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-mips3d}] [@b{-no-mips3d}]
    [@b{-mdmx}] [@b{-no-mdmx}]
    [@b{-mdebug}] [@b{-no-mdebug}]
+   [@b{-mpdr}] [@b{-mno-pdr}]
 @end ifset
 @ifset MMIX
 
@@ -951,6 +952,10 @@ of an mfhi or mflo instruction occurs in the following two instructions.
 @itemx -no-mdebug
 Cause stabs-style debugging output to go into an ECOFF-style .mdebug
 section instead of the standard ELF .stabs sections.
+
+@item -mpdr
+@itemx -mno-pdr
+Control generation of @code{.pdr} sections.
 
 @item -mgp32
 @itemx -mfp32
