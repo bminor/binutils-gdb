@@ -1,3 +1,9 @@
+Tue Aug  8 10:50:15 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
+
+	* symfile.c (add_psymbol_to_list): Initialize SYMBOL_SECTION.
+	(add_psymbol_addr_to_list): Likewise.
+	* symfile.h (ADD_PSYMBOL_VT_TO_LIST): Likewise.
+
 Mon Aug  7 15:34:29 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* top.c (target_output_hook): New definition.
