@@ -1,3 +1,7 @@
+Fri Mar 29 11:31:27 1996  J.T. Conklin  (jtc@lisa.cygnus.com)
+
+	* doc/as.1: Changed to be recognized by catman -w on Solaris.
+
 Thu Mar 28 15:27:47 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* stabs.c (s_stab_generic): Call the listing functions before
