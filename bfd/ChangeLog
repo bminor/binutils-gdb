@@ -1,3 +1,8 @@
+2003-06-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-sparc.c (sparc64_elf_relocate_section): Ignore R_SPARC_DISP32
+	reloc overflow on discarded eh_frame entries.
+
 2003-06-18  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elf32-cris.c (cris_elf_relocate_section) <case
@@ -63,7 +68,7 @@
 
 	2003-05-21  Nick Clifton  <nickc@redhat.com>
 	* elf.c (bfd_elf_get_needed_list): Use is_elf_hash_table to check
-	the type of the has table in the bfd_link_info structure.
+	the type of the hash table in the bfd_link_info structure.
 	(bfd_elf_get_runpath_list): Likewise.
 
 	2003-05-20  Jakub Jelinek  <jakub@redhat.com>
