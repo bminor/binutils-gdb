@@ -122,7 +122,7 @@ call_ptrace (int request, int pid, PTRACE_ARG3_TYPE addr, int data)
   if (request == PT_SETTRC)
     {
       errno = 0;
-#if !defined (FIVE_ARG_PTRACE)
+#ifndef PTRACE_TYPE_ARG5
       pt_status = ptrace (PT_SETTRC, pid, addr, data);
 #else
       /* Deal with HPUX 8.0 braindamage.  We never use the
@@ -159,7 +159,7 @@ call_ptrace (int request, int pid, PTRACE_ARG3_TYPE addr, int data)
   saved_errno = errno;
   errno = 0;
 #endif
-#if !defined (FIVE_ARG_PTRACE)
+#ifndef PTRACE_TYPE_ARG5
   pt_status = ptrace (request, pid, addr, data);
 #else
   /* Deal with HPUX 8.0 braindamage.  We never use the
@@ -178,7 +178,7 @@ call_ptrace (int request, int pid, PTRACE_ARG3_TYPE addr, int data)
 }
 
 
-#if defined (DEBUG_PTRACE) || defined (FIVE_ARG_PTRACE)
+#if defined (DEBUG_PTRACE) || defined (PTRACE_TYPE_ARG5)
 /* For the rest of the file, use an extra level of indirection */
 /* This lets us breakpoint usefully on call_ptrace. */
 #define ptrace call_ptrace

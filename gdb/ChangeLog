@@ -1,5 +1,8 @@
 2004-08-11  Mark Kettenis  <kettenis@gnu.org>
 
+	* infptrace.c (call_ptrace): Select code based on PTRACE_TYPE_ARG5
+	instead of FIVE_ARG_PTRACE.
+
 	* inflow.c (O_NOCTTY): Define to zero if not already defined.
 	(new_tty): Use O_NOCTTY unconditionally.
 
