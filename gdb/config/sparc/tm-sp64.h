@@ -212,6 +212,22 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #undef  TARGET_PTR_BIT
 #define TARGET_PTR_BIT 64
 
+/* Does the specified function use the "struct returning" convention
+   or the "value returning" convention?  The "value returning" convention
+   almost invariably returns the entire value in registers.  The
+   "struct returning" convention often returns the entire value in
+   memory, and passes a pointer (out of or into the function) saying
+   where the value (is or should go).
+
+   Since this sometimes depends on whether it was compiled with GCC,
+   this is also an argument.  This is used in call_function to build a
+   stack, and in value_being_returned to print return values.
+
+   On sparc64, all structs are returned via a pointer.  */
+
+#undef  USE_STRUCT_CONVENTION
+#define USE_STRUCT_CONVENTION(gcc_p, type) 1
+
 /* Store the address of the place in which to copy the structure the
    subroutine will return.  This is called from call_function. */
 /* FIXME: V9 uses %o0 for this.  */
@@ -219,17 +235,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #undef  STORE_STRUCT_RETURN
 #define STORE_STRUCT_RETURN(ADDR, SP) \
   { target_write_memory ((SP)+(16*8), (char *)&(ADDR), 8); }
-
-/* Extract from an array REGBUF containing the (raw) register state
-   the address in which a function should return its structure value,
-   as a CORE_ADDR (or an expression that can be used as one).  */
-
-#undef  EXTRACT_STRUCT_VALUE_ADDRESS
-#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
-  (sparc64_extract_struct_value_address (REGBUF))
-
-extern CORE_ADDR
-sparc64_extract_struct_value_address PARAMS ((char [REGISTER_BYTES]));
 
 /* Return number of bytes at start of arglist that are not really args.  */
 
