@@ -1,3 +1,20 @@
+Mon Jun 27 18:07:06 1994  Steve Chamberlain  (sac@cirdan.cygnus.com)
+
+	* section.c (bfd_get_section_contents): Put in parens to get
+	precedence right.
+
+Sun Jun 26 18:08:29 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* libelf.h (relocate_section): New argument "output_names" added
+	to prototype.
+	* elfcode.h (elf_link_input_bfd): New argument "output_names"
+	added to prototype of relocate_section.  Pass the output symbol
+	names to relocate_section.
+	* elf32-i386.c (elf_i386_relocate_section): Use "output_names" to
+	determine the name of a local symbol.
+	* elf32-mips.c (mips_elf_relocate_section): Likewise.
+	* elf32-sparc.c (elf32_sparc_relocate_section): Likewise.
+
 Fri Jun 24 08:15:42 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	Add Solaris BCP (the part of Solaris which allows it to run
