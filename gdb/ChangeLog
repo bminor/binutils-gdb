@@ -1,3 +1,7 @@
+2004-11-02  Paul Hilfinger  <hilfingr@nile.gnat.com>
+
+	* NEWS: GDB understands GNAT Ada.
+
 2004-10-23  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* s390-tdep.c (enum pv_boolean): Remove.
