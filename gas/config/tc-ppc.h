@@ -268,7 +268,7 @@ extern const char *ppc_comment_chars;
 #define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section(FIXP, SEC)
 extern long md_pcrel_from_section PARAMS ((struct fix *, segT));
 
-#define md_parse_name(name, exp) ppc_parse_name (name, exp)
+#define md_parse_name(name, exp, c) ppc_parse_name (name, exp)
 extern int ppc_parse_name PARAMS ((const char *, struct expressionS *));
 
 #define md_operand(x)

@@ -92,7 +92,7 @@ extern void ia64_handle_align PARAMS ((fragS *f));
 #define tc_unrecognized_line(ch)	ia64_unrecognized_line (ch)
 #define tc_frob_label(s)		ia64_frob_label (s)
 #define md_flush_pending_output()	ia64_flush_pending_output ()
-#define md_parse_name(s,e)		ia64_parse_name (s, e)
+#define md_parse_name(s,e,c)		ia64_parse_name (s, e)
 #define tc_canonicalize_symbol_name(s)	ia64_canonicalize_symbol_name (s)
 #define md_optimize_expr(l,o,r)		ia64_optimize_expr (l, o, r)
 #define md_cons_align(n)		ia64_cons_align (n)

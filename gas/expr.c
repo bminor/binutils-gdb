@@ -1231,7 +1231,7 @@ operand (expressionP)
              specially in certain contexts.  If a name always has a
              specific value, it can often be handled by simply
              entering it in the symbol table.  */
-	  if (md_parse_name (name, expressionP))
+	  if (md_parse_name (name, expressionP, &c))
 	    {
 	      *input_line_pointer = c;
 	      break;
