@@ -20,8 +20,11 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
  *  $Id$ 
  *
  *  $Log$
- *  Revision 1.2  1991/03/22 23:02:38  steve
- *  Brought up to sync with Intel again.
+ *  Revision 1.3  1991/03/27 02:29:21  steve
+ *  *** empty log message ***
+ *
+ * Revision 1.2  1991/03/22  23:02:38  steve
+ * Brought up to sync with Intel again.
  *
  * Revision 1.1  1991/03/13  00:48:32  chrisb
  * Initial revision
@@ -449,4 +452,19 @@ ldsym_write()
     *tablep =  (asymbol *)NULL;
     bfd_set_symtab(output_bfd, symbol_table, (unsigned)( tablep - symbol_table));
   }
+}
+
+/*
+return true if the supplied symbol name is not in the 
+linker symbol table
+*/
+boolean 
+ldsym_undefined(sym)
+char *sym;
+{
+  ldsym_type *from_table = ldsym_get_soft(sym);
+  if (from_table != (ldsym_type *)NULL) {
+    if (from_table->sdefs_chain != (asymbol **)NULL) return false;
+  }
+  return true;
 }

@@ -51,9 +51,10 @@ PROTO(ldsym_type *, ldsym_get, (char *));
 PROTO(ldsym_type *, ldsym_get_soft, (char *));
 PROTO(void, ldsym_print_symbol_table,(void));
 PROTO(void, ldsym_write, (void));
-
+PROTO(boolean, ldsym_undefined, (char *));
 #define FOR_EACH_LDSYM(x)						\
 	extern ldsym_type *symbol_head;					\
 	ldsym_type *x;							\
 	for (x = symbol_head; x != (ldsym_type *)NULL; x = x->next) 	
+
 

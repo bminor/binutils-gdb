@@ -19,7 +19,10 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* $Id$ 
  *
  * $Log$
- * Revision 1.3  1991/03/27 00:52:49  steve
+ * Revision 1.4  1991/03/27 02:29:22  steve
+ * *** empty log message ***
+ *
+ * Revision 1.3  1991/03/27  00:52:49  steve
  * *** empty log message ***
  *
  * Revision 1.2  1991/03/22  23:02:34  steve
@@ -2170,7 +2173,7 @@ lang_abs_symbol_at_beginning_of(section, name)
 char *section;
 char *name;
 {
-  if (ldsym_get_soft(name) == (asymbol *)NULL) {
+  if (ldsym_undefined(name)) {
     extern bfd *output_bfd;
     extern asymbol *create_symbol();
     asection *s = bfd_get_section_by_name(output_bfd, section);
@@ -2198,7 +2201,7 @@ lang_abs_symbol_at_end_of(section, name)
 char *section;
 char *name;
 {
-  if (ldsym_get_soft(name) == (asymbol *)NULL) {
+  if (ldsym_undefined(name)){
     extern bfd *output_bfd;
     extern asymbol *create_symbol();
     asection *s = bfd_get_section_by_name(output_bfd, section);
