@@ -1,3 +1,7 @@
+Thu Oct 16 15:03:58 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* remote-sds.c (sds_load): Properly declare as static.
+
 Wed Oct 15 10:27:14 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* config/sparc/tm-sparc.h (FIX_CALL_DUMMY): Mask off displacement

@@ -74,7 +74,7 @@ static void sds_mourn PARAMS ((void));
 
 static void sds_create_inferior PARAMS ((char *, char *, char **));
 
-extern void sds_load PARAMS ((char *, int));
+static void sds_load PARAMS ((char *, int));
 
 static int getmessage PARAMS ((unsigned char *, int));
 
