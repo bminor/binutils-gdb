@@ -125,8 +125,10 @@ static void DebugCheckNullTermString(char *prefix, bool nl,
     }
 }
 
+#ifdef NEED_SYSERRLIST
 extern int sys_nerr;
 extern char *sys_errlist[];
+#endif
 
 static char *DebugStrError(int last_errno)
 {

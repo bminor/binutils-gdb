@@ -36,6 +36,11 @@
 #include <sys/types.h>
 #include <sys/time.h>
 
+#if defined (__FreeBSD__) || defined (__NetBSD__) || defined (__OpenBSD__) || defined (bsdi)
+#undef BSD
+#include <sys/ioctl.h>
+#endif
+
 #ifdef sun
 # include <sys/ioccom.h>
 # ifdef __svr4__
@@ -253,6 +258,13 @@ extern int Unix_OpenSerial(const char *name)
         perror("open");
         return -1;
     }
+#ifdef TIOCEXCL
+    if (ioctl(serpfd, TIOCEXCL) < 0) {
+	close(serpfd);
+        perror("ioctl: TIOCEXCL");
+        return -1;
+    }
+#endif
 
     return 0;
 }

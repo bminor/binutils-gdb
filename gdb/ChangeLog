@@ -1,3 +1,16 @@
+2000-02-25  Fernando Nasser  <fnasser@cygnus.com>
+
+	From: Thomas Zenker <thz@Lennartz-electronic.DE>
+	* rdi-share/hsys.c: to compile under 4.4BSD derived systems (FreeBSD,
+	NetBSD...) sys_errlist should not be declared in hsys.c.
+	NEED_SYSERRLIST is set already by configure, so we can use it.
+	* rdi-share/unixcomm.c: 4.4BSD derived systems define BSD, but are
+	posix compliant and we should not work with the old compatibility
+	stuff.  Because of that I undef BSD in case of FBSD etc and include
+	sys/ioctl to get the flags.
+	* rdi-share/unixcomm.c: If the TIOCEXCL flags exists set serial line
+	for exclusive use.
+
 2000-02-24  Kevin Buettner  <kevinb@redhat.com>
 
 	* ppc-linux-tdep.c (ppc_sysv_abi_push_arguments): Put address
