@@ -1,3 +1,11 @@
+Mon Nov 21 11:14:01 1994  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* configure.in (*-*-netware*): Don't configure xiberty.
+
+Mon Nov 14 08:49:15 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* configure.in:  Remove tk from native_only list.
+
 Fri Nov 11 15:31:26 1994  Bill Cox  (bill@rtl.cygnus.com)
 
 	* build-all.mk: Add mips-ncd-elf target to sun4 targets
