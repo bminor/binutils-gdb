@@ -1,3 +1,8 @@
+2001-03-20  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-cmd-disas.c (mi_cmd_disassemble): Initialize ``file_string''
+	and ``line_num''.  Consolidate declaration of argument variables.
+
 2001-03-19  Andrew Cagney  <ac131313@redhat.com>
 
 	* mi-out.h: Remove #ifdef __STDC__.

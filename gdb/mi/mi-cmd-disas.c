@@ -112,15 +112,9 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
 {
   CORE_ADDR pc;
   CORE_ADDR start;
-  CORE_ADDR low = 0;
-  CORE_ADDR high = 0;
 
-  int how_many = -1;
   int mixed_source_and_assembly;
   int num_displayed;
-  int line_num;
-
-  char *file_string;
   static disassemble_info di;
   static int di_initialized;
 
@@ -136,12 +130,19 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
   char *filename = NULL;
   char *name = NULL;
 
-  /* Which options have we processed? */
+  /* Which options have we processed ... */
   int file_seen = 0;
   int line_seen = 0;
   int num_seen = 0;
   int start_seen = 0;
   int end_seen = 0;
+
+  /* ... and their corresponding value. */
+  char *file_string = NULL;
+  int line_num = -1;
+  int how_many = -1;
+  CORE_ADDR low = 0;
+  CORE_ADDR high = 0;
 
   /* Options processing stuff. */
   int optind = 0;
