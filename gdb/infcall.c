@@ -669,7 +669,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
     sp = DEPRECATED_PUSH_ARGUMENTS (nargs, args, sp, struct_return,
 				    struct_addr);
   else
-    sp = legacy_push_arguments (nargs, args, sp, struct_return, struct_addr);
+    error ("This target does not support function calls");
 
   if (DEPRECATED_PUSH_RETURN_ADDRESS_P ())
     /* for targets that use no CALL_DUMMY */

@@ -418,6 +418,34 @@ ns32k_pop_frame (void)
   write_register (SP_REGNUM, fp + 8);
   flush_cached_frames ();
 }
+
+static CORE_ADDR
+ns32k_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
+		      int struct_return, CORE_ADDR struct_addr)
+{
+  /* ASSERT ( !struct_return); */
+  int i;
+  for (i = nargs - 1; i >= 0; i--)
+    {
+      struct value *arg = args[i];
+      int len = TYPE_LENGTH (VALUE_ENCLOSING_TYPE (arg));
+      int container_len = len;
+      int offset;
+
+      /* Are we going to put it at the high or low end of the
+	 container?  */
+      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+	offset = container_len - len;
+      else
+	offset = 0;
+
+      /* Stack grows downward.  */
+      sp -= container_len;
+      write_memory (sp + offset, VALUE_CONTENTS_ALL (arg), len);
+    }
+  return sp;
+}
+
 
 static void
 ns32k_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
@@ -524,6 +552,7 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Call dummy info */
   set_gdbarch_deprecated_pop_frame (gdbarch, ns32k_pop_frame);
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
+  set_gdbarch_deprecated_push_arguments (gdbarch, ns32k_push_arguments);
 
   /* Breakpoint info */
   set_gdbarch_breakpoint_from_pc (gdbarch, ns32k_breakpoint_from_pc);

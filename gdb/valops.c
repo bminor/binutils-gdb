@@ -50,8 +50,6 @@ extern int overload_debug;
 static int typecmp (int staticp, int varargs, int nargs,
 		    struct field t1[], struct value *t2[]);
 
-static CORE_ADDR value_push (CORE_ADDR, struct value *);
-
 static struct value *search_struct_field (char *, struct value *, int,
 				      struct type *, int);
 
@@ -1002,49 +1000,6 @@ push_bytes (CORE_ADDR sp, char *buffer, int len)
       sp += len;
     }
 
-  return sp;
-}
-
-/* Push onto the stack the specified value VALUE.  Pad it correctly for
-   it to be an argument to a function.  */
-
-static CORE_ADDR
-value_push (CORE_ADDR sp, struct value *arg)
-{
-  int len = TYPE_LENGTH (VALUE_ENCLOSING_TYPE (arg));
-  int container_len = len;
-  int offset;
-
-  /* Are we going to put it at the high or low end of the container?  */
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-    offset = container_len - len;
-  else
-    offset = 0;
-
-  if (INNER_THAN (1, 2))
-    {
-      /* stack grows downward */
-      sp -= container_len;
-      write_memory (sp + offset, VALUE_CONTENTS_ALL (arg), len);
-    }
-  else
-    {
-      /* stack grows upward */
-      write_memory (sp + offset, VALUE_CONTENTS_ALL (arg), len);
-      sp += container_len;
-    }
-
-  return sp;
-}
-
-CORE_ADDR
-legacy_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
-		       int struct_return, CORE_ADDR struct_addr)
-{
-  /* ASSERT ( !struct_return); */
-  int i;
-  for (i = nargs - 1; i >= 0; i--)
-    sp = value_push (sp, args[i]);
   return sp;
 }
 
