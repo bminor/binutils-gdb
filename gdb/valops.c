@@ -659,7 +659,7 @@ call_function_by_hand (function, nargs, args)
   register int i;
   CORE_ADDR start_sp;
   /* CALL_DUMMY is an array of words (REGISTER_TYPE), but each word
-     in in host byte order.  It is switched to target byte order before calling
+     is in host byte order.  It is switched to target byte order before calling
      FIX_CALL_DUMMY.  */
   static REGISTER_TYPE dummy[] = CALL_DUMMY;
   REGISTER_TYPE dummy1[sizeof dummy / sizeof (REGISTER_TYPE)];
@@ -720,6 +720,7 @@ call_function_by_hand (function, nargs, args)
   /* Convex Unix prohibits executing in the stack segment. */
   /* Hope there is empty room at the top of the text segment. */
   {
+    extern CORE_ADDR text_end;
     static checked = 0;
     if (!checked)
       for (start_sp = text_end - sizeof dummy; start_sp < text_end; ++start_sp)
@@ -732,6 +733,7 @@ call_function_by_hand (function, nargs, args)
   }
 #else /* After text_end.  */
   {
+    extern CORE_ADDR text_end;
     int errcode;
     sp = old_sp;
     start_sp = text_end;
@@ -891,7 +893,7 @@ value_string (ptr, len)
   register int c;
 
   /* Copy the string into COPY, processing escapes.
-     We could not conveniently process them in expread
+     We could not conveniently process them in the parser
      because the string there wants to be a substring of the input.  */
 
   while (i - ibeg < len)

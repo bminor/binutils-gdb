@@ -17,9 +17,10 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* Sequence of bytes for breakpoint instruction.  */
+/* Define BPT_VECTOR if it is different than the default.
+   This is the vector number used by traps to indicate a breakpoint. */
 
-#define BREAKPOINT {0x4e, 0x4e}
+#define BPT_VECTOR 0xe
 
 /* Define this if the C compiler puts an underscore at the front
    of external names before giving them to the linker.  */
@@ -92,39 +93,5 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
   set_current_frame (create_new_frame (read_register (FP_REGNUM),	\
 					read_pc ())); }
 
-/* This sequence of words is the instructions
-     fmovem 0xff,-(sp)
-     moveml 0xfffc,-(sp)
-     clrw -(sp)
-     movew ccr,-(sp)
-     /..* The arguments are pushed at this point by GDB;
-	no code is needed in the dummy for this.
-	The CALL_DUMMY_START_OFFSET gives the position of 
-	the following jsr instruction.  *../
-     jsr @#32323232
-     addl #69696969,sp
-     bpt
-     nop
-Note this is 28 bytes.
-We actually start executing at the jsr, since the pushing of the
-registers is done by PUSH_DUMMY_FRAME.  If this were real code,
-the arguments for the function called by the jsr would be pushed
-between the moveml and the jsr, and we could allow it to execute through.
-But the arguments have to be pushed by GDB after the PUSH_DUMMY_FRAME is done,
-and we cannot allow the moveml to push the registers again lest they be
-taken for the arguments.  */
-
-#define CALL_DUMMY {0xf227e0ff, 0x48e7fffc, 0x426742e7, 0x4eb93232, 0x3232dffc, 0x69696969, 0x4e4e4e71}
-
-#define CALL_DUMMY_LENGTH 28
-
-#define CALL_DUMMY_START_OFFSET 12
-
-/* Insert the specified number of args and function address
-   into a call sequence of the above form stored at DUMMYNAME.  */
-
-#define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p)     \
-{ *(int *)((char *) dummyname + 20) = nargs * 4;  \
-  *(int *)((char *) dummyname + 14) = fun; }
 
 #include "tm-68k.h"

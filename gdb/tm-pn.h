@@ -419,6 +419,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    Setup our stack frame, load argumemts, call and then restore registers.
 */
 
+/* FIXME:  The below defines an m68k CALL_DUMMY, which looks nothing like what
+   is documented above. */
+
 #define CALL_DUMMY {0xf227e0ff, 0x48e7fffc, 0x426742e7, 0x4eb93232, 0x3232dffc, 0x69696969, 0x4e4f4e71}
 
 #define CALL_DUMMY_LENGTH 28

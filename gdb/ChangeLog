@@ -1,5 +1,15 @@
 Thu Oct 24 23:06:40 1991  Fred Fish  (fnf at cygnus.com)
 
+	* tm-3b1.h, tm-68k.h, tm-altos.h, tm-amix.h, tm-hp300bsd.h,
+	tm-hp300hpux.h, tm-isi.h, tm-news.h, tm-pn.h, tm-sun2.h,
+	tm-sun3.h:  Remove locally duplicated code for calling functions
+	in the inferior.  The only differences were in the specific trap
+	vectors used and whether or not an fpu was present.  These are
+	now handled by appropriate definitions of BPT_VECTOR and
+	HAVE_68881 respectively.  Other minor obvious cleanups.
+
+	* valops.c:  Correct a minor misspelling.
+
 	* utils.c:  Remove local BSD/USG hacks that are now in libiberty.
 
 	* dwarfread.c:  Remove prototype for dwarfwarn.  Does not work

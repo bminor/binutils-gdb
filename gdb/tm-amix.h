@@ -21,36 +21,27 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* All Amiga's (so far) running UNIX have come standard with the floating
    point coprocessor. */
 
-#define HAVE_68881	/* Amiga has floating point coprocessor */
+#define HAVE_68881
 
-/* Sequence of bytes for breakpoint instruction.
-   This is a TRAP instruction.  The last 4 bits (0x1 below) is the
-   vector. */
+/* Define BPT_VECTOR if it is different than the default.
+   This is the vector number used by traps to indicate a breakpoint. */
 
-#define BREAKPOINT {0x4e, 0x41 }	/* Trap using vector 0x1 */
+#define BPT_VECTOR 0x1
 
 /* How much to decrement the PC after a trap.  Depends on kernel. */
 
 #define DECR_PC_AFTER_BREAK 0		/* No decrement required */
 
-
-#include "tm-68k.h"
-#include "tm-svr4.h"
-
-/* Address of end of stack space. (actually one byte past it).
+/* Address of end of stack space.  Actually one byte past it.
    This value is typically very OS dependent.
    FIXME:  Check to see if SVR4 offers some machine independent way
    of discovering this value and use it if so, and if we need it. */
 
 /* #define STACK_END_ADDR 0xc0800000 */
 
-/* Use the alternate method of avoiding running up off the end of
-   the frame chain or following frames back into the startup code.
-   See the comments in blockframe.c */
-   
-#undef FRAME_CHAIN_VALID
-#define FRAME_CHAIN_VALID(chain, thisframe)	\
-  (chain != 0 					\
-   && !(inside_main_scope ((thisframe)->pc))	\
-   && !(inside_entry_scope ((thisframe)->pc)))
+/* Use the alternate method of determining valid frame chains. */
 
+#define FRAME_CHAIN_VALID_ALTERNATE
+
+#include "tm-svr4.h"
+#include "tm-68k.h"

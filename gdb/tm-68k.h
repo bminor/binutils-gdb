@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* Generic 68000 stuff, to be included by other m-*.h files.
+/* Generic 68000 stuff, to be included by other tm-*.h files.
    Define HAVE_68881 if that is the case.  */
 
 #if defined (HAVE_68881)
@@ -65,11 +65,15 @@ read_memory_integer (read_register (SP_REGNUM), 4)
 
 /* Sequence of bytes for breakpoint instruction.
    This is a TRAP instruction.  The last 4 bits (0xf below) is the
-   vector.  Systems which don't use 0xf should define BREAKPOINT
+   vector.  Systems which don't use 0xf should define BPT_VECTOR
    themselves before including this file.  */
 
+#if !defined BPT_VECTOR
+#define BPT_VECTOR 0xf
+#endif
+
 #if !defined (BREAKPOINT)
-#define BREAKPOINT {0x4e, 0x4f}
+#define BREAKPOINT {0x4e, (0x40 | BPT_VECTOR)}
 #endif
 
 /* If your kernel resets the pc after the trap happens you may need to
@@ -310,8 +314,23 @@ extern struct ext_format ext_format_68881;
    read_memory_integer ((thisframe)->frame, 4) :\
    0)
 
+#if defined (FRAME_CHAIN_VALID_ALTERNATE)
+
+/* Use the alternate method of avoiding running up off the end of
+   the frame chain or following frames back into the startup code.
+   See the comments in blockframe.c */
+   
+#define FRAME_CHAIN_VALID(chain, thisframe)	\
+  (chain != 0 					\
+   && !(inside_main_scope ((thisframe)->pc))	\
+   && !(inside_entry_scope ((thisframe)->pc)))
+
+#else
+
 #define FRAME_CHAIN_VALID(chain, thisframe) \
   (chain != 0 && outside_startup_file (FRAME_SAVED_PC (thisframe)))
+
+#endif	/* FRAME_CHAIN_VALID_ALTERNATE */
 
 #define FRAME_CHAIN_COMBINE(chain, thisframe) (chain)
 
@@ -476,40 +495,53 @@ extern struct ext_format ext_format_68881;
    for most configurations.  The m68k family should be able to do this as
    well.  These macros can still be overridden when necessary.  */
 
-/* The CALL_DUMMY macro is the sequence of instructions
-     fmovem 0xff,-(sp)
-     moveml 0xfffc,-(sp)
-     clrw -(sp)
-     movew ccr,-(sp)
-     /..* The arguments are pushed at this point by GDB;
+/* The CALL_DUMMY macro is the sequence of instructions, as disassembled
+   by gdb itself:
+
+	fmovemx fp0-fp7,sp@-			0xf227 0xe0ff
+	moveml d0-a5,sp@-			0x48e7 0xfffc
+	clrw sp@-				0x4267
+	movew ccr,sp@-				0x42e7
+
+	/..* The arguments are pushed at this point by GDB;
 	no code is needed in the dummy for this.
 	The CALL_DUMMY_START_OFFSET gives the position of 
 	the following jsr instruction.  *../
-     jsr @#32323232
-     addl #69696969,sp
-     bpt
-     nop
-Note this is 28 bytes.
-We actually start executing at the jsr, since the pushing of the
-registers is done by PUSH_DUMMY_FRAME.  If this were real code,
-the arguments for the function called by the jsr would be pushed
-between the moveml and the jsr, and we could allow it to execute through.
-But the arguments have to be pushed by GDB after the PUSH_DUMMY_FRAME is done,
-and we cannot allow the moveml to push the registers again lest they be
-taken for the arguments.  */
 
-#define CALL_DUMMY {0xf227e0ff, 0x48e7fffc, 0x426742e7, 0x4eb93232, 0x3232dffc, 0x69696969, 0x4e414e71}
+	jsr @#0x32323232			0x4eb9 0x3232 0x3232
+	addal #0x69696969,sp			0xdffc 0x6969 0x6969
+	trap #<your BPT_VECTOR number here>	0x4e4?
+	nop					0x4e71
 
-#define CALL_DUMMY_LENGTH 28
+   Note this is CALL_DUMMY_LENGTH bytes (28 for the above example).
+   We actually start executing at the jsr, since the pushing of the
+   registers is done by PUSH_DUMMY_FRAME.  If this were real code,
+   the arguments for the function called by the jsr would be pushed
+   between the moveml and the jsr, and we could allow it to execute through.
+   But the arguments have to be pushed by GDB after the PUSH_DUMMY_FRAME is
+   done, and we cannot allow the moveml to push the registers again lest
+   they be taken for the arguments.  */
 
-#define CALL_DUMMY_START_OFFSET 12
+#if defined (HAVE_68881)
+
+#define CALL_DUMMY {0xf227e0ff, 0x48e7fffc, 0x426742e7, 0x4eb93232, 0x3232dffc, 0x69696969, (0x4e404e71 | (BPT_VECTOR << 16))}
+#define CALL_DUMMY_LENGTH 28		/* Size of CALL_DUMMY */
+#define CALL_DUMMY_START_OFFSET 12	/* Offset to jsr instruction*/
+
+#else
+
+#define CALL_DUMMY {0x48e7fffc, 0x426742e7, 0x4eb93232, 0x3232dffc, 0x69696969, (0x4e404e71 | (BPT_VECTOR << 16))}
+#define CALL_DUMMY_LENGTH 24		/* Size of CALL_DUMMY */
+#define CALL_DUMMY_START_OFFSET 8	/* Offset to jsr instruction*/
+
+#endif	/* HAVE_68881 */
 
 /* Insert the specified number of args and function address
    into a call sequence of the above form stored at DUMMYNAME.  */
 
 #define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p)     \
-{ *(int *)((char *) dummyname + 20) = nargs * 4;  \
-  *(int *)((char *) dummyname + 14) = fun; }
+{ *(int *)((char *) dummyname + CALL_DUMMY_START_OFFSET + 2) = fun;  \
+  *(int *)((char *) dummyname + CALL_DUMMY_START_OFFSET + 8) = nargs * 4; }
 
 /* Push an empty stack frame, to record the current PC, etc.  */
 
@@ -517,9 +549,5 @@ taken for the arguments.  */
 
 /* Discard from the stack the innermost frame, restoring all registers.  */
 
-#define POP_FRAME { m68k_pop_frame (); }
+#define POP_FRAME		{ m68k_pop_frame (); }
 
-/* Note that stuff for calling inferior functions is not in this file
-   because the call dummy is different for different breakpoint
-   instructions, which are different on different systems.  Perhaps
-   they could be merged, but I haven't bothered.  */
