@@ -989,6 +989,8 @@ register_name ()
 
   return reg_number;
 }
+#define M6811_OP_CALL_ADDR    0x00800000
+#define M6811_OP_PAGE_ADDR    0x04000000
 
 /* Parse a string of operands and return an array of expressions.
 
@@ -1054,6 +1056,24 @@ get_operand (oper, which, opmode)
 	  p += 3;
 	  mode |= M6811_OP_LOW_ADDR;
 	}
+      /* %page modifier is used to obtain only the page number
+         of the address of a function.  */
+      else if (strncmp (p, "%page", 5) == 0)
+	{
+	  p += 5;
+	  mode |= M6811_OP_PAGE_ADDR;
+	}
+
+      /* %addr modifier is used to obtain the physical address part
+         of the function (16-bit).  For 68HC12 the function will be
+         mapped in the 16K window at 0x8000 and the value will be
+         within that window (although the function address may not fit
+         in 16-bit).  See bfd/elf32-m68hc12.c for the translation.  */
+      else if (strncmp (p, "%addr", 5) == 0)
+	{
+	  p += 5;
+	  mode |= M6811_OP_CALL_ADDR;
+	}
     }
   else if (*p == '.' && (p[1] == '+' || p[1] == '-'))
     {
@@ -1085,6 +1105,12 @@ get_operand (oper, which, opmode)
 	}
       as_bad (_("Spurious `,' or bad indirect register addressing mode."));
       return -1;
+    }
+  /* Handle 68HC12 page specification in 'call foo,%page(bar)'.  */
+  else if ((opmode & M6812_OP_PAGE) && strncmp (p, "%page", 5) == 0)
+    {
+      p += 5;
+      mode = M6811_OP_PAGE_ADDR | M6812_OP_PAGE | M6811_OP_IND16;
     }
   input_line_pointer = p;
 
@@ -1422,16 +1448,24 @@ fixup8 (oper, mode, opmode)
 	}
       else
 	{
-	  /* Now create an 8-bit fixup.  If there was some %hi or %lo
-	     modifier, generate the reloc accordingly.  */
-	  fix_new_exp (frag_now, f - frag_now->fr_literal, 1,
-		       oper, FALSE,
-		       ((opmode & M6811_OP_HIGH_ADDR)
-			? BFD_RELOC_M68HC11_HI8
-			: ((opmode & M6811_OP_LOW_ADDR)
-			   ? BFD_RELOC_M68HC11_LO8
-                           : ((mode & M6812_OP_PAGE)
-                              ? BFD_RELOC_M68HC11_PAGE : BFD_RELOC_8))));
+	  fixS *fixp;
+          int reloc;
+
+	  /* Now create an 8-bit fixup.  If there was some %hi, %lo
+	     or %page modifier, generate the reloc accordingly.  */
+          if (opmode & M6811_OP_HIGH_ADDR)
+            reloc = BFD_RELOC_M68HC11_HI8;
+          else if (opmode & M6811_OP_LOW_ADDR)
+            reloc = BFD_RELOC_M68HC11_LO8;
+          else if (opmode & M6811_OP_PAGE_ADDR)
+            reloc = BFD_RELOC_M68HC11_PAGE;
+          else
+            reloc = BFD_RELOC_8;
+
+	  fixp = fix_new_exp (frag_now, f - frag_now->fr_literal, 1,
+                              oper, FALSE, reloc);
+          if (reloc != BFD_RELOC_8)
+            fixp->fx_no_overflow = 1;
 	}
       number_to_chars_bigendian (f, 0, 1);
     }
@@ -1465,18 +1499,27 @@ fixup16 (oper, mode, opmode)
   else if (oper->X_op != O_register)
     {
       fixS *fixp;
+      int reloc;
+
+      if ((opmode & M6811_OP_CALL_ADDR) && (mode & M6811_OP_IMM16))
+        reloc = BFD_RELOC_M68HC11_LO16;
+      else if (mode & M6812_OP_JUMP_REL16)
+        reloc = BFD_RELOC_16_PCREL;
+      else if (mode & M6812_OP_PAGE)
+        reloc = BFD_RELOC_M68HC11_LO16;
+      else
+        reloc = BFD_RELOC_16;
 
       /* Now create a 16-bit fixup.  */
       fixp = fix_new_exp (frag_now, f - frag_now->fr_literal, 2,
 			  oper,
-			  (mode & M6812_OP_JUMP_REL16 ? TRUE : FALSE),
-			  (mode & M6812_OP_JUMP_REL16
-			   ? BFD_RELOC_16_PCREL
-                           : (mode & M6812_OP_PAGE)
-                           ? BFD_RELOC_M68HC11_LO16 : BFD_RELOC_16));
+			  reloc == BFD_RELOC_16_PCREL,
+                          reloc);
       number_to_chars_bigendian (f, 0, 2);
-      if (mode & M6812_OP_JUMP_REL16)
+      if (reloc == BFD_RELOC_16_PCREL)
 	fixp->fx_pcrel_adjust = 2;
+      if (reloc == BFD_RELOC_M68HC11_LO16)
+        fixp->fx_no_overflow = 1;
     }
   else
     {
@@ -2405,6 +2448,11 @@ find_opcode (opc, operands, nb_operands)
       if (i >= opc->min_operands)
 	{
 	  opcode = find (opc, operands, i);
+
+          /* Another special case for 'call foo,page' instructions.
+             Since we support 'call foo' and 'call foo,page' we must look
+             if the optional page specification is present otherwise we will
+             assemble immediately and treat the page spec as garbage.  */
           if (opcode && !(opcode->format & M6812_OP_PAGE))
              return opcode;
 
@@ -2996,7 +3044,9 @@ md_estimate_size_before_relax (fragP, segment)
   if (RELAX_LENGTH (fragP->fr_subtype) == STATE_UNDF)
     {
       if (S_GET_SEGMENT (fragP->fr_symbol) != segment
-	  || !relaxable_symbol (fragP->fr_symbol))
+	  || !relaxable_symbol (fragP->fr_symbol)
+          || (segment != absolute_section
+              && RELAX_STATE (fragP->fr_subtype) == STATE_INDEXED_OFFSET))
 	{
 	  /* Non-relaxable cases.  */
 	  int old_fr_fix;
@@ -3211,15 +3261,15 @@ tc_m68hc11_fix_adjustable (fixP)
     case BFD_RELOC_M68HC11_RL_GROUP:
     case BFD_RELOC_VTABLE_INHERIT:
     case BFD_RELOC_VTABLE_ENTRY:
+    case BFD_RELOC_32:
 
       /* The memory bank addressing translation also needs the original
          symbol.  */
-    case BFD_RELOC_LO16:
+    case BFD_RELOC_M68HC11_LO16:
     case BFD_RELOC_M68HC11_PAGE:
     case BFD_RELOC_M68HC11_24:
       return 0;
 
-    case BFD_RELOC_32:
     default:
       return 1;
     }

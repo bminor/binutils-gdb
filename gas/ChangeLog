@@ -1,3 +1,20 @@
+2003-04-05  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* config/tc-m68hc11.c (M6811_OP_CALL_ADDR): New internal define.
+	(M6811_OP_PAGE_ADDR): New internal define.
+	(get_operand): New modifier %page and %addr to obtain page and 
+	address part of a far-function.
+	(fixup8): Use BFD_RELOC_M68HC11_PAGE for a %page modifier; don't 
+	complain on overflow for the BFD_RELOC_M68HC11_PAGE and truncation
+	relocs.
+	(fixup16): Use BFD_RELOC_M68HC11_LO16 for a %addr modifier.
+	(find_opcode): Add comment.
+	(md_estimate_size_before_relax): Force relocation of
+	STATE_UNDEXED_OFFSET types when the symbol is not absolute.
+	(tc_m68hc11_fix_adjustable): Check for BFD_RELOC_M68HC11_LO16
+	instead of BFD_RELOC_LO16; temporarily make the BFD_RELOC_32
+	on the symbol itself so that DWARF2 strings are merged correctly.
+
 2003-04-04  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
 	* config/obj-coff.h (TARGET_FORMAT): Namespace cleanup, changed
