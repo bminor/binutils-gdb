@@ -29,10 +29,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define KERNEL_U_ADDR UADDR
 #endif
 
-#ifdef ultrix
-extern char *strdup();
-#endif
-
 #if ! defined (__STDC__) && ! defined (offsetof)
 # define offsetof(TYPE, MEMBER) ((unsigned long) &((TYPE *)0)->MEMBER)
 #endif

@@ -20,6 +20,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+#ifndef TM_MIPS_H
+#define TM_MIPS_H 1
+
 #ifdef __STDC__
 struct frame_info;
 struct symbol;
@@ -537,3 +540,7 @@ extern struct frame_info *setup_arbitrary_frame PARAMS ((int, CORE_ADDR *));
 extern CORE_ADDR sigtramp_address, sigtramp_end;
 extern void fixup_sigtramp PARAMS ((void));
 
+/* Defined in mips-tdep.c and used in remote-mips.c */
+extern char *mips_read_processor_type PARAMS ((void));
+
+#endif	/* TM_MIPS_H */

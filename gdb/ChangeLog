@@ -1,3 +1,12 @@
+Thu Aug  1 10:11:34 1996  Fred Fish  <fnf@cygnus.com>
+
+	* config/mips/tm-mips.h (TM_MIPS_H): Enclose file contents in
+	this, define when contents are included.
+	(mips_read_processor_type): Add prototype.
+	* config/mips/xm-mips.h: Remove strdup decl, now in gdb_string.h
+	* mdebugread.c (ecoff_relocate_efi): Add prototype.
+	(fixup_sigtramp): Only needed when TM_MIPS_H is defined.
+
 start-sanitize-gdbtk 
 Thu Aug  1 16:12:05 1996  Jason Molenda  (crash@godzilla.cygnus.co.jp)
 

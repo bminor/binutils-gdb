@@ -56,6 +56,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #ifndef MIPS_EFI_SYMBOL_NAME
 #define MIPS_EFI_SYMBOL_NAME "__GDB_EFI_INFO__"
+extern void ecoff_relocate_efi PARAMS ((struct symbol *, CORE_ADDR));
 #include "coff/sym.h"
 #include "coff/symconst.h"
 typedef struct mips_extra_func_info {
@@ -4179,7 +4180,10 @@ elfmdebug_build_psymtabs (objfile, swap, sec, section_offsets)
 
 /* FIXME: This function is called only by mips-tdep.c.  It needs to be
    here because it calls functions defined in this file, but perhaps
-   this could be handled in a better way.  */
+   this could be handled in a better way.  Only compile it in when
+   tm-mips.h is included. */
+
+#ifdef TM_MIPS_H
 
 void
 fixup_sigtramp ()
@@ -4280,6 +4284,8 @@ fixup_sigtramp ()
 
   BLOCK_SYM (b, BLOCK_NSYMS (b)++) = s;
 }
+
+#endif	/* TM_MIPS_H */
 
 void
 _initialize_mdebugread ()
