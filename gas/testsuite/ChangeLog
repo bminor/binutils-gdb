@@ -1,3 +1,11 @@
+start-sanitize-r5900
+Wed Apr 15 13:08:30 1998  Frank Ch. Eigler <fche.cygnus.com>
+
+        * gas/mips/vu0.s: Updated test case for changed specs of
+	VCALLMSR instruction.
+        * gas/mips/vu0.d: Corresponding change.
+
+end-sanitize-r5900
 Wed Apr  8 18:45:17 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/testsuite/all/gas.exp: No longer expect failures for

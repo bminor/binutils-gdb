@@ -1,10 +1,16 @@
+start-sanitize-r5900
+Wed Apr 15 10:35:59 1998  Frank Ch. Eigler <fche@cygnus.com>
+ 
+        * config/tc-mips.c (mips_ip): Specs changed for
+	VCALLMSR instruction.
+ 
+end-sanitize-vr5900
 start-sanitize-vr5400
 Wed Apr 15 07:06:04 1998  Catherine Moore  <clm@cygnus.com>
  
         * config/tc-mips.c (hilo_interlocks): Remove VR5400.
  
 end-sanitize-vr5400
-
 Wed Apr 15 07:06:04 1998  Catherine Moore  <clm@cygnus.com>
 
         * config/tc-mips.c (hilo_interlocks): Remove 4300.

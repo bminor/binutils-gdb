@@ -7232,11 +7232,11 @@ mips_ip (str, ip)
 	      s = expr_end;
 	      continue;
 
-	    case '9':		/* vi19 for vcallmsr */
-	      if (strncmp (s, "vi19", 4) == 0)
+	    case '9':		/* vi27 for vcallmsr */
+	      if (strncmp (s, "vi27", 4) == 0)
 		s += 4;
 	      else
-		as_bad ("expected vi19");
+		as_bad ("expected vi27");
 	      continue;
 
 	    case '#':		/* escape character */
