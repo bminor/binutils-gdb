@@ -1,3 +1,8 @@
+2003-11-20  Jim Blandy  <jimb@redhat.com>
+
+	* cpu-powerpc.c (powerpc_compatible): Any ISA in the PowerPC
+	family is a superset of <bfd_arch_rs6000,bfd_mach_rs6k>.
+
 2003-11-20  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* elf32-s390.c (elf_s390_relocate_section): Don't recalculate symbol
