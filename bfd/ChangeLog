@@ -1,3 +1,34 @@
+2000-01-13  Timothy Wall (twall@tiac.net>
+
+	* archures.c (bfd_octets_per_byte): New function: Return
+	target byte size.
+	(bfd_arch_mach_octets_per_byte): New function: Return target
+	byte size.
+
+	* section.c: Distinguish between octets and bytes for usage of 
+	_cooked_size,  _raw_size, and output_offset.  Clarify
+	description of bfd_set_section_contents.
+
+	* bfd-in2.h: Regenerate.
+
+	* coffgen.c: Indicate that the offset parameter is in bytes, not
+	octets.
+	
+	* cofflink.c (bfd_coff_link_input_bfd): Use bfd_octets_per_byte
+	where appropriate to get the octet offset when calling
+	bfd_set_section_contents.
+	(bfd_coff_reloc_link_order): Ditto.
+	
+	* linker.c (bfd_generic_reloc_link_order): Ditto.
+	(_bfd_default_link_order): Ditto.
+	
+	* reloc.c (bfd_perform_relocation):  Distinguish between octets
+	and bytes.  Use octets when indexing into octet data; use bytes
+	when calculating target addresses.
+	(bfd_install_relocation): Ditto.
+	
+	* srec.c (srec_write_section): Ditto.
+	
 2000-01-13  Nick Clifton  <nickc@cygnus.com>
 
 	* coff-mcore.c (COFF_DEFAULT_SECTION_ALIGNMENT_POWER): Change from

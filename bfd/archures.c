@@ -897,9 +897,59 @@ bfd_printable_arch_mach (arch, machine)
      enum bfd_architecture arch;
      unsigned long machine;
 {
-    const bfd_arch_info_type *ap = bfd_lookup_arch (arch, machine);
+    const bfd_arch_info_type * ap = bfd_lookup_arch (arch, machine);
 
     if (ap)
       return ap->printable_name;
     return "UNKNOWN!";
 }
+
+/*
+FUNCTION
+	bfd_octets_per_byte
+
+SYNOPSIS
+	int bfd_octets_per_byte(bfd *abfd);
+
+DESCRIPTION
+	Return the number of octets (8-bit quantities) per target byte
+        (minimum addressable unit).  In most cases, this will be one, but some
+        DSP targets have 16, 32, or even 48 bits per byte.
+
+*/
+
+int
+bfd_octets_per_byte (abfd)
+     bfd * abfd;
+{
+    return bfd_arch_mach_octets_per_byte (bfd_get_arch (abfd), 
+                                          bfd_get_mach (abfd));
+}
+
+/*
+FUNCTION
+	bfd_arch_mach_octets_per_byte
+
+SYNOPSIS
+	int bfd_arch_mach_octets_per_byte(enum bfd_architecture arch,
+                                          unsigned long machine);
+
+DESCRIPTION
+	See bfd_octets_per_byte.
+        
+        This routine is provided for those cases where a bfd * is not
+        available
+*/
+
+int
+bfd_arch_mach_octets_per_byte (arch, mach)
+    enum bfd_architecture arch;
+    unsigned long mach;
+{
+    const bfd_arch_info_type * ap = bfd_lookup_arch (arch, mach);
+    
+    if (ap)
+      return ap->bits_per_byte / 8;
+    return 1;
+}
+

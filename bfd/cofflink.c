@@ -2425,7 +2425,10 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
       if (secdata == NULL || secdata->stab_info == NULL)
 	{
 	  if (! bfd_set_section_contents (output_bfd, o->output_section,
-					  contents, o->output_offset,
+					  contents, 
+                                          (file_ptr) 
+                                          (o->output_offset * 
+                                           bfd_octets_per_byte (output_bfd)),
 					  (o->_cooked_size != 0
 					   ? o->_cooked_size
 					   : o->_raw_size)))
@@ -2737,7 +2740,9 @@ _bfd_coff_reloc_link_order (output_bfd, finfo, output_section, link_order)
 	  break;
 	}
       ok = bfd_set_section_contents (output_bfd, output_section, (PTR) buf,
-				     (file_ptr) link_order->offset, size);
+				     (file_ptr) 
+                                     (link_order->offset *
+                                      bfd_octets_per_byte (output_bfd)), size);
       free (buf);
       if (! ok)
 	return false;

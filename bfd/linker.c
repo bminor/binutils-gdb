@@ -2524,7 +2524,9 @@ _bfd_generic_reloc_link_order (abfd, info, sec, link_order)
 	  break;
 	}
       ok = bfd_set_section_contents (abfd, sec, (PTR) buf,
-				     (file_ptr) link_order->offset, size);
+				     (file_ptr) 
+                                     (link_order->offset *
+                                      bfd_octets_per_byte (abfd)), size);
       free (buf);
       if (! ok)
 	return false;
@@ -2592,7 +2594,9 @@ _bfd_default_link_order (abfd, info, sec, link_order)
     case bfd_data_link_order:
       return bfd_set_section_contents (abfd, sec,
 				       (PTR) link_order->u.data.contents,
-				       (file_ptr) link_order->offset,
+				       (file_ptr) 
+                                       (link_order->offset *
+                                        bfd_octets_per_byte (abfd)),
 				       link_order->size);
     }
 }
@@ -2626,7 +2630,9 @@ default_fill_link_order (abfd, info, sec, link_order)
   for (i = 1; i < size; i += 2)
     space[i] = fill;
   result = bfd_set_section_contents (abfd, sec, space,
-				     (file_ptr) link_order->offset,
+				     (file_ptr) 
+                                     (link_order->offset * 
+                                      bfd_octets_per_byte (abfd)),
 				     link_order->size);
   free (space);
   return result;

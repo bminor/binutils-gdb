@@ -592,7 +592,7 @@ bfd_perform_relocation (abfd, reloc_entry, data, input_section, output_bfd,
 {
   bfd_vma relocation;
   bfd_reloc_status_type flag = bfd_reloc_ok;
-  bfd_size_type addr = reloc_entry->address;
+  bfd_size_type octets = reloc_entry->address * bfd_octets_per_byte (abfd);
   bfd_vma output_base = 0;
   reloc_howto_type *howto = reloc_entry->howto;
   asection *reloc_target_output_section;
@@ -628,7 +628,8 @@ bfd_perform_relocation (abfd, reloc_entry, data, input_section, output_bfd,
     }
 
   /* Is the address of the relocation really within the section?  */
-  if (reloc_entry->address > input_section->_cooked_size)
+  if (reloc_entry->address > input_section->_cooked_size /
+      bfd_octets_per_byte (abfd))
     return bfd_reloc_outofrange;
 
   /* Work out which section the relocation is targetted at and the
@@ -897,41 +898,41 @@ space consuming.  For each target:
     {
     case 0:
       {
-	char x = bfd_get_8 (abfd, (char *) data + addr);
+	char x = bfd_get_8 (abfd, (char *) data + octets);
 	DOIT (x);
-	bfd_put_8 (abfd, x, (unsigned char *) data + addr);
+	bfd_put_8 (abfd, x, (unsigned char *) data + octets);
       }
       break;
 
     case 1:
       {
-	short x = bfd_get_16 (abfd, (bfd_byte *) data + addr);
+	short x = bfd_get_16 (abfd, (bfd_byte *) data + octets);
 	DOIT (x);
-	bfd_put_16 (abfd, x, (unsigned char *) data + addr);
+	bfd_put_16 (abfd, x, (unsigned char *) data + octets);
       }
       break;
     case 2:
       {
-	long x = bfd_get_32 (abfd, (bfd_byte *) data + addr);
+	long x = bfd_get_32 (abfd, (bfd_byte *) data + octets);
 	DOIT (x);
-	bfd_put_32 (abfd, x, (bfd_byte *) data + addr);
+	bfd_put_32 (abfd, x, (bfd_byte *) data + octets);
       }
       break;
     case -2:
       {
-	long x = bfd_get_32 (abfd, (bfd_byte *) data + addr);
+	long x = bfd_get_32 (abfd, (bfd_byte *) data + octets);
 	relocation = -relocation;
 	DOIT (x);
-	bfd_put_32 (abfd, x, (bfd_byte *) data + addr);
+	bfd_put_32 (abfd, x, (bfd_byte *) data + octets);
       }
       break;
 
     case -1:
       {
-	long x = bfd_get_16 (abfd, (bfd_byte *) data + addr);
+	long x = bfd_get_16 (abfd, (bfd_byte *) data + octets);
 	relocation = -relocation;
 	DOIT (x);
-	bfd_put_16 (abfd, x, (bfd_byte *) data + addr);
+	bfd_put_16 (abfd, x, (bfd_byte *) data + octets);
       }
       break;
 
@@ -942,9 +943,9 @@ space consuming.  For each target:
     case 4:
 #ifdef BFD64
       {
-	bfd_vma x = bfd_get_64 (abfd, (bfd_byte *) data + addr);
+	bfd_vma x = bfd_get_64 (abfd, (bfd_byte *) data + octets);
 	DOIT (x);
-	bfd_put_64 (abfd, x, (bfd_byte *) data + addr);
+	bfd_put_64 (abfd, x, (bfd_byte *) data + octets);
       }
 #else
       abort ();
@@ -994,7 +995,7 @@ bfd_install_relocation (abfd, reloc_entry, data_start, data_start_offset,
 {
   bfd_vma relocation;
   bfd_reloc_status_type flag = bfd_reloc_ok;
-  bfd_size_type addr = reloc_entry->address;
+  bfd_size_type octets = reloc_entry->address * bfd_octets_per_byte (abfd);
   bfd_vma output_base = 0;
   reloc_howto_type *howto = reloc_entry->howto;
   asection *reloc_target_output_section;
@@ -1283,7 +1284,7 @@ space consuming.  For each target:
 #define DOIT(x) \
   x = ( (x & ~howto->dst_mask) | (((x & howto->src_mask) +  relocation) & howto->dst_mask))
 
-  data = (bfd_byte *) data_start + (addr - data_start_offset);
+  data = (bfd_byte *) data_start + (octets - data_start_offset);
 
   switch (howto->size)
     {

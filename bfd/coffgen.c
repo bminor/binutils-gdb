@@ -2136,10 +2136,9 @@ _bfd_coff_is_local_label_name (abfd, name)
   return name[0] == '.' && name[1] == 'L';
 }
 
-/* Provided a BFD, a section and an offset into the section, calculate
-   and return the name of the source file and the line nearest to the
-   wanted location.  */
-
+/* Provided a BFD, a section and an offset (in bytes, not octets) into the
+   section, calculate and return the name of the source file and the line
+   nearest to the wanted location.  */
 /*ARGSUSED*/
 boolean
 coff_find_nearest_line (abfd, section, symbols, offset, filename_ptr,

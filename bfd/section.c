@@ -369,22 +369,25 @@ CODE_FRAGMENT
 .
 .   bfd_vma lma;
 .
-.        {* The size of the section in bytes, as it will be output.
-.           contains a value even if the section has no contents (e.g., the
-.           size of <<.bss>>). This will be filled in after relocation *}
+.        {* The size of the section in octets, as it will be output.
+.           Contains a value even if the section has no contents (e.g., the
+.           size of <<.bss>>).  This will be filled in after relocation.  *}
 .
 .   bfd_size_type _cooked_size;
 .
-.        {* The original size on disk of the section, in bytes.  Normally this
+.        {* The original size on disk of the section, in octets.  Normally this
 .	    value is the same as the size, but if some relaxing has
 .	    been done, then this value will be bigger.  *}
 .
 .   bfd_size_type _raw_size;
 .
 .        {* If this section is going to be output, then this value is the
-.           offset into the output section of the first byte in the input
-.           section. E.g., if this was going to start at the 100th byte in
-.           the output section, this value would be 100. *}
+.           offset in *bytes* into the output section of the first byte in the
+.           input section (byte ==> smallest addressable unit on the
+.           target).  In most cases, if this was going to start at the
+.           100th octet (8-bit quantity) in the output section, this value
+.           would be 100.  However, if the target byte size is 16 bits
+.           (bfd_octets_per_byte is "2"), this value would be 50. *}
 .
 .   bfd_vma output_offset;
 .
@@ -920,7 +923,7 @@ DESCRIPTION
 	Sets the contents of the section @var{section} in BFD
 	@var{abfd} to the data starting in memory at @var{data}. The
 	data is written to the output section starting at offset
-	@var{offset} for @var{count} bytes.
+	@var{offset} for @var{count} octets.
 
 
 

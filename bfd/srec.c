@@ -1000,31 +1000,28 @@ srec_write_section (abfd, tdata, list)
      tdata_type *tdata;
      srec_data_list_type *list;
 {
-  unsigned int bytes_written = 0;
+  unsigned int octets_written = 0;
   bfd_byte *location = list->data;
 
-  while (bytes_written < list->size)
+  while (octets_written < list->size)
     {
       bfd_vma address;
+      unsigned int octets_this_chunk = list->size - octets_written;
 
-      unsigned int bytes_this_chunk = list->size - bytes_written;
+      if (octets_this_chunk > CHUNK)
+	octets_this_chunk = CHUNK;
 
-      if (bytes_this_chunk > CHUNK)
-	{
-	  bytes_this_chunk = CHUNK;
-	}
-
-      address = list->where + bytes_written;
+      address = list->where + octets_written / bfd_octets_per_byte (abfd);
 
       if (! srec_write_record (abfd,
 			       tdata->type,
 			       address,
 			       location,
-			       location + bytes_this_chunk))
+			       location + octets_this_chunk))
 	return false;
 
-      bytes_written += bytes_this_chunk;
-      location += bytes_this_chunk;
+      octets_written += octets_this_chunk;
+      location += octets_this_chunk;
     }
 
   return true;
