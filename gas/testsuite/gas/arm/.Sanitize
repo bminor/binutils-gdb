@@ -25,12 +25,12 @@ Do-first:
 
 Things-to-keep:
 
+arm.exp
 arm3.s
 arm6.s
 arm7dm.s
 copro.s
 float.s
-gas.exp
 inst.s
 
 Things-to-lose:
