@@ -253,6 +253,7 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 	    case LOC_REGPARM_ADDR:	/* indirect register arg */
 	    case LOC_LOCAL_ARG:	/* stack arg             */
 	    case LOC_BASEREG_ARG:	/* basereg arg           */
+	    case LOC_COMPUTED_ARG:	/* arg with computed location */
 	      if (!locals)
 		print_me = 1;
 	      break;
@@ -261,6 +262,7 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 	    case LOC_BASEREG:	/* basereg local         */
 	    case LOC_STATIC:	/* static                */
 	    case LOC_REGISTER:	/* register              */
+	    case LOC_COMPUTED:	/* computed location     */
 	      if (locals)
 		print_me = 1;
 	      break;
