@@ -1,3 +1,14 @@
+1999-02-04  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* gdb.base/help.exp ("help delete display"): Fix test to match
+	gdb's output.
+
+	* gdb.base/long_long.c (known_types): Initialize values to zero.
+	* gdb.base/long_long.exp: Step one more line
+	so 'dec' is initialized in "get to known place".  GDB doesn't 
+        prepend unnecessary zeros to the front of numbers.  Explicitly 
+	ask for hex formatting.  Use unique test case names.
+
 Tue Feb  2 10:16:08 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* lib/gdb.exp (gdb_preprocess): Remove 'puts' statement. 
