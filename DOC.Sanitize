@@ -65,6 +65,9 @@ keep-gm		avoids removing GM-specific stuff.
 
 lose-gdbtk	removes gdbtk stuff.  This is really only needed for
 		FSF GDB releases.
+lose-inet	Lose I*Net stuff.  This is currently only used in
+		send-pr; useful if you really don't want the
+		location-independence code
 
 for-intel	builds a distribution in the style that Intel likes.
 for-fsf		builds a distribution in the style that the FSF likes.
