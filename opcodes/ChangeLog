@@ -1,6 +1,8 @@
 start-sanitize-v850
 Thu Aug 22 01:05:24 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* v850-opc.c (v850_opcodes): Enable "trap".
+
 	* v850-opc.c (v850_opcodes): Fix order of displacement
 	and register for "set1", "clr1", "not1", and "tst1".
 
