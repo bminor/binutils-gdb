@@ -304,6 +304,9 @@ static struct frag *prev_insn_frag;
 /* The offset into prev_insn_frag for the previous instruction.  */
 static long prev_insn_where;
 
+/* The reloc type for the previous instruction, if any.  */
+static bfd_reloc_code_real_type prev_insn_reloc_type;
+
 /* The reloc for the previous instruction, if any.  */
 static fixS *prev_insn_fixp;
 
@@ -452,30 +455,34 @@ static const int mips16_to_32_reg_map[] =
    the same time that we support the relaxation described above.  We
    use the high bit of the subtype field to distinguish these cases.
 
-   The information we store for this type of relaxation is simply the
-   argument code found in the opcode file for this relocation, and
-   whether the user explicitly requested a small or extended form.
-   That tells us the size of the value, and how it should be stored.
-   We also store whether the fragment is considered to be extended or
-   not.  We also store whether this is known to be a branch to a
-   different section, whether we have tried to relax this frag yet,
-   and whether we have ever extended a PC relative fragment because of
-   a shift count.  */
-#define RELAX_MIPS16_ENCODE(type, small, ext)	\
-  (0x80000000					\
-   | ((type) & 0xff)				\
-   | ((small) ? 0x100 : 0)			\
-   | ((ext) ? 0x200 : 0))
+   The information we store for this type of relaxation is the
+   argument code found in the opcode file for this relocation, whether
+   the user explicitly requested a small or extended form, and whether
+   the relocation is in a jump or jal delay slot.  That tells us the
+   size of the value, and how it should be stored.  We also store
+   whether the fragment is considered to be extended or not.  We also
+   store whether this is known to be a branch to a different section,
+   whether we have tried to relax this frag yet, and whether we have
+   ever extended a PC relative fragment because of a shift count.  */
+#define RELAX_MIPS16_ENCODE(type, small, ext, dslot, jal_dslot)	\
+  (0x80000000							\
+   | ((type) & 0xff)						\
+   | ((small) ? 0x100 : 0)					\
+   | ((ext) ? 0x200 : 0)					\
+   | ((dslot) ? 0x400 : 0)					\
+   | ((jal_dslot) ? 0x800 : 0))
 #define RELAX_MIPS16_P(i) (((i) & 0x80000000) != 0)
 #define RELAX_MIPS16_TYPE(i) ((i) & 0xff)
 #define RELAX_MIPS16_USER_SMALL(i) (((i) & 0x100) != 0)
 #define RELAX_MIPS16_USER_EXT(i) (((i) & 0x200) != 0)
-#define RELAX_MIPS16_EXTENDED(i) (((i) & 0x400) != 0)
-#define RELAX_MIPS16_MARK_EXTENDED(i) ((i) | 0x400)
-#define RELAX_MIPS16_CLEAR_EXTENDED(i) ((i) &~ 0x400)
-#define RELAX_MIPS16_LONG_BRANCH(i) (((i) & 0x800) != 0)
-#define RELAX_MIPS16_MARK_LONG_BRANCH(i) ((i) | 0x800)
-#define RELAX_MIPS16_CLEAR_LONG_BRANCH(i) ((i) &~ 0x800)
+#define RELAX_MIPS16_DSLOT(i) (((i) & 0x400) != 0)
+#define RELAX_MIPS16_JAL_DSLOT(i) (((i) & 0x800) != 0)
+#define RELAX_MIPS16_EXTENDED(i) (((i) & 0x1000) != 0)
+#define RELAX_MIPS16_MARK_EXTENDED(i) ((i) | 0x1000)
+#define RELAX_MIPS16_CLEAR_EXTENDED(i) ((i) &~ 0x1000)
+#define RELAX_MIPS16_LONG_BRANCH(i) (((i) & 0x2000) != 0)
+#define RELAX_MIPS16_MARK_LONG_BRANCH(i) ((i) | 0x2000)
+#define RELAX_MIPS16_CLEAR_LONG_BRANCH(i) ((i) &~ 0x2000)
 
 /* Prototypes for static functions.  */
 
@@ -1384,7 +1391,11 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
       assert (mips16 && address_expr != NULL);
       f = frag_var (rs_machine_dependent, 4, 0,
 		    RELAX_MIPS16_ENCODE (reloc_type - BFD_RELOC_UNUSED,
-					 mips16_small, mips16_ext),
+					 mips16_small, mips16_ext,
+					 (prev_pinfo
+					  & INSN_UNCOND_BRANCH_DELAY),
+					 (prev_insn_reloc_type
+					  == BFD_RELOC_MIPS16_JMP)),
 		    make_expr_symbol (address_expr), (long) 0,
 		    (char *) NULL);
     }
@@ -1821,6 +1832,10 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	      prev_prev_insn.insn_mo = &dummy_opcode;
 	      prev_insn.insn_mo = &dummy_opcode;
 	    }
+
+	  prev_insn_fixp = NULL;
+	  prev_insn_reloc_type = BFD_RELOC_UNUSED;
+	  prev_insn_extended = 0;
 	}
       else if (pinfo & INSN_COND_BRANCH_LIKELY)
 	{
@@ -1832,6 +1847,9 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	  /* Update the previous insn information.  */
 	  prev_prev_insn = *ip;
 	  prev_insn.insn_mo = &dummy_opcode;
+	  prev_insn_fixp = NULL;
+	  prev_insn_reloc_type = BFD_RELOC_UNUSED;
+	  prev_insn_extended = 0;
 	}
       else
 	{
@@ -1846,16 +1864,27 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	     immediately; since this insn is not a branch, we know it
 	     is not in a delay slot.  */
 	  prev_insn_is_delay_slot = 0;
+
+	  prev_insn_fixp = fixp;
+	  prev_insn_reloc_type = reloc_type;
+	  if (mips16)
+	    prev_insn_extended = (ip->use_extend
+				  || reloc_type > BFD_RELOC_UNUSED);
 	}
 
       prev_prev_insn_unreordered = prev_insn_unreordered;
       prev_insn_unreordered = 0;
       prev_insn_frag = frag_now;
       prev_insn_where = f - frag_now->fr_literal;
-      prev_insn_fixp = fixp;
-      if (mips16)
-	prev_insn_extended = ip->use_extend || reloc_type > BFD_RELOC_UNUSED;
       prev_insn_valid = 1;
+    }
+  else
+    {
+      /* We need to record a bit of uninformation even when we are not
+         reordering, in order to determine the base address for mips16
+         PC relative relocs.  */
+      prev_insn = *ip;
+      prev_insn_reloc_type = reloc_type;
     }
 
   /* We just output an insn, so the next one doesn't have a label.  */
@@ -1874,6 +1903,7 @@ mips_no_prev_insn ()
   prev_insn_is_delay_slot = 0;
   prev_insn_unreordered = 0;
   prev_insn_extended = 0;
+  prev_insn_reloc_type = BFD_RELOC_UNUSED;
   prev_prev_insn_unreordered = 0;
   insn_label = NULL;
 }
@@ -9163,7 +9193,20 @@ mips16_extended_frag (fragp, sec, stretch)
 	  val += stretch;
 	}
 
-      addr = fragp->fr_address + fragp->fr_fix + 2;
+      addr = fragp->fr_address + fragp->fr_fix;
+
+      /* The base address rules are complicated.  The base address of
+         a branch is the following instruction.  The base address of a
+         PC relative load or add is the instruction itself, but if it
+         is extended add 2, and if it is in a delay slot (in which
+         case it can not be extended) use the address of the
+         instruction whose delay slot it is in.  */
+      if (type == 'p' || type == 'q')
+	addr += 2;
+      else if (RELAX_MIPS16_JAL_DSLOT (fragp->fr_subtype))
+	addr -= 4;
+      else if (RELAX_MIPS16_DSLOT (fragp->fr_subtype))
+	addr -= 2;
 
       /* If we are currently assuming that this frag should be
          extended, then the current address is two bytes higher.  */
@@ -9558,11 +9601,26 @@ md_convert_frag (abfd, asec, fragp)
 	{
 	  addressT addr;
 
-	  addr = fragp->fr_address + fragp->fr_fix + 2;
+	  addr = fragp->fr_address + fragp->fr_fix;
+
+	  /* The rules for the base address of a PC relative reloc are
+             complicated; see mips16_extended_frag.  */
+	  if (type == 'p' || type == 'q')
+	    addr += 2;
+	  else if (RELAX_MIPS16_JAL_DSLOT (fragp->fr_subtype))
+	    addr -= 4;
+	  else if (RELAX_MIPS16_DSLOT (fragp->fr_subtype))
+	    addr -= 2;
+
 	  if (ext)
 	    addr += 2;
 	  addr &= ~ (addressT) ((1 << op->shift) - 1);
 	  val -= addr;
+
+	  /* Make sure the section winds up with the alignment we have
+             assumed.  */
+	  if (op->shift > 0)
+	    record_alignment (asec, op->shift);
 	}
 
       buf = (bfd_byte *) (fragp->fr_literal + fragp->fr_fix);

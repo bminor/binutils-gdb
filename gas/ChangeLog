@@ -1,3 +1,19 @@
+Sat Dec 14 22:37:27 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (prev_insn_reloc_type): New static variable.
+	(RELAX_MIPS16_ENCODE): Add dslot and jal_dslot arguments, and
+	store them.  Adjust other RELAX_MIPS16 macros.
+	(RELAX_MIPS16_DSLOT): Define.
+	(RELAX_MIPS16_JAL_DSLOT): Define.
+	(append_insn): Pass new arguments to RELAX_MIPS16_ENCODE.  Correct
+	handling of whether previous instruction has a fixup.  Set
+	prev_insn_reloc_type.
+	(mips_no_prev_insn): Clear prev_insn_reloc_type.
+	(mips16_extended_frag): Use the right base address for a PC
+	relative add or load.
+	(md_convert_frag): Likewise.  If a PC relative add or load is
+	used, record the alignment for the section.
+
 Fri Dec 13 13:00:33 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* write.c (adjust_reloc_syms): Don't reduce a reloc against a
