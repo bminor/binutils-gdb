@@ -1,3 +1,11 @@
+2002-06-18  Dave Brolley  <brolley@redhat.com>
+
+	From Catherine Moore, Michael Meissner, Jim Blandy:
+	* emulparams/elf32frv.sh: New file.
+	* configure.tgt: Support frv-*-*.
+	* Makefile.am (ALL_EMULATIONS): Add eelf32frv.o.
+	(eelf32frv.c): New target.
+
 2002-06-17  Tom Rix  <trix@redhat.com>
 
 	* emultempl/elf32.em: gld*_get_script:  Check for 

@@ -159,6 +159,7 @@ ALL_EMULATIONS = \
 	eelf32ebmip.o \
 	eelf32elmip.o \
 	eelf32fr30.o \
+	eelf32frv.o \
 	eelf32i370.o \
 	eelf32l4300.o \
 	eelf32lmip.o \
@@ -526,6 +527,9 @@ eelf32vax.c: $(srcdir)/emulparams/elf32vax.sh \
 eelf32fr30.c: $(srcdir)/emulparams/elf32fr30.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32fr30 "$(tdir_fr30)"
+eelf32frv.c: $(srcdir)/emulparams/elf32frv.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32frv "$(tdir_frv)"
 eelf32mcore.c: $(srcdir)/emulparams/elf32mcore.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32mcore "$(tdir_mcore)"

@@ -481,6 +481,7 @@ tic80-*-*)		targ_emul=tic80coff ;;
 v850-*-*)		targ_emul=v850 ;;
 v850e-*-*)		targ_emul=v850 ;;
 v850ea-*-*)		targ_emul=v850 ;;
+frv-*-*)		targ_emul=elf32frv ;;
 w65-*-*)		targ_emul=w65 ;;
 xstormy16-*-*)		targ_emul=elf32xstormy16 ;;
 fr30-*-*)		targ_emul=elf32fr30 ;;
