@@ -1,3 +1,8 @@
+2000-19-01  Chandra Chavva   <cchavva@cygnus.com>
+
+	* config/tc-mcore.c (md_assemble): Give warning message if
+	operands passes to instruction are more than the spec.
+
 2000-01-27  Thomas de Lellis <tdel@windriver.com>
 
         * config/tc-arm.c (armadjust_symtab): If the assembler is in

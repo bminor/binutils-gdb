@@ -1,5 +1,5 @@
 /* tc-mcore.c -- Assemble code for M*Core
-   Copyright (C) 1999 Free Software Foundation.
+   Copyright (C) 1999, 2000 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1339,8 +1339,11 @@ md_assemble (str)
 	++ op_end;
   
       if (* op_end == ',')
-	/* parse_rt calls frag_more() for us.  */
-	input_line_pointer = parse_rt (op_end + 1, & output, 0, 0);
+	{
+	  /* parse_rt calls frag_more() for us.  */
+	  input_line_pointer = parse_rt (op_end + 1, & output, 0, 0);
+          op_end = input_line_pointer;
+	}
       else
 	{
 	  as_bad (_("second operand missing"));
@@ -1351,6 +1354,7 @@ md_assemble (str)
     case LJ:
       input_line_pointer = parse_rt (op_end + 1, & output, 1, 0);
       /* parse_rt() calls frag_more() for us.  */
+      op_end = input_line_pointer;
       break;
       
     case RM:
@@ -1463,6 +1467,7 @@ md_assemble (str)
       
     case BR:
       input_line_pointer = parse_exp (op_end + 1, & e);
+      op_end = input_line_pointer;
       
       output = frag_more (2);
       
@@ -1495,6 +1500,7 @@ md_assemble (str)
       
     case JC:
       input_line_pointer = parse_exp (op_end + 1, & e);
+      op_end = input_line_pointer;
       
       output = frag_var (rs_machine_dependent,
 			 md_relax_table[C (COND_JUMP, COND32)].rlx_length,
@@ -1505,6 +1511,8 @@ md_assemble (str)
       
     case JU:
       input_line_pointer = parse_exp (op_end + 1, & e);
+      op_end = input_line_pointer;
+
       output = frag_var (rs_machine_dependent,
 			 md_relax_table[C (UNCD_JUMP, UNCD32)].rlx_length,
 			 md_relax_table[C (UNCD_JUMP, UNCD12)].rlx_length,
@@ -1516,6 +1524,7 @@ md_assemble (str)
       inst = MCORE_INST_JSRI;		/* jsri */
       input_line_pointer = parse_rt (op_end + 1, & output, 1, & e);
       /* parse_rt() calls frag_more for us.  */
+      op_end = input_line_pointer;
       
       /* Only do this if we know how to do it ... */
       if (e.X_op != O_absent && do_jsri2bsr)
@@ -1595,6 +1604,14 @@ md_assemble (str)
     default:
       as_bad (_("unimplemented opcode \"%s\""), name);
     }
+
+  /* Drop whitespace after all the operands have been parsed.  */
+  while (isspace (* op_end))
+    op_end ++;
+
+  /* Give warning message if the insn has more operands than required. */
+  if (strcmp (op_end, opcode->name) && strcmp (op_end, ""))
+    as_warn (_("ignoring operands: %s "), op_end);
   
   output[0] = INST_BYTE0 (inst);
   output[1] = INST_BYTE1 (inst);
@@ -1971,8 +1988,8 @@ md_apply_fix3 (fixP, valp, segment)
 	as_bad_where (file, fixP->fx_line,
 		      _("pcrel for branch to %s too far (0x%x)"),
 		      symname, val);
-        buf[0] |= ((val >> 8) & 0x7);
-        buf[1] |= (val & 0xff);
+	  buf[0] |= ((val >> 8) & 0x7);
+	  buf[1] |= (val & 0xff);
       break;
 
     case BFD_RELOC_MCORE_PCREL_IMM8BY4:	/* lower 8 bits of 2 byte opcode */
@@ -1991,7 +2008,7 @@ md_apply_fix3 (fixP, valp, segment)
 	as_bad_where (file, fixP->fx_line,
 		      _("pcrel for loopt too far (0x%x)"), val);
       val /= 2;
-        buf[1] |= (val & 0xf);
+	buf[1] |= (val & 0xf);
       break;
 
     case BFD_RELOC_MCORE_PCREL_JSR_IMM11BY2:
@@ -2248,7 +2265,7 @@ mcore_force_relocation (fix)
 {
   if (   fix->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fix->fx_r_type == BFD_RELOC_VTABLE_ENTRY
-      || fixP->fx_r_type == BFD_RELOC_RVA)
+      || fix->fx_r_type == BFD_RELOC_RVA)
     return 1;
 
   return 0;
