@@ -42,6 +42,10 @@
 
 /@LIBS@/s/@LIBS@//g
 
+# Whack out autoconf hook for thread debugging.
+/@THREAD_DB_OBS@/s/@THREAD_DB_OBS@//g
+
+# Fix up paths to include directories.
 /INCLUDE_DIR/s/"{s}"{INCLUDE_DIR}/{INCLUDE_DIR}/g
 /INCLUDE_DIR/s/{INCLUDE_DIR}:/{INCLUDE_DIR}/g
 /INCLUDE_DIR/s/"{INCLUDE_DIR}":/"{INCLUDE_DIR}"/g
@@ -69,6 +73,7 @@ readline_headers =\
 # Fix the syntax of bits of C code that go into version.c.
 /char /s/'char .Option-x/'char */
 
+# Point at files in the obj dir rather than src dir.
 /version/s/"{s}"version\.c/"{o}"version.c/g
 /version/s/^version\.c/"{o}"version.c/
 /config/s/"{s}"config\.h/"{o}"config.h/g

@@ -1,3 +1,19 @@
+Thu May 23 12:09:52 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-make.sed: Edit @THREAD_DB_OBS@ out of makefile.
+
+Tue May 21 11:53:56 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* breakpoint.c (bpstat_do_actions):  Avoid endless recursion
+	if a `source' command is contained in bs->commands.
+
+	* infrun.c (wait_for_inferior):  Update step_frame_address when
+	stepping into a new line.
+
+	From schwab@issan.informatik.uni-dortmund.de (Andreas Schwab):
+	* breakpoint.c (breakpoint_1):  Add shlib_disabled case to
+	bpenables array.
+
 Mon May 20 22:52:00 1996  Mark Alexander  <marka@cygnus.com>
 
 	* dsrec.c (load_srec): Add WAITACK parameter, for machines
@@ -99,7 +115,7 @@ end-sanitize-gdbtk
 
 Wed May 15 08:25:12 1996  Jeffrey A Law  (law@cygnus.com)
 
-	* top.c (read_next_line): Fix thinkos.  From Don Seeley.
+	* top.c (read_next_line): Fix thinkos.  From Donn Seeley.
 
 	* coffread.c (coff_symtab_read): Handle C_LABEL symbols like
 	C_STAT symbols.
@@ -112,7 +128,7 @@ Wed May 15 08:25:12 1996  Jeffrey A Law  (law@cygnus.com)
 Tue May 14 18:05:16 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* procfs.c (procfs_thread_alive procfs_stop):  Make static.
-	* (procfs_pid_to_str):  New routine to print out thread id's in an
+	(procfs_pid_to_str):  New routine to print out thread id's in an
 	intelligible manner.
 	* sol-thread.c (sol_thread_fetch_registers):  Re-order manner in
 	which supply_register is called to fix bug with writing
@@ -129,7 +145,7 @@ Mon May 13 23:53:30 1996  Stu Grossman  (grossman@critters.cygnus.com)
 	libthread_db.so.1.
 
 	* procfs.c (info_proc):  Use int instead of id_t.  Old versions of
-	Irix don't see to define this.
+	Irix don't seem to define this.
 
 start-sanitize-gdbtk
 Mon May 13 13:43:25 1996  Fred Fish  <fnf@cygnus.com>
