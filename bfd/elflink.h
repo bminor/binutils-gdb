@@ -6776,7 +6776,7 @@ elf_link_input_bfd (finfo, input_bfd)
 		  irela->r_offset += o->output_offset;
 
 		  /* Relocs in an executable have to be virtual addresses.  */
-		  if (finfo->info->emitrelocations)
+		  if (!finfo->info->relocateable)
 		    irela->r_offset += o->output_section->vma;
 
 		  r_symndx = ELF_R_SYM (irela->r_info);
@@ -6908,7 +6908,8 @@ elf_link_input_bfd (finfo, input_bfd)
 		{
 		  internal_relocs += (NUM_SHDR_ENTRIES (input_rel_hdr)
 				      * bed->s->int_rels_per_ext_rel);
-		  reloc_emitter (output_bfd, o, input_rel_hdr, internal_relocs);
+		  (*reloc_emitter) (output_bfd, o, input_rel_hdr,
+				    internal_relocs);
 		}
 
 	    }
