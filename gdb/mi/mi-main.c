@@ -886,6 +886,7 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
     {
       xasprintf (&mi_error_message,
 		 "mi_cmd_data_read_memory: invalid number of columns.");
+      return MI_CMD_ERROR;
     }
   /* The un-printable character when printing ascii. */
   if (argc == 6)
@@ -897,12 +898,6 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
   total_bytes = word_size * nr_rows * nr_cols;
   mbuf = xcalloc (total_bytes, 1);
   make_cleanup (xfree, mbuf);
-  if (mbuf == NULL)
-    {
-      xasprintf (&mi_error_message,
-		 "mi_cmd_data_read_memory: out of memory.");
-      return MI_CMD_ERROR;
-    }
   nr_bytes = 0;
   while (nr_bytes < total_bytes)
     {
