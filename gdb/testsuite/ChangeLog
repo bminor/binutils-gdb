@@ -1,3 +1,9 @@
+2004-07-07  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdb.java/jmisc.exp: Fix expected output of ptype to look for
+	the jmisc() constructor instead of <init>.
+	* gdb.java/jmisc1.exp: Ditto.
+
 2004-07-07  Andrew Cagney  <cagney@gnu.org>
 
 	* gdb.base/sigbpt.exp (stepi_out): Check for a single step
