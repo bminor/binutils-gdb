@@ -323,7 +323,7 @@ create_range_type (result_type, index_type, low_bound, high_bound)
   if (TYPE_FLAGS (index_type) & TYPE_FLAG_STUB)
     TYPE_FLAGS (result_type) |= TYPE_FLAG_TARGET_STUB;
   else
-    TYPE_LENGTH (result_type) = TYPE_LENGTH (index_type);
+    TYPE_LENGTH (result_type) = TYPE_LENGTH (check_typedef (index_type));
   TYPE_NFIELDS (result_type) = 2;
   TYPE_FIELDS (result_type) = (struct field *)
     TYPE_ALLOC (result_type, 2 * sizeof (struct field));
@@ -345,6 +345,7 @@ get_discrete_bounds (type, lowp, highp)
      struct type *type;
      LONGEST *lowp, *highp;
 {
+  CHECK_TYPEDEF (type);
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_RANGE:
@@ -352,8 +353,16 @@ get_discrete_bounds (type, lowp, highp)
       *highp = TYPE_HIGH_BOUND (type);
       return 1;
     case TYPE_CODE_ENUM:
-      *lowp = TYPE_FIELD_BITPOS (type, 0);
-      *highp = TYPE_FIELD_BITPOS (type, TYPE_NFIELDS (type) - 1);
+      if (TYPE_NFIELDS (type) > 0)
+	{
+	  *lowp = TYPE_FIELD_BITPOS (type, 0);
+	  *highp = TYPE_FIELD_BITPOS (type, TYPE_NFIELDS (type) - 1);
+	}
+      else
+	{
+	  *lowp = 0;
+	  *highp = -1;
+	}
       return 0;
     case TYPE_CODE_BOOL:
       *lowp = 0;
@@ -371,46 +380,10 @@ get_discrete_bounds (type, lowp, highp)
       /* ... fall through for unsigned ints ... */
     case TYPE_CODE_CHAR:
       *lowp = 0;
-      *highp = 1 << (TYPE_LENGTH (type) * TARGET_CHAR_BIT) - 1;
+      *highp = (1 << (TYPE_LENGTH (type) * TARGET_CHAR_BIT)) - 1;
       return 0;
     default:
       return -1;
-    }
-}
-
-/* A lot of code assumes that the "index type" of an array/string/
-   set/bitstring is specifically a range type, though in some languages
-   it can be any discrete type. */
-
-struct type *
-force_to_range_type (type)
-     struct type *type;
-{
-  switch (TYPE_CODE (type))
-    {
-    case TYPE_CODE_RANGE:
-      return type;
-
-    case TYPE_CODE_ENUM:
-    case TYPE_CODE_BOOL:
-    case TYPE_CODE_CHAR:
-      {
-	LONGEST low_bound, high_bound;
-	struct type *range_type;
-	get_discrete_bounds (type, &low_bound, &high_bound);
-	range_type = create_range_type (NULL, type, low_bound, high_bound);
-	TYPE_NAME (range_type) = TYPE_NAME (range_type);
-	TYPE_DUMMY_RANGE (range_type) = 1;
-	return range_type;
-      }
-    default:
-      {
-	static struct complaint msg =
-	  { "array index type must be a discrete type", 0, 0};
-	complain (&msg);
-
-	return create_range_type (NULL, builtin_type_int, 0, 0);
-      }
     }
 }
 
@@ -429,18 +402,17 @@ create_array_type (result_type, element_type, range_type)
      struct type *element_type;
      struct type *range_type;
 {
-  int low_bound;
-  int high_bound;
+  LONGEST low_bound, high_bound;
 
-  range_type = force_to_range_type (range_type);
   if (result_type == NULL)
     {
       result_type = alloc_type (TYPE_OBJFILE (range_type));
     }
   TYPE_CODE (result_type) = TYPE_CODE_ARRAY;
   TYPE_TARGET_TYPE (result_type) = element_type;
-  low_bound = TYPE_LOW_BOUND (range_type);
-  high_bound = TYPE_HIGH_BOUND (range_type);
+  if (get_discrete_bounds (range_type, &low_bound, &high_bound) < 0)
+    low_bound = high_bound = 0;
+  CHECK_TYPEDEF (element_type);
   TYPE_LENGTH (result_type) =
     TYPE_LENGTH (element_type) * (high_bound - low_bound + 1);
   TYPE_NFIELDS (result_type) = 1;
@@ -481,7 +453,7 @@ create_set_type (result_type, domain_type)
      struct type *result_type;
      struct type *domain_type;
 {
-  int low_bound, high_bound, bit_length;
+  LONGEST low_bound, high_bound, bit_length;
   if (result_type == NULL)
     {
       result_type = alloc_type (TYPE_OBJFILE (domain_type));
@@ -494,9 +466,8 @@ create_set_type (result_type, domain_type)
 
   if (! (TYPE_FLAGS (domain_type) & TYPE_FLAG_STUB))
     {
-      domain_type = force_to_range_type (domain_type);
-      low_bound = TYPE_LOW_BOUND (domain_type);
-      high_bound = TYPE_HIGH_BOUND (domain_type);
+      if (get_discrete_bounds (domain_type, &low_bound, &high_bound) < 0)
+	low_bound = high_bound = 0;
       bit_length = high_bound - low_bound + 1;
       TYPE_LENGTH (result_type)
 	= (bit_length + TARGET_CHAR_BIT - 1) / TARGET_CHAR_BIT;
@@ -773,9 +744,14 @@ lookup_struct_elt_type (type, name, noerr)
 {
   int i;
 
-  while (TYPE_CODE (type) == TYPE_CODE_PTR ||
-      TYPE_CODE (type) == TYPE_CODE_REF)
+  for (;;)
+    {
+      CHECK_TYPEDEF (type);
+      if (TYPE_CODE (type) != TYPE_CODE_PTR
+	  && TYPE_CODE (type) != TYPE_CODE_REF)
+	break;
       type = TYPE_TARGET_TYPE (type);
+    }
 
   if (TYPE_CODE (type) != TYPE_CODE_STRUCT &&
       TYPE_CODE (type) != TYPE_CODE_UNION)
@@ -786,8 +762,6 @@ lookup_struct_elt_type (type, name, noerr)
       type_print (type, "", gdb_stderr, -1);
       error (" is not a structure or union type.");
     }
-
-  check_stub_type (type);
 
 #if 0
   /* FIXME:  This change put in by Michael seems incorrect for the case where
@@ -851,7 +825,7 @@ void
 fill_in_vptr_fieldno (type)
      struct type *type;
 {
-  check_stub_type (type);
+  CHECK_TYPEDEF (type);
 
   if (TYPE_VPTR_FIELDNO (type) < 0)
     {
@@ -890,10 +864,43 @@ fill_in_vptr_fieldno (type)
 struct complaint stub_noname_complaint =
   {"stub type has NULL name", 0, 0};
 
-void 
+void
 check_stub_type (type)
      struct type *type;
 {
+  check_typedef (type);
+}
+
+struct type *
+check_typedef (type)
+     register struct type *type;
+{
+  struct type *orig_type = type;
+  while (TYPE_CODE (type) == TYPE_CODE_TYPEDEF)
+    {
+      if (!TYPE_TARGET_TYPE (type))
+	{
+	  char* name = type_name_no_tag (type);
+	  /* FIXME: shouldn't we separately check the TYPE_NAME and the
+	     TYPE_TAG_NAME, and look in STRUCT_NAMESPACE and/or VAR_NAMESPACE
+	     as appropriate?  (this code was written before TYPE_NAME and
+	     TYPE_TAG_NAME were separate).  */
+	  struct symbol *sym;
+	  if (name == NULL)
+	    {
+	      complain (&stub_noname_complaint);
+	      return type;
+	    }
+	  sym = lookup_symbol (name, 0, STRUCT_NAMESPACE, 0, 
+			       (struct symtab **) NULL);
+	  if (sym)
+	    TYPE_TARGET_TYPE (type) = SYMBOL_TYPE (sym);
+	  else
+	    TYPE_TARGET_TYPE (type) = alloc_type (NULL);  /* TYPE_CODE_UNDEF */
+	}
+      type = TYPE_TARGET_TYPE (type);
+    }
+
   if (TYPE_FLAGS(type) & TYPE_FLAG_STUB)
     {
       char* name = type_name_no_tag (type);
@@ -905,7 +912,7 @@ check_stub_type (type)
       if (name == NULL)
 	{
 	  complain (&stub_noname_complaint);
-	  return;
+	  return type;
 	}
       sym = lookup_symbol (name, 0, STRUCT_NAMESPACE, 0, 
 			   (struct symtab **) NULL);
@@ -920,9 +927,9 @@ check_stub_type (type)
   if (TYPE_FLAGS (type) & TYPE_FLAG_TARGET_STUB)
     {
       struct type *range_type;
+      struct type *target_type = check_typedef (TYPE_TARGET_TYPE (type));
 
-      check_stub_type (TYPE_TARGET_TYPE (type));
-      if (TYPE_FLAGS (TYPE_TARGET_TYPE (type)) & TYPE_FLAG_STUB)
+      if (TYPE_FLAGS (target_type) & TYPE_FLAG_STUB)
 	{ }
       else if (TYPE_CODE (type) == TYPE_CODE_ARRAY
 	       && TYPE_NFIELDS (type) == 1
@@ -935,15 +942,18 @@ check_stub_type (type)
 	    ((TYPE_FIELD_BITPOS (range_type, 1)
 	      - TYPE_FIELD_BITPOS (range_type, 0)
 	      + 1)
-	     * TYPE_LENGTH (TYPE_TARGET_TYPE (type)));
+	     * TYPE_LENGTH (target_type));
 	  TYPE_FLAGS (type) &= ~TYPE_FLAG_TARGET_STUB;
 	}
       else if (TYPE_CODE (type) == TYPE_CODE_RANGE)
 	{
-	  TYPE_LENGTH (type) = TYPE_LENGTH (TYPE_TARGET_TYPE (type));
+	  TYPE_LENGTH (type) = TYPE_LENGTH (target_type);
 	  TYPE_FLAGS (type) &= ~TYPE_FLAG_TARGET_STUB;
 	}
     }
+  /* Cache TYPE_LENGTH for future use. */
+  TYPE_LENGTH (orig_type) = TYPE_LENGTH (type);
+  return type;
 }
 
 /* Ugly hack to convert method stubs into method types.
@@ -1175,6 +1185,7 @@ can_dereference (t)
      struct type *t;
 {
   /* FIXME: Should we return true for references as well as pointers?  */
+  CHECK_TYPEDEF (t);
   return
     (t != NULL
      && TYPE_CODE (t) == TYPE_CODE_PTR
@@ -1472,6 +1483,9 @@ recursive_dump_type (type, spaces)
 	break;
       case TYPE_CODE_BOOL:
 	printf_filtered ("(TYPE_CODE_BOOL)");
+	break;
+      case TYPE_CODE_TYPEDEF:
+	printf_filtered ("(TYPE_CODE_TYPEDEF)");
 	break;
       default:
 	printf_filtered ("(UNKNOWN TYPE CODE)");

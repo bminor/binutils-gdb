@@ -120,7 +120,9 @@ enum type_code
   TYPE_CODE_BOOL,
 
   /* Fortran */
-  TYPE_CODE_COMPLEX		/* Complex float */
+  TYPE_CODE_COMPLEX,		/* Complex float */
+
+  TYPE_CODE_TYPEDEF
 };
 
 /* For now allow source to use TYPE_CODE_CLASS for C++ classes, as an
@@ -145,9 +147,10 @@ enum type_code
 #define TYPE_FLAG_STUB		(1 << 2)
 
 /* The target type of this type is a stub type, and this type needs to
-   be updated if it gets un-stubbed in check_stub_type.  Currently only
-   used for arrays and ranges, in which TYPE_LENGTH of the array/range
-   gets set based on the TYPE_LENGTH of the target type.  */
+   be updated if it gets un-stubbed in check_typedef.
+   Used for arrays and ranges, in which TYPE_LENGTH of the array/range
+   gets set based on the TYPE_LENGTH of the target type.
+   Also, set for TYPE_CODE_TYPEDEF. */
 
 #define TYPE_FLAG_TARGET_STUB (1 << 3)
 
@@ -486,10 +489,16 @@ allocate_cplus_struct_type PARAMS ((struct type *));
 #define TYPE_TARGET_TYPE(thistype) (thistype)->target_type
 #define TYPE_POINTER_TYPE(thistype) (thistype)->pointer_type
 #define TYPE_REFERENCE_TYPE(thistype) (thistype)->reference_type
+/* Note that if thistype is a TYPEDEF type, you have to call check_typedef.
+   But check_typedef does set the TYPE_LENGTH of the TYPEDEF type,
+   so you only have to call check_typedef once.  Since allocate_value
+   calls check_typedef, TYPE_LENGTH (VALUE_TYPE (X)) is safe.  */
 #define TYPE_LENGTH(thistype) (thistype)->length
 #define TYPE_OBJFILE(thistype) (thistype)->objfile
 #define TYPE_FLAGS(thistype) (thistype)->flags
 #define TYPE_UNSIGNED(thistype) ((thistype)->flags & TYPE_FLAG_UNSIGNED)
+/* Note that TYPE_CODE can be TYPE_CODE_TYPEDEF, so if you wan the real
+   type, you need to do TYPE_CODE (check_type (this_type)). */
 #define TYPE_CODE(thistype) (thistype)->code
 #define TYPE_NFIELDS(thistype) (thistype)->nfields
 #define TYPE_FIELDS(thistype) (thistype)->fields
@@ -497,9 +506,6 @@ allocate_cplus_struct_type PARAMS ((struct type *));
 #define TYPE_INDEX_TYPE(type) TYPE_FIELD_TYPE (type, 0)
 #define TYPE_LOW_BOUND(range_type) TYPE_FIELD_BITPOS (range_type, 0)
 #define TYPE_HIGH_BOUND(range_type) TYPE_FIELD_BITPOS (range_type, 1)
-/* If TYPE_DUMMY_RANGE is true for a range type, it was allocated
-   by force_to_range_type. */
-#define TYPE_DUMMY_RANGE(type) ((type)->vptr_fieldno)
 
 /* Moto-specific stuff for FORTRAN arrays */
 
@@ -734,8 +740,10 @@ lookup_unsigned_typename PARAMS ((char *));
 extern struct type *
 lookup_signed_typename PARAMS ((char *));
 
-extern void
-check_stub_type PARAMS ((struct type *));
+extern struct type *
+check_typedef PARAMS ((struct type *));
+
+#define CHECK_TYPEDEF(TYPE) (TYPE) = check_typedef (TYPE)
 
 extern void
 check_stub_method PARAMS ((struct type *, int, int));

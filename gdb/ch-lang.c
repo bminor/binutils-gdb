@@ -304,11 +304,13 @@ type_lower_upper (op, type, result_type)
      struct type *type;
      struct type **result_type;
 {
-  LONGEST tmp;
-  *result_type = builtin_type_int;
+  LONGEST low, high;
+  *result_type = type;
+  CHECK_TYPEDEF (type);
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_STRUCT:
+      *result_type = builtin_type_int;
       if (chill_varying_type (type))
 	return type_lower_upper (op, TYPE_FIELD_TYPE (type, 1), result_type);
       break;
@@ -319,29 +321,19 @@ type_lower_upper (op, type, result_type)
 
       /* ... fall through ... */
     case TYPE_CODE_RANGE:
-      if (TYPE_DUMMY_RANGE (type) > 0)
-	return type_lower_upper (op, TYPE_TARGET_TYPE (type), result_type);
       *result_type = TYPE_TARGET_TYPE (type);
       return op == UNOP_LOWER ? TYPE_LOW_BOUND (type) : TYPE_HIGH_BOUND (type);
 
     case TYPE_CODE_ENUM:
-      *result_type = type;
-      if (TYPE_NFIELDS (type) > 0)
-	return TYPE_FIELD_BITPOS (type,
-				  op == UNOP_LOWER ? 0
-				  : TYPE_NFIELDS (type) - 1);
-
     case TYPE_CODE_BOOL:
-      *result_type = type;
-      return op == UNOP_LOWER ? 0 : 1;
     case TYPE_CODE_INT:
     case TYPE_CODE_CHAR:
-      *result_type = type;
-      tmp = (LONGEST) 1 << (TARGET_CHAR_BIT * TYPE_LENGTH (type));
-      if (TYPE_UNSIGNED (type))
-	return op == UNOP_LOWER ? 0 : tmp - (LONGEST) 1;
-      tmp = tmp >> 1;
-      return op == UNOP_LOWER ? -tmp : (tmp - 1);
+      if (get_discrete_bounds (type, &low, &high) >= 0)
+	{
+	  *result_type = type;
+	  return op == UNOP_LOWER ? low : high;
+	}
+      break;
     case TYPE_CODE_UNDEF:
     case TYPE_CODE_PTR:
     case TYPE_CODE_UNION:
@@ -367,6 +359,7 @@ value_chill_length (val)
   LONGEST tmp;
   struct type *type = VALUE_TYPE (val);
   struct type *ttype;
+  CHECK_TYPEDEF (type);
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_ARRAY:
@@ -404,17 +397,28 @@ evaluate_subexp_chill (expect_type, exp, pos, noside)
   switch (op)
     {
     case MULTI_SUBSCRIPT:
-      if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
+      if (noside == EVAL_SKIP)
 	break;
       (*pos) += 3;
       nargs = longest_to_int (exp->elts[pc + 1].longconst);
       arg1 = evaluate_subexp_with_coercion (exp, pos, noside);
+      type = check_typedef (VALUE_TYPE (arg1));
 
-      switch (TYPE_CODE (VALUE_TYPE (arg1)))
+      if (nargs == 1 && TYPE_CODE (type) == TYPE_CODE_INT)
+	{
+	  /* Looks like string repetition. */
+	  value_ptr string = evaluate_subexp_with_coercion (exp, pos, noside);
+	  return value_concat (arg1, string);
+	}
+
+      switch (TYPE_CODE (type))
 	{
 	case TYPE_CODE_PTR:
 	case TYPE_CODE_FUNC:
 	  /* It's a function call. */
+	  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	    break;
+
 	  /* Allocate arg vector, including space for the function to be
 	     called in argvec[0] and a terminating NULL */
 	  argvec = (value_ptr *) alloca (sizeof (value_ptr) * (nargs + 2));

@@ -99,10 +99,14 @@ chill_type_print_base (type, stream, show, level)
       return;
     }
 
-  check_stub_type (type);
+  if (TYPE_CODE (type) != TYPE_CODE_TYPEDEF)
+    CHECK_TYPEDEF (type);
 
   switch (TYPE_CODE (type))
     {
+      case TYPE_CODE_TYPEDEF:
+        chill_type_print_base (TYPE_TARGET_TYPE (type), stream, 0, level);
+	break;
       case TYPE_CODE_PTR:
 	if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_VOID)
 	  {
@@ -111,7 +115,7 @@ chill_type_print_base (type, stream, show, level)
 	    break;
 	  }
 	fprintf_filtered (stream, "REF ");
-	chill_type_print_base (TYPE_TARGET_TYPE (type), stream, show, level);
+	chill_type_print_base (TYPE_TARGET_TYPE (type), stream, 0, level);
 	break;
 
       case TYPE_CODE_BOOL:
@@ -124,16 +128,21 @@ chill_type_print_base (type, stream, show, level)
 	break;
 
       case TYPE_CODE_ARRAY:
-	range_type = TYPE_FIELD_TYPE (type, 0);
-	index_type = TYPE_TARGET_TYPE (range_type);
-	low_bound = TYPE_FIELD_BITPOS (range_type, 0);
-	high_bound = TYPE_FIELD_BITPOS (range_type, 1);
         fputs_filtered ("ARRAY (", stream);
-	print_type_scalar (index_type, low_bound, stream);
-	fputs_filtered (":", stream);
-	print_type_scalar (index_type, high_bound, stream);
+	range_type = TYPE_FIELD_TYPE (type, 0);
+	if (TYPE_CODE (range_type) != TYPE_CODE_RANGE)
+	  chill_print_type (range_type, "", stream, 0, level);
+	else
+	  {
+	    index_type = TYPE_TARGET_TYPE (range_type);
+	    low_bound = TYPE_FIELD_BITPOS (range_type, 0);
+	    high_bound = TYPE_FIELD_BITPOS (range_type, 1);
+	    print_type_scalar (index_type, low_bound, stream);
+	    fputs_filtered (":", stream);
+	    print_type_scalar (index_type, high_bound, stream);
+	  }
 	fputs_filtered (") ", stream);
-	chill_print_type (TYPE_TARGET_TYPE (type), "", stream, show, level);
+	chill_print_type (TYPE_TARGET_TYPE (type), "", stream, 0, level);
 	break;
 
       case TYPE_CODE_BITSTRING:
@@ -158,7 +167,7 @@ chill_type_print_base (type, stream, show, level)
 
       case TYPE_CODE_MEMBER:
 	fprintf_filtered (stream, "MEMBER ");
-        chill_type_print_base (TYPE_TARGET_TYPE (type), stream, show, level);
+        chill_type_print_base (TYPE_TARGET_TYPE (type), stream, 0, level);
 	break;
       case TYPE_CODE_REF:
 	fprintf_filtered (stream, "/*LOC*/ ");
@@ -178,7 +187,7 @@ chill_type_print_base (type, stream, show, level)
 	    if (TYPE_CODE (param_type) == TYPE_CODE_REF)
 	      {
 		chill_type_print_base (TYPE_TARGET_TYPE (param_type),
-				       stream, show, level);
+				       stream, 0, level);
 		fputs_filtered (" LOC", stream);
 	      }
 	    else
@@ -188,7 +197,7 @@ chill_type_print_base (type, stream, show, level)
 	if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_VOID)
 	  {
 	    fputs_filtered (" RETURNS (", stream);
-	    chill_type_print_base (TYPE_TARGET_TYPE (type), stream, show, level);
+	    chill_type_print_base (TYPE_TARGET_TYPE (type), stream, 0, level);
 	    fputs_filtered (")", stream);
 	  }
 	break;
@@ -197,7 +206,7 @@ chill_type_print_base (type, stream, show, level)
 	if (chill_varying_type (type))
 	  {
 	    chill_type_print_base (TYPE_FIELD_TYPE (type, 1),
-				   stream, show, level);
+				   stream, 0, level);
 	    fputs_filtered (" VARYING", stream);
 	  }
 	else
@@ -269,9 +278,6 @@ chill_type_print_base (type, stream, show, level)
 	break;
 
       case TYPE_CODE_RANGE:
-	if (TYPE_DUMMY_RANGE (type) > 0)
-	  chill_type_print_base (TYPE_TARGET_TYPE (type), stream, show, level);
-	else
 	  {
 	    struct type *target = TYPE_TARGET_TYPE (type);
 	    if (target && TYPE_NAME (target))

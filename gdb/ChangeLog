@@ -1,5 +1,28 @@
 Wed Nov 29 13:35:18 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
+	* gdbtypes.h (enum type_code):  Added TYPE_CODE_TYPEDEF.
+	(check_typedef):  New prototype.
+	(CHECK_TYPEDEF):  New macro.
+	(TYPE_DUMMY_RANGE):  Removed.
+	* gdbtypes.c (get_discrete_bounds):  Fix paren error; make more robust.
+	(create_array_type):  Don't force_to_range_type;  users of the
+	array are responsible for handling non-range index types.
+	(create_set_type):  Likewise.
+	(force_to_range_type):  Removed.
+	(check_typedef):  New function handles stub types and typedefs.
+	(check_stub_type):  Just call check_typedef. (To be removed.)
+	(recursive_dump_type):  Handle TYPE_CODE_TYPEDEF.
+	* ch-lang.c (type_lower_upper):  Use get_discrete_bounds.
+	(evaluate_subexp_chill):  Handle string repetition.
+	Re-arrange to handle EVAL_AVOID_SIDE_EFFECTS better.
+	* ch-typeprint.c (chill_type_print_base):  Handle TYPE_CODE_TYPEDEF.
+	Pass show=0 in recursive calls various places.
+	(case TYPE_CODE_ARRAY):  Don't require index type to have
+	TYPE_CODE_RANGE.
+	(case TYPE_CODE_RANGE):  Don't need to support TYPE_DUMMY_RANGE.
+	* gdbtypes.c, ch-lang.c, ch-typeprint.c (numerous places):
+	Add check_typedef/CHECK_TYPEDEF as needed.
+
 	* top.c (command_line_input):  Only strip out an initial #-comment.
 	Looking for internal comments is language-specific (breaks Scheme).
 	
