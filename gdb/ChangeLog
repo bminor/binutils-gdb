@@ -1,5 +1,16 @@
 2004-01-31  Daniel Jacobowitz  <drow@mvista.com>
 
+	* breakpoint.c (software_breakpoint_inserted_here_p): New function.
+	(bpstat_stop_status): Don't decrement PC.
+	* breakpoint.h (software_breakpoint_inserted_here_p): Add
+	prototype.
+	* infrun.c (adjust_pc_after_break): New function.
+	(handle_inferior_event): Call it, early.  Remove later references
+	to DECR_PC_AFTER_BREAK.
+	(normal_stop): Add commentary.
+
+2004-01-31  Daniel Jacobowitz  <drow@mvista.com>
+
 	* breakpoint.c (breakpoint_re_set_one): Add missing chunk of
 	2004-01-27 double-free fix.
 

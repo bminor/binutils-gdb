@@ -605,6 +605,8 @@ extern enum breakpoint_here breakpoint_here_p (CORE_ADDR);
 
 extern int breakpoint_inserted_here_p (CORE_ADDR);
 
+extern int software_breakpoint_inserted_here_p (CORE_ADDR);
+
 /* FIXME: cagney/2002-11-10: The current [generic] dummy-frame code
    implements a functional superset of this function.  The only reason
    it hasn't been removed is because some architectures still don't

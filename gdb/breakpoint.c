@@ -1717,6 +1717,37 @@ breakpoint_inserted_here_p (CORE_ADDR pc)
   return 0;
 }
 
+/* This function returns non-zero iff there is a software breakpoint
+   inserted at PC.  */
+
+int
+software_breakpoint_inserted_here_p (CORE_ADDR pc)
+{
+  struct bp_location *bpt;
+  int any_breakpoint_here = 0;
+
+  ALL_BP_LOCATIONS (bpt)
+    {
+      if (bpt->loc_type != bp_loc_software_breakpoint)
+	continue;
+
+      if ((breakpoint_enabled (bpt->owner)
+	   || bpt->owner->enable_state == bp_permanent)
+	  && bpt->inserted
+	  && bpt->address == pc)	/* bp is enabled and matches pc */
+	{
+	  if (overlay_debugging 
+	      && section_is_overlay (bpt->section) 
+	      && !section_is_mapped (bpt->section))
+	    continue;		/* unmapped overlay -- can't be a match */
+	  else
+	    return 1;
+	}
+    }
+
+  return 0;
+}
+
 /* Return nonzero if FRAME is a dummy frame.  We can't use
    DEPRECATED_PC_IN_CALL_DUMMY because figuring out the saved SP would
    take too much time, at least using frame_register() on the 68k.
@@ -2571,13 +2602,7 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_sw_breakpoint)
   /* Pointer to the last thing in the chain currently.  */
   bpstat bs = root_bs;
 
-  /* Get the address where the breakpoint would have been.  The
-     "not_a_sw_breakpoint" argument is meant to distinguish between a
-     breakpoint trap event and a trace/singlestep trap event.  For a
-     trace/singlestep trap event, we would not want to subtract
-     DECR_PC_AFTER_BREAK from the PC. */
-
-  bp_addr = *pc - (not_a_sw_breakpoint ? 0 : DECR_PC_AFTER_BREAK);
+  bp_addr = *pc;
 
   ALL_BREAKPOINTS_SAFE (b, temp)
   {
@@ -2862,18 +2887,6 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_sw_breakpoint)
 
   bs->next = NULL;		/* Terminate the chain */
   bs = root_bs->next;		/* Re-grab the head of the chain */
-
-  if (real_breakpoint && bs)
-    {
-      if (bs->breakpoint_at->type != bp_hardware_breakpoint)
-	{
-	  if (DECR_PC_AFTER_BREAK != 0)
-	    {
-	      *pc = bp_addr;
-	      write_pc (bp_addr);
-	    }
-	}
-    }
 
   /* The value of a hardware watchpoint hasn't changed, but the
      intermediate memory locations we are watching may have.  */

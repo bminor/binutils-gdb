@@ -1313,6 +1313,74 @@ handle_step_into_function (struct execution_control_state *ecs)
   return;
 }
 
+static void
+adjust_pc_after_break (struct execution_control_state *ecs)
+{
+  CORE_ADDR stop_pc;
+
+  /* If this target does not decrement the PC after breakpoints, then
+     we have nothing to do.  */
+  if (DECR_PC_AFTER_BREAK == 0)
+    return;
+
+  /* If we've hit a breakpoint, we'll normally be stopped with SIGTRAP.  If
+     we aren't, just return.
+     
+     NOTE drow/2004-01-31: On some targets, breakpoints may generate
+     different signals (SIGILL or SIGEMT for instance), but it is less
+     clear where the PC is pointing afterwards.  It may not match
+     DECR_PC_AFTER_BREAK.  I don't know any specific target that generates
+     these signals at breakpoints (the code has been in GDB since at least
+     1992) so I can not guess how to handle them here.
+     
+     In earlier versions of GDB, a target with HAVE_NONSTEPPABLE_WATCHPOINTS
+     would have the PC after hitting a watchpoint affected by
+     DECR_PC_AFTER_BREAK.  I haven't found any target with both of these set
+     in GDB history, and it seems unlikely to be correct, so
+     HAVE_NONSTEPPABLE_WATCHPOINTS is not checked here.  */
+
+  if (ecs->ws.kind != TARGET_WAITKIND_STOPPED)
+    return;
+
+  if (ecs->ws.value.sig != TARGET_SIGNAL_TRAP)
+    return;
+
+  /* Find the location where (if we've hit a breakpoint) the breakpoint would
+     be.  */
+  stop_pc = read_pc_pid (ecs->ptid) - DECR_PC_AFTER_BREAK;
+
+  /* If we're software-single-stepping, then assume this is a breakpoint.
+     NOTE drow/2004-01-17: This doesn't check that the PC matches, or that
+     we're even in the right thread.  The software-single-step code needs
+     some modernization.
+
+     If we're not software-single-stepping, then we first check that there
+     is an enabled software breakpoint at this address.  If there is, and
+     we weren't using hardware-single-step, then we've hit the breakpoint.
+
+     If we were using hardware-single-step, we check prev_pc; if we just
+     stepped over an inserted software breakpoint, then we should decrement
+     the PC and eventually report hitting the breakpoint.  The prev_pc check
+     prevents us from decrementing the PC if we just stepped over a jump
+     instruction and landed on the instruction after a breakpoint.
+
+     The last bit checks that we didn't hit a breakpoint in a signal handler
+     without an intervening stop in sigtramp, which is detected by a new
+     stack pointer value below any usual function calling stack adjustments.
+
+     NOTE drow/2004-01-17: I'm not sure that this is necessary.  The check
+     predates checking for software single step at the same time.  Also,
+     if we've moved into a signal handler we should have seen the
+     signal.  */
+
+  if ((SOFTWARE_SINGLE_STEP_P () && singlestep_breakpoints_inserted_p)
+      || (software_breakpoint_inserted_here_p (stop_pc)
+	  && !(currently_stepping (ecs)
+	       && prev_pc != stop_pc
+	       && !(step_range_end && INNER_THAN (read_sp (), (step_sp - 16))))))
+    write_pc_pid (stop_pc, ecs->ptid);
+}
+
 /* Given an execution control state that has been freshly filled in
    by an event from the inferior, figure out what it means and take
    appropriate action.  */
@@ -1331,6 +1399,8 @@ handle_inferior_event (struct execution_control_state *ecs)
   /* Cache the last pid/waitstatus. */
   target_last_wait_ptid = ecs->ptid;
   target_last_waitstatus = *ecs->wp;
+
+  adjust_pc_after_break (ecs);
 
   switch (ecs->infwait_state)
     {
@@ -1685,19 +1755,15 @@ handle_inferior_event (struct execution_control_state *ecs)
       /* Check if a regular breakpoint has been hit before checking
          for a potential single step breakpoint. Otherwise, GDB will
          not see this breakpoint hit when stepping onto breakpoints.  */
-      if (breakpoints_inserted
-          && breakpoint_here_p (stop_pc - DECR_PC_AFTER_BREAK))
+      if (breakpoints_inserted && breakpoint_here_p (stop_pc))
 	{
 	  ecs->random_signal = 0;
-	  if (!breakpoint_thread_match (stop_pc - DECR_PC_AFTER_BREAK,
-					ecs->ptid))
+	  if (!breakpoint_thread_match (stop_pc, ecs->ptid))
 	    {
 	      int remove_status;
 
 	      /* Saw a breakpoint, but it was hit by the wrong thread.
 	         Just continue. */
-	      if (DECR_PC_AFTER_BREAK)
-		write_pc_pid (stop_pc - DECR_PC_AFTER_BREAK, ecs->ptid);
 
 	      remove_status = remove_breakpoints ();
 	      /* Did we fail to remove breakpoints?  If so, try
@@ -1710,7 +1776,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	      if (remove_status != 0)
 		{
 		  /* FIXME!  This is obviously non-portable! */
-		  write_pc_pid (stop_pc - DECR_PC_AFTER_BREAK + 4, ecs->ptid);
+		  write_pc_pid (stop_pc + 4, ecs->ptid);
 		  /* We need to restart all the threads now,
 		   * unles we're running in scheduler-locked mode. 
 		   * Use currently_stepping to determine whether to 
@@ -1744,17 +1810,6 @@ handle_inferior_event (struct execution_control_state *ecs)
 	}
       else if (SOFTWARE_SINGLE_STEP_P () && singlestep_breakpoints_inserted_p)
         {
-          /* Readjust the stop_pc as it is off by DECR_PC_AFTER_BREAK
-             compared to the value it would have if the system stepping
-             capability was used. This allows the rest of the code in
-             this function to use this address without having to worry
-             whether software single step is in use or not.  */
-          if (DECR_PC_AFTER_BREAK)
-            {
-              stop_pc -= DECR_PC_AFTER_BREAK;
-              write_pc_pid (stop_pc, ecs->ptid);
-            }
-
           sw_single_step_trap_p = 1;
           ecs->random_signal = 0;
         }
@@ -1885,9 +1940,6 @@ handle_inferior_event (struct execution_control_state *ecs)
          single-step processing handle proceed.  Since this
          includes evaluating watchpoints, things will come to a
          stop in the correct manner.  */
-
-      if (DECR_PC_AFTER_BREAK)
-	write_pc (stop_pc - DECR_PC_AFTER_BREAK);
 
       remove_breakpoints ();
       registers_changed ();
@@ -3121,6 +3173,7 @@ normal_stop (void)
       previous_inferior_ptid = inferior_ptid;
     }
 
+  /* NOTE drow/2004-01-17: Is this still necessary?  */
   /* Make sure that the current_frame's pc is correct.  This
      is a correction for setting up the frame info before doing
      DECR_PC_AFTER_BREAK */
