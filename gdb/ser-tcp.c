@@ -218,7 +218,12 @@ tcp_readchar(scb, timeout)
   if (status < 0)
     return status;
 
-  scb->bufcnt = read(scb->fd, scb->buf, BUFSIZ);
+  while (1)
+    {
+      scb->bufcnt = read(scb->fd, scb->buf, BUFSIZ);
+      if (scb->bufcnt != -1 || errno != EINTR)
+	break;
+    }
 
   if (scb->bufcnt <= 0)
     if (scb->bufcnt == 0)

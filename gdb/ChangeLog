@@ -1,3 +1,50 @@
+Thu Jun  2 08:50:00 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* configure.in:  Add nlm subdir to configdirs for alpha-*-netware
+	target.
+	* defs.h (enum language):  Add language_asm.
+	* findvar.c (read_register_bytes read_register_gen
+	write_register_bytes read_register read_register_pid
+	write_register write_register_pid supply_register):  Move multi-
+	thread handling down into these routines.  Create XXX_pid routines
+	that allow register references to specify the pid.
+	* findvar.c infcmd.c (read_pc read_pc_pid write_pc write_pc_pid
+	read_sp write_sp read_fp write_fp):  Move these routines from
+	infcmd to findvar to centralize the whole mess.
+	* i386-nlmstub.c:  Portability fixes.
+	* infptrace.c (child_resume):  Conditionalize to allow other natives
+	to override it.  Remove PIDGET gubbish, it's no longer necessary.
+	* infrun.c (wait_for_inferior):  Put registers_changed() before
+	target_wait() to speed up remote debugging.
+	* Replace code that reads registers from other threads with much
+	nicer looking new function calls (see changes to findvar.c).
+	* Don't skip prologues if debugging assembly source.
+	* lynx-nat.c (child_resume):  Lynx now needs it's own version of
+	child_resume to handle multi-thread debugging properly.
+	* remote.c:  Add O response to get console output from target.
+	* (readchar): Add timeout parameter.  Handle SERIAL_EOF and
+	SERIAL_ERROR here to simplify callers.
+	* Change static var timeout to remote_timeout.
+	* (fromhex):  Remove unnecessary return -1 at end of routine.
+	* (remote_wait):  Turn this into a big switch statement.  Add
+	support for O response.
+	* (putpkt):  Remove unnecessary handling of SERIAL_EOF/ERROR.
+	* (getpkt):  Split getpkt into two parts.  read_frame deals with
+	all formatting issues, run-length encoding, and framing.  getpkt
+	now handles error recovery, and frame detection.
+	* ser-tcp.c (tcp_readchar):  Handle EINTR from read().
+	* ser-unix.c (hardwire_raw):  Set CLOCAL so that we ignore modem
+	control.  (hardwire_readchar):  Handle EINTR from read().
+	* symfile.c (deduce_language_from_filename):  Add support for .s
+	files.
+	* config/nm-lynx.h:  Define CHILD_WAIT so that lynx-nat.c can
+	override infptrace's child_wait.
+	* config/rs6000/rs6000lynx.mh:  Use xm-rs6000ly.h & nm-rs6000ly.h
+	instead of XXXlynx.h.
+	* config/rs6000/rs6000lynx.mt:  Use tm-rs6000ly.h instead of
+	tm-rs6000lynx.h.
+	* nlm/gdbserve.c:  Portability fixes.
+
 Tue May 31 20:35:44 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* inftarg.c (child_wait): Call proc_wait, not wait.

@@ -353,7 +353,7 @@ hardwire_raw(scb)
   state.termios.c_oflag = 0;
   state.termios.c_lflag = 0;
   state.termios.c_cflag &= ~(CSIZE|PARENB);
-  state.termios.c_cflag |= CS8;
+  state.termios.c_cflag |= CLOCAL | CS8;
   state.termios.c_cc[VMIN] = 0;
   state.termios.c_cc[VTIME] = 0;
 #endif
@@ -363,7 +363,7 @@ hardwire_raw(scb)
   state.termio.c_oflag = 0;
   state.termio.c_lflag = 0;
   state.termio.c_cflag &= ~(CSIZE|PARENB);
-  state.termio.c_cflag |= CS8;
+  state.termio.c_cflag |= CLOCAL | CS8;
   state.termio.c_cc[VMIN] = 0;
   state.termio.c_cc[VTIME] = 0;
 #endif
@@ -534,6 +534,8 @@ hardwire_readchar(scb, timeout)
 	      else
 		return SERIAL_TIMEOUT;
 	    }
+	  else if (errno == EINTR)
+	    continue;
 	  else
 	    return SERIAL_ERROR;	/* Got an error from read */
 	}

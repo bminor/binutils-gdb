@@ -652,6 +652,44 @@ child_wait (pid, ourstatus)
     }
 }
 
+/* Resume execution of the inferior process.
+   If STEP is nonzero, single-step it.
+   If SIGNAL is nonzero, give it that signal.  */
+
+void
+child_resume (pid, step, signal)
+     int pid;
+     int step;
+     enum target_signal signal;
+{
+  errno = 0;
+
+  if (pid == -1)
+    /* Resume all threads.  */
+    /* I think this only gets used in the non-threaded case, where "resume
+       all threads" and "resume inferior_pid" are the same.  */
+    pid = inferior_pid;
+
+  /* An address of (PTRACE_ARG3_TYPE)1 tells ptrace to continue from where
+     it was.  (If GDB wanted it to start some other way, we have already
+     written a new PC value to the child.)
+
+     If this system does not support PT_STEP, a higher level function will
+     have called single_step() to transmute the step request into a
+     continue request (by setting breakpoints on all possible successor
+     instructions), so we don't have to worry about that here.  */
+
+  if (step)
+    ptrace (PTRACE_SINGLESTEP_ONE,     pid, (PTRACE_ARG3_TYPE) 1,
+	    target_signal_to_host (signal));
+  else
+    ptrace (PTRACE_CONT_ONE, pid, (PTRACE_ARG3_TYPE) 1,
+	    target_signal_to_host (signal));
+
+  if (errno)
+    perror_with_name ("ptrace");
+}
+
 /* Convert a Lynx process ID to a string.  Returns the string in a static
    buffer.  */
 

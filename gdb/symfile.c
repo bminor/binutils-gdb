@@ -621,8 +621,15 @@ symbol_file_add (name, from_tty, addr, mainline, mapped, readnow)
   return (objfile);
 }
 
-/* This is the symbol-file command.  Read the file, analyze its symbols,
-   and add a struct symtab to a symtab list.  */
+/* This is the symbol-file command.  Read the file, analyze its
+   symbols, and add a struct symtab to a symtab list.  The syntax of
+   the command is rather bizarre--(1) buildargv implements various
+   quoting conventions which are undocumented and have little or
+   nothing in common with the way things are quoted (or not quoted)
+   elsewhere in GDB, (2) options are used, which are not generally
+   used in GDB (perhaps "set mapped on", "set readnow on" would be
+   better), (3) the order of options matters, which is contrary to GNU
+   conventions (because it is confusing and inconvenient).  */
 
 void
 symbol_file_command (args, from_tty)
@@ -902,7 +909,7 @@ generic_load (filename, from_tty)
 	      printf_filtered ("Loading section %s, size 0x%lx vma ",
 			       bfd_get_section_name (loadfile_bfd, s),
 			       (unsigned long) size);
-	      print_address_numeric (vma, gdb_stdout);
+	      print_address_numeric (vma, 1, gdb_stdout);
 	      printf_filtered ("\n");
 
 	      bfd_get_section_contents (loadfile_bfd, s, buffer, 0, size);
@@ -1202,6 +1209,8 @@ deduce_language_from_filename (filename)
     return language_m2;
   else if (STREQ(c,".c"))
     return language_c;
+  else if (STREQ(c,".s"))
+    return language_asm;
   else if (STREQ (c,".cc") || STREQ (c,".C") || STREQ (c, ".cxx")
 	   || STREQ (c, ".cpp"))
     return language_cplus;

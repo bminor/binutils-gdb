@@ -147,10 +147,20 @@ static const char hexchars[] = "0123456789abcdef";
 #define NUM_REGS 16		/* Number of machine registers */
 #define REGISTER_BYTES (NUM_REGS * 4) /* Total size of registers array */
 
+#define ExceptionPC ExceptionEIP
+#define DECR_PC_AFTER_BREAK 1	/* int 3 leaves PC pointing after insn */
+#define BREAKPOINT {0xcc}
+#define StackFrame T_TSS_StackFrame
+
+unsigned char breakpoint_insn[] = BREAKPOINT;
+#define BREAKPOINT_SIZE (sizeof breakpoint_insn)
+
 static void flush_i_cache() {}
 
 static char *mem2hex (void *mem, char *buf, int count, int may_fault);
 static char *hex2mem (char *buf, void *mem, int count, int may_fault);
+static void set_step_traps (struct StackFrame *);
+static void clear_step_traps (struct StackFrame *);
 
 #if 0
 __main() {};
@@ -205,14 +215,14 @@ putDebugChar (c)
 
 static void
 frame_to_registers (frame, regs)
-     T_TSS_StackFrame *frame;
+     struct StackFrame *frame;
      char *regs;
 {
   /* Copy EAX -> EDI */
   mem2hex (&frame->ExceptionEAX, &regs[0 * 4 * 2], 4 * 8, 0);
 
   /* Copy EIP & PS */
-  mem2hex (&frame->ExceptionEIP, &regs[8 * 4 * 2], 4 * 2, 0);
+  mem2hex (&frame->ExceptionPC, &regs[8 * 4 * 2], 4 * 2, 0);
 
   /* Copy CS, SS, DS */
   mem2hex (&frame->ExceptionCS, &regs[10 * 4 * 2], 4 * 3, 0);
@@ -229,13 +239,13 @@ frame_to_registers (frame, regs)
 static void
 registers_to_frame (regs, frame)
      char *regs;
-     T_TSS_StackFrame *frame;
+     struct StackFrame *frame;
 {
   /* Copy EAX -> EDI */
   hex2mem (&regs[0 * 4 * 2], &frame->ExceptionEAX, 4 * 8, 0);
 
   /* Copy EIP & PS */
-  hex2mem (&regs[8 * 4 * 2], &frame->ExceptionEIP, 4 * 2, 0);
+  hex2mem (&regs[8 * 4 * 2], &frame->ExceptionPC, 4 * 2, 0);
 
   /* Copy CS, SS, DS */
   hex2mem (&regs[10 * 4 * 2], &frame->ExceptionCS, 4 * 3, 0);
@@ -567,9 +577,23 @@ hexToInt(ptr, intValue)
 }
 
 static void
+set_step_traps (frame)
+     struct StackFrame *frame;
+{
+  frame->ExceptionSystemFlags |= 0x100;
+}
+
+static void
+clear_step_traps (frame)
+     struct StackFrame *frame;
+{
+  frame->ExceptionSystemFlags &= ~0x100;
+}
+
+static void
 do_status (ptr, frame)
      char *ptr;
-     struct T_TSS_StackFrame *frame;
+     struct StackFrame *frame;
 {
   int sigval;
 
@@ -579,7 +603,7 @@ do_status (ptr, frame)
   ptr += 3;
 
   sprintf (ptr, "%02x:", PC_REGNUM);
-  ptr = mem2hex (&frame->ExceptionEIP, ptr + 3, 4, 0);
+  ptr = mem2hex (&frame->ExceptionPC, ptr + 3, 4, 0);
   *ptr++ = ';';
 
   sprintf (ptr, "%02x:", SP_REGNUM);
@@ -599,12 +623,12 @@ do_status (ptr, frame)
 
 static LONG
 handle_exception (frame)
-     T_TSS_StackFrame *frame;
+     struct StackFrame *frame;
 {
   int addr, length;
   char *ptr;
   static struct DBG_LoadDefinitionStructure *ldinfo = 0;
-  static LONG first_insn;	/* The first instruction in the program.  */
+  static unsigned char first_insn[BREAKPOINT_SIZE]; /* The first instruction in the program.  */
 
   /* Apparently the bell can sometimes be ringing at this point, and
      should be stopped.  */
@@ -616,7 +640,7 @@ handle_exception (frame)
 		     frame->ExceptionNumber,
 		     frame->ExceptionDescription,
 		     frame->ExceptionSystemFlags,
-		     frame->ExceptionEIP,
+		     frame->ExceptionPC,
 		     GetThreadID ());
     }
 
@@ -629,8 +653,10 @@ handle_exception (frame)
 
       ldinfo = ((struct DBG_LoadDefinitionStructure *)
 		frame->ExceptionErrorCode);
-      first_insn = *(unsigned char *)ldinfo->LDInitializationProcedure;
-      *(unsigned char *)ldinfo->LDInitializationProcedure = 0xcc;
+      memcpy (first_insn, ldinfo->LDInitializationProcedure,
+	      BREAKPOINT_SIZE);
+      memcpy (ldinfo->LDInitializationProcedure, breakpoint_insn,
+	      BREAKPOINT_SIZE);
       flush_i_cache ();
       return RETURN_TO_PROGRAM;
 
@@ -642,11 +668,13 @@ handle_exception (frame)
 
     case 3:			/* Breakpoint */
       /* After we've reached the initial breakpoint, reset it.  */
-      if (frame->ExceptionEIP - 1 == (long) ldinfo->LDInitializationProcedure
-	  && *(unsigned char *) ldinfo->LDInitializationProcedure == 0xcc)
+      if (frame->ExceptionPC - DECR_PC_AFTER_BREAK == (LONG) ldinfo->LDInitializationProcedure
+	  && memcmp (ldinfo->LDInitializationProcedure, breakpoint_insn,
+		     BREAKPOINT_SIZE) == 0)
 	{
-	  *(unsigned char *) ldinfo->LDInitializationProcedure = first_insn;
-	  frame->ExceptionEIP -= 1;
+	  memcpy (ldinfo->LDInitializationProcedure, first_insn,
+		  BREAKPOINT_SIZE);
+	  frame->ExceptionPC -= DECR_PC_AFTER_BREAK;
 	  flush_i_cache ();
 	}
       /* Normal breakpoints end up here */
@@ -670,16 +698,16 @@ handle_exception (frame)
 	 instruction pointer is near set_char or get_char, then we caused
 	 the fault ourselves accessing an illegal memory location.  */
       if (mem_may_fault
-	  && ((frame->ExceptionEIP >= (long) &set_char
-	       && frame->ExceptionEIP < (long) &set_char + 50)
-	      || (frame->ExceptionEIP >= (long) &get_char
-		  && frame->ExceptionEIP < (long) &get_char + 50)))
+	  && ((frame->ExceptionPC >= (long) &set_char
+	       && frame->ExceptionPC < (long) &set_char + 50)
+	      || (frame->ExceptionPC >= (long) &get_char
+		  && frame->ExceptionPC < (long) &get_char + 50)))
 	{
 	  mem_err = 1;
 	  /* Point the instruction pointer at an assembly language stub
 	     which just returns from the function.  */
 
-	  frame->ExceptionEIP = (long) &just_return;
+	  frame->ExceptionPC = (long) &just_return;
 
 	  /* Keep going.  This will act as though it returned from
 	     set_char or get_char.  The calling routine will check
@@ -700,6 +728,8 @@ handle_exception (frame)
      the program we are debugging?  We can check whether the PC is in
      the range of the module we are debugging, but that doesn't help
      much since an error could occur in a library routine.  */
+
+  clear_step_traps (frame);
 
   if (! putpacket(remcomOutBuffer))
     return RETURN_TO_NEXT_DEBUGGER;
@@ -803,12 +833,8 @@ handle_exception (frame)
 	      while (1);
 	    }
 
-	  /* clear the trace bit */
-	  frame->ExceptionSystemFlags &= ~0x100;
-
-	  /* set the trace bit if we're stepping */
 	  if (remcomInBuffer[0] == 's')
-	    frame->ExceptionSystemFlags |= 0x100;
+	    set_step_traps (frame);
 
 	  flush_i_cache ();
 	  return RETURN_TO_PROGRAM;

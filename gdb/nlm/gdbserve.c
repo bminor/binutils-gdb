@@ -151,10 +151,19 @@ static const char hexchars[] = "0123456789abcdef";
 #define NUM_REGS 66		/* Number of machine registers */
 #define REGISTER_BYTES (NUM_REGS * 8) /* Total size of registers array */
 
+#define ExceptionPC ExceptionRegs[SF_REG_PC].lo
+#define DECR_PC_AFTER_BREAK 0	/* NT's Palcode gets this right! */
+#define BREAKPOINT {0x80, 0, 0, 0} /* call_pal bpt */
+
+unsigned char breakpoint_insn[] = BREAKPOINT;
+#define BREAKPOINT_SIZE (sizeof breakpoint_insn)
+
 /*#define flush_i_cache() asm("call_pal 0x86")*/
 
 static char *mem2hex (void *mem, char *buf, int count, int may_fault);
 static char *hex2mem (char *buf, void *mem, int count, int may_fault);
+static void set_step_traps (struct StackFrame *);
+static void clear_step_traps (struct StackFrame *);
 
 #if 0
 __main() {};
@@ -212,7 +221,7 @@ frame_to_registers (frame, regs)
      struct StackFrame *frame;
      char *regs;
 {
-  mem2hex (&frame->ExceptionRegs[SF_REG_PC], &regs[PC_REGNUM * 8 * 2], 8 * 1, 0);
+  mem2hex (&frame->ExceptionPC, &regs[PC_REGNUM * 8 * 2], 8 * 1, 0);
 
   mem2hex (&frame->ExceptionRegs[SF_IREG_OFFSET], &regs[V0_REGNUM * 8 * 2], 8 * 64, 0);
 }
@@ -224,7 +233,7 @@ registers_to_frame (regs, frame)
      char *regs;
      struct StackFrame *frame;
 {
-  hex2mem (&regs[PC_REGNUM * 8 * 2], &frame->ExceptionRegs[SF_REG_PC], 8 * 1, 0);
+  hex2mem (&regs[PC_REGNUM * 8 * 2], &frame->ExceptionPC, 8 * 1, 0);
 
   hex2mem (&regs[V0_REGNUM * 8 * 2], &frame->ExceptionRegs[SF_IREG_OFFSET], 8 * 64, 0);
 }
@@ -581,14 +590,14 @@ static LONG saved_target_inst;
 static LONG *saved_target_inst_pc = 0;
 
 static void
-set_step_breakpoint (pc, frame)
-     LONG *pc;
+set_step_traps (frame)
      struct StackFrame *frame;
 {
   union inst inst;
   LONG *target;
   int opcode;
   int ra, rb;
+  LONG *pc = (LONG *)frame->ExceptionPC;
 
   inst.l = *pc++;
 
@@ -620,10 +629,11 @@ set_step_breakpoint (pc, frame)
    set.  */
 
 static int
-clear_step_breakpoint (pc)
-     LONG *pc;
+clear_step_traps (frame)
+     struct StackFrame *frame;
 {
   int retcode;
+  LONG *pc = (LONG *)frame->ExceptionPC;
 
   if (saved_inst_pc == pc || saved_target_inst_pc == pc)
     retcode = 1;
@@ -658,7 +668,7 @@ do_status (ptr, frame)
   ptr += 3;
 
   sprintf (ptr, "%02x:", PC_REGNUM);
-  ptr = mem2hex (&frame->ExceptionRegs[SF_REG_PC], ptr + 3, 8, 0);
+  ptr = mem2hex (&frame->ExceptionPC, ptr + 3, 8, 0);
   *ptr++ = ';';
 
   sprintf (ptr, "%02x:", SP_REGNUM);
@@ -687,7 +697,7 @@ handle_exception (frame)
   int addr, length;
   char *ptr;
   static struct DBG_LoadDefinitionStructure *ldinfo = 0;
-  static LONG first_insn;	/* The first instruction in the program.  */
+  static unsigned char first_insn[BREAKPOINT_SIZE]; /* The first instruction in the program.  */
 
   /* Apparently the bell can sometimes be ringing at this point, and
      should be stopped.  */
@@ -698,7 +708,7 @@ handle_exception (frame)
       ConsolePrintf ("vector=%d: %s, pc=%08x, thread=%08x\r\n",
 		     frame->ExceptionNumber,
 		     frame->ExceptionDescription,
-		     frame->ExceptionRegs[SF_REG_PC].lo,
+		     frame->ExceptionPC,
 		     GetThreadID ());
     }
 
@@ -711,8 +721,10 @@ handle_exception (frame)
 
       ldinfo = ((struct DBG_LoadDefinitionStructure *)
 		frame->ExceptionErrorCode);
-      first_insn = *(LONG *)ldinfo->LDInitializationProcedure;
-      *(LONG *)ldinfo->LDInitializationProcedure = 0x80; /* call_pal bpt */
+      memcpy (first_insn, ldinfo->LDInitializationProcedure,
+	      BREAKPOINT_SIZE);
+      memcpy (ldinfo->LDInitializationProcedure, breakpoint_insn,
+	      BREAKPOINT_SIZE);
       flush_i_cache ();
       return RETURN_TO_PROGRAM;
 
@@ -724,10 +736,13 @@ handle_exception (frame)
 
     case 3:			/* Breakpoint */
       /* After we've reached the initial breakpoint, reset it.  */
-      if (frame->ExceptionRegs[SF_REG_PC].lo == (LONG) ldinfo->LDInitializationProcedure
-	  && *(LONG *) ldinfo->LDInitializationProcedure == 0x80)
+      if (frame->ExceptionPC - DECR_PC_AFTER_BREAK == (LONG) ldinfo->LDInitializationProcedure
+	  && memcmp (ldinfo->LDInitializationProcedure, breakpoint_insn,
+		     BREAKPOINT_SIZE) == 0)
 	{
-	  *(LONG *) ldinfo->LDInitializationProcedure = first_insn;
+	  memcpy (ldinfo->LDInitializationProcedure, first_insn,
+		  BREAKPOINT_SIZE);
+	  frame->ExceptionPC -= DECR_PC_AFTER_BREAK;
 	  flush_i_cache ();
 	}
       /* Normal breakpoints end up here */
@@ -751,16 +766,16 @@ handle_exception (frame)
 	 instruction pointer is near set_char or get_char, then we caused
 	 the fault ourselves accessing an illegal memory location.  */
       if (mem_may_fault
-	  && ((frame->ExceptionRegs[SF_REG_PC].lo >= (long) &set_char
-	       && frame->ExceptionRegs[SF_REG_PC].lo < (long) &set_char + 50)
-	      || (frame->ExceptionRegs[SF_REG_PC].lo >= (long) &get_char
-		  && frame->ExceptionRegs[SF_REG_PC].lo < (long) &get_char + 50)))
+	  && ((frame->ExceptionPC >= (long) &set_char
+	       && frame->ExceptionPC < (long) &set_char + 50)
+	      || (frame->ExceptionPC >= (long) &get_char
+		  && frame->ExceptionPC < (long) &get_char + 50)))
 	{
 	  mem_err = 1;
 	  /* Point the instruction pointer at an assembly language stub
 	     which just returns from the function.  */
 
-	  frame->ExceptionRegs[SF_REG_PC].lo += 4; /* Skip the load or store */
+	  frame->ExceptionPC += 4; /* Skip the load or store */
 
 	  /* Keep going.  This will act as though it returned from
 	     set_char or get_char.  The calling routine will check
@@ -782,7 +797,7 @@ handle_exception (frame)
      the range of the module we are debugging, but that doesn't help
      much since an error could occur in a library routine.  */
 
-  clear_step_breakpoint (frame->ExceptionRegs[SF_REG_PC]);
+  clear_step_traps (frame);
 
   if (! putpacket(remcomOutBuffer))
     return RETURN_TO_NEXT_DEBUGGER;
@@ -887,7 +902,7 @@ handle_exception (frame)
 	    }
 
 	  if (remcomInBuffer[0] == 's')
-	    set_step_breakpoint (frame->ExceptionRegs[SF_REG_PC].lo);
+	    set_step_traps (frame);
 
 	  flush_i_cache ();
 	  return RETURN_TO_PROGRAM;
