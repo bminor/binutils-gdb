@@ -38,7 +38,7 @@ sparc32nbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 {
   /* The following is true for NetBSD 1.6.2:
 
-     The pcb contains %sp, %sp, %psr and %wim.  From this information
+     The pcb contains %sp, %pc, %psr and %wim.  From this information
      we reconstruct the register state as it would look when we just
      returned from cpu_switch().  */
 

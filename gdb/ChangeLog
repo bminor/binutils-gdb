@@ -1,3 +1,7 @@
+2004-07-23  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparcnbsd-nat.c (sparc32nbsd_supply_pcb): Fix typo in comment.
+
 2004-07-21  Andrew Cagney  <cagney@gnu.org>
 
 	Use regcache_raw_supply instead of supply_register.
