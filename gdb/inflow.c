@@ -3,19 +3,19 @@
 
 This file is part of GDB.
 
-GDB is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-GDB is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GDB; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 #include "defs.h"
@@ -258,6 +258,7 @@ term_info (arg, from_tty)
   target_terminal_info (arg, from_tty);
 }
 
+/* ARGSUSED */
 void
 child_terminal_info (args, from_tty)
      char *args;
@@ -304,21 +305,29 @@ child_terminal_info (args, from_tty)
 #endif
 }
 
-/* NEW_TTY is called in new child processes under Unix, which will
-   become debugger target processes.
-   If the TTYNAME argument is non-null, we switch to that tty for further
-   input and output.  In either case, we remember the setup.  */
+/* NEW_TTY_PREFORK is called before forking a new child process,
+   so we can record the state of ttys in the child to be formed.
+   TTYNAME is null if we are to share the terminal with gdb;
+   or points to a string containing the name of the desired tty.
 
-void
-new_tty (ttyname)
+   NEW_TTY is called in new child processes under Unix, which will
+   become debugger target processes.  This actually switches to
+   the terminal specified in the NEW_TTY_PREFORK call.  */
+
+new_tty_prefork (ttyname)
      char *ttyname;
 {
-  register int tty;
-
   /* Save the name for later, for determining whether we and the child
      are sharing a tty.  */
   inferior_thisrun_terminal = ttyname;
-  if (ttyname == 0)
+}
+
+void
+new_tty ()
+{
+  register int tty;
+
+  if (inferior_thisrun_terminal == 0)
     return;
 
 #ifdef TIOCNOTTY
@@ -333,10 +342,10 @@ new_tty (ttyname)
 
   /* Now open the specified new terminal.  */
 
-  tty = open(ttyname, O_RDWR);
+  tty = open(inferior_thisrun_terminal, O_RDWR);
   if (tty == -1)
     {
-      print_sys_errmsg (ttyname, errno);
+      print_sys_errmsg (inferior_thisrun_terminal, errno);
       _exit(1);
     }
 
