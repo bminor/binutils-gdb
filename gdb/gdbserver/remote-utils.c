@@ -48,7 +48,7 @@ void
 remote_open (char *name)
 {
   int save_fcntl_flags;
-
+  
   if (!strchr (name, ':'))
     {
       remote_desc = open (name, O_RDWR);
@@ -99,7 +99,7 @@ remote_open (char *name)
       }
 #endif
 
-
+      fprintf (stderr, "Remote debugging using %s\n", name);
     }
   else
     {
@@ -154,6 +154,10 @@ remote_open (char *name)
 
       signal (SIGPIPE, SIG_IGN);	/* If we don't do this, then gdbserver simply
 					   exits when the remote side dies.  */
+
+      /* Convert IP address to string.  */
+      fprintf (stderr, "Remote debugging from host %s\n", 
+         inet_ntoa (sockaddr.sin_addr));
     }
 
 #if defined(F_SETFL) && defined (FASYNC)
@@ -164,7 +168,6 @@ remote_open (char *name)
 #endif
 #endif
   disable_async_io ();
-  fprintf (stderr, "Remote debugging using %s\n", name);
 }
 
 void
