@@ -25,6 +25,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "expression.h"
 #include "value.h"
 #include "language.h"
+#include "demangle.h"
 
 static void
 chill_print_value_fields PARAMS ((struct type *, char *, FILE *, int, int,
@@ -266,7 +267,8 @@ chill_print_value_fields (type, valaddr, stream, format, recurse, pretty,
 	    {
 	      wrap_here (n_spaces (2 + 2 * recurse));
 	    }
-	  fprint_symbol (stream, TYPE_FIELD_NAME (type, i));
+	  fprintf_symbol_filtered (stream, TYPE_FIELD_NAME (type, i),
+				   language_chill, DMGL_NO_OPTS);
 	  fputs_filtered (" = ", stream);
 	  if (TYPE_FIELD_PACKED (type, i))
 	    {

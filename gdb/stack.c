@@ -201,7 +201,8 @@ print_frame_info (fi, level, source, args)
       if (addressprint)
 	if (fi->pc != sal.pc || !sal.symtab)
 	  printf_filtered ("%s in ", local_hex_string(fi->pc));
-      fputs_demangled (funname ? funname : "??", stdout, 0, funlang);
+      fprintf_symbol_filtered (stdout, funname ? funname : "??", funlang,
+			       DMGL_NO_OPTS);
       wrap_here ("   ");
       fputs_filtered (" (", stdout);
       if (args)
@@ -413,7 +414,8 @@ frame_info (addr_exp, from_tty)
   if (funname)
     {
       printf_filtered (" in ");
-      fputs_demangled (funname, stdout, DMGL_ANSI | DMGL_PARAMS, funlang);
+      fprintf_symbol_filtered (stdout, funname, funlang,
+			       DMGL_ANSI | DMGL_PARAMS);
     }
   wrap_here ("   ");
   if (sal.symtab)

@@ -151,8 +151,8 @@ cp_type_print_method_args (args, prefix, varstring, staticp, stream)
 {
   int i;
 
-  fputs_demangled (prefix, stream, DMGL_ANSI, language_cplus);
-  fputs_demangled (varstring, stream, DMGL_ANSI, language_cplus);
+  fprintf_symbol_filtered (stream, prefix, language_cplus, DMGL_ANSI);
+  fprintf_symbol_filtered (stream, varstring, language_cplus, DMGL_ANSI);
   fputs_filtered (" (", stream);
   if (args && args[!staticp] && args[!staticp]->code != TYPE_CODE_VOID)
     {
