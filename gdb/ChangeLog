@@ -1,3 +1,8 @@
+Tue Mar 14 15:00:54 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* valops.c (value_arg_coerce):  Do possible value_coerce_array
+	before determining type argument to value_cast.
+
 Tue Mar 14 10:41:41 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
 	* remote-es.c: Replace ignore with 0.
