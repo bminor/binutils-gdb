@@ -7,6 +7,12 @@
 
 1999-09-11  Donn Terry  <donn@interix.com>
 
+	* libpei.h (_bfd_pei_final_link_postscript): Declare.
+	(coff_final_link_postscript): Define.
+	* peigen.c (_bfd_pei_swap_aouthdr_out): Don't set value for data
+	directory entries here.
+	(_bfd_pei_final_link_postscript): New function.
+
 	* peigen.c (_bfd_pei_swap_scnhdr_out): Remove code which sets
 	section flags based on the section name.
 

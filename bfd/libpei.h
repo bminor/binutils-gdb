@@ -238,6 +238,10 @@ boolean _bfd_pe_bfd_copy_private_bfd_data_common PARAMS ((bfd *, bfd *));
 
 void _bfd_pe_get_symbol_info PARAMS ((bfd *, asymbol *, symbol_info *));
 
+boolean _bfd_pei_final_link_postscript
+  PARAMS ((bfd *, struct coff_final_link_info *));
+#define coff_final_link_postscript _bfd_pei_final_link_postscript
+
 /* The following are needed only for ONE of pe or pei, but don't
    otherwise vary; peicode.h fixes up ifdefs but we provide the
    prototype.  */

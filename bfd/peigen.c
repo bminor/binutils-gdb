@@ -566,31 +566,27 @@ _bfd_pei_swap_aouthdr_out (abfd, in, out)
   /* first null out all data directory entries .. */
   memset (extra->DataDirectory, sizeof (extra->DataDirectory), 0);
 
-  add_data_entry (abfd, extra, 0, ".edata", ib);
-  add_data_entry (abfd, extra, 1, ".idata", ib);
-  add_data_entry (abfd, extra, 2, ".rsrc" ,ib);
+  add_data_entry (abfd, extra, 0, ".edata", 0);
 
-#ifdef POWERPC_LE_PE
-  /* FIXME: do other PE platforms use this? */
-  add_data_entry (abfd, extra, 3, ".pdata" ,ib);
-#endif
+  /* Don't call add_data_entry for .idata$2 or .idata$5.  It's done in
+     bfd_coff_final_link where all the required information is
+     available.  */
 
-  add_data_entry (abfd, extra, 5, ".reloc", ib);
+  /* However, until other .idata fixes are made (pending patch), the
+     entry for .idata is needed for backwards compatability.  FIXME.  */
+  add_data_entry (abfd, extra, 1, ".idata" ,0);
 
-#ifdef POWERPC_LE_PE
-  /* On the PPC NT system, this field is set up as follows. It is not
-     an "officially" reserved field, so it currently has no title.
-     first_thunk_address is idata$5, and the thunk_size is the size of
-     the idata$5 chunk of the idata section.  */
-  extra->DataDirectory[12].VirtualAddress = first_thunk_address;
-  extra->DataDirectory[12].Size = thunk_size;
+  add_data_entry (abfd, extra, 2, ".rsrc" ,0);
 
-  /* On the PPC NT system, the size of the directory entry is not the
-     size of the entire section. It's actually offset to the end of
-     the idata$3 component of the idata section. This is the size of
-     the entire import table. (also known as the start of idata$4).  */
-  extra->DataDirectory[1].Size = import_table_size;
-#endif
+  add_data_entry (abfd, extra, 3, ".pdata", 0);
+
+  /* For some reason, the virtual size (which is what's set by
+     add_data_entry) for .reloc is not the same as the size recorded
+     in this slot by MSVC; it doesn't seem to cause problems (so far),
+     but since it's the best we've got, use it.  It does do the right
+     thing for .pdata.  */
+  if (pe_data (abfd)->has_reloc_section)
+    add_data_entry (abfd, extra, 5, ".reloc", 0);
 
   {
     asection *sec;
@@ -1855,4 +1851,62 @@ _bfd_pe_get_symbol_info (abfd, symbol, ret)
 	  || (symbol->flags & BSF_DEBUGGING_RELOC) != 0)
       && ! bfd_is_abs_section (symbol->section))
     ret->value += pe_data (abfd)->pe_opthdr.ImageBase;
+}
+
+/* Handle the .idata section and other things that need symbol table
+   access.  */
+
+boolean
+_bfd_pei_final_link_postscript (abfd, pfinfo)
+     bfd *abfd;
+     struct coff_final_link_info *pfinfo;
+{
+  struct coff_link_hash_entry *h1;
+  struct bfd_link_info *info = pfinfo->info;
+
+  /* There are a few fields that need to be filled in now while we
+     have symbol table access.
+
+     The .idata subsections aren't directly available as sections, but
+     they are in the symbol table, so get them from there.  */
+
+  /* The import directory.  This is the address of .idata$2, with size
+     of .idata$2 + .idata$3.  */
+  h1 = coff_link_hash_lookup (coff_hash_table (info),
+			      ".idata$2", false, false, true);
+  if (h1 != NULL)
+    {
+      pe_data(abfd)->pe_opthdr.DataDirectory[1].VirtualAddress =
+	(h1->root.u.def.value
+	 + h1->root.u.def.section->output_section->vma
+	 + h1->root.u.def.section->output_offset);
+      h1 = coff_link_hash_lookup (coff_hash_table (info),
+				  ".idata$4", false, false, true);
+      pe_data (abfd)->pe_opthdr.DataDirectory[1].Size =
+	((h1->root.u.def.value
+	  + h1->root.u.def.section->output_section->vma
+	  + h1->root.u.def.section->output_offset)
+	 - pe_data(abfd)->pe_opthdr.DataDirectory[1].VirtualAddress);
+
+      /* The import address table.  This is the size/address of
+         .idata$5.  */
+      h1 = coff_link_hash_lookup (coff_hash_table (info),
+				  ".idata$5", false, false, true);
+      pe_data (abfd)->pe_opthdr.DataDirectory[12].VirtualAddress =
+	(h1->root.u.def.value
+	 + h1->root.u.def.section->output_section->vma
+	 + h1->root.u.def.section->output_offset);
+      h1 = coff_link_hash_lookup (coff_hash_table (info),
+				  ".idata$6", false, false, true);
+      pe_data (abfd)->pe_opthdr.DataDirectory[12].Size =
+	((h1->root.u.def.value
+	  + h1->root.u.def.section->output_section->vma
+	  + h1->root.u.def.section->output_offset)
+	 - pe_data(abfd)->pe_opthdr.DataDirectory[12].VirtualAddress);
+    }
+
+  /* If we couldn't find idata$2, we either have an excessively
+     trivial program or are in DEEP trouble; we have to assume trivial
+     program....  */
+  return true;
 }
