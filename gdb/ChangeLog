@@ -1,3 +1,8 @@
+2004-04-03  Jim Blandy  <jimb@redhat.com>
+
+	* MAINTAINERS: Chris Faylor has changed employers; add him to
+	"paper trail" section, and update his E-mail address.
+
 2004-04-03  Andrew Cagney  <cagney@redhat.com>
 
 	* frame-unwind.c (frame_unwind_find_by_frame): Delete check for
