@@ -1,3 +1,9 @@
+2002-10-25  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* config.bfd (mips*el-*-netbsd*, mips*-*-netbsd*): Add
+	bfd_elf64_bigmips_vec and bfd_elf64_littlemips_vec to
+	targ_selvecs.
+
 2002-10-25  Jim Wilson  <wilson@redhat.com>
 
 	* elf64-sh64.c (sh_elf64_relocate_section): Call
