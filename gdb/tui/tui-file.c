@@ -22,6 +22,13 @@
 #include "ui-file.h"
 #include "tui/tui-file.h"
 
+#ifdef TUI
+#include "tui.h"
+#include "tuiData.h"
+#include "tuiIO.h"
+#include "tuiCommand.h"
+#endif
+
 #include <string.h>
 
 /* Called instead of fputs for all TUI_FILE output.  */
@@ -196,7 +203,7 @@ tui_file_fputs (linebuffer, file)
 
 	  if (stream->ts_streamtype == astring)
 	    {
-	      tui_file_adjust_strbuf (strlen (linebuffer), stream);
+	      tui_file_adjust_strbuf (strlen (linebuffer), file);
 	      strcat (stream->ts_strbuf, linebuffer);
 	    }
 	  else
@@ -215,7 +222,7 @@ tui_file_fputs (linebuffer, file)
 	  /* The normal case - just do a fputs() */
 	  if (stream->ts_streamtype == astring)
 	    {
-	      tui_file_adjust_strbuf (strlen (linebuffer), stream);
+	      tui_file_adjust_strbuf (strlen (linebuffer), file);
 	      strcat (stream->ts_strbuf, linebuffer);
 	    }
 	  else
