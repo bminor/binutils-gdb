@@ -2890,7 +2890,7 @@ macro_build (place, counter, ep, name, fmt, va_alist)
       && mips_opts.noreorder
       && (prev_prev_insn.insn_mo->pinfo
 	  & (INSN_UNCOND_BRANCH_DELAY | INSN_COND_BRANCH_DELAY
-	     | INSN_COND_BRANCH_LIKELY) != 0)
+	     | INSN_COND_BRANCH_LIKELY)) != 0)
     as_warn (_("Macro instruction expanded into multiple instructions in a branch delay slot"));
 
   if (place == NULL)

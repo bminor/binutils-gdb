@@ -1,7 +1,12 @@
+2002-04-22  Chris Demetriou  <cgd@broadcom.com>
+
+	* config/tc-mips.c (macro_build): Add close-parenthesis missing
+	from previous change.
+
 2002-04-22  Eric Christopher  <echristo@redhat.com>
 
-	* config/tc-mips.c: Add warning if macro instructions are expanded
-	into a branch delay slot.
+	* config/tc-mips.c (macro_build): Add warning if macro instructions
+	are expanded into a branch delay slot.
 
 2002-04-17  Geoffrey Keating  <geoffk@redhat.com>
 
