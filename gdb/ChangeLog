@@ -1,3 +1,9 @@
+Sat May 13 13:55:04 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* dwarfread.c (struct dwfinfo), dbxread.c (struct symloc),
+	mdebugread.c (struct symloc), hpread.c (struct symloc): Fix error
+	in 20 Apr 1995 cleanup of comments.
+
 Sat May 13 13:34:18 1995  Jim Kingdon  <kingdon@deneb.cygnus.com>
 
 	* rs6000-tdep.c (find_toc_address): Revise comment.

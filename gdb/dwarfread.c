@@ -342,9 +342,8 @@ static CORE_ADDR baseaddr;	/* Add to each symbol value */
    only used to pass one value (baseaddr) at the moment.  */
 static struct section_offsets *base_section_offsets;
 
-/* Each partial symbol table entry contains a pointer to private data for the
-   sym_read function to use when expanding a partial symbol table entry
-   to a full symbol table entry.  */
+/* We put a pointer to this structure in the read_symtab_private field
+   of the psymtab.  */
 
 struct dwfinfo {
   /* Always the absolute file offset to the start of the ".debug"

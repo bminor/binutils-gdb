@@ -98,9 +98,8 @@ typedef struct mips_extra_func_info {
 #define ECOFF_REG_TO_REGNUM(num) (num)
 #endif
 
-/* Each partial symbol table entry contains a pointer to private data for the
-   sym_read function to use when expanding a partial symbol table entry
-   to a full symbol table entry.  */
+/* We put a pointer to this structure in the read_symtab_private field
+   of the psymtab.  */
 
 struct symloc
 {

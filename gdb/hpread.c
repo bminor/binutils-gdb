@@ -100,9 +100,8 @@ struct hpread_symfile_info
   else \
     *NAMEP = (SYM)->dsfile.name + VT (OBJFILE)
 
-/* Each partial symbol table entry contains a pointer to private data for the
-   sym_read function to use when expanding a partial symbol table entry
-   to a full symbol table entry.  */
+/* We put a pointer to this structure in the read_symtab_private field
+   of the psymtab.  */
 
 struct symloc
 {
