@@ -13101,6 +13101,7 @@ letter.
 @menu
 * TUI Overview::                TUI overview
 * TUI Keys::                    TUI key bindings
+* TUI Single Key Mode::         TUI single key mode
 * TUI Commands::                TUI specific commands
 * TUI Configuration::           TUI configuration variables
 @end menu
@@ -13186,7 +13187,9 @@ assembly and registers
 The TUI installs several key bindings in the readline keymaps
 (@pxref{Command Line Editing}).
 They allow to leave or enter in the TUI mode or they operate
-directly on the TUI layout and windows.  The following key bindings
+directly on the TUI layout and windows.  The TUI also provides
+a @emph{SingleKey} keymap which binds several keys directly to
+@value{GDBN} commands.  The following key bindings
 are installed for both TUI mode and the @value{GDBN} standard mode.
 
 @table @kbd
@@ -13218,6 +13221,11 @@ When a new layout is chosen, one window will always be common to the
 previous layout and the new one.
 
 Think of it as the Emacs @kbd{C-x 2} binding.
+
+@kindex C-x s
+@item C-x s
+Use the TUI @emph{SingleKey} keymap that binds single key to gdb commands
+(@pxref{TUI Single Key Mode}).
 
 @end table
 
@@ -13258,6 +13266,65 @@ In the TUI mode, the arrow keys are used by the active window
 for scrolling.  This means they are not available for readline.  It is
 necessary to use other readline key bindings such as @key{C-p}, @key{C-n},
 @key{C-b} and @key{C-f}.
+
+@node TUI Single Key Mode
+@section TUI Single Key Mode
+@cindex TUI single key mode
+
+The TUI provides a @emph{SingleKey} mode in which it installs a particular
+key binding in the readline keymaps to connect single keys to
+some gdb commands. 
+
+@table @kbd
+@kindex c @r{(SingleKey TUI key)}
+@item c
+continue
+
+@kindex d @r{(SingleKey TUI key)}
+@item d
+down
+
+@kindex f @r{(SingleKey TUI key)}
+@item f
+finish
+
+@kindex n @r{(SingleKey TUI key)}
+@item n
+next
+
+@kindex q @r{(SingleKey TUI key)}
+@item q
+exit the @emph{SingleKey} mode.
+
+@kindex r @r{(SingleKey TUI key)}
+@item r
+run
+
+@kindex s @r{(SingleKey TUI key)}
+@item s
+step
+
+@kindex u @r{(SingleKey TUI key)}
+@item u
+up
+
+@kindex v @r{(SingleKey TUI key)}
+@item v
+info locals
+
+@kindex w @r{(SingleKey TUI key)}
+@item w
+where
+
+@end table
+
+Other keys temporarily switch to the @value{GDBN} command prompt.
+The key that was pressed is inserted in the editing buffer so that
+it is possible to type most @value{GDBN} commands without interaction
+with the TUI @emph{SingleKey} mode.  Once the command is entered the TUI
+@emph{SingleKey} mode is restored.  The only way to permanently leave
+this mode is by hitting @key{q} or @samp{@key{C-x} @key{s}}.
+
 
 @node TUI Commands
 @section TUI specific commands
