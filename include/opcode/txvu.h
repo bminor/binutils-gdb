@@ -133,7 +133,7 @@ struct txvu_operand {
 
   /* Parse function.  This is used by the assembler.
      If the operand cannot be parsed an error message is stored in ERRMSG,
-     otherwise NULL is stored.  */
+     otherwise ERRMSG is unchanged.  */
   long (*parse) PARAMS ((char **str, const char **errmsg));
 
   /* Insertion function.  This is used by the assembler.  To insert an
@@ -146,17 +146,17 @@ struct txvu_operand {
      complement arithmetic).
 
      If this field is not NULL, then simply call it with the
-     instruction and the operand value.  It will return the new value
-     of the instruction.  If the ERRMSG argument is not NULL, then if
-     the operand value is illegal, *ERRMSG will be set to a warning
-     string (the operand will be inserted in any case).  If the
-     operand value is legal, *ERRMSG will be unchanged.
+     instruction and the operand value.  It will overwrite the appropriate
+     bits of the instruction with the operand's value.
+     If the ERRMSG argument is not NULL, then if the operand value is illegal,
+     *ERRMSG will be set to a warning string (the operand will be inserted in
+     any case).  If the operand value is legal, *ERRMSG will be unchanged.
 
      REG is non-NULL when inserting a register value.  */
 
-  TXVU_INSN (*insert) PARAMS ((TXVU_INSN insn,
-			      const struct txvu_operand *operand, int mods,
-			      long value, const char **errmsg));
+  void (*insert) PARAMS ((TXVU_INSN *insn,
+			  const struct txvu_operand *operand, int mods,
+			  long value, const char **errmsg));
 
   /* Extraction function.  This is used by the disassembler.  To
      extract this operand type from an instruction, check this field.
@@ -181,17 +181,19 @@ struct txvu_operand {
      FIXME: just thrown in here for now.
      */
 
-  long (*extract) PARAMS ((TXVU_INSN insn,
+  long (*extract) PARAMS ((TXVU_INSN *insn,
 			   const struct txvu_operand *operand,
 			   int mods, int *pinvalid));
 
   /* Print function.  This is used by the disassembler.  */
-  void (*print) PARAMS ((disassemble_info *info, TXVU_INSN insn,
+  void (*print) PARAMS ((disassemble_info *info, TXVU_INSN *insn,
 			 long value));
 };
 
 /* Given an operand entry, return the table index.  */
 #define TXVU_OPERAND_INDEX(op) ((op) - 128)
+
+/* VU support.  */
 
 /* Positions, masks, and values of various fields used in multiple places
    (the opcode table, the disassembler, GAS).  */
@@ -212,16 +214,11 @@ struct txvu_operand {
 #define TXVU_SDEST_W 3
 
 extern const struct txvu_operand txvu_operands[];
-extern const int txvu_operand_count;
 extern /*const*/ struct txvu_opcode txvu_upper_opcodes[];
 extern /*const*/ struct txvu_opcode txvu_lower_opcodes[];
 extern const int txvu_upper_opcodes_count;
 extern const int txvu_lower_opcodes_count;
 
-/* Utility fns in txvu-opc.c.  */
-void txvu_opcode_init_tables PARAMS ((int));
-void txvu_opcode_init_parse PARAMS ((void));
-void txvu_opcode_init_print PARAMS ((void));
 const struct txvu_opcode *txvu_upper_opcode_lookup_asm PARAMS ((const char *));
 const struct txvu_opcode *txvu_lower_opcode_lookup_asm PARAMS ((const char *));
 const struct txvu_opcode *txvu_upper_opcode_lookup_dis PARAMS ((unsigned int));
@@ -229,7 +226,7 @@ const struct txvu_opcode *txvu_lower_opcode_lookup_dis PARAMS ((unsigned int));
 
 /* PKE support.  */
 
-/* PKE instruction flags.
+/* PKE opcode flags.
    The usage here is a bit wasteful of bits, but there's enough bits
    and we can always make better usage later.  */
 
@@ -247,3 +244,36 @@ const struct txvu_opcode *txvu_lower_opcode_lookup_dis PARAMS ((unsigned int));
 #define PKE_OPCODE_DIRECTHL 32
 /* the unpack instruction */
 #define PKE_OPCODE_UNPACK 64
+
+extern const struct txvu_operand pke_operands[];
+extern /*const*/ struct txvu_opcode pke_opcodes[];
+extern const int pke_opcodes_count;
+const struct txvu_opcode *pke_opcode_lookup_asm PARAMS ((const char *));
+const struct txvu_opcode *pke_opcode_lookup_dis PARAMS ((unsigned int));
+
+/* DMA support.  */
+
+/* DMA instruction flags.  */
+#define DMA_FLAG_PCE0 1
+#define DMA_FLAG_PCE1 2
+#define DMA_FLAG_INT 4
+#define DMA_FLAG_SPR 8
+
+extern const struct txvu_operand dma_operands[];
+extern /*const*/ struct txvu_opcode dma_opcodes[];
+extern const int dma_opcodes_count;
+const struct txvu_opcode *dma_opcode_lookup_asm PARAMS ((const char *));
+const struct txvu_opcode *dma_opcode_lookup_dis PARAMS ((unsigned int));
+
+/* GPUIF support.  */
+
+extern const struct txvu_operand gpuif_operands[];
+extern /*const*/ struct txvu_opcode gpuif_opcodes[];
+extern const int gpuif_opcodes_count;
+const struct txvu_opcode *gpuif_opcode_lookup_asm PARAMS ((const char *));
+const struct txvu_opcode *gpuif_opcode_lookup_dis PARAMS ((unsigned int));
+
+/* Utility fns in txvu-opc.c.  */
+void txvu_opcode_init_tables PARAMS ((int));
+void txvu_opcode_init_parse PARAMS ((void));
+void txvu_opcode_init_print PARAMS ((void));

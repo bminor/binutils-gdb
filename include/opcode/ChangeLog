@@ -1,3 +1,11 @@
+start-sanitize-sky
+Mon Jan 26 16:19:01 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* txvu.h (txvu_opcode): insert/extract/print take pointer to
+	instruction rather than instruction itself.  Result of insert is
+	`void'.  Add decls for dma, pke, gpuif support.
+
+end-sanitize-sky
 Thu Jan 22 17:54:56 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* cgen.h: Add prototypes for cgen_save_fixups(),
