@@ -1,6 +1,6 @@
-# .Sanitize for deja-gnu.
+# .Sanitize for gdb/testsuite/config.
 
-# Each directory to survive it's way into a release will need a file
+# Each directory to survive its way into a release will need a file
 # like this one called "./.Sanitize".  All keyword lines must exist,
 # and must exist in the order specified by this file.  Each directory
 # in the tree will be processed, top down, in the following order.
@@ -23,23 +23,18 @@ Do-first:
 
 Things-to-keep:
 
-config.rel.in
-makefile.rel.in
 mips-gdb.exp
 mt-a29k-udi
-mt-frwcom-aout
+mt-hpux
 mt-i386-aout
 mt-i960-nindy
-mt-i960-vx
-mt-m68k-abug-aout
-mt-m68k-abug-coff
-mt-m68k-aout
-mt-m68k-coff
-mt-m68k-vx
-mt-mips
+mt-lynx
+mt-m68k
+mt-mips-ecoff
+mt-slite
 mt-sparc-aout
-mt-sparc-vx
-mt-sparclite
+mt-unix
+mt-vxworks
 nind-gdb.exp
 udi-gdb.exp
 unix-gdb.exp

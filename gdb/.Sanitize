@@ -317,9 +317,6 @@ z8k-tdep.c
 
 
 # Things which are explicitly *not* kept, for now.
-# deblib/		- CVS won't let you blow away directories yet,
-#			  so this is still around from when Stu checked
-#			  it in, as part of Lucid support.
 # energize		- Part of Lucid support.
 # energize-patches	- Part of Lucid support.
 # energize.c		- Part of Lucid support.
@@ -336,7 +333,6 @@ z8k-tdep.c
 
 Things-to-lose:
 
-deblib
 energize
 energize-patches
 energize.c

@@ -1,8 +1,6 @@
-# Sanitize.in for devo.
-# $Id$
-#
+# .Sanitize for gdb/doc.
 
-# Each directory to survive it's way into a release will need a file
+# Each directory to survive its way into a release will need a file
 # like this one called "./.Sanitize".  All keyword lines must exist,
 # and must exist in the order specified by this file.  Each directory
 # in the tree will be processed, top down, in the following order.
@@ -13,7 +11,7 @@
 
 # The lines between the "Do-first:" line and the "Things-to-keep:"
 # line are executed as a /bin/sh shell script before anything else is
-# done in this 
+# done in this directory.
 
 Do-first:
 
@@ -44,12 +42,7 @@ refcard.tex
 remote.texi
 stabs.texinfo
 
-# Things which are explicitly *not* kept by default.
-
 Things-to-lose:
-
-# Obsolete; only exists because CVS can't delete directories.
-config
 
 # Cygnus logo bitmap, huge file, no point in bundling all over the place.
 cyglogo.eps

@@ -84,7 +84,6 @@ signals.c
 signals.exp
 sparc-aout.u
 sparc-elf.u
-t10.c
 term.exp
 twice.c
 twice.exp

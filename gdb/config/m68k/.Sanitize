@@ -41,8 +41,6 @@ Things-to-keep:
 3b1.mt
 altos.mh
 altos.mt
-amix.mh
-amix.mt
 apollo68b.mh
 apollo68b.mt
 apollo68v.mh
@@ -60,6 +58,8 @@ isi.mh
 isi.mt
 m68klynx.mh
 m68klynx.mt
+m68kv4.mh
+m68kv4.mt
 monitor.mt
 news.mh
 news.mt
@@ -91,12 +91,12 @@ tm-delta68.h
 tm-m68k.h
 tm-m68klynx.h
 tm-altos.h
-tm-amix.h
 tm-dpx2.h
 tm-es1800.h
 tm-hp300bsd.h
 tm-hp300hpux.h
 tm-isi.h
+tm-m68kv4.h
 tm-monitor.h
 tm-news.h
 tm-os68k.h
@@ -109,7 +109,6 @@ tm-vx68.h
 vxworks68.mt
 xm-3b1.h
 xm-altos.h
-xm-amix.h
 xm-apollo68b.h
 xm-apollo68v.h
 xm-delta68.h
@@ -119,6 +118,7 @@ xm-hp300hpux.h
 xm-isi.h
 xm-m68k.h
 xm-m68klynx.h
+xm-m68kv4.h
 xm-news.h
 xm-news1000.h
 xm-sun2.h
