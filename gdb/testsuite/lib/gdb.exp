@@ -136,6 +136,24 @@ proc delete_breakpoints {} {
 # elsewhere.
 #
 proc gdb_run_cmd {} {
+    global usestubs
+    global prompt
+
+    if $usestubs!=0 {
+	send "jump *start\n"
+	expect {
+	    -re "Line.* Jump anyway.*y or n. $" {
+		send "y\n"
+		expect {
+		    -re "Continuing.*$prompt $" {}
+		    timeout { perror "Jump to start() failed"; return }
+		}
+            }
+	    timeout { perror "Jump to start() failed (timeout)"; return }
+	}
+	send "continue\n"
+	return
+    }
     send "run\n"
     expect {
 	-re "The program .* has been started already.*y or n. $" {
