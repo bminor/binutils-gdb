@@ -1,5 +1,10 @@
 2004-01-01  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.cp/virtfunc.exp: Modify some patterns to avoid a
+	mysterious bug with sourceware version of expect.
+
+2004-01-01  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.cp/overload.exp: Rewrite.  Clean up patterns to match
 	current versions of gcc, including gcc abi 2.  Remove gratuitous
 	restart of test program.  Use gdb_test_multiple and gdb_test for

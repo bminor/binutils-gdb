@@ -1,4 +1,4 @@
-# Copyright 1992, 1994, 1995, 1996, 1997, 1998, 1999, 2001, 2002, 2003
+# Copyright 1992, 1994, 1995, 1996, 1997, 1998, 1999, 2001, 2002, 2003, 2004
 # Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -330,14 +330,22 @@ proc test_ptype_of_classes {} {
     }
 
     # class D
+    #
+    # I wrote this differently from the others to avoid a problem with
+    # the sourceware version of expect, which dates from 1998.
+    # The bug manifests as ERROR/UNRESOLVED results after an "eof"
+    # in gdb_test_multiple.
+    #
+    # -- chastain 2004-01-01
 
     set re_class	"class D : public AD, public virtual V \{(${ws}private:|)"
     set re_vbptr	"V \\*(_vb.1V|_vb.V);"
     set re_fields	"int d;"
-    set re_methods	"static void s\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}virtual int vd\\((void|)\\);${ws}int fd\\((void|)\\);"
+    set re_methods_2	"static void s\\(void\\);${ws}virtual int vg\\(void\\);${ws}virtual int vd\\(void\\);${ws}int fd\\(void\\);"
+    set re_methods_3	"static void s\\(\\);${ws}virtual int vg\\(\\);${ws}virtual int vd\\(\\);${ws}int fd\\(\\);"
     set re_synth_gcc_2	"D & operator=\\(D const ?&\\);${ws}D\\(int, D const ?&\\);${ws}D\\(int\\);"
     set re_synth_gcc_3	"D & operator=\\(D const ?&\\);${ws}D\\(D const ?&\\);${ws}D\\(\\);"
-    set re_all_methods	"($re_methods|$re_synth_gcc_2${ws}$re_methods|$re_synth_gcc_3${ws}$re_methods|$re_methods${ws}$re_synth_gcc_3)"
+    set re_all_methods	"($re_methods_2|$re_methods_3|$re_synth_gcc_2${ws}$re_methods_2|$re_synth_gcc_3${ws}$re_methods_3|$re_methods${ws}$re_synth_gcc_3)"
 
     gdb_test_multiple "ptype D" "ptype D" {
 	-re "type = ${re_class}${ws}(${re_vbptr}${ws}|)public:${ws}${re_fields}${ws}${re_all_methods}$nl\}$nl$gdb_prompt $" {
