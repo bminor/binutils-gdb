@@ -1,3 +1,8 @@
+Mon Feb 26 10:34:10 1996  Doug Evans  <dje@charmed.cygnus.com>
+
+	* config/tc-sparc.c (sparc_ip): Print all architectures that support
+	the insn on mismatch.
+
 Fri Feb 23 21:44:39 1996  Rob Savoye  <rob@chinadoll.cygnus.com>
 
 	* configure.in: Add support for a29-coff.

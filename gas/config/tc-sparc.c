@@ -1828,16 +1828,36 @@ sparc_ip (str)
 	      current_architecture = needed_architecture;
 	    }
 	  /* Conflict.  */
+	  /* ??? This seems to be a bit fragile.  What if the next entry in
+	     the opcode table is the one we want and it is supported?
+	     It is possible to arrange the table today so that this can't
+	     happen but what about tomorrow?  */
 	  else
 	    {
-	      enum sparc_opcode_arch_val needed_architecture =
-		sparc_ffs (~ SPARC_OPCODE_SUPPORTED (max_architecture)
-			   & needed_arch_mask);
+	      int arch,printed_one_p = 0;
+	      char *p;
+	      char required_archs[SPARC_OPCODE_ARCH_MAX * 16];
 
-	      assert (needed_architecture <= SPARC_OPCODE_ARCH_MAX);
+	      /* Create a list of the architectures that support the insn.  */
+	      needed_arch_mask &= ~ SPARC_OPCODE_SUPPORTED (max_architecture);
+	      p = required_archs;
+	      arch = sparc_ffs (needed_arch_mask);
+	      while ((1 << arch) <= needed_arch_mask)
+		{
+		  if ((1 << arch) & needed_arch_mask)
+		    {
+		      if (printed_one_p)
+			*p++ = '|';
+		      strcpy (p, sparc_opcode_archs[arch].name);
+		      p += strlen (p);
+		      printed_one_p = 1;
+		    }
+		  ++arch;
+		}
+
 	      as_bad ("Architecture mismatch on \"%s\".", str);
 	      as_tsktsk (" (Requires %s; requested architecture is %s.)",
-			 sparc_opcode_archs[needed_architecture].name,
+			 required_archs,
 			 sparc_opcode_archs[max_architecture].name);
 	      return;
 	    }
