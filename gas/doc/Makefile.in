@@ -121,35 +121,18 @@ AUTOMAKE_OPTIONS = cygnus
 # What version of the manual you want; "all" includes everything
 CONFIG = all
 
+# Options to extract the man page from as.texinfo
+MANCONF = -Dman
+
+TEXI2POD = perl $(top_srcdir)/../etc/texi2pod.pl
+
+POD2MAN = pod2man --center="GNU" --release="binutils-$(VERSION)" --section=1
+
 man_MANS = as.1
 
 info_TEXINFOS = as.texinfo gasp.texi
 
-CPU_DOCS = \
-	c-a29k.texi \
-	c-arc.texi \
-	c-arm.texi \
-	c-d10v.texi \
-	c-h8300.texi \
-	c-h8500.texi \
-	c-hppa.texi \
-	c-i370.texi \
-	c-i386.texi \
-	c-i860.texi \
-	c-i960.texi \
-	c-m32r.texi \
-	c-m68hc11.texi \
-	c-m68k.texi \
-	c-mips.texi \
-	c-ns32k.texi \
-	c-pdp11.texi \
-	c-pj.texi \
-	c-sh.texi \
-	c-sparc.texi \
-        c-tic54x.texi \
-	c-vax.texi \
-	c-v850.texi \
-	c-z8k.texi
+CPU_DOCS =  	c-a29k.texi 	c-arc.texi 	c-arm.texi 	c-d10v.texi 	c-h8300.texi 	c-h8500.texi 	c-hppa.texi 	c-i370.texi 	c-i386.texi 	c-i860.texi 	c-i960.texi 	c-m32r.texi 	c-m68hc11.texi 	c-m68k.texi 	c-mips.texi 	c-ns32k.texi 	c-pdp11.texi 	c-pj.texi 	c-sh.texi 	c-sparc.texi         c-tic54x.texi 	c-vax.texi 	c-v850.texi 	c-z8k.texi
 
 
 # This one isn't ready for prime time yet.  Not even a little bit.
@@ -176,7 +159,7 @@ DIST_COMMON =  Makefile.am Makefile.in
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
 all: all-redirect
 .SUFFIXES:
@@ -357,7 +340,7 @@ distdir: $(DISTFILES)
 	@for file in $(DISTFILES); do \
 	  if test -f $$file; then d=.; else d=$(srcdir); fi; \
 	  if test -d $$d/$$file; then \
-	    cp -pr $$d/$$file $(distdir)/$$file; \
+	    cp -pr $$/$$file $(distdir)/$$file; \
 	  else \
 	    test -f $(distdir)/$$file \
 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
@@ -447,6 +430,19 @@ gasver.texi: Makefile
 
 as.info: $(srcdir)/as.texinfo asconfig.texi gasver.texi $(CPU_DOCS)
 as.dvi: $(srcdir)/as.texinfo asconfig.texi gasver.texi $(CPU_DOCS)
+
+# Maintenance
+
+# Build the man page from the texinfo file
+# The sed command removes the no-adjust Nroff command so that
+# the man output looks standard.
+$(srcdir)/as.1: $(srcdir)/as.texinfo
+	touch $(srcdir)/as.1
+	-$(TEXI2POD) $(MANCONF) < $(srcdir)/as.texinfo > as.pod
+	-($(POD2MAN) as.pod | \
+		sed -e '/^.if n .na/d' > $(srcdir)/as.1.T$$$$ && \
+		mv -f $(srcdir)/as.1.T$$$$ $(srcdir)/as.1) || \
+		(rm -f $(srcdir)/as.1.T$$$$ && exit 1)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

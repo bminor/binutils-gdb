@@ -52,8 +52,28 @@ DLLWRAP_PROG=dllwrap
 
 SRCONV_PROG=srconv$(EXEEXT) sysdump$(EXEEXT) coffdump$(EXEEXT) 
 
-man_MANS = ar.1 nm.1 objdump.1 ranlib.1 size.1 strings.1 strip.1 objcopy.1 \
-	addr2line.1 nlmconv.1 $(DEMANGLER_NAME).1
+MANCONF  = -Dman
+
+TEXI2POD = perl $(srcdir)/../etc/texi2pod.pl
+
+POD2MAN = pod2man --center="GNU" --release="binutils-$(VERSION)" --section=1
+
+# List of man pages generated from binutils.texi
+man_MANS = \
+	addr2line.1 \
+	ar.1 \
+	dlltool.1 \
+	nlmconv.1 \
+	nm.1 \
+	objcopy.1 \
+	objdump.1 \
+	ranlib.1 \
+	readelf.1 \
+	size.1 \
+	strings.1 \
+	strip.1 \
+	windres.1 \
+	$(DEMANGLER_NAME).1
 
 PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRINGS_PROG) $(STRIP_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@ $(ADDR2LINE_PROG) $(READELF_PROG) @BUILD_DLLWRAP@ @BUILD_MISC@
 
@@ -338,6 +358,112 @@ config.texi: Makefile
 binutils.dvi: $(srcdir)/binutils.texi config.texi
 
 binutils.info: $(srcdir)/binutils.texi config.texi
+
+# Man page generation from texinfo
+$(srcdir)/addr2line.1:	$(srcdir)/binutils.texi
+	touch $@
+	-$(TEXI2POD) $(MANCONF) -Daddr2line < $< > $@.pod
+	-($(POD2MAN) $@.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
+		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
+	rm -f $@.pod
+
+$(srcdir)/ar.1:	$(srcdir)/binutils.texi
+	touch $@
+	-$(TEXI2POD) $(MANCONF) -Dar < $< > $@.pod
+	-($(POD2MAN) $@.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
+		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
+	rm -f $@.pod
+
+$(srcdir)/dlltool.1:	$(srcdir)/binutils.texi
+	touch $@
+	-$(TEXI2POD) $(MANCONF) -Ddlltool < $< > $@.pod
+	-($(POD2MAN) $@.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
+		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
+	rm -f $@.pod
+
+$(srcdir)/dlltool.1:	$(srcdir)/binutils.texi
+	touch $@
+	-$(TEXI2POD) $(MANCONF) -Ddlltool < $< > $@.pod
+	-($(POD2MAN) $@.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
+		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
+	rm -f $@.pod
+
+$(srcdir)/nlmconv.1:	$(srcdir)/binutils.texi
+	touch $@
+	-$(TEXI2POD) $(MANCONF) -Dnlmconv < $< > $@.pod
+	-($(POD2MAN) $@.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
+		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
+	rm -f $@.pod
+
+$(srcdir)/nm.1:	$(srcdir)/binutils.texi
+	touch $@
+	-$(TEXI2POD) $(MANCONF) -Dnm < $< > $@.pod
+	-($(POD2MAN) $@.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
+		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
+	rm -f $@.pod
+
+$(srcdir)/objcopy.1:	$(srcdir)/binutils.texi
+	touch $@
+	-$(TEXI2POD) $(MANCONF) -Dobjcopy < $< > $@.pod
+	-($(POD2MAN) $@.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
+		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
+	rm -f $@.pod
+
+$(srcdir)/objdump.1:	$(srcdir)/binutils.texi
+	touch $@
+	-$(TEXI2POD) $(MANCONF) -Dobjdump < $< > $@.pod
+	-($(POD2MAN) $@.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
+		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
+	rm -f $@.pod
+
+$(srcdir)/ranlib.1:	$(srcdir)/binutils.texi
+	touch $@
+	-$(TEXI2POD) $(MANCONF) -Dranlib < $< > $@.pod
+	-($(POD2MAN) $@.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
+		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
+	rm -f $@.pod
+
+$(srcdir)/readelf.1:	$(srcdir)/binutils.texi
+	touch $@
+	-$(TEXI2POD) $(MANCONF) -Dreadelf < $< > $@.pod
+	-($(POD2MAN) $@.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
+		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
+	rm -f $@.pod
+
+$(srcdir)/size.1:	$(srcdir)/binutils.texi
+	touch $@
+	-$(TEXI2POD) $(MANCONF) -Dsize < $< > $@.pod
+	-($(POD2MAN) $@.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
+		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
+	rm -f $@.pod
+
+$(srcdir)/strings.1:	$(srcdir)/binutils.texi
+	touch $@
+	-$(TEXI2POD) $(MANCONF) -Dstrings < $< > $@.pod
+	-($(POD2MAN) $@.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
+		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
+	rm -f $@.pod
+
+$(srcdir)/strip.1:	$(srcdir)/binutils.texi
+	touch $@
+	-$(TEXI2POD) $(MANCONF) -Dstrip < $< > $@.pod
+	-($(POD2MAN) $@.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
+		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
+	rm -f $@.pod
+
+$(srcdir)/windres.1:	$(srcdir)/binutils.texi
+	touch $@
+	-$(TEXI2POD) $(MANCONF) -Dwindres < $< > $@.pod
+	-($(POD2MAN) $@.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
+		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
+	rm -f $@.pod
+
+$(srcdir)/cxxfilt.man:	$(srcdir)/binutils.texi
+	touch $@
+	-$(TEXI2POD) $(MANCONF) -Dcxxfilt < $< > $@.pod
+	-($(POD2MAN) $@.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
+		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
+	rm -f $@.pod
 
 MAINTAINERCLEANFILES = config.texi
 

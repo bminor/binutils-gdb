@@ -9,6 +9,38 @@
 
 @c @smallbook
 
+@c man begin NAME
+@ifset man
+@c Configure for the generation of man pages
+@set UsesEnvVars
+@set GENERIC
+@set A29K
+@set ARC
+@set ARM
+@set D10V
+@set D30V
+@set H8/300
+@set H8/500
+@set HPPA
+@set I370
+@set I80386
+@set I860
+@set I960
+@set M32R
+@set M68HC11
+@set M680X0
+@set MCORE
+@set MIPS
+@set PDP11
+@set PJ
+@set SH
+@set SPARC
+@set C54X
+@set V850
+@set VAX
+@end ifset
+@c man end
+
 @ifinfo
 @format
 START-INFO-DIR-ENTRY
@@ -63,14 +95,16 @@ notice identical to this one except for the removal of this paragraph
 @end tex
 
 @vskip 0pt plus 1filll
+@c man begin COPYRIGHT
 Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000 Free Software Foundation, Inc.
 
-      Permission is granted to copy, distribute and/or modify this document
-      under the terms of the GNU Free Documentation License, Version 1.1
-      or any later version published by the Free Software Foundation;
-      with no Invariant Sections, with no Front-Cover Texts, and with no
-      Back-Cover Texts.  A copy of the license is included in the
-      section entitled "GNU Free Documentation License".
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.1
+or any later version published by the Free Software Foundation;
+with no Invariant Sections, with no Front-Cover Texts, and with no
+Back-Cover Texts.  A copy of the license is included in the
+section entitled "GNU Free Documentation License".
+@c man end
 
 @end titlepage
 @end iftex
@@ -123,6 +157,21 @@ section entitled "GNU Free Documentation License".
 
 @cindex @sc{gnu} linker
 @cindex what is this?
+
+@ifsef man
+@c man begin SYNOPSIS
+ld [ options ] objfile...
+@c man end
+
+@c man begin SEEALSO
+ar(1), nm(1), objcopy(1), objdump(1), readelf(1) and
+the Info entries for @file{binutils} and
+@file{ld}.
+@c man end
+@end ifset
+
+@c man begin DESCRIPTION
+
 @code{ld} combines a number of object and archive files, relocates
 their data and ties up symbol references. Usually the last step in
 compiling a program is to run @code{ld}.
@@ -130,6 +179,14 @@ compiling a program is to run @code{ld}.
 @code{ld} accepts Linker Command Language files written in
 a superset of AT&T's Link Editor Command Language syntax,
 to provide explicit and total control over the linking process.
+
+@ifset man
+@c For the man only
+This man page does not describe the command language; see the 
+@code{ld} entry in @code{info}, or the manual
+ld: the GNU linker, for full details on the command language and 
+on other aspects of the GNU linker. 
+@end ifset
 
 @ifclear SingleFormat
 This version of @code{ld} uses the general purpose BFD libraries
@@ -145,12 +202,18 @@ execution immediately upon encountering an error; whenever possible,
 @code{ld} continues executing, allowing you to identify other errors
 (or, in some cases, to get an output file in spite of the error).
 
+@c man end
+
 @node Invocation
 @chapter Invocation
+
+@c man begin DESCRIPTION
 
 The @sc{gnu} linker @code{ld} is meant to cover a broad range of situations,
 and to be as compatible as possible with other linkers.  As a result,
 you have many choices to control its behavior.
+
+@c man end
 
 @ifset UsesEnvVars
 @menu
@@ -164,6 +227,9 @@ you have many choices to control its behavior.
 
 @cindex command line
 @cindex options
+
+@c man begin OPTIONS
+
 The linker supports a plethora of command-line options, but in actual
 practice few of them are used in any particular context.
 @cindex standard Unix system
@@ -309,7 +375,10 @@ The default format is taken from the environment variable
 @xref{Environment}.
 @end ifset
 You can also define the input format from a script, using the command
-@code{TARGET}; see @ref{Format Commands}.
+@code{TARGET};
+@ifclear man
+see @ref{Format Commands}.
+@end ifclear
 @end ifclear
 
 @kindex -c @var{MRI-cmdfile}
@@ -319,7 +388,13 @@ You can also define the input format from a script, using the command
 @itemx --mri-script=@var{MRI-commandfile}
 For compatibility with linkers produced by MRI, @code{ld} accepts script
 files written in an alternate, restricted command language, described in
-@ref{MRI,,MRI Compatible Script Files}.  Introduce MRI script files with
+@ifclear man
+@ref{MRI,,MRI Compatible Script Files}.
+@end ifclear
+@ifset man
+the MRI Compatible Script Files section of GNU ld documentation.
+@end ifset
+Introduce MRI script files with
 the option @samp{-c}; use the @samp{-T} option to run linker
 scripts written in the general-purpose @code{ld} scripting language.
 If @var{MRI-cmdfile} does not exist, @code{ld} looks for it in the directories
@@ -1443,7 +1518,11 @@ those options are only available for ELF systems.
 
 @end table
 
+@c man end
+
 @subsection Options specific to i386 PE targets
+
+@c man begin OPTIONS
 
 The i386 PE linker supports the @code{-shared} option, which causes
 the output to be a dynamically linked library (DLL) instead of a
@@ -1600,9 +1679,13 @@ subsystem version also.
 
 @end table
 
+@c man end
+
 @ifset UsesEnvVars
 @node Environment
 @section Environment Variables
+
+@c man begin ENVIRONMENT
 
 You can change the behavior of @code{ld} with the environment variables
 @code{GNUTARGET}, @code{LDEMULATION}, and @code{COLLECT_NO_DEMANGLE}.
@@ -1631,7 +1714,6 @@ available emulations with the @samp{--verbose} or @samp{-V} options.  If
 the @samp{-m} option is not used, and the @code{LDEMULATION} environment
 variable is not defined, the default emulation depends upon how the
 linker was configured.
-@end ifset
 
 @kindex COLLECT_NO_DEMANGLE
 @cindex demangling, default
@@ -1641,6 +1723,9 @@ default to not demangling symbols.  This environment variable is used in
 a similar fashion by the @code{gcc} linker wrapper program.  The default
 may be overridden by the @samp{--demangle} and @samp{--no-demangle}
 options.
+
+@c man end
+@end ifset
 
 @node Scripts
 @chapter Linker Scripts

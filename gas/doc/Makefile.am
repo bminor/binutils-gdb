@@ -5,6 +5,13 @@ AUTOMAKE_OPTIONS = cygnus
 # What version of the manual you want; "all" includes everything
 CONFIG=all
 
+# Options to extract the man page from as.texinfo
+MANCONF = -Dman
+
+TEXI2POD = perl $(top_srcdir)/../etc/texi2pod.pl
+
+POD2MAN = pod2man --center="GNU" --release="binutils-$(VERSION)" --section=1
+
 man_MANS = as.1
 
 info_TEXINFOS = as.texinfo gasp.texi
@@ -55,3 +62,17 @@ noinst_TEXINFOS = internals.texi
 DISTCLEANFILES = asconfig.texi
 
 MAINTAINERCLEANFILES = gasver.texi
+
+# Maintenance
+
+# Build the man page from the texinfo file
+# The sed command removes the no-adjust Nroff command so that
+# the man output looks standard.
+$(srcdir)/as.1: $(srcdir)/as.texinfo
+	touch $(srcdir)/as.1
+	-$(TEXI2POD) $(MANCONF) < $(srcdir)/as.texinfo > as.pod
+	-($(POD2MAN) as.pod | \
+		sed -e '/^.if n .na/d' > $(srcdir)/as.1.T$$$$ && \
+		mv -f $(srcdir)/as.1.T$$$$ $(srcdir)/as.1) || \
+		(rm -f $(srcdir)/as.1.T$$$$ && exit 1)
+

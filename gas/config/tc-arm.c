@@ -8424,7 +8424,38 @@ arm_frob_label (sym)
   ARM_SET_INTERWORK (sym, support_interwork);
 #endif
 
-  if (label_is_thumb_function_name)
+  /* Note - do not allow local symbols (.Lxxx) to be labeled
+     as Thumb functions.  This is because these labels, whilst
+     they exist inside Thumb code, are not the entry points for
+     possible ARM->Thumb calls.  Also, these labels can be used
+     as part of a computed goto or switch statement.  eg gcc
+     can generate code that looks like this:
+
+                ldr  r2, [pc, .Laaa]
+                lsl  r3, r3, #2
+                ldr  r2, [r3, r2]
+                mov  pc, r2
+		
+       .Lbbb:  .word .Lxxx
+       .Lccc:  .word .Lyyy
+       ..etc...
+       .Laaa:   .word Lbbb
+
+     The first instruction loads the address of the jump table.
+     The second instruction converts a table index into a byte offset.
+     The third instruction gets the jump address out of the table.
+     The fourth instruction performs the jump.
+     
+     If the address stored at .Laaa is that of a symbol which has the
+     Thumb_Func bit set, then the linker will arrange for this address
+     to have the bottom bit set, which in turn would mean that the
+     address computation performed by the third instruction would end
+     up with the bottom bit set.  Since the ARM is capable of unaligned
+     word loads, the instruction would then load the incorrect address
+     out of the jump table, and chaos would ensue.  */
+  if (label_is_thumb_function_name
+      && (S_GET_NAME (sym)[0] != '.' || S_GET_NAME (sym)[1] != 'L')
+      && (bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE) != 0)
     {
       /* When the address of a Thumb function is taken the bottom
 	 bit of that address should be set.  This will allow

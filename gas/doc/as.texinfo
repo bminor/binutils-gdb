@@ -19,6 +19,38 @@
 @include asconfig.texi
 @include gasver.texi
 @c ---
+@c man begin NAME
+@ifset man
+@c Configure for the generation of man pages
+@set AS as
+@set TARGET TARGET
+@set GENERIC
+@set A29K
+@set ARC
+@set ARM
+@set D10V
+@set D30V
+@set H8/300
+@set H8/500
+@set HPPA
+@set I370
+@set I80386
+@set I860
+@set I960
+@set M32R
+@set M68HC11
+@set M680X0
+@set MCORE
+@set MIPS
+@set PDP11
+@set PJ
+@set SH
+@set SPARC
+@set C54X
+@set V850
+@set VAX
+@end ifset
+@c man end
 @c common OR combinations of conditions
 @ifset AOUT
 @set aout-bout
@@ -88,14 +120,17 @@ END-INFO-DIR-ENTRY
 @ifinfo
 This file documents the GNU Assembler "@value{AS}".
 
+@c man begin COPYRIGHT
 Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001 Free Software Foundation, Inc.
 
-      Permission is granted to copy, distribute and/or modify this document
-      under the terms of the GNU Free Documentation License, Version 1.1
-      or any later version published by the Free Software Foundation;
-      with no Invariant Sections, with no Front-Cover Texts, and with no
-      Back-Cover Texts.  A copy of the license is included in the
-      section entitled "GNU Free Documentation License".
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.1
+or any later version published by the Free Software Foundation;
+with no Invariant Sections, with no Front-Cover Texts, and with no
+Back-Cover Texts.  A copy of the license is included in the
+section entitled "GNU Free Documentation License".
+
+@c man end
 
 @ignore
 Permission is granted to process this file through Tex and print the
@@ -197,11 +232,19 @@ code for @value{TARGET} architectures.
 Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
 @pxref{Invoking,,Comand-Line Options}.
 
+@c man title AS the portable GNU assembler.
+
+@c man begin SEEALSO
+gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
+@c man end
+
 @c We don't use deffn and friends for the following because they seem
 @c to be limited to one line for the header.
 @smallexample
+@c man begin SYNOPSIS
 @value{AS} [ -a[cdhlns][=file] ] [ -D ]  [ --defsym @var{sym}=@var{val} ]
- [ -f ] [ --gstabs ] [ --gdwarf2 ] [ --help ] [ -I @var{dir} ] [ -J ] [ -K ] [ -L ]
+ [ -f ] [ --gstabs ] [ --gdwarf2 ] [ --help ] [ -I @var{dir} ] 
+ [ -J ] [ -K ] [ -L ]
  [ --listing--lhs-width=NUM ][ --listing-lhs-width2=NUM ]
  [ --listing-rhs-width=NUM ][ --listing-cont-lines=NUM ]
  [ --keep-locals ] [ -o @var{objfile} ] [ -R ] [ --statistics ] [ -v ]
@@ -215,20 +258,22 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
  [ -EB | -EL ]
 @end ifset
 @ifset ARM
- [ -m[arm]1 | -m[arm]2 | -m[arm]250 | -m[arm]3 | -m[arm]6 | -m[arm]60 |
-   -m[arm]600 | -m[arm]610 | -m[arm]620 | -m[arm]7[t][[d]m[i]][fe] | -m[arm]70 |
-   -m[arm]700 | -m[arm]710[c] | -m[arm]7100 | -m[arm]7500 | -m[arm]8 |
-   -m[arm]810 | -m[arm]9 | -m[arm]920 | -m[arm]920t | -m[arm]9tdmi |
+ [ -m[arm]1 | -m[arm]2 | -m[arm]250 | -m[arm]3 |
+   -m[arm]6 | -m[arm]60 | -m[arm]600 | -m[arm]610 |
+   -m[arm]620 | -m[arm]7[t][[d]m[i]][fe] | -m[arm]70 |
+   -m[arm]700 | -m[arm]710[c] | -m[arm]7100 |
+   -m[arm]7500 | -m[arm]8 | -m[arm]810 | -m[arm]9 |
+   -m[arm]920 | -m[arm]920t | -m[arm]9tdmi |
    -mstrongarm | -mstrongarm110 | -mstrongarm1100 ]
- [ -m[arm]v2 | -m[arm]v2a | -m[arm]v3 | -m[arm]v3m | -m[arm]v4 | -m[arm]v4t |
-   -m[arm]v5 | -[arm]v5t | -[arm]v5te ]
+ [ -m[arm]v2 | -m[arm]v2a | -m[arm]v3 | -m[arm]v3m |
+   -m[arm]v4 | -m[arm]v4t | -m[arm]v5 | -[arm]v5t |
+   -[arm]v5te ]
  [ -mthumb | -mall ]
  [ -mfpa10 | -mfpa11 | -mfpe-old | -mno-fpu ]
  [ -EB | -EL ]
- [ -mapcs-32 | -mapcs-26 | -mapcs-float | -mapcs-reentrant ]
- [ -mthumb-interwork ]
- [ -moabi ]
- [ -k ]
+ [ -mapcs-32 | -mapcs-26 | -mapcs-float |
+   -mapcs-reentrant ]
+ [ -mthumb-interwork ] [ -moabi ] [ -k ]
 @end ifset
 @ifset D10V
  [ -O ]
@@ -249,7 +294,8 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
 @c The order here is important.  See c-sparc.texi.
  [ -Av6 | -Av7 | -Av8 | -Asparclet | -Asparclite
    -Av8plus | -Av8plusa | -Av9 | -Av9a ]
- [ -xarch=v8plus | -xarch=v8plusa ] [ -bump ] [ -32 | -64 ]
+ [ -xarch=v8plus | -xarch=v8plusa ] [ -bump ]
+ [ -32 | -64 ]
 @end ifset
 @ifset TIC54X
  [ -mcpu=54[123589] | -mcpu=54[56]lp ] [ -mfar-mode | -mf ] 
@@ -260,11 +306,13 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
 @end ifset
 @ifset I960
 @c see md_parse_option in tc-i960.c
- [ -ACA | -ACA_A | -ACB | -ACC | -AKA | -AKB | -AKC | -AMC ]
+ [ -ACA | -ACA_A | -ACB | -ACC | -AKA | -AKB |
+   -AKC | -AMC ]
  [ -b ] [ -no-relax ]
 @end ifset
 @ifset M32R
- [ --m32rx | --[no-]warn-explicit-parallel-conflicts | --W[n]p ]
+ [ --m32rx | --[no-]warn-explicit-parallel-conflicts |
+   --W[n]p ]
 @end ifset
 @ifset M680X0
  [ -l ] [ -m68000 | -m68010 | -m68020 | ... ]
@@ -275,8 +323,9 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
 @end ifset
 @ifset M68HC11
  [ -m68hc11 | -m68hc12 ]
- [ --force-long-branchs ] [ --short-branchs ] [ --strict-direct-mode ]
- [ --print-insn-syntax ] [ --print-opcodes ] [ --generate-example ]
+ [ --force-long-branchs ] [ --short-branchs ]
+ [ --strict-direct-mode ] [ --print-insn-syntax ]
+ [ --print-opcodes ] [ --generate-example ]
 @end ifset
 @ifset MIPS
  [ -nocpp ] [ -EL ] [ -EB ] [ -G @var{num} ] [ -mcpu=@var{CPU} ]
@@ -287,7 +336,10 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
  [ --emulation=@var{name} ]
 @end ifset
  [ -- | @var{files} @dots{} ]
+@c man end
 @end smallexample
+
+@c man begin OPTIONS
 
 @table @code
 @item -a[cdhlmns]
@@ -546,8 +598,9 @@ Motorola 68000 series.
 @item -l
 Shorten references to undefined symbols, to one word instead of two.
 
-@item -m68000 | -m68008 | -m68010 | -m68020 | -m68030 | -m68040 | -m68060
-@itemx | -m68302 | -m68331 | -m68332 | -m68333 | -m68340 | -mcpu32 | -m5200
+@item -m68000 | -m68008 | -m68010 | -m68020 | -m68030
+@itemx | -m68040 | -m68060 | -m68302 | -m68331 | -m68332
+@itemx | -m68333 | -m68340 | -mcpu32 | -m5200
 Specify what processor in the 68000 family is the target.  The default
 is normally the 68020, but this can be changed at configuration time.
 
@@ -810,6 +863,8 @@ Assemble for a little endian target.
 @end table
 @end ifset
 
+@c man end
+
 @menu
 * Manual::                      Structure of this Manual
 * GNU Assembler::               The GNU Assembler
@@ -895,6 +950,8 @@ computer-readable series of instructions.  Different versions of
 @node GNU Assembler
 @section The GNU Assembler
 
+@c man begin DESCRIPTION
+
 @sc{gnu} @code{as} is really a family of assemblers.
 @ifclear GENERIC
 This manual describes @code{@value{AS}}, a member of that family which is
@@ -922,6 +979,8 @@ This doesn't mean @code{@value{AS}} always uses the same syntax as another
 assembler for the same architecture; for example, we know of several
 incompatible versions of 680x0 assembly language syntax.
 @end ifset
+
+@c man end
 
 Unlike older assemblers, @code{@value{AS}} is designed to assemble a source
 program in one pass of the source file.  This has a subtle impact on the
@@ -960,6 +1019,7 @@ SOM or ELF format object files.
 @section Command Line
 
 @cindex command line conventions
+
 After the program name @code{@value{AS}}, the command line may contain
 options and file names.  Options may appear in any order, and may be
 before, after, or between file names.  The order of file names is
@@ -1003,6 +1063,7 @@ doesn't change the meaning of the source.
 The source program is a concatenation of the text in all the files, in the
 order specified.
 
+@c man begin DESCRIPTION
 Each time you run @code{@value{AS}} it assembles exactly one source
 program.  The source program is made up of one or more files.
 (The standard input is also a file.)
@@ -1022,6 +1083,8 @@ in your command line.
 
 If the source is empty, @code{@value{AS}} produces a small, empty object
 file.
+
+@c man end
 
 @subheading Filenames and Line-numbers
 
@@ -1080,6 +1143,8 @@ information for the debugger.
 @node Errors
 @section Error and Warning Messages
 
+@c man begin DESCRIPTION
+
 @cindex error messages
 @cindex warning messages
 @cindex messages from assembler
@@ -1088,6 +1153,8 @@ file (usually your terminal).  This should not happen when  a compiler
 runs @code{@value{AS}} automatically.  Warnings report an assumption made so
 that @code{@value{AS}} could keep assembling a flawed program; errors report a
 grave problem that stops the assembly.
+
+@c man end
 
 @cindex format of warning messages
 Warning messages have the format
@@ -1139,6 +1206,8 @@ to the @value{TARGET}.
 to particular machine architectures.
 @end ifset
 
+@c man begin DESCRIPTION
+
 If you are invoking @code{@value{AS}} via the @sc{gnu} C compiler (version 2),
 you can use the @samp{-Wa} option to pass arguments through to the assembler.
 The assembler arguments must be separated from each other (and the @samp{-Wa})
@@ -1158,6 +1227,8 @@ command-line options are automatically passed to the assembler by the compiler.
 (You can call the @sc{gnu} compiler driver with the @samp{-v} option to see
 precisely what options it passes to each compilation pass, including the
 assembler.)
+
+@c man end
 
 @menu
 * a::             -a[cdhlns] enable listings

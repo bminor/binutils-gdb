@@ -41,6 +41,13 @@ MKDEP = gcc -MM
 # What version of the manual to build
 DOCVER = gen
 
+# Options to extract the man page from ld.texinfo
+MANCONF = -Dman
+
+TEXI2POD = perl $(BASEDIR)/etc/texi2pod.pl
+
+POD2MAN = pod2man --center="GNU" --release="binutils-$(VERSION)" --section=1
+
 #stuff for self hosting (can be overridden in config file).
 HOSTING_CRT0 = @HOSTING_CRT0@
 HOSTING_LIBS = @HOSTING_LIBS@
@@ -899,6 +906,17 @@ ld.info: $(srcdir)/ld.texinfo configdoc.texi ldver.texi
 ld.dvi: $(srcdir)/ld.texinfo configdoc.texi ldver.texi
 	TEXINPUTS=$(top_srcdir)/../texinfo:$$TEXINPUTS \
 	  MAKEINFO="$(MAKEINFO) -I $(srcdir) -I $(BFDDIR)/doc" $(TEXI2DVI) $(srcdir)/ld.texinfo
+
+# Build the man page from the texinfo file
+# The sed command removes the no-adjust Nroff command so that
+# the man output looks standard.
+$(srcdir)/ld.1: $(srcdir)/ld.texinfo
+	touch $(srcdir)/ld.1
+	-$(TEXI2POD) $(MANCONF) < $(srcdir)/ld.texinfo > ld.pod
+	-($(POD2MAN) ld.pod | \
+		sed -e '/^.if n .na/d' > $(srcdir)/ld.1.T$$$$ && \
+		mv -f $(srcdir)/ld.1.T$$$$ $(srcdir)/ld.1) || \
+		(rm -f $(srcdir)/ld.1.T$$$$ && exit 1)
 
 MAINTAINERCLEANFILES = ldver.texi
 

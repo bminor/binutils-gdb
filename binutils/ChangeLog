@@ -1,3 +1,14 @@
+2001-03-25  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* binutils.texi: Put @c man begin and @c man end indications
+	to generate man pages using texi2pod and pod2man. Put @c man title
+	to identify each man. Add SEEALSO entries.
+	* Makefile.am (MANCONF, TEXI2POD, POD2MAN): New variable.
+	(man_MANS): Add dlltool.1, nlmconv.1, readelf.1, windres.1,
+	sort the list.
+	(*.1): Build the man pages from binutils.texi.
+	* Makefile.in: Regenerate.
+
 2001-03-13  Eric Kohl  <ekohl@rz-online.de>
 
 	* defparse.y (opt_equal_name): allow "." in name.

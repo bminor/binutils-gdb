@@ -28,15 +28,17 @@ END-INFO-DIR-ENTRY
 @end ifinfo
 
 @ifinfo
+@c man begin COPYRIGHT
 Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001 Free Software Foundation, Inc.
 
-      Permission is granted to copy, distribute and/or modify this document
-      under the terms of the GNU Free Documentation License, Version 1.1
-      or any later version published by the Free Software Foundation;
-      with no Invariant Sections, with no Front-Cover Texts, and with no
-      Back-Cover Texts.  A copy of the license is included in the
-      section entitled "GNU Free Documentation License".
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.1
+or any later version published by the Free Software Foundation;
+with no Invariant Sections, with no Front-Cover Texts, and with no
+Back-Cover Texts.  A copy of the license is included in the
+section entitled "GNU Free Documentation License".
 
+@c man end
 @ignore
 Permission is granted to process this file through TeX and print the
 results, provided the printed document carries a copying permission
@@ -173,10 +175,15 @@ section entitled "GNU Free Documentation License".
 @kindex ar
 @cindex archives
 @cindex collections of files
+
+@c man title ar create, modify, and extract from archives
+
 @smallexample
 ar [-]@var{p}[@var{mod} [@var{relpos}] [@var{count}]] @var{archive} [@var{member}@dots{}]
 ar -M [ <mri-script ]
 @end smallexample
+
+@c man begin DESCRIPTION ar
 
 The @sc{gnu} @code{ar} program creates, modifies, and extracts from
 archives.  An @dfn{archive} is a single file holding a collection of
@@ -222,6 +229,8 @@ specify the single command-line option @samp{-M}, you can control it
 with a script supplied via standard input, like the MRI ``librarian''
 program.
 
+@c man end
+
 @menu
 * ar cmdline::                  Controlling @code{ar} on the command line
 * ar scripts::                  Controlling @code{ar} with a script
@@ -232,7 +241,9 @@ program.
 @section Controlling @code{ar} on the command line
 
 @smallexample
+@c man begin SYNOPSIS ar
 ar [-X32_64] [-]@var{p}[@var{mod} [@var{relpos}] [@var{count}]] @var{archive} [@var{member}@dots{}]
+@c man end
 @end smallexample
 
 @cindex Unix compatibility, @code{ar}
@@ -243,6 +254,8 @@ arguments to execute: one keyletter specifying the @emph{operation}
 
 Most operations can also accept further @var{member} arguments,
 specifying particular files to operate on.
+
+@c man begin OPTIONS ar
 
 @sc{gnu} @code{ar} allows you to mix the operation code @var{p} and modifier
 flags @var{mod} in any order, within the first command-line argument.
@@ -455,6 +468,14 @@ default for GNU @code{ar}.  @code{ar} does not support any of the other
 @code{-X} options; in particular, it does not support @code{-X32}
 which is the default for AIX @code{ar}.
 
+@c man end
+
+@ignore
+@c man begin SEEALSO ar
+nm(1), ranlib(1), and the Info entries for @file{binutils}.
+@c man end
+@end ignore
+
 @node ar scripts
 @section Controlling @code{ar} with a script
 
@@ -632,7 +653,10 @@ The @sc{gnu} linker @code{ld} is now described in a separate manual.
 @cindex symbols
 @kindex nm
 
+@c man title nm list symbols from object files
+
 @smallexample
+@c man begin SYNOPSIS nm
 nm [ -a | --debug-syms ]  [ -g | --extern-only ]
    [ -B ]  [ -C | --demangle[=@var{style}] ] [ -D | --dynamic ]
    [ -s | --print-armap ]  [ -A | -o | --print-file-name ]
@@ -642,8 +666,10 @@ nm [ -a | --debug-syms ]  [ -g | --extern-only ]
    [ --target=@var{bfdname} ] [ -f @var{format} | --format=@var{format} ]
    [ --defined-only ] [-l | --line-numbers ]  [ --no-demangle ]
    [ -V | --version ]  [ -X 32_64 ]  [ --help ]  [ @var{objfile}@dots{} ]
+@c man end
 @end smallexample
 
+@c man begin DESCRIPTION nm
 @sc{gnu} @code{nm} lists the symbols from object files @var{objfile}@dots{}.
 If no object files are listed as arguments, @code{nm} assumes the file
 @file{a.out}.
@@ -674,8 +700,11 @@ The symbol is in the uninitialized data section (known as BSS).
 The symbol is common.  Common symbols are uninitialized data.  When
 linking, multiple common symbols may appear with the same name.  If the
 symbol is defined anywhere, the common symbols are treated as undefined
-references.  For more details on common symbols, see the discussion of
+references.
+@ifclear man
+For more details on common symbols, see the discussion of
 --warn-common in @ref{Options,,Linker options,ld.info,The GNU linker}.
+@end man
 
 @item D
 The symbol is in the initialized data section.
@@ -732,6 +761,9 @@ The symbol type is unknown, or object file format specific.
 The symbol name.
 @end itemize
 
+@c man end
+
+@c man begin OPTIONS nm
 The long and short forms of options, shown here as alternatives, are
 equivalent.
 
@@ -869,10 +901,21 @@ to @code{-X 32}, which is not supported by @sc{gnu} @code{nm}.
 Show a summary of the options to @code{nm} and exit.
 @end table
 
+@c man end
+
+@ignore
+@c man begin SEEALSO nm
+ar(1), objdump(1), ranlib(1), and the Info entries for @file{binutils}.
+@c man end
+@end ignore
+
 @node objcopy
 @chapter objcopy
 
+@c man title objcopy copy and translate object files
+
 @smallexample
+@c man begin SYNOPSIS objcopy
 objcopy [ -F @var{bfdname} | --target=@var{bfdname} ]
         [ -I @var{bfdname} | --input-target=@var{bfdname} ]
         [ -O @var{bfdname} | --output-target=@var{bfdname} ]
@@ -902,8 +945,10 @@ objcopy [ -F @var{bfdname} | --target=@var{bfdname} ]
         [ --redefine-sym @var{old}=@var{new} ] [ --weaken ]
         [ -v | --verbose ] [ -V | --version ]  [ --help ]
         @var{infile} [@var{outfile}]
+@c man end
 @end smallexample
 
+@c man begin DESCRIPTION objcopy
 The @sc{gnu} @code{objcopy} utility copies the contents of an object
 file to another.  @code{objcopy} uses the @sc{gnu} @sc{bfd} Library to
 read and write the object files.  It can write the destination object
@@ -938,6 +983,10 @@ Note - @code{objcopy} is not able to change the endianness of its input
 files.  If the input format has an endianness, (some formats do not),
 @code{objcopy} can only copy the inputs into file formats that have the
 same endianness or which have no endianness (eg @samp{srec}).
+
+@c man end
+
+@c man begin OPTIONS objcopy
 
 @table @code
 @item @var{infile}
@@ -1203,13 +1252,24 @@ archives, @samp{objcopy -V} lists all members of the archive.
 Show a summary of the options to @code{objcopy}.
 @end table
 
+@c man end
+
+@ignore
+@c man begin SEEALSO objcopy
+ld(1), objdump(1), and the Info entries for @file{binutils}.
+@c man end
+@end ignore
+
 @node objdump
 @chapter objdump
 
 @cindex object file information
 @kindex objdump
 
+@c man title objdump display information from object files.
+
 @smallexample
+@c man begin SYNOPSIS objdump
 objdump [ -a | --archive-headers ] 
         [ -b @var{bfdname} | --target=@var{bfdname} ] 
         [ -C | --demangle[=@var{style}] ]
@@ -1244,7 +1304,10 @@ objdump [ -a | --archive-headers ]
         [ -V | --version ]
         [ -H | --help ]
         @var{objfile}@dots{}
+@c man end
 @end smallexample
+
+@c man begin DESCRIPTION objdump
 
 @code{objdump} displays information about one or more object files.
 The options control what particular information to display.  This
@@ -1255,6 +1318,10 @@ program to compile and work.
 @var{objfile}@dots{} are the object files to be examined.  When you
 specify archives, @code{objdump} shows information on each of the member
 object files.
+
+@c man end
+
+@c man begin OPTIONS objdump
 
 The long and short forms of options, shown here as alternatives, are
 equivalent.  At least one option from the list
@@ -1481,8 +1548,11 @@ ELF file.  This is only useful on systems (such as Solaris 2.0) in which
 @code{.stab} debugging symbol-table entries are carried in an ELF
 section.  In most other file formats, debugging symbol-table entries are
 interleaved with linkage symbols, and are visible in the @samp{--syms}
-output.  For more information on stabs symbols, see @ref{Top,Stabs,Stabs
+output.
+@ifclear man
+For more information on stabs symbols, see @ref{Top,Stabs,Stabs
 Overview,stabs.info, The ``stabs'' debug format}.
+@end ifclear
 
 @item --start-address=@var{address}
 @cindex start-address
@@ -1525,6 +1595,14 @@ relocation entries.  Using @samp{-x} is equivalent to specifying all of
 Format some lines for output devices that have more than 80 columns.
 @end table
 
+@c man end
+
+@ignore
+@c man begin SEEALSO objdump
+nm(1), readelf(1), and the Info entries for @file{binutils}.
+@c man end
+@end ignore
+
 @node ranlib
 @chapter ranlib
 
@@ -1532,9 +1610,15 @@ Format some lines for output devices that have more than 80 columns.
 @cindex archive contents
 @cindex symbol index
 
+@c man title ranlib generate index to archive.
+
 @smallexample
+@c man begin SYNOPSIS ranlib
 ranlib [-vV] @var{archive}
+@c man end
 @end smallexample
+
+@c man begin DESCRIPTION ranlib
 
 @code{ranlib} generates an index to the contents of an archive and
 stores it in the archive.  The index lists each symbol defined by a
@@ -1550,6 +1634,10 @@ The @sc{gnu} @code{ranlib} program is another form of @sc{gnu} @code{ar}; runnin
 @code{ranlib} is completely equivalent to executing @samp{ar -s}.
 @xref{ar}.
 
+@c man end
+
+@c man begin OPTIONS ranlib
+
 @table @code
 @item -v
 @itemx -V
@@ -1557,18 +1645,32 @@ The @sc{gnu} @code{ranlib} program is another form of @sc{gnu} @code{ar}; runnin
 Show the version number of @code{ranlib}.
 @end table
 
+@c man end
+
+@ignore
+@c man begin SEEALSO ranlib
+ar(1), nm(1), and the Info entries for @file{binutils}.
+@c man end
+@end ignore
+
 @node size
 @chapter size
 
 @kindex size
 @cindex section sizes
 
+@c man title size list section sizes and total size.
+
 @smallexample
+@c man begin SYNOPSIS size
 size [ -A | -B | --format=@var{compatibility} ]
      [ --help ]  [ -d | -o | -x | --radix=@var{number} ]
      [ --target=@var{bfdname} ]  [ -V | --version ]  
      [ @var{objfile}@dots{} ]
+@c man end
 @end smallexample
+
+@c man begin DESCRIPTION size
 
 The @sc{gnu} @code{size} utility lists the section sizes---and the total
 size---for each of the object or archive files @var{objfile} in its
@@ -1577,6 +1679,10 @@ object file or each module in an archive.
 
 @var{objfile}@dots{} are the object files to be examined.
 If none are specified, the file @code{a.out} will be used.
+
+@c man end
+
+@c man begin OPTIONS size
 
 The command line options have the following meanings:
 
@@ -1653,6 +1759,14 @@ automatically recognize many formats.
 Display the version number of @code{size}.
 @end table
 
+@c man end
+
+@ignore
+@c man begin SEEALSO size
+ar(1), objdump(1), readelf(1), and the Info entries for @file{binutils}.
+@c man end
+@end ignore
+
 @node strings
 @chapter strings
 @kindex strings
@@ -1660,12 +1774,18 @@ Display the version number of @code{size}.
 @cindex printing strings
 @cindex strings, printing
 
+@c man title strings print the strings of printable characters in files.
+
 @smallexample
+@c man begin SYNOPSIS strings
 strings [-afov] [-@var{min-len}] [-n @var{min-len}] [-t @var{radix}] [-]
         [--all] [--print-file-name] [--bytes=@var{min-len}]
         [--radix=@var{radix}] [--target=@var{bfdname}]
         [--help] [--version] @var{file}@dots{}
+@c man end
 @end smallexample
+
+@c man begin DESCRIPTION strings
 
 For each @var{file} given, @sc{gnu} @code{strings} prints the printable
 character sequences that are at least 4 characters long (or the number
@@ -1676,6 +1796,10 @@ the strings from the whole file.
 
 @code{strings} is mainly useful for determining the contents of non-text
 files.
+
+@c man end
+
+@c man begin OPTIONS strings
 
 @table @code
 @item -a
@@ -1718,6 +1842,15 @@ Specify an object code format other than your system's default format.
 Print the program version number on the standard output and exit.
 @end table
 
+@c man end
+
+@ignore
+@c man begin SEEALSO strings
+ar(1), nm(1), objdump(1), ranlib(1), readelf(1)
+and the Info entries for @file{binutils}.
+@c man end
+@end ignore
+
 @node strip
 @chapter strip
 
@@ -1726,7 +1859,10 @@ Print the program version number on the standard output and exit.
 @cindex discarding symbols
 @cindex symbols, discarding
 
+@c man title strip Discard symbols from object files.
+
 @smallexample
+@c man begin SYNOPSIS strip
 strip [ -F @var{bfdname} | --target=@var{bfdname} ]
       [ -I @var{bfdname} | --input-target=@var{bfdname} ]
       [ -O @var{bfdname} | --output-target=@var{bfdname} ]
@@ -1738,7 +1874,10 @@ strip [ -F @var{bfdname} | --target=@var{bfdname} ]
       [ -o @var{file} ] [ -p | --preserve-dates ]
       [ -v | --verbose ]  [ -V | --version ]  [ --help ]
       @var{objfile}@dots{}
+@c man end
 @end smallexample
+
+@c man begin DESCRIPTION strip
 
 @sc{gnu} @code{strip} discards all symbols from object files
 @var{objfile}.  The list of object files may include archives.
@@ -1746,6 +1885,10 @@ At least one object file must be given.
 
 @code{strip} modifies the files named in its argument,
 rather than writing modified copies under different names.
+
+@c man end
+
+@c man begin OPTIONS strip
 
 @table @code
 @item -F @var{bfdname}
@@ -1825,19 +1968,33 @@ Verbose output: list all object files modified.  In the case of
 archives, @samp{strip -v} lists all members of the archive.
 @end table
 
+@c man end
+
+@ignore
+@c man begin SEEALSO strip
+the Info entries for @file{binutils}.
+@c man end
+@end ignore
+
 @node c++filt, addr2line, strip, Top
 @chapter c++filt
 
 @kindex c++filt
 @cindex demangling C++ symbols
 
+@c man title cxxfilt Demangle C++ and Java symbols.
+
 @smallexample
+@c man begin SYNOPSIS cxxfilt
 c++filt [ -_ | --strip-underscores ]
         [ -j | --java ]
 	[ -n | --no-strip-underscores ]
         [ -s @var{format} | --format=@var{format} ]
         [ --help ]  [ --version ]  [ @var{symbol}@dots{} ]
+@c man end
 @end smallexample
+
+@c man begin DESCRIPTION cxxfilt
 
 @kindex cxxfilt
 The C++ and Java languages provides function overloading, which means
@@ -1865,6 +2022,10 @@ c++filt @var{symbol}
 If no @var{symbol} arguments are given, @code{c++filt} reads symbol
 names from the standard input and writes the demangled names to the
 standard output.  All results are printed on the standard output.
+
+@c man end
+
+@c man begin OPTIONS cxxfilt
 
 @table @code
 @item -_
@@ -1911,6 +2072,14 @@ Print a summary of the options to @code{c++filt} and exit.
 Print the version number of @code{c++filt} and exit.
 @end table
 
+@c man end
+
+@ignore
+@c man begin SEEALSO cxxfilt
+the Info entries for @file{binutils}.
+@c man end
+@end ignore
+
 @quotation
 @emph{Warning:} @code{c++filt} is a new utility, and the details of its
 user interface are subject to change in future releases.  In particular,
@@ -1935,14 +2104,20 @@ c++filt @var{option} @var{symbol}
 @kindex addr2line
 @cindex address to file name and line number
 
+@c man title addr2line convert addresses into file names and line numbers.
+
 @smallexample
+@c man begin SYNOPSIS addr2line
 addr2line [ -b @var{bfdname} | --target=@var{bfdname} ]
           [ -C | --demangle[=@var{style} ]
           [ -e @var{filename} | --exe=@var{filename} ]
           [ -f | --functions ] [ -s | --basename ]
           [ -H | --help ] [ -V | --version ]
           [ addr addr ... ]
+@c man end
 @end smallexample
+
+@c man begin DESCRIPTION addr2line
 
 @code{addr2line} translates program addresses into file names and line
 numbers.  Given an address and an executable, it uses the debugging
@@ -1972,6 +2147,10 @@ containing the address.
 If the file name or function name can not be determined,
 @code{addr2line} will print two question marks in their place.  If the
 line number can not be determined, @code{addr2line} will print 0.
+
+@c man end
+
+@c man begin OPTIONS addr2line
 
 The long and short forms of options, shown here as alternatives, are
 equivalent.
@@ -2007,6 +2186,14 @@ Display function names as well as file and line number information.
 Display only the base of each file name.
 @end table
 
+@c man end
+
+@ignore
+@c man begin SEEALSO addr2line
+Info entries for @file{binutils}.
+@c man end
+@end ignore
+
 @node nlmconv
 @chapter nlmconv
 
@@ -2027,14 +2214,20 @@ with the above formats.}.
 utilities, since it is only useful for NLM targets.
 @end quotation
 
+@c man title nlmconv converts object code into an NLM.
+
 @smallexample
+@c man begin SYNOPSIS nlmconv
 nlmconv [ -I @var{bfdname} | --input-target=@var{bfdname} ]
         [ -O @var{bfdname} | --output-target=@var{bfdname} ]
         [ -T @var{headerfile} | --header-file=@var{headerfile} ]
         [ -d | --debug]  [ -l @var{linker} | --linker=@var{linker} ]
         [ -h | --help ]  [ -V | --version ]
         @var{infile} @var{outfile}
+@c man end
 @end smallexample
+
+@c man begin DESCRIPTION nlmconv
 
 @code{nlmconv} converts the relocatable @samp{i386} object file
 @var{infile} into the NetWare Loadable Module @var{outfile}, optionally
@@ -2044,13 +2237,19 @@ on writing the NLM command file language used in header files, see the
 Development and Tools Overview}, which is part of the NLM Software
 Developer's Kit (``NLM SDK''), available from Novell, Inc.
 @code{nlmconv} uses the @sc{gnu} Binary File Descriptor library to read
-@var{infile}; see @ref{BFD,,BFD,ld.info,Using LD}, for
-more information.
+@var{infile};
+@ifclear man
+see @ref{BFD,,BFD,ld.info,Using LD}, for more information.
+@end ifclear
 
 @code{nlmconv} can perform a link step.  In other words, you can list
 more than one object file for input if you list them in the definitions
 file (rather than simply specifying one input file on the command line).
 In this case, @code{nlmconv} calls the linker for you.
+
+@c man end
+
+@c man begin OPTIONS nlmconv
 
 @table @code
 @item -I @var{bfdname}
@@ -2092,6 +2291,14 @@ Prints a usage summary.
 Prints the version number for @code{nlmconv}.
 @end table
 
+@c man end
+
+@ignore
+@c man begin SEEALSO nlmconv
+the Info entries for @file{binutils}.
+@c man end
+@end ignore
+
 @node windres
 @chapter windres
 
@@ -2102,9 +2309,15 @@ Prints the version number for @code{nlmconv}.
 utilities, since it is only useful for Windows targets.
 @end quotation
 
+@c man title windres manipulate Windows resources.
+
 @smallexample
+@c man begin SYNOPSIS windres
 windres [options] [input-file] [output-file]
+@c man end
 @end smallexample
+
+@c man begin DESCRIPTION windres
 
 @code{windres} reads resources from an input file and copies them into
 an output file.  Either file may be in one of three formats:
@@ -2147,6 +2360,10 @@ The normal use is for you to write an @code{rc} file, use @code{windres}
 to convert it to a COFF object file, and then link the COFF file into
 your application.  This will make the resources described in the
 @code{rc} file available to Windows.
+
+@c man end
+
+@c man begin OPTIONS windres
 
 @table @code
 @item -i @var{filename}
@@ -2233,6 +2450,13 @@ If @code{windres} is compiled with @code{YYDEBUG} defined as @code{1},
 this will turn on parser debugging.
 @end table
 
+@c man end
+
+@ignore
+@c man begin SEEALSO windres
+the Info entries for @file{binutils}.
+@c man end
+@end ignore
 
 @node dlltool
 @chapter Create files needed to build and use DLLs
@@ -2247,7 +2471,10 @@ dynamic link libraries (DLLs).
 utilities, since it is only useful for those targets which support DLLs.
 @end quotation
 
+@c man title dlltool Create files needed to build and use DLLs.
+
 @smallexample
+@c man begin SYNOPSIS dlltool
 dlltool [-d|--input-def @var{def-file-name}]
         [-b|--base-file @var{base-file-name}]
         [-e|--output-exp @var{exports-file-name}]
@@ -2263,7 +2490,10 @@ dlltool [-d|--input-def @var{def-file-name}]
         [-x|--no-idata4] [-c|--no-idata5] [-i|--interwork]
         [-n|--nodelete] [-v|--verbose] [-h|--help] [-V|--version]
         [object-file @dots{}]
+@c man end
 @end smallexample
+
+@c man begin DESCRIPTION dlltool
 
 @code{dlltool} reads its inputs, which can come from the @samp{-d} and
 @samp{-b} options as well as object files specified on the command
@@ -2328,6 +2558,10 @@ that uses that DLL:
   gcc dll.o exports.o -o dll.dll
   gcc program.o dll.lib -o program
 @end smallexample
+
+@c man end
+
+@c man begin OPTIONS dlltool
 
 The command line options have the following meanings:
 
@@ -2478,13 +2712,24 @@ Displays dlltool's version number and then exits.
 
 @end table
 
+@c man end
+
+@ignore
+@c man begin SEEALSO dlltool
+the Info entries for @file{binutils}.
+@c man end
+@end ignore
+
 @node readelf
 @chapter readelf
 
 @cindex ELF file information
 @kindex readelf
 
+@c man title readelf Displays information about ELF files.
+
 @smallexample
+@c man begin SYNOPSIS readelf
 readelf [ -a | --all ] 
         [ -h | --file-header]
         [ -l | --program-headers | --segments]
@@ -2503,7 +2748,10 @@ readelf [ -a | --all ]
         [ -v | --version]
         [ -H | --help]
         @var{elffile}@dots{}
+@c man end
 @end smallexample
+
+@c man begin DESCRIPTION readelf
 
 @code{readelf} displays information about one or more ELF format object
 files.  The options control what particular information to display.
@@ -2511,6 +2759,10 @@ files.  The options control what particular information to display.
 @var{elffile}@dots{} are the object files to be examined.  At the
 moment, @code{readelf} does not support examining archives, nor does it
 support examing 64 bit ELF files.
+
+@c man end
+
+@c man begin OPTIONS readelf
 
 The long and short forms of options, shown here as alternatives, are
 equivalent.  At least one option besides @samp{-v} or @samp{-H} must be
@@ -2612,6 +2864,13 @@ Display the command line options understood by @code{readelf}.
 
 @end table
 
+@c man end
+
+@ignore
+@c man begin SEEALSO readelf
+objdump(1), and the Info entries for @file{binutils}.
+@c man end
+@end ignore
 
 @node Selecting The Target System
 @chapter Selecting the target system

@@ -2,7 +2,7 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.6  2001/03/25 20:32:25  nickc
+''' Revision 1.1  2001/03/25 20:32:25  nickc
 ''' Automate generate on man pages
 '''
 '''
@@ -96,7 +96,7 @@
 .nr % 0
 .rr F
 .\}
-.TH STRIP.1 1 "binutils-2.11.90" "23/Mar/101" "GNU"
+.TH READELF.1 1 "binutils-2.11.90" "23/Mar/101" "GNU"
 .UC
 .if n .hy 0
 .ds C+ C\v'-.1v'\h'-1p'\s-2+\h'-1p'+\s0\v'.1v'\h'-1p'
@@ -190,86 +190,105 @@
 .\}
 .rm #[ #] #H #V #F C
 .SH "NAME"
-strip \- Discard symbols from object files.
+readelf \- Displays information about ELF files.
 .SH "SYNOPSIS"
-strip [ \-F \fIbfdname\fR | --target=\fIbfdname\fR ]
-      [ \-I \fIbfdname\fR | --input-target=\fIbfdname\fR ]
-      [ \-O \fIbfdname\fR | --output-target=\fIbfdname\fR ]
-      [ \-s | --strip-all ] [ \-S | \-g | --strip-debug ]
-      [ \-K \fIsymbolname\fR | --keep-symbol=\fIsymbolname\fR ]
-      [ \-N \fIsymbolname\fR | --strip-symbol=\fIsymbolname\fR ]
-      [ \-x | --discard-all ] [ \-X | --discard-locals ]
-      [ \-R \fIsectionname\fR | --remove-section=\fIsectionname\fR ]
-      [ \-o \fIfile\fR ] [ \-p | --preserve-dates ]
-      [ \-v | --verbose ]  [ \-V | --version ]  [ --help ]
-      \fIobjfile\fR...
+readelf [ \-a | --all ] 
+        [ \-h | --file-header]
+        [ \-l | --program-headers | --segments]
+        [ \-S | --section-headers | --sections]
+        [ \-e | --headers]
+        [ \-s | --syms | --symbols]
+        [ \-n | --notes]
+        [ \-r | --relocs]
+        [ \-u | --unwind]
+        [ \-d | --dynamic]
+        [ \-V | --version-info]
+        [ \-D | --use-dynamic]
+        [ \-x <number> | --hex-dump=<number>]
+        [ \-w[liaprf] | --debug-dump[=info,=line,=abbrev,=pubnames,=ranges,=frames]]
+        [      --histogram]
+        [ \-v | --version]
+        [ \-H | --help]
+        \fIelffile\fR...
 .SH "DESCRIPTION"
-GNU \f(CWstrip\fR discards all symbols from object files
-\fIobjfile\fR.  The list of object files may include archives.
-At least one object file must be given.
+\f(CWreadelf\fR displays information about one or more ELF format object
+files.  The options control what particular information to display.
 .PP
-\f(CWstrip\fR modifies the files named in its argument,
-rather than writing modified copies under different names.
+\fIelffile\fR... are the object files to be examined.  At the
+moment, \f(CWreadelf\fR does not support examining archives, nor does it
+support examing 64 bit ELF files.
 .SH "OPTIONS"
-.Ip "\f(CW-F \fIbfdname\fR\fR" 4
-.Ip "\f(CW--target=\fIbfdname\fR\fR" 4
-Treat the original \fIobjfile\fR as a file with the object
-code format \fIbfdname\fR, and rewrite it in the same format.
-.Ip "\f(CW--help\fR" 4
-Show a summary of the options to \f(CWstrip\fR and exit.
-.Ip "\f(CW-I \fIbfdname\fR	\fR" 4
-.Ip "\f(CW--input-target=\fIbfdname\fR\fR" 4
-Treat the original \fIobjfile\fR as a file with the object
-code format \fIbfdname\fR.
-.Ip "\f(CW-O \fIbfdname\fR\fR" 4
-.Ip "\f(CW--output-target=\fIbfdname\fR\fR" 4
-Replace \fIobjfile\fR with a file in the output format \fIbfdname\fR.
-.Ip "\f(CW-R \fIsectionname\fR\fR" 4
-.Ip "\f(CW--remove-section=\fIsectionname\fR\fR" 4
-Remove any section named \fIsectionname\fR from the output file.  This
-option may be given more than once.  Note that using this option
-inappropriately may make the output file unusable.
-.Ip "\f(CW-s\fR" 4
-.Ip "\f(CW--strip-all\fR" 4
-Remove all symbols.
-.Ip "\f(CW-g\fR" 4
+The long and short forms of options, shown here as alternatives, are
+equivalent.  At least one option besides \fB\-v\fR or \fB\-H\fR must be
+given. 
+.Ip "\f(CW-a\fR" 4
+.Ip "\f(CW--all\fR" 4
+Equivalent to specifiying \fB--file-header\fR,
+\fB--program-headers\fR, \fB--sections\fR, \fB--symbols\fR,
+\fB--relocs\fR, \fB--dynamic\fR, \fB--notes\fR and
+\fB--version-info\fR. 
+.Ip "\f(CW-h\fR" 4
+.Ip "\f(CW--file-header\fR" 4
+Displays the information contained in the \s-1ELF\s0 header at the start of the
+file.
+.Ip "\f(CW-l\fR" 4
+.Ip "\f(CW--program-headers\fR" 4
+.Ip "\f(CW--segments\fR" 4
+Displays the information contained in the file's segment headers, if it
+has any.
 .Ip "\f(CW-S\fR" 4
-.Ip "\f(CW--strip-debug\fR" 4
-Remove debugging symbols only.
-.Ip "\f(CW--strip-unneeded\fR" 4
-Remove all symbols that are not needed for relocation processing.
-.Ip "\f(CW-K \fIsymbolname\fR\fR" 4
-.Ip "\f(CW--keep-symbol=\fIsymbolname\fR\fR" 4
-Keep only symbol \fIsymbolname\fR from the source file.  This option may
-be given more than once.
-.Ip "\f(CW-N \fIsymbolname\fR\fR" 4
-.Ip "\f(CW--strip-symbol=\fIsymbolname\fR\fR" 4
-Remove symbol \fIsymbolname\fR from the source file. This option may be
-given more than once, and may be combined with strip options other than
-\f(CW-K\fR.
-.Ip "\f(CW-o \fIfile\fR\fR" 4
-Put the stripped output in \fIfile\fR, rather than replacing the
-existing file.  When this argument is used, only one \fIobjfile\fR
-argument may be specified.
-.Ip "\f(CW-p\fR" 4
-.Ip "\f(CW--preserve-dates\fR" 4
-Preserve the access and modification dates of the file.
-.Ip "\f(CW-x\fR" 4
-.Ip "\f(CW--discard-all\fR" 4
-Remove non-global symbols.
-.Ip "\f(CW-X\fR" 4
-.Ip "\f(CW--discard-locals\fR" 4
-Remove compiler-generated local symbols.
-(These usually start with \fBL\fR or \fB.\fR.)
+.Ip "\f(CW--sections\fR" 4
+.Ip "\f(CW--section-headers\fR" 4
+Displays the information contained in the file's section headers, if it
+has any.
+.Ip "\f(CW-s\fR" 4
+.Ip "\f(CW--symbols\fR" 4
+.Ip "\f(CW--syms\fR" 4
+Displays the entries in symbol table section of the file, if it has one.
+.Ip "\f(CW-e\fR" 4
+.Ip "\f(CW--headers\fR" 4
+Display all the headers in the file.  Equivalent to \fB\-h \-l \-S\fR.
+.Ip "\f(CW-n\fR" 4
+.Ip "\f(CW--notes\fR" 4
+Displays the contents of the \s-1NOTE\s0 segment, if it exists.
+.Ip "\f(CW-r\fR" 4
+.Ip "\f(CW--relocs\fR" 4
+Displays the contents of the file's relocation section, if it has one.
+.Ip "\f(CW-u\fR" 4
+.Ip "\f(CW--unwind\fR" 4
+Displays the contents of the file's unwind section, if it has one.  Only
+the unwind sections for \s-1IA64\s0 \s-1ELF\s0 files are currently supported.
+.Ip "\f(CW-d\fR" 4
+.Ip "\f(CW--dynamic\fR" 4
+Displays the contents of the file's dynamic section, if it has one.
 .Ip "\f(CW-V\fR" 4
-.Ip "\f(CW--version\fR" 4
-Show the version number for \f(CWstrip\fR.
+.Ip "\f(CW--version-info\fR" 4
+Displays the contents of the version sections in the file, it they
+exist.
+.Ip "\f(CW-D\fR" 4
+.Ip "\f(CW--use-dynamic\fR" 4
+When displaying symbols, this option makes \f(CWreadelf\fR use the
+symbol table in the file's dynamic section, rather than the one in the
+symbols section.
+.Ip "\f(CW-x <number>\fR" 4
+.Ip "\f(CW--hex-dump=<number>\fR" 4
+Displays the contents of the indicated section as a hexadecimal dump.
+.Ip "\f(CW-w[liaprf]\fR" 4
+.Ip "\f(CW--debug-dump[=line,=info,=abbrev,=pubnames,=ranges,=frames]\fR" 4
+Displays the contents of the debug sections in the file, if any are
+present.  If one of the optional letters or words follows the switch
+then only data found in those specific sections will be dumped.
+.Ip "\f(CW--histogram\fR" 4
+Display a histogram of bucket list lengths when displaying the contents
+of the symbol tables.
 .Ip "\f(CW-v\fR" 4
-.Ip "\f(CW--verbose\fR" 4
-Verbose output: list all object files modified.  In the case of
-archives, \fBstrip \-v\fR lists all members of the archive.
+.Ip "\f(CW--version\fR" 4
+Display the version number of readelf.
+.Ip "\f(CW-H\fR" 4
+.Ip "\f(CW--help\fR" 4
+Display the command line options understood by \f(CWreadelf\fR.
 .SH "SEE ALSO"
-the Info entries for \fIbinutils\fR.
+\fIobjdump\fR\|(1), and the Info entries for \fIbinutils\fR.
 .SH "COPYRIGHT"
 Copyright (c) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001 Free Software Foundation, Inc.
 .PP
@@ -281,8 +300,8 @@ Back-Cover Texts.  A copy of the license is included in the
 section entitled \*(L"GNU Free Documentation License\*(R".
 
 .rn }` ''
-.IX Title "STRIP.1 1"
-.IX Name "strip - Discard symbols from object files."
+.IX Title "READELF.1 1"
+.IX Name "readelf - Displays information about ELF files."
 
 .IX Header "NAME"
 
@@ -292,65 +311,77 @@ section entitled \*(L"GNU Free Documentation License\*(R".
 
 .IX Header "OPTIONS"
 
-.IX Item "\f(CW-F \fIbfdname\fR\fR"
+.IX Item "\f(CW-a\fR"
 
-.IX Item "\f(CW--target=\fIbfdname\fR\fR"
+.IX Item "\f(CW--all\fR"
 
-.IX Item "\f(CW--help\fR"
+.IX Item "\f(CW-h\fR"
 
-.IX Item "\f(CW-I \fIbfdname\fR	\fR"
+.IX Item "\f(CW--file-header\fR"
 
-.IX Item "\f(CW--input-target=\fIbfdname\fR\fR"
+.IX Item "\f(CW-l\fR"
 
-.IX Item "\f(CW-O \fIbfdname\fR\fR"
+.IX Item "\f(CW--program-headers\fR"
 
-.IX Item "\f(CW--output-target=\fIbfdname\fR\fR"
-
-.IX Item "\f(CW-R \fIsectionname\fR\fR"
-
-.IX Item "\f(CW--remove-section=\fIsectionname\fR\fR"
-
-.IX Item "\f(CW-s\fR"
-
-.IX Item "\f(CW--strip-all\fR"
-
-.IX Item "\f(CW-g\fR"
+.IX Item "\f(CW--segments\fR"
 
 .IX Item "\f(CW-S\fR"
 
-.IX Item "\f(CW--strip-debug\fR"
+.IX Item "\f(CW--sections\fR"
 
-.IX Item "\f(CW--strip-unneeded\fR"
+.IX Item "\f(CW--section-headers\fR"
 
-.IX Item "\f(CW-K \fIsymbolname\fR\fR"
+.IX Item "\f(CW-s\fR"
 
-.IX Item "\f(CW--keep-symbol=\fIsymbolname\fR\fR"
+.IX Item "\f(CW--symbols\fR"
 
-.IX Item "\f(CW-N \fIsymbolname\fR\fR"
+.IX Item "\f(CW--syms\fR"
 
-.IX Item "\f(CW--strip-symbol=\fIsymbolname\fR\fR"
+.IX Item "\f(CW-e\fR"
 
-.IX Item "\f(CW-o \fIfile\fR\fR"
+.IX Item "\f(CW--headers\fR"
 
-.IX Item "\f(CW-p\fR"
+.IX Item "\f(CW-n\fR"
 
-.IX Item "\f(CW--preserve-dates\fR"
+.IX Item "\f(CW--notes\fR"
 
-.IX Item "\f(CW-x\fR"
+.IX Item "\f(CW-r\fR"
 
-.IX Item "\f(CW--discard-all\fR"
+.IX Item "\f(CW--relocs\fR"
 
-.IX Item "\f(CW-X\fR"
+.IX Item "\f(CW-u\fR"
 
-.IX Item "\f(CW--discard-locals\fR"
+.IX Item "\f(CW--unwind\fR"
+
+.IX Item "\f(CW-d\fR"
+
+.IX Item "\f(CW--dynamic\fR"
 
 .IX Item "\f(CW-V\fR"
 
-.IX Item "\f(CW--version\fR"
+.IX Item "\f(CW--version-info\fR"
+
+.IX Item "\f(CW-D\fR"
+
+.IX Item "\f(CW--use-dynamic\fR"
+
+.IX Item "\f(CW-x <number>\fR"
+
+.IX Item "\f(CW--hex-dump=<number>\fR"
+
+.IX Item "\f(CW-w[liaprf]\fR"
+
+.IX Item "\f(CW--debug-dump[=line,=info,=abbrev,=pubnames,=ranges,=frames]\fR"
+
+.IX Item "\f(CW--histogram\fR"
 
 .IX Item "\f(CW-v\fR"
 
-.IX Item "\f(CW--verbose\fR"
+.IX Item "\f(CW--version\fR"
+
+.IX Item "\f(CW-H\fR"
+
+.IX Item "\f(CW--help\fR"
 
 .IX Header "SEE ALSO"
 

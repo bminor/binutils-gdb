@@ -1,114 +1,327 @@
-.\" Copyright 1991, 1994 Free Software Foundation, Inc.
-.\" See section COPYING for conditions for redistribution
-.TH @PROGRAM@ 1 "June 1993" "cygnus support" "GNU Development Tools"
-.de BP
-.sp
-.ti \-.2i
-\(**
+.rn '' }`
+''' $RCSfile$$Revision$$Date$
+'''
+''' $Log$
+''' Revision 1.3  2001/03/25 20:32:25  nickc
+''' Automate generate on man pages
+'''
+'''
+.de Sh
+.br
+.if t .Sp
+.ne 5
+.PP
+\fB\\$1\fR
+.PP
 ..
+.de Sp
+.if t .sp .5v
+.if n .sp
+..
+.de Ip
+.br
+.ie \\n(.$>=3 .ne \\$3
+.el .ne 3
+.IP "\\$1" \\$2
+..
+.de Vb
+.ft CW
+.nf
+.ne \\$1
+..
+.de Ve
+.ft R
 
-.SH NAME
-@PROGRAM@ \- demangle C++ symbols
-
-.SH SYNOPSIS
-.hy 0
-.na
-.TP
-.B @PROGRAM@
-.RB "[\|" \-_ | \-\-strip-underscores "\|]"
-.RB "[\|" "\-s {gnu,lucid,arm} " | " \-\-format={gnu,lucid,arm}" "\|]"
-.RB "[\|" \-\-help "\|]"
-.RB "[\|" \-\-version "\|]"
-.RB "[\|" symbol "...\|]"
-.SH DESCRIPTION
-The C++ language provides function overloading, which means that you can
-write many functions with the same name (providing each takes parameters
-of different types).  All C++ function names are encoded into a
-low-level assembly label (this process is known as
-.I mangling\c
-).  The 
-.B @PROGRAM@
-program does the inverse mapping: it decodes (\fIdemangles\fR)
-low-level names into user-level names so that the linker can keep
-these overloaded functions from clashing.
+.fi
+..
+'''
+'''
+'''     Set up \*(-- to give an unbreakable dash;
+'''     string Tr holds user defined translation string.
+'''     Bell System Logo is used as a dummy character.
+'''
+.tr \(*W-|\(bv\*(Tr
+.ie n \{\
+.ds -- \(*W-
+.ds PI pi
+.if (\n(.H=4u)&(1m=24u) .ds -- \(*W\h'-12u'\(*W\h'-12u'-\" diablo 10 pitch
+.if (\n(.H=4u)&(1m=20u) .ds -- \(*W\h'-12u'\(*W\h'-8u'-\" diablo 12 pitch
+.ds L" ""
+.ds R" ""
+'''   \*(M", \*(S", \*(N" and \*(T" are the equivalent of
+'''   \*(L" and \*(R", except that they are used on ".xx" lines,
+'''   such as .IP and .SH, which do another additional levels of
+'''   double-quote interpretation
+.ds M" """
+.ds S" """
+.ds N" """""
+.ds T" """""
+.ds L' '
+.ds R' '
+.ds M' '
+.ds S' '
+.ds N' '
+.ds T' '
+'br\}
+.el\{\
+.ds -- \(em\|
+.tr \*(Tr
+.ds L" ``
+.ds R" ''
+.ds M" ``
+.ds S" ''
+.ds N" ``
+.ds T" ''
+.ds L' `
+.ds R' '
+.ds M' `
+.ds S' '
+.ds N' `
+.ds T' '
+.ds PI \(*p
+'br\}
+.\"	If the F register is turned on, we'll generate
+.\"	index entries out stderr for the following things:
+.\"		TH	Title 
+.\"		SH	Header
+.\"		Sh	Subsection 
+.\"		Ip	Item
+.\"		X<>	Xref  (embedded
+.\"	Of course, you have to process the output yourself
+.\"	in some meaninful fashion.
+.if \nF \{
+.de IX
+.tm Index:\\$1\t\\n%\t"\\$2"
+..
+.nr % 0
+.rr F
+.\}
+.TH CXXFILT.MAN 1 "binutils-2.11.90" "23/Mar/101" "GNU"
+.UC
+.if n .hy 0
+.ds C+ C\v'-.1v'\h'-1p'\s-2+\h'-1p'+\s0\v'.1v'\h'-1p'
+.de CQ          \" put $1 in typewriter font
+.ft CW
+'if n "\c
+'if t \\&\\$1\c
+'if n \\&\\$1\c
+'if n \&"
+\\&\\$2 \\$3 \\$4 \\$5 \\$6 \\$7
+'.ft R
+..
+.\" @(#)ms.acc 1.5 88/02/08 SMI; from UCB 4.2
+.	\" AM - accent mark definitions
+.bd B 3
+.	\" fudge factors for nroff and troff
+.if n \{\
+.	ds #H 0
+.	ds #V .8m
+.	ds #F .3m
+.	ds #[ \f1
+.	ds #] \fP
+.\}
+.if t \{\
+.	ds #H ((1u-(\\\\n(.fu%2u))*.13m)
+.	ds #V .6m
+.	ds #F 0
+.	ds #[ \&
+.	ds #] \&
+.\}
+.	\" simple accents for nroff and troff
+.if n \{\
+.	ds ' \&
+.	ds ` \&
+.	ds ^ \&
+.	ds , \&
+.	ds ~ ~
+.	ds ? ?
+.	ds ! !
+.	ds /
+.	ds q
+.\}
+.if t \{\
+.	ds ' \\k:\h'-(\\n(.wu*8/10-\*(#H)'\'\h"|\\n:u"
+.	ds ` \\k:\h'-(\\n(.wu*8/10-\*(#H)'\`\h'|\\n:u'
+.	ds ^ \\k:\h'-(\\n(.wu*10/11-\*(#H)'^\h'|\\n:u'
+.	ds , \\k:\h'-(\\n(.wu*8/10)',\h'|\\n:u'
+.	ds ~ \\k:\h'-(\\n(.wu-\*(#H-.1m)'~\h'|\\n:u'
+.	ds ? \s-2c\h'-\w'c'u*7/10'\u\h'\*(#H'\zi\d\s+2\h'\w'c'u*8/10'
+.	ds ! \s-2\(or\s+2\h'-\w'\(or'u'\v'-.8m'.\v'.8m'
+.	ds / \\k:\h'-(\\n(.wu*8/10-\*(#H)'\z\(sl\h'|\\n:u'
+.	ds q o\h'-\w'o'u*8/10'\s-4\v'.4m'\z\(*i\v'-.4m'\s+4\h'\w'o'u*8/10'
+.\}
+.	\" troff and (daisy-wheel) nroff accents
+.ds : \\k:\h'-(\\n(.wu*8/10-\*(#H+.1m+\*(#F)'\v'-\*(#V'\z.\h'.2m+\*(#F'.\h'|\\n:u'\v'\*(#V'
+.ds 8 \h'\*(#H'\(*b\h'-\*(#H'
+.ds v \\k:\h'-(\\n(.wu*9/10-\*(#H)'\v'-\*(#V'\*(#[\s-4v\s0\v'\*(#V'\h'|\\n:u'\*(#]
+.ds _ \\k:\h'-(\\n(.wu*9/10-\*(#H+(\*(#F*2/3))'\v'-.4m'\z\(hy\v'.4m'\h'|\\n:u'
+.ds . \\k:\h'-(\\n(.wu*8/10)'\v'\*(#V*4/10'\z.\v'-\*(#V*4/10'\h'|\\n:u'
+.ds 3 \*(#[\v'.2m'\s-2\&3\s0\v'-.2m'\*(#]
+.ds o \\k:\h'-(\\n(.wu+\w'\(de'u-\*(#H)/2u'\v'-.3n'\*(#[\z\(de\v'.3n'\h'|\\n:u'\*(#]
+.ds d- \h'\*(#H'\(pd\h'-\w'~'u'\v'-.25m'\f2\(hy\fP\v'.25m'\h'-\*(#H'
+.ds D- D\\k:\h'-\w'D'u'\v'-.11m'\z\(hy\v'.11m'\h'|\\n:u'
+.ds th \*(#[\v'.3m'\s+1I\s-1\v'-.3m'\h'-(\w'I'u*2/3)'\s-1o\s+1\*(#]
+.ds Th \*(#[\s+2I\s-2\h'-\w'I'u*3/5'\v'-.3m'o\v'.3m'\*(#]
+.ds ae a\h'-(\w'a'u*4/10)'e
+.ds Ae A\h'-(\w'A'u*4/10)'E
+.ds oe o\h'-(\w'o'u*4/10)'e
+.ds Oe O\h'-(\w'O'u*4/10)'E
+.	\" corrections for vroff
+.if v .ds ~ \\k:\h'-(\\n(.wu*9/10-\*(#H)'\s-2\u~\d\s+2\h'|\\n:u'
+.if v .ds ^ \\k:\h'-(\\n(.wu*10/11-\*(#H)'\v'-.4m'^\v'.4m'\h'|\\n:u'
+.	\" for low resolution devices (crt and lpr)
+.if \n(.H>23 .if \n(.V>19 \
+\{\
+.	ds : e
+.	ds 8 ss
+.	ds v \h'-1'\o'\(aa\(ga'
+.	ds _ \h'-1'^
+.	ds . \h'-1'.
+.	ds 3 3
+.	ds o a
+.	ds d- d\h'-1'\(ga
+.	ds D- D\h'-1'\(hy
+.	ds th \o'bp'
+.	ds Th \o'LP'
+.	ds ae ae
+.	ds Ae AE
+.	ds oe oe
+.	ds Oe OE
+.\}
+.rm #[ #] #H #V #F C
+.SH "NAME"
+cxxfilt \- Demangle \*(C+ and Java symbols.
+.SH "SYNOPSIS"
+c++filt [ \-_ | --strip-underscores ]
+        [ \-j | --java ]
+	[ \-n | --no-strip-underscores ]
+        [ \-s \fIformat\fR | --format=\fIformat\fR ]
+        [ --help ]  [ --version ]  [ \fIsymbol\fR... ]
+.SH "DESCRIPTION"
+The \*(C+ and Java languages provides function overloading, which means
+that you can write many functions with the same name (providing each
+takes parameters of different types).  All \*(C+ and Java function names
+are encoded into a low-level assembly label (this process is known as
+\fImangling\fR). The \f(CWc++filt\fR
+[1]
+program does the inverse mapping: it decodes (\fIdemangles\fR) low-level
+names into user-level names so that the linker can keep these overloaded
+functions from clashing.
 .PP
 Every alphanumeric word (consisting of letters, digits, underscores,
 dollars, or periods) seen in the input is a potential label.  If the
-label decodes into a C++ name, the C++ name replaces the low-level
+label decodes into a \*(C+ name, the \*(C+ name replaces the low-level
 name in the output.
 .PP
-You can use
-.B @PROGRAM@
-to decipher individual symbols by specifying these symbols on the
-command line.
+You can use \f(CWc++filt\fR to decipher individual symbols:
 .PP
-If no
-.B symbol
-arguments are given,
-.B @PROGRAM@
-reads symbol names from the standard input and writes the demangled
-names to the standard output.  All results are printed on the standard
-output.
-.SH OPTIONS
-.TP
-.B \-_
-.TP
-.B \-\-strip\-underscores
-On some systems, both the C and C++ compilers put an
-underscore in front of every name.  For example, the C name 
-.B foo
-gets the low-level name 
-.BR _foo .
-This option removes the leading underscore.
-
-.TP
-.B "\-s {gnu,lucid,arm}"
-.TP
-.B \-\-format={gnu,lucid,arm}
-GNU
-.B nm
-can decode three different methods of mangling, used by different C++
-compilers.  This option selects which method it uses: the one used by
-the GNU compiler, the one used by the Lucid compiler, or the one
-specified by the C++ Annotated Reference Manual.  The default is the
-GNU style.
-
-.TP
-.B \-\-help
-Print a summary of the options to
-.B @PROGRAM@
-and exit.
-
-.TP
-.B \-\-version
-Print the version number of
-.B @PROGRAM@
-and exit.
-
+.Vb 2
+\&        
+\&        c++filt I<symbol>
+.Ve
+If no \fIsymbol\fR arguments are given, \f(CWc++filt\fR reads symbol
+names from the standard input and writes the demangled names to the
+standard output.  All results are printed on the standard output.
+.SH "OPTIONS"
+.Ip "\f(CW-_\fR" 4
+.Ip "\f(CW--strip-underscores\fR" 4
+On some systems, both the C and \*(C+ compilers put an underscore in front
+of every name.  For example, the C name \f(CWfoo\fR gets the low-level
+name \f(CW_foo\fR.  This option removes the initial underscore.  Whether
+\f(CWc++filt\fR removes the underscore by default is target dependent.
+.Ip "\f(CW-j\fR" 4
+.Ip "\f(CW--java\fR" 4
+Prints demangled names using Java syntax.  The default is to use \*(C+
+syntax.
+.Ip "\f(CW-n\fR" 4
+.Ip "\f(CW--no-strip-underscores\fR" 4
+Do not remove the initial underscore.
+.Ip "\f(CW-s \fIformat\fR\fR" 4
+.Ip "\f(CW--format=\fIformat\fR\fR" 4
+\s-1GNU\s0 \f(CWnm\fR can decode three different methods of mangling, used by
+different \*(C+ compilers.  The argument to this option selects which
+method it uses:
+.Ip "\f(CWgnu\fR" 8
+the one used by the \s-1GNU\s0 compiler (the default method)
+.Ip "\f(CWlucid\fR" 8
+the one used by the Lucid compiler
+.Ip "\f(CWarm\fR" 8
+the one specified by the \*(C+ Annotated Reference Manual
+.Ip "\f(CWhp\fR" 8
+the one used by the \s-1HP\s0 compiler
+.Ip "\f(CWedg\fR" 8
+the one used by the \s-1EDG\s0 compiler
+.Ip "\f(CWgnu-new-abi\fR" 8
+the one used by the \s-1GNU\s0 compiler with the new \s-1ABI\s0.
+.Ip "\f(CW--help\fR" 4
+Print a summary of the options to \f(CWc++filt\fR and exit.
+.Ip "\f(CW--version\fR" 4
+Print the version number of \f(CWc++filt\fR and exit.
+.SH "FOOTNOTES"
+.Ip "1." 4
+\s-1MS\s0\-\s-1DOS\s0 does not allow \f(CW+\fR characters in file names, so on
+\s-1MS\s0\-\s-1DOS\s0 this program is named \f(CWcxxfilt\fR.
 .SH "SEE ALSO"
-.RB "`\|" binutils "\|'" 
-entry in 
-.B
-info\c
-\&; 
-.I
-The GNU Binary Utilities\c
-\&, Roland H. Pesch (June 1993).
+the Info entries for \fIbinutils\fR.
+.SH "COPYRIGHT"
+Copyright (c) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001 Free Software Foundation, Inc.
+.PP
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.1
+or any later version published by the Free Software Foundation;
+with no Invariant Sections, with no Front-Cover Texts, and with no
+Back-Cover Texts.  A copy of the license is included in the
+section entitled \*(L"GNU Free Documentation License\*(R".
 
-.SH COPYING
-Copyright (c) 1993 Free Software Foundation, Inc.
-.PP
-Permission is granted to make and distribute verbatim copies of
-this manual provided the copyright notice and this permission notice
-are preserved on all copies.
-.PP
-Permission is granted to copy and distribute modified versions of this
-manual under the conditions for verbatim copying, provided that the
-entire resulting derived work is distributed under the terms of a
-permission notice identical to this one.
-.PP
-Permission is granted to copy and distribute translations of this
-manual into another language, under the above conditions for modified
-versions, except that this permission notice may be included in
-translations approved by the Free Software Foundation instead of in
-the original English.
+.rn }` ''
+.IX Title "CXXFILT.MAN 1"
+.IX Name "cxxfilt - Demangle C++ and Java symbols."
+
+.IX Header "NAME"
+
+.IX Header "SYNOPSIS"
+
+.IX Header "DESCRIPTION"
+
+.IX Header "OPTIONS"
+
+.IX Item "\f(CW-_\fR"
+
+.IX Item "\f(CW--strip-underscores\fR"
+
+.IX Item "\f(CW-j\fR"
+
+.IX Item "\f(CW--java\fR"
+
+.IX Item "\f(CW-n\fR"
+
+.IX Item "\f(CW--no-strip-underscores\fR"
+
+.IX Item "\f(CW-s \fIformat\fR\fR"
+
+.IX Item "\f(CW--format=\fIformat\fR\fR"
+
+.IX Item "\f(CWgnu\fR"
+
+.IX Item "\f(CWlucid\fR"
+
+.IX Item "\f(CWarm\fR"
+
+.IX Item "\f(CWhp\fR"
+
+.IX Item "\f(CWedg\fR"
+
+.IX Item "\f(CWgnu-new-abi\fR"
+
+.IX Item "\f(CW--help\fR"
+
+.IX Item "\f(CW--version\fR"
+
+.IX Header "FOOTNOTES"
+
+.IX Item "1."
+
+.IX Header "SEE ALSO"
+
+.IX Header "COPYRIGHT"
+

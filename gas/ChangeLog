@@ -1,3 +1,12 @@
+2001-03-23  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* doc/as.texinfo: Put @c man begin to generate the as man page.
+	When generating man, define all the variables. Re-organize some
+	options to obtain better indentation of man page.
+	* doc/Makefile.am (MANCONF, TEXI2POD, POD2MAN): New variable.
+	(as.1): Build from as.texinfo.
+	* doc/Makefile.in: Regenerate.Index: binutils/Makefile.am
+
 2001-03-25  Alan Modra  <alan@linuxcare.com.au>
 
 	* config/tc-i386.c (i386_scale): Accept an absolute expression for
