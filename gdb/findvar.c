@@ -618,7 +618,30 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
   struct value *v = allocate_value (type);
   CHECK_TYPEDEF (type);
 
-  if (CONVERT_REGISTER_P (regnum, type))
+  if (TYPE_LENGTH (type) == 0)
+    {
+      /* It doesn't matter much what we return for this: since the
+         length is zero, it could be anything.  But if allowed to see
+         a zero-length type, the register-finding loop below will set
+         neither mem_stor nor reg_stor, and then report an internal
+         error.  
+
+         Zero-length types can legitimately arise from declarations
+         like 'struct {}'.  GDB may also create them when it finds
+         bogus debugging information; for example, in GCC 2.94.4 and
+         binutils 2.11.93.0.2, the STABS BINCL->EXCL compression
+         process can create bad type numbers.  GDB reads these as
+         TYPE_CODE_UNDEF types, with zero length.  (That bug is
+         actually the only known way to get a zero-length value
+         allocated to a register --- which is what it takes to make it
+         here.)
+
+         We'll just attribute the value to the original register.  */
+      VALUE_LVAL (v) = lval_register;
+      VALUE_ADDRESS (v) = regnum;
+      VALUE_REGNO (v) = regnum;
+    }
+  else if (CONVERT_REGISTER_P (regnum, type))
     {
       /* The ISA/ABI need to something weird when obtaining the
          specified value from this register.  It might need to

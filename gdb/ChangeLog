@@ -1,5 +1,8 @@
 2004-02-17  Jim Blandy  <jimb@redhat.com>
 
+	* findvar.c (value_from_register): If the type has no length, just
+	return an acceptable value --- don't report an internal error.
+
 	* stabsread.c (read_type): If we find any type numbers that are
 	forward references, complain if the references aren't resolved by
 	the time we're finished reading.
