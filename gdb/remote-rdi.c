@@ -181,6 +181,9 @@ mygets (arg, buffer, len)
   return fgets(buffer, len, stdin);
 }
 
+/* Prevent multiple calls to angel_RDI_close().  */
+static int closed_already = 1;
+
 /* Open a connection to a remote debugger.  NAME is the filename used
    for communication.  */
 
@@ -318,6 +321,8 @@ device is attached to the remote system (e.g. /dev/ttya).");
   }
 
   printf_filtered ("Connected to ARM RDI target.\n");
+
+  closed_already = 0;
 }
 
 /* Start an inferior process and set inferior_pid to its pid.
@@ -414,10 +419,14 @@ arm_rdi_close (quitting)
 {
   int rslt;
 
-  rslt = angel_RDI_close ();
-  if (rslt)
+  if (! closed_already)
     {
-      printf_filtered ("RDI_close: %s\n", rdi_error_message (rslt));
+      rslt = angel_RDI_close ();
+      if (rslt)
+	{
+	  printf_filtered ("RDI_close: %s\n", rdi_error_message (rslt));
+	}
+      closed_already = 1;
     }
 }
 

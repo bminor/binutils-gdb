@@ -1,3 +1,8 @@
+Tue Sep 15 14:02:01 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* remote-rdi.c: Prevent multiple attempts to close the remote
+	connection. 
+
 Tue Sep 15 10:24:17 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* printcmd.c (examine_i_type): New static - type for instructions.
