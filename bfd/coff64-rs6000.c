@@ -1788,11 +1788,6 @@ xcoff64_rtype2howto (relent, internal)
       && (relent->howto->bitsize
 	  != ((unsigned int) internal->r_size & 0x3f) + 1))
     abort ();
-
-  /* Put a meaningful value in addend */
-  relent->addend = (internal->r_size & 0x80
-		    ? -internal->r_vaddr
-		    : internal->r_vaddr);
 }
 
 reloc_howto_type *
