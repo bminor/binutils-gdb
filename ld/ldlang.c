@@ -70,6 +70,7 @@ static lang_input_statement_type *new_afile
 	   const char *target, boolean add_to_list));
 static void print_flags PARAMS ((int *ignore_flags));
 static void init_os PARAMS ((lang_output_section_statement_type *s));
+static void section_already_linked PARAMS ((bfd *, asection *, PTR));
 static void wild_section PARAMS ((lang_wild_statement_type *ptr,
 				  const char *section,
 				  lang_input_statement_type *file,
@@ -626,6 +627,87 @@ init_os (s)
   s->bfd_section->output_offset = 0;
   get_userdata (s->bfd_section) = (PTR) new;
 }
+
+/* Sections marked with the SEC_LINK_ONCE flag should only be linked
+   once into the output.  This routine checks each sections, and
+   arranges to discard it if a section of the same name has already
+   been linked.  This code assumes that all relevant sections have the
+   SEC_LINK_ONCE flag set; that is, it does not depend solely upon the
+   section name.  This is called via bfd_map_over_sections.  */
+
+/*ARGSUSED*/
+static void
+section_already_linked (abfd, sec, ignore)
+     bfd *abfd;
+     asection *sec;
+     PTR ignore;
+{
+  struct sec_link_once
+    {
+      struct sec_link_once *next;
+      asection *sec;
+    };
+  static struct sec_link_once *sec_link_once_list;
+  flagword flags;
+  const char *name;
+  struct sec_link_once *l;
+
+  flags = bfd_get_section_flags (abfd, sec);
+
+  if ((flags & SEC_LINK_ONCE) == 0)
+    return;
+
+  name = bfd_get_section_name (abfd, sec);
+
+  for (l = sec_link_once_list; l != NULL; l = l->next)
+    {
+      if (strcmp (name, bfd_get_section_name (l->sec->owner, l->sec)) == 0)
+	{
+	  /* The section has already been linked.  See if we should
+             issue a warning.  */
+	  switch (flags & SEC_LINK_DUPLICATES)
+	    {
+	    default:
+	      abort ();
+
+	    case SEC_LINK_DUPLICATES_DISCARD:
+	      break;
+
+	    case SEC_LINK_DUPLICATES_ONE_ONLY:
+	      einfo ("%P: %B: warning: ignoring duplicate section `%s'",
+		     abfd, name);
+	      break;
+
+	    case SEC_LINK_DUPLICATES_SAME_CONTENTS:
+	      /* FIXME: We should really dig out the contents of both
+                 sections and memcmp them.  The COFF/PE spec says that
+                 the Microsoft linker does not implement this
+                 correctly, so I'm not going to bother doing it
+                 either.  */
+	      /* Fall through.  */
+	    case SEC_LINK_DUPLICATES_SAME_SIZE:
+	      if (bfd_section_size (abfd, sec)
+		  != bfd_section_size (l->sec->owner, l->sec))
+		einfo ("%P: %B: warning: duplicate section `%s' has different size",
+		       abfd, sec);
+	      break;
+	    }
+
+	  /* Set the output_section field so that wild_doit does not
+	     create a lang_input_section structure for this section.  */
+	  sec->output_section = bfd_abs_section_ptr;
+
+	  return;
+	}
+    }
+
+  /* This is the first section with this name.  Record it.  */
+
+  l = (struct sec_link_once *) xmalloc (sizeof *l);
+  l->sec = sec;
+  l->next = sec_link_once_list;
+  sec_link_once_list = l;
+}
 
 /* The wild routines.
 
@@ -644,11 +726,24 @@ wild_doit (ptr, section, output, file)
      lang_output_section_statement_type *output;
      lang_input_statement_type *file;
 {
-  /* Input sections which are assigned to a section named
-     DISCARD_SECTION_NAME are discarded.  */
+  boolean discard;
+
+  discard = false;
+
+  /* If we are doing a final link, discard sections marked with
+     SEC_EXCLUDE.  */
+  if (! link_info.relocateable
+      && (bfd_get_section_flags (section->owner, section) & SEC_EXCLUDE) != 0)
+    discard = true;
+
+  /* Discard input sections which are assigned to a section named
+     DISCARD_SECTION_NAME.  */
   if (strcmp (output->name, DISCARD_SECTION_NAME) == 0)
+    discard = true;
+
+  if (discard)
     {
-      if (section != NULL && section->output_section == NULL)
+      if (section->output_section == NULL)
 	{
 	  /* This prevents future calls from assigning this section.  */
 	  section->output_section = bfd_abs_section_ptr;
@@ -656,13 +751,15 @@ wild_doit (ptr, section, output, file)
       return;
     }
 
-  if (output->bfd_section == NULL)
-    init_os (output);
-
-  if (section != NULL && section->output_section == NULL)
+  if (section->output_section == NULL)
     {
+      lang_input_section_type *new;
+
+      if (output->bfd_section == NULL)
+	init_os (output);
+
       /* Add a section reference to the list */
-      lang_input_section_type *new = new_stat (lang_input_section, ptr);
+      new = new_stat (lang_input_section, ptr);
 
       new->section = section;
       new->ifile = file;
@@ -2682,6 +2779,18 @@ ldlang_add_file (entry)
   *pp = entry->the_bfd;
   entry->the_bfd->usrdata = (PTR) entry;
   bfd_set_gp_size (entry->the_bfd, g_switch_value);
+
+  /* Look through the sections and check for any which should not be
+     included in the link.  We need to do this now, so that we can
+     notice when the backend linker tries to report multiple
+     definition errors for symbols which are in sections we aren't
+     going to link.  FIXME: It might be better to entirely ignore
+     symbols which are defined in sections which are going to be
+     discarded.  This would require modifying the backend linker for
+     each backend which might set the SEC_LINK_ONCE flag.  If we do
+     this, we should probably handle SEC_EXCLUDE in the same way.  */
+
+  bfd_map_over_sections (entry->the_bfd, section_already_linked, (PTR) NULL);
 }
 
 void

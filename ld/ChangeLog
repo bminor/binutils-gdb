@@ -1,3 +1,14 @@
+Mon Apr  1 11:49:52 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldlang.c (section_already_linked): New static function.
+	(wild_doit): Discard sections with SEC_EXCLUDE set if not doing a
+	relocateable link.  Don't worry about section being NULL, since it
+	never should be.  Don't call init_os unless the section is going
+	to be added.
+	(ldlang_add_file): Call section_already_linked for each section.
+	* ldmain.c (multiple_definition): Don't warn about multiple
+	definitions in sections which are being discarded.
+
 Sun Mar 31 00:30:47 1996  steve chamberlain  <sac@slash.cygnus.com>
 
 	* scripttempl/{ppcpe.sc, pe.sc} (.junk): Remove and use /DISCARD/.
