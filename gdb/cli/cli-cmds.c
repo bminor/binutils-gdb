@@ -26,6 +26,7 @@
 #include "gdb_wait.h"		/* For shell escape implementation */
 #include "gdb_regex.h"		/* Used by apropos_command */
 #include "gdb_string.h"
+#include "gdb_vfork.h"
 #include "linespec.h"
 #include "expression.h"
 #include "frame.h"
@@ -509,7 +510,7 @@ shell_escape (char *arg, int from_tty)
   else
     p++;			/* Get past '/' */
 
-  if ((pid = fork ()) == 0)
+  if ((pid = vfork ()) == 0)
     {
       if (!arg)
 	execl (user_shell, p, 0);

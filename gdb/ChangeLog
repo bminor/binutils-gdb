@@ -1,3 +1,9 @@
+2003-06-21  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in (cli-cmds.o): Depend on $(gdb_vfork_h)
+	* cli/cli-cmds.c: Include "gdb_vfork.h".
+	(shell_escape): Use vfork.
+
 2003-06-21  Andrew Cagney  <cagney@redhat.com>
 
 	* mips-tdep.c (mips_find_saved_regs): Rewrite mdebug code handling
