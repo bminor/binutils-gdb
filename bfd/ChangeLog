@@ -1,3 +1,15 @@
+Wed Jul 12 17:55:55 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* elflink.h (elf_link_add_object_symbols): Cast return value from
+	bfd_alloc.
+
+	* elfcode.h (size_info): Don't use "&" before function names.
+
+Wed Jul 12 00:16:48 1995  Ken Raeburn  <raeburn@kr-pc.cygnus.com>
+
+	* libelf.h (elf_backend_data): Use unsigned, not unsigned char,
+	for bitfields.
+
 Tue Jul 11 15:19:53 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf.c (bfd_section_from_shdr): In case SHT_REL[A], only get the

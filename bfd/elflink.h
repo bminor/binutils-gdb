@@ -397,8 +397,9 @@ elf_link_add_object_symbols (abfd, info)
 		  struct bfd_elf_link_needed_list *n, **pn;
 		  char *fnm, *anm;
 
-		  n = bfd_alloc (abfd,
-				 sizeof (struct bfd_elf_link_needed_list));
+		  n = (struct bfd_elf_link_needed_list *)
+		    bfd_alloc (abfd,
+			       sizeof (struct bfd_elf_link_needed_list));
 		  fnm = bfd_elf_string_from_elf_section (abfd, link,
 							 dyn.d_un.d_val);
 		  if (n == NULL || fnm == NULL)

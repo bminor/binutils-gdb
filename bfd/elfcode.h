@@ -27,7 +27,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Problems and other issues to resolve.
 
@@ -201,7 +201,7 @@ void
 elf_swap_symbol_out (abfd, src, cdst)
      bfd *abfd;
      Elf_Internal_Sym *src;
-     char *cdst;
+     PTR cdst;
 {
   Elf_External_Sym *dst = (Elf_External_Sym *) cdst;
   bfd_h_put_32 (abfd, src->st_name, dst->st_name);
@@ -1263,10 +1263,10 @@ const struct elf_size_info NAME(_bfd_elf,size_info) = {
 
   ARCH_SIZE, FILE_ALIGN,
   ELFCLASS, EV_CURRENT,
-  &write_out_phdrs,
-  &write_shdrs_and_ehdr,
-  &write_relocs,
-  &elf_swap_symbol_out,
-  &elf_slurp_reloc_table,
-  &elf_slurp_symbol_table,
+  write_out_phdrs,
+  write_shdrs_and_ehdr,
+  write_relocs,
+  elf_swap_symbol_out,
+  elf_slurp_reloc_table,
+  elf_slurp_symbol_table,
 };
