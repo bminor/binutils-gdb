@@ -1,3 +1,29 @@
+2000-06-03  Christopher Faylor  <cgf@cygnus.com>
+
+	* win32-nat.c (safe_symbol_file_add_cleanup): Ensure that gdb_stderr is
+	flushed before deleting and restoring it.
+	(safe_symbol_file_add): Ensure that gdb_stderr is flushed before
+	reassigning it.
+	(handle_load_dll): Split into two functions so that WFI can handle
+	shared library events.
+	(child_solib_loaded_library_pathname): New function.
+	(child_clear_solibs): New function.  Clears shared library list.
+	(child_solib_add): New function.  Adds shared library symbols.
+	(dll_symbol_command): New function.  Handles "dll-symbol" command.
+	(info_dll_command): New function.  Handles info
+	"sharedlibrary" command.
+	(handle_exceptions): Eliminate 'ignore_trap' argument.
+	(get_child_debug_event): Eliminate two arguments.  Return "pid" when
+	appropriate.  Break out on most events to allow WFI to handle stuff.
+	(child_wait): Accomodate get_child_debug_event changes.
+	(child_attach): Clear thread list and list of loaded dlls.
+	(child_create_inferior): Clear list of loaded dlls.  Use
+	wait_for_inferior in a loop to look for first "trap".
+	(child_resume): Avoid accessing a possibly-freed thread pointer.
+	(_initialize_inftarg): Add "dll-symbols", "sharedlibrary", and "info
+	sharedlibrary" commands.
+	* config/i386/tm-cygwin.h: Add some shared library (aka DLL) hooks.
+
 2000-06-02  Christopher Faylor  <cgf@cygnus.com>
 
 	* win32-nat.c: Fix up gcc warnings throughout.

@@ -24,8 +24,20 @@
 
 #include "i386/tm-i386v.h"
 
+#if 0
 #define IN_SOLIB_CALL_TRAMPOLINE(pc, name) skip_trampoline_code (pc, name)
 #define SKIP_TRAMPOLINE_CODE(pc)           skip_trampoline_code (pc, 0)
 extern CORE_ADDR skip_trampoline_code (CORE_ADDR pc, char *name);
+#endif
 
-extern char *cygwin_pid_to_str (int pid);
+#define SOLIB_ADD(filename, from_tty, targ) child_solib_add(filename, from_tty, targ)
+#define SOLIB_LOADED_LIBRARY_PATHNAME(pid) child_solib_loaded_library_pathname(pid)
+#define CLEAR_SOLIB child_clear_solib
+#define ADD_SHARED_SYMBOL_FILES dll_symbol_command
+
+struct target_ops;
+char *cygwin_pid_to_str (int pid);
+void child_solib_add (char *, int, struct target_ops *);
+char *child_solib_loaded_library_pathname(int);
+void child_clear_solib (void);
+void dll_symbol_command (char *, int);
