@@ -1,3 +1,16 @@
+Wed May  7 16:12:24 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/mips/lifloat.s: Update for recent changes to floating point
+	handling.
+	* gas/mips/lif-empic.d, gas/mips/lif-svr4pic.d: Likewise.
+	* gas/mips/lif-xgot.d, gas/mips/lifloat.d: Likewise.
+
+	* gas/mips/mips.exp: Handle Irix 6 like Irix 5.
+
+Sat Apr 19 23:16:35 1997  Niklas Hallqvist  <niklas@petra.appli.se>
+
+	* gas/mips/mips.exp: Handle OpenBSD like NetBSD.
+
 start-sanitize-d30v
 Wed Apr 16 12:20:24 1997  Martin Hunt  <hunt@cygnus.com>
 
@@ -6,7 +19,6 @@ Wed Apr 16 12:20:24 1997  Martin Hunt  <hunt@cygnus.com>
 	* gas/d30v/opt.d: Rebuild.
 
 end-sanitize-d30v	
-
 Tue Apr 15 18:10:01 1997  Gavin Koch  <gavin@cygnus.com>
 
 	* gas/mips/{delay.d,nodelay.d}: added.
