@@ -1,7 +1,12 @@
+2001-02-28  Andreas Jaeger  <aj@suse.de>
+
+	* elf64-x86-64.c (elf64_x86_64_relocate_section): Add relocation
+	to addend.
+
 2001-02-28  Philip Blundell  <pb@futuretv.com>
 
 	* elf32-arm.h: Update mentions of renamed EF_xx constants.
- 	(elf32_arm_print_private_bfd_data): Handle ARM EABI version 2.
+	(elf32_arm_print_private_bfd_data): Handle ARM EABI version 2.
 
 2001-02-27  H.J. Lu  <hjl@gnu.org>
 
@@ -25,7 +30,7 @@
 2001-02-26  Timothy Wall  <twall@cygnus.com>
 
 	* elfxx-ia64.c (elfNN_ia64_aix_add_symbol_hook): Remove obsolete
-	comments. 
+	comments.
 
 2001-02-26  Nick Clifton <nickc@redhat.com>
 

@@ -1495,7 +1495,7 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 		  BFD_ASSERT (h != NULL && h->dynindx != -1);
 		  relocate = false;
 		  outrel.r_info = ELF64_R_INFO (h->dynindx, r_type);
-		  outrel.r_addend = rela->r_addend;
+		  outrel.r_addend = relocation + rela->r_addend;
 		}
 	      else
 		{
@@ -1508,14 +1508,14 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 		    {
 		      relocate = true;
 		      outrel.r_info = ELF64_R_INFO (0, R_X86_64_RELATIVE);
-		      outrel.r_addend = rela->r_addend;
+		      outrel.r_addend = relocation + rela->r_addend;
 		    }
 		  else
 		    {
 		      BFD_ASSERT (h->dynindx != -1);
 		      relocate = false;
 		      outrel.r_info = ELF64_R_INFO (h->dynindx, R_X86_64_32);
-		      outrel.r_addend = rela->r_addend;
+		      outrel.r_addend = relocation + rela->r_addend;
 		    }
 		}
 
