@@ -1,5 +1,10 @@
 Mon Jul 19 18:14:06 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
+	* lib/gdb.exp (runto): Don't insist that function we are running to
+	was compiled with -g.
+
+	* gdb.t10/{nodebug.{c,exp},Makefile.in}: New test.
+
 	* gdb.t17/interrupt.exp: Before sending ^C, give the inferior time
 	to get back into the read system call.
 	Accept leading newline in case where we woke it up.
