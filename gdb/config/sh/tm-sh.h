@@ -288,5 +288,3 @@ extern void sh_pop_frame PARAMS ((void));
 
 /* Need this for WinGDB.  See gdb/mswin/{regdoc.h, gdbwin.c, gui.cpp}.  */
 #define TARGET_SH
-
-extern int sh_set_processor_type PARAMS ((char *));

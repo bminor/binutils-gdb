@@ -46,9 +46,7 @@
 #include "remote-utils.h"
 #include "symfile.h"
 #include <time.h>
-
-//#define DEBUGIFY
-#include "debugify.h"
+#include <ctype.h>
 
 #if 1
 #define HARD_BREAKPOINTS	/* Now handled by set option. */
@@ -89,6 +87,8 @@ static void expect_full_prompt PARAMS ((void));
 
 static void expect_prompt PARAMS ((void));
 
+static int e7000_parse_device PARAMS ((char *args, char *dev_name,
+				       int baudrate));
 /* Variables. */
 
 static serial_t e7000_desc;
@@ -129,18 +129,16 @@ puts_e7000debug (buf)
     error ("Use \"target e7000 ...\" first.");
 
   if (remote_debug)
-    printf("Sending %s\n", buf);
-  DBG(("Sending %s; waiting for echo...\n", buf));
+    printf_unfiltered ("Sending %s\n", buf);
 
   if (SERIAL_WRITE (e7000_desc, buf, strlen (buf)))
-    fprintf (stderr, "SERIAL_WRITE failed: %s\n", safe_strerror (errno));
+    fprintf_unfiltered (gdb_stderr, "SERIAL_WRITE failed: %s\n", safe_strerror (errno));
 
   /* And expect to see it echoed, unless using the pc interface */
 #if 0
   if (!using_pc)
 #endif
     expect (buf);
-  DBG(("Got echo!n"));
 }
 
 static void
@@ -170,7 +168,8 @@ normal (x)
 }
 
 /* Read a character from the remote system, doing all the fancy timeout
-   stuff.  */
+   stuff.  Handles serial errors and EOF.  If TIMEOUT == 0, and no chars,
+   returns -1, else returns next char.  Discards chars > 127.  */
 
 static int
 readchar (timeout)
@@ -191,10 +190,13 @@ readchar (timeout)
       echo = 0;
       error ("Timeout reading from remote system.");
     }
+  else if (c < 0)
+    error ("Serial communication error");
+
   if (remote_debug) 
     {
-      putchar (c);
-      fflush (stdout);
+      putchar_unfiltered (c);
+      gdb_flush (gdb_stdout);
     }
 
   return normal (c);
@@ -238,6 +240,7 @@ expect (string)
   while (1)
     {
       c = readchar (timeout);
+#if 0
       notice_quit ();
       if (quit_flag == 1) 
 	{
@@ -251,25 +254,22 @@ expect (string)
 	      quit ();
 	    }
 	}
+#endif
       
-      if (c == SERIAL_ERROR)
-	{
-	  error ("Serial communication error");
-	}
-      if (echo || remote_debug)
+      if (echo)
 	{
 	  if (c == '\r' || c == '\n')
 	    {
 	      if (!nl)
-		putchar ('\n');
+		putchar_unfiltered ('\n');
 	      nl = 1;
 	    }
 	  else
 	    {
 	      nl = 0;
-	      putchar (c);
+	      putchar_unfiltered (c);
 	    }
-	  fflush (stdout);
+	  gdb_flush (gdb_stdout);
 	}
       if (normal (c) == normal (*p++))
 	{
@@ -458,7 +458,7 @@ e7000_login_command (args, from_tty)
       dir = next (&args);
       if (from_tty)
 	{
-	  printf ("Set info to %s %s %s %s\n", machine, user, passwd, dir);
+	  printf_unfiltered ("Set info to %s %s %s %s\n", machine, user, passwd, dir);
 	}
     }
   else
@@ -502,10 +502,9 @@ e7000_ftp_command (args, from_tty)
 }
 
 static int 
-e7000_parse_device(args,dev_name,serial_flag,baudrate) 
+e7000_parse_device (args, dev_name, baudrate) 
     char *args;
     char *dev_name;
-    int serial_flag;
     int baudrate;
 {
   char junk[128];
@@ -519,7 +518,7 @@ e7000_parse_device(args,dev_name,serial_flag,baudrate)
     {
       /* FIXME! temp hack to allow use with port master -
 	     target tcp_remote <device> */
-      if (args && strncmp (args, "tcp_remote", 10) == 0) 
+      if (args && strncmp (args, "tcp", 10) == 0) 
         {
 	  char com_type[128];
 	  n = sscanf (args, " %s %s %d %s", com_type, dev_name, &baudrate, junk);
@@ -555,59 +554,45 @@ or \t\ttarget e7000 pc\n");
   return n;
 }
 
-static void
-e7000_open (args, from_tty)
-     char *args;
-     int from_tty;
+/* Stub for catch_errors.  */
+
+static int
+e7000_start_remote (dummy)
+     char *dummy;
 {
-  int n;
   int loop;
   int sync;
-  int serial_flag;
-  int try=0;
-  int quit_trying=20;
+  int try;
+  int quit_trying;
 
-  target_preopen (from_tty);
-
-  n = e7000_parse_device(args,dev_name,serial_flag,baudrate);
-
-  push_target (&e7000_ops);
-
-  e7000_desc = SERIAL_OPEN (dev_name);
-
-  if (!e7000_desc)
-  {
-      error ("Unable to open target or file not found: %s\n", dev_name);
-  }
-
-  SERIAL_SETBAUDRATE (e7000_desc, baudrate);
-  SERIAL_RAW (e7000_desc);
+  immediate_quit = 1;		/* Allow user to interrupt it */
 
   /* Hello?  Are you there?  */
   sync = 0;
   loop =  0;
+  try = 0;
+  quit_trying = 20;
   putchar_e7000 (CTRLC);
   while (!sync && ++try <= quit_trying)
     {
       int c;
 
-      if (from_tty)
-	printf_unfiltered ("[waiting for e7000...]\n");
+      printf_unfiltered ("[waiting for e7000...]\n");
 
       write_e7000 ("\r");
-      c = SERIAL_READCHAR (e7000_desc, 1);
+      c = readchar (1);
 
       /* FIXME!  this didn't seem right->  while (c != SERIAL_TIMEOUT)
        * we get stuck in this loop ...
        * We may never timeout, and never sync up :-(
        */
-      while (!sync && c != SERIAL_TIMEOUT)
+      while (!sync && c != -1)
 	{
 	  /* Dont echo cr's */
-	  if (from_tty && c != '\r')
+	  if (c != '\r')
 	    {
-	      putchar (c);
-	      fflush (stdout);
+	      putchar_unfiltered (c);
+	      gdb_flush (gdb_stdout);
 	    }
 	  /* Shouldn't we either break here, or check for sync in inner loop? */
 	  if (c == ':')
@@ -621,46 +606,80 @@ e7000_open (args, from_tty)
 
 	  QUIT ;
 
-
-	  /* FIXME!  with this logic, you might never break out of this loop!
-	   * Changed to count tries and treat reads as TIMEOUTS
-	   * In windows version, you never timeout cuz always read 1 char!
-	   */
 	  if (quit_flag)
 	    {
 	      putchar_e7000 (CTRLC);
 	      /* Was-> quit_flag = 0; */
-	      c = SERIAL_TIMEOUT;
+	      c = -1;
 	      quit_trying = try+1;  /* we don't want to try anymore */
 	    }
 	  else
-	      c = SERIAL_READCHAR (e7000_desc, 1);
+	    {
+	      c = readchar (1);
+	    }
 	}
     }
 
   if (!sync)
-  {
-      if (from_tty)
-	printf_unfiltered ("Giving up after %d tries...\n",try);
+    {
+      fprintf_unfiltered (gdb_stderr, "Giving up after %d tries...\n",try);
       error ("Unable to syncronize with target.\n");
-      return;
-  }
+    }
 
   puts_e7000debug ("\r");
-
+  expect_prompt ();
+  puts_e7000debug ("b -\r");	/* Clear breakpoints */
   expect_prompt ();
 
-  puts_e7000debug ("b -\r");
+  immediate_quit = 0;
 
-  expect_prompt ();
+/* This is really the job of start_remote however, that makes an assumption
+   that the target is about to print out a status message of some sort.  That
+   doesn't happen here. */
 
-  if (from_tty)
-    printf_filtered ("Remote target %s connected to %s\n", target_shortname,
-		     dev_name);
+  flush_cached_frames ();
+  registers_changed ();
+  stop_pc = read_pc ();
+  set_current_frame (create_new_frame (read_fp (), stop_pc));
+  select_frame (get_current_frame (), 0);
+  print_stack_frame (selected_frame, -1, 1);
+
+  return 1;
+}
+
+static void
+e7000_open (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  int n;
+
+  target_preopen (from_tty);
+
+  n = e7000_parse_device (args, dev_name, baudrate);
+
+  push_target (&e7000_ops);
+
+  e7000_desc = SERIAL_OPEN (dev_name);
+
+  if (!e7000_desc)
+    perror_with_name (dev_name);
+
+  SERIAL_SETBAUDRATE (e7000_desc, baudrate);
+  SERIAL_RAW (e7000_desc);
 
 #ifdef GDB_TARGET_IS_H8300
   h8300hmode = 1;
 #endif
+
+  /* Start the remote connection; if error (0), discard this target.
+     In particular, if the user quits, be sure to discard it
+     (we'd be in an inconsistent state otherwise).  */
+  if (!catch_errors (e7000_start_remote, (char *)0, 
+		     "Couldn't establish connection to remote target\n", RETURN_MASK_ALL))
+  if (from_tty)
+    printf_filtered ("Remote target %s connected to %s\n", target_shortname,
+		     dev_name);
 }
 
 /* Close out all files and local state before this target loses control. */
@@ -685,7 +704,7 @@ e7000_detach (from_tty)
 {
   pop_target ();		/* calls e7000_close to do the real work */
   if (from_tty)
-    printf ("Ending remote %s debugging\n", target_shortname);
+    printf_unfiltered ("Ending remote %s debugging\n", target_shortname);
 }
 
 /* Tell the remote machine to resume.  */
@@ -772,16 +791,7 @@ char *want_sh3_nopc = "%16 SR=%22\n\
 static int
 gch ()
 {
-  int c = readchar (timeout);
-
-  if (remote_debug)
-    {
-      if (c >= ' ')
-	printf ("%c", c);
-      else if (c == '\n')
-	printf ("\n");
-    }
-  return c;
+  return readchar (timeout);
 }
 
 static unsigned int
@@ -904,18 +914,29 @@ static void
 e7000_fetch_registers ()
 {
   int regno;
+  char *wanted;
 
   puts_e7000debug ("R\r");
 
 #ifdef GDB_TARGET_IS_SH
-  if  ((sh_processor_type != NULL) && (*(sh_processor_type+2) == '3')) 
-     fetch_regs_from_dump (gch, want_sh3);
-  else
-     fetch_regs_from_dump (gch, want);
+  wanted = want;
+  if (target_architecture->arch == bfd_arch_sh)
+    switch (target_architecture->mach)
+      {
+      case bfd_mach_sh3:
+      case bfd_mach_sh3e:
+	/* start-sanitize-sh4 */	
+      case bfd_mach_sh4:
+	/* end-sanitize-sh4 */	
+	wanted = want_sh3;
+      }
 #else
-  fetch_regs_from_dump (gch, h8300smode ? want_h8300s : want_h8300h);
+  if (h8300smode)
+    wanted = want_h8300s;
+  else
+    wanted = want_h8300h);
 #endif
-
+  fetch_regs_from_dump (gch, wanted);
 
   /* And supply the extra ones the simulator uses */
   for (regno = NUM_REALREGS; regno < NUM_REGS; regno++)
@@ -1045,7 +1066,7 @@ e7000_prepare_to_store ()
 static void
 e7000_files_info ()
 {
-  printf ("\tAttached to %s at %d baud.\n", dev_name, baudrate);
+  printf_unfiltered ("\tAttached to %s at %d baud.\n", dev_name, baudrate);
 }
 
 static int
@@ -1170,8 +1191,8 @@ write_large (memaddr, myaddr, len)
       compose[where++] = 0;
 
       SERIAL_WRITE (e7000_desc, compose, where);
-      j = SERIAL_READCHAR (e7000_desc, 0);
-      if (j == SERIAL_TIMEOUT)
+      j = readchar (0);
+      if (j == -1)
 	{
 	  /* This is ok - nothing there */
 	}
@@ -1183,10 +1204,10 @@ write_large (memaddr, myaddr, len)
 	}
       else
 	{
-	  printf ("@%d}@", j);
-	  while ((j = SERIAL_READCHAR(e7000_desc,0)) > 0) 
+	  printf_unfiltered ("@%d}@", j);
+	  while ((j = readchar (0)) > 0) 
 	    {
-	      printf ("@{%d}@",j);
+	      printf_unfiltered ("@{%d}@",j);
 	    }
 	}
     }
@@ -1259,7 +1280,8 @@ e7000_read_inferior_memory (memaddr, myaddr, len)
       c = gch ();
       if (c == '*') 
 	{			/* Some kind of error */
-	  expect_prompt();
+	  puts_e7000debug (".\r"); /* Some errors leave us in memory input mode */
+	  expect_full_prompt();
 	  return -1;
 	}
       while (c != ' ')
@@ -1496,7 +1518,6 @@ e7000_load (args, from_tty)
   asection *section;
   bfd *pbfd;
   bfd_vma entry;
-  int i;
 #define WRITESIZE 0x1000
   char buf[2 + 4 + 4 + WRITESIZE]; /* `DT' + <addr> + <len> + <data> */
   char *filename;
@@ -1702,7 +1723,9 @@ e7000_insert_breakpoint (addr, shadow)
 {
   int i;
   char buf[200];
+#if 0
   static char nop[2] = NOP;
+#endif
 
   for (i = 0; i <= MAX_E7000DEBUG_BREAKPOINTS; i++)
     if (breakaddr[i] == 0)
@@ -1828,7 +1851,7 @@ e7000_drain_command (args, fromtty)
   puts_e7000debug("end\r");
   putchar_e7000 (CTRLC);
 
-  while ((c = SERIAL_READCHAR (e7000_desc, 1) != SERIAL_TIMEOUT))
+  while ((c = readchar (1) != -1))
     {
       if (quit_flag)
 	{
@@ -1836,9 +1859,9 @@ e7000_drain_command (args, fromtty)
 	  quit_flag = 0;
 	}
       if (c > ' ' && c < 127)
-	printf ("%c", c & 0xff);
+	printf_unfiltered ("%c", c & 0xff);
       else
-	printf ("<%x>", c & 0xff);
+	printf_unfiltered ("<%x>", c & 0xff);
     }
 }
 
@@ -1909,8 +1932,8 @@ char **strings;
       int i;
       int gotone = 0;
 
-      c = SERIAL_READCHAR (e7000_desc, 1);
-      if (c == SERIAL_TIMEOUT)
+      c = readchar (1);
+      if (c == -1)
 	{
 	  printf_unfiltered ("[waiting for e7000...]\n");
 	}
@@ -1957,13 +1980,13 @@ char **strings;
 	  if (buffer != saveaway) 
 	    {
 	      *buffer++ = 0;
-	      printf ("%s", buffer);
+	      printf_unfiltered ("%s", buffer);
 	      buffer = saveaway;
 	    }
-	  if (c != SERIAL_TIMEOUT)
+	  if (c != -1)
 	    {
-	      putchar (c);
-	      fflush (stdout);
+	      putchar_unfiltered (c);
+	      gdb_flush (gdb_stdout);
 	    }
 	}
     }
@@ -2013,6 +2036,7 @@ e7000_wait (pid, status)
   int running_count = 0;
   int had_sleep = 0;
   int loop = 1;
+  char *wanted_nopc;
 
   /* Then echo chars until PC= string seen */
   gch ();			/* Drop cr */
@@ -2052,13 +2076,24 @@ e7000_wait (pid, status)
   expect ("=");
 
 #ifdef GDB_TARGET_IS_SH
-  if  ((sh_processor_type != NULL) && (*(sh_processor_type+2) == '3')) 
-     fetch_regs_from_dump (gch, want_sh3_nopc);
-  else
-     fetch_regs_from_dump (gch, want_nopc);
+  wanted_nopc = want_nopc;
+  if (target_architecture->arch == bfd_arch_sh)
+    switch (target_architecture->mach)
+      {
+      case bfd_mach_sh3:
+      case bfd_mach_sh3e:
+	/* start-sanitize-sh4 */	
+      case bfd_mach_sh4:
+	/* end-sanitize-sh4 */	
+	wanted_nopc = want_sh3_nopc;
+      }
 #else
-  fetch_regs_from_dump (gch, h8300smode ? want_nopc_h8300s : want_nopc_h8300h);
+  if (h8300smode)
+    wanted_nopc = want_nopc_h8300s;
+  else
+    wanted_nopc = want_nopc_h8300h);
 #endif
+  fetch_regs_from_dump (gch, wanted_nopc);
 
   /* And supply the extra ones the simulator uses */
   for (regno = NUM_REALREGS; regno < NUM_REGS; regno++)
@@ -2183,13 +2218,13 @@ _initialize_remote_e7000 ()
 {
   add_target (&e7000_ops);
 
-  add_com ("e7000 <command>", class_obscure, e7000_command,
+  add_com ("e7000", class_obscure, e7000_command,
 	   "Send a command to the e7000 monitor.");
 
-  add_com ("ftplogin <machine> <name> <passwd> <dir>", class_obscure, e7000_login_command,
+  add_com ("ftplogin", class_obscure, e7000_login_command,
 	   "Login to machine and change to directory.");
 
-  add_com ("ftpload <file>", class_obscure, e7000_ftp_command,
+  add_com ("ftpload", class_obscure, e7000_ftp_command,
 	   "Fetch and load a file from previously described place.");
 
   add_com ("drain", class_obscure, e7000_drain_command,

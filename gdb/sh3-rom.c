@@ -284,7 +284,7 @@ sh3_open (args, from_tty)
     }
 
   /* If we connected successfully, we know the processor is an SH3.  */
-  sh_set_processor_type ("sh3");
+  set_architecture ("sh3", 0);
 }
 
 
@@ -333,7 +333,7 @@ sh3e_open (args, from_tty)
     }
 
   /* If we connected successfully, we know the processor is an SH3E.  */
-  sh_set_processor_type ("sh3e");
+  set_architecture ("sh3e", 0);
 }
 
 static void

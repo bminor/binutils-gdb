@@ -504,7 +504,11 @@ gdbsim_open (args, from_tty)
   if (gdbsim_desc != NULL)
     unpush_target (&gdbsim_ops);
 
-  len = 7 + 1 + (args ? strlen (args) : 0) + 50;
+  len = (7 + 1 /* gdbsim */
+	 + strlen (" -E little")
+	 + strlen (" --arch=xxxxxxxxxx")
+	 + (args ? strlen (args) : 0)
+	 + 50) /* slack */;
   arg_buf = (char *) alloca (len);
   strcpy (arg_buf, "gdbsim"); /* 7 */
   /* Specify the byte order for the target when it is both selectable
@@ -525,6 +529,13 @@ gdbsim_open (args, from_tty)
 	}
     }
 #endif
+  /* Specify the architecture of the target when it has been
+     explicitly specified */
+  if (!target_architecture_auto)
+    {
+      strcat (arg_buf, " --arch=");
+      strcat (arg_buf, target_architecture->printable_name);
+    }
   /* finally, any explicit args */
   if (args)
     {

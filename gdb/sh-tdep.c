@@ -37,16 +37,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 extern int remote_write_size;	/* in remote.c */
 
-/* Default to the original SH.  */
-
-#define DEFAULT_SH_TYPE "sh"
-
-/* This value is the model of SH in use.  */
-
-char *sh_processor_type;
-
-char *tmp_sh_processor_type;
-
 /* A set of original names, to be used when restoring back to generic
    registers from a specific set.  */
 
@@ -89,13 +79,16 @@ char *sh3e_reg_names[] = {
 };
 
 struct {
-  char *name;
   char **regnames;
+  int mach;
 } sh_processor_type_table[] = {
-  { "sh", sh_reg_names },
-  { "sh3", sh3_reg_names },
-  { "sh3e", sh3e_reg_names },
-  { NULL, NULL }
+  { sh_reg_names, bfd_mach_sh },
+  { sh3_reg_names, bfd_mach_sh3 },
+  { sh3e_reg_names, bfd_mach_sh3e },
+  /* start-sanitize-sh4 */
+  { sh3e_reg_names, bfd_mach_sh4 },
+  /* end-sanitize-sh4 */
+  { NULL, 0 }
 };
 
 /* Prologue looks like
@@ -589,74 +582,28 @@ get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
 }
 
 
-/* Command to set the processor type.  */
-
-void
-sh_set_processor_type_command (args, from_tty)
-     char *args;
-     int from_tty;
-{
-  int i;
-  char *temp;
-
-  /* The `set' commands work by setting the value, then calling the hook,
-     so we let the general command modify a scratch location, then decide
-     here if we really want to modify the processor type.  */
-  if (tmp_sh_processor_type == NULL || *tmp_sh_processor_type == '\0')
-    {
-      printf_unfiltered ("The known SH processor types are as follows:\n\n");
-      for (i = 0; sh_processor_type_table[i].name != NULL; ++i)
-	printf_unfiltered ("%s\n", sh_processor_type_table[i].name);
-
-      /* Restore the value.  */
-      tmp_sh_processor_type = strsave (sh_processor_type);
-
-      return;
-    }
-  
-  if (!sh_set_processor_type (tmp_sh_processor_type))
-    {
-      /* Restore to a valid value before erroring out.  */
-      temp = tmp_sh_processor_type;
-      tmp_sh_processor_type = strsave (sh_processor_type);
-      error ("Unknown processor type `%s'.", temp);
-    }
-}
-
-/* This is a dummy not actually run.  */
-
-static void
-sh_show_processor_type_command (args, from_tty)
-     char *args;
-     int from_tty;
-{
-}
-
 /* Modify the actual processor type. */
 
 int
-sh_set_processor_type (str)
-     char *str;
+sh_target_architecture_hook (ap)
+     const bfd_arch_info_type *ap;
 {
   int i, j;
 
-  if (str == NULL)
+  if (ap->arch != bfd_arch_sh)
     return 0;
 
-  for (i = 0; sh_processor_type_table[i].name != NULL; ++i)
+  for (i = 0; sh_processor_type_table[i].regnames != NULL; i++)
     {
-      if (strcasecmp (str, sh_processor_type_table[i].name) == 0)
+      if (sh_processor_type_table[i].mach == ap->mach)
 	{
-	  sh_processor_type = str;
-
 	  for (j = 0; j < NUM_REGS; ++j)
 	    reg_names[j] = sh_processor_type_table[i].regnames[j];
-
 	  return 1;
 	}
     }
 
-  return 0;
+  fatal ("Architecture `%s' unreconized", ap->printable_name);
 }
 
 /* Print the registers in a form similar to the E7000 */
@@ -666,12 +613,16 @@ sh_show_regs (args, from_tty)
      char *args;
      int from_tty;
 {
-  int cpu = 0;
-
-  if (strcmp (sh_processor_type, "sh3") == 0)
-    cpu = 1;
-  else if (strcmp (sh_processor_type, "sh3e") == 0)
-    cpu = 2;
+  int cpu;
+  if (target_architecture->arch == bfd_arch_sh)
+    cpu = target_architecture->mach;
+  else
+    cpu = 0;
+  /* start-sanitize-sh4 */
+  /* FIXME: sh4 has more registers */
+  if (cpu == bfd_mach_sh4)
+    cpu = bfd_mach_sh3;
+  /* end-sanitize-sh4 */
 
   printf_filtered ("PC=%08x SR=%08x PR=%08x MACH=%08x MACHL=%08x\n",
 		   read_register (PC_REGNUM),
@@ -683,12 +634,12 @@ sh_show_regs (args, from_tty)
   printf_filtered ("GBR=%08x VBR=%08x",
                    read_register (GBR_REGNUM),
                    read_register (VBR_REGNUM));
-  if (cpu == 1 || cpu == 2)
+  if (cpu == bfd_mach_sh3 || cpu == bfd_mach_sh3e)
     {
       printf_filtered (" SSR=%08x SPC=%08x",
                        read_register (SSR_REGNUM),
                        read_register (SPC_REGNUM));
-      if (cpu ==2)
+      if (cpu == bfd_mach_sh3e)
         {
           printf_filtered (" FPUL=%08x FPSCR=%08x",
                            read_register (FPUL_REGNUM),
@@ -714,7 +665,7 @@ sh_show_regs (args, from_tty)
 		   read_register (13),
 		   read_register (14),
 		   read_register (15));
-  if (cpu == 2)
+  if (cpu == bfd_mach_sh3e)
     {
       printf_filtered ("FP0-FP7  %08x %08x %08x %08x %08x %08x %08x %08x\n",
                        read_register (FP0_REGNUM + 0),
@@ -764,18 +715,7 @@ _initialize_sh_tdep ()
 
   tm_print_insn = gdb_print_insn_sh;
 
-  c = add_set_cmd ("processor", class_support, var_string_noescape,
-		   (char *) &tmp_sh_processor_type,
-		   "Set the type of SH processor in use.\n\
-Set this to be able to access processor-type-specific registers.\n\
-",
-		   &setlist);
-  c->function.cfunc = sh_set_processor_type_command;
-  c = add_show_from_set (c, &showlist);
-  c->function.cfunc = sh_show_processor_type_command;
-
-  tmp_sh_processor_type = strsave (DEFAULT_SH_TYPE);
-  sh_set_processor_type_command (strsave (DEFAULT_SH_TYPE), 0);
+  target_architecture_hook = sh_target_architecture_hook;
 
   add_com ("regs", class_vars, sh_show_regs, "Print all registers");
 }

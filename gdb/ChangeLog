@@ -1,3 +1,35 @@
+Thu Aug 28 10:20:04 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote-e7000.c (e7000_fetch_registers): Check
+ 	target_architecture instead of sh_processor_type.
+	(e7000_wait): Ditto.
+
+	* config/sh/tm-sh.h (sh_set_processor_type): Delete prototype.
+
+	* sh3-rom.c (sh3_open): Call set_architecture not
+ 	sh_set_processor_type.
+	(sh3e_open): Ditto.
+
+	* sh-tdep.c (sh_show_processor_type_command): Delete.
+	(sh_set_processor_type_command): Delete.
+	(sh_target_architecture_hook): Rename from sh_set_processor_type,
+ 	use AP to determine architecture.
+	(sh_show_regs): Use bfd_mach_sh* types.
+
+	* remote-sim.c (gdbsim_open): Pass --arch=XXX to simulator when
+ 	architecture was specified explicitly.
+
+	* defs.h (target_architecture, target_architecture_auto,
+ 	set_architecture, set_architecture_from_file): Declare.
+	(target_architecture_hook): Allow targets to be notified of set
+ 	arch commands.
+	
+	* top.c (init_main): Add set/show/info architecture commands.
+  	(set_architecture, show_architecture, info_architecture): New
+ 	functions, parse same.
+	(set_architecture_from_file): New function, determine arch from
+ 	BFD.
+	
 Tue Aug 26 17:13:43 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote-sim.c (gdbsim_open): Only pass endianness to sim_open

@@ -118,6 +118,12 @@ static void set_endian_auto PARAMS ((char *, int));
 
 static void show_endian PARAMS ((char *, int));
 
+extern void set_architecture PARAMS ((char *, int));
+
+static void show_architecture PARAMS ((char *, int));
+
+static void info_architecture PARAMS ((char *, int));
+
 static void show_history PARAMS ((char *, int));
 
 static void set_history PARAMS ((char *, int));
@@ -3229,6 +3235,110 @@ set_endian_from_file (abfd)
 #endif /* ! defined (TARGET_BYTE_ORDER_SELECTABLE) */
 }
 
+/* Functions to manipulate the architecture of the target */
+
+int target_architecture_auto = 1;
+extern const bfd_arch_info_type bfd_default_arch_struct;
+const bfd_arch_info_type *target_architecture = &bfd_default_arch_struct;
+int (*target_architecture_hook) PARAMS ((const bfd_arch_info_type *ap));
+
+/* Called if the user enters ``set architecture'' with or without an argument. */
+void
+set_architecture (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  if (args == NULL)
+    {
+      printf_unfiltered ("\"set architecture\" must be followed by \"auto\" or an architecture name.\n");
+    }
+  else if (strcmp (args, "auto") == 0)
+    {
+      target_architecture_auto = 1;
+    }
+  else
+    {
+      const bfd_arch_info_type *arch = bfd_scan_arch (args);
+      if (arch != NULL)
+	{
+	  /* FIXME: Is it compatible with gdb? */
+	  /* Check with the target on the setting */
+	  if (target_architecture_hook != NULL
+	      && !target_architecture_hook (arch))
+	    printf_unfiltered ("Target does not support `%s' architecture.", args);
+	  else
+	    {
+	      target_architecture_auto = 0;
+	      target_architecture = arch;
+	    }
+	}
+      else
+	{
+	  printf_unfiltered ("Architecture `%s' not reconized.\n", args);
+	}
+    }
+}
+
+/* Called if the user enters ``show architecture'' without an argument. */
+static void
+show_architecture (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  const char *arch;
+  arch = target_architecture->printable_name;
+  if (target_architecture_auto)
+    printf_filtered ("The target architecture is set automatically (currently %s)\n", arch);
+  else
+    printf_filtered ("The target architecture is assumed to be %s\n", arch);
+}
+
+/* Called if the user enters ``info architecture'' without an argument. */
+static void
+info_architecture (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  enum bfd_architecture a;
+  printf_filtered ("Available architectures are:\n");
+  for (a = bfd_arch_obscure + 1; a < bfd_arch_last; a++)
+    {
+      const bfd_arch_info_type *ap = bfd_lookup_arch (a, 0);
+      if (ap != NULL)
+	{
+	  do
+	    {
+	      printf_filtered (" %s", ap->printable_name);
+	      ap = ap->next;
+	    }
+	  while (ap != NULL);
+	  printf_filtered ("\n");
+	}
+    }
+}
+
+/* Set the architecture from a BFD */
+void
+set_architecture_from_file (abfd)
+     bfd *abfd;
+{
+  const bfd_arch_info_type *wanted = bfd_get_arch_info (abfd);
+  if (target_architecture_auto)
+    {
+      if (target_architecture_hook != NULL
+	  && !target_architecture_hook (wanted))
+	warning ("Target may not support %s architecture",
+		 wanted->printable_name);
+      target_architecture = wanted;
+    }
+  else if (wanted != target_architecture)
+    {
+      warning ("%s architecture file may be incompatible with %s target.",
+	       wanted->printable_name,
+	       target_architecture->printable_name);
+    }
+}
+
 /* Functions to manipulate command line editing control variables.  */
 
 /* Number of commands to print in each call to show_commands.  */
@@ -3460,6 +3570,14 @@ init_main ()
 	   "Select target endianness automatically.", &endianlist);
   add_cmd ("endian", class_support, show_endian,
 	   "Show endianness of target.", &showlist);
+
+  add_cmd ("architecture", class_support, set_architecture,
+	   "Set architecture of target.", &setlist);
+  add_cmd ("architecture", class_support, show_architecture,
+	   "Show architecture of target.", &showlist);
+  add_cmd ("architecture", class_support, info_architecture,
+	   "List supported target architectures", &infolist);
+
 
 #ifdef DEFAULT_PROMPT
   prompt = savestring (DEFAULT_PROMPT, strlen(DEFAULT_PROMPT));

@@ -764,6 +764,15 @@ extern int target_byte_order_auto;
 
 extern void set_endian_from_file PARAMS ((bfd *));
 
+/* The target architecture can be set at run-time. */
+extern int target_architecture_auto;
+extern const bfd_arch_info_type *target_architecture;
+extern void set_architecture_from_file PARAMS ((bfd *));
+/* Notify target of a change to the selected architecture. Zero return
+   status indicates that the target did not like the change. */
+extern int (*target_architecture_hook) PARAMS ((const bfd_arch_info_type *ap)); 
+extern void set_architecture PARAMS ((char *arg, int from_tty));
+
 /* Number of bits in a char or unsigned char for the target machine.
    Just like CHAR_BIT in <limits.h> but describes the target machine.  */
 #if !defined (TARGET_CHAR_BIT)
