@@ -640,39 +640,38 @@ xcoff_relocate_symtab (pid)
      unsigned int pid;
 {
   int load_segs = 64; /* number of load segments */
+  int rc;
+  struct ld_info *ldi = NULL;
 
   do
     {
-  struct ld_info *ldi;
-      int rc;
+      ldi = (void *) xrealloc (ldi, load_segs * sizeof (*ldi));
 
-      ldi = (void *) alloca (load_segs * sizeof (*ldi));
-      if (ldi == 0)
-	perror_with_name ("xcoff_relocate_symtab");
+      /* According to my humble theory, AIX has some timing problems and
+         when the user stack grows, kernel doesn't update stack info in time
+         and ptrace calls step on user stack. That is why we sleep here a
+         little, and give kernel to update its internals. */
 
-  /* According to my humble theory, AIX has some timing problems and
-     when the user stack grows, kernel doesn't update stack info in time
-     and ptrace calls step on user stack. That is why we sleep here a little,
-     and give kernel to update its internals. */
+      usleep (36000);
 
-  usleep (36000);
-
-  errno = 0;
+      errno = 0;
       rc = ptrace (PT_LDINFO, pid, (PTRACE_ARG3_TYPE) ldi,
-	      load_segs * sizeof (*ldi), (int *) ldi);
+                  load_segs * sizeof (*ldi), (int *) ldi);
       if (rc == -1)
         {
-	if (errno == ENOMEM)
-	  load_segs *= 2;
-	else
-    perror_with_name ("ptrace ldinfo");
+          if (errno == ENOMEM)
+            load_segs *= 2;
+          else
+            perror_with_name ("ptrace ldinfo");
         }
       else
 	{
-  vmap_ldinfo (ldi);
-	  vmap_exec (); /* relocate the exec and core sections as well. */
+          vmap_ldinfo (ldi);
+          vmap_exec (); /* relocate the exec and core sections as well. */
 	}
     } while (rc == -1);
+  if (ldi)
+    free (ldi);
 }
 
 /* Core file stuff.  */
