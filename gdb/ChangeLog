@@ -1,5 +1,34 @@
 2004-09-02  Andrew Cagney  <cagney@gnu.org>
 
+	* config/vax/nbsd.mt (TM_FILE): Set to solib.h.
+	* config/vax/tm-nbsd.h: Delete file.
+	* config/sparc/vxworks.mt (TM_FILE): Set to config/tm-vxworks.h.
+	* config/sparc/tm-vxworks.h: Delete file.
+	* config/sparc/nbsd.mt (TM_FILE): Set to solib.h.
+	* config/sparc/tm-nbsd.h: Delete file.
+	* config/sparc/linux64.mt (TM_FILE): Set to solib.h.
+	* config/sparc/linux.mt (TM_FILE): Set to solib.h.
+	* config/sparc/tm-linux.h: Delete file.
+	* config/s390/s390.mt (TM_FILE): Set to config/tm-linux.h
+	* config/s390/tm-linux.h: Delete file.
+	* config/pa/obsd.mt (TM_FILE): Set to solib.h.
+	* config/pa/tm-bsd.h: Delete file.
+	* config/m68k/obsd.mt (TM_FILE): Set to solib.h.
+	* config/m68k/tm-obsd.h: Delete file.
+	* config/m68k/nbsd.mt (TM_FILE): Set to solib.h.
+	* config/m68k/tm-nbsd.h: Delete file.
+	* config/i386/vxworks.mt (TM_FILE): Set to config/tm-vxworks.h.
+	* config/i386/tm-vxworks.h: Delete file.
+	* config/i386/obsd64.mt (TM_FILE): Set to solib.h.
+	* config/i386/obsd.mt (TM_FILE): Set to solib.h.
+	* config/i386/nbsd64.mt (TM_FILE): Set to solib.h.
+	* config/i386/nbsd.mt (TM_FILE): Set to solib.h.
+	* config/i386/tm-nbsd.h: Delete file.
+	* config/i386/i386lynx.mt (TM_FILE): Set to config/tm-lynx.h.
+	* config/i386/tm-i386lynx.h: Delete file.
+	* config/cris/cris.mt (TM_FILE): Set to solib.h.
+	* config/cris/tm-cris.h: Delete file.
+
 	* configure.in: Let TM_FILE, XM_FILE and NAT_FILE specify a path.
 	* configure: Re-generate.
 	* config/arm/nbsd.mt (TM_FILE): Set to "solib.h".
