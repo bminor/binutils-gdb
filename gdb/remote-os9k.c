@@ -270,13 +270,11 @@ get_hex_regs (n, regno)
       val = 0;
       for (j = 0; j < 4; j++)
 	{
-#if TARGET_BYTE_ORDER == BIG_ENDIAN
-	  get_hex_byte(&b);
-	  val = (val << 8) + b;
-#else
-	  get_hex_byte(&b);
-	  val = val + (b << (j*8));
-#endif
+	  get_hex_byte (&b);
+	  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+	    val = (val << 8) + b;
+	  else
+	    val = val + (b << (j*8));
 	}
       supply_register (regno++, (char *) &val);
     }
@@ -577,13 +575,11 @@ rombug_fetch_registers ()
 	  val = 0;
 	  for (j = 0; j < 2; j++)
             {
-#if TARGET_BYTE_ORDER == BIG_ENDIAN
-              get_hex_byte(&b);
-              val = (val << 8) + b;
-#else
-              get_hex_byte(&b);
-              val = val + (b << (j*8));
-#endif
+              get_hex_byte (&b);
+	      if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+		val = (val << 8) + b;
+	      else
+		val = val + (b << (j*8));
             }
 
 	  if (regno == 8) i = 10;
@@ -640,13 +636,11 @@ rombug_fetch_register (regno)
 	  val = 0;
 	  for (j = 0; j < 2; j++)
             {
-#if TARGET_BYTE_ORDER == BIG_ENDIAN
-              get_hex_byte(&b);
-              val = (val << 8) + b;
-#else
-              get_hex_byte(&b);
-              val = val + (b << (j*8));
-#endif
+              get_hex_byte (&b);
+	      if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+		val = (val << 8) + b;
+	      else
+		val = val + (b << (j*8));
             }
 	  supply_register (regno, (char *) &val);
 	}

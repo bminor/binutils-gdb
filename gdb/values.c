@@ -1249,11 +1249,10 @@ unpack_field_as_long (type, valaddr, fieldno)
 
   /* Extract bits.  See comment above. */
 
-#if BITS_BIG_ENDIAN
-  lsbcount = (sizeof val * 8 - bitpos % 8 - bitsize);
-#else
-  lsbcount = (bitpos % 8);
-#endif
+  if (BITS_BIG_ENDIAN)
+    lsbcount = (sizeof val * 8 - bitpos % 8 - bitsize);
+  else
+    lsbcount = (bitpos % 8);
   val >>= lsbcount;
 
   /* If the field does not entirely fill a LONGEST, then zero the sign bits.
@@ -1300,9 +1299,8 @@ modify_field (addr, fieldval, bitpos, bitsize)
   oword = extract_signed_integer (addr, sizeof oword);
 
   /* Shifting for bit field depends on endianness of the target machine.  */
-#if BITS_BIG_ENDIAN
-  bitpos = sizeof (oword) * 8 - bitpos - bitsize;
-#endif
+  if (BITS_BIG_ENDIAN)
+    bitpos = sizeof (oword) * 8 - bitpos - bitsize;
 
   /* Mask out old value, while avoiding shifts >= size of oword */
   if (bitsize < 8 * sizeof (oword))

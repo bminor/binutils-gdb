@@ -867,11 +867,13 @@ define_symbol (valu, string, desc, type, objfile)
 #endif
       add_symbol_to_list (sym, &local_symbols);
 
-#if TARGET_BYTE_ORDER == LITTLE_ENDIAN
-      /* On little-endian machines, this crud is never necessary, and,
-	 if the extra bytes contain garbage, is harmful.  */
-      break;
-#else /* Big endian.  */
+      if (TARGET_BYTE_ORDER != BIG_ENDIAN)
+	{
+	  /* On little-endian machines, this crud is never necessary,
+	     and, if the extra bytes contain garbage, is harmful.  */
+	  break;
+	}
+
       /* If it's gcc-compiled, if it says `short', believe it.  */
       if (processing_gcc_compilation || BELIEVE_PCC_PROMOTION)
 	break;
@@ -950,7 +952,6 @@ define_symbol (valu, string, desc, type, objfile)
 #endif /* no BELIEVE_PCC_PROMOTION_TYPE.  */
       }
 #endif /* !BELIEVE_PCC_PROMOTION.  */
-#endif /* Big endian.  */
 
     case 'P':
       /* acc seems to use P to delare the prototypes of functions that

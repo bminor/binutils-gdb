@@ -33,9 +33,8 @@ print_insn (memaddr, stream)
 
   GDB_INIT_DISASSEMBLE_INFO(info, stream);
 
-#if TARGET_BYTE_ORDER == BIG_ENDIAN
-  return print_insn_big_a29k (memaddr, &info);
-#else
-  return print_insn_little_a29k (memaddr, &info);
-#endif
+  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+    return print_insn_big_a29k (memaddr, &info);
+  else
+    return print_insn_little_a29k (memaddr, &info);
 }
