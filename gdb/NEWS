@@ -5,9 +5,9 @@
 
 * New native configurations
 
-Microsoft NT and Microsoft Windows95		i[345]86-*-win32
+Windows 95, Windows NT				i[345]86-*-win32
 
-* New Targets
+* New targets
 
 ARM via RDP protocol				arm-*-*
 
