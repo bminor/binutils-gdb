@@ -1,5 +1,24 @@
 2004-12-07  Mark Kettenis  <kettenis@gnu.org>
 
+	* inf-ttrace.c: Include "gdbthread.h".
+	(inf_ttrace_num_lwps): New variable.
+	(inf_ttrace_num_lwps_in_syscall): Renamed from
+	inf_ttrace_num_threads_in_syscall.
+	(inf_ttrace_him): Track TTEVT_LWP_CREATE, TTEVT_LWP_EXIT and
+	TTEVT_LWP_TERMINATE events.
+	(inf_ttrace_create_inferior): Assert that INF_TTRACE_NUM_LWPS is
+	zero.
+	(inf_ttrace_mourn_inferior): Set INF_TTRACE_NUM_LWPS to zero.
+	(inf_ttrace_attach): Assert that INF_TTRACE_NUM_LWPS is zero.
+	Track TTEVT_LWP_CREATE, TTEVT_LWP_EXIT and TTEVT_LWP_TERMINATE
+	events.
+	(inf_ttrace_wait): Report status as TARGET_WAITKIND_SPURIOUS by
+	default.  Handle TTEVT_LWP_CREATE, TTEVT_LWP_EXIT and
+	TTEVT_LWP_TERMINATE events.
+	(inf_ttrace_thread_alive, inf_ttrace_pid_to_str): New functions.
+	(inf_ttrace_target): Set to_thread_alive and to_pid_to_str.
+	* Makefile.in (inf-ttrace.o): Update dependencies.
+
 	* hppa-tdep.h (hppa_read_pc, hppa_write_pc, hppa_unwind_pc): New
 	prototypes.
 	* hppa-tdep.c (hppa_read_pc): Rename from hppa_target_read_pc.

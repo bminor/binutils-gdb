@@ -27,6 +27,7 @@
 
 #include "command.h"
 #include "gdbcore.h"
+#include "gdbthread.h"
 #include "inferior.h"
 #include "observer.h"
 #include "target.h"
@@ -41,6 +42,19 @@
 
 /* HACK: Save the ttrace ops returned by inf_ttrace_target.  */
 static struct target_ops *ttrace_ops_hack;
+
+
+/* HP-UX uses a threading model where each user-space thread
+   corresponds to a kernel thread.  These kernel threads are called
+   lwps.  The ttrace(2) interface gives us almost full control over
+   the threads, which makes it very easy to support them in GDB.  We
+   identify the threads by process ID and lwp ID.  The ttrace(2) also
+   provides us with a thread's user ID (in the `tts_user_tid' member
+   of `ttstate_t') but we don't use that (yet) as it isn't necessary
+   to uniquely label the thread.  */
+
+/* Number of active lwps.  */
+static int inf_ttrace_num_lwps;
 
 
 /* On HP-UX versions that have the ttrace(2) system call, we can
@@ -65,8 +79,8 @@ struct inf_ttrace_page_dict
   int count;			/* Number of pages in this dictionary.  */
 } inf_ttrace_page_dict;
 
-/* Number of threads that are currently in a system call.  */
-static int inf_ttrace_num_threads_in_syscall;
+/* Number of lwps that are currently in a system call.  */
+static int inf_ttrace_num_lwps_in_syscall;
 
 /* Flag to indicate whether we should re-enable page protections after
    the next wait.  */
@@ -80,7 +94,7 @@ inf_ttrace_enable_syscall_events (pid_t pid)
   ttevent_t tte;
   ttstate_t tts;
 
-  gdb_assert (inf_ttrace_num_threads_in_syscall == 0);
+  gdb_assert (inf_ttrace_num_lwps_in_syscall == 0);
 
   if (ttrace (TT_PROC_GET_EVENT_MASK, pid, 0,
 	      (uintptr_t)&tte, sizeof tte, 0) == -1)
@@ -97,7 +111,7 @@ inf_ttrace_enable_syscall_events (pid_t pid)
     perror_with_name ("ttrace");
 
   if (tts.tts_flags & TTS_INSYSCALL)
-    inf_ttrace_num_threads_in_syscall++;
+    inf_ttrace_num_lwps_in_syscall++;
 
   /* FIXME: Handle multiple threads.  */
 }
@@ -121,7 +135,7 @@ inf_ttrace_disable_syscall_events (pid_t pid)
 	      (uintptr_t)&tte, sizeof tte, 0) == -1)
     perror_with_name ("ttrace");
 
-  inf_ttrace_num_threads_in_syscall = 0;
+  inf_ttrace_num_lwps_in_syscall = 0;
 }
 
 /* Get information about the page at address ADDR for process PID from
@@ -191,7 +205,7 @@ inf_ttrace_add_page (pid_t pid, CORE_ADDR addr)
       if (inf_ttrace_page_dict.count == 1)
 	inf_ttrace_enable_syscall_events (pid);
 
-      if (inf_ttrace_num_threads_in_syscall == 0)
+      if (inf_ttrace_num_lwps_in_syscall == 0)
 	{
 	  if (ttrace (TT_PROC_SET_MPROTECT, pid, 0,
 		      addr, pagesize, prot & ~PROT_WRITE) == -1)
@@ -231,7 +245,7 @@ inf_ttrace_remove_page (pid_t pid, CORE_ADDR addr)
 
   if (page->refcount == 0)
     {
-      if (inf_ttrace_num_threads_in_syscall == 0)
+      if (inf_ttrace_num_lwps_in_syscall == 0)
 	{
 	  if (ttrace (TT_PROC_SET_MPROTECT, pid, 0,
 		      addr, pagesize, page->prot) == -1)
@@ -449,7 +463,8 @@ inf_ttrace_him (int pid)
 
   /* Set the initial event mask.  */
   memset (&tte, 0, sizeof (tte));
-  tte.tte_events = TTEVT_EXEC | TTEVT_EXIT;
+  tte.tte_events |= TTEVT_EXEC | TTEVT_EXIT;
+  tte.tte_events |= TTEVT_LWP_CREATE | TTEVT_LWP_EXIT | TTEVT_LWP_TERMINATE;
   tte.tte_opts = TTEO_NOSTRCCHLD;
   if (ttrace (TT_PROC_SET_EVENT_MASK, pid, 0,
 	      (uintptr_t)&tte, sizeof tte, 0) == -1)
@@ -484,8 +499,9 @@ static void
 inf_ttrace_create_inferior (char *exec_file, char *allargs, char **env,
 			    int from_tty)
 {
+  gdb_assert (inf_ttrace_num_lwps == 0);
+  gdb_assert (inf_ttrace_num_lwps_in_syscall == 0);
   gdb_assert (inf_ttrace_page_dict.count == 0);
-  gdb_assert (inf_ttrace_num_threads_in_syscall == 0);
   gdb_assert (inf_ttrace_reenable_page_protections == 0);
 
   fork_inferior (exec_file, allargs, env, inf_ttrace_me, inf_ttrace_him,
@@ -518,7 +534,8 @@ inf_ttrace_mourn_inferior (void)
   const int num_buckets = ARRAY_SIZE (inf_ttrace_page_dict.buckets);
   int bucket;
 
-  inf_ttrace_num_threads_in_syscall = 0;
+  inf_ttrace_num_lwps = 0;
+  inf_ttrace_num_lwps_in_syscall = 0;
 
   for (bucket = 0; bucket < num_buckets; bucket++)
     {
@@ -572,14 +589,17 @@ inf_ttrace_attach (char *args, int from_tty)
       gdb_flush (gdb_stdout);
     }
 
+  gdb_assert (inf_ttrace_num_lwps == 0);
+  gdb_assert (inf_ttrace_num_lwps_in_syscall == 0);
+
   if (ttrace (TT_PROC_ATTACH, pid, 0, TT_KILL_ON_EXIT, TT_VERSION, 0) == -1)
     perror_with_name ("ttrace");
   attach_flag = 1;
 
   /* Set the initial event mask.  */
-  gdb_assert (inf_ttrace_num_threads_in_syscall == 0);
   memset (&tte, 0, sizeof (tte));
-  tte.tte_events = TTEVT_EXEC | TTEVT_EXIT;
+  tte.tte_events |= TTEVT_EXEC | TTEVT_EXIT;
+  tte.tte_events |= TTEVT_LWP_CREATE | TTEVT_LWP_EXIT | TTEVT_LWP_TERMINATE;
   tte.tte_opts = TTEO_NOSTRCCHLD;
   if (ttrace (TT_PROC_SET_EVENT_MASK, pid, 0,
 	      (uintptr_t)&tte, sizeof tte, 0) == -1)
@@ -616,7 +636,8 @@ inf_ttrace_detach (char *args, int from_tty)
   if (ttrace (TT_PROC_DETACH, pid, 0, 0, sig, 0) == -1)
     perror_with_name ("ttrace");
 
-  inf_ttrace_num_threads_in_syscall = 0;
+  inf_ttrace_num_lwps = 0;
+  inf_ttrace_num_lwps_in_syscall = 0;
 
   unpush_target (ttrace_ops_hack);
   inferior_ptid = null_ptid;
@@ -655,7 +676,7 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
   ttstate_t tts;
 
   /* Until proven otherwise.  */
-  ourstatus->kind = TARGET_WAITKIND_IGNORE;
+  ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
 
   if (pid == -1)
     pid = 0;
@@ -678,10 +699,12 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
   /* Now that we've waited, we can re-enable the page protections.  */
   if (inf_ttrace_reenable_page_protections)
     {
-      gdb_assert (inf_ttrace_num_threads_in_syscall == 0);
+      gdb_assert (inf_ttrace_num_lwps_in_syscall == 0);
       inf_ttrace_enable_page_protections (tts.tts_pid);
       inf_ttrace_reenable_page_protections = 0;
     }
+
+  ptid = ptid_build (tts.tts_pid, tts.tts_lwpid, 0);
 
   switch (tts.tts_event)
     {
@@ -693,6 +716,40 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 
     case TTEVT_EXIT:
       store_waitstatus (ourstatus, tts.tts_u.tts_exit.tts_exitcode);
+      inf_ttrace_num_lwps = 0;
+      break;
+
+    case TTEVT_LWP_CREATE:
+      lwpid = tts.tts_u.tts_thread.tts_target_lwpid;
+      ptid = ptid_build (tts.tts_pid, lwpid, 0);
+      if (inf_ttrace_num_lwps == 0)
+	{
+	  /* Now that we're going to be multi-threaded, add the
+	     origional thread to the list first.  */
+	  add_thread (ptid_build (tts.tts_pid, tts.tts_lwpid, 0));
+	  inf_ttrace_num_lwps++;
+	}
+      printf_filtered ("[New %s]\n", target_pid_to_str (ptid));
+      add_thread (ptid);
+      inf_ttrace_num_lwps++;
+      ptid = ptid_build (tts.tts_pid, tts.tts_lwpid, 0);
+      break;
+
+    case TTEVT_LWP_EXIT:
+      printf_filtered("[%s exited]\n", target_pid_to_str (ptid));
+      delete_thread (ptid);
+      inf_ttrace_num_lwps--;
+      /* If we don't return -1 here, core GDB will re-add the thread.  */
+      ptid = minus_one_ptid;
+      break;
+
+    case TTEVT_LWP_TERMINATE:
+      lwpid = tts.tts_u.tts_thread.tts_target_lwpid;
+      ptid = ptid_build (tts.tts_pid, lwpid, 0);
+      printf_filtered("[%s has been terminated]\n", target_pid_to_str (ptid));
+      delete_thread (ptid);
+      inf_ttrace_num_lwps--;
+      ptid = ptid_build (tts.tts_pid, tts.tts_lwpid, 0);
       break;
 
     case TTEVT_SIGNAL:
@@ -703,8 +760,8 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 
     case TTEVT_SYSCALL_ENTRY:
       gdb_assert (inf_ttrace_reenable_page_protections == 0);
-      inf_ttrace_num_threads_in_syscall++;
-      if (inf_ttrace_num_threads_in_syscall == 1)
+      inf_ttrace_num_lwps_in_syscall++;
+      if (inf_ttrace_num_lwps_in_syscall == 1)
 	{
 	  /* A thread has just entered a system call.  Disable any
              page protections as the kernel can't deal with them.  */
@@ -715,18 +772,22 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
       break;
 
     case TTEVT_SYSCALL_RETURN:
-      if (inf_ttrace_num_threads_in_syscall > 0)
+      if (inf_ttrace_num_lwps_in_syscall > 0)
 	{
 	  /* If the last thread has just left the system call, this
 	     would be a logical place to re-enable the page
 	     protections, but that doesn't work.  We can't re-enable
 	     them until we've done another wait.  */
 	  inf_ttrace_reenable_page_protections = 
-	    (inf_ttrace_num_threads_in_syscall == 1);
-	  inf_ttrace_num_threads_in_syscall--;
+	    (inf_ttrace_num_lwps_in_syscall == 1);
+	  inf_ttrace_num_lwps_in_syscall--;
 	}
       ourstatus->kind = TARGET_WAITKIND_SYSCALL_RETURN;
       ourstatus->value.syscall_id = tts.tts_scno;
+      break;
+
+    default:
+      gdb_assert (!"Unexpected ttrace event");
       break;
     }
 
@@ -737,9 +798,9 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
   /* HACK: Twiddle INFERIOR_PTID such that the initial thread of a
      process isn't recognized as a new thread.  */
   if (ptid_get_lwp (inferior_ptid) == 0)
-    inferior_ptid = ptid_build (tts.tts_pid, tts.tts_lwpid, tts.tts_user_tid);
+    inferior_ptid = ptid;
 
-  return ptid_build (tts.tts_pid, tts.tts_lwpid, tts.tts_user_tid);
+  return ptid;
 }
 
 /* Transfer LEN bytes from ADDR in the inferior's memory into READBUF,
@@ -805,6 +866,28 @@ inf_ttrace_files_info (struct target_ops *ignore)
 		     attach_flag ? "attached" : "child",
 		     target_pid_to_str (inferior_ptid));
 }
+
+static int
+inf_ttrace_thread_alive (ptid_t ptid)
+{
+  return 1;
+}
+
+static char *
+inf_ttrace_pid_to_str (ptid_t ptid)
+{
+  if (inf_ttrace_num_lwps > 0)
+    {
+      pid_t pid = ptid_get_pid (ptid);
+      lwpid_t lwpid = ptid_get_lwp (ptid);
+      static char buf[80];
+
+      sprintf (buf, "process %ld, lwp %ld", (long)pid, (long)lwpid);
+      return buf;
+    }
+
+  return normal_pid_to_str (ptid);
+}
 
 
 struct target_ops *
@@ -821,6 +904,8 @@ inf_ttrace_target (void)
   t->to_wait = inf_ttrace_wait;
   t->to_xfer_partial = inf_ttrace_xfer_partial;
   t->to_files_info = inf_ttrace_files_info;
+  t->to_thread_alive = inf_ttrace_thread_alive;
+  t->to_pid_to_str = inf_ttrace_pid_to_str;
   t->to_can_use_hw_breakpoint = inf_ttrace_can_use_hw_breakpoint;
   t->to_region_size_ok_for_hw_watchpoint =
     inf_ttrace_region_size_ok_for_hw_watchpoint;
