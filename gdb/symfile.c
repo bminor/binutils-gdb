@@ -1230,7 +1230,7 @@ generic_load (char *args, int from_tty)
   /* FIXME: should be checking for errors from bfd_close (for one thing,
      on error it does not free all the storage associated with the
      bfd).  */
-  make_cleanup ((make_cleanup_func) bfd_close, loadfile_bfd);
+  make_cleanup_bfd_close (loadfile_bfd);
 
   if (!bfd_check_format (loadfile_bfd, bfd_object))
     {

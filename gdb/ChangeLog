@@ -1,3 +1,13 @@
+Tue May 16 10:54:55 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* defs.h (make_cleanup_bfd_close): Add declaration.
+	* utils.c (do_bfd_close_cleanup, make_cleanup_bfd_close): New
+ 	functions.
+
+	* symfile.c (generic_load), sparcl-tdep.c (download), remote-udi.c
+ 	(download), remote-e7000.c (e7000_load), corelow.c (core_open,
+ 	core_file_to_sym_file): Replace calls to make_cleanup.
+
 Mon May 15 16:50:45 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* TODO: Add notes on register cache.

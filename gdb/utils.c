@@ -204,6 +204,18 @@ make_cleanup_freeargv (arg)
 }
 
 static void
+do_bfd_close_cleanup (void *arg)
+{
+  bfd_close (arg);
+}
+
+struct cleanup *
+make_cleanup_bfd_close (bfd *abfd)
+{
+  return make_cleanup (do_bfd_close_cleanup, abfd);
+}
+
+static void
 do_ui_file_delete (void *arg)
 {
   ui_file_delete (arg);

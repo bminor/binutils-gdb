@@ -1580,7 +1580,7 @@ e7000_load (args, from_tty)
       perror_with_name (filename);
       return;
     }
-  old_chain = make_cleanup ((make_cleanup_func) bfd_close, pbfd);
+  old_chain = make_cleanup_bfd_close (pbfd);
 
   if (!bfd_check_format (pbfd, bfd_object))
     error ("\"%s\" is not an object file: %s", filename,
