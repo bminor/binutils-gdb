@@ -33,6 +33,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* libiberty.h can't declare this one, but evidently we can.  */
 extern char *strsignal PARAMS ((int));
 
+#include "progress.h"
+
 #include "mmalloc.h"
 
 /* For BFD64 and bfd_vma.  */
@@ -68,7 +70,11 @@ extern int sevenbit_strings;
 
 extern void quit PARAMS ((void));
 
-#define QUIT { if (quit_flag) quit (); if (interactive_hook) interactive_hook (); }
+#define QUIT { \
+  if (quit_flag) quit (); \
+  if (interactive_hook) interactive_hook (); \
+  PROGRESS (1); \
+}
 
 /* Command classes are top-level categories into which commands are broken
    down for "help" purposes.  
@@ -376,6 +382,11 @@ enum val_prettyprint
 
 #include "nm.h"
 
+/* Target machine definition.  This will be a symlink to one of the
+   tm-*.h files, built by the `configure' script.  */
+
+#include "tm.h"
+
 /* If the xm.h file did not define the mode string used to open the
    files, assume that binary files are opened the same way as text
    files */
@@ -670,11 +681,6 @@ extern char *strerror PARAMS ((int));			/* 4.11.6.2 */
 #endif
 
 /* Target-system-dependent parameters for GDB. */
-
-/* Target machine definition.  This will be a symlink to one of the
-   tm-*.h files, built by the `configure' script.  */
-
-#include "tm.h"
 
 #ifdef TARGET_BYTE_ORDER_SELECTABLE
 /* The target endianness is selectable at runtime.  Define

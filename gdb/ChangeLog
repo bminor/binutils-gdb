@@ -1,5 +1,9 @@
 Wed Jan  4 12:27:29 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
+	* defs.h: move include tm.h up, so that the type LONGEST can
+	also based on the target requirement to determine. In this case
+	target mips64.
+
 	* remote-os9k.c (rombug_open): catch exception e in rombug.
 	* remote-os9k.c (rombug_wait): print message before register display
 	from rombug.
