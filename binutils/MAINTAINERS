@@ -75,6 +75,7 @@ responsibility among the other maintainers.
   s390, s390x	   Martin Schwidefsky <schwidefsky@de.ibm.com>
   SH		   Jörn Rennecke <amylaar@onetel.net.uk>
   SH		   Hans-Peter Nilsson <hp@bitrange.com>
+  SH		   Alexandre Oliva <aoliva@redhat.com>
   SPARC		   Jakub Jelinek <jakub@redhat.com>
   TIC54X           Timothy Wall <twall@alum.mit.edu>
   z8k		   Christian Groessler <cpg@aladdin.de>

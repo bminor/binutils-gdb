@@ -1,3 +1,7 @@
+2002-02-06  Alexandre Oliva  <aoliva@redhat.com>
+
+	* MAINTAINERS: Added self as SH co-maintainer.
+
 2002-02-05  Nick Clifton <nickc@redhat.com>
 
 	* po/tr.po: Updated translation.
