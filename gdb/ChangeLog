@@ -1,3 +1,28 @@
+Mon Mar 11 09:19:58 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* From Peter Schauer:
+	* breakpoint.c (insert_breakpoints): Use ALL_BREAKPOINTS_SAFE.
+	(bpstat_stop_status): Likewise.
+	(remove_solib_event_breakpoints): Likewise.
+	(clear_momentary_breakpoints): Likewise.
+	(re_enable_breakpoints_in_shlibs): Don't reenable a breakpoint
+	if we still can't read the memory for that breakpoint.
+	(mention): Add bp_shlib_event case to keep gcc quiet.
+	
+Fri Mar  8 12:08:12 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* breakpoint.h (enum enable): New enum shlib_disabled for
+	shared library breakpoints that have been temporarily disabled.
+	* breakpoint.c: Handle temporarily disabled shared library
+	breakpoints like disabled breakpoints in most places.
+	(insert_breakpoints): Use shlib_disabled to indicate
+	that an unsettable breakpoint is only temporarily disabled.
+	(re_enable_breakpoints_in_shlibs): New function.
+	* corelow.c (solib_add_stub): After adding shared libraries,
+	try to reenable any temporarily disabled breakpoints.
+	* infcmd.c (attach_command): Likewise.
+	* infrun.c (wait_for_inferior): Likewise.
+
 Fri Mar  8 11:41:25 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* defs.h (extract_long_unsigned_integer): Declare.
