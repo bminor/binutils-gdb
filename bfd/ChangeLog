@@ -1,3 +1,10 @@
+Mon Aug 30 15:26:48 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* elf-hppa.h (_bfd_elf_hppa_gen_reloc_type): Allow both
+	R_PARISC_DIR32 and R_PARISC_DIR64 regardless of how the
+	tools were configured.
+	* elf32-hppa.h (_bfd_elf32_hppa_gen_reloc_type): Declare.
+
 1999-08-26  Mark Mitchell  <mark@codesourcery.com>
 
 	* elf32-mips.c (_bfd_mips_elf_check_relocs): Don't allocate local

@@ -335,7 +335,11 @@ _bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
      for PA ELF.  */
   switch (base_type)
     {
-    case R_HPPA:
+    /* We have been using generic relocation types.  However, that may not
+       really make sense.  Anyway, we need to support both R_PARISC_DIR64
+       and R_PARISC_DIR32 here.  */
+    case R_PARISC_DIR32:
+    case R_PARISC_DIR64:
     case R_HPPA_ABS_CALL:
       switch (format)
 	{

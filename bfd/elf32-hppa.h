@@ -41,6 +41,9 @@ boolean elf32_hppa_size_stubs
 boolean elf32_hppa_build_stubs
   PARAMS ((bfd *, struct bfd_link_info *));
 
+extern void ** _bfd_elf32_hppa_gen_reloc_type
+  PARAMS ((bfd *, int, int, int, int, asymbol *));
+
 /* Define groups of basic relocations.  FIXME:  These should
    be the only basic relocations created by GAS.  The rest
    should be internal to the BFD backend.
