@@ -1,3 +1,11 @@
+Sat Sep 26 00:25:15 1992  John Gilmore  (gnu@cygnus.com)
+
+	* Makefile.in: Remove inftarg.[co], since it is now included via
+	config/*.mh files.
+	* config/*.mh:  Add inftarg.o and fork-child.o to all *.mh that
+	reference infptrace.o.  Add fork-child.o to all *.mh that
+	reference procfs.o.
+
 Fri Sep 25 21:59:27 1992  John Gilmore  (gnu@cygnus.com)
 
 	Split non-target-dependent code out of target_attach routines.

@@ -194,10 +194,10 @@ FLAGS_TO_PASS = \
 SFILES_MAINDIR = \
 	 blockframe.c breakpoint.c command.c core.c demangle.c \
 	 environ.c eval.c expprint.c findvar.c infcmd.c inflow.c infrun.c \
-	 main.c printcmd.c gdbtypes.c \
+	 main.c core.c printcmd.c gdbtypes.c \
 	 remote.c source.c stack.c symmisc.c symtab.c symfile.c \
 	 utils.c valarith.c valops.c valprint.c values.c c-exp.y m2-exp.y \
-	 mem-break.c target.c inftarg.c \
+	 mem-break.c target.c \
 	 dbxread.c coffread.c elfread.c dwarfread.c xcoffread.c stabsread.c \
 	 ieee-float.c language.c parse.c buildsym.c objfiles.c \
 	 minsyms.c mipsread.c maint.c
@@ -288,14 +288,14 @@ OBS = main.o blockframe.o breakpoint.o findvar.o stack.o source.o \
     symtab.o symfile.o symmisc.o infcmd.o infrun.o remote.o \
     command.o utils.o expprint.o environ.o version.o gdbtypes.o \
     copying.o $(DEPFILES) mem-break.o target.o \
-    inftarg.o ieee-float.o putenv.o parse.o language.o $(YYOBJ) \
+    ieee-float.o putenv.o parse.o language.o $(YYOBJ) \
     buildsym.o objfiles.o minsyms.o maint.o demangle.o \
     dbxread.o coffread.o elfread.o dwarfread.o xcoffread.o mipsread.o \
-    stabsread.o
+    stabsread.o core.o
 
 RAPP_OBS = rgdb.o rudp.o rserial.o serial.o udp.o $(XDEPFILES)
 
-TSOBS = core.o inflow.o
+TSOBS = corelow.o inflow.o
 
 NTSOBS = standalone.o
 
@@ -538,7 +538,7 @@ gdb.tar.Z: force_update
 
 # Update the "alldeps.mak" file in a source directory.
 update-alldeps: force_update
-	../configure none
+	../configure none -norecursion
 	rm -f alldeps.mak
 	$(MAKE) $(MFLAGS) alldeps.mak
 
@@ -546,14 +546,14 @@ update-alldeps: force_update
 # We update alldeps.mak first, since it is used to generate the list
 # of files to be checked for dependencies.
 update-depend: update-alldeps force_update
-	../configure none
+	../configure none -norecursion
 	rm -f depend
 	$(MAKE) $(MFLAGS) depend
 
 # Set up the GDB source directory for distribution, by building all files that
 # are products of other files.
 setup-to-dist: update-depend force_update
-	../configure none
+	../configure none -norecursion
 	(cd doc; $(MAKE) $(MFLAGS) gdbVN.m4)
 	$(MAKE) $(MFLAGS) gdb.info
 	$(MAKE) $(MFLAGS) refcard.ps
