@@ -35,7 +35,7 @@ SHELL = @SHELL@
 EXEEXT = @EXEEXT@
 SUBDIRS = @subdirs@
 RPATH_ENVVAR = @RPATH_ENVVAR@
-ALL_SUBDIRS = gdb.arch gdb.asm gdb.base gdb.c++ gdb.disasm gdb.java gdb.mi \
+ALL_SUBDIRS = gdb.arch gdb.asm gdb.base gdb.cp gdb.disasm gdb.java gdb.mi \
 	gdb.objc gdb.threads gdb.trace $(SUBDIRS)
 
 EXPECT = `if [ -f $${rootme}/../../expect/expect ] ; then \
