@@ -1,5 +1,5 @@
 /* Functions specific to running gdb native on a Motorola Delta Series sysV68.
-   Copyright (C) 1993, Free Software Foundation, Inc.
+   Copyright (C) 1993, 1997-98, Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -83,4 +83,9 @@ clear_insn_cache ()
 #ifdef MCT_TEXT /* in sys/signal.h on sysV68 R3V7.1 */
   memctl(0, 4096, MCT_TEXT);
 #endif
+}
+
+kernel_u_size ()
+{
+  return sizeof (struct user);
 }
