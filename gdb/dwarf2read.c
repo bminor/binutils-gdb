@@ -5617,29 +5617,29 @@ dump_die (struct die_info *die)
 {
   unsigned int i;
 
-  fprintf (stderr, "Die: %s (abbrev = %d, offset = %d)\n",
+  fprintf_unfiltered (gdb_stderr, "Die: %s (abbrev = %d, offset = %d)\n",
 	   dwarf_tag_name (die->tag), die->abbrev, die->offset);
-  fprintf (stderr, "\thas children: %s\n",
+  fprintf_unfiltered (gdb_stderr, "\thas children: %s\n",
 	   dwarf_bool_name (die->has_children));
 
-  fprintf (stderr, "\tattributes:\n");
+  fprintf_unfiltered (gdb_stderr, "\tattributes:\n");
   for (i = 0; i < die->num_attrs; ++i)
     {
-      fprintf (stderr, "\t\t%s (%s) ",
+      fprintf_unfiltered (gdb_stderr, "\t\t%s (%s) ",
 	       dwarf_attr_name (die->attrs[i].name),
 	       dwarf_form_name (die->attrs[i].form));
       switch (die->attrs[i].form)
 	{
 	case DW_FORM_ref_addr:
 	case DW_FORM_addr:
-	  fprintf (stderr, "address: ");
+	  fprintf_unfiltered (gdb_stderr, "address: ");
 	  print_address_numeric (DW_ADDR (&die->attrs[i]), 1, gdb_stderr);
 	  break;
 	case DW_FORM_block2:
 	case DW_FORM_block4:
 	case DW_FORM_block:
 	case DW_FORM_block1:
-	  fprintf (stderr, "block: size %d", DW_BLOCK (&die->attrs[i])->size);
+	  fprintf_unfiltered (gdb_stderr, "block: size %d", DW_BLOCK (&die->attrs[i])->size);
 	  break;
 	case DW_FORM_data1:
 	case DW_FORM_data2:
@@ -5650,30 +5650,30 @@ dump_die (struct die_info *die)
 	case DW_FORM_ref4:
 	case DW_FORM_udata:
 	case DW_FORM_sdata:
-	  fprintf (stderr, "constant: %ld", DW_UNSND (&die->attrs[i]));
+	  fprintf_unfiltered (gdb_stderr, "constant: %ld", DW_UNSND (&die->attrs[i]));
 	  break;
 	case DW_FORM_string:
 	case DW_FORM_strp:
-	  fprintf (stderr, "string: \"%s\"",
+	  fprintf_unfiltered (gdb_stderr, "string: \"%s\"",
 		   DW_STRING (&die->attrs[i])
 		   ? DW_STRING (&die->attrs[i]) : "");
 	  break;
 	case DW_FORM_flag:
 	  if (DW_UNSND (&die->attrs[i]))
-	    fprintf (stderr, "flag: TRUE");
+	    fprintf_unfiltered (gdb_stderr, "flag: TRUE");
 	  else
-	    fprintf (stderr, "flag: FALSE");
+	    fprintf_unfiltered (gdb_stderr, "flag: FALSE");
 	  break;
 	case DW_FORM_indirect:
 	  /* the reader will have reduced the indirect form to
 	     the "base form" so this form should not occur */
-	  fprintf (stderr, "unexpected attribute form: DW_FORM_indirect");
+	  fprintf_unfiltered (gdb_stderr, "unexpected attribute form: DW_FORM_indirect");
 	  break;
 	default:
-	  fprintf (stderr, "unsupported attribute form: %d.",
+	  fprintf_unfiltered (gdb_stderr, "unsupported attribute form: %d.",
 		   die->attrs[i].form);
 	}
-      fprintf (stderr, "\n");
+      fprintf_unfiltered (gdb_stderr, "\n");
     }
 }
 

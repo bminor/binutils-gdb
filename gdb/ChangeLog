@@ -1,3 +1,8 @@
+2002-02-14  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* dwarf2read.c: Replace fprintf (stderr, ...) by 
+	fprintf_unfiltered (gdb_stderr, ...).
+
 2002-02-15  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdbserver/gdbserver.1: Document --attach.
