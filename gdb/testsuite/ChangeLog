@@ -1,5 +1,15 @@
 Thu Feb  3 12:04:49 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.t00/default.exp: Match udi_attach error message as well as
+	the one from child_attach.
+
+	* gdb.t00/default.exp: Use "." instead of "?" to match a question mark.
+
+	* gdb.stabs/weird.exp: Remove xfail for const70; just fixed in GDB.
+
+	* gdb.stabs/weird.def (bad_neg0type): Size of this type is 16, not 8.
+	* gdb.stabs/weird.exp: Remove xfail for "p bad_neg0"; this fixes it.
+
 	* Move test with enums and partial symbols back to
 	gdb.t03/{ptype.exp,gdbme.c} from gdb.stabs/{weird.def,weird.exp}.
 	Reverts the change of 26 May 93.  Per today's change to
