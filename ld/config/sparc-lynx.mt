@@ -1,2 +1,2 @@
 EMUL=sparclynx
-OTHER_EMULATIONS=em_sparclynx.o
+OTHER_EMULATIONS=esparclynx.o

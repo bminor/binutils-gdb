@@ -1,3 +1,10 @@
+Fri May 13 13:00:38 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/i386-linux.mt (OTHER_EMULATIONS): Change em_ to e to
+	match corresponding change in emulation templates.
+	* config/i386-lynx.mt, config/m68k-lynx.mt: Likewise.
+	* config/sparc-lynx.mt, config/sun4sol2.mt: Likewise.
+
 Wed May 11 18:16:46 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* ldver.c (ldversion): Updated version number.
