@@ -1,3 +1,7 @@
+Tue Dec 20 11:25:12 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* mips-opc.c: Add dli as a synonym for li.
+
 start-sanitize-arc
 Mon Dec 19 12:35:51 1994  Doug Evans  <dje@canuck.cygnus.com>
 

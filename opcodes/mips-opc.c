@@ -82,10 +82,14 @@ const struct mips_opcode mips_opcodes[] = {
 {"li",      "t,j",      0x24000000, 0xffe00000, WR_t		}, /* addiu */
 {"li",	    "t,i",	0x34000000, 0xffe00000, WR_t		}, /* ori */
 {"li",      "t,I",	0,    (int) M_LI,	INSN_MACRO	},
-{"move",    "d,s",	0x00000021, 0xfc1f07ff,	WR_d|RD_s	}, /* addu */
-{"b",       "p",	0x10000000, 0xffff0000,	UBD		}, /* beq 0,0 */
-{"b",       "p",	0x04010000, 0xffff0000,	UBD		}, /* bgez 0 */
-{"bal",     "p",	0x04110000, 0xffff0000,	UBD|WR_31	}, /* bgezal 0 */
+/* dli is used on Irix 6 for a 64 bit load--our li can do that.  */
+{"dli",     "t,j",      0x24000000, 0xffe00000, WR_t		}, /* addiu */
+{"dli",	    "t,i",	0x34000000, 0xffe00000, WR_t		}, /* ori */
+{"dli",     "t,I",	0,    (int) M_LI,	INSN_MACRO	},
+{"move",    "d,s",	0x00000025, 0xfc1f07ff,	WR_d|RD_s	},/* or */
+{"b",       "p",	0x10000000, 0xffff0000,	UBD		},/* beq 0,0 */
+{"b",       "p",	0x04010000, 0xffff0000,	UBD		},/* bgez 0 */
+{"bal",     "p",	0x04110000, 0xffff0000,	UBD|WR_31	},/* bgezal 0*/
 
 {"abs",     "d,v",	0,    (int) M_ABS,	INSN_MACRO	},
 {"abs.s",   "D,V",	0x46000005, 0xffff003f,	WR_D|RD_S	},
@@ -234,7 +238,7 @@ const struct mips_opcode mips_opcodes[] = {
 {"cvt.s.w", "D,S",	0x46800020, 0xffff003f,	WR_D|RD_S	},
 {"cvt.w.d", "D,S",	0x46200024, 0xffff003f,	WR_D|RD_S	},
 {"cvt.w.s", "D,S",	0x46000024, 0xffff003f,	WR_D|RD_S	},
-{"dabs",    "d,v",	0,    (int) M_DABS,	INSN_MACRO	},
+{"dabs",    "d,v",	3,    (int) M_DABS,	INSN_MACRO	},
 {"dadd",    "d,v,t",	0x0000002c, 0xfc0007ff, WR_d|RD_s|RD_t|I3},
 {"dadd",    "t,r,I",	3,    (int) M_DADD_I,	INSN_MACRO	},
 {"daddi",   "t,r,j",	0x60000000, 0xfc000000, WR_t|RD_s|I3	},
@@ -421,7 +425,7 @@ const struct mips_opcode mips_opcodes[] = {
 /* nop is at the start of the table.  */
 {"nor",     "d,v,t",	0x00000027, 0xfc0007ff,	WR_d|RD_s|RD_t	},
 {"nor",     "t,r,I",	0,    (int) M_NOR_I,	INSN_MACRO	},
-{"not",     "d,v",	0x00000027, 0xfc0007ff,	WR_d|RD_s|RD_t	}, /* nor d,s,zero */
+{"not",     "d,v",	0x00000027, 0xfc0007ff,	WR_d|RD_s|RD_t	},/*nor d,s,0*/
 {"or",      "d,v,t",	0x00000025, 0xfc0007ff,	WR_d|RD_s|RD_t	},
 {"or",      "t,r,I",	0,    (int) M_OR_I,	INSN_MACRO	},
 {"ori",     "t,r,i",	0x34000000, 0xfc000000,	WR_t|RD_s	},
