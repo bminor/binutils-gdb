@@ -31,6 +31,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "remote-utils.h"
 
 #include <signal.h>
+#include <varargs.h>
 
 /* Prototypes for local functions.  */
 
@@ -52,8 +53,7 @@ static int mips_cksum PARAMS ((const unsigned char *hdr,
 static void
 mips_send_packet PARAMS ((const char *s, int get_ack));
 
-static int
-mips_receive_packet PARAMS ((char *buff));
+static int mips_receive_packet PARAMS ((char *buff, int));
 
 static int
 mips_request PARAMS ((char cmd, unsigned int addr, unsigned int data,
@@ -303,8 +303,13 @@ mips_error (va_alist)
   fprintf_filtered (gdb_stderr, "\n");
   va_end (args);
 
-  /* We probably should print "ending remote debugging" here, but that would
-     appear to be a problem for mips_initialize and its catch_errors.  */
+  /* Clean up in such a way that mips_close won't try to talk to the
+     board (it almost surely won't work since we weren't able to talk to
+     it).  */
+  mips_is_open = 0;
+  SERIAL_CLOSE (mips_desc);
+
+  printf_unfiltered ("Ending remote MIPS debugging.\n");
   target_mourn_inferior ();
 
   return_to_top_level (RETURN_ERROR);
@@ -629,11 +634,13 @@ mips_send_packet (s, get_ack)
    should be DATA_MAXLEN + 1 bytes).  The protocol documentation
    implies that only the sender retransmits packets, so this code just
    waits silently for a packet.  It returns the length of the received
-   packet.  */
+   packet.  If THROW_ERROR is nonzero, call error() on errors.  If not,
+   don't print an error message and return -1.  */
 
 static int
-mips_receive_packet (buff)
+mips_receive_packet (buff, throw_error)
      char *buff;
+     int throw_error;
 {
   int ch;
   int garbage;
@@ -651,7 +658,12 @@ mips_receive_packet (buff)
       int err;
 
       if (mips_receive_header (hdr, &garbage, ch, mips_receive_wait) != 0)
-	mips_error ("Timed out waiting for remote packet");
+	{
+	  if (throw_error)
+	    mips_error ("Timed out waiting for remote packet");
+	  else
+	    return -1;
+	}
 
       ch = 0;
 
@@ -685,7 +697,12 @@ mips_receive_packet (buff)
 	      break;
 	    }
 	  if (rch == SERIAL_TIMEOUT)
-	    mips_error ("Timed out waiting for remote packet");
+	    {
+	      if (throw_error)
+		mips_error ("Timed out waiting for remote packet");
+	      else
+		return -1;
+	    }
 	  buff[i] = rch;
 	}
 
@@ -699,7 +716,12 @@ mips_receive_packet (buff)
 
       err = mips_receive_trailer (trlr, &garbage, &ch, mips_receive_wait);
       if (err == -1)
-	mips_error ("Timed out waiting for packet");
+	{
+	  if (throw_error)
+	    mips_error ("Timed out waiting for packet");
+	  else
+	    return -1;
+	}
       if (err == -2)
 	{
 	  if (sr_get_debug () > 0)
@@ -736,7 +758,12 @@ mips_receive_packet (buff)
 	}
 
       if (SERIAL_WRITE (mips_desc, ack, HDR_LENGTH + TRLR_LENGTH) != 0)
-	mips_error ("write to target failed: %s", safe_strerror (errno));
+	{
+	  if (throw_error)
+	    mips_error ("write to target failed: %s", safe_strerror (errno));
+	  else
+	    return -1;
+	}
     }
 
   if (sr_get_debug () > 0)
@@ -767,7 +794,12 @@ mips_receive_packet (buff)
     }
 
   if (SERIAL_WRITE (mips_desc, ack, HDR_LENGTH + TRLR_LENGTH) != 0)
-    mips_error ("write to target failed: %s", safe_strerror (errno));
+    {
+      if (throw_error)
+	mips_error ("write to target failed: %s", safe_strerror (errno));
+      else
+	return -1;
+    }
 
   return len;
 }
@@ -828,7 +860,7 @@ mips_request (cmd, addr, data, perr)
 
   mips_need_reply = 0;
 
-  len = mips_receive_packet (buff);
+  len = mips_receive_packet (buff, 1);
   buff[len] = '\0';
 
   if (sscanf (buff, "0x%x %c 0x%x 0x%x",
@@ -861,7 +893,6 @@ mips_initialize ()
 {
   char cr;
   int hold_wait;
-  int tries;
   char buff[DATA_MAXLEN + 1];
   int err;
 
@@ -882,16 +913,9 @@ mips_initialize ()
   hold_wait = mips_receive_wait;
   mips_receive_wait = 3;
 
-  tries = 0;
-  while (catch_errors (mips_receive_packet, buff, (char *) NULL,
-		       RETURN_MASK_ALL)
-	 == 0)
+  if (mips_receive_packet (buff, 0) < 0)
     {
       char cc;
-
-      if (tries > 0)
-	mips_error ("Could not connect to target");
-      ++tries;
 
       /* We did not receive the packet we expected; try resetting the
 	 board and trying again.  */
@@ -904,6 +928,7 @@ mips_initialize ()
       cr = '\r';
       SERIAL_WRITE (mips_desc, &cr, 1);
     }
+  mips_receive_packet (buff, 1);
 
   mips_receive_wait = hold_wait;
   mips_initializing = 0;

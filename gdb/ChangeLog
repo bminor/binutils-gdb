@@ -4,6 +4,10 @@ Thu Dec 30 10:16:54 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* remote-mips.c (mips_error): New function.
 	* remote-mips.c: Use it instead of error() most places.
+	* remote-mips.c (mips_receive_packet): New arg throw_error.
+	(mips_initialize): Use it not catch_errors.
+	* defs.h: Declare error_pre_print and warning_pre_print here...
+	* main.c: ...not here.
 
 	* breakpoint.c (breakpoint_chain): Make static.
 	* breakpoint.c, breakpoint.h (frame_in_dummy): New function.

@@ -186,14 +186,6 @@ extern char *host_canonical;
 
 extern char *target_canonical;
 
-/* Message to be printed before the error message, when an error occurs.  */
-
-extern char *error_pre_print;
-
-/* Message to be printed before the warning message, when a warning occurs.  */
-
-extern char *warning_pre_print;
-
 extern char lang_frame_mismatch_warn[];		/* language.c */
 
 /* Flag for whether we want all the "from_tty" gubbish printed.  */
