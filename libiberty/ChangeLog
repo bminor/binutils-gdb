@@ -1,6 +1,6 @@
 2001-03-10  Neil Booth  <neil@daikokuya.demon.co.uk>
+	    John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
-	John David Anglin  <dave@hiauly1.hia.nrc.ca>
 	* libiberty/lbasename.c: New file.
 	* libiberty/Makefile.in: Update for lbasename.
 	
@@ -12,6 +12,7 @@
 	* config.table: Kill *-*-beos* entry.
 	* config/mh-beos: Delete.
 	* configure, config.in: Regenerate.
+
 	* Makefile.in (ALLOCA, HFILES): Kill.
 	(REQUIRED_OFILES): Add alloca.o.
 	(alloca.o): Depend on libiberty.h.
@@ -21,15 +22,15 @@
 	blocks.  Provide the C alloca unconditionally.  Use PTR where
 	appropriate.  Make i00afunc static.
 	* argv.c: Don't include alloca-conf.h.
-	
+
 2001-03-04  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* cplus-dem.c (main): Cast enum style to int.
-	
+
 2001-02-16  Loren J. Rittle  <ljrittle@acm.org>
 
 	* cplus-dem.c (main): Initialize style.
-	
+
 2001-01-31  Bryce McKinlay  <bryce@albatross.co.nz>
 
 	Add support for Java demangling under the v3 ABI:
@@ -51,11 +52,11 @@
 	(main): Remove explicit handling of `java' option. Instead, pass style
 	parameter in cplus_demangle flags as gdb does.
 	* testsuite/demangle.expected: Add some Java test cases.
-	
+
 2001-01-29  Phil Edwards  <pme@sources.redhat.com>
 
 	* COPYING.LIB:  Update to LGPL 2.1 from the FSF.
-	
+
 2000-12-29  DJ Delorie  <dj@redhat.com>
 
 	* fnmatch.c: Make the note about the origins of this file more
